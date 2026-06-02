@@ -52399,8 +52399,31 @@ function _renderCityDialogue(venue, data, p){
   var node = data.node || '';
   window.vEncounter.render(
     { npc: data.npc, script: data.script, choices: data.choices },
-    { player: p, closeable: true, onChoice: function(ch){ _resolveCityChoice(venue, node, ch && ch.id, p, data.npc); } }
+    { player: p, closeable: true, onChoice: function(ch){
+        if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
+        else if (node) { _resolveCityChoice(venue, node, ch && ch.id, p, data.npc); }
+        else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
+    } }
   );
+}
+
+// PADRAO_SERVIDOR bridge: roda um cb de tela profunda (mesa de jogos, mercenários,
+// mural, relaxar) e renderiza a tela retornada como node. Cada botão da tela vira
+// uma choice 'screen' → repete o ciclo (multi-step funciona).
+function _openCityScreen(venue, cb, p, npc){
+  if (!cb) return;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Um momento...' }); } catch(_){} }
+  window.vCityServer.cityAction('dialogue.screen', { venue: venue, cb: cb }).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível abrir.', 'warn'); return; }
+    if (data.transition) { _handleCityDialogueResult(venue, data, p, npc); return; }
+    _applyHudFromDialogue(data);
+    _renderCityDialogue(venue, data, p);
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY-DIALOGUE] screen failed', e);
+    if (typeof vToast === 'function') vToast('Erro ao abrir.', 'warn');
+  });
 }
 
 function _resolveCityChoice(venue, node, choiceId, p, npc){
@@ -52431,6 +52454,11 @@ function _handleCityDialogueResult(venue, data, p, npc){
     try { window.vEncounter.close(); } catch(_){}
     if (typeof doAction === 'function') doAction(data.transition.cb);
     else if (typeof vCity !== 'undefined' && typeof vCity.act === 'function') vCity.act(data.transition.cb);
+    return;
+  }
+  // combate staged por uma tela (ex.: rinha/quest) → vai pra arena
+  if (data.transition && data.transition.kind === 'combat' && data.transition.url) {
+    if (typeof _goToCombatFromCity === 'function') _goToCombatFromCity(data.transition.url);
     return;
   }
   // sub-node aberto (greeting → rooms/meal/relax/shortrest)
