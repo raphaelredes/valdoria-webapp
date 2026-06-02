@@ -32211,6 +32211,7 @@ function _squareShowArtistsPopup(p){
   });
   _squareShowListPopup({
     icon: _heralIco('ic-mochila'), stackKey: 'square_artists', title: 'Artistas de Rua',
+    bannerImg: '/shared/img/city/artistas-banner.webp',  // #17: banner-cenário PADRAO_LOCAIS
     flavor: '<i>Artistas espalhados pela praça apresentam-se em troca de gorjetas. Uma moeda generosa pode trazer mais que aplausos — pode trazer uma bênção fugaz que dura até o próximo descanso.</i>',
     items: items,
     onPick: function(item){
@@ -32841,7 +32842,9 @@ function _aaaListSubScreen(opts){
     + '</style>'
     // Cenário
     + '<div class="aaa-sub">'
-    +   '<div class="aaa-sub-cenario">'
+    // PADRAO_LOCAIS (#70): banner-cenário WebP (nível taverna/estalagem) quando
+    // opts.bannerImg presente — imagem full-bleed + gradiente escuro p/ legibilidade.
+    +   '<div class="aaa-sub-cenario"' + (opts.bannerImg ? ' style="background-image:linear-gradient(180deg,rgba(10,8,5,0.25),rgba(10,8,5,0.82)),url(' + opts.bannerImg + ');background-size:cover;background-position:center 28%;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;"' : '') + '>'
     +     (opts.icon ? '<div class="aaa-sub-icon">' + opts.icon + '</div>' : '')
     +     '<div class="aaa-sub-title">' + (opts.title || '') + '</div>'
     +     (opts.subtitle ? '<div class="aaa-sub-orn">◆ ' + opts.subtitle + ' ◆</div>' : '')
@@ -32944,6 +32947,7 @@ function _squareShowListPopup(opts){
     flavor: opts.flavor,
     npcInfo: opts.npcInfo,
     sectionLabel: opts.sectionLabel,
+    bannerImg: opts.bannerImg,  // #70: banner-cenário PADRAO_LOCAIS (opcional)
     items: opts.items || [],
     onPick: opts.onPick,
     theme: theme
@@ -33403,6 +33407,7 @@ function _squareShowBulletinPopup(p){
   _squareShowListPopup({
     icon: _heralIco('ic-missões'),
     title: 'Quadro de Avisos',
+    bannerImg: '/shared/img/city/quadro-banner.webp',  // #14: banner-cenário PADRAO_LOCAIS
     flavor: 'Pergaminhos pregados na parede de pedra. Conteúdo do dia.',
     items: items,
     stackKey: 'square_bulletin',
@@ -33696,7 +33701,8 @@ function _squareShowVendorPopup(p){
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     var npc = {
       name: vendor.name, desc: vendor.desc,
-      portraitHTML: vendor.icon,  // brasão heráldico do vendedor (SVG markup)
+      portraitImg: '/shared/img/npcs/plaza/vendor_' + vendor.id + '.webp',  // #16: foto WebP (PADRAO_WEBP)
+      portraitHTML: vendor.icon,  // fallback brasão heráldico (SVG markup)
       id: 'vendor_' + vendor.id
     };
     var _d = (vendor.desc || '').trim();
