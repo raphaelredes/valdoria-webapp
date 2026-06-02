@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T03:59:46Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T04:28:52Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13520,6 +13520,12 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         alive: hp > 0, se: [],
         dying: hp <= 0, stable: false, isDead: false, deathSaves: { s: 0, f: 0 },
         lvl: lvl,
+        /* User sessão #69: XP real do DB (REMOTE) pra tela de vitória usar o limiar
+           D&D 5e (PHB Tabela 1-2) em vez do stub level*50. xpNext/xpPrev = limiares
+           cumulativos do próximo/atual nível; xp = XP cumulativo atual. */
+        xp: (spec.xp_exact != null) ? Math.max(0, parseInt(spec.xp_exact, 10) || 0) : null,
+        xpNext: (spec.xp_next_exact != null) ? Math.max(0, parseInt(spec.xp_next_exact, 10) || 0) : null,
+        xpPrev: (spec.xp_prev_exact != null) ? Math.max(0, parseInt(spec.xp_prev_exact, 10) || 0) : null,
         res: { type: cdef.res.type, name: cdef.res.name, ico: cdef.res.ico, value: resCur, max: resMax },
         skills: skillsCopy,
         bag: (spec.bag && Array.isArray(spec.bag)) ? spec.bag : randomBagForChar(),
@@ -15804,15 +15810,20 @@ function computeRewards(s) {
             if (pool.length) items.push(pick(pool));
         }
     });
-    /* Level up: cada 50 XP por nivel atual */
-    var threshold = (p.lvl || 1) * 50;
-    var curXp = (p.lvl || 1) * 50 - 30; /* Stub: simula que estava perto */
+    /* User sessão #69: XP cumulativo D&D 5e (PHB Tabela 1-2). Usa o XP REAL do DB
+       (p.xp/p.xpNext/p.xpPrev em REMOTE); fallback pra tabela canônica por nível
+       (LOCAL/sim). Antes era stub level*50 → vitória mostrava "136/150" sem sentido. */
+    var _DDXP = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];
+    var _lv = Math.max(1, Math.min(20, p.lvl || 1));
+    var threshold = (p.xpNext != null) ? p.xpNext : (_DDXP[_lv] || _DDXP[19]);
+    var xpPrev = (p.xpPrev != null) ? p.xpPrev : (_DDXP[_lv - 1] || 0);
+    var curXp = (p.xp != null) ? p.xp : xpPrev; /* fallback: início do nível atual */
     var newXp = curXp + xp;
     var levelUp = newXp >= threshold;
     return {
         xp: xp, gold: gold, items: items,
-        oldXp: curXp, newXp: newXp, threshold: threshold,
-        oldLvl: p.lvl || 1, newLvl: levelUp ? (p.lvl || 1) + 1 : (p.lvl || 1),
+        oldXp: curXp, newXp: newXp, threshold: threshold, xpPrev: xpPrev,
+        oldLvl: _lv, newLvl: levelUp ? Math.min(20, _lv + 1) : _lv,
         levelUp: levelUp,
     };
 }
@@ -18616,7 +18627,11 @@ function render(s) {
         /* Bloco de recompensas — apenas em vitoria */
         if (ph === 'victory' && s.rewards) {
             var r = s.rewards;
-            var xpPct = Math.min(100, Math.round((r.newXp / r.threshold) * 100));
+            /* User sessão #69: barra = progresso DENTRO do nível (cumulativo - xpPrev),
+               igual à ficha; o texto mostra o cumulativo D&D (newXp / threshold). */
+            var _xpSpan = (r.threshold || 0) - (r.xpPrev || 0);
+            var _xpInto = (r.newXp || 0) - (r.xpPrev || 0);
+            var xpPct = _xpSpan > 0 ? Math.min(100, Math.max(0, Math.round(100 * _xpInto / _xpSpan))) : 0;
             html += '<div class="res-rewards">';
             html += '<div class="rr-section-title">Recompensas</div>';
             /* XP bar */
@@ -27243,7 +27258,10 @@ async function playTurn(aIdx, tIdx, opts) {
             (atkExtra ? '+' + atkExtra : '') + '=' + hitRes.total +
             ' vs CA ' + effAc + (effAc !== target.ac ? ' (incl. bônus)' : '');
         if (r === 1) _missAtkPart = '💥 NAT 1! vs CA ' + effAc;
-        s.log.push(actor.n + ' erra ' + target.n + ' — ' + _missAtkPart + '.');
+        /* User sessão #69: errar = a rolagem não passou a CA → o alvo DESVIOU/o golpe
+           passou (D&D 5e), NÃO que "defendeu". NAT 1 = o atacante erra feio. */
+        if (r === 1) s.log.push(actor.n + ' erra feio o golpe contra ' + target.n + ' — ' + _missAtkPart + '.');
+        else s.log.push(target.n + ' se desvia do golpe de ' + actor.n + ' — ' + _missAtkPart + '.');
         s.last = { a: actor.n, t: target.n, r: r, hit: false, tIdx: tIdx };
         var missUid = unitUidForOrderIndex(s, tIdx);
         if (missUid) await playMissVFX(missUid, target);
@@ -27788,6 +27806,15 @@ async function playTurn(aIdx, tIdx, opts) {
             skill: atkSkill || null,
             sneakAttack: !!(atkSkill && atkSkill.sneakAttack && hitRes && hitRes.hit),
         });
+    }
+    /* User sessão #69: som de dano quando o INIMIGO acerta o player/aliado. Antes só
+       tocava no caminho player→inimigo (via showDamageDice). Gated em alvo da party
+       (t==='p'||'a') pra NÃO duplicar com o SFX do ataque do próprio player. */
+    if (target && (target.t === 'p' || target.t === 'a')) {
+        try {
+            if (critForDeath && typeof sfxCrit === 'function') sfxCrit();
+            else if (typeof sfxHit === 'function') sfxHit();
+        } catch (_eSfx) { /* SFX não-crítico */ }
     }
     /* Reset flag pro próximo ataque */
     s._hitVfxPlayed = false;
