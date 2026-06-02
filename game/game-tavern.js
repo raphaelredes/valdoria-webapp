@@ -8,11 +8,10 @@
  *   Este renderer só desenha o hub e ABRE o diálogo server-driven via
  *   window._openCityDialogue('tavern', <node>). ZERO narrativa hardcoded aqui.
  *
- *   FIX importante: os ícones e diálogos antigos usavam cb do MOCKUP
- *   ('tavern_drinks_open' etc.) que NUNCA batiam com os cb reais do backend
- *   ('tavern_drink_menu' etc.) — em produção os cards ficavam SEM ícone e
- *   abriam o menu legado. Agora TAVERN_SVC_META + _TAVERN_CARD_NODE usam os cb
- *   REAIS do backend (tavern.py get_menu svc_structured).
+ *   FIX (sessão #71): o HUB renderiza do _buildTavernMockData (cidade/index.html),
+ *   cujos cb são 'tavern_<svc>_open' / 'tavern_rumor_buy'. Portanto TAVERN_SVC_META
+ *   + _TAVERN_CARD_NODE são keyed NESSES cb (do mock builder) — NÃO nos '_menu' do
+ *   process_action. Os cb reais de efeito/transição vivem DENTRO dos nodes (server-side).
  *
  * NPC: Grom Barba-Cinza. Doc: docs/sistemas/padrao-servidor.md
  *
@@ -26,33 +25,38 @@
 
 (function() {
 
-/* svc.cb REAL do backend (tavern.py:153-165) -> PNG icon canonical. */
+/* svc.cb do hub (cidade/index.html _buildTavernMockData, replica tavern.py get_menu)
+   -> PNG icon canonical. ATENÇÃO: o hub renderiza do MOCK builder, cujos cb são
+   'tavern_<svc>_open' / 'tavern_rumor_buy' / 'tavern_drinks_open' — NÃO os '_menu'
+   do process_action. Manter estes em sincronia com _buildTavernMockData. */
 var TAVERN_SVC_META = {
-  'tavern_rumor':            { icon: '../shared/img/services/svc-rumores.webp',      meta: '5 V · pistas' },
-  'tavern_drink_menu':       { icon: '../shared/img/services/svc-bebidas.webp',      meta: 'Recupera HP/MP' },
-  'tavern_mercenaries_menu': { icon: '../shared/img/services/svc-mercenarios.webp',  meta: 'Contratar por dia' },
-  'tavern_adventurers_menu': { icon: '../shared/img/services/svc-exploradores.webp', meta: 'Especialistas de campo' },
-  'tavern_games_menu':       { icon: '../shared/img/services/svc-dados.webp',        meta: 'Apostar nos dados' },
-  'tavern_carousing_menu':   { icon: '../shared/img/services/svc-socializar.webp',   meta: 'Fazer contatos' },
-  'tavern_gather_menu':      { icon: '../shared/img/services/svc-informacoes.webp',  meta: 'Investigar boatos' },
-  'tavern_pitfight_menu':    { icon: '../shared/img/services/svc-rinha.webp',        meta: 'Combate de aposta' },
-  'tavern_board_menu':       { icon: '../shared/img/services/svc-mural.webp',        meta: 'Tarefas locais' },
-  'tavern_bard_listen':      { icon: '../shared/img/services/svc-bardo.webp',        meta: 'Inspiração: +1d6' }
+  'tavern_rumor_buy':        { icon: '../shared/img/services/svc-rumores.webp',      meta: '5 V · pistas' },
+  'tavern_drinks_open':      { icon: '../shared/img/services/svc-bebidas.webp',      meta: 'Recupera HP/MP' },
+  'tavern_mercenaries_open': { icon: '../shared/img/services/svc-mercenarios.webp',  meta: 'Contratar por dia' },
+  'tavern_adventurers_open': { icon: '../shared/img/services/svc-exploradores.webp', meta: 'Especialistas de campo' },
+  'tavern_games_open':       { icon: '../shared/img/services/svc-dados.webp',        meta: 'Apostar nos dados' },
+  'tavern_carousing_open':   { icon: '../shared/img/services/svc-socializar.webp',   meta: 'Fazer contatos' },
+  'tavern_gather_open':      { icon: '../shared/img/services/svc-informacoes.webp',  meta: 'Investigar boatos' },
+  'tavern_pitfight_open':    { icon: '../shared/img/services/svc-rinha.webp',        meta: 'Combate de aposta' },
+  'tavern_bulletin_open':    { icon: '../shared/img/services/svc-mural.webp',        meta: 'Tarefas locais' },
+  'tavern_bard_open':        { icon: '../shared/img/services/svc-bardo.webp',        meta: 'Inspiração: +1d6' }
 };
 
-/* PADRAO_SERVIDOR (sessão #71) — svc.cb REAL do backend -> node de diálogo.
-   Clicar num card abre o Grom em PADRAO_ALDRIC já no node daquele serviço. */
+/* PADRAO_SERVIDOR (sessão #71) — svc.cb do hub (tavern_*_open, do _buildTavernMockData)
+   -> node de diálogo. Clicar num card abre o Grom em PADRAO_ALDRIC nesse node. Os cb
+   reais de EFEITO/transição (tavern_buy_drink_*, tavern_games_menu) vivem DENTRO dos
+   nodes (server-side) — aqui só mapeamos a cb do card -> node. */
 var _TAVERN_CARD_NODE = {
-  'tavern_rumor': 'rumor',
-  'tavern_drink_menu': 'drinks',
-  'tavern_mercenaries_menu': 'mercenaries',
-  'tavern_adventurers_menu': 'adventurers',
-  'tavern_games_menu': 'games',
-  'tavern_carousing_menu': 'carousing',
-  'tavern_gather_menu': 'gather',
-  'tavern_pitfight_menu': 'pitfight',
-  'tavern_board_menu': 'bulletin',
-  'tavern_bard_listen': 'bard'
+  'tavern_drinks_open': 'drinks',
+  'tavern_rumor_buy': 'rumor',
+  'tavern_mercenaries_open': 'mercenaries',
+  'tavern_adventurers_open': 'adventurers',
+  'tavern_games_open': 'games',
+  'tavern_carousing_open': 'carousing',
+  'tavern_gather_open': 'gather',
+  'tavern_pitfight_open': 'pitfight',
+  'tavern_bulletin_open': 'bulletin',
+  'tavern_bard_open': 'bard'
 };
 
 function _isRemote() {
@@ -175,6 +179,8 @@ function _tavBuildServices(services) {
       img.loading = 'lazy';
       img.onerror = function(){ this.style.display = 'none'; };
       ico.appendChild(img);
+    } else if (svc.icon) {
+      ico.innerHTML = svc.icon; // fallback: ícone do mock builder (heráldico) se não há PNG meta
     }
     card.appendChild(ico);
 
