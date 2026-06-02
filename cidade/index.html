@@ -718,6 +718,9 @@ LOG SINK (Fase 7):
        não funcionar pro user (só logavam no console). */
     document.write('<link rel="stylesheet" href="/shared/toast.css?v=' + v + '">');
     document.write('<script src="/shared/toast.js?v=' + v + '"><\/script>');
+    /* Fase 4 vínculo de contas (Sessão #68): diálogo de merge (>=3 opções no
+       409 linked_to_another_account). Self-contained; usa vToast/vProcessing/vOverlay. */
+    document.write('<script src="/shared/merge-dialog.js?v=' + v + '"><\/script>');
     /* 2026-05-14: vInventory canonical (shared/inventory-screen.{css,js}) — Mochila
        redesign que substitui _showInventoryPopup local. Sprite ic-it-* (519 symbols)
        carregado primeiro pra ser usado em qualquer item icon. Fallback automático
@@ -12634,7 +12637,17 @@ function _linkTelegramStart(){
         } else {
           var msg = (data && data.error) ? data.error : 'Falha ao vincular Telegram.';
           if (data && data.code === 'linked_to_another_account'){
-            msg = '⚠️ Esta conta Telegram já está vinculada a outro personagem.';
+            // Fase 4: oferece as >=3 opções de merge (backend manda data.merge).
+            if (data.merge && data.merge.options && window.vMergeDialog){
+              vMergeDialog.show({
+                api: api, token: token,
+                credentialBody: { provider: 'telegram', telegram_data: tg_data, initData: initData },
+                mergeData: data.merge,
+                onMerged: function(){ _loadLinkSection(); }
+              });
+              return;
+            }
+            msg = '⚠️ Esta conta Telegram já está vinculada a outra conta.';
           }
           vToast(msg);
         }

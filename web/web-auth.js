@@ -245,8 +245,27 @@ async function _onGoogleAuthLink(response) {
         var data = {};
         try { data = await resp.json(); } catch (_e) { /* noqa: preflight */ }
         if (resp.status === 409 && data && data.code === 'linked_to_another_account') {
-            // AUTH-3 (futuro): UI de merge. Por ora, mensagem clara.
-            showAuthError('Esta conta Google já está vinculada a outro personagem. Suporte: AUTH-3 pendente.');
+            // Fase 4 (Sessão #68): oferece as >=3 opções de merge (data.merge).
+            if (data.merge && data.merge.options && window.vMergeDialog) {
+                showAuthLoading(false);
+                window.vMergeDialog.show({
+                    api: _linkPending.api, token: _linkPending.token,
+                    credentialBody: { provider: 'google', credential: credential },
+                    mergeData: data.merge,
+                    onMerged: function () {
+                        try { sessionStorage.removeItem('valdoria_link_pending'); } catch (_) { /* noqa: preflight */ }
+                        try {
+                            var b = document.getElementById('screen-login');
+                            if (b) b.innerHTML = '<div style="text-align:center;padding:24px;color:#d4c8b0;font-family:Cinzel,serif">'
+                                + '<div style="font-size:48px;margin-bottom:16px">✓</div>'
+                                + '<div style="font-size:18px">Contas vinculadas!</div>'
+                                + '<div style="font-size:13px;opacity:.7;margin-top:12px">Você pode fechar esta janela.</div></div>';
+                        } catch (_e) { /* noqa: preflight */ }
+                    }
+                });
+                return;
+            }
+            showAuthError('Esta conta Google já está vinculada a outra conta.');
             return;
         }
         if (resp.ok && (data.linked || data.already_linked)) {

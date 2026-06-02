@@ -210,6 +210,9 @@
          Synchronous document.write guarantees load order (the async _loadScript below
          does NOT). Doc: docs/sistemas/refactor-1-plan.md -->
     <script>document.write('<script src="../shared/auth-token-store.js?v=' + v + '"><\/script>');</script>
+    <!-- Fase 4 vínculo de contas (Sessão #68): diálogo de merge no 409. Self-contained
+         (degrada sem vToast/vOverlay). Carregado antes de web-auth.js que o invoca. -->
+    <script>document.write('<script src="../shared/merge-dialog.js?v=' + v + '"><\/script>');</script>
     <script>
     var _loadScript = function(src) {
         var s = document.createElement('script');
