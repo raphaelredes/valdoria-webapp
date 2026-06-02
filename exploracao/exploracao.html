@@ -40189,7 +40189,18 @@ function updateHud() {
       const resCls = RES_CLASS_MAP[resName] || 'mp';
       mpRow.classList.remove('mp', 'fury', 'energy', 'ki', 'vigor');
       mpRow.classList.add(resCls);
-      setBarFill('mp-fill', 'mp-val', p.mp, p.mmp, 'mp');
+      // User sessão #69: Bárbaro mostra CARGAS DE FÚRIA (D&D 5e PHB p.48: 2 cargas
+      // no nv1-2, +1 em 3/6/12/17), não o pool de MP. Antes a exploração mostrava
+      // 20/20 (pool) enquanto o combate mostrava 2/2 (cargas) — divergência. Agora
+      // ambos mostram as cargas. rage_charges atual vem do server (p.rage_charges);
+      // fora de combate o padrão é cheio (Fúria reseta no descanso longo).
+      if (p.cls_key === 'barbaro') {
+        var _rgMax = 2 + (p.level>=3?1:0) + (p.level>=6?1:0) + (p.level>=12?1:0) + (p.level>=17?1:0);
+        var _rgCur = (p.rage_charges != null) ? p.rage_charges : _rgMax;
+        setBarFill('mp-fill', 'mp-val', Math.max(0, Math.min(_rgMax, _rgCur)), _rgMax, 'mp');
+      } else {
+        setBarFill('mp-fill', 'mp-val', p.mp, p.mmp, 'mp');
+      }
     } else {
       mpRowParent.style.display = 'none';
     }

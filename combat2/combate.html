@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-01T21:15:19Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T03:51:44Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1957,19 +1957,20 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .current-turn .ct-label { color: var(--v-text-dim, #a09484); }
 .current-turn .ct-name { color: #c06a3a; font-weight: 700; letter-spacing: 2px; }
 .current-turn.player-turn { background: linear-gradient(90deg, transparent, rgba(196,149,58,.25), transparent); border-color: var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); font-weight: 700; letter-spacing: 4px; font-size: calc(14px * var(--v-font-scale, 1)); text-shadow: 0 0 10px rgba(196,149,58,.6), 0 1px 2px rgba(0,0,0,.8); animation: ctFade .3s ease, playerTurnGlow 1.6s ease-in-out infinite; }
-.current-turn.player-turn .ct-text { display: inline-block; animation: seuTurnoAttention 4s ease-in-out infinite; }
+.current-turn.player-turn .ct-text { display: inline-block; animation: seuTurnoAttention 3.4s ease-in-out infinite; }
+/* User sessão #69: pulso SUAVE (respiração) em vez dos saltos bruscos de escala
+   em 78-92% (que causavam flicker/zoom rápido como seizure). Escala sutil 1→1.04,
+   sem filter:brightness (caro no mobile). */
 @keyframes seuTurnoAttention {
-    0%, 75%, 100% { transform: scale(1); text-shadow: 0 0 10px rgba(196,149,58,.6), 0 1px 2px rgba(0,0,0,.8); filter: brightness(1); }
-    78% { transform: scale(1.18); text-shadow: 0 0 20px rgba(255,215,130,1), 0 0 40px rgba(196,149,58,.8), 0 1px 2px rgba(0,0,0,.8); filter: brightness(1.5); }
-    83% { transform: scale(.98); filter: brightness(1); }
-    87% { transform: scale(1.12); text-shadow: 0 0 16px rgba(255,215,130,.9), 0 0 30px rgba(196,149,58,.6), 0 1px 2px rgba(0,0,0,.8); filter: brightness(1.35); }
-    92% { transform: scale(1); filter: brightness(1); }
+    0%, 100% { transform: scale(1); text-shadow: 0 0 10px rgba(196,149,58,.5), 0 1px 2px rgba(0,0,0,.8); }
+    50% { transform: scale(1.04); text-shadow: 0 0 16px rgba(255,215,130,.8), 0 0 26px rgba(196,149,58,.45), 0 1px 2px rgba(0,0,0,.8); }
 }
-.current-turn.player-turn .ct-chevron { color: var(--v-gold, #c4953a); font-size: calc(16px * var(--v-font-scale, 1)); animation: ctChevron 1s ease-in-out infinite; display: inline-block; }
-.current-turn.player-turn .ct-chevron:last-child { animation-delay: .5s; }
+/* User sessão #69: setas mais lentas e sutis (eram 1s / 4px — rápidas demais). */
+.current-turn.player-turn .ct-chevron { color: var(--v-gold, #c4953a); font-size: calc(16px * var(--v-font-scale, 1)); animation: ctChevron 2.4s ease-in-out infinite; display: inline-block; }
+.current-turn.player-turn .ct-chevron:last-child { animation-delay: 1.2s; }
 @keyframes ctFade { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; } }
-@keyframes playerTurnGlow { 0%,100% { box-shadow: 0 0 10px rgba(196,149,58,.2); } 50% { box-shadow: 0 0 20px rgba(196,149,58,.5); } }
-@keyframes ctChevron { 0%,100% { transform: translateX(0); opacity: .6; } 50% { transform: translateX(4px); opacity: 1; } }
+@keyframes playerTurnGlow { 0%,100% { box-shadow: 0 0 10px rgba(196,149,58,.2); } 50% { box-shadow: 0 0 18px rgba(196,149,58,.45); } }
+@keyframes ctChevron { 0%,100% { transform: translateX(0); opacity: .55; } 50% { transform: translateX(3px); opacity: .9; } }
 
 /* Turno do player ativo — seta epica + label SEU TURNO acima do card */
 .cell.occupied.player.player-turn-active { position: relative; }
@@ -13777,6 +13778,21 @@ function newCombatFromSetup(cfg) {
             if (c.t === 'p' || c.t === 'a') {
                 c.init = (c.init | 0) + 30;
             } else if (c.t === 'e') {
+                c.surprised = true;
+                c.surprisedFromIntro = true;
+            }
+        });
+    }
+    // User sessão #69: emboscada AO player ("orcs saltam, sem tempo de reagir").
+    // Oposto de cfg.surprise: os INIMIGOS agem primeiro (+30 init) e o PLAYER +
+    // aliados perdem o round 1 (PHB p.189). Assim o log "foi pego de surpresa"
+    // nomeia o PLAYER, coerente com a narrativa de emboscada (antes dizia que o
+    // orc foi surpreendido, contradizendo o texto).
+    if (cfg.playerSurprised === true) {
+        order.forEach(function (c) {
+            if (c.t === 'e') {
+                c.init = (c.init | 0) + 30;
+            } else if (c.t === 'p' || c.t === 'a') {
                 c.surprised = true;
                 c.surprisedFromIntro = true;
             }
