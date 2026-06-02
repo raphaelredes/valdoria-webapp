@@ -2772,6 +2772,49 @@ body.perf-lite #top-danger { animation: none !important; }
   text-shadow: 0 0 8px rgba(251, 215, 112, 0.7), 0 0 4px rgba(0, 0, 0, 0.9);
 }
 #btn-hud-float-toggle:active { transform: scale(0.92); }
+/* #22 (sessao #70): botao Configuracoes — empilhado abaixo do toggle, mesmo estilo */
+#btn-explore-settings {
+  position: absolute; top: 36px; right: -24px; width: 22px; height: 22px; padding: 0;
+  background: linear-gradient(180deg, rgba(28,22,16,0.94), rgba(14,11,8,0.92));
+  border: 1px solid rgba(196,149,58,0.28); border-left: none; border-radius: 0 6px 6px 0;
+  color: var(--v-gold,#c4953a); font-size: calc(13px * var(--v-font-scale,1)); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.4); transition: color .15s ease, transform .15s ease;
+  line-height: 1; pointer-events: auto; z-index: 4;
+}
+#btn-explore-settings:hover { color: #fbd770; }
+#btn-explore-settings:active { transform: scale(0.92); }
+/* #22: overlay de configuracoes da exploracao (dentro do #frame, position:relative) */
+#explore-settings-overlay {
+  position: absolute; inset: 0; z-index: 9100; display: flex; align-items: center; justify-content: center;
+  background: rgba(10,8,5,0.80); padding: 16px; pointer-events: auto;
+}
+#explore-settings-overlay .exs-card {
+  width: 100%; max-width: 360px; max-height: 90%; overflow-y: auto;
+  background: linear-gradient(180deg, var(--v-bg-card,#2e2520), var(--v-bg,#2a2420));
+  border: 1px solid var(--v-gold,#c4953a); border-radius: var(--v-radius,10px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 0 20px rgba(196,149,58,0.08);
+}
+#explore-settings-overlay .exs-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--v-border,#4a3828); }
+#explore-settings-overlay .exs-title { font-family: var(--v-font-display,Cinzel,serif); font-size: calc(15px * var(--v-font-scale,1)); color: var(--v-gold,#c4953a); letter-spacing: 1px; text-transform: uppercase; }
+#explore-settings-overlay .exs-close { background: none; border: none; color: var(--v-text-dim,#a09484); font-size: calc(18px * var(--v-font-scale,1)); cursor: pointer; line-height: 1; padding: 0 4px; }
+#explore-settings-overlay .exs-close:hover { color: var(--v-gold,#c4953a); }
+#explore-settings-overlay .exs-body { padding: 10px 14px 14px; }
+#explore-settings-overlay .exs-section { font-family: var(--v-font-display,Cinzel,serif); font-size: calc(10px * var(--v-font-scale,1)); color: var(--v-gold,#c4953a); letter-spacing: 1.5px; text-transform: uppercase; margin: 12px 0 6px; padding-top: 6px; border-top: 1px solid var(--v-gold-12,rgba(196,149,58,0.12)); }
+#explore-settings-overlay .exs-section.first { margin-top: 0; border-top: none; padding-top: 0; }
+#explore-settings-overlay .exs-font-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+#explore-settings-overlay .exs-font-btn { padding: 8px; border-radius: var(--v-radius-sm,6px); background: rgba(196,149,58,0.04); border: 1px solid var(--v-border,#4a3828); color: var(--v-text,#d4c8b0); font-family: var(--v-font,serif); cursor: pointer; min-height: 38px; font-weight: 700; }
+#explore-settings-overlay .exs-font-btn.on { background: rgba(196,149,58,0.15); border-color: var(--v-gold,#c4953a); color: var(--v-gold,#c4953a); }
+#explore-settings-overlay .exs-toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 8px; margin-bottom: 3px; background: rgba(196,149,58,0.04); border-radius: var(--v-radius-sm,6px); cursor: pointer; }
+#explore-settings-overlay .exs-lbl { font-size: calc(14px * var(--v-font-scale,1)); color: var(--v-text,#d4c8b0); }
+#explore-settings-overlay .exs-toggle { width: 36px; height: 20px; border-radius: 10px; position: relative; flex-shrink: 0; margin-left: 8px; background: var(--v-border,#4a3828); transition: background .2s ease; }
+#explore-settings-overlay .exs-toggle.on { background: var(--v-gold,#c4953a); }
+#explore-settings-overlay .exs-knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--v-bg,#2a2420); transition: left .2s ease; }
+#explore-settings-overlay .exs-toggle.on .exs-knob { left: 18px; }
+#explore-settings-overlay .exs-slider-row { padding: 9px 8px; margin-bottom: 3px; background: rgba(196,149,58,0.04); border-radius: var(--v-radius-sm,6px); }
+#explore-settings-overlay .exs-slider-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+#explore-settings-overlay .exs-val { color: var(--v-gold,#c4953a); font-weight: 600; font-size: calc(13px * var(--v-font-scale,1)); }
+#explore-settings-overlay .exs-slider-row input[type=range] { width: 100%; accent-color: var(--v-gold,#c4953a); cursor: pointer; }
 /* 2026-04-27 USER RULE: collapse SOMENTE vertical. Antes #hud-float.hf-collapsed
    reduzia min-width pra 0 e padding lateral 10px→6px — causava encolhimento
    horizontal indesejado. AGORA: largura preservada (min-width 204px, padding
@@ -8442,6 +8485,8 @@ window.__onIntroTap = function() {
        no toggle. -->
   <div id="hud-float" class="hud-pro">
     <button id="btn-hud-float-toggle" title="Recolher status" aria-label="Recolher status">▲</button>
+    <!-- #22 (sessao #70): acesso a Configuracoes (Fonte/Som/Vibracao) dentro da exploracao -->
+    <button id="btn-explore-settings" title="Configurações" aria-label="Configurações">⚙</button>
     <!-- HP row SEMPRE VISÍVEL — não colapsa com o toggle -->
     <div class="hud-row" title="Vida (HP)">
       <svg class="hud-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.5c-.3 0-.5-.1-.7-.3L2.4 9.3C1 7.9 1 5.7 2.4 4.3c1.3-1.3 3.4-1.3 4.7 0L8 5.2l.9-.9c1.3-1.3 3.4-1.3 4.7 0 1.4 1.4 1.4 3.6 0 5l-4.9 4.9c-.2.2-.4.3-.7.3z"/></svg>
@@ -41170,6 +41215,98 @@ function bindQuickActions() {
       try { localStorage.setItem('valdoria_explore_hud_float_collapsed', willCollapse ? '1' : '0'); } catch (_e) {}
     });
   }
+
+  // #22 (sessao #70): Configuracoes acessiveis DENTRO da exploracao (Fonte/Som/
+  // Vibracao). Antes nao havia botao de settings no mapa. Overlay dentro do
+  // #frame (position:relative -> absolute inset:0). Reusa as MESMAS prefs/keys da
+  // cidade (valdoria_font_size, valdoria_haptic, ValdoriaAudio) pra consistencia.
+  // Re-renderiza ao mudar um valor (mesmo padrao do _showSettingsPopup da cidade).
+  function _exsPref(key, def) { try { var v = localStorage.getItem(key); return v === null ? def : v; } catch (e) { return def; } }
+  function _exsSetPref(key, val) { try { localStorage.setItem(key, String(val)); } catch (e) {} }
+  function _exsToggleRow(label, on, key) {
+    return '<div class="exs-toggle-row" data-key="' + key + '"><span class="exs-lbl">' + label + '</span>'
+      + '<span class="exs-toggle' + (on ? ' on' : '') + '"><span class="exs-knob"></span></span></div>';
+  }
+  function _exsSliderRow(label, val, key) {
+    return '<div class="exs-slider-row"><div class="exs-slider-top"><span class="exs-lbl">' + label + '</span>'
+      + '<span class="exs-val">' + val + '%</span></div>'
+      + '<input type="range" min="0" max="100" value="' + val + '" data-slider="' + key + '"></div>';
+  }
+  function _closeExploreSettings() { var ov = document.getElementById('explore-settings-overlay'); if (ov) ov.remove(); }
+  function _showExploreSettings() {
+    _closeExploreSettings();
+    var frame = document.getElementById('frame'); if (!frame) return;
+    var fontSize = _exsPref('valdoria_font_size', 'normal');
+    var haptic = _exsPref('valdoria_haptic', '1') === '1';
+    var musicMuted = false, sfxMuted = false, musicVol = 15, sfxVol = 15;
+    if (typeof ValdoriaAudio !== 'undefined') {
+      try {
+        musicMuted = ValdoriaAudio.isMusicMuted();
+        sfxMuted = ValdoriaAudio.isSFXMuted();
+        musicVol = Math.round(ValdoriaAudio.getVolume() * 100);
+        sfxVol = Math.round(ValdoriaAudio.getSFXVolume() * 100);
+      } catch (e) {}
+    }
+    var FONTS = [{ id: 'small', f: '13px' }, { id: 'normal', f: '16px' }, { id: 'large', f: '19px' }];
+    var h = '<div class="exs-card" role="dialog" aria-modal="true">'
+      + '<div class="exs-head"><span class="exs-title">Configurações</span>'
+      + '<button class="exs-close" id="exs-close" aria-label="Fechar">✕</button></div>'
+      + '<div class="exs-body">'
+      + '<div class="exs-section first">Tamanho da Fonte</div><div class="exs-font-row">';
+    FONTS.forEach(function (fs) {
+      h += '<button class="exs-font-btn' + (fs.id === fontSize ? ' on' : '') + '" data-font="' + fs.id
+        + '" style="font-size:' + fs.f + '">A</button>';
+    });
+    h += '</div><div class="exs-section">Som</div>'
+      + _exsToggleRow('Música', !musicMuted, 'music');
+    if (!musicMuted) h += _exsSliderRow('Volume Música', musicVol, 'music_vol');
+    h += _exsToggleRow('Efeitos Sonoros', !sfxMuted, 'sfx');
+    if (!sfxMuted) h += _exsSliderRow('Volume Efeitos', sfxVol, 'sfx_vol');
+    h += '<div class="exs-section">Jogo</div>'
+      + _exsToggleRow('Vibração', haptic, 'haptic')
+      + '</div></div>';
+    var ov = document.createElement('div');
+    ov.id = 'explore-settings-overlay';
+    ov.innerHTML = h;
+    frame.appendChild(ov);
+    ov.addEventListener('click', function (e) { if (e.target === ov) _closeExploreSettings(); });
+    var cbtn = document.getElementById('exs-close'); if (cbtn) cbtn.addEventListener('click', _closeExploreSettings);
+    ov.querySelectorAll('.exs-font-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var size = b.getAttribute('data-font');
+        _exsSetPref('valdoria_font_size', size);
+        document.body.setAttribute('data-font-size', size);
+        if (window.vHaptic) window.vHaptic('light');
+        _showExploreSettings();
+      });
+    });
+    ov.querySelectorAll('.exs-toggle-row').forEach(function (row) {
+      row.addEventListener('click', function () {
+        var k = row.getAttribute('data-key');
+        if (k === 'music' && typeof ValdoriaAudio !== 'undefined') { try { ValdoriaAudio.toggleMusic(); } catch (e) {} }
+        else if (k === 'sfx' && typeof ValdoriaAudio !== 'undefined') {
+          try { ValdoriaAudio.toggleSFX(); if (!ValdoriaAudio.isSFXMuted() && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_confirm'); } catch (e) {}
+        } else if (k === 'haptic') {
+          var cur = _exsPref('valdoria_haptic', '1') === '1';
+          _exsSetPref('valdoria_haptic', cur ? '0' : '1');
+          if (!cur) { try { if (navigator.vibrate) navigator.vibrate([40, 60, 40]); } catch (_) {} }
+        }
+        if (window.vHaptic) window.vHaptic('light');
+        _showExploreSettings();
+      });
+    });
+    ov.querySelectorAll('input[data-slider]').forEach(function (sl) {
+      sl.addEventListener('input', function () {
+        var k = sl.getAttribute('data-slider'); var v = parseInt(sl.value, 10) / 100;
+        if (typeof ValdoriaAudio !== 'undefined') {
+          try { if (k === 'music_vol') ValdoriaAudio.setVolume(v); if (k === 'sfx_vol') ValdoriaAudio.setSFXVolume(v); } catch (e) {}
+        }
+      });
+      sl.addEventListener('change', function () { _showExploreSettings(); });
+    });
+  }
+  var _exsBtn = document.getElementById('btn-explore-settings');
+  if (_exsBtn) { _exsBtn.addEventListener('click', function (e) { e.stopPropagation(); _showExploreSettings(); }); }
   // 2026-04-27 USER RULE: hex-nav size controls — 3 níveis (0.6 / 0.78 / 1.0).
   // Botões − e + flanqueiam o hex-dir S (centro-bottom). Estado salvo em
   // localStorage 'valdoria_explore_hex_nav_scale_level' (0..2).
