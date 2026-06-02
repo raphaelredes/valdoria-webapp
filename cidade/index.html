@@ -27626,12 +27626,12 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Criança da Praça', desc: 'Garota de tranças com cesta caída', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/crianca_pomar.webp' },
     script: [
       { type: 'narration', text: 'Uma garota de oito anos tropeça no calçamento e a cesta de vime escapa das mãos dela. Maçãs vermelhas rolam em todas as direções pela praça.' },
-      { type: 'speech', speaker: 'crianca_pomar', text: '— Ai, ai! <i>(ela se ajoelha rapidamente)</i> A senhora vai me bater de novo se eu perder essas maçãs! Era pra eu entregar todas no mercado da esquina!' }
+      { type: 'speech', speaker: 'crianca_pomar', text: '— Ai, ai! <i>(ela se ajoelha rapidamente)</i> Minha avó vai brigar comigo de novo se eu perder essas maçãs! Era pra eu entregar todas no mercado da esquina!' }
     ],
     choices: [
       { id: 'help', label: '🍎 Ajudar a recolher', result: 'apply_now',
         effect: { xp: 3 },
-        result_text: 'Você se ajoelha e ajuda a juntar as maçãs uma por uma. <i>A criança te olha agradecida — e duas senhoras que passavam param pra ajudar também.</i> Em um minuto a cesta está cheia de novo. <b>"Que Eldor te abençoe, moço."</b>' },
+        result_text: 'Você se ajoelha e ajuda a juntar as maçãs uma por uma. <i>A criança te olha agradecida — e duas senhoras que passavam param pra ajudar também.</i> Em um minuto a cesta está cheia de novo. <b>"Que Eldor te abençoe, viajante."</b>' },
       // 2026-05-12 PADRAO_ALDRIC dice rolls — CHA pra inspirar criança / DEX pra recolher rápido
       { id: 'cheer_up', label: '🗣️ [CAR 11] "Sua avó vai entender — vamos resolver juntos."',
         result: 'skill_check', stat: 'charisma', dc: 11,
