@@ -21630,10 +21630,27 @@ function _showSharedNpcListPopup(opts){
   opts.npcs.forEach(function(npc, idx){
     var hasMore = _npcHasMore(npc);
     var subtitle = npc.role + (hasMore ? '' : ' · ✓ tudo conversado');
+    // #12 (sessão #70): avatar VARIADO por NPC — foto WebP (portraitImg, PADRAO_WEBP)
+    // > ícone heráldico do próprio NPC (npc.icon, variado por arquétipo) > fallback
+    // aldeão. Antes: todos usavam #ic-aldeao (mesma silhueta repetida).
+    var avatar;
+    if (npc.portraitImg) {
+      avatar = '<span class="sb-icon sb-icon-img"><img src="' + npc.portraitImg + '" alt="" loading="lazy" '
+        + 'style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--v-gold-40,rgba(196,149,58,0.45));" '
+        + 'onerror="this.style.display=\'none\'"></span>';
+    } else if (npc.icon && typeof npc.icon === 'string' && npc.icon.indexOf('<') === 0) {
+      avatar = '<span class="sb-icon">' + npc.icon + '</span>';
+    } else if (npc.icon && typeof npc.icon === 'string' && npc.icon.indexOf('ic-') === 0) {
+      avatar = '<span class="sb-icon"><svg class="v-heraldic"><use href="#' + npc.icon + '"/></svg></span>';
+    } else if (npc.icon && typeof npc.icon === 'string') {
+      avatar = '<span class="sb-icon">' + npc.icon + '</span>';
+    } else {
+      avatar = '<span class="sb-icon"><svg class="v-heraldic"><use href="#ic-aldeao"/></svg></span>';
+    }
     html += '<button class="subscreen-btn bnk-item-btn" data-idx="' + idx + '"'
       + (hasMore ? '' : ' style="opacity:0.6"')
       + '>'
-      + '<span class="sb-icon"><svg class="v-heraldic"><use href="#ic-aldeao"/></svg></span>'
+      + avatar
       + '<span class="sb-text">' + npc.name + '</span>'
       + '<span class="sb-info">' + subtitle + '</span>'
       + '</button>';
