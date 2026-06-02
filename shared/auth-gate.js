@@ -10,7 +10,7 @@
  * Detecta 3 contextos validos (qualquer um -> permite carregar a pagina):
  *   1. Telegram WebApp initData (window.Telegram.WebApp.initData presente)
  *   2. URL params token + uid (bot-launched WebApp com HMAC)
- *   3. localStorage session web (v_dev_session_* ou v_prod_session_*)
+ *   3. localStorage session web (valdoria_session_<env> via vAuthTokenStore)
  *
  * Skip automatico (NUNCA redireciona):
  *   - Simuladores file:// e qualquer hostname nao-real
@@ -63,49 +63,56 @@
         if (hasUid && hasAnyToken) return;
     } catch (e) { /* URLSearchParams indisponivel — segue */ }
 
-    /* Check 3 (task #77, 2026-05-20): localStorage v_dev_session / v_prod_session.
-       Game pages (cidade/exploracao/combat/play) escrevem essa key apos auth
-       bem-sucedida. Formato: {token, apiBase, uid, charId, env, ts}.
+    /* Check 3 (bug C1 fix, Sessao #68 2026-06-01): localStorage
+       `valdoria_session_<env>` — a chave CANONICA escrita por vAuthTokenStore
+       (shared/auth-token-store.js) em /play/ e /web/ apos auth bem-sucedida.
+       Formato: {token, user_id, char_id, env, scope, api_base, saved_at}.
 
-       User reportou (2026-05-20): "/web/ aparece mesmo já autenticado".
-       Diagnóstico Chrome MCP: user tem v_dev_session válido (token+uid+apiBase)
-       mas web-auth.js só checa WEB_TOKEN_KEY (chave legada diferente).
+       Lemos a chave DIRETO (nao via window.vAuthTokenStore.getRecord) porque
+       o auth-gate carrega ANTES de auth-token-store.js no <head> de TODAS as
+       paginas — window.vAuthTokenStore ainda eh undefined neste ponto.
 
-       Fix: detectamos v_*_session AQUI. Se presente E não-expired, REDIRECT
-       direto pra /cidade/?token=...&uid=... (skip /web/ login screen).
+       Antes (bug C1, account-linking-design.md §C): liamos uma chave ORFA
+       antiga (campos `uid`/`apiBase`/`ts`) que NADA escrevia (REFACTOR-1
+       Sessao #65 centralizou no writer novo e deixou este reader apontando
+       pra chave morta). Resultado: o redirect "pular prompt" NUNCA disparava
+       e /web/ reaparecia mesmo ja autenticado.
 
-       v_dev_session é canonical pra DEV; v_prod_session pra PROD. Detecção
-       baseada em hostname (host=='dev.lendasdevaldoria.com.br' -> dev). */
+       Se presente e valida (token+user_id+api_base, env bate, < 30 dias),
+       REDIRECT direto pra /cidade/?token=... (skip /web/ login screen). */
     try {
-        var envPrefix = host === 'dev.lendasdevaldoria.com.br' ? 'v_dev_session' : 'v_prod_session';
-        var rawSession = localStorage.getItem(envPrefix);
+        var _env = host === 'dev.lendasdevaldoria.com.br' ? 'dev' : 'prod';
+        var sessKey = 'valdoria_session_' + _env;
+        var rawSession = localStorage.getItem(sessKey);
         if (rawSession) {
             var sess = JSON.parse(rawSession);
-            // Valid session: token + uid + apiBase present, NOT older than 30 days
-            var ageMs = Date.now() - (sess.ts || 0);
+            // env stamp deve bater com o ambiente atual (Environment Isolation)
+            var envOk = !sess.env || sess.env === _env;
+            // Valid session: token + user_id + api_base present, NOT older than 30 days
+            var ageMs = Date.now() - (sess.saved_at || 0);
             var maxAge = 30 * 24 * 60 * 60 * 1000;  // 30 days
-            if (sess.token && sess.uid && sess.apiBase && ageMs < maxAge) {
+            if (envOk && sess.token && sess.user_id && sess.api_base && ageMs < maxAge) {
                 // Redirect direto pra cidade com URL params (game pages lêem do URL)
                 var url = '/cidade/?token=' + encodeURIComponent(sess.token)
-                    + '&api=' + encodeURIComponent(sess.apiBase)
-                    + '&uid=' + encodeURIComponent(String(sess.uid))
-                    + '&env=' + encodeURIComponent(sess.env || (host === 'dev.lendasdevaldoria.com.br' ? 'dev' : 'prod'))
-                    + (sess.charId ? '&char=' + encodeURIComponent(sess.charId) : '')
+                    + '&api=' + encodeURIComponent(sess.api_base)
+                    + '&uid=' + encodeURIComponent(String(sess.user_id))
+                    + '&env=' + encodeURIComponent(sess.env || _env)
+                    + (sess.char_id ? '&char=' + encodeURIComponent(sess.char_id) : '')
                     + '&_cb=' + Date.now();
                 // Se já estamos em /cidade/, /exploracao/, etc, NAO redirect (deixa página carregar)
                 if (path === '/play/' || path === '/play') {
-                    try { console.info('[AUTH-GATE] localStorage v_*_session detectada — redirect /play/ -> /cidade/ com URL params'); } catch(_){}
+                    try { console.info('[AUTH-GATE] valdoria_session detectada — redirect /play/ -> /cidade/ com URL params'); } catch(_){}
                     try { window.__valdoria_transitioning = true; } catch(_){}
                     location.replace(url);
                     return;
                 }
                 // Em outras game pages, deixa página carregar (já é destino válido)
-                try { console.info('[AUTH-GATE] localStorage v_*_session detectada — permite carregar', path); } catch(_){}
+                try { console.info('[AUTH-GATE] valdoria_session detectada — permite carregar', path); } catch(_){}
                 return;
             }
         }
     } catch (e) {
-        try { console.warn('[AUTH-GATE] localStorage v_*_session check falhou', e); } catch(_){}
+        try { console.warn('[AUTH-GATE] valdoria_session check falhou', e); } catch(_){}
     }
 
     /* Nenhum contexto -> redireciona pra /web/ (auth screen) */
