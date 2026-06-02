@@ -476,6 +476,16 @@
         try { affinityBadge = window.npcAffinity.renderBadgeHTML(_p, npcId); } catch(_e){}
       }
     }
+    // PADRAO_ALDRIC (sessão #70): contador de Valdoritas SEMPRE visível, logo
+    // ACIMA dos números de paginação. Lê opts.player.gold (ou CITY_MOCK_PLAYER).
+    // A classe cgb-num deixa o contador da cidade (_refreshGoldBadges) atualizá-lo.
+    var _encGold = '';
+    var _gp = (opts && opts.player) || window.CITY_MOCK_PLAYER || null;
+    if (_gp && typeof _gp.gold === 'number' && !(opts && opts.showGold === false)) {
+      _encGold = '<div class="enc-gold-badge" title="Suas Valdoritas">' +
+        '<span class="vi vi-coin sm"></span>' +
+        '<span class="enc-gold-num cgb-num">' + _gp.gold + '</span></div>';
+    }
     header.innerHTML =
       '<div class="enc-portrait"' + (npcPortrait ? ' title="Clique pra ampliar"' : '') + '>' +
         (npcPortraitHTML ? npcPortraitHTML
@@ -485,7 +495,10 @@
         '<div class="enc-name">' + npcName + (affinityBadge ? ' ' + affinityBadge : '') + '</div>' +
         '<div class="enc-desc">' + npcDesc + '</div>' +
       '</div>' +
-      '<div class="enc-page-indicator" id="enc-page-ind">' + (currentPage + 1) + ' / ' + pages.length + '</div>';
+      '<div class="enc-rightcol">' +
+        _encGold +
+        '<div class="enc-page-indicator" id="enc-page-ind">' + (currentPage + 1) + ' / ' + pages.length + '</div>' +
+      '</div>';
     card.appendChild(header);
 
     // Lightbox no portrait click — só quando há URL real (npcPortrait), não
