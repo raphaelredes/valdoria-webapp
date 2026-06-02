@@ -37600,17 +37600,65 @@ var JOURNEY_HAZARDS = {
   ]
 };
 
-// Pool de narrativas seguras por bioma destino (sem hazard)
+// Pool de narrativas seguras por bioma destino (sem hazard).
+// User sessão #69: reescritas no nível PADRAO_ALDRIC — 5 sentidos, mostre-não-
+// conte, mistério ambiental (ver docs/sistemas/narrativa-guia.md). 4 variações
+// por bioma pra reduzir repetição numa viagem de 3-5 etapas.
 var JOURNEY_SAFE = {
-  forest: ['A trilha serpenteia entre carvalhos ancestrais.', 'Pássaros cantam ao longe.', 'Raios de sol filtram pelas copas.'],
-  plains: ['O vento ondula o trigal dourado.', 'Uma estrada de terra clara se estende ao horizonte.', 'Andorinhas cruzam o céu.'],
-  swamp: ['Sapos coaxam nas poças escuras.', 'Árvores retorcidas formam arcos.', 'Luzes estranhas piscam ao longe.'],
-  mountain: ['O ar fica rarefeito.', 'Picos nevados brilham ao longe.', 'Águias circulam acima.'],
-  desert: ['A estrada se estende sob o sol abrasador.', 'Dunas mudam de forma com o vento.', 'Miragens dançam no horizonte.'],
-  snow: ['A neve range sob seus pés.', 'O hálito embaça no ar gelado.', 'Lobos uivam ao longe.'],
-  cave: ['Gotas ecoam nos túneis.', 'Cristais reflexos sua luz.', 'O ar é frio e denso.'],
-  graveyard: ['Lápides marcam o caminho.', 'Corvos observam em silêncio.', 'A névoa se arrasta entre as cruzes.'],
-  volcanic: ['Cinzas caem como neve preta.', 'Brasas brilham no chão.', 'O calor faz o ar tremular.']
+  forest: [
+    'A trilha serpenteia entre carvalhos ancestrais, e o musgo abafa cada passo.',
+    'Algo canta no alto da copa — depois silencia, como se tivesse notado você.',
+    'Raios de sol atravessam as folhas e espalham moedas de luz no chão úmido.',
+    'Cheiro de terra molhada e resina enche o ar. A floresta respira devagar.'
+  ],
+  plains: [
+    'O vento corre pelo trigal dourado em ondas longas, como a respiração do mundo.',
+    'A estrada de terra clara some no horizonte, reta como uma promessa.',
+    'Andorinhas riscam o céu aberto; a sombra delas desliza sobre a planície.',
+    'Ao longe, o sino de uma vila toca uma vez — e o silêncio volta maior.'
+  ],
+  swamp: [
+    'Sapos coaxam nas poças escuras, e a lama suga seus passos com gula paciente.',
+    'Árvores retorcidas formam arcos sobre a trilha, como costelas de algo enorme.',
+    'Luzes pálidas piscam entre os juncos. Você decide não segui-las.',
+    'O ar é doce e podre ao mesmo tempo. Cada respiração pesa um pouco mais.'
+  ],
+  mountain: [
+    'O ar rarefeito queima os pulmões; cada passo custa o dobro.',
+    'Picos nevados ardem em branco ao longe, indiferentes à sua jornada.',
+    'Uma águia descreve círculos lá no alto, dona de um céu que não é seu.',
+    'O vento corta a rocha num assobio longo, e o abismo escuta calado.'
+  ],
+  desert: [
+    'A estrada se arrasta sob um sol que não perdoa; o calor sobe do chão em ondas.',
+    'As dunas mudam de forma ao vento, apagando rastros como se nunca houvesse ninguém.',
+    'Uma miragem dança no horizonte — água onde só há areia e sede.',
+    'A areia range entre os dentes. A garganta pede o que o cantil não pode dar.'
+  ],
+  snow: [
+    'A neve range sob suas botas, e o frio morde através de cada camada.',
+    'Seu hálito vira fumaça branca e some no ar de vidro.',
+    'Ao longe, um uivo. Depois outro, mais perto. Você apressa o passo.',
+    'Tudo é branco e quieto — a quietude pesada de quem espera.'
+  ],
+  cave: [
+    'Gotas ecoam na escuridão, marcando um tempo que não é o seu.',
+    'Cristais devolvem a luz da tocha em estrelas frias presas na pedra.',
+    'O ar é denso e parado, com gosto de mineral e de séculos.',
+    'Algo se moveu lá atrás — ou foi só o eco do seu próprio medo.'
+  ],
+  graveyard: [
+    'Lápides inclinadas marcam o caminho como dentes velhos.',
+    'Corvos observam de galhos secos, em silêncio absoluto.',
+    'A névoa se arrasta entre as cruzes, fria como uma lembrança.',
+    'Não há vento — mas algo faz as folhas mortas sussurrarem.'
+  ],
+  volcanic: [
+    'Cinzas caem como neve preta e pousam, mornas, nos seus ombros.',
+    'Brasas brilham nas fendas do chão, um carvão que nunca dorme.',
+    'O calor faz o ar tremular, e o horizonte derrete em vermelho.',
+    'A rocha estala sob seus pés. Lá embaixo, algo enorme respira fogo.'
+  ]
 };
 var STAT_NAMES_PT = { str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma' };
 
@@ -37687,9 +37735,11 @@ function _renderJourneyStep() {
       '<div class="journey-step-badge hazard">⚠ ' + hazard.title + '</div>' +
       '<div>' + hazard.narr + '</div>';
     hazard.choices.forEach(function(ch) {
-      _addJourneyBtn(footEl, ch.i, ch.t, _statLabel(ch.stat) + ' DC ' + ch.dc, '', function() {
-        _resolveJourneyHazard(hazard, ch);
-      });
+      // DC + chance% (user sessão #69): mesma legibilidade do PADRAO_ALDRIC.
+      var _m = (S.player && S.player.mods && typeof S.player.mods[ch.stat] === 'number') ? S.player.mods[ch.stat] : 0;
+      _addJourneyBtn(footEl, ch.i, ch.t,
+        _statLabel(ch.stat) + ' · CD ' + ch.dc + ' · ' + _journeyChancePct(ch.dc, _m) + '%', '',
+        function() { _resolveJourneyHazard(hazard, ch); });
     });
   } else {
     const safePool = JOURNEY_SAFE[j.biome] || JOURNEY_SAFE.forest;
@@ -37705,11 +37755,79 @@ function _statLabel(stat) {
   return STAT_NAMES_PT[stat] || stat.toUpperCase();
 }
 
+// User sessão #69: chance de sucesso (%) na escolha, como PADRAO_ALDRIC.
+// d20: passa quando face+mod >= dc. Faces que passam = 20 - (need-1). Clamp
+// [5%,95%] — sempre há chance e sempre há risco (sabor de jogo, evita 0/100%).
+function _journeyChancePct(dc, mod) {
+  var need = dc - (mod || 0);
+  var passing = 20 - Math.max(0, Math.min(20, need - 1));
+  passing = Math.max(1, Math.min(19, passing));
+  return Math.round(passing / 20 * 100);
+}
+
+// User sessão #69: o dado d20 ROLA num popup 3D (antes só aparecia o número em
+// texto). Self-contained — usa window.Dice3D global (/shared/dice-3d.js). z=60
+// acima do journey-overlay (z=35). Respeita perf-lite. CSS injetado 1x.
+function _journeyRollDice(d20, mod, total, dc, success, callback) {
+  if (!document.getElementById('journey-dice-style')) {
+    var st = document.createElement('style');
+    st.id = 'journey-dice-style';
+    st.textContent = ''
+      + '#journey-dice-ov{position:fixed;inset:0;z-index:60;background:rgba(8,6,4,0.92);'
+      + '  display:flex;flex-direction:column;align-items:center;justify-content:center;'
+      + '  gap:14px;animation:jdFade .3s ease;backdrop-filter:none}'
+      + '@keyframes jdFade{from{opacity:0}to{opacity:1}}'
+      + '#journey-dice-mount{width:200px;height:200px}'
+      + '.jd-formula{font-family:Cinzel,serif;color:#f4d896;'
+      + '  font-size:calc(13px * var(--v-font-scale, 1));letter-spacing:1px;'
+      + '  min-height:20px;text-align:center}'
+      + '.jd-formula b{color:#fff4d0}'
+      + '.jd-result{font-family:Cinzel,serif;font-weight:700;letter-spacing:2px;'
+      + '  font-size:calc(22px * var(--v-font-scale, 1));opacity:0;transition:opacity .3s}'
+      + '.jd-result.success{color:#7ad06b;text-shadow:0 0 16px rgba(122,208,107,.55)}'
+      + '.jd-result.fail{color:#d85848;text-shadow:0 0 16px rgba(216,88,72,.55)}'
+      + '.jd-btn{margin-top:4px;padding:9px 28px;border-radius:6px;cursor:pointer;'
+      + '  background:linear-gradient(180deg,rgba(196,149,58,.30),rgba(196,149,58,.12));'
+      + '  border:1px solid var(--v-gold,#c4953a);color:#e8dcc8;font-family:Cinzel,serif;'
+      + '  font-weight:600;font-size:calc(12px * var(--v-font-scale, 1));letter-spacing:1.5px;'
+      + '  opacity:0;transition:opacity .3s;box-shadow:0 0 14px rgba(196,149,58,.3)}';
+    document.head.appendChild(st);
+  }
+  var ov = document.createElement('div');
+  ov.id = 'journey-dice-ov';
+  ov.innerHTML = '<div id="journey-dice-mount"></div>'
+    + '<div class="jd-formula" id="jd-formula"></div>'
+    + '<div class="jd-result" id="jd-result"></div>'
+    + '<button class="jd-btn" id="jd-btn">Continuar</button>';
+  if (typeof vOverlay !== 'undefined' && vOverlay.add) vOverlay.add(ov);
+  else document.body.appendChild(ov);
+
+  var done = false;
+  function finish() { if (done) return; done = true; if (ov.parentNode) ov.parentNode.removeChild(ov); callback(); }
+  var revealed = false;
+  function reveal() {
+    if (revealed) return; revealed = true;
+    var f = document.getElementById('jd-formula');
+    var r = document.getElementById('jd-result');
+    var b = document.getElementById('jd-btn');
+    if (f) f.innerHTML = 'd20 ' + d20 + ' ' + (mod >= 0 ? '+' : '') + mod + ' = <b>' + total + '</b> vs CD ' + dc;
+    if (r) { r.textContent = success ? 'SUCESSO' : 'FALHA'; r.className = 'jd-result ' + (success ? 'success' : 'fail'); r.style.opacity = '1'; }
+    if (b) { b.style.opacity = '1'; b.onclick = finish; }
+  }
+  var lite = document.body.classList.contains('perf-lite');
+  if (lite) { setTimeout(reveal, 200); }
+  else if (window.Dice3D) {
+    try {
+      var dice = new window.Dice3D(document.getElementById('journey-dice-mount'), { size: 200, dieType: 'd20', duration: 1500 });
+      dice.roll(d20, reveal);
+    } catch (e) { setTimeout(reveal, 500); }
+  } else { setTimeout(reveal, 500); }
+  setTimeout(reveal, 3200);  // safety: Dice3D callback pode não disparar
+}
+
 function _resolveJourneyHazard(hazard, choice) {
-  const checkEl = document.getElementById('journey-check');
-  const narrEl = document.getElementById('journey-narration');
   const footEl = document.getElementById('journey-footer');
-  footEl.innerHTML = '';
+  footEl.innerHTML = '';  // some os botões de escolha enquanto o dado rola
   // Roll d20 + ability mod
   const stat = choice.stat;
   const mod = (S.player && S.player.mods && typeof S.player.mods[stat] === 'number')
@@ -37717,10 +37835,19 @@ function _resolveJourneyHazard(hazard, choice) {
   const d20 = Math.floor(Math.random() * 20) + 1;
   const total = d20 + mod;
   const success = total >= choice.dc;
-  // Mostra dado + total
+  // User sessão #69: o d20 rola num popup 3D ANTES de revelar o desfecho.
+  _journeyRollDice(d20, mod, total, choice.dc, success, function() {
+    _applyJourneyHazardOutcome(hazard, choice, d20, mod, total, success);
+  });
+}
+
+function _applyJourneyHazardOutcome(hazard, choice, d20, mod, total, success) {
+  const checkEl = document.getElementById('journey-check');
+  const narrEl = document.getElementById('journey-narration');
+  const footEl = document.getElementById('journey-footer');
   const sign = mod >= 0 ? '+' : '';
   checkEl.innerHTML =
-    '<div class="journey-formula">d20: ' + d20 + ' ' + sign + mod + ' (' + _statLabel(stat) + ') = ' + total + ' vs DC ' + choice.dc + '</div>' +
+    '<div class="journey-formula">d20: ' + d20 + ' ' + sign + mod + ' (' + _statLabel(choice.stat) + ') = ' + total + ' vs DC ' + choice.dc + '</div>' +
     '<div class="journey-check-result ' + (success ? 'success' : 'fail') + '">' +
     (success ? '✓ Sucesso' : '✗ Falha') + '</div>';
   if (success) {
