@@ -42769,7 +42769,7 @@ function _registerDynamicHandlers(){
     // 2026-05-21: spoiler gating — converse com Martha desbloqueia cellar quest no Diary
     if (typeof window._markQuestsAsSeen === 'function') window._markQuestsAsSeen('inn_martha');
   };
-  ACTION_HANDLERS['inn_cellar_quest']   = function(p){ _openMarthaDialogue(p, 'cellar'); };
+  ACTION_HANDLERS['inn_cellar_quest']   = function(p){ _enterMarthaCellar(p); };  // #9: cena server-driven do porão
   // 2026-05-18: Mercadores fixos do Mercado migrados pra PADRAO_ALDRIC.
   // Override DEPOIS do registro dinâmico (que setou _showSharedNpcDialogue
   // com greetings/talkOptions legacy). Cada mercador abre _openMerchantDialogue
@@ -46532,7 +46532,7 @@ var ACTION_HANDLERS = {
   },
   // X-6.5.51BP: 'inn_cellar_quest' agora abre Martha dialogue PADRAO_ALDRIC (cellar topic)
   // via override em _registerDynamicHandlers. Stub abaixo é fallback raro.
-  'inn_cellar_quest':       function(p){ if (typeof _openMarthaDialogue === 'function') _openMarthaDialogue(p, 'cellar'); else vToast('🗝️ Martha sussurra sobre a adega...', 'warn'); },
+  'inn_cellar_quest':       function(p){ if (typeof _enterMarthaCellar === 'function') _enterMarthaCellar(p); else if (typeof _openMarthaDialogue === 'function') _openMarthaDialogue(p, 'cellar'); else vToast('🗝️ Martha sussurra sobre a adega...', 'warn'); },
 
   // Market misc
   'market_sell':            function(p){
@@ -52069,6 +52069,105 @@ function _openMarthaDialogue(p, encounterKey){
   if (typeof _renderEncounterPopup === 'function') {
     _renderEncounterPopup(enc, 'inn_npc_inn_martha', p);
   }
+}
+
+// ============================================================================
+// #9 (sessão #70) — Cena server-driven do PORÃO da Martha (quest_martha_cellar)
+// ============================================================================
+// "Investigar adega" (inn_cellar_quest) tenta /api/inn/cellar/init: se a quest
+// está ativa (stage 0), o servidor manda a descida + choices (combater / veneno
+// se tiver / recuar) e resolve cada escolha em /choice. Senão (não aceita / já
+// limpa), cai no diálogo da Martha (aceitar/reportar). SUPREME RULE #0: o
+// servidor decide tudo (has_poison, skill check, trigger de combate); o cliente
+// só renderiza + anima. LOCAL (file://) usa o diálogo client-side.
+var _cellarNpc = null;
+
+function _cellarPost(path, body){
+  var a = (window.vCityServer && window.vCityServer.auth) ? window.vCityServer.auth() : null;
+  if (!a) return Promise.reject(new Error('no_auth'));
+  body = body || {}; body.user_id = a.uid;
+  return fetch(a.api + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + a.token },
+    body: JSON.stringify(body)
+  }).then(function(r){ return r.json().catch(function(){ return { ok: false, error: 'http_' + r.status }; }); });
+}
+
+function _enterMarthaCellar(p){
+  // LOCAL ou sem auth → diálogo client-side (aceitação da quest).
+  if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
+    _openMarthaDialogue(p, 'cellar');
+    return;
+  }
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Descendo ao porão...' }); } catch(_){} }
+  _cellarPost('/api/inn/cellar/init', {}).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    // quest_not_ready (não aceita / já resolvida) → diálogo da Martha
+    if (!data || !data.ok) { _openMarthaDialogue(p, 'cellar'); return; }
+    _cellarNpc = data.npc || null;
+    if (window.vEncounter && window.vEncounter.render) {
+      window.vEncounter.render(
+        { npc: data.npc, script: data.script, choices: data.choices },
+        { player: p, closeable: true, onChoice: function(ch){ _resolveCellarChoice(p, ch && ch.id); } }
+      );
+    }
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CELLAR] init failed', e);
+    _openMarthaDialogue(p, 'cellar');
+  });
+}
+
+function _resolveCellarChoice(p, choiceId){
+  if (!choiceId) return;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Resolvendo...' }); } catch(_){} }
+  _cellarPost('/api/inn/cellar/choice', { choice: choiceId }).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || !data.ok) { vToast('Não foi possível agir no porão.', 'warn'); return; }
+    _handleCellarResult(p, data);
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CELLAR] choice failed', e);
+    vToast('Erro ao agir no porão.', 'warn');
+  });
+}
+
+function _goToCombatFromCity(combatUrl){
+  if (!combatUrl) { vToast('Falha ao iniciar combate.', 'warn'); return; }
+  window.__valdoria_transitioning = true;
+  try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
+  if (window._vTransitionLoader) { try { window._vTransitionLoader.show('Preparando combate...'); } catch(_){} }
+  setTimeout(function(){ window.location.replace(combatUrl); }, 30);
+}
+
+function _handleCellarResult(p, data){
+  var res = data.result;
+  if (res === 'combat' && data.combat_url) { _goToCombatFromCity(data.combat_url); return; }
+  // Monta o script de desfecho: intro do veneno + rolagem (texto) + script narrado.
+  var script = [];
+  if (data.intro) script.push({ type: 'narration', text: data.intro });
+  if (data.roll) {
+    var rl = data.roll;
+    script.push({ type: 'narration',
+      text: '🎲 ' + (rl.skill || 'TESTE') + ': d20 ' + rl.d20 + ' ' + (rl.modifier >= 0 ? '+' : '') + rl.modifier
+          + ' = <b>' + rl.total + '</b> vs CD ' + rl.dc + ' — ' + (rl.success ? '✅ Sucesso' : '❌ Falha') });
+  }
+  if (Array.isArray(data.script)) script = script.concat(data.script);
+  var npc = _cellarNpc || data.npc || { name: 'Martha', id: 'npc_inn_martha' };
+
+  if (res === 'poison_fail' && data.combat_url) {
+    window.vEncounter.render(
+      { npc: npc, script: script, choices: [{ id: 'go', label: '⚔ Resolver no aço' }] },
+      { player: p, onChoice: function(){ _goToCombatFromCity(data.combat_url); } }
+    );
+    return;
+  }
+  // poison_success / retreat → cena final + fecha + refresh HUD
+  var doneLabel = (res === 'poison_success') ? '✔ Voltar à estalagem' : '↩ Voltar';
+  window.vEncounter.render(
+    { npc: npc, script: script, choices: [{ id: 'done', label: doneLabel }] },
+    { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
+  );
 }
 
 // ============================================================================
