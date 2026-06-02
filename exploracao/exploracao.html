@@ -14856,6 +14856,14 @@ body.perf-lite .stub-popup-voice { animation: none; }
 // pra manter decoder síncrono e sem deps. Backend (exploracao_snap_builder.py)
 // já aplica stripping progressivo pra caber em <1800 chars.
 window.__decodeExploreSnap = function() {
+  // User sessão #69 (bug CRÍTICO "voltei como Gorath" a CADA combate): re-lê o snap
+  // da URL ATUAL (location.search), não só do global setado no module-load. Em
+  // navegação SPA (combate→exploração SEM reload completo), o global ficava STALE →
+  // o snap do retorno NUNCA era lido → caía no nome mock random. Agora re-lê sempre.
+  try {
+    var _cur = new URLSearchParams(location.search).get('snap');
+    if (_cur) window.__EXPLORE_SNAP_B64 = _cur;
+  } catch (_e) {}
   if (!window.__EXPLORE_SNAP_B64) {
     console.info('[E-REM:BOOT] snap missing — url has no ?snap= param');
     return null;
@@ -15128,6 +15136,34 @@ window.__applyExploreDelta = function(S, delta) {
     + ' conds=' + JSON.stringify(p.conditions || []));
 };
 
+// User sessão #69 (bug CRÍTICO "voltei como Gorath"): fallback anti-mock. Se o snap
+// da URL falhar/sumir, busca o PERFIL REAL do personagem no servidor (SUPREME RULE
+// #0: em REMOTE o cliente NUNCA fabrica identidade — sempre vem do servidor). Async:
+// o HUD atualiza quando chega. Reusa __applyExploreSnap (seta name/cls/stats/hp/xp).
+window.__fetchExploreProfileFallback = function(S) {
+  try {
+    var tok = window.__EXPLORE_TOKEN, api = window.__EXPLORE_API_BASE;
+    if (!tok || !api || !S || !S.player) return;
+    var mid = '';
+    try { mid = new URLSearchParams(location.search).get('map_id') || ''; } catch (_e) {}
+    console.warn('[E-REM:BOOT] snap ausente/corrompido — buscando perfil REAL do servidor (anti-mock Gorath)');
+    fetch(api + '/api/exploracao/profile' + (mid ? ('?map_id=' + encodeURIComponent(mid)) : ''),
+      { headers: { 'Authorization': 'Bearer ' + tok } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && d.snap) {
+          window.__applyExploreSnap(S, d.snap);
+          try { window.__rewardsCaptureStart(S.player); } catch (_e2) {}  // re-baseline com char real
+          if (typeof updateHud === 'function') { try { updateHud(); } catch (_e3) {} }
+          console.info('[E-REM:BOOT] perfil REAL aplicado via fallback: ' + S.player.name);
+        } else {
+          console.error('[E-REM:BOOT] fallback profile vazio — char real nao recuperado');
+        }
+      })
+      .catch(function (e) { console.error('[E-REM:BOOT] profile fallback failed', (e && e.message) || e); });
+  } catch (_e) {}
+};
+
 // Helper: orchestra hidratação remota completa (snap + delta + rewards tracker)
 // Chamado no boot() após initState() quando em remote mode.
 window.__hydrateStateFromRemote = function(S) {
@@ -15136,6 +15172,7 @@ window.__hydrateStateFromRemote = function(S) {
   try {
     var snap = window.__decodeExploreSnap && window.__decodeExploreSnap();
     if (snap) window.__applyExploreSnap(S, snap);
+    else window.__fetchExploreProfileFallback(S);  // snap falhou → busca char REAL (anti-mock)
     var delta = window.__decodeExploreDelta && window.__decodeExploreDelta();
     if (delta) window.__applyExploreDelta(S, delta);
     // Captura HP/MP/HD/exh pós-hidratação como baseline pro tracker de rewards.
@@ -20752,7 +20789,7 @@ function initState() {
         lvl: lvl,
         background: setupChoices.background || 'folk_hero',
         alignment: setupChoices.alignment || 'NG',
-        name: setupChoices.name || (S && S.player && S.player.name) || randomFantasyName()
+        name: setupChoices.name || (S && S.player && S.player.name) || (window.__EXPLORE_MODE === 'remote' ? 'Aventureiro' : randomFantasyName())
       };
     })(),
     grid: map.grid,
@@ -37975,7 +38012,7 @@ function renderPartyPopup() {
   // X-6.5.51m: usa p.name (nome do personagem) em vez de "Voce"; passa cls_key
   // pra que _partyMemberCard renderize o icone heraldico se a lib estiver carregada.
   body.appendChild(_partyMemberCard({
-    name: p.name || randomFantasyName(),
+    name: p.name || (window.__EXPLORE_MODE === 'remote' ? 'Aventureiro' : randomFantasyName()),
     cls: p.cls || '—',
     cls_key: p.cls_key || '',
     letter: p.ico || '?',
