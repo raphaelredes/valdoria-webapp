@@ -1113,7 +1113,7 @@
         ]
       },
       "about_martha_detail": {
-        "text": "Íntimas? Martha é a pessoa mais próxima de uma irmã que já tive. Nas noites de tempestade, ela sobe ao templo com uma garrafa de hidromel e conversamos até o amanhecer. Ela me conta sobre os viajantes, eu conto sobre as estrelas.\n\n(Elara baixa a voz) Ela é mais forte do que parece. Já a vi enfrentar três bêbados armados com nada além de uma concha de sopa e um olhar que gelaria o próprio Fenrir. Ninguém mexe com Martha no Grifo.",
+        "text": "Íntimas? Martha é a pessoa mais próxima de uma irmã que já tive. Nas noites de tempestade, ela sobe ao templo com uma garrafa de hidromel e conversamos até o amanhecer. Ela me conta sobre os viajantes, eu conto sobre as estrelas.\n\n(Elara baixa a voz) Ela é mais forte do que parece. Já a vi enfrentar três bêbados armados com nada além de uma concha de sopa e um olhar que gelaria o próprio Fenrir. Ninguém mexe com Martha na Pena-Dourada.",
         "choices": [
           {
             "text": "Ela é realmente especial.",
@@ -1143,7 +1143,7 @@
           },
           {
             "type": "narration",
-            "text": "Ninguém mexe com Martha no Grifo."
+            "text": "Ninguém mexe com Martha na Pena-Dourada."
           }
         ]
       },

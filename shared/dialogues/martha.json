@@ -61,9 +61,9 @@
     "nodes": {
       "start": {
         "text": [
-          "Bem-vindo à Estalagem Descanso do Viajante, querido. É raro ver rostos novos por Eldoria ultimamente. Como posso te ajudar?",
+          "Bem-vindo à Estalagem da Pena-Dourada, querido. É raro ver rostos novos por Eldoria ultimamente. Como posso te ajudar?",
           "Ah, entre, entre! Tira esse peso dos ombros. Minha estalagem é seu refúgio.",
-          "Você parece exausto, meu jovem. O Grifo tem camas macias e sopa quente esperando por você.",
+          "Você parece exausto, meu jovem. A Pena-Dourada tem camas macias e sopa quente esperando por você.",
           "Sente-se onde quiser, querido. Aqui todos são família. O que Martha pode fazer por você hoje?",
           "O mundo lá fora é frio, mas aqui dentro mantemos o fogo aceso. Aceita algo para beber?"
         ],
@@ -177,7 +177,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "Bem-vindo à Estalagem Descanso do Viajante, querido."
+            "text": "Bem-vindo à Estalagem da Pena-Dourada, querido."
           },
           {
             "type": "narration",
@@ -205,7 +205,7 @@
           },
           {
             "type": "narration",
-            "text": "O Grifo tem camas macias e sopa quente esperando por você."
+            "text": "A Pena-Dourada tem camas macias e sopa quente esperando por você."
           },
           {
             "type": "narration",
@@ -898,10 +898,10 @@
       },
       "act1_trusted": {
         "text": [
-          "Ah, {player_name}! Meu herói favorito! A estalagem fica mais segura quando você está por perto. Sente-se, precisa de algo?",
+          "Ah, {player_name}! Meu aventureiro favorito! A estalagem fica mais segura quando você está por perto. Sente-se, precisa de algo?",
           "Olha só quem apareceu! Já estava preparando seu ensopado favorito. Intuição de estalajadeira.",
           "Bem-vindo de volta, querido! Desde que você limpou o porão, tenho dormido como uma pedra. O que posso fazer por você?",
-          "O Grifo está de pé graças a você, {player_name}. Considere esta estalagem sua segunda casa.",
+          "A Pena-Dourada está de pé graças a você, {player_name}. Considere esta estalagem sua segunda casa.",
           "Ah, meu salvador! Os hóspedes ainda comentam sobre como você enfrentou aqueles ratos. Você é uma lenda por aqui!"
         ],
         "choices": [
@@ -1002,7 +1002,7 @@
           },
           {
             "type": "narration",
-            "text": "Meu herói favorito!"
+            "text": "Meu favorito!"
           },
           {
             "type": "narration",
@@ -1038,7 +1038,7 @@
           },
           {
             "type": "narration",
-            "text": "O Grifo está de pé graças a você, {player_name}."
+            "text": "A Pena-Dourada está de pé graças a você, {player_name}."
           },
           {
             "type": "narration",
@@ -1189,7 +1189,7 @@
         ]
       },
       "act1_thorne_gossip": {
-        "text": "Desde que Aris voltou, Thorne é outro homem! Sorri pela primeira vez em semanas. Ele forjou uma lâmina especial em agradecimento — disse que é para 'o herói que trouxe meu filho de volta'. Você merece, querido.",
+        "text": "Desde que Aris voltou, Thorne é outro homem! Sorri pela primeira vez em semanas. Ele forjou uma lâmina especial em agradecimento — disse que é para 'o salvador que trouxe meu filho de volta'. Você merece, querido.",
         "choices": [
           {
             "text": "Thorne é um bom homem.",
@@ -1212,7 +1212,7 @@
           },
           {
             "type": "narration",
-            "text": "Ele forjou uma lâmina especial em agradecimento — disse que é para 'o herói que trouxe meu filho de volta'."
+            "text": "Ele forjou uma lâmina especial em agradecimento — disse que é para 'o salvador que trouxe meu filho de volta'."
           },
           {
             "type": "narration",
@@ -1257,7 +1257,7 @@
         ]
       },
       "act1_travelers": {
-        "text": "Agora que você mencionou... uma figura encapuzada ficou aqui uma noite, semana passada. Pagou com moedas de ouro antigas — de um reino que não existe mais. Partiu antes do amanhecer sem dizer uma palavra. Me deu arrepios.",
+        "text": "Agora que você mencionou... uma figura encapuzada ficou aqui uma noite, semana passada. Pagou com Valdoritas antigas — de um reino que não existe mais. Partiu antes do amanhecer sem dizer uma palavra. Me deu arrepios.",
         "choices": [
           {
             "text": "Estranho. Vou prestar atenção.",
@@ -1276,7 +1276,7 @@
           },
           {
             "type": "narration",
-            "text": "Pagou com moedas de ouro antigas — de um reino que não existe mais."
+            "text": "Pagou com Valdoritas antigas — de um reino que não existe mais."
           },
           {
             "type": "narration",
@@ -1641,7 +1641,7 @@
         "text": "(Martha fecha os olhos e respira fundo) Você merece saber. Eu não fui sempre uma estalajadeira, {player_name}. Antes de Eldoria... eu era uma <b>Barda</b>. Me chamavam de <b>Rouxinol do Norte</b>.\n\nEu viajava com um grupo: Edric, meu marido — um Guerreiro destemido. Lysara, uma Maga brilhante. E Gareth, o melhor Ranger que já conheci.\n\nNós éramos famosos nos reinos do norte. Até que... (a voz dela falha) Edric morreu lutando contra um dragão jovem. Ele se sacrificou para que o resto de nós escapasse. Depois disso, eu pendurei meu alaúde e vim para cá. Começar de novo.",
         "choices": [
           {
-            "text": "Eu sinto muito, Martha. Edric era um herói.",
+            "text": "Eu sinto muito, Martha. Edric era um aventureiro.",
             "target": "act2_edric_honored",
             "impact": {
               "flags": {
@@ -2760,10 +2760,10 @@
         ]
       },
       "act3_rogue_approach": {
-        "text": "(Martha acena com aprovação) Você sabe lidar com sombras. O homem está hospedado no <b>Urso Cego</b> — a taberna do Grom. Ele bebe sozinho no canto todas as noites. Se alguém pode investigar sem levantar suspeitas, é você.",
+        "text": "(Martha acena com aprovação) Você sabe lidar com sombras. O homem está hospedado no <b>Javali Bêbado</b> — a Taverna do Javali Bêbado. Ele bebe sozinho no canto todas as noites. Se alguém pode investigar sem levantar suspeitas, é você.",
         "choices": [
           {
-            "text": "📜 Vou investigar no Urso Cego.",
+            "text": "📜 Vou investigar no Javali Bêbado.",
             "target": "act3_quest_accept",
             "impact": {
               "flags": {
@@ -2782,7 +2782,7 @@
           },
           {
             "type": "narration",
-            "text": "O homem está hospedado no <b>Urso Cego</b> — a taberna do Grom."
+            "text": "O homem está hospedado no <b>Javali Bêbado</b> — a Taverna do Javali Bêbado."
           },
           {
             "type": "narration",
@@ -2887,7 +2887,7 @@
         "text": "Como você quer lidar com isso?",
         "choices": [
           {
-            "text": "📜 Vou ao Urso Cego enfrentar esse agente de frente.",
+            "text": "📜 Vou ao Javali Bêbado enfrentar esse agente de frente.",
             "target": "act3_quest_accept",
             "impact": {
               "flags": {
@@ -2913,7 +2913,7 @@
         ]
       },
       "act3_plan": {
-        "text": "(Martha acena) Você tem razão. Não podemos agir sem pensar. O agente está no Urso Cego. É o único lugar além daqui onde hóspedes se hospedam em Eldoria.",
+        "text": "(Martha acena) Você tem razão. Não podemos agir sem pensar. O agente está no Javali Bêbado. É o único lugar além daqui onde hóspedes se hospedam em Eldoria.",
         "choices": [
           {
             "text": "📜 Vou confrontá-lo diretamente.",
@@ -2945,7 +2945,7 @@
           },
           {
             "type": "narration",
-            "text": "O agente está no Urso Cego."
+            "text": "O agente está no Javali Bêbado."
           },
           {
             "type": "narration",
@@ -2999,8 +2999,8 @@
       },
       "act4_legacy": {
         "text": [
-          "(Martha te abraça longamente ao te ver) {player_name}... você fez mais por esta velha estalajadeira do que qualquer herói das canções que eu cantava.",
-          "(Martha tem os olhos brilhando de orgulho) Meu herói, meu protetor, meu amigo. A estalagem nunca esteve tão segura. O que precisa?",
+          "(Martha te abraça longamente ao te ver) {player_name}... você fez mais por esta velha estalajadeira do que qualquer aventureiro das canções que eu cantava.",
+          "(Martha tem os olhos brilhando de orgulho) Meu salvador, meu protetor, meu amigo. A estalagem nunca esteve tão segura. O que precisa?",
           "(Martha sorri com uma paz que você nunca viu nela) Sabe, pela primeira vez em anos, eu sinto que posso dormir em paz. Tudo graças a você.",
           "(Martha prepara seu prato favorito sem você pedir) Eu sabia que você viria hoje. Intuição de velha aventureira."
         ],
@@ -3084,11 +3084,11 @@
         "script": [
           {
             "type": "narration",
-            "text": "(Martha te abraça longamente ao te ver) {player_name}... você fez mais por esta velha estalajadeira do que qualquer herói das canções que eu cantava."
+            "text": "(Martha te abraça longamente ao te ver) {player_name}... você fez mais por esta velha estalajadeira do que qualquer aventureiro das canções que eu cantava."
           },
           {
             "type": "narration",
-            "text": "(Martha tem os olhos brilhando de orgulho) Meu herói, meu protetor, meu amigo."
+            "text": "(Martha tem os olhos brilhando de orgulho) Meu salvador, meu protetor, meu amigo."
           },
           {
             "type": "narration",
@@ -3659,7 +3659,7 @@
       "act4_advice": {
         "text": [
           "(Martha te olha com carinho maternal) Nunca subestime a importância de um bom descanso. Os melhores guerreiros que conheci dormiam bem antes de cada batalha.",
-          "Meu conselho? Carregue sempre uma poção extra. Edric dizia que a diferença entre um herói morto e um vivo é uma poção de cura no bolso.",
+          "Meu conselho? Carregue sempre uma poção extra. Edric dizia que a diferença entre um aventureiro morto e um vivo é uma poção de cura no bolso.",
           "Se o inimigo é forte demais, não há vergonha em recuar. Vergonha é morrer por orgulho quando há gente esperando você voltar.",
           "Conheça seus aliados. Nas Colinas de Ferro, sobrevivemos porque cada um confiava no outro cegamente.",
           "A escuridão nem sempre é inimiga. Às vezes, a melhor estratégia é se esconder e observar antes de agir.",
@@ -3690,7 +3690,7 @@
           },
           {
             "type": "narration",
-            "text": "Edric dizia que a diferença entre um herói morto e um vivo é uma poção de cura no bolso."
+            "text": "Edric dizia que a diferença entre um aventureiro morto e um vivo é uma poção de cura no bolso."
           },
           {
             "type": "narration",
@@ -4182,7 +4182,7 @@
         "Olá, viajante! Precisa de uma cama quente ou um prato de sopa?",
         "Cansado da estrada? Você veio ao lugar certo.",
         "Sinta-se em casa, mas mantenha as botas longe das cadeiras.",
-        "O Grifo espera por você com os braços abertos. Como posso servir?",
+        "A Pena-Dourada espera por você com os braços abertos. Como posso servir?",
         "Um rosto novo! Temos quartos vagos, entre.",
         "O ensopado está quase pronto. Quer esperar ou prefere um quarto?",
         "As noites de Eldoria podem ser perigosas sem um teto. Venha.",
@@ -4209,11 +4209,11 @@
       "O ferreiro Thorne é um bom homem, mas muito reservado. Desde que Aris sumiu, mal sai da forja.",
       "Minha família fundou esta estalagem gerações atrás. Já abrigamos reis e ladrões. Às vezes os dois na mesma noite.",
       "Se vir o bardo, diga que ele ainda me deve três canecas e meia. A meia conta porque ele derrubou no chão.",
-      "O hidromel do Urso Cego é forte demais para mim. Grom coloca alguma coisa a mais ali, tenho certeza.",
+      "O hidromel do Javali Bêbado é forte demais para mim. Grom coloca alguma coisa a mais ali, tenho certeza.",
       "As noites são longas quando se está sozinha. Por isso eu gosto quando os aventureiros passam por aqui.",
       "Cuidado com os becos escuros à meia-noite. Já vi coisas... e fingi que não vi.",
       "Elara no templo anda com uma expressão estranha. Algo a preocupa, mas ela não me conta.",
-      "Os aventureiros costumam trazer moedas de ouro antigas. Algumas são de reinos que nem existem mais.",
+      "Os aventureiros costumam trazer Valdoritas antigas. Algumas são de reinos que nem existem mais.",
       "O clima está mudando, sinto isso em meus ossos. As estrelas dizem que tempos difíceis virão.",
       "Nunca subestime um inimigo pequeno. Aprendi isso com os ratos do meu porão.",
       "O pão de Eldoria é o melhor do reino! Uso a receita da minha avó. O segredo é o mel silvestre.",

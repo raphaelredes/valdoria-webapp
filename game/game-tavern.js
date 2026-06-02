@@ -1,5 +1,5 @@
 /* ============================================================================
- * game-tavern.js — Taverna do Javali Negro (PADRAO_TAVERNA + PADRAO_SERVIDOR)
+ * game-tavern.js — Taverna do Javali Bêbado (PADRAO_TAVERNA + PADRAO_SERVIDOR)
  * ============================================================================
  *
  * Task #27 sessão #14 — refatorado p/ PADRAO_TAVERNA (cenário/rep-bar/services).
@@ -72,13 +72,13 @@ function _tavBuildCenario(data) {
   cenarioEl.appendChild(vCity.el('div', 'candle-glow r'));
   var crest = vCity.el('img', 'cenario-brasao');
   crest.src = '../shared/img/taverna/javali-negro-crest.webp';
-  crest.alt = 'Brasão do Javali Negro';
+  crest.alt = 'Brasão do Javali Bêbado';
   crest.loading = 'lazy';
   crest.onerror = function(){ this.style.display = 'none'; };
   cenarioEl.appendChild(crest);
   var titulo = vCity.el('div', 'cenario-titulo');
   var nameEl = vCity.el('div', 'name');
-  nameEl.textContent = 'Taverna do Javali Negro';
+  nameEl.textContent = 'Taverna do Javali Bêbado';
   titulo.appendChild(nameEl);
   var subEl = vCity.el('div', 'sub');
   subEl.textContent = 'Estabelecimento de Grom Barba-Cinza · Bairro do Mercado';

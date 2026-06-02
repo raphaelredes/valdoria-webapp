@@ -134,7 +134,7 @@
       "start_internal": {
         "text": [
           "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nCaminhe na luz, cidadão. O crime floresce onde a vigilância falha.",
-          "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nTyr observa seus passos. Espero que eles sejam justos.",
+          "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nVorenn observa seus passos. Espero que eles sejam justos.",
           "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nMantenha a ordem. Eldoria é um bastião de civilização neste mundo selvagem.",
           "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nReporte qualquer irregularidade ao Capitão. Segurança é dever de todos."
         ],
@@ -239,7 +239,7 @@
           },
           {
             "type": "narration",
-            "text": "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nTyr observa seus passos."
+            "text": "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nVorenn observa seus passos."
           },
           {
             "type": "narration",
@@ -871,7 +871,7 @@
         ]
       },
       "aldric_welcome": {
-        "text": "Bem, você parece honesto o suficiente. Eldoria precisa de braços fortes. Entre e apresente-se na estalagem do Grifo.",
+        "text": "Bem, você parece honesto o suficiente. Eldoria precisa de braços fortes. Entre e apresente-se na Estalagem da Pena-Dourada.",
         "options": [
           {
             "text": "Obrigado, Guarda.",
@@ -898,7 +898,7 @@
           },
           {
             "type": "narration",
-            "text": "Entre e apresente-se na estalagem do Grifo."
+            "text": "Entre e apresente-se na Estalagem da Pena-Dourada."
           }
         ]
       },
