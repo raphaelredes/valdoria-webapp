@@ -385,12 +385,31 @@ var TEMPLE_TIER_META = {
  * Sessão #24 (2026-05-22) AAA revamp: card rico com título do serviço +
  * NPC + desc D&D + tier badge + locked state (pattern Liga/Conquistas).
  * Back-compat: ainda usa .svc-name como fallback se svc.title ausente. */
+// PADRAO_LOCAIS (#70): tracking "1ª visualização" de serviço desbloqueado
+// (localStorage per-char, UI state). Quando uma opção antes travada por nível
+// fica visível pro personagem, mostra "Novo!" UMA vez.
+function _tmpSvcNewlyUnlocked(svc) {
+  var sid = svc.cb || svc.title || '';
+  if (!sid) return false;
+  try {
+    var cid = window._charId || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.char_id) || 'default';
+    var key = 'valdoria_temple_svc_seen_' + cid;
+    var seen = JSON.parse(localStorage.getItem(key) || '[]');
+    if (seen.indexOf(sid) >= 0) return false;
+    seen.push(sid);
+    localStorage.setItem(key, JSON.stringify(seen));
+    return true;
+  } catch (_e) { return false; }
+}
+
 function _tmpBuildServices(services) {
   var grid = vCity.el('div', 'services');
   (services || []).forEach(function(svc) {
+    // PADRAO_LOCAIS (#70): opções travadas por nível NÃO aparecem (escondidas
+    // até o jogador alcançar o nível). O "Novo!" abaixo sinaliza a 1ª vez visível.
+    if (svc.locked) return;
     var card = vCity.el('div', 'svc tmp-svc-rich');
     if (svc.disabled) card.classList.add('disabled');
-    if (svc.locked)   card.classList.add('tmp-svc-locked');
     card.setAttribute('data-svc', svc.cb || '');
 
     // Tier accent (CSS custom property)
@@ -399,7 +418,14 @@ function _tmpBuildServices(services) {
     card.style.setProperty('--tier-color', tierMeta.color);
 
     // Tier badge (top-right corner — sobrescreve svc-badge legacy se ambos)
-    if (!svc.badge) {
+    // PADRAO_LOCAIS: "Novo!" quando um serviço antes travado por nível acaba de
+    // ficar visível pra este personagem (1ª visualização). Senão tier/badge.
+    var _novo = (!svc.badge && (svc.min_level || 1) > 1) ? _tmpSvcNewlyUnlocked(svc) : false;
+    if (_novo) {
+      var nbadge = vCity.el('div', 'svc-badge tmp-svc-novo');
+      nbadge.textContent = 'Novo!';
+      card.appendChild(nbadge);
+    } else if (!svc.badge) {
       var tBadge = vCity.el('div', 'tmp-svc-tier');
       tBadge.textContent = tierMeta.emoji;
       tBadge.title = tierMeta.label;
