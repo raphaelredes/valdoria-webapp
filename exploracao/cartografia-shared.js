@@ -366,9 +366,35 @@
     });
   }
 
+  // User sessão #69: mapa-múndi medieval desenhado à mão (WebP gerado via OpenAI
+  // low) como BASE da cartografia — o mapa procedural anterior era "tosco". Preload
+  // no init; desenhado em _drawParchmentBase se pronto. Os marcadores e caminhos dos
+  // biomas continuam desenhados POR CIMA (posições corretas mantidas).
+  var _cartWorldMap = null;
+  (function(){
+    try {
+      var _im = new Image();
+      _im.onload = function(){ _cartWorldMap = _im; };
+      _im.onerror = function(){ _cartWorldMap = null; };
+      _im.src = '/shared/img/map/world-map.webp';
+    } catch(_e){ _cartWorldMap = null; }
+  })();
+
   // === _drawParchmentBase ===
   function _drawParchmentBase(ctx, w, h){
-    // 1. Base flat sepia (sem gradient)
+    // Se o mapa medieval carregou, ele É a base (cobre o canvas, object-fit cover);
+    // senão cai no pergaminho procedural (fallback seguro). Veil sépia leve integra
+    // com a UI dourada.
+    if (_cartWorldMap && _cartWorldMap.complete && _cartWorldMap.naturalWidth) {
+      var _iw = _cartWorldMap.naturalWidth, _ih = _cartWorldMap.naturalHeight;
+      var _sc = Math.max(w / _iw, h / _ih);
+      var _dw = _iw * _sc, _dh = _ih * _sc;
+      ctx.drawImage(_cartWorldMap, (w - _dw) / 2, (h - _dh) / 2, _dw, _dh);
+      ctx.fillStyle = 'rgba(42,30,18,0.12)';
+      ctx.fillRect(0, 0, w, h);
+      return;
+    }
+    // 1. Base flat sepia (sem gradient) — fallback procedural
     ctx.fillStyle = PAPER_BG;
     ctx.fillRect(0, 0, w, h);
     // 2. Aged blotches ORGÂNICOS (não círculos toscos — formas Bezier irregulares
