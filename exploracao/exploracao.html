@@ -36282,7 +36282,8 @@ function closeEventModal() {
         enemyId: pendingCombat.enemy,
         surprise: pendingCombat.surprise,
         lookup_name: pendingCombat.lookup_name,
-        preCombatEffects: pendingCombat.preCombatEffects || []
+        preCombatEffects: pendingCombat.preCombatEffects || [],
+        narrative: pendingCombat.narrative || ''  /* #17 fix (review): path _pendingCombat (combate de masmorra) tambem propaga a narrativa */
       });
     }, 350);
   }
@@ -41270,7 +41271,7 @@ function bindQuickActions() {
     ov.innerHTML = h;
     frame.appendChild(ov);
     ov.addEventListener('click', function (e) { if (e.target === ov) _closeExploreSettings(); });
-    var cbtn = document.getElementById('exs-close'); if (cbtn) cbtn.addEventListener('click', _closeExploreSettings);
+    var cbtn = ov.querySelector('#exs-close'); if (cbtn) cbtn.addEventListener('click', _closeExploreSettings);
     ov.querySelectorAll('.exs-font-btn').forEach(function (b) {
       b.addEventListener('click', function () {
         var size = b.getAttribute('data-font');

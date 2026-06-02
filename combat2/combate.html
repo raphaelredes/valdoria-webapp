@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T10:12:16Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T15:19:05Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -26360,6 +26360,9 @@ function _combatTypewriter(el, text, charMs, onDone) {
     }
     function step() {
         if (done) return;
+        /* #17 fix (review): se o popup foi fechado durante a digitacao, o el fica
+           desconectado do DOM — para o timer orfao em vez de iterar a vazio. */
+        if (!el.isConnected) { done = true; if (timer) { clearTimeout(timer); timer = null; } return; }
         if (idx >= tokens.length) { finish(); return; }
         var tok = tokens[idx++];
         built += tok;
