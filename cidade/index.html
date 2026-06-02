@@ -20973,6 +20973,28 @@ var DAILY_CHALLENGE_POOL = [
     desc: 'Templo de Pelor distribui poções aos enfermos. Ajude na coleta.' }
 ];
 
+// #DC (sessao #70): PNG relativo ao desafio (inimigo p/ hunt, item p/ gather) no
+// topo do popup do Desafio do Dia. Substitui o SVG heraldico <use href="#ic-*">
+// "tosco" que era usado antes (regra PRIORIDADE 0: NUNCA SVG, sempre PNG).
+// Mapeado por TARGET (nao por icon: 'ic-lobo' colide entre "Lobos Cinzentos" e
+// "Pelo de Lobo"). Ao adicionar entry em DAILY_CHALLENGE_POOL, mapear o PNG aqui.
+// Todos os PNGs ja existem em shared/img/{combat/enemies,items}/ (verificado).
+function _dcDailyPng(ch){
+  var MAP = {
+    'Lobos Cinzentos':      'combat/enemies/lobo.webp',
+    'Goblins':              'combat/enemies/goblin.webp',
+    'Esqueletos':           'combat/enemies/esqueleto.webp',
+    'Bandidos':             'combat/enemies/bandido.webp',
+    'Aranhas Gigantes':     'combat/enemies/aranha-gigante.webp',
+    'Raízes-da-Noite': 'items/raizes-silvestres.webp',
+    'Pelo de Lobo':         'items/pele-de-lobo.webp',
+    'Cogumelos Brilhantes': 'items/cogumelos-selvagens.webp',
+    'Gemas Brutas':         'items/gema-lapidada.webp',
+    'Ervas Curativas':      'items/erva-curativa.webp'
+  };
+  return '../shared/img/' + ((ch && MAP[ch.target]) || 'city/daily_challenge.webp');
+}
+
 function _dailyChallengeForToday(){
   // Seed determinístico: YYYYMMDD vira índice no pool (rotação diária).
   var d = new Date();
@@ -20992,7 +21014,7 @@ function _buildDailyChallengeMockData(player){
   var ctaLabel = ch.kind === 'hunt' ? 'Iniciar Caçada' : 'Iniciar Coleta';
   return {
     type: 'hub',
-    flavor: '<svg viewBox="0 0 120 120" style="width:18px;height:18px;color:var(--v-gold);vertical-align:middle;"><use href="#' + ch.icon + '"/></svg> '
+    flavor: '<img src="' + _dcDailyPng(ch) + '" alt="" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;border-radius:3px;" onerror="this.style.display=\'none\'"> '
           + '<b>Desafio do Dia · ' + kindLabel + '</b><br>'
           + '<i>' + ch.desc + '</i><br><br>'
           + '🎯 ' + verb + ' <b>' + ch.count + 'x ' + ch.target + '</b> em <b>' + ch.biome + '</b><br>'
@@ -41976,9 +41998,11 @@ function _showDailyChallengeEpicPopup(p){
   var ctaLabel = ch.kind === 'hunt' ? 'Iniciar Caçada' : 'Iniciar Coleta';
 
   _showInfoPopup({
-    icon: '<svg viewBox="0 0 120 120" style="width:54px;height:54px;color:var(--v-gold,#c4953a);'
+    icon: '<img src="' + _dcDailyPng(ch) + '" alt="" '
+        + 'style="width:74px;height:74px;object-fit:contain;border-radius:10px;'
         + 'filter:drop-shadow(0 0 12px rgba(255,210,90,0.5)) drop-shadow(0 4px 12px rgba(0,0,0,0.6));'
-        + 'animation:dcHeroPulse 3.4s ease-in-out infinite;"><use href="#' + ch.icon + '"/></svg>',
+        + 'animation:dcHeroPulse 3.4s ease-in-out infinite;" '
+        + 'onerror="this.onerror=null;this.src=\'../shared/img/city/daily_challenge.webp\';">',
     npc: 'Desafio do Dia',
     title: ch.target,
     desc: '<style>'
@@ -42122,7 +42146,7 @@ function _dailyStartCombat(p){
   var verb = ch.kind === 'hunt' ? 'derrotou' : 'reuniu';
   var verbFail = ch.kind === 'hunt' ? 'derrotar' : 'reunir';
   _showInfoPopup({
-    icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#' + ch.icon + '"/></svg>',
+    icon: '<img src="' + _dcDailyPng(ch) + '" alt="" style="width:48px;height:48px;object-fit:contain;border-radius:8px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));" onerror="this.onerror=null;this.src=\'../shared/img/city/daily_challenge.webp\';">',
     npc: 'Desafio do Dia',
     title: ch.kind === 'hunt' ? 'Iniciar Caçada' : 'Iniciar Coleta',
     desc: '<div style="text-align:center;color:var(--v-text-dim,#a09484);'
