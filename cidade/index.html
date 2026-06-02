@@ -52369,6 +52369,100 @@ function _handleCellarResult(p, data){
 }
 
 // ============================================================================
+// === PADRAO_SERVIDOR — Diálogos server-driven genéricos (sessão #71) ========
+// ============================================================================
+// Generaliza o padrão do Porão: o SERVIDOR monta {npc, script, choices} (estado
+// vivo: preços/cardápio/gating reais) e RESOLVE cada escolha (efeito real via
+// process_callback + consequência narrada). O cliente só renderiza via
+// vEncounter e posta o id da escolha — o servidor re-deriva o cb (anti-cheat).
+// venue: 'inn' agora; 'tavern' no Plano 2. Doc: docs/sistemas/padrao-servidor.md
+function _openCityDialogue(venue, node, p){
+  p = p || window.CITY_MOCK_PLAYER || null;
+  if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
+    if (typeof vToast === 'function') vToast('Disponível no jogo.', 'info');
+    return;
+  }
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Um momento...' }); } catch(_){} }
+  window.vCityServer.cityAction('dialogue.get', { venue: venue, node: node }).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível abrir o diálogo.', 'warn'); return; }
+    _renderCityDialogue(venue, data, p);
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY-DIALOGUE] get failed', e);
+    if (typeof vToast === 'function') vToast('Erro ao abrir o diálogo.', 'warn');
+  });
+}
+
+function _renderCityDialogue(venue, data, p){
+  if (!(window.vEncounter && window.vEncounter.render)) return;
+  var node = data.node || '';
+  window.vEncounter.render(
+    { npc: data.npc, script: data.script, choices: data.choices },
+    { player: p, closeable: true, onChoice: function(ch){ _resolveCityChoice(venue, node, ch && ch.id, p, data.npc); } }
+  );
+}
+
+function _resolveCityChoice(venue, node, choiceId, p, npc){
+  if (!choiceId) return;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Um momento...' }); } catch(_){} }
+  window.vCityServer.cityAction('dialogue.choice', { venue: venue, node: node, choice_id: choiceId }).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível agir.', 'warn'); return; }
+    _handleCityDialogueResult(venue, data, p, npc);
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY-DIALOGUE] choice failed', e);
+    if (typeof vToast === 'function') vToast('Erro ao agir.', 'warn');
+  });
+}
+
+function _handleCityDialogueResult(venue, data, p, npc){
+  // fechar
+  if (data.close) { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); return; }
+  // transição (porão server-driven já existente)
+  if (data.transition && data.transition.kind === 'cellar') {
+    try { window.vEncounter.close(); } catch(_){}
+    if (typeof _enterMarthaCellar === 'function') _enterMarthaCellar(p);
+    return;
+  }
+  // transição p/ tela existente (ex.: relaxamento) — reusa o caminho que já funciona
+  if (data.transition && data.transition.kind === 'action' && data.transition.cb) {
+    try { window.vEncounter.close(); } catch(_){}
+    if (typeof doAction === 'function') doAction(data.transition.cb);
+    else if (typeof vCity !== 'undefined' && typeof vCity.act === 'function') vCity.act(data.transition.cb);
+    return;
+  }
+  // sub-node aberto (greeting → rooms/meal/relax/shortrest)
+  if (data.choices && data.script && data.node) { _renderCityDialogue(venue, data, p); return; }
+  // efeito aplicado → atualiza HUD + narra consequência PADRAO_ALDRIC
+  if (data.result_script) {
+    _applyHudFromDialogue(data);
+    if (window.vEncounter && window.vEncounter.render) {
+      window.vEncounter.render(
+        { npc: data.npc || npc || { name: 'Martha' }, script: data.result_script, choices: [{ id: 'done', label: '↩ Voltar' }] },
+        { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
+      );
+    }
+    return;
+  }
+  try { window.vEncounter.close(); } catch(_){}
+}
+
+function _applyHudFromDialogue(d){
+  var p = window.CITY_MOCK_PLAYER;
+  if (p) {
+    if (typeof d.gold === 'number') p.gold = d.gold;
+    if (typeof d.hp === 'number') p.hp = d.hp;
+    if (typeof d.mp === 'number') p.mp = d.mp;
+    if (typeof d.max_hp === 'number') { p.hpMax = d.max_hp; p.maxHp = d.max_hp; }
+    if (typeof d.max_mp === 'number') { p.mpMax = d.max_mp; p.maxMp = d.max_mp; }
+  }
+  if (typeof window.refreshHud === 'function') { try { window.refreshHud(); } catch(_){} }
+}
+window._openCityDialogue = _openCityDialogue;
+
+// ============================================================================
 // === MERCADORES — Diálogos PADRAO_ALDRIC (2026-05-18) =======================
 // ============================================================================
 // Encounters dos 5 mercadores fixos do Mercado seguindo o canonical script[]
