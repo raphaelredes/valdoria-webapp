@@ -13202,8 +13202,16 @@ function _showSettingsPopup(){
               + 'body.perf-lite .rating-star.confirmed{animation:none;}'
               + '@media (prefers-reduced-motion:reduce){.rating-star.confirmed{animation:none;}}'
               + '</style>'
-              + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);font-size:calc(12px * var(--v-font-scale, 1));margin:4px 0 10px;line-height:1.5;">'
-              + '"Que tua voz ressoe nas salas do mestre da forja, viajante."'
+              // User sessão #69: banner épico (menestrel sob estrelas) no topo.
+              // Imagem WebP gerada via OpenAI low (pipeline canonical). object-fit
+              // cover recorta como faixa; vinheta gradiente + frase Cinzel embaixo.
+              + '<div style="position:relative;margin:-2px -2px 12px;border-radius:8px;overflow:hidden;border:1px solid var(--v-gold-40,rgba(196,149,58,0.4));box-shadow:0 6px 20px rgba(0,0,0,0.55),0 0 26px rgba(196,149,58,0.18);">'
+              +   '<img src="/shared/img/ui/rate-minstrel.webp" alt="Menestrel sob as estrelas" style="display:block;width:100%;height:132px;object-fit:cover;object-position:center 42%;">'
+              +   '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,20,16,0) 35%,rgba(26,20,16,0.84) 100%);"></div>'
+              +   '<div style="position:absolute;left:8px;right:8px;bottom:7px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:1.5px;text-transform:uppercase;color:#ffd9a0;text-shadow:0 1px 5px rgba(0,0,0,0.95);">Que tua voz ressoe nas salas do mestre</div>'
+              + '</div>'
+              + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);font-size:calc(12px * var(--v-font-scale, 1));margin:0 0 10px;line-height:1.5;">'
+              + 'O menestrel canta as lendas de quem ousa vivê-las. <b style="color:var(--v-gold,#c4953a);font-style:normal;">E a tua?</b>'
               + '</div>'
               + (_prevRating
                 ? '<div style="text-align:center;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);margin-bottom:6px;">Última nota: ' + '★'.repeat(parseInt(_prevRating,10)) + '</div>'
@@ -56662,60 +56670,67 @@ window._openCartographerPopup = _openCartographerPopup;
 //   ~37660 _showDiscoveryPopup — popup imersivo de descoberta
 // ═══════════════════════════════════════════════════════════════════
 
-// Narrativas de descoberta por local (baseado em settlement_discovery_data.py)
+// Narrativas de descoberta por local (baseado em settlement_discovery_data.py).
+// REALISMO (user sessão #69): as narrativas NUNCA afirmam que o personagem
+// esteve em lugares específicos — a descoberta acontece ao LER o Mapa de
+// Valdoria e observar sinais à distância (fumaça, luzes, ecos, rumores gerais).
+// Antes, korthag dizia "você se lembra de tê-la visto enquanto cruzava os Picos
+// de Pedra" — fabricava história que o personagem pode nunca ter vivido (o
+// jogador relatou: "fui somente aos Campos Verdes"). Cada local tem uma imagem
+// épica (poi/<img>.webp) renderizada como banner no topo (substitui o ícone).
 var SETTLEMENT_DISCOVERY_DATA = {
   korthag: {
-    header: '⛏️ Vila Mineira Descoberta!',
-    icon: 'ic-mochila',
+    header: 'Vila Mineira Descoberta!',
+    img: 'korthag',
     narrative: [
-      'Conforme você desliza o dedo pelo Mapa de Valdoria, algo chama sua atenção.',
-      'Uma fumaça fina sobe das montanhas próximas — você se lembra de tê-la visto enquanto cruzava os Picos de Pedra.',
-      'Aprofundando os olhos, vê pequenas luzes piscando entre os penhascos. <b>Vila mineira de Korthag.</b>',
-      'Os anões mineradores preferem isolamento, mas as fornalhas ardendo dia e noite são impossíveis de esconder.'
+      'Você percorre o Mapa de Valdoria com o dedo, e algo nas montanhas a leste prende teu olhar.',
+      'Uma coluna fina de fumaça sobe entre os penhascos — constante, alimentada, viva. Não é fogueira de passagem.',
+      'Onde a rocha se abre, pequenas luzes alaranjadas pulsam na penumbra: <b>fornalhas</b>. E muitas.',
+      'Anões raramente anunciam onde vivem. Mas o calor de mil forjas não se esconde. <b>Korthag</b> revela-se no mapa.'
     ],
     desc: 'Anões mineradores escavam minério raro nos Picos de Pedra. Comércio de cobre e quartzo.'
   },
   valkrest: {
-    header: '⛺ Acampamento de Veteranos!',
-    icon: 'ic-mochila',
+    header: 'Acampamento de Veteranos!',
+    img: 'valkrest',
     narrative: [
-      'Você nota algo no Mapa próximo ao Passo do Dragão.',
-      'Um grupo de aventureiros veteranos te disse na taverna que estabeleceram base por lá — você não acreditou na época.',
-      'Mas as marcas no pergaminho não mentem: <b>tendas reforçadas, postos de guarda, pequena forja improvisada.</b>',
-      'Valkrest. Acampamento fortificado pra quem é louco o bastante de explorar terras vulcânicas.'
+      'Perto do Passo do Dragão, o pergaminho do Mapa ganha marcas que antes não havia.',
+      'Tendas reforçadas. Paliçadas afiadas. Uma forja improvisada cuspindo faíscas contra um céu rubro.',
+      'Só gente endurecida acampa à sombra de terras vulcânicas — e gente assim sempre deixa rastro.',
+      '<b>Valkrest</b>. Um reduto de veteranos onde a fraqueza não sobrevive à primeira noite.'
     ],
     desc: 'Acampamento de aventureiros veteranos perto da Cratera Vulcânica. Refúgio em terras hostis.'
   },
   ancestral_graveyard: {
-    header: '🪦 Cemitério Ancestral!',
-    icon: 'ic-templo',
+    header: 'Cemitério Ancestral!',
+    img: 'ancestral_graveyard',
     narrative: [
-      'Suas viagens pelo Cemitério Antigo te ensinaram a ler os sinais.',
-      'Caminhos antigos partem dali — você seguiu um até onde ousou. Mausoléus maiores, mais antigos.',
-      'No Mapa, agora identifica claramente: <b>Cemitério Ancestral.</b>',
-      'Tumbas da aristocracia esquecida, magia necromântica residual. Recompensa rara — perigo maior.'
+      'Sobre o Mapa, trilhas esquecidas convergem para um ponto que o tempo tentou apagar.',
+      'Quanto mais fundo a vista alcança, maiores e mais antigos erguem-se os mausoléus.',
+      'Um frio sem vento paira sobre aquele lugar — a marca de uma magia que não descansa.',
+      '<b>Cemitério Ancestral</b>. Tumbas de uma aristocracia esquecida, e o que ainda guardam.'
     ],
     desc: 'Mausoléus antigos da aristocracia esquecida. Magia necromântica residual.'
   },
   underground_caverns: {
-    header: '🪨 Cavernas Subterrâneas!',
-    icon: 'ic-mochila',
+    header: 'Cavernas Subterrâneas!',
+    img: 'underground_caverns',
     narrative: [
-      'Conforme você examina a Passagem Subterrânea, sente uma corrente de ar fria vinda de fissuras nas paredes.',
-      'Você seguiu o vento numa expedição passada — as fissuras dão pra um sistema de túneis bem maior.',
-      '<b>Cavernas Subterrâneas.</b> Pedras esculpidas pelo tempo, ecos profundos.',
-      'Local pra quem busca minério raro... ou quer fugir de algo.'
+      'Ao traçar a Passagem Subterrânea no Mapa, uma corrente de ar frio parece escapar do próprio pergaminho.',
+      'As fissuras na pedra não terminam ali — descem, ramificam, respiram.',
+      'Ecos profundos sugerem salões muito maiores do que mapa algum ousou registrar.',
+      '<b>Cavernas Subterrâneas</b>. Refúgio de quem busca minério raro... ou de quem foge da luz.'
     ],
     desc: 'Sistema de túneis profundos sob os Picos de Pedra. Pedra esculpida pelo tempo.'
   },
   crystal_depths: {
-    header: '💎 Profundezas de Cristal!',
-    icon: 'ic-mochila',
+    header: 'Profundezas de Cristal!',
+    img: 'crystal_depths',
     narrative: [
-      'Nas Cavernas Subterrâneas, você ouviu rumores de um lugar ainda mais profundo.',
-      'Mineradores sussurram sobre <b>cristais luminescentes</b> nas câmaras mais distantes — magia ancestral pulsando nas paredes.',
-      'No Mapa, agora você delimita esse lugar: <b>Profundezas de Cristal.</b>',
-      'Apenas os mais corajosos descem até lá. A recompensa, dizem, vale a pena.'
+      'Mais abaixo das Cavernas, o Mapa se desfaz em sombra — mas algo cintila nas margens do desconhecido.',
+      'Mineradores sussurram sobre <b>cristais que brilham por conta própria</b>, pulsando como um coração de pedra.',
+      'A própria parede pareceria viva, dizem, banhada por uma luz antiga e fria.',
+      '<b>Profundezas de Cristal</b>. Só os mais ousados descem. Poucos sobem com o mesmo olhar.'
     ],
     desc: 'Cavernas iluminadas por cristais luminescentes. Magia ancestral pulsa nas paredes.'
   }
@@ -56802,17 +56817,23 @@ function _showDiscoveryPopup(biome, onDone) {
       + '  max-width:440px;width:100%;max-height:90vh;overflow:hidden;'
       + '  display:flex;flex-direction:column;'
       + '  box-shadow:0 14px 50px rgba(0,0,0,0.8),0 0 50px rgba(196,149,58,0.25)}'
-      + '.disc-header{padding:18px 16px 12px;background:rgba(15,12,8,0.55);'
-      + '  border-bottom:1px solid rgba(196,149,58,0.4);text-align:center}'
-      + '.disc-icon{font-size:calc(42px * var(--v-font-scale, 1));margin-bottom:8px;'
-      + '  filter:drop-shadow(0 0 12px rgba(196,149,58,0.5));'
-      + '  animation:discIcon 1.2s ease-in-out infinite}'
-      + '@keyframes discIcon{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}'
-      + '.disc-title{font-family:Cinzel,serif;color:#c4953a;font-size:calc(18px * var(--v-font-scale, 1));'
+      // User sessão #69: banner épico (imagem WebP do local) no topo, no lugar
+      // do ícone de picareta. Título/subtítulo sobrepostos na base do banner
+      // (estilo descoberta Witcher 3/Skyrim). Imagem dá fade-in + leve zoom-out.
+      + '.disc-header{position:relative;width:100%;height:150px;overflow:hidden;'
+      + '  border-bottom:1px solid rgba(196,149,58,0.5);background:#1a1510}'
+      + '.disc-banner-img{width:100%;height:100%;object-fit:cover;'
+      + '  object-position:center 45%;display:block;animation:discImgIn 0.9s ease-out}'
+      + '@keyframes discImgIn{from{opacity:0;transform:scale(1.07)}to{opacity:1;transform:scale(1)}}'
+      + '.disc-banner-veil{position:absolute;inset:0;background:linear-gradient(180deg,'
+      + '  rgba(26,20,16,0.05) 0%,rgba(26,20,16,0.15) 50%,rgba(26,20,16,0.94) 100%)}'
+      + '.disc-title{position:absolute;left:10px;right:10px;bottom:24px;text-align:center;'
+      + '  font-family:Cinzel,serif;color:#f4d49a;font-size:calc(18px * var(--v-font-scale, 1));'
       + '  font-weight:700;letter-spacing:2px;margin:0;'
-      + '  text-shadow:0 0 12px rgba(196,149,58,0.45)}'
-      + '.disc-subtitle{font-style:italic;color:#a09484;font-size:calc(11px * var(--v-font-scale, 1));'
-      + '  margin:4px 0 0;letter-spacing:0.5px}'
+      + '  text-shadow:0 2px 8px #000,0 0 16px rgba(196,149,58,0.55)}'
+      + '.disc-subtitle{position:absolute;left:10px;right:10px;bottom:7px;text-align:center;'
+      + '  font-style:italic;color:#cbb896;font-size:calc(11px * var(--v-font-scale, 1));'
+      + '  margin:0;letter-spacing:0.5px;text-shadow:0 1px 4px #000}'
       + '.disc-body{padding:16px;flex:1;overflow-y:auto;display:flex;'
       + '  flex-direction:column;gap:10px}'
       + '.disc-line{font-size:calc(13px * var(--v-font-scale, 1));line-height:1.6;color:#d4c8b0;'
@@ -56837,7 +56858,8 @@ function _showDiscoveryPopup(biome, onDone) {
   ov.innerHTML = ''
     + '<div class="disc-card">'
     + '  <div class="disc-header">'
-    + '    <div class="disc-icon">' + (biome.ico || '🗺️') + '</div>'
+    +      (data.img ? '<img src="/shared/img/poi/' + data.img + '.webp" alt="' + (biome.name || '') + '" class="disc-banner-img">' : '')
+    + '    <div class="disc-banner-veil"></div>'
     + '    <h3 class="disc-title">' + data.header + '</h3>'
     + '    <p class="disc-subtitle">— ' + biome.name + ' —</p>'
     + '  </div>'
