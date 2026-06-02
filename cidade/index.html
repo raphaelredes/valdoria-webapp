@@ -12840,11 +12840,14 @@ function _showSettingsPopup(){
   html += _toggleRow('ic-musica', 'Música',
     s.music_muted ? 'Desativada' : 'Ativada',
     !s.music_muted, 'audio_music_muted');
-  html += _sliderRow('ic-som', 'Volume Música', s.music_vol, 'audio_music_vol');
+  // User sessão #69: a barra de volume some quando o áudio está desativado.
+  // O toggle re-renderiza o popup (_showSettingsPopup), então o slider
+  // aparece/some instantaneamente conforme o estado mute.
+  if (!s.music_muted) html += _sliderRow('ic-som', 'Volume Música', s.music_vol, 'audio_music_vol');
   html += _toggleRow('ic-som', 'Efeitos Sonoros',
     s.sfx_muted ? 'Desativados' : 'Ativados',
     !s.sfx_muted, 'audio_sfx_muted');
-  html += _sliderRow('ic-som', 'Volume Efeitos', s.sfx_vol, 'audio_sfx_vol');
+  if (!s.sfx_muted) html += _sliderRow('ic-som', 'Volume Efeitos', s.sfx_vol, 'audio_sfx_vol');
 
   // SEÇÃO 3: Jogo — apenas Vibração (Telegram HapticFeedback API).
   // Sessão #56: verificado que vibração funciona — vHaptic respeita
@@ -13601,13 +13604,18 @@ function _showStatusPopup(memberIdx){
     if (loc.indexOf('file://') === 0) return '/shared/img/levelup/attrs/';
     return '/shared/img/levelup/attrs/';
   }
+  // Ícones de atributos: WebP gerados (OpenAI low → WebP canonical), NUNCA SVG.
+  // BUG FIX (user sessão #69): pedia 'forca.png' mas os arquivos são .webp →
+  // 404 → caía no fallback SVG ic-stat-*. Os 6 WebP existem em
+  // /shared/img/levelup/attrs/. Agora carrega o WebP correto. O onerror SVG
+  // permanece só como rede de segurança (não deve disparar).
   var STATS_DATA = [
-    { key: 'str', label: 'FOR', icon: 'ic-stat-str', png: 'forca.png' },
-    { key: 'dex', label: 'DES', icon: 'ic-stat-dex', png: 'destreza.png' },
-    { key: 'con', label: 'CON', icon: 'ic-stat-con', png: 'constituicao.png' },
-    { key: 'int', label: 'INT', icon: 'ic-stat-int', png: 'inteligencia.png' },
-    { key: 'wis', label: 'SAB', icon: 'ic-stat-wis', png: 'sabedoria.png' },
-    { key: 'cha', label: 'CAR', icon: 'ic-stat-cha', png: 'carisma.png' }
+    { key: 'str', label: 'FOR', icon: 'ic-stat-str', png: 'forca.webp' },
+    { key: 'dex', label: 'DES', icon: 'ic-stat-dex', png: 'destreza.webp' },
+    { key: 'con', label: 'CON', icon: 'ic-stat-con', png: 'constituicao.webp' },
+    { key: 'int', label: 'INT', icon: 'ic-stat-int', png: 'inteligencia.webp' },
+    { key: 'wis', label: 'SAB', icon: 'ic-stat-wis', png: 'sabedoria.webp' },
+    { key: 'cha', label: 'CAR', icon: 'ic-stat-cha', png: 'carisma.webp' }
   ];
   var _attrBase = _attrPngBase();
   var _attrV = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();

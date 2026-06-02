@@ -6229,6 +6229,20 @@ document.write('<script src="../shared/lightbox.js?v=' + _vti + '"><\/script>');
 </script>
 </head>
 <body>
+<script>
+/* User sessão #69: propaga o tamanho de fonte escolhido no settings da cidade
+   para a exploração/viagem. Mesma mecânica da cidade: body[data-font-size] →
+   --v-font-scale em valdoria-design.css. Sem isto, o texto da exploração ficava
+   sempre no tamanho base mesmo com A+ selecionado nas configurações. */
+(function(){
+  try {
+    var sz = localStorage.getItem('valdoria_font_size') || 'normal';
+    if (sz === 'xlarge') sz = 'large';
+    if (['small','normal','large'].indexOf(sz) < 0) sz = 'normal';
+    if (document.body) document.body.setAttribute('data-font-size', sz);
+  } catch(_e) {}
+})();
+</script>
 
 <!-- ════════════════════════════════════════════════════════════════════════
      HERALDIC ICONS SPRITE — 8 ícones canonical (2026-05-06)
@@ -40083,7 +40097,13 @@ function updateHud() {
   const xpLevelBase = XP_THRESHOLDS[p.level - 1] || 0;
   const xpInLevel = Math.max(0, p.xp - xpLevelBase);
   const xpNext = xpForNextLevel(p.level);
+  // Barra = progresso DENTRO do nível; TEXTO = cumulativo D&D 5e (PHB Tabela 1-2),
+  // IDÊNTICO à ficha da cidade (ex: "536/900", não "236/600"). Consistência
+  // cross-tela (user sessão #69): mesmo personagem, mesmos números em toda tela.
   setBarFill('xp-fill', 'xp-val', xpInLevel, xpNext, 'xp');
+  const _xpCumNext = XP_THRESHOLDS[p.level] || p.xp;
+  const _xpValEl = document.getElementById('xp-val');
+  if (_xpValEl) _xpValEl.textContent = p.xp + '/' + _xpCumNext;
   const lvlEl = document.getElementById('hud-level');
   if (lvlEl) lvlEl.textContent = 'N' + p.level;
   // V2.5: gold visível no HUD (steps-val removido — steps-val element já não existe)
