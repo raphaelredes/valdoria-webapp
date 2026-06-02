@@ -21604,6 +21604,20 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
   }
 }
 
+// #11 (sessão #70): fotos WebP (OpenAI low + rembg, PADRAO_WEBP) dos NPCs da praça
+// em /shared/img/npcs/plaza/{slug}.webp. _plazaPhotoFor(npc) resolve a foto pelo sid
+// (_canonKey p/ uniques 'unique_*', id p/ legacy 'square_*'); só retorna se o slug
+// foi gerado (PLAZA_PHOTO_SLUGS) — senão o render cai no ícone heráldico variado.
+var PLAZA_PHOTO_SLUGS = ['survivor_wolves','survivor_blizzard','noble_exile','pilgrim_lost','orphan_doll','seer_blind','bard_broken','thief_repentant','wizard_failed','guard_veteran','gourmet','monk_peace','smith_apprentice','alchemist_student','hunter_traine','cleric_acolyte','baker_master','fisher_old','farmer_lost','miner_gold','woodcutter','gravedigger','librarian','painter_visionary','sculptor','dancer_exotic','juggler_fire','snake_charmer','illusionist','beast_tamer','square_circus','square_wanderer','square_homeless','square_child','square_lyana'];
+function _plazaPhotoFor(npc){
+  if (!npc) return null;
+  var sid = npc._canonKey || npc.id || '';
+  if (!sid) return null;
+  var slug = String(sid).replace(/^unique_/, '');
+  if (PLAZA_PHOTO_SLUGS.indexOf(slug) < 0) return null;
+  return '/shared/img/npcs/plaza/' + slug + '.webp';
+}
+
 // Helper genérico: lista de NPCs com restoreFn registrado pra Voltar funcionar
 //   opts.stackKey, opts.title, opts.icon, opts.flavor, opts.npcs[], opts.player
 function _showSharedNpcListPopup(opts){
@@ -21634,8 +21648,9 @@ function _showSharedNpcListPopup(opts){
     // > ícone heráldico do próprio NPC (npc.icon, variado por arquétipo) > fallback
     // aldeão. Antes: todos usavam #ic-aldeao (mesma silhueta repetida).
     var avatar;
-    if (npc.portraitImg) {
-      avatar = '<span class="sb-icon sb-icon-img"><img src="' + npc.portraitImg + '" alt="" loading="lazy" '
+    var _photo = npc.portraitImg || _plazaPhotoFor(npc);
+    if (_photo) {
+      avatar = '<span class="sb-icon sb-icon-img"><img src="' + _photo + '" alt="" loading="lazy" '
         + 'style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--v-gold-40,rgba(196,149,58,0.45));" '
         + 'onerror="this.style.display=\'none\'"></span>';
     } else if (npc.icon && typeof npc.icon === 'string' && npc.icon.indexOf('<') === 0) {
@@ -32212,22 +32227,28 @@ function _squareShowArtistsPopup(p){
           if (!_pay(p, SQUARE_TIP_COST)) return;
           p.metadata = p.metadata || {};
           var hasActive = !!p.metadata.artist_buff_active;
-          var rolled = Math.random() < SQUARE_ARTIST_BUFF_CHANCE;
-          var narrative;
+          var narrative, diceData = null;
           if (hasActive){
             narrative = '<i>O artista agradece com uma reverência, mas você já está sob efeito de outro número de hoje. A magia não dobra.</i>';
-          } else if (rolled){
-            p.metadata.artist_buff_active = a.id;
-            p.metadata.artist_buff_name = a.buff;
-            narrative = '<i>A apresentação desperta algo em você.</i><br><br>' +
-                        '✨ <b>' + a.buff + '</b> aplicada!<br>' +
-                        '<i>' + a.desc + ' (até o próximo descanso longo)</i>';
           } else {
-            narrative = '<i>O artista agradece a gorjeta com uma vênia. A apresentação foi boa, mas nada além disso.</i>';
+            // #17 (sessão #70): PADRAO_DADOS — "Sorte do Artista" via 1d20 visível
+            // (>=13 ≈ 40%, igual ao SQUARE_ARTIST_BUFF_CHANCE silencioso anterior).
+            var d20 = 1 + Math.floor(Math.random() * 20);
+            diceData = { formula: 'Sorte do Artista · 1d20', sides: 20, value: d20, total: d20 };
+            if (d20 >= 13){
+              p.metadata.artist_buff_active = a.id;
+              p.metadata.artist_buff_name = a.buff;
+              narrative = '<i>A apresentação desperta algo em você.</i><br><br>' +
+                          '✨ <b>' + a.buff + '</b> aplicada!<br>' +
+                          '<i>' + a.desc + ' (até o próximo descanso longo)</i>';
+            } else {
+              narrative = '<i>O artista agradece a gorjeta com uma vênia. A apresentação foi boa, mas nada além disso.</i>';
+            }
           }
           _showServiceResultPopup({
             icon: a.icon, npc: a.name,
             narrative: narrative,
+            dice: diceData,
             deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
             onContinue: _squareTxnReturnToHub
           });
@@ -33642,49 +33663,68 @@ function _squareShowGambleResult(p, stake, playerRoll, houseRoll, win, preGoldBe
 }
 
 // === 5. VENDEDOR ITINERANTE — rotação diária canonical (AMBULANT_VENDORS) ====
+// #16 (sessão #70): PADRAO_LOCAIS + PADRAO_ALDRIC — o vendedor (Faelis e os 7
+// rotativos) abre via vEncounter (narração + fala + escolhas) em vez do list-popup
+// plano. Mantém o fluxo de compra (confirma → paga → resultado PADRAO_DADOS-ready).
 function _squareShowVendorPopup(p){
   var vendor = _squareGetDailyVendor();
   window._squareVendorVisited = true;
-  var items = vendor.items.map(function(it){
-    return {
-      icon: it.icon,
-      label: it.name,
-      badge: it.value + ' V',
-      _item: it,
-      _vendor: vendor
+  var _buyItem = function(it, v){
+    _showConfirmPurchase({
+      icon: it.icon, npc: v.name,
+      title: 'Comprar ' + it.name,
+      desc: '<b>' + it.name + '</b><br><i>' + it.desc + '</i><br><br>' +
+            '<b>Preço:</b> ' + it.value + ' Valdoritas',
+      cost: it.value,
+      onConfirm: function(){
+        var preGold = p.gold;
+        if (!_pay(p, it.value)) return;
+        _showServiceResultPopup({
+          icon: it.icon, npc: v.name,
+          narrative: '<i>' + v.name.split(',')[0] + ' embrulha o item em pano grosso.</i><br><br>' +
+                     '<b>' + it.name + '</b> adicionado à sua bolsa.<br>' +
+                     '<i>"' + it.desc + '"</i>',
+          deltas: [
+            { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
+          ],
+          onContinue: _squareTxnReturnToHub
+        });
+      }
+    });
+  };
+  // PADRAO_ALDRIC quando disponível (REMOTE/cidade carrega encounter-popup.js)
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    var npc = {
+      name: vendor.name, desc: vendor.desc,
+      portraitHTML: vendor.icon,  // brasão heráldico do vendedor (SVG markup)
+      id: 'vendor_' + vendor.id
     };
+    var _d = (vendor.desc || '').trim();
+    var script = [
+      { type: 'narration', text: 'Um pano de feira se abre sobre o calçamento da praça, e a mercadoria reluz à luz da tarde.' },
+      { type: 'speech', speaker: vendor.name, text: '— ' + _d + ' Dá uma olhada, viajante: mercadoria boa, preço justo. <i>Só por hoje.</i>' }
+    ];
+    var choices = vendor.items.map(function(it){
+      return { id: 'buy', label: '⚒ ' + it.name + ' · ' + it.value + ' V', _item: it };
+    });
+    choices.push({ id: 'leave', label: '↩ "Quem sabe outra hora."' });
+    window.vEncounter.render({ npc: npc, script: script, choices: choices }, {
+      player: p, closeable: true,
+      onChoice: function(ch){
+        if (ch && ch._item) { _buyItem(ch._item, vendor); }
+        else { try { window.vEncounter.close(); } catch(_){} }
+      }
+    });
+    return;
+  }
+  // Fallback LOCAL (sem vEncounter): list-popup legado
+  var items = vendor.items.map(function(it){
+    return { icon: it.icon, label: it.name, badge: it.value + ' V', _item: it, _vendor: vendor };
   });
   _squareShowListPopup({
-    icon: vendor.icon,
-    title: vendor.name,
-    flavor: '<i>' + vendor.desc + '</i>',
-    items: items,
-    stackKey: 'square_vendor',
-    onPick: function(item){
-      var it = item._item;
-      var v = item._vendor;
-      _showConfirmPurchase({
-        icon: it.icon, npc: v.name,
-        title: 'Comprar ' + it.name,
-        desc: '<b>' + it.name + '</b><br><i>' + it.desc + '</i><br><br>' +
-              '<b>Preço:</b> ' + it.value + ' Valdoritas',
-        cost: it.value,
-        onConfirm: function(){
-          var preGold = p.gold;
-          if (!_pay(p, it.value)) return;
-          _showServiceResultPopup({
-            icon: it.icon, npc: v.name,
-            narrative: '<i>' + v.name.split(',')[0] + ' embrulha o item em pano grosso.</i><br><br>' +
-                       '<b>' + it.name + '</b> adicionado à sua bolsa.<br>' +
-                       '<i>"' + it.desc + '"</i>',
-            deltas: [
-              { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
-            ],
-            onContinue: _squareTxnReturnToHub
-          });
-        }
-      });
-    }
+    icon: vendor.icon, title: vendor.name, flavor: '<i>' + vendor.desc + '</i>',
+    items: items, stackKey: 'square_vendor',
+    onPick: function(item){ _buyItem(item._item, item._vendor); }
   });
 }
 
