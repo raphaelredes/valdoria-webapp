@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T03:51:44Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T03:59:46Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9286,6 +9286,12 @@ document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/sc
 </script>
 </head>
 <body class="biome-forest sim-combat-layout">
+<script>
+/* User sessão #69: propaga o tamanho de fonte escolhido no settings da cidade
+   para o COMBATE. body[data-font-size] → --v-font-scale (valdoria-design.css).
+   Sem isto o texto do combate ficava sempre no tamanho base mesmo com A+. */
+(function(){try{var sz=localStorage.getItem('valdoria_font_size')||'normal';if(sz==='xlarge')sz='large';if(['small','normal','large'].indexOf(sz)<0)sz='normal';if(document.body)document.body.setAttribute('data-font-size',sz);}catch(_e){}})();
+</script>
 <!-- ════════════════════════════════════════════════════════════════════════
      INTRO TITLE + LOADING — pattern canonical (USER REQUEST 2026-05-05)
      Igual /app.html e cidade.html. Combate audio: combat track.

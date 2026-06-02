@@ -18876,8 +18876,14 @@ var sessionEventHistory = [];
     // alcançava drawFogComposite) → mapa inteiro visível, sem névoa. Default ON.
     fog_of_war: true,
     player_aura: false,
-    day_night_tint: false,
-    weather_overlay: false,
+    // Sessão #69 (user: "efeitos quando o tempo muda no mapa não aplicam ao
+    // andar"): estes flags ficaram OFF desde um A/B FPS-test antigo (MESMA causa
+    // do fog_of_war na sessão #67) e nunca foram religados → o tint de dia/noite e
+    // o overlay de clima nunca desenhavam, mesmo com S.dayPhase/S.weather mudando
+    // a cada passo. Religados por default. drawDayNightTint/drawWeatherOverlay já
+    // respeitam o perf tier (lite reduz partículas).
+    day_night_tint: true,
+    weather_overlay: true,
     debug_hud: false,
 
     // V8 USER REVERT: idle_pause removido definitivamente (travava rain anim).
@@ -18890,11 +18896,12 @@ var sessionEventHistory = [];
     // Sessão #67: bump _v7 → _v8 pra re-aplicar defaults (limpa saves antigos
     // que tinham fog_of_war:false travado). Painel é dev-only, real users não têm
     // config salva — bump garante que TODOS pegam o novo default (fog ON).
-    var raw = localStorage.getItem('valdoria_explore_features_v8');
+    var raw = localStorage.getItem('valdoria_explore_features_v9');
     if (raw) saved = JSON.parse(raw);
     // Migração: limpa keys antigas se existem
     try { localStorage.removeItem('valdoria_explore_features'); } catch (_) {}
     try { localStorage.removeItem('valdoria_explore_features_v7'); } catch (_) {}
+    try { localStorage.removeItem('valdoria_explore_features_v8'); } catch (_) {}
   } catch (_) {}
   var merged = {};
   for (var k in DEFAULTS) merged[k] = (saved.hasOwnProperty(k)) ? !!saved[k] : DEFAULTS[k];
@@ -18903,7 +18910,7 @@ var sessionEventHistory = [];
 })();
 function _setFeature(key, val) {
   window._FEATURES[key] = !!val;
-  try { localStorage.setItem('valdoria_explore_features_v8', JSON.stringify(window._FEATURES)); } catch (_) {}
+  try { localStorage.setItem('valdoria_explore_features_v9', JSON.stringify(window._FEATURES)); } catch (_) {}
 }
 window._setFeature = _setFeature;
 
