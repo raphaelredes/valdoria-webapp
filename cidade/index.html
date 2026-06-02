@@ -27181,7 +27181,7 @@ var PLAZA_OFFER_EVENTS = [
     npc_data: {
       name: 'Marília, a Fruteira',
       desc: 'Vendedora de frutas com cesta cheia de produtos da estação',
-      portrait: 'ic-mercado'
+      portrait: 'ic-mercado', portraitImg: '/shared/img/npcs/marilia-fruteira.webp'
     },
     script: [
       { type: 'narration', text: 'Uma mulher de meia-idade com lenço amarelo na cabeça arruma maçãs vermelhas brilhantes numa cesta de vime. Ela ergue uma das maçãs ao te ver.' },
@@ -27207,7 +27207,7 @@ var PLAZA_OFFER_EVENTS = [
     npc_data: {
       name: 'Bertran, o Pregador da Taverna',
       desc: 'Funcionário da taverna distribuindo amostras pra atrair clientes',
-      portrait: 'ic-taverna'
+      portrait: 'ic-taverna', portraitImg: '/shared/img/npcs/bertran-pregador.webp'
     },
     script: [
       { type: 'narration', text: 'Um homem magro de chapéu de aba caída se aproxima com uma bandeja de pequenos copos de cerâmica.' },
@@ -27329,7 +27329,7 @@ window._squareShowOfferEvent = _squareShowOfferEvent;
 var PLAZA_PASSIVE_DIALOGUES = {
   guard_nod: {
     npc_key: 'guarda_praca',
-    npc_data: { name: 'Guarda da Praça', desc: 'Soldado de patrulha matinal', portrait: 'ic-guerreiro' },
+    npc_data: { name: 'Guarda da Praça', desc: 'Soldado de patrulha matinal', portrait: 'ic-guerreiro', portraitImg: '/shared/img/npcs/guarda-praca.webp' },
     script: [
       { type: 'narration', text: 'Um guarda em armadura de couro reforçado te avista atravessando a praça. Ele bate o peito num saudar formal.' },
       { type: 'speech', speaker: 'guarda_praca', text: '— Aventureiro. <i>(o tom é seco mas respeitoso)</i> Bom ver que voltou inteiro.' }
@@ -27360,7 +27360,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   bard_song: {
     npc_key: 'bardo_rua',
-    npc_data: { name: 'Bardo das Ruas', desc: 'Trovador errante com alaúde', portrait: 'ic-bardo' },
+    npc_data: { name: 'Bardo das Ruas', desc: 'Trovador errante com alaúde', portrait: 'ic-bardo', portraitImg: '/shared/img/npcs/bardo-ruas.webp' },
     script: [
       { type: 'narration', text: 'Um bardo desconhecido para de tocar ao te ver passar. Ele dedilha rapidamente o alaúde.' },
       { type: 'speech', speaker: 'bardo_rua', text: '— Veja só! O aventureiro das nossas histórias. <i>(ele começa improvisar uma estrofe sobre suas aventuras)</i>' }
@@ -27376,7 +27376,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   old_lady: {
     npc_key: 'velha_praca',
-    npc_data: { name: 'Anciã de Valdoria', desc: 'Mulher idosa de cabelos brancos', portrait: 'ic-praca' },
+    npc_data: { name: 'Anciã de Valdoria', desc: 'Mulher idosa de cabelos brancos', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/ancia-valdoria.webp' },
     script: [
       { type: 'narration', text: 'Uma senhora idosa de cabelos brancos te aborda com mãos trêmulas mas olhar firme.' },
       { type: 'speech', speaker: 'velha_praca', text: '— Obrigada, aventureiro. <i>(ela aperta sua mão)</i> Pessoas como você fazem essa cidade ainda valer a pena.' }
@@ -27423,7 +27423,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   flower_vendor: {
     npc_key: 'florista',
-    npc_data: { name: 'Florista da Praça', desc: 'Vendedora ambulante de flores secas', portrait: 'ic-mercado' },
+    npc_data: { name: 'Florista da Praça', desc: 'Vendedora ambulante de flores secas', portrait: 'ic-mercado', portraitImg: '/shared/img/npcs/florista-praca.webp' },
     script: [
       { type: 'narration', text: 'Uma florista de avental rústico estende uma pétala dourada na sua direção.' },
       { type: 'speech', speaker: 'florista', text: '— Pra sorte na próxima jornada. <i>(o sorriso dela é genuíno)</i> Cortesia da casa.' }
@@ -27455,7 +27455,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   merchant_drop: {
     npc_key: 'mercador_pressa',
-    npc_data: { name: 'Mercador Apressado', desc: 'Comerciante carregando sacos', portrait: 'ic-mercado' },
+    npc_data: { name: 'Mercador Apressado', desc: 'Comerciante carregando sacos', portrait: 'ic-mercado', portraitImg: '/shared/img/npcs/mercador-apressado.webp' },
     script: [
       { type: 'narration', text: 'Um mercador atravessa a praça correndo. Algumas moedas escapam do bolso e tilintam no chão.' },
       { type: 'speech', speaker: 'mercador_pressa', text: '— Pelos deuses, minha bolsa! <i>(ele para apavorado)</i>' }
@@ -27471,7 +27471,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   musician_tip: {
     npc_key: 'musico_rua',
-    npc_data: { name: 'Músico de Rua', desc: 'Tocador de gaita com chapéu surrado', portrait: 'ic-bardo' },
+    npc_data: { name: 'Músico de Rua', desc: 'Tocador de gaita com chapéu surrado', portrait: 'ic-bardo', portraitImg: '/shared/img/npcs/musico-rua.webp' },
     script: [
       { type: 'narration', text: 'Um músico de gaita toca uma melodia melancólica. As notas parecem amaciar o cansaço da estrada.' }
     ],
@@ -31909,17 +31909,16 @@ function _renderEpicSquareHub(container, data){
     + '@keyframes sqrCardSlide{0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}'
     + '.sqr-epic-wrap{padding:var(--v-space-md,8px);font-family:var(--v-font,serif);}'
     /* Cenário principal — pedra + chao + fontainh */
-    + '.sqr-cenario{position:relative;padding:18px 14px 16px;margin-bottom:12px;'
-    + 'background:radial-gradient(ellipse at 50% 12%,' + theme.glow + ' 0%,rgba(74,56,40,0.25) 35%,rgba(30,22,16,0.92) 80%);'
-    + 'border:1px solid ' + theme.secondary + ';border-radius:var(--v-radius,10px);overflow:hidden;}'
-    + '.sqr-cenario::before{content:"◆";position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:calc(10px * var(--v-font-scale, 1));color:' + theme.primary + ';letter-spacing:2px;opacity:0.75;}'
-    + '.sqr-period-badge{position:absolute;top:7px;left:10px;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(9px * var(--v-font-scale, 1));color:' + theme.primary + ';letter-spacing:2px;text-transform:uppercase;opacity:0.85;}'
-    + '.sqr-torch{position:absolute;width:14px;height:18px;font-size:calc(14px * var(--v-font-scale, 1));line-height:1;animation:sqrTorchFlicker 1.8s ease-in-out infinite;}'
-    + '.sqr-torch.tl{top:4px;left:6px;}'
-    + '.sqr-torch.tr{top:4px;right:6px;}'
-    + '.sqr-fountain{display:flex;justify-content:center;margin:4px 0 6px;font-size:calc(clamp(40px,9vw,52px) * var(--v-font-scale, 1));line-height:1;color:' + theme.primary + ';text-shadow:0 0 12px ' + theme.glow + ';animation:sqrFountainSway 3.6s ease-in-out infinite;}'
-    + '.sqr-title{text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(clamp(15px,3.8vw,17px) * var(--v-font-scale, 1));font-weight:700;letter-spacing:3px;color:' + theme.primary + ';text-shadow:0 0 10px ' + theme.glow + ';margin:2px 0 4px;text-transform:uppercase;}'
-    + '.sqr-flavor{text-align:center;font-size:calc(clamp(11px,2.8vw,12px) * var(--v-font-scale, 1));line-height:1.5;color:#d4c8b0;font-style:italic;margin:6px 6px 0;}'
+    /* #praca (sessao #70): cenario EPICO no padrao taverna/estalagem — banner
+       PNG (city/square.webp) cobrindo o topo + titulo sobre gradiente escuro.
+       Removidos: tochas de fogo, period badge "Amanhecer", fonte ASCII. */
+    + '.sqr-cenario{position:relative;min-height:158px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:14px;margin-bottom:12px;'
+    + 'border:1px solid ' + theme.secondary + ';border-radius:var(--v-radius,10px);overflow:hidden;box-shadow:inset 0 0 24px rgba(0,0,0,0.5);}'
+    + '.sqr-cenario-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 38%;filter:brightness(0.66) saturate(1.12);z-index:0;}'
+    + '.sqr-cenario::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,' + theme.primary + ',transparent);z-index:2;opacity:0.7;}'
+    + '.sqr-cenario::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(30,22,16,0.10) 0%,rgba(30,22,16,0.34) 48%,rgba(30,22,16,0.88) 100%);z-index:1;}'
+    + '.sqr-title{position:relative;z-index:3;text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(clamp(18px,4.6vw,22px) * var(--v-font-scale, 1));font-weight:700;letter-spacing:3px;color:' + theme.primary + ';text-shadow:0 2px 8px rgba(0,0,0,0.9),0 0 16px ' + theme.glow + ';margin:0;text-transform:uppercase;}'
+    + '.sqr-flavor{position:relative;z-index:3;text-align:center;font-size:calc(clamp(11px,2.8vw,12px) * var(--v-font-scale, 1));line-height:1.5;color:#e8dcc8;font-style:italic;margin:5px 6px 0;text-shadow:0 1px 4px rgba(0,0,0,0.85);}'
     /* Reputation/buff banners */
     + '.sqr-banner-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}'
     + '.sqr-rep-banner,.sqr-buff-banner{flex:1;min-width:0;padding:8px 10px;border-radius:var(--v-radius-sm,6px);border:1px solid;font-size:calc(clamp(10px,2.5vw,11px) * var(--v-font-scale, 1));text-align:center;letter-spacing:1px;font-family:var(--v-font-display,Cinzel,serif);}'
@@ -31938,9 +31937,7 @@ function _renderEpicSquareHub(container, data){
   /* === CENÁRIO PRINCIPAL === */
   html += '<div class="sqr-epic-wrap">'
     + '<div class="sqr-cenario">'
-    +   '<span class="sqr-torch tl">🔥</span><span class="sqr-torch tr">🔥</span>'
-    +   '<div class="sqr-period-badge">◆ ' + theme.label + ' ◆</div>'
-    +   '<div class="sqr-fountain">⛲</div>'
+    +   '<img class="sqr-cenario-bg" src="../shared/img/city/praca-banner.webp" alt="" onerror="this.onerror=null;this.src=\'../shared/img/city/square.webp\'">'
     +   '<div class="sqr-title">Praça Central</div>';
   if (data.flavor) {
     html += '<div class="sqr-flavor">' + data.flavor + '</div>';
@@ -51826,7 +51823,7 @@ var RECURRING_NPCS = {
   },
   silvana: {
     name: 'Silvana, a Bardisa',
-    portrait: 'ic-bardo',
+    portrait: 'ic-bardo', portraitImg: '/shared/img/npcs/silvana-bardisa.webp',
     desc: 'Bardisa elfa com harpa de cordas douradas. Sorriso enigmático.',
     legendary: true,
     title: 'Voz das Ruínas Élficas · Memória Viva',
@@ -51845,7 +51842,7 @@ var RECURRING_NPCS = {
   },
   miriana: {
     name: 'Mestra Miriana',
-    portrait: 'ic-mago',
+    portrait: 'ic-mago', portraitImg: '/shared/img/npcs/mestra-miriana.webp',
     desc: 'Erudita de vestes acadêmicas. Carrega livros antigos.'
   },
   garrick: {
@@ -51857,22 +51854,22 @@ var RECURRING_NPCS = {
   // 2026-05-12 NPCs das missões da Guilda (PADRAO_ALDRIC consistency)
   helga: {
     name: 'Capitã Helga',
-    portrait: 'ic-guerreiro',
+    portrait: 'ic-guerreiro', portraitImg: '/shared/img/npcs/capita-helga.webp',
     desc: 'Capitã da Guarda, voz firme, mão calejada. Veterana de três cercos.'
   },
   sylvi: {
     name: 'Mestra Sylvi',
-    portrait: 'ic-druida',
+    portrait: 'ic-druida', portraitImg: '/shared/img/npcs/mestra-sylvi.webp',
     desc: 'Herbalista de vestes verdes, dedos manchados de seiva. Conhece cada planta da floresta.'
   },
   brael: {
     name: 'Comerciante Brael',
-    portrait: 'ic-ladino',
+    portrait: 'ic-ladino', portraitImg: '/shared/img/npcs/comerciante-brael.webp',
     desc: 'Mercador rotineiro, mãos calosas das rédeas. Cinco carroções, três rotas.'
   },
   maeve: {
     name: 'Estudiosa Maeve',
-    portrait: 'ic-mago',
+    portrait: 'ic-mago', portraitImg: '/shared/img/npcs/estudiosa-maeve.webp',
     desc: 'Erudita de óculos arredondados, pergaminhos sob o braço. Especialista em ruínas pré-imperiais.'
   },
   lyana: {
