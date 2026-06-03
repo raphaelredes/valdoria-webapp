@@ -9,6 +9,28 @@
    - Medieval UI patterns: laurel wreaths, embossed gold, stone textures
 
    Safe DOM: todos os elementos construidos via createElement/textContent.
+
+   MAPA_IA — navegacao rapida (atualizar a CADA mudanca):
+     ~21   ARENA_SVC_META           cb -> WebP icon canonical (grid de servicos)
+     ~62   VORHAN_DIALOGUE          greeting principal (NPC row click)
+     ~89   renderArenaScreen        dispatcher por d.type
+     ~110  _arenaTierMedallion      medalhao do tier + crest WebP (fallback CSS)
+     ~150  _arenaBackdrop           coliseu (tochas + multidao)
+     ~165  _renderArenaMain         tela principal (cenario+NPC+rep+tier+stats+
+                                     desafiante+recompensa+SERVICOS+acoes)
+     ~410  _renderArenaHpWarning    aviso de HP baixo
+     ~480  _renderArenaResult       pos-combate (vitoria/derrota)
+     ~620  _renderArenaLeaderboard  ranking diario (podium + lista)
+     ~760  _arenaServicesGrid       grid .services/.svc (PADRAO_LOCAIS)
+     ~810  _renderArenaRules        Regras do Coliseu (tiers + leis da areia)
+     ~960  _renderArenaRecord       Seus Feitos (registro agregado)
+     ~1010 _renderArenaHistory      Historico de Lutas (ultimos combates)
+     ~1100 _div/_makeBtn/etc        DOM helpers
+     ~1190 window.renderArenaScreen export
+
+   Busca rapida:
+     grep "function _render"  -> telas
+     grep "data-tier"         -> medalhoes/tiers
    ═══════════════════════════════════════════════════════════════ */
 
 /* task #75 (2026-05-20): IIFE wrap pra prevenir colis\u00F5es de globais entre
@@ -28,6 +50,11 @@ var ARENA_SVC_META = {
   'arena_train':       { icon: '<img src="../shared/img/services/svc-treino-arena.webp" alt="">' },
   'arena_ranking':     { icon: '<img src="../shared/img/services/svc-ranking-arena.webp" alt="">' },
   'arena_daily_board': { icon: '<img src="../shared/img/services/svc-ranking-arena.webp" alt="">' },
+  /* arena_history reaproveita svc-livros (crônica de combates passados);
+     arena_record reaproveita svc-torneio (troféu/louros = feitos pessoais).
+     Catálogo existente — regra "Items Existentes: NUNCA recriar SVG". */
+  'arena_history':     { icon: '<img src="../shared/img/services/svc-livros.webp" alt="">' },
+  'arena_record':      { icon: '<img src="../shared/img/services/svc-torneio.webp" alt="">' },
   'arena_rules':       { icon: '<img src="../shared/img/services/svc-informacoes.webp" alt="">' }
 };
 window._ARENA_SVC_META = ARENA_SVC_META;
@@ -87,6 +114,9 @@ function renderArenaScreen(el, data) {
     else if (type === 'hp_warning')  _renderArenaHpWarning(el, data);
     else if (type === 'result')      _renderArenaResult(el, data);
     else if (type === 'leaderboard') _renderArenaLeaderboard(el, data);
+    else if (type === 'rules')       _renderArenaRules(el, data);
+    else if (type === 'record')      _renderArenaRecord(el, data);
+    else if (type === 'history')     _renderArenaHistory(el, data);
     else {
         el.textContent = 'Erro: tipo de tela desconhecido.';
     }
@@ -97,6 +127,52 @@ function _coinEl() {
     var s = document.createElement('span');
     s.className = 'vi vi-coin sm';
     return s;
+}
+
+/* ── Tier medallion (crest image + CSS fallback) ───────────── *
+ * Retorna um wrapper [medalhão + legenda]. A heráldica WebP do tier
+ * (/shared/img/arena/tier-{id}.webp) é sobreposta ao medalhão CSS.
+ * Se a imagem falhar (onerror), o medalhão CSS (gradiente + texto
+ * embossado) permanece como fallback gracioso — nenhuma tela quebrada.
+ * A legenda (nome + faixa de nível) fica SEMPRE visível abaixo, então
+ * a informação nunca se perde, com ou sem crest.
+ * tierId = iron|bronze|silver|gold|mythral (id canonical do backend). */
+function _arenaTierMedallion(tierId, tierName, min, max) {
+    var box = _div('arena-tier-box');
+
+    var badge = _div('arena-tier-medallion');
+    badge.setAttribute('data-tier', tierId);
+
+    /* CSS fallback content (texto embossado — escondido quando há crest) */
+    var tierLabel = _div('arena-tier-label');
+    tierLabel.textContent = 'TIER';
+    badge.appendChild(tierLabel);
+    var tierNameEl = _div('arena-tier-name');
+    tierNameEl.textContent = (tierName || 'Ferro').toUpperCase();
+    badge.appendChild(tierNameEl);
+
+    /* Crest image overlay — graceful fallback se faltar o arquivo. */
+    var crestImg = document.createElement('img');
+    crestImg.className = 'arena-tier-crest';
+    crestImg.src = '../shared/img/arena/tier-' + tierId + '.webp';
+    crestImg.alt = 'Brasão Tier ' + (tierName || '');
+    crestImg.loading = 'lazy';
+    crestImg.onerror = function() { this.remove(); };
+    crestImg.onload = function() { badge.classList.add('has-crest'); };
+    badge.appendChild(crestImg);
+    box.appendChild(badge);
+
+    /* Legenda sempre visível (nome + faixa de nível). */
+    var caption = _div('arena-tier-caption');
+    var capName = _div('arena-tier-caption-name');
+    capName.textContent = (tierName || 'Ferro').toUpperCase();
+    caption.appendChild(capName);
+    var capRange = _div('arena-tier-caption-range');
+    capRange.textContent = 'Nível ' + (min || 1) + '–' + (max || 4);
+    caption.appendChild(capRange);
+    box.appendChild(caption);
+
+    return box;
 }
 
 /* ── Coliseum backdrop (shared decorative element) ────────── */
@@ -212,18 +288,7 @@ function _renderArenaMain(el, d) {
     /* Tier badge — imposing laurel wreath */
     var tierWrap = _div('arena-tier-cabecalho');
     var laurel = _div('arena-tier-laurel');
-    var tierId = tier.id || 'iron';
-    var badge = _div('arena-tier-medallion');
-    badge.setAttribute('data-tier', tierId);
-    var tierLabel = _div('arena-tier-label');
-    tierLabel.textContent = 'TIER';
-    badge.appendChild(tierLabel);
-    var tierName = _div('arena-tier-name');
-    tierName.textContent = (tier.name || 'Ferro').toUpperCase();
-    badge.appendChild(tierName);
-    var tierRange = _div('arena-tier-range');
-    tierRange.textContent = 'N\u00edvel ' + (tier.min || 1) + '\u2013' + (tier.max || 4);
-    badge.appendChild(tierRange);
+    var badge = _arenaTierMedallion(tier.id || 'iron', tier.name, tier.min, tier.max);
     laurel.appendChild(badge);
     tierWrap.appendChild(laurel);
     frag.appendChild(tierWrap);
@@ -324,6 +389,16 @@ function _renderArenaMain(el, d) {
     rewardScroll.appendChild(fee);
     frag.appendChild(rewardScroll);
 
+    /* Formal services grid (PADRAO_LOCAIS — paridade com a Guilda).
+       Backend envia d.services [{icon,label,desc,cb,badge}]; ícones
+       resolvidos por ARENA_SVC_META (WebP canonical). */
+    if (d.services && d.services.length) {
+        var svcLabel = _div('pt-section-label');
+        svcLabel.textContent = '⚔ Serviços do Coliseu ⚔';
+        frag.appendChild(svcLabel);
+        frag.appendChild(_arenaServicesGrid(d.services));
+    }
+
     /* Actions */
     var actions = _div('arena-actions');
     if (d.cooldown > 0) {
@@ -358,7 +433,8 @@ function _renderArenaMain(el, d) {
         var feeText = 'DESAFIAR \u2694 \u2212' + (d.fee || 0) + ' Valdoritas';
         actions.appendChild(_makeBtn(feeText, 'arena_challenge', 'arena-btn--challenge'));
     }
-    actions.appendChild(_makeBtn('\uD83C\uDFC6 Ranking do Dia', 'arena_daily_board', 'arena-btn--ranking'));
+    /* "Ranking do Dia" agora vive no grid de servi\u00E7os (paridade Guilda) \u2014
+       o bot\u00E3o hero DESAFIAR permanece para feedback de cooldown/saldo. */
     frag.appendChild(actions);
 
     el.appendChild(frag);
@@ -708,6 +784,358 @@ function _renderArenaLeaderboard(el, d) {
     /* Button */
     var actions = _div('arena-actions');
     actions.appendChild(_makeBtn('\u2B05\uFE0F Voltar \u00e0 Arena', 'arena_main', 'arena-btn--back-main'));
+    wrap.appendChild(actions);
+
+    frag.appendChild(wrap);
+    el.appendChild(frag);
+}
+
+/* ── Services grid (PADRAO_LOCAIS — espelha a Guilda) ──────── *
+ * services = [{ icon, label, desc, cb, badge? }]. Ícone resolvido por
+ * ARENA_SVC_META (WebP) com fallback para o emoji/texto enviado.
+ * Reusa as classes .services/.svc do padrao-taverna.css (presente em
+ * cidade/index.html). Clique despacha o cb via doAction (server-driven). */
+function _arenaServicesGrid(services) {
+    var grid = _div('services');
+    services.forEach(function(svc) {
+        var card = _div('svc');
+        if (svc.disabled) card.classList.add('disabled');
+        card.setAttribute('data-svc', svc.cb || '');
+
+        var ico = _div('svc-ico');
+        var meta = ARENA_SVC_META[svc.cb || ''];
+        var icoStr = (meta && meta.icon) || svc.icon || '▸';
+        if (icoStr.indexOf('<svg') >= 0 || icoStr.indexOf('<img') >= 0) {
+            ico.innerHTML = icoStr;
+            var img = ico.querySelector('img');
+            if (img) img.style.cssText = 'width:38px;height:38px;object-fit:contain;';
+        } else {
+            ico.textContent = icoStr;
+            ico.style.fontSize = 'calc(20px * var(--v-font-scale, 1))';
+        }
+        card.appendChild(ico);
+
+        var txt = _div('svc-text');
+        var nameEl = _div('svc-name');
+        nameEl.textContent = svc.label || '';
+        txt.appendChild(nameEl);
+        if (svc.desc) {
+            var metaEl = _div('svc-meta');
+            metaEl.textContent = svc.desc;
+            txt.appendChild(metaEl);
+        }
+        card.appendChild(txt);
+
+        if (svc.badge) {
+            var badgeEl = _div('svc-badge');
+            badgeEl.textContent = svc.badge;
+            card.appendChild(badgeEl);
+        }
+
+        if (svc.cb && !svc.disabled) {
+            card.addEventListener('click', function() {
+                if (typeof haptic === 'function') haptic('light');
+                if (typeof doAction === 'function') doAction(svc.cb);
+            });
+        }
+        grid.appendChild(card);
+    });
+    return grid;
+}
+
+/* ── Rules sub-screen (Regras do Coliseu) ──────────────────── *
+ * Dados canônicos do backend (arena_data.get_rules_data): tiers com faixa
+ * de nível + taxa + recompensas, cooldown e bônus de sequência. Server é
+ * autoridade — zero número inventado aqui. Tier atual destacado. */
+function _renderArenaRules(el, d) {
+    var frag = document.createDocumentFragment();
+    var wrap = _div('arena-rules');
+
+    /* Header em pergaminho */
+    var header = _div('arena-rules-header');
+    var hIcon = _div('arena-rules-icon');
+    hIcon.textContent = '📖';
+    header.appendChild(hIcon);
+    var hTitle = _div('arena-rules-title');
+    hTitle.textContent = 'REGRAS DO COLISEU';
+    header.appendChild(hTitle);
+    var hSub = _div('arena-rules-sub');
+    hSub.textContent = 'Mestre Vorhan registra cada combate. Conhece as leis da areia.';
+    header.appendChild(hSub);
+    wrap.appendChild(header);
+
+    /* Section: Tiers */
+    var tiersLabel = _div('pt-section-label');
+    tiersLabel.textContent = '⚔ Tiers de Combate ⚔';
+    wrap.appendChild(tiersLabel);
+
+    var tiers = d.tiers || [];
+    var list = _div('arena-rules-tiers');
+    tiers.forEach(function(t) {
+        var row = _div('arena-rules-tier');
+        row.setAttribute('data-tier', t.id);
+        if (t.id === d.current_tier_id) row.classList.add('is-current');
+
+        /* Crest mini-medallion (mesma fonte WebP, fallback CSS) */
+        var medal = _div('arena-rules-tier-medal');
+        medal.setAttribute('data-tier', t.id);
+        var crest = document.createElement('img');
+        crest.className = 'arena-tier-crest';
+        crest.src = '../shared/img/arena/tier-' + t.id + '.webp';
+        crest.alt = '';
+        crest.loading = 'lazy';
+        crest.onerror = function() { this.remove(); };
+        medal.appendChild(crest);
+        row.appendChild(medal);
+
+        var info = _div('arena-rules-tier-info');
+        var nameRow = _div('arena-rules-tier-name');
+        nameRow.textContent = t.name;
+        if (t.id === d.current_tier_id) {
+            var youBadge = document.createElement('span');
+            youBadge.className = 'arena-rules-tier-you';
+            youBadge.textContent = 'VOCÊ';
+            nameRow.appendChild(youBadge);
+        }
+        info.appendChild(nameRow);
+        var lvlRow = _div('arena-rules-tier-lvl');
+        lvlRow.textContent = 'Nível ' + t.min + '–' + t.max;
+        info.appendChild(lvlRow);
+
+        var statRow = _div('arena-rules-tier-stats');
+        /* Fee */
+        var feeStat = _div('arena-rules-stat');
+        var feeLbl = document.createElement('span');
+        feeLbl.className = 'arena-rules-stat-lbl';
+        feeLbl.textContent = 'Inscrição';
+        feeStat.appendChild(feeLbl);
+        var feeVal = document.createElement('span');
+        feeVal.className = 'arena-rules-stat-val';
+        feeVal.appendChild(_coinEl());
+        feeVal.appendChild(document.createTextNode(' ' + t.fee));
+        feeStat.appendChild(feeVal);
+        statRow.appendChild(feeStat);
+        /* Gold reward */
+        var goldStat = _div('arena-rules-stat');
+        var goldLbl = document.createElement('span');
+        goldLbl.className = 'arena-rules-stat-lbl';
+        goldLbl.textContent = 'Prêmio';
+        goldStat.appendChild(goldLbl);
+        var goldVal = document.createElement('span');
+        goldVal.className = 'arena-rules-stat-val';
+        goldVal.appendChild(_coinEl());
+        var gr = (t.gold && t.gold.length === 2) ? (t.gold[0] + '–' + t.gold[1]) : '?';
+        goldVal.appendChild(document.createTextNode(' ' + gr));
+        goldStat.appendChild(goldVal);
+        statRow.appendChild(goldStat);
+        /* XP reward */
+        var xpStat = _div('arena-rules-stat');
+        var xpLbl = document.createElement('span');
+        xpLbl.className = 'arena-rules-stat-lbl';
+        xpLbl.textContent = 'XP';
+        xpStat.appendChild(xpLbl);
+        var xpVal = document.createElement('span');
+        xpVal.className = 'arena-rules-stat-val';
+        xpVal.textContent = '✨ ' + t.xp;
+        xpStat.appendChild(xpVal);
+        statRow.appendChild(xpStat);
+        info.appendChild(statRow);
+
+        row.appendChild(info);
+        list.appendChild(row);
+    });
+    wrap.appendChild(list);
+
+    /* Section: rules of engagement */
+    var lawsLabel = _div('pt-section-label');
+    lawsLabel.textContent = '📜 Leis da Areia 📜';
+    wrap.appendChild(lawsLabel);
+
+    var laws = _div('arena-rules-laws');
+    laws.appendChild(_arenaLawItem('⏳', 'Tempo de Recuperação',
+        'Após cada combate, descanse ' + (d.cooldown_turns || 3) +
+        ' turno(s) antes de desafiar novamente.'));
+    var sg = d.streak_gold_per_win || 5;
+    var sx = d.streak_xp_per_win || 10;
+    var cap = d.streak_cap || 5;
+    laws.appendChild(_arenaLawItem('🔥', 'Bônus de Sequência',
+        'Vitórias consecutivas rendem +' + sg + ' Valdoritas e +' + sx +
+        ' XP por vitória na sequência, até ' + cap + ' vitórias seguidas.'));
+    laws.appendChild(_arenaLawItem('🩸', 'Derrota Não é Morte',
+        'Perder na arena não é fatal — os curandeiros te recuperam, mas a sequência zera.'));
+    wrap.appendChild(laws);
+
+    /* Back button */
+    var actions = _div('arena-actions');
+    actions.appendChild(_makeBtn('⬅️ Voltar à Arena', 'arena_main', 'arena-btn--back-main'));
+    wrap.appendChild(actions);
+
+    frag.appendChild(wrap);
+    el.appendChild(frag);
+}
+
+function _arenaLawItem(icon, title, body) {
+    var item = _div('arena-rules-law');
+    var ic = _div('arena-rules-law-ic');
+    ic.textContent = icon;
+    item.appendChild(ic);
+    var txt = _div('arena-rules-law-txt');
+    var t = _div('arena-rules-law-title');
+    t.textContent = title;
+    txt.appendChild(t);
+    var b = _div('arena-rules-law-body');
+    b.textContent = body;
+    txt.appendChild(b);
+    item.appendChild(txt);
+    return item;
+}
+
+/* ── Record sub-screen (Seus Feitos) ───────────────────────── *
+ * Registro de combate agregado real do jogador (wins/losses/streak/
+ * best/daily/win-rate). Dados do backend handle_record. */
+function _renderArenaRecord(el, d) {
+    var stats = d.stats || {};
+    var frag = document.createDocumentFragment();
+    var wrap = _div('arena-record-screen');
+
+    var header = _div('arena-rules-header');
+    var hIcon = _div('arena-rules-icon');
+    hIcon.textContent = '🎖️';
+    header.appendChild(hIcon);
+    var hTitle = _div('arena-rules-title');
+    hTitle.textContent = 'SEUS FEITOS';
+    header.appendChild(hTitle);
+    var hSub = _div('arena-rules-sub');
+    hSub.textContent = 'O registro de combate que a multidão recorda.';
+    header.appendChild(hSub);
+    wrap.appendChild(header);
+
+    /* Big win/loss tablet */
+    var tablet = _div('arena-record-tablet');
+    var tabHeader = _div('arena-record-header');
+    tabHeader.textContent = 'REGISTRO DE COMBATE';
+    tablet.appendChild(tabHeader);
+    var statsRow = _div('arena-stats-row');
+    statsRow.appendChild(_statBadgeEl(stats.wins || 0, 'Vitórias', 'stat-wins'));
+    statsRow.appendChild(_statBadgeEl(stats.losses || 0, 'Derrotas', 'stat-losses'));
+    statsRow.appendChild(_statBadgeEl(stats.streak || 0, 'Sequência', 'stat-streak'));
+    tablet.appendChild(statsRow);
+    wrap.appendChild(tablet);
+
+    /* Detail rows */
+    var detail = _div('arena-record-detail');
+    detail.appendChild(_arenaRecordRow('🏆', 'Melhor sequência', String(stats.best_streak || 0)));
+    detail.appendChild(_arenaRecordRow('📜', 'Vitórias hoje', String(stats.daily_wins || 0)));
+    detail.appendChild(_arenaRecordRow('⚔', 'Total de combates', String(stats.total || 0)));
+    detail.appendChild(_arenaRecordRow('📊', 'Taxa de vitória', (stats.win_rate || 0) + '%'));
+    wrap.appendChild(detail);
+
+    var actions = _div('arena-actions');
+    actions.appendChild(_makeBtn('⬅️ Voltar à Arena', 'arena_main', 'arena-btn--back-main'));
+    wrap.appendChild(actions);
+
+    frag.appendChild(wrap);
+    el.appendChild(frag);
+}
+
+function _arenaRecordRow(icon, label, value) {
+    var row = _div('arena-record-row');
+    var ic = _div('arena-record-row-ic');
+    ic.textContent = icon;
+    row.appendChild(ic);
+    var lbl = _div('arena-record-row-lbl');
+    lbl.textContent = label;
+    row.appendChild(lbl);
+    var val = _div('arena-record-row-val');
+    val.textContent = value;
+    row.appendChild(val);
+    return row;
+}
+
+/* ── History sub-screen (Histórico de Lutas) ───────────────── *
+ * Lista os últimos combates registrados (server-only state). entries =
+ * [{ opponent, opponent_class, opponent_icon, tier, victory, gold, xp, date }].
+ * Safe DOM: ícone do oponente via textContent (emoji), nunca innerHTML. */
+function _renderArenaHistory(el, d) {
+    var entries = d.entries || [];
+    var frag = document.createDocumentFragment();
+    var wrap = _div('arena-history-screen');
+
+    var header = _div('arena-rules-header');
+    var hIcon = _div('arena-rules-icon');
+    hIcon.textContent = '📜';
+    header.appendChild(hIcon);
+    var hTitle = _div('arena-rules-title');
+    hTitle.textContent = 'HISTÓRICO DE LUTAS';
+    header.appendChild(hTitle);
+    var hSub = _div('arena-rules-sub');
+    hSub.textContent = 'Os ecos dos teus combates mais recentes.';
+    header.appendChild(hSub);
+    wrap.appendChild(header);
+
+    if (!entries.length) {
+        var empty = _div('arena-lb-empty');
+        var emptyIcon = _div('arena-lb-empty-icon');
+        emptyIcon.textContent = '🏟️';
+        empty.appendChild(emptyIcon);
+        var emptyTxt = document.createElement('div');
+        emptyTxt.textContent = 'Nenhum combate registrado ainda.';
+        empty.appendChild(emptyTxt);
+        var emptySub = document.createElement('div');
+        emptySub.className = 'empty-sub';
+        emptySub.textContent = 'Entre na arena e faça história!';
+        empty.appendChild(emptySub);
+        wrap.appendChild(empty);
+    } else {
+        var list = _div('arena-history-list');
+        entries.forEach(function(e) {
+            var row = _div('arena-history-entry ' + (e.victory ? 'is-victory' : 'is-defeat'));
+            /* result icon */
+            var res = _div('arena-history-res');
+            res.textContent = e.victory ? '🏆' : '💀';
+            row.appendChild(res);
+            /* opponent — safe DOM: icon como textContent (emoji) */
+            var info = _div('arena-history-info');
+            var oppName = _div('arena-history-opp');
+            var oppIcon = document.createElement('span');
+            oppIcon.className = 'arena-history-opp-ic';
+            oppIcon.textContent = (e.opponent_icon || '⚔️') + ' ';
+            oppName.appendChild(oppIcon);
+            oppName.appendChild(document.createTextNode(e.opponent || '???'));
+            info.appendChild(oppName);
+            var meta = _div('arena-history-meta');
+            var metaParts = [];
+            if (e.tier) metaParts.push('Tier ' + e.tier);
+            if (e.opponent_class) metaParts.push(e.opponent_class);
+            meta.textContent = metaParts.join(' · ');
+            info.appendChild(meta);
+            row.appendChild(info);
+            /* outcome */
+            var out = _div('arena-history-out');
+            if (e.victory) {
+                var goldOut = document.createElement('div');
+                goldOut.className = 'arena-history-gold';
+                goldOut.appendChild(_coinEl());
+                goldOut.appendChild(document.createTextNode(' +' + (e.gold || 0)));
+                out.appendChild(goldOut);
+                var xpOut = document.createElement('div');
+                xpOut.className = 'arena-history-xp';
+                xpOut.textContent = '✨ +' + (e.xp || 0);
+                out.appendChild(xpOut);
+            } else {
+                var lossOut = document.createElement('div');
+                lossOut.className = 'arena-history-loss';
+                lossOut.textContent = 'Derrota';
+                out.appendChild(lossOut);
+            }
+            row.appendChild(out);
+            list.appendChild(row);
+        });
+        wrap.appendChild(list);
+    }
+
+    var actions = _div('arena-actions');
+    actions.appendChild(_makeBtn('⬅️ Voltar à Arena', 'arena_main', 'arena-btn--back-main'));
     wrap.appendChild(actions);
 
     frag.appendChild(wrap);
