@@ -228,6 +228,14 @@ body.perf-lite #encounter-overlay.active .enc-card {
   line-height: 1.4;
   margin: 0;
   letter-spacing: 0.3px;
+  /* Sessão #72 (user): a descrição do NPC no header do diálogo NÃO pode ficar
+     "extremamente grande" — atrapalha quem joga com fonte grande. Limita a 2
+     linhas + reticências (adapta a qualquer tamanho de fonte). Vale p/ TODOS os
+     NPCs (impede regressão). A fala/narrativa (enc-line) não é afetada. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .enc-page-indicator {
   font-family: 'Georgia', serif;

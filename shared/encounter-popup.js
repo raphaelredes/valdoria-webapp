@@ -57,6 +57,18 @@
      dourado + glifo). NUNCA mostra o ícone de imagem quebrada do browser. */
   var _ENC_IMG_ONERR = "onerror=\"this.style.display='none';this.parentNode.classList.add('enc-portrait-fallback');\"";
 
+  /* Sessão #72 (user, IMMUTABLE): nas ESCOLHAS DE AÇÃO de TODOS os diálogos, o
+     custo em moeda DEVE usar o desenho da Valdorita (ícone), nunca "Valdoritas"
+     por extenso. Só a FALA/narrativa do NPC (enc-line) pode usar "valdoritas" por
+     extenso em ocasiões raras. _coinify converte "<n> Valdoritas/Valdorita/V" no
+     ícone — aplicado SOMENTE em labels de choice (não em speech/narration). */
+  var _VCOIN = '<span class="vi vi-coin sm" aria-label="Valdoritas"></span>';
+  function _coinify(s) {
+    return String(s == null ? '' : s)
+      .replace(/(\d+)\s*[Vv]aldoritas?\b/g, '$1 ' + _VCOIN)
+      .replace(/(\d+)\s*V\b(?![a-zA-Z])/g, '$1 ' + _VCOIN);
+  }
+
   /* task #69 (2026-05-20) — MIGRATION HTML <dialog> element.
      Pesquisa em 4 fontes (MDN, caniuse 95.48%, LogRocket, dev.to) confirma
      <dialog> + showModal() é solução definitiva pra z-index conflicts.
@@ -386,7 +398,7 @@
       if (ch.dc && ch.skill) {
         dcBadge = '<span class="enc-cho-dc">DC ' + ch.dc + ' · ' + ch.skill + '</span>';
       } else if (ch.cost) {
-        dcBadge = '<span class="enc-cho-dc enc-cho-cost">' + ch.cost + ' V</span>';
+        dcBadge = '<span class="enc-cho-dc enc-cho-cost">' + ch.cost + ' ' + _VCOIN + '</span>';
       } else if (ch.renownDelta) {
         var rd = ch.renownDelta > 0 ? '+' + ch.renownDelta : String(ch.renownDelta);
         dcBadge = '<span class="enc-cho-dc enc-cho-renown">Renome ' + rd + '</span>';
@@ -395,7 +407,7 @@
       row.innerHTML =
         '<span class="enc-cho-row-icon">' + icon + '</span>' +
         '<span class="enc-cho-row-body">' +
-          '<span class="enc-cho-row-label">' + (ch.label || '') + '</span>' +
+          '<span class="enc-cho-row-label">' + _coinify(ch.label || '') + '</span>' +
           (ch.desc ? '<span class="enc-cho-row-desc">' + ch.desc + '</span>' : '') +
         '</span>' +
         (dcBadge ? '<span class="enc-cho-row-side">' + dcBadge + '</span>' : '') +
@@ -818,7 +830,7 @@
         choices.forEach(function(ch, idx) {
           var btn = document.createElement('button');
           btn.className = 'enc-btn' + (idx === 0 ? ' enc-btn-primary' : '');
-          btn.textContent = ch.label;
+          btn.innerHTML = _coinify(ch.label);  // labels são autorais (não input) — coin icon ok
           btn.addEventListener('click', function() { _handleChoiceInternal(ch); });
           actions.appendChild(btn);
         });

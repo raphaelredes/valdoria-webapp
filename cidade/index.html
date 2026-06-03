@@ -15906,10 +15906,16 @@ var AREA_REGISTRY = {
     subkeys: [],
     status: 'ok'
   },
-  // === Arena (Fase 9.8 — 2026-05-02) ===
-  // NB: arena tem renderer próprio (game-arena.js) mas é mais complexo
-  // (battle screen). Pra simulator, usamos renderSquareHub-like via fallback
-  // pra o hub principal — ver _buildArenaMockData.
+  // === Arena (Fase 9.8 — 2026-05-02; HUB épico sessão #71f 2026-06-03) ===
+  // O HUB usa o renderer canonical do jogo (game-arena.js renderArenaScreen →
+  // _renderArenaMain), MESMO template PADRAO_TAVERNA/PADRAO_LOCAIS da Taverna
+  // (cenário + banner + crest + NPC row Vorhan + barra de reputação + tiers +
+  // grid de serviços + CTA DESAFIAR). _buildArenaMockData devolve type:'main'
+  // com o contrato de dados completo que _renderArenaMain consome (era o bug:
+  // antes devolvia type:'arena_main' e o render path forçava renderSquareHub →
+  // lista crua "tosca"). NÃO reusamos renderTavernHub porque ele HARDCODA a
+  // Taverna (banner do Javali, Grom, "No balcão e na sala") — o renderer da
+  // Arena já É esse template aplicado à Arena.
   'arena': {
     renderer: 'renderArenaScreen',
     mockBuilder: '_buildArenaMockData',
@@ -19534,30 +19540,94 @@ var ARENA_TIERS = [
   ]}
 ];
 
-// canonical: arena_manager.py — sem NPC dialogável (player interage com tiers
-// e _CHALLENGERS direto). Arena é só o sistema de combate por tiers.
+// canonical: arena_manager.py — Mestre Vorhan registra cada combate (NPC row +
+// VORHAN_DIALOGUE em game-arena.js). Arena é o sistema de combate por tiers.
+// (ARENA_NPCS continua [] porque o NPC row/diálogo é construído pelo renderer
+// canonical _renderArenaMain, não pelo loop genérico de NPCs do mock builder.)
 var ARENA_NPCS = [];
 
+// PADRAO_LOCAIS (sessão #71f, 2026-06-03): o HUB da Arena agora renderiza ÉPICO
+// via o renderer canonical do jogo (renderArenaScreen → _renderArenaMain), o
+// MESMO template PADRAO_TAVERNA/PADRAO_LOCAIS da Taverna (cenário + banner +
+// crest + NPC row Vorhan + barra de reputação + tiers + grid de serviços +
+// CTA DESAFIAR). Antes, este builder devolvia type:'arena_main' e o render path
+// forçava renderSquareHub → lista crua "tosca" (sem banner/NPC/seções). O motor
+// (arena_manager.py) é a autoridade real; aqui só montamos o snapshot de preview
+// no MESMO contrato de dados que _renderArenaMain consome (type:'main').
 function _buildArenaMockData(player){
+  player = player || {};
   var lvl = player.level || 1;
   var arena = (player.metadata && player.metadata.arena) || { wins: 0, losses: 0, streak: 0 };
+
+  // Tier "atual" = o tier mais alto que o nível do player desbloqueia (espelha
+  // arena_manager.get_player_tier). Fallback: primeiro tier (Ferro).
+  var curTier = ARENA_TIERS[0];
+  var curIdx = 0;
+  for (var ti = 0; ti < ARENA_TIERS.length; ti++) {
+    if (lvl >= ARENA_TIERS[ti].min_lvl) { curTier = ARENA_TIERS[ti]; curIdx = ti; }
+  }
+  var maxLvl = (curIdx + 1 < ARENA_TIERS.length) ? (ARENA_TIERS[curIdx + 1].min_lvl - 1) : (curTier.min_lvl + 3);
+
+  // Desafiante do tier atual (pool canonical tier.enemies). Stats sintetizados
+  // escalando pelo índice do tier — preview do card de desafiante (HP/CA/ATQ).
+  var enemy = curTier.enemies[Math.floor(Math.random() * curTier.enemies.length)] || {};
+  var challenger = {
+    name: enemy.name || '???',
+    cls: enemy.cls || 'Guerreiro',
+    icon: enemy.icon || _heralIco('ic-inimigo'),
+    flavor: enemy.flavor || '',
+    hp: 20 + curIdx * 14,
+    ac: 12 + curIdx * 2,
+    atk: 3 + curIdx * 2
+  };
+
+  // Reputação (renome) da Arena — espelha a barra do renderer (d.renome.arena).
+  var renome = 0;
+  if (player.metadata && typeof player.metadata.renome_arena === 'number') renome = player.metadata.renome_arena;
+  else if (player.metadata && player.metadata.renome && typeof player.metadata.renome.arena === 'number') renome = player.metadata.renome.arena;
+  else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.arena === 'number') renome = window._PLAYER_RENOWN.arena;
+
+  // Grid de serviços épico (PADRAO_LOCAIS): 5 tiers (cards com crest WebP do tier
+  // como ícone + badge de entrada/cadeado, cb arena_tier_* / arena_locked_*
+  // preservados) + Histórico + Ranking + Regras. Ícones resolvidos por
+  // ARENA_SVC_META no renderer (svc-livros / svc-ranking-arena / svc-informacoes);
+  // os tiers usam svc.icon = crest WebP heráldico do próprio tier.
+  var services = ARENA_TIERS.map(function(t){
+    var locked = lvl < t.min_lvl;
+    return {
+      icon: '<img src="/shared/img/arena/tier-' + t.id + '.webp" alt="">',
+      label: t.name,
+      desc: locked ? ('Requer nível ' + t.min_lvl) : (t.entry + ' V · ' + t.reward_min + '-' + t.reward_max + ' V + ' + t.xp + ' XP'),
+      cb: locked ? 'arena_locked_' + t.id : 'arena_tier_' + t.id,
+      badge: locked ? '🔒 nv ' + t.min_lvl : (t.entry + ' V'),
+      disabled: locked
+    };
+  }).concat([
+    { label: 'Histórico de Lutas', desc: 'Crônica dos seus combates', cb: 'arena_history' },
+    { label: 'Ranking do Dia',     desc: 'Os melhores gladiadores',   cb: 'arena_daily_board' },
+    { label: 'Regras do Coliseu',  desc: 'As leis da areia',          cb: 'arena_rules' }
+  ]);
+
   return {
-    type: 'arena_main',
-    flavor: 'Arena de areia avermelhada. Multidão grita. Cheiro de suor, sangue e cerveja.',
-    rep_label: '🥇 Vitórias: ' + (arena.wins || 0) + ' · Derrotas: ' + (arena.losses || 0) + (arena.streak ? ' · 🔥 Streak: ' + arena.streak : ''),
-    services: ARENA_TIERS.map(function(t){
-      var locked = lvl < t.min_lvl;
-      return {
-        icon: t.icon,
-        label: t.name,
-        cb: locked ? 'arena_locked_' + t.id : 'arena_tier_' + t.id,
-        badge: locked ? '🔒 nv ' + t.min_lvl : (t.entry + ' V'),
-        disabled: locked
-      };
-    }).concat([
-      { icon: _heralIco('ic-missões'), label: 'Histórico de Lutas', cb: 'arena_history' },
-      { icon: _heralIco('ic-trofeu'), label: 'Ranking do Dia',     cb: 'arena_ranking' }
-    ])
+    type: 'main',
+    flavor: 'Arena de areia avermelhada. A multidão ruge. Cheiro de suor, sangue e cerveja paira no ar.',
+    tier: { id: curTier.id, name: curTier.name.replace(/^Tier\s+/i, ''), min: curTier.min_lvl, max: maxLvl },
+    stats: {
+      wins: arena.wins || 0,
+      losses: arena.losses || 0,
+      streak: arena.streak || 0,
+      best_streak: arena.best_streak || 0,
+      daily_wins: arena.daily_wins || 0
+    },
+    challenger: challenger,
+    reward: { gold: [curTier.reward_min, curTier.reward_max], xp: curTier.xp },
+    fee: curTier.entry,
+    renome: { arena: renome },
+    can_afford: (player.gold || 0) >= curTier.entry,
+    cooldown: 0,
+    services: services,
+    // Guarda o tier atual pra o CTA "DESAFIAR" (arena_challenge) saber qual lutar.
+    _cur_tier_id: curTier.id
   };
 }
 
@@ -42041,6 +42111,41 @@ function _arenaShowRanking(p){
   });
 }
 
+// Sessão #71f (2026-06-03): CTA "DESAFIAR" do HUB épico (renderArenaScreen) e a
+// escolha "Vim lutar" do diálogo do Vorhan. Luta o tier ATUAL (mais alto que o
+// nível do player desbloqueia) reusando o fluxo canonical _arenaTier (confirm →
+// combate → resultado). Sem inventar lógica nova — reaproveita o que já existe.
+function _arenaChallengeCurrent(p){
+  p = p || window.CITY_MOCK_PLAYER || {};
+  var lvl = p.level || 1;
+  var curTier = ARENA_TIERS[0];
+  for (var ti = 0; ti < ARENA_TIERS.length; ti++) {
+    if (lvl >= ARENA_TIERS[ti].min_lvl) curTier = ARENA_TIERS[ti];
+  }
+  _arenaTier(p, curTier);
+}
+
+// Sessão #71f (2026-06-03): "Regras do Coliseu" (card de serviço + escolha
+// "Explica as regras" do Vorhan). Espelha arena_data.get_rules_data — tiers com
+// faixa de nível/taxa/recompensa + leis da areia. Vorhan é a voz (PADRAO_ALDRIC).
+function _arenaShowRules(p){
+  var tiersDesc = ARENA_TIERS.map(function(t){
+    return '<b>' + t.name.replace(/^Tier\s+/i, 'Tier ') + '</b> (nv ' + t.min_lvl + '+) · '
+      + t.entry + ' V → ' + t.reward_min + '-' + t.reward_max + ' V + ' + t.xp + ' XP';
+  }).join('<br>');
+  _showInfoPopup({
+    icon: _heralIco('ic-arena'), npc: 'Mestre Vorhan', title: 'Regras do Coliseu',
+    desc: '<i>"Escuta bem, pois só digo uma vez."</i><br><br>'
+      + '<b>⚔ Tiers de Combate ⚔</b><br>' + tiersDesc
+      + '<br><br><b>⚖ Leis da Areia ⚖</b><br>'
+      + '• Paga a inscrição antes de pisar na areia.<br>'
+      + '• Duas vitórias seguidas e a multidão lembrará teu nome.<br>'
+      + '• Perde mais que ganha e ninguém vai ao teu funeral.<br>'
+      + '• Os curandeiros não entram no meio do combate — entra são, ou não entra.',
+    onConfirm: function(){}
+  });
+}
+
 // --- PORTÕES — Preparar Viagem ---
 // Quando opts.beforeTravel === true, adiciona botão "Continuar para Viagem"
 // que fecha o popup e abre o exit modal (Viajar). Caso contrário, é só uma
@@ -44476,18 +44581,22 @@ function _renderCityPopup(key){
     return;
   }
   if (key === 'arena') {
-    // FIX 2026-05-03: renderArenaScreen exige tier/stats/challenger/reward data
-    // que o sim não constrói. Usar SEMPRE renderSquareHub (multi-tier list)
-    // que matcha _buildArenaMockData (services list).
+    // PADRAO_LOCAIS (sessão #71f, 2026-06-03): HUB ÉPICO via renderer canonical
+    // do jogo (renderArenaScreen → _renderArenaMain), o MESMO template
+    // PADRAO_TAVERNA/PADRAO_LOCAIS da Taverna (cenário + banner + crest + NPC row
+    // Vorhan + barra de reputação + tiers + grid de serviços + CTA DESAFIAR).
+    // Substitui o antigo fallback renderSquareHub (lista crua "tosca", FIX
+    // 2026-05-03 obsoleto): agora _buildArenaMockData devolve o contrato épico
+    // completo (type:'main') que _renderArenaMain consome. Fallback gracioso pro
+    // renderSquareHub apenas se game-arena.js falhar a carregar.
+    if (titleEl) titleEl.textContent = 'Arena de Valdoria';
+    var arenaData = _buildArenaMockData(window.CITY_MOCK_PLAYER);
+    if (typeof renderArenaScreen === 'function') {
+      renderArenaScreen(bodyEl, arenaData);
+      return;
+    }
     if (typeof renderSquareHub === 'function') {
-      if (titleEl) titleEl.textContent = 'Arena de Valdoria';
-      var arenaData = _buildArenaMockData(window.CITY_MOCK_PLAYER);
-      arenaData.flavor = arenaData.flavor || 'Arena.';
-      renderSquareHub(bodyEl, {
-        flavor: arenaData.flavor + '<br><br>' + (arenaData.npc || ''),
-        rep_label: arenaData.rep_label,
-        services: arenaData.services
-      });
+      renderSquareHub(bodyEl, { flavor: arenaData.flavor || 'Arena.', services: arenaData.services });
       return;
     }
   }
@@ -47021,8 +47130,15 @@ var ACTION_HANDLERS = {
   'festival_merchant':    function(p){ _festivalMerchant(p); },
 
   // --- ARENA ---
+  // Sessão #71f (2026-06-03): handlers do HUB épico (renderArenaScreen).
+  // CTA "DESAFIAR" + escolhas do diálogo do Vorhan (VORHAN_DIALOGUE em
+  // game-arena.js) usam arena_challenge / arena_daily_board / arena_rules.
   'arena_history':        function(p){ _arenaShowHistory(p); },
   'arena_ranking':        function(p){ _arenaShowRanking(p); },
+  'arena_daily_board':    function(p){ _arenaShowRanking(p); },   // VORHAN choice "ranking"
+  'arena_record':         function(p){ _arenaShowHistory(p); },   // alias feitos pessoais
+  'arena_challenge':      function(p){ _arenaChallengeCurrent(p); }, // CTA DESAFIAR → tier atual
+  'arena_rules':          function(p){ _arenaShowRules(p); },     // VORHAN choice "regras"
 
   // === Áreas extras (Trade Board / Shadow Alley / Travelers / Mural dos Aventureiros) ===
   // TRADE BOARD — ofertas P2P
