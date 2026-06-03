@@ -2997,6 +2997,45 @@ LOG SINK (Fase 7):
         drop-shadow(0 1px 1px rgba(0, 0, 0, 0.85));
     }
 
+    /* ===== c-effects-badge (efeitos temporários ATIVOS — canto sup. esquerdo) =====
+       PADRAO_LOCAIS sessão #71h: indicador ✦ + contagem no card do player quando
+       há boato/sonho ativo (até descanso longo). Pareia com a seção "Efeitos
+       Ativos" da ficha. title lista os efeitos; click no card abre a ficha. */
+    .cgp-card.v8-style .c-effects-badge {
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      padding: 1px 3px 1px 2px;
+      border-radius: var(--v-radius-pill, 20px);
+      background: linear-gradient(180deg, rgba(196,149,58,0.30), rgba(196,149,58,0.14));
+      border: 1px solid var(--v-gold-40, rgba(196,149,58,0.4));
+      box-shadow: 0 0 5px rgba(196,149,58,0.45), inset 0 0 3px rgba(232,196,90,0.25);
+      pointer-events: none;
+      animation: cEffBadgePulse 2.4s ease-in-out infinite;
+    }
+    .cgp-card.v8-style .c-eff-rune {
+      font-size: calc(8px * var(--v-font-scale, 1));
+      line-height: 1;
+      color: var(--v-gold-bright, #e8c45a);
+      text-shadow: 0 0 4px rgba(232,196,90,0.7);
+    }
+    .cgp-card.v8-style .c-eff-count {
+      font-family: 'Cinzel', serif;
+      font-size: calc(8px * var(--v-font-scale, 1));
+      font-weight: 700;
+      line-height: 1;
+      color: var(--v-gold-bright, #e8c45a);
+    }
+    @keyframes cEffBadgePulse {
+      0%, 100% { box-shadow: 0 0 5px rgba(196,149,58,0.40), inset 0 0 3px rgba(232,196,90,0.20); }
+      50%      { box-shadow: 0 0 9px rgba(196,149,58,0.65), inset 0 0 4px rgba(232,196,90,0.40); }
+    }
+    body.perf-lite .cgp-card.v8-style .c-effects-badge { animation: none; }
+
     /* ===== c-stats (single column 4 rows: PV/Recurso/XP/Gold — CA removida) ===== */
     /* 2026-05-11 v5: removeu CA do card (user request). Grid simplificado pra
        1 coluna — todas linhas full-width. */
@@ -8808,6 +8847,12 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.max_hit_dice != null)     p.hdMax = picked.max_hit_dice;
       if (picked.pending_skills != null)   p.pendingSkills = picked.pending_skills;
       if (picked.pending_asi != null)      p.pendingAsi = picked.pending_asi;
+      // PADRAO_LOCAIS sessão #71h: efeitos temporários ATIVOS (boato/sonho até
+      // descanso longo) REAIS do servidor → card badge + ficha "Efeitos Ativos".
+      // Sem isto, um boato comprado em sessão anterior (persistido no DB) não
+      // apareceria no cold-open — só após um novo diálogo (_applyHudFromDialogue).
+      // Server é a autoridade (web_auth serializa temp_bonuses do Player).
+      if (picked.temp_bonuses && typeof picked.temp_bonuses === 'object') p.temp_bonuses = picked.temp_bonuses;
       // FASE 1 server-driven (docs/sistemas/server-driven-state-migration.md):
       // popula QUESTS_ACTIVE com as quests REAIS do servidor (picked.quests) em
       // vez do array mock vazio. Completa a intenção da sessão #37 (web_auth já
@@ -48754,6 +48799,24 @@ function renderCityGroupPanel(){
     // USER 2026-05-18: formato 'k' para milhares — _fmtV substitui toLocaleString
     var goldStr = _fmtV(m.gold || 0);
 
+    // PADRAO_LOCAIS (sessão #71h) — badge de efeitos temporários ATIVOS no card
+    // do player (boato/sonho até descanso longo). User: "como fico sabendo que
+    // está funcionando? indicador no card e ficha". Server é a autoridade
+    // (temp_bonuses vem do DB; _applyHudFromDialogue espelha). Badge ✦ + contagem,
+    // title lista os efeitos. Click no card já abre a ficha (Efeitos Ativos).
+    var _effBadge = '';
+    if (m.isPlayer && typeof _activeEffectsList === 'function') {
+      try {
+        var _effs = _activeEffectsList(window.CITY_MOCK_PLAYER);
+        if (_effs && _effs.length) {
+          _effBadge = '<div class="c-effects-badge" title="' + _hubEsc(_effs.join(' · '))
+            + '" aria-label="' + _effs.length + ' efeito(s) ativo(s): ' + _hubEsc(_effs.join(', ')) + '">'
+            + '<span class="c-eff-rune" aria-hidden="true">✦</span>'
+            + '<span class="c-eff-count">' + _effs.length + '</span></div>';
+        }
+      } catch (_ee) {}
+    }
+
     // ===== Card V8 compact — sem CA, sem raca, sem sobrenome =====
     // Sessão #28 v2 (2026-05-24): aliado vivo = só nome + classe + ícone classe
     // + grande botão "Conversar" (sem stats). Player e aliado morto seguem com
@@ -48763,6 +48826,7 @@ function renderCityGroupPanel(){
       + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + (isLivingAlly ? ' chat-only' : '') + '" data-member="' + i + '">'
       + '    <div class="c-name">' + safeName + '</div>'
       + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
+      + _effBadge
       + '    <div class="c-class-tag">' + safeCls + ' · Nv ' + m.level + '</div>';
     if (isLivingAlly) {
       // Aliado vivo: chat zone grande ocupando area dos stats
