@@ -16858,8 +16858,9 @@ function _buildTavernMockData(player){
       return { icon: '<img src="/shared/img/npcs/aldeao.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: n.name + ' — ' + n.role, cb: 'tavern_npc_' + n.id };
     }),
     services: [
-      // Replica canonical tavern.py L130-138 (TavernManager.get_menu)
-      { icon: _heralIco('ic-dialogo'), label: 'Boatos',           cb: 'tavern_rumor_buy',     cost: 5 },
+      // PADRAO_LOCAIS (sessão #71d): "Boatos" REMOVIDO como serviço solto — vive só
+      // no diálogo do Grom (clicar no NPC → "Conta um boato"), com info real + teto
+      // diário + anti-repeat (tavern_rumor_service.py). Não duplicar aqui.
       { icon: _heralIco('ic-cerveja'), label: 'Bebidas',           cb: 'tavern_drinks_open' },
       // Sessao #37 v17: labels abreviadas (Exploradores→Aventura, Mesa de Jogos→Jogos)
       { icon: _heralIco('ic-stat-attack'), label: 'Mercenários',  cb: 'tavern_mercenaries_open' },
