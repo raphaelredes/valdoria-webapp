@@ -425,8 +425,12 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
          _cartFindNodeAt, _cartShowTooltip, _cartHideTooltip,           │
          _cartGetPlayerBiome (~3554-3660)                               │
   ~3663  function _openCartLocationPopup / _closeCartLocationPopup      │
-  ~3724  function _drawCart — orchestrator (parchment + sea + continent │
-         + frame + biomes + paths + nodes + cartouche + seal)           │
+  ~3722  function _ensureCartBaseCache — Perf #1: base estática (parch- │
+         ment+bússola+scorched) num canvas offscreen, blit por frame    │
+  ~3724  function _drawCart — orchestrator (blit base cache + biomes +  │
+         paths + nodes + player-pin + quest-focus halo AO VIVO)         │
+  •      _cartDragDraw (Perf #6 throttle 30fps lite) + _cartDpr/_cart-  │
+         BaseCache vars (Perf #1/#2)                                    │
   ~3783  function _drawSea + _drawCompassRoseSmall + _drawShip +        │
          _drawSeaSerpent + _drawTinyIsland (~3783-3941)                 │
   ~3942  function _drawContinent + _drawCartFrame + _drawCartouche +    │
@@ -10388,6 +10392,12 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('tharos') >= 0)   return '/shared/img/npcs/tharos-mestre-armas.webp';
   if (s.indexOf('ysoria') >= 0)   return '/shared/img/npcs/capita-ysoria.webp';
   if (s.indexOf('caçador') >= 0 || s.indexOf('cacador') >= 0) return '/shared/img/npcs/cacadora-itinerante.webp';
+  // Sessão #72 (2026-06-03) — Sereniel (escrivã) e o Sumo Sacerdote caíam nos
+  // fallbacks genéricos de papel (escriba.webp / padre-aldric.webp). PADRAO_LOCAIS
+  // #2: NPC nomeado com retrato SEMPRE tem WebP dedicado. ANTES dos fallbacks
+  // role-based pra ter prioridade sobre 'escrivã'/'sacerdot'.
+  if (s.indexOf('sereniel') >= 0) return '/shared/img/npcs/sereniel-escriva.webp';
+  if (s.indexOf('sumo sacerdote') >= 0) return '/shared/img/npcs/sumo-sacerdote.webp';
   // Plaza NPCs (Sessao #37 v18 — PADRAO_ALDRIC lightbox parity para discovery quests)
   if (s.indexOf('mendigo') >= 0) return '/shared/img/npcs/plaza/mendigo_praca.webp';
   if (s.indexOf('crian') >= 0)   return '/shared/img/npcs/plaza/crianca_pomar.webp';
@@ -50909,6 +50919,8 @@ var _cartCanvas = null;
 var _cartCtx = null;
 var _cartW = 360;
 var _cartH = 500;
+var _cartDpr = 1;            // DPR efetivo (capado por tier) — usado p/ base cache (#1)
+var _cartBaseCache = null;   // canvas offscreen com a base estática (parchment+compass+scorched)
 var _cartIsDragging = false;
 var _cartDragStartX = 0;
 var _cartDragStartY = 0;
@@ -50953,10 +50965,15 @@ function renderCartographyCanvas(el){
     }
 
   _cartCanvas = document.getElementById('cart-canvas');
-  _cartCtx = _cartCanvas.getContext('2d');
-  // Set canvas resolution (HiDPI-aware)
+  // Perf #3 (cartografia-perf.md): {alpha:false} — base pinta sépia opaca, browser
+  // pula alpha blending do backdrop. Perf #1 invalida o base cache (dims podem mudar).
+  _cartCtx = _cartCanvas.getContext('2d', { alpha: false });
+  _cartBaseCache = null;
+  // Set canvas resolution (HiDPI-aware) — Perf #2: cap DPR. Em telas 3x (Android)
+  // a área de fill seria 9× os pixels CSS (380 grain → ~3400 efetivos). Lite=1, resto=2.
   var rect = _cartCanvas.getBoundingClientRect();
-  var dpr = window.devicePixelRatio || 1;
+  var dpr = Math.min(window.devicePixelRatio || 1, (window._valdoriaPerformanceTier === 'lite') ? 1 : 2);
+  _cartDpr = dpr;
   _cartCanvas.width = rect.width * dpr;
   _cartCanvas.height = rect.height * dpr;
   _cartCtx.scale(dpr, dpr);
@@ -51090,7 +51107,7 @@ function _wireCartEvents(){
       _cartPanX = e.offsetX - _cartDragStartX;
       _cartPanY = e.offsetY - _cartDragStartY;
       _cartClampPan();
-      _drawCart();
+      _cartDragDraw();  // Perf #6: throttle 30fps em perf-lite
     } else {
       _cartHandleHover(e.offsetX, e.offsetY);
     }
@@ -51160,7 +51177,7 @@ function _wireCartEvents(){
         _cartPanX = curX - _cartDragStartX;
         _cartPanY = curY - _cartDragStartY;
         _cartClampPan();
-        _drawCart();
+        _cartDragDraw();  // Perf #6: throttle 30fps em perf-lite
       }
     }
   }, { passive: false });
@@ -51223,6 +51240,20 @@ function _cartClampPan(){
 function _cartUpdateZoomInfo(){
   var el = document.getElementById('cart-zoom-info');
   if (el) el.textContent = Math.round(_cartZoom * 100) + '%';
+}
+
+// Perf #6 (cartografia-perf.md): throttle de redraw durante DRAG/pan. Em perf-lite
+// (Android 2GB), 30fps basta — gate por delta-time evita rajadas de _drawCart em
+// mousemove/touchmove. Outras tiers desenham livre. Zoom/hover/click NÃO passam aqui
+// (têm seus próprios caminhos), só o pan contínuo.
+var _cartLastDragDrawT = 0;
+function _cartDragDraw(){
+  if (window._valdoriaPerformanceTier === 'lite') {
+    var _now = (window.performance && performance.now) ? performance.now() : Date.now();
+    if (_now - _cartLastDragDrawT < 33) return;  // ~30fps
+    _cartLastDragDrawT = _now;
+  }
+  _drawCart();
 }
 
 // === HOVER + CLICK ===
@@ -51485,6 +51516,35 @@ function _closeCartLocationPopup(){
   });
 })();
 
+// === Perf #1 (cartografia-perf.md 2026-06-03): BASE CACHE ESTÁTICA ==========
+// As Stages 1 (pergaminho), 3 (bússola) e 4 (scorched edge) são determinísticas
+// (_cartSeedRand com seed fixa) e desenhadas em SCREEN SPACE → produzem os mesmos
+// ~500 ops/frame jogadas fora a cada hover/drag. Renderizamos UMA vez num canvas
+// offscreen em memória (mesma thread — OffscreenCanvas em worker é irregular no
+// WebView) e fazemos blit barato (drawImage) por frame. Quest-focus halo (pulsante)
+// e player-pin continuam desenhados AO VIVO por cima (dentro do transform da Stage 2).
+// Invalidação: só dimensões/dpr (Stages 1/3/4 NÃO leem known_locations — confirmado).
+function _ensureCartBaseCache(w, h){
+  if (_cartBaseCache && _cartBaseCache._w === w && _cartBaseCache._h === h
+      && _cartBaseCache._dpr === _cartDpr) {
+    return _cartBaseCache;
+  }
+  var cv = document.createElement('canvas');
+  cv.width = Math.max(1, Math.round(w * _cartDpr));
+  cv.height = Math.max(1, Math.round(h * _cartDpr));
+  var bc = cv.getContext('2d', { alpha: false });
+  bc.scale(_cartDpr, _cartDpr);
+  // Stage 1 — pergaminho (pinta sépia opaca cobrindo todo o canvas)
+  if (CartShared && CartShared._drawAgedParchment) CartShared._drawAgedParchment(bc, w, h);
+  // Stage 3 — bússola (screen-space, top-right)
+  if (CartShared && CartShared._drawCartCompass) CartShared._drawCartCompass(bc, w, h);
+  // Stage 4 — scorched edge (vinheta chamuscada por cima da base)
+  if (CartShared && CartShared._drawScorchedEdge) CartShared._drawScorchedEdge(bc, w, h, 0.38);
+  cv._w = w; cv._h = h; cv._dpr = _cartDpr;
+  _cartBaseCache = cv;
+  return cv;
+}
+
 // === DRAWING ===
 function _drawCart(){
   // === Mapa de Valdoria simplificado (Fase 7.1 — 2026-04-30) ================
@@ -51500,15 +51560,14 @@ function _drawCart(){
   if (!ctx) return;
   var w = _cartW, h = _cartH;
   ctx.save();
-  ctx.clearRect(0, 0, w, h);
 
-  // === STAGE 1: PERGAMINHO VELHO MANCHADO (USER REQUEST 2026-05-04) ===
-  // Aplica estilo #4 escolhido pelo user. Manchas ORGÂNICAS (não círculos
-  // toscos) via _drawOrganicBlob/_drawAgedStain — coffee-ring + salpicos
-  // + creases + scorched edges. Pintura no canvas, não mais CSS bg flat.
-  if (CartShared && CartShared._drawAgedParchment) {
-    CartShared._drawAgedParchment(ctx, w, h);
-  }
+  // === STAGES 1+3+4 (PERGAMINHO + BÚSSOLA + SCORCHED) via BASE CACHE ===
+  // Perf #1 (2026-06-03): essas 3 stages são estáticas/screen-space (determinísticas
+  // com seed fixa). Renderizadas 1× num canvas offscreen e blitadas aqui — substitui
+  // ~500 ops/frame por 1 drawImage. Base opaca cobre todo o canvas (não precisa
+  // clearRect antes). Stage 4 (scorched) já vem POR CIMA dentro do cache.
+  var _base = _ensureCartBaseCache(w, h);
+  ctx.drawImage(_base, 0, 0, w, h);
 
   // === STAGE 2: Conteúdo do mapa (PAN + ZOOM) ===
   // 2026-05-04 USER REQUEST: visibility-based rendering. Apenas locais em
@@ -51551,17 +51610,10 @@ function _drawCart(){
   }
   ctx.restore();
 
-  // === STAGE 3: Compass rose top-right (FIXED) ===
-  // Sai do bottom-right pra não conflitar com os botões de zoom (+/-/⌂).
-  _drawCartCompass(ctx, w, h);
-
-  // === STAGE 4: Scorched edges (vinheta chamuscada — POR CIMA do conteúdo) ===
-  // USER REQUEST 2026-05-04 (estilo #4 Pergaminho Velho Manchado): bordas
-  // chamuscadas com chamas irregulares orgânicas. Aplicado por último pra
-  // criar vinheta que escurece somente os cantos sem obscurecer o centro.
-  if (CartShared && CartShared._drawScorchedEdge) {
-    CartShared._drawScorchedEdge(ctx, w, h, 0.38);
-  }
+  // Stages 3 (bússola) + 4 (scorched edge) movidas pro BASE CACHE (Perf #1) —
+  // desenhadas 1× no offscreen e blitadas no topo de _drawCart. A vinheta
+  // chamuscada agora compõe a base (cantos escurecidos preservados); a arte de
+  // bioma fica por cima dela. Quest-focus halo + player-pin seguem ao vivo acima.
 
   ctx.restore();
 }

@@ -165,6 +165,7 @@ body.perf-lite #encounter-overlay.active .enc-card {
   overflow: hidden;
   box-shadow: 0 0 10px rgba(196, 149, 58, 0.45);
   cursor: pointer;
+  position: relative; /* anchor p/ .enc-portrait-fallback::after (PADRAO_LOCAIS #2) */
 }
 .enc-portrait img {
   width: 100%;
@@ -183,6 +184,31 @@ body.perf-lite #encounter-overlay.active .enc-card {
   object-position: center;
   padding: 4px;
   box-sizing: border-box;
+}
+/* PADRAO_LOCAIS #2 (2026-06-03): fallback de retrato quando o WebP falha (404/rede).
+   O onerror em encounter-popup.js esconde o <img> quebrado e adiciona esta classe,
+   revelando um brasão heráldico estilizado — gradiente dourado radial + glifo ◆ em
+   Cinzel — em vez do ícone de imagem quebrada do browser. Mantém a identidade
+   medieval (esfera/ouro/serif) e cabe no mesmo círculo de 44px do retrato. */
+.enc-portrait-fallback {
+  background:
+    radial-gradient(circle at 50% 38%,
+      rgba(196, 149, 58, 0.42) 0%,
+      rgba(120, 88, 30, 0.28) 55%,
+      rgba(40, 28, 12, 0.45) 100%);
+}
+.enc-portrait-fallback::after {
+  content: '\25C6'; /* ◆ gem heráldica (mesmo glifo dos dividers do jogo) */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-size: calc(18px * var(--v-font-scale, 1));
+  color: #d8b878;
+  text-shadow: 0 0 6px var(--v-gold-40, rgba(196, 149, 58, 0.4));
+  pointer-events: none;
 }
 .enc-meta { flex: 1; min-width: 0; }
 .enc-name {

@@ -50,6 +50,13 @@
   var OVERLAY_ID = 'encounter-overlay';
   var _currentRenderState = null;
 
+  /* PADRAO_LOCAIS #2 (2026-06-03): fallback de retrato. Atributo onerror estático
+     (sem conteúdo dinâmico) anexado ao <img> do portrait — se o WebP falhar
+     (404/rede), some o <img> quebrado e marca o .enc-portrait com a classe
+     enc-portrait-fallback, revelando um brasão heráldico via CSS (gradiente
+     dourado + glifo). NUNCA mostra o ícone de imagem quebrada do browser. */
+  var _ENC_IMG_ONERR = "onerror=\"this.style.display='none';this.parentNode.classList.add('enc-portrait-fallback');\"";
+
   /* task #69 (2026-05-20) — MIGRATION HTML <dialog> element.
      Pesquisa em 4 fontes (MDN, caniuse 95.48%, LogRocket, dev.to) confirma
      <dialog> + showModal() é solução definitiva pra z-index conflicts.
@@ -489,7 +496,7 @@
     header.innerHTML =
       '<div class="enc-portrait"' + (npcPortrait ? ' title="Clique pra ampliar"' : '') + '>' +
         (npcPortraitHTML ? npcPortraitHTML
-          : (npcPortrait ? '<img src="' + npcPortrait + '" alt="">' : '')) +
+          : (npcPortrait ? ('<img src="' + npcPortrait + '" alt="" ' + _ENC_IMG_ONERR + '>') : '')) +
       '</div>' +
       '<div class="enc-meta">' +
         '<div class="enc-name">' + npcName + (affinityBadge ? ' ' + affinityBadge : '') + '</div>' +

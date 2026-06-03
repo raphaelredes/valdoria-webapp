@@ -3287,8 +3287,11 @@
       }
     }
     ctx.globalAlpha = 1;
-    // 5) Paper grain (textura de fibras)
-    for (var gi = 0; gi < 380; gi++) {
+    // 5) Paper grain (textura de fibras) — Perf #5 (cartografia-perf.md): conta
+    //    escalada por tier (lite ~152, full 380). Fator estável na sessão → mesma
+    //    seed gera os N primeiros grains determinísticos (pixel-identical por tier).
+    var _grainN = Math.round(380 * (window._valdoriaMinLoadFactor || 1));
+    for (var gi = 0; gi < _grainN; gi++) {
       var gx = rng() * w, gy = rng() * h;
       var ga = 0.04 + rng() * 0.10;
       ctx.fillStyle = 'rgba(60,40,12,' + ga.toFixed(3) + ')';
