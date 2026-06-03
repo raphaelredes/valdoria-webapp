@@ -1526,6 +1526,17 @@ html.sim-prod #frame { margin: 0 auto !important; }
   flex-direction: column;
   justify-content: flex-start;
   padding: 6px 4px;
+  /* PADRAO_LOCAIS: texto do evento de objeto RESPONSIVO (respeita preferência de
+     fonte do jogador + clamp pro viewport) — antes era fixo, não escalava. */
+  font-size: clamp(13px, calc(14px * var(--v-font-scale, 1)), 17px);
+  line-height: 1.55;
+}
+.stub-popup-card .stub-popup-gains {
+  margin-top: 8px;
+  font-family: Cinzel, serif;
+  font-size: clamp(12px, calc(12.5px * var(--v-font-scale, 1)), 15px);
+  color: var(--v-gold, #c4953a);
+  text-align: center;
 }
 /* Telas pequenas: padding mais enxuto, max-height maior pra aproveitar
    altura curta da viewport mobile. */
@@ -33632,6 +33643,29 @@ function _maybeShowAmbientTip() {
 
 // ──────────────────────── Hooks de outcome (auto-bump tracks/flags) ─────────
 // Wrapper sobre OutcomeApplier — bump archetype track + persistir flags.
+// PADRAO_LOCAIS: resumo legível de ganhos/perdas de um outcome.ops[] (pra feedback
+// visível — antes a escolha aplicava o efeito mas "nada acontecia" na tela).
+function _outcomeGainsSummary(ops) {
+  if (!Array.isArray(ops) || !ops.length) return '';
+  var parts = [];
+  ops.forEach(function (op) {
+    if (!op || !op.op) return;
+    var d = op.delta;
+    if (op.op === 'gold' && d) parts.push((d > 0 ? '+' : '') + d + ' Valdoritas');
+    else if (op.op === 'xp' && d) parts.push((d > 0 ? '+' : '') + d + ' XP');
+    else if (op.op === 'hp' && d) parts.push((d > 0 ? '+' : '') + d + ' PV');
+    else if (op.op === 'mp' && d) parts.push((d > 0 ? '+' : '') + d + ' PM');
+    else if (op.op === 'exh' && d) parts.push((d > 0 ? '+' : '') + d + ' Exaustão');
+    else if (op.op === 'item') {
+      var nm = (window.ITEMS_DB && op.id && window.ITEMS_DB[op.id] && window.ITEMS_DB[op.id].name) || op.id || 'item';
+      parts.push('🎁 ' + nm);
+    } else if (op.op === 'condition' && op.id) {
+      parts.push((op.remove ? '− ' : '+ ') + op.id);
+    }
+  });
+  return parts.join(' · ');
+}
+
 function _processChoiceOutcome(choice, outcome, isSuccess) {
   if (!choice || !outcome) return;
   // 1. Auto-bump archetype track baseado em skill da choice
@@ -33648,7 +33682,17 @@ function _processChoiceOutcome(choice, outcome, isSuccess) {
       if (op && op.op === 'flag' && op.id) _setPersistedFlag(op.id, op.scope || 'session');
     });
   }
-  // 3. Quest progress check
+  // 3. PADRAO_LOCAIS — feedback VISÍVEL de ganhos/perdas + atualizar HUD (HP/MP/ouro).
+  //    Antes: a escolha aplicava o efeito mas o jogador não via nada acontecer.
+  try {
+    var summary = _outcomeGainsSummary(outcome.ops);
+    if (summary && typeof vToast === 'function') {
+      var _hasLoss = /-\d/.test(summary);
+      vToast(summary, _hasLoss ? 'warn' : 'info');
+    }
+    if (typeof updateHud === 'function') updateHud();
+  } catch (_) { }
+  // 4. Quest progress check
   try { _checkQuestGoals(); } catch (_) {}
 }
 
