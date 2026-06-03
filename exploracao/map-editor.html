@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<!-- MAPA_IA — Editor de posicionamento dos ícones de local sobre o mapa-bioma OpenAI.
+  PADRAO_LOCAIS / pedido do user (sessão #71e): "crie uma página que eu consiga
+  posicionar no mapa gerado pelo OpenAI os locais (imagens low OpenAI) e salvar, e
+  sejam clicáveis dentro do jogo." Ferramenta DEV standalone (file:// ou deployada).
+  - Fundo: /shared/img/map/world-map.webp (mapa só-bioma, sem texto).
+  - Locais: window.CartShared.CART_BIOMES (key,name,x,y) + /shared/img/map/locations/<key>.webp.
+  - Arrasta p/ mover · roda do mouse (ou slider) p/ escalar · "Salvar" → JSON
+    {key:{x,y,scale}} (normalizado 0–1). O renderer (cartografia-shared.js) consome
+    esse JSON via map-locations-coords.json. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Editor do Mapa — Lendas de Valdoria</title>
+<style>
+  :root { --gold:#c4953a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#15110c; color:#e8dcc8; font-family:'Cinzel',Georgia,serif; }
+  #bar { position:fixed; top:0; left:0; right:0; height:52px; display:flex; align-items:center;
+    gap:10px; padding:0 12px; background:#1f1812; border-bottom:1px solid #4a3828; z-index:50; flex-wrap:wrap; }
+  #bar h1 { font-size:15px; margin:0; color:var(--gold); letter-spacing:1px; }
+  button { background:linear-gradient(180deg,rgba(196,149,58,.30),rgba(196,149,58,.12));
+    border:1px solid var(--gold); color:#e8dcc8; padding:7px 14px; border-radius:6px;
+    cursor:pointer; font-family:inherit; font-size:12px; letter-spacing:.5px; }
+  button:hover { background:rgba(196,149,58,.4); }
+  #stage-wrap { position:fixed; top:52px; left:0; right:0; bottom:0; overflow:auto; padding:16px;
+    display:flex; align-items:flex-start; justify-content:center; }
+  #stage { position:relative; box-shadow:0 0 30px rgba(0,0,0,.6); }
+  #stage img.bg { display:block; width:100%; height:100%; }
+  .loc { position:absolute; transform:translate(-50%,-50%); cursor:grab; user-select:none;
+    text-align:center; }
+  .loc.sel { outline:2px dashed var(--gold); outline-offset:3px; }
+  .loc img { display:block; width:100%; height:auto; pointer-events:none;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+  .loc .lbl { font-size:9px; color:#3a2a18; background:rgba(244,228,200,.7); padding:0 3px;
+    border-radius:3px; margin-top:1px; white-space:nowrap; }
+  .loc.missing img { opacity:.25; }
+  #hint { font-size:11px; color:#a09484; letter-spacing:0; font-family:system-ui,sans-serif; }
+  #scaleBox { display:flex; align-items:center; gap:6px; font-size:11px; }
+  #out { position:fixed; right:12px; bottom:12px; width:340px; max-width:46vw; height:220px;
+    background:#0d0a06; color:#9fe0a0; border:1px solid #4a3828; border-radius:6px; padding:8px;
+    font-family:ui-monospace,monospace; font-size:10px; z-index:60; display:none; }
+</style>
+<script src="./cartografia-shared.js"></script>
+</head>
+<body>
+<div id="bar">
+  <h1>⚜ Editor do Mapa</h1>
+  <button id="btn-save">💾 Salvar posições (JSON)</button>
+  <button id="btn-reset">↺ Resetar p/ padrão</button>
+  <span id="scaleBox">Escala do selecionado: <input id="scale" type="range" min="4" max="22" step="0.5" value="10" disabled> <b id="scalev">—</b></span>
+  <span id="hint">Arraste os locais · roda do mouse sobre um local p/ escalar · clique p/ selecionar</span>
+</div>
+<div id="stage-wrap"><div id="stage"></div></div>
+<textarea id="out" readonly></textarea>
+<script>
+(function(){
+  var MAP = '/shared/img/map/world-map.webp';
+  var ICON_DIR = '/shared/img/map/locations/';
+  var COORDS_OVERRIDE = './map-locations-coords.json'; // posições já salvas (se houver)
+  var stage = document.getElementById('stage');
+  var out = document.getElementById('out');
+  var scaleInput = document.getElementById('scale');
+  var scaleV = document.getElementById('scalev');
+  var BIOMES = (window.CartShared && window.CartShared.CART_BIOMES) || [];
+  var state = {};   // key -> {x,y,scale,name,el}
+  var sel = null;
+
+  // mapa de fundo (quadrado 1024 → mantemos aspecto 1:1, largura responsiva)
+  var bg = new Image();
+  bg.className = 'bg'; bg.src = MAP;
+  bg.onload = function(){ layout(); };
+  stage.appendChild(bg);
+
+  function stageSize(){
+    var w = Math.min(window.innerWidth - 32, 900);
+    stage.style.width = w + 'px';
+    stage.style.height = w + 'px'; // world-map é 1:1
+    return { w: w, h: w };
+  }
+
+  function makeLoc(b, ov){
+    var d = document.createElement('div');
+    d.className = 'loc';
+    d.dataset.key = b.key;
+    var img = new Image();
+    img.src = ICON_DIR + b.key + '.webp';
+    img.onerror = function(){ d.classList.add('missing'); img.src =
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="16" fill="%23c4953a" opacity="0.4"/></svg>'; };
+    var lbl = document.createElement('div'); lbl.className = 'lbl'; lbl.textContent = b.name;
+    d.appendChild(img); d.appendChild(lbl);
+    stage.appendChild(d);
+    state[b.key] = {
+      x: (ov && typeof ov.x === 'number') ? ov.x : b.x,
+      y: (ov && typeof ov.y === 'number') ? ov.y : b.y,
+      scale: (ov && typeof ov.scale === 'number') ? ov.scale : 10, // % da largura
+      name: b.name, el: d
+    };
+    wireDrag(d, b.key);
+    return d;
+  }
+
+  function layout(){
+    var sz = stageSize();
+    Object.keys(state).forEach(function(k){
+      var s = state[k];
+      s.el.style.left = (s.x * sz.w) + 'px';
+      s.el.style.top = (s.y * sz.h) + 'px';
+      s.el.style.width = (s.scale / 100 * sz.w) + 'px';
+    });
+  }
+
+  function wireDrag(d, key){
+    var dragging = false, ox = 0, oy = 0;
+    d.addEventListener('mousedown', function(e){
+      e.preventDefault(); select(key); dragging = true; d.style.cursor = 'grabbing';
+      var r = d.getBoundingClientRect();
+      ox = e.clientX - (r.left + r.width / 2); oy = e.clientY - (r.top + r.height / 2);
+    });
+    window.addEventListener('mousemove', function(e){
+      if(!dragging) return;
+      var sr = stage.getBoundingClientRect();
+      var nx = (e.clientX - ox - sr.left) / sr.width;
+      var ny = (e.clientY - oy - sr.top) / sr.height;
+      state[key].x = Math.max(0, Math.min(1, nx));
+      state[key].y = Math.max(0, Math.min(1, ny));
+      layout();
+    });
+    window.addEventListener('mouseup', function(){ if(dragging){ dragging = false; d.style.cursor = 'grab'; } });
+    d.addEventListener('wheel', function(e){
+      e.preventDefault(); select(key);
+      state[key].scale = Math.max(4, Math.min(22, state[key].scale + (e.deltaY < 0 ? 0.5 : -0.5)));
+      scaleInput.value = state[key].scale; scaleV.textContent = state[key].scale;
+      layout();
+    }, { passive: false });
+  }
+
+  function select(key){
+    if(sel && state[sel]) state[sel].el.classList.remove('sel');
+    sel = key; state[key].el.classList.add('sel');
+    scaleInput.disabled = false; scaleInput.value = state[key].scale; scaleV.textContent = state[key].scale;
+  }
+  scaleInput.addEventListener('input', function(){
+    if(!sel) return; state[sel].scale = parseFloat(scaleInput.value); scaleV.textContent = scaleInput.value; layout();
+  });
+
+  document.getElementById('btn-save').addEventListener('click', function(){
+    var o = {};
+    Object.keys(state).forEach(function(k){
+      o[k] = { x: +state[k].x.toFixed(4), y: +state[k].y.toFixed(4), scale: +state[k].scale.toFixed(1) };
+    });
+    var json = JSON.stringify(o, null, 0);
+    out.style.display = 'block'; out.value = json; out.select();
+    try {
+      var blob = new Blob([JSON.stringify(o, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'map-locations-coords.json'; a.click();
+    } catch(_){}
+    try { navigator.clipboard.writeText(json); } catch(_){}
+  });
+  document.getElementById('btn-reset').addEventListener('click', function(){
+    Object.keys(state).forEach(function(k){
+      var b = BIOMES.find(function(x){ return x.key === k; });
+      if(b){ state[k].x = b.x; state[k].y = b.y; state[k].scale = 10; }
+    });
+    layout();
+  });
+  window.addEventListener('resize', layout);
+
+  // boot: tenta carregar overrides salvos, senão usa coords padrão de CART_BIOMES
+  fetch(COORDS_OVERRIDE).then(function(r){ return r.ok ? r.json() : {}; }).catch(function(){ return {}; })
+    .then(function(ov){
+      ov = ov || {};
+      BIOMES.forEach(function(b){ makeLoc(b, ov[b.key]); });
+      if(bg.complete) layout();
+    });
+})();
+</script>
+</body>
+</html>
