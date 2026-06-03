@@ -13705,6 +13705,30 @@ function _showStatusPopup(memberIdx){
   });
   html += '</div></div>';
 
+  // === EFEITOS ATIVOS — bônus temporários (boato/sonho) até o descanso longo ===
+  // PADRAO_LOCAIS (indicador de bônus ativo, user #71f): o jogador vê na ficha que
+  // o bônus do boato (+15% Ouro etc.) está ATIVO. Lê player.temp_bonuses (server).
+  if (m.isPlayer && typeof _activeEffectsList === 'function') {
+    var _eff = _activeEffectsList(window.CITY_MOCK_PLAYER);
+    if (_eff.length) {
+      html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 10px 4px;">';
+      html += '<div class="ficha-section-title" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
+        + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom:4px; display:flex; align-items:center; gap:5px;">'
+        + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">✦</span> Efeitos Ativos'
+        + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left:4px;"></span>'
+        + '</div>';
+      html += '<div style="display:flex; flex-direction:column; gap:3px;">';
+      _eff.forEach(function(lbl){
+        html += '<div style="display:flex; align-items:center; gap:6px; font-size:calc(11px * var(--v-font-scale,1)); color:var(--v-text,#d4c8b0);'
+          + 'background:linear-gradient(180deg,rgba(196,149,58,0.12),rgba(42,36,32,0.55)); border:1px solid rgba(196,149,58,0.28); border-radius:5px; padding:4px 8px;">'
+          + '<span style="color:var(--v-gold,#c4953a);">✦</span><span>' + lbl + '</span>'
+          + '<span style="flex:1;"></span><span style="font-size:calc(9px * var(--v-font-scale,1)); color:var(--v-text-dim,#a09484); font-style:italic;">até descanso longo</span>'
+          + '</div>';
+      });
+      html += '</div></div>';
+    }
+  }
+
   // 2026-05-22 v6: "Histórico do Aventureiro" REMOVIDO — user feedback:
   // "Remove a parte nova que foi adicionada referente a histórico do aventureiro."
   // Liga/Conquistas/Abates/Sequência continuam acessíveis pelo hub (progress_strip).
@@ -52563,10 +52587,35 @@ function _applyHudFromDialogue(d){
     if (typeof d.mp === 'number') p.mp = d.mp;
     if (typeof d.max_hp === 'number') { p.hpMax = d.max_hp; p.maxHp = d.max_hp; }
     if (typeof d.max_mp === 'number') { p.mpMax = d.max_mp; p.maxMp = d.max_mp; }
+    // PADRAO_LOCAIS (indicador de bônus ativo): reflete os efeitos temporários do
+    // servidor (boato/etc.) na ficha + card. O servidor é a autoridade.
+    if (d.temp_bonuses && typeof d.temp_bonuses === 'object') p.temp_bonuses = d.temp_bonuses;
   }
   if (typeof window.refreshHud === 'function') { try { window.refreshHud(); } catch(_){} }
 }
 window._openCityDialogue = _openCityDialogue;
+
+// PADRAO_LOCAIS — efeitos temporários ATIVOS (até descanso longo) p/ ficha + card.
+// Mapeia chaves de player.temp_bonuses → label legível. Server é a autoridade
+// (boato aplica server-side; _applyHudFromDialogue espelha no player do cliente).
+var _TEMP_EFFECT_LABELS = {
+  rumor_ac: '+1 Classe de Armadura', rumor_atk: '+1 Acerto em Combate',
+  rumor_save: '+1 Testes de Resistência', rumor_heal_bonus: '+3 Cura de Poções',
+  rumor_gold_bonus: '+15% Ouro de Combate'
+};
+function _activeEffectsList(player){
+  var tb = (player && player.temp_bonuses) || {};
+  var out = [];
+  Object.keys(tb).forEach(function(k){
+    if (!tb[k]) return;
+    if (_TEMP_EFFECT_LABELS[k]) out.push(_TEMP_EFFECT_LABELS[k]);
+    else if (k.indexOf('knowledge_') === 0) out.push('+2 dano vs ' + k.slice(10));
+    else if (k.indexOf('rumor_dmg_') === 0) out.push('+2 dano vs ' + k.slice(10));
+    else if (k.indexOf('dream_insight_') === 0) out.push('Bênção do sonho');
+  });
+  return out;
+}
+window._activeEffectsList = _activeEffectsList;
 
 // ============================================================================
 // === MERCADORES — Diálogos PADRAO_ALDRIC (2026-05-18) =======================
