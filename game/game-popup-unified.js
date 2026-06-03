@@ -155,6 +155,12 @@ function _buildPopupBody(data) {
         return el;
     }
 
+    // Guild: recruit list (V1 épico — PADRAO_LOCAIS card grid)
+    if (data._guild_recruit_list && typeof renderGuildRecruitList === 'function') {
+        renderGuildRecruitList(el, data._guild_recruit_list);
+        return el;
+    }
+
     // Guild: adventurer detail (V1 Retrato principal)
     if (data._guild_adventurer && typeof renderGuildAdventurer === 'function') {
         renderGuildAdventurer(el, data._guild_adventurer);

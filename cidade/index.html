@@ -19096,11 +19096,14 @@ var GUILD_QUEST_DETAILS = {
 };
 
 // GUILD_RECRUITS — 4 mercenários com brasões de classe canonical
+// PADRAO_LOCAIS (sessão #71e): cada recruta tem clsKey (heráldico), level, race,
+// roleTag (função tática) e blurb épico (voz da Mestra Tavira ao apresentá-lo).
+// O retrato do card é o brasão heráldico da CLASSE (regra: nunca emoji de pessoa).
 var GUILD_RECRUITS = [
-  { id: 'rc_korin', icon: _heralIco('ic-guerreiro'),   name: 'Korin Punho-Pesado', cls: 'Guerreiro nv 3',   cost: 60, desc: 'Tank confiável, especialista em armas pesadas.' },
-  { id: 'rc_lyra',  icon: _heralIco('ic-patrulheiro'), name: 'Lyra Vento-Rápido',  cls: 'Patrulheira nv 2', cost: 45, desc: 'Atiradora ágil, conhecedora da floresta.' },
-  { id: 'rc_mira',  icon: _heralIco('ic-clerigo'),     name: 'Mira Luz-da-Vida',   cls: 'Clériga nv 3',     cost: 70, desc: 'Curandeira essencial, magia divina.' },
-  { id: 'rc_vex',   icon: _heralIco('ic-ladino'),      name: 'Vex Sombra-Veloz',   cls: 'Ladino nv 4',      cost: 85, desc: 'Especialista em ataques furtivos e armadilhas.' }
+  { id: 'rc_korin', clsKey: 'ic-guerreiro',   icon: _heralIco('ic-guerreiro'),   name: 'Korin Punho-Pesado', cls: 'Guerreiro', level: 3, race: 'Anão',  roleTag: 'Linha de Frente', cost: 60, desc: 'Tank confiável, especialista em armas pesadas.', blurb: 'Aguenta pancada como ninguém. Se precisas de um escudo vivo, é ele.' },
+  { id: 'rc_lyra',  clsKey: 'ic-patrulheiro', icon: _heralIco('ic-patrulheiro'), name: 'Lyra Vento-Rápido',  cls: 'Patrulheira', level: 2, race: 'Elfa',  roleTag: 'Combate à Distância', cost: 45, desc: 'Atiradora ágil, conhecedora da floresta.', blurb: 'Lê a mata como um livro e acerta o que mira. Vale cada moeda.' },
+  { id: 'rc_mira',  clsKey: 'ic-clerigo',     icon: _heralIco('ic-clerigo'),     name: 'Mira Luz-da-Vida',   cls: 'Clériga', level: 3, race: 'Humana', roleTag: 'Suporte e Cura', cost: 70, desc: 'Curandeira essencial, magia divina.', blurb: 'A diferença entre voltar inteiro e voltar num caixão. Não saias sem cura.' },
+  { id: 'rc_vex',   clsKey: 'ic-ladino',      icon: _heralIco('ic-ladino'),      name: 'Vex Sombra-Veloz',   cls: 'Ladino', level: 4, race: 'Meio-Elfo', roleTag: 'Furtividade', cost: 85, desc: 'Especialista em ataques furtivos e armadilhas.', blurb: 'Abre fechaduras, desarma armadilhas e crava a adaga onde dói. Caro, mas eficaz.' }
 ];
 
 // GUILD_RESEARCH — 4 áreas de pesquisa com brasões canonical
@@ -19135,14 +19138,14 @@ function _buildGuildMockData(player){
         cb: 'guild_quests_open',
         badge: ((window.SERVER_QUEST_BOARD_LOADED && Array.isArray(window.SERVER_QUEST_BOARD))
                   ? window.SERVER_QUEST_BOARD.length : GUILD_QUESTS_AVAILABLE.length) + '' },
-      { icon: _heralIco('ic-paladino'), label: 'Tavira — Recompensas',
+      { icon: _heralIco('ic-trofeu'), label: 'Tavira — Recompensas',
         desc: 'Contratos de caça ativos',
         cb: 'guild_rewards_open' },
       { icon: _heralIco('ic-grupo'), label: 'Gerenciar meu grupo',
         desc: partyCount + ' de 3 aventureiros contigo',
         cb: 'guild_party_open',
         badge: partyCount + '/3' },
-      { icon: _heralIco('ic-paladino'), label: 'Treinar com Braun, o Marcado',
+      { icon: _heralIco('ic-guerreiro'), label: 'Treinar com Braun, o Marcado',
         desc: 'Mestre de armas veterano',
         cb: 'guild_npc_guild_braun' },
       { icon: _heralIco('ic-stat-str'), label: 'Sala de Treinamento',
@@ -41067,20 +41070,37 @@ function _guildShowRecruits(p){
   var available = GUILD_RECRUITS.filter(function(r){
     return alreadyHired.indexOf(r.name) === -1;
   });
+  // PADRAO_LOCAIS épico: banner-cenário WebP + brasão da Guilda + voz da Tavira.
+  var coin = '<span class="vi vi-coin sm"></span>';
+  var vagas = Math.max(0, 3 - ((window.GROUP_MEMBERS || []).filter(Boolean).length - 1));
   if (available.length === 0) {
     _squareShowListPopup({
-      stackKey: 'guild_recruits', icon: _heralIco('ic-grupo'), title: 'Recrutar Aliados',
-      flavor: '<i>Todos os recrutas disponíveis já estão no seu grupo. Volte em 12h para nova rotação.</i>',
+      stackKey: 'guild_recruits', icon: _heralIco('ic-grupo', null, '38px'), title: 'Recrutar Aliados',
+      subtitle: 'Salão de Mestra Tavira',
+      bannerImg: '../shared/img/guilda/guilda-banner.webp',
+      flavor: 'Tavira corre o dedo pela lista e fecha o livro. <i>(dá de ombros)</i> "Por ora, todo aventureiro disponível já marcha contigo. Volta em 12 horas — sempre chega gente nova ao Salão."',
       items: [], onPick: function(){}
     });
     return;
   }
   var items = available.map(function(r){
-    return { icon: r.icon, label: r.name + ' (' + r.cls + ')', badge: r.cost + ' V', _r: r };
+    var clsLine = r.cls + ' · Nível ' + r.level + (r.roleTag ? ' · ' + r.roleTag : '');
+    return {
+      icon: r.icon,
+      label: r.name,
+      desc: clsLine,
+      badge: r.cost + ' ' + coin,
+      _r: r
+    };
   });
   _squareShowListPopup({
-    stackKey: 'guild_recruits', icon: _heralIco('ic-grupo'), title: 'Recrutar Aliados',
-    flavor: '<i>Aventureiros disponíveis pra contrato. Pago uma vez, segue você na jornada.</i>',
+    stackKey: 'guild_recruits', icon: _heralIco('ic-grupo', null, '38px'), title: 'Recrutar Aliados',
+    subtitle: 'Salão de Mestra Tavira',
+    bannerImg: '../shared/img/guilda/guilda-banner.webp',
+    flavor: (vagas > 0
+      ? 'Tavira aponta o quadro com os contratos selados. <i>(toca o canto da boca num meio-sorriso)</i> "Estes aqui estão prontos pra marchar. ' + (vagas === 1 ? 'Tens uma vaga' : 'Tens ' + vagas + ' vagas') + ' no grupo. Escolhe bem — pagas uma vez, e seguem contigo até o fim."'
+      : 'Tavira ergue os olhos do livro. <i>(suspira)</i> "Teu grupo já está completo, aventureiro. Dispensa alguém antes de fechar novo contrato."'),
+    sectionLabel: 'Aventureiros à disposição',
     items: items,
     onPick: function(item){
       var r = item._r;
@@ -41090,19 +41110,28 @@ function _guildShowRecruits(p){
         vToast('⚠️ Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn');
         return;
       }
+      // Ficha do recruta em PADRAO_ALDRIC (apresentação da Tavira) antes de confirmar.
+      var sheet = ''
+        + '<b>' + r.cls + ' · Nível ' + r.level + '</b>'
+        + (r.race ? ' &middot; ' + r.race : '')
+        + (r.roleTag ? '<br><span style="color:var(--v-gold,#c4953a);font-size:0.92em;letter-spacing:0.5px;">&#9670; ' + r.roleTag + '</span>' : '')
+        + '<br><br><i>' + r.desc + '</i>'
+        + '<br><br>Tavira inclina a cabeça em direção a ele. <i>"' + r.blurb + '"</i>'
+        + '<br><br>Custo de contrato: <b>' + r.cost + ' ' + coin + '</b>';
       _showConfirmPurchase({
-        icon: r.icon, npc: r.name, title: 'Recrutar ' + r.name,
-        desc: '<b>' + r.cls + '</b><br><i>' + r.desc + '</i><br><br>Custo: ' + r.cost + ' Valdoritas',
+        icon: r.icon, npc: 'Mestra Tavira', title: 'Recrutar ' + r.name,
+        desc: sheet,
         cost: r.cost,
         onConfirm: function(){
           var preGold = p.gold;
           if (!_pay(p, r.cost)) return;
           // 2026-05-12 BUG #19 fix: ADICIONA ally ao GROUP_MEMBERS canonical state
-          // Parse classe + nv de r.cls (formato "Patrulheira nv 2"):
-          var clsMatch = r.cls.match(/^(\w+)/);
-          var lvlMatch = r.cls.match(/nv\s*(\d+)/i);
+          // #71e: classe/nível agora vêm de campos explícitos (r.cls = "Guerreiro",
+          // r.level = 3). Fallback ao parse legado de r.cls ("Patrulheira nv 2").
+          var clsMatch = (r.cls || '').match(/^(\w+)/);
+          var lvlMatch = (r.cls || '').match(/nv\s*(\d+)/i);
           var allyClass = (clsMatch ? clsMatch[1] : 'Aventureiro').toLowerCase();
-          var allyLvl = lvlMatch ? parseInt(lvlMatch[1], 10) : 2;
+          var allyLvl = (typeof r.level === 'number') ? r.level : (lvlMatch ? parseInt(lvlMatch[1], 10) : 2);
           // PHB HP base por classe (d8 médio nv * 4.5 + CON 14):
           var hpByClass = { guerreiro: 12, clerigo: 10, ladino: 9, mago: 8, druida: 10, patrulheiro: 10, patrulheira: 10, paladino: 12, clériga: 10, bárbaro: 14, monge: 9, bardo: 10, feiticeiro: 8, bruxo: 9 };
           var baseHp = hpByClass[allyClass] || 10;
@@ -41233,35 +41262,84 @@ function _guildShowResearch(p){
 }
 
 function _guildShowParty(p){
-  // Replica canonical guild_party_menu — gerenciar grupo (até 3 aliados)
+  // Replica canonical guild_party_menu — gerenciar grupo (até 3 aliados).
+  // #71e: PADRAO_LOCAIS — lista de cards com brasão heráldico da classe de cada
+  // aliado (nunca emoji de pessoa) + banner-cenário + voz da Tavira.
   var aliveAllies = (window.GROUP_MEMBERS || []).slice(1).filter(function(m){ return m && !m.dead; });
-  var html = '<i>Seu grupo atual de aventureiros (máx. 3).</i><br><br>';
-  if (aliveAllies.length === 0) {
-    html += '<b>Grupo vazio.</b> Recrute aliados na Guilda ou Taverna.';
-  } else {
-    aliveAllies.forEach(function(m){
-      html += '<b>' + (m.name || '?') + '</b> — ' + (m.cls || 'classe?') +
-              ' · HP ' + (m.hp || 0) + '/' + (m.hpMax || 0) + ' · Lv ' + (m.level || 1) + '<br>';
-    });
+  // Map classe (PT-BR, com/sem acento) -> brasão heráldico ic-*.
+  function _allyClsIco(cls){
+    var k = (cls || '').toLowerCase();
+    var map = {
+      guerreiro:'ic-guerreiro', clerigo:'ic-clerigo', 'clériga':'ic-clerigo', clériga:'ic-clerigo',
+      ladino:'ic-ladino', mago:'ic-mago', druida:'ic-druida',
+      patrulheiro:'ic-patrulheiro', patrulheira:'ic-patrulheiro', paladino:'ic-paladino',
+      'bárbaro':'ic-barbaro', barbaro:'ic-barbaro', monge:'ic-monge', bardo:'ic-bardo',
+      feiticeiro:'ic-feiticeiro', feiticeira:'ic-feiticeiro', bruxo:'ic-bruxo'
+    };
+    return _heralIco(map[k] || 'ic-grupo');
   }
-  _showInfoPopup({
-    icon: _heralIco('ic-grupo'), npc: 'Tavira', title: 'Gerenciar Grupo (' + aliveAllies.length + '/3)',
-    desc: html,
-    onConfirm: function(){ /* informativo — gestão real fica pra Fase 5 */ }
+  if (aliveAllies.length === 0) {
+    _squareShowListPopup({
+      stackKey: 'guild_party', icon: _heralIco('ic-grupo', null, '38px'), title: 'Meu Grupo',
+      subtitle: 'Salão de Mestra Tavira',
+      bannerImg: '../shared/img/guilda/guilda-banner.webp',
+      flavor: 'Tavira folheia o registro e te encara. <i>(bate a pena no balcão)</i> "Marchas sozinho, aventureiro. Recruta aliados aqui ou na Taverna antes que a estrada te engula."',
+      items: [], onPick: function(){}
+    });
+    return;
+  }
+  var items = aliveAllies.map(function(m){
+    var lvl = m.level || m.lvl || 1;
+    var clsName = (m.cls || 'Aventureiro');
+    clsName = clsName.charAt(0).toUpperCase() + clsName.slice(1);
+    return {
+      icon: _allyClsIco(m.cls),
+      label: m.name || '?',
+      desc: clsName + ' · Nível ' + lvl + ' · HP ' + (m.hp || 0) + '/' + (m.hpMax || 0),
+      _m: m
+    };
+  });
+  _squareShowListPopup({
+    stackKey: 'guild_party', icon: _heralIco('ic-grupo', null, '38px'),
+    title: 'Meu Grupo (' + aliveAllies.length + '/3)',
+    subtitle: 'Salão de Mestra Tavira',
+    bannerImg: '../shared/img/guilda/guilda-banner.webp',
+    flavor: 'Tavira aponta os nomes no registro. <i>(meio-sorriso)</i> "Eis os que marcham contigo. Honram o nome da Guilda — mantém-nos vivos."',
+    sectionLabel: 'Aventureiros no grupo',
+    items: items,
+    onPick: function(item){
+      var m = item._m;
+      var lvl = m.level || m.lvl || 1;
+      var clsName = (m.cls || 'Aventureiro');
+      clsName = clsName.charAt(0).toUpperCase() + clsName.slice(1);
+      _showInfoPopup({
+        icon: _allyClsIco(m.cls), npc: 'Mestra Tavira', title: m.name || 'Aliado',
+        desc: '<b>' + clsName + ' · Nível ' + lvl + '</b>'
+          + '<br><br>HP <b>' + (m.hp || 0) + '/' + (m.hpMax || 0) + '</b>'
+          + (m.mpMax ? ' &middot; MP <b>' + (m.mp || 0) + '/' + (m.mpMax || 0) + '</b>' : '')
+          + '<br><br><i>"Conta com ele em campo. Gestão completa do grupo chega em breve."</i>',
+        onConfirm: function(){ /* informativo — gestão real fica pra Fase 5 */ }
+      });
+    }
   });
 }
 
 function _guildShowTraining(p){
+  // #71e: PADRAO_ALDRIC — o Veterano Braun (quartelmestre da Guilda) conduz o treino.
+  // Ícone de combate (ic-guerreiro), não mochila genérica.
   _showConfirmPurchase({
-    icon: _heralIco('ic-mochila'), npc: 'Mestre de Armas', title: 'Treinamento',
-    desc: 'Sessão de treinamento — +1 ATK por uma semana.<br>Custo: 25 Valdoritas',
+    icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Treinamento de Armas',
+    desc: 'Braun rola os ombros e ergue uma espada de treino. <i>"Postura errada mata mais que inimigo. Vem — uma semana de suor vale o preço."</i>'
+      + '<br><br>Efeito: <b>+1 ATK por 7 dias</b>'
+      + '<br>Custo: <b>25 <span class="vi vi-coin sm"></span></b>',
     cost: 25,
     onConfirm: function(){
       var preGold = p.gold;
       if (!_pay(p, 25)) return;
       _showServiceResultPopup({
-        icon: _heralIco('ic-bolsa'), npc: 'Mestre de Armas',
-        narrative: '<i>Treinamento intenso. Suor, repetição, dor.</i><br><br>+1 ATK por 7 dias.',
+        icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun',
+        narrative: 'Braun não te poupa. <i>(corrige tua guarda com um tapa no ombro)</i> "De novo. E de novo." Ao fim do dia, os músculos ardem — mas a lâmina obedece.'
+          + '<br><br><b>+1 ATK por 7 dias.</b>',
         deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
         onContinue: function(){ navigateBack(); }
       });
@@ -45385,13 +45463,12 @@ var SUBSCREEN_DATA = {
   },
   'guild_recruit': {
     header: '👥 Recrutar Aliados',
-    flavor: 'Lista atual (rotação 12h). Aliados acompanham em aventuras. Máx 3 no grupo.',
+    flavor: 'Mestra Tavira aponta o quadro de contratos. Aventureiros prontos pra marchar contigo (máx 3 no grupo · rotação 12h).',
     buttons: [
-      [_heralIco('ic-mochila'), 'Korin — Guerreiro nv 3', '60 <span class="vi vi-coin sm"></span> recrut.', 'recruit_korin'],
-      [_heralIco('ic-mochila'), 'Lyra — Patrulheira nv 2', '45 <span class="vi vi-coin sm"></span> recrut.', 'recruit_lyra'],
-      [_heralIco('ic-mochila'), 'Mira — Clériga nv 3', '70 <span class="vi vi-coin sm"></span> recrut.', 'recruit_mira'],
-      [_heralIco('ic-mochila'), 'Vex — Ladino nv 4', '85 <span class="vi vi-coin sm"></span> recrut.', 'recruit_vex'],
-      [_heralIco('ic-mochila'), 'Sylwen — Feiticeira nv 3', '75 <span class="vi vi-coin sm"></span> recrut.', 'recruit_sylwen']
+      [_heralIco('ic-guerreiro'),   'Korin — Guerreiro Nv 3',  '60 <span class="vi vi-coin sm"></span> recrut.', 'recruit_korin'],
+      [_heralIco('ic-patrulheiro'), 'Lyra — Patrulheira Nv 2', '45 <span class="vi vi-coin sm"></span> recrut.', 'recruit_lyra'],
+      [_heralIco('ic-clerigo'),     'Mira — Clériga Nv 3',     '70 <span class="vi vi-coin sm"></span> recrut.', 'recruit_mira'],
+      [_heralIco('ic-ladino'),      'Vex — Ladino Nv 4',       '85 <span class="vi vi-coin sm"></span> recrut.', 'recruit_vex']
     ]
   },
   'guild_bounties': {

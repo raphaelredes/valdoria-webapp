@@ -251,6 +251,10 @@ body.perf-lite #encounter-overlay.active .enc-card {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* PADRAO_LOCAIS (user #71f): diálogos/narrativas CENTRALIZADOS verticalmente —
+     conteúdo curto fica no meio (antes colava no topo com muito espaço sobrando).
+     `safe center` não corta: se o texto for longo, alinha no topo (scrollável). */
+  justify-content: safe center;
   overflow-y: auto;
   /* Indicação visual de scroll quando texto excede body */
   scrollbar-width: thin;

@@ -7,6 +7,26 @@
  *
  * Uses the Valdoria coin icon (.vi.vi-coin) for gold display —
  * NEVER the money-bag emoji.
+ *
+ * #71e (2026-06-03) — PADRAO_LOCAIS sweep: avatares agora usam o BRASÃO
+ * HERÁLDICO da classe (nunca emoji de pessoa) via _gldClassCrest; novo
+ * renderGuildRecruitList (grid épico de recrutas). Roda no contexto de
+ * cidade/index.html (símbolos ic-* + padrao-taverna.css presentes lá).
+ *
+ * MAPA_IA — navegação rápida (atualizar a CADA mudança):
+ *   ~40   GUILD_SVC_META            cb -> PNG icon canonical
+ *   ~46   _gldEl / _gldSpeech       helpers DOM
+ *   ~86   TAVIRA_DIALOGUE           greeting principal (NPC row click)
+ *   ~107  renderGuildHub            hub PADRAO_TAVERNA (cenário + serviços)
+ *   ~276  _gldClassSlug             classe PT-BR -> slug avatar gradiente
+ *   ~290  _gldClassIcoId            classe -> id heráldico ic-*
+ *   ~310  _GLD_CLASS_COLOR          ic-* -> cor heráldica
+ *   ~318  _gldClassCrest            HTML do brasão da classe (fallback emoji)
+ *   ~330  renderGuildAdventurer     ficha do recruta (crest + stats + lore)
+ *   ~430  renderGuildHireConfirm    confirmar contratação (saldo before/after)
+ *   ~480  renderGuildHireSuccess    boas-vindas do aliado (crest + selo ◆)
+ *   ~575  renderGuildRecruitList    grid épico de recrutas (PADRAO_LOCAIS)
+ *   ~700  window exports
  */
 'use strict';
 
@@ -285,16 +305,61 @@ function _gldClassSlug(cls) {
   return map[cls] || 'generic';
 }
 
+/* #71e PADRAO_LOCAIS: brasão heráldico da CLASSE (regra: nunca emoji de pessoa).
+   Aceita nome PT-BR (com/sem acento) ou já-key. Retorna SVG <use href="#ic-*">
+   reaproveitando os <symbol id="ic-*"> injetados em cidade/index.html + combate.html.
+   Fallback gracioso: data.class_icon do backend, depois '⚔'. */
+function _gldClassIcoId(cls) {
+  if (!cls) return null;
+  var s = String(cls).toLowerCase().trim();
+  var map = {
+    'guerreiro': 'ic-guerreiro', 'fighter': 'ic-guerreiro', 'class_warrior': 'ic-guerreiro',
+    'ladino': 'ic-ladino', 'ladrão': 'ic-ladino', 'ladrao': 'ic-ladino', 'rogue': 'ic-ladino', 'class_rogue': 'ic-ladino',
+    'mago': 'ic-mago', 'wizard': 'ic-mago', 'class_mage': 'ic-mago',
+    'clérigo': 'ic-clerigo', 'clerigo': 'ic-clerigo', 'clériga': 'ic-clerigo', 'cleric': 'ic-clerigo', 'class_cleric': 'ic-clerigo',
+    'bárbaro': 'ic-barbaro', 'barbaro': 'ic-barbaro', 'barbarian': 'ic-barbaro',
+    'patrulheiro': 'ic-patrulheiro', 'patrulheira': 'ic-patrulheiro', 'ranger': 'ic-patrulheiro', 'class_ranger': 'ic-patrulheiro',
+    'feiticeiro': 'ic-feiticeiro', 'feiticeira': 'ic-feiticeiro', 'sorcerer': 'ic-feiticeiro', 'class_sorcerer': 'ic-feiticeiro',
+    'bruxo': 'ic-bruxo', 'warlock': 'ic-bruxo',
+    'paladino': 'ic-paladino', 'paladina': 'ic-paladino', 'paladin': 'ic-paladino',
+    'monge': 'ic-monge', 'monk': 'ic-monge',
+    'bardo': 'ic-bardo', 'bard': 'ic-bardo',
+    'druida': 'ic-druida', 'druid': 'ic-druida'
+  };
+  return map[s] || null;
+}
+
+/* Cores heráldicas por classe (espelha HERALDIC_COLORS de cidade/index.html). */
+var _GLD_CLASS_COLOR = {
+  'ic-barbaro': '#a02020', 'ic-bardo': '#9050a0', 'ic-bruxo': '#5a2a78',
+  'ic-clerigo': '#e8d878', 'ic-druida': '#3a8a3a', 'ic-feiticeiro': '#c43020',
+  'ic-guerreiro': '#a0a0a8', 'ic-ladino': '#5a5a60', 'ic-mago': '#4878c8',
+  'ic-monge': '#c08040', 'ic-paladino': '#e0d090', 'ic-patrulheiro': '#5a8a5a'
+};
+
+/* HTML do brasão heráldico da classe; size em px. Fallback p/ fallbackIcon. */
+function _gldClassCrest(cls, size, fallbackIcon) {
+  var id = _gldClassIcoId(cls);
+  if (id) {
+    var color = _GLD_CLASS_COLOR[id] || 'var(--v-gold,#c4953a)';
+    var sz = (size || 34);
+    return '<svg viewBox="0 0 120 120" style="width:' + sz + 'px;height:' + sz + 'px;color:' + color + ';display:block;" aria-hidden="true"><use href="#' + id + '"/></svg>';
+  }
+  return fallbackIcon || '⚔';
+}
+
 function renderGuildAdventurer(container, data) {
   if (!container || !data) return;
   while (container.firstChild) container.removeChild(container.firstChild);
 
   var root = _gldEl('div', 'gld-adv-v1');
 
-  /* Cena principal: avatar (left) + text block (right) — horizontal compact */
+  /* Cena principal: brasão heráldico da classe (left) + bloco de texto (right).
+     #71e: avatar = brasão heráldico (SVG hardcoded, sem input do jogador) —
+     regra Heraldic Icons Only (nunca emoji de pessoa). Fallback gracioso. */
   var cenario = _gldEl('div', 'gld-adv-cenario');
-  var av = _gldEl('div', 'gld-adv-avatar ' + _gldClassSlug(data.class_name));
-  av.innerHTML = data.class_icon || '⚔';
+  var av = _gldEl('div', 'gld-adv-avatar gld-adv-crest ' + _gldClassSlug(data.class_name),
+                  _gldClassCrest(data.class_name, 40, data.class_icon || '⚔'));
   cenario.appendChild(av);
   var cenarioTexto = _gldEl('div', 'gld-adv-cenario-texto');
   cenarioTexto.appendChild(_gldEl('div', 'gld-adv-name', data.name || ''));
@@ -302,6 +367,7 @@ function renderGuildAdventurer(container, data) {
   var chips = _gldEl('div', 'gld-adv-chips');
   chips.appendChild(_gldEl('span', 'gld-adv-chip', 'Nv. ' + (data.level || 1)));
   if (data.race) chips.appendChild(_gldEl('span', 'gld-adv-chip', data.race));
+  if (data.role_tag) chips.appendChild(_gldEl('span', 'gld-adv-chip', data.role_tag));
   cenarioTexto.appendChild(chips);
   cenario.appendChild(cenarioTexto);
   root.appendChild(cenario);
@@ -412,8 +478,9 @@ function renderGuildHireConfirm(container, data) {
   var root = _gldEl('div', 'gld-confirm-v2');
   var card = _gldEl('div', 'gld-confirm-card');
 
-  var iconEl = _gldEl('div', 'gld-confirm-icon');
-  iconEl.innerHTML = data.class_icon || '⚔';
+  /* #71e: brasão heráldico da classe (SVG hardcoded) — nunca emoji. */
+  var iconEl = _gldEl('div', 'gld-confirm-icon gld-adv-crest',
+                      _gldClassCrest(data.class_name, 34, data.class_icon || '⚔'));
   card.appendChild(iconEl);
 
   card.appendChild(_gldEl('div', 'gld-confirm-q', 'Contratar?'));
@@ -480,14 +547,16 @@ function renderGuildHireSuccess(container, data) {
 
   var root = _gldEl('div', 'gld-success-v2');
 
-  /* Scene: confetti + NPC + wave (horizontal compact layout) */
+  /* Scene: confetti + brasão heráldico da classe (horizontal compact layout).
+     #71e: avatar = brasão heráldico (nunca emoji de pessoa). Removido o aceno 👋
+     (emote de pessoa — regra No NPC Emotes); selo dourado ◆ no lugar. */
   var scene = _gldEl('div', 'gld-success-scene');
   scene.appendChild(_gldEl('div', 'gld-success-confetti'));
   var avWrap = _gldEl('div', 'gld-success-av-wrap');
-  var av = _gldEl('div', 'gld-success-avatar ' + _gldClassSlug(data.class_name));
-  av.innerHTML = data.class_icon || '⚔';
+  var av = _gldEl('div', 'gld-success-avatar gld-adv-crest ' + _gldClassSlug(data.class_name),
+                  _gldClassCrest(data.class_name, 34, data.class_icon || '⚔'));
   avWrap.appendChild(av);
-  avWrap.appendChild(_gldEl('span', 'gld-success-wave', '👋'));
+  avWrap.appendChild(_gldEl('span', 'gld-success-seal', '◆'));
   scene.appendChild(avWrap);
   var headerText = _gldEl('div', 'gld-success-header-text');
   headerText.appendChild(_gldEl('div', 'gld-success-title', '✓ Novo Aliado'));
@@ -571,10 +640,131 @@ function renderGuildHireSuccess(container, data) {
   container.appendChild(root);
 }
 
+/* ============================================================
+ * RECRUIT LIST — V1 épico (2026-06-03, #71e)
+ * Lista de recrutas em PADRAO_LOCAIS: cenário (banner+crest) + intro da
+ * Tavira (PADRAO_ALDRIC) + grid de cards .svc, cada um com o BRASÃO HERÁLDICO
+ * da classe do recruta (nunca emoji), nome, "Classe · Nv N · função" e badge
+ * de custo (Valdoritas via .vi.vi-coin). Clicar abre o detalhe (cb do backend
+ * via doAction) — server-driven, zero dado fabricado no cliente.
+ *
+ * data = {
+ *   banner?, crest?, title?, subtitle?, intro? (fala da Tavira),
+ *   section_label?, party_count?, party_max?,
+ *   recruits: [{ name, class_name, level, race?, role_tag?, cost,
+ *                class_icon?, cb (abre detalhe), disabled?, badge? }],
+ *   empty_text?
+ * }
+ * ============================================================ */
+function renderGuildRecruitList(container, data) {
+  if (!container || !data) return;
+  while (container.firstChild) container.removeChild(container.firstChild);
+
+  var root = _gldEl('div', 'gld-recruit-list');
+
+  /* === Cenário (banner + crest + título) — reusa .cenario do PADRAO_TAVERNA === */
+  var cenarioEl = _gldEl('div', 'cenario');
+  var bg = _gldEl('img', 'cenario-bg');
+  bg.src = data.banner || '../shared/img/guilda/guilda-banner.webp';
+  bg.alt = '';
+  bg.loading = 'lazy';
+  bg.onerror = function(){ this.style.display = 'none'; };
+  cenarioEl.appendChild(bg);
+  cenarioEl.appendChild(_gldEl('div', 'candle-glow l'));
+  cenarioEl.appendChild(_gldEl('div', 'candle-glow r'));
+  var crest = _gldEl('img', 'cenario-brasao');
+  crest.src = data.crest || '../shared/img/guilda/guilda-crest.webp';
+  crest.alt = 'Brasão da Guilda';
+  crest.loading = 'lazy';
+  crest.onerror = function(){ this.style.display = 'none'; };
+  cenarioEl.appendChild(crest);
+  var titulo = _gldEl('div', 'cenario-titulo');
+  titulo.appendChild(_gldEl('div', 'name', data.title || 'Recrutar Aliados'));
+  titulo.appendChild(_gldEl('div', 'sub', data.subtitle || 'Salão de Mestra Tavira'));
+  cenarioEl.appendChild(titulo);
+  root.appendChild(cenarioEl);
+
+  /* === Body === */
+  var body = _gldEl('div', 'gld-body');
+  body.style.cssText = 'padding:8px 12px 0;display:flex;flex-direction:column;gap:7px;';
+
+  /* Intro da Tavira (PADRAO_ALDRIC) — pergaminho com aspas. */
+  if (data.intro) {
+    var intro = _gldEl('div', 'gld-recruit-intro', data.intro);
+    body.appendChild(intro);
+  }
+
+  /* Section label ornamentada. */
+  var sectionLbl = _gldEl('div', 'pt-section-label', data.section_label || '⚜ Aventureiros à disposição ⚜');
+  body.appendChild(sectionLbl);
+
+  var recruits = data.recruits || [];
+  if (!recruits.length) {
+    var empty = _gldEl('div', 'gld-recruit-empty', data.empty_text
+      || 'Nenhum aventureiro disponível por ora. A lista se renova em algumas horas.');
+    body.appendChild(empty);
+  } else {
+    var grid = _gldEl('div', 'services');
+    recruits.forEach(function(r) {
+      var card = _gldEl('div', 'svc gld-recruit-card');
+      if (r.disabled) card.classList.add('disabled');
+      card.setAttribute('data-cb', r.cb || '');
+
+      /* Brasão heráldico da classe (nunca emoji). Fallback gracioso. */
+      var ico = _gldEl('div', 'svc-ico gld-recruit-ico',
+                       _gldClassCrest(r.class_name, 30, r.class_icon || '⚔'));
+      card.appendChild(ico);
+
+      var txt = _gldEl('div', 'svc-text');
+      txt.appendChild(_gldEl('div', 'svc-name', r.name || ''));
+      var metaParts = [];
+      if (r.class_name) metaParts.push(r.class_name);
+      if (r.level != null) metaParts.push('Nv ' + r.level);
+      if (r.role_tag) metaParts.push(r.role_tag);
+      txt.appendChild(_gldEl('div', 'svc-meta', metaParts.join(' · ')));
+      card.appendChild(txt);
+
+      /* Badge de custo com moeda canonical (.vi.vi-coin). */
+      var badgeEl = _gldEl('div', 'svc-badge gld-recruit-cost');
+      if (r.badge) {
+        badgeEl.textContent = r.badge;
+      } else {
+        badgeEl.appendChild(_gldEl('span', 'vi vi-coin sm'));
+        badgeEl.appendChild(document.createTextNode(' ' + (r.cost != null ? r.cost : '?')));
+      }
+      card.appendChild(badgeEl);
+
+      if (r.cb && !r.disabled) {
+        card.addEventListener('click', function() {
+          if (typeof doAction === 'function') doAction(r.cb);
+          else if (typeof vCity !== 'undefined' && typeof vCity.act === 'function') vCity.act(r.cb);
+        });
+      }
+      grid.appendChild(card);
+    });
+    body.appendChild(grid);
+  }
+
+  /* Rodapé: vagas no grupo. */
+  if (data.party_max != null) {
+    var foot = _gldEl('div', 'gld-recruit-foot');
+    var pc = data.party_count || 0, pm = data.party_max;
+    var vagas = Math.max(0, pm - pc);
+    foot.textContent = vagas > 0
+      ? ('⚔ ' + vagas + ' vaga' + (vagas !== 1 ? 's' : '') + ' no grupo (' + pc + '/' + pm + ')')
+      : ('Grupo completo — ' + pc + '/' + pm);
+    body.appendChild(foot);
+  }
+
+  root.appendChild(body);
+  container.appendChild(root);
+}
+
 /* task #75: expose public API. Privadas: TAVIRA_DIALOGUE, _gldEl, _gldSpeech, _gldClassSlug. */
 window.renderGuildHub = renderGuildHub;
 window.renderGuildAdventurer = renderGuildAdventurer;
 window.renderGuildHireConfirm = renderGuildHireConfirm;
 window.renderGuildHireSuccess = renderGuildHireSuccess;
+window.renderGuildRecruitList = renderGuildRecruitList;
 
 })(); /* end IIFE task #75 */
