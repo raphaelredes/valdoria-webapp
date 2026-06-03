@@ -368,17 +368,72 @@
 
   // User sessão #69: mapa-múndi medieval desenhado à mão (WebP gerado via OpenAI
   // low) como BASE da cartografia — o mapa procedural anterior era "tosco". Preload
-  // no init; desenhado em _drawParchmentBase se pronto. Os marcadores e caminhos dos
-  // biomas continuam desenhados POR CIMA (posições corretas mantidas).
+  // no init; desenhado em _drawWorldMapBg quando pronto. Os marcadores/caminhos dos
+  // biomas + ícones OpenAI dos locais continuam desenhados POR CIMA.
+  //
+  // 2026-06-03 (sessão #72 — fix mapa stale): o mapa do JOGO (cidade "Partir para
+  // aventura") agora renderiza o MESMO mapa do editor (/exploracao/map-editor):
+  // world-map.webp como fundo do canvas + ícones de local (OpenAI) nas coords
+  // salvas (/api/exploracao/map-coords). _onWorldMapLoad permite o consumer
+  // invalidar a base-cache + redraw quando a imagem chega assíncrona.
   var _cartWorldMap = null;
+  var _cartWorldMapCbs = [];
   (function(){
     try {
       var _im = new Image();
-      _im.onload = function(){ _cartWorldMap = _im; };
+      _im.onload = function(){
+        _cartWorldMap = _im;
+        var cbs = _cartWorldMapCbs; _cartWorldMapCbs = [];
+        cbs.forEach(function(cb){ try { cb(); } catch(_){} });
+      };
       _im.onerror = function(){ _cartWorldMap = null; };
       _im.src = '/shared/img/map/world-map.webp';
     } catch(_e){ _cartWorldMap = null; }
   })();
+
+  // === worldMapReady / _onWorldMapLoad ===
+  // worldMapReady() → true quando a imagem do mapa carregou (segura pra blit).
+  // _onWorldMapLoad(cb) → chama cb agora se já pronto, senão enfileira pra quando
+  // carregar (consumer usa pra invalidar cache + redraw). Idempotente.
+  function worldMapReady(){
+    return !!(_cartWorldMap && _cartWorldMap.complete && _cartWorldMap.naturalWidth);
+  }
+  function _onWorldMapLoad(cb){
+    if (typeof cb !== 'function') return;
+    if (worldMapReady()) { try { cb(); } catch(_){} return; }
+    _cartWorldMapCbs.push(cb);
+  }
+
+  // === _cartWorldMapRect ===
+  // Retângulo (em px de canvas) onde o world-map é renderizado com object-fit:cover.
+  // A imagem é QUADRADA (1024×1024) e o editor a desenha num stage QUADRADO, então
+  // todo coord normalizado (0..1) vive sobre um QUADRADO de lado S = max(w,h)
+  // centrado no canvas. Mapear coords por este rect garante alinhamento PIXEL-PERFECT
+  // com o editor (mesma transformação cover). Escala UNIFORME → sem distorção.
+  function _cartWorldMapRect(w, h){
+    var S = Math.max(w, h);
+    return { x: (w - S) / 2, y: (h - S) / 2, s: S };
+  }
+
+  // === _drawWorldMapBg ===
+  // Desenha o world-map.webp como FUNDO do canvas (cover) + véu sépia leve pra
+  // integrar com a UI dourada medieval. Se a imagem ainda não carregou, pinta um
+  // fundo escuro neutro (NÃO o pergaminho procedural antigo — esse foi removido do
+  // path da cartografia do jogo; ver tombstone em cidade/index.html). Quando a
+  // imagem chegar, o consumer redesenha (via _onWorldMapLoad).
+  function _drawWorldMapBg(ctx, w, h){
+    if (worldMapReady()) {
+      var r = _cartWorldMapRect(w, h);
+      ctx.drawImage(_cartWorldMap, r.x, r.y, r.s, r.s);
+      ctx.fillStyle = 'rgba(42,30,18,0.12)';   // véu sépia leve (medieval)
+      ctx.fillRect(0, 0, w, h);
+      return true;
+    }
+    // Fallback (imagem ainda carregando): fundo escuro neutro — sem desenho tosco.
+    ctx.fillStyle = '#2a2018';
+    ctx.fillRect(0, 0, w, h);
+    return false;
+  }
 
   // === _drawParchmentBase ===
   function _drawParchmentBase(ctx, w, h){
@@ -3343,7 +3398,11 @@
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,
-    _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA
+    _drawWorldMapBg: _drawWorldMapBg,              // 2026-06-03: world-map.webp como fundo (cover)
+    _cartWorldMapRect: _cartWorldMapRect,          // 2026-06-03: rect cover → mapeia coords do editor
+    worldMapReady: worldMapReady,                  // 2026-06-03: imagem do mapa carregou?
+    _onWorldMapLoad: _onWorldMapLoad,              // 2026-06-03: invalida cache + redraw quando carregar
+    _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA (legado — só fallback explore)
     _drawOrganicBlob: _drawOrganicBlob,            // helper exposto
     _drawAgedStain: _drawAgedStain,                // helper exposto
     _drawCrease: _drawCrease,                      // helper exposto

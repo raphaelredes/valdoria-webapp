@@ -425,10 +425,12 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
          _cartFindNodeAt, _cartShowTooltip, _cartHideTooltip,           │
          _cartGetPlayerBiome (~3554-3660)                               │
   ~3663  function _openCartLocationPopup / _closeCartLocationPopup      │
-  ~3722  function _ensureCartBaseCache — Perf #1: base estática (parch- │
-         ment+bússola+scorched) num canvas offscreen, blit por frame    │
-  ~3724  function _drawCart — orchestrator (blit base cache + biomes +  │
-         paths + nodes + player-pin + quest-focus halo AO VIVO)         │
+  ~3722  function _ensureCartBaseCache — Perf #1: base estática        │
+         (world-map.webp cover + bússola) offscreen, blit por frame     │
+  •      _cartEnsureLocArt/_cartDrawLocArt — ícones OpenAI dos locais   │
+         (coords do editor /api/exploracao/map-coords); fallback proc.  │
+  ~3724  function _drawCart — orchestrator (blit base + ÍCONES OpenAI + │
+         paths + nodes + player-pin + quest-halo no QUADRADO cover S)   │
   •      _cartDragDraw (Perf #6 throttle 30fps lite) + _cartDpr/_cart-  │
          BaseCache vars (Perf #1/#2)                                    │
   ~3783  function _drawSea + _drawCompassRoseSmall + _drawShip +        │
@@ -8339,6 +8341,9 @@ body.perf-lite .vc-action-btn { transition: none; }
   var _hatchArea = CartShared._hatchArea;
   var _wavyLine = CartShared._wavyLine;
   var _drawParchmentBase = CartShared._drawParchmentBase;
+  /* 2026-06-03 (sessão #72): world-map.webp + ícones OpenAI = mapa do editor */
+  var _drawWorldMapBg = CartShared._drawWorldMapBg;
+  var _cartWorldMapRect = CartShared._cartWorldMapRect;
   var _drawBiomeArt = CartShared._drawBiomeArt;
   var _drawPlayerPin = CartShared._drawPlayerPin;
   var _drawCartCompass = CartShared._drawCartCompass;
@@ -51405,6 +51410,11 @@ function _cartFindNodeAt(mx, my){
   // Convert screen coords to world coords (revert pan/zoom)
   var wx = (mx - _cartPanX) / _cartZoom;
   var wy = (my - _cartPanY) / _cartZoom;
+  // 2026-06-03 (sessão #72): nodes vivem no QUADRADO cover (S × offset) — mesma
+  // transformação aplicada em _drawCart Stage 2. Hit-test DEVE usar o mesmo
+  // mapeamento, senão o tap não bate com o ícone/node desenhado.
+  var _mr = _cartWorldMapRect(_cartW, _cartH);
+  var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
   // FIX 2026-05-04 v2: detectar touch device → raio maior (36px) pra mobile
   // (dedo é maior que cursor). Hover (mouse) continua usando 24px estrito.
   var isTouch = (typeof window !== 'undefined' && (
@@ -51418,8 +51428,8 @@ function _cartFindNodeAt(mx, my){
   var bestD = rsq + 1;
   for (var i = 0; i < CART_BIOMES.length; i++) {
     var b = CART_BIOMES[i];
-    var bx = b.x * _cartW;
-    var by = b.y * _cartH;
+    var bx = _offX + b.x * _S;
+    var by = _offY + b.y * _S;
     var dx = wx - bx;
     var dy = wy - by;
     var d = dx*dx + dy*dy;
@@ -51642,7 +51652,8 @@ function _closeCartLocationPopup(){
 // Invalidação: só dimensões/dpr (Stages 1/3/4 NÃO leem known_locations — confirmado).
 function _ensureCartBaseCache(w, h){
   if (_cartBaseCache && _cartBaseCache._w === w && _cartBaseCache._h === h
-      && _cartBaseCache._dpr === _cartDpr) {
+      && _cartBaseCache._dpr === _cartDpr
+      && _cartBaseCache._mapReady === (CartShared && CartShared.worldMapReady && CartShared.worldMapReady())) {
     return _cartBaseCache;
   }
   var cv = document.createElement('canvas');
@@ -51650,86 +51661,158 @@ function _ensureCartBaseCache(w, h){
   cv.height = Math.max(1, Math.round(h * _cartDpr));
   var bc = cv.getContext('2d', { alpha: false });
   bc.scale(_cartDpr, _cartDpr);
-  // Stage 1 — pergaminho (pinta sépia opaca cobrindo todo o canvas)
-  if (CartShared && CartShared._drawAgedParchment) CartShared._drawAgedParchment(bc, w, h);
-  // Stage 3 — bússola (screen-space, top-right)
+  // === Stage 1 — FUNDO = world-map.webp (cover) + véu sépia ====================
+  // 2026-06-03 (sessão #72 — fix mapa stale): o fundo do mapa do JOGO agora é o
+  // MESMO mapa do editor (world-map.webp), não o pergaminho procedural. Os ícones
+  // OpenAI dos locais + nodes/paths/pin são desenhados AO VIVO por cima (Stage 2,
+  // com pan/zoom). O scorched-edge (vinheta chamuscada) e o _drawAgedParchment
+  // foram removidos deste path — ver tombstone em _drawCart. _mapReady no cache key
+  // garante rebuild quando a imagem chega assíncrona (fallback escuro → mapa real).
+  var _mapReady = (CartShared && CartShared._drawWorldMapBg) ? CartShared._drawWorldMapBg(bc, w, h) : false;
+  // Stage 3 — bússola (screen-space, top-right) — preservada sobre o mapa
   if (CartShared && CartShared._drawCartCompass) CartShared._drawCartCompass(bc, w, h);
-  // Stage 4 — scorched edge (vinheta chamuscada por cima da base)
-  if (CartShared && CartShared._drawScorchedEdge) CartShared._drawScorchedEdge(bc, w, h, 0.38);
-  cv._w = w; cv._h = h; cv._dpr = _cartDpr;
+  cv._w = w; cv._h = h; cv._dpr = _cartDpr; cv._mapReady = _mapReady;
   _cartBaseCache = cv;
   return cv;
 }
 
+// === LOCATION ICONS (OpenAI) — espelha exploracao.html#_xcartEnsureLocArt ====
+// 2026-06-03 (sessão #72 — fix mapa stale): o mapa do JOGO desenha os MESMOS
+// ícones de local do editor (/exploracao/map-editor), nas coords salvas no
+// servidor (/api/exploracao/map-coords) ou nas coords padrão de CART_BIOMES.
+// FALLBACK total: ícone não carregou → desenha a arte procedural do bioma (sem
+// regressão visual). Lazy + 1×. As coords vêm da MESMA fonte do editor, então
+// salvar no editor reflete aqui imediatamente (na próxima abertura do mapa).
+var _cartLocArt = null;     // {key: Image|false}
+var _cartLocCoords = {};    // override {key:{x,y,scale}} do editor (server)
+function _cartEnsureLocArt() {
+  if (_cartLocArt !== null) return;
+  _cartLocArt = {};
+  var base = (window._VALDORIA_API_BASE || window._API_BASE || '').replace(/\/$/, '');
+  if (base) {
+    try {
+      fetch(base + '/api/exploracao/map-coords', { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { if (j && j.coords) { _cartLocCoords = j.coords; if (typeof _drawCart === 'function') _drawCart(); } })
+        .catch(function () { });
+    } catch (_) { }
+  }
+  CART_BIOMES.forEach(function (b) {
+    var im = new Image();
+    im.onload = function () { try { if (typeof _drawCart === 'function') _drawCart(); } catch (_) { } };
+    im.onerror = function () { _cartLocArt[b.key] = false; };
+    im.src = '/shared/img/map/locations/' + b.key + '.webp';
+    _cartLocArt[b.key] = im;
+  });
+}
+// Desenha o ícone OpenAI do local na coord salva (mapeada pelo rect cover do
+// world-map, IGUAL ao editor). Fallback: arte procedural do bioma. cx/cy/iw já
+// chegam no espaço da Stage 2 (quadrado S × offset aplicados por _drawCart).
+function _cartDrawLocArt(ctx, b, w, h) {
+  var ic = _cartLocArt && _cartLocArt[b.key];
+  if (!ic || ic === false || !ic.complete || !ic.naturalWidth) {
+    _drawBiomeArt(ctx, b, w, h);  // fallback procedural — sem regressão
+    return;
+  }
+  var ov = _cartLocCoords[b.key] || {};
+  var cx = (typeof ov.x === 'number' ? ov.x : b.x) * w;
+  var cy = (typeof ov.y === 'number' ? ov.y : b.y) * h;
+  var iw = ((typeof ov.scale === 'number' ? ov.scale : 10) / 100) * w;
+  var ih = iw * (ic.naturalHeight / ic.naturalWidth);
+  try { ctx.drawImage(ic, cx - iw / 2, cy - ih / 2, iw, ih); }
+  catch (_) { _drawBiomeArt(ctx, b, w, h); }
+}
+
+// Quando a imagem do world-map chega assíncrona, invalida a base-cache e redesenha
+// (fundo escuro → mapa real). Registrado UMA vez.
+if (CartShared && CartShared._onWorldMapLoad) {
+  CartShared._onWorldMapLoad(function(){
+    _cartBaseCache = null;
+    if (_cartCtx && typeof _drawCart === 'function') _drawCart();
+  });
+}
+
 // === DRAWING ===
 function _drawCart(){
-  // === Mapa de Valdoria simplificado (Fase 7.1 — 2026-04-30) ================
-  // User feedback: "remova essa forma aleatória no meio e deixe sem moldes em
-  // volta do mapa, o mapa deve ser somente a parte que dá zoom e movimenta,
-  // os desenhos devem ser feitos diretamente lá".
-  // REMOVIDO: _drawSea (oceano), _drawContinent (blob), _drawShip,
-  // _drawSeaSerpent, _drawTinyIsland, _drawCartFrame (moldura externa),
-  // _drawCartouche (banner topo), _drawRoyalSeal (selo canto inferior-esq).
-  // MANTIDO: parchment base + biome art + paths + nodes + player pin.
-  // Compass rose movido pro top-RIGHT (sai do bottom-right onde tem zoom controls).
+  // === Mapa de Valdoria — MESMO mapa do editor (Fase 7.1 + fix sessão #72) ====
+  // 2026-06-03: FUNDO = world-map.webp (cover) + ÍCONES OpenAI dos locais nas
+  // coords salvas no editor (/api/exploracao/map-coords). Antes desenhava o mapa
+  // procedural (pergaminho + pictogramas à mão) que IGNORAVA o editor — salvar lá
+  // nunca refletia aqui. Agora cidade ↔ editor mostram o mesmo mapa.
+  // REMOVIDO (Fase 7.1): _drawSea, _drawContinent, _drawShip, _drawSeaSerpent,
+  // _drawTinyIsland, _drawCartFrame, _drawCartouche, _drawRoyalSeal.
+  // REMOVIDO (sessão #72): _drawAgedParchment (pergaminho) + _drawScorchedEdge
+  // (vinheta) deste path — o fundo é o world-map.webp. Ícone faltando → fallback
+  // procedural _drawBiomeArt (sem regressão). Bússola (top-right) segue no cache.
   var ctx = _cartCtx;
   if (!ctx) return;
   var w = _cartW, h = _cartH;
   ctx.save();
 
-  // === STAGES 1+3+4 (PERGAMINHO + BÚSSOLA + SCORCHED) via BASE CACHE ===
-  // Perf #1 (2026-06-03): essas 3 stages são estáticas/screen-space (determinísticas
-  // com seed fixa). Renderizadas 1× num canvas offscreen e blitadas aqui — substitui
-  // ~500 ops/frame por 1 drawImage. Base opaca cobre todo o canvas (não precisa
-  // clearRect antes). Stage 4 (scorched) já vem POR CIMA dentro do cache.
+  // === STAGE 1+3 (WORLD-MAP + BÚSSOLA) via BASE CACHE ===
+  // Perf #1 (2026-06-03): o fundo (world-map.webp cover + véu sépia) e a bússola
+  // (screen-space) são estáticos → renderizados 1× num canvas offscreen e blitados
+  // aqui (1 drawImage por frame, ainda mais leve que o pergaminho procedural antigo).
+  // Base opaca cobre todo o canvas (não precisa clearRect). Cache invalida em
+  // dims/dpr/mapReady (ver _ensureCartBaseCache).
   var _base = _ensureCartBaseCache(w, h);
   ctx.drawImage(_base, 0, 0, w, h);
 
   // === STAGE 2: Conteúdo do mapa (PAN + ZOOM) ===
-  // 2026-05-04 USER REQUEST: visibility-based rendering. Apenas locais em
-  // known_locations aparecem completos. Outros: silhueta com "?" (insinuação
-  // de que existe algo, mas precisa de mapa do Cartógrafo Corvus).
+  // 2026-06-03 (sessão #72 — fix mapa stale): coords vivem sobre um QUADRADO de lado
+  // S = max(w,h) centrado no canvas (mesma transformação cover do world-map e do
+  // editor) → ícones/nodes/paths/pin alinham PIXEL-PERFECT com o que o editor mostra.
+  // Aplicamos pan/zoom e depois translate(offX, offY); todas as draw fns recebem
+  // (S, S) como base de multiplicação (b.x*S). Tamanhos absolutos (raio do node,
+  // labels) NÃO mudam — só os CENTROS são remapeados pro quadrado do mapa.
+  var _mr = _cartWorldMapRect(w, h);
+  var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
   ctx.save();
   ctx.translate(_cartPanX, _cartPanY);
   ctx.scale(_cartZoom, _cartZoom);
+  ctx.translate(_offX, _offY);
+  // 2026-05-04 USER REQUEST: visibility-based rendering. Apenas locais em
+  // known_locations aparecem completos. Outros: silhueta com "?" (insinuação
+  // de que existe algo, mas precisa de mapa do Cartógrafo Corvus).
   var _knownLocs = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || [];
-  // Pictogramas — só os conhecidos (com pictograma completo)
+  // Ícones OpenAI dos locais conhecidos (fallback procedural se a imagem faltar).
+  // Garante o fetch das coords + preload dos ícones (1× lazy).
+  _cartEnsureLocArt();
   CART_BIOMES.forEach(function(b){
     if (_knownLocs.indexOf(b.key) >= 0 || b.isOrigin) {
-      _drawBiomeArt(ctx, b, w, h);
+      _cartDrawLocArt(ctx, b, _S, _S);
     }
   });
   // Paths — só entre locais conhecidos
   CART_PATHS.forEach(function(p){
     var aKnown = _knownLocs.indexOf(p[0]) >= 0 || p[0] === 'plains';
     var bKnown = _knownLocs.indexOf(p[1]) >= 0 || p[1] === 'plains';
-    if (aKnown && bKnown) _drawCartPath(ctx, p[0], p[1], w, h);
+    if (aKnown && bKnown) _drawCartPath(ctx, p[0], p[1], _S, _S);
   });
   // Nodes — locais conhecidos com label completo, desconhecidos com "?"
   CART_BIOMES.forEach(function(b){
     if (_knownLocs.indexOf(b.key) >= 0 || b.isOrigin) {
-      _drawCartNode(ctx, b, w, h);
+      _drawCartNode(ctx, b, _S, _S);
     } else {
       // Local desconhecido — silhueta com "?"
-      _drawUnknownLocation(ctx, b, w, h);
+      _drawUnknownLocation(ctx, b, _S, _S);
     }
   });
   var playerBiomeKey = _cartGetPlayerBiome();
   var playerNode = CART_BIOMES.find(function(b){ return b.key === playerBiomeKey; });
-  if (playerNode) _drawPlayerPin(ctx, playerNode, w, h);
+  if (playerNode) _drawPlayerPin(ctx, playerNode, _S, _S);
   // X-6.5.51BJ (2026-05-15): halo dourado pulsante no biome alvo da missão
   // (escolhida via "Ver no mapa"). Antes _questFocusLoc era set mas nunca
   // lido — toast "destacada" era vazio. Agora desenha ring + label.
   if (window._questFocusLoc && window._questFocusLoc.key) {
     var qfNode = CART_BIOMES.find(function(b){ return b.key === window._questFocusLoc.key; });
-    if (qfNode) _drawQuestFocusHalo(ctx, qfNode, w, h, window._questFocusLoc.questTitle || 'Missão');
+    if (qfNode) _drawQuestFocusHalo(ctx, qfNode, _S, _S, window._questFocusLoc.questTitle || 'Missão');
   }
   ctx.restore();
 
-  // Stages 3 (bússola) + 4 (scorched edge) movidas pro BASE CACHE (Perf #1) —
-  // desenhadas 1× no offscreen e blitadas no topo de _drawCart. A vinheta
-  // chamuscada agora compõe a base (cantos escurecidos preservados); a arte de
-  // bioma fica por cima dela. Quest-focus halo + player-pin seguem ao vivo acima.
+  // NOTA (2026-06-03): Stage 4 (scorched edge / vinheta chamuscada) e o pergaminho
+  // procedural (_drawAgedParchment) foram REMOVIDOS do path da cartografia do jogo —
+  // o fundo agora é o world-map.webp. A bússola (Stage 3) segue no BASE CACHE.
 
   ctx.restore();
 }
