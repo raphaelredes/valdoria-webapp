@@ -58,7 +58,6 @@
 (function(){
   var MAP = '/shared/img/map/world-map.webp';
   var ICON_DIR = '/shared/img/map/locations/';
-  var COORDS_OVERRIDE = './map-locations-coords.json'; // posições já salvas (se houver)
   var stage = document.getElementById('stage');
   var out = document.getElementById('out');
   var scaleInput = document.getElementById('scale');
@@ -66,6 +65,25 @@
   var BIOMES = (window.CartShared && window.CartShared.CART_BIOMES) || [];
   var state = {};   // key -> {x,y,scale,name,el}
   var sel = null;
+
+  // Auth/API (mesma sessão do jogo): lê token/api/uid da URL ou do localStorage.
+  function _qs(k){ try { return new URL(location.href).searchParams.get(k); } catch(_) { return null; } }
+  var API = _qs('api') || (function(){ try { return JSON.parse(localStorage.getItem('valdoria_session_dev')||localStorage.getItem('valdoria_session_prod')||'{}').api; } catch(_){ return null; } })() || '';
+  var TOKEN = _qs('token') || (function(){ try { return JSON.parse(localStorage.getItem('valdoria_session_dev')||localStorage.getItem('valdoria_session_prod')||'{}').token; } catch(_){ return null; } })() || '';
+  var UID = _qs('uid') || (function(){ try { return JSON.parse(localStorage.getItem('valdoria_session_dev')||localStorage.getItem('valdoria_session_prod')||'{}').uid; } catch(_){ return null; } })() || '';
+  function _api(path){ return (API ? API.replace(/\/$/, '') : '') + path; }
+
+  // Nível sugerido (referência existente): min_level da região (REGIONAL_MAP_CATALOG)
+  // + tier do local (CART_BIOMES). Sugerido = max(regionMin, tier, 1).
+  var REGION_MIN_LEVEL = {
+    'Mapa das Planícies': 1, 'Mapa da Floresta': 2, 'Mapa do Deserto': 2,
+    'Mapa do Pântano': 3, 'Mapa do Ermo Gelado': 3, 'Mapa das Montanhas': 5,
+    'Mapa Vulcânico': 7
+  };
+  function suggestedLevel(b){
+    var rm = REGION_MIN_LEVEL[b.mapKey] || 0;
+    return Math.max(1, rm, (typeof b.tier === 'number' ? b.tier : 0));
+  }
 
   // mapa de fundo (quadrado 1024 → mantemos aspecto 1:1, largura responsiva)
   var bg = new Image();
@@ -88,7 +106,8 @@
     img.src = ICON_DIR + b.key + '.webp';
     img.onerror = function(){ d.classList.add('missing'); img.src =
       'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="16" fill="%23c4953a" opacity="0.4"/></svg>'; };
-    var lbl = document.createElement('div'); lbl.className = 'lbl'; lbl.textContent = b.name;
+    var lbl = document.createElement('div'); lbl.className = 'lbl';
+    lbl.textContent = b.name + ' · Nv ' + suggestedLevel(b) + '+ · T' + (b.tier || 0);
     d.appendChild(img); d.appendChild(lbl);
     stage.appendChild(d);
     state[b.key] = {
@@ -150,14 +169,25 @@
     Object.keys(state).forEach(function(k){
       o[k] = { x: +state[k].x.toFixed(4), y: +state[k].y.toFixed(4), scale: +state[k].scale.toFixed(1) };
     });
-    var json = JSON.stringify(o, null, 0);
-    out.style.display = 'block'; out.value = json; out.select();
-    try {
-      var blob = new Blob([JSON.stringify(o, null, 2)], { type: 'application/json' });
-      var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-      a.download = 'map-locations-coords.json'; a.click();
-    } catch(_){}
-    try { navigator.clipboard.writeText(json); } catch(_){}
+    out.style.display = 'block'; out.value = JSON.stringify(o, null, 0);
+    // SEMPRE confirma antes de salvar (janela popup).
+    if (!window.confirm('Salvar as posições dos locais?\n\nReflete no jogo imediatamente e mantém os últimos 5 backups (5 alterações).')) return;
+    if (!API || !TOKEN) {
+      // fallback offline (sem sessão): baixa o JSON.
+      try { var blob = new Blob([JSON.stringify(o, null, 2)], { type: 'application/json' }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'map-locations-coords.json'; a.click(); } catch(_){}
+      window.alert('Sem sessão (API/token) — baixei o JSON. Abra o editor a partir do jogo (/play) para salvar direto no servidor.');
+      return;
+    }
+    var btn = this; var oldTxt = btn.textContent; btn.disabled = true; btn.textContent = '⏳ Salvando...';
+    fetch(_api('/api/exploracao/map-coords'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: TOKEN, user_id: +UID, coords: o })
+    }).then(function(r){ return r.json().catch(function(){ return { error: 'bad_json', status: r.status }; }); })
+      .then(function(j){
+        btn.disabled = false; btn.textContent = oldTxt;
+        if (j && j.ok) window.alert('✓ Salvo! As posições já refletem no jogo.\nBackups mantidos: ' + (j.backups != null ? j.backups : '?') + '/5.');
+        else window.alert('Falha ao salvar: ' + ((j && (j.message || j.error)) || 'erro') + (j && j.status ? (' (HTTP ' + j.status + ')') : ''));
+      }).catch(function(e){ btn.disabled = false; btn.textContent = oldTxt; window.alert('Erro de rede ao salvar: ' + e); });
   });
   document.getElementById('btn-reset').addEventListener('click', function(){
     Object.keys(state).forEach(function(k){
@@ -168,13 +198,15 @@
   });
   window.addEventListener('resize', layout);
 
-  // boot: tenta carregar overrides salvos, senão usa coords padrão de CART_BIOMES
-  fetch(COORDS_OVERRIDE).then(function(r){ return r.ok ? r.json() : {}; }).catch(function(){ return {}; })
-    .then(function(ov){
-      ov = ov || {};
-      BIOMES.forEach(function(b){ makeLoc(b, ov[b.key]); });
-      if(bg.complete) layout();
-    });
+  // boot: carrega posições salvas do servidor (se houver sessão), senão usa as
+  // coords padrão de CART_BIOMES.
+  function boot(ov){ ov = ov || {}; BIOMES.forEach(function(b){ makeLoc(b, ov[b.key]); }); if (bg.complete) layout(); }
+  if (API && TOKEN) {
+    fetch(_api('/api/exploracao/map-coords') + '?token=' + encodeURIComponent(TOKEN) + '&user_id=' + encodeURIComponent(UID))
+      .then(function(r){ return r.ok ? r.json() : {}; })
+      .then(function(j){ boot((j && j.coords) || {}); })
+      .catch(function(){ boot({}); });
+  } else { boot({}); }
 })();
 </script>
 </body>
