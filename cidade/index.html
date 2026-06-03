@@ -10380,6 +10380,10 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('vorhan') >= 0)  return '/shared/img/npcs/mestre-vorhan.webp';
   if (s.indexOf('garrick') >= 0) return '/shared/img/npcs/mestre-garrick.webp';
   if (s.indexOf('thessil') >= 0) return '/shared/img/npcs/mestre-thessil.webp';
+  // Eirik (Escriba Rúnico) — usa o MESMO retrato do hub de runas (game-rune-scribe.js
+  // mantém o asset legado mestre-thessil.webp). Garante que "Conversar com Eirik" e
+  // a row do hub mostrem a mesma face. ANTES do fallback 'escriba' genérico.
+  if (s.indexOf('eirik') >= 0)   return '/shared/img/npcs/mestre-thessil.webp';
   if (s.indexOf('bjorn') >= 0)   return '/shared/img/npcs/bjorn-comerciante.webp';
   if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.webp';
   if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.webp';
@@ -21558,12 +21562,81 @@ function _pickNonRepeatingChat(npcId, chatPool){
   return _pickNonRepeating(npcId, chatPool, window._marketChatHeard);
 }
 
-// Helper genérico: mostra dialogue NPC com greeting + lista de options não-usadas
-// + auto-detecção de "Sem mais perguntas". Usado por TODAS as áreas.
+// PADRAO_ALDRIC (sessão #73): trata o clique numa choice do diálogo NPC dentro
+// do vEncounter. browse (Mercado) → shop popup; cost → fluxo legacy (confirm →
+// result popup → re-abre o diálogo); non-cost → aplica efeitos + mostra opt.a
+// DENTRO do mesmo popup (re-render como nova fala do NPC, a opção some).
+function _npcHandleTalkEncounter(p, npc, opt, opts){
+  if (opt.id === 'browse' && npc.id && CANON_MARKET_SHOPS && CANON_MARKET_SHOPS[npc.id]){
+    try { window.vEncounter.close(); } catch(_){}
+    _showShopPopup(npc.id);
+    return;
+  }
+  if (opt.cost) {
+    try { window.vEncounter.close(); } catch(_){}
+    _npcHandleTalk(p, npc, opt, opts.parentRestoreFn);
+    return;
+  }
+  var msgExtra = _npcApplyTalkEffects(p, npc, opt);
+  var answerText = opt.a + (opt.buff ? '<br><br><b>Efeito:</b> ' + opt.buff : '') + msgExtra;
+  _showSharedNpcDialogue(opts, { answer: { speaker: npc.name, text: answerText }, answeredId: opt.id });
+}
+
+// Aplica os efeitos de uma talkOption SEM custo (mark-used + visit count + quest
+// flags + XP/gold/item rewards). Extraído de _npcHandleTalk pra ser reusado tanto
+// pelo fluxo legacy (_showServiceResultPopup) quanto pelo novo (vEncounter in-popup).
+// Retorna msgExtra (HTML das linhas de recompensa) pra anexar à narrativa.
+function _npcApplyTalkEffects(p, npc, opt){
+  _npcMarkUsed(npc.id, opt.id);
+  if (npc._isCanonUnique && npc._canonKey){
+    window._uniqueNpcsVisitCount = window._uniqueNpcsVisitCount || {};
+    window._uniqueNpcsVisitCount[npc._canonKey] = (window._uniqueNpcsVisitCount[npc._canonKey] || 0) + 1;
+    try {
+      var vcKey = 'valdoria_unique_npcs_visits_' + (window._charId || 'default');
+      localStorage.setItem(vcKey, JSON.stringify(window._uniqueNpcsVisitCount));
+    } catch(_){}
+  }
+  if (npc.id === 'square_child' && opt.id === 'help'){
+    p.metadata = p.metadata || {};
+    p.metadata.town_lia_helped = true;
+    try {
+      if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+        window.vCityServer.flag.set('town_lia_helped', true);
+      }
+    } catch (_) {}
+  }
+  var msgExtra = '';
+  if (opt._grantsXp){
+    _gainXp(p, opt._grantsXp);
+  }
+  if (opt._isUniqueFinish && opt._reward){
+    var r = opt._reward;
+    var rewardLines = [];
+    if (r.xp){ _gainXp(p, r.xp); rewardLines.push('✨ +' + r.xp + ' XP'); }
+    if (r.gold){ p.gold += r.gold; rewardLines.push('💰 +' + r.gold + ' Valdoritas'); }
+    if (r.item){ p.inventory = p.inventory || []; p.inventory.push(r.item); rewardLines.push('🎒 Obteve: ' + r.item); }
+    if (rewardLines.length){ msgExtra = '<br><br>' + rewardLines.join('<br>'); }
+    if (npc._canonKey){
+      window._uniqueNpcsFinished[npc._canonKey] = true;
+      if (typeof window._persistUniqueFinished === 'function') { window._persistUniqueFinished(); }
+    }
+  }
+  if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_){} }
+  return msgExtra;
+}
+
+// Helper genérico: mostra dialogue NPC com greeting + options não-usadas via
+// vEncounter.render (PADRAO_ALDRIC — MESMA engine narrativa da Martha/Grom),
+// substituindo o antigo list-screen "tosco". A resposta opt.a aparece DENTRO
+// do mesmo popup como nova fala do NPC; Voltar = fechar o encounter (revela a
+// lista de NPCs atrás). Fallback legacy só se vEncounter não estiver carregado.
+// Usado por TODAS as áreas (Mercado/Vínculos/Viajantes/Praça/Runas Eirik/etc.).
 //   opts.npc       = NPC object { id, name, role, desc, greetings[], talkOptions[] }
 //   opts.player    = player ref (pra cobrança em opt.cost)
 //   opts.parentRestoreFn = função pra re-renderizar a tela pai (lista de NPCs)
-function _showSharedNpcDialogue(opts){
+//   internalState (2º arg interno) = { answer:{speaker,text}, answeredId } — re-render
+//     após resposta non-cost (mostra a fala + remove a opção já consumida).
+function _showSharedNpcDialogue(opts, internalState){
   var npc = opts.npc;
   var p = opts.player || window.CITY_MOCK_PLAYER;
   // canonical: town_square_events.process_interaction L62-64 — Lia override quando flag
@@ -21587,6 +21660,44 @@ function _showSharedNpcDialogue(opts){
       talkOptions: overrideTalkOptions
     };
   }
+
+  // PADRAO_ALDRIC via vEncounter (caminho principal — Martha/Grom usam o mesmo).
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    var available = _npcAvailableOptions(npc);
+    var greeting = _npcGreet(npc) || ('<i>"' + (npc.desc || 'Olá, viajante.') + '"</i>');
+    // Script: fala de saudação; desc como narração se diferir; resposta da pergunta.
+    var script = [{ type: 'speech', speaker: npc.name || '', text: greeting }];
+    if (npc.desc && npc.desc !== greeting) {
+      script.push({ type: 'narration', text: npc.desc });
+    }
+    if (internalState && internalState.answer) {
+      script.push({ type: 'speech', speaker: npc.name || '', text: internalState.answer.text });
+    } else if (available.length === 0) {
+      script.push({ type: 'narration', text: '— Sem mais perguntas. Volte mais tarde para nova conversa. —' });
+    }
+    // talkOptions → choices (label = pergunta; cost → badge de Valdorita).
+    var choices = available.map(function(opt){
+      return { id: opt.id, label: opt.q, cost: opt.cost, icon: '💬' };
+    });
+    // Retrato: name + role no resolver (WebP dedicado / fallback por papel / null).
+    var portrait = null;
+    try { portrait = _discoverySpeakerPortrait((npc.name || '') + ' ' + (npc.role || '')); }
+    catch (_e) { portrait = null; }
+    var roleDesc = String(npc.role || '').replace(/<svg[\s\S]*?<\/svg>\s*/g, '').trim();
+    window.vEncounter.render(
+      { npc: { id: npc.id, name: npc.name || '', desc: roleDesc, portrait: portrait || '' },
+        script: script, choices: choices },
+      { player: p, closeable: true,
+        onChoice: function(ch){
+          var opt = (npc.talkOptions || []).find(function(o){ return o.id === (ch && ch.id); });
+          if (!opt) { try { window.vEncounter.close(); } catch(_){} return; }
+          _npcHandleTalkEncounter(p, npc, opt, opts);
+        } }
+    );
+    return;
+  }
+
+  // ── Fallback legacy (file:// sem vEncounter): list-screen em #city-subscreen-popup ──
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');

@@ -3,7 +3,9 @@
  * ============================================================================
  *
  * Task #36 sessão #14 (2026-05-20) — REFATORADO p/ PADRAO_TAVERNA canonical.
- * NPC: Mestre Thessil (Escriba Rúnico).
+ * NPC: Eirik (Escriba Rúnico) — canonical _NPC_NAME (market_rune_scribe.py L24).
+ *   (sessão #73: nome visível alinhado a "Eirik"; a const THESSIL_DIALOGUE e o
+ *    asset mestre-thessil.webp mantêm o nome legado — só strings visíveis mudaram.)
  * Source: simuladores/escriba-runico-final.html
  * ============================================================================ */
 'use strict';
@@ -18,14 +20,14 @@ if (!window._SVC_CONFIG_RUNES) {
     faction: 'runes',
     factionLabel: 'Câmara do Escriba',
     reactions: {
-      very_negative: 'Thessil fecha o livro de glifos com um clack ressonante. <i>(volta-se para a parede de runas)</i> "Não."',
-      negative: 'Thessil suspira, decepcionado. <i>(continua escrevendo)</i> "Cada palavra tem peso. As tuas perderam o seu."',
-      neutral: 'Thessil acena com leveza. <i>(volta ao manuscrito)</i> "Sigamos."',
-      positive: 'Thessil sorri discretamente. <i>(traça um pequeno glifo no ar)</i> "Há sabedoria em ti que poucos cultivam."',
-      very_positive: 'Thessil curva-se levemente. <i>(rara cortesia entre arcanistas)</i> "És dos poucos que entendem o peso de cada runa. A Câmara honra teu nome."'
+      very_negative: 'Eirik fecha o livro de glifos com um clack ressonante. <i>(volta-se para a parede de runas)</i> "Não."',
+      negative: 'Eirik suspira, decepcionado. <i>(continua escrevendo)</i> "Cada palavra tem peso. As tuas perderam o seu."',
+      neutral: 'Eirik acena com leveza. <i>(volta ao manuscrito)</i> "Sigamos."',
+      positive: 'Eirik sorri discretamente. <i>(traça um pequeno glifo no ar)</i> "Há sabedoria em ti que poucos cultivam."',
+      very_positive: 'Eirik curva-se levemente. <i>(rara cortesia entre arcanistas)</i> "És dos poucos que entendem o peso de cada runa. A Câmara honra teu nome."'
     },
     confirmMsgs: {
-      narration: 'Thessil traça o glifo no pergaminho com pena de corvo. <i>(murmura uma sílaba em língua antiga)</i>',
+      narration: 'Eirik traça o glifo no pergaminho com pena de corvo. <i>(murmura uma sílaba em língua antiga)</i>',
       generic: '"Selado em runa." <i>(toca a runa com a ponta do indicador)</i>'
     }
   };
@@ -33,13 +35,13 @@ if (!window._SVC_CONFIG_RUNES) {
 
 var THESSIL_DIALOGUE = {
   npc: {
-    name: 'Mestre Thessil',
+    name: 'Eirik',
     desc: 'Escriba Rúnico · trinta e dois anos decifrando glifos antigos',
     portrait: '../shared/img/npcs/mestre-thessil.webp'
   },
   script: [
-    { type: 'narration', text: 'A câmara de Thessil é um santuário de pergaminhos e glifos. Estantes alcançam o teto, abarrotadas de manuscritos encadernados em couro escuro. Um cheiro de pena queimada, tinta de carvão e algo metálico — magia em estado bruto — paira no ar. Thessil ergue os olhos de um pergaminho aberto, traça um glifo no ar, e te reconhece.' },
-    { type: 'speech', speaker: 'Mestre Thessil', text: 'A Câmara está aberta. <i>(pousa a pena de corvo no tinteiro)</i> Trazes fragmentos? Três do mesmo tier forjam uma runa aleatória. É lei antiga, não tradição minha. O que precisas?' }
+    { type: 'narration', text: 'A câmara de Eirik é um santuário de pergaminhos e glifos. Estantes alcançam o teto, abarrotadas de manuscritos encadernados em couro escuro. Um cheiro de pena queimada, tinta de carvão e algo metálico — magia em estado bruto — paira no ar. Eirik ergue os olhos de um pergaminho aberto, traça um glifo no ar, e te reconhece.' },
+    { type: 'speech', speaker: 'Eirik', text: 'A Câmara está aberta. <i>(pousa a pena de corvo no tinteiro)</i> Trazes fragmentos? Três do mesmo tier forjam uma runa aleatória. É lei antiga, não tradição minha. O que precisas?' }
   ],
   choices: [
     // task #70 (2026-05-20): cb's alinhadas com backend canonical em market_rune_scribe.py.
@@ -91,7 +93,7 @@ function renderRuneScribe(container, data) {
   cenarioEl.appendChild(crest);
   var titulo = vCity.el('div', 'cenario-titulo');
   titulo.appendChild(_rnsEl('div', 'name', 'Câmara do Escriba'));
-  titulo.appendChild(_rnsEl('div', 'sub', 'Mestre Thessil · Guardião dos Glifos'));
+  titulo.appendChild(_rnsEl('div', 'sub', 'Eirik · Guardião dos Glifos'));
   cenarioEl.appendChild(titulo);
   root.appendChild(cenarioEl);
 
@@ -99,18 +101,18 @@ function renderRuneScribe(container, data) {
   var body = vCity.el('div', 'rns-body');
   body.style.cssText = 'padding:8px 12px 0;display:flex;flex-direction:column;gap:7px;';
 
-  /* === 2a. NPC row Thessil === */
+  /* === 2a. NPC row Eirik === */
   var npcRow = vCity.el('div', 'row-npc');
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = _rnsEl('img');
   img.src = '../shared/img/npcs/mestre-thessil.webp';
-  img.alt = 'Mestre Thessil';
+  img.alt = 'Eirik';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };
   portraitWrap.appendChild(img);
   npcRow.appendChild(portraitWrap);
   var info = vCity.el('div', 'npc-info');
-  info.appendChild(_rnsEl('div', 'name', 'Mestre Thessil'));
+  info.appendChild(_rnsEl('div', 'name', 'Eirik'));
   info.appendChild(_rnsEl('div', 'quote', '"Trazes fragmentos? Três do mesmo tier forjam uma runa."'));
   npcRow.appendChild(info);
   npcRow.appendChild(_rnsEl('div', 'npc-chev', '›'));
