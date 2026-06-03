@@ -52643,7 +52643,12 @@ window._openCityDialogue = _openCityDialogue;
 var _TEMP_EFFECT_LABELS = {
   rumor_ac: '+1 Classe de Armadura', rumor_atk: '+1 Acerto em Combate',
   rumor_save: '+1 Testes de Resistência', rumor_heal_bonus: '+3 Cura de Poções',
-  rumor_gold_bonus: '+15% Ouro de Combate'
+  rumor_gold_bonus: '+15% Ouro de Combate',
+  // XGtE Gather Info (tavern_gather_info_data.py — "Coletar informações" do Grom):
+  // bonus_keys dos 4 tópicos. Sem isto, o reward do boato não aparecia no
+  // indicador (card/ficha) — só os rumor_* legados (gap visto no teste #71h).
+  gather_enemies: '+1 Dano contra inimigos', gather_locations: '+1 Percepção Passiva',
+  gather_treasures: '+10% Ouro encontrado', gather_people: '+1 em Testes Sociais'
 };
 function _activeEffectsList(player){
   var tb = (player && player.temp_bonuses) || {};
