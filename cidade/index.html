@@ -2997,44 +2997,23 @@ LOG SINK (Fase 7):
         drop-shadow(0 1px 1px rgba(0, 0, 0, 0.85));
     }
 
-    /* ===== c-effects-badge (efeitos temporários ATIVOS — canto sup. esquerdo) =====
-       PADRAO_LOCAIS sessão #71h: indicador ✦ + contagem no card do player quando
-       há boato/sonho ativo (até descanso longo). Pareia com a seção "Efeitos
-       Ativos" da ficha. title lista os efeitos; click no card abre a ficha. */
-    .cgp-card.v8-style .c-effects-badge {
-      position: absolute;
-      top: 2px;
-      left: 3px;
-      z-index: 4;
-      display: flex;
-      align-items: center;
-      gap: 1px;
-      padding: 1px 3px 1px 2px;
-      border-radius: var(--v-radius-pill, 20px);
-      background: linear-gradient(180deg, rgba(196,149,58,0.30), rgba(196,149,58,0.14));
-      border: 1px solid var(--v-gold-40, rgba(196,149,58,0.4));
-      box-shadow: 0 0 5px rgba(196,149,58,0.45), inset 0 0 3px rgba(232,196,90,0.25);
-      pointer-events: none;
-      animation: cEffBadgePulse 2.4s ease-in-out infinite;
+    /* ===== Efeitos temporários ATIVOS — anel dourado pulsante (sessão #71h) =====
+       PADRAO_LOCAIS: indica boato/sonho ativo no card do player SEM cobrir conteúdo
+       (o card é minúsculo e denso; um badge de canto colidia com o nome/stats). O
+       anel inset fica DENTRO do card (overflow:hidden → não vaza p/ cards vizinhos)
+       + glow externo contido. O pulso é o sinal "vivo"; tap no card → ficha (seção
+       "Efeitos Ativos") com a lista completa. perf-lite usa estado fixo (sem anim). */
+    .cgp-card.v8-style.has-active-effects {
+      animation: cEffRing 2s ease-in-out infinite;
     }
-    .cgp-card.v8-style .c-eff-rune {
-      font-size: calc(8px * var(--v-font-scale, 1));
-      line-height: 1;
-      color: var(--v-gold-bright, #e8c45a);
-      text-shadow: 0 0 4px rgba(232,196,90,0.7);
+    @keyframes cEffRing {
+      0%, 100% { box-shadow: inset 0 0 0 1px var(--v-gold-40, rgba(196,149,58,0.45)), 0 0 7px rgba(232,196,90,0.40); }
+      50%      { box-shadow: inset 0 0 0 1.5px var(--v-gold, #c4953a), 0 0 13px rgba(232,196,90,0.70); }
     }
-    .cgp-card.v8-style .c-eff-count {
-      font-family: 'Cinzel', serif;
-      font-size: calc(8px * var(--v-font-scale, 1));
-      font-weight: 700;
-      line-height: 1;
-      color: var(--v-gold-bright, #e8c45a);
+    body.perf-lite .cgp-card.v8-style.has-active-effects {
+      animation: none;
+      box-shadow: inset 0 0 0 1.5px var(--v-gold, #c4953a), 0 0 9px rgba(232,196,90,0.5);
     }
-    @keyframes cEffBadgePulse {
-      0%, 100% { box-shadow: 0 0 5px rgba(196,149,58,0.40), inset 0 0 3px rgba(232,196,90,0.20); }
-      50%      { box-shadow: 0 0 9px rgba(196,149,58,0.65), inset 0 0 4px rgba(232,196,90,0.40); }
-    }
-    body.perf-lite .cgp-card.v8-style .c-effects-badge { animation: none; }
 
     /* ===== c-stats (single column 4 rows: PV/Recurso/XP/Gold — CA removida) ===== */
     /* 2026-05-11 v5: removeu CA do card (user request). Grid simplificado pra
@@ -48799,20 +48778,20 @@ function renderCityGroupPanel(){
     // USER 2026-05-18: formato 'k' para milhares — _fmtV substitui toLocaleString
     var goldStr = _fmtV(m.gold || 0);
 
-    // PADRAO_LOCAIS (sessão #71h) — badge de efeitos temporários ATIVOS no card
-    // do player (boato/sonho até descanso longo). User: "como fico sabendo que
-    // está funcionando? indicador no card e ficha". Server é a autoridade
-    // (temp_bonuses vem do DB; _applyHudFromDialogue espelha). Badge ✦ + contagem,
-    // title lista os efeitos. Click no card já abre a ficha (Efeitos Ativos).
-    var _effBadge = '';
+    // PADRAO_LOCAIS (sessão #71h) — indicador de efeitos temporários ATIVOS no
+    // card do player (boato/sonho até descanso longo). User: "como fico sabendo
+    // que está funcionando? indicador no card e ficha". O card é minúsculo (~101px,
+    // 4 linhas densas) e qualquer badge de canto colide com o nome/stats — então
+    // o indicador é um ANEL DOURADO PULSANTE no card (classe has-active-effects),
+    // sem cobrir conteúdo. title lista os efeitos (hover desktop). Detalhe completo
+    // no mobile: tap no card → ficha (seção "Efeitos Ativos"). Server é autoridade.
+    var _effClass = '', _effTitle = '';
     if (m.isPlayer && typeof _activeEffectsList === 'function') {
       try {
         var _effs = _activeEffectsList(window.CITY_MOCK_PLAYER);
         if (_effs && _effs.length) {
-          _effBadge = '<div class="c-effects-badge" title="' + _hubEsc(_effs.join(' · '))
-            + '" aria-label="' + _effs.length + ' efeito(s) ativo(s): ' + _hubEsc(_effs.join(', ')) + '">'
-            + '<span class="c-eff-rune" aria-hidden="true">✦</span>'
-            + '<span class="c-eff-count">' + _effs.length + '</span></div>';
+          _effClass = ' has-active-effects';
+          _effTitle = ' title="✦ Efeitos ativos: ' + _hubEsc(_effs.join(' · ')) + '"';
         }
       } catch (_ee) {}
     }
@@ -48823,10 +48802,9 @@ function renderCityGroupPanel(){
     // stats normais. Click no botão → fullscreen PADRAO_ALDRIC c/ closeable.
     var isLivingAlly = !m.isPlayer && !m.dead;
     html += '<div class="cgp-slot" data-slot="' + i + '">'
-      + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + (isLivingAlly ? ' chat-only' : '') + '" data-member="' + i + '">'
+      + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + _effClass + (isLivingAlly ? ' chat-only' : '') + '"' + _effTitle + ' data-member="' + i + '">'
       + '    <div class="c-name">' + safeName + '</div>'
       + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
-      + _effBadge
       + '    <div class="c-class-tag">' + safeCls + ' · Nv ' + m.level + '</div>';
     if (isLivingAlly) {
       // Aliado vivo: chat zone grande ocupando area dos stats
