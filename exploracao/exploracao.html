@@ -68,6 +68,8 @@
   Modal fecha                                closeEventModal            31606
   Skill check 3D dice                        rollSkillCheck             31227
   Combat trigger                             triggerCombatScreen        30517
+  Emboscada c/ escolhas (PADRAO_ALDRIC)      triggerSurpriseAmbush      ~35057 (Lutar/Fugir/Emboscar; surprise/playerSurprised + enemyCount; sessão #72)
+  Custom runtime event (ambush, etc.)        StubEventLayer.showCustomEvent ~11283
   Dungeon entry overlay                      triggerDungeonEntry        31781
   Edge transition (cross-map)                triggerEdgeTransition      31931
   Biome arrival (Fase 6.4)                   cidade chama playTravelAnimation antes do redirect
@@ -926,6 +928,9 @@ html.editor-mode #hud-bottom,
 html.editor-mode #hud-float,
 html.editor-mode #hud-quick,
 html.editor-mode #hex-nav,
+html.editor-mode #bottom-panel,
+html.editor-mode #footer-collapse-toggle,
+html.editor-mode #footer-restore,
 html.editor-mode #feat-panel,
 html.editor-mode #quest-journal,
 html.editor-mode #quest-indicator,
@@ -2783,18 +2788,120 @@ body.perf-lite #top-danger { animation: none !important; }
   text-shadow: 0 0 8px rgba(251, 215, 112, 0.7), 0 0 4px rgba(0, 0, 0, 0.9);
 }
 #btn-hud-float-toggle:active { transform: scale(0.92); }
-/* #22 (sessao #70): botao Configuracoes — empilhado abaixo do toggle, mesmo estilo */
-#btn-explore-settings {
-  position: absolute; top: 36px; right: -24px; width: 22px; height: 22px; padding: 0;
-  background: linear-gradient(180deg, rgba(28,22,16,0.94), rgba(14,11,8,0.92));
-  border: 1px solid rgba(196,149,58,0.28); border-left: none; border-radius: 0 6px 6px 0;
-  color: var(--v-gold,#c4953a); font-size: calc(13px * var(--v-font-scale,1)); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 2px 2px 6px rgba(0,0,0,0.4); transition: color .15s ease, transform .15s ease;
-  line-height: 1; pointer-events: auto; z-index: 4;
+/* Sessão #72 (2026-06-03): #btn-explore-settings removido (config foi pro footer
+   retrátil). CSS abaixo é o FOOTER CANONICAL (espelha cidade/index.html ~1108).
+   Estrutura: #bottom-panel (footer-quick + footer-nav) + toggle (·) FORA + pill. */
+#bottom-panel {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: var(--v-z-dropdown, 50);
+  background: linear-gradient(180deg, rgba(42,36,32,0.95) 0%, var(--v-bg, #2a2420) 100%);
+  border-top: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.45);
+  padding: var(--v-space-xs, 2px) var(--v-space-sm, 6px) var(--v-space-sm, 6px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-xs, 2px);
 }
-#btn-explore-settings:hover { color: #fbd770; }
-#btn-explore-settings:active { transform: scale(0.92); }
+.footer-row {
+  display: flex;
+  gap: var(--v-space-xs, 2px);
+  justify-content: center;
+}
+.footer-row.footer-quick { gap: var(--v-space-xs, 2px); }
+.footer-row.footer-nav {
+  gap: var(--v-space-xs, 2px);
+  padding-top: var(--v-space-xs, 2px);
+  border-top: 1px solid var(--v-gold-12, rgba(196,149,58,0.12));
+}
+.footer-row.footer-nav:empty { display: none; }
+.fb-btn {
+  flex: 1;
+  max-width: 100px;
+  min-height: 32px;
+  padding: var(--v-space-xs, 2px) var(--v-space-sm, 6px);
+  background: linear-gradient(180deg, #332a22 0%, #2a2218 100%);
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-xs, 11px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-xs, 2px);
+  transition: border-color var(--v-transition, 0.15s), background var(--v-transition, 0.15s), transform 0.1s;
+  letter-spacing: 0.04em;
+  pointer-events: auto;
+}
+.fb-btn:hover { border-color: var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); background: linear-gradient(180deg, #3a2e22 0%, #2a2218 100%); }
+.fb-btn:active { transform: scale(0.96); }
+.fb-btn.fb-icon-only { flex: 0 0 32px; max-width: 32px; min-width: 32px; padding: 2px; }
+.fb-btn .fb-heraldic { width: 18px; height: 18px; flex-shrink: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7)); }
+.fb-btn .fb-ico {
+  font-size: calc(14px * var(--v-font-scale, 1));
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7));
+}
+.fb-btn span:not(.fb-ico):not(.fb-heraldic) { font-size: calc(11px * var(--v-font-scale, 1)); }
+/* Toggle (·) FORA do panel — flutua acima do bottom-panel */
+#footer-collapse-toggle {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--v-z-dropdown-high, 51);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(28,22,16,0.92);
+  border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
+  border-radius: 50%;
+  color: var(--v-text-dim, #a09484);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-md, 14px);
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  transition: border-color var(--v-transition, 0.15s), color var(--v-transition, 0.15s), transform 0.1s;
+}
+#footer-collapse-toggle:hover { border-color: var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); }
+#footer-collapse-toggle:active { transform: translateX(-50%) scale(0.96); }
+body.footer-collapsed #footer-collapse-toggle { display: none; }
+/* Restore pill (modo recolhido) */
+#footer-restore {
+  position: absolute;
+  bottom: var(--v-space-md, 10px); left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--v-z-dropdown-high, 51);
+  display: none;
+  background: rgba(28,22,16,0.95);
+  border: 1px solid var(--v-gold, #c4953a);
+  color: var(--v-gold, #c4953a);
+  padding: var(--v-space-sm, 10px) var(--v-space-xl, 24px);
+  border-radius: var(--v-radius-pill, 20px);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-base, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  min-height: 36px;
+  pointer-events: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 12px var(--v-gold-30, rgba(196,149,58,0.3));
+  transition: border-color var(--v-transition, 0.15s), box-shadow var(--v-transition, 0.15s), transform 0.1s;
+}
+#footer-restore:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.5), 0 0 18px var(--v-gold-50, rgba(196,149,58,0.5));
+  border-color: var(--v-gold, #c4953a);
+}
+#footer-restore:active { transform: translateX(-50%) scale(0.96); }
+body.footer-collapsed #bottom-panel { display: none; }
+body.footer-collapsed #footer-restore { display: block; }
+/* (editor-mode hide do footer está na lista canonical ~html.editor-mode #hex-nav) */
 /* #22: overlay de configuracoes da exploracao (dentro do #frame, position:relative) */
 #explore-settings-overlay {
   position: absolute; inset: 0; z-index: 9100; display: flex; align-items: center; justify-content: center;
@@ -4188,11 +4295,18 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 /* ====== HEX-NAV (6 dirs + center) ===================================== */
 #hex-nav {
   position: absolute;
-  left: 0; right: 0; bottom: 10px;
+  left: 0; right: 0;
+  /* Sessão #72 (2026-06-03): subido de bottom:10px → 64px pra os controles de
+     movimento não ficarem por baixo do footer retrátil (#bottom-panel ~56px).
+     Quando o footer está recolhido (só a pill "· Menu"), o hex-nav desce de
+     volta pra 10px (regra abaixo) — aproveita o espaço liberado. */
+  bottom: 64px;
   z-index: 15;
   display: flex; justify-content: center;
   pointer-events: none;
+  transition: bottom 0.2s ease;
 }
+body.footer-collapsed #hex-nav { bottom: 10px; }
 #hex-nav-inner {
   /* X-6.5.51e: height 148 -> 188 (mais separacao vertical entre N-NE-SE-S
      pra ficar formato HEXAGONO real, nao quase-quadrado).
@@ -8496,8 +8610,10 @@ window.__onIntroTap = function() {
        no toggle. -->
   <div id="hud-float" class="hud-pro">
     <button id="btn-hud-float-toggle" title="Recolher status" aria-label="Recolher status">▲</button>
-    <!-- #22 (sessao #70): acesso a Configuracoes (Fonte/Som/Vibracao) dentro da exploracao -->
-    <button id="btn-explore-settings" title="Configurações" aria-label="Configurações">⚙</button>
+    <!-- Sessão #72 (2026-06-03): #btn-explore-settings REMOVIDO do HUD. Config
+         (Fonte/Som/Vibração) agora vive no footer retrátil (botão ⚙ em
+         #footer-quick), espelhando o padrão da cidade. O volume (va-btn) também
+         embeda no footer-quick via audio-manager.js — sem botão flutuante solto. -->
     <!-- HP row SEMPRE VISÍVEL — não colapsa com o toggle -->
     <div class="hud-row" title="Vida (HP)">
       <svg class="hud-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.5c-.3 0-.5-.1-.7-.3L2.4 9.3C1 7.9 1 5.7 2.4 4.3c1.3-1.3 3.4-1.3 4.7 0L8 5.2l.9-.9c1.3-1.3 3.4-1.3 4.7 0 1.4 1.4 1.4 3.6 0 5l-4.9 4.9c-.2.2-.4.3-.7.3z"/></svg>
@@ -9011,6 +9127,20 @@ window.__onIntroTap = function() {
       <div id="sim-log-panel-list-verbose" aria-live="polite"></div>
     </div>
   </div>
+
+  <!-- Sessão #72 (2026-06-03): FOOTER RETRÁTIL canonical (mesmo padrão da cidade,
+       regra "Collapsible Panel (Immersive Mode)"). Estrutura: toggle (·) FORA do
+       panel + #bottom-panel (#footer-quick com Grupo/Mochila/Acampar/Cartografia/
+       Config) + #footer-restore (pill "· Menu"). audio-manager.js embeda o va-btn
+       (volume) em #footer-quick automaticamente, removendo o botão flutuante solto.
+       Aliases data-alias=immersive-toggle/immersive-restore satisfazem o preflight
+       check_webapp_immersive_mode_complete. -->
+  <button id="footer-collapse-toggle" data-alias="immersive-toggle" aria-label="Recolher menu" title="Recolher menu">·</button>
+  <div id="bottom-panel">
+    <div id="footer-quick" class="footer-row footer-quick"></div>
+    <div id="footer-nav" class="footer-row footer-nav"></div>
+  </div>
+  <button id="footer-restore" data-alias="immersive-restore" aria-label="Expandir menu">· Menu</button>
 </div>
 
 <script>
@@ -10688,6 +10818,10 @@ window.__onIntroTap = function() {
             var _dc = outcome && outcome.dungeon_combat;
             if (_dc && _dc.enemy) {
               _evCombat = { enemyId: _dc.enemy, surprise: !!_dc.surprise,
+                /* Sessão #72: playerSurprised (emboscada AO player, PHB p.189) +
+                   enemy_count (narrativa de "N figuras" gera N inimigos). */
+                playerSurprised: !!_dc.playerSurprised,
+                enemyCount: _dc.enemy_count || _dc.enemyCount || 1,
                 lookup_name: _dc.lookup_name || null,
                 preCombatEffects: Array.isArray(_dc.preCombatEffects) ? _dc.preCombatEffects : [],
                 /* #17 (sessao #70): narrativa do evento -> intro typewriter do combate */
@@ -10706,6 +10840,8 @@ window.__onIntroTap = function() {
                 }
                 _evCombat = { enemyId: _enemy,
                   surprise: (_raw && typeof _raw === 'object') ? !!_raw.surprise : false,
+                  playerSurprised: (_raw && typeof _raw === 'object') ? !!_raw.playerSurprised : false,
+                  enemyCount: (_raw && typeof _raw === 'object' && (_raw.enemy_count || _raw.enemyCount)) || 1,
                   lookup_name: null, preCombatEffects: [],
                   /* #17 (sessao #70): narrativa do evento -> intro typewriter do combate */
                   narrative: (outcome && (outcome.flavor || outcome.text)) || '' };
@@ -10715,7 +10851,8 @@ window.__onIntroTap = function() {
           _close();
           if (_evCombat && typeof window.triggerCombatScreen === 'function') {
             if (window.TileLog) window.TileLog.info('STUB-EVT', 'finalize_combat_dispatch', {
-              enemy: _evCombat.enemyId, surprise: _evCombat.surprise, hex: rt.hexId
+              enemy: _evCombat.enemyId, surprise: _evCombat.surprise,
+              playerSurprised: _evCombat.playerSurprised, enemyCount: _evCombat.enemyCount, hex: rt.hexId
             });
             setTimeout(function () { window.triggerCombatScreen(_evCombat); }, 200);
           }
@@ -11272,9 +11409,21 @@ window.__onIntroTap = function() {
     renderPage(0);
   }
 
+  /* Sessão #72 (2026-06-03): showCustomEvent — exibe um RuntimeEvent montado
+     fora do EventResolver (ex: emboscada surpresa com choices PADRAO_ALDRIC
+     Lutar/Fugir/Emboscar). Força interação (player DEVE escolher) e roteia pelo
+     mesmo _showRuntimeEvent → paginated + skill check 3D dice + dungeon_combat
+     handoff dos eventos normais. rt deve ter {title, script[], choices[]}. */
+  function showCustomEvent(rt) {
+    if (!rt) return;
+    _forceInteraction = (rt.forceInteraction !== false);
+    _showRuntimeEvent(rt);
+  }
+
   window.StubEventLayer = {
     showTileObjectEvent: showTileObjectEvent,
     showLegacyEvent: showLegacyEvent,
+    showCustomEvent: showCustomEvent,
     close: _close,
     isOpen: function () { return _isOpen; },
     _displayNames: TYPE_DISPLAY_NAMES,
@@ -34977,13 +35126,28 @@ function _eventHasCombat(ev) {
   return false;
 }
 
-// V3.1: extrai o primeiro enemy_id mencionado nos outcomes do evento
+// V3.1: extrai o primeiro enemy_id mencionado no evento.
+// Sessão #72 (2026-06-03): lê também ev.combat.enemy_id e outcome.combat.enemy_id
+// (combat_forced events tipo plains_bandit_ambush_01 declaram o inimigo em
+// ev.combat, não em record_enemy). Antes só record_enemy → ambush caía no
+// _pickRandomEnemyForBiome ignorando o inimigo correto do evento.
 function _extractEnemyId(ev) {
-  if (!ev || !Array.isArray(ev.choices)) return null;
+  if (!ev) return null;
+  // 1) bloco combat no nível do evento (combat_forced)
+  if (ev.combat && (ev.combat.enemy_id || ev.combat.enemyId)) {
+    return ev.combat.enemy_id || ev.combat.enemyId;
+  }
+  if (!Array.isArray(ev.choices)) return null;
+  // 2) record_enemy OU combat embutido em qualquer outcome de choice
   for (const ch of ev.choices) {
     const outs = [ch.outcome_ok, ch.outcome_fail, ch.outcome_partial];
     for (const o of outs) {
-      if (o && o.record_enemy) {
+      if (!o) continue;
+      if (o.combat && (o.combat.enemy_id || o.combat.enemyId)) {
+        return o.combat.enemy_id || o.combat.enemyId;
+      }
+      if (o.dungeon_combat && o.dungeon_combat.enemy) return o.dungeon_combat.enemy;
+      if (o.record_enemy) {
         return Array.isArray(o.record_enemy) ? o.record_enemy[0] : o.record_enemy;
       }
     }
@@ -34991,18 +35155,202 @@ function _extractEnemyId(ev) {
   return null;
 }
 
-// V3.2: EMBOSCADA SURPRESA → vai DIRETO pra tela de combate
-// (user: "tudo relacionado a combate chame a tela de combate")
+// Sessão #72 (2026-06-03): quantos inimigos a narrativa do evento implica.
+// Lê ev.combat.enemy_count, outcome.combat.enemy_count, ou o tamanho do array
+// record_enemy. Default 1. Corrige o bug "narrativa diz 2 figuras mas vem 1
+// inimigo" — agora o combate reflete o texto. Clamp 1..8 (cap do SIM combate).
+function _extractEnemyCount(ev) {
+  let n = 1;
+  if (ev) {
+    if (ev.combat && (ev.combat.enemy_count || ev.combat.enemyCount)) {
+      n = ev.combat.enemy_count || ev.combat.enemyCount;
+    } else if (Array.isArray(ev.choices)) {
+      for (const ch of ev.choices) {
+        const outs = [ch.outcome_ok, ch.outcome_fail, ch.outcome_partial];
+        let found = false;
+        for (const o of outs) {
+          if (!o) continue;
+          if (o.combat && (o.combat.enemy_count || o.combat.enemyCount)) {
+            n = o.combat.enemy_count || o.combat.enemyCount; found = true; break;
+          }
+          if (Array.isArray(o.record_enemy) && o.record_enemy.length > 1) {
+            n = o.record_enemy.length; found = true; break;
+          }
+        }
+        if (found) break;
+      }
+    }
+  }
+  return Math.max(1, Math.min(8, parseInt(n, 10) || 1));
+}
+
+// Sessão #72 (2026-06-03): EMBOSCADA com AGÊNCIA do jogador (PADRAO_ALDRIC).
+// User reportou: "só tinha opção de ir pro combate; narrativa dizia 2 figuras
+// mas veio 1 inimigo; sem chance de fugir". Antes triggerSurpriseAmbush ia
+// DIRETO pro combate com 1 inimigo e surprise:true (que surpreendia o INIMIGO,
+// contradizendo a narrativa de emboscada). Agora:
+//   1) Conta inimigos pela narrativa (_extractEnemyCount) → combate reflete.
+//   2) Determina se o player foi pego de surpresa (PHB p.189): NÃO surpreso se
+//      ritmo cauteloso (vigiando) OU Percepção passiva >= furtividade do
+//      emboscador (DC 14). Surpreso = não pode "Emboscar primeiro".
+//   3) Apresenta escolhas via StubEventLayer (PADRAO_ALDRIC + PADRAO_DADOS):
+//      Lutar (normal) · Fugir (DEX/Furtividade; sucesso volta à exploração,
+//      falha = combate com playerSurprised/desvantagem) · Emboscar primeiro
+//      (só se notou; sucesso = surprise/vantagem, falha = combate normal).
+// Fallback: sem StubEventLayer, cai no combate direto (preserva fluxo antigo).
+function _ambushPassivePerception(p) {
+  if (!p) return 10;
+  var wisMod = (p.mods && typeof p.mods.wis === 'number') ? p.mods.wis : 0;
+  var profBonus = (p.prof && Array.isArray(p.prof) && p.prof.indexOf('perception') >= 0) ? 2 : 0;
+  return 10 + wisMod + profBonus;
+}
+
 function triggerSurpriseAmbush(ev) {
   const enemyId = _extractEnemyId(ev) || _pickRandomEnemyForBiome();
-  LOG('COMBAT', 'surprise ambush → combat screen enemy=' + enemyId);
-  triggerCombatScreen({
-    enemyId: enemyId,
-    surprise: true,
-    context: ev,
-    onWin: null,      // emboscada sem rewards específicos
-    onLose: () => triggerDefeat('Morto em emboscada surpresa.')
+  const enemyCount = _extractEnemyCount(ev);
+  const eData = (typeof ENEMIES_DB !== 'undefined' && ENEMIES_DB[enemyId]) || null;
+  const enemyName = (eData && eData.name) || 'inimigo';
+  const p = (window.S && window.S.player) ? window.S.player : null;
+
+  // PHB p.189: jogador NÃO é surpreendido se estava vigiando (ritmo cauteloso)
+  // ou se a Percepção passiva supera a furtividade do emboscador (DC 14).
+  const AMBUSH_STEALTH_DC = 14;
+  const passivePP = _ambushPassivePerception(p);
+  const cautious = (window.S && window.S.pace === 'cautious');
+  const playerNoticed = cautious || (passivePP >= AMBUSH_STEALTH_DC);
+  const playerSurprised = !playerNoticed;
+
+  LOG('COMBAT', 'ambush prep enemy=' + enemyId + ' count=' + enemyCount
+    + ' passivePP=' + passivePP + ' pace=' + (window.S && window.S.pace)
+    + ' noticed=' + playerNoticed);
+  console.info('[E-REM:COMBAT] ambush enemy=' + enemyId + ' count=' + enemyCount
+    + ' playerSurprised=' + playerSurprised);
+
+  // Texto plural/singular coerente com a contagem (resolve "2 figuras → 1 inimigo").
+  const plural = enemyCount > 1;
+  const countWord = enemyCount === 2 ? 'dois' : enemyCount === 3 ? 'três'
+    : enemyCount === 4 ? 'quatro' : (enemyCount + '');
+  const figuresPhrase = plural
+    ? (countWord + ' vultos saltam de seus esconderijos')
+    : 'um vulto salta de seu esconderijo';
+  const lowEnemy = String(enemyName).toLowerCase();
+
+  // Narração PADRAO_ALDRIC (3ª pessoa, mostre-não-conte, 5 sentidos). Difere
+  // conforme o player notou ou foi pego de surpresa.
+  const script = playerNoticed
+    ? [
+        { type: 'narration', text: 'Um estalo seco de galho à frente, fora de ritmo com o vento — e seus sentidos já estavam alertas. Sombras se mexem entre a folhagem onde sombras não deveriam estar.' },
+        { type: 'narration', text: 'Você os pega no instante exato: ' + figuresPhrase + ', lâminas reluzindo, mas <i>um passo atrasados</i>. A emboscada falhou em pegá-lo de guarda baixa. ' + (plural ? ('São ' + countWord + ' — ' + lowEnemy + 's prontos para o bote.') : ('É um ' + lowEnemy + ', tenso, calculando o salto.')) },
+        { type: 'narration', text: 'O ar fica denso, suspenso entre o respirar e o golpe. A vantagem ainda pende — para quem agir primeiro. <b>O que você faz?</b>' }
+      ]
+    : [
+        { type: 'narration', text: 'O bote vem sem aviso. Num átimo o caminho está vazio; no seguinte, ' + figuresPhrase + ' — couro, aço e fôlego quente perto demais do seu rosto.' },
+        { type: 'narration', text: 'O coração dispara num susto que percorre a espinha. ' + (plural ? ('São ' + countWord + ' ' + lowEnemy + 's, fechando o cerco') : ('Um ' + lowEnemy + ', já em cima de você')) + '; o cheiro de suor e metal preenche o ar. <i>Eles tiveram o primeiro lance</i> — e você corre atrás do tempo perdido.' },
+        { type: 'narration', text: 'A surpresa pesa contra você, mas não decide nada sozinha. <b>Reagir é tudo agora.</b>' }
+      ];
+
+  // Inimigo: usa BESTIARY se o ENEMIES_DB define bestiary_name (stats canônicos).
+  const _baseCombat = { enemy: enemyId, enemy_count: enemyCount };
+  if (eData && eData.bestiary_name) _baseCombat.lookup_name = eData.bestiary_name;
+
+  const choices = [];
+
+  // (1) LUTAR — combate normal (o player reage a tempo, sem penalidade).
+  choices.push({
+    id: 'ambush_fight',
+    label: 'Lutar — encarar de frente',
+    flavor: 'Você firma os pés e levanta a guarda. Que venham.',
+    outcome_ok: {
+      flavor: 'Aço encontra aço. O combate começa em pé de igualdade.',
+      ops: [],
+      tech: { label: 'COMBATE', text: 'Iniciativa normal vs ' + enemyCount + ' ' + (plural ? 'inimigos' : 'inimigo') + '. Iniciando…' },
+      dungeon_combat: Object.assign({}, _baseCombat, {
+        surprise: false, playerSurprised: false,
+        narrative: 'A emboscada vira batalha aberta. ' + (plural ? ('São ' + countWord + ' contra você.') : ('Um contra um.'))
+      })
+    }
   });
+
+  // (2) FUGIR — DEX/Furtividade. Sucesso: volta à exploração (sem combate).
+  //     Falha: combate com playerSurprised (pego de costas = desvantagem PHB).
+  choices.push({
+    id: 'ambush_flee',
+    label: 'Fugir — desaparecer na mata',
+    skill: 'stealth', dc: 14,
+    outcome_ok: {
+      flavor: 'Você gira nos calcanhares e mergulha entre as árvores antes que as lâminas alcancem. Galhos chicoteiam o rosto, mas os passos atrás de você se perdem — e silenciam. <i>Escapou.</i>',
+      ops: [{ op: 'xp', delta: 8 }],
+      fsm: null
+      /* sem dungeon_combat → Finalizar só fecha o popup, de volta à exploração */
+    },
+    outcome_fail: {
+      flavor: 'Sua bota escorrega num tronco caído e o atraso é fatal. ' + (plural ? 'Eles te cercam antes do segundo passo' : 'Ele te alcança antes do segundo passo') + ' — você entra na luta de costas, sem fôlego.',
+      ops: [{ op: 'hp', delta: -4 }],
+      tech: { label: 'COMBATE', text: 'Fuga falhou: você começa SURPRESO (perde o 1º round). Iniciando…' },
+      dungeon_combat: Object.assign({}, _baseCombat, {
+        surprise: false, playerSurprised: true,
+        narrative: 'A fuga falhou. ' + (plural ? ('Os ' + lowEnemy + 's') : ('O ' + lowEnemy)) + ' caem sobre você primeiro — você reage em desvantagem.'
+      })
+    }
+  });
+
+  // (3) EMBOSCAR PRIMEIRO — só quando o player NÃO foi surpreendido (PHB p.189:
+  //     quem nota o emboscador pode virar a mesa). DEX/Furtividade: sucesso =
+  //     surprise (vantagem, inimigo perde 1º turno), falha = combate normal.
+  if (playerNoticed) {
+    choices.push({
+      id: 'ambush_preempt',
+      label: 'Emboscar primeiro — golpear antes do bote',
+      skill: 'stealth', dc: 13,
+      outcome_ok: {
+        flavor: 'Você lê o tempo deles e ataca um instante antes — a presa virou caçador. ' + (plural ? 'Eles hesitam, pegos no próprio jogo.' : 'Ele hesita, pego no próprio jogo.'),
+        ops: [{ op: 'xp', delta: 12 }],
+        tech: { label: 'COMBATE', text: 'Você surpreende ' + (plural ? 'os inimigos' : 'o inimigo') + ' (perdem o 1º round + você age primeiro). Iniciando…' },
+        dungeon_combat: Object.assign({}, _baseCombat, {
+          surprise: true, playerSurprised: false,
+          narrative: 'Você inverte a emboscada e golpeia primeiro — vantagem é sua.'
+        })
+      },
+      outcome_fail: {
+        flavor: 'Você se precipita e um galho denuncia o movimento. ' + (plural ? 'Eles giram a tempo' : 'Ele gira a tempo') + ' — a vantagem se dissolve, e a luta começa parelha.',
+        ops: [],
+        tech: { label: 'COMBATE', text: 'A investida falhou: iniciativa normal. Iniciando…' },
+        dungeon_combat: Object.assign({}, _baseCombat, {
+          surprise: false, playerSurprised: false,
+          narrative: 'A investida foi notada. Combate em pé de igualdade.'
+        })
+      }
+    });
+  }
+
+  const rt = {
+    source: 'ambush',
+    type: 'ambush',
+    title: 'Emboscada!',
+    hexId: (p ? (p.col + ',' + p.row) : null),
+    legacyId: (ev && ev.id) ? ('ambush_' + ev.id) : 'ambush_surprise',
+    script: script,
+    choices: choices,
+    repeatable: true,       /* emboscada não persiste escolha (anti-cheat n/a) */
+    forceInteraction: true  /* player DEVE escolher — sem backdrop/ESC */
+  };
+
+  if (window.StubEventLayer && typeof window.StubEventLayer.showCustomEvent === 'function') {
+    window.StubEventLayer.showCustomEvent(rt);
+  } else {
+    // Fallback: sem o layer de eventos, mantém o comportamento antigo (combate
+    // direto), mas já com a contagem correta e sem surpresa errada do inimigo.
+    LOGW('COMBAT', 'ambush fallback (no StubEventLayer) → combat direct');
+    triggerCombatScreen({
+      enemyId: enemyId,
+      enemyCount: enemyCount,
+      surprise: false,
+      playerSurprised: playerSurprised,
+      lookup_name: (eData && eData.bestiary_name) || null,
+      context: ev,
+      onLose: () => triggerDefeat('Morto em emboscada surpresa.')
+    });
+  }
 }
 
 function _pickRandomEnemyForBiome() {
@@ -35141,7 +35489,19 @@ function triggerCombatScreen(cfg) {
       LOG('COMBAT', 'reinforcement triggered: +1 orc (delayedTurns=' + delayTurns
         + ', flags: alarm_raised=' + alarmFlag + ' guards_alerted=' + guardsAlertedFlag + ')');
     }
-    var enemyCountTotal = 1 + reinforcements.length;
+    // Sessão #72 (2026-06-03): enemy_count fix. Eventos com narrativa de "2/3
+    // figuras" (ex: plains_bandit_ambush_01 combat.enemy_count=2) só geravam 1
+    // inimigo porque triggerCombatScreen sempre escrevia enemies:[simEnemy].
+    // Agora cfg.enemyCount (extraído de ev.combat.enemy_count / record_enemy[]
+    // por _extractEnemyCount) duplica o simEnemy N vezes — combate reflete a
+    // narrativa. Clamp 1..8 (SIM cap). Reforços de alarme somam por cima.
+    var baseEnemyN = Math.max(1, Math.min(8, parseInt(cfg.enemyCount, 10) || 1));
+    var baseEnemies = [];
+    for (var _en = 0; _en < baseEnemyN; _en++) {
+      // Cópia rasa por slot — combate.html dá nome/sufixo único a cada um.
+      baseEnemies.push(Object.assign({}, simEnemy));
+    }
+    var enemyCountTotal = Math.min(8, baseEnemies.length + reinforcements.length);
     sessionStorage.setItem('valdoria_sim_combat_setup_v1', JSON.stringify({
       v: 1,
       fillMode: 'per_slot',
@@ -35159,6 +35519,12 @@ function triggerCombatScreen(cfg) {
       //     'boss_enraged' → boss +2 dmgMod
       //     'boss_ac_debuff' → boss CA -2
       surprise: !!cfg.surprise,
+      // Sessão #72 (2026-06-03): emboscada AO player (PHB p.189). Quando o
+      // jogador é surpreendido (ex: falhou a fuga, foi pego de guarda baixa),
+      // os INIMIGOS agem primeiro (+30 init) e o player perde o round 1.
+      // combate.html newCombatFromSetup lê cfg.playerSurprised → c.surprised
+      // nos slots do player. Oposto de `surprise` (que surpreende o inimigo).
+      playerSurprised: !!cfg.playerSurprised,
       preCombatEffects: Array.isArray(cfg.preCombatEffects) ? cfg.preCombatEffects : [],
       player: {
         name: p.name || 'Heroi',
@@ -35178,13 +35544,14 @@ function triggerCombatScreen(cfg) {
       // originou no servidor via outcome.text). Vazio = combate cai no fluxo
       // classico (CTAs imediatos, sem bloco de narrativa).
       narrative: (cfg.narrative != null ? String(cfg.narrative) : ''),
-      enemies: [simEnemy].concat(reinforcements)
+      enemies: baseEnemies.concat(reinforcements)
     }));
     LOG('COMBAT', 'SIM setup written enemy=' + cfg.enemyId
       + ' lookup_name=' + (resolvedLookupName || '-')
       + ' (source=' + (cfg.lookup_name ? 'cfg-explicit' : (enemyData && enemyData.bestiary_name ? 'bestiary_name' : 'fallback-n_exact')) + ')'
       + ' lvl=' + (p.lvl || 3) + ' godmode=' + godmode
-      + ' surprise=' + !!cfg.surprise);
+      + ' baseEnemies=' + baseEnemyN + ' total=' + enemyCountTotal
+      + ' surprise=' + !!cfg.surprise + ' playerSurprised=' + !!cfg.playerSurprised);
   } catch (eSim) {
     LOGW('COMBAT', 'failed to write SIM setup', (eSim && eSim.message) || eSim);
   }
@@ -41203,6 +41570,124 @@ function bindPinchZoom() {
 }
 
 // ============================================================================
+// FOOTER RETRÁTIL (Immersive Mode) — Sessão #72 (2026-06-03)
+// ----------------------------------------------------------------------------
+// Espelha o footer da cidade (cidade/index.html renderFooter/_toggleFooter).
+// #footer-quick: Grupo · Mochila · Acampar · Cartografia · Config (⚙). O volume
+// (va-btn) embeda aqui via audio-manager.js (remove o botão flutuante solto).
+// Toggle (·) recolhe o panel inteiro → mostra a pill "· Menu". Persistência
+// char-prefixed em localStorage (preferência de UI — permitido por Server-Only
+// State). Default = EXPANDIDO (igual cidade, sessão #62).
+// NOTA innerHTML: conteúdo 100% estático/agent-authored (sem input do jogador),
+// idêntico ao padrão canonical de cidade/index.html renderFooter — não é XSS.
+// ============================================================================
+var _exploreFooterCollapsed = (function () {
+  try {
+    var charId = (new URLSearchParams(location.search)).get('char') || 'default';
+    var v = localStorage.getItem('valdoria_footer_collapsed_' + charId);
+    if (v === null) v = localStorage.getItem('valdoria_footer_collapsed');
+    return v === '1';
+  } catch (_) { return false; }
+})();
+function _applyExploreFooterCollapsedClass() {
+  try {
+    if (_exploreFooterCollapsed) document.body.classList.add('footer-collapsed');
+    else document.body.classList.remove('footer-collapsed');
+  } catch (_) { /* DOM not ready */ }
+}
+function renderExploreFooter() {
+  var quickEl = document.getElementById('footer-quick');
+  var navEl = document.getElementById('footer-nav');
+  if (!quickEl) return;
+  // Brasão heráldico inline (mesmos symbols ic-* já presentes no SVG sprite).
+  // Cores naturais por função (couro/grupo/fogo/mapa) — regra No NPC Emotes:
+  // ícone representa a FUNÇÃO, não pessoa.
+  function _heralB(id, color) {
+    return '<svg class="fb-heraldic" viewBox="0 0 120 120" style="color:' + color + ';" aria-hidden="true"><use href="#' + id + '"/></svg>';
+  }
+  // Ações da exploração + Config. Volume (va-btn) é embedado por audio-manager.
+  var _html = ''
+    + '<button class="fb-btn" data-action="party" title="Grupo">'
+    +   _heralB('ic-grupo', '#8a98a8') + '<span>Grupo</span>'
+    + '</button>'
+    + '<button class="fb-btn" data-action="inventory" title="Mochila">'
+    +   _heralB('ic-mochila', '#7a5028') + '<span>Mochila</span>'
+    + '</button>'
+    + '<button class="fb-btn" data-action="camp" title="Acampar">'
+    +   _heralB('ic-acampamento', '#8a6840') + '<span>Acampar</span>'
+    + '</button>'
+    + '<button class="fb-btn" data-action="cartografia" title="Mapa de Valdoria">'
+    +   _heralB('ic-cartografia', '#b8956a') + '<span>Mapa</span>'
+    + '</button>'
+    + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
+    +   '<span class="fb-ico">⚙</span>'
+    + '</button>';
+  quickEl.innerHTML = _html;  // static trusted markup (ver nota acima)
+  if (navEl) navEl.innerHTML = '';
+  // PADRAO_VOLUME: força re-embed do va-btn em #footer-quick (igual cidade
+  // ~10938). audio-manager.js pode ter caído no botão flutuante (#va-float) se
+  // o footer-quick estava vazio no init — agora que está populado, re-embeda.
+  try {
+    var floatEl = document.getElementById('va-float');
+    if (floatEl) {
+      floatEl.remove();
+      var oldBtn = document.getElementById('va-btn');
+      if (oldBtn) oldBtn.remove();
+      if (window.ValdoriaAudio && typeof window.ValdoriaAudio.embedInFooter === 'function') {
+        window.ValdoriaAudio.embedInFooter(quickEl);
+      } else {
+        var dummy = document.createElement('span');
+        quickEl.appendChild(dummy);
+        setTimeout(function () { try { quickEl.removeChild(dummy); } catch (_) {} }, 50);
+      }
+    }
+  } catch (_e) { /* defensive */ }
+}
+function _toggleExploreFooter() {
+  _exploreFooterCollapsed = !_exploreFooterCollapsed;
+  document.body.classList.toggle('footer-collapsed', _exploreFooterCollapsed);
+  try {
+    var charId = (new URLSearchParams(location.search)).get('char') || 'default';
+    var val = _exploreFooterCollapsed ? '1' : '0';
+    localStorage.setItem('valdoria_footer_collapsed_' + charId, val);
+    localStorage.setItem('valdoria_footer_collapsed', val);
+  } catch (_e) { /* localStorage cheio — não fatal */ }
+  try { if (window.vHaptic) window.vHaptic('light'); } catch (_) {}
+}
+function _onExploreFooterAction(action) {
+  switch (action) {
+    case 'party':       if (typeof openPartyPopup === 'function') openPartyPopup(); break;
+    case 'inventory':   if (typeof _showExploracaoInventoryPopup === 'function') _showExploracaoInventoryPopup(); break;
+    case 'camp':
+      // Reusa o botão #btn-camp (mantém o phase-guard + toast da quick action).
+      var _cb = document.getElementById('btn-camp');
+      if (_cb) _cb.click();
+      else if (typeof openCampOverlay === 'function') openCampOverlay();
+      break;
+    case 'cartografia': if (typeof _openCartographyWithPrompt === 'function') _openCartographyWithPrompt(); break;
+    case 'settings':    if (typeof _showExploreSettings === 'function') _showExploreSettings(); break;
+    default: break;
+  }
+}
+function bindExploreFooter() {
+  _applyExploreFooterCollapsedClass();
+  renderExploreFooter();
+  var bp = document.getElementById('bottom-panel');
+  if (bp && !bp._footerBound) {
+    bp._footerBound = true;
+    bp.addEventListener('click', function (e) {
+      var b = e.target.closest('.fb-btn');
+      if (!b) return;
+      _onExploreFooterAction(b.getAttribute('data-action'));
+    });
+  }
+  var fct = document.getElementById('footer-collapse-toggle');
+  if (fct && !fct._footerBound) { fct._footerBound = true; fct.addEventListener('click', _toggleExploreFooter); }
+  var fr = document.getElementById('footer-restore');
+  if (fr && !fr._footerBound) { fr._footerBound = true; fr.addEventListener('click', _toggleExploreFooter); }
+}
+
+// ============================================================================
 // QUICK ACTIONS
 // ============================================================================
 
@@ -41461,6 +41946,9 @@ function bindQuickActions() {
       sl.addEventListener('change', function () { _showExploreSettings(); });
     });
   }
+  // Sessão #72 (2026-06-03): #btn-explore-settings removido — Config agora abre
+  // pelo footer retrátil (data-action="settings" → _onExploreFooterAction →
+  // _showExploreSettings). Guard preservado por robustez (botão não existe mais).
   var _exsBtn = document.getElementById('btn-explore-settings');
   if (_exsBtn) { _exsBtn.addEventListener('click', function (e) { e.stopPropagation(); _showExploreSettings(); }); }
   // 2026-04-27 USER RULE: hex-nav size controls — 3 níveis (0.6 / 0.78 / 1.0).
@@ -42031,6 +42519,7 @@ function boot() {
     if (!_bindingsBound) {
       bindHexNav();
       bindQuickActions();
+      bindExploreFooter();   // Sessão #72: footer retrátil (immersive) canonical
       bindWheelZoom();
       bindPinchZoom();
       bindZoomControls();

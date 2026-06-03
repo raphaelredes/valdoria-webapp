@@ -1,6 +1,12 @@
-// simuladores/tile_events_data.js — Sub-projeto #3 Phase A.8
-// MAPA_IA: 5 entries orc_camp (dormant/active/alerted/cleared/ruins).
-// Phase B vai expandir para os outros 11 types.
+// valdoria-webapp/exploracao/tile_events_data.js — Sub-projeto #3 Phase A.8
+// MAPA_IA: 12 tile-object types × estados (dormant/active/alerted/cleared/ruins).
+//   Cada entry = { body (fallback string), script[] (PADRAO_ALDRIC narração),
+//                  voiceLines{}, choices[] (com outcome_ok/_fail.ops/dungeon_combat) }.
+//   _showRuntimeEvent (exploracao.html) usa script[] → _showRuntimeEventPaginated
+//   (narração tipada + reveal); sem script[] cai pro fallback bodyEl.textContent.
+//   2026-06-03: TODAS as 51 entries têm script[] (narração 3ª pessoa, mostre-não-conte,
+//   5 sentidos; NUNCA Mestre/Narrador/DM como speaker — só narration). PADRAO_ALDRIC.
+// Aliases (linha ~2247): *.active → *.dormant (compartilham objeto + script).
 // Sem auto-generation — escrita manual com prosa cuidadosa em PT-BR.
 
 window.TILE_EVENTS_DB = window.TILE_EVENTS_DB || {};
@@ -141,6 +147,11 @@ window.TILE_EVENTS_DB['orc_camp.active'] = {
 
 window.TILE_EVENTS_DB['orc_camp.alerted'] = {
   body: 'Eles te viram. Lanças apontam. Gritos guturais ecoam pela mata. Sem volta.',
+  script: [
+    { type: 'narration', text: 'Tarde demais. Um berro gutural rasga a clareira e ricocheteia entre os troncos — o alarme orc, agudo e animal. Cabeças se viram na sua direção; olhos amarelos te encontram entre as samambaias.' },
+    { type: 'narration', text: 'Lanças de ponta enegrecida se erguem em fileira. O cheiro de couro rançoso e carne crua chega no vento. Botas pesadas batem o chão úmido, fechando o semicírculo — <i>devagar, sem pressa</i>, como quem já sabe que a presa não tem saída fácil.' },
+    { type: 'narration', text: 'O coração martela contra as costelas. A mata densa ainda murmura uma promessa de fuga ao leste, mas os orcs também a conhecem. <b>Não há mais volta</b> — só o que vem a seguir.' }
+  ],
   voiceLines: {
     martial:    '"Que venham!"',
     specialist: '"Tarde demais para furtividade. Posições defensivas."',
@@ -201,6 +212,11 @@ window.TILE_EVENTS_DB['orc_camp.alerted'] = {
 
 window.TILE_EVENTS_DB['orc_camp.cleared'] = {
   body: 'O acampamento agora é silêncio. Corpos onde antes havia guarda. A fogueira reduzida a cinzas. Há despojos no chão.',
+  script: [
+    { type: 'narration', text: 'O silêncio depois da luta tem um peso próprio. A fogueira que crepitava agora é um olho de cinza fria, e a fumaça fina sobe reta — não há vento que a agite. As tendas pretas pendem rasgadas.' },
+    { type: 'narration', text: 'Onde havia guarda, há vultos imóveis sobre a terra batida. O cheiro de ferro e suor ainda paira, denso. Aqui e ali, despojos repousam ao alcance: um saco de couro, uma lâmina largada, o brilho fosco de moeda entre as folhas.' },
+    { type: 'narration', text: 'O bosque parece prender a respiração, esperando ver o que você fará com o que sobrou. <i>Saquear, investigar — ou seguir e deixar os mortos em paz.</i>' }
+  ],
   voiceLines: {
     martial:    '"Limpo. O que sobrou é meu."',
     specialist: '"Cuidado com armadilhas. Sempre cuidado."',
@@ -257,6 +273,11 @@ window.TILE_EVENTS_DB['orc_camp.cleared'] = {
 
 window.TILE_EVENTS_DB['orc_camp.ruins'] = {
   body: 'O tempo cobriu tudo. Estrutura desabada, musgo invadindo, ossos antigos. Nada útil aqui — só lembranças.',
+  script: [
+    { type: 'narration', text: 'O que foi acampamento agora é cicatriz na floresta. Estacas tombadas apodrecem sob um manto de musgo verde-escuro; o totem outrora pintado de sangue está rachado, devolvido lentamente à terra.' },
+    { type: 'narration', text: 'Ossos antigos espalham-se entre as raízes, alvejados pelo tempo e pela chuva. Nada se move além de insetos e do farfalhar das folhas. <i>Quem lutou e morreu aqui já não tem nome.</i>' },
+    { type: 'narration', text: 'Há uma quietude grave neste lugar — o tipo de silêncio que convida à contemplação, mas não oferece nada de valor. Apenas a memória de violências esquecidas.' }
+  ],
   voiceLines: {
     martial:    '"Pó."',
     specialist: '"Anos. Nada para colher."',
@@ -350,6 +371,11 @@ window.TILE_EVENTS_DB['forgotten_chest.dormant'] = {
 
 window.TILE_EVENTS_DB['forgotten_chest.cleared'] = {
   body: 'O baú está aberto, vazio. Pedaços do conteúdo espalhados ao redor — você já o saqueou antes.',
+  script: [
+    { type: 'narration', text: 'O baú jaz de tampa aberta sob o carvalho, a boca escancarada para o céu como se ainda esperasse algo. As raízes continuam abraçadas à madeira escura, indiferentes ao fato de já não guardarem segredo algum.' },
+    { type: 'narration', text: 'Lascas e farpas espalham-se em volta — vestígios da sua própria passagem por aqui. O cheiro de musgo e madeira úmida permanece. <i>Você já levou o que valia.</i>' },
+    { type: 'narration', text: 'Ainda assim, baús viajados às vezes escondem fundos falsos e bolsos esquecidos. Um olhar mais atento, com calma, talvez revele o que a pressa anterior deixou para trás.' }
+  ],
   voiceLines: {
     martial:    '"Já peguei o que valia."',
     specialist: '"Eu mesmo deixei essa carcaça aqui."',
@@ -386,6 +412,10 @@ window.TILE_EVENTS_DB['forgotten_chest.cleared'] = {
 
 window.TILE_EVENTS_DB['forgotten_chest.ruins'] = {
   body: 'Restos de madeira apodrecida no chão. Foi um baú, há muito tempo.',
+  script: [
+    { type: 'narration', text: 'Tábuas escuras e quebradiças jazem caídas entre as raízes, devolvidas à terra que as gerou. Ferragens enferrujadas marcam onde antes houve dobradiças e fechadura.' },
+    { type: 'narration', text: 'O que quer que isto guardasse já se foi há muito — para ratos, para o tempo, ou para mãos mais ligeiras que as suas. <i>Restou apenas a forma esquecida de um baú.</i>' }
+  ],
   voiceLines: {
     martial:    '"Tarde demais."',
     specialist: '"Ratos pegaram o que sobrou."',
@@ -408,6 +438,11 @@ window.TILE_EVENTS_DB['forgotten_chest.ruins'] = {
 
 window.TILE_EVENTS_DB['tripwire_trap.dormant'] = {
   body: 'Um fio fino estendido entre duas árvores na altura do tornozelo. Mal visível. Liga-se a um mecanismo escondido na folhagem.',
+  script: [
+    { type: 'narration', text: 'A trilha à frente parece limpa — até a luz incidir num ângulo certo e revelar um brilho tênue na altura do tornozelo. Um fio, fino como teia, estendido entre duas árvores e tenso como corda de alaúde.' },
+    { type: 'narration', text: 'Os olhos seguem o fio até a folhagem do lado direito, onde algo se esconde sob galhos cuidadosamente arranjados — a forma curva de um arco armado, talvez, ou o dente de aço de uma cilada. Quem montou isto entende de presa e paciência.' },
+    { type: 'narration', text: 'Um passo descuidado e o silvo viria <i>antes</i> do som. Mas o fio está ali, exposto à sua atenção, e isso muda tudo: desarmá-lo, transpô-lo, ou contornar pela mata.' }
+  ],
   voiceLines: {
     martial:    '"Cilada de caçador. Posso passar com cuidado."',
     specialist: '"Vejo a tensão do fio. Posso desarmar isto."',
@@ -463,6 +498,10 @@ window.TILE_EVENTS_DB['tripwire_trap.dormant'] = {
 
 window.TILE_EVENTS_DB['tripwire_trap.cleared'] = {
   body: 'O fio está cortado, o mecanismo desativado. Um caminho seguro agora.',
+  script: [
+    { type: 'narration', text: 'O fio pende frouxo entre as árvores, cortado limpo — obra da sua própria mão. Na folhagem ao lado, o mecanismo jaz inerte, mola distendida, dente de aço desarmado.' },
+    { type: 'narration', text: 'A trilha está aberta e segura agora. Onde antes havia tensão silenciosa, há apenas o farfalhar tranquilo das folhas. <i>Você pode passar sem temer o silvo.</i>' }
+  ],
   voiceLines: {
     martial:    '"Limpo. Próximo viajante deve a mim."',
     specialist: '"Trabalho bem feito."',
@@ -481,6 +520,10 @@ window.TILE_EVENTS_DB['tripwire_trap.cleared'] = {
 
 window.TILE_EVENTS_DB['tripwire_trap.ruins'] = {
   body: 'Fragmentos de uma armadilha enferrujada espalhados pelo chão. Não funciona mais — o tempo a desativou.',
+  script: [
+    { type: 'narration', text: 'Pedaços de metal corroído jazem semienterrados na trilha — uma mola partida, restos de um gatilho tomado pela ferrugem alaranjada. O fio há muito apodreceu e se desfez.' },
+    { type: 'narration', text: 'A cilada que um dia espreitou aqui rendeu-se ao inimigo que vence todos: o tempo. <i>Inofensiva agora, apenas sucata sob as folhas.</i>' }
+  ],
   voiceLines: {
     martial:    '"Velha demais pra machucar alguém."',
     specialist: '"Mal feita. O ferrugem fez o resto."',
@@ -566,6 +609,11 @@ window.TILE_EVENTS_DB['runestone.dormant'] = {
 
 window.TILE_EVENTS_DB['runestone.active'] = {
   body: 'A pedra brilha forte agora. Energia arcana se condensa ao seu redor — alguém ou algo a despertou recentemente.',
+  script: [
+    { type: 'narration', text: 'O monólito de pedra cinzenta arde de dentro para fora. Veios de luz azul-prateada serpenteiam pelos sulcos das runas, pulsando num ritmo lento — como uma respiração que não deveria existir em rocha.' },
+    { type: 'narration', text: 'O ar à volta zumbe, denso e elétrico; os pelos dos braços se eriçam, e há um gosto metálico na boca. Folhas próximas tremem sem vento, atraídas e repelidas pela energia que se condensa. Algo despertou esta pedra <i>há pouco tempo</i>.' },
+    { type: 'narration', text: 'O poder transborda em ondas quase visíveis. Aproximar-se é tentar segurar relâmpago nas mãos: a magia pode fluir através de você — <b>ou engolir você por inteiro</b>.' }
+  ],
   voiceLines: {
     martial:    '"Algo há aí dentro. Não gosto."',
     specialist: '"Recém ativada. Não estava assim antes."',
@@ -617,6 +665,10 @@ window.TILE_EVENTS_DB['runestone.active'] = {
 
 window.TILE_EVENTS_DB['runestone.cleared'] = {
   body: 'A pedra agora é apenas pedra. Sem brilho, sem zumbido — algo a esvaziou. Resta a forma, sem o poder.',
+  script: [
+    { type: 'narration', text: 'O monólito está apagado. As runas que pulsavam em azul agora são apenas sulcos frios na pedra cinzenta, e o zumbido elétrico cedeu lugar ao silêncio comum do bosque.' },
+    { type: 'narration', text: 'Algo drenou esta pedra até a casca — restou a forma sem a alma. Sob os dedos, a superfície ainda guarda um resíduo fino, pó esbranquiçado nos vincos das marcas. <i>Sussurro do poder que um dia houve aqui.</i>' }
+  ],
   voiceLines: {
     martial:    '"Pedra comum agora."',
     specialist: '"Foi drenada. Quem fez isso?"',
@@ -653,6 +705,10 @@ window.TILE_EVENTS_DB['runestone.cleared'] = {
 
 window.TILE_EVENTS_DB['runestone.ruins'] = {
   body: 'A pedra está partida ao meio. Os símbolos quebrados não significam mais nada.',
+  script: [
+    { type: 'narration', text: 'O monólito jaz partido ao meio, as duas metades caídas em ângulos opostos como um osso quebrado. A fenda é limpa demais para ser obra do tempo — alguém golpeou esta pedra <i>de propósito</i>.' },
+    { type: 'narration', text: 'As runas que percorriam a superfície foram riscadas e estilhaçadas, os símbolos rompidos no meio de cada traço. O conhecimento que guardavam dispersou-se com os fragmentos. <i>O que quer que isto significasse, perdeu-se para sempre.</i>' }
+  ],
   voiceLines: {
     martial:    '"Vandalismo. Ou guerra."',
     specialist: '"Foi quebrada de propósito. Símbolos riscados."',
@@ -799,6 +855,10 @@ window.TILE_EVENTS_DB['fresh_tracks.dormant'] = {
 
 window.TILE_EVENTS_DB['fresh_tracks.cleared'] = {
   body: 'As pegadas foram seguidas e exploradas. Nada mais a aprender aqui.',
+  script: [
+    { type: 'narration', text: 'As marcas no barro continuam ali, fundas e nítidas, mas você já as leu de ponta a ponta. Para onde levavam, você descobriu; o que diziam, você ouviu.' },
+    { type: 'narration', text: 'O rastro esfriou de propósito investigativo — resta apenas o registro de uma passagem que já não guarda surpresa. <i>O caminho à frente é o que importa agora.</i>' }
+  ],
   voiceLines: {
     martial:    '"Já segui. Próximo passo."',
     specialist: '"Rastro frio agora."',
@@ -817,6 +877,10 @@ window.TILE_EVENTS_DB['fresh_tracks.cleared'] = {
 
 window.TILE_EVENTS_DB['fresh_tracks.ruins'] = {
   body: 'O barro secou e as pegadas viraram cicatrizes secas no chão. Velhas demais pra ler.',
+  script: [
+    { type: 'narration', text: 'O barro que um dia recebeu aquelas patas endureceu sob o sol, e as pegadas viraram cicatrizes rachadas no chão ressecado. As bordas desmoronaram; a profundidade se perdeu.' },
+    { type: 'narration', text: 'O que passou por aqui já está longe — semanas, talvez uma estação inteira. Não há rastro vivo a seguir, apenas a impressão fóssil de um movimento antigo. <i>Terra é só terra agora.</i>' }
+  ],
   voiceLines: {
     martial:    '"Tempo demais."',
     specialist: '"Sem leitura possível."',
@@ -999,6 +1063,11 @@ window.TILE_EVENTS_DB['sentinel_post.dormant'] = {
 
 window.TILE_EVENTS_DB['sentinel_post.active'] = {
   body: 'Fumaça sobe da chaminé. Uma silhueta se move pela janela — alguém vigia. Os olhos passam pela estrada.',
+  script: [
+    { type: 'narration', text: 'Adiante, uma torre de pedra atarracada vigia a curva da estrada. Um fio de fumaça sobe da chaminé, dobrando-se preguiçoso no ar frio — sinal de que o posto está ocupado.' },
+    { type: 'narration', text: 'Atrás da janela estreita, uma silhueta se move com a regularidade de quem cumpre vigília: passos lentos, uma pausa, os olhos varrendo a estrada de ponta a ponta. O brilho fosco de uma besta acompanha o movimento das mãos.' },
+    { type: 'narration', text: 'Ainda há sombra suficiente na orla da mata para passar despercebido — <i>se os pés forem leves</i>. Ou você pode caminhar à vista, mãos longe das armas, e tentar a palavra antes do aço.' }
+  ],
   voiceLines: {
     martial:    '"Sentinela armada. Cuidado."',
     specialist: '"Apenas um vigia. Posso passar de noite."',
@@ -1122,6 +1191,10 @@ window.TILE_EVENTS_DB['sentinel_post.active'] = {
 
 window.TILE_EVENTS_DB['sentinel_post.cleared'] = {
   body: 'O posto está vazio agora. O sentinela partiu — ou foi removido. Você pode descansar brevemente aqui.',
+  script: [
+    { type: 'narration', text: 'A torre está em silêncio. A chaminé não fumega mais, e a janela estreita emoldura apenas penumbra vazia. O sentinela partiu — por vontade própria, ou removido por quem veio antes de você.' },
+    { type: 'narration', text: 'Pela porta entreaberta, vê-se um catre dobrado, um banco e a frieza tranquila da pedra. O posto oferece o que todo posto oferece a quem passa: sombra, abrigo e um momento de fôlego. <i>Um descanso curto cairia bem.</i>' }
+  ],
   voiceLines: {
     martial:    '"Posto livre. Útil pra um descanso."',
     specialist: '"Pelo menos a vista é boa."',
@@ -1153,6 +1226,10 @@ window.TILE_EVENTS_DB['sentinel_post.cleared'] = {
 
 window.TILE_EVENTS_DB['sentinel_post.ruins'] = {
   body: 'A torre está desabada. Apenas uma pilha de pedras restou — quem viveu aqui foi esquecido pelo tempo.',
+  script: [
+    { type: 'narration', text: 'A torre de vigília desmoronou sobre si mesma. Onde havia parede e janela, resta apenas um amontoado de pedras musgosas, costuradas por raízes e líquen cinzento.' },
+    { type: 'narration', text: 'Não há como dizer se foi guerra ou simples abandono — o tempo apaga as duas coisas do mesmo jeito. Quem montou guarda aqui, vigiando estradas que talvez já não existam, foi esquecido há gerações. <i>Só o monte de pedras lembra que houve alguém.</i>' }
+  ],
   voiceLines: {
     martial:    '"Foi guerra ou tempo?"',
     specialist: '"Tempo. Anos."',
@@ -1235,6 +1312,10 @@ window.TILE_EVENTS_DB['broken_tower.dormant'] = {
 
 window.TILE_EVENTS_DB['broken_tower.cleared'] = {
   body: 'Você já explorou esta torre. Resta apenas o esqueleto da estrutura.',
+  script: [
+    { type: 'narration', text: 'A torre fendida ergue-se onde a deixou, mas já não guarda mistério. Você subiu a rampa de pedras, vasculhou a plataforma, recolheu o que havia — restou o esqueleto cinzento da estrutura contra o céu.' },
+    { type: 'narration', text: 'As aves de rapina voltaram aos seus ninhos no alto, indiferentes. O vento assobia pelas fendas como sempre fez. <i>Nada de novo a colher aqui.</i>' }
+  ],
   voiceLines: {
     martial:    '"Já esvaziei aqui."',
     specialist: '"Mais nada útil."',
@@ -1253,6 +1334,10 @@ window.TILE_EVENTS_DB['broken_tower.cleared'] = {
 
 window.TILE_EVENTS_DB['broken_tower.ruins'] = {
   body: 'Apenas alicerces submersos sob musgo e raízes. Era torre, num passado distante.',
+  script: [
+    { type: 'narration', text: 'Mal se reconhece que houve torre aqui. Os alicerces afundaram na terra, submersos sob um lençol de musgo espesso e raízes que rasgam as últimas pedras quadradas.' },
+    { type: 'narration', text: 'O contorno da fundação ainda se adivinha sob a vegetação — um anel de pedra devolvido ao chão de onde veio. <i>Num passado distante demais para nomes, alguém olhou o horizonte daqui.</i>' }
+  ],
   voiceLines: {
     martial:    '"Pó."',
     specialist: '"Total devolução à terra."',
@@ -1327,6 +1412,11 @@ window.TILE_EVENTS_DB['bandit_camp.dormant'] = {
 
 window.TILE_EVENTS_DB['bandit_camp.active'] = {
   body: 'Bandidos riem em torno da fogueira, contando moedas roubadas. Quatro deles, dois com bestas. Não te viram ainda.',
+  script: [
+    { type: 'narration', text: 'Da orla da mata, você os vê antes de ser visto. Quatro bandidos rodeiam uma fogueira crepitante, gargalhadas roucas misturadas ao tinir de moedas sendo contadas sobre um pano sujo.' },
+    { type: 'narration', text: 'Dois deles têm bestas apoiadas ao alcance da mão; os outros, facas cravadas no chão entre os pés. O cheiro de fumaça e bebida barata viaja no ar. Eles riem alto demais — <i>confiantes, descuidados</i> — e ainda não notaram sua presença.' },
+    { type: 'narration', text: 'O flanco direito do acampamento mergulha em sombra, ponto cego para quem fita o fogo. <i>Ali</i> mora a escolha: esgueirar-se, cair sobre eles antes do primeiro grito, ou recuar e deixá-los com o que roubaram.' }
+  ],
   voiceLines: {
     martial:    '"Quatro contra um. Justo."',
     specialist: '"Dois bestas — flanco direito é cego."',
@@ -1392,6 +1482,11 @@ window.TILE_EVENTS_DB['bandit_camp.active'] = {
 
 window.TILE_EVENTS_DB['bandit_camp.alerted'] = {
   body: 'Eles te viram. Saques sacam armas — facas, bestas, ódio.',
+  script: [
+    { type: 'narration', text: 'O riso morre de uma vez. Quatro pares de olhos se cravam em você, e a moeda contada rola esquecida na poeira. <i>Eles viram.</i>' },
+    { type: 'narration', text: 'Facas saltam do chão para as mãos; uma besta range ao ser engatilhada, depois outra. O ar enche-se de ódio fácil de quem vive de tomar o que é dos outros — e agora enxerga em você presa ou ameaça.' },
+    { type: 'narration', text: 'A mata densa ainda promete fuga, mas eles fecham distância depressa. <b>Aço ou fuga</b> — a estrada não dá terceira opção.' }
+  ],
   voiceLines: {
     martial:    '"Sem volta agora."',
     specialist: '"Vou pelos pontos cegos."',
@@ -1431,6 +1526,11 @@ window.TILE_EVENTS_DB['bandit_camp.alerted'] = {
 
 window.TILE_EVENTS_DB['bandit_camp.cleared'] = {
   body: 'Os bandidos foram derrotados ou fugiram. Os despojos estão por toda parte.',
+  script: [
+    { type: 'narration', text: 'O acampamento está vencido. A fogueira ainda fumega fraco, mas os que riam em volta dela já não riem — caídos, ou dispersos pela mata em fuga desordenada.' },
+    { type: 'narration', text: 'Os despojos espalham-se por toda parte: uma faca largada, um saco entreaberto derramando moedas, tendas reviradas na pressa. O fruto de assaltos a viajantes está agora ao alcance de quem tiver estômago para vasculhar.' },
+    { type: 'narration', text: 'O bosque retoma seus sons normais — pássaros, vento, o estalar da fogueira moribunda. <i>Resta decidir o que fazer com o que sobrou.</i>' }
+  ],
   voiceLines: {
     martial:    '"Limpo. Tomarei o que merecer."',
     specialist: '"Inventário rápido."',
@@ -1467,6 +1567,10 @@ window.TILE_EVENTS_DB['bandit_camp.cleared'] = {
 
 window.TILE_EVENTS_DB['bandit_camp.ruins'] = {
   body: 'Restos de tendas há muito decompostas. Ossos antigos. Foi acampamento, há anos.',
+  script: [
+    { type: 'narration', text: 'Trapos esfarrapados pendem de estacas tortas — o que restou de tendas há muito apodrecidas. A fogueira não passa de uma mancha escura e fria na terra, coberta de folhas secas.' },
+    { type: 'narration', text: 'Ossos antigos jazem entre os escombros, branqueados pelo sol e pela chuva de muitas estações. Quem acampou aqui — bandido ou vítima — não deixou nome, apenas a poeira. <i>Há anos que o vento é o único morador.</i>' }
+  ],
   voiceLines: {
     martial:    '"Velho demais."',
     specialist: '"Sem nada a colher."',
@@ -1531,6 +1635,11 @@ window.TILE_EVENTS_DB['hunter_camp.dormant'] = {
 
 window.TILE_EVENTS_DB['hunter_camp.active'] = {
   body: 'Três caçadores afiam facas em volta da fogueira. Um cervo recém abatido pendurado próximo. Eles te avistam — neutros até agora.',
+  script: [
+    { type: 'narration', text: 'Três caçadores ocupam a clareira, sentados em volta de uma fogueira honesta de lenha seca. Facas longas raspam pedras de amolar num ritmo constante — o som metálico e paciente de quem vive da lâmina afiada.' },
+    { type: 'narration', text: 'Um cervo recém-abatido pende de um galho próximo, ainda gotejando, e o cheiro de couro e sangue fresco mistura-se à fumaça. Os três param o que fazem ao notá-lo: olhares firmes, sem hostilidade — mas sem convite. <i>Neutros, calculando.</i>' },
+    { type: 'narration', text: 'Estes são caçadores de verdade, não salteadores. Recebem com hospitalidade quem chega em paz e respondem com flecha quem chega com mão leve. <i>O tom dos próximos instantes depende inteiramente de você.</i>' }
+  ],
   voiceLines: {
     martial:    '"Caçadores. Não são ameaça se tratados bem."',
     specialist: '"Posso aprender com eles. Boa sina."',
@@ -1581,6 +1690,11 @@ window.TILE_EVENTS_DB['hunter_camp.active'] = {
 
 window.TILE_EVENTS_DB['hunter_camp.alerted'] = {
   body: 'Eles ergueram os arcos. Você os ofendeu, ameaçou ou foi confundido com inimigo.',
+  script: [
+    { type: 'narration', text: 'A hospitalidade evaporou. Três arcos estão erguidos, flechas encostadas nas faces, as cordas tensas até o limite. Os caçadores não piscam — apontam para o seu peito com a calma de quem nunca erra o alvo.' },
+    { type: 'narration', text: 'Algo deu errado: uma palavra mal colocada, um gesto interpretado como ameaça, ou simplesmente o azar de ser confundido com inimigo. <i>O cheiro do cervo abatido ali perto lembra exatamente o que essas mãos fazem com presa.</i>' },
+    { type: 'narration', text: 'Um movimento brusco e três flechas voam. Resta o fio da navalha entre as opções: <b>pedir perdão, sacar o aço, ou correr</b> antes que as cordas se soltem.' }
+  ],
   voiceLines: {
     martial:    '"Como cheguei a este ponto..."',
     specialist: '"Posso recuar — não vale a luta."',
@@ -1636,6 +1750,10 @@ window.TILE_EVENTS_DB['hunter_camp.alerted'] = {
 
 window.TILE_EVENTS_DB['hunter_camp.cleared'] = {
   body: 'O acampamento agora silente — os caçadores foram embora ou caíram. Algumas coisas restam.',
+  script: [
+    { type: 'narration', text: 'A clareira repousa em silêncio. As facas que raspavam pedra calaram-se; a fogueira é só um círculo de cinza morna. Os caçadores partiram — seguindo a caça para longe, ou tombados onde estavam.' },
+    { type: 'narration', text: 'Couros ainda pendem nas estruturas de secagem, e provisões restam dobradas com o cuidado de quem respeita o próprio ofício. <i>Há suprimentos úteis aqui</i> — para quem souber tomá-los como um viajante de boa fé, e não como abutre.' }
+  ],
   voiceLines: {
     martial:    '"Que descansem. Se levarei algo, é com respeito."',
     specialist: '"Provisões valiosas aqui."',
@@ -1668,6 +1786,10 @@ window.TILE_EVENTS_DB['hunter_camp.cleared'] = {
 
 window.TILE_EVENTS_DB['hunter_camp.ruins'] = {
   body: 'Restos antigos de couros e ossos. Foi acampamento, faz tempo.',
+  script: [
+    { type: 'narration', text: 'Couros endurecidos e quebradiços pendem de estruturas tombadas, e ossos de caça antiga espalham-se pela terra, alvejados pelo tempo. As estacas de secagem inclinam-se, vencidas pelo peso das estações.' },
+    { type: 'narration', text: 'Foi acampamento de caçadores, faz muito. Eles seguiram em frente — para outra mata, ou para o silêncio definitivo. <i>Só os restos curtidos pela intempérie sabem dizer que houve vida aqui.</i>' }
+  ],
   voiceLines: {
     martial:    '"Tempo demais."',
     specialist: '"Sem rastros vivos."',
@@ -1690,6 +1812,11 @@ window.TILE_EVENTS_DB['hunter_camp.ruins'] = {
 
 window.TILE_EVENTS_DB['caravan_camp.active'] = {
   body: 'Uma caravana mercante descansa. Carroças cobertas, mulas pastando, comerciantes contando moedas. Eles te observam.',
+  script: [
+    { type: 'narration', text: 'Uma fileira de carroças cobertas de lona descansa à beira da estrada, mulas pastando soltas na grama rala. Caixotes e fardos amontoam-se sob redes amarradas — a riqueza viajante de uma caravana mercante.' },
+    { type: 'narration', text: 'Os comerciantes contam moedas e conferem cargas, mas os olhos os traem: acompanham cada passo seu com a cautela de quem já perdeu mercadoria para a estrada. Um guarda apoia a mão no cabo da arma — <i>sem sacá-la, por ora</i>.' },
+    { type: 'narration', text: 'Há cheiro de especiaria, suor de mula e couro novo no ar. Comércio honesto é possível aqui; mãos leves entre as lonas, também — mas guardas atentos cobram caro o atrevimento.' }
+  ],
   voiceLines: {
     martial:    '"Mercadores. Pacíficos, mas atentos."',
     specialist: '"Carga interessante. Posso negociar."',
@@ -1747,6 +1874,11 @@ window.TILE_EVENTS_DB['caravan_camp.active'] = {
 
 window.TILE_EVENTS_DB['caravan_camp.dormant'] = {
   body: 'A caravana descansa em silêncio profundo. Tochas apagadas, mulas dormindo, comerciantes em sono pesado. É madrugada.',
+  script: [
+    { type: 'narration', text: 'É madrugada cerrada, e a caravana dorme. As tochas apagaram-se em fios de fumaça fria; as mulas cochilam de cabeça baixa, e os comerciantes roncam pesado sob as lonas, embalados pelo cansaço da estrada.' },
+    { type: 'narration', text: 'Só uma sentinela bocejante luta contra o sono num banquinho, a cabeça pendendo a cada poucos instantes. O orvalho assenta sobre as carroças. <i>O mundo inteiro parece ter parado para respirar.</i>' },
+    { type: 'narration', text: 'A hora favorece passos silenciosos. Você pode atravessar sem perturbar o sono alheio — ou armar acampamento a uma distância respeitosa e dividir, à sua maneira, a quietude da noite.' }
+  ],
   voiceLines: {
     martial:    '"Vigia leve neste horário."',
     specialist: '"Posso passar sem ninguém notar."',
@@ -1787,6 +1919,11 @@ window.TILE_EVENTS_DB['caravan_camp.dormant'] = {
 
 window.TILE_EVENTS_DB['caravan_camp.alerted'] = {
   body: 'Os guardas da caravana sacam armas. Você foi pego — ou confundido com bandido.',
+  script: [
+    { type: 'narration', text: 'Um grito de alerta corta a calmaria. Guardas da caravana saltam de junto das carroças, lâminas já desembainhadas, formando um muro entre você e a carga. Os comerciantes recuam para trás dos fardos.' },
+    { type: 'narration', text: 'Há mais medo do que raiva nos olhos deles — o medo de quem teme perder tudo para um salteador. <i>Confundiram você com a ameaça que tanto temem</i>, e o engano é perigoso de ambos os lados.' },
+    { type: 'narration', text: 'As pontas de aço tremem, à espera de um pretexto. Uma palavra calma ainda pode desarmar o mal-entendido — ou a mata densa ainda pode acolher uma retirada rápida.' }
+  ],
   voiceLines: {
     martial:    '"Mal entendido. Posso explicar — talvez."',
     specialist: '"Recuar é o mais sábio."',
@@ -1829,6 +1966,10 @@ window.TILE_EVENTS_DB['caravan_camp.alerted'] = {
 
 window.TILE_EVENTS_DB['caravan_camp.cleared'] = {
   body: 'A caravana partiu. Marcas de carroças, fogueira morta, e algumas coisas esquecidas.',
+  script: [
+    { type: 'narration', text: 'A caravana seguiu viagem. Sulcos paralelos de rodas afundam-se na terra batida, apontando estrada afora, e o capim pisado ainda guarda o formato das mulas que ali dormiram.' },
+    { type: 'narration', text: 'A fogueira virou um círculo de cinza apagada. Aqui e ali, vestígios da partida apressada: uma corda largada, restos de embalagem, o brilho discreto de algo pequeno deixado para trás entre as marcas. <i>Vale um olhar atento.</i>' }
+  ],
   voiceLines: {
     martial:    '"Já se foram. Nada perdido."',
     specialist: '"Vejamos o que esqueceram."',
@@ -1865,6 +2006,10 @@ window.TILE_EVENTS_DB['caravan_camp.cleared'] = {
 
 window.TILE_EVENTS_DB['caravan_camp.ruins'] = {
   body: 'Carroças tombadas, mulas mortas há anos. Esta caravana foi atacada e nunca recuperada.',
+  script: [
+    { type: 'narration', text: 'Carroças jazem tombadas e estraçalhadas à beira da estrada, rodas quebradas apontando para o céu. Entre os destroços, ossadas de mulas branqueadas pelo tempo contam de uma jornada que terminou em violência.' },
+    { type: 'narration', text: 'Flechas partidas ainda espetam a madeira apodrecida — sinais nítidos de emboscada. Esta caravana foi atacada e nunca recuperada; ninguém voltou para enterrar os mortos nem reclamar a carga. <i>Um silêncio pesado guarda a tragédia.</i>' }
+  ],
   voiceLines: {
     martial:    '"Tragédia velha."',
     specialist: '"Sinais de embuscada."',
@@ -1949,6 +2094,10 @@ window.TILE_EVENTS_DB['abandoned_camp.dormant'] = {
 
 window.TILE_EVENTS_DB['abandoned_camp.cleared'] = {
   body: 'Você já vasculhou tudo aqui. O lugar continua vazio.',
+  script: [
+    { type: 'narration', text: 'O acampamento esquecido continua como você o deixou: tendas em farrapos, marmita virada, o pingente quebrado pendendo do mesmo galho. Você já revirou cada canto.' },
+    { type: 'narration', text: 'O medo antigo ainda paira como névoa fina, mas já não esconde segredos — você viu tudo o que havia para ver. <i>Resta apenas seguir, deixando os ecos onde estão.</i>' }
+  ],
   voiceLines: {
     martial:    '"Já estive aqui."',
     specialist: '"Mais nada útil."',
@@ -1967,6 +2116,10 @@ window.TILE_EVENTS_DB['abandoned_camp.cleared'] = {
 
 window.TILE_EVENTS_DB['abandoned_camp.ruins'] = {
   body: 'Apenas marcas no chão restam. O tempo apagou o resto.',
+  script: [
+    { type: 'narration', text: 'Quase nada sobrou. Manchas escuras na terra marcam onde houve fogueiras; depressões rasas no solo, onde houve tendas. A vegetação rasteira já reconquistou quase tudo.' },
+    { type: 'narration', text: 'Quem viveu seu drama aqui — e qualquer terror que os tenha expulsado — desapareceu na poeira de muitas estações. <i>O tempo apagou até as histórias.</i>' }
+  ],
   voiceLines: {
     martial:    '"Pó."',
     specialist: '"Devolvido à terra."',
@@ -2044,6 +2197,10 @@ window.TILE_EVENTS_DB['war_drum.dormant'] = {
 
 window.TILE_EVENTS_DB['war_drum.cleared'] = {
   body: 'O tambor está destruído — couro rasgado, postes derrubados. Nunca mais convocará ninguém.',
+  script: [
+    { type: 'narration', text: 'O grande tambor de guerra jaz silenciado para sempre. O couro está rasgado em farrapos, os postes de carvalho derrubados, os crânios de amarração espalhados pela terra.' },
+    { type: 'narration', text: 'Nenhum toque ressoará mais por estas montanhas convocando lâminas para a guerra. <i>O instrumento da violência tribal calou-se — e o silêncio, aqui, soa como vitória.</i>' }
+  ],
   voiceLines: {
     martial:    '"Trabalho feito."',
     specialist: '"Eficiente."',
@@ -2062,6 +2219,10 @@ window.TILE_EVENTS_DB['war_drum.cleared'] = {
 
 window.TILE_EVENTS_DB['war_drum.ruins'] = {
   body: 'Apenas restos de madeira apodrecida e couro escuro. Foi tambor, há anos.',
+  script: [
+    { type: 'narration', text: 'Postes de carvalho apodrecidos jazem caídos no chão, e tiras de couro enegrecido — o que restou da pele do tambor — estão ressecadas e enroladas como folhas mortas.' },
+    { type: 'narration', text: 'Foi um tambor de guerra, faz muitos anos. As runas tribais desbotaram até a ilegibilidade. <i>O som que um dia chamava exércitos há muito se perdeu no vento das montanhas.</i>' }
+  ],
   voiceLines: {
     martial:    '"Tempo apagou tudo."',
     specialist: '"Sem nada a fazer."',
@@ -2100,6 +2261,11 @@ window.TILE_EVENTS_DB['abandoned_camp.active']  = window.TILE_EVENTS_DB['abandon
 window.TILE_EVENTS_DB['war_drum.alerted'] = {
   body: 'O som do tambor reverberou pelas montanhas. Algo respondeu — passos pesados se aproximam. Você precisa decidir AGORA.',
   tech: { label: 'AMEAÇA', text: 'Inimigos atraídos pelo tambor — combate iminente.' },
+  script: [
+    { type: 'narration', text: 'O eco do tambor ainda vibra entre os paredões de pedra, grave e crescente, ricocheteando pelas montanhas em ondas que não querem morrer.' },
+    { type: 'narration', text: 'E então — uma resposta. Passos pesados, muitos, batendo o solo em cadência de marcha. O som vem de trás da encosta e cresce a cada instante; couro range, metal tine. <i>O chamado foi ouvido.</i>' },
+    { type: 'narration', text: 'Não há tempo para hesitar. A encosta oposta oferece fuga, mas o terreno aberto à frente serve a quem quiser escolher onde firmar os pés. <b>A decisão é agora.</b>' }
+  ],
   voiceLines: {
     martial:    '"Eles vêm. Postura de combate."',
     specialist: '"Aqueles passos não são humanos. Reforços!"',
@@ -2142,6 +2308,11 @@ window.TILE_EVENTS_DB['war_drum.alerted'] = {
 window.TILE_EVENTS_DB['broken_tower.alerted'] = {
   body: 'Algo se moveu nas ruínas — uma silhueta entre as pedras. Não está sozinho aqui.',
   tech: { label: 'PERCEPÇÃO', text: 'Presença hostil próxima — possível bandido ou criatura.' },
+  script: [
+    { type: 'narration', text: 'Um lampejo de movimento ao canto do olho — uma silhueta que se esgueira entre os blocos tombados da torre fendida e desaparece atrás de uma coluna caída.' },
+    { type: 'narration', text: 'O ar fica subitamente atento. Um seixo rola sozinho de uma pilha de escombros; uma sombra alonga-se onde não deveria haver nada. <i>Você não está sozinho aqui</i> — e o que partilha as ruínas não se mostrou por acaso.' },
+    { type: 'narration', text: 'Pode ser apenas um corvo assustado entre as pedras. Pode ser algo com mãos e intenção. Avançar com cautela revelaria a verdade; recuar deixaria o enigma intacto.' }
+  ],
   voiceLines: {
     martial:    '"Inimigo. Pronto."',
     specialist: '"Movimento atrás dos blocos caídos."',
@@ -2178,6 +2349,11 @@ window.TILE_EVENTS_DB['broken_tower.alerted'] = {
 window.TILE_EVENTS_DB['fresh_tracks.alerted'] = {
   body: 'As pegadas levam a um animal grande, agora a poucos metros. Ele ergueu a cabeça — te viu.',
   tech: { label: 'AMEAÇA', text: 'Animal selvagem alerta. Movimento errado dispara investida.' },
+  script: [
+    { type: 'narration', text: 'A trilha de patas funda termina ali, a poucos metros: uma criatura grande, de pelo eriçado, parada entre os fetos. O cheiro almiscarado de fera chega forte no vento.' },
+    { type: 'narration', text: 'Ela ergue a cabeça num movimento brusco. Olhos âmbar travam nos seus, e o corpo inteiro tensiona — músculos preparados, narinas dilatadas. <i>Te viu.</i> A respiração dela sai em nuvens lentas pelo focinho.' },
+    { type: 'narration', text: 'Um movimento brusco demais e ela investe. Há um fio invisível de tensão entre vocês dois — gestos calmos talvez o desfaçam em paz, ou um recuo cuidadoso talvez evite o confronto por completo.' }
+  ],
   voiceLines: {
     martial:    '"Caça ou luta. Decida rápido."',
     specialist: '"Postura defensiva da fera."',
@@ -2214,6 +2390,11 @@ window.TILE_EVENTS_DB['fresh_tracks.alerted'] = {
 window.TILE_EVENTS_DB['abandoned_camp.alerted'] = {
   body: 'O acampamento parecia abandonado — mas alguém estava escondido. Uma figura se levanta de trás de uma carroça quebrada.',
   tech: { label: 'AMEAÇA', text: 'Humano armado em postura defensiva. Diplomacia ou combate.' },
+  script: [
+    { type: 'narration', text: 'O acampamento parecia morto — tendas em farrapos, fogueira fria. Até que um som de raspagem quebra a quietude e uma figura se ergue de trás de uma carroça quebrada, surpreendendo a ambos.' },
+    { type: 'narration', text: 'É um vulto magro, de roupas em frangalhos e olhos fundos. Uma mão trêmula segura uma adaga improvisada; a outra se ergue num gesto que é meio defesa, meio súplica. <i>Há mais terror do que ameaça naquele rosto</i> — alguém que se escondia, e foi encontrado.' },
+    { type: 'narration', text: 'A tensão pesa. Uma palavra mal escolhida pode transformar medo em violência; um gesto calmo pode desarmar o desespero. Ou você pode simplesmente recuar e deixá-lo com seu esconderijo.' }
+  ],
   voiceLines: {
     martial:    '"Postura agressiva. Identifique-se ou ataque."',
     specialist: '"Não estava abandonado. Armadilha clássica."',
@@ -2253,6 +2434,11 @@ window.TILE_EVENTS_DB['abandoned_camp.alerted'] = {
 window.TILE_EVENTS_DB['sentinel_post.alerted'] = {
   body: 'A sentinela te viu. O grito de alarme já saiu — outras vozes respondem ao longe. Combate ou fuga, em segundos.',
   tech: { label: 'AMEAÇA', text: 'Alarme disparado. Reforços chegando em 1-2 turnos. Janela tática curta.' },
+  script: [
+    { type: 'narration', text: 'O grito rasga o ar antes que você possa reagir — a sentinela apontou na sua direção e berrou o alarme, a voz quebrando de urgência sobre o telhado do posto.' },
+    { type: 'narration', text: 'Ao longe, outras vozes respondem. Cornetas, gritos, o tropel de botas que se organizam. <i>Reforços a caminho</i> — questão de um ou dois fôlegos até chegarem. A janela para agir está se fechando depressa.' },
+    { type: 'narration', text: 'O coração dispara. Cair sobre a sentinela agora, enquanto está sozinha, daria vantagem antes do reforço; mergulhar na mata enquanto a confusão reina poderia abrir caminho de fuga. <b>Não há terceira respiração para pensar.</b>' }
+  ],
   voiceLines: {
     martial:    '"Eles vêm. Aço pronto."',
     specialist: '"Reforços a 30 passos. Janela curta."',
