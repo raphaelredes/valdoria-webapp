@@ -66,11 +66,24 @@
   var state = {};   // key -> {x,y,scale,name,el}
   var sel = null;
 
-  // Auth/API (mesma sessão do jogo): lê token/api/uid da URL ou do localStorage.
+  // Auth/API (mesma sessão do jogo): lê token/api/uid da URL ou do record
+  // canônico `valdoria_session_<env>` gravado por vAuthTokenStore (localStorage
+  // compartilhado por origem — funciona ao abrir o editor direto na MESMA aba/
+  // navegador onde o jogo está logado). FIX 2026-06-03: o record usa as chaves
+  // `api_base`/`user_id` (não `api`/`uid`) — ler errado deixava API/UID vazios e
+  // o botão Salvar caía no fallback de download (janela de salvar arquivo) em vez
+  // de gravar direto no servidor. Ver shared/auth-token-store.js setToken().
   function _qs(k){ try { return new URL(location.href).searchParams.get(k); } catch(_) { return null; } }
-  var API = _qs('api') || (function(){ try { return JSON.parse(localStorage.getItem('valdoria_session_dev')||localStorage.getItem('valdoria_session_prod')||'{}').api; } catch(_){ return null; } })() || '';
-  var TOKEN = _qs('token') || (function(){ try { return JSON.parse(localStorage.getItem('valdoria_session_dev')||localStorage.getItem('valdoria_session_prod')||'{}').token; } catch(_){ return null; } })() || '';
-  var UID = _qs('uid') || (function(){ try { return JSON.parse(localStorage.getItem('valdoria_session_dev')||localStorage.getItem('valdoria_session_prod')||'{}').uid; } catch(_){ return null; } })() || '';
+  function _sessRec(){
+    try {
+      var raw = localStorage.getItem('valdoria_session_dev') || localStorage.getItem('valdoria_session_prod') || '{}';
+      return JSON.parse(raw) || {};
+    } catch(_){ return {}; }
+  }
+  var _SR = _sessRec();
+  var API = _qs('api') || _SR.api_base || '';
+  var TOKEN = _qs('token') || _SR.token || '';
+  var UID = _qs('uid') || _SR.user_id || '';
   function _api(path){ return (API ? API.replace(/\/$/, '') : '') + path; }
 
   // Nível sugerido (referência existente): min_level da região (REGIONAL_MAP_CATALOG)
@@ -185,8 +198,12 @@
     }).then(function(r){ return r.json().catch(function(){ return { error: 'bad_json', status: r.status }; }); })
       .then(function(j){
         btn.disabled = false; btn.textContent = oldTxt;
-        if (j && j.ok) window.alert('✓ Salvo! As posições já refletem no jogo.\nBackups mantidos: ' + (j.backups != null ? j.backups : '?') + '/5.');
-        else window.alert('Falha ao salvar: ' + ((j && (j.message || j.error)) || 'erro') + (j && j.status ? (' (HTTP ' + j.status + ')') : ''));
+        if (j && j.ok) { window.alert('✓ Salvo! As posições já refletem no jogo.\nBackups mantidos: ' + (j.backups != null ? j.backups : '?') + '/5.'); return; }
+        // Mensagens claras por causa (não baixa arquivo — o save É via servidor).
+        var err = (j && j.error) || '';
+        if (err === 'invalid_session') window.alert('Sessão expirada. Reabra o editor a partir do jogo (/play) para renovar a sessão e salvar.');
+        else if (err === 'not_admin') window.alert('Apenas admin pode editar o mapa (config global).\nSua conta (uid ' + UID + ') não é admin neste ambiente. Use a conta admin ou peça para adicioná-la em data/admins.json.');
+        else window.alert('Falha ao salvar: ' + ((j && (j.message || err)) || 'erro') + (j && j.status ? (' (HTTP ' + j.status + ')') : ''));
       }).catch(function(e){ btn.disabled = false; btn.textContent = oldTxt; window.alert('Erro de rede ao salvar: ' + e); });
   });
   document.getElementById('btn-reset').addEventListener('click', function(){

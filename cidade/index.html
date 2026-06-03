@@ -37266,73 +37266,12 @@ var MARKET_SELL_MULTIPLIERS = {
 var MARKET_SELL_MULTIPLIER_DEFAULT = 0.5;
 var MARKET_SELL_TAX_PERCENT = 10;
 
-function _tavernRumorBuy(p){
-  // canonical: 2 sistemas — boato sobre inimigo (RUMOR_TABLE +2 dano vs tipo)
-  // OU boato genérico (BONUS_RUMORS — AC/Ouro/Cura/Save/Atk)
-  var enemyKeys = Object.keys(TAVERN_RUMOR_TABLE);
-  var items = enemyKeys.map(function(key){
-    var info = TAVERN_RUMOR_TABLE[key];
-    return { icon: info.icon, label: 'Sobre ' + info.label, badge: '5 V', _enemy: key };
-  });
-  items.push({ icon: _heralIco('ic-dialogo'), label: 'Boato genérico (sorteado)', badge: '5 V', _enemy: null });
-  _aaaListSubScreen({
-    theme: 'tavern',
-    stackKey: 'tavern_rumor_choice', icon: _heralIco('ic-bolsa'), title: 'Comprar Boato (5 V)',
-    flavor: '<i>"Cinco Valdoritas, e te conto algo útil. Sobre o que quer saber?"</i>',
-    items: items,
-    onPick: function(item){
-      if (!_pay(p, 5)) return;
-      var preGold = p.gold + 5;  // já pagou
-      if (item._enemy){
-        // RUMOR_TABLE: dica específica + buff +2 dano vs tipo
-        var info = TAVERN_RUMOR_TABLE[item._enemy];
-        var variant = info.variants[Math.floor(Math.random() * info.variants.length)];
-        p.temp_bonuses = p.temp_bonuses || {};
-        p.temp_bonuses['rumor_dmg_' + item._enemy] = 2;
-        _showServiceResultPopup({
-          icon: info.icon, npc: 'Grom Barba-Cinza',
-          narrative: '<i>Grom inclina-se sobre o balcão e sussurra:</i><br><br>' + variant +
-                     '<br><br><b>Bônus adquirido:</b> +2 dano contra ' + info.label + ' (até descanso longo).',
-          deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
-          onContinue: _refreshTavernPopupIfOpen
-        });
-      } else {
-        // canonical: tavern_rumors_data.py BONUS_RUMORS via CANON_BONUS_RUMORS
-        // 5 categorias canonical (attack/defense/gold/healing/saves) com 6 variants cada
-        // Fallback: TAVERN_BONUS_RUMORS legacy se canonical nao carregar
-        var canonRumors = (typeof CANON_BONUS_RUMORS !== 'undefined' && CANON_BONUS_RUMORS.bonus_rumors)
-                          ? CANON_BONUS_RUMORS.bonus_rumors : null;
-        var category;
-        if (canonRumors){
-          var catKeys = Object.keys(canonRumors);
-          var randCatKey = catKeys[Math.floor(Math.random() * catKeys.length)];
-          var canonCat = canonRumors[randCatKey];
-          category = {
-            key: canonCat.key,
-            label: canonCat.label,
-            icon: canonCat.icon,
-            value: canonCat.value,
-            variants: canonCat.variants
-          };
-        } else {
-          category = TAVERN_BONUS_RUMORS[Math.floor(Math.random() * TAVERN_BONUS_RUMORS.length)];
-        }
-        var variant = category.variants[Math.floor(Math.random() * category.variants.length)];
-        p.temp_bonuses = p.temp_bonuses || {};
-        p.temp_bonuses[category.key] = (p.temp_bonuses[category.key] || 0) + (category.value || 1);
-        _showServiceResultPopup({
-          icon: _heralIco('ic-bolsa'), npc: 'Grom Barba-Cinza',
-          narrative: variant + '<br><br>' +
-                     '<b>Bônus adquirido:</b> ' + category.icon + ' ' + category.label + '<br>' +
-                     '<i>Ativo até o próximo descanso longo.</i>',
-          deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
-          rewards: [{ type:'item', amount: 1, label: category.label }],
-          onContinue: _refreshTavernPopupIfOpen
-        });
-      }
-    }
-  });
-}
+// _tavernRumorBuy REMOVIDO (sessão #72): o boato simples ("Comprar Boato") foi
+// consolidado na XGtE Gather Info ("Coletar informações" / _tavernShowGather, cb
+// 'tavern_gather_open'), que é o ÚNICO sistema de boato. Sem entry point (nenhum
+// card do _buildTavernMockData usava 'tavern_rumor_buy' desde #71d). Os mirrors de
+// dados (CANON_BONUS_RUMORS / TAVERN_BONUS_RUMORS / TAVERN_RUMOR_TABLE) ficam
+// dormentes. _TEMP_EFFECT_LABELS mantém os rumor_* legados (compat de bônus ativos).
 
 function _refreshTavernPopupIfOpen(){
   if (typeof _popupStack === 'undefined' || !_popupStack.length) return;
@@ -47006,7 +46945,7 @@ var ACTION_HANDLERS = {
   'tavern_games_open':        function(p){ _tavernShowGames(p); },
   'tavern_bulletin_open':     function(p){ _tavernShowBulletin(p); },
   'tavern_meal_open':         function(p){ _tavernShowMeal(p); },
-  'tavern_rumor_buy':         function(p){ _tavernRumorBuy(p); },
+  // 'tavern_rumor_buy' removido (sessão #72) — boato consolidado em 'tavern_gather_open'.
   'tavern_mercenaries_open':  function(p){ _tavernShowMercenaries(p); },
   'tavern_adventurers_open':  function(p){ _tavernShowAdventurers(p); },
   'tavern_carousing_open':    function(p){ _tavernShowCarousing(p); },

@@ -9,9 +9,12 @@
  *   window._openCityDialogue('tavern', <node>). ZERO narrativa hardcoded aqui.
  *
  *   FIX (sessão #71): o HUB renderiza do _buildTavernMockData (cidade/index.html),
- *   cujos cb são 'tavern_<svc>_open' / 'tavern_rumor_buy'. Portanto TAVERN_SVC_META
- *   + _TAVERN_CARD_NODE são keyed NESSES cb (do mock builder) — NÃO nos '_menu' do
- *   process_action. Os cb reais de efeito/transição vivem DENTRO dos nodes (server-side).
+ *   cujos cb são 'tavern_<svc>_open'. Portanto TAVERN_SVC_META + _TAVERN_CARD_NODE
+ *   são keyed NESSES cb (do mock builder) — NÃO nos '_menu' do process_action. Os
+ *   cb reais de efeito/transição vivem DENTRO dos nodes (server-side).
+ *
+ *   Sessão #72: o boato simples ('tavern_rumor_buy' / node 'rumor') foi REMOVIDO —
+ *   o boato canônico é a XGtE Gather Info ('tavern_gather_open' → node 'gather').
  *
  * NPC: Grom Barba-Cinza. Doc: docs/sistemas/padrao-servidor.md
  *
@@ -27,10 +30,9 @@
 
 /* svc.cb do hub (cidade/index.html _buildTavernMockData, replica tavern.py get_menu)
    -> PNG icon canonical. ATENÇÃO: o hub renderiza do MOCK builder, cujos cb são
-   'tavern_<svc>_open' / 'tavern_rumor_buy' / 'tavern_drinks_open' — NÃO os '_menu'
-   do process_action. Manter estes em sincronia com _buildTavernMockData. */
+   'tavern_<svc>_open' / 'tavern_drinks_open' — NÃO os '_menu' do process_action.
+   Manter estes em sincronia com _buildTavernMockData. (Boato simples removido #72.) */
 var TAVERN_SVC_META = {
-  'tavern_rumor_buy':        { icon: '../shared/img/services/svc-rumores.webp',      meta: '5 V · pistas' },
   'tavern_drinks_open':      { icon: '../shared/img/services/svc-bebidas.webp',      meta: 'Recupera HP/MP' },
   'tavern_mercenaries_open': { icon: '../shared/img/services/svc-mercenarios.webp',  meta: 'Contratar por dia' },
   'tavern_adventurers_open': { icon: '../shared/img/services/svc-exploradores.webp', meta: 'Especialistas de campo' },
@@ -48,7 +50,6 @@ var TAVERN_SVC_META = {
    nodes (server-side) — aqui só mapeamos a cb do card -> node. */
 var _TAVERN_CARD_NODE = {
   'tavern_drinks_open': 'drinks',
-  'tavern_rumor_buy': 'rumor',
   'tavern_mercenaries_open': 'mercenaries',
   'tavern_adventurers_open': 'adventurers',
   'tavern_games_open': 'games',
