@@ -10374,6 +10374,20 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('bjorn') >= 0)   return '/shared/img/npcs/bjorn-comerciante.webp';
   if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.webp';
   if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.webp';
+  // Sessão #72 (2026-06-03) — NPCs nomeados de discovery quests (portões/oficina/
+  // banco/runas/arena/templo) que caíam no ícone heráldico ou num WebP genérico de
+  // papel. User: "Joran sentinela sem imagem, e vários outros". PADRAO_LOCAIS #2:
+  // NPC nomeado com retrato SEMPRE tem WebP dedicado. Vêm ANTES dos fallbacks de
+  // papel (ex.: 'thorne' antes de 'ferreir'). 4 já existiam (anciã/mirena/thorne/
+  // velithra); Joran/Tharos/Ysoria/Caçadora gerados via OpenAI low + WebP.
+  if (s.indexOf('joran') >= 0)    return '/shared/img/npcs/joran-sentinela.webp';
+  if (s.indexOf('anci') >= 0)     return '/shared/img/npcs/ancia-valdoria.webp';
+  if (s.indexOf('mirena') >= 0)   return '/shared/img/npcs/mirena-armadureira.webp';
+  if (s.indexOf('thorne') >= 0)   return '/shared/img/npcs/thorne-armeiro.webp';
+  if (s.indexOf('velithra') >= 0) return '/shared/img/npcs/velithra-alquimista.webp';
+  if (s.indexOf('tharos') >= 0)   return '/shared/img/npcs/tharos-mestre-armas.webp';
+  if (s.indexOf('ysoria') >= 0)   return '/shared/img/npcs/capita-ysoria.webp';
+  if (s.indexOf('caçador') >= 0 || s.indexOf('cacador') >= 0) return '/shared/img/npcs/cacadora-itinerante.webp';
   // Plaza NPCs (Sessao #37 v18 — PADRAO_ALDRIC lightbox parity para discovery quests)
   if (s.indexOf('mendigo') >= 0) return '/shared/img/npcs/plaza/mendigo_praca.webp';
   if (s.indexOf('crian') >= 0)   return '/shared/img/npcs/plaza/crianca_pomar.webp';
