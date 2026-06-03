@@ -10776,6 +10776,14 @@ window.__onIntroTap = function() {
       if (window.TileLog) window.TileLog.warn('STUB-EVT', 'resolve_failed', { hex: hexId });
       return;
     }
+    // PADRAO_LOCAIS (anti-repeat): evento de objeto NÃO-repetível já resolvido não
+    // reabre o diálogo ao reentrar no hexágono (bug: "voltei e apareceu de novo").
+    // EventResolver marca rt.alreadyChosen quando EventChoicePersistence já tem escolha.
+    if (rt.alreadyChosen && !rt.repeatable) {
+      if (window.TileLog) window.TileLog.info('STUB-EVT', 'skip_already_resolved', { hex: hexId });
+      try { if (typeof vToast === 'function') vToast('Você já resolveu o que havia aqui.', 'info'); } catch (_) { }
+      return;
+    }
     // Sub-projeto #4 v9: tile-object popup = força interação, evita evasão.
     _forceInteraction = true;
     _showRuntimeEvent(rt);
@@ -37885,14 +37893,16 @@ function _journeyChancePct(dc, mod) {
 }
 
 // User sessão #69: o dado d20 ROLA num popup 3D (antes só aparecia o número em
-// texto). Self-contained — usa window.Dice3D global (/shared/dice-3d.js). z=60
-// acima do journey-overlay (z=35). Respeita perf-lite. CSS injetado 1x.
+// texto). Self-contained — usa window.Dice3D global (/shared/dice-3d.js).
+// FIX sessão #71e: z=60 ficava ATRÁS da tela de "Rumo a…" (o dado rolava embaixo).
+// z=10000 (acima de tudo: combate=200, eventos=100) + body-child (vOverlay) garante
+// que cubra a tela. Respeita perf-lite. CSS injetado 1x.
 function _journeyRollDice(d20, mod, total, dc, success, callback) {
   if (!document.getElementById('journey-dice-style')) {
     var st = document.createElement('style');
     st.id = 'journey-dice-style';
     st.textContent = ''
-      + '#journey-dice-ov{position:fixed;inset:0;z-index:60;background:rgba(8,6,4,0.92);'
+      + '#journey-dice-ov{position:fixed;inset:0;z-index:10000;background:rgba(8,6,4,0.92);'
       + '  display:flex;flex-direction:column;align-items:center;justify-content:center;'
       + '  gap:14px;animation:jdFade .3s ease;backdrop-filter:none}'
       + '@keyframes jdFade{from{opacity:0}to{opacity:1}}'
