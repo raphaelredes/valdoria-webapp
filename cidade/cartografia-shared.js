@@ -3074,19 +3074,24 @@
     // estrada bem mais visível sobre o world-map — contorno escuro (legibilidade em
     // qualquer fundo) + tracejado claro/dourado por cima (a "estrada") + marcos
     // dourados. Antes era 1px sépia (INK_MED), quase invisível no mapa pintado.
+    // P-mapa sessão #74 (user: "diminua o tamanho dos caminhos... os locais agora estão
+    // com tamanho menor e as trilhas ficaram tão grandes que chegaram a tampar um dos
+    // locais"): trilha AFINADA ~37% (era 3.2/1.6/dash[5,4]/dots1.4) p/ ficar proporcional
+    // aos loc-art menores. Mantém contorno escuro + tracejado dourado, só mais fino —
+    // continua bem mais legível que o 1px sépia original (não regride à invisibilidade).
     ctx.save();
     ctx.lineCap = 'round';
     // 1) Contorno escuro
     ctx.strokeStyle = 'rgba(20,14,8,0.55)';
-    ctx.lineWidth = 3.2;
+    ctx.lineWidth = 2.0;
     ctx.beginPath();
     ctx.moveTo(ax, ay);
     ctx.quadraticCurveTo(cx, cy, bx, by);
     ctx.stroke();
     // 2) Tracejado claro dourado por cima
     ctx.strokeStyle = 'rgba(212,182,124,0.78)';
-    ctx.lineWidth = 1.6;
-    ctx.setLineDash([5, 4]);
+    ctx.lineWidth = 1.0;
+    ctx.setLineDash([4, 3]);
     ctx.beginPath();
     ctx.moveTo(ax, ay);
     ctx.quadraticCurveTo(cx, cy, bx, by);
@@ -3099,7 +3104,7 @@
       var px = u*u*ax + 2*u*t*cx + t*t*bx;
       var py = u*u*ay + 2*u*t*cy + t*t*by;
       ctx.beginPath();
-      ctx.arc(px, py, 1.4, 0, Math.PI*2);
+      ctx.arc(px, py, 0.9, 0, Math.PI*2);
       ctx.fill();
     }
     ctx.restore();
