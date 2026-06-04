@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T18:43:40Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T21:57:03Z - do not edit directly, edit source -->
 
 
 
@@ -22696,6 +22696,12 @@ setInterval(function() {
     LOGW('RENDER', 'watchdog detected stuck rAF — forcing reset');
     _rafScheduled = false;
     _rafLastScheduled = now;
+    // X-7 (sessao #74): se a aba esta VISIVEL e o rAF travou de verdade (nao so
+    // pausado por background), re-agendar via rAF nao recupera — o rAF esta quebrado.
+    // Forca 1 frame SINCRONO pra tela atualizar mesmo sem o rAF voltar (anti tela-preta).
+    if (typeof document !== 'undefined' && !document.hidden) {
+      try { renderFrame(performance.now()); } catch (_) {}
+    }
     try { requestAnimationFrame(renderFrame); } catch (_) {}
   }
 }, 2000);
@@ -33257,9 +33263,17 @@ function bindGlobalInputWake() {
       scheduleRender();  // wake imediato — sem esperar próximo idle tick
     }, { capture: true, passive: true });
   });
-  // Visibility change: tab voltou ao foreground → render imediato
+  // Visibility change: tab voltou ao foreground → render imediato.
+  // X-7 (sessao #74): o browser PAUSA o rAF em segundo plano e o WebView do Telegram
+  // nem sempre o RETOMA ao voltar — scheduleRender() sozinho so re-agenda via rAF
+  // (assincrono) e a tela ficava presa em PRETO. Forca 1 frame SINCRONO imediato.
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) { _markActive(); scheduleRender(); }
+    if (!document.hidden) {
+      _markActive();
+      _rafScheduled = false;
+      try { renderFrame(performance.now()); } catch (_) {}
+      scheduleRender();
+    }
   });
 }
 
@@ -42525,6 +42539,13 @@ function boot() {
     updateQuestIndicator();
     updateAllyIndicator();
     scheduleRender();
+
+    // X-7 (sessao #74): defense-in-depth contra tela preta no boot. O browser PAUSA
+    // o rAF quando o WebApp abre em segundo plano (Telegram pre-carrega o WebApp).
+    // Sem isto, nem o render nem a centralizacao (ambos via rAF abaixo) rodam → tela
+    // preta ate o rAF voltar. Forca centralizacao + 1 frame SINCRONOS, sem o rAF.
+    try { centerOnPlayer(false); } catch (_) {}
+    try { renderFrame(performance.now()); } catch (_) {}
 
     // Centraliza após render inicial — aguarda um tick pro viewport medir corretamente
     requestAnimationFrame(() => {
