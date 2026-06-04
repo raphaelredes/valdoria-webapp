@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T09:08:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T09:43:57Z - do not edit directly, edit source -->
 
 
 
@@ -39905,7 +39905,8 @@ function _openCartLocationPopup(biome){
     + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
     + (isCurrent ? '<div class="clp-current-here">📍 VOCÊ ESTÁ AQUI</div>' : '')
     + '<h2>' + biome.name + '</h2>'
-    + (biome.tier ? '<div class="clp-tier">⚡ Tier ' + biome.tier + '</div>' : '')
+    // P-mapa sessão #73: sem badge "⚡ Tier N" (redundante) — a faixa de nível
+    // recomendado no clp-meta abaixo é mais clara. Alinhado com o popup da cidade.
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
     + (rec ? '<div class="clp-meta">📊 ' + rec + '<br>🏷️ Bioma: ' + ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key)) + '</div>' : '')
     + '<div class="clp-buttons">'
@@ -44425,6 +44426,9 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 .xcart-wrapper {
   display: flex;
   flex-direction: column;
+  /* P-mapa sessão #73 (user): canvas quadrado sobrava área escura embaixo — centra o
+     grupo header+mapa+Voltar (back-row já está no fluxo) pra equilibrar o espaço. */
+  justify-content: center;
   width: 100%;
   height: 100%;
   max-width: 480px;
