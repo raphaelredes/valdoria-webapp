@@ -44,8 +44,18 @@
     function _detectApiBase() {
         try {
             var p = new URLSearchParams(window.location.search);
-            return p.get('api') || window.SERVER_LOG_API || '';
-        } catch (_) { return ''; }
+            var fromUrl = p.get('api');
+            if (fromUrl) {
+                /* Sessão #75: cachear o api base na 1ª detecção. cidade é SPA e pode
+                   reescrever a URL (perder ?api=) entre o boot e um serverLog tardio;
+                   sem cache, _detectApiBase cairia no origin de Pages (dev.…) que NÃO
+                   tem rota /api/sim/log → POST 503 ruidoso. Com cache, persiste o host
+                   real da API mesmo se o ?api= sumir da URL. */
+                window.SERVER_LOG_API = fromUrl;
+                return fromUrl;
+            }
+            return window.SERVER_LOG_API || '';
+        } catch (_) { return window.SERVER_LOG_API || ''; }
     }
 
     function _detectEnv() {
