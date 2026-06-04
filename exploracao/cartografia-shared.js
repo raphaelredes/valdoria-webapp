@@ -404,6 +404,33 @@
     _cartWorldMapCbs.push(cb);
   }
 
+  // === Player pin image (sessão #74) ===
+  // User: "remova a mensagem 'Você está aqui' do mapa / gere uma imagem low no OPENAI
+  // pra ser o pin pra mostrar onde o personagem está". Estandarte/flâmula dourada
+  // (gen_player_pin.py → gpt-image-2 low + rembg + WebP RGBA). Carregado module-level
+  // com registry de redraw (igual ao world-map). _drawPlayerPin desenha a imagem;
+  // fallback X (SEM o label "Você está aqui") se a imagem não carregar (ex.: file://).
+  var _playerPin = null;
+  var _playerPinCbs = [];
+  (function(){
+    try {
+      var _pp = new Image();
+      _pp.onload = function(){
+        _playerPin = _pp;
+        var cbs = _playerPinCbs; _playerPinCbs = [];
+        cbs.forEach(function(cb){ try { cb(); } catch(_){} });
+      };
+      _pp.onerror = function(){ _playerPin = false; };
+      _pp.src = '/shared/img/map/player-pin.webp';
+    } catch(_e){ _playerPin = false; }
+  })();
+  function _playerPinReady(){ return !!(_playerPin && _playerPin.complete && _playerPin.naturalWidth); }
+  function _onPlayerPinLoad(cb){
+    if (typeof cb !== 'function') return;
+    if (_playerPinReady()) { try { cb(); } catch(_){} return; }
+    if (_playerPin !== false) _playerPinCbs.push(cb);
+  }
+
   // === _cartWorldMapRect ===
   // Retângulo (em px de canvas) onde o world-map é renderizado. A imagem é QUADRADA
   // (1024×1024) e o editor a desenha num stage QUADRADO, então todo coord normalizado
@@ -3263,25 +3290,35 @@
 
   // === _drawPlayerPin ===
   function _drawPlayerPin(ctx, b, w, h){
-    // === Pin do jogador hand-drawn (Fase 6.5) ================================
-    // Pencil-style: X marks the spot acima do node + flecha apontando + label
-    // backplate papel. SEM emoji, SEM gold dashed, SEM cor vermelha forte.
+    // Sessão #74 (user): SEM o label "Você está aqui" + IMAGEM de estandarte fincado
+    // (player-pin.webp) marcando a posição do personagem. A BASE do estandarte crava no
+    // node (posição) e a flâmula se ergue acima. Desenhado APÓS o fog → sempre visível.
     var bx = b.x * w, by = b.y * h;
+    if (_playerPinReady()) {
+      var PIN_H = 46;
+      var PIN_W = PIN_H * (_playerPin.naturalWidth / _playerPin.naturalHeight);
+      // Âncora: ponto da imagem (mastro/base) que fica exatamente sobre o node.
+      var ANCHOR_X = 0.40, ANCHOR_Y = 0.88;
+      ctx.save();
+      // sombra sutil pra destacar o estandarte do fundo pintado do mapa
+      ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 4; ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 2;
+      ctx.drawImage(_playerPin, bx - PIN_W * ANCHOR_X, by - PIN_H * ANCHOR_Y, PIN_W, PIN_H);
+      ctx.restore();
+      return;
+    }
+    // Fallback (imagem indisponível, ex.: file://): X marks the spot — SEM label.
     ctx.save();
     ctx.strokeStyle = INK_DARK;
     ctx.lineWidth = 1.4;
-    // X marks the spot (cruz X) acima do node
     var px = bx, py = by - 36;
     ctx.beginPath();
     ctx.moveTo(px - 5, py - 5); ctx.lineTo(px + 5, py + 5);
     ctx.moveTo(px - 5, py + 5); ctx.lineTo(px + 5, py - 5);
     ctx.stroke();
-    // Círculo ao redor do X
     ctx.lineWidth = 0.8;
     ctx.beginPath();
     ctx.arc(px, py, 7, 0, Math.PI*2);
     ctx.stroke();
-    // Linha conectando X ao node (flecha pontilhada)
     ctx.setLineDash([2, 2]);
     ctx.lineWidth = 0.7;
     ctx.beginPath();
@@ -3289,24 +3326,6 @@
     ctx.lineTo(bx, by - 5);
     ctx.stroke();
     ctx.setLineDash([]);
-    // Label "VÓS ESTAIS AQUI" abaixo do node (Cinzel italic bold)
-    ctx.font = 'bold italic 9px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    var labelText = 'Você está aqui';
-    var tw = ctx.measureText(labelText).width;
-    // Backplate papel pra contraste
-    ctx.fillStyle = PAPER_BG;
-    ctx.globalAlpha = 0.95;
-    ctx.fillRect(bx - tw/2 - 4, by + 50, tw + 8, 13);
-    ctx.globalAlpha = 1;
-    // Borda do label
-    ctx.strokeStyle = INK_DARK;
-    ctx.lineWidth = 0.6;
-    ctx.strokeRect(bx - tw/2 - 4, by + 50, tw + 8, 13);
-    // Texto
-    ctx.fillStyle = INK_DARK;
-    ctx.fillText(labelText, bx, by + 52);
     ctx.restore();
   }
 
@@ -3523,6 +3542,9 @@
     // Quando a imagem do world-map chega assíncrona: invalida a base-cache desta
     // instância + redesenha (fundo escuro → mapa real). Registrado 1× por instância.
     _onWorldMapLoad(function(){ _baseCache = null; _onLoad(); });
+    // Sessão #74: redraw quando a imagem do pin (estandarte) carregar async (não
+    // toca a base-cache; o pin é desenhado por cima, depois do fog).
+    _onPlayerPinLoad(function(){ _onLoad(); });
 
     // Perf #1 (cartografia-perf.md): base estática (world-map cover + véu sépia) num
     // canvas offscreen → blit barato por frame. Invalida só em dims/dpr/mapReady.
