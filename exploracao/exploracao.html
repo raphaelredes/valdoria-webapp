@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T09:43:57Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T10:31:05Z - do not edit directly, edit source -->
 
 
 
@@ -40083,10 +40083,6 @@ function openCartography() {
   _xcartCanvas = document.getElementById('xcart-canvas');
   _xcartCtx = _xcartCanvas.getContext('2d');
 
-  // P-mapa sessão #73: fallback JS pra WebViews sem aspect-ratio (CSS) — força o
-  // frame QUADRADO (height = width) pra o canvas não letterboxar (área preta).
-  var _xcartFrame = _xcartCanvas.parentElement;  // .xcart-canvas-frame
-  if (_xcartFrame) _xcartFrame.style.height = _xcartFrame.clientWidth + 'px';
   // HiDPI canvas setup — 2026-05-06: cap DPR em 2 + safety 8000px backing
   // (GPU limit). Em smartphones com DPR=3 + rect grande, sem cap o backing
   // pode causar fallback pra software rendering (FPS catastrofica).
@@ -44426,9 +44422,6 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 .xcart-wrapper {
   display: flex;
   flex-direction: column;
-  /* P-mapa sessão #73 (user): canvas quadrado sobrava área escura embaixo — centra o
-     grupo header+mapa+Voltar (back-row já está no fluxo) pra equilibrar o espaço. */
-  justify-content: center;
   width: 100%;
   height: 100%;
   max-width: 480px;
@@ -44457,18 +44450,14 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   margin: 0;
 }
 .xcart-canvas-frame {
-  /* P-mapa sessão #73 (user): canvas QUADRADO = tamanho da imagem do mapa real
-     (como no map-editor) → SEM área preta acima/abaixo. aspect-ratio + fallback JS
-     (frame.style.height = width) garantem o quadrado em todo WebView. */
-  flex: 0 0 auto;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  margin: 0 auto;
+  /* P-mapa sessão #73 (user): canvas FULL-SCREEN responsivo (revertido o quadrado). O
+     mapa quadrado é renderizado CONTAIN e a área fora dele fica PRETA (motor). */
+  flex: 1;
   position: relative;
   border: 0;
   border-radius: 0;
   overflow: hidden;
-  background: #1a1510;  /* fundo escuro — o world-map preenche o quadrado */
+  background: #000;  /* área fora do mapa = PRETA (user) */
   touch-action: none;
 }
 #xcart-canvas {

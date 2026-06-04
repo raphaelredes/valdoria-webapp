@@ -3188,15 +3188,10 @@ LOG SINK (Fase 7):
     .cart-wrapper {
       display: flex;
       flex-direction: column;
-      /* P-mapa sessão #73 (user): com o canvas QUADRADO sobrava ~324px de área escura
-         abaixo do mapa (frame menor que o viewport). Centraliza o grupo header+mapa+
-         Voltar pra o mapa virar o foco vertical, com espaço escuro equilibrado em cima
-         e embaixo (em vez de um vão grande só embaixo). */
-      justify-content: center;
       height: 100%;
       width: 100%;
       gap: 0;
-      background: #1a1510;
+      background: #000;  /* P-mapa sessão #73 (user): fundo PRETO fora do mapa */
     }
     .cart-header {
       flex-shrink: 0;
@@ -3220,31 +3215,25 @@ LOG SINK (Fase 7):
       margin: 0;
     }
     .cart-canvas-frame {
-      /* P-mapa sessão #73 (user): canvas QUADRADO = tamanho da imagem do mapa real
-         (como no map-editor) → SEM área preta acima/abaixo. Antes flex:1 deixava o
-         frame retrato e o mapa quadrado (CONTAIN) gerava letterbox. aspect-ratio +
-         fallback JS (frame.style.height = width) garantem o quadrado em todo WebView. */
-      flex: 0 0 auto;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      margin: 0 auto;
+      /* P-mapa sessão #73 (user): canvas FULL-SCREEN responsivo (ocupa todo o espaço
+         do dispositivo) — revertido o frame quadrado. O mapa (1024² quadrado) é
+         renderizado CONTAIN no centro e TODA a área fora dele fica PRETA (#000), feita
+         no motor (_drawWorldMapBg). Letterbox preto intencional, não "barras" sépia. */
+      flex: 1;
       position: relative;
       border: 0;
       border-radius: 0;
       overflow: hidden;
-      background: #1a1510;  /* fundo escuro — o world-map preenche o quadrado */
+      background: #000;  /* área fora do mapa = PRETA (user) */
       touch-action: none;
     }
     /* Botão Voltar como overlay flutuante no canto top-left (não rouba espaço do canvas) */
     body.state-cart .subscreen-back-row {
-      /* P-mapa sessão #73 (user): com o canvas QUADRADO, "inferior do mapa" agora é
-         LOGO ABAIXO do mapa (não o fundo da tela, que ficava a ~324px de distância).
-         Volta pro fluxo (order:3 → depois de header+frame no flex column) e centra,
-         virando parte do grupo centralizado vertical. */
-      position: static;
-      order: 3;
-      align-self: center;
-      margin-top: 10px;
+      /* Voltar como overlay flutuante no fundo central do mapa full-screen. */
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 60;
       flex-shrink: 0;
     }
@@ -51249,10 +51238,6 @@ function renderCartographyCanvas(el){
   // pula alpha blending do backdrop. Perf #1 invalida o base cache (dims podem mudar).
   _cartCtx = _cartCanvas.getContext('2d', { alpha: false });
   if (_cartEngine) _cartEngine.invalidateBase();  // dims/dpr podem mudar — força rebuild da base
-  // P-mapa sessão #73: fallback JS pra WebViews sem suporte a aspect-ratio (CSS) —
-  // força o frame QUADRADO (height = width) pra o canvas não letterboxar (área preta).
-  var _cartFrame = _cartCanvas.parentElement;  // .cart-canvas-frame
-  if (_cartFrame) _cartFrame.style.height = _cartFrame.clientWidth + 'px';
   // Set canvas resolution (HiDPI-aware) — Perf #2: cap DPR. Em telas 3x (Android)
   // a área de fill seria 9× os pixels CSS (380 grain → ~3400 efetivos). Lite=1, resto=2.
   var rect = _cartCanvas.getBoundingClientRect();

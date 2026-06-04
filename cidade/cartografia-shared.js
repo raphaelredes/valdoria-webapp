@@ -426,16 +426,18 @@
   // path da cartografia do jogo; ver tombstone em cidade/index.html). Quando a
   // imagem chegar, o consumer redesenha (via _onWorldMapLoad).
   function _drawWorldMapBg(ctx, w, h){
+    // P-mapa sessão #73 (user: "toda área que não seja a do mapa ficar preta"): fundo
+    // PRETO em todo o canvas. Antes o véu sépia cobria 0,0,w,h e tingia o letterbox de
+    // marrom — agora o véu cobre SÓ o retângulo do mapa, deixando o resto preto puro.
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
     if (worldMapReady()) {
       var r = _cartWorldMapRect(w, h);
       ctx.drawImage(_cartWorldMap, r.x, r.y, r.s, r.s);
-      ctx.fillStyle = 'rgba(42,30,18,0.12)';   // véu sépia leve (medieval)
-      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(42,30,18,0.12)';   // véu sépia leve (medieval) — SÓ sobre o mapa
+      ctx.fillRect(r.x, r.y, r.s, r.s);
       return true;
     }
-    // Fallback (imagem ainda carregando): fundo escuro neutro — sem desenho tosco.
-    ctx.fillStyle = '#2a2018';
-    ctx.fillRect(0, 0, w, h);
     return false;
   }
 
@@ -3507,8 +3509,9 @@
       if (!ctx) return;
       var w = view.w, h = view.h;
       ctx.save();
-      // Backdrop escuro — revelado em pan/zoom além das bordas do world-map.
-      ctx.fillStyle = '#1a1510';
+      // P-mapa sessão #73 (user: "área que não seja a do mapa ficar preta"): backdrop
+      // PRETO — letterbox + revelado em pan/zoom além das bordas do world-map.
+      ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, w, h);
       var _mr = _cartWorldMapRect(w, h);
       var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
