@@ -50,7 +50,23 @@
     background:#0d0a06; color:#9fe0a0; border:1px solid #4a3828; border-radius:6px; padding:8px;
     font-family:ui-monospace,monospace; font-size:10px; z-index:60; display:none; }
 </style>
-<script src="./cartografia-shared.js"></script>
+<!-- sessão #74: cache-busting do cartografia (Bucket B é immutable) — sem ?v= o editor
+     servia a versão ANTIGA cacheada (não refletia trilhas afinadas/fog/mudanças do mapa).
+     Carrega via DOM (createElement) ordenado: bundle-version → cartografia?v=hash → boot
+     do editor (__editorMain), adiado até o CartShared existir. VBUNDLE_HASH rotaciona
+     quando qualquer Bucket B muda; fallback Date.now(). -->
+<script>
+(function(){
+  function ld(src, cb){ var s = document.createElement('script'); s.src = src; s.onload = cb; s.onerror = cb; document.head.appendChild(s); }
+  function boot(){
+    if (window.__editorMain) { window.__editorMain(); }
+    else { document.addEventListener('DOMContentLoaded', function(){ if (window.__editorMain) window.__editorMain(); }); }
+  }
+  ld('/bundle-version.js', function(){
+    ld('./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || Date.now()), boot);
+  });
+})();
+</script>
 </head>
 <body>
 <div id="bar">
@@ -69,7 +85,9 @@
 </div>
 <textarea id="out" readonly></textarea>
 <script>
-(function(){
+// sessão #74: boot nomeado (não auto-exec) — chamado pelo loader do <head> só DEPOIS
+// que o cartografia-shared.js?v=hash carregar (garante window.CartShared disponível).
+function __editorMain(){
   var MAP = '/shared/img/map/world-map.webp';
   var ICON_DIR = '/shared/img/map/locations/';
   var stage = document.getElementById('stage');
@@ -352,7 +370,7 @@
       .then(function(j){ boot((j && j.coords) || {}); })
       .catch(function(){ boot({}); });
   } else { boot({}); }
-})();
+}
 </script>
 </body>
 </html>
