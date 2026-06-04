@@ -6361,7 +6361,12 @@ body.remote-mode #debug-hud { display: none !important; }
      ambos — browser ignora o que não existir. -->
 <link rel="stylesheet" href="../valdoria-webapp/explore/explore-camp.css?v=local">
 <link rel="stylesheet" href="/explore/explore-camp.css?v=remote" onerror="this.remove()">
-<script src="./cartografia-shared.js"></script>
+<!-- cartografia-shared.js e Bucket B (immutable). Carregar COM ?v=<bundle hash>
+     senao o browser serve a copia STALE do cache immutable (bug sessao #73: a
+     exploracao ficava com a versao antiga do shared - sem createWorldCart - e o
+     mapa nao unificava). bundle-version.js ja carregou (linha ~854 -> VBUNDLE_HASH).
+     Mesmo padrao da cidade (index.html ~8324). -->
+<script>document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');</script>
 <!-- Canonical title screen + loading libs (USER REQUEST 2026-05-05) -->
 <script>var _vti = Date.now();
 document.write('<link rel="stylesheet" href="../shared/loading-title.css?v=' + _vti + '">');
