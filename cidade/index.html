@@ -9511,6 +9511,13 @@ function _isCTA(btn) {
       backBtn.setAttribute('data-fLs-restore', backBtn.style.display || '');
       backBtn.style.display = 'none';
     }
+    // Sessão #73 (user): ESCONDE o contador de Valdoritas (csp-gold) no header — a
+    // tela de Política de Privacidade não deve mostrar saldo no canto superior direito.
+    var cspGoldEl = document.getElementById('csp-gold');
+    if (cspGoldEl) {
+      cspGoldEl.setAttribute('data-fLs-restore', cspGoldEl.style.display || '');
+      cspGoldEl.style.display = 'none';
+    }
 
     // Helper feature card — fontes maiores, descs resumidas (sessão #23 v2)
     function _fLsFeature(icon, name, desc){
@@ -9565,11 +9572,14 @@ function _isCTA(btn) {
       + '<span style="flex:0 0 40px; height:1px; background:linear-gradient(270deg, transparent, var(--v-gold,#c4953a));"></span>'
       + '</div>'
 
-      // PNG do livro — 88x88 (era 80 → ligeiramente maior)
-      + '<div style="position:relative; width:88px; height:88px; margin:0 auto 10px;">'
-      + '<img class="fLs-icon-anim" src="../shared/img/ui/splash-welcome.webp" alt="Livro de Aventuras"'
-      + ' style="width:100%; height:100%; object-fit:contain;"'
-      + ' onerror="this.style.opacity=\'0.5\';">'
+      // Imagem da tela de Política de Privacidade (sessão #73 — user: "mostre a imagem
+      // relacionada a essa tela no topo"). Antes era o livro genérico de boas-vindas;
+      // agora o decreto selado de proteção (privacy-policy.webp, gerado via OpenAI low).
+      // Banner com fundo → moldura dourada arredondada (em vez do glow de ícone isolado).
+      + '<div style="position:relative; width:118px; height:90px; margin:0 auto 10px; border-radius:8px; overflow:hidden; border:1px solid var(--v-gold-40,rgba(196,149,58,0.4)); box-shadow:0 0 18px rgba(196,149,58,0.35), 0 2px 8px rgba(0,0,0,0.5);">'
+      + '<img src="../shared/img/ui/privacy-policy.webp" alt="Decreto de Privacidade — proteção dos teus dados"'
+      + ' style="width:100%; height:100%; object-fit:cover; display:block;"'
+      + ' onerror="this.parentNode.style.display=\'none\';">'
       + '</div>'
 
       // Título principal — fontes maiores (era 17-22 → 22-28)
@@ -9679,6 +9689,8 @@ function _isCTA(btn) {
         if (bb) bb.style.display = bb.getAttribute('data-fLs-restore') || '';
         var tl = document.getElementById('csp-title');
         if (tl) tl.style.paddingRight = tl.getAttribute('data-fLs-pr-restore') || '';
+        var cg = document.getElementById('csp-gold');  // restaura Valdoritas (escondidas no splash de privacidade)
+        if (cg) cg.style.display = cg.getAttribute('data-fLs-restore') || '';
         if (typeof closeCityPopup === 'function') closeCityPopup();
         else if (typeof navigateBack === 'function') navigateBack();
         if (typeof vToast === 'function') vToast(window._fLsIsUpdate ? '✓ Atualização aceita.' : '✨ Boa aventura, aventureiro!');
