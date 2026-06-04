@@ -3110,6 +3110,95 @@
     ctx.restore();
   }
 
+  // === Fog of War (Low-Res Upscale) — sessão #74 ==============================
+  // User (sessão #74): "faça com que no mapa também exista o efeito fog of war igual
+  // a exploração, tampando os locais que o personagem ainda não foi ou nem ficou
+  // sabendo que existe mesmo sem saber o nome do local". Porta a técnica IMMUTABLE
+  // "Low-Res Upscale" (Riot/LoL) do explore-fog: máscara de baixa-res (alpha por
+  // distância) → upscale bilinear (browser suaviza) → tint source-in. No mapa-mundo
+  // NÃO há grid de hexágonos — o "revelado" é o conjunto de locais CONHECIDOS
+  // (known_locations) + as ESTRADAS entre dois locais conhecidos (user: "locais +
+  // estradas"). A névoa cobre o resto (terra incognita), escondendo a EXISTÊNCIA do
+  // local — não só o nome. Mesmo FOG_COLOR do explore-fog (consistência).
+  var CART_FOG_COLOR = 'rgba(26,21,16,0.92)';   // idêntico ao explore-fog FOG_COLOR
+  // falloff smoothstep: 0 (revelado) até r0; 255 (névoa cheia) após r1; gradiente no meio.
+  function _cartFogFalloff(dist, r0, r1){
+    if (dist <= r0) return 0;
+    if (dist >= r1) return 255;
+    var t = (dist - r0) / (r1 - r0);
+    t = t * t * (3 - 2 * t);   // smoothstep (borda macia, igual ao upscale bilinear)
+    return Math.round(t * 255);
+  }
+  // distância ponto→segmento em coords normalizadas (clareira ao longo das estradas)
+  function _cartDistToSeg(px, py, ax, ay, bx, by){
+    var dx = bx - ax, dy = by - ay;
+    var len2 = dx*dx + dy*dy;
+    var t = len2 > 0 ? ((px-ax)*dx + (py-ay)*dy) / len2 : 0;
+    t = t < 0 ? 0 : (t > 1 ? 1 : t);
+    var cx = ax + t*dx, cy = ay + t*dy;
+    var ex = px - cx, ey = py - cy;
+    return Math.sqrt(ex*ex + ey*ey);
+  }
+  // Constrói o canvas de névoa S×S (cacheado pelo consumer; só muda quando known/coords/S mudam).
+  // knownArr = array de keys conhecidas; biomes = RB (coords resolvidas do editor).
+  function _buildCartFog(S, knownArr, biomes){
+    if (typeof document === 'undefined' || !knownArr) return null;
+    var lite = (typeof window !== 'undefined' && window._valdoriaPerformanceTier === 'lite');
+    var RES = lite ? 48 : 72;                       // resolução da máscara (bilinear suaviza)
+    var isK = function(key){ return knownArr.indexOf(key) >= 0 || key === 'plains'; };
+    var locs = [];
+    biomes.forEach(function(b){ if (isK(b.key) || b.isOrigin) locs.push([b.x, b.y]); });
+    if (!locs.length) locs.push([0.42, 0.55]);      // origem (Portões de Valdoria) fallback
+    var roads = [];
+    CART_PATHS.forEach(function(p){
+      if (!isK(p[0]) || !isK(p[1])) return;         // estrada só revela se AMBAS as pontas conhecidas
+      var a = biomes.find(function(bb){ return bb.key === p[0]; });
+      var b = biomes.find(function(bb){ return bb.key === p[1]; });
+      if (a && b) roads.push([a.x, a.y, b.x, b.y]);
+    });
+    var LOC_R0 = 0.055, LOC_R1 = 0.16;              // clareira ao redor de cada local
+    var ROAD_R0 = 0.018, ROAD_R1 = 0.052;           // faixa ao longo das estradas
+    var mask = document.createElement('canvas');
+    mask.width = RES; mask.height = RES;
+    var mctx = mask.getContext('2d');
+    var img = mctx.createImageData(RES, RES);
+    var d = img.data;
+    for (var j = 0; j < RES; j++) {
+      var ny = (j + 0.5) / RES;
+      for (var i = 0; i < RES; i++) {
+        var nx = (i + 0.5) / RES;
+        var dl = Infinity;
+        for (var k = 0; k < locs.length; k++) {
+          var ddx = nx - locs[k][0], ddy = ny - locs[k][1];
+          var dd = Math.sqrt(ddx*ddx + ddy*ddy);
+          if (dd < dl) dl = dd;
+        }
+        var a = _cartFogFalloff(dl, LOC_R0, LOC_R1);
+        if (a > 0 && roads.length) {                // estradas só importam onde ainda há névoa
+          var dr = Infinity;
+          for (var m = 0; m < roads.length; m++) {
+            var ds = _cartDistToSeg(nx, ny, roads[m][0], roads[m][1], roads[m][2], roads[m][3]);
+            if (ds < dr) dr = ds;
+          }
+          var ar = _cartFogFalloff(dr, ROAD_R0, ROAD_R1);
+          if (ar < a) a = ar;                       // revelado se perto de local OU estrada
+        }
+        var idx = (j * RES + i) * 4;
+        d[idx] = 0; d[idx+1] = 0; d[idx+2] = 0; d[idx+3] = a;
+      }
+    }
+    mctx.putImageData(img, 0, 0);
+    var fog = document.createElement('canvas');
+    fog.width = Math.max(1, Math.round(S)); fog.height = Math.max(1, Math.round(S));
+    var fctx = fog.getContext('2d');
+    fctx.imageSmoothingEnabled = true; fctx.imageSmoothingQuality = 'high';  // upscale bilinear
+    fctx.drawImage(mask, 0, 0, RES, RES, 0, 0, fog.width, fog.height);
+    fctx.globalCompositeOperation = 'source-in';    // mantém o alpha da máscara, troca RGB
+    fctx.fillStyle = CART_FOG_COLOR;
+    fctx.fillRect(0, 0, fog.width, fog.height);
+    return fog;
+  }
+
   // === _drawCartNode ===
   function _drawCartNode(ctx, b, w, h, isHover){
     // === Node hand-drawn (Fase 6.5) ============================================
@@ -3455,6 +3544,20 @@
       return cv;
     }
 
+    // Fog of war (sessão #74): cache por-instância do canvas de névoa. Invalida quando
+    // a assinatura (S arredondado + lista de known ordenada) muda OU quando as coords do
+    // editor chegam (_fogCache=null no callback de coords). known===null (exploração) →
+    // SEM névoa (o mapa sandbox mostra tudo; só a cidade tem descoberta progressiva).
+    var _fogCache = null;
+    function _ensureCartFog(S, known, biomes){
+      if (known === null || !Array.isArray(known)) return null;
+      var sig = Math.round(S) + '|' + known.slice().sort().join(',');
+      if (_fogCache && _fogCache.sig === sig) return _fogCache.canvas;
+      var canvas = _buildCartFog(S, known, biomes);
+      _fogCache = { sig: sig, canvas: canvas };
+      return canvas;
+    }
+
     // Ícones OpenAI dos locais (mesma fonte do editor: /api/exploracao/map-coords).
     // Fallback total: ícone faltando → arte procedural do bioma (sem regressão). Lazy 1×.
     function _ensureLocArt(){
@@ -3472,7 +3575,7 @@
           try {
             fetch(cbase + '/api/exploracao/map-coords', { cache: 'no-store' })
               .then(function (r) { return r.ok ? r.json() : null; })
-              .then(function (j) { _coordsFetching = false; if (j && j.coords) { _locCoords = j.coords; _coordsLoaded = true; _onLoad(); } })
+              .then(function (j) { _coordsFetching = false; if (j && j.coords) { _locCoords = j.coords; _coordsLoaded = true; _fogCache = null; _onLoad(); } })
               .catch(function () { _coordsFetching = false; });
           } catch (_) { _coordsFetching = false; }
         }
@@ -3558,6 +3661,12 @@
       CART_PATHS.forEach(function(p){
         if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
       });
+      // P-mapa sessão #74 (user: "fog of war igual a exploração — tampando os locais
+      // que o personagem ainda não foi ou nem soube que existe"): NÉVOA por cima do não-
+      // conhecido. Depois das estradas + ícones (clareiras revelam o conhecido), antes
+      // dos labels/pin (ficam por cima). known===null (exploração) → _ensureCartFog null.
+      var _fog = _ensureCartFog(_S, known, RB);
+      if (_fog) ctx.drawImage(_fog, 0, 0, _S, _S);
       RB.forEach(function(b){
         // P-mapa sessão #73 (user): NÃO mostra locais não-descobertos (nem o "?").
         // Só aparece o que o personagem JÁ descobriu (known_locations) ou a origem —
@@ -3672,6 +3781,7 @@
     _drawScorchedEdge: _drawScorchedEdge,          // helper exposto
     _drawBiomeArt: _drawBiomeArt,
     _drawCartPath: _drawCartPath,
+    _buildCartFog: _buildCartFog,                  // 2026-06-04 (sessão #74): fog of war Low-Res Upscale
     _drawCartNode: _drawCartNode,
     _drawPlayerPin: _drawPlayerPin,
     _drawCartCompass: _drawCartCompass,

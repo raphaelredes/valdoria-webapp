@@ -24,9 +24,17 @@
     border:1px solid var(--gold); color:#e8dcc8; padding:7px 14px; border-radius:6px;
     cursor:pointer; font-family:inherit; font-size:12px; letter-spacing:.5px; }
   button:hover { background:rgba(196,149,58,.4); }
-  #stage-wrap { position:fixed; top:52px; left:0; right:0; bottom:0; overflow:auto; padding:16px;
-    display:flex; align-items:flex-start; justify-content:center; }
-  #stage { position:relative; box-shadow:0 0 30px rgba(0,0,0,.6); }
+  #stage-wrap { position:fixed; top:52px; left:0; right:0; bottom:0; overflow:hidden;
+    background:#15110c; touch-action:none; cursor:grab; }
+  #stage-wrap.panning { cursor:grabbing; }
+  #stage { position:absolute; left:0; top:0; transform-origin:0 0; box-shadow:0 0 30px rgba(0,0,0,.6); }
+  /* Controles de zoom (sessão #74): canto inferior-esquerdo (não cobre o #out à direita) */
+  #ed-zoomctl { position:fixed; left:14px; bottom:14px; z-index:55; display:flex; flex-direction:column;
+    gap:6px; align-items:center; }
+  #ed-zoomctl button { width:40px; height:40px; padding:0; font-size:19px; line-height:1;
+    display:flex; align-items:center; justify-content:center; }
+  #ed-zoom-pct { font-size:11px; color:var(--gold); background:rgba(15,17,12,.85);
+    border:1px solid #4a3828; border-radius:5px; padding:2px 7px; font-family:system-ui,sans-serif; }
   #stage img.bg { display:block; width:100%; height:100%; }
   .loc { position:absolute; transform:translate(-50%,-50%); cursor:grab; user-select:none;
     text-align:center; }
@@ -50,9 +58,15 @@
   <button id="btn-save">💾 Salvar posições (JSON)</button>
   <button id="btn-reset">↺ Resetar p/ padrão</button>
   <span id="scaleBox">Escala do selecionado: <input id="scale" type="range" min="4" max="22" step="0.5" value="10" disabled> <b id="scalev">—</b></span>
-  <span id="hint">Arraste os locais · roda do mouse sobre um local p/ escalar · clique p/ selecionar</span>
+  <span id="hint">Arraste locais · roda sobre um local = escala · arraste o fundo = mover · roda no fundo / botões = zoom</span>
 </div>
 <div id="stage-wrap"><div id="stage"></div></div>
+<div id="ed-zoomctl">
+  <span id="ed-zoom-pct">100%</span>
+  <button id="ed-zoom-in" title="Aproximar">+</button>
+  <button id="ed-zoom-out" title="Afastar">−</button>
+  <button id="ed-zoom-reset" title="Centralizar / resetar zoom">⌂</button>
+</div>
 <textarea id="out" readonly></textarea>
 <script>
 (function(){
@@ -65,6 +79,32 @@
   var BIOMES = (window.CartShared && window.CartShared.CART_BIOMES) || [];
   var state = {};   // key -> {x,y,scale,name,el}
   var sel = null;
+
+  // === Zoom/Pan do editor (sessão #74) ======================================
+  // User: "permita dar zoom no map-editor para fazer as edições dos locais do mapa".
+  // CSS transform no #stage (translate+scale, origin 0,0). O drag dos locais (wireDrag)
+  // usa getBoundingClientRect (PÓS-transform) → continua exato em qualquer zoom, sem
+  // ajuste. Pan = arrastar o fundo; zoom = roda do mouse no fundo / botões / pinça.
+  var ed = { zoom: 1, panX: 0, panY: 0, baseW: 0, inited: false };
+  function applyEdTransform(){
+    stage.style.transform = 'translate(' + ed.panX + 'px,' + ed.panY + 'px) scale(' + ed.zoom + ')';
+    var zi = document.getElementById('ed-zoom-pct');
+    if (zi) zi.textContent = Math.round(ed.zoom * 100) + '%';
+  }
+  function edCenter(){
+    var wrap = document.getElementById('stage-wrap');
+    ed.panX = Math.max(0, (wrap.clientWidth - ed.baseW) / 2);
+    ed.panY = Math.max(8, (wrap.clientHeight - ed.baseW) / 2);
+    applyEdTransform();
+  }
+  function edSetZoom(nz, ax, ay){
+    nz = Math.max(0.4, Math.min(5, nz));
+    var k = nz / ed.zoom;
+    ed.panX = ax - (ax - ed.panX) * k;   // mantém o ponto (ax,ay) fixo sob o cursor
+    ed.panY = ay - (ay - ed.panY) * k;
+    ed.zoom = nz;
+    applyEdTransform();
+  }
 
   // Auth/API (mesma sessão do jogo): lê token/api/uid da URL ou do record
   // canônico `valdoria_session_<env>` gravado por vAuthTokenStore (localStorage
@@ -133,7 +173,10 @@
   }
 
   function stageSize(){
-    var w = Math.min(window.innerWidth - 32, 900);
+    var wrap = document.getElementById('stage-wrap');
+    var avail = Math.min(wrap ? wrap.clientWidth : window.innerWidth,
+                         wrap ? wrap.clientHeight : window.innerHeight) - 24;
+    var w = Math.max(220, Math.min(avail, 900));
     stage.style.width = w + 'px';
     stage.style.height = w + 'px'; // world-map é 1:1
     return { w: w, h: w };
@@ -163,6 +206,7 @@
 
   function layout(){
     var sz = stageSize();
+    ed.baseW = sz.w;
     Object.keys(state).forEach(function(k){
       var s = state[k];
       s.el.style.left = (s.x * sz.w) + 'px';
@@ -170,6 +214,8 @@
       s.el.style.width = (s.scale / 100 * sz.w) + 'px';
     });
     drawPaths(sz);  // P-mapa sessão #73: redesenha as estradas acompanhando os locais
+    // sessão #74: 1ª montagem centraliza (zoom 1); depois preserva o pan/zoom atual.
+    if (!ed.inited) { ed.inited = true; edCenter(); } else applyEdTransform();
   }
 
   function wireDrag(d, key){
@@ -190,7 +236,8 @@
     });
     window.addEventListener('mouseup', function(){ if(dragging){ dragging = false; d.style.cursor = 'grab'; } });
     d.addEventListener('wheel', function(e){
-      e.preventDefault(); select(key);
+      e.preventDefault(); e.stopPropagation();   // sessão #74: roda sobre LOCAL = escala dele (não zoom do mapa)
+      select(key);
       state[key].scale = Math.max(4, Math.min(22, state[key].scale + (e.deltaY < 0 ? 0.5 : -0.5)));
       scaleInput.value = state[key].scale; scaleV.textContent = state[key].scale;
       layout();
@@ -243,6 +290,58 @@
     layout();
   });
   window.addEventListener('resize', layout);
+
+  // === Handlers de zoom/pan (sessão #74) ====================================
+  (function wireZoomPan(){
+    var wrap = document.getElementById('stage-wrap');
+    if (!wrap) return;
+    // Roda do mouse no FUNDO = zoom (sobre um local o .loc faz stopPropagation → não
+    // chega aqui). Âncora no cursor (mantém o ponto sob o mouse fixo).
+    wrap.addEventListener('wheel', function(e){
+      e.preventDefault();
+      var r = wrap.getBoundingClientRect();
+      edSetZoom(ed.zoom * (e.deltaY < 0 ? 1.12 : 0.89), e.clientX - r.left, e.clientY - r.top);
+    }, { passive: false });
+    // Arrastar o FUNDO = pan (clicar num local cai no wireDrag, sem panar).
+    var panning = false, plx = 0, ply = 0;
+    wrap.addEventListener('mousedown', function(e){
+      if (e.target.closest('.loc')) return;
+      panning = true; plx = e.clientX; ply = e.clientY; wrap.classList.add('panning');
+    });
+    window.addEventListener('mousemove', function(e){
+      if (!panning) return;
+      ed.panX += (e.clientX - plx); ed.panY += (e.clientY - ply);
+      plx = e.clientX; ply = e.clientY; applyEdTransform();
+    });
+    window.addEventListener('mouseup', function(){ if (panning) { panning = false; wrap.classList.remove('panning'); } });
+    // Touch: pinça (2 dedos) = zoom · 1 dedo no fundo = pan.
+    function _td(t){ var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY; return Math.sqrt(dx*dx + dy*dy); }
+    var t0 = 0, tz = 1, tpan = false, tlx = 0, tly = 0;
+    wrap.addEventListener('touchstart', function(e){
+      if (e.target.closest('.loc')) return;
+      if (e.touches.length === 2) { t0 = _td(e.touches); tz = ed.zoom; tpan = false; }
+      else if (e.touches.length === 1) { tpan = true; tlx = e.touches[0].clientX; tly = e.touches[0].clientY; }
+    }, { passive: false });
+    wrap.addEventListener('touchmove', function(e){
+      if (e.touches.length === 2 && t0 > 0) {
+        e.preventDefault();
+        var r = wrap.getBoundingClientRect();
+        var mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
+        var my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
+        edSetZoom(tz * (_td(e.touches) / t0), mx, my);
+      } else if (e.touches.length === 1 && tpan) {
+        e.preventDefault();
+        ed.panX += e.touches[0].clientX - tlx; ed.panY += e.touches[0].clientY - tly;
+        tlx = e.touches[0].clientX; tly = e.touches[0].clientY; applyEdTransform();
+      }
+    }, { passive: false });
+    wrap.addEventListener('touchend', function(e){ if (e.touches.length === 0) { tpan = false; t0 = 0; } });
+    // Botões de zoom (âncora no centro do viewport).
+    function _ctrZoom(f){ var r = wrap.getBoundingClientRect(); edSetZoom(ed.zoom * f, r.width / 2, r.height / 2); }
+    var bi = document.getElementById('ed-zoom-in'); if (bi) bi.onclick = function(){ _ctrZoom(1.25); };
+    var bo = document.getElementById('ed-zoom-out'); if (bo) bo.onclick = function(){ _ctrZoom(0.8); };
+    var br = document.getElementById('ed-zoom-reset'); if (br) br.onclick = function(){ ed.zoom = 1; edCenter(); };
+  })();
 
   // boot: carrega posições salvas do servidor (se houver sessão), senão usa as
   // coords padrão de CART_BIOMES.
