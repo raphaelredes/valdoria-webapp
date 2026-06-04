@@ -3422,6 +3422,7 @@
     var _baseCache = null;
     var _locArt = null;       // {key: Image|false}
     var _locCoords = {};      // override {key:{x,y,scale}} do editor (server)
+    var _coordsLoaded = false, _coordsFetching = false;  // P-mapa #73: carrega coords c/ retry (race apiBase)
     var _apiBase = (cfg.apiBase || '');
     var _onLoad = (typeof cfg.onAsyncRedraw === 'function') ? cfg.onAsyncRedraw : function(){};
 
@@ -3452,17 +3453,27 @@
     // Ícones OpenAI dos locais (mesma fonte do editor: /api/exploracao/map-coords).
     // Fallback total: ícone faltando → arte procedural do bioma (sem regressão). Lazy 1×.
     function _ensureLocArt(){
+      // P-mapa sessão #73 (FIX race): os coords do editor carregam num GUARD SEPARADO do
+      // loc-art, com apiBase LAZY (fallback pro global) e RETRY a cada draw até carregar.
+      // Bug: se createWorldCart rodava ANTES de window._VALDORIA_API_BASE existir,
+      // _apiBase ficava '' → o fetch dos coords salvos era pulado e os locais ficavam no
+      // DEFAULT (≠ map-editor). Agora lê o apiBase atual e retenta — locais sempre nas
+      // posições salvas no editor, independente da ordem de init.
+      if (!_coordsLoaded && !_coordsFetching) {
+        var _ab = _apiBase || (typeof window !== 'undefined' && (window._VALDORIA_API_BASE || window._API_BASE)) || '';
+        var cbase = ('' + _ab).replace(/\/$/, '');
+        if (cbase) {
+          _coordsFetching = true;
+          try {
+            fetch(cbase + '/api/exploracao/map-coords', { cache: 'no-store' })
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (j) { _coordsFetching = false; if (j && j.coords) { _locCoords = j.coords; _coordsLoaded = true; _onLoad(); } })
+              .catch(function () { _coordsFetching = false; });
+          } catch (_) { _coordsFetching = false; }
+        }
+      }
       if (_locArt !== null) return;
       _locArt = {};
-      var base = (_apiBase || '').replace(/\/$/, '');
-      if (base) {
-        try {
-          fetch(base + '/api/exploracao/map-coords', { cache: 'no-store' })
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (j) { if (j && j.coords) { _locCoords = j.coords; _onLoad(); } })
-            .catch(function () { });
-        } catch (_) { }
-      }
       CART_BIOMES.forEach(function (b) {
         var im = new Image();
         im.onload = function () { try { _onLoad(); } catch (_) { } };
