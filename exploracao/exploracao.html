@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T04:48:38Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T09:08:44Z - do not edit directly, edit source -->
 
 
 
@@ -39907,12 +39907,12 @@ function _openCartLocationPopup(biome){
     + '<h2>' + biome.name + '</h2>'
     + (biome.tier ? '<div class="clp-tier">⚡ Tier ' + biome.tier + '</div>' : '')
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
-    + (rec ? '<div class="clp-meta">📊 ' + rec + '<br>🏷️ Bioma: ' + biome.key + '</div>' : '')
+    + (rec ? '<div class="clp-meta">📊 ' + rec + '<br>🏷️ Bioma: ' + ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key)) + '</div>' : '')
     + '<div class="clp-buttons">'
     + (isCurrent
-        ? '<button class="clp-btn clp-btn-back" data-clp="back">🗺️ Voltar pro Mapa</button>'
-        : '<button class="clp-btn clp-btn-travel" data-clp="travel">🗡️ Viajar pra ' + biome.name.split(' ')[0] + '</button>'
-          + '<button class="clp-btn clp-btn-back" data-clp="back">🗺️ Voltar pro Mapa</button>'
+        ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
+        : '<button class="clp-btn clp-btn-travel" data-clp="travel">Viajar pra ' + biome.name.split(' ')[0] + '</button>'
+          + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
        )
     + '</div>';
   el.classList.add('active');
@@ -40082,6 +40082,10 @@ function openCartography() {
   _xcartCanvas = document.getElementById('xcart-canvas');
   _xcartCtx = _xcartCanvas.getContext('2d');
 
+  // P-mapa sessão #73: fallback JS pra WebViews sem aspect-ratio (CSS) — força o
+  // frame QUADRADO (height = width) pra o canvas não letterboxar (área preta).
+  var _xcartFrame = _xcartCanvas.parentElement;  // .xcart-canvas-frame
+  if (_xcartFrame) _xcartFrame.style.height = _xcartFrame.clientWidth + 'px';
   // HiDPI canvas setup — 2026-05-06: cap DPR em 2 + safety 8000px backing
   // (GPU limit). Em smartphones com DPR=3 + rect grande, sem cap o backing
   // pode causar fallback pra software rendering (FPS catastrofica).
@@ -44449,12 +44453,18 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   margin: 0;
 }
 .xcart-canvas-frame {
-  flex: 1;
+  /* P-mapa sessão #73 (user): canvas QUADRADO = tamanho da imagem do mapa real
+     (como no map-editor) → SEM área preta acima/abaixo. aspect-ratio + fallback JS
+     (frame.style.height = width) garantem o quadrado em todo WebView. */
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
   position: relative;
   border: 0;
   border-radius: 0;
   overflow: hidden;
-  background: #e6c890;  /* papel sépia (era #1a1510 escuro com inset shadow) */
+  background: #1a1510;  /* fundo escuro — o world-map preenche o quadrado */
   touch-action: none;
 }
 #xcart-canvas {

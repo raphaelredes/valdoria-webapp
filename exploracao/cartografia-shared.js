@@ -3068,24 +3068,36 @@
     var mx = (ax + bx) / 2, my = (ay + by) / 2;
     var cx = mx + (-dy * 0.15);
     var cy = my + (dx * 0.15);
-    // Linha pontilhada principal
+    // P-mapa sessão #73 (user: "reforce o desenho do caminho entre os locais"):
+    // estrada bem mais visível sobre o world-map — contorno escuro (legibilidade em
+    // qualquer fundo) + tracejado claro/dourado por cima (a "estrada") + marcos
+    // dourados. Antes era 1px sépia (INK_MED), quase invisível no mapa pintado.
     ctx.save();
-    ctx.strokeStyle = INK_MED;
-    ctx.lineWidth = 1.0;
-    ctx.setLineDash([3, 3]);
+    ctx.lineCap = 'round';
+    // 1) Contorno escuro
+    ctx.strokeStyle = 'rgba(20,14,8,0.55)';
+    ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.quadraticCurveTo(cx, cy, bx, by);
+    ctx.stroke();
+    // 2) Tracejado claro dourado por cima
+    ctx.strokeStyle = 'rgba(212,182,124,0.78)';
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([5, 4]);
     ctx.beginPath();
     ctx.moveTo(ax, ay);
     ctx.quadraticCurveTo(cx, cy, bx, by);
     ctx.stroke();
     ctx.setLineDash([]);
-    // Marcos (4 pontinhos pequenos ao longo da curva)
-    ctx.fillStyle = INK_DARK;
+    // 3) Marcos (pontinhos dourados ao longo da curva)
+    ctx.fillStyle = 'rgba(196,149,58,0.92)';
     for (var t = 0.2; t < 1; t += 0.2) {
       var u = 1 - t;
       var px = u*u*ax + 2*u*t*cx + t*t*bx;
       var py = u*u*ay + 2*u*t*cy + t*t*by;
       ctx.beginPath();
-      ctx.arc(px, py, 1, 0, Math.PI*2);
+      ctx.arc(px, py, 1.4, 0, Math.PI*2);
       ctx.fill();
     }
     ctx.restore();
@@ -3100,33 +3112,10 @@
     var bx = b.x * w, by = b.y * h;
     var isOrigin = b.isOrigin;
     ctx.save();
-    // Pin location (círculo preto pequeno = "X marks the spot")
-    ctx.fillStyle = INK_DARK;
-    ctx.beginPath();
-    ctx.arc(bx, by, 2.5, 0, Math.PI*2);
-    ctx.fill();
-    // Anel externo (mostra área clicável + hover state)
-    ctx.strokeStyle = isHover ? INK_DARK : (isOrigin ? INK_MED : INK_LIGHT);
-    ctx.lineWidth = isHover ? 1.6 : (isOrigin ? 1.0 : 0.7);
-    ctx.beginPath();
-    ctx.arc(bx, by, 18, 0, Math.PI*2);
-    ctx.stroke();
-    // Se origin, anel duplo
-    if (isOrigin) {
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.arc(bx, by, 22, 0, Math.PI*2);
-      ctx.stroke();
-    }
-    // Hover: ring extra
-    if (isHover) {
-      ctx.lineWidth = 0.5;
-      ctx.setLineDash([2, 2]);
-      ctx.beginPath();
-      ctx.arc(bx, by, 24, 0, Math.PI*2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
+    // P-mapa sessão #73 (user): SEM círculo marrom / anel. O local é só a IMAGEM
+    // (loc-art, desenhada por _drawLocArt com hover-zoom) + o label do nome abaixo.
+    // A DESCRIÇÃO aparece no tooltip ao passar o mouse. Removidos: pin dot + anel
+    // externo + anel duplo de origem + anel tracejado de hover.
     // Label do bioma — P3 sessão #73: pill ESCURO + texto claro/dourado, legível
     // sobre o world-map medieval. Antes era backplate cream (PAPER_BG) do mapa-
     // pergaminho ANTIGO — destoava do fundo escuro e deixava o range de nível
@@ -3546,8 +3535,10 @@
         if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
       });
       RB.forEach(function(b){
+        // P-mapa sessão #73 (user): NÃO mostra locais não-descobertos (nem o "?").
+        // Só aparece o que o personagem JÁ descobriu (known_locations) ou a origem —
+        // antes desenhava _drawUnknownLocation (silhueta tracejada + "?") pra todos.
         if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) _drawCartNode(ctx, b, _S, _S, hoverKey === b.key);
-        else _drawUnknownLocation(ctx, b, _S, _S);
       });
       var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
       var pn = pk && RB.find(function(b){ return b.key === pk; });
@@ -3572,9 +3563,14 @@
       var isTouch = (typeof window !== 'undefined' && (('ontouchstart' in window) || (navigator && navigator.maxTouchPoints > 0)));
       var radius = isTouch ? 36 : 24;
       var rsq = radius * radius;
+      // P-mapa sessão #73: só locais descobertos (ou origem) são clicáveis — os
+      // não-descobertos não aparecem no mapa, então também não respondem ao tap/hover
+      // (assim o popup "Local Desconhecido" não acontece mais).
+      var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() : null;
       var best = null, bestD = rsq + 1;
       for (var i = 0; i < CART_BIOMES.length; i++) {
         var b = CART_BIOMES[i];
+        if (!(known === null || known.indexOf(b.key) >= 0 || b.isOrigin)) continue;
         var rb = _resolved(b);  // P5 sessão #73: coords do editor (igual ao render)
         var bx = _offX + rb.x * _S;
         var by = _offY + rb.y * _S;
@@ -3614,6 +3610,15 @@
       + '<span class="clp-loc-emoji" style="display:none">' + ico + '</span>';
   }
 
+  // P-mapa sessão #73 (user: "Bioma: forest" deve estar em PT-BR): traduz a chave de
+  // bioma (ASCII canonical) pro nome PT-BR exibido no popup do mapa.
+  var _BIOME_PT = {
+    plains: 'Planície', forest: 'Floresta', swamp: 'Pântano', mountain: 'Montanha',
+    desert: 'Deserto', cave: 'Caverna', graveyard: 'Cemitério', snow: 'Ermo Gelado',
+    volcanic: 'Vulcânico'
+  };
+  function biomePT(key){ return _BIOME_PT[key] || key; }
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
@@ -3629,6 +3634,7 @@
     _onWorldMapLoad: _onWorldMapLoad,              // 2026-06-03: invalida cache + redraw quando carregar
     createWorldCart: createWorldCart,              // 2026-06-04 (sessão #73): motor ÚNICO do mapa (cidade+exploração)
     locArtHtml: locArtHtml, clpImgFallback: clpImgFallback,  // P2 sessão #73: imagem do local no popup de viagem
+    biomePT: biomePT,                              // P-mapa sessão #73: bioma key -> PT-BR no popup
     _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA (legado — só fallback explore)
     _drawOrganicBlob: _drawOrganicBlob,            // helper exposto
     _drawAgedStain: _drawAgedStain,                // helper exposto

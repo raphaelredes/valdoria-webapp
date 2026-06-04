@@ -104,6 +104,34 @@
   bg.onload = function(){ layout(); };
   stage.appendChild(bg);
 
+  // P-mapa sessão #73 (user: "mostre o caminho entre os locais do mapa também no
+  // map-editor"): overlay de canvas com as MESMAS estradas do jogo (CART_PATHS +
+  // _drawCartPath do engine cartografia-shared), redesenhado a cada layout pra
+  // acompanhar os locais enquanto o admin arrasta. Fica ACIMA do mapa-fundo e ABAIXO
+  // dos ícones (.loc são appended depois no DOM → renderizam por cima).
+  var pathCanvas = document.createElement('canvas');
+  pathCanvas.id = 'path-overlay';
+  pathCanvas.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;';
+  stage.appendChild(pathCanvas);
+  var pathCtx = pathCanvas.getContext('2d');
+  function drawPaths(sz){
+    var dp = window.CartShared && window.CartShared._drawCartPath;
+    var PATHS = (window.CartShared && window.CartShared.CART_PATHS) || [];
+    if (!dp || !pathCtx) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    pathCanvas.width = Math.round(sz.w * dpr);
+    pathCanvas.height = Math.round(sz.h * dpr);
+    pathCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    pathCtx.clearRect(0, 0, sz.w, sz.h);
+    // biomas resolvidos com as coords ATUAIS do editor (state) — a estrada segue o
+    // local enquanto arrasta, e usa as coords padrão pros que ainda não moveram.
+    var rb = BIOMES.map(function(b){
+      var s = state[b.key] || {};
+      return { key: b.key, x: (typeof s.x === 'number' ? s.x : b.x), y: (typeof s.y === 'number' ? s.y : b.y) };
+    });
+    PATHS.forEach(function(p){ dp(pathCtx, p[0], p[1], sz.w, sz.h, rb); });
+  }
+
   function stageSize(){
     var w = Math.min(window.innerWidth - 32, 900);
     stage.style.width = w + 'px';
@@ -141,6 +169,7 @@
       s.el.style.top = (s.y * sz.h) + 'px';
       s.el.style.width = (s.scale / 100 * sz.w) + 'px';
     });
+    drawPaths(sz);  // P-mapa sessão #73: redesenha as estradas acompanhando os locais
   }
 
   function wireDrag(d, key){
