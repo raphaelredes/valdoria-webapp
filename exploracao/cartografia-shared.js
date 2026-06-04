@@ -3556,6 +3556,27 @@
     };
   }
 
+  // === Popup loc-art (P2 sessão #73) — IMAGEM do local no popup de viagem ======
+  // _openCartLocationPopup (cidade + exploração) mostrava biome.ico (emoji). User
+  // pediu a IMAGEM de cada local (mesma .webp do mapa). Single source aqui → os dois
+  // popups usam CartShared.locArtHtml(biome). Fallback pro emoji se a imagem faltar
+  // ou em file:// (onerror → clpImgFallback troca a img pelo span do emoji).
+  function clpImgFallback(img){
+    try {
+      img.style.display = 'none';
+      var s = img.nextElementSibling;
+      if (s) s.style.display = '';
+    } catch (_e) {}
+  }
+  function locArtHtml(biome){
+    if (!biome) return '';
+    var key = biome.key || '';
+    var ico = biome.ico || '';
+    return '<img class="clp-loc-img" alt="" src="/shared/img/map/locations/' + key + '.webp" '
+      + 'onerror="CartShared.clpImgFallback(this)">'
+      + '<span class="clp-loc-emoji" style="display:none">' + ico + '</span>';
+  }
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
@@ -3570,6 +3591,7 @@
     worldMapReady: worldMapReady,                  // 2026-06-03: imagem do mapa carregou?
     _onWorldMapLoad: _onWorldMapLoad,              // 2026-06-03: invalida cache + redraw quando carregar
     createWorldCart: createWorldCart,              // 2026-06-04 (sessão #73): motor ÚNICO do mapa (cidade+exploração)
+    locArtHtml: locArtHtml, clpImgFallback: clpImgFallback,  // P2 sessão #73: imagem do local no popup de viagem
     _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA (legado — só fallback explore)
     _drawOrganicBlob: _drawOrganicBlob,            // helper exposto
     _drawAgedStain: _drawAgedStain,                // helper exposto

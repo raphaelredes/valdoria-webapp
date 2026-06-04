@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-01T22:50:47Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T04:15:52Z - do not edit directly, edit source -->
 
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-05-19T02:43:48Z - do not edit directly, edit source -->
+
 
 
 <!--
@@ -39885,7 +39885,7 @@ function _openCartLocationPopup(biome){
   var card = document.getElementById('clp-card-content');
   if (!card) return;
   card.innerHTML = ''
-    + '<div class="clp-icon">' + biome.ico + '</div>'
+    + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
     + (isCurrent ? '<div class="clp-current-here">📍 VOCÊ ESTÁ AQUI</div>' : '')
     + '<h2>' + biome.name + '</h2>'
     + (biome.tier ? '<div class="clp-tier">⚡ Tier ' + biome.tier + '</div>' : '')
@@ -44290,6 +44290,20 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   font-size: calc(56px * var(--v-font-scale, 1));
   margin-bottom: 6px;
   filter: drop-shadow(0 0 12px rgba(196,149,58,0.4));
+  line-height: 1;
+}
+/* P2 sessão #73: imagem do local no popup de viagem (.webp do mapa); .clp-loc-emoji = fallback */
+.clp-loc-img {
+  width: clamp(80px, 28vw, 112px);
+  height: auto;
+  border-radius: var(--v-radius, 10px);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+  filter: drop-shadow(0 0 10px rgba(196,149,58,0.35));
+  display: block;
+  margin: 0 auto 6px;
+}
+.clp-loc-emoji {
+  font-size: calc(56px * var(--v-font-scale, 1));
   line-height: 1;
 }
 .clp-current-here {

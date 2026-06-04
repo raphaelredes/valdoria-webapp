@@ -564,6 +564,9 @@ LOG SINK (Fase 7):
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <!-- Sessão #38 (2026-05-26) perf P0: removidas meta http-equiv Cache-Control/Pragma/Expires.
      Anulavam ETag/304 do _headers Tier C, forçando 3MB redownload por revisita. HTTP headers controlam cache. -->
   <meta charset="UTF-8">
@@ -3578,6 +3581,20 @@ LOG SINK (Fase 7):
   font-size: calc(56px * var(--v-font-scale, 1));  /* HARDCODED: popup icon principal, fora da escala (>3xl=22px) — candidato a SVG heráldico */
   margin-bottom: 6px;
   filter: drop-shadow(0 0 12px rgba(196,149,58,0.4));
+  line-height: 1;
+}
+/* P2 sessão #73: imagem do local no popup de viagem (.webp do mapa); .clp-loc-emoji = fallback */
+.clp-loc-img {
+  width: clamp(80px, 28vw, 112px);
+  height: auto;
+  border-radius: var(--v-radius, 10px);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+  filter: drop-shadow(0 0 10px rgba(196,149,58,0.35));
+  display: block;
+  margin: 0 auto 6px;
+}
+.clp-loc-emoji {
+  font-size: calc(56px * var(--v-font-scale, 1));
   line-height: 1;
 }
 .clp-current-here {
@@ -51664,7 +51681,7 @@ function _openCartLocationPopup(biome){
   var canExploreOrigin = isCurrent && biome.isOrigin;
   // 2026-05-05 v10: removido badge "Tier N" — só level range no rec.
   card.innerHTML = ''
-    + '<div class="clp-icon">' + biome.ico + '</div>'
+    + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
     + (isCurrent ? '<div class="clp-current-here">📍 VOCÊ ESTÁ AQUI</div>' : '')
     + '<h2>' + biome.name + '</h2>'
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
