@@ -40018,6 +40018,7 @@ var _xcartLastPinchDist = 0;
 var _xcartW = 0, _xcartH = 0;
 var _xcartCanvas = null;
 var _xcartCtx = null;
+var _xcartDpr = 1;            // DPR efetivo (capado) — passado ao motor p/ base cache HiDPI
 
 function openCartography() {
   // Reset zoom/pan
@@ -40071,6 +40072,7 @@ function openCartography() {
   _xcartCanvas.width = Math.round(rectW * dpr);
   _xcartCanvas.height = Math.round(rectH * dpr);
   _xcartCtx.scale(dpr, dpr);
+  _xcartDpr = dpr;
   _xcartW = rectW;
   _xcartH = rectH;
 
@@ -40103,68 +40105,26 @@ function _cartSeedRandV2(seed){ return CartShared._cartSeedRand(seed); }
 var CART_BIOMES_V2 = CartShared.CART_BIOMES;
 var CART_PATHS_V2 = CartShared.CART_PATHS;
 
-// PADRAO_LOCAIS: ícones de local (OpenAI) desenhados nas coords salvas no editor
-// (/api/exploracao/map-coords) ou nas coords padrão de CART_BIOMES. FALLBACK total:
-// ícone não carregou → desenha a arte procedural (sem regressão). Lazy + 1x.
-var _xcartLocArt = null;   // {key: Image|false}
-var _xcartLocCoords = {};  // override {key:{x,y,scale}} do editor (server)
-function _xcartEnsureLocArt() {
-  if (_xcartLocArt !== null) return;
-  _xcartLocArt = {};
-  var base = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
-  if (base) {
-    try {
-      fetch(base + '/api/exploracao/map-coords', { cache: 'no-store' })
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (j) { if (j && j.coords) { _xcartLocCoords = j.coords; _xcartDraw(); } })
-        .catch(function () { });
-    } catch (_) { }
-  }
-  if (typeof CART_BIOMES_V2 === 'undefined') return;
-  CART_BIOMES_V2.forEach(function (b) {
-    var im = new Image();
-    im.onload = function () { try { _xcartDraw(); } catch (_) { } };
-    im.onerror = function () { _xcartLocArt[b.key] = false; };
-    im.src = '/shared/img/map/locations/' + b.key + '.webp';
-    _xcartLocArt[b.key] = im;
-  });
-}
-function _xcartDrawLocArt(ctx, b, w, h) {
-  var ic = _xcartLocArt && _xcartLocArt[b.key];
-  if (!ic || ic === false || !ic.complete || !ic.naturalWidth) {
-    _drawBiomeArtV2(ctx, b, w, h);  // fallback procedural — sem regressão
-    return;
-  }
-  var ov = _xcartLocCoords[b.key] || {};
-  var cx = (typeof ov.x === 'number' ? ov.x : b.x) * w;
-  var cy = (typeof ov.y === 'number' ? ov.y : b.y) * h;
-  var iw = ((typeof ov.scale === 'number' ? ov.scale : 10) / 100) * w;
-  var ih = iw * (ic.naturalHeight / ic.naturalWidth);
-  try { ctx.drawImage(ic, cx - iw / 2, cy - ih / 2, iw, ih); }
-  catch (_) { _drawBiomeArtV2(ctx, b, w, h); }
-}
+// (ícones OpenAI dos locais + base-cache + world-map: movidos pro motor único
+//  CartShared.createWorldCart — _ensureLocArt/_drawLocArt. Single source c/ cidade.)
 
+// === MAPA — motor ÚNICO compartilhado com a cidade (sessão #73 — P1) =========
+// 2026-06-04: a exploração agora renderiza o MESMO mapa da cidade (world-map.webp
+// + ícones OpenAI dos locais nas coords do editor + pan/zoom + bússola), via o
+// motor compartilhado CartShared.createWorldCart (cartografia-shared.js). Antes
+// desenhava o mapa antigo (sem world-map, coords retangulares b.x*w) → divergia da
+// cidade. A diferença entre as duas telas fica SÓ nos botões de rodapé.
+// getKnownLocations:null → mostra TODOS os locais (comportamento atual da
+// exploração; a cidade passa o array known_locations p/ filtrar + "?").
+var _xcartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShared.createWorldCart({
+  apiBase: (window.__EXPLORE_API_BASE || ''),
+  getKnownLocations: function(){ return null; },
+  getPlayerBiomeKey: _cartGetPlayerBiomeV2,
+  onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartDraw === 'function') _xcartDraw(); }
+}) : null;
 function _xcartDraw() {
-  var ctx = _xcartCtx;
-  if (!ctx) return;
-  var w = _xcartW, h = _xcartH;
-  ctx.save();
-  ctx.clearRect(0, 0, w, h);
-  // Fase 7.2 (2026-04-30): _drawScrollBgV2 (textura papel) REMOVIDO —
-  // user feedback "remova as texturas de fundo do mapa que não estão
-  // na camada que funciona o zoom". Container CSS bg fornece o papel.
-  ctx.translate(_cartPanX, _cartPanY);
-  ctx.scale(_cartZoom, _cartZoom);
-  CART_BIOMES_V2.forEach(function(b){ _drawBiomeHaloV2(ctx, b, w, h); });
-  _xcartEnsureLocArt();
-  CART_BIOMES_V2.forEach(function(b){ _xcartDrawLocArt(ctx, b, w, h); });
-  CART_PATHS_V2.forEach(function(p){ _drawCartPathV2(ctx, p[0], p[1], w, h); });
-  CART_BIOMES_V2.forEach(function(b){ _xcartDrawNode(ctx, b, w, h); });
-  // Player pin "VOCÊ ESTÁ AQUI"
-  var playerBiomeKey = _cartGetPlayerBiomeV2();
-  var playerNode = CART_BIOMES_V2.find(function(b){ return b.key === playerBiomeKey; });
-  if (playerNode) _drawPlayerPinV2(ctx, playerNode, w, h);
-  ctx.restore();
+  if (!_xcartCtx || !_xcartEngine) return;
+  _xcartEngine.draw({ ctx: _xcartCtx, w: _xcartW, h: _xcartH, dpr: _xcartDpr, panX: _cartPanX, panY: _cartPanY, zoom: _cartZoom, hoverNode: _xcartHoverNode });
 }
 
 // Wraper do drawNode pra checkar hover (espelha cidade)
@@ -40327,17 +40287,10 @@ function _xcartHandleClick(mx, my){
 }
 
 function _xcartFindNodeAt(mx, my){
-  var wx = (mx - _cartPanX) / _cartZoom;
-  var wy = (my - _cartPanY) / _cartZoom;
-  for (var i = 0; i < CART_BIOMES_V2.length; i++) {
-    var b = CART_BIOMES_V2[i];
-    var bx = b.x * _xcartW;
-    var by = b.y * _xcartH;
-    var dx = wx - bx;
-    var dy = wy - by;
-    if (dx*dx + dy*dy <= 24*24) return b;
-  }
-  return null;
+  // sessão #73: hit-test no motor compartilhado (mapeamento quadrado-cover S,
+  // igual ao draw → o tap bate com o ícone/node do world-map).
+  if (!_xcartEngine) return null;
+  return _xcartEngine.findNodeAt({ w: _xcartW, h: _xcartH, panX: _cartPanX, panY: _cartPanY, zoom: _cartZoom }, mx, my);
 }
 
 function _xcartShowTooltip(b, mx, my){

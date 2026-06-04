@@ -368,17 +368,72 @@
 
   // User sessão #69: mapa-múndi medieval desenhado à mão (WebP gerado via OpenAI
   // low) como BASE da cartografia — o mapa procedural anterior era "tosco". Preload
-  // no init; desenhado em _drawParchmentBase se pronto. Os marcadores e caminhos dos
-  // biomas continuam desenhados POR CIMA (posições corretas mantidas).
+  // no init; desenhado em _drawWorldMapBg quando pronto. Os marcadores/caminhos dos
+  // biomas + ícones OpenAI dos locais continuam desenhados POR CIMA.
+  //
+  // 2026-06-03 (sessão #72 — fix mapa stale): o mapa do JOGO (cidade "Partir para
+  // aventura") agora renderiza o MESMO mapa do editor (/exploracao/map-editor):
+  // world-map.webp como fundo do canvas + ícones de local (OpenAI) nas coords
+  // salvas (/api/exploracao/map-coords). _onWorldMapLoad permite o consumer
+  // invalidar a base-cache + redraw quando a imagem chega assíncrona.
   var _cartWorldMap = null;
+  var _cartWorldMapCbs = [];
   (function(){
     try {
       var _im = new Image();
-      _im.onload = function(){ _cartWorldMap = _im; };
+      _im.onload = function(){
+        _cartWorldMap = _im;
+        var cbs = _cartWorldMapCbs; _cartWorldMapCbs = [];
+        cbs.forEach(function(cb){ try { cb(); } catch(_){} });
+      };
       _im.onerror = function(){ _cartWorldMap = null; };
       _im.src = '/shared/img/map/world-map.webp';
     } catch(_e){ _cartWorldMap = null; }
   })();
+
+  // === worldMapReady / _onWorldMapLoad ===
+  // worldMapReady() → true quando a imagem do mapa carregou (segura pra blit).
+  // _onWorldMapLoad(cb) → chama cb agora se já pronto, senão enfileira pra quando
+  // carregar (consumer usa pra invalidar cache + redraw). Idempotente.
+  function worldMapReady(){
+    return !!(_cartWorldMap && _cartWorldMap.complete && _cartWorldMap.naturalWidth);
+  }
+  function _onWorldMapLoad(cb){
+    if (typeof cb !== 'function') return;
+    if (worldMapReady()) { try { cb(); } catch(_){} return; }
+    _cartWorldMapCbs.push(cb);
+  }
+
+  // === _cartWorldMapRect ===
+  // Retângulo (em px de canvas) onde o world-map é renderizado com object-fit:cover.
+  // A imagem é QUADRADA (1024×1024) e o editor a desenha num stage QUADRADO, então
+  // todo coord normalizado (0..1) vive sobre um QUADRADO de lado S = max(w,h)
+  // centrado no canvas. Mapear coords por este rect garante alinhamento PIXEL-PERFECT
+  // com o editor (mesma transformação cover). Escala UNIFORME → sem distorção.
+  function _cartWorldMapRect(w, h){
+    var S = Math.max(w, h);
+    return { x: (w - S) / 2, y: (h - S) / 2, s: S };
+  }
+
+  // === _drawWorldMapBg ===
+  // Desenha o world-map.webp como FUNDO do canvas (cover) + véu sépia leve pra
+  // integrar com a UI dourada medieval. Se a imagem ainda não carregou, pinta um
+  // fundo escuro neutro (NÃO o pergaminho procedural antigo — esse foi removido do
+  // path da cartografia do jogo; ver tombstone em cidade/index.html). Quando a
+  // imagem chegar, o consumer redesenha (via _onWorldMapLoad).
+  function _drawWorldMapBg(ctx, w, h){
+    if (worldMapReady()) {
+      var r = _cartWorldMapRect(w, h);
+      ctx.drawImage(_cartWorldMap, r.x, r.y, r.s, r.s);
+      ctx.fillStyle = 'rgba(42,30,18,0.12)';   // véu sépia leve (medieval)
+      ctx.fillRect(0, 0, w, h);
+      return true;
+    }
+    // Fallback (imagem ainda carregando): fundo escuro neutro — sem desenho tosco.
+    ctx.fillStyle = '#2a2018';
+    ctx.fillRect(0, 0, w, h);
+    return false;
+  }
 
   // === _drawParchmentBase ===
   function _drawParchmentBase(ctx, w, h){
@@ -3287,8 +3342,11 @@
       }
     }
     ctx.globalAlpha = 1;
-    // 5) Paper grain (textura de fibras)
-    for (var gi = 0; gi < 380; gi++) {
+    // 5) Paper grain (textura de fibras) — Perf #5 (cartografia-perf.md): conta
+    //    escalada por tier (lite ~152, full 380). Fator estável na sessão → mesma
+    //    seed gera os N primeiros grains determinísticos (pixel-identical por tier).
+    var _grainN = Math.round(380 * (window._valdoriaMinLoadFactor || 1));
+    for (var gi = 0; gi < _grainN; gi++) {
       var gx = rng() * w, gy = rng() * h;
       var ga = 0.04 + rng() * 0.10;
       ctx.fillStyle = 'rgba(60,40,12,' + ga.toFixed(3) + ')';
@@ -3331,6 +3389,173 @@
     ctx.restore();
   }
 
+  // === WORLD-CART ENGINE — fonte ÚNICA do mapa (cidade + exploração) =========
+  // 2026-06-04 (sessão #73 — P1 unificação): antes o ORQUESTRADOR do mapa vivia
+  // DUPLICADO em cada HTML — cidade evoluiu pro world-map.webp + ícones OpenAI;
+  // exploração ficou no renderizador antigo (pergaminho/pictograma) → os mapas
+  // divergiram. Agora o renderizador COMPLETO (fundo world-map cover + ícones nas
+  // coords do editor + nodes/paths/pin/bússola, com pan/zoom) é UMA função aqui.
+  // Cada HTML cria sua instância (createWorldCart) com o seu config e chama
+  // .draw(view) / .findNodeAt(view,...). Mudou aqui → cidade E exploração refletem.
+  //
+  //   cfg = {
+  //     apiBase,                              // base p/ GET /api/exploracao/map-coords
+  //     getKnownLocations(): string[]|null,   // null = mostra TODOS (exploração);
+  //                                           // array = filtra + "?" nos ocultos (cidade)
+  //     getPlayerBiomeKey(): string|null,     // bioma do player (pin "VOCÊ ESTÁ AQUI")
+  //     getQuestFocus(): {key,title}|null,    // halo dourado de missão (opcional)
+  //     drawQuestHalo(ctx,node,w,h,title),    // desenha o halo (opcional; cidade só)
+  //     onAsyncRedraw(),                      // chamado quando imagem/coords chegam (redraw)
+  //   }
+  //   view = { ctx, w, h, dpr, panX, panY, zoom, hoverNode }
+  function createWorldCart(cfg){
+    cfg = cfg || {};
+    var _baseCache = null;
+    var _locArt = null;       // {key: Image|false}
+    var _locCoords = {};      // override {key:{x,y,scale}} do editor (server)
+    var _apiBase = (cfg.apiBase || '');
+    var _onLoad = (typeof cfg.onAsyncRedraw === 'function') ? cfg.onAsyncRedraw : function(){};
+
+    // Quando a imagem do world-map chega assíncrona: invalida a base-cache desta
+    // instância + redesenha (fundo escuro → mapa real). Registrado 1× por instância.
+    _onWorldMapLoad(function(){ _baseCache = null; _onLoad(); });
+
+    // Perf #1 (cartografia-perf.md): base estática (world-map cover + véu sépia) num
+    // canvas offscreen → blit barato por frame. Invalida só em dims/dpr/mapReady.
+    function _ensureBase(view){
+      var w = view.w, h = view.h, dpr = view.dpr || 1;
+      var mapReady = worldMapReady();
+      if (_baseCache && _baseCache._w === w && _baseCache._h === h
+          && _baseCache._dpr === dpr && _baseCache._mapReady === mapReady) {
+        return _baseCache;
+      }
+      var cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.round(w * dpr));
+      cv.height = Math.max(1, Math.round(h * dpr));
+      var bc = cv.getContext('2d', { alpha: false });
+      bc.scale(dpr, dpr);
+      var _mapReady = _drawWorldMapBg(bc, w, h);
+      cv._w = w; cv._h = h; cv._dpr = dpr; cv._mapReady = _mapReady;
+      _baseCache = cv;
+      return cv;
+    }
+
+    // Ícones OpenAI dos locais (mesma fonte do editor: /api/exploracao/map-coords).
+    // Fallback total: ícone faltando → arte procedural do bioma (sem regressão). Lazy 1×.
+    function _ensureLocArt(){
+      if (_locArt !== null) return;
+      _locArt = {};
+      var base = (_apiBase || '').replace(/\/$/, '');
+      if (base) {
+        try {
+          fetch(base + '/api/exploracao/map-coords', { cache: 'no-store' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (j) { if (j && j.coords) { _locCoords = j.coords; _onLoad(); } })
+            .catch(function () { });
+        } catch (_) { }
+      }
+      CART_BIOMES.forEach(function (b) {
+        var im = new Image();
+        im.onload = function () { try { _onLoad(); } catch (_) { } };
+        im.onerror = function () { _locArt[b.key] = false; };
+        im.src = '/shared/img/map/locations/' + b.key + '.webp';
+        _locArt[b.key] = im;
+      });
+    }
+
+    // cx/cy/iw chegam no espaço da Stage 2 (quadrado S × offset já aplicados).
+    function _drawLocArt(ctx, b, w, h){
+      var ic = _locArt && _locArt[b.key];
+      if (!ic || ic === false || !ic.complete || !ic.naturalWidth) {
+        _drawBiomeArt(ctx, b, w, h);  // fallback procedural — sem regressão
+        return;
+      }
+      var ov = _locCoords[b.key] || {};
+      var cx = (typeof ov.x === 'number' ? ov.x : b.x) * w;
+      var cy = (typeof ov.y === 'number' ? ov.y : b.y) * h;
+      var iw = ((typeof ov.scale === 'number' ? ov.scale : 10) / 100) * w;
+      var ih = iw * (ic.naturalHeight / ic.naturalWidth);
+      try { ctx.drawImage(ic, cx - iw / 2, cy - ih / 2, iw, ih); }
+      catch (_) { _drawBiomeArt(ctx, b, w, h); }
+    }
+
+    // Orquestrador — FUNDO world-map.webp (cover, sob pan/zoom) + ícones/nodes/paths/
+    // pin (Stage 2, no quadrado cover S) + bússola screen-space (fixa). Espelha o
+    // _drawCart histórico da cidade (cartografia-perf.md / fix pan sessão #72).
+    function draw(view){
+      var ctx = view.ctx;
+      if (!ctx) return;
+      var w = view.w, h = view.h;
+      ctx.save();
+      // Backdrop escuro — revelado em pan/zoom além das bordas do world-map.
+      ctx.fillStyle = '#1a1510';
+      ctx.fillRect(0, 0, w, h);
+      var _mr = _cartWorldMapRect(w, h);
+      var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
+      ctx.save();
+      ctx.translate(view.panX || 0, view.panY || 0);
+      ctx.scale(view.zoom || 1, view.zoom || 1);
+      var _base = _ensureBase(view);
+      ctx.drawImage(_base, 0, 0, w, h);
+      ctx.translate(_offX, _offY);
+      // Visibility: known=null → mostra TODOS (exploração); array → filtra + "?" (cidade).
+      var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() : null;
+      var hover = view.hoverNode || null;
+      function _pathEndKnown(key){ return known === null || known.indexOf(key) >= 0 || key === 'plains'; }
+      _ensureLocArt();
+      CART_BIOMES.forEach(function(b){
+        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) _drawLocArt(ctx, b, _S, _S);
+      });
+      CART_PATHS.forEach(function(p){
+        if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, CART_BIOMES);
+      });
+      CART_BIOMES.forEach(function(b){
+        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) _drawCartNode(ctx, b, _S, _S, hover === b);
+        else _drawUnknownLocation(ctx, b, _S, _S);
+      });
+      var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
+      var pn = pk && CART_BIOMES.find(function(b){ return b.key === pk; });
+      if (pn) _drawPlayerPin(ctx, pn, _S, _S);
+      var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
+      if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
+        var qn = CART_BIOMES.find(function(b){ return b.key === qf.key; });
+        if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
+      }
+      ctx.restore();
+      // Bússola — screen-space (top-right, NÃO pan/zooma).
+      _drawCartCompass(ctx, w, h);
+      ctx.restore();
+    }
+
+    // Hit-test — converte tela→mundo (revert pan/zoom) e mapeia no quadrado cover S.
+    function findNodeAt(view, mx, my){
+      var wx = (mx - (view.panX || 0)) / (view.zoom || 1);
+      var wy = (my - (view.panY || 0)) / (view.zoom || 1);
+      var _mr = _cartWorldMapRect(view.w, view.h);
+      var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
+      var isTouch = (typeof window !== 'undefined' && (('ontouchstart' in window) || (navigator && navigator.maxTouchPoints > 0)));
+      var radius = isTouch ? 36 : 24;
+      var rsq = radius * radius;
+      var best = null, bestD = rsq + 1;
+      for (var i = 0; i < CART_BIOMES.length; i++) {
+        var b = CART_BIOMES[i];
+        var bx = _offX + b.x * _S;
+        var by = _offY + b.y * _S;
+        var dx = wx - bx, dy = wy - by;
+        var d = dx*dx + dy*dy;
+        if (d <= rsq && d < bestD) { best = b; bestD = d; }
+      }
+      return best;
+    }
+
+    return {
+      draw: draw,
+      findNodeAt: findNodeAt,
+      invalidateBase: function(){ _baseCache = null; },
+      ensureLocArt: _ensureLocArt
+    };
+  }
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
@@ -3340,7 +3565,12 @@
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,
-    _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA
+    _drawWorldMapBg: _drawWorldMapBg,              // 2026-06-03: world-map.webp como fundo (cover)
+    _cartWorldMapRect: _cartWorldMapRect,          // 2026-06-03: rect cover → mapeia coords do editor
+    worldMapReady: worldMapReady,                  // 2026-06-03: imagem do mapa carregou?
+    _onWorldMapLoad: _onWorldMapLoad,              // 2026-06-03: invalida cache + redraw quando carregar
+    createWorldCart: createWorldCart,              // 2026-06-04 (sessão #73): motor ÚNICO do mapa (cidade+exploração)
+    _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA (legado — só fallback explore)
     _drawOrganicBlob: _drawOrganicBlob,            // helper exposto
     _drawAgedStain: _drawAgedStain,                // helper exposto
     _drawCrease: _drawCrease,                      // helper exposto
