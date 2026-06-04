@@ -47999,7 +47999,13 @@ function _acceptQuest(qid){
   // GUILD_QUEST_DETAILS pode trazer whatHappened/whatToDo pré-escritos;
   // se não, geramos fallbacks razoáveis a partir do desc/title/npc.
   if (typeof QUESTS_ACTIVE !== 'undefined') {
-    var _wh = d.whatHappened || (d.npc ? (d.npc + ' te ofereceu este contrato na Guilda dos Aventureiros.') : 'Missão aceita na Guilda dos Aventureiros.');
+    // Fallback NEUTRO de origem (2026-06-03): NÃO assume "na Guilda dos Aventureiros"
+    // — antes toda missão sem whatHappened próprio dizia ter sido oferecida na Guilda,
+    // o que é falso pra quests obtidas em diálogo (ex.: "Investigar a Adega" da Martha
+    // na Estalagem). "te confiou este contrato" é correto pra QUALQUER origem (Guilda,
+    // estalagem, prólogo, NPC). Quests do Quadro com whatHappened próprio mantêm o
+    // texto rico; o servidor (sync) já usa o desc da quest (sem menção à Guilda).
+    var _wh = d.whatHappened || (d.npc ? (d.npc + ' te confiou este contrato.') : 'Contrato aceito.');
     var _wt = d.whatToDo || (d.desc || 'Cumprir o objetivo e retornar pra entregar.');
     QUESTS_ACTIVE.push({
       id: 'qa_' + qid, icon: d.icon,
