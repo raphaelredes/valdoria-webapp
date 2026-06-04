@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T04:15:52Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T04:26:11Z - do not edit directly, edit source -->
 
 
 
@@ -31658,6 +31658,23 @@ function drawWeatherOverlay(ctx) {
   var _wTier = (window._valdoriaPerformanceTier === 'lite') ? 0
              : (window._valdoriaPerformanceTier === 'full') ? 2
              : (typeof _tileDetail !== 'undefined' ? _tileDetail : 1);
+  // P4 sessão #73: em LITE (celular fraco) PULAMOS nuvens/partículas/raios, mas o
+  // clima continua DE FATO APLICADO como UM tint estático barato (1 fillRect, sem
+  // animação por-frame). Assim chuva/tempestade/neblina aparecem em TODO device —
+  // só otimizado. O tint de dia/noite (drawDayNightTint) já roda em todos os tiers.
+  if (S.weather && _wTier === 0) {
+    var _ltC = (S.weather === 'r') ? 'rgba(64,90,124,0.12)'    // chuva: azul-cinza frio
+             : (S.weather === 't') ? 'rgba(28,32,46,0.24)'      // tempestade: escuro ominoso
+             : (S.weather === 'f') ? 'rgba(198,202,208,0.18)'   // neblina: esbranquiçado
+             : null;                                            // 's' (limpo): sem tint
+    if (_ltC) {
+      ctx.save();
+      ctx.fillStyle = _ltC;
+      ctx.fillRect(0, 0, canvasW, canvasH);
+      ctx.restore();
+    }
+    return;
+  }
   if (S.weather && _wTier >= 1) {
     var cloudCfg = null;
     // 2026-04-27 USER FIX: storm NÃO usa shadow clouds — usa apenas sistema
