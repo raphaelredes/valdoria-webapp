@@ -51398,10 +51398,14 @@ function _wireCartEvents(){
   var _cartTapStartX = 0, _cartTapStartY = 0;
   var _cartTapStartT = 0;
   var _cartTouchMoved = false;
+  var _cartLastMidX = null, _cartLastMidY = null;  // sessão #74: midpoint anterior dos 2 dedos → pan fluido durante a pinça
   _cartCanvas.addEventListener('touchstart', function(e){
     e.preventDefault();
     if (e.touches.length === 2) {
       _cartLastPinchDist = _cartTouchDist(e.touches);
+      var _r2 = _cartCanvas.getBoundingClientRect();
+      _cartLastMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - _r2.left;
+      _cartLastMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - _r2.top;
       _cartTouchMoved = true; /* pinch nunca é tap */
       _cartTapPending = false;
     } else if (e.touches.length === 1) {
@@ -51425,8 +51429,16 @@ function _wireCartEvents(){
       var rect = _cartCanvas.getBoundingClientRect();
       var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
       var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+      // sessão #74: pan fluido — o conteúdo SEGUE o deslize do midpoint dos dedos (antes a
+      // pinça só dava zoom, sem acompanhar o movimento). _cartSetZoom logo após reancla o
+      // zoom no midpoint (+ clamp + draw), então o ponto sob os dedos fica estável.
+      if (_cartLastMidX !== null) {
+        _cartPanX += midX - _cartLastMidX;
+        _cartPanY += midY - _cartLastMidY;
+      }
       _cartSetZoom(_cartZoom * ratio, midX, midY);
       _cartLastPinchDist = d;
+      _cartLastMidX = midX; _cartLastMidY = midY;
       _cartTouchMoved = true;
       _cartTapPending = false;
     } else if (e.touches.length === 1) {
@@ -51450,7 +51462,21 @@ function _wireCartEvents(){
     }
   }, { passive: false });
   _cartCanvas.addEventListener('touchend', function(e){
-    if (e.touches.length < 2) _cartLastPinchDist = 0;
+    if (e.touches.length < 2) { _cartLastPinchDist = 0; _cartLastMidX = null; _cartLastMidY = null; }
+    // FIX sessão #74 (user: "toda vez que dou zoom muda de posição da tela"): transição
+    // pinça(2 dedos)→drag(1 dedo). A pinça moveu o pan, mas _cartDragStart era do toque
+    // inicial (pan ANTIGO) → o dedo restante recalculava panX = curX - dragStart_velho e
+    // PULAVA ~150px. Re-seed o dragStart pro dedo restante com o pan ATUAL → pan contínuo.
+    if (e.touches.length === 1) {
+      var _rt = _cartCanvas.getBoundingClientRect();
+      _cartTapStartX = e.touches[0].clientX - _rt.left;
+      _cartTapStartY = e.touches[0].clientY - _rt.top;
+      _cartDragStartX = _cartTapStartX - _cartPanX;
+      _cartDragStartY = _cartTapStartY - _cartPanY;
+      _cartTouchMoved = false;
+      _cartTapPending = false;
+      _cartIsDragging = true;
+    }
     if (e.touches.length === 0) {
       // Tap detectado: pendente + sem movimento + dentro de 600ms.
       // Independente de _cartIsDragging (Android sintetiza mouseup que zera).
@@ -51469,6 +51495,7 @@ function _wireCartEvents(){
     _cartTouchMoved = false;
     _cartTapPending = false;
     _cartLastPinchDist = 0;
+    _cartLastMidX = null; _cartLastMidY = null;
   });
 
   // Botões
