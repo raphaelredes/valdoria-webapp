@@ -405,13 +405,17 @@
   }
 
   // === _cartWorldMapRect ===
-  // Retângulo (em px de canvas) onde o world-map é renderizado com object-fit:cover.
-  // A imagem é QUADRADA (1024×1024) e o editor a desenha num stage QUADRADO, então
-  // todo coord normalizado (0..1) vive sobre um QUADRADO de lado S = max(w,h)
-  // centrado no canvas. Mapear coords por este rect garante alinhamento PIXEL-PERFECT
-  // com o editor (mesma transformação cover). Escala UNIFORME → sem distorção.
+  // Retângulo (em px de canvas) onde o world-map é renderizado. A imagem é QUADRADA
+  // (1024×1024) e o editor a desenha num stage QUADRADO, então todo coord normalizado
+  // (0..1) vive sobre um QUADRADO de lado S centrado no canvas.
+  // P5 sessão #73: CONTAIN (S=min) em vez de cover (S=max). Em viewport RETRATO o
+  // cover cortava as bordas L/R → locais nas pontas (korthag 0.11, crystal 0.85)
+  // ficavam FORA da tela e o jogador não via o mapa inteiro (user report + img).
+  // Contain mostra o MAPA INTEIRO + TODOS os locais de uma vez (letterbox escuro
+  // topo/baixo, preenchido pelo backdrop). Coords 0..1 do editor mapeiam sobre o
+  // MESMO quadrado → alinhamento pixel-perfect editor↔jogo. Escala UNIFORME, sem distorção.
   function _cartWorldMapRect(w, h){
-    var S = Math.max(w, h);
+    var S = Math.min(w, h);
     return { x: (w - S) / 2, y: (h - S) / 2, s: S };
   }
 
@@ -3473,7 +3477,17 @@
     }
 
     // cx/cy/iw chegam no espaço da Stage 2 (quadrado S × offset já aplicados).
-    function _drawLocArt(ctx, b, w, h){
+    // P5 sessão #73: coords do EDITOR (_locCoords, salvas em /api/exploracao/map-coords)
+    // p/ TODOS os elementos — não só o ícone. Retorna o biome com x/y do editor quando
+    // salvos; senão o default de CART_BIOMES. Antes só o ÍCONE usava editor e o resto
+    // (node/label/rota/pin/hit-test) usava CART_BIOMES → ícones e rotas em lugares
+    // DIFERENTES (user: "locais em lugares diferentes das rotas desenhadas no mapa").
+    function _resolved(b){
+      var ov = _locCoords[b.key];
+      if (!ov || typeof ov.x !== 'number' || typeof ov.y !== 'number') return b;
+      var c = {}; for (var k in b) { c[k] = b[k]; } c.x = ov.x; c.y = ov.y; return c;
+    }
+    function _drawLocArt(ctx, b, w, h, isHover){
       var ic = _locArt && _locArt[b.key];
       if (!ic || ic === false || !ic.complete || !ic.naturalWidth) {
         _drawBiomeArt(ctx, b, w, h);  // fallback procedural — sem regressão
@@ -3483,8 +3497,16 @@
       var cx = (typeof ov.x === 'number' ? ov.x : b.x) * w;
       var cy = (typeof ov.y === 'number' ? ov.y : b.y) * h;
       var iw = ((typeof ov.scale === 'number' ? ov.scale : 10) / 100) * w;
+      // P5 sessão #73: zoom pequeno + glow dourado no HOVER/seleção (user pediu "efeito
+      // de zoom ao passar o mouse / clicar no local que deseja ir"). +18%, instant
+      // (o hover já dispara redraw). O popup de viagem (P2) complementa no clique.
+      if (isHover) iw *= 1.18;
       var ih = iw * (ic.naturalHeight / ic.naturalWidth);
-      try { ctx.drawImage(ic, cx - iw / 2, cy - ih / 2, iw, ih); }
+      try {
+        if (isHover) { ctx.save(); ctx.shadowColor = 'rgba(196,149,58,0.75)'; ctx.shadowBlur = 14; }
+        ctx.drawImage(ic, cx - iw / 2, cy - ih / 2, iw, ih);
+        if (isHover) ctx.restore();
+      }
       catch (_) { _drawBiomeArt(ctx, b, w, h); }
     }
 
@@ -3510,24 +3532,29 @@
       // Visibility: known=null → mostra TODOS (exploração); array → filtra + "?" (cidade).
       var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() : null;
       var hover = view.hoverNode || null;
+      var hoverKey = hover ? hover.key : null;
       function _pathEndKnown(key){ return known === null || known.indexOf(key) >= 0 || key === 'plains'; }
       _ensureLocArt();
-      CART_BIOMES.forEach(function(b){
-        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) _drawLocArt(ctx, b, _S, _S);
+      // P5 sessão #73: RB = biomes com as coords do EDITOR → ícones/nodes/labels/rotas/
+      // pin/hit-test TODOS no MESMO lugar (antes só o ícone usava editor; o resto usava
+      // CART_BIOMES, por isso ícone e rota apareciam separados).
+      var RB = CART_BIOMES.map(_resolved);
+      RB.forEach(function(b){
+        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) _drawLocArt(ctx, b, _S, _S, hoverKey === b.key);
       });
       CART_PATHS.forEach(function(p){
-        if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, CART_BIOMES);
+        if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
       });
-      CART_BIOMES.forEach(function(b){
-        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) _drawCartNode(ctx, b, _S, _S, hover === b);
+      RB.forEach(function(b){
+        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) _drawCartNode(ctx, b, _S, _S, hoverKey === b.key);
         else _drawUnknownLocation(ctx, b, _S, _S);
       });
       var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
-      var pn = pk && CART_BIOMES.find(function(b){ return b.key === pk; });
+      var pn = pk && RB.find(function(b){ return b.key === pk; });
       if (pn) _drawPlayerPin(ctx, pn, _S, _S);
       var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
       if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
-        var qn = CART_BIOMES.find(function(b){ return b.key === qf.key; });
+        var qn = RB.find(function(b){ return b.key === qf.key; });
         if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
       }
       ctx.restore();
@@ -3548,8 +3575,9 @@
       var best = null, bestD = rsq + 1;
       for (var i = 0; i < CART_BIOMES.length; i++) {
         var b = CART_BIOMES[i];
-        var bx = _offX + b.x * _S;
-        var by = _offY + b.y * _S;
+        var rb = _resolved(b);  // P5 sessão #73: coords do editor (igual ao render)
+        var bx = _offX + rb.x * _S;
+        var by = _offY + rb.y * _S;
         var dx = wx - bx, dy = wy - by;
         var d = dx*dx + dy*dy;
         if (d <= rsq && d < bestD) { best = b; bestD = d; }
