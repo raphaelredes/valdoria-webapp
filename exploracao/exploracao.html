@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T10:31:05Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T11:23:33Z - do not edit directly, edit source -->
 
 
 
@@ -40319,9 +40319,10 @@ function _xcartFindNodeAt(mx, my){
 function _xcartShowTooltip(b, mx, my){
   var tip = document.getElementById('xcart-tooltip');
   if (!tip) return;
-  tip.innerHTML = '<strong>' + b.name + '</strong><br>'
-    + '<span class="xcart-tier">Tier ' + b.tier + '</span><br>'
-    + '<span style="font-size:calc(10px * var(--v-font-scale, 1)); font-style:italic; color:#a09484;">' + b.desc + '</span>';
+  // P-mapa sessão #73 (user): o NOME + NÍVEL já aparecem no pill ao passar o mouse
+  // sobre o local — o tooltip mostra SÓ a descrição (textContent, sem repetir info).
+  tip.textContent = b.desc || '';
+  tip.style.fontStyle = 'italic';
   tip.style.left = (mx + 12) + 'px';
   tip.style.top = (my + 12) + 'px';
   tip.classList.add('active');

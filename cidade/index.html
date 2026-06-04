@@ -51572,18 +51572,10 @@ function _cartShowTooltip(b, mx, my){
       + '<span style="font-size:calc(10px * var(--v-font-scale, 1));font-style:italic;color:#6a5a4a">'
       + 'Clique para mais informações</span>';
   } else {
-    // 2026-05-05 v10: removido "Tier N" — mostra level range só
-    var tipLvl = '';
-    if (typeof b.tier === 'number' && b.tier > 0) {
-      tipLvl = (b.tier <= 1) ? 'nv 1–2' :
-               (b.tier <= 3) ? 'nv 2–4' :
-               (b.tier <= 5) ? 'nv 4–7' :
-               (b.tier <= 7) ? 'nv 7–10' :
-                               'nv 10+';
-    } else if (b.tier === 0) tipLvl = 'Cidade Segura';
-    tip.innerHTML = '<strong>' + b.name + '</strong><br>'
-      + (tipLvl ? '<span class="tier">' + tipLvl + '</span><br>' : '')
-      + '<span style="font-size:calc(10px * var(--v-font-scale, 1)); font-style:italic; color:#a09484;">' + b.desc + '</span>';
+    // P-mapa sessão #73 (user): o NOME + NÍVEL já aparecem no pill ao passar o mouse
+    // sobre o local — o tooltip mostra SÓ a descrição (textContent, sem repetir info).
+    tip.textContent = b.desc || '';
+    tip.style.fontStyle = 'italic';
   }
   tip.style.left = (mx + 12) + 'px';
   tip.style.top = (my + 12) + 'px';
