@@ -3561,19 +3561,25 @@
       var _mr = _cartWorldMapRect(view.w, view.h);
       var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
       var isTouch = (typeof window !== 'undefined' && (('ontouchstart' in window) || (navigator && navigator.maxTouchPoints > 0)));
-      var radius = isTouch ? 36 : 24;
-      var rsq = radius * radius;
       // P-mapa sessão #73: só locais descobertos (ou origem) são clicáveis — os
       // não-descobertos não aparecem no mapa, então também não respondem ao tap/hover
       // (assim o popup "Local Desconhecido" não acontece mais).
       var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() : null;
-      var best = null, bestD = rsq + 1;
+      var best = null, bestD = Infinity;
       for (var i = 0; i < CART_BIOMES.length; i++) {
         var b = CART_BIOMES[i];
         if (!(known === null || known.indexOf(b.key) >= 0 || b.isOrigin)) continue;
         var rb = _resolved(b);  // P5 sessão #73: coords do editor (igual ao render)
         var bx = _offX + rb.x * _S;
         var by = _offY + rb.y * _S;
+        // P-mapa sessão #73 (user: "efeitos do mouse SÓ na imagem"): raio de hit =
+        // metade da largura REAL da imagem do local (MESMA conta do _drawLocArt: iw =
+        // scale% * _S), não um círculo fixo maior. Mínimo de tap-target pra toque no
+        // smartphone (~56px) e desktop (~24px) — usabilidade sem estourar a imagem.
+        var _ov = _locCoords[b.key] || {};
+        var imgHalf = (((typeof _ov.scale === 'number' ? _ov.scale : 10) / 100) * _S) / 2;
+        var radius = isTouch ? Math.max(imgHalf, 28) : Math.max(imgHalf, 12);
+        var rsq = radius * radius;
         var dx = wx - bx, dy = wy - by;
         var d = dx*dx + dy*dy;
         if (d <= rsq && d < bestD) { best = b; bestD = d; }
