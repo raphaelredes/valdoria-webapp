@@ -3114,6 +3114,11 @@
     var bx = b.x * w, by = b.y * h;
     var isOrigin = b.isOrigin;
     ctx.save();
+    // P-mapa sessão #73 (user: "o nome e nível dos locais deve sumir e aparecer SÓ com
+    // o mouse em cima do local"): o label (pill nome + nível) só é desenhado no HOVER.
+    // Por padrão o mapa mostra APENAS as imagens dos locais (loc-art) — nada de labels
+    // poluindo a visão. A descrição aparece no tooltip (também só no hover).
+    if (!isHover) { ctx.restore(); return; }
     // P-mapa sessão #73 (user): SEM círculo marrom / anel. O local é só a IMAGEM
     // (loc-art, desenhada por _drawLocArt com hover-zoom) + o label do nome abaixo.
     // A DESCRIÇÃO aparece no tooltip ao passar o mouse. Removidos: pin dot + anel
