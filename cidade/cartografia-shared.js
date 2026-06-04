@@ -3123,37 +3123,46 @@
       ctx.stroke();
       ctx.setLineDash([]);
     }
-    // Label do bioma (nome completo em Cinzel)
-    // Background de papel atrás (esconde linhas do mapa)
+    // Label do bioma — P3 sessão #73: pill ESCURO + texto claro/dourado, legível
+    // sobre o world-map medieval. Antes era backplate cream (PAPER_BG) do mapa-
+    // pergaminho ANTIGO — destoava do fundo escuro e deixava o range de nível
+    // (texto INK_MED escuro, SEM backplate) quase ilegível sobre o mapa.
     var labelText = b.name;
     ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     var tw = ctx.measureText(labelText).width;
-    // Backplate (retângulo papel)
-    ctx.fillStyle = PAPER_BG;
-    ctx.globalAlpha = 0.92;
-    ctx.fillRect(bx - tw/2 - 3, by + 22, tw + 6, 13);
-    ctx.globalAlpha = 1;
-    // Borda fina do label
-    ctx.strokeStyle = INK_LIGHT;
-    ctx.lineWidth = 0.4;
-    ctx.strokeRect(bx - tw/2 - 3, by + 22, tw + 6, 13);
-    // Texto do label
-    ctx.fillStyle = INK_DARK;
-    ctx.fillText(labelText, bx, by + 24);
-    // 2026-05-05 v10: User pediu remover "Tier N" e mostrar só range de
-    // nível recomendado. Tier interno mantido em b.tier (calc/balance), só
-    // o display muda. Origem (tier 0) sem badge — é cidade segura.
-    if (typeof b.tier === 'number' && b.tier > 0) {
-      var lvlRange = (b.tier <= 1) ? 'nv 1–2' :
-                     (b.tier <= 3) ? 'nv 2–4' :
-                     (b.tier <= 5) ? 'nv 4–7' :
-                     (b.tier <= 7) ? 'nv 7–10' :
-                                     'nv 10+';
+    // 2026-05-05 v10: sem "Tier N" — só range de nível recomendado. Origem (tier 0)
+    // sem badge (cidade segura).
+    var hasLvl = (typeof b.tier === 'number' && b.tier > 0);
+    var lvlRange = !hasLvl ? '' :
+                   (b.tier <= 1) ? 'nv 1–2' :
+                   (b.tier <= 3) ? 'nv 2–4' :
+                   (b.tier <= 5) ? 'nv 4–7' :
+                   (b.tier <= 7) ? 'nv 7–10' : 'nv 10+';
+    var lvlW = 0;
+    if (hasLvl) { ctx.font = 'italic 8px serif'; lvlW = ctx.measureText(lvlRange).width; ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif'; }
+    var pillW = Math.max(tw, lvlW) + 12;
+    var pillH = hasLvl ? 27 : 16;
+    var pillX = bx - pillW / 2, pillY = by + 21;
+    // Pill escuro semi-transparente (lê em QUALQUER parte do world-map)
+    ctx.fillStyle = 'rgba(26,21,16,0.82)';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, 5);
+    else ctx.rect(pillX, pillY, pillW, pillH);
+    ctx.fill();
+    // Borda dourada sutil (origem mais forte; hover mais grosso)
+    ctx.strokeStyle = isOrigin ? 'rgba(196,149,58,0.85)' : 'rgba(196,149,58,0.42)';
+    ctx.lineWidth = isHover ? 0.9 : 0.6;
+    ctx.stroke();
+    // Nome do local (claro; origem dourada)
+    ctx.fillStyle = isOrigin ? '#e8c45a' : '#e6dcc4';
+    ctx.fillText(labelText, bx, pillY + 3);
+    // Range de nível (dourado, DENTRO do pill — agora legível)
+    if (hasLvl) {
       ctx.font = 'italic 8px serif';
-      ctx.fillStyle = INK_MED;
-      ctx.fillText(lvlRange, bx, by + 37);
+      ctx.fillStyle = 'rgba(196,149,58,0.92)';
+      ctx.fillText(lvlRange, bx, pillY + 16);
     }
     ctx.restore();
   }
