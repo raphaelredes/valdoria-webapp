@@ -51780,8 +51780,10 @@ function _ensureCartBaseCache(w, h){
   // foram removidos deste path — ver tombstone em _drawCart. _mapReady no cache key
   // garante rebuild quando a imagem chega assíncrona (fallback escuro → mapa real).
   var _mapReady = (CartShared && CartShared._drawWorldMapBg) ? CartShared._drawWorldMapBg(bc, w, h) : false;
-  // Stage 3 — bússola (screen-space, top-right) — preservada sobre o mapa
-  if (CartShared && CartShared._drawCartCompass) CartShared._drawCartCompass(bc, w, h);
+  // FIX pan (2026-06-03): a bússola NÃO entra mais no cache. O cache agora é só o
+  // world-map (cover) + véu sépia, e é blitado DENTRO da transform de pan/zoom em
+  // _drawCart (move junto com os locais). A bússola é screen-space (fixa) e é
+  // desenhada por _drawCart DEPOIS do bloco de pan/zoom.
   cv._w = w; cv._h = h; cv._dpr = _cartDpr; cv._mapReady = _mapReady;
   _cartBaseCache = cv;
   return cv;
@@ -51860,27 +51862,27 @@ function _drawCart(){
   var w = _cartW, h = _cartH;
   ctx.save();
 
-  // === STAGE 1+3 (WORLD-MAP + BÚSSOLA) via BASE CACHE ===
-  // Perf #1 (2026-06-03): o fundo (world-map.webp cover + véu sépia) e a bússola
-  // (screen-space) são estáticos → renderizados 1× num canvas offscreen e blitados
-  // aqui (1 drawImage por frame, ainda mais leve que o pergaminho procedural antigo).
-  // Base opaca cobre todo o canvas (não precisa clearRect). Cache invalida em
-  // dims/dpr/mapReady (ver _ensureCartBaseCache).
-  var _base = _ensureCartBaseCache(w, h);
-  ctx.drawImage(_base, 0, 0, w, h);
+  // Backdrop escuro atrás do mapa — revelado quando o jogador faz pan/zoom além das
+  // bordas do world-map (a base agora pan/zooma; antes cobria fixa em (0,0)).
+  ctx.fillStyle = '#1a1510';
+  ctx.fillRect(0, 0, w, h);
 
-  // === STAGE 2: Conteúdo do mapa (PAN + ZOOM) ===
-  // 2026-06-03 (sessão #72 — fix mapa stale): coords vivem sobre um QUADRADO de lado
-  // S = max(w,h) centrado no canvas (mesma transformação cover do world-map e do
-  // editor) → ícones/nodes/paths/pin alinham PIXEL-PERFECT com o que o editor mostra.
-  // Aplicamos pan/zoom e depois translate(offX, offY); todas as draw fns recebem
-  // (S, S) como base de multiplicação (b.x*S). Tamanhos absolutos (raio do node,
-  // labels) NÃO mudam — só os CENTROS são remapeados pro quadrado do mapa.
+  // === WORLD-MAP + CONTEÚDO — TUDO sob PAN+ZOOM ================================
+  // FIX (2026-06-03 user report "o mapa não se move, só os locais estão se movendo"):
+  // o fundo (world-map.webp cover, via _ensureCartBaseCache) agora é blitado DENTRO da
+  // transform de pan/zoom → move/escala JUNTO com ícones/nodes/paths/pin. Antes a base
+  // era blitada fixa em (0,0) e só o conteúdo recebia translate(pan)+scale(zoom), por
+  // isso o mapa parecia parado. A base alinha PIXEL-PERFECT com os nodes porque ambos
+  // partem do MESMO quadrado cover S (ver _cartWorldMapRect): a base é blitada em
+  // (0,0,w,h) sob translate(pan)·scale(zoom), e os nodes em b.x*S sob a MESMA transform
+  // + translate(offX,offY). A bússola é screen-space (desenhada depois, sem pan/zoom).
   var _mr = _cartWorldMapRect(w, h);
   var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
   ctx.save();
   ctx.translate(_cartPanX, _cartPanY);
   ctx.scale(_cartZoom, _cartZoom);
+  var _base = _ensureCartBaseCache(w, h);
+  ctx.drawImage(_base, 0, 0, w, h);
   ctx.translate(_offX, _offY);
   // 2026-05-04 USER REQUEST: visibility-based rendering. Apenas locais em
   // known_locations aparecem completos. Outros: silhueta com "?" (insinuação
@@ -51921,9 +51923,10 @@ function _drawCart(){
   }
   ctx.restore();
 
-  // NOTA (2026-06-03): Stage 4 (scorched edge / vinheta chamuscada) e o pergaminho
-  // procedural (_drawAgedParchment) foram REMOVIDOS do path da cartografia do jogo —
-  // o fundo agora é o world-map.webp. A bússola (Stage 3) segue no BASE CACHE.
+  // === Bússola — screen-space (fixa top-right, NÃO pan/zooma) ===
+  // Saiu do base-cache (que agora pan/zooma com o mapa); desenhada por último, sobre
+  // o mapa, sem a transform de pan/zoom — fica ancorada na tela.
+  if (CartShared && CartShared._drawCartCompass) CartShared._drawCartCompass(ctx, w, h);
 
   ctx.restore();
 }
