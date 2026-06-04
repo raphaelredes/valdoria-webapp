@@ -57429,9 +57429,15 @@ function _confirmOrderMap(mapName, player) {
           cf.remove();
           _openCartographerPopup(player, { silent: true });
         } else {
-          // Server rejeitou (insufficient_gold/already_ordered/etc.)
+          // Server rejeitou (insufficient_gold/already_ordered/cartographer_unavailable/etc.)
           console.warn('[CARTO:REMOTE] order rejected:', resp);
           cf.remove();
+          // Sessão #73 (user: mapas mais difíceis): mostra a FALA do cartógrafo quando
+          // ele recusa — limite diário (1/dia) ou alta chance de falha ("poucos
+          // aventureiros voltam com vida pra mapear"). resp.message só vem nesses casos.
+          if (resp && resp.message && typeof vToast === 'function') {
+            vToast('📜 ' + resp.message, (typeof calcReadTime === 'function') ? calcReadTime(resp.message, 'toast-warn') : 5500);
+          }
         }
       }).catch(function(err){
         console.error('[CARTO:REMOTE] order failed, fallback LOCAL:', err);
