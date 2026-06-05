@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T03:30:29Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T13:41:06Z - do not edit directly, edit source -->
 
 
 
@@ -35964,7 +35964,20 @@ function _engageForcedCombat(ev) {
     && typeof window.ExploracaoAPI.hasToken === 'function'
     && window.ExploracaoAPI.hasToken());
   if (_isRemote && typeof window.ExploracaoAPI.eventChoice === 'function') {
-    Promise.resolve(window.ExploracaoAPI.eventChoice(0)).then(_go).catch(function (e) {
+    Promise.resolve(window.ExploracaoAPI.eventChoice(0)).then(function (res) {
+      // Sessão #75 (SERVER-AUTHORITY): se o servidor stageou o combate REMOTE
+      // (combat_redirect — flag VALDORIA_REMOTE_FORCED_COMBAT on), redireciona pro
+      // combate REMOTE (token+api → /api/combat2/prepare + bridge + rewards validados
+      // server-side). Senão (combat_forced / flag off / staging falhou), combate LOCAL
+      // via triggerCombatScreen (fallback que NUNCA trava o jogo).
+      if (res && res.combat_redirect && res.combat_redirect.redirect_url) {
+        if (typeof LOG === 'function') LOG('API', 'forced_combat REMOTE enemy=' + res.combat_redirect.enemy_id);
+        try { window.__valdoria_transitioning = true; } catch (_) {}
+        window.location.href = res.combat_redirect.redirect_url;
+        return;
+      }
+      _go();
+    }).catch(function (e) {
       if (typeof LOGW === 'function') LOGW('API', 'forced_combat_ack err=' + (e && e.message));
       _go();
     });
