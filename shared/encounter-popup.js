@@ -533,12 +533,21 @@
        (skip-typewriter) nao intercepta. */
     var portraitEl = header.querySelector('.enc-portrait');
     if (portraitEl && npcPortrait) {
+      // sessão #76 FIX: os listeners 'click' E 'pointerup' (abaixo) disparavam
+      // AMBOS no mesmo toque → window.showLightbox era chamado 2x em sequência →
+      // o lightbox abria e FECHAVA SOZINHO (bug reportado: foto pisca e some).
+      // Guard de double-fire (400ms) mantém a compat touch do pointerup sem o
+      // 2º disparo. NÃO remover o pointerup (alguns Telegram WebViews engolem click).
+      var _lastPortraitTap = 0;
       var _onPortraitTap = function(e){
         if (e) {
           if (e.stopPropagation) e.stopPropagation();
           if (e.stopImmediatePropagation) e.stopImmediatePropagation();
           if (e.preventDefault) e.preventDefault();
         }
+        var _now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        if (_now - _lastPortraitTap < 400) return;  // ignora o disparo duplicado
+        _lastPortraitTap = _now;
         if (typeof window.showLightbox === 'function') {
           window.showLightbox(npcPortrait, npcName, npcDesc);
         } else {
@@ -856,6 +865,14 @@
     /* Dispatch único usado por renderActions (closure sobre dialogue + opts). */
     function _handleChoiceInternal(ch) {
       closeChoices(); /* fecha sub-overlay antes de dispatch */
+      /* sessão #76: diálogos de ALIADO (npc.id 'ally_*') marcam a pergunta como
+         USADA ao escolher — mesmo em falha de skill check → não reaparece. NPCs
+         normais já fazem seu próprio tracking; este guard é só pra allies. */
+      if (dialogue && dialogue.npc && typeof dialogue.npc.id === 'string'
+          && dialogue.npc.id.indexOf('ally_') === 0
+          && ch && ch.id && typeof window._npcMarkUsed === 'function') {
+        try { window._npcMarkUsed(dialogue.npc.id, ch.id); } catch(_e) {}
+      }
       /* Sessao #29 (2026-05-24): ally_source dispara backend apply-effect.
          Pra non-dice (cb='close' ou empty): chama AGORA antes do close.
          Pra dice (cb='dice:'): _diceCheckSvc chama apos resolver dado. */

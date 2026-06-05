@@ -94,7 +94,11 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'd_1000', label: '💰 Depositar 1000 V · taxa 5V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_1000', renownDelta: +3,
         resultNarration: 'Aldwin sai detrás do balcão pessoalmente. Cobre Vossa Senhoria com olhar de respeito profundo. Dois guardas escoltam o cofre interno.',
         resultText: '"Mil Valdoritas. Cinco de taxa. <i>(ajeita os óculos)</i> Vossa Senhoria entra agora pro registro dos clientes principais da Casa de Tholram." <b>+3 Renome. Acesso a investimentos premium liberado.</b>' },
-      { id: 'd_persuade', label: '💬 "Sem taxas, Aldwin?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
+      { id: 'd_persuade', label: '💬 "Sem taxas, Aldwin?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2',
+        resultNarration: 'Aldwin ergue uma sobrancelha, surpreso com o argumento. <i>(pousa a pena e cruza os dedos sobre o livro-razão)</i>',
+        resultText: '"Pois bem... a Casa abre exceção desta vez. Sem taxa neste depósito — cortesia a um cliente de boa lábia." <i>(carimba o lacre com meio sorriso)</i> "Mas não comente com os outros. A balança de Tholram não costuma pesar a favor de ninguém."',
+        resultNarrationFail: 'Aldwin nem ergue os olhos do livro-razão. <i>(continua anotando com caligrafia precisa)</i>',
+        resultTextFail: '"A taxa mantém o cofre selado, os guardas pagos e o ferro das portas afiado, Vossa Senhoria. Nem o Conde pede isenção." <i>(ajeita o monóculo)</i> "Meio por cento. Como sempre foi."' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]
   },
@@ -119,7 +123,11 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'w_max',  label: '💰 Retirar saldo total · taxa 2%', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_all', renownDelta: 0,
         resultNarration: 'Aldwin pausa um momento. <i>(olha por cima dos óculos meia-lua)</i> Fechar conta é decisão séria.',
         resultText: '"Saldo total, descontados dois por cento. <i>(empurra a bolsa cheia)</i> A conta fica suspensa por seis meses — se voltar antes, retomamos sem taxa de reabertura. Boa jornada, Vossa Senhoria."' },
-      { id: 'w_persuade', label: '💬 "Taxa menor pra cliente fiel?" · Persuasão DC 15', cb: 'dice:persuasion:15:+1' },
+      { id: 'w_persuade', label: '💬 "Taxa menor pra cliente fiel?" · Persuasão DC 15', cb: 'dice:persuasion:15:+1',
+        resultNarration: 'Aldwin considera por um momento, medindo Vossa Senhoria como mediria ouro na balança. <i>(assente devagar)</i>',
+        resultText: '"Fidelidade tem seu valor, admito. Reduzo a taxa à metade desta retirada — um por cento, não dois." <i>(corrige o lance no livro)</i> "A Casa de Tholram lembra de quem volta. Que volte mais vezes."',
+        resultNarrationFail: 'Aldwin pousa o carimbo e olha por cima dos óculos meia-lua. <i>(paciente, mas firme)</i>',
+        resultTextFail: '"Fidelidade se mede em anos, Vossa Senhoria, não em visitas. <i>(sela a bolsa)</i> A taxa é dois por cento — para o mendigo e para o Conde, igual. É o que mantém a Casa de pé."' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]
   },
@@ -141,7 +149,14 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'l_1000', label: '📜 Pedir 1000 V · 60 dias · juros 200V', cb: 'loan-confirm', backend_cb: 'bank_loan_take_large', renownDelta: 0,
         resultNarration: 'Aldwin pausa antes de pegar o terceiro contrato. <i>(estuda Vossa Senhoria por um momento longo)</i>',
         resultText: '"Mil Valdoritas. <i>(traz o contrato selado de cera vermelha)</i> Sessenta dias, duzentos de juros. <b>Empréstimo registrado.</b> Se falhar duas vezes, o brasão da Casa vai à porta do Castelo. Eu, pessoalmente, espero não ter que enviar."' },
-      { id: 'l_insight', label: '🔍 "Quais os termos exatos?" · Intuição DC 13', cb: 'dice:insight:13:+1' },
+      // sessão #76 FIX: choices de dado precisam de resultNarration/resultText —
+      // senão svc-interactions.js fecha o encounter ao clicar "Continuar" (bug
+      // reportado: rolagem → Continuar → sai do diálogo sem mostrar nada).
+      { id: 'l_insight', label: '🔍 "Quais os termos exatos?" · Intuição DC 13', cb: 'dice:insight:13:+1',
+        resultNarration: 'Vossa Senhoria observa os olhos de Aldwin enquanto ele fala — e percebe que ele não esconde nada. Cada cláusula está exatamente como dita.',
+        resultText: '"Dez por cento ao mês, juros simples — nunca compostos. Atraso cobra vinte por cento de multa sobre o saldo. Na terceira falta, o brasão da Casa vai à sua porta com dois guardas e um oficial do Conde." <i>(bate o indicador no contrato)</i> "Está tudo aqui. Leia antes de assinar — eu insisto."',
+        resultNarrationFail: 'Aldwin recosta-se e fecha o monóculo. <i>(o olhar fica ilegível)</i>',
+        resultTextFail: '"Os termos estão no contrato, Vossa Senhoria — cada palavra escrita pela pena da Casa. Não cabe a mim resumir o que o pergaminho já diz com clareza." <i>(empurra o contrato pela mesa)</i> "Leia com calma."' },
       { id: 'back',   label: '↩ Voltar', cb: 'close' }
     ]
   },

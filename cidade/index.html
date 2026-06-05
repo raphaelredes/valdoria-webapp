@@ -15560,7 +15560,15 @@ function _showDailyLoginPopup(info){
         if (typeof MOCK_PLAYER_INVENTORY !== 'undefined') {
           var found = MOCK_PLAYER_INVENTORY.find(function(it){ return it.n === info.reward.item.name; });
           if (found) found.q = (found.q || 0) + info.reward.item.qty;
-          else MOCK_PLAYER_INVENTORY.push({ n: info.reward.item.name, q: info.reward.item.qty });
+          // sessão #76 FIX: item de reward precisa dos MESMOS getters do resto do
+          // inventário (name/icon/value) — sem eles, telas que usam it.name/it.icon
+          // mostravam undefined/objeto. _rewardItemName garante string (nunca dict).
+          else MOCK_PLAYER_INVENTORY.push({
+            n: _rewardItemName(info.reward.item.name), q: info.reward.item.qty,
+            get name(){ return this.n; },
+            get icon(){ return (typeof getItemData === 'function' ? (getItemData(this.n) || {}).e : '') || '📦'; },
+            get value(){ return (typeof getItemData === 'function' ? (getItemData(this.n) || {}).v : 0) || 0; }
+          });
         }
       }
     }
@@ -19371,29 +19379,41 @@ function _buildRuneScribeMockData(player){
     npc_emoji: '🔮',
     npc_name: 'Eirik',  // canonical _NPC_NAME (market_rune_scribe.py L24)
     npc_role: 'Escriba Rúnico',
+    // sessão #76: Inscrever/Ver Inscritas movidos do rodapé global pra DENTRO de
+    // cada card de fragmento (tier_actions). Rodapé fica só com "Comprar Fragmentos".
     tiers: [
       {
         tier: 1, frag_emoji: '🔹', frag_name: 'Fragmento Menor',
         count: state[1], cost: 3, can_craft: state[1] >= 3 && lvl >= 3,
         cb: 'rune_craft_1', min_level: 3,
-        locked_level: lvl < 3
+        locked_level: lvl < 3,
+        tier_actions: [
+          { icon: _heralIco('ic-runas'), label: 'Inscrever', cb: 'rune_inscribe_open' },
+          { icon: _heralIco('ic-stat-wis'), label: 'Ver Inscritas', cb: 'rune_inscribed_view' }
+        ]
       },
       {
         tier: 2, frag_emoji: '🔷', frag_name: 'Fragmento Maior',
         count: state[2], cost: 3, can_craft: state[2] >= 3 && lvl >= 5,
         cb: 'rune_craft_2', min_level: 5,
-        locked_level: lvl < 5
+        locked_level: lvl < 5,
+        tier_actions: [
+          { icon: _heralIco('ic-runas'), label: 'Inscrever', cb: 'rune_inscribe_open' },
+          { icon: _heralIco('ic-stat-wis'), label: 'Ver Inscritas', cb: 'rune_inscribed_view' }
+        ]
       },
       {
         tier: 3, frag_emoji: '💠', frag_name: 'Fragmento Ancestral',
         count: state[3], cost: 3, can_craft: state[3] >= 3 && lvl >= 7,
         cb: 'rune_craft_3', min_level: 7,
-        locked_level: lvl < 7
+        locked_level: lvl < 7,
+        tier_actions: [
+          { icon: _heralIco('ic-runas'), label: 'Inscrever', cb: 'rune_inscribe_open' },
+          { icon: _heralIco('ic-stat-wis'), label: 'Ver Inscritas', cb: 'rune_inscribed_view' }
+        ]
       }
     ],
     actions: [
-      { icon: _heralIco('ic-runas'), label: 'Inscrever Runa',     cb: 'rune_inscribe_open' },
-      { icon: _heralIco('ic-stat-wis'), label: 'Ver Inscritas',       cb: 'rune_inscribed_view' },
       { icon: _heralIco('ic-bolsa'), label: 'Comprar Fragmentos',  cb: 'rune_buy_open' }
       // sessão #76: "Conversar com Eirik" removido daqui — o diálogo agora abre
       // direto ao clicar no retrato/nome do Eirik (row-npc no topo da tela).
@@ -41027,6 +41047,20 @@ function _marketAtmosphereLine(){
 //   1. Mundane items: 50% base + specialist bonus
 //   2. Gems/jewelry: 100% FULL value
 //   3. Magic items : Persuasão d20 check obrigatório → 0-200%
+// sessão #76: garante nome de item de reward como STRING. Alguns reward.item.name
+// vinham como objeto OU como repr de dict ("{'n': 'Espada'}") do backend → vazava
+// texto malformado ("{'n':") nas telas de inventário/venda. Extrai o nome real.
+function _rewardItemName(v){
+  if (typeof v === 'string'){
+    var m = v.match(/['"]n['"]\s*:\s*['"]([^'"]+)['"]/);
+    if (m) return m[1];
+    return v;
+  }
+  if (v && typeof v === 'object') return v.n || v.name || '';
+  return String(v == null ? '' : v);
+}
+window._rewardItemName = _rewardItemName;
+
 function _marketShowSell(p){
   var inv = MOCK_PLAYER_INVENTORY;
   if (inv.length === 0) {
@@ -41054,14 +41088,19 @@ function _marketShowSell(p){
       sellPrice = _marketCalculateSellPrice(it.n || it.name, spec.key, p);
     }
     var npcShort = spec.npc.split(' ')[0];
+    // sessão #76 FIX: usar it.n||it.name (consistente com o resto da função) —
+    // alguns items só têm 'n' (sem getter 'name') → label virava undefined e
+    // mostrava fragmento de objeto ("{'n':"). Ícone com fallback via getItemData.
+    var _itName = it.n || it.name;
+    var _itIcon = it.icon || (typeof getItemData === 'function' ? ((getItemData(_itName) || {}).e || '📦') : '📦');
     return {
-      icon: it.icon, label: it.name,
+      icon: _itIcon, label: _itName,
       badge: (isMagic ? '~' : '+') + _fmtV(sellPrice) + ' <span class="vi vi-coin sm"></span> · ' + npcShort + badgeExtra,
       _it: it, _spec: spec, _isMagic: isMagic
     };
   });
   _squareShowListPopup({
-    stackKey: 'market_sell', icon: _heralIco('ic-bolsa'), title: 'Vender Itens',
+    stackKey: 'market_sell', title: 'Vender Itens',
     flavor: '<i>Equipamento comum vende a metade do valor. Gemas e joias mantêm o valor cheio. Itens mágicos exigem negociação.</i><br>'
           + '<i>Cada item vai pro mercador certo — especialistas pagam melhor. Sua reputação e charme afetam o preço final.</i>',
     items: items,
@@ -41089,8 +41128,8 @@ function _marketShowSell(p){
       var specBonusLabel = spec.specBonus > 0 ? ' + ' + Math.round(spec.specBonus * 100) + '% (especialista no ramo)' : '';
       _showConfirmPurchase({
         icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
-        title: 'Vender ' + it.name,
-        desc: '<b>' + it.name + '</b><br>' + breakdown + '<br>'
+        title: 'Vender ' + (it.n || it.name),
+        desc: '<b>' + (it.n || it.name) + '</b><br>' + breakdown + '<br>'
               + '<i>Base:</i> ' + basePctLabel + specBonusLabel + '<br>'
               + '<b>Oferta final:</b> <b>' + _fmtV(sellPrice) + '</b> <span class="vi vi-coin sm"></span>',
         cost: sellPrice, creditMode: true,
@@ -48908,8 +48947,11 @@ function _showAllyDialogue(idx){
   function _personalize(s) {
     return typeof s === 'string' ? s.replace(/\{name\}/g, displayName) : s;
   }
+  // sessão #76: id estável por aliado p/ marcar perguntas já usadas (1x só).
+  var _allyNpcId = 'ally_' + (m.name || ('idx' + idx));
   var dlg = {
     npc: {
+      id: _allyNpcId,
       name: displayName,
       desc: tpl.desc + ' · ' + _classLabelPT(m.cls) + ' · Nv ' + m.level,
       portraitHTML: portraitHTML
@@ -48920,7 +48962,12 @@ function _showAllyDialogue(idx){
          + resultText (success) ou resultNarrationFail + resultTextFail (failure)
        - cb: 'close' (default, leave/lore choices) — só fecha o encounter
        - renown: N pra renownDelta cosmético no badge */
-    choices: (tpl.choices || []).map(function(c){
+    // sessão #76: só perguntas AINDA NÃO usadas — uma pergunta concluída (mesmo em
+    // FALHA de skill check) NUNCA mais reaparece. _npcMarkUsed roda em
+    // _handleChoiceInternal (encounter-popup.js) ao escolher.
+    choices: (tpl.choices || []).filter(function(c){
+      return typeof _npcIsUsed !== 'function' || !_npcIsUsed(_allyNpcId, c.id);
+    }).map(function(c){
       return {
         id: c.id,
         label: _personalize(c.label),

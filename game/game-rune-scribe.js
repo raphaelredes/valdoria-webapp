@@ -212,6 +212,24 @@ function renderRuneScribe(container, data) {
           btn.style.opacity = '0.5';
         }
         card.appendChild(btn);
+
+        /* sessão #76: tier_actions (Inscrever / Ver Inscritas) DENTRO do card de
+           cada fragmento — movidos do rodapé global a pedido do user. Row
+           secundária, visual tênue. textContent (sem innerHTML) por segurança. */
+        if (t.tier_actions && t.tier_actions.length) {
+          var taRow = vCity.el('div', '');
+          taRow.style.cssText = 'display:flex;gap:5px;margin-top:2px;';
+          for (var sa = 0; sa < t.tier_actions.length; sa++) {
+            var saItem = t.tier_actions[sa];
+            var saBtn = vCity.el('button', 'v-popup-btn');
+            saBtn.style.cssText = 'flex:1;padding:5px 6px;font-size:calc(11px * var(--v-font-scale, 1));background:rgba(196,149,58,0.10);border:1px solid rgba(196,149,58,0.35);';
+            saBtn.textContent = saItem.label;
+            saBtn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(saItem.cb));
+            taRow.appendChild(saBtn);
+          }
+          card.appendChild(taRow);
+        }
+
         grid.appendChild(card);
       }
       body.appendChild(grid);
