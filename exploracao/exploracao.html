@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-04T21:57:03Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T00:06:46Z - do not edit directly, edit source -->
 
 
 
@@ -35541,7 +35541,10 @@ function triggerCombatScreen(cfg) {
     sessionStorage.setItem('valdoria_sim_combat_setup_v1', JSON.stringify({
       v: 1,
       fillMode: 'per_slot',
-      allyCount: 0,
+      // Sessão #75: passa a PARTY REAL (S.allies do snap: Sia/Joel/Quade) pro combate
+      // de exploração. Antes era allyCount:0 hardcoded → a party não aparecia (só um
+      // familiar default "Sprite"). Cap em SIM_PARTY_MAX_ALLIES (3) — combate.html re-clampa.
+      allyCount: Math.min(3, (S.allies || []).length),
       enemyCount: enemyCountTotal,
       enemyDifficulty: godmode ? 'easy' : 'normal',
       // Phase 5b polish v3 (2026-04-26): user reportou "vantagens antes da batalha
@@ -35575,6 +35578,23 @@ function triggerCombatScreen(cfg) {
         // vulnerabilidade a frio + resistência a fogo enquanto wetTurns > 0.
         wetTurns_exact: (typeof p.wet === 'number' && p.wet > 0) ? p.wet : 0
       },
+      // Sessão #75: party real (S.allies do snap). cls vem ASCII ('clerigo'); getClassDefByName
+      // do combate exige o nome de display ('Clérigo'), então convertemos via CLASSES[key].name
+      // — exatamente como __applyExploreSnap faz pro player. Sem isso, todo aliado caía em Guerreiro.
+      allies: (S.allies || []).slice(0, 3).map(function (a) {
+        var _ak = (a.cls || '').toLowerCase();  // snap.cls já é ASCII canonical (regra Canonical Keys)
+        var _aC = (typeof CLASSES !== 'undefined' && CLASSES[_ak]) || null;
+        return {
+          name: a.name || 'Aliado',
+          cls: _aC ? _aC.name : 'Guerreiro',
+          lvl: a.level || 1,
+          race: a.race || 'Humano',
+          hp_exact: a.hp,
+          mhp_exact: a.mhp || a.hp,
+          mp_exact: a.mp || 0,
+          mmp_exact: a.mmp || a.mp || 0
+        };
+      }),
       // #17 (sessao #70): narrativa do evento -> intro typewriter do combate
       // (caminho LOCAL/sessionStorage). Texto vem do cfg.narrative (no REMOTE
       // originou no servidor via outcome.text). Vazio = combate cai no fluxo
