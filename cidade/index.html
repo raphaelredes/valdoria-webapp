@@ -18866,6 +18866,10 @@ function _marketShowTransient(p, npc){
           var itemKey = parts[2];
           var item = npc.items.find(function(x){ return x.key === itemKey; });
           if (!item) return;
+          // sessão #76 FIX: fecha o diálogo (vEncounter <dialog> top-layer) ANTES de
+          // abrir o popup de compra — senão o popup abria ATRÁS do diálogo (invisível,
+          // "nada acontecia"; o item só aparecia ao clicar a ação SEGUINTE — bug Borin).
+          try { window.vEncounter.close(); } catch(_e){}
           var purchaseIcon = (typeof _resolveItemIcon === 'function') ? _resolveItemIcon(item.name, '48px') : '';
           if (!purchaseIcon) purchaseIcon = (item.icon || _heralIco("ic-mochila"));
           _showConfirmPurchase({

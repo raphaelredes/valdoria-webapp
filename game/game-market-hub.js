@@ -219,6 +219,20 @@ function _mktBuildMerchantRow(npcKey, merchantData) {
         npc: npcDef.npc,
         script: npcDef.script,
         choices: npcDef.choices
+      }, {
+        /* sessão #76 FIX: as choices usavam cb 'market_interact_menu_<role>' —
+           cbs de BACKEND que NÃO estão registrados no client-mock → clicar
+           "Ver inventário/poções/mapas" não fazia NADA (bug reportado: Thorne,
+           Garlen). Agora a choice de ver-loja (qualquer id != 'leave') FECHA o
+           diálogo e abre o popup de loja do mercador via _showShopPopup(npcKey)
+           — npcKey é chave de CANON_MARKET_SHOPS (thorne/garlen/etc.). */
+        onChoice: function(ch){
+          try { window.vEncounter.close(); } catch(_e){}
+          if (ch && ch.id !== 'leave' && (ch.cb || '') !== 'close'
+              && typeof window._showShopPopup === 'function') {
+            window._showShopPopup(npcKey);
+          }
+        }
       });
     } else if (merchantData && merchantData.cb && typeof vCity.act === 'function') {
       vCity.act(merchantData.cb);
