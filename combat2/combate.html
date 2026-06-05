@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-02T15:19:05Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-05T15:03:00Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1310,10 +1310,14 @@ html.sim-prod .sim-side-panel { display: none !important; }
   html.sim-prod:not(.sim-tg) {
     --sim-frame-w: min(100vw, 430px) !important;
     --sim-frame-h: min(100dvh - 32px, 932px) !important;
-    background:
-      radial-gradient(circle at 22% 18%, rgba(80, 50, 20, 0.55) 0%, transparent 45%),
-      radial-gradient(circle at 78% 82%, rgba(40, 30, 60, 0.55) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, #1a1208 0%, #050302 100%) !important;
+    /* Fundo limpo em torno do frame: vinheta unica, fixa, SEM tiling (fix sessao
+       #76). Quando .sim-combat-root, o <html> fica 430px e a sua background
+       propaga pro canvas do viewport -> os gradients brown/purple com repeat
+       default TILAVAM -> "quadrados marrons" tosco. Agora 1 vinheta no-repeat. */
+    background: radial-gradient(ellipse at 50% 35%, #1a1510 0%, #0a0806 70%, #050302 100%) !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
   }
   html.sim-prod:not(.sim-tg).sim-combat-root {
     max-width: min(100vw, 430px) !important;

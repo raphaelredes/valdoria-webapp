@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T14:38:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T15:02:58Z - do not edit directly, edit source -->
 
 
 
@@ -1122,11 +1122,15 @@ html.sim-prod #frame { margin: 0 auto !important; }
     /* Override CSS vars pra match auth dims */
     --sim-frame-w: min(100vw, 430px) !important;
     --sim-frame-h: min(100dvh - 32px, 932px) !important;
-    /* Background ÉPICO em torno do frame (mimetiza valdoria-design.css L2060) */
-    background:
-      radial-gradient(circle at 22% 18%, rgba(80, 50, 20, 0.55) 0%, transparent 45%),
-      radial-gradient(circle at 78% 82%, rgba(40, 30, 60, 0.55) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, #1a1208 0%, #050302 100%) !important;
+    /* Fundo limpo em torno do frame: vinheta escura unica, fixa ao viewport e SEM
+       tiling (fix sessao #76). Os radial-gradients brown/purple antigos herdavam
+       background-repeat 'repeat' e, como o <html> e travado em 430px e a sua
+       background propaga pro canvas do viewport, TILAVAM -> "quadrados marrons"
+       tosco fora do frame. Agora: 1 vinheta escura, no-repeat, cobre o viewport. */
+    background: radial-gradient(ellipse at 50% 35%, #1a1510 0%, #0a0806 70%, #050302 100%) !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
   }
   html.sim-prod:not(.sim-tg) #frame {
     /* Frame ÉPICO — gold border 2px + radius 18px + dark ring + gold glow */
