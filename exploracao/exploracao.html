@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T13:41:06Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T14:38:46Z - do not edit directly, edit source -->
 
 
 
@@ -23047,7 +23047,15 @@ function renderFrame(ts) {
       if (_vpBoundsCurrent) {
         var sx = Math.max(0, _vpBoundsCurrent.x), sy = Math.max(0, _vpBoundsCurrent.y);
         var sw = Math.min(canvasW - sx, _vpBoundsCurrent.w), sh = Math.min(canvasH - sy, _vpBoundsCurrent.h);
-        if (sw > 0 && sh > 0) mainCtx.drawImage(fogCanvas, sx, sy, sw, sh, sx, sy, sw, sh);
+        // BUG FIX (sessao #76, tela preta exploracao em dpr>1): fogCanvas e device-resolution
+        // (width=mainCanvas.width + setTransform(dpr)). _vpBoundsCurrent esta em coords LOGICAS
+        // (scrollLeft/clientWidth). O retangulo SOURCE do drawImage indexa pixels intrinsecos
+        // (device) do fogCanvas — usar coords logicas amostrava o fog de uma regiao errada
+        // (offset pelo fator dpr) -> hexes explorados cobertos por fog de area nao-explorada ->
+        // mapa todo preto em celulares dpr!=1. SOURCE deve ser device (x _fdpr); DEST fica logico
+        // (o setTransform(dpr) do mainCtx escala). Em dpr=1, _fdpr=1 (sem mudanca).
+        var _fdpr = fogCanvas.width / canvasW;
+        if (sw > 0 && sh > 0) mainCtx.drawImage(fogCanvas, sx * _fdpr, sy * _fdpr, sw * _fdpr, sh * _fdpr, sx, sy, sw, sh);
       } else {
         mainCtx.drawImage(fogCanvas, 0, 0, canvasW, canvasH);
       }
@@ -32377,7 +32385,10 @@ function drawHardFogOnUnexplored(ctx) {
     var _hsx = Math.max(0, _vpBoundsCurrent.x), _hsy = Math.max(0, _vpBoundsCurrent.y);
     var _hsw = Math.min(canvasW - _hsx, _vpBoundsCurrent.w);
     var _hsh = Math.min(canvasH - _hsy, _vpBoundsCurrent.h);
-    if (_hsw > 0 && _hsh > 0) ctx.drawImage(_hardFogCanvas, _hsx, _hsy, _hsw, _hsh, _hsx, _hsy, _hsw, _hsh);
+    // BUG FIX (sessao #76): mesmo bug dpr do drawImage(fogCanvas) acima — _hardFogCanvas e
+    // device-resolution (setTransform(dpr)). SOURCE rect deve ser device (x _hdpr), DEST logico.
+    var _hdpr = _hardFogCanvas.width / canvasW;
+    if (_hsw > 0 && _hsh > 0) ctx.drawImage(_hardFogCanvas, _hsx * _hdpr, _hsy * _hdpr, _hsw * _hdpr, _hsh * _hdpr, _hsx, _hsy, _hsw, _hsh);
   } else {
     ctx.drawImage(_hardFogCanvas, 0, 0, canvasW, canvasH);
   }
