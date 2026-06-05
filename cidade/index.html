@@ -19292,15 +19292,17 @@ function _buildGuildMockData(player){
 // === OFICINA — Ferramentas + Receitas + Materiais ===========================
 // ============================================================================
 // WORKSHOP_TOOLS — 8 categorias com brasões heráldicos canonical (substitui ⚔🧪🦬🪵💎🌿🍳🔧)
+// sessão #76: cada profissão ganha um NPC mestre (nomes originais de fantasia) +
+// desc. A oficina é um HUB de PROFISSÕES (8 ofícios) — não só a forja.
 var WORKSHOP_TOOLS = [
-  { cb: 'workshop_smith',      emoji: _heralIco('ic-oficina'),         name: 'Forja (Smith)',      recipe_count: 12 },
-  { cb: 'workshop_alchemy',    emoji: _heralIco('ic-poção'),           name: 'Alquimia',           recipe_count: 8 },
-  { cb: 'workshop_leather',    emoji: _heralIco('ic-stat-ac'),         name: 'Curtume (Leather)',  recipe_count: 6 },
-  { cb: 'workshop_carpentry',  emoji: _heralIco('ic-druida'),          name: 'Carpintaria (Wood)', recipe_count: 5 },
-  { cb: 'workshop_jeweler',    emoji: _heralIco('ic-ach-colecionador'),name: 'Joalheria',          recipe_count: 4 },
-  { cb: 'workshop_herbalism',  emoji: _heralIco('ic-cura'),            name: 'Herbalismo',         recipe_count: 4 },
-  { cb: 'workshop_cook',       emoji: _heralIco('ic-cerveja'),         name: 'Culinária',          recipe_count: 5 },
-  { cb: 'workshop_tinker',     emoji: _heralIco('ic-engrenagem'),      name: 'Engenhoca (Tinker)', recipe_count: 4 }
+  { cb: 'workshop_smith',      emoji: _heralIco('ic-oficina'),         name: 'Forja',       npc: 'Mestre Garrick',   desc: 'Ferreiro · quarenta e quatro anos de bigorna', recipe_count: 12 },
+  { cb: 'workshop_alchemy',    emoji: _heralIco('ic-poção'),           name: 'Alquimia',    npc: 'Mestra Velina',    desc: 'Alquimista · três gerações de frascos',        recipe_count: 8 },
+  { cb: 'workshop_leather',    emoji: _heralIco('ic-stat-ac'),         name: 'Curtume',     npc: 'Mestre Bram',      desc: 'Curtidor · couro batido sob medida',           recipe_count: 6 },
+  { cb: 'workshop_carpentry',  emoji: _heralIco('ic-druida'),          name: 'Carpintaria', npc: 'Mestre Aldous',    desc: 'Carpinteiro · arcos, cajados e flechas',       recipe_count: 5 },
+  { cb: 'workshop_jeweler',    emoji: _heralIco('ic-ach-colecionador'),name: 'Joalheria',   npc: 'Mestra Seraphine', desc: 'Joalheira · prata, ouro e gemas',              recipe_count: 4 },
+  { cb: 'workshop_herbalism',  emoji: _heralIco('ic-cura'),            name: 'Herbalismo',  npc: 'Mestra Wynne',     desc: 'Herbalista · tônicos, bálsamos e antídotos',   recipe_count: 4 },
+  { cb: 'workshop_cook',       emoji: _heralIco('ic-cerveja'),         name: 'Culinária',   npc: 'Mestre Otho',      desc: 'Cozinheiro · ensopados, pães e banquetes',     recipe_count: 5 },
+  { cb: 'workshop_tinker',     emoji: _heralIco('ic-engrenagem'),      name: 'Engenhoca',   npc: 'Mestra Pip',       desc: 'Engenhoqueira · gazuas, armadilhas e bússolas',recipe_count: 4 }
 ];
 
 // WORKSHOP_RECIPES — 23 receitas com brasões heráldicos canonical (substitui 23 emojis)

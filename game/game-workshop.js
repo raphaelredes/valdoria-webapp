@@ -16,7 +16,7 @@
 if (!window._SVC_CONFIG_WORKSHOP) {
   window._SVC_CONFIG_WORKSHOP = {
     faction: 'workshop',
-    factionLabel: 'Oficina da Bigorna',
+    factionLabel: 'Oficina de Artesanato',
     reactions: {
       very_negative: 'Garrick larga o martelo no chão. <i>(sai sem te olhar)</i> "Sai da minha oficina."',
       negative: 'Garrick coça a barba ruiva. <i>(volta ao trabalho)</i> "Cada um com seus modos. Mas aqui é trabalho."',
@@ -68,6 +68,34 @@ function _wksEl(tag, cls, text) {
   return el;
 }
 
+/* sessão #76: abre o diálogo do mestre de uma profissão (cada ofício tem seu NPC).
+   Retrato = ícone heráldico do ofício (placeholder até arte dedicada). "Ver
+   Receitas" fecha o diálogo e dispatcha o cb do ofício (recipes). */
+function _wksOpenProfession(t){
+  if (!(typeof window.vEncounter === 'object' && window.vEncounter.render)) {
+    if (typeof vCity === 'object' && vCity.act) vCity.act(t.cb);
+    return;
+  }
+  window._SVC_CONFIG = window._SVC_CONFIG_WORKSHOP;
+  window.vEncounter.render({
+    npc: { name: t.npc || 'Mestre Artesão', desc: t.desc || '', portraitHTML: t.emoji || '' },
+    script: [
+      { type: 'speech', speaker: t.npc || 'Mestre', text: 'Bem-vindo à minha bancada de ' + String(t.name || '').toLowerCase() + '. ' + (t.recipe_count || 0) + ' receitas no meu repertório. O que deseja criar?' }
+    ],
+    choices: [
+      { id: 'recipes', label: '📜 "Ver as receitas de ' + (t.name || '') + '"', cb: t.cb },
+      { id: 'leave',   label: '↩ "Volto outra hora."', cb: 'close' }
+    ]
+  }, {
+    onChoice: function(ch){
+      try { window.vEncounter.close(); } catch(_e){}
+      if (ch && ch.id !== 'leave' && (ch.cb || '') !== 'close' && typeof vCity === 'object' && vCity.act) {
+        vCity.act(ch.cb);
+      }
+    }
+  });
+}
+
 function renderWorkshopHub(container, data) {
   if (!container || !data) return;
   console.warn('[CITY-WORKSHOP] renderWorkshopHub (PADRAO_TAVERNA) type=' + data.type + ' tools=' + (data.tools ? data.tools.length : 0));
@@ -91,8 +119,8 @@ function renderWorkshopHub(container, data) {
   crest.onerror = function(){ this.style.display = 'none'; };
   cenarioEl.appendChild(crest);
   var titulo = vCity.el('div', 'cenario-titulo');
-  titulo.appendChild(_wksEl('div', 'name', 'Oficina da Bigorna'));
-  titulo.appendChild(_wksEl('div', 'sub', 'Forja de Mestre Garrick · Bairro do Ferro'));
+  titulo.appendChild(_wksEl('div', 'name', 'Oficina de Artesanato'));
+  titulo.appendChild(_wksEl('div', 'sub', 'Oito ofícios · escolha sua profissão'));
   cenarioEl.appendChild(titulo);
   root.appendChild(cenarioEl);
 
@@ -100,28 +128,13 @@ function renderWorkshopHub(container, data) {
   var body = vCity.el('div', 'wks-body');
   body.style.cssText = 'padding:8px 12px 0;display:flex;flex-direction:column;gap:7px;';
 
-  /* === 2a. NPC row Garrick === */
-  var npcRow = vCity.el('div', 'row-npc');
-  var portraitWrap = vCity.el('div', 'npc-portrait');
-  var img = _wksEl('img');
-  img.src = '../shared/img/npcs/mestre-garrick.webp';
-  img.alt = 'Mestre Garrick';
-  img.loading = 'lazy';
-  img.onerror = function(){ this.style.display = 'none'; };
-  portraitWrap.appendChild(img);
-  npcRow.appendChild(portraitWrap);
-  var info = vCity.el('div', 'npc-info');
-  info.appendChild(_wksEl('div', 'name', 'Mestre Garrick'));
-  info.appendChild(_wksEl('div', 'quote', '"Eu não vendo curiosidade — só trabalho."'));
-  npcRow.appendChild(info);
-  npcRow.appendChild(_wksEl('div', 'npc-chev', '›'));
-  npcRow.addEventListener('click', function(){
-    if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
-      window._SVC_CONFIG = window._SVC_CONFIG_WORKSHOP;
-      window.vEncounter.render(GARRICK_DIALOGUE);
-    }
-  });
-  body.appendChild(npcRow);
+  /* === 2a. Intro multi-profissão (sessão #76) === */
+  /* A oficina é um HUB de 8 ofícios — não só a forja. Cada profissão tem seu
+     mestre artesão (ver grid de Profissões abaixo). O single-NPC Garrick foi
+     substituído por esta intro pra deixar claro que não é só ferraria. */
+  var introEl = _wksEl('div', '', 'Oito mestres artesãos trabalham na Oficina. Toque um ofício abaixo para falar com o mestre e ver suas receitas.');
+  introEl.style.cssText = 'text-align:center;font-style:italic;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;padding:7px 9px;background:rgba(0,0,0,0.18);border-left:2px solid rgba(196,149,58,0.3);border-radius:4px;';
+  body.appendChild(introEl);
 
   /* === 2b. Rep bar === */
   var renome = (data.renome && typeof data.renome.workshop === 'number') ? data.renome.workshop : (window._PLAYER_RENOWN && window._PLAYER_RENOWN.workshop) || 0;
@@ -185,9 +198,11 @@ function renderWorkshopHub(container, data) {
     card.appendChild(ico);
     var txt = vCity.el('div', 'svc-text');
     txt.appendChild(_wksEl('div', 'svc-name', t.name));
-    txt.appendChild(_wksEl('div', 'svc-meta', t.recipe_count + ' receitas'));
+    txt.appendChild(_wksEl('div', 'svc-meta', (t.npc ? t.npc + ' · ' : '') + t.recipe_count + ' receitas'));
     card.appendChild(txt);
-    card.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(t.cb));
+    /* sessão #76: clicar a profissão abre o diálogo do mestre artesão (cada
+       profissão "tem um NPC"), com "Ver Receitas" → cb do ofício. */
+    card.addEventListener('click', (function(tool){ return function(){ _wksOpenProfession(tool); }; })(t));
     grid.appendChild(card);
   }
   body.appendChild(grid);
