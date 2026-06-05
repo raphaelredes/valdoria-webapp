@@ -473,6 +473,10 @@
 
     var card = document.createElement('div');
     card.className = 'enc-card';
+    /* sessão #77: opts.fullHeight → card ocupa o MÁXIMO de espaço vertical
+       (regra "Popup DEVE Ocupar Máximo de Espaço"). Usado pela viagem da
+       cidade ("Rumo a <destino>") pra ficar épico/imersivo igual à exploração. */
+    if (opts.fullHeight) card.classList.add('enc-full');
 
     // Header
     var header = document.createElement('div');

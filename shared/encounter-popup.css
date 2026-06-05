@@ -72,6 +72,15 @@
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 30px var(--v-gold-20);
 }
 
+/* sessão #77: enc-full — quando opts.fullHeight=true (viagem "Rumo a <destino>"),
+   o card preenche o MÁXIMO de espaço vertical SEMPRE (regra "Popup DEVE Ocupar
+   Máximo de Espaço"). O body (flex:1, overflow-y:auto) expande/scrolla; narração
+   no topo + ações no rodapé = popup épico imersivo igual ao da exploração. */
+.enc-card.enc-full {
+  min-height: 92dvh;
+  height: 92dvh;
+}
+
 /* Sessão #28 (2026-05-24): close X visivel no canto sup-direito do encounter
    card (apenas quando opts.closeable=true). Permite sair a qualquer momento. */
 .enc-card-close {

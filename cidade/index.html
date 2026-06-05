@@ -50561,46 +50561,79 @@ function _pickCityDeparture(biome) {
 
 var _cityJourney = null;
 
+// ════════════════════════════════════════════════════════════════════════
+// CITY JOURNEY v13 (sessão #77) — render via vEncounter (PADRAO_ALDRIC)
+// ════════════════════════════════════════════════════════════════════════
+// User pediu: a tela de viagem ("Rumo a <destino>") usar a MESMA engine de
+// encounter da EXPLORAÇÃO (vEncounter / shared/encounter-popup.js):
+//   • narrativa PADRAO_ALDRIC (typewriter; SEM ícones de badge/botão)
+//   • popup de rolagem de dado 3D canônico nos testes de perícia
+//   • popup preenchendo o MÁXIMO de espaço SEMPRE (opts.fullHeight → .enc-full)
+// Substitui o #journey-overlay custom antigo (badges ⚜⚠✓🚶, dado embutido que
+// às vezes nem aparecia). MANTÉM os dados (DEPARTURES/HAZARDS/SAFE), a matemática
+// D&D 5e dos checks e a anti-repetição persistente. Orquestração igual:
+//   startCityJourney → partida → N etapas (hazard/safe) → chegada → redirect.
+// MAPA_IA: startCityJourney(entry) · _journeyVRender(wrapper) · _journeyRenderDeparture ·
+//   _showCityJourneyStep(advance) · _journeyStepV13(hazard/safe) · _journeyResolveV13 ·
+//   _journeyDiceRoll(popup dado) · _journeyShowOutcome(narrativa+dano) · _cityJourneyArrive.
 function startCityJourney(biome, displayName, finalUrl) {
   var totalSteps = 3 + Math.floor(Math.random() * 3);  // 3-5 etapas
   _cityJourney = {
-    biome: biome,
-    displayName: displayName,
-    finalUrl: finalUrl,
-    totalSteps: totalSteps,
-    currentStep: 0,
-    riskChance: 55  // 55% de chance de hazard por etapa
+    biome: biome, displayName: displayName, finalUrl: finalUrl,
+    totalSteps: totalSteps, currentStep: 0, riskChance: 55
   };
-  document.getElementById('journey-title').textContent = 'Rumo a ' + displayName;
-  document.getElementById('journey-overlay').classList.add('show');
-  // Sessão #66 — PADRAO_ALDRIC tap-to-skip: tocar na área de narração completa o
-  // reveal na hora (igual ao encounter canônico). Bind uma vez por overlay.
-  var _jBody = document.querySelector('#journey-overlay .journey-body');
-  if (_jBody && !_jBody._skipBound) {
-    _jBody._skipBound = true;
-    _jBody.addEventListener('click', function(ev) {
-      if (ev.target.closest('button, a')) return;  // não intercepta botões
-      _journeySkipReveal();
-    });
-  }
-  // 2026-05-06 v11.3: música do bioma quando journey começa (user pediu:
-  // "quando começar journey-overlay já comece a tocar a música tema do
-  // mapa de exploracao que foi escolhido"). playBiome() faz crossfade
-  // ~1.2s da música atual (city) pra trilha apropriada do bioma.
-  // Mapeamento canonical em audio-manager.js:
-  //   plains→forest (wilderness), forest→forest, swamp→swamp,
-  //   mountain→mountain, cave→dungeon, desert→desert, snow→snow,
-  //   volcanic→dungeon, graveyard→mystery
+  // Música do bioma (crossfade ~1.2s da trilha da cidade pra do mapa escolhido).
   try {
     if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playBiome) {
       ValdoriaAudio.playBiome(biome);
       _logCity('biome music started: ' + biome);
     }
   } catch (e) { _logCity('biome music failed: ' + e.message); }
-  // 2026-05-12 USER REQUEST: narrativa épica de partida PADRAO_ALDRIC antes
-  // do step 1 (saída cinematográfica dos portões). _showCityJourneyDeparture
-  // renderiza 2-3 linhas script[] com reveal sequencial + botão "Partir →".
-  _showCityJourneyDeparture();
+  _journeyRenderDeparture();
+}
+
+// Player mock da cidade (estado vivo de HP/stats pro check + HUD refresh).
+function _journeyEncPlayer() { return window.CITY_MOCK_PLAYER || {}; }
+
+// Renderiza uma "página" da jornada no encounter canônico (vEncounter).
+//   cfg.script   : linhas { type:'narration'|'speech', text, speaker? }
+//   cfg.npc      : header opcional { name, desc, portrait? }
+//   cfg.choices  : [{ id, label, desc?, dc?, skill? }]  — SEM ícone (limpo)
+//   cfg.inline   : true → botões inline (partida/continuar/chegar = 1 escolha)
+//   cfg.onChoice : (rawChoice) => próximo passo
+// fullHeight:true → popup ocupa o MÁXIMO de espaço sempre (épico imersivo).
+function _journeyVRender(cfg) {
+  if (!(window.vEncounter && typeof window.vEncounter.render === 'function')) {
+    _logCity('WARN: vEncounter ausente — pulando passo da jornada');
+    if (typeof cfg.onChoice === 'function') cfg.onChoice((cfg.choices && cfg.choices[0]) || {});
+    return;
+  }
+  window.vEncounter.render({
+    npc: cfg.npc || null,
+    script: cfg.script || [],
+    choices: cfg.choices || []
+  }, {
+    player: _journeyEncPlayer(),
+    showGold: false,
+    fullHeight: true,
+    inlineChoices: cfg.inline === true,
+    onChoice: function (ch) { if (typeof cfg.onChoice === 'function') cfg.onChoice(ch); }
+  });
+}
+
+// Partida — narração cinematográfica PADRAO_ALDRIC dos portões + escolha "Partir".
+function _journeyRenderDeparture() {
+  var j = _cityJourney;
+  if (!j) return;
+  var script = (_pickCityDeparture(j.biome) || []).map(function (l) {
+    return { type: l.type || 'narration', text: l.text };
+  });
+  _journeyVRender({
+    script: script,
+    choices: [{ id: 'jrn_partir', label: 'Partir' }],
+    inline: true,
+    onChoice: function () { _showCityJourneyStep(); }
+  });
 }
 
 // 2026-05-12 USER REQUEST: tela épica de partida — narração PADRAO_ALDRIC
@@ -50761,7 +50794,14 @@ function _journeyPickNarrative(choice, success) {
   }
 }
 
+// sessão #77: render da etapa via vEncounter (PADRAO_ALDRIC) — delega pra _journeyStepV13.
 function _renderCityJourneyStep() {
+  var j = _cityJourney;
+  if (!j) return;
+  _journeyStepV13(j);
+}
+// LEGACY v12 (#journey-overlay custom — NÃO mais chamado; remover em cleanup pós-teste):
+function _renderCityJourneyStepLEGACY() {
   var j = _cityJourney;
   if (!j) return;
   var remaining = j.totalSteps - j.currentStep;
@@ -50984,7 +51024,12 @@ function _cityJourneyChance(choice) {
   return Math.round(passing / 20 * 100);
 }
 
+// sessão #77: resolução do hazard via vEncounter + dado 3D canônico — delega.
 function _resolveCityJourneyHazard(hazard, choice) {
+  _journeyResolveV13(hazard, choice);
+}
+// LEGACY v12 (#journey-overlay custom — NÃO mais chamado; remover em cleanup pós-teste):
+function _resolveCityJourneyHazardLEGACY(hazard, choice) {
   var checkEl = document.getElementById('journey-check');
   var narrEl = document.getElementById('journey-narration');
   var footEl = document.getElementById('journey-footer');
@@ -51177,6 +51222,211 @@ function _addCityJourneyBtn(container, icon, title, desc, cls, onClick) {
   container.appendChild(btn);
 }
 
+// ════════════════════════════════════════════════════════════════════════
+// CITY JOURNEY v13 render (sessão #77) — etapas via vEncounter (PADRAO_ALDRIC)
+// ════════════════════════════════════════════════════════════════════════
+
+// Escolhe um hazard ainda não visto (anti-repetição: sessão + dia real localStorage).
+function _journeyPickHazard(j) {
+  var pool = CITY_JOURNEY_HAZARDS[j.biome] || CITY_JOURNEY_HAZARDS.forest;
+  j._usedHazards = j._usedHazards || [];
+  var avail = pool.filter(function (h) {
+    return j._usedHazards.indexOf(h.title) < 0 && !_isJourneyHazardUsed(j.biome, h.title);
+  });
+  if (avail.length === 0) avail = pool.filter(function (h) { return j._usedHazards.indexOf(h.title) < 0; });
+  if (avail.length === 0) { j._usedHazards = []; avail = pool.slice(); }
+  var hazard = avail[Math.floor(Math.random() * avail.length)];
+  j._usedHazards.push(hazard.title);
+  _markJourneyHazardUsed(j.biome, hazard.title);
+  return hazard;
+}
+
+// Escolhe uma narração "safe" ainda não vista (mesma anti-repetição).
+function _journeyPickSafe(j) {
+  var pool = CITY_JOURNEY_SAFE[j.biome] || CITY_JOURNEY_SAFE.forest;
+  j._usedSafe = j._usedSafe || [];
+  var avail = pool.filter(function (t) {
+    return j._usedSafe.indexOf(t) < 0 && !_isJourneySafeUsed(j.biome, t);
+  });
+  if (avail.length === 0) avail = pool.filter(function (t) { return j._usedSafe.indexOf(t) < 0; });
+  if (avail.length === 0) { j._usedSafe = []; avail = pool.slice(); }
+  var txt = avail[Math.floor(Math.random() * avail.length)];
+  j._usedSafe.push(txt);
+  _markJourneySafeUsed(j.biome, txt);
+  return txt;
+}
+
+// Render de UMA etapa (hazard ou safe) via vEncounter — PADRAO_ALDRIC, sem ícones.
+function _journeyStepV13(j) {
+  var hasHazard = (Math.random() * 100) < j.riskChance;
+  var remaining = j.totalSteps - j.currentStep;
+  if (hasHazard) {
+    var hazard = _journeyPickHazard(j);
+    j._currentHazard = hazard;
+    // Script narrativo: narração DM + speech do NPC encontrado (se houver).
+    var script = (hazard.script || []).map(function (line) {
+      if (line.type === 'speech') {
+        return { type: 'speech', speaker: (hazard.npc && hazard.npc.name) || line.speaker || '', text: line.text };
+      }
+      return { type: 'narration', text: line.text };
+    });
+    if (!script.length && hazard.narr) script = [{ type: 'narration', text: hazard.narr }];
+    if (hazard.speech && hazard.npc) script.push({ type: 'speech', speaker: hazard.npc.name, text: hazard.speech });
+    // Escolhas LIMPAS (sem ícone): label + desc(CD/chance) + dc/skill p/ badge canônico.
+    var choices = (hazard.choices || []).map(function (ch, i) {
+      var skillPt = ch.stat ? (CITY_STAT_NAMES_PT[ch.stat] || ch.stat.toUpperCase()) : '';
+      var pc = (ch.stat && ch.dc) ? _cityJourneyChance(ch) : null;
+      var dInfo = (ch.stat && ch.dc) ? (skillPt + (pc != null ? ' · ' + pc + '%' : '')) : '';
+      var out = {
+        id: 'jrn_ch_' + i,
+        label: ch.t,
+        desc: ch.desc ? (ch.desc + (dInfo ? ' — ' + dInfo : '')) : dInfo,
+        _haz: ch
+      };
+      if (ch.stat && ch.dc) { out.dc = ch.dc; out.skill = skillPt; }
+      return out;
+    });
+    _journeyVRender({
+      npc: hazard.npc || null,
+      script: script,
+      choices: choices,
+      inline: choices.length <= 1,
+      onChoice: function (ch) { _resolveCityJourneyHazard(hazard, (ch && ch._haz) || ch); }
+    });
+  } else {
+    var txt = _journeyPickSafe(j);
+    _journeyVRender({
+      script: [{ type: 'narration', text: txt }],
+      choices: [{ id: 'jrn_cont', label: (remaining > 0 ? 'Continuar viagem' : 'Chegar ao destino') }],
+      inline: true,
+      onChoice: function () { _showCityJourneyStep(); }
+    });
+  }
+}
+
+// Resolve a escolha de um hazard: skill check → dado 3D → desfecho.
+function _journeyResolveV13(hazard, ch) {
+  var p = _journeyEncPlayer();
+  var hasCheck = !!(ch && ch.stat && ch.dc);
+  if (!hasCheck) { _journeyShowOutcome(hazard, ch, true, null); return; }
+  // Rolagem D&D 5e: stat base por classe (PHB) + proficiência whitelisted.
+  var statVal = (p.stats && p.stats[ch.stat]) || _statBaseForClass(p.cls, ch.stat);
+  var mod = Math.floor((statVal - 10) / 2);
+  var prof = 0;
+  var pLvl = p.level || 1;
+  if (_classHasSkillProficiency(p.cls, ch.stat, ch.skill)) prof = 2 + Math.floor((pLvl - 1) / 4);
+  var d20 = Math.floor(Math.random() * 20) + 1;
+  var total = d20 + mod + prof;
+  var success = total >= ch.dc;
+  var roll = { d20: d20, mod: mod, prof: prof, total: total, dc: ch.dc, stat: ch.stat, success: success };
+  _journeyDiceRoll(roll, function () { _journeyShowOutcome(hazard, ch, success, roll); });
+}
+
+// Popup de rolagem de dado 3D — visual canônico (.enc-card "Teste de X" fullHeight),
+// SEM acoplamento de Renome (≠ _diceCheckSvc de serviço). Rola no MESMO
+// #encounter-overlay já aberto pelo vEncounter da hazard. Fallback número se
+// THREE/Dice3D faltar → o popup SEMPRE aparece (corrige "dado não mostrava").
+// DOM seguro (createElement/textContent) — sem innerHTML.
+function _journeyDiceRoll(roll, onDone) {
+  var ov = document.getElementById('encounter-overlay');
+  if (!ov) { onDone(); return; }
+  var label = CITY_STAT_NAMES_PT[roll.stat] || roll.stat.toUpperCase();
+  var modTotal = roll.mod + roll.prof;
+  function _mk(tag, css, txt) {
+    var e = document.createElement(tag);
+    if (css) e.style.cssText = css;
+    if (txt != null) e.textContent = txt;
+    return e;
+  }
+  while (ov.firstChild) ov.removeChild(ov.firstChild);
+  var card = document.createElement('div');
+  card.className = 'enc-card enc-full';
+  card.style.cssText = 'display:flex;flex-direction:column;justify-content:center;text-align:center;padding:24px;';
+  card.appendChild(_mk('div', 'font-size:calc(11px * var(--v-font-scale,1));letter-spacing:2px;color:#c4953a;text-transform:uppercase;margin-bottom:6px;', 'Teste de ' + label));
+  card.appendChild(_mk('div', 'font-size:calc(13px * var(--v-font-scale,1));color:#f4d896;letter-spacing:1.5px;margin-bottom:16px;', 'Classe de Dificuldade ' + roll.dc + '  ·  modificador ' + (modTotal >= 0 ? '+' : '') + modTotal));
+  var mount = _mk('div', 'width:160px;height:160px;margin:0 auto 14px;');
+  card.appendChild(mount);
+  var resEl = _mk('div', 'min-height:52px;font-size:calc(15px * var(--v-font-scale,1));color:#f4d896;letter-spacing:1px;line-height:1.6;');
+  card.appendChild(resEl);
+  var actEl = _mk('div', 'display:flex;gap:10px;justify-content:center;margin-top:16px;opacity:0;transition:opacity 0.4s;');
+  card.appendChild(actEl);
+  ov.appendChild(card);
+  try { if (typeof ov.showModal === 'function' && !ov.open) ov.showModal(); } catch (_e) {}
+  ov.classList.add('active');
+
+  var _done = false;
+  function _finish() { if (_done) return; _done = true; if (typeof onDone === 'function') onDone(); }
+  function _showResult() {
+    while (resEl.firstChild) resEl.removeChild(resEl.firstChild);
+    resEl.appendChild(_mk('div', 'font-size:calc(11px * var(--v-font-scale,1));color:#a09484;letter-spacing:1.5px;margin-bottom:6px;', 'Rolagem d20 ' + roll.d20 + ' ' + (modTotal >= 0 ? '+' : '') + modTotal + ' = ' + roll.total + ' vs CD ' + roll.dc));
+    var statusTxt = roll.d20 === 20 ? 'ACERTO CRÍTICO!' : roll.d20 === 1 ? 'FALHA CRÍTICA' : (roll.success ? 'Sucesso' : 'Falha');
+    var statusColor = roll.success ? '#7ad06b' : '#d85848';
+    resEl.appendChild(_mk('div', 'font-size:calc(18px * var(--v-font-scale,1));color:' + statusColor + ';font-weight:700;letter-spacing:2px;font-family:Cinzel,serif;', statusTxt));
+    var btn = document.createElement('button');
+    btn.className = 'enc-btn enc-btn-primary';
+    btn.style.cssText = 'padding:8px 22px;';
+    btn.textContent = 'Continuar →';
+    btn.addEventListener('click', _finish);
+    actEl.appendChild(btn);
+    actEl.style.opacity = '1';
+  }
+  setTimeout(function () {
+    if (typeof Dice3D === 'function' && typeof THREE !== 'undefined') {
+      try {
+        var dice = new Dice3D(mount, { size: 156, dieType: 'd20', duration: 1600 });
+        dice.roll(roll.d20, _showResult);
+        // Safety: RAF throttled no WebView → mostra resultado mesmo assim.
+        setTimeout(function () { if (!_done && actEl.style.opacity !== '1') _showResult(); }, 5000);
+        return;
+      } catch (e) { _logCity('journey Dice3D failed: ' + e.message); }
+    }
+    mount.appendChild(_mk('div', 'font-size:80px;color:#f4d896;line-height:160px;font-family:Cinzel,serif;', String(roll.d20)));
+    setTimeout(_showResult, 700);
+  }, 80);
+}
+
+// Desfecho do hazard: narrativa (por classe/alinhamento) + dano em falha + avanço.
+function _journeyShowOutcome(hazard, ch, success, roll) {
+  var j = _cityJourney;
+  if (!j) return;
+  var p = _journeyEncPlayer();
+  var narrative = _journeyPickNarrative(ch, success)
+    || (success ? 'Você supera o perigo e segue em frente.' : 'O perigo te alcança, mas você sobrevive — desta vez.');
+  var dmgApplied = 0;
+  if (!success) {
+    var dmg = (ch && ch.dmg != null) ? ch.dmg : 1;
+    if (dmg > 0 && p) { p.hp = Math.max(0, (p.hp || 0) - dmg); dmgApplied = dmg; if (typeof refreshHud === 'function') refreshHud(); }
+  }
+  var body = narrative;
+  if (dmgApplied > 0) {
+    body += ' <span style="color:#d85848;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;white-space:nowrap;">(−' + dmgApplied + ' HP)</span>';
+  }
+  var script = [{ type: 'narration', text: body }];
+  // Morte na jornada → socorro nos Portões.
+  if (p && p.hp <= 0) {
+    _journeyVRender({
+      script: script,
+      choices: [{ id: 'jrn_dead', label: 'Você sucumbiu...' }],
+      inline: true,
+      onChoice: function () {
+        try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch (_e) {}
+        _closeCityJourney();
+        if (p) p.hp = Math.max(1, Math.floor((p.hpMax || 28) / 4));
+        if (typeof vToast === 'function') vToast('Você foi derrotado na jornada. Aldric te socorre nos Portões.', 'warn');
+        if (typeof refreshHud === 'function') refreshHud();
+      }
+    });
+    return;
+  }
+  var remaining = j.totalSteps - j.currentStep;
+  _journeyVRender({
+    script: script,
+    choices: [{ id: 'jrn_cont', label: (remaining > 0 ? 'Continuar viagem' : 'Chegar ao destino') }],
+    inline: true,
+    onChoice: function () { _showCityJourneyStep(); }
+  });
+}
+
 function _cityJourneyArrive() {
   var j = _cityJourney;
   if (!j) return;
@@ -51203,6 +51453,8 @@ function _cityJourneyArrive() {
 }
 
 function _closeCityJourney() {
+  // sessão #77: a viagem agora roda no #encounter-overlay (vEncounter) — fecha ele.
+  try { if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close(); } catch (_e) {}
   var ov = document.getElementById('journey-overlay');
   if (ov) ov.classList.remove('show');
   _cityJourney = null;
