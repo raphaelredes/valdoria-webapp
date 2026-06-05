@@ -117,9 +117,15 @@ function renderRuneScribe(container, data) {
   npcRow.appendChild(info);
   npcRow.appendChild(_rnsEl('div', 'npc-chev', '›'));
   npcRow.addEventListener('click', function(){
-    if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
-      window._SVC_CONFIG = window._SVC_CONFIG_RUNES;
-      window.vEncounter.render(THESSIL_DIALOGUE);
+    // sessão #76: o retrato/nome do Eirik abre DIRETO a conversa (talkOptions
+    // Q&A: Quem é você / tipos de runas / forja / fragmentos) — o MESMO diálogo
+    // do antigo botão "Conversar com Eirik" (removido do menu de ações). Routing:
+    // rune_npc_rune_eirik → RUNE_NPCS[0] → _showSharedNpcDialogue (cidade.html).
+    window._SVC_CONFIG = window._SVC_CONFIG_RUNES;  // reações por reputação
+    if (typeof vCity === 'object' && typeof vCity.act === 'function') {
+      vCity.act('rune_npc_rune_eirik');
+    } else if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
+      window.vEncounter.render(THESSIL_DIALOGUE);  // fallback legado (file:// sem dispatch)
     }
   });
   body.appendChild(npcRow);

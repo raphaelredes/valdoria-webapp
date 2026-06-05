@@ -19394,8 +19394,9 @@ function _buildRuneScribeMockData(player){
     actions: [
       { icon: _heralIco('ic-runas'), label: 'Inscrever Runa',     cb: 'rune_inscribe_open' },
       { icon: _heralIco('ic-stat-wis'), label: 'Ver Inscritas',       cb: 'rune_inscribed_view' },
-      { icon: _heralIco('ic-bolsa'), label: 'Comprar Fragmentos',  cb: 'rune_buy_open' },
-      { icon: _heralIco('ic-escriba'), label: 'Conversar com Eirik', cb: 'rune_npc_rune_eirik' }
+      { icon: _heralIco('ic-bolsa'), label: 'Comprar Fragmentos',  cb: 'rune_buy_open' }
+      // sessão #76: "Conversar com Eirik" removido daqui — o diálogo agora abre
+      // direto ao clicar no retrato/nome do Eirik (row-npc no topo da tela).
     ]
   };
 }
@@ -21695,16 +21696,23 @@ function _showSharedNpcDialogue(opts, internalState){
   // PADRAO_ALDRIC via vEncounter (caminho principal — Martha/Grom usam o mesmo).
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     var available = _npcAvailableOptions(npc);
-    var greeting = _npcGreet(npc) || ('<i>"' + (npc.desc || 'Olá, viajante.') + '"</i>');
-    // Script: fala de saudação; desc como narração se diferir; resposta da pergunta.
-    var script = [{ type: 'speech', speaker: npc.name || '', text: greeting }];
-    if (npc.desc && npc.desc !== greeting) {
-      script.push({ type: 'narration', text: npc.desc });
-    }
+    // BUG FIX (sessão #76): ao mostrar a RESPOSTA de uma pergunta, NÃO repetir a
+    // saudação + desc. Antes, o script era sempre [saudação, desc, (resposta)] →
+    // a "primeira parte" (saudação) reaparecia a CADA opção clicada, independente
+    // da escolha (bug reportado). Agora: saudação+desc só na 1ª abertura; ao
+    // responder uma pergunta, mostra SÓ a fala da resposta. Vale p/ todos os NPCs.
+    var script;
     if (internalState && internalState.answer) {
-      script.push({ type: 'speech', speaker: npc.name || '', text: internalState.answer.text });
-    } else if (available.length === 0) {
-      script.push({ type: 'narration', text: '— Sem mais perguntas. Volte mais tarde para nova conversa. —' });
+      script = [{ type: 'speech', speaker: npc.name || '', text: internalState.answer.text }];
+    } else {
+      var greeting = _npcGreet(npc) || ('<i>"' + (npc.desc || 'Olá, viajante.') + '"</i>');
+      script = [{ type: 'speech', speaker: npc.name || '', text: greeting }];
+      if (npc.desc && npc.desc !== greeting) {
+        script.push({ type: 'narration', text: npc.desc });
+      }
+      if (available.length === 0) {
+        script.push({ type: 'narration', text: '— Sem mais perguntas. Volte mais tarde para nova conversa. —' });
+      }
     }
     // talkOptions → choices (label = pergunta; cost → badge de Valdorita).
     var choices = available.map(function(opt){
