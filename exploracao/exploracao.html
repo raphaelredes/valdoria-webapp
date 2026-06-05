@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T00:06:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T03:30:29Z - do not edit directly, edit source -->
 
 
 
@@ -15709,7 +15709,24 @@ const CLASSES = {
   monge: { name: 'Monge', letter: 'K', color: '#4a6a8f',
     hp: 9, mp: 1, hd: 2, mhd: 2, resName: 'KI',
     mods: { str: 0, dex: 3, con: 2, int: 1, wis: 3, cha: 0 },
-    prof: ['str', 'dex'] }
+    prof: ['str', 'dex'] },
+  // Sessão #75: +3 classes que FALTAVAM (feiticeiro/druida/bruxo). Sem elas, o snap
+  // hidratava esses cls_key e CLASSES[key] dava undefined → player/aliado dessas classes
+  // caía em fallback (aparecia como Guerreiro no combate de exploração). Descoberto via
+  // teste live: aliado Feiticeiro (Joel) virava Guerreiro. resName D&D 5e (regra D&D
+  // Fidelity): Feiticeiro/Druida=MANA, Bruxo=PACTO.
+  feiticeiro: { name: 'Feiticeiro', letter: 'S', color: '#b5446e',
+    hp: 8, mp: 11, hd: 2, mhd: 2, resName: 'MANA',
+    mods: { str: 0, dex: 2, con: 2, int: 1, wis: 1, cha: 3 },
+    prof: ['con', 'cha'] },
+  druida: { name: 'Druida', letter: 'U', color: '#4a8b3a',
+    hp: 10, mp: 8, hd: 2, mhd: 2, resName: 'MANA',
+    mods: { str: 1, dex: 2, con: 2, int: 1, wis: 3, cha: 0 },
+    prof: ['int', 'wis'] },
+  bruxo: { name: 'Bruxo', letter: 'W', color: '#5a3a7a',
+    hp: 9, mp: 8, hd: 2, mhd: 2, resName: 'PACTO',
+    mods: { str: 0, dex: 2, con: 2, int: 1, wis: 1, cha: 3 },
+    prof: ['wis', 'cha'] }
 };
 
 // V2.6: BACKGROUNDS — PHB Ch.4. Cada um gera escolhas únicas em eventos e flavor
