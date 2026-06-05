@@ -51862,7 +51862,12 @@ function _closeCartLocationPopup(){
 // known_locations → "?" nos ocultos; pin do player; halo de missão) e o view
 // (pan/zoom/hover). Exploração usa o MESMO motor → mapas idênticos, fonte única.
 var _cartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShared.createWorldCart({
-  apiBase: (window._VALDORIA_API_BASE || window._API_BASE || ''),
+  // sessão #76 FIX (mapa posições erradas): lê o param 'api' DIRETO da URL como
+  // fallback. _VALDORIA_API_BASE é setado dentro de uma função de boot que roda
+  // DEPOIS deste parse-time → aqui ficava '' → o fetch de /api/exploracao/map-coords
+  // ia pra origin errada (Cloudflare Pages, não o bot) → 404 → coords do editor
+  // NÃO carregavam → cada localidade caía na posição default (≠ map-editor).
+  apiBase: (window._VALDORIA_API_BASE || window._API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
   getKnownLocations: function(){ return (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || []; },
   getPlayerBiomeKey: _cartGetPlayerBiome,
   getQuestFocus: function(){ return (window._questFocusLoc && window._questFocusLoc.key) ? { key: window._questFocusLoc.key, title: window._questFocusLoc.questTitle || 'Missão' } : null; },

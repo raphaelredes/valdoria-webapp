@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T15:02:58Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T16:53:43Z - do not edit directly, edit source -->
 
 
 
@@ -40219,7 +40219,10 @@ var CART_PATHS_V2 = CartShared.CART_PATHS;
 // getKnownLocations:null → mostra TODOS os locais (comportamento atual da
 // exploração; a cidade passa o array known_locations p/ filtrar + "?").
 var _xcartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShared.createWorldCart({
-  apiBase: (window.__EXPLORE_API_BASE || ''),
+  // sessão #76: robustez de apiBase (mesma defesa da cidade). Lê o param 'api'
+  // direto da URL como fallback p/ garantir que o fetch de map-coords (posições
+  // do editor) sempre vá pro bot, nunca pra origin relativa (Cloudflare Pages).
+  apiBase: (window.__EXPLORE_API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
   getKnownLocations: function(){ return null; },
   getPlayerBiomeKey: _cartGetPlayerBiomeV2,
   onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartDraw === 'function') _xcartDraw(); }
