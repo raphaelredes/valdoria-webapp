@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T01:30:54Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T01:57:20Z - do not edit directly, edit source -->
 
 
 
@@ -6381,6 +6381,8 @@ document.write('<script src="../shared/loading-title.js?v=' + _vti + '"><\/scrip
 document.write('<script src="../shared/loading-template.js?v=' + _vti + '"><\/script>');
 // dnd-rules-shared.js: fonte unica D&D 5e (FASE 1 single-source consolidation).
 document.write('<script src="../shared/dnd-rules-shared.js?v=' + _vti + '"><\/script>');
+// status-bars.js: threshold unico de cor de HP (vBarHpClass 60/25) — FASE 4 single-source.
+document.write('<script src="../shared/status-bars.js?v=' + _vti + '"><\/script>');
 // journey-data-shared.js: dados + regra da viagem (FASE 2 single-source). Requer DndRules.
 document.write('<script src="../shared/journey-data-shared.js?v=' + _vti + '"><\/script>');
 /* 2026-05-14: Mochila canonical compartilhada (vInventory) — substitui
@@ -41055,8 +41057,10 @@ function setBarFill(fillId, valId, cur, max, type) {
   val.textContent = cur + '/' + max;
   if (type === 'hp') {
     fill.classList.remove('warn', 'crit');
-    if (pct < 25) fill.classList.add('crit');
-    else if (pct < 50) fill.classList.add('warn');
+    // FASE 4 single-source: threshold 60/25 via vBarHpTier (era 50% no warn -> agora 60%).
+    var _hpTier = vBarHpTier(pct);
+    if (_hpTier === 'low') fill.classList.add('crit');
+    else if (_hpTier === 'mid') fill.classList.add('warn');
   }
 }
 

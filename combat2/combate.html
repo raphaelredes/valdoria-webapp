@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-05T23:54:26Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T01:57:21Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10846,6 +10846,8 @@ window.__onIntroTap = function() {
     document.write('<script src="' + BASE + '/shared/audio-manager.js?v=' + v + '"><\/script>');
     // dnd-rules-shared.js: fonte unica D&D 5e (FASE 1 single-source consolidation).
     document.write('<script src="' + BASE + '/shared/dnd-rules-shared.js?v=' + v + '"><\/script>');
+    // status-bars.js: threshold unico de cor de HP (vBarHpClass 60/25) — FASE 4 single-source.
+    document.write('<script src="' + BASE + '/shared/status-bars.js?v=' + v + '"><\/script>');
     /* Clock skew guard (USER REQUEST 2026-05-04) — detecta NET::ERR_CERT_DATE_INVALID
        proativamente quando relógio do device está errado. */
     document.write('<script src="' + BASE + '/shared/clock-skew-guard.js?v=' + v + '"><\/script>');
@@ -16738,8 +16740,8 @@ function buildCellInnerHTML(u, utype, opt, uid) {
     inner += '<div class="cell-bars">';
     var hpVal = opt.displayHp != null ? opt.displayHp : u.hp;
     var hpPct = Math.max(0, Math.min(100, Math.round((hpVal / u.mhp) * 100)));
-    var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
-    var fillCls = hpPct > 60 ? 'fill-hp-high' : (hpPct > 25 ? 'fill-hp-mid' : 'fill-hp-low');
+    var hpCls = vBarHpClass(hpPct);  /* FASE 4 single-source 60/25 */
+    var fillCls = 'fill-' + vBarHpClass(hpPct);  /* FASE 4 single-source 60/25 */
     inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + fillCls + '" style="width:' + hpPct + '%"></div></div><div class="bar-num ' + hpCls + '">' + hpVal + '/' + u.mhp + '</div></div>';
     if (u.res && u.res.max > 0) {
         var rPct = Math.max(0, Math.min(100, Math.round((u.res.value / u.res.max) * 100)));
@@ -16753,7 +16755,7 @@ function buildCellInnerHTML(u, utype, opt, uid) {
     if (isHeraldic) {
         /* HP threshold color: high > 60%, mid 25-60%, low < 25% */
         var hpPctStat = u.mhp > 0 ? Math.max(0, Math.min(100, Math.round((hpVal / u.mhp) * 100))) : 0;
-        var hpThr = hpPctStat > 60 ? 'high' : (hpPctStat > 25 ? 'mid' : 'low');
+        var hpThr = vBarHpTier(hpPctStat);  /* FASE 4 single-source 60/25 */
         /* Barras atrás de c-stat-val: captura estado anterior pra animar from→to.
          * uid só existe em cells reais do arena (buildCell). Overlays de dice/heal
          * chamam sem uid: renderizam a barra no estado atual, sem tracking. */
@@ -22426,7 +22428,7 @@ function showTargetConfirm(tgtIdx) {
     var card = document.createElement('div');
     card.className = 'target-confirm-card';
     var hpPct = Math.round((u.hp / u.mhp) * 100);
-    var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
+    var hpCls = vBarHpClass(hpPct);  /* FASE 4 single-source 60/25 */
 
     /* Previsao de dano D&D 5e (PHB p.194): mod soma uma vez; crit = +1 dado do mesmo tipo se damageSpec. */
     var dmgFormula, critFormula, minDmg, maxDmg, critMin, critMax;
@@ -22544,7 +22546,7 @@ function showHealTargetConfirm(tgtIdx) {
     var card = document.createElement('div');
     card.className = 'target-confirm-card target-confirm-card--heal';
     var hpPct = u.mhp ? Math.round((u.hp / u.mhp) * 100) : 0;
-    var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
+    var hpCls = vBarHpClass(hpPct);  /* FASE 4 single-source 60/25 */
     var inconsc = !u.alive && u.hp != null && u.hp <= 0;
     var html = '';
     var verb = isBuffAlly ? 'Aplicar ' + skill.n + ' em ' : (inconsc ? 'Restabelecer ' : 'Curar ');
@@ -25761,7 +25763,7 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
                     var newPct = Math.max(0, Math.min(100, Math.round((newHp / target.mhp) * 100)));
 
                     function bandFromWidthPct(pt) {
-                        return pt > 60 ? 'high' : (pt > 25 ? 'mid' : 'low');
+                        return vBarHpTier(pt);  /* FASE 4 single-source 60/25 */
                     }
 
                     setTimeout(function () {
@@ -25955,7 +25957,7 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
                         var oldPct = Math.max(0, Math.min(100, Math.round((oldHp / target.mhp) * 100)));
                         var newPct = Math.max(0, Math.min(100, Math.round((newHp / target.mhp) * 100)));
                         function bandFromWidthPct(pt) {
-                            return pt > 60 ? 'high' : (pt > 25 ? 'mid' : 'low');
+                            return vBarHpTier(pt);  /* FASE 4 single-source 60/25 */
                         }
                         setTimeout(function () {
                             if (!cellRoot || !fill || !hpNum) {
@@ -26085,7 +26087,7 @@ function openUnitDetail(uid) {
     html += '<div class="udc-section"><div class="udc-section-title">Status</div>';
     html += '<div class="udc-stats">';
     var hpPct = Math.round((u.hp / u.mhp) * 100);
-    var hpCls = hpPct > 60 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
+    var hpCls = vBarHpClass(hpPct);  /* FASE 4 single-source 60/25 */
     html += '<div class="udc-stat"><span class="udc-stat-lbl">PV</span><span class="udc-stat-val ' + hpCls + '">' + u.hp + ' / ' + u.mhp + '</span></div>';
     if (u.res && u.res.max) {
         html += '<div class="udc-stat"><span class="udc-stat-lbl">' + escHtml(u.res.name) + '</span><span class="udc-stat-val res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + ' / ' + u.res.max + '</span></div>';
