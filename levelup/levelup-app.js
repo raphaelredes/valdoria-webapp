@@ -290,7 +290,11 @@ el.innerHTML = `<div class="dm-bubble">Chegou a hora de definir seu caminho. Cad
 <div class="section-title">🏰 Subclasse: ${info.name}</div>
 <div class="hint">Escolha sua especialização — toque pra ver detalhes</div>
 <div id="subclassList"></div>`;
-const mount = document.getElementById('subclassList');
+// FIX (sessão #82): goTo()/_rebuildCurrentScreen() chamam build(wrapper) ANTES de
+// anexar o wrapper ao DOM — então document.getElementById('subclassList') retornava
+// null e vSubclass.renderGrid(null) não populava (grid de subclasse vazio no nível 3+).
+// Buscar dentro do próprio `el` (o wrapper) funciona anexado ou não.
+const mount = el.querySelector('#subclassList');
 const subEntries = Object.entries(subs);
 if (subEntries.length === 0) {
 mount.innerHTML = '<div class="empty-msg">Subclasses não disponíveis para este nível.</div>';
