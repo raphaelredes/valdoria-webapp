@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T16:44:25Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T17:06:54Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -15647,6 +15647,21 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
         damageApplied -= absorbed;
         newHp = oldHp - damageApplied;
         if (s && s.log) s.log.push(target.n + ' absorve ' + absorbed + ' via PV temporários (restam ' + target.tempHp + ').');
+    }
+    /* FASE 8 / Forma Selvagem (PHB p.66): se a forma bestial cairia a 0, o Druida
+       REVERTE e o EXCESSO de dano carrega pro PV normal ("excess damage carries over").
+       Se sobrar PV normal, sobrevive na forma original; senão segue pro fluxo de queda. */
+    if (newHp <= 0 && target && target.wildShape && target._wsBackup
+        && (target.t === 'p' || target.t === 'a')
+        && typeof _localWildShapeRevert === 'function') {
+        var _wsExc = Math.max(0, damageApplied - oldHp);
+        var _wsIco = (target.wildShape.form_ico || '🐾');
+        var _wsName = (target.wildShape.form_name || 'forma');
+        _localWildShapeRevert(target, _wsExc);
+        if (s && s.log) s.log.push(_wsIco + ' A forma de ' + _wsName + ' se desfez!'
+            + (_wsExc > 0 ? ' (' + _wsExc + ' dano excedente)' : ''));
+        if ((target.hp | 0) > 0) { target.alive = true; clearDownedMeta(target); return; }
+        newHp = 0;  // reverteu mas o excesso derrubou o PV normal a 0 → segue p/ queda
     }
     target.hp = newHp;
     if (damageApplied > 0) {
