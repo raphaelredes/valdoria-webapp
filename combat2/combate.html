@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-05T15:03:00Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-05T23:54:26Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10844,6 +10844,8 @@ window.__onIntroTap = function() {
        sfx_fire.mp3, sfx_cold.mp3, etc.). Chamadas: ValdoriaAudio.play('combat')
        pra música; ValdoriaAudio.playSFX('sfx_hit') pra effects. */
     document.write('<script src="' + BASE + '/shared/audio-manager.js?v=' + v + '"><\/script>');
+    // dnd-rules-shared.js: fonte unica D&D 5e (FASE 1 single-source consolidation).
+    document.write('<script src="' + BASE + '/shared/dnd-rules-shared.js?v=' + v + '"><\/script>');
     /* Clock skew guard (USER REQUEST 2026-05-04) — detecta NET::ERR_CERT_DATE_INVALID
        proativamente quando relógio do device está errado. */
     document.write('<script src="' + BASE + '/shared/clock-skew-guard.js?v=' + v + '"><\/script>');
