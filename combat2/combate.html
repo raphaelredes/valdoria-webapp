@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T10:05:42Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T16:44:25Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -8661,6 +8661,13 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .mm-confirm-btn-cancel { background: rgba(30,22,14,0.9); border: 1px solid rgba(196,149,58,0.5); color: var(--v-text-dim, #a09484); }
 .mm-confirm-btn-ok:hover { transform: translateY(-1px); box-shadow: 0 0 18px rgba(255,220,140,0.85); }
 .mm-confirm-btn-cancel:hover { color: var(--v-text, #d4c8b0); border-color: rgba(255,220,140,0.8); }
+/* FASE 8 — Forma Selvagem (Wild Shape): grid de seleção de forma bestial */
+.wildshape-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 4px; }
+.wildshape-form-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px; background: rgba(30,22,14,0.85); border: 1px solid rgba(196,149,58,0.5); border-radius: 12px; color: var(--v-text, #d4c8b0); font-family: var(--v-font, 'MedievalSharp'), serif; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+.wildshape-form-btn:hover { transform: translateY(-2px); border-color: rgba(255,220,140,0.9); box-shadow: 0 0 16px rgba(196,149,58,0.55); }
+.wildshape-form-btn .ws-ico { font-size: calc(26px * var(--v-font-scale, 1)); line-height: 1.1; }
+.wildshape-form-btn .ws-name { font-weight: 700; font-size: calc(13px * var(--v-font-scale, 1)); color: #e8c45a; }
+.wildshape-form-btn .ws-stats { font-size: calc(11px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); text-align: center; }
 /* Variante FORCE (Mísseis Mágicos) — roxo arcano explícito */
 .mm-confirm-overlay--force { background: radial-gradient(ellipse at center, rgba(20,10,35,0.72), rgba(0,0,0,0.88)); }
 .mm-confirm-card--force {
@@ -15087,8 +15094,12 @@ function rollDamage(a, crit, skill) {
         for (i = 0; i < rollCount; i++) rolls2.push(rollN(d));
         return rolls2;
     }
-    var rolls3 = [rollN(a.die)];
-    if (crit) rolls3.push(rollN(a.die));
+    // FASE 8 / Forma Selvagem: a mordida/garra da fera rola N dados (ex.: Lobo 2d4).
+    // `wildBiteDice` é setado ao transformar (espelha o motor _roll_damage). Crit dobra.
+    var nBite = Math.max(1, (a.wildBiteDice | 0) || 1);
+    var rolls3 = [];
+    for (var wb = 0; wb < nBite; wb++) rolls3.push(rollN(a.die));
+    if (crit) { for (var wc = 0; wc < nBite; wc++) rolls3.push(rollN(a.die)); }
     return rolls3;
 }
 
@@ -21482,9 +21493,145 @@ function showSkillUseConfirmPopup(skill) {
     });
 }
 
+/* ============================================================ FASE 8 — Forma Selvagem (Wild Shape)
+   PHB p.66: o Druida ESCOLHE uma forma bestial num CARD e se transforma; o stat block da fera
+   substitui o do combatente. REMOTE: POST {type:'skill',slot,form} ao MOTOR (autoridade —
+   src/game/combat2_wildshape.py). LOCAL (DEV tool): transform/revert no estado local, espelhando
+   o motor. Dados das formas = mirror de src/game/classes/wild_shape_forms.py. */
+var WILD_SHAPE_FORMS_JS = {
+    wolf:         { id: 'wolf', name: 'Lobo', ico: '🐺', cr: 0.25, hp: 11, ac: 13, atk: 4, diceN: 2, die: 4, flat: 1, dmgType: 'piercing', str: 12, dex: 15, con: 12, minLevel: 2, desc: 'Ágil predador com mordida poderosa.' },
+    boar:         { id: 'boar', name: 'Javali', ico: '🐗', cr: 0.25, hp: 11, ac: 11, atk: 3, diceN: 1, die: 6, flat: 1, dmgType: 'slashing', str: 13, dex: 11, con: 12, minLevel: 2, desc: 'Resistente e feroz no corpo-a-corpo.' },
+    black_bear:   { id: 'black_bear', name: 'Urso Negro', ico: '🐻', cr: 0.5, hp: 19, ac: 11, atk: 3, diceN: 2, die: 4, flat: 2, dmgType: 'slashing', str: 15, dex: 10, con: 14, minLevel: 4, desc: 'Fera poderosa com garras devastadoras.' },
+    crocodile:    { id: 'crocodile', name: 'Crocodilo', ico: '🐊', cr: 0.5, hp: 19, ac: 12, atk: 4, diceN: 1, die: 10, flat: 1, dmgType: 'piercing', str: 15, dex: 10, con: 13, minLevel: 4, desc: 'Predador aquático com mordida esmagadora.' },
+    giant_spider: { id: 'giant_spider', name: 'Aranha Gigante', ico: '🕷️', cr: 1.0, hp: 26, ac: 14, atk: 5, diceN: 1, die: 8, flat: 3, dmgType: 'piercing', str: 14, dex: 16, con: 12, minLevel: 8, desc: 'Predadora ágil com veneno paralisante.' },
+    dire_wolf:    { id: 'dire_wolf', name: 'Lobo Atroz', ico: '🐺', cr: 1.0, hp: 37, ac: 14, atk: 5, diceN: 2, die: 6, flat: 3, dmgType: 'piercing', str: 17, dex: 15, con: 15, minLevel: 8, desc: 'Lobo ancestral de tamanho monstruoso.' }
+};
+function wildShapeFormsForLevel(level) {
+    level = Math.max(1, level | 0);
+    var maxCr = (level >= 8) ? 1.0 : (level >= 4 ? 0.5 : 0.25);
+    var out = [];
+    for (var k in WILD_SHAPE_FORMS_JS) {
+        if (WILD_SHAPE_FORMS_JS[k].cr <= maxCr) out.push(WILD_SHAPE_FORMS_JS[k]);
+    }
+    return out;
+}
+function _wsIsTransformed(p) {
+    return !!(p && (p.wildShape || (p.se || []).some(function (x) { return x && x.id === 'forma_selvagem'; })));
+}
+function openWildShapePicker(forms, usesLeft) {
+    return new Promise(function (resolve) {
+        var prev = document.getElementById('wildshape-overlay');
+        if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+        var ov = document.createElement('div');
+        ov.id = 'wildshape-overlay';
+        ov.className = 'mm-confirm-overlay';
+        var card = document.createElement('div');
+        card.className = 'mm-confirm-card';
+        var title = document.createElement('div');
+        title.className = 'mm-confirm-title';
+        title.textContent = '🐺 Forma Selvagem';
+        var sub = document.createElement('div');
+        sub.className = 'mm-confirm-sub';
+        sub.style.opacity = '.85';
+        sub.textContent = 'Escolha a forma bestial' + (usesLeft != null ? (' · ' + usesLeft + ' uso(s)') : '') + ' (PHB p.66)';
+        var grid = document.createElement('div');
+        grid.className = 'wildshape-grid';
+        function done(v) { if (ov.parentNode) ov.parentNode.removeChild(ov); resolve(v); }
+        forms.forEach(function (f) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'wildshape-form-btn';
+            var sIco = document.createElement('span'); sIco.className = 'ws-ico'; sIco.textContent = f.ico || '🐾';
+            var sName = document.createElement('span'); sName.className = 'ws-name'; sName.textContent = f.name;
+            var sStats = document.createElement('span'); sStats.className = 'ws-stats';
+            sStats.textContent = 'PV ' + f.hp + ' · CA ' + f.ac + ' · ' + f.diceN + 'd' + f.die + (f.flat ? '+' + f.flat : '');
+            b.appendChild(sIco); b.appendChild(sName); b.appendChild(sStats);
+            b.addEventListener('click', function () { done(f.id); });
+            grid.appendChild(b);
+        });
+        var btnCancel = document.createElement('button');
+        btnCancel.type = 'button';
+        btnCancel.className = 'mm-confirm-btn-cancel';
+        btnCancel.textContent = 'Cancelar';
+        btnCancel.addEventListener('click', function () { done(null); });
+        card.appendChild(title);
+        card.appendChild(sub);
+        card.appendChild(grid);
+        card.appendChild(btnCancel);
+        ov.appendChild(card);
+        mountInGameFrame(ov);
+    });
+}
+function _localWildShapeApply(p, form) {
+    p._wsBackup = {
+        n: p.n, ico: p.ico, mhp: p.mhp, ac: p.ac, atk: p.atk, die: p.die,
+        dmgMod: p.dmgMod, str: p.str, dex: p.dex, con: p.con, wildBiteDice: p.wildBiteDice
+    };
+    var originalHp = p.hp | 0;
+    p.n = form.name; p.ico = form.ico;
+    p.hp = form.hp; p.mhp = form.hp;
+    p.ac = form.ac; p.atk = form.atk;
+    p.die = form.die; p.dmgMod = form.flat;
+    p.wildBiteDice = form.diceN;
+    p.str = form.str; p.dex = form.dex; p.con = form.con;
+    p.wildShape = { form_id: form.id, form_name: form.name, form_ico: form.ico, original_hp: originalHp, form_max_hp: form.hp };
+    p.se = (p.se || []).filter(function (x) { return x.id !== 'forma_selvagem'; });
+    p.se.push({ id: 'forma_selvagem', kind: 'buff', ico: form.ico, n: 'Forma Selvagem (' + form.name + ')', turnsLeft: -1, dndCondition: 'Forma Selvagem (' + form.name + ')' });
+}
+function _localWildShapeRevert(p, excess) {
+    var ws = p.wildShape, bk = p._wsBackup;
+    if (!ws || !bk) return;
+    for (var k in bk) { if (bk[k] != null) p[k] = bk[k]; }
+    if (bk.wildBiteDice == null) { try { delete p.wildBiteDice; } catch (e) { p.wildBiteDice = 1; } }
+    var orig = ws.original_hp | 0;
+    p.hp = Math.max(0, orig - (excess | 0));
+    p.alive = p.hp > 0;
+    try { delete p.wildShape; } catch (e2) { p.wildShape = null; }
+    try { delete p._wsBackup; } catch (e3) { p._wsBackup = null; }
+    p.se = (p.se || []).filter(function (x) { return x.id !== 'forma_selvagem'; });
+}
+async function useWildShapeSkill(skill, opts) {
+    opts = opts || {};
+    var p = currentState.order[currentState.p_idx];
+    var isRemote = (window.__COMBAT_MODE === 'remote');
+    var slot = -1;
+    if (p && p.skills) {
+        for (var si = 0; si < p.skills.length; si++) {
+            if (p.skills[si] === skill || (p.skills[si] && skill && p.skills[si].n === skill.n)) { slot = si; break; }
+        }
+    }
+    if (slot < 0) { console.warn('[WILDSHAPE] slot_not_found'); return; }
+    /* Já transformado → reverter (reusar a habilidade). */
+    if (_wsIsTransformed(p)) {
+        if (isRemote) { await __combatRemoteAction({ type: 'skill', slot: slot }); return; }
+        _localWildShapeRevert(p, 0);
+        var sL = currentState; simLogPushTurnHeader(sL, p);
+        sL.log.push((p.ico || '🌿') + ' ' + p.n + ' reverte à forma normal.');
+        p.actionSpent = true; render(sL); _actionTaken = false; await _maybeAdvanceOrStay();
+        return;
+    }
+    var forms = (skill.forms && skill.forms.length) ? skill.forms : wildShapeFormsForLevel(p.lvl | 0);
+    if (!forms.length) { if (typeof vToast === 'function') vToast('Forma Selvagem indisponível neste nível.'); return; }
+    var uses = (p.wildShapeUses != null) ? (p.wildShapeUses | 0) : 2;
+    if (uses <= 0) { if (typeof vToast === 'function') vToast('Sem usos de Forma Selvagem.'); return; }
+    var formId = await openWildShapePicker(forms, uses);
+    if (!formId) { if (typeof opts.onCancel === 'function') { try { opts.onCancel(); } catch (e) {} } return; }
+    if (isRemote) { await __combatRemoteAction({ type: 'skill', slot: slot, form: formId }); return; }
+    var form = forms.filter(function (f) { return f.id === formId; })[0];
+    if (!form) return;
+    p.wildShapeUses = uses - 1;
+    var oldName = p.n;
+    _localWildShapeApply(p, form);
+    var sL2 = currentState; simLogPushTurnHeader(sL2, p);
+    sL2.log.push(form.ico + ' ' + oldName + ' assume a forma de ' + form.name + '! (PV ' + form.hp + ' · CA ' + form.ac + ')');
+    p.actionSpent = true; render(sL2); _actionTaken = false; await _maybeAdvanceOrStay();
+}
+
 async function useSkill(skill, opts) {
     opts = opts || {};
     var p = currentState.order[currentState.p_idx];
+    /* FASE 8 / Forma Selvagem: card de seleção de forma (ou reverter). REMOTE = motor autoridade. */
+    if (skill && skill.kind === 'wildshape') { return useWildShapeSkill(skill, opts); }
     /* [C-REM:SKILL] REMOTE MODE: resolve slot + setup pending (se target) OU POST direto. */
     if (window.__COMBAT_MODE === 'remote') {
         /* Resolve slot index a partir do skill object. */

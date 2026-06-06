@@ -1270,9 +1270,13 @@ var CHAR_CLASSES = [
             desc: 'Ação bônus (PHB p.259): 1d4+SAB PV à distância (+1d4 a cada 4 níveis).',
             healSpec: { n: 1, d: 4, useCastingMod: true, scaleByCasterLevel: { perLevels: 4 } }, healSpell: true,
             helpDnd5e: 'Palavra de Cura / Healing Word (PHB p.259 — Druida nv 1): **AÇÃO BÔNUS**; 18m; 1d4 + mod de conjuração SAB. Não funciona em construtos/mortos-vivos.\nUpcast: +1d4 por slot acima do 1º.\nArena: 1d4+3 base (3 = WIS mod stub); +1d4 a cada 4 níveis.\nV1.7 Sprint-17 (2026-04-21): era 2d4+2 — corrigido pra 1d4 RAW PHB.' },
-        { n: 'Forma Selvagem', ico: '🐺', cost: 2, kind: 'buff', minLevel: 2, desc: 'Transforma-se em fera (PHB p.66 Druida nv 2+, stub): +10 PV temporários e +2 dano por 3 turnos.',
-            helpDnd5e: 'Forma Selvagem / Wild Shape (PHB p.66 — Druida nível 2): transforma-se em fera que viu antes. Mantém sua INT/SAB/CAR + perícias/proficiências; ganha stats da fera (HP, CA, movimento, atk, etc.).\nDuração: metade do nível de druida em horas.\nNo arena: SIMPLIFICADO como buff self (+10 HP temporários + 2 dano por 3 rodadas) — sem stat block real de fera.\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.66): adicionada flag `minLevel: 2` (antes faltava — Druida nv 1 tinha acesso indevido).',
-            buffSim: { id: 'forma_selvagem', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Forma Selvagem', condRule: 'PHB — transformação em fera. Resumo arena: +HP temp + dano bônus.', dmgFlat: 2, tempHp: 10 } },
+        /* FASE 8 (sessão #82) — Forma Selvagem REAL (PHB p.66): kind:'wildshape'. O Druida
+           escolhe a forma bestial num CARD e se transforma (stat block da fera substitui o seu).
+           Antes era stub buff (+tempHp). REMOTE: motor (combat2_wildshape.py) é autoridade +
+           manda `forms`. LOCAL: useWildShapeSkill usa WILD_SHAPE_FORMS_JS (combate.html). */
+        { n: 'Forma Selvagem', ico: '🐺', cost: 0, kind: 'wildshape', isWildShape: true, isClassFeature: true, minLevel: 2,
+            desc: 'Transforma-se numa fera (PHB p.66): escolha a forma; o stat block da besta substitui o seu.',
+            helpDnd5e: 'Forma Selvagem / Wild Shape (PHB p.66 — Druida nível 2): ação para se transformar numa besta que já viu (CR por nível: 1/4 nv2, 1/2 nv4, 1 nv8). Ganha HP/CA/ataques da fera; o PV da forma absorve o dano e o excesso volta pro PV normal. 2 usos por descanso.\nArena: escolha a forma no card; reverte ao reusar a habilidade ou quando a forma cai a 0 PV.' },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB audit) — Invocar Raio é AOE (1.5m raio
            em torno do ponto escolhido). Adicionado multiTarget:true pra bater em
            todos os inimigos (arena simplifica "todos na área" como "todos vivos"). */
