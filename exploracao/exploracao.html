@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-05T23:54:26Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T00:54:32Z - do not edit directly, edit source -->
 
 
 
@@ -6381,6 +6381,8 @@ document.write('<script src="../shared/loading-title.js?v=' + _vti + '"><\/scrip
 document.write('<script src="../shared/loading-template.js?v=' + _vti + '"><\/script>');
 // dnd-rules-shared.js: fonte unica D&D 5e (FASE 1 single-source consolidation).
 document.write('<script src="../shared/dnd-rules-shared.js?v=' + _vti + '"><\/script>');
+// journey-data-shared.js: dados + regra da viagem (FASE 2 single-source). Requer DndRules.
+document.write('<script src="../shared/journey-data-shared.js?v=' + _vti + '"><\/script>');
 /* 2026-05-14: Mochila canonical compartilhada (vInventory) — substitui
    _showExploracaoInventoryPopup local. Sprite ic-it-* (519 symbols) primeiro. */
 document.write('<link rel="stylesheet" href="../shared/inventory-screen.css?v=' + _vti + '">');
@@ -38153,136 +38155,15 @@ function closeQuestJournal() {
 var _journey = null;
 
 // Pool de hazards por bioma destino (skill checks D&D 5e)
-var JOURNEY_HAZARDS = {
-  forest: [
-    { title: 'Armadilha de Caçadores', narr: 'Um laço escondido nas folhas se prende ao seu pé!',
-      choices: [
-        { i: '🔍', t: 'Desarmar', stat: 'dex', dc: 12, sNarr: 'Suas mãos ágeis desarmam o laço sem ferimento.', fNarr: 'O laço corta sua perna ao apertar.', dmg: 3 },
-        { i: '💪', t: 'Romper', stat: 'str', dc: 13, sNarr: 'Você arrebenta a corda com força bruta!', fNarr: 'A corda lacera sua pele.', dmg: 4 } ] },
-    { title: 'Galho Caído', narr: 'Um galho enorme cai do alto, bloqueando a trilha.',
-      choices: [
-        { i: '🧗', t: 'Saltar por cima', stat: 'dex', dc: 11, sNarr: 'Salto leve, sem dificuldade.', fNarr: 'Você tropeça e arranha o joelho.', dmg: 2 },
-        { i: '💪', t: 'Empurrar', stat: 'str', dc: 12, sNarr: 'Você move o galho do caminho.', fNarr: 'O galho é mais pesado do que parece.', dmg: 2 } ] },
-    { title: 'Atoleiro', narr: 'O caminho se afoga em lama negra entre raízes.',
-      choices: [
-        { i: '🔍', t: 'Encontrar trilha firme', stat: 'wis', dc: 12, sNarr: 'Você encontra um caminho seco.', fNarr: 'Você afunda até as canelas e perde tempo.', dmg: 2 } ] }
-  ],
-  plains: [
-    { title: 'Vendaval', narr: 'O vento sopra com força, levantando poeira que cega seus olhos.',
-      choices: [
-        { i: '🛡', t: 'Resistir', stat: 'con', dc: 11, sNarr: 'Você suporta o vendaval sem perder o passo.', fNarr: 'O vento o derruba; areia entra nos olhos.', dmg: 2 } ] },
-    { title: 'Bandidos!', narr: 'Três figuras encapuzadas saem do trigal!',
-      choices: [
-        { i: '🗣', t: 'Negociar', stat: 'cha', dc: 13, sNarr: 'Sua lábia os convence a recuar.', fNarr: 'Eles atacam; você sangra antes de fugir.', dmg: 5 },
-        { i: '🏃', t: 'Fugir', stat: 'dex', dc: 12, sNarr: 'Você corre mais rápido que eles!', fNarr: 'Uma flecha o atinge nas costas.', dmg: 4 } ] }
-  ],
-  swamp: [
-    { title: 'Areia Movediça', narr: 'Seus pés afundam na lama traiçoeira!',
-      choices: [
-        { i: '💪', t: 'Forçar saída', stat: 'str', dc: 13, sNarr: 'Com esforço brutal, você se liberta.', fNarr: 'Você afunda mais antes de escapar.', dmg: 4 },
-        { i: '🧠', t: 'Manter calma', stat: 'wis', dc: 12, sNarr: 'Movimentos lentos permitem sair.', fNarr: 'O pânico consome sua energia.', dmg: 3 } ] },
-    { title: 'Gás Pantanoso', narr: 'Uma nuvem verde sobe das poças apodrecidas.',
-      choices: [
-        { i: '🛡', t: 'Prender respiração', stat: 'con', dc: 13, sNarr: 'Você segura o ar a tempo.', fNarr: 'O gás queima seus pulmões.', dmg: 4 } ] }
-  ],
-  mountain: [
-    { title: 'Avalanche', narr: 'Neve e pedras descem a encosta sobre você!',
-      choices: [
-        { i: '🏃', t: 'Correr lateral', stat: 'dex', dc: 13, sNarr: 'Você desvia da avalanche a tempo.', fNarr: 'A força da neve o derruba.', dmg: 5 },
-        { i: '🛡', t: 'Proteger-se', stat: 'con', dc: 12, sNarr: 'Você suporta o impacto.', fNarr: 'Pedras quebram suas costelas.', dmg: 4 } ] },
-    { title: 'Fenda', narr: 'Uma fenda profunda corta o caminho.',
-      choices: [
-        { i: '🧗', t: 'Saltar', stat: 'str', dc: 12, sNarr: 'Salto perfeito sobre o abismo!', fNarr: 'Você escorrega na borda.', dmg: 3 } ] }
-  ],
-  desert: [
-    { title: 'Tempestade de Areia', narr: 'O céu escurece e areia gira em redemoinho.',
-      choices: [
-        { i: '🛡', t: 'Cobrir-se', stat: 'con', dc: 12, sNarr: 'Você se protege com o manto e espera.', fNarr: 'A areia rasga sua pele.', dmg: 4 } ] }
-  ],
-  snow: [
-    { title: 'Lobo Solitário', narr: 'Olhos amarelos brilham na neve à frente.',
-      choices: [
-        { i: '🗣', t: 'Intimidar', stat: 'cha', dc: 13, sNarr: 'O lobo recua, intimidado.', fNarr: 'Ele ataca antes de fugir.', dmg: 4 },
-        { i: '🏃', t: 'Recuar devagar', stat: 'wis', dc: 12, sNarr: 'Você recua sem provocar.', fNarr: 'Você escorrega no gelo; ele avança.', dmg: 3 } ] }
-  ],
-  cave: [
-    { title: 'Estalactite', narr: 'Uma estalactite cai do teto sem aviso!',
-      choices: [
-        { i: '🏃', t: 'Esquivar', stat: 'dex', dc: 13, sNarr: 'Você se joga pro lado a tempo.', fNarr: 'A pedra raspa em você.', dmg: 4 } ] }
-  ],
-  graveyard: [
-    { title: 'Espíritos Inquietos', narr: 'Vultos translúcidos cercam você.',
-      choices: [
-        { i: '🧠', t: 'Resistir', stat: 'wis', dc: 13, sNarr: 'Sua vontade afasta os espíritos.', fNarr: 'O medo paralisa você por instantes.', dmg: 3 },
-        { i: '🏃', t: 'Correr', stat: 'dex', dc: 12, sNarr: 'Você escapa antes que se aproximem.', fNarr: 'Um toque gelado drena sua energia.', dmg: 4 } ] }
-  ],
-  volcanic: [
-    { title: 'Erupção Lateral', narr: 'Lava escorre por uma fissura próxima.',
-      choices: [
-        { i: '🏃', t: 'Saltar', stat: 'dex', dc: 13, sNarr: 'Você salta pra terra firme!', fNarr: 'Faíscas queimam suas pernas.', dmg: 5 } ] }
-  ]
-};
+// FASE 2 single-source: dados da viagem em valdoria-webapp/shared/journey-data-shared.js (shape rico).
+var JOURNEY_HAZARDS = (window.JourneyData && JourneyData.HAZARDS) || {};
 
 // Pool de narrativas seguras por bioma destino (sem hazard).
 // User sessão #69: reescritas no nível PADRAO_ALDRIC — 5 sentidos, mostre-não-
 // conte, mistério ambiental (ver docs/sistemas/narrativa-guia.md). 4 variações
 // por bioma pra reduzir repetição numa viagem de 3-5 etapas.
-var JOURNEY_SAFE = {
-  forest: [
-    'A trilha serpenteia entre carvalhos ancestrais, e o musgo abafa cada passo.',
-    'Algo canta no alto da copa — depois silencia, como se tivesse notado você.',
-    'Raios de sol atravessam as folhas e espalham moedas de luz no chão úmido.',
-    'Cheiro de terra molhada e resina enche o ar. A floresta respira devagar.'
-  ],
-  plains: [
-    'O vento corre pelo trigal dourado em ondas longas, como a respiração do mundo.',
-    'A estrada de terra clara some no horizonte, reta como uma promessa.',
-    'Andorinhas riscam o céu aberto; a sombra delas desliza sobre a planície.',
-    'Ao longe, o sino de uma vila toca uma vez — e o silêncio volta maior.'
-  ],
-  swamp: [
-    'Sapos coaxam nas poças escuras, e a lama suga seus passos com gula paciente.',
-    'Árvores retorcidas formam arcos sobre a trilha, como costelas de algo enorme.',
-    'Luzes pálidas piscam entre os juncos. Você decide não segui-las.',
-    'O ar é doce e podre ao mesmo tempo. Cada respiração pesa um pouco mais.'
-  ],
-  mountain: [
-    'O ar rarefeito queima os pulmões; cada passo custa o dobro.',
-    'Picos nevados ardem em branco ao longe, indiferentes à sua jornada.',
-    'Uma águia descreve círculos lá no alto, dona de um céu que não é seu.',
-    'O vento corta a rocha num assobio longo, e o abismo escuta calado.'
-  ],
-  desert: [
-    'A estrada se arrasta sob um sol que não perdoa; o calor sobe do chão em ondas.',
-    'As dunas mudam de forma ao vento, apagando rastros como se nunca houvesse ninguém.',
-    'Uma miragem dança no horizonte — água onde só há areia e sede.',
-    'A areia range entre os dentes. A garganta pede o que o cantil não pode dar.'
-  ],
-  snow: [
-    'A neve range sob suas botas, e o frio morde através de cada camada.',
-    'Seu hálito vira fumaça branca e some no ar de vidro.',
-    'Ao longe, um uivo. Depois outro, mais perto. Você apressa o passo.',
-    'Tudo é branco e quieto — a quietude pesada de quem espera.'
-  ],
-  cave: [
-    'Gotas ecoam na escuridão, marcando um tempo que não é o seu.',
-    'Cristais devolvem a luz da tocha em estrelas frias presas na pedra.',
-    'O ar é denso e parado, com gosto de mineral e de séculos.',
-    'Algo se moveu lá atrás — ou foi só o eco do seu próprio medo.'
-  ],
-  graveyard: [
-    'Lápides inclinadas marcam o caminho como dentes velhos.',
-    'Corvos observam de galhos secos, em silêncio absoluto.',
-    'A névoa se arrasta entre as cruzes, fria como uma lembrança.',
-    'Não há vento — mas algo faz as folhas mortas sussurrarem.'
-  ],
-  volcanic: [
-    'Cinzas caem como neve preta e pousam, mornas, nos seus ombros.',
-    'Brasas brilham nas fendas do chão, um carvão que nunca dorme.',
-    'O calor faz o ar tremular, e o horizonte derrete em vermelho.',
-    'A rocha estala sob seus pés. Lá embaixo, algo enorme respira fogo.'
-  ]
-};
+// FASE 2 single-source: dados da viagem em valdoria-webapp/shared/journey-data-shared.js (shape rico).
+var JOURNEY_SAFE = (window.JourneyData && JourneyData.SAFE) || {};
 var STAT_NAMES_PT = { str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma' };
 
 // #21 (sessão #70): nº de etapas = distância Manhattan do jogador até o ponto
@@ -38314,7 +38195,8 @@ function startJourneyToMap(targetMapId, targetMap, options) {
     biome: targetMap.biome,
     totalSteps: totalSteps,
     currentStep: 0,
-    riskChance: 55,  // 55% de chance de hazard por etapa
+    riskChance: (window.JourneyData ? JourneyData.RISK_CHANCE : 55),  // FASE 2: risco single-source
+    _usedHazards: [], _usedSafe: [],  // FASE 2: anti-repeat por viagem (sessao) — pareia com 24h localStorage
     // Quando vem de cidade, mapa já foi booted → não re-boot ao chegar
     skipReboot: !!options.skipReboot,
     titlePrefix: options.titlePrefix || 'Rumo a ',
@@ -38370,26 +38252,50 @@ function _renderJourneyStep() {
   footEl.innerHTML = '';
 
   if (hasHazard) {
-    const pool = JOURNEY_HAZARDS[j.biome] || JOURNEY_HAZARDS.forest;
-    const hazard = pool[Math.floor(Math.random() * pool.length)];
+    // FASE 2 single-source: hazard rico (script[]) da fonte unica + anti-repeat (sessao + 24h char-namespaced).
+    var hazard = (window.JourneyData && JourneyData.pickFreshHazard)
+      ? JourneyData.pickFreshHazard(j.biome, S.player, (j._usedHazards = j._usedHazards || []))
+      : ((JOURNEY_HAZARDS[j.biome] || JOURNEY_HAZARDS.forest || [])[0]);
+    if (!hazard) { _journeyContinueBtn(); return; }  // pool vazio -> segue como seguro
     narrEl.innerHTML =
       '<div class="journey-step-badge hazard">⚠ ' + hazard.title + '</div>' +
-      '<div>' + hazard.narr + '</div>';
+      _journeyScriptHtml(hazard);
     hazard.choices.forEach(function(ch) {
-      // DC + chance% (user sessão #69): mesma legibilidade do PADRAO_ALDRIC.
-      var _m = (S.player && S.player.mods && typeof S.player.mods[ch.stat] === 'number') ? S.player.mods[ch.stat] : 0;
-      _addJourneyBtn(footEl, ch.i, ch.t,
-        _statLabel(ch.stat) + ' · CD ' + ch.dc + ' · ' + _journeyChancePct(ch.dc, _m) + '%', '',
-        function() { _resolveJourneyHazard(hazard, ch); });
+      if (ch.stat) {
+        // chance% via fonte unica (DndRules: mod + proficiencia escalada PHB) — MESMA odd do resolve (corrige H1/A1).
+        var pct = (window.JourneyData && JourneyData.successPctForChoice) ? JourneyData.successPctForChoice(S.player, ch) : null;
+        var info = _statLabel(ch.stat) + ' · CD ' + ch.dc + (pct != null ? ' · ' + pct + '%' : '');
+        _addJourneyBtn(footEl, ch.i, ch.t, (ch.desc ? ch.desc + ' — ' + info : info), '',
+          function() { _resolveJourneyHazard(hazard, ch); });
+      } else {
+        // escolha sem teste (stat:null no shape rico) — apenas seguir, sem risco.
+        _addJourneyBtn(footEl, ch.i, ch.t, ch.desc || '', '',
+          function() { _resolveJourneyHazard(hazard, ch); });
+      }
     });
   } else {
-    const safePool = JOURNEY_SAFE[j.biome] || JOURNEY_SAFE.forest;
-    const txt = safePool[Math.floor(Math.random() * safePool.length)];
+    var txt = (window.JourneyData && JourneyData.pickFreshSafe)
+      ? JourneyData.pickFreshSafe(j.biome, S.player, (j._usedSafe = j._usedSafe || []))
+      : ((JOURNEY_SAFE[j.biome] || JOURNEY_SAFE.forest || [''])[0]);
     narrEl.innerHTML =
       '<div class="journey-step-badge safe">✓ Caminho seguro</div>' +
       '<div>' + txt + '</div>';
     _journeyContinueBtn();
   }
+}
+
+// FASE 2: renderiza o script[] rico (narration/speech) do hazard; fallback p/ narr legado.
+function _journeyScriptHtml(hazard) {
+  if (hazard && Array.isArray(hazard.script) && hazard.script.length) {
+    return hazard.script.map(function(s) {
+      if (s.type === 'speech') {
+        var who = (hazard.npc && hazard.npc.name) || s.speaker || '';
+        return '<div class="journey-speech">' + (who ? '<b>' + who + ':</b> ' : '') + '<i>' + s.text + '</i></div>';
+      }
+      return '<div>' + s.text + '</div>';
+    }).join('');
+  }
+  return '<div>' + ((hazard && hazard.narr) || '') + '</div>';
 }
 
 function _statLabel(stat) {
@@ -38471,39 +38377,49 @@ function _journeyRollDice(d20, mod, total, dc, success, callback) {
 function _resolveJourneyHazard(hazard, choice) {
   const footEl = document.getElementById('journey-footer');
   footEl.innerHTML = '';  // some os botões de escolha enquanto o dado rola
-  // Roll d20 + ability mod
-  const stat = choice.stat;
-  const mod = (S.player && S.player.mods && typeof S.player.mods[stat] === 'number')
-    ? S.player.mods[stat] : 0;
-  const d20 = Math.floor(Math.random() * 20) + 1;
-  const total = d20 + mod;
-  const success = total >= choice.dc;
+  // FASE 2 single-source: resolucao via fonte unica (DndRules) — odds IGUAIS a cidade (corrige H1/A1).
+  var roll = (window.JourneyData && JourneyData.resolveJourneyCheck) ? JourneyData.resolveJourneyCheck(S.player, choice) : null;
+  if (!roll) {
+    // escolha sem teste (stat:null) -> auto-sucesso, sem dado.
+    _applyJourneyHazardOutcome(hazard, choice, null, true);
+    return;
+  }
+  var modTotal = roll.mod + roll.prof;
   // User sessão #69: o d20 rola num popup 3D ANTES de revelar o desfecho.
-  _journeyRollDice(d20, mod, total, choice.dc, success, function() {
-    _applyJourneyHazardOutcome(hazard, choice, d20, mod, total, success);
+  _journeyRollDice(roll.d20, modTotal, roll.total, roll.dc, roll.success, function() {
+    _applyJourneyHazardOutcome(hazard, choice, roll, roll.success);
   });
 }
 
-function _applyJourneyHazardOutcome(hazard, choice, d20, mod, total, success) {
+function _applyJourneyHazardOutcome(hazard, choice, roll, success) {
   const checkEl = document.getElementById('journey-check');
   const narrEl = document.getElementById('journey-narration');
   const footEl = document.getElementById('journey-footer');
-  const sign = mod >= 0 ? '+' : '';
-  checkEl.innerHTML =
-    '<div class="journey-formula">d20: ' + d20 + ' ' + sign + mod + ' (' + _statLabel(choice.stat) + ') = ' + total + ' vs DC ' + choice.dc + '</div>' +
-    '<div class="journey-check-result ' + (success ? 'success' : 'fail') + '">' +
-    (success ? '✓ Sucesso' : '✗ Falha') + '</div>';
+  if (roll) {
+    var modTotal = roll.mod + roll.prof;
+    var sign = modTotal >= 0 ? '+' : '';
+    checkEl.innerHTML =
+      '<div class="journey-formula">d20: ' + roll.d20 + ' ' + sign + modTotal + ' (' + _statLabel(choice.stat) + ') = ' + roll.total + ' vs DC ' + roll.dc + '</div>' +
+      '<div class="journey-check-result ' + (success ? 'success' : 'fail') + '">' +
+      (success ? '✓ Sucesso' : '✗ Falha') + '</div>';
+  } else {
+    checkEl.innerHTML = '';
+  }
+  // FASE 2: narrativa rica por traço (sNarr_by_class > _by_alignment > default) via fonte unica.
+  var narrTxt = (window.JourneyData && JourneyData.pickNarrative)
+    ? JourneyData.pickNarrative(choice, S.player, success)
+    : (success ? (choice.sNarr || '') : (choice.fNarr || ''));
   if (success) {
     narrEl.innerHTML =
       '<div class="journey-step-badge safe">' + hazard.title + ' — Superado</div>' +
-      '<div>' + choice.sNarr + '</div>';
+      '<div>' + narrTxt + '</div>';
   } else {
     const dmg = choice.dmg || 3;
     if (S && S.player) S.player.hp = Math.max(0, S.player.hp - dmg);
     if (typeof updateHud === 'function') updateHud();
     narrEl.innerHTML =
       '<div class="journey-step-badge danger">' + hazard.title + ' — Falha</div>' +
-      '<div>' + choice.fNarr + '</div>' +
+      '<div>' + narrTxt + '</div>' +
       '<div style="margin-top:6px;color:#d85848;font-size:calc(12px * var(--v-font-scale, 1));font-family:Cinzel,serif;font-weight:700">−' + dmg + ' HP</div>';
   }
   // Verifica defeat antes de continuar
