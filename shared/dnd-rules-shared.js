@@ -216,6 +216,18 @@
         return (CLASS_SAVE_PROFS[classKey(cls)] || []).slice();
     }
 
+    // Nome do recurso de classe — autoridade Python resource_name / combate-data-shared.
+    // UPPERCASE (convenção da exploração + chave do RES_CLASS_MAP). FASE 6 (H5):
+    // antes a exploração mostrava Bardo='MANA' (errado) e Guerreiro=null.
+    var _CLASS_RESOURCE = {
+        barbaro: 'FÚRIA', guerreiro: 'VIGOR', bardo: 'INSPIRAÇÃO',
+        monge: 'KI', ladino: 'ENERGIA', bruxo: 'PACTO'
+        // demais conjuradores (mago/clerigo/druida/paladino/patrulheiro/feiticeiro) -> MANA
+    };
+    function classResourceName(cls) {
+        return _CLASS_RESOURCE[classKey(cls)] || 'MANA';
+    }
+
     /* ------------------------------------------------------------------ */
     /* Normalizadores de shape de player                                   */
     /* ------------------------------------------------------------------ */
@@ -335,6 +347,7 @@
         statBaseForClass: statBaseForClass,
         spellcastingAbility: spellcastingAbility,
         classSaveProficiencies: classSaveProficiencies,
+        classResourceName: classResourceName,
         statMod: statMod,
         getStatMod: statMod,  // alias (plano §3.1 chama getStatMod, §7.3 chama statMod)
         isProficient: isProficient,

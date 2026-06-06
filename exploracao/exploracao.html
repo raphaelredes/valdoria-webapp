@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T01:57:20Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T04:15:32Z - do not edit directly, edit source -->
 
 
 
@@ -38685,8 +38685,8 @@ function _partyMemberCard(m) {
     // não 'MANA'/'mp' hardcoded. Bárbaro mostrava "MANA" (azul) no grupo em vez
     // de "FÚRIA" (vermelho). Mesma lógica do updateHud (CLASSES[cls_key].resName).
     var _pmCdef = (typeof CLASSES !== 'undefined' && m.cls_key) ? CLASSES[m.cls_key] : null;
-    var _pmRes = (_pmCdef && _pmCdef.resName) ? _pmCdef.resName : 'MANA';
-    var _pmKind = ({ 'MANA': 'mp', 'FÚRIA': 'fury', 'FURIA': 'fury', 'ENERGIA': 'energy', 'KI': 'ki', 'VIGOR': 'vigor' })[_pmRes] || 'mp';
+    var _pmRes = (window.DndRules && DndRules.classResourceName) ? DndRules.classResourceName(m.cls_key) : ((_pmCdef && _pmCdef.resName) ? _pmCdef.resName : 'MANA');
+    var _pmKind = ({ 'MANA': 'mp', 'FÚRIA': 'fury', 'FURIA': 'fury', 'ENERGIA': 'energy', 'KI': 'ki', 'VIGOR': 'vigor', 'INSPIRAÇÃO': 'inspiration', 'INSPIRACAO': 'inspiration', 'PACTO': 'pact' })[_pmRes] || 'mp';
     bars.appendChild(_partyBarRow(_pmRes, _pmKind, m.mp, m.mmp));
   }
   card.appendChild(bars);
@@ -40738,11 +40738,12 @@ function updateHud() {
   // Guerreiro nao tem recurso (resName=null) -> row escondida. Mago/Clerigo/Paladino/
   // Patrulheiro/Bardo = MANA. Ladino = ENERGIA. Barbaro = FURIA. Monge = KI.
   const cdef = (typeof CLASSES !== 'undefined' && p.cls_key) ? CLASSES[p.cls_key] : null;
-  const resName = cdef ? cdef.resName : 'MANA';
+  // FASE 6 single-source: nome do recurso POR CLASSE (corrige Bardo='MANA'->INSPIRAÇÃO, Guerreiro->VIGOR).
+  const resName = (window.DndRules && DndRules.classResourceName) ? DndRules.classResourceName(p.cls_key) : (cdef ? cdef.resName : 'MANA');
   // X-6.5.51AB (2026-04-26): mapa resName -> CSS class do bar fill (cores do
   // combate.html .fill-res-*). MANA=mp(azul) / FURIA=fury(vermelho) /
   // ENERGIA=energy(dourado) / KI=ki(prata) / VIGOR=vigor(marrom-vermelho).
-  const RES_CLASS_MAP = { 'MANA': 'mp', 'FÚRIA': 'fury', 'FURIA': 'fury', 'ENERGIA': 'energy', 'KI': 'ki', 'VIGOR': 'vigor' };
+  const RES_CLASS_MAP = { 'MANA': 'mp', 'FÚRIA': 'fury', 'FURIA': 'fury', 'ENERGIA': 'energy', 'KI': 'ki', 'VIGOR': 'vigor', 'INSPIRAÇÃO': 'inspiration', 'INSPIRACAO': 'inspiration', 'PACTO': 'pact' };
   const mpRow = document.getElementById('mp-fill');
   const mpRowParent = mpRow ? mpRow.closest('.hud-row') : null;
   if (mpRowParent) {
@@ -40754,7 +40755,7 @@ function updateHud() {
       // Troca classe do fill: remove todas as cores conhecidas e aplica a
       // correta. Sem isso, fica sempre azul (mp) hardcoded no HTML.
       const resCls = RES_CLASS_MAP[resName] || 'mp';
-      mpRow.classList.remove('mp', 'fury', 'energy', 'ki', 'vigor');
+      mpRow.classList.remove('mp', 'fury', 'energy', 'ki', 'vigor', 'inspiration', 'pact');
       mpRow.classList.add(resCls);
       // User sessão #69: Bárbaro mostra CARGAS DE FÚRIA (D&D 5e PHB p.48: 2 cargas
       // no nv1-2, +1 em 3/6/12/17), não o pool de MP. Antes a exploração mostrava
