@@ -47,12 +47,14 @@ function setVolume(val){_volume=Math.max(0,Math.min(1,val));try{localStorage.set
 if(_volume>0&&(_muted||_musicMuted)){_muted=false;_musicMuted=false;try{localStorage.setItem(STORAGE_KEY,'0');}catch(e){console.warn('[AUDIO_MANAGER]',e);}try{localStorage.setItem(MUSIC_MUTED_KEY,'0');}catch(e){console.warn('[AUDIO_MANAGER]',e);}if(_audio&&!_audio.paused){_audio.volume=_volume*0.5;/*music cap 50%*/}else if(_pendingTrack||_currentTrack){_playTrack(_pendingTrack||_currentTrack);}}
 _syncUI();}
 function getVolume(){return _volume;}
-function playBiome(biome){
-/* Map de bioma D&D 5e -> track. 'plains' = wilderness (forest amb), NÃO city.
-   Hubs urbanos (Valdoria/Korthag/Valkrest) chamam play('city') diretamente
-   pelo caller — não passam por playBiome. Bug 2026-04-24: jogador parou
-   em Acampamento Orc (biome=plains) e ouviu música de cidade. */
-const biomeMap={'plains':'forest','forest':'forest','swamp':'swamp','mountain':'mountain','cave':'dungeon','desert':'desert','snow':'snow','volcanic':'dungeon','ocean':'ocean','coastal':'ocean','ruins':'ancient_ruins','underground':'dungeon','graveyard':'mystery',};const track=biomeMap[biome]||'forest';play(track);}
+function playBiome(biome){play(resolveBiomeTrack(biome));}
+/* FASE 3 single-source: mapa bioma->track CANONICO. Era 'plains':'forest'; user 2026-04-27
+   (exploracao) pediu planicie != floresta -> 'mountain' (vento de campos abertos). Hubs
+   urbanos chamam play('city') direto (nao passam por playBiome). resolveBiomeTrack aceita
+   bioma OU track e SEMPRE retorna track valido (substitui _BIOME_TO_TRACK + _VALID_AUDIO_TRACKS
+   da exploracao; usa o TRACKS dict como conjunto de tracks validos). */
+const _BIOME_TRACK_MAP={'plains':'mountain','forest':'forest','swamp':'swamp','mountain':'mountain','cave':'dungeon','desert':'desert','snow':'snow','volcanic':'dungeon','ocean':'ocean','coastal':'ocean','ruins':'ancient_ruins','underground':'dungeon','graveyard':'mystery','urban':'city','tavern':'tavern'};
+function resolveBiomeTrack(rawKey){if(!rawKey)return'forest';if(typeof TRACKS!=='undefined'&&TRACKS[rawKey])return rawKey;if(_BIOME_TRACK_MAP[rawKey])return _BIOME_TRACK_MAP[rawKey];return'forest';}
 const HINT_KEY='valdoria_audio_hint_seen';const _TRACK_NAMES={tavern:'Taverna',city:'Cidade',forest:'Floresta',combat:'Combate',desert:'Deserto',dungeon:'Masmorra',swamp:'Pântano',mountain:'Montanha',snow:'Neve',victory:'Vitória',defeat:'Derrota',levelup:'Nível',prologue:'Prólogo',boss:'Chefe',intro:'Tema Épico',};const _SVG_MUTED='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';const _SVG_LOW='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';const _SVG_HIGH='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';let _popupOpen=false;let _closeTimer=null;function _injectUI(){if(_uiInjected&&document.getElementById('va-btn'))return;_uiInjected=true;_isEmbedded=false;_injectCSS();_tryEmbedInFooter();}
 function _injectCSS(){const style=document.createElement('style');style.textContent=`
             /* ── Volume popup (appears above footer/button) ── */
@@ -335,7 +337,7 @@ function isSFXMuted(){return _sfxMuted;}
 function setSFXVolume(val){_sfxVolume=Math.max(0,Math.min(1,val));try{localStorage.setItem(SFX_VOLUME_KEY,_sfxVolume.toString());}catch(e){console.warn('[AUDIO_MANAGER]',e);}if(_sfxVolume===0&&!_sfxMuted){_sfxMuted=true;try{localStorage.setItem(SFX_MUTED_KEY,'1');}catch(e){console.warn('[AUDIO_MANAGER]',e);}}
 if(_sfxVolume>0&&_sfxMuted){_sfxMuted=false;try{localStorage.setItem(SFX_MUTED_KEY,'0');}catch(e){console.warn('[AUDIO_MANAGER]',e);}}}
 function getSFXVolume(){return _sfxVolume;}
-return{init,_warmUp:_warmUpAudioContext,play,playBiome,playSFX,stop,toggleMute,isMuted,setVolume,getVolume,toggleMusic,toggleSFX,isMusicMuted,isSFXMuted,setSFXVolume,getSFXVolume,createMuteButton,previewSFX:_sfxPreviewTick,getCurrentTrack:function(){return _currentTrack;},isUnlocked:function(){return _unlocked;},forceUnlock:function(){if(!_unlocked)_unlockHandler();},getAnalyser:getAnalyser,TRACKS,
+return{init,_warmUp:_warmUpAudioContext,play,playBiome,resolveBiomeTrack,playSFX,stop,toggleMute,isMuted,setVolume,getVolume,toggleMusic,toggleSFX,isMusicMuted,isSFXMuted,setSFXVolume,getSFXVolume,createMuteButton,previewSFX:_sfxPreviewTick,getCurrentTrack:function(){return _currentTrack;},isUnlocked:function(){return _unlocked;},forceUnlock:function(){if(!_unlocked)_unlockHandler();},getAnalyser:getAnalyser,TRACKS,
 /* task #87 (2026-05-20) — public embedInFooter API. Permite que páginas que
    populam #footer-quick DEPOIS do audio-manager init forcem re-embed. Remove
    va-float fallback se existir + embed em footer-quick. Resolve race condition

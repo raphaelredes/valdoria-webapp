@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T00:54:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T01:30:54Z - do not edit directly, edit source -->
 
 
 
@@ -40579,28 +40579,9 @@ var _musicGestureListeners = null;  // { click, touch, keydown } — re-bound on
 // resolver — applyBiomeMusic, _audioWatchdog, _bindMusicGestureRetry,
 // _tryPlayExpected, _audioBiomeMusic.
 
-// Lista hardcoded de tracks VÁLIDOS no ValdoriaAudio (sincronizado com
-// valdoria-webapp/shared/audio-manager.js TRACKS dict).
-var _VALID_AUDIO_TRACKS = {
-  'tavern': 1, 'city': 1, 'forest': 1, 'combat': 1, 'desert': 1,
-  'dungeon': 1, 'swamp': 1, 'mountain': 1, 'snow': 1, 'victory': 1,
-  'defeat': 1, 'levelup': 1, 'prologue': 1, 'boss': 1, 'inn_rest': 1,
-  'festival': 1, 'combat_ambush': 1, 'stealth': 1, 'death': 1,
-  'character_creation': 1, 'guild_hall': 1, 'ancient_ruins': 1,
-  'market': 1, 'mystery': 1, 'sacred': 1, 'ocean': 1, 'intro': 1
-};
-
-// Mapa biome → track. 'plains' = mountain_wind (campos abertos com vento),
-// 'forest' próprio. Diferenciação biome distinta. User feedback 2026-04-27:
-// "estou em planície e está tocando música de floresta — não tem música
-// de planície?" — agora tem (mountain_wind serve bem pra campos abertos).
-var _BIOME_TO_TRACK = {
-  'plains': 'mountain', 'forest': 'forest', 'swamp': 'swamp',
-  'mountain': 'mountain', 'cave': 'dungeon', 'desert': 'desert',
-  'snow': 'snow', 'volcanic': 'dungeon', 'ocean': 'ocean',
-  'coastal': 'ocean', 'ruins': 'ancient_ruins', 'underground': 'dungeon',
-  'graveyard': 'mystery', 'urban': 'city', 'tavern': 'tavern'
-};
+// FASE 3 single-source: _VALID_AUDIO_TRACKS + _BIOME_TO_TRACK (plains->mountain)
+// movidos p/ valdoria-webapp/shared/audio-manager.js (TRACKS dict + _BIOME_TRACK_MAP).
+// Resolucao via ValdoriaAudio.resolveBiomeTrack (aceita bioma OU track, fallback 'forest').
 
 function _resolveExpectedTrack() {
   // Resolução em camadas com fallback garantido. NUNCA retorna track inválido.
@@ -40614,16 +40595,8 @@ function _resolveExpectedTrack() {
     rawKey = window.S.biome;
   }
   if (!rawKey) return 'forest';  // fallback safe — sempre existe
-
-  // Step 1: rawKey já é um track válido? (ex: mapDef.music='dungeon')
-  if (_VALID_AUDIO_TRACKS[rawKey]) return rawKey;
-
-  // Step 2: rawKey é um nome de bioma? Mapeia pra track.
-  if (_BIOME_TO_TRACK[rawKey]) return _BIOME_TO_TRACK[rawKey];
-
-  // Step 3: fallback final — 'forest' sempre existe. Log para debug.
-  try { LOGW('AUDIO', 'unknown_track_normalized rawKey=' + rawKey + ' → forest'); } catch (_) {}
-  return 'forest';
+  // FASE 3 single-source: resolve (bioma OU track) -> track valido via fonte unica.
+  return (window.ValdoriaAudio && ValdoriaAudio.resolveBiomeTrack) ? ValdoriaAudio.resolveBiomeTrack(rawKey) : 'forest';
 }
 
 // Tracking de últimas tentativas pra reduzir spam de log.
@@ -40633,16 +40606,8 @@ var _lastAudioAttempt = { track: null, ts: 0, count: 0 };
 // ValdoriaAudio.play. NUNCA causa "Unknown track" — sempre resolve pra valido.
 function _safeAudioPlay(rawKey) {
   if (!window.ValdoriaAudio || typeof ValdoriaAudio.play !== 'function') return;
-  var resolved = rawKey;
-  // Step 1: já é track válido?
-  if (!_VALID_AUDIO_TRACKS[resolved]) {
-    // Step 2: é nome de bioma?
-    if (_BIOME_TO_TRACK[resolved]) resolved = _BIOME_TO_TRACK[resolved];
-    else {
-      try { LOGW('AUDIO', '_safeAudioPlay unknown_key=' + rawKey + ' → forest fallback'); } catch (_) {}
-      resolved = 'forest';
-    }
-  }
+  // FASE 3 single-source: resolve via ValdoriaAudio.resolveBiomeTrack (bioma OU track).
+  var resolved = (typeof ValdoriaAudio.resolveBiomeTrack === 'function') ? ValdoriaAudio.resolveBiomeTrack(rawKey) : 'forest';
   try { ValdoriaAudio.play(resolved); } catch (e) {
     try { LOGW('AUDIO', '_safeAudioPlay err=' + (e && e.message)); } catch (_) {}
   }
