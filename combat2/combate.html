@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T04:49:35Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T10:05:42Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13043,6 +13043,10 @@ async function __combatServerCall(method, body) {
         }
     };
     if (body) opts.body = bodyStr;
+    // FASE 8/8i (#10): keepalive garante que a acao (atk/skill/flee) complete no
+    // servidor mesmo se a pagina descarregar logo apos o clique (transicao/unload).
+    // Bodies de combate sao pequenos (JSON), bem abaixo do limite de 64KB do keepalive.
+    opts.keepalive = true;
     if (window.crypto && typeof window.crypto.randomUUID === 'function') {
         opts.headers['X-Idempotency-Key'] = window.crypto.randomUUID();
     }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T05:25:20Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T10:05:43Z - do not edit directly, edit source -->
 
 
 
@@ -19080,7 +19080,12 @@ function calcReadTime(text, cat) {
 }
 function calcSuccessPct(choice, p) {
   if (!choice.skill) return 100;
-  const mod = (p.mods[choice.skill] || 0) + (p.prof.includes(choice.skill) ? 2 : 0);
+  // FASE 8/8l (#9): mapeia skill->atributo via DndRules.SKILL_TO_ABILITY ANTES de
+  // ler p.mods (que so tem abreviacoes de atributo str/dex/.../cha). Antes lia
+  // p.mods[choice.skill] direto, entao skills nomeadas (persuasion/athletics/...)
+  // davam mod 0 -> chance% errada em ~70% dos checks de tile.
+  var ab = (window.DndRules && DndRules.SKILL_TO_ABILITY && DndRules.SKILL_TO_ABILITY[String(choice.skill).toLowerCase()]) || choice.skill;
+  const mod = (p.mods[ab] || 0) + (p.prof && p.prof.includes(choice.skill) ? 2 : 0);
   const needed = choice.dc - mod;
   if (needed <= 1) return 100;
   if (needed > 20) return 0;
