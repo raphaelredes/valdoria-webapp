@@ -13138,7 +13138,9 @@ function _showStatusPopup(memberIdx){
   var prof = (m.prof != null) ? m.prof : (Math.floor((m.level || 1) / 4) + 2);
   var ac = (m.ac != null) ? m.ac : (10 + _mod(stats.dex));
   var attackBonus = (m.atk != null) ? m.atk : (prof + _mod(stats.str));
-  var spellDc = (m.dc != null) ? m.dc : (8 + prof + _mod(stats.int));
+  // FASE 5 single-source: CD de magia usa o atributo de conjuracao POR CLASSE (PHB p.205),
+  // nao mais INT fixo. DndRules.spellSaveDc respeita m.dc/spell_save_dc do servidor primeiro.
+  var spellDc = (window.DndRules) ? DndRules.spellSaveDc(m) : ((m.dc != null) ? m.dc : (8 + prof + _mod(stats.int)));
   var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
   var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
   // USER REPORT 2026-05-14 — XP cumulativo D&D 5e (): barra
