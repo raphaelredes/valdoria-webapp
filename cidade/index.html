@@ -54173,12 +54173,59 @@ function _sanitizeDialogueHTML(s) {
 }
 
 // ═══ POPUP DOM ════════════════════════════════════════════════════
+/* FASE 7a single-source (docs/sistemas/single-source-consolidation-plan.md, H6):
+   adapter que renderiza um encounter da cidade via o motor COMPARTILHADO
+   window.vEncounter (encounter-popup.js — o mesmo que o resto da cidade ja usa
+   em ~55 telas), preservando o dispatch de escolha legado (_onEncounterChoice) +
+   mutex _encounterActive + onDone. Normaliza enc.choices igual _renderEncounterChoices
+   (dc/cost/renown badges + _original pro dispatch) -> UX de choices identica
+   (inline p/ 1, sheet "Escolher acao" p/ 2+). Render legado abaixo vira FALLBACK. */
+function _renderEncounterViaVEncounter(enc, originalAction, player, npc) {
+  var dnpc = { id: enc.npc, name: npc.name || '', desc: npc.desc || '' };
+  if (npc.portraitImg) {
+    dnpc.portrait = npc.portraitImg;             // <img> + lightbox (PNG real)
+  } else if (npc.portrait && typeof _heralIco === 'function') {
+    dnpc.portraitHTML = _heralIco(npc.portrait); // SVG heraldico (sem lightbox)
+  }
+  var choices = (enc.choices || []).map(function (c) {
+    var n = { id: c.id || '', label: c.label || '',
+              desc: c.desc || c.result_hint || '', cb: c.cb || c.result || '' };
+    if (c.dc && c.skill) { n.dc = c.dc; n.skill = c.skill; }
+    else if (c.check && c.check.dc) { n.dc = c.check.dc; n.skill = c.check.skill || ''; }
+    if (c.cost) n.cost = c.cost;
+    if (c.icon) n.icon = c.icon;
+    if (c.effect && typeof c.effect.renown === 'number') n.renownDelta = c.effect.renown;
+    n._original = c;
+    return n;
+  });
+  window.vEncounter.render({ npc: dnpc, script: enc.script || [], choices: choices }, {
+    player: player || (window.CITY_MOCK_PLAYER || null),
+    onChoice: function (ch) {
+      _onEncounterChoice(enc, ch._original || ch, originalAction, player);
+    }
+  });
+  // Mutex-leak guard: se o overlay fechar por ESC/backdrop SEM escolha (o dispatch
+  // legado so reseta _encounterActive ao escolher), reseta no evento 'close' do <dialog>.
+  var ov = document.getElementById('encounter-overlay');
+  if (ov && !ov._fase7aCloseBound) {
+    ov._fase7aCloseBound = true;
+    ov.addEventListener('close', function () { window._encounterActive = false; });
+  }
+}
+
 function _renderEncounterPopup(enc, originalAction, player) {
   window._encounterActive = true;
 
   var npc = RECURRING_NPCS[enc.npc];
   if (!npc) {
     window._encounterActive = false;
+    return;
+  }
+
+  // FASE 7a: delega o RENDER pro motor compartilhado vEncounter; o motor legado
+  // abaixo vira FALLBACK (preview standalone / vEncounter ausente).
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    _renderEncounterViaVEncounter(enc, originalAction, player, npc);
     return;
   }
 
@@ -55000,6 +55047,12 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
   if (typeof enc.onDone === 'function') {
     try { enc.onDone(player); } catch(e){ console.warn('encounter onDone:', e); }
     try { _persistEncNpcs(player); } catch(_pe){}
+  }
+  // FASE 7a: se o render veio do motor compartilhado (vEncounter), fecha por ele
+  // primeiro (limpa typewriters + _currentRenderState); o removeChild abaixo cobre
+  // os 2 paths (dialog do vEncounter OU div do render legado).
+  if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+    try { window.vEncounter.close(); } catch(_vc){}
   }
   var ov = document.getElementById('encounter-overlay');
   if (ov) {
