@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T04:15:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T05:25:20Z - do not edit directly, edit source -->
 
 
 
@@ -12250,7 +12250,9 @@ body.perf-lite .stub-popup-voice { animation: none; }
    nat 1/20 não auto-fail/succ por default (5e rule); opt-in via choice.
    ════════════════════════════════════════════════════════════════════════════ */
 (function () {
-  var SKILL_TO_ABILITY = {
+  // FASE 9/L2 single-source: skill->ability vem do DndRules (superset seguro:
+  // adiciona sleight_of_hand/animal_handling; nenhum mapeamento existente muda).
+  var SKILL_TO_ABILITY = (window.DndRules && DndRules.SKILL_TO_ABILITY) || {
     'str': 'str', 'athletics': 'str',
     'dex': 'dex', 'acrobatics': 'dex', 'sleight': 'dex', 'stealth': 'dex',
     'con': 'con',
@@ -38166,7 +38168,7 @@ var JOURNEY_HAZARDS = (window.JourneyData && JourneyData.HAZARDS) || {};
 // por bioma pra reduzir repetição numa viagem de 3-5 etapas.
 // FASE 2 single-source: dados da viagem em valdoria-webapp/shared/journey-data-shared.js (shape rico).
 var JOURNEY_SAFE = (window.JourneyData && JourneyData.SAFE) || {};
-var STAT_NAMES_PT = { str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma' };
+var STAT_NAMES_PT = (window.DndRules && DndRules.STAT_NAMES_PT) || { str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma' };  // FASE 9/L1 single-source
 
 // #21 (sessão #70): nº de etapas = distância Manhattan do jogador até o ponto
 // de entrada do mapa (spawn). Quanto mais longe vagou, mais longa a viagem de

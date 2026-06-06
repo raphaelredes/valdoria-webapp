@@ -33190,7 +33190,7 @@ function _squareShowExploreEvent(p){
   var ev = eligible[Math.floor(Math.random() * eligible.length)];
   window._plazaEventCooldown[ev.id] = now;
   // Constrói lista de escolhas com hint de chance pra cada skill check
-  var STAT_KEY = { FOR: 'strength', DES: 'dexterity', CON: 'constitution', INT: 'intelligence', SAB: 'wisdom', CAR: 'charisma' };
+  var STAT_KEY = (window.DndRules && DndRules.STAT_KEY_PT) || { FOR: 'strength', DES: 'dexterity', CON: 'constitution', INT: 'intelligence', SAB: 'wisdom', CAR: 'charisma' };  // FASE 9/M8 single-source
   var items = ev.choices.map(function(ch){
     var hint = '';
     if (ch.stat && ch.dc){
@@ -33446,8 +33446,8 @@ function _squareShowBulletinPopup(p){
                 '<b>Recompensa:</b> ' + d.reward_gold + ' V + ' + d.reward_xp + ' XP',
                 onConfirm: function(){
             // Roll d20 + mod vs DC
-            var STAT_KEY = { FOR: 'strength', DES: 'dexterity', CON: 'constitution',
-                              INT: 'intelligence', SAB: 'wisdom', CAR: 'charisma' };
+            var STAT_KEY = (window.DndRules && DndRules.STAT_KEY_PT) || { FOR: 'strength', DES: 'dexterity', CON: 'constitution',
+                              INT: 'intelligence', SAB: 'wisdom', CAR: 'charisma' };  // FASE 9/M8 single-source
             var statVal = (p.stats && p.stats[STAT_KEY[statAbbr]]) || 10;
             var mod = Math.floor((statVal - 10) / 2);
             var roll = 1 + Math.floor(Math.random() * 20);
@@ -49331,7 +49331,8 @@ var CITY_JOURNEY_HAZARDS = (window.JourneyData && JourneyData.HAZARDS) || {};
 // ═══════════════════════════════════════════════════════════════════════
 // FASE 2 single-source: dados da viagem em valdoria-webapp/shared/journey-data-shared.js
 var CITY_JOURNEY_SAFE = (window.JourneyData && JourneyData.SAFE) || {};
-var CITY_STAT_NAMES_PT = {
+// FASE 9/L1 single-source: nomes PT-BR de atributo vem do DndRules (byte-identico).
+var CITY_STAT_NAMES_PT = (window.DndRules && DndRules.STAT_NAMES_PT) || {
   str: 'Força', dex: 'Destreza', con: 'Constituição',
   int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma'
 };

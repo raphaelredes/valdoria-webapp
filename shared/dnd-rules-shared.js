@@ -78,6 +78,14 @@
         int: 'intelligence', wis: 'wisdom', cha: 'charisma'
     };
 
+    // PT-BR abreviacao de atributo -> full canonical (FASE 9/M8: era STAT_KEY
+    // duplicado 2x na cidade, function-scoped). Le p.stats['strength'] a partir
+    // de FOR/DES/CON/INT/SAB/CAR (rolagem de skill check da cidade).
+    var STAT_KEY_PT = {
+        FOR: 'strength', DES: 'dexterity', CON: 'constitution',
+        INT: 'intelligence', SAB: 'wisdom', CAR: 'charisma'
+    };
+
     // Skill name -> ability key (short). União de exploração (12245) + svc (60).
     // Inclui passthrough das próprias abreviações de atributo (str:'str') pra os
     // checks que vêm chaveados por stat (journey) E por skill (tile-event). L2 do plano.
@@ -358,6 +366,7 @@
         statLabel: statLabel,
         STAT_NAMES_PT: STAT_NAMES_PT,
         STAT_FULL: STAT_FULL,
+        STAT_KEY_PT: STAT_KEY_PT,
         SKILL_TO_ABILITY: SKILL_TO_ABILITY,
         CLASS_STAT_MAP: CLASS_STAT_MAP,
         CLASS_SAVE_PROFS: CLASS_SAVE_PROFS
