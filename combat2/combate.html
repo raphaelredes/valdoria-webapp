@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T01:57:21Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T04:49:35Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10848,6 +10848,8 @@ window.__onIntroTap = function() {
     document.write('<script src="' + BASE + '/shared/dnd-rules-shared.js?v=' + v + '"><\/script>');
     // status-bars.js: threshold unico de cor de HP (vBarHpClass 60/25) — FASE 4 single-source.
     document.write('<script src="' + BASE + '/shared/status-bars.js?v=' + v + '"><\/script>');
+    // narrative-reveal.js: typewriter slim unico (FASE 7c single-source).
+    document.write('<script src="' + BASE + '/shared/narrative-reveal.js?v=' + v + '"><\/script>');
     /* Clock skew guard (USER REQUEST 2026-05-04) — detecta NET::ERR_CERT_DATE_INVALID
        proativamente quando relógio do device está errado. */
     document.write('<script src="' + BASE + '/shared/clock-skew-guard.js?v=' + v + '"><\/script>');
@@ -26336,50 +26338,22 @@ function closeInitiativeOrderPopup() {
  * Callback: buttons têm data-act="next" e data-act="skip-init" — bindActions
  * (chamada por render) anexa onBtnClick automaticamente.
  */
-/* #17 (sessão #70): typewriter inline pra narrativa de intro do combate.
-   Baseado em _typewriter de encounter-popup.js (NÃO carregado no combate),
-   simplificado: narração pura 3ª pessoa (sem choices/NPC). Tags HTML (<i>/<b>)
-   são inseridas instantâneas; só caracteres de texto são digitados (~28ms/char,
-   Human Reading Time). Retorna uma função skip() que completa imediatamente. */
+/* FASE 7c single-source: _combatTypewriter agora DELEGA ao shared
+   NarrativeReveal (shared/narrative-reveal.js) — versao O(n) extraida do
+   encounter-popup.js + guard #17 (timer orfao se el sai do DOM). Antes era
+   uma copia O(n^2) local (reconstruia o HTML acumulado por char). Mantem a
+   assinatura legada: retorna uma funcao skip() bare pro unico caller
+   (showIntroChoicePopup). Ref: docs/sistemas/single-source-consolidation-plan.md H6. */
 function _combatTypewriter(el, text, charMs, onDone) {
     if (!el) { if (typeof onDone === 'function') onDone(); return function () {}; }
-    charMs = charMs || 28;
-    text = String(text == null ? '' : text);
-    /* Tokeniza: tags HTML inteiras vs caracteres de texto. */
-    var tokens = [], i = 0;
-    while (i < text.length) {
-        var c = text.charAt(i);
-        if (c === '<') {
-            var end = text.indexOf('>', i);
-            if (end > 0) { tokens.push(text.substring(i, end + 1)); i = end + 1; continue; }
-        }
-        tokens.push(c); i++;
+    if (window.NarrativeReveal && typeof NarrativeReveal.typewriter === 'function') {
+        var ctrl = NarrativeReveal.typewriter(el, text, charMs || 28, onDone);
+        return function () { if (ctrl && typeof ctrl.skip === 'function') ctrl.skip(); };
     }
-    var built = '', idx = 0, done = false, timer = null;
-    el.classList.add('typing');
-    el.innerHTML = '';
-    function finish() {
-        if (done) return;
-        done = true;
-        if (timer) { clearTimeout(timer); timer = null; }
-        el.innerHTML = text;  /* garante HTML completo */
-        el.classList.remove('typing');
-        if (typeof onDone === 'function') onDone();
-    }
-    function step() {
-        if (done) return;
-        /* #17 fix (review): se o popup foi fechado durante a digitacao, o el fica
-           desconectado do DOM — para o timer orfao em vez de iterar a vazio. */
-        if (!el.isConnected) { done = true; if (timer) { clearTimeout(timer); timer = null; } return; }
-        if (idx >= tokens.length) { finish(); return; }
-        var tok = tokens[idx++];
-        built += tok;
-        el.innerHTML = built;
-        var delay = (tok.length > 1) ? 0 : charMs;  /* tags = instantâneo */
-        timer = setTimeout(step, delay);
-    }
-    step();
-    return finish;
+    /* fallback defensivo: shared nao carregou -> mostra tudo de uma vez via setHTML. */
+    setHTML(el, String(text == null ? '' : text));
+    if (typeof onDone === 'function') onDone();
+    return function () {};
 }
 
 function showIntroChoicePopup() {
