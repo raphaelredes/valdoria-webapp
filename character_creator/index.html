@@ -3473,6 +3473,11 @@ Busca rápida:
             document.getElementById('nameInput').addEventListener('input', e => { sel.name = e.target.value.trim(); document.getElementById('nameLimit').textContent = `${sel.name.length}/15`; });
             document.getElementById('surnameInput').addEventListener('input', e => { sel.surname = e.target.value.trim(); document.getElementById('surnameLimit').textContent = `${sel.surname.length}/15`; });
             setupBackButton();
+            /* Sessao 2026-06-07: init NAO chamava updateBackButton — na PRIMEIRA tela
+               o #screen-back-btn ficava escondido (sem saida no browser, onde nao ha
+               BackButton nativo do Telegram). Chama agora pra mostrar o "voltar pro
+               Hall" ja no screen 0. */
+            if (typeof updateBackButton === 'function') updateBackButton();
             // USER REQUEST 2026-05-04: init layout pixel-based (smartphone constraint)
             if (typeof _initLayout === 'function') _initLayout();
             // 2026-05-11 fix: stub do controller (not-cold-boot) NAO tem .hide,
@@ -4275,7 +4280,9 @@ Busca rápida:
                 // Caso 4: tela 0 sem sub-screen → volta pro Hall (cidade).
                 // User pediu (sessao #38, 2026-05-26): "permita sair da tela de
                 // criacao do personagem, podendo voltar ao hall de personagens".
-                _exitCreatorToHall();
+                // Sessao 2026-06-07: via exitToHall (history.back -> sessao de jogo
+                // VALIDA + Hall ja aberto; fallback _exitCreatorToHall sem historico).
+                exitToHall();
             });
         }
 
@@ -4373,16 +4380,33 @@ Busca rápida:
             });
         }
 
+        /* Sessao 2026-06-07 (pedido do user): sair do criador na PRIMEIRA tela e
+           voltar ao Hall de Personagens. A cidade (com token de jogo valido) e a
+           entrada anterior no historico; history.back() retorna pra la e o flag
+           reabre o Hall (bfcache normalmente ja restaura o popup aberto). */
+        function exitToHall() {
+            if (typeof haptic === 'function') haptic();
+            try { sessionStorage.setItem('valdoria_reopen_hall', '1'); } catch (_e) {}
+            try { window.__valdoria_transitioning = true; } catch (_e) {}
+            if (window.history && window.history.length > 1) {
+                try { window.history.back(); return; } catch (_e) {}
+            }
+            /* Sem historico (criador aberto direto): nav forward pra /cidade/?showHall=1
+               (Sessao #38) carregando os params essenciais. O flag acima + o handler
+               pageshow da cidade reabrem o Hall. */
+            try { if (typeof _exitCreatorToHall === 'function') { _exitCreatorToHall(); return; } } catch (_e) {}
+            try { if (typeof valdoriaSpaClose === 'function') valdoriaSpaClose(); } catch (_e) {}
+        }
+
         function updateBackButton() {
             /* Sessao #29 v4 (2026-05-24): atualiza tanto Telegram BackButton
                quanto o screen-back-btn header (visivel em browser desktop tambem). */
             const headerBack = document.getElementById('screen-back-btn');
             if (headerBack) {
-                /* Mostra so quando ha pra onde voltar (screen > 0 OU sub-screen aberta).
-                   Screen 0 sem sub: esconde porque so fecharia o WebApp. */
-                const hasOpenSub = !!document.querySelector('.sub-screen.active');
-                const showBack = hasOpenSub || currentScreen > 0;
-                headerBack.style.display = showBack ? 'grid' : 'none';
+                /* Sessao 2026-06-07: SEMPRE visivel. Em screen 0 sem sub-screen o
+                   back agora SAI pro Hall de Personagens (antes ficava escondido
+                   porque so fecharia o WebApp pro chat). */
+                headerBack.style.display = 'grid';
                 /* Click ja foi setado inline pra goScreen — mas precisa cobrir
                    sub-screen tambem. Atualiza handler dinamicamente. */
                 headerBack.onclick = function() {
@@ -4399,7 +4423,9 @@ Busca rápida:
                         closeSubScreen(openSub.id);
                         return;
                     }
-                    if (currentScreen > 0) goScreen(currentScreen - 1);
+                    if (currentScreen > 0) { goScreen(currentScreen - 1); return; }
+                    /* Sessao 2026-06-07: screen 0 sem sub-screen -> sai pro Hall */
+                    exitToHall();
                 };
             }
             if (!tg || !tg.BackButton) return;

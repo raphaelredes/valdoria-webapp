@@ -10706,6 +10706,24 @@ function _onFooterAction(action){
   }
 }
 
+/* Sessao 2026-06-07 (pedido do user): retorno do Forjar Personagem (criador) ->
+   reabre o Hall de Personagens. O criador, ao sair na PRIMEIRA tela, faz
+   history.back() + seta sessionStorage 'valdoria_reopen_hall'. Em bfcache a
+   cidade volta com o Hall ja aberto; este handler cobre o reload fresco. */
+window.addEventListener('pageshow', function(){
+  try {
+    var wantHall = false;
+    try { if (sessionStorage.getItem('valdoria_reopen_hall') === '1') { wantHall = true; sessionStorage.removeItem('valdoria_reopen_hall'); } } catch(_f){}
+    try { var _pp = new URLSearchParams(window.location.search); if (_pp.get('showHall') === '1') wantHall = true; } catch(_f){}
+    if (!wantHall) return;
+    var ov = document.getElementById('city-subscreen-popup');
+    if (ov && ov.classList.contains('active')) return; // ja aberto (bfcache restaurou)
+    if (typeof _showCharactersPopup === 'function') {
+      setTimeout(function(){ try { _showCharactersPopup(); } catch(e){ console.warn('[CITY] reopen-hall:', e); } }, 200);
+    }
+  } catch(e){ console.warn('[CITY] reopen-hall pageshow:', e); }
+});
+
 // Helper: Title Case — primeira letra de cada palavra em maiúscula
 // (usado em nome/raça/classe pra padronizar exibição). Preserva separadores
 // (espaço/hífen). Ex: "meio-elfo mago" → "Meio-Elfo Mago".
