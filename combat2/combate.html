@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T22:10:37Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T23:19:57Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6504,6 +6504,62 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
    personagem com muitas habilidades empurrava o Fechar pra fora. */
 .lp-close { margin-top: 6px; padding: 10px; background: var(--v-bg-card, #2e2520); border: 1px solid var(--v-border, #4a3828); color: var(--v-text, #d4c8b0); border-radius: 8px; font-family: var(--v-font-display, 'Cinzel'), serif; font-size: calc(12px * var(--v-font-scale, 1)); letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .15s ease; flex-shrink: 0; }
 .lp-close:hover { border-color: rgba(212,200,176,.5); background: var(--v-bg-raised, #332a22); }
+
+/* ===== Q (2026-06-07): Log de combate ÉPICO — mesma linguagem visual da tela
+   de vitória (.res-rewards / .resolution::before). Escopado em --log pra NÃO
+   afetar os outros popups que usam .list-panel-card (Habilidades, Mochila). */
+.list-panel-card--log {
+    position: relative;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(130,90,40,0.18) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(30,22,14,0.97) 0%, rgba(15,12,8,0.97) 100%);
+    border: 1px solid rgba(196,149,58,0.55);
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.7),
+        0 0 24px rgba(196,149,58,0.16),
+        inset 0 1px 0 rgba(255,220,140,0.12),
+        inset 0 0 0 1px rgba(196,149,58,0.15);
+}
+/* Moldura interna fina dourada com gleam nos 4 cantos (igual .resolution::before) */
+.list-panel-card--log::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(196,149,58,0.30);
+    border-radius: 9px;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 0 0, rgba(255,220,140,0.13) 0%, transparent 46px),
+        radial-gradient(circle at 100% 0, rgba(255,220,140,0.13) 0%, transparent 46px),
+        radial-gradient(circle at 0 100%, rgba(255,220,140,0.13) 0%, transparent 46px),
+        radial-gradient(circle at 100% 100%, rgba(255,220,140,0.13) 0%, transparent 46px);
+    z-index: 0;
+}
+.list-panel-card--log > * { position: relative; z-index: 1; }
+/* Título com linhas douradas flanqueando (igual .rr-section-title da vitória) */
+.list-panel-card--log .lp-title { gap: 10px; }
+.list-panel-card--log .lp-title::before,
+.list-panel-card--log .lp-title::after {
+    content: '';
+    flex: 0 1 30px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,149,58,0.7), transparent);
+}
+/* Gema ✧◆✧ sob o subtítulo — eco do .res-title::after da vitória */
+.list-panel-card--log .lp-sub { border-bottom: 0; padding-bottom: 4px; }
+.list-panel-card--log .lp-sub::after {
+    content: '✧  ◆  ✧';
+    display: block;
+    font-family: serif;
+    font-size: calc(11px * var(--v-font-scale, 1));
+    letter-spacing: 6px;
+    margin-top: 6px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(196,149,58,0.25);
+    color: rgba(196,149,58,0.85);
+    text-shadow: 0 0 10px rgba(196,149,58,0.6);
+    animation: lpHelpGemPulse 2.4s ease-in-out infinite alternate;
+}
 
 /* Popup informativo da ordem de iniciativa (init_done).
    pointer-events: none -> nao bloqueia clique no botao Comecar Combate. */
