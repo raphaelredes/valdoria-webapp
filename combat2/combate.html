@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T21:06:31Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T21:15:29Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -5116,6 +5116,17 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   align-items: stretch;
   gap: var(--v-space-md, 10px);
   padding: 0;
+}
+/* 2026-06-07 (user): ícone de ação = imagem OpenAI (shared/img/ui/) no lugar de
+   emoji. Escala com --v-font-scale; flex-shrink 0 pra não distorcer. */
+.action-btn-ico {
+  width: calc(26px * var(--v-font-scale, 1));
+  height: calc(26px * var(--v-font-scale, 1));
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  margin-right: 5px;
 }
 .sim-action-sheet .action-btns-grid .action-btn {
   display: flex;
@@ -16597,6 +16608,14 @@ function _skillIconHTML(sk) {
     }
     return sk.ico || '?';
 }
+/* 2026-06-07 (user): ícone de AÇÃO do combate via imagem OpenAI (shared/img/ui/)
+   no lugar de emoji/SVG. Fallback: esconde a <img> (o texto do botão permanece). */
+function _actBtnIco(slug) {
+    var loc = (typeof location !== 'undefined') ? location.href : '';
+    var base = (loc.indexOf('file://') === 0) ? '../shared/img/ui/' : '/shared/img/ui/';
+    return '<img class="action-btn-ico" src="' + base + slug + '.webp" alt="" loading="lazy" '
+        + 'onerror="this.onerror=null;this.style.display=\'none\'">';
+}
 function _slugifyCombat(name) {
     if (!name) return '';
     return String(name)
@@ -19079,9 +19098,9 @@ function render(s) {
                 if (pCur && pCur.bonusActionWasSpell && !pCur.actionSpent && anySkillOk) {
                     skillsExtraChip = '<span class="action-btn-sub-chip" title="PHB p.202: só TRUQUE (cantrip) como ação principal — magias leveled bloqueadas até o próximo turno">só truque</span>';
                 }
-                html += '<button type="button" class="action-btn primary" data-act="attack">⚔️ Atacar' + actionGlyph + '</button>';
-                html += '<button type="button" class="' + skillsBtnCls + '" data-act="skills"' + (anySkillOk ? '' : ' aria-disabled="true" title="Nenhuma habilidade utilizável neste turno"') + '>✨ Habilidades' + actionGlyph + skillsExtraChip + '</button>';
-                html += '<button type="button" class="action-btn" data-act="bag"><svg class="btn-glyph-ico" aria-hidden="true"><use href="#ic-mochila"></use></svg>Mochila' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn primary" data-act="attack">' + _actBtnIco('acao-atacar') + 'Atacar' + actionGlyph + '</button>';
+                html += '<button type="button" class="' + skillsBtnCls + '" data-act="skills"' + (anySkillOk ? '' : ' aria-disabled="true" title="Nenhuma habilidade utilizável neste turno"') + '>' + _actBtnIco('acao-habilidades') + 'Habilidades' + actionGlyph + skillsExtraChip + '</button>';
+                html += '<button type="button" class="action-btn" data-act="bag">' + _actBtnIco('mochila') + 'Mochila' + actionGlyph + '</button>';
                 html += '</div>';
                 html += '<div class="sim-action-sheet-sep" aria-hidden="true"></div>';
                 html += '<div class="action-btns-grid action-btns-grid--secondary">';
@@ -19090,11 +19109,11 @@ function render(s) {
                    handler). User feedback: "remova o botão Passar turno e
                    sempre deixe Encerrar turno disponível logo acima do botão Agir".
                    Esquivar/Fugir continuam consumindo AÇÃO (PHB p.190). */
-                html += '<button type="button" class="action-btn secondary" data-act="dodge">🛡️ Esquivar' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="flee">🏃 Fugir' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="dodge">' + _actBtnIco('acao-esquivar') + 'Esquivar' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="flee">' + _actBtnIco('acao-fugir') + 'Fugir' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="Pular as animações de dados (suas, dos inimigos e da iniciativa). Persistente — pode marcar/desmarcar quando quiser.">' +
                     (_skipAllDiceAnim ? '☑ Pular dados' : '☐ Pular dados') + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="log">' + _actBtnIco('acao-log') + 'Log</button>';
                 html += '</div>';
                 /* V1 Invocações Phase 1+2 — seção BÔNUS + Encerrar Turno (oculto até estado).
                    X-6.5.51AB (2026-04-26): "Focar Familiar" REMOVIDO — PHB p.240 (Find
@@ -19107,10 +19126,10 @@ function render(s) {
                    botão "Comandar Companheiro" CONSOME a ação principal do Patrulheiro
                    (PHB p.93). Patrulheiro nível 5+ (Extra Attack) pode comandar+atacar
                    no mesmo turno. Visibilidade controlada em _updateActionSheetState. */
-                html += '<button type="button" class="command-companion-btn" id="command-companion-btn" data-act="command-companion">🐺 Comandar Companheiro <span class="action-btn-res-icon res-action" aria-hidden="true">◆</span></button>';
+                html += '<button type="button" class="command-companion-btn" id="command-companion-btn" data-act="command-companion">' + _actBtnIco('acao-comandar') + 'Comandar Companheiro <span class="action-btn-res-icon res-action" aria-hidden="true">◆</span></button>';
                 /* E2 (escolha autor) — Mount buff: botão Montar/Desmontar quando Steed vivo. */
-                html += '<button type="button" class="mount-toggle-btn" id="mount-toggle-btn" data-act="mount-toggle">🐴 Montar</button>';
-                html += '<button type="button" class="end-turn-btn" id="end-turn-btn" data-act="end-turn">Encerrar turno</button>';
+                html += '<button type="button" class="mount-toggle-btn" id="mount-toggle-btn" data-act="mount-toggle">' + _actBtnIco('cavalo') + 'Montar</button>';
+                html += '<button type="button" class="end-turn-btn" id="end-turn-btn" data-act="end-turn">' + _actBtnIco('acao-encerrar-turno') + 'Encerrar turno</button>';
                 html += '</div>';
                 html += '</div>';
                 if (_actionSheetOpen) {
