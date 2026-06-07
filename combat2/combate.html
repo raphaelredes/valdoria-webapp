@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T17:53:14Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T19:24:38Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13612,8 +13612,14 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     var resCur = (spec.mp_exact != null) ? Math.max(0, Math.min(resMax, parseInt(spec.mp_exact, 10) || 0)) : resMax;
     return {
         t: roleTag, n: n, cls: cdef.cls, subclass: sub,
+        /* 2026-06-07 FIX: clsLabel = rótulo de exibição (ex.: "Ferreiro Ferido" do
+           Thorne) — antes o badge mostrava cdef.cls ("Guerreiro") porque
+           getClassDefByName('Ferreiro Ferido') cai no Guerreiro. cls continua a
+           CLASSE mecânica (re-lookup determinístico). ico honra spec.icon. */
+        clsLabel: (!useRandom && spec.cls && String(spec.cls).trim()) ? String(spec.cls).trim() : cdef.cls,
+        essential: !!spec.essential,
         summonsInvoked: summonsInvokedFinal,
-        race: race, ico: cdef.ico,
+        race: race, ico: (spec.icon && String(spec.icon).trim()) || cdef.ico,
         hp: hp, mhp: mhp, ac: ac, atk: atk, die: cdef.die,
         dmgMod: cdef.dmgMod, attr: cdef.attr,
         dex: dex, wis: wis, intScore: intSc, cha: cha, str: strSc, con: conSc,
@@ -15696,6 +15702,20 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
     if (damageApplied > 0) {
         simCheckConcentrationOnDamage(target, damageApplied);
     }
+    /* 2026-06-07: aliado ESSENCIAL (ex.: Thorne no prólogo) NUNCA cai. Se o dano o
+       levaria a 0, ele cambaleia mas resiste a 1 PV — sem dying/testes de morte.
+       Garante que a história siga até a cidade (a vitória do jogador o reergue). */
+    if (newHp <= 0 && target && target.essential && (target.t === 'p' || target.t === 'a')) {
+        target.hp = 1;
+        target.alive = true;
+        target.dying = false;
+        target.stable = false;
+        target.isDead = false;
+        target.deathSaves = { s: 0, f: 0 };
+        clearDownedMeta(target);
+        if (s && s.log) s.log.push('🛡️ ' + (target.n || 'O aliado') + ' cambaleia ao golpe — mas se recusa a cair. Resta de pé por pura teimosia (1 PV).');
+        return;
+    }
     if (newHp > 0) {
         target.alive = true;
         clearDownedMeta(target);
@@ -16771,7 +16791,9 @@ function _v8ClassTagOf(u, utype) {
         };
         return SUMMON_TAG_MAP[u.summonKind] || 'Invocação';
     }
-    var base = (u && u.cls) || 'Aliado';
+    /* 2026-06-07: prefere o rótulo de exibição (clsLabel, ex.: "Ferreiro Ferido")
+       sobre a classe mecânica (u.cls, ex.: "Guerreiro"). */
+    var base = (u && (u.clsLabel || u.cls)) || 'Aliado';
     var lvl = (u && u.lvl != null) ? (u.lvl | 0) : 0;
     if (lvl > 0) return base + ' · Nv ' + lvl;
     return base;
@@ -26486,7 +26508,7 @@ function openUnitDetail(uid) {
     html += '<div class="udc-name">' + escHtml(u.n) + '</div>';
     if (u.t === 'p' || u.t === 'a') {
         var raceLbl = u.race ? escHtml(u.race) + ' · ' : '';
-        html += '<div class="udc-sub">' + raceLbl + escHtml(u.cls) + ' · Nível ' + (u.lvl || 1) + '</div>';
+        html += '<div class="udc-sub">' + raceLbl + escHtml(u.clsLabel || u.cls) + ' · Nível ' + (u.lvl || 1) + '</div>';
     } else {
         var diffLbl = u.simDiff ? ' · ' + ({ easy: 'Fácil', normal: 'Normal', hard: 'Difícil' }[u.simDiff] || u.simDiff) : '';
         html += '<div class="udc-sub">' + escHtml(u.species || 'Criatura') + ' · Nível sugerido ' + (u.sugLvl || 1) + diffLbl + '</div>';
