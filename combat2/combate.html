@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T21:15:29Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T22:10:37Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2747,11 +2747,19 @@ html.sim-combat-root .bf-pan-viewport::-webkit-scrollbar {
 .bf-zoom-btn:active { transform: scale(0.92); }
 html.sim-combat-root .bf-pan-viewport:active { cursor: grabbing !important; }
 html.sim-combat-root .bf-pan-stage {
-  width: 100% !important;
-  max-width: 100% !important;
+  /* 2026-06-07 (user): largura = conteúdo (max-content) com min 100%. Antes width:100%
+     travava o scroll horizontal em 0 (scrollWidth==clientWidth) — só o arraste vertical
+     funcionava. Com max-content, fonte grande deixa a arena mais larga que o viewport e
+     o arraste HORIZONTAL passa a ter range. padding dá margem nas bordas (esq/dir, longe
+     dos controles de zoom à direita). */
+  width: max-content !important;
+  min-width: 100% !important;
+  max-width: none !important;
+  padding: 0 var(--v-space-lg, 16px) !important;
+  box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: stretch !important;
+  align-items: center !important;
   transform-origin: 0 0 !important;
   will-change: transform !important;
   /* Nitidez sob transform:scale — font-smoothing + GPU layer + subpixel rendering */
@@ -2775,8 +2783,10 @@ html.sim-combat-root .bf-pan-stage .battlefield {
   flex: 0 0 auto !important;
   min-height: 0 !important;
   overflow: visible !important;
-  width: 100% !important;
-  max-width: 100% !important;
+  /* 2026-06-07: largura natural (max-content) p/ permitir scroll horizontal com fonte grande */
+  width: max-content !important;
+  min-width: 100% !important;
+  max-width: none !important;
   /* Remove o gradient gold/brown do combat-vfx.css que aparecia como "mancha
      verde/oliva" ao redor da arena em scale < 1. Arena flutua limpa sobre o bg escuro. */
   background: transparent !important;
@@ -6552,6 +6562,8 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
    (antes usava emoji c.ico — antigo). SVG herda cor via currentColor → cls-XXX. */
 .iop-ico--heraldic { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 0; background: none; }
 .iop-ico--heraldic svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+/* 2026-06-07: retrato WebP (OpenAI) no popup de ordem de iniciativa — constrange ao box (28px). */
+.iop-ico--heraldic img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
 /* Phase 5b polish v6 (2026-04-26): inline SVG d20 + sword (rolagem + dano).
    Estilo monocromatico dourado, herda currentColor. */
 .iop-ico--inline { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 0; background: none; color: var(--v-gold, #c4953a); }
@@ -16372,7 +16384,8 @@ function buildBattlefield(s) {
        Touch já funciona via pinça, mas botões dão fallback explícito + acesso desktop. */
     html += '<div class="bf-zoom-controls" aria-label="Controles de zoom da arena">';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomIn" title="Aproximar (+)" aria-label="Aproximar">+</button>';
-    html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="fit" title="Ajustar tela" aria-label="Ajustar tela à arena">⌂</button>';
+    /* 2026-06-07 (user): botão "Ajustar tela" (⌂ recentralizar) REMOVIDO — não faz
+       sentido na arena (poucos inimigos, mapa pequeno). Só zoom +/−. */
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomOut" title="Afastar (−)" aria-label="Afastar">−</button>';
     html += '</div>';
     html += '<div class="bf-pan-stage" data-bf-pan-stage>';
@@ -18777,8 +18790,14 @@ function _maybeDispatchCheckpoint(s) {
     try { sendBattleCheckpoint(s); } catch (_e) {}
 }
 
+/* 2026-06-07 FIX (turno travado): true enquanto um popup de reação (Repreensão
+   Infernal/Escudo Arcano/Contramágica/etc.) está aberto. render() faz setHTML(#app)
+   que apagaria o popup + seus listeners → a Promise da reação nunca resolveria e o
+   turno travava. Enquanto aberto, render() não toca o DOM. */
+var _reactionPromptOpen = false;
 function render(s) {
     currentState = s;
+    if (_reactionPromptOpen) return;  // não apaga o popup de reação aberto (anti-travamento)
     _maybeDispatchCheckpoint(s);
     /* X-6.5.51AC: log mudança de fase (só quando muda — render é chamada toda hora) */
     try {
@@ -19517,6 +19536,9 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
         html += '</div>';
         setHTML(card, html);
         ov.appendChild(card);
+        /* 2026-06-07 FIX (turno travado): marca popup de reação aberto pra render()
+           NÃO apagar o #app (e com ele este popup + listeners). Resetado em done(). */
+        _reactionPromptOpen = true;
         if (typeof mountInGameFrame === 'function') {
             mountInGameFrame(ov);
         } else if (typeof vOverlay !== 'undefined' && vOverlay.add) {
@@ -19527,6 +19549,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             _appHost.appendChild(ov);
         }
         function done(v) {
+            _reactionPromptOpen = false;
             try { ov.remove(); } catch (_er) {}
             resolve(!!v);
         }
@@ -26783,7 +26806,26 @@ function beginCombatAfterInitOrder() {
     currentState.active_idx = 0;
     render(currentState);
     if (currentState.active_idx !== currentState.p_idx) {
-        void runNpcSegmentUntilPlayerTurn();
+        /* 2026-06-07 FIX (turno travado): era `void runNpcSegmentUntilPlayerTurn()`
+           — fire-and-forget, SEM await, SEM try/catch e SEM o tail de reset que
+           devolve o turno ao jogador. Qualquer erro no segmento (ou o fim normal)
+           deixava o combate sem liberar o botão Agir → turno travado. Agora espelha
+           o tail de runNpcsUntilPlayer (libera Agir + render). */
+        (async function () {
+            try {
+                if (await runNpcSegmentUntilPlayerTurn()) {
+                    _simSkipNonPlayerDice = false;
+                    render(currentState);
+                    return;
+                }
+            } catch (_eNpc) {
+                console.error('[SIM] runNpcSegment (início de combate) erro:', _eNpc);
+            }
+            _simSkipNonPlayerDice = false;
+            _actionTaken = false;
+            if (typeof _resetActionFlags === 'function') _resetActionFlags(currentState);
+            render(currentState);
+        })();
     }
 }
 
@@ -26821,7 +26863,13 @@ function showInitiativeOrderPopup() {
         var clsSlug = (typeof _heraldicClsSlugOf === 'function') ? _heraldicClsSlugOf(c, utype) : '';
         parts.push('<div class="iop-row' + (isSide ? ' player' : '') + '">');
         parts.push('<span class="iop-pos">' + (i + 1) + '</span>');
-        if (heraldicId) {
+        /* 2026-06-07 (user): popup de ORDEM de iniciativa usa o MESMO retrato WebP
+           (OpenAI) dos cards/tracker, com fallback SVG heráldico → emoji. Antes era
+           SVG cru sempre. */
+        var iopPortrait = (typeof _combatPortraitHTML === 'function') ? _combatPortraitHTML(heraldicId, c, utype) : '';
+        if (iopPortrait) {
+            parts.push('<span class="iop-ico iop-ico--heraldic ' + clsSlug + '">' + iopPortrait + '</span>');
+        } else if (heraldicId) {
             parts.push('<span class="iop-ico iop-ico--heraldic ' + clsSlug + '">' +
                        '<svg aria-hidden="true" focusable="false"><use href="#' + heraldicId + '"></use></svg>' +
                        '</span>');
