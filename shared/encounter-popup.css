@@ -81,6 +81,46 @@
   height: 92dvh;
 }
 
+/* 2026-06-07 EX5: banner de progresso da viagem ("Rumo a <destino>") — TOPO do
+   card, mostra "Etapa X de Y" + quantas faltam + barra de avanço dourada. */
+.enc-journey-progress {
+  flex: 0 0 auto;
+  padding: var(--v-space-sm, 8px) var(--v-space-md, 12px);
+  background: linear-gradient(180deg, rgba(40, 30, 18, 0.6), rgba(28, 22, 16, 0.3));
+  border-bottom: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+}
+.enc-jp-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--v-space-sm, 8px);
+  margin-bottom: 5px;
+}
+.enc-jp-label {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-sm, 13px);
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 0.5px;
+}
+.enc-jp-remain {
+  font-size: var(--v-font-xs, 11px);
+  color: var(--v-text-dim, #a09484);
+}
+.enc-jp-bar {
+  height: 6px;
+  border-radius: var(--v-radius-pill, 20px);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  overflow: hidden;
+}
+.enc-jp-fill {
+  height: 100%;
+  border-radius: var(--v-radius-pill, 20px);
+  background: linear-gradient(90deg, var(--v-gold-dark, #8b6420), var(--v-gold, #c4953a));
+  transition: width var(--v-transition-base, 0.3s) ease;
+}
+
 /* Sessão #28 (2026-05-24): close X visivel no canto sup-direito do encounter
    card (apenas quando opts.closeable=true). Permite sair a qualquer momento. */
 .enc-card-close {
@@ -795,18 +835,14 @@ body.perf-lite #encounter-overlay.active .enc-card {
 .enc-cho-row:hover::before { transform: translateX(100%); }
 .enc-cho-row:active { transform: translateX(1px) scale(0.985); }
 
-.enc-cho-row-icon {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+/* 2026-06-07 (user): PADRAO_ALDRIC — escolhas SEM símbolo à esquerda. O antigo
+   .enc-cho-row-icon foi removido do markup; aqui fica a meta-line (DC/custo) de
+   LARGURA TOTAL embaixo do título, em vez da coluna lateral que espremia o texto. */
+.enc-cho-row-meta {
+  margin-top: 4px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(196, 149, 58, 0.16);
-  border: 1px solid var(--v-gold-50);
-  border-radius: 50%;
-  color: #c4953a;
-  font-size: var(--v-font-xl);
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .enc-cho-row-body {
@@ -847,7 +883,8 @@ body.perf-lite #encounter-overlay.active .enc-card {
   font-size: calc(10.5px * var(--v-font-scale, 1));
   font-weight: 700;
   letter-spacing: 0.6px;
-  white-space: nowrap;
+  white-space: normal;          /* 2026-06-07: pode quebrar — agora tem largura total na meta-line */
+  align-self: flex-start;       /* não estica; tamanho do conteúdo */
 }
 .enc-cho-cost { color: #d4a54a; }
 .enc-cho-renown { color: #b89968; }

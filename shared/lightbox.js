@@ -30,6 +30,7 @@
 
   var LIGHTBOX_ID = 'v-lightbox';
   var _isOpen = false;
+  var _lbOpenedAt = 0;  /* 2026-06-07: ts de abertura — guard anti-fechar-no-mesmo-tap */
 
   function _ensureLightbox() {
     var lb = document.getElementById(LIGHTBOX_ID);
@@ -70,7 +71,11 @@
     if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
     // Click on backdrop (clicking outside card) closes
     lb.addEventListener('click', function(e) {
-      if (e.target === lb) closeLightbox();
+      /* 2026-06-07 FIX (foto fecha o diálogo): no toque, o MESMO tap que abriu o
+         lightbox dispara um 'click' trailing que caía no backdrop e fechava na hora
+         (parecia "tocar na foto fecha o diálogo sozinho"). Ignora cliques de backdrop
+         nos primeiros ~350ms após abrir. */
+      if (e.target === lb && (Date.now() - _lbOpenedAt) > 350) closeLightbox();
     });
     // <dialog> native cancel event (ESC key)
     lb.addEventListener('cancel', function(e) {
@@ -180,6 +185,7 @@
       descEl.innerHTML = desc || '';
       descEl.style.display = desc ? '' : 'none';
     }
+    _lbOpenedAt = Date.now();  /* 2026-06-07: marca abertura p/ o guard do backdrop */
     // task #69: activate via showModal() — native top-layer
     if (lb.tagName.toLowerCase() === 'dialog' && typeof lb.showModal === 'function') {
       try { if (!lb.open) lb.showModal(); }

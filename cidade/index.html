@@ -49431,6 +49431,13 @@ function _journeyVRender(cfg) {
     if (typeof cfg.onChoice === 'function') cfg.onChoice((cfg.choices && cfg.choices[0]) || {});
     return;
   }
+  /* 2026-06-07 EX5: mostra "Etapa X de Y / faltam N" no TOPO durante a viagem.
+     Auto-deriva do _cityJourney ativo (vale p/ hazard, safe e desfecho); a
+     narração de partida passa cfg.noProgress (ainda na etapa 0). */
+  var _prog = null;
+  if (!cfg.noProgress && _cityJourney && _cityJourney.totalSteps > 0 && _cityJourney.currentStep >= 1) {
+    _prog = { current: _cityJourney.currentStep, total: _cityJourney.totalSteps };
+  }
   window.vEncounter.render({
     npc: cfg.npc || null,
     script: cfg.script || [],
@@ -49439,6 +49446,7 @@ function _journeyVRender(cfg) {
     player: _journeyEncPlayer(),
     showGold: false,
     fullHeight: true,
+    progress: _prog,
     inlineChoices: cfg.inline === true,
     onChoice: function (ch) { if (typeof cfg.onChoice === 'function') cfg.onChoice(ch); }
   });
@@ -49455,6 +49463,7 @@ function _journeyRenderDeparture() {
     script: script,
     choices: [{ id: 'jrn_partir', label: 'Partir' }],
     inline: true,
+    noProgress: true,  /* 2026-06-07 EX5: partida ainda é "etapa 0" — sem banner */
     onChoice: function () { _showCityJourneyStep(); }
   });
 }
@@ -49628,14 +49637,15 @@ function _journeyStepV13(j) {
     var choices = (hazard.choices || []).map(function (ch, i) {
       var skillPt = ch.stat ? (CITY_STAT_NAMES_PT[ch.stat] || ch.stat.toUpperCase()) : '';
       var pc = (ch.stat && ch.dc) ? _cityJourneyChance(ch) : null;
-      var dInfo = (ch.stat && ch.dc) ? (skillPt + (pc != null ? ' · ' + pc + '%' : '')) : '';
       var out = {
         id: 'jrn_ch_' + i,
         label: ch.t,
-        desc: ch.desc ? (ch.desc + (dInfo ? ' — ' + dInfo : '')) : dInfo,
+        /* 2026-06-07 (user): desc = narrativa LIMPA; CD/perícia/chance vão pro badge
+           (meta-line de largura total), sem duplicar "Carisma" no texto. */
+        desc: ch.desc || '',
         _haz: ch
       };
-      if (ch.stat && ch.dc) { out.dc = ch.dc; out.skill = skillPt; }
+      if (ch.stat && ch.dc) { out.dc = ch.dc; out.skill = skillPt; if (pc != null) out.chance = pc; }
       return out;
     });
     _journeyVRender({

@@ -393,10 +393,9 @@
       var row = document.createElement('button');
       row.className = 'enc-cho-row';
       row.style.setProperty('--idx', idx);
-      var icon = ch.icon || _iconForChoice(ch);
       var dcBadge = '';
       if (ch.dc && ch.skill) {
-        dcBadge = '<span class="enc-cho-dc">DC ' + ch.dc + ' · ' + ch.skill + '</span>';
+        dcBadge = '<span class="enc-cho-dc">DC ' + ch.dc + ' · ' + ch.skill + (ch.chance != null ? ' · ' + ch.chance + '%' : '') + '</span>';
       } else if (ch.cost) {
         dcBadge = '<span class="enc-cho-dc enc-cho-cost">' + ch.cost + ' ' + _VCOIN + '</span>';
       } else if (ch.renownDelta) {
@@ -405,12 +404,14 @@
       }
       // label e desc podem ter HTML inline simples (<span>, <i>)
       row.innerHTML =
-        '<span class="enc-cho-row-icon">' + icon + '</span>' +
+        /* 2026-06-07 (user): PADRAO_ALDRIC — SEM símbolo (◆) à esquerda das escolhas;
+           o badge de DC/custo vira uma meta-line de LARGURA TOTAL embaixo do título
+           (antes era coluna à direita que espremia o título e ficava mal distribuída). */
         '<span class="enc-cho-row-body">' +
           '<span class="enc-cho-row-label">' + _coinify(ch.label || '') + '</span>' +
           (ch.desc ? '<span class="enc-cho-row-desc">' + ch.desc + '</span>' : '') +
+          (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
         '</span>' +
-        (dcBadge ? '<span class="enc-cho-row-side">' + dcBadge + '</span>' : '') +
         '<span class="enc-cho-row-chev">›</span>';
       row.addEventListener('click', function() {
         closeChoices(); // sempre fecha primeiro pra UX consistente
@@ -477,6 +478,37 @@
        (regra "Popup DEVE Ocupar Máximo de Espaço"). Usado pela viagem da
        cidade ("Rumo a <destino>") pra ficar épico/imersivo igual à exploração. */
     if (opts.fullHeight) card.classList.add('enc-full');
+
+    /* 2026-06-07 EX5 (viagem "Rumo a <destino>"): mostra no TOPO quantas etapas
+       faltam até o local. opts.progress = { current, total } (1-based). Banner
+       épico full-width com barra de avanço. Safe-DOM (evita hook de innerHTML). */
+    if (opts.progress && opts.progress.total > 0) {
+      var _pg = opts.progress;
+      var _cur = Math.max(1, Math.min(_pg.current || 1, _pg.total));
+      var _remain = Math.max(0, _pg.total - _cur);
+      var pBan = document.createElement('div');
+      pBan.className = 'enc-journey-progress';
+      var pLine = document.createElement('div');
+      pLine.className = 'enc-jp-line';
+      var pLabel = document.createElement('span');
+      pLabel.className = 'enc-jp-label';
+      pLabel.textContent = 'Etapa ' + _cur + ' de ' + _pg.total;
+      var pRemain = document.createElement('span');
+      pRemain.className = 'enc-jp-remain';
+      pRemain.textContent = _remain === 0 ? 'Você chegou!'
+        : (_remain === 1 ? 'Falta 1 etapa' : 'Faltam ' + _remain + ' etapas');
+      pLine.appendChild(pLabel);
+      pLine.appendChild(pRemain);
+      var pBar = document.createElement('div');
+      pBar.className = 'enc-jp-bar';
+      var pFill = document.createElement('div');
+      pFill.className = 'enc-jp-fill';
+      pFill.style.width = Math.round((_cur / _pg.total) * 100) + '%';
+      pBar.appendChild(pFill);
+      pBan.appendChild(pLine);
+      pBan.appendChild(pBar);
+      card.appendChild(pBan);
+    }
 
     // Header
     var header = document.createElement('div');
