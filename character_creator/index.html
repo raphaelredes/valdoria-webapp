@@ -558,8 +558,13 @@ Busca rápida:
         .gender-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 10px;
         }
+        /* 2026-06-07 (user): cada gênero usa imagem OpenAI (emblema heráldico) +
+           margens próprias por card. */
+        .gender-grid .gender-card { padding: 12px 8px; }
+        .gender-grid .gender-ico { margin: 0 auto 6px; min-height: 60px; display: flex; align-items: center; justify-content: center; }
+        .gender-grid .gender-ico img { width: 60px; height: 60px; object-fit: contain; display: block; filter: drop-shadow(0 0 6px rgba(196,149,58,0.35)); }
 
         /* Name section */
         .name-section {
@@ -7235,11 +7240,27 @@ Busca rápida:
         // ═══════════════════════════════════════════════
         function buildGenderGrid() {
             const grid = document.getElementById('genderGrid');
-            grid.innerHTML = '';
+            while (grid.firstChild) grid.removeChild(grid.firstChild);
+            /* 2026-06-07 (user): cada gênero usa a IMAGEM OpenAI (emblema heráldico do
+               símbolo de gênero) em vez de emoji. DOM seguro; fallback emoji no onerror. */
             GENDERS.forEach(g => {
                 const card = document.createElement('div');
-                card.className = 'v-card';
-                card.innerHTML = `<div class="v-card-icon">${g.icon}</div><div class="v-card-name">${g.name}</div>`;
+                card.className = 'v-card gender-card';
+                const ico = document.createElement('div');
+                ico.className = 'v-card-icon gender-ico';
+                const slug = String(g.key).toLowerCase();
+                const img = document.createElement('img');
+                img.src = '/shared/img/character_creator/gender/' + slug + '.webp';
+                img.alt = '';
+                img.loading = 'lazy';
+                const emoji = g.icon || '';
+                img.onerror = function () { img.onerror = null; ico.textContent = emoji; };
+                ico.appendChild(img);
+                const nm = document.createElement('div');
+                nm.className = 'v-card-name';
+                nm.textContent = g.name;
+                card.appendChild(ico);
+                card.appendChild(nm);
                 card.onclick = () => { haptic(); sel.gender = g.key; document.querySelectorAll('#genderGrid .v-card').forEach(c => c.classList.remove('selected')); card.classList.add('selected'); };
                 grid.appendChild(card);
             });
