@@ -8060,7 +8060,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     // city_gates, green_fields, whispering_woods, misty_marshes, golden_sands.
     // Mas no CART_BIOMES o key 'forest'='whispering_woods', 'swamp'='misty_marshes',
     // 'desert'='golden_sands'. Aliasamos pra coincidir.
-    known_locations: ['plains', 'green_fields', 'forest', 'swamp', 'desert'],
+    known_locations: ['plains'],  /* 2026-06-07: só os Portões (city_gates='plains') no mock DEV; REMOTE hidrata do servidor */
     // Mapas no inventário (mock — REMOTE preenche via /api/game/state)
     maps_owned: [],
     // Pedidos pendentes do cartógrafo (cada um: {map, ordered_day, ready_day, paid})
