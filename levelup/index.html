@@ -2812,6 +2812,19 @@
             try {
                 if (apiFallback) {
                     payload.user_id = parseInt(userId);
+                    // Resiliência (sessão #82 — quebra o loop de level-up): o token de
+                    // level-up é efêmero e o bot pode reiniciar antes do "Confirmar".
+                    // Enviamos também a SESSÃO DE JOGO persistente (valdoria_session_<env>)
+                    // como prova de identidade; o servidor aplica via autoridade do DB se
+                    // o token efêmero tiver sido perdido. Sem isto: 401 → "sessão expirada"
+                    // → reabre → level-up de novo (loop reportado pelo jogador).
+                    try {
+                        var _env = (location.hostname.indexOf('dev.') === 0 || /[?&]env=dev/.test(location.search)) ? 'dev' : 'prod';
+                        var _gs = JSON.parse(localStorage.getItem('valdoria_session_' + _env) || 'null');
+                        if (_gs && _gs.token && (!userId || String(_gs.user_id) === String(userId))) {
+                            payload.game_session = _gs.token;
+                        }
+                    } catch (_e) {}
                     const _lh = {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
