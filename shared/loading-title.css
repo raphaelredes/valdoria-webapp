@@ -2,6 +2,13 @@
 .title-screen {
   position: fixed;
   inset: 0;
+  /* #83: respeita o frame de smartphone (máx 430px, centralizado) como o resto do
+     jogo — antes o position:fixed + inset:0 ocupava a LARGURA TODA do navegador em
+     telas grandes (viola Smartphone-Only Layout). left:0+right:0 (inset) + max-width
+     + margin auto centra a tela de título em 430px. */
+  max-width: 430px;
+  margin-left: auto;
+  margin-right: auto;
   z-index: var(--v-z-critical, 10000);
   display: flex;
   flex-direction: column;
