@@ -14969,6 +14969,18 @@ body.perf-lite .stub-popup-voice { animation: none; }
       var res = await _post('/api/exploracao/init', snap, 'peek');
       if (res && res.token) {
         window.__EXPLORE_MOTOR_TOKEN = res.token;
+        /* 2026-06-07: known_locations PER-CHAR (server-authoritative) pro mapa da
+           exploração filtrar IGUAL ao mapa da cidade (mesma fonte CartShared +
+           mesmos destinos descobertos individuais; nunca compartilhado). O server
+           manda keys do world_init (city_gates...) → mapear pras keys do cart
+           (plains...), MESMO mapping da cidade (index.html SERVER_TO_CART). Só
+           seta se o campo veio (LOCAL/old server → fica null → mostra tudo). */
+        if (Array.isArray(res.known_locations)) {
+          var _S2C = { 'city_gates': 'plains', 'whispering_woods': 'forest', 'misty_marshes': 'swamp', 'golden_sands': 'desert' };
+          window.__EXPLORE_KNOWN = res.known_locations.map(function (k) { return _S2C[k] || k; });
+          console.info('[E-REM:API-INIT] known_locations=' + window.__EXPLORE_KNOWN.length + ' [' + window.__EXPLORE_KNOWN.join(',') + ']');
+          if (typeof _xcartDraw === 'function' && typeof _xcartCtx !== 'undefined' && _xcartCtx) { try { _xcartDraw(); } catch (_ekd) {} }
+        }
         console.info('[E-REM:API-INIT] ok motor_token=' + res.token.slice(0, 8) + '...'
           + ' state_pos=(' + res.state.player_col + ',' + res.state.player_row + ')'
           + ' visible_n=' + (res.state.visible ? res.state.visible.length : 0)
@@ -40192,14 +40204,17 @@ var CART_PATHS_V2 = CartShared.CART_PATHS;
 // motor compartilhado CartShared.createWorldCart (cartografia-shared.js). Antes
 // desenhava o mapa antigo (sem world-map, coords retangulares b.x*w) → divergia da
 // cidade. A diferença entre as duas telas fica SÓ nos botões de rodapé.
-// getKnownLocations:null → mostra TODOS os locais (comportamento atual da
-// exploração; a cidade passa o array known_locations p/ filtrar + "?").
+// 2026-06-07: getKnownLocations agora retorna o known set PER-CHAR (server) —
+// IGUAL ao mapa da cidade (mesma fonte CartShared + mesmos destinos descobertos
+// individuais; nunca compartilhado entre personagens). window.__EXPLORE_KNOWN é
+// hidratado no /init (keys já mapeadas pras do cart). Se ausente (LOCAL/old
+// server) → null → mostra TODOS (fallback do comportamento antigo).
 var _xcartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShared.createWorldCart({
   // sessão #76: robustez de apiBase (mesma defesa da cidade). Lê o param 'api'
   // direto da URL como fallback p/ garantir que o fetch de map-coords (posições
   // do editor) sempre vá pro bot, nunca pra origin relativa (Cloudflare Pages).
   apiBase: (window.__EXPLORE_API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
-  getKnownLocations: function(){ return null; },
+  getKnownLocations: function(){ return (window.__EXPLORE_KNOWN != null) ? window.__EXPLORE_KNOWN : null; },
   getPlayerBiomeKey: _cartGetPlayerBiomeV2,
   onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartDraw === 'function') _xcartDraw(); }
 }) : null;
