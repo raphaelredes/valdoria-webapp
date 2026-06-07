@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-06T17:06:54Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T05:19:54Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -8663,11 +8663,38 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .mm-confirm-btn-cancel:hover { color: var(--v-text, #d4c8b0); border-color: rgba(255,220,140,0.8); }
 /* FASE 8 — Forma Selvagem (Wild Shape): grid de seleção de forma bestial */
 .wildshape-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 4px; }
-.wildshape-form-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px; background: rgba(30,22,14,0.85); border: 1px solid rgba(196,149,58,0.5); border-radius: 12px; color: var(--v-text, #d4c8b0); font-family: var(--v-font, 'MedievalSharp'), serif; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+.wildshape-form-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 6px 10px; background: rgba(30,22,14,0.85); border: 1px solid rgba(196,149,58,0.5); border-radius: 12px; color: var(--v-text, #d4c8b0); font-family: var(--v-font, 'MedievalSharp'), serif; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
 .wildshape-form-btn:hover { transform: translateY(-2px); border-color: rgba(255,220,140,0.9); box-shadow: 0 0 16px rgba(196,149,58,0.55); }
 .wildshape-form-btn .ws-ico { font-size: calc(26px * var(--v-font-scale, 1)); line-height: 1.1; }
 .wildshape-form-btn .ws-name { font-weight: 700; font-size: calc(13px * var(--v-font-scale, 1)); color: #e8c45a; }
 .wildshape-form-btn .ws-stats { font-size: calc(11px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); text-align: center; }
+/* Frente 4 (#83): tela épica de Forma Selvagem — grid de arte + detalhe stat block */
+.wildshape-card { width: min(360px, 92vw); max-height: 88vh; overflow-y: auto; }
+.ws-card-imgwrap { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; overflow: hidden; background: radial-gradient(circle at 50% 38%, rgba(60,46,24,0.6), rgba(20,15,9,0.9)); display: flex; align-items: center; justify-content: center; }
+.ws-card-imgwrap .ws-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ws-detail-imgwrap { width: clamp(120px, 42vw, 168px); aspect-ratio: 1 / 1; margin: 4px auto 8px; border-radius: 12px; overflow: hidden; background: radial-gradient(circle at 50% 38%, rgba(60,46,24,0.6), rgba(20,15,9,0.9)); border: 1px solid rgba(196,149,58,0.5); box-shadow: 0 0 22px rgba(196,149,58,0.35); display: flex; align-items: center; justify-content: center; }
+.ws-detail-imgwrap .ws-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ws-detail-imgwrap .ws-ico { font-size: calc(56px * var(--v-font-scale, 1)); }
+.ws-detail-name { margin-bottom: 0; }
+.ws-detail-cr { text-align: center; font-size: calc(11px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+.ws-detail-flavor { font-size: calc(12.5px * var(--v-font-scale, 1)); line-height: 1.5; color: var(--v-text, #d4c8b0); font-style: italic; text-align: center; margin: 0 2px 10px; }
+.ws-detail-statgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.ws-stat-chip { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; padding: 5px 9px; background: rgba(30,22,14,0.7); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; }
+.ws-stat-l { font-size: calc(11px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); }
+.ws-stat-v { font-size: calc(13px * var(--v-font-scale, 1)); font-weight: 700; color: #e8c45a; }
+.ws-detail-attrs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 10px; }
+.ws-attr { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 2px; background: rgba(20,15,9,0.6); border: 1px solid rgba(74,56,40,0.7); border-radius: 7px; }
+.ws-attr-l { font-size: calc(9.5px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); letter-spacing: 1px; }
+.ws-attr-v { font-size: calc(12px * var(--v-font-scale, 1)); font-weight: 700; color: var(--v-text, #d4c8b0); }
+.ws-detail-abilities { text-align: left; margin-bottom: 10px; }
+.ws-abilities-title { font-size: calc(12px * var(--v-font-scale, 1)); font-weight: 700; color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.ws-ability { margin-bottom: 6px; padding-left: 8px; border-left: 2px solid rgba(196,149,58,0.5); }
+.ws-ability-n { display: block; font-size: calc(12px * var(--v-font-scale, 1)); font-weight: 700; color: #e8c45a; }
+.ws-ability-d { display: block; font-size: calc(11.5px * var(--v-font-scale, 1)); line-height: 1.45; color: var(--v-text-dim, #a09484); }
+.ws-detail-btns { display: flex; gap: 8px; margin-top: 4px; }
+.ws-detail-btns .mm-confirm-btn-cancel { flex: 0 0 auto; }
+.ws-transform-btn { flex: 1; padding: 11px 10px; background: linear-gradient(180deg, rgba(196,149,58,0.95), rgba(139,100,32,0.95)); border: 1px solid rgba(255,220,140,0.8); border-radius: 10px; color: #1a1510; font-family: var(--v-font, 'MedievalSharp'), serif; font-weight: 700; font-size: calc(13px * var(--v-font-scale, 1)); cursor: pointer; transition: transform 0.12s ease, box-shadow 0.2s ease; }
+.ws-transform-btn:hover { transform: translateY(-1px); box-shadow: 0 0 18px rgba(196,149,58,0.6); }
 /* Variante FORCE (Mísseis Mágicos) — roxo arcano explícito */
 .mm-confirm-overlay--force { background: radial-gradient(ellipse at center, rgba(20,10,35,0.72), rgba(0,0,0,0.88)); }
 .mm-confirm-card--force {
@@ -17186,6 +17213,17 @@ function buildCell(cell, activeId) {
 
 /* ========= Render ========= */
 var currentState = null, _selectingTarget = false, _pendingSkill = null, _pendingHealItem = null, _skipInit = false, _simSkipNonPlayerDice = false, _activeDiceClose = null, _mmTargets = null;
+/* Frente 8 (#83): preferência PERSISTENTE do jogador "pular animação de dados".
+   Marcada = nenhuma animação de dado roda (player + inimigos + iniciativa) — o
+   resultado é aplicado instantâneo (com som de impacto). Preferência de UI (não
+   estado de jogo) → localStorage permitido. _simSkipNonPlayerDice continua sendo
+   o skip POR-SEQUÊNCIA de dados de não-jogador (botão dentro da overlay). */
+var _skipAllDiceAnim = false;
+try { _skipAllDiceAnim = (localStorage.getItem('valdoria_skip_dice_anim') === '1'); } catch (_eSkipPref) {}
+function _setSkipAllDiceAnim(v) {
+    _skipAllDiceAnim = !!v;
+    try { localStorage.setItem('valdoria_skip_dice_anim', v ? '1' : '0'); } catch (_eSkipSet) {}
+}
 
 /* ============================================================================
  * V1 Invocações Phase 1+2+3 — BA System + Arma Espiritual + Familiar (2026-04-18)
@@ -18491,22 +18529,23 @@ function mountBattlefieldPanZoom() {
     };
     var fitAll = function () {
         var vpW = vp.clientWidth || 430;
-        /* Sessão #66: STAGE_W acompanha --v-font-scale (células escalam no CSS).
-           Sem isso o fit usava 652px fixo e o tabuleiro cortava em letra grande.
-           Lê do PRÓPRIO stage: ele herda o --v-font-scale efetivo (1.30 em letra
-           grande), exatamente como as .cell filhas. body[data-font-size] seta a var
-           no <body>, e o <html> fica 1.0 — ler de documentElement pegava 1.0 errado
-           (o tabuleiro cortava). Fallback body → 1 se a var não existir. */
-        var _fs = parseFloat(getComputedStyle(stage).getPropertyValue('--v-font-scale'));
-        if (!(_fs > 0)) _fs = parseFloat(getComputedStyle(document.body).getPropertyValue('--v-font-scale'));
-        if (!(_fs > 0)) _fs = 1;
-        var stageW = 4 * (160 * _fs) + 12;
-        var z = Math.min(1, (vpW - 4) / stageW);
-        z = Math.max(MIN_ZOOM, z);
+        var vpH = vp.clientHeight || 0;
+        /* Frente 7 (#83): fit baseado no CONTEÚDO REAL do stage (scrollWidth/Height,
+           que já reflete --v-font-scale + fileiras/colunas colapsadas) em vez de
+           assumir 4 colunas fixas. E o boost de foco é CLAMPADO ao que cabe (fitX,
+           fitY) — antes o boost ×1.6 estourava o viewport e cortava cards quando
+           havia ≤4 ocupados (3-4 numa fileira). Espelha a lógica correta do
+           shared/combat-battlefield-pan-zoom.js (fitToViewport). */
+        var sw = stage.scrollWidth || 652;
+        var sh = stage.scrollHeight || 0;
+        var fitX = (vpW - 8) / sw;
+        var fitY = (vpH > 40 && sh > 0) ? (vpH - 8) / sh : fitX;
+        var z = Math.min(fitX, fitY, 1);
         var occ = countOccupied();
         if (occ > 0 && occ <= FOCUSED_THRESHOLD) {
-            z = Math.min(MAX_ZOOM, z * FOCUSED_BOOST);
+            z = Math.min(z * FOCUSED_BOOST, MAX_ZOOM, fitX, fitY);
         }
+        z = Math.max(MIN_ZOOM, z);
         applyZoom(z);
     };
     fitAll();
@@ -18998,8 +19037,8 @@ function render(s) {
                    Esquivar/Fugir continuam consumindo AÇÃO (PHB p.190). */
                 html += '<button type="button" class="action-btn secondary" data-act="dodge">🛡️ Esquivar' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="flee">🏃 Fugir' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="toggle-skip-dice">' +
-                    (_simSkipNonPlayerDice ? '🙈 Pular rolagens' : '👁 Ver rolagens') + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="Pular as animações de dados (suas, dos inimigos e da iniciativa). Persistente — pode marcar/desmarcar quando quiser.">' +
+                    (_skipAllDiceAnim ? '☑ Pular dados' : '☐ Pular dados') + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
                 html += '</div>';
                 /* V1 Invocações Phase 1+2 — seção BÔNUS + Encerrar Turno (oculto até estado).
@@ -19925,6 +19964,7 @@ function onBtnClick(ev) {
             _actionSheetOpen = false;
             _skipInit = true;
             _simSkipNonPlayerDice = true;
+            _setSkipAllDiceAnim(true);  /* Frente 8 (#83): confirmar pular iniciativa marca a pref geral */
             render(currentState);
             (async function () {
                 try {
@@ -20243,11 +20283,12 @@ function onBtnClick(ev) {
     if (act === 'next') { _safeAnimInit(); return; }
     if (act === 'skip-init') {
         document.body.classList.add('sim-paused-bg');
-        confirmSimDiceSkip('Pular todas as rolagens (iniciativa e dados de aliados/inimigos durante o combate)? Suas próprias rolagens continuam sendo mostradas.').then(function (ok) {
+        confirmSimDiceSkip('Pular as animações de dados (iniciativa e todo o combate, incluindo as suas)? Fica salvo — você pode reativar quando quiser no botão "☑ Pular dados".').then(function (ok) {
             document.body.classList.remove('sim-paused-bg');
             if (!ok) return;
             _skipInit = true;
             _simSkipNonPlayerDice = true;
+            _setSkipAllDiceAnim(true);  /* Frente 8 (#83): confirmar pular iniciativa marca a pref geral persistente */
             if (_activeDiceClose) _activeDiceClose();
             else _safeAnimInit(true);
         });
@@ -20258,7 +20299,8 @@ function onBtnClick(ev) {
         return;
     }
     if (act === 'toggle-skip-dice') {
-        _simSkipNonPlayerDice = !_simSkipNonPlayerDice;
+        /* Frente 8 (#83): alterna a pref PERSISTENTE "pular animação de dados". */
+        _setSkipAllDiceAnim(!_skipAllDiceAnim);
         render(currentState);
         return;
     }
@@ -21513,13 +21555,90 @@ function showSkillUseConfirmPopup(skill) {
    substitui o do combatente. REMOTE: POST {type:'skill',slot,form} ao MOTOR (autoridade —
    src/game/combat2_wildshape.py). LOCAL (DEV tool): transform/revert no estado local, espelhando
    o motor. Dados das formas = mirror de src/game/classes/wild_shape_forms.py. */
+/* Frente 4 (#83): WILD_SHAPE_FORMS_JS espelha src/game/classes/wild_shape_forms.py
+   (autoridade). Campos enriquecidos (int/wis/cha, speedText, senses, abilities[],
+   epicDesc, img) alimentam a TELA ÉPICA de detalhe da forma (openWildShapePicker).
+   Em REMOTE o motor manda forms enriquecidos via skill.forms; este é o fallback LOCAL. */
 var WILD_SHAPE_FORMS_JS = {
-    wolf:         { id: 'wolf', name: 'Lobo', ico: '🐺', cr: 0.25, hp: 11, ac: 13, atk: 4, diceN: 2, die: 4, flat: 1, dmgType: 'piercing', str: 12, dex: 15, con: 12, minLevel: 2, desc: 'Ágil predador com mordida poderosa.' },
-    boar:         { id: 'boar', name: 'Javali', ico: '🐗', cr: 0.25, hp: 11, ac: 11, atk: 3, diceN: 1, die: 6, flat: 1, dmgType: 'slashing', str: 13, dex: 11, con: 12, minLevel: 2, desc: 'Resistente e feroz no corpo-a-corpo.' },
-    black_bear:   { id: 'black_bear', name: 'Urso Negro', ico: '🐻', cr: 0.5, hp: 19, ac: 11, atk: 3, diceN: 2, die: 4, flat: 2, dmgType: 'slashing', str: 15, dex: 10, con: 14, minLevel: 4, desc: 'Fera poderosa com garras devastadoras.' },
-    crocodile:    { id: 'crocodile', name: 'Crocodilo', ico: '🐊', cr: 0.5, hp: 19, ac: 12, atk: 4, diceN: 1, die: 10, flat: 1, dmgType: 'piercing', str: 15, dex: 10, con: 13, minLevel: 4, desc: 'Predador aquático com mordida esmagadora.' },
-    giant_spider: { id: 'giant_spider', name: 'Aranha Gigante', ico: '🕷️', cr: 1.0, hp: 26, ac: 14, atk: 5, diceN: 1, die: 8, flat: 3, dmgType: 'piercing', str: 14, dex: 16, con: 12, minLevel: 8, desc: 'Predadora ágil com veneno paralisante.' },
-    dire_wolf:    { id: 'dire_wolf', name: 'Lobo Atroz', ico: '🐺', cr: 1.0, hp: 37, ac: 14, atk: 5, diceN: 2, die: 6, flat: 3, dmgType: 'piercing', str: 17, dex: 15, con: 15, minLevel: 8, desc: 'Lobo ancestral de tamanho monstruoso.' }
+    wolf: {
+        id: 'wolf', name: 'Lobo', ico: '🐺', cr: 0.25, hp: 11, ac: 13, atk: 4,
+        diceN: 2, die: 4, flat: 1, dmgType: 'piercing',
+        str: 12, dex: 15, con: 12, int: 3, wis: 12, cha: 6,
+        minLevel: 2, desc: 'Ágil predador com mordida poderosa.',
+        speedText: '12m (40 pés)', senses: 'Percepção passiva 13',
+        abilities: [
+            { name: 'Faro e Audição Aguçados', desc: 'Vantagem em testes de Percepção que dependem de audição ou olfato.' },
+            { name: 'Táticas de Matilha', desc: 'Vantagem no ataque contra um alvo se um aliado seu estiver a até 1,5m dele.' }
+        ],
+        epicDesc: 'O Lobo é o caçador de matilha por excelência: rápido, implacável e mortal em grupo. Sua mordida derruba presas maiores, e seus sentidos aguçados farejam inimigos ocultos antes que eles sequer percebam o perigo.',
+        img: '/shared/img/combat/wildshape/wolf.webp'
+    },
+    boar: {
+        id: 'boar', name: 'Javali', ico: '🐗', cr: 0.25, hp: 11, ac: 11, atk: 3,
+        diceN: 1, die: 6, flat: 1, dmgType: 'slashing',
+        str: 13, dex: 11, con: 12, int: 2, wis: 9, cha: 5,
+        minLevel: 2, desc: 'Resistente e feroz no corpo-a-corpo.',
+        speedText: '12m (40 pés)', senses: 'Percepção passiva 9',
+        abilities: [
+            { name: 'Investida', desc: 'Se mover 6m em linha reta antes de atacar com a presa, causa dano extra e pode derrubar o alvo.' },
+            { name: 'Implacável', desc: 'Ao receber dano que o reduziria a 0 PV (até 7), permanece com 1 PV (1×/combate).' }
+        ],
+        epicDesc: 'O Javali é puro músculo e fúria. Quando investe, é uma avalanche de presas e fibra — e mesmo derrubado, recusa-se a cair, levantando-se uma última vez para revidar.',
+        img: '/shared/img/combat/wildshape/boar.webp'
+    },
+    black_bear: {
+        id: 'black_bear', name: 'Urso Negro', ico: '🐻', cr: 0.5, hp: 19, ac: 11, atk: 3,
+        diceN: 2, die: 4, flat: 2, dmgType: 'slashing',
+        str: 15, dex: 10, con: 14, int: 2, wis: 12, cha: 7,
+        minLevel: 4, desc: 'Fera poderosa com garras devastadoras.',
+        speedText: '12m (40 pés), escalar 9m', senses: 'Percepção passiva 13',
+        abilities: [
+            { name: 'Faro Aguçado', desc: 'Vantagem em testes de Percepção que dependem de olfato.' },
+            { name: 'Ataque Múltiplo', desc: 'Combina mordida e garras numa investida feroz de garras devastadoras.' }
+        ],
+        epicDesc: 'O Urso Negro é uma muralha de pelo e garras. Resistente o bastante para absorver golpes que abateriam guerreiros, ele esmaga inimigos com investidas de duas patas, sem jamais recuar.',
+        img: '/shared/img/combat/wildshape/black_bear.webp'
+    },
+    crocodile: {
+        id: 'crocodile', name: 'Crocodilo', ico: '🐊', cr: 0.5, hp: 19, ac: 12, atk: 4,
+        diceN: 1, die: 10, flat: 1, dmgType: 'piercing',
+        str: 15, dex: 10, con: 13, int: 2, wis: 10, cha: 5,
+        minLevel: 4, desc: 'Predador aquático com mordida esmagadora.',
+        speedText: '6m (20 pés), nadar 9m', senses: 'Percepção passiva 10',
+        abilities: [
+            { name: 'Prender a Respiração', desc: 'Pode prender a respiração por até 15 minutos — emboscadas aquáticas perfeitas.' },
+            { name: 'Mordida Agarradora', desc: 'A mordida agarra o alvo, prendendo-o até que se solte (Teste de Atletismo/Acrobacia).' }
+        ],
+        epicDesc: 'O Crocodilo é a paciência feita predador. Imóvel na superfície, explode num bote de presas que prendem a presa e a arrastam para o fundo — sem chance de fuga até que a forma se desfaça.',
+        img: '/shared/img/combat/wildshape/crocodile.webp'
+    },
+    giant_spider: {
+        id: 'giant_spider', name: 'Aranha Gigante', ico: '🕷️', cr: 1.0, hp: 26, ac: 14, atk: 5,
+        diceN: 1, die: 8, flat: 3, dmgType: 'piercing',
+        str: 14, dex: 16, con: 12, int: 2, wis: 11, cha: 4,
+        minLevel: 8, desc: 'Predadora ágil com veneno paralisante.',
+        speedText: '9m (30 pés), escalar 9m', senses: 'Visão no escuro 18m, Percepção passiva 10',
+        abilities: [
+            { name: 'Andar nas Teias', desc: 'Ignora restrição de movimento causada por teias e escala superfícies difíceis livremente.' },
+            { name: 'Sentido de Teia', desc: 'Percebe a localização exata de qualquer criatura em contato com sua teia.' },
+            { name: 'Mordida Venenosa', desc: 'A mordida injeta veneno (dano de veneno adicional, metade se o alvo resistir).' }
+        ],
+        epicDesc: 'A Aranha Gigante caça das sombras e do alto. Escala qualquer parede, sente cada vibração em suas teias e crava presas envenenadas que enfraquecem a presa antes mesmo de o combate começar de verdade.',
+        img: '/shared/img/combat/wildshape/giant_spider.webp'
+    },
+    dire_wolf: {
+        id: 'dire_wolf', name: 'Lobo Atroz', ico: '🐺', cr: 1.0, hp: 37, ac: 14, atk: 5,
+        diceN: 2, die: 6, flat: 3, dmgType: 'piercing',
+        str: 17, dex: 15, con: 15, int: 3, wis: 12, cha: 7,
+        minLevel: 8, desc: 'Lobo ancestral de tamanho monstruoso.',
+        speedText: '15m (50 pés)', senses: 'Percepção passiva 13',
+        abilities: [
+            { name: 'Faro e Audição Aguçados', desc: 'Vantagem em testes de Percepção que dependem de audição ou olfato.' },
+            { name: 'Táticas de Matilha', desc: 'Vantagem no ataque contra um alvo se um aliado seu estiver a até 1,5m dele.' }
+        ],
+        epicDesc: 'O Lobo Atroz é a lenda viva das florestas profundas: do tamanho de um cavalo, com presas capazes de partir escudos. Sua mordida derruba até os mais fortes, e sua matilha espiritual o segue em cada bote.',
+        img: '/shared/img/combat/wildshape/dire_wolf.webp'
+    }
 };
 function wildShapeFormsForLevel(level) {
     level = Math.max(1, level | 0);
@@ -21533,6 +21652,15 @@ function wildShapeFormsForLevel(level) {
 function _wsIsTransformed(p) {
     return !!(p && (p.wildShape || (p.se || []).some(function (x) { return x && x.id === 'forma_selvagem'; })));
 }
+function _wsCrLabel(cr) {
+    if (cr === 0.25 || cr === 1 / 4) return '1/4';
+    if (cr === 0.5) return '1/2';
+    return String(cr | 0 || cr);
+}
+/* Frente 4 (#83): tela ÉPICA de Forma Selvagem (PADRAO_SUBCLASSE — grid → detalhe →
+   confirmar). O grid mostra cards com a ARTE de cada besta; clicar abre o detalhe
+   com stat block D&D completo (PV/CA/ataque + 6 atributos), deslocamento, sentidos,
+   traços e flavor; "Transformar" confirma. Imagem com fallback pro emoji se falhar. */
 function openWildShapePicker(forms, usesLeft) {
     return new Promise(function (resolve) {
         var prev = document.getElementById('wildshape-overlay');
@@ -21541,39 +21669,93 @@ function openWildShapePicker(forms, usesLeft) {
         ov.id = 'wildshape-overlay';
         ov.className = 'mm-confirm-overlay';
         var card = document.createElement('div');
-        card.className = 'mm-confirm-card';
-        var title = document.createElement('div');
-        title.className = 'mm-confirm-title';
-        title.textContent = '🐺 Forma Selvagem';
-        var sub = document.createElement('div');
-        sub.className = 'mm-confirm-sub';
-        sub.style.opacity = '.85';
-        sub.textContent = 'Escolha a forma bestial' + (usesLeft != null ? (' · ' + usesLeft + ' uso(s)') : '') + ' (PHB p.66)';
-        var grid = document.createElement('div');
-        grid.className = 'wildshape-grid';
-        function done(v) { if (ov.parentNode) ov.parentNode.removeChild(ov); resolve(v); }
-        forms.forEach(function (f) {
-            var b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'wildshape-form-btn';
-            var sIco = document.createElement('span'); sIco.className = 'ws-ico'; sIco.textContent = f.ico || '🐾';
-            var sName = document.createElement('span'); sName.className = 'ws-name'; sName.textContent = f.name;
-            var sStats = document.createElement('span'); sStats.className = 'ws-stats';
-            sStats.textContent = 'PV ' + f.hp + ' · CA ' + f.ac + ' · ' + f.diceN + 'd' + f.die + (f.flat ? '+' + f.flat : '');
-            b.appendChild(sIco); b.appendChild(sName); b.appendChild(sStats);
-            b.addEventListener('click', function () { done(f.id); });
-            grid.appendChild(b);
-        });
-        var btnCancel = document.createElement('button');
-        btnCancel.type = 'button';
-        btnCancel.className = 'mm-confirm-btn-cancel';
-        btnCancel.textContent = 'Cancelar';
-        btnCancel.addEventListener('click', function () { done(null); });
-        card.appendChild(title);
-        card.appendChild(sub);
-        card.appendChild(grid);
-        card.appendChild(btnCancel);
+        card.className = 'mm-confirm-card wildshape-card';
         ov.appendChild(card);
+        function done(v) { if (ov.parentNode) ov.parentNode.removeChild(ov); resolve(v); }
+        function clearCard() { while (card.firstChild) card.removeChild(card.firstChild); }
+        function formImg(f, cls) {
+            var wrap = document.createElement('div'); wrap.className = cls;
+            var emo = document.createElement('span'); emo.className = 'ws-ico'; emo.textContent = f.ico || '🐾';
+            if (f.img) {
+                var im = document.createElement('img'); im.className = 'ws-img'; im.alt = f.name; im.loading = 'lazy'; im.src = f.img;
+                emo.style.display = 'none';
+                im.addEventListener('error', function () { im.style.display = 'none'; emo.style.display = ''; });
+                wrap.appendChild(im);
+            }
+            wrap.appendChild(emo);
+            return wrap;
+        }
+        function renderGrid() {
+            clearCard();
+            var t = document.createElement('div'); t.className = 'mm-confirm-title'; t.textContent = '🐺 Forma Selvagem'; card.appendChild(t);
+            var s = document.createElement('div'); s.className = 'mm-confirm-sub'; s.style.opacity = '.85';
+            s.textContent = 'Escolha a forma bestial' + (usesLeft != null ? (' · ' + usesLeft + ' uso(s)') : '') + ' (PHB p.66)';
+            card.appendChild(s);
+            var grid = document.createElement('div'); grid.className = 'wildshape-grid';
+            forms.forEach(function (f) {
+                var b = document.createElement('button'); b.type = 'button'; b.className = 'wildshape-form-btn';
+                b.appendChild(formImg(f, 'ws-card-imgwrap'));
+                var sName = document.createElement('span'); sName.className = 'ws-name'; sName.textContent = f.name; b.appendChild(sName);
+                var sCr = document.createElement('span'); sCr.className = 'ws-stats';
+                sCr.textContent = 'ND ' + _wsCrLabel(f.cr) + ' · PV ' + f.hp + ' · CA ' + f.ac; b.appendChild(sCr);
+                b.addEventListener('click', function () { renderDetail(f); });
+                grid.appendChild(b);
+            });
+            card.appendChild(grid);
+            var btnCancel = document.createElement('button'); btnCancel.type = 'button'; btnCancel.className = 'mm-confirm-btn-cancel'; btnCancel.textContent = 'Cancelar';
+            btnCancel.addEventListener('click', function () { done(null); });
+            card.appendChild(btnCancel);
+        }
+        function renderDetail(f) {
+            clearCard();
+            card.appendChild(formImg(f, 'ws-detail-imgwrap'));
+            var nm = document.createElement('div'); nm.className = 'mm-confirm-title ws-detail-name'; nm.textContent = (f.ico || '🐾') + ' ' + f.name; card.appendChild(nm);
+            var cr = document.createElement('div'); cr.className = 'ws-detail-cr'; cr.textContent = 'Nível de Desafio ' + _wsCrLabel(f.cr); card.appendChild(cr);
+            if (f.epicDesc || f.desc) { var ep = document.createElement('div'); ep.className = 'ws-detail-flavor'; ep.textContent = f.epicDesc || f.desc; card.appendChild(ep); }
+            var sb = document.createElement('div'); sb.className = 'ws-detail-statgrid';
+            function stat(label, val) {
+                var d = document.createElement('div'); d.className = 'ws-stat-chip';
+                var l = document.createElement('span'); l.className = 'ws-stat-l'; l.textContent = label;
+                var v = document.createElement('span'); v.className = 'ws-stat-v'; v.textContent = val;
+                d.appendChild(l); d.appendChild(v); sb.appendChild(d);
+            }
+            stat('PV', String(f.hp));
+            stat('CA', String(f.ac));
+            stat('Ataque', '+' + f.atk);
+            stat('Mordida', f.diceN + 'd' + f.die + (f.flat ? '+' + f.flat : ''));
+            if (f.speedText) stat('Desloc.', f.speedText);
+            if (f.senses) stat('Sentidos', f.senses);
+            card.appendChild(sb);
+            var attrs = document.createElement('div'); attrs.className = 'ws-detail-attrs';
+            function attr(k, val) {
+                if (val == null) return;
+                var d = document.createElement('div'); d.className = 'ws-attr';
+                var l = document.createElement('span'); l.className = 'ws-attr-l'; l.textContent = k;
+                var mod = Math.floor((val - 10) / 2);
+                var n = document.createElement('span'); n.className = 'ws-attr-v'; n.textContent = val + ' (' + (mod >= 0 ? '+' : '') + mod + ')';
+                d.appendChild(l); d.appendChild(n); attrs.appendChild(d);
+            }
+            attr('FOR', f.str); attr('DES', f.dex); attr('CON', f.con); attr('INT', f.int); attr('SAB', f.wis); attr('CAR', f.cha);
+            card.appendChild(attrs);
+            if (f.abilities && f.abilities.length) {
+                var ab = document.createElement('div'); ab.className = 'ws-detail-abilities';
+                var abt = document.createElement('div'); abt.className = 'ws-abilities-title'; abt.textContent = 'Traços'; ab.appendChild(abt);
+                f.abilities.forEach(function (a) {
+                    var row = document.createElement('div'); row.className = 'ws-ability';
+                    var an = document.createElement('span'); an.className = 'ws-ability-n'; an.textContent = a.name; row.appendChild(an);
+                    var ad = document.createElement('span'); ad.className = 'ws-ability-d'; ad.textContent = a.desc; row.appendChild(ad);
+                    ab.appendChild(row);
+                });
+                card.appendChild(ab);
+            }
+            var btnRow = document.createElement('div'); btnRow.className = 'ws-detail-btns';
+            var back = document.createElement('button'); back.type = 'button'; back.className = 'mm-confirm-btn-cancel'; back.textContent = '← Voltar';
+            back.addEventListener('click', renderGrid); btnRow.appendChild(back);
+            var go = document.createElement('button'); go.type = 'button'; go.className = 'ws-transform-btn'; go.textContent = '🐾 Transformar em ' + f.name;
+            go.addEventListener('click', function () { done(f.id); }); btnRow.appendChild(go);
+            card.appendChild(btnRow);
+        }
+        renderGrid();
         mountInGameFrame(ov);
     });
 }
@@ -25455,7 +25637,7 @@ function showDice(value, cb, actor, context, opts) {
                     try { dB && dB.resume && dB.resume(); } catch (e) {}
                     return;
                 }
-                if (initiativeSequence) _skipInit = true;
+                if (initiativeSequence) { _skipInit = true; _setSkipAllDiceAnim(true); }  /* Frente 8 (#83): pular iniciativa marca a pref geral */
                 _simSkipNonPlayerDice = true;
                 close();
             });
@@ -25485,6 +25667,15 @@ function showDice(value, cb, actor, context, opts) {
     /* Expose para skip externo (ex: pular rolagens de iniciativa) */
     _activeDiceClose = close;
     continueBtn.addEventListener('click', close);
+    /* Frente 8 (#83): pref "pular animação de dados" — resolve a rolagem (d20 /
+       iniciativa / save) instantânea. O valor já foi passado como 1.º argumento de
+       showDice; close()→cb() apenas sinaliza conclusão (mesmo caminho do safety
+       timeout). Em iniciativa, marca _skipInit pra pular a fila inteira. */
+    if (_skipAllDiceAnim) {
+        if (initiativeSequence) _skipInit = true;
+        close();
+        return;
+    }
     /* Sessão #66 (FIX combate travado em "Rolando Iniciativa..."): SAFETY TIMEOUT.
        Se a rolagem NÃO completar — Dice3D não renderizou o canvas, requestAnimation-
        Frame não disparou, WebGL falhou, device lento, callback do roll perdido — o
@@ -25830,8 +26021,17 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
     /* [SFX 2026-04-21] Som de dado rolando no início de qualquer showDamageDice
        (tanto LOCAL quanto REMOTE — showDamageDice é chamada nos 2 paths).
        Som hit/crit/damageType é tocado no FIM (quando resultado é aplicado). */
-    if (typeof sfxDiceRoll === 'function') sfxDiceRoll();
+    if (!_skipAllDiceAnim && typeof sfxDiceRoll === 'function') sfxDiceRoll();
     return new Promise(function (resolve) {
+        /* Frente 8 (#83): pref "pular animação de dados" — resolve instantâneo COM
+           som de impacto (hit/crit/tipo de dano), sem montar a overlay 3D. */
+        if (_skipAllDiceAnim) {
+            if (crit && typeof sfxCrit === 'function') sfxCrit();
+            else if (typeof sfxHit === 'function') sfxHit();
+            if (opts && opts.theme && typeof sfxDamageType === 'function') { try { sfxDamageType(opts.theme); } catch (_eST) {} }
+            resolve(Math.max(1, rolls.reduce(function (a, b) { return a + b; }, 0) + dmgMod));
+            return;
+        }
         if (!window.Dice3D) { resolve(rolls.reduce(function (a, b) { return a + b; }, 0) + dmgMod); return; }
         var dieType = 'd' + die;
         var diceSum = rolls.reduce(function (a, b) { return a + b; }, 0);
@@ -25874,17 +26074,27 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
         ov.style.zIndex = '101000';
         mountInGameFrame(ov); // regra: overlays dentro do frame #app
         var d;
-        function close() {
-            try { d && d.dispose(); } catch (e) {}
-            ov.remove();
-            if (_activeDiceClose === close) _activeDiceClose = null;
-            /* [SFX 2026-04-21] Hit/crit/damageType quando resolve. Crit prioriza
-               som de crit. damageType toca em paralelo se houver tema específico. */
+        /* Frente 9 (#83): o som de IMPACTO (hit/crit + tipo de dano) toca quando o
+           DANO APARECE (resumo + tween de PV), não no close() — que só dispara quando
+           o jogador clica "Continuar" (~650ms+ após o impacto visual). Idempotente. */
+        var _impactSfxDone = false;
+        function _playImpactSfx() {
+            if (_impactSfxDone) return;
+            _impactSfxDone = true;
             if (crit && typeof sfxCrit === 'function') sfxCrit();
             else if (typeof sfxHit === 'function') sfxHit();
             if (opts && opts.theme && typeof sfxDamageType === 'function') {
                 try { sfxDamageType(opts.theme); } catch (_eS) {}
             }
+        }
+        function close() {
+            try { d && d.dispose(); } catch (e) {}
+            ov.remove();
+            if (_activeDiceClose === close) _activeDiceClose = null;
+            /* [SFX 2026-04-21 → Frente 9 #83] fallback idempotente — o som normalmente
+               já tocou no impacto (resumo do dano); aqui só cobre o caso de close()
+               sem passar pelo resumo. */
+            _playImpactSfx();
             /* [SFX REMOVE 2026-04-21] sfxEnemyDeath desabilitado — autor reportou
                "som muito alto chiado" ao matar \u00faltimo inimigo. Track `sfx_enemy_death`
                precisa ser substitu\u00edda por asset melhor antes de reabilitar. */
@@ -25909,6 +26119,7 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
                     i = rolls.length;
                 }
                 if (i >= rolls.length) {
+                    _playImpactSfx();  /* Frente 9 (#83): som no IMPACTO (dano aparece + PV cai) */
                     /* Resumo dos dados + celula igual ao grid, PV animado */
                     while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
                     /* V1 Invocações Phase 4 — opts.summonCasterCls (ex.: 'cls-clerigo')
@@ -26024,7 +26235,7 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
 function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal, skillName, showReviveLine) {
     mod = mod || 0;
     /* [SFX 2026-04-21] Dice roll + heal sound ao iniciar a cura. */
-    if (typeof sfxDiceRoll === 'function') {
+    if (!_skipAllDiceAnim && typeof sfxDiceRoll === 'function') {
         try { sfxDiceRoll(); } catch (_eS) {}
     }
     if (typeof sfxHeal === 'function') {
@@ -26034,6 +26245,9 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
         var diceSum = rolls.reduce(function (a, b) { return a + b; }, 0);
         var totalRolled = diceSum + mod;
         var gained = Math.max(0, newHp - oldHp);
+        /* Frente 8 (#83): pref "pular animação de dados" — cura instantânea (o som
+           de cura já tocou acima; o card de PV anima no tabuleiro). */
+        if (_skipAllDiceAnim) { resolve(gained); return; }
         if (!window.Dice3D) {
             resolve(gained);
             return;
