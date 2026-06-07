@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T05:19:54Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T05:39:30Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13707,6 +13707,8 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
         multiAttack: Math.max(1, (spec.multiAttack_exact | 0) || (sc.multiAttack | 0) || (b.multiAttack | 0) || 1),
         sugLvl: (spec.sugLvl_exact != null) ? parseInt(spec.sugLvl_exact, 10) : sugLvl,
         species: spec.species_exact || b.n, simDiff: diff,
+        tags: (b.tags || []),  /* #83: propaga tags do bestiário → fallback heráldico por família (beast/undead/...) no _heraldicIconOf quando não há arte WebP */
+        xpReward: (spec.xpReward_exact != null ? parseInt(spec.xpReward_exact, 10) : 0),  /* #83: XP canônico D&D 5e (por CR) vindo do backend; 0 em LOCAL → computeRewards usa fallback */
         it: { ic: '⚔️', lb: 'ataca' }
     };
     /* V1.7 Stage-CASTERS (2026-04-21) — propaga skills + res + caster flags.
@@ -15810,6 +15812,21 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
                 ' além do 0 PV vs ' + _mhpCheck + ' PV máx) — MORTE INSTANTÂNEA (PHB p.197).');
             return;
         }
+        if (!partyAnyoneStanding(s)) {
+            /* #83 (proposta do user): SOLO, sem ninguém consciente para socorrer →
+               MORTE IMEDIATA. Sem aliado que possa curar/estabilizar, os testes de
+               morte só atrasam o inevitável (os inimigos seguem atacando o corpo a
+               0 PV → falhas automáticas). target.hp já = 0 acima, então
+               partyAnyoneStanding conta só OUTROS membros conscientes. Idempotente:
+               se houver outro de pé, segue os testes de morte normais (ele pode curar).
+               A derrota leva ao templo + dívida (penalidades já existem no /complete). */
+            target.isDead = true;
+            target.dying = false;
+            target.stable = false;
+            target.deathSaves = { s: 0, f: 0 };
+            s.log.push(target.n + ' cai a 0 PV sem ninguém para socorrê-lo — a morte é inevitável. Será levado ao templo.');
+            return;
+        }
         target.dying = true;
         target.stable = false;
         target.deathSaves = { s: 0, f: 0 };
@@ -15922,7 +15939,10 @@ function computeRewards(s) {
     var enemies = s.order.filter(function (c) { return c.t === 'e'; });
     var xp = 0, gold = 0, items = [];
     enemies.forEach(function (e) {
-        xp += 8 + (e.sugLvl || 1) * 4;
+        /* #83: XP canônico D&D 5e (xpReward por CR do inimigo, enviado pelo backend
+           no setup). Fallback pra fórmula por sugLvl em LOCAL/dev (sem backend). O
+           backend recomputa o XP autoritativo no /complete — este é só o display. */
+        xp += (e.xpReward > 0) ? e.xpReward : (8 + (e.sugLvl || 1) * 4);
         gold += rng(2, 6) + (e.sugLvl || 1);
         if (Math.random() < 0.35) {
             var pool = LOOT_POOL.filter(function (it) {
@@ -26449,7 +26469,15 @@ function openUnitDetail(uid) {
     var _udcIconId = _heraldicIconOf(u, _udcUtype);
     var _udcClsSlug = _heraldicClsSlugOf(u, _udcUtype);
     html += '<div class="udc-header ' + _udcClsSlug + '">';
-    if (_udcIconId) {
+    /* #83: o popup de detalhe usa o MESMO resolvedor de imagem do card no
+       tabuleiro (_combatPortraitHTML): mostra a arte WebP real do inimigo
+       (ex.: Cobra Constritora Gigante) quando existe em ENEMY_PNG_AVAILABLE,
+       com fallback pro ícone heráldico/emoji. Antes mostrava só o SVG genérico
+       ic-inimigo. */
+    var _udcPortrait = _combatPortraitHTML(_udcIconId, u, _udcUtype);
+    if (_udcPortrait) {
+        html += '<div class="udc-ico udc-ico--heraldic">' + _udcPortrait + '</div>';
+    } else if (_udcIconId) {
         html += '<div class="udc-ico udc-ico--heraldic"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + _udcIconId + '"/></svg></div>';
     } else {
         html += '<div class="udc-ico">' + escHtml(u.ico) + '</div>';
