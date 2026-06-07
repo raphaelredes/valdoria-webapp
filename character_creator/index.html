@@ -4564,12 +4564,17 @@ Busca rápida:
            ficam em /character_creator/icons/{slug}.png (Sessao #29 batch).
            _attrIconHtml usa PNG quando disponivel, fallback automatic em onerror. */
         const STAT_ICONS = { strength: '💪', dexterity: '🏃', constitution: '🛡️', intelligence: '📚', wisdom: '🙏', charisma: '✨' };
+        /* 2026-06-07 FIX (user): usar as IMAGENS OpenAI já geradas dos 6 atributos
+           (shared/img/levelup/attrs/{ptbr}.webp) em vez de emoji/ícone. Antes apontava
+           pra /character_creator/icons/{en}.png (inexistente) -> caía no emoji. */
+        const _ATTR_SLUG_PT = { strength: 'forca', dexterity: 'destreza', constitution: 'constituicao', intelligence: 'inteligencia', wisdom: 'sabedoria', charisma: 'carisma' };
         function _attrIconHtml(attrKey, sizePx) {
             const emoji = STAT_ICONS[attrKey] || '⚔️';
             const sz = sizePx || 24;
+            const ptSlug = _ATTR_SLUG_PT[attrKey] || attrKey;
             const onErr = "this.onerror=null;this.outerHTML='<span style=\\'font-size:" + sz + "px\\'>" + emoji.replace(/'/g, "\\'") + "</span>';";
-            return '<img src="/character_creator/icons/' + attrKey + '.png" alt="" ' +
-                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;display:inline-block;vertical-align:middle;" ' +
+            return '<img src="/shared/img/levelup/attrs/' + ptSlug + '.webp" alt="" ' +
+                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;display:inline-block;vertical-align:middle;border-radius:6px;" ' +
                    'loading="lazy" onerror="' + onErr + '">';
         }
         let selectedPoolValue = null;
