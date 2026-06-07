@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T20:30:21Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T21:03:56Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -15676,8 +15676,11 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             });
         }
     }
-    // Floating Combat Text (FCT) — número sobe acima do card
-    if (damageApplied > 0) {
+    // Floating Combat Text (FCT) — número sobe acima do card.
+    // 2026-06-07: dmgMeta.deferFct adia o FCT (a animação do dano sofrido) — usado
+    // quando uma reação (ex.: Repreensão Infernal) vai abrir um popup ANTES: o
+    // chamador dispara o FCT só depois que o jogador decide.
+    if (damageApplied > 0 && !dmgMeta.deferFct) {
         _spawnFloatingDmgNumber(target, damageApplied, {
             crit: !!dmgMeta.deathFailCrit,
             dmgType: dmgMeta.dmgType || '',
@@ -28038,13 +28041,23 @@ async function playTurn(aIdx, tIdx, opts) {
     /* Aplica de fato + VFX (0 PV: teste de morte / falhas automáticas, PHB simplificado) */
     var critForDeath = !spellNoWeaponCrit && hitRes.crit;
     var dmgTypeFinal = (atkSkill && atkSkill.dmgType) ? atkSkill.dmgType : (actor.dmgType || '');
+    /* 2026-06-07 (user): se uma reação de Repreensão Infernal vai ser oferecida ao
+       player, ADIA a animação do dano sofrido (FCT) pra DEPOIS do popup — o jogador
+       decide ANTES de ver a animação de dano e da repreensão. */
+    var _rebukeWillOffer = (hitRes.hit && target && target.t === 'p' && newHp > 0
+        && !target.reactionSpent && target.alive !== false && !target.isDead && !target.dying
+        && Array.isArray(target.skills) && target.skills.some(function (sk) {
+            return sk && sk.n === 'Repreensão Infernal' && sk.reactionOnly
+                && target.res && (target.res.value | 0) >= (sk.cost | 0);
+        }));
     applyHpAfterDamage(s, target, oldHp, newHp, {
         deathFailCrit: !!critForDeath,
         dmgType: dmgTypeFinal,
         /* V1.7 Sprint-17 Ronda 13 (2026-04-21 QA PHB p.96) — contexto de save pra Evasion.
            Se skill teve save:{ability:'dex'} E save falhou, contexto aplica halfDmgDexSaveOnly. */
         saveAbility: atkSkill && atkSkill.save ? atkSkill.save.ability : null,
-        saveFailed: saveSuccess === false
+        saveFailed: saveSuccess === false,
+        deferFct: _rebukeWillOffer
     });
 
     /* V1.7 Stage 7 [PHB-FIX 2026-04-21] — REPREENSÃO INFERNAL (Hellish Rebuke
@@ -28068,27 +28081,12 @@ async function playTurn(aIdx, tIdx, opts) {
             }
         }
         if (rebukeSkP && target.res && (target.res.value | 0) >= (rebukeSkP.cost | 0)) {
-            /* V1.7 FIX (2026-04-21) — aguarda animação de dano completar antes do popup.
-               Pedido do autor: "execute a animação primeiro do combatente inimigo,
-               mostre a animação toda e só depois abra o popup da reação".
-               applyHpAfterDamage já disparou FCT + flash; playHitVFX virá depois.
-               Sleep aqui garante que a visualização do dano pegue ao menos o pico
-               da animação antes do popup interromper o pacing. */
+            /* 2026-06-07 (user): popup da reação ANTES das animações. O jogador escolhe
+               reagir / deixar passar e SÓ DEPOIS animamos o dano sofrido (FCT adiado
+               via deferFct + impacto) e a repreensão. Reverte o fix antigo que abria
+               o popup só após a animação. */
             var uidRT = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : null;
             var uidRTa = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
-            /* Dispara VFX do atacante (swing/projectile/impact) AGORA (antes do popup)
-               em vez de esperar o playHitVFX do fim da função. */
-            if (uidRTa && typeof playHitVFX === 'function') {
-                try {
-                    await playHitVFX(uidRTa, !!hitRes.crit, (atkSkill && atkSkill.dmgType) ? atkSkill.dmgType : (actor.dmgType || ''), {
-                        fromUid: uidRT, skill: atkSkill || null
-                    });
-                } catch (_eVr) {}
-            }
-            /* Guard contra duplo VFX: marca que já foi disparado */
-            s._hitVfxPlayed = true;
-            /* Dwell mínimo para user absorver o impacto antes do popup */
-            await sleep(400);
             var useRebukeP = false;
             try {
                 useRebukeP = await showShieldReactionPromptLocal(
@@ -28096,6 +28094,17 @@ async function playTurn(aIdx, tIdx, opts) {
                     rebukeSkP.cost | 0, 'rebuke'
                 );
             } catch (_erRP) { useRebukeP = false; }
+            /* Popup fechado — agora anima o dano sofrido (FCT adiado) + impacto no player. */
+            var _dmgDealtP = Math.max(0, oldHp - newHp);
+            if (_dmgDealtP > 0 && typeof _spawnFloatingDmgNumber === 'function') {
+                try { _spawnFloatingDmgNumber(target, _dmgDealtP, { crit: !!critForDeath, dmgType: dmgTypeFinal }); } catch (_eF) {}
+            }
+            if (uidRTa && typeof playHitVFX === 'function' && !s._hitVfxPlayed) {
+                try {
+                    await playHitVFX(uidRTa, !!hitRes.crit, dmgTypeFinal, { fromUid: uidRT, skill: atkSkill || null });
+                } catch (_eVr) {}
+            }
+            s._hitVfxPlayed = true;
             if (useRebukeP) {
                 /* Spend MP + reaction */
                 target.res.value = Math.max(0, (target.res.value | 0) - (rebukeSkP.cost | 0));
