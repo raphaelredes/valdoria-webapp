@@ -42461,62 +42461,40 @@ function _showDailyChallengeEpicPopup(p){
 }
 
 function _dailyStartCombat(p){
-  if (window._dailyChallengeDone) {
-    vToast('✓ Desafio já completado hoje.');
-    return;
-  }
+  // CY6 (P1, 2026-06-07): ANTES isto fazia um "combate" MOCK no cliente —
+  // Math.random()<0.65 decidia sucesso/falha e, na falha, TIRAVA 4-11 HP do
+  // jogador direto no cliente, mostrando tela de FRACASSO. Bug reportado pelo
+  // user (aceitou "coletar cogumelos" → fracasso + perdeu 6 HP). Viola
+  // SUPREME RULE #0 (Servidor é a Autoridade): não havia combate real, nem
+  // skill check, nem autorização do servidor; e o servidor já tem o desafio
+  // AUTO-TRACK (matar X / coletar X durante a aventura real, progresso passivo).
+  // FIX: zero coin-flip, ZERO mutação de HP/gold/XP no cliente. O popup explica
+  // que o desafio é cumprido jogando; a recompensa vem do servidor ao concluir.
   if (typeof _dailyChallengeForToday !== 'function') return;
   var ch = _dailyChallengeForToday();
-  var verb = ch.kind === 'hunt' ? 'derrotou' : 'reuniu';
-  var verbFail = ch.kind === 'hunt' ? 'derrotar' : 'reunir';
+  var isHunt = ch.kind === 'hunt';
   _showInfoPopup({
     icon: '<img src="' + _dcDailyPng(ch) + '" alt="" style="width:48px;height:48px;object-fit:contain;border-radius:8px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));" onerror="this.onerror=null;this.src=\'../shared/img/city/daily_challenge.webp\';">',
     npc: 'Desafio do Dia',
-    title: ch.kind === 'hunt' ? 'Iniciar Caçada' : 'Iniciar Coleta',
+    title: isHunt ? 'Caçada do Dia' : 'Coleta do Dia',
     desc: '<div style="text-align:center;color:var(--v-text-dim,#a09484);'
-        + 'font-size:calc(13px * var(--v-font-scale,1));line-height:1.5;">Deseja iniciar agora?</div>',
-    confirmLabel: 'Sim',
+        + 'font-size:calc(13px * var(--v-font-scale,1));line-height:1.55;">'
+        + 'Este desafio é cumprido <b>durante suas aventuras</b>: '
+        + (isHunt ? 'derrote os alvos' : 'colete o necessário')
+        + ' explorando a região. O progresso é contado automaticamente — '
+        + 'a recompensa chega ao concluir. <i>(Sem risco aqui: nenhum dano por '
+        + 'tocar neste aviso.)</i></div>',
+    confirmLabel: 'Partir para Aventura',
+    cancelLabel: 'Voltar',
     onConfirm: function(){
-      // Mock combat — 65% sucesso (caça/coleta menos punitivo que masmorra antiga)
-      var win = Math.random() < 0.65;
-      var preGold = p.gold;
-      var preHp = p.hp || 0;
-      window._dailyChallengeDone = true;
-      if (win) {
-        // Bônus: 40% high (+50%), 35% mid (+25%), 25% no bonus
-        var bonus = Math.random();
-        var multiplier = bonus < 0.4 ? 1.5 : (bonus < 0.75 ? 1.25 : 1);
-        var goldGain = Math.floor(ch.reward_gold * multiplier);
-        var xpGain = Math.floor(ch.reward_xp * multiplier);
-        p.gold += goldGain;
-        _gainXp(p, xpGain);
-        refreshHud();
-        var bonusLabel = multiplier === 1.5 ? '+50% (HP > 75%)' : (multiplier === 1.25 ? '+25% (HP > 50%)' : 'sem bônus');
-        _showServiceResultPopup({
-          icon: _heralIco('ic-bolsa'), npc: 'Desafio do Dia',
-          narrative: '<b>SUCESSO!</b><br><i>Você ' + verb + ' o necessário. A cidade agradece.</i><br><br>'
-                   + '<b>Bônus por HP:</b> ' + bonusLabel + '<br>'
-                   + '<b>Recompensa:</b> ' + goldGain + ' Valdoritas + ' + xpGain + ' XP',
-          deltas: [
-            { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
-            _lastXpDelta(p)
-          ],
-          onContinue: function(){ /* fecha pra hub */ }
-        });
-      } else {
-        var dmg = (ch.kind === 'hunt' ? 8 : 4) + Math.floor(Math.random() * 8);
-        p.hp = Math.max(1, preHp - dmg);
-        refreshHud();
-        _showServiceResultPopup({
-          icon: _heralIco('ic-mochila'), npc: 'Desafio do Dia',
-          narrative: '<b>FRACASSO</b><br><i>Não conseguiste ' + verbFail + ' tudo a tempo. Volta amanhã.</i><br><br>'
-                   + '<b>-' + dmg + ' HP</b> · Sem recompensa hoje.',
-          deltas: [
-            { type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || preHp, bar: false }
-          ],
-          onContinue: function(){ /* fecha pra hub */ }
-        });
-      }
+      // Direciona pra aventura real (auto-track server). NUNCA muta HP/gold/XP aqui.
+      vToast(isHunt ? '⚔️ Boa caçada! O progresso conta sozinho.' : '🌿 Boa coleta! O progresso conta sozinho.');
+      try {
+        // Clica o CTA real "PARTIR PARA AVENTURA" (cb=explore_main). Se não achar,
+        // só fecha (o aviso já explicou). Nunca chama função de viagem com args errados.
+        var partir = document.querySelector('[data-cb="explore_main"]');
+        if (partir) partir.click();
+      } catch(_e){ console.warn('[CITY] daily->depart fallback:', _e); }
     }
   });
 }
