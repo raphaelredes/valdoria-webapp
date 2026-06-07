@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-06T10:05:43Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-07T22:26:51Z - do not edit directly, edit source -->
 
 
 
@@ -35449,6 +35449,52 @@ function _pickRandomEnemyForBiome() {
 // escolha "atacar") redireciona pro combate.html oficial via query params.
 // O combate.html é o simulador master de combat2 — fonte única de QA.
 // ============================================================================
+/* 2026-06-07 EX6: overlay BLOQUEANTE de "preparando combate". Antes, entre o
+   clique em "Enfrentar"/"Partir" e o combate.html realmente carregar (fetch da
+   página em 3G pode levar segundos), a tela velha da exploração continuava
+   interativa — o jogador "agia na tela velha" sem feedback de carregamento.
+   Este overlay cobre TUDO (pointer-events:auto) imediatamente até o redirect.
+   Não é loading duplo: cobre o tempo morto antes do loading próprio do
+   combate.html aparecer (handoff contínuo). Safe-DOM (sem innerHTML). */
+function _showCombatLoadOverlay() {
+  try {
+    if (document.getElementById('_combat-load-ov')) return;
+    // injeta keyframe uma única vez (textContent = safe, não dispara hook XSS)
+    if (!document.getElementById('_combat-load-kf')) {
+      var st = document.createElement('style');
+      st.id = '_combat-load-kf';
+      st.textContent =
+        '@keyframes _clRingSpin{to{transform:rotate(360deg)}}' +
+        '@keyframes _clPulse{0%,100%{opacity:.55}50%{opacity:1}}';
+      document.head.appendChild(st);
+    }
+    var ov = document.createElement('div');
+    ov.id = '_combat-load-ov';
+    ov.style.cssText = ''
+      + 'position:fixed;inset:0;z-index:10001;pointer-events:auto;'
+      + 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;'
+      + 'background:radial-gradient(circle at 50% 40%, rgba(40,24,14,0.97), rgba(16,12,8,0.99));'
+      + 'opacity:0;transition:opacity 0.18s ease;';
+    var ring = document.createElement('div');
+    ring.style.cssText = ''
+      + 'width:56px;height:56px;border-radius:50%;'
+      + 'border:4px solid rgba(196,149,58,0.25);border-top-color:#c4953a;'
+      + 'animation:_clRingSpin 0.9s linear infinite;';
+    var txt = document.createElement('div');
+    txt.textContent = 'Preparando combate…';
+    txt.style.cssText = ''
+      + 'font-family:Cinzel, serif;font-size:calc(16px * var(--v-font-scale, 1));'
+      + 'letter-spacing:1.5px;color:#c4953a;text-shadow:0 0 16px rgba(196,149,58,0.4);'
+      + 'animation:_clPulse 1.6s ease-in-out infinite;';
+    ov.appendChild(ring);
+    ov.appendChild(txt);
+    document.body.appendChild(ov);
+    requestAnimationFrame(function(){ ov.style.opacity = '1'; });
+  } catch (e) {
+    if (typeof LOGW === 'function') LOGW('COMBAT', 'combat-load overlay failed: ' + (e && e.message));
+  }
+}
+
 function triggerCombatScreen(cfg) {
   // X-6.5.51AB (2026-04-26): warning quando enemyId nao existe em ENEMIES_DB.
   // Bug real (orc_warrior caia em goblin silenciosamente, sem alerta). Agora
@@ -35674,6 +35720,9 @@ function triggerCombatScreen(cfg) {
     + ' surprise=' + !!cfg.surprise + ' mode=' + window.__EXPLORE_MODE);
   // Marca transition pra anti close-beacon
   window.__valdoria_transitioning = true;
+  // EX6 (2026-06-07): cobre a tela ANTES do redirect — bloqueia interação na
+  // exploração enquanto combate.html carrega (handoff sem tela velha clicável).
+  _showCombatLoadOverlay();
   if (window.__EXPLORE_MODE === 'remote') {
     // URL absoluta pro combate2 shim (infra canonical deployada em /combat2/)
     window.location.href = '/combat2/?' + params.toString();
