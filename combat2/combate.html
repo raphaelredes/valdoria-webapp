@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T05:39:30Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T17:53:14Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -29016,7 +29016,12 @@ async function startCombatRemoteCanonical() {
     console.info('[C-REM:PIVOT-BOOT] fetching /api/combat2/prepare');
     resetSimDiceSkipForNewCombat();
     try {
-        var url = window.__COMBAT_API_BASE + '/api/combat2/prepare';
+        /* WebApp Token Resilience: envia ?uid= como dica pra o servidor recuperar
+           a sessão de combate read-only se o token efêmero (TTL ~30min) expirou
+           — sem isso, lingering no prólogo / app em background derrubava o combate
+           em 401 e prendia o jogador no loop cidade↔combate. Server: combat2_pivot_http _handle_prepare. */
+        var url = window.__COMBAT_API_BASE + '/api/combat2/prepare'
+            + (window.__COMBAT_USER_ID ? ('?uid=' + encodeURIComponent(window.__COMBAT_USER_ID)) : '');
         var r = await fetch(url, {
             method: 'GET',
             headers: {
