@@ -1191,15 +1191,17 @@ LOG SINK (Fase 7):
       left: 50%;
       transform: translateX(-50%);
       z-index: var(--v-z-dropdown-high, 51);
-      width: 28px;
-      height: 28px;
+      /* 2026-06-07 (user): círculo + seta MAIORES — o '·' antigo não lia como
+         "recolher". Agora ▾ (seta pra baixo clara) maior. */
+      width: 34px;
+      height: 34px;
       padding: 0;
       background: rgba(28,22,16,0.92);
       border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
       border-radius: 50%;
-      color: var(--v-text-dim, #a09484);
+      color: var(--v-gold, #c4953a);
       font-family: var(--v-font-display, 'Cinzel', serif);
-      font-size: var(--v-font-md, 14px);
+      font-size: var(--v-font-2xl, 18px);
       line-height: 1;
       cursor: pointer;
       display: flex;
@@ -7888,12 +7890,12 @@ body.perf-lite .vc-action-btn { transition: none; }
          canonical do CLAUDE.md "Collapsible Panel (Immersive Mode)". O comportamento
          continua o mesmo (footer-collapse-toggle/footer-restore sao os ids
          operacionais com handlers em DOMContentLoaded). -->
-    <button id="footer-collapse-toggle" data-alias="immersive-toggle" aria-label="Recolher menu" title="Recolher menu">·</button>
+    <button id="footer-collapse-toggle" data-alias="immersive-toggle" aria-label="Recolher menu" title="Recolher menu">&#9662;</button>
     <div id="bottom-panel">
       <div id="footer-quick" class="footer-row footer-quick"></div>
       <div id="footer-nav" class="footer-row footer-nav"></div>
     </div>
-    <button id="footer-restore" data-alias="immersive-restore" aria-label="Expandir menu">· Menu</button>
+    <button id="footer-restore" data-alias="immersive-restore" aria-label="Expandir menu">&#9652; Menu</button>
     <div id="sim-log-panel"></div>
   </div>
   <script>
