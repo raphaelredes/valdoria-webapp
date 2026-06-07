@@ -8325,6 +8325,15 @@ body.perf-lite .vc-action-btn { transition: none; }
     if (_skipRestore) {
       console.warn('[CITY] _skiprestore=1 — skipping /api/game/state + last_screen restore');
     }
+    /* 2026-06-07 (user): se o jogador clicou "voltar" no criador pra voltar ao HALL
+       (flag sessionStorage 'valdoria_reopen_hall' OU ?showHall=1), NÃO auto-resume pra
+       explore/combat/levelup/prologue — esse redirect roubava o retorno ao Hall
+       (ganhava a corrida do reopen). Honra a intenção do jogador: fica na cidade e o
+       handler pageshow reabre o Hall. NÃO consome o flag aqui (pageshow consome). */
+    var _returningToHall = false;
+    try { if (sessionStorage.getItem('valdoria_reopen_hall') === '1') _returningToHall = true; } catch (_f) {}
+    try { if (new URLSearchParams(window.location.search).get('showHall') === '1') _returningToHall = true; } catch (_f) {}
+    if (_returningToHall) console.log('[CITY] returning to Hall — auto-resume redirect suprimido');
 
     // USER REQUEST 2026-05-05: REGRA MANDATORY — usar /api/game/state pra restaurar
     // posição EXATA do player (last_screen_payload). Se player estava em
@@ -8350,7 +8359,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       // Hall com mock fallback (Brunhilda/Lyana). User report:
       //   "criei Sage, foi direto para cidade sem prólogo, vejo Brunhilda/
       //    Lyana ao invés de Wilzen, e 2 grupo members aleatórios (Liriel/Korin)"
-      if (state && state.transition && state.transition.to){
+      if (state && state.transition && state.transition.to && !_returningToHall){
         var dest = state.transition.to;
         var serverUrl = state.transition.url;  // server-built URL (preferred)
         console.log('[CITY] last_screen_payload → redirect to:', dest, '(serverUrl:', serverUrl ? 'yes' : 'no', ')');

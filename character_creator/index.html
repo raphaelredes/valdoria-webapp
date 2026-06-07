@@ -2733,19 +2733,24 @@ Busca rápida:
                 <br><small>Você pode mudar depois nas <b>Configurações</b> da cidade.</small>
             </p>
             <div class="font-onboarding-options">
-                <button class="font-onboarding-option" data-size="small" onclick="_pickFontAndStart('small')">
+                <button class="font-onboarding-option" data-size="small" onclick="_previewFontSize('small')">
                     <span class="font-onboarding-label">Pequena</span>
                     <span class="font-onboarding-sample" style="font-size: 12.6px;">A coragem forja lendas eternas.</span>
                 </button>
-                <button class="font-onboarding-option font-onboarding-recommended" data-size="normal" onclick="_pickFontAndStart('normal')">
+                <button class="font-onboarding-option font-onboarding-recommended" data-size="normal" onclick="_previewFontSize('normal')">
                     <span class="font-onboarding-label">Normal <span class="font-onboarding-pill">Recomendado</span></span>
                     <span class="font-onboarding-sample" style="font-size: 14px;">A coragem forja lendas eternas.</span>
                 </button>
-                <button class="font-onboarding-option" data-size="large" onclick="_pickFontAndStart('large')">
+                <button class="font-onboarding-option" data-size="large" onclick="_previewFontSize('large')">
                     <span class="font-onboarding-label">Maior</span>
                     <span class="font-onboarding-sample" style="font-size: 16.1px;">A coragem forja lendas eternas.</span>
                 </button>
             </div>
+            <!-- 2026-06-07 (user): pré-visualização ao vivo — tocar numa opção aplica o
+                 tamanho em TODA a tela na hora; o "Confirmar" só salva depois que o
+                 jogador vê como fica. -->
+            <p class="font-onboarding-preview-hint" id="font-onboarding-hint">Toque numa opção para ver como fica.</p>
+            <button type="button" id="font-onboarding-confirm" class="v-btn v-btn-primary btn-block" onclick="_confirmFontSize()" disabled>Confirmar tamanho</button>
         </div>
     </div>
     <style>
@@ -2912,6 +2917,30 @@ Busca rápida:
         /* Sessao #37 (2026-05-25 REVISADO): one-time font-size onboarding.
            Persiste em localStorage.valdoria_font_size — depois disso, usuario
            muda via Configuracoes da cidade (NUNCA mais aparece este overlay). */
+        /* 2026-06-07 (user): pré-visualização ao vivo. _previewFontSize aplica o
+           tamanho em TODA a UI imediatamente (SEM salvar) e habilita o Confirmar;
+           _confirmFontSize salva + dismissa via _pickFontAndStart. */
+        var _pendingFontSize = null;
+        window._previewFontSize = function(size){
+            if (!['small','normal','large'].includes(size)) return;
+            _pendingFontSize = size;
+            try { document.body.setAttribute('data-font-size', size); } catch(e){}
+            if (typeof haptic === 'function') haptic('light');
+            var ov = document.getElementById('font-size-onboarding');
+            if (ov) {
+                ov.querySelectorAll('.font-onboarding-option').forEach(function(b){
+                    b.classList.toggle('font-onboarding-current', b.getAttribute('data-size') === size);
+                });
+            }
+            var hint = document.getElementById('font-onboarding-hint');
+            if (hint) hint.textContent = 'É assim que a tela vai ficar. Confirme ou escolha outro tamanho.';
+            var cbtn = document.getElementById('font-onboarding-confirm');
+            if (cbtn) cbtn.disabled = false;
+        };
+        window._confirmFontSize = function(){
+            if (!_pendingFontSize) return;
+            window._pickFontAndStart(_pendingFontSize);
+        };
         window._pickFontAndStart = function(size){
             if (!['small','normal','large'].includes(size)) return;
             try {
@@ -2953,13 +2982,13 @@ Busca rápida:
                     var ov = document.getElementById('font-size-onboarding');
                     if (!ov) return;
                     ov.style.display = 'flex';
-                    // Marca botao atual como ativo (feedback visual da preferencia armazenada)
+                    /* 2026-06-07 (user): pré-aplica o tamanho atual (ou Normal) já na
+                       abertura — marca a opção, mostra a prévia ao vivo e habilita o
+                       Confirmar. Assim o jogador VÊ como fica antes de confirmar. */
                     var stored = localStorage.getItem('valdoria_font_size');
                     if (stored === 'xlarge') stored = 'large';
-                    if (stored && ['small','normal','large'].indexOf(stored) >= 0) {
-                        var btn = ov.querySelector('.font-onboarding-option[data-size="' + stored + '"]');
-                        if (btn) btn.classList.add('font-onboarding-current');
-                    }
+                    var initial = (stored && ['small','normal','large'].indexOf(stored) >= 0) ? stored : 'normal';
+                    if (typeof window._previewFontSize === 'function') window._previewFontSize(initial);
                 };
                 if (document.readyState !== 'loading') apply();
                 else document.addEventListener('DOMContentLoaded', apply, { once: true });
@@ -3977,12 +4006,20 @@ Busca rápida:
         // 100vw referencia viewport REAL do navegador (1920px desktop) e ignora
         // html max-width: 430px. Pixel math via clientWidth garante slide correto
         // dentro do container. Init + resize re-aplicam tamanho.
-        function _initLayout() {
+        var _lastLayoutW = 0;
+        function _initLayout(force) {
             const viewport = document.getElementById('screenViewport');
             const track = document.getElementById('screenTrack');
             if (!viewport || !track) return;
             const w = viewport.clientWidth;
             if (!w) return;
+            /* 2026-06-07 FIX flicker (revisão geral): o WebView do Telegram dispara
+               'resize' em rajada (altura/safe-area assentando) com a LARGURA IGUAL.
+               Reescrever a largura de todos os screens a cada rajada forçava reflow →
+               flicker (pior na tela densa de personalidade/atributos). Se a largura
+               não mudou, só re-posiciona via transform (sem reflow). */
+            if (w === _lastLayoutW && !force) { _slideTrackTo(currentScreen); return; }
+            _lastLayoutW = w;
             track.style.width = (SCREENS.length * w) + 'px';
             Array.from(track.children).forEach(s => {
                 s.style.flex = `0 0 ${w}px`;
@@ -4209,8 +4246,13 @@ Busca rápida:
 
         // USER REQUEST 2026-05-04: re-init layout on resize (orientation change ou
         // janela ajustada). Sem isso, slide quebra ao redimensionar.
+        /* 2026-06-07 FIX flicker: coalesce rajadas de 'resize' do Telegram WebView num
+           único requestAnimationFrame (com o guard de largura em _initLayout, vira no-op
+           quando só a altura oscila). Antes era 1 reflow por evento → flicker. */
+        var _rzRaf = 0;
         window.addEventListener('resize', function() {
-            try { _initLayout(); } catch(e){}
+            if (_rzRaf) cancelAnimationFrame(_rzRaf);
+            _rzRaf = requestAnimationFrame(function () { try { _initLayout(); } catch (e) {} });
         });
 
         // ═══════════════════════════════════════════════
@@ -6526,7 +6568,10 @@ Busca rápida:
             if (!pkgs) { finishClassScreen(); return; }
             const cls = CLASSES[classKey];
             const classIcon = _classIconHtml(classKey, 40);
-            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelEquipment()">← Voltar</button>`;
+            /* 2026-06-07 (user): botão "← Voltar" interno REMOVIDO — o back do header
+               (ao lado de "FORJAR PERSONAGEM") + o BackButton do Telegram já cobrem
+               (fecham o sub-screen de equipamento). Evita botão duplicado acima do título. */
+            let html = '';
             // Sessao #29 (2026-05-24) AAA: header com PNG da classe + ornamento gold
             html += `<div class="equip-header">`
                   + `<div class="equip-header-icon">${classIcon}</div>`
