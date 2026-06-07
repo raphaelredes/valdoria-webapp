@@ -2012,6 +2012,59 @@ LOG SINK (Fase 7):
     }
     .cpp-btn-cancel:hover { border-color: #c4953a; color: #c4953a; }
 
+    /* ===== Hall popup — Convocação do Aventureiro (Trocar Personagem) =====
+       2026-06-07 (design judge-panel): popup épico de troca de personagem.
+       Arte WebP da classe num medalhão circular (anel rúnico girando + brasão
+       de canto + vinheta), nome Cinzel, badges. Escopado por :has(.hcs-conv)
+       pra NÃO vazar pros outros usos de _showInfoPopup. */
+    /* Esconde o slot de ícone padrão SÓ neste popup — a arte vive toda no desc.
+       _showInfoPopup injeta opts.icon (<span> noop), então usamos :has no card. */
+    .cpp-card:has(.hcs-conv) .cpp-icon { display: none; }
+    .hcs-icon-noop { display: none; }
+    /* Neutraliza border-left/padding/bg/left-align herdados do .cpp-desc — só aqui. */
+    #cpp-desc:has(.hcs-conv) { background: transparent; border-left: 0; padding: 0; text-align: center; margin-bottom: var(--v-space-md, 12px); }
+
+    .hcs-conv { display: flex; flex-direction: column; align-items: center; gap: var(--v-space-sm, 8px); text-align: center; }
+
+    /* --- Medalhão: arte da classe + anel rúnico + raios cerimoniais --- */
+    .hcs-medallion { position: relative; width: clamp(104px, 32vw, 116px); height: clamp(104px, 32vw, 116px); display: flex; align-items: center; justify-content: center; margin: 2px 0; }
+    .hcs-rays { position: absolute; inset: -20px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(196,149,58,0.16) 0deg 6deg, transparent 6deg 18deg); -webkit-mask: radial-gradient(circle, transparent 46%, #000 58%, transparent 80%); mask: radial-gradient(circle, transparent 46%, #000 58%, transparent 80%); animation: hcs-rays-spin 26s linear infinite; pointer-events: none; }
+    .hcs-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px dashed var(--v-gold, #c4953a); opacity: 0.7; box-shadow: 0 0 14px var(--v-gold-30, rgba(196,149,58,0.3)); animation: hcs-ring-spin 30s linear infinite; }
+    .hcs-ring2 { position: absolute; inset: 7px; border-radius: 50%; border: 1px solid var(--v-gold-dim, #9a7530); opacity: 0.5; animation: hcs-ring-spin 22s linear infinite reverse; }
+    .hcs-portrait { position: relative; width: 92px; height: 92px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--v-gold, #c4953a); background: radial-gradient(circle at 50% 35%, rgba(58,46,34,0.95), rgba(20,16,12,0.98)); box-shadow: inset 0 0 14px rgba(0,0,0,0.6), 0 0 18px var(--v-gold-30, rgba(196,149,58,0.3)); display: flex; align-items: center; justify-content: center; animation: hcs-glow 2.8s ease-in-out infinite; }
+    .hcs-art { width: 100%; height: 100%; object-fit: cover; object-position: center 26%; display: block; }
+    .hcs-fallback { position: absolute; inset: 0; align-items: center; justify-content: center; }
+    .hcs-fallback svg { width: 58px; height: 58px; fill: var(--v-gold, #c4953a); filter: drop-shadow(0 0 8px var(--v-gold-30, rgba(196,149,58,0.3))); }
+    /* Vinheta inferior: integra a arte ao fundo escuro do card */
+    .hcs-vignette { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 50% 42%, transparent 54%, rgba(14,10,6,0.5) 100%), linear-gradient(180deg, transparent 58%, rgba(14,10,6,0.62) 100%); pointer-events: none; }
+    /* Brasão de classe sobreposto no canto (sempre SVG = identidade garantida) */
+    .hcs-crest { position: absolute; right: 2px; bottom: 2px; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 40% 35%, rgba(48,38,24,0.98), rgba(16,12,8,0.98)); border: 1.5px solid var(--v-gold, #c4953a); box-shadow: 0 2px 8px rgba(0,0,0,0.6), inset 0 0 6px var(--v-gold-30, rgba(196,149,58,0.3)); }
+    .hcs-crest svg { width: 62%; height: 62%; fill: var(--v-gold, #c4953a); }
+
+    /* --- Nome em Cinzel --- */
+    .hcs-name { font-family: var(--v-font-display, 'Cinzel', serif); font-weight: 700; font-size: calc(20px * var(--v-font-scale, 1)); line-height: 1.15; color: var(--v-text-bright, #e8dcc8); letter-spacing: 0.04em; text-shadow: 0 0 12px var(--v-gold-30, rgba(196,149,58,0.3)); margin: 2px 0 1px; }
+
+    /* --- Badges Nível · Raça · Classe --- */
+    .hcs-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+    .hcs-badge { font-family: var(--v-font-display, 'Cinzel', serif); font-size: var(--v-font-sm, 12px); color: var(--v-text, #d4c8b0); letter-spacing: 0.06em; padding: 3px 10px; border-radius: var(--v-radius-pill, 20px); border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); background: rgba(196,149,58,0.10); white-space: nowrap; }
+    .hcs-badge-cls { color: var(--v-gold, #c4953a); border-color: var(--v-gold, #c4953a); background: rgba(196,149,58,0.16); }
+
+    /* --- Divisória de selo ◆ --- */
+    .hcs-divider { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--v-gold, #c4953a); font-size: 9px; width: 100%; margin: 4px 0 2px; opacity: 0.85; }
+    .hcs-divider span { height: 1px; width: 46px; background: linear-gradient(90deg, transparent, var(--v-gold-30, rgba(196,149,58,0.3)), transparent); }
+
+    /* --- Narração neutra (3ª pessoa) --- */
+    .hcs-narr { font-family: var(--v-font, 'MedievalSharp', serif); font-style: italic; font-size: var(--v-font-base, 13px); line-height: 1.55; color: var(--v-text, #d4c8b0); margin: 0 auto; max-width: 284px; padding: 0 4px; }
+
+    /* --- Tranquilização --- */
+    .hcs-reassure { font-size: var(--v-font-sm, 12px); line-height: 1.5; color: var(--v-text-dim, #a09484); margin: 6px auto 0; max-width: 284px; padding: 7px 10px; background: rgba(15,12,8,0.5); border-left: 2px solid var(--v-gold, #c4953a); border-radius: var(--v-radius-sm, 6px); text-align: left; }
+
+    @keyframes hcs-ring-spin { to { transform: rotate(360deg); } }
+    @keyframes hcs-rays-spin { to { transform: rotate(360deg); } }
+    @keyframes hcs-glow { 0%, 100% { box-shadow: inset 0 0 14px rgba(0,0,0,0.6), 0 0 14px var(--v-gold-30, rgba(196,149,58,0.3)); } 50% { box-shadow: inset 0 0 14px rgba(0,0,0,0.6), 0 0 26px rgba(196,149,58,0.55); } }
+    @media (prefers-reduced-motion: reduce) { .hcs-ring, .hcs-ring2, .hcs-rays, .hcs-portrait { animation: none; } }
+    body.perf-lite .hcs-ring, body.perf-lite .hcs-ring2, body.perf-lite .hcs-rays, body.perf-lite .hcs-portrait { animation: none; }
+
     /* ============================================================
        === NPC DIALOGUE POPUP (Fase 9.3 — drill-down NPC)
        ============================================================
@@ -12125,25 +12178,45 @@ function _onPlayCharacter(){
 
 // === CONFIRM TROCA — usa _showInfoPopup (sem semântica de compra) ===
 function _showCharSwitchConfirm(picked){
+  // 2026-06-07: redesign ÉPICO (workflow design judge-panel) — "Convocação do
+  // Aventureiro". Arte WebP da classe num medalhão (anel rúnico + brasão de
+  // canto + vinheta), nome Cinzel, badges, narração neutra 3ª pessoa.
+  // Regras: heraldic/OpenAI only (sem o emoji 🧙 antigo), herói≠personagem,
+  // DM não fala, PT-BR, tokens. slug ASCII via _hallClassToHeraldic (normaliza
+  // acento PT-BR → ic-clerigo); arte em /shared/img/combat/{slug}.webp + fallback SVG.
+  var _csSlug = _hallClassToHeraldic(picked.cls).replace('ic-', '');
+  var _csImg = (location.protocol === 'file:') ? '../shared/img/combat/' : '/shared/img/combat/';
+  var _csName = _titleCase(picked.name), _csRace = _titleCase(picked.race), _csCls = _titleCase(picked.cls);
+  var _csCrest = '<svg viewBox="0 0 120 120"><use href="#ic-' + _csSlug + '"/></svg>';
+  var _csDesc =
+      '<div class="hcs-conv">'
+    +   '<div class="hcs-medallion" aria-hidden="true">'
+    +     '<span class="hcs-rays"></span><span class="hcs-ring"></span><span class="hcs-ring2"></span>'
+    +     '<span class="hcs-portrait">'
+    +       '<img class="hcs-art" src="' + _csImg + _csSlug + '.webp" alt="" '
+    +         'onerror="this.onerror=null;this.style.display=\'none\';var f=this.parentNode.querySelector(\'.hcs-fallback\');if(f)f.style.display=\'flex\';">'
+    +       '<span class="hcs-fallback" style="display:none">' + _csCrest + '</span>'
+    +       '<span class="hcs-vignette"></span>'
+    +     '</span>'
+    +     '<span class="hcs-crest">' + _csCrest + '</span>'
+    +   '</div>'
+    +   '<div class="hcs-name">' + _csName + '</div>'
+    +   '<div class="hcs-badges">'
+    +     '<span class="hcs-badge">Nível ' + picked.level + '</span>'
+    +     '<span class="hcs-badge">' + _csRace + '</span>'
+    +     '<span class="hcs-badge hcs-badge-cls">' + _csCls + '</span>'
+    +   '</div>'
+    +   '<div class="hcs-divider" aria-hidden="true"><span></span>&#9670;<span></span></div>'
+    +   '<p class="hcs-narr">O estandarte muda de portador — e outra jornada de ' + _csName + ' desperta além do salão.</p>'
+    +   '<p class="hcs-reassure">Seu progresso atual permanece salvo. O jogo será recarregado para assumir este caminho.</p>'
+    + '</div>';
   _showInfoPopup({
-    icon: picked.emoji || '🧙',
-    title: 'Trocar Personagem?',
+    icon: '<span class="hcs-icon-noop"></span>',
+    title: 'Convocar Aventureiro',
     npc: 'Hall de Personagens',
-    desc: '<div style="text-align:left;">'
-      + '<div style="background: rgba(196,149,58,0.06); border-radius: var(--v-radius-sm, 6px); '
-      + 'padding: var(--v-space-md, 8px); margin-bottom: var(--v-space-md, 8px);">'
-      + '<div style="font-family: var(--v-font, MedievalSharp, serif); font-size: var(--v-font-body, 14px); '
-      + 'font-weight: 700; color: var(--v-text-bright, #e8dcc8);">' + _titleCase(picked.name) + '</div>'
-      + '<div style="font-size: var(--v-font-base, 13px); color: var(--v-text-dim, #a09484); margin-top:2px;">'
-      + 'Nível ' + picked.level + ' · ' + _titleCase(picked.race) + ' ' + _titleCase(picked.cls)
-      + '</div>'
-      + '</div>'
-      + '<p style="font-size: var(--v-font-base, 13px); color: var(--v-text-dim, #a09484); margin: 0; line-height: 1.5;">'
-      + 'O jogo vai recarregar com este personagem ativo. Seu progresso atual permanece salvo.'
-      + '</p>'
-      + '</div>',
-    confirmLabel: 'Confirmar',
-    cancelLabel: 'Voltar',
+    desc: _csDesc,
+    confirmLabel: 'Assumir este caminho',
+    cancelLabel: 'Voltar ao salão',
     onConfirm: function(){
       // USER REQUEST 2026-05-04: REMOTE mode chama /api/auth/select-character
       // pra trocar a sessão server-side (gera novo token p/ novo char).
