@@ -6437,18 +6437,21 @@ Busca rápida:
             openSubScreen('sub-equip-select');
         }
 
-        /* Sessao #29 v4 (2026-05-24): item -> PNG slug helper.
+        /* Sessao #29 v4 (2026-05-24): item -> imagem (slug helper).
            Normaliza nome (NFKD), strip accents, lowercase, hyphens.
-           User pediu: equipment selection mostrar PNG real do item em vez de
-           apenas texto. PNGs ja existem em /shared/img/items/<slug>.png. */
+           User pediu: equipment selection mostrar a imagem real do item em vez de
+           apenas texto. As imagens vivem em /shared/img/items/<slug>.webp.
+           FIX 2026-06-07: o inventario canonico migrou pra WebP (606 .webp, 0 .png,
+           PADRAO_WEBP) — o codigo ainda pedia .png e TODOS os thumbs de equipamento
+           inicial 404avam (onerror escondia → "sem imagem"). Trocado p/ .webp. */
         function _itemSlug(name) {
             if (!name) return '';
             let s = String(name);
             // BUGFIX sessão #29 (2026-05-24): EQUIPMENT_PACKAGES tem itens com
             // parenthetical de stats: "Espada de Treino (1d8)", "Cota de Malha (6 CA)".
-            // PNGs no inventário canônico /shared/img/items/ usam slug LIMPO:
-            // espada-de-treino.png, cota-de-malha.png. Strip () antes de slugify
-            // garante 21/21 items com PNG (antes era 1/21).
+            // As imagens no inventário canônico /shared/img/items/ usam slug LIMPO:
+            // espada-de-treino.webp, cota-de-malha.webp. Strip () antes de slugify
+            // garante 21/21 items com imagem (antes era 1/21).
             s = s.replace(/\s*\([^)]*\)\s*/g, ' ');
             s = s.normalize('NFKD').replace(/[̀-ͯ]/g, '');
             s = s.toLowerCase().trim();
@@ -6459,8 +6462,8 @@ Busca rápida:
             const slug = _itemSlug(itemName);
             const sz = sizePx || 28;
             if (!slug) return '';
-            /* Fallback: se PNG nao existir (onerror), some o thumb e fica so o texto */
-            return '<img src="/shared/img/items/' + slug + '.png" alt="" ' +
+            /* Fallback: se o WebP nao existir (onerror), some o thumb e fica so o texto */
+            return '<img src="/shared/img/items/' + slug + '.webp" alt="" ' +
                    'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;flex-shrink:0;border-radius:4px;background:rgba(0,0,0,0.2);" ' +
                    'loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';">';
         }
