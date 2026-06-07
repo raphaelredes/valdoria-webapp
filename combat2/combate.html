@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T21:03:56Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T21:06:31Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -21460,7 +21460,18 @@ function openSkillsPanel() {
        cai de ~95px pra ~50px. Card popup ganhou height:calc(100% - 40px) (~94%
        do overlay). Com 654px - 265px fixos = 389px pra lista. 5 skills × 50px +
        4 gaps × 6px = 274px — cabe com folga. User pediu cap em 5 por página. */
-    var PAGE_SIZE = 5;
+    /* 2026-06-07 (user): PAGE_SIZE RESPONSIVO ao tamanho de fonte — texto menor cabe
+       MAIS skills (menos paginação/espaço em branco); texto maior, menos. A .lp-list
+       tem overflow-y:auto, então qualquer sobra rola. Calcula por altura disponível /
+       altura de row (que escala com --v-font-scale). */
+    var PAGE_SIZE = (function () {
+        var fs = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--v-font-scale')) || 1;
+        if (!(fs > 0)) fs = 1;
+        var vh = Math.min((window.innerHeight || 654), 960);
+        var listH = Math.max(180, vh - 285);   // header + filtro + pager + close (chrome fixo)
+        var rowH = (48 * fs) + 6;               // row ~48px no scale 1 + gap 6px
+        return Math.max(3, Math.min(9, Math.floor(listH / rowH)));
+    })();
 
     function renderListBody() {
         var listEl = card.querySelector('.lp-list');
