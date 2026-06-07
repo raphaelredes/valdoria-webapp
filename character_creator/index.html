@@ -3367,9 +3367,26 @@ Busca rápida:
             tg.expand();
             tg.setHeaderColor(_vBg);
             tg.setBackgroundColor(_vBg);
-            document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportHeight + 'px');
-            tg.onEvent('viewportChanged', () => {
-                document.documentElement.style.setProperty('--tg-viewport-height', tg.viewportHeight + 'px');
+            /* 2026-06-07 FIX (botão "Confirmar Atributos" piscando): o
+               viewportChanged do Telegram dispara em rajada com viewportHeight
+               oscilando enquanto a WebView assenta a chrome/safe-area. Sem debounce,
+               cada disparo reescrevia --tg-viewport-height -> reflow do .screen-viewport
+               -> a tela densa de atributos quicava (botão entrando/saindo do viewport).
+               Fix: só commitar a altura quando estável (isStateStable) e mudou >=2px,
+               coalescido num requestAnimationFrame. */
+            var _lastVpH = 0, _vpRaf = 0;
+            function _applyVpHeight() {
+                var h = (tg && tg.viewportHeight) || window.innerHeight;
+                if (h > 0 && Math.abs(h - _lastVpH) >= 2) {
+                    _lastVpH = h;
+                    document.documentElement.style.setProperty('--tg-viewport-height', h + 'px');
+                }
+            }
+            _applyVpHeight();
+            tg.onEvent('viewportChanged', function (e) {
+                if (e && e.isStateStable === false) return;  // ignora intermediários
+                if (_vpRaf) cancelAnimationFrame(_vpRaf);
+                _vpRaf = requestAnimationFrame(_applyVpHeight);
             });
         }
 
