@@ -1496,6 +1496,16 @@
         <div class="err-msg" id="fatalMsg">Dados invalidos</div>
         <div class="err-hint">Volte ao bot e tente novamente.</div>
     </div>
+    <!-- vPopup overlay (shared/popup.js) — usado por vSubclass.openDetail (PADRAO_SUBCLASSE).
+         Sem este elemento, vPopup.show no-opava ("overlay not found") e o modal de detalhe
+         da subclasse nunca abria (bug sessão #82). Espelha character_creator/index.html. -->
+    <div class="v-popup-overlay" id="v-popup-overlay" style="display:none">
+        <div class="v-popup-card">
+            <div class="v-popup-header"></div>
+            <div class="v-popup-body"></div>
+            <div class="v-popup-actions"></div>
+        </div>
+    </div>
     <!-- Processing overlay injected by shared/processing-overlay.js -->
     <!-- Loading controller -->
     <script>
