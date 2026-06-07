@@ -7601,13 +7601,47 @@ Busca rápida:
                     _ch['X-Idempotency-Key'] = crypto.randomUUID();
                     const _ac2 = new AbortController();
                     const _tid2 = setTimeout(() => _ac2.abort(), 15000);
-                    const resp = await fetch(`${apiBase}/api/character/apply`, {
+                    let resp = await fetch(`${apiBase}/api/character/apply`, {
                         method: 'POST',
                         headers: _ch,
                         signal: _ac2.signal,
                         body: JSON.stringify(payload)
                     });
                     clearTimeout(_tid2);
+                    // Sessão #82: o creation token é EFÊMERO (in-memory `_pending_creations`,
+                    // perdido em restart do bot / TTL). Sem isso, o jogador preso DENTRO do
+                    // creator levava 401 "sessão expirada" e perdia a criação. Recupera via
+                    // /api/character/new_session (que usa validate_or_restore — sobrevive a
+                    // restart) com a SESSÃO DE JOGO persistente, e tenta o apply UMA vez com
+                    // o token novo. Retry inline único (sem loop): se falhar de novo, cai no
+                    // tratamento de erro normal abaixo.
+                    if (resp.status === 401) {
+                        try {
+                            var _env401 = (location.hostname.indexOf('dev.') === 0 || /[?&]env=dev/.test(location.search)) ? 'dev' : 'prod';
+                            var _gs401 = JSON.parse(localStorage.getItem('valdoria_session_' + _env401) || 'null');
+                            if (_gs401 && _gs401.token) {
+                                var _ns = await fetch(`${apiBase}/api/character/new_session`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _gs401.token },
+                                    body: JSON.stringify({ user_id: userId, char_id: charId })
+                                });
+                                if (_ns.ok) {
+                                    var _nsd = await _ns.json().catch(function () { return {}; });
+                                    if (_nsd && _nsd.token) {
+                                        token = _nsd.token;
+                                        _ch['Authorization'] = 'Bearer ' + token;
+                                        try { window.serverLog && window.serverLog('character_creator', 'info', 'token_recovered_via_new_session', {}); } catch (_) {}
+                                        resp = await fetch(`${apiBase}/api/character/apply`, {
+                                            method: 'POST', headers: _ch, body: JSON.stringify(payload)
+                                        });
+                                    }
+                                }
+                            }
+                        } catch (_re401) {
+                            console.error('[CHAR_CREATOR] 401 recovery failed:', _re401);
+                            try { window.serverLog && window.serverLog('character_creator', 'error', 'recovery_401_failed', { error: String(_re401 && _re401.message) }); } catch (_) {}
+                        }
+                    }
                     /* X-6.5.51AI: log status HTTP server-side */
                     try { window.serverLog && window.serverLog('character_creator', 'info', 'fetch_response', { status: resp.status, ok: resp.ok }); } catch (_) {}
                     if (resp.ok) {
