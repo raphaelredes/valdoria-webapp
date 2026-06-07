@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T19:36:20Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T20:30:21Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -20353,7 +20353,13 @@ function onBtnClick(ev) {
     if (act === 'toggle-skip-dice') {
         /* Frente 8 (#83): alterna a pref PERSISTENTE "pular animação de dados". */
         _setSkipAllDiceAnim(!_skipAllDiceAnim);
-        render(currentState);
+        /* 2026-06-07: NÃO re-renderiza a tela toda (reabria "Escolha uma ação"). Só
+           atualiza o checkbox no LUGAR — toggle inteligente, sem reload/flicker. */
+        var _sdBtn = document.querySelector('[data-act="toggle-skip-dice"]');
+        if (_sdBtn) {
+            _sdBtn.setAttribute('aria-pressed', _skipAllDiceAnim ? 'true' : 'false');
+            _sdBtn.textContent = (_skipAllDiceAnim ? '☑ Pular dados' : '☐ Pular dados');
+        }
         return;
     }
     if (act === 'toggle-actions') {
@@ -21035,11 +21041,30 @@ function openSkillHelpMini(overlayEl, skill) {
            pro PHB (resumo já está acima em descNode, não duplicar). */
         raw = 'Consulte o PHB/SRD 5.1 para a magia ou talento homólogo.';
     }
+    /* 2026-06-07: (1) PULA linhas de changelog/versão do dev (V1.x, Sprint, Ronda,
+       datas, X-codes, "alinhamento PHB", "flag X adicionada", "era kind:") — não
+       interessam ao jogador; (2) renderiza **negrito** de verdade (antes o textContent
+       mostrava o ** literal), via DOM seguro (sem innerHTML). */
+    var _DEV_NOTE_RE = /^\s*(V\d|Sprint|Ronda|\(?20\d\d-\d\d|X-\d|QA\b|alinhamento PHB|flag\s+\S+\s+(adicionad|removid)|era\s+`?kind)/i;
+    function _appendBoldLine(parent, text) {
+        var parts = String(text).split('**');
+        for (var _i = 0; _i < parts.length; _i++) {
+            if (!parts[_i]) continue;
+            if (_i % 2 === 1) {
+                var _st = document.createElement('strong');
+                _st.textContent = parts[_i];
+                parent.appendChild(_st);
+            } else {
+                parent.appendChild(document.createTextNode(parts[_i]));
+            }
+        }
+    }
     String(raw).split('\n').forEach(function (line) {
         if (!line.trim()) return;
+        if (_DEV_NOTE_RE.test(line)) return;  // não mostra notas de dev/versão ao jogador
         var pr = document.createElement('p');
         pr.className = 'lp-help-p';
-        pr.textContent = line;
+        _appendBoldLine(pr, line);
         body.appendChild(pr);
     });
     // Linha de botões: [Entendido] [?] — o "?" abre sub-popup com notas
