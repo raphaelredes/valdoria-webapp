@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T19:24:38Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T19:36:20Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -4986,6 +4986,9 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
    .tcc-name e a paleta vermelha-cobre do card. */
 .tcc-ico.tcc-ico--svg { width: 44px; height: 44px; flex-shrink: 0; }
 .tcc-ico.tcc-ico--svg svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 0 8px rgba(224,96,64,.45)); }
+/* 2026-06-07: retrato WebP (OpenAI) do alvo — constrange ao box (44px) pra NUNCA
+   renderizar a imagem no tamanho natural (512px = "imagem gigante tampando o popup"). */
+.tcc-ico.tcc-ico--svg img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
 .target-confirm-card--heal .tcc-ico.tcc-ico--svg svg { filter: drop-shadow(0 0 8px rgba(90, 168, 110, .5)); }
 .target-confirm-card--reaction .tcc-ico.tcc-ico--svg svg { filter: drop-shadow(0 0 10px rgba(160, 110, 220, .55)); }
 .tcc-info { flex: 1; min-width: 0; }
@@ -6621,6 +6624,9 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 #turn-queue .tl-node .tl-name { display: none; }
 #turn-queue .tl-node .tl-ico { font-size: calc(22px * var(--v-font-scale, 1)); line-height: 1; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; }
 #turn-queue .tl-node .tl-ico svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+/* 2026-06-07: retrato WebP (OpenAI) no tracker de iniciativa — constrange ao node
+   (28px) pra NUNCA renderizar a imagem no tamanho natural (512px). */
+#turn-queue .tl-node .tl-ico img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
 /* Por classe: a cor do ícone segue o slug heráldico (cls-mago, cls-druida, etc). */
 #turn-queue .tl-node.cls-guerreiro .tl-ico { color: #b06040; }
 #turn-queue .tl-node.cls-mago .tl-ico { color: #6a82c8; }
@@ -8619,6 +8625,10 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 @keyframes mmConfOvIn { from { opacity: 0; } to { opacity: 1; } }
 .mm-confirm-card { width: min(92vw, 320px); padding: 16px 18px 14px; background: linear-gradient(180deg, var(--v-bg-raised, #3a2e1e), var(--v-bg, #2a2014)); border: 1px solid rgba(196,149,58,0.6); border-radius: 16px; box-shadow: 0 0 30px rgba(196,149,58,0.35), 0 10px 24px rgba(0,0,0,0.75); color: var(--v-text, #d4c8b0); font-family: var(--v-font, 'MedievalSharp'), serif; animation: mmConfCardIn 0.3s ease-out; }
 @keyframes mmConfCardIn { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+/* 2026-06-07: imagem WebP (OpenAI) da habilidade no topo do popup de confirmação.
+   Tamanho fixo (72px) — constrange a imagem pra NUNCA renderizar no natural (512px). */
+.mm-confirm-ico { display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: calc(40px * var(--v-font-scale, 1)); line-height: 1; }
+.mm-confirm-ico img.skill-ico-img { width: 72px; height: 72px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(196,149,58,0.45); box-shadow: 0 0 14px rgba(196,149,58,0.3); display: block; }
 .mm-confirm-title {
     font-family: var(--v-font-display, 'Cinzel'), serif;
     font-weight: 700;
@@ -16270,13 +16280,13 @@ function buildTurnQueue(s) {
         var id = 'tq-' + entry.n.replace(/[^a-zA-Z0-9]/g, '_');
         /* V1 Invocações Phase 3 — usa SVG heráldico (mesmo dos cards) quando há
            mapping; fallback emoji para entries sem ícone designado. */
+        /* 2026-06-07: usa o MESMO retrato WebP (OpenAI) dos cards no tracker de
+           iniciativa (topo) — antes era SVG heráldico cru. _combatPortraitHTML
+           retorna <img> (com fallback SVG no onerror); se não houver retrato nem
+           ícone, cai no emoji. CSS .tl-ico img constrange ao tamanho do node. */
         var heraldicId = _heraldicIconOf(entry, entryUtype);
-        var iconHtml;
-        if (heraldicId) {
-            iconHtml = '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg>';
-        } else {
-            iconHtml = escHtml(entry.ico);
-        }
+        var iconHtml = _combatPortraitHTML(heraldicId, entry, entryUtype);
+        if (!iconHtml) iconHtml = escHtml(entry.ico);
         parts.push('<div class="' + cls + '" id="' + id + '" title="' + escHtml(entry.n) + '"><div class="tl-ico">' + iconHtml + '</div></div>');
     }
     parts.push('</div>');
@@ -21556,9 +21566,30 @@ function showSkillUseConfirmPopup(skill) {
         ov.className = 'mm-confirm-overlay' + (themeCls ? ' mm-confirm-overlay--' + themeCls : '');
         var card = document.createElement('div');
         card.className = 'mm-confirm-card' + (themeCls ? ' mm-confirm-card--' + themeCls : '');
+        /* 2026-06-07: imagem WebP (OpenAI) da habilidade no topo do popup — a MESMA
+           da tela de habilidades. DOM seguro (sem innerHTML): <img> + fallback emoji. */
+        var icoWrap = document.createElement('div');
+        icoWrap.className = 'mm-confirm-ico';
+        (function () {
+            var _slug = (skill.n && typeof _slugifyCombat === 'function') ? _slugifyCombat(skill.n) : '';
+            if (_slug && typeof SKILL_PNG_AVAILABLE !== 'undefined' && SKILL_PNG_AVAILABLE[_slug]) {
+                var _base = (typeof location !== 'undefined' && location.href.indexOf('file://') === 0)
+                    ? '../shared/img/combat/skills/' : '/shared/img/combat/skills/';
+                var _img = document.createElement('img');
+                _img.className = 'skill-ico-img';
+                _img.src = _base + _slug + '.webp';
+                _img.alt = '';
+                _img.loading = 'lazy';
+                var _emoji = skill.ico || '✨';
+                _img.onerror = function () { _img.onerror = null; _img.replaceWith(document.createTextNode(_emoji)); };
+                icoWrap.appendChild(_img);
+            } else {
+                icoWrap.textContent = skill.ico || '✨';
+            }
+        })();
         var title = document.createElement('div');
         title.className = 'mm-confirm-title' + (themeCls ? ' mm-confirm-title--' + themeCls : '');
-        title.textContent = (skill.ico ? skill.ico + ' ' : '') + 'Usar ' + (skill.n || 'habilidade') + '?';
+        title.textContent = 'Usar ' + (skill.n || 'habilidade') + '?';
         var sub = document.createElement('div');
         sub.className = 'mm-confirm-sub';
         sub.textContent = skill.desc || '';
@@ -21583,6 +21614,7 @@ function showSkillUseConfirmPopup(skill) {
         btnOk.addEventListener('click', function () { done(true); });
         btns.appendChild(btnCancel);
         btns.appendChild(btnOk);
+        card.appendChild(icoWrap);
         card.appendChild(title);
         if (skill.desc) card.appendChild(sub);
         card.appendChild(meta);
@@ -22859,12 +22891,11 @@ function showTargetConfirm(tgtIdx) {
        X-6.5.51AB (2026-04-26): tcc-ico agora usa SVG heraldico (ic-boss/ic-inimigo
        /ic-mago/etc) em vez do emoji u.ico (renderizava como icone tosco do
        Windows). Fallback pro emoji apenas se _heraldicIconOf nao retornar id. */
-    var _tccIconId = (typeof _heraldicIconOf === 'function')
-        ? _heraldicIconOf(u, (u.t === 'e' ? 'enemy' : (u.t === 'a' ? 'ally' : 'player')))
-        : null;
-    var _tccIconHtml = _tccIconId
-        ? '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + _tccIconId + '"/></svg>'
-        : escHtml(u.ico || '?');
+    var _tccUtype = (u.t === 'e' ? 'enemy' : (u.t === 'a' ? 'ally' : 'player'));
+    var _tccIconId = (typeof _heraldicIconOf === 'function') ? _heraldicIconOf(u, _tccUtype) : null;
+    /* 2026-06-07: retrato WebP (OpenAI) do alvo no popup de confirmação — antes era
+       SVG cru (o "lobo tosco"). _combatPortraitHTML resolve a imagem (fallback SVG). */
+    var _tccIconHtml = _combatPortraitHTML(_tccIconId, u, _tccUtype) || escHtml(u.ico || '?');
     html += '<div class="tcc-preview">';
     html += '<div class="tcc-ico tcc-ico--svg">' + _tccIconHtml + '</div>';
     html += '<div class="tcc-info">';
@@ -22944,12 +22975,10 @@ function showHealTargetConfirm(tgtIdx) {
     var verb = isBuffAlly ? 'Aplicar ' + skill.n + ' em ' : (inconsc ? 'Restabelecer ' : 'Curar ');
     html += '<div class="tcc-title">' + escHtml(verb) + escHtml(u.n) + '?</div>';
     /* X-6.5.51AB: heraldico no popup heal/buff (igual tcc do attack). */
-    var _tccHealIconId = (typeof _heraldicIconOf === 'function')
-        ? _heraldicIconOf(u, (u.t === 'e' ? 'enemy' : (u.t === 'a' ? 'ally' : 'player')))
-        : null;
-    var _tccHealIconHtml = _tccHealIconId
-        ? '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + _tccHealIconId + '"/></svg>'
-        : escHtml(u.ico || '?');
+    var _tccHealUtype = (u.t === 'e' ? 'enemy' : (u.t === 'a' ? 'ally' : 'player'));
+    var _tccHealIconId = (typeof _heraldicIconOf === 'function') ? _heraldicIconOf(u, _tccHealUtype) : null;
+    /* 2026-06-07: retrato WebP (OpenAI) do alvo no popup de cura — antes SVG cru. */
+    var _tccHealIconHtml = _combatPortraitHTML(_tccHealIconId, u, _tccHealUtype) || escHtml(u.ico || '?');
     html += '<div class="tcc-preview">';
     html += '<div class="tcc-ico tcc-ico--svg">' + _tccHealIconHtml + '</div>';
     html += '<div class="tcc-info">';
