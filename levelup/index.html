@@ -54,6 +54,23 @@
            (que é a altura REAL alocada pelo Telegram). Fallback 100dvh / 100vh / 100% pra
            browsers fora do Telegram. !important pra vencer qualquer override. */
         html, body { height: 100% !important; min-height: 100%; }
+        /* DESKTOP phone-frame fix (sessão #82): no desktop (html.app-frame), o
+           design system limita o body a 412×892 (moldura de celular centralizada).
+           MAS o `min-height: 100%` acima vence o `max-height: 892px` (min-height
+           ganha de max-height no CSS) → a ALTURA enchia a janela inteira enquanto a
+           largura continuava capada. Aqui resetamos min-height e prendemos
+           .lu-backdrop/.lu-card a 100% do body (a moldura), em vez de 100dvh (a
+           viewport). Escopado a desktop: Telegram/touch real (--tg-viewport-height)
+           NÃO é afetado. */
+        @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
+            html.app-frame, html.app-frame body { min-height: 0 !important; }
+            html.app-frame .lu-backdrop,
+            html.app-frame .lu-card {
+                height: 100% !important;
+                min-height: 0 !important;
+                max-height: 100% !important;
+            }
+        }
         .lu-backdrop {
             position: fixed;
             inset: 0;
