@@ -542,33 +542,35 @@ function renderCharacterList() {
     var playBtn = document.getElementById('btn-play');
     var createBtn = document.getElementById('btn-create-char');
     var titleEl = document.getElementById('chars-title');
+    var hero = document.getElementById('wa-empty-hero');
+    var miniOrb = document.querySelector('.wa-chars-orb');
     if (!_characters || _characters.length === 0) {
-        // 2026-06-08: Hall VAZIO (0 personagens) — estado real e util, NAO um
-        // dead-end. Esconde "Jogar" (nada pra jogar) e mostra "Criar Personagem"
-        // como acao principal. (O user pediu: "o hall pode estar sem nenhum
-        // inicialmente".) DOM seguro (sem innerHTML). Criar so aparece no estado
-        // vazio: redirectToGame('',true) e o caminho PROVADO de 1a criacao (0 chars);
-        // contas COM personagens criam pelo popup da cidade (que faz o handshake
-        // /api/character/new_session pra um creation_token valido).
-        list.textContent = '';
-        var emptyEl = document.createElement('div');
-        emptyEl.className = 'wa-char-empty';
-        var _l1 = document.createElement('div');
-        _l1.textContent = 'Você ainda não tem personagens.';
-        var _l2 = document.createElement('div');
-        _l2.textContent = 'Forje seu primeiro aventureiro para começar sua jornada.';
-        emptyEl.appendChild(_l1);
-        emptyEl.appendChild(_l2);
-        list.appendChild(emptyEl);
-        if (createBtn) createBtn.style.display = '';
+        // 2026-06-08: Hall VAZIO (0 personagens) — HERO ÉPICO (orb de Valdória
+        // animada + moldura de pergaminho + chamado). Esconde mini-orb/título/lista/
+        // Jogar e revela o hero. "Forjar Primeiro Personagem" é a ação principal.
+        // (User: "o hall pode estar sem nenhum inicialmente" + "melhorias épicas".)
+        // redirectToGame('',true) é o caminho PROVADO de 1a criação (0 chars);
+        // contas COM chars criam pela cidade (handshake /api/character/new_session).
+        if (hero) hero.style.display = '';
+        if (miniOrb) miniOrb.style.display = 'none';
+        if (titleEl) titleEl.style.display = 'none';
+        if (list) { list.style.display = 'none'; list.textContent = ''; }
         if (playBtn) playBtn.style.display = 'none';
-        if (titleEl) titleEl.textContent = 'Seus Personagens';
+        if (createBtn) {
+            createBtn.style.display = '';
+            createBtn.classList.add('wa-btn-create--forge');
+            createBtn.textContent = 'Forjar Primeiro Personagem';
+        }
         return;
     }
-    // >=1 personagem: criar-novo se faz pela cidade (handshake p/ creation_token).
-    if (createBtn) createBtn.style.display = 'none';
+    // >=1 personagem: seleção normal. Criar-novo se faz pela cidade (handshake p/
+    // creation_token), então o botão Criar fica oculto aqui.
+    if (hero) hero.style.display = 'none';
+    if (miniOrb) miniOrb.style.display = '';
+    if (list) list.style.display = '';
+    if (createBtn) { createBtn.style.display = 'none'; createBtn.classList.remove('wa-btn-create--forge'); }
     if (playBtn) playBtn.style.display = '';
-    if (titleEl) titleEl.textContent = 'Selecione seu Personagem';
+    if (titleEl) { titleEl.style.display = ''; titleEl.textContent = 'Selecione seu Personagem'; }
     var html = '';
     for (var i = 0; i < _characters.length; i++) {
         var c = _characters[i];

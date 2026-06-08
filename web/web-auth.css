@@ -1269,6 +1269,117 @@ body.wa-portal {
 }
 
 
+/* ===== Hero épico do Hall VAZIO (2026-06-08) — orb de Valdória animada +
+   moldura de pergaminho ornamentada + chamado à forja. ===== */
+.wa-empty-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: var(--v-space-lg, 12px);
+    animation: waEmptyRise 0.6s ease-out both;
+}
+@keyframes waEmptyRise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.wa-empty-orb {
+    height: 92px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--v-space-sm, 4px);
+}
+.wa-empty-orb .title-orb-wrap {
+    transform: scale(0.78);
+    transform-origin: center center;
+    animation: titleOrbFloat 6s ease-in-out infinite;
+}
+.wa-empty-frame {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
+    background:
+        radial-gradient(120% 100% at 50% 0%, var(--v-gold-12, rgba(196,149,58,0.10)), transparent 70%),
+        linear-gradient(165deg, rgba(58,45,32,0.55), rgba(36,30,24,0.55));
+    border: 1px solid var(--v-gold-dim, #9a7530);
+    border-radius: var(--v-radius-lg, 14px);
+    box-shadow: inset 0 0 24px var(--v-gold-12, rgba(196,149,58,0.10)), 0 4px 18px rgba(0,0,0,0.4);
+    text-align: center;
+    overflow: hidden;
+}
+/* brilho dourado varrendo a moldura (sutil) */
+.wa-empty-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 40%, var(--v-gold-20, rgba(196,149,58,0.14)) 50%, transparent 60%);
+    background-size: 250% 100%;
+    animation: waEmptyShimmer 5.5s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes waEmptyShimmer {
+    0%, 100% { background-position: 150% 0; }
+    50%      { background-position: -60% 0; }
+}
+.wa-empty-corner {
+    position: absolute;
+    color: var(--v-gold, #c4953a);
+    font-size: var(--v-font-xs, 10px);
+    opacity: 0.7;
+    text-shadow: 0 0 6px var(--v-gold-40, rgba(196,149,58,0.4));
+}
+.wa-empty-corner--tl { top: 6px; left: 8px; }
+.wa-empty-corner--tr { top: 6px; right: 8px; }
+.wa-empty-corner--bl { bottom: 6px; left: 8px; }
+.wa-empty-corner--br { bottom: 6px; right: 8px; }
+.wa-empty-heading {
+    margin: 0 0 var(--v-space-xs, 2px);
+    font-family: var(--v-font-display, 'Cinzel', serif);
+    font-size: var(--v-font-2xl, 18px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--v-gold, #c4953a);
+    text-shadow: 0 0 14px var(--v-gold-40, rgba(196,149,58,0.4)), 0 0 28px var(--v-gold-20, rgba(196,149,58,0.2));
+}
+.wa-empty-frame .wa-gold-divider {
+    margin: var(--v-space-sm, 4px) auto;
+}
+.wa-empty-text {
+    margin: var(--v-space-sm, 4px) 0 0;
+    font-family: var(--v-font, 'MedievalSharp', serif);
+    font-size: var(--v-font-body, 14px);
+    line-height: 1.6;
+    color: var(--v-text-dim, #a09484);
+    font-style: italic;
+}
+/* CTA épico de forja — modificador do .wa-btn-create (vira botão dourado sólido
+   com pulso suave; no Hall vazio é a ação principal). */
+.wa-btn-create.wa-btn-create--forge {
+    background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
+    border: 1px solid var(--v-gold, #c4953a);
+    color: #1a1410;
+    box-shadow: 0 3px 14px var(--v-gold-30, rgba(196,149,58,0.3)), inset 0 1px 0 rgba(255,255,255,0.18);
+    animation: waForgePulse 2.8s ease-in-out infinite;
+}
+.wa-btn-create.wa-btn-create--forge:hover {
+    background: linear-gradient(135deg, #d4a648, var(--v-gold, #c4953a));
+    box-shadow: 0 4px 20px var(--v-gold-40, rgba(196,149,58,0.4)), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+@keyframes waForgePulse {
+    0%, 100% { box-shadow: 0 3px 14px var(--v-gold-30, rgba(196,149,58,0.3)), inset 0 1px 0 rgba(255,255,255,0.18); }
+    50%      { box-shadow: 0 3px 24px var(--v-gold-50, rgba(196,149,58,0.5)), inset 0 1px 0 rgba(255,255,255,0.28); }
+}
+/* Performance / acessibilidade: corta animações em lite e reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+    .wa-empty-hero, .wa-empty-frame::before, .wa-btn-create--forge,
+    .wa-empty-orb .title-orb-wrap { animation: none !important; }
+}
+body.perf-lite .wa-empty-frame::before,
+body.perf-lite .wa-btn-create--forge { animation: none; }
+
 
 /* ----- Logout Button ----- */
 

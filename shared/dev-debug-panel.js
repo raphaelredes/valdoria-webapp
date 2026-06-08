@@ -37,6 +37,17 @@ var _lvlBtns = {};
 
 function _shouldActivate() {
     try {
+        /* 2026-06-08 (HARD GUARD): o painel de debug NUNCA pode aparecer pro jogador
+           em PRODUÇÃO — nem que ?env=dev vaze na URL de um host PROD. Bloqueio por
+           HOST canonical (defesa em profundidade), além do gate env=dev abaixo.
+           ValdoriaEnv.isProd é a fonte canonical; fallback por hostname caso
+           env-utils ainda não tenha carregado. */
+        if (window.ValdoriaEnv && window.ValdoriaEnv.isProd === true) return false;
+        var host = String(window.location.hostname || '').toLowerCase();
+        var isProdHost = (host === 'jogo.lendasdevaldoria.com.br')
+            || (host === 'prod.lendasdevaldoria.com.br')
+            || (host.indexOf('.lendasdevaldoria.com.br') >= 0 && host.indexOf('dev.') !== 0);
+        if (isProdHost) return false;
         var env = window._envOverride || new URLSearchParams(window.location.search).get('env');
         if (env !== 'dev') return false;
         /* nodevpanel=1 means we are INSIDE the iframe - don't activate */

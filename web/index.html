@@ -188,6 +188,61 @@
                     <ellipse cx="11" cy="10" rx="4" ry="3" fill="#fff4d0" opacity="0.3"/>
                 </svg>
             </div>
+
+            <!-- 2026-06-08: HERO ÉPICO do Hall VAZIO (0 personagens). Mostrado só
+                 quando não há personagens (JS toggle em renderCharacterList): esconde
+                 a mini-orb + título + lista e revela este bloco. Orb de Valdória
+                 ANIMADA (mesma do login, regra Identidade Visual — nunca esfera
+                 chapada) + moldura de pergaminho ornamentada + chamado épico. -->
+            <div id="wa-empty-hero" class="wa-empty-hero" style="display:none">
+                <div class="wa-empty-orb">
+                    <div class="title-orb-wrap">
+                        <div class="title-orb-rays"></div>
+                        <div class="title-orb-ambient"></div>
+                        <div class="title-orb">
+                            <div class="title-orb-nebula">
+                                <div class="title-orb-neb1"></div>
+                                <div class="title-orb-neb2"></div>
+                                <div class="title-orb-neb3"></div>
+                                <div class="title-orb-neb4"></div>
+                                <div class="title-orb-wisp title-orb-w1"></div>
+                                <div class="title-orb-wisp title-orb-w2"></div>
+                                <div class="title-orb-wisp title-orb-w3"></div>
+                                <div class="title-orb-wisp title-orb-w4"></div>
+                                <div class="title-orb-wisp title-orb-w5"></div>
+                                <div class="title-orb-spark title-orb-sp1"></div>
+                                <div class="title-orb-spark title-orb-sp2"></div>
+                                <div class="title-orb-spark title-orb-sp3"></div>
+                            </div>
+                            <div class="title-orb-core"></div>
+                            <div class="title-orb-core-fl"></div>
+                            <div class="title-orb-intlight"></div>
+                            <div class="title-orb-term"></div>
+                            <div class="title-orb-fresnel"></div>
+                            <div class="title-orb-sss"></div>
+                            <div class="title-orb-gp"></div>
+                            <div class="title-orb-gs"></div>
+                            <div class="title-orb-grim"></div>
+                            <div class="title-orb-gcaus"></div>
+                            <div class="title-orb-gel"></div>
+                            <div class="title-orb-ger"></div>
+                            <div class="title-orb-spec"></div>
+                        </div>
+                        <div class="title-orb-floor"></div>
+                    </div>
+                </div>
+                <div class="wa-empty-frame">
+                    <span class="wa-empty-corner wa-empty-corner--tl">&#9670;</span>
+                    <span class="wa-empty-corner wa-empty-corner--tr">&#9670;</span>
+                    <span class="wa-empty-corner wa-empty-corner--bl">&#9670;</span>
+                    <span class="wa-empty-corner wa-empty-corner--br">&#9670;</span>
+                    <h2 class="wa-empty-heading">Forje sua Lenda</h2>
+                    <div class="wa-gold-divider"><span class="wa-gold-divider-gem">&#9670;</span></div>
+                    <p class="wa-empty-text">As crônicas de Valdória aguardam um novo nome.<br>
+                        Nenhuma lenda foi forjada nesta conta — que a sua seja a primeira.</p>
+                </div>
+            </div>
+
             <h2 class="wa-chars-title" id="chars-title">Selecione seu Personagem</h2>
             <div id="char-list" class="wa-char-list"></div>
             <div id="char-error" class="wa-error" style="display:none"></div>
@@ -237,11 +292,20 @@
     _loadScript('../shared/console-collector.js');
     _loadScript('../shared/error-reporter.js');
     _loadScript('web-auth.js');
-    /* DEV debug panel */
-    if (new URLSearchParams(window.location.search).get('env') === 'dev') {
-        _loadCssBody('../shared/dev-debug-panel.css');
-        _loadScript('../shared/dev-debug-panel.js');
-    }
+    /* DEV debug panel — SÓ carrega em DEV (env=dev) E NUNCA num host de PRODUÇÃO.
+       Garante que o jogador em PROD jamais vê o painel de debug, mesmo que ?env=dev
+       vaze na URL (defesa em profundidade; o próprio dev-debug-panel.js também
+       bloqueia por host em _shouldActivate). 2026-06-08. */
+    (function(){
+        var _qenv = new URLSearchParams(window.location.search).get('env');
+        var _h = String(location.hostname || '').toLowerCase();
+        var _prodHost = (_h === 'jogo.lendasdevaldoria.com.br') || (_h === 'prod.lendasdevaldoria.com.br')
+            || (_h.indexOf('.lendasdevaldoria.com.br') >= 0 && _h.indexOf('dev.') !== 0);
+        if (_qenv === 'dev' && !_prodHost) {
+            _loadCssBody('../shared/dev-debug-panel.css');
+            _loadScript('../shared/dev-debug-panel.js');
+        }
+    })();
     </script>
 </body>
 </html>
