@@ -437,18 +437,19 @@ window.onGoogleAuth = async function(response) {
             return;
         }
         console.info('[WEB-AUTH] POST %s/api/auth/login provider=google', _apiBase);
-        var controller = new AbortController();
-        var timeout = setTimeout(function() { controller.abort(); }, 15000);
-        var resp = await fetch(_apiBase + '/api/auth/login', {
+        var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        var timeout = controller ? setTimeout(function() { controller.abort(); }, 15000) : null;
+        var _fopts = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 provider: 'google',
                 credential: response.credential
-            }),
-            signal: controller.signal
-        });
-        clearTimeout(timeout);
+            })
+        };
+        if (controller) { _fopts.signal = controller.signal; }
+        var resp = await fetch(_apiBase + '/api/auth/login', _fopts);
+        if (timeout) { clearTimeout(timeout); timeout = null; }
         console.info('[WEB-AUTH] Login response status=%d', resp.status);
         if (_checkRateLimit(resp)) return;
         if (!resp.ok) {
@@ -463,6 +464,7 @@ window.onGoogleAuth = async function(response) {
         console.error('[WEB-AUTH] Google login error:', e);
         showAuthError(_friendlyError(e));
     } finally {
+        if (timeout) { clearTimeout(timeout); }  // limpa o timer em erro (evita abort em contexto morto)
         showAuthLoading(false);
     }
 };
