@@ -11426,6 +11426,17 @@ function _doDeleteChar(charId, charName){
         });
         return;  // skip toast + re-render abaixo — redirect já foi disparado
       }
+      // NOVO (2026-06-08): apagou o ÚLTIMO personagem ativo → Hall fica VAZIO.
+      // Sem isto, a sessão ficava apontando pro char morto (estado zumbi). Vai pro
+      // /web/?relogin=1 que re-autentica e roteia 0 personagens → criação. O Hall
+      // PODE ficar vazio por design (o jogador cria um novo do zero).
+      if (!_firstRemaining && token && api){
+        console.log('[CITY] último personagem apagado — Hall vazio, indo pra criação');
+        try { window.__valdoria_transitioning = true; } catch(_t){}
+        var _delEnv = (new URLSearchParams(window.location.search).get('env')) || 'dev';
+        window.location.replace(window.location.origin + '/web/?relogin=1&env=' + encodeURIComponent(_delEnv));
+        return;
+      }
       // Delete normal (char não-ativo apagado): seleciona primeiro pra UX, mas
       // active continua false em todos.
       window._hallSelectedId = _firstRemaining ? _firstRemaining.id : null;
