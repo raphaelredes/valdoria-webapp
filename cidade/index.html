@@ -8276,6 +8276,20 @@ body.perf-lite .vc-action-btn { transition: none; }
   // via DOMContentLoaded.
   function _showSessionErrorOverlay(reason, detail){
     _cityLog('critical', 'session_error_overlay_shown', {reason: reason, detail: detail || null});
+    // Auto-recuperação (2026-06-08): em vez de dead-end "SESSÃO EXPIRADA", redireciona
+    // pro /web/ que re-autentica e roteia corretamente (0 personagens → criação;
+    // sessão morta → login). Guard anti-loop: tenta UMA vez por sessão de página —
+    // se já tentou (ex.: /web/ mandou de volta), aí sim mostra o overlay como fallback.
+    try {
+      if (!sessionStorage.getItem('valdoria_relogin_attempt')) {
+        sessionStorage.setItem('valdoria_relogin_attempt', '1');
+        try { window.__valdoria_transitioning = true; } catch (_t) {}
+        var _renv = (new URLSearchParams(location.search).get('env')) || 'dev';
+        _cityLog('warn', 'session_error_autorecover_redirect', {env: _renv});
+        location.replace(location.origin + '/web/?relogin=1&env=' + encodeURIComponent(_renv));
+        return;
+      }
+    } catch (_rec) {}
     var html = (
       '<div id="city-session-error" style="position:fixed;inset:0;background:#1a1510;color:#d4c8b0;display:flex;align-items:center;justify-content:center;z-index:99999;padding:24px;text-align:center;font-family:Cinzel,serif;">' +
         '<div style="max-width:340px">' +
@@ -8756,6 +8770,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       // #city-group-panel. refreshHud() abaixo dispara renderCityGroupPanel
       // que agora respeita _cityRealPlayerReady e revela o painel.
       window._cityRealPlayerReady = true;
+      try { sessionStorage.removeItem('valdoria_relogin_attempt'); } catch (_clr) {}  // char carregou OK — libera futura auto-recuperação
       // Sessão #60 (2026-05-28): Single-device session lock pra cidade.
       // Dispara heartbeat poll a cada 3s (ativo) / 10s (background) que
       // detecta displacement (outro device tomou a sessão). Quando o user
@@ -8850,6 +8865,7 @@ body.perf-lite .vc-action-btn { transition: none; }
         _cityLog('warn', 'fallback_char_loaded', {name: p.name, level: p.level, cls: p.cls, race: p.race});
         // Sessão #55 (2026-05-28): fallback aplicou char real — libera fade-in.
         window._cityRealPlayerReady = true;
+        try { sessionStorage.removeItem('valdoria_relogin_attempt'); } catch (_clr) {}  // char carregou OK — libera futura auto-recuperação
         // Sessão #60 (2026-05-28): mesma fix do single-device lock também no
         // fallback path (state failed mas /api/auth/characters succeed).
         if (window.SessionHeartbeat && typeof SessionHeartbeat.init === 'function') {

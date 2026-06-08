@@ -872,7 +872,50 @@ async function _devReauth(devToken) {
 
 /* ----- Auto-Login Check ----- */
 
+/* Auto-recuperação (2026-06-08): a cidade redireciona pra /web/?relogin=1 quando o
+   carregamento do personagem falha (sessão morta OU 0 personagens pós-wipe). Em vez do
+   redirect CEGO de volta pra /cidade/ (que faria loop com o token morto), validamos via
+   fetchCharacters — que roteia certo: token válido + 0 personagens → criação; token
+   morto → login. Lê o token da sessão canônica (valdoria_session_<env>) ou das WEB_* keys. */
+function _reauthAndRoute() {
+    try {
+        var host = String(location.hostname || '').toLowerCase();
+        var _env = host === 'dev.lendasdevaldoria.com.br' ? 'dev' : 'prod';
+        var token, uid, api;
+        var raw = localStorage.getItem('valdoria_session_' + _env);
+        if (raw) {
+            try { var s = JSON.parse(raw); if (s && s.token) { token = s.token; uid = s.user_id; api = s.api_base; } } catch (e) {}
+        }
+        if (!token) {
+            token = localStorage.getItem(WEB_TOKEN_KEY);
+            uid = localStorage.getItem(WEB_USER_KEY);
+            api = localStorage.getItem(WEB_API_KEY);
+        }
+        if (!token || !uid || !api) {
+            console.info('[WEB-AUTH] relogin: sem token/uid/api — cai no login');
+            return false;
+        }
+        _authToken = token;
+        _userId = parseInt(uid, 10);
+        _apiBase = api;
+        console.info('[WEB-AUTH] relogin: validando sessão via fetchCharacters (uid=%s)', uid);
+        fetchCharacters();  // 200+chars → cidade/select · 200+0 → criação · 401 → login
+        return true;
+    } catch (e) {
+        console.warn('[WEB-AUTH] _reauthAndRoute erro', e);
+        return false;
+    }
+}
+
 function checkExistingSession() {
+    // Auto-recuperação pós-falha da cidade: valida (fetchCharacters) em vez do redirect cego.
+    var _relogin = false;
+    try { _relogin = new URLSearchParams(location.search).get('relogin') === '1'; } catch (e) {}
+    if (_relogin) {
+        console.info('[WEB-AUTH] checkExistingSession: relogin=1 (vindo de falha de carga) — rota validada');
+        if (_reauthAndRoute()) return;
+        // sem sessão utilizável → segue pro fluxo normal (que mostrará login)
+    }
     // DEV auto-login: if a persistent device token exists, try to re-authenticate silently.
     // Fix (2026-04-11): if _devReauth fails (expired token, 401), fall through to the
     // normal WEB_TOKEN_KEY flow instead of stopping on the login screen. Previously the
