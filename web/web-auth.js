@@ -1058,17 +1058,20 @@ function _tryWebTokenSession() {
 
 async function fetchCharacters() {
     showAuthLoading(true);
+    // Timeout (15s) p/ não deixar o spinner preso se o servidor pendurar — crítico no
+    // fluxo de auto-recuperação (/web/?relogin=1). Mesmo padrão de onGoogleAuth.
+    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timeout = controller ? setTimeout(function () { controller.abort(); }, 15000) : null;
     try {
-        var resp = await fetch(_apiBase + '/api/auth/characters', {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + _authToken
-            }
-        });
+        var fopts = { method: 'GET', headers: { 'Authorization': 'Bearer ' + _authToken } };
+        if (controller) { fopts.signal = controller.signal; }
+        var resp = await fetch(_apiBase + '/api/auth/characters', fopts);
+        if (timeout) { clearTimeout(timeout); timeout = null; }
         if (!resp.ok) {
             // Token expired or invalid — clear and show login
             console.warn('[WEB-AUTH] Existing session invalid status=%d, clearing token', resp.status);
             _clearStoredSession();
+            _clearReloginGuard();
             showAuthLoading(false);
             return;
         }
@@ -1084,12 +1087,22 @@ async function fetchCharacters() {
             redirectToGame('', true);
         }
     } catch (e) {
-        // Network error (server unreachable) — clear token and show login
-        console.warn('[WEB-AUTH] Session check failed (network?):', e.message || e);
+        if (timeout) { clearTimeout(timeout); timeout = null; }
+        // Timeout (AbortError) ou erro de rede — limpa sessão + guard e mostra login (sem spinner preso).
+        var msg = (e && e.name === 'AbortError') ? 'timeout (servidor não respondeu)' : (e.message || e);
+        console.warn('[WEB-AUTH] Session check failed:', msg);
         _clearStoredSession();
+        _clearReloginGuard();
     } finally {
         showAuthLoading(false);
     }
+}
+
+/* Limpa o guard anti-loop da auto-recuperação (set por cidade.html em
+   /web/?relogin=1). Sem isso, um reload do /web/ após falha de rede ficaria preso
+   (a cidade não tentaria recuperar de novo). */
+function _clearReloginGuard() {
+    try { sessionStorage.removeItem('valdoria_relogin_attempt'); } catch (e) { /* */ }
 }
 
 function _clearStoredSession() {

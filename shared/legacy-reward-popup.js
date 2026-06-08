@@ -12,7 +12,14 @@
  */
 (function () {
   'use strict';
-  var SHOWN_KEY = 'valdoria_legacy_reward_shown';
+  // once-guard char-scoped (defensivo): a recompensa é por-CONTA e o servidor já bloqueia
+  // re-claim via flag `claimed`, mas escopar por personagem evita qualquer interferência
+  // entre personagens na mesma aba.
+  function _shownKey() {
+    var cid = 'default';
+    try { cid = window._charId || 'default'; } catch (e) { /* */ }
+    return 'valdoria_legacy_reward_shown_' + cid;
+  }
   var CITY_SETTLE_DELAY_MS = 2600;  // aguarda a cidade assentar antes de checar (pos-loading)
   var FETCH_TIMEOUT_MS = 12000;     // teto p/ nao deixar o CTA preso em "Concedendo..."
 
@@ -61,6 +68,11 @@
     if (!c.token || !c.uid) { console.warn('[LEGACY_REWARD] sem token/uid — pulando', path); cb(null); return; }
     if (!c.api) { console.warn('[LEGACY_REWARD] api base ausente — abortando', path); cb(null); return; }
     var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + c.token };
+    // Idempotency key (igual prologue.js/combat.js) — proteção anti double-apply no /claim
+    try {
+      headers['X-Idempotency-Key'] = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
+    } catch (e) { headers['X-Idempotency-Key'] = Date.now() + '-' + Math.random().toString(36).slice(2); }
     var payload = Object.assign({ token: c.token, user_id: Number(c.uid) }, body || {});
     var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
     var timer = setTimeout(function () { try { if (ctrl) ctrl.abort(); } catch (e) {} }, FETCH_TIMEOUT_MS);
@@ -74,6 +86,11 @@
 
   function injectStyle() {
     if (document.getElementById('vlr-style')) { return; }
+    /* HARDCODED (justificado): overlay self-contained — usa fallbacks var(--v-*) onde há token
+       (gold/text/border/font) e hex/rgba literais p/ o gradiente escuro do card e sombras (sem
+       token equivalente). z-index 12000: acima do máximo do design system (--v-z-critical 10000)
+       DE PROPÓSITO — a recompensa é um popup único pós-prólogo que deve cobrir TODOS os overlays
+       da cidade. Mantido literal p/ não acoplar este módulo standalone a valdoria-design.css. */
     var css = [
       '.vlr-ov{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;',
       'background:rgba(15,12,8,.88);padding:16px;overflow-y:auto;font-family:var(--v-font,"MedievalSharp","Cinzel",serif);}',
@@ -237,7 +254,7 @@
         return;
       }
       // Sucesso (ou ja reivindicado) — AGORA sim marca o once-guard.
-      try { sessionStorage.setItem(SHOWN_KEY, '1'); } catch (e) { /* */ }
+      try { sessionStorage.setItem(_shownKey(), '1'); } catch (e) { /* */ }
       while (card.firstChild) { card.removeChild(card.firstChild); }
       var crest = document.createElement('div'); crest.className = 'vlr-crest'; crest.textContent = '⚜️';
       var title = document.createElement('div'); title.className = 'vlr-title'; title.textContent = 'Recompensa concedida';
@@ -271,7 +288,7 @@
   }
 
   function check() {
-    try { if (sessionStorage.getItem(SHOWN_KEY)) { return; } } catch (e) { /* */ }
+    try { if (sessionStorage.getItem(_shownKey())) { return; } } catch (e) { /* */ }
     var c = ctx();
     if (!c.token || !c.uid) { return; }
     _afterCityTutorial(function () {
