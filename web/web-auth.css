@@ -1216,6 +1216,60 @@ body.wa-portal {
 
 
 
+/* ----- Create Button (2026-06-08: Hall vazio / criar personagem) ----- */
+
+.wa-btn-create {
+
+    display: block;
+
+    width: 100%;
+
+    margin-top: var(--v-space-lg, 12px);
+
+    padding: 14px var(--v-space-xl, 16px);
+
+    background: transparent;
+
+    border: 1px dashed var(--v-gold-dim, #9a7530);
+
+    border-radius: var(--v-radius, 10px);
+
+    font-family: var(--v-font-display, 'Cinzel', serif);
+
+    font-size: var(--v-font-lg, 15px);
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    color: var(--v-gold, #c4953a);
+
+    cursor: pointer;
+
+    transition: border-color var(--v-transition, 0.2s), color var(--v-transition, 0.2s), background var(--v-transition, 0.2s);
+
+    min-height: 48px;
+
+    text-transform: uppercase;
+
+}
+
+.wa-btn-create:hover {
+
+    border-color: var(--v-gold, #c4953a);
+
+    background: var(--v-gold-12, rgba(196, 149, 58, 0.12));
+
+}
+
+.wa-btn-create:active {
+
+    transform: scale(0.97);
+
+}
+
+
+
 /* ----- Logout Button ----- */
 
 

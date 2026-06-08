@@ -188,11 +188,17 @@
                     <ellipse cx="11" cy="10" rx="4" ry="3" fill="#fff4d0" opacity="0.3"/>
                 </svg>
             </div>
-            <h2 class="wa-chars-title">Selecione seu Personagem</h2>
+            <h2 class="wa-chars-title" id="chars-title">Selecione seu Personagem</h2>
             <div id="char-list" class="wa-char-list"></div>
             <div id="char-error" class="wa-error" style="display:none"></div>
             <button id="btn-play" class="wa-btn-play" disabled onclick="onPlay()">
                 &#9670; Jogar
+            </button>
+            <!-- 2026-06-08: Criar Personagem — sempre presente no Hall (paridade com o
+                 popup da cidade). Essencial pro Hall VAZIO (0 personagens): e a unica
+                 saida util (antes so havia "Jogar" desabilitado + "Sair"). -->
+            <button id="btn-create-char" class="wa-btn-create" onclick="onCreateChar()" style="display:none">
+                + Criar Personagem
             </button>
             <button class="wa-btn-logout" onclick="onLogout()">Sair</button>
         </div>

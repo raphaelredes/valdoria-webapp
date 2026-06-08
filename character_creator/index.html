@@ -3390,6 +3390,11 @@ Busca rápida:
         let currentRaceDetailKey = '';
         let existingNames = [];
         let token = '', charId = '', apiBase = '', userId = '';
+        /* 2026-06-08: de onde o criador foi aberto ('cidade' | 'web' | '').
+           Decide o destino do botao Voltar na PRIMEIRA tela (exitToHall):
+           cidade -> history.back() reabre o popup do Hall na cidade; web/ausente
+           -> /web/?hall=1 (Hall de Personagens visivel, inclusive vazio). */
+        let creatorFrom = '';
 
         // ═══════════════════════════════════════════════
         // INIT
@@ -3486,6 +3491,7 @@ Busca rápida:
                Aceita ambos pra retro-compat. */
             apiBase = params.get('api') || params.get('api_base') || '';
             userId = params.get('user_id') || params.get('uid') || '';
+            creatorFrom = params.get('from') || '';  // 'cidade' | 'web' | '' (define o Voltar->Hall)
             try { existingNames = JSON.parse(decodeBase64Utf8(params.get('names') || 'W10=')); } catch (e) { console.warn('[CHAR_CREATOR] Failed to decode existing names', e); existingNames = []; }
 
             // ── Shared Error Reporter ──
@@ -4351,10 +4357,17 @@ Busca rápida:
         }
 
         function _exitCreatorToHall() {
-            // Volta pra cidade preservando params essenciais (token, api, uid, env).
-            // O Hall (popup de personagens) abrira automaticamente quando cidade
-            // detectar que o user veio da criacao via ?showHall=1.
+            // Destino do Hall conforme a ORIGEM (creatorFrom):
+            //  - from=cidade: Hall = popup da cidade (/cidade/?showHall=1). A cidade
+            //    tem o token de jogo real; o pageshow reabre o popup.
+            //  - from=web OU ausente: Hall = /web/?hall=1 (tela de selecao de
+            //    personagens, que agora renderiza vazio com "Criar Personagem"
+            //    sem bouncar pro criador). Um jogador com 0 chars NAO tem cidade.
+            // Preserva params essenciais (token, api, uid, env). /web/ re-autentica
+            // via localStorage valdoria_session_<env> (o token aqui pode ser um
+            // creation_token, que /web/ ignora — usa a sessao persistida).
             window.__valdoria_transitioning = true;
+            var toCidade = (creatorFrom === 'cidade');
             try {
                 var params = new URLSearchParams(window.location.search);
                 var newParams = new URLSearchParams();
@@ -4362,13 +4375,19 @@ Busca rápida:
                     var v = params.get(k);
                     if (v) newParams.set(k, v);
                 });
-                newParams.set('showHall', '1');
-                // file:// ou sem params essenciais: tenta /cidade/ direto
+                var dest;
+                if (toCidade) {
+                    newParams.set('showHall', '1');
+                    dest = '/cidade/';
+                } else {
+                    newParams.set('hall', '1');
+                    dest = '/web/';
+                }
                 var qs = newParams.toString();
-                window.location.href = '/cidade/' + (qs ? ('?' + qs) : '');
+                window.location.replace(dest + (qs ? ('?' + qs) : ''));
             } catch (e) {
                 console.warn('[CREATOR] exit to hall failed:', e);
-                try { window.location.href = '/cidade/'; } catch (_) {}
+                try { window.location.replace(toCidade ? '/cidade/' : '/web/?hall=1'); } catch (_) {}
             }
         }
 
@@ -4452,12 +4471,18 @@ Busca rápida:
             if (typeof haptic === 'function') haptic();
             try { sessionStorage.setItem('valdoria_reopen_hall', '1'); } catch (_e) {}
             try { window.__valdoria_transitioning = true; } catch (_e) {}
-            if (window.history && window.history.length > 1) {
+            /* 2026-06-08 FIX (back-to-hall loop): destino DETERMINISTICO por origem,
+               em vez de history.back() cego (que, pra quem entrou via /web/ com 0
+               personagens, voltava pro /web/ e era re-bouncado pro criador = loop
+               sem Hall visivel).
+               - from=cidade: o Hall e o popup da cidade (token de jogo real esta no
+                 historico anterior); history.back() + flag 'valdoria_reopen_hall'
+                 reabrem o popup via bfcache/pageshow. Fallback /cidade/?showHall=1.
+               - from=web OU ausente (inclui 1a criacao com 0 chars): vai DIRETO pro
+                 /web/?hall=1 (Hall de Personagens, renderiza vazio sem bounce). */
+            if (creatorFrom === 'cidade' && window.history && window.history.length > 1) {
                 try { window.history.back(); return; } catch (_e) {}
             }
-            /* Sem historico (criador aberto direto): nav forward pra /cidade/?showHall=1
-               (Sessao #38) carregando os params essenciais. O flag acima + o handler
-               pageshow da cidade reabrem o Hall. */
             try { if (typeof _exitCreatorToHall === 'function') { _exitCreatorToHall(); return; } } catch (_e) {}
             try { if (typeof valdoriaSpaClose === 'function') valdoriaSpaClose(); } catch (_e) {}
         }

@@ -68,6 +68,13 @@ var _isDevLogin = false;
 // existente em sessionStorage) em vez do /api/auth/login normal.
 var _linkMode = '';  // '', 'google'
 var _linkPending = null;  // { token, api, returnUrl, ts }
+/* 2026-06-08: ?hall=1 — quando o jogador volta do criador pro Hall (botao Voltar
+   na 1a tela). Forca a tela de selecao (#screen-chars) a aparecer mesmo com 0 ou 1
+   personagem, em vez de auto-redirecionar pro jogo/criador (que causava o loop
+   criador<->/web/ pra contas com 0 chars). NUNCA usar como early-return no topo
+   (auth precisa rodar primeiro) — so dentro dos ramos de contagem de personagens. */
+var _forceHall = false;
+try { _forceHall = (new URLSearchParams(location.search).get('hall') === '1'); } catch (_eh) { /* noqa: preflight */ }
 
 /* ----- API Base Discovery ----- */
 
@@ -489,7 +496,11 @@ function handleLoginSuccess(data) {
         console.info('[WEB-AUTH] handleLoginSuccess: dev_device_token saved for future auto-login');
     }
 
-    if (_characters.length === 0) {
+    if (_forceHall) {
+        // 2026-06-08: voltou do criador pro Hall (?hall=1) — mostra a selecao
+        // (inclui estado vazio com "Criar Personagem"), nunca auto-redireciona.
+        showCharacterSelect();
+    } else if (_characters.length === 0) {
         // No characters — redirect to character creation
         redirectToGame('', true);
     } else if (_characters.length === 1) {
@@ -528,10 +539,36 @@ function showCharacterSelect() {
 
 function renderCharacterList() {
     var list = document.getElementById('char-list');
+    var playBtn = document.getElementById('btn-play');
+    var createBtn = document.getElementById('btn-create-char');
+    var titleEl = document.getElementById('chars-title');
     if (!_characters || _characters.length === 0) {
-        list.innerHTML = '<div class="wa-char-empty">Nenhum personagem encontrado.</div>';
+        // 2026-06-08: Hall VAZIO (0 personagens) — estado real e util, NAO um
+        // dead-end. Esconde "Jogar" (nada pra jogar) e mostra "Criar Personagem"
+        // como acao principal. (O user pediu: "o hall pode estar sem nenhum
+        // inicialmente".) DOM seguro (sem innerHTML). Criar so aparece no estado
+        // vazio: redirectToGame('',true) e o caminho PROVADO de 1a criacao (0 chars);
+        // contas COM personagens criam pelo popup da cidade (que faz o handshake
+        // /api/character/new_session pra um creation_token valido).
+        list.textContent = '';
+        var emptyEl = document.createElement('div');
+        emptyEl.className = 'wa-char-empty';
+        var _l1 = document.createElement('div');
+        _l1.textContent = 'Você ainda não tem personagens.';
+        var _l2 = document.createElement('div');
+        _l2.textContent = 'Forje seu primeiro aventureiro para começar sua jornada.';
+        emptyEl.appendChild(_l1);
+        emptyEl.appendChild(_l2);
+        list.appendChild(emptyEl);
+        if (createBtn) createBtn.style.display = '';
+        if (playBtn) playBtn.style.display = 'none';
+        if (titleEl) titleEl.textContent = 'Seus Personagens';
         return;
     }
+    // >=1 personagem: criar-novo se faz pela cidade (handshake p/ creation_token).
+    if (createBtn) createBtn.style.display = 'none';
+    if (playBtn) playBtn.style.display = '';
+    if (titleEl) titleEl.textContent = 'Selecione seu Personagem';
     var html = '';
     for (var i = 0; i < _characters.length; i++) {
         var c = _characters[i];
@@ -564,6 +601,17 @@ function selectChar(el) {
     }
     document.getElementById('btn-play').disabled = !_selectedCharId;
 }
+
+/* 2026-06-08: Criar Personagem a partir do Hall (/web/). redirectToGame('', true)
+   persiste a sessao de jogo (vAuthTokenStore -> valdoria_session_<env>) e abre o
+   criador com from=web. O criador NAO recebe um creation_token aqui — ele troca o
+   game token por um creation_token no APPLY (401-recovery via valdoria_session_<env>,
+   character_creator/index.html ~L7760). O from=web faz o Voltar do criador retornar
+   pra ESTE Hall (sem loop). É o MESMO caminho da 1a criacao (0 chars) ja em producao. */
+function onCreateChar() {
+    redirectToGame('', true);
+}
+window.onCreateChar = onCreateChar;
 
 /* ----- Play / Redirect ----- */
 
@@ -658,6 +706,9 @@ function redirectToGame(charId, isNew, token) {
     if (isNew && !charId) {
         // Fluxo de criação de personagem (sem state restore)
         // 2026-05-23 FIX (Wilzen loop): /app.html → 301 → /play/. Usar /character_creator/ direto.
+        // 2026-06-08: from=web — o criador sabe que o Hall de retorno é /web/?hall=1
+        // (e não history.back, que com 0 personagens voltava pra cá e re-bouncava = loop).
+        params.set('from', 'web');
         var url = '../character_creator/?' + params.toString();
         console.info('[WEB-AUTH] redirect target=%s (new char flow)', url.split('?')[0]);
         window.location.href = url;
@@ -995,6 +1046,14 @@ function _tryVStarSession() {
         } catch (e) {
             console.warn('[WEB-AUTH] _tryVStarSession: localStorage.setItem failed', e);
         }
+        // 2026-06-08: ?hall=1 (voltou do criador pro Hall) — NAO auto-redireciona
+        // pra /cidade/. As keys WEB_* ja foram migradas acima, entao retornar false
+        // deixa checkExistingSession seguir pra _tryWebTokenSession -> fetchCharacters,
+        // que com _forceHall renderiza o Hall de selecao (inclusive vazio).
+        if (_forceHall) {
+            console.info('[WEB-AUTH] _tryVStarSession: ?hall=1 — mostra Hall em vez de redirect pra /cidade/');
+            return false;
+        }
         var url = '/cidade/?token=' + encodeURIComponent(sess.token)
             + '&api=' + encodeURIComponent(sess.api_base)
             + '&uid=' + encodeURIComponent(String(sess.user_id))
@@ -1079,8 +1138,15 @@ async function fetchCharacters() {
         }
         var data = await resp.json();
         _characters = data.characters || [];
-        console.info('[WEB-AUTH] fetchCharacters OK count=%d', _characters.length);
-        if (_characters.length === 1) {
+        console.info('[WEB-AUTH] fetchCharacters OK count=%d hall=%s', _characters.length, _forceHall);
+        if (_forceHall) {
+            // 2026-06-08: voltou do criador pro Hall (?hall=1) — mostra a selecao
+            // (inclui estado vazio com "Criar Personagem"), nunca auto-redireciona.
+            if (_characters.length === 1) {
+                _selectedCharId = _characters[0].id || _characters[0].char_id || '';
+            }
+            showCharacterSelect();
+        } else if (_characters.length === 1) {
             _selectedCharId = _characters[0].id || _characters[0].char_id || '';
             redirectToGame(_selectedCharId, false);
         } else if (_characters.length > 1) {
@@ -1244,8 +1310,18 @@ async function _tryTelegramInitAuth() {
         localStorage.setItem(WEB_USER_KEY, String(_userId));
 
         var charId = data.char_id || '';
-        console.info('[WEB-AUTH] Silent auth OK — uid=%s char=%s env=%s', _userId, charId || '(none)', data.env || '?');
+        console.info('[WEB-AUTH] Silent auth OK — uid=%s char=%s env=%s hall=%s', _userId, charId || '(none)', data.env || '?', _forceHall);
 
+        if (_forceHall) {
+            /* 2026-06-08: voltou do criador pro Hall (?hall=1) dentro do Telegram.
+               Este path de silent-auth roda ANTES de checkExistingSession e NAO
+               consultava _forceHall — re-criava o loop criador<->/web/ pra contas
+               com 0 personagens. Agora busca a lista e mostra a selecao (inclui o
+               estado vazio com "Criar Personagem"), nunca auto-redireciona. */
+            if (charId) _selectedCharId = charId;
+            await fetchCharacters();
+            return true;
+        }
         if (charId) {
             /* Ja tem personagem ativo — direto para o jogo. */
             redirectToGame(charId, false, _authToken);

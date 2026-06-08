@@ -11189,7 +11189,7 @@ function _showCharactersPopup(){
     var env = params.get('env');
     if (window.location.protocol === 'file:'){
       window.__valdoria_transitioning = true;
-      window.location.href = '../character_creator/index.html?local=1&new=1';
+      window.location.href = '../character_creator/index.html?local=1&new=1&from=cidade';
       return;
     }
     if (!token || !api){
@@ -11240,6 +11240,10 @@ function _showCharactersPopup(){
     if (uid){ newParams.set('uid', uid); newParams.set('user_id', uid); }
     if (env) newParams.set('env', env);
     newParams.set('new', '1');
+    // 2026-06-08: from=cidade — o Voltar do criador volta pra cidade (history.back +
+    // bfcache reabre o popup do Hall via flag 'valdoria_reopen_hall'/showHall=1).
+    // NAO mexer pra location.replace: isso quebraria o retorno history.back.
+    newParams.set('from', 'cidade');
     window.__valdoria_transitioning = true;
     window.location.href = '/character_creator/index.html?' + newParams.toString();
   });
