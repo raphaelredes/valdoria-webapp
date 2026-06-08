@@ -5643,6 +5643,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     function _cityTryHideWhenReady() {
       if (_cityLoadingDone) return true;
       if (_cityIntroBlocking()) return false;   // título/intro ativo — não esconder ainda
+      if (window.__cityResumePending) return false;  // 2026-06-08: decisão de resume em curso — segura
       if (!_cityGameReady()) return false;       // conteúdo do jogo ainda não pronto — espera
       _cityLoadingDone = true;
       _cityHideLoading('game-ready');
@@ -5661,12 +5662,16 @@ body.perf-lite .vc-action-btn { transition: none; }
       var _cityPi = setInterval(function(){
         _cityPolls++;
         if (_cityTryHideWhenReady()) { if (_cityMo) { _cityMo.disconnect(); _cityMo = null; } clearInterval(_cityPi); return; }
-        if (_cityPolls >= 25 && !_cityIntroBlocking()) {  // ~5s (200ms × 25)
+        // 2026-06-08: force-hide normal aos 5s SÓ se a decisão de resume não estiver
+        // em curso (senão revelaria o hub antes do redirect). Backstop final aos ~12s
+        // (60 polls) força mesmo com resume pendente, pra nunca deixar loading eterno.
+        if ((_cityPolls >= 25 && !_cityIntroBlocking() && !window.__cityResumePending)
+            || (_cityPolls >= 60 && !_cityIntroBlocking())) {  // ~5s normal / ~12s backstop
           _cityLoadingDone = true;
           if (_cityMo) { _cityMo.disconnect(); _cityMo = null; }
           clearInterval(_cityPi);
-          console.warn('[INTRO] loading force-hide após 5s (#app não renderizou — evita travar)');
-          _cityHideLoading('force-5s-fallback');
+          console.warn('[INTRO] loading force-hide (#app não renderizou ou resume travou — evita travar)');
+          _cityHideLoading('force-fallback');
         }
       }, 200);
     }
@@ -8416,6 +8421,13 @@ body.perf-lite .vc-action-btn { transition: none; }
     // posição EXATA do player (last_screen_payload). Se player estava em
     // exploracao/combate, redireciona pra lá em vez de ficar na cidade.
     // 2026-05-18: _skipRestore branch retorna state vazio direto (sem fetch).
+    // 2026-06-08 (Loading-First): segura o #loading até a decisão de resume. Sem
+    // isto, o DCL podia revelar o hub ANTES do /api/game/state resolver e, se o
+    // player estava em explore/combat, o hub PISCAVA antes do redirect. O hide
+    // (_cityTryHideWhenReady + DCL) checa __cityResumePending e espera; ao decidir
+    // FICAR na cidade, limpamos o flag (libera o hide); ao REDIRECIONAR, deixamos
+    // o flag setado (a cobertura fica até navegar — loader contínuo).
+    try { window.__cityResumePending = true; } catch (_e) {}
     var _statePromise = _skipRestore
       ? Promise.resolve({transition: null, snap: null})
       : fetch(_api.replace(/\/$/,'') + '/api/game/state', {
@@ -8468,6 +8480,10 @@ body.perf-lite .vc-action-btn { transition: none; }
         window.__valdoria_transitioning = false;
         // fall-through to chars fetch
       }
+      // 2026-06-08 (Loading-First): chegou aqui = NÃO redirecionou (os redirects
+      // fazem return null antes). Vamos FICAR na cidade → libera o hide do #loading
+      // (o _cityTryHideWhenReady/poll esconde quando o hub pintar).
+      try { window.__cityResumePending = false; } catch (_e) {}
       // Apply HUD snapshot from state (overrides CITY_MOCK_PLAYER)
       if (state && state.hud) {
         var p = window.CITY_MOCK_PLAYER;
@@ -8797,6 +8813,9 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (typeof refreshHud === 'function') refreshHud();
       if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
     }).catch(function(err){
+      // 2026-06-08 (Loading-First): fetch falhou → NÃO vamos redirecionar; libera o
+      // hide do #loading (fica na cidade ou mostra overlay de erro, ambos visíveis).
+      try { window.__cityResumePending = false; } catch (_e) {}
       console.warn('[CITY] state/characters fetch failed:', err.message || err);
       _cityLog('error', 'state_or_chars_fetch_failed', {error: String(err && err.message || err).slice(0, 300)});
       // Fallback: tenta só /api/auth/characters (sem state restoration)
@@ -51113,7 +51132,10 @@ document.addEventListener('DOMContentLoaded', function(){
   // __pendingHideTGLoading). Agora que renderCurrentScreen+renderFooter
   // rodaram (content + footer já existem no DOM), escondemos o loading.
   // Isso evita a janela onde o user via "placeholder dark + va-float".
-  if (window.__pendingHideTGLoading) {
+  // 2026-06-08 (Loading-First): se a decisão de resume ainda está em curso, NÃO
+  // esconde aqui — senão o hub piscaria antes do redirect. O poll do window.load
+  // (_cityTryHideWhenReady) esconde assim que o resume decidir FICAR na cidade.
+  if (window.__pendingHideTGLoading && !window.__cityResumePending) {
     window.__pendingHideTGLoading = false;
     var _ldTG = document.getElementById('loading');
     if (_ldTG) {

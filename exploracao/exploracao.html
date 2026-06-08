@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-07T22:26:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-08T17:14:16Z - do not edit directly, edit source -->
+
 
 
 
@@ -6610,11 +6611,47 @@ document.write('<script src="../shared/lightbox.js?v=' + _vti + '"><\/script>');
   var isTG = document.documentElement.classList.contains('sim-tg');
   if (params.get('nointro') === '1' || isTG) {
     window.__introTitleSkip = true;
-    /* Tela DENTRO do Telegram OU vindo de /play/: NUNCA mostrar magic-circle
-       redundante. Placeholder dark (#1a1510) ja visivel — conteudo renderiza
-       por cima dele direto. Sem "Buscando o caminho…" travado. */
+    /* 2026-06-08 (Loading-First / hold-until-painted): NÃO esconder o #loading agora
+       — o mapa ainda NÃO foi desenhado (boot() roda no DOMContentLoaded). Antes
+       escondia já e o jogador via o mapa montando (flash). Agora REUSA o #loading
+       existente como cobertura (mesmo padrão da cidade: anel OUTLINE girando, NUNCA
+       esfera dourada chapada) e só esconde quando a exploração JÁ pintou
+       (window.load — após o boot do DCL — + 2 rAF = 1º frame na tela). Backstop 12s
+       evita loading eterno. Sem tela nova: é o próprio #loading. DOM seguro (sem innerHTML). */
     var ld = document.getElementById('loading');
-    if (ld) ld.style.display = 'none';
+    if (ld) {
+      if (!document.getElementById('explore-boot-loader-css')) {
+        var _ebcss = document.createElement('style');
+        _ebcss.id = 'explore-boot-loader-css';
+        _ebcss.textContent = '@keyframes exploreBootSpin{to{transform:rotate(360deg)}}';
+        (document.head || document.documentElement).appendChild(_ebcss);
+      }
+      while (ld.firstChild) ld.removeChild(ld.firstChild);
+      var _ebWrap = document.createElement('div');
+      _ebWrap.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px';
+      var _ebRing = document.createElement('div');
+      _ebRing.style.cssText = 'width:52px;height:52px;border-radius:50%;background:transparent;border:3px solid rgba(196,149,58,.20);border-top-color:#c4953a;box-shadow:0 0 14px rgba(196,149,58,.18);animation:exploreBootSpin .85s linear infinite';
+      var _ebTxt = document.createElement('div');
+      _ebTxt.style.cssText = 'font-family:Cinzel,serif;color:#c4953a;font-size:14px;letter-spacing:2px;opacity:.9';
+      _ebTxt.textContent = 'Buscando o caminho…';
+      _ebWrap.appendChild(_ebRing); _ebWrap.appendChild(_ebTxt); ld.appendChild(_ebWrap);
+      ld.style.position = 'fixed'; ld.style.inset = '0'; ld.style.zIndex = '99999';
+      ld.style.display = 'flex'; ld.style.alignItems = 'center'; ld.style.justifyContent = 'center';
+      ld.style.background = '#1a1510';
+      window.__pendingHideExploreLoading = true;
+      var _hideExploreBoot = function (reason) {
+        if (!window.__pendingHideExploreLoading) return;
+        window.__pendingHideExploreLoading = false;
+        var l2 = document.getElementById('loading');
+        if (l2) { l2.style.display = 'none'; l2.classList.add('hidden'); }
+        try { console.info('[EXPLORE] boot loading hidden —', reason); } catch (_e) {}
+      };
+      // Esconde só quando a exploração pintou: window.load (após boot/DCL) + 2 rAF.
+      window.addEventListener('load', function () {
+        requestAnimationFrame(function () { requestAnimationFrame(function () { _hideExploreBoot('painted'); }); });
+      });
+      setTimeout(function () { _hideExploreBoot('sanity-12s'); }, 12000);
+    }
     return;
   }
   var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts')||'0',10);

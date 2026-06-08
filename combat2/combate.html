@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-07T23:19:57Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-08T17:14:09Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9497,11 +9497,45 @@ document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/sc
   var isTG = document.documentElement.classList.contains('sim-tg');
   if (params.get('nointro') === '1' || isTG) {
     window.__introTitleSkip = true;
-    /* Tela DENTRO do Telegram OU vindo de /play/: NUNCA mostrar magic-circle
-       redundante. Placeholder dark (#1a1510) ja visivel — conteudo renderiza
-       por cima dele direto. Sem "Buscando o caminho…" travado. */
+    /* 2026-06-08 (Loading-First / hold-until-painted): NÃO esconder o #loading agora
+       — a arena ainda NÃO foi montada. Antes escondia já e o jogador via a arena se
+       montando (flash). Agora REUSA o #loading existente como cobertura (anel OUTLINE
+       girando, NUNCA esfera dourada chapada) e só esconde quando o combate JÁ pintou
+       (window.load + 2 rAF = 1º frame). Backstop 12s evita loading eterno. Sem tela
+       nova: é o próprio #loading. DOM seguro (sem innerHTML). */
     var ld = document.getElementById('loading');
-    if (ld) ld.style.display = 'none';
+    if (ld) {
+      if (!document.getElementById('combat-boot-loader-css')) {
+        var _cmcss = document.createElement('style');
+        _cmcss.id = 'combat-boot-loader-css';
+        _cmcss.textContent = '@keyframes combatBootSpin{to{transform:rotate(360deg)}}';
+        (document.head || document.documentElement).appendChild(_cmcss);
+      }
+      while (ld.firstChild) ld.removeChild(ld.firstChild);
+      var _cmWrap = document.createElement('div');
+      _cmWrap.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px';
+      var _cmRing = document.createElement('div');
+      _cmRing.style.cssText = 'width:52px;height:52px;border-radius:50%;background:transparent;border:3px solid rgba(196,149,58,.20);border-top-color:#c4953a;box-shadow:0 0 14px rgba(196,149,58,.18);animation:combatBootSpin .85s linear infinite';
+      var _cmTxt = document.createElement('div');
+      _cmTxt.style.cssText = 'font-family:Cinzel,serif;color:#c4953a;font-size:14px;letter-spacing:2px;opacity:.9';
+      _cmTxt.textContent = 'Preparando combate…';
+      _cmWrap.appendChild(_cmRing); _cmWrap.appendChild(_cmTxt); ld.appendChild(_cmWrap);
+      ld.style.position = 'fixed'; ld.style.inset = '0'; ld.style.zIndex = '99999';
+      ld.style.display = 'flex'; ld.style.alignItems = 'center'; ld.style.justifyContent = 'center';
+      ld.style.background = '#1a1510';
+      window.__pendingHideCombatLoading = true;
+      var _hideCombatBoot = function (reason) {
+        if (!window.__pendingHideCombatLoading) return;
+        window.__pendingHideCombatLoading = false;
+        var l2 = document.getElementById('loading');
+        if (l2) { l2.style.display = 'none'; l2.classList.add('hidden'); }
+        try { console.info('[COMBAT] boot loading hidden —', reason); } catch (_e) {}
+      };
+      window.addEventListener('load', function () {
+        requestAnimationFrame(function () { requestAnimationFrame(function () { _hideCombatBoot('painted'); }); });
+      });
+      setTimeout(function () { _hideCombatBoot('sanity-12s'); }, 12000);
+    }
     return;
   }
   var resumeTs = parseInt(localStorage.getItem('valdoria_audio_resume_ts')||'0',10);
