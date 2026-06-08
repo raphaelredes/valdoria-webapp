@@ -501,7 +501,7 @@ function handleLoginSuccess(data) {
     // 2026-06-08 (user): 1 personagem (e sem ?hall=1) → joga direto. TODO o resto —
     // 0 personagens, vários, ou ?hall=1 — mostra o Hall. Com 0 chars o Hall é o
     // "Crie sua Lenda" e o jogador FICA nele (NÃO encaminha pra criação sozinho;
-    // ele toca "Criar Primeiro Personagem"). Antes 0 chars ia direto pro criador.
+    // ele toca "Criar Personagem"). Antes 0 chars ia direto pro criador.
     if (!_forceHall && _characters.length === 1) {
         _selectedCharId = _characters[0].id || _characters[0].char_id || '';
         redirectToGame(_selectedCharId, false);
@@ -548,7 +548,7 @@ function renderCharacterList() {
     if (!_characters || _characters.length === 0) {
         // 2026-06-08: Hall VAZIO (0 personagens) — HERO ÉPICO (orb de Valdória
         // animada + moldura de pergaminho + chamado). Esconde mini-orb/título/lista/
-        // Jogar e revela o hero. "Forjar Primeiro Personagem" é a ação principal.
+        // Jogar e revela o hero. "Criar Personagem" é a ação principal.
         // (User: "o hall pode estar sem nenhum inicialmente" + "melhorias épicas".)
         // redirectToGame('',true) é o caminho PROVADO de 1a criação (0 chars);
         // contas COM chars criam pela cidade (handshake /api/character/new_session).
@@ -560,7 +560,7 @@ function renderCharacterList() {
         if (createBtn) {
             createBtn.style.display = '';
             createBtn.classList.add('wa-btn-create--forge');
-            createBtn.textContent = 'Criar Primeiro Personagem';
+            createBtn.textContent = 'Criar Personagem';
         }
         return;
     }
@@ -1202,7 +1202,7 @@ async function fetchCharacters() {
         console.info('[WEB-AUTH] fetchCharacters OK count=%d hall=%s', _characters.length, _forceHall);
         // 2026-06-08 (user): 1 personagem (sem ?hall=1) → joga direto; 0 / vários /
         // ?hall=1 → mostra o Hall. 0 chars = "Crie sua Lenda" e o jogador FICA nele
-        // (toca "Criar Primeiro Personagem"); NUNCA encaminha sozinho pro criador.
+        // (toca "Criar Personagem"); NUNCA encaminha sozinho pro criador.
         if (!_forceHall && _characters.length === 1) {
             _selectedCharId = _characters[0].id || _characters[0].char_id || '';
             redirectToGame(_selectedCharId, false);
@@ -1387,7 +1387,7 @@ async function _tryTelegramInitAuth() {
         } else {
             /* 2026-06-08 (user): 0 personagens — busca a lista e FICA no Hall vazio
              * ("Crie sua Lenda"), em vez de encaminhar direto pro criador. O jogador
-             * toca "Criar Primeiro Personagem". (fetchCharacters com 0 chars mostra o Hall.) */
+             * toca "Criar Personagem". (fetchCharacters com 0 chars mostra o Hall.) */
             await fetchCharacters();
         }
         return true;
