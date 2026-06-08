@@ -97,6 +97,17 @@
       'font-family:var(--v-font-display,"Cinzel",serif);font-weight:700;font-size:15px;letter-spacing:.5px;',
       'background:linear-gradient(180deg,#d8a843,#b07f28);color:#1a1510;box-shadow:0 3px 10px rgba(0,0,0,.4);}',
       '.vlr-cta:disabled{opacity:.45;cursor:default;filter:grayscale(.4);}',
+      '.vlr-defer{width:100%;margin-top:9px;padding:11px;border:1px solid var(--v-border,#4a3828);',
+      'border-radius:10px;cursor:pointer;background:transparent;color:var(--v-text-dim,#a09484);',
+      'font-family:var(--v-font,"MedievalSharp","Cinzel",serif);font-size:13px;}',
+      '.vlr-defer:hover{border-color:var(--v-gold,#c4953a);color:var(--v-text,#d4c8b0);}',
+      '.vlr-warn{text-align:left;background:rgba(196,149,58,.10);border:1px solid var(--v-gold,#c4953a);',
+      'border-radius:10px;padding:11px 12px;margin:4px 0 12px;}',
+      '.vlr-warn-h{font-family:var(--v-font-display,"Cinzel",serif);font-weight:700;color:var(--v-gold,#c4953a);',
+      'font-size:13px;margin-bottom:6px;letter-spacing:.5px;}',
+      '.vlr-warn ul{margin:0;padding-left:18px;}',
+      '.vlr-warn li{font-size:12.5px;color:var(--v-text,#d4c8b0);line-height:1.5;margin:2px 0;}',
+      '.vlr-warn b{color:var(--v-gold,#c4953a);}',
       '.vlr-note{font-size:11px;color:var(--v-text-dim,#a09484);margin-top:10px;font-style:italic;}',
       '.vlr-result{font-size:14px;line-height:1.6;color:var(--v-text,#d4c8b0);margin:14px 4px;}'
     ].join('');
@@ -110,11 +121,11 @@
     try { if (ov && ov.parentNode) { ov.parentNode.removeChild(ov); } } catch (e) { /* */ }
   }
 
-  function show(reward) {
+  function show(reward, charName) {
     if (!reward || !reward.options) { return; }
     if (document.getElementById('vlr-ov')) { return; }
     injectStyle();
-    // NOTA: o once-guard (SHOWN_KEY) so e setado APOS um claim bem-sucedido (em claim()).
+    // NOTA: o once-guard (SHOWN_KEY) só é setado APÓS um claim bem-sucedido (em claim()).
     // Marcar aqui faria o jogador perder a recompensa pra sempre se o claim falhasse.
 
     var ov = document.createElement('div');
@@ -125,12 +136,37 @@
     card.className = 'vlr-card';
     ov.appendChild(card);
 
+    var who = (charName && String(charName).trim()) ? String(charName).trim() : '';
+
     var crest = document.createElement('div'); crest.className = 'vlr-crest'; crest.textContent = '⚜️';
     var title = document.createElement('div'); title.className = 'vlr-title'; title.textContent = 'Recompensa de Veterano';
     var sub = document.createElement('div'); sub.className = 'vlr-sub';
     setFmt(sub, 'O reino de Valdoria renasceu, e os registros de antes se tornaram lenda. '
-      + 'Em honra à sua jornada anterior, escolha <b>uma</b> recompensa para o seu novo começo.');
+      + 'Em honra à sua jornada anterior, você pode resgatar <b>uma</b> recompensa.');
     card.appendChild(crest); card.appendChild(title); card.appendChild(sub);
+
+    // Caixa de aviso — destaque para escolha única, irreversível e não-transferível
+    var warn = document.createElement('div'); warn.className = 'vlr-warn';
+    var warnH = document.createElement('div'); warnH.className = 'vlr-warn-h'; warnH.textContent = '⚠ Leia antes de escolher';
+    var ul = document.createElement('ul');
+    [
+      'A recompensa vale para <b>um único personagem</b>.',
+      'Só pode ser resgatada <b>uma vez</b>.',
+      '<b>Não é transferível</b>: depois de resgatada, fica ligada ao personagem escolhido — um personagem novo não a recebe.'
+    ].forEach(function (t) { var li = document.createElement('li'); setFmt(li, t); ul.appendChild(li); });
+    warn.appendChild(warnH); warn.appendChild(ul);
+    card.appendChild(warn);
+
+    // A quem se aplica + opção de adiar para criar outro personagem
+    var applyTo = document.createElement('div'); applyTo.className = 'vlr-sub';
+    if (who) {
+      setFmt(applyTo, 'Será aplicada a <b>' + who + '</b>, seu personagem atual. '
+        + 'Prefere guardá-la para outro? Crie o personagem primeiro e volte aqui.');
+    } else {
+      setFmt(applyTo, 'Será aplicada ao seu personagem atual. '
+        + 'Prefere guardá-la para outro? Crie o personagem primeiro e volte aqui.');
+    }
+    card.appendChild(applyTo);
     var div = document.createElement('div'); div.className = 'vlr-div'; card.appendChild(div);
 
     var selected = null;
@@ -143,7 +179,7 @@
       b.setAttribute('data-opt', opt.id);
       var h = document.createElement('div'); h.className = 'vlr-opt-h';
       var ic = document.createElement('span'); ic.className = 'vlr-opt-ic'; ic.textContent = opt.icon || '✦';
-      var hn = document.createElement('span'); hn.textContent = opt.title || ('Opcao ' + opt.id);
+      var hn = document.createElement('span'); hn.textContent = opt.title || ('Opção ' + opt.id);
       h.appendChild(ic); h.appendChild(hn);
       var d = document.createElement('div'); d.className = 'vlr-opt-d'; setFmt(d, opt.desc || '');
       b.appendChild(h); b.appendChild(d);
@@ -163,6 +199,13 @@
       claim(selected, ov, card);
     };
     card.appendChild(cta);
+
+    // Adiar: fecha SEM marcar o once-guard — reaparece na proxima vez que chegar na cidade
+    // (inclusive depois de criar outro personagem). A recompensa continua pendente no servidor.
+    var defer = document.createElement('button'); defer.className = 'vlr-defer';
+    defer.textContent = 'Prefiro criar outro personagem primeiro';
+    defer.onclick = function () { close(ov); };
+    card.appendChild(defer);
 
     var note = document.createElement('div'); note.className = 'vlr-note';
     note.textContent = 'A escolha é definitiva e aparece apenas uma vez.';
@@ -213,7 +256,7 @@
     var c = ctx();
     if (!c.token || !c.uid) { return; }
     post('/api/game/legacy-reward', {}, function (res) {
-      if (res && res.pending && res.reward) { show(res.reward); }
+      if (res && res.pending && res.reward) { show(res.reward, res.char_name); }
     });
   }
 
