@@ -42672,12 +42672,18 @@ function _dailyStartCombat(p){
     onConfirm: function(){
       // Direciona pra aventura real (auto-track server). NUNCA muta HP/gold/XP aqui.
       vToast(isHunt ? '⚔️ Boa caçada! O progresso conta sozinho.' : '🌿 Boa coleta! O progresso conta sozinho.');
+      // 2026-06-08 (user): BUG — o popup do Desafio fica numa TELA própria, então o
+      // botão [data-cb="explore_main"] do hub NÃO está no DOM -> querySelector dava
+      // null e só o toast aparecia. Chama o dispatcher direto (mesma coisa que o CTA
+      // "PARTIR PARA AVENTURA" faz), com o click no DOM como fallback.
       try {
-        // Clica o CTA real "PARTIR PARA AVENTURA" (cb=explore_main). Se não achar,
-        // só fecha (o aviso já explicou). Nunca chama função de viagem com args errados.
-        var partir = document.querySelector('[data-cb="explore_main"]');
-        if (partir) partir.click();
-      } catch(_e){ console.warn('[CITY] daily->depart fallback:', _e); }
+        if (typeof doAction === 'function') {
+          doAction('explore_main');
+        } else {
+          var partir = document.querySelector('[data-cb="explore_main"]');
+          if (partir) partir.click();
+        }
+      } catch(_e){ console.warn('[CITY] daily->depart failed:', _e); }
     }
   });
 }
