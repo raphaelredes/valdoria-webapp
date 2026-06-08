@@ -70,13 +70,13 @@ Busca rápida:
     <style>html{background:#2a2420}</style>
     <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
     <meta name="description" content="Criador de Personagens D&D 5e - Lendas de Valdoria">
-    <meta property="og:title" content="Forjar Personagem - Lendas de Valdoria">
+    <meta property="og:title" content="Criar Personagem - Lendas de Valdoria">
     <meta property="og:description" content="Crie seu personagem com racas, classes e habilidades do D&D 5e">
     <meta property="og:type" content="website">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../shared/fonts.css">
     <link rel="manifest" href="../manifest.json">
-    <title>Forjar Personagem - Lendas de Valdoria</title>
+    <title>Criar Personagem - Lendas de Valdoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- 2026-05-11: Auth Gate — redireciona pra /web/ se sem auth context.
          Aceita creation_token URL param tambem (character creator flow). -->
@@ -2697,7 +2697,7 @@ Busca rápida:
                 onclick="goScreen(Math.max(0, currentScreen - 1))"
                 aria-label="Voltar"
                 style="display:none;">←</button>
-        <h1 id="headerTitle">FORJAR PERSONAGEM</h1>
+        <h1 id="headerTitle">CRIAR PERSONAGEM</h1>
         <div class="v-progress-bar" id="progressBar"></div>
         <div class="v-progress-label" id="progressLabel">1/9 - Raça</div>
         <!-- Sessao #37 (2026-05-25 — REVISADO): picker fixo do header REMOVIDO.
@@ -2729,7 +2729,7 @@ Busca rápida:
                 <span class="font-onboarding-line"></span>
             </div>
             <p class="font-onboarding-subtitle">
-                Antes de forjar seu personagem, escolha o tamanho de letra ideal para sua leitura.
+                Antes de criar seu personagem, escolha o tamanho de letra ideal para sua leitura.
                 <br><small>Você pode mudar depois nas <b>Configurações</b> da cidade.</small>
             </p>
             <div class="font-onboarding-options">
@@ -7861,7 +7861,7 @@ Busca rápida:
                                     + '  <p style="margin:0 0 14px;font-size:15px;"><strong style="color:var(--v-gold,#c4953a);">Você já tem ' + cur + ' aventureiros ativos.</strong></p>'
                                     + '  <p style="margin:0 0 14px;font-size:14px;">O máximo permitido é <strong>' + lim + ' personagens</strong> por conta.</p>'
                                     + '  <p style="margin:8px 0 0;color:var(--v-text-dim,#a09484);font-size:13px;font-style:italic;">'
-                                    + '    Apague um aventureiro existente no <em>Hall</em> antes de forjar outro.'
+                                    + '    Apague um aventureiro existente no <em>Hall</em> antes de criar outro.'
                                     + '  </p>'
                                     + '</div>',
                                 actions: [
@@ -8019,7 +8019,7 @@ Busca rápida:
                     '<div style="max-width:360px;text-align:center;">' +
                         '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom:16px;animation:pulse 1.4s ease-in-out infinite;">⚔️</div>' +
                         '<h2 style="font-size:calc(18px * var(--v-font-scale, 1));color:#c4953a;margin:0 0 12px;letter-spacing:2px;text-transform:uppercase;">Iniciando aventura...</h2>' +
-                        '<p style="font-size:calc(13px * var(--v-font-scale, 1));line-height:1.6;margin:0;color:#a09484;">Seu personagem foi forjado. Aguarde a transição para Valdória.</p>' +
+                        '<p style="font-size:calc(13px * var(--v-font-scale, 1));line-height:1.6;margin:0;color:#a09484;">Seu personagem foi criado. Aguarde a transição para Valdória.</p>' +
                     '</div>';
                 document.body.appendChild(ov);
             } catch (_) {}

@@ -498,19 +498,14 @@ function handleLoginSuccess(data) {
         console.info('[WEB-AUTH] handleLoginSuccess: dev_device_token saved for future auto-login');
     }
 
-    if (_forceHall) {
-        // 2026-06-08: voltou do criador pro Hall (?hall=1) — mostra a selecao
-        // (inclui estado vazio com "Criar Personagem"), nunca auto-redireciona.
-        showCharacterSelect();
-    } else if (_characters.length === 0) {
-        // No characters — redirect to character creation
-        redirectToGame('', true);
-    } else if (_characters.length === 1) {
-        // Single character — go straight to game
+    // 2026-06-08 (user): 1 personagem (e sem ?hall=1) → joga direto. TODO o resto —
+    // 0 personagens, vários, ou ?hall=1 — mostra o Hall. Com 0 chars o Hall é o
+    // "Crie sua Lenda" e o jogador FICA nele (NÃO encaminha pra criação sozinho;
+    // ele toca "Criar Primeiro Personagem"). Antes 0 chars ia direto pro criador.
+    if (!_forceHall && _characters.length === 1) {
         _selectedCharId = _characters[0].id || _characters[0].char_id || '';
         redirectToGame(_selectedCharId, false);
     } else {
-        // Multiple characters — show selection
         showCharacterSelect();
     }
 }
@@ -565,7 +560,7 @@ function renderCharacterList() {
         if (createBtn) {
             createBtn.style.display = '';
             createBtn.classList.add('wa-btn-create--forge');
-            createBtn.textContent = 'Forjar Primeiro Personagem';
+            createBtn.textContent = 'Criar Primeiro Personagem';
         }
         return;
     }
@@ -1186,20 +1181,17 @@ async function fetchCharacters() {
         var data = await resp.json();
         _characters = data.characters || [];
         console.info('[WEB-AUTH] fetchCharacters OK count=%d hall=%s', _characters.length, _forceHall);
-        if (_forceHall) {
-            // 2026-06-08: voltou do criador pro Hall (?hall=1) — mostra a selecao
-            // (inclui estado vazio com "Criar Personagem"), nunca auto-redireciona.
+        // 2026-06-08 (user): 1 personagem (sem ?hall=1) → joga direto; 0 / vários /
+        // ?hall=1 → mostra o Hall. 0 chars = "Crie sua Lenda" e o jogador FICA nele
+        // (toca "Criar Primeiro Personagem"); NUNCA encaminha sozinho pro criador.
+        if (!_forceHall && _characters.length === 1) {
+            _selectedCharId = _characters[0].id || _characters[0].char_id || '';
+            redirectToGame(_selectedCharId, false);
+        } else {
             if (_characters.length === 1) {
                 _selectedCharId = _characters[0].id || _characters[0].char_id || '';
             }
             showCharacterSelect();
-        } else if (_characters.length === 1) {
-            _selectedCharId = _characters[0].id || _characters[0].char_id || '';
-            redirectToGame(_selectedCharId, false);
-        } else if (_characters.length > 1) {
-            showCharacterSelect();
-        } else {
-            redirectToGame('', true);
         }
     } catch (e) {
         if (timeout) { clearTimeout(timeout); timeout = null; }
@@ -1374,9 +1366,10 @@ async function _tryTelegramInitAuth() {
             /* Ja tem personagem ativo — direto para o jogo. */
             redirectToGame(charId, false, _authToken);
         } else {
-            /* Sem personagem: manda para criacao. O backend cria o personagem
-             * e o proximo load volta ao fluxo normal. */
-            redirectToGame('', true, _authToken);
+            /* 2026-06-08 (user): 0 personagens — busca a lista e FICA no Hall vazio
+             * ("Crie sua Lenda"), em vez de encaminhar direto pro criador. O jogador
+             * toca "Criar Primeiro Personagem". (fetchCharacters com 0 chars mostra o Hall.) */
+            await fetchCharacters();
         }
         return true;
     } catch (e) {

@@ -8483,7 +8483,11 @@ body.perf-lite .vc-action-btn { transition: none; }
       // 2026-06-08 (Loading-First): chegou aqui = NÃO redirecionou (os redirects
       // fazem return null antes). Vamos FICAR na cidade → libera o hide do #loading
       // (o _cityTryHideWhenReady/poll esconde quando o hub pintar).
-      try { window.__cityResumePending = false; } catch (_e) {}
+      // 2026-06-08: libera o hide do #loading SÓ se o state trouxe HUD (>=1 personagem
+      // → o hub já tem dados pra pintar). SEM HUD (provável 0 personagens), MANTÉM a
+      // cobertura: a busca de personagens abaixo decide (0 → /web/?hall=1; >=1 → revela
+      // após hidratar o char real). Evita o flash do hub em branco pra conta 0-char.
+      try { if (state && state.hud) window.__cityResumePending = false; } catch (_e) {}
       // Apply HUD snapshot from state (overrides CITY_MOCK_PLAYER)
       if (state && state.hud) {
         var p = window.CITY_MOCK_PLAYER;
@@ -8508,13 +8512,25 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (!payload) return; // navigated away
       var chars = (payload && payload.characters) || [];
       if (!chars.length){
-        console.warn('[CITY] no characters returned — keeping mock');
-        _cityLog('critical', 'characters_empty_response', {has_payload: !!payload});
-        if (_isProductionHost){
-          _showSessionErrorOverlay(
-            'Nenhum personagem encontrado em sua conta.',
-            'API retornou lista vazia — verifique se você ja criou um personagem'
-          );
+        // 2026-06-08 (user): conta com 0 personagens é LEGÍTIMO (ex.: pós-wipe), NÃO
+        // erro. Vai pro Hall vazio "Crie sua Lenda" (/web/?hall=1) MANTENDO a cobertura
+        // de carregamento (sem hub em branco, sem overlay de erro). O jogador FICA no
+        // Hall e toca "Criar Primeiro Personagem". Antes: hub em branco → overlay de
+        // erro → /web/?relogin → flash → criador.
+        console.info('[CITY] 0 personagens — indo pro Hall vazio (/web/?hall=1), cobertura mantida');
+        _cityLog('info', 'zero_chars_to_hall', {});
+        try {
+          var _zp = new URLSearchParams(window.location.search);
+          var _zu = '/web/?hall=1&env=' + encodeURIComponent(_zp.get('env') || 'dev');
+          var _zt = _zp.get('token'), _za = _zp.get('api'), _zuid = _zp.get('uid');
+          if (_zt) _zu += '&token=' + encodeURIComponent(_zt);
+          if (_za) _zu += '&api=' + encodeURIComponent(_za);
+          if (_zuid) _zu += '&uid=' + encodeURIComponent(_zuid);
+          window.__valdoria_transitioning = true;
+          window.location.replace(_zu);
+        } catch (_ze) {
+          try { window.__cityResumePending = false; } catch (_e2) {}
+          window.location.replace('/web/?hall=1');
         }
         return;
       }
@@ -8812,6 +8828,10 @@ body.perf-lite .vc-action-btn { transition: none; }
       // Re-render se hub ja foi montado
       if (typeof refreshHud === 'function') refreshHud();
       if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+      // 2026-06-08: personagem real hidratado + hub re-renderizado → AGORA revela
+      // (caso a cobertura tenha sido mantida por falta de state.hud no boot). O
+      // jogador só vê o hub já com o personagem — sem flash de hub em branco.
+      try { window.__cityResumePending = false; } catch (_e) {}
     }).catch(function(err){
       // 2026-06-08 (Loading-First): fetch falhou → NÃO vamos redirecionar; libera o
       // hide do #loading (fica na cidade ou mostra overlay de erro, ambos visíveis).
@@ -11047,7 +11067,7 @@ function _showCharactersPopup(){
   if (_hallEmpty) {
     html += '<div class="hall-empty" style="text-align:center; color: var(--v-text-dim, #a09484); '
       + 'font-size: var(--v-font-body, 14px); line-height:1.6; padding: var(--v-space-xl, 16px) 0;">'
-      + 'Você ainda não tem personagens.<br>Forje seu primeiro aventureiro para começar sua jornada.'
+      + 'Você ainda não tem personagens.<br>Crie seu primeiro aventureiro para começar sua jornada.'
       + '</div>';
   }
   chars.forEach(function(c){
