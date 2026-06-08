@@ -260,7 +260,8 @@
       var seen = false;
       try {
         var charId = window._charId || 'default';
-        seen = localStorage.getItem('valdoria_first_city_tutorial_seen_' + charId) === '1';
+        var tutKey = 'valdoria_first_city_tutorial_seen_' + charId;  // char-namespaced (mesma chave da cidade)
+        seen = localStorage.getItem(tutKey) === '1';
       } catch (e) { seen = true; }
       if (seen || waited >= MAX) { cb(); return; }
       waited += STEP;
