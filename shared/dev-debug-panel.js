@@ -515,7 +515,9 @@ function _initAsHost() {
     s.id = 'dev-panel-host-css';
     s.textContent = [
         'html.dev-panel-active{max-width:none!important;margin:0!important;height:100dvh!important;overflow:hidden!important}',
-        'html.dev-panel-active body{display:flex!important;flex-direction:row!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#0f0d0a!important}',
+        /* 2026-06-08: body PRECISA ocupar a largura toda (o lock smartphone do jogo
+           limitava o body a ~430px → flex-row colapsava: jogo centrado + painel 1px). */
+        'html.dev-panel-active body{display:flex!important;flex-direction:row!important;width:100vw!important;max-width:none!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#0f0d0a!important}',
         /* 2026-06-08 (user): a ÁREA DO JOGO ocupa a largura TOTAL do dispositivo, até o
            máximo do jogo (430px — regra smartphone-only; o conteúdo já capa em 430 via
            valdoria-design.css). Antes era FIXA em 384px (preview Telegram Desktop) e
