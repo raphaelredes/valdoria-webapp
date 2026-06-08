@@ -1094,6 +1094,15 @@ function _tryVStarSession() {
             console.info('[WEB-AUTH] _tryVStarSession: ?hall=1 — mostra Hall em vez de redirect pra /cidade/');
             return false;
         }
+        // 2026-06-08 (user): sessão SEM personagem ativo (char_id vazio — ex.: conta
+        // pós-wipe) NÃO vai pra /cidade/ (que mostraria título + hub em branco antes
+        // de redirecionar de volta). As chaves WEB_* já foram migradas acima, então
+        // retornar false deixa o fluxo seguir pra fetchCharacters → 0 chars → Hall
+        // vazio "Crie sua Lenda" direto. (>=1 char tem char_id → segue pro /cidade/.)
+        if (!sess.char_id) {
+            console.info('[WEB-AUTH] _tryVStarSession: sessão sem char ativo — vai pro Hall (sem passar pela cidade)');
+            return false;
+        }
         var url = '/cidade/?token=' + encodeURIComponent(sess.token)
             + '&api=' + encodeURIComponent(sess.api_base)
             + '&uid=' + encodeURIComponent(String(sess.user_id))
