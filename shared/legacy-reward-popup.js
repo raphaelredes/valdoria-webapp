@@ -13,6 +13,8 @@
 (function () {
   'use strict';
   var SHOWN_KEY = 'valdoria_legacy_reward_shown';
+  var CITY_SETTLE_DELAY_MS = 2600;  // aguarda a cidade assentar antes de checar (pos-loading)
+  var FETCH_TIMEOUT_MS = 12000;     // teto p/ nao deixar o CTA preso em "Concedendo..."
 
   // Render seguro de texto com tags <b>/<i> simples (parser por indexOf — sem innerHTML).
   function setFmt(el, str) {
@@ -56,14 +58,18 @@
 
   function post(path, body, cb) {
     var c = ctx();
-    if (!c.token || !c.uid) { return; }
-    var headers = { 'Content-Type': 'application/json' };
-    if (c.token) { headers['Authorization'] = 'Bearer ' + c.token; }
+    if (!c.token || !c.uid) { console.warn('[LEGACY_REWARD] sem token/uid — pulando', path); cb(null); return; }
+    if (!c.api) { console.warn('[LEGACY_REWARD] api base ausente — abortando', path); cb(null); return; }
+    var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + c.token };
     var payload = Object.assign({ token: c.token, user_id: Number(c.uid) }, body || {});
-    fetch(c.api + path, { method: 'POST', headers: headers, body: JSON.stringify(payload) })
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { try { if (ctrl) ctrl.abort(); } catch (e) {} }, FETCH_TIMEOUT_MS);
+    var opts = { method: 'POST', headers: headers, body: JSON.stringify(payload) };
+    if (ctrl) { opts.signal = ctrl.signal; }
+    fetch(c.api + path, opts)
       .then(function (r) { return r.json(); })
-      .then(function (j) { cb(j); })
-      .catch(function (e) { console.warn('[LEGACY_REWARD]', path, e); });
+      .then(function (j) { clearTimeout(timer); cb(j); })
+      .catch(function (e) { clearTimeout(timer); console.warn('[LEGACY_REWARD]', path, e); cb(null); });
   }
 
   function injectStyle() {
@@ -108,7 +114,8 @@
     if (!reward || !reward.options) { return; }
     if (document.getElementById('vlr-ov')) { return; }
     injectStyle();
-    try { sessionStorage.setItem(SHOWN_KEY, '1'); } catch (e) { /* */ }
+    // NOTA: o once-guard (SHOWN_KEY) so e setado APOS um claim bem-sucedido (em claim()).
+    // Marcar aqui faria o jogador perder a recompensa pra sempre se o claim falhasse.
 
     var ov = document.createElement('div');
     ov.className = 'vlr-ov';
@@ -122,7 +129,7 @@
     var title = document.createElement('div'); title.className = 'vlr-title'; title.textContent = 'Recompensa de Veterano';
     var sub = document.createElement('div'); sub.className = 'vlr-sub';
     setFmt(sub, 'O reino de Valdoria renasceu, e os registros de antes se tornaram lenda. '
-      + 'Em honra a sua jornada anterior, escolha <b>uma</b> recompensa para o seu novo comeco.');
+      + 'Em honra à sua jornada anterior, escolha <b>uma</b> recompensa para o seu novo começo.');
     card.appendChild(crest); card.appendChild(title); card.appendChild(sub);
     var div = document.createElement('div'); div.className = 'vlr-div'; card.appendChild(div);
 
@@ -158,21 +165,36 @@
     card.appendChild(cta);
 
     var note = document.createElement('div'); note.className = 'vlr-note';
-    note.textContent = 'A escolha e definitiva e aparece apenas uma vez.';
+    note.textContent = 'A escolha é definitiva e aparece apenas uma vez.';
     card.appendChild(note);
 
-    if (window.vOverlay && window.vOverlay.add) { window.vOverlay.add(ov); }
-    else { document.body.appendChild(ov); }
+    // SPA cleanup: preferir vOverlay; senao append ao body + registrar cleanup manual
+    // em _spaCleanupFns (evita overlay orfao em troca de rota). Avisa se vOverlay ausente.
+    if (window.vOverlay && window.vOverlay.add) {
+      window.vOverlay.add(ov);
+    } else {
+      console.warn('[LEGACY_REWARD] vOverlay ausente — fallback body.appendChild + cleanup manual');
+      document.body.appendChild(ov);
+      try {
+        window._spaCleanupFns = window._spaCleanupFns || [];
+        window._spaCleanupFns.push(function () { close(ov); });
+      } catch (e) { /* */ }
+    }
   }
 
   function claim(option, ov, card) {
-    post('/api/game/legacy-reward/claim', { option: option }, function (res) {
+    // game_session: prova de identidade persistente p/ o fallback server-side (token in-memory perdido)
+    var gs = '';
+    try { if (window.vAuthTokenStore && window.vAuthTokenStore.getToken) { gs = window.vAuthTokenStore.getToken() || ''; } } catch (e) { /* */ }
+    post('/api/game/legacy-reward/claim', { option: option, game_session: gs }, function (res) {
       if (!res || (!res.ok && !res.already_claimed)) {
         var cta = card.querySelector('.vlr-cta');
-        if (cta) { cta.disabled = false; cta.textContent = 'Tentar novamente'; }
+        if (cta) { cta.disabled = false; cta.textContent = 'Erro de conexão. Tentar novamente'; }
         console.warn('[LEGACY_REWARD] claim falhou', res);
         return;
       }
+      // Sucesso (ou ja reivindicado) — AGORA sim marca o once-guard.
+      try { sessionStorage.setItem(SHOWN_KEY, '1'); } catch (e) { /* */ }
       while (card.firstChild) { card.removeChild(card.firstChild); }
       var crest = document.createElement('div'); crest.className = 'vlr-crest'; crest.textContent = '⚜️';
       var title = document.createElement('div'); title.className = 'vlr-title'; title.textContent = 'Recompensa concedida';
@@ -197,8 +219,8 @@
 
   window.vLegacyReward = { check: check, show: show };
 
-  // Auto-fire: aguarda a cidade assentar (~2.6s) para nao competir com o loading.
-  function arm() { setTimeout(check, 2600); }
+  // Auto-fire: aguarda a cidade assentar para não competir com o loading.
+  function arm() { setTimeout(check, CITY_SETTLE_DELAY_MS); }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', arm);
   } else { arm(); }
