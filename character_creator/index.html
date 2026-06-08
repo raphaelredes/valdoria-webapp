@@ -169,28 +169,11 @@ Busca rápida:
     document.write('<script src="../shared/loading-controller.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/popup.js?v=' + v + '"><\/script>');
     document.write('<script src="../shared/subclass-card.js?v=' + v + '"><\/script>');
-    /* 2026-05-11 (user request): seta animada inferior central indicando
-       scroll disponível. Auto-attach via [data-scroll-hint] + register API.
-       Distribui-se a info pra caber em 694px (Telegram Desktop minimum) e
-       quando ainda houver overflow, jogador ve o indicador. */
-    document.write('<link rel="stylesheet" href="../shared/scroll-hint-arrow.css?v=' + v + '">');
-    document.write('<script src="../shared/scroll-hint-arrow.js?v=' + v + '"><\/script>');
-    /* Registra apenas os scrolls LIMITADOS do creator. NAO registra .screen
-       nem .sub-screen (carousel full-height): a seta absoluta bottom:8px fica
-       fixa no content-space do scroll container e DERIVA pro meio da tela ao
-       rolar, alem de colidir com o .confirm-btn sticky (mesmo bottom:8px).
-       Bug reportado pelo user 2026-06-08. O conteudo cortado + o CONFIRMAR
-       sticky ja sinalizam "role pra ver mais" nessas telas. */
-    document.write('<script>'
-      + 'document.addEventListener("DOMContentLoaded", function(){'
-      + '  if (window.vScrollHint && window.vScrollHint.register) {'
-      + '    window.vScrollHint.register("#summarySections");'
-      + '    window.vScrollHint.register("#summaryContent .section-body");'
-      + '    window.vScrollHint.register(".help-card");'
-      + '    window.vScrollHint.register(".v-popup-body");'
-      + '  }'
-      + '});'
-      + '<\/script>');
+    /* 2026-06-08 (user): a seta de scroll ("ha mais conteudo abaixo") foi REMOVIDA
+       de TODAS as telas de criacao de personagem a pedido do user. O modulo
+       shared/scroll-hint-arrow NAO e mais carregado nem registrado aqui (nem no
+       resumo 9/9, nem nos detalhes/popups). As telas ja sinalizam overflow pelo
+       conteudo cortado + os botoes sticky (CONFIRMAR). */
     </script>
     <style>
         /* BUGFIX sessão #29 (2026-05-24): SMARTPHONE-LOCK STRICT.
