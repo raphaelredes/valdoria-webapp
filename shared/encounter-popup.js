@@ -706,7 +706,12 @@
       strophes.forEach(function(s) {
         s.container.innerHTML = '';
         s.container.classList.remove('typing-started');
-        s.container.style.visibility = '';
+        /* 2026-06-08 (user): a estrofe so aparece quando A SUA digitacao comecar.
+           Mantem o box escondido (sem fundo/borda visivel) ate typeNextSentence
+           (ou _instantReveal) revelar. Inline visibility e SCOPED a esta engine
+           (renderPage) -> NAO afeta o renderer legacy da cidade (clip-path) que
+           tinha o bug do default visibility:hidden em 2026-05-20. */
+        s.container.style.visibility = 'hidden';
       });
 
       var state = {
@@ -754,6 +759,7 @@
         }
         if (state.sentenceIdx === 0) {
           sd.container.classList.add('typing-started');
+          sd.container.style.visibility = '';  /* revela a estrofe ao INICIAR a digitacao */
         }
         var sentence = sd.sentences[state.sentenceIdx];
         var container = sd.container;
@@ -819,6 +825,7 @@
         var sd = st.strophes[st.stropheIdx];
         var container = sd.container;
         container.classList.add('typing-started');
+        container.style.visibility = '';  /* skip/pular revela TODAS as estrofes */
         while (st.sentenceIdx < sd.sentences.length) {
           var sentence = sd.sentences[st.sentenceIdx];
           if (st.sentenceIdx > 0) container.appendChild(document.createTextNode(' '));
