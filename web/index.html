@@ -17,6 +17,10 @@
     <style>
       html.wa-link-google #screen-login{display:none!important;}
       html.wa-link-google #wa-link-overlay{display:flex!important;}
+      html.wa-link-google #wa-boot{display:none!important;}
+      /* Cobertura de boot: visível no 1º paint; some só quando o JS decide o destino.
+         Evita o flash da tela de login durante o auto-login (regra Loading-First). */
+      #wa-boot{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:#1a1510;}
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,6 +49,13 @@
     <!-- Google GSI loaded programmatically by web-auth.js after callback is defined -->
 </head>
 <body class="wa-portal">
+    <!-- 2026-06-08: cobertura de BOOT full-screen. Visível por padrão (primeiro paint),
+         removida só quando o JS decide o destino final (login OU redirect/hall). Garante
+         que SÓ a tela de carregamento apareça até o destino estar pronto — sem flash da
+         tela de login durante a cadeia de auto-login. Ring de spinner (outline) — NUNCA
+         esfera dourada chapada (regra Identidade Visual). -->
+    <div id="wa-boot"><div class="wa-spinner"></div></div>
+
     <!-- Ambient Particles -->
     <div class="wa-cenario-particles">
         <div class="wa-ember"></div>
@@ -65,8 +76,9 @@
       <div style="font-size:12px;color:var(--v-text-dim,#a09484);max-width:280px;line-height:1.5;">Você será levado à tela de login do Google. Após autorizar, volte ao jogo.</div>
     </div>
 
-    <!-- Login Screen -->
-    <div id="screen-login" class="wa-screen wa-active">
+    <!-- Login Screen — NÃO começa wa-active: o #wa-boot cobre a tela até o JS
+         decidir que o login é realmente necessário (_showLoginUI revela). -->
+    <div id="screen-login" class="wa-screen">
         <div class="wa-login-card">
             <!-- 3D Orb of Valdoria -->
             <div class="wa-orb-wrap">

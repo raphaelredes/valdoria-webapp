@@ -262,6 +262,7 @@ async function _onGoogleAuthLink(response) {
                     onMerged: function () {
                         try { sessionStorage.removeItem('valdoria_link_pending'); } catch (_) { /* noqa: preflight */ }
                         try {
+                            _showLoginUI();  // 2026-06-08: revela #screen-login (link mode o esconde via CSS)
                             var b = document.getElementById('screen-login');
                             if (b) b.innerHTML = '<div style="text-align:center;padding:24px;color:#d4c8b0;font-family:Cinzel,serif">'
                                 + '<div style="font-size:48px;margin-bottom:16px">✓</div>'
@@ -281,6 +282,7 @@ async function _onGoogleAuthLink(response) {
             var msg = data.already_linked ? 'Conta Google já vinculada.' : 'Conta Google vinculada com sucesso!';
             // Substitui a tela de login por uma mensagem de sucesso.
             try {
+                _showLoginUI();  // 2026-06-08: revela #screen-login (link mode o esconde via CSS) + tira o #wa-boot
                 var box = document.getElementById('screen-login');
                 if (box) {
                     box.innerHTML = '<div class="wa-link-success" style="text-align:center;padding:24px;color:#d4c8b0;font-family:Cinzel,serif;">'
@@ -516,6 +518,10 @@ function handleLoginSuccess(data) {
 /* ----- Character Selection ----- */
 
 function showCharacterSelect() {
+    // 2026-06-08 (Loading-First): some o #wa-boot no MESMO frame em que mostra o
+    // #screen-chars — o Hall aparece sob a cobertura e a cobertura é removida; a tela
+    // de login NUNCA é exibida no caminho pro Hall (ela nem ficou wa-active).
+    _hideBoot();
     document.getElementById('screen-login').classList.remove('wa-active');
     document.getElementById('screen-chars').classList.add('wa-active');
     /* Sessao #19 (2026-05-21): user pediu remover botao Sair quando aberto
@@ -665,6 +671,11 @@ async function onPlay() {
 }
 
 function redirectToGame(charId, isNew, token) {
+    // 2026-06-08 (Loading-First): mantém o #wa-boot painted através da navegação
+    // (NUNCA chama _showLoginUI/_hideBoot aqui) — a próxima tela tem o próprio loader,
+    // então a transição é uma cobertura de carregamento contínua, sem flash. O flag
+    // de transição também impede o close-beacon de disparar no beforeunload.
+    try { window.__valdoria_transitioning = true; } catch (_e) { /* noqa: preflight */ }
     var t = token || _authToken;
     var params = new URLSearchParams();
     params.set('token', t);
@@ -717,12 +728,20 @@ function redirectToGame(charId, isNew, token) {
         return;
     }
 
-    // Pre-fetch /api/game/state pra determinar destino exato
-    fetch(_apiBase + '/api/game/state', {
+    // Pre-fetch /api/game/state pra determinar destino exato.
+    // 2026-06-08: timeout 15s — sem ele, um servidor pendurado deixaria o #wa-boot
+    // preso pra sempre (o backstop pula páginas em transição). No abort/erro, o
+    // .catch cai pra cidade (navega; cobertura contínua até o destino).
+    var _stCtl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var _stTo = _stCtl ? setTimeout(function () { try { _stCtl.abort(); } catch (_e) {} }, 15000) : null;
+    var _stOpts = {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: _userId })
-    }).then(function(r){
+    };
+    if (_stCtl) _stOpts.signal = _stCtl.signal;
+    fetch(_apiBase + '/api/game/state', _stOpts).then(function(r){
+        if (_stTo) { clearTimeout(_stTo); _stTo = null; }
         if (!r.ok) throw new Error('state HTTP ' + r.status);
         return r.json();
     }).then(function(state){
@@ -752,7 +771,8 @@ function redirectToGame(charId, isNew, token) {
             state && state.transition ? state.transition.to : 'none');
         window.location.href = url;
     }).catch(function(err){
-        // Fallback graceful: vai pra cidade como antes
+        if (_stTo) { clearTimeout(_stTo); _stTo = null; }
+        // Fallback graceful: vai pra cidade como antes (cobre abort/timeout/erro de rede).
         console.warn('[WEB-AUTH] /api/game/state failed, fallback to cidade:', err.message || err);
         var fallbackUrl = '../cidade/index.html?' + paramStr;
         window.location.href = fallbackUrl;
@@ -770,6 +790,7 @@ function onLogout() {
 /* ----- Blocked Screen (brute force detected) ----- */
 
 function showBlockedScreen(retryAfter) {
+    _hideBoot();  // 2026-06-08: tela bloqueada (429) fica SOB o #wa-boot (z-60) — revela
     /* Hide both login and character screens */
     var login = document.getElementById('screen-login');
     var chars = document.getElementById('screen-chars');
@@ -857,7 +878,29 @@ function showAuthLoading(show) {
     if (el) el.style.display = show ? 'flex' : 'none';
 }
 
+/* 2026-06-08 (Loading-First): #wa-boot cobre a tela do 1º paint até o destino final
+   estar decidido. _hideBoot() remove a cobertura; _showLoginUI() revela a tela de
+   login. Chamados SÓ nos pontos terminais "fica no /web/ e mostra login". Caminhos de
+   redirect/hall NUNCA chamam _showLoginUI — deixam o #wa-boot painted até a navegação
+   (a próxima tela tem o próprio loader), evitando o flash da tela de login. */
+function _hideBoot() {
+    try { var b = document.getElementById('wa-boot'); if (b) b.style.display = 'none'; } catch (_e) { /* noqa: preflight */ }
+}
+function _showLoginUI() {
+    _hideBoot();
+    try {
+        // 2026-06-08: se estávamos em link_mode=google, o CSS html.wa-link-google
+        // esconde #screen-login (display:none!important) — revelar o login (ex.: erro
+        // de vinculação) exige remover a classe, senão a mensagem fica invisível e o
+        // usuário trava no overlay "Vinculando…".
+        document.documentElement.classList.remove('wa-link-google');
+        var s = document.getElementById('screen-login');
+        if (s) { s.classList.add('wa-active'); s.style.visibility = ''; }
+    } catch (_e) { /* noqa: preflight */ }
+}
+
 function showAuthError(msg) {
+    _showLoginUI();  // um erro só faz sentido com a tela de login visível
     var el = document.getElementById('auth-error');
     if (el) {
         el.textContent = msg;
@@ -1116,6 +1159,7 @@ function _tryWebTokenSession() {
         fetchCharacters();
     } else {
         console.info('[WEB-AUTH] No existing session — showing login buttons');
+        _showLoginUI();  // terminal: sem sessão → revela a tela de login (tira o #wa-boot)
     }
 }
 
@@ -1136,6 +1180,7 @@ async function fetchCharacters() {
             _clearStoredSession();
             _clearReloginGuard();
             showAuthLoading(false);
+            _showLoginUI();  // terminal: sessão inválida → revela login (tira o #wa-boot)
             return;
         }
         var data = await resp.json();
@@ -1163,6 +1208,7 @@ async function fetchCharacters() {
         console.warn('[WEB-AUTH] Session check failed:', msg);
         _clearStoredSession();
         _clearReloginGuard();
+        _showLoginUI();  // terminal: falha de rede/timeout → revela login (tira o #wa-boot)
     } finally {
         showAuthLoading(false);
     }
@@ -1344,6 +1390,25 @@ async function _tryTelegramInitAuth() {
 async function _initWebAuth() {
     console.info('[WEB-AUTH] Init: isProd=%s bot=%s env=%s readyState=%s', _isProd, BOT_USERNAME, _envId, document.readyState);
 
+    /* 2026-06-08 BACKSTOP (Loading-First): se em ~12s o #wa-boot ainda cobre a tela e
+       nenhum destino foi revelado nem navegamos (algum caminho terminal imprevisto),
+       revela o login pra NUNCA deixar o jogador preso numa tela escura. */
+    setTimeout(function () {
+        try {
+            if (window.__valdoria_transitioning) return;
+            var b = document.getElementById('wa-boot');
+            if (!b || b.style.display === 'none') return;
+            var login = document.getElementById('screen-login');
+            var chars = document.getElementById('screen-chars');
+            var loginActive = login && login.classList.contains('wa-active');
+            var charsActive = chars && chars.classList.contains('wa-active');
+            if (!loginActive && !charsActive) {
+                console.warn('[WEB-AUTH] boot backstop — revelando login (nenhum destino em 12s)');
+                _showLoginUI();
+            }
+        } catch (_e) { /* noqa: preflight */ }
+    }, 12000);
+
     /* AUTH-1 (Sessao #64): Detecta link_mode=google OU pending sessionStorage.
      * Fluxo:
      *   1. cidade.html grava sessionStorage.valdoria_link_pending + openLink('/web/?link_mode=google')
@@ -1425,12 +1490,9 @@ async function _initWebAuth() {
      * o initData se perde e o auto-login nunca roda. */
     if (_isInsideTelegram()) {
         console.info('[WEB-AUTH] Telegram context detected — running silent auth BEFORE dev panel');
-        /* Oculta imediatamente a tela de login enquanto tentamos silent auth,
-         * evitando flash dos botoes antes do redirect. */
-        try {
-            var _loginScreen = document.getElementById('screen-login');
-            if (_loginScreen) _loginScreen.style.visibility = 'hidden';
-        } catch (_) { /* noqa: preflight */ }
+        /* 2026-06-08: o #wa-boot já cobre a tela desde o 1º paint, então o login
+         * nunca pisca enquanto a silent auth roda (não precisa mais de visibility
+         * hidden). Em sucesso, redirectToGame mantém o #wa-boot até navegar. */
         var silentOk = await _tryTelegramInitAuth();
         if (silentOk) return;
         /* 2026-05-21 USER FIX: NUNCA mostrar opção Google quando estamos em
@@ -1446,8 +1508,7 @@ async function _initWebAuth() {
                 _errBox.textContent = 'Sessão expirou. Feche e abra novamente pelo /start do bot.';
                 _errBox.style.display = 'block';
             }
-            var _lsRestore = document.getElementById('screen-login');
-            if (_lsRestore) _lsRestore.style.visibility = '';
+            _showLoginUI();  // silent auth falhou → revela a tela de login (tira o #wa-boot)
         } catch (_) { /* noqa: preflight */ }
         /* Não retorna — deixa loadTelegramWidget e checkExistingSession rodarem
            pra tentar reauth via Telegram (mas Google fica escondido). */
