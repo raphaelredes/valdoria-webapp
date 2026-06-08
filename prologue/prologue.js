@@ -391,7 +391,9 @@ function _sceneInjuredCompanionResult(result) {
     npc: {
       name: result.title || 'Resultado',
       desc: 'Brenn — aprendiz de Thorne',
-      portrait: '/shared/img/npcs/thorne-armeiro.webp'
+      /* 2026-06-08 (user): a cena de Primeiros Socorros e sobre o Brenn (aprendiz
+         caido), entao mostra o retrato do Brenn — antes usava o do Thorne. */
+      portrait: '/shared/img/npcs/brenn-aprendiz.webp'
     },
     script: script,
     choices: [
