@@ -92,7 +92,7 @@ function renderRuneScribe(container, data) {
   crest.onerror = function(){ this.style.display = 'none'; };
   cenarioEl.appendChild(crest);
   var titulo = vCity.el('div', 'cenario-titulo');
-  titulo.appendChild(_rnsEl('div', 'name', 'Câmara do Escriba'));
+  titulo.appendChild(_rnsEl('div', 'name', 'Escriba Rúnico'));
   titulo.appendChild(_rnsEl('div', 'sub', 'Eirik · Guardião dos Glifos'));
   cenarioEl.appendChild(titulo);
   root.appendChild(cenarioEl);

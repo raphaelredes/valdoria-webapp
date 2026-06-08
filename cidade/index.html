@@ -44501,7 +44501,7 @@ function _renderCityPopup(key){
   bodyEl.innerHTML = '';
   // === AREA_REGISTRY dispatch (canonical renderers) ===
   if (key === 'temple' && typeof renderTempleHub === 'function') {
-    if (titleEl) titleEl.textContent = 'Templo dos Deuses';
+    if (titleEl) titleEl.textContent = 'Templo dos Quatro';
     renderTempleHub(bodyEl, _buildTempleMockData(window.CITY_MOCK_PLAYER));
     return;
   }
@@ -44547,7 +44547,7 @@ function _renderCityPopup(key){
     return;
   }
   if (key === 'tavern' && typeof renderTavernHub === 'function') {
-    if (titleEl) titleEl.textContent = 'Taverna do Javali';
+    if (titleEl) titleEl.textContent = 'Taverna do Javali Bêbado';
     renderTavernHub(bodyEl, _buildTavernMockData(window.CITY_MOCK_PLAYER));
     return;
   }
@@ -45296,7 +45296,7 @@ var SUBSCREEN_DATA = {
     ]
   },
   'temple': {
-    header: '⛪ Templo dos Deuses',
+    header: '⛪ Templo dos Quatro',
     flavor: 'Velas iluminam o altar. O incenso perfuma o ar. Sacerdotes oferecem suas bênçãos divinas.',
     npcInfo: '<svg class="v-heraldic v-h-banner"><use href="#ic-clerigo"/></svg> Irmã Elara — "A luz divina te abençoe."',
     buttons: [

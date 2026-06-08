@@ -1,5 +1,5 @@
 /* ============================================================================
- * game-temple.js — Templo dos Deuses renderer (FULL PADRAO_TAVERNA canonical)
+ * game-temple.js — Templo dos Quatro renderer (FULL PADRAO_TAVERNA canonical)
  * ============================================================================
  *
  * Task #26 sessão #14 (2026-05-20) — REFATORADO p/ usar PADRAO_TAVERNA canonical:
@@ -13,7 +13,7 @@
  *   ~55   ALDRIC_DIALOGUE (greeting principal — Padre Aldric)
  *   ~80   SERVICE_DIALOGUES_TEMPLE (6 dialogues PADRAO_ALDRIC inline)
  *   ~280  TEMPLE_CB_TO_DIALOGUE (backend cb → dialogue key map)
- *   ~310  TEMPLE_SVC_META (svc icon path + meta text canonical)
+ *   ~260  TEMPLE_SVC_WEBP (svc icon WebP por sid — CY3)
  *   ~340  _tmpBuildCenario(data) — cenário canonical PADRAO_TAVERNA
  *   ~390  _tmpBuildNpcRow(data) — .row-npc canonical PADRAO_TAVERNA
  *   ~440  _tmpBuildRepBar(data) — Renome
@@ -256,15 +256,18 @@ var TEMPLE_CB_TO_DIALOGUE = {
 };
 
 /* === Service icon meta ================================================== */
-var TEMPLE_SVC_META = {
-  // Sessão #23 (2026-05-22): refs PHB removidas (regra "D&D refs sweep player-visible").
-  // Meta agora descreve o serviço em PT-BR pra clareza ao jogador.
-  'temple_interact_menu_npc_temple_elara':    { icon: '../shared/img/services/svc-cura.webp',         meta: 'Cura ferimentos divinos' },
-  'temple_interact_menu_npc_temple_aldric':   { icon: '../shared/img/services/svc-pocoes.webp',       meta: 'Purifica veneno e doenças' },
-  'temple_interact_menu_npc_temple_theron':   { icon: '../shared/img/services/svc-bencao.webp',       meta: 'Bênção arcana de combate' },
-  'temple_interact_menu_npc_temple_miriel':   { icon: '../shared/img/services/svc-bencao.webp',       meta: 'Liberta de maldições' },
-  'temple_interact_menu_npc_temple_varek':    { icon: '../shared/img/services/svc-bencao.webp',       meta: 'Remove condições graves' },
-  'temple_interact_menu_npc_temple_orenthia': { icon: '../shared/img/services/svc-ressuscitar.webp',  meta: 'Reviver dos caídos' }
+// CY3 (2026-06-07): os 6 serviços sagrados agora usam WebP OpenAI (svc-*.webp)
+// em vez do SVG heráldico inline ("malfeitos"). Mapa keyed por SID (deriva de
+// svc.cb = 'temple_dialogue_<sid>'). Funciona pro mock (cidade _buildTempleMockData)
+// E pro server-driven (_temple_screen) — ambos produzem o mesmo cb. O antigo
+// TEMPLE_SVC_META era dead code (keys 'temple_interact_menu_*' nunca casavam).
+var TEMPLE_SVC_WEBP = {
+  'heal':                '../shared/img/services/svc-cura.webp',
+  'cure_poison':         '../shared/img/services/svc-pocoes.webp',
+  'bless':               '../shared/img/services/svc-bencao.webp',
+  'remove_curse':        '../shared/img/services/svc-maldicao.webp',
+  'greater_restoration': '../shared/img/services/svc-recuperacao.webp',
+  'raise_dead':          '../shared/img/services/svc-ressuscitar.webp'
 };
 
 /* === Cenário canonical (PADRAO_TAVERNA — usa .cenario CSS classes) === */
@@ -436,15 +439,16 @@ function _tmpBuildServices(services) {
       card.appendChild(badge);
     }
 
-    var legacyMeta = TEMPLE_SVC_META[svc.cb] || {};
-
-    // Icon: prefere SVG inline do mock (svc.icon = innerHTML SVG markup do _heralIco)
+    // CY3 (2026-06-07): ícone WebP OpenAI por SID (svc.cb = 'temple_dialogue_<sid>').
+    // Antes usava SVG heráldico inline ("malfeitos"); agora os 6 serviços resolvem
+    // pra svc-*.webp. Fallback: path em svc.icon (se já vier .webp/.png do server).
+    var _svcSid = (svc.cb || '').replace('temple_dialogue_', '');
+    var _icoPath = TEMPLE_SVC_WEBP[_svcSid]
+      || (svc.icon && typeof svc.icon === 'string' && /\.(webp|png|jpe?g)(\?|$)/i.test(svc.icon) ? svc.icon : '');
     var ico = vCity.el('div', 'svc-ico');
-    if (svc.icon && typeof svc.icon === 'string' && svc.icon.indexOf('<svg') === 0) {
-      ico.innerHTML = svc.icon;
-    } else if (legacyMeta.icon) {
+    if (_icoPath) {
       var img = vCity.el('img');
-      img.src = legacyMeta.icon;
+      img.src = _icoPath;
       img.alt = '';
       img.loading = 'lazy';
       img.onerror = function(){ this.style.display = 'none'; };
@@ -494,9 +498,9 @@ function _tmpBuildServices(services) {
       var costText = svc.cost !== undefined
         ? (svc.cost === 0 ? 'Grátis' : String(svc.cost) + ' V')
         : '';
-      metaTxt.textContent = (legacyMeta.meta && costText)
-        ? (costText + ' · ' + legacyMeta.meta)
-        : (legacyMeta.meta || costText);
+      // CY3: legacyMeta (dead) removido — o custo já é o meta visível; a descrição
+      // D&D do serviço aparece em .tmp-svc-desc acima.
+      metaTxt.textContent = costText;
     }
     txt.appendChild(metaTxt);
 
