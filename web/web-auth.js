@@ -612,6 +612,16 @@ function selectChar(el) {
    character_creator/index.html ~L7760). O from=web faz o Voltar do criador retornar
    pra ESTE Hall (sem loop). É o MESMO caminho da 1a criacao (0 chars) ja em producao. */
 function onCreateChar() {
+    // 2026-06-08 (user "transição demorando"): mostra a cobertura de carregamento
+    // IMEDIATAMENTE. Sem isto, o Hall ficava CONGELADO durante o download/parse do
+    // criador (página grande; pior no celular/3G) — parecia travado. O #wa-boot
+    // (anel girando) cobre o Hall na hora e fica até o criador pintar (loader contínuo).
+    try {
+        var b = document.getElementById('wa-boot');
+        if (b) { b.style.display = 'flex'; }   // cobre o Hall com o anel de loading na hora
+        var btn = document.getElementById('btn-create-char');
+        if (btn) { btn.disabled = true; }       // evita duplo-clique (o cover já bloqueia)
+    } catch (_e) { /* noqa: preflight */ }
     redirectToGame('', true);
 }
 window.onCreateChar = onCreateChar;
