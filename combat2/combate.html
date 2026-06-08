@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-08T17:14:09Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-08T20:08:34Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2011,6 +2011,8 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 /* Indicador de turno atual no topo */
 .current-turn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 14px; margin: 6px 12px 0; background: linear-gradient(90deg, transparent, rgba(74,56,40,.4), transparent); border-top: 1px solid rgba(196,149,58,.3); border-bottom: 1px solid rgba(196,149,58,.3); font-family: var(--v-font-display, 'Cinzel'), serif; font-size: calc(12px * var(--v-font-scale, 1)); letter-spacing: 1.5px; text-transform: uppercase; color: var(--v-text-dim, #a09484); text-shadow: 0 1px 2px rgba(0,0,0,.8); animation: ctFade .3s ease; }
 .current-turn .ct-ico { font-size: calc(18px * var(--v-font-scale, 1)); }
+/* 2026-06-08: quando o ct-ico vira retrato (img/svg da classe) limita ao tamanho do emoji */
+.current-turn .ct-ico img, .current-turn .ct-ico svg { width: calc(24px * var(--v-font-scale, 1)); height: calc(24px * var(--v-font-scale, 1)); display: inline-block; vertical-align: middle; object-fit: contain; }
 .current-turn .ct-label { color: var(--v-text-dim, #a09484); }
 .current-turn .ct-name { color: #c06a3a; font-weight: 700; letter-spacing: 2px; }
 .current-turn.player-turn { background: linear-gradient(90deg, transparent, rgba(196,149,58,.25), transparent); border-color: var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); font-weight: 700; letter-spacing: 4px; font-size: calc(14px * var(--v-font-scale, 1)); text-shadow: 0 0 10px rgba(196,149,58,.6), 0 1px 2px rgba(0,0,0,.8); animation: ctFade .3s ease, playerTurnGlow 1.6s ease-in-out infinite; }
@@ -4501,6 +4503,11 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 /* Crest heraldico (SVG) no header da ficha — tinta via currentColor da cls-X */
 .udc-ico--heraldic { width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; color: color-mix(in srgb, var(--card-accent, #c4953a) 55%, #fff 45%); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--card-accent, #c4953a) 60%, transparent)) drop-shadow(0 1px 2px rgba(0,0,0,.85)); }
 .udc-ico--heraldic svg { width: 100%; height: 100%; display: block; }
+/* 2026-06-08 (user): a arte WebP do inimigo/aliado no detalhe vira THUMBNAIL (cabe nos 54px,
+   sem zoom). A imagem grande abre no lightbox (PADRAO_ALDRIC) ao tocar. */
+.udc-ico--heraldic img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.udc-ico--heraldic.udc-clickable { cursor: pointer; transition: transform .15s ease, filter .15s ease; }
+.udc-ico--heraldic.udc-clickable:hover { transform: scale(1.07); }
 .udc-header.cls-inimigo .udc-ico--heraldic { color: color-mix(in srgb, var(--enemy-red, #a03020) 55%, #fff 45%); filter: drop-shadow(0 0 6px rgba(255,80,60,.5)) drop-shadow(0 1px 2px rgba(0,0,0,.85)); }
 .udc-header.cls-boss .udc-ico--heraldic { color: var(--boss-gold, #d4a040); filter: drop-shadow(0 0 8px rgba(255,215,100,.85)) drop-shadow(0 1px 2px rgba(0,0,0,.85)); }
 .udc-header.cls-mago { --card-accent: var(--class-mago); }
@@ -11007,6 +11014,8 @@ window.__onIntroTap = function() {
     document.write('<script src="' + BASE + '/shared/status-bars.js?v=' + v + '"><\/script>');
     // narrative-reveal.js: typewriter slim unico (FASE 7c single-source).
     document.write('<script src="' + BASE + '/shared/narrative-reveal.js?v=' + v + '"><\/script>');
+    // lightbox.js: ampliacao de retrato (PADRAO_ALDRIC) usada pelo detalhe de combatente (2026-06-08).
+    document.write('<script src="' + BASE + '/shared/lightbox.js?v=' + v + '"><\/script>');
     /* Clock skew guard (USER REQUEST 2026-05-04) — detecta NET::ERR_CERT_DATE_INVALID
        proativamente quando relógio do device está errado. */
     document.write('<script src="' + BASE + '/shared/clock-skew-guard.js?v=' + v + '"><\/script>');
@@ -16656,9 +16665,9 @@ var ENEMY_PNG_AVAILABLE = {
    Source: scripts/generate_skill_icons.py + logs/inventory_skills.json.
    Keyed pela versão slugificada do nome (ex: "Bola de Fogo" → "bola-de-fogo"). */
 var SKILL_PNG_AVAILABLE = {
-    'ação-ardilosa': 1, 'agarrar': 1, 'arma-espiritual': 1, 'arma-magica': 1, 'armadura-de-agathys': 1, 'ataque-assassino': 1,
-    'ataque-brutal': 1, 'ataque-furtivo': 1, 'ataque-poderoso': 1, 'aura-de-proteção': 1, 'aura-de-vitalidade': 1, 'auto': 1,
-    'banir': 1, 'bencao': 1, 'bola-de-fogo': 1, 'bruxaria': 1, 'calmar-emocoes': 1, 'canção-de-cura': 1,
+    'acao-ardilosa': 1, 'agarrar': 1, 'arma-espiritual': 1, 'arma-magica': 1, 'armadura-de-agathys': 1, 'ataque-assassino': 1,
+    'ataque-brutal': 1, 'ataque-furtivo': 1, 'ataque-poderoso': 1, 'aura-de-protecao': 1, 'aura-de-vitalidade': 1, 'auto': 1,
+    'banir': 1, 'bencao': 1, 'bola-de-fogo': 1, 'bruxaria': 1, 'calmar-emocoes': 1, 'cancao-de-cura': 1,
     'cegueira': 1, 'chama-sagrada': 1, 'chicote-espinhoso': 1, 'choque-eletrico': 1, 'chuva-de-espinhos': 1, 'cone-de-frio': 1,
     'conjurar-animais': 1, 'contagio': 1, 'contramagica': 1, 'corpo-calmo': 1, 'crescimento-espinhoso': 1, 'cura': 1,
     'cura-da-companhia': 1, 'cura-pelas-maos': 1, 'curar': 1, 'curar-ferimentos': 1, 'defesa-paciente': 1, 'desviar-projeteis': 1,
@@ -16667,17 +16676,17 @@ var SKILL_PNG_AVAILABLE = {
     'flecha-de-acido': 1, 'forma-selvagem': 1, 'furia': 1, 'furia-devastadora': 1, 'golpe-arcano': 1, 'golpe-atordoante': 1,
     'golpe-de-armadilha': 1, 'golpe-divino': 1, 'golpe-flamejante': 1, 'golpe-fulminante': 1, 'golpe-guidado': 1, 'golpe-irado': 1,
     'golpe-marcante': 1, 'golpe-mortal': 1, 'golpe-preciso': 1, 'golpe-trovejante': 1, 'graxa': 1, 'grito-de-guerra': 1,
-    'hipnose': 1, 'imobilizar-pessoa': 1, 'infligir-ferimentos': 1, 'inspiração': 1, 'investida': 1, 'investida-selvagem': 1,
+    'hipnose': 1, 'imobilizar-pessoa': 1, 'infligir-ferimentos': 1, 'inspiracao': 1, 'investida': 1, 'investida-selvagem': 1,
     'invisibilidade': 1, 'invisibilidade-maior': 1, 'invocar-lobo': 1, 'invocar-raio': 1, 'juramento-de-inimizade': 1, 'lamina-sombria': 1,
-    'lentidao': 1, 'lobo-espiritual': 1, 'maldição': 1, 'maldição-da-fraqueza': 1, 'mao-arcana': 1, 'maos-flamejantes': 1,
+    'lentidao': 1, 'lobo-espiritual': 1, 'maldicao': 1, 'maldicao-da-fraqueza': 1, 'mao-arcana': 1, 'maos-flamejantes': 1,
     'marca-do-cacador': 1, 'massa-de-cura': 1, 'medo': 1, 'metamagia-acelerar': 1, 'metamagia-duplicar': 1, 'misseis-magicos': 1,
     'missil-magico': 1, 'nevoa-ardente': 1, 'nuvem-toxica': 1, 'onda-de-trovao': 1, 'palavra-de-cura': 1, 'palavra-guia': 1,
     'palavra-imperiosa': 1, 'palavra-poder-atordoar': 1, 'palavras-cortantes': 1, 'palavras-crueis': 1, 'passar-sem-rastro': 1, 'passo-brumoso': 1,
     'passo-do-vento': 1, 'passo-oculto': 1, 'passos-silenciosos': 1, 'plaga-de-insetos': 1, 'postura-defensiva': 1, 'pressa': 1,
-    'produzir-chama': 1, 'proteção-contra-energia': 1, 'proteção-divina': 1, 'raio-caotico': 1, 'raio-de-enfraquecimento': 1, 'raio-de-fogo': 1,
+    'produzir-chama': 1, 'protecao-contra-energia': 1, 'protecao-divina': 1, 'raio-caotico': 1, 'raio-de-enfraquecimento': 1, 'raio-de-fogo': 1,
     'raio-doentio': 1, 'raio-gelido': 1, 'raio-guiador': 1, 'raio-relampejante': 1, 'rajada-de-flechas': 1, 'rajada-de-golpes': 1,
     'recuperacao-rapida': 1, 'reflexos-evasivos': 1, 'relampago': 1, 'repreensao-divina': 1, 'repreensao-infernal': 1, 'rugido-feroz': 1,
-    'santuario': 1, 'segundo-folego': 1, 'sono': 1, 'surto-de-ação': 1, 'sussurros-dissonantes': 1, 'temerario': 1,
+    'santuario': 1, 'segundo-folego': 1, 'sono': 1, 'surto-de-acao': 1, 'sussurros-dissonantes': 1, 'temerario': 1,
     'tiro-certeiro': 1, 'tiro-preciso': 1, 'transmutar-em-pedra': 1,
     // Sessão #43 (2026-05-27): 20 novas skills dos 5 Cleric domains (Knowledge,
     // Nature, Tempest, Trickery, War — PHB p.58-67). Slugs computados via
@@ -19054,7 +19063,12 @@ function render(s) {
         if (isPlayerTurn) {
             html += '<div class="current-turn player-turn"><span class="ct-chevron">▸</span><span class="ct-text">SEU TURNO</span><span class="ct-chevron">◂</span></div>';
         } else {
-            html += '<div class="current-turn"><span class="ct-ico">' + escHtml(activeNow.ico) + '</span><span class="ct-label">Turno de</span><span class="ct-name">' + escHtml(activeNow.n) + '</span></div>';
+            /* 2026-06-08 (user): resolve a IMAGEM da classe (ex.: Guerreiro do Thorne)
+               em vez de imprimir o id cru 'IC_GUERREIRO' como texto. */
+            var _ctUtype = activeNow.t === 'p' ? 'player' : (activeNow.t === 'a' ? 'ally' : 'enemy');
+            var _ctIcoId = (typeof _heraldicIconOf === 'function') ? _heraldicIconOf(activeNow, _ctUtype) : null;
+            var _ctPortrait = _ctIcoId ? _combatPortraitHTML(_ctIcoId, activeNow, _ctUtype) : escHtml(activeNow.ico || '');
+            html += '<div class="current-turn"><span class="ct-ico">' + _ctPortrait + '</span><span class="ct-label">Turno de</span><span class="ct-name">' + escHtml(activeNow.n) + '</span></div>';
         }
     }
     html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Turno ' + s.rn + '</span> Floresta <span class="weather-badge w-clear">☀️ Limpo</span></div></div>';
@@ -26801,6 +26815,18 @@ function openUnitDetail(uid) {
 
     setHTML(card, html);
     card.querySelector('.udc-close').addEventListener('click', function () { ov.remove(); });
+    /* 2026-06-08 (user): a imagem do detalhe e um THUMBNAIL; tocar abre o lightbox
+       (PADRAO_ALDRIC: imagem grande limitada a tela + nome + descricao). So quando
+       ha arte raster (img); o crest SVG nao tem o que ampliar. */
+    (function () {
+        var _udcImg = card.querySelector('.udc-ico--heraldic img');
+        if (!_udcImg || typeof window.showLightbox !== 'function') return;
+        var _box = card.querySelector('.udc-ico--heraldic');
+        if (_box) _box.classList.add('udc-clickable');
+        var _subEl = card.querySelector('.udc-sub');
+        var _desc = _subEl ? _subEl.textContent : '';
+        _udcImg.addEventListener('click', function (e) { e.stopPropagation(); window.showLightbox(_udcImg.src, u.n, _desc); });
+    })();
     /* X-6.5.51AB: wire pager de skills (se lista paginada) */
     if (skills.length > UDC_SKILLS_PER_PAGE) {
         var udcCurPage = 0;
