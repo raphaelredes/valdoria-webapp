@@ -8521,6 +8521,14 @@ body.perf-lite .vc-action-btn { transition: none; }
         _cityLog('info', 'zero_chars_to_hall', {});
         try {
           var _zp = new URLSearchParams(window.location.search);
+          // 2026-06-08: limpa o char_id da sessão cacheada (provável stale do char
+          // apagado) pra que o PRÓXIMO open NÃO volte pra cidade — o _tryVStarSession
+          // pula a cidade quando char_id está vazio, indo direto pro Hall vazio.
+          try {
+            var _sk = 'valdoria_session_' + (_zp.get('env') || 'dev');
+            var _sraw = localStorage.getItem(_sk);
+            if (_sraw) { var _sj = JSON.parse(_sraw); if (_sj && _sj.char_id) { _sj.char_id = ''; localStorage.setItem(_sk, JSON.stringify(_sj)); } }
+          } catch (_ske) { /* noqa */ }
           var _zu = '/web/?hall=1&env=' + encodeURIComponent(_zp.get('env') || 'dev');
           var _zt = _zp.get('token'), _za = _zp.get('api'), _zuid = _zp.get('uid');
           if (_zt) _zu += '&token=' + encodeURIComponent(_zt);
