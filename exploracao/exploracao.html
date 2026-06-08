@@ -8690,9 +8690,9 @@ window.__onIntroTap = function() {
     <button class="quick-btn" id="btn-party" title="Grupo (membros do partido)" aria-label="Grupo">
       <svg class="qb-icon" style="color:#8a98a8" aria-hidden="true"><use href="#ic-grupo"></use></svg>
     </button>
-    <button class="quick-btn" id="btn-inventory" title="Mochila (Inventário)" aria-label="Mochila">
-      <svg class="qb-icon" style="color:#7a5028" aria-hidden="true"><use href="#ic-mochila"></use></svg>
-    </button>
+    <!-- MN3 (2026-06-07): Mochila avulsa REMOVIDA — já existe no menu fixo (footer
+         #footer-quick data-action=inventory, o MESMO menu da cidade). User pediu
+         pra não duplicar. A ação de inventário continua disponível pelo footer. -->
     <div class="light-btn-wrap" id="light-wrap">
       <button class="quick-btn" id="btn-light" title="Fontes de Luz" aria-label="Tochas">
         <svg class="qb-icon" style="color:#e85020" aria-hidden="true"><use href="#ic-tochas"></use></svg>
@@ -41745,9 +41745,10 @@ function bindQuickActions() {
   // FIX: ambos LOCAL e REMOTE agora usam popup inline canonical (vInventory
   // shared module). S.player + S.inventory são hidratados via API em REMOTE,
   // popup mostra dados reais.
-  document.getElementById('btn-inventory').addEventListener('click', function() {
-    _showExploracaoInventoryPopup();
-  });
+  // MN3 (2026-06-07): btn-inventory avulso removido (já no footer fixo). Wiring
+  // null-safe caso o botão volte. A ação de inventário é disparada pelo footer.
+  var _btnInv = document.getElementById('btn-inventory');
+  if (_btnInv) _btnInv.addEventListener('click', function() { _showExploracaoInventoryPopup(); });
 
   // Wire close button + backdrop click
   var invCloseBtn = document.getElementById('inv-close-btn');

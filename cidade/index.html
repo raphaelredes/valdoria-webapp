@@ -13362,26 +13362,19 @@ function _showStatusPopup(memberIdx){
     // Halo radial
     + '<div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:180px; height:90px;'
     + 'background:radial-gradient(ellipse at center top,rgba(196,149,58,0.22) 0%,transparent 60%); pointer-events:none;"></div>'
-    // Container avatar 64px (double-ring + 4 ornamentos compactos)
+    // FC1 (2026-06-07): moldura SUAVIZADA — removidos o ring externo duplo, os 4
+    // ornamentos ◆ e o pulso animado (roubavam o foco da imagem). Sobra uma borda
+    // gold fina + glow estático sutil. A imagem é CLICÁVEL (v-zoomable) → abre o
+    // lightbox ampliado, igual aos retratos de NPC (delegação em lightbox.js).
     + '<div style="position:relative; width:64px; height:64px; margin:0 auto 6px; z-index:2;">'
-    // Ring externo
-    + '<div style="position:absolute; inset:0; border-radius:50%;'
-    + 'border:1.5px solid var(--v-gold-50,rgba(196,149,58,0.5));'
-    + 'box-shadow:0 0 14px rgba(196,149,58,0.35);"></div>'
-    // Avatar circular (50px dentro do ring 64px)
-    // 2026-05-24 sessão #29: removido radial-gradient amarelo tosco. Fundo
-    // sólido dark + ring gold + SVG da classe são suficientes pra identidade.
-    + '<div class="ficha-avatar fEp-avatar-anim" style="position:absolute; inset:5px;'
+    + '<div class="ficha-avatar v-zoomable" data-zoom-name="' + _titleCase(m.name) + '" data-zoom-desc="Nível ' + (m.level || 1) + '" '
+    + 'title="Toque para ampliar" style="position:absolute; inset:0;'
     + 'background:linear-gradient(180deg, var(--v-bg-card,#2e2520), var(--v-bg,#2a2420));'
-    + 'border-radius:50%; display:flex; align-items:center; justify-content:center;'
-    + 'border:1.5px solid var(--v-gold,#c4953a); color:var(--v-gold,#c4953a);">'
+    + 'border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center;'
+    + 'border:1px solid var(--v-gold-50,rgba(196,149,58,0.5)); color:var(--v-gold,#c4953a); cursor:pointer;'
+    + 'box-shadow:0 0 8px var(--v-gold-30,rgba(196,149,58,0.3));">'
     + heroAvatarSvg
     + '</div>'
-    // 4 ornamentos cardeais menores
-    + '<div style="position:absolute; top:-7px; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(9px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</div>'
-    + '<div style="position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(9px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</div>'
-    + '<div style="position:absolute; top:50%; left:-7px; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:calc(9px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</div>'
-    + '<div style="position:absolute; top:50%; right:-7px; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:calc(9px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</div>'
     + '</div>'
     // Nome 17px Cinzel
     + '<div class="ficha-name" style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(17px * var(--v-font-scale, 1));'
