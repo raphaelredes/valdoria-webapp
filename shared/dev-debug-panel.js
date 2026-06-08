@@ -516,9 +516,17 @@ function _initAsHost() {
     s.textContent = [
         'html.dev-panel-active{max-width:none!important;margin:0!important;height:100dvh!important;overflow:hidden!important}',
         'html.dev-panel-active body{display:flex!important;flex-direction:row!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#0f0d0a!important}',
-        /* X-6.5.51: 430×932 (iPhone Pro Max) → 384×694 (Telegram Desktop oficial) */
-        '#dev-game-iframe{width:384px;min-width:384px;max-width:384px;height:min(100dvh,694px);border:none;flex-shrink:0;background:#1a1510;align-self:center;border-radius:12px;box-shadow:0 0 40px rgba(0,0,0,0.6)}',
-        '#dev-log-panel{flex: 1 !important; display: flex !important; min-width: 0 !important; background: #0f0d0a !important}'
+        /* 2026-06-08 (user): a ÁREA DO JOGO ocupa a largura TOTAL do dispositivo, até o
+           máximo do jogo (430px — regra smartphone-only; o conteúdo já capa em 430 via
+           valdoria-design.css). Antes era FIXA em 384px (preview Telegram Desktop) e
+           nunca preenchia o dispositivo / espremia em telas estreitas.
+           • >=760px (desktop): jogo a 430px (esq.) + painel preenche o resto (sem gap).
+           • <760px (celular/popup): painel some e o jogo ocupa a tela toda
+             (100dvw; centrado quando a janela é maior que 430). max-width (não
+             min-width) → não é breakpoint desktop. */
+        '#dev-game-iframe{width:min(100dvw,430px);max-width:430px;height:100dvh;border:none;flex-shrink:0;background:#1a1510}',
+        '#dev-log-panel{flex:1 !important;display:flex !important;min-width:0 !important;background:#0f0d0a !important}',
+        '@media (max-width:760px){html.dev-panel-active body{justify-content:center !important}html.dev-panel-active #dev-log-panel{display:none !important}}'
     ].join('\n');
     document.head.appendChild(s);
 
