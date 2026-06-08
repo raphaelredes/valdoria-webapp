@@ -11624,7 +11624,7 @@ var TUTORIAL_STEPS = [
     selector: '.hub-cta',
     title: '⚔️ Partir para Aventura',
     description: 'O coração do jogo. Clique aqui para abrir o <b>Mapa de Valdoria</b> e escolher uma região '
-                + 'para explorar — bosques, montanhas, ruínas. É onde você ganha XP, ouro e itens.'
+                + 'para explorar — bosques, montanhas, ruínas. É onde você ganha XP, Valdoritas e itens.'
   },
   {
     selector: '.hub-loc[data-cb="action_quests"], .hub-loc[data-cb="quests"]',
@@ -13215,6 +13215,34 @@ function _getFichaMember(idx){
   return Object.assign({ idx: idx, isPlayer: false, stats: _genFichaStats(m) }, m);
 }
 
+// FC2 (2026-06-07): explicações D&D 5e dos atributos e stats de combate da ficha.
+// Tocar em qualquer card abre um popup explicando o que é, conforme as mecânicas
+// (PHB). Texto-fonte client-side (espelha src/game/character/creation_help.py +
+// help_texts; idealmente server-driven — follow-up junto com MN2).
+var _FICHA_STAT_HELP = {
+  str: { t: 'Força (FOR)', d: 'Poder físico bruto. Modifica ataques e dano corpo-a-corpo, testes de Atletismo e o quanto você carrega. Conjuração de nenhuma classe.' },
+  dex: { t: 'Destreza (DES)', d: 'Agilidade e reflexos. Modifica a Classe de Armadura (sem armadura pesada), a Iniciativa, ataques à distância e com armas acuradas, além de Acrobacia e Furtividade.' },
+  con: { t: 'Constituição (CON)', d: 'Vigor e saúde. Determina seus Pontos de Vida (somada por nível) e a resistência a fadiga, veneno e exaustão.' },
+  int: { t: 'Inteligência (INT)', d: 'Raciocínio e memória. Atributo de conjuração do Mago. Rege Arcanismo, Investigação, História e Natureza.' },
+  wis: { t: 'Sabedoria (SAB)', d: 'Percepção e intuição. Atributo de conjuração de Clérigo, Druida e Patrulheiro. Rege Percepção, Intuição, Medicina e Sobrevivência.' },
+  cha: { t: 'Carisma (CAR)', d: 'Força de personalidade. Atributo de conjuração de Bardo, Feiticeiro, Bruxo e Paladino. Rege Persuasão, Enganação, Intimidação e Atuação.' },
+  ac:  { t: 'Classe de Armadura (CA)', d: 'O quão difícil é te acertar. Um ataque precisa rolar d20 + bônus IGUAL ou MAIOR que sua CA pra atingir. Base 10 + modificador de DES + armadura/escudo equipados.' },
+  atk: { t: 'Bônus de Ataque', d: 'Somado à rolagem de d20 dos seus ataques: bônus de Proficiência + modificador do atributo da arma (FOR no corpo-a-corpo, DES em armas acuradas/à distância).' },
+  spelldc: { t: 'CD de Magia (Spell Save DC)', d: 'A dificuldade para um inimigo resistir às suas magias: 8 + bônus de Proficiência + modificador do seu atributo de conjuração (INT, SAB ou CAR, conforme a classe). PHB p.205.' },
+  prof: { t: 'Bônus de Proficiência', d: 'Somado a ataques, CD de magia e testes em que você é proficiente. Escala com o nível: +2 (níveis 1–4), +3 (5–8), até +6 no nível 17+. PHB Tabela 1-2.' }
+};
+function _showFichaStatHelp(key){
+  var h = _FICHA_STAT_HELP[key];
+  if (!h || typeof _showInfoPopup !== 'function') return;
+  _showInfoPopup({
+    icon: '<svg viewBox="0 0 120 120" style="width:34px;height:34px;color:var(--v-gold,#c4953a);"><use href="#ic-stat-' + (key === 'spelldc' ? 'spelldc' : key) + '"/></svg>',
+    npc: 'Ficha do Aventureiro',
+    title: h.t,
+    desc: '<div style="text-align:left;color:var(--v-text,#d4c8b0);font-size:calc(13px * var(--v-font-scale,1));line-height:1.6;">' + h.d + '</div>',
+    singleButton: true, cancelLabel: 'Entendi'
+  });
+}
+
 function _showStatusPopup(memberIdx){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
@@ -13506,7 +13534,7 @@ function _showStatusPopup(memberIdx){
       + 'style="width:36px;height:36px;flex-shrink:0;object-fit:contain;border-radius:6px;'
       + 'filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));" '
       + 'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=&quot;0 0 120 120&quot; style=&quot;width:32px;height:32px;color:' + iconCol + ';flex-shrink:0;&quot;><use href=&quot;#' + s.icon + '&quot;/></svg>\'">';
-    html += '<div class="ficha-stat-stone" style="position:relative;'
+    html += '<div class="ficha-stat-stone" onclick="_showFichaStatHelp(\'' + s.key + '\')" title="O que é? (mecânica D&D)" style="position:relative; cursor:pointer;'
       + 'background:linear-gradient(165deg,rgba(80,62,40,0.45) 0%,rgba(42,34,24,0.85) 100%);'
       + 'border:1px solid var(--v-border,#4a3828); border-radius:6px;'
       + 'padding:5px 7px; line-height:1.1;'
@@ -13539,15 +13567,15 @@ function _showStatusPopup(memberIdx){
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left:4px;"></span>'
     + '</div>';
   var COMBAT_DATA = [
-    { icon: 'ic-stat-ac',      label: 'CA',      value: ac },
-    { icon: 'ic-stat-attack',  label: 'Atq.',    value: (attackBonus >= 0 ? '+' : '') + attackBonus },
-    { icon: 'ic-stat-spelldc', label: 'DC Mag.', value: spellDc },
-    { icon: 'ic-stat-prof',    label: 'Prof.',   value: '+' + prof }
+    { icon: 'ic-stat-ac',      label: 'CA',      value: ac,       key: 'ac' },
+    { icon: 'ic-stat-attack',  label: 'Atq.',    value: (attackBonus >= 0 ? '+' : '') + attackBonus, key: 'atk' },
+    { icon: 'ic-stat-spelldc', label: 'DC Mag.', value: spellDc,  key: 'spelldc' },
+    { icon: 'ic-stat-prof',    label: 'Prof.',   value: '+' + prof, key: 'prof' }
   ];
   html += '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:4px;">';
   COMBAT_DATA.forEach(function(c){
     var iconCol = HERALDIC_COLORS[c.icon] || '#8a7a6a';
-    html += '<div class="ficha-combat-badge fEp-shield" style="position:relative;'
+    html += '<div class="ficha-combat-badge fEp-shield" onclick="_showFichaStatHelp(\'' + c.key + '\')" title="O que é? (mecânica D&D)" style="position:relative; cursor:pointer;'
       + 'display:flex; align-items:center; justify-content:space-between; gap:5px;'
       + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,36,32,0.6) 100%);'
       + 'border:1px solid rgba(196,149,58,0.30); border-radius:4px 4px 7px 7px;'
@@ -37237,21 +37265,21 @@ var WNPC_TRAIL_COMPANION_DEPART_LINES = [
 
 // canonical: help_texts_data.py + help_texts_data_extra.py
 var HELP_TEXTS_CITY = {
-    'temple': '\\n🛐 <b>TEMPLO - GUIA RÁPIDO</b>\\n\\nO Templo oferece serviços divinos:\\n\\n<b>🩹 Curar Ferimentos (30 Valdoritas)</b>\\n• Restaura HP usando magia sagrada\\n• Usa dado 2d8+2 (média 11 HP, máx 18 HP)\\n• Mais eficiente que poções para grandes danos\\n\\n<b>🧪 Purificar Veneno (40 Valdoritas)</b>\\n• Remove venenos e doenças (Lesser Restoration)\\n• Essencial após combates com criaturas venenosas\\n\\n<b>✨ Benção da Clareza (25 Valdoritas)</b>\\n• Restaura +5 MP\\n• Útil para usuários de magia\\n\\n💡 <i>Dica</i>: NPCs do templo mudam diariamente e cada um oferece diálogos únicos. Converse com eles!\\n',
+    'temple': '\\n🛐 <b>TEMPLO - GUIA RÁPIDO</b>\\n\\nO Templo oferece serviços divinos:\\n\\n<b>🩹 Curar Ferimentos (30 Valdoritas)</b>\\n• Restaura HP usando magia sagrada\\n• Usa dado 2d8+2 (média 11 HP, máx 18 HP)\\n• Mais eficiente que poções para grandes danos\\n\\n<b>🧪 Purificar Veneno (40 Valdoritas)</b>\\n• Remove venenos e doenças (restauração menor)\\n• Essencial após combates com criaturas venenosas\\n\\n<b>✨ Benção da Clareza (25 Valdoritas)</b>\\n• Restaura +5 MP\\n• Útil para usuários de magia\\n\\n💡 <i>Dica</i>: NPCs do templo mudam diariamente e cada um oferece diálogos únicos. Converse com eles!\\n',
 
     'tavern': '\\n🍺 <b>TAVERNA - GUIA RÁPIDO</b>\\n\\nO centro social de Valdoria:\\n\\n<b>🗣️ Boatos (5 Valdoritas)</b>\\n• Grom compartilha dicas sobre inimigos\\n• Cada rumor dá +2 Dano contra um tipo de criatura\\n• O bônus dura até o próximo descanso longo\\n\\n<b>🍺 Bebidas</b>\\n• Restauram HP e/ou MP levemente\\n• Variantes Envelhecida/Safra Especial custam mais, mas têm efeito maior\\n\\n<b>⚔️ Mercenários</b>\\n• Contrate guerreiros como companheiros permanentes\\n• Eles lutam ao seu lado em combate\\n\\n<b>⚜️ Exploradores</b>\\n• Aventureiros disponíveis para contratação\\n• Cada um tem classe e habilidades próprias\\n\\n<b>🎲 Mesa de Jogos</b>\\n• Aposte 10 ou 50 Valdoritas nos dados (D20 vs oponente)\\n• Vitória = dobro do valor apostado!\\n• Derrota pode provocar uma briga de bar...\\n\\n💡 <i>Dica</i>: Mercadores do Mercado que estão de folga podem ser encontrados bebendo aqui!\\n',
 
-    'inn': '\\n🏨 <b>ESTALAGEM - GUIA RÁPIDO</b>\\n\\nO local para descansar e recuperar energias (Long Rest):\\n\\n<b>🐴 Estábulo (Grátis)</b>\\n• Restaura HP (com chance de sono interrompido)\\n• +1 MP apenas\\n• Risco de penalidade temporária ou roubo por ratos\\n• Recupera 50% dos Dados de Vida (Hit Dice)\\n\\n<b>🛏️ Quarto Comum (base 3 Valdoritas)</b>\\n• Restaura HP e MP completos\\n• Recupera 50% dos Dados de Vida\\n• Reduz 1 nível de exaustão\\n\\n<b>👑 Suíte Real (base 10 Valdoritas)</b>\\n• Restaura HP, MP e Dados de Vida completos\\n• Concede <b>Inspirado</b> (vantagem no próximo teste)\\n• Reduz 1 nível de exaustão\\n\\n<b>👥 Grupo na Estalagem</b>\\n• Preço sobe +50% por aliado no grupo\\n• Aliados são curados junto com você\\n\\n💡 <i>Dica</i>: Apenas a Suíte garante recuperação total + Inspiração para grandes aventuras!\\n',
+    'inn': '\\n🏨 <b>ESTALAGEM - GUIA RÁPIDO</b>\\n\\nO local para descansar e recuperar energias (Descanso Longo):\\n\\n<b>🐴 Estábulo (Grátis)</b>\\n• Restaura HP (com chance de sono interrompido)\\n• +1 MP apenas\\n• Risco de penalidade temporária ou roubo por ratos\\n• Recupera 50% dos Dados de Vida (Hit Dice)\\n\\n<b>🛏️ Quarto Comum (base 3 Valdoritas)</b>\\n• Restaura HP e MP completos\\n• Recupera 50% dos Dados de Vida\\n• Reduz 1 nível de exaustão\\n\\n<b>👑 Suíte Real (base 10 Valdoritas)</b>\\n• Restaura HP, MP e Dados de Vida completos\\n• Concede <b>Inspirado</b> (vantagem no próximo teste)\\n• Reduz 1 nível de exaustão\\n\\n<b>👥 Grupo na Estalagem</b>\\n• Preço sobe +50% por aliado no grupo\\n• Aliados são curados junto com você\\n\\n💡 <i>Dica</i>: Apenas a Suíte garante recuperação total + Inspiração para grandes aventuras!\\n',
 
-    'bank': '\\n🏛️ <b>BANCO - GUIA RÁPIDO</b>\\n\\nProteja seu patrimônio contra infortúnios:\\n\\n<b>📥 Guardar Moedas</b>\\n• Depósitos são gratuitos (sem taxas!)\\n• Ouro no banco sobrevive à morte em combate\\n• Precisa sacar para usar em lojas\\n\\n<b>📤 Retirar Moedas</b>\\n• <b>Taxa de 2%</b> sobre qualquer saque\\n• Arredondado para cima (mínimo 1 Valdoritas)\\n• Planeje seus saques para minimizar perdas!\\n\\n<b>📦 Depositar/Recuperar Pertences</b>\\n• Guarde itens preciosos ou pesados\\n• Itens no cofre não ocupam espaço na mochila\\n• Protegidos contra roubos e morte\\n\\n💡 <i>Dica</i>: Sempre deposite grandes quantias antes de sair para explorar!\\n',
+    'bank': '\\n🏛️ <b>BANCO - GUIA RÁPIDO</b>\\n\\nProteja seu patrimônio contra infortúnios:\\n\\n<b>📥 Guardar Moedas</b>\\n• Depósitos são gratuitos (sem taxas!)\\n• Suas Valdoritas no banco sobrevivem à morte em combate\\n• Precisa sacar para usar em lojas\\n\\n<b>📤 Retirar Moedas</b>\\n• <b>Taxa de 2%</b> sobre qualquer saque\\n• Arredondado para cima (mínimo 1 Valdoritas)\\n• Planeje seus saques para minimizar perdas!\\n\\n<b>📦 Depositar/Recuperar Pertences</b>\\n• Guarde itens preciosos ou pesados\\n• Itens no cofre não ocupam espaço na mochila\\n• Protegidos contra roubos e morte\\n\\n💡 <i>Dica</i>: Sempre deposite grandes quantias antes de sair para explorar!\\n',
 
-    'guild': '\\n🛡️ <b>GUILDA - GUIA RÁPIDO</b>\\n\\nO quartel-general dos aventureiros:\\n\\n<b>📋 Quadro de Missões</b>\\n• Missões diárias com recompensas em ouro e XP\\n• Novas missões disponíveis periodicamente\\n\\n<b>🗡️ Tavira (Recompensas)</b>\\n• Entregue caçadas concluídas para receber recompensas\\n• Contratos de eliminação de criaturas específicas\\n\\n<b>📜 Contratar Aventureiros</b>\\n• Recrute companheiros para seu grupo\\n• Cada aliado tem classe, nível e habilidades\\n• Eles lutam e usam magias automaticamente em combate\\n\\n<b>👥 Gerenciar Grupo</b>\\n• Veja o status dos seus companheiros\\n• Dispense aliados para abrir espaço\\n\\n<b>🧓 Braun, o Marcado</b>\\n• Histórias de guerra e dicas sobre cada região\\n• Conheça Os Cinco de Valdoria — o lendário grupo de Braun\\n• Quanto mais você o visita, mais ele revela do passado\\n\\n💡 <i>Dica</i>: Um Clérigo ou Paladino no grupo aumenta muito sua sobrevivência!\\n',
+    'guild': '\\n🛡️ <b>GUILDA - GUIA RÁPIDO</b>\\n\\nO quartel-general dos aventureiros:\\n\\n<b>📋 Quadro de Missões</b>\\n• Missões diárias com recompensas em Valdoritas e XP\\n• Novas missões disponíveis periodicamente\\n\\n<b>🗡️ Tavira (Recompensas)</b>\\n• Entregue caçadas concluídas para receber recompensas\\n• Contratos de eliminação de criaturas específicas\\n\\n<b>📜 Contratar Aventureiros</b>\\n• Recrute companheiros para seu grupo\\n• Cada aliado tem classe, nível e habilidades\\n• Eles lutam e usam magias automaticamente em combate\\n\\n<b>👥 Gerenciar Grupo</b>\\n• Veja o status dos seus companheiros\\n• Dispense aliados para abrir espaço\\n\\n<b>🧓 Braun, o Marcado</b>\\n• Histórias de guerra e dicas sobre cada região\\n• Conheça Os Cinco de Valdoria — o lendário grupo de Braun\\n• Quanto mais você o visita, mais ele revela do passado\\n\\n💡 <i>Dica</i>: Um Clérigo ou Paladino no grupo aumenta muito sua sobrevivência!\\n',
 
     'town_square': '\\n⛲ <b>PRAÇA - GUIA RÁPIDO</b>\\n\\nO coração pulsante da cidade:\\n\\n<b>🔍 Investigar a Praça</b>\\n• Encontre NPCs e converse com eles\\n• NPCs mudam conforme o período (Manhã/Tarde)\\n• Alguns NPCs únicos têm histórias progressivas\\n\\n<b>🔎 Explorar a Área</b>\\n• Eventos investigativos com testes de perícia\\n• Pode encontrar itens, pistas ou situações inesperadas\\n\\n<b>📜 Mestre Cartógrafo (Corvus)</b>\\n• Vende mapas que revelam locais no mapa-múndi\\n• <b>Mapas Comuns</b>: compra direta (Planícies, Floresta, Deserto)\\n• <b>Mapas Raros</b>: exigem teste de perícia (Pântano, Ermo Gelado)\\n• <b>Mapas de Expedição</b>: exigem ter visitado 3+ locais (Montanhas, Vulcânico)\\n• <b>Mapa Mestre</b>: exige 5+ mapas regionais + teste de INT DC 15\\n\\n<b>👥 Social</b>\\n• Acesse o popup Social para chat e jogadores online\\n• Envie desafios, convites e saudações\\n\\n💡 <i>Dica</i>: Mercadores do Mercado que estão de folga aparecem pela praça ou taverna!\\n',
 
     'market': '\\n🏪 <b>MERCADO - GUIA RÁPIDO</b>\\n\\nOnde o comércio acontece:\\n\\n<b>⚔️ Comprar Equipamentos</b>\\n• <b>Ferreiro</b>: Armas e Armaduras pesadas\\n• <b>Alquimista</b>: Poções e Ingredientes\\n• <b>Místico</b>: Itens mágicos e pergaminhos\\n• <b>Viajantes</b>: Itens raros e exóticos (Rotação periódica)\\n\\n<b>⚖️ Vender Itens</b>\\n• Mercadores só compram o que lhes interessa\\n• O Ferreiro compra metais, o Alquimista compra ervas, etc.\\n• Preço de venda é geralmente 50% do valor base (ou menos)\\n\\n<b>🗣️ Negociação e Fofoca</b>\\n• Pergunte aos mercadores sobre seus colegas ausentes\\n• Use perícias de Carisma para tentar descontos (arriscado!)\\n\\n💡 <i>Dica</i>: Itens equipados não aparecem na lista de venda para evitar acidentes.\\n',
 
-    'city_main': '\\n🏘️ <b>CIDADE DE Valdoria - GUIA</b>\\n\\nSeu refúgio seguro. Onde ir?\\n\\n<b>🏕️ Aventura</b>: Explorar biomas, encontros narrativos e combates\\n<b>🏨 Estalagem</b>: Recuperar Vida/Mana (Descanso Longo)\\n<b>🏪 Mercado</b>: Comprar/Vender Equipamentos e Mapas\\n<b>🍺 Taverna</b>: Rumores, Jogos, Bebidas e Mercenários\\n<b>🛡️ Guilda</b>: Missões, Recompensas e Recrutar Aventureiros\\n<b>🏛️ Banco</b>: Guardar Ouro e Itens\\n<b>⛲ Praça</b>: NPCs, Cartógrafo e Social\\n<b>⛪ Templo</b>: Cura, Purificação e Bênçãos\\n<b>🏰 Portões</b>: Guardas e Arredores da Cidade\\n\\n💡 <i>Dica</i>: Compre um <b>Mapa de Valdória</b> para viajar entre regiões. Converse com todos — cada NPC pode ter informações valiosas!\\n',
+    'city_main': '\\n🏘️ <b>CIDADE DE Valdoria - GUIA</b>\\n\\nSeu refúgio seguro. Onde ir?\\n\\n<b>🏕️ Aventura</b>: Explorar biomas, encontros narrativos e combates\\n<b>🏨 Estalagem</b>: Recuperar Vida/Mana (Descanso Longo)\\n<b>🏪 Mercado</b>: Comprar/Vender Equipamentos e Mapas\\n<b>🍺 Taverna</b>: Rumores, Jogos, Bebidas e Mercenários\\n<b>🛡️ Guilda</b>: Missões, Recompensas e Recrutar Aventureiros\\n<b>🏛️ Banco</b>: Guardar Valdoritas e Itens\\n<b>⛲ Praça</b>: NPCs, Cartógrafo e Social\\n<b>⛪ Templo</b>: Cura, Purificação e Bênçãos\\n<b>🏰 Portões</b>: Guardas e Arredores da Cidade\\n\\n💡 <i>Dica</i>: Compre um <b>Mapa de Valdória</b> para viajar entre regiões. Converse com todos — cada NPC pode ter informações valiosas!\\n',
 };
 
 var HELP_TEXTS_SYSTEMS = {
@@ -45257,7 +45285,7 @@ var SUBSCREEN_DATA = {
     npcInfo: '<svg class="v-heraldic v-h-banner"><use href="#ic-estalajadeira"/></svg> Martha — "Que bom que voltou! O que precisa hoje?"',
     buttons: [
       [_heralIco('ic-estalagem'), 'Conversar com Martha', 'NPC dialogue', 'inn_npc_inn_martha'],
-      [_heralIco('ic-sono'), 'Quartos / Descanso', '3 tipos (Long Rest)', 'nav:inn_rest'],
+      [_heralIco('ic-sono'), 'Quartos / Descanso', '3 tipos (Descanso Longo)', 'nav:inn_rest'],
       [_heralIco('ic-mochila'), 'Comer Algo', '7 pratos no cardápio', 'nav:inn_meals'],
       [_heralIco('ic-estalagem'), 'Descanso Curto', 'Grátis', 'inn_short_rest'],
       [_heralIco('ic-estalagem'), 'Relaxar', '10 <span class="vi vi-coin sm"></span>', 'inn_relaxation'],
