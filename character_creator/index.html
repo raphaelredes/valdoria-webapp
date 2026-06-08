@@ -157,6 +157,9 @@ Busca rápida:
         document.write('<script src="../shared/drawer.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/escape-key.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/encoding-utils.js?v=' + v + '"><\/script>');
+        // PADRAO_NOTIFICACOES: toast.css DEVE acompanhar toast.js. Sem o CSS o
+        // #v-shared-toast renderiza sem fundo (texto solto sobre o conteudo).
+        document.write('<link rel="stylesheet" href="../shared/toast.css?v=' + v + '">');
         document.write('<script src="../shared/toast.js?v=' + v + '"><\/script>');
     </script>
     <script>
@@ -172,14 +175,15 @@ Busca rápida:
        quando ainda houver overflow, jogador ve o indicador. */
     document.write('<link rel="stylesheet" href="../shared/scroll-hint-arrow.css?v=' + v + '">');
     document.write('<script src="../shared/scroll-hint-arrow.js?v=' + v + '"><\/script>');
-    /* Registra TODOS os containers scrollable do creator. O modulo varre o
-       body em DOMContentLoaded + MutationObserver pra sub-screens criadas
-       dinamicamente (ex: detail overlays, summary sections, help card). */
+    /* Registra apenas os scrolls LIMITADOS do creator. NAO registra .screen
+       nem .sub-screen (carousel full-height): a seta absoluta bottom:8px fica
+       fixa no content-space do scroll container e DERIVA pro meio da tela ao
+       rolar, alem de colidir com o .confirm-btn sticky (mesmo bottom:8px).
+       Bug reportado pelo user 2026-06-08. O conteudo cortado + o CONFIRMAR
+       sticky ja sinalizam "role pra ver mais" nessas telas. */
     document.write('<script>'
       + 'document.addEventListener("DOMContentLoaded", function(){'
       + '  if (window.vScrollHint && window.vScrollHint.register) {'
-      + '    window.vScrollHint.register(".screen");'
-      + '    window.vScrollHint.register(".sub-screen");'
       + '    window.vScrollHint.register("#summarySections");'
       + '    window.vScrollHint.register("#summaryContent .section-body");'
       + '    window.vScrollHint.register(".help-card");'
