@@ -251,12 +251,32 @@
     });
   }
 
+  // A recompensa só aparece DEPOIS do tutorial da primeira visita à cidade.
+  // O tutorial grava localStorage['valdoria_first_city_tutorial_seen_<charId>']='1' ao
+  // concluir/pular. Esperamos esse flag (ou já-visto) antes de checar a recompensa.
+  function _afterCityTutorial(cb) {
+    var waited = 0, MAX = 180000, STEP = 800;
+    function poll() {
+      var seen = false;
+      try {
+        var charId = window._charId || 'default';
+        seen = localStorage.getItem('valdoria_first_city_tutorial_seen_' + charId) === '1';
+      } catch (e) { seen = true; }
+      if (seen || waited >= MAX) { cb(); return; }
+      waited += STEP;
+      setTimeout(poll, STEP);
+    }
+    poll();
+  }
+
   function check() {
     try { if (sessionStorage.getItem(SHOWN_KEY)) { return; } } catch (e) { /* */ }
     var c = ctx();
     if (!c.token || !c.uid) { return; }
-    post('/api/game/legacy-reward', {}, function (res) {
-      if (res && res.pending && res.reward) { show(res.reward, res.char_name); }
+    _afterCityTutorial(function () {
+      post('/api/game/legacy-reward', {}, function (res) {
+        if (res && res.pending && res.reward) { show(res.reward, res.char_name); }
+      });
     });
   }
 
