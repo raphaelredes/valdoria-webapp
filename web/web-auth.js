@@ -882,7 +882,8 @@ function _reauthAndRoute() {
         var host = String(location.hostname || '').toLowerCase();
         var _env = host === 'dev.lendasdevaldoria.com.br' ? 'dev' : 'prod';
         var token, uid, api;
-        var raw = localStorage.getItem('valdoria_session_' + _env);
+        var sessKey = 'valdoria_session_' + _env;  // chave canônica env-namespaced (igual _tryVStarSession)
+        var raw = localStorage.getItem(sessKey);
         if (raw) {
             try { var s = JSON.parse(raw); if (s && s.token) { token = s.token; uid = s.user_id; api = s.api_base; } } catch (e) {}
         }
