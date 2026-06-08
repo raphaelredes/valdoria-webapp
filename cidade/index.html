@@ -13770,10 +13770,49 @@ var LEAGUE_BENEFITS = {
 // 2026-05-21: expandido com mini-lore dos 3 lendários (user pediu).
 // Sessão #23 (2026-05-22): visual revamp épico — header banner, zonas
 // de ranking visualizadas, cards dos lendários, dicas "Como subir".
+// CY4 (2026-06-07): posição na Ordem COERENTE com o progresso real.
+// ANTES: rank 100% MOCK (`|| 487` → "Veteranos #101-1K" pra QUALQUER char, até
+// recém-criado — sintoma reportado pelo user). AGORA: usa league_rank real do
+// servidor SE existir; senão DERIVA de level+league_xp reais (server-authoritative
+// nos inputs) de forma MONÓTONA — char novo (nv1, 0 XP) = número grande =
+// "Iniciantes" (>10k); #1-10 (Lendas) reservado pros NPCs lendários.
+function _deriveLeagueRank(p){
+  p = p || window.CITY_MOCK_PLAYER || {};
+  if (typeof p.league_rank === 'number' && p.league_rank > 0) return p.league_rank;
+  var lvl = Math.max(1, (p.level | 0) || 1);
+  var lxp = Math.max(0, (p.league_xp | 0) || 0);
+  var base = Math.max(11, Math.round(60000 / Math.pow(lvl, 2.2)));
+  base = Math.max(11, base - Math.floor(lxp / 25));
+  return base;
+}
+
+// Abre o diálogo PADRAO_ALDRIC de um lendário (Vorhan/Tavira/Silvana) — usa o
+// retrato real e a lore canônica do RECURRING_NPCS. Speaker = o NPC concreto
+// (regra "DM nunca fala como personagem" OK).
+function _openLegendNpc(key){
+  try {
+    var npc = (typeof RECURRING_NPCS !== 'undefined') ? RECURRING_NPCS[key] : null;
+    if (!npc || !(window.vEncounter && typeof vEncounter.render === 'function')) return;
+    var quotes = {
+      vorhan: 'Trinta anos atrás enfrentei um Lich em Brakenhall. Aprendi que a lâmina mais afiada é a paciência.',
+      tavira: 'Limpei o Forte dos Bandidos sozinha. Hoje zelo pra que a Guilda nunca mais traia os seus.',
+      silvana: 'Vi impérios nascer e ruir. As pedras lembram — e eu canto o que elas esqueceram.'
+    };
+    vEncounter.render({
+      npc: { name: npc.name, desc: npc.title || npc.desc || '', portrait: npc.portraitImg || '' },
+      script: [
+        { type: 'narration', text: npc.lore || npc.desc || '' },
+        { type: 'speech', speaker: npc.name, text: quotes[key] || '' }
+      ],
+      choices: [{ id: 'close', label: 'Outra hora' }]
+    }, { onChoice: function(){} });
+  } catch(e){ console.warn('[CITY] openLegendNpc:', e); }
+}
+
 function _showLeagueRankInfo(){
   if (typeof _showInfoPopup !== 'function') return;
-  // Mock player position (em PROD: player.metadata.league_rank)
-  var playerRank = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.league_rank) || 487;
+  // CY4: rank REAL (server) ou derivado de level+league_xp reais — nunca o 487 mock.
+  var playerRank = _deriveLeagueRank(window.CITY_MOCK_PLAYER);
   var playerTier = playerRank <= 10 ? 'mithral'
                  : playerRank <= 100 ? 'platinum'
                  : playerRank <= 1000 ? 'gold'
@@ -13793,17 +13832,33 @@ function _showLeagueRankInfo(){
       + '</div>';
   }
 
-  function _legendaryCard(name, title, lore){
-    return '<div style="display:flex; gap:8px; padding:8px; '
+  // CY4: card de lendário com RETRATO real (RECURRING_NPCS[key].portraitImg) +
+  // CLIQUE que abre o diálogo PADRAO_ALDRIC (vEncounter). Antes era só um glifo ★
+  // estático sem imagem nem clique. Nome/título/lore vêm do NPC real (consistência).
+  function _legendaryCard(key){
+    var npc = (typeof RECURRING_NPCS !== 'undefined') ? RECURRING_NPCS[key] : null;
+    if (!npc) return '';
+    var name = npc.name || '';
+    var title = npc.title || npc.desc || '';
+    var loreShort = (npc.lore || npc.desc || '');
+    if (loreShort.length > 120) loreShort = loreShort.slice(0, 117).replace(/\s+\S*$/, '') + '…';
+    var img = npc.portraitImg
+      ? '<img src="' + npc.portraitImg + '" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1.5px solid var(--v-gold,#c4953a);box-shadow:0 0 8px var(--v-gold-30,rgba(196,149,58,0.3));flex-shrink:0;align-self:center;" '
+        + 'onerror="this.onerror=null;this.outerHTML=\'<div style=&quot;font-size:calc(18px * var(--v-font-scale,1));align-self:center;&quot;>★</div>\'">'
+      : '<div style="font-size:calc(18px * var(--v-font-scale, 1)); line-height:1; align-self:center;">★</div>';
+    return '<div onclick="_openLegendNpc(\'' + key + '\')" role="button" tabindex="0" '
+      + 'title="Ver ' + name + '" '
+      + 'style="display:flex; gap:8px; padding:8px; cursor:pointer; '
       + 'background:linear-gradient(135deg, rgba(196,149,58,0.08), rgba(42,36,32,0.4)); '
       + 'border:1px solid var(--v-gold-30,rgba(196,149,58,0.30)); '
       + 'border-left:3px solid var(--v-gold,#c4953a); '
-      + 'border-radius:5px; margin-bottom:4px;">'
-      + '<div style="font-size:calc(18px * var(--v-font-scale, 1)); line-height:1; align-self:center;">★</div>'
+      + 'border-radius:5px; margin-bottom:4px; transition:border-color 0.15s, background 0.15s;" '
+      + 'onmouseover="this.style.borderColor=\'var(--v-gold,#c4953a)\'" onmouseout="this.style.borderColor=\'var(--v-gold-30,rgba(196,149,58,0.30))\'">'
+      + img
       + '<div style="flex:1; min-width:0;">'
-      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(12px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); font-weight:700; letter-spacing:0.5px;">' + name + '</div>'
+      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(12px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); font-weight:700; letter-spacing:0.5px;">' + name + ' <span style="font-size:calc(9px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);">▸</span></div>'
       + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); font-style:italic; margin-top:1px;">' + title + '</div>'
-      + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-text,#d4c8b0); line-height:1.4; margin-top:3px;">' + lore + '</div>'
+      + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-text,#d4c8b0); line-height:1.4; margin-top:3px;">' + loreShort + '</div>'
       + '</div>'
       + '</div>';
   }
@@ -13850,9 +13905,9 @@ function _showLeagueRankInfo(){
 
     // === LENDÁRIOS no topo ===
     + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase; margin:12px 0 6px;">★ Lendas Vivas (Top 10)</div>'
-    + _legendaryCard('Vorhan, o Veterano', 'Lâmina do Norte', 'Derrotou um Lich em Brakenhall há 30 anos.')
-    + _legendaryCard('Tavira Lança-Justa', 'Reformadora da Guilda', 'Limpou o Forte dos Bandidos sozinha.')
-    + _legendaryCard('Silvana, a Bardisa', 'Voz das Ruínas Élficas', 'Cantou nas cortes élficas há 200 anos.')
+    + _legendaryCard('vorhan')
+    + _legendaryCard('tavira')
+    + _legendaryCard('silvana')
 
     // === COMO SUBIR ===
     + '<div style="margin-top:12px; padding:10px; background:rgba(196,149,58,0.05); '
@@ -13897,7 +13952,7 @@ function _showLeaguePopup(p){
   pctInTier = Math.max(0, Math.min(100, pctInTier));
   var atMax = (nextTier === currentTier);
   var tColor = currentTier.color;
-  var rankMock = 1234 - currentXp; // mock posição global "menor é melhor"
+  var rankMock = (typeof _deriveLeagueRank === 'function') ? _deriveLeagueRank(window.CITY_MOCK_PLAYER) : Math.max(11, 60000 - currentXp); // CY4: rank coerente (level+league_xp reais), não mais "1234-xp"
   var currentBenefits = LEAGUE_BENEFITS[currentTier.id] || [];
 
   var html = '<div class="lg-hub" style="position:relative; padding:0; overflow:hidden;">';
