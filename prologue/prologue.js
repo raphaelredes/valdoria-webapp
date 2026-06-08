@@ -544,6 +544,62 @@ function _dispatchPrologueChoice(ch) {
   }
 }
 
+/* 2026-06-08 (user): rolagem 3D GENERICA (PADRAO 3D Dice) pra checks do prologo
+   que retornam result.rolled (ex.: Primeiros Socorros = Medicina DC12; Magia de
+   Cura = Religiao DC10). Mostra d20 + breakdown + SUCESSO/FALHA, depois onDone().
+   Diferente de showDiceRoll() que e especifico do gate (narrativa hardcoded). */
+function _showSkillDiceThen(rolled, onDone) {
+  var overlay = document.getElementById('diceOverlay');
+  var canvas = document.getElementById('prologueDice3dCanvas');
+  var breakdown = document.getElementById('diceBreakdown');
+  var resultLabel = document.getElementById('diceResultLabel');
+  var narrative = document.getElementById('diceNarrative');
+  var actions = document.getElementById('diceActions');
+  if (!overlay || !breakdown || !resultLabel || !actions || !rolled) { if (onDone) onDone(); return; }
+  breakdown.textContent = '';
+  resultLabel.textContent = '';
+  if (narrative) narrative.textContent = '';
+  actions.textContent = '';
+  overlay.classList.add('active');
+  var _done = false;
+  function finish() {
+    if (_done) return;
+    _done = true;
+    try { if (_prologueDice) { _prologueDice.dispose(); _prologueDice = null; } } catch (e) { /* ok */ }
+    overlay.classList.remove('active');
+    if (onDone) onDone();
+  }
+  function afterRoll() {
+    var modSign = rolled.modifier >= 0 ? '+' : '';
+    breakdown.textContent = '1d20 (' + rolled.natural + ') ' + modSign + rolled.modifier + ' = ' + rolled.total + ' vs DC ' + rolled.dc;
+    resultLabel.textContent = rolled.success ? 'SUCESSO!' : 'FALHA!';
+    resultLabel.style.color = rolled.success ? 'var(--v-success)' : 'var(--v-danger)';
+    try { if (tg) tg.HapticFeedback.notificationOccurred(rolled.success ? 'success' : 'error'); } catch (e) { /* ok */ }
+    var btn = document.createElement('button');
+    btn.className = 'v-skip-btn';
+    btn.id = 'skillDiceContinue';
+    btn.textContent = 'Continuar ▸';
+    btn.onclick = finish;
+    actions.appendChild(btn);
+    var delay = (typeof calcReadTime === 'function') ? calcReadTime(breakdown.textContent, 'overlay') : 2600;
+    setTimeout(function () { var b = document.getElementById('skillDiceContinue'); if (b) b.classList.add('visible'); }, 500);
+    setTimeout(finish, delay);
+  }
+  try {
+    if (_prologueDice) { _prologueDice.dispose(); _prologueDice = null; }
+    _prologueDice = new Dice3D(canvas, {
+      size: (typeof ValdoriaDice !== 'undefined' ? ValdoriaDice.D20_SIZE : 220),
+      dieType: 'd20',
+      duration: (typeof ValdoriaDice !== 'undefined' ? ValdoriaDice.TIMING.D20_ROLL_MS : 1200)
+    });
+    var _rd = false;
+    _prologueDice.roll(rolled.natural, function () { if (_rd) return; _rd = true; afterRoll(); });
+  } catch (e) {
+    console.warn('[PROLOGUE] skill dice init failed:', e);
+    afterRoll();
+  }
+}
+
 /* Sessao #37 v19 (2026-05-25): handler de escolha de cura do Brenn.
    Chama POST /api/prologue/heal_companion → render result scene. */
 var _brennChoiceMade = false;
@@ -557,8 +613,11 @@ async function onCompanionHealChoice(key) {
       showError('Erro ao aplicar cura: ' + (result && result.error || 'desconhecido'));
       return;
     }
-    /* Render outcome scene → user clica "Seguir para Valdoria" → aftermath */
-    _renderScene(function() { return _sceneInjuredCompanionResult(result); });
+    /* 2026-06-08 (user): se houve rolagem (Primeiros Socorros / Magia de Cura),
+       mostra o d20 3D + resultado ANTES da cena (PADRAO 3D Dice); senao vai direto. */
+    var _renderOutcome = function () { _renderScene(function () { return _sceneInjuredCompanionResult(result); }); };
+    if (result.rolled) { _showSkillDiceThen(result.rolled, _renderOutcome); }
+    else { _renderOutcome(); }
   } catch (e) {
     _brennChoiceMade = false;
     showError('Erro ao curar aprendiz.', e);

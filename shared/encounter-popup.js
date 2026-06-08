@@ -659,18 +659,24 @@
       var hasSpeech = page.some(function(line){ return line.type === 'speech'; });
       header.style.display = hasSpeech ? '' : 'none';
 
-      var strophes = page.map(function(line) {
+      var strophes = [];
+      page.forEach(function(line) {
+        /* 2026-06-08 (user): NAO cria box pra estrofe sem texto. Aparecia uma
+           caixa com fundo/borda VAZIA no dialogo (ex.: resultado dos Primeiros
+           Socorros). So renderiza estrofe que de fato tem conteudo. */
+        var _sentences = _splitIntoSentences(_sanitizeDialogueHTML(line.text));
+        if (!_sentences.length) return;
         var div = document.createElement('div');
         div.className = 'enc-line ' + (line.type === 'narration' ? 'enc-narration' : 'enc-speech');
         if (line.type === 'speech' && line.speaker) {
           div.setAttribute('data-speaker', line.speaker);
         }
         body.appendChild(div);
-        return {
+        strophes.push({
           line: line,
           container: div,
-          sentences: _splitIntoSentences(_sanitizeDialogueHTML(line.text))
-        };
+          sentences: _sentences
+        });
       });
 
       // Pre-measure (forçar reflow pra calcular altura)
