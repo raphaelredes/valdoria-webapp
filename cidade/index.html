@@ -20444,9 +20444,16 @@ function _refreshNpcState(){
 // sobrevivente) mantêm o valor mock — divergência de catálogo documentada (§12).
 function _refreshAchProgress(){
   if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
+  // CY5 (2026-06-07): em REMOTE, ZERA tudo ANTES de aplicar o servidor. Antes, as
+  // 6 chains sem stat no backend (cacador/cartografo/forjador/erudito/diplomata/
+  // sobrevivente) mantinham os valores de SHOWCASE do mock (algoz 1500, cacador
+  // 23, cartografo 180, etc.) → um personagem RECÉM-CRIADO aparecia com ~8/70
+  // conquistas (11%) falsas. Agora unwired = 0 (honesto) até o backend trackear.
+  // O mock de showcase continua só em LOCAL (file://, retorna antes deste ponto).
+  if (typeof ACH_PROGRESS !== 'undefined'){ for (var z in ACH_PROGRESS){ ACH_PROGRESS[z] = 0; } }
   return window.vCityServer.ach.progress().then(function(r){
     if (r && r.ok && r.ach_progress && typeof ACH_PROGRESS !== 'undefined'){
-      for (var k in r.ach_progress){ ACH_PROGRESS[k] = r.ach_progress[k]; }  // sobrescreve mock com real
+      for (var k in r.ach_progress){ ACH_PROGRESS[k] = r.ach_progress[k]; }  // aplica o real do servidor
     }
   }).catch(function(e){ console.warn('[CITY] ach progress failed', e); });
 }
