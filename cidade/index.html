@@ -10921,16 +10921,12 @@ function _showCharactersPopup(){
   var chars = window._mockCharacters;
   if (!chars || !chars.length){
     if (_isRemote){
-      // REMOTE sem _mockCharacters populado: erro real. Mostra só o player atual
-      // pra evitar mock de outra conta; tenta re-fetch em background.
-      chars = [{
-        id: 'active', name: p.name || 'Aventureiro',
-        cls: (p.cls || 'guerreiro'), race: (p.race || 'humano'),
-        level: p.level || 1,
-        icon: _hallClassToHeraldic(p.cls || 'guerreiro'),
-        active: true
-      }];
-      console.warn('[CITY] Hall: REMOTE mode but _mockCharacters empty — using current player only + re-fetch');
+      // Server-Authority #0 (2026-06-08): o cliente NUNCA fabrica personagem. O Hall
+      // PODE estar VAZIO (0 chars) — renderiza um estado vazio REAL e busca a lista
+      // verdadeira no servidor em background. (Antes inventava um "Aventureiro"
+      // fantasma aqui, mostrando um char falso pra contas com 0 personagens.)
+      chars = [];
+      console.info('[CITY] Hall: REMOTE 0 chars locais — estado vazio + re-fetch do servidor');
       // Re-tenta fetch em background (não bloquear render)
       setTimeout(function(){
         try {
@@ -10940,7 +10936,8 @@ function _showCharactersPopup(){
             fetch(_a.replace(/\/$/,'') + '/api/auth/characters', {
               headers: { 'Authorization': 'Bearer ' + _t }
             }).then(function(r){ return r.ok ? r.json() : null; }).then(function(data){
-              if (data && data.characters && data.characters.length){
+              if (data && Array.isArray(data.characters) && data.characters.length){
+                // Tem personagens reais — popula + re-renderiza.
                 window._mockCharacters = data.characters.map(function(c){
                   var clsKey = String(c.class_name || '').toLowerCase().split(' ')[0];
                   return {
@@ -10952,7 +10949,13 @@ function _showCharactersPopup(){
                 });
                 if (window._mockCharacters.length) window._mockCharacters[0].active = true;
                 _showCharactersPopup();  // re-render com chars reais
+              } else if (data && Array.isArray(data.characters)){
+                // Fetch OK e GENUINAMENTE 0 personagens — confirma o estado vazio
+                // (sem fantasma). O estado vazio ja esta na tela; nao re-renderiza.
+                window._mockCharacters = [];
               }
+              // data null (HTTP != ok): erro possivelmente transitorio — NAO mexe
+              // (nao esconde chars reais nem pisca a tela; mantem o que esta visivel).
             }).catch(function(e){ console.warn('[CITY] Hall re-fetch failed:', e); });
           }
         } catch(e){}
@@ -10979,8 +10982,9 @@ function _showCharactersPopup(){
     }
   }
   window._mockCharacters = chars;
-  // Default: ativo já vem selecionado
-  if (!window._hallSelectedId) {
+  var _hallEmpty = !chars.length;  // 2026-06-08: Hall pode estar VAZIO (0 chars)
+  // Default: ativo já vem selecionado (so quando ha personagens — sem chars[0] em vazio)
+  if (!window._hallSelectedId && !_hallEmpty) {
     var activeChar = chars.find(function(c){ return c.active; });
     window._hallSelectedId = activeChar ? activeChar.id : chars[0].id;
   }
@@ -11012,13 +11016,21 @@ function _showCharactersPopup(){
     + 'margin: 0 0 var(--v-space-xl, 16px); '
     + 'text-shadow: 0 0 10px var(--v-gold-30, rgba(196,149,58,0.3)); '
     + 'letter-spacing: 1px;">'
-    + 'Selecione seu Personagem'
+    + (_hallEmpty ? 'Seus Personagens' : 'Selecione seu Personagem')
     + '</h2>'
 
     // Lista de chars (.wa-char-list)
     + '<div class="hall-list" style="display:flex; flex-direction:column; gap: var(--v-space-md, 8px); '
     + 'margin-bottom: var(--v-space-xl, 16px); width: 100%;">';
 
+  // 2026-06-08: Hall VAZIO (0 personagens) — estado real (sem fantasma). O botao
+  // "+ Criar Novo Personagem" (abaixo) e a acao principal; "Jogar" e omitido.
+  if (_hallEmpty) {
+    html += '<div class="hall-empty" style="text-align:center; color: var(--v-text-dim, #a09484); '
+      + 'font-size: var(--v-font-body, 14px); line-height:1.6; padding: var(--v-space-xl, 16px) 0;">'
+      + 'Você ainda não tem personagens.<br>Forje seu primeiro aventureiro para começar sua jornada.'
+      + '</div>';
+  }
   chars.forEach(function(c){
     var isSelected = c.id === selectedId;
     var isActive = c.active;
@@ -11124,19 +11136,21 @@ function _showCharactersPopup(){
     + '<div id="hall-archived-list" style="display:none; flex-direction:column; gap: 6px; margin-top: 8px;"></div>'
     + '</div>';
 
-  // Botão Jogar (canonical .wa-btn-play)
-  var selChar = chars.find(function(c){ return c.id === selectedId; });
-  var isPlayingCurrent = selChar && selChar.active;
-  html += '<button class="hall-btn-play" '
-    + 'style="display:block; width: 100%; padding: 14px var(--v-space-xl, 16px); '
-    + 'background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530)); '
-    + 'color: #1a1410; border: none; border-radius: var(--v-radius, 10px); '
-    + 'font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-lg, 15px); '
-    + 'font-weight: 700; letter-spacing: 1px; cursor: pointer; '
-    + 'box-shadow: 0 3px 12px var(--v-gold-30, rgba(196,149,58,0.3)), inset 0 1px 0 rgba(255,255,255,0.15); '
-    + 'min-height: 48px; text-transform: uppercase;">'
-    + '◆ ' + (isPlayingCurrent ? 'Continuar Jogando' : 'Jogar')
-    + '</button>';
+  // Botão Jogar (canonical .wa-btn-play) — omitido no Hall vazio (nada pra jogar).
+  if (!_hallEmpty) {
+    var selChar = chars.find(function(c){ return c.id === selectedId; });
+    var isPlayingCurrent = selChar && selChar.active;
+    html += '<button class="hall-btn-play" '
+      + 'style="display:block; width: 100%; padding: 14px var(--v-space-xl, 16px); '
+      + 'background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530)); '
+      + 'color: #1a1410; border: none; border-radius: var(--v-radius, 10px); '
+      + 'font-family: var(--v-font-display, Cinzel, serif); font-size: var(--v-font-lg, 15px); '
+      + 'font-weight: 700; letter-spacing: 1px; cursor: pointer; '
+      + 'box-shadow: 0 3px 12px var(--v-gold-30, rgba(196,149,58,0.3)), inset 0 1px 0 rgba(255,255,255,0.15); '
+      + 'min-height: 48px; text-transform: uppercase;">'
+      + '◆ ' + (isPlayingCurrent ? 'Continuar Jogando' : 'Jogar')
+      + '</button>';
+  }
 
   // Botão "+ Criar Novo Personagem" (estilo logout, secundário)
   html += '<button class="hall-btn-create" '
