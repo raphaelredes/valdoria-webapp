@@ -159,7 +159,7 @@ function showDiceRoll(result) {
         'Você pega uma tocha da carroça tombada e a balança na direção dos lobos, ' +
         'gritando e batendo em um escudo improvisado. O fogo e o barulho os assustam — ' +
         'os predadores recuam entre os arbustos, ganindo.<br><br>' +
-        '<span style="color:var(--v-success);font-weight:700">✨ +50 XP</span>'
+        '<span style="color:var(--v-success);font-weight:700">✨ +100 XP</span>'
       );
       actions.innerHTML = `<button class="cenario-btn" onclick="haptic('medium'); onDistractSuccess()">🗣️ Falar com o ferreiro</button>`;
     } else {
@@ -209,7 +209,7 @@ function _showDiceRollFallback(result) {
       narrative.innerHTML = 'Você pega uma tocha da carroça tombada e a balança na direção dos lobos, ' +
         'gritando e batendo em um escudo improvisado. O fogo e o barulho os assustam — ' +
         'os predadores recuam entre os arbustos, ganindo.<br><br>' +
-        '<span style="color:var(--v-success);font-weight:700">✨ +50 XP</span>';
+        '<span style="color:var(--v-success);font-weight:700">✨ +100 XP</span>';
       actions.innerHTML = `<button class="cenario-btn" onclick="haptic('medium'); onDistractSuccess()">🗣️ Falar com o ferreiro</button>`;
     } else {
       narrative.innerHTML = 'Você tenta assustar os lobos, mas o líder da matilha não se intimida. ' +
