@@ -7932,6 +7932,11 @@ Busca rápida:
             const raceLabel = (RACES[sel.race] && RACES[sel.race].name) || sel.race || '';
             const classObj = (typeof CLASSES !== 'undefined' && CLASSES[sel.classKey]) || null;
             const classLabel = (classObj && (classObj.name || classObj.label)) || sel.classKey || '';
+            /* 2026-06-08 (user): retrato da CLASSE no resumo final, antes de Iniciar Aventura.
+               Slug = nome PT da classe sem acento (Bruxo->bruxo, Clerigo->clerigo) = nome do
+               webp em shared/img/combat/. Some via onerror se nao existir. */
+            const _classSlug = String(classLabel).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const _classImgBase = (location.href.indexOf('file://') === 0) ? '../shared/img/combat/' : '/shared/img/combat/';
 
             try {
                 const overlay = document.createElement('div');
@@ -7940,6 +7945,9 @@ Busca rápida:
                 overlay.innerHTML =
                     '<div style="max-width:380px;width:100%;background:linear-gradient(180deg,rgba(42,36,32,0.97),rgba(26,21,16,0.97));border:1px solid rgba(196,149,58,0.6);border-radius:12px;padding:24px;text-align:center;box-shadow:0 12px 36px rgba(0,0,0,0.7);">' +
                         '<div style="font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:3px;color:#c4953a;margin-bottom:8px;text-transform:uppercase;">◆ Iniciar Aventura ◆</div>' +
+                        '<div style="width:120px;height:120px;margin:4px auto 16px;border-radius:12px;border:1px solid rgba(196,149,58,0.5);background:radial-gradient(circle at 50% 30%, rgba(196,149,58,0.16), rgba(15,12,8,0.5));box-shadow:0 4px 16px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(196,149,58,0.15);display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
+                            '<img src="' + _classImgBase + _classSlug + '.webp" alt="" onerror="this.parentNode.style.display=\'none\'" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.6));">' +
+                        '</div>' +
                         '<h2 style="font-size:calc(20px * var(--v-font-scale, 1));color:#e8c45a;margin:0 0 18px;letter-spacing:1.2px;font-weight:700;">' + summaryName + '</h2>' +
                         '<div style="font-size:calc(13px * var(--v-font-scale, 1));color:#a09484;margin-bottom:18px;line-height:1.5;">' +
                             raceLabel + ' · ' + classLabel +
