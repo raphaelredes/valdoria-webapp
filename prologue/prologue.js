@@ -521,11 +521,17 @@ function _sceneGate() {
   if (choices.length === 0) {
     choices.push({ id: 'enter', label: '▸ Entrar', cb: '__local_gate:enter' });
   }
+  /* #85 (user, #7): evento de lore com imagem do sujeito (cão/NPC/objeto). O
+     server manda inter.subject_image (/shared/img/lore/<origin>.webp); usamos no
+     portrait do vEncounter. Evento de lore mostra o contexto como desc; o gate
+     padrão (sem imagem) mantém "Os portões de Valdória". */
+  const isLore = (inter.type === 'lore');
+  const subjectImg = inter.subject_image || '';
   return {
     npc: {
       name: title.toUpperCase(),
-      desc: 'Os portões de Valdória',
-      portrait: ''
+      desc: isLore ? (inter.context || '') : 'Os portões de Valdória',
+      portrait: subjectImg
     },
     script: script,
     choices: choices
@@ -577,6 +583,9 @@ function _dispatchPrologueChoice(ch) {
   } else if (cb.indexOf('__local_gate:') === 0) {
     const key = cb.slice('__local_gate:'.length);
     onGateChoice(key);
+  } else if (cb === '__local_lore_outcome_done') {
+    /* #85 (#8): fim da narrativa pós-escolha de lore → entra na cidade */
+    onEnterCity();
   } else {
     console.warn('[PROLOGUE] Unknown choice cb:', cb);
   }
@@ -751,31 +760,87 @@ function onAftermathDone() {
   _renderScene(_sceneGate);
 }
 
+var _gateChoiceMade = false;
 async function onGateChoice(key) {
+  if (_gateChoiceMade) return;
+  const inter = DATA.interaction || {};
+  /* #85 (user, #8): opção de lore COM teste de dados D&D. Servidor é a autoridade
+     — rola o d20 e escolhe success/fail. Fluxo espelha onCompanionHealChoice:
+     fecha o encounter → mostra o d20 3D (_showSkillDiceThen) → showGateResult. */
+  const chosen = (inter.options || []).find(function (o) { return o.key === key; });
+  if (chosen && chosen.check) {
+    _gateChoiceMade = true;
+    choices.gate_choice = key;
+    choices.interaction_type = inter.type || 'lore';
+    try {
+      const result = await apiCall('/api/prologue/lore_check', { option_key: key });
+      if (!result || result.error) {
+        _gateChoiceMade = false;
+        showError('Erro ao resolver o teste: ' + (result && result.error || 'desconhecido'));
+        return;
+      }
+      await _saveChoiceServer('gate', key);
+      await _saveChoiceServer('interaction_type', choices.interaction_type);
+      const _eff = result.effect || (result.xp ? '+' + result.xp + ' XP' : '');
+      /* Narrativa pós-escolha (PADRAO_ALDRIC) com o script do outcome + recompensa. */
+      const _finishLore = function () {
+        _renderScene(function () { return _sceneLoreOutcome(result.script, _eff); });
+      };
+      if (typeof vEncounter !== 'undefined' && vEncounter.close) vEncounter.close();
+      if (result.rolled) { _showSkillDiceThen(result.rolled, _finishLore); }
+      else { _finishLore(); }
+    } catch (e) {
+      _gateChoiceMade = false;
+      showError('Erro ao resolver o teste de lore.', e);
+    }
+    return;
+  }
+  _gateChoiceMade = true;
   choices.gate_choice = key;
   choices.interaction_type = DATA.interaction?.type || 'gate';
   await _saveChoiceServer('gate', key);
   await _saveChoiceServer('interaction_type', choices.interaction_type);
-  const inter = DATA.interaction || {};
-  let outcomeText = '';
-  let effectText = '';
+  /* #85 (#8): lore SEM teste (ex.: feed/ignore) — renderiza a narrativa pós-escolha
+     (PADRAO_ALDRIC) com o script do outcome, depois segue para os portões. */
   if (inter.type === 'lore' && inter.outcomes) {
     const outcome = inter.outcomes[key] || {};
-    outcomeText = outcome.text || 'Você avança para a cidade.';
-    if (outcome.gold) { const sign = outcome.gold > 0 ? '+' : ''; effectText = `${sign}${outcome.gold} GP`; }
-  } else {
-    const gateTexts = {
-      refuge: { text: 'O guarda te analisa de cima a baixo e te deixa passar, mas não sem uma inspeção.', effect: '⚠️ Inspeção nos portões' },
-      bribe: { text: 'O guarda pega as moedas rapidamente. "Um cidadão exemplar. A cidade lhe dá as boas-vindas."', effect: '<span class="vi vi-coin sm"></span> Taxa de entrada paga' },
-      intimidate: { text: 'O guarda mais velho não hesita — a coronha da lança acerta seu estômago. A dor acende algo dentro de você.', effect: '⚡ Entrada pela força' },
-    };
-    const g = gateTexts[key] || { text: 'Você entra na cidade.', effect: '' };
-    outcomeText = g.text;
-    effectText = g.effect;
+    let eff = '';
+    if (outcome.gold) { const sign = outcome.gold > 0 ? '+' : ''; eff = `${sign}${outcome.gold} Valdoritas`; }
+    else if (outcome.xp) { eff = '+' + outcome.xp + ' XP'; }
+    if (typeof vEncounter !== 'undefined' && vEncounter.close) vEncounter.close();
+    _renderScene(function () { return _sceneLoreOutcome(outcome.script, eff); });
+    return;
   }
-  /* Close encounter antes de mostrar result overlay (z-index) */
+  /* Gate clássico (guarda) — mantém o result overlay. */
+  const gateTexts = {
+    refuge: { text: 'O guarda te analisa de cima a baixo e te deixa passar, mas não sem uma inspeção.', effect: '⚠️ Inspeção nos portões' },
+    bribe: { text: 'O guarda pega as moedas rapidamente. "Um cidadão exemplar. A cidade lhe dá as boas-vindas."', effect: '<span class="vi vi-coin sm"></span> Taxa de entrada paga' },
+    intimidate: { text: 'O guarda mais velho não hesita — a coronha da lança acerta seu estômago. A dor acende algo dentro de você.', effect: '⚡ Entrada pela força' },
+  };
+  const g = gateTexts[key] || { text: 'Você entra na cidade.', effect: '' };
   if (typeof vEncounter !== 'undefined' && vEncounter.close) vEncounter.close();
-  showGateResult(outcomeText, effectText, () => { onEnterCity(); });
+  showGateResult(g.text, g.effect, () => { onEnterCity(); });
+}
+
+/* #85 (user, #8): cena de narrativa pós-escolha de evento de lore. Renderiza o
+   script do outcome (PADRAO_ALDRIC) + a recompensa, com a imagem do sujeito. */
+function _sceneLoreOutcome(scriptSegs, effectText) {
+  const inter = DATA.interaction || {};
+  let segs = (Array.isArray(scriptSegs) && scriptSegs.length)
+    ? scriptSegs.slice()
+    : [{ type: 'narration', text: 'Você segue em frente.' }];
+  if (effectText) {
+    segs = segs.concat([{ type: 'narration', text: '<b style="color:var(--v-gold,#c4953a)">✦ ' + effectText + ' ✦</b>' }]);
+  }
+  return {
+    npc: {
+      name: (inter.title || 'O Caminho').toUpperCase(),
+      desc: inter.context || '',
+      portrait: inter.subject_image || ''
+    },
+    script: segs,
+    choices: [{ id: 'continue', label: '🏰 Seguir para os Portões', cb: '__local_lore_outcome_done' }]
+  };
 }
 
 async function onEnterCity() {
