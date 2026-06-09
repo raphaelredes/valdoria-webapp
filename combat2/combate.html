@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T14:06:01Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T16:33:16Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13761,6 +13761,10 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
            _combatPortraitHTML prioriza u.portrait sobre o ícone heráldico/PNG.
            Sem isto, Thorne renderizava o PNG genérico de Guerreiro no card. */
         portrait: (spec.portrait && String(spec.portrait).trim()) || null,
+        /* Sessão #86 (C): iniciativa FIXA carregada do spec (aliado scriptado tipo
+           Thorne). Honrada em newCombatFromSetup — sem isso o ally rola d20+0
+           (DEX 10 default) e age por último, sumindo na luta curta do prólogo. */
+        init_exact: (spec.init_exact != null) ? (parseInt(spec.init_exact, 10) || null) : null,
         hp: hp, mhp: mhp, ac: ac, atk: atk, die: cdef.die,
         dmgMod: cdef.dmgMod, attr: cdef.attr,
         dex: dex, wis: wis, intScore: intSc, cha: cha, str: strSc, con: conSc,
@@ -14023,7 +14027,13 @@ function newCombatFromSetup(cfg) {
             c.initPending = true;
             return;
         }
-        c.init = rollN(20) + Math.floor((c.dex - 10) / 2);
+        /* Sessão #86 (C): iniciativa FIXA (init_exact) tem prioridade sobre o
+           d20+DEX — garante que um aliado scriptado (Thorne no prólogo) aja
+           cedo/visivelmente. DEX 10 default dava d20 puro e ele agia por último,
+           sumindo na luta curta antes do turno dele. */
+        c.init = (c.init_exact != null)
+            ? parseInt(c.init_exact, 10)
+            : rollN(20) + Math.floor((c.dex - 10) / 2);
         c.initRevealed = false;
         c.initRolling = false;
     });
@@ -24658,6 +24668,21 @@ function _sbShowSummonOverlay(actor, beast, s) {
     return new Promise(function (resolve) {
         var ov = document.createElement('div');
         ov.className = 'dice-overlay';
+        /* SAFETY (padrão do fix #74 / Arma Espiritual): o overlay é montado no
+           #app via mountInGameFrame; um render() concorrente (checkpoint / loop de
+           NPC) faz setHTML(#app) e APAGA o conteúdo → continueBtn.isConnected vira
+           false → o auto-continue nunca resolveria → o await em playSummonBeastTurn
+           penduraria pra sempre e o lobo invocado travaria (mesma classe do bug da
+           Arma Espiritual). finish() idempotente + timeout garantem resolve
+           INCONDICIONAL mesmo se o overlay já tiver sido removido por um render(). */
+        var _done = false;
+        function finish() {
+            if (_done) return;
+            _done = true;
+            if (ov.parentNode) ov.parentNode.removeChild(ov);
+            resolve();
+        }
+        var _safety = setTimeout(finish, 2600);
         if (s.rn) {
             var rb = document.createElement('div');
             rb.className = 'dice-round-badge';
@@ -24707,15 +24732,17 @@ function _sbShowSummonOverlay(actor, beast, s) {
         ov.style.zIndex = '101000';
         mountInGameFrame(ov);
         continueBtn.addEventListener('click', function () {
+            clearTimeout(_safety);
             ov.style.transition = 'opacity 0.26s ease-out';
             ov.style.opacity = '0';
-            setTimeout(function () {
-                if (ov.parentNode) ov.parentNode.removeChild(ov);
-                resolve();
-            }, 280);
+            setTimeout(finish, 280);
         });
-        // Auto-continue após 2.2s
-        setTimeout(function () { if (continueBtn.isConnected) continueBtn.click(); }, 2200);
+        // Auto-continue após 2.2s — resolve INCONDICIONAL: se um render() já
+        // removeu o overlay (isConnected=false), finish() resolve do mesmo jeito.
+        setTimeout(function () {
+            if (continueBtn.isConnected) { continueBtn.click(); }
+            else { finish(); }
+        }, 2200);
     });
 }
 
