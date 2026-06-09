@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T02:47:21Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T12:01:46Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -16775,6 +16775,17 @@ function _combatItemIconHTML(it) {
     return fallback;
 }
 function _combatPortraitHTML(iconId, u, utype) {
+    /* #85 (user): retrato CUSTOM do NPC (ex.: Thorne = thorne-armeiro.webp) tem
+       prioridade sobre o ícone heráldico de classe. Cai pro SVG do iconId se a
+       imagem falhar (onerror). file:// usa ../shared; remoto usa /shared. */
+    if (u && u.portrait) {
+        var pSrc = String(u.portrait);
+        var pLoc = (typeof location !== 'undefined') ? location.href : '';
+        if (pLoc.indexOf('file://') === 0 && pSrc.indexOf('/shared/') === 0) pSrc = '..' + pSrc;
+        return '<img class="c-portrait-img" src="' + pSrc + '" ' +
+               'alt="" loading="lazy" ' +
+               'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + (iconId || 'ic-guerreiro') + '\\\'/></svg>\'">';
+    }
     /* Per-enemy PNG check (priority over generic tag-based PNG).
        2026-05-17 FIX: enemies podem ter NOME FANTASIA via ENEMY_NAME_POOLS
        (ex: "Gnarl" = nome fantasia de Crocodilo). u.n=nome display vai
