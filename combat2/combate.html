@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T12:01:46Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T13:08:45Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13757,6 +13757,10 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         essential: !!spec.essential,
         summonsInvoked: summonsInvokedFinal,
         race: race, ico: (spec.icon && String(spec.icon).trim()) || cdef.ico,
+        /* #85 (user): retrato CUSTOM do NPC (ex.: Thorne = thorne-armeiro.webp).
+           _combatPortraitHTML prioriza u.portrait sobre o ícone heráldico/PNG.
+           Sem isto, Thorne renderizava o PNG genérico de Guerreiro no card. */
+        portrait: (spec.portrait && String(spec.portrait).trim()) || null,
         hp: hp, mhp: mhp, ac: ac, atk: atk, die: cdef.die,
         dmgMod: cdef.dmgMod, attr: cdef.attr,
         dex: dex, wis: wis, intScore: intSc, cha: cha, str: strSc, con: conSc,
