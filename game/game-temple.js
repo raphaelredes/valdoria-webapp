@@ -143,7 +143,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     },
     script: [
       { type: 'narration', text: 'Sacerdotisa Miriel não te recebe no salão principal — ela te conduz a uma câmara lateral selada por símbolos dourados. As paredes pulsam suavemente com runas em níveis quase imperceptíveis. Miriel tira o véu de prata da cabeça e olha direto nos teus olhos.' },
-      { type: 'speech', speaker: 'Sacerdotisa Miriel', text: 'Maldição é parasita de alma. <i>(traça runas no ar com o indicador)</i> Remove Curse, terceiro círculo, noventa Valdoritas. Vai doer mais que o corte que a recebeu — mas em dez minutos serás livre.' }
+      { type: 'speech', speaker: 'Sacerdotisa Miriel', text: 'Maldição é parasita de alma. <i>(traça runas no ar com o indicador)</i> Remover Maldição, terceiro círculo, noventa Valdoritas. Vai doer mais que o corte que a recebeu — mas em dez minutos serás livre.' }
     ],
     choices: [
       { id: 'rc_pay', label: 'Pagar 90V — Remover Maldição', cb: 'remove_curse-confirm', backend_cb: 'temple_pay_remove_curse', renownDelta: 2,
