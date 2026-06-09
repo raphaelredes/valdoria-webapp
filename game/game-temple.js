@@ -64,11 +64,11 @@ var ALDRIC_DIALOGUE = {
     { type: 'speech', speaker: 'Padre Aldric', text: 'O que te traz hoje ao Templo, irmão? <i>(entrelaça as mãos sobre o terço)</i> Conta-me — e que os Quatro nos ouçam.' }
   ],
   choices: [
-    { id: 'heal',    label: '❤️ "Preciso de cura."', cb: 'heal' },
-    { id: 'bless',   label: '✨ "Vim buscar uma bênção."', cb: 'bless' },
-    { id: 'confess', label: '🕯️ "Quero me confessar."', cb: 'confess' },
-    { id: 'donate',  label: '🪙 "Trouxe uma oferta ao Santuário."', cb: 'donate' },
-    { id: 'leave',   label: '↩ "Volto outra hora, Padre."', cb: 'close' }
+    { id: 'heal',    label: '"Preciso de cura."', cb: 'heal' },
+    { id: 'bless',   label: '"Vim buscar uma bênção."', cb: 'bless' },
+    { id: 'confess', label: '"Quero me confessar."', cb: 'confess' },
+    { id: 'donate',  label: '"Trouxe uma oferta ao Santuário."', cb: 'donate' },
+    { id: 'leave',   label: '"Volto outra hora, Padre."', cb: 'close' }
   ]
 };
 
@@ -87,14 +87,14 @@ var SERVICE_DIALOGUES_TEMPLE = {
     choices: [
       // task #64 (2026-05-20) — backend_cb canonical: temple_services.py:46 "temple_pay_<service>"
       // task #84 (2026-05-20): resultText específico por serviço — cohesão.
-      { id: 'h_cure',  label: '❤️ Cure Wounds 1º · 30V · 1d8+3', cb: 'heal-confirm', backend_cb: 'temple_pay_heal',
+      { id: 'h_cure',  label: 'Cura de Ferimentos · 1º círculo · 30V · 1d8+3', cb: 'heal-confirm', backend_cb: 'temple_pay_heal',
         resultNarration: 'Irmã Elara coloca as mãos sobre teus ferimentos. Uma luz dourada e morna pulsa de suas palmas.',
         resultText: '"Os Quatro escutam." <i>(murmura prece de cura)</i> <b>+1d8+3 HP recuperado.</b> "Que o sangue circule e a carne se feche, em nome da Mãe-Auroral."' },
-      { id: 'h_mass',  label: '❤️ Mass Cure 5º · 80V · 3d8+4 (6 alvos)', cb: 'heal-confirm', backend_cb: 'temple_pay_mass_cure',
+      { id: 'h_mass',  label: 'Cura em Massa · 5º círculo · 80V · 3d8+4 (6 alvos)', cb: 'heal-confirm', backend_cb: 'temple_pay_mass_cure',
         resultNarration: 'Irmã Elara ergue ambas as mãos. Uma onda dourada se expande do altar — atinge todos os feridos ao alcance.',
         resultText: '"Magia de quinto círculo, dom dos Quatro." <i>(voz firme em ritual)</i> <b>+3d8+4 HP em até 6 alvos.</b> "Sejam todos restaurados — corpo, espírito, e o juramento que os trouxe aqui."' },
-      { id: 'h_pray',  label: '🙏 Tentar prece pessoal · Religião DC 14', cb: 'dice:religion:14:+1' },
-      { id: 'back',    label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'h_pray',  label: 'Tentar prece pessoal · Religião DC 14', cb: 'dice:religion:14:+1' },
+      { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
 
@@ -105,11 +105,11 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { type: 'speech', speaker: 'Padre Aldric', text: 'Veneno é traição da natureza — o corpo se torna inimigo de si mesmo. <i>(traça o sinal sagrado em tua testa)</i> Purificação Menor, magia de segundo círculo, quarenta Valdoritas. Em cinco minutos, o veneno se torna mais leve que a fumaça.' }
     ],
     choices: [
-      { id: 'p_pay',   label: '🧪 Pagar 40V — purificar veneno', cb: 'cure_poison-confirm', backend_cb: 'temple_pay_cure_poison',
+      { id: 'p_pay',   label: 'Pagar 40V — purificar veneno', cb: 'cure_poison-confirm', backend_cb: 'temple_pay_cure_poison',
         resultNarration: 'Padre Aldric ergue o braseiro acima de tua cabeça. A fumaça branca encurva-se ao redor — atraída pelo veneno em teu sangue.',
         resultText: '"Veneno purificado, em nome do Pai-da-Aurora." <i>(traça o sinal sagrado em tua testa)</i> <b>Condição Envenenado removida.</b> "Vai com cuidado — a próxima dose vai exigir mais que prata."' },
-      { id: 'p_persuade', label: '💬 "Há quem pague isso?" · Persuasão DC 15', cb: 'dice:persuasion:15:+0' },
-      { id: 'back',    label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'p_persuade', label: '"Há quem pague isso?" · Persuasão DC 15', cb: 'dice:persuasion:15:+0' },
+      { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
 
@@ -124,14 +124,14 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { type: 'speech', speaker: 'Acólito Theron', text: 'B-bênção da Clareza, irmão! <i>(consulta um pergaminho dobrado, depois enrola apressado)</i> A Irmã Elara me ensinou ontem. Magia de primeiro círculo, concentração, vinte e cinco Valdoritas. Adiciona um dado de quatro a teus ataques e tuas salvaguardas, por um minuto.' }
     ],
     choices: [
-      { id: 'b_pay',   label: '✨ Pagar 25V — Bênção (+1d4 atk/save 1min)', cb: 'bless-confirm', backend_cb: 'temple_pay_bless', renownDelta: 1,
+      { id: 'b_pay',   label: 'Pagar 25V — Bênção (+1d4 atk/save 1min)', cb: 'bless-confirm', backend_cb: 'temple_pay_bless', renownDelta: 1,
         resultNarration: 'Theron sussurra a prece três vezes — uma pra cada Quatro menos o Silencioso. Uma luz pálida pousa sobre teus ombros.',
         resultText: '"P-pronto! <i>(suspira aliviado)</i> Pela primeira vez deu certo!" <b>+1d4 em ataques e salvaguardas por 1 minuto (até 3 rolagens).</b>' },
-      { id: 'b_guide', label: '✨ Orientação · 5V · +1d4 perícia única', cb: 'bless-confirm', backend_cb: 'temple_pay_guidance', renownDelta: 1,
+      { id: 'b_guide', label: 'Orientação · 5V · +1d4 perícia única', cb: 'bless-confirm', backend_cb: 'temple_pay_guidance', renownDelta: 1,
         resultNarration: 'Theron passa o polegar úmido sobre tua testa, deixando um sinal que reluz brevemente.',
         resultText: '"O-orientação, irmão. <i>(pisca esperançoso)</i> Funciona uma vez só, depois passa. Mas funciona bem!" <b>+1d4 na próxima perícia que tentar.</b>' },
-      { id: 'b_persuade', label: '💬 "Bênção a um irmão?" · Persuasão DC 13', cb: 'dice:persuasion:13:+1' },
-      { id: 'back',    label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'b_persuade', label: '"Bênção a um irmão?" · Persuasão DC 13', cb: 'dice:persuasion:13:+1' },
+      { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
 
@@ -146,11 +146,11 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { type: 'speech', speaker: 'Sacerdotisa Miriel', text: 'Maldição é parasita de alma. <i>(traça runas no ar com o indicador)</i> Remove Curse, terceiro círculo, noventa Valdoritas. Vai doer mais que o corte que a recebeu — mas em dez minutos serás livre.' }
     ],
     choices: [
-      { id: 'rc_pay', label: '🔮 Pagar 90V — Remove Curse', cb: 'remove_curse-confirm', backend_cb: 'temple_pay_remove_curse', renownDelta: 2,
+      { id: 'rc_pay', label: 'Pagar 90V — Remover Maldição', cb: 'remove_curse-confirm', backend_cb: 'temple_pay_remove_curse', renownDelta: 2,
         resultNarration: 'Miriel sela a câmara com runas douradas no chão. Tua pele formiga — depois queima. As runas pulsam em sincronia com teu coração.',
         resultText: '"Quem te amaldiçoou foi habilidoso, mas todo nó pode ser desfeito." <i>(traça o último símbolo)</i> <b>Maldição removida.</b> "Cuida pra não cruzar com quem te marcou — segunda vez a magia custa o dobro."' },
-      { id: 'rc_arcana', label: '📖 "Que tipo de maldição?" · Arcana DC 15', cb: 'dice:arcana:15:+2' },
-      { id: 'back',   label: '↩ "Vou pensar."', cb: 'close' }
+      { id: 'rc_arcana', label: '"Que tipo de maldição?" · Arcana DC 15', cb: 'dice:arcana:15:+2' },
+      { id: 'back',   label: '"Vou pensar."', cb: 'close' }
     ]
   },
 
@@ -158,17 +158,17 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: {
       name: 'Sumo-Sacerdote Varek',
       desc: 'Sumo-Sacerdote · quarenta anos servindo os Quatro',
-      portrait: '../shared/img/npcs/padre-aldric.webp'
+      portrait: '../shared/img/npcs/sumo-sacerdote.webp'
     },
     script: [
       { type: 'narration', text: 'Sumo-Sacerdote Varek aparece raramente no salão público — sua presença significa que algo grave foi pedido. Ele se aproxima do altar trazendo um cetro de prata e ônix. As vestes púrpura debruadas em fio de platina arrastam-se solenes contra o mármore.' },
       { type: 'speech', speaker: 'Sumo-Sacerdote Varek', text: 'Restauração Maior é magia de quinto círculo. <i>(ergue o cetro contra a luz dos vitrais)</i> Quatrocentas e cinquenta Valdoritas. Remove uma condição: exaustão, petrificação, maldição, encantamento, ou redução de atributo. Os Quatro não devolvem o que jamais foi tirado — apenas restauram o que ainda pode ser.' }
     ],
     choices: [
-      { id: 'gr_pay', label: '🌟 Pagar 450V — Greater Restoration', cb: 'greater_restoration-confirm', backend_cb: 'temple_pay_greater_restoration', renownDelta: 3,
+      { id: 'gr_pay', label: 'Pagar 450V — Restauração Maior', cb: 'greater_restoration-confirm', backend_cb: 'temple_pay_greater_restoration', renownDelta: 3,
         resultNarration: 'Varek ergue o cetro de prata e ônix ao alto. Os vitrais de cima da câmara reagem — luz colorida pousa em ti como manto de seda.',
         resultText: '"Os Quatro restauram o que ainda pode ser." <i>(toca tua fronte com o cetro)</i> <b>Uma condição removida: exaustão, petrificação, maldição, encantamento, ou redução de atributo.</b> "Vai com cautela — magia desta ordem deixa marcas no espírito."' },
-      { id: 'back',   label: '↩ "Vou ponderar."', cb: 'close' }
+      { id: 'back',   label: '"Vou ponderar."', cb: 'close' }
     ]
   },
 
@@ -176,18 +176,18 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: {
       name: 'Oráculo Orenthia',
       desc: 'Oráculo · vidente dos Quatro, comunica-se com o Plano dos Mortos',
-      portrait: '../shared/img/npcs/sacerdotisa-miriel.webp'
+      portrait: '../shared/img/npcs/oraculo-orenthia.webp'
     },
     script: [
       { type: 'narration', text: 'Oráculo Orenthia espera-te na cripta sob o Templo. Velas de cera negra ardem em silêncio. Ela traz uma máscara de prata sem olhos — apenas duas fendas verticais por onde algo brilha. Seu vestido é de linho cinzento, sem ornamentos. Ela não fala alto — sua voz parece vir de longe.' },
       { type: 'speech', speaker: 'Oráculo Orenthia', text: 'Reviver os caídos é privilégio dos Quatro, não direito dos vivos. <i>(toca tua testa com dedos gélidos)</i> Mil Valdoritas. O corpo deve estar diante de mim, e a alma ainda não dispersa. O caído retorna com penalidade de menos quatro em todas as rolagens por quatro descansos longos — o preço de cruzar a porta duas vezes.' }
     ],
     choices: [
-      { id: 'rd_pay', label: '💀 Pagar 1000V — Raise Dead', cb: 'raise_dead-confirm', backend_cb: 'temple_pay_raise_dead', renownDelta: 5,
+      { id: 'rd_pay', label: 'Pagar 1000V — Reviver os Mortos', cb: 'raise_dead-confirm', backend_cb: 'temple_pay_raise_dead', renownDelta: 5,
         resultNarration: 'Orenthia se posiciona sobre o corpo. As velas negras dobram a intensidade — então, súbito, todas se apagam ao mesmo tempo. Silêncio absoluto. Por meio segundo eternos.',
         resultText: '"Volta, irmão. <i>(voz dupla — a dela e algo mais)</i> O caminho ainda não terminou pra ti." <b>Personagem revive com 1 HP. Penalidade: -4 em todas as rolagens por 4 descansos longos.</b> "Não fale do que viu lá. Os Quatro ouvem o que se diz."' },
-      { id: 'rd_insight', label: '🔮 "Ela voltará... a mesma?" · Intuição DC 16', cb: 'dice:insight:16:+1' },
-      { id: 'back',   label: '↩ "Não estou pronto."', cb: 'close' }
+      { id: 'rd_insight', label: '"Ela voltará... a mesma?" · Intuição DC 16', cb: 'dice:insight:16:+1' },
+      { id: 'back',   label: '"Não estou pronto."', cb: 'close' }
     ]
   },
 
@@ -198,13 +198,13 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { type: 'speech', speaker: 'Padre Aldric', text: 'Os Quatro já sabem, irmão. <i>(suspira longo)</i> Sempre souberam. A confissão não é pra eles, é pra ti. Vais carregar trinta dias de bênção — a alma mais leve faz teu corpo mais ágil. Vantagem em salvaguardas de Sabedoria. Três Valdoritas como oferta — ou dez, e o Santuário se lembrará de ti. Vai em paz.' }
     ],
     choices: [
-      { id: 'c_pay',    label: '🕯️ Pagar 3V — Confissão (bênção 30 dias)', cb: 'confess-confirm', backend_cb: 'temple_pay_confess_humble', renownDelta: 1,
+      { id: 'c_pay',    label: 'Pagar 3V — Confissão (bênção 30 dias)', cb: 'confess-confirm', backend_cb: 'temple_pay_confess_humble', renownDelta: 1,
         resultNarration: 'Padre Aldric abençoa três velas — uma pra cada Quatro presente. Depois sopra a primeira pra liberar tua alma.',
         resultText: '"Vai em paz, irmão." <i>(traça o sinal sobre tua testa)</i> <b>Vantagem em salvaguardas de Sabedoria por 30 dias.</b> "Volta sempre que precisar — a porta do confessionário não se fecha pra ninguém."' },
-      { id: 'c_donate', label: '💰 Pagar 10V — Confissão + reputação', cb: 'confess-confirm', backend_cb: 'temple_pay_confess_devout', renownDelta: 3,
+      { id: 'c_donate', label: 'Pagar 10V — Confissão + reputação', cb: 'confess-confirm', backend_cb: 'temple_pay_confess_devout', renownDelta: 3,
         resultNarration: 'Padre Aldric abre o cofrinho do Santuário e deposita as moedas com gesto cuidadoso. Depois te abençoa com prece dobrada.',
         resultText: '"Tua oferta é lembrada, e tua alma, igual." <i>(faz o sinal duas vezes)</i> <b>Vantagem em saves WIS 30 dias + reconhecimento entre os clérigos. +3 Renome do Templo.</b> "O Sumo-Sacerdote saberá teu nome."' },
-      { id: 'back',     label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'back',     label: '"Outra hora."', cb: 'close' }
     ]
   },
 
@@ -219,16 +219,16 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { type: 'speech', speaker: 'Acólito Theron', text: 'D-doações vão pra alimentar os pobres do bairro e manter as velas acesas, irmão! <i>(tenta soar profissional, mas a voz trai a empolgação)</i> E sobe tua reputação com o Santuário! A Irmã Elara me ensinou — quanto mais doas, mais os Quatro lembram do teu nome.' }
     ],
     choices: [
-      { id: 'd_5',    label: '🪙 Doar 5V — oferta humilde', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_5', renownDelta: 1,
+      { id: 'd_5',    label: 'Doar 5V — oferta humilde', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_5', renownDelta: 1,
         resultNarration: 'Theron coloca as cinco moedas no cesto e te dá um sorriso emocionado. Irmã Elara observa de longe, satisfeita.',
         resultText: '"Os pobres do bairro vão ter pão essa semana, irmão!" <i>(curva-se desajeitado)</i> <b>+1 Renome do Templo.</b> "Os Quatro lembrarão."' },
-      { id: 'd_25',   label: '🪙 Doar 25V — oferta digna', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_25', renownDelta: 2,
+      { id: 'd_25',   label: 'Doar 25V — oferta digna', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_25', renownDelta: 2,
         resultNarration: 'Theron quase deixa o cesto cair quando as vinte e cinco moedas tilintam dentro. Irmã Elara aproxima-se, sorrindo discreta.',
         resultText: '"V-Vinte e cinco! <i>(emocionado)</i> Vai pagar o ferreiro de manter o sino da Capela em ordem por um ano!" <b>+2 Renome do Templo.</b>' },
-      { id: 'd_100',  label: '🪙 Doar 100V — oferta generosa', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_100', renownDelta: 5,
+      { id: 'd_100',  label: 'Doar 100V — oferta generosa', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_100', renownDelta: 5,
         resultNarration: 'Irmã Elara intervém pessoalmente — toca o braço de Theron com gentileza e assume o cesto. As cem Valdoritas brilham como rio de prata.',
         resultText: '"Cem Valdoritas. <i>(sorri com gratidão profunda)</i> Vossa Senhoria honra o Santuário. Os Quatro hão de lembrar — e o Sumo-Sacerdote, também." <b>+5 Renome do Templo. Acesso a serviços de tier superior desbloqueado.</b>' },
-      { id: 'back',   label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'back',   label: '"Outra hora."', cb: 'close' }
     ]
   }
 };
