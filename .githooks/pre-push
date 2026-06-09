@@ -10,9 +10,11 @@
 # promove `main`->`prod`. Isto é uma trava DE VERDADE, não só uma regra: mesmo
 # que um agente rode `git push origin prod` por engano, é REJEITADO aqui.
 #
-# Ativação: `git config core.hooksPath .githooks` (rode scripts/setup_git_guardrails
-# no repo principal, ou o comando direto no valdoria-webapp/). Tracked em
-# .githooks/ pra sobreviver e ser versionado.
+# Ativacao (idempotente): rode no repo principal
+#   .venv/Scripts/python.exe scripts/setup_git_guardrails.py
+# (seta core.hooksPath=.githooks). Tambem (re)ativado no startup da GUI
+# (src/gui.py:_deferred_init) e no scripts/agent_session_start.py; o preflight
+# check_git_guardrail_active avisa se sumir. Tracked em .githooks/ pra ser versionado.
 # ============================================================================
 
 protected="refs/heads/prod"
