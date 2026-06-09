@@ -28262,7 +28262,7 @@ function _resolveInteractiveChoiceLOCAL(player, choice) {
     if ((player.level || 1) > preLevel) {
       deltas.push({ type:'gold', label:'XP', from: preXp, to: preXpNext,
                     max: preXpNext, bar: false,
-                    _suffix: ' 🎉 LEVEL UP! Nv ' + (player.level || preLevel + 1) });
+                    _suffix: ' 🎉 SUBIU DE NÍVEL! Nv ' + (player.level || preLevel + 1) });
     } else {
       deltas.push({ type:'gold', label:'XP', from: preXp, to: preXp + effect.xp,
                     max: preXpNext, bar: false });
@@ -28338,7 +28338,7 @@ function _resolveInteractiveChoiceREMOTE(player, choice) {
     var xpDelta = (typeof res.xp_delta === 'number') ? res.xp_delta : 0;
     if (xpDelta) {
       if ((player.level || 1) > preLevel) {
-        deltas.push({ type: 'gold', label: 'XP', from: preXp, to: preXpNext, max: preXpNext, bar: false, _suffix: ' 🎉 LEVEL UP! Nv ' + (player.level || preLevel + 1) });
+        deltas.push({ type: 'gold', label: 'XP', from: preXp, to: preXpNext, max: preXpNext, bar: false, _suffix: ' 🎉 SUBIU DE NÍVEL! Nv ' + (player.level || preLevel + 1) });
       } else {
         deltas.push({ type: 'gold', label: 'XP', from: preXp, to: preXp + xpDelta, max: preXpNext, bar: false });
       }
@@ -32291,7 +32291,7 @@ function _shopGetFilters(npcId){
     { id:'gem',        label:'💎 Gemas',      count:counts.gem       },
     { id:'map',        label:'🗺️ Mapas',      count:counts.map       },
     { id:'accessory',  label:'💍 Anéis',      count:counts.accessory },
-    { id:'tool',       label:'⛺ Equip',      count:counts.tool      }
+    { id:'tool',       label:'⛺ Equipamento', count:counts.tool      }
   ];
   return allFilters.filter(function(f){ return f.id === 'all' || f.count > 0; });
 }
@@ -38676,7 +38676,7 @@ function _renderInventoryPopup(){
   var filters = [
     { id:'all',   label:'Todos',     count:counts.all   },
     { id:'fav',   label:'⭐ Fav',    count:counts.fav   },
-    { id:'equip', label:'⚔️ Equip',  count:counts.equip },
+    { id:'equip', label:'⚔️ Equipar',  count:counts.equip },
     { id:'use',   label:'🧪 Consum', count:counts.use   },
     { id:'gem',   label:'💎 Gemas',  count:counts.gem   },
     { id:'rune',  label:'✨ Runas',  count:counts.rune  },
@@ -41842,7 +41842,7 @@ function _runeConfirmInscribe(p, runeName, slot, itemName, existingRune){
     icon: _heralIco('ic-mochila'), npc: 'Eirik', title: 'Confirmar Inscrição',
     desc: '<div style="font-size: var(--v-font-sm, 13px); line-height: 1.5;">' +
           '<b>Runa:</b> ' + runeName + '<br>' +
-          '<b>Equip.:</b> ' + itemName + '<br>' +
+          '<b>Equipado:</b> ' + itemName + '<br>' +
           '<b>Slot:</b> ' + slot + '<br>' +
           '<b>Efeito:</b> ' + _formatRuneEffect(runeName) +
           existingMsg +
@@ -47666,7 +47666,7 @@ function _gainXp(p, amt){
   var preXp = p.xp || 0;
   var preXpNext = p.xpNext || 100;
   p.xp += amt;
-  if (p.xp >= p.xpNext) { p.level += 1; p.xp -= p.xpNext; p.xpNext = Math.floor(p.xpNext * 1.5); vToast('🎉 LEVEL UP! Agora nv ' + p.level); }
+  if (p.xp >= p.xpNext) { p.level += 1; p.xp -= p.xpNext; p.xpNext = Math.floor(p.xpNext * 1.5); vToast('🎉 SUBIU DE NÍVEL! Agora nv ' + p.level); }
   p._lastXpGain = { gain: amt, preXp: preXp, preLevel: preLevel, preXpNext: preXpNext, leveledUp: (p.level || 1) > preLevel };
   refreshHud();
   // FASE 6: persiste o XP no servidor (delta — autoridade aplica level-up canônico).
@@ -47689,7 +47689,7 @@ function _lastXpDelta(p, label){
   if (info.leveledUp) {
     return { type: 'gold', label: label || 'XP', from: preXp, to: preXpNext,
              max: preXpNext, bar: false,
-             _suffix: ' 🎉 LEVEL UP! Nv ' + (p.level || 1) };
+             _suffix: ' 🎉 SUBIU DE NÍVEL! Nv ' + (p.level || 1) };
   }
   return { type: 'gold', label: label || 'XP', from: preXp,
            to: preXp + (info.gain || 0), max: preXpNext, bar: false };
@@ -55573,7 +55573,7 @@ function _resolveOfferChoice(player, offerChoice, subResult) {
       // Level up: bar enche até preXpNext, suffix mostra novo nível.
       deltas.push({ type: 'gold', label: 'XP', from: preXp, to: preXpNext,
                     max: preXpNext, bar: false,
-                    _suffix: ' 🎉 LEVEL UP! Nv ' + (player.level || preLevel + 1) });
+                    _suffix: ' 🎉 SUBIU DE NÍVEL! Nv ' + (player.level || preLevel + 1) });
     } else {
       // Ganho normal: from preXp → preXp+gain (não usa player.xp atual,
       // que pode ter feito wraparound em level-up subsequente).
