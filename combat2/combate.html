@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T13:08:45Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T14:06:01Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -17681,7 +17681,23 @@ async function _playSpiritualWeaponFlightVfx(s, originIdx, targetIdx, opts) {
     var isCrit = !!opts.crit;
 
     return new Promise(function (resolve) {
+        /* SAFETY (mesmo padrão do fix #74 — dice showDice): rAF é throttled/pausado
+           no Telegram WebView (aba em background) e em devices fracos. Sem rede de
+           segurança, o `tick` nunca chega ao branch final → a espada (anexada a
+           document.body, SOBREVIVE ao render que só recria #app) fica PRESA na tela
+           E o await desta Promise pendura para sempre → a Arma Espiritual "ataca só
+           1x" e a imagem trava (bug user #85). O timeout garante cleanup + resolve
+           mesmo se o rAF parar. finish() é idempotente (guard _done). */
+        var _done = false;
+        function finish() {
+            if (_done) return;
+            _done = true;
+            if (sword.parentNode) sword.parentNode.removeChild(sword);
+            resolve();
+        }
+        var _safety = setTimeout(finish, phase1 + phase2 + phase3 + 600);
         function tick(now) {
+            if (_done) return;
             var t = now - start;
             if (t < phase1) {
                 /* Outbound arco — sword aponta na direção do voo (rotate) */
@@ -17763,8 +17779,8 @@ async function _playSpiritualWeaponFlightVfx(s, originIdx, targetIdx, opts) {
                 sword.style.top = y2 + 'px';
                 sword.style.transform = 'translate(-50%, -50%) rotate(' + rot2 + 'deg)';
             } else {
-                if (sword.parentNode) sword.parentNode.removeChild(sword);
-                resolve();
+                clearTimeout(_safety);
+                finish();
                 return;
             }
             requestAnimationFrame(tick);
