@@ -3147,7 +3147,11 @@
   // (known_locations) + as ESTRADAS entre dois locais conhecidos (user: "locais +
   // estradas"). A névoa cobre o resto (terra incognita), escondendo a EXISTÊNCIA do
   // local — não só o nome. Mesmo FOG_COLOR do explore-fog (consistência).
-  var CART_FOG_COLOR = 'rgba(26,21,16,0.92)';   // idêntico ao explore-fog FOG_COLOR
+  // #85 (user): não-descoberto = PRETO SÓLIDO (não escurecido). Antes era
+  // rgba(26,21,16,0.92) (marrom 92%) → dava pra ver o mapa por baixo e saber o
+  // TAMANHO total já no nível 1. Agora preto opaco esconde a extensão do mapa até
+  // o jogador descobrir os limites (igual o fundo preto do zoom-out).
+  var CART_FOG_COLOR = 'rgba(0,0,0,1)';
   // falloff smoothstep: 0 (revelado) até r0; 255 (névoa cheia) após r1; gradiente no meio.
   function _cartFogFalloff(dist, r0, r1){
     if (dist <= r0) return 0;
