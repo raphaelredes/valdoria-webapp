@@ -13663,22 +13663,31 @@ function _showStatusPopup(memberIdx){
     + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Combate'
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left:4px;"></span>'
     + '</div>';
+  // Backlog item 11 (sessao #85): combat stats agora usam WebP OpenAI (igual
+  // STATS_DATA dos atributos). 4 WebP em shared/img/ui/: stat-ac, stat-attack,
+  // stat-spelldc, stat-prof. Fallback SVG mantido por seguranca (onerror).
   var COMBAT_DATA = [
-    { icon: 'ic-stat-ac',      label: 'CA',      value: ac,       key: 'ac' },
-    { icon: 'ic-stat-attack',  label: 'Atq.',    value: (attackBonus >= 0 ? '+' : '') + attackBonus, key: 'atk' },
-    { icon: 'ic-stat-spelldc', label: 'DC Mag.', value: spellDc,  key: 'spelldc' },
-    { icon: 'ic-stat-prof',    label: 'Prof.',   value: '+' + prof, key: 'prof' }
+    { icon: 'ic-stat-ac',      label: 'CA',      value: ac,       key: 'ac',      png: 'stat-ac.webp' },
+    { icon: 'ic-stat-attack',  label: 'Atq.',    value: (attackBonus >= 0 ? '+' : '') + attackBonus, key: 'atk', png: 'stat-attack.webp' },
+    { icon: 'ic-stat-spelldc', label: 'DC Mag.', value: spellDc,  key: 'spelldc', png: 'stat-spelldc.webp' },
+    { icon: 'ic-stat-prof',    label: 'Prof.',   value: '+' + prof, key: 'prof',  png: 'stat-prof.webp' }
   ];
+  var _combatUiBase = '/shared/img/ui/';
+  var _combatV = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
   html += '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:4px;">';
   COMBAT_DATA.forEach(function(c){
     var iconCol = HERALDIC_COLORS[c.icon] || '#8a7a6a';
+    var pngImg = '<img src="' + _combatUiBase + c.png + '?v=' + _combatV + '" alt="' + c.label + '" '
+      + 'style="width:18px;height:18px;flex-shrink:0;object-fit:contain;border-radius:3px;'
+      + 'filter:drop-shadow(0 1px 1px rgba(0,0,0,0.5));" '
+      + 'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=&quot;0 0 120 120&quot; style=&quot;width:13px;height:13px;color:' + iconCol + ';&quot;><use href=&quot;#' + c.icon + '&quot;/></svg>\'">';
     html += '<div class="ficha-combat-badge fEp-shield" onclick="_showFichaStatHelp(\'' + c.key + '\')" title="O que é? (mecânica D&D)" style="position:relative; cursor:pointer;'
       + 'display:flex; align-items:center; justify-content:space-between; gap:5px;'
       + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,36,32,0.6) 100%);'
       + 'border:1px solid rgba(196,149,58,0.30); border-radius:4px 4px 7px 7px;'
       + 'padding:4px 8px;">'
       + '<span style="display:inline-flex; align-items:center; gap:4px; font-size:calc(11px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484);">'
-      + '<svg viewBox="0 0 120 120" style="width:13px;height:13px;color:' + iconCol + ';"><use href="#' + c.icon + '"/></svg>'
+      + pngImg
       + c.label + '</span>'
       + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(13px * var(--v-font-scale, 1)); font-weight:700;'
       + 'color:var(--v-gold,#c4953a); text-shadow:0 0 6px rgba(196,149,58,0.35);">' + c.value + '</span>'
