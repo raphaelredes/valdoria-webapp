@@ -432,6 +432,15 @@ body.wa-portal {
 
 }
 
+/* #85 (user): dentro do empty-frame (fundo em gradiente dourado), o "mask" escuro
+   da gema (#261e14, feito p/ blendar no fundo escuro da PÁGINA no divisor do título)
+   destoa e vira um quadrado preto feio abaixo de "Crie sua Lenda". No empty-frame a
+   gema fica transparente — o ◆ cobre a linha fina do divisor, sem caixa. */
+.wa-empty-frame .wa-gold-divider-gem {
+    background: transparent;
+    padding: 0;
+}
+
 
 
 /* ----- Auth Buttons Area ----- */
