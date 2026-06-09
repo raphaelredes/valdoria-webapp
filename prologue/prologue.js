@@ -356,6 +356,25 @@ function _sceneInjuredCompanion() {
   return { npc: npc, script: script, choices: choices };
 }
 
+/* Cena CURANDEIRA ERRANTE (tarefa A, sessao #86): se o personagem caiu a 0 PV
+   durante o combate da estrada MAS a luta foi vencida (Thorne abateu o ultimo
+   lobo), Maela Folha-Prata passa e o estabiliza. Server e a autoridade — esta
+   cena so existe quando DATA.death_healer vem preenchido (player.hp <= 0 no
+   aftermath); a cura e aplicada server-side (apply_road_aftermath). Escolha
+   unica avanca pro fluxo normal do aftermath (Brenn / aftermath canonical). */
+function _sceneDeathHealer() {
+  const dh = (DATA && DATA.death_healer) || {};
+  const npc = dh.npc || { name: 'Maela Folha-Prata', desc: 'Curandeira errante', portrait: '' };
+  const script = _filterEmptySegments(dh.script || []);
+  return {
+    npc: npc,
+    script: script,
+    choices: [
+      { id: 'levantar', label: '▸ Levantar-se', cb: '__local_death_healer_done' }
+    ]
+  };
+}
+
 /* Cena INJURED COMPANION RESULT: mostra outcome narrativo apos a escolha
    de cura. Header com nome do NPC vivo (Brenn) ou Thorne dependendo do
    outcome. Choice unica avanca pra _sceneAftermath. */
@@ -578,6 +597,12 @@ function _dispatchPrologueChoice(ch) {
   } else if (cb === '__local_companion_result_done') {
     /* Apos resultado da cura → segue pro aftermath canonical */
     _renderScene(_sceneAftermath);
+  } else if (cb === '__local_death_healer_done') {
+    /* Tarefa A: apos a curandeira errante → segue pro fluxo normal do aftermath
+       (Brenn ferido se ainda nao curado, senao aftermath canonical). */
+    var _scDH = (DATA && DATA.saved_choices) || {};
+    if (_scDH.brenn_choice) { _renderScene(_sceneAftermath); }
+    else { _renderScene(_sceneInjuredCompanion); }
   } else if (cb === '__local_aftermath_done') {
     onAftermathDone();
   } else if (cb.indexOf('__local_gate:') === 0) {
@@ -1049,6 +1074,15 @@ async function boot() {
     if (sc.distract_result) choices.distract = sc.distract_result;
 
     if (DATA.mode === 'aftermath') {
+      /* Tarefa A (sessao #86): se o personagem caiu a 0 PV mas venceu, a curandeira
+         errante (Maela) aparece ANTES do fluxo normal. DATA.death_healer so vem
+         preenchido quando downed (gate server-side) -> o caso comum (sobreviveu)
+         nao e afetado. A escolha "Levantar-se" segue pro fluxo Brenn/aftermath. */
+      if (DATA.death_healer) {
+        console.info('[PROLOGUE] mode=aftermath: player downed → death healer scene');
+        _renderScene(_sceneDeathHealer);
+        return;
+      }
       /* Sessao #37 v19 (2026-05-25): novo flow — injured companion FIRST
          (se ainda nao foi feita a escolha), depois aftermath canonical. */
       if (sc.brenn_choice) {
