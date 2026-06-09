@@ -92,6 +92,46 @@
   /* Expose como API global p\u00FAblica pra outros contextos reusar. */
   window.ValdoriaOrb = { buildElement: _buildOrbElement };
 
+  /* \u2500\u2500 Selo de vers\u00E3o (vN.NN) \u2014 canto superior direito, S\u00D3 nesta tela \u2500\u2500
+     2026-06-09 (version-display-plan): busca /api/webapp/version (no-store) e
+     exibe version_label. API host detectado por hostname (mesmo padr\u00E3o do
+     /play/index.html). Em file:// ou host desconhecido o fetch \u00E9 pulado e o
+     label fica oculto \u2014 nunca bloqueia o boot. */
+  function _resolveApiHost() {
+    try {
+      if (location.protocol === 'file:') return '';
+      var h = (location.hostname || '').toLowerCase();
+      if (h === 'jogo.lendasdevaldoria.com.br' || h === 'www.jogo.lendasdevaldoria.com.br') {
+        return 'https://prod.lendasdevaldoria.com.br';
+      }
+      if (h === 'dev.lendasdevaldoria.com.br') {
+        return 'https://api.lendasdevaldoria.com.br';
+      }
+      var env = new URLSearchParams(location.search).get('env');
+      if (env === 'dev') return 'https://api.lendasdevaldoria.com.br';
+      if (env === 'prod') return 'https://prod.lendasdevaldoria.com.br';
+    } catch (_e) { /* noop */ }
+    return '';
+  }
+
+  function _fetchVersionLabel(el) {
+    var apiHost = _resolveApiHost();
+    if (!apiHost || typeof fetch !== 'function' || !el) return;
+    fetch(apiHost + '/api/webapp/version', { cache: 'no-store' })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) {
+        if (d && d.version_label && el) {
+          el.textContent = d.version_label;
+          el.classList.add('visible');
+          console.log('[INTRO_TITLE] version label: ' + d.version_label +
+            ' (n=' + d.n + ', dev_ahead=' + d.dev_ahead + ')');
+        }
+      })
+      .catch(function(e) {
+        console.warn('[INTRO_TITLE] version fetch failed (label oculto)', e);
+      });
+  }
+
   window.ValdoriaTitleScreen = function(opts) {
     opts = opts || {};
     var onStart = opts.onStart || function() {};
@@ -107,6 +147,12 @@
       var root = document.createElement('div');
       root.id = 'title-screen';
       root.className = 'title-screen' + tierClass;
+
+      /* Selo de versão (top-right) — preenchido async por _fetchVersionLabel;
+         invisível até o fetch resolver (classe .visible). */
+      var verEl = document.createElement('div');
+      verEl.className = 'title-version';
+      root.appendChild(verEl);
 
       /* Particles (embers rising) */
       var particles = document.createElement('div');
@@ -197,6 +243,9 @@
       _el = _buildDOM();
       document.body.appendChild(_el);
       console.log('[INTRO_TITLE] Title screen INJECTED into DOM (tier=' + tier + ')');
+
+      /* Selo de versão — async, nunca bloqueia o boot (R1, version-display-plan) */
+      _fetchVersionLabel(_el.querySelector('.title-version'));
 
       /* Tap handler — entire screen is clickable */
       _el.addEventListener('click', _onTap);

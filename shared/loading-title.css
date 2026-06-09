@@ -703,3 +703,31 @@
 @media (prefers-reduced-motion: reduce) {
   .title-dnd-badge { animation: none !important; opacity: 0.55 !important; }
 }
+
+/* ── Selo de versão (2026-06-09, version-display-plan) ──────────────
+   "vN.NN" no canto superior direito, SÓ na tela tap-to-start (R1).
+   Invisível até o fetch de /api/webapp/version resolver (.visible). */
+.title-version {
+  position: absolute;
+  /* HARDCODED env(): safe-area do notch — não há token equivalente */
+  top: calc(var(--v-space-md, 8px) + env(safe-area-inset-top, 0px));
+  right: var(--v-space-md, 8px);
+  z-index: 2;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: var(--v-font-xs, 10px);
+  color: var(--v-text-faint, #8a7a68);
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: opacity var(--v-transition-slow, 0.5s) ease;
+  pointer-events: none;
+}
+.title-version.visible { opacity: 0.7; }
+
+/* Saída: some rápido junto com o CTA */
+.title-screen.exit .title-version {
+  animation: titleCtaExit 0.3s ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-version { transition: none; }
+}
