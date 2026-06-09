@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T02:35:04Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T02:47:21Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14210,6 +14210,16 @@ function pickNpcAttackTarget(s, attackerIdx) {
             }
             return _pIdx;
         }
+        /* BUG FIX (#85): inimigos PREFEREM alvos NÃO-essenciais (o jogador) em vez
+           de aliados essenciais (ex.: Thorne no prólogo, clampado a 1 PV). Sem isto
+           os lobos miravam Thorne aleatoriamente e ele ficava "imortal" a 1/16.
+           Aliado essencial só vira alvo se for o ÚNICO restante (player caído). É
+           coerente: os lobos farejam o sangue novo do aventureiro. */
+        var _nonEssential = cand.filter(function (_ci) {
+            var _u = s.order[_ci];
+            return _u && !_u.essential;
+        });
+        if (_nonEssential.length) cand = _nonEssential;
         return cand[Math.floor(Math.random() * cand.length)];
     }
     if (attacker.t === 'a') {

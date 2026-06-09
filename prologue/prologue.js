@@ -359,6 +359,42 @@ function _sceneInjuredCompanion() {
 /* Cena INJURED COMPANION RESULT: mostra outcome narrativo apos a escolha
    de cura. Header com nome do NPC vivo (Brenn) ou Thorne dependendo do
    outcome. Choice unica avanca pra _sceneAftermath. */
+/* #85 (user): bloco de RECOMPENSA ÉPICO (PADRAO_ALDRIC) reutilizável p/ XP/
+   Valdoritas/itens — substitui o "+25 XP — título" tosco por uma apresentação
+   digna (header ornamentado + valores em Cinzel dourado). Renderizado como
+   narration HTML dentro do vEncounter. */
+function _epicRewardBlock(opts) {
+  opts = opts || {};
+  var rows = [];
+  if (opts.xp && opts.xp > 0) rows.push(['+' + opts.xp + ' XP', 'Experiência']);
+  if (opts.gold && opts.gold > 0) rows.push(['+' + opts.gold + ' Valdoritas', 'Tesouro']);
+  (opts.items || []).forEach(function (it) { if (it) rows.push([it, 'Item']); });
+  if (!rows.length) return '';
+  var inner = rows.map(function (r) {
+    return '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(21px * var(--v-font-scale,1));'
+      + 'font-weight:700;color:var(--v-gold,#c4953a);text-shadow:0 1px 0 rgba(0,0,0,0.6),0 0 14px rgba(196,149,58,0.45);'
+      + 'line-height:1.15;">' + r[0] + '</div>'
+      + '<div style="font-size:calc(10px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);'
+      + 'letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">' + r[1] + '</div>';
+  }).join('');
+  return '<div style="text-align:center;padding:10px 0;margin:6px 0;'
+    + 'border-top:1px solid rgba(196,149,58,0.30);border-bottom:1px solid rgba(196,149,58,0.30);'
+    + 'background:linear-gradient(180deg,rgba(196,149,58,0.08),transparent);">'
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale,1));'
+    + 'letter-spacing:3px;color:var(--v-gold,#c4953a);text-transform:uppercase;margin-bottom:5px;">&#9670; Recompensa &#9670;</div>'
+    + inner + '</div>';
+}
+
+/* #85 (user): remove segmentos de script VAZIOS (texto só whitespace/tags/aspas)
+   que viravam um "fundo de diálogo sem nada" (ex.: acima da fala do Thorne nos
+   portões, entre duas falas consecutivas). Defensivo p/ TODA cena PADRAO_ALDRIC. */
+function _filterEmptySegments(script) {
+  return (script || []).filter(function (s) {
+    return s && typeof s.text === 'string'
+      && s.text.replace(/<[^>]*>/g, '').replace(/[\s'"'']/g, '').length > 0;
+  });
+}
+
 function _sceneInjuredCompanionResult(result) {
   result = result || {};
   /* Parse narrativa: split em paragrafos pra narration / speech */
@@ -383,19 +419,21 @@ function _sceneInjuredCompanionResult(result) {
   } else {
     script.push({ type: 'narration', text: text });
   }
-  /* Append XP gain como narration final (se houver) */
-  if (result.xp && result.xp > 0) {
-    script.push({ type: 'narration', text: '<b>+' + result.xp + ' XP</b> — ' + (result.title || 'Ação concluída') });
+  /* #85 (user): recompensa ÉPICA (PADRAO_ALDRIC) em vez de "+25 XP — título" tosco. */
+  if ((result.xp && result.xp > 0) || (result.gold && result.gold > 0) || (result.items && result.items.length)) {
+    script.push({ type: 'narration', text: _epicRewardBlock({ xp: result.xp, gold: result.gold, items: result.items }) });
   }
+  /* #85: o NPC da cena é o Brenn (acorda) nos sucessos, ou Thorne (carrega) nas
+     falhas — NÃO o título do outcome (que ia no nome e ficava tosco). */
+  var _brennAwake = (result.outcome_key === 'magic_success' || result.outcome_key === 'potion'
+                     || result.outcome_key === 'firstaid_success');
   return {
     npc: {
-      name: result.title || 'Resultado',
-      desc: 'Brenn — aprendiz de Thorne',
-      /* 2026-06-08 (user): a cena de Primeiros Socorros e sobre o Brenn (aprendiz
-         caido), entao mostra o retrato do Brenn — antes usava o do Thorne. */
+      name: _brennAwake ? 'Brenn, Aprendiz' : 'Thorne, o Ferreiro',
+      desc: result.title || 'Aprendiz de Thorne',
       portrait: '/shared/img/npcs/brenn-aprendiz.webp'
     },
-    script: script,
+    script: _filterEmptySegments(script),
     choices: [
       { id: 'continuar', label: '▸ Seguir para Valdoria', cb: '__local_companion_result_done' }
     ]
@@ -447,7 +485,7 @@ function _sceneAftermath() {
       desc: 'Salvo dos lobos, agradecido',
       portrait: '../shared/img/npcs/thorne-armeiro.webp'
     },
-    script: script,
+    script: _filterEmptySegments(script),
     choices: [
       { id: 'continuar', label: '🏰 Seguir para os Portões', cb: '__local_aftermath_done' }
     ]
@@ -616,8 +654,13 @@ async function onCompanionHealChoice(key) {
     /* 2026-06-08 (user): se houve rolagem (Primeiros Socorros / Magia de Cura),
        mostra o d20 3D + resultado ANTES da cena (PADRAO 3D Dice); senao vai direto. */
     var _renderOutcome = function () { _renderScene(function () { return _sceneInjuredCompanionResult(result); }); };
-    if (result.rolled) { _showSkillDiceThen(result.rolled, _renderOutcome); }
-    else { _renderOutcome(); }
+    if (result.rolled) {
+      /* #85 (user): a rolagem de dados NÃO aparecia (Magia de Cura) porque o
+         vEncounter ficava POR CIMA do dice overlay. Fecha o encounter ANTES de
+         rolar (mesmo padrão do doDistract) → o d20 3D aparece 100% das vezes. */
+      if (typeof vEncounter !== 'undefined' && vEncounter.close) vEncounter.close();
+      _showSkillDiceThen(result.rolled, _renderOutcome);
+    } else { _renderOutcome(); }
   } catch (e) {
     _brennChoiceMade = false;
     showError('Erro ao curar aprendiz.', e);
