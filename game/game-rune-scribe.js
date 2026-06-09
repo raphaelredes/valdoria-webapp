@@ -48,10 +48,10 @@ var THESSIL_DIALOGUE = {
     // Antes: 'rune_craft'/'rune_inspect'/'rune_learn' → não dispatched (silent close).
     // Agora: 'rune_scribe_menu' (hub), 'rune_scribe_catalog' (lista runas),
     // 'rune_scribe_intro_1' (tutorial). Backend canonical handlers.
-    { id: 'craft',   label: '🔮 "Quero forjar runas."', cb: 'rune_scribe_menu' },
-    { id: 'catalog', label: '📜 "Mostra o catálogo de runas."', cb: 'rune_scribe_catalog' },
-    { id: 'learn',   label: '✨ "Ensina-me sobre os glifos."', cb: 'rune_scribe_intro_1' },
-    { id: 'leave',   label: '↩ "Volto outra hora, Mestre."', cb: 'close' }
+    { id: 'craft',   label: '"Quero forjar runas."', cb: 'rune_scribe_menu' },
+    { id: 'catalog', label: '"Mostra o catálogo de runas."', cb: 'rune_scribe_catalog' },
+    { id: 'learn',   label: '"Ensina-me sobre os glifos."', cb: 'rune_scribe_intro_1' },
+    { id: 'leave',   label: '"Volto outra hora, Mestre."', cb: 'close' }
   ]
 };
 

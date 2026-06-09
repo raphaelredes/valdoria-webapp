@@ -78,8 +78,8 @@ var MERCHANT_NPCS_MARKET = {
       { type: 'speech', speaker: 'Thorne', text: 'Tudo do meu estoque corta osso sem entortar. <i>(ergue uma espada longa)</i> Adaga, cinco. Espada longa, vinte. Machado de duas mãos, trinta. Sem desconto.' }
     ],
     choices: [
-      { id: 'weapons', label: '⚔ Ver inventário de armas', cb: 'market_interact_menu_blacksmith' },
-      { id: 'leave',   label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'weapons', label: 'Ver inventário de armas', cb: 'market_interact_menu_blacksmith' },
+      { id: 'leave',   label: '"Outra hora."', cb: 'close' }
     ]
   },
   mirena: {
@@ -91,8 +91,8 @@ var MERCHANT_NPCS_MARKET = {
       { type: 'speech', speaker: 'Mirena', text: 'Couro batido, dez Valdoritas. Cota de malha, cinquenta. Peitoral de bronze, cento e cinquenta. <i>(toca seu braço pra estimar tamanho)</i> Sob medida, sai pelo dobro. Mas dura o triplo.' }
     ],
     choices: [
-      { id: 'armor', label: '🛡 Ver armaduras disponíveis', cb: 'market_interact_menu_alchemist' },
-      { id: 'leave', label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'armor', label: 'Ver armaduras disponíveis', cb: 'market_interact_menu_alchemist' },
+      { id: 'leave', label: '"Outra hora."', cb: 'close' }
     ]
   },
   velithra: {
@@ -104,8 +104,8 @@ var MERCHANT_NPCS_MARKET = {
       { type: 'speech', speaker: 'Velithra', text: 'Cura simples, vinte e cinco Valdoritas. Antídoto, quarenta. Heroísmo temporário, oitenta. <i>(ergue um frasco roxo)</i> Esta… só tu sabes pra que serve. Cento e vinte, sem perguntas.' }
     ],
     choices: [
-      { id: 'potions', label: '🧪 Ver poções', cb: 'market_interact_menu_jeweler' },
-      { id: 'leave',   label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'potions', label: 'Ver poções', cb: 'market_interact_menu_jeweler' },
+      { id: 'leave',   label: '"Outra hora."', cb: 'close' }
     ]
   },
   corvus: {
@@ -117,8 +117,8 @@ var MERCHANT_NPCS_MARKET = {
       { type: 'speech', speaker: 'Corvus', text: 'Livro comum, dez Valdoritas. Tomo raro, cinquenta. Pergaminho mágico, varia muito. <i>(toca uma lombada gasta)</i> Tenho dois grimórios menores, se Vossa Senhoria for mago e tiver aval do Escriba Thessil.' }
     ],
     choices: [
-      { id: 'books', label: '📚 Ver livros e tomos', cb: 'market_interact_menu_cartographer' },
-      { id: 'leave', label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'books', label: 'Ver livros e tomos', cb: 'market_interact_menu_cartographer' },
+      { id: 'leave', label: '"Outra hora."', cb: 'close' }
     ]
   },
   bjorn: {
@@ -130,8 +130,8 @@ var MERCHANT_NPCS_MARKET = {
       { type: 'speech', speaker: 'Bjorn', text: 'Pão fresco, três cobres. Queijo curado, uma Valdorita. Ração de viagem (sete dias), cinco. <i>(corta o queijo num gesto rápido)</i> Prova primeiro — se não gostar, não vendo. Honestidade é meu único capital.' }
     ],
     choices: [
-      { id: 'food',  label: '🍞 Ver mantimentos', cb: 'market_interact_menu_tentmaker' },
-      { id: 'leave', label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'food',  label: 'Ver mantimentos', cb: 'market_interact_menu_tentmaker' },
+      { id: 'leave', label: '"Outra hora."', cb: 'close' }
     ]
   },
   garlen: {
@@ -143,8 +143,8 @@ var MERCHANT_NPCS_MARKET = {
       { type: 'speech', speaker: 'Garlen', text: 'Mapas variam por região. <i>(consulta o estoque)</i> Floresta Esquecida, vinte. Montanhas do Norte, cinquenta. Masmorra Antiga (com armadilhas marcadas), cento e vinte. Contratos antigos, valor negociado.' }
     ],
     choices: [
-      { id: 'maps',  label: '🗺 Ver mapas disponíveis', cb: 'market_interact_menu_cartographer' },
-      { id: 'leave', label: '↩ "Outra hora."', cb: 'close' }
+      { id: 'maps',  label: 'Ver mapas disponíveis', cb: 'market_interact_menu_cartographer' },
+      { id: 'leave', label: '"Outra hora."', cb: 'close' }
     ]
   }
 };
