@@ -44702,7 +44702,10 @@ function _renderCityPopup(key){
   }
   if (key === 'market' && typeof renderMarketHub === 'function') {
     if (titleEl) titleEl.textContent = 'Mercado de Valdoria';
-    renderMarketHub(bodyEl, _buildMarketMockData(window.CITY_MOCK_PLAYER));
+    var _showMarket = function(){ renderMarketHub(bodyEl, _buildMarketMockData(window.CITY_MOCK_PLAYER)); };
+    // #12: 1ª visita pós-prólogo → welcome do Thorne (server decide); senão abre a loja.
+    if (typeof _marketWelcomeThenShop === 'function') _marketWelcomeThenShop(_showMarket);
+    else _showMarket();
     return;
   }
   if (key === 'guild' && typeof renderGuildHub === 'function') {
@@ -51780,6 +51783,37 @@ function _applyHudFromDialogue(d){
   if (typeof window.refreshHud === 'function') { try { window.refreshHud(); } catch(_){} }
 }
 window._openCityDialogue = _openCityDialogue;
+
+// #12 (sessão #85): 1ª visita ao Mercado pós-prólogo → welcome do Thorne + Brenn.
+// SUPREME RULE #0: o SERVIDOR decide (flag pending_market_welcome via dialogue.get) e
+// aplica o reward (dialogue.choice → dynamic market_welcome_claim). O cliente só
+// pergunta "tem welcome?", renderiza via vEncounter, posta o choice_id, depois abre a
+// loja. Se não houver welcome (já visto / não-remote), abre a loja direto.
+function _marketWelcomeThenShop(showMarket){
+  var done = false;
+  var _go = function(){ if (done) return; done = true; try { showMarket(); } catch(_){} };
+  if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && window.vEncounter && window.vEncounter.render)) { _go(); return; }
+  window.vCityServer.cityAction('dialogue.get', { venue: 'market', node: 'welcome' }).then(function(data){
+    if (!data || !data.ok || !data.choices) { _go(); return; }
+    var p = window.CITY_MOCK_PLAYER || null;
+    window.vEncounter.render(
+      { npc: data.npc, script: data.script, choices: data.choices },
+      { player: p, closeable: false, onChoice: function(ch){
+          window.vCityServer.cityAction('dialogue.choice', { venue: 'market', node: 'welcome', choice_id: (ch && ch.id) || 'accept' }).then(function(res){
+            if (res && res.ok && typeof _applyHudFromDialogue === 'function') _applyHudFromDialogue(res);
+            if (res && res.ok && res.result_script && window.vEncounter && window.vEncounter.render) {
+              window.vEncounter.render(
+                { npc: res.npc || data.npc, script: res.result_script, choices: [{ id: 'done', label: '🏪 Entrar no Mercado' }] },
+                { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} _go(); } }
+              );
+            } else { try { window.vEncounter.close(); } catch(_){} _go(); }
+          }).catch(function(){ try { window.vEncounter.close(); } catch(_){} _go(); });
+      } }
+    );
+  }).catch(function(){ _go(); });
+}
+window._marketWelcomeThenShop = _marketWelcomeThenShop;
 
 // PADRAO_LOCAIS — efeitos temporários ATIVOS (até descanso longo) p/ ficha + card.
 // Mapeia chaves de player.temp_bonuses → label legível. Server é a autoridade
