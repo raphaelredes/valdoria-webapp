@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-08T20:54:16Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T02:35:04Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -12552,9 +12552,11 @@ window.ReinforceSkills = (function () {
         if (!attacker || !s) return false;
         if (!attacker.isBoss) return false;
         if (attacker._bossSummonUsed) return false;
-        if (!attacker.hp || !attacker.hpMax) return false;
+        if (!attacker.hp || !attacker.mhp) return false;
 
-        var hpPct = (attacker.hp / attacker.hpMax) * 100;
+        // BUG FIX (#85): inimigos/bosses usam `mhp` (não `hpMax`) → sem isto o
+        // boss NUNCA invocava aliados (gate de <50% PV nunca disparava).
+        var hpPct = (attacker.hp / attacker.mhp) * 100;
         if (hpPct >= 50) return false;
 
         /* Tenta queue */
@@ -24453,7 +24455,9 @@ function applyAllySpellImpact(dart, s, targetEl, skill, themeKey, srcRect) {
                     return total;
                 })();
                 var oldH = u.hp;
-                var maxH = u.hpMax || (u.hp + healAmount);
+                // BUG FIX (#85): player/aliado usam `mhp` (não `hpMax`); sem isto
+                // o cap caía em (hp+heal) = SEM cap → cura ultrapassava o PV máx (13/10).
+                var maxH = u.mhp || u.hpMax || (u.hp + healAmount);
                 u.hp = Math.min(maxH, oldH + healAmount);
                 healed.push(u.n + ' (+' + (u.hp - oldH) + ' PV)');
             }
@@ -24488,7 +24492,9 @@ function applyAllySpellImpact(dart, s, targetEl, skill, themeKey, srcRect) {
     // Aplica efeito por tipo (single target):
     if (themeKey === 'holy' && dart.dmg > 0) {
         var oldHp = t.hp;
-        var newHp = Math.min(t.hpMax || t.hp + dart.dmg, oldHp + dart.dmg);
+        // BUG FIX (#85): `mhp` é o campo canônico de PV máx (não `hpMax`) → Palavra
+        // de Cura etc. cap correto, sem ultrapassar (era 13/10).
+        var newHp = Math.min(t.mhp || t.hpMax || (t.hp + dart.dmg), oldHp + dart.dmg);
         t.hp = newHp;
         /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — heal single-target
            com breakdown: "Cura [1d8: 5]+3 = 8 PV em Bardo." */
