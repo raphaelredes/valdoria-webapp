@@ -46907,13 +46907,23 @@ var ACTION_HANDLERS = {
     };
     var _abilityToStat = { 'intelligence': 'INT', 'wisdom': 'SAB', 'charisma': 'CAR', 'strength': 'FOR', 'dexterity': 'DEX', 'constitution': 'CON' };
     var _checkToSkill  = { 'religion': 'Religião', 'medicine': 'Medicina', 'persuasion': 'Persuasão', 'investigation': 'Investigação', 'insight': 'Intuição' };
+    // Backlog item 5 (sessão #85): tela épica — imagem WebP por serviço (NUNCA
+    // emoji), banner-cenário do templo. Oração reusa svc-orar.webp; cuidar/sermão
+    // são WebP OpenAI low dedicados.
+    var _svcRelImg = { 'prayer': 'svc-orar.webp', 'tending': 'svc-cuidar-feridos.webp', 'sermon': 'svc-sermao.webp' };
+    var _svcRelV = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
+    function _svcRelIco(id){
+      var f = _svcRelImg[id] || 'svc-orar.webp';
+      return '<img src="/shared/img/services/' + f + '?v=' + _svcRelV + '" alt="" '
+        + 'style="width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));">';
+    }
     var services;
     if (canonSvc && canonSvc.length) {
       services = canonSvc.map(function(cs){
         var meta = _svcMeta[cs.id] || {};
         return {
           id: cs.id,
-          icon: cs.emoji || meta.icon || '🙏',
+          icon: _svcRelIco(cs.id),
           label: cs.name || meta.label,
           stat: _abilityToStat[cs.ability] || meta.stat || 'INT',
           skill: _checkToSkill[cs.check_type] || meta.skill || 'Religião',
@@ -46923,16 +46933,18 @@ var ACTION_HANDLERS = {
       });
     } else {
       services = [
-        { id: 'prayer',  icon: _heralIco('ic-mochila'), label: 'Oração Comunitária', stat: 'INT', skill: 'Religião',   dc: 12, narrative: _svcMeta.prayer.narrative },
-        { id: 'tending', icon: _heralIco('ic-mochila'), label: 'Cuidar dos Feridos', stat: 'SAB', skill: 'Medicina',   dc: 12, narrative: _svcMeta.tending.narrative },
-        { id: 'sermon',  icon: _heralIco('ic-mochila'), label: 'Sermão Inspirador',  stat: 'CAR', skill: 'Persuasão',  dc: 12, narrative: _svcMeta.sermon.narrative }
+        { id: 'prayer',  icon: _svcRelIco('prayer'),  label: 'Oração Comunitária', stat: 'INT', skill: 'Religião',   dc: 12, narrative: _svcMeta.prayer.narrative },
+        { id: 'tending', icon: _svcRelIco('tending'), label: 'Cuidar dos Feridos', stat: 'SAB', skill: 'Medicina',   dc: 12, narrative: _svcMeta.tending.narrative },
+        { id: 'sermon',  icon: _svcRelIco('sermon'),  label: 'Sermão Inspirador',  stat: 'CAR', skill: 'Persuasão',  dc: 12, narrative: _svcMeta.sermon.narrative }
       ];
     }
     var items = services.map(function(s){
-      return { icon: s.icon, label: s.label, badge: s.skill + ' DC ' + s.dc, _s: s };
+      return { icon: s.icon, label: s.label, desc: 'Perícia ' + s.skill + ' · ' + s.stat, badge: 'DC ' + s.dc, _s: s };
     });
     _squareShowListPopup({
-      stackKey: 'temple_downtime', icon: _heralIco('ic-mochila'), title: 'Serviço Religioso',
+      stackKey: 'temple_downtime', title: 'Serviço Religioso',
+      subtitle: 'Santuário de Valdoria',
+      bannerImg: '/shared/img/templo/templo-banner.webp',
       flavor: '<i>Os sacerdotes oferecem três formas de servir hoje. Escolha conforme suas habilidades — cada uma testa uma perícia diferente. </i>',
       items: items,
       onPick: function(item){
