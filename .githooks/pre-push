@@ -1,0 +1,40 @@
+#!/bin/sh
+# ============================================================================
+# pre-push hook — TRAVA TÉCNICA: bloqueia push para o branch `prod` (PROD do
+# frontend → jogo.lendasdevaldoria.com.br) a menos que a flag de deploy HUMANO
+# esteja setada (VALDORIA_PROD_DEPLOY=1).
+#
+# Regra do user (sessão #86): agentes de IA desenvolvem/corrigem no DEV
+# (branch `main` → dev.lendasdevaldoria.com.br) e NUNCA podem afetar PROD.
+# Só UMA intervenção HUMANA MANUAL (o botão Deploy da GUI, que seta a flag)
+# promove `main`->`prod`. Isto é uma trava DE VERDADE, não só uma regra: mesmo
+# que um agente rode `git push origin prod` por engano, é REJEITADO aqui.
+#
+# Ativação: `git config core.hooksPath .githooks` (rode scripts/setup_git_guardrails
+# no repo principal, ou o comando direto no valdoria-webapp/). Tracked em
+# .githooks/ pra sobreviver e ser versionado.
+# ============================================================================
+
+protected="refs/heads/prod"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    if [ "$remote_ref" = "$protected" ]; then
+        if [ "${VALDORIA_PROD_DEPLOY:-0}" != "1" ]; then
+            echo "" 1>&2
+            echo "================================================================" 1>&2
+            echo " BLOQUEADO: push para o branch 'prod' (PROD = jogo.lendasdevaldoria.com.br)." 1>&2
+            echo "" 1>&2
+            echo " Agentes de IA desenvolvem no branch 'main' (DEV = dev.lendasdevaldoria.com.br)." 1>&2
+            echo " PROD so atualiza por INTERVENCAO HUMANA MANUAL (botao Deploy da GUI)." 1>&2
+            echo " O Deploy seta VALDORIA_PROD_DEPLOY=1 e faz o merge main->prod com seguranca." 1>&2
+            echo "" 1>&2
+            echo " Se voce e humano e quer promover de proposito fora da GUI:" 1>&2
+            echo "   VALDORIA_PROD_DEPLOY=1 git push origin prod" 1>&2
+            echo "================================================================" 1>&2
+            echo "" 1>&2
+            exit 1
+        fi
+    fi
+done
+
+exit 0
