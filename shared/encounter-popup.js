@@ -1101,12 +1101,15 @@
     /* Dispatch único usado por renderActions (closure sobre dialogue + opts). */
     function _handleChoiceInternal(ch) {
       closeChoices(); /* fecha sub-overlay antes de dispatch */
-      /* sessão #76: diálogos de ALIADO (npc.id 'ally_*') marcam a pergunta como
-         USADA ao escolher — mesmo em falha de skill check → não reaparece. NPCs
+      /* sessão #76: diálogos de ALIADO (npc.id 'ally_*') marcam a pergunta de
+         LORE como USADA ao escolher — mesmo em falha de skill check → não
+         reaparece. B2.2 #90: SÓ marca choices `_oneShot` (perguntas de lore);
+         a choice de skill e o "Sair" NÃO são marcadas → ficam sempre
+         disponíveis, então o aliado nunca vira mudo ('Fechar'-only). NPCs
          normais já fazem seu próprio tracking; este guard é só pra allies. */
       if (dialogue && dialogue.npc && typeof dialogue.npc.id === 'string'
           && dialogue.npc.id.indexOf('ally_') === 0
-          && ch && ch.id && typeof window._npcMarkUsed === 'function') {
+          && ch && ch.id && ch._oneShot && typeof window._npcMarkUsed === 'function') {
         try { window._npcMarkUsed(dialogue.npc.id, ch.id); } catch(_e) {}
       }
       /* Sessao #29 (2026-05-24): ally_source dispara backend apply-effect.

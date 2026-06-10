@@ -49032,13 +49032,22 @@ function _showAllyDialogue(idx){
     // sessão #76: só perguntas AINDA NÃO usadas — uma pergunta concluída (mesmo em
     // FALHA de skill check) NUNCA mais reaparece. _npcMarkUsed roda em
     // _handleChoiceInternal (encounter-popup.js) ao escolher.
+    /* B2.2 #90: só perguntas de LORE são one-shot (somem após perguntar uma
+       vez — narrativamente correto). A choice de skill-check e o "Sair" são
+       RENOVÁVEIS (sem `check`/id 'leave') → ficam SEMPRE disponíveis, então o
+       aliado NUNCA vira mudo ('Fechar'-only) após esgotar as perguntas de lore.
+       Bug original: encounter-popup.js marcava QUALQUER choice (incl leave)
+       como usada → após ~4 cliques o aliado renderizava só a intro + Fechar. */
     choices: (tpl.choices || []).filter(function(c){
-      return typeof _npcIsUsed !== 'function' || !_npcIsUsed(_allyNpcId, c.id);
+      var oneShot = (c.id !== 'leave' && !c.check);
+      // skill/leave: sempre passam. lore: só se ainda não foi perguntada.
+      return !oneShot || typeof _npcIsUsed !== 'function' || !_npcIsUsed(_allyNpcId, c.id);
     }).map(function(c){
       return {
         id: c.id,
         label: _personalize(c.label),
         cb: c.cb || 'close',
+        _oneShot: (c.id !== 'leave' && !c.check),
         renownDelta: c.renown,
         resultNarration: _personalize(c.resultNarration),
         resultText: _personalize(c.resultText),
