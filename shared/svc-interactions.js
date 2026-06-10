@@ -84,7 +84,13 @@
     var p = window.CITY_MOCK_PLAYER || {};
     var stats = p.stats || {};
     var ability = (opts.ability||'').toLowerCase();
-    var abilityStat = _SKILL_TO_ABILITY[ability] || ability;
+    // A1.7 (auditoria #90): delega ao canônico DndRules.SKILL_TO_ABILITY_FULL
+    // (skill -> 'wisdom'; cobre também keys curtas 'wis' e o alias
+    // sleight_of_hand que o mapa local não tinha). Fallback local pros
+    // mockups standalone (simuladores/*-final.html) que não carregam DndRules.
+    var abilityStat = (window.DndRules && window.DndRules.SKILL_TO_ABILITY_FULL
+                       && window.DndRules.SKILL_TO_ABILITY_FULL[ability])
+                      || _SKILL_TO_ABILITY[ability] || ability;
     var statShort = { strength:'str', dexterity:'dex', constitution:'con',
                       intelligence:'int', wisdom:'wis', charisma:'cha' }[abilityStat] || abilityStat;
     var score = stats[statShort] || stats[abilityStat] || 10;

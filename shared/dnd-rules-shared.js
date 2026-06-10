@@ -49,6 +49,8 @@
  *   STAT_NAMES_PT, STAT_FULL, SKILL_TO_ABILITY, CLASS_STAT_MAP, CLASS_SAVE_PROFS
  *   ABILITY_NAMES_PT (strength->Força), SKILL_NAMES_PT (18 perícias PHB PT-BR;
  *     animal_handling='Lidar com Animais' — decisão A1.4, fonte única de label)
+ *   SKILL_TO_ABILITY_FULL (A1.7: skill -> 'wisdom' nome completo; derivado de
+ *     SKILL_TO_ABILITY+STAT_FULL — só lookup, não enumerar)
  *
  * check = { stat?, skill?, dc }  — journey passa {stat}; tile-event passa {skill}.
  *   Se só vier skill, o atributo é derivado via SKILL_TO_ABILITY. SEMPRE a mesma
@@ -145,6 +147,21 @@
         wis: 'wis', animal: 'wis', animal_handling: 'wis', insight: 'wis', medicine: 'wis', perception: 'wis', survival: 'wis',
         cha: 'cha', deception: 'cha', intimidation: 'cha', performance: 'cha', persuasion: 'cha'
     };
+
+    // A1.7 (auditoria #90): skill -> nome COMPLETO do atributo ('wisdom').
+    // Derivado de SKILL_TO_ABILITY + STAT_FULL (cobre aliases animal/sleight e
+    // passthroughs str->strength). Consumidores que leem player.stats keyed
+    // por nome completo (svc _SKILL_TO_ABILITY, creator SKILL_ATTR) delegam a
+    // este em vez de duplicar o mapa. SÓ lookups — não enumerar (superset:
+    // 18 skills + 2 aliases + 6 atributos curtos).
+    var SKILL_TO_ABILITY_FULL = (function () {
+        var out = {};
+        for (var k in SKILL_TO_ABILITY) {
+            var full = STAT_FULL[SKILL_TO_ABILITY[k]];
+            if (full) out[k] = full;
+        }
+        return out;
+    })();
 
     // Array PHB padrão por classe (prioridade de atributo). Base = cidade
     // _statBaseForClass CLASS_STAT_MAP (rica, 12 classes). Keyed por ASCII PT.
@@ -419,6 +436,7 @@
         STAT_FULL: STAT_FULL,
         STAT_KEY_PT: STAT_KEY_PT,
         SKILL_TO_ABILITY: SKILL_TO_ABILITY,
+        SKILL_TO_ABILITY_FULL: SKILL_TO_ABILITY_FULL,
         CLASS_STAT_MAP: CLASS_STAT_MAP,
         CLASS_SAVE_PROFS: CLASS_SAVE_PROFS
     };
