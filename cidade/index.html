@@ -16833,7 +16833,10 @@ function _buildTempleMockData(player){
     flavor: (function(){
       var visits = (player.metadata && player.metadata.temple_visits) || 0;
       var pool = visits >= 4 ? TEMPLE_AMBIENT : TEMPLE_FLAVORS;
-      return pool[Math.floor(Math.random() * pool.length)];
+      // B1.7 #90: anti-repeat — sem reler o mesmo ambient 2 visitas seguidas
+      window._cityFlavorHeard = window._cityFlavorHeard || {};
+      return _pickNonRepeating(visits >= 4 ? 'temple_ambient' : 'temple_flavor',
+        pool, window._cityFlavorHeard) || pool[0];
     })(),
     debt: debt,
     gold: player.gold,
@@ -16940,7 +16943,10 @@ function _buildTavernMockData(player){
   // canonical: TAVERN_FLAVORS rotaciona por rep tier
   var tier = _tavernRepTier(player);
   var flavorPool = TAVERN_FLAVORS[tier] || TAVERN_FLAVORS.neutral;
-  var flavorText = flavorPool[Math.floor(Math.random() * flavorPool.length)];
+  // B1.7 #90: anti-repeat por tier de reputação
+  window._cityFlavorHeard = window._cityFlavorHeard || {};
+  var flavorText = _pickNonRepeating('tavern_flavor_' + tier, flavorPool,
+    window._cityFlavorHeard) || flavorPool[0];
   return {
     type: 'hub',
     flavor: '<i>' + flavorText + '</i>',
@@ -21553,8 +21559,12 @@ function _pickNonRepeating(poolKey, items, trackingObj){
   if (!items || !items.length) return null;
   trackingObj[poolKey] = trackingObj[poolKey] || [];
   var heard = trackingObj[poolKey];
-  // Reset quando todas usadas
+  // Reset quando todas usadas — guardando a ÚLTIMA usada pra NÃO repetir o
+  // mesmo item 2x seguidas na virada do ciclo (B1.5 #90; espelha a exclusão
+  // do último que o npc_lines.pick_line do servidor já fazia).
+  var lastUsed = null;
   if (heard.length >= items.length){
+    lastUsed = heard[heard.length - 1] || null;
     trackingObj[poolKey] = [];
     heard = trackingObj[poolKey];
   }
@@ -21562,7 +21572,9 @@ function _pickNonRepeating(poolKey, items, trackingObj){
   var available = [];
   for (var i = 0; i < items.length; i++){
     var key = (typeof items[i] === 'string') ? items[i] : (items[i].id || JSON.stringify(items[i]));
-    if (heard.indexOf(key) === -1) available.push({ item: items[i], key: key, idx: i });
+    if (heard.indexOf(key) === -1 && !(lastUsed !== null && key === lastUsed && items.length > 1)){
+      available.push({ item: items[i], key: key, idx: i });
+    }
   }
   if (!available.length) return items[0]; // safety
   var pick = available[Math.floor(Math.random() * available.length)];
@@ -41003,7 +41015,10 @@ function _marketNpcLine(npcKey, action, cat){
   var npc = MARKET_NPC_REACTIONS[npcKey] || MARKET_NPC_REACTIONS.generic;
   var actionPool = npc[action] || {};
   var pool = actionPool[cat] || actionPool.generic || ['<i>O mercador aceita em silêncio.</i>'];
-  return pool[Math.floor(Math.random() * pool.length)];
+  // B1.9 #90: anti-repeat por NPC+ação+categoria (loop de venda é muito frequente)
+  window._marketReactHeard = window._marketReactHeard || {};
+  return _pickNonRepeating(npcKey + ':' + action + ':' + (cat || 'generic'),
+    pool, window._marketReactHeard) || pool[0];
 }
 
 // Atmosfera de entrada no mercado — varia com hora do dia (CITY_MOCK_TIME ou _squarePeriodKey)
@@ -41029,7 +41044,9 @@ function _marketAtmosphereLine(){
     ]
   };
   var pool = pools[period] || pools.day;
-  return pool[Math.floor(Math.random() * pool.length)];
+  // B1.9 #90: anti-repeat por período do dia
+  window._marketAtmoHeard = window._marketAtmoHeard || {};
+  return _pickNonRepeating('atmo_' + period, pool, window._marketAtmoHeard) || pool[0];
 }
 // =============================================================================
 // END MARKET AAA SYSTEM
@@ -42910,7 +42927,10 @@ function _shadowBuyItem(p, item){
                       ? canonBM[canonKey]
                       : (canonBM && canonBM._default && canonBM._default.length ? canonBM._default : null);
       var flavorPool = canonPool || SHADOW_PURCHASE_FLAVORS[item.id] || SHADOW_PURCHASE_FLAVORS['_default'];
-      var flavor = flavorPool[Math.floor(Math.random() * flavorPool.length)];
+      // B1.9 #90: anti-repeat por item comprado no Beco
+      window._shadowFlavorHeard = window._shadowFlavorHeard || {};
+      var flavor = _pickNonRepeating('shadow_' + item.id, flavorPool,
+        window._shadowFlavorHeard) || flavorPool[0];
       var deltas = [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }];
       var narrative = flavor + '<br><br><b>' + item.name + '</b> adicionado à bolsa.';
       // Caixa Misteriosa: rola loot canonical
@@ -43290,7 +43310,17 @@ function _registerDynamicHandlers(){
   // inn_cellar_quest agora entra direto no encounter da cellar (com choices
   // accept/decline ativando _acceptQuest('cellar')).
   ACTION_HANDLERS['inn_npc_inn_martha'] = function(p){
-    _openMarthaDialogue(p, 'greeting');
+    /* B1.4 (#90): em sessão REMOTE o card da Martha abre o diálogo
+       SERVER-DRIVEN rotativo (PADRAO_SERVIDOR — saudação/sub-nodes/resultados
+       anti-repeat + estado vivo de preços/cardápio). O caminho client-side
+       legado (_openMarthaDialogue: 1 fala fixa por tier de reputação,
+       sub-diálogos de string única) vira fallback LOCAL (file://). */
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && typeof window._openCityDialogue === 'function') {
+      window._openCityDialogue('inn', 'martha', p);
+    } else {
+      _openMarthaDialogue(p, 'greeting');
+    }
     // 2026-05-21: spoiler gating — converse com Martha desbloqueia cellar quest no Diary
     if (typeof window._markQuestsAsSeen === 'function') window._markQuestsAsSeen('inn_martha');
   };
@@ -47068,7 +47098,9 @@ var ACTION_HANDLERS = {
     // canonical: tavern_flavor_texts.py GROM_INTERACT (5 tiers de reputação)
     var tier = _tavernRepTier(p);
     var pool = TAVERN_GROM_INTERACT[tier] || TAVERN_GROM_INTERACT.neutral;
-    vToast(pool[Math.floor(Math.random() * pool.length)]);
+    // B1.9 #90: Grom não repete a mesma frase em 2 cliques seguidos
+    window._gromInteractHeard = window._gromInteractHeard || {};
+    vToast(_pickNonRepeating('grom_' + tier, pool, window._gromInteractHeard) || pool[0]);
   },
   'tavern_bard':            function(p){ vToast('🎵 O bardo entoa "A Balada de Valdrak". +1 morale por 2 horas.'); _gainXp(p, 5); },
   'tavern_blackmarket':     function(p){ var hour = new Date().getHours(); if (hour < 20 && hour > 6) { vToast('🌑 Beco Sombrio fechado. O Vulto só atende à noite (20h-6h).'); return; } navigateTo('shadow_alley'); },
@@ -49672,7 +49704,10 @@ var CITY_JOURNEY_DEPARTURES = (window.JourneyData && JourneyData.DEPARTURES) || 
 
 function _pickCityDeparture(biome) {
   var pool = CITY_JOURNEY_DEPARTURES[biome] || CITY_JOURNEY_DEPARTURES.forest;
-  return pool[Math.floor(Math.random() * pool.length)];
+  // B1.8 #90: anti-repeat — "Rumo a..." não repete a mesma cena 2 viagens seguidas
+  window._cityFlavorHeard = window._cityFlavorHeard || {};
+  return _pickNonRepeating('journey_departure_' + biome, pool,
+    window._cityFlavorHeard) || pool[0];
 }
 
 var _cityJourney = null;
