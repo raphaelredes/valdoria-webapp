@@ -229,22 +229,52 @@
             } else {
               _closeEncounterCanon();
             }
-          } else if (opts.ch && (opts.ch.resultNarration || opts.ch.resultText)) {
-            // Mostra narrativa de resultado (success/fail) como popup curto
-            var rNarration = success ? (opts.ch.resultNarration || '') : (opts.ch.resultNarrationFail || opts.ch.resultNarration || '');
-            var rText = success ? (opts.ch.resultText || '') : (opts.ch.resultTextFail || opts.ch.resultText || '');
+          } else {
+            /* A3.5 (#90): NUNCA fechar MUDO. Antes, choice de dado sem
+               resultNarration/resultText fazia rolagem → Continuar → o
+               encounter sumia sem mostrar nada (bug sessão #76 do banco,
+               generalizado — 12 choices mudas em produção). E na FALHA, o
+               fallback usava a narração de SUCESSO (desonesto). Agora:
+               campos do resultado certo quando existem; senão, default
+               HONESTO na voz do NPC reusando _SVC_CONFIG.reactions (mesmo
+               pool do opinion-*), mapeado pelo delta de Renome. */
+            var rNarration = '', rText = '';
+            if (opts.ch && success && (opts.ch.resultNarration || opts.ch.resultText)) {
+              rNarration = opts.ch.resultNarration || '';
+              rText = opts.ch.resultText || '';
+            } else if (opts.ch && !success && (opts.ch.resultNarrationFail || opts.ch.resultTextFail)) {
+              rNarration = opts.ch.resultNarrationFail || '';
+              rText = opts.ch.resultTextFail || '';
+            } else {
+              var _reactions = (window._SVC_CONFIG && window._SVC_CONFIG.reactions) || {};
+              var _rkey = deltaR >= 3 ? 'very_positive' : deltaR > 0 ? 'positive'
+                : deltaR <= -2 ? 'very_negative' : deltaR < 0 ? 'negative' : 'neutral';
+              rText = _reactions[_rkey] || (success
+                ? 'O olhar diante de ti se ilumina — a sorte sorriu desta vez.'
+                : 'Um aceno breve encerra o assunto. Não foi desta vez.');
+            }
+            var _npcObj = (opts.dialogue && opts.dialogue.npc) || null;
+            var _npcName = (_npcObj && _npcObj.name) || '';
             _closeEncounterCanon();
             if (typeof window._showInfoPopup === 'function') {
               window._showInfoPopup({
                 icon: '',
-                npc: (opts.dialogue && opts.dialogue.npc && opts.dialogue.npc.name) || '',
+                npc: _npcName,
                 title: success ? 'Sucesso' : 'Falha',
                 desc: (rNarration ? '<i style="color:var(--v-text-dim,#a09484);">' + rNarration + '</i><br><br>' : '') + rText,
                 onConfirm: function(){}
               });
+            } else if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+              // Fallback fora da cidade (_showInfoPopup é cidade-only)
+              window.vEncounter.render({
+                npc: _npcObj || { name: _npcName },
+                script: (rNarration ? [{ type: 'narration', text: rNarration }] : [])
+                  .concat([{ type: 'narration', text: rText }]),
+                choices: [{ id: 'close', label: '↩ Voltar', cb: 'close' }]
+              });
+            } else if (typeof window.vToast === 'function') {
+              vToast(rText, success ? 'ok' : 'warn');
             }
-          } else {
-            _closeEncounterCanon();
           }
         });
       }, 600);

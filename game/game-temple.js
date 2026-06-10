@@ -93,7 +93,11 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'h_mass',  label: 'Cura em Massa · 5º círculo · 80V · 3d8+4 (6 alvos)', cb: 'heal-confirm', backend_cb: 'temple_pay_mass_cure',
         resultNarration: 'Irmã Elara ergue ambas as mãos. Uma onda dourada se expande do altar — atinge todos os feridos ao alcance.',
         resultText: '"Magia de quinto círculo, dom dos Quatro." <i>(voz firme em ritual)</i> <b>+3d8+4 HP em até 6 alvos.</b> "Sejam todos restaurados — corpo, espírito, e o juramento que os trouxe aqui."' },
-      { id: 'h_pray',  label: 'Tentar prece pessoal · Religião DC 14', check: { skill: 'religion', dc: 14 } },
+      { id: 'h_pray',  label: 'Tentar prece pessoal · Religião DC 14', check: { skill: 'religion', dc: 14 },
+        resultNarration: 'Ajoelhas diante do altar. As velas oscilam — e por um instante a luz dos vitrais pousa sobre teus ombros como um manto.',
+        resultText: '"Os Quatro ouviram." <i>(Elara inclina a cabeça, sem surpresa)</i> "Eles não respondem em palavras — respondem em caminhos. Mantém os olhos abertos na próxima encruzilhada, irmão."',
+        resultNarrationFail: 'As palavras da prece saem truncadas, fora de ordem. As velas queimam, indiferentes.',
+        resultTextFail: '"Não te aflijas." <i>(Elara reacende a vela que apagou)</i> "Prece torta de coração reto vale mais que salmo perfeito de boca vazia. Volta quando a alma estiver quieta."' },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -108,7 +112,11 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'p_pay',   label: 'Pagar 40V — purificar veneno', cb: 'cure_poison-confirm', backend_cb: 'temple_pay_cure_poison',
         resultNarration: 'Padre Aldric ergue o braseiro acima de tua cabeça. A fumaça branca encurva-se ao redor — atraída pelo veneno em teu sangue.',
         resultText: '"Veneno purificado, em nome do Pai-da-Aurora." <i>(traça o sinal sagrado em tua testa)</i> <b>Condição Envenenado removida.</b> "Vai com cuidado — a próxima dose vai exigir mais que prata."' },
-      { id: 'p_persuade', label: '"Há quem pague isso?" · Persuasão DC 15', check: { skill: 'persuasion', dc: 15 } },
+      { id: 'p_persuade', label: '"Há quem pague isso?" · Persuasão DC 15', check: { skill: 'persuasion', dc: 15 },
+        resultNarration: 'Padre Aldric corre os olhos pelo salão vazio — e a postura solene cede um dedo.',
+        resultText: '"Entre nós, irmão? <i>(meia voz)</i> Os nobres pagam o dobro da tabela para furar a fila das bênçãos. É desse ouro que sai o pão de quem não paga nada. Os Quatro perdoam a aritmética."',
+        resultNarrationFail: 'A expressão do sacerdote volta a ser pedra de altar: polida, fria, sem fissuras.',
+        resultTextFail: '"O Templo não discute suas contas. <i>(une as mãos)</i> Cada moeda tem destino santo. Se o valor te pesa, os Quatro também aceitam teu trabalho como oferta."' },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -130,7 +138,11 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'b_guide', label: 'Orientação · 5V · +1d4 perícia única', cb: 'bless-confirm', backend_cb: 'temple_pay_guidance', renownDelta: 1,
         resultNarration: 'Theron passa o polegar úmido sobre tua testa, deixando um sinal que reluz brevemente.',
         resultText: '"O-orientação, irmão. <i>(pisca esperançoso)</i> Funciona uma vez só, depois passa. Mas funciona bem!" <b>+1d4 na próxima perícia que tentar.</b>' },
-      { id: 'b_persuade', label: '"Bênção a um irmão?" · Persuasão DC 13', check: { skill: 'persuasion', dc: 13 } },
+      { id: 'b_persuade', label: '"Bênção a um irmão?" · Persuasão DC 13', check: { skill: 'persuasion', dc: 13 },
+        resultNarration: 'Theron olha por cima do ombro duas vezes antes de molhar o polegar no óleo sagrado.',
+        resultText: '"S-só desta vez, tá? <i>(traça o sinal rápido na tua testa)</i> Se o Padre perguntar, foi treino. Os Quatro não cobram de quem chega de mãos vazias... mas eu levo bronca."',
+        resultNarrationFail: 'Theron recua meio passo, as orelhas vermelhas. A coragem do acólito tem limites bem mapeados.',
+        resultTextFail: '"N-não posso! <i>(sussurro aflito)</i> O óleo é contado, o Padre confere o frasco toda noite. Volta com cinco Valdoritas — a Orientação é baratinha, juro."' },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -149,7 +161,11 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'rc_pay', label: 'Pagar 90V — Remover Maldição', cb: 'remove_curse-confirm', backend_cb: 'temple_pay_remove_curse', renownDelta: 2,
         resultNarration: 'Miriel sela a câmara com runas douradas no chão. Tua pele formiga — depois queima. As runas pulsam em sincronia com teu coração.',
         resultText: '"Quem te amaldiçoou foi habilidoso, mas todo nó pode ser desfeito." <i>(traça o último símbolo)</i> <b>Maldição removida.</b> "Cuida pra não cruzar com quem te marcou — segunda vez a magia custa o dobro."' },
-      { id: 'rc_arcana', label: '"Que tipo de maldição?" · Arcana DC 15', check: { skill: 'arcana', dc: 15 } },
+      { id: 'rc_arcana', label: '"Que tipo de maldição?" · Arcana DC 15', check: { skill: 'arcana', dc: 15 },
+        resultNarration: 'Os termos arcanos saem precisos da tua boca — e o olhar de Miriel muda de sacerdotisa para colega de ofício.',
+        resultText: '"Estudaste. <i>(baixa a voz)</i> As piores que cruzam estas portas são as de vínculo — agarram-se a um objeto querido e bebem do dono devagar. Se um dia teus pertences pesarem mais que o costume, não esperes para me procurar."',
+        resultNarrationFail: 'Os termos se embaralham na tua língua. Miriel ergue a mão antes de a frase terminar.',
+        resultTextFail: '"Quem confunde hex com mau agouro precisa de menos perguntas e mais leitura. <i>(sorri sem deboche)</i> Traz o objeto, se houver objeto. O resto é conversa de taverna."' },
       { id: 'back',   label: '"Vou pensar."', cb: 'close' }
     ]
   },
@@ -186,7 +202,11 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'rd_pay', label: 'Pagar 1000V — Reviver os Mortos', cb: 'raise_dead-confirm', backend_cb: 'temple_pay_raise_dead', renownDelta: 5,
         resultNarration: 'Orenthia se posiciona sobre o corpo. As velas negras dobram a intensidade — então, súbito, todas se apagam ao mesmo tempo. Silêncio absoluto. Por meio segundo eternos.',
         resultText: '"Volta, irmão. <i>(voz dupla — a dela e algo mais)</i> O caminho ainda não terminou pra ti." <b>Personagem revive com 1 HP. Penalidade: -4 em todas as rolagens por 4 descansos longos.</b> "Não fale do que viu lá. Os Quatro ouvem o que se diz."' },
-      { id: 'rd_insight', label: '"Ela voltará... a mesma?" · Intuição DC 16', check: { skill: 'insight', dc: 16 } },
+      { id: 'rd_insight', label: '"Ela voltará... a mesma?" · Intuição DC 16', check: { skill: 'insight', dc: 16 },
+        resultNarration: 'Orenthia não responde de imediato. Os dedos dela apertam o medalhão — e é o gesto, não a voz, que te entrega a verdade.',
+        resultText: '"Voltam inteiros de corpo. <i>(longa pausa)</i> Mas todos trazem um silêncio novo. Alguns o perdem em semanas; outros o carregam até a segunda morte. Quem amas saberá te reencontrar — dá-lhe tempo."',
+        resultNarrationFail: 'O rosto da oráculo é sereno como vitral. O que quer que saiba, guarda atrás da serenidade.',
+        resultTextFail: '"A alma pertence aos Quatro — e os Quatro não dão entrevistas. <i>(pousa a mão fria no teu braço)</i> Traz quem precisas trazer. O resto, deixa com o Templo."' },
       { id: 'back',   label: '"Não estou pronto."', cb: 'close' }
     ]
   },

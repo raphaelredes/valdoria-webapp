@@ -47416,7 +47416,11 @@ var ACTION_HANDLERS = {
         //   aplicar reward. Fix: id passa a ser igual à key de LYANA_SUB.
         { id: 'lyana-confirm-deliver',        label: '🤝 "Aceito. Que teu pai retorne em paz."' },
         { id: 'lyana-confirm-deliver-modest', label: '↩ "Não preciso de paga. Cuida-te, Lyana."' },
-        { id: 'curious', label: '🔮 "O cristal... runas que sangram? Conta mais." · Investigação DC 13', check: { skill: 'investigation', dc: 13 } }
+        { id: 'curious', label: '🔮 "O cristal... runas que sangram? Conta mais." · Investigação DC 13', check: { skill: 'investigation', dc: 13 },
+          resultNarration: 'Cruzas as datas da carta com o que sabes das luas. O padrão salta: toda menção às runas coincide com a lua nova — e o pedido do cristal veio três dias antes da próxima.',
+          resultText: '<i>(Lyana empalidece, depois assente devagar)</i> "Tu vês o que ele vê, então. Papai dizia que as runas só sangram quando algo do outro lado empurra. O cristal não é enfeite — é fechadura. Guarda isso contigo... e se um dia vires uma runa úmida, não a toques."',
+          resultNarrationFail: 'As linhas da carta se recusam a formar padrão. Datas, runas, o cristal — peças demais, encaixes de menos.',
+          resultTextFail: '<i>(Lyana dobra a carta, protetora)</i> "Perdoa. Já disse mais do que devia — papai sempre pediu segredo sobre as runas. Quando ele voltar, pergunta a ele. É história dele, não minha."' }
       ]
     };
     var LYANA_SUB = {
@@ -49766,18 +49770,16 @@ function _journeyPlayerTraits() {
 
 // Helper: escolhe sNarr ou fNarr baseado em variants disponíveis
 function _journeyPickNarrative(choice, success) {
-  var traits = _journeyPlayerTraits();
-  if (success) {
-    // Priority: by_class > by_alignment > by_background > default
-    if (choice.sNarr_by_class && choice.sNarr_by_class[traits.cls]) return choice.sNarr_by_class[traits.cls];
-    if (choice.sNarr_by_alignment && choice.sNarr_by_alignment[traits.alignment]) return choice.sNarr_by_alignment[traits.alignment];
-    if (choice.sNarr_by_background && choice.sNarr_by_background[traits.bg]) return choice.sNarr_by_background[traits.bg];
-    return choice.sNarr || '';
-  } else {
-    if (choice.fNarr_by_class && choice.fNarr_by_class[traits.cls]) return choice.fNarr_by_class[traits.cls];
-    if (choice.fNarr_by_alignment && choice.fNarr_by_alignment[traits.alignment]) return choice.fNarr_by_alignment[traits.alignment];
-    return choice.fNarr || '';
+  /* A3.5 (#90): delega ao picker canônico compartilhado
+     (JourneyData.pickNarrative) — esta era a 3ª cópia da cascata
+     by_class > by_alignment > by_background. BÔNUS de correção: o shared
+     normaliza a classe via DndRules.classKey ('Clérigo'→'clerigo'),
+     enquanto a cópia local usava lowercase cru — variantes by_class de
+     classes acentuadas nunca casavam na cidade. */
+  if (window.JourneyData && typeof JourneyData.pickNarrative === 'function') {
+    return JourneyData.pickNarrative(choice, window.CITY_MOCK_PLAYER || {}, success);
   }
+  return success ? (choice.sNarr || '') : (choice.fNarr || '');
 }
 
 // sessão #77: render da etapa via vEncounter (PADRAO_ALDRIC) — delega pra _journeyStepV13.

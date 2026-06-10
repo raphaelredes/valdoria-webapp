@@ -177,7 +177,11 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 's_year',  label: 'Guardar 1 ano · 200V (Honored+)', cb: 'store-confirm', renownDelta: +3,
         resultNarration: 'Aldwin curva-se levemente. Conduz Vossa Senhoria à câmara dos cofres principais, no andar de cima. Quatro guardas postados.',
         resultText: '"Trezentos e sessenta dias, duzentas Valdoritas. <i>(seleciona o cofre nobre)</i> A Casa de Tholram garante a salvaguarda. Quem deposita por um ano, recebe o anel auxiliar para acesso de emergência." <b>Item armazenado no Cofre Real. +3 Renome.</b>' },
-      { id: 's_persuade', label: '"Sou cliente antigo, dispense a primeira semana" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 } },
+      { id: 's_persuade', label: '"Sou cliente antigo, dispense a primeira semana" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 },
+        resultNarration: 'Aldwin ergue o monóculo e percorre o livro-razão até encontrar teu nome. O dedo para sobre uma coluna de depósitos antigos.',
+        resultText: '"De fato, Vossa Senhoria consta destas páginas há tempo. <i>(anota uma marca discreta ao lado do teu nome)</i> A Casa lembrará desta lealdade quando os prazos apertarem. Cortesia que vira regra deixa de ser cortesia — mas fidelidade tem peso no meu livro."',
+        resultNarrationFail: 'O monóculo desce devagar. Aldwin tamborila uma única vez no balcão — o som seco de quem já ouviu esse pedido mil vezes.',
+        resultTextFail: '"Antiguidade conta histórias, não abate taxas. <i>(reabre o livro-razão)</i> O preço é o preço, Vossa Senhoria. A Casa não faria diferente nem pelo Conde."' },
       { id: 'back', label: 'Voltar', cb: 'close' }
     ]
   },
@@ -198,7 +202,11 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'r_all',    label: 'Esvaziar cofre · 2% do valor total', cb: 'retrieve-confirm', renownDelta: 0,
         resultNarration: 'Aldwin escolta Vossa Senhoria pessoalmente à câmara dos cofres. Dois guardas testemunham.',
         resultText: '"Cofre esvaziado, dois por cento do valor total como taxa final. <i>(sela o cofre vazio)</i> A Casa de Tholram lembrará desta data. Vossa Senhoria fica livre para reabrir conta nova quando quiser." <b>Cofre desocupado.</b>' },
-      { id: 'r_insight', label: '"Você confere por dentro também?" · Insight DC 12', check: { skill: 'insight', dc: 12 } },
+      { id: 'r_insight', label: '"Você confere por dentro também?" · Insight DC 12', check: { skill: 'insight', dc: 12 },
+        resultNarration: 'Observas as mãos de Aldwin enquanto ele destrava o cofre — três giros, uma pausa, um quarto giro que ele não anuncia. Nada escapa ao teu olhar.',
+        resultText: '"Olho clínico, Vossa Senhoria. <i>(inclina o cofre para a luz)</i> Selo interno, forro intacto, nenhum dedo além dos meus. A Casa confere duas vezes para que o cliente não precise conferir nenhuma."',
+        resultNarrationFail: 'Aldwin move as mãos rápido demais — entre um giro e outro, perdes o fio do que ele fez.',
+        resultTextFail: '"Confiança é como juro composto: cresce devagar e desaba de uma vez. <i>(entrega o item sem pressa)</i> Confere por fora, se desejares. Por dentro, a palavra da Casa terá de bastar."' },
       { id: 'back', label: 'Voltar', cb: 'close' }
     ]
   },
@@ -219,7 +227,11 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'i_high', label: 'Alto · 1000V × 20% (risco real)', cb: 'invest-confirm', renownDelta: +2,
         resultNarration: 'Aldwin pausa antes de pegar o contrato Alto. <i>(estuda Vossa Senhoria)</i> Volta com pergaminho selado em cera vermelha-sangue.',
         resultText: '"Mil Valdoritas, vinte por cento ao mês — explora rota das Marcas, primeiro mês com expedição experimental. <i>(coloca a pena)</i> Pode duplicar capital em três meses, ou perder tudo se a expedição falhar." <b>+200V/mês potencial · risco substancial. +2 Renome.</b>' },
-      { id: 'i_persuade', label: '"Posso ter taxa preferencial?" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 } },
+      { id: 'i_persuade', label: '"Posso ter taxa preferencial?" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 },
+        resultNarration: 'Aldwin recosta-se. Pela primeira vez na conversa, os óculos meia-lua sobem em vez de descer.',
+        resultText: '"Taxa preferencial é privilégio de quem movimenta a Casa. <i>(faz uma anotação à margem)</i> Vossa Senhoria acaba de entrar nessa lista. No próximo contrato, os números serão... mais simpáticos."',
+        resultNarrationFail: 'A pena de Aldwin nem chega a tocar o pergaminho. O silêncio dura o bastante para a resposta ficar óbvia.',
+        resultTextFail: '"Todos pedem. <i>(sorri sem calor)</i> Os que recebem são os que não precisaram pedir. Cinco por cento, Vossa Senhoria — pegar ou largar."' },
       { id: 'about_tavira', label: '"E os bons clientes antigos? Como a Mestra Tavira?"', cb: 'about_tavira' },
       { id: 'i_rude', label: '"Cinco por cento é miséria. Você está roubando."', cb: 'opinion-rude', renownDelta: -2 },
       { id: 'back', label: 'Voltar', cb: 'close' }
@@ -236,8 +248,16 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'in_buy', label: 'Adquirir Seguro · 50V/mês · 3 meses min.', cb: 'insurance-confirm', renownDelta: +3,
         resultNarration: 'Aldwin pega o pergaminho selado com a marca do Conde. <i>(testemunha do banqueiro júnior chamada)</i>',
         resultText: '"Seguro de Aventureiros ativado. Cinquenta Valdoritas mensais, mínimo de três meses. <i>(empurra pergaminho assinado)</i> Em caso de morte verificada por testemunha, a Casa contrata Revivify no Templo (até 300V em diamante), e o herdeiro nomeado recebe o resíduo." <b>Seguro ativo. +3 Renome da Casa.</b>' },
-      { id: 'in_test', label: '"Confio em você, não em papéis" · Engano DC 15', check: { skill: 'deception', dc: 15 } },
-      { id: 'in_insight', label: '"Já houve fraude com este Seguro?" · Insight DC 14', check: { skill: 'insight', dc: 14 } },
+      { id: 'in_test', label: '"Confio em você, não em papéis" · Engano DC 15', check: { skill: 'deception', dc: 15 },
+        resultNarration: 'Aldwin estuda teu rosto por um longo instante. O que quer que procurasse ali, não encontrou.',
+        resultText: '"Palavras tocantes. <i>(guarda o pergaminho na gaveta)</i> Raros são os que dispensam o papel — e mais raros os que o dizem com os olhos limpos. A Casa aprecia... a intenção."',
+        resultNarrationFail: 'O monóculo de Aldwin brilha. Banqueiros envelhecem ouvindo mentiras — e a tua não foi das melhores.',
+        resultTextFail: '"Confiança sem papel é poesia, Vossa Senhoria. E a Casa de Tholram não financia poetas. <i>(empurra o contrato de volta)</i> Assina, ou a porta é aquela."' },
+      { id: 'in_insight', label: '"Já houve fraude com este Seguro?" · Insight DC 14', check: { skill: 'insight', dc: 14 },
+        resultNarration: 'A pausa de Aldwin antes de responder dura meio segundo a mais que o habitual. É resposta suficiente.',
+        resultText: '"Uma vez. <i>(baixa a voz)</i> Um suposto morto que voltou a respirar quando o herdeiro veio cobrar. A Casa pagou o Revivify... e depois cobrou dele em juízo cada moeda, com juros. Não houve segunda vez."',
+        resultNarrationFail: 'O rosto de Aldwin é um livro-razão fechado. Nenhuma linha se move.',
+        resultTextFail: '"A Casa de Tholram honra seus contratos desde antes do teu avô nascer. <i>(ajusta os óculos)</i> Se houve percalços, morreram nos arquivos. Próxima pergunta."' },
       { id: 'in_rude', label: '"Vocês banqueiros só vendem medo."', cb: 'opinion-rude', renownDelta: -3 },
       { id: 'back', label: 'Voltar', cb: 'close' }
     ]
@@ -259,7 +279,11 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'e_tower',  label: 'Torre · 15000V · 100 dias', cb: 'estate-confirm', renownDelta: +3,
         resultNarration: 'Aldwin entrega plantas arquitetônicas — torre fortificada com porão de cofre, três andares, salão de audiência. <i>(prazo de cem dias de construção)</i>',
         resultText: '"Quinze mil Valdoritas, mais cem dias de construção. <i>(carimba o contrato)</i> A Casa supervisiona obras. Quando concluída, gera 1 gp/dia + base de operações fortificada. <b>Tower +3 Renome da Casa.</b>"' },
-      { id: 'e_stronghold', label: 'Stronghold · 50000V · 400 dias · DC 20 Persuasão', check: { skill: 'persuasion', dc: 20 } },
+      { id: 'e_stronghold', label: 'Stronghold · 50000V · 400 dias · DC 20 Persuasão', check: { skill: 'persuasion', dc: 20 },
+        resultNarration: 'Aldwin desce do banco e abre um armário trancado a chave dupla. Lá dentro, plantas que poucos clientes da Casa já viram.',
+        resultText: '"Cinquenta mil, quatrocentos dias, e um pedaço do mapa com teu nome. <i>(desenrola a planta da fortaleza)</i> A Casa raramente apresenta este portfólio. Reúne o capital, Vossa Senhoria — a papelada estará pronta quando o ouro estiver."',
+        resultNarrationFail: 'Aldwin sequer se move na direção do armário. O monóculo permanece fixo no livro-razão.',
+        resultTextFail: '"Fortaleza não se ergue com entusiasmo, ergue-se com lastro. <i>(vira a página)</i> Volta quando o teu cofre impressionar mais que o teu discurso."' },
       { id: 'back',     label: 'Voltar', cb: 'close' }
     ]
   },
