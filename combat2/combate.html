@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T15:11:01Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T21:40:26Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9094,6 +9094,10 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 /* Banner epico do inicio do combate */
 .epic-banner { padding: 22px 16px 16px; text-align: center; border-bottom: 1px solid rgba(196,149,58,.3); background: radial-gradient(ellipse at center, rgba(196,149,58,.1), transparent); }
+/* B2.6 #90: fala de abertura scriptada do aliado (ex.: Thorne) na fase intro. */
+.ally-intro-line { margin: 10px 14px 4px; padding: 10px 14px; border-left: 3px solid var(--v-gold, #c4953a); background: rgba(196,149,58,.08); border-radius: 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0; }
+.ally-intro-line .aint-name { color: var(--v-gold, #c4953a); font-weight: 700; font-size: var(--v-font-label, 12px); letter-spacing: .5px; }
+.ally-intro-line .aint-text { color: var(--v-text, #d4c8b0); font-style: italic; font-size: var(--v-font-body, 14px); line-height: 1.5; margin-top: 2px; }
 .epic-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: clamp(18px, 5.2vw, 24px); letter-spacing: 4px; color: var(--v-gold, #c4953a); text-transform: uppercase; text-shadow: 0 0 14px rgba(196,149,58,.5), 0 0 28px rgba(196,149,58,.25), 0 1px 3px rgba(0,0,0,.8); animation: simEpicTitlePulse 1.8s ease-in-out infinite; line-height: 1.2; }
 .epic-sub { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 5px; animation: simEpicSubIn 1s ease .3s both; }
 /* Sem filter: brightness — compositing no WebView pode parecer “brilho” em toda a coluna de combate. */
@@ -13757,6 +13761,11 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
            CLASSE mecânica (re-lookup determinístico). ico honra spec.icon. */
         clsLabel: (!useRandom && spec.cls && String(spec.cls).trim()) ? String(spec.cls).trim() : cdef.cls,
         essential: !!spec.essential,
+        /* B2.6 #90: fala de abertura scriptada do aliado (ex.: Thorne no prólogo,
+           'Meu filho está atrás de mim...'). O servidor já serializava
+           spec.intro_line (combat2_pivot_http) mas o cliente NUNCA lia — wiring
+           morto. Renderizada na fase intro por _showAllyIntroLine(). */
+        introLine: (spec.intro_line && String(spec.intro_line).trim()) || null,
         summonsInvoked: summonsInvokedFinal,
         race: race, ico: (spec.icon && String(spec.icon).trim()) || cdef.ico,
         /* #85 (user): retrato CUSTOM do NPC (ex.: Thorne = thorne-armeiro.webp).
@@ -16582,6 +16591,22 @@ function animateQueueTransition(oldRects) {
     });
 }
 
+/* B2.6 #90: fala de abertura scriptada dos aliados (spec.intro_line vindo do
+   servidor — ex.: Thorne no prólogo). Renderizada na fase intro como bolha
+   PADRAO_ALDRIC (speech do NPC). Escapa o texto (autoral, mas defensivo). */
+function buildAllyIntroLines(s) {
+    if (!s || !s.order) return '';
+    var html = '';
+    s.order.forEach(function (c) {
+        if (!c || c.t !== 'a' || !c.introLine) return;
+        var name = (typeof escHtml === 'function') ? escHtml(c.n || 'Aliado') : (c.n || 'Aliado');
+        var line = (typeof escHtml === 'function') ? escHtml(c.introLine) : c.introLine;
+        html += '<div class="ally-intro-line"><div class="aint-name">' + name +
+                '</div><div class="aint-text">"' + line + '"</div></div>';
+    });
+    return html;
+}
+
 function buildBattlefield(s) {
     var ROW_LABELS = ['retaguarda inimiga', 'frente inimiga', 'frente aliada', 'retaguarda aliada'];
     var grid = [[null, null, null, null], [null, null, null, null], [null, null, null, null], [null, null, null, null]];
@@ -19182,6 +19207,7 @@ function render(s) {
         /* Banner epico apenas no intro */
         if (ph === 'intro') {
             html += '<div class="epic-banner"><div class="epic-title">COMBATE INICIADO</div><div class="epic-sub">Prepare-se para a batalha</div></div>';
+            html += buildAllyIntroLines(s);
             html += '<div class="sim-setup-bar"><a href="combate-setup-frontend-testes.html">Cenário de testes (frontend)</a></div>';
         } else {
             html += buildTurnQueue(s);
