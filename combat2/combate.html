@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T21:40:26Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T21:49:53Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13766,6 +13766,10 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
            spec.intro_line (combat2_pivot_http) mas o cliente NUNCA lia — wiring
            morto. Renderizada na fase intro por _showAllyIntroLine(). */
         introLine: (spec.intro_line && String(spec.intro_line).trim()) || null,
+        /* B2.4 #90: pool de barks (falas pré-ação) do aliado. Sorteado com
+           anti-repeat no início do turno do aliado (runNpcSegment). */
+        barks: (spec.barks && Array.isArray(spec.barks)) ? spec.barks.slice() : null,
+        _barkHeard: [],
         summonsInvoked: summonsInvokedFinal,
         race: race, ico: (spec.icon && String(spec.icon).trim()) || cdef.ico,
         /* #85 (user): retrato CUSTOM do NPC (ex.: Thorne = thorne-armeiro.webp).
@@ -28961,6 +28965,23 @@ async function runNpcSegmentUntilPlayerTurn() {
                     se: (c.se || []).map(function (x) { return x && (x.id || x.n); })
                 });
             } catch (_eAi) {}
+            /* B2.4 #90: bark (fala de personalidade) do ALIADO no início do
+               turno — ~30% de chance, anti-repeat via c._barkHeard (cicla o pool
+               antes de repetir). Antes o combat2 não exibia NENHUMA fala de
+               aliado. Só aliados (t==='a') com pool; inimigos/bosses não. */
+            try {
+                if (c.t === 'a' && c.barks && c.barks.length && Math.random() < 0.30) {
+                    c._barkHeard = c._barkHeard || [];
+                    if (c._barkHeard.length >= c.barks.length) c._barkHeard = [];
+                    var _bAvail = [];
+                    for (var _bi = 0; _bi < c.barks.length; _bi++) {
+                        if (c._barkHeard.indexOf(_bi) === -1) _bAvail.push(_bi);
+                    }
+                    var _bPick = _bAvail[Math.floor(Math.random() * _bAvail.length)];
+                    c._barkHeard.push(_bPick);
+                    s.log.push(c.barks[_bPick]);
+                }
+            } catch (_eBark) {}
             /* V1.7 Stage-CASTERS (2026-04-21) — AI de cast pro NPC caster.
                Se NPC tem `isCaster:true` + skills + MP + random roll <= castProb,
                escolhe uma skill castável e resolve como spell (passa opts.skill
