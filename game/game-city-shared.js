@@ -206,7 +206,7 @@ function playerBlock(p) {
 
   var hpPct = p.max_hp > 0 ? (p.hp / p.max_hp * 100) : 0;
   var mpPct = p.max_mp > 0 ? (p.mp / p.max_mp * 100) : 0;
-  var hpCls = hpPct > 50 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low');
+  var hpCls = vBarHpClass(hpPct);  // FASE 4 single-source (era 50%, agora 60/25 canonico)
 
   /* Name + class */
   if (p.name) {

@@ -350,7 +350,8 @@ function renderHubScreen(el, screen) {
             if (typeof haptic === 'function') haptic('light');
             if (typeof doAction === 'function') doAction('daily_challenge_main');
         });
-        dcEl.textContent = '\uD83D\uDC3A Desafio: ' + dcb.dungeon_name;
+        /* Sess\u00E3o #64 (2026-05-30): sem emoji de lobo \u2014 user pediu s\u00F3 texto. */
+        dcEl.textContent = 'Desafio: ' + dcb.dungeon_name;
         frag.appendChild(dcEl);
     }
 
@@ -452,7 +453,7 @@ var CITY_LOC_PNG_AVAILABLE = {
 };
 function _cityLocIconHTML(cb, fallbackIco) {
     if (cb && CITY_LOC_PNG_AVAILABLE[cb]) {
-        var base = '/shared/img/city/';
+        var base = '../valdoria-webapp/shared/img/city/';
         var loc = (typeof location !== 'undefined') ? location.href : '';
         if (loc.indexOf('file://') === 0) {
             base = '../valdoria-webapp/shared/img/city/';
@@ -461,9 +462,14 @@ function _cityLocIconHTML(cb, fallbackIco) {
            que tinham as PNGs com Cache-Control:immutable do header anterior.
            Sem isso, browsers servem versão velha (1.5MB) por até 1 ano sem nem
            consultar o servidor. Tier C (no-cache + ETag) só pega efeito em URLs
-           novas — daí o sufixo. Date.now() fallback se bundle hash falhar. */
+           novas — daí o sufixo. Date.now() fallback se bundle hash falhar.
+           Sessão #56 (2026-05-28): FIX P0 cidade images — formato dos arquivos
+           é .webp (gerado via OpenAI + Pillow + save_optimized kind='scenery'),
+           NÃO .png. Antes o <img src="...tavern.png"> 404ava + onerror sumia o
+           elemento. User reportou: "imagens taverna/missões/mercado/templo não
+           aparecem". Fix: src usa .webp matching o filesystem. */
         var v = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
-        return '<img class="hl-ico-img" src="' + base + cb + '.png?v=' + v + '" ' +
+        return '<img class="hl-ico-img" src="' + base + cb + '.webp?v=' + v + '" ' +
                'alt="" loading="lazy" ' +
                'onerror="this.onerror=null;this.outerHTML=\'\'">';
     }
@@ -479,15 +485,19 @@ function _buildLocCell(ico, name, btn) {
        (evita "tudo gold" — cada local tem sua cor heráldica natural). */
     if (btn && btn.cb) cell.setAttribute('data-cb', btn.cb);
 
-    /* Icon: PNG (AI-generated 2026-05-16) > SVG heraldic (canonical) > emoji fallback */
-    var icoEl = _hubDiv('hl-ico');
-    var pngHtml = _cityLocIconHTML(btn && btn.cb, ico);
-    if (pngHtml.indexOf('<img') === 0 || pngHtml.indexOf('<svg') === 0) {
-        icoEl.innerHTML = pngHtml;
-    } else {
-        icoEl.textContent = pngHtml;
+    /* Sessão #63 (2026-05-30) — User pediu as IMAGENS geradas dos locais de
+       volta, EM DESTAQUE no topo do card. Histórico: #56 mostrava como
+       iconezinho 36px lateral; #62 removeu (user achou "ícone ao lado do nome"
+       poluído); agora user quer as ilustrações .webp visíveis como thumbnail
+       proeminente. _cityLocIconHTML retorna <img .webp> p/ locais em
+       CITY_LOC_PNG_AVAILABLE; layout via .hl-thumb (CSS no <style> inline).
+       Só adiciona se há imagem real (.webp) — fallback SVG/vazio = só nome. */
+    var thumbHtml = (typeof _cityLocIconHTML === 'function') ? _cityLocIconHTML(btn && btn.cb, ico) : '';
+    if (thumbHtml && thumbHtml.indexOf('<img') === 0) {
+        var thumb = _hubDiv('hl-thumb');
+        thumb.innerHTML = thumbHtml;
+        cell.appendChild(thumb);
     }
-    cell.appendChild(icoEl);
 
     /* Label */
     var nmEl = _hubDiv('hl-nm');
