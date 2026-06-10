@@ -54593,6 +54593,13 @@ function _renderEncounterPopup(enc, originalAction, player) {
 
   var npc = RECURRING_NPCS[enc.npc];
   if (!npc) {
+    /* A3.7 (#90): key não registrada era um RETURN SILENCIOSO — o diálogo
+       simplesmente nunca abria (classe de bug "diálogo inerte", sem log, sem
+       feedback). Agora loga pro error-reporter e avisa o jogador. */
+    console.error('[CITY] RECURRING_NPCS key ausente: ' + enc.npc);
+    if (typeof window.vToast === 'function') {
+      vToast('Não foi possível iniciar a conversa.', 'err');
+    }
     window._encounterActive = false;
     return;
   }

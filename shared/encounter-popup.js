@@ -61,6 +61,53 @@
      dourado + glifo). NUNCA mostra o ícone de imagem quebrada do browser. */
   var _ENC_IMG_ONERR = "onerror=\"this.style.display='none';this.parentNode.classList.add('enc-portrait-fallback');\"";
 
+  /* A3.7 (#90): NORMALIZADOR canônico do shape de NPC de diálogo (vNpc).
+     3 shapes coexistem nos dados: (1) string-key resolvida contra
+     RECURRING_NPCS (cidade); (2) objeto contrato deste motor {name, desc,
+     portrait:URL, portraitHTML:html}; (3) objeto do registry da cidade com
+     semântica INVERTIDA (portrait='ic-*' ícone heráldico; portraitImg=URL).
+     O render normaliza AQUI (choke-point único) — bug real: o Porão
+     (PADRAO_SERVIDOR) mandava portraitImg e o retrato da Martha NÃO
+     renderizava. Datasets NÃO foram renomeados de propósito (111 literais +
+     18 consumidores legados leem os campos antigos). Regras:
+       - portraitImg (URL real) VENCE → vira portrait (lightbox funciona);
+       - portrait com cara de ícone ('ic-*') vira portraitHTML via _heralIco
+         quando disponível e NUNCA chega num <img src>; fora da cidade (sem
+         _heralIco) degrada pra sem-retrato (comportamento atual);
+       - objeto já canônico passa intacto (idempotente). */
+  var _NPC_ICON_RE = /^ic-[\w-]+$/;
+  function _vNpcResolve(raw, opts) {
+    if (!raw) return null;
+    if (typeof raw === 'string') {
+      var reg = (opts && opts.npcRegistry) || window.RECURRING_NPCS || null;
+      var hit = reg ? reg[raw] : null;
+      if (!hit) {
+        try { console.error('[ENC] vNpc: NPC key não resolvida: ' + raw); } catch (_e) {}
+        return null;
+      }
+      var o = _vNpcResolve(hit, opts);
+      if (o && !o.id) o.id = raw;
+      return o;
+    }
+    if (typeof raw !== 'object') return null;
+    var out = {};
+    for (var k in raw) {
+      if (Object.prototype.hasOwnProperty.call(raw, k)) out[k] = raw[k];
+    }
+    if (out.portraitImg) {
+      out.portrait = out.portraitImg;
+    } else if (out.portrait && _NPC_ICON_RE.test(String(out.portrait))) {
+      if (!out.portraitHTML && typeof window._heralIco === 'function') {
+        try { out.portraitHTML = window._heralIco(out.portrait); } catch (_eIco) {}
+      }
+      out.portrait = '';
+    }
+    return out;
+  }
+  // API pública: adapter da cidade / svc / exploração podem delegar em vez de
+  // reimplementar a tradução (resolve aceita string-key OU objeto).
+  window.vNpc = { resolve: _vNpcResolve };
+
   /* Sessão #72 (user, IMMUTABLE): nas ESCOLHAS DE AÇÃO de TODOS os diálogos, o
      custo em moeda DEVE usar o desenho da Valdorita (ícone), nunca "Valdoritas"
      por extenso. Só a FALA/narrativa do NPC (enc-line) pode usar "valdoritas" por
@@ -617,6 +664,14 @@
     // Header
     var header = document.createElement('div');
     header.className = 'enc-header';
+    /* A3.7 (#90): normaliza o shape do npc no choke-point — aceita string-key
+       (registry), objeto canônico OU objeto do registry da cidade
+       (portraitImg/ic-*). Conserta o retrato perdido do Porão (servidor manda
+       portraitImg) e protege consumidores novos da semântica dupla. */
+    if (dialogue.npc) {
+      var _nrmNpc = _vNpcResolve(dialogue.npc, opts);
+      if (_nrmNpc) dialogue.npc = _nrmNpc;
+    }
     var npcPortrait = (dialogue.npc && dialogue.npc.portrait) || '';
     /* Sessão #28 (2026-05-24): suporte a portraitHTML — HTML pronto (ex: SVG
        sprite ou <img> de PNG de classe) em vez de URL pra <img src=...>.
