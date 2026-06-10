@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T18:14:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T22:01:12Z - do not edit directly, edit source -->
 
 
 
@@ -10469,6 +10469,22 @@ window.__onIntroTap = function() {
 
   function _getEl(id) { return document.getElementById(id); }
 
+  // B2.7 #90: pick anti-repeat de variante de texto de outcome (ex.: interação
+  // com aliado). Cicla o pool inteiro antes de repetir, por chave de evento.
+  function _pickOutcomeVariant(key, variants) {
+    if (!variants || !variants.length) return null;
+    if (variants.length === 1) return variants[0];
+    window._outcomeVariantHeard = window._outcomeVariantHeard || {};
+    var heard = window._outcomeVariantHeard[key] || [];
+    if (heard.length >= variants.length) heard = [];
+    var avail = [];
+    for (var i = 0; i < variants.length; i++) if (heard.indexOf(i) === -1) avail.push(i);
+    var pick = avail[Math.floor(Math.random() * avail.length)];
+    heard.push(pick);
+    window._outcomeVariantHeard[key] = heard;
+    return variants[pick];
+  }
+
   // 2026-04-27 USER FIX: renderiza tech callout (info mecânica) separado da
   // narrativa. Aceita string ou null/undef. Limpo se vazio.
   // Pode receber tech.label custom (ex: "INICIATIVA", "VANTAGEM", "COMBATE")
@@ -10783,7 +10799,15 @@ window.__onIntroTap = function() {
       } catch (_) { /* persist falha silenciosa não bloqueia gameplay */ }
       var bodyEl = _getEl('stub-popup-body');
       if (bodyEl) {
-        bodyEl.textContent = outcome.flavor || (rollResult.success ? 'Sucesso.' : 'Falha.');
+        // B2.7 #90: se o outcome tem text_variants, sorteia com anti-repeat
+        // (não repete a mesma fala 2 interações seguidas).
+        var _outText = outcome.flavor;
+        if (outcome.text_variants && outcome.text_variants.length) {
+          _outText = _pickOutcomeVariant(
+            (rt.hexId || rt.legacyId || 'ev') + ':' + (choice.id || choice.label || 'c'),
+            outcome.text_variants) || outcome.flavor;
+        }
+        bodyEl.textContent = _outText || (rollResult.success ? 'Sucesso.' : 'Falha.');
         bodyEl.classList.add('stub-popup-outcome-' + (rollResult.success ? 'ok' : 'fail'));
       }
       // 2026-04-27: tech callout no outcome também — combate iniciando, vantagem, condição, etc.
@@ -12709,6 +12733,12 @@ function parseRewardString(s) {
       ops: _buildOps(ok),
       fsm: ok.combat_trigger ? 'player_attack_choice' : null
     };
+    // B2.7 #90: variantes de texto do outcome (ex.: interação com aliado) —
+    // sorteadas com anti-repeat no RENDER (não no boot), pra a fala do
+    // companheiro não ser idêntica toda vez.
+    if (ok.text_variants && Array.isArray(ok.text_variants) && ok.text_variants.length) {
+      c.outcome_ok.text_variants = ok.text_variants.slice();
+    }
     // 2026-04-27 USER FIX: preserva campos extras do schema novo
     // (chain, tech, dungeon_combat) — sem isso, eventos procedurais perdem
     // toda a profundidade. Bug root cause de "eventos shallow".
@@ -16210,7 +16240,7 @@ const EVENTS_POOL = {
         outcome_fail: { text: 'A rota termina em barranco. Ele descarta a sugestão decepcionado.' } },
       { label: 'Chamar aliado pra força conjunta', ally_interaction: true,
         desc: 'Pedir ao aliado pra puxar a roda enquanto você empurra — força combinada.',
-        outcome_ok: { text: 'Com ajuda, a carroça sai em menos de um minuto. Duas bolsas de pagamento.', reward: '+25 Valdoritas' } },
+        outcome_ok: { text: 'Com ajuda, a carroça sai em menos de um minuto. Duas bolsas de pagamento.', text_variants: ['Com ajuda, a carroça sai em menos de um minuto. Duas bolsas de pagamento.', 'Teu companheiro firma o ombro na roda e puxa — a carroça se solta de uma vez. O dono, aliviado, conta as moedas sem pechinchar.', 'A dois, a lama cede rápido. O viajante agradece à dupla e divide o pagamento prometido.'], reward: '+25 Valdoritas' } },
       { label: 'Seguir em frente',
         desc: 'Ignorar pedidos e continuar a jornada.',
         outcome_ok: {
@@ -16291,7 +16321,7 @@ const EVENTS_POOL = {
         outcome_fail: { text: 'Detalhes escapam.' } },
       { label: 'Chamar aliado pra dividir', ally_interaction: true,
         desc: 'Peça ajuda do aliado pra dividir rações — dupla generosidade.',
-        outcome_ok: { text: 'Chora de gratidão. Confia um mapa desenhado à mão.', reward: 'Mapa da Mata Velha' } },
+        outcome_ok: { text: 'Chora de gratidão. Confia um mapa desenhado à mão.', text_variants: ['Chora de gratidão. Confia um mapa desenhado à mão.', 'A generosidade da dupla o comove. Sem palavras, entrega um mapa rabiscado que guardava para uma emergência.', 'Ele olha de um a outro, sem acreditar na sorte. Em troca, revela um mapa que poucos olhos já viram.'], reward: 'Mapa da Mata Velha' } },
       { label: 'Intimidar', skill: 'cha', dc: 12,
         desc: 'Postura ameaçadora, tom firme sem violência.',
         outcome_ok: { text: 'Recua tropeçando. Você passa.' },
@@ -16710,7 +16740,7 @@ const EVENTS_POOL = {
         outcome_fail: { text: 'As ovelhas reagem nervosas. O fazendeiro pede que você guarde a prece.' } },
       { label: 'Vigiar a noite junto com aliado', ally_interaction: true,
         desc: 'Você e teu aliado dividem turnos de vigia durante toda a noite.',
-        outcome_ok: { text: 'Vocês rechaçam os lobos a meia-noite. Fazendeiro paga generosamente pela dupla.', reward: '+50 Valdoritas' } },
+        outcome_ok: { text: 'Vocês rechaçam os lobos a meia-noite. Fazendeiro paga generosamente pela dupla.', text_variants: ['Vocês rechaçam os lobos a meia-noite. Fazendeiro paga generosamente pela dupla.', 'Turnos divididos, olhos atentos: quando os lobos vêm, vocês já estão de pé. O fazendeiro paga em dobro pela vigília certeira.', 'A noite passa sem perdas — teu companheiro acorda você a tempo do ataque. De manhã, o pagamento vem cheio.'], reward: '+50 Valdoritas' } },
       { label: 'Oferecer conselho e partir',
         desc: 'Sugerir estratégias sem envolvimento direto.',
         outcome_ok: {
@@ -17188,7 +17218,7 @@ const EVENTS_POOL = {
         outcome_fail: { text: 'Considerado presa. Atacam.', hp_loss: 8 } },
       { label: 'Enfrentar junto com aliado', ally_interaction: true,
         desc: 'Defesa coordenada com o aliado.',
-        outcome_ok: { text: 'Vocês repelem a alcateia juntos sem ferimentos graves.', reward: '+1 Pelo de Lobo' } }
+        outcome_ok: { text: 'Vocês repelem a alcateia juntos sem ferimentos graves.', text_variants: ['Vocês repelem a alcateia juntos sem ferimentos graves.', 'Costas com costas, vocês fecham o cerco contra a alcateia. Quando o último lobo recua, nenhum dos dois sangra de verdade.', 'A defesa coordenada não dá brecha. Os lobos cedem e fogem; sobra apenas o pelo de um deles como troféu.'], reward: '+1 Pelo de Lobo' } }
     ]
   },
 
@@ -17509,7 +17539,7 @@ const EVENTS_POOL = {
         outcome_fail: { text: 'Ela sente. Grita. O cemitério todo responde com ecos de dor. Você corre.', hp_loss: 3, exh_gain: 1 } },
       { label: 'Consolar junto com aliado', ally_interaction: true,
         desc: 'Um de vocês conversa enquanto o outro reza. Abordagem dupla, mais eficaz em casos de luto fresco.',
-        outcome_ok: { text: 'A abordagem dupla funciona. Ela se abre por completo e pede ajuda detalhada. Recompensa dobrada.', reward: '+2 Anel da Mãe + Moeda Dourada' } },
+        outcome_ok: { text: 'A abordagem dupla funciona. Ela se abre por completo e pede ajuda detalhada. Recompensa dobrada.', text_variants: ['A abordagem dupla funciona. Ela se abre por completo e pede ajuda detalhada. Recompensa dobrada.', 'Enquanto um conversa e o outro reza, a mulher enlutada baixa a guarda. As palavras certas vêm de ambos — ela confia tudo, e a recompensa vem em dobro.', 'A dor encontra dois ombros em vez de um. Ela chora, depois respira, e entrega o que prometera — grata pela presença da dupla.'], reward: '+2 Anel da Mãe + Moeda Dourada' } },
       { label: 'Passar em silêncio',
         desc: 'Respeitar a dor dela. Seguir sem perturbar.',
         outcome_ok: {
