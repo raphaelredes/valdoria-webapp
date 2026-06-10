@@ -56,6 +56,15 @@
  *   Se só vier skill, o atributo é derivado via SKILL_TO_ABILITY. SEMPRE a mesma
  *   regra: prof ESCALANDO por nível (PHB), NUNCA +2 fixo.
  *
+ *   normalizeCheck(raw) (A3.2 #90) — NORMALIZADOR canônico do descritor de check.
+ *   Aceita TODOS os dialetos dos datasets: flat {dc, skill} (skill = key PHB,
+ *   alias 'sleight'/'animal', ability short 'wis', ability FULL 'wisdom', ou PT
+ *   'SAB'), flat {stat, dc} (short ou full), aninhado {check:{dc, skill|stat}},
+ *   string legada 'dice:<skill>:<dc>:<mod>', e skill ARRAY (multi-skill).
+ *   Retorna {stat:<short>, skill:<key|null>, dc:<int|null>, mod:<int|null>,
+ *   skills?:[...]}. resolveSkillCheck/successPct já roteiam por ele — novo
+ *   consumidor NUNCA deve parsear descritor por conta própria.
+ *
  * SELF-TEST (console DEV — deve dar tudo true):
  *   DndRules.abilityMod(14)===2 && DndRules.proficiencyBonus(5)===3 &&
  *   DndRules.classKey('Clérigo')==='clerigo' && DndRules.classKey('Wizard')==='mago' &&
@@ -234,15 +243,80 @@
     }
 
     // mod + prof compartilhado por resolveSkillCheck E successPct → ODDS IGUAIS.
+    // A3.2 (#90): full EN -> short ('wisdom'->'wis'). Reverso de STAT_FULL.
+    var _STAT_SHORT = (function () {
+        var out = {};
+        for (var k in STAT_FULL) { if (STAT_FULL.hasOwnProperty(k)) out[STAT_FULL[k]] = k; }
+        return out;
+    })();
+
+    // A3.2 (#90): normalizador canônico do descritor de skill check. Ver doc no
+    // header. Qualquer dialeto -> {stat:<short>, skill:<key|null>, dc, mod, skills?}.
+    function normalizeCheck(raw) {
+        if (!raw) return null;
+        if (typeof raw === 'string') {
+            // Encoding legado 'dice:<skill>:<dc>:<mod>' (svc dialogues pré-A3.2).
+            if (raw.indexOf('dice:') === 0) {
+                var parts = raw.split(':');
+                return normalizeCheck({
+                    skill: parts[1],
+                    dc: parseInt(parts[2], 10),
+                    mod: parseInt(String(parts[3] || '0').replace('+', ''), 10) || 0
+                });
+            }
+            return null;
+        }
+        if (typeof raw !== 'object') return null;
+        // Shape aninhado {check:{...}} (festival/cidade) — campos do nível de
+        // cima (mod) complementam os do aninhado.
+        if (raw.check && typeof raw.check === 'object') {
+            var inner = normalizeCheck(raw.check);
+            if (inner && inner.mod == null && typeof raw.mod === 'number') inner.mod = raw.mod;
+            return inner;
+        }
+        var out = {
+            stat: null, skill: null,
+            dc: (raw.dc != null ? (raw.dc | 0) : (raw.difficulty != null ? (raw.difficulty | 0) : null)),
+            mod: (typeof raw.mod === 'number' ? raw.mod : null)
+        };
+        var skillRaw = raw.skill;
+        if (Array.isArray(skillRaw)) {           // multi-skill (exploração legacy)
+            out.skills = skillRaw.slice();
+            skillRaw = skillRaw[0];
+        }
+        var k = String(skillRaw || '').toLowerCase().trim();
+        if (k) {
+            k = _SKILL_ALIAS[k] || k;
+            if (STAT_NAMES_PT[k]) {                       // ability short no campo skill
+                out.stat = k;
+            } else if (_STAT_SHORT[k]) {                  // ability FULL no campo skill
+                out.stat = _STAT_SHORT[k];
+            } else if (STAT_KEY_PT[k.toUpperCase()]) {    // PT 'SAB'/'DES' no campo skill
+                out.stat = _STAT_SHORT[STAT_KEY_PT[k.toUpperCase()]];
+            } else if (SKILL_TO_ABILITY[k]) {             // skill PHB canônica
+                out.skill = k;
+                out.stat = SKILL_TO_ABILITY[k];
+            } else {
+                out.skill = k;                            // passthrough (label/desconhecida)
+            }
+        }
+        var s = String(raw.stat || '').toLowerCase().trim();
+        if (s) {                                          // campo stat VENCE (precedência histórica)
+            if (STAT_NAMES_PT[s]) out.stat = s;
+            else if (_STAT_SHORT[s]) out.stat = _STAT_SHORT[s];
+            else if (STAT_KEY_PT[s.toUpperCase()]) out.stat = _STAT_SHORT[STAT_KEY_PT[s.toUpperCase()]];
+        }
+        return out;
+    }
+
     function _modAndProf(player, check) {
-        check = check || {};
-        var stat = check.stat
-            ? String(check.stat).toLowerCase()
-            : (SKILL_TO_ABILITY[String(check.skill || '').toLowerCase()] || 'str');
+        // A3.2: roteia pelo normalizador — aceita todos os dialetos de descritor.
+        var n = normalizeCheck(check) || {};
+        var stat = n.stat || 'str';
         var mod = statMod(player, stat);
         var lvl = (player && (player.level || player.lvl)) || 1;
-        var prof = isProficient(player, stat, check.skill) ? proficiencyBonus(lvl) : 0;
-        return { stat: stat, mod: mod, prof: prof };
+        var prof = isProficient(player, stat, n.skill) ? proficiencyBonus(lvl) : 0;
+        return { stat: stat, mod: mod, prof: prof, skill: n.skill };
     }
 
     /* ------------------------------------------------------------------ */
@@ -373,9 +447,11 @@
     // % de sucesso pro preview — usa o MESMO mod+prof do resolve (garante que o
     // % mostrado bate com a rolagem; resolve o H1/A1 — preview e resolve divergiam).
     function successPct(player, check) {
-        if (!check || check.dc == null) return null;
+        // A3.2: dc pode vir flat, aninhado (check{}) ou do encoding legado.
+        var n = normalizeCheck(check);
+        if (!n || n.dc == null) return null;
         var r = _modAndProf(player, check);
-        return dcToSuccessPct(check.dc, r.mod + r.prof);
+        return dcToSuccessPct(n.dc, r.mod + r.prof);
     }
 
     // CD de magia: 8 + prof + mod(atributo de conjuração POR CLASSE). Respeita o
@@ -394,13 +470,14 @@
     // auto-sucesso/falha em 20/1 — crit/critFail ficam como flag informativa pra
     // narrativa). prof SEMPRE escala por nível (PHB), NUNCA +2 fixo.
     function resolveSkillCheck(player, check) {
-        check = check || {};
+        // A3.2: roteia pelo normalizador (todos os dialetos de descritor).
+        var n = normalizeCheck(check) || {};
         var mp = _modAndProf(player, check);
         var d20 = 1 + Math.floor(Math.random() * 20);
-        var dc = (check.dc != null) ? (check.dc | 0) : 10;
+        var dc = (n.dc != null) ? n.dc : 10;
         var total = d20 + mp.mod + mp.prof;
         return {
-            d20: d20, mod: mp.mod, prof: mp.prof, stat: mp.stat, skill: check.skill || null,
+            d20: d20, mod: mp.mod, prof: mp.prof, stat: mp.stat, skill: mp.skill || null,
             total: total, dc: dc, success: total >= dc, crit: d20 === 20, critFail: d20 === 1
         };
     }
@@ -427,6 +504,7 @@
         dcToSuccessPct: dcToSuccessPct,
         successPct: successPct,
         spellSaveDc: spellSaveDc,
+        normalizeCheck: normalizeCheck,
         resolveSkillCheck: resolveSkillCheck,
         statLabel: statLabel,
         skillLabelPT: skillLabelPT,

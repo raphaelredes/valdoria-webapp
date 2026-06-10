@@ -472,6 +472,26 @@
   window._dispatchSvcChoice = function(ch, dialogue, dialogues) {
     var cb = ch.cb || '';
     var ov = document.getElementById('encounter-overlay');
+    /* A3.2 (#90): shape CANÔNICO de skill check em choice — check:{skill|stat,
+       dc, faction?}. Substitui o encoding legado cb:'dice:<skill>:<dc>:<mod>'
+       (parser mantido abaixo só por back-compat). Normalização via DndRules. */
+    if (ch.check && typeof ch.check === 'object' && ch.check.dc != null) {
+      var nck = (window.DndRules && DndRules.normalizeCheck)
+        ? DndRules.normalizeCheck(ch.check)
+        : { skill: ch.check.skill || null, stat: ch.check.stat || null, dc: ch.check.dc, mod: null };
+      window._diceCheckSvc({
+        ability: nck.skill || nck.stat || 'dexterity',
+        dc: nck.dc,
+        mod: 0,  // servidor é a autoridade do mod; LOCAL computa dos stats reais
+        npc: dialogue.npc,
+        label: ch.label,
+        faction: ch.check.faction || (window._SVC_CONFIG && window._SVC_CONFIG.faction),
+        ch: ch,
+        dialogue: dialogue,
+        dialogues: dialogues
+      });
+      return true;
+    }
     if (cb === 'close') {
       // Sessão #23 v8 (2026-05-22): user reportou "Talvez depois" não fechava.
       // Sessão #28 (2026-05-24): user reportou tela escurecida + nada acontece

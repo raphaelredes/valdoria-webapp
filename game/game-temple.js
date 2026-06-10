@@ -93,7 +93,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'h_mass',  label: 'Cura em Massa · 5º círculo · 80V · 3d8+4 (6 alvos)', cb: 'heal-confirm', backend_cb: 'temple_pay_mass_cure',
         resultNarration: 'Irmã Elara ergue ambas as mãos. Uma onda dourada se expande do altar — atinge todos os feridos ao alcance.',
         resultText: '"Magia de quinto círculo, dom dos Quatro." <i>(voz firme em ritual)</i> <b>+3d8+4 HP em até 6 alvos.</b> "Sejam todos restaurados — corpo, espírito, e o juramento que os trouxe aqui."' },
-      { id: 'h_pray',  label: 'Tentar prece pessoal · Religião DC 14', cb: 'dice:religion:14:+1' },
+      { id: 'h_pray',  label: 'Tentar prece pessoal · Religião DC 14', check: { skill: 'religion', dc: 14 } },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -108,7 +108,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'p_pay',   label: 'Pagar 40V — purificar veneno', cb: 'cure_poison-confirm', backend_cb: 'temple_pay_cure_poison',
         resultNarration: 'Padre Aldric ergue o braseiro acima de tua cabeça. A fumaça branca encurva-se ao redor — atraída pelo veneno em teu sangue.',
         resultText: '"Veneno purificado, em nome do Pai-da-Aurora." <i>(traça o sinal sagrado em tua testa)</i> <b>Condição Envenenado removida.</b> "Vai com cuidado — a próxima dose vai exigir mais que prata."' },
-      { id: 'p_persuade', label: '"Há quem pague isso?" · Persuasão DC 15', cb: 'dice:persuasion:15:+0' },
+      { id: 'p_persuade', label: '"Há quem pague isso?" · Persuasão DC 15', check: { skill: 'persuasion', dc: 15 } },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -130,7 +130,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'b_guide', label: 'Orientação · 5V · +1d4 perícia única', cb: 'bless-confirm', backend_cb: 'temple_pay_guidance', renownDelta: 1,
         resultNarration: 'Theron passa o polegar úmido sobre tua testa, deixando um sinal que reluz brevemente.',
         resultText: '"O-orientação, irmão. <i>(pisca esperançoso)</i> Funciona uma vez só, depois passa. Mas funciona bem!" <b>+1d4 na próxima perícia que tentar.</b>' },
-      { id: 'b_persuade', label: '"Bênção a um irmão?" · Persuasão DC 13', cb: 'dice:persuasion:13:+1' },
+      { id: 'b_persuade', label: '"Bênção a um irmão?" · Persuasão DC 13', check: { skill: 'persuasion', dc: 13 } },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -149,7 +149,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'rc_pay', label: 'Pagar 90V — Remover Maldição', cb: 'remove_curse-confirm', backend_cb: 'temple_pay_remove_curse', renownDelta: 2,
         resultNarration: 'Miriel sela a câmara com runas douradas no chão. Tua pele formiga — depois queima. As runas pulsam em sincronia com teu coração.',
         resultText: '"Quem te amaldiçoou foi habilidoso, mas todo nó pode ser desfeito." <i>(traça o último símbolo)</i> <b>Maldição removida.</b> "Cuida pra não cruzar com quem te marcou — segunda vez a magia custa o dobro."' },
-      { id: 'rc_arcana', label: '"Que tipo de maldição?" · Arcana DC 15', cb: 'dice:arcana:15:+2' },
+      { id: 'rc_arcana', label: '"Que tipo de maldição?" · Arcana DC 15', check: { skill: 'arcana', dc: 15 } },
       { id: 'back',   label: '"Vou pensar."', cb: 'close' }
     ]
   },
@@ -186,7 +186,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'rd_pay', label: 'Pagar 1000V — Reviver os Mortos', cb: 'raise_dead-confirm', backend_cb: 'temple_pay_raise_dead', renownDelta: 5,
         resultNarration: 'Orenthia se posiciona sobre o corpo. As velas negras dobram a intensidade — então, súbito, todas se apagam ao mesmo tempo. Silêncio absoluto. Por meio segundo eternos.',
         resultText: '"Volta, irmão. <i>(voz dupla — a dela e algo mais)</i> O caminho ainda não terminou pra ti." <b>Personagem revive com 1 HP. Penalidade: -4 em todas as rolagens por 4 descansos longos.</b> "Não fale do que viu lá. Os Quatro ouvem o que se diz."' },
-      { id: 'rd_insight', label: '"Ela voltará... a mesma?" · Intuição DC 16', cb: 'dice:insight:16:+1' },
+      { id: 'rd_insight', label: '"Ela voltará... a mesma?" · Intuição DC 16', check: { skill: 'insight', dc: 16 } },
       { id: 'back',   label: '"Não estou pronto."', cb: 'close' }
     ]
   },

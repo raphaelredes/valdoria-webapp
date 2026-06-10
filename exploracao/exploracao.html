@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T12:05:19Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T15:57:48Z - do not edit directly, edit source -->
 
 
 
@@ -19156,14 +19156,25 @@ function seededRng(seed) {
    window.calcReadTime de shared/text-timing.js (9 categorias + strip de HTML),
    carregado no bloco de loaders cedo. O call site (window.calcReadTime) já
    tinha guard `window.calcReadTime ? ... : 2000` como fallback. */
+// A3.2 (#90): modificador de check CONSOLIDADO — skill nomeada -> atributo via
+// DndRules (fix 8l) + proficiência ESCALANDO por nível (PHB Tabela 1-2). Era
+// +2 FIXO em 3 sites (calcSuccessPct/confirmChoice/_resolveSkillForCheck) e
+// 2 deles nem mapeavam skill->atributo — preview divergia do roll do servidor
+// (8f, prof escala) a partir do nível 5.
+function _checkModOf(p, skillKey) {
+  if (!p || !skillKey) return 0;
+  var k = String(skillKey).toLowerCase();
+  var ab = (window.DndRules && DndRules.SKILL_TO_ABILITY && DndRules.SKILL_TO_ABILITY[k]) || k;
+  var mod = (p.mods && (p.mods[ab] || 0)) || 0;
+  if (p.prof && p.prof.indexOf && p.prof.indexOf(k) >= 0) {
+    mod += (window.DndRules && DndRules.proficiencyBonus)
+      ? DndRules.proficiencyBonus(p.lvl || p.level || 1) : 2;
+  }
+  return mod;
+}
 function calcSuccessPct(choice, p) {
   if (!choice.skill) return 100;
-  // FASE 8/8l (#9): mapeia skill->atributo via DndRules.SKILL_TO_ABILITY ANTES de
-  // ler p.mods (que so tem abreviacoes de atributo str/dex/.../cha). Antes lia
-  // p.mods[choice.skill] direto, entao skills nomeadas (persuasion/athletics/...)
-  // davam mod 0 -> chance% errada em ~70% dos checks de tile.
-  var ab = (window.DndRules && DndRules.SKILL_TO_ABILITY && DndRules.SKILL_TO_ABILITY[String(choice.skill).toLowerCase()]) || choice.skill;
-  const mod = (p.mods[ab] || 0) + (p.prof && p.prof.includes(choice.skill) ? 2 : 0);
+  const mod = _checkModOf(p, choice.skill);
   const needed = choice.dc - mod;
   if (needed <= 1) return 100;
   if (needed > 20) return 0;
@@ -36194,7 +36205,9 @@ function confirmChoice(idx) {
   const statsEl = document.getElementById('confirm-stats');
   if (ch.skill) {
     const pct = calcSuccessPct(ch, S.player);
-    const mod = (S.player.mods[ch.skill] || 0) + (S.player.prof.includes(ch.skill) ? 2 : 0);
+    // A3.2 (#90): mesmo mod do preview/roll (antes lia mods[skill] direto sem
+    // mapear skill->atributo e somava +2 fixo — o "(1d20 +X)" exibido divergia).
+    const mod = _checkModOf(S.player, ch.skill);
     const modStr = (mod >= 0 ? '+' : '') + mod;
     statsEl.textContent = 'Teste de ' + skillLabelOf(ch.skill) + ' CD ' + ch.dc + ' (1d20 ' + modStr + ') · ' + pct + '% de sucesso';
     statsEl.style.display = 'block';
@@ -36536,7 +36549,9 @@ function _resolveSkillForCheck(p, skillSpec) {
   var best = { skill: skills[0], mod: -99 };
   for (var i = 0; i < skills.length; i++) {
     var sk = skills[i];
-    var m = (p.mods[sk] || 0) + (p.prof && p.prof.includes(sk) ? 2 : 0);
+    // A3.2 (#90): _checkModOf mapeia skill nomeada->atributo (antes mods[sk]
+    // direto dava 0 pra 'athletics' etc.) + prof escalando (era +2 fixo).
+    var m = _checkModOf(p, sk);
     if (m > best.mod) best = { skill: sk, mod: m };
   }
   return best;

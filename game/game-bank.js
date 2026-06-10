@@ -94,7 +94,7 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'd_1000', label: 'Depositar 1000 V · taxa 5V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_1000', renownDelta: +3,
         resultNarration: 'Aldwin sai detrás do balcão pessoalmente. Cobre Vossa Senhoria com olhar de respeito profundo. Dois guardas escoltam o cofre interno.',
         resultText: '"Mil Valdoritas. Cinco de taxa. <i>(ajeita os óculos)</i> Vossa Senhoria entra agora pro registro dos clientes principais da Casa de Tholram." <b>+3 Renome. Acesso a investimentos premium liberado.</b>' },
-      { id: 'd_persuade', label: '"Sem taxas, Aldwin?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2',
+      { id: 'd_persuade', label: '"Sem taxas, Aldwin?" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 },
         resultNarration: 'Aldwin ergue uma sobrancelha, surpreso com o argumento. <i>(pousa a pena e cruza os dedos sobre o livro-razão)</i>',
         resultText: '"Pois bem... a Casa abre exceção desta vez. Sem taxa neste depósito — cortesia a um cliente de boa lábia." <i>(carimba o lacre com meio sorriso)</i> "Mas não comente com os outros. A balança de Tholram não costuma pesar a favor de ninguém."',
         resultNarrationFail: 'Aldwin nem ergue os olhos do livro-razão. <i>(continua anotando com caligrafia precisa)</i>',
@@ -123,7 +123,7 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'w_max',  label: 'Retirar saldo total · taxa 2%', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_all', renownDelta: 0,
         resultNarration: 'Aldwin pausa um momento. <i>(olha por cima dos óculos meia-lua)</i> Fechar conta é decisão séria.',
         resultText: '"Saldo total, descontados dois por cento. <i>(empurra a bolsa cheia)</i> A conta fica suspensa por seis meses — se voltar antes, retomamos sem taxa de reabertura. Boa jornada, Vossa Senhoria."' },
-      { id: 'w_persuade', label: '"Taxa menor pra cliente fiel?" · Persuasão DC 15', cb: 'dice:persuasion:15:+1',
+      { id: 'w_persuade', label: '"Taxa menor pra cliente fiel?" · Persuasão DC 15', check: { skill: 'persuasion', dc: 15 },
         resultNarration: 'Aldwin considera por um momento, medindo Vossa Senhoria como mediria ouro na balança. <i>(assente devagar)</i>',
         resultText: '"Fidelidade tem seu valor, admito. Reduzo a taxa à metade desta retirada — um por cento, não dois." <i>(corrige o lance no livro)</i> "A Casa de Tholram lembra de quem volta. Que volte mais vezes."',
         resultNarrationFail: 'Aldwin pousa o carimbo e olha por cima dos óculos meia-lua. <i>(paciente, mas firme)</i>',
@@ -152,7 +152,7 @@ var SERVICE_DIALOGUES_BANK = {
       // sessão #76 FIX: choices de dado precisam de resultNarration/resultText —
       // senão svc-interactions.js fecha o encounter ao clicar "Continuar" (bug
       // reportado: rolagem → Continuar → sai do diálogo sem mostrar nada).
-      { id: 'l_insight', label: '"Quais os termos exatos?" · Intuição DC 13', cb: 'dice:insight:13:+1',
+      { id: 'l_insight', label: '"Quais os termos exatos?" · Intuição DC 13', check: { skill: 'insight', dc: 13 },
         resultNarration: 'Vossa Senhoria observa os olhos de Aldwin enquanto ele fala — e percebe que ele não esconde nada. Cada cláusula está exatamente como dita.',
         resultText: '"Dez por cento ao mês, juros simples — nunca compostos. Atraso cobra vinte por cento de multa sobre o saldo. Na terceira falta, o brasão da Casa vai à sua porta com dois guardas e um oficial do Conde." <i>(bate o indicador no contrato)</i> "Está tudo aqui. Leia antes de assinar — eu insisto."',
         resultNarrationFail: 'Aldwin recosta-se e fecha o monóculo. <i>(o olhar fica ilegível)</i>',
@@ -177,7 +177,7 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 's_year',  label: 'Guardar 1 ano · 200V (Honored+)', cb: 'store-confirm', renownDelta: +3,
         resultNarration: 'Aldwin curva-se levemente. Conduz Vossa Senhoria à câmara dos cofres principais, no andar de cima. Quatro guardas postados.',
         resultText: '"Trezentos e sessenta dias, duzentas Valdoritas. <i>(seleciona o cofre nobre)</i> A Casa de Tholram garante a salvaguarda. Quem deposita por um ano, recebe o anel auxiliar para acesso de emergência." <b>Item armazenado no Cofre Real. +3 Renome.</b>' },
-      { id: 's_persuade', label: '"Sou cliente antigo, dispense a primeira semana" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
+      { id: 's_persuade', label: '"Sou cliente antigo, dispense a primeira semana" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 } },
       { id: 'back', label: 'Voltar', cb: 'close' }
     ]
   },
@@ -198,7 +198,7 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'r_all',    label: 'Esvaziar cofre · 2% do valor total', cb: 'retrieve-confirm', renownDelta: 0,
         resultNarration: 'Aldwin escolta Vossa Senhoria pessoalmente à câmara dos cofres. Dois guardas testemunham.',
         resultText: '"Cofre esvaziado, dois por cento do valor total como taxa final. <i>(sela o cofre vazio)</i> A Casa de Tholram lembrará desta data. Vossa Senhoria fica livre para reabrir conta nova quando quiser." <b>Cofre desocupado.</b>' },
-      { id: 'r_insight', label: '"Você confere por dentro também?" · Insight DC 12', cb: 'dice:insight:12:+1' },
+      { id: 'r_insight', label: '"Você confere por dentro também?" · Insight DC 12', check: { skill: 'insight', dc: 12 } },
       { id: 'back', label: 'Voltar', cb: 'close' }
     ]
   },
@@ -219,7 +219,7 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'i_high', label: 'Alto · 1000V × 20% (risco real)', cb: 'invest-confirm', renownDelta: +2,
         resultNarration: 'Aldwin pausa antes de pegar o contrato Alto. <i>(estuda Vossa Senhoria)</i> Volta com pergaminho selado em cera vermelha-sangue.',
         resultText: '"Mil Valdoritas, vinte por cento ao mês — explora rota das Marcas, primeiro mês com expedição experimental. <i>(coloca a pena)</i> Pode duplicar capital em três meses, ou perder tudo se a expedição falhar." <b>+200V/mês potencial · risco substancial. +2 Renome.</b>' },
-      { id: 'i_persuade', label: '"Posso ter taxa preferencial?" · Persuasão DC 16', cb: 'dice:persuasion:16:+2' },
+      { id: 'i_persuade', label: '"Posso ter taxa preferencial?" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 } },
       { id: 'about_tavira', label: '"E os bons clientes antigos? Como a Mestra Tavira?"', cb: 'about_tavira' },
       { id: 'i_rude', label: '"Cinco por cento é miséria. Você está roubando."', cb: 'opinion-rude', renownDelta: -2 },
       { id: 'back', label: 'Voltar', cb: 'close' }
@@ -236,8 +236,8 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'in_buy', label: 'Adquirir Seguro · 50V/mês · 3 meses min.', cb: 'insurance-confirm', renownDelta: +3,
         resultNarration: 'Aldwin pega o pergaminho selado com a marca do Conde. <i>(testemunha do banqueiro júnior chamada)</i>',
         resultText: '"Seguro de Aventureiros ativado. Cinquenta Valdoritas mensais, mínimo de três meses. <i>(empurra pergaminho assinado)</i> Em caso de morte verificada por testemunha, a Casa contrata Revivify no Templo (até 300V em diamante), e o herdeiro nomeado recebe o resíduo." <b>Seguro ativo. +3 Renome da Casa.</b>' },
-      { id: 'in_test', label: '"Confio em você, não em papéis" · Engano DC 15', cb: 'dice:deception:15:+0' },
-      { id: 'in_insight', label: '"Já houve fraude com este Seguro?" · Insight DC 14', cb: 'dice:insight:14:+2' },
+      { id: 'in_test', label: '"Confio em você, não em papéis" · Engano DC 15', check: { skill: 'deception', dc: 15 } },
+      { id: 'in_insight', label: '"Já houve fraude com este Seguro?" · Insight DC 14', check: { skill: 'insight', dc: 14 } },
       { id: 'in_rude', label: '"Vocês banqueiros só vendem medo."', cb: 'opinion-rude', renownDelta: -3 },
       { id: 'back', label: 'Voltar', cb: 'close' }
     ]
@@ -259,7 +259,7 @@ var SERVICE_DIALOGUES_BANK = {
       { id: 'e_tower',  label: 'Torre · 15000V · 100 dias', cb: 'estate-confirm', renownDelta: +3,
         resultNarration: 'Aldwin entrega plantas arquitetônicas — torre fortificada com porão de cofre, três andares, salão de audiência. <i>(prazo de cem dias de construção)</i>',
         resultText: '"Quinze mil Valdoritas, mais cem dias de construção. <i>(carimba o contrato)</i> A Casa supervisiona obras. Quando concluída, gera 1 gp/dia + base de operações fortificada. <b>Tower +3 Renome da Casa.</b>"' },
-      { id: 'e_stronghold', label: 'Stronghold · 50000V · 400 dias · DC 20 Persuasão', cb: 'dice:persuasion:20:+3' },
+      { id: 'e_stronghold', label: 'Stronghold · 50000V · 400 dias · DC 20 Persuasão', check: { skill: 'persuasion', dc: 20 } },
       { id: 'back',     label: 'Voltar', cb: 'close' }
     ]
   },

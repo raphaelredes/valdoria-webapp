@@ -47416,7 +47416,7 @@ var ACTION_HANDLERS = {
         //   aplicar reward. Fix: id passa a ser igual à key de LYANA_SUB.
         { id: 'lyana-confirm-deliver',        label: '🤝 "Aceito. Que teu pai retorne em paz."' },
         { id: 'lyana-confirm-deliver-modest', label: '↩ "Não preciso de paga. Cuida-te, Lyana."' },
-        { id: 'curious', label: '🔮 "O cristal... runas que sangram? Conta mais." · Investigação DC 13', cb: 'dice:investigation:13:+0' }
+        { id: 'curious', label: '🔮 "O cristal... runas que sangram? Conta mais." · Investigação DC 13', check: { skill: 'investigation', dc: 13 } }
       ]
     };
     var LYANA_SUB = {
@@ -48660,7 +48660,8 @@ function _classLabelPT(c){
 // - Removidos "irmão/irmã" (gender bug: Clóvis masculino vinha com "irmã" no leave)
 // - "desc" usa forma neutra/default-masc (classe oficial D&D 5e) — gender-aware
 //   via (a) parenthetical em adjetivos que precisem
-// - 4ª choice é DICE CHECK (cb: 'dice:ability:dc:+mod') com narrativa de
+// - 4ª choice é DICE CHECK (check: {skill|stat, dc} — A3.2 #90; encoding
+// legado cb:'dice:...' ainda parseado por back-compat) com narrativa de
 //   sucesso/falha. Ability D&D 5e por classe; CD 12-15 (mid-level).
 var ALLY_DIALOGUE_TEMPLATES = {
   clerigo: {
@@ -48673,7 +48674,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'pray',  label: '🕯️ "Reza por nós antes do próximo combate."',  renown: 2 },
       { id: 'ask',   label: '📜 "Conta-me sobre tua devoção."',              renown: 1 },
       { id: 'boon',  label: '✨ "Pede aos Quatro um favor especial." [CD 14 Persuasão]',
-        cb: 'dice:cha:14:+2',
+        check: { skill: 'persuasion', dc: 14 },
         resultNarration: '{name} fecha os olhos. Luz dourada envolve teus dedos por um instante — bênção rara dos Quatro.',
         resultText: 'Você se sente fortalecido(a). <b>+1 dado de inspiração</b> guardado até o próximo descanso.',
         resultNarrationFail: '{name} sorri triste. "A fé não se barganha. Os Quatro decidem quem merece."',
@@ -48691,7 +48692,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'tactics', label: '⚔️ "Que tática usamos no próximo combate?"', renown: 2 },
       { id: 'story',   label: '🪨 "Conta uma batalha que te marcou."',       renown: 1 },
       { id: 'spar',    label: '🛡️ "Sparring rápido pra aquecer." [CD 13 Atletismo]',
-        cb: 'dice:str:13:+3',
+        check: { skill: 'athletics', dc: 13 },
         resultNarration: 'Vocês trocam golpes secos por dois minutos. {name} desarma-te no terceiro lance — sorri, devolve a arma.',
         resultText: 'Aprendeu um truque novo. <b>Vantagem na primeira jogada de ataque</b> do próximo combate.',
         resultNarrationFail: 'Você escorrega na lama. {name} agarra teu braço antes da queda — paciente, mas crítico(a).',
@@ -48709,7 +48710,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'spell',  label: '✨ "Que magia preparaste pra hoje?"',           renown: 2 },
       { id: 'theory', label: '📚 "Explica-me a Trama Arcana."',               renown: 1 },
       { id: 'scribe', label: '📜 "Escreve uma magia pra meu uso." [CD 15 Arcanismo]',
-        cb: 'dice:int:15:+3',
+        check: { skill: 'arcana', dc: 15 },
         resultNarration: '{name} disseca uma página, anota fórmulas marginais e entrega-te o pergaminho ainda úmido de tinta.',
         resultText: 'Recebeu <b>Pergaminho de Mísseis Mágicos</b> (uso único, próximo descanso).',
         resultNarrationFail: '{name} morde o lábio. "A fórmula resiste. Ou tu não estás concentrado(a)."',
@@ -48727,7 +48728,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'rumor', label: '👂 "Ouviste algum rumor interessante?"',        renown: 2 },
       { id: 'past',  label: '🗝️ "De onde vieste?"',                          renown: 0 },
       { id: 'lift',  label: '💰 "Pega-me algo na multidão. Discreto(a)." [CD 14 Furtividade]',
-        cb: 'dice:dex:14:+4',
+        check: { skill: 'stealth', dc: 14 },
         resultNarration: '{name} desaparece num parágrafo. Volta antes do próximo suspiro — uma bolsa de couro caída no teu cinto.',
         resultText: 'Recebeu <b>+8 Valdoritas</b>. Ninguém percebeu.',
         resultNarrationFail: 'Um grito atravessa a praça. {name} pisa atrás de ti, mão vazia, olhar tenso. "Apressei o coração demais."',
@@ -48745,7 +48746,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'track',  label: '🐺 "Pode rastrear esses lobos comigo?"',         renown: 2 },
       { id: 'nature', label: '🌲 "Fala-me da floresta do norte."',             renown: 1 },
       { id: 'forage', label: '🌿 "Coleta ervas curativas pra mim." [CD 13 Sobrevivência]',
-        cb: 'dice:wis:13:+3',
+        check: { skill: 'survival', dc: 13 },
         resultNarration: '{name} some por dez minutos entre as ruelas da feira. Volta com três folhas amassadas e raízes secas.',
         resultText: 'Recebeu <b>2× Erva Curativa</b> (cada uma cura 1d4+1 PV fora de combate).',
         resultNarrationFail: '{name} volta com as mãos vazias e um machucado leve no antebraço. "A cidade não tem o que a floresta tem."',
@@ -48763,7 +48764,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'bless', label: '✨ "Renova-me a fé antes do combate."',          renown: 2 },
       { id: 'oath',  label: '⚜️ "Conta-me como fizeste teu juramento."',      renown: 1 },
       { id: 'imbue', label: '🛡️ "Imbui minha arma de luz sagrada." [CD 14 Religião]',
-        cb: 'dice:cha:14:+3',
+        check: { skill: 'religion', dc: 14 },
         resultNarration: '{name} coloca as mãos sobre tua arma. Uma luz dourada flui ao longo do gume — calma como sol de manhã.',
         resultText: 'Sua arma recebe <b>+1d8 dano radiante</b> no próximo ataque acertado.',
         resultNarrationFail: 'O símbolo sagrado treme. {name} retrai as mãos. "Os Deuses pedem mais do que palavras hoje."',
@@ -48781,7 +48782,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'inspire', label: '🎵 "Toca-me Inspiração antes da batalha."',    renown: 2 },
       { id: 'tale',    label: '📖 "Conta a melhor história da estrada."',     renown: 1 },
       { id: 'gossip',  label: '👂 "Sonda boatos da taverna pra mim." [CD 12 Persuasão]',
-        cb: 'dice:cha:12:+3',
+        check: { skill: 'persuasion', dc: 12 },
         resultNarration: '{name} desaparece pela porta da taverna. Volta meia-hora depois com sorriso enviesado e um nome em código.',
         resultText: 'Aprendeu <b>localização secreta</b> de uma masmorra próxima. Marcada no mapa.',
         resultNarrationFail: '{name} volta encharcado(a) de cerveja, sem dizer nada. Alguém o(a) reconheceu.',
@@ -48799,7 +48800,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'commune', label: '🌿 "Comunga com a natureza por nós."',         renown: 2 },
       { id: 'animal',  label: '🦅 "Que forma animal preferes assumir?"',      renown: 1 },
       { id: 'totem',   label: '🐺 "Pede um espírito animal pra me guiar." [CD 13 Natureza]',
-        cb: 'dice:wis:13:+3',
+        check: { skill: 'nature', dc: 13 },
         resultNarration: '{name} murmura uma canção antiga. Sentes algo invisível pousar no teu ombro — leve como pena, vigilante.',
         resultText: 'Recebeu <b>Espírito Sentinela</b> (avisa de emboscadas no próximo descanso longo).',
         resultNarrationFail: 'Os pássaros se afastam. {name} balança a cabeça. "Os espíritos não vêm a quem grita por eles."',
@@ -48817,7 +48818,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'train',  label: '👊 "Treina comigo antes da aventura."',         renown: 2 },
       { id: 'wisdom', label: '☯️ "Compartilha um ensinamento."',              renown: 1 },
       { id: 'focus',  label: '🧘 "Ajuda-me a focar minha mente." [CD 13 Sabedoria]',
-        cb: 'dice:wis:13:+3',
+        check: { stat: 'wis', dc: 13 },
         resultNarration: '{name} pousa dois dedos no centro de tua testa. Por um instante todo som do mundo desaparece — clareza total.',
         resultText: 'Recebeu <b>Vantagem em saves de Sabedoria</b> nas próximas 8 horas.',
         resultNarrationFail: 'Tua mente vagueia pela praça. {name} suspira. "Não posso te focar de fora. O caminho é teu."',
@@ -48835,7 +48836,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'rage',  label: '💢 "Solta a fúria contigo no próximo combate."', renown: 2 },
       { id: 'tribe', label: '🪓 "Fala-me da tua tribo."',                     renown: 1 },
       { id: 'arm',   label: '💪 "Queda de braço. Quem ganha paga a cerveja." [CD 15 Atletismo]',
-        cb: 'dice:str:15:+3',
+        check: { skill: 'athletics', dc: 15 },
         resultNarration: 'Quase trinta segundos de pulso firme. Tu vences no fim — {name} ri alto e bate na mesa.',
         resultText: '{name} paga a cerveja. Recebeu <b>+5 Valdoritas</b> (taxa simbólica da vitória).',
         resultNarrationFail: 'Teu braço bate na mesa em três segundos. {name} ri sem maldade — empurra a cerveja para ti.',
@@ -48853,7 +48854,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'show',   label: '🔥 "Mostra-me um truque novo."',                 renown: 2 },
       { id: 'origin', label: '🩸 "De onde vem teu poder?"',                    renown: 0 },
       { id: 'spark',  label: '⚡ "Empresta-me uma fagulha de poder." [CD 14 Carisma]',
-        cb: 'dice:cha:14:+3',
+        check: { stat: 'cha', dc: 14 },
         resultNarration: '{name} toca teu peito com a ponta do dedo. Uma faísca azul mergulha sob tua pele — quente, viva.',
         resultText: 'Recebeu <b>+1d6 dano elemental</b> no próximo ataque acertado.',
         resultNarrationFail: 'A faísca se apaga ao tocar-te. {name} ergue uma sobrancelha. "Tu não tens o fogo dentro. Hoje, ao menos."',
@@ -48871,7 +48872,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'pact',    label: '🌑 "Conta-me sobre teu Patrono."',              renown: 0 },
       { id: 'gift',    label: '🔮 "Pede um favor sombrio pra próxima luta."', renown: 2 },
       { id: 'whisper', label: '🌒 "Escuta o que o Patrono diz sobre mim." [CD 14 Intimidação]',
-        cb: 'dice:cha:14:+3',
+        check: { skill: 'intimidation', dc: 14 },
         resultNarration: '{name} fecha os olhos. Quando os abre, a pupila brilha por um instante. "Ele te conhece. Sabe teu nome verdadeiro."',
         resultText: 'Recebeu <b>profecia obscura</b> — vantagem no próximo save contra magia.',
         resultNarrationFail: '{name} abre os olhos depressa. "Ele não falou. Pior — viu-te e calou. Cuidado."',
@@ -48935,7 +48936,7 @@ function _showAllyDialogue(idx){
     },
     script: personalizedScript,
     /* Sessão #28 v3 (2026-05-24): choices podem ter:
-       - cb: 'dice:ability:dc:+mod' (dice check) → _diceCheckSvc lê resultNarration
+       - check: {skill|stat, dc} (dice check, A3.2 #90) → _diceCheckSvc lê resultNarration
          + resultText (success) ou resultNarrationFail + resultTextFail (failure)
        - cb: 'close' (default, leave/lore choices) — só fecha o encounter
        - renown: N pra renownDelta cosmético no badge */
