@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-09T02:01:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T03:04:41Z - do not edit directly, edit source -->
 
 
 
@@ -11346,7 +11346,18 @@ window.__onIntroTap = function() {
         }
         if (line.type === 'speech') {
           div.className = 'enc-line enc-speech';
-          if (line.speaker) div.setAttribute('data-speaker', line.speaker);
+          /* GUARD anti-vazamento (sessão #88, paridade com vEncounter): speaker
+             é display name; key snake_case de backend NUNCA aparece na tela —
+             cai pro nome do NPC do evento (rt.npc/npc_data) ou some. */
+          if (line.speaker) {
+            var _spk = String(line.speaker);
+            if (/^[a-z0-9_]+$/.test(_spk)) {
+              console.warn('[EXPLORE] speaker key não resolvida: ' + _spk);
+              var _evNpc = (rt && rt.event && rt.event.npc_data) || (rt && rt.npc) || null;
+              _spk = (_evNpc && _evNpc.name) || '';
+            }
+            if (_spk) div.setAttribute('data-speaker', _spk);
+          }
           div.innerHTML = safe;
         } else {
           div.className = 'enc-line enc-narration';
@@ -35364,18 +35375,28 @@ function triggerSurpriseAmbush(ev) {
     ? (countWord + ' vultos saltam de seus esconderijos')
     : 'um vulto salta de seu esconderijo';
   const lowEnemy = String(enemyName).toLowerCase();
+  /* Plural PT-BR por palavra (sessão #88 — antes era lowEnemy+'s', que gerava
+     "lobo cinzentos"): -ão→-ões, -l→-is, -r/-z→+es, -s/-x invariável, senão +s.
+     "lobo cinzento" → "lobos cinzentos", "salteador" → "salteadores". */
+  const lowEnemyPl = lowEnemy.split(' ').map(function (w) {
+    if (/ão$/.test(w)) return w.replace(/ão$/, 'ões');
+    if (/[sx]$/.test(w)) return w;
+    if (/l$/.test(w)) return w.replace(/l$/, 'is');
+    if (/[rz]$/.test(w)) return w + 'es';
+    return w + 's';
+  }).join(' ');
 
   // Narração PADRAO_ALDRIC (3ª pessoa, mostre-não-conte, 5 sentidos). Difere
   // conforme o player notou ou foi pego de surpresa.
   const script = playerNoticed
     ? [
         { type: 'narration', text: 'Um estalo seco de galho à frente, fora de ritmo com o vento — e seus sentidos já estavam alertas. Sombras se mexem entre a folhagem onde sombras não deveriam estar.' },
-        { type: 'narration', text: 'Você os pega no instante exato: ' + figuresPhrase + ', lâminas reluzindo, mas <i>um passo atrasados</i>. A emboscada falhou em pegá-lo de guarda baixa. ' + (plural ? ('São ' + countWord + ' — ' + lowEnemy + 's prontos para o bote.') : ('É um ' + lowEnemy + ', tenso, calculando o salto.')) },
+        { type: 'narration', text: 'Você os pega no instante exato: ' + figuresPhrase + ', lâminas reluzindo, mas <i>um passo atrasados</i>. A emboscada falhou em pegá-lo de guarda baixa. ' + (plural ? ('São ' + countWord + ' — ' + lowEnemyPl + ' prontos para o bote.') : ('É um ' + lowEnemy + ', tenso, calculando o salto.')) },
         { type: 'narration', text: 'O ar fica denso, suspenso entre o respirar e o golpe. A vantagem ainda pende — para quem agir primeiro. <b>O que você faz?</b>' }
       ]
     : [
         { type: 'narration', text: 'O bote vem sem aviso. Num átimo o caminho está vazio; no seguinte, ' + figuresPhrase + ' — couro, aço e fôlego quente perto demais do seu rosto.' },
-        { type: 'narration', text: 'O coração dispara num susto que percorre a espinha. ' + (plural ? ('São ' + countWord + ' ' + lowEnemy + 's, fechando o cerco') : ('Um ' + lowEnemy + ', já em cima de você')) + '; o cheiro de suor e metal preenche o ar. <i>Eles tiveram o primeiro lance</i> — e você corre atrás do tempo perdido.' },
+        { type: 'narration', text: 'O coração dispara num susto que percorre a espinha. ' + (plural ? ('São ' + countWord + ' ' + lowEnemyPl + ', fechando o cerco') : ('Um ' + lowEnemy + ', já em cima de você')) + '; o cheiro de suor e metal preenche o ar. <i>Eles tiveram o primeiro lance</i> — e você corre atrás do tempo perdido.' },
         { type: 'narration', text: 'A surpresa pesa contra você, mas não decide nada sozinha. <b>Reagir é tudo agora.</b>' }
       ];
 
@@ -35419,7 +35440,7 @@ function triggerSurpriseAmbush(ev) {
       tech: { label: 'COMBATE', text: 'Fuga falhou: você começa SURPRESO (perde o 1º round). Iniciando…' },
       dungeon_combat: Object.assign({}, _baseCombat, {
         surprise: false, playerSurprised: true,
-        narrative: 'A fuga falhou. ' + (plural ? ('Os ' + lowEnemy + 's') : ('O ' + lowEnemy)) + ' caem sobre você primeiro — você reage em desvantagem.'
+        narrative: 'A fuga falhou. ' + (plural ? ('Os ' + lowEnemyPl) : ('O ' + lowEnemy)) + ' caem sobre você primeiro — você reage em desvantagem.'
       })
     }
   });
@@ -35706,7 +35727,7 @@ function triggerCombatScreen(cfg) {
       playerSurprised: !!cfg.playerSurprised,
       preCombatEffects: Array.isArray(cfg.preCombatEffects) ? cfg.preCombatEffects : [],
       player: {
-        name: p.name || 'Heroi',
+        name: p.name || 'Aventureiro',  /* sessão #88: regra Herói≠Personagem (alinha 35586/21097/38705) */
         cls: p.cls || 'Guerreiro',
         lvl: p.lvl || 3,
         race: 'Humano',
@@ -38506,7 +38527,7 @@ function _applyJourneyHazardOutcome(hazard, choice, roll, success) {
     var modTotal = roll.mod + roll.prof;
     var sign = modTotal >= 0 ? '+' : '';
     checkEl.innerHTML =
-      '<div class="journey-formula">d20: ' + roll.d20 + ' ' + sign + modTotal + ' (' + _statLabel(choice.stat) + ') = ' + roll.total + ' vs DC ' + roll.dc + '</div>' +
+      '<div class="journey-formula">d20: ' + roll.d20 + ' ' + sign + modTotal + ' (' + _statLabel(choice.stat) + ') = ' + roll.total + ' vs CD ' + roll.dc + '</div>' +
       '<div class="journey-check-result ' + (success ? 'success' : 'fail') + '">' +
       (success ? '✓ Sucesso' : '✗ Falha') + '</div>';
   } else {

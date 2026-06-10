@@ -7,13 +7,17 @@
  * de estabelecimento em cidade/index.html (Task #23 centralização).
  *
  * MAPA_IA — navegação rápida:
- *   ~40   _ensureOverlay() — cria #encounter-overlay no DOM se ainda não existe
- *   ~80   _groupScriptIntoPages(script) — paginação canonical (2 estrofes / 10 linhas)
- *   ~110  _splitIntoSentences(text) — quebra por .!? pra typewriter por frase
- *   ~125  _typewriter(el, text, charMs, onDone) — char-by-char com pausa em <i>
- *   ~200  vEncounter.render(dialogue) — entry principal
- *   ~430  renderActions(dialogue, actionsEl, overlayEl, dialoguesRef) — cb dispatch
- *   ~510  vEncounter.close() / vEncounter.isOpen()
+ *   ~80   _ensureOverlay() — cria #encounter-overlay no DOM se ainda não existe
+ *   ~170  _groupScriptIntoPages(script) — paginação canonical (2 estrofes / 10 linhas)
+ *   ~160  _splitIntoSentences(text) — quebra por .!? pra typewriter por frase
+ *   ~200  _typewriter(el, text, charMs, onDone) — char-by-char com pausa em <i>
+ *   ~310  _sanitizeDialogueHTML(html) — whitelist REAL (#88): escape + i/em/b/strong/br/u/s/code
+ *   ~325  _SKILL_LABEL_PT + _skillLabelPT(s) — keys EN → PT-BR no badge de CD
+ *   ~390  openChoices(choices, opts) — sub-overlay AAA (badge CD, label fallback)
+ *   ~500  vEncounter.render(dialogue) — entry principal (check_hint preproc #88)
+ *   ~720  renderPage(idx) — linhas narration/speech/dm + GUARD anti speaker-key (#88)
+ *   ~960  renderActions() — choices (fallback Fechar se vazio #88) + cb dispatch
+ *   ~1090 vEncounter.close() / vEncounter.isOpen()
  *
  * Doc canonical:
  *   memory/feedback_centralize_in_canonical_webapps.md (porting pattern)
@@ -300,8 +304,17 @@
   }
 
   function _sanitizeDialogueHTML(html) {
-    // Whitelist simples — permite <i><em><b><strong>. Em produção bem robusta usar DOMPurify.
-    return html;
+    /* Whitelist REAL (sessão #88 — antes era no-op `return html`): escapa toda
+       tag e re-permite apenas inline seguro SEM atributos (i/em/b/strong/br/
+       u/s/code) — mesmo contrato dos sanitizers da cidade e da exploração.
+       Fecha num ponto único os 3 sinks de line.text (pre-measure innerHTML,
+       _instantReveal span.innerHTML e _typewriter createElement/setAttribute):
+       um `<img onerror=...>` vindo de payload nunca chega ao DOM como tag.
+       NÃO escapa `&` — entidades (&mdash;) são legítimas nos textos. */
+    var escaped = String(html == null ? '' : html)
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    return escaped.replace(/&lt;(\/?)(i|em|b|strong|br|u|s|code)&gt;/gi, '<$1$2>');
   }
 
   // ──────────────────────────────────────────────────────────────────────
@@ -310,14 +323,22 @@
   // z-index 9700 (acima do encounter 9500 e city popup 9000).
   // ──────────────────────────────────────────────────────────────────────
 
-  function _iconForChoice(ch) {
-    if (ch.cb && /dice|check|skill/.test(ch.cb)) return '🎲';
-    if (ch.cb && /close|leave|skip/.test(ch.cb)) return '←';
-    if (ch.cb && /confirm|pay|deposit|invest/.test(ch.cb)) return '✓';
-    if (ch.cb && /attack|fight|duel/.test(ch.cb)) return '⚔';
-    if (ch.cb && /talk|chat|gossip/.test(ch.cb)) return '💬';
-    if (ch.result && /goto_cartographer/.test(ch.result)) return '🗺';
-    return '◆';
+  /* Tradução EN→PT-BR de keys de skill/atributo no badge de CD das choices.
+     Preserva strings já em PT-BR (callers da viagem/cidade passam label pronto):
+     key desconhecida retorna o valor original — NUNCA clobbera label legítimo. */
+  var _SKILL_LABEL_PT = {
+    strength: 'Força', dexterity: 'Destreza', constitution: 'Constituição',
+    intelligence: 'Inteligência', wisdom: 'Sabedoria', charisma: 'Carisma',
+    athletics: 'Atletismo', acrobatics: 'Acrobacia', stealth: 'Furtividade',
+    sleight_of_hand: 'Prestidigitação', arcana: 'Arcanismo', history: 'História',
+    investigation: 'Investigação', nature: 'Natureza', religion: 'Religião',
+    animal_handling: 'Adestrar Animais', insight: 'Intuição', medicine: 'Medicina',
+    perception: 'Percepção', survival: 'Sobrevivência', deception: 'Enganação',
+    intimidation: 'Intimidação', performance: 'Atuação', persuasion: 'Persuasão'
+  };
+  function _skillLabelPT(s) {
+    if (!s) return '';
+    return _SKILL_LABEL_PT[String(s).toLowerCase()] || s;
   }
 
   /* Ensure choice sub-overlay DOM exists (singleton).
@@ -395,7 +416,9 @@
       row.style.setProperty('--idx', idx);
       var dcBadge = '';
       if (ch.dc && ch.skill) {
-        dcBadge = '<span class="enc-cho-dc">DC ' + ch.dc + ' · ' + ch.skill + (ch.chance != null ? ' · ' + ch.chance + '%' : '') + '</span>';
+        /* sessão #88: "CD" (convenção PT-BR do projeto, não "DC") + tradução
+           de key EN ('charisma' → 'Carisma') preservando labels já em PT-BR. */
+        dcBadge = '<span class="enc-cho-dc">CD ' + ch.dc + ' · ' + _skillLabelPT(ch.skill) + (ch.chance != null ? ' · ' + ch.chance + '%' : '') + '</span>';
       } else if (ch.cost) {
         dcBadge = '<span class="enc-cho-dc enc-cho-cost">' + ch.cost + ' ' + _VCOIN + '</span>';
       } else if (ch.renownDelta) {
@@ -403,12 +426,16 @@
         dcBadge = '<span class="enc-cho-dc enc-cho-renown">Renome ' + rd + '</span>';
       }
       // label e desc podem ter HTML inline simples (<span>, <i>)
+      /* sessão #88: choice sem label NUNCA vira botão vazio (só chevron) —
+         fallback 'Continuar' + warn pro error-reporter. */
+      var _choLabel = (ch.label && String(ch.label).trim()) || 'Continuar';
+      if (!ch.label) console.warn('[ENC] choice sem label', ch.id || ch.cb || '');
       row.innerHTML =
         /* 2026-06-07 (user): PADRAO_ALDRIC — SEM símbolo (◆) à esquerda das escolhas;
            o badge de DC/custo vira uma meta-line de LARGURA TOTAL embaixo do título
            (antes era coluna à direita que espremia o título e ficava mal distribuída). */
         '<span class="enc-cho-row-body">' +
-          '<span class="enc-cho-row-label">' + _coinify(ch.label || '') + '</span>' +
+          '<span class="enc-cho-row-label">' + _coinify(_choLabel) + '</span>' +
           (ch.desc ? '<span class="enc-cho-row-desc">' + ch.desc + '</span>' : '') +
           (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
         '</span>' +
@@ -469,7 +496,19 @@
     var ov = _ensureOverlay();
     ov.innerHTML = '';
 
-    var pages = _groupScriptIntoPages(dialogue.script || []);
+    /* check_hint (doc dialogue-pattern-aldric.md §4.0.2, implementado sessão #88):
+       linha com { check_hint: { phrase } } ganha uma sub-linha dourada própria
+       ("⚀ Sabedoria (Percepção) CD 13") logo após a estrofe — anuncia o teste
+       antes das choices. Estrofe sintética flui pelo pipeline normal. */
+    var _scriptIn = dialogue.script || [];
+    var _script = [];
+    _scriptIn.forEach(function (l) {
+      _script.push(l);
+      if (l && l.check_hint && l.check_hint.phrase) {
+        _script.push({ type: 'narration', _checkHint: true, text: '⚀ ' + l.check_hint.phrase });
+      }
+    });
+    var pages = _groupScriptIntoPages(_script);
     var currentPage = 0;
 
     var card = document.createElement('div');
@@ -541,14 +580,19 @@
         '<span class="vi vi-coin sm"></span>' +
         '<span class="enc-gold-num cgb-num">' + _gp.gold + '</span></div>';
     }
+    /* sessão #88: npcName/npcDesc passam pelo sanitizer (escape + whitelist
+       inline) — fecha o sink de header que aceitava HTML cru; URL do portrait
+       tem aspas escapadas. portraitHTML continua confiado (gerado pelo caller
+       via _heralIco/sprite, nunca payload). */
+    var _safePortraitURL = String(npcPortrait).replace(/"/g, '&quot;');
     header.innerHTML =
       '<div class="enc-portrait"' + (npcPortrait ? ' title="Clique pra ampliar"' : '') + '>' +
         (npcPortraitHTML ? npcPortraitHTML
-          : (npcPortrait ? ('<img src="' + npcPortrait + '" alt="" ' + _ENC_IMG_ONERR + '>') : '')) +
+          : (npcPortrait ? ('<img src="' + _safePortraitURL + '" alt="" ' + _ENC_IMG_ONERR + '>') : '')) +
       '</div>' +
       '<div class="enc-meta">' +
-        '<div class="enc-name">' + npcName + (affinityBadge ? ' ' + affinityBadge : '') + '</div>' +
-        '<div class="enc-desc">' + npcDesc + '</div>' +
+        '<div class="enc-name">' + _sanitizeDialogueHTML(npcName) + (affinityBadge ? ' ' + affinityBadge : '') + '</div>' +
+        '<div class="enc-desc">' + _sanitizeDialogueHTML(npcDesc) + '</div>' +
       '</div>' +
       '<div class="enc-rightcol">' +
         _encGold +
@@ -667,9 +711,28 @@
         var _sentences = _splitIntoSentences(_sanitizeDialogueHTML(line.text));
         if (!_sentences.length) return;
         var div = document.createElement('div');
-        div.className = 'enc-line ' + (line.type === 'narration' ? 'enc-narration' : 'enc-speech');
+        /* sessão #88: tipo 'dm' (voz de Mestre, doc §4.0.1) ganha visual próprio
+           (sépia + label MESTRE via .enc-dm); qualquer type desconhecido cai em
+           narration (antes caía em speech — invertido vs. legacy/Stub). */
+        var _lineCls = (line.type === 'speech') ? 'enc-speech'
+          : (line.type === 'dm') ? 'enc-narration enc-dm'
+          : 'enc-narration' + (line._checkHint ? ' enc-check-hint' : '');
+        div.className = 'enc-line ' + _lineCls;
         if (line.type === 'speech' && line.speaker) {
-          div.setAttribute('data-speaker', line.speaker);
+          /* GUARD anti-vazamento (sessão #88 — bug reportado pelo user: key de
+             backend exibida como nome do NPC). speaker DEVE ser display name;
+             o CSS exibe data-speaker VERBATIM (content:attr). Key snake_case
+             pura (lowercase ASCII sem espaço/acento) ou igual ao id/key do NPC
+             do diálogo NUNCA aparece — cai pro nome do NPC e loga o vazamento.
+             Display names legítimos ('Martha', 'Grom Barba-Cinza', 'Aldwin de
+             Tholram') têm maiúscula/acento/espaço e passam intactos. */
+          var _spk = String(line.speaker);
+          if (/^[a-z0-9_]+$/.test(_spk) ||
+              (dialogue.npc && (_spk === dialogue.npc.id || _spk === dialogue.npc.key))) {
+            console.warn('[ENC] speaker key não resolvida (usando npc.name): ' + _spk);
+            _spk = (dialogue.npc && dialogue.npc.name) || '';
+          }
+          if (_spk) div.setAttribute('data-speaker', _spk);
         }
         body.appendChild(div);
         strophes.push({
@@ -880,15 +943,19 @@
       actions.innerHTML = '';
       var choices = dialogue.choices || [];
       if (choices.length === 0) {
-        actions.style.display = 'none';
-        return;
+        /* Anti-trap (sessão #88): última página sem choices virava modal SEM
+           SAÍDA no mobile (<dialog> showModal, sem ESC no Telegram WebView,
+           nextBtn hidden, X só com opts.closeable). Fallback: botão Fechar. */
+        console.warn('[ENC] dialogue sem choices — fallback Fechar');
+        choices = [{ id: '_enc_auto_close', label: 'Fechar', cb: 'close' }];
       }
       var useInline = opts.inlineChoices === true || choices.length === 1;
       if (useInline) {
         choices.forEach(function(ch, idx) {
           var btn = document.createElement('button');
           btn.className = 'enc-btn' + (idx === 0 ? ' enc-btn-primary' : '');
-          btn.innerHTML = _coinify(ch.label);  // labels são autorais (não input) — coin icon ok
+          /* sessão #88: label vazio → 'Continuar' (nunca botão clicável vazio) */
+          btn.innerHTML = _coinify((ch.label && String(ch.label).trim()) || 'Continuar');  // labels são autorais (não input) — coin icon ok
           btn.addEventListener('click', function() { _handleChoiceInternal(ch); });
           actions.appendChild(btn);
         });

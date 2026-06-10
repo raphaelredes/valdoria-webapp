@@ -186,8 +186,16 @@
     var node = (dialogueData && dialogueData.nodes && dialogueData.nodes[nodeId]) || null;
     if (!node) return null;
 
+    /* sessão #88: NUNCA usar a key como nome/speaker exibido — vEncounter mostra
+       speaker VERBATIM. Resolve display name uma vez (npc do JSON → opts do
+       caller → key como último recurso, com warn). */
+    var displayName = (dialogueData.npc && dialogueData.npc.name) || opts.displayName || '';
+    if (!displayName) {
+      console.warn('[DLG] dialogue sem npc.name/opts.displayName — usando key: ' + npcKey);
+      displayName = npcKey;
+    }
     var npc = (dialogueData.npc) || {
-      name: npcKey,
+      name: displayName,
       desc: '',
       portrait: opts.portrait || ''
     };
@@ -199,17 +207,21 @@
     } else if (Array.isArray(node.text)) {
       // Múltiplas variantes — pega 1 aleatória (RNG behavior canonical)
       var picked = node.text[Math.floor(Math.random() * node.text.length)];
-      script = [{ type: 'speech', speaker: npcKey, text: picked }];
+      script = [{ type: 'speech', speaker: displayName, text: picked }];
     } else if (typeof node.text === 'string') {
-      script = [{ type: 'speech', speaker: npcKey, text: node.text }];
+      script = [{ type: 'speech', speaker: displayName, text: node.text }];
     }
 
-    // Choices: filter por once/conditions, traduz pra cb pattern
+    // Choices: filter por once/conditions, traduz pra cb pattern.
+    // sessão #88 (regra GSIA dialogue graph): suporta AMBOS formatos —
+    // base ("options" + "next") e modular ("choices" + "target").
     var choices = [];
-    if (Array.isArray(node.options)) {
-      node.options.forEach(function(opt){
+    var rawOpts = node.options || node.choices || [];
+    if (Array.isArray(rawOpts)) {
+      rawOpts.forEach(function(opt){
+        var next = opt.next || opt.target || '';
         // Skip options já usadas (once: true + visited)
-        if (opt.once && window.npcAffinity && window.npcAffinity.getFlag(player, npcKey, '_once_' + (opt.next || opt.text))) {
+        if (opt.once && window.npcAffinity && window.npcAffinity.getFlag(player, npcKey, '_once_' + (next || opt.text))) {
           return;
         }
         // Skip se conditions não satisfeitas
@@ -217,7 +229,7 @@
           return;
         }
         choices.push({
-          id: opt.next || opt.exit_callback || ('opt_' + choices.length),
+          id: next || opt.exit_callback || ('opt_' + choices.length),
           label: opt.text || '...',
           // Stash original option pra resolver no callback
           _original: opt,

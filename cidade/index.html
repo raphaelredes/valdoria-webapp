@@ -10395,7 +10395,9 @@ function _renderDiscoveryStage(){
       }
     }
     // Self-narration ("Você (lendo)") → narration; senão speech
-    if (spk.toLowerCase().indexOf('você') >= 0 || spk.toLowerCase().indexOf('você') >= 0) {
+    /* sessão #88: 2º operando era duplicata exata de 'você' — intenção era a
+       variante SEM acento (dataset defensivo). */
+    if (spk.toLowerCase().indexOf('você') >= 0 || spk.toLowerCase().indexOf('voce') >= 0) {
       script.push({ type: 'narration', text: stg.text });
     } else {
       script.push({ type: 'speech', speaker: spkKey, text: stg.text });
@@ -52147,7 +52149,9 @@ function _openMerchantDialogue(p, merchantId, topicKey){
     ? MARKET_MERCHANTS.filter(function(m){ return m.id === merchantId || m.id === merchantId.replace('mer_',''); })[0]
     : null;
   if (!merchant){
-    if (typeof vToast === 'function') vToast('Mercador desconhecido: ' + merchantId, 'warn');
+    /* sessão #88: NUNCA expor id interno ao jogador — detalhe vai pro console (error-reporter) */
+    console.warn('[CITY] merchant desconhecido id=' + merchantId);
+    if (typeof vToast === 'function') vToast('Este mercador não está disponível agora.', 'warn');
     return;
   }
   var npcKey = 'mer_' + merchant.id;
@@ -52183,7 +52187,9 @@ function _openMerchantDialogue(p, merchantId, topicKey){
   var encKey = bjornFix + '_' + topicKey;
   var enc = MARKET_MERCHANT_ENCOUNTERS[encKey];
   if (!enc){
-    if (typeof vToast === 'function') vToast('Tópico desconhecido: ' + encKey, 'warn');
+    /* sessão #88: key interna só no console — jogador recebe mensagem diegética */
+    console.warn('[CITY] topic encounter ausente key=' + encKey);
+    if (typeof vToast === 'function') vToast('Não há nada a dizer sobre isso agora.', 'warn');
     return;
   }
 
@@ -52330,7 +52336,9 @@ window._openNpcDialogue = function(npcKey, player){
   }
   window.dialogueEngine.load(npcKey).then(function(data){
     if (!data) {
-      if (typeof vToast === 'function') vToast(npcKey + '.json não carregou');
+      /* sessão #88: nome de arquivo interno só no console */
+      console.error('[CITY] dialogue JSON falhou npc=' + npcKey);
+      if (typeof vToast === 'function') vToast('Não foi possível abrir a conversa. Tente novamente.', 'err');
       return;
     }
     if (window.npcAffinity && window.npcAffinity.markVisit) window.npcAffinity.markVisit(p, npcKey);
@@ -52347,7 +52355,9 @@ window._openAldricGuardDialog = function(player){
 function _renderNpcNode(player, dialogueData, nodeId, npcKey){
   var dialogue = window.dialogueEngine.buildVEncounterDialogue(npcKey, nodeId, dialogueData, player);
   if (!dialogue) {
-    if (typeof vToast === 'function') vToast('Node "' + nodeId + '" não encontrado em ' + npcKey);
+    /* sessão #88: id de node do grafo só no console */
+    console.error('[CITY] node ausente node=' + nodeId + ' npc=' + npcKey);
+    if (typeof vToast === 'function') vToast('Não foi possível continuar a conversa.', 'err');
     return;
   }
   // npc.id pra affinity badge (B3)
@@ -54524,6 +54534,23 @@ function _renderEncounterViaVEncounter(enc, originalAction, player, npc) {
   } else if (npc.portrait && typeof _heralIco === 'function') {
     dnpc.portraitHTML = _heralIco(npc.portrait); // SVG heraldico (sem lightbox)
   }
+  /* FIX RAIZ (sessão #88 — bug reportado: nome de NPC quebrado com key de
+     backend exposta, ex. "MER_THORNE"/"CORVUS_GREETING"). O motor compartilhado
+     exibe line.speaker VERBATIM (data-speaker → CSS content:attr); o renderer
+     legado resolvia a key via RECURRING_NPCS[line.speaker].name, mas o adapter
+     7a entregava enc.script CRU — regressão. Resolve por linha ANTES do render:
+     key registrada → display name; key órfã snake_case → nome do NPC do
+     encounter; speaker já em display name passa intacto. */
+  var script = (enc.script || []).map(function (line) {
+    if (!line || line.type !== 'speech' || !line.speaker) return line;
+    var spkr = (typeof RECURRING_NPCS !== 'undefined' && RECURRING_NPCS[line.speaker]) || null;
+    var resolved = (spkr && spkr.name) ||
+      (/^[a-z0-9_]+$/.test(String(line.speaker)) ? (npc.name || '') : line.speaker);
+    if (resolved === line.speaker) return line;
+    var copy = Object.assign({}, line);
+    copy.speaker = resolved;
+    return copy;
+  });
   var choices = (enc.choices || []).map(function (c) {
     var n = { id: c.id || '', label: c.label || '',
               desc: c.desc || c.result_hint || '', cb: c.cb || c.result || '' };
@@ -54535,7 +54562,7 @@ function _renderEncounterViaVEncounter(enc, originalAction, player, npc) {
     n._original = c;
     return n;
   });
-  window.vEncounter.render({ npc: dnpc, script: enc.script || [], choices: choices }, {
+  window.vEncounter.render({ npc: dnpc, script: script, choices: choices }, {
     player: player || (window.CITY_MOCK_PLAYER || null),
     onChoice: function (ch) {
       _onEncounterChoice(enc, ch._original || ch, originalAction, player);
@@ -54882,7 +54909,8 @@ function _renderEncounterPopup(enc, originalAction, player) {
     if (line.type === 'speech') {
       var spkr = RECURRING_NPCS[line.speaker] || RECURRING_NPCS[enc.npc];
       div.className = 'enc-line enc-speech enc-tw';
-      div.setAttribute('data-speaker', spkr.name);
+      /* sessão #88: guard igual ao skip path (linha ~54946) — deref nunca crasheia */
+      if (spkr) div.setAttribute('data-speaker', spkr.name);
     } else {
       div.className = 'enc-line enc-narration enc-tw';
     }

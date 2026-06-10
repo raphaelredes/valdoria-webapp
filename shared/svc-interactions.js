@@ -296,12 +296,15 @@
   window._showOpinionReaction = function(npc, optionLabel, renownDelta, ch) {
     var faction = (window._SVC_CONFIG && window._SVC_CONFIG.faction) || 'unknown';
     var reactions = (window._SVC_CONFIG && window._SVC_CONFIG.reactions) || {};
+    /* sessão #88: defaults usavam o literal "NPC" como sujeito da narração —
+       placeholder de backend exposto. Interpola o nome real do NPC. */
+    var _who = (npc && npc.name) || 'O atendente';
     var resp;
-    if (renownDelta < -2) resp = reactions.very_negative || 'NPC fecha o livro com som seco. <i>(voz cortante)</i> "Vossa Senhoria escolheu como tratar esta casa. Eu não esquecerei."';
-    else if (renownDelta < 0) resp = reactions.negative || 'NPC pausa. <i>(sorri sem calor)</i> "Cada um tem sua opinião."';
-    else if (renownDelta > 2) resp = reactions.very_positive || 'NPC curva-se levemente. <i>(sorri com cortesia rara)</i> "Palavras que honram esta casa."';
-    else if (renownDelta > 0) resp = reactions.positive || 'NPC acena com aprovação contida. "Bem dito."';
-    else resp = reactions.neutral || 'NPC mantém o olhar neutro. "Anotado."';
+    if (renownDelta < -2) resp = reactions.very_negative || (_who + ' fecha o livro com som seco. <i>(voz cortante)</i> "Vossa Senhoria escolheu como tratar esta casa. Eu não esquecerei."');
+    else if (renownDelta < 0) resp = reactions.negative || (_who + ' pausa. <i>(sorri sem calor)</i> "Cada um tem sua opinião."');
+    else if (renownDelta > 2) resp = reactions.very_positive || (_who + ' curva-se levemente. <i>(sorri com cortesia rara)</i> "Palavras que honram esta casa."');
+    else if (renownDelta > 0) resp = reactions.positive || (_who + ' acena com aprovação contida. "Bem dito."');
+    else resp = reactions.neutral || (_who + ' mantém o olhar neutro. "Anotado."');
 
     _renderViaCanonical({
       npc: npc,
@@ -315,7 +318,8 @@
     _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
     if (typeof window.vToast === 'function' && renownDelta !== 0) {
       var facLabel = (window._SVC_CONFIG && window._SVC_CONFIG.factionLabel) || faction;
-      setTimeout(function(){ window.vToast((renownDelta>=0?'+':'')+renownDelta+' Renown · '+facLabel, renownDelta>=0?'gold':'warn'); }, 400);
+      /* sessão #88: 'Renown' → 'Renome' (PT-BR, alinha com linha ~158) */
+      setTimeout(function(){ window.vToast((renownDelta>=0?'+':'')+renownDelta+' Renome · '+facLabel, renownDelta>=0?'gold':'warn'); }, 400);
     }
   };
 
@@ -339,10 +343,12 @@
   window._showPurchaseConfirm = function(npc, optionLabel, renownDelta, ch) {
     var faction = (window._SVC_CONFIG && window._SVC_CONFIG.faction) || 'unknown';
     var confirmMsgs = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs) || {};
-    var defaultMsg = 'NPC registra a transação. <i>(gesto pragmático)</i> "Combinado. Boa jornada, viajante."';
+    /* sessão #88: literal "NPC" → nome real (placeholder exposto na narrativa) */
+    var _who = (npc && npc.name) || 'O atendente';
+    var defaultMsg = _who + ' registra a transação. <i>(gesto pragmático)</i> "Combinado. Boa jornada, viajante."';
 
     /* Choice-specific overrides — preferido (cohesão) */
-    var specificNarration = (ch && ch.resultNarration) || confirmMsgs.narration || 'NPC anota o valor com gesto preciso.';
+    var specificNarration = (ch && ch.resultNarration) || confirmMsgs.narration || (_who + ' anota o valor com gesto preciso.');
     var specificMsg = (ch && ch.resultText) || confirmMsgs.generic || defaultMsg;
 
     /* Script multi-segment: aceita ch.resultScript (array de {type, text})
@@ -366,7 +372,8 @@
     _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
     if (typeof window.vToast === 'function' && renownDelta !== 0) {
       var facLabel = (window._SVC_CONFIG && window._SVC_CONFIG.factionLabel) || faction;
-      setTimeout(function(){ window.vToast((renownDelta>=0?'+':'')+renownDelta+' Renown · '+facLabel, renownDelta>=0?'gold':'warn'); }, 400);
+      /* sessão #88: 'Renown' → 'Renome' (PT-BR, alinha com linha ~158) */
+      setTimeout(function(){ window.vToast((renownDelta>=0?'+':'')+renownDelta+' Renome · '+facLabel, renownDelta>=0?'gold':'warn'); }, 400);
     }
   };
 

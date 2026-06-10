@@ -261,7 +261,10 @@ body.perf-lite #encounter-overlay.active .enc-card {
 }
 .enc-meta { flex: 1; min-width: 0; }
 .enc-name {
-  font-family: 'Georgia', serif;
+  /* sessão #88: Cinzel (identidade medieval — Georgia violava o design system
+     e divergia do legacy/Stub) + overflow-wrap (nome longo sem espaço não
+     estoura/clipa no overflow:hidden do card). */
+  font-family: var(--v-font-display, 'Cinzel', serif);
   color: #c4953a;
   font-size: var(--v-font-body);
   font-weight: 800;
@@ -269,6 +272,7 @@ body.perf-lite #encounter-overlay.active .enc-card {
   text-transform: uppercase;
   margin: 0 0 2px;
   text-shadow: 0 0 8px var(--v-gold-40);
+  overflow-wrap: anywhere;
 }
 .enc-desc {
   font-style: italic;
@@ -405,7 +409,9 @@ body.perf-lite #encounter-overlay.active .enc-card {
   content: attr(data-speaker);
   color: #c4953a;
   font-weight: 800;
-  font-family: 'Georgia', serif;
+  /* sessão #88: Cinzel (alinha com legacy cidade + StubEventLayer exploração;
+     Georgia violava a identidade medieval) */
+  font-family: var(--v-font-display, 'Cinzel', serif);
   display: block;
   /* Sessao #32: bump speaker label 12px -> 13px (mesma logica do .enc-line) */
   font-size: calc(13px * var(--v-font-scale, 1));
@@ -413,6 +419,9 @@ body.perf-lite #encounter-overlay.active .enc-card {
   margin-bottom: 5px;
   text-transform: uppercase;
   text-shadow: 0 0 6px var(--v-gold-40);
+  /* sessão #88: token sem espaço (ex.: key vazada) quebra linha em vez de
+     estourar horizontal — belt-and-suspenders do guard JS */
+  overflow-wrap: anywhere;
 }
 .enc-speech i, .enc-speech em {
   color: #9b8e7c;
@@ -423,6 +432,38 @@ body.perf-lite #encounter-overlay.active .enc-card {
 .enc-narration i, .enc-narration em {
   color: #7d705e;
   font-style: italic;
+}
+/* Voz de Mestre — type:'dm' (PADRAO_ALDRIC §4.0.1, implementado sessão #88):
+   sépia escuro + borda lateral gold + label MESTRE no topo + itálico. */
+.enc-dm {
+  background: rgba(43, 33, 20, 0.55);
+  border-left: 3px solid var(--v-gold-60, rgba(196, 149, 58, 0.6));
+  border-radius: 0 7px 7px 0;
+  color: #c2b49a;
+}
+.enc-dm::before {
+  content: 'MESTRE';
+  display: block;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-style: normal;
+  font-weight: 800;
+  font-size: calc(11px * var(--v-font-scale, 1));
+  letter-spacing: 2px;
+  color: #a8854f;
+  margin-bottom: 4px;
+  text-shadow: 0 0 6px var(--v-gold-40);
+}
+/* check_hint (PADRAO_ALDRIC §4.0.2, sessão #88): anúncio do teste como
+   sub-linha dourada compacta ("⚀ Sabedoria (Percepção) CD 13"). */
+.enc-check-hint {
+  font-style: normal;
+  color: #d8b878;
+  font-size: calc(12px * var(--v-font-scale, 1));
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  letter-spacing: 0.8px;
+  padding: 4px 12px;
+  border-left: 2px solid var(--v-gold-60, rgba(196, 149, 58, 0.6));
+  background: var(--v-gold-08);
 }
 
 .enc-nav {

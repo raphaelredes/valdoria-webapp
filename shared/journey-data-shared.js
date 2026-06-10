@@ -136,8 +136,8 @@ var HAZARDS = {
       npc: { name: 'Líder dos Bandidos', desc: 'Veterano de guerra desempregado', portrait: '../shared/img/npcs/trail/lider-dos-bandidos.webp' },
       script: [
         { type: 'narration', text: 'Três figuras saem do trigal alto à esquerda. Um homem grisalho de armadura remendada à frente — os outros dois flanqueiam, espadas curtas.' },
-        { type: 'speech', speaker: 'plains_bandit_leader', text: '— Pare aí, viajante. <i>(o tom é cansado, não cruel)</i> Quem cruza nossas terras paga pedágio. Bolsa pra dentro do saco — ou cabeça pra dentro do trigal.' },
-        { type: 'speech', speaker: 'plains_bandit_leader', text: '— Não somos cruéis. Servimos numa guerra que acabou e o reino esqueceu. <b>Família precisa comer.</b> Decida rápido.' }
+        { type: 'speech', speaker: 'Líder dos Bandidos', text: '— Pare aí, viajante. <i>(o tom é cansado, não cruel)</i> Quem cruza nossas terras paga pedágio. Bolsa pra dentro do saco — ou cabeça pra dentro do trigal.' },
+        { type: 'speech', speaker: 'Líder dos Bandidos', text: '— Não somos cruéis. Servimos numa guerra que acabou e o reino esqueceu. <b>Família precisa comer.</b> Decida rápido.' }
       ],
       choices: [
         { i: '🗣', t: 'Negociar com palavras', stat: 'cha', dc: 13,
@@ -212,8 +212,8 @@ var HAZARDS = {
       npc: { name: 'Caçador do Pântano', desc: 'Eremita que protege o ecossistema', portrait: '../shared/img/npcs/trail/cacador-do-pantano.webp' },
       script: [
         { type: 'narration', text: 'Você ouve uma flecha cravar numa árvore a um metro do seu rosto. Aviso, não erro.' },
-        { type: 'speech', speaker: 'swamp_hunter', text: '— Pare aí. <i>(a voz vem das sombras das árvores)</i> Esse pântano não é estrada. Quem cruza paga.' },
-        { type: 'speech', speaker: 'swamp_hunter', text: '— Não quero ouro. Quero promessa: o que você caçar aqui, você come ou usa. Nada de troféus, nada de venda. Concorda?' }
+        { type: 'speech', speaker: 'Caçador do Pântano', text: '— Pare aí. <i>(a voz vem das sombras das árvores)</i> Esse pântano não é estrada. Quem cruza paga.' },
+        { type: 'speech', speaker: 'Caçador do Pântano', text: '— Não quero ouro. Quero promessa: o que você caçar aqui, você come ou usa. Nada de troféus, nada de venda. Concorda?' }
       ],
       choices: [
         { i: '🤝', t: 'Concordar', stat: null,
@@ -437,8 +437,8 @@ var HAZARDS_EXTRA = {
       npc: { name: 'Velho Andarilho', desc: 'Eremita cego que conhece a floresta de cor', portrait: '../shared/img/npcs/velho-andarilho.webp' },
       script: [
         { type: 'narration', text: 'Um velho de barba branca caminha sozinho na trilha, bastão de madeira tateando o chão. Os olhos são leitosos — cego.' },
-        { type: 'speech', speaker: 'old_blind', text: '— Pare, viajante. <i>(a voz é serena)</i> Sinto teus passos há quinze minutos. Andas com pressa, mas sem rumo claro.' },
-        { type: 'speech', speaker: 'old_blind', text: '— A floresta me conta coisas. <b>Adiante há perigo</b> — não preciso vê-lo pra saber. Posso te indicar atalho seguro, em troca de uma palavra de gentileza ou uma moeda. Você decide.' }
+        { type: 'speech', speaker: 'Velho Andarilho', text: '— Pare, viajante. <i>(a voz é serena)</i> Sinto teus passos há quinze minutos. Andas com pressa, mas sem rumo claro.' },
+        { type: 'speech', speaker: 'Velho Andarilho', text: '— A floresta me conta coisas. <b>Adiante há perigo</b> — não preciso vê-lo pra saber. Posso te indicar atalho seguro, em troca de uma palavra de gentileza ou uma moeda. Você decide.' }
       ],
       choices: [
         { i: '🤝', t: 'Aceitar gentileza', stat: 'cha', dc: 11,
@@ -480,8 +480,8 @@ var HAZARDS_EXTRA = {
       npc: { name: 'Fada da Trilha', desc: 'Pequena criatura mágica de luz dourada', portrait: '../shared/img/npcs/trail/fada-da-trilha.webp' },
       script: [
         { type: 'narration', text: 'Uma luz dourada flutua à sua frente. Não é vagalume — tem forma humana minúscula, asas translúcidas batendo rápido.' },
-        { type: 'speech', speaker: 'fairy', text: '— Aventureiro grandalhão! <i>(voz fina, ágil)</i> Tenho um pedido — e uma oferta. Decide rápido, tenho mais cinco trilhas pra cuidar essa noite.' },
-        { type: 'speech', speaker: 'fairy', text: '— Um sapo está preso numa raiz oca a vinte metros. Liberte-o e eu te abro um atalho mágico até o destino — chega bem mais rápido. Recuse e eu sigo viagem — sem rancor, mas sem ajuda.' }
+        { type: 'speech', speaker: 'Fada da Trilha', text: '— Aventureiro grandalhão! <i>(voz fina, ágil)</i> Tenho um pedido — e uma oferta. Decide rápido, tenho mais cinco trilhas pra cuidar essa noite.' },
+        { type: 'speech', speaker: 'Fada da Trilha', text: '— Um sapo está preso numa raiz oca a vinte metros. Liberte-o e eu te abro um atalho mágico até o destino — chega bem mais rápido. Recuse e eu sigo viagem — sem rancor, mas sem ajuda.' }
       ],
       choices: [
         { i: '🐸', t: 'Libertar o sapo', stat: 'dex', dc: 11,
@@ -547,7 +547,7 @@ var HAZARDS_EXTRA = {
       npc: { name: 'Mendigo de Estrada', desc: 'Velho com olhos vivos demais pra ser apenas mendigo', portrait: '../shared/img/npcs/trail/mendigo-de-estrada.webp' },
       script: [
         { type: 'narration', text: 'Um homem maltrapilho está sentado na borda da trilha. Quando você se aproxima, ele ergue o olhar — verde brilhante, lúcido demais pra alguém em condição assim.' },
-        { type: 'speech', speaker: 'beggar_road', text: '— Aventureiro... <i>(estende mão sem desespero)</i> Uma moeda? Eu te conto uma história em troca. Toda história tem valor de moeda — mais ou menos.' }
+        { type: 'speech', speaker: 'Mendigo de Estrada', text: '— Aventureiro... <i>(estende mão sem desespero)</i> Uma moeda? Eu te conto uma história em troca. Toda história tem valor de moeda — mais ou menos.' }
       ],
       choices: [
         { i: '🪙', t: 'Dar uma moeda', stat: null,
@@ -601,7 +601,7 @@ var HAZARDS_EXTRA = {
       npc: { name: 'Mulher do Poço', desc: 'Camponesa carregando dois baldes pesados', portrait: '../shared/img/npcs/trail/mulher-do-poco.webp' },
       script: [
         { type: 'narration', text: 'Uma camponesa caminha pela trilha com dois baldes de água, balança difícil. Ela tropeça quando você passa, mas não derrama — equilibrio de quem fez isso muitas vezes.' },
-        { type: 'speech', speaker: 'water_woman', text: '— Bom dia, viajante! <i>(sorriso cansado)</i> Vem dos Portões? Diga-me, ainda há festa esta noite na praça? Ouvi rumor de bardo novo.' }
+        { type: 'speech', speaker: 'Mulher do Poço', text: '— Bom dia, viajante! <i>(sorriso cansado)</i> Vem dos Portões? Diga-me, ainda há festa esta noite na praça? Ouvi rumor de bardo novo.' }
       ],
       choices: [
         { i: '🗣', t: 'Conversar gentilmente', stat: null,
@@ -664,7 +664,7 @@ var HAZARDS_EXTRA = {
       npc: { name: 'Pescador do Pântano', desc: 'Homem velho com canas no ombro', portrait: '../shared/img/npcs/trail/pescador-do-pantano.webp' },
       script: [
         { type: 'narration', text: 'Você vê uma figura solitária à beira da água, pescando. Cana de bambu, paciência infinita.' },
-        { type: 'speech', speaker: 'swamp_fisher', text: '— Quieto aí, viajante! <i>(sussurra sem virar)</i> Tem uma carpa-fantasma vindo. Vinte minutos esperando ela. Fica quieto cinco minutos comigo, eu te dou rota segura depois.' }
+        { type: 'speech', speaker: 'Pescador do Pântano', text: '— Quieto aí, viajante! <i>(sussurra sem virar)</i> Tem uma carpa-fantasma vindo. Vinte minutos esperando ela. Fica quieto cinco minutos comigo, eu te dou rota segura depois.' }
       ],
       choices: [
         { i: '🤐', t: 'Esperar em silêncio', stat: 'wis', dc: 11,
