@@ -103,7 +103,14 @@ var remaining=_BG_HEALTH_MAX_POLLS-_bgHealthCount;var minutesLeft=Math.ceil((rem
 _clog('BG-HEALTH: server restored!');_stopBgHealth();_retryAttempt=0;if(_els.overlay)_els.overlay.style.display='none';if(_cfg.onRetry){_cfg.onRetry();}
 else{_sendCloseAndReturn();}}}).catch(function(e){console.warn('[ERROR_REPORTER]',e.name,e.message);});},_BG_HEALTH_INTERVAL);}
 function _stopBgHealth(){if(_bgHealthTimer){clearInterval(_bgHealthTimer);_bgHealthTimer=null;}}
-function showToast(text,duration){if(!duration){duration=(typeof window.calcReadTime==='function')?window.calcReadTime(text,'toast-warn'):2500;}
+function showToast(text,duration){
+/* A1.8 (auditoria #90, PADRAO_NOTIFICACOES): delega ao shared toast canônico
+   (#v-shared-toast via window.vToast) — NUNCA reimplementar notificação local.
+   type 'err' = visual de aviso importante (duração 'toast-warn' calculada pelo
+   próprio vToast quando duration vem undefined). O fallback legacy abaixo
+   (#v-err-toast/.v-toast) só roda em entry points que não carregam toast.js. */
+if(typeof window.vToast==='function'){window.vToast(text,'err',duration);return;}
+if(!duration){duration=(typeof window.calcReadTime==='function')?window.calcReadTime(text,'toast-warn'):2500;}
 var el=document.getElementById('v-err-toast');if(!el){el=document.createElement('div');el.id='v-err-toast';el.className='v-toast v-toast-error';document.body.appendChild(el);}
 el.textContent=text;el.style.display='';el.style.animation='none';el.offsetHeight;el.style.animation='';setTimeout(function(){el.style.display='none';},duration);}
 var _networkListening=false;function _updateNetworkBadge(){_cacheEls();var badge=_els.network;if(!badge)return;var online=navigator.onLine;badge.style.display='';badge.className='v-err-network '+(online?'online':'offline');badge.textContent=online?'🟢 Conectado à internet':'🔴 Sem conexão com a internet';if(!_networkListening){_networkListening=true;var handler=function(){if(_els.overlay&&_els.overlay.style.display!=='none')_updateNetworkBadge();};window.addEventListener('online',handler);window.addEventListener('offline',handler);}}
