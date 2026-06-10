@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T23:04:00Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T23:13:19Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -15242,6 +15242,18 @@ function _simConsumeAdvanceFlags(actor, target) {
      · Save success (dano já metade) → 0 dano (PHB: "no damage if succeed")
      · Save failure (dano cheio) → half (PHB: "only half damage if fail")
    ctx.saveAbility: atributo do save. ctx.saveFailed: true/false se save falhou. */
+// C1.6 #90: resistência racial a dano TIPADO (metade) — espelha
+// combat2_race.racial_resists_damage. Tiefling fogo, Anão/Stout veneno,
+// Draconato o tipo da ancestralidade.
+function _simRacialResists(unit, dmgType) {
+    if (!unit || !dmgType) return false;
+    var rk = unit.raceKey || '', sub = unit.subrace || '', dt = String(dmgType).toLowerCase();
+    if (rk === 'tiefling' && dt === 'fire') return true;
+    if (dt === 'poison' && (rk === 'dwarf' || (rk === 'halfling' && sub === 'stout'))) return true;
+    if (rk === 'dragonborn' && unit.draconicAncestry === dt) return true;
+    return false;
+}
+
 function _simApplyDmgReduction(target, dmg, ctx) {
     if (!target || !target.se || dmg <= 0) return dmg;
     ctx = ctx || {};
@@ -15959,6 +15971,20 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             newHp = oldHp - damageApplied;
             if (s && s.log) s.log.push(target.n + ' está MOLHADO — resistência a fogo (DMG p.110): ' + _origFire + ' → ' + damageApplied + ' dano.');
         }
+    }
+    // C1.6 #90: resistência racial tipada (Tiefling fogo, Anão/Stout veneno,
+    // Draconato ancestry). Metade do dano, após vulnerabilidade/resistência de
+    // status (Molhado), antes das reduções aditivas — PHB p.197.
+    if (damageApplied > 0 && dmgMeta.dmgType && _simRacialResists(target, dmgMeta.dmgType)) {
+        var _origRR = damageApplied;
+        damageApplied = Math.max(1, Math.floor(damageApplied / 2));
+        newHp = oldHp - damageApplied;
+        if (s && s.log) s.log.push(target.n + ' resiste a ' + dmgMeta.dmgType + ' (traço racial): ' + _origRR + ' → ' + damageApplied + ' dano.');
+        try {
+            var _rrUid = target.id || (target.t === 'p' ? 'player' : '');
+            var _rrEl = _rrUid ? document.querySelector('[data-unit-id="' + _rrUid + '"]') : null;
+            if (_rrEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_rrEl, 'RESISTENTE', 'attack');
+        } catch (_eRR) {}
     }
     // Redução por Reflexos Evasivos (halfDmg) — só se não for cura/skip
     if (damageApplied > 0 && !dmgMeta.noReduction) {
