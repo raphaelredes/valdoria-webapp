@@ -522,6 +522,19 @@
       });
       return true;
     }
+    /* B2.3 (#90): pergunta de LORE de aliado com resposta — renderiza a fala do
+       aliado ANTES de fechar (antes, escolher pray/ask/tactics/... só dava um
+       toast de Renome e fechava, sem o aliado responder). O Renome já foi
+       aplicado por _postAllyEffect (em _handleChoiceInternal) antes daqui. */
+    if (ch && ch._replyScript && ch._replyScript.length
+        && window.vEncounter && typeof window.vEncounter.render === 'function') {
+      window.vEncounter.render({
+        npc: dialogue.npc,
+        script: ch._replyScript,
+        choices: [{ id: '_ally_reply_done', label: '↩ Continuar', cb: 'close' }]
+      }, { closeable: true });
+      return true;
+    }
     if (cb === 'close') {
       // Sessão #23 v8 (2026-05-22): user reportou "Talvez depois" não fechava.
       // Sessão #28 (2026-05-24): user reportou tela escurecida + nada acontece

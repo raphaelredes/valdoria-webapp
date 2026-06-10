@@ -48971,6 +48971,39 @@ var ALLY_DIALOGUE_TEMPLATES = {
   }
 };
 
+// === B2.3 #90: respostas das perguntas de LORE do ally chat ==================
+// Antes, escolher uma pergunta sem dado (pray/ask/tactics/story/...) só dava um
+// toast de Renome e fechava — o aliado nunca RESPONDIA. Aqui cada pergunta de
+// lore ganha uma resposta in-character (PADRAO_ALDRIC: narração neutra + fala
+// do aliado), renderizada ANTES de fechar. Conteúdo separado da lógica (regra
+// No Hardcoded Content). Chave: '<classe>:<choice_id>'. {name} → nome do aliado.
+var ALLY_LORE_REPLIES = {
+  'clerigo:pray':   { narration: '{name} ergue o símbolo sagrado e murmura uma litania baixa, a mão livre pousada sobre teu ombro.', speech: 'Que os Quatro firmem teu braço e suavizem tua queda. <i>(traça um sinal no ar)</i> Vai em paz — a luz caminha contigo.' },
+  'clerigo:ask':    { narration: '{name} acaricia o símbolo desgastado, o olhar perdido em alguma manhã antiga.', speech: 'Eu não escolhi a fé — ela me encontrou num campo de mortos, quando rezei por um e dois se levantaram. Desde então sirvo. É tudo o que sei fazer direito.' },
+  'guerreiro:tactics': { narration: '{name} risca o chão com a ponta da bota, desenhando duas linhas e um círculo.', speech: 'Eu seguro a frente, tu rodeias pela direita. Quem cair, cai gritando — pra avisar o outro. Sem heroísmo. Heroísmo enche cova.' },
+  'guerreiro:story':   { narration: '{name} guarda a pedra de amolar e fica em silêncio por um instante longo demais.', speech: 'Ponte de Karreth. Éramos quarenta ao amanhecer, seis ao pôr do sol. Não conto pra impressionar — conto pra tu lembrares que voltar já é vitória.' },
+  'mago:spell':     { narration: '{name} abre o grimório numa página marcada com fita vermelha e a vira pra ti.', speech: 'Hoje preparei chama e escudo. Uma pra abrir caminho, outra pra fechar feridas que não deveriam existir. Magia é economia — gasta-se o que se tem.' },
+  'mago:theory':    { narration: '{name} ergue dois dedos e uma teia tênue de luz se desenha entre eles.', speech: 'A Trama é o tecido por baixo do mundo. Nós não criamos magia — apenas puxamos os fios certos e torcemos que não desfie tudo. Geralmente funciona.' },
+  'ladino:rumor':   { narration: '{name} inclina-se, a voz caindo pra um sussurro que mal passa do colarinho.', speech: 'Dizem que o tesoureiro da guilda anda pagando dívidas que não tinha. Dinheiro novo sempre cheira a problema velho. Guarda isso — pode valer mais que ouro.' },
+  'ladino:past':    { narration: '{name} dá de ombros, mas o sorriso some por um segundo.', speech: 'Vim de lugar nenhum e de toda parte. Aprendi a abrir fechaduras antes de aprender a ler. Não pergunta mais — o passado é a única coisa que ninguém me rouba.' },
+  'patrulheiro:track': { narration: '{name} ajoelha-se e toca a terra, lendo marcas que teus olhos não captam.', speech: 'Posso. Três adultos, movendo-se contra o vento — espertos. Se formos hoje, vamos calados e a favor da brisa. Lobo que te fareja primeiro é lobo que te come.' },
+  'patrulheiro:nature': { narration: '{name} olha pro norte, onde a linha das árvores escurece o horizonte.', speech: 'A floresta do norte é velha e tem memória. Anda por ela com respeito e ela te abriga. Anda com pressa e ela te engole. Já vi as duas coisas.' },
+  'paladino:bless': { narration: '{name} pousa a palma sobre teu peito; um calor breve e sereno atravessa a armadura.', speech: 'Que tua coragem não vacile e tua causa permaneça justa. <i>(retira a mão)</i> A luz não te fará invencível — fará-te digno. O resto é contigo.' },
+  'paladino:oath':  { narration: '{name} toca o símbolo no peito, e por um instante a postura fica mais ereta.', speech: 'Jurei sobre o corpo de quem eu não consegui salvar. Não foi glória — foi vergonha virando promessa. Carrego os dois desde então, lado a lado.' },
+  'bardo:inspire':  { narration: '{name} dedilha três notas que parecem firmar o ar à tua volta.', speech: 'Pronto — leva essa melodia contigo. Quando o medo apertar, lembra dela. <i>(pisca)</i> Coragem é só uma canção que a gente decide cantar mesmo desafinado.' },
+  'bardo:tale':     { narration: '{name} se acomoda, e a voz baixa ganha o ritmo de quem já contou isto cem vezes.', speech: 'Uma vez derrubei um barão com uma rima. Sério. A verdade certa, no salão certo, na hora certa — derruba mais que espada. Lâmina mata um; palavra muda um reino.' },
+  'druida:commune': { narration: '{name} fecha os olhos; um pardal pousa no ombro como se atendesse a um chamado.', speech: 'A terra está inquieta a oeste — algo a feriu. Não corras pra lá sem preparo. <i>(o pardal voa)</i> A natureza avisa quem sabe escutar.' },
+  'druida:animal':  { narration: '{name} sorri, e por um instante há algo selvagem demais no fundo dos olhos.', speech: 'O urso, quando preciso de força. O falcão, quando preciso de distância. Mas é o lobo que sinto em casa — correr em matilha, dividir o frio. Talvez eu sempre tenha sido um.' },
+  'monge:train':    { narration: '{name} levanta-se num movimento só e assume uma guarda leve, convidando-te com um aceno.', speech: 'Cuidado — eu não bato pra ferir, bato pra ensinar. <i>(equilibra o peso nos pés)</i> Sente meu centro antes de atacar o teu. O corpo aprende o que a mente esquece.' },
+  'monge:wisdom':   { narration: '{name} fecha os olhos um instante antes de falar, como quem busca a frase no fundo de um poço.', speech: 'A tempestade não vence o junco porque o junco não luta — dobra-se e permanece. Sê junco quando puderes, rocha só quando precisares. Saber a diferença é o caminho.' },
+  'barbaro:rage':   { narration: '{name} bate o punho no peito e solta uma risada curta, feroz.', speech: 'No próximo combate, fica perto de mim. Quando o sangue ferver, eu abro caminho e tu segues na brecha. <i>(range os dentes)</i> Juntos somos uma tempestade. Sozinhos, só barulho.' },
+  'barbaro:tribe':  { narration: '{name} para de mastigar e o olhar viaja pra muito longe da praça.', speech: 'Minha tribo dançava sobre o gelo e cantava aos trovões. Já não existe — o inverno e os homens levaram tudo. Carrego o canto deles no peito. Enquanto eu rugir, eles não morreram.' },
+  'feiticeiro:show': { narration: '{name} estala os dedos e uma chama azul dança na palma, mudando de forma ao sabor de um pensamento.', speech: 'Olha — sem encantamento, sem gesto. Só vontade. <i>(a chama vira um pássaro e se apaga)</i> O perigo não é não conseguir. É conseguir demais, e cedo demais.' },
+  'feiticeiro:origin': { narration: '{name} olha a própria mão como quem olha um estranho.', speech: 'Não sei de onde vem. Acordei aos doze com o quarto em chamas e nenhum fósforo à vista. Alguns dizem sangue de dragão. Eu digo: uma sorte que ainda estou aprendendo a não amaldiçoar.' },
+  'bruxo:pact':     { narration: '{name} toca o amuleto sob a roupa, e a sombra do capuz parece adensar.', speech: 'Meu Patrono não tem nome que tua língua suporte. Falamos em sonhos e dívidas. <i>(voz mais baixa)</i> Não perguntes mais — o que se nomeia, escuta. E o que escuta, cobra.' },
+  'bruxo:gift':     { narration: '{name} murmura algo numa língua que arranha o ouvido, e o ar à tua volta esfria um grau.', speech: 'Está feito. Na próxima luta, quando a esperança faltar, algo te puxará de volta. <i>(olhar duro)</i> Mas todo favor sombrio é empréstimo. Um dia, o Patrono cobra os juros — de nós dois.' },
+};
+
 function _allyTplKey(cls){
   var k = (cls || '').toLowerCase()
     .replace(/[áàâã]/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i')
@@ -49043,11 +49076,20 @@ function _showAllyDialogue(idx){
       // skill/leave: sempre passam. lore: só se ainda não foi perguntada.
       return !oneShot || typeof _npcIsUsed !== 'function' || !_npcIsUsed(_allyNpcId, c.id);
     }).map(function(c){
+      // B2.3 #90: pergunta de lore ganha resposta in-character (renderizada
+      // antes de fechar). Só lore (sem check, não 'leave') tem reply.
+      var _reply = (c.id !== 'leave' && !c.check)
+        ? ALLY_LORE_REPLIES[cls + ':' + c.id] : null;
+      var _replyScript = _reply ? [
+        { type: 'narration', text: _personalize(_reply.narration) },
+        { type: 'speech', speaker: displayName, text: _personalize(_reply.speech) }
+      ] : null;
       return {
         id: c.id,
         label: _personalize(c.label),
         cb: c.cb || 'close',
         _oneShot: (c.id !== 'leave' && !c.check),
+        _replyScript: _replyScript,
         renownDelta: c.renown,
         resultNarration: _personalize(c.resultNarration),
         resultText: _personalize(c.resultText),
