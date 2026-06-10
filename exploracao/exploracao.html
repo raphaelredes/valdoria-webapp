@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T03:04:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T09:57:29Z - do not edit directly, edit source -->
 
 
 
@@ -11107,6 +11107,12 @@ window.__onIntroTap = function() {
      simples — eventos legacy sem script[] continuam funcionando.
      ═══════════════════════════════════════════════════════════════════════ */
   function _sanitizeDialogueHTML(s) {
+    // A1.2 (auditoria #90): delega ao sanitizer canônico (vEncounter.sanitize —
+    // whitelist maior i/em/b/strong/br/u/s/code, preserva entidades &mdash;).
+    // Fallback local (whitelist menor, escapa &/") só se vEncounter ausente.
+    if (window.vEncounter && typeof window.vEncounter.sanitize === 'function') {
+      return window.vEncounter.sanitize(s);
+    }
     if (!s) return '';
     var escaped = String(s)
       .replace(/&/g, '&amp;')

@@ -128,7 +128,7 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
   Renderer canônico:
     grep "function _renderEncounterPopup" → motor único (37608+)
     grep "function _groupScriptIntoPages" → paginação 1-2 linhas
-    grep "function _sanitizeDialogueHTML" → whitelist <i>/<em>/<b>
+    grep "function _sanitizeDialogueHTML" → delega a vEncounter.sanitize (A1.2)
 
   Resolvers por tipo de evento:
     grep "function _resolveOfferChoice"        → offers (apply_now/take_along/decline)
@@ -54511,14 +54511,18 @@ window._openCorvusGreetingDialog = _openCorvusGreetingDialog;
 // texto do diálogo — useful pra pausas teatrais "<i>(uma pausa)</i>"
 // que ficam cinza italic via CSS .enc-speech i. Tudo mais é escapado.
 function _sanitizeDialogueHTML(s) {
+  // A1.2 (auditoria #90): delega ao sanitizer canônico (vEncounter.sanitize —
+  // whitelist maior i/em/b/strong/br/u/s/code, preserva entidades &mdash;).
+  // Fallback local (whitelist menor, escapa &/") só roda se vEncounter ausente.
+  if (window.vEncounter && typeof window.vEncounter.sanitize === 'function') {
+    return window.vEncounter.sanitize(s);
+  }
   if (!s) return '';
-  // 1. Escapa TUDO primeiro (segurança)
   var escaped = String(s)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-  // 2. Re-permite tags da whitelist (somente abertura/fechamento simples)
   return escaped
     .replace(/&lt;(\/?)(i|em|b|strong|br)&gt;/g, '<$1$2>');
 }

@@ -1077,7 +1077,11 @@
        pra reuso por _renderEncounterPopup legacy + qualquer outro renderer. */
     openChoices: openChoices,
     closeChoices: closeChoices,
-    isChoicesOpen: isChoicesOpen
+    isChoicesOpen: isChoicesOpen,
+    /* A1.2 (auditoria #90): sanitizer de diálogo CANÔNICO. Whitelist
+       i/em/b/strong/br/u/s/code (sem atributos), case-insensitive, NÃO escapa
+       & (entidades &mdash; são legítimas). cidade/exploração delegam a ele. */
+    sanitize: _sanitizeDialogueHTML
   };
 
   /* Compat: alias usado por cidade openCityPopup (task #47 dismiss flow). */
