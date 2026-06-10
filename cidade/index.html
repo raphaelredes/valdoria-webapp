@@ -21533,7 +21533,8 @@ window._persistNpcTalkoptsUsed = function(){
 // que o servidor já faz em player.metadata via content_rotation.
 var _HEARD_GLOBALS = ['_npcGreetingsHeard', '_marketWalkHeard', '_marketChatHeard',
   '_aldwinPickHeard', '_templePickHeard', '_cityFlavorHeard', '_marketReactHeard',
-  '_marketAtmoHeard', '_shadowFlavorHeard', '_gromInteractHeard', '_merResultHeard'];
+  '_marketAtmoHeard', '_shadowFlavorHeard', '_gromInteractHeard', '_merResultHeard',
+  '_plazaHeard', '_chanceEncHeard'];  // B3.3/B3.9 #90: anti-repeat praça + chance encounters
 (function _hydrateHeardSets(){
   try {
     var raw = localStorage.getItem('valdoria_npc_heard_' + (window._charId || 'default'));
@@ -27622,6 +27623,41 @@ var PLAZA_OFFER_EVENTS = [
   }
 ];
 
+// B3.2 #90: guard diário da praça persistido (char-namespaced) — sobrevive a
+// reload do WebView, fechando o farm de XP/gold por reabertura.
+function _getPlazaFiredDay(){
+  try { return localStorage.getItem('valdoria_plaza_fired_' + (window._charId || 'default')) || null; }
+  catch(_){ return window._plazaEntryFiredToday || null; }
+}
+function _setPlazaFiredDay(dayKey){
+  window._plazaEntryFiredToday = dayKey;
+  try { localStorage.setItem('valdoria_plaza_fired_' + (window._charId || 'default'), dayKey); } catch(_){}
+}
+
+// B3.3 #90: weighted pick com ANTI-REPEAT — antes os 3 pools da praça
+// (OFFER/INTERACTIVE/PASSIVE) sorteavam weighted-random puro, então o mesmo
+// evento repetia em dias consecutivos. Filtra os já vistos (heard-set
+// persistido via B1.6) antes do weighted pick; cicla quando exaure.
+function _pickPlazaWeighted(pool, poolKey){
+  if (!pool || !pool.length) return null;
+  window._plazaHeard = window._plazaHeard || {};
+  var heard = window._plazaHeard[poolKey] || [];
+  if (heard.length >= pool.length) heard = [];
+  var avail = pool.filter(function(e){ return heard.indexOf(e.id) === -1; });
+  if (!avail.length) avail = pool.slice();
+  var totalW = avail.reduce(function(s, e){ return s + (e.weight || 1); }, 0);
+  var rollW = Math.random() * totalW;
+  var acc = 0, picked = avail[0];
+  for (var i = 0; i < avail.length; i++){
+    acc += avail[i].weight || 1;
+    if (rollW <= acc){ picked = avail[i]; break; }
+  }
+  heard.push(picked.id);
+  window._plazaHeard[poolKey] = heard;
+  if (typeof window._persistHeardSets === 'function') window._persistHeardSets();
+  return picked;
+}
+
 function _squareTryFireEntryEvent(p){
   // CHAIN GUARD (2026-05-05 v7): NUNCA disparar evento de plaza enquanto
   // outro encounter está ativo (Corvus, Aldric, etc.) ou enquanto um
@@ -27636,48 +27672,30 @@ function _squareTryFireEntryEvent(p){
   if (window._suppressPlazaEntry) return;
   var d = new Date();
   var todayKey = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
-  if (window._plazaEntryFiredToday === todayKey) return;  // ja disparou hoje
+  // B3.2 #90: o teto '1x/dia' vivia só em window var volátil — todo reload do
+  // Telegram WebView re-armava o evento (farm de XP/gold). Agora persiste em
+  // localStorage char-namespaced (mesmo padrão dos heard-sets B1.6).
+  if (_getPlazaFiredDay() === todayKey) return;  // ja disparou hoje
   // canonical (2026-05-24, sessao #29): chance bumpada de 50% → 75% per user request
   // "dice rolling com frequência relativamente alta — tabletop RPG"
   if (Math.random() > 0.75) return;
-  window._plazaEntryFiredToday = todayKey;
+  _setPlazaFiredDay(todayKey);
 
   // Decide tipo (2026-05-24 rebalance — skill checks ganharam share):
   // 25% offer (interativo dialogue), 50% interactive (skill checks D&D 5e),
   // 25% passive (atmosférico simples — só quando não tem o que rolar)
   var roll = Math.random();
   if (roll < 0.25 && PLAZA_OFFER_EVENTS.length > 0) {
-    var totalW = PLAZA_OFFER_EVENTS.reduce(function(s, e){ return s + (e.weight || 1); }, 0);
-    var rollW = Math.random() * totalW;
-    var acc = 0;
-    var picked = PLAZA_OFFER_EVENTS[0];
-    for (var i = 0; i < PLAZA_OFFER_EVENTS.length; i++){
-      acc += PLAZA_OFFER_EVENTS[i].weight || 1;
-      if (rollW <= acc){ picked = PLAZA_OFFER_EVENTS[i]; break; }
-    }
+    // B3.3 #90: weighted pick com anti-repeat
+    var picked = _pickPlazaWeighted(PLAZA_OFFER_EVENTS, 'offer');
     setTimeout(function(){ _squareShowOfferEvent(p, picked); }, 600);
     return;
   }
   if (roll < 0.75 && CANON_PLAZA_ENTRY_INTERACTIVE.length > 0){
-    // Pick weighted
-    var totalW = CANON_PLAZA_ENTRY_INTERACTIVE.reduce(function(s, e){ return s + (e.weight || 1); }, 0);
-    var rollW = Math.random() * totalW;
-    var acc = 0;
-    var picked = CANON_PLAZA_ENTRY_INTERACTIVE[0];
-    for (var i = 0; i < CANON_PLAZA_ENTRY_INTERACTIVE.length; i++){
-      acc += CANON_PLAZA_ENTRY_INTERACTIVE[i].weight || 1;
-      if (rollW <= acc){ picked = CANON_PLAZA_ENTRY_INTERACTIVE[i]; break; }
-    }
+    var picked = _pickPlazaWeighted(CANON_PLAZA_ENTRY_INTERACTIVE, 'interactive');
     setTimeout(function(){ _squareShowEntryInteractive(p, picked); }, 600);
   } else {
-    var totalW = CANON_PLAZA_ENTRY_PASSIVE.reduce(function(s, e){ return s + (e.weight || 1); }, 0);
-    var rollW = Math.random() * totalW;
-    var acc = 0;
-    var picked = CANON_PLAZA_ENTRY_PASSIVE[0];
-    for (var i = 0; i < CANON_PLAZA_ENTRY_PASSIVE.length; i++){
-      acc += CANON_PLAZA_ENTRY_PASSIVE[i].weight || 1;
-      if (rollW <= acc){ picked = CANON_PLAZA_ENTRY_PASSIVE[i]; break; }
-    }
+    var picked = _pickPlazaWeighted(CANON_PLAZA_ENTRY_PASSIVE, 'passive');
     setTimeout(function(){ _squareShowEntryPassive(p, picked); }, 600);
   }
 }
@@ -53064,7 +53082,11 @@ function _tryChanceEncounter(action, player) {
   } else {
     // Demais: 35% chance
     if (Math.random() > ENCOUNTER_BASE_CHANCE) return false;
-    rolledEnc = eligible[Math.floor(Math.random() * eligible.length)];
+    // B3.9 #90: anti-repeat — antes era pick uniforme puro (mesmo encontro,
+    // ex.: vorhan_tavern_recurring, repetia o script idêntico em sequência).
+    window._chanceEncHeard = window._chanceEncHeard || {};
+    rolledEnc = _pickNonRepeating('chance_enc', eligible, window._chanceEncHeard)
+      || eligible[Math.floor(Math.random() * eligible.length)];
   }
 
   _logCity('chance encounter triggered: ' + rolledEnc.id);
