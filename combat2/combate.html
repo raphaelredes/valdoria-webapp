@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T10:08:55Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T15:11:01Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13915,15 +13915,41 @@ function _gatherCheckpointSnapshot(state) {
     var allies = [], enemies = [];
     state.order.forEach(function(c) {
         if (!c) return;
-        var snap = { id: c.id || '', hp: c.hp | 0, conditions: (c.conditions || []).slice() };
+        /* Campos REAIS do engine (bug user 2026-06-10): recurso vive em
+           res.value (não c.mp), buffs/condições em c.se[] (não c.conditions),
+           economia de ação é POR unidade (actionSpent etc.). init+ordem entram
+           pra restaurar a iniciativa sem re-rolar. */
+        var snap = {
+            id: c.id || '',
+            hp: c.hp | 0,
+            alive: (c.alive !== false),
+            init: (typeof c.init === 'number') ? c.init : 0,
+            temp_hp: c.tempHp | 0,
+            wet_turns: c.wetTurns | 0,
+            action_spent: !!c.actionSpent,
+            bonus_spent: !!c.bonusActionSpent,
+            reaction_spent: !!c.reactionSpent,
+            se: []
+        };
+        try { snap.se = JSON.parse(JSON.stringify(c.se || [])); } catch (_eSe) { snap.se = []; }
         if (c.t === 'p' || c.t === 'a') {
-            snap.mp = c.mp | 0;
+            snap.mp = (c.res && typeof c.res.value === 'number') ? c.res.value : (c.mp | 0);
+            snap.death = {
+                dying: !!c.dying, stable: !!c.stable, is_dead: !!c.isDead,
+                s: (c.deathSaves && c.deathSaves.s) | 0,
+                f: (c.deathSaves && c.deathSaves.f) | 0
+            };
+            snap.bag = (c.bag || []).map(function(it){
+                return { n: (it && it.n) || '', qty: (it && it.qty) | 0 };
+            });
+            try { snap.once = c.combatOnceUsed ? JSON.parse(JSON.stringify(c.combatOnceUsed)) : null; } catch (_eOn) { snap.once = null; }
             allies.push(snap);
         } else {
             enemies.push(snap);
         }
     });
     return {
+        order_ids: state.order.map(function(c){ return (c && c.id) || ''; }),
         turn: state.turn | 0,
         // Sessão #66: salva FASE + turno-ativo + round pra o resume restaurar o
         // combate em andamento. Sem isto o reload voltava pra ph='intro' e a tela
@@ -13965,9 +13991,62 @@ function applyBattleCheckpoint(state, cp) {
         var match = (c.t === 'p' || c.t === 'a') ? allyMap[c.id] : enemyMap[c.id];
         if (!match) return;
         if (typeof match.hp === 'number') c.hp = Math.max(0, Math.min(match.hp, c.mhp || c.maxHp || c.hp));
-        if (typeof match.mp === 'number' && (c.t === 'p' || c.t === 'a')) c.mp = Math.max(0, Math.min(match.mp, c.mmp || c.maxMp || c.mp));
-        if (Array.isArray(match.conditions)) c.conditions = match.conditions.slice();
+        /* Recurso real do engine é res.value (bug user 2026-06-10). */
+        if (typeof match.mp === 'number' && (c.t === 'p' || c.t === 'a')) {
+            if (c.res && typeof c.res.value === 'number') c.res.value = Math.max(0, Math.min(match.mp, c.res.max || match.mp));
+            else c.mp = Math.max(0, Math.min(match.mp, c.mmp || c.maxMp || c.mp));
+        }
+        if (Array.isArray(match.se)) {
+            try { c.se = JSON.parse(JSON.stringify(match.se)); } catch (_eSe) {}
+        }
+        if (typeof match.alive === 'boolean') c.alive = match.alive;
+        if (c.hp <= 0 && c.t === 'e') { c.alive = false; c.isDead = true; }
+        if (typeof match.temp_hp === 'number' && match.temp_hp > 0) c.tempHp = match.temp_hp;
+        if (typeof match.wet_turns === 'number') c.wetTurns = match.wet_turns;
+        c.actionSpent = !!match.action_spent;
+        c.bonusActionSpent = !!match.bonus_spent;
+        c.reactionSpent = !!match.reaction_spent;
+        if (match.death && (c.t === 'p' || c.t === 'a')) {
+            c.dying = !!match.death.dying;
+            c.stable = !!match.death.stable;
+            c.isDead = !!match.death.is_dead;
+            c.deathSaves = { s: match.death.s | 0, f: match.death.f | 0 };
+            if (c.isDead) c.alive = false;
+        }
+        if (Array.isArray(match.bag) && Array.isArray(c.bag)) {
+            match.bag.forEach(function(sv){
+                if (!sv || !sv.n) return;
+                for (var bi = 0; bi < c.bag.length; bi++) {
+                    if (c.bag[bi] && c.bag[bi].n === sv.n) { c.bag[bi].qty = sv.qty | 0; break; }
+                }
+            });
+        }
+        if (match.once && typeof match.once === 'object') {
+            try { c.combatOnceUsed = JSON.parse(JSON.stringify(match.once)); } catch (_eOn) {}
+        }
+        /* Iniciativa salva: restaura o valor rolado na sessão original em vez
+           do re-roll do rebuild (a ordem do array vem de order_ids abaixo). */
+        if (typeof match.init === 'number') { c.init = match.init; c.initRevealed = true; c.initRolling = false; }
     });
+    /* Reordena state.order pela sequência salva (o sort por iniciativa roda só
+       no animInit da sessão original; num resume direto pra ph='active' o array
+       rebuilt ficava na ordem de origem e active_idx apontava pra unidade
+       errada). Unidades sem match (ex.: summon não restaurável) vão pro fim. */
+    if (Array.isArray(cp.order_ids) && cp.order_ids.length) {
+        var byId = {};
+        state.order.forEach(function(c){ if (c && c.id) byId[c.id] = c; });
+        var reordered = [], seen = {};
+        cp.order_ids.forEach(function(oid){
+            if (oid && byId[oid] && !seen[oid]) { reordered.push(byId[oid]); seen[oid] = true; }
+        });
+        state.order.forEach(function(c){
+            if (c && (!c.id || !seen[c.id])) reordered.push(c);
+        });
+        if (reordered.length === state.order.length) {
+            state.order = reordered;
+            state.p_idx = state.order.findIndex(function(c){ return c && c.t === 'p'; });
+        }
+    }
     if (typeof cp.turn === 'number') state.turn = cp.turn;
     // Sessão #66: restaura FASE/turno-ativo/round — sem isto o resume ficava em
     // ph='intro' e a tela "Combate Iniciado" entrava em loop ao recarregar.
@@ -13979,6 +14058,20 @@ function applyBattleCheckpoint(state, cp) {
     if (state.ph === 'intro' && ((cp.turn | 0) > 0 || (cp.rn | 0) > 0)) {
         state.ph = 'active';
         if (typeof state.p_idx === 'number') state.active_idx = state.p_idx;
+    }
+    /* Resume avança pro turno do JOGADOR (precedente do backbone:
+       restore_advance_to_player). Um boot frio não tem o loop de NPC rodando —
+       restaurar active_idx num NPC deixava a tela presa em "TURNO DE LOBO I"
+       (screenshot do user 2026-06-10). Turnos de NPC são atômicos: o checkpoint
+       foi tirado após um damage event, então pular pro player é consistente. */
+    if (state.ph === 'active' && Array.isArray(state.order)) {
+        if (state.active_idx < 0 || state.active_idx >= state.order.length) state.active_idx = 0;
+        var _au = state.order[state.active_idx];
+        if ((!_au || _au.t !== 'p') && typeof state.p_idx === 'number' && state.p_idx >= 0) {
+            state.active_idx = state.p_idx;
+            var _pu = state.order[state.p_idx];
+            if (_pu) { _pu.actionSpent = false; _pu.bonusActionSpent = false; }
+        }
     }
     state.actionUsed = !!cp.action_used;
     state.bonusUsed = !!cp.bonus_used;
@@ -14016,6 +14109,12 @@ function newCombatFromSetup(cfg) {
     }
 
     var order = [p].concat(allies).concat(enemies);
+    /* IDs estáveis por posição de origem (player→aliados→inimigos). O snapshot
+       de checkpoint referencia unidades por id; sem ids o restore de HP era
+       no-op silencioso (bug user 2026-06-10: lobo morto revivia ao reabrir o
+       WebApp). Determinístico entre rebuilds: o setup do /prepare vem do mesmo
+       fight_data, então a posição de origem não muda entre boots. */
+    order.forEach(function (c, ci) { if (c && !c.id) c.id = 'u' + ci; });
     order.forEach(function (c) {
         /* Phase 5b polish v8 (2026-04-26): reforco com countdown NAO rola
            iniciativa no inicio (ainda nao chegou ao combate). User feedback:
