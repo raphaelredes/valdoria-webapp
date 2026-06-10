@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T10:53:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T11:26:40Z - do not edit directly, edit source -->
 
 
 
@@ -36151,7 +36151,17 @@ function _engageForcedCombat(ev) {
 }
 
 function skillLabelOf(s) {
-  return { str: 'FOR', dex: 'DES', con: 'CON', int: 'INT', wis: 'SAB', cha: 'CAR' }[s] || s.toUpperCase();
+  /* A1.6 (auditoria #90): perícias delegam ao canônico DndRules.skillLabelPT
+     (A1.4) — antes era s.toUpperCase() e o jogador via "Teste de ATHLETICS"
+     em INGLÊS. Abreviações de ATRIBUTO (str→FOR) ficam locais por design
+     (display compacto da exploração). toUpperCase só como último fallback. */
+  var abbr = { str: 'FOR', dex: 'DES', con: 'CON', int: 'INT', wis: 'SAB', cha: 'CAR' }[s];
+  if (abbr) return abbr;
+  if (window.DndRules && typeof window.DndRules.skillLabelPT === 'function') {
+    var label = window.DndRules.skillLabelPT(s);
+    if (label !== s) return label;
+  }
+  return String(s || '').toUpperCase();
 }
 
 /* X-6.5.51g (2026-04-25): helper pra disable/enable TODOS os event-choice buttons.
