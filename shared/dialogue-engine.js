@@ -213,13 +213,13 @@
     }
 
     // Choices: filter por once/conditions, traduz pra cb pattern.
-    // sessão #88 (regra GSIA dialogue graph): suporta AMBOS formatos —
-    // base ("options" + "next") e modular ("choices" + "target").
+    // A3.6 (#90): formato único choices+target — o codemod migrou os JSONs
+    // base ("options"/"next") pro padrão único.
     var choices = [];
-    var rawOpts = node.options || node.choices || [];
+    var rawOpts = node.choices || [];
     if (Array.isArray(rawOpts)) {
       rawOpts.forEach(function(opt){
-        var next = opt.next || opt.target || '';
+        var next = opt.target || '';
         // Skip options já usadas (once: true + visited)
         if (opt.once && window.npcAffinity && window.npcAffinity.getFlag(player, npcKey, '_once_' + (next || opt.text))) {
           return;

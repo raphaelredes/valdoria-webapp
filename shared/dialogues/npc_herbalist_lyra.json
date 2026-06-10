@@ -56,16 +56,16 @@
           },
           {
             "text": "💬 O que você faz aqui?",
-            "next": "job_desc"
+            "target": "job_desc"
           },
           {
             "text": "🌿 Me fale sobre suas ervas.",
-            "next": "about_herbs",
+            "target": "about_herbs",
             "once": true
           },
           {
             "text": "😟 Você parece preocupada...",
-            "next": "plague_intro",
+            "target": "plague_intro",
             "req_reputation": 0
           },
           {
@@ -117,22 +117,22 @@
           },
           {
             "text": "🌲 Como está a floresta?",
-            "next": "about_forest",
+            "target": "about_forest",
             "once": true
           },
           {
             "text": "💧 O Pântano está avançando?",
-            "next": "about_swamp",
+            "target": "about_swamp",
             "once": true
           },
           {
             "text": "⚗️ O que acha da alquimista?",
-            "next": "about_mirena",
+            "target": "about_mirena",
             "once": true
           },
           {
             "text": "🏪 E a Martha da estalagem?",
-            "next": "about_martha",
+            "target": "about_martha",
             "once": true
           },
           {
@@ -196,22 +196,22 @@
           },
           {
             "text": "🌀 Me conte sobre seu círculo.",
-            "next": "about_circle",
+            "target": "about_circle",
             "once": true
           },
           {
             "text": "🌲 Novídades da floresta?",
-            "next": "about_forest",
+            "target": "about_forest",
             "once": true
           },
           {
             "text": "💧 O Pântano te preocupa?",
-            "next": "about_swamp",
+            "target": "about_swamp",
             "once": true
           },
           {
             "text": "⚗️ O que acha da Mirena?",
-            "next": "about_mirena",
+            "target": "about_mirena",
             "once": true
           },
           {
@@ -265,7 +265,7 @@
         "choices": [
           {
             "text": "🔙 Voltar",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -291,11 +291,11 @@
         "choices": [
           {
             "text": "Mas poções não curam mais rápido?",
-            "next": "herbs_vs_potions"
+            "target": "herbs_vs_potions"
           },
           {
             "text": "🔙 Voltar",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -350,7 +350,7 @@
         "choices": [
           {
             "text": "Faz sentido. Obrigado.",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -384,11 +384,11 @@
         "choices": [
           {
             "text": "Você acha que é o Pântano?",
-            "next": "forest_corruption"
+            "target": "forest_corruption"
           },
           {
             "text": "🔙 Voltar",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -435,7 +435,7 @@
         "choices": [
           {
             "text": "Obrigado pelo aviso.",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -470,11 +470,11 @@
         "choices": [
           {
             "text": "O que aconteceu?",
-            "next": "circle_fall"
+            "target": "circle_fall"
           },
           {
             "text": "Não precisa contar se não quiser.",
-            "next": "circle_gratitude"
+            "target": "circle_gratitude"
           }
         ],
         "script": [
@@ -516,11 +516,11 @@
         "choices": [
           {
             "text": "Você acha que ele está vivo?",
-            "next": "circle_thalvek"
+            "target": "circle_thalvek"
           },
           {
             "text": "Sinto muito, Lyra.",
-            "next": "circle_gratitude"
+            "target": "circle_gratitude"
           }
         ],
         "script": [
@@ -567,7 +567,7 @@
         "choices": [
           {
             "text": "Se eu encontrar algo, aviso você.",
-            "next": "circle_gratitude"
+            "target": "circle_gratitude"
           }
         ],
         "script": [
@@ -602,7 +602,7 @@
         "choices": [
           {
             "text": "Seu segredo está seguro comigo.",
-            "next": "start_trusted"
+            "target": "start_trusted"
           }
         ],
         "script": [
@@ -633,11 +633,11 @@
         "choices": [
           {
             "text": "Você investigou a causa?",
-            "next": "swamp_cause"
+            "target": "swamp_cause"
           },
           {
             "text": "🔙 Voltar",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -664,11 +664,11 @@
         "choices": [
           {
             "text": "Posso ajudar a investigar?",
-            "next": "swamp_help"
+            "target": "swamp_help"
           },
           {
             "text": "Preocupante. Obrigado.",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -699,7 +699,7 @@
         "choices": [
           {
             "text": "Farei isso.",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -726,11 +726,11 @@
         "choices": [
           {
             "text": "Vocês trabalham juntas?",
-            "next": "mirena_collab"
+            "target": "mirena_collab"
           },
           {
             "text": "🔙 Voltar",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -773,7 +773,7 @@
         "choices": [
           {
             "text": "Entendo. Mudando de assunto...",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -808,11 +808,11 @@
         "choices": [
           {
             "text": "Martha parece gostar de você.",
-            "next": "martha_bond"
+            "target": "martha_bond"
           },
           {
             "text": "🔙 Voltar",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -839,7 +839,7 @@
         "choices": [
           {
             "text": "É bom ter alguém que se importa.",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -867,15 +867,15 @@
         "choices": [
           {
             "text": "🟣 Veios roxos? (Lore)",
-            "next": "plague_lore"
+            "target": "plague_lore"
           },
           {
             "text": "⚔️ Posso ajudar?",
-            "next": "plague_quest_hint"
+            "target": "plague_quest_hint"
           },
           {
             "text": "🔙 Mudar de assunto",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -906,11 +906,11 @@
         "choices": [
           {
             "text": "😨 Isso soa perigoso. Posso ajudar?",
-            "next": "plague_quest_hint"
+            "target": "plague_quest_hint"
           },
           {
             "text": "🔙 Voltar",
-            "next": "start"
+            "target": "start"
           }
         ],
         "script": [
@@ -934,12 +934,12 @@
         "choices": [
           {
             "text": "✅ Farei isso se encontrar algo.",
-            "next": "start",
+            "target": "start",
             "effect": "add_reputation_5"
           },
           {
             "text": "💰 Só trabalho com pagamento adiantado.",
-            "next": "start",
+            "target": "start",
             "effect": "sub_reputation_2"
           }
         ],
