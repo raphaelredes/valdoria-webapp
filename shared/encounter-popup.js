@@ -68,6 +68,9 @@
      ícone — aplicado SOMENTE em labels de choice (não em speech/narration). */
   var _VCOIN = '<span class="vi vi-coin sm" aria-label="Valdoritas"></span>';
   function _coinify(s) {
+    if (window.vCoin && typeof window.vCoin.coinify === 'function') {
+      return window.vCoin.coinify(s);
+    }
     return String(s == null ? '' : s)
       .replace(/(\d+)\s*[Vv]aldoritas?\b/g, '$1 ' + _VCOIN)
       .replace(/(\d+)\s*V\b(?![a-zA-Z])/g, '$1 ' + _VCOIN);

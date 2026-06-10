@@ -31,6 +31,9 @@ function el(tag, cls) {
 }
 
 function coin(size) {
+  // A1.9 (auditoria #90): delega ao canônico shared/coin-utils.js (vCoin.el);
+  // fallback local idêntico se coin-utils.js não tiver carregado.
+  if (window.vCoin && typeof window.vCoin.el === 'function') return window.vCoin.el(size);
   var c = document.createElement('span');
   c.className = 'vi vi-coin' + (size ? ' ' + size : '');
   return c;

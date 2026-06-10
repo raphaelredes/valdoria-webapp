@@ -8037,6 +8037,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     // chama vEncounter.render(dialogue, { dialogues: SERVICE_DIALOGUES_X }).
     // Doc canonical: memory/feedback_centralize_in_canonical_webapps.md
     document.write('<link rel="stylesheet" href="/shared/encounter-popup.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
+    document.write('<script src="/shared/coin-utils.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<script src="/shared/encounter-popup.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // 2026-05-22: NPC dialogue engine foundation (skeleton — wiring NPC-a-NPC pendente).
     // npc-affinity: store centralizado em player.metadata.npc_affinity + reputation + memory.
@@ -57595,6 +57596,9 @@ function el(tag, cls) {
 }
 
 function coin(size) {
+  // A1.9 (auditoria #90): delega ao canônico shared/coin-utils.js (vCoin.el);
+  // fallback local idêntico se coin-utils.js não tiver carregado.
+  if (window.vCoin && typeof window.vCoin.el === 'function') return window.vCoin.el(size);
   var c = document.createElement('span');
   c.className = 'vi vi-coin' + (size ? ' ' + size : '');
   return c;
