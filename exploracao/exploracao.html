@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T10:08:55Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T10:37:03Z - do not edit directly, edit source -->
 
 
 
@@ -10384,28 +10384,32 @@ window.__onIntroTap = function() {
   };
 
   // PT-BR display names para skill keys nas badges das choices.
-  // Skills D&D 5e em português brasileiro consagrado.
-  var SKILL_LABELS_PTBR = {
-    str: 'FOR', dex: 'DES', con: 'CON', int: 'INT', wis: 'SAB', cha: 'CAR',
-    athletics:    'Atletismo',
-    acrobatics:   'Acrobacia',
-    sleight:      'Prestidigitação',
-    stealth:      'Furtividade',
-    arcana:       'Arcanismo',
-    history:      'História',
-    investigation: 'Investigação',
-    nature:       'Natureza',
-    religion:     'Religião',
-    animal:       'Adestrar Animais',
-    insight:      'Intuição',
-    medicine:     'Medicina',
-    perception:   'Percepção',
-    survival:     'Sobrevivência',
-    deception:    'Enganação',
-    intimidation: 'Intimidação',
-    performance:  'Atuação',
-    persuasion:   'Persuasão'
-  };
+  // A1.4 (auditoria #90): perícias vêm do canônico DndRules.SKILL_NAMES_PT
+  // (fonte única — animal='Lidar com Animais', + keys completas
+  // animal_handling/sleight_of_hand). Abreviações de ATRIBUTO (str→FOR) são
+  // display compacto exclusivo da exploração — ficam locais por design.
+  // dnd-rules-shared.js carrega no head (~6384), antes deste bloco.
+  var SKILL_LABELS_PTBR = (function () {
+    var m = {
+      str: 'FOR', dex: 'DES', con: 'CON', int: 'INT', wis: 'SAB', cha: 'CAR',
+      // fallback local (só usado se DndRules não carregou)
+      athletics: 'Atletismo', acrobatics: 'Acrobacia',
+      sleight: 'Prestidigitação', stealth: 'Furtividade',
+      arcana: 'Arcanismo', history: 'História', investigation: 'Investigação',
+      nature: 'Natureza', religion: 'Religião',
+      animal: 'Lidar com Animais', insight: 'Intuição', medicine: 'Medicina',
+      perception: 'Percepção', survival: 'Sobrevivência',
+      deception: 'Enganação', intimidation: 'Intimidação',
+      performance: 'Atuação', persuasion: 'Persuasão'
+    };
+    var src = (window.DndRules && DndRules.SKILL_NAMES_PT) || null;
+    if (src) {
+      for (var k in src) m[k] = src[k];
+      m.sleight = src.sleight_of_hand;   // aliases legados dos tile-events
+      m.animal = src.animal_handling;
+    }
+    return m;
+  })();
 
   // Flavor body text per state (placeholder Phase 4 — Phase #3 da iniciativa
   // substitui isso com prosa rica, skill checks, narração reativa).

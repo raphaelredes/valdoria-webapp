@@ -66,7 +66,17 @@
     deception: 'charisma', intimidation: 'charisma', performance: 'charisma',
     persuasion: 'charisma'
   };
-  function _abilityLabelPT(key){ return _ABILITY_LABEL_PT[(key||'').toLowerCase()] || 'Atributo'; }
+  function _abilityLabelPT(key){
+    // A1.4 (auditoria #90): delega ao canônico DndRules.skillLabelPT (fonte
+    // única). skillLabelPT retorna a key original quando não resolve — nesse
+    // caso cai no mapa local e por fim no genérico 'Atributo' (semântica svc).
+    var k = (key || '').toLowerCase();
+    if (window.DndRules && typeof window.DndRules.skillLabelPT === 'function') {
+      var l = window.DndRules.skillLabelPT(k);
+      if (l !== k) return l;
+    }
+    return _ABILITY_LABEL_PT[k] || 'Atributo';
+  }
   function _computeRealMod(opts){
     // Se cb veio com mod hardcoded > 0, respeita (override manual).
     if (opts.mod && opts.mod !== 0) return opts.mod;

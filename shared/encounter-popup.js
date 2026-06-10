@@ -324,20 +324,26 @@
   // ──────────────────────────────────────────────────────────────────────
 
   /* Tradução EN→PT-BR de keys de skill/atributo no badge de CD das choices.
-     Preserva strings já em PT-BR (callers da viagem/cidade passam label pronto):
-     key desconhecida retorna o valor original — NUNCA clobbera label legítimo. */
+     A1.4 (auditoria #90): delega ao canônico DndRules.skillLabelPT (fonte
+     única; animal_handling='Lidar com Animais' — decisão A1.4). Fallback local
+     pra entry points sem dnd-rules-shared.js. Preserva strings já em PT-BR
+     (callers da viagem/cidade passam label pronto): key desconhecida retorna
+     o valor original — NUNCA clobbera label legítimo. */
   var _SKILL_LABEL_PT = {
     strength: 'Força', dexterity: 'Destreza', constitution: 'Constituição',
     intelligence: 'Inteligência', wisdom: 'Sabedoria', charisma: 'Carisma',
     athletics: 'Atletismo', acrobatics: 'Acrobacia', stealth: 'Furtividade',
     sleight_of_hand: 'Prestidigitação', arcana: 'Arcanismo', history: 'História',
     investigation: 'Investigação', nature: 'Natureza', religion: 'Religião',
-    animal_handling: 'Adestrar Animais', insight: 'Intuição', medicine: 'Medicina',
+    animal_handling: 'Lidar com Animais', insight: 'Intuição', medicine: 'Medicina',
     perception: 'Percepção', survival: 'Sobrevivência', deception: 'Enganação',
     intimidation: 'Intimidação', performance: 'Atuação', persuasion: 'Persuasão'
   };
   function _skillLabelPT(s) {
     if (!s) return '';
+    if (window.DndRules && typeof window.DndRules.skillLabelPT === 'function') {
+      return window.DndRules.skillLabelPT(s);
+    }
     return _SKILL_LABEL_PT[String(s).toLowerCase()] || s;
   }
 

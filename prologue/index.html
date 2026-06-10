@@ -193,6 +193,7 @@
         document.write('<script src="../shared/drawer.js?v=' + v + '"><\/script>');
         /* Sessão #19 (2026-05-21): PADRAO_ALDRIC v2 engine. DEVE carregar ANTES
            de prologue.js (que chama vEncounter.render). */
+        document.write('<script src="../shared/dnd-rules-shared.js?v=' + v + '"><\/script>');
         document.write('<script src="../shared/encounter-popup.js?v=' + v + '"><\/script>');
         /* Sessao #32 (2026-05-25): lightbox.js permite ampliar retrato dos NPCs
            (PADRAO_ALDRIC canonical). Cidade carrega; prologo nao carregava — Thorne

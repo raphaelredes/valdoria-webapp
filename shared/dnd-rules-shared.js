@@ -43,7 +43,12 @@
  *   spellSaveDc(actor)               8 + prof + mod(atributo de conjuração POR CLASSE)
  *   resolveSkillCheck(player, check)  {d20, mod, prof, total, dc, success, crit, critFail}
  *   statLabel(stat)                   nome PT-BR do atributo
+ *   skillLabelPT(key)                 label PT-BR de skill/atributo (A1.4) —
+ *                                     skill EN -> alias -> ability full -> short;
+ *                                     desconhecida retorna o original (passthrough)
  *   STAT_NAMES_PT, STAT_FULL, SKILL_TO_ABILITY, CLASS_STAT_MAP, CLASS_SAVE_PROFS
+ *   ABILITY_NAMES_PT (strength->Força), SKILL_NAMES_PT (18 perícias PHB PT-BR;
+ *     animal_handling='Lidar com Animais' — decisão A1.4, fonte única de label)
  *
  * check = { stat?, skill?, dc }  — journey passa {stat}; tile-event passa {skill}.
  *   Se só vier skill, o atributo é derivado via SKILL_TO_ABILITY. SEMPRE a mesma
@@ -85,6 +90,49 @@
         FOR: 'strength', DES: 'dexterity', CON: 'constitution',
         INT: 'intelligence', SAB: 'wisdom', CAR: 'charisma'
     };
+
+    // A1.4 (auditoria #90): nome PT-BR do atributo keyed pelo nome EN COMPLETO
+    // (strength->Força). Consumidores: creator/levelup ATTR_PT, svc, encounter.
+    var ABILITY_NAMES_PT = {
+        strength: 'Força', dexterity: 'Destreza', constitution: 'Constituição',
+        intelligence: 'Inteligência', wisdom: 'Sabedoria', charisma: 'Carisma'
+    };
+
+    // A1.4: nome PT-BR das 18 perícias D&D 5e (PHB), keyed pela key EN canônica.
+    // EXATAMENTE as 18 skills — sem aliases nem atributos — pra Object.keys()
+    // ser enumerável com segurança (creator usa como pool de escolha de perícia).
+    // animal_handling = 'Lidar com Animais' (decisão A1.4: maioria do conteúdo
+    // do projeto — 9+ lore assets, creator, svc — e PHB PT-BR; os 2 mapas que
+    // diziam 'Adestrar Animais' foram migrados).
+    var SKILL_NAMES_PT = {
+        athletics: 'Atletismo', acrobatics: 'Acrobacia',
+        sleight_of_hand: 'Prestidigitação', stealth: 'Furtividade',
+        arcana: 'Arcanismo', history: 'História', investigation: 'Investigação',
+        nature: 'Natureza', religion: 'Religião',
+        animal_handling: 'Lidar com Animais', insight: 'Intuição',
+        medicine: 'Medicina', perception: 'Percepção', survival: 'Sobrevivência',
+        deception: 'Enganação', intimidation: 'Intimidação',
+        performance: 'Atuação', persuasion: 'Persuasão'
+    };
+
+    // A1.4: aliases abreviados que aparecem em payloads legados (exploração
+    // tile-events usa 'animal'/'sleight'). Resolvidos por skillLabelPT.
+    var _SKILL_ALIAS = { animal: 'animal_handling', sleight: 'sleight_of_hand' };
+
+    /**
+     * A1.4: resolve QUALQUER key de skill/atributo pro label PT-BR de display.
+     * Ordem: skill EN canônica -> alias legado -> atributo EN completo ->
+     * atributo curto (str->Força). Key desconhecida retorna o valor original
+     * (NUNCA clobbera label já em PT-BR passado por callers da viagem/cidade).
+     */
+    function skillLabelPT(key) {
+        var k = String(key == null ? '' : key).toLowerCase();
+        if (SKILL_NAMES_PT[k]) return SKILL_NAMES_PT[k];
+        if (_SKILL_ALIAS[k]) return SKILL_NAMES_PT[_SKILL_ALIAS[k]];
+        if (ABILITY_NAMES_PT[k]) return ABILITY_NAMES_PT[k];
+        if (STAT_NAMES_PT[k]) return STAT_NAMES_PT[k];
+        return key;
+    }
 
     // Skill name -> ability key (short). União de exploração (12245) + svc (60).
     // Inclui passthrough das próprias abreviações de atributo (str:'str') pra os
@@ -364,7 +412,10 @@
         spellSaveDc: spellSaveDc,
         resolveSkillCheck: resolveSkillCheck,
         statLabel: statLabel,
+        skillLabelPT: skillLabelPT,
         STAT_NAMES_PT: STAT_NAMES_PT,
+        ABILITY_NAMES_PT: ABILITY_NAMES_PT,
+        SKILL_NAMES_PT: SKILL_NAMES_PT,
         STAT_FULL: STAT_FULL,
         STAT_KEY_PT: STAT_KEY_PT,
         SKILL_TO_ABILITY: SKILL_TO_ABILITY,
