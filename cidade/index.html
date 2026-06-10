@@ -20004,8 +20004,8 @@ var SHADOW_EVENT_POOL = [
     },
     script: [
       { type: 'narration', text: 'Você se espreme atrás de barris empilhados. <b>Duas figuras encapuzadas</b> conversam baixo atrás de uma cortina rasgada — não te viram. As vozes carregam um peso ritualístico, palavras escolhidas com cuidado.' },
-      { type: 'speech', speaker: 'shadow_whisperer', text: '— A forja abandonada guarda mais do que ferrugem. <i>(uma pausa carregada)</i> Os irmãos antigos deixaram <b>algo</b> lá quando partiram. Algo que pulsa no escuro.' },
-      { type: 'speech', speaker: 'shadow_whisperer', text: '— Quem mexe sem saber, paga. <i>(o tom é grave)</i> Mas quem sabe — quem REALMENTE sabe — sai de lá com o que vale dez anos de ouro de mercador.' },
+      { type: 'speech', speaker: 'Figura Encapuzada', text: '— A forja abandonada guarda mais do que ferrugem. <i>(uma pausa carregada)</i> Os irmãos antigos deixaram <b>algo</b> lá quando partiram. Algo que pulsa no escuro.' },
+      { type: 'speech', speaker: 'Figura Encapuzada', text: '— Quem mexe sem saber, paga. <i>(o tom é grave)</i> Mas quem sabe — quem REALMENTE sabe — sai de lá com o que vale dez anos de ouro de mercador.' },
       { type: 'narration', text: 'Você prende a respiração. Eles podem te pegar a qualquer momento. Mas o que ouviu vale ouro de outra forma — informação é poder no submundo de Valdoria.' }
     ],
     choices: [
@@ -27501,9 +27501,9 @@ var PLAZA_OFFER_EVENTS = [
     },
     script: [
       { type: 'narration', text: 'Um homem rechonchudo de avental manchado de soro de leite te alcança no meio da praça. Ele segura uma tábua de madeira com pequenos cubos de queijo curado, cada um espetado num palito.' },
-      { type: 'speech', speaker: 'queijeiro', text: '— Aventureiro! Você tem cara de quem entende de queijo. <i>(ele sorri largo, mostrando dente faltando)</i> Aceita uma amostra? Curei esse aqui por seis meses na adega da minha avó.' },
+      { type: 'speech', speaker: 'Queijeiro', text: '— Aventureiro! Você tem cara de quem entende de queijo. <i>(ele sorri largo, mostrando dente faltando)</i> Aceita uma amostra? Curei esse aqui por seis meses na adega da minha avó.' },
       { type: 'narration', text: 'Ele estende a tábua. O cheiro forte e amanteigado preenche o ar — claramente é trabalho honesto.' },
-      { type: 'speech', speaker: 'queijeiro', text: '— Tô introduzindo a fornada nova no mercado. Quem provar e gostar conta pros amigos. Cortesia da casa, sem compromisso.' }
+      { type: 'speech', speaker: 'Queijeiro', text: '— Tô introduzindo a fornada nova no mercado. Quem provar e gostar conta pros amigos. Cortesia da casa, sem compromisso.' }
     ],
     choices: [
       { id: 'eat_now', label: '🧀 Provar agora', result: 'apply_now',
@@ -27528,7 +27528,7 @@ var PLAZA_OFFER_EVENTS = [
     },
     script: [
       { type: 'narration', text: 'Uma mulher de meia-idade com lenço amarelo na cabeça arruma maçãs vermelhas brilhantes numa cesta de vime. Ela ergue uma das maçãs ao te ver.' },
-      { type: 'speech', speaker: 'fruteira', text: '— Ô viajante, prova essa maçã. <i>(ela polis ela na manga do avental)</i> Veio das colinas verdes, colhida ontem mesmo. Açúcar puro.' },
+      { type: 'speech', speaker: 'Fruteira', text: '— Ô viajante, prova essa maçã. <i>(ela polis ela na manga do avental)</i> Veio das colinas verdes, colhida ontem mesmo. Açúcar puro.' },
       { type: 'narration', text: 'A maçã é grande, com cor vibrante quase artificial. Você sente o cheiro frutado a metros de distância.' }
     ],
     choices: [
@@ -27554,8 +27554,8 @@ var PLAZA_OFFER_EVENTS = [
     },
     script: [
       { type: 'narration', text: 'Um homem magro de chapéu de aba caída se aproxima com uma bandeja de pequenos copos de cerâmica.' },
-      { type: 'speech', speaker: 'agente_taverna', text: '— Pst. Aventureiro. <i>(ele baixa a voz como se fosse confidencial)</i> Cortesia da Taverna do Urso Cego — gole de hidromel novo. Tô divulgando pelas ruas.' },
-      { type: 'speech', speaker: 'agente_taverna', text: '— Receita do estalajadeiro. Mel das colinas + ervas que ele não revela. Se gostar, passa lá depois — primeira caneca tem 20% de desconto pra quem provou na rua.' }
+      { type: 'speech', speaker: 'Divulgador da Taverna', text: '— Pst. Aventureiro. <i>(ele baixa a voz como se fosse confidencial)</i> Cortesia da Taverna do Urso Cego — gole de hidromel novo. Tô divulgando pelas ruas.' },
+      { type: 'speech', speaker: 'Divulgador da Taverna', text: '— Receita do estalajadeiro. Mel das colinas + ervas que ele não revela. Se gostar, passa lá depois — primeira caneca tem 20% de desconto pra quem provou na rua.' }
     ],
     choices: [
       { id: 'drink_now', label: '🍯 Provar', result: 'apply_now',
@@ -27675,7 +27675,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
     npc_data: { name: 'Guarda da Praça', desc: 'Soldado de patrulha matinal', portrait: 'ic-guerreiro', portraitImg: '/shared/img/npcs/guarda-praca.webp' },
     script: [
       { type: 'narration', text: 'Um guarda em armadura de couro reforçado te avista atravessando a praça. Ele bate o peito num saudar formal.' },
-      { type: 'speech', speaker: 'guarda_praca', text: '— Aventureiro. <i>(o tom é seco mas respeitoso)</i> Bom ver que voltou inteiro.' }
+      { type: 'speech', speaker: 'Guarda da Praça', text: '— Aventureiro. <i>(o tom é seco mas respeitoso)</i> Bom ver que voltou inteiro.' }
     ],
     choices: [
       { id: 'salute', label: '🤝 Retribuir o saudar', result: 'apply_now',
@@ -27706,7 +27706,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
     npc_data: { name: 'Bardo das Ruas', desc: 'Trovador errante com alaúde', portrait: 'ic-bardo', portraitImg: '/shared/img/npcs/bardo-ruas.webp' },
     script: [
       { type: 'narration', text: 'Um bardo desconhecido para de tocar ao te ver passar. Ele dedilha rapidamente o alaúde.' },
-      { type: 'speech', speaker: 'bardo_rua', text: '— Veja só! O aventureiro das nossas histórias. <i>(ele começa improvisar uma estrofe sobre suas aventuras)</i>' }
+      { type: 'speech', speaker: 'Bardo de Rua', text: '— Veja só! O aventureiro das nossas histórias. <i>(ele começa improvisar uma estrofe sobre suas aventuras)</i>' }
     ],
     choices: [
       { id: 'tip', label: '🎵 Jogar uma moeda', result: 'apply_now',
@@ -27722,7 +27722,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
     npc_data: { name: 'Anciã de Valdoria', desc: 'Mulher idosa de cabelos brancos', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/ancia-valdoria.webp' },
     script: [
       { type: 'narration', text: 'Uma senhora idosa de cabelos brancos te aborda com mãos trêmulas mas olhar firme.' },
-      { type: 'speech', speaker: 'velha_praca', text: '— Obrigada, aventureiro. <i>(ela aperta sua mão)</i> Pessoas como você fazem essa cidade ainda valer a pena.' }
+      { type: 'speech', speaker: 'Anciã da Praça', text: '— Obrigada, aventureiro. <i>(ela aperta sua mão)</i> Pessoas como você fazem essa cidade ainda valer a pena.' }
     ],
     choices: [
       { id: 'kind', label: '🙏 Sorrir e aceitar', result: 'apply_now',
@@ -27769,7 +27769,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
     npc_data: { name: 'Florista da Praça', desc: 'Vendedora ambulante de flores secas', portrait: 'ic-mercado', portraitImg: '/shared/img/npcs/florista-praca.webp' },
     script: [
       { type: 'narration', text: 'Uma florista de avental rústico estende uma pétala dourada na sua direção.' },
-      { type: 'speech', speaker: 'florista', text: '— Pra sorte na próxima jornada. <i>(o sorriso dela é genuíno)</i> Cortesia da casa.' }
+      { type: 'speech', speaker: 'Florista', text: '— Pra sorte na próxima jornada. <i>(o sorriso dela é genuíno)</i> Cortesia da casa.' }
     ],
     choices: [
       { id: 'accept', label: '🌼 Aceitar a pétala', result: 'take_along',
@@ -27801,7 +27801,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
     npc_data: { name: 'Mercador Apressado', desc: 'Comerciante carregando sacos', portrait: 'ic-mercado', portraitImg: '/shared/img/npcs/mercador-apressado.webp' },
     script: [
       { type: 'narration', text: 'Um mercador atravessa a praça correndo. Algumas moedas escapam do bolso e tilintam no chão.' },
-      { type: 'speech', speaker: 'mercador_pressa', text: '— Pelos deuses, minha bolsa! <i>(ele para apavorado)</i>' }
+      { type: 'speech', speaker: 'Mercador Apressado', text: '— Pelos deuses, minha bolsa! <i>(ele para apavorado)</i>' }
     ],
     choices: [
       { id: 'return', label: '💰 Devolver as moedas', result: 'apply_now',
@@ -27847,7 +27847,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
     npc_data: { name: 'Crianças da Praça', desc: 'Pequenos brincando de aventura', portrait: 'ic-praca' },
     script: [
       { type: 'narration', text: 'Crianças brincam de aventureiros com gravetos por espadas. Uma delas te vê e o jogo congela.' },
-      { type: 'speech', speaker: 'crianca_praca', text: '— É VOCÊ! <i>(elas correm em sua direção)</i> Faz autógrafo! No nosso pergaminho!' }
+      { type: 'speech', speaker: 'Criança da Praça', text: '— É VOCÊ! <i>(elas correm em sua direção)</i> Faz autógrafo! No nosso pergaminho!' }
     ],
     choices: [
       { id: 'sign', label: '✒️ Assinar com pose dramática', result: 'apply_now',
@@ -27863,7 +27863,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
     npc_data: { name: 'Morador de Valdoria', desc: 'Vizinho oferecendo abrigo', portrait: 'ic-praca' },
     script: [
       { type: 'narration', text: 'Começa uma chuva fina. Moradores oferecem abrigo sob seus toldos.' },
-      { type: 'speech', speaker: 'morador_eldoria', text: '— Vem, aventureiro. <i>(o homem ergue o toldo)</i> Não custa nada e seca rápido.' }
+      { type: 'speech', speaker: 'Morador da Cidade', text: '— Vem, aventureiro. <i>(o homem ergue o toldo)</i> Não custa nada e seca rápido.' }
     ],
     choices: [
       { id: 'accept', label: '☂️ Aceitar abrigo', result: 'apply_now',
@@ -27957,7 +27957,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Criança da Praça', desc: 'Garota de tranças com cesta caída', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/crianca_pomar.webp' },
     script: [
       { type: 'narration', text: 'Uma garota de oito anos tropeça no calçamento e a cesta de vime escapa das mãos dela. Maçãs vermelhas rolam em todas as direções pela praça.' },
-      { type: 'speech', speaker: 'crianca_pomar', text: '— Ai, ai! <i>(ela se ajoelha rapidamente)</i> Minha avó vai brigar comigo de novo se eu perder essas maçãs! Era pra eu entregar todas no mercado da esquina!' }
+      { type: 'speech', speaker: 'Menina do Pomar', text: '— Ai, ai! <i>(ela se ajoelha rapidamente)</i> Minha avó vai brigar comigo de novo se eu perder essas maçãs! Era pra eu entregar todas no mercado da esquina!' }
     ],
     choices: [
       { id: 'help', label: '🍎 Ajudar a recolher', result: 'apply_now',
@@ -27987,7 +27987,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Mendigo da Praça', desc: 'Homem magro de barba grisalha e mãos trêmulas', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/mendigo_praca.webp' },
     script: [
       { type: 'narration', text: 'Um homem magro de barba grisalha emerge da multidão e estende as mãos esqueléticas pra você. As roupas dele têm remendo sobre remendo.' },
-      { type: 'speech', speaker: 'mendigo_praca', text: '— Aventureiro... só uma moeda. <i>(a voz é trêmula, ele tenta sorrir mas tosse)</i> Faz três dias que não como nada. Qualquer coisa serve. Pão velho, casca de queijo... qualquer coisa.' }
+      { type: 'speech', speaker: 'Mendigo', text: '— Aventureiro... só uma moeda. <i>(a voz é trêmula, ele tenta sorrir mas tosse)</i> Faz três dias que não como nada. Qualquer coisa serve. Pão velho, casca de queijo... qualquer coisa.' }
     ],
     choices: [
       { id: 'donate', label: '🪙 Doar 1 valdorita', result: 'apply_now',
@@ -28017,7 +28017,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Guarda da Cidade', desc: 'Soldado de meia-idade com barba grisalha e armadura suada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/npcs/plaza/guarda_barricada.webp' },
     script: [
       { type: 'narration', text: 'Um guarda de meia-idade está empurrando uma barricada de madeira pesada que bloqueia a entrada de uma rua lateral. Ele se vira e te avista, ofegando.' },
-      { type: 'speech', speaker: 'guarda_barricada', text: '— Ei, aventureiro! <i>(ele limpa o suor da testa com a manga)</i> Tem um par de braços de sobra? Essa praga não move sozinha — e o mercado abre em meia hora.' }
+      { type: 'speech', speaker: 'Guarda da Barricada', text: '— Ei, aventureiro! <i>(ele limpa o suor da testa com a manga)</i> Tem um par de braços de sobra? Essa praga não move sozinha — e o mercado abre em meia hora.' }
     ],
     choices: [
       { id: 'help', label: '💪 Ajudar a empurrar', result: 'skill_check',
@@ -28044,7 +28044,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Mercador da Feira', desc: 'Homem desesperado apontando pro telhado', portrait: 'ic-mercado', portraitImg: '/shared/img/npcs/plaza/dono_gato.webp' },
     script: [
       { type: 'narration', text: 'Um homem aponta agitado pro alto de uma barraca de feira coberta. No telhado de palha, um gato malhado mia desesperadamente, com uma das patas presa entre as fibras.' },
-      { type: 'speech', speaker: 'dono_gato', text: '— O Mestre Bigodes! <i>(o homem quase chora)</i> Ele subiu atrás de um pombo e agora não desce de jeito nenhum! Já é a terceira vez essa semana — mas dessa vez tá mesmo preso!' }
+      { type: 'speech', speaker: 'Dono do Gato', text: '— O Mestre Bigodes! <i>(o homem quase chora)</i> Ele subiu atrás de um pombo e agora não desce de jeito nenhum! Já é a terceira vez essa semana — mas dessa vez tá mesmo preso!' }
     ],
     choices: [
       { id: 'rescue', label: '🐱 Escalar e resgatar', result: 'skill_check',
@@ -28071,7 +28071,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Bardo Itinerante', desc: 'Jovem com alaúde quebrado e cara de desespero', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/bardo_praca.webp' },
     script: [
       { type: 'narration', text: 'Um bardo jovem está sentado no chão da praça com um alaúde de tampo rachado. <i>Algumas crianças zombam, jogam migalhas. Ele tenta sorrir mas as bochechas tremem.</i>' },
-      { type: 'speech', speaker: 'bardo_praca', text: '— Apresentação de coroação amanhã. Sem alaúde, sem moeda, sem honra. <i>(ele engole)</i> Se voltar pra casa assim, meu pai vai mandar pra Guarda. "Sem futuro, vai aprender disciplina lá."' }
+      { type: 'speech', speaker: 'Bardo da Praça', text: '— Apresentação de coroação amanhã. Sem alaúde, sem moeda, sem honra. <i>(ele engole)</i> Se voltar pra casa assim, meu pai vai mandar pra Guarda. "Sem futuro, vai aprender disciplina lá."' }
     ],
     choices: [
       { id: 'cheer', label: '🎶 [CAR 12] (Cantar com ele um verso popular)',
@@ -28100,7 +28100,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Batedor de Carteira', desc: 'Garoto magro de mãos rápidas, olhos arregalados', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/batedor_carteira.webp' },
     script: [
       { type: 'narration', text: 'Você sente uma mão roçar a sua bolsa de moedas. <i>Vira rápido — um garoto de uns 12 anos congela com sua mão ainda no fecho.</i> Ao redor, ninguém viu.' },
-      { type: 'speech', speaker: 'batedor_carteira', text: '— P-por favor... <i>(a voz dele falha)</i> Minha irmã tá doente, não comemos há dois dias. Foi minha primeira vez, juro. Não me entrega pra Guarda — eles cortam mão de batedor.' }
+      { type: 'speech', speaker: 'Batedor de Carteira', text: '— P-por favor... <i>(a voz dele falha)</i> Minha irmã tá doente, não comemos há dois dias. Foi minha primeira vez, juro. Não me entrega pra Guarda — eles cortam mão de batedor.' }
     ],
     choices: [
       { id: 'persuade', label: '🗣️ [CAR 13] "Tá dizendo a verdade? Olha nos meus olhos."',
@@ -28129,7 +28129,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Velha do Oculto', desc: 'Mulher idosa de cabelos brancos e olhos como pedra', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/velha_oculto.webp' },
     script: [
       { type: 'narration', text: 'Uma anciã com véu negro sobre os ombros estende a mão calejada quando você passa. <i>Os olhos dela são duas pedras-lua — sem foco, sem juventude, sem medo.</i>' },
-      { type: 'speech', speaker: 'velha_oculto', text: '— Aventureiro. <i>(a voz é fina mas firme)</i> Te vi em sonho. Quer saber o que vem? Três cobres, e te falo o que os outros não veem. Recusa, e talvez nunca saiba o nome do teu próximo inimigo.' }
+      { type: 'speech', speaker: 'Velha Vidente', text: '— Aventureiro. <i>(a voz é fina mas firme)</i> Te vi em sonho. Quer saber o que vem? Três cobres, e te falo o que os outros não veem. Recusa, e talvez nunca saiba o nome do teu próximo inimigo.' }
     ],
     choices: [
       { id: 'pay_truth', label: '🔮 Pagar 3 cobres pela leitura', result: 'apply_now',
@@ -28158,7 +28158,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Bêbados Brigando', desc: 'Dois homens redondos e vermelhos em volta de uma mesa virada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/npcs/plaza/bebados_briga.webp' },
     script: [
       { type: 'narration', text: 'Dois homens robustos viram uma mesa de taverna no meio da praça. <i>Cervejas derramadas, punhos abertos, gritos que ninguém entende.</i> Uma multidão se afasta — a Guarda ainda não chegou.' },
-      { type: 'speech', speaker: 'bebados_briga', text: '— TU É QUEM TRAIU MEU IRMÃO! <i>(o gordo de barba ruiva)</i> NÃO TÁ AQUI POR ACASO! <i>(o outro avança)</i>' }
+      { type: 'speech', speaker: 'Bêbado Brigão', text: '— TU É QUEM TRAIU MEU IRMÃO! <i>(o gordo de barba ruiva)</i> NÃO TÁ AQUI POR ACASO! <i>(o outro avança)</i>' }
     ],
     choices: [
       { id: 'separate', label: '💪 [FOR 13] (Entrar entre eles e separar)',
@@ -51456,18 +51456,18 @@ function _marthaGreeting(p){
   if (rep >= 50) {
     return [
       { type: 'narration', text: 'Martha sai de trás do balcão e te abraça como se fosse parente.' },
-      { type: 'speech', speaker: 'martha', text: '"Senta, senta! Tem caldo no fogão. Não quero saber, é por conta da casa."' }
+      { type: 'speech', speaker: 'Martha', text: '"Senta, senta! Tem caldo no fogão. Não quero saber, é por conta da casa."' }
     ];
   }
   if (rep >= 10) {
     return [
       { type: 'narration', text: 'Martha ergue uma sobrancelha enquanto seca um copo.' },
-      { type: 'speech', speaker: 'martha', text: '"De volta? Dorme aí, mas avisa se for sair na madrugada. Não gosto de portas abertas à noite."' }
+      { type: 'speech', speaker: 'Martha', text: '"De volta? Dorme aí, mas avisa se for sair na madrugada. Não gosto de portas abertas à noite."' }
     ];
   }
   return [
     { type: 'narration', text: 'Martha te olha de cima a baixo com desconfiança mal disfarçada.' },
-    { type: 'speech', speaker: 'martha', text: '"Quarto? Cinco Valdoritas. À vista. E nada de barulho até o galo cantar."' }
+    { type: 'speech', speaker: 'Martha', text: '"Quarto? Cinco Valdoritas. À vista. E nada de barulho até o galo cantar."' }
   ];
 }
 
@@ -51501,7 +51501,7 @@ var MARTHA_ENCOUNTERS = {
     npc: 'martha',
     script: [
       { type: 'narration', text: 'Ela inclina a cabeça e baixa a voz, conferindo se ninguém escuta.' },
-      { type: 'speech', speaker: 'martha', text: '"Hoje cedo um mercador chegou apavorado. Disse que viu <i>fogueiras na Floresta dos Sussurros</i> — três pontos, em triângulo. <i>Não eram lenhadores.</i>"' }
+      { type: 'speech', speaker: 'Martha', text: '"Hoje cedo um mercador chegou apavorado. Disse que viu <i>fogueiras na Floresta dos Sussurros</i> — três pontos, em triângulo. <i>Não eram lenhadores.</i>"' }
     ],
     choices: _marthaChoicesAfter(['rumor'])
   },
@@ -51510,9 +51510,9 @@ var MARTHA_ENCOUNTERS = {
     npc: 'martha',
     script: [
       { type: 'narration', text: 'Martha hesita por um instante. Os olhos vão para a escada que desce pro porão.' },
-      { type: 'speech', speaker: 'martha', text: '"Velharias. Barris vazios. Coisas que o meu falecido marido guardou e nunca mais alguém olhou."' },
+      { type: 'speech', speaker: 'Martha', text: '"Velharias. Barris vazios. Coisas que o meu falecido marido guardou e nunca mais alguém olhou."' },
       { type: 'narration', text: 'Ela limpa as mãos no avental.' },
-      { type: 'speech', speaker: 'martha', text: '"Mas ultimamente... <i>ouço ruídos.</i> Tem algo lá embaixo que não devia estar. Se quiser investigar, pega a chave atrás do balcão. Te pago bem se limpar."' }
+      { type: 'speech', speaker: 'Martha', text: '"Mas ultimamente... <i>ouço ruídos.</i> Tem algo lá embaixo que não devia estar. Se quiser investigar, pega a chave atrás do balcão. Te pago bem se limpar."' }
     ],
     choices: [
       { id: 'accept_cellar',  label: '◆ Aceito investigar a adega', result: 'accept_quest', _questId: 'cellar' },
@@ -51524,7 +51524,7 @@ var MARTHA_ENCOUNTERS = {
     npc: 'martha',
     script: [
       { type: 'narration', text: 'Ela enxuga as mãos no avental, ponderando.' },
-      { type: 'speech', speaker: 'martha', text: '"Não bebe da fonte do Templo sem deixar um gole pros antigos. E se o capitão Aldric oferece chá, <i>aceita</i> — significa que ele confia em você."' }
+      { type: 'speech', speaker: 'Martha', text: '"Não bebe da fonte do Templo sem deixar um gole pros antigos. E se o capitão Aldric oferece chá, <i>aceita</i> — significa que ele confia em você."' }
     ],
     choices: _marthaChoicesAfter(['local'])
   },
@@ -51533,7 +51533,7 @@ var MARTHA_ENCOUNTERS = {
     npc: 'martha',
     script: [
       { type: 'narration', text: 'Martha ri baixinho, soltando uma gargalhada contida.' },
-      { type: 'speech', speaker: 'martha', text: '"Que a guilda anda pagando mal. Que o ferreiro Thorne brigou de novo com a esposa. E que o templo está procurando alguém disposto a entrar na cripta. <i>Nada que não seja boato.</i>"' }
+      { type: 'speech', speaker: 'Martha', text: '"Que a guilda anda pagando mal. Que o ferreiro Thorne brigou de novo com a esposa. E que o templo está procurando alguém disposto a entrar na cripta. <i>Nada que não seja boato.</i>"' }
     ],
     choices: _marthaChoicesAfter(['gossip'])
   },
@@ -51542,7 +51542,7 @@ var MARTHA_ENCOUNTERS = {
     npc: 'martha',
     script: [
       { type: 'narration', text: 'Ela aponta a escada com o queixo.' },
-      { type: 'speech', speaker: 'martha', text: '"Segundo andar, terceira porta. Lençol limpo, água pra lavar o rosto. <i>Cinco Valdoritas se for ficar uma noite só.</i> Outras opções no menu de Quartos."' }
+      { type: 'speech', speaker: 'Martha', text: '"Segundo andar, terceira porta. Lençol limpo, água pra lavar o rosto. <i>Cinco Valdoritas se for ficar uma noite só.</i> Outras opções no menu de Quartos."' }
     ],
     choices: _marthaChoicesAfter(['sleep'])
   },
@@ -51551,7 +51551,7 @@ var MARTHA_ENCOUNTERS = {
     npc: 'martha',
     script: [
       { type: 'narration', text: 'Martha encolhe os ombros e volta a polir o copo.' },
-      { type: 'speech', speaker: 'martha', text: '"Tudo bem. <i>A chave fica onde está.</i> Quando mudar de ideia, é só pedir."' }
+      { type: 'speech', speaker: 'Martha', text: '"Tudo bem. <i>A chave fica onde está.</i> Quando mudar de ideia, é só pedir."' }
     ],
     choices: _marthaChoicesAfter(['cellar'])
   }
@@ -51873,67 +51873,67 @@ function _merchantGreeting(merchantId){
     thorne: [
       [
         { type: 'narration', text: 'Thorne larga o martelo no balcão. O som ressoa como um sino grave.' },
-        { type: 'speech', speaker: 'mer_thorne', text: '"Aço novo? Tem o que precisa aqui."' }
+        { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Aço novo? Tem o que precisa aqui."' }
       ],
       [
         { type: 'narration', text: 'O ferreiro te encara enquanto enxuga a fronte com a manga manchada de fuligem.' },
-        { type: 'speech', speaker: 'mer_thorne', text: '"Aventureiro. <i>(uma pausa)</i> Vê algo bom?"' }
+        { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Aventureiro. <i>(uma pausa)</i> Vê algo bom?"' }
       ],
       [
         { type: 'narration', text: 'Thorne bate uma peça quente no balcão. O metal ainda assobia.' },
-        { type: 'speech', speaker: 'mer_thorne', text: '"Acabou de sair da forja. <i>Tá quente ainda.</i>"' }
+        { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Acabou de sair da forja. <i>Tá quente ainda.</i>"' }
       ]
     ],
     mirena: [
       [
         { type: 'narration', text: 'Mirena ajusta os óculos e fecha o livro de receitas com cuidado.' },
-        { type: 'speech', speaker: 'mer_mirena', text: '"Poções? Venenos? <i>Diga seu mal</i> — tenho cura pra quase tudo."' }
+        { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Poções? Venenos? <i>Diga seu mal</i> — tenho cura pra quase tudo."' }
       ],
       [
         { type: 'narration', text: 'A alquimista mexe um caldeirão. Vapor azul escapa em volutas que cheiram a hortelã e enxofre.' },
-        { type: 'speech', speaker: 'mer_mirena', text: '"Ah — alguém com <i>cheiro de aventura</i>. Bem-vindo."' }
+        { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Ah — alguém com <i>cheiro de aventura</i>. Bem-vindo."' }
       ],
       [
         { type: 'narration', text: 'Mirena te estuda de cima a baixo, como quem examina um espécime curioso.' },
-        { type: 'speech', speaker: 'mer_mirena', text: '"Vejo cansaço nos teus olhos. Tenho cura disponível — <i>se confias no meu trabalho</i>."' }
+        { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Vejo cansaço nos teus olhos. Tenho cura disponível — <i>se confias no meu trabalho</i>."' }
       ]
     ],
     velithra: [
       [
         { type: 'narration', text: 'Velithra sorri e ergue uma gema entre dois dedos finos. A luz atravessa e dança no balcão.' },
-        { type: 'speech', speaker: 'mer_velithra', text: '"Gemas brilham mais quando o sol se põe. <i>Veja por si mesmo</i>."' }
+        { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Gemas brilham mais quando o sol se põe. <i>Veja por si mesmo</i>."' }
       ],
       [
         { type: 'narration', text: 'A joalheira deixa um anel deslizar sobre o veludo escuro do mostruário.' },
-        { type: 'speech', speaker: 'mer_velithra', text: '"Esse aqui — turquesa do leste. <i>Olho de quem viaja muito</i>. Combina com você."' }
+        { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Esse aqui — turquesa do leste. <i>Olho de quem viaja muito</i>. Combina com você."' }
       ],
       [
         { type: 'narration', text: 'Velithra organiza as peças com gestos precisos, como quem afina um instrumento.' },
-        { type: 'speech', speaker: 'mer_velithra', text: '"Aventureiros precisam de mais que aço. <i>Precisam de magia</i> — e ela vive em pedras como estas."' }
+        { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Aventureiros precisam de mais que aço. <i>Precisam de magia</i> — e ela vive em pedras como estas."' }
       ]
     ],
     corvus: [
       [
         { type: 'narration', text: 'Corvus desenrola um pergaminho amarelado sobre a mesa. As bordas estão queimadas.' },
-        { type: 'speech', speaker: 'mer_corvus', text: '"Mapas. <i>Sempre mapas.</i> Pra onde vai?"' }
+        { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Mapas. <i>Sempre mapas.</i> Pra onde vai?"' }
       ],
       [
         { type: 'narration', text: 'O cartógrafo te encara por cima dos pergaminhos. Os olhos são cinzentos, atentos.' },
-        { type: 'speech', speaker: 'mer_corvus', text: '"Aventureiro precisa de mapa. Aventureiro sem mapa — <i>morto</i>."' }
+        { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Aventureiro precisa de mapa. Aventureiro sem mapa — <i>morto</i>."' }
       ],
       [
         { type: 'narration', text: 'Corvus aponta com um dedo manchado de tinta um traço sinuoso no pergaminho.' },
-        { type: 'speech', speaker: 'mer_corvus', text: '"Vê esse traço? <i>Lá tem dragão. Lá tem ouro.</i> Escolha bem."' }
+        { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Vê esse traço? <i>Lá tem dragão. Lá tem ouro.</i> Escolha bem."' }
       ]
     ],
     bjorn: [
       [
         { type: 'narration', text: 'Bjorn ajusta o suporte de uma tenda armada no canto da loja. O tecido grosso range.' },
-        { type: 'speech', speaker: 'mer_bjorn', text: '"Equipamentos pra sobreviver nas terras selvagens! <i>Diga o que precisa, jovem.</i>"' }
+        { type: 'speech', speaker: 'Bjorn, o Seleiro', text: '"Equipamentos pra sobreviver nas terras selvagens! <i>Diga o que precisa, jovem.</i>"' }
       ],
       [
         { type: 'narration', text: 'O seleiro testa a tensão de uma corda recém-trançada, esticando-a entre as mãos calejadas.' },
-        { type: 'speech', speaker: 'mer_bjorn', text: '"Aguenta três aventureiros pendurados. Quatro, se não comerem demais."' }
+        { type: 'speech', speaker: 'Bjorn, o Seleiro', text: '"Aguenta três aventureiros pendurados. Quatro, se não comerem demais."' }
       ]
     ]
   };
@@ -51960,7 +51960,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_thorne',
     script: [
       { type: 'narration', text: '<i>"Como conseguiu o mithral?"</i>' },
-      { type: 'speech', speaker: 'mer_thorne', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithral, sobrevive."' }
+      { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithral, sobrevive."' }
     ],
     choices: 'auto'  // populated em _openMerchantDialogue
   },
@@ -51969,7 +51969,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_thorne',
     script: [
       { type: 'narration', text: '<i>"Conserta equipamento?"</i>' },
-      { type: 'speech', speaker: 'mer_thorne', text: '"Pequenos amassados, conserto sim. Dez Valdoritas e fica como novo."' },
+      { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Pequenos amassados, conserto sim. Dez Valdoritas e fica como novo."' },
       { type: 'narration', text: 'Thorne examina suas armas com olhos de quem mede metal por som.' }
     ],
     _cost: 10,
@@ -51982,7 +51982,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_thorne',
     script: [
       { type: 'narration', text: '<i>"Há quanto tempo é ferreiro?"</i>' },
-      { type: 'speech', speaker: 'mer_thorne', text: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. <i>Forjei pra dois reis e três bandidos.</i> Bandidos pagaram melhor."' }
+      { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. <i>Forjei pra dois reis e três bandidos.</i> Bandidos pagaram melhor."' }
     ],
     choices: 'auto'
   },
@@ -51996,7 +51996,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_mirena',
     script: [
       { type: 'narration', text: '<i>"Faz poções customizadas?"</i>' },
-      { type: 'speech', speaker: 'mer_mirena', text: '"Faço. <i>Mas precisa de ingredientes raros e tempo.</i> Volta com lista específica — e bolsa pesada."' }
+      { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Faço. <i>Mas precisa de ingredientes raros e tempo.</i> Volta com lista específica — e bolsa pesada."' }
     ],
     choices: 'auto'
   },
@@ -52005,9 +52005,9 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_mirena',
     script: [
       { type: 'narration', text: '<i>"De onde aprendeu alquimia?"</i>' },
-      { type: 'speech', speaker: 'mer_mirena', text: '"Aprendiz da Bruxa Veldrina por dezessete anos."' },
+      { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Aprendiz da Bruxa Veldrina por dezessete anos."' },
       { type: 'narration', text: 'Os olhos de Mirena se desviam por um instante, perdidos em alguma memória.' },
-      { type: 'speech', speaker: 'mer_mirena', text: '"Ela morreu numa poção experimental. <i>Eu vivi. Aprendi.</i>"' }
+      { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Ela morreu numa poção experimental. <i>Eu vivi. Aprendi.</i>"' }
     ],
     choices: 'auto'
   },
@@ -52021,7 +52021,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_velithra',
     script: [
       { type: 'narration', text: '<i>"Como funcionam os encaixes?"</i>' },
-      { type: 'speech', speaker: 'mer_velithra', text: '"Equipamento precisa ter <i>slot</i>. A forja de Thorne pode adicionar slots — cem Valdoritas cada. Aí trago a gema certa pra ti."' }
+      { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Equipamento precisa ter <i>slot</i>. A forja de Thorne pode adicionar slots — cem Valdoritas cada. Aí trago a gema certa pra ti."' }
     ],
     choices: 'auto'
   },
@@ -52030,7 +52030,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_velithra',
     script: [
       { type: 'narration', text: '<i>"Encanta itens?"</i>' },
-      { type: 'speech', speaker: 'mer_velithra', text: '"Encanto. Duzentas Valdoritas — <i>mas resultado é aleatório</i>. Só pra corajosos."' },
+      { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Encanto. Duzentas Valdoritas — <i>mas resultado é aleatório</i>. Só pra corajosos."' },
       { type: 'narration', text: 'Velithra sorri de lado, como quem oferece um jogo de azar elegante.' }
     ],
     _cost: 200,
@@ -52048,8 +52048,8 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_corvus',
     script: [
       { type: 'narration', text: '<i>"Que tipo de mapa custom?"</i>' },
-      { type: 'speech', speaker: 'mer_corvus', text: '"Floresta do Sussurro. Catacumbas Esquecidas. Montanhas Brakenhall. Pântano dos Mortos."' },
-      { type: 'speech', speaker: 'mer_corvus', text: '"Duzentas Valdoritas por região — <i>e três dias de trabalho</i>. Tinta de cor especial pra cada uma."' }
+      { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Floresta do Sussurro. Catacumbas Esquecidas. Montanhas Brakenhall. Pântano dos Mortos."' },
+      { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Duzentas Valdoritas por região — <i>e três dias de trabalho</i>. Tinta de cor especial pra cada uma."' }
     ],
     choices: 'auto'
   },
@@ -52059,7 +52059,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     script: [
       { type: 'narration', text: '<i>"Tem mapas raros?"</i>' },
       { type: 'narration', text: 'Corvus baixa a voz e olha rápido pra ambos os lados, como quem confessa pecado.' },
-      { type: 'speech', speaker: 'mer_corvus', text: '"Tenho <i>um</i>. Cidade Submersa. <b>Mil Valdoritas.</b> Não vendo pra qualquer um — <i>e quando vendo, depois não durmo</i>."' }
+      { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Tenho <i>um</i>. Cidade Submersa. <b>Mil Valdoritas.</b> Não vendo pra qualquer um — <i>e quando vendo, depois não durmo</i>."' }
     ],
     choices: 'auto'
   },
@@ -52082,8 +52082,8 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     script: [
       { type: 'narration', text: '<i>"Como funciona o câmbio?"</i>' },
       { type: 'narration', text: 'Garlen pesa uma moeda na palma da mão, depois outra. Sorri sem alegria.' },
-      { type: 'speech', speaker: 'mer_garlen', text: '"Trade goods têm preço <i>estável</i>. Sal, especiarias, ferro bruto — pago e cobro o mesmo. Sem pechinchar."' },
-      { type: 'speech', speaker: 'mer_garlen', text: '"É o jeito honesto. Quem mexe com peso, sabe que <i>cada grama conta</i>."' }
+      { type: 'speech', speaker: 'Garlen Pesa-Justo', text: '"Trade goods têm preço <i>estável</i>. Sal, especiarias, ferro bruto — pago e cobro o mesmo. Sem pechinchar."' },
+      { type: 'speech', speaker: 'Garlen Pesa-Justo', text: '"É o jeito honesto. Quem mexe com peso, sabe que <i>cada grama conta</i>."' }
     ],
     choices: 'auto'
   },
@@ -52092,9 +52092,9 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_garlen',
     script: [
       { type: 'narration', text: '<i>"Há quanto tempo faz câmbio?"</i>' },
-      { type: 'speech', speaker: 'mer_garlen', text: '"Vinte e oito anos. Aprendi com meu pai — joalheiro nas terras do sul. Ele dizia: <i>pesos não mentem, gente sim</i>."' },
+      { type: 'speech', speaker: 'Garlen Pesa-Justo', text: '"Vinte e oito anos. Aprendi com meu pai — joalheiro nas terras do sul. Ele dizia: <i>pesos não mentem, gente sim</i>."' },
       { type: 'narration', text: 'Garlen ergue uma sobrancelha, ajeita o pince-nez.' },
-      { type: 'speech', speaker: 'mer_garlen', text: '"Por isso prefiro lidar com mercadoria. Mercadoria é simples — tem peso, tem valor. Gente é complicada."' }
+      { type: 'speech', speaker: 'Garlen Pesa-Justo', text: '"Por isso prefiro lidar com mercadoria. Mercadoria é simples — tem peso, tem valor. Gente é complicada."' }
     ],
     choices: 'auto'
   }
@@ -52450,11 +52450,11 @@ var CHANCE_ENCOUNTERS = [
     },
     script: [
       { type: 'narration', text: 'Você cruza a porta da Taverna do Urso Cego. O cheiro de hidromel e fumaça de carvalho toma seus sentidos. Antes que possa procurar uma mesa, uma voz rouca te chama do canto mais escuro.' },
-      { type: 'speech', speaker: 'vorhan', text: '— Ei... você aí. Senta um pouco.' },
+      { type: 'speech', speaker: 'Vorhan, o Veterano', text: '— Ei... você aí. Senta um pouco.' },
       { type: 'narration', text: 'Um homem de barba grisalha, com uma cicatriz longa atravessando o rosto, gesticula para a cadeira em frente. A armadura sobre ele está coberta de cortes velhos — testemunhos de muitas batalhas.' },
-      { type: 'speech', speaker: 'vorhan', text: '— Sou Vorhan. Há vinte invernos eu batia essas terras como você. Hoje só observo. Mas observar ensina muito.' },
+      { type: 'speech', speaker: 'Vorhan, o Veterano', text: '— Sou Vorhan. Há vinte invernos eu batia essas terras como você. Hoje só observo. Mas observar ensina muito.' },
       { type: 'narration', text: 'Ele aponta com a caneca para fora da janela.' },
-      { type: 'speech', speaker: 'vorhan', text: '— Ouvi do velho Corvus, na Praça, que ele tá precisando de informação fresca de uma região nova. Mapas regionais, sabe? Cada um cobre uma parte de Valdoria. Não sei se você tem interesse... mas pra um aventureiro do seu calibre, valeria a visita ao cartógrafo.' }
+      { type: 'speech', speaker: 'Vorhan, o Veterano', text: '— Ouvi do velho Corvus, na Praça, que ele tá precisando de informação fresca de uma região nova. Mapas regionais, sabe? Cada um cobre uma parte de Valdoria. Não sei se você tem interesse... mas pra um aventureiro do seu calibre, valeria a visita ao cartógrafo.' }
     ],
     choices: [
       { id: 'thank', label: 'Obrigado pela dica, Vorhan.', result: 'continue' },
@@ -52507,12 +52507,12 @@ var CHANCE_ENCOUNTERS = [
     },
     script: [
       { type: 'narration', text: 'Você se aproxima dos Portões para consultar o mapa de Valdoria. Aldric, o guarda veterano, levanta o capacete ao te ver. Você o conhece — guarda esses portões há décadas.' },
-      { type: 'speech', speaker: 'aldric', text: '— Aventureiro... uma palavra antes de você partir.' },
+      { type: 'speech', speaker: 'Guarda Aldric', text: '— Aventureiro... uma palavra antes de você partir.' },
       { type: 'narration', text: 'Ele baixa a voz, olhando ao redor. Em sua mão, um pergaminho amarelado com bordas chamuscadas — provavelmente o único mapa que ele carrega há anos.' },
-      { type: 'speech', speaker: 'aldric', text: '— Vejo aventureiros entrando e saindo todo dia. A maioria nem sabe pra onde vai. Você não pode atravessar Valdoria sem mapa. É praticamente suicídio.' },
-      { type: 'speech', speaker: 'aldric', text: '— O Mestre Corvus, na Praça Central, vende mapas regionais. Cada um cobre uma região do reino. Mas ele leva tempo pra preparar — depende de aventureiros como você que voltam contando o que viram.' },
+      { type: 'speech', speaker: 'Guarda Aldric', text: '— Vejo aventureiros entrando e saindo todo dia. A maioria nem sabe pra onde vai. Você não pode atravessar Valdoria sem mapa. É praticamente suicídio.' },
+      { type: 'speech', speaker: 'Guarda Aldric', text: '— O Mestre Corvus, na Praça Central, vende mapas regionais. Cada um cobre uma região do reino. Mas ele leva tempo pra preparar — depende de aventureiros como você que voltam contando o que viram.' },
       { type: 'narration', text: 'Aldric te entrega seu pergaminho gasto.' },
-      { type: 'speech', speaker: 'aldric', text: '— Toma. É um mapa antigo dos arredores próximos. Não cobre muito, mas é um começo. Volte aqui quando quiser saber mais — sempre tô de plantão.' }
+      { type: 'speech', speaker: 'Guarda Aldric', text: '— Toma. É um mapa antigo dos arredores próximos. Não cobre muito, mas é um começo. Volte aqui quando quiser saber mais — sempre tô de plantão.' }
     ],
     choices: [
       { id: 'thank', label: '— Obrigado, Aldric.', result: 'continue_to_cart' },
@@ -52563,10 +52563,10 @@ var CHANCE_ENCOUNTERS = [
     },
     script: [
       { type: 'narration', text: 'A bardisa no canto interrompe sua música no momento em que seus olhos se cruzam. Ela desliza um dedo languidamente pela harpa de cordas douradas, abrindo um sorriso enigmático.' },
-      { type: 'speech', speaker: 'silvana', text: '— Ah, viajante... há dias eu te vejo passar por aqui. Senta, senta. Tenho uma história fresca pra você.' },
+      { type: 'speech', speaker: 'Silvana, a Bardisa', text: '— Ah, viajante... há dias eu te vejo passar por aqui. Senta, senta. Tenho uma história fresca pra você.' },
       { type: 'narration', text: 'Ela tira o cabelo prateado dos olhos e se inclina mais perto.' },
-      { type: 'speech', speaker: 'silvana', text: '— Faz três noites, um caçador veio chegando dos Pântanos Profundos. Coberto de lama, mas sorrindo como quem viu coisas. Entregou um pergaminho ao velho Corvus na Praça.' },
-      { type: 'speech', speaker: 'silvana', text: '— Informações cartográficas valiosas, dizem. O cartógrafo agora tá adicionando aquela região ao próximo mapa que ele vai vender. Se você tem coragem de explorar terras inexploradas, talvez seja hora de visitá-lo. Os melhores mapas são os mais frescos — e Corvus tem um quase pronto.' }
+      { type: 'speech', speaker: 'Silvana, a Bardisa', text: '— Faz três noites, um caçador veio chegando dos Pântanos Profundos. Coberto de lama, mas sorrindo como quem viu coisas. Entregou um pergaminho ao velho Corvus na Praça.' },
+      { type: 'speech', speaker: 'Silvana, a Bardisa', text: '— Informações cartográficas valiosas, dizem. O cartógrafo agora tá adicionando aquela região ao próximo mapa que ele vai vender. Se você tem coragem de explorar terras inexploradas, talvez seja hora de visitá-lo. Os melhores mapas são os mais frescos — e Corvus tem um quase pronto.' }
     ],
     choices: [
       { id: 'thank', label: 'Linda história. Obrigado, Silvana.', result: 'continue' },
@@ -52615,12 +52615,12 @@ var CHANCE_ENCOUNTERS = [
     },
     script: [
       { type: 'narration', text: 'Antes de chegar nos balcões do mercado, alguém puxa sua manga com firmeza. Um homem baixo, de chapéu largo e olhos espertos, te puxa pra um canto entre as barracas.' },
-      { type: 'speech', speaker: 'thessil', text: '— Pst! Você aí! Tô precisando trocar uma palavra rápida.' },
+      { type: 'speech', speaker: 'Thessil, o Mercador', text: '— Pst! Você aí! Tô precisando trocar uma palavra rápida.' },
       { type: 'narration', text: 'Ele inclina o chapéu pra trás, revelando um sorriso astuto.' },
-      { type: 'speech', speaker: 'thessil', text: '— Sou Thessil. Recebi uma carga rara de uma caravana das Montanhas hoje pela manhã. Eles trouxeram mais que mercadorias — trouxeram informações.' },
-      { type: 'speech', speaker: 'thessil', text: '— Ouvi dizer que o cartógrafo Corvus tá juntando detalhes do Passo do Dragão. A caravana passou por lá. Falaram pra ele tudo que viram. Se você vai pra Praça, leva esse rumor — pode acelerar o pedido de algum aventureiro lá.' },
+      { type: 'speech', speaker: 'Thessil, o Mercador', text: '— Sou Thessil. Recebi uma carga rara de uma caravana das Montanhas hoje pela manhã. Eles trouxeram mais que mercadorias — trouxeram informações.' },
+      { type: 'speech', speaker: 'Thessil, o Mercador', text: '— Ouvi dizer que o cartógrafo Corvus tá juntando detalhes do Passo do Dragão. A caravana passou por lá. Falaram pra ele tudo que viram. Se você vai pra Praça, leva esse rumor — pode acelerar o pedido de algum aventureiro lá.' },
       { type: 'narration', text: 'Ele te dá um tapinha amistoso no ombro.' },
-      { type: 'speech', speaker: 'thessil', text: '— Falo isso de coração. Entre mercadores e aventureiros, a gente compartilha boas oportunidades.' }
+      { type: 'speech', speaker: 'Thessil, o Mercador', text: '— Falo isso de coração. Entre mercadores e aventureiros, a gente compartilha boas oportunidades.' }
     ],
     choices: [
       { id: 'thank', label: 'Valeu, Thessil.', result: 'continue' },
@@ -52669,10 +52669,10 @@ var CHANCE_ENCOUNTERS = [
     },
     script: [
       { type: 'narration', text: 'Você atravessa a Praça Central. O burburinho dos vendedores se mistura com o som das fontes. Uma mulher de vestes acadêmicas se aproxima, segurando um livro grosso de capa em couro escuro.' },
-      { type: 'speech', speaker: 'miriana', text: '— Perdão pela interrupção, aventureiro. Vi você nos portões antes. Você... viaja, não viaja? Cruza terras de Valdoria além das muralhas?' },
+      { type: 'speech', speaker: 'Mestra Miriana', text: '— Perdão pela interrupção, aventureiro. Vi você nos portões antes. Você... viaja, não viaja? Cruza terras de Valdoria além das muralhas?' },
       { type: 'narration', text: 'Ela abre o livro com cuidado, mostrando ilustrações detalhadas de mapas antigos — alguns com séculos de idade.' },
-      { type: 'speech', speaker: 'miriana', text: '— Sou Mestra Miriana, da Academia de História. Estou pesquisando a história cartográfica de nosso reino. O Mestre Corvus na Praça é o melhor cartógrafo vivo — herdou três gerações de traço de família.' },
-      { type: 'speech', speaker: 'miriana', text: '— Mas ele só vende mapas regionais comuns. Para o Mapa Mestre completo de Valdoria, ele exige um teste de erudição. Caso você queira... eu posso te treinar nas runas cartográficas. É uma arte difícil, mas... recompensadora.' }
+      { type: 'speech', speaker: 'Mestra Miriana', text: '— Sou Mestra Miriana, da Academia de História. Estou pesquisando a história cartográfica de nosso reino. O Mestre Corvus na Praça é o melhor cartógrafo vivo — herdou três gerações de traço de família.' },
+      { type: 'speech', speaker: 'Mestra Miriana', text: '— Mas ele só vende mapas regionais comuns. Para o Mapa Mestre completo de Valdoria, ele exige um teste de erudição. Caso você queira... eu posso te treinar nas runas cartográficas. É uma arte difícil, mas... recompensadora.' }
     ],
     choices: [
       { id: 'interested', label: 'Estou interessado em estudar.', result: 'continue' },
@@ -52723,10 +52723,10 @@ var CHANCE_ENCOUNTERS = [
     },
     script: [
       { type: 'narration', text: 'Você entra na taverna. Vorhan, o veterano, te reconhece imediatamente do canto e levanta a caneca em saudação.' },
-      { type: 'speech', speaker: 'vorhan', text: '— Você de novo! Bom te ver inteiro. Estive pensando... aquela conversa que tivemos sobre mapas.' },
+      { type: 'speech', speaker: 'Vorhan, o Veterano', text: '— Você de novo! Bom te ver inteiro. Estive pensando... aquela conversa que tivemos sobre mapas.' },
       { type: 'narration', text: 'Ele coça a barba grisalha com a mão calejada.' },
-      { type: 'speech', speaker: 'vorhan', text: '— Não vou te empurrar nada. Mas ouvi essa manhã que dois aventureiros voltaram do Forte dos Bandidos com info nova. Corvus vai conseguir acelerar mapas se eles dividirem o que viram.' },
-      { type: 'speech', speaker: 'vorhan', text: '— Você sabe como é. Cartógrafo bom precisa de informação fresca, e informação fresca vem de quem volta vivo. Vale a visita.' }
+      { type: 'speech', speaker: 'Vorhan, o Veterano', text: '— Não vou te empurrar nada. Mas ouvi essa manhã que dois aventureiros voltaram do Forte dos Bandidos com info nova. Corvus vai conseguir acelerar mapas se eles dividirem o que viram.' },
+      { type: 'speech', speaker: 'Vorhan, o Veterano', text: '— Você sabe como é. Cartógrafo bom precisa de informação fresca, e informação fresca vem de quem volta vivo. Vale a visita.' }
     ],
     choices: [
       { id: 'thank', label: 'Obrigado pela dica, velho.', result: 'continue' },
@@ -52776,11 +52776,11 @@ var CHANCE_ENCOUNTERS = [
     },
     script: [
       { type: 'narration', text: 'Você se aproxima dos portões. Um patrulheiro de capa de pele encosta na muralha, observando o horizonte. Quando vê você, faz um aceno breve com a cabeça.' },
-      { type: 'speech', speaker: 'garrick', text: '— Saindo a campo? Ou só conferindo o tempo?' },
+      { type: 'speech', speaker: 'Garrick, o Caçador', text: '— Saindo a campo? Ou só conferindo o tempo?' },
       { type: 'narration', text: 'Ele se afasta da muralha, ajustando o arco às costas. O olhar dele tem aquela calma só dos que andaram muito sob estrelas.' },
-      { type: 'speech', speaker: 'garrick', text: '— Sou Garrick. Patrulho rotas pra Coroa há dezessete invernos. Conheço Valdoria como minha mão direita.' },
-      { type: 'speech', speaker: 'garrick', text: '— Olha, vou te dar um conselho que ninguém vai te dar: Corvus, na Praça, vende mapas. Bons. Mas ele só sabe vender o que TEM. Tem regiões que ninguém mapeou ainda — locais escondidos que só descobrem quem realmente caminha por eles.' },
-      { type: 'speech', speaker: 'garrick', text: '— Quando você passa perto de um lugar inexplorado, presta atenção nos sinais. Pegadas estranhas. Fumaça de longe. Um aroma que não é da floresta. É assim que aventureiros descobrem o que não tá nos pergaminhos.' }
+      { type: 'speech', speaker: 'Garrick, o Caçador', text: '— Sou Garrick. Patrulho rotas pra Coroa há dezessete invernos. Conheço Valdoria como minha mão direita.' },
+      { type: 'speech', speaker: 'Garrick, o Caçador', text: '— Olha, vou te dar um conselho que ninguém vai te dar: Corvus, na Praça, vende mapas. Bons. Mas ele só sabe vender o que TEM. Tem regiões que ninguém mapeou ainda — locais escondidos que só descobrem quem realmente caminha por eles.' },
+      { type: 'speech', speaker: 'Garrick, o Caçador', text: '— Quando você passa perto de um lugar inexplorado, presta atenção nos sinais. Pegadas estranhas. Fumaça de longe. Um aroma que não é da floresta. É assim que aventureiros descobrem o que não tá nos pergaminhos.' }
     ],
     choices: [
       { id: 'thank', label: 'Vou ficar de olho. Obrigado, Garrick.', result: 'continue' },
@@ -54471,23 +54471,23 @@ function _openCorvusGreetingDialog(player, opts) {
   var script = fromAldric ? [
     { type: 'narration', text: 'Você atravessa os portões da Praça Central e segue o aroma de cera de selo e tinta de carvalho até uma barraca coberta por toldo desbotado. Pergaminhos secam pendurados em cordas tensionadas entre dois postes.' },
     { type: 'narration', text: 'Atrás de uma mesa cheia de instrumentos — compassos, transferidores, uma bússola com ponteiro fino como agulha — um homem grisalho mede uma linha com precisão de quem fez isso a vida inteira.' },
-    { type: 'speech', speaker: 'corvus_greeting', text: '— Não pise nos mapas. A tinta de carvalho leva três dias pra fixar no pergaminho, e eu acabei de aplicar a quarta camada na rota das Colinas Etéreas.' },
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Não pise nos mapas. A tinta de carvalho leva três dias pra fixar no pergaminho, e eu acabei de aplicar a quarta camada na rota das Colinas Etéreas.' },
     { type: 'narration', text: 'Ele não levanta os olhos. A pena se move com cuidado milimétrico sobre uma curva de relevo.' },
-    { type: 'speech', speaker: 'corvus_greeting', text: '— Diga o que precisa. Se for direção, veio ao lugar certo. Se for conversa barata, a taverna é na outra rua.' },
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Diga o que precisa. Se for direção, veio ao lugar certo. Se for conversa barata, a taverna é na outra rua.' },
     { type: 'narration', text: 'Você menciona Aldric — o capitão dos Portões — e o pergaminho gasto que ele te entregou.' },
-    { type: 'speech', speaker: 'corvus_greeting', text: '— Aldric. <i>(uma pausa)</i> Aquele guarda velho. Um olho a menos, mas o que sobrou enxerga melhor que muito olho são. Ele não manda gente à toa.' },
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Aldric. <i>(uma pausa)</i> Aquele guarda velho. Um olho a menos, mas o que sobrou enxerga melhor que muito olho são. Ele não manda gente à toa.' },
     { type: 'narration', text: 'Corvus finalmente levanta os olhos. Estuda você por um instante — não como ameaça, como cartógrafo: medindo distâncias invisíveis.' },
-    { type: 'speech', speaker: 'corvus_greeting', text: '— Aldric e eu temos um acordo silencioso. Ele filtra os aventureiros que cruzam os portões; os que sobrevivem voltam aqui pra me contar o que viram. É assim que mapas ficam precisos. Sangue, suor e anotações.' },
-    { type: 'speech', speaker: 'corvus_greeting', text: '— Vejo que ele te enxergou como alguém que pode chegar inteiro de volta. Não vou contradizê-lo.' },
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Aldric e eu temos um acordo silencioso. Ele filtra os aventureiros que cruzam os portões; os que sobrevivem voltam aqui pra me contar o que viram. É assim que mapas ficam precisos. Sangue, suor e anotações.' },
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Vejo que ele te enxergou como alguém que pode chegar inteiro de volta. Não vou contradizê-lo.' },
     { type: 'narration', text: 'Ele empurra um caderno aberto na sua direção. As páginas mostram sete regiões cuidadosamente catalogadas — cada uma com preço, dificuldade e prazo de preparo.' },
-    { type: 'speech', speaker: 'corvus_greeting', text: '— Tenho sete mapas regionais. Os de regiões mais brandas vendo direto a qualquer um com prata na mão. Os de terras hostis... <i>(uma pausa)</i> esses só caem nas mãos de quem já provou que volta inteiro. Aldric e eu cuidamos disso. Cada mapa leva alguns dias pra eu preparar — depende de quem volta da estrada me trazendo informação fresca.' },
-    { type: 'speech', speaker: 'corvus_greeting', text: '— Pequena dica: Bjorn — sócio meu, perdeu a mão direita, desenha com a esquerda como se nascesse assim — costuma trazer informações de trilhas perigosas. Quando ele volta, eu acelero meus pedidos. Se você acabar cruzando com ele, mande lembranças. Ou um soco pelas costas.' }
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Tenho sete mapas regionais. Os de regiões mais brandas vendo direto a qualquer um com prata na mão. Os de terras hostis... <i>(uma pausa)</i> esses só caem nas mãos de quem já provou que volta inteiro. Aldric e eu cuidamos disso. Cada mapa leva alguns dias pra eu preparar — depende de quem volta da estrada me trazendo informação fresca.' },
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Pequena dica: Bjorn — sócio meu, perdeu a mão direita, desenha com a esquerda como se nascesse assim — costuma trazer informações de trilhas perigosas. Quando ele volta, eu acelero meus pedidos. Se você acabar cruzando com ele, mande lembranças. Ou um soco pelas costas.' }
   ] : [
     // Fallback: jogador chegou direto sem ser via Aldric
     { type: 'narration', text: 'Você se aproxima da barraca de mapas na Praça Central. O cheiro de tinta de carvalho e cera de selo é inconfundível.' },
-    { type: 'speech', speaker: 'corvus_greeting', text: '— Hmm? Ah, um visitante. Perdão, estava calculando a distância entre o Pico Etelar e o Desfiladeiro Cinza. São exatamente trezentas e quarenta e duas braças, caso se pergunte. O que posso fazer por você?' },
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Hmm? Ah, um visitante. Perdão, estava calculando a distância entre o Pico Etelar e o Desfiladeiro Cinza. São exatamente trezentas e quarenta e duas braças, caso se pergunte. O que posso fazer por você?' },
     { type: 'narration', text: 'Corvus não levanta os olhos do pergaminho — apenas estende a mão pedindo paciência enquanto termina uma linha.' },
-    { type: 'speech', speaker: 'corvus_greeting', text: '— Tenho sete mapas regionais à venda. Cada linha neste caderno representa semanas de caminhada, acampamentos sob chuva, e ao menos um encontro com algo que queria me comer. Vamos ao que interessa: precisa de algum?' }
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Tenho sete mapas regionais à venda. Cada linha neste caderno representa semanas de caminhada, acampamentos sob chuva, e ao menos um encontro com algo que queria me comer. Vamos ao que interessa: precisa de algum?' }
   ];
 
   var enc = {
@@ -54927,10 +54927,15 @@ function _renderEncounterPopup(enc, originalAction, player) {
     // 2026-05-22: typewriter inline, não mais clip-path wipe.
     // Mantém revealDur para cálculo de overlap entre linhas (60% rule).
     if (line.type === 'speech') {
+      /* A3.8 (#90): speaker nos DADOS agora é DISPLAY NAME (codemod) — usa
+         verbatim quando não é key snake_case; lookup no registry continua
+         cobrindo dados legados/dinâmicos (discovery quests). */
       var spkr = RECURRING_NPCS[line.speaker] || RECURRING_NPCS[enc.npc];
       div.className = 'enc-line enc-speech enc-tw';
-      /* sessão #88: guard igual ao skip path (linha ~54946) — deref nunca crasheia */
-      if (spkr) div.setAttribute('data-speaker', spkr.name);
+      var _spkName = (line.speaker && !/^[a-z0-9_]+$/.test(String(line.speaker)))
+        ? line.speaker : (spkr ? spkr.name : '');
+      /* sessão #88: guard igual ao skip path — deref nunca crasheia */
+      if (_spkName) div.setAttribute('data-speaker', _spkName);
     } else {
       div.className = 'enc-line enc-narration enc-tw';
     }
@@ -54969,7 +54974,9 @@ function _renderEncounterPopup(enc, originalAction, player) {
       if (line.type === 'speech') {
         var spkr = RECURRING_NPCS[line.speaker] || RECURRING_NPCS[enc.npc];
         div.className = 'enc-line enc-speech enc-tw enc-tw-done';
-        if (spkr) div.setAttribute('data-speaker', spkr.name);
+        var _spkName2 = (line.speaker && !/^[a-z0-9_]+$/.test(String(line.speaker)))
+          ? line.speaker : (spkr ? spkr.name : '');
+        if (_spkName2) div.setAttribute('data-speaker', _spkName2);
       } else {
         div.className = 'enc-line enc-narration enc-tw enc-tw-done';
       }
@@ -55746,7 +55753,7 @@ var CORVUS_MAPS = [
     reveals: ['orc_tribe', 'bandit_fortress'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus abre um pergaminho amarelo, cuidadosamente catalogado, e o desliza pra você.' },
-      { type: 'speech', speaker: 'corvus_greeting', text: '— Planícies de Valdoria. Terra de coelhos, fazendeiros... e bandidos. Bom pra começar a aventura — risco baixo, recompensa modesta. Aldric te credenciou — você tem o tipo de cabeça que volta inteira pra contar a história.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Planícies de Valdoria. Terra de coelhos, fazendeiros... e bandidos. Bom pra começar a aventura — risco baixo, recompensa modesta. Aldric te credenciou — você tem o tipo de cabeça que volta inteira pra contar a história.' }
     ]
   },
   { name: 'Mapa da Floresta',    price: 35, days: 3, emoji: '🌲', min_level: 2,
@@ -55754,7 +55761,7 @@ var CORVUS_MAPS = [
     reveals: ['goblin_nest', 'elven_ruins'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus puxa um caderno encadernado em couro verde-musgo. Folhas secas caem das páginas.' },
-      { type: 'speech', speaker: 'corvus_greeting', text: '— Floresta dos Sussurros. <i>(uma pausa)</i> Goblins emboscam à noite, mas as Ruínas Élficas guardam relíquias que valem o risco. Lyra mapeia trilhas lá há anos. Pelo que ouvi de Aldric, você já tem o calo das primeiras estradas — está pronto pra terras mais densas.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Floresta dos Sussurros. <i>(uma pausa)</i> Goblins emboscam à noite, mas as Ruínas Élficas guardam relíquias que valem o risco. Lyra mapeia trilhas lá há anos. Pelo que ouvi de Aldric, você já tem o calo das primeiras estradas — está pronto pra terras mais densas.' }
     ]
   },
   { name: 'Mapa do Deserto',     price: 20, days: 2, emoji: '🌵', min_level: 2,
@@ -55762,7 +55769,7 @@ var CORVUS_MAPS = [
     reveals: ['desert'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus abana o ar com a mão como se sentisse calor só de pegar o pergaminho.' },
-      { type: 'speech', speaker: 'corvus_greeting', text: '— Areias Douradas. Sol implacável, água escassa, areias movediças que engolem cavalos inteiros. Mas os bandidos do leste têm carga pesada — vale ouro pra quem aguentar.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Areias Douradas. Sol implacável, água escassa, areias movediças que engolem cavalos inteiros. Mas os bandidos do leste têm carga pesada — vale ouro pra quem aguentar.' }
     ]
   },
   { name: 'Mapa do Pântano',     price: 40, days: 4, emoji: '🐍', min_level: 3,
@@ -55770,7 +55777,7 @@ var CORVUS_MAPS = [
     reveals: ['deep_swamp', 'graveyard', 'ancestral_graveyard'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus abre um pergaminho que cheira levemente a mofo. Manchas escuras decoram as bordas.' },
-      { type: 'speech', speaker: 'corvus_greeting', text: '— Pântano Profundo. <i>(o tom dele endurece)</i> Mortos não ficam quietos lá. Theron sobreviveu três expedições e voltou da quarta sem o caçador parceiro. Você já provou que tem aço pra encarar trilhas duras — esse é o próximo nível de prova, mas dia frio e botas secas continuam sendo conselho de quem te quer vivo.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Pântano Profundo. <i>(o tom dele endurece)</i> Mortos não ficam quietos lá. Theron sobreviveu três expedições e voltou da quarta sem o caçador parceiro. Você já provou que tem aço pra encarar trilhas duras — esse é o próximo nível de prova, mas dia frio e botas secas continuam sendo conselho de quem te quer vivo.' }
     ]
   },
   { name: 'Mapa do Ermo Gelado', price: 30, days: 4, emoji: '❄️', min_level: 3,
@@ -55778,7 +55785,7 @@ var CORVUS_MAPS = [
     reveals: ['snow'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus tira um pergaminho enrolado em pano de lã grossa. Uma nuvem de respiração condensada acompanha.' },
-      { type: 'speech', speaker: 'corvus_greeting', text: '— Ermo Gelado. Sarya volta de lá com gelo nos cabelos e histórias de aurora boreal sobre tundra infinita. Aquecimento mágico ou pelagem grossa — escolha um.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Ermo Gelado. Sarya volta de lá com gelo nos cabelos e histórias de aurora boreal sobre tundra infinita. Aquecimento mágico ou pelagem grossa — escolha um.' }
     ]
   },
   { name: 'Mapa das Montanhas',  price: 60, days: 5, emoji: '🏔️', min_level: 5,
@@ -55786,7 +55793,7 @@ var CORVUS_MAPS = [
     reveals: ['troll_cave', 'dragon_pass', 'cave', 'underground_caverns', 'crystal_depths'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus puxa um pergaminho extenso, dobrado em quatro. Borgar — o anão grisalho — desenhou esse mapa com a precisão típica do povo dele.' },
-      { type: 'speech', speaker: 'corvus_greeting', text: '— Picos de Pedra. Trolls, dragões, cavernas de cristal mais profundas que o céu é alto. Sem rodeios: esse é caminho de gente que já enfrentou de tudo nas estradas baixas. Você tem o porte pra subir agora — só quem provou ter aço no estômago E na mochila chega vivo.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Picos de Pedra. Trolls, dragões, cavernas de cristal mais profundas que o céu é alto. Sem rodeios: esse é caminho de gente que já enfrentou de tudo nas estradas baixas. Você tem o porte pra subir agora — só quem provou ter aço no estômago E na mochila chega vivo.' }
     ]
   },
   { name: 'Mapa Vulcânico',      price: 55, days: 6, emoji: '🌋', min_level: 7,
@@ -55794,7 +55801,7 @@ var CORVUS_MAPS = [
     reveals: ['volcanic'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus desenrola um pergaminho com bordas chamuscadas. <i>De fato chamuscadas.</i>' },
-      { type: 'speech', speaker: 'corvus_greeting', text: '— Cratera Ardente. <i>(silêncio prolongado)</i> Aqui eu deveria desaconselhar. <i>(ele te encara fixamente)</i> Mas você sobreviveu a tudo até aqui — pântanos, montanhas, ermos. Lava, dragões, e algo mais antigo dormindo no centro. Se for mesmo, leve testamento assinado.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Cratera Ardente. <i>(silêncio prolongado)</i> Aqui eu deveria desaconselhar. <i>(ele te encara fixamente)</i> Mas você sobreviveu a tudo até aqui — pântanos, montanhas, ermos. Lava, dragões, e algo mais antigo dormindo no centro. Se for mesmo, leve testamento assinado.' }
     ]
   }
 ];
@@ -56005,12 +56012,12 @@ function _showCorvusMapRevealDialog(player, newMaps) {
   if (newMaps.length === 1) {
     script.push({ type: 'narration',
       text: 'Corvus para de medir o pergaminho que estava trabalhando e ergue o olhar.' });
-    script.push({ type: 'speech', speaker: 'corvus_greeting',
+    script.push({ type: 'speech', speaker: 'Mestre Corvus',
       text: '— Espera. Antes de fechar a venda — tenho algo novo pra te mostrar.' });
   } else {
     script.push({ type: 'narration',
       text: 'Corvus larga a pena e abre vários cadernos sobre a mesa, todos catalogados em vermelho.' });
-    script.push({ type: 'speech', speaker: 'corvus_greeting',
+    script.push({ type: 'speech', speaker: 'Mestre Corvus',
       text: '— Você progrediu desde a última vez. Tenho ' + newMaps.length + ' regiões novas pra apresentar.' });
   }
 
@@ -56020,7 +56027,7 @@ function _showCorvusMapRevealDialog(player, newMaps) {
       m.reveal_intro.forEach(function(line){ script.push(line); });
     } else {
       // Fallback se mapa não tiver reveal_intro definido
-      script.push({ type: 'speech', speaker: 'corvus_greeting',
+      script.push({ type: 'speech', speaker: 'Mestre Corvus',
         text: '— ' + m.name + '. ' + m.desc });
     }
   });
@@ -56028,7 +56035,7 @@ function _showCorvusMapRevealDialog(player, newMaps) {
   // Encerramento
   script.push({ type: 'narration',
     text: 'Ele empurra os pergaminhos pra borda da mesa, próximos a você.' });
-  script.push({ type: 'speech', speaker: 'corvus_greeting',
+  script.push({ type: 'speech', speaker: 'Mestre Corvus',
     text: '— Estão à venda. Quando estiver pronto, escolhe — eu preparo na hora.' });
 
   var enc = {
