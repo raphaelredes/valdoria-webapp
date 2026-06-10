@@ -21526,6 +21526,43 @@ window._persistNpcTalkoptsUsed = function(){
   }, 200);
 };
 
+// B1.6 #90: heard-sets de anti-repeat persistem entre reloads (antes eram
+// in-memory puros — todo reload zerava e o anti-repeat não valia entre
+// visitas). Mesmo padrão do _npcDialoguesUsed: localStorage char-namespaced.
+// É histórico COSMÉTICO de rotação de flavor (não game state) — análogo ao
+// que o servidor já faz em player.metadata via content_rotation.
+var _HEARD_GLOBALS = ['_npcGreetingsHeard', '_marketWalkHeard', '_marketChatHeard',
+  '_aldwinPickHeard', '_templePickHeard', '_cityFlavorHeard', '_marketReactHeard',
+  '_marketAtmoHeard', '_shadowFlavorHeard', '_gromInteractHeard', '_merResultHeard'];
+(function _hydrateHeardSets(){
+  try {
+    var raw = localStorage.getItem('valdoria_npc_heard_' + (window._charId || 'default'));
+    if (!raw) return;
+    var data = JSON.parse(raw);
+    if (!data || typeof data !== 'object') return;
+    for (var i = 0; i < _HEARD_GLOBALS.length; i++){
+      var g = _HEARD_GLOBALS[i];
+      if (data[g] && typeof data[g] === 'object') window[g] = data[g];
+    }
+  } catch(_){ /* localStorage indisponível */ }
+})();
+var _persistHeardTimer = null;
+window._persistHeardSets = function(){
+  if (_persistHeardTimer) return;
+  _persistHeardTimer = setTimeout(function(){
+    _persistHeardTimer = null;
+    try {
+      var out = {};
+      for (var i = 0; i < _HEARD_GLOBALS.length; i++){
+        var g = _HEARD_GLOBALS[i];
+        if (window[g]) out[g] = window[g];
+      }
+      localStorage.setItem('valdoria_npc_heard_' + (window._charId || 'default'),
+        JSON.stringify(out));
+    } catch(_){}
+  }, 250);
+};
+
 function _npcMarkUsed(npcId, optId){
   if (!window._npcDialoguesUsed[npcId]) window._npcDialoguesUsed[npcId] = [];
   if (window._npcDialoguesUsed[npcId].indexOf(optId) === -1) {
@@ -21579,6 +21616,8 @@ function _pickNonRepeating(poolKey, items, trackingObj){
   if (!available.length) return items[0]; // safety
   var pick = available[Math.floor(Math.random() * available.length)];
   heard.push(pick.key);
+  // B1.6 #90: persiste os heard-sets globais (debounced) — sobrevive a reload
+  if (typeof window._persistHeardSets === 'function') window._persistHeardSets();
   return pick.item;
 }
 
@@ -52023,7 +52062,12 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     ],
     _cost: 10,
     _effect: { gold: -10, xp: 3 },
-    _result_text: 'Thorne empunha o martelo e trabalha em silêncio. Quando devolve teu equipamento, o aço brilha — não novo, mas pronto pra outra jornada.',
+    // B1.10 #90: pool de variantes — serviço pago repetível não narra igual 2x
+    _result_text: [
+      'Thorne empunha o martelo e trabalha em silêncio. Quando devolve teu equipamento, o aço brilha — não novo, mas pronto pra outra jornada.',
+      'Três marteladas certeiras, uma pausa, mais duas. Thorne ergue a peça contra a luz da forja e assente uma vez. <i>"Pronto. Aguenta mais uma estrada."</i>',
+      'Thorne passa o polegar pelo fio, franze o cenho, e refaz um trecho sem dizer palavra. Quando entrega, o metal canta limpo ao toque — som de aço são.'
+    ],
     choices: 'auto_with_cost'
   },
   thorne_history: {
@@ -52084,7 +52128,12 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     ],
     _cost: 200,
     _effect: { gold: -200, xp: 8 },
-    _result_text: 'Velithra murmura uma palavra antiga sobre teu equipamento. A gema absorve a luz por um segundo — depois devolve. Você sente o item mais... presente. <i>Como se tivesse uma alma.</i>',
+    // B1.10 #90: pool de variantes — serviço pago repetível não narra igual 2x
+    _result_text: [
+      'Velithra murmura uma palavra antiga sobre teu equipamento. A gema absorve a luz por um segundo — depois devolve. Você sente o item mais... presente. <i>Como se tivesse uma alma.</i>',
+      'O olho de cristal de Velithra gira devagar enquanto ela traça um símbolo no ar. O equipamento esquenta, esfria, e por um instante pesa <i>diferente</i> na tua mão. "Feito", ela diz, satisfeita consigo mesma.',
+      'Velithra sopra pó prateado sobre o item e sussurra três sílabas que tua mente se recusa a guardar. Quando o brilho passa, algo mudou — sutil como um nome novo que ainda não aprendeste a usar.'
+    ],
     choices: 'auto_with_cost'
   },
 
@@ -55618,7 +55667,14 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     var mId = choice._merchantId;
     var cost = choice._cost || 0;
     var effect = choice._effect || {};
-    var resultText = choice._result_text || 'Serviço prestado.';
+    // B1.10 #90: _result_text aceita array de variantes — anti-repeat por serviço
+    var rtPool = choice._result_text;
+    if (Object.prototype.toString.call(rtPool) === '[object Array]' && rtPool.length){
+      window._merResultHeard = window._merResultHeard || {};
+      rtPool = _pickNonRepeating('mer_result_' + (choice._topicKey || mId),
+        rtPool, window._merResultHeard) || rtPool[0];
+    }
+    var resultText = rtPool || 'Serviço prestado.';
     var topicKey = choice._topicKey;
     if (typeof _pay !== 'function' || !_pay(player, cost)){
       // Sem gold suficiente — re-abre greeting com toast
