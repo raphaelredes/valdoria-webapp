@@ -101,36 +101,53 @@
     // Sessão #55: label PT-BR + mod real (PHB ability mod + proficiency)
     var displayLabel = _abilityLabelPT(opts.ability);
     var realMod = _computeRealMod(opts);
-    opts.mod = realMod;  // propaga pro resto da função usar
+    opts.mod = realMod;  // propaga pro path LOCAL usar
     card.innerHTML =
       '<div style="font-size:11px;letter-spacing:2px;color:#c4953a;text-transform:uppercase;margin-bottom:6px;">Teste de ' + displayLabel + '</div>'
-      + '<div style="font-size:13px;color:#f4d896;letter-spacing:1.5px;margin-bottom:14px;">Classe de Dificuldade ' + opts.dc + ' &nbsp;·&nbsp; modificador ' + (realMod>=0?'+':'') + realMod + '</div>'
+      + '<div id="dice-mod-line" style="font-size:13px;color:#f4d896;letter-spacing:1.5px;margin-bottom:14px;">Classe de Dificuldade ' + opts.dc + ' &nbsp;·&nbsp; modificador ' + (realMod>=0?'+':'') + realMod + '</div>'
       + '<div id="dice-mount" style="width:160px;height:160px;margin:0 auto 12px;"></div>'
       + '<div id="dice-result" style="min-height:48px;font-size:15px;color:#f4d896;letter-spacing:1px;line-height:1.6;"></div>'
       + '<div id="dice-actions" style="display:flex;gap:10px;justify-content:center;margin-top:14px;opacity:0;transition:opacity 0.4s;"></div>';
     ov.appendChild(card);
     ov.classList.add('active');
 
-    var rawD20 = Math.floor(Math.random()*20)+1;
-    var total = rawD20 + opts.mod;
-    var success = total >= opts.dc;
-    var critSuccess = rawD20 === 20;
-    var critFail = rawD20 === 1;
     var faction = opts.faction || (window._SVC_CONFIG && window._SVC_CONFIG.faction) || 'unknown';
 
-    function showResult() {
+    /* SUPREME RULE #0 (sessão #89): em sessão REMOTE o d20 e o Renome são
+       rolados/aplicados NO SERVIDOR (intent svc.dice em /api/city/action —
+       deriva o modificador dos stats REAIS via get_skill_bonus e aplica
+       reputação PERSISTENTE com teto diário anti-farm). O cliente só ANIMA o
+       resultado retornado. Math.random continua como path LOCAL (file:// dev
+       tool) e fallback gracioso se a rede falhar. */
+    function _localRoll() {
+      var rawD20 = Math.floor(Math.random()*20)+1;
+      var total = rawD20 + opts.mod;
+      var success = total >= opts.dc;
+      var critS = rawD20 === 20, critF = rawD20 === 1;
+      return { d20: rawD20, mod: opts.mod, total: total, dc: opts.dc,
+               success: success, critSuccess: critS, critFail: critF,
+               deltaR: critS ? +3 : success ? +1 : critF ? -2 : -1,
+               renownNow: null, serverApplied: false };
+    }
+
+    function showResult(roll) {
       var resEl = card.querySelector('#dice-result');
       var statusTxt, statusColor;
-      if (critSuccess) { statusTxt = '⚜ ACERTO CRÍTICO! ⚜'; statusColor = '#fff4d0'; }
-      else if (critFail) { statusTxt = '✗ FALHA CRÍTICA'; statusColor = '#d04848'; }
-      else if (success) { statusTxt = '✓ SUCESSO'; statusColor = '#7ad06b'; }
+      if (roll.critSuccess) { statusTxt = '⚜ ACERTO CRÍTICO! ⚜'; statusColor = '#fff4d0'; }
+      else if (roll.critFail) { statusTxt = '✗ FALHA CRÍTICA'; statusColor = '#d04848'; }
+      else if (roll.success) { statusTxt = '✓ SUCESSO'; statusColor = '#7ad06b'; }
       else { statusTxt = '✗ FALHA'; statusColor = '#d04848'; }
       resEl.innerHTML =
-        '<div style="font-size:11px;color:#a09484;letter-spacing:1.5px;margin-bottom:6px;">Rolagem d20 ' + rawD20 + ' ' + (opts.mod>=0?'+':'') + opts.mod + ' = <b>' + total + '</b> vs CD ' + opts.dc + '</div>'
+        '<div style="font-size:11px;color:#a09484;letter-spacing:1.5px;margin-bottom:6px;">Rolagem d20 ' + roll.d20 + ' ' + (roll.mod>=0?'+':'') + roll.mod + ' = <b>' + roll.total + '</b> vs CD ' + roll.dc + '</div>'
         + '<div style="font-size:18px;color:' + statusColor + ';font-weight:700;letter-spacing:2px;">' + statusTxt + '</div>';
 
-      var deltaR = critSuccess ? +3 : success ? +1 : critFail ? -2 : -1;
-      window._applyRenownDelta(faction, deltaR);
+      var deltaR = roll.deltaR;
+      if (roll.serverApplied) {
+        // Servidor JÁ aplicou/persistiu — espelha o valor real no mock de UI.
+        if (roll.renownNow != null) window._PLAYER_RENOWN[faction] = roll.renownNow;
+      } else {
+        window._applyRenownDelta(faction, deltaR);
+      }
 
       /* Sessao #29 (2026-05-24): se opts.ch.ally_source existe, dispara
          POST /api/ally/apply-effect com o dice_result. Backend aplica
@@ -139,10 +156,10 @@
       if (opts.ch && opts.ch.ally_source && typeof window._postAllyEffect === 'function') {
         try {
           window._postAllyEffect(opts.ch.ally_source, {
-            success: success,
-            crit_success: critSuccess,
-            crit_failure: critFail,
-            total: total,
+            success: roll.success,
+            crit_success: roll.critSuccess,
+            crit_failure: roll.critFail,
+            total: roll.total,
           });
         } catch(_e) { /* defensivo, nao bloqueia dice flow */ }
       }
@@ -153,10 +170,12 @@
         actions.style.opacity = '1';
         actions.querySelector('button').addEventListener('click', function() {
           // Sessão #23 v8: Toast de Renome + continuação do diálogo se houver.
-          if (typeof window.vToast === 'function') {
+          // deltaR=0 (teto diário do servidor) → sem toast (nada mudou).
+          if (typeof window.vToast === 'function' && deltaR !== 0) {
             var facLabel = (window._SVC_CONFIG && window._SVC_CONFIG.factionLabel) || faction;
             window.vToast((deltaR>=0?'+':'')+deltaR+' Renome · '+facLabel, deltaR>=0?'gold':'warn');
           }
+          var success = roll.success;
           // Próximo nó: success → opts.ch.success / fail → opts.ch.failure
           // Senão: continueDialogue (legacy). Senão: close.
           var nextNodeId = null;
@@ -215,21 +234,61 @@
       }, 600);
     }
 
-    setTimeout(function() {
-      var mount = card.querySelector('#dice-mount');
-      if (window.Dice3D) {
-        try {
-          var dice = new window.Dice3D(mount, { size: 156, dieType: 'd20', duration: 2200 });
-          dice.roll(rawD20, showResult);
-        } catch(e) {
-          mount.innerHTML = '<div style="font-size:80px;color:#f4d896;line-height:160px;">'+rawD20+'</div>';
-          setTimeout(showResult, 800);
+    function _animate(roll) {
+      // Mod AUTORITATIVO pode diferir da estimativa do header (server-side
+      // get_skill_bonus considera expertise/flags que o cliente não vê).
+      if (roll.serverApplied && roll.mod !== realMod) {
+        var modLine = card.querySelector('#dice-mod-line');
+        if (modLine) {
+          modLine.innerHTML = 'Classe de Dificuldade ' + roll.dc
+            + ' &nbsp;·&nbsp; modificador ' + (roll.mod>=0?'+':'') + roll.mod;
         }
-      } else {
-        mount.innerHTML = '<div style="font-size:80px;color:#f4d896;line-height:160px;">'+rawD20+'</div>';
-        setTimeout(showResult, 800);
       }
-    }, 100);
+      setTimeout(function() {
+        var mount = card.querySelector('#dice-mount');
+        var done = function(){ showResult(roll); };
+        if (window.Dice3D) {
+          try {
+            var dice = new window.Dice3D(mount, { size: 156, dieType: 'd20', duration: 2200 });
+            dice.roll(roll.d20, done);
+          } catch(e) {
+            mount.innerHTML = '<div style="font-size:80px;color:#f4d896;line-height:160px;">'+roll.d20+'</div>';
+            setTimeout(done, 800);
+          }
+        } else {
+          mount.innerHTML = '<div style="font-size:80px;color:#f4d896;line-height:160px;">'+roll.d20+'</div>';
+          setTimeout(done, 800);
+        }
+      }, 100);
+    }
+
+    var _isRemote = !!(window.vCityServer
+        && typeof window.vCityServer.isRemote === 'function'
+        && window.vCityServer.isRemote()
+        && typeof window.vCityServer.cityAction === 'function');
+    if (_isRemote) {
+      window.vCityServer.cityAction('svc.dice', {
+        ability: opts.ability, dc: opts.dc, faction: faction,
+      }).then(function(r){
+        if (r && r.ok) {
+          _animate({
+            d20: r.d20|0, mod: r.mod|0, total: r.total|0, dc: r.dc|0,
+            success: !!r.success, critSuccess: !!r.crit_success, critFail: !!r.crit_fail,
+            deltaR: r.renown_delta|0,
+            renownNow: (typeof r.renown === 'number' ? r.renown : null),
+            serverApplied: true,
+          });
+        } else {
+          console.warn('[SVC] svc.dice resposta inválida — fallback local', r && r.error);
+          _animate(_localRoll());
+        }
+      }).catch(function(e){
+        console.warn('[SVC] svc.dice falhou — fallback local', e);
+        _animate(_localRoll());
+      });
+    } else {
+      _animate(_localRoll());
+    }
   };
 
   /**
