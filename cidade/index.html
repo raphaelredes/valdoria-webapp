@@ -49004,6 +49004,63 @@ var ALLY_LORE_REPLIES = {
   'bruxo:gift':     { narration: '{name} murmura algo numa língua que arranha o ouvido, e o ar à tua volta esfria um grau.', speech: 'Está feito. Na próxima luta, quando a esperança faltar, algo te puxará de volta. <i>(olhar duro)</i> Mas todo favor sombrio é empréstimo. Um dia, o Patrono cobra os juros — de nós dois.' },
 };
 
+// === B2.1 #90: intros ROTATIVAS do ally chat ================================
+// Antes, ALLY_DIALOGUE_TEMPLATES[cls].script era a ÚNICA intro por classe —
+// repetia toda visita e dois aliados da mesma classe falavam igual. Aqui cada
+// classe ganha 2 aberturas alternativas (mantendo a voz da classe); o pool de
+// intro = [script original, ...extras] e _showAllyDialogue sorteia via
+// _pickNonRepeating. {name} → nome do aliado. PADRAO_ALDRIC (narração + fala).
+var ALLY_INTRO_EXTRA = {
+  clerigo: [
+    [ { type: 'narration', text: '{name} acende um toco de vela diante de um pequeno altar improvisado, a chama tremulando no vento da praça.' }, { type: 'speech', text: 'A luz é teimosa — basta uma faísca pra afastar muita treva. <i>(protege a chama com a mão)</i> Vieste buscar bênção, ou só um momento de paz antes da estrada?' } ],
+    [ { type: 'narration', text: '{name} enrola ataduras limpas com cuidado metódico, separando-as por tamanho sobre o joelho.' }, { type: 'speech', text: 'Curar não é só rezar — é estar pronto quando a prece não basta. <i>(ergue os olhos)</i> Diz-me o que pesa em ti. Corpo ou alma, eu trato dos dois.' } ],
+  ],
+  guerreiro: [
+    [ { type: 'narration', text: '{name} verifica as correias da armadura uma a uma, testando cada fivela com um puxão seco.' }, { type: 'speech', text: 'Equipamento solto mata mais que inimigo bom. <i>(aperta a última correia)</i> Antes de pensar em vencer, pensa em não morrer por bobagem. Que precisas?' } ],
+    [ { type: 'narration', text: '{name} observa os transeuntes com o olhar treinado de quem mede ameaças por reflexo, mesmo em paz.' }, { type: 'speech', text: 'Velho hábito — conto as saídas de todo lugar onde entro. <i>(aponta o queixo pra ti)</i> Tu também devias. Mas fala: o que te traz ao velho soldado?' } ],
+  ],
+  mago: [
+    [ { type: 'narration', text: '{name} sopra a poeira de um pergaminho antigo, os olhos correndo símbolos que dançam à luz fraca.' }, { type: 'speech', text: 'Cada página dessas custou a alguém os olhos ou a sanidade. <i>(enrola o pergaminho)</i> Conhecimento tem preço. Felizmente, conversa é barata. Que desejas saber?' } ],
+    [ { type: 'narration', text: '{name} equilibra uma esfera de luz pálida na ponta do dedo, fazendo-a girar devagar como quem brinca distraído.' }, { type: 'speech', text: 'Um truque de aprendiz — mas até o trivial exige controle absoluto. <i>(a esfera se apaga)</i> Perde-se o controle uma vez só. Enfim — em que posso ser útil?' } ],
+  ],
+  ladino: [
+    [ { type: 'narration', text: '{name} embaralha uma moeda entre os dedos, fazendo-a sumir e reaparecer sem nunca olhar pra ela.' }, { type: 'speech', text: 'Mãos ocupadas, mente afiada. <i>(a moeda some de vez)</i> Aprendi que quem observa demais é observado de volta. Tu, por exemplo — chegaste quieto. Gostei. Fala.' } ],
+    [ { type: 'narration', text: '{name} encosta-se na sombra de um toldo, de onde vê a praça inteira sem ser notado.' }, { type: 'speech', text: 'Daqui eu vejo tudo: quem rouba, quem mente, quem tem medo. <i>(sorri de lado)</i> A cidade é um livro aberto pra quem sabe ler nas entrelinhas. O que queres ler hoje?' } ],
+  ],
+  patrulheiro: [
+    [ { type: 'narration', text: '{name} testa a tensão da corda do arco contra o ouvido, ajustando-a com pequenos giros até soar certo.' }, { type: 'speech', text: 'Um arco mal-afinado erra o alvo e a vida que dependia dele. <i>(guarda o arco)</i> Tudo na natureza tem seu tom certo. Inclusive o silêncio. Que precisas?' } ],
+    [ { type: 'narration', text: '{name} esfarela uma folha seca entre os dedos e cheira o pó, o olhar voltado pro horizonte além das muralhas.' }, { type: 'speech', text: 'Carvalho do norte. O vento mudou — vem chuva em dois dias. <i>(limpa as mãos)</i> A terra fala o tempo todo; poucos param pra ouvir. Tu vieste falar de quê?' } ],
+  ],
+  paladino: [
+    [ { type: 'narration', text: '{name} pole o símbolo sagrado com um pano macio, em movimentos lentos e quase reverentes.' }, { type: 'speech', text: 'Mantenho-o limpo pra lembrar por que luto — fácil esquecer no meio do sangue. <i>(ergue o símbolo à luz)</i> A causa primeiro, a espada depois. Em que posso servir-te?' } ],
+    [ { type: 'narration', text: '{name} ajoelha-se brevemente em prece silenciosa antes de se levantar e te encarar com firmeza serena.' }, { type: 'speech', text: 'Começo todo dia assim — pedindo força pra não falhar com quem confia em mim. <i>(põe a mão no peito)</i> Hoje isso te inclui. Fala, e caminharemos juntos.' } ],
+  ],
+  bardo: [
+    [ { type: 'narration', text: '{name} afina o alaúde com a cabeça inclinada, buscando a nota teimosa que insiste em escapar.' }, { type: 'speech', text: 'Esta corda anda rebelde — como certos aventureiros que conheço. <i>(arranca um acorde limpo)</i> Pronto, domada. Toda discórdia se resolve com paciência e o dedo certo. O que te traz à minha modesta plateia?' } ],
+    [ { type: 'narration', text: '{name} rabisca versos num caderno surrado, riscando metade deles com um muxoxo de quem não se contenta.' }, { type: 'speech', text: 'Uma boa rima é como uma boa estocada: precisa, ou não vale nada. <i>(fecha o caderno)</i> Mas chega de mim — toda história precisa de um segundo personagem. Conta o teu.' } ],
+  ],
+  druida: [
+    [ { type: 'narration', text: '{name} agacha-se junto a uma fresta no calçamento, onde uma muda teimosa rompeu a pedra em busca de sol.' }, { type: 'speech', text: 'Vês? Nem a cidade segura a vida que quer crescer. <i>(toca a folhinha com cuidado)</i> A natureza é paciente e implacável. Aprende-se muito só observando. Que buscas?' } ],
+    [ { type: 'narration', text: '{name} sussurra algo a um gato esquálido que, contra todo instinto, se aproxima e se enrosca em suas pernas.' }, { type: 'speech', text: 'Eles sentem quem não traz ameaça. <i>(coça a orelha do bicho)</i> Os animais não mentem — é por isso que confio mais neles que na maioria. Mas tu pareces honesto. Fala.' } ],
+  ],
+  monge: [
+    [ { type: 'narration', text: '{name} executa um movimento lento e preciso com as mãos, o corpo fluindo de uma postura à outra como água.' }, { type: 'speech', text: 'A forma sem pressa ensina o corpo a lembrar na pressa. <i>(retorna ao repouso)</i> Repetição é a mãe da maestria, e a paciência, o seu pai. Precisas de algo?' } ],
+    [ { type: 'narration', text: '{name} equilibra um seixo liso sobre o dorso da mão estendida, imóvel como uma estátua.' }, { type: 'speech', text: 'Pedra parada no corpo agitado, ou corpo parado na pedra agitada? <i>(o seixo nem treme)</i> A diferença é só a mente. Acalmaste a tua hoje? Fala-me o que pesa.' } ],
+  ],
+  barbaro: [
+    [ { type: 'narration', text: '{name} afia o gume do machado contra uma pedra com golpes longos e ritmados, faíscas saltando a cada passada.' }, { type: 'speech', text: 'Aço cego é insulto ao inimigo. <i>(testa o fio no pelo do braço)</i> Quando eu cortar, vai ser limpo e honesto. Nada de sofrimento à toa. Que queres, forasteiro?' } ],
+    [ { type: 'narration', text: '{name} arranca um naco de carne com os dentes e mastiga ruidosamente, encarando-te sem cerimônia.' }, { type: 'speech', text: 'Comida primeiro, conversa depois — regra da tribo. <i>(empurra um pedaço na tua direção)</i> Mas senta, divide. Quem parte o pão comigo não é mais estranho. Fala.' } ],
+  ],
+  feiticeiro: [
+    [ { type: 'narration', text: '{name} observa pequenas faíscas saltarem espontâneas entre os dedos, franzindo a testa como quem repreende a própria mão.' }, { type: 'speech', text: 'Quieto, ainda não te chamei. <i>(as faíscas obedecem a contragosto)</i> Tem dias que o poder tem vontade própria. Hoje está manhoso. Diz logo o que queres antes que ele se entedie.' } ],
+    [ { type: 'narration', text: '{name} aquece as mãos numa chama azul que flutua sem fonte, encolhida como quem sente um frio que não é do corpo.' }, { type: 'speech', text: 'Engraçado — faço fogo e ainda sinto frio. <i>(a chama oscila)</i> Talvez o que arde por dentro não aqueça mesmo. Enfim, basta de filosofia. Em que te sirvo?' } ],
+  ],
+  bruxo: [
+    [ { type: 'narration', text: '{name} traça símbolos no ar com o dedo, símbolos que brilham por um instante e somem antes que consigas decifrá-los.' }, { type: 'speech', text: 'Não tentes ler — alguns sinais olham de volta. <i>(apaga o último com a palma)</i> Falo com quem não deveria, e ouço o que não deveria. É um fardo útil. Que queres de mim?' } ],
+    [ { type: 'narration', text: '{name} inclina a cabeça de súbito, como quem escuta uma voz vinda de lugar nenhum, e só depois se volta pra ti.' }, { type: 'speech', text: 'Perdão — Ele às vezes fala sem ser chamado. <i>(toca o amuleto)</i> Disse que tu chegarias. Não sei se é bom sinal ou aviso. De qualquer forma: fala, estou ouvindo. Nós dois estamos.' } ],
+  ],
+};
+
 function _allyTplKey(cls){
   var k = (cls || '').toLowerCase()
     .replace(/[áàâã]/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i')
@@ -49028,8 +49085,18 @@ function _showAllyDialogue(idx){
   var cls = _allyTplKey(m.cls);
   var tpl = ALLY_DIALOGUE_TEMPLATES[cls] || ALLY_DIALOGUE_TEMPLATES.guerreiro;
   var displayName = (m.name || '').split(/\s+/)[0];
-  // Personaliza {name} no script
-  var personalizedScript = (tpl.script || []).map(function(line){
+  // B2.1 #90: intro ROTATIVA — pool = [script original, ...ALLY_INTRO_EXTRA[cls]]
+  // sorteado via _pickNonRepeating (não repete a mesma abertura 2 visitas
+  // seguidas; dois aliados da mesma classe não falam igual toda vez).
+  var _introPool = [tpl.script || []].concat(ALLY_INTRO_EXTRA[cls] || []);
+  var _introScript = tpl.script || [];
+  if (typeof _pickNonRepeating === 'function' && _introPool.length > 1) {
+    window._cityFlavorHeard = window._cityFlavorHeard || {};
+    _introScript = _pickNonRepeating('ally_intro_' + cls, _introPool,
+      window._cityFlavorHeard) || (tpl.script || []);
+  }
+  // Personaliza {name} no script escolhido
+  var personalizedScript = _introScript.map(function(line){
     var copy = { type: line.type, text: (line.text || '').replace(/\{name\}/g, displayName) };
     if (line.type === 'speech') copy.speaker = displayName;
     return copy;
