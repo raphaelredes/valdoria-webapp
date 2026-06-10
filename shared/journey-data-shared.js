@@ -888,6 +888,16 @@ var DEPARTURES = {
       { type: 'narration', text: 'A neve range sob as botas desde o primeiro passo fora dos portões. Capuzes erguidos, cachecóis amarrados, exalações brancas como pequenos fantasmas.' },
       { type: 'narration', text: 'O céu é prata baixo e pesado. <i>Vai nevar antes do fim do dia</i>, vocês percebem juntos, sem palavras.' },
       { type: 'narration', text: 'O frio aqui não é desconforto — é <b>predador</b>. Quem não anda, vira pedra.' }
+    ],
+    [
+      { type: 'narration', text: 'O vento corta antes mesmo de virem o primeiro morro — agulhas de gelo na pele exposta. Vocês baixam a cabeça e avançam em fila, cada passo afundando até o tornozelo.' },
+      { type: 'narration', text: 'A brancura apaga a estrada; só uma intuição teimosa aponta o rumo. <i>Aqui o mapa mente</i> — quem confia demais no que vê, se perde.' },
+      { type: 'narration', text: 'O silêncio da neve é total, quase sólido. Até a respiração soa intrusa. Vocês seguem, e a paisagem branca os engole devagar.' }
+    ],
+    [
+      { type: 'narration', text: 'Os flocos caem mansos no começo, quase gentis, pousando nos cílios. Mas há um peso no ar — a calmaria que vem antes da nevasca de verdade.' },
+      { type: 'narration', text: 'Pegadas antigas, meio cobertas, cruzam o caminho e somem. <i>Quem passou por aqui? E voltou?</i> Ninguém pergunta em voz alta.' },
+      { type: 'narration', text: 'O frio entra pelas juntas como um hóspede mal-educado. Vocês apertam o passo — parar é o único erro que a neve não perdoa.' }
     ]
   ],
   cave: [
@@ -895,6 +905,16 @@ var DEPARTURES = {
       { type: 'narration', text: 'A entrada da caverna se abre como uma boca antiga. <b>Frio</b> que vem de dentro encontra <i>calor</i> que vem de fora — neblina nasce no limiar exato.' },
       { type: 'narration', text: 'Tochas acesas. Olhares trocados. <i>Quem desce, desce inteiro?</i> A piada veterana cai sem graça hoje.' },
       { type: 'narration', text: 'O som dos passos muda assim que vocês atravessam — agora ecoa contra paredes invisíveis. A caverna registra cada movimento.' }
+    ],
+    [
+      { type: 'narration', text: 'A escuridão lá dentro não é ausência de luz — é uma presença, espessa, que as tochas só conseguem empurrar um palmo à frente. Vocês hesitam no limiar.' },
+      { type: 'narration', text: 'Uma corrente de ar gelado sopra de dentro, carregando um cheiro de terra molhada e algo mais antigo. <i>A montanha exala.</i>' },
+      { type: 'narration', text: 'Os ecos começam antes dos passos, como se a caverna ensaiasse a chegada de vocês. Armas firmes, vocês cruzam a fronteira de pedra.' }
+    ],
+    [
+      { type: 'narration', text: 'Estalactites pingam num ritmo lento e paciente, contando um tempo que não é o dos homens. Cada gota soa como uma porta distante se fechando.' },
+      { type: 'narration', text: 'A luz do dia morre três passos adentro, engolida sem resistência. Vocês acendem mais uma tocha — e ainda assim a treva parece rir.' },
+      { type: 'narration', text: 'O chão é traiçoeiro, liso de limo e cheio de fendas. <i>Aqui se anda olhando os pés e os ombros ao mesmo tempo.</i> Vocês descem com cuidado.' }
     ]
   ],
   graveyard: [
@@ -902,6 +922,16 @@ var DEPARTURES = {
       { type: 'narration', text: 'O caminho até o cemitério é silencioso por convenção. Não cantam, não conversam alto — <i>respeito</i>, dizem os ortodoxos. <b>Medo</b>, sabem os realistas.' },
       { type: 'narration', text: 'Corvos pousam nas cercas baixas, contando os que entram. Não há sino, não há sentinela. Só o vento entre as lápides distantes.' },
       { type: 'narration', text: 'O ar muda na fronteira do campo santo. Fica <i>denso</i>, como se respirasse pra fora do solo. Vocês ajustam armas e seguem.' }
+    ],
+    [
+      { type: 'narration', text: 'A névoa se acumula baixa entre as lápides, na altura dos joelhos, como um lençol que ninguém ousou recolher. Os pés somem nela a cada passo.' },
+      { type: 'narration', text: 'As datas nas pedras vão ficando mais antigas conforme vocês avançam — e mais apagadas. <i>No fundo do campo, ninguém mais lê os nomes.</i>' },
+      { type: 'narration', text: 'Um sino quebrado pende de um portão enferrujado, sem badalo, mudo. Vocês passam por baixo dele, e o silêncio parece ficar ainda mais fundo.' }
+    ],
+    [
+      { type: 'narration', text: 'Flores murchas marcam algumas covas; outras, abandonadas, deixaram a terra afundar. O cemitério tem hierarquias até entre os esquecidos.' },
+      { type: 'narration', text: 'O ar é parado, sem o menor sopro — nem os corvos batem asas. <i>É como se o lugar prendesse a respiração junto com vocês.</i>' },
+      { type: 'narration', text: 'Uma estátua de anjo, de rosto comido pelo tempo, aponta vagamente para o leste. Vocês seguem a direção dela, sem saber bem por quê.' }
     ]
   ],
   volcanic: [
@@ -909,6 +939,16 @@ var DEPARTURES = {
       { type: 'narration', text: 'A trilha sobe entre rochas escuras. Cinzas finas começam a cair três quilômetros antes — neve negra que se acumula nos ombros.' },
       { type: 'narration', text: 'O cheiro de enxofre já irrita os olhos. <b>Cratera Vulcânica</b> à frente, fumegando como uma ferida aberta da própria terra.' },
       { type: 'narration', text: '<i>O calor vem de baixo</i> — é o que assusta. Não é sol, é o coração do mundo respirando.' }
+    ],
+    [
+      { type: 'narration', text: 'O solo esquenta sob as solas conforme vocês sobem; em alguns trechos, é preciso desviar de fissuras que respiram um ar quente e vermelho.' },
+      { type: 'narration', text: 'O céu some atrás de uma cortina de fumaça parda. <i>O sol vira uma moeda baça</i>, e o mundo inteiro ganha cor de brasa apagada.' },
+      { type: 'narration', text: 'Cada inspiração arde um pouco. Vocês molham panos e os amarram sobre o rosto — a montanha cobra pedágio em fôlego.' }
+    ],
+    [
+      { type: 'narration', text: 'Rios finos de rocha alaranjada escorrem ao longe, lentos como mel ardente. A beleza é hipnótica e o perigo, óbvio.' },
+      { type: 'narration', text: 'O chão treme de leve, um ronco surdo que vem das entranhas. <i>A terra aqui não dorme</i> — apenas cochila entre fúrias.' },
+      { type: 'narration', text: 'O calor distorce o ar à frente, fazendo a trilha dançar como miragem. Vocês avançam pelo que parece sólido, torcendo para que seja.' }
     ]
   ]
 };
@@ -940,11 +980,12 @@ var DEPARTURES = {
                 if (data && Date.now() - (data.lastReset || 0) < 24 * 60 * 60 * 1000) {
                     data.hazards = data.hazards || {};
                     data.safe = data.safe || {};
+                    data.departures = data.departures || {};  // B3.5 #90
                     return data;
                 }
             }
         } catch (e) {}
-        return { hazards: {}, safe: {}, lastReset: Date.now() };
+        return { hazards: {}, safe: {}, departures: {}, lastReset: Date.now() };
     }
     function _saveUsage(player, data) {
         try { if (global.localStorage) global.localStorage.setItem(_usageKey(player), JSON.stringify(data)); } catch (e) {}
@@ -990,7 +1031,42 @@ var DEPARTURES = {
         return t;
     }
 
-    function pickDeparture(biome) {
+    function _markDepartureUsed(player, biome, idx) {
+        var d = _getUsage(player);
+        d.departures = d.departures || {};
+        d.departures[biome] = d.departures[biome] || [];
+        if (d.departures[biome].indexOf(idx) < 0) d.departures[biome].push(idx);
+        _saveUsage(player, d);
+    }
+    function _isDepartureUsed(player, biome, idx) {
+        return ((_getUsage(player).departures || {})[biome] || []).indexOf(idx) >= 0;
+    }
+
+    // B3.5 #90: partida 'Rumo a...' com anti-repeat (sessão + 24h char-namespaced)
+    // — antes pickDeparture sorteava puro, igual à queixa "eventos de Rumo a…
+    // repetiam". Mesmo mecanismo do pickFreshHazard/pickFreshSafe, por índice.
+    function pickFreshDeparture(biome, player, sessionUsed) {
+        var pool = DEPARTURES[biome] || DEPARTURES.forest || [];
+        if (!pool.length) return [];
+        sessionUsed = sessionUsed || [];
+        var idxs = [];
+        var i;
+        for (i = 0; i < pool.length; i++) {
+            if (sessionUsed.indexOf(i) < 0 && !_isDepartureUsed(player, biome, i)) idxs.push(i);
+        }
+        if (!idxs.length) {
+            for (i = 0; i < pool.length; i++) if (sessionUsed.indexOf(i) < 0) idxs.push(i);
+        }
+        if (!idxs.length) { sessionUsed.length = 0; for (i = 0; i < pool.length; i++) idxs.push(i); }
+        var pick = idxs[Math.floor(Math.random() * idxs.length)];
+        sessionUsed.push(pick);
+        _markDepartureUsed(player, biome, pick);
+        return pool[pick];
+    }
+
+    function pickDeparture(biome, player, sessionUsed) {
+        // B3.5 #90: com player, delega ao anti-repeat; sem player = back-compat random.
+        if (player) return pickFreshDeparture(biome, player, sessionUsed);
         var pool = DEPARTURES[biome] || DEPARTURES.forest || [];
         if (!pool.length) return [];
         return pool[Math.floor(Math.random() * pool.length)];
@@ -1047,6 +1123,7 @@ var DEPARTURES = {
         pickFreshHazard: pickFreshHazard,
         pickFreshSafe: pickFreshSafe,
         pickDeparture: pickDeparture,
+        pickFreshDeparture: pickFreshDeparture,
         resolveJourneyCheck: resolveJourneyCheck,
         successPctForChoice: successPctForChoice,
         pickNarrative: pickNarrative
