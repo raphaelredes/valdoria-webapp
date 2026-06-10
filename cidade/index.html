@@ -28307,14 +28307,28 @@ function _resolveInteractiveChoiceREMOTE(player, choice) {
   var preLevel = player.level || 1, preXpNext = player.xpNext || 100;
   var preHp = player.hp || 0, hpMax = player.hpMax || 28;
   if (window.vProcessing) { try { window.vProcessing.show({ text: 'Resolvendo...' }); } catch(_){} }
+  /* A3.4 (#90): normaliza o effect ANTES do POST — allowlist de keys
+     (gold/xp/hp_heal/hp/reputation) + renown→reputation (o applier do
+     servidor lê 'reputation'; os datasets usam 'renown' — sem o mapeamento o
+     renome dos encounters nunca era aplicado). O servidor capa as magnitudes
+     (caps anti-fabricação ±50/50/30/±5). */
+  function _normEffect(e) {
+    if (!e || typeof e !== 'object') return {};
+    var out = {};
+    ['gold', 'xp', 'hp_heal', 'hp', 'reputation'].forEach(function(k){
+      if (typeof e[k] === 'number') out[k] = e[k];
+    });
+    if (out.reputation == null && typeof e.renown === 'number') out.reputation = e.renown;
+    return out;
+  }
   window.vCityServer.cityAction('social.check', {
     encounter_id: choice._encounter_id || '',
     choice_id: choice._choice_id || choice.id || '',
     stat: choice.stat || '',
     dc: choice.dc || 0,
     npc_id: choice.npc_id || '',
-    effect: choice.effect || {},
-    effect_fail: choice.effect_fail || {}
+    effect: _normEffect(choice.effect),
+    effect_fail: _normEffect(choice.effect_fail)
   }).then(function(res){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     // Sincroniza o estado autoritativo do servidor (sempre que vier).
