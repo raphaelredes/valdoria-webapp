@@ -55269,6 +55269,11 @@ function _showDialogHistoryPopup(){
 // página (até 50w combinadas), OU 2 narrations curtas consecutivas, OU 2 speeches
 // do MESMO speaker em sequência. Mantém atmosfera "fala + comentário" do Aldric
 // encounter — fala dourada (speech) + comentário cinza italic (narration).
+// A1.5 (auditoria #90): NÃO delegar este ao vEncounter.groupScriptIntoPages —
+// este helper só executa no renderer LEGACY, que por construção só roda quando
+// window.vEncounter está AUSENTE (guard em _renderEncounterPopup ~54600);
+// com vEncounter carregado (produção, sempre) o caminho é o motor canônico.
+// É o fallback do fallback — delegação aqui nunca dispararia.
 function _groupScriptIntoPages(script) {
   var MAX_PAIR_WORDS = 50; // Reading time aprox. 13s a 220wpm
   var pages = [];

@@ -191,6 +191,62 @@
     return pages;
   }
 
+  /* A1.5 (auditoria #90): modo 'compact' — algoritmo v3 do StubEventLayer da
+     exploração PROMOVIDO a fonte única (era o mais avançado dos 3: agrupamento
+     speaker-aware, balanceado por PALAVRAS e responsivo ao viewport; páginas
+     menores pro card compacto stub 80vh). smallScreen é avaliado a cada
+     chamada de propósito (viewport pode mudar entre eventos). */
+  function _groupScriptCompact(script) {
+    var smallScreen = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 600);
+    var MAX_PAGE_WORDS = smallScreen ? 60 : 120;
+    var MAX_LINES = smallScreen ? 2 : 3;
+    var countWords = function (s) { return (s || '').split(/\s+/).filter(Boolean).length; };
+    var canGroup = function (curr, next) {
+      var sameSpeaker = curr.type === 'speech' && next.type === 'speech'
+                        && (curr.speaker || '') === (next.speaker || '');
+      return (
+        (curr.type === 'speech'    && next.type === 'narration') ||
+        (curr.type === 'narration' && next.type === 'speech') ||
+        (curr.type === 'narration' && next.type === 'narration') ||
+        sameSpeaker
+      );
+    };
+    var pages = [];
+    var i = 0;
+    while (i < script.length) {
+      var page = [script[i]];
+      var totalWords = countWords(script[i].text);
+      var lines = 1;
+      while (
+        lines < MAX_LINES &&
+        i + 1 < script.length &&
+        canGroup(page[page.length - 1], script[i + 1])
+      ) {
+        var nextWords = countWords(script[i + 1].text);
+        if (totalWords + nextWords > MAX_PAGE_WORDS) break;
+        page.push(script[i + 1]);
+        totalWords += nextWords;
+        lines++;
+        i++;
+      }
+      pages.push(page);
+      i++;
+    }
+    return pages;
+  }
+
+  /* A1.5: API pública de paginação de script[] de diálogo (fonte única).
+     opts.mode: 'aldric' (default — PADRAO_ALDRIC, 2 estrofes/10 sentences,
+     usado pelo próprio vEncounter.render — pacing da cidade NÃO muda) |
+     'compact' (StubEventLayer da exploração — 2-3 linhas, 60/120 palavras,
+     speaker-aware + responsivo). Input/output: array de line objects
+     {type,speaker?,text} → array de páginas (array de arrays). */
+  function groupScriptIntoPages(script, opts) {
+    var mode = (opts && opts.mode) || 'aldric';
+    if (mode === 'compact') return _groupScriptCompact(script || []);
+    return _groupScriptIntoPages(script || []);
+  }
+
   /* Typewriter RPG clássico — char-by-char com pausa em <i>/</i>.
      Velocidade ~28ms/char (~36 chars/s).
      Sessão #38 perf P0 (Fase 2.5): O(n²) → O(n) via textNode.appendData()
@@ -1087,7 +1143,10 @@
     /* A1.2 (auditoria #90): sanitizer de diálogo CANÔNICO. Whitelist
        i/em/b/strong/br/u/s/code (sem atributos), case-insensitive, NÃO escapa
        & (entidades &mdash; são legítimas). cidade/exploração delegam a ele. */
-    sanitize: _sanitizeDialogueHTML
+    sanitize: _sanitizeDialogueHTML,
+    /* A1.5 (auditoria #90): paginação canônica de script[]. mode 'aldric'
+       (default, PADRAO_ALDRIC) | 'compact' (StubEventLayer exploração). */
+    groupScriptIntoPages: groupScriptIntoPages
   };
 
   /* Compat: alias usado por cidade openCityPopup (task #47 dismiss flow). */

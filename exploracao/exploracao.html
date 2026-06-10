@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T10:37:03Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T10:53:34Z - do not edit directly, edit source -->
 
 
 
@@ -11129,6 +11129,13 @@ window.__onIntroTap = function() {
   }
 
   function _groupScriptIntoPages(script) {
+    /* A1.5 (auditoria #90): o algoritmo v3 daqui foi PROMOVIDO a fonte única
+       em encounter-popup.js (vEncounter.groupScriptIntoPages, mode 'compact').
+       Delega quando disponível (exploração sempre carrega encounter-popup.js
+       no head); o corpo v3 abaixo fica como fallback idêntico. */
+    if (window.vEncounter && typeof window.vEncounter.groupScriptIntoPages === 'function') {
+      return window.vEncounter.groupScriptIntoPages(script, { mode: 'compact' });
+    }
     /* 2026-05-06 v3: card 80% suporta 2-3 linhas por página (não só pares).
        Threshold aumentado pra ~120 palavras combinadas; tela pequena cai pra
        60. Resultado: scripts de 4-5 linhas agora ficam em 1-2 páginas (era 3).
