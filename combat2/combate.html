@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T22:51:40Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T23:04:00Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -15199,16 +15199,25 @@ function _simSaveAdvState(defender, ability) {
     return 'normal';
 }
 /* Rola d20 respeitando vantagem/desvantagem. Retorna { r, raw1, raw2, mode }. */
-function _simRollD20WithAdv(mode) {
+// C1.5 #90: rola 1d20; Halfling Sortudo (PHB p.28) rerola nat-1.
+function _simLuckyD20(lucky) {
+    var v = rollN(20);
+    if (lucky && v === 1) v = rollN(20);
+    return v;
+}
+function _simIsLucky(unit) {
+    return !!(unit && unit.raceKey === 'halfling');
+}
+function _simRollD20WithAdv(mode, lucky) {
     if (mode === 'advantage') {
-        var r1 = rollN(20), r2 = rollN(20);
+        var r1 = _simLuckyD20(lucky), r2 = _simLuckyD20(lucky);
         return { r: Math.max(r1, r2), raw1: r1, raw2: r2, mode: 'advantage' };
     }
     if (mode === 'disadvantage') {
-        var r1b = rollN(20), r2b = rollN(20);
+        var r1b = _simLuckyD20(lucky), r2b = _simLuckyD20(lucky);
         return { r: Math.min(r1b, r2b), raw1: r1b, raw2: r2b, mode: 'disadvantage' };
     }
-    return { r: rollN(20), raw1: null, raw2: null, mode: 'normal' };
+    return { r: _simLuckyD20(lucky), raw1: null, raw2: null, mode: 'normal' };
 }
 
 /* Consome 1 "uso" de buffs/debuffs marcados como 1 ataque único
@@ -15441,7 +15450,16 @@ function rollDamage(a, crit, skill) {
     var nBite = Math.max(1, (a.wildBiteDice | 0) || 1);
     var rolls3 = [];
     for (var wb = 0; wb < nBite; wb++) rolls3.push(rollN(a.die));
-    if (crit) { for (var wc = 0; wc < nBite; wc++) rolls3.push(rollN(a.die)); }
+    if (crit) {
+        for (var wc = 0; wc < nBite; wc++) rolls3.push(rollN(a.die));
+        // C1.4 #90: Meio-Orc Ataques Selvagens (PHB p.41) — +1 dado em crit
+        // corpo-a-corpo com arma (skill ausente). Espelha o motor _roll_damage.
+        if (!skill && a.raceKey === 'halforc') {
+            var _sav = rollN(a.die);
+            rolls3.push(_sav);
+            a._savageExtra = _sav;
+        }
+    }
     return rolls3;
 }
 
@@ -16007,6 +16025,27 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             + (_wsExc > 0 ? ' (' + _wsExc + ' dano excedente)' : ''));
         if ((target.hp | 0) > 0) { target.alive = true; clearDownedMeta(target); return; }
         newHp = 0;  // reverteu mas o excesso derrubou o PV normal a 0 → segue p/ queda
+    }
+    /* C1.2 #90: Resistência Implacável (Meio-Orc, PHB p.41) — ao cair a 0 PV (não
+       por dano massivo), fica com 1 PV. 1×/combate (unit recriado a cada combate,
+       relentlessUsed começa falso). Espelha o trait 'Implacável' do Lobo. */
+    if (newHp <= 0 && target && target.t === 'p' && target.raceKey === 'halforc'
+            && !target.relentlessUsed && oldHp > 0) {
+        var _relExc = Math.max(0, damageApplied - oldHp);
+        if (_relExc < ((target.mhp | 0) || 1)) {  // não é dano massivo
+            target.relentlessUsed = true;
+            target.hp = 1; target.alive = true; target.dying = false;
+            target.isDead = false; target.stable = false;
+            target.deathSaves = { s: 0, f: 0 };
+            if (typeof clearDownedMeta === 'function') clearDownedMeta(target);
+            if (s && s.log) s.log.push(target.n + ' resiste com Resistência Implacável (PHB p.41) — fica com 1 PV!');
+            try {
+                var _relEl = document.querySelector('[data-unit-id="player"]');
+                if (_relEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_relEl, 'IMPLACÁVEL!', 'boss');
+                if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell('player', 'rally', { durationMs: 2200 });
+            } catch (_eRel) {}
+            return;
+        }
     }
     target.hp = newHp;
     if (damageApplied > 0) {
@@ -27757,7 +27796,7 @@ async function playTurn(aIdx, tIdx, opts) {
         // Vantagem/desvantagem via status (Surto de Ação, Ação Ardilosa,
         // Juramento de Inimizade, Passo Oculto, Temerário, Zombaria, Prostrado, Rugido Feroz)
         var advMode = _simAttackAdvState(actor, target);
-        var d20Pack = _simRollD20WithAdv(advMode);
+        var d20Pack = _simRollD20WithAdv(advMode, _simIsLucky(actor));  // C1.5 #90
         r = d20Pack.r;
         if (advMode !== 'normal') {
             s.log.push(actor.n + ' — d20 com ' + (advMode === 'advantage' ? 'VANTAGEM' : 'DESVANTAGEM') +
