@@ -932,6 +932,10 @@ function hideCharError() {
 }
 
 function _esc(str) {
+    // A1.1: delega ao escaper canônico (window.vEsc — escapa também " e ',
+    // seguro em atributo como data-id="..."). Fallback DOM-based (legado: NÃO
+    // escapa aspas) só roda se escape.js não tiver carregado.
+    if (typeof vEsc === 'function') return vEsc(str);
     if (!str) return '';
     var d = document.createElement('div');
     d.textContent = str;

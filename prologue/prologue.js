@@ -1019,7 +1019,7 @@ function openLoreOverlay() {
     if (nextBtn) nextBtn.onclick = function() { if (curPage < pages.length - 1) { curPage++; haptic('light'); _renderPage(); } };
     if (closeBtn) closeBtn.onclick = function() { haptic('medium'); closeLoreOverlay(); };
   }
-  function _escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function _escapeHtml(s) { if (typeof vEsc === 'function') return vEsc(s); return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   _renderPage();
   vDrawer.open('loreOverlay');
 }

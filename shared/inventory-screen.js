@@ -1469,6 +1469,8 @@
   //  UTIL — escape, slugify
   // ============================================================
   function _esc(s) {
+    // A1.1: delega ao escaper canônico (window.vEsc); fallback local idêntico.
+    if (typeof vEsc === 'function') return vEsc(s);
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')

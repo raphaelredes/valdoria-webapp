@@ -637,6 +637,7 @@ LOG SINK (Fase 7):
     window.SERVER_LOG_AREA = 'cidade';
     /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
        window.fetch pra detectar maintenance em qualquer response do servidor. */
+    document.write('<script src="/shared/escape.js?v=' + __vEarly + '"><\/script>');
     document.write('<script src="/shared/maintenance-overlay.js?v=' + __vEarly + '"><\/script>');
     /* SPA-NAV-COMPAT shim (sessão #18, 2026-05-21) — restaura helpers
        window.valdoriaSpaNav que a SPA shell removida em maio quebrou. Sem
@@ -10468,6 +10469,9 @@ function _closeDiscoveryPopup(){
 }
 
 function _esc(s){
+  // A1.1: delega ao escaper canônico (window.vEsc — cobertura COMPLETA &<>"',
+  // segura em atributo). Fallback local cobre só <>& (legado).
+  if (typeof vEsc === 'function') return vEsc(s);
   return String(s == null ? '' : s).replace(/[<>&]/g, function(c){
     return c === '<' ? '&lt;' : c === '>' ? '&gt;' : '&amp;';
   });

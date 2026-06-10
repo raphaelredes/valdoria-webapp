@@ -146,6 +146,8 @@ function _mountRealisticOrb() {
 }
 
 function _esc(s) {
+    // A1.1: delega ao escaper canônico (window.vEsc); fallback local.
+    if (typeof vEsc === 'function') return vEsc(s);
     if (!s) return '';
     return String(s).replace(/[&<>"']/g, function(c) {
         return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];

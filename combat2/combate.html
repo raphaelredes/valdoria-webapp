@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-09T16:33:16Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T09:45:15Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -588,6 +588,7 @@ window.SERVER_LOG_AREA = 'combate';
    window.fetch pra detectar maintenance em qualquer response do servidor.
    Pattern canonical do cidade.html — necessário pra sync_combate passar
    no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
+document.write('<script src="' + BASE + '/shared/escape.js?v=' + v + '"><\/script>');
 document.write('<script src="' + BASE + '/shared/maintenance-overlay.js?v=' + v + '"><\/script>');
 /* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
 document.write('<script src="' + BASE + '/shared/overlay-registry.js?v=' + v + '"><\/script>');
@@ -16157,6 +16158,8 @@ function computeRewards(s) {
 
 /* ========= HTML builders — mesmas classes do legado ========= */
 function escHtml(str) {
+    // A1.1: delega ao escaper canônico (window.vEsc); fallback local idêntico.
+    if (typeof vEsc === 'function') return vEsc(str);
     return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });

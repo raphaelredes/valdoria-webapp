@@ -50,6 +50,8 @@
     // ─── Utilities ───────────────────────────────────────────
 
     function _escapeHtml(s) {
+        // A1.1: delega ao escaper canônico (window.vEsc); fallback local idêntico.
+        if (typeof vEsc === 'function') return vEsc(s);
         return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
             return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
         });
