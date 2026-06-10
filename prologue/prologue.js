@@ -102,13 +102,31 @@ async function apiCall(endpoint, body = {}) {
 
 function showError(msg, err) {
   console.error('[PROLOGUE]', msg, err || '');
+  /* Bug user 2026-06-10: o botão "Fechar" só removia o overlay → deixava a
+     tela VAZIA por baixo (o boot havia falhado, nada renderizou). Agora a ação
+     primária é "Recomeçar" (recarrega — o server já recupera a sessão via DB
+     authority), pra o jogador NUNCA ficar preso numa tela sem saída. Construído
+     via DOM (textContent na mensagem) para evitar injeção. */
   var ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px';
-  ov.innerHTML = '<div style="background:#2a2218;border:1px solid #c4953a;padding:24px;border-radius:12px;max-width:380px;color:#d4c8b0;text-align:center">'
-    + '<div style="color:#c02020;font-size:32px;margin-bottom:8px">⚠️</div>'
-    + '<p style="margin:0 0 16px">' + msg + '</p>'
-    + '<button style="padding:10px 24px;background:#c4953a;color:#1a1510;border:none;border-radius:6px;font-weight:bold;cursor:pointer" onclick="this.closest(\'div\').parentElement.remove()">Fechar</button>'
-    + '</div>';
+  var card = document.createElement('div');
+  card.style.cssText = 'background:#2a2218;border:1px solid #c4953a;padding:24px;border-radius:12px;max-width:380px;color:#d4c8b0;text-align:center';
+  var icon = document.createElement('div');
+  icon.style.cssText = 'color:#c02020;font-size:32px;margin-bottom:8px';
+  icon.textContent = '⚠️';
+  var p = document.createElement('p');
+  p.style.cssText = 'margin:0 0 16px';
+  p.textContent = String(msg == null ? '' : msg);
+  var btn = document.createElement('button');
+  btn.style.cssText = 'padding:10px 24px;background:#c4953a;color:#1a1510;border:none;border-radius:6px;font-weight:bold;cursor:pointer';
+  btn.textContent = '↻ Recomeçar';
+  btn.addEventListener('click', function() {
+    try { window.location.reload(); } catch (e) { /* ok */ }
+  });
+  card.appendChild(icon);
+  card.appendChild(p);
+  card.appendChild(btn);
+  ov.appendChild(card);
   document.body.appendChild(ov);
 }
 
@@ -1063,7 +1081,10 @@ async function boot() {
     return;
   }
   try {
-    DATA = await apiCall('/api/prologue/init');
+    /* mode/show_preface viajam no body p/ a recuperação server-side (WebApp
+       Token Resilience): se o token efêmero morreu num restart, o server
+       reconstrói a sessão do prólogo a partir do DB usando estes parâmetros. */
+    DATA = await apiCall('/api/prologue/init', { mode: MODE, show_preface: SHOW_PREFACE });
     _hideAllLoadings();
     if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('prologue');
 
