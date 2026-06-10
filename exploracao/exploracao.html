@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T09:57:29Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T10:08:55Z - do not edit directly, edit source -->
 
 
 
@@ -743,6 +743,8 @@
        no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     /* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
@@ -19138,12 +19140,10 @@ function seededRng(seed) {
   let s = seed * 2654435761 | 0;
   return function() { s = (s * 1664525 + 1013904223) | 0; return ((s >>> 0) / 4294967295); };
 }
-function calcReadTime(text, cat) {
-  const words = String(text).trim().split(/\s+/).filter(Boolean).length;
-  const base = words * 250;
-  const rng = (cat === 'summary') ? { min: 2500, max: 6000, bonus: 1500 } : { min: 2000, max: 5000, bonus: 0 };
-  return Math.max(rng.min, Math.min(rng.max, base + rng.bonus));
-}
+/* A1.3 (auditoria #90): fork local de calcReadTime REMOVIDO — usa o canônico
+   window.calcReadTime de shared/text-timing.js (9 categorias + strip de HTML),
+   carregado no bloco de loaders cedo. O call site (window.calcReadTime) já
+   tinha guard `window.calcReadTime ? ... : 2000` como fallback. */
 function calcSuccessPct(choice, p) {
   if (!choice.skill) return 100;
   // FASE 8/8l (#9): mapeia skill->atributo via DndRules.SKILL_TO_ABILITY ANTES de

@@ -32,9 +32,16 @@ var DiaryEngine = (function () {
   }
 
   function _calcReadTime(text) {
+    // A1.3 (auditoria #90): delega ao canônico window.calcReadTime na categoria
+    // 'dm' (min 2000, max 8000 — combina com o intent de narração do diário e
+    // corrige o bug do fork local que NÃO tinha teto: texto longo dava timing
+    // ilimitado, ex. 2000 palavras = 500s). Fallback local mantém o teto novo.
+    if (typeof window !== 'undefined' && typeof window.calcReadTime === 'function') {
+      return window.calcReadTime(text, 'dm');
+    }
     if (!text) return 2000;
     var words = text.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length;
-    return Math.max(2000, words * 250);
+    return Math.max(2000, Math.min(8000, words * 250));
   }
 
   /* ── constructor ── */
