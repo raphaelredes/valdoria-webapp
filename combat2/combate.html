@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T21:49:53Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T22:51:40Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13398,8 +13398,11 @@ function randomPlayer() {
     // 2026-05-18 BUG #2 FIX: usar pName URL param se vier do exploracao (nome
     // real do player), senao pick(CHAR_NAMES) (compatibilidade com setup local).
     var _playerName = window.__COMBAT_PLAYER_NAME || pick(CHAR_NAMES);
+    var _localRace = pick(CHAR_RACES);
     return { t: 'p', n: _playerName, cls: c.cls, subclass: subcls,
-             summonsInvoked: summonsInvokedDefault, race: pick(CHAR_RACES), ico: c.ico,
+             summonsInvoked: summonsInvokedDefault, race: _localRace,
+             raceKey: _raceKeyJS(_localRace), subrace: '', draconicAncestry: '',
+             ico: c.ico,
              hp: hp, mhp: hp, ac: rng(c.ac[0], c.ac[1]),
              atk: rng(c.atk[0], c.atk[1]), die: c.die,
              dmgMod: c.dmgMod, attr: c.attr,
@@ -13669,6 +13672,28 @@ function randomBagForChar() {
 }
 
 /** Personagem ou aliado a partir do setup (cfg v1). useRandom força sorteio total da linha. */
+// C1.1 #90: normaliza nome de raça (display PT-BR/EN) → key ASCII canonical,
+// espelhando race_key do backend (src/game/mechanics/utils.py). Usado só no
+// fallback LOCAL/file://; em REMOTE o pivot já envia spec.race_key.
+function _raceKeyJS(s) {
+    var k = String(s || '').toLowerCase()
+        .replace(/[áàâã]/g, 'a').replace(/é|ê/g, 'e').replace(/í/g, 'i')
+        .replace(/[óô]/g, 'o').replace(/ú/g, 'u').replace(/ç/g, 'c')
+        .replace(/[\s_-]+/g, '');
+    var MAP = {
+        humano: 'human', human: 'human',
+        anao: 'dwarf', dwarf: 'dwarf',
+        elfo: 'elf', elf: 'elf',
+        gnomo: 'gnome', gnome: 'gnome',
+        halfling: 'halfling', pequenino: 'halfling',
+        meioelfo: 'halfelf', halfelf: 'halfelf',
+        meioorc: 'halforc', halforc: 'halforc',
+        tiefling: 'tiefling',
+        draconato: 'dragonborn', dragonborn: 'dragonborn'
+    };
+    return MAP[k] || k;
+}
+
 function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     spec = spec || {};
     var cdef = useRandom ? pick(CHAR_CLASSES) : getClassDefByName(spec.cls || 'Guerreiro');
@@ -13688,6 +13713,12 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     }
     var mhp = (spec.mhp_exact != null) ? Math.max(hp, parseInt(spec.mhp_exact, 10) || hp) : hp;
     var race = useRandom ? pick(CHAR_RACES) : (spec.race && String(spec.race).trim()) || 'Humano';
+    // C1.1 #90: raça canonical (key ASCII) pra mecânica racial. REMOTE: vem do
+    // pivot (spec.race_key); LOCAL: normaliza o display. Pré-req dos traits.
+    var raceKey = (spec.race_key && String(spec.race_key).trim().toLowerCase())
+        || _raceKeyJS(race);
+    var subrace = (spec.subrace && String(spec.subrace).trim().toLowerCase()) || '';
+    var draconicAncestry = (spec.draconic_ancestry && String(spec.draconic_ancestry).trim().toLowerCase()) || '';
     var n = useRandom ? pick(CHAR_NAMES) : (String(spec.name || '').trim() || pick(CHAR_NAMES));
     // Cópia rasa completa — preserva todos os campos PHB (magicMissiles, smite,
     // concentration, scale, sneakAttack/sneakDice, rageDmg, rageResistance,
@@ -13771,7 +13802,8 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         barks: (spec.barks && Array.isArray(spec.barks)) ? spec.barks.slice() : null,
         _barkHeard: [],
         summonsInvoked: summonsInvokedFinal,
-        race: race, ico: (spec.icon && String(spec.icon).trim()) || cdef.ico,
+        race: race, raceKey: raceKey, subrace: subrace, draconicAncestry: draconicAncestry,
+        ico: (spec.icon && String(spec.icon).trim()) || cdef.ico,
         /* #85 (user): retrato CUSTOM do NPC (ex.: Thorne = thorne-armeiro.webp).
            _combatPortraitHTML prioriza u.portrait sobre o ícone heráldico/PNG.
            Sem isto, Thorne renderizava o PNG genérico de Guerreiro no card. */
