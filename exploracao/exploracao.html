@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T15:57:48Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T18:14:53Z - do not edit directly, edit source -->
 
 
 
@@ -12587,6 +12587,27 @@ body.perf-lite .stub-popup-voice { animation: none; }
    Spec: § 4.2
    Skeleton: API + normalização básica. Phase C completa o mapping.
    ════════════════════════════════════════════════════════════════════════════ */
+
+/* A3.3 B1 (#90): parser UNICO de reward-string (era 2 copias que so casavam
+   Valdoritas). Estende pra XP / HP / exaustao — antes '+30 XP', '+2 HP',
+   '-1 exaustao' eram EXIBIDOS na badge dourada e nunca aplicados. Strings de
+   ITEM ('+1 Obsidiana') continuam display-only (follow-up no plano A3.3).
+   Retorna {gold, xp, hp, exh} (zeros quando nao casa). */
+function parseRewardString(s) {
+  var out = { gold: 0, xp: 0, hp: 0, exh: 0 };
+  if (typeof s !== 'string' || !s) return out;
+  function _num(m) {
+    if (!m) return 0;
+    var v = parseInt(m[2], 10);
+    return (m[1] === '−' || m[1] === '-') ? -v : v;
+  }
+  out.gold = _num(s.match(/([+−\-])\s*(\d+)\s*Valdoritas?/i));
+  out.xp = _num(s.match(/([+−\-])\s*(\d+)\s*XP\b/i));
+  out.hp = _num(s.match(/([+−\-])\s*(\d+)\s*HP\b/i));
+  out.exh = _num(s.match(/([+−\-])\s*(\d+)\s*exaust/i));
+  return out;
+}
+
 (function () {
   var _cache = {};
 
@@ -12637,12 +12658,12 @@ body.perf-lite .stub-popup-voice { animation: none; }
         if (typeof outcome.reward.gold === 'number') rewardDelta = outcome.reward.gold;
         if (typeof outcome.reward.xp === 'number') ops.push({ op: 'xp', delta: outcome.reward.xp });
       } else if (typeof outcome.reward === 'string') {
-        // parse "+N Valdoritas" ou "−N Valdoritas"
-        var m = outcome.reward.match(/([+−\-])\s*(\d+)\s*Valdoritas?/i);
-        if (m) {
-          rewardDelta = parseInt(m[2], 10);
-          if (m[1] === '−' || m[1] === '-') rewardDelta = -rewardDelta;
-        }
+        /* A3.3 B1 (#90): parser compartilhado — agora também XP/HP/exaustão. */
+        var rw = (typeof parseRewardString === 'function') ? parseRewardString(outcome.reward) : { gold: 0, xp: 0, hp: 0, exh: 0 };
+        rewardDelta = rw.gold;
+        if (rw.xp) ops.push({ op: 'xp', delta: rw.xp });
+        if (rw.hp) ops.push({ op: 'hp', delta: rw.hp });
+        if (rw.exh) ops.push({ op: 'exh', delta: rw.exh });
       }
       if (rewardDelta !== 0) ops.push({ op: 'gold', delta: rewardDelta });
     }
@@ -12698,6 +12719,7 @@ body.perf-lite .stub-popup-voice { animation: none; }
     if (ok.starts_quest) c.outcome_ok.starts_quest = ok.starts_quest;
     if (ok.recruit_ally) c.outcome_ok.recruit_ally = ok.recruit_ally;
     if (ok.record_enemy) c.outcome_ok.record_enemy = ok.record_enemy;
+    if (ok.record_material) c.outcome_ok.record_material = ok.record_material;  /* A3.3 B3 (#90) */
 
     var fail = legacyChoice.outcome_fail || legacyChoice.outcome_ok;
     c.outcome_fail = {
@@ -12713,6 +12735,7 @@ body.perf-lite .stub-popup-voice { animation: none; }
       if (fail.starts_quest) c.outcome_fail.starts_quest = fail.starts_quest;
       if (fail.recruit_ally) c.outcome_fail.recruit_ally = fail.recruit_ally;
       if (fail.record_enemy) c.outcome_fail.record_enemy = fail.record_enemy;
+      if (fail.record_material) c.outcome_fail.record_material = fail.record_material;  /* A3.3 B3 (#90) */
     }
 
     if (legacyChoice.outcome_partial) {
@@ -36693,6 +36716,23 @@ function applyChoiceOutcome(choice, success, total, dc) {
   if (outcome.mp_gain && S.player.mmp > 0) {
     S.player.mp = Math.min(S.player.mmp, S.player.mp + outcome.mp_gain);
   }
+  /* A3.3 B2 (#90): dialeto de SERVIDOR (reward_xp/reward_gold/hp_delta/
+     mp_delta) usado pelo chain do carvalho (forest_old_oak_grove) resolve por
+     ESTE path — era dropado em silêncio (19x reward_xp + loot perdidos). */
+  if (typeof outcome.reward_gold === 'number' && outcome.reward_gold !== 0) {
+    S.gold = Math.max(0, (S.gold || 0) + outcome.reward_gold);
+    LOG('ECONOMY', 'outcome.reward_gold applied delta=' + outcome.reward_gold + ' new_gold=' + S.gold);
+  }
+  if (typeof outcome.reward_xp === 'number' && outcome.reward_xp > 0 && S.player.xp != null) {
+    S.player.xp = (S.player.xp || 0) + outcome.reward_xp;
+    LOG('XP', 'outcome.reward_xp applied delta=' + outcome.reward_xp);
+  }
+  if (typeof outcome.hp_delta === 'number' && outcome.hp_delta !== 0) {
+    S.player.hp = Math.max(0, Math.min(S.player.mhp, S.player.hp + outcome.hp_delta));
+  }
+  if (typeof outcome.mp_delta === 'number' && outcome.mp_delta !== 0 && S.player.mmp > 0) {
+    S.player.mp = Math.max(0, Math.min(S.player.mmp, S.player.mp + outcome.mp_delta));
+  }
   if (typeof outcome.gold === 'number' && outcome.gold !== 0) {
     S.gold = Math.max(0, (S.gold || 0) + outcome.gold);
     LOG('ECONOMY', 'outcome.gold applied delta=' + outcome.gold + ' new_gold=' + S.gold + ' source=event:' + S.event.id);
@@ -36714,6 +36754,14 @@ function applyChoiceOutcome(choice, success, total, dc) {
         delta = parseInt(m[2], 10);
         if (m[1] === '\u2212' || m[1] === '-') delta = -delta;
       }
+    }
+    /* A3.3 B1 (#90): parser compartilhado — '+30 XP', '+2 HP', '-1 exaustao'
+       eram exibidos na badge e nunca aplicados neste path. */
+    if (typeof outcome.reward === 'string' && typeof parseRewardString === 'function') {
+      var _rw2 = parseRewardString(outcome.reward);
+      if (_rw2.xp > 0 && S.player.xp != null) { S.player.xp = (S.player.xp || 0) + _rw2.xp; LOG('XP', 'reward-string xp=' + _rw2.xp); }
+      if (_rw2.hp) S.player.hp = Math.max(0, Math.min(S.player.mhp, S.player.hp + _rw2.hp));
+      if (_rw2.exh) S.player.exh = Math.max(0, Math.min(6, S.player.exh + _rw2.exh));
     }
     if (delta !== 0) {
       S.gold = Math.max(0, (S.gold || 0) + delta);
