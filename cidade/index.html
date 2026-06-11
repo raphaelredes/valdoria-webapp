@@ -8393,6 +8393,66 @@ body.perf-lite .vc-action-btn { transition: none; }
     console.log('[CITY] REMOTE mode detected — fetching state via /api/game/state');
     _cityLog('info', 'remote_mode_start', {api: _api, uid: _uid, wanted_char: _wantedChar || ''});
 
+    /* 2026-06-11 (user: "depois de carregar ficou muito tempo travado nessa tela
+       sem nenhuma informacao" — tela em branco). Resiliencia de rede na cidade:
+       uma falha de fetch TRANSIENTE (network "Failed to fetch" / 5xx — tipico de
+       deploy/tunnel reiniciando) NAO pode virar tela em branco nem disparar o
+       fluxo de sessao-expirada (redirect pro /web/) — a sessao continua valida,
+       a rede so piscou. Auto-reconecta com overlay VISIVEL (nunca "sem
+       informacao"), igual ao retry do /play/. Erro DEFINITIVO (401/403/404 auth)
+       segue pro overlay de sessao. Doc: WebApp Token Resilience + /play/ retry. */
+    function _cityErrIsTransient(e){
+      var m = (e && e.message ? e.message : String(e || ''));
+      if (/HTTP 4\d\d/.test(m)) return false;        // 401/403/404 — auth definitivo
+      if (m.indexOf('auth invalida') >= 0) return false;
+      return true;                                    // Failed to fetch / 5xx / timeout / network
+    }
+    function _cityShowReconnectOverlay(attempt){
+      var el = document.getElementById('city-reconnect');
+      if (!el){
+        el = document.createElement('div');
+        el.id = 'city-reconnect';
+        el.style.cssText = 'position:fixed;inset:0;background:#1a1510;color:#d4c8b0;display:flex;align-items:center;justify-content:center;z-index:99998;padding:24px;text-align:center;font-family:Cinzel,serif;';
+        if (document.body) { document.body.appendChild(el); }
+      }
+      // DOM seguro (sem innerHTML): nodes + textContent.
+      while (el.firstChild) { el.removeChild(el.firstChild); }
+      var box = document.createElement('div'); box.style.cssText = 'max-width:320px';
+      var brand = document.createElement('div');
+      brand.style.cssText = 'font-size:calc(26px * var(--v-font-scale,1));font-weight:700;letter-spacing:5px;color:#c4953a;text-shadow:0 0 22px rgba(196,149,58,.5);margin-bottom:12px';
+      brand.textContent = 'VALDORIA';
+      var msg = document.createElement('div');
+      msg.style.cssText = 'font-size:calc(14px * var(--v-font-scale,1));line-height:1.6;margin-bottom:10px';
+      msg.textContent = 'Reconectando ao servidor…';
+      var att = document.createElement('div');
+      att.style.cssText = 'font-size:calc(12px * var(--v-font-scale,1));color:#a09484';
+      att.textContent = 'tentativa ' + attempt;
+      box.appendChild(brand); box.appendChild(msg); box.appendChild(att);
+      el.appendChild(box);
+    }
+    /* Reconexao por RELOAD: re-roda o boot inteiro (estado fresco do servidor),
+       bulletproof vs. falha parcial. Contador persiste em sessionStorage p/
+       sobreviver ao reload e permitir um teto (apos ~60s desiste -> overlay
+       manual). Limpo no sucesso (junto do valdoria_relogin_attempt). */
+    function _cityScheduleReconnect(e){
+      var n = 0;
+      try { n = parseInt(sessionStorage.getItem('valdoria_city_reconnect') || '0', 10) || 0; } catch (_g) {}
+      n++;
+      try { sessionStorage.setItem('valdoria_city_reconnect', String(n)); } catch (_s) {}
+      try { _cityLog('warn', 'city_reconnect_scheduled', {attempt: n, error: String(e && e.message || e).slice(0, 140)}); } catch (_l) {}
+      if (n > 20){  // ~60s de tentativas (3s cada) — desiste e mostra erro manual
+        try { sessionStorage.removeItem('valdoria_city_reconnect'); } catch (_c) {}
+        _showSessionErrorOverlay('Servidor indisponivel no momento.', 'reconnect cap apos ' + (n - 1) + ' tentativas');
+        return;
+      }
+      try { window.__cityResumePending = true; } catch (_p) {}  // segura o hide do #loading (anti-blank)
+      try { _cityShowReconnectOverlay(n); } catch (_o) {}
+      setTimeout(function(){
+        try { window.__valdoria_transitioning = true; } catch (_t) {}  // suprime close-beacon na reload
+        try { location.reload(); } catch (_r) { try { window.location.href = window.location.href; } catch (_r2) {} }
+      }, 3000);
+    }
+
     // FIX 2026-05-10 v3: bug critico descoberto via logs — `state` referenciado
     // no .then(payload) segundo nivel mas era parametro do .then(state) anterior
     // (out of scope). Causava ReferenceError 'state is not defined' -> catch
@@ -8814,6 +8874,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       // que agora respeita _cityRealPlayerReady e revela o painel.
       window._cityRealPlayerReady = true;
       try { sessionStorage.removeItem('valdoria_relogin_attempt'); } catch (_clr) {}  // char carregou OK — libera futura auto-recuperação
+      try { sessionStorage.removeItem('valdoria_city_reconnect'); } catch (_clr2) {}  // 2026-06-11: reseta contador de reconexao (load OK)
       // Sessão #60 (2026-05-28): Single-device session lock pra cidade.
       // Dispara heartbeat poll a cada 3s (ativo) / 10s (background) que
       // detecta displacement (outro device tomou a sessão). Quando o user
@@ -8916,6 +8977,7 @@ body.perf-lite .vc-action-btn { transition: none; }
         // Sessão #55 (2026-05-28): fallback aplicou char real — libera fade-in.
         window._cityRealPlayerReady = true;
         try { sessionStorage.removeItem('valdoria_relogin_attempt'); } catch (_clr) {}  // char carregou OK — libera futura auto-recuperação
+      try { sessionStorage.removeItem('valdoria_city_reconnect'); } catch (_clr2) {}  // 2026-06-11: reseta contador de reconexao (load OK)
         // Sessão #60 (2026-05-28): mesma fix do single-device lock também no
         // fallback path (state failed mas /api/auth/characters succeed).
         if (window.SessionHeartbeat && typeof SessionHeartbeat.init === 'function') {
@@ -8935,7 +8997,14 @@ body.perf-lite .vc-action-btn { transition: none; }
       }).catch(function(e){
         console.warn('[CITY] fallback failed:', e);
         _cityLog('critical', 'fallback_chars_fetch_failed', {error: String(e && e.message || e).slice(0, 300)});
-        if (_isProductionHost){
+        // 2026-06-11: state E characters falharam. TRANSIENTE (rede/deploy) →
+        // reconecta com overlay visivel (nunca tela em branco, nunca redirect
+        // espurio pro /web/). DEFINITIVO (auth 4xx) → overlay de sessao. Antes:
+        // so mostrava overlay em production-host e SEM retry → DEV ficava em
+        // branco e PROD exigia reabrir pelo bot (user: "travado sem informacao").
+        if (_cityErrIsTransient(e)){
+          _cityScheduleReconnect(e);
+        } else {
           _showSessionErrorOverlay(
             'Erro de conexão ao carregar personagem.',
             'state + characters fallback falharam: ' + String(e && e.message || e).slice(0, 100)
