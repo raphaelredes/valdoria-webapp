@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T22:26:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T22:59:34Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -232,6 +232,10 @@
   ~11845 animInit; 11883 beginCombatAfterInitOrder; 11899 showInitiativeOrderPopup
   ~11995 playHealTurn; 12052 playTurn (núcleo ataque + skill dano + advantage/disadvantage + FCT)
   ~12333 _hasSkipTurnStatus; 12340 runNpcSegmentUntilPlayerTurn (+skipTurn handler)
+  ENEMY-VARIATIONS 2026-06-11 (user "5 lobos diferentes, goblins, orcs..."):
+  ~17273 ENEMY_VARIATION_COUNT (manifest, gerado por build_enemy_variation_manifest.py)
+  ~17290 _enemyVarHash (FNV-1a) + _enemyVariationIndex (varIdx estável por u.id+slug)
+  ~17415 _combatPortraitHTML escolhe {slug}-(N+1).webp; onerror cascata var→base→heráldico
   THORNE-HEAL 2026-06-11 (user "Thorne levanta o personagem com pote"):
   ~29448 _allyPickHealTarget (prio: dying > estável > <40% PV; player > aliado)
   ~29620 AI de cura do aliado em runNpcSegmentUntilPlayerTurn — c.t==='a' com
@@ -17271,8 +17275,35 @@ var ENEMY_PNG_AVAILABLE = {
     'elemental-de-lava-menor': 1, 'brakthar': 1,
     // 2026-05-17: 6 enemies adicionais (have name pools but were missing PNGs)
     'ghoul': 1, 'urso': 1, 'urso-pardo': 1, 'lobo-atroz': 1,
-    'bandido-arqueiro': 1, 'capitao-bandido': 1
+    'bandido-arqueiro': 1, 'capitao-bandido': 1,
+    // 2026-06-11: bases que JÁ existiam no disco mas nunca foram registradas
+    // (caíam no heráldico). Tier 1 de variações precisa delas registradas.
+    'rato-gigante': 1, 'javali': 1, 'kobold': 1
 };
+/* THORNE? não — VARIAÇÕES DE INIMIGO (2026-06-11, user "5 lobos diferentes,
+   goblins, orcs..."). ENEMY_VARIATION_COUNT[slug] = nº total de variações no
+   disco (base + N). 1 = só a base (comportamento atual). >1 = há
+   enemies/{slug}-2.webp .. -{count}.webp. Gerado por
+   scripts/build_enemy_variation_manifest.py (varre o dir). A seleção por
+   instância em _combatPortraitHTML é estável (hash de u.id+slug) — Lobo I
+   sempre mostra a mesma variação na luta, mas Lobo I ≠ Lobo II. */
+var ENEMY_VARIATION_COUNT = {'aranha-gigante': 5, 'bandido': 5, 'esqueleto': 5, 'goblin': 5, 'javali': 5, 'kobold': 5, 'lobo': 5, 'orc': 5, 'rato-gigante': 5, 'zumbi': 5};
+/* Hash de string determinístico (FNV-1a 32-bit) — estável entre re-renders e
+   plataformas. Usado pra escolher a variação por instância de inimigo. */
+function _enemyVarHash(str) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+    }
+    return h >>> 0;
+}
+/* varIdx estável (0..count-1) pra uma instância de inimigo. 0 = base. */
+function _enemyVariationIndex(u, slug, count) {
+    if (!count || count < 2) return 0;
+    var key = String((u && (u.id || u.uid || u.n)) || '') + '|' + slug;
+    return _enemyVarHash(key) % count;
+}
 /* 2026-05-16: Skill icon PNG availability — 135 AI-generated skills.
    Source: scripts/generate_skill_icons.py + logs/inventory_skills.json.
    Keyed pela versão slugificada do nome (ex: "Bola de Fogo" → "bola-de-fogo"). */
@@ -17400,9 +17431,27 @@ function _combatPortraitHTML(iconId, u, utype) {
                 if (loc.indexOf('file://') === 0) {
                     base = '../shared/img/combat/enemies/';
                 }
-                return '<img class="c-portrait-img" src="' + base + enemySlug + '.webp" ' +
+                /* Variação por instância (2026-06-11): se há >1 variação no
+                   disco, escolhe uma estável por unidade. varIdx 0 = base
+                   ({slug}.webp); varIdx N = {slug}-(N+1).webp. onerror em
+                   cascata: variação → base → heráldico (faltar variação nunca
+                   quebra). */
+                var vCount = (typeof ENEMY_VARIATION_COUNT !== 'undefined' && ENEMY_VARIATION_COUNT[enemySlug]) || 1;
+                var vIdx = _enemyVariationIndex(u, enemySlug, vCount);
+                var baseSrc = base + enemySlug + '.webp';
+                var imgSrc = (vIdx > 0) ? (base + enemySlug + '-' + (vIdx + 1) + '.webp') : baseSrc;
+                var svgFb = '<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + (iconId || 'ic-inimigo') + '\\\'/></svg>';
+                var onErr;
+                if (vIdx > 0) {
+                    /* 1º erro: cai pra base e re-arma o handler pro heráldico.
+                       2º erro (base também falhou): vira heráldico. */
+                    onErr = 'this.onerror=function(){this.onerror=null;this.outerHTML=\'' + svgFb + '\'};this.src=\'' + baseSrc + '\'';
+                } else {
+                    onErr = 'this.onerror=null;this.outerHTML=\'' + svgFb + '\'';
+                }
+                return '<img class="c-portrait-img" src="' + imgSrc + '" ' +
                        'alt="" loading="lazy" ' +
-                       'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + (iconId || 'ic-inimigo') + '\\\'/></svg>\'">';
+                       'onerror="' + onErr + '">';
             }
         }
     }
