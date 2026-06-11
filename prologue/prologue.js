@@ -100,6 +100,49 @@ async function apiCall(endpoint, body = {}) {
   }).catch(function() { throw new Error('Resposta inválida do servidor'); });
 }
 
+/* 2026-06-11 (user: escolheu combater os lobos → 2min de tela em branco).
+   Logs do device mostraram a conexão STALLANDO: o servidor respondeu o
+   save_choice em 1ms mas a resposta nunca chegou (timeout 15s). Chamadas
+   CRÍTICAS (fight/complete/distract) agora re-tentam em falha TRANSIENTE
+   (network/timeout/5xx) a cada 3s — mesmo padrão do /play/ e da cidade.
+   Erro DEFINITIVO (sessão/4xx) propaga na hora. */
+async function apiCallRetry(endpoint, body, opts) {
+  opts = opts || {};
+  var max = opts.attempts || 5;
+  for (var i = 0; ; i++) {
+    try {
+      return await apiCall(endpoint, body || {});
+    } catch (e) {
+      var msg = String(e && e.message || e);
+      var transient = !(/session_expired/.test(msg) || /HTTP 4\d\d/.test(msg));
+      if (!transient || i >= max - 1) throw e;
+      console.warn('[PROLOGUE] ' + endpoint + ' transiente (' + msg.slice(0, 80) + ') — retry ' + (i + 2) + '/' + max);
+      try {
+        if (window.vProcessing && vProcessing.isActive && vProcessing.isActive()) {
+          vProcessing.setText('Reconectando ao servidor… (tentativa ' + (i + 2) + ')');
+        }
+      } catch (e2) {}
+      await new Promise(function (r) { setTimeout(r, 3000); });
+    }
+  }
+}
+
+/* Overlay PERSISTENTE para transições de PÁGINA (fight→combate, complete→cidade).
+   O _prologueInitLoading usa contentCheck '#viewport' — correto pro INIT do
+   prólogo, mas numa transição o #viewport local está sempre "pronto" e o
+   vProcessing auto-escondia em 6ms, deixando o download da página destino SEM
+   nenhum feedback (a tela em branco dos 2min). SEM contentCheck o overlay fica
+   até o browser pintar o documento de destino; se a navegação travar, o botão
+   de retry default do vProcessing (18s) recarrega — e o resume server-side
+   (detect_active_state) leva de volta ao destino correto. */
+function _showTransitionOverlay(text) {
+  try {
+    if (window.vProcessing && vProcessing.show) { vProcessing.show({ text: text }); return; }
+  } catch (e) {}
+  var _ld = document.getElementById('loading');
+  if (_ld) { _ld.style.display = 'flex'; _ld.classList.remove('hidden'); }
+}
+
 function showError(msg, err) {
   console.error('[PROLOGUE]', msg, err || '');
   /* Bug user 2026-06-10: o botão "Fechar" só removia o overlay → deixava a
@@ -754,7 +797,11 @@ async function onRoadChoice(key) {
   if (_roadChoiceMade) return;
   _roadChoiceMade = true;
   choices.road_choice = key;
-  await _saveChoiceServer('road', key);
+  /* 2026-06-11: SEM await — save_choice é persistência não-crítica (o /fight
+     já grava a escolha server-side via quest) e o await bloqueava o caminho
+     crítico por até 15s quando a conexão stallava (timeout do fetchT). A
+     função tem catch próprio — fire-and-forget é seguro. */
+  _saveChoiceServer('road', key);
   if (key === 'fight') {
     await doFight();
   } else {
@@ -764,22 +811,24 @@ async function onRoadChoice(key) {
 
 async function doFight() {
   try {
-    if (window._prologueInitLoading) {
-      window._prologueInitLoading.show();
-    } else {
-      var _ld = document.getElementById('loading');
-      if (_ld) { _ld.style.display = 'flex'; _ld.classList.remove('hidden'); }
-    }
-    const result = await apiCall('/api/prologue/fight', {});
+    /* Overlay PERSISTENTE (sem contentCheck) — cobre a chamada + a navegação
+       inteira até o combate pintar. Antes: _prologueInitLoading auto-escondia
+       em 6ms e a navegação ficava sem feedback (user: 2min de tela em branco). */
+    _showTransitionOverlay('Os lobos avançam — preparando o combate…');
+    const result = await apiCallRetry('/api/prologue/fight', {});
     if (result.combat_url || result.arena_url) {
       window.__valdoria_transitioning = true;
       /* Close encounter overlay antes da transição (UX limpo) */
       if (typeof vEncounter !== 'undefined' && vEncounter.close) vEncounter.close();
+      try { if (window.vProcessing && vProcessing.setText) vProcessing.setText('Entrando em combate…'); } catch (e2) {}
       valdoriaSpaNav(result.combat_url || result.arena_url);
+      /* NÃO esconder o overlay — ele cobre o download da página de combate. */
     } else {
+      try { if (window.vProcessing) vProcessing.hide(); } catch (e3) {}
       showError('Erro ao iniciar combate.');
     }
   } catch (e) {
+    try { if (window.vProcessing) vProcessing.hide(); } catch (e4) {}
     showError('Erro ao iniciar combate.', e);
   }
 }
@@ -788,7 +837,7 @@ async function doDistract() {
   try {
     /* Fecha encounter antes de abrir dice overlay (z-index conflict). */
     if (typeof vEncounter !== 'undefined' && vEncounter.close) vEncounter.close();
-    const result = await apiCall('/api/prologue/distract');
+    const result = await apiCallRetry('/api/prologue/distract');
     choices.distract = result;
     showDiceRoll(result);
   } catch (e) {
@@ -840,8 +889,9 @@ async function onGateChoice(key) {
         showError('Erro ao resolver o teste: ' + (result && result.error || 'desconhecido'));
         return;
       }
-      await _saveChoiceServer('gate', key);
-      await _saveChoiceServer('interaction_type', choices.interaction_type);
+      /* 2026-06-11: sem await — não-crítico, não bloquear (ver onRoadChoice) */
+      _saveChoiceServer('gate', key);
+      _saveChoiceServer('interaction_type', choices.interaction_type);
       const _eff = result.effect || (result.xp ? '+' + result.xp + ' XP' : '');
       /* Narrativa pós-escolha (PADRAO_ALDRIC) com o script do outcome + recompensa. */
       const _finishLore = function () {
@@ -859,8 +909,9 @@ async function onGateChoice(key) {
   _gateChoiceMade = true;
   choices.gate_choice = key;
   choices.interaction_type = DATA.interaction?.type || 'gate';
-  await _saveChoiceServer('gate', key);
-  await _saveChoiceServer('interaction_type', choices.interaction_type);
+  /* 2026-06-11: sem await — não-crítico, não bloquear (ver onRoadChoice) */
+  _saveChoiceServer('gate', key);
+  _saveChoiceServer('interaction_type', choices.interaction_type);
   /* #85 (#8): lore SEM teste (ex.: feed/ignore) — renderiza a narrativa pós-escolha
      (PADRAO_ALDRIC) com o script do outcome, depois segue para os portões. */
   if (inter.type === 'lore' && inter.outcomes) {
@@ -909,29 +960,31 @@ function _sceneLoreOutcome(scriptSegs, effectText) {
 
 async function onEnterCity() {
   try {
-    if (window._prologueInitLoading) {
-      window._prologueInitLoading.show();
-    } else {
-      var _ld2 = document.getElementById('loading');
-      if (_ld2) { _ld2.style.display = 'flex'; _ld2.classList.remove('hidden'); }
-    }
+    /* 2026-06-11: overlay persistente + retry transiente — mesma família do
+       doFight (a transição prólogo→cidade tinha o mesmo gap: contentCheck
+       '#viewport' auto-escondia e o /complete não re-tentava em stall). */
+    _showTransitionOverlay('Os portões de Valdoria se aproximam…');
     const body = {
       gate_choice: choices.gate_choice || '',
       interaction_type: choices.interaction_type || 'gate',
       aftermath_only: MODE === 'aftermath',
     };
     if (choices.distract) body.distract = choices.distract;
-    const result = await apiCall('/api/prologue/complete', body);
+    const result = await apiCallRetry('/api/prologue/complete', body);
     if (result && result.game_url) {
       window.__valdoria_transitioning = true;
+      try { if (window.vProcessing && vProcessing.setText) vProcessing.setText('Entrando na cidade…'); } catch (e2) {}
       valdoriaSpaNav(result.game_url);
+      /* overlay fica — cobre o download da cidade */
     } else {
+      try { if (window.vProcessing) vProcessing.hide(); } catch (e3) {}
       if (window.Telegram && Telegram.WebApp) {
         window.__valdoria_transitioning = true;
         valdoriaSpaClose();
       }
     }
   } catch (e) {
+    try { if (window.vProcessing) vProcessing.hide(); } catch (e4) {}
     showError('Erro ao entrar na cidade.', e);
   }
 }
@@ -1104,8 +1157,9 @@ async function boot() {
   try {
     /* mode/show_preface viajam no body p/ a recuperação server-side (WebApp
        Token Resilience): se o token efêmero morreu num restart, o server
-       reconstrói a sessão do prólogo a partir do DB usando estes parâmetros. */
-    DATA = await apiCall('/api/prologue/init', { mode: MODE, show_preface: SHOW_PREFACE });
+       reconstrói a sessão do prólogo a partir do DB usando estes parâmetros.
+       2026-06-11: retry transiente (init é read-only — seguro re-tentar). */
+    DATA = await apiCallRetry('/api/prologue/init', { mode: MODE, show_preface: SHOW_PREFACE });
     _hideAllLoadings();
     if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('prologue');
 
