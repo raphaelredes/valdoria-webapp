@@ -2892,11 +2892,28 @@ Busca rápida:
             opacity: 0.95;
             line-height: 1.4;
         }
+        /* 2026-06-11 (user): a dica "E assim que a tela vai ficar..." ficava colada
+           no botao MAIOR (era <p> sem regra propria — so a margem default do UA).
+           Espaco explicito acima (separa do bloco de opcoes) + abaixo (antes do
+           Confirmar) + leve separador para deixar claro que e uma legenda. */
+        .font-onboarding-preview-hint {
+            text-align: center;
+            color: var(--v-text-dim, #a09484);
+            font-family: 'Marcellus', 'Cinzel', serif;
+            font-size: calc(12px * var(--v-font-scale, 1));
+            font-style: italic;
+            line-height: 1.5;
+            opacity: 0.85;
+            margin: 18px 0 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(196,149,58,0.15);
+        }
         @media (max-height: 620px) {
             .font-onboarding-card { padding: 18px 16px; }
             .font-onboarding-header h2 { font-size: calc(13px * var(--v-font-scale, 1)); letter-spacing: 2px; }
             .font-onboarding-subtitle { margin-bottom: 14px; font-size: calc(12px * var(--v-font-scale, 1)); }
             .font-onboarding-option { padding: 10px 14px; min-height: 52px; }
+            .font-onboarding-preview-hint { margin: 12px 0 10px; padding-top: 10px; }
         }
         @media (max-width: 340px) {
             .font-onboarding-header h2 { font-size: calc(13px * var(--v-font-scale, 1)); letter-spacing: 1.5px; }
