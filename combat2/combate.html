@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T17:10:26Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T20:44:54Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6630,6 +6630,12 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .iop-ico--heraldic svg { width: 100%; height: 100%; display: block; fill: currentColor; }
 /* 2026-06-07: retrato WebP (OpenAI) no popup de ordem de iniciativa — constrange ao box (28px). */
 .iop-ico--heraldic img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
+/* 2026-06-11 (user): retrato real do combatente no popup "Animações puladas".
+   Box ligeiramente maior + moldura dourada sutil = miniatura do card da arena. */
+.iop-ico--portrait { width: 32px; height: 32px; border-radius: 6px; overflow: hidden;
+    border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); box-shadow: 0 0 6px rgba(0,0,0,0.5); }
+.iop-ico--portrait img { border-radius: 5px; }
+.iop-ico--portrait svg { width: 100%; height: 100%; padding: 2px; box-sizing: border-box; }
 /* Phase 5b polish v6 (2026-04-26): inline SVG d20 + sword (rolagem + dano).
    Estilo monocromatico dourado, herda currentColor. */
 .iop-ico--inline { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 0; background: none; color: var(--v-gold, #c4953a); }
@@ -17371,7 +17377,11 @@ function _combatPortraitHTML(iconId, u, utype) {
         if (loc2.indexOf('file://') === 0) {
             base2 = '../shared/img/combat/';
         }
-        return '<img class="c-portrait-img" src="' + base2 + slug + '.png" ' +
+        /* 2026-06-11 (user "popup mostra SVG em vez da imagem do card"): BUG raiz
+           — pedia `.png` mas TODOS os 20 retratos de classe são `.webp` (0 png no
+           dir). O onerror sempre disparava → heráldico, tanto no CARD da arena
+           quanto no popup. Os retratos de inimigo (acima) já usavam `.webp`. */
+        return '<img class="c-portrait-img" src="' + base2 + slug + '.webp" ' +
                'alt="" loading="lazy" ' +
                'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + iconId + '\\\'/></svg>\'">';
     }
@@ -17801,15 +17811,17 @@ function simBuildAttackSkipRows(r, atkShown, hitRes, effAc, actor, target, dmgRo
         vsTitle = 'Teste vs CA';
     }
     return [
-        { icoClass: actorIcoCls, clsSlug: actorClsSlug, name: actor.n + ' → ' + target.n, roll: atkRes, longName: false },
-        /* 2026-06-11 (user): "a tela ATAQUE/ANIMAÇÕES PULADAS está usando
-           ícones ou imagens SVG ainda, resolva" — emoji 🎲 do sistema (OS)
-           REMOVIDO (regra Heraldic Icons Only: emoji nunca é ícone de UI).
-           ic-d20/ic-sword agora renderizam glifos heráldicos PREENCHIDOS
-           (paleta do ic-guerreiro), não mais outline fino moderno. */
+        /* 2026-06-11 (user): as linhas dos COMBATENTES (ator/alvo) mostram agora
+           o RETRATO REAL do card (mesma resolução de _combatPortraitHTML: retrato
+           custom → WebP de inimigo → PNG de classe → heráldico só como fallback).
+           Antes renderizavam o ícone heráldico de classe cru — "imagens SVG em vez
+           das imagens corretas dos cards". `unit`/`utype` viajam pro renderer. */
+        { icoClass: actorIcoCls, clsSlug: actorClsSlug, unit: actor, utype: actorUtype, name: actor.n + ' → ' + target.n, roll: atkRes, longName: false },
+        /* d20/ic-sword: glifos heráldicos PREENCHIDOS (paleta ic-guerreiro), não
+           emoji do sistema nem outline moderno (regras Heraldic Icons / No Modern Icons). */
         { icoClass: 'ic-d20', name: vsTitle, roll: vs, longName: false },
         { icoClass: 'ic-sword', name: parts, roll: String(total) + ' PV', longName: true },
-        { icoClass: targetIcoCls, clsSlug: targetClsSlug, name: 'PV ' + target.n, roll: oldHp + ' → ' + newHp, longName: false }
+        { icoClass: targetIcoCls, clsSlug: targetClsSlug, unit: target, utype: targetUtype, name: 'PV ' + target.n, roll: oldHp + ' → ' + newHp, longName: false }
     ];
 }
 
@@ -27830,7 +27842,17 @@ function showAttackSkipSummaryIOPLayout(rows) {
                - 'ic-sword' → espada heráldica inline (estilo ic-guerreiro)
                Fallback row.ico (legado) so se icoClass ausente. */
             var icoHtml;
-            if (row.icoClass === 'ic-d20') {
+            if (row.unit && typeof _combatPortraitHTML === 'function') {
+                /* 2026-06-11 (user): linha de COMBATENTE → retrato REAL do card
+                   (mesma resolução da arena: retrato custom → WebP de inimigo →
+                   PNG de classe → heráldico só se nenhuma imagem existir). O
+                   <img class=c-portrait-img> é estilizado por `.iop-ico--heraldic
+                   img` (object-fit cover + border-radius); o clsSlug colore o
+                   fallback heráldico. */
+                var pSlugCls = row.clsSlug ? (' ' + row.clsSlug) : '';
+                icoHtml = '<span class="iop-ico iop-ico--heraldic iop-ico--portrait' + pSlugCls + '" aria-hidden="true">' +
+                    _combatPortraitHTML(row.icoClass, row.unit, row.utype) + '</span>';
+            } else if (row.icoClass === 'ic-d20') {
                 icoHtml = '<span class="iop-ico iop-ico--inline" aria-hidden="true">' +
                     '<svg viewBox="0 0 24 24">' +
                     '<ellipse cx="12" cy="22.6" rx="6.5" ry="0.9" fill="#000" opacity="0.4"/>' +
