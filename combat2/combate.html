@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T04:25:42Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T11:53:38Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -17126,6 +17126,24 @@ var CLASS_SLUG_MAP = {
     'Feiticeiro':   'cls-feiticeiro',
     'Bruxo':        'cls-bruxo'
 };
+/* C5.3 #90 (Canonical Keys PT-BR): índice tolerante a acento/case/slug. O
+   backend pode mandar u.cls como 'Clérigo' (label), 'clerigo' (class_key) ou
+   'ic-clerigo'/'cls-clerigo' (fallback de slug do serializer de aliado). O
+   lookup EXATO em CLASS_ICON_MAP (keyed 'Clérigo' acentuado) falhava → o aliado
+   caía em ic-inimigo (ÍCONE DE INIMIGO num card de aliado — família do bug
+   Thorne). Normaliza a chave antes de indexar. */
+function _clsKeyNorm(s) {
+    return String(s || '')
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')  /* remove acento */
+        .toLowerCase()
+        .replace(/^(?:ic|cls)-/, '');                       /* remove prefixo de slug */
+}
+var CLASS_ICON_BY_KEY = {};
+var CLASS_SLUG_BY_KEY = {};
+(function () {
+    for (var _ck in CLASS_ICON_MAP) CLASS_ICON_BY_KEY[_clsKeyNorm(_ck)] = CLASS_ICON_MAP[_ck];
+    for (var _sk in CLASS_SLUG_MAP) CLASS_SLUG_BY_KEY[_clsKeyNorm(_sk)] = CLASS_SLUG_MAP[_sk];
+})();
 /* Mapping de tags do BESTIARY (PHB MM creature types) → brasão de família.
    FIX 2026-05-04 (audit): antes ic-inimigo era genérico pra 25+ inimigos
    diferentes (Goblin/Orc/Esqueleto/Aranha/Cultista/etc) — todos com a MESMA
@@ -17165,7 +17183,7 @@ function _heraldicIconOf(u, utype) {
         return 'ic-familiar';
     }
     if (u.summonKind) return 'ic-summon';
-    var byCls = CLASS_ICON_MAP[u.cls];
+    var byCls = CLASS_ICON_MAP[u.cls] || CLASS_ICON_BY_KEY[_clsKeyNorm(u.cls)];  /* C5.3 #90 */
     if (byCls) return byCls;
     /* fix-ally-fallback-v8 (PORT_LOG #14) — Ally NPC sem cls mapeada usa ic-inimigo
        (que existe na biblioteca heraldic) + cls-aliado (verde-aço). Garante que
@@ -17371,7 +17389,7 @@ function _heraldicClsSlugOf(u, utype) {
             return CLASS_SLUG_MAP[caster.cls];
         }
     }
-    var bySlug = CLASS_SLUG_MAP[u.cls];
+    var bySlug = CLASS_SLUG_MAP[u.cls] || CLASS_SLUG_BY_KEY[_clsKeyNorm(u.cls)];  /* C5.3 #90 */
     if (bySlug) return bySlug;
     /* fix-ally-fallback-v8 (PORT_LOG #14) — Ally NPC sem cls mapeada usa cls-aliado
        (verde-aço, definido em combat2.css) em vez de fallback vazio. */
