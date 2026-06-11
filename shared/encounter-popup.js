@@ -417,10 +417,63 @@
        _instantReveal span.innerHTML e _typewriter createElement/setAttribute):
        um `<img onerror=...>` vindo de payload nunca chega ao DOM como tag.
        NÃO escapa `&` — entidades (&mdash;) são legítimas nos textos. */
-    var escaped = String(html == null ? '' : html)
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    return escaped.replace(/&lt;(\/?)(i|em|b|strong|br|u|s|code)&gt;/gi, '<$1$2>');
+    var raw = String(html == null ? '' : html);
+    var escaped = raw.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    var permitted = escaped.replace(/&lt;(\/?)(i|em|b|strong|br|u|s|code)&gt;/gi, '<$1$2>');
+    /* ANTI-VAZAMENTO PERMANENTE (bug prólogo 2026-06-11 — user: "nunca mais
+       vaze código pro jogador"). Defense-in-depth: tags NÃO-whitelist (escapadas
+       acima e não re-permitidas — ex.: `<div style>`, `<b style="...">`, `<span>`)
+       ficariam VISÍVEIS como texto literal `<div style=...>` quando o innerHTML
+       reinterpreta `&lt;`/`&gt;`. Aqui REMOVEMOS qualquer sequência com FORMA DE
+       TAG escapada restante, de modo que CSS/HTML cravado num campo de texto
+       NUNCA chega ao jogador como lixo de marcação. Só remove o que tem forma de
+       tag (`<nome ...>`); `<` literal que não é tag (ex.: "a < b") é preservado.
+       Apresentação rica (recompensa/XP) DEVE usar script item {type:'reward'}. */
+    var stripped = permitted.replace(/&lt;\/?[a-zA-Z][^&]*?&gt;/g, '');
+    if (stripped !== permitted) {
+      try {
+        console.error('[ENC] HTML bloqueado em texto de diálogo (use {type:"reward"} '
+          + 'ou tags inline i/b/em/br) — trecho: ' + raw.slice(0, 120));
+      } catch (_e) { /* console pode faltar */ }
+    }
+    return stripped;
+  }
+
+  /* Bloco de RECOMPENSA estruturado (PADRAO_ALDRIC) — apresentação ÉPICA de
+     XP/Valdoritas/itens/efeito SEM cravar HTML em campo de texto. Construído
+     AQUI pelo renderer confiável via DOM (createElement + textContent) — XSS
+     impossível por construção (zero innerHTML, valores dinâmicos viram texto).
+     Consumido por um script item `{type:'reward', xp?, gold?, items?, effect?}`
+     em renderPage. Substitui o antigo _epicRewardBlock do prólogo que cravava
+     `<div style>`/`<b style>` em narração e vazava como texto (bug 2026-06-11).
+     Estilo via classes .enc-reward* (encounter-popup.css) — zero inline style.
+     Retorna HTMLElement (ou null se sem recompensa). */
+  function _buildRewardBlockEl(line) {
+    var rows = [];
+    if (line.xp && line.xp > 0) rows.push(['+' + (line.xp | 0) + ' XP', 'Experiência']);
+    if (line.gold && line.gold > 0) rows.push(['+' + (line.gold | 0) + ' Valdoritas', 'Tesouro']);
+    (line.items || []).forEach(function (it) { if (it) rows.push([String(it), 'Item']); });
+    if (line.effect) rows.push([String(line.effect), '']);
+    if (!rows.length) return null;
+    var box = document.createElement('div');
+    box.className = 'enc-reward';
+    var title = document.createElement('div');
+    title.className = 'enc-reward-title';
+    title.textContent = '◆ Recompensa ◆';
+    box.appendChild(title);
+    rows.forEach(function (r) {
+      var val = document.createElement('div');
+      val.className = 'enc-reward-val';
+      val.textContent = r[0];           /* textContent = escape nativo, sem XSS */
+      box.appendChild(val);
+      if (r[1]) {
+        var lbl = document.createElement('div');
+        lbl.className = 'enc-reward-lbl';
+        lbl.textContent = r[1];
+        box.appendChild(lbl);
+      }
+    });
+    return box;
   }
 
   // ──────────────────────────────────────────────────────────────────────
@@ -825,6 +878,20 @@
 
       var strophes = [];
       page.forEach(function(line) {
+        /* Script item ESTRUTURADO de recompensa (bug prólogo 2026-06-11): nó DOM
+           construído pelo renderer confiável (textContent, sem innerHTML/HTML em
+           texto). Estático (sem typewriter); revelado junto da página via
+           .enc-body.revealed (CSS). Não entra em `strophes`. */
+        if (line.type === 'reward') {
+          var rel = _buildRewardBlockEl(line);
+          if (rel) {
+            var rdiv = document.createElement('div');
+            rdiv.className = 'enc-line enc-reward-line';
+            rdiv.appendChild(rel);
+            body.appendChild(rdiv);
+          }
+          return;
+        }
         /* 2026-06-08 (user): NAO cria box pra estrofe sem texto. Aparecia uma
            caixa com fundo/borda VAZIA no dialogo (ex.: resultado dos Primeiros
            Socorros). So renderiza estrofe que de fato tem conteudo. */

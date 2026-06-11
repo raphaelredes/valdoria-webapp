@@ -396,30 +396,16 @@ function _sceneDeathHealer() {
 /* Cena INJURED COMPANION RESULT: mostra outcome narrativo apos a escolha
    de cura. Header com nome do NPC vivo (Brenn) ou Thorne dependendo do
    outcome. Choice unica avanca pra _sceneAftermath. */
-/* #85 (user): bloco de RECOMPENSA ÉPICO (PADRAO_ALDRIC) reutilizável p/ XP/
-   Valdoritas/itens — substitui o "+25 XP — título" tosco por uma apresentação
-   digna (header ornamentado + valores em Cinzel dourado). Renderizado como
-   narration HTML dentro do vEncounter. */
-function _epicRewardBlock(opts) {
+/* #85 (user): RECOMPENSA ÉPICA (PADRAO_ALDRIC) — XP/Valdoritas/itens com
+   apresentação digna. 2026-06-11 (user, bug grotesco): NÃO se constrói mais
+   HTML aqui (o antigo _epicRewardBlock cravava `<div style>` em narração e o
+   sanitizer do vEncounter o ESCAPAVA → vazava `<div style=...>` como texto pro
+   jogador). Agora é um SCRIPT ITEM ESTRUTURADO `{type:'reward', ...}` que o
+   renderer confiável desenha via DOM (shared/encounter-popup.js _buildRewardBlockEl).
+   Helper só monta o objeto — zero HTML em campo de texto. */
+function _rewardItem(opts) {
   opts = opts || {};
-  var rows = [];
-  if (opts.xp && opts.xp > 0) rows.push(['+' + opts.xp + ' XP', 'Experiência']);
-  if (opts.gold && opts.gold > 0) rows.push(['+' + opts.gold + ' Valdoritas', 'Tesouro']);
-  (opts.items || []).forEach(function (it) { if (it) rows.push([it, 'Item']); });
-  if (!rows.length) return '';
-  var inner = rows.map(function (r) {
-    return '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(21px * var(--v-font-scale,1));'
-      + 'font-weight:700;color:var(--v-gold,#c4953a);text-shadow:0 1px 0 rgba(0,0,0,0.6),0 0 14px rgba(196,149,58,0.45);'
-      + 'line-height:1.15;">' + r[0] + '</div>'
-      + '<div style="font-size:calc(10px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);'
-      + 'letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">' + r[1] + '</div>';
-  }).join('');
-  return '<div style="text-align:center;padding:10px 0;margin:6px 0;'
-    + 'border-top:1px solid rgba(196,149,58,0.30);border-bottom:1px solid rgba(196,149,58,0.30);'
-    + 'background:linear-gradient(180deg,rgba(196,149,58,0.08),transparent);">'
-    + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale,1));'
-    + 'letter-spacing:3px;color:var(--v-gold,#c4953a);text-transform:uppercase;margin-bottom:5px;">&#9670; Recompensa &#9670;</div>'
-    + inner + '</div>';
+  return { type: 'reward', xp: opts.xp || 0, gold: opts.gold || 0, items: opts.items || [] };
 }
 
 /* #85 (user): remove segmentos de script VAZIOS (texto só whitespace/tags/aspas)
@@ -427,7 +413,10 @@ function _epicRewardBlock(opts) {
    portões, entre duas falas consecutivas). Defensivo p/ TODA cena PADRAO_ALDRIC. */
 function _filterEmptySegments(script) {
   return (script || []).filter(function (s) {
-    return s && typeof s.text === 'string'
+    if (!s) return false;
+    /* Script item estruturado (reward) não tem .text — preservar sempre. */
+    if (s.type === 'reward') return true;
+    return typeof s.text === 'string'
       && s.text.replace(/<[^>]*>/g, '').replace(/[\s'"'']/g, '').length > 0;
   });
 }
@@ -441,13 +430,19 @@ function _sceneInjuredCompanionResult(result) {
   let lastIdx = 0;
   let match;
   let foundAny = false;
+  let quoteIdx = 0;
+  /* Speaker coerente com o header (bug 2026-06-11): quando o Brenn acorda
+     (magic_success/potion) a 1ª fala é dele ("Mestre..."/"Que aconteceu?") e as
+     seguintes do Thorne; quando NÃO acorda (first_aid/carry/fails) todas são do
+     Thorne — assim o nome da bolha nunca diverge do retrato do header. */
+  const isBrennAwake = (result.outcome_key === 'magic_success' || result.outcome_key === 'potion');
   while ((match = quoteRegex.exec(text)) !== null) {
     foundAny = true;
     const preText = text.slice(lastIdx, match.index).trim();
     if (preText) script.push({ type: 'narration', text: preText });
-    /* Speaker: 'Brenn' nos outcomes de sucesso (acorda), senao Thorne */
-    const isBrennAwake = (result.outcome_key === 'magic_success' || result.outcome_key === 'potion');
-    script.push({ type: 'speech', speaker: isBrennAwake && match[2].indexOf('Mestre') >= 0 ? 'Brenn, Aprendiz' : 'Thorne, o Ferreiro', text: match[2] });
+    const speaker = (isBrennAwake && quoteIdx === 0) ? 'Brenn, Aprendiz' : 'Thorne, o Ferreiro';
+    script.push({ type: 'speech', speaker: speaker, text: match[2] });
+    quoteIdx++;
     lastIdx = match.index + match[0].length;
   }
   if (foundAny) {
@@ -456,19 +451,27 @@ function _sceneInjuredCompanionResult(result) {
   } else {
     script.push({ type: 'narration', text: text });
   }
-  /* #85 (user): recompensa ÉPICA (PADRAO_ALDRIC) em vez de "+25 XP — título" tosco. */
+  /* #85 (user): recompensa ÉPICA (PADRAO_ALDRIC) — agora script item estruturado
+     (bug 2026-06-11: HTML em narração vazava como texto). */
   if ((result.xp && result.xp > 0) || (result.gold && result.gold > 0) || (result.items && result.items.length)) {
-    script.push({ type: 'narration', text: _epicRewardBlock({ xp: result.xp, gold: result.gold, items: result.items }) });
+    script.push(_rewardItem({ xp: result.xp, gold: result.gold, items: result.items }));
   }
-  /* #85: o NPC da cena é o Brenn (acorda) nos sucessos, ou Thorne (carrega) nas
-     falhas — NÃO o título do outcome (que ia no nome e ficava tosco). */
-  var _brennAwake = (result.outcome_key === 'magic_success' || result.outcome_key === 'potion'
-                     || result.outcome_key === 'firstaid_success');
+  /* O NPC do header (retrato + nome + desc) DEVE ser COERENTE com quem fala.
+     2026-06-11 (user, bug): em `first_aid_success` o Brenn NÃO acorda ("Brenn
+     não acorda, mas a respiração estabiliza") → quem fala é o Thorne. Mas o
+     header mostrava imagem do Brenn (hardcoded) + nome do Thorne — mismatch.
+     _brennAwake = SÓ quando o Brenn realmente acorda e fala (magic_success/
+     potion). A key do server é `first_aid_success` (com underscore) — o antigo
+     'firstaid_success' era dead code (e Brenn não acorda no firstaid de toda
+     forma). Retrato/nome/desc agora derivam todos do MESMO booleano. */
+  var _brennAwake = (result.outcome_key === 'magic_success' || result.outcome_key === 'potion');
   return {
     npc: {
       name: _brennAwake ? 'Brenn, Aprendiz' : 'Thorne, o Ferreiro',
-      desc: result.title || 'Aprendiz de Thorne',
-      portrait: '/shared/img/npcs/brenn-aprendiz.webp'
+      desc: _brennAwake ? 'Aprendiz de Thorne' : 'O Ferreiro',
+      portrait: _brennAwake
+        ? '/shared/img/npcs/brenn-aprendiz.webp'
+        : '/shared/img/npcs/thorne-armeiro.webp'
     },
     script: _filterEmptySegments(script),
     choices: [
@@ -564,10 +567,25 @@ function _sceneGate() {
      padrão (sem imagem) mantém "Os portões de Valdória". */
   const isLore = (inter.type === 'lore');
   const subjectImg = inter.subject_image || '';
+  /* Bug 2026-06-11 (user): vinhetas de ORIGEM têm cenário próprio (praia/mastro,
+     deserto, montanha…) e tocavam aos portões de Valdoria como se acontecessem
+     ALI — incoerência espacial ("estou na floresta, por que uma praia?"). Fix de
+     RAIZ p/ todas as ~250 origens, sem editar 250 arquivos: enquadrar a vinheta
+     como MEMÓRIA da terra natal. A lembrança é coerente em QUALQUER cenário; as
+     escolhas representam como você reviveu/agiu naquele momento. O outcome
+     (_sceneLoreOutcome) já fecha com "Seguir para os Portões" (volta ao presente). */
+  if (isLore) {
+    script = [{
+      type: 'narration',
+      text: 'A estrada para Valdoria se estende adiante. Por um instante seus passos pesam — '
+        + 'e a memória te puxa de volta, para um dia que ainda mora em você, nítido como se '
+        + 'acontecesse agora:'
+    }].concat(script);
+  }
   return {
     npc: {
       name: title.toUpperCase(),
-      desc: isLore ? (inter.context || '') : 'Os portões de Valdória',
+      desc: isLore ? ('Uma lembrança — ' + (inter.context || 'sua origem')) : 'Os portões de Valdória',
       portrait: subjectImg
     },
     script: script,
@@ -873,7 +891,10 @@ function _sceneLoreOutcome(scriptSegs, effectText) {
     ? scriptSegs.slice()
     : [{ type: 'narration', text: 'Você segue em frente.' }];
   if (effectText) {
-    segs = segs.concat([{ type: 'narration', text: '<b style="color:var(--v-gold,#c4953a)">✦ ' + effectText + ' ✦</b>' }]);
+    /* 2026-06-11 (user, bug grotesco): antes cravava `<b style="color:...">` em
+       narração e o sanitizer ESCAPAVA → vazava `<b style=...>` como texto. Agora
+       script item estruturado de recompensa (efeito ornamentado pelo renderer). */
+    segs = segs.concat([{ type: 'reward', effect: effectText }]);
   }
   return {
     npc: {

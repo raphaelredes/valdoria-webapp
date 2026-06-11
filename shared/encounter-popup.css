@@ -373,6 +373,53 @@ body.perf-lite #encounter-overlay.active .enc-card {
   visibility: visible;
 }
 
+/* ── Bloco de RECOMPENSA estruturado (bug prólogo 2026-06-11) ──────────────
+   Apresentação ÉPICA de XP/Valdoritas/itens/efeito. Construído como nó DOM pelo
+   renderer (sem HTML em texto → zero vazamento). Estilo 100% via classes +
+   tokens do design system (zero inline style). Revelado junto da página. */
+.enc-reward-line {
+  visibility: hidden;            /* revela quando a página termina (.revealed) */
+  text-align: center;
+}
+.enc-body.revealed .enc-reward-line {
+  visibility: visible;
+  animation: encRewardIn 0.45s ease both;
+}
+@keyframes encRewardIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.enc-reward {
+  padding: 10px 0;
+  margin: 4px 0;
+  border-top: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  border-bottom: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  background: linear-gradient(180deg, var(--v-gold-08, rgba(196, 149, 58, 0.08)), transparent);
+}
+.enc-reward-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(11px * var(--v-font-scale, 1));
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+  margin-bottom: 5px;
+}
+.enc-reward-val {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(21px * var(--v-font-scale, 1));
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--v-gold, #c4953a);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6), 0 0 14px var(--v-gold-45, rgba(196, 149, 58, 0.45));
+}
+.enc-reward-lbl {
+  font-size: calc(10px * var(--v-font-scale, 1));
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--v-text-dim, #a09484);
+  margin-bottom: 4px;
+}
+
 .enc-sentence {
   display: inline;
 }
