@@ -8949,10 +8949,15 @@ body.perf-lite .vc-action-btn { transition: none; }
         if (picked.class_name) p.cls = String(picked.class_name).toLowerCase();
         if (picked.race) p.race = String(picked.race).toLowerCase();
         if (picked.level) p.level = picked.level;
-        if (picked.hp)         p.hp = picked.hp;
-        if (picked.max_hp)     p.hpMax = picked.max_hp;
+        /* 2026-06-11 (user: ficha mostrava 28/9 PV — "erro grotesco"): hp=0 do
+           servidor é FALSY → `if (picked.hp)` descartava o valor real e ficava o
+           hp do MOCK (28) com o max real (9) = "28/9". O path principal (~8627)
+           já usava `!= null`; este fallback ainda era truthy. SEMPRE `!= null`
+           pra valores numéricos do servidor (0 é dado legítimo). */
+        if (picked.hp != null)     p.hp = picked.hp;
+        if (picked.max_hp != null) p.hpMax = picked.max_hp;
         if (picked.mp != null) p.mp = picked.mp;
-        if (picked.max_mp)     p.mpMax = picked.max_mp;
+        if (picked.max_mp != null) p.mpMax = picked.max_mp;
         if (picked.gold != null) p.gold = picked.gold;
         if (picked.xp != null)   p.xp = picked.xp;
         if (picked.exhaustion != null) p.exh = picked.exhaustion;
