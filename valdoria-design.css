@@ -2334,10 +2334,25 @@ body[data-font-size="small"]  {
   --v-font-micro: 8px;   /* 10 * 0.82 = 8.2 → 8 */
   --v-font-label: 10px;  /* 12 * 0.82 = 9.84 → 10 */
 }
+/* 2026-06-11 (user): "o tamanho do texto normal esta muito pequeno, faca ajuste
+   no tamanho normal para ficar um pouco maior". Normal subiu de 1.0 -> 1.10 — a
+   maioria dos tokens cresce so ~1px (um pouco maior, sem quebrar viewport). Como
+   normal e o default que TODA tela do jogo aplica (boot seta data-font-size=normal),
+   precisa OVERRIDE explicito dos tokens (igual small/large) — senao so o texto
+   calc(Npx*scale) cresceria e o token-driven (var(--v-font-base)) ficaria no :root. */
 body[data-font-size="normal"] {
-  --v-font-scale: 1.0;
-  --v-font-body-scaled: 14px;
-  /* tokens default de :root — sem override */
+  --v-font-scale: 1.10;
+  --v-font-body-scaled: 15.4px;
+  --v-font-xs: 11px;     /* 10 * 1.1 = 11 */
+  --v-font-sm: 13px;     /* 12 * 1.1 = 13.2 → 13 */
+  --v-font-md: 13px;
+  --v-font-base: 14px;   /* 13 * 1.1 = 14.3 → 14 */
+  --v-font-body: 15px;   /* 14 * 1.1 = 15.4 → 15 */
+  --v-font-lg: 17px;     /* 15 * 1.1 = 16.5 → 17 */
+  --v-font-xl: 18px;     /* 16 * 1.1 = 17.6 → 18 */
+  --v-font-2xl: 20px;    /* 18 * 1.1 = 19.8 → 20 */
+  --v-font-micro: 11px;  /* 10 * 1.1 = 11 */
+  --v-font-label: 13px;  /* 12 * 1.1 = 13.2 → 13 */
 }
 body[data-font-size="large"]  {
   --v-font-scale: 1.30;
