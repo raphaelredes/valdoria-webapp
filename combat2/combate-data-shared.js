@@ -517,6 +517,7 @@ var CHAR_CLASSES = [
            14-20 em vez de só 20) + atkAdvantage. Representa surpresa tática. */
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.97) — Assassinate Subclass nv 3+. */
         { n: 'Ataque Assassino', ico: '🗡', cost: 2, kind: 'buff', bonus: true, minLevel: 3,
+            requiresSubclass: 'assassin', /* REVIEW-#90 [8/17/25]: exclusiva do Assassino (PHB p.97) */
             combatOnceId: 'assassinate',
             desc: 'Subclass Assassin PHB p.97 (1x/combate): próximo ataque com vantagem + crit em 14-20.',
             helpDnd5e: 'Assassinato / Assassinate (PHB p.97 — Ladino Assassino nv 3): vantagem em atk vs criaturas que ainda não agiram no combate. Qualquer acerto em criatura SURPRESA é crítico automático.\nV1.7 Sprint-10 (2026-04-21 closeout): arena stub como AÇÃO BÔNUS 1x/combate — aplica buff atkAdvantage + critRange:14 (crit em 14-20) no próximo ataque. Representa surpresa tática condensada.',
@@ -552,6 +553,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Ação Ardilosa / Cunning Action (PHB p.96 — Ladino nível 2): **AÇÃO BÔNUS** para Desengajar, Esconder ou Correr (qualquer uma). Neste fluxo: convertida em vantagem no próximo ataque (o efeito tático mais comum após uma ação ardilosa).\nV1.7 (2026-04-21) alinhamento PHB: era sem flag `bonus` — consumia AÇÃO principal (divergência). Agora `bonus:true` libera ação pra atacar no mesmo turno (RAW).\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.96): adicionada flag `minLevel: 2` (antes faltava — Ladino nv 1 tinha acesso indevido).',
             buffSim: { id: 'acao_ardilosa', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Ação Ardilosa', condRule: 'PHB p.96 — BA; vantagem no próximo ataque (Desengajar/Esconder/Correr traduzido).', atkAdvantage: true } },
         { n: 'Golpe Mortal', ico: '💀', cost: 3, kind: 'attack', desc: 'Acerto devastador em ponto vital: 3d6 + DEX de dano perfurante.',
+            requiresSubclass: 'assassin', /* REVIEW-#90 [8/17/25]: exclusiva do Assassino (PHB p.97) — paridade c/ motor C3.5 */
             damageSpec: { n: 3, d: 6 }, dmgType: 'piercing',
             helpDnd5e: 'Referência: Assassinar (PHB p.97 — Assassino): crítico automático contra alvo surpreso. Neste fluxo: dado extra de dano (3d6 no lugar do 1d8 + DEX normal) representando o golpe preciso em ponto vulnerável.' },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.96) — Evasion Ladino nv 7+. */
@@ -925,6 +927,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Ataque Imprudente / Reckless Attack (PHB p.48 — Bárbaro nv 2): FEATURE DE CLASSE (não consome ação). Quando você faz seu primeiro ataque do turno, pode atacar RECKLESSLY — ganha vantagem em TODOS os ataques com arma baseados em FOR este turno, mas atacantes têm vantagem contra você até início da sua próxima rodada.\nV1.7 Sprint-10 (2026-04-21): cost 0 (PHB free action) + grantsExtraAction:true (reseta actionSpent pra permitir atacar logo após ativar). BuffSim aplica ambos: atkAdvantage (ofensivo) + selfAtkVulnerable (defensivo).\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.48): adicionada flag `minLevel: 2` (antes faltava — disponível em nv 1 violava PHB RAW).',
             buffSim: { id: 'temerario', vfx: 'bless', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Temerário', condRule: 'PHB p.48 — Vantagem em atk FOR, inimigos vantagem contra você.', atkAdvantage: true, selfAtkVulnerable: true } },
         { n: 'Rugido Feroz', ico: '🦁', cost: 2, kind: 'buff', minLevel: 10, desc: 'Rugido que amedronta inimigos visíveis (PHB p.49 nv 10+): desvantagem em ataques contra você por 2 turnos.',
+            requiresSubclass: 'berserker', /* REVIEW-#90 [8/17/25]: Presença Intimidante (Berserker PHB p.49) — paridade c/ motor C3.5 */
             blessSpell: true,
             helpDnd5e: 'Presença Intimidante (PHB p.49 — Bárbaro nível 10): ação para amedrontar uma criatura até 30m; TR SAB (CD 8 + prof + CAR). Em falha, fica amedrontada por concentração de 1 min.\nNeste fluxo: área simplificada — todos inimigos ficam com desvantagem em ataques contra você por 2 rodadas.\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.49): adicionada flag `minLevel: 10` (antes faltava — Bárbaro nv 1-9 tinha acesso indevido).',
             buffSim: { id: 'rugido_feroz', vfx: 'bless', decOn: 'round', turns: 2, kind: 'buff', condName: 'Rugido Feroz', condRule: 'PHB — Inimigos amedrontados = desvantagem em ataques enquanto você estiver à vista.', enemyAtkDisadvantage: true } },
@@ -932,6 +935,7 @@ var CHAR_CLASSES = [
            Antes dizia "PHB p.48 nv 2+" e minLevel:2 (divergência dupla: página E nível).
            PHB p.49 RAW: Berserker é SUBCLASS acessada no nv 3, Frenzy é o feature. */
         { n: 'Fúria Devastadora', ico: '💥', cost: 2, kind: 'attack', minLevel: 3, desc: 'Ataque brutal (PHB p.49 Berserker nv 3+) que só funciona em Fúria: 1d12 + STR extra.',
+            requiresSubclass: 'berserker', /* REVIEW-#90 [8/17/25]: Frenesi (Berserker PHB p.49) — paridade c/ motor C3.5 */
             damageSpec: { n: 1, d: 12 }, dmgType: 'slashing',
             requiresBuff: 'furia',
             helpDnd5e: 'Frenesi / Frenzy (PHB p.49 — Caminho do Berserker nível 3): durante Fúria, um ataque extra como ação bônus a cada turno. Ao fim da Fúria, exaustão (1 nível).\nNeste fluxo: requer Fúria ativa (sem isso, usa-se Ataque Brutal normal); dano 1d12 + STR.\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.49): corrigido `minLevel: 2 → 3` (PHB RAW — subclass Berserker é nv 3, não nv 2).' }
@@ -1210,7 +1214,9 @@ var CHAR_CLASSES = [
       skills: [
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.78) — Flurry of Blows Monge nv 2+. */
         { n: 'Rajada de Golpes', ico: '👊', cost: 1, kind: 'attack', bonus: true, requiresActionTaken: true, minLevel: 2, desc: 'Ação bônus (PHB p.78, nv 2+): imediatamente APÓS usar a ação Atacar, gasta 1 Ki para 2 golpes desarmados extras.',
-            damageSpec: { n: 2, d: 6 }, dmgType: 'bludgeoning',
+            /* C2.9 #90: martialArtsDie — o `d` é substituído em runtime pelo dado
+               de Artes Marciais escalado por nível (d4/d6/d8/d10, PHB p.78). */
+            damageSpec: { n: 2, d: 6 }, martialArtsDie: true, dmgType: 'bludgeoning',
             helpDnd5e: 'Rajada de Golpes / Flurry of Blows (PHB p.78 — Monge nível 2): **AÇÃO BÔNUS**; gasta 1 ponto de Ki; imediatamente APÓS fazer a ação Atacar no seu turno, faz 2 ataques desarmados.\nV1.7 Stage-FIX (2026-04-21): flag `requiresActionTaken:true` — gate PHB-fiel impede cast sem Atacar antes. Badge "Ataque antes" no painel se tentar BA sem ter usado ação principal.\nNo arena: 2d6 bludgeoning condensa os 2 ataques desarmados. Custo: 1 Ki + BA.' },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.78) — Patient Defense Monge nv 2+. */
         { n: 'Defesa Paciente', ico: '🧘', cost: 1, kind: 'buff', bonus: true, minLevel: 2, desc: 'Ação bônus (PHB p.78, nv 2+): gasta 1 Ki para Esquivar — atacantes rolam com DESVANTAGEM até início do próximo turno.',
@@ -1367,6 +1373,13 @@ var CHAR_CLASSES = [
             dmgType: 'force', autoHit: true,
             magicMissiles: { count: 3, perDart: { n: 1, d: 4, flat: 1 }, scaleByCasterLevel: true },
             helpDnd5e: 'Mísseis Mágicos / Magic Missile (PHB p.257 — Feiticeiro nv 1): 3 dardos autohit 1d4+1 força.\nUpcast: +1 dardo por nível acima do 1º.\nArena (escala nível): 3 (nv 1-2) · 4 (nv 3-4) · 5 (nv 5-6) · 6 (nv 7-8) · 7 (nv 9+).' },
+        /* REVIEW-#90 [13]: 'Raio Gélido' existia no pool L1 do motor (CLASS_INITIAL_CHOICES)
+           mas NÃO no CHAR_CLASSES do sim — a escolha do jogador sumia em produção.
+           Espelho da entry do motor (combat2_skills_data.py, Feiticeiro). */
+        { n: 'Raio Gélido', ico: '❄', cost: 0, kind: 'attack', desc: 'Truque (PHB p.271): ranged 1d8 frio; em acerto reduz velocidade (stub).',
+            damageSpec: { n: 1, d: 8 }, dmgType: 'cold',
+            scale: 'cantrip',
+            helpDnd5e: 'Raio Gélido / Ray of Frost (PHB p.271 — truque Feiticeiro/Mago): ataque de magia à distância; 1d8 frio; em acerto reduz a velocidade do alvo em 3m até o início do seu próximo turno. Escala cantrip: 2d8 nv 5, 3d8 nv 11, 4d8 nv 17.\nArena: redução de velocidade não modelada (sem grid).' },
         /* V1.7 Sprint-17 Ronda 15 (2026-04-21 QA PHB p.236) — Chaos Bolt upcast:
            +1d6 per slot above 1st. PHB damage: 2d8 + 1d6, tipo random.
            Arena stub: 2d8 force + escala +1d6/slot acima 1º. */

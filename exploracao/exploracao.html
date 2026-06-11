@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-10T22:01:12Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-11T00:27:34Z - do not edit directly, edit source -->
 
 
 
@@ -12407,6 +12407,11 @@ body.perf-lite .stub-popup-voice { animation: none; }
       if (player.conditions['frightened']) disadv = true;
       if (player.conditions['restrained']) disadv = true;
       if (player.conditions['poisoned']) disadv = true;
+    }
+    /* C4.10 #90: Exaustão nv1+ — DESVANTAGEM em testes de habilidade (PHB
+       p.291). O texto do jogo já prometia; _detectAdvantage ignorava. */
+    if (player && ((player.exh | 0) >= 1 || (player.exhaustion | 0) >= 1)) {
+      disadv = true;
     }
     if (adv && disadv) return 'normal';
     if (adv) return 'advantage';

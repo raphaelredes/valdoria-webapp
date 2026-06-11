@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-10T23:13:19Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T04:25:42Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13672,6 +13672,59 @@ function randomBagForChar() {
 }
 
 /** Personagem ou aliado a partir do setup (cfg v1). useRandom força sorteio total da linha. */
+// C3.3 #90: normaliza key/display de subclasse pra comparação (backend manda
+// 'beast_master'; sim declara 'Beast Master') — lowercase + espaços/hífens→_.
+function _subclassKeyNorm(s) {
+    return String(s || '').toLowerCase().replace(/[\s-]+/g, '_');
+}
+
+// C3.4 #90: bônus de dano condicionais de subclasse — espelha o motor
+// combat2_subclass.subclass_attack_damage_bonus. Retorna [{val,label}].
+function _simSubclassDmgBonus(a, d, skill, s) {
+    var out = [];
+    if (!a) return out;
+    var sub = _subclassKeyNorm(a.subclass);
+    var acq = a.acquired || [];
+    // Hunter — Abatedor Colossal: +1d8 vs presa ferida, 1×/turno (PHB p.93)
+    if (a.cls === 'Patrulheiro' && sub === 'hunter' && acq.indexOf('colossus_slayer') >= 0
+            && d && (d.hp | 0) < (d.mhp | 0) && !(s && s._colossusUsedThisTurn)) {
+        var _cs = rollN(8);
+        if (s) s._colossusUsedThisTurn = true;
+        out.push({ val: _cs, label: 'Abatedor Colossal +' + _cs });
+    }
+    // Evocation — Cantrip Potente / Evocação Potente (+INT)
+    if (a.cls === 'Mago' && sub === 'evocation' && skill) {
+        var _intMod = Math.max(0, Math.floor(((a.intScore | 0 || 10) - 10) / 2));
+        if (_intMod > 0) {
+            var _isCantrip = skill.scale === 'cantrip';
+            if (_isCantrip && acq.indexOf('potent_cantrip') >= 0) {
+                out.push({ val: _intMod, label: 'Cantrip Potente +' + _intMod });
+            } else if (!_isCantrip && (skill.cost | 0) > 0 && acq.indexOf('empowered_evocation') >= 0) {
+                out.push({ val: _intMod, label: 'Evocação Potente +' + _intMod });
+            }
+        }
+    }
+    // Draconic — Afinidade Elemental (+CHA em fogo)
+    if (a.cls === 'Feiticeiro' && sub === 'draconic' && acq.indexOf('elemental_affinity') >= 0
+            && skill && skill.dmgType === 'fire') {
+        var _chaMod = Math.max(0, Math.floor(((a.cha | 0 || 10) - 10) / 2));
+        if (_chaMod > 0) out.push({ val: _chaMod, label: 'Afinidade Elemental +' + _chaMod });
+    }
+    return out;
+}
+
+// C3.2 #90: crit range persistente — Champion (Guerreiro) crita em 19-20 no L3
+// (Crítico Aprimorado) e 18-20 no L15 (Crítico Superior), PHB p.72-73.
+// Espelha o motor combat2_subclass.crit_range_for.
+function _simCritRangeFor(sub, lvl, acquired) {
+    if (_subclassKeyNorm(sub) === 'champion') {
+        var acq = acquired || [];
+        if (acq.indexOf('superior_critical') >= 0 || (lvl | 0) >= 15) return 18;
+        if (acq.indexOf('improved_critical') >= 0 || (lvl | 0) >= 3) return 19;
+    }
+    return 20;
+}
+
 // C1.1 #90: normaliza nome de raça (display PT-BR/EN) → key ASCII canonical,
 // espelhando race_key do backend (src/game/mechanics/utils.py). Usado só no
 // fallback LOCAL/file://; em REMOTE o pivot já envia spec.race_key.
@@ -13730,11 +13783,73 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     var sub = null;
     if (cdef.subclasses) {
         var requested = spec.subclass && String(spec.subclass).trim();
-        if (requested && cdef.subclasses.indexOf(requested) >= 0) {
-            sub = requested;
+        /* C3.3 #90: o backend manda keys lowercase ('hunter'/'beast_master');
+           o sim declara display ('Hunter'/'Beast Master'). Antes 'hunter' nunca
+           batia → TODO Patrulheiro caía no default 'Beast Master' (lobo grátis,
+           Hunter ignorado). Agora compara NORMALIZADO; requested REMOTE que não
+           bate → SEM subclasse (sem lobo grátis). LOCAL/sem requested mantém o
+           default (dev tool). */
+        if (requested) {
+            var _reqNorm = _subclassKeyNorm(requested);
+            var _matched = null;
+            for (var _si = 0; _si < cdef.subclasses.length; _si++) {
+                if (_subclassKeyNorm(cdef.subclasses[_si]) === _reqNorm) { _matched = cdef.subclasses[_si]; break; }
+            }
+            sub = _matched;  // null se não bateu (REMOTE: sem subclasse)
         } else {
             sub = cdef.defaultSubclass || cdef.subclasses[0];
         }
+    } else if (spec.subclass && String(spec.subclass).trim()) {
+        /* REVIEW-#90 [24]: classes SEM cdef.subclasses (11 de 12) descartavam
+           spec.subclass — Champion/Evocation/Fiend/Life/etc. ficavam MORTOS em
+           produção (critRange 20, hooks nunca disparavam). O backend é a
+           autoridade da subclasse: usa o valor do spec diretamente. */
+        sub = String(spec.subclass).trim();
+    }
+    /* C3.5 #90: skills exclusivas de subclasse (requiresSubclass) não vazam pra
+       classe inteira — qualquer Totem Warrior usava Frenzy, qualquer Thief usava
+       Golpe Mortal. Comparação normalizada (C3.3). */
+    skillsCopy = skillsCopy.filter(function (sk) {
+        if (!sk.requiresSubclass) return true;
+        return sub && _subclassKeyNorm(sk.requiresSubclass) === _subclassKeyNorm(sub);
+    });
+    /* C4.9 #90: exaustão REAL do player (0-6) entra no combate — seed do se[]
+       (o runtime já consome: _simExhaustionLevel + adv/disadv + HUD). */
+    var _exhSeed = (spec.exhaustion_exact != null) ? (parseInt(spec.exhaustion_exact, 10) | 0) : 0;
+    /* C2.1 #90: escolhas de magias L1 aplicadas na PRODUÇÃO. O spec traz o POOL
+       escolhível (l1_choice_pool = CLASS_INITIAL_CHOICES) e as escolhas da
+       criação (l1_skill_choices). Remove do card toda skill que está no pool e
+       NÃO foi escolhida — auto-unlocks por nível e demais skills ficam. Antes
+       um Mago L1 real entrava com TODAS as 7 magias nv1 (fix da sessão #37 só
+       existia no motor, que a produção não usa pra montar skills). */
+    if (!useRandom && spec.l1_choice_pool && Array.isArray(spec.l1_choice_pool)
+            && spec.l1_choice_pool.length) {
+        var _l1Chosen = (spec.l1_skill_choices && Array.isArray(spec.l1_skill_choices))
+            ? spec.l1_skill_choices : [];
+        if (_l1Chosen.length) {
+            skillsCopy = skillsCopy.filter(function (sk) {
+                if (spec.l1_choice_pool.indexOf(sk.n) < 0) return true;  // fora do pool
+                return _l1Chosen.indexOf(sk.n) >= 0;  // no pool: só as escolhidas
+            });
+        }
+    }
+    /* C1.7/C1.8 #90: skills RACIAIS injetadas no arsenal (espelha o motor
+       _build_player): Sopro Dracônico (Draconato) + Repreensão Infernal
+       (Tiefling nv3+, dedup se a classe — Bruxo — já concede). NOTA: `lvl`
+       só é declarado mais abaixo — calcula localmente do spec. */
+    var _racialLvl = useRandom ? 3 : Math.min(20, Math.max(1, parseInt(spec.lvl, 10) || 3));
+    if (raceKey === 'dragonborn') {
+        var _bw = _simBreathWeaponSkill(draconicAncestry, _racialLvl);
+        /* REVIEW [1]: CD do sopro = 8 + CON mod + prof (PHB p.34). conSc/prof
+           ainda não computados aqui — usa spec.con_exact + prof por nível. */
+        var _bwCon = (spec.con_exact != null) ? (parseInt(spec.con_exact, 10) | 0) : 12;
+        var _bwProf = 2 + Math.floor((_racialLvl - 1) / 4);
+        _bw.save.dc = 8 + Math.floor((_bwCon - 10) / 2) + _bwProf;
+        skillsCopy.push(_bw);
+    }
+    if (raceKey === 'tiefling' && _racialLvl >= 3
+            && !skillsCopy.some(function (sk) { return sk.n === 'Repreensão Infernal'; })) {
+        skillsCopy.push(_simTieflingRebukeSkill());
     }
     /* B1+C1 — flag de rituais já feitos (default true). Setup-frontend pode passar
        spec.summonsInvoked = {familiar: false} pra simular "ainda não invocou". */
@@ -13803,6 +13918,9 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         _barkHeard: [],
         summonsInvoked: summonsInvokedFinal,
         race: race, raceKey: raceKey, subrace: subrace, draconicAncestry: draconicAncestry,
+        /* C3.10/C3.2 #90: acquired_skills do levelup + crit range persistente. */
+        acquired: (spec.acquired && Array.isArray(spec.acquired)) ? spec.acquired.slice() : [],
+        critRange: _simCritRangeFor(sub, lvl, spec.acquired),
         ico: (spec.icon && String(spec.icon).trim()) || cdef.ico,
         /* #85 (user): retrato CUSTOM do NPC (ex.: Thorne = thorne-armeiro.webp).
            _combatPortraitHTML prioriza u.portrait sobre o ícone heráldico/PNG.
@@ -13812,11 +13930,18 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
            Thorne). Honrada em newCombatFromSetup — sem isso o ally rola d20+0
            (DEX 10 default) e age por último, sumindo na luta curta do prólogo. */
         init_exact: (spec.init_exact != null) ? (parseInt(spec.init_exact, 10) || null) : null,
-        hp: hp, mhp: mhp, ac: ac, atk: atk, die: cdef.die,
+        /* C2.9 #90: Monge usa o dado de Artes Marciais escalado (d4/d6/d8/d10). */
+        hp: hp, mhp: mhp, ac: ac, atk: atk,
+        die: (cdef.cls === 'Monge') ? _simMonkMartialDie(lvl) : cdef.die,
         dmgMod: cdef.dmgMod, attr: cdef.attr,
         dex: dex, wis: wis, intScore: intSc, cha: cha, str: strSc, con: conSc,
         prof: (function (lv) { lv = Math.max(1, lv | 0); return 2 + Math.floor((lv - 1) / 4); })(lvl),
-        alive: hp > 0, se: [],
+        alive: hp > 0,
+        /* C4.9 #90: seed da Exaustão real (PHB p.291) — runtime já consome. */
+        se: _exhSeed > 0 ? [{ id: 'exhaustion', kind: 'debuff', ico: '😩',
+            n: 'Exaustão (nível ' + _exhSeed + ')',
+            dndCondition: 'Exaustão ' + _exhSeed + ' (PHB p.291)',
+            exhaustionLevel: _exhSeed, turnsLeft: null }] : [],
         dying: hp <= 0, stable: false, isDead: false, deathSaves: { s: 0, f: 0 },
         lvl: lvl,
         /* User sessão #69: XP real do DB (REMOTE) pra tela de vitória usar o limiar
@@ -14500,19 +14625,35 @@ function pushBuffSim(u, sim, skillIco, skillName) {
     if (!u.se) u.se = [];
     var id = sim.id || 'fx';
     /* PHB p.203 concentração exclusiva: se a nova magia é de concentração,
-       remove buff de concentração anterior do mesmo unit (se houver). */
-    if (sim.concentration && u.se.length) {
+       remove buff de concentração anterior do mesmo unit (se houver).
+       REVIEW-#90 [7/28] (C4.3 paridade): Fúria também quebra concentração
+       (PHB p.49: Bárbaro em Fúria não concentra) e a quebra remove a condição
+       LINKADA do alvo (Hold Person etc.) — espelha _apply_buff_self do motor. */
+    if ((sim.concentration || sim.rageDmg) && u.se.length) {
         var droppedConc = [];
         u.se = u.se.filter(function (x) {
             if (x && x.concentration && x.id !== id) {
                 droppedConc.push(x.n || x.id);
+                if (x.linkedConditionId != null && x.linkedTargetIdx != null
+                        && typeof currentState !== 'undefined' && currentState
+                        && currentState.order && currentState.order[x.linkedTargetIdx]) {
+                    var _lkTu = currentState.order[x.linkedTargetIdx];
+                    _lkTu.se = (_lkTu.se || []).filter(function (y) {
+                        return !y || y.id !== x.linkedConditionId;
+                    });
+                    if (currentState.log) {
+                        currentState.log.push((_lkTu.n || '?') + ' se liberta — a concentração de ' +
+                            (u.n || '?') + ' foi quebrada (PHB p.203).');
+                    }
+                }
                 return false;
             }
             return true;
         });
         if (droppedConc.length && typeof currentState !== 'undefined' && currentState && currentState.log) {
             currentState.log.push(u.n + ' perde concentração em ' + droppedConc.join(', ') +
-                ' ao conjurar ' + (skillName || sim.condName || 'nova magia') + ' (PHB p.203).');
+                ' ao conjurar ' + (skillName || sim.condName || 'nova magia') + ' (PHB p.203' +
+                (sim.rageDmg ? ' — Fúria impede concentração, p.49' : '') + ').');
         }
     }
     u.se = u.se.filter(function (x) { return x.id !== id; });
@@ -14775,7 +14916,40 @@ async function simResolveEndTurnConditions(s, unitIdx) {
         var dc = st.saveDc;
         if (rs && typeof rs === 'object' && dc != null) {
             var ab = (rs.ability || 'dex').toLowerCase();
-            var d20 = rollN(20);
+            /* REVIEW-#90 [15] (C4.4 paridade): Paralisado/Atordoado/Inconsciente/
+               Petrificado AUTO-FALHAM TRs de FOR/DES (PHB App.A) — excluindo o
+               PRÓPRIO entry testado (senão Hold Person nunca termina pelo seu
+               próprio TR). Espelha resolve_end_turn_conditions do motor. */
+            if (ab === 'str' || ab === 'dex') {
+                var _afEnd = false;
+                for (var _afJ = 0; _afJ < u.se.length; _afJ++) {
+                    var _afE = u.se[_afJ];
+                    if (_afE && _afE !== st && _afE.autoFailStrDex
+                            && (_afE.turnsLeft == null || _afE.turnsLeft > 0)) { _afEnd = true; break; }
+                }
+                if (_afEnd) {
+                    s.log.push(name + ' — TR ' + (ab === 'str' ? 'FOR' : 'DES') + ' vs ' +
+                        (st.n || st.id || 'efeito') + ' AUTO-FALHA (PHB App.A — ' +
+                        'Paralisado/Atordoado/Inconsciente/Petrificado) → efeito mantém.');
+                    var _afTl = st.turnsLeft;
+                    if (_afTl == null) { out.push(st); continue; }
+                    if ((_afTl | 0) <= 1) {
+                        s.log.push(name + ': ' + (st.n || 'Efeito') + ' dissipou-se (fim da duração em turnos).');
+                        continue;
+                    }
+                    st.turnsLeft = (_afTl | 0) - 1;
+                    out.push(st);
+                    continue;
+                }
+            }
+            /* C1.5/C1.3 #90: Sortudo rerola nat-1; vantagem racial = 2º d20. */
+            var d20 = _simLuckyD20(_simIsLucky(u));
+            var _rsAdv = _simRacialSaveAdv(u, ab, (st.dndCondition || '') + ' ' + (st.n || ''));
+            if (_rsAdv.adv) {
+                var _rsD2 = _simLuckyD20(_simIsLucky(u));
+                if (_rsD2 > d20) d20 = _rsD2;
+                s.log.push(name + ' — ' + _rsAdv.label + ': vantagem no TR (PHB).');
+            }
             var smod = simSaveMod(u, ab);
             var total = d20 + smod;
             var ok = total >= (dc | 0);
@@ -15085,6 +15259,12 @@ function formatTurnsLeftLabel(st) {
    ============================================================ */
 function _simAttackAdvState(actor, target) {
     var adv = false, dis = false;
+    /* C3.4 #90: Assassinar (Assassino, PHB p.97) — vantagem na 1ª rodada
+       (aprox. de 'criatura que ainda não agiu'). Espelha o motor. */
+    if (actor && _subclassKeyNorm(actor.subclass) === 'assassin'
+            && currentState && (currentState.rn | 0) <= 1) {
+        adv = true;
+    }
     if (actor && actor.se) {
         actor.se.forEach(function (st) {
             if (!st) return;
@@ -15199,6 +15379,76 @@ function _simSaveAdvState(defender, ability) {
     return 'normal';
 }
 /* Rola d20 respeitando vantagem/desvantagem. Retorna { r, raw1, raw2, mode }. */
+// C1.3 #90: vantagem RACIAL em salvaguardas (PHB) — espelha o motor
+// combat2_race.racial_save_advantage. Retorna {adv, label}.
+function _simRacialSaveAdv(unit, ability, effectText) {
+    if (!unit) return { adv: false, label: '' };
+    var rk = unit.raceKey || '', sub = unit.subrace || '';
+    var ab = String(ability || '').toLowerCase();
+    var txt = String(effectText || '').toLowerCase();
+    if (rk === 'gnome' && (ab === 'int' || ab === 'wis' || ab === 'cha')) {
+        return { adv: true, label: 'ASTÚCIA GNÔMICA' };
+    }
+    if (rk === 'halfling' && (txt.indexOf('amedront') >= 0 || txt.indexOf('fright') >= 0 || txt.indexOf('medo') >= 0)) {
+        return { adv: true, label: 'BRAVURA' };
+    }
+    if ((rk === 'elf' || rk === 'halfelf') && (txt.indexOf('enfeiti') >= 0 || txt.indexOf('charm') >= 0 || txt.indexOf('encant') >= 0)) {
+        return { adv: true, label: 'ANCESTRALIDADE FEÉRICA' };
+    }
+    if ((txt.indexOf('venen') >= 0 || txt.indexOf('poison') >= 0)
+            && (rk === 'dwarf' || (rk === 'halfling' && sub === 'stout'))) {
+        return { adv: true, label: 'RESILIÊNCIA' };
+    }
+    return { adv: false, label: '' };
+}
+
+// C1.7 #90: Sopro Dracônico (Draconato, PHB p.34) — skill racial injetada no
+// arsenal. Espelha o motor combat2_race.dragonborn_breath_skill.
+function _simBreathWeaponSkill(ancestry, lvl) {
+    ancestry = ancestry || 'fire';
+    lvl = lvl | 0 || 1;
+    var n = 2 + (lvl >= 6 ? 1 : 0) + (lvl >= 11 ? 1 : 0) + (lvl >= 16 ? 1 : 0);
+    var ICON = { fire: '🔥', lightning: '⚡', cold: '❄️', acid: '🧪', poison: '☠️' };
+    var PT = { fire: 'fogo', lightning: 'relâmpago', cold: 'frio', acid: 'ácido', poison: 'veneno' };
+    var saveAb = (ancestry === 'cold' || ancestry === 'poison') ? 'con' : 'dex';
+    return {
+        n: 'Sopro Dracônico', ico: ICON[ancestry] || '🐉', cost: 0,
+        kind: 'attack', dmgType: ancestry, multiTarget: true,
+        /* REVIEW [1]: CD = 8 + CON + prof (PHB p.34) — preenchido no build
+           (o helper não tem o unit; ver wire do dc em buildCharUnitFromSetup). */
+        save: { ability: saveAb },
+        damageSpec: { n: n, d: 6, flat: 0 },
+        combatOnceId: 'breath_weapon', isRacial: true,
+        desc: 'Sopro de ' + (PT[ancestry] || ancestry) + ' (' + n + 'd6, TR p/ metade). 1×/combate (PHB p.34).',
+        helpDnd5e: 'Sopro Dracônico (PHB p.34 — traço racial do Draconato): exala energia em área; TR (CD 8+CON+prof), metade em sucesso. Escala 2d6/3d6/4d6/5d6 (nv 1/6/11/16). 1×/descanso — na arena, 1×/combate.'
+    };
+}
+
+// C1.8 #90: Repreensão Infernal RACIAL (Tiefling Legado Infernal nv3+, PHB
+// p.43) — reação 2d10 fogo, 1×/combate. O runtime reactionOnly do Bruxo já
+// resolve (gate por skill no arsenal).
+function _simTieflingRebukeSkill() {
+    return {
+        n: 'Repreensão Infernal', ico: '🔥', cost: 0, kind: 'attack',
+        dmgType: 'fire', reactionOnly: true,
+        damageSpec: { n: 3, d: 10, flat: 0 },  /* REVIEW [0]: 2º nível = 3d10 (PHB p.43) */
+        combatOnceId: 'hellish_rebuke_racial', isRacial: true,
+        desc: 'Reação: 3d10 fogo em quem te feriu (TR DES p/ metade). 1×/combate (PHB p.43).',
+        helpDnd5e: 'Repreensão Infernal (PHB p.43 — Legado Infernal do Tiefling, nv 3): REAÇÃO ao receber dano; agressor faz TR de DES ou sofre 3d10 de fogo (metade em sucesso) — conjurada como magia de 2º NÍVEL.'
+    };
+}
+
+// C2.9 #90: dado de Artes Marciais do Monge escala por nível (PHB p.78):
+// d4 (nv1-4), d6 (nv5-10), d8 (nv11-16), d10 (nv17+). Espelha o motor
+// monk_martial_arts_die (combat2_skills_data.py).
+function _simMonkMartialDie(lvl) {
+    lvl = Math.max(1, Math.min(20, lvl | 0 || 1));
+    if (lvl < 5) return 4;
+    if (lvl < 11) return 6;
+    if (lvl < 17) return 8;
+    return 10;
+}
+
 // C1.5 #90: rola 1d20; Halfling Sortudo (PHB p.28) rerola nat-1.
 function _simLuckyD20(lucky) {
     var v = rollN(20);
@@ -15312,8 +15562,10 @@ function resolveHit(a, d, r, opts) {
     /* V1.7 Sprint-10 (2026-04-21 closeout) — PHB crit range estendido:
        Assassinato (PHB p.97) + outros buffs de crit estendido (critRange em se[]).
        Champion Fighter PHB p.72 também usa esse pattern (nv 3 crit em 19-20).
-       Default crit range = 20. Se actor tem `critRange:N` em se[], crit em N+. */
-    var critThreshold = 20;
+       Default crit range = 20. Se actor tem `critRange:N` em se[], crit em N+.
+       C3.2 #90: também lê o critRange PERSISTENTE do unit (Champion 19/18,
+       setado em buildCharUnitFromSetup via _simCritRangeFor). */
+    var critThreshold = (a.critRange | 0) >= 2 && (a.critRange | 0) < 20 ? (a.critRange | 0) : 20;
     if (a.se && a.se.length) {
         for (var _cri = 0; _cri < a.se.length; _cri++) {
             var _crs = a.se[_cri];
@@ -15428,6 +15680,11 @@ function rollDamage(a, crit, skill) {
         var d = spec.d | 0;
         if (n < 1) n = 1;
         if (d < 2) d = 4;
+        /* C2.9 #90: Rajada de Golpes usa o dado de Artes Marciais escalado por
+           nível (d4/d6/d8/d10, PHB p.78) em vez do d fixo do spec. */
+        if (skill && skill.martialArtsDie) {
+            d = _simMonkMartialDie(a && a.lvl);
+        }
         if (skill && skill.scale === 'cantrip') {
             n += simCantripDiceBonus(a && a.lvl);
         }
@@ -15738,8 +15995,25 @@ function healRollsFromSpec(skill, actor) {
         }
     }
     var rolls = [];
-    for (var i = 0; i < n; i++) rolls.push(rollN(d));
+    /* C3.6 #90: Domínio da Vida (Clérigo) — Cura Suprema (L17): dados de cura
+       MAXIMIZADOS; Discípulo da Vida (L1): +2+nível da magia. Espelha o motor
+       combat2_subclass.life_domain_heal_mods. */
+    var _ldLife = (actor && actor.cls === 'Clérigo'
+        && _subclassKeyNorm(actor.subclass) === 'life');
+    var _ldAcq = (actor && actor.acquired) || [];
+    if (_ldLife && _ldAcq.indexOf('supreme_healing') >= 0) {
+        for (var iS = 0; iS < n; iS++) rolls.push(d);
+    } else {
+        for (var i = 0; i < n; i++) rolls.push(rollN(d));
+    }
     var mod = sp.flat | 0;
+    if (_ldLife && _ldAcq.indexOf('disciple_of_life') >= 0) {
+        var _ldBonus = 2 + Math.max(1, skill.cost | 0 || 1);
+        mod += _ldBonus;
+        try {
+            if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell('player', 'bless', { durationMs: 1800 });
+        } catch (_eLd) {}
+    }
     /* V1.7 Ronda 27: flatScale PHB upcast (Heal +10/slot) */
     if (sp.flatScale && sp.flatScale.breakpoints) {
         mod += simHealFlatUpcastBreakpoints(actor && actor.lvl, sp.flatScale.breakpoints);
@@ -15886,7 +16160,25 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
         } else {
             var lost = [];
             target.se = target.se.filter(function (x) {
-                if (x && x.concentration) { lost.push(x.id || 'buff'); return false; }
+                if (x && x.concentration) {
+                    lost.push(x.id || 'buff');
+                    /* REVIEW-#90 [7/28] (C4.3 paridade): concentração LINKADA —
+                       quebra do caster remove a condição aplicada no ALVO
+                       (Hold Person/Cegueira/Banir etc., PHB p.203). */
+                    if (x.linkedConditionId != null && x.linkedTargetIdx != null
+                            && currentState.order && currentState.order[x.linkedTargetIdx]) {
+                        var _lkT = currentState.order[x.linkedTargetIdx];
+                        var _lkBefore = (_lkT.se || []).length;
+                        _lkT.se = (_lkT.se || []).filter(function (y) {
+                            return !y || y.id !== x.linkedConditionId;
+                        });
+                        if ((_lkT.se || []).length < _lkBefore) {
+                            currentState.log.push((_lkT.n || '?') + ' se liberta — a concentração de ' +
+                                (target.n || '?') + ' foi quebrada (PHB p.203).');
+                        }
+                    }
+                    return false;
+                }
                 return true;
             });
             currentState.log.push(target.n + ' PERDE concentração (' + roll + '+' + conMod + '=' + total + ' vs CD ' + dc + ') — ' + lost.join(', ') + '.');
@@ -18604,7 +18896,10 @@ function spawnPassivesForClass(state, playerEntry) {
         if (passive.minLevel && pLvl < passive.minLevel) return;
         /* H1 (2026-04-19) — subclass gating: só spawna se player.subclass bate
            (ex.: Patrulheiro Beast Master tem Animal Companion; Hunter NÃO). */
-        if (passive.requiresSubclass && playerEntry.subclass !== passive.requiresSubclass) return;
+        /* C3.3 #90: comparação NORMALIZADA (backend 'beast_master' vs display
+           'Beast Master') — antes 'hunter' real nunca batia e caía no default. */
+        if (passive.requiresSubclass
+            && _subclassKeyNorm(playerEntry.subclass) !== _subclassKeyNorm(passive.requiresSubclass)) return;
         /* B1+C1 (2026-04-19) — PHB-fiel: Familiar/Steed exigem ritual fora-de-combate.
            Se passive.preCombatRitual é true E player não fez o ritual (sessionStorage
            ou setupSummon flag), NÃO spawna. Default: assume que fez (UX). */
@@ -27625,6 +27920,8 @@ async function playTurn(aIdx, tIdx, opts) {
     var actor = s.order[aIdx];
     var target = s.order[tIdx];
     if (!actor || !target) return;
+    /* C3.4 #90: Abatedor Colossal é 1×/TURNO — reseta no início do turno do player. */
+    if (actor.t === 'p') s._colossusUsedThisTurn = false;
     /* X-6.5.51AC: log início de turno pra debug. */
     try {
         _simLog('[SIM:TURN]', {
@@ -27758,7 +28055,9 @@ async function playTurn(aIdx, tIdx, opts) {
         saveRoll = 0; saveMod = 0; saveTotal = 0; saveDc = _poolSum;
         atkSkill = Object.assign({}, atkSkill, { save: { ability: 'wis' } });
     } else if (atkSkill && atkSkill.save) {
-        saveDc = simSpellSaveDc(actor);
+        /* REVIEW-#90 [1]: CD explícito da skill tem precedência (Sopro Dracônico
+           = 8 + CON + prof, PHB p.34) — senão CD de magia da classe. */
+        saveDc = (atkSkill.save.dc | 0) || simSpellSaveDc(actor);
         // Contramágica / Proteção: se alvo tem magicSaveAdvantage, rola com vantagem
         var hasMagicSaveAdv = target.se && target.se.some(function (st) {
             return st && st.magicSaveAdvantage && (st.turnsLeft == null || st.turnsLeft > 0);
@@ -27790,25 +28089,39 @@ async function playTurn(aIdx, tIdx, opts) {
         } else {
             /* V1.7 Sprint-17 Ronda 28 (2026-04-21 QA PHB p.173) — Save adv/dis via helper PHB.
                Centraliza cancelamento + Exhaustion 3+ + Restrained + magicSaveAdv. */
+            /* REVIEW-#90 [11] (C1.3/C1.5 paridade): este é o path PRINCIPAL de
+               TR do sim (Sopro Dracônico/Nuvem Tóxica/Bola de Fogo) — Sortudo
+               rerola nat-1 e vantagem RACIAL (Anão vs veneno, Gnomo INT/SAB/CAR,
+               etc.) entram aqui como no motor (_apply_save_damage_shared_roll). */
+            var _rsvLucky = _simIsLucky(target);
+            var _rsvAdv = _simRacialSaveAdv(target, _saveAbl,
+                (atkSkill.n || '') + ' ' + (atkSkill.dmgType || ''));
             if (hasMagicSaveAdv) {
                 /* Path legacy preservado pra compat (Contramágica buff carrega flag). Helper
                    também lê magicSaveAdvantage, então consistente. */
-                var r1ms = rollN(20), r2ms = rollN(20);
+                var r1ms = _simLuckyD20(_rsvLucky), r2ms = _simLuckyD20(_rsvLucky);
                 saveRoll = Math.max(r1ms, r2ms);
                 if (s && s.log) s.log.push(target.n + ' — salvaguarda com vantagem (Contramágica/Proteção): ' + r1ms + '/' + r2ms + ' → ' + saveRoll + '.');
             } else {
                 var _saveAdvMode = (typeof _simSaveAdvState === 'function')
                     ? _simSaveAdvState(target, atkSkill.save.ability) : 'normal';
+                /* PHB p.173: vantagem racial soma à equação adv/disadv — se o
+                   estado era desvantagem, cancela (normal); se normal, vira adv. */
+                if (_rsvAdv.adv) {
+                    if (_saveAdvMode === 'disadvantage') _saveAdvMode = 'normal';
+                    else _saveAdvMode = 'advantage';
+                    if (s && s.log) s.log.push(target.n + ' — ' + _rsvAdv.label + ': vantagem no TR (PHB).');
+                }
                 if (_saveAdvMode === 'advantage') {
-                    var _sr1a = rollN(20), _sr2a = rollN(20);
+                    var _sr1a = _simLuckyD20(_rsvLucky), _sr2a = _simLuckyD20(_rsvLucky);
                     saveRoll = Math.max(_sr1a, _sr2a);
                     if (s && s.log) s.log.push(target.n + ' — TR com VANTAGEM (' + _sr1a + '/' + _sr2a + ' → ' + saveRoll + ').');
                 } else if (_saveAdvMode === 'disadvantage') {
-                    var _sr1b = rollN(20), _sr2b = rollN(20);
+                    var _sr1b = _simLuckyD20(_rsvLucky), _sr2b = _simLuckyD20(_rsvLucky);
                     saveRoll = Math.min(_sr1b, _sr2b);
                     if (s && s.log) s.log.push(target.n + ' — TR com DESVANTAGEM (Exhaustion/Restrained — ' + _sr1b + '/' + _sr2b + ' → ' + saveRoll + ').');
                 } else {
-                    saveRoll = rollN(20);
+                    saveRoll = _simLuckyD20(_rsvLucky);
                 }
             }
             saveMod = simSaveMod(target, atkSkill.save.ability);
@@ -28325,8 +28638,10 @@ async function playTurn(aIdx, tIdx, opts) {
                 /* V1.7 Sprint-17 Ronda 25 (2026-04-21 QA PHB p.250) — Hellish Rebuke upcast:
                    +1d10 por slot acima 1º. Bruxo Pact Magic: slots sempre no max (nv 1-2: 1st/2d10,
                    nv 3-4: 2nd/3d10, nv 5-6: 3rd/4d10, nv 7-8: 4th/5d10, nv 9+: 5th/6d10). */
-                var _rebukeDiceN = (typeof simWarlockHellishRebukeDice === 'function')
-                    ? simWarlockHellishRebukeDice(target.lvl | 0) : 2;
+                var _rebukeDiceN = (rebukeSk && rebukeSk.combatOnceId === 'hellish_rebuke_racial')
+                    ? 3  /* REVIEW [0]: racial = conjurada como 2º nível (3d10 FIXO, PHB p.43) */
+                    : ((typeof simWarlockHellishRebukeDice === 'function')
+                        ? simWarlockHellishRebukeDice(target.lvl | 0) : 2);
                 var _rebukeRolls = [];
                 var _rebukeDmg = 0;
                 for (var _ri = 0; _ri < _rebukeDiceN; _ri++) {
@@ -28395,6 +28710,17 @@ async function playTurn(aIdx, tIdx, opts) {
        Arena abstrai distância: todo hit melee (slashing/piercing/bludgeoning OU weapon atk)
        vira crit quando target tem `critMelee:true` em se[]. Não aplica a ranged/magic. */
     if (hitRes.hit && !hitRes.crit && target && target.se) {
+        /* C3.4 #90: Assassinar — qualquer HIT contra alvo SURPRESO é crítico
+           (PHB p.97). Espelha o motor _apply_attack. */
+        if (!hitRes.crit && hitRes.hit && actor
+                && _subclassKeyNorm(actor.subclass) === 'assassin' && target.surprised) {
+            hitRes.crit = true;
+            s.log.push(actor.n + ' — ASSASSINAR: crítico contra alvo surpreso (PHB p.97)!');
+            try {
+                var _asEl = document.querySelector('[data-unit-id="' + (target.id || '') + '"]');
+                if (_asEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_asEl, 'ASSASSINAR!', 'crit');
+            } catch (_eAs) {}
+        }
         var _hasCritMelee = target.se.some(function (st) {
             return st && st.critMelee && (st.turnsLeft == null || st.turnsLeft > 0);
         });
@@ -28458,9 +28784,24 @@ async function playTurn(aIdx, tIdx, opts) {
                 ' = ' + _bvtRolls.join('+') + ' = ' + bonusVsTagDmg + ' (PHB p.85).');
         }
     }
+    /* C3.4 #90: bônus de dano condicionais de SUBCLASSE (Abatedor Colossal,
+       Cantrip/Evocação Potente, Afinidade Elemental) — espelha o motor
+       combat2_subclass.subclass_attack_damage_bonus. */
+    var subclassBonusDmg = 0;
+    if (!isMagicMissiles && hitRes.hit) {
+        var _sbList = _simSubclassDmgBonus(actor, target, atkSkill, s);
+        for (var _sbi = 0; _sbi < _sbList.length; _sbi++) {
+            subclassBonusDmg += _sbList[_sbi].val;
+            if (s && s.log) s.log.push(actor.n + ' — ' + _sbList[_sbi].label + '!');
+            try {
+                var _sbEl = document.querySelector('[data-unit-id="' + (target.id || 'player') + '"]');
+                if (_sbEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_sbEl, _sbList[_sbi].label.toUpperCase(), 'crit');
+            } catch (_eSb) {}
+        }
+    }
     var fullDmg = isMagicMissiles
         ? Math.max(1, mmPack.totalOverride)
-        : Math.max(1, dmgDice + dmgMod + dmgItem + dmgSpecFlat + dmgBonusExtra + bonusVsTagDmg);
+        : Math.max(1, dmgDice + dmgMod + dmgItem + dmgSpecFlat + dmgBonusExtra + bonusVsTagDmg + subclassBonusDmg);
     // PHB Bárbaro Fúria: resistência 50% a cortante/perfurante/concussão.
     var dmgTypeForRage = resolveSkillHitDmgType(actor, atkSkill);
     var rageResisted = false;
@@ -28469,6 +28810,19 @@ async function playTurn(aIdx, tIdx, opts) {
             fullDmg = Math.max(1, Math.floor(fullDmg / 2));
             rageResisted = true;
         }
+    }
+    /* C3.4 #90: Espírito do Urso (Bárbaro Totem em Fúria) — resistência a TUDO
+       exceto psíquico (PHB p.50). Espelha o motor bear_totem_resists. */
+    if (!rageResisted && dmgTypeForRage !== 'psychic'
+            && _subclassKeyNorm(target.subclass) === 'totem_warrior'
+            && (target.acquired || []).indexOf('totem_bear') >= 0
+            && target.se && target.se.some(function (x) { return x && (x.rageDmg || x.rageResistance); })) {
+        fullDmg = Math.max(1, Math.floor(fullDmg / 2));
+        if (s && s.log) s.log.push(target.n + ' — Espírito do Urso resiste ao dano (PHB p.50).');
+        try {
+            var _btEl = document.querySelector('[data-unit-id="' + (target.id || 'player') + '"]');
+            if (_btEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_btEl, 'ESPÍRITO DO URSO', 'attack');
+        } catch (_eBt) {}
     }
     var total = (atkSkill && atkSkill.save)
         ? (saveSuccess ? Math.max(1, Math.floor(fullDmg / 2)) : fullDmg)
@@ -28561,6 +28915,34 @@ async function playTurn(aIdx, tIdx, opts) {
         deferFct: _rebukeWillOffer
     });
 
+    /* C3.4/C3.9 #90: hooks ON-KILL de subclasse — alvo reduzido a 0 PV por este
+       ataque. Espelha o motor (_apply_attack on-kill). */
+    if (oldHp > 0 && ((target.hp | 0) <= 0 || target.isDead) && actor && actor.t === 'p') {
+        var _aSub = _subclassKeyNorm(actor.subclass);
+        var _aAcq = actor.acquired || [];
+        // Bruxo Fiend — Bênção do Senhor Negro: CHA mod + nível em PV temp (PHB p.109)
+        if (actor.cls === 'Bruxo' && _aSub === 'fiend' && _aAcq.indexOf('dark_ones_blessing') >= 0) {
+            var _dobV = Math.max(1, Math.floor(((actor.cha | 0 || 10) - 10) / 2) + (actor.lvl | 0 || 1));
+            actor.tempHp = Math.max(actor.tempHp | 0, _dobV);
+            if (s && s.log) s.log.push(actor.n + ' — Bênção do Senhor Negro: +' + _dobV + ' PV temporários (PHB p.109).');
+            try {
+                if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell('player', 'rally', { durationMs: 2200 });
+            } catch (_eDob) {}
+        }
+        // Mago Necromancia — Colheita Sombria: cura 2×nível da magia (3× necromancia) (PHB p.118)
+        if (actor.cls === 'Mago' && _aSub === 'necromancy' && _aAcq.indexOf('grim_harvest') >= 0
+                && atkSkill && (atkSkill.cost | 0) > 0) {
+            var _ghMult = (atkSkill.school === 'necromancy') ? 3 : 2;
+            var _ghV = _ghMult * Math.max(1, atkSkill.cost | 0);
+            var _ghOld = actor.hp;
+            actor.hp = Math.min(actor.mhp, actor.hp + _ghV);
+            if (s && s.log) s.log.push(actor.n + ' — Colheita Sombria: +' + (actor.hp - _ghOld) + ' PV (PHB p.118).');
+            try {
+                if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell('player', 'bless', { durationMs: 2200 });
+            } catch (_eGh) {}
+        }
+    }
+
     /* V1.7 Stage 7 [PHB-FIX 2026-04-21] — REPREENSÃO INFERNAL (Hellish Rebuke
        PHB p.250): gatilho RAW é "in response to being DAMAGED". Dispara AQUI,
        APÓS o dano do atacante ser aplicado no player.
@@ -28620,8 +29002,10 @@ async function playTurn(aIdx, tIdx, opts) {
                 var _rebukeSaveTotalP = _rebukeSaveRollP + _rebukeSaveModP;
                 var _rebukeSaveSuccessP = _rebukeSaveTotalP >= _rebukeDcP;
                 /* V1.7 Sprint-17 Ronda 25 (2026-04-21 QA PHB p.250) — Hellish Rebuke upcast (PÓS-DANO path). */
-                var _rebukeDiceNP = (typeof simWarlockHellishRebukeDice === 'function')
-                    ? simWarlockHellishRebukeDice(target.lvl | 0) : 2;
+                var _rebukeDiceNP = (rebukeSkP && rebukeSkP.combatOnceId === 'hellish_rebuke_racial')
+                    ? 3  /* REVIEW [0]: racial = 2º nível (3d10 FIXO, PHB p.43) */
+                    : ((typeof simWarlockHellishRebukeDice === 'function')
+                        ? simWarlockHellishRebukeDice(target.lvl | 0) : 2);
                 var _rebukeRollsP = [];
                 var _rebukeDmgP = 0;
                 for (var _riP = 0; _riP < _rebukeDiceNP; _riP++) {
@@ -28725,7 +29109,14 @@ async function playTurn(aIdx, tIdx, opts) {
                 var actorScore = actor[actorCastingAttr] != null ? actor[actorCastingAttr] : 14;
                 var actorMod = Math.floor((actorScore - 10) / 2);
                 var sonCd = aed.saveOnHit.dc | 0 || (8 + actorProf + actorMod);
-                var sonRoll = rollN(20);
+                /* C1.5/C1.3 #90: Sortudo + vantagem racial no TR on-hit. */
+                var sonRoll = _simLuckyD20(_simIsLucky(target));
+                var _sonAdv = _simRacialSaveAdv(target, ab, (aed.dndCondition || '') + ' ' + (aed.n || ''));
+                if (_sonAdv.adv) {
+                    var _sonD2 = _simLuckyD20(_simIsLucky(target));
+                    if (_sonD2 > sonRoll) sonRoll = _sonD2;
+                    s.log.push(target.n + ' — ' + _sonAdv.label + ': vantagem no TR (PHB).');
+                }
                 var sonMod = (typeof simSaveMod === 'function') ? simSaveMod(target, ab) : 0;
                 var sonTotal = sonRoll + sonMod;
                 var sonSuccess = sonTotal >= sonCd;
@@ -28737,6 +29128,18 @@ async function playTurn(aIdx, tIdx, opts) {
                 s.log.push(target.n + ' — TR ' + abPt + ' (on-hit) ' + _sonRollTxt + ' vs CD ' + sonCd + ' ' +
                     (sonSuccess ? 'SUCESSO → ' + (aed.n || 'condição') + ' NÃO aplica.' : 'FALHA → ' + (aed.n || 'condição') + ' aplica.'));
                 applyDebuff = !sonSuccess;
+            }
+            /* C1.9 #90: Ancestralidade Feérica (Elfo/Meio-Elfo) — IMUNE a sono
+               mágico (PHB p.23/39). */
+            if (applyDebuff && (aed.sleepHpPool
+                    || /sono|sleep|adormec/i.test((aed.dndCondition || '') + ' ' + (aed.n || '')))
+                    && (target.raceKey === 'elf' || target.raceKey === 'halfelf')) {
+                applyDebuff = false;
+                if (s && s.log) s.log.push(target.n + ' — Ancestralidade Feérica: imune a sono mágico (PHB p.23).');
+                try {
+                    var _feyEl = document.querySelector('[data-unit-id="' + (target.id || 'player') + '"]');
+                    if (_feyEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_feyEl, 'ANCESTRALIDADE FEÉRICA', 'attack');
+                } catch (_eFey) {}
             }
             if (applyDebuff) {
                 target.se = target.se || [];
@@ -28762,7 +29165,13 @@ async function playTurn(aIdx, tIdx, opts) {
                     resistAllDmg: !!aed.resistAllDmg,
                     abilityCheckDisadv: !!aed.abilityCheckDisadv,
                     exhaustionLevel: aed.exhaustionLevel | 0 || null,
-                    concentration: !!aed.concentration,
+                    /* REVIEW-#90 [7/28] (C4.3 paridade motor↔sim): 'concentration'
+                       NÃO vai pro se[] do ALVO — a concentração é do CASTER (PHB
+                       p.203). Antes a flag ia pra vítima: dano no conjurador nunca
+                       quebrava a condição, e dano no alvo rolava o CON save da
+                       própria vítima (mecânica invertida). Marcador linkado no
+                       caster é gravado após o push (espelha o motor C4.3). */
+                    concentration: false,
                     halfDmg: !!aed.halfDmg,
                     /* V1.7 Sprint-17 Ronda 20 (2026-04-21 QA PHB p.216) — Bane
                        penalty dice propagados no debuff. */
@@ -28791,6 +29200,36 @@ async function playTurn(aIdx, tIdx, opts) {
                     }
                 }
                 target.se.push(_debuffEntry);
+                /* REVIEW-#90 [7/28] (C4.3 paridade): condição de CONCENTRAÇÃO —
+                   marcador no se[] do CASTER linkando a condição aplicada no alvo.
+                   Quebrar a concentração do caster (dano → simCheckConcentration
+                   OnDamage) remove a condição linkada do alvo (PHB p.203). Nova
+                   concentração derruba a anterior (PHB: só 1 por vez). */
+                if (aed.concentration && actor) {
+                    actor.se = actor.se || [];
+                    for (var _ocI = actor.se.length - 1; _ocI >= 0; _ocI--) {
+                        var _ocE = actor.se[_ocI];
+                        if (!_ocE || !_ocE.concentration) continue;
+                        if (_ocE.linkedConditionId != null && _ocE.linkedTargetIdx != null
+                                && s && s.order && s.order[_ocE.linkedTargetIdx]) {
+                            var _ocT = s.order[_ocE.linkedTargetIdx];
+                            _ocT.se = (_ocT.se || []).filter(function (x) {
+                                return !x || x.id !== _ocE.linkedConditionId;
+                            });
+                            if (s.log) s.log.push((_ocT.n || '?') + ' se liberta — ' + (actor.n || '?') +
+                                ' trocou de concentração (PHB p.203: só 1 por vez).');
+                        }
+                        actor.se.splice(_ocI, 1);
+                    }
+                    actor.se.push({
+                        id: 'conc_' + (_debuffEntry.id || 'cond'), kind: 'buff', ico: '🧠',
+                        n: 'Concentração (' + (_debuffEntry.n || 'condição') + ')',
+                        concentration: true,
+                        linkedTargetIdx: (typeof tIdx === 'number' ? tIdx : (s && s.order ? s.order.indexOf(target) : -1)),
+                        linkedConditionId: _debuffEntry.id,
+                        turnsLeft: _debuffEntry.turnsLeft
+                    });
+                }
             }
         }
     }
