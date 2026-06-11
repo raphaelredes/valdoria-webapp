@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T21:11:47Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T21:51:10Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -232,6 +232,14 @@
   ~11845 animInit; 11883 beginCombatAfterInitOrder; 11899 showInitiativeOrderPopup
   ~11995 playHealTurn; 12052 playTurn (núcleo ataque + skill dano + advantage/disadvantage + FCT)
   ~12333 _hasSkipTurnStatus; 12340 runNpcSegmentUntilPlayerTurn (+skipTurn handler)
+  THORNE-HEAL 2026-06-11 (user "Thorne levanta o personagem com pote"):
+  ~29448 _allyPickHealTarget (prio: dying > estável > <40% PV; player > aliado)
+  ~29620 AI de cura do aliado em runNpcSegmentUntilPlayerTurn — c.t==='a' com
+         healSkills (spec.heal_skills do _serialize_ally) PRIORIZA curar antes
+         de atacar; delega a playHealTurn (skipResCost) + label verde +N PV;
+         usesLeft limita potes; cura consome a ação (gate _allyHealedThisTurn)
+  ~13935 buildCharUnitFromSetup ingere spec.heal_skills → u.healSkills
+  ~6847  CSS .cell-skill-impact-heal (label verde-dourado de cura)
   ~12396 runDeathSaveTurnForUnit; 12419 runNpcsUntilPlayer (+_actionTaken reset)
   ~12449 loadScript; 12457 startSimAfterDiceBoot; 12467 loadDice3dUrl + IIFE boot
   -----------------------------------------------------------------------------
@@ -6843,6 +6851,16 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     text-shadow:
         0 0 8px rgba(255,80,30,1),
         0 0 16px rgba(212,40,30,0.85),
+        0 2px 3px rgba(0,0,0,0.95);
+    font-size: calc(14px * var(--v-font-scale, 1));
+}
+/* THORNE-HEAL (2026-06-11): label verde-dourado de cura (+N PV) — usado pela
+   AI de aliado quando arremessa poção (paleta holy dos heals do sim). */
+.cell-skill-impact-label.cell-skill-impact-heal {
+    color: #c8ffc0;
+    text-shadow:
+        0 0 8px rgba(120,230,110,1),
+        0 0 16px rgba(60,180,80,0.85),
         0 2px 3px rgba(0,0,0,0.95);
     font-size: calc(14px * var(--v-font-scale, 1));
 }
@@ -13922,6 +13940,21 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
            anti-repeat no início do turno do aliado (runNpcSegment). */
         barks: (spec.barks && Array.isArray(spec.barks)) ? spec.barks.slice() : null,
         _barkHeard: [],
+        /* THORNE-HEAL (2026-06-11, user): skills de cura do aliado scriptado
+           (spec.heal_skills do _serialize_ally — ex.: Thorne arremessa poção
+           2d4+2 no prólogo). A AI de aliado (runNpcSegmentUntilPlayerTurn)
+           PRIORIZA curar player caído/baixo (<40%) antes de atacar; usesLeft
+           limita os potes (Thorne exausto). */
+        healSkills: (spec.heal_skills && Array.isArray(spec.heal_skills))
+            ? spec.heal_skills.map(function (_h) {
+                return {
+                    id: String(_h.id || 'ally_heal'),
+                    n: String(_h.n || 'Cura'),
+                    heal: String(_h.heal || '2d4+2'),
+                    usesLeft: Math.max(1, parseInt(_h.uses, 10) || 1)
+                };
+            })
+            : null,
         summonsInvoked: summonsInvokedFinal,
         race: race, raceKey: raceKey, subrace: subrace, draconicAncestry: draconicAncestry,
         /* C3.10/C3.2 #90: acquired_skills do levelup + crit range persistente. */
@@ -29446,6 +29479,29 @@ async function playTurn(aIdx, tIdx, opts) {
 /* Trecho da ordem de iniciativa até o índice do jogador (inclui teste de morte de aliados). */
 /* Helper: verifica se unidade está com status que força pular o turno
    (Adormecido / Atordoado / etc.). Retorna true se deve pular. */
+/* THORNE-HEAL (2026-06-11, user): alvo de cura da AI de aliado com healSkills.
+   Prioridade PHB-coerente: caído fazendo testes de morte (3) > caído estável (2)
+   > vivo abaixo de 40% PV (1). Empate: player antes de outro aliado. Nunca cura
+   quem está acima do limiar (não desperdiça pote). */
+function _allyPickHealTarget(s, self) {
+    if (!s || !s.order) return null;
+    var best = null, bestPrio = 0;
+    for (var i = 0; i < s.order.length; i++) {
+        var u = s.order[i];
+        if (!u || u === self || u.isDead) continue;
+        if (u.t !== 'p' && u.t !== 'a') continue;
+        var prio = 0;
+        if (u.hp <= 0 && u.dying && !u.stable) prio = 3;
+        else if (u.hp <= 0 && u.stable) prio = 2;
+        else if (u.hp > 0 && (u.mhp | 0) > 0 && (u.hp / u.mhp) < 0.4) prio = 1;
+        if (!prio) continue;
+        var beats = prio > bestPrio ||
+            (prio === bestPrio && u.t === 'p' && best && best.unit.t !== 'p');
+        if (beats) { best = { idx: i, unit: u }; bestPrio = prio; }
+    }
+    return best;
+}
+
 function _hasSkipTurnStatus(unit) {
     if (!unit || !unit.se) return false;
     var hasSkip = unit.se.some(function (st) {
@@ -29574,6 +29630,70 @@ async function runNpcSegmentUntilPlayerTurn() {
                     s.log.push(c.barks[_bPick]);
                 }
             } catch (_eBark) {}
+            /* THORNE-HEAL (2026-06-11, user): "faça com que Thorne possa
+               levantar o personagem com pote, jogando pote nele". Aliado com
+               healSkills (spec.heal_skills do servidor) PRIORIZA curar player/
+               aliado caído ou baixo (<40% PV) ANTES de atacar. PHB p.153:
+               arremessar/administrar poção = 1 ação (substitui o ataque do
+               turno); PHB p.197: curar qualquer PV tira de dying. usesLeft
+               limita os potes (Thorne exausto — anti-trivialização). */
+            var _allyHealedThisTurn = false;
+            if (c.t === 'a' && c.healSkills && c.healSkills.length) {
+                var _hs = null;
+                for (var _hsi = 0; _hsi < c.healSkills.length; _hsi++) {
+                    if ((c.healSkills[_hsi].usesLeft | 0) > 0) { _hs = c.healSkills[_hsi]; break; }
+                }
+                var _hTgt = _hs ? _allyPickHealTarget(s, c) : null;
+                if (_hs && _hTgt) {
+                    var _tu = _hTgt.unit;
+                    /* Parse "NdM+K" → healSpec {n,d,flat} (fallback 2d4+2 =
+                       Poção de Cura PHB p.153). */
+                    var _hm = String(_hs.heal || '2d4+2').match(/^(\d+)d(\d+)(?:\+(\d+))?$/);
+                    var _hSkill = {
+                        n: _hs.n, kind: 'heal', cost: 0,
+                        healSpec: {
+                            n: _hm ? Math.max(1, _hm[1] | 0) : 2,
+                            d: _hm ? Math.max(2, _hm[2] | 0) : 4,
+                            flat: _hm ? (_hm[3] | 0) : 2
+                        }
+                    };
+                    var _wasDown = _tu.hp <= 0 && !_tu.isDead;
+                    var _hpBefore = Math.max(0, _tu.hp | 0);
+                    _hs.usesLeft = (_hs.usesLeft | 0) - 1;
+                    try {
+                        _simLog('[SIM:AI]', {
+                            event: 'ally_heal', npc: c.n, skill: _hs.n,
+                            target: _tu.n, was_down: _wasDown,
+                            hp_before: _hpBefore, uses_left: _hs.usesLeft
+                        });
+                    } catch (_eHL) {}
+                    s.log.push(c.n + ' arremessa um pote — o vidro estilhaça em ' + _tu.n + ' e a cura banha o corpo!');
+                    render(s);
+                    /* playHealTurn = path canonical de cura do sim: dados 3D
+                       (showHealDice), clearDownedMeta no revive, aura revive,
+                       canvas VFX heal e log com breakdown dos dados. */
+                    try {
+                        await playHealTurn(s.active_idx, _hTgt.idx, _hSkill, { skipResCost: true });
+                    } catch (_eHD) {}
+                    if ((_hs.usesLeft | 0) <= 0) {
+                        s.log.push(c.n + ' não tem mais potes de cura.');
+                    }
+                    /* Float label verde "+N PV" no card do alvo (reforço visual) */
+                    try {
+                        var _hGained = Math.max(0, (_tu.hp | 0) - _hpBefore);
+                        var _tUid = (typeof unitUidForOrderIndex === 'function')
+                            ? unitUidForOrderIndex(s, _hTgt.idx) : null;
+                        var _tEl = _tUid ? document.querySelector('[data-unit-id="' + _tUid + '"]') : null;
+                        if (_tEl && _hGained > 0 && typeof spawnSkillImpactLabel === 'function') {
+                            spawnSkillImpactLabel(_tEl, '+' + _hGained + ' PV', 'heal');
+                        }
+                    } catch (_eHV) {}
+                    render(s);
+                    await sleep(900);
+                    if (checkEnd(s)) return true;
+                    _allyHealedThisTurn = true;
+                }
+            }
             /* V1.7 Stage-CASTERS (2026-04-21) — AI de cast pro NPC caster.
                Se NPC tem `isCaster:true` + skills + MP + random roll <= castProb,
                escolhe uma skill castável e resolve como spell (passa opts.skill
@@ -29587,7 +29707,8 @@ async function runNpcSegmentUntilPlayerTurn() {
                Brakthar) além de attack/heal. Skills `combatOnceId` ainda gating
                por once-per-combat via combatOnceUsed map. */
             var npcSkillChoice = null;
-            var npcUseSkillsForAI = (c.isCaster || c.isBoss) && c.skills && c.skills.length && c.res;
+            /* THORNE-HEAL: cura consumiu a ação do turno — sem cast adicional. */
+            var npcUseSkillsForAI = !_allyHealedThisTurn && (c.isCaster || c.isBoss) && c.skills && c.skills.length && c.res;
             if (c.isBoss) {
                 /* [BOSS-AI] Diagnóstico: por que skill foi/não foi escolhida */
                 console.log('[BOSS-AI] turno boss=' + c.n
@@ -29811,7 +29932,7 @@ async function runNpcSegmentUntilPlayerTurn() {
                         if (checkEnd(s)) return true;
                     }
                 }
-            } else {
+            } else if (!_allyHealedThisTurn) {
                 // PHB Monster Manual: Multiattack = N ataques por turno do NPC.
                 var atkCount = Math.max(1, c.multiAttack | 0 || 1);
                 for (var mi = 0; mi < atkCount; mi++) {

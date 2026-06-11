@@ -122,7 +122,7 @@ async function apiCallRetry(endpoint, body, opts) {
           vProcessing.setText('Reconectando ao servidor… (tentativa ' + (i + 2) + ')');
         }
       } catch (e2) {}
-      await new Promise(function (r) { setTimeout(r, 3000); });
+      await new Promise(function (r) { setTimeout(r, 3000); }); /* noqa: preflight - backoff de retry de rede, nao tempo de leitura */
     }
   }
 }
