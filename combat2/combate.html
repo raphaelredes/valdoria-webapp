@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T22:59:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T23:08:26Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -17298,9 +17298,40 @@ function _enemyVarHash(str) {
     }
     return h >>> 0;
 }
-/* varIdx estável (0..count-1) pra uma instância de inimigo. 0 = base. */
+/* varIdx estável (0..count-1) pra uma instância de inimigo. 0 = base.
+   Quando a unidade está no estado de combate atual, distribui DISTINTO entre os
+   inimigos da MESMA espécie (rank + seed estável) — garante Lobo I ≠ Lobo II
+   quando há <= count lobos (caso do prólogo). Hash puro de u.id+slug não basta:
+   ids adjacentes (u2/u3) colidem em %count (~20% das vezes). Fora do estado
+   (popups/synthetic) cai no hash por instância. */
 function _enemyVariationIndex(u, slug, count) {
     if (!count || count < 2) return 0;
+    try {
+        var s = (typeof currentState !== 'undefined') ? currentState : null;
+        if (s && s.order && u) {
+            var same = [];
+            for (var i = 0; i < s.order.length; i++) {
+                var o = s.order[i];
+                if (!o || o.t !== 'e') continue;
+                if (_slugifyCombat(o.n || '') === slug || _slugifyCombat(o.species || '') === slug) {
+                    same.push(o);
+                }
+            }
+            if (same.length > 1) {
+                same.sort(function (a, b) {
+                    return String(a.id || a.n).localeCompare(String(b.id || b.n));
+                });
+                var rank = -1;
+                for (var j = 0; j < same.length; j++) {
+                    if (same[j] === u || (u.id && same[j].id === u.id)) { rank = j; break; }
+                }
+                if (rank >= 0) {
+                    var seed = _enemyVarHash(slug) % count;
+                    return (seed + rank) % count;
+                }
+            }
+        }
+    } catch (e) { /* cai no hash por instância */ }
     var key = String((u && (u.id || u.uid || u.n)) || '') + '|' + slug;
     return _enemyVarHash(key) % count;
 }
