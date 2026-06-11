@@ -946,6 +946,13 @@
 
 }
 
+/* 2026-06-11 (user): título e "fundo de diálogo" colapsam quando vazios.
+   - .dice-title vazio = sem título por padrão (não é sempre survival).
+   - .dice-narrative vazio = sem a caixa escura de diálogo (a maioria das
+     rolagens não tem narrativa; só o gate-distract preenche). */
+.dice-title:empty { display: none; }
+.dice-narrative:empty { display: none; }
+
 .dice-narrative {
 
   font-size: var(--v-font-body);

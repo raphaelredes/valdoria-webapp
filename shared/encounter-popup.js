@@ -1044,7 +1044,14 @@
       }
       var nextBtn = document.getElementById('enc-next');
       var isLastPage = idx === pages.length - 1;
-      if (nextBtn) {
+      /* 2026-06-11 (user, bug "Pular não faz nada" após reward do Brenn): se a
+         página NÃO tem texto (ex.: só {type:'reward'} → strophes vazio),
+         typeNextSentence() ACIMA já completou SINCRONAMENTE (skipped=true,
+         renderActions, nextBtn hidden). O bloco abaixo então re-mostrava
+         "Pular ▸" e re-escondia actions — deixando o botão visível mas INERTE
+         (onclick: skipped já true + última página → no-op) e os choices
+         escondidos = jogador travado. Guard: se já completou, NÃO clobберar. */
+      if (nextBtn && !state.skipped) {
         /* Sessao #42 (2026-05-27): "Pular ▸" SEMPRE visivel durante typewriter,
            inclusive na ultima pagina. Bug raiz: antes na ultima pagina ou em
            dialogo de 1 pagina, nav era hidden + actions display:none durante

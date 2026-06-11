@@ -131,7 +131,12 @@
     <!-- Dice overlay for distract skill check -->
     <div class="dice-overlay" id="diceOverlay">
         <div class="dice-content">
-            <div class="dice-title" id="diceTitle">TESTE DE SOBREVIVÊNCIA</div>
+            <!-- 2026-06-11 (user): SEM título por padrão. Antes era hardcoded
+                 "TESTE DE SOBREVIVÊNCIA" e aparecia em TODA rolagem (lore check,
+                 cura de aliado, etc.) mesmo quando não era survival. Vazio +
+                 .dice-title:empty{display:none}. Um caller pode setar via JS se
+                 algum dia precisar de título contextual. -->
+            <div class="dice-title" id="diceTitle"></div>
             <div class="dice-container">
                 <div class="dice3d-canvas" id="prologueDice3dCanvas"></div>
                 <div class="dice-d20" id="diceD20" style="display:none">?</div>

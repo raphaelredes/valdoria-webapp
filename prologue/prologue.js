@@ -236,14 +236,11 @@ function showDiceRoll(result) {
         onDistractFail();
       };
       actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkip">⚔️ Lutar!</button>`;
-      const failDelay = typeof calcReadTime === 'function' ? calcReadTime(narrative.textContent, 'overlay') : 2500;
+      /* 2026-06-11 (user): NÃO avança sozinho — só pelo botão "⚔️ Lutar!". */
       setTimeout(() => {
-        if (!_failDone) {
-          const skipBtn = document.getElementById('distractFailSkip');
-          if (skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = goFight; }
-        }
+        const skipBtn = document.getElementById('distractFailSkip');
+        if (skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = goFight; }
       }, 500);
-      setTimeout(goFight, failDelay);
     }
     try { if (tg) tg.HapticFeedback.notificationOccurred(success ? 'success' : 'error'); }
     catch (e) { console.warn('[PROLOGUE] haptic:', e); }
@@ -278,14 +275,11 @@ function _showDiceRollFallback(result) {
       let _failDone = false;
       const goFight = () => { if (_failDone) return; _failDone = true; haptic('heavy'); onDistractFail(); };
       actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkipFb">⚔️ Lutar!</button>`;
-      const fbDelay = typeof calcReadTime === 'function' ? calcReadTime(narrative.textContent, 'overlay') : 2500;
+      /* 2026-06-11 (user): botão only, sem auto-avanço (igual path 3D). */
       setTimeout(() => {
-        if (!_failDone) {
-          const skipBtn = document.getElementById('distractFailSkipFb');
-          if (skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = goFight; }
-        }
+        const skipBtn = document.getElementById('distractFailSkipFb');
+        if (skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = goFight; }
       }, 500);
-      setTimeout(goFight, fbDelay);
     }
   }, 2000);
 }
@@ -732,9 +726,10 @@ function _showSkillDiceThen(rolled, onDone) {
     btn.textContent = 'Continuar ▸';
     btn.onclick = finish;
     actions.appendChild(btn);
-    var delay = (typeof calcReadTime === 'function') ? calcReadTime(breakdown.textContent, 'overlay') : 2600;
+    /* 2026-06-11 (user): a rolagem de dados NÃO fecha sozinha — só pelo botão
+       "Continuar ▸". Antes um setTimeout(finish, delay) auto-fechava, sem dar
+       tempo de ler o resultado. Botão revela em 500ms (anti-double-fire). */
     setTimeout(function () { var b = document.getElementById('skillDiceContinue'); if (b) b.classList.add('visible'); }, 500);
-    setTimeout(finish, delay);
   }
   try {
     if (_prologueDice) { _prologueDice.dispose(); _prologueDice = null; }
