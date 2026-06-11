@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T21:51:10Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T22:26:34Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -29761,7 +29761,10 @@ async function runNpcSegmentUntilPlayerTurn() {
                 _simLog('[SIM:AI]', {
                     event: 'npc_decision',
                     npc: c.n,
-                    decision: npcSkillChoice ? 'skill' : 'weapon_attack',
+                    /* THORNE-HEAL: cura já consumiu a ação — log fiel (sem
+                       "weapon_attack" fantasma; o ataque é gateado abaixo). */
+                    decision: npcSkillChoice ? 'skill'
+                        : (_allyHealedThisTurn ? 'heal_consumed_action' : 'weapon_attack'),
                     skill_name: npcSkillChoice ? npcSkillChoice.n : null,
                     skill_kind: npcSkillChoice ? (npcSkillChoice.kind || 'attack') : null,
                     skill_cost: npcSkillChoice ? (npcSkillChoice.cost | 0) : null,
