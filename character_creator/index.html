@@ -292,6 +292,18 @@ Busca rápida:
         #sub-rogue-expertise.active {
             transform: translateX(-50%) translateY(0) !important;
         }
+        /* 2026-06-11 (bug "tela marrom em branco" pós-confirmar): o body do
+           jogo usa contain:layout size (frame celular-virtual) — sob contain,
+           este bottom-sheet "fixed" em translateY(100%) vira conteúdo do body
+           e ESTICA o scrollHeight em +100dvh (uma viewport fantasma). O body
+           vira scrollável; teclado/scrollIntoView/viewport do Telegram scrollam
+           o body e TODOS os overlays "fixed" (incl. o popup Iniciar Aventura)
+           deslizam pra fora da tela — o jogador vê só a parede marrom deste
+           painel. display:none quando inativo mata o fantasma; o slide-up de
+           entrada segue funcionando (transition em transform roda ao ativar). */
+        #sub-rogue-expertise:not(.active) {
+            display: none;
+        }
 
         .sub-screen .screen-content {
             padding-top: 8px;
@@ -7967,6 +7979,11 @@ Busca rápida:
            Iniciar Aventura seta _confirmedSubmit=true e chama submitCharacter
            de novo, que agora passa do guard. */
         function _showSubmitConfirmation() {
+            /* 2026-06-11: o body (contain:layout size) é o containing block dos
+               "fixed" — se ele estiver scrollado (teclado do nome/sobrenome,
+               viewport do Telegram), o popup renderiza FORA da tela e o jogador
+               vê tela vazia. Zera o scroll antes de abrir. */
+            try { document.body.scrollTop = 0; document.documentElement.scrollTop = 0; } catch (_eScr) {}
             const summaryName = ((sel.name || '') + ' ' + (sel.surname || '')).trim() || 'Aventureiro(a)';
             const raceLabel = (RACES[sel.race] && RACES[sel.race].name) || sel.race || '';
             const classObj = (typeof CLASSES !== 'undefined' && CLASSES[sel.classKey]) || null;
