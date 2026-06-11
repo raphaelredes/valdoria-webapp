@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T20:44:54Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-11T21:11:47Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14031,7 +14031,12 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
         dmgMod: (spec.dmgMod_exact != null) ? parseInt(spec.dmgMod_exact, 10) : sc.dmgMod,
         attr: sc.attr, dex: sc.dex, con: sc.con,
         wis: sc.wis != null ? sc.wis : 10, str: sc.str != null ? sc.str : 10, int: sc.int != null ? sc.int : 10, cha: sc.cha != null ? sc.cha : 10,
-        ico: spec.ico_exact || sc.ico, alive: hp > 0, se: [],
+        ico: spec.ico_exact || sc.ico, alive: hp > 0,
+        /* 2026-06-11 (user): status PRÉ-aplicado no inimigo via spec.se_exact
+           (ex.: lobos Amedrontados no prólogo). Cópia defensiva. buildCell
+           renderiza a aura .card-frightened (dndCondition) e _simAttackAdvState
+           aplica desvantagem (atkDisadvantage). Default [] preserva comportamento. */
+        se: (Array.isArray(spec.se_exact) ? spec.se_exact.map(function (_s) { return Object.assign({}, _s); }) : []),
         // PHB Monster Manual Multiattack: padrão 1; bestiário pode setar valor maior.
         multiAttack: Math.max(1, (spec.multiAttack_exact | 0) || (sc.multiAttack | 0) || (b.multiAttack | 0) || 1),
         sugLvl: (spec.sugLvl_exact != null) ? parseInt(spec.sugLvl_exact, 10) : sugLvl,
