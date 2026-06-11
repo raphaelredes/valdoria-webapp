@@ -624,12 +624,19 @@ LOG SINK (Fase 7):
        de autenticacao (Telegram WebApp initData / URL token+uid / session
        em localStorage). Skip em simulators file:// e paths public. -->
   <script src="/shared/auth-gate.js"></script>
+  <!-- Tiered Cache (user 2026-06-11, otimização de boot): bundle-version ANTES
+       do bloco early pra que __vEarly use o hash ESTÁVEL — antes era
+       Date.now() puro e os 5 scripts do bloco (sim-full-motion, server-log,
+       escape, maintenance-overlay, text-timing) re-baixavam em TODO load da
+       cidade (cache nunca acertava). bundle-version.js é ~500B no-cache; o
+       2º load dele mais abaixo (?_=<ts>, task #31) permanece e é inofensivo. -->
+  <script>document.write('<script src="/bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
   <script>
     /* X-6.5.51AG (2026-05-07): bypass de prefers-reduced-motion. Mesmo fix
        portado de combate.html via shared sim-full-motion.js. Carrega ANTES
        de qualquer outro script pra spoofar matchMedia + setar
        vReducedMotion=false ANTES de outros scripts checarem. */
-    var __vEarly = Date.now();
+    var __vEarly = (window.VBUNDLE_HASH || Date.now());
     document.write('<script src="/shared/sim-full-motion.js?v=' + __vEarly + '"><\/script>');
     /* X-6.5.51AI (2026-05-07): server-log helper canônico — POST /api/sim/log
        persiste logs do client em logs/sim_cidade_<env>.<date>.jsonl. */

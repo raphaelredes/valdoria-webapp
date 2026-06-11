@@ -1555,6 +1555,25 @@ Busca rápida:
 
 <body>
 
+    <!-- Loading-First (user 2026-06-11): placeholder de boot INSTANTÂNEO,
+         zero-JS, zero deps externas. Bug real: clicar "Criar Personagem"
+         deixava a tela EM BRANCO ~15s até o wizard montar — o
+         ValdoriaLoadingController (overlayId 'loading', linha ~2676) só roda
+         depois de ~20 scripts do head; tudo antes disso era vazio. Este div
+         pinta no 1º parse do body e é dispensado pelos caminhos JÁ existentes:
+         creator-app.js (_creatorLoadingCtrl.hide no fim do boot),
+         creator-loading.js (_dismissFullLoading) e loading-guard (timeout).
+         Sem SVG (regra No Hardcoded SVG in HTML Body) — só texto + barra CSS. -->
+    <div id="loading" class="loading-overlay" aria-busy="true"
+         style="display:flex;position:fixed;inset:0;z-index:1000;background:#1a1510;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px">
+        <div style="font-family:Cinzel,Georgia,serif;font-weight:700;letter-spacing:5px;color:#c4953a;font-size:24px;text-shadow:0 0 22px rgba(196,149,58,.45)">VALDORIA</div>
+        <div style="font-family:Georgia,serif;font-style:italic;color:#a09484;font-size:13px;letter-spacing:.5px">Preparando a forja de aventureiros&hellip;</div>
+        <div style="width:140px;height:2px;background:rgba(196,149,58,.15);border-radius:2px;overflow:hidden">
+            <div style="width:45%;height:100%;background:linear-gradient(90deg,#9a7530,#c4953a);border-radius:2px;animation:vCreatorBootSlide 1.1s ease-in-out infinite alternate"></div>
+        </div>
+        <style>@keyframes vCreatorBootSlide{from{margin-left:0}to{margin-left:55%}}</style>
+    </div>
+
     <!-- ════════════════════════════════════════════════════════════════════
          BUG FIX 2026-05-05: SVG defs MOVED OUT of #onboarding-overlay.
          Anteriormente os gradients rh-* (heráldicos das raças) ficavam DENTRO

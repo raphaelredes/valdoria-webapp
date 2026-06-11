@@ -807,6 +807,74 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
     });
   }
 
+  // === PREFETCH OCIOSO (user 2026-06-11) ===================================
+  // "investigue formas de melhorar o carregamento das telas para já ser
+  // pré-carregado durante a tela de loading logo depois da TOQUE PARA INICIAR".
+  // Enquanto o jogador olha a esfera (tempo ocioso), aquecemos o HTTP cache
+  // dos assets PESADOS e de URL ESTÁVEL que o destino vai precisar (cidade/
+  // criador/web). Tier A (three.min.js, fontes woff2) e Bucket B (?v=hash
+  // immutable) ficam quentes PERMANENTEMENTE; os locais no-cache do criador
+  // viram 304 (~200B) em vez de download cheio. <link rel=prefetch> é hint
+  // de prioridade mínima — não compete com o boot do /play/ nem bloqueia.
+  // HTMLs de destino NÃO entram (URL final tem token/_cb dinâmicos — a chave
+  // de cache nunca casaria). Guard: pula em saveData / 2g.
+  function _idlePrefetchDestinations(){
+    try {
+      var conn = navigator.connection || {};
+      if (conn.saveData) { sendLog('info', 'prefetch_skipped_savedata'); return; }
+      if (/2g/.test(String(conn.effectiveType || ''))) { sendLog('info', 'prefetch_skipped_slow'); return; }
+      var h = (window.VBUNDLE_HASH || '');
+      var q = h ? ('?v=' + h) : '';
+      var urls = [
+        // Tier A — imutáveis por filename (maior peso primeiro)
+        '/shared/three.min.js',
+        '/shared/fonts/cinzel.woff2',
+        '/shared/fonts/medievalsharp.woff2',
+        '/shared/fonts/marcellus.woff2',
+        // Bucket B — core compartilhado de TODOS os destinos (?v=hash immutable)
+        '/valdoria-design.css' + q,
+        '/shared/fonts.css' + q,
+        '/shared/loading.css' + q,
+        '/shared/loading-template.js' + q,
+        '/shared/loading-controller.js' + q,
+        '/shared/loading-guard.js' + q,
+        '/shared/processing-overlay.css' + q,
+        '/shared/processing-overlay.js' + q,
+        '/shared/toast.css' + q,
+        '/shared/toast.js' + q,
+        '/shared/popup.css' + q,
+        '/shared/popup.js' + q,
+        '/shared/audio-manager.js' + q,
+        '/shared/dice-3d.js' + q,
+        '/shared/console-collector.js' + q,
+        '/shared/error-reporter.js' + q,
+        // Criador (no-cache → prefetch deixa o load real em 304 de ~200B)
+        '/character_creator/data.js' + q,
+        '/character_creator/personality_data.js' + q,
+        '/character_creator/_skills_data_inline.js' + q,
+        '/character_creator/creator-app.js' + q,
+        '/character_creator/creator.css' + q
+      ];
+      var added = 0;
+      urls.forEach(function(u){
+        var l = document.createElement('link');
+        l.rel = 'prefetch';
+        l.href = u;
+        document.head.appendChild(l);
+        added++;
+      });
+      sendLog('info', 'prefetch_started', { count: added, bundle: h ? 'hash' : 'no-hash' });
+    } catch (e) {
+      sendLog('warn', 'prefetch_failed', { err: String(e).slice(0, 120) });
+    }
+  }
+  function _schedulePrefetch(){
+    // Espera o /play/ assentar (title pintado) pra não competir com o boot.
+    var fire = function(){ _idlePrefetchDestinations(); };
+    if (typeof requestIdleCallback === 'function') requestIdleCallback(fire, { timeout: 4000 });
+    else setTimeout(fire, 1500);
+  }
+
   // === TOQUE PARA INICIAR (sempre primeiro) ================================
   // ValdoriaTitleScreen renderiza esfera AAA com runas + "Toque para iniciar"
   // (gesto do user destrava autoplay de audio na pagina destino).
@@ -824,6 +892,7 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
     });
     title.show();
     sendLog('info', 'title_shown');
+    _schedulePrefetch();
   }
   /* Sessao #32 (2026-05-25): user reportou que apos prologo, /play/ mostra
      "Toque para Iniciar" como se fosse boot do zero. Pula title screen quando
@@ -835,6 +904,7 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
   if (_qsSkip.get('skipTitle') === '1') {
     sendLog('info', 'title_skipped_via_param');
     runAuthAndRedirect();
+    _schedulePrefetch();  // prefetch persiste atravessando a navegação seguinte
   } else {
     _showTitleScreen();
   }
