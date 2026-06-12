@@ -1017,9 +1017,7 @@ LOG SINK (Fase 7):
     html body .title-screen,
     html body #title-screen,
     html body .loading-overlay,
-    html body #loading,
-    html body #processing-overlay,
-    html body .processing-overlay {
+    html body #loading {
       position: absolute !important;
       inset: 0 !important;
       max-width: 100% !important;
@@ -1027,6 +1025,21 @@ LOG SINK (Fase 7):
       width: 100% !important;
       height: 100% !important;
       margin: 0 !important;
+    }
+    /* 2026-06-12: processing-overlay canonical (.v-processing / #v-processing — NÃO
+       #processing-overlay, que era o selector ERRADO da regra acima). DEVE ficar
+       acima de TODOS os overlays da cidade — popups (z 10000) e vEncounter (z 12000)
+       — pra aparecer em QUALQUER transição (diálogo de NPC, troca/arquivar/restaurar
+       personagem). A canonical processing-overlay.css usa --v-z-overlay (500), baixo
+       demais pro landscape de z da cidade. position:absolute ancora no frame (dim
+       lock), igual aos outros overlays acima. */
+    html body #v-processing,
+    html body .v-processing {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 13000 !important;
     }
     /* html/body: cor de fundo do simulador (lock dimensional vem do valdoria-design.css importado acima). */
     html { background: #1a1510; }
