@@ -179,14 +179,15 @@
     return Object.prototype.hasOwnProperty.call(ICON_MAP, slug);
   }
 
+  /* NÃO seta src aqui — o caller (swapUse) anexa onload/onerror ANTES de setar
+     src, senão imagem cacheada dispara `load` antes do handler existir e o swap
+     nunca ocorre (bug real: ícone re-renderizado/cacheado ficaria como SVG). */
   function buildImg(slug, altText) {
     var img = new Image();
-    img.src = imgBase + ICON_MAP[slug];
     img.alt = altText || slug;
     img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'contain';
-    img.loading = 'lazy';
     img.setAttribute('data-icon-slug', slug);
     return img;
   }
@@ -207,11 +208,15 @@
     if (svgEl.className && svgEl.getAttribute('class')) {
       img.setAttribute('class', svgEl.getAttribute('class'));
     }
-    img.onload = function () {
+    var doSwap = function () {
+      if (svgEl.getAttribute('data-icon-swapped') === '1') return;
       svgEl.setAttribute('data-icon-swapped', '1');
       if (svgEl.parentNode) svgEl.parentNode.replaceChild(img, svgEl);
     };
+    img.onload = doSwap;
     img.onerror = function () { /* mantém SVG como último recurso */ };
+    img.src = imgBase + ICON_MAP[slug]; // src DEPOIS dos handlers
+    if (img.complete && img.naturalWidth > 0) doSwap(); // cacheada: load já disparou
     return true;
   }
 
