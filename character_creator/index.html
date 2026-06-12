@@ -3788,12 +3788,12 @@ Busca rápida:
 
             // 6. Equipment choice — Sessão #64 (DND-B2): Warrior tem A/B/C
             // (Defense / Great Weapon / Two-Weapon), classes têm 2-3 options
-            var _equipValid = ['A', 'B', 'C'];
+            var _equipValid = ['A', 'B'];  /* 2026-06-12 F15: 'C' removido em CC3b (2026-06-07) — servidor agora REJEITA */
             if (serverSpec && _equipValid.indexOf(serverSpec.equipment_choice) >= 0) {
                 sel.equipmentChoice = serverSpec.equipment_choice;
             } else {
                 // Warrior tem 3 opções; outras classes só A/B. Backend valida.
-                var _equipPool = (sel.classKey === 'class_warrior') ? ['A', 'B', 'C'] : ['A', 'B'];
+                var _equipPool = ['A', 'B'];  /* 2026-06-12 F15: residuo do pacote C do Guerreiro (removido CC3b) — gerava choice invalido em ~1/3 dos randomizes */
                 sel.equipmentChoice = _equipPool[Math.floor(Math.random() * _equipPool.length)];
             }
 
@@ -7637,7 +7637,7 @@ Busca rápida:
                 });
             }
             equipBody += `<div style="margin-top:6px;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim)"><b>Armaduras:</b> ${cls.armor.map(a => ARMOR_PT[a]).join(', ') || 'Nenhuma'}</div>`;
-            equipBody += `<div class="detail-row"><b>Armas:</b> ${cls.weapons.map(w => WEAPON_PT[w]).join(', ')}</div>`;
+            equipBody += `<div class="detail-row"><b>Armas:</b> ${cls.weapons.map(w => WEAPON_PT[w] || w).join(', ')}</div>`;
             const langList = race.langs.map(l => {
                 if (l === '+1 à escolha' && sel.languages.length > 0) return sel.languages[0];
                 return l;
