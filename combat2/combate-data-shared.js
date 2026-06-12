@@ -1034,22 +1034,19 @@ var CHAR_CLASSES = [
            Skill MAIOR que invoca matilha (4 lobos, slot 3). Patrulheiro nível 9+ apenas. */
         { n: 'Conjurar Animais', ico: '🐾', cost: 5, kind: 'summon_pack',
             minLevel: 9,
-            desc: 'Conjura 4 lobos espirituais que atacam por 5 turnos. Pack Tactics: vantagem se ≥1 aliado vivo.',
+            desc: 'Conjura 8 lobos espirituais (TR 1/4, Pack Tactics) — concentração: caem se você perder a concentração.',
             helpDnd5e: 'Conjurar Animais (PHB p.225 — Conjure Animals): magia de 3º nível ' +
                        'de Patrulheiro/Druida. Invoca espíritos feéricos em forma de bestas. ' +
-                       'PHB literal: até 8 bestas TR 1/4 (Lobo é TR 1/4) por slot 3, ou 4 TR 1/2, ' +
-                       'ou 2 TR 1, ou 1 TR 2. Slot 5+ multiplica. ' +
-                       'ADAPTAÇÃO combat2 (escolha W2 do autor): invoca 4 LOBOS (TR 1/4) por ' +
-                       'cast — versão reduzida pra balancear visual e jogabilidade. ' +
-                       'ADAPTAÇÕES adicionais vs PHB: ' +
-                       '(a) PHB exige nível 9 — combat2 espelha (gating minLevel:9); ' +
-                       '(b) PHB usa concentração (1h) — combat2 simplifica como duração FIXA ' +
-                       'de 5 turnos sem TR CON checks; ' +
-                       '(c) PHB permite escolher tipo de besta — combat2 sempre invoca Lobo. ' +
+                       'PHB literal: até 8 bestas TR 1/4 (Lobo é TR 1/4) por slot 3 — combat2 ' +
+                       'invoca os 8 LOBOS. Duração: até 1 hora, CONCENTRAÇÃO (na arena, os lobos ' +
+                       'se dissipam se você perder a concentração — TR CON ao sofrer dano, ou ao ' +
+                       'conjurar outra magia de concentração). ' +
+                       'ADAPTAÇÃO vs PHB: (a) gating minLevel:9; (b) sempre invoca Lobo. ' +
                        'Lobos têm Pack Tactics (Wolf MM p.341): vantagem em ataque se ≥1 aliado vivo.',
             packSpec: {
-                count: 4,
-                durTurns: 5,
+                count: 8,
+                durTurns: 100,
+                concentration: true,
                 summonKind: 'conjure_animals_wolf',
                 /* Stats Lobo PHB MM p.341 — idênticos ao Animal Companion */
                 wolfSpec: {

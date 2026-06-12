@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T19:32:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T20:11:26Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13582,8 +13582,12 @@ function _simLog(tag, data) {
 /** Chave sessionStorage preenchida por combate-setup-frontend-testes.html */
 var SIM_COMBAT_SETUP_KEY = 'valdoria_sim_combat_setup_v1';
 /** Aliados extras: alinhado ao party_max da guilda no jogo (3 NPCs + personagem). */
-var SIM_PARTY_MAX_ALLIES = 3;
-var SIM_MAX_ENEMIES = 8;
+/* 2026-06-12 (user): arena suporta até 20 por lado (aliados E inimigos). O
+   battlefield gera fileiras dinâmicas (buildBattlefield) e o pan/zoom auto-fit
+   mantém responsivo (escala o stage pra caber em qualquer tela). Conjurar
+   Animais (8 lobos) cabe folgado. */
+var SIM_PARTY_MAX_ALLIES = 20;
+var SIM_MAX_ENEMIES = 20;
 
 function initiativeTieOrder(c) {
     if (c.t === 'p') return 0;
@@ -14702,6 +14706,12 @@ function pushBuffSim(u, sim, skillIco, skillName) {
         u.se = u.se.filter(function (x) {
             if (x && x.concentration && x.id !== id) {
                 droppedConc.push(x.n || x.id);
+                /* PHB p.204 — nova concentração dissipa as criaturas conjuradas
+                   da magia de concentração anterior (Conjurar Animais). */
+                if (x.concSummonSpellId && typeof _dissipateConjuredSummons === 'function'
+                        && typeof currentState !== 'undefined' && currentState) {
+                    _dissipateConjuredSummons(currentState, u, x.concSummonSpellId);
+                }
                 if (x.linkedConditionId != null && x.linkedTargetIdx != null
                         && typeof currentState !== 'undefined' && currentState
                         && currentState.order && currentState.order[x.linkedTargetIdx]) {
@@ -16328,6 +16338,11 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
             target.se = target.se.filter(function (x) {
                 if (x && x.concentration) {
                     lost.push(x.id || 'buff');
+                    /* PHB p.204 — quebra de concentração dissipa as criaturas
+                       conjuradas (Conjurar Animais). */
+                    if (x.concSummonSpellId && typeof _dissipateConjuredSummons === 'function') {
+                        _dissipateConjuredSummons(currentState, target, x.concSummonSpellId);
+                    }
                     /* REVIEW-#90 [7/28] (C4.3 paridade): concentração LINKADA —
                        quebra do caster remove a condição aplicada no ALVO
                        (Hold Person/Cegueira/Banir etc., PHB p.203). */
@@ -17167,28 +17182,52 @@ function buildAllyIntroLines(s) {
 }
 
 function buildBattlefield(s) {
-    var ROW_LABELS = ['retaguarda inimiga', 'frente inimiga', 'frente aliada', 'retaguarda aliada'];
-    var grid = [[null, null, null, null], [null, null, null, null], [null, null, null, null], [null, null, null, null]];
-    function findCol(row) {
-        var order = [1, 2, 0, 3];
-        for (var i = 0; i < order.length; i++) if (grid[row][order[i]] === null) return order[i];
-        return -1;
-    }
+    var COLS = 4;
+    var FILL_ORDER = [1, 2, 0, 3];  // center-out dentro da fileira
+    /* 2026-06-12 (user): fileiras DINÂMICAS — arena até 20 por lado, responsiva.
+       Coleta unidades por lado (preserva uids 'enemy_'+idx / 'player' / 'ally_'+idx
+       usados em targeting/animações). */
+    var enemyUnits = [], allyUnits = [];
     s.order.forEach(function (c, idx) {
-        if (c.t !== 'e') return;
-        var row = findCol(1) !== -1 ? 1 : 0;
-        var col = findCol(row);
-        if (col !== -1) grid[row][col] = { uid: 'enemy_' + idx, utype: 'enemy', u: c };
+        if (c.t === 'e') enemyUnits.push({ uid: 'enemy_' + idx, utype: 'enemy', u: c });
     });
     var p = s.order[s.p_idx];
-    var pcol = findCol(2);
-    if (pcol !== -1) grid[2][pcol] = { uid: 'player', utype: 'player', u: p };
+    allyUnits.push({ uid: 'player', utype: 'player', u: p });
     s.order.forEach(function (c, idx) {
-        if (c.t !== 'a') return;
-        var rowA = findCol(2) !== -1 ? 2 : 3;
-        var colA = findCol(rowA);
-        if (colA !== -1) grid[rowA][colA] = { uid: 'ally_' + idx, utype: 'ally', u: c };
+        if (c.t === 'a') allyUnits.push({ uid: 'ally_' + idx, utype: 'ally', u: c });
     });
+    /* Mín 2 fileiras por lado preserva o layout dos combates pequenos (1v1..8v8
+       idênticos ao anterior: 2 fileiras inimigas + 2 aliadas, retaguarda colapsa
+       quando vazia). Cresce só com >8 de um lado (ex.: Conjurar Animais 8 lobos).
+       O auto-fit do pan/zoom (min fitX,fitY) escala o stage mais alto → tudo cabe
+       em qualquer tela; zoom +/− pra detalhe. */
+    var enemyRows = Math.max(2, Math.ceil(enemyUnits.length / COLS));
+    var allyRows = Math.max(2, Math.ceil(allyUnits.length / COLS));
+    var totalRows = enemyRows + allyRows;
+    var grid = [];
+    for (var gr = 0; gr < totalRows; gr++) {
+        grid.push([]);
+        for (var gc = 0; gc < COLS; gc++) grid[gr].push(null);
+    }
+    function placeInRow(rowArr, cell) {
+        for (var i = 0; i < FILL_ORDER.length; i++) {
+            var cc = FILL_ORDER[i];
+            if (cc < COLS && rowArr[cc] === null) { rowArr[cc] = cell; return true; }
+        }
+        return false;
+    }
+    /* Inimigos preenchem a FRENTE primeiro (fileira inimiga mais perto do divisor
+       = última fileira inimiga), recuando pra retaguarda conforme lota. */
+    var ei = 0;
+    for (var er = enemyRows - 1; er >= 0 && ei < enemyUnits.length; er--) {
+        while (ei < enemyUnits.length && placeInRow(grid[er], enemyUnits[ei])) ei++;
+    }
+    /* Aliados (player primeiro) preenchem a FRENTE aliada primeiro (1ª fileira
+       aliada, logo abaixo do divisor), recuando conforme lota. */
+    var ai = 0;
+    for (var ar = 0; ar < allyRows && ai < allyUnits.length; ar++) {
+        while (ai < allyUnits.length && placeInRow(grid[enemyRows + ar], allyUnits[ai])) ai++;
+    }
 
     var activeId = null;
     var active = s.order[s.active_idx];
@@ -17220,40 +17259,40 @@ function buildBattlefield(s) {
        <=440px, não a altura. Template idêntico entre fileiras = alinhamento
        mantido. Cells vazias usam width:auto (CSS) → 0px na coluna colapsada,
        slot de 160px na coluna ocupada. Fallback p/ grid cheio se nada ocupado. */
-    var occupiedCols = [false, false, false, false];
-    for (var orow = 0; orow < 4; orow++) {
-        for (var ocol = 0; ocol < 4; ocol++) {
+    var occupiedCols = [];
+    for (var oc0 = 0; oc0 < COLS; oc0++) occupiedCols.push(false);
+    for (var orow = 0; orow < totalRows; orow++) {
+        for (var ocol = 0; ocol < COLS; ocol++) {
             if (grid[orow][ocol] !== null) occupiedCols[ocol] = true;
         }
     }
-    if (!occupiedCols[0] && !occupiedCols[1] && !occupiedCols[2] && !occupiedCols[3]) {
-        occupiedCols = [true, true, true, true];
+    if (!occupiedCols.some(function (o) { return o; })) {
+        for (var oz = 0; oz < COLS; oz++) occupiedCols[oz] = true;
     }
     var _bfCellW = 'calc(160px * var(--v-font-scale, 1))';
     var _bfColTemplate = occupiedCols.map(function (o) { return o ? _bfCellW : '0px'; }).join(' ');
     var _bfRowStyle = ' style="grid-template-columns: ' + _bfColTemplate + ' !important"';
 
     html += '<div class="battlefield' + bfExtra + '">';
-    for (var row = 0; row < 4; row++) {
-        var zoneClass = row < 2 ? ' enemy-zone' : ' ally-zone';
-        /* Sessão #67 (2026-06-01): colapsa a fileira de RETAGUARDA (row 0 inimiga /
-           row 3 aliada) quando vazia, pra recuperar espaço vertical → o auto-fit
-           do pan/zoom escala os cards MAIORES em qualquer tela. 1v1/1v2/2v2
-           deixavam 2 das 4 fileiras vazias ocupando 150px cada, forçando um fit
-           minúsculo. Só backline: é estrutural (enemies preenchem a frente
-           primeiro; player/aliados vão pra frente) e fica vazia o combate todo —
-           então não há reflow ao morrer unidade na frente. DOM preservado (cells
-           continuam no DOM, índices intactos) — some só visualmente via CSS. */
-        var isBackRow = (row === 0 || row === 3);
-        var rowVacant = isBackRow && !grid[row].some(function (c) { return c !== null; });
+    for (var row = 0; row < totalRows; row++) {
+        var isEnemyRow = row < enemyRows;
+        var zoneClass = isEnemyRow ? ' enemy-zone' : ' ally-zone';
+        var isFrontRow = isEnemyRow ? (row === enemyRows - 1) : (row === enemyRows);
+        var rowLabel = isEnemyRow ? (isFrontRow ? 'frente inimiga' : 'retaguarda inimiga')
+                                  : (isFrontRow ? 'frente aliada' : 'retaguarda aliada');
+        /* Qualquer fileira totalmente vazia colapsa (height 0) — com preenchimento
+           front-first as fileiras vazias ficam sempre na retaguarda, então não há
+           reflow ao morrer unidade na frente. DOM preservado (cells no DOM, índices
+           intactos p/ targeting/animações); some só visualmente via CSS. */
+        var rowVacant = !grid[row].some(function (c) { return c !== null; });
         var collapseCls = rowVacant ? ' bf-row--collapsed' : '';
-        html += '<div class="row-label' + zoneClass + collapseCls + '">' + escHtml(ROW_LABELS[row]) + '</div>';
+        html += '<div class="row-label' + zoneClass + collapseCls + '">' + escHtml(rowLabel) + '</div>';
         html += '<div class="bf-row' + collapseCls + '"' + _bfRowStyle + '>';
-        for (var col = 0; col < 4; col++) {
+        for (var col = 0; col < COLS; col++) {
             html += buildCell(grid[row][col], activeId);
         }
         html += '</div>';
-        if (row === 1) html += '<div class="bf-divider"></div>';
+        if (row === enemyRows - 1) html += '<div class="bf-divider"></div>';
     }
     html += '</div></div></div>';
     return html;
@@ -18692,9 +18731,29 @@ async function castSummonPack(s, p, sk) {
     p.res.value = Math.max(0, p.res.value - (sk.cost | 0));
     /* Marca ação principal gasta */
     p.actionSpent = true;
+    /* PHB p.204 — conjurar uma magia de concentração ENCERRA a anterior (dissipa
+       condições linkadas + criaturas conjuradas). ANTES de invocar os novos lobos
+       (senão dissiparia os próprios — eles têm o mesmo conjureSpellId). */
+    if (ps.concentration && p.se && p.se.length) {
+        p.se = p.se.filter(function (x) {
+            if (x && x.concentration) {
+                if (x.concSummonSpellId && typeof _dissipateConjuredSummons === 'function') {
+                    _dissipateConjuredSummons(s, p, x.concSummonSpellId);
+                }
+                if (x.linkedConditionId != null && x.linkedTargetIdx != null && s.order[x.linkedTargetIdx]) {
+                    s.order[x.linkedTargetIdx].se = (s.order[x.linkedTargetIdx].se || []).filter(function (y) {
+                        return !y || y.id !== x.linkedConditionId;
+                    });
+                }
+                return false;
+            }
+            return true;
+        });
+    }
     if (typeof simLogPushTurnHeader === 'function') simLogPushTurnHeader(s, p);
     s.log.push(p.n + ' conjura ' + count + ' ' + (ws.name || 'bestas espirituais') +
-               ' (PHB Conjure Animals — duração ' + dur + ' rodadas).');
+               (ps.concentration ? ' (PHB Conjure Animals — concentração).'
+                                 : ' (PHB Conjure Animals — duração ' + dur + ' rodadas).'));
     /* Spawn N entries no order, com init logo após o caster (frações pra evitar conflito) */
     var pIdx = s.order.indexOf(p);
     var insertPos = pIdx + 1;
@@ -18725,9 +18784,22 @@ async function castSummonPack(s, p, sk) {
             /* W2 — duração da invocação (decrementada no tick de round) */
             durTurns: dur,
             conjureCasterIdx: pIdx,
+            conjureCaster: p,  /* referência ESTÁVEL (índices mudam com splices) */
             conjureSpellId: 'conjure_animals'
         };
         s.order.splice(insertPos + i, 0, summon);
+    }
+    /* PHB p.204 — Conjurar Animais é CONCENTRAÇÃO: ancora no conjurador. Ao
+       sofrer dano e falhar o TR CON (simCheckConcentrationOnDamage) OU conjurar
+       outra magia de concentração (pushBuffSim), os lobos se dissipam. */
+    if (ps.concentration) {
+        p.se = p.se || [];
+        p.se.push({
+            id: 'conc_conjure_animals', concentration: true,
+            concSummonSpellId: 'conjure_animals',
+            n: 'Concentração: Conjurar Animais', ico: '🐾',
+            turnsLeft: null, decOn: 'round', kind: 'buff'
+        });
     }
     /* Re-render */
     if (typeof _actionTaken !== 'undefined') _actionTaken = false;
@@ -18735,6 +18807,28 @@ async function castSummonPack(s, p, sk) {
     render(s);
     /* Após cast, segue fluxo normal de Patrulheiro (action gasta → maybeAdvanceOrStay) */
     await _maybeAdvanceOrStay();
+}
+
+/* PHB p.204 — dissipa TODAS as criaturas conjuradas por um `conjureSpellId` de um
+   conjurador específico (match por referência ESTÁVEL `conjureCaster`, não índice).
+   Chamado quando a concentração do conjurador quebra (dano/TR CON) ou ao conjurar
+   outra magia de concentração. Ajusta p_idx/active_idx ao remover do order. */
+function _dissipateConjuredSummons(s, caster, spellId) {
+    if (!s || !s.order || !spellId) return 0;
+    var removed = 0;
+    for (var oi = s.order.length - 1; oi >= 0; oi--) {
+        var oc = s.order[oi];
+        if (!oc || oc.conjureSpellId !== spellId) continue;
+        if (caster && oc.conjureCaster && oc.conjureCaster !== caster) continue;
+        s.order.splice(oi, 1);
+        if (s.p_idx > oi) s.p_idx--;
+        if (s.active_idx > oi) s.active_idx--;
+        removed++;
+    }
+    if (removed && s.log) {
+        s.log.push(removed + ' criatura(s) conjurada(s) se dissipam — concentração encerrada (PHB p.204).');
+    }
+    return removed;
 }
 
 /* W2 — Tick de duração das criaturas conjuradas. Chamado no wrap de round
