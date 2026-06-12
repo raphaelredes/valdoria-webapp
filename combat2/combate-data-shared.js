@@ -1481,6 +1481,22 @@ var CHAR_CLASSES = [
             desc: 'Ação bônus (PHB p.275): invoca arma sombria — próximo atk +2d8 psíquico.',
             helpDnd5e: 'Golpe de Lâmina Sombria / Shadow Blade (PHB p.275 — Bruxo/Feiticeiro/Mago nv 2): **AÇÃO BÔNUS**; concentração até 1 min. Invoca espada de sombras (2d8 psíquico, finesse/light/thrown); vantagem em atk contra alvos em escuridão/penumbra. Upcast: +1d8 no nv 3, +2d8 no nv 5, +3d8 no nv 7.\nArena stub: buff BA concentration; próximo atk ganha dmgBonusDie:2d8 psychic. Em stub arena sem luz-tracking, não aplica vantagem automática.',
             buffSim: { id: 'shadow_blade', vfx: 'shadow', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Lâmina Sombria', condRule: 'PHB p.275 — próximo atk +2d8 psíquico.', dmgBonusDie: { n: 2, d: 8 }, concentration: true } }
+      ],
+      /* PHB p.107 Pacto da Corrente — o familiar é COMANDADO pelo Bruxo na arena
+         ("forgo one of your own attacks to allow your familiar to make one attack"):
+         noInit (sem turno próprio); comandar consome a AÇÃO (Bruxo sem Ataque Extra
+         → ação inteira). Gate por `requiresWarlockPact` (NÃO subclass — o patrono
+         Fiend/Archfey/GOO continua sendo a subclasse). Stats vêm do
+         chain_familiar_spec (Python, por tipo: Diabrete/Pseudodragão/Quasit/Sprite). */
+      passives: [
+        { id: 'chain_familiar', kind: 'summon_combatant_passive', spawnInBattle: true,
+          requiresWarlockPact: 'chain',
+          summonSpec: {
+            name: 'Familiar', ico: '😈', hp: 10, mhp: 10, ac: 13,
+            atk: 5, die: 4, dex: 14, wis: 12, con: 10, str: 6, int: 10, cha: 10,
+            multiAttack: 1, damageSpec: { n: 1, d: 4, flat: 3 }, dmgType: 'piercing',
+            iconHeraldic: 'ic-familiar', noInit: true
+          } }
       ] },
 ];
 

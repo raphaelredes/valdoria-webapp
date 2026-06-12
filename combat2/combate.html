@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T20:11:26Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T21:01:18Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13953,6 +13953,10 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     var resCur = (spec.mp_exact != null) ? Math.max(0, Math.min(resMax, parseInt(spec.mp_exact, 10) || 0)) : resMax;
     return {
         t: roleTag, n: n, cls: cdef.cls, subclass: sub,
+        /* PHB p.107 Pacto da Corrente — gate do passive chain_familiar + stats do
+           familiar (do Python). Passados ao unit pra spawnPassivesForClass ler. */
+        warlock_pact: (spec.warlock_pact && String(spec.warlock_pact).trim().toLowerCase()) || '',
+        chain_familiar_spec: spec.chain_familiar_spec || null,
         /* 2026-06-07 FIX: clsLabel = rótulo de exibição (ex.: "Ferreiro Ferido" do
            Thorne) — antes o badge mostrava cdef.cls ("Guerreiro") porque
            getClassDefByName('Ferreiro Ferido') cai no Guerreiro. cls continua a
@@ -17387,6 +17391,11 @@ function _heraldicIconOf(u, utype) {
         if (u.n === 'Sprite') return 'ic-sprite';
         return 'ic-familiar';
     }
+    /* PHB p.107 — familiar do Pacto da Corrente (Bruxo): Sprite usa ic-sprite,
+       demais tipos (Diabrete/Pseudodragão/Quasit) usam o ícone heráldico familiar. */
+    if (u.summonKind === 'chain_familiar') {
+        return (u.n === 'Sprite') ? 'ic-sprite' : 'ic-familiar';
+    }
     if (u.summonKind) return 'ic-summon';
     var byCls = CLASS_ICON_MAP[u.cls] || CLASS_ICON_BY_KEY[_clsKeyNorm(u.cls)];  /* C5.3 #90 */
     if (byCls) return byCls;
@@ -19287,12 +19296,33 @@ function spawnPassivesForClass(state, playerEntry) {
            'Beast Master') — antes 'hunter' real nunca batia e caía no default. */
         if (passive.requiresSubclass
             && _subclassKeyNorm(playerEntry.subclass) !== _subclassKeyNorm(passive.requiresSubclass)) return;
+        /* PHB p.107 Pacto da Corrente — gate por PACTO (não subclasse): o familiar
+           do Bruxo só spawna se warlock_pact bate. Mantém o patrono (Fiend/Archfey/
+           GOO) como a subclasse real, sem conflito. */
+        if (passive.requiresWarlockPact
+            && String(playerEntry.warlock_pact || '').toLowerCase() !== passive.requiresWarlockPact) return;
         /* B1+C1 (2026-04-19) — PHB-fiel: Familiar/Steed exigem ritual fora-de-combate.
            Se passive.preCombatRitual é true E player não fez o ritual (sessionStorage
            ou setupSummon flag), NÃO spawna. Default: assume que fez (UX). */
         if (passive.preCombatRitual && playerEntry.summonsInvoked &&
             playerEntry.summonsInvoked[passive.id] === false) return;
         var spec = passive.summonSpec;
+        /* PHB p.107 — stats do familiar do Pacto da Corrente vêm do Python
+           (chain_familiar_spec, por tipo: Diabrete/Pseudodragão/Quasit/Sprite).
+           Override do summonSpec default quando presente. */
+        if (passive.id === 'chain_familiar' && playerEntry.chain_familiar_spec) {
+            var _cfs = playerEntry.chain_familiar_spec;
+            spec = Object.assign({}, spec, {
+                name: _cfs.name || spec.name,
+                ico: _cfs.ico || spec.ico,
+                hp: (_cfs.hp != null) ? _cfs.hp : spec.hp,
+                mhp: (_cfs.mhp != null) ? _cfs.mhp : ((_cfs.hp != null) ? _cfs.hp : spec.mhp),
+                ac: (_cfs.ac != null) ? _cfs.ac : spec.ac,
+                atk: (_cfs.atk != null) ? _cfs.atk : spec.atk,
+                damageSpec: _cfs.damageSpec || spec.damageSpec,
+                dmgType: _cfs.dmgType || spec.dmgType
+            });
+        }
         var summon = {
             t: 'a', n: spec.name, ico: spec.ico,
             hp: spec.hp, mhp: spec.mhp, ac: spec.ac,
@@ -19488,16 +19518,25 @@ function _updateActionSheetState(s) {
        com Wolf vivo (animal_companion). Spent quando ação principal já gasta. */
     var cmdBtn = document.getElementById('command-companion-btn');
     if (cmdBtn) {
-        var wolfIdx = -1;
+        var wolfIdx = -1, cmdKind = '';
         for (var wi = 0; wi < s.order.length; wi++) {
             var u = s.order[wi];
-            if (u && u.summonKind === 'animal_companion' && u.summonedBy === s.p_idx && u.alive) {
-                wolfIdx = wi; break;
+            if (u && (u.summonKind === 'animal_companion' || u.summonKind === 'chain_familiar')
+                    && u.summonedBy === s.p_idx && u.alive) {
+                wolfIdx = wi; cmdKind = u.summonKind; break;
             }
         }
         if (wolfIdx >= 0) {
             cmdBtn.style.display = 'block';
             cmdBtn.classList.toggle('spent', !!p.actionSpent);
+            /* Label dinâmico (text-node, sem innerHTML): Familiar (Bruxo) vs
+               Companheiro (Patrulheiro). */
+            var _cmdLbl = (cmdKind === 'chain_familiar') ? 'Comandar Familiar ' : 'Comandar Companheiro ';
+            for (var _cn = 0; _cn < cmdBtn.childNodes.length; _cn++) {
+                if (cmdBtn.childNodes[_cn].nodeType === 3 && cmdBtn.childNodes[_cn].textContent.trim()) {
+                    cmdBtn.childNodes[_cn].textContent = _cmdLbl; break;
+                }
+            }
         } else {
             cmdBtn.style.display = 'none';
         }
@@ -21722,7 +21761,8 @@ function onBtnClick(ev) {
         var wolfIdxC = -1;
         for (var wci = 0; wci < sCc.order.length; wci++) {
             var uw = sCc.order[wci];
-            if (uw && uw.summonKind === 'animal_companion' && uw.summonedBy === sCc.p_idx && uw.alive) {
+            if (uw && (uw.summonKind === 'animal_companion' || uw.summonKind === 'chain_familiar')
+                    && uw.summonedBy === sCc.p_idx && uw.alive) {
                 wolfIdxC = wci; break;
             }
         }
