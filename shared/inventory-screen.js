@@ -722,6 +722,16 @@
   function _renderLoadout(el, cfg) {
     el.className = 'vinv-loadout';
     var loadout = cfg.player.loadout || {};
+    /* 2026-06-12 (user): botão AUTO-EQUIPAR no topo da aba Equipados. O caller
+       (cidade) implementa a inteligência D&D (proficiências por classe,
+       Unarmored Defense, finesse, foco de conjurador) em cfg.onAutoEquip e faz
+       o refresh com o player atualizado. Só aparece quando o callback existe. */
+    var autoHtml = '';
+    if (typeof cfg.onAutoEquip === 'function') {
+      autoHtml = '<button type="button" class="vinv-btn primary vinv-autoequip" '
+        + 'data-action="auto-equip" style="width:100%;margin:0 0 8px;">'
+        + '⚔ Auto-Equipar (melhor conjunto)</button>';
+    }
     var slotDef = [
       { key: 'head',      label: 'Cabeça' },
       { key: 'amulet',    label: 'Amuleto' },
@@ -733,7 +743,7 @@
       { key: 'feet',      label: 'Botas' },
       { key: 'ring2',     label: 'Anel II' },
     ];
-    var html = '<div class="vinv-loadout-avatar">';
+    var html = autoHtml + '<div class="vinv-loadout-avatar">';
     slotDef.forEach(function (s) {
       var it = loadout[s.key];
       if (it) {
@@ -783,18 +793,31 @@
         _showEmptySlotPicker(key, cfg);
       });
     });
+    var autoBtn = el.querySelector('[data-action="auto-equip"]');
+    if (autoBtn) {
+      autoBtn.addEventListener('click', function () {
+        try { cfg.onAutoEquip(); }
+        catch (e) { console.error('[vInventory] onAutoEquip:', e); }
+      });
+    }
   }
 
   /** Abre seletor pra slot vazio (lista de items compatíveis) */
   function _showEmptySlotPicker(slotKey, cfg) {
     var alternatives = _findSlotAlternatives(slotKey, cfg.player.items);
-    if (alternatives.length === 0) return;
+    /* 2026-06-12 (user): o popup SEMPRE abre ao tocar num slot vazio — lista os
+       equipamentos possíveis pro slot; sem compatíveis, estado vazio honesto.
+       Antes o `return` silencioso fazia o toque parecer quebrado. */
     // Reusa detail card pra render a lista
     var card = _state.overlay.querySelector('[data-region="detail-card"]');
     var ov = _state.overlay.querySelector('[data-region="detail"]');
     if (!card || !ov) return;
 
     var cost = cfg.inCombat ? _slotCombatCost(slotKey) : null;
+    var listHtml = (alternatives.length === 0)
+      ? '<div class="vinv-empty" style="padding:18px 10px;text-align:center;">'
+        + 'Nenhum item compatível com este slot na mochila.</div>'
+      : _renderSwapList(null, slotKey, alternatives, cost, cfg);
     card.innerHTML = ''
       + '<div class="vinv-detail-close" data-action="close-detail">' + _uiIcon('close', 13) + '</div>'
       + '<div class="vinv-detail-header">'
@@ -804,11 +827,11 @@
       +   '<div class="vinv-detail-name">Slot Vazio: ' + _esc(_slotLabel(slotKey)) + '</div>'
       +   '<div class="vinv-detail-rarity common">SEM ITEM EQUIPADO</div>'
       + '</div>'
-      + _renderSwapList(null, slotKey, alternatives, cost, cfg);
+      + listHtml;
 
     ov.classList.add('active');
     card.querySelector('[data-action="close-detail"]').addEventListener('click', _hideDetail);
-    _wireSwapList(card, null, slotKey, cfg);
+    if (alternatives.length > 0) _wireSwapList(card, null, slotKey, cfg);
   }
 
   function _statRow(label, val) {

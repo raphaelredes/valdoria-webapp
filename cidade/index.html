@@ -8029,6 +8029,11 @@ body.perf-lite .vc-action-btn { transition: none; }
     document.write('<script src="/shared/status-bars.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // journey-data-shared.js: dados + regra da viagem (FASE 2 single-source). Requer DndRules.
     document.write('<script src="/shared/journey-data-shared.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    // items-db-generated.js (2026-06-12, user): TODOS os 610 itens do ITEMS_DB
+    // Python (fonte única) — fallback do CANON_ITEMS_DB curado (178). Sem ele,
+    // itens reais fora do CANON caíam no stub "(desconhecido)" sem slot/stats,
+    // quebrando detail/equip/auto-equip. Gerado por scripts/build_items_db_client.py.
+    document.write('<script src="/shared/items-db-generated.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // === NPC Living System libraries (sessão #13, Task #19, 2026-05-19) ============
     //  - npc-relations-data.js: NPC_IDS (18 slugs) + NPC_RELATIONS matrix + NPC_EVENTS_TIMELINE
     //  - npc-living-system.js: memory + cascade + mood + dispatcher (window._npcMarkVisit/etc.)
@@ -32234,7 +32239,19 @@ var CANON_ITEM_SETS = {
 function getItemData(name){
   // Stub heráldico canonical pra items desconhecidos (regra Heraldic Icons Only)
   if (!name) return { e: _heralIco('ic-mochila'), v:0, r:'common', t:[], desc:'' };
-  return CANON_ITEMS_DB[name] || { e: _heralIco('ic-mochila'), v:0, r:'common', t:[], desc:'(desconhecido)' };
+  if (CANON_ITEMS_DB[name]) return CANON_ITEMS_DB[name];
+  // 2026-06-12 (user): fallback pro DB GERADO do ITEMS_DB Python (610 itens,
+  // shared/items-db-generated.js). Antes, itens reais fora do CANON curado
+  // (~432) caíam no stub "(desconhecido)" SEM slot/desc/stats — quebrava o
+  // detail, o equipar e o auto-equip. Injeta ícone heráldico default (GEN não
+  // carrega `e`) e cacheia no CANON pra não realocar a cada chamada.
+  var gen = (window.ITEMS_DB_GEN && window.ITEMS_DB_GEN[name]) || null;
+  if (gen) {
+    var entry = Object.assign({ e: _heralIco('ic-mochila'), r: 'common' }, gen);
+    CANON_ITEMS_DB[name] = entry;
+    return entry;
+  }
+  return { e: _heralIco('ic-mochila'), v:0, r:'common', t:[], desc:'(desconhecido)' };
 }
 
 // canonical: rarity tokens (replica valdoria-design.css :root --v-rarity-*)
@@ -38675,7 +38692,10 @@ function _vinvAdaptItem(invEntry) {
     equipped: !!_isItemEquipped(name),
     favorite: !!_isItemFav(name),
     tags: tags,
-    slot: _vinvSlotMap(it.slot),
+    // 2026-06-12 (user): schema cliente usa `s` — it.slot era SEMPRE undefined
+    // → _findSlotAlternatives nunca achava nada → o picker de slot vazio não
+    // abria e a swap list do detail ficava vazia.
+    slot: _vinvSlotMap(it.s || it.slot),
     dmg_die: it.dd || it.dmg_die,
     ac_bonus: it.ac || it.ac_bonus,
     bonus: it.b || it.bonus,
@@ -38715,6 +38735,171 @@ function _vinvBuildStats() {
     pm: ((p.mp != null) ? p.mp : '—') + ' / ' + mpMax,
   };
 }
+/* ════════════════════════════════════════════════════════════════════════
+   AUTO-EQUIPAR INTELIGENTE (2026-06-12, user): "equipar o que for melhor para
+   o personagem... investigue as mecânicas D&D com relação a cada classe".
+   Regras PHB aplicadas (regra Class Balance D&D 5e):
+   - Proficiência de ARMADURA: pesada={guerreiro,paladino}; média(+leve)=
+     {clerigo,druida,patrulheiro,barbaro}; leve={bardo,ladino,bruxo};
+     NENHUMA={mago,feiticeiro,monge}. Sem proficiência → NUNCA auto-equipar
+     (PHB p.144: desvantagem em tudo e não conjura).
+   - ESCUDO: {guerreiro,paladino,clerigo,druida,patrulheiro,barbaro}.
+   - DRUIDA: não veste armadura/escudo de METAL (PHB p.65 — tag 'metal').
+   - MONGE: Defesa sem Armadura + Artes Marciais (PHB p.78) — perde TUDO com
+     armadura/escudo → nunca auto-equipar chest/escudo pra monge.
+   - ARMA: marciais={guerreiro,paladino,patrulheiro,barbaro}+exceções de classe
+     (PHB: ladino/bardo têm rapieira/espada curta/longa). Finesse/ranged usa
+     DES quando melhor (PHB p.147). Score = média do dado + mod + bônus.
+   - OFF-HAND de conjurador: foco compatível (arcano/símbolo sagrado/foco
+     druídico/grimório) quando não há (ou não pode) escudo.
+   ════════════════════════════════════════════════════════════════════════ */
+function _aeClsKey(c) {
+  return String(c || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+var _AE_HEAVY  = { guerreiro: 1, paladino: 1 };
+var _AE_MEDIUM = { guerreiro: 1, paladino: 1, clerigo: 1, druida: 1, patrulheiro: 1, barbaro: 1 };
+var _AE_LIGHT  = { guerreiro: 1, paladino: 1, clerigo: 1, druida: 1, patrulheiro: 1, barbaro: 1, bardo: 1, ladino: 1, bruxo: 1 };
+var _AE_SHIELD = { guerreiro: 1, paladino: 1, clerigo: 1, druida: 1, patrulheiro: 1, barbaro: 1 };
+var _AE_MARTIAL = { guerreiro: 1, paladino: 1, patrulheiro: 1, barbaro: 1 };
+/* Exceções de arma marcial por classe (PHB p.95/p.51) */
+var _AE_WEAPON_ALLOW = {
+  ladino: ['rapieira', 'espada curta', 'espada longa'],
+  bardo:  ['rapieira', 'espada curta', 'espada longa'],
+  monge:  ['espada curta'],
+};
+/* Foco de conjuração compatível por classe (tags do item) */
+var _AE_FOCUS_TAGS = {
+  mago: ['arcane_focus', 'arcane', 'spellbook', 'focus'],
+  feiticeiro: ['arcane_focus', 'arcane', 'focus'],
+  bruxo: ['arcane_focus', 'arcane', 'focus'],
+  clerigo: ['holy_symbol', 'focus'],
+  paladino: ['holy_symbol', 'focus'],
+  druida: ['druidic_focus', 'focus'],
+  bardo: ['focus', 'instrument'],
+};
+function _aeMod(score) { return Math.floor(((score || 10) - 10) / 2); }
+function _aeAvgDie(dd) {
+  var m = String(dd || '').match(/^(\d+)d(\d+)/);
+  if (!m) return 0;
+  return (parseInt(m[1], 10) * (parseInt(m[2], 10) + 1)) / 2;
+}
+function _aeArmorCat(tags) {
+  if (tags.indexOf('heavy_armor') !== -1) return 'heavy';
+  if (tags.indexOf('medium_armor') !== -1) return 'medium';
+  if (tags.indexOf('light_armor') !== -1) return 'light';
+  return null; // armadura sem categoria → trata como leve (roupas reforçadas)
+}
+function _aeCanWearArmor(cls, tags) {
+  var cat = _aeArmorCat(tags) || 'light';
+  if (cls === 'druida' && tags.indexOf('metal') !== -1) return false; // PHB p.65
+  if (cat === 'heavy') return !!_AE_HEAVY[cls];
+  if (cat === 'medium') return !!_AE_MEDIUM[cls];
+  return !!_AE_LIGHT[cls];
+}
+function _aeCanUseWeapon(cls, name, tags) {
+  var martial = tags.indexOf('martial_weapon') !== -1 || tags.indexOf('martial') !== -1;
+  if (!martial) return true; // armas simples: todos
+  if (_AE_MARTIAL[cls]) return true;
+  var allow = _AE_WEAPON_ALLOW[cls] || [];
+  var n = _aeClsKey(name);
+  for (var i = 0; i < allow.length; i++) {
+    if (n.indexOf(_aeClsKey(allow[i])) !== -1) return true;
+  }
+  return false;
+}
+function _aeWeaponScore(it, stats) {
+  var tags = it.t || [];
+  var dexBased = tags.indexOf('ranged') !== -1
+    || (tags.indexOf('finesse') !== -1 && (stats.dex || 10) > (stats.str || 10));
+  var mod = dexBased ? _aeMod(stats.dex) : _aeMod(stats.str);
+  return _aeAvgDie(it.dd) + mod + (it.b || 0) + (it.v || 0) / 1000;
+}
+function _aeGenericScore(it) {
+  return (it.ac || 0) * 2 + (it.hb || 0) + (it.mb || 0) + (it.b || 0) + (it.v || 0) / 1000;
+}
+function _vinvAutoEquipSmart() {
+  var p = window.CITY_MOCK_PLAYER || {};
+  var cls = _aeClsKey(p.cls || p.class_name || '');
+  var stats = p.stats || {};
+  if (typeof MOCK_PLAYER_EQUIPPED === 'undefined') window.MOCK_PLAYER_EQUIPPED = {};
+  var eq = MOCK_PLAYER_EQUIPPED;
+
+  // candidatos: inventário com qty>0 (inclui os já equipados — re-avaliados)
+  var pool = [];
+  (window.MOCK_PLAYER_INVENTORY || []).forEach(function (e) {
+    if (!e || !e.n || (e.q || 0) <= 0) return;
+    var it = getItemData(e.n) || {};
+    var slot = _vinvSlotMap(it.s || it.slot);
+    if (!slot) return;
+    pool.push({ name: e.n, slot: slot, it: it, tags: it.t || [] });
+  });
+
+  // melhor candidato por slot (D&D-aware)
+  function bestFor(slotKey, excludeName) {
+    var best = null, bestScore = 0;
+    pool.forEach(function (c) {
+      if (c.slot !== slotKey && !(slotKey.indexOf('ring') === 0 && c.slot === 'ring')) return;
+      if (excludeName && c.name === excludeName) return;
+      var score;
+      if (slotKey === 'main_hand') {
+        if (!_aeCanUseWeapon(cls, c.name, c.tags)) return;
+        score = _aeWeaponScore(c.it, stats);
+      } else if (slotKey === 'chest') {
+        if (cls === 'monge') return;                       // Defesa sem Armadura
+        if (!_aeCanWearArmor(cls, c.tags)) return;          // proficiência PHB
+        score = _aeGenericScore(c.it);
+      } else if (slotKey === 'off_hand') {
+        var isShield = c.tags.indexOf('shield') !== -1 || (c.it.s === 'off_hand' && (c.it.ac || 0) > 0 && c.tags.indexOf('focus') === -1);
+        if (isShield) {
+          if (!_AE_SHIELD[cls] || cls === 'monge') return;  // sem prof → nunca
+          if (cls === 'druida' && c.tags.indexOf('metal') !== -1) return;
+          score = _aeGenericScore(c.it) + 1;                // escudo prioriza CA
+        } else {
+          // foco de conjuração: só se compatível com a classe
+          var ft = _AE_FOCUS_TAGS[cls] || [];
+          var match = false;
+          for (var i = 0; i < ft.length; i++) { if (c.tags.indexOf(ft[i]) !== -1) { match = true; break; } }
+          if (!match) return;
+          score = 1 + (c.it.mb || 0) * 2 + (c.it.b || 0);   // foco habilita conjuração
+        }
+      } else {
+        score = _aeGenericScore(c.it);
+        if (score <= 0) return;                             // sem benefício → não equipa
+      }
+      if (score > bestScore) { bestScore = score; best = c; }
+    });
+    return best;
+  }
+
+  var SLOTS = ['main_hand', 'chest', 'off_hand', 'head', 'amulet', 'cloak', 'feet', 'ring1', 'ring2'];
+  var changes = [];
+  var ring1Pick = null;
+  SLOTS.forEach(function (slotKey) {
+    var pick = bestFor(slotKey, slotKey === 'ring2' && ring1Pick ? ring1Pick.name : null);
+    if (slotKey === 'ring1') ring1Pick = pick;
+    if (!pick) return;
+    var current = eq[slotKey];
+    if (current === pick.name) return;                      // já é o melhor
+    // troca: ajusta CA (delta do que sai + do que entra), sem toast por item
+    if (current) _vinvApplyAcDelta(current, -1);
+    eq[slotKey] = pick.name;
+    _vinvApplyAcDelta(pick.name, +1);
+    changes.push(pick.name);
+  });
+
+  if (typeof refreshHud === 'function') refreshHud();
+  if (typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
+  if (typeof vToast === 'function') {
+    vToast(changes.length
+      ? '⚔ Auto-equipado: ' + changes.length + ' troca(s) — ' + changes.join(', ')
+      : '✓ Você já está com o melhor conjunto para sua classe.');
+  }
+  if (window.vInventory && vInventory.isOpen && vInventory.isOpen()) {
+    vInventory.refresh(_vinvBuildConfig().player);
+  }
+  return changes.length;
+}
+
 /* 2026-06-12 (user): CA reflete equip/unequip na hora. Ajusta p.ac pelo bônus
    do item (it.ac). Mock client-side — o servidor reconcilia no próximo load. */
 function _vinvApplyAcDelta(name, sign) {
@@ -38773,6 +38958,10 @@ function _vinvBuildConfig() {
       if (typeof _useInventoryItem === 'function') _useInventoryItem(item.name);
       else if (typeof vToast === 'function') vToast('Usar ' + item.name);
     },
+    // 2026-06-12 (user): botão AUTO-EQUIPAR (aba Equipados) — inteligência D&D
+    // em _vinvAutoEquipSmart (proficiências PHB por classe, Defesa sem Armadura,
+    // finesse, foco de conjurador). O próprio handler faz refresh+toast resumo.
+    onAutoEquip: function () { _vinvAutoEquipSmart(); },
     onItemEquip: function (item) {
       if (typeof _equipItem === 'function') _equipItem(item.name);
       else if (typeof vToast === 'function') vToast('Equipar ' + item.name);
