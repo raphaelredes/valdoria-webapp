@@ -13754,12 +13754,14 @@ function _showStatusPopup(memberIdx){
     + '</div>';
   // Backlog item 11 (sessao #85): combat stats agora usam WebP OpenAI (igual
   // STATS_DATA dos atributos). 4 WebP em shared/img/ui/: stat-ac, stat-attack,
-  // stat-spelldc, stat-prof. Fallback SVG mantido por seguranca (onerror).
+  // stat-spelldc-2, stat-prof-2. Fallback SVG mantido por seguranca (onerror).
+  // 2026-06-12 (user): stat-spelldc/stat-prof tinham FUNDO BRANCO -> rembg +
+  // renomeados pra -2 (Tier A immutable: conteudo novo = filename novo).
   var COMBAT_DATA = [
     { icon: 'ic-stat-ac',      label: 'CA',      value: ac,       key: 'ac',      png: 'stat-ac.webp' },
     { icon: 'ic-stat-attack',  label: 'Atq.',    value: (attackBonus >= 0 ? '+' : '') + attackBonus, key: 'atk', png: 'stat-attack.webp' },
-    { icon: 'ic-stat-spelldc', label: 'DC Mag.', value: spellDc,  key: 'spelldc', png: 'stat-spelldc.webp' },
-    { icon: 'ic-stat-prof',    label: 'Prof.',   value: '+' + prof, key: 'prof',  png: 'stat-prof.webp' }
+    { icon: 'ic-stat-spelldc', label: 'DC Mag.', value: spellDc,  key: 'spelldc', png: 'stat-spelldc-2.webp' },
+    { icon: 'ic-stat-prof',    label: 'Prof.',   value: '+' + prof, key: 'prof',  png: 'stat-prof-2.webp' }
   ];
   var _combatUiBase = '/shared/img/ui/';
   var _combatV = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();

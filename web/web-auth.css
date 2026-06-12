@@ -1394,6 +1394,12 @@ body.perf-lite .wa-btn-create--forge { animation: none; }
 
 
 
+/* 2026-06-12 (user): no Telegram WebApp (html.tg-webapp, setado no boot quando
+   initData != '') o botão "Sair" do Hall NUNCA aparece — não há Google/conta
+   alternativa lá, e fechar é via Telegram. Regra CSS garante em todo caminho
+   de render, independente de timing do JS. */
+html.tg-webapp .wa-btn-logout { display: none !important; }
+
 .wa-btn-logout {
 
     display: block;

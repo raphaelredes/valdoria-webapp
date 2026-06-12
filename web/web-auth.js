@@ -1406,6 +1406,18 @@ async function _tryTelegramInitAuth() {
 async function _initWebAuth() {
     console.info('[WEB-AUTH] Init: isProd=%s bot=%s env=%s readyState=%s', _isProd, BOT_USERNAME, _envId, document.readyState);
 
+    /* 2026-06-12 (user): garante 100% que o botão "Sair" NUNCA aparece no Hall
+       quando jogando pelo Telegram WebApp. _isInsideTelegram() (initData != '')
+       é a detecção CANÔNICA — o SDK do Telegram só popula initData quando a
+       página é aberta de DENTRO do Telegram (o polyfill nunca preenche). Marca
+       <html>.tg-webapp logo no boot → a regra CSS (web-auth.css) esconde o Sair
+       em QUALQUER caminho de render do Hall, independente de timing/JS. */
+    try {
+        if (_isInsideTelegram()) {
+            document.documentElement.classList.add('tg-webapp');
+        }
+    } catch (_eTg) { /* non-fatal */ }
+
     /* 2026-06-08 BACKSTOP (Loading-First): se em ~12s o #wa-boot ainda cobre a tela e
        nenhum destino foi revelado nem navegamos (algum caminho terminal imprevisto),
        revela o login pra NUNCA deixar o jogador preso numa tela escura. */
