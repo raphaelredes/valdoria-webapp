@@ -10941,6 +10941,10 @@ function _onFooterAction(action){
    cidade volta com o Hall ja aberto; este handler cobre o reload fresco. */
 window.addEventListener('pageshow', function(){
   try {
+    // 2026-06-12: remove a cobertura de loading da criação se a cidade voltou do
+    // criador via history.back/bfcache COM o overlay ainda pintado (senão ficaria
+    // bloqueando a cidade restaurada). Idempotente — no-op se não existe.
+    try { var _ccb = document.getElementById('city-creator-boot'); if (_ccb && _ccb.parentNode) _ccb.parentNode.removeChild(_ccb); } catch (_cb) { /* noqa: preflight */ }
     var wantHall = false;
     try { if (sessionStorage.getItem('valdoria_reopen_hall') === '1') { wantHall = true; sessionStorage.removeItem('valdoria_reopen_hall'); } } catch(_f){}
     try { var _pp = new URLSearchParams(window.location.search); if (_pp.get('showHall') === '1') wantHall = true; } catch(_f){}
@@ -11335,8 +11339,50 @@ function _showCharactersPopup(){
   if (playBtn) playBtn.addEventListener('click', function(){
     _onPlayCharacter();
   });
+  // 2026-06-12 (user "Criar Personagem fica toda vazia"): cobertura de loading
+  // self-contained pra transição cidade→criador. vProcessing é STUB no cidade
+  // (processing-overlay.js não é carregado aqui → no-op silencioso), então este
+  // overlay espelha o #loading do criador (creator/index.html ~L1580): quando o
+  // location.href navega, o #loading idêntico do criador assume sem flash
+  // (Single Loading Screen contínuo). Sobrevive à navegação (fica pintado até o
+  // browser trocar de página). Igual em espírito ao #wa-boot do /web/ onCreateChar.
+  function _cityCreatorBootShow(){
+    if (document.getElementById('city-creator-boot')) return;
+    var ov = document.createElement('div');
+    ov.id = 'city-creator-boot';
+    ov.setAttribute('aria-busy', 'true');
+    // HARDCODED: espelha o #loading do criador (boot cover, sem depender de CSS vars).
+    // z-index máximo: cobertura de transição DEVE ficar acima de QUALQUER overlay do
+    // jogo (vEncounter usa isolation/stacking-context que vence z menores). Verificado
+    // live: elementFromPoint(centro) === city-creator-boot mesmo com overlays abertos.
+    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:#1a1510;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px';
+    var title = document.createElement('div');
+    title.style.cssText = 'font-family:Cinzel,Georgia,serif;font-weight:700;letter-spacing:5px;color:#c4953a;font-size:24px;text-shadow:0 0 22px rgba(196,149,58,.45)';
+    title.textContent = 'VALDORIA';
+    var sub = document.createElement('div');
+    sub.style.cssText = 'font-family:Georgia,serif;font-style:italic;color:#a09484;font-size:13px;letter-spacing:.5px';
+    sub.textContent = 'Preparando a forja de aventureiros…';
+    var track = document.createElement('div');
+    track.style.cssText = 'width:140px;height:2px;background:rgba(196,149,58,.15);border-radius:2px;overflow:hidden';
+    var fill = document.createElement('div');
+    fill.style.cssText = 'width:45%;height:100%;background:linear-gradient(90deg,#9a7530,#c4953a);border-radius:2px;animation:vCityBootSlide 1.1s ease-in-out infinite alternate';
+    track.appendChild(fill);
+    ov.appendChild(title); ov.appendChild(sub); ov.appendChild(track);
+    if (!document.getElementById('city-creator-boot-kf')){
+      var st = document.createElement('style');
+      st.id = 'city-creator-boot-kf';
+      st.textContent = '@keyframes vCityBootSlide{from{margin-left:0}to{margin-left:55%}}';
+      document.head.appendChild(st);
+    }
+    document.body.appendChild(ov);
+  }
+  function _cityCreatorBootHide(){
+    var ov = document.getElementById('city-creator-boot');
+    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+  }
   var createBtn = bodyEl.querySelector('.hall-btn-create');
   if (createBtn) createBtn.addEventListener('click', async function(){
+    _cityCreatorBootShow();   // cobertura imediata — antes do handshake + navegação
     var params = new URLSearchParams(window.location.search);
     var token = params.get('token');
     var api = params.get('api');
@@ -11348,6 +11394,7 @@ function _showCharactersPopup(){
       return;
     }
     if (!token || !api){
+      _cityCreatorBootHide();
       vToast('Sessão não encontrada. Faça login novamente.');
       return;
     }
@@ -11375,14 +11422,17 @@ function _showCharactersPopup(){
           creationToken = data.token;
           charId = data.char_id || '';
         } else {
+          _cityCreatorBootHide();
           vToast('⚠️ Sessão inválida. Faça login no bot.');
           return;
         }
       } else {
+        _cityCreatorBootHide();
         vToast('⚠️ Erro de sessão (' + resp.status + ').');
         return;
       }
     } catch (e) {
+      _cityCreatorBootHide();
       console.warn('[CITY] new_session handshake failed:', e);
       vToast('⚠️ Erro de conexão.');
       return;
