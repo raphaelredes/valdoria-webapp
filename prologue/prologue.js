@@ -73,6 +73,15 @@ async function apiCall(endpoint, body = {}) {
   });
   if (resp.status === 401 || resp.status === 403) {
     console.error('[PROLOGUE] Auth error:', resp.status);
+    /* 2026-06-12 (user: "o jogo travou e o webapp encerrou sozinho" + "bots
+       enviando mensagens sem /start"). Se JÁ estamos numa transição intencional
+       (o /complete que navega pra cidade CONSOME a sessão de prólogo), uma 2ª
+       chamada recebe 401 ESPERADO. Disparar webapp_reconnect (→ bot manda banner
+       sem /start) + tgRef.close() (→ WebApp fecha) era o bug. Durante transição:
+       suprime tudo e só propaga o erro silenciosamente — a navegação segue. */
+    if (window.__valdoria_transitioning) {
+      throw new Error('session_expired');
+    }
     const tgRef = window.Telegram?.WebApp;
     if (tgRef?.sendData) {
       window.__valdoria_transitioning = true;
@@ -633,11 +642,23 @@ function _sceneGate() {
 /* ============================================================================
  * Scene dispatcher — single source pra abrir cada cena via vEncounter
  * ============================================================================ */
+/* 2026-06-12 (user): garante tema FLORESTA em todo diálogo do prólogo. play() é
+   idempotente (não faz nada se já é 'forest'); se a música de vitória do combate
+   estiver tocando ao voltar pro aftermath, faz crossfade pra floresta. */
+function _ensureForestMusic() {
+  try {
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+      ValdoriaAudio.play('forest');
+    }
+  } catch (e) { /* áudio é best-effort */ }
+}
+
 function _renderScene(sceneFn) {
   if (typeof vEncounter === 'undefined' || !vEncounter.render) {
     showError('PADRAO_ALDRIC engine não carregada.');
     return;
   }
+  _ensureForestMusic();
   const dialogue = sceneFn();
   vEncounter.render(dialogue, {
     onChoice: function(ch) {
@@ -953,7 +974,13 @@ function _sceneLoreOutcome(scriptSegs, effectText) {
   };
 }
 
+var _enteringCity = false;
 async function onEnterCity() {
+  /* 2026-06-12 (user): guard de double-fire. A 2ª chamada de /complete batia 401
+     (sessão de prólogo já consumida pela 1ª) e disparava o reconnect+close.
+     Uma vez iniciada a entrada na cidade, NUNCA re-disparar. */
+  if (_enteringCity) return;
+  _enteringCity = true;
   try {
     /* 2026-06-11: overlay persistente + retry transiente — mesma família do
        doFight (a transição prólogo→cidade tinha o mesmo gap: contentCheck
@@ -972,15 +999,19 @@ async function onEnterCity() {
       valdoriaSpaNav(result.game_url);
       /* overlay fica — cobre o download da cidade */
     } else {
+      /* 2026-06-12 (user): NUNCA fechar o WebApp sozinho. Sem game_url (raro — o
+         server retorna 503 nesse caso, que cai no catch), mostra erro c/ retry em
+         vez de fechar o app pelo Telegram (que era o "encerrou sozinho"). */
+      _enteringCity = false;
       try { if (window.vProcessing) vProcessing.hide(); } catch (e3) {}
-      if (window.Telegram && Telegram.WebApp) {
-        window.__valdoria_transitioning = true;
-        valdoriaSpaClose();
-      }
+      showError('Não foi possível entrar na cidade agora. Toque para tentar de novo.');
     }
   } catch (e) {
+    /* erro definitivo (rede/serv): libera o guard p/ o jogador re-tentar; NUNCA
+       fecha o WebApp. */
+    _enteringCity = false;
     try { if (window.vProcessing) vProcessing.hide(); } catch (e4) {}
-    showError('Erro ao entrar na cidade.', e);
+    showError('Erro ao entrar na cidade. Toque para tentar de novo.', e);
   }
 }
 
@@ -1156,7 +1187,12 @@ async function boot() {
        2026-06-11: retry transiente (init é read-only — seguro re-tentar). */
     DATA = await apiCallRetry('/api/prologue/init', { mode: MODE, show_preface: SHOW_PREFACE });
     _hideAllLoadings();
-    if (typeof ValdoriaAudio !== 'undefined') ValdoriaAudio.play('prologue');
+    /* 2026-06-12 (user): TODO o prólogo (incluindo o aftermath pós-combate) usa
+       o tema FLORESTA — a estrada/lobos acontecem na floresta. Antes tocava
+       'prologue', e ao voltar do combate a música de VITÓRIA persistia (resume
+       do combate). `_ensureForestMusic()` (chamado também em _renderScene) força
+       floresta em toda cena/diálogo — crossfade idempotente sobre victory. */
+    _ensureForestMusic();
 
     var sc = (DATA && DATA.saved_choices) || {};
     if (sc.gate_choice) choices.gate_choice = sc.gate_choice;
