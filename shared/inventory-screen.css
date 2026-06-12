@@ -1534,6 +1534,23 @@
 
 }
 
+/* 2026-06-12 (user): portrait clicável (lightbox) sinaliza com cursor + hover. */
+.vinv-detail-portrait.v-zoomable {
+
+  cursor: pointer;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+}
+
+.vinv-detail-portrait.v-zoomable:hover {
+
+  transform: scale(1.04);
+
+  box-shadow: 0 0 18px var(--v-gold-50, rgba(196, 149, 58, 0.5));
+
+}
+
 .vinv-detail-name {
 
   font-family: var(--vinv-font-display);
@@ -1783,6 +1800,20 @@
   padding: 0 6px;
 
   justify-items: center;
+
+}
+
+/* 2026-06-12 (user): célula invisível do paper-doll — ocupa o tamanho de um slot
+   (78x78) pra manter Cabeça/Botas centradas na coluna do meio, sem borda/glifo. */
+.vinv-slot-spacer {
+
+  width: 78px;
+
+  height: 78px;
+
+  visibility: hidden;
+
+  pointer-events: none;
 
 }
 

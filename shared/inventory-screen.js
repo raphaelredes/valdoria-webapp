@@ -732,28 +732,35 @@
         + 'data-action="auto-equip" style="width:100%;margin:0 0 8px;">'
         + '⚔ Auto-Equipar (melhor conjunto)</button>';
     }
-    // 2026-06-12 (user "revise todo o sistema de equipamentos"): paper-doll com
-    // TODOS os slots vestíveis do ITEMS_DB. Antes faltavam shoulders/belt/hands/
-    // legs — itens nesses slots ficavam equipados (V na lista) mas invisíveis no
-    // avatar. Grid 3-col flui pras linhas extras. Ordem corpo: cabeça→tronco→
-    // braços→pernas/anéis→botas.
+    // 2026-06-12 (user): paper-doll medieval com TODOS os slots vestíveis do
+    // ITEMS_DB, centralizado como uma silhueta — Cabeça no topo-CENTRO e Botas no
+    // rodapé-CENTRO (coluna do meio, junto de amuleto/peito/cinto); acessórios e
+    // armas nas laterais. Os `spacer` ocupam as células laterais da 1ª linha pra
+    // manter a Cabeça centrada. Grid 3-col (.vinv-loadout-avatar).
+    //   [   ] Cabeça [   ]
+    //   Ombros Amuleto Capa
+    //   MãoEsq Peito  MãoDir
+    //   Mãos   Cinto  Pernas
+    //   AnelI  Botas  AnelII
     var slotDef = [
-      { key: 'head',      label: 'Cabeça' },
-      { key: 'amulet',    label: 'Amuleto' },
+      { spacer: true }, { key: 'head', label: 'Cabeça' }, { spacer: true },
       { key: 'shoulders', label: 'Ombros' },
+      { key: 'amulet',    label: 'Amuleto' },
       { key: 'cloak',     label: 'Capa' },
-      { key: 'chest',     label: 'Peito' },
-      { key: 'belt',      label: 'Cinto' },
       { key: 'off_hand',  label: 'Mão Esq.' },
-      { key: 'hands',     label: 'Mãos' },
+      { key: 'chest',     label: 'Peito' },
       { key: 'main_hand', label: 'Mão Dir.' },
-      { key: 'ring1',     label: 'Anel I' },
+      { key: 'hands',     label: 'Mãos' },
+      { key: 'belt',      label: 'Cinto' },
       { key: 'legs',      label: 'Pernas' },
-      { key: 'ring2',     label: 'Anel II' },
+      { key: 'ring1',     label: 'Anel I' },
       { key: 'feet',      label: 'Botas' },
+      { key: 'ring2',     label: 'Anel II' },
     ];
     var html = autoHtml + '<div class="vinv-loadout-avatar">';
     slotDef.forEach(function (s) {
+      // célula invisível (mantém Cabeça/Botas centradas na coluna do meio)
+      if (s.spacer) { html += '<div class="vinv-slot-spacer" aria-hidden="true"></div>'; return; }
       var it = loadout[s.key];
       if (it) {
         var iconId = _resolveItemIcon(it);
@@ -1026,10 +1033,22 @@
 
     var actions = _buildDetailActions(it, cfg, ctx);
 
+    // 2026-06-12 (user): a imagem do equipamento é CLICÁVEL → abre o lightbox
+    // ampliado (delegação .v-zoomable em lightbox.js, igual aos retratos de NPC e
+    // ao avatar da Ficha). Só quando há <img> real (item com WebP); ícone SVG
+    // heráldico não amplia (o lightbox faz no-op gracioso sem <img>).
+    var _detailIcon = _iconSrc(iconId, it.name);
+    var _portraitCls = 'vinv-detail-portrait';
+    var _portraitAttr = '';
+    if (_detailIcon.indexOf('<img') >= 0) {
+      _portraitCls += ' v-zoomable';
+      _portraitAttr = ' data-zoom-name="' + _esc(it.name) + '"'
+        + ' data-zoom-desc="' + _esc(it.desc || '') + '" title="Toque para ampliar"';
+    }
     card.innerHTML = ''
       + '<div class="vinv-detail-close" data-action="close-detail">' + _uiIcon('close', 13) + '</div>'
       + '<div class="vinv-detail-header">'
-      +   '<div class="vinv-detail-portrait">' + _iconSrc(iconId, it.name) + '</div>'
+      +   '<div class="' + _portraitCls + '"' + _portraitAttr + '>' + _detailIcon + '</div>'
       +   '<div class="vinv-detail-name">' + _esc(it.name) + '</div>'
       +   '<div class="vinv-detail-rarity ' + rarity + '">' + rarityLabel + '</div>'
       +   (it.equipped ? '<div style="margin-top:6px"><span class="vinv-cost-badge action" style="background:rgba(196,149,58,0.2);color:var(--vinv-gold);border:1px solid var(--vinv-gold)">EQUIPADO</span></div>' : '')
@@ -1106,7 +1125,10 @@
       var iconId = _resolveItemIcon(alt);
       var altRarity = alt.rarity || 'common';
       html += '<div class="vinv-swap-row r-' + altRarity + (blocked ? ' blocked' : '') + '" data-swap-idx="' + i + '">'
-        +   _iconSrc(iconId, (it && it.name) || iconId)
+        // 2026-06-12 (review): usa o NOME do alternativo (alt.name) — antes usava
+        // `it` (não existe neste escopo) → o slug do PNG saía errado e a swap list
+        // mostrava ícone do item atual / fallback SVG em vez do ícone do alternativo.
+        +   _iconSrc(iconId, alt.name || iconId)
         +   '<div class="vinv-swap-info">'
         +     '<div class="vinv-swap-name">' + _esc(alt.name) + '</div>'
         +     '<div class="vinv-swap-meta">' + _buildMeta(alt) + '</div>'
@@ -1173,9 +1195,15 @@
     ctx = ctx || {};
     var btns = [];
     var isEquipped = !!it.equipped;
-    var isEquippable = (cfg.onItemEquip && it.tags && (it.tags.indexOf('weapon') !== -1
-      || it.tags.indexOf('armor') !== -1 || it.tags.indexOf('shield') !== -1
-      || it.tags.indexOf('accessory') !== -1 || it.tags.indexOf('clothing') !== -1));
+    // 2026-06-12 (review): cobre subtipos de arma (simple_weapon/martial_weapon) —
+    // antes um item só com 'simple_weapon' (sem a tag genérica 'weapon') perdia o
+    // botão "Equipar". NÃO usar it.slot como fallback: o Mapa tem slot 'map' e não
+    // deve virar equipável.
+    var _equipTags = ['weapon', 'simple_weapon', 'martial_weapon', 'armor',
+      'light_armor', 'medium_armor', 'heavy_armor', 'shield', 'accessory', 'clothing'];
+    var isEquippable = !!(cfg.onItemEquip && it.tags && _equipTags.some(function (t) {
+      return it.tags.indexOf(t) !== -1;
+    }));
     var canUse = (cfg.onItemUse && it.tags && (it.tags.indexOf('consumable') !== -1
       || it.tags.indexOf('potion') !== -1 || it.tags.indexOf('food') !== -1));
     var canSell = (cfg.onItemSell && it.rarity !== 'quest' && (!it.tags || it.tags.indexOf('no_sell') === -1));
@@ -1287,11 +1315,15 @@
   }
 
   function _slotLabel(slot) {
+    // 2026-06-12 (user): labels alinhados ao slotDef do paper-doll (mesma palavra
+    // que o jogador clicou) + os 4 slots novos — antes shoulders/belt/hands/legs
+    // caíam no fallback `|| slot` (mostrava a key crua "shoulders" no picker).
     return ({
-      head: 'Cabeça', chest: 'Peito', feet: 'Pés',
-      main_hand: 'Mão Principal', off_hand: 'Mão Secundária',
+      head: 'Cabeça', chest: 'Peito', feet: 'Botas',
+      main_hand: 'Mão Dir.', off_hand: 'Mão Esq.',
       ring: 'Anel', ring1: 'Anel I', ring2: 'Anel II',
       amulet: 'Amuleto', cloak: 'Capa', map: 'Mapa',
+      shoulders: 'Ombros', belt: 'Cinto', hands: 'Mãos', legs: 'Pernas',
     })[slot] || slot;
   }
 

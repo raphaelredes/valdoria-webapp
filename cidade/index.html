@@ -38957,7 +38957,12 @@ function _vinvAutoEquipSmart() {
   function bestFor(slotKey, excludeName) {
     var best = null, bestScore = 0;
     pool.forEach(function (c) {
-      if (c.slot !== slotKey && !(slotKey.indexOf('ring') === 0 && c.slot === 'ring')) return;
+      // 2026-06-12 (review): slotKey agora é canônico (ring_1/ring_2/necklace).
+      // O pool tem c.slot = _vinvSlotMap(it.s): anéis viram 'ring' genérico e
+      // amuletos viram 'amulet' — casa a família aqui.
+      if (c.slot !== slotKey
+          && !(slotKey.indexOf('ring') === 0 && c.slot === 'ring')
+          && !(slotKey === 'necklace' && c.slot === 'amulet')) return;
       if (excludeName && c.name === excludeName) return;
       var score;
       if (slotKey === 'main_hand') {
@@ -38990,12 +38995,16 @@ function _vinvAutoEquipSmart() {
     return best;
   }
 
-  var SLOTS = ['main_hand', 'chest', 'off_hand', 'head', 'amulet', 'cloak', 'feet', 'ring1', 'ring2'];
+  // 2026-06-12 (review): keys CANÔNICAS do MOCK_PLAYER_EQUIPPED (ring_1/ring_2/
+  // necklace) — iguais às que _equipItem/_resolveEquipSlot gravam. Antes o
+  // auto-equip escrevia ring1/ring2/amulet (keys da UI) → coexistiam com as
+  // canônicas do equip manual (dupla representação, sync inconsistente).
+  var SLOTS = ['main_hand', 'chest', 'off_hand', 'head', 'necklace', 'cloak', 'feet', 'ring_1', 'ring_2'];
   var changes = [];
   var ring1Pick = null;
   SLOTS.forEach(function (slotKey) {
-    var pick = bestFor(slotKey, slotKey === 'ring2' && ring1Pick ? ring1Pick.name : null);
-    if (slotKey === 'ring1') ring1Pick = pick;
+    var pick = bestFor(slotKey, slotKey === 'ring_2' && ring1Pick ? ring1Pick.name : null);
+    if (slotKey === 'ring_1') ring1Pick = pick;
     if (!pick) return;
     var current = eq[slotKey];
     if (current === pick.name) return;                      // já é o melhor
