@@ -508,9 +508,11 @@
     return !!manifestState.slugs[slug];
   }
 
+  /* NÃO seta src aqui — o caller anexa onload/onerror ANTES de setar src, senão
+     imagem cacheada dispara `load` antes do handler existir e o swap nunca ocorre
+     (bug: item re-renderizado/cacheado ficaria como SVG sprite). */
   function buildImg(slug, altText) {
     var img = new Image();
-    img.src = pngBase + slug + '.webp';
     img.alt = altText || slug;
     img.style.width = '100%';
     img.style.height = '100%';
@@ -544,14 +546,18 @@
     var nameEl = card.querySelector('.item-name');
     var altText = nameEl ? nameEl.textContent : slug;
     var img = buildImg(slug, altText);
-    img.onload = function () {
-      iconDiv.innerHTML = '';
+    var doSwap = function () {
+      if (iconDiv.querySelector('img[data-item-slug]')) return; // já trocado
+      while (iconDiv.firstChild) iconDiv.removeChild(iconDiv.firstChild);
       iconDiv.appendChild(img);
       card.setAttribute('data-img-source', 'png');
     };
+    img.onload = doSwap;
     img.onerror = function () {
       card.setAttribute('data-img-source', 'svg-fallback');
     };
+    img.src = pngBase + slug + '.webp'; // src DEPOIS dos handlers
+    if (img.complete && img.naturalWidth > 0) doSwap(); // cacheada: load já disparou
     return true;
   }
 
@@ -571,11 +577,15 @@
     if (!svgEl || svgEl.closest('defs')) return false; // skip defs entries
     if (svgEl.getAttribute('data-img-swapped') === '1') return false;
     var img = buildImg(slug, rawSlug);
-    img.onload = function () {
+    var doSwap = function () {
+      if (svgEl.getAttribute('data-img-swapped') === '1') return;
       svgEl.setAttribute('data-img-swapped', '1');
       if (svgEl.parentNode) svgEl.parentNode.replaceChild(img, svgEl);
     };
+    img.onload = doSwap;
     img.onerror = function () { /* keep SVG fallback */ };
+    img.src = pngBase + slug + '.webp'; // src DEPOIS dos handlers
+    if (img.complete && img.naturalWidth > 0) doSwap(); // cacheada: load já disparou
     return true;
   }
 
