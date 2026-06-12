@@ -3855,27 +3855,33 @@ Busca rápida:
             if (bg && bg.toolChoice) toolCount += bg.toolChoice;
             if (race.toolChoice) toolCount++;
             if (toolCount > 0) {
+                // F13: pool tipado da escolha local (gaming vs artisan) quando só o
+                // antecedente dá a escolha (sem escolha genérica de classe).
+                const _hasGen = cls.tools.some(t => t.startsWith('_choice'));
+                let _poolKeys = Object.keys(ARTISAN_TOOLS);
+                if (!_hasGen && bg && bg.toolChoice && bg.toolPool === 'gaming') _poolKeys = GAMING_TOOL_KEYS.slice();
+                else if (!_hasGen && bg && bg.toolChoice && bg.toolPool === 'artisan') _poolKeys = ARTISAN_ONLY_KEYS.slice();
                 if (serverSpec && Array.isArray(serverSpec.tool_proficiencies) && serverSpec.tool_proficiencies.length > 0) {
                     const validTools = serverSpec.tool_proficiencies.filter(t => ARTISAN_TOOLS[t]);
                     if (validTools.length >= toolCount) {
                         sel.toolProfs = validTools.slice(0, toolCount);
                     } else {
-                        // Top up local
+                        // Top up local (respeitando o pool)
                         const granted = [];
                         cls.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
                         if (bg && bg.tools) bg.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
                         if (raceKey === 'Gnome' && sel.subrace === 'rock') granted.push('tinker_tools');
-                        const allTools = Object.keys(ARTISAN_TOOLS).filter(t => !granted.includes(t) && !validTools.includes(t));
+                        const allTools = _poolKeys.filter(t => !granted.includes(t) && !validTools.includes(t));
                         const shuffledTools = allTools.sort(() => Math.random() - 0.5);
                         sel.toolProfs = [...validTools, ...shuffledTools.slice(0, toolCount - validTools.length)];
                     }
                 } else {
-                    // Fallback local
+                    // Fallback local (respeitando o pool)
                     const granted = [];
                     cls.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
                     if (bg && bg.tools) bg.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
                     if (raceKey === 'Gnome' && sel.subrace === 'rock') granted.push('tinker_tools');
-                    const allTools = Object.keys(ARTISAN_TOOLS).filter(t => !granted.includes(t));
+                    const allTools = _poolKeys.filter(t => !granted.includes(t));
                     const shuffledTools = allTools.sort(() => Math.random() - 0.5);
                     sel.toolProfs = shuffledTools.slice(0, toolCount);
                 }
@@ -3931,6 +3937,17 @@ Busca rápida:
                     const allLangs = [...LANGUAGES.standard, ...LANGUAGES.exotic];
                     const available = allLangs.filter(l => !fixedLangs.includes(l.key));
                     if (available.length > 0) sel.languages = [pick(available).key];
+                }
+            }
+            // F10: idiomas concedidos pelo antecedente (random)
+            sel.bgLanguages = [];
+            const _bgRand = BACKGROUNDS[sel.bg];
+            if (_bgRand && _bgRand.languageChoice) {
+                const _knownR = [...raceLangs.filter(l => !l.includes('à escolha')), ...(sel.languages || [])];
+                const _poolR = [...LANGUAGES.standard, ...LANGUAGES.exotic].filter(l => !_knownR.includes(l.key));
+                for (let _i = 0; _i < _bgRand.languageChoice && _poolR.length > 0; _i++) {
+                    const _idx = Math.floor(Math.random() * _poolR.length);
+                    sel.bgLanguages.push(_poolR.splice(_idx, 1)[0].key);
                 }
             }
 
@@ -7033,6 +7050,8 @@ Busca rápida:
 
         function buildBgDetail(key) {
             const bg = BACKGROUNDS[key];
+            window._bgDetailKey = key;
+            sel.bgLanguages = [];  // F10: reset escolhas de idioma ao (re)abrir o detalhe
 
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubScreen('sub-bg-detail')">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">${bg.name}</div><div class="detail-subtitle">${bg.desc}</div></div>`;
@@ -7059,14 +7078,15 @@ Busca rápida:
                 html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🔧 Ferramentas<span class="toggle-arrow">▾</span></div><div class="section-body">`;
                 if (bg.tools) {
                     bg.tools.forEach(t => {
-                        const tool = ARTISAN_TOOLS[t];
+                        const tool = ARTISAN_TOOLS[t] || FIXED_TOOL_NAMES[t];
                         const desc = TOOL_DESC[t] || '';
                         html += `<div class="detail-row"><b>${tool ? tool.icon + ' ' + tool.name : t}</b></div>`;
                         if (desc) html += `<div class="detail-row" style="color:var(--v-text-dim);font-size:calc(10px * var(--v-font-scale, 1));padding-left:18px">${desc}</div>`;
                     });
                 }
                 if (bg.toolChoice) {
-                    html += `<div class="detail-row">Escolha ${bg.toolChoice} ferramenta(s) artesanais (seleção na próxima etapa)</div>`;
+                    const _tlabel = bg.toolPool === 'gaming' ? 'conjunto(s) de jogo' : 'ferramenta(s) de artesão';
+                    html += `<div class="detail-row">Escolha ${bg.toolChoice} ${_tlabel} (seleção na próxima etapa)</div>`;
                 }
                 html += `</div></div>`;
             }
@@ -7088,10 +7108,42 @@ Busca rápida:
                 }
             }
 
-            // Confirm
-            html += `<button class="v-btn v-btn-primary confirm-btn" onclick="confirmBg('${key}')">✓ CONFIRMAR ${bg.name.toUpperCase()}</button>`;
+            // Background languages (F10) — multi-picker quando o antecedente concede idiomas
+            if (bg.languageChoice) {
+                const _raceKnown = getRaceKnownLangs(sel.race || '', sel.subrace || '');
+                const _racePicked = (sel.languages || []);
+                const _allLangs = [...LANGUAGES.standard, ...LANGUAGES.exotic];
+                const _availLangs = _allLangs.filter(l => !_raceKnown.includes(l.key) && !_racePicked.includes(l.key));
+                html += `<div class="detail-section"><div class="detail-section-title">🗣️ Idiomas do Antecedente <span class="section-summary" id="bgLangStatus">0/${bg.languageChoice}</span></div>`;
+                html += `<div class="v-caption" style="margin-bottom:8px">Escolha ${bg.languageChoice} idioma(s) — PHB.</div>`;
+                html += `<div class="lang-grid" id="bgLangOptions">`;
+                _availLangs.forEach(l => {
+                    const _on = (sel.bgLanguages || []).includes(l.key);
+                    html += `<div class="lang-option${_on ? ' selected' : ''}" data-key="${l.key}" onclick="selectBgLanguage('${l.key}',this)">${l.name}</div>`;
+                });
+                html += `</div></div>`;
+            }
+
+            // Confirm — gated quando há idiomas de antecedente pendentes
+            const _bgLangOk = !bg.languageChoice || (sel.bgLanguages || []).length === bg.languageChoice;
+            html += `<button class="v-btn v-btn-primary confirm-btn" id="bgConfirmBtn"${_bgLangOk ? '' : ' disabled'} onclick="confirmBg('${key}')">✓ CONFIRMAR ${bg.name.toUpperCase()}</button>`;
 
             document.getElementById('bgDetailContent').innerHTML = html;
+        }
+
+        // F10: seleção de idiomas concedidos pelo antecedente (multi, capada por languageChoice)
+        function selectBgLanguage(langKey, el) {
+            haptic();
+            const bg = BACKGROUNDS[window._bgDetailKey];
+            if (!bg || !bg.languageChoice) return;
+            if (!Array.isArray(sel.bgLanguages)) sel.bgLanguages = [];
+            const idx = sel.bgLanguages.indexOf(langKey);
+            if (idx >= 0) { sel.bgLanguages.splice(idx, 1); el.classList.remove('selected'); }
+            else if (sel.bgLanguages.length < bg.languageChoice) { sel.bgLanguages.push(langKey); el.classList.add('selected'); }
+            const status = document.getElementById('bgLangStatus');
+            if (status) status.textContent = `${sel.bgLanguages.length}/${bg.languageChoice}`;
+            const btn = document.getElementById('bgConfirmBtn');
+            if (btn) btn.disabled = sel.bgLanguages.length !== bg.languageChoice;
         }
 
         function confirmBg(bgKey) {
