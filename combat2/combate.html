@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T17:57:26Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T19:32:34Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -18282,6 +18282,10 @@ function _resetActionFlags(s) {
     /* E2 (escolha autor 2026-04-19) — Mount/Dismount: PHB p.198 "free action
        once per turn". Flag mountedThisTurn previne mount+dismount no mesmo turno. */
     p.mountedThisTurn = false;
+    /* PHB p.93 Beast Master — comando da fera é 1×/turno; o ataque de arma extra
+       (nv5+) é consumido no turno. Reset no início de cada turno do jogador. */
+    p._beastCommandedThisTurn = false;
+    p._companionWeaponAttackPending = false;
 }
 
 /* V1 Invocações Phase 4 (2026-04-19, b) — PHB p.189: jogador pode encerrar o turno
@@ -18957,8 +18961,18 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
         s.log.push(summon.n + _smVerb + target.n + ' — ' + _smAtkPart +
             ' vs CA ' + target.ac + ' | ' + _smDiceN + 'd' + _smDiceD + ' [' + _smRollsDisplay + ']' + _smModStr + ' = ' + dmgTotal + ' ' + summon.dmgType + '.');
     }
-    /* PHB-fiel: comandar consome a AÇÃO PRINCIPAL do Patrulheiro. */
+    /* PHB p.93 (Beast Master) — comandar a fera a Atacar usa sua AÇÃO. A partir do
+       nv5 (Ataque Extra): "you can make one weapon attack yourself when you command
+       the beast to take the Attack action" → a fera ataca E você faz 1 ataque de
+       ARMA na MESMA ação. Modelo: a ação é gasta (bloqueia outras ações/skills =
+       sem exploit), mas `_companionWeaponAttackPending` libera 1 ataque de arma
+       (reabilita só o botão Atacar; confirmAndAttack força 1 ataque). nv1-4 (sem
+       Ataque Extra): comandar = ação inteira. */
+    p._beastCommandedThisTurn = true;
     p.actionSpent = true;
+    if (simClassExtraAttacks(p.cls, p.lvl) >= 1) {
+        p._companionWeaponAttackPending = true;
+    }
     if (typeof _actionTaken !== 'undefined') _actionTaken = false;
     _actionSheetOpen = false;
     await _maybeAdvanceOrStay();
@@ -19314,7 +19328,11 @@ function _updateActionSheetState(s) {
             btnEl.removeAttribute('aria-disabled');
         } else if (ACTION_GATED[actName]) {
             /* Atacar/Esquivar/Fugir/Mochila: requerem ação principal */
-            btnEl.classList.toggle('spent', !!p.actionSpent);
+            var _gateSpent = !!p.actionSpent;
+            /* PHB p.93 Beast Master nv5+: o ataque de arma concedido pelo comando da
+               fera fica disponível mesmo com a ação gasta (só o botão Atacar). */
+            if (actName === 'attack' && p._companionWeaponAttackPending) _gateSpent = false;
+            btnEl.classList.toggle('spent', _gateSpent);
         } else {
             /* Fallback legado: trata como action-gated (não regrediu) */
             btnEl.classList.toggle('spent', !!p.actionSpent);
@@ -21597,10 +21615,11 @@ function onBtnClick(ev) {
        comandar Companheiro Animal CONSOME a Ação principal (PHB p.93). Abre target
        picker; ao clicar inimigo, Wolf ataca usando seus stats (com Pack Tactics G1
        advantage se ≥1 aliado vivo).
-       Patrulheiro nível 5+ Extra Attack: pode atacar com arma + comandar Wolf no mesmo
-       turno. Implementação atual: comando consume ação inteira (simplificação — Extra
-       Attack lógica via attackIndex já permite 2 ataques pra Patrulheiro nv5+ no
-       confirmAndAttack, mas ainda separadamente do command). */
+       Patrulheiro nível 5+ Extra Attack (PHB p.93): comandar a fera a Atacar concede
+       1 ataque de arma do Patrulheiro na MESMA ação — `commandPassiveSummon` gasta a
+       ação mas seta `_companionWeaponAttackPending`, que reabilita 1 ataque de arma
+       (confirmAndAttack força extras=0). nv1-4 (sem Ataque Extra): comando = ação
+       inteira. */
     if (act === 'command-companion') {
         var sCc = currentState;
         if (!sCc || sCc.ph !== 'active') return;
@@ -21860,6 +21879,13 @@ async function confirmAndAttack(tgtIdx) {
     }
     // Extra Attack só aplica a ataque com arma (sem skill). Com skill, 1 ação.
     var extras = skill ? 0 : simClassExtraAttacks(p && p.cls, p && p.lvl);
+    /* PHB p.93 Beast Master nv5+: o ataque de arma que acompanha "Comandar
+       Companheiro" é UM só (não o Ataque Extra completo) — o comando já ocupou o
+       outro ataque da ação. Consome o pending. */
+    if (!skill && p && p._companionWeaponAttackPending) {
+        extras = 0;
+        p._companionWeaponAttackPending = false;
+    }
     /* V1.7 Sprint-17 Ronda 12 (2026-04-21 QA PHB p.251) — Haste extra attack:
        "On each of its turns, the target can take one additional action...
         that action can be used only to take the Attack (one weapon attack only)..."
