@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T04:01:44Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T04:15:26Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -903,6 +903,8 @@ html body .va-backdrop {
     stroke-linejoin: round;
     filter: drop-shadow(0 0 3px currentColor);
 }
+/* 2026-06-12 (user): ícones de volume viraram imagens OpenAI (low). */
+#sim-vol-btn img { width: 24px; height: 24px; display: block; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)); }
 #sim-vol-btn.muted {
     color: var(--v-text-dim, #a09484);
     opacity: 0.6;
@@ -30567,19 +30569,19 @@ function stopForceCombatMusic() {
    Cria elemento fixed no canto superior direito, sincroniza ícone com
    estado de mute, e despacha click pro #va-btn quando disponível pra
    abrir popup de sliders (ou usa toggleMute como fallback). */
-var _SIM_VOL_ICONS = {
-    high: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-          '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>' +
-          '<path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>' +
-          '<path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
-    low:  '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-          '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>' +
-          '<path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>',
-    mute: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-          '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>' +
-          '<line x1="23" y1="9" x2="17" y2="15"/>' +
-          '<line x1="17" y1="9" x2="23" y2="15"/></svg>'
-};
+/* 2026-06-12 (user): ícones de volume são IMAGENS OpenAI (low), não SVG
+   outline (regra "Glifos de UI: Imagem Gerada" + "No Modern Icons"). file://
+   usa ../shared; remoto /shared. onerror esconde (botão continua clicável). */
+var _SIM_VOL_ICONS = (function () {
+    var b = '/shared/img/combat/ui/';
+    if (typeof location !== 'undefined' && location.href.indexOf('file://') === 0) {
+        b = '../shared/img/combat/ui/';
+    }
+    function img(f) {
+        return '<img src="' + b + f + '.webp" alt="" onerror="this.style.display=\'none\'">';
+    }
+    return { high: img('vol-high'), low: img('vol-low'), mute: img('vol-mute') };
+})();
 function _simVolSyncIcon() {
     var btn = document.getElementById('sim-vol-btn');
     if (!btn) return;
