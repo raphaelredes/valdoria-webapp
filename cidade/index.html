@@ -38510,7 +38510,9 @@ if (typeof document !== 'undefined') {
 
 function _itemSlotOf(name) {
   var it = getItemData(name) || {};
-  return it.slot || null;
+  // 2026-06-12 (user): o schema cliente usa `s` (não `slot`) — antes `it.slot`
+  // era SEMPRE undefined → "Esse item não pode ser equipado" pra tudo.
+  return it.s || it.slot || null;
 }
 function _itemTagsOf(name) {
   var it = getItemData(name) || {};
@@ -38530,7 +38532,7 @@ function _useInventoryItem(name) {
   var p = window.CITY_MOCK_PLAYER || {};
   if (tags.indexOf('potion') !== -1 && /cura/i.test(name)) {
     var preHp = p.hp || 0;
-    var maxHp = p.max_hp || preHp;
+    var maxHp = (p.hpMax != null ? p.hpMax : (p.max_hp != null ? p.max_hp : preHp));
     var heal = (it.heal || 6);  // default 1d4+2 média = 6
     p.hp = Math.min(maxHp, preHp + heal);
     var gained = p.hp - preHp;
@@ -38553,6 +38555,10 @@ function _equipItem(name) {
   if (typeof MOCK_PLAYER_EQUIPPED === 'undefined') window.MOCK_PLAYER_EQUIPPED = {};
   var current = MOCK_PLAYER_EQUIPPED[slot];
   MOCK_PLAYER_EQUIPPED[slot] = name;
+  // 2026-06-12 (user): CA atualiza na hora. Tira o bônus do item que saiu do
+  // slot e soma o do novo.
+  if (current && current !== name) _vinvApplyAcDelta(current, -1);
+  if (current !== name) _vinvApplyAcDelta(name, +1);
   if (typeof vToast === 'function') {
     if (current && current !== name) vToast(current + ' → ' + name + ' (' + slot + ')');
     else vToast(name + ' equipado.');
@@ -38572,6 +38578,7 @@ function _unequipItem(name) {
     return false;
   }
   delete MOCK_PLAYER_EQUIPPED[found];
+  _vinvApplyAcDelta(name, -1);  // 2026-06-12 (user): CA cai ao desequipar
   if (typeof vToast === 'function') vToast(name + ' desequipado.');
   if (typeof refreshHud === 'function') refreshHud();
   _syncEquippedToLocalStorage();
@@ -38696,11 +38703,27 @@ function _vinvBuildLoadout() {
 }
 function _vinvBuildStats() {
   var p = window.CITY_MOCK_PLAYER || {};
+  // 2026-06-12 (user): CITY_MOCK_PLAYER usa hpMax/mpMax (server hud.max_hp →
+  // p.hpMax). Antes lia p.max_hp (sempre null) → mostrava "10 / —".
+  var hpMax = (p.hpMax != null) ? p.hpMax : (p.max_hp != null ? p.max_hp : '—');
+  var mpMax = (p.mpMax != null) ? p.mpMax : (p.max_mp != null ? p.max_mp : '—');
   return {
     ca: p.ac || p.armor_class || '—',
-    pv: ((p.hp != null) ? p.hp : '—') + ' / ' + ((p.max_hp != null) ? p.max_hp : '—'),
-    pm: ((p.mp != null) ? p.mp : '—') + ' / ' + ((p.max_mp != null) ? p.max_mp : '—'),
+    pv: ((p.hp != null) ? p.hp : '—') + ' / ' + hpMax,
+    pm: ((p.mp != null) ? p.mp : '—') + ' / ' + mpMax,
   };
+}
+/* 2026-06-12 (user): CA reflete equip/unequip na hora. Ajusta p.ac pelo bônus
+   do item (it.ac). Mock client-side — o servidor reconcilia no próximo load. */
+function _vinvApplyAcDelta(name, sign) {
+  try {
+    var it = getItemData(name) || {};
+    var acb = (typeof it.ac === 'number') ? it.ac : 0;
+    if (!acb) return;
+    var p = window.CITY_MOCK_PLAYER; if (!p) return;
+    var base = (typeof p.ac === 'number') ? p.ac : parseInt(p.ac, 10) || 0;
+    p.ac = base + sign * acb;
+  } catch (e) { /* best-effort */ }
 }
 function _vinvBuildConfig() {
   var items = (MOCK_PLAYER_INVENTORY || [])
@@ -38751,19 +38774,21 @@ function _vinvBuildConfig() {
     onItemEquip: function (item) {
       if (typeof _equipItem === 'function') _equipItem(item.name);
       else if (typeof vToast === 'function') vToast('Equipar ' + item.name);
-      window.vInventory && vInventory.refresh();
+      // 2026-06-12 (user): passa o player RECONSTRUÍDO (loadout + stats CA/PV/PM
+      // atualizados) — antes refresh() sem arg re-renderizava com stats stale.
+      window.vInventory && vInventory.refresh(_vinvBuildConfig().player);
     },
     onItemUnequip: function (item) {
       if (typeof _unequipItem === 'function') _unequipItem(item.name);
       else if (typeof vToast === 'function') vToast('Desequipar ' + item.name);
-      window.vInventory && vInventory.refresh();
+      window.vInventory && vInventory.refresh(_vinvBuildConfig().player);
     },
     onItemSwap: function (oldItem, newItem, slot) {
       if (typeof _equipItem === 'function') _equipItem(newItem.name);
       else if (typeof vToast === 'function') {
         vToast(oldItem ? ('Trocar ' + oldItem.name + ' → ' + newItem.name) : ('Equipar ' + newItem.name));
       }
-      window.vInventory && vInventory.refresh();
+      window.vInventory && vInventory.refresh(_vinvBuildConfig().player);
     },
     onItemSell: function (item) {
       if (typeof _sellSingleItem === 'function') _sellSingleItem(item.name);

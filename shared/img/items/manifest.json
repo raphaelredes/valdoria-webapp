@@ -3635,10 +3635,355 @@
       "cost": 0.04,
       "quality": "low",
       "category": "base-template"
+    },
+    "foco-druidico": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "corda-de-canhamo-15m": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "mochila": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "caixa-de-pederneira": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "tocha": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "simbolo-sagrado": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "bolsa-de-componentes": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "grimorio": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "foco-arcano": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pacote-do-explorador": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pacote-do-calabouco": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pacote-de-erudito": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "livro-de-oracoes": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "incenso": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "vestes-cerimoniais": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "kit-de-disfarce": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pe-de-cabra": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "roupas-escuras-com-capuz": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "roupas-finas": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "roupas-comuns": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "alaude": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "anel-de-sinete": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pergaminho-de-linhagem": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "cajado-de-caminhada": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "armadilha-de-caca": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "trofeu-animal": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "estojo-de-pergaminhos": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "cobertor-de-inverno": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pena-e-tinta": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "carta-selada": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "marlinspike": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "insignia-de-patente": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "trofeu-de-combate": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "mapa-da-cidade": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "faca-pequena": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pa": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "panela-de-ferro": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "ferramentas-de-artesao": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "carta-de-introducao-de-guilda": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "elixir-do-cacador": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pocao-da-pele-de-pedra": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "tonico-de-ferro": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "elixir-do-olhar-verdadeiro": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pocao-de-velocidade-menor": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "frasco-de-sono": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "tonico-do-furtivo": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pocao-do-coracao-calmo": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "elixir-do-esquecimento": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "topazio-estelar": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "coracao-de-cristal": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "anel-do-vigia": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pingente-da-linhagem": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "espelho-do-caminhante": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pedra-do-eco": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pergaminho-do-mapa-antigo": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "fragmento-de-runa-elfica": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "penas-de-grifo": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "selo-do-comerciante": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "flechas-de-prata-20": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "veneno-para-ratos-missao": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pocao-de-resist-ao-fogo": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "oleo-de-resist-a-lava": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "camisao-de-malha": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "ferramentas-de-ladrao": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "machado-de-guerra": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "arma-magica": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "orbe-arcano": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "varinha-de-mago-de-guerra": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "elmo-de-protecao": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
     }
   },
-  "last_run": "2026-05-19T12:12:37.809266",
-  "total_cost": 3.942385,
+  "last_run": "2026-06-12T10:40:40.942575",
+  "total_cost": 3.947225,
   "last_updated": "2026-05-17T21:30:13.724922",
-  "count": 606
+  "count": 675
 }

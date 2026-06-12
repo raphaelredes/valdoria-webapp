@@ -136,6 +136,14 @@
     if (altText) {
       var nameSlug = _slugify(altText);
       if (nameSlug) candidates.push(nameSlug);
+      // 1b) 2026-06-12 (user): variante de encantamento ("Espada Longa +1") reusa
+      //     a arte da BASE ("espada-longa") — não geramos arte quase idêntica por
+      //     nível de +N. Strip " +N" do nome antes do slug.
+      var baseName = String(altText).replace(/\s*\+\d+\s*$/, '').trim();
+      if (baseName && baseName !== altText) {
+        var baseSlug = _slugify(baseName);
+        if (baseSlug && candidates.indexOf(baseSlug) < 0) candidates.push(baseSlug);
+      }
     }
 
     // 2) Slug strippado do sprite iconId (Heraldic convention — sem connectives;
@@ -907,6 +915,10 @@
       + '</div>';
 
     el.querySelector('[data-action="secondary"]').addEventListener('click', function () {
+      // 2026-06-12 (user): nas abas Equipados/Aliados, "Voltar" volta pra MOCHILA
+      // (items) — antes fechava o inventário inteiro. Só fecha quando já está na
+      // lista de itens.
+      if (_state.activeTab !== 'items') { _state.activeTab = 'items'; _render(); return; }
       if (typeof secAct.onClick === 'function') secAct.onClick();
       else window.vInventory.close();
     });

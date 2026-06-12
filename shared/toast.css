@@ -55,7 +55,11 @@
     font-size: calc(14px * var(--v-font-scale, 1));
     text-align: center;
 
-    z-index: var(--v-z-loading, 1000);
+    /* 2026-06-12 (user): PADRAO_NOTIFICACOES — toast ACIMA DE TUDO. Antes era
+       --v-z-loading (1000), ficava ATRAS do inventario (.vinv-overlay z 9000) e
+       de modais (5000): a notificacao "Esse item nao pode ser equipado" so
+       aparecia ao fechar a Mochila (na cidade). Critical (10000) cobre tudo. */
+    z-index: var(--v-z-critical, 10000);
     pointer-events: none;
 
     /* Animacao dupla: entry com drift vertical + pulse dourado de "manifestacao" */
