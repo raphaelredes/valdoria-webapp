@@ -742,6 +742,15 @@ LOG SINK (Fase 7):
        não funcionar pro user (só logavam no console). */
     document.write('<link rel="stylesheet" href="/shared/toast.css?v=' + v + '">');
     document.write('<script src="/shared/toast.js?v=' + v + '"><\/script>');
+    /* 2026-06-12 (vProcessing stub fix): processing-overlay canonical (Loading
+       System — Dual Mode). Sem isto, window.vProcessing caía no STUB no-op (~L9994)
+       e TODAS as chamadas vProcessing.show/hide na cidade eram silenciosas
+       (_openCityScreen diálogos/serviços, _resolveCityChoice, arquivar/restaurar/
+       trocar personagem, merge-dialog). processing-overlay.js seta window.vProcessing
+       (impl real) — o stub guarda com `if (typeof window.vProcessing === 'undefined')`
+       então não sobrescreve. Carregado AQUI (antes de merge-dialog que o usa). */
+    document.write('<link rel="stylesheet" href="/shared/processing-overlay.css?v=' + v + '">');
+    document.write('<script src="/shared/processing-overlay.js?v=' + v + '"><\/script>');
     /* Fase 4 vínculo de contas (Sessão #68): diálogo de merge (>=3 opções no
        409 linked_to_another_account). Self-contained; usa vToast/vProcessing/vOverlay. */
     document.write('<script src="/shared/merge-dialog.js?v=' + v + '"><\/script>');
