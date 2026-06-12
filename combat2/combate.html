@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T08:23:16Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T17:57:26Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13879,10 +13879,26 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         _bw.save.dc = 8 + Math.floor((_bwCon - 10) / 2) + _bwProf;
         skillsCopy.push(_bw);
     }
+    // F8 #90: CD de magia racial (Drow/Tiefling conjuram por CARISMA, PHB
+    // p.24/43) = 8 + CHA mod + prof. cha/prof ainda não computados aqui.
+    var _racCha = (spec.cha_exact != null) ? (parseInt(spec.cha_exact, 10) | 0) : 12;
+    var _racProf = 2 + Math.floor((_racialLvl - 1) / 4);
+    var _racDc = 8 + Math.floor((_racCha - 10) / 2) + _racProf;
+    // Repreensão Infernal racial: SÓ Asmodeus (PHB p.43); subraça vazia = legado
+    // clássico. As outras linhagens têm magias próprias (abaixo).
     if (raceKey === 'tiefling' && _racialLvl >= 3
+            && (subrace === '' || subrace === 'asmodeus')
             && !skillsCopy.some(function (sk) { return sk.n === 'Repreensão Infernal'; })) {
         skillsCopy.push(_simTieflingRebukeSkill());
     }
+    // F8 #90: Magia Drow + magias inatas das linhagens Tiefling. Dedup por nome
+    // (não re-injeta se a classe já concede a mesma magia — ex.: Mago/Bruxo).
+    var _racialInnate = [];
+    if (raceKey === 'elf') _racialInnate = _simDrowMagicSkills(subrace, _racialLvl, _racDc);
+    else if (raceKey === 'tiefling') _racialInnate = _simTieflingLineageSkills(subrace, _racialLvl, _racDc);
+    _racialInnate.forEach(function (rsk) {
+        if (!skillsCopy.some(function (sk) { return sk.n === rsk.n; })) skillsCopy.push(rsk);
+    });
     /* B1+C1 — flag de rituais já feitos (default true). Setup-frontend pode passar
        spec.summonsInvoked = {familiar: false} pra simular "ainda não invocou". */
     var summonsInvokedFromSetup = (spec.summonsInvoked && typeof spec.summonsInvoked === 'object')
@@ -15488,6 +15504,104 @@ function _simTieflingRebukeSkill() {
         desc: 'Reação: 3d10 fogo em quem te feriu (TR DES p/ metade). 1×/combate (PHB p.43).',
         helpDnd5e: 'Repreensão Infernal (PHB p.43 — Legado Infernal do Tiefling, nv 3): REAÇÃO ao receber dano; agressor faz TR de DES ou sofre 3d10 de fogo (metade em sucesso) — conjurada como magia de 2º NÍVEL.'
     };
+}
+
+// F8 #90: magias raciais INATAS — Magia Drow (Elfo Negro PHB p.24) + Legado
+// Infernal das linhagens Tiefling. Espelham o motor combat2_race.py
+// (drow_magic_skills / tiefling_lineage_skills). Skills auto-contidas (cost 0 +
+// combatOnceId 1×/combate + isRacial), reusando flags de runtime existentes
+// (castSave/targetedAdvantage/attackerDisadvantage/afterAttackEnemyDebuff/
+// buffSim/concentration). CD = 8 + CHA mod + prof (Drow/Tiefling conjuram por
+// CARISMA, PHB p.24/43) — calculada no buildCharUnitFromSetup com spec.cha_exact.
+function _simSkillFaerieFire(dc) {
+    return {
+        n: 'Fogo Feérico', ico: '✨', cost: 0, kind: 'attack',
+        castSave: true, damageSpec: { n: 0, d: 0 },
+        save: { ability: 'dex', dc: dc },
+        afterAttackEnemyDebuff: {
+            id: 'faerie_fire_outlined', turns: 3, n: 'Delineado', ico: '✨',
+            targetedAdvantage: true, concentration: true,
+            dndCondition: 'Delineado (Fogo Feérico — atacado com vantagem)'
+        },
+        combatOnceId: 'drow_faerie_fire', isRacial: true,
+        desc: 'Delineia o alvo em luz (TR DES): atacantes têm vantagem contra ele. Concentração. 1×/combate (PHB p.24).',
+        helpDnd5e: 'Fogo Feérico / Faerie Fire (PHB p.239 — Magia Drow nv3): o alvo faz TR de DES ou fica DELINEADO por luz — todo ataque contra ele tem vantagem e ele não pode se beneficiar de invisibilidade. Concentração. 1×/dia — na arena, 1×/combate.'
+    };
+}
+function _simSkillDarkness() {
+    return {
+        n: 'Escuridão', ico: '🌑', cost: 0, kind: 'buff',
+        buffSim: {
+            id: 'darkness', turns: 3, attackerDisadvantage: true, concentration: true,
+            dndCondition: 'Escuridão (atacantes não te enxergam — desvantagem)'
+        },
+        combatOnceId: 'darkness_racial', isRacial: true,
+        desc: 'Envolve-se em escuridão mágica: atacantes não te enxergam (desvantagem). Concentração. 1×/combate (PHB p.230).',
+        helpDnd5e: 'Escuridão / Darkness (PHB p.230 — Magia Drow nv5 / Legado de Asmodeus nv5): cria escuridão mágica que bloqueia até visão no escuro. Arena: atacantes ficam com DESVANTAGEM (não te enxergam). Concentração. 1×/dia — na arena, 1×/combate.'
+    };
+}
+function _simSkillBurningHands(dc) {
+    return {
+        n: 'Mãos Flamejantes', ico: '🔥', cost: 0, kind: 'attack',
+        dmgType: 'fire', multiTarget: true,
+        save: { ability: 'dex', dc: dc },
+        damageSpec: { n: 3, d: 6, flat: 0 },
+        combatOnceId: 'mephistopheles_burning_hands', isRacial: true,
+        desc: 'Cone de fogo: 3d6 em área (TR DES p/ metade). 1×/combate (PHB p.220).',
+        helpDnd5e: 'Mãos Flamejantes / Burning Hands (PHB p.220 — Legado de Mephistopheles nv3): cone de fogo, 3d6 a cada alvo; TR DES p/ metade. Conjurada como magia de 1º nível. 1×/dia — na arena, 1×/combate.'
+    };
+}
+function _simSkillRayOfSickness(dc) {
+    return {
+        n: 'Raio Doentio', ico: '☠️', cost: 0, kind: 'attack',
+        dmgType: 'poison', ranged: true,
+        save: { ability: 'con', dc: dc },
+        damageSpec: { n: 2, d: 8, flat: 0 },
+        afterAttackEnemyDebuff: {
+            id: 'ray_sickness_poisoned', turns: 1, n: 'Envenenado', ico: '☠️',
+            atkDisadvantage: true,
+            dndCondition: 'Envenenado (PHB App.A — Raio Doentio)'
+        },
+        combatOnceId: 'baalzebul_ray_sickness', isRacial: true,
+        desc: 'Raio venenoso: 2d8 + alvo Envenenado (TR CON). 1×/combate (PHB p.271).',
+        helpDnd5e: 'Raio Doentio / Ray of Sickness (PHB p.271 — Legado de Baalzebul nv3): ataque de magia à distância; 2d8 veneno e o alvo faz TR de CON ou fica ENVENENADO (desvantagem em ataques). 1×/dia — na arena, 1×/combate.'
+    };
+}
+function _simSkillInvisibility() {
+    return {
+        n: 'Invisibilidade', ico: '👤', cost: 0, kind: 'buff',
+        buffSim: {
+            id: 'invisibility', turns: 3, atkAdvantage: true,
+            attackerDisadvantage: true, endOnAttack: true, concentration: true,
+            dndCondition: 'Invisível (PHB App.A — Invisibilidade)'
+        },
+        combatOnceId: 'dispater_invisibility', isRacial: true,
+        desc: 'Fica invisível: seus ataques com vantagem, atacantes com desvantagem (quebra ao atacar). 1×/combate (PHB p.255).',
+        helpDnd5e: 'Invisibilidade / Invisibility (PHB p.255 — Legado de Dispater nv5): você fica invisível; seus ataques têm vantagem e atacantes têm desvantagem. Quebra ao atacar/conjurar. Concentração. 1×/dia — na arena, 1×/combate.'
+    };
+}
+// Drow: Fogo Feérico (nv3) + Escuridão (nv5). dc = CD racial (8+CHA+prof).
+function _simDrowMagicSkills(subrace, lvl, dc) {
+    if (subrace !== 'drow') return [];
+    var out = [];
+    if (lvl >= 3) out.push(_simSkillFaerieFire(dc));
+    if (lvl >= 5) out.push(_simSkillDarkness());
+    return out;
+}
+// Tiefling: magias inatas por linhagem (subraça vazia = asmodeus por compat).
+function _simTieflingLineageSkills(subrace, lvl, dc) {
+    var sub = subrace || 'asmodeus';
+    var out = [];
+    if (sub === 'asmodeus' || sub === '') {
+        if (lvl >= 5) out.push(_simSkillDarkness());
+    } else if (sub === 'baalzebul') {
+        if (lvl >= 3) out.push(_simSkillRayOfSickness(dc));
+    } else if (sub === 'dispater') {
+        if (lvl >= 5) out.push(_simSkillInvisibility());
+    } else if (sub === 'mephistopheles') {
+        if (lvl >= 3) out.push(_simSkillBurningHands(dc));
+    }
+    return out;
 }
 
 // C2.9 #90: dado de Artes Marciais do Monge escala por nível (PHB p.78):
