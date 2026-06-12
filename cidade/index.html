@@ -38637,13 +38637,43 @@ function _useInventoryItem(name) {
   if (typeof refreshHud === 'function') refreshHud();
   return true;
 }
-function _equipItem(name) {
-  var slot = _itemSlotOf(name);
-  if (!slot) {
+// 2026-06-12 (user "anel não aparece no slot"): família de anel. ITEMS_DB usa o
+// slot 'ring' genérico, mas existem DOIS slots (ring_1/ring_2 → UI ring1/ring2).
+function _isRingSlot(s) {
+  s = String(s || '').toLowerCase();
+  return s === 'ring' || s === 'ring1' || s === 'ring2' || s === 'ring_1' || s === 'ring_2';
+}
+// Resolve o slot do ITEMS_DB pro slot canônico do MOCK_PLAYER_EQUIPPED (ring_1/
+// ring_2 p/ anéis; necklace p/ amuletos). Sem isso, _equipItem gravava o anel em
+// MOCK_PLAYER_EQUIPPED['ring'] — key órfã que NENHUM slot da aba Equipados lê →
+// o anel sumia do paper-doll apesar do V na lista. Re-equipar o mesmo anel é
+// idempotente (mantém o slot atual). Dois anéis distintos ocupam ring_1 e ring_2.
+function _resolveEquipSlot(rawSlot, name, preferUiSlot) {
+  var eq = window.MOCK_PLAYER_EQUIPPED || {};
+  if (_isRingSlot(rawSlot)) {
+    // slot UI clicado explicitamente (swap/picker de slot vazio) tem prioridade —
+    // clicar o Anel II preenche ring_2 (não o primeiro livre).
+    var pus = String(preferUiSlot || '').toLowerCase();
+    if (pus === 'ring1' || pus === 'ring_1') return 'ring_1';
+    if (pus === 'ring2' || pus === 'ring_2') return 'ring_2';
+    if (eq.ring_1 === name) return 'ring_1';   // re-equip idempotente
+    if (eq.ring_2 === name) return 'ring_2';
+    if (!eq.ring_1) return 'ring_1';
+    if (!eq.ring_2) return 'ring_2';
+    return 'ring_1';                            // ambos cheios → substitui o Anel I
+  }
+  var s = String(rawSlot || '').toLowerCase();
+  if (s === 'amulet' || s === 'necklace') return 'necklace';  // UI: necklace→amulet
+  return rawSlot;
+}
+function _equipItem(name, preferUiSlot) {
+  var rawSlot = _itemSlotOf(name);
+  if (!rawSlot) {
     if (typeof vToast === 'function') vToast('Esse item não pode ser equipado.');
     return false;
   }
   if (typeof MOCK_PLAYER_EQUIPPED === 'undefined') window.MOCK_PLAYER_EQUIPPED = {};
+  var slot = _resolveEquipSlot(rawSlot, name, preferUiSlot);
   var current = MOCK_PLAYER_EQUIPPED[slot];
   MOCK_PLAYER_EQUIPPED[slot] = name;
   // 2026-06-12 (user): CA atualiza na hora. Tira o bônus do item que saiu do
@@ -38777,6 +38807,21 @@ function _vinvAdaptItem(invEntry) {
     iconId: _vinvIconId(name),
   };
 }
+// 2026-06-12 (user): resolve a UI slot key (head/chest/.../ring1/ring2/amulet) a
+// partir da key do equip dict (autoritativa do slot ESPECÍFICO) + slot do item.
+// Família de anel preenche ring1 e depois ring2 (ITEMS_DB usa 'ring' genérico; a
+// UI tem 2 slots) — robusto a key órfã 'ring', a ring_1/ring_2 explícitos e a
+// estado vindo do servidor. Defensivo: tolera o bug antigo (key 'ring' solta).
+function _vinvLoadoutKey(equipKey, itemSlot, loadout) {
+  if (_isRingSlot(equipKey) || _isRingSlot(itemSlot)) {
+    var prefer2 = String(equipKey).indexOf('2') >= 0;  // ring_2/ring2 → ring2
+    if (prefer2 && !loadout.ring2) return 'ring2';
+    if (!loadout.ring1) return 'ring1';
+    if (!loadout.ring2) return 'ring2';
+    return 'ring1';
+  }
+  return _vinvSlotMap(equipKey) || _vinvSlotMap(itemSlot) || equipKey;
+}
 function _vinvBuildLoadout() {
   // Sessão #63 (2026-05-30): lê DIRETO de MOCK_PLAYER_EQUIPPED (slot→nome),
   // hidratado com o equipamento REAL do char no bootstrap. Antes cruzava com
@@ -38789,8 +38834,10 @@ function _vinvBuildLoadout() {
     var name = eq[slot];
     if (!name) return;
     var adapted = _vinvAdaptItem({ n: name, q: 1 });
-    // slot do ITEM (via ITEMS_DB) tem prioridade; senão a key do equip dict.
-    var key = adapted.slot || _vinvSlotMap(slot) || slot;
+    // 2026-06-12 (user "anel não aparece no slot"): usa a KEY do equip dict
+    // (slot específico) — NÃO o adapted.slot do item, que é o 'ring' genérico e
+    // virava key órfã. _vinvLoadoutKey trata a família de anel → ring1/ring2.
+    var key = _vinvLoadoutKey(slot, adapted.slot, loadout);
     if (key) loadout[key] = adapted;
   });
   return loadout;
@@ -39047,7 +39094,9 @@ function _vinvBuildConfig() {
       window.vInventory && vInventory.refresh(_vinvBuildConfig().player);
     },
     onItemSwap: function (oldItem, newItem, slot) {
-      if (typeof _equipItem === 'function') _equipItem(newItem.name);
+      // 2026-06-12 (user): passa o slot UI clicado (ex.: 'ring2') p/ o anel ir pro
+      // slot certo — clicar Anel II preenche ring_2, não o primeiro livre.
+      if (typeof _equipItem === 'function') _equipItem(newItem.name, slot);
       else if (typeof vToast === 'function') {
         vToast(oldItem ? ('Trocar ' + oldItem.name + ' → ' + newItem.name) : ('Equipar ' + newItem.name));
       }

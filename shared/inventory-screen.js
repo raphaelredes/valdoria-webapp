@@ -732,16 +732,25 @@
         + 'data-action="auto-equip" style="width:100%;margin:0 0 8px;">'
         + '⚔ Auto-Equipar (melhor conjunto)</button>';
     }
+    // 2026-06-12 (user "revise todo o sistema de equipamentos"): paper-doll com
+    // TODOS os slots vestíveis do ITEMS_DB. Antes faltavam shoulders/belt/hands/
+    // legs — itens nesses slots ficavam equipados (V na lista) mas invisíveis no
+    // avatar. Grid 3-col flui pras linhas extras. Ordem corpo: cabeça→tronco→
+    // braços→pernas/anéis→botas.
     var slotDef = [
       { key: 'head',      label: 'Cabeça' },
       { key: 'amulet',    label: 'Amuleto' },
+      { key: 'shoulders', label: 'Ombros' },
       { key: 'cloak',     label: 'Capa' },
-      { key: 'off_hand',  label: 'Mão Esq.' },
       { key: 'chest',     label: 'Peito' },
+      { key: 'belt',      label: 'Cinto' },
+      { key: 'off_hand',  label: 'Mão Esq.' },
+      { key: 'hands',     label: 'Mãos' },
       { key: 'main_hand', label: 'Mão Dir.' },
       { key: 'ring1',     label: 'Anel I' },
-      { key: 'feet',      label: 'Botas' },
+      { key: 'legs',      label: 'Pernas' },
       { key: 'ring2',     label: 'Anel II' },
+      { key: 'feet',      label: 'Botas' },
     ];
     var html = autoHtml + '<div class="vinv-loadout-avatar">';
     slotDef.forEach(function (s) {
