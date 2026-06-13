@@ -635,7 +635,7 @@
         ]
       },
       "about_tyr": {
-        "text": "Vorenn é o Mutilado, o deus da justiça e do dever. Ele sacrificou sua própria mão para prender o lobo Fenrir, provando que a justiça exige sacríficio pessoal. Ele observa Eldoria e guia aqueles que buscam o caminho reto.",
+        "text": "Vorenn é o Mutilado, o deus da justiça e do dever. Ele sacrificou sua própria mão para prender o lobo Fenrir, provando que a justiça exige sacríficio pessoal. Ele observa Valdoria e guia aqueles que buscam o caminho reto.",
         "choices": [
           {
             "text": "Entendido. Obrigado, Irmã.",
@@ -653,7 +653,7 @@
           },
           {
             "type": "narration",
-            "text": "Ele observa Eldoria e guia aqueles que buscam o caminho reto."
+            "text": "Ele observa Valdoria e guia aqueles que buscam o caminho reto."
           }
         ]
       },
@@ -820,7 +820,7 @@
           "Você... você conseguiu! A sombra no pântano foi purificada. Vorenn olha para você com favor, campeão.",
           "A escuridão foi afastada por suas mãos. O templo está em débito eterno com você.",
           "Sinto a luz fluindo mais forte desde que você destruiu aquela abominação. Seja abençoado!",
-          "O Horror do Pântano finalmente pereceu. Eldoria respira mais leve graças a você.",
+          "O Horror do Pântano finalmente pereceu. Valdoria respira mais leve graças a você.",
           "Campeão de Vorenn! Sua coragem purificou terras corrompidas. Como posso servi-lo?"
         ],
         "choices": [
@@ -907,7 +907,7 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria respira mais leve graças a você."
+            "text": "Valdoria respira mais leve graças a você."
           },
           {
             "type": "narration",
@@ -924,7 +924,7 @@
         ]
       },
       "swamp_explanation": {
-        "text": "Uma entidade da Feywild corrompida, presa entre os planos. Suas raízes buscavam drenar a essência sagrada de Eldoria. Você salvou mais do que imagina.",
+        "text": "Uma entidade da Feywild corrompida, presa entre os planos. Suas raízes buscavam drenar a essência sagrada de Valdoria. Você salvou mais do que imagina.",
         "choices": [
           {
             "text": "Fico feliz em ajudar.",
@@ -944,7 +944,7 @@
           },
           {
             "type": "narration",
-            "text": "Suas raízes buscavam drenar a essência sagrada de Eldoria."
+            "text": "Suas raízes buscavam drenar a essência sagrada de Valdoria."
           },
           {
             "type": "narration",
@@ -955,7 +955,7 @@
       "about_mirena": {
         "text": [
           "(Os olhos de Elara se suavizam, mas há uma tensão sutil) Mirena... minha prima. Crescemos juntas nos campos ao norte. Ela sempre foi brilhante — curiosa demais para o conforto de qualquer sacerdote. Enquanto eu rezava, ela desmontava relicários para ver como funcionavam.",
-          "(Elara toca o símbolo de Vorenn no peito) Minha prima escolheu o caminho da ciência, eu escolhi o da fé. Não concordamos em quase nada... mas o sangue nos une. Quando ela ficou doente no primeiro inverno em Eldoria, passei três noites no laboratório dela cuidando da febre.",
+          "(Elara toca o símbolo de Vorenn no peito) Minha prima escolheu o caminho da ciência, eu escolhi o da fé. Não concordamos em quase nada... mas o sangue nos une. Quando ela ficou doente no primeiro inverno em Valdoria, passei três noites no laboratório dela cuidando da febre.",
           "Mirena é como uma chama — ilumina e queima ao mesmo tempo. Suas poções salvam vidas, não nego. Mas ela confia demais na razão e pouco na fé. Há mistérios que a lógica não alcança."
         ],
         "choices": [
@@ -996,7 +996,7 @@
           },
           {
             "type": "narration",
-            "text": "Quando ela ficou doente no primeiro inverno em Eldoria, passei três noites no laboratório dela cuidando da febre."
+            "text": "Quando ela ficou doente no primeiro inverno em Valdoria, passei três noites no laboratório dela cuidando da febre."
           },
           {
             "type": "narration",
@@ -1017,7 +1017,7 @@
         ]
       },
       "about_mirena_detail": {
-        "text": "(Elara deixa escapar um riso inesperado) Brigar? Nós discutimos sobre TUDO. Ela diz que a cura divina é 'efeito placebo glorificado'. Eu digo que as poções dela são 'sopa com pretensão'. Uma vez discutimos por quatro horas sobre se a Água Benta tem propriedades químicas ou divinas.\n\n(O rosto dela se suaviza) Mas quando o Horror do Pântano ameaçou Eldoria, ela apareceu no templo com três frascos de antitoxina. Sem pedir nada em troca. Sem fazer piada. Só disse: 'Cuida de você, prima.' É... é assim que somos.",
+        "text": "(Elara deixa escapar um riso inesperado) Brigar? Nós discutimos sobre TUDO. Ela diz que a cura divina é 'efeito placebo glorificado'. Eu digo que as poções dela são 'sopa com pretensão'. Uma vez discutimos por quatro horas sobre se a Água Benta tem propriedades químicas ou divinas.\n\n(O rosto dela se suaviza) Mas quando o Horror do Pântano ameaçou Valdoria, ela apareceu no templo com três frascos de antitoxina. Sem pedir nada em troca. Sem fazer piada. Só disse: 'Cuida de você, prima.' É... é assim que somos.",
         "choices": [
           {
             "text": "Família é família, apesar de tudo.",
@@ -1043,7 +1043,7 @@
           },
           {
             "type": "narration",
-            "text": "Uma vez discutimos por quatro horas sobre se a Água Benta tem propriedades químicas ou divinas.\n\n(O rosto dela se suaviza) Mas quando o Horror do Pântano ameaçou Eldoria, ela apareceu no templo com três frascos de antitoxina."
+            "text": "Uma vez discutimos por quatro horas sobre se a Água Benta tem propriedades químicas ou divinas.\n\n(O rosto dela se suaviza) Mas quando o Horror do Pântano ameaçou Valdoria, ela apareceu no templo com três frascos de antitoxina."
           },
           {
             "type": "narration",
@@ -1061,7 +1061,7 @@
       },
       "about_martha": {
         "text": [
-          "(Elara sorri com ternura) Martha é a rocha de Eldoria. Quando cheguei a este templo, jovem e insegura, foi ela quem me trouxe chá na primeira noite. Disse: 'Os deuses cuidam da alma, mas alguém precisa cuidar do estômago.' Nunca esqueci.",
+          "(Elara sorri com ternura) Martha é a rocha de Valdoria. Quando cheguei a este templo, jovem e insegura, foi ela quem me trouxe chá na primeira noite. Disse: 'Os deuses cuidam da alma, mas alguém precisa cuidar do estômago.' Nunca esqueci.",
           "Martha carrega mais peso do que mostra. Perder Edric a marcou profundamente, mas ela transformou a dor em força. Cada prato que serve, cada hóspede que acolhe — é a forma dela de honrar a memória dele.",
           "(Elara junta as mãos em reflexão) Eu guio almas no templo, mas Martha guia corações na estalagem. Às vezes penso que o trabalho dela é mais sagrado que o meu."
         ],
@@ -1079,7 +1079,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "(Elara sorri com ternura) Martha é a rocha de Eldoria."
+            "text": "(Elara sorri com ternura) Martha é a rocha de Valdoria."
           },
           {
             "type": "narration",
@@ -1238,7 +1238,7 @@
       "friendly": [
         "Filho de Vorenn, é uma alegria vê-lo novamente!",
         "Sua presença traz uma aura de paz ao templo.",
-        "Fico grata por sua ajuda à Eldoria. Precisa de uma bênção?",
+        "Fico grata por sua ajuda à Valdoria. Precisa de uma bênção?",
         "Martha diz que você tem um coração de ouro. Eu concordo.",
         "A justiça é feita através de suas mãos. Vorenn te abençoe!",
         "Sempre haverá um lugar para você em nossa mesa."
@@ -1259,7 +1259,7 @@
       "O templo guarda registros de séculos de história. Já encontrei menções a esta corrupção nos pergaminhos antigos.",
       "A cura começa de dentro para fora. Nenhuma poção substitui a paz de espírito.",
       "Minha prima no mercado cura com alquimia, eu curo com fé. Ambos os caminhos têm mérito, por mais que ela discorde.",
-      "Eldoria é protegida por mais do que muros de pedra. Há selos antigos nas fundações deste templo.",
+      "Valdoria é protegida por mais do que muros de pedra. Há selos antigos nas fundações deste templo.",
       "A natureza e a divindade estão mais próximas do que parecem. Cada flor que desabrocha é uma oração.",
       "O solo perto do pântano está escurecendo. Algo drena a vida da terra e se aproxima da cidade.",
       "A retidão não é o caminho mais fácil, mas o único correto. Vejo isso nos aventureiros que sobrevivem.",

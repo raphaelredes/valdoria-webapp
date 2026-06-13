@@ -392,7 +392,7 @@
         ]
       },
       "about_sea": {
-        "text": "Corvus para de desenhar e olha para longe, como se visse algo além das paredes.\n\n\"Eu era navegador da Frota Mercante de Solhaven. Dez navios, cento e vinte homens. Cruzávamos o Mar de Vidro como se fosse um lago.\"\n\nEle engole em seco.\n\n\"Uma tempestade nos pegou na Passagem dos Ventos. Não uma tempestade comum — os marinheiros velhos diziam que o próprio mar estava com raiva. Perdi tudo. Todos. Acordei numa praia a dois dias de Eldoria, agarrado a um pedaço de mastro.\"\n\nEle volta a olhar para os mapas.\n\n\"Agora mapeio terra firme. O mar pode ficar com seus segredos.\"",
+        "text": "Corvus para de desenhar e olha para longe, como se visse algo além das paredes.\n\n\"Eu era navegador da Frota Mercante de Solhaven. Dez navios, cento e vinte homens. Cruzávamos o Mar de Vidro como se fosse um lago.\"\n\nEle engole em seco.\n\n\"Uma tempestade nos pegou na Passagem dos Ventos. Não uma tempestade comum — os marinheiros velhos diziam que o próprio mar estava com raiva. Perdi tudo. Todos. Acordei numa praia a dois dias de Valdoria, agarrado a um pedaço de mastro.\"\n\nEle volta a olhar para os mapas.\n\n\"Agora mapeio terra firme. O mar pode ficar com seus segredos.\"",
         "choices": [
           {
             "text": "[Sabedoria] A terra tem seus próprios perigos, mas ao menos podemos ver o horizonte.",
@@ -445,7 +445,7 @@
           },
           {
             "type": "narration",
-            "text": "Acordei numa praia a dois dias de Eldoria, agarrado a um pedaço de mastro.\"\n\nEle volta a olhar para os mapas."
+            "text": "Acordei numa praia a dois dias de Valdoria, agarrado a um pedaço de mastro.\"\n\nEle volta a olhar para os mapas."
           },
           {
             "type": "narration",
@@ -717,8 +717,8 @@
       },
       "about_city": {
         "text": [
-          "\"Eldoria é fascinante do ponto de vista cartográfico. Construída sobre ruínas mais antigas — se você observar os ângulos das ruas, não combinam. A cidade velha seguia um padrão radial, como uma teia de aranha. A nova foi construída por cima, em grade. Isso cria becos sem saída e cruzamentos estranhos.\"\n\nEle aponta para um mapa detalhado da cidade.\n\n\"O Templo está exatamente no centro da cidade antiga. Coincidência? Duvido.\"",
-          "\"Sabe o que é curioso sobre Eldoria? As muralhas são altas demais para o tamanho da cidade. Foram feitas para proteger algo maior. Ou algo que os construtores temiam fosse vir de fora.\"\n\nCorvus toca uma rachadura no mapa.\n\n\"Thorne me disse que encontrou pedras fundacionais sob a forja que não são da mesma época. Martha mencionou algo parecido sobre o porão da estalagem. Camadas sobre camadas.\""
+          "\"Valdoria é fascinante do ponto de vista cartográfico. Construída sobre ruínas mais antigas — se você observar os ângulos das ruas, não combinam. A cidade velha seguia um padrão radial, como uma teia de aranha. A nova foi construída por cima, em grade. Isso cria becos sem saída e cruzamentos estranhos.\"\n\nEle aponta para um mapa detalhado da cidade.\n\n\"O Templo está exatamente no centro da cidade antiga. Coincidência? Duvido.\"",
+          "\"Sabe o que é curioso sobre Valdoria? As muralhas são altas demais para o tamanho da cidade. Foram feitas para proteger algo maior. Ou algo que os construtores temiam fosse vir de fora.\"\n\nCorvus toca uma rachadura no mapa.\n\n\"Thorne me disse que encontrou pedras fundacionais sob a forja que não são da mesma época. Martha mencionou algo parecido sobre o porão da estalagem. Camadas sobre camadas.\""
         ],
         "choices": [
           {
@@ -729,7 +729,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "\"Eldoria é fascinante do ponto de vista cartográfico."
+            "text": "\"Valdoria é fascinante do ponto de vista cartográfico."
           },
           {
             "type": "narration",
@@ -761,7 +761,7 @@
           },
           {
             "type": "narration",
-            "text": "\"Sabe o que é curioso sobre Eldoria?"
+            "text": "\"Sabe o que é curioso sobre Valdoria?"
           },
           {
             "type": "narration",
@@ -959,7 +959,7 @@
         ]
       },
       "about_thorne_detail": {
-        "text": "\"Com frequência? Não diria isso. Mas quando preciso de algo em metal, não há outro em Eldoria. E em troca, já lhe dei mapas de depósitos minerais que encontrei nas colinas. Ele nunca agradece com palavras — mas no dia seguinte, sempre aparece uma peça nova na minha porta. É a linguagem dele.\"",
+        "text": "\"Com frequência? Não diria isso. Mas quando preciso de algo em metal, não há outro em Valdoria. E em troca, já lhe dei mapas de depósitos minerais que encontrei nas colinas. Ele nunca agradece com palavras — mas no dia seguinte, sempre aparece uma peça nova na minha porta. É a linguagem dele.\"",
         "choices": [
           {
             "text": "Uma troca silenciosa, mas honesta.",
@@ -977,7 +977,7 @@
           },
           {
             "type": "narration",
-            "text": "Mas quando preciso de algo em metal, não há outro em Eldoria."
+            "text": "Mas quando preciso de algo em metal, não há outro em Valdoria."
           },
           {
             "type": "narration",
@@ -1239,7 +1239,7 @@
       "Conheço cada trilha num raio de cinquenta léguas. As seguras, as perigosas, e as três que desaparecem dependendo da lua.",
       "Antes de ser cartógrafo, eu era navegador. A diferença? No mar, os erros são irreversíveis. Em terra, você pode voltar. Na maioria das vezes.",
       "Velithra me perguntou uma vez sobre depósitos minerais nas montanhas. Eu sabia a resposta, mas o olhar dela me fez pensar duas vezes antes de falar.",
-      "Se alguém te disser que conhece todas as rotas de Eldoria, está mentindo. Até eu descubro caminhos novos toda semana."
+      "Se alguém te disser que conhece todas as rotas de Valdoria, está mentindo. Até eu descubro caminhos novos toda semana."
     ],
     "insult": {
       "neutral": [

@@ -28,7 +28,7 @@
         "Meu amigo favorito! Para você, faço um preço especial.",
         "Sua fama o precede nas estradas do sul! Reservei peças especiais.",
         "Sempre bom ver um rosto amigo em terras estranhas. Olhe o que trouxe.",
-        "Fico feliz em te encontrar novamente em Eldoria. Deseja ver minha 'coleção privada'?",
+        "Fico feliz em te encontrar novamente em Valdoria. Deseja ver minha 'coleção privada'?",
         "A prosperidade te siga! Fiz uma pechincha e pensei em você.",
         "Sempre vibrante em suas negociações! Que sua bolsa esteja sempre cheia."
       ],
@@ -44,13 +44,13 @@
       "As estradas para o sul estão infestadas de bandidos. Perdi um cavalo na última viagem.",
       "Ouvi dizer que o Reino do Oriente está em guerra. Bom para o comércio de armas, ruim para todo o resto.",
       "É difícil manter cavalos saudáveis nestas viagens longas. O deserto cobra um preço alto.",
-      "O mercado de Eldoria é pequeno, mas promissor. Suas moedas de ouro são as mais bonitas que já vi.",
+      "O mercado de Valdoria é pequeno, mas promissor. Suas moedas de ouro são as mais bonitas que já vi.",
       "A vida de mercador itinerante é solitária e perigosa. Mas o lucro é doce.",
       "Nunca aceite uma joia sem testar sua pureza. Aprendi isso da pior maneira em Valorian.",
       "O comércio é a alma de qualquer reino civilizado. Sem mercadores, até reis passam fome.",
       "Em Valorian, o aço é mais barato que a água. Aqui, o contrário. É disso que vivo.",
       "Sempre carregue um mapa. O último aventureiro que não levou sumiu perto das ruínas do norte.",
-      "Compro aço de Thorne sempre que passo por Eldoria. Bom metal, preço justo. Revendo no triplo duas cidades adiante.",
+      "Compro aço de Thorne sempre que passo por Valdoria. Bom metal, preço justo. Revendo no triplo duas cidades adiante.",
       "O taverneiro Grom é a melhor fonte de rumóres em cem léguas. Pague uma cerveja e ele fala por horas.",
       "Martha, da estalagem, é a única que me deixa estacionar a caravana no pátio dos fundos. Cama limpa, sopa quente. Não se acha isso na estrada.",
       "Corvus, o cartógrafo, me vendeu um mapa das rotas do deserto. Valeu cada moeda. Nunca mais me perdi no Passo Vermelho.",
@@ -108,8 +108,8 @@
       "start_regular": {
         "text": [
           "Ah, meu cliente favorito! Separei umas peças especiais só para você. A estrada é dura, mas ver um rosto conhecido faz tudo valer a pena.",
-          "Olá, amigo! Meus cavalos já reconhecem o caminho até Eldoria. Acho que é por sua causa.",
-          "Sempre bom voltar a Eldoria sabendo que tem alguém que aprecia mercadoria de qualidade."
+          "Olá, amigo! Meus cavalos já reconhecem o caminho até Valdoria. Acho que é por sua causa.",
+          "Sempre bom voltar a Valdoria sabendo que tem alguém que aprecia mercadoria de qualidade."
         ],
         "choices": [
           {
@@ -129,7 +129,7 @@
             "target": "about_roads"
           },
           {
-            "text": "O que acha de Eldoria?",
+            "text": "O que acha de Valdoria?",
             "target": "about_eldoria"
           }
         ],
@@ -152,7 +152,7 @@
           },
           {
             "type": "narration",
-            "text": "Meus cavalos já reconhecem o caminho até Eldoria."
+            "text": "Meus cavalos já reconhecem o caminho até Valdoria."
           },
           {
             "type": "narration",
@@ -160,7 +160,7 @@
           },
           {
             "type": "narration",
-            "text": "Sempre bom voltar a Eldoria sabendo que tem alguém que aprecia mercadoria de qualidade."
+            "text": "Sempre bom voltar a Valdoria sabendo que tem alguém que aprecia mercadoria de qualidade."
           }
         ]
       },
@@ -303,7 +303,7 @@
       },
       "about_trade": {
         "text": [
-          "(Ele esfrega as mãos com um brilho nos olhos) O segredo do comércio é simples: cada cidade tem o que a outra precisa. Eldoria produz boas armas graças ao Thorne, mas não tem especiarias. Valorian é cheia de especiarias, mas faminta por aço. Eu sou a ponte.",
+          "(Ele esfrega as mãos com um brilho nos olhos) O segredo do comércio é simples: cada cidade tem o que a outra precisa. Valdoria produz boas armas graças ao Thorne, mas não tem especiarias. Valorian é cheia de especiarias, mas faminta por aço. Eu sou a ponte.",
           "Poções de cura vendem bem em qualquer lugar. Quem viaja pelas estradas sabe que um frasco pode ser a diferença entre vida e morte. Mas cuidado com falsificações — já vi gente vendendo água com corante como 'poção rara'."
         ],
         "choices": [
@@ -324,7 +324,7 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria produz boas armas graças ao Thorne, mas não tem especiarias."
+            "text": "Valdoria produz boas armas graças ao Thorne, mas não tem especiarias."
           },
           {
             "type": "narration",
@@ -389,12 +389,12 @@
       },
       "about_eldoria": {
         "text": [
-          "(Ele olha em volta com ar avaliador) Eldoria é uma cidade curiosa. Pequena, mas resistente. Já passei por reinos ricos que caíram por menos do que esta cidade já aguentou. As muralhas são fortes, o ferreiro é excelente, e a estalagem da Martha é a mais acolhedora em cinco dias de viagem.",
-          "Sabe o que falta a Eldoria? Concorrência. Só tem um ferreiro, uma estalagem, uma taverna. É bom pra eles — monopólio, preços firmes. Ruim pra mim — menos margem de negociação. Mas não reclamo. Cidade honesta num mundo de vigaristas."
+          "(Ele olha em volta com ar avaliador) Valdoria é uma cidade curiosa. Pequena, mas resistente. Já passei por reinos ricos que caíram por menos do que esta cidade já aguentou. As muralhas são fortes, o ferreiro é excelente, e a estalagem da Martha é a mais acolhedora em cinco dias de viagem.",
+          "Sabe o que falta a Valdoria? Concorrência. Só tem um ferreiro, uma estalagem, uma taverna. É bom pra eles — monopólio, preços firmes. Ruim pra mim — menos margem de negociação. Mas não reclamo. Cidade honesta num mundo de vigaristas."
         ],
         "choices": [
           {
-            "text": "O que as pessoas falam de Eldoria lá fora?",
+            "text": "O que as pessoas falam de Valdoria lá fora?",
             "target": "eldoria_reputation",
             "once": true
           },
@@ -406,7 +406,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "(Ele olha em volta com ar avaliador) Eldoria é uma cidade curiosa."
+            "text": "(Ele olha em volta com ar avaliador) Valdoria é uma cidade curiosa."
           },
           {
             "type": "narration",
@@ -422,7 +422,7 @@
           },
           {
             "type": "narration",
-            "text": "Sabe o que falta a Eldoria?"
+            "text": "Sabe o que falta a Valdoria?"
           },
           {
             "type": "narration",
@@ -451,7 +451,7 @@
         ]
       },
       "eldoria_reputation": {
-        "text": "(Ele coça o queixo) Depende de quem você pergunta. Mercadores a conhecem como parada segura com bom aço. Aventureiros ouvem falar das ruínas próximas e dos contratos da guilda. Bandidos... bom, bandidos sabem que a guarda daqui não brinca.\n\nMas tem uma coisa que todo mundo comenta: algo está mudando nas terras ao redor. Monstros mais agressivos, estradas menos seguras, mercadores desaparecendo. Eldoria pode ser o último ponto estável antes do caos.\n\nSe eu fosse você, protegeria este lugar. Quando a última cidade segura cai, não sobra nada.",
+        "text": "(Ele coça o queixo) Depende de quem você pergunta. Mercadores a conhecem como parada segura com bom aço. Aventureiros ouvem falar das ruínas próximas e dos contratos da guilda. Bandidos... bom, bandidos sabem que a guarda daqui não brinca.\n\nMas tem uma coisa que todo mundo comenta: algo está mudando nas terras ao redor. Monstros mais agressivos, estradas menos seguras, mercadores desaparecendo. Valdoria pode ser o último ponto estável antes do caos.\n\nSe eu fosse você, protegeria este lugar. Quando a última cidade segura cai, não sobra nada.",
         "choices": [
           {
             "text": "Vou manter isso em mente.",
@@ -485,7 +485,7 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria pode ser o último ponto estável antes do caos."
+            "text": "Valdoria pode ser o último ponto estável antes do caos."
           },
           {
             "type": "narration",

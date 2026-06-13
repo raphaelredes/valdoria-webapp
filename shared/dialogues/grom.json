@@ -249,7 +249,7 @@
         "text": [
           "De volta? Espero que tenha trazido ouro desta vez.",
           "Ah, é você. Tente não quebrar nada.",
-          "Ainda vivo? Eldoria está ficando mole.",
+          "Ainda vivo? Valdoria está ficando mole.",
           "Se vai ficar, sente-se e cale a boca. Se não, a porta é ali."
         ],
         "choices": [
@@ -343,7 +343,7 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria está ficando mole."
+            "text": "Valdoria está ficando mole."
           },
           {
             "type": "narration",
@@ -1233,7 +1233,7 @@
       "ask_martha": {
         "text": [
           "(Grom para de limpar a caneca e olha para longe) 'Martha? Aquela mulher vale mais que toda esta cidade junta. Cuida de todo mundo, mas ninguém cuida dela.'",
-          "(Ele bufa e depois suaviza) 'Martha é a alma de Eldoria. Sem a estalagem dela, metade desses bêbados dormiriam na rua. Inclusive eu, nos velhos tempos.'"
+          "(Ele bufa e depois suaviza) 'Martha é a alma de Valdoria. Sem a estalagem dela, metade desses bêbados dormiriam na rua. Inclusive eu, nos velhos tempos.'"
         ],
         "choices": [
           {
@@ -1261,7 +1261,7 @@
           },
           {
             "type": "narration",
-            "text": "(Ele bufa e depois suaviza) 'Martha é a alma de Eldoria."
+            "text": "(Ele bufa e depois suaviza) 'Martha é a alma de Valdoria."
           },
           {
             "type": "narration",
@@ -2824,7 +2824,7 @@
         ]
       },
       "quest_past_offer": {
-        "text": "(Grom está diferente hoje. Quieto. Ele olha pra porta como se esperasse alguém.)\n\n(Quando percebe você, puxa uma cadeira e senta do seu lado — algo que nunca faz) '{player_name}... preciso te contar uma coisa. Antes de ser taverneiro, eu era gladiador. Nas arenas de Krath.'\n\n(Ele mostra cicatrizes nos braços que normalmente esconde) 'Tinha um rival. Varnok. Nós nos enfrentamos seis vezes na arena. Três vitórias cada. E na sétima... eu perdi o olho e fugi.'\n\n(Ele abaixa a voz) 'Varnok apareceu em Eldoria. Alguém o viu nos portões. E eu sei que não é coincidência.'",
+        "text": "(Grom está diferente hoje. Quieto. Ele olha pra porta como se esperasse alguém.)\n\n(Quando percebe você, puxa uma cadeira e senta do seu lado — algo que nunca faz) '{player_name}... preciso te contar uma coisa. Antes de ser taverneiro, eu era gladiador. Nas arenas de Krath.'\n\n(Ele mostra cicatrizes nos braços que normalmente esconde) 'Tinha um rival. Varnok. Nós nos enfrentamos seis vezes na arena. Três vitórias cada. E na sétima... eu perdi o olho e fugi.'\n\n(Ele abaixa a voz) 'Varnok apareceu em Valdoria. Alguém o viu nos portões. E eu sei que não é coincidência.'",
         "choices": [
           {
             "text": "Vou investigar esse Varnok.",
@@ -2883,7 +2883,7 @@
           },
           {
             "type": "narration",
-            "text": "E na sétima... eu perdi o olho e fugi.'\n\n(Ele abaixa a voz) 'Varnok apareceu em Eldoria."
+            "text": "E na sétima... eu perdi o olho e fugi.'\n\n(Ele abaixa a voz) 'Varnok apareceu em Valdoria."
           },
           {
             "type": "narration",
@@ -3049,7 +3049,7 @@
       "Martha é uma boa mulher, mas vive preocupada demais. Agora jura que ouve barulhos no porão da estalagem.",
       "O capitão da guarda deveria beber mais e reclamar menos. Um homem tenso desses vai ter um derrame antes dos quarenta.",
       "Perdi este olho numa luta contra um ogro, no desfiladeiro de Krath. Fiz ele perder os dois. Valeu a troca.",
-      "Eldoria já foi o centro do comércio há décadas. Agora é só eu, meu balcão e um punhado de bêbados.",
+      "Valdoria já foi o centro do comércio há décadas. Agora é só eu, meu balcão e um punhado de bêbados.",
       "A vida de taverneiro é ouvir segredos e esquecê-los. A maioria não vale o preço da cerveja.",
       "O bardo que morava aqui fugiu com a filha do mercador. Não tive tempo de cobrar a conta dele.",
       "Thorne é o único que sabe lidar com aço de verdade nesta cidade. Os outros são uma vergonha.",

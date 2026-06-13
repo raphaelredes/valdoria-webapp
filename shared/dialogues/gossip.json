@@ -898,7 +898,7 @@
   "npc_pair_gossip": {
     "npc_tavern_grom": {
       "npc_inn_martha": [
-        "Grom para de limpar o balcão e sua voz amolece: 'Martha? Aquela mulher vale mais que toda essa cidade junta. Se algo acontecer a ela, eu queimo Eldoria inteira.'",
+        "Grom para de limpar o balcão e sua voz amolece: 'Martha? Aquela mulher vale mais que toda essa cidade junta. Se algo acontecer a ela, eu queimo Valdoria inteira.'",
         "Grom olha para o lado: 'Martha me trouxe sopa quando eu estava doente uma vez. Nunca contei pra ninguém. Nem conte você.'",
         "Grom bufa, mas está sorrindo: 'Martha reclama do meu hidromel. Diz que é forte demais. Claro que é — é pra ser.'"
       ],
@@ -936,7 +936,7 @@
     "npc_blacksmith_thorne": {
       "npc_tavern_grom": [
         "Thorne limpa o suor: 'Grom é grosso, barulhento e bebe demais. Mas é o homem mais honesto que eu conheço.'",
-        "Thorne bate o martelo: 'Se precisar de informação em Eldoria, pergunte ao Grom. Ele sabe de tudo que acontece.'"
+        "Thorne bate o martelo: 'Se precisar de informação em Valdoria, pergunte ao Grom. Ele sabe de tudo que acontece.'"
       ],
       "npc_inn_martha": [
         "Thorne suaviza a voz: 'Martha cuida de todos nós sem pedir nada em troca. Essa cidade não a merece.'",
@@ -1016,7 +1016,7 @@
         "Mestra Mirena franze o nariz: 'O taverneiro? Um desperdício de talento culinário afogado em álcool. Mas seus caldos são surpreendentemente medicinais.'"
       ],
       "npc_inn_martha": [
-        "Mestra Mirena suaviza o tom: 'Martha é a alma de Eldoria. Sem ela, esta cidade seria só pedras e gente mal-humorada.'"
+        "Mestra Mirena suaviza o tom: 'Martha é a alma de Valdoria. Sem ela, esta cidade seria só pedras e gente mal-humorada.'"
       ]
     },
     "npc_guild_braun": {
@@ -1042,13 +1042,13 @@
       ],
       "npc_tavern_grom": [
         "Corvus dá de ombros: 'Grom reclama que eu desenho no balcão dele. Mas nunca me cobra a tinta. Acho que, no fundo, gosta dos mapas.'",
-        "Corvus anota algo: 'O taverneiro sabe de tudo que acontece em Eldoria. É como um mapa vivo da cidade. Só que mais barulhento.'"
+        "Corvus anota algo: 'O taverneiro sabe de tudo que acontece em Valdoria. É como um mapa vivo da cidade. Só que mais barulhento.'"
       ],
       "npc_blacksmith_thorne": [
         "Corvus examina uma bússola: 'Thorne forja as melhores agulhas de bússola que já usei. Precisas como cirurgia. O homem entende metais como eu entendo coordenadas.'"
       ],
       "npc_inn_martha": [
-        "Corvus olha para um mapa na parede: 'Martha me deixou pendurar mapas na estalagem no meu primeiro inverno em Eldoria. Ninguém mais me deu espaço. Nunca esqueci isso.'"
+        "Corvus olha para um mapa na parede: 'Martha me deixou pendurar mapas na estalagem no meu primeiro inverno em Valdoria. Ninguém mais me deu espaço. Nunca esqueci isso.'"
       ],
       "npc_jeweler_velithra": [
         "Corvus hesita: 'Velithra me perguntou sobre depósitos minerais uma vez. Respondi vagamente. Alguns lugares nos meus mapas são perigosos demais para qualquer gema valer o risco.'"
@@ -1092,7 +1092,7 @@
       ],
       "npc_jeweler_velithra": [
         "Bjorn coça a cabeça: 'Velithra é quieta. Muito quieta. Mas quando lapida uma gema, é como assistir magia. Cada corte é perfeito. Meio assustador, na verdade.'",
-        "Bjorn abaixa a voz: 'Costurei uma cobertura pra bancada dela quando chegou em Eldoria. Ela não agradeceu com palavras, mas no dia seguinte tinha uma pedra de quartzo na minha oficina. Sem bilhete. É o jeito dela.'"
+        "Bjorn abaixa a voz: 'Costurei uma cobertura pra bancada dela quando chegou em Valdoria. Ela não agradeceu com palavras, mas no dia seguinte tinha uma pedra de quartzo na minha oficina. Sem bilhete. É o jeito dela.'"
       ],
       "npc_alchemist_mirena": [
         "Bjorn ergue um frasco: 'A alquimista me vende uma pomada que cura queimaduras em dois dias. Cheira a pântano podre, mas funciona como milagre!'"

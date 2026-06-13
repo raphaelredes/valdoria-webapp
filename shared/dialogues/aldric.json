@@ -29,10 +29,10 @@
     "nodes": {
       "start": {
         "text": [
-          "⚜️ <b>Eldoria</b> ⚜️\n\nIdentifique-se. Eldoria não acolhe quem carrega sombras no coração.",
-          "⚜️ <b>Eldoria</b> ⚜️\n\nRespeite as leis de Vorenn e encontrará abrigo. Desrespeite-as e encontrará minha lâmina.",
-          "⚜️ <b>Eldoria</b> ⚜️\n\nDeclare suas intenções, viajante. Os portões de Eldoria são a fronteira entre a civilização e o caos.",
-          "⚜️ <b>Eldoria</b> ⚜️\n\nQuem se aproxima sob a luz de Vorenn? Declare-se ou recue."
+          "⚜️ <b>Valdoria</b> ⚜️\n\nIdentifique-se. Valdoria não acolhe quem carrega sombras no coração.",
+          "⚜️ <b>Valdoria</b> ⚜️\n\nRespeite as leis de Vorenn e encontrará abrigo. Desrespeite-as e encontrará minha lâmina.",
+          "⚜️ <b>Valdoria</b> ⚜️\n\nDeclare suas intenções, viajante. Os portões de Valdoria são a fronteira entre a civilização e o caos.",
+          "⚜️ <b>Valdoria</b> ⚜️\n\nQuem se aproxima sob a luz de Vorenn? Declare-se ou recue."
         ],
         "choices": [
           {
@@ -75,15 +75,15 @@
         "script": [
           {
             "type": "narration",
-            "text": "⚜️ <b>Eldoria</b> ⚜️\n\nIdentifique-se."
+            "text": "⚜️ <b>Valdoria</b> ⚜️\n\nIdentifique-se."
           },
           {
             "type": "narration",
-            "text": "Eldoria não acolhe quem carrega sombras no coração."
+            "text": "Valdoria não acolhe quem carrega sombras no coração."
           },
           {
             "type": "narration",
-            "text": "⚜️ <b>Eldoria</b> ⚜️\n\nRespeite as leis de Vorenn e encontrará abrigo."
+            "text": "⚜️ <b>Valdoria</b> ⚜️\n\nRespeite as leis de Vorenn e encontrará abrigo."
           },
           {
             "type": "narration",
@@ -91,15 +91,15 @@
           },
           {
             "type": "narration",
-            "text": "⚜️ <b>Eldoria</b> ⚜️\n\nDeclare suas intenções, viajante."
+            "text": "⚜️ <b>Valdoria</b> ⚜️\n\nDeclare suas intenções, viajante."
           },
           {
             "type": "narration",
-            "text": "Os portões de Eldoria são a fronteira entre a civilização e o caos."
+            "text": "Os portões de Valdoria são a fronteira entre a civilização e o caos."
           },
           {
             "type": "narration",
-            "text": "⚜️ <b>Eldoria</b> ⚜️\n\nQuem se aproxima sob a luz de Vorenn?"
+            "text": "⚜️ <b>Valdoria</b> ⚜️\n\nQuem se aproxima sob a luz de Vorenn?"
           },
           {
             "type": "narration",
@@ -135,7 +135,7 @@
         "text": [
           "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nCaminhe na luz, cidadão. O crime floresce onde a vigilância falha.",
           "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nVorenn observa seus passos. Espero que eles sejam justos.",
-          "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nMantenha a ordem. Eldoria é um bastião de civilização neste mundo selvagem.",
+          "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nMantenha a ordem. Valdoria é um bastião de civilização neste mundo selvagem.",
           "⚜️ <b>Patrulha das Muralhas</b> ⚜️\n\nReporte qualquer irregularidade ao Capitão. Segurança é dever de todos."
         ],
         "choices": [
@@ -251,7 +251,7 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria é um bastião de civilização neste mundo selvagem."
+            "text": "Valdoria é um bastião de civilização neste mundo selvagem."
           },
           {
             "type": "narration",
@@ -305,7 +305,7 @@
       },
       "aldric_news": {
         "text": [
-          "As estradas ao sul estão infestadas de goblins, mas Eldoria permanece segura. Nosso aço é forte o suficiente para qualquer ameaça. Porém... ultimamente os mercadores reclamam de sombras nos portões à noite.",
+          "As estradas ao sul estão infestadas de goblins, mas Valdoria permanece segura. Nosso aço é forte o suficiente para qualquer ameaça. Porém... ultimamente os mercadores reclamam de sombras nos portões à noite.",
           "Os batedores detectaram movimentação de criaturas ao norte. Nada confirmado, mas o Capitão mandou reforçar as rondas. E entre nós... notei algo estranho nos portões nas últimas noites.",
           "Goblins ao sul, lobos ao norte, bandidos a leste. As estradas nunca foram seguras, mas ultimamente estão piores. E aqui dentro? Bem... nem tudo é o que parece."
         ],
@@ -331,7 +331,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "As estradas ao sul estão infestadas de goblins, mas Eldoria permanece segura."
+            "text": "As estradas ao sul estão infestadas de goblins, mas Valdoria permanece segura."
           },
           {
             "type": "narration",
@@ -581,12 +581,12 @@
       },
       "start_recognized": {
         "text": [
-          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nAh, você retornou. Que seus atos lá fora tenham honrado nossa cidade.",
-          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nBem-vindo de volta, aventureiro. A guarda reconhece seus esforços. Alguma novidade das estradas?",
-          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nOs portões se abrem para os conhecidos. Entre e descanse, você parece ter visto muita coisa hoje.",
-          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nUm rosto familiar é sempre um alívio nestes tempos incertos. O mundo lá fora parece ficar mais perigoso a cada dia.",
-          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nVejo que a poeira das estradas ainda cobre suas botas. Bem-vindo de volta.",
-          "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nSua lâmina parece ter trabalhado lá fora. Siga para a cidade, aventureiro."
+          "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nAh, você retornou. Que seus atos lá fora tenham honrado nossa cidade.",
+          "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nBem-vindo de volta, aventureiro. A guarda reconhece seus esforços. Alguma novidade das estradas?",
+          "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nOs portões se abrem para os conhecidos. Entre e descanse, você parece ter visto muita coisa hoje.",
+          "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nUm rosto familiar é sempre um alívio nestes tempos incertos. O mundo lá fora parece ficar mais perigoso a cada dia.",
+          "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nVejo que a poeira das estradas ainda cobre suas botas. Bem-vindo de volta.",
+          "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nSua lâmina parece ter trabalhado lá fora. Siga para a cidade, aventureiro."
         ],
         "choices": [
           {
@@ -661,7 +661,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nAh, você retornou."
+            "text": "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nAh, você retornou."
           },
           {
             "type": "narration",
@@ -669,7 +669,7 @@
           },
           {
             "type": "narration",
-            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nBem-vindo de volta, aventureiro."
+            "text": "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nBem-vindo de volta, aventureiro."
           },
           {
             "type": "narration",
@@ -681,7 +681,7 @@
           },
           {
             "type": "narration",
-            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nOs portões se abrem para os conhecidos."
+            "text": "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nOs portões se abrem para os conhecidos."
           },
           {
             "type": "narration",
@@ -689,7 +689,7 @@
           },
           {
             "type": "narration",
-            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nUm rosto familiar é sempre um alívio nestes tempos incertos."
+            "text": "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nUm rosto familiar é sempre um alívio nestes tempos incertos."
           },
           {
             "type": "narration",
@@ -697,7 +697,7 @@
           },
           {
             "type": "narration",
-            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nVejo que a poeira das estradas ainda cobre suas botas."
+            "text": "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nVejo que a poeira das estradas ainda cobre suas botas."
           },
           {
             "type": "narration",
@@ -705,7 +705,7 @@
           },
           {
             "type": "narration",
-            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nSua lâmina parece ter trabalhado lá fora."
+            "text": "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nSua lâmina parece ter trabalhado lá fora."
           },
           {
             "type": "narration",
@@ -748,12 +748,12 @@
       },
       "aldric_road_report": {
         "text": [
-          "(Aldric ouve atentamente, com expressão séria) 'Entendo... monstros e perigos em todo canto. Informarei o Capitão sobre essas movimentações. Eldoria agradece por manter os olhos abertos lá fora.'\n\n'Se encontrar algo mais específico — rastros, acampamentos, emboscadas — traga a informação diretamente a mim. Nem todo relatório precisa passar pelo Capitão.'",
+          "(Aldric ouve atentamente, com expressão séria) 'Entendo... monstros e perigos em todo canto. Informarei o Capitão sobre essas movimentações. Valdoria agradece por manter os olhos abertos lá fora.'\n\n'Se encontrar algo mais específico — rastros, acampamentos, emboscadas — traga a informação diretamente a mim. Nem todo relatório precisa passar pelo Capitão.'",
           "(Aldric cruza os braços, pensativo) 'As estradas estão cada vez piores. Há dois meses era seguro até a floresta. Agora, nem os mercadores com escolta se arriscam sozinhos.'\n\n'Obrigado pelo relato. Você é mais útil do que metade dos batedores que temos.'"
         ],
         "choices": [
           {
-            "text": "Eldoria pode contar comigo.",
+            "text": "Valdoria pode contar comigo.",
             "target": "exit",
             "exit_callback": "action_city_entry",
             "impact": {
@@ -784,7 +784,7 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria agradece por manter os olhos abertos lá fora.'\n\n'Se encontrar algo mais específico — rastros, acampamentos, emboscadas — traga a informação diretamente a mim."
+            "text": "Valdoria agradece por manter os olhos abertos lá fora.'\n\n'Se encontrar algo mais específico — rastros, acampamentos, emboscadas — traga a informação diretamente a mim."
           },
           {
             "type": "narration",
@@ -809,7 +809,7 @@
         ]
       },
       "start_wounded": {
-        "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nPor Vorenn! Você parece ter passado por um moedor de carne lá fora. Entre logo, antes que desmaie no meu portão e manche as lajes da cidade!",
+        "text": "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nPor Vorenn! Você parece ter passado por um moedor de carne lá fora. Entre logo, antes que desmaie no meu portão e manche as lajes da cidade!",
         "choices": [
           {
             "text": "Obrigado... preciso de um médico.",
@@ -825,7 +825,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "⚜️ <b>Portões de Eldoria</b> ⚜️\n\nPor Vorenn!"
+            "text": "⚜️ <b>Portões de Valdoria</b> ⚜️\n\nPor Vorenn!"
           },
           {
             "type": "narration",
@@ -838,7 +838,7 @@
         ]
       },
       "aldric_aris_reaction": {
-        "text": "Soube que você trouxe o garoto de volta. A floresta raramente devolve o que toma. Você tem sorte... ou habilidade. Eldoria agradece.",
+        "text": "Soube que você trouxe o garoto de volta. A floresta raramente devolve o que toma. Você tem sorte... ou habilidade. Valdoria agradece.",
         "choices": [
           {
             "text": "Obrigado, Guarda.",
@@ -866,12 +866,12 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria agradece."
+            "text": "Valdoria agradece."
           }
         ]
       },
       "aldric_welcome": {
-        "text": "Bem, você parece honesto o suficiente. Eldoria precisa de braços fortes. Entre e apresente-se na Estalagem da Pena-Dourada.",
+        "text": "Bem, você parece honesto o suficiente. Valdoria precisa de braços fortes. Entre e apresente-se na Estalagem da Pena-Dourada.",
         "choices": [
           {
             "text": "Obrigado, Guarda.",
@@ -894,7 +894,7 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria precisa de braços fortes."
+            "text": "Valdoria precisa de braços fortes."
           },
           {
             "type": "narration",
@@ -903,7 +903,7 @@
         ]
       },
       "aldric_cowed": {
-        "text": "Certo, certo! Não precisa ser tão... contundente. Passe logo, Eldoria tem problemas maiores que você.",
+        "text": "Certo, certo! Não precisa ser tão... contundente. Passe logo, Valdoria tem problemas maiores que você.",
         "choices": [
           {
             "text": "Assim é melhor.",
@@ -927,12 +927,12 @@
           },
           {
             "type": "narration",
-            "text": "Passe logo, Eldoria tem problemas maiores que você."
+            "text": "Passe logo, Valdoria tem problemas maiores que você."
           }
         ]
       },
       "aldric_persuaded": {
-        "text": "Aventureiros... sempre com as mesmas histórias. Sorte sua que Eldoria está precisando de braços fortes. Passe logo.",
+        "text": "Aventureiros... sempre com as mesmas histórias. Sorte sua que Valdoria está precisando de braços fortes. Passe logo.",
         "choices": [
           {
             "text": "Obrigado, Guarda.",
@@ -952,7 +952,7 @@
           },
           {
             "type": "narration",
-            "text": "Sorte sua que Eldoria está precisando de braços fortes."
+            "text": "Sorte sua que Valdoria está precisando de braços fortes."
           },
           {
             "type": "narration",
@@ -1142,7 +1142,7 @@
         ]
       },
       "quest_smugglers_complete": {
-        "text": "(Aldric bate com o punho na couraça — saudação militar) 'Excepcional. Vou levar isso ao Capitão imediatamente. Com essas provas, os responsáveis vão pra masmorra.'\n\n'Você prestou um grande serviço a Eldoria. A guarda não esquece quem ajuda.'\n\n(Ele te entrega a lanterna de vigia, agora com o brasão da cidade gravado) 'Fique com ela. Você a usou melhor do que qualquer recruta que já tive.'",
+        "text": "(Aldric bate com o punho na couraça — saudação militar) 'Excepcional. Vou levar isso ao Capitão imediatamente. Com essas provas, os responsáveis vão pra masmorra.'\n\n'Você prestou um grande serviço a Valdoria. A guarda não esquece quem ajuda.'\n\n(Ele te entrega a lanterna de vigia, agora com o brasão da cidade gravado) 'Fique com ela. Você a usou melhor do que qualquer recruta que já tive.'",
         "choices": [
           {
             "text": "Foi um prazer ajudar, Aldric.",
@@ -1160,7 +1160,7 @@
           },
           {
             "type": "narration",
-            "text": "Com essas provas, os responsáveis vão pra masmorra.'\n\n'Você prestou um grande serviço a Eldoria."
+            "text": "Com essas provas, os responsáveis vão pra masmorra.'\n\n'Você prestou um grande serviço a Valdoria."
           },
           {
             "type": "speech",
@@ -1308,7 +1308,7 @@
         ]
       },
       "quest_deserter_complete": {
-        "text": "(Aldric ouve seu relato em silêncio. Quando termina, ele respira fundo.)\n\n'Eu sabia. Sabia que Kael não fugiria por covardia.' (Ele guarda o emblema rasgado) 'Vou falar com o Capitão. Com as provas que você trouxe, posso limpar o nome dele.'\n\n(Ele remove um broche de sua capa — o broche da guarda de Eldoria) 'Tome. Não sou dado a sentimentalismos, mas... você merece. Broche da Guarda — poucos civis já receberam um.'",
+        "text": "(Aldric ouve seu relato em silêncio. Quando termina, ele respira fundo.)\n\n'Eu sabia. Sabia que Kael não fugiria por covardia.' (Ele guarda o emblema rasgado) 'Vou falar com o Capitão. Com as provas que você trouxe, posso limpar o nome dele.'\n\n(Ele remove um broche de sua capa — o broche da guarda de Valdoria) 'Tome. Não sou dado a sentimentalismos, mas... você merece. Broche da Guarda — poucos civis já receberam um.'",
         "choices": [
           {
             "text": "Honrarei esse broche, Aldric.",
@@ -1330,7 +1330,7 @@
           },
           {
             "type": "speech",
-            "text": "Com as provas que você trouxe, posso limpar o nome dele.'\n\n(Ele remove um broche de sua capa — o broche da guarda de Eldoria) 'Tome.",
+            "text": "Com as provas que você trouxe, posso limpar o nome dele.'\n\n(Ele remove um broche de sua capa — o broche da guarda de Valdoria) 'Tome.",
             "speaker": "Padre Aldric"
           },
           {
@@ -1344,7 +1344,7 @@
         ]
       },
       "quest_siege_offer": {
-        "text": "(Aldric te puxa para um canto, longe dos outros guardas. Sua voz é tensa.) 'Os relatórios são alarmantes. Batedores avistaram uma força hostil se reunindo nas colinas ao sul. Não são goblins — é algo organizado.'\n\n'O Capitão quer mandar um pelotão, mas isso deixaria os portões desguarnecidos. Preciso de alguém que vá até as colinas e avalie o tamanho e a natureza da ameaça.'\n\n(Ele te olha com gravidade) 'Se o que os batedores dizem for verdade... Eldoria pode estar em perigo real.'",
+        "text": "(Aldric te puxa para um canto, longe dos outros guardas. Sua voz é tensa.) 'Os relatórios são alarmantes. Batedores avistaram uma força hostil se reunindo nas colinas ao sul. Não são goblins — é algo organizado.'\n\n'O Capitão quer mandar um pelotão, mas isso deixaria os portões desguarnecidos. Preciso de alguém que vá até as colinas e avalie o tamanho e a natureza da ameaça.'\n\n(Ele te olha com gravidade) 'Se o que os batedores dizem for verdade... Valdoria pode estar em perigo real.'",
         "choices": [
           {
             "text": "Eu exploro as colinas.",
@@ -1390,12 +1390,12 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria pode estar em perigo real.'"
+            "text": "Valdoria pode estar em perigo real.'"
           }
         ]
       },
       "quest_siege_accepted": {
-        "text": "(Aldric aperta seu ombro — gesto raro para ele) 'Você tem coragem. Eldoria precisa disso agora.'\n\n'As colinas ficam ao sudeste. Siga a trilha antiga dos mineradores — ela leva ao ponto de observação mais alto. De lá, você verá qualquer acampamento.'\n\n'Avalie números, armamento, e qualquer estandarte ou símbolo. Se for grande demais pra enfrentar, VOLTE. Informação vale mais que heroísmo inútil.'\n\n(Ele bate no peito com o punho) 'Que Vorenn guie seus passos.'",
+        "text": "(Aldric aperta seu ombro — gesto raro para ele) 'Você tem coragem. Valdoria precisa disso agora.'\n\n'As colinas ficam ao sudeste. Siga a trilha antiga dos mineradores — ela leva ao ponto de observação mais alto. De lá, você verá qualquer acampamento.'\n\n'Avalie números, armamento, e qualquer estandarte ou símbolo. Se for grande demais pra enfrentar, VOLTE. Informação vale mais que heroísmo inútil.'\n\n(Ele bate no peito com o punho) 'Que Vorenn guie seus passos.'",
         "choices": [
           {
             "text": "Voltarei com informações.",
@@ -1409,7 +1409,7 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria precisa disso agora.'\n\n'As colinas ficam ao sudeste."
+            "text": "Valdoria precisa disso agora.'\n\n'As colinas ficam ao sudeste."
           },
           {
             "type": "narration",
@@ -1453,10 +1453,10 @@
         ]
       },
       "quest_siege_complete": {
-        "text": "(Aldric lê seu relatório. Suas mãos tremem — não de medo, de urgência.)\n\n'Por Vorenn... isso é pior do que temíamos. Mas graças a você, temos tempo. Tempo pra preparar.'\n\n(Ele se vira para os guardas) 'PORTÕES EM ALERTA MÁXIMO! Convoquem o Capitão! AGORA!'\n\n(Voltando-se para você) '{player_name}. Você acaba de salvar vidas. Muitas vidas. Eldoria não esquecerá.'\n\n(Ele remove seu escudo pessoal — batido, gasto, mas sólido) 'O Escudo do Bastião. Usei-o por quinze anos nestes portões. Agora é seu. Que proteja você como protegeu Eldoria.'",
+        "text": "(Aldric lê seu relatório. Suas mãos tremem — não de medo, de urgência.)\n\n'Por Vorenn... isso é pior do que temíamos. Mas graças a você, temos tempo. Tempo pra preparar.'\n\n(Ele se vira para os guardas) 'PORTÕES EM ALERTA MÁXIMO! Convoquem o Capitão! AGORA!'\n\n(Voltando-se para você) '{player_name}. Você acaba de salvar vidas. Muitas vidas. Valdoria não esquecerá.'\n\n(Ele remove seu escudo pessoal — batido, gasto, mas sólido) 'O Escudo do Bastião. Usei-o por quinze anos nestes portões. Agora é seu. Que proteja você como protegeu Valdoria.'",
         "choices": [
           {
-            "text": "Defenderei Eldoria com honra.",
+            "text": "Defenderei Valdoria com honra.",
             "target": "start_internal",
             "impact": {
               "reputation": {
@@ -1501,7 +1501,7 @@
           },
           {
             "type": "speech",
-            "text": "Eldoria não esquecerá.'\n\n(Ele remove seu escudo pessoal — batido, gasto, mas sólido) 'O Escudo do Bastião.",
+            "text": "Valdoria não esquecerá.'\n\n(Ele remove seu escudo pessoal — batido, gasto, mas sólido) 'O Escudo do Bastião.",
             "speaker": "Padre Aldric"
           },
           {
@@ -1514,7 +1514,7 @@
           },
           {
             "type": "narration",
-            "text": "Que proteja você como protegeu Eldoria.'"
+            "text": "Que proteja você como protegeu Valdoria.'"
           }
         ]
       },
@@ -1526,7 +1526,7 @@
     "greet": {
       "neutral": [
         "Pare. Identifique-se.",
-        "Eldoria não acolhe vagabundos.",
+        "Valdoria não acolhe vagabundos.",
         "O que traz você aos portões?",
         "Mantenha as mãos onde eu possa vê-las."
       ],

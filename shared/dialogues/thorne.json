@@ -241,7 +241,7 @@
       },
       "hero_welcome": {
         "text": [
-          "Olha quem voltou! O herói de Eldoria! Aris não para de falar de você.",
+          "Olha quem voltou! O herói de Valdoria! Aris não para de falar de você.",
           "Minha forja está sempre aberta para você, amigo. O que precisa?",
           "Graças a você, esta oficina tem vida novamente. Como posso ajudar?",
           "Aço especial para um cliente especial! Escolha o que quiser."
@@ -300,7 +300,7 @@
           },
           {
             "type": "narration",
-            "text": "O herói de Eldoria!"
+            "text": "O herói de Valdoria!"
           },
           {
             "type": "narration",
@@ -645,7 +645,7 @@
       "about_bjorn": {
         "text": [
           "(Thorne dá um raro sorriso) Bjorn? Aquele grandalhão é durão como couro curtido. Perdeu a mão e continuou trabalhando como se nada tivesse acontecido. Isso é respeito, não admiração — respeito de ferreiro pra ferreiro.",
-          "O seleiro fez as melhores fivelas e correias que já vi. Eu forjo o metal, ele trabalha o couro. Juntos, equipamos metade dos aventureiros de Eldoria.",
+          "O seleiro fez as melhores fivelas e correias que já vi. Eu forjo o metal, ele trabalha o couro. Juntos, equipamos metade dos aventureiros de Valdoria.",
           "Bjorn é barulhento demais pro meu gosto, mas é honesto. E na forja, honestidade vale mais que habilidade. Sorte que ele tem as duas."
         ],
         "choices": [
@@ -686,7 +686,7 @@
           },
           {
             "type": "narration",
-            "text": "Juntos, equipamos metade dos aventureiros de Eldoria."
+            "text": "Juntos, equipamos metade dos aventureiros de Valdoria."
           },
           {
             "type": "narration",
@@ -874,7 +874,7 @@
       "thorne_forge_accepted": {
         "text": [
           "(Thorne bate no seu ombro com tanta força que você quase perde o equilíbrio) Sabia que podia contar com você! Procure nas planícies ao sul — uma velha mina abandonada. O ferro lá é de boa qualidade. Traga o que puder e eu cuido do resto!",
-          "(Aris sorri timidamente atrás do pai) Vai ser a melhor forja de Eldoria, você vai ver! Papai já está desenhando a bigorna!"
+          "(Aris sorri timidamente atrás do pai) Vai ser a melhor forja de Valdoria, você vai ver! Papai já está desenhando a bigorna!"
         ],
         "choices": [
           {
@@ -901,7 +901,7 @@
           },
           {
             "type": "narration",
-            "text": "(Aris sorri timidamente atrás do pai) Vai ser a melhor forja de Eldoria, você vai ver!"
+            "text": "(Aris sorri timidamente atrás do pai) Vai ser a melhor forja de Valdoria, você vai ver!"
           },
           {
             "type": "narration",
@@ -967,7 +967,7 @@
         ]
       },
       "thorne_forge_complete": {
-        "text": "(Thorne examina os materiais com olhos brilhantes) Ferro estelar! E carvão de qualidade! Com isso eu monto a melhor forja que Eldoria já viu! (Ele te abraça, cobrindo você de fuligem novamente.) Você nos salvou duas vezes, amigo. Primeiro na estrada, agora aqui. A partir de hoje, minha forja é sua casa. E tome — um presente pela sua generosidade.",
+        "text": "(Thorne examina os materiais com olhos brilhantes) Ferro estelar! E carvão de qualidade! Com isso eu monto a melhor forja que Valdoria já viu! (Ele te abraça, cobrindo você de fuligem novamente.) Você nos salvou duas vezes, amigo. Primeiro na estrada, agora aqui. A partir de hoje, minha forja é sua casa. E tome — um presente pela sua generosidade.",
         "choices": [
           {
             "text": "Fico feliz em ajudar, Thorne!",
@@ -994,7 +994,7 @@
           },
           {
             "type": "narration",
-            "text": "Com isso eu monto a melhor forja que Eldoria já viu! (Ele te abraça, cobrindo você de fuligem novamente.) Você nos salvou duas vezes, amigo."
+            "text": "Com isso eu monto a melhor forja que Valdoria já viu! (Ele te abraça, cobrindo você de fuligem novamente.) Você nos salvou duas vezes, amigo."
           },
           {
             "type": "narration",
@@ -1018,7 +1018,7 @@
         "Thorne ao seu serviço. Fale rápido, o ferro esfria.",
         "Cuidado com as faíscas. O que deseja?",
         "Mais um aventureiro com a espada cega?",
-        "Sente o cheiro do ferro quente? É aqui que nasce a melhor arma de Eldoria.",
+        "Sente o cheiro do ferro quente? É aqui que nasce a melhor arma de Valdoria.",
         "Meu martelo está ocupado, mas meus ouvidos não.",
         "Não toque nas ferramentas. O que quer?"
       ],
@@ -1028,7 +1028,7 @@
         "Para você, o aço é de primeira! O que precisa hoje?",
         "A fornalha brilha mais quando você chega! Brincadeira. Mas quase.",
         "Fico feliz em te ver inteiro. Alguma nova missão no horizonte?",
-        "Obrigado por tudo que fez por Eldoria. O que posso forjar?"
+        "Obrigado por tudo que fez por Valdoria. O que posso forjar?"
       ],
       "hostile": [
         "Saia da minha oficina antes que eu te use como sucata.",
@@ -1039,7 +1039,7 @@
       ]
     },
     "chat": [
-      "O carvão está ficando caro em Eldoria. Os mercadores do sul cobram o triplo do que cobravam no ano passado.",
+      "O carvão está ficando caro em Valdoria. Os mercadores do sul cobram o triplo do que cobravam no ano passado.",
       "Meu filho Aris era o meu braço direito na forja. Agora o silêncio desta oficina pesa mais que o ferro.",
       "As espadas da guarda são funcionais, mas sem alma. O Capitão não entende a diferença entre cortar e cortar com estilo.",
       "Andam vindo mercadores do oriente com metais estranhos. Um trouxe algo que chamou de 'aço vivo'. Vibrava no meu toque.",
@@ -1049,10 +1049,10 @@
       "Sempre verifique o equilíbrio da lâmina antes da batalha. Uma espada desequilibrada te mata mais rápido que o inimigo.",
       "A têmpera em óleo de oliva dá um tom azulado ao metal. É a minha marca registrada.",
       "Proteja o que é precioso. O aço pode ser reforjado, mas um filho não pode.",
-      "A forja é o coração de Eldoria. Sem armas, estas muralhas são apenas pedra bonita.",
+      "A forja é o coração de Valdoria. Sem armas, estas muralhas são apenas pedra bonita.",
       "Amolar uma adaga é como afinar um alaúde, exige ouvido. Se o som mudar, você está tirando metal demais.",
       "Sabe, Aris e eu viemos de Miravel. Tivemos que sair às pressas quando o Lorde de lá exigiu que eu forjasse armas amaldiçoadas. Recusei. Quase nos custou a vida.",
-      "Eldoria nos acolheu quando ninguém mais quis. Esta cidade merece o melhor aço que eu posso forjar.",
+      "Valdoria nos acolheu quando ninguém mais quis. Esta cidade merece o melhor aço que eu posso forjar.",
       "Mirena, a alquimista, vive me pedindo metais raros. Sempre com pressa, nunca explica pra quê. Mas paga em dia, então não reclamo.",
       "Martha me trouxe uma panela rachada semana passada. Eu disse que sou ferreiro, não funileiro. Consertei mesmo assim. A mulher tem um jeito de pedir que não aceita 'não'.",
       "Bjorn fez as fivelas de bronze das minhas correias. Trabalho honesto, resistente. O homem entende de couro como eu entendo de aço."

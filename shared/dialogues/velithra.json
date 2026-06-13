@@ -711,7 +711,7 @@
         ]
       },
       "city_response": {
-        "text": "\"Força?\" Velithra dá um riso curto. \"Sobrevivência. Não é a mesma coisa. Mas obrigada.\"\n\nEla respira fundo.\n\n\"Martha é uma das poucas que sabe. Não a história toda, mas o suficiente. Ela me trouxe chá no primeiro inverno, quando eu dormia debaixo de uma barraca que Bjorn costurou às pressas. Nunca esqueci.\"\n\nEla endireita os ombros.\n\n\"Eldoria não é Lithvael. Mas é minha casa agora. E eu protejo o que é meu.\"",
+        "text": "\"Força?\" Velithra dá um riso curto. \"Sobrevivência. Não é a mesma coisa. Mas obrigada.\"\n\nEla respira fundo.\n\n\"Martha é uma das poucas que sabe. Não a história toda, mas o suficiente. Ela me trouxe chá no primeiro inverno, quando eu dormia debaixo de uma barraca que Bjorn costurou às pressas. Nunca esqueci.\"\n\nEla endireita os ombros.\n\n\"Valdoria não é Lithvael. Mas é minha casa agora. E eu protejo o que é meu.\"",
         "choices": [
           {
             "text": "Voltar ao início.",
@@ -758,7 +758,7 @@
           },
           {
             "type": "narration",
-            "text": "\"Eldoria não é Lithvael."
+            "text": "\"Valdoria não é Lithvael."
           },
           {
             "type": "narration",
@@ -991,7 +991,7 @@
       "A alquimista Mirena me vende um ácido suave para polimento de cristais. Funciona perfeitamente, apesar do cheiro terrível.",
       "Corvus me perguntou sobre depósitos minerais uma vez. Respondi vagamente. Alguns segredos protegem vidas, não apenas negócios.",
       "Gemas falsas são um insulto ao ofício. Cada vez que identifico uma falsificação, sinto vontade de quebrar algo. Geralmente a falsificação.",
-      "Antes de Eldoria, trabalhei em Lithvael. Uma cidade que brilhava como diamante ao sol. Agora é só escuridão. Não gosto de falar sobre isso.",
+      "Antes de Valdoria, trabalhei em Lithvael. Uma cidade que brilhava como diamante ao sol. Agora é só escuridão. Não gosto de falar sobre isso.",
       "Bjorn fez a cobertura de couro para minha bancada de trabalho. Rústico, mas funcional. Como ele.",
       "Pérolas de água doce são subestimadas. Têm um brilho lunar que nenhuma gema terrestre consegue imitar.",
       "Desconfie de quem vende gemas baratas. Na melhor das hipóteses, são quartzo pintado. Na pior... melhor nem saber."

@@ -10362,7 +10362,9 @@ var _NAMED_NPC_PORTRAITS = {
   'grom o caolho': 'npcs/grom-anao.webp',
   'grom': 'npcs/grom-anao.webp',
   'bjorn o seleiro': 'merchants/bjorn-anao.webp',
-  'bjorn': 'merchants/bjorn-anao.webp'
+  'bjorn': 'merchants/bjorn-anao.webp',
+  // 2026-06-13: nomes de Lyra desambiguados (3 NPCs distintos não podem mais colidir).
+  'lyra erva doce': 'npcs/lyra-herbalista.webp'
 };
 function _npcPortraitByName(name) {
   if (!name) return null;
@@ -18133,7 +18135,7 @@ var MARKET_TRANSIENT_POOL = [
   },
   {
     "id": "mystic2",
-    "name": "Madam Serath",
+    "name": "Serath",
     "role": "Vidente",
     "items": [
       {
@@ -18302,7 +18304,7 @@ var MARKET_TRANSIENT_POOL = [
   },
   {
     "id": "herb1",
-    "name": "Ivy",
+    "name": "Liora",
     "role": "Herborista",
     "items": [
       {
@@ -18323,7 +18325,7 @@ var MARKET_TRANSIENT_POOL = [
   },
   {
     "id": "herb2",
-    "name": "Verdana",
+    "name": "Naelith",
     "role": "Druida",
     "items": [
       {
@@ -18344,7 +18346,7 @@ var MARKET_TRANSIENT_POOL = [
   },
   {
     "id": "herb3",
-    "name": "Bramble",
+    "name": "Tervin",
     "role": "Botânico",
     "items": [
       {
@@ -18365,7 +18367,7 @@ var MARKET_TRANSIENT_POOL = [
   },
   {
     "id": "herb4",
-    "name": "Willow",
+    "name": "Elowen",
     "role": "Curandeira",
     "items": [
       {
@@ -22630,7 +22632,7 @@ function _squareGetDailyVendor(){
 // Dar gorjeta (BUFF_CHANCE=40%) pode conceder buff +1 em ability até descanso longo.
 var SQUARE_ARTIST_BUFFS = [
   { id: 'bard_jaskier',  icon: _heralIco('ic-musica'), name: 'Jaskier, o Bardo',          buff: 'Inspiração Bárdica',  stat: 'CAR', desc: '+1 em testes de Carisma e Persuasão' },
-  { id: 'dancer_lyra',   icon: '🎶', name: 'Lyra, a Dançarina',         buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
+  { id: 'dancer_lyra',   icon: '🎶', name: 'Lyra Pé-Leve',              buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
   { id: 'fire_eater',    icon: _heralIco('ic-tochas'), name: 'Drask, Engolidor de Fogo',  buff: 'Coragem do Fogo',      stat: 'CON', desc: '+1 em testes de Constituição' },
   { id: 'flutist',       icon: '🎶', name: 'Sylwen, a Flautista',       buff: 'Melodia Calmante',     stat: 'SAB', desc: '+1 em testes de Sabedoria' },
   { id: 'poet',          icon: _heralIco('ic-escriba'), name: 'Velmar, o Poeta',           buff: 'Sorte do Artista',     stat: 'INT', desc: '+1 em testes de Inteligência' }
@@ -26423,7 +26425,7 @@ var CANON_REGULAR_NPCS = {
     ]
   },
   "dancer_lyra": {
-    "name": "Lyra",
+    "name": "Lyra Pé-Leve",
     "role": "💃 Dançarina",
     "desc": "Lyra gira no centro de um círculo de espectadores, fitas de seda carmesim e dourada traçando espirais no ar como serpentes encantadas. Seus pés descalços mal tocam as pedras da praça, e o rufar ritmado de dois tamborileiros anões marca cada salto com precisão hipnótica.",
     "interactions": [
@@ -53068,7 +53070,7 @@ var _NPC_DEFAULTS = {
   bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Anão selador e coureiro',            portrait: '/shared/img/merchants/bjorn-anao.webp', icon: 'ic-patrulheiro' },
   alchemist:   { name: 'Velithra',            desc: 'Alquimista do Mercado',              portrait: '/shared/img/merchants/velithra.webp',     icon: 'ic-feiticeiro' },
   gossip:      { name: 'Velho Mendigo',       desc: 'Boateiro da Praça',                  portrait: '',  icon: 'ic-aldeao' },
-  npc_herbalist_lyra: { name: 'Lyra, a Herbalista', desc: 'Conhecedora de plantas',       portrait: '/shared/img/npcs/lyra-herbalista.webp',         icon: 'ic-druida' },
+  npc_herbalist_lyra: { name: 'Lyra Erva-Doce', desc: 'Conhecedora de plantas',           portrait: '/shared/img/npcs/lyra-herbalista.webp',         icon: 'ic-druida' },
   itinerant_merchant: { name: 'Mercador Errante', desc: 'Comerciante de passagem',        portrait: '/shared/img/npcs/mercador-errante.webp',    icon: 'ic-ladino' }
 };
 

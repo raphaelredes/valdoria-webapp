@@ -537,7 +537,7 @@
         ]
       },
       "about_hand": {
-        "text": "Bjorn olha para a prótese de madeira e faz um gesto dramático.\n\n\"Esta belezinha? Fiz eu mesmo!\" Ele bate a mão de madeira na mesa com orgulho. \"A original? Perdida numa armadilha de urso nas Montanhas Rubras. Quatorze anos atrás.\"\n\nEle se senta, e por um momento raro, fica quieto.\n\n\"Eu era batedor. Bom nisso. Rastreava qualquer coisa — lobos, cervos, bandidos. Naquela noite, estava seguindo rastros de urso pardo perto de um riacho. Não vi a armadilha de caçadores furtivos. Quando percebi... já era.\"\n\nEle ergue a prótese.\n\n\"Dois dias sozinho na floresta, com a mão presa, sangrando. No terceiro dia, tomei uma decisão. Usei minha faca de campo e... bem.\" Ele faz um gesto cortante. \"Cauterizei com brasas. Caminhei três dias até Eldoria.\"\n\nEle abre um sorriso largo.\n\n\"E aqui estou! Não posso mais empunhar uma espada direito, mas posso costurar o melhor couro que você já viu. A vida te tira uma coisa e te dá outra. Basta saber aceitar.\"",
+        "text": "Bjorn olha para a prótese de madeira e faz um gesto dramático.\n\n\"Esta belezinha? Fiz eu mesmo!\" Ele bate a mão de madeira na mesa com orgulho. \"A original? Perdida numa armadilha de urso nas Montanhas Rubras. Quatorze anos atrás.\"\n\nEle se senta, e por um momento raro, fica quieto.\n\n\"Eu era batedor. Bom nisso. Rastreava qualquer coisa — lobos, cervos, bandidos. Naquela noite, estava seguindo rastros de urso pardo perto de um riacho. Não vi a armadilha de caçadores furtivos. Quando percebi... já era.\"\n\nEle ergue a prótese.\n\n\"Dois dias sozinho na floresta, com a mão presa, sangrando. No terceiro dia, tomei uma decisão. Usei minha faca de campo e... bem.\" Ele faz um gesto cortante. \"Cauterizei com brasas. Caminhei três dias até Valdoria.\"\n\nEle abre um sorriso largo.\n\n\"E aqui estou! Não posso mais empunhar uma espada direito, mas posso costurar o melhor couro que você já viu. A vida te tira uma coisa e te dá outra. Basta saber aceitar.\"",
         "choices": [
           {
             "text": "[Força] Isso é a coisa mais impressionante que já ouvi.",
@@ -622,7 +622,7 @@
           },
           {
             "type": "narration",
-            "text": "Caminhei três dias até Eldoria.\"\n\nEle abre um sorriso largo."
+            "text": "Caminhei três dias até Valdoria.\"\n\nEle abre um sorriso largo."
           },
           {
             "type": "narration",

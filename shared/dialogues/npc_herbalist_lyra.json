@@ -181,7 +181,7 @@
         "text": [
           "Lyra te oferece chá de camomila silvestre sem que você precise pedir.\n\n\"Sente-se. Tenho coisas para te contar.\"",
           "\"Meu amigo das trilhas! A floresta me soprou que você viria. Ou talvez eu tenha visto suas pegadas na lama da entrada.\"",
-          "\"Há poucas pessoas em Eldoria com quem eu divido meu chá. Você é uma delas.\""
+          "\"Há poucas pessoas em Valdoria com quem eu divido meu chá. Você é uma delas.\""
         ],
         "choices": [
           {
@@ -252,7 +252,7 @@
           },
           {
             "type": "narration",
-            "text": "\"Há poucas pessoas em Eldoria com quem eu divido meu chá."
+            "text": "\"Há poucas pessoas em Valdoria com quem eu divido meu chá."
           },
           {
             "type": "narration",
@@ -261,7 +261,7 @@
         ]
       },
       "job_desc": {
-        "text": "\"Eu sou a guardiã dos remédios naturais de Eldoria. O Templo cura com preces, a alquimista cura com fórmulas, e eu curo com o que a terra nos dá. Preparo poções, cataplasmas e antídotos para os aventureiros que ousam entrar na floresta.\"",
+        "text": "\"Eu sou a guardiã dos remédios naturais de Valdoria. O Templo cura com preces, a alquimista cura com fórmulas, e eu curo com o que a terra nos dá. Preparo poções, cataplasmas e antídotos para os aventureiros que ousam entrar na floresta.\"",
         "choices": [
           {
             "text": "🔙 Voltar",
@@ -271,7 +271,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "\"Eu sou a guardiã dos remédios naturais de Eldoria."
+            "text": "\"Eu sou a guardiã dos remédios naturais de Valdoria."
           },
           {
             "type": "narration",
@@ -804,7 +804,7 @@
         ]
       },
       "about_martha": {
-        "text": "\"Martha é uma bênção para Eldoria. Fornecemos ervas uma para a outra — eu dou camomila e hortelã para os chás dela, ela me dá sementes de mostarda e açafrão dos mercadores. O caldo de galinha que ela faz com minhas ervas cura resfriados melhor que qualquer poção. Já disse isso pra Mirena, ela ficou furiosa.\"",
+        "text": "\"Martha é uma bênção para Valdoria. Fornecemos ervas uma para a outra — eu dou camomila e hortelã para os chás dela, ela me dá sementes de mostarda e açafrão dos mercadores. O caldo de galinha que ela faz com minhas ervas cura resfriados melhor que qualquer poção. Já disse isso pra Mirena, ela ficou furiosa.\"",
         "choices": [
           {
             "text": "Martha parece gostar de você.",
@@ -818,7 +818,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "\"Martha é uma bênção para Eldoria."
+            "text": "\"Martha é uma bênção para Valdoria."
           },
           {
             "type": "narration",
@@ -988,7 +988,7 @@
       "A Irmã Elara reza pela cura, a alquimista destila, e eu colho. Três caminhos para o mesmo fim. Mas só o meu não machuca a terra.",
       "As raízes de Mandrágora desta região são as mais potentes que já encontrei. Pelo menos eram, antes da corrupção.",
       "Já notou que os pássaros não cantam mais perto do pântano? Os animais sentem antes de nós.",
-      "Minha mãe me ensinou herbologia em Greenmere. Aqui em Eldoria, as plantas são diferentes. Mais resistentes, mas também mais voláteis.",
+      "Minha mãe me ensinou herbologia em Greenmere. Aqui em Valdoria, as plantas são diferentes. Mais resistentes, mas também mais voláteis.",
       "A erva-da-lua só floresce sob lua cheia. Uma única pétala pode curar febre por três dias.",
       "Cuidado com cogumelos roxos na floresta. Parecem inofensivos, mas uma mordida e você dorme por uma semana.",
       "O solo perto do pântano está mudando de cor. A corrupção avança devagar, mas não para.",
@@ -1005,7 +1005,7 @@
     ],
     "chat_class": {
       "Druida": [
-        "Lyra fecha os olhos e respira fundo. \"Sinto o vínculo que você tem com a terra. É raro encontrar outro guardião aqui em Eldoria.\"",
+        "Lyra fecha os olhos e respira fundo. \"Sinto o vínculo que você tem com a terra. É raro encontrar outro guardião aqui em Valdoria.\"",
         "\"Seu círculo lhe ensinou a ouvir as raízes? O meu me ensinou a ouvir o silêncio entre elas. É aí que mora a verdade.\"",
         "\"Entre druidas, não há segredos — só conhecimento compartilhado. Me conte o que a floresta lhe sussurrou hoje.\""
       ],

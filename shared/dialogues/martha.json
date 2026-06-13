@@ -61,7 +61,7 @@
     "nodes": {
       "start": {
         "text": [
-          "Bem-vindo à Estalagem da Pena-Dourada, querido. É raro ver rostos novos por Eldoria ultimamente. Como posso te ajudar?",
+          "Bem-vindo à Estalagem da Pena-Dourada, querido. É raro ver rostos novos por Valdoria ultimamente. Como posso te ajudar?",
           "Ah, entre, entre! Tira esse peso dos ombros. Minha estalagem é seu refúgio.",
           "Você parece exausto, meu jovem. A Pena-Dourada tem camas macias e sopa quente esperando por você.",
           "Sente-se onde quiser, querido. Aqui todos são família. O que Martha pode fazer por você hoje?",
@@ -181,7 +181,7 @@
           },
           {
             "type": "narration",
-            "text": "É raro ver rostos novos por Eldoria ultimamente."
+            "text": "É raro ver rostos novos por Valdoria ultimamente."
           },
           {
             "type": "narration",
@@ -371,7 +371,7 @@
         ]
       },
       "city_rumors": {
-        "text": "Eldoria já foi mais calma. Agora, com os desaparecimentos na floresta, as pessoas trancam as portas mais cedo. O capitão da guarda anda com os nervos à flor da pele.",
+        "text": "Valdoria já foi mais calma. Agora, com os desaparecimentos na floresta, as pessoas trancam as portas mais cedo. O capitão da guarda anda com os nervos à flor da pele.",
         "choices": [
           {
             "text": "❗ Desaparecimentos? Quem sumiu?",
@@ -391,7 +391,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "Eldoria já foi mais calma."
+            "text": "Valdoria já foi mais calma."
           },
           {
             "type": "narration",
@@ -1119,7 +1119,7 @@
       "act1_city_news": {
         "text": [
           "As coisas andam agitadas. O mercado está mais caro, os viajantes estão mais raros, e Aldric dobrou as patrulhas.",
-          "Eldoria muda a cada semana. Novas caras, novos problemas. Mas enquanto minha estalagem tiver sopa quente, tudo fica bem.",
+          "Valdoria muda a cada semana. Novas caras, novos problemas. Mas enquanto minha estalagem tiver sopa quente, tudo fica bem.",
           "Ouvi que os comerciantes do sul estão evitando as estradas. Algo os assusta por lá.",
           "O mundo anda inquieto. Até os pássaros migram mais cedo este ano."
         ],
@@ -1160,7 +1160,7 @@
           },
           {
             "type": "narration",
-            "text": "Eldoria muda a cada semana."
+            "text": "Valdoria muda a cada semana."
           },
           {
             "type": "narration",
@@ -1221,7 +1221,7 @@
         ]
       },
       "act1_elara_gossip": {
-        "text": "Elara anda com uma expressão estranha. Mais tensa que o normal. Ela é minha amiga mais antiga em Eldoria, e me preocupo. Passa horas no templo rezando... mais do que o habitual. Algo a perturba, mas ela não me conta.",
+        "text": "Elara anda com uma expressão estranha. Mais tensa que o normal. Ela é minha amiga mais antiga em Valdoria, e me preocupo. Passa horas no templo rezando... mais do que o habitual. Algo a perturba, mas ela não me conta.",
         "choices": [
           {
             "text": "Vou ficar de olho nela.",
@@ -1244,7 +1244,7 @@
           },
           {
             "type": "narration",
-            "text": "Ela é minha amiga mais antiga em Eldoria, e me preocupo."
+            "text": "Ela é minha amiga mais antiga em Valdoria, e me preocupo."
           },
           {
             "type": "narration",
@@ -1289,7 +1289,7 @@
         ]
       },
       "act1_about_martha": {
-        "text": "(Martha ri, secando as mãos no avental) Oh, não tem nada interessante sobre esta velha estalajadeira... Vim para Eldoria há muitos anos, de muito longe. Meu marido construiu o primeiro quarto desta estalagem com as próprias mãos.",
+        "text": "(Martha ri, secando as mãos no avental) Oh, não tem nada interessante sobre esta velha estalajadeira... Vim para Valdoria há muitos anos, de muito longe. Meu marido construiu o primeiro quarto desta estalagem com as próprias mãos.",
         "choices": [
           {
             "text": "Seu marido? Onde ele está?",
@@ -1313,7 +1313,7 @@
           },
           {
             "type": "narration",
-            "text": "Vim para Eldoria há muitos anos, de muito longe."
+            "text": "Vim para Valdoria há muitos anos, de muito longe."
           },
           {
             "type": "narration",
@@ -1546,7 +1546,7 @@
         ]
       },
       "act2_memory_gate": {
-        "text": "(Martha hesita, as mãos apertando o pano de prato) É... complicado. São coisas antigas. De antes de eu vir para Eldoria.",
+        "text": "(Martha hesita, as mãos apertando o pano de prato) É... complicado. São coisas antigas. De antes de eu vir para Valdoria.",
         "choices": [
           {
             "text": "🎲 [Persuasão DC 12] Martha, você pode confiar em mim.",
@@ -1602,7 +1602,7 @@
           },
           {
             "type": "narration",
-            "text": "De antes de eu vir para Eldoria."
+            "text": "De antes de eu vir para Valdoria."
           }
         ]
       },
@@ -1638,7 +1638,7 @@
         ]
       },
       "act2_confession": {
-        "text": "(Martha fecha os olhos e respira fundo) Você merece saber. Eu não fui sempre uma estalajadeira, {player_name}. Antes de Eldoria... eu era uma <b>Barda</b>. Me chamavam de <b>Rouxinol do Norte</b>.\n\nEu viajava com um grupo: Edric, meu marido — um Guerreiro destemido. Lysara, uma Maga brilhante. E Gareth, o melhor Ranger que já conheci.\n\nNós éramos famosos nos reinos do norte. Até que... (a voz dela falha) Edric morreu lutando contra um dragão jovem. Ele se sacrificou para que o resto de nós escapasse. Depois disso, eu pendurei meu alaúde e vim para cá. Começar de novo.",
+        "text": "(Martha fecha os olhos e respira fundo) Você merece saber. Eu não fui sempre uma estalajadeira, {player_name}. Antes de Valdoria... eu era uma <b>Barda</b>. Me chamavam de <b>Rouxinol do Norte</b>.\n\nEu viajava com um grupo: Edric, meu marido — um Guerreiro destemido. Lysara, uma Maga brilhante. E Gareth, o melhor Ranger que já conheci.\n\nNós éramos famosos nos reinos do norte. Até que... (a voz dela falha) Edric morreu lutando contra um dragão jovem. Ele se sacrificou para que o resto de nós escapasse. Depois disso, eu pendurei meu alaúde e vim para cá. Começar de novo.",
         "choices": [
           {
             "text": "Eu sinto muito, Martha. Edric era um aventureiro.",
@@ -1723,7 +1723,7 @@
           },
           {
             "type": "narration",
-            "text": "Antes de Eldoria... eu era uma <b>Barda</b>."
+            "text": "Antes de Valdoria... eu era uma <b>Barda</b>."
           },
           {
             "type": "narration",
@@ -1983,7 +1983,7 @@
       "act2_past_revealed": {
         "text": [
           "(Martha parece mais leve, como se um peso tivesse sido tirado dos ombros) Faz bem falar sobre o passado de vez em quando. O que você precisa, querido?",
-          "(Martha sorri com uma ternura nova) Você sabe mais sobre mim do que a maioria das pessoas em Eldoria. Isso me faz confiar mais em você.",
+          "(Martha sorri com uma ternura nova) Você sabe mais sobre mim do que a maioria das pessoas em Valdoria. Isso me faz confiar mais em você.",
           "(Os olhos de Martha brilham) Sabe, desde que contei minha história, sinto que esta estalagem ficou mais acolhedora. O que posso fazer por você?",
           "(Martha te recebe com um abraço) Meu confidente favorito! Em que posso ajudar?"
         ],
@@ -2062,7 +2062,7 @@
           },
           {
             "type": "narration",
-            "text": "(Martha sorri com uma ternura nova) Você sabe mais sobre mim do que a maioria das pessoas em Eldoria."
+            "text": "(Martha sorri com uma ternura nova) Você sabe mais sobre mim do que a maioria das pessoas em Valdoria."
           },
           {
             "type": "narration",
@@ -2795,7 +2795,7 @@
         ]
       },
       "act3_guard_path": {
-        "text": "(Martha entra em pânico) Não! A guarda não pode saber sobre meu passado! Aldric é justo, mas inflexível. Se souber que eu fui uma aventureira que roubou de uma guilda... ele pode me banir de Eldoria! Esta estalagem é tudo que eu tenho!",
+        "text": "(Martha entra em pânico) Não! A guarda não pode saber sobre meu passado! Aldric é justo, mas inflexível. Se souber que eu fui uma aventureira que roubou de uma guilda... ele pode me banir de Valdoria! Esta estalagem é tudo que eu tenho!",
         "choices": [
           {
             "text": "Entendo. Vou resolver sozinho.",
@@ -2824,7 +2824,7 @@
           },
           {
             "type": "narration",
-            "text": "Se souber que eu fui uma aventureira que roubou de uma guilda... ele pode me banir de Eldoria!"
+            "text": "Se souber que eu fui uma aventureira que roubou de uma guilda... ele pode me banir de Valdoria!"
           },
           {
             "type": "narration",
@@ -2913,7 +2913,7 @@
         ]
       },
       "act3_plan": {
-        "text": "(Martha acena) Você tem razão. Não podemos agir sem pensar. O agente está no Javali Bêbado. É o único lugar além daqui onde hóspedes se hospedam em Eldoria.",
+        "text": "(Martha acena) Você tem razão. Não podemos agir sem pensar. O agente está no Javali Bêbado. É o único lugar além daqui onde hóspedes se hospedam em Valdoria.",
         "choices": [
           {
             "text": "📜 Vou confrontá-lo diretamente.",
@@ -2949,7 +2949,7 @@
           },
           {
             "type": "narration",
-            "text": "É o único lugar além daqui onde hóspedes se hospedam em Eldoria."
+            "text": "É o único lugar além daqui onde hóspedes se hospedam em Valdoria."
           }
         ]
       },
@@ -3858,7 +3858,7 @@
         "text": "(Martha ri baixo) Cuido porque alguém precisa. Thorne nunca pediria ajuda — orgulho de ferreiro. Mas eu vejo as olheiras, os ombros caídos depois de um dia longo. Então mando comida, finjo que é sobra. Ele finge que acredita. Funciona pra nós dois.",
         "choices": [
           {
-            "text": "Você é a mãe de Eldoria, Martha.",
+            "text": "Você é a mãe de Valdoria, Martha.",
             "target": "act1_trusted"
           }
         ],
@@ -3891,7 +3891,7 @@
       },
       "about_mirena": {
         "text": [
-          "(Martha balança a cabeça com um sorriso enviesado) Mirena? Esperta demais para o próprio bem. Quando chegou em Eldoria, mal falava com ninguém — só queria seus frascos e seus experimentos. Mas tem bom coração, no fundo. Bem no fundo.",
+          "(Martha balança a cabeça com um sorriso enviesado) Mirena? Esperta demais para o próprio bem. Quando chegou em Valdoria, mal falava com ninguém — só queria seus frascos e seus experimentos. Mas tem bom coração, no fundo. Bem no fundo.",
           "A alquimista é como um ensopado forte demais: impressiona, mas nem todo mundo aguenta. (Martha ri) Outro dia ela me explicou por que o pão cresce usando palavras que eu nunca ouvi na vida. Eu disse: 'Querida, eu sei FAZER o pão. Não preciso entender a química.'",
           "(Martha abaixa a voz) Mirena é prima da Elara, sabia? As duas são como água e fogo. Uma cura com fé, outra com ciência. Mas quando precisam, trabalham juntas sem reclamar. Sangue é sangue."
         ],
@@ -3917,7 +3917,7 @@
           },
           {
             "type": "narration",
-            "text": "Quando chegou em Eldoria, mal falava com ninguém — só queria seus frascos e seus experimentos."
+            "text": "Quando chegou em Valdoria, mal falava com ninguém — só queria seus frascos e seus experimentos."
           },
           {
             "type": "narration",
@@ -4076,7 +4076,7 @@
         "text": "Toda terça e sexta. Sempre o mesmo prato: ensopado de carneiro com pão de centeio. Senta no canto perto da janela, abre os mapas na mesa e anota coisas enquanto come. Bjorn aparece depois e os dois ficam até tarde discutindo rotas. É bom ver gente feliz na minha estalagem.",
         "choices": [
           {
-            "text": "Sua estalagem é o coração de Eldoria.",
+            "text": "Sua estalagem é o coração de Valdoria.",
             "target": "act1_trusted"
           }
         ],
@@ -4185,7 +4185,7 @@
         "A Pena-Dourada espera por você com os braços abertos. Como posso servir?",
         "Um rosto novo! Temos quartos vagos, entre.",
         "O ensopado está quase pronto. Quer esperar ou prefere um quarto?",
-        "As noites de Eldoria podem ser perigosas sem um teto. Venha.",
+        "As noites de Valdoria podem ser perigosas sem um teto. Venha.",
         "Nada de brigas no meu salão. Fora isso, é bem-vindo."
       ],
       "friendly": [
@@ -4216,7 +4216,7 @@
       "Os aventureiros costumam trazer Valdoritas antigas. Algumas são de reinos que nem existem mais.",
       "O clima está mudando, sinto isso em meus ossos. As estrelas dizem que tempos difíceis virão.",
       "Nunca subestime um inimigo pequeno. Aprendi isso com os ratos do meu porão.",
-      "O pão de Eldoria é o melhor do reino! Uso a receita da minha avó. O segredo é o mel silvestre.",
+      "O pão de Valdoria é o melhor do reino! Uso a receita da minha avó. O segredo é o mel silvestre.",
       "Meu marido costumava dizer que a coragem não é a ausência do medo, mas a decisão de enfrentar o medo.",
       "Já viajei muito antes de me estabelecer aqui. Cada cidade tem seu próprio sabor de perigo.",
       "As estrelas contam histórias para quem sabe ouvir. Uma amiga maga me ensinou isso.",

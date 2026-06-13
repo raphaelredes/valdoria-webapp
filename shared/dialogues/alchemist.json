@@ -308,7 +308,7 @@
             "exit_callback": "market_visit_alchemist"
           },
           {
-            "text": "Mirena... como você acabou em Eldoria?",
+            "text": "Mirena... como você acabou em Valdoria?",
             "target": "about_past",
             "once": true
           },
@@ -666,7 +666,7 @@
             "target": "past_regret"
           },
           {
-            "text": "E como veio parar em Eldoria?",
+            "text": "E como veio parar em Valdoria?",
             "target": "past_eldoria"
           }
         ],
@@ -1065,7 +1065,7 @@
         ]
       },
       "swamp_promise": {
-        "text": "Faça isso. Traga amostras se puder — raízes, água, cogumelos. Qualquer coisa anômala. Se minha teoria estiver certa, Eldoria precisa saber. E se eu estiver errada... bem, ganho ingredientes grátis.",
+        "text": "Faça isso. Traga amostras se puder — raízes, água, cogumelos. Qualquer coisa anômala. Se minha teoria estiver certa, Valdoria precisa saber. E se eu estiver errada... bem, ganho ingredientes grátis.",
         "choices": [
           {
             "text": "Combinado.",
@@ -1087,7 +1087,7 @@
           },
           {
             "type": "narration",
-            "text": "Se minha teoria estiver certa, Eldoria precisa saber."
+            "text": "Se minha teoria estiver certa, Valdoria precisa saber."
           },
           {
             "type": "narration",
@@ -1208,7 +1208,7 @@
         ]
       },
       "thorne_friendship": {
-        "text": "\"Amigos\" é forte. Colegas de ofício que se respeitam. Ele forja, eu destilo. Juntos somos a infraestrutura alquímico-metalúrgica de Eldoria. Parece importante quando digo assim, não?",
+        "text": "\"Amigos\" é forte. Colegas de ofício que se respeitam. Ele forja, eu destilo. Juntos somos a infraestrutura alquímico-metalúrgica de Valdoria. Parece importante quando digo assim, não?",
         "choices": [
           {
             "text": "Com certeza. Mudando de assunto...",
@@ -1230,7 +1230,7 @@
           },
           {
             "type": "narration",
-            "text": "Juntos somos a infraestrutura alquímico-metalúrgica de Eldoria."
+            "text": "Juntos somos a infraestrutura alquímico-metalúrgica de Valdoria."
           },
           {
             "type": "narration",
@@ -1359,7 +1359,7 @@
         ]
       },
       "rumor_rats_detail": {
-        "text": "Normal para Eldoria? Não. Normal para uma cidade sobre solo alquímico ativo, perto de um pântano corrupto, com ruínas anômalas nas colinas? ...Talvez. Este lugar é um barril de pólvora disfarçado de cidadezinha. E eu adoro pólvora.",
+        "text": "Normal para Valdoria? Não. Normal para uma cidade sobre solo alquímico ativo, perto de um pântano corrupto, com ruínas anômalas nas colinas? ...Talvez. Este lugar é um barril de pólvora disfarçado de cidadezinha. E eu adoro pólvora.",
         "choices": [
           {
             "text": "Reconfortante. Mais algum rumor?",
@@ -1369,7 +1369,7 @@
         "script": [
           {
             "type": "narration",
-            "text": "Normal para Eldoria?"
+            "text": "Normal para Valdoria?"
           },
           {
             "type": "narration",
@@ -1597,7 +1597,7 @@
         ]
       },
       "quest_plague_offer": {
-        "text": "Mirena ergue os olhos de um caldeirão borbulhante, o rosto tenso.\n\n\"Um mensageiro chegou ao amanhecer. Um vilarejo ao sul está sendo devastado por uma praga — febre negra, pústulas, morte em dias. A única cura conhecida usa Raiz de Lua.\"\n\nEla aponta para três frascos selados na prateleira.\n\n\"Aquilo ali é meu estoque inteiro. Já prometi essas doses para três pacientes terminais aqui em Eldoria. Se eu usar para o vilarejo, eles morrem. Se não usar...\" Ela esfrega os olhos. \"Dezenas morrem lá fora.\"\n\nMirena te olha com urgência.\n\n\"Preciso de alguém que investigue a origem dessa praga. Talvez haja outra solução que eu não esteja vendo. Você topa?\"",
+        "text": "Mirena ergue os olhos de um caldeirão borbulhante, o rosto tenso.\n\n\"Um mensageiro chegou ao amanhecer. Um vilarejo ao sul está sendo devastado por uma praga — febre negra, pústulas, morte em dias. A única cura conhecida usa Raiz de Lua.\"\n\nEla aponta para três frascos selados na prateleira.\n\n\"Aquilo ali é meu estoque inteiro. Já prometi essas doses para três pacientes terminais aqui em Valdoria. Se eu usar para o vilarejo, eles morrem. Se não usar...\" Ela esfrega os olhos. \"Dezenas morrem lá fora.\"\n\nMirena te olha com urgência.\n\n\"Preciso de alguém que investigue a origem dessa praga. Talvez haja outra solução que eu não esteja vendo. Você topa?\"",
         "choices": [
           {
             "text": "📜 Aceitar: investigar a praga no vilarejo.",
@@ -1643,7 +1643,7 @@
           },
           {
             "type": "narration",
-            "text": "Já prometi essas doses para três pacientes terminais aqui em Eldoria."
+            "text": "Já prometi essas doses para três pacientes terminais aqui em Valdoria."
           },
           {
             "type": "narration",
@@ -1792,7 +1792,7 @@
       "hostile": [
         "Saia daqui antes que eu use você como cobaia.",
         "Sua presença contamina minha atmosfera controlada.",
-        "Eldoria ficaria melhor se você fosse transmutado em chumbo.",
+        "Valdoria ficaria melhor se você fosse transmutado em chumbo.",
         "Mais um passo e eu te mostro o efeito de uma bomba de fumaça.",
         "Sua vida é tão instável quanto nitroglicerina. Saia."
       ]
@@ -1809,7 +1809,7 @@
       "A cor violeta em um extrato indica pureza extrema... ou veneno imediato. A diferença está na temperatura de preparo.",
       "Não confunda alquimia com feitiçaria. Feitiçaria quebra as leis da natureza. Alquimia as entende e as usa.",
       "A destilação fracionada permite separar a essência da alma... ou do álcool. Ambos têm aplicações interessantes.",
-      "Eldoria tem um solo rico em minerais alquímicos. É o único motivo pelo qual monto minha barraca nesta cidadezinha.",
+      "Valdoria tem um solo rico em minerais alquímicos. É o único motivo pelo qual monto minha barraca nesta cidadezinha.",
       "Thorne me emprestou uma bigorna semana passada. Eu precisava moer pirita. Ele quase teve um colapso quando viu as marcas. Vou devolver. Eventualmente.",
       "Bjorn me trouxe um pedido especial: uma pomada que cura queimaduras E cheira bem. Impossível. Queimaduras precisam de enxofre, e enxofre cheira a ovo podre. É a ciência.",
       "Corvus me pediu tinta que brilha no escuro para seus mapas de caverna. Funcionou perfeitamente. Só atraiu algumas mariposas. Gigantes. Ele não voltou para reclamar, então considero um sucesso.",
