@@ -3848,44 +3848,10 @@ Busca rápida:
                 sel.skillProfs = shuffled.slice(0, needed);
             }
 
-            // 11. Tools (X-6.5.25 server-side, depende de class+bg+race)
+            // 11. Tools — escolha REMOVIDA da criação (2026-06-12, user). NÃO popular
+            //     sel.toolProfs: o personagem aleatório também difere a escolha de
+            //     ferramenta pro in-game; o backend grava pending_tool_choices.
             sel.toolProfs = [];
-            let toolCount = 0;
-            if (cls.tools.some(t => t.startsWith('_choice'))) toolCount++;
-            if (bg && bg.toolChoice) toolCount += bg.toolChoice;
-            if (race.toolChoice) toolCount++;
-            if (toolCount > 0) {
-                // F13: pool tipado da escolha local (gaming vs artisan) quando só o
-                // antecedente dá a escolha (sem escolha genérica de classe).
-                const _hasGen = cls.tools.some(t => t.startsWith('_choice'));
-                let _poolKeys = Object.keys(ARTISAN_TOOLS);
-                if (!_hasGen && bg && bg.toolChoice && bg.toolPool === 'gaming') _poolKeys = GAMING_TOOL_KEYS.slice();
-                else if (!_hasGen && bg && bg.toolChoice && bg.toolPool === 'artisan') _poolKeys = ARTISAN_ONLY_KEYS.slice();
-                if (serverSpec && Array.isArray(serverSpec.tool_proficiencies) && serverSpec.tool_proficiencies.length > 0) {
-                    const validTools = serverSpec.tool_proficiencies.filter(t => ARTISAN_TOOLS[t]);
-                    if (validTools.length >= toolCount) {
-                        sel.toolProfs = validTools.slice(0, toolCount);
-                    } else {
-                        // Top up local (respeitando o pool)
-                        const granted = [];
-                        cls.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
-                        if (bg && bg.tools) bg.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
-                        if (raceKey === 'Gnome' && sel.subrace === 'rock') granted.push('tinker_tools');
-                        const allTools = _poolKeys.filter(t => !granted.includes(t) && !validTools.includes(t));
-                        const shuffledTools = allTools.sort(() => Math.random() - 0.5);
-                        sel.toolProfs = [...validTools, ...shuffledTools.slice(0, toolCount - validTools.length)];
-                    }
-                } else {
-                    // Fallback local (respeitando o pool)
-                    const granted = [];
-                    cls.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
-                    if (bg && bg.tools) bg.tools.filter(t => !t.startsWith('_')).forEach(t => granted.push(t));
-                    if (raceKey === 'Gnome' && sel.subrace === 'rock') granted.push('tinker_tools');
-                    const allTools = _poolKeys.filter(t => !granted.includes(t));
-                    const shuffledTools = allTools.sort(() => Math.random() - 0.5);
-                    sel.toolProfs = shuffledTools.slice(0, toolCount);
-                }
-            }
 
             // 12. Gender
             if (serverSpec && serverSpec.gender && GENDERS.find(g => g.key === serverSpec.gender)) {
@@ -7086,7 +7052,8 @@ Busca rápida:
                 }
                 if (bg.toolChoice) {
                     const _tlabel = bg.toolPool === 'gaming' ? 'conjunto(s) de jogo' : 'ferramenta(s) de artesão';
-                    html += `<div class="detail-row">Escolha ${bg.toolChoice} ${_tlabel} (seleção na próxima etapa)</div>`;
+                    // 2026-06-12 (user): escolha de ferramenta DIFERIDA pro in-game (sem etapa na criação).
+                    html += `<div class="detail-row" style="color:var(--v-text-dim)">Direito a ${bg.toolChoice} ${_tlabel} — você escolherá durante o jogo.</div>`;
                 }
                 html += `</div></div>`;
             }
@@ -7331,14 +7298,23 @@ Busca rápida:
         // TOOLS — Enhanced with descriptions
         // ═══════════════════════════════════════════════
         function getToolChoiceCount() {
-            let count = 0;
-            const cls = CLASSES[sel.classKey];
-            if (cls && cls.tools.some(t => t.startsWith('_choice'))) count++;
-            const bg = BACKGROUNDS[sel.bg];
-            if (bg && bg.toolChoice) count += bg.toolChoice;
-            const race = RACES[sel.race];
-            if (race && race.toolChoice) count++;
-            return count;
+            // 2026-06-12 (user): ESCOLHA DE FERRAMENTAS REMOVIDA da criação — o jogador
+            // escolherá in-game quando houver feature pra isso (o Treino da Guilda já
+            // permite aprender ferramentas durante o jogo). Retornar 0 faz o carousel
+            // AUTO-PULAR a tela de ferramentas (o skip já existe em goScreen idx===6) SEM
+            // deslocar índices, e a validação `0 !== 0` passa. A tela/buildToolGrid ficam
+            // intactos p/ reativar (basta restaurar o corpo original abaixo). O backend
+            // grava o direito pendente em player.metadata['pending_tool_choices'].
+            return 0;
+            /* eslint-disable no-unreachable */ // corpo original preservado p/ reativar:
+            // let count = 0;
+            // const cls = CLASSES[sel.classKey];
+            // if (cls && cls.tools.some(t => t.startsWith('_choice'))) count++;
+            // const bg = BACKGROUNDS[sel.bg];
+            // if (bg && bg.toolChoice) count += bg.toolChoice;
+            // const race = RACES[sel.race];
+            // if (race && race.toolChoice) count++;
+            // return count;
         }
 
         function buildToolGrid() {
