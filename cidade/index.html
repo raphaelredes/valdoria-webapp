@@ -10339,7 +10339,30 @@ var _NAMED_NPC_PORTRAITS = {
   'velha do oculto': 'npcs/velha-oculto.webp',
   'batedor de carteira': 'npcs/batedor-carteira.webp',
   'guarda da praca': 'npcs/guarda-praca.webp',
-  'guarda da cidade': 'npcs/guarda-praca.webp'
+  'guarda da cidade': 'npcs/guarda-praca.webp',
+  // 2026-06-13: NPCs NAO-HUMANOS nomeados da praca (CANON_REGULAR_NPCS) — torna a
+  // diversidade D&D que ja existe na lore VISIVEL (gnomo/anao/tiefling/meio-elfo/
+  // elfo/halfling/meio-orc). Chave = nome normalizado do npc.name; render automatico
+  // via vEncounter -> _npcPortraitByName (sem editar cada npc_data). Retratos OpenAI.
+  'orion': 'npcs/orion-livreiro.webp',
+  'ruby': 'npcs/ruby-joalheira.webp',
+  'nila': 'npcs/nila-alquimista.webp',
+  'gep': 'npcs/gep-brinquedeiro.webp',
+  'cartografo varneth': 'npcs/varneth-cartografo.webp',
+  'varneth': 'npcs/varneth-cartografo.webp',
+  'ilanya': 'npcs/ilanya-florista.webp',
+  'pellaren': 'npcs/pellaren-viajante.webp',
+  'krom ferro velho': 'npcs/krom-mercenario.webp',
+  'krom': 'npcs/krom-mercenario.webp',
+  'torvin costas largas': 'npcs/torvin-trabalhador.webp',
+  'torvin': 'npcs/torvin-trabalhador.webp',
+  'aelindra': 'npcs/aelindra-viajante.webp',
+  // 2026-06-13: NPCs humanos convertidos em ANÃO (diversidade entre os principais).
+  'grom barba cinza': 'npcs/grom-anao.webp',
+  'grom o caolho': 'npcs/grom-anao.webp',
+  'grom': 'npcs/grom-anao.webp',
+  'bjorn o seleiro': 'merchants/bjorn-anao.webp',
+  'bjorn': 'merchants/bjorn-anao.webp'
 };
 function _npcPortraitByName(name) {
   if (!name) return null;
@@ -10369,7 +10392,7 @@ function _discoverySpeakerPortrait(speaker) {
   // mantém o asset legado mestre-thessil.webp). Garante que "Conversar com Eirik" e
   // a row do hub mostrem a mesma face. ANTES do fallback 'escriba' genérico.
   if (s.indexOf('eirik') >= 0)   return '/shared/img/npcs/mestre-thessil.webp';
-  if (s.indexOf('bjorn') >= 0)   return '/shared/img/merchants/bjorn.webp';  /* canonical = retrato do mercado (seleiro humano). bjorn-comerciante.webp (halfling) era colisão — reservado p/ NPC halfling. */
+  if (s.indexOf('bjorn') >= 0)   return '/shared/img/merchants/bjorn-anao.webp';  /* Bjorn — seleiro ANÃO (convertido 2026-06-13). merchants/bjorn.webp (humano) e bjorn-comerciante.webp (halfling) ficam reservados. */
   if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.webp';
   if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.webp';
   // Sessão #72 (2026-06-03) — NPCs nomeados de discovery quests (portões/oficina/
@@ -10400,7 +10423,8 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('batedor') >= 0) return '/shared/img/npcs/plaza/batedor_carteira.webp';
   if (s.indexOf('velha') >= 0 && s.indexOf('oculto') >= 0) return '/shared/img/npcs/plaza/velha_oculto.webp';
   // Fallback role-based (PNGs genéricos quando NPC não tem portrait dedicado)
-  if (s.indexOf('grom') >= 0 || s.indexOf('taverneir') >= 0) return '/shared/img/npcs/taverneiro.webp';
+  if (s.indexOf('grom') >= 0)        return '/shared/img/npcs/grom-anao.webp';  /* Grom, o Caolho — taverneiro ANÃO (retrato dedicado, ANTES do fallback generico de taverneiro). */
+  if (s.indexOf('taverneir') >= 0)   return '/shared/img/npcs/taverneiro.webp';
   if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/estalajadeira.webp';
   if (s.indexOf('banqueir') >= 0) return '/shared/img/npcs/banqueiro.webp';
   if (s.indexOf('alquimist') >= 0) return '/shared/img/npcs/alquimista.webp';
@@ -17783,9 +17807,14 @@ var MERCHANT_NAME_MAP = {
   bjorn:    'Bjorn · Seleiro',
   garlen:   'Garlen Pesa-Justo · Cambista'
 };
+// Override de filename quando o retrato canônico do mercador NÃO é merchants/{id}.webp
+// (Bjorn foi convertido em ANÃO → bjorn-anao.webp; merchants/ é Tier A immutable, então
+// um filename novo busta o cache. Manter sincronizado com check_npc_merchant_portrait_consistency).
+var _MERCHANT_PORTRAIT_FILE = { bjorn: 'bjorn-anao.webp' };
 function _merchantPortrait(id){
   var fullName = MERCHANT_NAME_MAP[id] || id;
-  return '<img src="/shared/img/merchants/' + id + '.webp" alt="' + fullName +
+  var file = _MERCHANT_PORTRAIT_FILE[id] || (id + '.webp');
+  return '<img src="/shared/img/merchants/' + file + '" alt="' + fullName +
     '" class="merchant-portrait vlb-zoomable" loading="lazy" ' +
     'data-lb-caption="' + fullName.replace(/"/g, '&quot;') + '" title="Toque para ampliar" />';
 }
@@ -19884,7 +19913,7 @@ function _buildArenaMockData(player){
 // Sessão #26 (2026-05-22) P1 #77: adicionado portraitImg (PNG quando disponível, fallback role-based)
 var RELATIONS_NPCS = [
   { id: 'rel_martha',  icon: '<img src="/shared/img/npcs/estalajadeira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.webp' },
-  { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/taverneiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/taverneiro.webp' },
+  { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/grom-anao.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/grom-anao.webp' },
   { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/guarda-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Guarda Aldric',   role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/guarda-aldric.webp' },
   { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.webp' },
   { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
@@ -26293,9 +26322,9 @@ var CANON_REGULAR_NPCS = {
     ]
   },
   "spices_merchant": {
-    "name": "Raj",
+    "name": "Saelir",
     "role": "🌶️ Especiarias",
-    "desc": "Um homem de turbante cor de açafrão e barba perfumada, cercado por sacos de juta transbordando pós coloridos: canela avermelhada, cúrcuma dourada, pimenta-do-reino negra como carvão. O ar ao redor arde suavemente nas narinas e faz os olhos lacrimejarem de prazer. Ele pesa cada pitada numa balança de latão com a solenidade de um ourives.",
+    "desc": "Um mercador de mãos manchadas de cúrcuma e olhos atentos, cercado por sacos de juta transbordando pós coloridos: canela avermelhada, cúrcuma dourada, pimenta-do-reino negra como carvão. O ar ao redor arde suavemente nas narinas e faz os olhos lacrimejarem de prazer. Ele pesa cada pitada numa balança de latão com a solenidade de um ourives.",
     "interactions": [
       {
         "id": "smell",
@@ -26327,7 +26356,7 @@ var CANON_REGULAR_NPCS = {
     ]
   },
   "leathersmith": {
-    "name": "Tanner",
+    "name": "Dornel",
     "role": "🧥 Curtidor",
     "desc": "Um homem de ombros largos e mãos ásperas como lixa, com cicatrizes brancas de cortes antigos cruzando os dedos. Ele martela rebites numa jaqueta de couro esticada sobre um cavalete, cada batida precisa e seca. O cheiro acre de tanino e couro molhado é forte, mas ele parece nem notar, assobiando uma melodia simples entre os dentes.",
     "interactions": [
@@ -27551,13 +27580,13 @@ var CANON_INTERACTION_RESULTS = {
   "spices_merchant": {
     "smell": [
       "Você se inclina sobre um saco de canela avermelhada.\n\n🌶️ <i>\"Canela de Zephyros. Mais aromática que qualquer outra. Os padeiros pagam o dobro por essa.\"</i>\n\nO perfume quente e adocicado envolve você como um cobertor de inverno.",
-      "Você aproxima o nariz de um pó dourado vibrante.\n\n🌶️ <i>\"Cuidado! Cúrcuma da Costa-Sol. Linda, mas mancha tudo que toca. Até a alma, dizem os poetas.\"</i>\n\nRaj ri suavemente e cobre o saco com um gesto protetor.",
-      "Você aspira o ar carregado de aromas misturados.\n\n🌶️ <i>\"Sente? Cravo, noz-moscada, pimenta-rosa. Juntas, contam a história de três continentes numa só respiração.\"</i>\n\nSeus olhos lacrimejam levemente e Raj oferece um pano de seda com um sorriso."
+      "Você aproxima o nariz de um pó dourado vibrante.\n\n🌶️ <i>\"Cuidado! Cúrcuma da Costa-Sol. Linda, mas mancha tudo que toca. Até a alma, dizem os poetas.\"</i>\n\nSaelir ri suavemente e cobre o saco com um gesto protetor.",
+      "Você aspira o ar carregado de aromas misturados.\n\n🌶️ <i>\"Sente? Cravo, noz-moscada, pimenta-rosa. Juntas, contam a história de três continentes numa só respiração.\"</i>\n\nSeus olhos lacrimejam levemente e Saelir oferece um pano de seda com um sorriso."
     ],
     "chat": [
-      "Você pergunta de onde vêm as especiarias.\n\n🌶️ <i>\"De todos os cantos do mundo. Cada saco cruzou mares, montanhas e desertos. Especiaria barata é especiaria falsa.\"</i>\n\nRaj pesa uma pitada de açafrão com a solenidade de quem pesa ouro.",
+      "Você pergunta de onde vêm as especiarias.\n\n🌶️ <i>\"De todos os cantos do mundo. Cada saco cruzou mares, montanhas e desertos. Especiaria barata é especiaria falsa.\"</i>\n\nSaelir pesa uma pitada de açafrão com a solenidade de quem pesa ouro.",
       "Você pergunta qual a mais rara.\n\n🌶️ <i>\"Flor-de-sal-negra. Colhida uma vez por ano, à noite, quando a maré recua. Tenho apenas um punhado.\"</i>\n\nEle abre um frasco de vidro selado e o perfume é indescritível.",
-      "Você comenta que seus olhos ardem um pouco.\n\n🌶️ <i>\"São as pimentas. Eu já nem sinto. Depois de vinte anos, meu nariz se rendeu e meus olhos fizeram as pazes.\"</i>\n\nRaj ri e oferece uma fatia de pão para aliviar a ardência."
+      "Você comenta que seus olhos ardem um pouco.\n\n🌶️ <i>\"São as pimentas. Eu já nem sinto. Depois de vinte anos, meu nariz se rendeu e meus olhos fizeram as pazes.\"</i>\n\nSaelir ri e oferece uma fatia de pão para aliviar a ardência."
     ]
   },
   "map_maker": {
@@ -27574,13 +27603,13 @@ var CANON_INTERACTION_RESULTS = {
   },
   "leathersmith": {
     "ask_price": [
-      "Você pergunta quanto custa uma jaqueta de couro reforçada.\n\n👘 <i>\"Depende. Couro simples, quinze. Couro de búfalo do norte, trinta. Couro de wyvern... melhor nem perguntar.\"</i>\n\nTanner martela um rebite sem te olhar, esperando sua decisão.",
+      "Você pergunta quanto custa uma jaqueta de couro reforçada.\n\n👘 <i>\"Depende. Couro simples, quinze. Couro de búfalo do norte, trinta. Couro de wyvern... melhor nem perguntar.\"</i>\n\nDornel martela um rebite sem te olhar, esperando sua decisão.",
       "Você aponta para um par de braçadeiras na parede.\n\n👘 <i>\"Oito moedas. Couro duplo, costura tripla, aguentam uma mordida de lobo. Já testei. Não por escolha.\"</i>\n\nEle mostra uma marca de dentes no antebraço como prova.",
-      "Você pergunta o preço de um cinto de utilidades.\n\n👘 <i>\"Cinco moedas. Quatro bolsos, fivela de bronze, e uma bainha escondida pra adaga. Todo aventureiro precisa de um.\"</i>\n\nTanner joga o cinto na bancada para você examinar."
+      "Você pergunta o preço de um cinto de utilidades.\n\n👘 <i>\"Cinco moedas. Quatro bolsos, fivela de bronze, e uma bainha escondida pra adaga. Todo aventureiro precisa de um.\"</i>\n\nDornel joga o cinto na bancada para você examinar."
     ],
     "chat": [
       "Você pergunta sobre as cicatrizes nas mãos dele.\n\n👘 <i>\"Cada uma é uma lição. Essa aqui: nunca corte couro molhado. Essa: nunca confie em faca cega. Essa...\"</i>\n\nEle olha para a mão e decide não continuar. Volta a martelar.",
-      "Você comenta sobre o cheiro forte de tanino.\n\n👘 <i>\"Cheiro de trabalho honesto. Minha esposa reclama, mas o ouro que trago pra casa não reclama de nada.\"</i>\n\nTanner dá um meio-sorriso e testa a tensão de uma tira de couro.",
+      "Você comenta sobre o cheiro forte de tanino.\n\n👘 <i>\"Cheiro de trabalho honesto. Minha esposa reclama, mas o ouro que trago pra casa não reclama de nada.\"</i>\n\nDornel dá um meio-sorriso e testa a tensão de uma tira de couro.",
       "Você pergunta qual o trabalho mais difícil que ele já fez.\n\n👘 <i>\"Uma sela de grifo. O couro tinha que ser leve mas resistente a garras. Levou um mês. Paguei em cerveja.\"</i>\n\nEle assobia a melodia de sempre enquanto corta o próximo pedaço."
     ]
   },
@@ -53020,13 +53049,13 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
 var _NPC_DEFAULTS = {
   aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/guarda-aldric.webp',  icon: 'ic-paladino' },
   martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/estalajadeira.webp',  icon: 'ic-estalajadeira' },
-  grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro do Javali Sangrento',     portrait: '/shared/img/npcs/taverneiro.webp',    icon: 'ic-barbaro' },
+  grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro anão do Javali Sangrento', portrait: '/shared/img/npcs/grom-anao.webp',    icon: 'ic-barbaro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/irma-elara.webp',   icon: 'ic-clerigo' },
   thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
   mirena:      { name: 'Mirena Folha-Verde',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
   velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.webp', icon: 'ic-mago' },
   corvus:      { name: 'Corvus Mapa-Escuro',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus.webp',   icon: 'ic-ladino' },
-  bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Mestre selador e coureiro',          portrait: '/shared/img/merchants/bjorn.webp',    icon: 'ic-patrulheiro' },
+  bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Anão selador e coureiro',            portrait: '/shared/img/merchants/bjorn-anao.webp', icon: 'ic-patrulheiro' },
   alchemist:   { name: 'Velithra',            desc: 'Alquimista do Mercado',              portrait: '/shared/img/merchants/velithra.webp',     icon: 'ic-feiticeiro' },
   gossip:      { name: 'Velho Mendigo',       desc: 'Boateiro da Praça',                  portrait: '',  icon: 'ic-aldeao' },
   npc_herbalist_lyra: { name: 'Lyra, a Herbalista', desc: 'Conhecedora de plantas',       portrait: '/shared/img/npcs/lyra-herbalista.webp',         icon: 'ic-druida' },
