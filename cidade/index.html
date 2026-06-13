@@ -10315,6 +10315,8 @@ function _discoverySpeakerIcon(speaker) {
 function _discoverySpeakerPortrait(speaker) {
   var s = String(speaker || '').toLowerCase();
   // Personagens nominais (PNGs dedicados)
+  // 2026-06-13: capitão dos portões (guarda) ANTES do clero — colisão de nome "Aldric".
+  if (s.indexOf('aldric') >= 0 && (s.indexOf('guarda') >= 0 || s.indexOf('capit') >= 0 || s.indexOf('port') >= 0)) return '/shared/img/npcs/guarda-aldric.webp';
   if (s.indexOf('aldric') >= 0 && s.indexOf('padre') >= 0) return '/shared/img/npcs/padre-aldric.webp';
   if (s.indexOf('tavira') >= 0)  return '/shared/img/npcs/mestra-tavira.webp';
   if (s.indexOf('lyana') >= 0)   return '/shared/img/npcs/lyana-herbalista.webp';
@@ -19846,7 +19848,7 @@ function _buildArenaMockData(player){
 var RELATIONS_NPCS = [
   { id: 'rel_martha',  icon: '<img src="/shared/img/npcs/estalajadeira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.webp' },
   { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/taverneiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/taverneiro.webp' },
-  { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/padre-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Guarda Aldric',   role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/padre-aldric.webp' },
+  { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/guarda-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Guarda Aldric',   role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/guarda-aldric.webp' },
   { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.webp' },
   { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
   { id: 'rel_thorne',  icon: '<img src="/shared/img/npcs/thorne-armeiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/npcs/thorne-armeiro.webp' },
@@ -51969,8 +51971,8 @@ var RECURRING_NPCS = {
   },
   aldric: {
     name: 'Guarda Aldric',
-    portrait: 'ic-paladino',
-    portraitImg: '/shared/img/npcs/padre-aldric.webp',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
+    portrait: 'ic-guerreiro',
+    portraitImg: '/shared/img/npcs/guarda-aldric.webp',  // 2026-06-13 FIX: era o retrato do clero (colisão de nome) — agora retrato próprio do capitão
     desc: 'Veterano dos portões. Olho atento, voz grave.'
   },
   silvana: {
@@ -52979,19 +52981,19 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
 
 // Mapa de defaults por NPC (name/desc/portrait/icon fallback)
 var _NPC_DEFAULTS = {
-  aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/aldric.png',  icon: 'ic-paladino' },
-  martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/martha.png',  icon: 'ic-estalajadeira' },
-  grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro do Javali Sangrento',     portrait: '/shared/img/npcs/grom.png',    icon: 'ic-barbaro' },
-  elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/elara.png',   icon: 'ic-clerigo' },
+  aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/guarda-aldric.webp',  icon: 'ic-paladino' },
+  martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/estalajadeira.webp',  icon: 'ic-estalajadeira' },
+  grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro do Javali Sangrento',     portrait: '/shared/img/npcs/taverneiro.webp',    icon: 'ic-barbaro' },
+  elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/irma-elara.webp',   icon: 'ic-clerigo' },
   thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
   mirena:      { name: 'Mirena Folha-Verde',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
   velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.webp', icon: 'ic-mago' },
   corvus:      { name: 'Corvus Mapa-Escuro',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus.webp',   icon: 'ic-ladino' },
   bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Mestre selador e coureiro',          portrait: '/shared/img/merchants/bjorn.webp',    icon: 'ic-patrulheiro' },
-  alchemist:   { name: 'Velithra',            desc: 'Alquimista do Mercado',              portrait: '/shared/img/npcs/alchemist.png',     icon: 'ic-feiticeiro' },
+  alchemist:   { name: 'Velithra',            desc: 'Alquimista do Mercado',              portrait: '/shared/img/merchants/velithra.webp',     icon: 'ic-feiticeiro' },
   gossip:      { name: 'Velho Mendigo',       desc: 'Boateiro da Praça',                  portrait: '',  icon: 'ic-aldeao' },
-  npc_herbalist_lyra: { name: 'Lyra, a Herbalista', desc: 'Conhecedora de plantas',       portrait: '/shared/img/npcs/lyra.png',         icon: 'ic-druida' },
-  itinerant_merchant: { name: 'Mercador Errante', desc: 'Comerciante de passagem',        portrait: '/shared/img/npcs/itinerant.png',    icon: 'ic-ladino' }
+  npc_herbalist_lyra: { name: 'Lyra, a Herbalista', desc: 'Conhecedora de plantas',       portrait: '',         icon: 'ic-druida' },
+  itinerant_merchant: { name: 'Mercador Errante', desc: 'Comerciante de passagem',        portrait: '',    icon: 'ic-ladino' }
 };
 
 /** GENÉRICO: abre dialogue JSON de qualquer NPC suportado. */
