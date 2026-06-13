@@ -127,8 +127,8 @@
     'stat-dex': 'ui/stat-dex.webp',
     'stat-con': 'ui/stat-con.webp',
     'stat-int': 'ui/stat-int.webp',
-    'stat-wis': 'ui/stat-wis.webp',
-    'stat-cha': 'ui/stat-cha.webp',
+    'stat-wis': 'ui/stat-wis-v2.webp',
+    'stat-cha': 'ui/stat-cha-v2.webp',
     'stat-prof': 'ui/stat-prof.webp',
     'stat-spelldc': 'ui/stat-spelldc.webp',
     'stat-exhaustion': 'ui/stat-exhaustion.webp',
@@ -145,10 +145,10 @@
     'liga-ouro': 'ui/liga-ouro.webp',
     'liga-platina': 'ui/liga-platina.webp',
     'liga-mithral': 'ui/liga-mithral.webp',
-    'luz-do-dia': 'combat/skills/luz-do-dia.webp',
-    'luzes-dancantes': 'combat/skills/luzes-dancantes.webp',
+    'luz-do-dia': 'combat/skills/luz-do-dia-v2.webp',
+    'luzes-dancantes': 'combat/skills/luzes-dancantes-v2.webp',
     'raio': 'combat/skills/raio.webp',
-    'truque-luz': 'combat/skills/truque-luz.webp',
+    'truque-luz': 'combat/skills/truque-luz-v2.webp',
   };
 
   var _currentScript = (typeof document !== 'undefined' && document.currentScript) || null;
@@ -185,11 +185,8 @@
   function buildImg(slug, altText) {
     var img = new Image();
     img.alt = altText || slug;
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'contain';
     img.setAttribute('data-icon-slug', slug);
-    return img;
+    return img; // tamanho é definido em swapUse (a partir do box do <svg>)
   }
 
   /* Substitui um <use href="#ic-X"> por <img> WebP, se X estiver no ICON_MAP.
@@ -204,10 +201,23 @@
     if (!svgEl || svgEl.closest('defs')) return false;    // não trocar as defs
     if (svgEl.getAttribute('data-icon-swapped') === '1') return false;
     var img = buildImg(slug, slug);
-    // Preserva classes do <svg> original (ex.: .ic-icon) no <img>.
-    if (svgEl.className && svgEl.getAttribute('class')) {
-      img.setAttribute('class', svgEl.getAttribute('class'));
-    }
+    // Preserva a APARÊNCIA exata do <svg>: mesma classe + MESMO tamanho que ele
+    // ocupava. Antes forçávamos width/height:100% → o <img> enchia containers
+    // grandes → ícone GIGANTE. Agora medimos o box renderizado do <svg> e fixamos
+    // em px (fallback: atributos width/height; rede de segurança: max 100% do pai).
+    var cls = svgEl.getAttribute('class');
+    if (cls) img.setAttribute('class', cls);
+    var rect = svgEl.getBoundingClientRect();
+    var aw = svgEl.getAttribute('width');
+    var ah = svgEl.getAttribute('height');
+    if (rect && rect.width > 0) img.style.width = Math.round(rect.width) + 'px';
+    else if (aw) img.style.width = /^[0-9.]+$/.test(aw) ? aw + 'px' : aw;
+    if (rect && rect.height > 0) img.style.height = Math.round(rect.height) + 'px';
+    else if (ah) img.style.height = /^[0-9.]+$/.test(ah) ? ah + 'px' : ah;
+    img.style.objectFit = 'contain';
+    img.style.verticalAlign = 'middle';
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '100%';
     var doSwap = function () {
       if (svgEl.getAttribute('data-icon-swapped') === '1') return;
       svgEl.setAttribute('data-icon-swapped', '1');
