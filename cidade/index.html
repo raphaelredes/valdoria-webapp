@@ -10360,7 +10360,7 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('elara') >= 0)   return '/shared/img/npcs/irma-elara.webp';
   if (s.indexOf('theron') >= 0)  return '/shared/img/npcs/acolito-theron.webp';
   if (s.indexOf('miriel') >= 0)  return '/shared/img/npcs/sacerdotisa-miriel.webp';
-  if (s.indexOf('corvus') >= 0)  return '/shared/img/npcs/corvus-livreiro.webp';
+  if (s.indexOf('corvus') >= 0)  return '/shared/img/merchants/corvus.webp';  /* canonical = retrato do mercado (cartógrafo humano). corvus-livreiro.webp (tiefling) era colisão — reservado p/ NPC tiefling. */
   if (s.indexOf('garlen') >= 0) return '/shared/img/merchants/garlen.webp';  /* CY1: Garlen é CAMBISTA (não cartógrafo — esse é o Corvus, acima). Retrato consistente com o card do mercado (_merchantPortrait). */
   if (s.indexOf('vorhan') >= 0)  return '/shared/img/npcs/mestre-vorhan.webp';
   if (s.indexOf('garrick') >= 0) return '/shared/img/npcs/mestre-garrick.webp';
@@ -10369,7 +10369,7 @@ function _discoverySpeakerPortrait(speaker) {
   // mantém o asset legado mestre-thessil.webp). Garante que "Conversar com Eirik" e
   // a row do hub mostrem a mesma face. ANTES do fallback 'escriba' genérico.
   if (s.indexOf('eirik') >= 0)   return '/shared/img/npcs/mestre-thessil.webp';
-  if (s.indexOf('bjorn') >= 0)   return '/shared/img/npcs/bjorn-comerciante.webp';
+  if (s.indexOf('bjorn') >= 0)   return '/shared/img/merchants/bjorn.webp';  /* canonical = retrato do mercado (seleiro humano). bjorn-comerciante.webp (halfling) era colisão — reservado p/ NPC halfling. */
   if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.webp';
   if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.webp';
   // Sessão #72 (2026-06-03) — NPCs nomeados de discovery quests (portões/oficina/
@@ -10380,9 +10380,9 @@ function _discoverySpeakerPortrait(speaker) {
   // velithra); Joran/Tharos/Ysoria/Caçadora gerados via OpenAI low + WebP.
   if (s.indexOf('joran') >= 0)    return '/shared/img/npcs/joran-sentinela.webp';
   if (s.indexOf('anci') >= 0)     return '/shared/img/npcs/ancia-valdoria.webp';
-  if (s.indexOf('mirena') >= 0)   return '/shared/img/npcs/mirena-armadureira.webp';
-  if (s.indexOf('thorne') >= 0)   return '/shared/img/npcs/thorne-armeiro.webp';
-  if (s.indexOf('velithra') >= 0) return '/shared/img/npcs/velithra-alquimista.webp';
+  if (s.indexOf('mirena') >= 0)   return '/shared/img/merchants/mirena.webp';  /* canonical = retrato do mercado (alquimista humana, com faixa do nome). mirena-armadureira.webp (armadureira pequenina) era colisão de raça+papel. */
+  if (s.indexOf('thorne') >= 0)   return '/shared/img/merchants/thorne.webp';  /* canonical = retrato do mercado (ferreiro ANÃO). thorne-armeiro.webp (humano) era colisão de raça. */
+  if (s.indexOf('velithra') >= 0) return '/shared/img/merchants/velithra.webp';  /* canonical = retrato do mercado (joalheira élfica). velithra-alquimista.webp reservado p/ outra NPC élfica. */
   if (s.indexOf('tharos') >= 0)   return '/shared/img/npcs/tharos-mestre-armas.webp';
   if (s.indexOf('ysoria') >= 0)   return '/shared/img/npcs/capita-ysoria.webp';
   if (s.indexOf('caçador') >= 0 || s.indexOf('cacador') >= 0) return '/shared/img/npcs/cacadora-itinerante.webp';
@@ -19888,8 +19888,8 @@ var RELATIONS_NPCS = [
   { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/guarda-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Guarda Aldric',   role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/guarda-aldric.webp' },
   { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.webp' },
   { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
-  { id: 'rel_thorne',  icon: '<img src="/shared/img/npcs/thorne-armeiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/npcs/thorne-armeiro.webp' },
-  { id: 'rel_mirena',  icon: '<img src="/shared/img/npcs/alquimista.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/npcs/alquimista.webp' },
+  { id: 'rel_thorne',  icon: '<img src="/shared/img/merchants/thorne.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/merchants/thorne.webp' },
+  { id: 'rel_mirena',  icon: '<img src="/shared/img/merchants/mirena.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/merchants/mirena.webp' },
   { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Lança-Justa',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.webp' },
   { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.webp' }
 ];
