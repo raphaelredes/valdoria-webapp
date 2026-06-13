@@ -10312,6 +10312,43 @@ function _discoverySpeakerIcon(speaker) {
 // Sessão #26 (2026-05-22) P0 #71: descoberta usava só ic-* SVG.
 // Agora também tenta PNG portrait pra speakers conhecidos (Padre Aldric, Tavira,
 // Lyana, Irmã Elara) — fallback pro SVG se PNG não existir.
+// 2026-06-13: FONTE ÚNICA nome-de-NPC-nomeado → retrato dedicado (caminho rel a
+// /shared/img/). Fia os NPCs da praça/eventos que só tinham ícone, num lugar só.
+// Editar AQUI ao adicionar NPC nomeado — o preflight check_named_npc_has_portrait
+// cobra quem ficar de fora. Chave = nome normalizado (minúsculo, sem acento/pontuação).
+var _NAMED_NPC_PORTRAITS = {
+  'marilia a fruteira': 'npcs/marilia-fruteira.webp',
+  'bertran o pregador da taverna': 'npcs/bertran-pregador.webp',
+  'bardo das ruas': 'npcs/bardo-ruas.webp',
+  'ancia de valdoria': 'npcs/ancia-valdoria.webp',
+  'florista da praca': 'npcs/florista-praca.webp',
+  'mercador apressado': 'npcs/mercador-apressado.webp',
+  'musico de rua': 'npcs/musico-rua.webp',
+  'capita helga': 'npcs/capita-helga.webp',
+  'estudiosa maeve': 'npcs/estudiosa-maeve.webp',
+  'silvana a bardisa': 'npcs/silvana-bardisa.webp',
+  'tavira a mestra': 'npcs/mestra-tavira.webp',
+  'vorhan o veterano': 'npcs/mestre-vorhan.webp',
+  'thessil o mercador': 'npcs/mestre-thessil.webp',
+  'garrick o cacador': 'npcs/mestre-garrick.webp',
+  'comerciante brael': 'npcs/comerciante-brael.webp',
+  'mestra miriana': 'npcs/mestra-miriana.webp',
+  'mestre corvus': 'merchants/corvus.webp',
+  'ferreiro da praca': 'npcs/ferreiro.webp',
+  'quinto o queijeiro': 'npcs/quinto-queijeiro.webp',
+  'velha do oculto': 'npcs/velha-oculto.webp',
+  'batedor de carteira': 'npcs/batedor-carteira.webp',
+  'guarda da praca': 'npcs/guarda-praca.webp',
+  'guarda da cidade': 'npcs/guarda-praca.webp'
+};
+function _npcPortraitByName(name) {
+  if (!name) return null;
+  var k = String(name).replace(/<[^>]*>/g, '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  var p = _NAMED_NPC_PORTRAITS[k];
+  return p ? '/shared/img/' + p : null;
+}
 function _discoverySpeakerPortrait(speaker) {
   var s = String(speaker || '').toLowerCase();
   // Personagens nominais (PNGs dedicados)
@@ -55212,6 +55249,8 @@ function _renderEncounterViaVEncounter(enc, originalAction, player, npc) {
   var dnpc = { id: enc.npc, name: npc.name || '', desc: npc.desc || '' };
   if (npc.portraitImg) {
     dnpc.portrait = npc.portraitImg;             // <img> + lightbox (PNG real)
+  } else if (typeof _npcPortraitByName === 'function' && _npcPortraitByName(npc.name)) {
+    dnpc.portrait = _npcPortraitByName(npc.name); // 2026-06-13: retrato dedicado por nome (fonte única)
   } else if (npc.portrait && typeof _heralIco === 'function') {
     dnpc.portraitHTML = _heralIco(npc.portrait); // SVG heraldico (sem lightbox)
   }
@@ -55445,6 +55484,8 @@ function _renderEncounterPopup(enc, originalAction, player) {
   var portraitSvg;
   if (npc.portraitImg) {
     portraitSvg = '<img src="' + npc.portraitImg + '" alt="' + (npc.name || '') + '" loading="lazy" />';
+  } else if (typeof _npcPortraitByName === 'function' && _npcPortraitByName(npc.name)) {
+    portraitSvg = '<img src="' + _npcPortraitByName(npc.name) + '" alt="' + (npc.name || '') + '" loading="lazy" />';
   } else {
     portraitSvg = (typeof _heralIco === 'function') ? _heralIco(npc.portrait) : '';
   }
