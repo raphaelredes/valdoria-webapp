@@ -800,7 +800,11 @@ async function onCompanionHealChoice(key) {
  * Handlers — bridge entre vEncounter choices e API/transitions
  * ============================================================================ */
 function onPrefaceDone() {
-  _renderScene(_sceneIntro);
+  // 2026-06-12 (user): escolha de origem REMOVIDA — a origem é aleatória (atribuída na
+  // criação do personagem, character_webapp_apply.py). Pula o _sceneIntro e vai direto à
+  // narrativa. Reativar a escolha (voltar p/ _sceneIntro) quando a origem influenciar de
+  // fato a narrativa/eventos do jogo. (O _sceneIntro/doReroll ficam intactos p/ reativar.)
+  _renderScene(_sceneRoad);
 }
 
 function onIntroDone() {
@@ -1243,7 +1247,9 @@ async function boot() {
     if (DATA.show_preface) {
       _renderScene(_scenePreface);
     } else {
-      _renderScene(_sceneIntro);
+      // 2026-06-12 (user): sem escolha de origem — direto à narrativa (origem aleatória
+      // já atribuída na criação). Pula o _sceneIntro.
+      _renderScene(_sceneRoad);
     }
   } catch (e) {
     _hideAllLoadings();
