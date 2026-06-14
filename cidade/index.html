@@ -40580,8 +40580,9 @@ function _showShopItemDetail(name, npcId){
   actionsHtml += '<button class="inv-detail-btn" id="shop-detail-close" style="font-size:calc(11px * var(--v-font-scale, 1));opacity:0.75;">Fechar</button>';
   actionsHtml += '</div>';
   // 2026-05-18 v2: usa _resolveItemIcon (strip de artigos PT-BR) mesma
-  // chain do shop card. Tamanho maior (64px) pro detalhe do item.
-  var detailIcon = _resolveItemIcon(name, '64px');
+  // chain do shop card. 2026-06-14: thumbnail GRANDE no detalhe (overhaul do
+  // mercado) — a WebP do item é 512px, suporta. Clicável p/ zoom (lightbox).
+  var detailIcon = _resolveItemIcon(name, '140px');
   if (!detailIcon) detailIcon = (it.e || _heralIco("ic-mochila"));
   // X-6.5.51CH (2026-05-18): badges canonical D&D 5e — sinaliza items que
   // requerem sintonização e items mágicos (que viram unidentified após compra).
@@ -40609,6 +40610,22 @@ function _showShopItemDetail(name, npcId){
     + negNote
     + actionsHtml;
   ov.classList.add('active');
+  // 2026-06-14 FIX (zoom de equipamento, como nos retratos de NPC/combate):
+  // a classe legada .vlb-zoomable-svg ficou SEM handler — o vLightbox INLINE morre
+  // cedo (guard 'if(global.vLightbox)return') porque o shared/lightbox.js já definiu
+  // window.vLightbox, então a delegação inline p/ .vlb-zoomable-svg nunca registra.
+  // Fix: usar o mecanismo VIVO window.showLightbox(src, titulo, desc) — o MESMO do
+  // combate. A imagem é a <img> webp que o items-resolver injeta (agora eager → carrega).
+  var _zoomEl = card.querySelector('.inv-detail-emoji');
+  if (_zoomEl) {
+    _zoomEl.style.cursor = 'zoom-in';
+    _zoomEl.addEventListener('click', function(){
+      var _zi = _zoomEl.querySelector('img');
+      if (_zi && _zi.src && typeof window.showLightbox === 'function') {
+        window.showLightbox(_zi.src, name, it.desc || '');
+      }
+    });
+  }
   // Wire actions
   var closeBtn = document.getElementById('shop-detail-close');
   if (closeBtn) closeBtn.addEventListener('click', function(){ ov.classList.remove('active'); });

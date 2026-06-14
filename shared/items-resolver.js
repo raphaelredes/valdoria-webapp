@@ -518,7 +518,15 @@
     img.style.height = '100%';
     img.style.objectFit = 'contain';
     img.style.imageRendering = 'auto';
-    img.loading = 'lazy';
+    /* 2026-06-14 FIX (item sem imagem no mercado/mochila): NÃO usar loading='lazy'.
+       O swap só insere a <img> no DOM dentro do onload (load-then-swap, ver
+       swapCardToPng/swapSvgUseToPng). Uma imagem 'lazy' enquanto AINDA DESANEXADA
+       do DOM NUNCA começa a carregar (lazy só dispara p/ <img> no documento + perto
+       do viewport) → onload nunca dispara → o swap nunca ocorre → BLANK permanente.
+       Só itens já em cache (img.complete) apareciam. Verificado live: 0/45 itens da
+       loja do Thorne carregavam; com eager → carregam. WebP de item é pequeno/otimizado
+       (CDN immutable, cacheado após o 1º load), então eager é barato. */
+    img.loading = 'eager';
     img.setAttribute('data-item-slug', slug);
     return img;
   }
