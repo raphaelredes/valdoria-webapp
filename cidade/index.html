@@ -27808,9 +27808,9 @@ var PLAZA_OFFER_EVENTS = [
     },
     script: [
       { type: 'narration', text: 'Um homem rechonchudo de avental manchado de soro de leite te alcança no meio da praça. Ele segura uma tábua de madeira com pequenos cubos de queijo curado, cada um espetado num palito.' },
-      { type: 'speech', speaker: 'Queijeiro', text: '— Aventureiro! Você tem cara de quem entende de queijo. <i>(ele sorri largo, mostrando dente faltando)</i> Aceita uma amostra? Curei esse aqui por seis meses na adega da minha avó.' },
+      { type: 'speech', speaker: 'Quinto', text: '— Aventureiro! Você tem cara de quem entende de queijo. <i>(ele sorri largo, mostrando dente faltando)</i> Aceita uma amostra? Curei esse aqui por seis meses na adega da minha avó.' },
       { type: 'narration', text: 'Ele estende a tábua. O cheiro forte e amanteigado preenche o ar — claramente é trabalho honesto.' },
-      { type: 'speech', speaker: 'Queijeiro', text: '— Tô introduzindo a fornada nova no mercado. Quem provar e gostar conta pros amigos. Cortesia da casa, sem compromisso.' }
+      { type: 'speech', speaker: 'Quinto', text: '— Tô introduzindo a fornada nova no mercado. Quem provar e gostar conta pros amigos. Cortesia da casa, sem compromisso.' }
     ],
     choices: [
       { id: 'eat_now', label: '🧀 Provar agora', result: 'apply_now',
@@ -27835,7 +27835,7 @@ var PLAZA_OFFER_EVENTS = [
     },
     script: [
       { type: 'narration', text: 'Uma mulher de meia-idade com lenço amarelo na cabeça arruma maçãs vermelhas brilhantes numa cesta de vime. Ela ergue uma das maçãs ao te ver.' },
-      { type: 'speech', speaker: 'Fruteira', text: '— Ô viajante, prova essa maçã. <i>(ela polis ela na manga do avental)</i> Veio das colinas verdes, colhida ontem mesmo. Açúcar puro.' },
+      { type: 'speech', speaker: 'Marília', text: '— Ô viajante, prova essa maçã. <i>(ela polis ela na manga do avental)</i> Veio das colinas verdes, colhida ontem mesmo. Açúcar puro.' },
       { type: 'narration', text: 'A maçã é grande, com cor vibrante quase artificial. Você sente o cheiro frutado a metros de distância.' }
     ],
     choices: [
@@ -27861,8 +27861,8 @@ var PLAZA_OFFER_EVENTS = [
     },
     script: [
       { type: 'narration', text: 'Um homem magro de chapéu de aba caída se aproxima com uma bandeja de pequenos copos de cerâmica.' },
-      { type: 'speech', speaker: 'Divulgador da Taverna', text: '— Pst. Aventureiro. <i>(ele baixa a voz como se fosse confidencial)</i> Cortesia da Taverna do Urso Cego — gole de hidromel novo. Tô divulgando pelas ruas.' },
-      { type: 'speech', speaker: 'Divulgador da Taverna', text: '— Receita do estalajadeiro. Mel das colinas + ervas que ele não revela. Se gostar, passa lá depois — primeira caneca tem 20% de desconto pra quem provou na rua.' }
+      { type: 'speech', speaker: 'Bertran', text: '— Pst. Aventureiro. <i>(ele baixa a voz como se fosse confidencial)</i> Cortesia da Taverna do Urso Cego — gole de hidromel novo. Tô divulgando pelas ruas.' },
+      { type: 'speech', speaker: 'Bertran', text: '— Receita do estalajadeiro. Mel das colinas + ervas que ele não revela. Se gostar, passa lá depois — primeira caneca tem 20% de desconto pra quem provou na rua.' }
     ],
     choices: [
       { id: 'drink_now', label: '🍯 Provar', result: 'apply_now',
@@ -28453,7 +28453,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Velha do Oculto', desc: 'Mulher idosa de cabelos brancos e olhos como pedra', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/velha_oculto.webp' },
     script: [
       { type: 'narration', text: 'Uma anciã com véu negro sobre os ombros estende a mão calejada quando você passa. <i>Os olhos dela são duas pedras-lua — sem foco, sem juventude, sem medo.</i>' },
-      { type: 'speech', speaker: 'Velha Vidente', text: '— Aventureiro. <i>(a voz é fina mas firme)</i> Te vi em sonho. Quer saber o que vem? Três cobres, e te falo o que os outros não veem. Recusa, e talvez nunca saiba o nome do teu próximo inimigo.' }
+      { type: 'speech', speaker: 'Velha do Oculto', text: '— Aventureiro. <i>(a voz é fina mas firme)</i> Te vi em sonho. Quer saber o que vem? Três cobres, e te falo o que os outros não veem. Recusa, e talvez nunca saiba o nome do teu próximo inimigo.' }
     ],
     choices: [
       { id: 'pay_truth', label: '🔮 Pagar 3 cobres pela leitura', result: 'apply_now',
@@ -38061,13 +38061,27 @@ function _tavernShowMercenaries(p){
       if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
       if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível abrir os contratos.', 'warn'); return; }
       if (typeof _applyHudFromDialogue === 'function') _applyHudFromDialogue(data);
-      var choices = (data.choices || []).filter(function(c){
+      var _allChoices = data.choices || [];
+      // 2026-06-14 FIX (revisão adversarial): se JÁ HÁ mercenário ativo, o servidor
+      // mostra Renovar/Dispensar JUNTO com os outros mercs (não-exclusivo). O filtro
+      // de _aaaListSubScreen (só merc_details/hire) DESCARTAVA Renovar/Dispensar →
+      // jogador com merc ativo ficava sem como gerir. Aqui: se há ação de gestão do
+      // ativo no node, renderiza o node as-is (vEncounter) preservando TODAS as ações
+      // (autoridade do servidor). Lista épica com banner só quando NÃO há merc ativo.
+      var _hasActiveMgmt = _allChoices.some(function(c){
+        var cb = (c && (c.screen || c.id)) || '';
+        return /renew_mercenary|dismiss_mercenary/.test(cb);
+      });
+      if (_hasActiveMgmt) {
+        if (typeof _renderCityDialogue === 'function') _renderCityDialogue('tavern', data, p);
+        return;
+      }
+      var choices = _allChoices.filter(function(c){
         var cb = (c && (c.screen || c.id)) || '';
         return /merc_details_|hire_mercenary_/.test(cb);
       });
       if (!choices.length) {
-        // Sem mercenarios livres OU ja tem um ativo (node mostra Renovar/Dispensar):
-        // renderiza o node do servidor as-is (vEncounter) — autoridade do servidor.
+        // Sem mercenarios livres: node as-is.
         if (typeof _renderCityDialogue === 'function') _renderCityDialogue('tavern', data, p);
         return;
       }
