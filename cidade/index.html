@@ -40114,6 +40114,14 @@ function _showItemDetail(name){
       ? '<button class="inv-detail-btn" id="inv-detail-unequip">Desequipar</button>'
       : '<button class="inv-detail-btn" id="inv-detail-equip">Equipar</button>';
   }
+  // Sintonização (DMG p.138): itens com a tag 'attunement' precisam sintonizar
+  // pro bônus valer (server gateia via is_bonus_active; cap 3). (auditoria 2026-06-14)
+  if ((typeof _attunementRequired === 'function') && _attunementRequired(name)){
+    var _attPlayer = window.CITY_MOCK_PLAYER || { metadata: {} };
+    var _itemAttuned = (typeof _isAttuned === 'function') && _isAttuned(_attPlayer, name);
+    actionsHtml += '<button class="inv-detail-btn" id="inv-detail-attune">'
+      + (_itemAttuned ? '✓ Sintonizado' : '✨ Sintonizar') + '</button>';
+  }
   if ((it.t || []).indexOf('consumable') !== -1){
     actionsHtml += '<button class="inv-detail-btn" id="inv-detail-use">Usar</button>';
   }
@@ -40134,6 +40142,40 @@ function _showItemDetail(name){
   var closeBtn = document.getElementById('inv-detail-close');
   if (closeBtn) closeBtn.addEventListener('click', function(){ ov.classList.remove('active'); });
   ov.addEventListener('click', function(e){ if (e.target === ov) ov.classList.remove('active'); });
+  // Sintonizar/Dessintonizar — server-authoritative (equip.attune) em REMOTE;
+  // helpers locais (_attuneItem/_unattuneItem) em LOCAL (DEV). (auditoria 2026-06-14)
+  var attuneBtn = document.getElementById('inv-detail-attune');
+  if (attuneBtn) attuneBtn.addEventListener('click', function(){
+    var _p = window.CITY_MOCK_PLAYER || (window.CITY_MOCK_PLAYER = { metadata: {} });
+    if (!_p.metadata) _p.metadata = {};
+    var _finish = function(nowAtt, full){
+      if (full){
+        if (typeof vToast === 'function') vToast('Sintonização cheia (máx 3). Dessintonize outro item primeiro.', 'warn');
+        return;
+      }
+      if (typeof vToast === 'function') vToast(nowAtt ? ('✨ Sintonizado com ' + name) : ('Dessintonizado de ' + name), 'ok');
+      if (typeof refreshHud === 'function') refreshHud();
+      if (typeof _renderInventoryPopup === 'function') _renderInventoryPopup();
+      ov.classList.remove('active');
+    };
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()){
+      window.vCityServer.cityAction('equip.attune', { item: name }).then(function(res){
+        if (res && res.ok){ _p.metadata.attuned_items = res.attuned_items || []; _finish(!!res.attuned, false); }
+        else { _finish(false, res && res.error === 'attunement_full'); }
+      }).catch(function(){ if (typeof vToast === 'function') vToast('Falha ao sintonizar.', 'err'); });
+    } else {
+      // LOCAL (DEV): usa os helpers do cliente
+      if (typeof _isAttuned === 'function' && _isAttuned(_p, name)){
+        if (typeof _unattuneItem === 'function') _unattuneItem(_p, name);
+        else (_p.metadata.attuned_items = (_p.metadata.attuned_items || []).filter(function(x){ return x !== name; }));
+        _finish(false, false);
+      } else {
+        var r = (typeof _attuneItem === 'function') ? _attuneItem(_p, name) : { ok: true };
+        if (r && r.ok === false && /cheia|máx|slots/i.test(r.reason || '')) _finish(false, true);
+        else _finish(true, false);
+      }
+    }
+  });
   var favBtn = document.getElementById('inv-detail-fav');
   if (favBtn) favBtn.addEventListener('click', function(){
     if (fav) {
