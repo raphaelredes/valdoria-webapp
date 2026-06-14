@@ -3828,7 +3828,7 @@ Busca rápida:
             // 10. Skills (server retorna lista; valida contra opções da classe)
             sel.skillProfs = [];
             const bgSkills = bg ? bg.skills : [];
-            const availableSkills = cls.skills.opts.filter(s => !bgSkills.includes(s));
+            const availableSkills = cls.skills.opts.filter(s => !bgSkills.includes(s) && s !== sel.variantSkill && !(sel.halfElfSkills || []).includes(s));
             const needed = Math.min(cls.skills.count, availableSkills.length);
             if (serverSpec && Array.isArray(serverSpec.skill_proficiencies)) {
                 const validServer = serverSpec.skill_proficiencies.filter(s => availableSkills.includes(s));
@@ -4230,7 +4230,7 @@ Busca rápida:
                 const cls = CLASSES[sel.classKey];
                 const bg = BACKGROUNDS[sel.bg];
                 const bgSkills = bg ? bg.skills : [];
-                const available = cls.skills.opts.filter(s => !bgSkills.includes(s));
+                const available = cls.skills.opts.filter(s => !bgSkills.includes(s) && s !== sel.variantSkill && !(sel.halfElfSkills || []).includes(s));
                 const needed = Math.min(cls.skills.count, available.length);
                 if (needed === 0) {
                     sel.skillProfs = [];
@@ -4567,7 +4567,7 @@ Busca rápida:
                 const cls = CLASSES[sel.classKey];
                 const bg = BACKGROUNDS[sel.bg];
                 const bgSkills = bg ? bg.skills : [];
-                const available = cls.skills.opts.filter(s => !bgSkills.includes(s));
+                const available = cls.skills.opts.filter(s => !bgSkills.includes(s) && s !== sel.variantSkill && !(sel.halfElfSkills || []).includes(s));
                 const needed = Math.min(cls.skills.count, available.length);
                 if (sel.skillProfs.length !== needed) return `Selecione ${needed} perícia(s).`;
                 // Sessao #34 (2026-05-25): Rogue Expertise gate (PHB p.96 L1)
@@ -7260,7 +7260,7 @@ Busca rápida:
             const cls = CLASSES[sel.classKey];
             const bg = BACKGROUNDS[sel.bg];
             const bgSkills = bg ? bg.skills : [];
-            const available = cls.skills.opts.filter(s => !bgSkills.includes(s));
+            const available = cls.skills.opts.filter(s => !bgSkills.includes(s) && s !== sel.variantSkill && !(sel.halfElfSkills || []).includes(s));
             const needed = Math.min(cls.skills.count, available.length);
             sel.skillProfs = sel.skillProfs.filter(s => available.includes(s));
             document.getElementById('skillDesc').textContent = `Escolha ${needed} perícia(s) de classe.`;

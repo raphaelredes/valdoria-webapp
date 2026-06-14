@@ -34736,86 +34736,82 @@ function _tavernShowGames(p){
 }
 
 function _tavernShowBulletin(p){
-  // canonical: tavern_notice_board_data.py — 16 NOTICE_TEMPLATES + NOTICE_REWARDS por nivel.
-  // Mostra 4 do dia (canonical NOTICES_PER_BOARD=4) escolhidos via daily seed.
-  var canon = (typeof CANON_NOTICE_BOARD !== 'undefined') ? CANON_NOTICE_BOARD : null;
-  var templates = (canon && canon.notice_templates) || [];
-  var perBoard = (canon && canon.notices_per_board) || 4;
-  var rewardsByLevel = (canon && canon.notice_rewards) || {};
-  // Daily seed: 4 dos 16 templates por dia
-  var d = new Date();
-  var seed = d.getFullYear() * 1000 + d.getMonth() * 50 + d.getDate();
-  var rng = (function(s){
-    var st = s % 2147483647; if (st <= 0) st += 2147483646;
-    return function(){ st = (st * 16807) % 2147483647; return (st - 1) / 2147483646; };
-  })(seed);
-  var lvl = p.level || 1;
-  var enemies = (canon && canon.notice_enemies) || ['Goblins', 'Lobos', 'Esqueletos'];
-  var locations = (canon && canon.notice_locations) || ['vila vizinha', 'mercado', 'porto'];
-  // Filtra templates por level_min, sorteia perBoard
-  var eligible = (templates.length > 0)
-    ? templates.filter(function(t){ return (t.level_min || 1) <= lvl; })
-    : [];
-  if (!eligible.length){
-    // Fallback legacy
-    eligible = (typeof TAVERN_BULLETIN !== 'undefined') ? TAVERN_BULLETIN.map(function(b){
-      return { type: 'legacy', title: b.title, desc: b.desc, icon: b.icon, level_min: 1 };
-    }) : [];
+  // 2026-06-14 (user: "peguei missões no mural com V verde, mas não apareceram em
+  // Missões"): o Mural era um board PROCEDURAL fake (CANON_NOTICE_BOARD) que só
+  // mostrava popup "Missão aceita / Diário atualizado" SEM persistir nada (sem
+  // quest.accept, sem quest id real). User escolheu "virar quadro real": agora o
+  // Mural mostra o MESMO board do servidor (SERVER_QUEST_BOARD, igual ao Quadro da
+  // Guilda) e aceitar PERSISTE via quest.accept → _applyServerQuests, aparecendo em
+  // Missões. Server-authority (SUPREME RULE #0). LOCAL (file://) usa o catálogo local.
+  var remote = !!(window.vCityServer && window.vCityServer.isRemote());
+  var coin = '<span class="vi vi-coin sm"></span>';
+
+  function _render(){
+    var board = remote ? (window.SERVER_QUEST_BOARD || [])
+                       : (typeof GUILD_QUESTS_AVAILABLE !== 'undefined' ? GUILD_QUESTS_AVAILABLE : []);
+    var items = board.map(function(q){
+      var rw = q.reward || 0, xp = q.xp || 0;
+      var diff = remote ? ('nv ' + (q.min_level || 1)) : (q.diff || '');
+      return { icon: q.icon || _heralIco('ic-missões'), label: q.title || q.id,
+               badge: rw + 'V + ' + xp + 'XP · ' + diff, _q: q };
+    });
+    _aaaListSubScreen({
+      theme: 'tavern',
+      stackKey: 'tavern_bulletin', icon: _heralIco('ic-missões'), title: 'Quadro de Avisos',
+      flavor: items.length
+        ? '<i>Grom aponta o mural coberto de editais selados. "Contratos de verdade, forasteiro. Aceita um — teu diário registra."</i>'
+        : '<i>Grom dá de ombros. "Mural vazio por ora. Volta mais tarde que sempre pinga contrato novo."</i>',
+      items: items,
+      onPick: function(item){
+        var q = item._q;
+        var rw = q.reward || 0, xp = q.xp || 0;
+        var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
+        _showInfoPopup({
+          icon: q.icon || _heralIco('ic-missões'), npc: 'Grom Barba-Cinza',
+          title: 'Aceitar: ' + (q.title || q.id),
+          desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
+            + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level
+                                     : (q.diff ? '<br><b>Dificuldade:</b> ' + q.diff : '')),
+          onConfirm: function(){
+            if (!remote) {
+              // LOCAL mode (file://): fallback mock client-side (dev tool).
+              if (typeof _acceptQuest === 'function') _acceptQuest(q.id);
+              navigateBack();
+              return;
+            }
+            if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Aceitando missão...' });
+            window.vCityServer.quest.accept(q.id).then(function(r){
+              if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+              if (r && r.ok) {
+                if (typeof _applyServerQuests === 'function') _applyServerQuests(r.quests);  // hidrata QUESTS_ACTIVE → aparece em Missões
+                if (Array.isArray(window.SERVER_QUEST_BOARD)) {
+                  window.SERVER_QUEST_BOARD = window.SERVER_QUEST_BOARD.filter(function(b){ return b.id !== q.id; });
+                }
+                _showServiceResultPopup({
+                  icon: q.icon || _heralIco('ic-missões'), npc: 'Grom Barba-Cinza',
+                  narrative: '<b>' + (q.title || q.id) + '</b> registrada no seu diário.<br><i>"Boa sorte. Volta vivo."</i>',
+                  deltas: [], onContinue: function(){ navigateBack(); }
+                });
+              } else if (typeof vToast === 'function') {
+                vToast((r && r.error) || 'Não foi possível aceitar a missão');
+              }
+            }).catch(function(e){
+              if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+              console.error('[CITY] tavern bulletin quest accept failed', e);
+              if (typeof vToast === 'function') vToast('Erro ao aceitar missão');
+            });
+          }
+        });
+      }
+    });
   }
-  // Pick perBoard via daily seed
-  var pool = eligible.slice();
-  var visible = [];
-  for (var i = 0; i < perBoard && pool.length > 0; i++){
-    var idx = Math.floor(rng() * pool.length);
-    visible.push(pool.splice(idx, 1)[0]);
+
+  // Estado fresco do board (pode ter mudado desde o boot por accept/abandon).
+  if (remote && typeof _refreshServerBoard === 'function') {
+    _refreshServerBoard().then(_render).catch(_render);
+  } else {
+    _render();
   }
-  // Tier de recompensa por nivel
-  var tier = '1-3';
-  if (lvl >= 13) tier = '13+';
-  else if (lvl >= 8) tier = '8-12';
-  else if (lvl >= 4) tier = '4-7';
-  var reward = rewardsByLevel[tier] || { gold_min: 15, gold_max: 40, xp: 25 };
-  var items = visible.map(function(t){
-    var enemy = enemies[Math.floor(rng() * Math.max(1, enemies.length))];
-    var location = locations[Math.floor(rng() * Math.max(1, locations.length))];
-    var title = (t.title || '').replace(/\{enemy\}/g, enemy).replace(/\{location\}/g, location);
-    var desc = (t.desc || '').replace(/\{enemy\}/g, enemy).replace(/\{location\}/g, location);
-    return {
-      icon: t.icon || '📜',
-      label: title,
-      badge: 'Nv ' + (t.level_min || 1) + '+',
-      _t: t, _title: title, _desc: desc, _enemy: enemy, _location: location
-    };
-  });
-  _aaaListSubScreen({
-    theme: 'tavern',
-    stackKey: 'tavern_bulletin', icon: _heralIco('ic-missões'), title: 'Quadro de Avisos',
-    flavor: '<i>Pergaminhos pregados. Recompensa: ' + reward.gold_min + '-' + reward.gold_max + ' V + ' + reward.xp + ' XP (nível ' + tier + ').</i>',
-    items: items,
-    onPick: function(item){
-      var goldRange = reward.gold_max - reward.gold_min;
-      var awarded = reward.gold_min + Math.floor(Math.random() * Math.max(1, goldRange + 1));
-      _showInfoPopup({
-        icon: item._t.icon || '📜', npc: 'Quadro', title: item._title,
-        desc: '<i>' + item._desc + '</i><br><br>' +
-              '<b>Objetivo:</b> ' + ((item._t.objective || '').replace(/\{enemy\}/g, item._enemy).replace(/\{location\}/g, item._location) || 'Completar a tarefa') + '<br>' +
-              '<b>Recompensa:</b> ' + awarded + ' V + ' + reward.xp + ' XP',
-            onConfirm: function(){
-          _showServiceResultPopup({
-            icon: item._t.icon || '📜', npc: 'Missão Aceita',
-            narrative: '<b>' + item._title + '</b> aceita. Diário atualizado.<br>' +
-                       '<i>Complete a tarefa pra resgatar a recompensa.</i>',
-            deltas: [],
-            rewards: [
-              { type:'gold', amount: awarded, label: 'Recompensa pendente' },
-              { type:'xp', amount: reward.xp, label: 'XP pendente' }
-            ],
-            onContinue: function(){ navigateBack(); }
-          });
-        }
-      });
-    }
-  });
 }
 
 function _tavernShowRoom(p){
@@ -43131,8 +43127,15 @@ function _questsShowTab(p, tab){
   } else if (tab === 'available') {
     icon = '📜'; title = 'Missões Disponíveis';
     flavor = '<i>Missões da Guilda dos Aventureiros — aceite o que se adequar ao seu nível.</i>';
-    items = GUILD_QUESTS_AVAILABLE.map(function(q){
-      return { icon: q.icon, label: q.title, badge: q.reward + 'V + ' + q.xp + 'XP · ' + q.diff, _q: q, _kind: 'available' };
+    // 2026-06-14: usa o board REAL do servidor (SERVER_QUEST_BOARD) em remote, como
+    // o Quadro da Guilda/Mural — antes usava o MOCK GUILD_QUESTS_AVAILABLE + accept
+    // fake (sem persistir). LOCAL (file://) mantém o catálogo local (dev tool).
+    var _avRemote = !!(window.vCityServer && window.vCityServer.isRemote());
+    var _avBoard = _avRemote ? (window.SERVER_QUEST_BOARD || []) : (GUILD_QUESTS_AVAILABLE || []);
+    items = _avBoard.map(function(q){
+      var _avDiff = _avRemote ? ('nv ' + (q.min_level || 1)) : (q.diff || '');
+      return { icon: q.icon || _heralIco('ic-missões'), label: q.title || q.id,
+               badge: (q.reward || 0) + 'V + ' + (q.xp || 0) + 'XP · ' + _avDiff, _q: q, _kind: 'available' };
     });
   } else if (tab === 'history') {
     icon = '📚'; title = 'Missões Concluídas';
@@ -43179,16 +43182,20 @@ function _questsShowTab(p, tab){
           }
         });
       } else if (kind === 'available') {
-        // Reusa _guildShowQuests pattern — aceita missão
+        // 2026-06-14: aceita de VERDADE (server-authority via _srvAcceptQuest →
+        // quest.accept + _applyServerQuests). Antes era popup fake sem persistir,
+        // então a missão nunca aparecia na aba "Ativas".
+        var _avRemote = !!(window.vCityServer && window.vCityServer.isRemote());
+        var _avCoin = '<span class="vi vi-coin sm"></span>';
+        var _avCtx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
         _showInfoPopup({
-          icon: q.icon, npc: 'Quadro', title: 'Aceitar: ' + q.title,
-          desc: '<b>Recompensa:</b> ' + q.reward + ' V + ' + q.xp + ' XP<br><b>Dificuldade:</b> ' + q.diff,
-                onConfirm: function(){
-            _showServiceResultPopup({
-              icon: q.icon, npc: 'Quadro',
-              narrative: '<b>' + q.title + '</b> aceita.<br><i>"Boa sorte. Volte vivo."</i>',
-              deltas: [], onContinue: function(){ navigateBack(); }
-            });
+          icon: q.icon || _heralIco('ic-missões'), npc: 'Tavira', title: 'Aceitar: ' + (q.title || q.id),
+          desc: _avCtx + '<b>Recompensa:</b> ' + (q.reward || 0) + ' ' + _avCoin + ' + ' + (q.xp || 0) + ' XP'
+            + (_avRemote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level
+                                        : (q.diff ? '<br><b>Dificuldade:</b> ' + q.diff : '')),
+          onConfirm: function(){
+            if (_avRemote) { _srvAcceptQuest(q.id); }
+            else { if (typeof _acceptQuest === 'function') _acceptQuest(q.id); navigateBack(); }
           }
         });
       } else {
