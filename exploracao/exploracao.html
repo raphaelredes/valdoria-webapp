@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-14T18:20:35Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-14T19:59:41Z - do not edit directly, edit source -->
 
 
 
@@ -4098,7 +4098,12 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   padding: 0;
   width: calc(100% - 24px);
   max-width: 340px;
-  max-height: 100%;
+  /* 2026-06-14 FIX (botão "Continuar" das etapas de viagem cortado no Telegram):
+     max-height:100% colava o card no fundo do overlay → a footer (botão) ficava
+     sob a barra inferior/safe-area do WebView. calc(100% - 24px) levanta o card
+     (mesmo padrão do .loc-card que não corta). journey-body já rola + footer é
+     flex-shrink:0, então só faltava esse respiro vertical. */
+  max-height: calc(100% - 24px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -4245,7 +4250,9 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 }
 .journey-footer {
   flex-shrink: 0;
-  padding: 10px 14px;
+  /* 2026-06-14: barra fixa do botão (escolha/Continuar) — safe-area p/ não ficar
+     sob a barra inferior do Telegram WebView. É a "área do Pular": sempre visível. */
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
   background: linear-gradient(0deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
   border-top: 1px solid rgba(196, 149, 58, 0.25);
   display: flex;
@@ -36388,6 +36395,14 @@ function confirmChoice(idx) {
 
 function onConfirmOk() {
   document.getElementById('confirm-overlay').classList.remove('visible');
+  // 2026-06-14: o #confirm-overlay é compartilhado com as ETAPAS DE VIAGEM.
+  // Se há escolha de viagem pendente, resolve o hazard da viagem (não o evento).
+  if (S._pendingJourneyChoice) {
+    var jc = S._pendingJourneyChoice;
+    S._pendingJourneyChoice = null;
+    _resolveJourneyHazard(jc.hazard, jc.choice);
+    return;
+  }
   const idx = S.pendingChoiceIdx;
   S.pendingChoiceIdx = null;
   if (idx === null || idx === undefined) {
@@ -36402,6 +36417,9 @@ function onConfirmOk() {
 
 function onConfirmBack() {
   document.getElementById('confirm-overlay').classList.remove('visible');
+  // 2026-06-14: cancelar uma escolha de VIAGEM — só fecha o overlay; a tela de
+  // viagem (com os botões de escolha) continua atrás, intacta. Não toca o evento.
+  if (S._pendingJourneyChoice) { S._pendingJourneyChoice = null; return; }
   S.pendingChoiceIdx = null;
   /* X-6.5.51g: user cancelou — re-enable choices pra escolher outra opcao */
   _setEventChoicesDisabled(false);
@@ -38631,11 +38649,11 @@ function _renderJourneyStep() {
         var pct = (window.JourneyData && JourneyData.successPctForChoice) ? JourneyData.successPctForChoice(S.player, ch) : null;
         var info = _statLabel(ch.stat) + ' · CD ' + ch.dc + (pct != null ? ' · ' + pct + '%' : '');
         _addJourneyBtn(footEl, ch.i, ch.t, (ch.desc ? ch.desc + ' — ' + info : info), '',
-          function() { _resolveJourneyHazard(hazard, ch); });
+          function() { _confirmJourneyChoice(hazard, ch); });
       } else {
         // escolha sem teste (stat:null no shape rico) — apenas seguir, sem risco.
         _addJourneyBtn(footEl, ch.i, ch.t, ch.desc || '', '',
-          function() { _resolveJourneyHazard(hazard, ch); });
+          function() { _confirmJourneyChoice(hazard, ch); });
       }
     });
   } else {
@@ -38737,6 +38755,31 @@ function _journeyRollDice(d20, mod, total, dc, success, callback) {
     } catch (e) { setTimeout(reveal, 500); }
   } else { setTimeout(reveal, 500); }
   setTimeout(reveal, 3200);  // safety: Dice3D callback pode não disparar
+}
+
+/* 2026-06-14 (user: faltava confirmação nas escolhas das etapas de viagem, como
+   nos diálogos): intercepta a escolha de hazard e REUSA o #confirm-overlay do
+   diálogo (sem UI nova). Mostra "Você pretende:" + desc + linha de teste
+   (Perícia · CD · %) e só resolve no "Confirmar". onConfirmOk/onConfirmBack
+   distinguem viagem (S._pendingJourneyChoice) de evento (S.pendingChoiceIdx). */
+function _confirmJourneyChoice(hazard, choice) {
+  S._pendingJourneyChoice = { hazard: hazard, choice: choice };
+  var descEl = document.getElementById('confirm-desc');
+  if (descEl) descEl.textContent = choice.desc || choice.t || '';
+  var statsEl = document.getElementById('confirm-stats');
+  if (statsEl) {
+    if (choice.stat) {
+      var pct = (window.JourneyData && JourneyData.successPctForChoice)
+        ? JourneyData.successPctForChoice(S.player, choice) : null;
+      statsEl.textContent = 'Teste de ' + _statLabel(choice.stat) + ' · CD ' + choice.dc
+        + (pct != null ? ' · ' + pct + '% de sucesso' : '');
+      statsEl.style.display = 'block';
+    } else {
+      statsEl.style.display = 'none';
+    }
+  }
+  var ov = document.getElementById('confirm-overlay');
+  if (ov) ov.classList.add('visible');
 }
 
 function _resolveJourneyHazard(hazard, choice) {
