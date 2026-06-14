@@ -6042,7 +6042,7 @@ Busca rápida:
                 // final. Rotula como "Sugeridos" + caption ate o jogador atribuir os 6.
                 const _statsDefined = !!(sel.statAssignment && Object.keys(sel.statAssignment).length === 6);
                 const _attrTitle = _statsDefined ? '📊 Atributos' : '📊 Atributos Sugeridos';
-                const _attrCaption = _statsDefined ? '' : `<div class="detail-text" style="font-size:11px;color:var(--v-text-dim);margin:-2px 0 6px">Prioridade recomendada desta classe — você define seus valores na etapa de Atributos.</div>`;
+                const _attrCaption = _statsDefined ? '' : `<div class="detail-text" style="font-size:var(--v-font-micro, 11px);color:var(--v-text-dim);margin:-2px 0 6px">Prioridade recomendada desta classe — você define seus valores na etapa de Atributos.</div>`;
                 html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">${_attrTitle}${sel.race ? ' (com bônus de ' + RACES[sel.race].name + ')' : ''}<span class="toggle-arrow">▾</span></div><div class="section-body">${_attrCaption}`;
                 attrs.forEach(a => {
                     const v = stats[a];

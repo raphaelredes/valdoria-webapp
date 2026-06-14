@@ -41952,6 +41952,10 @@ function _guildShowQuests(p){
     });
     _squareShowListPopup({
       stackKey: 'guild_quests', icon: _heralIco('ic-missões'), title: 'Quadro de Missões',
+      // #11 (user): eleva o Quadro de Missões ao PADRAO_LOCAIS épico — banner-cenário
+      // full-bleed (reusa quadro-banner.webp, já existente). Retratos por categoria
+      // (story/bounty) via OpenAI ficam como follow-up.
+      bannerImg: '/shared/img/city/quadro-banner.webp',
       flavor: items.length
         ? '<i>Tavira aponta o quadro coberto de editais selados. "Escolha um contrato. Falha conta na sua reputação."</i>'
         : '<i>Tavira dá de ombros. "Nenhum contrato novo no quadro por ora. Volte mais tarde, aventureiro."</i>',
