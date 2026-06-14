@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-12T22:50:39Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-14T17:52:53Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -5581,6 +5581,12 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     display: flex;
     flex-direction: column;
     gap: 10px;
+    /* 2026-06-14 PERF (Referência Tática travava ao abrir, até no S20 FE):
+       promove o card a uma layer de GPU própria — a stack de 6 box-shadows é
+       rasterizada UMA vez e a animação de scale vira um transform composto na
+       GPU (sem repaint da sombra por frame). O card sai do DOM ao fechar, então
+       o will-change não vaza memória. */
+    will-change: transform, opacity;
     animation: lpHelpEntry .5s cubic-bezier(.34,1.56,.64,1) both;
 }
 /* Moldura interna fina + gleam nos 4 cantos */
@@ -5599,8 +5605,11 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     z-index: 1;
 }
 @keyframes lpHelpEntry {
-    0%   { transform: scale(0.72) rotate(-3deg); opacity: 0; filter: blur(4px); }
-    100% { transform: scale(1) rotate(0); opacity: 1; filter: blur(0); }
+    /* 2026-06-14 PERF: removido filter:blur (era o pior custo de GPU em WebView
+       Android — re-borrava a textura inteira do card a cada frame). scale+rotate+
+       opacity são compostos na GPU; a sensação de profundidade continua pelo scale. */
+    0%   { transform: scale(0.72) rotate(-3deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
 }
 /* TAG: "REFERÊNCIA TÁTICA…" com linhas flanqueando */
 .lp-help-tag {
@@ -5662,6 +5671,25 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 @keyframes lpHelpGemPulse {
     0%   { opacity: 0.65; text-shadow: 0 0 4px rgba(196,149,58,0.4); }
     100% { opacity: 1;    text-shadow: 0 0 10px rgba(255,220,140,0.75); }
+}
+/* 2026-06-14 PERF tiers — cumpre a promessa de tiering (comentário ~3150) no
+   popup de leitura "Referência Tática". Em perf-lite/medium: entrada instantânea
+   (sem scale/sombra animada) + pulses infinitos de filter/text-shadow DESLIGADOS
+   (repaint contínuo, sem ganho funcional numa tela de leitura). Escopo só
+   .lp-help-* — NÃO toca outros consumidores de lpHelpGemPulse (6583/9299).
+   Em flagship (full) o visual completo é mantido; o lag de ABERTURA já foi
+   resolvido pra TODOS os tiers removendo o filter:blur + will-change no card. */
+body.perf-lite .lp-help-card, body.perf-medium .lp-help-card,
+body.perf-lite .lp-help-lim-card, body.perf-medium .lp-help-lim-card {
+    animation: none;
+}
+body.perf-lite .lp-help-card { box-shadow: 0 14px 36px rgba(0,0,0,0.9); }
+body.perf-lite .lp-help-title, body.perf-medium .lp-help-title,
+body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
+    animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+    .lp-help-title, .lp-help-title::after { animation: none; }
 }
 /* RESUMO: descrição curta da skill (movida da skill row pro help card em
    X-6.5.51AT, 2026-05-08). Estilo: itálico centralizado, sutilmente
@@ -19430,8 +19458,13 @@ function _updateActionSheetState(s) {
        actionSpent mesmo quando BAs estavam disponíveis (evidente no Monge). */
     var mainBtns = document.querySelectorAll('.action-btns-grid--main .action-btn, .action-btns-grid--secondary .action-btn');
     var anySkillOk = (typeof _simAnySkillUsable === 'function') ? _simAnySkillUsable(s, p) : true;
-    /* Buttons que SEMPRE ativos (meta/UI, sem custo de ação) */
-    var ALWAYS_ACTIVE = { 'pass': true, 'skip-non-player-dice': true, 'skip-combat-dice-others': true, 'log': true };
+    /* Buttons que SEMPRE ativos (meta/UI, sem custo de ação).
+       2026-06-14 FIX ("Pular dados" desativava sem ação): o data-act real do botão
+       é 'toggle-skip-dice' (toggle de preferência da animação 3D), mas o whitelist
+       só tinha nomes LEGADOS ('skip-non-player-dice'/'skip-combat-dice-others' que
+       não existem mais) → o botão caía no fallback action-gated e ganhava .spent
+       (pointer-events:none) quando p.actionSpent. É só preferência de UI: sempre ativo. */
+    var ALWAYS_ACTIVE = { 'pass': true, 'toggle-skip-dice': true, 'log': true };
     /* Buttons que requerem ação principal (PHB) */
     var ACTION_GATED = { 'attack': true, 'dodge': true, 'flee': true, 'bag': true, 'use-item': true };
     for (var bi = 0; bi < mainBtns.length; bi++) {
