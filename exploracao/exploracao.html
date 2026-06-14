@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-14T19:59:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-14T20:47:53Z - do not edit directly, edit source -->
 
 
 
@@ -34653,7 +34653,9 @@ function _scheduleTorchStormExtinguish() {
     // padrão. Fallback pra inline se vToast não carregou.
     try {
       if (typeof vToast === 'function') {
-        vToast('🔥 Tocha apagada pela tempestade. Reacenda no menu se quiser.', 'warn', 4000);
+        // 2026-06-14 (Human Reading Time): duração escala com o texto, não 4000ms fixo.
+        vToast('🔥 Tocha apagada pela tempestade. Reacenda no menu se quiser.', 'warn',
+               (typeof calcReadTime === 'function' ? calcReadTime('🔥 Tocha apagada pela tempestade. Reacenda no menu se quiser.', 'toast-warn') : 4000));
       } else if (typeof _showWaterStatusToast === 'function') {
         _showWaterStatusToast('🔥 Tocha apagada pela tempestade.', 4000);
       }
@@ -37293,7 +37295,7 @@ async function triggerReturnToCity(opts) {
     // Toast de erro (se vToast disponivel via shared) OU alert inline
     var msg = 'Falha ao retornar. Tente de novo ou feche o app.';
     if (typeof vToast === 'function') {
-      try { vToast(msg, 'err', 4000); } catch (_) {}
+      try { vToast(msg, 'err', (typeof calcReadTime === 'function' ? calcReadTime(msg, 'toast-warn') : 4000)); } catch (_) {}
     } else {
       // Fallback visual: adiciona overlay simples de erro (nao defeat)
       var errEl = document.createElement('div');
