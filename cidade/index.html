@@ -38039,11 +38039,58 @@ function _marketRollMagicComplication(player){
   });
 }
 
+// 2026-06-14 (user #11): contratacao SERVER-DRIVEN (PADRAO_SERVIDOR). Antes esta
+// tela era MOCK client-side — o onConfirm so fazia _pay() (debitava ouro local) e
+// NUNCA contratava: o jogador pagava e o mercenario nunca aparecia no combate
+// (viola SUPREME RULE #0 + "cobrar e entregar efeito real"). Agora REMOTE lista o
+// pool REAL do servidor (dialogue.screen cb=tavern_mercenaries_menu) e contrata de
+// verdade via o screen-bridge (_openCityScreen -> ficha -> Contratar -> hire_npc
+// atomico + set active_mercenary -> combat_manager_allies injeta o merc como aliado).
+// Banner epico via _aaaListSubScreen (mercenarios-banner.webp). Mock so em LOCAL (file://).
+function _dialogueFlavorText(data){
+  try {
+    var t = (data && data.script || []).map(function(s){ return s && s.text; }).filter(Boolean).join(' ');
+    return t ? ('<i>' + t + '</i>') : '';
+  } catch(_e){ return ''; }
+}
 function _tavernShowMercenaries(p){
-  // Mercenaries canonical (tavern_mercenaries.py) — sistema dinâmico
-  // server_npc_manager.get_available_sync('mercenary') gera 3 mercenários dinamicamente
+  var remote = !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote());
+  if (remote) {
+    if (window.vProcessing) { try { window.vProcessing.show({ text: 'Abrindo contratos...' }); } catch(_){} }
+    window.vCityServer.cityAction('dialogue.screen', { venue: 'tavern', cb: 'tavern_mercenaries_menu' }).then(function(data){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível abrir os contratos.', 'warn'); return; }
+      if (typeof _applyHudFromDialogue === 'function') _applyHudFromDialogue(data);
+      var choices = (data.choices || []).filter(function(c){
+        var cb = (c && (c.screen || c.id)) || '';
+        return /merc_details_|hire_mercenary_/.test(cb);
+      });
+      if (!choices.length) {
+        // Sem mercenarios livres OU ja tem um ativo (node mostra Renovar/Dispensar):
+        // renderiza o node do servidor as-is (vEncounter) — autoridade do servidor.
+        if (typeof _renderCityDialogue === 'function') _renderCityDialogue('tavern', data, p);
+        return;
+      }
+      var items = choices.map(function(c){
+        return { icon: _heralIco('ic-stat-attack'), label: (c.label || 'Mercenário'), _cb: (c.screen || c.id) };
+      });
+      _aaaListSubScreen({
+        theme: 'tavern', stackKey: 'tav_mercenaries',
+        icon: _heralIco('ic-stat-attack'), title: 'Contratar Mercenário',
+        bannerImg: '/shared/img/taverna/mercenarios-banner.webp',
+        flavor: _dialogueFlavorText(data) || '<i>O Mestre dos Contratos folheia a lista. "Estes estão livres hoje. Pagamento à vista — o contrato vale por alguns combates."</i>',
+        items: items,
+        onPick: function(item){ _openCityScreen('tavern', item._cb, p); }
+      });
+    }).catch(function(e){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      console.error('[CITY] mercenaries menu failed', e);
+      if (typeof vToast === 'function') vToast('Erro ao abrir os contratos.', 'warn');
+    });
+    return;
+  }
+  // LOCAL (file://) fallback — mock client-side (dev tool, sem servidor).
   // canonical: tavern_mercenaries.py + npc_data_types.py MERCENARY_FIRST_NAMES + MERCENARY_TITLES
-  // 4 roles canonical: Mercenário/Guarda/Batedor/Curandeiro
   // Sessão #44 (2026-05-27): SVG → PNG (regra "no SVG in city"). icons mirror combat/{class}.png.
   var pool = [
     { icon: '<img src="/shared/img/combat/guerreiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Vorag Coração-de-Aço', role: 'Mercenário (Guerreiro nv 4)', cls: 'Guerreiro',   cost: 80,  duration: 5 },
@@ -38084,7 +38131,47 @@ function _tavernShowMercenaries(p){
   });
 }
 
+// 2026-06-14 (user #11): SERVER-DRIVEN (PADRAO_SERVIDOR), como mercenarios. Antes
+// era mock client-side (cobrava e nao entregava — active_adventurer nunca setado ->
+// buffs passivos nunca aplicados). REMOTE lista o pool REAL (dialogue.screen
+// cb=tavern_adventurers_menu) e contrata via o screen-bridge (confirm -> pagar ->
+// hire_adventurer + set active_adventurer + buffs passivos). Banner epico via
+// _aaaListSubScreen (exploradores-banner.webp). Mock so em LOCAL (file://).
 function _tavernShowAdventurers(p){
+  var remote = !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote());
+  if (remote) {
+    if (window.vProcessing) { try { window.vProcessing.show({ text: 'Procurando exploradores...' }); } catch(_){} }
+    window.vCityServer.cityAction('dialogue.screen', { venue: 'tavern', cb: 'tavern_adventurers_menu' }).then(function(data){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível abrir.', 'warn'); return; }
+      if (typeof _applyHudFromDialogue === 'function') _applyHudFromDialogue(data);
+      var choices = (data.choices || []).filter(function(c){
+        var cb = (c && (c.screen || c.id)) || '';
+        return /hire_adventurer_|pay_adventurer_/.test(cb);
+      });
+      if (!choices.length) {
+        if (typeof _renderCityDialogue === 'function') _renderCityDialogue('tavern', data, p);
+        return;
+      }
+      var items = choices.map(function(c){
+        return { icon: _heralIco('ic-grupo'), label: (c.label || 'Explorador'), _cb: (c.screen || c.id) };
+      });
+      _aaaListSubScreen({
+        theme: 'tavern', stackKey: 'tav_adventurers',
+        icon: _heralIco('ic-grupo'), title: 'Recrutar Explorador',
+        bannerImg: '/shared/img/taverna/exploradores-banner.webp',
+        flavor: _dialogueFlavorText(data) || '<i>"Estes não são mercenários — são exploradores. Vão com você pelo propósito, não só pelo ouro. Mas ainda cobram."</i>',
+        items: items,
+        onPick: function(item){ _openCityScreen('tavern', item._cb, p); }
+      });
+    }).catch(function(e){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      console.error('[CITY] adventurers menu failed', e);
+      if (typeof vToast === 'function') vToast('Erro ao abrir.', 'warn');
+    });
+    return;
+  }
+  // LOCAL (file://) fallback — mock client-side (dev tool, sem servidor).
   // canonical: tavern_adventurers.py + EXPLORER_CLASS_MAP (5 roles canonical)
   // Sessão #44 (2026-05-27): SVG → PNG (regra "no SVG in city"). icons mirror combat/{class}.png.
   var pool = [
