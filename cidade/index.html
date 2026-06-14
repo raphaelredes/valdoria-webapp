@@ -22378,7 +22378,7 @@ var MOCK_PLAYER_LOCKED    = ['Pergaminho Antigo'];
 var MOCK_ALLY_EQUIPPED = {
   liriel: {
     head:      null,
-    chest:     'Giboia de Pele',
+    chest:     'Gibão de Peles',
     main_hand: 'Cajado de Salgueiro',
     off_hand:  null,
     legs:      null,
@@ -32107,7 +32107,6 @@ var CANON_ITEMS_DB = {
   'Espada de Mithral':  {e: _heralIco('ic-liga-mithral'), v:500, r:'very_rare',t:['weapon','martial_weapon','versatile','magic'], s:'main_hand', dd:'1d8', b:2, desc:'Lâmina de mithral azulado. +2 ataque, leve como pluma.'},
   // === ARMADURAS — Thorne ===
   'Cota de Malha':      {e: _heralIco('ic-mochila'), v:75,  r:'common',  t:['armor','medium_armor'],            s:'chest',     ac:5,  desc:'Cota de malha de ferro. CA base 16.'},
-  'Giboia de Pele':     {e: _heralIco('ic-lobo'), v:40,  r:'common',  t:['armor','light_armor'],             s:'chest',     ac:3,  desc:'Couro reforçado. CA base 12 + DES (máx +2).'},
   'Peitoral de Mithral':{e: _heralIco('ic-liga-mithral'), v:500, r:'rare',    t:['armor','medium_armor','magic'],    s:'chest',     ac:6, b:1, desc:'Peitoral leve e impenetrável de mithral forjado.'},
   'Elmo Enferrujado':   {e: _heralIco('ic-mochila'), v:25,  r:'common',  t:['armor'],                            s:'head',      ac:1,  desc:'Elmo simples de ferro. +1 CA.'},
   'Elmo de Cavaleiro':  {e: _heralIco('ic-mochila'), v:150, r:'uncommon',t:['armor'],                            s:'head',      ac:2,  desc:'Elmo de aço polido com viseira. +2 CA.'},
@@ -32533,7 +32532,7 @@ var CANON_MARKET_SHOPS = {
       // Escudos
       'Escudo de Madeira', 'Escudo de Aço',
       // Armaduras leves
-      'Armadura Acolchoada', 'Armadura de Couro', 'Couro Batido', 'Giboia de Pele',
+      'Armadura Acolchoada', 'Armadura de Couro', 'Couro Batido',
       // Armaduras médias
       'Gibão de Peles', 'Cota de Malha', 'Cota de Escamas', 'Brunea',
       // Armaduras pesadas
@@ -40198,7 +40197,7 @@ var _HERALDIC_ITEM_ALIASES = {
   // Alias name → name in catalog (or direct ic-it-id)
   // X-6.5.51CA (2026-05-18): fix de aliases broken — direct IDs onde slug falha.
   'Couro Batido':           'ic-it-couro-batido',
-  'Giboia de Pele':         'ic-it-gibao-peles',      // FIX: alias antigo apontava pra nome 'Gibao de Peles' que falhava slug
+  'Gibão de Peles':         'ic-it-gibao-peles',      // FIX: alias antigo apontava pra nome 'Gibao de Peles' que falhava slug
   'Brunea de Aneis':        'ic-it-brunea-aneis',
   'Brunea de Anéis':        'ic-it-brunea-aneis',     // FIX: variante com acento
   'Peitoral de Mithral':    'ic-it-base-breastplate', // FIX: era furia-montanhas (visualmente errado pra mithral)
@@ -46245,7 +46244,7 @@ var SUBSCREEN_DATA = {
       [_heralIco('ic-it-espada-longa'),      'Espada Longa',       '15 <span class="vi vi-coin sm"></span> — 1d8 versátil (1d10)', 'buy_thorne_longsword'],
       [_heralIco('ic-it-martelo-guerra'),    'Martelo de Guerra',  '15 <span class="vi vi-coin sm"></span> — 1d8 contund. versátil', 'buy_thorne_hammer'],
       [_heralIco('ic-it-cota-malha'),        'Cota de Malha',      '75 <span class="vi vi-coin sm"></span> — CA 16 pesada', 'buy_thorne_armor'],
-      [_heralIco('ic-it-gibao-peles'),       'Giboia de Pele',     '40 <span class="vi vi-coin sm"></span> — CA 12 + DES (máx +2)', 'buy_thorne_hide'],
+      [_heralIco('ic-it-gibao-peles'),       'Gibão de Peles',     '40 <span class="vi vi-coin sm"></span> — CA 12 + DES (máx +2)', 'buy_thorne_hide'],
       [_heralIco('ic-it-elmo-enferrujado'),  'Elmo Enferrujado',   '25 <span class="vi vi-coin sm"></span> — +2 CA cabeça', 'buy_thorne_helm'],
       [_heralIco('ic-it-base-splint-mail'),  'Grevas de Ferro',    '45 <span class="vi vi-coin sm"></span> — +2 CA pernas', 'buy_thorne_greaves'],
       [_heralIco('ic-it-botas-pesadas'),     'Botas Pesadas',      '35 <span class="vi vi-coin sm"></span> — +1 CA + estabilidade', 'buy_thorne_boots']
@@ -47113,7 +47112,7 @@ var ACTION_HANDLERS = {
   'buy_thorne_longsword':function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-espada-longa'),     npc: 'Thorne — Ferreiro', item: 'Espada Longa',        desc: '<i>Arma Marcial. 1d8 cortante. Versátil (1d10).</i>',                                                       cost: 15 }); },
   'buy_thorne_hammer':   function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-martelo-guerra'),   npc: 'Thorne — Ferreiro', item: 'Martelo de Guerra',  desc: '<i>Arma Marcial. 1d8 contundente. Versátil (1d10).</i>',                                                     cost: 15 }); },
   'buy_thorne_armor':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-cota-malha'),       npc: 'Thorne — Ferreiro', item: 'Cota de Malha',       desc: '<i>Armadura Pesada. CA 16. Desvantagem Furtividade. Requer FOR 13.</i>',                                  cost: 75 }); },
-  'buy_thorne_hide':     function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-gibao-peles'),      npc: 'Thorne — Ferreiro', item: 'Giboia de Pele',      desc: '<i>Armadura Média. CA 12 + Mod. DES (máx +2).</i>',                                                          cost: 40 }); },
+  'buy_thorne_hide':     function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-gibao-peles'),      npc: 'Thorne — Ferreiro', item: 'Gibão de Peles',      desc: '<i>Armadura Média. CA 12 + Mod. DES (máx +2).</i>',                                                          cost: 40 }); },
   'buy_thorne_helm':     function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-elmo-enferrujado'), npc: 'Thorne — Ferreiro', item: 'Elmo Enferrujado',    desc: '<i>Slot Cabeça. +2 CA. Aparência rústica, mas funcional.</i>',                                              cost: 25 }); },
   'buy_thorne_greaves':  function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-base-splint-mail'), npc: 'Thorne — Ferreiro', item: 'Grevas de Ferro',     desc: '<i>Slot Pernas. +2 CA. Sem penalidades.</i>',                                                                cost: 45 }); },
   'buy_thorne_boots':    function(p){ _buyConfirm({ p: p, icon: _heralIco('ic-it-botas-pesadas'),    npc: 'Thorne — Ferreiro', item: 'Botas Pesadas',       desc: '<i>Slot Pés. +1 CA. Vantagem contra ser empurrado.</i>',                                                     cost: 35 }); },
