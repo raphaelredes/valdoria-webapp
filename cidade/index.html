@@ -38680,9 +38680,59 @@ function _syncEquippedToLocalStorage() {
   // GUARD _cityEquipReady: evita wipe (boot sync antes da hidratação async).
   try {
     if (window._cityEquipReady && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
-      window.vCityServer.equip.set(window.MOCK_PLAYER_EQUIPPED || {});
+      var _eqp = window.vCityServer.equip.set(window.MOCK_PLAYER_EQUIPPED || {});
+      // Auditoria equip 2026-06-14: o servidor recusa (confirm_rune_loss) quando
+      // desequipar/trocar destruiria uma runa inscrita (inscrição destrutiva) —
+      // confirmamos antes (só quando há runa).
+      if (_eqp && typeof _eqp.then === 'function') {
+        _eqp.then(function(res){
+          if (res && res.confirm_rune_loss && res.confirm_rune_loss.length) _cityConfirmRuneLoss(res);
+        });
+      }
     }
   } catch (_) {}
+}
+
+// Confirmação de destruição de runa ao desequipar/trocar no WebApp (cidade). O
+// servidor (equip.set) recusou e devolveu confirm_rune_loss + o equipamento ATUAL.
+// Revertemos o mock pro estado do servidor (item volta equipado) e pedimos
+// confirmação; no "confirmar", re-aplica a remoção e re-envia com a flag.
+function _cityConfirmRuneLoss(res){
+  try {
+    var srv = res.equipment || {};
+    if (window.MOCK_PLAYER_EQUIPPED) {
+      Object.keys(window.MOCK_PLAYER_EQUIPPED).forEach(function(s){
+        window.MOCK_PLAYER_EQUIPPED[s] = (srv[s] != null) ? srv[s] : null;
+      });
+    }
+    if (typeof refreshHud === 'function') refreshHud();
+    if (typeof _renderInventoryPopup === 'function') _renderInventoryPopup();
+  } catch(_r){}
+  var losses = res.confirm_rune_loss || [];
+  var runeList = losses.map(function(l){ return '🔮 ' + (l.rune || 'runa'); }).join(', ');
+  var doConfirm = function(){
+    try {
+      losses.forEach(function(l){ if (window.MOCK_PLAYER_EQUIPPED) delete window.MOCK_PLAYER_EQUIPPED[l.slot]; });
+      if (typeof refreshHud === 'function') refreshHud();
+      if (typeof _renderInventoryPopup === 'function') _renderInventoryPopup();
+      window.vCityServer.cityAction('equip.set', { equipment: window.MOCK_PLAYER_EQUIPPED || {}, confirm_rune_loss: true });
+    } catch(_c){}
+  };
+  if (typeof _showInfoPopup === 'function') {
+    _showInfoPopup({
+      icon: (typeof _heralIco === 'function' ? _heralIco('ic-runas') : ''),
+      npc: 'Inscrição Rúnica',
+      title: 'Destruir runa?',
+      desc: '<div style="text-align:left;line-height:1.5;color:var(--v-text,#d4c8b0);">'
+          + '<p style="margin:0 0 8px;">Desequipar vai <b>destruir permanentemente</b> ' + runeList
+          + ' — a inscrição é destrutiva e não pode ser recuperada.</p></div>',
+      confirmLabel: '🔮 Destruir e desequipar',
+      cancelLabel: 'Cancelar (manter)',
+      onConfirm: doConfirm
+    });
+  } else if (typeof vToast === 'function') {
+    vToast('Runa preservada (confirmação indisponível).', 'warn');
+  }
 }
 // Sync inicial no boot
 if (typeof document !== 'undefined') {
