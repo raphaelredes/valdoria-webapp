@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-12T22:50:39Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-14T10:14:23Z - do not edit directly, edit source -->
 
 
 
@@ -14998,6 +14998,31 @@ function parseRewardString(s) {
 //
 // Tags de log: [E-REM:API-*] (INIT/MOVE/STATE/FINISH/EVENT_CHOICE/ERROR).
 // ===========================================================================
+
+// 2026-06-14 ANTI-TRAVAMENTO: fetch com timeout (AbortController). CAUSA-RAIZ
+// de travamentos na exploração: os fetch de gameplay (move/eventChoice/transition)
+// NÃO tinham timeout — numa rede móvel travada (3G/4G BR, foco do projeto) a
+// Promise NUNCA resolvia nem rejeitava → o loader de transição (#loading) ou o
+// modal de evento ficavam presos PARA SEMPRE (o watchdog do FSM volta ph→idle
+// mas não esconde o loader; o modal de evento visível impede o watchdog 'event').
+// Agora: aborta após `ms` → a rejeição cai no catch existente de cada caller
+// (esconde loader, faz fallback do evento, reseta ph, reabilita retry).
+// Espelha o padrão já usado no health-check do boot (linha ~775, AbortController 5s).
+window.__explFetchTO = function(url, opts, ms) {
+  opts = opts || {};
+  ms = ms || 15000;
+  if (typeof AbortController !== 'function') return fetch(url, opts);  // WebView antigo: sem timeout
+  var ctrl = new AbortController();
+  var tid = setTimeout(function () { try { ctrl.abort(); } catch (_) {} }, ms);
+  var merged = {};
+  for (var k in opts) merged[k] = opts[k];
+  merged.signal = ctrl.signal;
+  return fetch(url, merged).then(
+    function (r) { clearTimeout(tid); return r; },
+    function (e) { clearTimeout(tid); throw e; }
+  );
+};
+
 (function() {
   if (window.__EXPLORE_MODE !== 'remote' || !window.__EXPLORE_API_BASE) {
     window.ExploracaoAPI = null;
@@ -15026,12 +15051,12 @@ function parseRewardString(s) {
       headers = _bearer();
     }
     try {
-      var resp = await fetch(API_BASE + path, {
+      var resp = await window.__explFetchTO(API_BASE + path, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(body || {}),
         keepalive: true
-      });
+      }, 12000);  // 2026-06-14 anti-travamento: aborta rede travada → catch → fallback
       var dt = Math.round(performance.now() - t0);
       var data = null;
       try { data = await resp.json(); } catch (_eJ) { data = { _parse_err: true }; }
@@ -15044,19 +15069,20 @@ function parseRewardString(s) {
       return data;
     } catch (eNet) {
       var dtE = Math.round(performance.now() - t0);
-      console.error('[E-REM:API-ERROR] ' + path + ' network ms=' + dtE + ' msg=' + (eNet && eNet.message));
-      return { _network_error: true, error: 'network' };
+      var _isTO = !!(eNet && eNet.name === 'AbortError');  // 2026-06-14: timeout via __explFetchTO
+      console.error('[E-REM:API-ERROR] ' + path + ' ' + (_isTO ? 'timeout' : 'network') + ' ms=' + dtE + ' msg=' + (eNet && eNet.message));
+      return { _network_error: true, _timeout: _isTO, error: _isTO ? 'timeout' : 'network' };
     }
   }
 
   async function _get(path) {
     var t0 = performance.now();
     try {
-      var resp = await fetch(API_BASE + path, {
+      var resp = await window.__explFetchTO(API_BASE + path, {
         method: 'GET',
         headers: _bearer(),
         keepalive: true
-      });
+      }, 12000);  // 2026-06-14 anti-travamento: aborta rede travada → catch → fallback
       var dt = Math.round(performance.now() - t0);
       var data = null;
       try { data = await resp.json(); } catch (_eJ) { data = { _parse_err: true }; }
@@ -15069,8 +15095,9 @@ function parseRewardString(s) {
       return data;
     } catch (eNet) {
       var dtE = Math.round(performance.now() - t0);
-      console.error('[E-REM:API-ERROR] ' + path + ' network ms=' + dtE + ' msg=' + (eNet && eNet.message));
-      return { _network_error: true, error: 'network' };
+      var _isTO = !!(eNet && eNet.name === 'AbortError');  // 2026-06-14: timeout via __explFetchTO
+      console.error('[E-REM:API-ERROR] ' + path + ' ' + (_isTO ? 'timeout' : 'network') + ' ms=' + dtE + ' msg=' + (eNet && eNet.message));
+      return { _network_error: true, _timeout: _isTO, error: _isTO ? 'timeout' : 'network' };
     }
   }
 
@@ -15633,7 +15660,7 @@ window.__postExploracaoTransition = async function(status) {
   var idemKey = __getOrCreateIdemKey();
   var t0 = Date.now();
   try {
-    var resp = await fetch(window.__EXPLORE_API_BASE + '/api/webapp/transition', {
+    var resp = await window.__explFetchTO(window.__EXPLORE_API_BASE + '/api/webapp/transition', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -15652,7 +15679,7 @@ window.__postExploracaoTransition = async function(status) {
         }
       }),
       keepalive: true
-    });
+    }, 12000);  // 2026-06-14 anti-travamento: rede travada → abort → catch → loader escondido + retry (era: loader preso pra sempre)
     var ms = Date.now() - t0;
     var data = await resp.json().catch(function() { return {}; });
     console.info('[E-REM:HTTP] POST /api/webapp/transition status=' + status
@@ -22885,6 +22912,18 @@ setInterval(function() {
       try { renderFrame(performance.now()); } catch (_) {}
     }
     try { requestAnimationFrame(renderFrame); } catch (_) {}
+  } else if (!_rafScheduled && S && S.ph !== 'defeat'
+             && typeof document !== 'undefined' && !document.hidden
+             && now - _renderLastTs > 1500) {
+    // 2026-06-14 ANTI-TRAVAMENTO: renderFrame pode lançar exceção ANTES de re-agendar
+    // (o scheduleRender() no fim do renderFrame não roda) → _rafScheduled fica preso
+    // em false → o branch acima (que EXIGE _rafScheduled) NUNCA recupera → loop morto
+    // → tela congelada (só destravava via input em bindGlobalInputWake). Detecta
+    // "sem frame agendado E sem frame recente E aba visível E não derrotado" e
+    // reinicia o loop sozinho. ph==='defeat' é estado terminal legítimo (não re-agenda).
+    LOGW('RENDER', 'watchdog detected DEAD loop (no frame scheduled, last=' + Math.round(now - _renderLastTs) + 'ms) — forcing restart');
+    try { renderFrame(performance.now()); } catch (_) {}
+    try { scheduleRender(); } catch (_) {}
   }
 }, 2000);
 
@@ -32868,9 +32907,15 @@ if (typeof window._fsmWatchdogInterval === 'undefined') {
         try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}
       }
     } else if (S.ph === 'return') {
-      // Return de combat. Se >10s sem progresso, força idle (combate falhou silenciosamente).
+      // Return de combat / retorno à cidade. Se >10s sem progresso, força idle.
       if (elapsed > 10000) {
         try { LOGE('FSM-WATCHDOG', 'STUCK on return for ' + elapsed + 'ms — forcing idle'); } catch (_) {}
+        // 2026-06-14 ANTI-TRAVAMENTO: a transição mostra um loader full-screen
+        // (#loading). Se ela travou (rede), o jogador fica preso ATRÁS do loader
+        // mesmo após o ph voltar pra idle. Esconde o loader + reabilita o
+        // close-beacon (a transição planejada falhou — o jogador continua na exploração).
+        try { if (window._vTransitionLoader) window._vTransitionLoader.hide(); } catch (_) {}
+        try { window.__valdoria_transitioning = false; } catch (_) {}
         _setPhase('idle', 'watchdog_recovery_return_stuck');
         try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}
       }
@@ -37491,7 +37536,7 @@ async function confirmEdgeTransition() {
       window.__valdoria_transitioning = true;
       const rewards = (typeof window.__buildRewardsDelta === 'function')
         ? window.__buildRewardsDelta() : {};
-      const resp = await fetch(window.__EXPLORE_API_BASE + '/api/webapp/transition', {
+      const resp = await window.__explFetchTO(window.__EXPLORE_API_BASE + '/api/webapp/transition', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37508,7 +37553,7 @@ async function confirmEdgeTransition() {
           }
         }),
         keepalive: true
-      });
+      }, 12000);  // 2026-06-14 anti-travamento: rede travada → abort → catch → loader escondido + fallback retorno (era: loader 'Viajando…' preso pra sempre)
       const data = await resp.json().catch(() => ({}));
       console.info('[E-REM:EDGE] transition response code=' + resp.status
         + ' has_url=' + (data && data.url ? 'yes' : 'no')
