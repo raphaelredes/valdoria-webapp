@@ -3874,9 +3874,12 @@ Busca rápida:
                 if (name.length > 15) name = name.slice(0, 15);
                 sel.name = name;
 
-                const pre2 = pick(NAMES_DATA.pre);
-                const title = pick(NAMES_DATA.titles);
-                let surname = pre2 + title.replace(/^(o |a |da |do )/, '');
+                // 2026-06-13 (dono): sobrenome OPACO de outro idioma; NUNCA concatenar
+                // título PT-BR (gerava "BelLâmina"/"CorPunho"). Usa o pool de sobrenomes
+                // prontos OU combina prefixo+sufixo de sobrenome (ambos opacos).
+                let surname = (Math.random() < 0.5)
+                    ? pick(NAMES_DATA.surnames)
+                    : (pick(NAMES_DATA.sur_pre) + pick(NAMES_DATA.sur_suf));
                 if (surname.length > 15) surname = surname.slice(0, 15);
                 sel.surname = surname;
 
@@ -7433,28 +7436,27 @@ Busca rápida:
            Brightblade, Thornwell, Duskborn, Wyrmrest, Vandermir, Corvalheiro,
            Drakonar, Lumenrath, Veltharion, Solveric, Mournfall, Stelvarn,
            Halvendar, Brammoth, Ironvale, Wolfvane, Embergrim, Skyrend, Goldhand. */
-        const SURNAME_BONUS = ['Blackwood', 'Stormrider', 'Ironsong', 'Ravencrest', 'Ashthorne',
-            'Vexbane', 'Grimward', 'Frostmane', 'Wolfsbane', 'Stoneveil',
-            'Shadowmere', 'Brightblade', 'Thornwell', 'Duskborn', 'Wyrmrest',
-            'Vandermir', 'Corvalheiro', 'Drakonar', 'Lumenrath', 'Veltharion',
-            'Solveric', 'Mournfall', 'Stelvarn', 'Halvendar', 'Brammoth',
-            'Ironvale', 'Wolfvane', 'Embergrim', 'Skyrend', 'Goldhand'];
+        /* 2026-06-13 (dono): "ofereça SOMENTE sobrenomes em outros idiomas, nenhum em
+           PT-BR". Pool OPACO original (nórdico/germânico/élfico/latim-fantasia). SEM
+           anglicismo transparente (Blackwood/Wolfsbane), SEM copyright, SEM título PT-BR. */
+        const SURNAME_BONUS = ['Korvaldr', 'Stenvald', 'Gronvald', 'Haldrun', 'Hrafnel',
+            'Vornheld', 'Grimsveld', 'Ulfgrim', 'Bralduk', 'Skarnveld',
+            'Aelmira', 'Lurithael', 'Caelwyn', 'Maeloran', 'Thaliriel',
+            'Ninthael', 'Elarith', 'Oronvael', 'Sylwen', 'Verewyn',
+            'Veltharion', 'Corvalon', 'Drusilex', 'Solverian', 'Marventus',
+            'Nyctaeon', 'Castellor', 'Aurelvex', 'Valeriax', 'Nyxara'];
         function generateSurname() {
             const r = Math.random();
             let surname;
-            if (r < 0.30) {
-                /* 30%: surnames[] (canonical, 40 prontos) */
+            if (r < 0.35) {
+                /* 35%: surnames[] (pool opaco pronto) */
                 surname = pick(NAMES_DATA.surnames);
-            } else if (r < 0.55) {
-                /* 25%: sur_pre + sur_suf (combine, gera 432 variações) */
+            } else if (r < 0.65) {
+                /* 30%: sur_pre + sur_suf (combina, gera 432 variações opacas) */
                 surname = pick(NAMES_DATA.sur_pre) + pick(NAMES_DATA.sur_suf);
-            } else if (r < 0.85) {
-                /* 30%: pool AAA inglês (estilo Skyrim/D&D anglo, sem copyright) */
-                surname = pick(SURNAME_BONUS);
             } else {
-                /* 15%: pre + " " + title preservado (estilo D&D clássico
-                       "Aldric o Bravo" / "Cora Punho de Aço") */
-                surname = pick(NAMES_DATA.pre) + ' ' + pick(NAMES_DATA.titles);
+                /* 35%: pool opaco extra (SURNAME_BONUS) — nada de PT-BR/anglicismo */
+                surname = pick(SURNAME_BONUS);
             }
             if (surname.length > 15) surname = surname.slice(0, 15);
             document.getElementById('surnameInput').value = surname;

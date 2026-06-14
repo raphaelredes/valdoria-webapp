@@ -10352,7 +10352,7 @@ var _NAMED_NPC_PORTRAITS = {
   'varneth': 'npcs/varneth-cartografo.webp',
   'ilanya': 'npcs/ilanya-florista.webp',
   'pellaren': 'npcs/pellaren-viajante.webp',
-  'krom ferro velho': 'npcs/krom-mercenario.webp',
+  'krom gronvald': 'npcs/krom-mercenario.webp',
   'krom': 'npcs/krom-mercenario.webp',
   'torvin costas largas': 'npcs/torvin-trabalhador.webp',
   'torvin': 'npcs/torvin-trabalhador.webp',
@@ -10364,7 +10364,7 @@ var _NAMED_NPC_PORTRAITS = {
   'bjorn o seleiro': 'merchants/bjorn-anao.webp',
   'bjorn': 'merchants/bjorn-anao.webp',
   // 2026-06-13: nomes de Lyra desambiguados (3 NPCs distintos não podem mais colidir).
-  'lyra erva doce': 'npcs/lyra-herbalista.webp'
+  'lyra sylwen': 'npcs/lyra-herbalista.webp'
 };
 function _npcPortraitByName(name) {
   if (!name) return null;
@@ -10375,7 +10375,21 @@ function _npcPortraitByName(name) {
   return p ? '/shared/img/' + p : null;
 }
 function _discoverySpeakerPortrait(speaker) {
+  // HARDENING 2026-06-13 (dono): resolve por IDENTIDADE EXATA (mapa _NAMED_NPC_PORTRAITS,
+  // fonte única) ANTES da cadeia de substring frágil abaixo. Elimina a colisão de
+  // substring (bug Aldric/Lyra: o nome descartava o id estável). Aditivo: se o speaker
+  // não bater exato, cai no substring legado — zero regressão. O warn (1× por speaker)
+  // cataloga quem ainda depende do substring p/ futura migração.
+  var _exact = (typeof _npcPortraitByName === 'function') ? _npcPortraitByName(speaker) : null;
+  if (_exact) return _exact;
   var s = String(speaker || '').toLowerCase();
+  if (s) {
+    window._npcPortraitFallbacks = window._npcPortraitFallbacks || {};
+    if (!window._npcPortraitFallbacks[s] && window.console && console.warn) {
+      window._npcPortraitFallbacks[s] = 1;
+      try { console.warn('[NPC PORTRAIT] fallback substring p/ speaker="' + speaker + '" (candidato a _NAMED_NPC_PORTRAITS)'); } catch (_e) {}
+    }
+  }
   // Personagens nominais (PNGs dedicados)
   // 2026-06-13: capitão dos portões (guarda) ANTES do clero — colisão de nome "Aldric".
   if (s.indexOf('aldric') >= 0 && (s.indexOf('guarda') >= 0 || s.indexOf('capit') >= 0 || s.indexOf('port') >= 0)) return '/shared/img/npcs/guarda-aldric.webp';
@@ -17802,12 +17816,12 @@ function _marketShowAbsentRumor(p, merchant, state){
 // X-6.5.51CJ (2026-05-18): zoom em tela cheia via vLightbox no toque/clique.
 // X-6.5.51CJ (2026-05-18): caption do lightbox usa nome amigável via MERCHANT_NAME_MAP
 var MERCHANT_NAME_MAP = {
-  thorne:   'Thorne Forja-de-Ferro · Ferreiro',
-  mirena:   'Mirena Folha-Verde · Alquimista',
-  velithra: 'Velithra Olho-de-Cristal · Joalheira',
-  corvus:   'Corvus Mapa-Escuro · Cartógrafo',
+  thorne:   'Thorne Korvaldr · Ferreiro',
+  mirena:   'Mirena Virelle · Alquimista',
+  velithra: 'Velithra Aelmira · Joalheira',
+  corvus:   'Corvus Veltharion · Cartógrafo',
   bjorn:    'Bjorn · Seleiro',
-  garlen:   'Garlen Pesa-Justo · Cambista'
+  garlen:   'Garlen Castellor · Cambista'
 };
 // Override de filename quando o retrato canônico do mercador NÃO é merchants/{id}.webp
 // (Bjorn foi convertido em ANÃO → bjorn-anao.webp; merchants/ é Tier A immutable, então
@@ -17988,7 +18002,7 @@ var MARKET_MERCHANTS = [
   {
     id: 'thorne',
     icon: _merchantPortrait('thorne'),
-    name: 'Thorne Forja-de-Ferro',
+    name: 'Thorne Korvaldr',
     role: 'Ferreiro',
     desc: 'Anão musculoso, avental queimado, martelo sempre na mão.',
     greetings: [
@@ -18006,7 +18020,7 @@ var MARKET_MERCHANTS = [
   {
     id: 'mirena',
     icon: _merchantPortrait('mirena'),
-    name: 'Mirena Folha-Verde',
+    name: 'Mirena Virelle',
     role: 'Alquimista',
     desc: 'Mulher esbelta, manto roxo bordado de runas, óculos pendurados no pescoço.',
     greetings: [
@@ -18023,7 +18037,7 @@ var MARKET_MERCHANTS = [
   {
     id: 'velithra',
     icon: _merchantPortrait('velithra'),
-    name: 'Velithra Olho-de-Cristal',
+    name: 'Velithra Aelmira',
     role: 'Joalheira',
     desc: 'Elfa de meia-idade, dedos cobertos de anéis, voz suave.',
     greetings: [
@@ -18040,7 +18054,7 @@ var MARKET_MERCHANTS = [
   {
     id: 'corvus',
     icon: _merchantPortrait('corvus'),
-    name: 'Corvus Mapa-Escuro',
+    name: 'Corvus Veltharion',
     role: 'Cartógrafo',
     desc: 'Homem alto e magro, manto preto, mãos manchadas de tinta.',
     greetings: [
@@ -18075,12 +18089,12 @@ var MARKET_MERCHANTS = [
         '<b>Rações de Viagem</b> (5 <span class="vi vi-coin sm"></span>) — Comida para 1 dia"' }
     ]
   },
-  // X-6.5.51CG (2026-05-18): Garlen Pesa-Justo — Cambista de Bens de Troca.
+  // X-6.5.51CG (2026-05-18): Garlen Castellor — Cambista de Bens de Troca.
   // Sexto mercador canonical. Vende commodities a 100% (preço estável PHB).
   {
     id: 'garlen',
     icon: _merchantPortrait('garlen'),
-    name: 'Garlen Pesa-Justo',
+    name: 'Garlen Castellor',
     role: 'Cambista',
     desc: 'Homem magro, dedos manchados de tinta, balança de bronze sempre à mão. Não negocia armas nem magia — só mercadoria de peso e fé.',
     greetings: [
@@ -19291,7 +19305,7 @@ function _buildMarketMockData(player){
 var GUILD_NPCS = [
   {
     id: 'guild_tavira',
-    name: 'Tavira Lança-Justa',
+    name: 'Tavira Valeriax',
     role: '📋 Mestre da Guilda',
     desc: 'Mulher imponente de meia-idade, brasão da guilda no peito.',
     greetings: [
@@ -19921,7 +19935,7 @@ var RELATIONS_NPCS = [
   { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
   { id: 'rel_thorne',  icon: '<img src="/shared/img/merchants/thorne.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/merchants/thorne.webp' },
   { id: 'rel_mirena',  icon: '<img src="/shared/img/merchants/mirena.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/merchants/mirena.webp' },
-  { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Lança-Justa',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.webp' },
+  { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Valeriax',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.webp' },
   { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.webp' }
 ];
 
@@ -19968,14 +19982,14 @@ function _buildRelationsMockData(player){
 // MIN_LEVEL=3, MAX_ACTIVE_OFFERS=3, MAX_GOLD_PER_TRADE=5000, COMMISSION 5%, EXPIRY 48h.
 // Ofertas mostradas vêm do DB de outros aventureiros (mock simulando o feed real).
 var TRADE_BOARD_OFFERS = [
-  { id: 'tb_001', icon: _heralIco('ic-stat-attack'), item: 'Espada Curta +1',     price: 350, seller: 'Korin Folha-Ferida',     time: '2h atrás' },
-  { id: 'tb_002', icon: _heralIco('ic-stat-ac'), item: 'Escudo de Aço',       price: 180, seller: 'Brand Pé-de-Pedra',      time: '5h atrás' },
-  { id: 'tb_003', icon: _heralIco('ic-poção'), item: 'Poção de Cura (3x)',  price: 90,  seller: 'Mira Tecelã-de-Ervas',   time: '7h atrás' },
-  { id: 'tb_004', icon: _heralIco('ic-escriba'), item: 'Pergaminho: Mísseis Mágicos', price: 220, seller: 'Velgar Tinta-Negra', time: '12h atrás' },
-  { id: 'tb_005', icon: _heralIco('ic-ach-colecionador'), item: 'Anel de Proteção',    price: 800, seller: 'Sira Olho-de-Falcão',    time: '18h atrás' },
-  { id: 'tb_006', icon: _heralIco('ic-patrulheiro'), item: 'Arco Longo Élfico',   price: 450, seller: 'Aenir Vento-Suave',      time: '22h atrás' },
-  { id: 'tb_007', icon: _heralIco('ic-bolsa'), item: 'Bolsa de Pedras Preciosas', price: 1200, seller: 'Drogan Mão-de-Ouro', time: '32h atrás' },
-  { id: 'tb_008', icon: _heralIco('ic-stat-str'), item: 'Luvas de Escalada',   price: 75,  seller: 'Pip Garra-Veloz',        time: '40h atrás' }
+  { id: 'tb_001', icon: _heralIco('ic-stat-attack'), item: 'Espada Curta +1',     price: 350, seller: 'Korin Bladwen',     time: '2h atrás' },
+  { id: 'tb_002', icon: _heralIco('ic-stat-ac'), item: 'Escudo de Aço',       price: 180, seller: 'Brand Stengar',      time: '5h atrás' },
+  { id: 'tb_003', icon: _heralIco('ic-poção'), item: 'Poção de Cura (3x)',  price: 90,  seller: 'Mira Herveth',   time: '7h atrás' },
+  { id: 'tb_004', icon: _heralIco('ic-escriba'), item: 'Pergaminho: Mísseis Mágicos', price: 220, seller: 'Velgar Nyctel', time: '12h atrás' },
+  { id: 'tb_005', icon: _heralIco('ic-ach-colecionador'), item: 'Anel de Proteção',    price: 800, seller: 'Sira Sirvane',    time: '18h atrás' },
+  { id: 'tb_006', icon: _heralIco('ic-patrulheiro'), item: 'Arco Longo Élfico',   price: 450, seller: 'Aenir Zephyrael',      time: '22h atrás' },
+  { id: 'tb_007', icon: _heralIco('ic-bolsa'), item: 'Bolsa de Pedras Preciosas', price: 1200, seller: 'Drogan Aurmund', time: '32h atrás' },
+  { id: 'tb_008', icon: _heralIco('ic-stat-str'), item: 'Luvas de Escalada',   price: 75,  seller: 'Pip Velkar',        time: '40h atrás' }
 ];
 
 function _buildTradeBoardMockData(player){
@@ -20473,39 +20487,39 @@ var MURAL_RANKINGS = {
     label: '🏆 Nível Mais Alto', desc: 'Os aventureiros mais experientes de Valdoria',
     top: [
       { rank: 1, name: 'Veldra Coroa-de-Tempestades', cls: 'Mago',     val: 'Nível 18' },
-      { rank: 2, name: 'Drogan Mão-de-Ouro',           cls: 'Paladino', val: 'Nível 16' },
-      { rank: 3, name: 'Aenir Vento-Suave',            cls: 'Patrulheiro', val: 'Nível 15' },
-      { rank: 4, name: 'Sira Olho-de-Falcão',          cls: 'Ladina',   val: 'Nível 14' },
-      { rank: 5, name: 'Korin Folha-Ferida',           cls: 'Bárbaro',  val: 'Nível 13' }
+      { rank: 2, name: 'Drogan Aurmund',           cls: 'Paladino', val: 'Nível 16' },
+      { rank: 3, name: 'Aenir Zephyrael',            cls: 'Patrulheiro', val: 'Nível 15' },
+      { rank: 4, name: 'Sira Sirvane',          cls: 'Ladina',   val: 'Nível 14' },
+      { rank: 5, name: 'Korin Bladwen',           cls: 'Bárbaro',  val: 'Nível 13' }
     ]
   },
   gold: {
     label: '💰 Maior Fortuna', desc: 'Os mais ricos do reino',
     top: [
       { rank: 1, name: 'Borek Saco-Pesado',     cls: 'Bardo',    val: '24.500 <span class="vi vi-coin sm"></span>' },
-      { rank: 2, name: 'Drogan Mão-de-Ouro',    cls: 'Paladino', val: '18.200 <span class="vi vi-coin sm"></span>' },
-      { rank: 3, name: 'Mira Tecelã-de-Ervas',  cls: 'Druida',   val: '14.700 <span class="vi vi-coin sm"></span>' },
-      { rank: 4, name: 'Velgar Tinta-Negra',    cls: 'Mago',     val: '12.300 <span class="vi vi-coin sm"></span>' },
-      { rank: 5, name: 'Pip Garra-Veloz',       cls: 'Ladino',   val: '9.800 <span class="vi vi-coin sm"></span>' }
+      { rank: 2, name: 'Drogan Aurmund',    cls: 'Paladino', val: '18.200 <span class="vi vi-coin sm"></span>' },
+      { rank: 3, name: 'Mira Herveth',  cls: 'Druida',   val: '14.700 <span class="vi vi-coin sm"></span>' },
+      { rank: 4, name: 'Velgar Nyctel',    cls: 'Mago',     val: '12.300 <span class="vi vi-coin sm"></span>' },
+      { rank: 5, name: 'Pip Velkar',       cls: 'Ladino',   val: '9.800 <span class="vi vi-coin sm"></span>' }
     ]
   },
   monsters: {
     label: '⚔️ Caçador Supremo', desc: 'Os maiores matadores de monstros',
     top: [
-      { rank: 1, name: 'Brand Pé-de-Pedra',     cls: 'Guerreiro', val: '247 monstros' },
+      { rank: 1, name: 'Brand Stengar',     cls: 'Guerreiro', val: '247 monstros' },
       { rank: 2, name: 'Rhylla Rosa-de-Aço',    cls: 'Bárbara',   val: '198 monstros' },
-      { rank: 3, name: 'Korin Folha-Ferida',    cls: 'Bárbaro',   val: '176 monstros' },
+      { rank: 3, name: 'Korin Bladwen',    cls: 'Bárbaro',   val: '176 monstros' },
       { rank: 4, name: 'Veldra Coroa-de-Tempestades', cls: 'Mago', val: '154 monstros' },
-      { rank: 5, name: 'Aenir Vento-Suave',     cls: 'Patrulheiro', val: '142 monstros' }
+      { rank: 5, name: 'Aenir Zephyrael',     cls: 'Patrulheiro', val: '142 monstros' }
     ]
   },
   items: {
     label: '🎒 Colecionador', desc: 'Quem possui mais itens únicos',
     top: [
-      { rank: 1, name: 'Velgar Tinta-Negra',    cls: 'Mago',     val: '89 itens únicos' },
-      { rank: 2, name: 'Sira Olho-de-Falcão',   cls: 'Ladina',   val: '76 itens únicos' },
+      { rank: 1, name: 'Velgar Nyctel',    cls: 'Mago',     val: '89 itens únicos' },
+      { rank: 2, name: 'Sira Sirvane',   cls: 'Ladina',   val: '76 itens únicos' },
       { rank: 3, name: 'Orana Folha-de-Vidro',  cls: 'Mago',     val: '64 itens únicos' },
-      { rank: 4, name: 'Drogan Mão-de-Ouro',    cls: 'Paladino', val: '52 itens únicos' },
+      { rank: 4, name: 'Drogan Aurmund',    cls: 'Paladino', val: '52 itens únicos' },
       { rank: 5, name: 'Borek Saco-Pesado',     cls: 'Bardo',    val: '47 itens únicos' }
     ]
   },
@@ -20513,10 +20527,10 @@ var MURAL_RANKINGS = {
     label: '🗺️ Explorador', desc: 'Quem descobriu mais locais',
     top: [
       { rank: 1, name: 'Thessan Caminhos-Longos', cls: 'Patrulheiro', val: '42 locais' },
-      { rank: 2, name: 'Aenir Vento-Suave',       cls: 'Patrulheiro', val: '38 locais' },
+      { rank: 2, name: 'Aenir Zephyrael',       cls: 'Patrulheiro', val: '38 locais' },
       { rank: 3, name: 'Silvia Capuz-de-Lua',     cls: 'Ladina',      val: '34 locais' },
-      { rank: 4, name: 'Mira Tecelã-de-Ervas',    cls: 'Druida',      val: '31 locais' },
-      { rank: 5, name: 'Korin Folha-Ferida',      cls: 'Bárbaro',     val: '27 locais' }
+      { rank: 4, name: 'Mira Herveth',    cls: 'Druida',      val: '31 locais' },
+      { rank: 5, name: 'Korin Bladwen',      cls: 'Bárbaro',     val: '27 locais' }
     ]
   }
 };
@@ -22612,7 +22626,7 @@ var SQUARE_AMBULANT_VENDORS = [
   // 2026-06-13: DRACONATO (9a raca D&D — ate entao 0 NPCs nomeados). Itens reusados
   // de outros vendedores (ja em ITEMS_DB). Raca na desc, como os pares (Lunara tiefling,
   // Brokk meio-orc). Nome de clã original (Original Naming).
-  { id: 'kaelthar', icon: _heralIco('ic-runas'),             name: 'Kaelthar Escama-Dourada',
+  { id: 'kaelthar', icon: _heralIco('ic-runas'),             name: 'Kaelthar Drakonel',
     desc: 'Um draconato de escamas douradas e olhos de brasa, mercador de relíquias arcanas.',
     items: [
       { name: 'Pergaminho Mágico',    value: 100, icon: _heralIco('ic-runas'),    desc: 'Magia de nível 1 (uso único).' },
@@ -22631,8 +22645,8 @@ function _squareGetDailyVendor(){
 // canonical: town_square_buffs.py ARTIST_BUFFS (5 artistas × stat_bonus)
 // Dar gorjeta (BUFF_CHANCE=40%) pode conceder buff +1 em ability até descanso longo.
 var SQUARE_ARTIST_BUFFS = [
-  { id: 'bard_jaskier',  icon: _heralIco('ic-musica'), name: 'Jaskier, o Bardo',          buff: 'Inspiração Bárdica',  stat: 'CAR', desc: '+1 em testes de Carisma e Persuasão' },
-  { id: 'dancer_lyra',   icon: '🎶', name: 'Lyra Pé-Leve',              buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
+  { id: 'bard_jaskier',  icon: _heralIco('ic-musica'), name: 'Taviel, o Bardo',           buff: 'Inspiração Bárdica',  stat: 'CAR', desc: '+1 em testes de Carisma e Persuasão' },
+  { id: 'dancer_lyra',   icon: '🎶', name: 'Lyra Caelwyn',              buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
   { id: 'fire_eater',    icon: _heralIco('ic-tochas'), name: 'Drask, Engolidor de Fogo',  buff: 'Coragem do Fogo',      stat: 'CON', desc: '+1 em testes de Constituição' },
   { id: 'flutist',       icon: '🎶', name: 'Sylwen, a Flautista',       buff: 'Melodia Calmante',     stat: 'SAB', desc: '+1 em testes de Sabedoria' },
   { id: 'poet',          icon: _heralIco('ic-escriba'), name: 'Velmar, o Poeta',           buff: 'Sorte do Artista',     stat: 'INT', desc: '+1 em testes de Inteligência' }
@@ -26127,7 +26141,7 @@ var CANON_UNIQUE_NPCS = {
 // CANON_INTERACTION_RESULTS[npc_id][event_id] (lista de variantes).
 var CANON_REGULAR_NPCS = {
   "baker_hilda": {
-    "name": "Hilda Mãos-de-Farinha",
+    "name": "Hilda Brennvald",
     "role": "🍞 Padeira",
     "desc": "Uma senhora robusta de bochechas rosadas, com farinha grudada até nos cílios e um avental manchado de mel. O aroma quente de pão de centeio recém-saído do forno envolve sua barraca como um cobertor invisível. Ela canta baixinho enquanto sova a massa, batendo o ritmo com os punhos.",
     "interactions": [
@@ -26425,7 +26439,7 @@ var CANON_REGULAR_NPCS = {
     ]
   },
   "dancer_lyra": {
-    "name": "Lyra Pé-Leve",
+    "name": "Lyra Caelwyn",
     "role": "💃 Dançarina",
     "desc": "Lyra gira no centro de um círculo de espectadores, fitas de seda carmesim e dourada traçando espirais no ar como serpentes encantadas. Seus pés descalços mal tocam as pedras da praça, e o rufar ritmado de dois tamborileiros anões marca cada salto com precisão hipnótica.",
     "interactions": [
@@ -26798,7 +26812,7 @@ var CANON_REGULAR_NPCS = {
     ]
   },
   "mercenary": {
-    "name": "Krom Ferro-Velho",
+    "name": "Krom Gronvald",
     "role": "⚔️ Mercenário",
     "short_name": "Krom",
     "desc": "Um meio-orc de braço grosso como um tronco, sentado num caixote com um machado de guerra apoiado no joelho. Ele poli a lâmina com um pano oleoso em movimentos lentos e deliberados, e seu olhar amarelo avalia cada passante como se calculasse quanto valeria a recompensa pela cabeça deles. Apesar da cara fechada, ele sempre dá espaço para crianças passarem.",
@@ -32501,7 +32515,7 @@ function _shopDecrementStock(npcId, itemName){
 // Filtros por NPC: derivam das tags dos items vendidos.
 var CANON_MARKET_SHOPS = {
   thorne: {
-    npc: 'Thorne Forja-de-Ferro',
+    npc: 'Thorne Korvaldr',
     role: 'Ferreiro',
     icon: _heralIco('ic-ach-forjador'),
     greeting: '"Aço novo? Tem o que precisa aqui." — Thorne larga o martelo.',
@@ -32533,7 +32547,7 @@ var CANON_MARKET_SHOPS = {
     ]
   },
   mirena: {
-    npc: 'Mirena Folha-Verde',
+    npc: 'Mirena Virelle',
     role: 'Alquimista',
     icon: _heralIco('ic-druida'),
     greeting: '"Poções? Venenos? Diga seu mal." — Mirena ajusta os óculos.',
@@ -32552,7 +32566,7 @@ var CANON_MARKET_SHOPS = {
     ]
   },
   velithra: {
-    npc: 'Velithra Olho-de-Cristal',
+    npc: 'Velithra Aelmira',
     role: 'Joalheira',
     icon: _heralIco('ic-ach-colecionador'),
     greeting: '"Gemas brilham mais quando o sol se põe. Veja." — Velithra sorri.',
@@ -32565,7 +32579,7 @@ var CANON_MARKET_SHOPS = {
     ]
   },
   corvus: {
-    npc: 'Corvus Mapa-Escuro',
+    npc: 'Corvus Veltharion',
     role: 'Cartógrafo',
     icon: _heralIco('ic-escriba'),
     greeting: '"Mapas. Sempre mapas. Para onde vai?" — Corvus desenrola um pergaminho.',
@@ -32587,11 +32601,11 @@ var CANON_MARKET_SHOPS = {
       'Tochas (5)', 'Rações de 7 dias', 'Capa do Vento'
     ]
   },
-  // X-6.5.51CG (2026-05-18): Garlen Pesa-Justo — Cambista de Bens de Troca.
+  // X-6.5.51CG (2026-05-18): Garlen Castellor — Cambista de Bens de Troca.
   // Vende/compra commodities (PHB p.143-144) a 100% do valor base. Player
   // pode usar trade goods como moeda estável entre cidades.
   garlen: {
-    npc: 'Garlen Pesa-Justo',
+    npc: 'Garlen Castellor',
     role: 'Cambista',
     icon: _heralIco('ic-banqueiro'),
     greeting: '"Mercadorias firmes — preço de hoje é o de amanhã." — Garlen ajusta a balança.',
@@ -38039,7 +38053,7 @@ function _tavernShowMercenaries(p){
   var pool = [
     { icon: '<img src="/shared/img/combat/guerreiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Vorag Coração-de-Aço', role: 'Mercenário (Guerreiro nv 4)', cls: 'Guerreiro',   cost: 80,  duration: 5 },
     { icon: '<img src="/shared/img/combat/paladino.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Lyra a Devotada',      role: 'Guarda (Paladino nv 3)',      cls: 'Paladino',    cost: 100, duration: 4 },
-    { icon: '<img src="/shared/img/combat/patrulheiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Sylas Olho-de-Falcão', role: 'Batedor (Patrulheiro nv 4)',  cls: 'Patrulheiro', cost: 90,  duration: 5 },
+    { icon: '<img src="/shared/img/combat/patrulheiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Sylas Sirvane', role: 'Batedor (Patrulheiro nv 4)',  cls: 'Patrulheiro', cost: 90,  duration: 5 },
     { icon: '<img src="/shared/img/combat/clerigo.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Elara Manto-Rubro',    role: 'Curandeira (Clériga nv 3)',   cls: 'Clérigo',     cost: 120, duration: 4 }
   ];
   var items = pool.map(function(m){
@@ -38079,7 +38093,7 @@ function _tavernShowAdventurers(p){
   // canonical: tavern_adventurers.py + EXPLORER_CLASS_MAP (5 roles canonical)
   // Sessão #44 (2026-05-27): SVG → PNG (regra "no SVG in city"). icons mirror combat/{class}.png.
   var pool = [
-    { icon: '<img src="/shared/img/combat/ladino.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',      name: 'Mira Sombra-Prateada',  role: 'Caçadora de Tesouros (Ladina nv 4)', cls: 'Ladino',      cost: 70,  duration: 4 },
+    { icon: '<img src="/shared/img/combat/ladino.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',      name: 'Mira Nyxara',  role: 'Caçadora de Tesouros (Ladina nv 4)', cls: 'Ladino',      cost: 70,  duration: 4 },
     { icon: '<img src="/shared/img/combat/mago.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',        name: 'Galren Marca-da-Guerra', role: 'Pesquisador Arcano (Mago nv 3)',     cls: 'Mago',        cost: 110, duration: 4 },
     { icon: '<img src="/shared/img/combat/guerreiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Brondak o Quebra-Ossos', role: 'Auxiliar de Campo (Guerreiro nv 5)', cls: 'Guerreiro',   cost: 95,  duration: 5 },
     { icon: '<img src="/shared/img/combat/patrulheiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Nyriel Passo-Sombrio',   role: 'Rastreadora (Patrulheira nv 4)',     cls: 'Patrulheiro', cost: 85,  duration: 5 },
@@ -40761,22 +40775,22 @@ var MARKET_SPECIALIST_RULES = [
 // Atualizar AQUI substitui referencias em todo o mercado.
 var MARKET_NPC_LIBRARY = {
   thorne: {
-    npc: 'Thorne Forja-de-Ferro', role: 'Ferreiro',
+    npc: 'Thorne Korvaldr', role: 'Ferreiro',
     icon: _heralIco('ic-ach-forjador'),
     fallback_mult: 0.60
   },
   mirena: {
-    npc: 'Mirena Folha-Verde', role: 'Alquimista',
+    npc: 'Mirena Virelle', role: 'Alquimista',
     icon: _heralIco('ic-druida'),
     fallback_mult: 0.60
   },
   velithra: {
-    npc: 'Velithra Olho-de-Cristal', role: 'Joalheira',
+    npc: 'Velithra Aelmira', role: 'Joalheira',
     icon: _heralIco('ic-ach-colecionador'),
     fallback_mult: 0.55
   },
   corvus: {
-    npc: 'Corvus Mapa-Escuro', role: 'Cartógrafo',
+    npc: 'Corvus Veltharion', role: 'Cartógrafo',
     icon: _heralIco('ic-escriba'),
     fallback_mult: 0.55
   },
@@ -40786,7 +40800,7 @@ var MARKET_NPC_LIBRARY = {
     fallback_mult: 0.55
   },
   garlen: {
-    npc: 'Garlen Pesa-Justo', role: 'Cambista',
+    npc: 'Garlen Castellor', role: 'Cambista',
     icon: _heralIco('ic-banqueiro'),
     fallback_mult: 1.00  // trade goods sempre 100% (preço estável)
   },
@@ -52116,7 +52130,7 @@ var RECURRING_NPCS = {
     portraitImg: '/shared/img/npcs/mestra-tavira.webp',  // Sessao #37 v18 (2026-05-25)
     desc: 'Guardiã da Guilda, armadura brunida. Anota cada contrato em pergaminho rúnico.',
     legendary: true,
-    title: 'Lança-Justa · Reformadora da Guilda',
+    title: 'Valeriax · Reformadora da Guilda',
     lore: 'Tavira foi uma aventureira de elite antes de assumir a Guilda. Liderou a '
         + 'expedição que limpou o Forte dos Bandidos do Cicatriz — sozinha, no fim. '
         + 'Aposentou-se quando o último companheiro de viagem caiu numa armadilha. '
@@ -52136,22 +52150,22 @@ var RECURRING_NPCS = {
   // Usa portraitImg (PNG AI-generated gpt-image-2) em vez de heraldic SVG —
   // identidade visual AAA. Fonte canonical das stats em MARKET_MERCHANTS.
   mer_thorne: {
-    name: 'Thorne Forja-de-Ferro',
+    name: 'Thorne Korvaldr',
     portraitImg: '/shared/img/merchants/thorne.webp',
     desc: 'Anão musculoso, avental queimado, martelo sempre na mão. Quarenta anos forjando aço — sabe ler o vento na lâmina.'
   },
   mer_mirena: {
-    name: 'Mirena Folha-Verde',
+    name: 'Mirena Virelle',
     portraitImg: '/shared/img/merchants/mirena.webp',
     desc: 'Mulher esbelta, manto roxo bordado de runas, óculos pendurados no pescoço. Aprendeu alquimia da Bruxa Veldrina — e sobreviveu pra contar.'
   },
   mer_velithra: {
-    name: 'Velithra Olho-de-Cristal',
+    name: 'Velithra Aelmira',
     portraitImg: '/shared/img/merchants/velithra.webp',
     desc: 'Elfa de meia-idade, dedos cobertos de anéis, voz suave como vento em pinheiros. Diz que gemas escolhem quem as porta.'
   },
   mer_corvus: {
-    name: 'Corvus Mapa-Escuro',
+    name: 'Corvus Veltharion',
     portraitImg: '/shared/img/merchants/corvus.webp',
     desc: 'Homem alto e magro, manto preto, mãos manchadas de tinta. Vê estradas onde outros veem mato — e cobra caro pela visão.'
   },
@@ -52164,7 +52178,7 @@ var RECURRING_NPCS = {
   // falhava silenciosamente (encActive=false). Adicionado com portraitImg
   // (PNG AI-generated v3 sem balança).
   mer_garlen: {
-    name: 'Garlen Pesa-Justo',
+    name: 'Garlen Castellor',
     portraitImg: '/shared/img/merchants/garlen.webp',
     desc: 'Cambista veterano, pesa cada moeda com precisão de joalheiro. Conhece o valor real de qualquer trade good — sal, especiarias, ferro bruto. Lida com cofre e câmbio honesto.'
   }
@@ -52605,57 +52619,57 @@ function _merchantGreeting(merchantId){
     thorne: [
       [
         { type: 'narration', text: 'Thorne larga o martelo no balcão. O som ressoa como um sino grave.' },
-        { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Aço novo? Tem o que precisa aqui."' }
+        { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Aço novo? Tem o que precisa aqui."' }
       ],
       [
         { type: 'narration', text: 'O ferreiro te encara enquanto enxuga a fronte com a manga manchada de fuligem.' },
-        { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Aventureiro. <i>(uma pausa)</i> Vê algo bom?"' }
+        { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Aventureiro. <i>(uma pausa)</i> Vê algo bom?"' }
       ],
       [
         { type: 'narration', text: 'Thorne bate uma peça quente no balcão. O metal ainda assobia.' },
-        { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Acabou de sair da forja. <i>Tá quente ainda.</i>"' }
+        { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Acabou de sair da forja. <i>Tá quente ainda.</i>"' }
       ]
     ],
     mirena: [
       [
         { type: 'narration', text: 'Mirena ajusta os óculos e fecha o livro de receitas com cuidado.' },
-        { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Poções? Venenos? <i>Diga seu mal</i> — tenho cura pra quase tudo."' }
+        { type: 'speech', speaker: 'Mirena Virelle', text: '"Poções? Venenos? <i>Diga seu mal</i> — tenho cura pra quase tudo."' }
       ],
       [
         { type: 'narration', text: 'A alquimista mexe um caldeirão. Vapor azul escapa em volutas que cheiram a hortelã e enxofre.' },
-        { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Ah — alguém com <i>cheiro de aventura</i>. Bem-vindo."' }
+        { type: 'speech', speaker: 'Mirena Virelle', text: '"Ah — alguém com <i>cheiro de aventura</i>. Bem-vindo."' }
       ],
       [
         { type: 'narration', text: 'Mirena te estuda de cima a baixo, como quem examina um espécime curioso.' },
-        { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Vejo cansaço nos teus olhos. Tenho cura disponível — <i>se confias no meu trabalho</i>."' }
+        { type: 'speech', speaker: 'Mirena Virelle', text: '"Vejo cansaço nos teus olhos. Tenho cura disponível — <i>se confias no meu trabalho</i>."' }
       ]
     ],
     velithra: [
       [
         { type: 'narration', text: 'Velithra sorri e ergue uma gema entre dois dedos finos. A luz atravessa e dança no balcão.' },
-        { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Gemas brilham mais quando o sol se põe. <i>Veja por si mesmo</i>."' }
+        { type: 'speech', speaker: 'Velithra Aelmira', text: '"Gemas brilham mais quando o sol se põe. <i>Veja por si mesmo</i>."' }
       ],
       [
         { type: 'narration', text: 'A joalheira deixa um anel deslizar sobre o veludo escuro do mostruário.' },
-        { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Esse aqui — turquesa do leste. <i>Olho de quem viaja muito</i>. Combina com você."' }
+        { type: 'speech', speaker: 'Velithra Aelmira', text: '"Esse aqui — turquesa do leste. <i>Olho de quem viaja muito</i>. Combina com você."' }
       ],
       [
         { type: 'narration', text: 'Velithra organiza as peças com gestos precisos, como quem afina um instrumento.' },
-        { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Aventureiros precisam de mais que aço. <i>Precisam de magia</i> — e ela vive em pedras como estas."' }
+        { type: 'speech', speaker: 'Velithra Aelmira', text: '"Aventureiros precisam de mais que aço. <i>Precisam de magia</i> — e ela vive em pedras como estas."' }
       ]
     ],
     corvus: [
       [
         { type: 'narration', text: 'Corvus desenrola um pergaminho amarelado sobre a mesa. As bordas estão queimadas.' },
-        { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Mapas. <i>Sempre mapas.</i> Pra onde vai?"' }
+        { type: 'speech', speaker: 'Corvus Veltharion', text: '"Mapas. <i>Sempre mapas.</i> Pra onde vai?"' }
       ],
       [
         { type: 'narration', text: 'O cartógrafo te encara por cima dos pergaminhos. Os olhos são cinzentos, atentos.' },
-        { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Aventureiro precisa de mapa. Aventureiro sem mapa — <i>morto</i>."' }
+        { type: 'speech', speaker: 'Corvus Veltharion', text: '"Aventureiro precisa de mapa. Aventureiro sem mapa — <i>morto</i>."' }
       ],
       [
         { type: 'narration', text: 'Corvus aponta com um dedo manchado de tinta um traço sinuoso no pergaminho.' },
-        { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Vê esse traço? <i>Lá tem dragão. Lá tem ouro.</i> Escolha bem."' }
+        { type: 'speech', speaker: 'Corvus Veltharion', text: '"Vê esse traço? <i>Lá tem dragão. Lá tem ouro.</i> Escolha bem."' }
       ]
     ],
     bjorn: [
@@ -52692,7 +52706,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_thorne',
     script: [
       { type: 'narration', text: '<i>"Como conseguiu o mithral?"</i>' },
-      { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithral, sobrevive."' }
+      { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithral, sobrevive."' }
     ],
     choices: 'auto'  // populated em _openMerchantDialogue
   },
@@ -52701,7 +52715,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_thorne',
     script: [
       { type: 'narration', text: '<i>"Conserta equipamento?"</i>' },
-      { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Pequenos amassados, conserto sim. Dez Valdoritas e fica como novo."' },
+      { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Pequenos amassados, conserto sim. Dez Valdoritas e fica como novo."' },
       { type: 'narration', text: 'Thorne examina suas armas com olhos de quem mede metal por som.' }
     ],
     _cost: 10,
@@ -52719,7 +52733,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_thorne',
     script: [
       { type: 'narration', text: '<i>"Há quanto tempo é ferreiro?"</i>' },
-      { type: 'speech', speaker: 'Thorne Forja-de-Ferro', text: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. <i>Forjei pra dois reis e três bandidos.</i> Bandidos pagaram melhor."' }
+      { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. <i>Forjei pra dois reis e três bandidos.</i> Bandidos pagaram melhor."' }
     ],
     choices: 'auto'
   },
@@ -52733,7 +52747,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_mirena',
     script: [
       { type: 'narration', text: '<i>"Faz poções customizadas?"</i>' },
-      { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Faço. <i>Mas precisa de ingredientes raros e tempo.</i> Volta com lista específica — e bolsa pesada."' }
+      { type: 'speech', speaker: 'Mirena Virelle', text: '"Faço. <i>Mas precisa de ingredientes raros e tempo.</i> Volta com lista específica — e bolsa pesada."' }
     ],
     choices: 'auto'
   },
@@ -52742,9 +52756,9 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_mirena',
     script: [
       { type: 'narration', text: '<i>"De onde aprendeu alquimia?"</i>' },
-      { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Aprendiz da Bruxa Veldrina por dezessete anos."' },
+      { type: 'speech', speaker: 'Mirena Virelle', text: '"Aprendiz da Bruxa Veldrina por dezessete anos."' },
       { type: 'narration', text: 'Os olhos de Mirena se desviam por um instante, perdidos em alguma memória.' },
-      { type: 'speech', speaker: 'Mirena Folha-Verde', text: '"Ela morreu numa poção experimental. <i>Eu vivi. Aprendi.</i>"' }
+      { type: 'speech', speaker: 'Mirena Virelle', text: '"Ela morreu numa poção experimental. <i>Eu vivi. Aprendi.</i>"' }
     ],
     choices: 'auto'
   },
@@ -52758,7 +52772,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_velithra',
     script: [
       { type: 'narration', text: '<i>"Como funcionam os encaixes?"</i>' },
-      { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Equipamento precisa ter <i>slot</i>. A forja de Thorne pode adicionar slots — cem Valdoritas cada. Aí trago a gema certa pra ti."' }
+      { type: 'speech', speaker: 'Velithra Aelmira', text: '"Equipamento precisa ter <i>slot</i>. A forja de Thorne pode adicionar slots — cem Valdoritas cada. Aí trago a gema certa pra ti."' }
     ],
     choices: 'auto'
   },
@@ -52767,7 +52781,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_velithra',
     script: [
       { type: 'narration', text: '<i>"Encanta itens?"</i>' },
-      { type: 'speech', speaker: 'Velithra Olho-de-Cristal', text: '"Encanto. Duzentas Valdoritas — <i>mas resultado é aleatório</i>. Só pra corajosos."' },
+      { type: 'speech', speaker: 'Velithra Aelmira', text: '"Encanto. Duzentas Valdoritas — <i>mas resultado é aleatório</i>. Só pra corajosos."' },
       { type: 'narration', text: 'Velithra sorri de lado, como quem oferece um jogo de azar elegante.' }
     ],
     _cost: 200,
@@ -52790,8 +52804,8 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_corvus',
     script: [
       { type: 'narration', text: '<i>"Que tipo de mapa custom?"</i>' },
-      { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Floresta do Sussurro. Catacumbas Esquecidas. Montanhas Brakenhall. Pântano dos Mortos."' },
-      { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Duzentas Valdoritas por região — <i>e três dias de trabalho</i>. Tinta de cor especial pra cada uma."' }
+      { type: 'speech', speaker: 'Corvus Veltharion', text: '"Floresta do Sussurro. Catacumbas Esquecidas. Montanhas Brakenhall. Pântano dos Mortos."' },
+      { type: 'speech', speaker: 'Corvus Veltharion', text: '"Duzentas Valdoritas por região — <i>e três dias de trabalho</i>. Tinta de cor especial pra cada uma."' }
     ],
     choices: 'auto'
   },
@@ -52801,7 +52815,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     script: [
       { type: 'narration', text: '<i>"Tem mapas raros?"</i>' },
       { type: 'narration', text: 'Corvus baixa a voz e olha rápido pra ambos os lados, como quem confessa pecado.' },
-      { type: 'speech', speaker: 'Corvus Mapa-Escuro', text: '"Tenho <i>um</i>. Cidade Submersa. <b>Mil Valdoritas.</b> Não vendo pra qualquer um — <i>e quando vendo, depois não durmo</i>."' }
+      { type: 'speech', speaker: 'Corvus Veltharion', text: '"Tenho <i>um</i>. Cidade Submersa. <b>Mil Valdoritas.</b> Não vendo pra qualquer um — <i>e quando vendo, depois não durmo</i>."' }
     ],
     choices: 'auto'
   },
@@ -52824,8 +52838,8 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     script: [
       { type: 'narration', text: '<i>"Como funciona o câmbio?"</i>' },
       { type: 'narration', text: 'Garlen pesa uma moeda na palma da mão, depois outra. Sorri sem alegria.' },
-      { type: 'speech', speaker: 'Garlen Pesa-Justo', text: '"Trade goods têm preço <i>estável</i>. Sal, especiarias, ferro bruto — pago e cobro o mesmo. Sem pechinchar."' },
-      { type: 'speech', speaker: 'Garlen Pesa-Justo', text: '"É o jeito honesto. Quem mexe com peso, sabe que <i>cada grama conta</i>."' }
+      { type: 'speech', speaker: 'Garlen Castellor', text: '"Trade goods têm preço <i>estável</i>. Sal, especiarias, ferro bruto — pago e cobro o mesmo. Sem pechinchar."' },
+      { type: 'speech', speaker: 'Garlen Castellor', text: '"É o jeito honesto. Quem mexe com peso, sabe que <i>cada grama conta</i>."' }
     ],
     choices: 'auto'
   },
@@ -52834,9 +52848,9 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_garlen',
     script: [
       { type: 'narration', text: '<i>"Há quanto tempo faz câmbio?"</i>' },
-      { type: 'speech', speaker: 'Garlen Pesa-Justo', text: '"Vinte e oito anos. Aprendi com meu pai — joalheiro nas terras do sul. Ele dizia: <i>pesos não mentem, gente sim</i>."' },
+      { type: 'speech', speaker: 'Garlen Castellor', text: '"Vinte e oito anos. Aprendi com meu pai — joalheiro nas terras do sul. Ele dizia: <i>pesos não mentem, gente sim</i>."' },
       { type: 'narration', text: 'Garlen ergue uma sobrancelha, ajeita o pince-nez.' },
-      { type: 'speech', speaker: 'Garlen Pesa-Justo', text: '"Por isso prefiro lidar com mercadoria. Mercadoria é simples — tem peso, tem valor. Gente é complicada."' }
+      { type: 'speech', speaker: 'Garlen Castellor', text: '"Por isso prefiro lidar com mercadoria. Mercadoria é simples — tem peso, tem valor. Gente é complicada."' }
     ],
     choices: 'auto'
   }
@@ -53064,13 +53078,13 @@ var _NPC_DEFAULTS = {
   grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro anão do Javali Sangrento', portrait: '/shared/img/npcs/grom-anao.webp',    icon: 'ic-barbaro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/irma-elara.webp',   icon: 'ic-clerigo' },
   thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
-  mirena:      { name: 'Mirena Folha-Verde',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
+  mirena:      { name: 'Mirena Virelle',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
   velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.webp', icon: 'ic-mago' },
-  corvus:      { name: 'Corvus Mapa-Escuro',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus.webp',   icon: 'ic-ladino' },
+  corvus:      { name: 'Corvus Veltharion',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus.webp',   icon: 'ic-ladino' },
   bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Anão selador e coureiro',            portrait: '/shared/img/merchants/bjorn-anao.webp', icon: 'ic-patrulheiro' },
   alchemist:   { name: 'Velithra',            desc: 'Alquimista do Mercado',              portrait: '/shared/img/merchants/velithra.webp',     icon: 'ic-feiticeiro' },
   gossip:      { name: 'Velho Mendigo',       desc: 'Boateiro da Praça',                  portrait: '',  icon: 'ic-aldeao' },
-  npc_herbalist_lyra: { name: 'Lyra Erva-Doce', desc: 'Conhecedora de plantas',           portrait: '/shared/img/npcs/lyra-herbalista.webp',         icon: 'ic-druida' },
+  npc_herbalist_lyra: { name: 'Lyra Sylwen', desc: 'Conhecedora de plantas',           portrait: '/shared/img/npcs/lyra-herbalista.webp',         icon: 'ic-druida' },
   itinerant_merchant: { name: 'Mercador Errante', desc: 'Comerciante de passagem',        portrait: '/shared/img/npcs/mercador-errante.webp',    icon: 'ic-ladino' }
 };
 
