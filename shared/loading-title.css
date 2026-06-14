@@ -534,6 +534,33 @@
 }
 
 /* ── Cinematic exit — each element leaves independently ── */
+/* 2026-06-14 (user "trava ao tocar — não está fluida"): ao TOCAR (.title-tapped,
+   aplicado no _onTap ANTES do flash/onStart), CONGELA as ~30 camadas internas
+   animadas do orb (nebula/wisps/sparks/glass/lighting — muitas com filter:blur,
+   caras de re-rasterizar por frame) + partículas + runas. Durante a saída elas só
+   precisam acompanhar o transform GPU do .title-orb-wrap (ascend); manter o
+   per-frame style/composite delas competia com a animação de saída + o trabalho
+   síncrono do onStart() → stutter. paused freezeia no frame atual (sem snap visível,
+   pois o flash cobre) e zera o recálculo → saída FLUIDA. */
+.title-screen.title-tapped .title-orb-nebula,
+.title-screen.title-tapped .title-orb-nebula > *,
+.title-screen.title-tapped .title-orb-wisp,
+.title-screen.title-tapped .title-orb-spark,
+.title-screen.title-tapped .title-orb-core-fl,
+.title-screen.title-tapped .title-orb-intlight,
+.title-screen.title-tapped .title-orb-term,
+.title-screen.title-tapped .title-orb-fresnel,
+.title-screen.title-tapped .title-orb-sss,
+.title-screen.title-tapped .title-orb-gcaus,
+.title-screen.title-tapped .title-orb-spec,
+.title-screen.title-tapped .title-orb-rays,
+.title-screen.title-tapped .title-orb-ambient,
+.title-screen.title-tapped .title-orb-floor,
+.title-screen.title-tapped .title-particles .tp,
+.title-screen.title-tapped .title-rune {
+  animation-play-state: paused !important;
+}
+
 .title-screen.exit {
   pointer-events: none;
 }

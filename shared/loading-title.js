@@ -261,6 +261,15 @@
       _started = true;
       console.log('[INTRO_TITLE] User TAPPED — starting exit sequence');
 
+      /* 2026-06-14 (user "trava ao tocar — não está fluida"): congela JA as ~30
+         camadas internas animadas do orb (nebula/wisps/sparks/glass/lighting, muitas
+         com filter:blur) + partículas/runas. Durante a saída elas só precisam
+         acompanhar o transform GPU do wrap (ascend); manter o per-frame style/
+         composite delas competia com a animação de saída + o trabalho síncrono do
+         onStart() → stutter. Congelar (animation-play-state:paused) zera esse custo
+         e a transição fica FLUIDA. Aplica ANTES do flash/onStart. */
+      if (_el) _el.classList.add('title-tapped');
+
       /* Haptic feedback */
       try {
         if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
