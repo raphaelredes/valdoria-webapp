@@ -290,6 +290,13 @@ Busca rápida:
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             z-index: var(--v-z-sticky, 10);
+            /* 2026-06-14 (user): flicker do botão "Confirmar Personalidade" + acordeão
+               "Defeito" no fundo. A altura do .screen-viewport oscila com
+               --tg-viewport-height (WebView do Telegram) -> o conteúdo do fundo quica.
+               contain:layout isola o reflow; overflow-anchor:none impede o browser de
+               re-ancorar o scroll quando a altura muda (mata o quique). */
+            contain: layout;
+            overflow-anchor: none;
         }
 
         .sub-screen.active {
@@ -3468,12 +3475,15 @@ Busca rápida:
                oscilando enquanto a WebView assenta a chrome/safe-area. Sem debounce,
                cada disparo reescrevia --tg-viewport-height -> reflow do .screen-viewport
                -> a tela densa de atributos quicava (botão entrando/saindo do viewport).
-               Fix: só commitar a altura quando estável (isStateStable) e mudou >=2px,
-               coalescido num requestAnimationFrame. */
+               Fix: só commitar a altura quando estável (isStateStable) e mudou >=8px,
+               coalescido num requestAnimationFrame. 2026-06-14: threshold subiu de
+               2px->8px (a tela densa de Personalidade ainda quicava com a oscilação
+               residual de poucos px da safe-area; <8px é imperceptível e o scroller
+               interno absorve). Pareia com contain:layout do .sub-screen. */
             var _lastVpH = 0, _vpRaf = 0;
             function _applyVpHeight() {
                 var h = (tg && tg.viewportHeight) || window.innerHeight;
-                if (h > 0 && Math.abs(h - _lastVpH) >= 2) {
+                if (h > 0 && Math.abs(h - _lastVpH) >= 8) {
                     _lastVpH = h;
                     document.documentElement.style.setProperty('--tg-viewport-height', h + 'px');
                 }
@@ -3657,6 +3667,42 @@ Busca rápida:
             } catch (e) {
                 console.warn('[CHAR_CREATOR] randomize fetch failed:', e);
                 return null;
+            }
+        }
+
+        // 2026-06-14 (user): preenche sel.selectedL1Skills com `quota` magias L1
+        // SORTEADAS do pool da classe (caster), pro fluxo "Personagem Aleatório"
+        // fazer uma escolha REAL em vez de pular (o que deixava o combate com TODAS
+        // as magias + levelup fantasma nv1). Reusa o endpoint/cache do picker manual.
+        // Não-caster (quota 0) -> no-op. Falha de API -> no-op (servidor preenche o
+        // default determinístico via resolve_l1_choices).
+        async function _randomFillL1Skills() {
+            try {
+                if (!sel.classKey || !apiBase) return;
+                let data = _l1SkillsCache[sel.classKey];
+                if (!data) {
+                    const serverClass = _CLIENT_CLASS_TO_SERVER[sel.classKey] || sel.classKey;
+                    const _ac = new AbortController();
+                    const _tid = setTimeout(() => _ac.abort(), 10000);
+                    const resp = await fetch(`${apiBase}/api/character/l1-skills?class=${encodeURIComponent(serverClass)}`, { headers: {}, signal: _ac.signal });
+                    clearTimeout(_tid);
+                    if (!resp.ok) return;
+                    data = await resp.json();
+                    _l1SkillsCache[sel.classKey] = data;
+                }
+                const quota = (data && data.quota) || 0;
+                const opts = (data && Array.isArray(data.options)) ? data.options.slice() : [];
+                if (quota <= 0 || opts.length === 0) return;  // não-caster
+                // Fisher–Yates shuffle (escolha aleatória dentre o pool)
+                for (let i = opts.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    const t = opts[i]; opts[i] = opts[j]; opts[j] = t;
+                }
+                sel.selectedL1Skills = opts.slice(0, quota).map(function (o) {
+                    return (o && typeof o === 'object') ? (o.name || o.id || o) : o;
+                });
+            } catch (e) {
+                console.warn('[CHAR_CREATOR] random L1 fill failed (servidor preenche default):', e);
             }
         }
 
@@ -3952,8 +3998,16 @@ Busca rápida:
                 if (pd.flaws && pd.flaws.length) sel.flaw = pick(pd.flaws);
             }
 
-            // 16. L1 skill — skip (optional, requires API fetch)
+            // 16. Magias L1 (casters): 2026-06-14 (user) — o random NÃO pode pular a
+            // escolha. Antes saía com selected_l1_skills=[] -> o char entrava no
+            // combate com TODAS as magias da classe ("Todas 23") + uma tela de
+            // "Subida de Nível" fantasma no nv1. Agora SORTEIA `quota` magias do pool
+            // (escolha REAL, só que aleatória, coerente com "Personagem Aleatório").
+            // Degrada pro default determinístico do servidor (resolve_l1_choices) se
+            // a API falhar — nunca volta a sair vazio.
             sel.selectedL1Skill = '';
+            sel.selectedL1Skills = [];
+            await _randomFillL1Skills();
 
             // Mark as random for re-roll button + telemetria de origem
             sel._wasRandom = true;
@@ -5982,7 +6036,14 @@ Busca rápida:
 
             // Attributes with bars (collapsed)
             if (stats) {
-                html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">📊 Atributos${sel.race ? ' (com bônus de ' + RACES[sel.race].name + ')' : ''}<span class="toggle-arrow">▾</span></div><div class="section-body">`;
+                // 2026-06-14 (user): "por que aparece Atributos se nem foram definidos?"
+                // — antes da tela de Atributos (screen-stats) estes valores sao o array
+                // SUGERIDO/prioridade da classe (fallback de calcStatsFor), nao escolha
+                // final. Rotula como "Sugeridos" + caption ate o jogador atribuir os 6.
+                const _statsDefined = !!(sel.statAssignment && Object.keys(sel.statAssignment).length === 6);
+                const _attrTitle = _statsDefined ? '📊 Atributos' : '📊 Atributos Sugeridos';
+                const _attrCaption = _statsDefined ? '' : `<div class="detail-text" style="font-size:11px;color:var(--v-text-dim);margin:-2px 0 6px">Prioridade recomendada desta classe — você define seus valores na etapa de Atributos.</div>`;
+                html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">${_attrTitle}${sel.race ? ' (com bônus de ' + RACES[sel.race].name + ')' : ''}<span class="toggle-arrow">▾</span></div><div class="section-body">${_attrCaption}`;
                 attrs.forEach(a => {
                     const v = stats[a];
                     const m = mod(v);

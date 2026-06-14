@@ -241,6 +241,12 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
             .va-float-btn:active {
                 transform: scale(0.9);
             }
+            /* 2026-06-14 (user): icone do botao agora e <img> OpenAI (vol-*.webp),
+               nao SVG inline -> dimensiona pra caber no botao 36x36. */
+            .va-float-btn img, .va-footer-btn img {
+                width: 22px; height: 22px; object-fit: contain; display: block;
+                pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+            }
             /* Hide during loading/overlays */
             .loading:not(.hidden) ~ .va-float,
             .dm-overlay.active ~ .va-float,
@@ -326,7 +332,14 @@ const _tryShow=()=>{const loading=document.querySelector('.loading:not(.hidden),
 if(_hintDismissed)return;if(btn)btn.classList.add('va-hint-pulse');setTimeout(()=>{_dismissHint(btn);},5000);};setTimeout(_tryShow,1500);}
 function _dismissHint(btn){if(_hintDismissed)return;_hintDismissed=true;try{localStorage.setItem(HINT_KEY,'1');}catch(e){console.warn('[AUDIO_MANAGER]',e);}
 if(btn)btn.classList.remove('va-hint-pulse');}
-function _updateBtnIcon(btn){if(!btn)return;if(_muted||_musicMuted||_volume===0){btn.innerHTML=_SVG_MUTED;btn.title='Som desativado';btn.classList.remove('va-playing');}else if(_volume<0.5){btn.innerHTML=_SVG_LOW;btn.title='Volume: '+Math.round(_volume*100)+'%';btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));}else{btn.innerHTML=_SVG_HIGH;btn.title='Volume: '+Math.round(_volume*100)+'%';btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));}}
+/* 2026-06-14 (user): o botao de volume usa as imagens OpenAI (vol-mute/low/
+   high.webp) — as MESMAS do combate (_SIM_VOL_ICONS) — em vez de SVG outline
+   inline. Regra "Glifos de UI: Imagem Gerada, nao SVG". Compartilhado: vale pra
+   TODAS as webapps que usam o botao. Via DOM (createElement) — sem innerHTML.
+   Path absoluto em webapp; '../shared/...' em file:// (simulador). */
+var _VOL_ICON_BASE=(function(){var b='/shared/img/combat/ui/';try{if(typeof location!=='undefined'&&String(location.href).indexOf('file://')===0)b='../shared/img/combat/ui/';}catch(_eVol){}return b;})();
+function _volSetBtnImg(btn,name){while(btn.firstChild)btn.removeChild(btn.firstChild);var im=document.createElement('img');im.src=_VOL_ICON_BASE+name+'.webp';im.alt='';im.draggable=false;im.onerror=function(){im.style.display='none';};btn.appendChild(im);}
+function _updateBtnIcon(btn){if(!btn)return;if(_muted||_musicMuted||_volume===0){_volSetBtnImg(btn,'vol-mute');btn.title='Som desativado';btn.classList.remove('va-playing');}else if(_volume<0.5){_volSetBtnImg(btn,'vol-low');btn.title='Volume: '+Math.round(_volume*100)+'%';btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));}else{_volSetBtnImg(btn,'vol-high');btn.title='Volume: '+Math.round(_volume*100)+'%';btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));}}
 function _syncUI(){const btn=document.getElementById('va-btn');_updateBtnIcon(btn);if(_popupOpen)_updatePopupUI();}
 function createMuteButton(){const span=document.createElement('span');span.style.display='none';return span;}
 function toggleMusic(){_musicMuted=!_musicMuted;try{localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');}catch(e){console.warn('[AUDIO_MANAGER]',e);}if(_musicMuted){if(_audio)_audio.volume=0;_muted=true;try{localStorage.setItem(STORAGE_KEY,'1');}catch(e){console.warn('[AUDIO_MANAGER]',e);}}else{_muted=false;try{localStorage.setItem(STORAGE_KEY,'0');}catch(e){console.warn('[AUDIO_MANAGER]',e);}if(_audio&&!_audio.paused){_audio.volume=_volume*0.5;/*music cap 50%*/}else if(_pendingTrack||_currentTrack){_playTrack(_pendingTrack||_currentTrack);}}
