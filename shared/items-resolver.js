@@ -164,7 +164,7 @@
     'base-lantern': 'tochas-5',
     'base-rope': 'corda-de-canhamo-(15m)',
     'base-mining-pick': 'picareta-mineiro',
-    'base-lockpick': 'gazua',
+    'base-lockpick': 'gazua-mestra',
     'base-bandage': 'ataduras-medicinais',
     'base-leather-roll': 'rolo-de-couro',
     // Truques/Trinkets
@@ -222,7 +222,7 @@
     'bandagem-mumia': 'bandagem-de-mumia',
     'bandana-suja-tool': 'ataduras-medicinais',
     'base-balanced-dagger': 'adaga',
-    'base-bone-helm': 'elmo-da-telepatia',
+    'base-bone-helm': 'elmo-de-ossos',
     'base-bread': 'racoes-de-7-dias',
     'base-claw': 'garra-de-carnical',
     'base-cloth-hood': 'capuz-de-tecido',
@@ -232,14 +232,14 @@
     'base-ear': 'orelha-de-goblin',
     'base-fang': 'presa-de-javali',
     'base-feather': 'pena-de-cocatrice',
-    'base-glove': 'manoplas-de-forca-de-ogro',
+    'base-glove': 'luvas-de-couro',
     'base-grimoire': 'grimorio-do-aprendiz',
     'base-herb-bunch': 'cogumelos-selvagens',
     'base-herb-leaf': 'folha-da-driade',
     'base-horn': 'chifre-de-alce',
     'base-junk-cloth': 'ataduras-medicinais',
     'base-key': 'chave-da-aurora',
-    'base-knight-helm': 'elmo-da-telepatia',
+    'base-knight-helm': 'elmo-de-ferro-bruto',
     'base-map': 'fragmento-de-mapa-antigo',
     'base-moss-clump': 'cogumelos-selvagens',
     'base-ring-band': 'anel-de-ouro',
@@ -317,7 +317,7 @@
     'diario-edric': 'diario-de-edric',
     'elmo-couro': 'elmo-de-couro',
     'elmo-ossos': 'elmo-de-ossos',
-    'elmo-protecao-1': 'elmo-da-telepatia',
+    'elmo-protecao-1': 'elmo-de-protecao',
     'elmo-protetor-ancestral': 'elmo-do-protetor-ancestral',
     'elmo-telepatia': 'elmo-da-telepatia',
     'escama-dragao-branco': 'escama-de-dragao-branco',
@@ -411,6 +411,7 @@
     'peitoral-furia-montanhas': 'peitoral-da-furia-das-montanhas',
     'pele-cobra-gigante': 'pele-de-cobra-gigante',
     'pele-lobo': 'pele-de-lobo',
+    'pelagem-de-lobo': 'pele-de-lobo',
     'pele-pantera-sombria': 'pele-de-pantera-sombria',
     'pele-sapo-gigante': 'pele-de-sapo-gigante',
     'pele-urso': 'pele-de-urso',
@@ -479,6 +480,27 @@
     return s;
   }
 
+  /* 2026-06-14 (user "sistema de ID"): resolucao MANIFEST-AWARE que escolhe o
+     webp CORRETO de cada item, em ordem de prioridade:
+       1. O slug do PROPRIO item vence (slugify(name) e o ID canonico) — se
+          `{slug}.webp` existe, usa ele. Impede que um mapeamento BASE_TO_SLUG
+          errado (ex.: 'base-knight-helm'->'elmo-da-telepatia') sobrescreva o
+          webp correto do item.
+       2. BASE_TO_SLUG (base-ids do design system / aliases de nome) — SO se o
+          slug mapeado tiver webp.
+       3. strip-`+N` (variante encantada "Espada Longa +1" -> reusa o webp BASE
+          'espada-longa') — regra DETERMINISTICA, dispensa entry por-variante.
+     Retorna null se nenhum webp existe (-> SVG fallback). Requer manifest carregado. */
+  function _resolveItemSlug(rawSlug) {
+    if (!rawSlug) return null;
+    var s = String(rawSlug);
+    if (hasManifestSlug(s)) return s;                                    // 1. ID do item vence
+    if (BASE_TO_SLUG.hasOwnProperty(s) && hasManifestSlug(BASE_TO_SLUG[s])) return BASE_TO_SLUG[s]; // 2.
+    var m = s.match(/^(.+)-\d+$/);                                        // 3. strip +N
+    if (m && hasManifestSlug(m[1])) return m[1];
+    return null;
+  }
+
   function loadManifest() {
     if (manifestState.loaded || manifestState.loading) {
       return manifestState.loading || Promise.resolve();
@@ -543,9 +565,9 @@
   function swapCardToPng(card) {
     var rawSlug = card.getAttribute('data-name') || card.getAttribute('data-slug');
     if (!rawSlug) return false;
-    /* 2026-05-19: aplica BASE_TO_SLUG antes de testar manifest. */
-    var slug = resolveSlug(rawSlug);
-    if (!hasManifestSlug(slug)) return false;
+    /* 2026-06-14: resolucao ID-first (slug do item vence) + BASE_TO_SLUG + strip-+N. */
+    var slug = _resolveItemSlug(rawSlug);
+    if (!slug) return false;
 
     var iconDiv = card.querySelector('.item-icon');
     if (!iconDiv) return false;
@@ -579,12 +601,32 @@
     var href = useEl.getAttribute('href') || useEl.getAttribute('xlink:href') || '';
     if (href.indexOf('#' + SVG_SPRITE_PREFIX) !== 0) return false;
     var rawSlug = href.substring(1 + SVG_SPRITE_PREFIX.length); // strip "#ic-it-"
-    var slug = resolveSlug(rawSlug);
-    if (!hasManifestSlug(slug)) return false;
+    var slug = _resolveItemSlug(rawSlug);  // 2026-06-14: ID-first + BASE_TO_SLUG + strip-+N
+    if (!slug) return false;
     var svgEl = useEl.closest('svg');
     if (!svgEl || svgEl.closest('defs')) return false; // skip defs entries
     if (svgEl.getAttribute('data-img-swapped') === '1') return false;
     var img = buildImg(slug, rawSlug);
+    /* 2026-06-14 FIX (user: "imagens maiores que os demais itens"): o <img> vinha
+       com width/height:100% (buildImg) e ESTOURAVA o container quando o <svg> que
+       ele substitui renderizava menor que o pai. Mede o tamanho RENDERIZADO do
+       <svg> e fixa no <img> (px) com max:100% — o item fica do MESMO tamanho do
+       ícone que substitui (consistente com os demais). Fallback: width/height attr
+       do svg; se nada, mantém o 100% do buildImg. */
+    try {
+      var _r = svgEl.getBoundingClientRect();
+      var _w = Math.round(_r.width), _h = Math.round(_r.height);
+      if (!(_w > 0 && _h > 0)) {
+        _w = parseInt(svgEl.getAttribute('width'), 10) || 0;
+        _h = parseInt(svgEl.getAttribute('height'), 10) || 0;
+      }
+      if (_w > 0 && _h > 0) {
+        img.style.width = _w + 'px';
+        img.style.height = _h + 'px';
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100%';
+      }
+    } catch (_eSz) { /* mantem 100% do buildImg */ }
     var doSwap = function () {
       if (svgEl.getAttribute('data-img-swapped') === '1') return;
       svgEl.setAttribute('data-img-swapped', '1');
