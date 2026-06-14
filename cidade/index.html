@@ -39180,6 +39180,9 @@ function _vinvApplyAcDelta(name, sign) {
     var acb = (typeof it.ac === 'number') ? it.ac : 0;
     if (!acb) return;
     var p = window.CITY_MOCK_PLAYER; if (!p) return;
+    // Item de sintonização só dá CA quando attuned — alinha o delta otimista ao
+    // que o server computa (is_bonus_active). (auditoria 2026-06-14)
+    if (typeof _itemBonusActive === 'function' && !_itemBonusActive(p, name)) return;
     var base = (typeof p.ac === 'number') ? p.ac : parseInt(p.ac, 10) || 0;
     p.ac = base + sign * acb;
   } catch (e) { /* best-effort */ }
