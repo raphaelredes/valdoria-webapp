@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-14T10:14:23Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-14T18:20:35Z - do not edit directly, edit source -->
 
 
 
@@ -95,7 +95,11 @@
   Setup overlay (Partir em Aventura)         initSetupOverlay           32107
   Boot sequence                              boot                       35660
 
-  CANVAS RENDER PIPELINE (renderFrame, linha 19572) — ordem atual:
+  CANVAS RENDER PIPELINE (renderFrame ~linha 23023) — ordem atual:
+   (2026-06-14: camadas AMBIENTE [3-6 pólen/folhas/atmosfera · 8 critters · 13
+    nuvens/raios/AVES · 16 haze] RE-RELIGADAS ao pipeline — estavam órfãs/código
+    morto desde um A/B FPS-test antigo, mapa ficava "parado". Gate: F.ambient_* +
+    tier (lite pula) + _shouldRenderAmbient() [1×/frame] + pause-on-hidden.)
    1. clearRect + fillRect '#1e1a16'              (vp-clipped, 19575)
    2. _runStep('drawScene-cached')                (19629 — V3 SCENE CACHE)
         → bake offscreen: drawTile + drawDecorationsForRow loop
@@ -19354,6 +19358,23 @@ var sessionEventHistory = [];
     weather_overlay: true,
     debug_hud: false,
 
+    // AMBIENT (mapa vivo) — RE-RELIGADO 2026-06-14. Estas camadas (aves voando,
+    // animais/critters, nuvens, raios de sol, folhas caindo, pólen, atmosfera
+    // zonada, haze distante) JÁ EXISTIAM mas foram CORTADAS do pipeline num A/B
+    // FPS-test antigo ("ativando aos poucos") e nunca religadas → viraram código
+    // morto e o mapa ficou "parado" (user: "tela de exploração sem animações
+    // mesmo com o personagem parado, deveria ter mapa vivo"). Default ON; cada
+    // função self-gate por bioma/clima, e o pipeline gateia por tier (lite pula)
+    // + _shouldRenderAmbient() (auto-throttle FPS<25) + pausa quando a aba oculta.
+    ambient_critters: true,
+    ambient_birds: true,
+    ambient_clouds: true,
+    ambient_sun_rays: true,
+    ambient_leaves: true,
+    ambient_pollen: true,
+    ambient_atmosphere: true,
+    ambient_haze: true,
+
     // V8 USER REVERT: idle_pause removido definitivamente (travava rain anim).
     // Render sempre rAF full-rate.
   };
@@ -22876,6 +22897,11 @@ function _isIdle() {
   return true;
 }
 function scheduleRender() {
+  // 2026-06-14 PAUSE-ON-HIDDEN (poupa bateria em celular fraco): com a aba oculta,
+  // NÃO agenda frame — nem o setTimeout idle de 150ms, que antes seguia disparando
+  // em background. O listener visibilitychange (abaixo) re-kicka quando a aba volta.
+  // O watchdog exige !document.hidden, então não reinicia o loop com a aba oculta.
+  if (typeof document !== 'undefined' && document.hidden) { _rafScheduled = false; return; }
   const now = performance.now();
   if (_rafScheduled) {
     if (now - _rafLastScheduled > 500) {
@@ -22897,6 +22923,17 @@ function scheduleRender() {
   } else {
     requestAnimationFrame(renderFrame);
   }
+}
+// 2026-06-14: pareia com o PAUSE-ON-HIDDEN — quando a aba volta a ficar visível,
+// re-kicka o loop (que parou com a aba oculta). _markActive(800) força ~800ms de
+// rAF full-rate na volta pra reanimar o mapa vivo suavemente antes de cair no idle.
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) {
+      try { _markActive(800); } catch (_) {}
+      try { scheduleRender(); } catch (_) {}
+    }
+  });
 }
 // Watchdog: a cada 2s verifica se frame avançou; se não, re-agenda
 setInterval(function() {
@@ -23236,8 +23273,27 @@ function renderFrame(ts) {
       });
     }
   }
+  // ── AMBIENT GROUND (mapa vivo — re-religado 2026-06-14) ───────────────────
+  // Camadas ambientes órfãs (cortadas num A/B FPS-test antigo) religadas ao
+  // pipeline. _ambientOK é calculado UMA ÚNICA vez por frame: _shouldRenderAmbient()
+  // tem hysteresis com EFEITO COLATERAL (incrementa contador) — chamá-la N× por
+  // frame corromperia o auto-throttle. Lite/reduced-motion pulam TODO o ambiente
+  // (só o essencial: weather/fog/tint). É renderização pura (não toca estado de jogo).
+  var _ambTier = window._valdoriaPerformanceTier || 'full';
+  var _ambientOK = (typeof _shouldRenderAmbient === 'function' ? _shouldRenderAmbient() : true)
+                   && _ambTier !== 'lite' && !window.vReducedMotion;
+  if (_ambientOK) {
+    if (F.ambient_pollen)     _runStep('drawAmbientPollenMotes',   () => _drawAmbientPollenMotes(mainCtx));
+    if (F.ambient_leaves)     _runStep('drawAmbientFallingLeaves', () => _drawAmbientFallingLeaves(mainCtx));
+    if (F.ambient_atmosphere) _runStep('drawAtmosphereOverlay',    () => drawAtmosphereOverlay(mainCtx));
+  }
   // ── COORDS ─────────────────────────────────────────────────────────────
   if (F.hex_coords)       _runStep('drawHexCoords', () => drawHexCoords(mainCtx));
+  // ── CRITTERS (animais vivos: coelho/raposa/pássaro/borboleta) — fog-gated ──
+  if (_ambientOK && F.ambient_critters && S && S.fogState) {
+    _runStep('updateCritters', () => updateCritters());
+    _runStep('drawCritters',   () => drawCritters(mainCtx));
+  }
   // ── FOG (V8 RESTORED — sistema antigo pre-V6) ──────────────────────────
   // User confirmou que pipeline atual (sem ambient + idle_pause OFF) mantém
   // 30fps com zoom mesmo com fog antigo. Reverte pra buildFogMask + composite
@@ -23267,8 +23323,17 @@ function renderFrame(ts) {
     _runStep('drawHardFogOnUnexplored', () => drawHardFogOnUnexplored(mainCtx));
   }
   if (F.player_aura)      _runStep('drawPlayerLightAura', () => drawPlayerLightAura(mainCtx));
+  // ── SKY/ATMOSFÉRICO (mapa vivo): nuvens, raios de sol, AVES voando ────────
+  // Acima do fog/aura (efeitos no ar), abaixo do tint dia/noite (a noite escurece
+  // as aves também). Cada fn self-gate por bioma/clima (aves só em campos de dia).
+  if (_ambientOK) {
+    if (F.ambient_clouds)   _runStep('drawCloudShadows', () => drawCloudShadows(mainCtx));
+    if (F.ambient_sun_rays) _runStep('drawSunRays',      () => drawSunRays(mainCtx));
+    if (F.ambient_birds)    _runStep('drawBirdFlock',    () => drawBirdFlock(mainCtx));
+  }
   if (F.day_night_tint)   _runStep('drawDayNightTint', () => drawDayNightTint(mainCtx));
   if (F.weather_overlay)  _runStep('drawWeatherOverlay', () => drawWeatherOverlay(mainCtx));
+  if (_ambientOK && F.ambient_haze) _runStep('drawDistantHaze', () => _drawDistantHaze(mainCtx));
   if (F.debug_hud)        _runStep('drawDebugHud', () => drawDebugHud(mainCtx));
 
   // 2026-04-29 PERF DIAG: tempo total do frame + atualiza top-5 a cada 60 frames
