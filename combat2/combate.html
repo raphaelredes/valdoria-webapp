@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-14T17:52:53Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-14T21:09:10Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -18322,10 +18322,24 @@ var currentState = null, _selectingTarget = false, _pendingSkill = null, _pendin
    estado de jogo) → localStorage permitido. _simSkipNonPlayerDice continua sendo
    o skip POR-SEQUÊNCIA de dados de não-jogador (botão dentro da overlay). */
 var _skipAllDiceAnim = false;
-try { _skipAllDiceAnim = (localStorage.getItem('valdoria_skip_dice_anim') === '1'); } catch (_eSkipPref) {}
+/* 2026-06-14 (user): a pref é POR-PERSONAGEM (padrão anti-leak da Sessão #55,
+   mesmo de _combatCharIdSafe). Antes era a key GLOBAL 'valdoria_skip_dice_anim'
+   → vazava entre personagens: um veterano marcava "Pular Todas" e o 1.º combate
+   (prólogo) de um personagem NOVO já vinha pulando os dados. Agora cada char tem
+   sua própria key; char novo/sem key → false → SEMPRE mostra as rolagens. Sem
+   fallback pra key global (justamente o que vazava). Self-contained (lê a query
+   direto) pra não depender de hoisting de _combatCharIdSafe entre <script>. */
+function _skipDiceStorageKey() {
+    try {
+        var _qs = new URLSearchParams(location.search);
+        var _cid = _qs.get('char') || _qs.get('char_id') || 'default';
+        return 'valdoria_skip_dice_anim_' + _cid;
+    } catch (_eK) { return 'valdoria_skip_dice_anim_default'; }
+}
+try { _skipAllDiceAnim = (localStorage.getItem(_skipDiceStorageKey()) === '1'); } catch (_eSkipPref) {}
 function _setSkipAllDiceAnim(v) {
     _skipAllDiceAnim = !!v;
-    try { localStorage.setItem('valdoria_skip_dice_anim', v ? '1' : '0'); } catch (_eSkipSet) {}
+    try { localStorage.setItem(_skipDiceStorageKey(), v ? '1' : '0'); } catch (_eSkipSet) {}
 }
 
 /* ============================================================================
@@ -21178,6 +21192,9 @@ function onBtnClick(ev) {
                  3. User clica "Começar Combate" (act='start') → dispara start
                     → server transita init→active */
             console.info('[C-REM:BTN] act=next (will animate initiative locally after server transition)');
+            /* 2026-06-14 (user): paridade com LOCAL — "Começar Rolagens" desmarca a
+               pref por-char de pular dados (opt-in explícito a ver as rolagens). */
+            _setSkipAllDiceAnim(false);
             _actionSheetOpen = false;
             render(currentState);
             (async function () {
@@ -21526,7 +21543,15 @@ function onBtnClick(ev) {
         void __combatLeaveRemoteToOrigin();
         return;
     }
-    if (act === 'next') { _safeAnimInit(); return; }
+    if (act === 'next') {
+        /* 2026-06-14 (user): "Começar Rolagens" é opt-in EXPLÍCITO a VER os dados —
+           simétrico ao "Pular Todas" (skip-init) que marca o skip. Desmarca a pref
+           ANTES de animar, senão o curto-circuito de _skipAllDiceAnim em showDice
+           pulava a iniciativa mesmo o jogador tendo escolhido rolar. */
+        _setSkipAllDiceAnim(false);
+        _safeAnimInit();
+        return;
+    }
     if (act === 'skip-init') {
         document.body.classList.add('sim-paused-bg');
         confirmSimDiceSkip('Pular as animações de dados (iniciativa e todo o combate, incluindo as suas)? Fica salvo — você pode reativar quando quiser no botão "☑ Pular dados".').then(function (ok) {
