@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T00:22:17Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T01:02:41Z - do not edit directly, edit source -->
 
 
 
@@ -19914,12 +19914,12 @@ const FIXED_MAPS = {
       'Mensageiros montados saem e chegam constantemente pelas portas principais.'
     ],
     dungeons: [],
-    edges: [
+        edges: [
       { col: 0, row: 14, targetMap: 'green_fields', label: 'Campos Verdes' },
-      { col: 4, row: 0, targetMap: 'whispering_woods', label: 'Bosques Sussurrantes' },
-      { col: 23, row: 14, targetMap: 'misty_marshes', label: 'Pântanos Brumosos' },
-      { col: 19, row: 0, targetMap: 'stone_peaks', label: 'Picos de Pedra' },
-      { col: 12, row: 27, targetMap: 'ancient_cemetery', label: 'Cemitério Antigo' }
+      { col: 4, row: 0, targetMap: 'whispering_woods', label: 'Floresta dos Sussurros' },
+      { col: 23, row: 14, targetMap: 'misty_marshes', label: 'Pântano Nebuloso' },
+      { col: 0, row: 15, targetMap: 'underground_passage', label: 'Passagem Subterrânea' },
+      { col: 23, row: 15, targetMap: 'golden_sands', label: 'Deserto Dourado' }
     ]
   },
   green_fields: {
@@ -19942,11 +19942,11 @@ const FIXED_MAPS = {
       'Um cavalo de carroça relincha ao reconhecer o dono.'
     ],
     dungeons: [],
-    edges: [
-      { col: 21, row: 13, targetMap: 'city_gates', label: 'Portões de Valdoria' },
-      { col: 0, row: 13, targetMap: 'orc_tribe', label: 'Tribo Orc' },
-      { col: 11, row: 25, targetMap: 'bandit_fortress', label: 'Fortaleza Bandida' },
-      { col: 11, row: 0, targetMap: 'whispering_woods', label: 'Bosques' }
+        edges: [
+      { col: 21, row: 13, targetMap: 'city_gates', label: 'Valdoria' },
+      { col: 0, row: 13, targetMap: 'orc_tribe', label: 'Acampamento Orc' },
+      { col: 11, row: 25, targetMap: 'bandit_fortress', label: 'Forte dos Bandidos' },
+      { col: 11, row: 0, targetMap: 'stone_peaks', label: 'Picos de Pedra' }
     ]
   },
   orc_tribe: {
@@ -19972,12 +19972,8 @@ const FIXED_MAPS = {
       { col: 10, row: 5, id: 'orc_chief_tent', name: 'Tenda do Chefe', reveal: 'any',
         intro: 'A tenda principal é maciça, feita de peles grossas. Lanças fincadas na terra marcam o limite. Gritos guturais vêm de dentro.' }
     ],
-    edges: [
+        edges: [
       { col: 19, row: 12, targetMap: 'green_fields', label: 'Campos Verdes' },
-      { col: 16, row: 23, targetMap: 'bandit_fortress', label: 'Fortaleza Bandida' },
-      // X-6.5.51AC (2026-05-04): edge simétrica pra orc_chief_tent (Tenda do Brakthar).
-      // Antes faltava — player saía da masmorra e caía no first-edge fallback (green_fields)
-      // em vez de spawnar no hex da entrada da tenda. Coords (10,5) batem com dungeons[0].
       { col: 10, row: 5, targetMap: 'orc_chief_tent', label: 'Tenda do Chefe' }
     ]
   },
@@ -20613,13 +20609,9 @@ const FIXED_MAPS = {
       { col: 11, row: 5, id: 'bandit_vault', name: 'Cofre dos Bandidos', reveal: 'night',
         intro: 'Sob a vigília do dia, guardas patrulham. À noite, a entrada do cofre principal fica exposta entre as muralhas rachadas.' }
     ],
-    edges: [
+        edges: [
       { col: 11, row: 0, targetMap: 'green_fields', label: 'Campos Verdes' },
-      { col: 4, row: 25, targetMap: 'orc_tribe', label: 'Tribo Orc' },
-      // X-6.5.51AC (2026-05-04): back-edge simétrica pra golden_sands (Areias Douradas
-      // edge SW (4,29) -> bandit_fortress). Antes faltava — player retornando do deserto
-      // caía no first-edge fallback. Coloca-se no leste (col 21) por geografia natural.
-      { col: 21, row: 13, targetMap: 'golden_sands', label: 'Areias Douradas' }
+      { col: 21, row: 13, targetMap: 'golden_sands', label: 'Deserto Dourado' }
     ]
   },
   // ============ FLORESTA (3 mapas) =============
@@ -20646,11 +20638,11 @@ const FIXED_MAPS = {
       { col: 18, row: 22, id: 'forest_altar', name: 'Altar Esquecido', reveal: 'night',
         intro: 'Sob o luar filtrado pela copa, um altar coberto de musgo se revela. Runas dançam na pedra quando a luz toca.' }
     ],
-    edges: [
-      { col: 23, row: 15, targetMap: 'city_gates', label: 'Portões de Valdoria' },
-      { col: 15, row: 29, targetMap: 'green_fields', label: 'Campos Verdes' },
-      { col: 8, row: 0, targetMap: 'goblin_nest', label: 'Ninho dos Goblins' },
-      { col: 18, row: 4, targetMap: 'elven_ruins', label: 'Ruínas Élficas' }
+        edges: [
+      { col: 23, row: 15, targetMap: 'city_gates', label: 'Valdoria' },
+      { col: 8, row: 0, targetMap: 'goblin_nest', label: 'Ninho de Goblins' },
+      { col: 18, row: 4, targetMap: 'elven_ruins', label: 'Ruínas Élficas' },
+      { col: 12, row: 0, targetMap: 'frozen_waste', label: 'Ermo Congelado' }
     ]
   },
   goblin_nest: {
@@ -20665,10 +20657,8 @@ const FIXED_MAPS = {
       { col: 10, row: 5, id: 'goblin_warren', name: 'Toca Principal', reveal: 'any',
         intro: 'Túneis escavados sob uma grande árvore. Tochas baixas ardem lá dentro. O fedor do lixo goblin é inconfundível.' }
     ],
-    edges: [
-      { col: 10, row: 23, targetMap: 'whispering_woods', label: 'Bosques' },
-      { col: 19, row: 6, targetMap: 'elven_ruins', label: 'Ruínas Élficas' },
-      { col: 2, row: 0, targetMap: 'frozen_waste', label: 'Terras Congeladas' }
+        edges: [
+      { col: 10, row: 23, targetMap: 'whispering_woods', label: 'Floresta dos Sussurros' }
     ]
   },
   elven_ruins: {
@@ -20683,9 +20673,9 @@ const FIXED_MAPS = {
       { col: 11, row: 5, id: 'elf_library', name: 'Biblioteca Esquecida', reveal: 'fog',
         intro: 'Colunas de mármore branco entre árvores colossais. Só a névoa revela a entrada — quando o véu desce, os símbolos élficos brilham.' }
     ],
-    edges: [
-      { col: 2, row: 13, targetMap: 'whispering_woods', label: 'Bosques' },
-      { col: 0, row: 4, targetMap: 'goblin_nest', label: 'Ninho dos Goblins' }
+        edges: [
+      { col: 2, row: 13, targetMap: 'whispering_woods', label: 'Floresta dos Sussurros' },
+      { col: 11, row: 0, targetMap: 'frozen_waste', label: 'Ermo Congelado' }
     ]
   },
   // ============ PÂNTANO (3 mapas) =============
@@ -20709,10 +20699,10 @@ const FIXED_MAPS = {
       { col: 5, row: 6, id: 'sunken_temple', name: 'Templo Submerso', reveal: 'rain',
         intro: 'A chuva eleva o nível da água e expõe uma escadaria de pedra descendo para escuridão — entradas submersas só emergem no dilúvio.' }
     ],
-    edges: [
-      { col: 0, row: 14, targetMap: 'city_gates', label: 'Portões de Valdoria' },
+        edges: [
+      { col: 0, row: 14, targetMap: 'city_gates', label: 'Valdoria' },
       { col: 11, row: 27, targetMap: 'deep_swamp', label: 'Pântano Profundo' },
-      { col: 2, row: 27, targetMap: 'ancestral_graveyard', label: 'Cemitério Ancestral' }
+      { col: 12, row: 27, targetMap: 'ancient_cemetery', label: 'Cemitério Antigo' }
     ]
   },
   ancestral_graveyard: {
@@ -20727,8 +20717,7 @@ const FIXED_MAPS = {
       { col: 10, row: 5, id: 'forgotten_catacombs', name: 'Catacumbas Esquecidas', reveal: 'night',
         intro: 'Sob a última lápide, uma entrada gelada desce para galerias onde ecos não são ecos — são respostas. Só à noite os selos cedem.' }
     ],
-    edges: [
-      { col: 19, row: 4, targetMap: 'misty_marshes', label: 'Pântanos Brumosos' },
+        edges: [
       { col: 16, row: 25, targetMap: 'deep_swamp', label: 'Pântano Profundo' },
       { col: 0, row: 13, targetMap: 'ancient_cemetery', label: 'Cemitério Antigo' }
     ]
@@ -20745,9 +20734,10 @@ const FIXED_MAPS = {
       { col: 11, row: 5, id: 'brume_labyrinth', name: 'Labirinto das Brumas', reveal: 'fog',
         intro: 'A névoa forma paredes sólidas. Dentro delas, o tempo se dobra. Ninguém conta quantos dias se passaram do outro lado.' }
     ],
-    edges: [
-      { col: 11, row: 0, targetMap: 'misty_marshes', label: 'Pântanos Brumosos' },
-      { col: 4, row: 0, targetMap: 'ancestral_graveyard', label: 'Cemitério Ancestral' }
+        edges: [
+      { col: 11, row: 0, targetMap: 'misty_marshes', label: 'Pântano Nebuloso' },
+      { col: 4, row: 0, targetMap: 'ancestral_graveyard', label: 'Cemitério Ancestral' },
+      { col: 12, row: 0, targetMap: 'burning_crater', label: 'Cratera Vulcânica' }
     ]
   },
   // ============ MONTANHA (5 mapas) =============
@@ -20771,13 +20761,13 @@ const FIXED_MAPS = {
       { col: 11, row: 5, id: 'wind_fortress', name: 'Fortaleza dos Ventos', reveal: 'storm',
         intro: 'Uma cidadela arruinada no alto do pico. Durante tempestades, os portões rangem abertos — o vento os arranca do próprio selo.' }
     ],
-    edges: [
-      { col: 4, row: 27, targetMap: 'city_gates', label: 'Portões de Valdoria' },
-      { col: 19, row: 0, targetMap: 'troll_cave', label: 'Caverna dos Trolls' },
-      { col: 21, row: 14, targetMap: 'dragon_pass', label: 'Passagem do Dragão' },
+        edges: [
+      { col: 19, row: 0, targetMap: 'troll_cave', label: 'Caverna do Troll' },
+      { col: 21, row: 14, targetMap: 'dragon_pass', label: 'Passo do Dragão' },
       { col: 19, row: 4, targetMap: 'korthag', label: 'Korthag' },
-      { col: 11, row: 27, targetMap: 'underground_passage', label: 'Passagem Subterrânea' },
-      { col: 11, row: 0, targetMap: 'frozen_waste', label: 'Terras Congeladas' }
+      { col: 11, row: 0, targetMap: 'frozen_waste', label: 'Ermo Congelado' },
+      { col: 11, row: 27, targetMap: 'green_fields', label: 'Campos Verdes' },
+      { col: 12, row: 27, targetMap: 'crystal_depths', label: 'Profundezas de Cristal' }
     ]
   },
   troll_cave: {
@@ -20792,9 +20782,8 @@ const FIXED_MAPS = {
       { col: 10, row: 5, id: 'troll_lair', name: 'Covil do Troll', reveal: 'any',
         intro: 'Uma caverna grande o suficiente pra guardar trolls adultos. O cheiro de podre e ferro velho é imediato.' }
     ],
-    edges: [
-      { col: 10, row: 23, targetMap: 'stone_peaks', label: 'Picos de Pedra' },
-      { col: 0, row: 12, targetMap: 'korthag', label: 'Korthag' }
+        edges: [
+      { col: 10, row: 23, targetMap: 'stone_peaks', label: 'Picos de Pedra' }
     ]
   },
   dragon_pass: {
@@ -20809,9 +20798,10 @@ const FIXED_MAPS = {
       { col: 11, row: 5, id: 'dragon_lair', name: 'Cova do Dragão', reveal: 'storm',
         intro: 'Uma fenda enorme na rocha. O vento traz um odor de enxofre. Só a tempestade abafa o ronco da criatura lá dentro.' }
     ],
-    edges: [
+        edges: [
       { col: 0, row: 13, targetMap: 'stone_peaks', label: 'Picos de Pedra' },
-      { col: 21, row: 13, targetMap: 'valkrest', label: 'Valkrest' }
+      { col: 21, row: 13, targetMap: 'valkrest', label: 'Valkrest' },
+      { col: 21, row: 14, targetMap: 'burning_crater', label: 'Cratera Vulcânica' }
     ]
   },
   underground_passage: {
@@ -20826,10 +20816,11 @@ const FIXED_MAPS = {
       { col: 10, row: 5, id: 'forgotten_tunnel', name: 'Túnel Esquecido', reveal: 'torch_on',
         intro: 'Uma bifurcação escura que só se revela quando a tocha lança luz entre as colunas. Mapeado há séculos, esquecido desde então.' }
     ],
-    edges: [
-      { col: 10, row: 0, targetMap: 'stone_peaks', label: 'Picos de Pedra' },
+        edges: [
       { col: 10, row: 23, targetMap: 'underground_caverns', label: 'Cavernas Subterrâneas' },
-      { col: 19, row: 18, targetMap: 'crystal_depths', label: 'Profundezas Cristalinas' }
+      { col: 10, row: 0, targetMap: 'korthag', label: 'Korthag' },
+      { col: 19, row: 12, targetMap: 'city_gates', label: 'Valdoria' },
+      { col: 11, row: 23, targetMap: 'ancient_cemetery', label: 'Cemitério Antigo' }
     ]
   },
   korthag: {
@@ -20850,9 +20841,9 @@ const FIXED_MAPS = {
       'Uma fumaça azul sobe de uma chaminé específica — forja mestre em ação.'
     ],
     dungeons: [],
-    edges: [
+        edges: [
       { col: 0, row: 12, targetMap: 'stone_peaks', label: 'Picos de Pedra' },
-      { col: 10, row: 23, targetMap: 'troll_cave', label: 'Caverna dos Trolls' }
+      { col: 10, row: 23, targetMap: 'underground_passage', label: 'Passagem Subterrânea' }
     ]
   },
   // ============ DESERTO (1 mapa) =============
@@ -20880,9 +20871,10 @@ const FIXED_MAPS = {
       { col: 18, row: 23, id: 'forbidden_oasis', name: 'Oásis Proibido', reveal: 'night',
         intro: 'Sob as estrelas, um círculo de palmeiras se revela. A água espelha a lua — mas algo se move na profundidade.' }
     ],
-    edges: [
-      { col: 4, row: 29, targetMap: 'bandit_fortress', label: 'Fortaleza Bandida' },
-      { col: 18, row: 0, targetMap: 'ancient_cemetery', label: 'Cemitério Antigo' }
+        edges: [
+      { col: 4, row: 29, targetMap: 'bandit_fortress', label: 'Forte dos Bandidos' },
+      { col: 0, row: 15, targetMap: 'city_gates', label: 'Valdoria' },
+      { col: 11, row: 0, targetMap: 'burning_crater', label: 'Cratera Vulcânica' }
     ]
   },
   // ============ NEVE (1 mapa) =============
@@ -20909,9 +20901,10 @@ const FIXED_MAPS = {
       { col: 16, row: 19, id: 'frost_keep', name: 'Forte Congelado', reveal: 'fog',
         intro: 'A torre do comandante do norte — caída há séculos. A neblina esconde o caminho, mas os portões rangem no vento.' }
     ],
-    edges: [
+        edges: [
       { col: 19, row: 27, targetMap: 'stone_peaks', label: 'Picos de Pedra' },
-      { col: 4, row: 27, targetMap: 'goblin_nest', label: 'Ninho dos Goblins' }
+      { col: 11, row: 27, targetMap: 'whispering_woods', label: 'Floresta dos Sussurros' },
+      { col: 12, row: 27, targetMap: 'elven_ruins', label: 'Ruínas Élficas' }
     ]
   },
   // ============ CAVERNA (2 mapas) =============
@@ -20937,10 +20930,9 @@ const FIXED_MAPS = {
       { col: 5, row: 5, id: 'lost_mine', name: 'Mina Perdida', reveal: 'torch_on',
         intro: 'Os trilhos da mina antiga desaparecem na escuridão. Só a luz da tocha revela os cristais incrustados nas paredes — e algo mais.' }
     ],
-    edges: [
+        edges: [
       { col: 11, row: 0, targetMap: 'underground_passage', label: 'Passagem Subterrânea' },
-      { col: 21, row: 14, targetMap: 'crystal_depths', label: 'Profundezas Cristalinas' },
-      { col: 0, row: 14, targetMap: 'ancient_cemetery', label: 'Cemitério Antigo' }
+      { col: 21, row: 14, targetMap: 'crystal_depths', label: 'Profundezas de Cristal' }
     ]
   },
   crystal_depths: {
@@ -20957,10 +20949,9 @@ const FIXED_MAPS = {
       { col: 10, row: 5, id: 'dimensional_portal', name: 'Portal Dimensional', reveal: 'torch_on',
         intro: 'Uma câmara de cristal puro onde a realidade ondula. O portal só se abre sob luz viva — e quem entra raramente retorna.' }
     ],
-    edges: [
+        edges: [
       { col: 0, row: 13, targetMap: 'underground_caverns', label: 'Cavernas Subterrâneas' },
-      { col: 5, row: 0, targetMap: 'underground_passage', label: 'Passagem Subterrânea' },
-      { col: 19, row: 25, targetMap: 'burning_crater', label: 'Cratera Ardente' }
+      { col: 10, row: 0, targetMap: 'stone_peaks', label: 'Picos de Pedra' }
     ]
   },
   // ============ VULCÂNICO (2 mapas) =============
@@ -20987,9 +20978,11 @@ const FIXED_MAPS = {
       { col: 16, row: 22, id: 'fire_temple', name: 'Templo de Fogo', reveal: 'storm',
         intro: 'Um templo de mármore negro, com brasas eternas. Só uma tempestade interrompe sua fornalha o suficiente pra entrar.' }
     ],
-    edges: [
-      { col: 2, row: 0, targetMap: 'crystal_depths', label: 'Profundezas Cristalinas' },
-      { col: 21, row: 4, targetMap: 'valkrest', label: 'Valkrest' }
+        edges: [
+      { col: 21, row: 4, targetMap: 'valkrest', label: 'Valkrest' },
+      { col: 11, row: 27, targetMap: 'golden_sands', label: 'Deserto Dourado' },
+      { col: 0, row: 14, targetMap: 'dragon_pass', label: 'Passo do Dragão' },
+      { col: 12, row: 27, targetMap: 'deep_swamp', label: 'Pântano Profundo' }
     ]
   },
   valkrest: {
@@ -21010,9 +21003,9 @@ const FIXED_MAPS = {
       'Os telhados de todas as casas são de ardósia negra — obsidiana local moída e compactada.'
     ],
     dungeons: [],
-    edges: [
-      { col: 0, row: 12, targetMap: 'dragon_pass', label: 'Passagem do Dragão' },
-      { col: 10, row: 23, targetMap: 'burning_crater', label: 'Cratera Ardente' }
+        edges: [
+      { col: 0, row: 12, targetMap: 'dragon_pass', label: 'Passo do Dragão' },
+      { col: 10, row: 23, targetMap: 'burning_crater', label: 'Cratera Vulcânica' }
     ]
   },
   // ============ CEMITÉRIO (1 mapa) =============
@@ -21037,11 +21030,10 @@ const FIXED_MAPS = {
       { col: 11, row: 5, id: 'lich_hall', name: 'Cripta da Coroa Funesta', reveal: 'night',
         intro: 'No centro do cemitério antigo, um portal negro se revela só sob o manto da noite. Os mortos sussurram quando ele se abre.' }
     ],
-    edges: [
-      { col: 11, row: 0, targetMap: 'city_gates', label: 'Portões de Valdoria' },
+        edges: [
       { col: 21, row: 13, targetMap: 'ancestral_graveyard', label: 'Cemitério Ancestral' },
-      { col: 11, row: 25, targetMap: 'underground_caverns', label: 'Cavernas Subterrâneas' },
-      { col: 0, row: 25, targetMap: 'golden_sands', label: 'Areias Douradas' }
+      { col: 11, row: 0, targetMap: 'underground_passage', label: 'Passagem Subterrânea' },
+      { col: 12, row: 0, targetMap: 'misty_marshes', label: 'Pântano Nebuloso' }
     ]
   }
 };
@@ -37635,6 +37627,7 @@ async function confirmEdgeTransition() {
           user_id: window.__EXPLORE_USER_ID,
           token: window.__EXPLORE_TOKEN,
           payload: {
+            from_map: window.__EXPLORE_MAP_ID || '',  // #8 Phase B: origem real p/ custo de turnos server-side
             target_map: ed.targetMap,
             rewards: rewards
           }
