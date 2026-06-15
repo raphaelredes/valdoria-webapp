@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T01:02:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T11:40:52Z - do not edit directly, edit source -->
 
 
 
@@ -15407,6 +15407,12 @@ window.__applyExploreSnap = function(S, snap) {
   if (typeof snap.hd === 'number')  p.hd = snap.hd;
   if (typeof snap.mhd === 'number') p.mhd = snap.mhd;
   if (typeof snap.exh === 'number') p.exh = snap.exh;
+  // 2026-06-15 (user): escolhas de magias L1 (server-authoritative). O combate
+  // LOCAL de exploração precisa delas pra filtrar o card de skills igual ao
+  // REMOTE — sem isto um caster (ex.: Druida) entrava com TODAS as magias da
+  // classe (o filtro de buildCharUnitFromSetup é pulado sem l1_choice_pool).
+  if (Array.isArray(snap.l1p)) p.l1_choice_pool = snap.l1p.slice();
+  if (Array.isArray(snap.l1c)) p.l1_skill_choices = snap.l1c.slice();
   // 2026-04-27: Wet status restaurado do perfil (D&D 5e DMG p.110). Server
   // armazena em player.metadata['explore_wet_turns'] após combate; snap traz
   // de volta. Decrementa por step na exploração.
@@ -35938,7 +35944,12 @@ function triggerCombatScreen(cfg) {
         mmp_exact: godmode ? 9999 : p.mmp,
         // 2026-04-27: Wet status (D&D 5e DMG p.110). Combate aplica
         // vulnerabilidade a frio + resistência a fogo enquanto wetTurns > 0.
-        wetTurns_exact: (typeof p.wet === 'number' && p.wet > 0) ? p.wet : 0
+        wetTurns_exact: (typeof p.wet === 'number' && p.wet > 0) ? p.wet : 0,
+        // 2026-06-15 (user): escolhas de magias L1 (do snap server-authoritative)
+        // pro filtro de skills do combate (buildCharUnitFromSetup:13888) rodar
+        // LOCAL igual ao REMOTE — senão caster (Druida) entra com TODAS as magias.
+        l1_choice_pool: Array.isArray(p.l1_choice_pool) ? p.l1_choice_pool : [],
+        l1_skill_choices: Array.isArray(p.l1_skill_choices) ? p.l1_skill_choices : []
       },
       // Sessão #75: party real (S.allies do snap). cls vem ASCII ('clerigo'); getClassDefByName
       // do combate exige o nome de display ('Clérigo'), então convertemos via CLASSES[key].name
