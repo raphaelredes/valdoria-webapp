@@ -72,13 +72,16 @@
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 30px var(--v-gold-20);
 }
 
-/* sessão #77: enc-full — quando opts.fullHeight=true (viagem "Rumo a <destino>"),
-   o card preenche o MÁXIMO de espaço vertical SEMPRE (regra "Popup DEVE Ocupar
-   Máximo de Espaço"). O body (flex:1, overflow-y:auto) expande/scrolla; narração
-   no topo + ações no rodapé = popup épico imersivo igual ao da exploração. */
+/* sessão #77: enc-full — viagem "Rumo a <destino>" (opts.fullHeight=true).
+   sessão #90 (user, 2026-06-15): NÃO forçar mais `height: 92dvh`. Com conteúdo
+   curto isso criava um VOID enorme E empurrava a faixa de ação pra TRÁS da barra
+   inferior do Telegram WebView (botão "Escolher ação"/"Continuar viagem" cortado).
+   Agora é CONTENT-SIZED: cresce com o conteúdo até 92dvh (body scrolla se exceder),
+   com piso modesto pra ter presença sem void. Combinado com a faixa de ação ÚNICA
+   (renderActions coloca a ação na nav band), os botões SEMPRE cabem na área visível. */
 .enc-card.enc-full {
-  min-height: 92dvh;
-  height: 92dvh;
+  min-height: min(92dvh, calc(340px * var(--v-font-scale, 1)));
+  max-height: 92dvh;
 }
 
 /* 2026-06-07 EX5: banner de progresso da viagem ("Rumo a <destino>") — TOPO do
@@ -575,6 +578,22 @@ body.perf-lite #encounter-overlay.active .enc-card {
 .enc-nav-btn-next:hover:not(:disabled) {
   background: linear-gradient(180deg, #d4a54a, #a78540);
   color: #1a1510;
+}
+
+/* sessão #90 (user): AÇÃO ÚNICA da última página ("Escolher ação"/"Continuar
+   viagem"/etc.) vive na MESMA FAIXA do "← Anterior" (nav band), no lado direito —
+   em vez de uma 2ª faixa empilhada (.enc-actions) que cortava o botão / estourava
+   a área visível do Telegram. Preenche o espaço à direita do Anterior; herda o
+   visual do .enc-btn-primary / .enc-btn-choose, só ajusta alinhamento e flex. */
+.enc-nav .enc-nav-action {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  margin: 0;
+}
+/* Anterior não estica — fica do tamanho do conteúdo à esquerda. */
+.enc-nav #enc-prev {
+  flex: 0 0 auto;
 }
 
 .enc-actions {

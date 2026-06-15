@@ -1044,6 +1044,13 @@
       }
       var nextBtn = document.getElementById('enc-next');
       var isLastPage = idx === pages.length - 1;
+      /* sessão #90: ao (re)renderizar QUALQUER página, limpa a ação que
+         renderActions tinha colocado na nav band da última página e restaura o
+         display do "Continuar →". Assim, voltar (← Anterior) pra uma página
+         intermediária mostra o "Continuar →" de novo (sem botão de ação stale). */
+      var _navActionStale = card.querySelector('.enc-nav .enc-nav-action');
+      if (_navActionStale) _navActionStale.remove();
+      if (nextBtn) nextBtn.style.display = '';
       /* 2026-06-11 (user, bug "Pular não faz nada" após reward do Brenn): se a
          página NÃO tem texto (ex.: só {type:'reward'} → strophes vazio),
          typeNextSentence() ACIMA já completou SINCRONAMENTE (skipped=true,
@@ -1135,6 +1142,11 @@
        mantém comportamento antigo (inline buttons). */
     function renderActions() {
       actions.innerHTML = '';
+      /* sessão #90: limpa ação prévia da nav band (renderActions roda 2x:
+         typewriter-finish + click-to-skip) — sem isso, duplicaria o botão. */
+      var prevNavAction = nav.querySelector('.enc-nav-action');
+      if (prevNavAction) prevNavAction.remove();
+      var encNext = document.getElementById('enc-next');
       var choices = dialogue.choices || [];
       if (choices.length === 0) {
         /* Anti-trap (sessão #88): última página sem choices virava modal SEM
@@ -1144,6 +1156,7 @@
         choices = [{ id: '_enc_auto_close', label: 'Fechar', cb: 'close' }];
       }
       var useInline = opts.inlineChoices === true || choices.length === 1;
+      var btns = [];
       if (useInline) {
         choices.forEach(function(ch, idx) {
           var btn = document.createElement('button');
@@ -1151,7 +1164,7 @@
           /* sessão #88: label vazio → 'Continuar' (nunca botão clicável vazio) */
           btn.innerHTML = _coinify((ch.label && String(ch.label).trim()) || 'Continuar');  // labels são autorais (não input) — coin icon ok
           btn.addEventListener('click', function() { _handleChoiceInternal(ch); });
-          actions.appendChild(btn);
+          btns.push(btn);
         });
       } else {
         // Single primary button → opens choice-overlay
@@ -1167,9 +1180,22 @@
             onChoice: _handleChoiceInternal
           });
         });
-        actions.appendChild(btn);
+        btns.push(btn);
       }
-      actions.style.display = '';
+      /* sessão #90 (user): AÇÃO ÚNICA fica na MESMA FAIXA do "← Anterior" (nav band),
+         no lado direito — em vez de uma 2ª faixa empilhada (.enc-actions) que estourava
+         a área visível do Telegram (botão cortado). O "Continuar →" da nav vira
+         display:none pra liberar o espaço. Múltiplas escolhas inline continuam
+         empilhadas em .enc-actions (precisam de linhas próprias). */
+      if (encNext) encNext.style.display = 'none';
+      if (btns.length === 1) {
+        btns[0].classList.add('enc-nav-action');
+        nav.appendChild(btns[0]);
+        actions.style.display = 'none';
+      } else {
+        btns.forEach(function(b) { actions.appendChild(b); });
+        actions.style.display = '';
+      }
     }
 
     /* Dispatch único usado por renderActions (closure sobre dialogue + opts). */
