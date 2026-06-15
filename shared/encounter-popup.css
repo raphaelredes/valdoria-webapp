@@ -1,5 +1,7 @@
 /* ============================================================================
  * encounter-popup.css — PADRAO_ALDRIC dialogue overlay styles
+ * cache-bump: sessão #90 (2026-06-15) — rotaciona o bundle hash p/ furar edge
+ * cache imutável poisoned (faixa de ação única + card content-sized).
  * ============================================================================
  * Companion CSS pra shared/encounter-popup.js (vEncounter.render).
  * Extraído de simuladores/banco-cofre-final.html linhas 720-973.
