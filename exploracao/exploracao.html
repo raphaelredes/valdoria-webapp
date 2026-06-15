@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T11:40:52Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T16:47:27Z - do not edit directly, edit source -->
 
 
 
@@ -10454,7 +10454,7 @@ window.__onIntroTap = function() {
       { id: 'wait',    label: 'Esperar (não resolver)', event: 'retreat_choice', flavor: 'Você fica em impasse — alerta persiste.' }
     ],
     cleared: [
-      { id: 'loot',  label: 'Saquear despojos', event: 'loot_picked', flavor: '+10 ouro, +1 troféu (stub).' },
+      { id: 'loot',  label: 'Saquear despojos', event: 'loot_picked', flavor: '+10 Valdoritas, +1 troféu (stub).' },
       { id: 'leave', label: 'Seguir caminho',   event: null,           flavor: 'Você deixa o lugar para trás.' }
     ],
     ruins: [
@@ -18358,7 +18358,7 @@ const EVENTS_POOL = {
                 id: 'rescued_npc_followup',
                 body: '{Ele} se ergue trêmulo: "Eu ia morrer. Tenho que te dar algo."',
                 choices: [
-                  { label: 'Aceitar gratidão tangível (item ou ouro)', flavor: 'Recompensa material direta.',
+                  { label: 'Aceitar gratidão tangível (item ou Valdoritas)', flavor: 'Recompensa material direta.',
                     ok: '{Ele} desamarra um pequeno talismã do pescoço. "Era da minha avó. Você merece." Você guarda com peso emocional.',
                     okItem: 'rune_protection', okXp: [10, 14] },
                   { label: 'Pedir favor pra cobrar mais tarde (Persuasão)', skill: 'cha', dc: 11,
@@ -21431,7 +21431,7 @@ function showBossDropModal(playerCls) {
     '⚙ Mecânica: ' + drop.bonus,
     '◆ Tipo: ' + typeLabel + (slotLabel ? ' (' + slotLabel + ')' : ''),
     '✦ Raridade: ' + rarityLabel,
-    '💰 Valor: ' + (drop.value_gp || 0) + ' Valdoritas'
+    'Valor: ' + (drop.value_gp || 0) + ' Valdoritas'
   ];
   var dropText = lines.join('\n');
   S.event = {
@@ -21529,7 +21529,7 @@ function _renderBraktharLootCard(drop, rarityLabel, typeLabel, slotLabel) {
     '</div>' +
     // Value chip
     '<div style="display:flex;justify-content:flex-end;align-items:center;gap:6px;font-size:calc(11px * var(--v-font-scale, 1));color:#d4b870;position:relative">' +
-      '<span style="font-size:calc(14px * var(--v-font-scale, 1))">💰</span>' +
+      '<span class="vi vi-coin sm"></span>' +
       '<span style="font-weight:700">' + (drop.value_gp || 0) + ' Valdoritas</span>' +
     '</div>';
   // Substitui o <p> de texto pelo card
@@ -39850,7 +39850,7 @@ const MATERIALS_DB = {
   // === Event-specific drops ===
   old_locket: { name: 'Medalhão Antigo', icon: '📿', desc: 'Relíquia de ordem extinta.',
     uses: ['Entregar em missão relacionada ao Cisne Branco', 'Colecionável: 20 Valdoritas'] },
-  worn_coin_pouch: { name: 'Bolsa Gasta', icon: '💰', desc: 'Contém moedas miscelâneas.',
+  worn_coin_pouch: { name: 'Bolsa Gasta', icon: '🪙', desc: 'Contém moedas miscelâneas.',
     uses: ['Abrir: +5-15 Valdoritas randômico'] },
   stolen_goods: { name: 'Bens Roubados', icon: '📦', desc: 'Pilhagem de viajantes anteriores.',
     uses: ['Vendido em mercado negro (+10v)', 'Entregar à guarda: +reputação'] },
@@ -40889,7 +40889,7 @@ function openEnemyDetail(enemyId) {
   const dropsEl = document.getElementById('detail-drops');
   clearChildren(dropsEl);
   const header = document.createElement('h4');
-  header.textContent = '💰 Drops';
+  header.textContent = 'Drops';
   dropsEl.appendChild(header);
   const registeredDrops = Object.keys(stats.drops || {});
   const possibleDrops = e.known_drops || [];

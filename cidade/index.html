@@ -7881,11 +7881,11 @@ body.perf-lite .vc-action-btn { transition: none; }
     <!-- Ally Loan Modal (Fase 9.3 — SPLIT entre múltiplos aliados) -->
     <div id="ally-loan-modal">
       <div class="alm-card">
-        <h3 class="alm-title">💰 Pedir Emprestado</h3>
+        <h3 class="alm-title"><span class="vi vi-coin sm"></span> Pedir Emprestado</h3>
         <p class="alm-flavor" id="alm-flavor"></p>
         <div class="alm-progress">
           <div class="alm-progress-text">
-            Acumulado: <span id="alm-prog-current">0</span> / <span class="alm-prog-need" id="alm-prog-need">0</span> g
+            Acumulado: <span id="alm-prog-current">0</span> / <span class="alm-prog-need" id="alm-prog-need">0</span> Valdoritas
           </div>
           <div class="alm-progress-bar">
             <div class="alm-progress-fill" id="alm-prog-fill"></div>
@@ -20509,7 +20509,7 @@ var MURAL_RANKINGS = {
     ]
   },
   gold: {
-    label: '💰 Maior Fortuna', desc: 'Os mais ricos do reino',
+    label: '🪙 Maior Fortuna', desc: 'Os mais ricos do reino',
     top: [
       { rank: 1, name: 'Borek Saco-Pesado',     cls: 'Bardo',    val: '24.500 <span class="vi vi-coin sm"></span>' },
       { rank: 2, name: 'Drogan Aurmund',    cls: 'Paladino', val: '18.200 <span class="vi vi-coin sm"></span>' },
@@ -21017,7 +21017,7 @@ function _srvQuestDetail(serverId){
     SUBSCREEN_DATA['quest_open_srv_' + serverId] = {
       header: '📜 Missão: ' + (sq.title || serverId),
       flavor: '<i>' + (sq.desc || '') + '</i>',
-      npcInfo: (sq.progress ? '📋 ' + sq.progress + ' · ' : '') + '💰 ' + (sq.reward||0) + ' ' + coin + ' + ' + (sq.xp||0) + ' XP',
+      npcInfo: (sq.progress ? '📋 ' + sq.progress + ' · ' : '') + '<span class="vi vi-coin sm"></span> ' + (sq.reward||0) + ' ' + coin + ' + ' + (sq.xp||0) + ' XP',
       buttons: btns
     };
     navigateTo('quest_open_srv_' + serverId);
@@ -21955,7 +21955,7 @@ function _npcApplyTalkEffects(p, npc, opt){
     var r = opt._reward;
     var rewardLines = [];
     if (r.xp){ _gainXp(p, r.xp); rewardLines.push('✨ +' + r.xp + ' XP'); }
-    if (r.gold){ p.gold += r.gold; rewardLines.push('💰 +' + r.gold + ' Valdoritas'); }
+    if (r.gold){ p.gold += r.gold; rewardLines.push('<span class="vi vi-coin sm"></span> +' + r.gold + ' Valdoritas'); }
     if (r.item){ p.inventory = p.inventory || []; p.inventory.push(r.item); rewardLines.push('🎒 Obteve: ' + r.item); }
     if (rewardLines.length){ msgExtra = '<br><br>' + rewardLines.join('<br>'); }
     if (npc._canonKey){
@@ -22179,7 +22179,7 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
       if (r.xp){ _gainXp(p, r.xp); rewardLines.push('✨ +' + r.xp + ' XP'); }
       if (r.gold){
         p.gold += r.gold;
-        rewardLines.push('💰 +' + r.gold + ' Valdoritas');
+        rewardLines.push('<span class="vi vi-coin sm"></span> +' + r.gold + ' Valdoritas');
         deltas.push({ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false });
       }
       if (r.item){
@@ -26403,7 +26403,7 @@ var CANON_REGULAR_NPCS = {
     "interactions": [
       {
         "id": "ask_price",
-        "text": "💰 Perguntar Preço",
+        "text": "<span class=\"vi vi-coin sm\"></span> Perguntar Preço",
         "req": null
       },
       {
@@ -27729,7 +27729,7 @@ var CANON_GAMBLE_TEXTS = {
   "header_result": "🎲 RESULTADO",
   "intro": "Um velho com olhos astutos convida você para uma aposta.",
   "rules": "Ambos rolam 1d20. Maior valor vence.",
-  "disclaimer": "⚖️ GP é moeda virtual sem valor real.",
+  "disclaimer": "⚖️ Valdoritas é moeda virtual sem valor real.",
   "history": "Histórico: {wins} Vitórias / {losses} Derrotas",
   "remaining": "Tentativas restantes hoje: <b>{remaining}/{limit}</b>",
   "win_narrative": "Vitória! Você ganhou {amount} Valdoritas.",
@@ -28032,7 +28032,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
       { type: 'narration', text: 'Você nota duas moedas de prata brilhando entre as pedras do calçamento. <i>(ninguém parece ter percebido)</i>' }
     ],
     choices: [
-      { id: 'take', label: '💰 Pegar as moedas', result: 'apply_now',
+      { id: 'take', label: 'Pegar as moedas', result: 'apply_now',
         effect: { gold: 2 },
         result_text: 'Você guarda as moedas no bolso discretamente. Sorte é sorte.' },
       { id: 'announce', label: '📢 Anunciar — alguém perdeu?', result: 'apply_now',
@@ -28143,7 +28143,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
       { type: 'speech', speaker: 'Mercador Apressado', text: '— Pelos deuses, minha bolsa! <i>(ele para apavorado)</i>' }
     ],
     choices: [
-      { id: 'return', label: '💰 Devolver as moedas', result: 'apply_now',
+      { id: 'return', label: 'Devolver as moedas', result: 'apply_now',
         effect: { xp: 4, gold: 1 },
         result_text: 'Você junta e devolve. <i>"Aventureiro honesto é raro como diamante azul."</i> Ele te dá uma moeda de gorjeta.' },
       { id: 'pocket', label: 'Pegar discretamente', result: 'apply_now',
@@ -30921,7 +30921,7 @@ var CANON_HEROES_FULL = {
       "top_n": 10
     },
     "gold": {
-      "label": "Valdoritas Maior Fortuna",
+      "label": "🪙 Maior Fortuna",
       "description": "Os mais ricos do reino",
       "field": "gold",
       "top_n": 10
@@ -31119,7 +31119,7 @@ var CANON_BLACK_MARKET_FULL = {
     ],
     [
       0.6,
-      "Valdoritas Bolsa de Moedas",
+      "Bolsa de Moedas",
       "gold_150"
     ],
     [
@@ -32019,7 +32019,7 @@ var CANON_INN_REST_FRAMES = {
   "wealthy_dream_inspired": "✨ <b>Inspirado</b>: uma força além do comum.",
   "wealthy_dawn_template": "<b>{name}</b> está pronto para desafiar deuses.",
   "result_inn_name": "<b>ESTALAGEM DA PENA-DOURADA</b>",
-  "result_cost_template": "💰 Custo: <b>{cost}</b> Valdoritas"
+  "result_cost_template": "<span class=\"vi vi-coin sm\"></span> Custo: <b>{cost}</b> Valdoritas"
 };
 
 // === CANONICAL_PACK9_INJECT — END ===
@@ -37765,7 +37765,7 @@ var HELP_TEXTS_SYSTEMS = {
 
     'travel': '\\n🗺️ <b>VIAGEM - GUIA RÁPIDO</b>\\n\\nViaje entre regiões de Valdoria:\\n\\n<b>🗺️ Mapa</b>\\n• Necessário para viajar (compre no Mercado ou Cartógrafo)\\n• Mostra locais conectados à sua posição\\n\\n<b>⚔️ Encontros na Estrada</b>\\n• Inimigos podem aparecer durante a viagem\\n• Prepare-se antes de partir!\\n\\n<b>🏕️ Acampamento</b>\\n• Descanse durante viagens longas\\n• Use Descanso Curto para recuperar HP\\n\\n💡 <i>Dica</i>: Leve poções extras — encontros na estrada podem ser perigosos!\\n',
 
-    'rune_scribe': '\\n🔮 <b>ESCRIBA DE RUNAS - GUIA RÁPIDO</b>\\n\\nInscrição de runas em equipamentos:\\n\\n<b>📜 Selecionar Runa</b>\\n• Escolha uma runa do inventário\\n• Cada runa tem efeitos e bônus diferentes\\n\\n<b>⚔️ Selecionar Equipamento</b>\\n• Escolha o item a ser encantado\\n• Cada equipamento tem slots limitados\\n\\n<b>Valdoritas Inscrever</b>\\n• Pague o custo de inscrição\\n• Runas aplicadas concedem bônus permanentes\\n\\n💡 <i>Dica</i>: Guarde runas raras para seus melhores equipamentos!\\n',
+    'rune_scribe': '\\n🔮 <b>ESCRIBA DE RUNAS - GUIA RÁPIDO</b>\\n\\nInscrição de runas em equipamentos:\\n\\n<b>📜 Selecionar Runa</b>\\n• Escolha uma runa do inventário\\n• Cada runa tem efeitos e bônus diferentes\\n\\n<b>⚔️ Selecionar Equipamento</b>\\n• Escolha o item a ser encantado\\n• Cada equipamento tem slots limitados\\n\\n<b><span class="vi vi-coin sm"></span> Inscrever</b>\\n• Pague o custo de inscrição\\n• Runas aplicadas concedem bônus permanentes\\n\\n💡 <i>Dica</i>: Guarde runas raras para seus melhores equipamentos!\\n',
 };
 
 var MARKET_WOUNDED_GREETINGS = {
@@ -39627,7 +39627,7 @@ function _showJunkSellerModal(){
     +   'Total: <b style="color:var(--v-gold,#c4953a)">+' + info.gold + ' <span class="vi vi-coin sm"></span></b>'
     + '</div>'
     + '<div class="inv-detail-actions">'
-    +   '<button class="inv-detail-btn" id="junk-sell-btn">💰 Vender Tudo</button>'
+    +   '<button class="inv-detail-btn" id="junk-sell-btn"><span class="vi vi-coin sm"></span> Vender Tudo</button>'
     +   '<button class="inv-detail-btn" id="junk-cancel-btn">Cancelar</button>'
     + '</div>';
   ov.classList.add('active');
@@ -41875,7 +41875,7 @@ window._rewardItemName = _rewardItemName;
 function _marketShowSell(p){
   var inv = MOCK_PLAYER_INVENTORY;
   if (inv.length === 0) {
-    vToast('💰 Bolsa vazia — nada pra vender.');
+    vToast('<span class="vi vi-coin sm"></span> Bolsa vazia — nada pra vender.');
     return;
   }
   var sellable = inv.filter(function(it){
@@ -41883,7 +41883,7 @@ function _marketShowSell(p){
     return _isItemSellable(it.n || it.name);
   });
   if (sellable.length === 0) {
-    vToast('💰 Nenhum item vendável (item de missão/único/mapa não vendem).');
+    vToast('<span class="vi vi-coin sm"></span> Nenhum item vendável (item de missão/único/mapa não vendem).');
     return;
   }
   var items = sellable.map(function(it){
@@ -43701,7 +43701,7 @@ var SHADOW_PURCHASE_FLAVORS = {
 // canonical: MYSTERY_LOOT — pesos cumulativos pra Caixa Misteriosa
 var SHADOW_MYSTERY_LOOT = [
   { p: 0.35, name: '🪨 Pedra Pintada de Ouro', tier: 'trash',    msg: 'O Vulto nem tenta disfarçar o riso. <i>"Acontece com os melhores."</i>' },
-  { p: 0.60, name: '💰 Bolsa de Moedas (150 <span class="vi vi-coin sm"></span>)', tier: 'gold',    msg: 'Moedas tilintam dentro da caixa. Não é muito, mas é algo.', gold_gain: 150 },
+  { p: 0.60, name: '<span class="vi vi-coin sm"></span> Bolsa de Moedas (150 <span class="vi vi-coin sm"></span>)', tier: 'gold',    msg: 'Moedas tilintam dentro da caixa. Não é muito, mas é algo.', gold_gain: 150 },
   { p: 0.80, name: '🧪 Poção de Cura',          tier: 'potion',   msg: 'Um frasco cuidadosamente embrulhado, contendo um líquido avermelhado. Poção legítima!' },
   { p: 0.95, name: '☠️ Frasco de Veneno',       tier: 'poison',   msg: 'O Vulto assobia. <i>"Boa puxada. Esse veneno vale mais do que você pagou."</i>' },
   { p: 1.00, name: '💎 Diamante Bruto',         tier: 'jackpot',  msg: 'Seus olhos se arregalam. Um diamante bruto, do tamanho de um punho!' }
@@ -44263,7 +44263,7 @@ function _bankShowInvestments(p){
     ? canon.map(function(ct){
         return {
           id: ct.id,
-          icon: ct.emoji || ct.icon || '💰',
+          icon: ct.emoji || ct.icon || '<span class="vi vi-coin sm"></span>',
           name: ct.name,
           min: ct.min_amount || ct.min,
           lock: ct.lock_turns || ct.lock,
@@ -46225,7 +46225,7 @@ function _onInnRestClick(room, members){
     title: roomNames[room] + membersLabel,
     desc: roomDescs[room] + (allies.length > 0
       ? '<br><br>👥 Aliados: ' + allies.map(function(a){ return a.name; }).join(', ')
-        + '<br>💰 Custo extra por aliado: ' + allyCost + ' <span class="vi vi-coin sm"></span>'
+        + '<br><span class="vi vi-coin sm"></span> Custo extra por aliado: ' + allyCost + ' <span class="vi vi-coin sm"></span>'
       : ''),
     cost: totalCost,
     onConfirm: function(){
@@ -47058,7 +47058,7 @@ var SUBSCREEN_DATA = {
   'quest_open_wolves': {
     header: '🐺 Missão: Caçar Lobos Cinzentos',
     flavor: '<i>Tavira ajusta o pergaminho do contrato.</i> "— Fazendeiros do norte mal dormem há semanas. Lobos cinzentos descem da Floresta dos Sussurros toda noite. Três abatidos e a alcateia recua — promessa antiga do meu pai."',
-    npcInfo: '📋 Estágio 2/3 · 👤 Tavira, a Mestra · 📍 Floresta dos Sussurros · 💰 50 <span class="vi vi-coin sm"></span> + 80 XP',
+    npcInfo: '📋 Estágio 2/3 · 👤 Tavira, a Mestra · 📍 Floresta dos Sussurros · 50 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Sussurros', 'quest_wolves_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes do objetivo', '3 lobos cinzentos', 'quest_wolves_details'],
@@ -47069,7 +47069,7 @@ var SUBSCREEN_DATA = {
   'quest_open_lyana': {
     header: '💬 Missão: Falar com Lyana',
     flavor: '<i>O pergaminho selado pesa no bolso.</i> "— Entrega esta carta nas próprias mãos de Lyana, na praça. Ela espera notícias da irmã há três luas. Não abre, não conta. Só entrega."',
-    npcInfo: '✅ Pronta pra entregar · 👤 Lyana, a Herbalista · 📍 Portões de Valdoria · 💰 20 <span class="vi vi-coin sm"></span> + 40 XP',
+    npcInfo: '✅ Pronta pra entregar · 👤 Lyana, a Herbalista · 📍 Portões de Valdoria · 20 <span class="vi vi-coin sm"></span> + 40 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_lyana_locate'],
       [_heralIco('ic-pergaminho'), 'Reler a carta', 'pergaminho selado', 'quest_lyana_read'],
@@ -47084,7 +47084,7 @@ var SUBSCREEN_DATA = {
   'quest_open_goblins': {
     header: '🐺 Missão: Caçar 3 Goblins',
     flavor: '<i>Capitã Helga aperta o ombro.</i> "— Goblins de novo. Eles armaram ninho ao norte da floresta. Mate três que servem de exemplo — tomara que os outros lembrem de fugir."',
-    npcInfo: '📋 Estágio 0/3 · 👤 Capitã Helga · 📍 Ninho de Goblins · 💰 25 <span class="vi vi-coin sm"></span> + 40 XP',
+    npcInfo: '📋 Estágio 0/3 · 👤 Capitã Helga · 📍 Ninho de Goblins · 25 <span class="vi vi-coin sm"></span> + 40 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Ninho de Goblins', 'quest_goblins_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 3 goblins', 'quest_goblins_details'],
@@ -47095,7 +47095,7 @@ var SUBSCREEN_DATA = {
   'quest_open_herbs': {
     header: '🌿 Missão: Coletar Ervas Raras',
     flavor: '<i>Mestra Sylvi sorri abrindo um pequeno livro de folhas prensadas.</i> "— Raiz-da-noite. Cresce só onde a lua bate forte, na Floresta dos Sussurros. Cinco bastam pra meu próximo lote de poções. Cuidado com as criaturas que adoram folha noturna."',
-    npcInfo: '📋 Estágio 0/5 · 👤 Mestra Sylvi · 📍 Floresta dos Sussurros · 💰 15 <span class="vi vi-coin sm"></span> + 25 XP',
+    npcInfo: '📋 Estágio 0/5 · 👤 Mestra Sylvi · 📍 Floresta dos Sussurros · 15 <span class="vi vi-coin sm"></span> + 25 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Sussurros', 'quest_herbs_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '5 raízes-da-noite', 'quest_herbs_details'],
@@ -47107,7 +47107,7 @@ var SUBSCREEN_DATA = {
   'quest_open_patrol': {
     header: '👁️ Missão: Patrulhar Fronteira',
     flavor: '<i>Vigia Tomás aponta pra trilha do pântano com bastão de madeira.</i> "— Três carroças sumiram nas últimas noites perto do Pântano Nebuloso. Não acho corpo, não acho roda. Caminha comigo até o amanhecer — preciso de outros olhos pra ver o que tá rondando."',
-    npcInfo: '📋 Estágio 0/1 · 👤 Vigia Tomás · 📍 Pântano Nebuloso · 💰 35 <span class="vi vi-coin sm"></span> + 80 XP',
+    npcInfo: '📋 Estágio 0/1 · 👤 Vigia Tomás · 📍 Pântano Nebuloso · 35 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Pântano Nebuloso', 'quest_patrol_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à patrulha', 'quest_patrol_details'],
@@ -47119,7 +47119,7 @@ var SUBSCREEN_DATA = {
   'quest_open_rat_den': {
     header: '🐀 Missão: Limpar Cova de Ratos',
     flavor: '<i>Padeiro Erlan limpa as mãos no avental coberto de farinha.</i> "— Já matei dois com pá. Restam quatro, do tamanho de gato grande. Porão da padaria virou ninho. Mata todos e te pago bem — quero meu forno de volta."',
-    npcInfo: '📋 Estágio 0/4 · 👤 Padeiro Erlan · 📍 Portões de Valdoria · 💰 40 <span class="vi vi-coin sm"></span> + 100 XP',
+    npcInfo: '📋 Estágio 0/4 · 👤 Padeiro Erlan · 📍 Portões de Valdoria · 40 <span class="vi vi-coin sm"></span> + 100 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_rat_den_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 4 ratos-gigantes', 'quest_rat_den_details'],
@@ -47130,7 +47130,7 @@ var SUBSCREEN_DATA = {
   'quest_open_escort': {
     header: '🛡️ Missão: Escoltar Caravana',
     flavor: '<i>Comerciante Brael aponta pra três carroções alinhados nos portões.</i> "— Bandidos andam soltos no caminho. Tenho mercadoria pra Valkrest que vale mais que minha vida. Te pago bem — se nada cair, nada se perde."',
-    npcInfo: '📋 Estágio 0/1 · 👤 Comerciante Brael · 📍 Valkrest (Acampamento) · 💰 50 <span class="vi vi-coin sm"></span> + 60 XP',
+    npcInfo: '📋 Estágio 0/1 · 👤 Comerciante Brael · 📍 Valkrest (Acampamento) · 50 <span class="vi vi-coin sm"></span> + 60 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Valkrest (Acampamento)', 'quest_escort_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à jornada', 'quest_escort_details'],
@@ -47141,7 +47141,7 @@ var SUBSCREEN_DATA = {
   'quest_open_ruin': {
     header: '🏛️ Missão: Investigar Ruínas Élficas',
     flavor: '<i>Estudiosa Maeve esfrega os óculos arredondados.</i> "— As Ruínas Élficas guardam restos de uma civilização antiga. Mortos-vivos vigiam algo lá embaixo há séculos. Traga três relíquias ou pergaminhos — qualquer coisa serve pra catalogação."',
-    npcInfo: '📋 Estágio 0/3 · 👤 Estudiosa Maeve · 📍 Ruínas Élficas · 💰 80 <span class="vi vi-coin sm"></span> + 80 XP',
+    npcInfo: '📋 Estágio 0/3 · 👤 Estudiosa Maeve · 📍 Ruínas Élficas · 80 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Ruínas Élficas', 'quest_ruin_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '3 relíquias ou pergaminhos', 'quest_ruin_details'],
@@ -47152,7 +47152,7 @@ var SUBSCREEN_DATA = {
   'quest_open_bandit_lord': {
     header: '👹 Missão: Matar Líder Bandido',
     flavor: '<i>Capitã Helga estende um cartaz de procurado.</i> "— Vargrim, o Cicatriz. Dois machados, marca no rosto, lidera o Forte. Tenta vivo, mas prefiro morto — gente nesse calibre não acorda do mesmo jeito atrás das grades."',
-    npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Forte dos Bandidos · 💰 150 <span class="vi vi-coin sm"></span> + 150 XP',
+    npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Forte dos Bandidos · 150 <span class="vi vi-coin sm"></span> + 150 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Forte dos Bandidos', 'quest_bandit_lord_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar Vargrim', 'quest_bandit_lord_details'],
@@ -47163,7 +47163,7 @@ var SUBSCREEN_DATA = {
   'quest_open_dragonet': {
     header: '🐲 Missão: Caçar Dragonete',
     flavor: '<i>Conselheiro Aldric baixa a voz e olha pra cratera no horizonte.</i> "— Filhote, sim. Mas filhote de dragão queima rebanho inteiro num sopro. Cinco fazendas perdidas em duas luas. Antes que cresça e vire problema do reino — é seu agora."',
-    npcInfo: '📋 Estágio 0/1 · 👤 Conselheiro Aldric · 📍 Cratera Vulcânica · 💰 300 <span class="vi vi-coin sm"></span> + 250 XP',
+    npcInfo: '📋 Estágio 0/1 · 👤 Conselheiro Aldric · 📍 Cratera Vulcânica · 300 <span class="vi vi-coin sm"></span> + 250 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Cratera Vulcânica', 'quest_dragonet_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar dragonete', 'quest_dragonet_details'],
@@ -47174,7 +47174,7 @@ var SUBSCREEN_DATA = {
   'quest_open_defend': {
     header: '🏰 Missão: Defender Campos Verdes',
     flavor: '<i>Capitã Helga olha o pergaminho com olhar grave, a tinta ainda fresca.</i> "— Mensageiro chegou meio-morto há uma hora. Os Campos Verdes serão atacados em três dias. Orcs vindos do leste avançam em força. A região precisa de aventureiros até depois de amanhã — depois disso é cinzas."',
-    npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Campos Verdes · 💰 500 <span class="vi vi-coin sm"></span> + 400 XP',
+    npcInfo: '📋 Estágio 0/1 · 👤 Capitã Helga · 📍 Campos Verdes · 500 <span class="vi vi-coin sm"></span> + 400 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Campos Verdes', 'quest_defend_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'defender a região', 'quest_defend_details'],
@@ -47186,7 +47186,7 @@ var SUBSCREEN_DATA = {
   'quest_open_cellar': {
     header: '🗝️ Missão: Investigar a Adega',
     flavor: '<i>Martha guarda a chave do porão na mão calejada.</i> "— Ouço ruídos há semanas. Velharias batendo, passos pequenos demais pra ser ladrão. Mata o que tiver lá embaixo — recompenso bem, juro pelo nome do meu falecido."',
-    npcInfo: '📋 Estágio 0/1 · 👤 Martha — Estalajadeira · 📍 Portões de Valdoria · 💰 60 <span class="vi vi-coin sm"></span> + 80 XP',
+    npcInfo: '📋 Estágio 0/1 · 👤 Martha — Estalajadeira · 📍 Portões de Valdoria · 60 <span class="vi vi-coin sm"></span> + 80 XP',
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_cellar_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'limpar a adega', 'quest_cellar_details'],
@@ -48066,7 +48066,7 @@ var ACTION_HANDLERS = {
 
   // Square — interactions
   'circus_watch':           function(p){ vToast('👀 Performance encantadora. +1 morale.'); _gainXp(p, 5); },
-  'circus_bet':             function(p){ if (!_pay(p, 5)) return; var w=Math.random()<0.5; if (w){p.gold+=12; vToast('💰 Acertou aposta! +12 Valdoritas');} else vToast('💰 Errou. -5 Valdoritas'); refreshHud(); },
+  'circus_bet':             function(p){ if (!_pay(p, 5)) return; var w=Math.random()<0.5; if (w){p.gold+=12; vToast('<span class="vi vi-coin sm"></span> Acertou aposta! +12 Valdoritas');} else vToast('<span class="vi vi-coin sm"></span> Errou. -5 Valdoritas'); refreshHud(); },
   'circus_perform':         function(p){ if (!_pay(p, 0)) return; var roll=1+Math.floor(Math.random()*20); if (roll>=14){p.gold+=10; _gainXp(p,30); vToast('🎭 DEX '+roll+' vs DC 14 — Sucesso! +10 Valdoritas +30 XP');} else vToast('🎭 DEX '+roll+' vs DC 14 — Falha. Plateia vaia.'); refreshHud(); },
   'wanderer_rumor':         function(p){ if (!_pay(p, 5)) return; var rumors=['"Catacumbas no leste guardam Valdoritas."','"Um lobo branco foi visto na montanha."','"O ferreiro Thorne tem um inimigo secreto."']; vToast('💬 ' + rumors[Math.floor(Math.random()*rumors.length)]); },
   'wanderer_map':           function(p){ if (!_pay(p, 50)) return; vToast('🗺️ Mapa secreto: localização de tumba antiga revelada.'); },
@@ -48486,7 +48486,7 @@ var ACTION_HANDLERS = {
   'rune_flames':            function(p){ vToast('🔥 T2 Chamas — 15% chance 1d6 fogo extra. Arma.'); },
   'rune_ice':               function(p){ vToast('❄️ T2 Gelo — 10% chance -2 ATK no alvo (1 turno). Arma.'); },
   'rune_heal':              function(p){ vToast('💗 T2 Cura — 2d4 HP após vitória. Manto/Peito.'); },
-  'rune_fortune':           function(p){ vToast('💰 T2 Fortuna — +5% loot em Valdoritas. Manto.'); },
+  'rune_fortune':           function(p){ vToast('<span class="vi vi-coin sm"></span> T2 Fortuna — +5% loot em Valdoritas. Manto.'); },
   'rune_thunder':           function(p){ vToast('⚡ T3 Trovão — 2d8 dano extra em crítico. Arma.'); },
   'rune_absorb':            function(p){ vToast('🌑 T3 Absorção — 5% HP temporário ao receber dano. Peito.'); },
   'rune_devastation':       function(p){ vToast('💥 T3 Devastação — +1 dano em todos ataques. Arma.'); },
@@ -48519,7 +48519,7 @@ var ACTION_HANDLERS = {
 
 // --- State helpers ---
 function _pay(p, cost){
-  if (p.gold < cost) { vToast('💰 Valdoritas insuficientes (' + cost + ' Valdoritas necessárias).'); return false; }
+  if (p.gold < cost) { vToast('<span class="vi vi-coin sm"></span> Valdoritas insuficientes (' + cost + ' Valdoritas necessárias).'); return false; }
   p.gold -= cost;
   refreshHud();
   // FASE 6: persiste o gasto no servidor (delta — autoridade). Ponto único de
@@ -49594,7 +49594,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'rumor', label: '👂 "Ouviste algum rumor interessante?"',        renown: 2 },
       { id: 'past',  label: '🗝️ "De onde vieste?"',                          renown: 0 },
-      { id: 'lift',  label: '💰 "Pega-me algo na multidão. Discreto(a)." [CD 14 Furtividade]',
+      { id: 'lift',  label: '"Pega-me algo na multidão. Discreto(a)." [CD 14 Furtividade]',
         check: { skill: 'stealth', dc: 14 },
         resultNarration: '{name} desaparece num parágrafo. Volta antes do próximo suspiro — uma bolsa de couro caída no teu cinto.',
         resultText: 'Recebeu <b>+8 Valdoritas</b>. Ninguém percebeu.',
@@ -57456,7 +57456,7 @@ function _renderCartographerOverlay(player, delivered, npcReturn) {
       + '<p class="corv-map-desc">' + m.desc + '</p>'
       + (owned || pending ? ''
         : '<div class="corv-map-meta">'
-          + '<span class="corv-price">💰 ' + m.price + ' Valdoritas</span>'
+          + '<span class="corv-price"><span class="vi vi-coin sm"></span> ' + m.price + ' Valdoritas</span>'
           + '<span class="corv-time">⏳ ' + m.days + ' dias</span>'
           + '</div>')
       + '</div>'

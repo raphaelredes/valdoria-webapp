@@ -128,7 +128,7 @@ function updatePreview() {
         '</div>' +
         '<div class="ap-tier-preview-divider"></div>' +
         '<div class="ap-tier-preview-rewards">' +
-            '<div class="ap-tier-preview-reward">💰 <b>+' + tier.gold.toLocaleString('pt-BR') + '</b> Valdoritas</div>' +
+            '<div class="ap-tier-preview-reward"><b>+' + tier.gold.toLocaleString('pt-BR') + '</b> Valdoritas</div>' +
             tier.items.map(function(it) { return '<div class="ap-tier-preview-reward">🧪 ' + it + '</div>'; }).join('');
 
     if (tier.exclusive) {

@@ -278,7 +278,7 @@ var SERVICE_DIALOGUES_BANK = {
         resultText: '"Cinco mil Valdoritas. Quinta nas margens do Vale do Cervo. <i>(entrega escritura selada)</i> Empregados pagos, colheita garantida. <b>Cottage: 5 cômodos. Geração: 2 sp/dia. +3 Renome da Casa.</b>"' },
       { id: 'e_tower',  label: 'Torre · 15000V · 100 dias', cb: 'estate-confirm', renownDelta: +3,
         resultNarration: 'Aldwin entrega plantas arquitetônicas — torre fortificada com porão de cofre, três andares, salão de audiência. <i>(prazo de cem dias de construção)</i>',
-        resultText: '"Quinze mil Valdoritas, mais cem dias de construção. <i>(carimba o contrato)</i> A Casa supervisiona obras. Quando concluída, gera 1 gp/dia + base de operações fortificada. <b>Tower +3 Renome da Casa.</b>"' },
+        resultText: '"Quinze mil Valdoritas, mais cem dias de construção. <i>(carimba o contrato)</i> A Casa supervisiona obras. Quando concluída, gera 1 Valdorita/dia + base de operações fortificada. <b>Tower +3 Renome da Casa.</b>"' },
       { id: 'e_stronghold', label: 'Stronghold · 50000V · 400 dias · DC 20 Persuasão', check: { skill: 'persuasion', dc: 20 },
         resultNarration: 'Aldwin desce do banco e abre um armário trancado a chave dupla. Lá dentro, plantas que poucos clientes da Casa já viram.',
         resultText: '"Cinquenta mil, quatrocentos dias, e um pedaço do mapa com teu nome. <i>(desenrola a planta da fortaleza)</i> A Casa raramente apresenta este portfólio. Reúne o capital, Vossa Senhoria — a papelada estará pronta quando o ouro estiver."',
