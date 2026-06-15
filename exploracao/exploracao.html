@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-14T23:16:39Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T00:22:17Z - do not edit directly, edit source -->
 
 
 
@@ -510,7 +510,7 @@
      Inventário (clicável → material detail), Reputação (com label Aliada/
      Amiga/Conhecida/Desconfiada/Hostil por valor).
    * AMBIENT_TIPS adicionados a 7 novos mapas (stone_peaks, green_fields,
-     orc_tribe, misty_swamps, underground_caverns, burning_crater) — total
+     orc_tribe, misty_marshes, underground_caverns, burning_crater) — total
      15 mapas com lore local.
    * record_enemy/record_material hooks em eventos geram drops automáticos
      pro inventário + bestiário + stats do inimigo.
@@ -553,7 +553,7 @@
    * AMBIENT_TIPS LOCAL-ESPECÍFICOS: city_gates, korthag (martelar anão, cantigas,
      cervejeiro), valkrest (lendas dragões mortos, cheiro de enxofre, forjas 24h),
      whispering_woods (sussurros élficos, corvo mensageiro), golden_sands (ossos
-     camelos, falcão do deserto), frozen_lands (aurora boreal, yeti, alce),
+     camelos, falcão do deserto), frozen_waste (aurora boreal, yeti, alce),
      ancient_cemetery (lápides milenares, sussurros). onMoveEnd mistura 60%
      local + 40% bioma quando map define ambient_tips.
    * Quests novas: bandit warning (plains), kidnapped noble (plains), hunter clearing,
@@ -606,8 +606,8 @@
    * FIXED_MAPS agora tem TODOS os 22 hubs do jogo real (vindos de
      valdoria-webapp/navigate/hub-data.js): city_gates (hub), green_fields,
      orc_tribe, bandit_fortress, whispering_woods, goblin_nest, elven_ruins,
-     misty_swamps, ancestral_graveyard, deep_swamp, stone_peaks, troll_cave,
-     dragon_pass, underground_passage, korthag, golden_sands, frozen_lands,
+     misty_marshes, ancestral_graveyard, deep_swamp, stone_peaks, troll_cave,
+     dragon_pass, underground_passage, korthag, golden_sands, frozen_waste,
      underground_caverns, crystal_depths, burning_crater, valkrest, ancient_cemetery.
    * worldPos em todos os mapas normalizado de LOCATION_COORDS do jogo real
      — geografia da Cartografia espelha o mapa-mundo canônico de Valdoria
@@ -635,7 +635,7 @@
      vulcânica), ~ (lama), c (cristal cave), l (lápide), H (casa com luz
      piscante), F (fogueira abandonada), t (arbusto)
    * TILE_HEIGHT + TERRAIN_NAMES + IMPASSABLE atualizados
-   * 3 mapas fixos novos: desert_golden_sands, snow_frozen_lands,
+   * 3 mapas fixos novos: desert_golden_sands, snow_frozen_waste,
      volcanic_burning_crater — cada um com 2 dungeons temáticas
    * FIXED_MAPS agora tem worldPos (coord 0-1 pra Cartografia),
      weather_pool (climas permitidos), required_gear, fog_base_mul,
@@ -14815,6 +14815,8 @@ function parseRewardString(s) {
   })();
   window.__EXPLORE_USER_ID  = parseInt(qs.get('uid'), 10) || 0;
   window.__EXPLORE_MAP_ID   = qs.get('map_id') || '';
+  // #8 fundacional: ids legados (snaps em voo durante o deploy) -> canônico.
+  (function(){ var _al={misty_swamps:'misty_marshes',frozen_lands:'frozen_waste'}; if(_al[window.__EXPLORE_MAP_ID]) window.__EXPLORE_MAP_ID=_al[window.__EXPLORE_MAP_ID]; })();
   window.__EXPLORE_ORIGIN   = qs.get('o') || 'navigate';
   window.__EXPLORE_SNAP_B64 = qs.get('snap') || '';
   window.__EXPLORE_DELTA_B64 = qs.get('delta') || '';
@@ -15141,7 +15143,7 @@ window.__explFetchTO = function(url, opts, ms) {
            (plains...), MESMO mapping da cidade (index.html SERVER_TO_CART). Só
            seta se o campo veio (LOCAL/old server → fica null → mostra tudo). */
         if (Array.isArray(res.known_locations)) {
-          var _S2C = { 'city_gates': 'plains', 'whispering_woods': 'forest', 'misty_marshes': 'swamp', 'golden_sands': 'desert' };
+          var _S2C = { 'city_gates': 'plains', 'whispering_woods': 'forest', 'misty_marshes': 'swamp', 'golden_sands': 'desert', 'underground_passage': 'cave', 'stone_peaks': 'mountain', 'ancient_cemetery': 'graveyard', 'frozen_waste': 'snow', 'burning_crater': 'volcanic' };
           window.__EXPLORE_KNOWN = res.known_locations.map(function (k) { return _S2C[k] || k; });
           console.info('[E-REM:API-INIT] known_locations=' + window.__EXPLORE_KNOWN.length + ' [' + window.__EXPLORE_KNOWN.join(',') + ']');
           if (typeof _xcartDraw === 'function' && typeof _xcartCtx !== 'undefined' && _xcartCtx) { try { _xcartDraw(); } catch (_ekd) {} }
@@ -16960,7 +16962,7 @@ const EVENTS_POOL = {
           starts_quest: {
             id: 'quest_cisne_branco', title: 'A Outra Metade do Medalhão',
             desc: 'O medalhão está quebrado. A outra metade está com um soldado caído nos Pântanos Brumosos. Recupere-a para honrar a memória da ordem.',
-            target_map: 'misty_swamps',
+            target_map: 'misty_marshes',
             deliver_text: 'Nos pântanos, você encontra o corpo do soldado da Ordem. Retira a outra metade do medalhão com reverência. O eremita, ao receber, ora pela primeira vez em décadas.',
             reward: { gold: 60, lore: 'Ordem do Cisne Branco — restaurada' }
           }
@@ -19874,11 +19876,11 @@ const REGIONS = {
       // Forest
       'whispering_woods', 'goblin_nest', 'elven_ruins',
       // Swamp
-      'misty_swamps', 'ancestral_graveyard', 'deep_swamp',
+      'misty_marshes', 'ancestral_graveyard', 'deep_swamp',
       // Mountain
       'stone_peaks', 'troll_cave', 'dragon_pass', 'underground_passage', 'korthag',
       // Extremos
-      'golden_sands', 'frozen_lands',
+      'golden_sands', 'frozen_waste',
       // Cave
       'underground_caverns', 'crystal_depths',
       // Volcanic
@@ -19896,7 +19898,7 @@ const FIXED_MAPS = {
     name: 'Portões de Valdoria',
     cols: 24, rows: 28, seed: 10001, spawnCol: 12, spawnRow: 14,
     music: 'plains', danger: 0,
-    worldPos: { x: 0.40, y: 0.67 },
+    worldPos: { x: 0.42, y: 0.55 },
     weather_pool: ['s', 's', 'r', 'f'],
     // 2026-04-29 USER RULE: plains = mapa com MENOR variação de altura.
     // Removido 'r' (rocha 2.0u) + minimizado 'T' (árvore 3.0u, era 6→1).
@@ -19915,7 +19917,7 @@ const FIXED_MAPS = {
     edges: [
       { col: 0, row: 14, targetMap: 'green_fields', label: 'Campos Verdes' },
       { col: 4, row: 0, targetMap: 'whispering_woods', label: 'Bosques Sussurrantes' },
-      { col: 23, row: 14, targetMap: 'misty_swamps', label: 'Pântanos Brumosos' },
+      { col: 23, row: 14, targetMap: 'misty_marshes', label: 'Pântanos Brumosos' },
       { col: 19, row: 0, targetMap: 'stone_peaks', label: 'Picos de Pedra' },
       { col: 12, row: 27, targetMap: 'ancient_cemetery', label: 'Cemitério Antigo' }
     ]
@@ -19925,7 +19927,7 @@ const FIXED_MAPS = {
     name: 'Campos Verdes',
     cols: 22, rows: 26, seed: 10002, spawnCol: 11, spawnRow: 13,
     music: 'plains', danger: 1,
-    worldPos: { x: 0.20, y: 0.67 },
+    worldPos: { x: 0.30, y: 0.72 },
     weather_pool: ['s', 's', 'r', 'f'],
     // 2026-04-29 USER RULE: plains = mapa com MENOR variação de altura.
     // Removida 'T' quase total (era 6→1). Campos Verdes agora é literal
@@ -19952,7 +19954,7 @@ const FIXED_MAPS = {
     name: 'Acampamento Orc',
     cols: 20, rows: 24, seed: 10003, spawnCol: 10, spawnRow: 12,
     music: 'plains', danger: 3,
-    worldPos: { x: 0.02, y: 0.67 },
+    worldPos: { x: 0.56, y: 0.74 },
     weather_pool: ['s', 'r'],
     // 2026-04-29 USER RULE: plains com menor variação. Reduzido 'T' (8→3),
     // removido 'r' (era 8 — rocha 2.0u). Mantém algum sabor wild com 'b'
@@ -20604,7 +20606,7 @@ const FIXED_MAPS = {
     name: 'Fortaleza Bandida',
     cols: 22, rows: 26, seed: 10004, spawnCol: 11, spawnRow: 13,
     music: 'plains', danger: 5,
-    worldPos: { x: 0.10, y: 0.92 },
+    worldPos: { x: 0.70, y: 0.66 },
     weather_pool: ['s', 'r', 'f', 't'],
     weights: { '.': 22, 'g': 8, 'p': 10, '#': 18, 'T': 6, 'r': 10, 'R': 8, 'H': 0.4, 'F': 0.4, 'b': 4 },
     dungeons: [
@@ -20626,7 +20628,7 @@ const FIXED_MAPS = {
     name: 'Bosques Sussurrantes',
     cols: 24, rows: 30, seed: 12345, spawnCol: 12, spawnRow: 15,
     music: 'forest', danger: 2,
-    worldPos: { x: 0.10, y: 0.50 },
+    worldPos: { x: 0.42, y: 0.34 },
     weather_pool: ['s', 'r', 'f', 't'],
     weights: { '.': 32, 'g': 22, 'T': 22, 't': 6, 'r': 6, 'p': 8, 'w': 2, 'R': 2 },
     ambient_tips: [
@@ -20656,7 +20658,7 @@ const FIXED_MAPS = {
     name: 'Ninho dos Goblins',
     cols: 20, rows: 24, seed: 12346, spawnCol: 10, spawnRow: 12,
     music: 'forest', danger: 3,
-    worldPos: { x: 0.10, y: 0.17 },
+    worldPos: { x: 0.28, y: 0.30 },
     weather_pool: ['r', 'f', 't'],
     weights: { '.': 24, 'g': 12, 'T': 26, 't': 8, 'r': 14, 'p': 6, 'b': 4, 'F': 0.4, 'R': 2 },
     dungeons: [
@@ -20666,7 +20668,7 @@ const FIXED_MAPS = {
     edges: [
       { col: 10, row: 23, targetMap: 'whispering_woods', label: 'Bosques' },
       { col: 19, row: 6, targetMap: 'elven_ruins', label: 'Ruínas Élficas' },
-      { col: 2, row: 0, targetMap: 'frozen_lands', label: 'Terras Congeladas' }
+      { col: 2, row: 0, targetMap: 'frozen_waste', label: 'Terras Congeladas' }
     ]
   },
   elven_ruins: {
@@ -20674,7 +20676,7 @@ const FIXED_MAPS = {
     name: 'Ruínas Élficas',
     cols: 22, rows: 26, seed: 12347, spawnCol: 11, spawnRow: 13,
     music: 'forest', danger: 4,
-    worldPos: { x: 0.20, y: 0.33 },
+    worldPos: { x: 0.58, y: 0.26 },
     weather_pool: ['s', 'f', 'r'],
     weights: { '.': 22, 'g': 14, 'T': 20, 't': 6, 'R': 14, 'p': 8, 'r': 6, 'c': 4, 'l': 2, 'w': 4 },
     dungeons: [
@@ -20687,12 +20689,12 @@ const FIXED_MAPS = {
     ]
   },
   // ============ PÂNTANO (3 mapas) =============
-  misty_swamps: {
-    id: 'misty_swamps', region: 'valdoria', biome: 'swamp',
+  misty_marshes: {
+    id: 'misty_marshes', region: 'valdoria', biome: 'swamp',
     name: 'Pântanos Brumosos',
     cols: 22, rows: 28, seed: 20001, spawnCol: 11, spawnRow: 14,
     music: 'swamp', danger: 3,
-    worldPos: { x: 0.80, y: 0.67 },
+    worldPos: { x: 0.66, y: 0.50 },
     weather_pool: ['r', 'f', 'f', 't'],
     weights: { '.': 18, 'g': 12, '~': 22, 'w': 14, 'W': 4, 'T': 14, 't': 4, 'r': 4, 'l': 2, 'R': 2, 'b': 4 },
     ambient_tips: [
@@ -20714,11 +20716,11 @@ const FIXED_MAPS = {
     ]
   },
   ancestral_graveyard: {
-    id: 'ancestral_graveyard', region: 'valdoria', biome: 'swamp',
+    id: 'ancestral_graveyard', region: 'valdoria', biome: 'graveyard',
     name: 'Cemitério Ancestral',
     cols: 20, rows: 26, seed: 20002, spawnCol: 10, spawnRow: 13,
-    music: 'swamp', danger: 4,
-    worldPos: { x: 0.70, y: 0.83 },
+    music: 'graveyard', danger: 4,
+    worldPos: { x: 0.18, y: 0.86 },
     weather_pool: ['f', 'r', 'f', 't'],
     weights: { '.': 18, 'g': 10, '~': 16, 'l': 14, 'T': 12, 't': 4, 'r': 6, 'R': 8, 'w': 6, 'b': 6 },
     dungeons: [
@@ -20726,7 +20728,7 @@ const FIXED_MAPS = {
         intro: 'Sob a última lápide, uma entrada gelada desce para galerias onde ecos não são ecos — são respostas. Só à noite os selos cedem.' }
     ],
     edges: [
-      { col: 19, row: 4, targetMap: 'misty_swamps', label: 'Pântanos Brumosos' },
+      { col: 19, row: 4, targetMap: 'misty_marshes', label: 'Pântanos Brumosos' },
       { col: 16, row: 25, targetMap: 'deep_swamp', label: 'Pântano Profundo' },
       { col: 0, row: 13, targetMap: 'ancient_cemetery', label: 'Cemitério Antigo' }
     ]
@@ -20736,7 +20738,7 @@ const FIXED_MAPS = {
     name: 'Pântano Profundo',
     cols: 22, rows: 28, seed: 20003, spawnCol: 11, spawnRow: 14,
     music: 'swamp', danger: 5,
-    worldPos: { x: 0.80, y: 0.92 },
+    worldPos: { x: 0.80, y: 0.58 },
     weather_pool: ['r', 'f', 't', 't'],
     weights: { '.': 12, 'g': 8, '~': 30, 'w': 16, 'W': 8, 'T': 12, 't': 4, 'r': 4, 'l': 3, 'R': 3 },
     dungeons: [
@@ -20744,7 +20746,7 @@ const FIXED_MAPS = {
         intro: 'A névoa forma paredes sólidas. Dentro delas, o tempo se dobra. Ninguém conta quantos dias se passaram do outro lado.' }
     ],
     edges: [
-      { col: 11, row: 0, targetMap: 'misty_swamps', label: 'Pântanos Brumosos' },
+      { col: 11, row: 0, targetMap: 'misty_marshes', label: 'Pântanos Brumosos' },
       { col: 4, row: 0, targetMap: 'ancestral_graveyard', label: 'Cemitério Ancestral' }
     ]
   },
@@ -20754,7 +20756,7 @@ const FIXED_MAPS = {
     name: 'Picos de Pedra',
     cols: 22, rows: 28, seed: 30001, spawnCol: 11, spawnRow: 14,
     music: 'mountain', danger: 4,
-    worldPos: { x: 0.70, y: 0.33 },
+    worldPos: { x: 0.20, y: 0.18 },
     weather_pool: ['s', 'f', 't'],
     weights: { '.': 18, 'g': 8, 'T': 12, 'r': 40, 'p': 8, 'R': 4, 'i': 4, 'w': 2 },
     ambient_tips: [
@@ -20775,15 +20777,15 @@ const FIXED_MAPS = {
       { col: 21, row: 14, targetMap: 'dragon_pass', label: 'Passagem do Dragão' },
       { col: 19, row: 4, targetMap: 'korthag', label: 'Korthag' },
       { col: 11, row: 27, targetMap: 'underground_passage', label: 'Passagem Subterrânea' },
-      { col: 11, row: 0, targetMap: 'frozen_lands', label: 'Terras Congeladas' }
+      { col: 11, row: 0, targetMap: 'frozen_waste', label: 'Terras Congeladas' }
     ]
   },
   troll_cave: {
-    id: 'troll_cave', region: 'valdoria', biome: 'mountain',
+    id: 'troll_cave', region: 'valdoria', biome: 'cave',
     name: 'Caverna dos Trolls',
     cols: 20, rows: 24, seed: 30002, spawnCol: 10, spawnRow: 12,
-    music: 'mountain', danger: 5,
-    worldPos: { x: 0.80, y: 0.17 },
+    music: 'cave', danger: 5,
+    worldPos: { x: 0.10, y: 0.40 },
     weather_pool: ['s', 'f', 't'],
     weights: { '.': 16, 'r': 46, 'T': 8, 'p': 6, 'R': 6, 'b': 8, 'F': 1, 'i': 4, '#': 2 },
     dungeons: [
@@ -20800,7 +20802,7 @@ const FIXED_MAPS = {
     name: 'Passagem do Dragão',
     cols: 22, rows: 26, seed: 30003, spawnCol: 11, spawnRow: 13,
     music: 'mountain', danger: 6,
-    worldPos: { x: 0.90, y: 0.50 },
+    worldPos: { x: 0.36, y: 0.10 },
     weather_pool: ['t', 's', 'f', 't'],
     weights: { '.': 12, 'r': 50, 'p': 6, 'b': 12, 'R': 6, 'v': 6, 'i': 4, 'T': 4 },
     dungeons: [
@@ -20813,11 +20815,11 @@ const FIXED_MAPS = {
     ]
   },
   underground_passage: {
-    id: 'underground_passage', region: 'valdoria', biome: 'mountain',
+    id: 'underground_passage', region: 'valdoria', biome: 'cave',
     name: 'Passagem Subterrânea',
     cols: 20, rows: 24, seed: 30004, spawnCol: 10, spawnRow: 12,
-    music: 'mountain', danger: 4, required_gear: 'torch',
-    worldPos: { x: 0.60, y: 0.67 },
+    music: 'cave', danger: 3, required_gear: 'torch',
+    worldPos: { x: 0.20, y: 0.52 },
     weather_pool: ['s', 'f'],
     weights: { '.': 22, 'r': 36, 'p': 10, '#': 12, 'c': 6, 'w': 4, 'R': 4, 'b': 6 },
     dungeons: [
@@ -20835,7 +20837,7 @@ const FIXED_MAPS = {
     name: 'Korthag',
     cols: 20, rows: 24, seed: 30005, spawnCol: 10, spawnRow: 12,
     music: 'mountain', danger: 3,
-    worldPos: { x: 0.90, y: 0.33 },
+    worldPos: { x: 0.04, y: 0.20 },
     weather_pool: ['s', 'f', 't'],
     weights: { '.': 22, 'p': 16, 'H': 2, 'r': 28, 'T': 6, 'F': 1, 'b': 2 },
     ambient_tips: [
@@ -20859,7 +20861,7 @@ const FIXED_MAPS = {
     name: 'Areias Douradas',
     cols: 22, rows: 30, seed: 40001, spawnCol: 11, spawnRow: 14,
     music: 'desert', danger: 4, required_gear: 'canteen',
-    worldPos: { x: 0.30, y: 1.00 },
+    worldPos: { x: 0.78, y: 0.80 },
     weather_pool: ['s', 's', 's', 't'],
     default_day_phase: 'day',
     weights: { '.': 28, 'S': 32, 'p': 10, 'r': 12, 'T': 4, 't': 4, 'R': 5, 's': 5 },
@@ -20884,12 +20886,12 @@ const FIXED_MAPS = {
     ]
   },
   // ============ NEVE (1 mapa) =============
-  frozen_lands: {
-    id: 'frozen_lands', region: 'valdoria', biome: 'snow',
+  frozen_waste: {
+    id: 'frozen_waste', region: 'valdoria', biome: 'snow',
     name: 'Terras Congeladas',
     cols: 22, rows: 28, seed: 50001, spawnCol: 11, spawnRow: 14,
     music: 'snow', danger: 5, required_gear: 'torch',
-    worldPos: { x: 0.40, y: 0.00 },
+    worldPos: { x: 0.50, y: 0.06 },
     weather_pool: ['f', 's', 't'],
     weights: { '.': 26, 'g': 4, 'i': 20, 'T': 14, 't': 8, 'r': 12, 'p': 6, 'w': 4, 'W': 3, 'R': 3 },
     ambient_tips: [
@@ -20918,7 +20920,7 @@ const FIXED_MAPS = {
     name: 'Cavernas Subterrâneas',
     cols: 22, rows: 28, seed: 60001, spawnCol: 11, spawnRow: 14,
     music: 'cave', danger: 3, required_gear: 'torch',
-    worldPos: { x: 0.60, y: 0.75 },
+    worldPos: { x: 0.06, y: 0.66 },
     weather_pool: ['s'],
     default_day_phase: 'night',
     fog_base_mul: 1.25,
@@ -20946,7 +20948,7 @@ const FIXED_MAPS = {
     name: 'Profundezas Cristalinas',
     cols: 20, rows: 26, seed: 60002, spawnCol: 10, spawnRow: 13,
     music: 'cave', danger: 5, required_gear: 'torch',
-    worldPos: { x: 0.70, y: 0.75 },
+    worldPos: { x: 0.06, y: 0.50 },
     weather_pool: ['s'],
     default_day_phase: 'night',
     fog_base_mul: 1.30,
@@ -20967,7 +20969,7 @@ const FIXED_MAPS = {
     name: 'Cratera Ardente',
     cols: 22, rows: 28, seed: 70001, spawnCol: 11, spawnRow: 14,
     music: 'volcanic', danger: 8, required_gear: 'canteen',
-    worldPos: { x: 1.00, y: 1.00 },
+    worldPos: { x: 0.92, y: 0.40 },
     weather_pool: ['s', 't'],
     fog_base_mul: 1.20,
     weights: { '.': 20, 'v': 24, 'r': 32, 'L': 10, 'p': 6, 'R': 4, 'b': 4 },
@@ -20995,7 +20997,7 @@ const FIXED_MAPS = {
     name: 'Valkrest',
     cols: 20, rows: 24, seed: 70002, spawnCol: 10, spawnRow: 12,
     music: 'volcanic', danger: 5, required_gear: 'canteen',
-    worldPos: { x: 1.00, y: 0.58 },
+    worldPos: { x: 0.92, y: 0.22 },
     weather_pool: ['s', 't'],
     weights: { '.': 22, 'p': 18, 'H': 2, 'v': 14, 'r': 24, 'F': 1, 'L': 2, 'T': 4 },
     ambient_tips: [
@@ -21019,7 +21021,7 @@ const FIXED_MAPS = {
     name: 'Cemitério Antigo',
     cols: 22, rows: 26, seed: 80001, spawnCol: 11, spawnRow: 13,
     music: 'graveyard', danger: 3,
-    worldPos: { x: 0.50, y: 0.75 },
+    worldPos: { x: 0.50, y: 0.88 },
     weather_pool: ['f', 'r', 'f', 't'],
     weights: { '.': 24, 'g': 8, 'l': 22, 'T': 14, 't': 4, 'r': 6, 'p': 8, 'R': 8, 'F': 1, 'b': 2 },
     ambient_tips: [
@@ -43767,10 +43769,10 @@ document.addEventListener('DOMContentLoaded', () => {
       var BIOME_DEFAULT_MAPS = {
         plains:    'green_fields',
         forest:    'whispering_woods',
-        swamp:     'misty_swamps',
+        swamp:     'misty_marshes',
         mountain:  'stone_peaks',
         desert:    'golden_sands',
-        snow:      'frozen_lands',
+        snow:      'frozen_waste',
         cave:      'underground_caverns',
         volcanic:  'burning_crater',
         graveyard: 'ancient_cemetery'

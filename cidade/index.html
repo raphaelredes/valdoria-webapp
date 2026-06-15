@@ -8791,11 +8791,21 @@ body.perf-lite .vc-action-btn { transition: none; }
          misty_marshes, golden_sands), CART_BIOMES usa keys legacy (plains,
          forest, swamp, desert). Aliasamos pra coincidir. */
       if (Array.isArray(picked.known_locations) && picked.known_locations.length > 0) {
+        // #8 fundacional: alias COMPLETO server-id -> CART key. Os 9 biomas-base
+        // do CART usam key de bioma (plains/forest/...); os demais nós usam o
+        // próprio id canônico (passam direto via `|| k`). Sem isto, locais
+        // descobertos como underground_passage/frozen_waste/stone_peaks ficavam
+        // OCULTOS no Mapa do Mundo (key não batia).
         var SERVER_TO_CART = {
           'city_gates': 'plains',
           'whispering_woods': 'forest',
           'misty_marshes': 'swamp',
-          'golden_sands': 'desert'
+          'golden_sands': 'desert',
+          'underground_passage': 'cave',
+          'stone_peaks': 'mountain',
+          'ancient_cemetery': 'graveyard',
+          'frozen_waste': 'snow',
+          'burning_crater': 'volcanic'
         };
         p.known_locations = picked.known_locations.map(function(k){
           return SERVER_TO_CART[k] || k;
@@ -8996,7 +9006,12 @@ body.perf-lite .vc-action-btn { transition: none; }
             'city_gates': 'plains',
             'whispering_woods': 'forest',
             'misty_marshes': 'swamp',
-            'golden_sands': 'desert'
+            'golden_sands': 'desert',
+            'underground_passage': 'cave',
+            'stone_peaks': 'mountain',
+            'ancient_cemetery': 'graveyard',
+            'frozen_waste': 'snow',
+            'burning_crater': 'volcanic'
           };
           p.known_locations = picked.known_locations.map(function(k){
             return SERVER_TO_CART_FB[k] || k;
@@ -50362,18 +50377,18 @@ function _travelToBiome(mapIdOrBiome, displayName){
   // mas FIXED_MAPS espera 'whispering_woods' → boot fail "Mapa desconhecido: forest".
   // Mapeamento COMPLETO CART_BIOMES.key → FIXED_MAPS.id (8 categorias falhando):
   //   forest → whispering_woods | cave → underground_passage
-  //   swamp → misty_swamps      | mountain → stone_peaks
+  //   swamp → misty_marshes      | mountain → stone_peaks
   //   desert → golden_sands     | graveyard → ancient_cemetery
-  //   snow → frozen_lands       | volcanic → burning_crater
+  //   snow → frozen_waste       | volcanic → burning_crater
   var BIOME_TO_DEFAULT_MAP = {
     'plains':    'city_gates',          // biome plains hub → mapa origem
     'forest':    'whispering_woods',    // Floresta dos Sussurros
     'cave':      'underground_passage', // Passagem Subterrânea
-    'swamp':     'misty_swamps',        // Pântano Nebuloso
+    'swamp':     'misty_marshes',        // Pântano Nebuloso
     'mountain':  'stone_peaks',         // Picos de Pedra
     'desert':    'golden_sands',        // Deserto Dourado
     'graveyard': 'ancient_cemetery',    // Cemitério Antigo
-    'snow':      'frozen_lands',        // Ermo Congelado
+    'snow':      'frozen_waste',        // Ermo Congelado
     'volcanic':  'burning_crater',      // Cratera Vulcânica
     // outros map_ids específicos (green_fields, orc_tribe, korthag, etc.) passam direto
   };
