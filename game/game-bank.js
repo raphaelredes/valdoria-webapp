@@ -412,8 +412,16 @@ function _bnkBuildNpcRow(data) {
   chev.textContent = '›';
   row.appendChild(chev);
 
-  // Click → open encounter PADRAO_ALDRIC
+  // Click → diálogo do Aldwin.
+  // PADRAO_SERVIDOR (#10 Fase 2): REMOTE usa o diálogo SERVER-DRIVEN (venue=bank,
+  // node=aldwin) — as escolhas roteiam pelas TELAS reais do BankManager via
+  // screen-bridge. LOCAL (file://) cai no ALDWIN_DIALOGUE client (dev tool).
   row.addEventListener('click', function(){
+    if (typeof window._openCityDialogue === 'function'
+        && typeof _isRemote === 'function' && _isRemote()) {
+      window._openCityDialogue('bank', 'aldwin');
+      return;
+    }
     if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
       window._SVC_CONFIG = window._SVC_CONFIG_BANK;
       window.vEncounter.render(ALDWIN_DIALOGUE, { dialogues: SERVICE_DIALOGUES_BANK });
@@ -499,6 +507,15 @@ function _bnkBuildServices(services) {
     // Click handler — abre PADRAO_ALDRIC dialogue ou fallback vCity.act
     if (svc.cb && !svc.disabled) {
       card.addEventListener('click', function(){
+        // PADRAO_SERVIDOR (#10 Fase 2): REMOTE roda a TELA real do BankManager
+        // via screen-bridge (dialogue.screen) — mostra saldo/taxa REAIS e aplica
+        // o efeito pelo handler de verdade (gold-safe). LOCAL cai no diálogo client.
+        if (typeof window._openCityScreen === 'function'
+            && typeof _isRemote === 'function' && _isRemote()) {
+          window._SVC_CONFIG = window._SVC_CONFIG_BANK;
+          window._openCityScreen('bank', svc.cb);
+          return;
+        }
         var dialogueKey = BANK_CB_TO_DIALOGUE[svc.cb] || svc.cb;
         var dialogue = SERVICE_DIALOGUES_BANK[dialogueKey];
         if (dialogue && typeof window.vEncounter === 'object' && window.vEncounter.render) {
