@@ -92,7 +92,7 @@
     font-size: 7px;
     color: var(--v-gold-30, rgba(196, 149, 58, 0.3));
     letter-spacing: 8px;
-    margin-top: 8px;
+    margin-top: var(--v-space-md, 8px);
     opacity: 0.55;
     line-height: 1;
 }

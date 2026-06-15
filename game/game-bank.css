@@ -9,14 +9,14 @@
 
 /* AAA variant: gold accents + medieval ledger feel */
 .bnk-hub-aaa {
-  padding: 4px 2px 8px;
+  padding: var(--v-space-sm, 4px) var(--v-space-xs, 2px) var(--v-space-md, 8px);
 }
 
 .bnk-greeting {
   font-size: var(--v-font-sm, 12px);
   color: var(--v-text-dim, #a09484);
   line-height: 1.5;
-  padding: 8px 12px;
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
   border-left: 3px solid var(--v-gold-40, rgba(196, 149, 58, 0.4));
   background: linear-gradient(90deg, var(--v-gold-06), transparent 70%);
   border-radius: 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0;
@@ -27,16 +27,16 @@
 .bnk-balance-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 6px 0 4px;
+  gap: var(--v-space-md-lg, 10px);
+  margin: 6px 0 var(--v-space-sm, 4px);
 }
 
 .bnk-balance-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 14px 8px 12px;
+  gap: var(--v-space-sm, 4px);
+  padding: 14px var(--v-space-md, 8px) var(--v-space-lg, 12px);
   background: linear-gradient(165deg, var(--v-bg-card, var(--v-bg-card)) 0%, #241e18 100%);
   border: 1.5px solid var(--v-gold-40);
   border-radius: var(--v-radius, 10px);
@@ -67,7 +67,7 @@
 .bnk-balance-icon {
   font-size: 0;
   line-height: 1;
-  margin-bottom: 4px;
+  margin-bottom: var(--v-space-sm, 4px);
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)) drop-shadow(0 0 8px var(--v-gold-30));
   display: flex;
   justify-content: center;

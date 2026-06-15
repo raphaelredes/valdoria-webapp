@@ -37,10 +37,10 @@
     font-size: var(--v-font-xs, 11px) !important;
     line-height: 1.35 !important;
   }
-  .dm-bubble::before { font-size: 9px !important; margin-bottom: 2px !important; }
+  .dm-bubble::before { font-size: 9px !important; margin-bottom: var(--v-space-xs, 2px) !important; }
   .v-title-sm {
     font-size: var(--v-font-base, 13px) !important;
-    margin-bottom: 2px !important;
+    margin-bottom: var(--v-space-xs, 2px) !important;
   }
   .v-caption {
     font-size: var(--v-font-xs, 11px) !important;
@@ -56,7 +56,7 @@
     line-height: 1.3 !important;
     margin-top: 1px !important;
   }
-  .v-card-bonus { font-size: var(--v-font-xs, 11px) !important; margin-top: 2px !important; }
+  .v-card-bonus { font-size: var(--v-font-xs, 11px) !important; margin-top: var(--v-space-xs, 2px) !important; }
   .v-toggle-grid { gap: 5px !important; }
   .v-toggle-card { padding: 7px 9px !important; font-size: var(--v-font-xs, 11px) !important; }
   .v-toggle-count { font-size: var(--v-font-xs, 11px) !important; margin-bottom: var(--v-space-2xs, 4px) !important; }
@@ -90,7 +90,7 @@
   }
   .onboarding-dots { margin-top: var(--v-space-md, 10px) !important; }
   /* Detail sub-screen */
-  .detail-header { padding: 2px 0 var(--v-space-sm, 8px) !important; }
+  .detail-header { padding: var(--v-space-xs, 2px) 0 var(--v-space-sm, 8px) !important; }
   .detail-icon { font-size: clamp(24px, 7vw, 32px) !important; }
   .detail-title { font-size: clamp(15px, 5vw, 18px) !important; }
   .detail-subtitle { font-size: var(--v-font-base, 12px) !important; }
@@ -114,7 +114,7 @@
 /* Compactação extra para viewport MUITO baixa (≤640px) */
 @media (max-height: 640px) {
   .v-header { padding: var(--v-space-2xs, 6px) var(--v-space-md, 10px) var(--v-space-2xs, 4px) !important; }
-  .v-header h1 { font-size: var(--v-font-base, 12px) !important; margin-bottom: 2px !important; }
+  .v-header h1 { font-size: var(--v-font-base, 12px) !important; margin-bottom: var(--v-space-xs, 2px) !important; }
   .v-progress-dot { width: 14px !important; }
   .dm-bubble { display: none !important; }
   .v-card { padding: var(--v-space-2xs, 6px) !important; }
@@ -125,39 +125,39 @@
    save-list + skill-list (18 skills) + summary footer button. Tudo em ~684px
    altura é apertado. @media compact reduz padding/font/gap de tudo summary. */
 @media (max-height: 720px) {
-  #screen-summary .screen-content { padding: 4px 8px 4px !important; }
-  .sheet-header { padding: 2px 0 4px !important; }
+  #screen-summary .screen-content { padding: var(--v-space-sm, 4px) var(--v-space-md, 8px) var(--v-space-sm, 4px) !important; }
+  .sheet-header { padding: var(--v-space-xs, 2px) 0 var(--v-space-sm, 4px) !important; }
   .sheet-name { font-size: clamp(15px, 4.5vw, 18px) !important; }
-  .sheet-subtitle { font-size: var(--v-font-xs, 11px) !important; margin-top: 2px !important; }
+  .sheet-subtitle { font-size: var(--v-font-xs, 11px) !important; margin-top: var(--v-space-xs, 2px) !important; }
   .combat-stats {
-    gap: 4px !important;
-    margin-bottom: 4px !important;
+    gap: var(--v-space-sm, 4px) !important;
+    margin-bottom: var(--v-space-sm, 4px) !important;
   }
-  .combat-stat-box { padding: 4px 2px !important; }
+  .combat-stat-box { padding: var(--v-space-sm, 4px) var(--v-space-xs, 2px) !important; }
   .combat-stat-label { font-size: 8px !important; }
   .combat-stat-value { font-size: clamp(13px, 4vw, 16px) !important; margin-top: 0 !important; }
   .combat-stat-detail { font-size: 8px !important; }
   .attr-grid {
-    gap: 4px !important;
-    margin-bottom: 4px !important;
+    gap: var(--v-space-sm, 4px) !important;
+    margin-bottom: var(--v-space-sm, 4px) !important;
   }
-  .attr-box { padding: 4px 2px !important; }
+  .attr-box { padding: var(--v-space-sm, 4px) var(--v-space-xs, 2px) !important; }
   .attr-box-label { font-size: 8px !important; }
   .attr-box-value { font-size: clamp(15px, 4.2vw, 18px) !important; }
   .attr-box-mod { font-size: 9px !important; }
   /* Listas internas (saves/skills) — limitar altura + scroll interno */
-  .save-list, .skill-list { gap: 2px !important; }
+  .save-list, .skill-list { gap: var(--v-space-xs, 2px) !important; }
   .save-row, .skill-row {
     font-size: 9px !important;
     padding: 1px 0 !important;
-    gap: 4px !important;
+    gap: var(--v-space-sm, 4px) !important;
   }
   .skill-attr-tag { font-size: 8px !important; }
   .skill-mod { font-size: 9px !important; min-width: 20px !important; }
   .prof-dot { width: 6px !important; height: 6px !important; }
   /* Detail sections do summary (proficiências, equipment, etc) */
   #summarySections .detail-section {
-    padding: 4px 6px !important;
+    padding: var(--v-space-sm, 4px) 6px !important;
     margin-bottom: 3px !important;
   }
   #summarySections .detail-section-title {
@@ -168,21 +168,21 @@
   #summarySections .section-body { max-height: 160px !important; }
   /* Footer com botão confirmar */
   .summary-footer {
-    padding: 4px 0 6px !important;
+    padding: var(--v-space-sm, 4px) 0 6px !important;
   }
   .confirm-btn {
     padding: var(--v-space-sm, 8px) !important;
     font-size: var(--v-font-base, 13px) !important;
-    margin-top: 4px !important;
-    margin-bottom: 4px !important;
+    margin-top: var(--v-space-sm, 4px) !important;
+    margin-bottom: var(--v-space-sm, 4px) !important;
   }
 }
 
 /* Compactação ainda mais agressiva pra viewport muito baixa (≤640px) */
 @media (max-height: 640px) {
-  #screen-summary .screen-content { padding: 2px 6px !important; }
-  .sheet-header { padding: 0 0 2px !important; }
-  .combat-stats, .attr-grid { margin-bottom: 2px !important; }
+  #screen-summary .screen-content { padding: var(--v-space-xs, 2px) 6px !important; }
+  .sheet-header { padding: 0 0 var(--v-space-xs, 2px) !important; }
+  .combat-stats, .attr-grid { margin-bottom: var(--v-space-xs, 2px) !important; }
   #summarySections .section-body { max-height: 110px !important; }
   /* Esconder síntese opcional pra dar espaço ao essencial */
   .save-list, .skill-list { max-height: 80px !important; overflow-y: auto !important; }

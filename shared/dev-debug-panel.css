@@ -164,7 +164,7 @@ html.dev-panel-active #dev-log-panel {
 
 .dev-ctrl-btn {
 
-    padding: 2px var(--v-space-md, 8px);
+    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
 
     background: transparent;
 
@@ -254,7 +254,7 @@ html.dev-panel-active #dev-log-panel {
 
     font-size: max(16px, var(--v-font-body));
 
-    padding: 2px var(--v-space-sm, 4px);
+    padding: var(--v-space-xs, 2px) var(--v-space-sm, 4px);
 
     outline: none;
 
@@ -378,7 +378,7 @@ html.dev-panel-active #dev-log-panel {
 
 .dev-pane-label {
 
-    padding: 2px var(--v-space-md, 8px);
+    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
 
     background: var(--v-bg, #2a2420);
 
@@ -506,7 +506,7 @@ html.dev-panel-active #dev-log-panel {
 
 .dev-log-lvl {
 
-    margin-right: 4px;
+    margin-right: var(--v-space-sm, 4px);
 
     font-weight: bold;
 

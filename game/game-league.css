@@ -4,18 +4,18 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .v-league-screen {
-  padding: 8px 0;
+  padding: var(--v-space-md, 8px) 0;
   color: var(--v-text, #d4c8b0);
 }
 
 /* ── BANNER PRINCIPAL com medalha gigante ─────────────────────── */
 .v-league-banner {
   text-align: center;
-  padding: 16px 12px;
+  padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
   background: radial-gradient(ellipse at center,
     color-mix(in srgb, var(--tier-color) 22%, transparent) 0%,
     transparent 70%);
-  margin-bottom: 12px;
+  margin-bottom: var(--v-space-lg, 12px);
   position: relative;
 }
 
@@ -44,14 +44,14 @@
   font-size: calc(clamp(22px, 6vw, 28px) * var(--v-font-scale, 1));
   color: var(--v-gold, #c4953a);
   letter-spacing: 2px;
-  margin-top: 10px;
+  margin-top: var(--v-space-md-lg, 10px);
   text-shadow: 0 0 14px var(--tier-color, rgba(196,149,58,0.5));
 }
 
 .v-league-tier-sub {
   font-size: var(--v-font-secondary, 13px);
   color: var(--v-text-dim, #a09484);
-  margin-top: 2px;
+  margin-top: var(--v-space-xs, 2px);
   font-style: italic;
 }
 
@@ -60,9 +60,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 12px 6px;
-  margin: 4px 0 12px 0;
+  gap: var(--v-space-xs, 2px);
+  padding: var(--v-space-lg, 12px) 6px;
+  margin: var(--v-space-sm, 4px) 0 var(--v-space-lg, 12px) 0;
   background: rgba(0,0,0,0.18);
   border-radius: var(--v-radius, 10px);
   border: 1px solid var(--v-gold-20);
@@ -103,7 +103,7 @@
 
 .v-league-path-label {
   font-size: calc(9px * var(--v-font-scale, 1));
-  margin-top: 4px;
+  margin-top: var(--v-space-sm, 4px);
   color: var(--v-text-dim, #a09484);
   font-family: var(--v-font-display, 'Cinzel', serif);
   letter-spacing: 0.5px;
@@ -130,9 +130,9 @@
   background: rgba(58,40,30,0.4);
   border: 1.5px solid var(--v-gold-40);
   border-radius: var(--v-radius, 10px);
-  padding: 12px;
+  padding: var(--v-space-lg, 12px);
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: var(--v-space-md-lg, 10px);
 }
 
 .v-league-xp-label {
@@ -146,7 +146,7 @@
   font-weight: 700;
   font-size: calc(clamp(20px, 5vw, 24px) * var(--v-font-scale, 1));
   color: var(--v-gold, #c4953a);
-  margin-top: 4px;
+  margin-top: var(--v-space-sm, 4px);
   text-shadow: 0 0 10px var(--v-gold-30);
 }
 
@@ -157,9 +157,9 @@
     var(--v-gold-10) 100%);
   border: 1.5px solid rgba(255,215,0,0.5);
   border-radius: var(--v-radius, 10px);
-  padding: 12px;
+  padding: var(--v-space-lg, 12px);
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: var(--v-space-md-lg, 10px);
   box-shadow: 0 0 16px rgba(255,215,0,0.2);
 }
 
@@ -180,7 +180,7 @@
   color: #1a1510;
   border: 1.5px solid #ffd95b;
   border-radius: 8px;
-  padding: 8px 20px;
+  padding: var(--v-space-md, 8px) 20px;
   font-family: var(--v-font-display, 'Cinzel', serif);
   font-weight: 700;
   font-size: var(--v-font-body, 14px);
@@ -196,21 +196,21 @@
   text-align: center;
   font-size: var(--v-font-label, 12px);
   color: var(--v-text-dim, #a09484);
-  padding: 8px 16px;
+  padding: var(--v-space-md, 8px) var(--v-space-xl, 16px);
 }
 
 /* ── STANDINGS VIEW ────────────────────────────────────────────── */
 .v-league-standings-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: var(--v-space-lg, 12px);
+  padding: var(--v-space-lg, 12px);
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--tier-color) 20%, transparent) 0%,
     rgba(0,0,0,0.1) 100%);
   border: 1px solid var(--tier-color, rgba(196,149,58,0.4));
   border-radius: var(--v-radius, 10px);
-  margin-bottom: 10px;
+  margin-bottom: var(--v-space-md-lg, 10px);
 }
 
 .v-league-standings-medal {
@@ -230,7 +230,7 @@
 .v-league-standings-sub {
   font-size: var(--v-font-secondary, 13px);
   color: var(--v-text-dim, #a09484);
-  margin-top: 2px;
+  margin-top: var(--v-space-xs, 2px);
 }
 
 .v-league-standings-sub b { color: var(--v-gold, #c4953a); }
@@ -244,8 +244,8 @@
 .v-league-rank-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: var(--v-space-md, 8px);
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);
   background: rgba(58,40,30,0.3);
   border: 1px solid rgba(74,56,40,0.5);
   border-radius: 8px;
@@ -309,7 +309,7 @@
   height: 3px;
   background: rgba(0,0,0,0.4);
   border-radius: 2px;
-  margin-top: 4px;
+  margin-top: var(--v-space-sm, 4px);
   overflow: hidden;
 }
 
@@ -328,7 +328,7 @@
 /* ── CLAIM CELEBRATION ─────────────────────────────────────────── */
 .v-league-claim-celebration {
   text-align: center;
-  padding: 24px 12px;
+  padding: var(--v-space-2xl, 24px) var(--v-space-lg, 12px);
   background: radial-gradient(ellipse at center,
     rgba(255,215,0,0.15) 0%,
     transparent 70%);
@@ -344,7 +344,7 @@
 .v-league-claim-rank {
   font-size: calc(56px * var(--v-font-scale, 1));
   line-height: 1;
-  margin: 12px 0;
+  margin: var(--v-space-lg, 12px) 0;
   filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
 }
 
@@ -359,7 +359,7 @@
   font-family: var(--v-font-display, 'Cinzel', serif);
   font-size: calc(clamp(24px, 6vw, 30px) * var(--v-font-scale, 1));
   color: #ffd95b;
-  margin-top: 12px;
+  margin-top: var(--v-space-lg, 12px);
   text-shadow: 0 0 12px rgba(255,217,91,0.5);
 }
 
@@ -372,6 +372,6 @@
 .v-league-claim-hint {
   font-size: var(--v-font-secondary, 13px);
   color: var(--v-text-dim, #a09484);
-  margin-top: 16px;
+  margin-top: var(--v-space-xl, 16px);
   font-style: italic;
 }

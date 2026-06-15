@@ -4,14 +4,14 @@
 .actions-row {
     display: flex;
     justify-content: center;
-    padding: 3px 12px 4px;
+    padding: 3px var(--v-space-lg, 12px) var(--v-space-sm, 4px);
     flex-shrink: 0;
     z-index: 2;
     position: relative;
 }
 
 .actions-trigger {
-    padding: 10px 0;
+    padding: var(--v-space-md-lg, 10px) 0;
     width: 100%;
     border-radius: var(--v-radius, 10px);
     background: linear-gradient(rgba(58,48,40,0.7), rgba(46,37,32,0.9));
@@ -41,7 +41,7 @@
     background: var(--v-bg-card);
     border: 1.5px solid var(--v-gold-30);
     border-radius: var(--v-radius-lg, 14px);
-    padding: 10px;
+    padding: var(--v-space-md-lg, 10px);
     box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
     width: 350px;
     max-width: min(96vw, calc(100% - 20px));
@@ -87,7 +87,7 @@
     align-items: center;
     justify-content: center;
     gap: 3px;
-    padding: 12px 4px 10px;
+    padding: var(--v-space-lg, 12px) var(--v-space-sm, 4px) var(--v-space-md-lg, 10px);
     border-radius: var(--v-radius, 10px);
     background: rgba(0,0,0,0.25);
     border: 1px solid var(--v-border-35);

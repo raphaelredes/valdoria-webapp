@@ -5,8 +5,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2px 8px;
-    gap: 2px;
+    padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+    gap: var(--v-space-xs, 2px);
     z-index: 1;
     flex: 1;
     /* Altura fixa por celula: teste de morte / chips nao redimensionam o card */
@@ -39,7 +39,7 @@
 .bf-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
+    gap: var(--v-space-sm, 4px);
     width: 100%;
 }
 
@@ -56,8 +56,8 @@
     justify-content: flex-start;
     border: 1px solid var(--v-border-15);
     background: rgba(0,0,0,0.06);
-    padding: 4px 3px 3px;
-    gap: 2px;
+    padding: var(--v-space-sm, 4px) 3px 3px;
+    gap: var(--v-space-xs, 2px);
     box-sizing: border-box;
     cursor: default;
     transition: box-shadow var(--v-transition, 0.2s) ease,
@@ -134,7 +134,7 @@ body.perf-lite .cell.in-range { animation: none; }
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: var(--v-space-xs, 2px);
     width: 100%;
 }
 
@@ -254,7 +254,7 @@ body.perf-lite .cell.in-range { animation: none; }
     right: 2px;
     font-size: var(--v-font-xs, 10px);
     background: rgba(140,30,30,0.8);
-    padding: 2px 5px;
+    padding: var(--v-space-xs, 2px) 5px;
     border-radius: var(--v-radius-sm, 6px);
     color: #ff8a80;
     font-family: var(--v-font-display, 'Cinzel', serif);

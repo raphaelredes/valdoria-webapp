@@ -346,7 +346,7 @@
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
     letter-spacing: 1.5px;
     line-height: 1.1;
-    margin-top: 2px;
+    margin-top: var(--v-space-xs, 2px);
 }
 
 .arena-tier-range {
@@ -354,7 +354,7 @@
     font-size: var(--v-font-xs, 10px);
     color: rgba(0, 0, 0, 0.6);
     letter-spacing: 0.5px;
-    margin-top: 2px;
+    margin-top: var(--v-space-xs, 2px);
     padding: 1px 6px;
     border-radius: var(--v-radius-pill, 20px);
     background: rgba(0, 0, 0, 0.15);
@@ -957,7 +957,7 @@
 
 .arena-cooldown strong {
     color: var(--v-gold-light, #dbb668);
-    margin: 0 2px;
+    margin: 0 var(--v-space-xs, 2px);
 }
 
 .arena-cooldown-bar {
@@ -1120,7 +1120,7 @@
 .arena-hp-choice-text {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--v-space-xs, 2px);
 }
 
 .arena-hp-choice-text > div:first-child {
@@ -1951,7 +1951,7 @@ body.perf-medium .arena-backdrop-torch .torch-flame { animation-duration: 2s; }
     font-size: var(--v-font-xs, 11px);
     color: var(--v-text-dim, #a09484);
     font-style: italic;
-    margin-top: 2px;
+    margin-top: var(--v-space-xs, 2px);
     line-height: 1.4;
 }
 
@@ -1999,7 +1999,7 @@ body.perf-medium .arena-backdrop-torch .torch-flame { animation-duration: 2s; }
 .arena-rules-tier-lvl {
     font-size: var(--v-font-xs, 11px);
     color: var(--v-text-dim, #a09484);
-    margin: 1px 0 4px;
+    margin: 1px 0 var(--v-space-sm, 4px);
 }
 .arena-rules-tier-stats {
     display: flex;
@@ -2023,7 +2023,7 @@ body.perf-medium .arena-backdrop-torch .torch-flame { animation-duration: 2s; }
     color: var(--v-text, #d4c8b0);
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--v-space-xs, 2px);
 }
 
 /* ── Rules — leis da areia ─────────────────────────────────── */
@@ -2057,7 +2057,7 @@ body.perf-medium .arena-backdrop-torch .torch-flame { animation-duration: 2s; }
     font-size: var(--v-font-xs, 12px);
     color: var(--v-text-dim, #a09484);
     line-height: 1.45;
-    margin-top: 2px;
+    margin-top: var(--v-space-xs, 2px);
 }
 
 /* ── Record — detail rows ──────────────────────────────────── */
@@ -2143,7 +2143,7 @@ body.perf-medium .arena-backdrop-torch .torch-flame { animation-duration: 2s; }
     color: var(--v-gold-light, #dbb668);
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--v-space-xs, 2px);
 }
 .arena-history-xp {
     font-size: var(--v-font-2xs, 10px);

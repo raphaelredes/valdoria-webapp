@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--v-space-md, 8px);
-  padding: 4px 0 8px;
+  padding: var(--v-space-sm, 4px) 0 var(--v-space-md, 8px);
 }
 
 /* Stats bar at top — gold + items count */
@@ -12,7 +12,7 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
-  padding: 8px 12px;
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
   font-family: var(--v-font-display, 'Cinzel', serif);
   font-size: var(--v-font-sm, 12px);
   color: var(--v-gold-light, #dbb668);
@@ -22,7 +22,7 @@
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-.mkt-stats .vi-coin { vertical-align: middle; margin-right: 4px; }
+.mkt-stats .vi-coin { vertical-align: middle; margin-right: var(--v-space-sm, 4px); }
 
 /* Merchant service cards — AAA epic with heraldic feel */
 .mkt-hub .vc-service-card,
@@ -30,7 +30,7 @@
   background: linear-gradient(165deg, var(--v-bg-card, #2e2520) 0%, #241e18 100%);
   border: 1.5px solid var(--v-gold-25, rgba(196,149,58,0.25));
   border-radius: var(--v-radius, 10px);
-  padding: 10px 8px 12px;
+  padding: var(--v-space-md-lg, 10px) var(--v-space-md, 8px) var(--v-space-lg, 12px);
   transition:
     border-color var(--v-transition-base),
     transform var(--v-transition),
@@ -91,14 +91,14 @@
   font-size: var(--v-font-xs, 10px);
   font-weight: 600;
   letter-spacing: 0.8px;
-  padding: 3px 8px 3px 6px;
+  padding: 3px var(--v-space-md, 8px) 3px 6px;
   border-radius: var(--v-radius-pill, 20px);
   background: var(--v-gold-12);
   border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
   color: var(--v-gold-light, #dbb668);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--v-space-sm, 4px);
   margin-top: 6px;
 }
 .mkt-hub .vc-badge svg,
@@ -116,8 +116,8 @@
   text-transform: uppercase;
   letter-spacing: 2px;
   text-align: center;
-  margin: 12px 0 4px;
-  padding: 0 12px;
+  margin: var(--v-space-lg, 12px) 0 var(--v-space-sm, 4px);
+  padding: 0 var(--v-space-lg, 12px);
 }
 
 /* Service price display */
@@ -127,6 +127,6 @@
   font-size: var(--v-font-xs, 11px);
   color: var(--v-gold-light, #dbb668);
   text-align: center;
-  margin-top: 4px;
+  margin-top: var(--v-space-sm, 4px);
   font-weight: 600;
 }

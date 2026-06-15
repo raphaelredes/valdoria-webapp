@@ -53,7 +53,7 @@
             font-family: var(--v-font-display);
             color: var(--v-gold);
             font-size: 1.6rem;
-            margin-bottom: 8px;
+            margin-bottom: var(--v-space-md, 8px);
             text-align: center;
         }
 
@@ -67,17 +67,17 @@
         /* ─── Dice type selector ─── */
         .dice-selector {
             display: flex;
-            gap: 8px;
+            gap: var(--v-space-md, 8px);
             flex-wrap: wrap;
             justify-content: center;
-            margin-bottom: 16px;
+            margin-bottom: var(--v-space-xl, 16px);
         }
 
         .dice-selector button {
             font-family: var(--v-font-display);
             font-size: 0.95rem;
             font-weight: 700;
-            padding: 8px 18px;
+            padding: var(--v-space-md, 8px) 18px;
             border: 2px solid var(--v-border);
             border-radius: var(--v-radius-sm);
             background: var(--v-bg-card);
@@ -108,7 +108,7 @@
             border: 2px solid var(--v-border);
             border-radius: var(--v-radius-lg);
             background: radial-gradient(circle at 50% 40%, #3a3028, var(--v-bg));
-            margin-bottom: 16px;
+            margin-bottom: var(--v-space-xl, 16px);
             overflow: hidden;
         }
 
@@ -134,7 +134,7 @@
             color: var(--v-gold);
             text-align: center;
             min-height: 48px;
-            margin-bottom: 12px;
+            margin-bottom: var(--v-space-lg, 12px);
             transition: all var(--v-transition-base);
         }
 
@@ -152,7 +152,7 @@
             font-size: 0.8rem;
             color: var(--v-text-dim);
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: var(--v-space-xl, 16px);
             min-height: 20px;
         }
 
@@ -192,8 +192,8 @@
         .modifier-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: var(--v-space-lg, 12px);
+            margin-bottom: var(--v-space-xl, 16px);
         }
 
         .modifier-row label {
@@ -235,8 +235,8 @@
             color: var(--v-gold);
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-top: 24px;
-            margin-bottom: 8px;
+            margin-top: var(--v-space-2xl, 24px);
+            margin-bottom: var(--v-space-md, 8px);
         }
 
         .history-log {
@@ -246,14 +246,14 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: var(--v-space-sm, 4px);
         }
 
         .history-entry {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
+            gap: var(--v-space-md, 8px);
+            padding: 6px var(--v-space-lg, 12px);
             border-radius: var(--v-radius-sm);
             background: rgba(255, 255, 255, 0.03);
             border-left: 3px solid var(--v-border);
@@ -316,8 +316,8 @@
         .manual-row {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: var(--v-space-md, 8px);
+            margin-bottom: var(--v-space-xl, 16px);
         }
 
         .manual-row label {
@@ -329,7 +329,7 @@
             font-family: var(--v-font-display);
             font-size: 0.95rem;
             width: 56px;
-            padding: 6px 8px;
+            padding: 6px var(--v-space-md, 8px);
             border: 2px solid var(--v-border);
             border-radius: var(--v-radius-sm);
             background: var(--v-bg-card);
@@ -392,13 +392,13 @@
     <button class="roll-btn" id="rollBtn">Rolar Dados</button>
 
     <!-- Multi-dice controls -->
-    <div class="modifier-row" style="margin-top:12px;margin-bottom:8px">
+    <div class="modifier-row" style="margin-top: var(--v-space-lg, 12px);margin-bottom: var(--v-space-md, 8px)">
         <label>Qtd dados:</label>
         <button id="diceCountMinus">&minus;</button>
         <span class="modifier-value" id="diceCountValue">2</span>
         <button id="diceCountPlus">+</button>
     </div>
-    <button class="roll-btn" id="rollMultiBtn" style="font-size:0.9rem;padding:10px 32px">Rolar Multi + Fusão</button>
+    <button class="roll-btn" id="rollMultiBtn" style="font-size:0.9rem;padding: var(--v-space-md-lg, 10px) 32px">Rolar Multi + Fusão</button>
 
     <!-- History -->
     <div class="history-title">Histórico</div>

@@ -273,8 +273,8 @@ Busca rápida:
         }
 
         .screen-content {
-            padding: 10px;
-            padding-bottom: 16px;
+            padding: var(--v-space-md-lg, 10px);
+            padding-bottom: var(--v-space-xl, 16px);
         }
 
         /* Sub-screen overlay */
@@ -324,14 +324,14 @@ Busca rápida:
         }
 
         .sub-screen .screen-content {
-            padding-top: 8px;
-            padding-bottom: 16px;
+            padding-top: var(--v-space-md, 8px);
+            padding-bottom: var(--v-space-xl, 16px);
         }
 
         /* ─── Detail sub-screen styles ─── */
         .detail-header {
             text-align: center;
-            padding: 4px 0 12px;
+            padding: var(--v-space-sm, 4px) 0 var(--v-space-lg, 12px);
         }
 
         .detail-icon {
@@ -343,36 +343,36 @@ Busca rápida:
             font-size: clamp(18px, 6vw, 22px);
             font-weight: 700;
             color: var(--v-gold);
-            margin-top: 4px;
+            margin-top: var(--v-space-sm, 4px);
             text-shadow: 0 0 12px rgba(196, 149, 58, 0.3);
         }
 
         .detail-subtitle {
             font-size: calc(13px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
-            margin-top: 4px;
+            margin-top: var(--v-space-sm, 4px);
         }
 
         .detail-section {
             background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
-            padding: 10px;
-            margin-bottom: 8px;
+            padding: var(--v-space-md-lg, 10px);
+            margin-bottom: var(--v-space-md, 8px);
         }
 
         .detail-section-title {
             font-size: calc(13px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-gold);
-            margin-bottom: 8px;
+            margin-bottom: var(--v-space-md, 8px);
             text-shadow: 0 0 6px rgba(196, 149, 58, 0.15);
         }
 
         .detail-row {
             font-size: calc(12px * var(--v-font-scale, 1));
             color: var(--v-text);
-            margin-bottom: 4px;
+            margin-bottom: var(--v-space-sm, 4px);
             line-height: 1.4;
         }
 
@@ -402,7 +402,7 @@ Busca rápida:
             background: rgba(196, 149, 58, 0.12);
             border: 1px solid rgba(196, 149, 58, 0.35);
             border-radius: var(--v-radius);
-            padding: 3px 10px;
+            padding: 3px var(--v-space-md-lg, 10px);
             font-size: calc(12px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-gold);
@@ -411,7 +411,7 @@ Busca rápida:
 
         /* Trait items */
         .trait-item {
-            margin-bottom: 8px;
+            margin-bottom: var(--v-space-md, 8px);
         }
 
         .trait-name {
@@ -423,7 +423,7 @@ Busca rápida:
         .trait-desc {
             font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
-            margin-top: 2px;
+            margin-top: var(--v-space-xs, 2px);
             padding-left: 18px;
             line-height: 1.4;
         }
@@ -432,8 +432,8 @@ Busca rápida:
         .detail-option-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 8px;
+            gap: var(--v-space-md, 8px);
+            margin-top: var(--v-space-md, 8px);
         }
 
         .detail-option-grid.single-col {
@@ -444,7 +444,7 @@ Busca rápida:
             background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
-            padding: 10px;
+            padding: var(--v-space-md-lg, 10px);
             cursor: pointer;
             transition: background var(--v-transition), transform var(--v-transition), border-color var(--v-transition), opacity var(--v-transition), color var(--v-transition);
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
@@ -469,14 +469,14 @@ Busca rápida:
         .detail-option-desc {
             font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
-            margin-top: 2px;
+            margin-top: var(--v-space-xs, 2px);
             line-height: 1.3;
         }
 
         .detail-option-bonus {
             font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-gold);
-            margin-top: 4px;
+            margin-top: var(--v-space-sm, 4px);
             font-weight: 600;
         }
 
@@ -485,10 +485,10 @@ Busca rápida:
             position: sticky;
             bottom: 8px;
             z-index: var(--v-z-base, 5);
-            margin-top: 12px;
+            margin-top: var(--v-space-lg, 12px);
             margin-bottom: 6px;
             width: 100%;
-            padding: 12px;
+            padding: var(--v-space-lg, 12px);
             font-size: calc(15px * var(--v-font-scale, 1));
             font-weight: 700;
         }
@@ -501,13 +501,13 @@ Busca rápida:
         /* Half-Elf selects in detail */
         .detail-selects {
             display: flex;
-            gap: 8px;
-            margin-top: 8px;
+            gap: var(--v-space-md, 8px);
+            margin-top: var(--v-space-md, 8px);
         }
 
         .detail-selects select {
             flex: 1;
-            padding: 10px;
+            padding: var(--v-space-md-lg, 10px);
             background: var(--v-bg-card);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
@@ -520,7 +520,7 @@ Busca rápida:
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin-top: 8px;
+            margin-top: var(--v-space-md, 8px);
         }
 
         .lang-option {
@@ -549,7 +549,7 @@ Busca rápida:
             font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             margin-top: 6px;
-            padding: 0 2px;
+            padding: 0 var(--v-space-xs, 2px);
         }
 
         /* Enhanced toggle items */
@@ -568,7 +568,7 @@ Busca rápida:
         .v-toggle-desc {
             font-size: calc(10px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
-            margin-top: 2px;
+            margin-top: var(--v-space-xs, 2px);
             line-height: 1.3;
         }
 
@@ -576,39 +576,39 @@ Busca rápida:
         .gender-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: var(--v-space-md-lg, 10px);
         }
         /* 2026-06-07 (user): cada gênero usa imagem OpenAI (emblema heráldico) +
            margens próprias por card. */
-        .gender-grid .gender-card { padding: 12px 8px; }
+        .gender-grid .gender-card { padding: var(--v-space-lg, 12px) var(--v-space-md, 8px); }
         .gender-grid .gender-ico { margin: 0 auto 6px; min-height: 60px; display: flex; align-items: center; justify-content: center; }
         .gender-grid .gender-ico img { width: 60px; height: 60px; object-fit: contain; display: block; filter: drop-shadow(0 0 6px rgba(196,149,58,0.35)); }
 
         /* Name section */
         .name-section {
-            margin-top: 8px;
+            margin-top: var(--v-space-md, 8px);
         }
 
         .char-limit {
             font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
             text-align: right;
-            margin-top: 4px;
+            margin-top: var(--v-space-sm, 4px);
         }
 
         /* Sub-back button */
         .sub-back {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            margin-bottom: 10px;
+            gap: var(--v-space-sm, 4px);
+            margin-bottom: var(--v-space-md-lg, 10px);
         }
 
         /* Stat bar visual */
         .stat-bar-container {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--v-space-md, 8px);
             width: 100%;
         }
 
@@ -631,8 +631,8 @@ Busca rápida:
         /* Stat assignment action buttons */
         .stat-actions {
             display: flex;
-            gap: 8px;
-            margin-top: 8px;
+            gap: var(--v-space-md, 8px);
+            margin-top: var(--v-space-md, 8px);
         }
 
         /* Sessao #37 v11 (2026-05-25): ROOT CAUSE FIXADO. <button> em Chrome
@@ -650,13 +650,13 @@ Busca rápida:
             background: linear-gradient(135deg, rgba(196, 149, 58, 0.2), rgba(160, 100, 30, 0.15));
             border: 1px dashed var(--v-gold);
             color: var(--v-gold);
-            padding: 10px 14px;
+            padding: var(--v-space-md-lg, 10px) 14px;
             border-radius: var(--v-radius);
             font: inherit;
             font-family: var(--v-font, 'Cinzel', 'MedievalSharp', serif);
             font-weight: 700;
             font-size: calc(15px * var(--v-font-scale, 1));
-            margin-bottom: 8px;
+            margin-bottom: var(--v-space-md, 8px);
             letter-spacing: 0.5px;
             transition: background var(--v-transition), transform var(--v-transition), border-color var(--v-transition), opacity var(--v-transition), color var(--v-transition);
         }
@@ -671,7 +671,7 @@ Busca rápida:
             background: linear-gradient(135deg, rgba(196, 149, 58, 0.15), rgba(196, 149, 58, 0.08));
             border: 1px solid var(--v-gold-dim);
             color: var(--v-gold);
-            padding: 10px 12px;
+            padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);
             border-radius: var(--v-radius);
             font-weight: 600;
         }
@@ -688,7 +688,7 @@ Busca rápida:
         /* Utility */
         .section-label {
             font-size: calc(13px * var(--v-font-scale, 1));
-            margin-top: 8px;
+            margin-top: var(--v-space-md, 8px);
         }
 
         .flex-between {
@@ -698,7 +698,7 @@ Busca rápida:
         }
 
         .btn-block {
-            margin-top: 12px;
+            margin-top: var(--v-space-lg, 12px);
             width: 100%;
         }
 
@@ -706,7 +706,7 @@ Busca rápida:
             position: sticky;
             bottom: 8px;
             z-index: var(--v-z-base, 5);
-            margin-top: 12px;
+            margin-top: var(--v-space-lg, 12px);
             width: 100%;
         }
 
@@ -718,10 +718,10 @@ Busca rápida:
         .equip-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 4px 12px;
+            gap: var(--v-space-lg, 12px);
+            padding: var(--v-space-md, 8px) var(--v-space-sm, 4px) var(--v-space-lg, 12px);
             border-bottom: 1px solid rgba(196, 149, 58, 0.2);
-            margin-bottom: 12px;
+            margin-bottom: var(--v-space-lg, 12px);
         }
         .equip-header-icon {
             flex: 0 0 auto;
@@ -747,22 +747,22 @@ Busca rápida:
             font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim, #a09484);
             font-style: italic;
-            margin-top: 2px;
+            margin-top: var(--v-space-xs, 2px);
         }
         .equip-hint {
             text-align: center;
             font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text-dim, #a09484);
             letter-spacing: 0.5px;
-            margin-bottom: 10px;
+            margin-bottom: var(--v-space-md-lg, 10px);
             opacity: 0.85;
         }
         .equip-card {
             background: linear-gradient(165deg, #382820 0%, #241a14 100%);
             border: 1px solid rgba(196, 149, 58, 0.25);
             border-radius: var(--v-radius, 10px);
-            padding: 12px;
-            margin-bottom: 12px;
+            padding: var(--v-space-lg, 12px);
+            margin-bottom: var(--v-space-lg, 12px);
             cursor: pointer;
             position: relative;
             overflow: hidden;
@@ -805,7 +805,7 @@ Busca rápida:
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: var(--v-space-md, 8px);
         }
         .equip-card-badge {
             display: inline-block;
@@ -817,8 +817,8 @@ Busca rápida:
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 4px;
+            padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
+            border-radius: var(--v-radius-xs, 4px);
         }
         .equip-card.selected .equip-card-badge {
             background: var(--v-gold, #c4953a);
@@ -848,7 +848,7 @@ Busca rápida:
             color: var(--v-gold, #c4953a);
             letter-spacing: 0.8px;
             text-shadow: 0 0 6px rgba(196, 149, 58, 0.3);
-            margin-bottom: 4px;
+            margin-bottom: var(--v-space-sm, 4px);
         }
         .equip-card-desc {
             font-size: calc(12px * var(--v-font-scale, 1));
@@ -861,7 +861,7 @@ Busca rápida:
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 12px 0 10px;
+            margin: var(--v-space-lg, 12px) 0 var(--v-space-md-lg, 10px);
             color: var(--v-gold, #c4953a);
             opacity: 0.55;
             position: relative;
@@ -874,24 +874,24 @@ Busca rápida:
             background: linear-gradient(90deg, transparent, rgba(196, 149, 58, 0.4), transparent);
         }
         .equip-card-divider-gem {
-            margin: 0 10px;
+            margin: 0 var(--v-space-md-lg, 10px);
             font-size: calc(9px * var(--v-font-scale, 1));
             text-shadow: 0 0 6px rgba(196, 149, 58, 0.5);
         }
         .equip-card-items {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: var(--v-space-md, 8px);
         }
         .equip-card-items.single-col { grid-template-columns: 1fr; }
         .equip-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 8px;
+            gap: var(--v-space-md, 8px);
+            padding: 6px var(--v-space-md, 8px);
             background: rgba(15, 11, 8, 0.45);
             border: 1px solid rgba(196, 149, 58, 0.15);
-            border-radius: 6px;
+            border-radius: var(--v-radius-sm, 6px);
             transition: all 0.2s ease;
         }
         .equip-card.selected .equip-item {
@@ -906,7 +906,7 @@ Busca rápida:
             align-items: center;
             justify-content: center;
             background: rgba(0, 0, 0, 0.35);
-            border-radius: 4px;
+            border-radius: var(--v-radius-xs, 4px);
             border: 1px solid rgba(196, 149, 58, 0.18);
             filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.2));
         }
@@ -920,13 +920,13 @@ Busca rápida:
             font-weight: 500;
         }
         @media (max-height: 720px) {
-            .equip-header { padding: 4px 4px 8px; margin-bottom: 8px; }
+            .equip-header { padding: var(--v-space-sm, 4px) var(--v-space-sm, 4px) var(--v-space-md, 8px); margin-bottom: var(--v-space-md, 8px); }
             .equip-header-title { font-size: calc(14px * var(--v-font-scale, 1)); }
             .equip-header-subtitle { font-size: calc(10px * var(--v-font-scale, 1)); }
-            .equip-card { padding: 10px; margin-bottom: 8px; }
+            .equip-card { padding: var(--v-space-md-lg, 10px); margin-bottom: var(--v-space-md, 8px); }
             .equip-card-name { font-size: calc(13px * var(--v-font-scale, 1)); }
             .equip-card-desc { font-size: calc(11px * var(--v-font-scale, 1)); }
-            .equip-card-divider { margin: 8px 0 6px; }
+            .equip-card-divider { margin: var(--v-space-md, 8px) 0 6px; }
             .equip-item-thumb { flex: 0 0 28px; width: 28px; height: 28px; }
             .equip-item-name { font-size: calc(10px * var(--v-font-scale, 1)); }
         }
@@ -934,12 +934,12 @@ Busca rápida:
         /* ═══ SCREEN 1: CLASS — Role filters AAA (Sessao #29, 2026-05-24) ═══ */
         .class-role-filters {
             display: flex;
-            gap: 4px;
-            margin: 6px 0 4px;
+            gap: var(--v-space-sm, 4px);
+            margin: 6px 0 var(--v-space-sm, 4px);
             overflow-x: auto;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 2px;
+            padding-bottom: var(--v-space-xs, 2px);
         }
         .class-role-filters::-webkit-scrollbar { display: none; }
         .class-role-tab {
@@ -977,14 +977,14 @@ Busca rápida:
             text-align: center;
             letter-spacing: 1.2px;
             text-transform: uppercase;
-            margin: 4px 0 8px;
+            margin: var(--v-space-sm, 4px) 0 var(--v-space-md, 8px);
             opacity: 0.85;
         }
         /* Cards de classe — AAA visual */
         #classGrid .v-card {
             background: linear-gradient(165deg, #382820 0%, #241a14 100%);
             border: 1px solid rgba(196, 149, 58, 0.25);
-            padding: 10px 8px 12px;
+            padding: var(--v-space-md-lg, 10px) var(--v-space-md, 8px) var(--v-space-lg, 12px);
             position: relative;
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1013,7 +1013,7 @@ Busca rápida:
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 4px;
+            margin-bottom: var(--v-space-sm, 4px);
             filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.3));
         }
         #classGrid .v-card .v-card-name {
@@ -1033,18 +1033,18 @@ Busca rápida:
             text-align: center;
             line-height: 1.3;
             letter-spacing: 0.3px;
-            margin-top: 2px;
+            margin-top: var(--v-space-xs, 2px);
             opacity: 0.85;
         }
         /* Compact mode (Telegram Desktop) */
         @media (max-height: 720px) {
-            .class-role-filters { margin: 4px 0 2px; }
+            .class-role-filters { margin: var(--v-space-sm, 4px) 0 var(--v-space-xs, 2px); }
             .class-role-tab {
                 padding: 5px 9px;
                 font-size: calc(10px * var(--v-font-scale, 1));
             }
-            .class-role-count { margin: 2px 0 4px; font-size: calc(9px * var(--v-font-scale, 1)); }
-            #classGrid .v-card { padding: 8px 6px 10px; }
+            .class-role-count { margin: var(--v-space-xs, 2px) 0 var(--v-space-sm, 4px); font-size: calc(9px * var(--v-font-scale, 1)); }
+            #classGrid .v-card { padding: var(--v-space-md, 8px) 6px var(--v-space-md-lg, 10px); }
             #classGrid .v-card .v-card-name { font-size: calc(12px * var(--v-font-scale, 1)); }
         }
 
@@ -1063,7 +1063,7 @@ Busca rápida:
             color: var(--v-text-dim);
             transition: transform var(--v-transition);
             flex-shrink: 0;
-            margin-left: 8px;
+            margin-left: var(--v-space-md, 8px);
         }
 
         .collapsed .toggle-arrow {
@@ -1075,7 +1075,7 @@ Busca rápida:
         }
 
         .collapsed {
-            padding-bottom: 4px;
+            padding-bottom: var(--v-space-sm, 4px);
         }
 
         .section-summary {
@@ -1112,8 +1112,8 @@ Busca rápida:
             background: linear-gradient(165deg, rgba(196, 149, 58, 0.08) 0%, rgba(196, 149, 58, 0.02) 100%);
             border-left: 3px solid var(--v-gold);
             border-radius: 0 var(--v-radius) var(--v-radius) 0;
-            padding: 8px 12px 8px 14px;
-            margin-bottom: 10px;
+            padding: var(--v-space-md, 8px) var(--v-space-lg, 12px) var(--v-space-md, 8px) 14px;
+            margin-bottom: var(--v-space-md-lg, 10px);
             font-size: var(--v-font-label, 12px);
             line-height: 1.5;
             color: var(--v-text);
@@ -1127,7 +1127,7 @@ Busca rápida:
             font-weight: 700;
             color: var(--v-gold);
             font-style: normal;
-            margin-bottom: 4px;
+            margin-bottom: var(--v-space-sm, 4px);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -1142,7 +1142,7 @@ Busca rápida:
             font-size: calc(9px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-gold);
-            margin-right: 4px;
+            margin-right: var(--v-space-sm, 4px);
             vertical-align: middle;
         }
 
@@ -1151,8 +1151,8 @@ Busca rápida:
             background: linear-gradient(165deg, rgba(80, 200, 120, 0.08) 0%, rgba(80, 200, 120, 0.02) 100%);
             border-left: 3px solid var(--v-success);
             border-radius: 0 var(--v-radius) var(--v-radius) 0;
-            padding: 8px 10px;
-            margin-bottom: 8px;
+            padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);
+            margin-bottom: var(--v-space-md, 8px);
             font-size: calc(12px * var(--v-font-scale, 1));
             line-height: 1.5;
             color: var(--v-text);
@@ -1162,7 +1162,7 @@ Busca rápida:
             font-size: calc(11px * var(--v-font-scale, 1));
             font-weight: 700;
             color: var(--v-success);
-            margin-bottom: 4px;
+            margin-bottom: var(--v-space-sm, 4px);
         }
 
         /* Character sheet summary — scrollable content + sticky confirm button */
@@ -1194,7 +1194,7 @@ Busca rápida:
         /* Sticky footer for confirm button — always visible */
         .summary-footer {
             flex-shrink: 0;
-            padding: 8px 0 10px;
+            padding: var(--v-space-md, 8px) 0 var(--v-space-md-lg, 10px);
             border-top: 1px solid var(--v-border);
             background: var(--v-bg);
         }
@@ -1206,7 +1206,7 @@ Busca rápida:
 
         .sheet-header {
             text-align: center;
-            padding: 6px 0 8px;
+            padding: 6px 0 var(--v-space-md, 8px);
         }
 
         .sheet-name {
@@ -1219,21 +1219,21 @@ Busca rápida:
         .sheet-subtitle {
             font-size: calc(12px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
-            margin-top: 4px;
+            margin-top: var(--v-space-sm, 4px);
         }
 
         .combat-stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 6px;
-            margin-bottom: 8px;
+            margin-bottom: var(--v-space-md, 8px);
         }
 
         .combat-stat-box {
             background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
-            padding: 8px 4px;
+            padding: var(--v-space-md, 8px) var(--v-space-sm, 4px);
             text-align: center;
         }
 
@@ -1248,7 +1248,7 @@ Busca rápida:
             font-size: clamp(16px, 5vw, 20px);
             font-weight: 700;
             color: var(--v-text-bright);
-            margin-top: 2px;
+            margin-top: var(--v-space-xs, 2px);
         }
 
         .combat-stat-detail {
@@ -1261,14 +1261,14 @@ Busca rápida:
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
-            margin-bottom: 8px;
+            margin-bottom: var(--v-space-md, 8px);
         }
 
         .attr-box {
             background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
-            padding: 6px 4px;
+            padding: 6px var(--v-space-sm, 4px);
             text-align: center;
         }
 
@@ -1304,7 +1304,7 @@ Busca rápida:
             gap: 6px;
             font-size: calc(11px * var(--v-font-scale, 1));
             color: var(--v-text);
-            padding: 2px 0;
+            padding: var(--v-space-xs, 2px) 0;
         }
 
         .prof-dot {
@@ -1364,14 +1364,14 @@ Busca rápida:
         .align-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            gap: var(--v-space-md, 8px);
         }
 
         .align-option {
             background: linear-gradient(165deg, var(--v-bg-card) 0%, #241e18 100%);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
-            padding: 8px 6px;
+            padding: var(--v-space-md, 8px) 6px;
             text-align: center;
             cursor: pointer;
             transition: background var(--v-transition), transform var(--v-transition), border-color var(--v-transition), opacity var(--v-transition), color var(--v-transition);
@@ -1394,13 +1394,13 @@ Busca rápida:
             font-size: calc(11px * var(--v-font-scale, 1));
             font-weight: 600;
             color: var(--v-text-bright);
-            margin-top: 4px;
+            margin-top: var(--v-space-sm, 4px);
         }
 
         .align-desc {
             font-size: calc(9px * var(--v-font-scale, 1));
             color: var(--v-text-dim);
-            margin-top: 2px;
+            margin-top: var(--v-space-xs, 2px);
             line-height: 1.3;
         }
 
@@ -1408,11 +1408,11 @@ Busca rápida:
         .stat-slot {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--v-space-md, 8px);
             background: var(--v-bg-card);
             border: 1px solid var(--v-border);
             border-radius: var(--v-radius);
-            padding: 8px 10px;
+            padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);
             margin-bottom: 5px;
             cursor: pointer;
             transition: background var(--v-transition), transform var(--v-transition), border-color var(--v-transition), opacity var(--v-transition), color var(--v-transition);
@@ -1444,7 +1444,7 @@ Busca rápida:
         .stat-slot-bonus {
             font-size: calc(11px * var(--v-font-scale, 1));
             color: #50c878;
-            margin-left: 4px;
+            margin-left: var(--v-space-sm, 4px);
         }
 
         .stat-slot-total {
@@ -1458,7 +1458,7 @@ Busca rápida:
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
-            margin: 12px 0;
+            margin: var(--v-space-lg, 12px) 0;
         }
 
         .stat-pool-chip {
@@ -1595,9 +1595,9 @@ Busca rápida:
          creator-loading.js (_dismissFullLoading) e loading-guard (timeout).
          Sem SVG (regra No Hardcoded SVG in HTML Body) — só texto + barra CSS. -->
     <div id="loading" class="loading-overlay" aria-busy="true"
-         style="display:flex;position:fixed;inset:0;z-index:1000;background:#1a1510;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px">
-        <div style="font-family:Cinzel,Georgia,serif;font-weight:700;letter-spacing:5px;color:#c4953a;font-size:24px;text-shadow:0 0 22px rgba(196,149,58,.45)">VALDORIA</div>
-        <div style="font-family:Georgia,serif;font-style:italic;color:#a09484;font-size:13px;letter-spacing:.5px">Preparando a forja de aventureiros&hellip;</div>
+         style="display:flex;position:fixed;inset:0;z-index:1000;background:#1a1510;flex-direction:column;align-items:center;justify-content:center;gap: var(--v-space-xl, 16px);text-align:center;padding: var(--v-space-2xl, 24px)">
+        <div style="font-family:Cinzel,Georgia,serif;font-weight:700;letter-spacing:5px;color:var(--v-gold, #c4953a);font-size:24px;text-shadow:0 0 22px rgba(196,149,58,.45)">VALDORIA</div>
+        <div style="font-family:Georgia,serif;font-style:italic;color:var(--v-text-dim, #a09484);font-size:13px;letter-spacing:.5px">Preparando a forja de aventureiros&hellip;</div>
         <div style="width:140px;height:2px;background:rgba(196,149,58,.15);border-radius:2px;overflow:hidden">
             <div style="width:45%;height:100%;background:linear-gradient(90deg,#9a7530,#c4953a);border-radius:2px;animation:vCreatorBootSlide 1.1s ease-in-out infinite alternate"></div>
         </div>
@@ -2362,7 +2362,7 @@ Busca rápida:
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            text-align: center; padding: 40px 24px;
+            text-align: center; padding: 40px var(--v-space-2xl, 24px);
             opacity: 0;
             transform: translateX(40px);
             transition:
@@ -2808,7 +2808,7 @@ Busca rápida:
             z-index: 9999;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: var(--v-space-2xl, 24px);
             animation: fontOnboardingFadeIn 0.4s ease;
         }
         .font-onboarding-overlay[style*="flex"] { display: flex !important; }
@@ -2829,7 +2829,7 @@ Busca rápida:
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: var(--v-space-md, 8px);
             margin-bottom: 14px;
         }
         .font-onboarding-line {
@@ -2868,7 +2868,7 @@ Busca rápida:
             opacity: 0.75;
             font-size: calc(11px * var(--v-font-scale, 1));
             display: inline-block;
-            margin-top: 4px;
+            margin-top: var(--v-space-sm, 4px);
         }
         .font-onboarding-subtitle b {
             color: var(--v-gold, #c4953a);
@@ -2877,13 +2877,13 @@ Busca rápida:
         .font-onboarding-options {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: var(--v-space-md-lg, 10px);
         }
         .font-onboarding-option {
             background: linear-gradient(180deg, rgba(196,149,58,0.04) 0%, rgba(42,36,32,0.55) 100%);
             border: 1px solid rgba(196,149,58,0.25);
-            border-radius: 10px;
-            padding: 13px 16px;
+            border-radius: var(--v-radius, 10px);
+            padding: 13px var(--v-space-xl, 16px);
             color: var(--v-text, #d4c8b0);
             font-family: 'Cinzel', serif;
             cursor: pointer;
@@ -2927,14 +2927,14 @@ Busca rápida:
             text-transform: uppercase;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--v-space-md, 8px);
         }
         .font-onboarding-pill {
             background: rgba(196,149,58,0.18);
             color: var(--v-gold, #c4953a);
             border: 1px solid rgba(196,149,58,0.45);
-            border-radius: 10px;
-            padding: 2px 8px;
+            border-radius: var(--v-radius, 10px);
+            padding: var(--v-space-xs, 2px) var(--v-space-md, 8px);
             font-size: calc(9px * var(--v-font-scale, 1));
             letter-spacing: 1px;
             font-weight: 600;
@@ -2966,11 +2966,11 @@ Busca rápida:
             border-top: 1px solid rgba(196,149,58,0.15);
         }
         @media (max-height: 620px) {
-            .font-onboarding-card { padding: 18px 16px; }
+            .font-onboarding-card { padding: 18px var(--v-space-xl, 16px); }
             .font-onboarding-header h2 { font-size: calc(13px * var(--v-font-scale, 1)); letter-spacing: 2px; }
             .font-onboarding-subtitle { margin-bottom: 14px; font-size: calc(12px * var(--v-font-scale, 1)); }
-            .font-onboarding-option { padding: 10px 14px; min-height: 52px; }
-            .font-onboarding-preview-hint { margin: 12px 0 10px; padding-top: 10px; }
+            .font-onboarding-option { padding: var(--v-space-md-lg, 10px) 14px; min-height: 52px; }
+            .font-onboarding-preview-hint { margin: var(--v-space-lg, 12px) 0 var(--v-space-md-lg, 10px); padding-top: var(--v-space-md-lg, 10px); }
         }
         @media (max-width: 340px) {
             .font-onboarding-header h2 { font-size: calc(13px * var(--v-font-scale, 1)); letter-spacing: 1.5px; }
@@ -3065,7 +3065,7 @@ Busca rápida:
         .v-spell-card {
             background: linear-gradient(180deg, rgba(196,149,58,0.04) 0%, rgba(42,36,32,0.3) 100%);
             border: 1px solid rgba(196,149,58,0.25);
-            border-radius: 10px;
+            border-radius: var(--v-radius, 10px);
         }
         .v-spell-card:hover {
             background: linear-gradient(180deg, rgba(196,149,58,0.10) 0%, rgba(74,56,40,0.5) 100%);
@@ -3236,8 +3236,8 @@ Busca rápida:
             <style>
                 /* Sessao #29 v4: stat method selector D&D 5e canonical */
                 .stat-method-selector {
-                    margin: 12px 0;
-                    padding: 12px;
+                    margin: var(--v-space-lg, 12px) 0;
+                    padding: var(--v-space-lg, 12px);
                     background: rgba(196, 149, 58, 0.06);
                     border: 1px solid rgba(196, 149, 58, 0.22);
                     border-radius: 8px;
@@ -3247,20 +3247,20 @@ Busca rápida:
                     color: var(--v-gold, #c4953a);
                     letter-spacing: 1.5px;
                     text-transform: uppercase;
-                    margin-bottom: 8px;
+                    margin-bottom: var(--v-space-md, 8px);
                     text-align: center;
                 }
                 .stat-method-tabs {
                     display: flex;
-                    gap: 4px;
-                    margin-bottom: 8px;
+                    gap: var(--v-space-sm, 4px);
+                    margin-bottom: var(--v-space-md, 8px);
                 }
                 .stat-method-tab {
                     flex: 1;
-                    padding: 8px 4px;
+                    padding: var(--v-space-md, 8px) var(--v-space-sm, 4px);
                     background: rgba(28, 22, 16, 0.65);
                     border: 1px solid rgba(196, 149, 58, 0.3);
-                    border-radius: 6px;
+                    border-radius: var(--v-radius-sm, 6px);
                     color: var(--v-text-dim, #a09484);
                     font-family: 'Cinzel', serif;
                     font-size: calc(10px * var(--v-font-scale, 1));
@@ -3287,7 +3287,7 @@ Busca rápida:
                 .pb-btn {
                     background: rgba(196, 149, 58, 0.18);
                     border: 1px solid rgba(196, 149, 58, 0.5);
-                    border-radius: 4px;
+                    border-radius: var(--v-radius-xs, 4px);
                     color: var(--v-gold, #c4953a);
                     font-family: 'Cinzel', serif;
                     font-weight: 700;
@@ -3333,7 +3333,7 @@ Busca rápida:
                     <div class="v-caption">A bússola moral do seu personagem. Opcional — toque para escolher ou pule.
                     </div>
                     <div class="align-grid" id="alignGrid"></div>
-                    <button class="v-btn v-btn-secondary btn-block" style="margin-top:12px"
+                    <button class="v-btn v-btn-secondary btn-block" style="margin-top: var(--v-space-lg, 12px)"
                         onclick="sel.alignment=''; goScreen(5)">⏭️ Pular</button>
                     <button class="v-btn v-btn-primary btn-block hidden" id="alignConfirm" onclick="goScreen(5)">✓
                         Confirmar Alinhamento</button>
@@ -3382,7 +3382,7 @@ Busca rápida:
                         <input class="v-input" id="nameInput" maxlength="15" placeholder="Nome do personagem">
                         <div class="flex-between">
                             <button class="v-btn v-btn-secondary v-btn-pill" onclick="generateName()"
-                                style="margin-top:8px">🎲 Gerar Nome</button>
+                                style="margin-top: var(--v-space-md, 8px)">🎲 Gerar Nome</button>
                             <span class="char-limit" id="nameLimit">0/15</span>
                         </div>
                     </div>
@@ -3393,7 +3393,7 @@ Busca rápida:
                         <input class="v-input" id="surnameInput" maxlength="15" placeholder="Sobrenome">
                         <div class="flex-between">
                             <button class="v-btn v-btn-secondary v-btn-pill" onclick="generateSurname()"
-                                style="margin-top:8px">🎲 Gerar Sobrenome</button>
+                                style="margin-top: var(--v-space-md, 8px)">🎲 Gerar Sobrenome</button>
                             <span class="char-limit" id="surnameLimit">0/15</span>
                         </div>
                     </div>
@@ -3405,7 +3405,7 @@ Busca rápida:
 
             <!-- ═══ SCREEN 8: SUMMARY ═══ -->
             <div class="screen" id="screen-summary">
-                <div class="screen-content" style="padding-bottom:8px">
+                <div class="screen-content" style="padding-bottom: var(--v-space-md, 8px)">
                     <div id="summaryContent"></div>
                 </div>
             </div>
@@ -4210,9 +4210,9 @@ Busca rápida:
             if (existing) existing.remove();
             var overlay = document.createElement('div');
             overlay.id = 'name-warn-overlay';
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;padding: var(--v-space-2xl, 24px);';
             var card = document.createElement('div');
-            card.style.cssText = 'background:var(--v-bg-card,#2e2520);border:2px solid '+(isBanWarning?'#d77a4a':'#c4953a')+';border-radius:12px;max-width:340px;padding:24px;text-align:center;box-shadow:0 0 40px rgba(0,0,0,0.6);';
+            card.style.cssText = 'background:var(--v-bg-card,#2e2520);border:2px solid '+(isBanWarning?'#d77a4a':'#c4953a')+';border-radius:12px;max-width:340px;padding: var(--v-space-2xl, 24px);text-align:center;box-shadow:0 0 40px rgba(0,0,0,0.6);';
             var t = document.createElement('div');
             t.style.cssText = 'font-family:Cinzel,serif;font-weight:700;font-size:calc(18px * var(--v-font-scale, 1));letter-spacing:2px;text-transform:uppercase;color:'+(isBanWarning?'#d77a4a':'#c4953a')+';margin-bottom:14px;';
             t.textContent = title;
@@ -4518,10 +4518,10 @@ Busca rápida:
                 '<style>@keyframes vFadeIn{from{opacity:0}to{opacity:1}}'
                 + '@keyframes vScaleIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}</style>'
                 + '<div style="background:var(--v-bg-card,#2e2520); border:1px solid var(--v-gold-dim,#9a7530); '
-                + 'border-radius:12px; padding:24px; max-width:320px; width:100%; '
+                + 'border-radius:12px; padding: var(--v-space-2xl, 24px); max-width:320px; width:100%; '
                 + 'box-shadow:0 12px 36px rgba(0,0,0,0.8), 0 0 24px rgba(196,149,58,0.2); '
                 + 'animation:vScaleIn 0.25s ease-out; text-align:center;">'
-                + '<div style="font-size:calc(36px * var(--v-font-scale, 1)); margin-bottom:8px;">⚔️</div>'
+                + '<div style="font-size:calc(36px * var(--v-font-scale, 1)); margin-bottom: var(--v-space-md, 8px);">⚔️</div>'
                 + '<div style="font-family:var(--v-font-display,Cinzel,serif); '
                 + 'font-size:calc(16px * var(--v-font-scale, 1)); font-weight:700; '
                 + 'color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase; '
@@ -4530,17 +4530,17 @@ Busca rápida:
                 + 'color:var(--v-text,#d4c8b0); line-height:1.55; margin-bottom:18px;">'
                 + 'Seu progresso atual <b>será perdido</b>. Deseja realmente fechar a criação de personagem?'
                 + '</div>'
-                + '<div style="display:flex; gap:10px; justify-content:center;">'
+                + '<div style="display:flex; gap: var(--v-space-md-lg, 10px); justify-content:center;">'
                 + '<button id="creator-close-cancel" style="flex:1; min-height:42px; '
                 + 'background:transparent; border:1px solid var(--v-border,#4a3828); '
                 + 'border-radius:8px; color:var(--v-text-dim,#a09484); cursor:pointer; '
                 + 'font-family:var(--v-font,MedievalSharp,serif); '
-                + 'font-size:calc(13px * var(--v-font-scale, 1)); padding:8px 14px;">Continuar Criando</button>'
+                + 'font-size:calc(13px * var(--v-font-scale, 1)); padding: var(--v-space-md, 8px) 14px;">Continuar Criando</button>'
                 + '<button id="creator-close-confirm" style="flex:1; min-height:42px; '
                 + 'background:linear-gradient(180deg, #d08070, #a04040); '
                 + 'border:1px solid #d08070; border-radius:8px; color:#fff; cursor:pointer; '
                 + 'font-family:var(--v-font-display,Cinzel,serif); font-weight:700; letter-spacing:0.5px; '
-                + 'font-size:calc(13px * var(--v-font-scale, 1)); padding:8px 14px;">Fechar</button>'
+                + 'font-size:calc(13px * var(--v-font-scale, 1)); padding: var(--v-space-md, 8px) 14px;">Fechar</button>'
                 + '</div></div>';
             document.body.appendChild(ov);
             document.getElementById('creator-close-cancel').onclick = function(){
@@ -4743,7 +4743,7 @@ Busca rápida:
             const ptSlug = _ATTR_SLUG_PT[attrKey] || attrKey;
             const onErr = "this.onerror=null;this.outerHTML='<span style=\\'font-size:" + sz + "px\\'>" + emoji.replace(/'/g, "\\'") + "</span>';";
             return '<img src="/shared/img/levelup/attrs/' + ptSlug + '.webp" alt="" ' +
-                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;display:inline-block;vertical-align:middle;border-radius:6px;" ' +
+                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;display:inline-block;vertical-align:middle;border-radius: var(--v-radius-sm, 6px);" ' +
                    'loading="lazy" onerror="' + onErr + '">';
         }
         let selectedPoolValue = null;
@@ -4851,12 +4851,12 @@ Busca rápida:
             ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.97);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Cinzel,serif;color:#e0d8c0;backdrop-filter:blur(4px);';
             ov.innerHTML =
                 '<div style="text-align:center;max-width:380px;width:100%;background:linear-gradient(180deg,rgba(42,36,32,0.95),rgba(26,21,16,0.95));border:1px solid rgba(196,149,58,0.5);border-radius:12px;padding:20px;box-shadow:0 12px 36px rgba(0,0,0,0.7);">' +
-                    '<div style="font-size:calc(10px * var(--v-font-scale, 1));letter-spacing:3px;color:#c4953a;margin-bottom:6px;text-transform:uppercase;">◆ Rolagem de Atributos ◆</div>' +
-                    '<h2 style="font-size:calc(18px * var(--v-font-scale, 1));color:#e8c45a;margin:0 0 4px;letter-spacing:1.2px;">4d6 · descarta menor</h2>' +
-                    '<div style="font-size:calc(11px * var(--v-font-scale, 1));color:#a09484;margin-bottom:14px;">Rolagem <b id="__atr-num" style="color:#c4953a">1</b> de 6</div>' +
-                    '<div id="__atr-mount" style="width:260px;height:260px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;"></div>' +
-                    '<div id="__atr-result" style="font-size:calc(14px * var(--v-font-scale, 1));color:#d4c8b0;min-height:38px;line-height:1.5;letter-spacing:0.5px;"></div>' +
-                    '<div style="font-size:calc(10px * var(--v-font-scale, 1));letter-spacing:1.5px;color:#a09484;margin:14px 0 6px;">SEUS VALORES</div>' +
+                    '<div style="font-size:calc(10px * var(--v-font-scale, 1));letter-spacing:3px;color:var(--v-gold, #c4953a);margin-bottom:6px;text-transform:uppercase;">◆ Rolagem de Atributos ◆</div>' +
+                    '<h2 style="font-size:calc(18px * var(--v-font-scale, 1));color:#e8c45a;margin: 0 0 var(--v-space-sm, 4px);letter-spacing:1.2px;">4d6 · descarta menor</h2>' +
+                    '<div style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);margin-bottom:14px;">Rolagem <b id="__atr-num" style="color:var(--v-gold, #c4953a)">1</b> de 6</div>' +
+                    '<div id="__atr-mount" style="width:260px;height:260px;margin: 0 auto var(--v-space-md-lg, 10px);display:flex;align-items:center;justify-content:center;"></div>' +
+                    '<div id="__atr-result" style="font-size:calc(14px * var(--v-font-scale, 1));color:var(--v-text, #d4c8b0);min-height:38px;line-height:1.5;letter-spacing:0.5px;"></div>' +
+                    '<div style="font-size:calc(10px * var(--v-font-scale, 1));letter-spacing:1.5px;color:var(--v-text-dim, #a09484);margin:14px 0 6px;">SEUS VALORES</div>' +
                     '<div id="__atr-pool" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:36px;"></div>' +
                 '</div>';
             document.body.appendChild(ov);
@@ -4891,7 +4891,7 @@ Busca rápida:
                     }
                 } else {
                     // Fallback sem 3D
-                    mount.innerHTML = '<div style="font-size:calc(24px * var(--v-font-scale, 1));color:#c4953a;">' + rolls.join(' ') + '</div>';
+                    mount.innerHTML = '<div style="font-size:calc(24px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);">' + rolls.join(' ') + '</div>';
                     await new Promise(r => setTimeout(r, 600));
                 }
 
@@ -4900,14 +4900,14 @@ Busca rápida:
                 resultEl.innerHTML = rolls.map(r => {
                     if (!droppedShown && r === dropped) {
                         droppedShown = true;
-                        return '<span style="text-decoration:line-through;opacity:0.4;color:#a09484;">' + r + '</span>';
+                        return '<span style="text-decoration:line-through;opacity:0.4;color:var(--v-text-dim, #a09484);">' + r + '</span>';
                     }
                     return '<b style="color:#e8c45a">' + r + '</b>';
                 }).join(' + ') + ' = <span style="font-size:calc(20px * var(--v-font-scale, 1));color:#e8c45a;font-weight:700;margin-left:6px;">' + total + '</span>';
 
                 // Adiciona chip ao pool visual
                 const chip = document.createElement('div');
-                chip.style.cssText = 'background:rgba(196,149,58,0.2);border:1px solid #c4953a;border-radius:6px;padding:5px 10px;font-size:calc(14px * var(--v-font-scale, 1));color:#e8c45a;font-weight:700;animation:atrChipIn 0.3s ease-out;';
+                chip.style.cssText = 'background:rgba(196,149,58,0.2);border:1px solid #c4953a;border-radius: var(--v-radius-sm, 6px);padding: 5px var(--v-space-md-lg, 10px);font-size:calc(14px * var(--v-font-scale, 1));color:#e8c45a;font-weight:700;animation:atrChipIn 0.3s ease-out;';
                 chip.textContent = total;
                 poolEl.appendChild(chip);
 
@@ -5058,7 +5058,7 @@ Busca rápida:
                 }
                 // Pointbuy: adiciona +/- inline
                 if (_statMethod === 'pointbuy') {
-                    inner += '<div class="pb-controls" style="display:inline-flex;gap:4px;margin-left:auto;">' +
+                    inner += '<div class="pb-controls" style="display:inline-flex;gap: var(--v-space-sm, 4px);margin-left:auto;">' +
                              '<button class="pb-btn" onclick="pointbuyAdjust(\'' + a + '\', -1)">−</button>' +
                              '<button class="pb-btn" onclick="pointbuyAdjust(\'' + a + '\', +1)">+</button>' +
                              '</div>';
@@ -5090,7 +5090,7 @@ Busca rápida:
 
         function _renderStandardPool(poolEl) {
             const usedValues = Object.values(sel.statAssignment);
-            poolEl.innerHTML = '<div style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim);width:100%;margin-bottom:4px">Toque num valor, depois num atributo:</div>';
+            poolEl.innerHTML = '<div style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim);width:100%;margin-bottom: var(--v-space-sm, 4px)">Toque num valor, depois num atributo:</div>';
             STANDARD_ARRAY.forEach(v => {
                 const timesInArray = STANDARD_ARRAY.filter(x => x === v).length;
                 const timesUsed = usedValues.filter(x => x === v).length;
@@ -5116,7 +5116,7 @@ Busca rápida:
                 poolEl.innerHTML = '<button class="v-btn v-btn-primary" style="width:100%;padding:14px;font-size:calc(14px * var(--v-font-scale, 1));" onclick="rollAttributesNow()">🎲 Rolar Atributos (4d6, descarta o menor)</button>';
                 return;
             }
-            poolEl.innerHTML = '<div style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim);width:100%;margin-bottom:4px">Seus valores rolados — distribua:</div>';
+            poolEl.innerHTML = '<div style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim);width:100%;margin-bottom: var(--v-space-sm, 4px)">Seus valores rolados — distribua:</div>';
             _rolledPool.forEach((v, i) => {
                 const timesInArray = _rolledPool.filter(x => x === v).length;
                 const timesUsed = usedValues.filter(x => x === v).length;
@@ -5136,7 +5136,7 @@ Busca rápida:
             // Sessao #31 (2026-05-25): user pediu pra rolagens nao poderem ser
             // refeitas. Substitui "Rolar Novamente" por indicador de lock.
             const locked = document.createElement('div');
-            locked.style.cssText = 'flex-basis:100%;margin-top:8px;padding:6px 10px;font-size:calc(11px * var(--v-font-scale, 1));text-align:center;color:var(--v-text-dim,#a09484);opacity:0.75;border-top:1px solid rgba(196,149,58,0.15);';
+            locked.style.cssText = 'flex-basis:100%;margin-top: var(--v-space-md, 8px);padding: 6px var(--v-space-md-lg, 10px);font-size:calc(11px * var(--v-font-scale, 1));text-align:center;color:var(--v-text-dim,#a09484);opacity:0.75;border-top:1px solid rgba(196,149,58,0.15);';
             locked.innerHTML = '🔒 Rolagens salvas — nao podem ser refeitas';
             poolEl.appendChild(locked);
         }
@@ -5146,7 +5146,7 @@ Busca rápida:
             const remaining = POINTBUY_BUDGET - cost;
             const color = remaining < 0 ? 'var(--v-danger,#d04848)' :
                           remaining === 0 ? 'var(--v-success,#7ad06b)' : 'var(--v-gold,#c4953a)';
-            poolEl.innerHTML = '<div style="font-size:calc(13px * var(--v-font-scale, 1));width:100%;text-align:center;color:' + color + ';padding:8px;background:rgba(28,22,16,0.5);border-radius:6px;">' +
+            poolEl.innerHTML = '<div style="font-size:calc(13px * var(--v-font-scale, 1));width:100%;text-align:center;color:' + color + ';padding: var(--v-space-md, 8px);background:rgba(28,22,16,0.5);border-radius: var(--v-radius-sm, 6px);">' +
                                '<b>Pontos: ' + cost + '/' + POINTBUY_BUDGET + '</b> · Restam: ' + remaining +
                                '</div>';
         }
@@ -5342,7 +5342,7 @@ Busca rápida:
             const subraceIconHtml = heraldicSubrace
                 ? `<div class="detail-icon detail-icon-heraldic" style="font-size:32px">${heraldicSubrace}</div>`
                 : `<div class="detail-icon" style="font-size:32px">${r.icon}</div>`;
-            html += `<div class="detail-header" style="padding-bottom:8px">${subraceIconHtml}<div class="detail-title" style="font-size:16px">${r.name}</div></div>`;
+            html += `<div class="detail-header" style="padding-bottom: var(--v-space-md, 8px)">${subraceIconHtml}<div class="detail-title" style="font-size:16px">${r.name}</div></div>`;
 
             // Selection content (reuse existing builders)
             if (r.halfelf) {
@@ -5442,13 +5442,13 @@ Busca rápida:
             // Sessao #38: cada card agora mostra PNG do dragao + texto.
             const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<div class="detail-section"><div class="detail-section-title">🐉 Ancestralidade Dracônica</div>`;
-            html += `<div class="v-caption" style="margin-bottom:8px">Toque em um dragão para ver detalhes e confirmar.</div>`;
+            html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Toque em um dragão para ver detalhes e confirmar.</div>`;
             html += `<div class="detail-option-grid" id="ancestryOptions">`;
             for (const [sk, sr] of Object.entries(race.subraces)) {
                 const info = ANCESTRY_DETAILS[sk];
-                html += `<div class="detail-option" onclick="selectAncestryOption('${raceKey}','${sk}',this)" style="text-align:center; padding:8px 6px;">`;
+                html += `<div class="detail-option" onclick="selectAncestryOption('${raceKey}','${sk}',this)" style="text-align:center; padding: var(--v-space-md, 8px) 6px;">`;
                 html += `<img src="/shared/img/character_creator/dragon-${sk}.webp?v=${_v}" alt="${sr.name}" `
-                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
+                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin: 0 auto var(--v-space-sm, 4px); `
                     + `background:radial-gradient(circle at center, rgba(196,149,58,0.18) 0%, transparent 65%); `
                     + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
                 html += `<div class="detail-option-name" style="font-size:calc(13px * var(--v-font-scale, 1));">${sr.name}</div>`;
@@ -5630,7 +5630,7 @@ Busca rápida:
 
         function buildVariantHumanSection(raceKey, race) {
             let html = `<div class="detail-section"><div class="detail-section-title">🔀 Tipo de Humano</div>`;
-            html += `<div class="v-caption" style="margin-bottom:8px">Escolha entre o Humano padrão (+1 em tudo) ou o Variante (mais especializado).</div>`;
+            html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Escolha entre o Humano padrão (+1 em tudo) ou o Variante (mais especializado).</div>`;
             html += `<div class="detail-option-grid" id="humanTypeOptions">`;
             html += `<div class="detail-option" onclick="selectHumanType(false,this)"><div class="detail-option-name">Humano Padrão</div><div class="detail-option-desc">+1 em todos os 6 atributos</div></div>`;
             html += `<div class="detail-option" onclick="selectHumanType(true,this)"><div class="detail-option-name">Humano Variante</div><div class="detail-option-desc">+1 em 2 atributos + 1 perícia + 1 talento</div></div>`;
@@ -5667,7 +5667,7 @@ Busca rápida:
             html += `<div class="section-body">`;
             html += `<div class="detail-option-grid single-col" id="vhFeatOptions">`;
             for (const [fid, f] of Object.entries(CREATION_FEATS)) {
-                html += `<div class="detail-option" style="padding:8px 10px" onclick="selectVariantFeat('${fid}',this)">`;
+                html += `<div class="detail-option" style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px)" onclick="selectVariantFeat('${fid}',this)">`;
                 html += `<div class="detail-option-name">${f.name}</div>`;
                 html += `<div class="detail-option-desc">${f.desc}</div></div>`;
             }
@@ -5808,7 +5808,7 @@ Busca rápida:
 
             let html = `<div class="detail-section" id="langSection"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🗣️ Idioma Adicional <span class="section-summary" id="langStatus">Escolha abaixo</span><span class="toggle-arrow">▾</span></div>`;
             html += `<div class="section-body">`;
-            html += `<div class="v-caption" style="margin-bottom:8px">Escolha 1 idioma extra além de: ${known.join(', ')}.</div>`;
+            html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Escolha 1 idioma extra além de: ${known.join(', ')}.</div>`;
             html += `<div class="lang-grid" id="langOptions">`;
             available.forEach(l => {
                 html += `<div class="lang-option" data-desc="${(l.desc || '').replace(/"/g, '&quot;')}" onclick="selectLanguage('${l.key}',this)">${l.name}</div>`;
@@ -6051,7 +6051,7 @@ Busca rápida:
                     const baseV = baseStats[a];
                     const raceBonus = v - baseV;
                     const pct = Math.min(100, (v / 20) * 100);
-                    html += `<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:calc(12px * var(--v-font-scale, 1));margin-bottom:2px"><span style="color:var(--v-text-dim)">${ATTR_PT[a]}</span><span><b style="color:var(--v-text-bright)">${v}</b> <span style="color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}; font-size:11px">(${sign}${m})</span>${raceBonus > 0 ? ` <span style="color:var(--v-gold);font-size:10px">+${raceBonus} raça</span>` : ''}</span></div>`;
+                    html += `<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:calc(12px * var(--v-font-scale, 1));margin-bottom: var(--v-space-xs, 2px)"><span style="color:var(--v-text-dim)">${ATTR_PT[a]}</span><span><b style="color:var(--v-text-bright)">${v}</b> <span style="color:${m >= 0 ? 'var(--v-success)' : 'var(--v-danger)'}; font-size:11px">(${sign}${m})</span>${raceBonus > 0 ? ` <span style="color:var(--v-gold);font-size:10px">+${raceBonus} raça</span>` : ''}</span></div>`;
                     html += `<div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%"></div></div></div>`;
                 });
                 html += `</div></div>`;
@@ -6352,7 +6352,7 @@ Busca rápida:
             html += '</div>';
             // Hero imagem com glow + 4 ornamentos
             if (opts.imgUrl) {
-                html += '<div style="position:relative; max-width:200px; margin:8px auto 18px; padding:14px;">';
+                html += '<div style="position:relative; max-width:200px; margin: var(--v-space-md, 8px) auto 18px; padding:14px;">';
                 html += '<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</span>';
                 html += '<span style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</span>';
                 html += '<span style="position:absolute; left:0; top:50%; transform:translateY(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">◆</span>';
@@ -6367,18 +6367,18 @@ Busca rápida:
             // Subtitle / lore
             if (opts.subtitle) {
                 html += '<div style="text-align:center; font-size:calc(13px * var(--v-font-scale, 1)); '
-                    + 'color:var(--v-text-dim,#a09484); margin:0 12px 14px; line-height:1.55; font-style:italic;">'
+                    + 'color:var(--v-text-dim,#a09484); margin: 0 var(--v-space-lg, 12px) 14px; line-height:1.55; font-style:italic;">'
                     + opts.subtitle + '</div>';
             }
             // Mechanics info bloco
             if (opts.mechanicsHtml) {
-                html += '<div style="margin:0 12px 18px; padding:12px 14px; '
+                html += '<div style="margin: 0 var(--v-space-lg, 12px) 18px; padding: var(--v-space-lg, 12px) 14px; '
                     + 'background:rgba(196,149,58,0.06); border-left:3px solid var(--v-gold,#c4953a); '
-                    + 'border-radius:6px; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.6;">'
+                    + 'border-radius: var(--v-radius-sm, 6px); font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.6;">'
                     + opts.mechanicsHtml + '</div>';
             }
             // Botao confirmar epico
-            html += '<button class="v-btn v-btn-primary" style="width:90%; margin:8px 5% 12px; '
+            html += '<button class="v-btn v-btn-primary" style="width:90%; margin: var(--v-space-md, 8px) 5% var(--v-space-lg, 12px); '
                 + 'font-family:var(--v-font-display,Cinzel,serif); letter-spacing:2px;" '
                 + 'onclick="(_creatorDetailConfirm||function(){})()">✓ Confirmar Escolha</button>';
 
@@ -6396,12 +6396,12 @@ Busca rápida:
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredEnemy()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">🏹 Inimigo Favorito</div>`;
             html += `<div class="detail-subtitle">Patrulheiro — toque em um inimigo para ver detalhes e confirmar.</div></div>`;
-            html += `<div class="v-card-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">`;
+            html += `<div class="v-card-grid" style="display:grid; grid-template-columns:1fr 1fr; gap: var(--v-space-md, 8px);">`;
             for (const [feId, fe] of Object.entries(RANGER_FAVORED_ENEMIES)) {
                 const selCls = sel.favoredEnemy === feId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectFavoredEnemy('${feId}')" style="text-align:center;">`;
                 html += `<img src="/shared/img/character_creator/ranger-enemy-${feId}.webp?v=${_v}" alt="${fe.name}" `
-                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
+                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin: 0 auto var(--v-space-sm, 4px); `
                     + `background:radial-gradient(circle at center, rgba(196,149,58,0.15) 0%, transparent 65%); `
                     + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
                 html += `<div class="v-card-name" style="font-size:calc(13px * var(--v-font-scale, 1));letter-spacing:0.5px;">${fe.name}</div>`;
@@ -6457,13 +6457,13 @@ Busca rápida:
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredTerrain()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">🗺️ Terreno Favorito</div>`;
             html += `<div class="detail-subtitle">Patrulheiro — toque em um terreno para ver detalhes e confirmar.</div></div>`;
-            html += `<div class="v-card-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">`;
+            html += `<div class="v-card-grid" style="display:grid; grid-template-columns:1fr 1fr; gap: var(--v-space-md, 8px);">`;
             for (const [ftId, ft] of Object.entries(RANGER_FAVORED_TERRAINS)) {
                 const selCls = sel.favoredTerrain === ftId ? ' selected' : '';
-                html += `<div class="v-card${selCls}" onclick="selectFavoredTerrain('${ftId}')" style="text-align:center; padding:6px 4px;">`;
+                html += `<div class="v-card${selCls}" onclick="selectFavoredTerrain('${ftId}')" style="text-align:center; padding: 6px var(--v-space-sm, 4px);">`;
                 // object-fit:cover para mostrar paisagem como vinheta (com fundo intacto)
                 html += `<img src="/shared/img/character_creator/ranger-terrain-${ftId}.webp?v=${_v}" alt="${ft.name}" `
-                    + `style="display:block; width:100%; aspect-ratio:1/1; max-width:120px; object-fit:cover; margin:0 auto 4px; `
+                    + `style="display:block; width:100%; aspect-ratio:1/1; max-width:120px; object-fit:cover; margin: 0 auto var(--v-space-sm, 4px); `
                     + `border-radius:8px; border:1px solid var(--v-border, #4a3828);" `
                     + `loading="lazy" onerror="this.style.opacity='0.3'" />`;
                 html += `<div class="v-card-name" style="font-size:calc(13px * var(--v-font-scale, 1));letter-spacing:0.5px;">${ft.name}</div>`;
@@ -6524,12 +6524,12 @@ Busca rápida:
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelDraconicAncestry()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">🐉 Linhagem Dracônica</div>`;
             html += `<div class="detail-subtitle">Feiticeiro — toque em uma cor para ver detalhes e confirmar.</div></div>`;
-            html += `<div class="v-caption" style="margin-bottom:8px">5 cromáticos (malignos) e 5 metálicos (bondosos).</div>`;
+            html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">5 cromáticos (malignos) e 5 metálicos (bondosos).</div>`;
             for (const [daId, da] of Object.entries(SORCERER_DRACONIC_ANCESTRY)) {
                 const selCls = sel.draconicAncestry === daId ? ' selected' : '';
                 html += `<div class="v-card${selCls}" onclick="selectDraconicAncestry('${daId}')" style="text-align:center;">`;
                 html += `<img src="/shared/img/character_creator/dragon-${daId}.webp?v=${_v}" alt="${da.name}" `
-                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin:0 auto 4px; `
+                    + `style="display:block; width:88px; height:88px; object-fit:contain; margin: 0 auto var(--v-space-sm, 4px); `
                     + `background:radial-gradient(circle at center, rgba(196,149,58,0.15) 0%, transparent 65%); `
                     + `border-radius:8px;" loading="lazy" onerror="this.style.opacity='0.3'" />`;
                 html += `<div class="v-card-name" style="font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:1px;">${da.name}</div>`;
@@ -6592,7 +6592,7 @@ Busca rápida:
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelRogueExpertise()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">🎯 Especialização (Expertise)</div>`;
             html += `<div class="detail-subtitle">Ladino — escolha 2 perícias para dobrar o bônus de proficiência. (PHB p.96)</div></div>`;
-            html += `<div class="v-caption" style="margin-bottom:8px"><b>${(sel.rogueExpertise||[]).length}/2</b> selecionadas. Toque para alternar.</div>`;
+            html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)"><b>${(sel.rogueExpertise||[]).length}/2</b> selecionadas. Toque para alternar.</div>`;
             html += `<div class="lang-grid">`;
             allSkills.forEach(sk => {
                 const isSelected = (sel.rogueExpertise || []).includes(sk);
@@ -6688,7 +6688,7 @@ Busca rápida:
             if (!slug) return '';
             /* Fallback: se o WebP nao existir (onerror), some o thumb e fica so o texto */
             return '<img src="/shared/img/items/' + slug + '.webp" alt="" ' +
-                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;flex-shrink:0;border-radius:4px;background:rgba(0,0,0,0.2);" ' +
+                   'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;flex-shrink:0;border-radius: var(--v-radius-xs, 4px);background:rgba(0,0,0,0.2);" ' +
                    'loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';">';
         }
 
@@ -6889,13 +6889,13 @@ Busca rápida:
                 html += `<span class="v-step-line"></span>`;
                 html += `</div>`;
                 /* Subtitle narrativo */
-                html += `<div style="text-align:center; font-size:calc(13px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin:0 8px 14px; line-height:1.55; font-style:italic;">`;
+                html += `<div style="text-align:center; font-size:calc(13px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin: 0 var(--v-space-md, 8px) 14px; line-height:1.55; font-style:italic;">`;
                 html += `D&amp;D 5e \u2014 ${data.class_display || 'sua classe'} comeca conhecendo <b style="color:var(--v-gold,#c4953a); font-style:normal;">${quota}</b> magia${quota > 1 ? 's' : ''}.`;
                 html += `<br>Toque em uma magia pra ver detalhes antes de escolher.`;
                 html += `</div>`;
                 /* Medalha contador dourado */
-                html += `<div style="text-align:center; margin:0 0 16px;">`;
-                html += `<div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; background:linear-gradient(180deg, rgba(196,149,58,0.18) 0%, rgba(196,149,58,0.05) 100%); border:1px solid var(--v-gold,#c4953a); border-radius:18px; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(11px * var(--v-font-scale, 1)); letter-spacing:2px; text-transform:uppercase; color:var(--v-gold-light,#dbb668);">`;
+                html += `<div style="text-align:center; margin: 0 0 var(--v-space-xl, 16px);">`;
+                html += `<div style="display:inline-flex; align-items:center; gap: var(--v-space-md, 8px); padding: 6px var(--v-space-xl, 16px); background:linear-gradient(180deg, rgba(196,149,58,0.18) 0%, rgba(196,149,58,0.05) 100%); border:1px solid var(--v-gold,#c4953a); border-radius:18px; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(11px * var(--v-font-scale, 1)); letter-spacing:2px; text-transform:uppercase; color:var(--v-gold-light,#dbb668);">`;
                 html += `<span>Selecionadas</span>`;
                 html += `<span style="font-family:var(--v-font-display,Cinzel,serif); font-weight:700; font-size:calc(15px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); text-shadow:0 0 6px rgba(196,149,58,0.4);">${selCount} / ${quota}</span>`;
                 html += `</div></div>`;
@@ -6906,17 +6906,17 @@ Busca rápida:
                     const costText = skill.cost > 0 ? `<b style="color:var(--v-gold,#c4953a);">${skill.cost}</b> MP` : '<b style="color:var(--v-gold-light,#dbb668);">Truque</b> \u00b7 sem custo';
                     const safeName = skill.name.replace(/'/g, "\\'");
                     const pngUrl = _spellPngUrl(skill.name);
-                    html += `<div class="v-card v-spell-card${selected}" onclick="openL1SkillDetail('${safeName}')" style="display:flex; align-items:center; gap:14px; padding:12px 14px; margin-bottom:8px; cursor:pointer; transition:all 0.18s ease; position:relative;">`;
+                    html += `<div class="v-card v-spell-card${selected}" onclick="openL1SkillDetail('${safeName}')" style="display:flex; align-items:center; gap:14px; padding: var(--v-space-lg, 12px) 14px; margin-bottom: var(--v-space-md, 8px); cursor:pointer; transition:all 0.18s ease; position:relative;">`;
                     /* PNG com halo dourado */
                     html += `<div style="position:relative; flex-shrink:0;">`;
                     if (isSel) {
-                        html += `<div style="position:absolute; inset:-3px; border:2px solid var(--v-gold,#c4953a); border-radius:10px; box-shadow:0 0 14px rgba(196,149,58,0.55); pointer-events:none;"></div>`;
+                        html += `<div style="position:absolute; inset:-3px; border:2px solid var(--v-gold,#c4953a); border-radius: var(--v-radius, 10px); box-shadow:0 0 14px rgba(196,149,58,0.55); pointer-events:none;"></div>`;
                     }
                     html += `<img src="${pngUrl}" alt="${skill.name}" style="display:block; width:54px; height:54px; object-fit:contain; border-radius:8px; background:radial-gradient(circle, rgba(196,149,58,0.12) 0%, rgba(42,36,32,0.0) 70%); border:1px solid rgba(196,149,58,${isSel ? '0.6' : '0.25'});" loading="lazy" onerror="this.style.display='none'" />`;
                     html += `</div>`;
                     /* Texto */
                     html += `<div style="flex:1; min-width:0;">`;
-                    html += `<div class="v-card-name" style="margin:0 0 4px; font-size:calc(14px * var(--v-font-scale, 1)); display:flex; align-items:center; gap:6px;">`;
+                    html += `<div class="v-card-name" style="margin: 0 0 var(--v-space-sm, 4px); font-size:calc(14px * var(--v-font-scale, 1)); display:flex; align-items:center; gap:6px;">`;
                     if (isSel) html += `<span style="color:var(--v-gold-light,#dbb668);">\u2713</span>`;
                     html += `<span>${skill.name}</span>`;
                     html += `</div>`;
@@ -6933,7 +6933,7 @@ Busca rápida:
                 const isReady = selCount === quota;
                 const btnClass = isReady ? 'v-btn-primary' : 'v-btn-secondary';
                 const btnDisabled = isReady ? '' : 'disabled';
-                html += `<button class="v-btn ${btnClass}" style="width:100%; margin-top:16px; font-family:var(--v-font-display,Cinzel,serif); letter-spacing:2px;" ${btnDisabled} onclick="confirmL1Skill()">`;
+                html += `<button class="v-btn ${btnClass}" style="width:100%; margin-top: var(--v-space-xl, 16px); font-family:var(--v-font-display,Cinzel,serif); letter-spacing:2px;" ${btnDisabled} onclick="confirmL1Skill()">`;
                 html += isReady ? '\u2713 Confirmar Magias' : `Escolha mais ${quota - selCount}`;
                 html += `</button>`;
             } else {
@@ -6946,7 +6946,7 @@ Busca rápida:
                 html += `<span class="v-step-text">Habilidade Inicial</span>`;
                 html += `<span class="v-step-line"></span>`;
                 html += `</div>`;
-                html += `<div style="text-align:center; font-size:calc(13px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin:0 8px 14px; font-style:italic;">Sua classe comeca com <b style="color:var(--v-gold,#c4953a); font-style:normal;">${(data.skills || []).find(s => s.is_default)?.name || 'habilidade padrao'}</b>. Escolha mais uma:</div>`;
+                html += `<div style="text-align:center; font-size:calc(13px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin: 0 var(--v-space-md, 8px) 14px; font-style:italic;">Sua classe comeca com <b style="color:var(--v-gold,#c4953a); font-style:normal;">${(data.skills || []).find(s => s.is_default)?.name || 'habilidade padrao'}</b>. Escolha mais uma:</div>`;
                 for (const skill of choices) {
                     const selected = sel.selectedL1Skill === skill.id ? ' selected' : '';
                     const costText = skill.cost > 0 ? ` \u2022 ${skill.cost} MP` : '';
@@ -6987,7 +6987,7 @@ Busca rápida:
             html += `<span class="v-step-line"></span>`;
             html += `</div>`;
             /* Hero PNG com 4 ornamentos cardinais + radial glow */
-            html += `<div style="position:relative; max-width:200px; margin:8px auto 18px; padding:14px;">`;
+            html += `<div style="position:relative; max-width:200px; margin: var(--v-space-md, 8px) auto 18px; padding:14px;">`;
             /* Ornamentos cardinais nos 4 cantos */
             html += `<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
             html += `<span style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); color:var(--v-gold,#c4953a); font-size:calc(11px * var(--v-font-scale, 1)); text-shadow:0 0 6px rgba(196,149,58,0.7);">\u25C6</span>`;
@@ -6997,13 +6997,13 @@ Busca rápida:
             html += `<img src="${pngUrl}" alt="${skillName}" style="display:block; width:160px; height:160px; object-fit:contain; margin:0 auto; border-radius:12px; background:radial-gradient(circle at center, rgba(196,149,58,0.22) 0%, rgba(42,36,32,0.0) 65%); box-shadow:0 6px 22px rgba(196,149,58,0.28);" loading="lazy" onerror="this.style.display='none'" />`;
             html += `</div>`;
             /* Badge custo MP epico */
-            html += `<div style="text-align:center; margin:0 0 16px;">`;
-            html += `<div style="display:inline-block; padding:6px 18px; background:linear-gradient(180deg, rgba(196,149,58,0.20) 0%, rgba(196,149,58,0.06) 100%); border:1px solid var(--v-gold,#c4953a); border-radius:20px; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(12px * var(--v-font-scale, 1)); letter-spacing:2px; text-transform:uppercase; color:var(--v-gold-light,#dbb668); text-shadow:0 0 8px rgba(196,149,58,0.4);">`;
+            html += `<div style="text-align:center; margin: 0 0 var(--v-space-xl, 16px);">`;
+            html += `<div style="display:inline-block; padding:6px 18px; background:linear-gradient(180deg, rgba(196,149,58,0.20) 0%, rgba(196,149,58,0.06) 100%); border:1px solid var(--v-gold,#c4953a); border-radius: var(--v-radius-pill, 20px); font-family:var(--v-font-display,Cinzel,serif); font-size:calc(12px * var(--v-font-scale, 1)); letter-spacing:2px; text-transform:uppercase; color:var(--v-gold-light,#dbb668); text-shadow:0 0 8px rgba(196,149,58,0.4);">`;
             html += costText;
             html += `</div></div>`;
             /* Descricao em pergaminho */
             if (skill.desc) {
-                html += `<div style="margin:0 12px 20px; padding:14px 16px; background:rgba(196,149,58,0.06); border-left:3px solid var(--v-gold,#c4953a); border-radius:6px; font-size:calc(13px * var(--v-font-scale, 1)); line-height:1.65; color:var(--v-text,#d4c8b0); font-family:var(--v-font, MedievalSharp, serif);">${skill.desc}</div>`;
+                html += `<div style="margin: 0 var(--v-space-lg, 12px) 20px; padding: 14px var(--v-space-xl, 16px); background:rgba(196,149,58,0.06); border-left:3px solid var(--v-gold,#c4953a); border-radius: var(--v-radius-sm, 6px); font-size:calc(13px * var(--v-font-scale, 1)); line-height:1.65; color:var(--v-text,#d4c8b0); font-family:var(--v-font, MedievalSharp, serif);">${skill.desc}</div>`;
             }
             /* Botao selecionar epico */
             const btnClass = isSel ? 'v-btn-secondary' : (atQuota ? 'v-btn-secondary' : 'v-btn-primary');
@@ -7011,7 +7011,7 @@ Busca rápida:
             const btnText = isSel ? '\u2713 Selecionada \u2014 toque para remover'
                                   : (atQuota ? `Quota atingida (${quota}/${quota})`
                                              : '\u2728 Selecionar Magia');
-            html += `<button class="v-btn ${btnClass}" style="width:90%; margin:0 5% 8px; font-family:var(--v-font-display,Cinzel,serif); letter-spacing:1.5px;" ${btnDisabled} onclick="toggleL1Skill('${safeName}'); closeL1SkillDetail();">${btnText}</button>`;
+            html += `<button class="v-btn ${btnClass}" style="width:90%; margin: 0 5% var(--v-space-md, 8px); font-family:var(--v-font-display,Cinzel,serif); letter-spacing:1.5px;" ${btnDisabled} onclick="toggleL1Skill('${safeName}'); closeL1SkillDetail();">${btnText}</button>`;
 
             document.getElementById('l1skillSelectContent').innerHTML = html;
         }
@@ -7165,7 +7165,7 @@ Busca rápida:
                 const _allLangs = [...LANGUAGES.standard, ...LANGUAGES.exotic];
                 const _availLangs = _allLangs.filter(l => !_raceKnown.includes(l.key) && !_racePicked.includes(l.key));
                 html += `<div class="detail-section"><div class="detail-section-title">🗣️ Idiomas do Antecedente <span class="section-summary" id="bgLangStatus">0/${bg.languageChoice}</span></div>`;
-                html += `<div class="v-caption" style="margin-bottom:8px">Escolha ${bg.languageChoice} idioma(s) — PHB.</div>`;
+                html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Escolha ${bg.languageChoice} idioma(s) — PHB.</div>`;
                 html += `<div class="lang-grid" id="bgLangOptions">`;
                 _availLangs.forEach(l => {
                     const _on = (sel.bgLanguages || []).includes(l.key);
@@ -7223,9 +7223,9 @@ Busca rápida:
                 { key: 'flaw', label: 'Defeito', icon: '💔', items: data.flaws }
             ];
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="skipPersonality()">← Pular</button>`;
-            html += `<div class="v-title-sm" style="margin-top:8px">Personalidade</div>`;
+            html += `<div class="v-title-sm" style="margin-top: var(--v-space-md, 8px)">Personalidade</div>`;
             html += `<div class="v-caption">Defina a personalidade do seu personagem. Opcional — toque em cada categoria para expandir.</div>`;
-            html += `<button class="v-btn v-btn-secondary btn-block" style="margin:0 0 10px" onclick="randomizePersonality()">🎲 Aleatório</button>`;
+            html += `<button class="v-btn v-btn-secondary btn-block" style="margin: 0 0 var(--v-space-md-lg, 10px)" onclick="randomizePersonality()">🎲 Aleatório</button>`;
             html += `<div class="v-accordion">`;
             cats.forEach(cat => {
                 html += `<div class="v-accordion-section collapsed" id="persSection_${cat.key}">`;
@@ -7245,7 +7245,7 @@ Busca rápida:
                 html += `</div></div>`;
             });
             html += `</div>`;
-            html += `<button class="v-btn v-btn-primary btn-block" id="persConfirmBtn" style="margin-top:12px" onclick="confirmPersonality()">✓ Confirmar Personalidade</button>`;
+            html += `<button class="v-btn v-btn-primary btn-block" id="persConfirmBtn" style="margin-top: var(--v-space-lg, 12px)" onclick="confirmPersonality()">✓ Confirmar Personalidade</button>`;
             document.getElementById('personalityContent').innerHTML = html;
         }
 
@@ -7349,7 +7349,7 @@ Busca rápida:
             // Show background granted skills
             const bgInfo = document.getElementById('skillBgInfo');
             if (bgSkills.length > 0) {
-                bgInfo.innerHTML = `<div class="detail-section" style="margin-bottom:12px"><div class="detail-section-title" style="font-size:12px">✅ Já incluídas pelo antecedente (${bg.name})</div>${bgSkills.map(s => `<div class="detail-row" style="color:var(--v-success);font-size:11px">• ${SKILL_PT[s]} (${ATTR_ABBR[SKILL_ATTR[s]]})</div>`).join('')}</div>`;
+                bgInfo.innerHTML = `<div class="detail-section" style="margin-bottom: var(--v-space-lg, 12px)"><div class="detail-section-title" style="font-size:var(--v-space-lg, 12px)">✅ Já incluídas pelo antecedente (${bg.name})</div>${bgSkills.map(s => `<div class="detail-row" style="color:var(--v-success);font-size:11px">• ${SKILL_PT[s]} (${ATTR_ABBR[SKILL_ATTR[s]]})</div>`).join('')}</div>`;
             }
 
             const confirmBtn = document.getElementById('skillConfirm');
@@ -7588,11 +7588,11 @@ Busca rápida:
 
             // --- Header (always visible) ---
             const alignText = sel.alignment && ALIGNMENTS[sel.alignment] ? ` | ${ALIGNMENTS[sel.alignment].icon} ${ALIGNMENTS[sel.alignment].abbr}` : '';
-            html += `<div class="sheet-header" style="padding:4px 0 8px">`;
+            html += `<div class="sheet-header" style="padding: var(--v-space-sm, 4px) 0 var(--v-space-md, 8px)">`;
             if (sel._wasRandom) {
-                html += `<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-bottom:4px">`;
-                html += `<input class="v-input" id="summaryName" value="${sel.name}" maxlength="15" placeholder="Nome" style="flex:1;text-align:center;font-size:calc(16px * var(--v-font-scale, 1));padding:6px 8px">`;
-                html += `<input class="v-input" id="summarySurname" value="${sel.surname}" maxlength="15" placeholder="Sobrenome" style="flex:1;text-align:center;font-size:calc(16px * var(--v-font-scale, 1));padding:6px 8px">`;
+                html += `<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-bottom: var(--v-space-sm, 4px)">`;
+                html += `<input class="v-input" id="summaryName" value="${sel.name}" maxlength="15" placeholder="Nome" style="flex:1;text-align:center;font-size:calc(16px * var(--v-font-scale, 1));padding: 6px var(--v-space-md, 8px)">`;
+                html += `<input class="v-input" id="summarySurname" value="${sel.surname}" maxlength="15" placeholder="Sobrenome" style="flex:1;text-align:center;font-size:calc(16px * var(--v-font-scale, 1));padding: 6px var(--v-space-md, 8px)">`;
                 html += `</div>`;
             } else {
                 html += `<div class="sheet-name" style="font-size:20px">${fullName}</div>`;
@@ -7601,7 +7601,7 @@ Busca rápida:
             html += `<div class="sheet-subtitle">${g ? g.icon + ' ' + g.name : ''} | Nível 1 | <span class="vi vi-coin sm"></span> +${bg.gold} Valdoritas</div></div>`;
 
             // --- Combat Stats Grid (always visible) ---
-            html += `<div class="combat-stats" style="margin-bottom:8px">`;
+            html += `<div class="combat-stats" style="margin-bottom: var(--v-space-md, 8px)">`;
             html += `<div class="combat-stat-box"><div class="combat-stat-label">CA</div><div class="combat-stat-value">${acInfo.ac}</div><div class="combat-stat-detail">Defesa</div></div>`;
             html += `<div class="combat-stat-box"><div class="combat-stat-label">Iniciativa</div><div class="combat-stat-value">${mod(stats.dexterity) >= 0 ? '+' : ''}${mod(stats.dexterity)}</div><div class="combat-stat-detail">mod DES</div></div>`;
             html += `<div class="combat-stat-box"><div class="combat-stat-label">Velocidade</div><div class="combat-stat-value">${speed_m}m</div><div class="combat-stat-detail">${speed} ft</div></div>`;
@@ -7609,7 +7609,7 @@ Busca rápida:
             html += `</div>`;
 
             // --- Attribute Grid (always visible) ---
-            html += `<div class="attr-grid" style="margin-bottom:8px">`;
+            html += `<div class="attr-grid" style="margin-bottom: var(--v-space-md, 8px)">`;
             attrs.forEach(a => {
                 const v = stats[a];
                 const m = mod(v);
@@ -7758,7 +7758,7 @@ Busca rápida:
 
             // Re-roll button (only if character was randomly generated)
             if (sel._wasRandom) {
-                html += `<div style="margin-top:12px;display:flex;gap:8px">`;
+                html += `<div style="margin-top: var(--v-space-lg, 12px);display:flex;gap: var(--v-space-md, 8px)">`;
                 html += `<button type="button" class="v-btn v-btn-random" style="flex:1;margin-bottom:0" onclick="randomizeCharacter()">🎲 Sortear Outro</button>`;
                 html += `<button type="button" class="v-btn v-btn-secondary" style="flex:1" onclick="resetAndGoStart()">✏️ Criar Manualmente</button>`;
                 html += `</div>`;
@@ -8004,11 +8004,11 @@ Busca rápida:
                             window.vPopup.show({
                                 header: '<h2 style="margin:0;color:var(--v-gold,#c4953a);font-family:var(--v-font-display,Cinzel,serif);letter-spacing:2px;text-align:center;">Limite de Personagens</h2>',
                                 body: ''
-                                    + '<div style="text-align:center;font-family:var(--v-font,MedievalSharp,serif);line-height:1.6;color:var(--v-text,#d4c8b0);padding:8px 4px;">'
-                                    + '  <div style="font-size:56px;margin:8px 0 16px;color:var(--v-gold,#c4953a);text-shadow:0 0 20px rgba(196,149,58,0.4);">⚔</div>'
+                                    + '<div style="text-align:center;font-family:var(--v-font,MedievalSharp,serif);line-height:1.6;color:var(--v-text,#d4c8b0);padding: var(--v-space-md, 8px) var(--v-space-sm, 4px);">'
+                                    + '  <div style="font-size:56px;margin: var(--v-space-md, 8px) 0 var(--v-space-xl, 16px);color:var(--v-gold,#c4953a);text-shadow:0 0 20px rgba(196,149,58,0.4);">⚔</div>'
                                     + '  <p style="margin:0 0 14px;font-size:15px;"><strong style="color:var(--v-gold,#c4953a);">Você já tem ' + cur + ' aventureiros ativos.</strong></p>'
                                     + '  <p style="margin:0 0 14px;font-size:14px;">O máximo permitido é <strong>' + lim + ' personagens</strong> por conta.</p>'
-                                    + '  <p style="margin:8px 0 0;color:var(--v-text-dim,#a09484);font-size:13px;font-style:italic;">'
+                                    + '  <p style="margin: var(--v-space-md, 8px) 0 0;color:var(--v-text-dim,#a09484);font-size:13px;font-style:italic;">'
                                     + '    Apague um aventureiro existente no <em>Hall</em> antes de criar outro.'
                                     + '  </p>'
                                     + '</div>',
@@ -8109,19 +8109,19 @@ Busca rápida:
                 overlay.id = '__submit_confirm_overlay';
                 overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(15,12,8,0.92);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Cinzel,Georgia,serif;color:#e0d8c0;backdrop-filter:blur(4px);';
                 overlay.innerHTML =
-                    '<div style="max-width:380px;width:100%;background:linear-gradient(180deg,rgba(42,36,32,0.97),rgba(26,21,16,0.97));border:1px solid rgba(196,149,58,0.6);border-radius:12px;padding:24px;text-align:center;box-shadow:0 12px 36px rgba(0,0,0,0.7);">' +
-                        '<div style="font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:3px;color:#c4953a;margin-bottom:8px;text-transform:uppercase;">◆ Iniciar Aventura ◆</div>' +
-                        '<div style="width:120px;height:120px;margin:4px auto 16px;border-radius:12px;border:1px solid rgba(196,149,58,0.5);background:radial-gradient(circle at 50% 30%, rgba(196,149,58,0.16), rgba(15,12,8,0.5));box-shadow:0 4px 16px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(196,149,58,0.15);display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
+                    '<div style="max-width:380px;width:100%;background:linear-gradient(180deg,rgba(42,36,32,0.97),rgba(26,21,16,0.97));border:1px solid rgba(196,149,58,0.6);border-radius:12px;padding: var(--v-space-2xl, 24px);text-align:center;box-shadow:0 12px 36px rgba(0,0,0,0.7);">' +
+                        '<div style="font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:3px;color:var(--v-gold, #c4953a);margin-bottom: var(--v-space-md, 8px);text-transform:uppercase;">◆ Iniciar Aventura ◆</div>' +
+                        '<div style="width:120px;height:120px;margin: var(--v-space-sm, 4px) auto var(--v-space-xl, 16px);border-radius:12px;border:1px solid rgba(196,149,58,0.5);background:radial-gradient(circle at 50% 30%, rgba(196,149,58,0.16), rgba(15,12,8,0.5));box-shadow:0 4px 16px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(196,149,58,0.15);display:flex;align-items:center;justify-content:center;overflow:hidden;">' +
                             '<img src="' + _classImgBase + _classSlug + '.webp" alt="" onerror="this.parentNode.style.display=\'none\'" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.6));">' +
                         '</div>' +
                         '<h2 style="font-size:calc(20px * var(--v-font-scale, 1));color:#e8c45a;margin:0 0 18px;letter-spacing:1.2px;font-weight:700;">' + summaryName + '</h2>' +
-                        '<div style="font-size:calc(13px * var(--v-font-scale, 1));color:#a09484;margin-bottom:18px;line-height:1.5;">' +
+                        '<div style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);margin-bottom:18px;line-height:1.5;">' +
                             raceLabel + ' · ' + classLabel +
                         '</div>' +
-                        '<p style="font-size:calc(13px * var(--v-font-scale, 1));color:#d4c8b0;margin:0 0 22px;line-height:1.55;">Pronto para iniciar a jornada? <br>Esta escolha definirá o início da sua aventura em Valdória.</p>' +
-                        '<div style="display:flex;gap:10px;flex-direction:column;">' +
-                            '<button id="__confirm_yes" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 24px;border-radius:8px;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));font-weight:700;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;min-height:48px;">⚔️ Iniciar Aventura</button>' +
-                            '<button id="__confirm_no" style="background:transparent;color:#a09484;border:1px solid rgba(196,149,58,0.3);padding:12px 24px;border-radius:8px;font-family:Cinzel,serif;font-size:calc(12px * var(--v-font-scale, 1));letter-spacing:1px;cursor:pointer;min-height:42px;">Voltar para revisar</button>' +
+                        '<p style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text, #d4c8b0);margin:0 0 22px;line-height:1.55;">Pronto para iniciar a jornada? <br>Esta escolha definirá o início da sua aventura em Valdória.</p>' +
+                        '<div style="display:flex;gap: var(--v-space-md-lg, 10px);flex-direction:column;">' +
+                            '<button id="__confirm_yes" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding: 14px var(--v-space-2xl, 24px);border-radius:8px;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));font-weight:700;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;min-height:48px;">⚔️ Iniciar Aventura</button>' +
+                            '<button id="__confirm_no" style="background:transparent;color:var(--v-text-dim, #a09484);border:1px solid rgba(196,149,58,0.3);padding: var(--v-space-lg, 12px) var(--v-space-2xl, 24px);border-radius:8px;font-family:Cinzel,serif;font-size:calc(12px * var(--v-font-scale, 1));letter-spacing:1px;cursor:pointer;min-height:42px;">Voltar para revisar</button>' +
                         '</div>' +
                     '</div>';
                 document.body.appendChild(overlay);
@@ -8175,12 +8175,12 @@ Busca rápida:
             try {
                 const ov = document.createElement('div');
                 ov.id = '__redirect_loading_overlay';
-                ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
+                ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding: var(--v-space-2xl, 24px);font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
                 ov.innerHTML =
                     '<div style="max-width:360px;text-align:center;">' +
-                        '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom:16px;animation:pulse 1.4s ease-in-out infinite;">⚔️</div>' +
-                        '<h2 style="font-size:calc(18px * var(--v-font-scale, 1));color:#c4953a;margin:0 0 12px;letter-spacing:2px;text-transform:uppercase;">Iniciando aventura...</h2>' +
-                        '<p style="font-size:calc(13px * var(--v-font-scale, 1));line-height:1.6;margin:0;color:#a09484;">Seu personagem foi criado. Aguarde a transição para Valdória.</p>' +
+                        '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom: var(--v-space-xl, 16px);animation:pulse 1.4s ease-in-out infinite;">⚔️</div>' +
+                        '<h2 style="font-size:calc(18px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin: 0 0 var(--v-space-lg, 12px);letter-spacing:2px;text-transform:uppercase;">Iniciando aventura...</h2>' +
+                        '<p style="font-size:calc(13px * var(--v-font-scale, 1));line-height:1.6;margin:0;color:var(--v-text-dim, #a09484);">Seu personagem foi criado. Aguarde a transição para Valdória.</p>' +
                     '</div>';
                 document.body.appendChild(ov);
             } catch (_) {}
@@ -8196,13 +8196,13 @@ Busca rápida:
             try {
                 const overlay = document.createElement('div');
                 overlay.id = '__creation_success_ui';
-                overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
+                overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding: var(--v-space-2xl, 24px);font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
                 overlay.innerHTML =
                     '<div style="max-width:420px;text-align:center;">' +
-                    '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom:16px;">⚔️</div>' +
-                    '<h2 style="font-size:calc(20px * var(--v-font-scale, 1));color:#c4953a;margin:0 0 12px;letter-spacing:1.5px;text-transform:uppercase;">' + title + '</h2>' +
-                    '<p style="font-size:calc(14px * var(--v-font-scale, 1));line-height:1.6;margin:0 0 20px;color:#a09484;">' + body + '</p>' +
-                    '<button id="__creation_close_btn" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 32px;border-radius:10px;font-family:Cinzel,serif;font-size:calc(14px * var(--v-font-scale, 1));font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;min-height:48px;">Voltar ao chat</button>' +
+                    '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom: var(--v-space-xl, 16px);">⚔️</div>' +
+                    '<h2 style="font-size:calc(20px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin: 0 0 var(--v-space-lg, 12px);letter-spacing:1.5px;text-transform:uppercase;">' + title + '</h2>' +
+                    '<p style="font-size:calc(14px * var(--v-font-scale, 1));line-height:1.6;margin:0 0 20px;color:var(--v-text-dim, #a09484);">' + body + '</p>' +
+                    '<button id="__creation_close_btn" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 32px;border-radius: var(--v-radius, 10px);font-family:Cinzel,serif;font-size:calc(14px * var(--v-font-scale, 1));font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;min-height:48px;">Voltar ao chat</button>' +
                     '<div style="margin-top:18px;font-size:calc(10px * var(--v-font-scale, 1));color:#5a5044;letter-spacing:1px;">debug: ' + pathTag + '</div>' +
                     '</div>';
                 document.body.appendChild(overlay);

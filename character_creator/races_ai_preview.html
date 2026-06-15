@@ -29,7 +29,7 @@
       min-height: 100vh;
     }
     header {
-      padding: 24px 32px;
+      padding: var(--v-space-2xl, 24px) 32px;
       background: linear-gradient(180deg, #2a2420 0%, transparent 100%);
       border-bottom: 1px solid var(--border);
       text-align: center;
@@ -40,7 +40,7 @@
       background-color: rgba(26, 21, 16, 0.85);
     }
     h1 {
-      margin: 0 0 8px 0;
+      margin: 0 0 var(--v-space-md, 8px) 0;
       font-size: 28px;
       font-weight: 700;
       color: var(--gold);
@@ -50,20 +50,20 @@
     .subtitle {
       font-size: 14px;
       color: var(--text-dim);
-      margin: 0 0 8px 0;
+      margin: 0 0 var(--v-space-md, 8px) 0;
     }
     .controls {
       display: flex;
-      gap: 12px;
+      gap: var(--v-space-lg, 12px);
       justify-content: center;
-      margin-top: 8px;
+      margin-top: var(--v-space-md, 8px);
       flex-wrap: wrap;
     }
     .ctrl-btn {
       padding: 6px 14px;
       background: transparent;
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: var(--v-radius-xs, 4px);
       color: var(--text-dim);
       font-family: 'Cinzel', serif;
       font-size: 12px;
@@ -75,20 +75,20 @@
       color: var(--gold);
     }
     main {
-      padding: 24px 16px 80px;
+      padding: var(--v-space-2xl, 24px) var(--v-space-xl, 16px) 80px;
       max-width: 1400px;
       margin: 0 auto;
     }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 24px;
+      gap: var(--v-space-2xl, 24px);
     }
     .race-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px 16px;
+      padding: 20px var(--v-space-xl, 16px);
       transition: all 0.25s ease;
       text-align: center;
     }
@@ -100,14 +100,14 @@
       font-size: 22px;
       font-weight: 700;
       color: var(--gold);
-      margin: 0 0 4px 0;
+      margin: 0 0 var(--v-space-sm, 4px) 0;
       letter-spacing: 3px;
     }
     .race-opt-label {
       font-size: 11px;
       color: var(--text-dim);
       letter-spacing: 2px;
-      margin-bottom: 12px;
+      margin-bottom: var(--v-space-lg, 12px);
       text-transform: uppercase;
     }
     .race-opt-label .num {
@@ -128,7 +128,7 @@
       transition: all 0.25s ease;
       box-shadow: 0 0 24px rgba(196, 149, 58, 0.2),
                   inset 0 0 24px rgba(196, 149, 58, 0.05);
-      margin-bottom: 12px;
+      margin-bottom: var(--v-space-lg, 12px);
     }
     .official-portrait:hover {
       border-color: var(--gold-bright);
@@ -154,8 +154,8 @@
       color: #1a1510;
       font-size: 10px;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
+      padding: 3px var(--v-space-md, 8px);
+      border-radius: var(--v-radius-xs, 4px);
       letter-spacing: 1.5px;
       text-transform: uppercase;
     }
@@ -163,22 +163,22 @@
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 6px;
-      margin-top: 12px;
-      padding-top: 12px;
+      margin-top: var(--v-space-lg, 12px);
+      padding-top: var(--v-space-lg, 12px);
       border-top: 1px solid var(--border);
     }
     .alt-options-label {
       font-size: 9px;
       color: var(--text-dim);
       letter-spacing: 1.5px;
-      margin-bottom: 8px;
+      margin-bottom: var(--v-space-md, 8px);
       text-transform: uppercase;
       opacity: 0.7;
     }
     .alt-opt {
       aspect-ratio: 1;
       background: rgba(0, 0, 0, 0.2);
-      border-radius: 6px;
+      border-radius: var(--v-radius-sm, 6px);
       overflow: hidden;
       border: 1px solid var(--border);
       cursor: zoom-in;
@@ -214,7 +214,7 @@
       color: var(--text-dim);
       font-size: 8px;
       font-weight: 700;
-      padding: 1px 4px;
+      padding: 1px var(--v-space-sm, 4px);
       border-radius: 3px;
       line-height: 1;
     }
@@ -244,16 +244,16 @@
       transform: translateX(-50%);
       background: rgba(0,0,0,0.8);
       color: var(--gold);
-      padding: 8px 20px;
-      border-radius: 4px;
+      padding: var(--v-space-md, 8px) 20px;
+      border-radius: var(--v-radius-xs, 4px);
       font-size: 14px;
       letter-spacing: 2px;
     }
     @media (max-width: 768px) {
-      header { padding: 16px 12px; }
+      header { padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px); }
       h1 { font-size: 20px; letter-spacing: 2px; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-      .race-card { padding: 14px 10px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--v-space-xl, 16px); }
+      .race-card { padding: 14px var(--v-space-md-lg, 10px); }
       .race-name { font-size: 18px; }
     }
   </style>

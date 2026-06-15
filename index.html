@@ -48,7 +48,7 @@
         /* ─── Cabeçalho Principal ─── */
         .cenario {
             width: 100%;
-            padding: 28px 16px 24px;
+            padding: 28px var(--v-space-xl, 16px) var(--v-space-2xl, 24px);
             text-align: center;
             background: radial-gradient(ellipse at 50% 60%, #3a2e20 0%, var(--v-bg, #2a2420) 70%);
             position: relative;
@@ -157,7 +157,7 @@
             font-size: 8px;
             color: var(--v-gold-dim, #9a7530);
             background: var(--v-bg, #2a2420);
-            padding: 0 8px;
+            padding: 0 var(--v-space-md, 8px);
         }
 
         /* ── CTA Cenário ── */
@@ -166,7 +166,7 @@
             align-items: center;
             gap: var(--v-space-md, 8px);
             margin-top: var(--v-space-xl, 16px);
-            padding: 12px 28px;
+            padding: var(--v-space-lg, 12px) 28px;
             background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
             color: var(--v-bg, #2a2420);
             border: none;
@@ -299,7 +299,7 @@
             display: inline-flex;
             align-items: center;
             gap: var(--v-space-md, 8px);
-            padding: 10px 24px;
+            padding: var(--v-space-md-lg, 10px) var(--v-space-2xl, 24px);
             background: linear-gradient(135deg, var(--v-gold, #c4953a), var(--v-gold-dim, #9a7530));
             color: var(--v-bg, #2a2420);
             border: none;
@@ -455,7 +455,7 @@
         <div class="cenario-cta-group">
             <a href="https://t.me/LendasDeValdoriaBOT" target="_blank" rel="noopener" class="cenario-cta">Jogar no Telegram</a>
             <a href="web/" class="cenario-cta cenario-cta-alt">Jogar no Navegador</a>
-            <a href="web/index.html?env=dev" class="footer-link" style="margin-top: 10px; opacity: 0.6;">Portal de Desenvolvimento</a>
+            <a href="web/index.html?env=dev" class="footer-link" style="margin-top: var(--v-space-md-lg, 10px); opacity: 0.6;">Portal de Desenvolvimento</a>
         </div>
     </div>
 

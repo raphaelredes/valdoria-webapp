@@ -79,10 +79,10 @@
 .tav-sign-plate {
   position: relative;
   width: 100%;
-  padding: 6px 12px 8px;
+  padding: 6px var(--v-space-lg, 12px) var(--v-space-md, 8px);
   background: linear-gradient(180deg, #4a2e18 0%, #2c1a0a 100%);
   border: 1.5px solid #c4953a;
-  border-radius: 6px;
+  border-radius: var(--v-radius-sm, 6px);
   box-shadow:
     0 6px 14px rgba(0, 0, 0, 0.6),
     inset 0 0 18px rgba(255, 140, 40, 0.18),
@@ -95,7 +95,7 @@
   width: 22px; height: 22px;
   color: #ffb060;
   filter: drop-shadow(0 0 6px rgba(255, 180, 80, 0.7));
-  margin-bottom: 2px;
+  margin-bottom: var(--v-space-xs, 2px);
 }
 .tav-sign-text {
   font-family: var(--v-font-display, 'Cinzel', serif);
@@ -106,7 +106,7 @@
 }
 .tav-sign-sub {
   font-size: 9px; color: #c4953a; letter-spacing: 1.5px;
-  margin-top: 2px; opacity: 0.85;
+  margin-top: var(--v-space-xs, 2px); opacity: 0.85;
   font-style: italic;
 }
 
@@ -131,7 +131,7 @@
 /* --- FLAVOR: pergaminho mood ------------------------------------------ */
 .tav-hub-aaa .tav-flavor {
   position: relative;
-  padding: 10px 14px 10px 30px;
+  padding: var(--v-space-md-lg, 10px) 14px var(--v-space-md-lg, 10px) 30px;
   background: linear-gradient(180deg, rgba(74, 56, 40, 0.35), rgba(42, 30, 18, 0.25));
   border: 1px solid var(--v-gold-35);
   border-radius: 8px;
@@ -161,7 +161,7 @@
   font-family: var(--v-font-display, 'Cinzel', serif);
   font-size: var(--v-font-sm); letter-spacing: 2px; text-transform: uppercase;
   color: var(--v-gold, #c4953a);
-  padding: 0 4px 2px;
+  padding: 0 var(--v-space-sm, 4px) var(--v-space-xs, 2px);
   border-bottom: 1px solid rgba(196, 149, 58, 0.20);
 }
 .tav-section-mark { color: var(--v-gold-bright, #e8c45a); }
@@ -172,8 +172,8 @@
   gap: 5px;
 }
 .tav-npc-card {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 10px;
+  display: flex; align-items: center; gap: var(--v-space-md-lg, 10px);
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);
   background: linear-gradient(180deg, rgba(74, 56, 40, 0.30) 0%, rgba(42, 30, 18, 0.55) 100%);
   border: 1px solid rgba(196, 149, 58, 0.30);
   border-radius: 8px;
@@ -236,8 +236,8 @@
 }
 .tav-svc-card {
   position: relative;
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 10px;
+  display: flex; align-items: center; gap: var(--v-space-md, 8px);
+  padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);
   background: linear-gradient(180deg, #3a2a1a 0%, #2a1c10 100%);
   border: 1px solid rgba(196, 149, 58, 0.30);
   border-radius: 8px;

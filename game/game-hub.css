@@ -426,7 +426,7 @@
 .hub-ally .ha-lvl {
   font-size: var(--v-font-xs, 10px);
   color: var(--v-text-muted, #a08050);
-  margin-left: 2px;
+  margin-left: var(--v-space-xs, 2px);
 }
 
 /* Daily Challenge badge (below progress strip) */

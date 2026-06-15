@@ -27,7 +27,7 @@
 .svc.tmp-svc-rich {
   /* Card precisa de mais altura pra acomodar 3 linhas de texto + cost. */
   align-items: flex-start;
-  padding: 10px 10px 9px 12px;
+  padding: var(--v-space-md-lg, 10px) var(--v-space-md-lg, 10px) 9px var(--v-space-lg, 12px);
   min-height: 80px;
   /* Tier accent border subtle — usa --tier-color setado via JS */
   border-color: color-mix(in srgb, var(--tier-color, var(--v-gold-35)) 35%, var(--v-gold-35));
@@ -100,7 +100,7 @@
 
 .svc.tmp-svc-rich .svc-meta {
   /* Cost reposicionado embaixo da desc, com cor dourada (destaque) */
-  margin-top: 4px;
+  margin-top: var(--v-space-sm, 4px);
   color: #c4953a;
   font-weight: 600;
   font-size: 10.5px;

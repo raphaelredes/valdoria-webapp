@@ -62,7 +62,7 @@
 
   align-items: center;
 
-  padding: 88px 16px 14px;
+  padding: 88px var(--v-space-xl, 16px) 14px;
 
   overflow: hidden;
 
@@ -198,7 +198,7 @@
 
   overflow-wrap: break-word;
 
-  margin-bottom: 4px;
+  margin-bottom: var(--v-space-sm, 4px);
 
 }
 
@@ -218,9 +218,9 @@
 
 }
 
-.cenario-titulo .sub::before { content: '◆ '; opacity: 0.7; margin-right: 2px; }
+.cenario-titulo .sub::before { content: '◆ '; opacity: 0.7; margin-right: var(--v-space-xs, 2px); }
 
-.cenario-titulo .sub::after  { content: ' ◆'; opacity: 0.7; margin-left: 2px; }
+.cenario-titulo .sub::after  { content: ' ◆'; opacity: 0.7; margin-left: var(--v-space-xs, 2px); }
 
 
 
@@ -274,13 +274,13 @@
 
   align-items: center;
 
-  padding: 8px 11px 8px 8px;
+  padding: var(--v-space-md, 8px) 11px var(--v-space-md, 8px) var(--v-space-md, 8px);
 
   background: linear-gradient(90deg, var(--v-gold-10), rgba(80, 40, 20, 0.18));
 
   border: 1px solid rgba(196, 149, 58, 0.38);
 
-  border-radius: 10px;
+  border-radius: var(--v-radius, 10px);
 
   flex-shrink: 0;
 
@@ -350,7 +350,7 @@
 
   color: #f4d896;
 
-  margin-bottom: 2px;
+  margin-bottom: var(--v-space-xs, 2px);
 
   text-transform: uppercase;
 
@@ -384,7 +384,7 @@
 
   font-size: calc(20px * var(--v-font-scale, 1));
 
-  margin-left: 4px;
+  margin-left: var(--v-space-sm, 4px);
 
 }
 
@@ -400,9 +400,9 @@
 
   align-items: center;
 
-  gap: 10px;
+  gap: var(--v-space-md-lg, 10px);
 
-  padding: 2px 4px;
+  padding: var(--v-space-xs, 2px) var(--v-space-sm, 4px);
 
 }
 
@@ -430,7 +430,7 @@
 
   background: rgba(255, 255, 255, 0.05);
 
-  border-radius: 4px;
+  border-radius: var(--v-radius-xs, 4px);
 
   overflow: hidden;
 
@@ -490,7 +490,7 @@
 
   text-align: center;
 
-  margin: 2px 0 0;
+  margin: var(--v-space-xs, 2px) 0 0;
 
   flex-shrink: 0;
 
@@ -540,7 +540,7 @@
 
   position: relative;
 
-  padding: 8px 9px 8px 10px;
+  padding: var(--v-space-md, 8px) 9px var(--v-space-md, 8px) var(--v-space-md-lg, 10px);
 
   background: linear-gradient(180deg, rgba(196, 149, 58, 0.07) 0%, rgba(40, 20, 10, 0.45) 100%);
 
@@ -704,7 +704,7 @@
 
   padding: 1px 5px;
 
-  border-radius: 4px;
+  border-radius: var(--v-radius-xs, 4px);
 
   font-weight: 900;
 

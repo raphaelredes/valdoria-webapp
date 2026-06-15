@@ -4,15 +4,15 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .v-ach-screen {
-  padding: 8px 0;
+  padding: var(--v-space-md, 8px) 0;
   color: var(--v-text, #d4c8b0);
 }
 
 /* ── BANNER GERAL (main view) ──────────────────────────────────── */
 .v-ach-banner {
   text-align: center;
-  padding: 16px 12px;
-  margin: 0 0 12px 0;
+  padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
+  margin: 0 0 var(--v-space-lg, 12px) 0;
   background: linear-gradient(180deg,
     rgba(196,149,58,0.18) 0%,
     var(--v-gold-06) 100%);
@@ -41,8 +41,8 @@
 .v-ach-progress {
   height: 8px;
   background: rgba(0,0,0,0.4);
-  border-radius: 4px;
-  margin-top: 10px;
+  border-radius: var(--v-radius-xs, 4px);
+  margin-top: var(--v-space-md-lg, 10px);
   overflow: hidden;
   border: 1px solid var(--v-gold-25);
 }
@@ -61,15 +61,15 @@
 .v-ach-cat-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: var(--v-space-md-lg, 10px);
+  margin-bottom: var(--v-space-lg, 12px);
 }
 
 .v-ach-cat-card {
   background: rgba(58,40,30,0.4);
   border: 1.5px solid var(--cat-accent, rgba(196,149,58,0.4));
   border-radius: var(--v-radius, 10px);
-  padding: 12px 8px;
+  padding: var(--v-space-lg, 12px) var(--v-space-md, 8px);
   text-align: center;
   color: var(--v-text, #d4c8b0);
   font-family: var(--v-font, 'MedievalSharp', serif);
@@ -105,7 +105,7 @@
 .v-ach-cat-count {
   font-size: var(--v-font-label, 12px);
   color: var(--v-text-dim, #a09484);
-  margin-top: 4px;
+  margin-top: var(--v-space-sm, 4px);
 }
 
 .v-ach-cat-count b {
@@ -117,7 +117,7 @@
   height: 4px;
   background: rgba(0,0,0,0.4);
   border-radius: 2px;
-  margin-top: 8px;
+  margin-top: var(--v-space-md, 8px);
   overflow: hidden;
 }
 
@@ -139,14 +139,14 @@
   text-align: center;
   font-size: var(--v-font-label, 12px);
   color: var(--v-text-dim, #a09484);
-  padding: 4px 0;
+  padding: var(--v-space-sm, 4px) 0;
 }
 
 /* ── CATEGORY VIEW: BANNER ─────────────────────────────────────── */
 .v-ach-cat-banner {
   text-align: center;
-  padding: 12px;
-  margin: 0 0 12px 0;
+  padding: var(--v-space-lg, 12px);
+  margin: 0 0 var(--v-space-lg, 12px) 0;
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--cat-accent) 25%, transparent) 0%,
     rgba(0,0,0,0.2) 100%);
@@ -164,7 +164,7 @@
 .v-ach-cat-banner-sub {
   font-size: var(--v-font-secondary, 13px);
   color: var(--v-text-dim, #a09484);
-  margin-top: 4px;
+  margin-top: var(--v-space-sm, 4px);
 }
 
 .v-ach-cat-banner-sub b {
@@ -176,14 +176,14 @@
 .v-ach-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--v-space-md, 8px);
 }
 
 .v-ach-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px;
+  gap: var(--v-space-lg, 12px);
+  padding: var(--v-space-md-lg, 10px);
   background: rgba(58,40,30,0.35);
   border: 1.5px solid rgba(74,56,40,0.5);
   border-radius: var(--v-radius, 10px);
@@ -270,7 +270,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--v-space-xs, 2px);
 }
 
 .v-ach-name {
@@ -298,14 +298,14 @@
 .v-ach-date {
   font-size: var(--v-font-label, 12px);
   color: #7dba5b;
-  margin-top: 4px;
+  margin-top: var(--v-space-sm, 4px);
   font-style: italic;
 }
 
 .v-ach-locked-txt {
   font-size: var(--v-font-label, 12px);
   color: var(--v-text-dim, #a09484);
-  margin-top: 4px;
+  margin-top: var(--v-space-sm, 4px);
   font-style: italic;
 }
 

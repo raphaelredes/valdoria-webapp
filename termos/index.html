@@ -38,13 +38,13 @@
         .priv-container {
             max-width: 430px;
             margin: 0 auto;
-            padding: 20px 16px 40px;
+            padding: 20px var(--v-space-xl, 16px) 40px;
         }
         .priv-header {
             text-align: center;
             padding: 20px 0;
             border-bottom: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
-            margin-bottom: 24px;
+            margin-bottom: var(--v-space-2xl, 24px);
         }
         .priv-header h1 {
             font-family: var(--v-font-display, 'Cinzel', serif);
@@ -52,7 +52,7 @@
             color: var(--v-gold, #c4953a);
             letter-spacing: 3px;
             text-transform: uppercase;
-            margin: 0 0 8px;
+            margin: 0 0 var(--v-space-md, 8px);
             text-shadow: 0 0 14px var(--v-gold-40, rgba(196,149,58,0.4));
         }
         .priv-header .priv-subtitle {
@@ -64,16 +64,16 @@
         .priv-header .priv-decoration {
             font-size: 14px;
             color: var(--v-gold, #c4953a);
-            margin: 10px 0;
+            margin: var(--v-space-md-lg, 10px) 0;
             opacity: 0.6;
         }
         section {
             margin: 28px 0;
-            padding: 16px;
+            padding: var(--v-space-xl, 16px);
             background: linear-gradient(180deg, rgba(196,149,58,0.05) 0%, rgba(42,36,32,0.4) 100%);
             border: 1px solid var(--v-border, #4a3828);
             border-left: 3px solid var(--v-gold, #c4953a);
-            border-radius: 6px;
+            border-radius: var(--v-radius-sm, 6px);
         }
         section h2 {
             font-family: var(--v-font-display, 'Cinzel', serif);
@@ -81,10 +81,10 @@
             color: var(--v-gold, #c4953a);
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin: 0 0 12px;
+            margin: 0 0 var(--v-space-lg, 12px);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--v-space-md, 8px);
         }
         section h2 .priv-section-num {
             display: inline-flex;
@@ -106,8 +106,8 @@
             letter-spacing: 1px;
             margin: 14px 0 6px;
         }
-        section p { margin: 8px 0; }
-        section ul { margin: 8px 0; padding-left: 18px; }
+        section p { margin: var(--v-space-md, 8px) 0; }
+        section ul { margin: var(--v-space-md, 8px) 0; padding-left: 18px; }
         section li { margin: 6px 0; }
         .priv-highlight {
             color: var(--v-gold, #c4953a);
@@ -116,12 +116,12 @@
         .priv-data-box {
             display: grid;
             grid-template-columns: auto 1fr;
-            gap: 8px 12px;
-            margin: 12px 0;
-            padding: 12px;
+            gap: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+            margin: var(--v-space-lg, 12px) 0;
+            padding: var(--v-space-lg, 12px);
             background: rgba(74,56,40,0.25);
             border: 1px solid var(--v-border, #4a3828);
-            border-radius: 6px;
+            border-radius: var(--v-radius-sm, 6px);
             font-size: 12px;
         }
         .priv-data-key {
@@ -136,37 +136,37 @@
         .priv-no-collect {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
+            gap: var(--v-space-md, 8px);
+            padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);
             background: rgba(125,186,91,0.08);
             border: 1px solid #7dba5b66;
             border-left: 3px solid #7dba5b;
-            border-radius: 6px;
-            margin: 12px 0;
+            border-radius: var(--v-radius-sm, 6px);
+            margin: var(--v-space-lg, 12px) 0;
             font-size: 12px;
         }
         .priv-no-collect-icon { font-size: 18px; color: #7dba5b; }
         .priv-warn {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
+            gap: var(--v-space-md, 8px);
+            padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);
             background: rgba(196,80,40,0.10);
             border: 1px solid rgba(196,80,40,0.5);
             border-left: 3px solid #c45028;
-            border-radius: 6px;
-            margin: 12px 0;
+            border-radius: var(--v-radius-sm, 6px);
+            margin: var(--v-space-lg, 12px) 0;
             font-size: 12px;
         }
         .priv-warn-icon { font-size: 18px; color: #e07050; }
         .priv-rights-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 8px;
-            margin: 12px 0;
+            gap: var(--v-space-md, 8px);
+            margin: var(--v-space-lg, 12px) 0;
         }
         .priv-right {
-            padding: 10px 12px;
+            padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);
             background: rgba(196,149,58,0.06);
             border: 1px solid var(--v-border, #4a3828);
             border-radius: 5px;
@@ -177,7 +177,7 @@
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 1px;
-            margin-bottom: 4px;
+            margin-bottom: var(--v-space-sm, 4px);
         }
         .priv-right-desc {
             font-size: 11px;
@@ -186,7 +186,7 @@
         }
         .priv-footer {
             text-align: center;
-            padding: 20px 0 10px;
+            padding: 20px 0 var(--v-space-md-lg, 10px);
             margin-top: 28px;
             border-top: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
             font-size: 11px;
@@ -194,7 +194,7 @@
             font-style: italic;
         }
         .priv-footer .priv-version {
-            margin-top: 8px;
+            margin-top: var(--v-space-md, 8px);
             color: var(--v-gold, #c4953a);
             font-family: var(--v-font-display, 'Cinzel', serif);
             letter-spacing: 1px;
@@ -202,11 +202,11 @@
         .priv-cta {
             display: inline-block;
             margin: 14px 0 0;
-            padding: 8px 18px;
+            padding: var(--v-space-md, 8px) 18px;
             background: linear-gradient(180deg, var(--v-gold, #c4953a), #8a6420);
             color: #1a1410;
             border: 1px solid var(--v-gold, #c4953a);
-            border-radius: 4px;
+            border-radius: var(--v-radius-xs, 4px);
             text-decoration: none;
             font-family: var(--v-font-display, 'Cinzel', serif);
             font-weight: 700;
@@ -229,18 +229,18 @@
             .priv-header { padding: 28px 0; margin-bottom: 32px; }
             .priv-header h1 { font-size: clamp(28px, 4vw, 36px); letter-spacing: 4px; }
             .priv-header .priv-subtitle { font-size: 14px; }
-            section { padding: 22px 24px; margin: 32px 0; }
+            section { padding: 22px var(--v-space-2xl, 24px); margin: 32px 0; }
             section h2 { font-size: 18px; }
             section h2 .priv-section-num { width: 28px; height: 28px; font-size: 13px; }
             section h3 { font-size: 16px; }
-            .priv-data-box { font-size: 13px; padding: 16px; gap: 10px 16px; }
+            .priv-data-box { font-size: 13px; padding: var(--v-space-xl, 16px); gap: var(--v-space-md-lg, 10px) var(--v-space-xl, 16px); }
             .priv-data-key { font-size: 12px; }
-            .priv-no-collect, .priv-warn { font-size: 13px; padding: 12px 16px; }
-            .priv-right { padding: 14px 16px; }
+            .priv-no-collect, .priv-warn { font-size: 13px; padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px); }
+            .priv-right { padding: 14px var(--v-space-xl, 16px); }
             .priv-right-name { font-size: 13px; }
             .priv-right-desc { font-size: 12px; }
             .priv-legal { font-size: 12px; }
-            .priv-cta { font-size: 13px; padding: 10px 24px; }
+            .priv-cta { font-size: 13px; padding: var(--v-space-md-lg, 10px) var(--v-space-2xl, 24px); }
         }
 
         /* ── DESKTOP (≥1024px) ───────────────────────────────────────── */
@@ -251,17 +251,17 @@
             section { padding: 28px 32px; }
             section h2 { font-size: 20px; }
             section h3 { font-size: 17px; }
-            .priv-rights-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .priv-rights-grid { grid-template-columns: 1fr 1fr; gap: var(--v-space-lg, 12px); }
             .priv-data-box { padding: 18px 22px; font-size: 14px; }
         }
 
         /* ── Formulário de contato (substitui mailto:) ────────────── */
         .priv-form {
-            margin-top: 16px;
+            margin-top: var(--v-space-xl, 16px);
             padding: 18px;
             background: rgba(28,22,16,0.5);
             border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
-            border-radius: 6px;
+            border-radius: var(--v-radius-sm, 6px);
         }
         .priv-form-row {
             margin-bottom: 14px;
@@ -283,8 +283,8 @@
             color: var(--v-text-dim, #a09484);
             text-transform: none;
             letter-spacing: 0;
-            margin-top: 2px;
-            margin-bottom: 4px;
+            margin-top: var(--v-space-xs, 2px);
+            margin-bottom: var(--v-space-sm, 4px);
         }
         .priv-form-row input,
         .priv-form-row select,
@@ -294,7 +294,7 @@
             padding: 9px 11px;
             background: rgba(15,12,8,0.7);
             border: 1px solid var(--v-border, #4a3828);
-            border-radius: 4px;
+            border-radius: var(--v-radius-xs, 4px);
             color: var(--v-text, #d4c8b0);
             font-family: var(--v-font, 'MedievalSharp', serif);
             font-size: 14px;
@@ -315,7 +315,7 @@
             font-size: 10px;
             color: var(--v-text-dim, #a09484);
             text-align: right;
-            margin-top: 2px;
+            margin-top: var(--v-space-xs, 2px);
         }
         .priv-form-submit {
             display: inline-block;
@@ -335,8 +335,8 @@
         .priv-form-submit:hover { background: linear-gradient(180deg, #d4a55a, #9a7430); }
         .priv-form-submit:disabled { opacity: 0.5; cursor: wait; }
         .priv-form-result {
-            margin-top: 12px;
-            padding: 10px 14px;
+            margin-top: var(--v-space-lg, 12px);
+            padding: var(--v-space-md-lg, 10px) 14px;
             border-radius: 5px;
             font-size: 13px;
             line-height: 1.5;
@@ -356,13 +356,13 @@
         }
 
         @media (min-width: 600px) {
-            .priv-form { padding: 22px 24px; }
-            .priv-form-row { margin-bottom: 16px; }
-            .priv-form-row input, .priv-form-row select, .priv-form-row textarea { padding: 10px 13px; font-size: 14px; }
+            .priv-form { padding: 22px var(--v-space-2xl, 24px); }
+            .priv-form-row { margin-bottom: var(--v-space-xl, 16px); }
+            .priv-form-row input, .priv-form-row select, .priv-form-row textarea { padding: var(--v-space-md-lg, 10px) 13px; font-size: 14px; }
         }
         @media (min-width: 1024px) {
             .priv-form-row.priv-form-row-half { display: inline-block; width: calc(50% - 8px); vertical-align: top; }
-            .priv-form-row.priv-form-row-half + .priv-form-row.priv-form-row-half { margin-left: 12px; }
+            .priv-form-row.priv-form-row-half + .priv-form-row.priv-form-row-half { margin-left: var(--v-space-lg, 12px); }
         }
 
         /* Print stylesheet */
@@ -575,7 +575,7 @@
                     <div class="priv-right-desc">Você pode contestar a decisão em até <strong>30 dias após notificação</strong> através do <a href="#contato">formulário de contato no final desta página</a> (selecione a categoria <strong>"Recurso de Banimento"</strong> e informe a data e hora em que você percebeu o banimento).</div>
                 </div>
             </div>
-            <p class="priv-legal" style="margin-top:12px;">
+            <p class="priv-legal" style="margin-top: var(--v-space-lg, 12px);">
                 <strong>Banimentos não geram direito a reembolso</strong> de eventuais doações realizadas via PIX (§ 7). Doações são contribuições voluntárias ao desenvolvimento, não pagamento por serviço.
             </p>
         </section>
@@ -849,7 +849,7 @@
             <div style="font-size:10px; color:var(--v-text-dim,#a09484); margin-top:6px; font-style:italic;">
                 15 seções · Conformidade CDC + Marco Civil + LGPD + ECA Digital
             </div>
-            <div style="margin-top: 8px;">
+            <div style="margin-top: var(--v-space-md, 8px);">
                 © 2026 Lendas de Valdoria. Todos os direitos reservados.<br>
                 Mecânicas inspiradas em D&amp;D 5e SRD (Wizards of the Coast, CC-BY-4.0).
             </div>

@@ -64,7 +64,7 @@ body.perf-lite .res-header.victory .res-title,body.perf-lite .res-levelup-btn{an
 .res-victory-card .res-rewards::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--v-gold-50,rgba(196,149,58,0.5)),transparent)}
 .res-rewards{max-width:320px}
 .res-reward--structured{text-align:left;align-items:center;padding:var(--v-space-md) var(--v-space-lg);gap:var(--v-space-md-lg,14px);background:var(--v-gold-05,rgba(196,149,58,0.05));border:1px solid var(--v-gold-15,rgba(196,149,58,0.15));border-radius:var(--v-radius,10px)}
-.res-reward-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.res-reward-body{display:flex;flex-direction:column;gap: var(--v-space-xs, 2px);flex:1;min-width:0}
 .res-reward-icon{font-size:22px;min-width:32px;text-align:center}
 .res-reward-label{font-size:var(--v-font-xs,10px);text-transform:uppercase;letter-spacing:0.12em;color:var(--v-text-faint,#8a7a68);font-weight:700}
 .res-reward-value{font-size:var(--v-font-body,15px);color:var(--v-gold-light,#f5d478);font-weight:700;line-height:1.35}

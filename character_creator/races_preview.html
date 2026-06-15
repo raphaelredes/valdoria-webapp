@@ -6,24 +6,24 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#1a1410;color:#d4c8b0;font-family:'Cinzel',Georgia,serif;min-height:100vh}
-body{padding:24px 12px 60px}
+body{padding: var(--v-space-2xl, 24px) var(--v-space-lg, 12px) 60px}
 h1{text-align:center;color:#c4953a;font-size:22px;letter-spacing:2px;margin-bottom:6px}
-.subtitle{text-align:center;color:#a09484;font-size:12px;margin-bottom:24px;max-width:740px;margin-left:auto;margin-right:auto}
-.toggle{text-align:center;margin-bottom:24px}
-.toggle button{background:#2e2520;color:#a09484;border:1px solid #4a3828;padding:6px 14px;margin:0 4px;border-radius:6px;font:inherit;font-size:11px;cursor:pointer}
+.subtitle{text-align:center;color:#a09484;font-size:12px;margin-bottom: var(--v-space-2xl, 24px);max-width:740px;margin-left:auto;margin-right:auto}
+.toggle{text-align:center;margin-bottom: var(--v-space-2xl, 24px)}
+.toggle button{background:#2e2520;color:#a09484;border:1px solid #4a3828;padding:6px 14px;margin: 0 var(--v-space-sm, 4px);border-radius: var(--v-radius-sm, 6px);font:inherit;font-size:11px;cursor:pointer}
 .toggle button.active{background:#4a3828;color:#c4953a;border-color:#c4953a}
 .bg-dark{background:linear-gradient(180deg,#2a2420 0%,#1a1410 100%)}
 .bg-grey{background:#666}
 .bg-checker{background:repeating-conic-gradient(#ccc 0% 25%, #888 0% 50%) 0 0 / 24px 24px}
 .bg-gold{background:radial-gradient(circle at center,#c4953a 0%,#3a2810 100%)}
-.grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap: var(--v-space-xl, 16px)}
 @media(max-width:780px){.grid{grid-template-columns:repeat(2,1fr)}}
-.card{border:2px solid #4a3828;border-radius:12px;padding:16px;text-align:center;box-shadow:0 4px 18px rgba(0,0,0,.5)}
-.card img{width:100%;max-width:280px;height:auto;display:block;margin:0 auto 8px}
+.card{border:2px solid #4a3828;border-radius:12px;padding: var(--v-space-xl, 16px);text-align:center;box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.card img{width:100%;max-width:280px;height:auto;display:block;margin: 0 auto var(--v-space-md, 8px)}
 .card-name{font-size:14px;color:#c4953a;letter-spacing:2px;text-transform:uppercase}
-.card-key{font-size:10px;color:#6a5a4a;margin-top:2px}
-.size-toggle{text-align:center;margin-bottom:16px}
-.size-toggle button{background:#2e2520;color:#a09484;border:1px solid #4a3828;padding:5px 12px;margin:0 4px;border-radius:5px;font:inherit;font-size:10px;cursor:pointer}
+.card-key{font-size:10px;color:#6a5a4a;margin-top: var(--v-space-xs, 2px)}
+.size-toggle{text-align:center;margin-bottom: var(--v-space-xl, 16px)}
+.size-toggle button{background:#2e2520;color:#a09484;border:1px solid #4a3828;padding: 5px var(--v-space-lg, 12px);margin: 0 var(--v-space-sm, 4px);border-radius:5px;font:inherit;font-size:10px;cursor:pointer}
 .size-toggle button.active{background:#4a3828;color:#c4953a;border-color:#c4953a}
 body.size-32 .card img{max-width:32px}
 body.size-64 .card img{max-width:64px}
@@ -38,7 +38,7 @@ body.size-full .card img{max-width:480px}
 <p class="subtitle">9 imagens processadas (Gemini originals → chroma key #00FF00 removido → PNG com alpha 512×512). Veja em vários tamanhos + fundos pra confirmar que o verde foi limpo e a transparência ficou bem.</p>
 
 <div class="toggle">
-  <span style="font-size:11px;color:#8a7a68">Fundo:</span>
+  <span style="font-size:11px;color:var(--v-text-faint, #8a7a68)">Fundo:</span>
   <button data-bg="dark" class="active" type="button">Escuro (jogo)</button>
   <button data-bg="grey" type="button">Cinza</button>
   <button data-bg="checker" type="button">Xadrez (alpha)</button>
@@ -46,7 +46,7 @@ body.size-full .card img{max-width:480px}
 </div>
 
 <div class="size-toggle">
-  <span style="font-size:10px;color:#8a7a68">Tamanho:</span>
+  <span style="font-size:10px;color:var(--v-text-faint, #8a7a68)">Tamanho:</span>
   <button data-size="32" type="button">32px</button>
   <button data-size="64" type="button">64px</button>
   <button data-size="128" type="button">128px</button>

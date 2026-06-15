@@ -58,7 +58,7 @@
   }
   .needs-design-badge {
     display: inline-block;
-    padding: 2px 6px;
+    padding: var(--v-space-xs, 2px) 6px;
     background: rgba(168, 133, 26, 0.18);
     color: #e0b34a;
     font-size: 9px;
@@ -100,14 +100,14 @@
     background: linear-gradient(180deg, #2a2420 0%, #1a1410 100%);
     color: #d4c8b0;
     font-family: 'Cinzel', Georgia, serif;
-    padding: 24px 16px 60px;
+    padding: var(--v-space-2xl, 24px) var(--v-space-xl, 16px) 60px;
     min-height: 100vh;
     line-height: 1.45;
   }
   /* ── Header ─────────────────────────────────────────── */
   header {
     max-width: 1500px;
-    margin: 0 auto 24px;
+    margin: 0 auto var(--v-space-2xl, 24px);
     text-align: center;
   }
   h1 {
@@ -129,14 +129,14 @@
   .search-box {
     width: 100%;
     max-width: 480px;
-    padding: 10px 14px;
+    padding: var(--v-space-md-lg, 10px) 14px;
     background: rgba(0,0,0,0.5);
     border: 1.5px solid #4a3828;
-    border-radius: 6px;
+    border-radius: var(--v-radius-sm, 6px);
     color: #d4c8b0;
     font-family: Georgia, serif;
     font-size: 14px;
-    margin: 8px auto 16px;
+    margin: var(--v-space-md, 8px) auto var(--v-space-xl, 16px);
     display: block;
     text-align: center;
     transition: border-color 0.2s;
@@ -150,12 +150,12 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 8px 12px;
-    margin: 12px auto 8px;
+    gap: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+    margin: var(--v-space-lg, 12px) auto var(--v-space-md, 8px);
     max-width: 1200px;
   }
   .cat-nav a, .cat-nav span {
-    padding: 6px 12px;
+    padding: 6px var(--v-space-lg, 12px);
     border-radius: 5px;
     font-size: 12px;
     text-decoration: none;
@@ -182,22 +182,22 @@
   main { max-width: 1500px; margin: 0 auto; }
   section {
     margin-bottom: 48px;
-    padding-top: 8px;
+    padding-top: var(--v-space-md, 8px);
   }
   section h2 {
     color: #c4953a;
     font-size: 22px;
     letter-spacing: 2.5px;
     border-bottom: 1px solid #4a3828;
-    padding: 0 0 8px 8px;
-    margin: 0 8px 18px;
+    padding: 0 0 var(--v-space-md, 8px) var(--v-space-md, 8px);
+    margin: 0 var(--v-space-md, 8px) 18px;
     text-transform: uppercase;
   }
   section h3 {
     color: #a89478;
     font-size: 14px;
     letter-spacing: 1.5px;
-    margin: 24px 0 12px 12px;
+    margin: var(--v-space-2xl, 24px) 0 var(--v-space-lg, 12px) var(--v-space-lg, 12px);
     text-transform: uppercase;
     font-weight: 400;
   }
@@ -210,8 +210,8 @@
   .item-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
-    padding: 0 8px;
+    gap: var(--v-space-lg, 12px);
+    padding: 0 var(--v-space-md, 8px);
   }
   /* Card base — sem sombra, com aura radial sutil (suggesting magia) */
   .item-card {
@@ -220,8 +220,8 @@
       radial-gradient(circle at 50% 30%, rgba(196,149,58,0.04) 0%, transparent 65%),
       linear-gradient(165deg, #2e2520 0%, #1a1410 100%);
     border: 1.5px solid #4a3828;
-    border-radius: 10px;
-    padding: 14px 8px 10px;
+    border-radius: var(--v-radius, 10px);
+    padding: 14px var(--v-space-md, 8px) var(--v-space-md-lg, 10px);
     text-align: center;
     transition: border-color 0.25s, transform 0.25s, background 0.25s;
     overflow: hidden;
@@ -297,7 +297,7 @@
     --rarity-glow: rgba(0,0,0,0);
     width: 84px;
     height: 84px;
-    margin: 0 auto 8px;
+    margin: 0 auto var(--v-space-md, 8px);
     filter:
       contrast(1.08) saturate(1.12)
       drop-shadow(0 0 2.5px rgba(0,0,0,0.55))
@@ -376,7 +376,7 @@
     font-weight: 700;
     color: #e8dcc8;
     letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    margin-bottom: var(--v-space-sm, 4px);
     line-height: 1.25;
     min-height: 32px;
   }
@@ -400,8 +400,8 @@
     background: rgba(0,0,0,0.35);
     border: 1px solid #3a2e22;
     border-radius: 8px;
-    padding: 12px;
-    margin: 0 8px 24px;
+    padding: var(--v-space-lg, 12px);
+    margin: 0 var(--v-space-md, 8px) var(--v-space-2xl, 24px);
     text-align: center;
   }
   .real-size-strip .lbl {
@@ -409,7 +409,7 @@
     font-size: 11px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: var(--v-space-md, 8px);
   }
   .real-size-strip .row {
     display: flex;
@@ -422,8 +422,8 @@
     height: 54px;
     background: #161210;
     border: 1.5px solid #3a2e22;
-    border-radius: 6px;
-    padding: 4px;
+    border-radius: var(--v-radius-sm, 6px);
+    padding: var(--v-space-sm, 4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -433,7 +433,7 @@
   footer {
     max-width: 1200px;
     margin: 40px auto 0;
-    padding: 16px;
+    padding: var(--v-space-xl, 16px);
     text-align: center;
     color: #6a5a4a;
     font-size: 11px;
@@ -444,9 +444,9 @@
   footer strong { color: #a89478; }
   /* ── Smartphone (≤430px) ────────────────────────────── */
   @media (max-width: 480px) {
-    body { padding: 16px 8px 40px; }
+    body { padding: var(--v-space-xl, 16px) var(--v-space-md, 8px) 40px; }
     h1 { font-size: 20px; letter-spacing: 2px; }
-    .item-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+    .item-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: var(--v-space-md, 8px); }
     .item-icon { width: 68px; height: 68px; }
     .item-name { font-size: 12px; min-height: 30px; }
     .item-meta { font-size: 10px; }
@@ -21511,7 +21511,7 @@
                 <!-- ═══════ BATCH 10 — Novos ícones AAA (2026-05-15) ═══════ -->
   <section id="cat-needs-design" class="cat-needs-design">
     <h2>🆕 Batch 10 — Novos Ícones AAA <span style="color:#7aa030;font-size:14px">(cobertura 100% • 160 itens novos)</span></h2>
-    <p style="color:#a09484;margin:8px 0 14px;font-size:13px;">
+    <p style="color:var(--v-text-dim, #a09484);margin: var(--v-space-md, 8px) 0 14px;font-size:13px;">
       <b style="color:#a8d050;">✓ Todos os 540 itens de ITEMS_DB agora têm ícone heráldico próprio.</b><br>
       Estes 160 ícones foram criados em <code>scripts/icon_library_batch10.py</code> seguindo o padrão
       AAA do projeto: viewBox 120×120, gradientes <code>rh-*</code> existentes, multi-layer com
@@ -22041,7 +22041,7 @@
   <p>Batches 1-9 ENTREGUES · ~340 itens com SVG heráldico AAA</p>
   <p>📋 Batch 1 (99 armas+focos) · Batch 2 (47 armaduras+escudos+elmos) · Batch 3 (41 consumíveis) · Batch 4 (22 gemas+runas) · Batch 5 (33 acessórios) · Batch 6 (60+ loot/troféus) · Batch 7 (18 materiais) · Batch 8 (35 ferramentas+quest)</p>
   <p>🐺 Batch 9 (sets) — 11 set pieces de armadura no Batch 2 + 4 set weapons no Batch 1 + 2 set foci no Batch 1 = TODOS os 24 set pieces dos 8 conjuntos cobertos</p>
-  <p style="margin-top:8px;color:#4a3828">Abra via <code style="color:#a89478">file://</code> — sem necessidade de servidor.</p>
+  <p style="margin-top: var(--v-space-md, 8px);color:var(--v-border, #4a3828)">Abra via <code style="color:#a89478">file://</code> — sem necessidade de servidor.</p>
 </footer>
 
 <script>

@@ -3,7 +3,7 @@
 .turn-queue {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
   gap: 0;
   background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2e2520) 100%);
   border-bottom: 2px solid var(--v-gold-20, rgba(196,149,58,0.2));
@@ -42,7 +42,7 @@
 .tl-nm {
   font-size: var(--v-font-xs, 10px);
   color: var(--v-text-dim, #a09484);
-  margin-top: 2px;
+  margin-top: var(--v-space-xs, 2px);
   max-width: 60px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -115,11 +115,11 @@
   font-size: var(--v-font-xs, 10px);
   font-weight: 700;
   color: var(--v-gold, #c4953a);
-  padding: 2px 6px;
+  padding: var(--v-space-xs, 2px) 6px;
   background: var(--v-gold-10);
   border: 1px solid var(--v-gold-20);
-  border-radius: 4px;
-  margin-right: 4px;
+  border-radius: var(--v-radius-xs, 4px);
+  margin-right: var(--v-space-sm, 4px);
   flex-shrink: 0;
   align-self: center;
 }

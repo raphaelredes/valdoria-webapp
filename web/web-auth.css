@@ -190,7 +190,7 @@ body.wa-portal {
 
     border: 1px solid var(--v-gold-25);
 
-    padding: 28px 16px 24px;
+    padding: 28px var(--v-space-xl, 16px) var(--v-space-2xl, 24px);
 
     text-align: center;
 
@@ -479,7 +479,7 @@ body.wa-portal {
 
     width: 100%;
 
-    padding: 12px var(--v-space-xl, 16px);
+    padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px);
 
     border: 1px solid var(--v-border, #4a3828);
 
@@ -859,7 +859,7 @@ body.wa-portal {
 
     border: 1px solid var(--v-border, #4a3828);
 
-    padding: 28px 20px 24px;
+    padding: 28px 20px var(--v-space-2xl, 24px);
 
     position: relative;
 
@@ -1470,7 +1470,7 @@ html.tg-webapp .wa-btn-logout { display: none !important; }
 
     max-width: 300px;
 
-    padding: 12px var(--v-space-xl, 16px);
+    padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px);
 
     background: var(--v-gold-06);
 
@@ -1642,7 +1642,7 @@ html.tg-webapp .wa-btn-logout { display: none !important; }
 
     border: 1px solid rgba(180, 50, 50, 0.3);
 
-    padding: 32px 24px;
+    padding: 32px var(--v-space-2xl, 24px);
 
     z-index: 1;
 
@@ -1784,11 +1784,11 @@ html.tg-webapp .wa-btn-logout { display: none !important; }
 
     display: none; /* hidden until JS sets data-env */
 
-    margin: 8px auto 4px;
+    margin: var(--v-space-md, 8px) auto var(--v-space-sm, 4px);
 
-    padding: 4px 14px;
+    padding: var(--v-space-sm, 4px) 14px;
 
-    border-radius: 14px;
+    border-radius: var(--v-radius-lg, 14px);
 
     font-family: var(--v-font-display, 'Cinzel', serif);
 
