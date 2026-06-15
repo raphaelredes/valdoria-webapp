@@ -77,7 +77,7 @@ var SERVICE_DIALOGUES_BANK = {
     npc: ALDWIN_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Aldwin abre uma gaveta interna do balcão e retira uma caixa de bronze polido, forrada de veludo púrpura. Pousa-a entre vocês com cuidado litúrgico — é nela que as moedas serão pesadas antes de ir ao cofre.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Depósito é direito de cidadão, não favor. <i>(prepara a balança de prato)</i> A Casa cobra meio por cento sobre cada cem Valdoritas — taxa que mantém o cofre selado, os guardas pagos, e o ferro das portas afiado. Quanto Vossa Senhoria deseja confiar a nós hoje?' }
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Depósito é direito de cidadão, não favor. <i>(prepara a balança de prato)</i> Guardar é gratuito — a Casa cobra apenas na retirada, dois por cento que mantêm o cofre selado, os guardas pagos e o ferro das portas afiado. Quanto Vossa Senhoria deseja confiar a nós hoje?' }
     ],
     choices: [
       // task #64 (2026-05-20): backend canonical bank.py:298-307 "bank_deposit_gold_<amount>"
