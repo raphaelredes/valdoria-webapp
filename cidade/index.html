@@ -52686,7 +52686,10 @@ function _renderCityDialogue(venue, data, p){
   window.vEncounter.render(
     { npc: data.npc, script: data.script, choices: data.choices },
     { player: p, closeable: true, onChoice: function(ch){
-        if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
+        if (ch && ch.screen && /^bank_(deposit|withdraw)_custom$/.test(ch.screen)) {
+          _bankCustomAmount(ch.screen, p, data.npc);  // input numérico WebApp-native
+        }
+        else if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
         else if (node) { _resolveCityChoice(venue, node, ch && ch.id, p, data.npc); }
         else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
     } }
@@ -52709,6 +52712,78 @@ function _openCityScreen(venue, cb, p, npc){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     console.error('[CITY-DIALOGUE] screen failed', e);
     if (typeof vToast === 'function') vToast('Erro ao abrir.', 'warn');
+  });
+}
+
+// PADRAO_SERVIDOR (#10 banco): input numérico WebApp-native pro "✏️ Digitar valor".
+// O fluxo Telegram-inline do bank.py (WAITING_BANK_) não existe no WebApp; aqui o
+// jogador digita o valor numa caixa e o cliente posta bank_<dep|wth>_gold_<N> via
+// screen-bridge → bank.py resolve deposit_gold_<N>/withdraw_gold_<N> p/ QUALQUER N
+// (handler REAL, gold-safe). Overlay self-contained (sem dep externa), tokens via var().
+function _vNumberPrompt(opts){
+  opts = opts || {};
+  var max = (typeof opts.max === 'number' && opts.max > 0) ? Math.floor(opts.max) : 999999;
+  var ov = document.createElement('div');
+  ov.setAttribute('style', 'position:fixed;inset:0;z-index:var(--v-z-critical,10000);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.62);');
+  var card = document.createElement('div');
+  card.setAttribute('style', 'background:var(--v-bg-card,#2e2520);border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius,10px);padding:16px;width:min(86vw,320px);box-shadow:0 8px 32px rgba(0,0,0,0.5);');
+  var h = document.createElement('div');
+  h.textContent = opts.title || 'Digite o valor';
+  h.setAttribute('style', 'font-family:var(--v-font-display,serif);color:var(--v-gold,#c4953a);font-size:var(--v-font-lg,16px);text-align:center;margin-bottom:6px;');
+  card.appendChild(h);
+  if (opts.hint){ var hi=document.createElement('div'); hi.textContent=opts.hint; hi.setAttribute('style','color:var(--v-text-dim,#a09484);font-size:var(--v-font-sm,13px);text-align:center;margin-bottom:10px;'); card.appendChild(hi); }
+  var field = document.createElement('input');
+  field.type='number'; field.inputMode='numeric'; field.min='1'; field.max=String(max); field.placeholder='0';
+  field.setAttribute('style','width:100%;box-sizing:border-box;text-align:center;font-size:var(--v-font-2xl,20px);padding:10px;border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-sm,6px);background:var(--v-bg,#2a2420);color:var(--v-text,#d4c8b0);margin-bottom:8px;');
+  card.appendChild(field);
+  var pr = document.createElement('div'); pr.setAttribute('style','display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px;');
+  (opts.presets||[]).forEach(function(v){
+    if (v > max) return;
+    var b=document.createElement('button'); b.type='button'; b.textContent=String(v);
+    b.setAttribute('style','padding:5px 11px;border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-pill,20px);background:var(--v-bg-raised,#332a22);color:var(--v-text,#d4c8b0);font-size:var(--v-font-sm,13px);cursor:pointer;');
+    b.addEventListener('click', function(){ field.value=String(v); field.focus(); });
+    pr.appendChild(b);
+  });
+  var bMax=document.createElement('button'); bMax.type='button'; bMax.textContent='Tudo ('+max+')';
+  bMax.setAttribute('style','padding:5px 11px;border:1px solid var(--v-gold,#c4953a);border-radius:var(--v-radius-pill,20px);background:var(--v-bg-raised,#332a22);color:var(--v-gold,#c4953a);font-size:var(--v-font-sm,13px);cursor:pointer;');
+  bMax.addEventListener('click', function(){ field.value=String(max); field.focus(); });
+  pr.appendChild(bMax);
+  card.appendChild(pr);
+  var act = document.createElement('div'); act.setAttribute('style','display:flex;gap:8px;');
+  var cancel=document.createElement('button'); cancel.type='button'; cancel.textContent='Cancelar';
+  cancel.setAttribute('style','flex:1;padding:9px;border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-sm,6px);background:transparent;color:var(--v-text-dim,#a09484);cursor:pointer;');
+  var ok=document.createElement('button'); ok.type='button'; ok.textContent='Confirmar';
+  ok.setAttribute('style','flex:1;padding:9px;border:1px solid var(--v-gold,#c4953a);border-radius:var(--v-radius-sm,6px);background:transparent;color:var(--v-gold,#c4953a);font-weight:bold;cursor:pointer;');
+  act.appendChild(cancel); act.appendChild(ok); card.appendChild(act);
+  ov.appendChild(card);
+  function _close(){ try { ov.parentNode && ov.parentNode.removeChild(ov); } catch(_){} }
+  cancel.addEventListener('click', _close);
+  ov.addEventListener('click', function(e){ if(e.target===ov) _close(); });
+  function _confirm(){
+    var n = parseInt(field.value, 10);
+    if (!isFinite(n) || n <= 0){ field.focus(); return; }
+    if (n > max) n = max;
+    _close();
+    if (typeof opts.onConfirm === 'function') opts.onConfirm(n);
+  }
+  ok.addEventListener('click', _confirm);
+  field.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); _confirm(); } });
+  if (window.vOverlay && window.vOverlay.add) window.vOverlay.add(ov); else document.body.appendChild(ov);
+  setTimeout(function(){ try { field.focus(); } catch(_){} }, 60);
+}
+
+function _bankCustomAmount(cb, p, npc){
+  var isDep = cb.indexOf('deposit') >= 0;
+  var pl = p || window.CITY_MOCK_PLAYER || {};
+  var maxV = isDep ? (pl.gold != null ? pl.gold : (pl.bag||0))
+                   : (pl.bank_gold != null ? pl.bank_gold : 0);
+  _vNumberPrompt({
+    title: isDep ? 'Depositar no Cofre' : 'Sacar do Cofre',
+    hint: isDep ? 'Quanto guardar? (depósito é gratuito)' : 'Quanto sacar? (taxa de 2%)',
+    max: maxV, presets: [10, 50, 100, 500],
+    onConfirm: function(n){
+      _openCityScreen('bank', (isDep ? 'bank_deposit_gold_' : 'bank_withdraw_gold_') + n, p, npc);
+    }
   });
 }
 
