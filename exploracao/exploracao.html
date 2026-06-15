@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T20:03:48Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T23:00:44Z - do not edit directly, edit source -->
 
 
 
@@ -6420,6 +6420,8 @@ document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/sc
 document.write('<link rel="stylesheet" href="../shared/encounter-popup.css?v=' + _vti + '">');
 document.write('<script src="../shared/coin-utils.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../shared/encounter-popup.js?v=' + _vti + '"><\/script>');
+// PADRAO_VIAGEM (#90): orquestrador UNICO de viagem (volta exploracao + map-to-map). Requer journey-data + encounter-popup + dice-3d.
+document.write('<script src="../shared/journey-runner.js?v=' + _vti + '"><\/script>');
 
 /* task #55 (2026-05-20) — PADRAO_LIGHTBOX: clicar nas imagens NPC pra ver
    maior. Aplica a .enc-portrait (PADRAO_ALDRIC) + .npc-portrait via global
@@ -36402,14 +36404,8 @@ function confirmChoice(idx) {
 
 function onConfirmOk() {
   document.getElementById('confirm-overlay').classList.remove('visible');
-  // 2026-06-14: o #confirm-overlay é compartilhado com as ETAPAS DE VIAGEM.
-  // Se há escolha de viagem pendente, resolve o hazard da viagem (não o evento).
-  if (S._pendingJourneyChoice) {
-    var jc = S._pendingJourneyChoice;
-    S._pendingJourneyChoice = null;
-    _resolveJourneyHazard(jc.hazard, jc.choice);
-    return;
-  }
+  // PADRAO_VIAGEM (#90): a viagem NÃO usa mais o #confirm-overlay (per-escolha);
+  // o runner mostra CD/chance no badge da escolha e resolve direto. Aqui é só evento.
   const idx = S.pendingChoiceIdx;
   S.pendingChoiceIdx = null;
   if (idx === null || idx === undefined) {
@@ -36424,9 +36420,6 @@ function onConfirmOk() {
 
 function onConfirmBack() {
   document.getElementById('confirm-overlay').classList.remove('visible');
-  // 2026-06-14: cancelar uma escolha de VIAGEM — só fecha o overlay; a tela de
-  // viagem (com os botões de escolha) continua atrás, intacta. Não toca o evento.
-  if (S._pendingJourneyChoice) { S._pendingJourneyChoice = null; return; }
   S.pendingChoiceIdx = null;
   /* X-6.5.51g: user cancelou — re-enable choices pra escolher outra opcao */
   _setEventChoicesDisabled(false);
@@ -38543,19 +38536,10 @@ function closeQuestJournal() {
 // de mecânica D&D, e use o sistema que já existe de viagem que mostra
 // eventos acontecendo, inclusive encontros em uma linha do tempo".
 
-var _journey = null;
-
-// Pool de hazards por bioma destino (skill checks D&D 5e)
-// FASE 2 single-source: dados da viagem em valdoria-webapp/shared/journey-data-shared.js (shape rico).
-var JOURNEY_HAZARDS = (window.JourneyData && JourneyData.HAZARDS) || {};
-
-// Pool de narrativas seguras por bioma destino (sem hazard).
-// User sessão #69: reescritas no nível PADRAO_ALDRIC — 5 sentidos, mostre-não-
-// conte, mistério ambiental (ver docs/sistemas/narrativa-guia.md). 4 variações
-// por bioma pra reduzir repetição numa viagem de 3-5 etapas.
-// FASE 2 single-source: dados da viagem em valdoria-webapp/shared/journey-data-shared.js (shape rico).
-var JOURNEY_SAFE = (window.JourneyData && JourneyData.SAFE) || {};
-var STAT_NAMES_PT = (window.DndRules && DndRules.STAT_NAMES_PT) || { str: 'Força', dex: 'Destreza', con: 'Constituição', int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma' };  // FASE 9/L1 single-source
+// PADRAO_VIAGEM (#90): JOURNEY_HAZARDS/JOURNEY_SAFE/STAT_NAMES_PT + o renderer
+// #journey-overlay LEGADO foram REMOVIDOS — a viagem usa o runner UNICO
+// (shared/journey-runner.js) + JourneyData (dados+regra D&D, anti-repeat). Mantém
+// só _stepsForDistance (nº de etapas pela distância vagada) abaixo.
 
 // #21 (sessão #70): nº de etapas = distância Manhattan do jogador até o ponto
 // de entrada do mapa (spawn). Quanto mais longe vagou, mais longa a viagem de
@@ -38572,353 +38556,29 @@ function _stepsForDistance() {
   return 5;
 }
 
-function startJourneyToMap(targetMapId, targetMap, options) {
-  // 2026-05-05 v11: opções pra suportar "first arrival from cidade".
-  // Antes só era usado pra map-to-map travel WITHIN exploracao.
-  // Agora também é a tela canônica pra travel cidade→exploracao
-  // (substituiu pt-overlay deletada em cidade.html).
-  options = options || {};
-  // #21: etapas pela distância vagada (options.steps faz override explícito).
-  const totalSteps = (typeof options.steps === 'number') ? options.steps : _stepsForDistance();
-  _journey = {
-    targetMapId: targetMapId,
-    targetMap: targetMap,
-    biome: targetMap.biome,
-    totalSteps: totalSteps,
-    currentStep: 0,
-    riskChance: (window.JourneyData ? JourneyData.RISK_CHANCE : 55),  // FASE 2: risco single-source
-    _usedHazards: [], _usedSafe: [],  // FASE 2: anti-repeat por viagem (sessao) — pareia com 24h localStorage
-    // Quando vem de cidade, mapa já foi booted → não re-boot ao chegar
-    skipReboot: !!options.skipReboot,
-    titlePrefix: options.titlePrefix || 'Rumo a ',
-    // #21: callback ao chegar (ex.: retorno à cidade) + flag de retorno à cidade
-    onArrive: (typeof options.onArrive === 'function') ? options.onArrive : null,
-    isCityReturn: !!options.isCityReturn
-  };
-  document.getElementById('journey-title').textContent = _journey.titlePrefix + targetMap.name;
-  document.getElementById('journey-overlay').classList.add('show');
-  _showJourneyStep();
-}
-
-function _showJourneyStep() {
-  if (!_journey) return;
-  _journey.currentStep++;
-  if (_journey.currentStep > _journey.totalSteps) {
-    _journeyArrive();
-    return;
-  }
-  _renderJourneyStep();
-}
-
-function _renderJourneyStep() {
-  const j = _journey;
-  if (!j) return;
-  const remaining = j.totalSteps - j.currentStep;
-  document.getElementById('journey-subtitle').textContent =
-    (remaining >= 1)
-      ? 'Etapa ' + j.currentStep + ' de ' + j.totalSteps + ' — ' + (remaining + 1) + ' restantes'
-      : 'Etapa final — chegando ao destino';
-
-  // Progress bar + dots
-  const pEl = document.getElementById('journey-progress');
-  const pct = Math.round((j.currentStep / (j.totalSteps + 1)) * 100);
-  let dots = '';
-  for (let i = 1; i <= j.totalSteps; i++) {
-    let cls = '';
-    if (i < j.currentStep) cls = 'done';
-    else if (i === j.currentStep) cls = 'current';
-    dots += '<div class="journey-progress-dot ' + cls + '"></div>';
-  }
-  pEl.innerHTML =
-    '<div class="journey-progress-bar"><div class="journey-progress-fill" style="width:' + pct + '%"></div></div>' +
-    '<div class="journey-progress-dots">' + dots + '</div>';
-
-  // Hazard ou seguro?
-  const roll = Math.random() * 100;
-  const hasHazard = roll < j.riskChance;
-  const narrEl = document.getElementById('journey-narration');
-  const checkEl = document.getElementById('journey-check');
-  const footEl = document.getElementById('journey-footer');
-  checkEl.innerHTML = '';
-  footEl.innerHTML = '';
-
-  if (hasHazard) {
-    // FASE 2 single-source: hazard rico (script[]) da fonte unica + anti-repeat (sessao + 24h char-namespaced).
-    var hazard = (window.JourneyData && JourneyData.pickFreshHazard)
-      ? JourneyData.pickFreshHazard(j.biome, S.player, (j._usedHazards = j._usedHazards || []))
-      : ((JOURNEY_HAZARDS[j.biome] || JOURNEY_HAZARDS.forest || [])[0]);
-    if (!hazard) { _journeyContinueBtn(); return; }  // pool vazio -> segue como seguro
-    narrEl.innerHTML =
-      '<div class="journey-step-badge hazard">⚠ ' + hazard.title + '</div>' +
-      _journeyScriptHtml(hazard);
-    hazard.choices.forEach(function(ch) {
-      if (ch.stat) {
-        // chance% via fonte unica (DndRules: mod + proficiencia escalada PHB) — MESMA odd do resolve (corrige H1/A1).
-        var pct = (window.JourneyData && JourneyData.successPctForChoice) ? JourneyData.successPctForChoice(S.player, ch) : null;
-        var info = _statLabel(ch.stat) + ' · CD ' + ch.dc + (pct != null ? ' · ' + pct + '%' : '');
-        _addJourneyBtn(footEl, ch.i, ch.t, (ch.desc ? ch.desc + ' — ' + info : info), '',
-          function() { _confirmJourneyChoice(hazard, ch); });
-      } else {
-        // escolha sem teste (stat:null no shape rico) — apenas seguir, sem risco.
-        _addJourneyBtn(footEl, ch.i, ch.t, ch.desc || '', '',
-          function() { _confirmJourneyChoice(hazard, ch); });
-      }
-    });
-  } else {
-    var txt = (window.JourneyData && JourneyData.pickFreshSafe)
-      ? JourneyData.pickFreshSafe(j.biome, S.player, (j._usedSafe = j._usedSafe || []))
-      : ((JOURNEY_SAFE[j.biome] || JOURNEY_SAFE.forest || [''])[0]);
-    narrEl.innerHTML =
-      '<div class="journey-step-badge safe">✓ Caminho seguro</div>' +
-      '<div>' + txt + '</div>';
-    _journeyContinueBtn();
-  }
-}
-
-// FASE 2: renderiza o script[] rico (narration/speech) do hazard; fallback p/ narr legado.
-function _journeyScriptHtml(hazard) {
-  if (hazard && Array.isArray(hazard.script) && hazard.script.length) {
-    return hazard.script.map(function(s) {
-      if (s.type === 'speech') {
-        var who = (hazard.npc && hazard.npc.name) || s.speaker || '';
-        return '<div class="journey-speech">' + (who ? '<b>' + who + ':</b> ' : '') + '<i>' + s.text + '</i></div>';
-      }
-      return '<div>' + s.text + '</div>';
-    }).join('');
-  }
-  return '<div>' + ((hazard && hazard.narr) || '') + '</div>';
-}
-
-function _statLabel(stat) {
-  return STAT_NAMES_PT[stat] || stat.toUpperCase();
-}
-
-// User sessão #69: chance de sucesso (%) na escolha, como PADRAO_ALDRIC.
-// d20: passa quando face+mod >= dc. Faces que passam = 20 - (need-1). Clamp
-// [5%,95%] — sempre há chance e sempre há risco (sabor de jogo, evita 0/100%).
-function _journeyChancePct(dc, mod) {
-  var need = dc - (mod || 0);
-  var passing = 20 - Math.max(0, Math.min(20, need - 1));
-  passing = Math.max(1, Math.min(19, passing));
-  return Math.round(passing / 20 * 100);
-}
-
-// User sessão #69: o dado d20 ROLA num popup 3D (antes só aparecia o número em
-// texto). Self-contained — usa window.Dice3D global (/shared/dice-3d.js).
-// FIX sessão #71e: z=60 ficava ATRÁS da tela de "Rumo a…" (o dado rolava embaixo).
-// z=10000 (acima de tudo: combate=200, eventos=100) + body-child (vOverlay) garante
-// que cubra a tela. Respeita perf-lite. CSS injetado 1x.
-function _journeyRollDice(d20, mod, total, dc, success, callback) {
-  if (!document.getElementById('journey-dice-style')) {
-    var st = document.createElement('style');
-    st.id = 'journey-dice-style';
-    st.textContent = ''
-      + '#journey-dice-ov{position:fixed;inset:0;z-index:10000;background:rgba(8,6,4,0.92);'
-      + '  display:flex;flex-direction:column;align-items:center;justify-content:center;'
-      + '  gap:14px;animation:jdFade .3s ease;backdrop-filter:none}'
-      + '@keyframes jdFade{from{opacity:0}to{opacity:1}}'
-      + '#journey-dice-mount{width:200px;height:200px}'
-      + '.jd-formula{font-family:Cinzel,serif;color:#f4d896;'
-      + '  font-size:calc(13px * var(--v-font-scale, 1));letter-spacing:1px;'
-      + '  min-height:20px;text-align:center}'
-      + '.jd-formula b{color:#fff4d0}'
-      + '.jd-result{font-family:Cinzel,serif;font-weight:700;letter-spacing:2px;'
-      + '  font-size:calc(22px * var(--v-font-scale, 1));opacity:0;transition:opacity .3s}'
-      + '.jd-result.success{color:#7ad06b;text-shadow:0 0 16px rgba(122,208,107,.55)}'
-      + '.jd-result.fail{color:#d85848;text-shadow:0 0 16px rgba(216,88,72,.55)}'
-      + '.jd-btn{margin-top: var(--v-space-sm, 4px);padding:9px 28px;border-radius: var(--v-radius-sm, 6px);cursor:pointer;'
-      + '  background:linear-gradient(180deg,rgba(196,149,58,.30),rgba(196,149,58,.12));'
-      + '  border:1px solid var(--v-gold,#c4953a);color:#e8dcc8;font-family:Cinzel,serif;'
-      + '  font-weight:600;font-size:calc(12px * var(--v-font-scale, 1));letter-spacing:1.5px;'
-      + '  opacity:0;transition:opacity .3s;box-shadow:0 0 14px rgba(196,149,58,.3)}';
-    document.head.appendChild(st);
-  }
-  var ov = document.createElement('div');
-  ov.id = 'journey-dice-ov';
-  ov.innerHTML = '<div id="journey-dice-mount"></div>'
-    + '<div class="jd-formula" id="jd-formula"></div>'
-    + '<div class="jd-result" id="jd-result"></div>'
-    + '<button class="jd-btn" id="jd-btn">Continuar</button>';
-  if (typeof vOverlay !== 'undefined' && vOverlay.add) vOverlay.add(ov);
-  else document.body.appendChild(ov);
-
-  var done = false;
-  function finish() { if (done) return; done = true; if (ov.parentNode) ov.parentNode.removeChild(ov); callback(); }
-  var revealed = false;
-  function reveal() {
-    if (revealed) return; revealed = true;
-    var f = document.getElementById('jd-formula');
-    var r = document.getElementById('jd-result');
-    var b = document.getElementById('jd-btn');
-    if (f) f.innerHTML = 'd20 ' + d20 + ' ' + (mod >= 0 ? '+' : '') + mod + ' = <b>' + total + '</b> vs CD ' + dc;
-    if (r) { r.textContent = success ? 'SUCESSO' : 'FALHA'; r.className = 'jd-result ' + (success ? 'success' : 'fail'); r.style.opacity = '1'; }
-    if (b) { b.style.opacity = '1'; b.onclick = finish; }
-  }
-  var lite = document.body.classList.contains('perf-lite');
-  if (lite) { setTimeout(reveal, 200); }
-  else if (window.Dice3D) {
-    try {
-      var dice = new window.Dice3D(document.getElementById('journey-dice-mount'), { size: 200, dieType: 'd20', duration: 1500 });
-      dice.roll(d20, reveal);
-    } catch (e) { setTimeout(reveal, 500); }
-  } else { setTimeout(reveal, 500); }
-  setTimeout(reveal, 3200);  // safety: Dice3D callback pode não disparar
-}
-
-/* 2026-06-14 (user: faltava confirmação nas escolhas das etapas de viagem, como
-   nos diálogos): intercepta a escolha de hazard e REUSA o #confirm-overlay do
-   diálogo (sem UI nova). Mostra "Você pretende:" + desc + linha de teste
-   (Perícia · CD · %) e só resolve no "Confirmar". onConfirmOk/onConfirmBack
-   distinguem viagem (S._pendingJourneyChoice) de evento (S.pendingChoiceIdx). */
-function _confirmJourneyChoice(hazard, choice) {
-  S._pendingJourneyChoice = { hazard: hazard, choice: choice };
-  var descEl = document.getElementById('confirm-desc');
-  if (descEl) descEl.textContent = choice.desc || choice.t || '';
-  var statsEl = document.getElementById('confirm-stats');
-  if (statsEl) {
-    if (choice.stat) {
-      var pct = (window.JourneyData && JourneyData.successPctForChoice)
-        ? JourneyData.successPctForChoice(S.player, choice) : null;
-      statsEl.textContent = 'Teste de ' + _statLabel(choice.stat) + ' · CD ' + choice.dc
-        + (pct != null ? ' · ' + pct + '% de sucesso' : '');
-      statsEl.style.display = 'block';
-    } else {
-      statsEl.style.display = 'none';
-    }
-  }
-  var ov = document.getElementById('confirm-overlay');
-  if (ov) ov.classList.add('visible');
-}
-
-function _resolveJourneyHazard(hazard, choice) {
-  const footEl = document.getElementById('journey-footer');
-  footEl.innerHTML = '';  // some os botões de escolha enquanto o dado rola
-  // FASE 2 single-source: resolucao via fonte unica (DndRules) — odds IGUAIS a cidade (corrige H1/A1).
-  var roll = (window.JourneyData && JourneyData.resolveJourneyCheck) ? JourneyData.resolveJourneyCheck(S.player, choice) : null;
-  if (!roll) {
-    // escolha sem teste (stat:null) -> auto-sucesso, sem dado.
-    _applyJourneyHazardOutcome(hazard, choice, null, true);
-    return;
-  }
-  var modTotal = roll.mod + roll.prof;
-  // User sessão #69: o d20 rola num popup 3D ANTES de revelar o desfecho.
-  _journeyRollDice(roll.d20, modTotal, roll.total, roll.dc, roll.success, function() {
-    _applyJourneyHazardOutcome(hazard, choice, roll, roll.success);
-  });
-}
-
-function _applyJourneyHazardOutcome(hazard, choice, roll, success) {
-  const checkEl = document.getElementById('journey-check');
-  const narrEl = document.getElementById('journey-narration');
-  const footEl = document.getElementById('journey-footer');
-  if (roll) {
-    var modTotal = roll.mod + roll.prof;
-    var sign = modTotal >= 0 ? '+' : '';
-    checkEl.innerHTML =
-      '<div class="journey-formula">d20: ' + roll.d20 + ' ' + sign + modTotal + ' (' + _statLabel(choice.stat) + ') = ' + roll.total + ' vs CD ' + roll.dc + '</div>' +
-      '<div class="journey-check-result ' + (success ? 'success' : 'fail') + '">' +
-      (success ? '✓ Sucesso' : '✗ Falha') + '</div>';
-  } else {
-    checkEl.innerHTML = '';
-  }
-  // FASE 2: narrativa rica por traço (sNarr_by_class > _by_alignment > default) via fonte unica.
-  var narrTxt = (window.JourneyData && JourneyData.pickNarrative)
-    ? JourneyData.pickNarrative(choice, S.player, success)
-    : (success ? (choice.sNarr || '') : (choice.fNarr || ''));
-  if (success) {
-    narrEl.innerHTML =
-      '<div class="journey-step-badge safe">' + hazard.title + ' — Superado</div>' +
-      '<div>' + narrTxt + '</div>';
-  } else {
-    const dmg = choice.dmg || 3;
-    if (S && S.player) S.player.hp = Math.max(0, S.player.hp - dmg);
-    if (typeof updateHud === 'function') updateHud();
-    narrEl.innerHTML =
-      '<div class="journey-step-badge danger">' + hazard.title + ' — Falha</div>' +
-      '<div>' + narrTxt + '</div>' +
-      '<div style="margin-top:6px;color:#d85848;font-size:calc(12px * var(--v-font-scale, 1));font-family:Cinzel,serif;font-weight:700">−' + dmg + ' HP</div>';
-  }
-  // Verifica defeat antes de continuar
-  setTimeout(function() {
-    if (S.player && S.player.hp <= 0) {
-      _addJourneyBtn(footEl, '💀', 'Você sucumbiu...', 'A jornada terminou aqui', '', function() {
-        _closeJourney();
-        if (typeof triggerDefeat === 'function') triggerDefeat('journey_hazard');
-      });
-      return;
-    }
-    _journeyContinueBtn();
-  }, 1500);
-}
-
-function _journeyContinueBtn() {
-  const footEl = document.getElementById('journey-footer');
-  const j = _journey;
-  if (!j) return;
-  const remaining = j.totalSteps - j.currentStep;
-  if (remaining > 0) {
-    _addJourneyBtn(footEl, '🚶', 'Continuar viagem',
-      remaining + ' etapa' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : ''),
-      '', function() { _showJourneyStep(); });
-  } else {
-    _addJourneyBtn(footEl, '✦', 'Chegar ao destino', 'Você avista as fronteiras de ' + j.targetMap.name, 'gold', function() { _journeyArrive(); });
-  }
-  // #21: acampar durante a jornada (descanso curto/longo D&D 5e). Reusa o
-  // camp-screen; ao sair retoma a jornada exatamente onde parou.
-  _addJourneyBtn(footEl, '🏕️', 'Acampar', 'Descansar antes de seguir', '', function() { _journeyCamp(); });
-}
-
-function _addJourneyBtn(container, icon, title, desc, cls, onClick) {
-  const btn = document.createElement('button');
-  btn.className = 'journey-btn' + (cls ? ' ' + cls : '');
-  btn.innerHTML =
-    (icon ? '<span class="journey-btn-icon">' + icon + '</span>' : '') +
-    '<div class="journey-btn-text">' + title +
-    (desc ? '<div class="journey-btn-desc">' + desc + '</div>' : '') +
-    '</div>';
-  btn.addEventListener('click', onClick);
-  container.appendChild(btn);
-}
-
-function _journeyArrive() {
-  const j = _journey;
-  if (!j) return;
-  const onArrive = j.onArrive;        // #21: captura antes de _closeJourney() nular
-  const skipReboot = j.skipReboot;
-  const targetName = j.targetMap.name;
-  _closeJourney();
-  // #21: chegada à cidade (ou outro destino com callback) → roda o retorno real
-  if (onArrive) { onArrive(); return; }
-  if (skipReboot) {
-    // First arrival from cidade — mapa já booted, só anuncia chegada
-    if (typeof dmNarrate === 'function') {
-      dmNarrate({ text: 'Você chega em ' + targetName + '.', type: 'action' });
-    }
-    return;
-  }
-  // Map-to-map travel — boot no novo mapa
-  setupChoices.map = j.targetMapId;
-  if (typeof dmNarrate === 'function') {
-    dmNarrate({ text: 'Você chega às terras de ' + targetName + '.', type: 'action' });
-  }
-  if (typeof boot === 'function') boot();
-}
-
-function _closeJourney() {
-  document.getElementById('journey-overlay').classList.remove('show');
-  _journey = null;
-}
-
-// #21 (sessão #70): retorno à cidade VIA jornada "Rumo a Valdoria". Mais longa
-// quanto mais longe o jogador vagou (etapas por distância) + opção de acampar.
-// Ao chegar aos Portões de Valdoria, dispara o retorno REAL (_returnToCityNow).
+// PADRAO_VIAGEM (#90): retorno à cidade ("Rumo a Valdoria") delega ao runner
+// UNICO compartilhado — MESMA engine da IDA da cidade. Etapas pela distância
+// vagada (_stepsForDistance). Ao chegar (ou ser socorrido ao sucumbir) dispara
+// o retorno REAL (_returnToCityNow). O #journey-overlay legado foi REMOVIDO.
 function startReturnToCity() {
-  if (_journey) return;  // já em jornada — não relança
+  if (window.JourneyRunner && JourneyRunner.isActive && JourneyRunner.isActive()) return;
   var biome = (S && S.mapDef && S.mapDef.biome) ? S.mapDef.biome
             : ((S && S.biome) ? S.biome : 'plains');
-  startJourneyToMap('city_gates',
-    { name: 'Valdoria', biome: biome },
-    { titlePrefix: 'Rumo a ', isCityReturn: true, onArrive: _returnToCityNow });
+  if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
+    JourneyRunner.start({
+      biome: biome,
+      displayName: 'Valdoria',
+      player: function () { return (window.S && S.player) || {}; },
+      confirm: true,
+      audioBiome: true,
+      totalSteps: _stepsForDistance(),
+      refreshHud: (typeof updateHud === 'function') ? updateHud : null,
+      onArrive: _returnToCityNow,
+      onDefeat: _returnToCityNow
+    });
+    return;
+  }
+  _returnToCityNow();
 }
 
 // #21: fluxo real de retorno (callback de chegada da jornada). Reproduz o
@@ -38959,16 +38619,6 @@ function _returnToCityNow() {
     console.warn('[RETURN-CITY] finish exception, redirecting anyway:', eF);
     _doRedirect();
   }
-}
-
-// #21: acampar durante a jornada. Esconde a jornada (preserva _journey + o
-// footer atual com os botões) e a retoma quando o camp fecha (closeCampOverlay).
-function _journeyCamp() {
-  if (!_journey) return;
-  _journey._resumeAfterCamp = true;
-  var ov = document.getElementById('journey-overlay');
-  if (ov) ov.classList.remove('show');
-  if (typeof openCampOverlay === 'function') openCampOverlay();
 }
 
 // ============================================================================
@@ -39219,13 +38869,6 @@ function closeCampOverlay() {
   const ov = document.getElementById('camp-screen');
   if (ov) ov.classList.remove('active');
   try { if (window.CampFire) window.CampFire.destroy(); } catch (_) {}
-  // #21: se o camp foi aberto durante a jornada de volta, retoma a jornada
-  // (footer/narração permanecem intactos — só re-exibe o overlay).
-  if (_journey && _journey._resumeAfterCamp) {
-    _journey._resumeAfterCamp = false;
-    var jov = document.getElementById('journey-overlay');
-    if (jov) jov.classList.add('show');
-  }
 }
 
 // Helper: dN roll
@@ -40856,7 +40499,22 @@ function openLocationPopup(mapId) {
     // eventos acontecendo, inclusive encontros em uma linha do tempo".
     closeLocationPopup();
     closeCartography();
-    startJourneyToMap(mapId, m);
+    // PADRAO_VIAGEM (#90): map-to-map usa o runner UNICO (mesma engine ida/volta).
+    if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
+      JourneyRunner.start({
+        biome: m.biome,
+        displayName: m.name,
+        player: function () { return (window.S && S.player) || {}; },
+        confirm: true,
+        audioBiome: true,
+        refreshHud: (typeof updateHud === 'function') ? updateHud : null,
+        onArrive: function () {
+          setupChoices.map = mapId;
+          if (typeof dmNarrate === 'function') dmNarrate({ text: 'Você chega às terras de ' + m.name + '.', type: 'action' });
+          if (typeof boot === 'function') boot();
+        }
+      });
+    }
   };
 
   ov.classList.add('visible');
