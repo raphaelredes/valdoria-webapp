@@ -27,7 +27,8 @@
  *                    destino real (ida: playTravelAnimation+redirect p/ exploração;
  *                    volta: ExploracaoAPI.finish()+redirect p/ cidade).
  *     onCancel     : () => cancelou na confirmação (volta ao mapa).
- *     onDefeat     : () => extra ao sucumbir (HUD/refresh). Opcional.
+ *     onDefeat     : () => o CALLER decide a morte (exploração: triggerDefeat —
+ *                    derrota real + servidor). SEM ele = cidade-mock revive a 1/4 HP.
  *     confirm      : false desliga o popup de confirmação (default: mostra).
  *     totalSteps   : nº de etapas (default 3-5 aleatório).
  *     log          : (msg) => log. audioBiome: true toca trilha do bioma.
@@ -259,7 +260,11 @@
     if (dmgApplied > 0) {
       body += ' <span style="color:#d85848;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;white-space:nowrap;">(−' + dmgApplied + ' HP)</span>';
     }
-    // Morte na jornada → socorro (revive a 1/4 HP). Aborta a viagem no contexto de origem.
+    // Morte na jornada. AUTORIDADE do desfecho:
+    //  • opts.onDefeat presente (exploração REMOTE) → o CALLER decide (triggerDefeat:
+    //    derrota REAL + post status=dead ao servidor). NUNCA reviver no cliente aqui —
+    //    seria fabricar estado de jogo (viola "Servidor é a Autoridade" #0).
+    //  • sem onDefeat (cidade = sandbox client-mock) → socorro local a 1/4 HP.
     if (p && p.hp <= 0) {
       _vRender({
         script: [{ type: 'narration', text: body }],
@@ -267,10 +272,13 @@
         inline: true,
         onChoice: function () {
           _close();
+          if (typeof j.opts.onDefeat === 'function') {
+            try { j.opts.onDefeat(); } catch (e) {}
+            return;
+          }
           if (p) p.hp = Math.max(1, Math.floor((p.hpMax || p.max_hp || 28) / 4));
           if (typeof j.opts.toast === 'function') { try { j.opts.toast('Você foi derrotado na jornada. Socorro nos Portões.', 'warn'); } catch (e) {} }
           if (typeof j.opts.refreshHud === 'function') { try { j.opts.refreshHud(); } catch (e) {} }
-          if (typeof j.opts.onDefeat === 'function') { try { j.opts.onDefeat(); } catch (e) {} }
         }
       });
       return;

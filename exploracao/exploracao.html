@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T23:00:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T23:37:49Z - do not edit directly, edit source -->
 
 
 
@@ -4075,239 +4075,6 @@ body.perf-lite #hud-float-status .icon { animation: none; }
 .party-close:hover {
   border-color: var(--v-text, #d4c8b0);
   background: rgba(60, 48, 32, 0.95);
-}
-
-/* X-6.5.51l (2026-04-25): JOURNEY OVERLAY — viagem entre mapas com etapas
-   (turnos), narrativas, hazards (skill checks D&D 5e), linha do tempo. */
-#journey-overlay {
-  display: none;
-  position: absolute;
-  inset: 0;
-  z-index: 35;
-  background: rgba(0, 0, 0, 0.78);
-  align-items: center;
-  justify-content: center;
-  padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px);
-  backdrop-filter: blur(3px);
-}
-#journey-overlay.show { display: flex; }
-.journey-card {
-  background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 0%, var(--v-bg, #2a2420) 100%);
-  border: 1.5px solid var(--v-gold, #c4953a);
-  border-radius: var(--v-radius, 10px);
-  padding: 0;
-  width: calc(100% - 24px);
-  max-width: 340px;
-  /* 2026-06-14 FIX (botão "Continuar" das etapas de viagem cortado no Telegram):
-     max-height:100% colava o card no fundo do overlay → a footer (botão) ficava
-     sob a barra inferior/safe-area do WebView. calc(100% - 24px) levanta o card
-     (mesmo padrão do .loc-card que não corta). journey-body já rola + footer é
-     flex-shrink:0, então só faltava esse respiro vertical. */
-  max-height: calc(100% - 24px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
-  color: var(--v-text, #d4c8b0);
-  position: relative;
-  animation: journeySlideUp 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes journeySlideUp {
-  from { transform: translateY(15px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-.journey-card::before {
-  content: ''; position: absolute;
-  top: -6px; left: 50%; transform: translateX(-50%);
-  width: 12px; height: 12px;
-  background: var(--v-gold, #c4953a);
-  border-radius: 50%;
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(196, 149, 58, 0.4);
-  z-index: 2;
-}
-.journey-header {
-  flex-shrink: 0;
-  padding: var(--v-space-lg, 12px) 14px var(--v-space-md-lg, 10px);
-  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
-  border-bottom: 1px solid rgba(196, 149, 58, 0.25);
-  text-align: center;
-}
-.journey-title {
-  font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: calc(14px * var(--v-font-scale, 1)); font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--v-gold, #c4953a);
-  margin: 0 0 var(--v-space-sm, 4px) 0;
-  text-shadow: 0 0 10px rgba(196, 149, 58, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7);
-}
-.journey-subtitle {
-  font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: calc(9.5px * var(--v-font-scale, 1));
-  letter-spacing: 1.3px;
-  text-transform: uppercase;
-  color: var(--v-text-dim, #a09484);
-}
-.journey-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  padding: var(--v-space-lg, 12px) 14px;
-}
-.journey-progress {
-  margin-bottom: var(--v-space-md-lg, 10px);
-}
-.journey-progress-bar {
-  height: 4px;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-.journey-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--v-gold, #c4953a) 0%, #e8b850 100%);
-  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 0 4px rgba(232, 184, 80, 0.5);
-}
-.journey-progress-dots {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-}
-.journey-progress-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: rgba(60, 48, 40, 0.5);
-  border: 1px solid rgba(196, 149, 58, 0.3);
-}
-.journey-progress-dot.done {
-  background: var(--v-gold, #c4953a);
-  border-color: #e8b850;
-  box-shadow: 0 0 4px rgba(232, 184, 80, 0.6);
-}
-.journey-progress-dot.current {
-  background: rgba(232, 184, 80, 0.4);
-  border-color: var(--v-gold, #c4953a);
-  animation: journeyDotPulse 1.2s ease-in-out infinite;
-}
-@keyframes journeyDotPulse {
-  0%, 100% { box-shadow: 0 0 4px rgba(232, 184, 80, 0.4); }
-  50% { box-shadow: 0 0 8px rgba(232, 184, 80, 0.8); }
-}
-.journey-narration {
-  font-family: 'MedievalSharp', 'Cinzel', serif;
-  font-size: calc(13px * var(--v-font-scale, 1));
-  line-height: 1.55;
-  color: var(--v-text, #d4c8b0);
-  margin-bottom: var(--v-space-md-lg, 10px);
-  min-height: 60px;
-}
-.journey-step-badge {
-  display: inline-block;
-  font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: calc(9.5px * var(--v-font-scale, 1));
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  font-weight: 700;
-  padding: 3px var(--v-space-md, 8px);
-  border-radius: var(--v-radius-sm, 6px);
-  margin-bottom: 6px;
-}
-.journey-step-badge.safe {
-  background: rgba(80, 130, 60, 0.25);
-  border: 1px solid rgba(120, 170, 90, 0.5);
-  color: #a8d878;
-}
-.journey-step-badge.hazard {
-  background: rgba(170, 80, 50, 0.25);
-  border: 1px solid rgba(220, 130, 90, 0.5);
-  color: #e8a878;
-}
-.journey-step-badge.danger {
-  background: rgba(180, 50, 40, 0.30);
-  border: 1px solid #c44438;
-  color: #ffaaaa;
-}
-.journey-check {
-  text-align: center;
-  margin: var(--v-space-md, 8px) 0;
-  min-height: 28px;
-}
-.journey-check-result {
-  margin-top: var(--v-space-sm, 4px);
-  font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: calc(14px * var(--v-font-scale, 1));
-  font-weight: 700;
-  letter-spacing: 1.5px;
-}
-.journey-check-result.success { color: #6acc78; text-shadow: 0 0 6px rgba(106, 204, 120, 0.4); }
-.journey-check-result.fail { color: #d85848; text-shadow: 0 0 6px rgba(216, 88, 72, 0.4); }
-.journey-formula {
-  font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: calc(11px * var(--v-font-scale, 1));
-  color: var(--v-text-dim, #a09484);
-  letter-spacing: 0.5px;
-}
-.journey-footer {
-  flex-shrink: 0;
-  /* 2026-06-14: barra fixa do botão (escolha/Continuar) — safe-area p/ não ficar
-     sob a barra inferior do Telegram WebView. É a "área do Pular": sempre visível. */
-  padding: var(--v-space-md-lg, 10px) 14px calc(10px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(0deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
-  border-top: 1px solid rgba(196, 149, 58, 0.25);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.journey-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--v-space-md, 8px);
-  width: 100%;
-  background: linear-gradient(180deg, rgba(40, 32, 24, 0.9), rgba(22, 18, 14, 0.9));
-  border: 1.5px solid var(--v-text-dim, #a09484);
-  color: var(--v-text, #d4c8b0);
-  border-radius: var(--v-radius-sm, 6px);
-  padding: 9px var(--v-space-lg, 12px);
-  font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: calc(11.5px * var(--v-font-scale, 1));
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-align: left;
-}
-.journey-btn:hover {
-  border-color: var(--v-text, #d4c8b0);
-  background: rgba(60, 48, 32, 0.95);
-  transform: translateX(2px);
-}
-.journey-btn.gold {
-  border-color: var(--v-gold, #c4953a);
-  background: linear-gradient(180deg, rgba(196, 149, 58, 0.25), rgba(139, 100, 32, 0.18));
-  color: #f0e0b8;
-}
-.journey-btn.gold:hover {
-  background: linear-gradient(180deg, rgba(196, 149, 58, 0.4), rgba(139, 100, 32, 0.3));
-  border-color: #fbd770;
-}
-.journey-btn.danger {
-  border-color: #c44438;
-  color: #ffcccc;
-}
-.journey-btn-icon {
-  font-size: calc(16px * var(--v-font-scale, 1));
-  flex-shrink: 0;
-}
-.journey-btn-text { flex: 1; }
-.journey-btn-desc {
-  font-size: calc(9.5px * var(--v-font-scale, 1));
-  font-weight: 400;
-  color: var(--v-text-dim, #a09484);
-  letter-spacing: 0.8px;
-  text-transform: none;
-  margin-top: var(--v-space-xs, 2px);
 }
 
 /* ====== HEX-NAV (6 dirs + center) ===================================== */
@@ -8999,30 +8766,6 @@ window.__onIntroTap = function() {
       <div class="loc-footer">
         <button class="loc-close" id="loc-close-btn">Fechar</button>
         <button class="loc-travel" id="loc-travel-btn">Viajar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- X-6.5.51l: journey-overlay — viagem entre mapas via cartografia, com
-       turnos, hazards (skill checks D&D 5e), narracoes, e linha do tempo
-       visual (etapas + dots de progresso). Adaptado de
-       valdoria-webapp/explore/explore-outbound-travel.js. User feedback:
-       "coloque os riscos da viagem, turnos, etc, o que existir de mecânica
-       D&D, e use o sistema que já existe de viagem que mostra eventos
-       acontecendo, inclusive encontros em uma linha do tempo". -->
-  <div id="journey-overlay">
-    <div class="journey-card">
-      <div class="journey-header">
-        <h2 class="journey-title" id="journey-title">Rumo a ...</h2>
-        <div class="journey-subtitle" id="journey-subtitle">Preparando partida</div>
-      </div>
-      <div class="journey-body">
-        <div class="journey-progress" id="journey-progress"></div>
-        <div class="journey-narration" id="journey-narration"></div>
-        <div class="journey-check" id="journey-check"></div>
-      </div>
-      <div class="journey-footer" id="journey-footer">
-        <!-- preenchido dinamicamente: 1-2 botoes de ação por etapa -->
       </div>
     </div>
   </div>
@@ -38574,7 +38317,7 @@ function startReturnToCity() {
       totalSteps: _stepsForDistance(),
       refreshHud: (typeof updateHud === 'function') ? updateHud : null,
       onArrive: _returnToCityNow,
-      onDefeat: _returnToCityNow
+      onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na jornada de volta a Valdoria.'); }
     });
     return;
   }
@@ -40512,7 +40255,8 @@ function openLocationPopup(mapId) {
           setupChoices.map = mapId;
           if (typeof dmNarrate === 'function') dmNarrate({ text: 'Você chega às terras de ' + m.name + '.', type: 'action' });
           if (typeof boot === 'function') boot();
-        }
+        },
+        onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na viagem.'); }
       });
     }
   };
