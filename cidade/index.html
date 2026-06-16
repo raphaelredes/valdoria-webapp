@@ -9886,12 +9886,44 @@ function _isCTA(btn) {
     var charName = p.name || 'seu personagem';
     var ICO = (typeof _heralIco === 'function') ? _heralIco('ic-ach-colecionador', null, '32px') : '';
     function _esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g, function(c){ return { '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;' }[c]; }); }
+    // Lista de personagens do jogador (time-of-use, não cachear — Hall pode mudar).
+    function _charList(){ return (window._mockCharacters || []).filter(function(c){ return c && c.id; }); }
+    function _clsPT(k){ return (typeof _classLabelPT === 'function') ? (_classLabelPT(k) || k) : (k || ''); }
+    function _racePT(k){ return (typeof _raceLabelPT === 'function') ? (_raceLabelPT(k) || k) : (k || ''); }
+    function _charLabel(c){
+      var bits = [];
+      var cl = _clsPT(c.cls); if (cl) bits.push(cl);
+      var rc = _racePT(c.race); if (rc) bits.push(rc);
+      return (c.name || 'Personagem') + (bits.length ? ' — ' + bits.join(' / ') : '');
+    }
+    // char_id ESCOLHIDO (select > char único > char ativo > vazio=ativo no server).
+    function _selectedCharId(){
+      var sel = document.getElementById('portrait-char-select');
+      if (sel && sel.value) return sel.value;
+      var chars = _charList();
+      if (chars.length === 1) return chars[0].id;
+      var act = chars.filter(function(c){ return c.active; })[0];
+      if (act) return act.id;
+      return (p && (p.char_id || p.id)) || '';
+    }
 
     function _renderForm(){
+      var chars = _charList();
+      var picker = '';
+      if (chars.length > 1){
+        picker = ''
+          + '<label style="display:block;font-size:calc(11px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);letter-spacing:1px;margin-bottom:var(--v-space-sm,4px);text-transform:uppercase;font-family:Cinzel,serif;">Para qual personagem</label>'
+          + '<select id="portrait-char-select" style="width:100%;box-sizing:border-box;background:var(--v-bg,#2a2420);border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-sm,6px);padding:var(--v-space-md,8px) var(--v-space-lg,12px);color:var(--v-text,#d4c8b0);font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale,1));margin-bottom:12px;outline:none;">'
+          + chars.map(function(c){ return '<option value="' + _esc(c.id) + '"' + (c.active ? ' selected' : '') + '>' + _esc(_charLabel(c)) + '</option>'; }).join('')
+          + '</select>';
+      } else if (chars.length === 1){
+        picker = '<p style="font-size:calc(12px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);margin:0 0 10px;">Para: <b style="color:var(--v-gold,#c4953a);">' + _esc(_charLabel(chars[0])) + '</b></p>';
+      }
       var H = ''
+        + picker
         + '<p style="color:var(--v-text-dim,#a09484);line-height:1.55;font-size:calc(13px * var(--v-font-scale,1));margin:0 0 12px;">'
-        +   'Descreva as características físicas de <b style="color:var(--v-gold,#c4953a);">' + _esc(charName) + '</b> — cabelo, olhos, pele, marcas, roupas, porte. '
-        +   'A arte será criada no estilo único de Valdória. <i>Apenas 1 pedido por jogador.</i>'
+        +   'Descreva as características físicas do personagem — cabelo, olhos, pele, marcas, roupas, porte. '
+        +   'A raça, classe e gênero são incluídos automaticamente. A arte será criada no estilo único de Valdória. <i>Apenas 1 pedido por jogador.</i>'
         + '</p>'
         + '<textarea id="portrait-desc" maxlength="800" rows="5" placeholder="Ex.: cabelos longos prateados, olhos âmbar, cicatriz no rosto, manto azul-escuro com fivela de prata&hellip;" '
         +   'style="width:100%;box-sizing:border-box;background:var(--v-bg,#2a2420);border:1px solid var(--v-border,#4a3828);'
@@ -9917,7 +9949,7 @@ function _isCTA(btn) {
       if (apiBase && token){
         fetch(apiBase + '/api/game/action', {
           method:'POST', headers:{ 'Content-Type':'application/json', 'X-Valdoria-Token': token },
-          body: JSON.stringify({ callback:'portrait_request_submit', body:{ portrait_desc: desc.slice(0,800) } })
+          body: JSON.stringify({ callback:'portrait_request_submit', body:{ portrait_desc: desc.slice(0,800), char_id: _selectedCharId() } })
         }).then(function(r){ return r.json(); }).then(function(d){
           if (typeof vToast === 'function') vToast((d && d.toast) || 'Pedido de retrato enviado! Aguarde a criação da arte.');
         }).catch(function(e){ console.warn('[PORTRAIT] submit failed:', e); if (typeof vToast === 'function') vToast('Falha ao enviar. Tente novamente.'); });
