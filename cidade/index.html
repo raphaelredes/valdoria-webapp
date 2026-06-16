@@ -9872,6 +9872,83 @@ function _isCTA(btn) {
       };
     }, 100);
   };
+
+  // === Pedido de retrato (1 por jogador) — descrição física + envio server ===
+  // Servidor é a AUTORIDADE: valida o gate de 1-por-jogador e persiste em
+  // portrait_requests. O owner revisa na GUI (janela "Retratos") e o agente gera
+  // a imagem no estilo NPC. Status/resultado vêm do server (portrait_status/result).
+  window._showPortraitRequestPopup = function(){
+    if (typeof window._showInfoPopup !== 'function') return;
+    var auth = window.__CITY_AUTH || {};
+    var apiBase = auth.api || window._VALDORIA_API_BASE || window._API_BASE || '';
+    var token = auth.token || (typeof _readToken === 'function' && _readToken()) || '';
+    var p = window.CITY_MOCK_PLAYER || {};
+    var charName = p.name || 'seu personagem';
+    var ICO = (typeof _heralIco === 'function') ? _heralIco('ic-ach-colecionador', null, '32px') : '';
+    function _esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g, function(c){ return { '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;' }[c]; }); }
+
+    function _renderForm(){
+      var H = ''
+        + '<p style="color:var(--v-text-dim,#a09484);line-height:1.55;font-size:calc(13px * var(--v-font-scale,1));margin:0 0 12px;">'
+        +   'Descreva as características físicas de <b style="color:var(--v-gold,#c4953a);">' + _esc(charName) + '</b> — cabelo, olhos, pele, marcas, roupas, porte. '
+        +   'A arte será criada no estilo único de Valdória. <i>Apenas 1 pedido por jogador.</i>'
+        + '</p>'
+        + '<textarea id="portrait-desc" maxlength="800" rows="5" placeholder="Ex.: cabelos longos prateados, olhos âmbar, cicatriz no rosto, manto azul-escuro com fivela de prata&hellip;" '
+        +   'style="width:100%;box-sizing:border-box;background:var(--v-bg,#2a2420);border:1px solid var(--v-border,#4a3828);'
+        +   'border-radius:var(--v-radius-sm,6px);padding:var(--v-space-md-lg,10px) var(--v-space-lg,12px);color:var(--v-text,#d4c8b0);'
+        +   'font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale,1));line-height:1.5;resize:none;outline:none;"></textarea>'
+        + '<div style="font-size:calc(10px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);text-align:right;margin-top:var(--v-space-xs,2px);"><span id="portrait-desc-count">0</span>/800</div>';
+      window._showInfoPopup({
+        icon: ICO, npc: 'Retrato sob Encomenda', title: 'Pedir Retrato',
+        desc: H, confirmLabel: 'Enviar pedido',
+        onConfirm: function(){ return _submit(); }
+      });
+      setTimeout(function(){
+        var ta = document.getElementById('portrait-desc');
+        var cnt = document.getElementById('portrait-desc-count');
+        if (ta && cnt){ ta.addEventListener('input', function(){ cnt.textContent = String(ta.value.length); }); try { ta.focus(); } catch(e){} }
+      }, 120);
+    }
+
+    function _submit(){
+      var ta = document.getElementById('portrait-desc');
+      var desc = (ta && ta.value || '').trim();
+      if (desc.length < 8){ if (typeof vToast === 'function') vToast('Descreva o personagem com mais detalhes (mín. 8 caracteres).'); return false; }
+      if (apiBase && token){
+        fetch(apiBase + '/api/game/action', {
+          method:'POST', headers:{ 'Content-Type':'application/json', 'X-Valdoria-Token': token },
+          body: JSON.stringify({ callback:'portrait_request_submit', body:{ portrait_desc: desc.slice(0,800) } })
+        }).then(function(r){ return r.json(); }).then(function(d){
+          if (typeof vToast === 'function') vToast((d && d.toast) || 'Pedido de retrato enviado! Aguarde a criação da arte.');
+        }).catch(function(e){ console.warn('[PORTRAIT] submit failed:', e); if (typeof vToast === 'function') vToast('Falha ao enviar. Tente novamente.'); });
+      } else {
+        if (typeof vToast === 'function') vToast('Pedido registrado (modo local — sem servidor).');
+      }
+      return true;
+    }
+
+    // Pré-check do status (1-por-jogador): se já pediu, mostra o estado; senão, form.
+    if (apiBase && token){
+      fetch(apiBase + '/api/game/action', {
+        method:'POST', headers:{ 'Content-Type':'application/json', 'X-Valdoria-Token': token },
+        body: JSON.stringify({ callback:'portrait_request_status', body:{} })
+      }).then(function(r){ return r.json(); }).then(function(d){
+        var st = d && d.portrait_status;
+        if (st && st.has_request){
+          var stPt = { pending:'pendente', approved:'aprovado', done:'concluído' }[st.status] || st.status;
+          window._showInfoPopup({
+            icon: ICO, npc: 'Retrato sob Encomenda', title: 'Pedido de Retrato',
+            desc: '<p style="color:var(--v-text-dim,#a09484);line-height:1.55;font-size:calc(13px * var(--v-font-scale,1));margin:0;">'
+              + 'Você já fez seu pedido de retrato <span style="opacity:0.7;">(limite de 1 por jogador)</span>.<br><br>'
+              + 'Status: <b style="color:var(--v-gold,#c4953a);">' + _esc(stPt) + '</b>'
+              + (st.description ? '<br><br><i>"' + _esc(st.description) + '"</i>' : '')
+              + '</p>',
+            confirmLabel: 'Entendi', onConfirm: function(){ return true; }
+          });
+        } else { _renderForm(); }
+      }).catch(function(e){ console.warn('[PORTRAIT] status failed:', e); _renderForm(); });
+    } else { _renderForm(); }
+  };
 })();
 
 // ============================================================================
@@ -13111,6 +13188,7 @@ function _showSettingsPopup(){
     { icon: 'ic-pergaminho',        label: 'Diálogos Recentes',       cb: 'extras_dialog_history' },
     { icon: 'ic-mensagem',          label: 'Meu Código de Indicação', cb: 'extras_referral' },
     { icon: 'ic-ach-colecionador',  label: 'Apoiar Projeto',          cb: 'extras_support' },
+    { icon: 'ic-ach-colecionador',  label: 'Pedir Retrato',           cb: 'extras_portrait' },
     { icon: 'ic-stat-cha',          label: 'Avaliar o Jogo',          cb: 'extras_feedback' }
   ];
   extras.forEach(function(ex){
@@ -13413,6 +13491,9 @@ function _showSettingsPopup(){
               + '</div>',
           onConfirm: function(){ vToast('Obrigado por considerar!'); }
         });
+      } else if (cb === 'extras_portrait') {
+        // Pedido de retrato (1 por jogador) — abre form com descrição física.
+        if (typeof window._showPortraitRequestPopup === 'function') window._showPortraitRequestPopup();
       } else if (cb === 'extras_feedback') {
         // Sessão #56 (2026-05-28) — Demand H: redesign estético medieval.
         // Antes: estrelas em círculos pequenos sem hover/cascade fill.
