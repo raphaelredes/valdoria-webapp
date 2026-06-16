@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-15T20:03:48Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-16T10:54:24Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -16864,10 +16864,23 @@ function computeRewards(s) {
     var curXp = (p.xp != null) ? p.xp : xpPrev; /* fallback: início do nível atual */
     var newXp = curXp + xp;
     var levelUp = newXp >= threshold;
+    /* BUG FIX 2026-06-16 (user: "tela de vitória mostrou o XP total errado"): ao
+       SUBIR DE NÍVEL, recalcular nível/limiar/piso para o NÍVEL NOVO. Antes a tela
+       mostrava "Nível {antigo} · {XPnovo} / {limiar antigo}" — newXp passava do
+       limiar e a barra estourava (>100%) + o nível exibido contradizia o banner
+       "NÍVEL X ALCANÇADO". Recalcula a partir do XP cumulativo (D&D 5e PHB Tab.1-2),
+       cobrindo até múltiplos níveis num só combate. Display-only: o servidor é a
+       autoridade do XP/nível real (aplicado no /complete). */
+    var newLvl = _lv;
+    if (levelUp) {
+        while (newLvl < 20 && newXp >= (_DDXP[newLvl] || _DDXP[19])) newLvl++;
+        threshold = (newLvl < 20) ? (_DDXP[newLvl] || _DDXP[19]) : _DDXP[19];
+        xpPrev = _DDXP[newLvl - 1] || 0;
+    }
     return {
         xp: xp, gold: gold, items: items,
         oldXp: curXp, newXp: newXp, threshold: threshold, xpPrev: xpPrev,
-        oldLvl: _lv, newLvl: levelUp ? Math.min(20, _lv + 1) : _lv,
+        oldLvl: _lv, newLvl: newLvl,
         levelUp: levelUp,
     };
 }
@@ -20023,7 +20036,7 @@ function render(s) {
             html += '<div class="rr-xp"><div class="rr-xp-row">';
             html += '<span class="rr-xp-lbl">Experiência</span><span class="rr-xp-val">+' + r.xp + ' XP</span>';
             html += '</div><div class="rr-xp-bar"><div class="rr-xp-fill" data-from="0" data-to="' + xpPct + '" style="width:0%"></div></div>';
-            html += '<div class="rr-xp-meta">Nível ' + r.oldLvl + ' · ' + r.newXp + ' / ' + r.threshold + ' XP</div>';
+            html += '<div class="rr-xp-meta">Nível ' + r.newLvl + ' · ' + r.newXp + ' / ' + r.threshold + ' XP</div>';
             html += '</div>';
             /* Level up banner */
             if (r.levelUp) {

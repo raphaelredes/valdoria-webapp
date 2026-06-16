@@ -8650,6 +8650,13 @@ body.perf-lite .vc-action-btn { transition: none; }
         }
       }
       if (!picked) picked = chars[0];
+      // BUG FIX 2026-06-16 (user: "voltei pra cidade e apareceu o tutorial de
+      // novo"): a identidade p/ chaves localStorage por-personagem (tutorial,
+      // seen_locations, npc_talkopts) DEVE vir do personagem ATIVO resolvido
+      // pelo servidor — NÃO da URL, que pode chegar SEM ?char no retorno do
+      // combate (window._charId caía em 'default' e a chave do tutorial mudava
+      // → reaparecia toda vez). Server-Is-Authority: o char carregado é a verdade.
+      try { var _pcid = picked.id || picked.char_id; if (_pcid) window._charId = String(_pcid); } catch(_eCid){}
       var p = window.CITY_MOCK_PLAYER;
       if (picked.name)       p.name = picked.name;
       if (picked.class_name) p.cls = String(picked.class_name).toLowerCase();
@@ -12085,7 +12092,13 @@ function _doRestoreChar(charId, charName){
 
 // task #80 (2026-05-20): char-namespaced para que cada personagem novo
 // veja o tutorial uma vez. Antes era global — alt char não via tutorial.
-var TUTORIAL_STORAGE_KEY = 'valdoria_first_city_tutorial_seen_' + (window._charId || 'default');
+// BUG FIX 2026-06-16: chave DINÂMICA (função, não const no parse). window._charId
+// é ajustado para o personagem ATIVO (autoritativo do servidor) DEPOIS deste
+// ponto do boot; computar a chave no USO garante o namespace correto mesmo
+// quando a URL chega sem ?char (retorno do combate) e _charId era 'default'.
+function _tutorialStorageKey(){
+  return 'valdoria_first_city_tutorial_seen_' + (window._charId || 'default');
+}
 var TUTORIAL_STEPS = [
   {
     selector: null,  // welcome screen (no spotlight)
@@ -12197,7 +12210,7 @@ var TUTORIAL_STEPS = [
 
 function _maybeShowFirstTimeTutorial(){
   try {
-    if (localStorage.getItem(TUTORIAL_STORAGE_KEY) === '1') return;
+    if (localStorage.getItem(_tutorialStorageKey()) === '1') return;
   } catch(e){ /* localStorage indisponível — segue mesmo assim */ }
   /* 2026-05-21 BUG FIX: se overlay JÁ existe (tutorial em progresso), NÃO
      reinicia. Antes: tab-switch (step 6 Mercado) chamava renderCurrentScreen
@@ -12223,7 +12236,7 @@ function _maybeShowFirstTimeTutorial(){
 }
 
 function _markTutorialSeen(){
-  try { localStorage.setItem(TUTORIAL_STORAGE_KEY, '1'); } catch(e){}
+  try { localStorage.setItem(_tutorialStorageKey(), '1'); } catch(e){}
 }
 
 function _showFirstTimeTutorial(stepIdx){
