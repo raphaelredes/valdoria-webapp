@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T21:25:33Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T21:38:20Z - do not edit directly, edit source -->
 
 
 
@@ -36543,9 +36543,50 @@ function _remoteShowOutcome(ch, oc) {
     LOG('API', 'combat_redirect enemy=' + oc.combat_trigger.enemy_id);
     setTimeout(function() {
       try {
-        var redir = (oc._combat_redirect && oc._combat_redirect.redirect_url)
-          || ('combate.html?enemy=' + encodeURIComponent(oc.combat_trigger.enemy_id));
-        window.location.href = redir;
+        // Caminho feliz: o server já mandou o redirect REMOTE (com token) →
+        // '✓ Continuar' → /api/combat2/complete persiste os rewards.
+        if (oc._combat_redirect && oc._combat_redirect.redirect_url) {
+          window.__valdoria_transitioning = true;
+          window.location.href = oc._combat_redirect.redirect_url;
+          return;
+        }
+        // 2026-06-16 (edge): evento server-rolled SEM combat_redirect (staging do
+        // server falhou/retornou null). ANTES caía num URL relativo SEM token
+        // ('combate.html?enemy=') → '🔄 Novo Combate' → rewards NUNCA persistiam +
+        // 404 no hosted. Agora, em REMOTE, RE-ENCENA no servidor via
+        // /api/exploracao/stage_combat (token → '✓ Continuar' → /complete persiste).
+        // Sem combate tokenless: se o re-staging falhar, avisa e fica na exploração.
+        var _tok = window.__EXPLORE_TOKEN, _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+        if (window.__EXPLORE_MODE === 'remote' && _tok && _api) {
+          fetch(_api + '/api/exploracao/stage_combat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
+            body: JSON.stringify({
+              token: _tok,
+              enemy: oc.combat_trigger.enemy_id,
+              count: (oc.combat_trigger.enemy_count || undefined),
+              surprise: !!oc.combat_trigger.surprise
+            })
+          }).then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+              if (d && d.redirect_url) {
+                console.info('[E-REM:COMBAT] re-staged via stage_combat → ' + String(d.redirect_url).slice(0, 64));
+                window.__valdoria_transitioning = true;
+                window.location.href = d.redirect_url;
+              } else {
+                console.error('[E-REM:COMBAT] stage_combat sem redirect — abortando (NÃO lança combate tokenless)');
+                if (typeof vToast === 'function') vToast('Não foi possível iniciar o combate. Tente se mover de novo.', 'err');
+              }
+            })
+            .catch(function (e) {
+              console.error('[E-REM:COMBAT] stage_combat erro', (e && e.message) || e);
+              if (typeof vToast === 'function') vToast('Não foi possível iniciar o combate. Tente se mover de novo.', 'err');
+            });
+          return;
+        }
+        // file:// LOCAL (simulador) — relativo é OK (mesmo diretório).
+        window.__valdoria_transitioning = true;
+        window.location.href = 'combate.html?enemy=' + encodeURIComponent(oc.combat_trigger.enemy_id);
       } catch (_) {}
     }, 2000);
   }
