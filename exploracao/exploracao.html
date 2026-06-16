@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T00:52:21Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T01:22:05Z - do not edit directly, edit source -->
 
 
 
@@ -22626,7 +22626,12 @@ var _rafLastScheduled = 0;
 var _lastInputAt = 0;       // performance.now() do último input/state-change
 var _animActiveUntil = 0;   // timestamp em que animação termina (extend on demand)
 var IDLE_AFTER_MS = 3000;   // 3s sem input = idle
-var IDLE_TICK_MS = 150;     // 6.6fps em idle (clouds drift visíveis mas leves)
+var IDLE_TICK_MS = 150;     // 6.6fps em idle (clouds drift visíveis mas leves) — LITE/reduced-motion
+// 2026-06-15 (user "mapa vivo"): em devices capazes (não-lite, sem reduced-motion) o
+// idle mantém ~33fps p/ o mapa ficar VIVO (pássaros voando, água se movendo). A 6.6fps
+// o auto-throttle do ambiente (_shouldRenderAmbient: FPS<25 desliga, FPS>30 religa)
+// DESLIGAVA critters/água e congelava a animação. 30ms => ~33fps, acima do religar (>30).
+var LIVING_TICK_MS = 30;    // ~33fps em idle p/ mapa vivo (mantém o ambiente ligado)
 function _markActive(durationMs) {
   // Marca interação/state-change. durationMs opcional pra estender anim mode.
   _lastInputAt = performance.now();
@@ -22671,7 +22676,11 @@ function scheduleRender() {
   // CPU em idle clear/fog: 100% → ~10% (V4 original target).
   // Storm/rain mantêm rAF full-rate — sem regressão do V8 incident.
   if (_isIdle()) {
-    setTimeout(function() { renderFrame(performance.now()); }, IDLE_TICK_MS);
+    // 2026-06-15 (user "mapa vivo"): device capaz mantém ~33fps no idle p/ a vida do
+    // mapa (pássaros/água/folhas) seguir animando; lite/reduced-motion cai a 6.6fps.
+    var _idleMs = ((window._valdoriaPerformanceTier !== 'lite') && !window.vReducedMotion)
+                  ? LIVING_TICK_MS : IDLE_TICK_MS;
+    setTimeout(function() { renderFrame(performance.now()); }, _idleMs);
   } else {
     requestAnimationFrame(renderFrame);
   }
@@ -25713,8 +25722,10 @@ function drawHexCoords(ctx) {
 function updateCritters() {
   if (!S.critters) S.critters = [];
   const now = _animTime;
-  // Spawn: 0.5% chance per frame, max 4 concurrent (era 3, aumentado pra borboletas)
-  if (S.critters.length < 4 && Math.random() < 0.003) spawnCritter();
+  // Spawn: 2026-06-15 (user "mapa vivo") — mais animais visíveis. max 6 (mata) / 5,
+  // chance 0.006/frame (~1 a cada ~3s a 33fps) pra os pássaros voarem com frequência.
+  var _maxCritters = (S && S.biome === 'forest') ? 6 : 5;
+  if (S.critters.length < _maxCritters && Math.random() < 0.006) spawnCritter();
   // Update existing
   for (let i = S.critters.length - 1; i >= 0; i--) {
     const cr = S.critters[i];
@@ -25740,6 +25751,9 @@ function spawnCritter() {
   let types = ['rabbit', 'fox', 'bird'];
   if (S && S.biome === 'plains' && S.dayPhase !== 'night') {
     types = ['rabbit', 'fox', 'bird', 'butterfly', 'butterfly'];  // 2x peso pra ver mais
+  } else if (S && S.biome === 'forest' && S.dayPhase !== 'night') {
+    // 2026-06-15 (user): na MATA, mais pássaros voando entre as árvores.
+    types = ['bird', 'bird', 'bird', 'rabbit', 'butterfly'];
   }
   const type = types[Math.floor(Math.random() * types.length)];
   const side = Math.floor(Math.random() * 4); // 0=top,1=right,2=bot,3=left
