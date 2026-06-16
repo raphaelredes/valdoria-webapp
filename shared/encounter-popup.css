@@ -588,14 +588,30 @@ body.perf-lite #encounter-overlay.active .enc-card {
    a área visível do Telegram. Preenche o espaço à direita do Anterior; herda o
    visual do .enc-btn-primary / .enc-btn-choose, só ajusta alinhamento e flex. */
 .enc-nav .enc-nav-action {
-  flex: 1 1 auto;
+  /* sessão #90 (user 2026-06-15): o botão de ação ÚNICO ("Escolher ação",
+     "Continuar viagem", "Partir", etc.) ocupa TODA a largura da faixa/div onde
+     está (flex-basis 100%). Quando há "← Anterior" (narração paginada) ele
+     divide a faixa; quando está sozinho (caso do hazard de viagem) fica full. */
+  flex: 1 1 100%;
+  width: 100%;
   min-width: 0;
   text-align: center;
   margin: 0;
 }
+.enc-nav .enc-nav-action .enc-btn-choose,
+.enc-nav .enc-nav-action .enc-btn {
+  width: 100%;
+}
 /* Anterior não estica — fica do tamanho do conteúdo à esquerda. */
 .enc-nav #enc-prev {
   flex: 0 0 auto;
+}
+/* sessão #90 (user 2026-06-15): na 1ª/única página não há pra onde "voltar" —
+   o "← Anterior" fica desabilitado. Some com ele (não ocupa espaço) p/ a ação
+   ficar FULL-WIDTH (caso do hazard de viagem). Em narração paginada ele reaparece
+   na página 2+ (quando habilitado). */
+.enc-nav #enc-prev:disabled {
+  display: none;
 }
 
 .enc-actions {
