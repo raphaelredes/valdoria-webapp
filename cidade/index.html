@@ -10037,6 +10037,26 @@ function _isCTA(btn) {
       if (payload) { for (var k in payload) { if (Object.prototype.hasOwnProperty.call(payload, k)) body[k] = payload[k]; } }
       var env = _env(); if (env) body.env = env;
       return _post('/api/city/action', body)
+        .then(function(res){
+          // Level-up server-driven (bug 2026-06-16): se a ação subiu de nível (XP
+          // do templo / town_square / quest via service.xp etc.), o SERVIDOR anexa
+          // res.levelup={to,url}. Abre a tela /levelup/ no MOMENTO do level-up, em
+          // QUALQUER local (USER RULE) — sem o texto antigo do bot. Delay deixa o
+          // jogador ver o resultado/'SUBIU DE NÍVEL' antes de navegar (Human Reading
+          // Time). Guard evita corrida de múltiplos redirects.
+          try {
+            if (res && res.levelup && res.levelup.url && !window.__cityLevelupRedirecting) {
+              window.__cityLevelupRedirecting = true;
+              var _lvurl = res.levelup.url;
+              console.log('[CITY] level-up detectado → /levelup/ em 3.2s');
+              setTimeout(function(){
+                window.__valdoria_transitioning = true;
+                window.location.replace(_lvurl);
+              }, 3200);
+            }
+          } catch (_lvErr) { console.warn('[CITY] levelup redirect guard', _lvErr); }
+          return res;
+        })
         .catch(function(e){ console.error('[CITY] vCityServer.cityAction(' + intent + ') failed', e); throw e; });
     },
     /* Sessão #66 FIX (NPC compras/vendas/dados): aplica o EFEITO de um backend_cb
@@ -47954,44 +47974,64 @@ var ACTION_HANDLERS = {
       items: items,
       onPick: function(item){
         var s = item._s;
-        var roll = 1 + Math.floor(Math.random() * 20);
-        var success = roll >= s.dc;
-        var preXp = p.xp;
-        _markServiceUsedAtRest('CITY_TEMPLE_DOWNTIME_AT_REST');
-        if (success){
-          _gainXp(p, 25);
-        }
-        // canonical: temple_downtime_data.py — d20 + skill check + reward block
-        // Dice3D obrigatório (rule: tudo que envolve rolagem de dados mostra animação 3D)
-        var rewards = success ? [{ type:'xp', amount: 25, label: 'XP' }] : [];
-        _showServiceResultPopup({
-          icon: s.icon, npc: 'Templo',
-          narrative: '<i>' + s.narrative + '</i><br><br>' +
-                     '<b>Teste de ' + s.skill + ' (' + s.stat + '):</b> ' + roll + ' vs DC ' + s.dc + '<br><br>' +
-                     (success
-                       ? '✅ <b>Sucesso!</b> +reputação com o Templo, +1 Favor Divino acumulado.'
-                       : '❌ <b>Falha.</b> Os sacerdotes agradecem mesmo assim — você gasta um dia, sem ganhos.'),
-          dice: { formula: '1d20', sides: 20, value: roll, total: roll },
-          rewards: rewards,
-          deltas: success ? [_lastXpDelta(p)] : [],
-          // BUG FIX 2026-05-21: user reportou que Continuar não funcionava após
-          // dice success. Causa: condicional checava 'temple' como top da stack,
-          // mas top era 'temple_downtime' (list popup). Result popup fechava
-          // mas usuario via temple_downtime list (popup sublinha). Fix: re-render
-          // o topo da stack se houver (preserva contexto) ou voltar pra temple.
-          onContinue: function(){
-            var top = (_popupStack && _popupStack.length > 0) ? _popupStack[_popupStack.length-1] : null;
-            if (top === 'temple_downtime') {
-              // Re-abre o list popup pra escolher outro serviço
-              if (typeof ACTION_HANDLERS['temple_downtime'] === 'function') {
-                ACTION_HANDLERS['temple_downtime'](p);
+        // SUPREME RULE #0 (servidor é autoridade) + anti-farm (bug 2026-06-16):
+        // a ROLAGEM (d20) e o COOLDOWN (1 serviço por descanso longo) vivem no
+        // SERVIDOR (intent service.temple_downtime). ANTES tudo era client-side
+        // (Math.random + _gainXp -> service.xp SEM cooldown) → +25 XP infinito por
+        // clique. Agora o cliente só dispara a intenção e ANIMA o resultado real.
+        function _renderResult(roll, success){
+          // _gainXp persiste via service.xp (gated pelo cooldown server-side acima —
+          // só roda quando o servidor liberou o serviço, então não há farm).
+          if (success) _gainXp(p, 25);
+          var rewards = success ? [{ type:'xp', amount: 25, label: 'XP' }] : [];
+          _showServiceResultPopup({
+            icon: s.icon, npc: 'Templo',
+            narrative: '<i>' + s.narrative + '</i><br><br>' +
+                       '<b>Teste de ' + s.skill + ' (' + s.stat + '):</b> ' + roll + ' vs DC ' + s.dc + '<br><br>' +
+                       (success
+                         ? '✅ <b>Sucesso!</b> Os sacerdotes agradecem sua devoção. +25 XP.'
+                         : '❌ <b>Falha.</b> Os sacerdotes agradecem mesmo assim — você gasta um dia, sem ganhos.'),
+            dice: { formula: '1d20', sides: 20, value: roll, total: roll },
+            rewards: rewards,
+            deltas: success ? [_lastXpDelta(p)] : [],
+            // BUG FIX 2026-05-21: user reportou que Continuar não funcionava após
+            // dice success. Causa: condicional checava 'temple' como top da stack,
+            // mas top era 'temple_downtime' (list popup). Fix: re-render o topo da
+            // stack se houver (preserva contexto) ou voltar pra temple.
+            onContinue: function(){
+              var top = (_popupStack && _popupStack.length > 0) ? _popupStack[_popupStack.length-1] : null;
+              if (top === 'temple_downtime') {
+                if (typeof ACTION_HANDLERS['temple_downtime'] === 'function') ACTION_HANDLERS['temple_downtime'](p);
+              } else if (top === 'temple') {
+                _renderCityPopup('temple');
               }
-            } else if (top === 'temple') {
-              _renderCityPopup('temple');
             }
-            // Se nenhum dos dois: usuario já saiu do contexto, deixa estar
-          }
-        });
+          });
+        }
+        function _onCooldown(){
+          _showServiceResultPopup({
+            icon: '⏳', npc: 'Templo',
+            narrative: '<i>"Você já fez seu retiro neste descanso. Volte após dormir novamente."</i>',
+            deltas: []
+          });
+        }
+        var _srv = (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote());
+        if (_srv) {
+          window.vCityServer.cityAction('service.temple_downtime', { id: s.id }).then(function(res){
+            if (!res || res.error) { if (typeof vToast === 'function') vToast('Não foi possível servir o templo agora.', 'err'); return; }
+            if (res.on_cooldown) { _onCooldown(); return; }
+            _markServiceUsedAtRest('CITY_TEMPLE_DOWNTIME_AT_REST');  // marcador UI local (badge/guard imediato)
+            _renderResult(res.roll, !!res.success);
+          }).catch(function(e){
+            console.error('[CITY] temple_downtime service failed', e);
+            if (typeof vToast === 'function') vToast('Erro ao servir o templo.', 'err');
+          });
+        } else {
+          // file:// (DEV tool offline): roll local só p/ teste visual sem servidor.
+          var roll = 1 + Math.floor(Math.random() * 20);
+          _markServiceUsedAtRest('CITY_TEMPLE_DOWNTIME_AT_REST');
+          _renderResult(roll, roll >= s.dc);
+        }
       }
     });
   },
