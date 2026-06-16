@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T13:32:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T17:46:02Z - do not edit directly, edit source -->
 
 
 
@@ -14871,6 +14871,23 @@ window.__explFetchTO = function(url, opts, ms) {
     init: async function(snap) {
       snap = snap || {};
       if (!snap.map_id) snap.map_id = window.__EXPLORE_MAP_ID || 'plains_01';
+      // 2026-06-16 (fix mapa persistente): manda biome+cols+rows do FIXED_MAPS pro
+      // server AUTO-REGISTRAR qualquer nó do mundo (acaba o unknown_map + o fallback
+      // pro orphan plains_01). Sem isto, init de um nó canônico (green_fields/
+      // city_gates/...) dava 400 e o cliente caía no plains_01 -> a descoberta nunca
+      // persistia no mapa da cidade. Os dims do FIXED_MAPS batem com o que o cliente
+      // renderiza, então server e cliente concordam nos limites de movimento.
+      try {
+        var _fm = (typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS) ? FIXED_MAPS[snap.map_id] : null;
+        if (_fm) {
+          if (!snap.biome) snap.biome = _fm.biome;
+          if (snap.cols == null) snap.cols = _fm.cols;
+          if (snap.rows == null) snap.rows = _fm.rows;
+          if (snap.spawn_col == null) snap.spawn_col = (_fm.spawnCol != null ? _fm.spawnCol : 0);
+          if (snap.spawn_row == null) snap.spawn_row = (_fm.spawnRow != null ? _fm.spawnRow : 0);
+          if (!snap.map_name) snap.map_name = _fm.name;
+        }
+      } catch (_efm) { console.warn('[E-REM:API-INIT] FIXED_MAPS dims inject failed', _efm); }
       console.info('[E-REM:API-INIT] send map=' + snap.map_id
         + ' hp=' + snap.hp + '/' + snap.mhp
         + ' mp=' + snap.mp + '/' + snap.mmp
