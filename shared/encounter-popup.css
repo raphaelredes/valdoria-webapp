@@ -126,6 +126,55 @@
   transition: width var(--v-transition-base, 0.3s) ease;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   BARRA DE VIDA (estilo card de combate) — abaixo do diálogo (PADRAO_ALDRIC)
+   sessão #90 (user 2026-06-15): "mostre a perda de vida de forma mais
+   interessante, com a barra de vida na MESMA formatação dos cards de combate".
+   Cores = thresholds do combate (.c-stat-bar-fill--hp-{high|mid|low}).
+   ════════════════════════════════════════════════════════════════════════ */
+.enc-hp {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  margin: var(--v-space-md-lg, 10px) 14px 0;
+  flex-shrink: 0;
+}
+.enc-hp-label {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: calc(10px * var(--v-font-scale, 1));
+  letter-spacing: 1.5px;
+  color: var(--v-text-dim, #a09484);
+}
+.enc-hp-track {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--v-gold-35, rgba(196, 149, 58, 0.35));
+  border-radius: var(--v-radius-sm, 6px);
+  overflow: hidden;
+}
+.enc-hp-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--v-radius-sm, 6px);
+  background: linear-gradient(180deg, var(--fill-from), var(--fill-to));
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* mesmas cores do .cell.v8-card .c-stat-bar-fill--hp-* (combate) */
+.enc-hp-high { --fill-from: #5a8a3e; --fill-to: #8ab04e; }
+.enc-hp-mid  { --fill-from: #b08038; --fill-to: #d0a040; }
+.enc-hp-low  { --fill-from: #8a2a20; --fill-to: #c04030; }
+.enc-hp-val {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: calc(12px * var(--v-font-scale, 1));
+  letter-spacing: 0.5px;
+  color: var(--v-text, #d4c8b0);
+  white-space: nowrap;
+}
+
 /* Sessão #28 (2026-05-24): close X visivel no canto sup-direito do encounter
    card (apenas quando opts.closeable=true). Permite sair a qualquer momento. */
 .enc-card-close {

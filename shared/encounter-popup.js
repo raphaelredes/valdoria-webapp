@@ -656,6 +656,29 @@
   }
 
   /* Main entry: vEncounter.render(dialogue, opts) */
+  // 2026-06-15 (user): barra de vida estilo card de combate, parte do PADRAO_ALDRIC.
+  // Mostra a vida TOTAL do personagem ABAIXO do diálogo (cores = thresholds do combate:
+  // alto >60% verde, médio 25-60% âmbar, baixo <25% vermelho). DOM-safe (sem innerHTML).
+  function _encHpTier(pct) { return pct > 60 ? 'high' : (pct >= 25 ? 'mid' : 'low'); }
+  function _appendHpBar(card, p) {
+    if (!p || !card) return;
+    var hp = (p.hp != null) ? p.hp : 0;
+    var mhp = p.mhp || p.hpMax || p.max_hp || p.total_max_hp || (hp > 0 ? hp : 0);
+    if (!(mhp > 0)) return;
+    var pct = Math.max(0, Math.min(100, Math.round((hp / mhp) * 100)));
+    var thr = (typeof window !== 'undefined' && typeof window.vBarHpTier === 'function')
+      ? window.vBarHpTier(pct) : _encHpTier(pct);
+    var wrap = document.createElement('div'); wrap.className = 'enc-hp';
+    var lbl = document.createElement('span'); lbl.className = 'enc-hp-label'; lbl.textContent = 'PV';
+    var track = document.createElement('div'); track.className = 'enc-hp-track';
+    var fill = document.createElement('span'); fill.className = 'enc-hp-fill enc-hp-' + thr;
+    fill.style.width = pct + '%';
+    track.appendChild(fill);
+    var val = document.createElement('span'); val.className = 'enc-hp-val'; val.textContent = hp + ' / ' + mhp;
+    wrap.appendChild(lbl); wrap.appendChild(track); wrap.appendChild(val);
+    card.appendChild(wrap);
+  }
+
   function render(dialogue, opts) {
     opts = opts || {};
     var ov = _ensureOverlay();
@@ -822,6 +845,11 @@
     body.className = 'enc-body';
     body.id = 'enc-body';
     card.appendChild(body);
+
+    // 2026-06-15 (user): barra de vida (estilo combate) abaixo do diálogo quando
+    // opts.showHp + opts.player. PADRAO_ALDRIC: a viagem liga isso (mostra a vida
+    // total e ela cai visivelmente ao sofrer dano).
+    if (opts.showHp && opts.player) _appendHpBar(card, opts.player);
 
     // Nav
     var nav = document.createElement('div');

@@ -79,6 +79,7 @@
       { npc: cfg.npc || null, script: cfg.script || [], choices: cfg.choices || [] },
       {
         player: _player(), showGold: false, fullHeight: true, progress: prog,
+        showHp: true,  /* #90 (user): barra de vida estilo combate abaixo do diálogo */
         inlineChoices: cfg.inline === true,
         onChoice: function (ch) { if (typeof cfg.onChoice === 'function') cfg.onChoice(ch); }
       }
