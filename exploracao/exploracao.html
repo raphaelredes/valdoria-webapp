@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T03:53:23Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T13:32:01Z - do not edit directly, edit source -->
 
 
 
@@ -14950,6 +14950,21 @@ window.__explFetchTO = function(url, opts, ms) {
       return res;
     },
 
+    // POST /api/exploracao/journey_combat — stagea o combate de EMBOSCADA de VIAGEM
+    // no SERVIDOR (origin='exploracao') -> /api/combat2/complete persiste HP/MP/XP +
+    // roteia a DERROTA pro Templo. Server-Is-Authority #0 (antes era LOCAL = mana nao
+    // persistia + derrota->exploracao). Retorna {combat_redirect} ou null (fallback LOCAL).
+    journeyCombat: async function(enemyId, direction) {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      console.info('[E-REM:API-JOURNEY_COMBAT] send enemy=' + enemyId + ' dir=' + direction);
+      var res = await _post('/api/exploracao/journey_combat',
+        { token: tok, enemy_id: enemyId, direction: direction });
+      console.info('[E-REM:API-JOURNEY_COMBAT] ok combat_redirect='
+        + (res && res.combat_redirect ? 'yes' : 'no'));
+      return res;
+    },
+
     // GET /api/exploracao/state?token=X
     state: async function() {
       var tok = _motorToken();
@@ -15007,7 +15022,7 @@ window.__explFetchTO = function(url, opts, ms) {
     hasToken: function() { return !!_motorToken(); }
   };
 
-  console.info('[E-REM:API] ExploracaoAPI wired (5 methods: init, move, eventChoice, state, finish)'
+  console.info('[E-REM:API] ExploracaoAPI wired (init, move, eventChoice, journeyCombat, state, finish)'
     + ' peek_tok=' + (PEEK_TOKEN ? PEEK_TOKEN.slice(0, 8) + '...' : '(empty)')
     + ' api_base=' + API_BASE);
 })();
@@ -38466,6 +38481,38 @@ function _journeyLaunchRareCombat(resumeState) {
     if (picked && typeof ENEMIES_DB !== 'undefined' && ENEMIES_DB[picked]) enemyId = picked;
   } catch (e2) { /* fallback goblin */ }
   console.info('[JOURNEY] rare combat -> enemy=' + enemyId + ' dir=' + (rs.direction || '?'));
+  // SERVER-AUTHORITY (SUPREME RULE #0, 2026-06-16): em REMOTE, stagea o combate no
+  // SERVIDOR (origin='exploracao') -> /api/combat2/complete PERSISTE HP/MP/XP e
+  // ROTEIA a DERROTA pro Templo. Antes era 100% LOCAL (triggerCombatScreen sem
+  // token) -> a Mana gasta NAO persistia (cidade/exploracao mostravam cheia de novo)
+  // e a DERROTA voltava pra exploracao em vez do Templo. Vitoria volta pra exploracao
+  // e _checkJourneyResume retoma a viagem ate o destino. Fallback LOCAL (staging
+  // falhou / flag off / file://) — o jogo NUNCA trava.
+  var _isRemoteJ = (window.__EXPLORE_MODE === 'remote'
+    && window.ExploracaoAPI && typeof window.ExploracaoAPI.hasToken === 'function'
+    && window.ExploracaoAPI.hasToken()
+    && typeof window.ExploracaoAPI.journeyCombat === 'function');
+  if (_isRemoteJ) {
+    Promise.resolve(window.ExploracaoAPI.journeyCombat(enemyId, rs.direction || '')).then(function (res) {
+      if (res && res.combat_redirect && res.combat_redirect.redirect_url) {
+        try { window.__valdoria_transitioning = true; } catch (_) {}
+        window.location.href = res.combat_redirect.redirect_url;
+        return;
+      }
+      _journeyLaunchRareCombatLocal(enemyId, biome);
+    }).catch(function (e) {
+      console.warn('[JOURNEY] remote stage failed -> LOCAL', (e && e.message) || e);
+      _journeyLaunchRareCombatLocal(enemyId, biome);
+    });
+    return;
+  }
+  _journeyLaunchRareCombatLocal(enemyId, biome);
+}
+
+// Fallback LOCAL (dev file:// OU staging REMOTE indisponivel): combate client-side.
+// Mantem o comportamento anterior — NUNCA trava o jogo. A derrota->exploracao e a
+// mana nao-persistida sao a degradacao aceitavel deste fallback raro.
+function _journeyLaunchRareCombatLocal(enemyId, biome) {
   if (typeof triggerCombatScreen === 'function') {
     triggerCombatScreen({
       enemyId: enemyId,
