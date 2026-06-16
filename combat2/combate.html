@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-16T10:54:24Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-16T11:59:37Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13898,6 +13898,22 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
             });
         }
     }
+    /* BUG FIX 2026-06-16 (user: "druida nv1 com varias habilidades mesmo apos
+       escolher 2"): filtro FINAL do arsenal de CLASSE pela lista AUTORITATIVA do
+       servidor (spec.allowed_skill_names = filter_skills_by_choices: gating por
+       NIVEL + escolhas L1). Antes o cliente so filtrava o pool L1 escolhivel,
+       deixando vazar skills de nivel > player.level (Forma Selvagem L2, Feixe
+       Lunar L3, Invocar Raio L5...) que nao estavam no pool. Skills RACIAIS/
+       summons/passives sao injetadas DEPOIS deste ponto (preservadas). LOCAL/sem
+       o campo: nao filtra (dev tool). Server-Is-Authority (#0). */
+    if (!useRandom && spec.allowed_skill_names && Array.isArray(spec.allowed_skill_names)
+            && spec.allowed_skill_names.length) {
+        var _allowedNm = {};
+        for (var _ani = 0; _ani < spec.allowed_skill_names.length; _ani++) {
+            _allowedNm[spec.allowed_skill_names[_ani]] = true;
+        }
+        skillsCopy = skillsCopy.filter(function (sk) { return _allowedNm[sk.n] === true; });
+    }
     /* C1.7/C1.8 #90: skills RACIAIS injetadas no arsenal (espelha o motor
        _build_player): Sopro Dracônico (Draconato) + Repreensão Infernal
        (Tiefling nv3+, dedup se a classe — Bruxo — já concede). NOTA: `lvl`
@@ -20822,9 +20838,13 @@ async function __combatCompleteCanonical(result, origin) {
     /* 2026-05-13 USER REQUEST: mostra magic-circle ANTES de fetch+redirect.
        Cobre o gap combate->origin (cidade/exploracao) com loader "real". */
     if (window._vTransitionLoader) {
-        var _exitLabel = origin === 'exploracao'
-            ? 'Retornando à exploração…'
-            : (result === 'defeat' ? 'Levando você à cidade…' : 'Retornando à cidade…');
+        /* BUG FIX 2026-06-16 (user: "tela de derrota dizia voltar a exploracao"):
+           derrota tem prioridade sobre origin — sempre rumo ao Templo, nunca
+           "Retornando à exploração". O destino real e decidido pelo servidor
+           (Server-Is-Authority); este label so reflete a intencao. */
+        var _exitLabel = (result === 'defeat')
+            ? 'Ressuscitando no Templo…'
+            : (origin === 'exploracao' ? 'Retornando à exploração…' : 'Retornando à cidade…');
         window._vTransitionLoader.show(_exitLabel);
     }
     var s = currentState || {};
