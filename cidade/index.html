@@ -9367,9 +9367,14 @@ function _isCTA(btn) {
       var cur = parseFloat(_pref('valdoria_gameplay_minutes', '0')) || 0;
       cur += elapsed;
       try { localStorage.setItem('valdoria_gameplay_minutes', cur.toFixed(2)); } catch(_) {}
-      // Auto-trigger Avaliar Jogo ao atingir 300 min (5h) — uma vez só
+      // Auto-trigger Avaliar Jogo ao atingir 300 min (5h) — uma vez só.
+      // #1 (user 2026-06-15): só pede a avaliação "Cinco horas" se o personagem
+      // está nível 3+ (engajamento real). Espelha feedback_checker.MIN_LEVEL=3 do
+      // servidor (a avaliação enviada já flui pra GUI via fb_survey_submit).
+      var MIN_RATING_LEVEL = 3;  // mirror de src/game/feedback/feedback_checker.MIN_LEVEL
+      var _ratingLvl = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.level) || 1;
       var seen = _pref('valdoria_rating_prompt_seen', '0') === '1';
-      if (cur >= 300 && !seen) {
+      if (cur >= 300 && _ratingLvl >= MIN_RATING_LEVEL && !seen) {
         try { localStorage.setItem('valdoria_rating_prompt_seen', '1'); } catch(_) {}
         // Aguarda 4s pra não atrapalhar transição/loading em curso
         setTimeout(function(){
