@@ -50532,24 +50532,69 @@ function _travelToBiome(mapIdOrBiome, displayName){
 // era DUPLICATA do renderer da exploração — REMOVIDO. Dados+regra D&D vivem em
 // shared/journey-data-shared.js; orquestração+render no runner. A cidade só
 // dispara e, ao chegar, anima a silhueta + redireciona pra exploração.
-function startCityJourney(biome, displayName, finalUrl) {
+// PADRAO_VIAGEM #90 (user 2026-06-15): nº de etapas da viagem cidade→destino é
+// PROPORCIONAL à DISTÂNCIA REAL no mapa-mundo (WORLD_COORDS / CART_BIOMES x,y),
+// não mais 3-5 random. Portões de Valdoria (a própria saída da cidade) é
+// ADJACENTE → 0 etapas (você sai dos portões e já está lá). Máx 7 (locais muito
+// distantes). Também resolve o bioma de terreno correto p/ os hazards (antes o
+// mapId 'whispering_woods' não casava com HAZARDS['forest']).
+function _cityTravelInfo(mapId) {
+  // mapId vem resolvido (FIXED_MAPS id). CART_BIOMES indexa por 'key' — alguns
+  // keys SÃO o mapId (green_fields, orc_tribe...), outros são a categoria de
+  // bioma (plains=city_gates, forest=whispering_woods, cave=underground_passage…).
+  var MAP2CART = {
+    city_gates: 'plains', whispering_woods: 'forest', underground_passage: 'cave',
+    misty_marshes: 'swamp', stone_peaks: 'mountain', golden_sands: 'desert',
+    ancient_cemetery: 'graveyard', frozen_waste: 'snow', burning_crater: 'volcanic'
+  };
+  var fb = { steps: 3, biome: 'forest' };
+  try {
+    var cb = (typeof CART_BIOMES !== 'undefined' && CART_BIOMES) ? CART_BIOMES : [];
+    function entry(id) {
+      var e = cb.find(function (b) { return b.key === id; });
+      if (!e && MAP2CART[id]) e = cb.find(function (b) { return b.key === MAP2CART[id]; });
+      return e || null;
+    }
+    var origin = entry('city_gates');
+    var dest = entry(mapId);
+    if (!dest) return fb;
+    var biome = dest.biome || 'plains';
+    if (!origin) return { steps: 3, biome: biome };
+    if (dest.key === origin.key) return { steps: 0, biome: biome };  // portões = origem
+    var d = Math.hypot(dest.x - origin.x, dest.y - origin.y);
+    var steps = Math.max(1, Math.min(7, Math.round(d * 11.5)));      // ~0.21→2 .. ~0.60→7
+    return { steps: steps, biome: biome };
+  } catch (e) { return fb; }
+}
+
+function startCityJourney(mapId, displayName, finalUrl) {
+  var info = _cityTravelInfo(mapId);
+  // Portões adjacentes (0 etapas) → sem tela de etapas, vai direto (realismo:
+  // sair dos portões da cidade já te coloca no mapa dos portões).
+  if (info.steps <= 0) {
+    if (typeof _logCity === 'function') _logCity('city travel adjacent (' + mapId + ') -> sem etapas, direto');
+    _cityJourneyArrive(mapId, displayName, finalUrl);
+    return;
+  }
   if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
+    if (typeof _logCity === 'function') _logCity('city journey ' + mapId + ' biome=' + info.biome + ' etapas=' + info.steps + ' (dist-proporcional)');
     JourneyRunner.start({
-      biome: biome,
+      biome: info.biome,
       displayName: displayName,
       player: function () { return window.CITY_MOCK_PLAYER || {}; },
       confirm: true,
       audioBiome: true,
+      totalSteps: info.steps,
       log: (typeof _logCity === 'function') ? _logCity : null,
       refreshHud: (typeof refreshHud === 'function') ? refreshHud : null,
       toast: (typeof vToast === 'function') ? vToast : null,
-      onArrive: function () { _cityJourneyArrive(biome, displayName, finalUrl); },
+      onArrive: function () { _cityJourneyArrive(mapId, displayName, finalUrl); },
       onCancel: function () { if (typeof _logCity === 'function') _logCity('city journey cancelled'); }
     });
     return;
   }
   // Fallback defensivo (runner ausente): vai direto pro destino.
-  _cityJourneyArrive(biome, displayName, finalUrl);
+  _cityJourneyArrive(mapId, displayName, finalUrl);
 }
 
 // Chegada: cobre o gap silhueta->exploração com o magic-circle loader ANTES do
