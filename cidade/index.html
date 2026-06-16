@@ -51904,6 +51904,10 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   });
   _logCity('cidade.html ready');
+  // #3 (user 2026-06-16): limpa o resume de viagem ao chegar na cidade. A vitória
+  // já o consumiu na exploração (_checkJourneyResume); aqui cobre a DERROTA (templo),
+  // onde o resume ficaria stale. Idempotente.
+  try { localStorage.removeItem('valdoria_journey_resume'); } catch (e) {}
 });
 
 // ═══════════════════════════════════════════════════════════════════

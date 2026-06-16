@@ -957,6 +957,11 @@ var DEPARTURES = {
 
     /* -------- politica de risco / etapas -------- */
     var RISK_CHANCE = 55;
+    /* #3 (user 2026-06-16): combate RARO de viagem (emboscada). Chance por etapa,
+       SÓ dispara em jornada com opts.onCombat (exploração REMOTE/LOCAL com combate
+       real — nunca na cidade mock). Vence -> retoma a viagem até o destino; perde
+       -> templo (padrão). Mantido baixo p/ ser "raro". */
+    var RARE_COMBAT_CHANCE = 7;
 
     function stepsForDistance(dist) {
         if (typeof dist !== 'number') return 3;
@@ -1119,6 +1124,7 @@ var DEPARTURES = {
         SAFE: SAFE,
         DEPARTURES: DEPARTURES,
         RISK_CHANCE: RISK_CHANCE,
+        RARE_COMBAT_CHANCE: RARE_COMBAT_CHANCE,
         stepsForDistance: stepsForDistance,
         pickFreshHazard: pickFreshHazard,
         pickFreshSafe: pickFreshSafe,

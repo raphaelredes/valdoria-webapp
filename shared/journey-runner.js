@@ -125,6 +125,13 @@
 
   function _renderStep() {
     var j = _j; if (!j) return;
+    // #3 (user 2026-06-16): COMBATE RARO de viagem (emboscada). Só em jornada com
+    // opts.onCombat (exploração — combate real). Vence → caller retoma a viagem até
+    // o destino; perde → templo (padrão). Nunca na cidade mock (sem onCombat).
+    if (typeof j.opts.onCombat === 'function') {
+      var rc = (typeof JD().RARE_COMBAT_CHANCE === 'number') ? JD().RARE_COMBAT_CHANCE : 0;
+      if (rc > 0 && (Math.random() * 100) < rc) { _rareCombat(); return; }
+    }
     var risk = (typeof JD().RISK_CHANCE === 'number') ? JD().RISK_CHANCE : 55;
     var hasHaz = (Math.random() * 100) < risk;
     if (!hasHaz) { _safe(); return; }
@@ -160,6 +167,23 @@
     // pickFreshSafe já empurra o texto em j.usedSafe (anti-repeat sessão+24h).
     var txt = JD().pickFreshSafe ? JD().pickFreshSafe(j.biome, _player(), j.usedSafe) : null;
     _renderContinue([{ type: 'narration', text: txt || 'O caminho segue tranquilo por mais um trecho.' }]);
+  }
+
+  // #3 (user 2026-06-16): emboscada — narração + 1 escolha "Enfrentar". O caller
+  // (exploração) salva o resume da viagem e dispara o combate REAL (redireciona).
+  // Vence/foge → retoma a viagem até o destino; perde → templo (padrão).
+  function _rareCombat() {
+    var j = _j; if (!j) return;
+    var jinfo = { biome: j.biome, displayName: j.displayName, step: j.step, total: j.total };
+    _vRender({
+      script: [{ type: 'narration', text: 'Vultos surgem no caminho — uma <b>emboscada</b>! Não há como prosseguir sem lutar.' }],
+      choices: [{ id: 'jrn_fight', label: 'Enfrentar' }],
+      inline: true,
+      onChoice: function () {
+        var cb = j.opts.onCombat;
+        if (typeof cb === 'function') { try { cb(jinfo); } catch (e) { _log('onCombat failed: ' + e.message); } }
+      }
+    });
   }
 
   // Tela "continuar/chegar" — UMA escolha inline. IDÊNTICA ida<->volta (PADRAO_VIAGEM:

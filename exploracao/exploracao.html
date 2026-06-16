@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T01:55:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T03:39:43Z - do not edit directly, edit source -->
 
 
 
@@ -37356,6 +37356,7 @@ async function confirmEdgeTransition(_skipJourney) {
       audioBiome: true,
       refreshHud: (typeof updateHud === 'function') ? updateHud : null,
       onArrive: function () { S._pendingEdge = ed; confirmEdgeTransition(true); },
+      onCombat: function (jinfo) { _journeyLaunchRareCombat({ direction: 'edge', targetMap: ed.targetMap, edgeLabel: ed.label, biome: (jinfo && jinfo.biome) || _tgtBiome }); },
       onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na travessia para ' + _tgtName + '.'); }
     });
     return;
@@ -38356,6 +38357,7 @@ function startReturnToCity() {
       totalSteps: _stepsForDistance(),
       refreshHud: (typeof updateHud === 'function') ? updateHud : null,
       onArrive: _returnToCityNow,
+      onCombat: function (jinfo) { _journeyLaunchRareCombat({ direction: 'return', biome: (jinfo && jinfo.biome) || biome }); },
       onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na jornada de volta a Valdoria.'); }
     });
     return;
@@ -38402,6 +38404,65 @@ function _returnToCityNow() {
     _doRedirect();
   }
 }
+
+// #3 (user 2026-06-16): COMBATE RARO DE VIAGEM. Quando a emboscada dispara numa
+// jornada, salvamos o RESUME (localStorage, igual valdoria_explore_resume) e
+// disparamos o combate REAL via triggerCombatScreen (bridge padrão de exploração):
+//   • vitória/fuga → volta pra /exploracao/ → _checkJourneyResume continua a
+//     viagem até o destino (cidade ou mapa-alvo), de onde parou.
+//   • derrota → templo (fluxo padrão de defeat — NÃO passa por _checkJourneyResume).
+// Inimigo vem do pool do bioma (mesma seleção do monstro vagante).
+function _journeyLaunchRareCombat(resumeState) {
+  var rs = { ts: Date.now() };
+  if (resumeState) { for (var k in resumeState) { if (Object.prototype.hasOwnProperty.call(resumeState, k)) rs[k] = resumeState[k]; } }
+  try { localStorage.setItem('valdoria_journey_resume', JSON.stringify(rs)); }
+  catch (e) { console.warn('[JOURNEY] resume save failed', e); }
+  var biome = (resumeState && resumeState.biome) || (window.S && S.biome) || 'plains';
+  var enemyId = 'goblin';
+  try {
+    var bt = (typeof BIOME_WANDERING_ENCOUNTERS !== 'undefined'
+              && (BIOME_WANDERING_ENCOUNTERS[biome] || BIOME_WANDERING_ENCOUNTERS.plains)) || {};
+    var pool = bt[(window.S && S.dayPhase === 'night') ? 'night' : 'day'] || bt.day || [];
+    var picked = (typeof pickRandom === 'function') ? pickRandom(pool) : null;
+    if (picked && typeof ENEMIES_DB !== 'undefined' && ENEMIES_DB[picked]) enemyId = picked;
+  } catch (e2) { /* fallback goblin */ }
+  console.info('[JOURNEY] rare combat -> enemy=' + enemyId + ' dir=' + (rs.direction || '?'));
+  if (typeof triggerCombatScreen === 'function') {
+    triggerCombatScreen({
+      enemyId: enemyId,
+      surprise: true,
+      context: { source: 'journey', biome: biome, dayPhase: (window.S && S.dayPhase) },
+      onLose: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Emboscado durante a viagem.'); }
+    });
+  }
+}
+
+// #3: ao (re)entrar na exploração após o combate de emboscada (vitória/fuga),
+// retoma a viagem até o destino. Derrota vai pro templo (não passa por aqui).
+function _checkJourneyResume(_attempt) {
+  _attempt = _attempt || 0;
+  if ((!window.S || !S.player) && _attempt < 25) {
+    setTimeout(function () { _checkJourneyResume(_attempt + 1); }, 200);
+    return;
+  }
+  var raw;
+  try { raw = localStorage.getItem('valdoria_journey_resume'); } catch (e) { return; }
+  if (!raw) return;
+  try { localStorage.removeItem('valdoria_journey_resume'); } catch (e) {}
+  var jr;
+  try { jr = JSON.parse(raw); } catch (e) { return; }
+  if (!jr || !jr.ts || (Date.now() - jr.ts) > 600000) return;  // TTL 10min
+  console.info('[JOURNEY] resume after combat -> ' + jr.direction);
+  if (jr.direction === 'return') {
+    if (typeof _returnToCityNow === 'function') _returnToCityNow();
+  } else if (jr.direction === 'edge' && jr.targetMap) {
+    S._pendingEdge = { targetMap: jr.targetMap, label: jr.edgeLabel || '' };
+    if (typeof confirmEdgeTransition === 'function') confirmEdgeTransition(true);
+  }
+}
+document.addEventListener('DOMContentLoaded', function () {
+  setTimeout(function () { _checkJourneyResume(0); }, 1200);
+});
 
 // ============================================================================
 // PARTY POPUP (X-6.5.51k) — lista resumida do grupo (jogador + S.allies)
