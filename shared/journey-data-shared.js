@@ -598,7 +598,7 @@ var HAZARDS_EXTRA = {
           fNarr: 'Você não consegue ler direito as marcas. Segue cauteloso e perde tempo olhando pra trás.', dmg: 1 } ] },
 
     { title: 'Mulher do Poço',
-      npc: { name: 'Mulher do Poço', desc: 'Camponesa carregando dois baldes pesados', portrait: '../shared/img/npcs/trail/mulher-do-poco.webp' },
+      npc: { name: 'Mulher do Poço', desc: 'Camponesa carregando dois baldes pesados', portrait: '../shared/img/npcs/trail/mulher-do-poco-v2.webp' },
       script: [
         { type: 'narration', text: 'Uma camponesa caminha pela trilha com dois baldes de água, balança difícil. Ela tropeça quando você passa, mas não derrama — equilibrio de quem fez isso muitas vezes.' },
         { type: 'speech', speaker: 'Mulher do Poço', text: '— Bom dia, viajante! <i>(sorriso cansado)</i> Vem dos Portões? Diga-me, ainda há festa esta noite na praça? Ouvi rumor de bardo novo.' }
