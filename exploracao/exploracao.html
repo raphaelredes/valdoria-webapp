@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-15T23:37:49Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T00:52:21Z - do not edit directly, edit source -->
 
 
 
@@ -37319,8 +37319,30 @@ function triggerEdgeTransition(ed) {
   ov.classList.add('visible');
 }
 
-async function confirmEdgeTransition() {
+async function confirmEdgeTransition(_skipJourney) {
   const ed = S._pendingEdge;
+  // PADRAO_VIAGEM #90 (user 2026-06-15): mudança de mapa pela exploração (pisar no
+  // hexágono verde) mostra UMA etapa de viagem antes de chegar — não vai mais
+  // direto. O edge-confirm (perigo/bioma) já serviu de confirmação, então a etapa
+  // não reconfirma. Dungeon-exit (abandono) e saída-total (sem targetMap) continuam
+  // diretos. Ao chegar, re-chama com _skipJourney=true p/ a transição real.
+  var _isDungeonExit = S.mapDef && S.mapDef.dungeon === true;
+  if (!_skipJourney && !_isDungeonExit && ed && ed.targetMap
+      && window.JourneyRunner && typeof JourneyRunner.start === 'function') {
+    document.getElementById('dungeon-overlay').classList.remove('visible');
+    var _tgt = (typeof FIXED_MAPS !== 'undefined') ? FIXED_MAPS[ed.targetMap] : null;
+    var _tgtBiome = (_tgt && _tgt.biome) ? _tgt.biome : ((S.mapDef && S.mapDef.biome) || 'plains');
+    var _tgtName = (_tgt && _tgt.name) ? _tgt.name : (ed.label || 'novo mapa');
+    JourneyRunner.start({
+      biome: _tgtBiome, displayName: _tgtName, totalSteps: 1, confirm: false,
+      player: function () { return (window.S && S.player) || {}; },
+      audioBiome: true,
+      refreshHud: (typeof updateHud === 'function') ? updateHud : null,
+      onArrive: function () { S._pendingEdge = ed; confirmEdgeTransition(true); },
+      onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na travessia para ' + _tgtName + '.'); }
+    });
+    return;
+  }
   S._pendingEdge = null;
   document.getElementById('dungeon-overlay').classList.remove('visible');
   document.getElementById('dungeon-enter').textContent = 'Entrar';
