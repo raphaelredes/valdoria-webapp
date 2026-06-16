@@ -1090,7 +1090,8 @@
          última página (gate state.isLastPage), logo a única janela em que a
          limpeza apagaria uma ação RECÉM-criada é skipped && isLastPage — por isso
          o guard é (!skipped || !isLastPage): páginas intermediárias e o caminho
-         async continuam limpando o stale normalmente (cobre back-nav ← Anterior). */
+         async continuam limpando o stale normalmente — cobre back-nav (← Anterior)
+         e qualquer página NÃO-última que complete de forma síncrona. */
       if (!state.skipped || !state.isLastPage) {
         var _navActionStale = card.querySelector('.enc-nav .enc-nav-action');
         if (_navActionStale) _navActionStale.remove();
