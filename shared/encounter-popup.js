@@ -1075,10 +1075,27 @@
       /* sessão #90: ao (re)renderizar QUALQUER página, limpa a ação que
          renderActions tinha colocado na nav band da última página e restaura o
          display do "Continuar →". Assim, voltar (← Anterior) pra uma página
-         intermediária mostra o "Continuar →" de novo (sem botão de ação stale). */
-      var _navActionStale = card.querySelector('.enc-nav .enc-nav-action');
-      if (_navActionStale) _navActionStale.remove();
-      if (nextBtn) nextBtn.style.display = '';
+         intermediária mostra o "Continuar →" de novo (sem botão de ação stale).
+         2026-06-16 (user, bug "travado na tela RECOMPENSA +25 XP — só sobra
+         '← Anterior'"): este bloco SÓ pode rodar quando a página NÃO completou
+         de forma síncrona. Numa última página de SÓ {type:'reward'} (strophes
+         vazio), typeNextSentence() ACIMA já completou síncrono (state.skipped=
+         true) e JÁ chamou renderActions(), que inseriu o botão de ação ÚNICA
+         (.enc-nav-action) na nav band E escondeu o "Continuar →". Sem o guard,
+         a limpeza removia o botão recém-criado e re-mostrava o nextBtn (que
+         continuava com visibility:hidden) → jogador travado só com "← Anterior".
+         Mesmo motivo do guard !state.skipped logo abaixo (#41040bfa). renderActions
+         já de-dupa a própria nav-action (querySelector+remove), então quando ela
+         roda síncrono não há stale a limpar aqui. renderActions() SÓ roda na
+         última página (gate state.isLastPage), logo a única janela em que a
+         limpeza apagaria uma ação RECÉM-criada é skipped && isLastPage — por isso
+         o guard é (!skipped || !isLastPage): páginas intermediárias e o caminho
+         async continuam limpando o stale normalmente (cobre back-nav ← Anterior). */
+      if (!state.skipped || !state.isLastPage) {
+        var _navActionStale = card.querySelector('.enc-nav .enc-nav-action');
+        if (_navActionStale) _navActionStale.remove();
+        if (nextBtn) nextBtn.style.display = '';
+      }
       /* 2026-06-11 (user, bug "Pular não faz nada" após reward do Brenn): se a
          página NÃO tem texto (ex.: só {type:'reward'} → strophes vazio),
          typeNextSentence() ACIMA já completou SINCRONAMENTE (skipped=true,
