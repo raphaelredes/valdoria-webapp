@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T17:46:02Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T21:25:33Z - do not edit directly, edit source -->
 
 
 
@@ -35831,7 +35831,41 @@ function triggerCombatScreen(cfg) {
   // exploração enquanto combate.html carrega (handoff sem tela velha clicável).
   _showCombatLoadOverlay();
   if (window.__EXPLORE_MODE === 'remote') {
-    // URL absoluta pro combate2 shim (infra canonical deployada em /combat2/)
+    // 2026-06-16 (user: XP/ouro do combate NÃO salvava + regredia): em REMOTE,
+    // ENCENA o combate no SERVIDOR (token+api → __COMBAT_IS_REMOTE_SESSION →
+    // '✓ Continuar' → POST /api/combat2/complete persiste HP/MP/XP/loot). ANTES
+    // ia direto pro /combat2/?from=exploracao SEM token → '↩ Voltar à Exploração'
+    // client-only → rewards NUNCA persistidos. O caminho client from=exploracao
+    // fica só pra file:// (simulador). Fallback client-side só se o staging falhar.
+    var _tok = window.__EXPLORE_TOKEN, _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+    if (_tok && _api) {
+      fetch(_api + '/api/exploracao/stage_combat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
+        body: JSON.stringify({
+          token: _tok,
+          enemy: cfg.enemyId || 'goblin',
+          count: (cfg.enemyCount || cfg.count || undefined),
+          surprise: !!cfg.surprise,
+          narrative: cfg.narrative || ''
+        })
+      }).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && d.redirect_url) {
+            console.info('[E-REM:COMBAT] server-staged combat → ' + String(d.redirect_url).slice(0, 64));
+            window.location.href = d.redirect_url;
+          } else {
+            console.error('[E-REM:COMBAT] stage_combat sem redirect — fallback client-side (rewards podem NÃO persistir)');
+            window.location.href = '/combat2/?' + params.toString();
+          }
+        })
+        .catch(function (e) {
+          console.error('[E-REM:COMBAT] stage_combat erro — fallback client-side', (e && e.message) || e);
+          window.location.href = '/combat2/?' + params.toString();
+        });
+      return;
+    }
+    // Sem token (não deveria em REMOTE) — fallback client-side.
     window.location.href = '/combat2/?' + params.toString();
   } else if (window.location.protocol === 'file:') {
     // LOCAL file:// — mesmo diretório (master path /simuladores/)
