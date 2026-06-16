@@ -1,0 +1,147 @@
+/* ============================================================================
+ * char-card.css — card de personagem ESTILO COMBATE (componente compartilhado).
+ * ============================================================================
+ * sessão #90 (user 2026-06-15): "no botão Grupo da exploração, use os MESMOS cards
+ * do combate; padronização da exploração/cidade/combate". Réplica FIEL do
+ * `.cell.v8-card.cls-aliado` do combate (simuladores/combate.html) — o combate
+ * NÃO é tocado (mantém o dele, idêntico); este é o single-source p/ os OUTROS
+ * lugares (Grupo da exploração agora; cidade/Hall depois) padronizarem.
+ *
+ * Cores 100% iguais ao combate: HP thresholds (#5a8a3e/#b08038/#8a2a20) e recursos
+ * (mp/furia/vigor/energia/ki/foco) batem com `.c-stat-bar-fill--*`. Bars value-on-bar.
+ * API: window.vCharCard.build(member) -> DOM (char-card.js).
+ * ========================================================================== */
+.vcc-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #2e4a2e;                 /* cls-aliado (combate) */
+  border: 1px solid var(--v-gold, #c4953a);
+  border-radius: var(--v-radius, 10px);
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 248, 192, 0.12);
+  --card-accent: #6b9a6b;
+  --card-accent-dark: #1a1510;
+}
+.vcc-card.is-self {
+  border-color: #e8c45a;
+  box-shadow: 0 4px 20px rgba(196, 149, 58, 0.4), inset 0 0 0 1px rgba(255, 248, 192, 0.28);
+}
+
+/* nome (banner topo, igual .c-name) */
+.vcc-name {
+  background: linear-gradient(180deg, #1e3320 0%, #0a1a0a 100%);
+  padding: 7px 48px 2px var(--v-space-md-lg, 10px);
+  margin: 0;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-weight: 900;
+  font-size: calc(13px * var(--v-font-scale, 1));
+  letter-spacing: 0.8px;
+  text-align: left;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: color-mix(in srgb, #6b9a6b 40%, #fff 60%);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* classe/nível (subtítulo com borda dourada inferior, igual .c-class-tag) */
+.vcc-class-tag {
+  background: linear-gradient(180deg, #1e3320 0%, #0a1a0a 100%);
+  padding: 0 48px 7px var(--v-space-md-lg, 10px);
+  margin: 0;
+  border-bottom: 1px solid var(--v-gold, #c4953a);
+  color: #8abf8a;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+  letter-spacing: 1.3px;
+  text-align: left;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.88;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* crest heráldico no canto sup-direito (igual .c-portrait) */
+.vcc-portrait {
+  position: absolute;
+  top: 6px; right: 8px;
+  width: calc(38px * var(--v-font-scale, 1));
+  height: calc(38px * var(--v-font-scale, 1));
+  display: flex; align-items: center; justify-content: center;
+  z-index: 3;
+  color: color-mix(in srgb, #6b9a6b 40%, #fff 60%);
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-weight: 900; font-size: calc(18px * var(--v-font-scale, 1));
+}
+.vcc-portrait svg, .vcc-portrait img {
+  width: 100%; height: 100%; object-fit: contain;
+  fill: currentColor; stroke: currentColor; opacity: 0.92;
+  filter: drop-shadow(0 0 3px rgba(107, 154, 107, 0.7)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
+}
+
+/* stats (PV à esq, recurso à esq, CA à dir — igual .c-stats grid) */
+.vcc-stats {
+  padding: var(--v-space-md-lg, 10px);
+  background: color-mix(in srgb, #1a1510 70%, #000);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px var(--v-space-md-lg, 10px);
+  align-items: center;
+}
+.vcc-stats .vcc-stat--hp  { grid-column: 1; grid-row: 1; }
+.vcc-stats .vcc-stat--res { grid-column: 1; grid-row: 2; }
+.vcc-stats .vcc-stat--ac  { grid-column: 2; grid-row: 1 / -1; justify-self: center; flex-direction: column; gap: 2px; padding: 4px 10px; }
+
+/* stat = label + valor com a BARRA atrás (igual .c-stat / .c-stat-bar) */
+.vcc-stat {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--v-radius-sm, 6px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--v-space-sm, 4px);
+  padding: 3px var(--v-space-md, 8px);
+  min-height: 24px;
+  justify-self: stretch;
+}
+.vcc-bar {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  border-radius: inherit; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.vcc-bar-fill {
+  display: block; height: 100%; width: var(--bar-pct, 0%);
+  opacity: 0.6; border-radius: inherit;
+  background: linear-gradient(90deg, var(--fill-from, #5a8a3e), var(--fill-to, #8ab04e));
+  transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* cores IDÊNTICAS ao combate (.c-stat-bar-fill--*) */
+.vcc-bar--hp-high     { --fill-from: #5a8a3e; --fill-to: #8ab04e; }
+.vcc-bar--hp-mid      { --fill-from: #b08038; --fill-to: #d0a040; }
+.vcc-bar--hp-low      { --fill-from: #8a2a20; --fill-to: #c04030; }
+.vcc-bar--mp          { --fill-from: #2a6090; --fill-to: #70c0f0; }
+.vcc-bar--furia       { --fill-from: #8a3020; --fill-to: #ff6040; }
+.vcc-bar--vigor       { --fill-from: #806820; --fill-to: #ffd060; }
+.vcc-bar--energia     { --fill-from: #208a78; --fill-to: #60e8d0; }
+.vcc-bar--ki          { --fill-from: #603888; --fill-to: #c080ff; }
+.vcc-bar--foco        { --fill-from: #8a4828; --fill-to: #ff9040; }
+.vcc-bar--inspiration { --fill-from: #8a3060; --fill-to: #ff80c0; }
+.vcc-bar--pact        { --fill-from: #402068; --fill-to: #9050d0; }
+.vcc-stat-label, .vcc-stat-val {
+  position: relative; z-index: 1;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  white-space: nowrap;
+}
+.vcc-stat-label {
+  font-size: calc(9px * var(--v-font-scale, 1));
+  letter-spacing: 1px; font-weight: 700; opacity: 0.78;
+  color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
+}
+.vcc-stat-val {
+  font-size: calc(14px * var(--v-font-scale, 1));
+  font-weight: 900;
+  color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+.vcc-stat-val--hp-low { animation: vccHpLowBlink 1.2s ease-in-out infinite; }
+@keyframes vccHpLowBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
+.vcc-stat--ac .vcc-stat-val { color: #ffd688; text-shadow: 0 0 5px rgba(196, 149, 58, 0.5), 0 1px 2px rgba(0, 0, 0, 0.95); }

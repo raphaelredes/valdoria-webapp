@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T01:22:05Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T01:55:46Z - do not edit directly, edit source -->
 
 
 
@@ -6189,6 +6189,9 @@ document.write('<script src="../shared/coin-utils.js?v=' + _vti + '"><\/script>'
 document.write('<script src="../shared/encounter-popup.js?v=' + _vti + '"><\/script>');
 // PADRAO_VIAGEM (#90): orquestrador UNICO de viagem (volta exploracao + map-to-map). Requer journey-data + encounter-popup + dice-3d.
 document.write('<script src="../shared/journey-runner.js?v=' + _vti + '"><\/script>');
+// char-card.{css,js}: card de personagem estilo COMBATE (shared) p/ o Grupo da exploracao (padronizacao #90).
+document.write('<link rel="stylesheet" href="../shared/char-card.css?v=' + _vti + '">');
+document.write('<script src="../shared/char-card.js?v=' + _vti + '"><\/script>');
 
 /* task #55 (2026-05-20) — PADRAO_LIGHTBOX: clicar nas imagens NPC pra ver
    maior. Aplica a .enc-portrait (PADRAO_ALDRIC) + .npc-portrait via global
@@ -38447,6 +38450,7 @@ function renderPartyPopup() {
     color: p.color || '#c4953a',
     hp: p.hp, mhp: p.mhp,
     mp: p.mp, mmp: p.mmp,
+    ac: (typeof p.ac === 'number') ? p.ac : null,
     level: (typeof p.level === 'number') ? p.level : 1,
     isSelf: true
   }));
@@ -38466,6 +38470,7 @@ function renderPartyPopup() {
       color: a.color || '#a09484',
       hp: aHp, mhp: aMhp,
       mp: aMp, mmp: aMmp,
+      ac: (typeof a.ac === 'number') ? a.ac : null,
       level: (typeof a.level === 'number') ? a.level : null,
       isSelf: false
     }));
@@ -38473,6 +38478,22 @@ function renderPartyPopup() {
 }
 
 function _partyMemberCard(m) {
+  // PADRAO #90 (user 2026-06-15): o Grupo usa o card de personagem ESTILO COMBATE
+  // compartilhado (shared/char-card.js) — padroniza Grupo ↔ combate ↔ (cidade depois).
+  // Fallback p/ o card .pm-* legado se a lib não carregou.
+  if (typeof vCharCard !== 'undefined' && vCharCard && vCharCard.build) {
+    var _resObj = null;
+    if (m.mp != null && m.mmp > 0) {
+      var _pmRes = (window.DndRules && DndRules.classResourceName) ? DndRules.classResourceName(m.cls_key) : 'MANA';
+      var _kindMap = { 'MANA': 'mp', 'FÚRIA': 'furia', 'FURIA': 'furia', 'ENERGIA': 'energia', 'KI': 'ki', 'VIGOR': 'vigor', 'INSPIRAÇÃO': 'inspiration', 'INSPIRACAO': 'inspiration', 'PACTO': 'pact', 'FOCO': 'foco' };
+      _resObj = { label: _pmRes, kind: (_kindMap[String(_pmRes || '').toUpperCase()] || 'mp'), value: m.mp, max: m.mmp };
+    }
+    return vCharCard.build({
+      name: m.name, cls: m.cls, clsKey: m.cls_key, level: m.level, letter: m.letter,
+      hp: m.hp, hpMax: m.mhp, res: _resObj,
+      ac: (m.ac != null ? m.ac : undefined), isSelf: m.isSelf
+    });
+  }
   const card = document.createElement('div');
   card.className = 'party-member' + (m.isSelf ? ' is-self' : '');
 
