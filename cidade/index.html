@@ -34928,7 +34928,7 @@ function _tavernShowMuralBoard(p){
     for (var i = 0; i < n; i++) {
       var row = Math.floor(i / 2), col = i % 2;
       var baseL = (col === 0) ? 2 : 52;
-      var baseT = 1 + row * 32.5;
+      var baseT = 1 + row * 30;      // 3 fileiras dentro da cortiça (zona já recuada)
       var jL = ((i * 37) % 7) - 3;   // -3..+3
       var jT = ((i * 53) % 5) - 2;   // -2..+2
       var rot = [-5, 4, -3, 5, -4, 3][i % 6];
@@ -34989,7 +34989,7 @@ function _tavernShowMuralBoard(p){
       + '.mural-board{position:relative;width:100%;height:74vh;min-height:460px;border-radius: var(--v-radius, 10px);overflow:hidden;'
       +   'background:#1a0e06 url(' + BOARD_IMG + '?v=' + _bv + ') center/cover no-repeat;'
       +   'border:1px solid rgba(196,149,58,0.35);box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 26px rgba(0,0,0,0.45);}'
-      + '.mural-papers{position:absolute;top:12%;left:14%;right:14%;bottom:10%;}'
+      + '.mural-papers{position:absolute;top:18%;left:15%;right:15%;bottom:13%;}'  /* zona = só a cortiça (marrom clara), longe da moldura (user 2026-06-16) */
       + '.mural-paper{position:absolute;width:44%;box-sizing:border-box;padding: 13px var(--v-space-md, 8px) 9px;cursor:pointer;'
       +   'background:linear-gradient(158deg,#efe2c4 0%,#e6d4ad 55%,#d8c398 100%);color:#3a2a14;'
       +   'border:1px solid rgba(120,90,40,0.55);border-radius: var(--v-radius-xs, 4px);'
