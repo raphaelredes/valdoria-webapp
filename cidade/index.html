@@ -34707,39 +34707,43 @@ function _tavernShowDrinks(p){
               '<br>Custo: ' + d.cost + ' Valdoritas',
         cost: d.cost,
         onConfirm: function(){
-          var preGold = p.gold;
-          var preHp = p.hp || 0;
-          var preMp = p.mp || 0;
-          if (!_pay(p, d.cost)) return;
-          if (d.heal) p.hp = Math.min(p.hpMax || (preHp + d.heal), preHp + d.heal);
-          if (d.mp) p.mp = Math.min(p.mpMax || (preMp + d.mp), preMp + d.mp);
-          // canonical: chance_effect (15-20% buff/debuff por bebida)
-          var ce = d.chance_effect;
-          var ceLabel = '';
-          if (ce && Math.random() < (ce.prob || 0)){
-            p.metadata = p.metadata || {};
-            if (ce.type === 'buff'){
-              p.metadata.drink_buff = { key: ce.key, value: ce.value, turns: ce.turns };
-            } else {
-              p.metadata.drink_debuff = { key: ce.key, value: ce.value, turns: ce.turns };
-            }
-            ceLabel = '<br><br><b>' + (ce.label || '') + '</b> — ' + (ce.desc || '') +
-                      (ce.msg ? '<br><i>' + ce.msg + '</i>' : '');
+          // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
+          // cobra, aplica HP/MP, decrementa estoque e rola o chance_effect via o intent
+          // 'service.buy_drink'; o cliente só anima o resultado. ANTES: _pay + p.hp+= +
+          // Math.random no cliente (fabricação do efeito da bebida).
+          if (!window.vCityServer || !window.vCityServer.isRemote()){
+            if (typeof vToast === 'function') vToast('Indisponível offline'); return;
           }
-          refreshHud();
-          var deltas = [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }];
-          if (d.heal) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || (preHp + d.heal) });
-          if (d.mp) deltas.push({ type:'mp', label:'MP', from: preMp, to: p.mp, max: p.mpMax || (preMp + d.mp) });
-          var rewards = ce && p.metadata && p.metadata.drink_buff
-            ? [{ type:'item', amount: 1, label: ce.label || 'Bônus de bebida' }]
-            : null;
-          _showServiceResultPopup({
-            icon: d.icon, npc: 'Grom, o Caolho',
-            narrative: '<i>' + (d.flavor || 'Grom entrega a caneca.') + '</i>' + ceLabel,
-            deltas: deltas,
-            rewards: rewards,
-            onContinue: function(){ navigateBack(); }
-          });
+          var preGold = p.gold, preHp = p.hp || 0, preMp = p.mp || 0;
+          window.vCityServer.cityAction('service.buy_drink', { drink: d.id }).then(function(res){
+            if (!res || !res.ok){
+              var emsg = (res && res.error === 'no_stock') ? 'Esgotado! Espere a próxima caravana.'
+                       : (res && res.error === 'no_funds') ? 'Sem Valdoritas suficientes.'
+                       : 'Não foi possível pedir agora.';
+              if (typeof vToast === 'function') vToast(emsg); return;
+            }
+            if (typeof res.gold === 'number') p.gold = res.gold;
+            if (typeof res.hp === 'number') p.hp = res.hp;
+            if (typeof res.mp === 'number') p.mp = res.mp;
+            var ceLabel = '';
+            if (res.chance){
+              p.metadata = p.metadata || {};
+              p.metadata[res.chance.type === 'buff' ? 'drink_buff' : 'drink_debuff'] = { label: res.chance.label };
+              ceLabel = '<br><br><b>' + (res.chance.label || '') + '</b> — ' + (res.chance.desc || '') +
+                        (res.chance.msg ? '<br><i>' + res.chance.msg + '</i>' : '');
+            }
+            if (typeof refreshHud === 'function') refreshHud();
+            var deltas = [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }];
+            if (res.hp_gained) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: res.max_hp || p.hp });
+            if (res.mp_gained) deltas.push({ type:'mp', label:'MP', from: preMp, to: p.mp, max: res.max_mp || p.mp });
+            _showServiceResultPopup({
+              icon: d.icon, npc: 'Grom, o Caolho',
+              narrative: '<i>' + (res.flavor || d.flavor || 'Grom entrega a caneca.') + '</i>' + ceLabel,
+              deltas: deltas,
+              rewards: (res.chance && res.chance.type === 'buff') ? [{ type:'item', amount: 1, label: res.chance.label || 'Bônus de bebida' }] : null,
+              onContinue: function(){ navigateBack(); }
+            });
+          }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao pedir bebida.'); });
         }
       });
     }
