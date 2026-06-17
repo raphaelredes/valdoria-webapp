@@ -9861,14 +9861,19 @@ function _isCTA(btn) {
           if (sug) body.survey.q_suggestion = sug;
         }
         try {
-          var apiBase = window._VALDORIA_API_BASE || window._API_BASE || '';
-          var token = (typeof _readToken === 'function' && _readToken()) ||
+          var _fbAuth = window.__CITY_AUTH || {};
+          var apiBase = _fbAuth.api || window._VALDORIA_API_BASE || window._API_BASE || '';
+          var token = _fbAuth.token || (typeof _readToken === 'function' && _readToken()) ||
                       (window.CITY_AUTH && window.CITY_AUTH.token) || '';
+          // Mesmo fix do portrait (user 2026-06-17): /api/game/action lê Authorization Bearer
+          // + body {user_id, cb, ...top-level}; X-Valdoria-Token é bloqueado por CORS e a key
+          // era 'callback'/aninhada. Flatten rating/survey pro top-level (servidor lê body.get).
+          var _fbUid = _fbAuth.uid || (new URLSearchParams(location.search)).get('uid') || '';
           if (apiBase && token) {
             fetch(apiBase + '/api/game/action', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'X-Valdoria-Token': token },
-              body: JSON.stringify({ callback: cb, body: body })
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: JSON.stringify(Object.assign({ user_id: _fbUid, cb: cb }, body))
             }).catch(function(e){ console.warn('[FB] submit failed:', e); });
           }
         } catch (e) { console.warn('[FB] submit error:', e); }
@@ -9889,6 +9894,12 @@ function _isCTA(btn) {
     var auth = window.__CITY_AUTH || {};
     var apiBase = auth.api || window._VALDORIA_API_BASE || window._API_BASE || '';
     var token = auth.token || (typeof _readToken === 'function' && _readToken()) || '';
+    // BUG (user 2026-06-17): /api/game/action lê token via Authorization Bearer + body
+    // {user_id, cb}; o cliente mandava header X-Valdoria-Token (bloqueado por CORS:
+    // allow-headers só tem Content-Type/Authorization/X-Telegram-Init-Data/X-Idempotency-Key)
+    // + key 'callback' (servidor lê 'cb') + portrait_desc aninhado (servidor lê top-level).
+    // = "Falha ao enviar". uid vem do __CITY_AUTH (ou ?uid= da URL).
+    var uid = auth.uid || (new URLSearchParams(location.search)).get('uid') || '';
     var p = window.CITY_MOCK_PLAYER || {};
     var charName = p.name || 'seu personagem';
     var ICO = (typeof _heralIco === 'function') ? _heralIco('ic-ach-colecionador', null, '32px') : '';
@@ -9955,9 +9966,10 @@ function _isCTA(btn) {
       if (desc.length < 8){ if (typeof vToast === 'function') vToast('Descreva o personagem com mais detalhes (mín. 8 caracteres).'); return false; }
       if (apiBase && token){
         fetch(apiBase + '/api/game/action', {
-          method:'POST', headers:{ 'Content-Type':'application/json', 'X-Valdoria-Token': token },
-          body: JSON.stringify({ callback:'portrait_request_submit', body:{ portrait_desc: desc.slice(0,800), char_id: _selectedCharId() } })
+          method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ user_id: uid, cb:'portrait_request_submit', portrait_desc: desc.slice(0,800), char_id: _selectedCharId() })
         }).then(function(r){ return r.json(); }).then(function(d){
+          if (d && d.error){ console.warn('[PORTRAIT] submit error:', d.error); if (typeof vToast === 'function') vToast('Falha ao enviar. Tente novamente.'); return; }
           if (typeof vToast === 'function') vToast((d && d.toast) || 'Pedido de retrato enviado! Aguarde a criação da arte.');
         }).catch(function(e){ console.warn('[PORTRAIT] submit failed:', e); if (typeof vToast === 'function') vToast('Falha ao enviar. Tente novamente.'); });
       } else {
@@ -9969,8 +9981,8 @@ function _isCTA(btn) {
     // Pré-check do status (1-por-jogador): se já pediu, mostra o estado; senão, form.
     if (apiBase && token){
       fetch(apiBase + '/api/game/action', {
-        method:'POST', headers:{ 'Content-Type':'application/json', 'X-Valdoria-Token': token },
-        body: JSON.stringify({ callback:'portrait_request_status', body:{} })
+        method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ user_id: uid, cb:'portrait_request_status' })
       }).then(function(r){ return r.json(); }).then(function(d){
         var st = d && d.portrait_status;
         if (st && st.has_request){
