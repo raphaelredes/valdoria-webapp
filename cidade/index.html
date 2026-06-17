@@ -38614,40 +38614,42 @@ function _tavernShowCarousing(p){
         desc: '<i>' + l.desc + '</i><br><br>Custo: ' + l.cost + ' V · Teste DC ' + l.dc + ' CHA',
         cost: l.cost,
         onConfirm: function(){
+          // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
+          // cobra, rola o teste de CHA, gera o contato, marca cooldown e rola a
+          // complicação via 'service.carousing'; o cliente só anima. ANTES: _pay +
+          // Math.random do teste + complicação no cliente (fabricação).
+          if (!window.vCityServer || !window.vCityServer.isRemote()){
+            if (typeof vToast === 'function') vToast('Indisponível offline'); return;
+          }
           var preGold = p.gold;
-          if (!_pay(p, l.cost)) return;
-          var rolled = 1 + Math.floor(Math.random() * 20);
-          var modCha = (p.stats && p.stats.cha) ? Math.floor((p.stats.cha - 10) / 2) : 0;
-          var total = rolled + modCha;
-          var success = total >= l.dc;
-          // canonical: 10% chance de complicação independente do resultado
-          var compl = null;
-          if (Math.random() < 0.10 && complications.length > 0){
-            compl = complications[Math.floor(Math.random() * complications.length)];
-            if (compl.gold_loss && p.gold >= compl.gold_loss){
-              p.gold = Math.max(0, p.gold - compl.gold_loss);
+          window.vCityServer.cityAction('service.carousing', { tier: l.id }).then(function(res){
+            if (!res || !res.ok){
+              var emsg = (res && res.error === 'cooldown') ? ('Você já fez farra. Volte em ' + (res.remaining || 5) + ' turnos.')
+                       : (res && res.error === 'no_funds') ? 'Sem Valdoritas suficientes.'
+                       : 'Não foi possível socializar agora.';
+              if (typeof vToast === 'function') vToast(emsg); return;
             }
-          }
-          var contact = contacts[Math.floor(Math.random() * contacts.length)];
-          var narrative = '<b>Teste:</b> ' + rolled + (modCha >= 0 ? '+' : '') + modCha +
-            ' CHA = ' + total + ' vs DC ' + l.dc + ' — <b>' + (success ? 'SUCESSO' : 'falha') + '</b><br><br>' +
-            (success
-              ? '<i>Conexões feitas! Você ganha como contato: <b>' + contact + '</b>.</i>'
-              : '<i>Bebeu demais. Acordou no banco da taverna sem contatos.</i>');
-          if (compl){
-            narrative += '<br><br><b>⚠️ Complicação:</b> ' + compl.text +
-              (compl.effect ? '<br><i>(' + compl.effect + ')</i>' : '');
-          }
-          refreshHud();
-          var rewards = success ? [{ type:'item', amount: 1, label: 'Contato: ' + contact }] : null;
-          _showServiceResultPopup({
-            icon: success ? '✅' : '⚠️', npc: 'Anfitrião',
-            narrative: narrative,
-            dice: { formula: '1d20' + (modCha>=0?'+':'') + modCha + ' vs DC ' + l.dc, sides: 20, value: rolled, total: total },
-            deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
-            rewards: rewards,
-            onContinue: function(){ navigateBack(); }
-          });
+            if (typeof res.gold === 'number') p.gold = res.gold;
+            var mod = (typeof res.modifier === 'number') ? res.modifier : 0;
+            var narrative = '<b>Teste:</b> ' + res.rolled + (mod >= 0 ? '+' : '') + mod +
+              ' CHA = ' + res.total + ' vs DC ' + res.dc + ' — <b>' + (res.success ? 'SUCESSO' : 'falha') + '</b><br><br>' +
+              (res.success
+                ? '<i>Conexões feitas! Você ganha como contato: <b>' + res.contact + '</b>.</i>'
+                : '<i>Bebeu demais. Acordou no banco da taverna sem contatos úteis.</i>');
+            if (res.complication){
+              narrative += '<br><br><b>⚠️ Complicação:</b> ' + (res.complication.text || '') +
+                (res.complication.effect ? '<br><i>(' + res.complication.effect + ')</i>' : '');
+            }
+            if (typeof refreshHud === 'function') refreshHud();
+            _showServiceResultPopup({
+              icon: res.success ? '✅' : '⚠️', npc: 'Anfitrião',
+              narrative: narrative,
+              dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total },
+              deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
+              rewards: res.success ? [{ type:'item', amount: 1, label: 'Contato: ' + res.contact }] : null,
+              onContinue: function(){ navigateBack(); }
+            });
+          }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao socializar.'); });
         }
       });
     }
