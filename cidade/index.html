@@ -10142,9 +10142,18 @@ function _isCTA(btn) {
       if (typeof window._cityCheckDiscovery === 'function' && window._cityCheckDiscovery(action)) {
         return;
       }
-      // 0.5 CHANCE ENCOUNTER (USER REQUEST 2026-05-04 AAA):
-      //    Antes de navegar, 30% chance de NPC familiar interceptar com diálogo
-      //    imersivo, dica de exploração, info de mapas. Padrão Witcher 3 / RDR2.
+      // 0.4 ARRIVAL ENCOUNTER (server-driven, REMOTE) — encontro/narrativa ANTES
+      //     de abrir um local da cidade (Taverna/Estalagem/Mercado/Templo/Portões).
+      //     O SERVIDOR decide/narra/resolve (PADRAO_SERVIDOR). Em LOCAL retorna
+      //     false → cai no legado _tryChanceEncounter (dev). Substitui a decisão
+      //     client-side (Math.random) por autoridade do servidor (SUPREME RULE #0).
+      if (typeof window._tryArrivalEncounter === 'function'
+          && window._tryArrivalEncounter(action)) {
+        return; // encontro de chegada disparou (ou o async vai navegar pro local)
+      }
+      // 0.5 CHANCE ENCOUNTER LEGADO (client-side, LOCAL/dev + triggers não-venue):
+      //    Antes de navegar, NPC familiar pode interceptar com diálogo imersivo.
+      //    Padrão Witcher 3 / RDR2. Em REMOTE os locais já passam pelo 0.4 acima.
       if (typeof window._tryChanceEncounter === 'function'
           && window._tryChanceEncounter(action, window.CITY_MOCK_PLAYER)) {
         return; // Encontro disparou — popup vai chamar doAction(action) ao continuar
@@ -52550,6 +52559,102 @@ function _handleCellarResult(p, data){
     { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
   );
 }
+
+// ============================================================================
+// === Encontros de CHEGADA server-driven (city arrival encounters) ===========
+// ============================================================================
+// Disparam ANTES de abrir um local (Taverna/Estalagem/Mercado/Templo/Portões —
+// NÃO a Praça, que tem o próprio sistema). O SERVIDOR decide/narra/resolve
+// (PADRAO_SERVIDOR + PADRAO_ALDRIC, manager+resolver em
+// src/game/narrative/city_arrival_encounters/); o cliente só renderiza via
+// vEncounter e, no nó terminal (proceed), abre o local. REMOTE only: em LOCAL
+// (file://) retorna false e o legado _tryChanceEncounter cuida (dev). Substitui
+// a decisão client-side (Math.random) por autoridade do servidor (SUPREME RULE #0).
+var _ARRIVAL_VENUE = {
+  'tavern': 'open_tavern', 'taverna': 'open_tavern',
+  'inn': 'open_inn', 'open_inn': 'open_inn', 'estalagem': 'open_inn',
+  'market': 'open_market', 'mercado': 'open_market',
+  'temple': 'open_temple', 'templo': 'open_temple',
+  'gates': 'action_city_gates', 'portoes': 'action_city_gates'
+};
+var _arrivalState = null;      // { encId, action }
+var _arrivalSkipOnce = false;  // guarda anti-reentrada ao navegar pro local
+
+function _arrivalProceed(action){
+  // abre o local-alvo (com guarda pra o hook de chegada NÃO re-disparar)
+  _arrivalSkipOnce = true;
+  try { if (typeof window.doAction === 'function') window.doAction(action); }
+  finally { _arrivalSkipOnce = false; }
+}
+
+function _arrivalFinish(){
+  var act = _arrivalState ? _arrivalState.action : null;
+  _arrivalState = null;
+  window._encounterActive = false;
+  try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
+  if (act) _arrivalProceed(act);
+}
+
+function _arrivalRenderNode(node){
+  if (!(window.vEncounter && window.vEncounter.render)) { _arrivalFinish(); return; }
+  window.vEncounter.render(
+    { npc: node.npc, script: node.script, choices: node.choices },
+    { player: window.CITY_MOCK_PLAYER, closeable: false,
+      onChoice: function(ch){ _arrivalChoice(ch && ch.id); } }
+  );
+}
+
+function _arrivalChoice(choiceId){
+  if (!choiceId || !_arrivalState) { _arrivalFinish(); return; }
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Um momento...' }); } catch(_){} }
+  window.vCityServer.cityAction('arrival.choice', { encounter_id: _arrivalState.encId, choice_id: choiceId })
+    .then(function(res){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      if (!res || !res.ok || res.proceed || !res.node) { _arrivalFinish(); return; }
+      var node = res.node;
+      // rolagem mostrada como linha de narração (mesmo padrão da cena do Porão)
+      if (res.dice) {
+        var d = res.dice;
+        node.script = [{ type: 'narration',
+          text: '🎲 ' + (d.skill || 'TESTE') + ': d20 ' + d.d20 + ' ' + (d.modifier >= 0 ? '+' : '') + d.modifier
+              + ' = <b>' + d.total + '</b> vs CD ' + d.dc + ' — ' + (d.success ? '✅ Sucesso' : '❌ Falha') }
+        ].concat(node.script || []);
+      }
+      _arrivalRenderNode(node);
+    })
+    .catch(function(e){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      console.warn('[CAE] arrival.choice failed', e);
+      _arrivalFinish();
+    });
+}
+
+function _tryArrivalEncounter(action){
+  if (_arrivalSkipOnce) return false;        // já estamos navegando pro local
+  if (window._encounterActive) return false; // outro popup aberto
+  if (window.vReducedMotion) return false;   // A11Y: motion reduzida pula
+  var venue = _ARRIVAL_VENUE[action];
+  if (!venue) return false;                  // não é abertura de local tratada
+  if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
+    return false;                            // LOCAL/dev → legado client-side cuida
+  }
+  window._encounterActive = true;            // trava reentrada durante o round-trip
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Atravessando a cidade...' }); } catch(_){} }
+  window.vCityServer.cityAction('arrival.check', { venue: venue })
+    .then(function(res){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      if (!res || !res.ok || !res.encounter) { _arrivalState = null; window._encounterActive = false; _arrivalProceed(action); return; }
+      _arrivalState = { encId: res.encounter.id, action: action };
+      _arrivalRenderNode({ npc: res.encounter.npc, script: res.encounter.script, choices: res.encounter.choices });
+    })
+    .catch(function(e){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      console.warn('[CAE] arrival.check failed', e);
+      _arrivalState = null; window._encounterActive = false; _arrivalProceed(action);
+    });
+  return true;                               // halta o doAction; o async navega/renderiza
+}
+window._tryArrivalEncounter = _tryArrivalEncounter;
 
 // ============================================================================
 // === PADRAO_SERVIDOR — Diálogos server-driven genéricos (sessão #71) ========
