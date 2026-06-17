@@ -10329,10 +10329,10 @@ var CITY_DISCOVERY_QUESTS = {
       choices:[{ label:'Vou procurar Martha.', next:'unlock' }] }
   ]},
   q_disc_rel: { id:'q_disc_rel', name:'Os Laços que Sustentam', targetCb:'rel_main', stages:[
-    { id:'s1', speaker:'Padre Aldric',
+    { id:'s1', speaker:'Padre Brevon',
       text:'Aventureiro… percebo que ainda caminhas sozinho. Os deuses honram quem firma laços — não há feito maior que voltar pra casa com os companheiros que partiram contigo. Os teus vínculos precisam ser cultivados.',
       choices:[{ label:'Como cultivo esses laços?', next:'s2' }] },
-    { id:'s2', speaker:'Padre Aldric',
+    { id:'s2', speaker:'Padre Brevon',
       text:'O Pavilhão dos Vínculos, atrás do templo, é onde a cidade registra os pactos de alma — quem te acompanhou, a quem deves favor, quem prometeu retornar. Anota lá, e ofereça lembranças aos que importam. Os deuses leem essas páginas.',
       choices:[{ label:'Vou ao Pavilhão.', next:'unlock' }] }
   ]},
@@ -10489,7 +10489,7 @@ function _discoverySpeakerIcon(speaker) {
 }
 
 // Sessão #26 (2026-05-22) P0 #71: descoberta usava só ic-* SVG.
-// Agora também tenta PNG portrait pra speakers conhecidos (Padre Aldric, Tavira,
+// Agora também tenta PNG portrait pra speakers conhecidos (Padre Brevon, Tavira,
 // Lyana, Irmã Elara) — fallback pro SVG se PNG não existir.
 // 2026-06-13: FONTE ÚNICA nome-de-NPC-nomeado → retrato dedicado (caminho rel a
 // /shared/img/). Fia os NPCs da praça/eventos que só tinham ícone, num lugar só.
@@ -10535,7 +10535,7 @@ var _NAMED_NPC_PORTRAITS = {
   'krom': 'npcs/krom-mercenario.webp',
   'torvin costas largas': 'npcs/torvin-trabalhador.webp',
   'torvin': 'npcs/torvin-trabalhador.webp',
-  'aelindra': 'npcs/aelindra-viajante.webp',
+  'thaelwen': 'npcs/aelindra-viajante.webp',
   // 2026-06-13: NPCs humanos convertidos em ANÃO (diversidade entre os principais).
   'grom barba cinza': 'npcs/grom-anao.webp',
   'grom o caolho': 'npcs/grom-anao.webp',
@@ -10572,7 +10572,7 @@ function _discoverySpeakerPortrait(speaker) {
   // Personagens nominais (PNGs dedicados)
   // 2026-06-13: capitão dos portões (guarda) ANTES do clero — colisão de nome "Aldric".
   if (s.indexOf('aldric') >= 0 && (s.indexOf('guarda') >= 0 || s.indexOf('capit') >= 0 || s.indexOf('port') >= 0)) return '/shared/img/npcs/guarda-aldric.webp';
-  if (s.indexOf('aldric') >= 0 && s.indexOf('padre') >= 0) return '/shared/img/npcs/padre-aldric.webp';
+  if (s.indexOf('brevon') >= 0) return '/shared/img/npcs/padre-aldric.webp';  /* Padre Brevon (ex-Padre Aldric, renomeado 2026-06-17 p/ 1o nome unico) */
   if (s.indexOf('tavira') >= 0)  return '/shared/img/npcs/mestra-tavira.webp';
   if (s.indexOf('lyana') >= 0)   return '/shared/img/npcs/lyana-herbalista.webp';
   if (s.indexOf('elara') >= 0)   return '/shared/img/npcs/irma-elara.webp';
@@ -16648,7 +16648,7 @@ var TEMPLE_NPCS_DB = {
     desc: 'Cura ferimentos via magia divina (1d8+3 HP).'
   },
   'cure_poison': {
-    npc: 'Padre Aldric',         npc_id: 'npc_temple_aldric',
+    npc: 'Padre Brevon',         npc_id: 'npc_temple_aldric',
     title: 'Purificar',          icon: _heralIco('ic-poção'),
     cost: 40,                    min_level: 1,
     desc: 'Remove venenos e doenças do corpo.'
@@ -16731,7 +16731,7 @@ var TEMPLE_FULL_HP_LINES = [
   '⛪ <b>{npc_name}</b>:<br><br><i>"Não desperdiçe bênçãos. Você está saudável — aproveite."</i>'
 ];
 var TEMPLE_DEBT_PAID_LINES = [
-  '⛪ Padre Aldric aceita o pagamento com um aceno solene.<br><br><i>"Sua dívida está quitada. Que os deuses guiem seus passos."</i>',
+  '⛪ Padre Brevon aceita o pagamento com um aceno solene.<br><br><i>"Sua dívida está quitada. Que os deuses guiem seus passos."</i>',
   '⛪ Irmã Elara recebe as moedas e sorri levemente.<br><br><i>"O Templo agradece. Que a luz divina o proteja em suas jornadas."</i>',
   '⛪ Acólito Theron registra o pagamento no livro sagrado.<br><br><i>"Conta encerrada. Os serviços do Templo estão novamente à sua disposição."</i>'
 ];
@@ -17161,7 +17161,7 @@ function _showTempleNpcDialogue(sid){
   // (svc click, action handler, etc.) abre o mesmo encounter PADRAO_ALDRIC
   // — mesmo comportamento que Taverna/Banco/Mercado.
   //
-  // ROOT CAUSE original (bug user 2026-05-20): clique em Padre Aldric
+  // ROOT CAUSE original (bug user 2026-05-20): clique em Padre Brevon
   // abria npc-dialogue-overlay (legacy) em vez do encounter PADRAO_ALDRIC.
   // Sistema diferente quebrava UX uniforme.
   //
@@ -17304,8 +17304,8 @@ var TAVERN_NPCS = [
   {
     id: 'tav_grom',
     name: 'Grom, o Caolho',
-    role: '<img src="/shared/img/npcs/taverneiro.webp" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Taverneiro',
-    desc: 'Anão robusto com barba grisalha trançada, esfrega canecas com pano sujo.',
+    role: '<img src="/shared/img/npcs/grom-anao.webp" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Taverneiro',
+    desc: 'Anão robusto e caolho de barba ruiva trançada, esfrega canecas com pano sujo.',
     greetings: [
       '<i>Grom larga uma caneca no balcão.</i> "O que vai ser hoje, aventureiro?"',
       '<i>O taverneiro te avalia.</i> "De volta? Bom sinal — nem todos voltam."',
@@ -22835,7 +22835,7 @@ function _squareGetDailyVendor(){
 // Dar gorjeta (BUFF_CHANCE=40%) pode conceder buff +1 em ability até descanso longo.
 var SQUARE_ARTIST_BUFFS = [
   { id: 'bard_jaskier',  icon: _heralIco('ic-musica'), name: 'Taviel, o Bardo',           buff: 'Inspiração Bárdica',  stat: 'CAR', desc: '+1 em testes de Carisma e Persuasão' },
-  { id: 'dancer_lyra',   icon: '🎶', name: 'Lyra Caelwyn',              buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
+  { id: 'dancer_lyra',   icon: '🎶', name: 'Wrenna Caelwyn',              buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
   { id: 'fire_eater',    icon: _heralIco('ic-tochas'), name: 'Drask, Engolidor de Fogo',  buff: 'Coragem do Fogo',      stat: 'CON', desc: '+1 em testes de Constituição' },
   { id: 'flutist',       icon: '🎶', name: 'Sylwen, a Flautista',       buff: 'Melodia Calmante',     stat: 'SAB', desc: '+1 em testes de Sabedoria' },
   { id: 'poet',          icon: _heralIco('ic-escriba'), name: 'Velmar, o Poeta',           buff: 'Sorte do Artista',     stat: 'INT', desc: '+1 em testes de Inteligência' }
@@ -26109,8 +26109,8 @@ var CANON_UNIQUE_NPCS = {
     }
   },
   "unique_farmer_lost": {
-    "name": "Fazendeiro Aldric",
-    "short_name": "Aldric",
+    "name": "Fazendeiro Tobren",
+    "short_name": "Tobren",
     "role": "🌾 Agricultor",
     "desc": "Um homem de mãos grossas e costas curvadas pelo sol, vasculhando bancas em busca de sementes. Seu olhar carrega o peso de uma colheita perdida.",
     "origin_link": "origin_017",
@@ -26628,7 +26628,7 @@ var CANON_REGULAR_NPCS = {
     ]
   },
   "dancer_lyra": {
-    "name": "Lyra Caelwyn",
+    "name": "Wrenna Caelwyn",
     "role": "💃 Dançarina",
     "desc": "Lyra gira no centro de um círculo de espectadores, fitas de seda carmesim e dourada traçando espirais no ar como serpentes encantadas. Seus pés descalços mal tocam as pedras da praça, e o rufar ritmado de dois tamborileiros anões marca cada salto com precisão hipnótica.",
     "interactions": [
@@ -26984,7 +26984,7 @@ var CANON_REGULAR_NPCS = {
     ]
   },
   "thief_suspect": {
-    "name": "Vulto Encapuzado",
+    "name": "Figura Encapuzada",
     "role": "🕵️ Suspeito",
     "desc": "Uma figura esguia espremida entre a parede de uma loja e um barril de chuva, o capuz de linho escuro projetando sombra sobre o rosto. Apenas um queixo fino e lábios cerrados são visíveis, e os dedos enluvados evitam tocar qualquer superfície — como se não quisessem deixar impressões digitais nem no ar.",
     "interactions": [
@@ -27143,7 +27143,7 @@ var CANON_REGULAR_NPCS = {
     ]
   },
   "lost_elf": {
-    "name": "Aelindra",
+    "name": "Thaelwen",
     "role": "🧝 Viajante",
     "desc": "Uma elfa de cabelos cor de cobre e orelhas pontudas avermelhadas pelo sol, olhando ao redor com uma mistura de fascinação e desconforto. Ela aperta contra o peito um ramo seco de carvalho-branco — talvez uma lembrança de casa — e franze o nariz a cada lufada de esgoto que sobe entre as pedras do calçamento.",
     "interactions": [
@@ -30532,7 +30532,7 @@ var CANON_TEMPLE_DATA_EXTRA = {
     "⛪ <b>{npc_name}</b>:\n\n<i>\"Não desperdiçe bênçãos. Você está saudável — aproveite.\"</i>"
   ],
   "debt_paid_lines": [
-    "⛪ Padre Aldric aceita o pagamento com um aceno solene.\n\n<i>\"Sua dívida está quitada. Que os deuses guiem seus passos.\"</i>",
+    "⛪ Padre Brevon aceita o pagamento com um aceno solene.\n\n<i>\"Sua dívida está quitada. Que os deuses guiem seus passos.\"</i>",
     "⛪ Irmã Elara recebe as moedas e sorri levemente.\n\n<i>\"O Templo agradece. Que a luz divina o proteja em suas jornadas.\"</i>",
     "⛪ Acólito Theron registra o pagamento no livro sagrado.\n\n<i>\"Conta encerrada. Os serviços do Templo estão novamente à sua disposição.\"</i>"
   ],
@@ -33144,7 +33144,7 @@ function _aldwinPick(category, fallback){
 
 // canonical: temple_data.py / temple_data_extra via CANON_TEMPLE_DATA(_EXTRA)
 // Pick texto canonical do Templo (no_gold/full_hp/debt_paid/debt_block/temple_flavors/etc)
-// Substitui {npc_name} pelo nome do NPC (Padre Aldric/Irmã Elara/etc).
+// Substitui {npc_name} pelo nome do NPC (Padre Brevon/Irmã Elara/etc).
 function _templePick(category, fallback, npcName){
   var canonExtra = (typeof CANON_TEMPLE_DATA_EXTRA !== 'undefined') ? CANON_TEMPLE_DATA_EXTRA : null;
   var canonBase  = (typeof CANON_TEMPLE_DATA !== 'undefined') ? CANON_TEMPLE_DATA : null;
@@ -46614,7 +46614,7 @@ var SUBSCREEN_DATA = {
   'tavern': {
     header: '🍺 Taverna do Urso Cego',
     flavor: 'Cheiro de cerveja. Fumaça de tabaco. Bardos cantam ao fundo. Grom limpa canecas no balcão.',
-    npcInfo: '<svg class="v-heraldic v-h-banner"><use href="#ic-taverneiro"/></svg> Grom — Taverneiro grisalho. "Bem-vindo. O que vai ser?"',
+    npcInfo: '<svg class="v-heraldic v-h-banner"><use href="#ic-taverneiro"/></svg> Grom — Taverneiro, o Caolho. "Bem-vindo. O que vai ser?"',
     buttons: [
       [_heralIco('ic-mochila'), 'Bebidas', '4 tipos', 'nav:tavern_drinks'],
       [_heralIco('ic-mochila'), 'Jogos de azar', '3 jogos', 'nav:tavern_games'],
@@ -46935,7 +46935,7 @@ var SUBSCREEN_DATA = {
     flavor: 'Seis sacerdotes servem aos deuses. Cada um especializado num tipo de bênção.',
     buttons: [
       [_heralIco('ic-mochila'), 'Irmã Elara', 'cura básica — nv 1+', 'nav:rel_elara'],
-      [_heralIco('ic-mochila'), 'Padre Aldric', 'cura veneno — nv 1+', 'nav:rel_temple_aldric'],
+      [_heralIco('ic-mochila'), 'Padre Brevon', 'cura veneno — nv 1+', 'nav:rel_temple_aldric'],
       [_heralIco('ic-mochila'), 'Acólito Theron', 'bênção — nv 1+', 'nav:rel_theron'],
       [_heralIco('ic-mochila'), 'Sacerdotisa Miriel', 'maldições — nv 5+', 'nav:rel_miriel'],
       [_heralIco('ic-mochila'), 'Sumo-Sacerdote Varek', 'restauração — nv 8+', 'nav:rel_varek'],
@@ -47361,7 +47361,7 @@ var SUBSCREEN_DATA = {
 
   // ========== SUB-SUB-SCREENS — TEMPLO NPCs (Fase 4) ==========
   'rel_temple_aldric': {
-    header: '🛡️ Padre Aldric — Curandeiro de Venenos',
+    header: '🛡️ Padre Brevon — Curandeiro de Venenos',
     flavor: '"Encontrei muito mal feito por ervas tóxicas. Posso te ajudar."',
     npcInfo: '⚪ Afinidade 30 — sereno | Especialidade: cure poison',
     buttons: [
@@ -48105,18 +48105,18 @@ var ACTION_HANDLERS = {
       return;
     }
     _showConfirmPurchase({
-      icon: _heralIco('ic-mochila'), npc: 'Padre Aldric', title: 'Quitar Dívida',
+      icon: _heralIco('ic-mochila'), npc: 'Padre Brevon', title: 'Quitar Dívida',
       desc: 'Pagar <b>' + debt + ' Valdoritas</b> ao Templo. Os serviços voltam a ficar disponíveis.',
       cost: debt,
       onConfirm: function(){
         var preGold = p.gold;
         if (!_pay(p, debt)) return;
         window.CITY_TEMPLE_DEBT = 0;
-        // canonical: temple_data_extra.py DEBT_PAID_LINES (3 variantes com Padre Aldric/Irmã Elara/Acólito Theron)
+        // canonical: temple_data_extra.py DEBT_PAID_LINES (3 variantes com Padre Brevon/Irmã Elara/Acólito Theron)
         var debtPaidLine = _templePick('debt_paid_lines',
-          '⛪ Padre Aldric aceita o pagamento com um aceno solene.\n\n<i>"Sua dívida está quitada. Que os deuses guiem seus passos."</i>');
+          '⛪ Padre Brevon aceita o pagamento com um aceno solene.\n\n<i>"Sua dívida está quitada. Que os deuses guiem seus passos."</i>');
         _showServiceResultPopup({
-          icon: _heralIco('ic-bolsa'), npc: 'Padre Aldric',
+          icon: _heralIco('ic-bolsa'), npc: 'Padre Brevon',
           narrative: debtPaidLine,
           deltas: [{ type:'gold', label:'Valdoritas', from:preGold, to:p.gold, max:Math.max(preGold, 1), bar:false }],
           onContinue: function(){ if (_popupStack[_popupStack.length-1] === 'temple') _renderCityPopup('temple'); }
@@ -53410,7 +53410,7 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
 var _NPC_DEFAULTS = {
   aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/guarda-aldric.webp',  icon: 'ic-paladino' },
   martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/estalajadeira.webp',  icon: 'ic-estalajadeira' },
-  grom:        { name: 'Grom, o Caolho',    desc: 'Taverneiro anão do Javali Sangrento', portrait: '/shared/img/npcs/grom-anao.webp',    icon: 'ic-barbaro' },
+  grom:        { name: 'Grom, o Caolho',    desc: 'Taverneiro anão do Javali Bêbado', portrait: '/shared/img/npcs/grom-anao.webp',    icon: 'ic-taverneiro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/irma-elara.webp',   icon: 'ic-clerigo' },
   thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
   mirena:      { name: 'Mirena Virelle',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
