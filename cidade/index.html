@@ -33061,35 +33061,46 @@ function _squareShowArtistsPopup(p){
               '<i>Chance de buff: ' + Math.round(SQUARE_ARTIST_BUFF_CHANCE * 100) + '% — só 1 buff de artista ativo por vez.</i>',
         cost: SQUARE_TIP_COST,
         onConfirm: function(){
-          var preGold = p.gold;
-          if (!_pay(p, SQUARE_TIP_COST)) return;
-          p.metadata = p.metadata || {};
-          var hasActive = !!p.metadata.artist_buff_active;
-          var narrative, diceData = null;
-          if (hasActive){
-            narrative = '<i>O artista agradece com uma reverência, mas você já está sob efeito de outro número de hoje. A magia não dobra.</i>';
-          } else {
-            // #17 (sessão #70): PADRAO_DADOS — "Sorte do Artista" via 1d20 visível
-            // (>=13 ≈ 40%, igual ao SQUARE_ARTIST_BUFF_CHANCE silencioso anterior).
-            var d20 = 1 + Math.floor(Math.random() * 20);
-            diceData = { formula: 'Sorte do Artista · 1d20', sides: 20, value: d20, total: d20 };
-            if (d20 >= 13){
-              p.metadata.artist_buff_active = a.id;
-              p.metadata.artist_buff_name = a.buff;
-              narrative = '<i>A apresentação desperta algo em você.</i><br><br>' +
-                          '✨ <b>' + a.buff + '</b> aplicada!<br>' +
-                          '<i>' + a.desc + ' (até o próximo descanso longo)</i>';
-            } else {
-              narrative = '<i>O artista agradece a gorjeta com uma vênia. A apresentação foi boa, mas nada além disso.</i>';
-            }
+          // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
+          // cobra, rola 1d20 e CONCEDE o buff de artista via 'service.square_artist_tip';
+          // o cliente só anima. ANTES: _pay + Math.random do d20 + set
+          // artist_buff_active no cliente (fabricação de estado — o buff é consumido
+          // em combate por overworld_effects).
+          if (!window.vCityServer || !window.vCityServer.isRemote()){
+            if (typeof vToast === 'function') vToast('Indisponível offline'); return;
           }
-          _showServiceResultPopup({
-            icon: a.icon, npc: a.name,
-            narrative: narrative,
-            dice: diceData,
-            deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
-            onContinue: _squareTxnReturnToHub
-          });
+          var preGold = p.gold;
+          window.vCityServer.cityAction('service.square_artist_tip', { npc_key: a.id }).then(function(res){
+            if (!res || !res.ok){
+              var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para a gorjeta.'
+                       : (res && res.error === 'bad_artist') ? 'Artista indisponível.'
+                       : 'Não foi possível dar a gorjeta agora.';
+              if (typeof vToast === 'function') vToast(emsg); return;
+            }
+            if (typeof res.gold === 'number') p.gold = res.gold;
+            if (typeof refreshHud === 'function') refreshHud();
+            var narrative, diceData = null;
+            if (res.already_active){
+              narrative = '<i>O artista agradece com uma reverência, mas você já está sob efeito de outro número de hoje. A magia não dobra.</i>';
+            } else {
+              // PADRAO_DADOS — "Sorte do Artista" via 1d20 visível (servidor rolou)
+              diceData = { formula: 'Sorte do Artista · 1d20', sides: 20, value: res.rolled, total: res.rolled };
+              if (res.granted){
+                narrative = '<i>A apresentação desperta algo em você.</i><br><br>' +
+                            '✨ <b>' + (res.buff_name || a.buff) + '</b> aplicada!<br>' +
+                            '<i>' + (res.buff_desc || a.desc) + ' (até o próximo descanso longo)</i>';
+              } else {
+                narrative = '<i>O artista agradece a gorjeta com uma vênia. A apresentação foi boa, mas nada além disso.</i>';
+              }
+            }
+            _showServiceResultPopup({
+              icon: a.icon, npc: a.name,
+              narrative: narrative,
+              dice: diceData,
+              deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
+              onContinue: _squareTxnReturnToHub
+            });
+          }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao dar gorjeta.'); });
         }
       });
     }
@@ -34428,20 +34439,34 @@ function _squareConfirmGamble(p, stake){
           '</b>. Se perder, perde a aposta.<br><br><i>"Que Tymora sorria pra você."</i>',
     cost: stake.amount,
     onConfirm: function(){
+      // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR é dono
+      // do limite diário, cobra, rola os 2 d20 e paga via 'service.square_gamble'; o
+      // cliente só anima. ANTES: _pay + Math.random + _squareGambleCount no cliente
+      // (limite diário resetava no reload).
+      if (!window.vCityServer || !window.vCityServer.isRemote()){
+        if (typeof vToast === 'function') vToast('Indisponível offline'); return;
+      }
       var preGold = p.gold;
-      if (!_pay(p, stake.amount)) return;
-      window._squareGambleCount++;
-      // Rola dado 3D
-      _squareRollGambleDice(p, stake, preGold);
+      window.vCityServer.cityAction('service.square_gamble', { bet: stake.amount }).then(function(res){
+        if (!res || !res.ok){
+          var emsg = (res && res.error === 'daily_limit') ? 'Você já apostou 3 vezes hoje. Volte amanhã.'
+                   : (res && res.error === 'no_funds') ? 'Sem Valdoritas para a aposta.'
+                   : (res && res.error === 'bad_bet') ? 'Aposta inválida.'
+                   : 'Não foi possível apostar agora.';
+          if (typeof vToast === 'function') vToast(emsg); return;
+        }
+        window._squareGambleCount = 3 - (typeof res.remaining === 'number' ? res.remaining : 0);
+        _squareRollGambleDice(p, stake, res, preGold);  // anima com as rolagens do servidor
+      }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na aposta.'); });
     }
   });
 }
 
-function _squareRollGambleDice(p, stake, preGoldBeforeStake){
-  // Rola 1d20 player vs 1d20 casa
-  var playerRoll = 1 + Math.floor(Math.random() * 20);
-  var houseRoll = 1 + Math.floor(Math.random() * 20);
-  var win = playerRoll > houseRoll;
+function _squareRollGambleDice(p, stake, res, preGoldBeforeStake){
+  // Rolagens vêm do SERVIDOR (res.player_roll / res.house_roll) — cliente só anima.
+  var playerRoll = res.player_roll;
+  var houseRoll = res.house_roll;
+  var win = res.win;
   // Show dice 3D animation
   if (typeof Dice3DInstance !== 'undefined' && Dice3DInstance) {
     var ov = document.createElement('div');
@@ -34460,39 +34485,45 @@ function _squareRollGambleDice(p, stake, preGoldBeforeStake){
           document.getElementById('sgd-label').innerHTML = 'Você: <b style="color:var(--v-gold, #c4953a)">' + playerRoll + '</b> vs Casa: <b style="color:#a85050">' + houseRoll + '</b>';
           setTimeout(function(){
             ov.remove();
-            _squareShowGambleResult(p, stake, playerRoll, houseRoll, win, preGoldBeforeStake);
+            _squareShowGambleResult(p, stake, res, preGoldBeforeStake);
           }, 1200);
         });
       }, 800);
     });
   } else {
     // Fallback sem 3D
-    _squareShowGambleResult(p, stake, playerRoll, houseRoll, win, preGoldBeforeStake);
+    _squareShowGambleResult(p, stake, res, preGoldBeforeStake);
   }
 }
 
-function _squareShowGambleResult(p, stake, playerRoll, houseRoll, win, preGoldBeforeStake){
-  // canonical: town_square_minigames_data.py GAMBLE_TEXTS — usa win_body/lose_body literais.
-  var preGold = p.gold;
-  if (win) p.gold += stake.payout;
+function _squareShowGambleResult(p, stake, res, preGoldBeforeStake){
+  // SERVER-AUTHORITATIVE: o servidor já cobrou+pagou (res.gold é o saldo real). O
+  // cliente só REFLETE — NUNCA recalcula gold (antes: p.gold += stake.payout = double).
+  var playerRoll = res.player_roll, houseRoll = res.house_roll, win = !!res.win, tie = !!res.tie;
+  var payout = res.payout || 0;
+  if (typeof res.gold === 'number') p.gold = res.gold;
   refreshHud();
   var gt = (typeof CANON_GAMBLE_TEXTS !== 'undefined') ? CANON_GAMBLE_TEXTS : null;
   var narrative;
   if (win){
     narrative = gt && gt.win_body
-      ? gt.win_body.replace('{player}', playerRoll).replace('{npc}', houseRoll).replace(/\{amount\}/g, stake.payout).replace(/\n/g, '<br>')
-      : '🎲 Você: <b>' + playerRoll + '</b> vs NPC: <b>' + houseRoll + '</b><br><br>🎉 <b>VITÓRIA!</b> +' + stake.payout + ' <span class="vi vi-coin sm"></span>';
+      ? gt.win_body.replace('{player}', playerRoll).replace('{npc}', houseRoll).replace(/\{amount\}/g, payout).replace(/\n/g, '<br>')
+      : '🎲 Você: <b>' + playerRoll + '</b> vs NPC: <b>' + houseRoll + '</b><br><br>🎉 <b>VITÓRIA!</b> +' + payout + ' <span class="vi vi-coin sm"></span>';
+  } else if (tie){
+    narrative = (gt && gt.tie_body)
+      ? gt.tie_body.replace('{player}', playerRoll).replace('{npc}', houseRoll).replace(/\n/g, '<br>')
+      : '🎲 Você: <b>' + playerRoll + '</b> vs NPC: <b>' + houseRoll + '</b><br><br>🤝 <b>EMPATE!</b> Aposta devolvida.';
   } else {
     narrative = gt && gt.lose_body
       ? gt.lose_body.replace('{player}', playerRoll).replace('{npc}', houseRoll).replace(/\{amount\}/g, stake.amount).replace(/\n/g, '<br>')
       : '🎲 Você: <b>' + playerRoll + '</b> vs NPC: <b>' + houseRoll + '</b><br><br>😔 <b>DERROTA.</b>';
   }
   // Rewards block apenas em vitoria (>= 5 V threshold)
-  var rewards = (win && stake.payout >= 5)
-    ? [{ type: 'gold', amount: stake.payout, label: 'Aposta paga' }]
+  var rewards = (win && payout >= 5)
+    ? [{ type: 'gold', amount: payout, label: 'Aposta paga' }]
     : null;
   _showServiceResultPopup({
-    icon: win ? '🏆' : '💔',
+    icon: win ? '🏆' : (tie ? '🤝' : '💔'),
     npc: (gt && CANON_GAMBLE_NPC) ? CANON_GAMBLE_NPC.name : 'Velho Apostador',
     narrative: narrative,
     dice: { formula: 'Você 1d20 vs Casa 1d20', sides: 20, value: playerRoll, total: playerRoll },
@@ -38836,17 +38867,38 @@ function _tavernShowBard(p){
       if (window._tavernBardHeard.length > 15) {
         window._tavernBardHeard = window._tavernBardHeard.slice(-15);
       }
-      var narrative = '<i>' + reaction + '</i>';
-      if (inspired) {
-        narrative += '<br><br>✨ <b>INSPIRAÇÃO BÁRDICA!</b> Vantagem no próximo teste de habilidade.';
+      // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): a Inspiração é
+      // rolada E CONCEDIDA pelo SERVIDOR (service.tavern_bard_listen, anti-farm 1x/
+      // visita). ANTES o cliente rolava com Math.random e PROMETIA vantagem mas
+      // NUNCA a concedia (#0 + "promete e não entrega").
+      function _bardResult(srvInspired, extraLine){
+        var pool = srvInspired ? (reactions.inspired || []) : (reactions.enjoyed || []);
+        if (!pool.length) pool = ['A multidão aplaude.'];
+        var rxn = pool[Math.floor(Math.random() * pool.length)];
+        var narrative = '<i>' + rxn + '</i>';
+        if (srvInspired) {
+          narrative += '<br><br>✨ <b>INSPIRAÇÃO BÁRDICA!</b> Vantagem no próximo teste de habilidade.';
+        } else if (extraLine) {
+          narrative += '<br><br><i>' + extraLine + '</i>';
+        }
+        _showServiceResultPopup({
+          icon: srvInspired ? '✨' : '🎵', npc: bardName,
+          narrative: narrative,
+          deltas: [],
+          rewards: srvInspired ? [{ type:'item', amount: 1, label: 'Inspiração Bárdica' }] : null,
+          onContinue: function(){ navigateBack(); }
+        });
       }
-      _showServiceResultPopup({
-        icon: inspired ? '✨' : '🎵', npc: bardName,
-        narrative: narrative,
-        deltas: [],
-        rewards: inspired ? [{ type:'item', amount: 1, label: 'Inspiração Bárdica' }] : null,
-        onContinue: function(){ navigateBack(); }
-      });
+      if (!window.vCityServer || !window.vCityServer.isRemote()){
+        _bardResult(inspired, null);  // LOCAL (file://) dev-tool fallback
+        return;
+      }
+      window.vCityServer.cityAction('service.tavern_bard_listen', {}).then(function(res){
+        if (!res || !res.ok){ _bardResult(false, null); return; }
+        var extra = res.already_listened ? 'Você já se deixou levar pela música nesta visita.'
+                  : (res.has_pending ? 'A inspiração de antes ainda vibra em você.' : null);
+        _bardResult(!!res.inspired, extra);
+      }).catch(function(_e){ _bardResult(false, null); });
     }
   });
 }
