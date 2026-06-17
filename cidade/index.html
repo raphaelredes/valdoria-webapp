@@ -34768,83 +34768,65 @@ function _tavernShowDrinking(p){
           '<b>Entrada:</b> ' + entryFee + ' Valdoritas',
     cost: entryFee,
     onConfirm: function(){
+      // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR cobra,
+      // rola todos os CON saves e concede XP via 'service.drinking_endurance'; o
+      // cliente só anima. ANTES: _pay + Math.random do loop + _gainXp no cliente
+      // (FABRICAÇÃO de XP — mesma classe do bug do farm do templo).
+      if (!window.vCityServer || !window.vCityServer.isRemote()){
+        if (typeof vToast === 'function') vToast('Indisponível offline'); return;
+      }
       var preGold = p.gold;
-      var preXp = p.xp || 0;
-      var preHp = p.hp || 0;
-      if (!_pay(p, entryFee)) return;
-      var conMod = (p.stats && p.stats.con) ? Math.floor((p.stats.con - 10) / 2) : 0;
-      var isDwarf = (p.race && /an[ãa]o|dwarf/i.test(p.race)) ? true : false;
-      var totalMod = conMod + (isDwarf ? dwarfBonus : 0);
-      var roundsAguentadas = 0;
-      var failedRound = -1;
-      var lastRoll = 0, lastDc = baseDC;
-      for (var r = 0; r < maxRounds; r++) {
-        var dc = baseDC + (r * dcIncrement);
-        var roll = 1 + Math.floor(Math.random() * 20);
-        var total = roll + totalMod;
-        lastRoll = roll; lastDc = dc;
-        if (total >= dc) {
-          roundsAguentadas++;
-        } else {
-          failedRound = r + 1;
-          break;
-        }
-      }
-      var won = (roundsAguentadas >= maxRounds);
-      var xpGain = won ? 25 : Math.max(5, roundsAguentadas * 3);
-      _gainXp(p, xpGain);
-      // canonical: poisoned_duration_combats — falha = envenenado 1 combate
-      if (!won && canon.poisoned_duration_combats) {
-        p.metadata = p.metadata || {};
-        p.metadata.drinking_poisoned_combats = canon.poisoned_duration_combats;
-      }
-      refreshHud();
-      // canonical: tavern_games_drinking_data.py via CANON_DRINKING_TEXTS — narrativas non-repeating
       var canonTexts = (typeof CANON_DRINKING_TEXTS !== 'undefined') ? CANON_DRINKING_TEXTS : null;
       window._drinkingTextsHeard = window._drinkingTextsHeard || {};
-      var roundFlavor = '';
-      if (canonTexts && canonTexts.round_flavor && canonTexts.round_flavor.length){
-        var roundIdx = won ? (maxRounds - 1) : (failedRound - 1);
-        if (roundIdx >= 0 && roundIdx < canonTexts.round_flavor.length){
-          roundFlavor = '<i>' + canonTexts.round_flavor[roundIdx] + '</i><br><br>';
+      window.vCityServer.cityAction('service.drinking_endurance', {}).then(function(res){
+        if (!res || !res.ok){
+          var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para a entrada.' : 'Não foi possível competir agora.';
+          if (typeof vToast === 'function') vToast(emsg); return;
         }
-      }
-      var endText = '';
-      if (won && canonTexts && canonTexts.victory_texts){
-        endText = _pickNonRepeating('drinking_victory', canonTexts.victory_texts, window._drinkingTextsHeard);
-      } else if (!won && canonTexts && canonTexts.defeat_texts){
-        endText = _pickNonRepeating('drinking_defeat', canonTexts.defeat_texts, window._drinkingTextsHeard);
-      }
-      var poisonedLine = '';
-      if (!won && canonTexts && canonTexts.poisoned_msg){
-        poisonedLine = '<br><br>' + canonTexts.poisoned_msg;
-      } else if (!won){
-        poisonedLine = '<br><br>🤢 <i>Envenenado por 1 combate.</i>';
-      }
-      var enduranceLine = '';
-      if (won && canonTexts && canonTexts.endurance_victory_msg){
-        enduranceLine = canonTexts.endurance_victory_msg.replace('{rounds}', String(maxRounds));
-      }
-      var rewards = (xpGain >= 10) ? [{ type:'xp', amount: xpGain, label: 'XP' }] : null;
-      _showServiceResultPopup({
-        icon: won ? '🏆' : '🍺', npc: 'Mesa de Bebida',
-        narrative: roundFlavor + (won
-          ? (enduranceLine || '<b>VITÓRIA!</b> Aguentou ' + maxRounds + ' rodadas!') + '<br><br>' +
-            (endText ? '<i>' + endText + '</i><br><br>' : '') +
-            (isDwarf ? '<i>Bônus Anão (+' + dwarfBonus + ') aplicado.</i><br>' : '') +
-            '<b>Último teste:</b> ' + lastRoll + (totalMod >= 0 ? '+' : '') + totalMod + ' = ' + (lastRoll + totalMod) + ' vs DC ' + lastDc
-          : '<b>Bêbado!</b> Falhou na rodada ' + failedRound + '/' + maxRounds + '.<br><br>' +
-            (endText ? '<i>' + endText + '</i><br><br>' : '') +
-            (isDwarf ? '<i>Bônus Anão (+' + dwarfBonus + ') aplicado mas não foi suficiente.</i><br>' : '') +
-            '<b>Teste fatal:</b> ' + lastRoll + (totalMod >= 0 ? '+' : '') + totalMod + ' = ' + (lastRoll + totalMod) + ' vs DC ' + lastDc + poisonedLine),
-        dice: { formula: '1d20' + (totalMod >= 0 ? '+' : '') + totalMod + ' vs DC ' + lastDc, sides: 20, value: lastRoll, total: lastRoll + totalMod },
-        deltas: [
-          { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false },
-          _lastXpDelta(p)
-        ],
-        rewards: rewards,
-        onContinue: function(){ navigateBack(); }
-      });
+        if (typeof res.gold === 'number') p.gold = res.gold;
+        if (typeof res.xp_gained === 'number') p.xp = (p.xp || 0) + res.xp_gained;
+        var won = !!res.won;
+        var totalMod = (typeof res.modifier === 'number') ? res.modifier : 0;
+        var lastRoll = res.last_roll || 0, lastDc = res.last_dc || baseDC;
+        var roundFlavor = '';
+        if (canonTexts && canonTexts.round_flavor && canonTexts.round_flavor.length){
+          var roundIdx = won ? (res.max_rounds - 1) : ((res.failed_round || 1) - 1);
+          if (roundIdx >= 0 && roundIdx < canonTexts.round_flavor.length){
+            roundFlavor = '<i>' + canonTexts.round_flavor[roundIdx] + '</i><br><br>';
+          }
+        }
+        var endText = '';
+        if (won && canonTexts && canonTexts.victory_texts){
+          endText = _pickNonRepeating('drinking_victory', canonTexts.victory_texts, window._drinkingTextsHeard);
+        } else if (!won && canonTexts && canonTexts.defeat_texts){
+          endText = _pickNonRepeating('drinking_defeat', canonTexts.defeat_texts, window._drinkingTextsHeard);
+        }
+        var enduranceLine = '';
+        if (won && canonTexts && canonTexts.endurance_victory_msg){
+          enduranceLine = canonTexts.endurance_victory_msg.replace('{rounds}', String(res.max_rounds));
+        }
+        var isDwarf = !!res.is_dwarf;
+        if (typeof refreshHud === 'function') refreshHud();
+        var rewards = (res.xp_gained >= 10) ? [{ type:'xp', amount: res.xp_gained, label: 'XP' }] : null;
+        _showServiceResultPopup({
+          icon: won ? '🏆' : '🍺', npc: 'Mesa de Bebida',
+          narrative: roundFlavor + (won
+            ? (enduranceLine || '<b>VITÓRIA!</b> Aguentou ' + res.max_rounds + ' rodadas!') + '<br><br>' +
+              (endText ? '<i>' + endText + '</i><br><br>' : '') +
+              (isDwarf ? '<i>Bônus Anão (+' + res.dwarf_bonus + ') aplicado.</i><br>' : '') +
+              '<b>Último teste:</b> ' + lastRoll + (totalMod >= 0 ? '+' : '') + totalMod + ' = ' + (lastRoll + totalMod) + ' vs DC ' + lastDc
+            : '<b>Bêbado!</b> Falhou na rodada ' + (res.failed_round || 0) + '/' + res.max_rounds + '.<br><br>' +
+              (endText ? '<i>' + endText + '</i><br><br>' : '') +
+              (isDwarf ? '<i>Bônus Anão (+' + res.dwarf_bonus + ') aplicado mas não foi suficiente.</i><br>' : '') +
+              '<b>Teste fatal:</b> ' + lastRoll + (totalMod >= 0 ? '+' : '') + totalMod + ' = ' + (lastRoll + totalMod) + ' vs DC ' + lastDc + '<br><br><i>A ressaca vai pesar amanhã.</i>'),
+          dice: { formula: '1d20' + (totalMod >= 0 ? '+' : '') + totalMod + ' vs DC ' + lastDc, sides: 20, value: lastRoll, total: lastRoll + totalMod },
+          deltas: [
+            { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
+          ],
+          rewards: rewards,
+          onContinue: function(){ navigateBack(); }
+        });
+      }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro no concurso.'); });
     }
   });
 }
@@ -34857,22 +34839,13 @@ function _tavernShowGames(p){
   var canonXGTE = (typeof CANON_XGTE !== 'undefined') ? CANON_XGTE : null;
   var canonXGTEExtra = (typeof CANON_XGTE_EXTRA !== 'undefined') ? CANON_XGTE_EXTRA : null;
   var lvl = p.level || 1;
+  // Mesa de Jogos server-authoritative (2026-06-17): o SERVIDOR é dono de
+  // cost/payout/win_chance/streak (resolve_tavern_game). O Torneio no WebApp é o
+  // bronze canônico (30→150); os tiers (prata) ficam no fluxo completo inline.
   var items = TAVERN_GAMES.map(function(g){
-    var locked = false;
     var labelStr = g.name;
     var badgeStr = g.cost + 'V → até ' + g.payout + 'V';
-    // Augment tournament com canonical tiers
-    if (g.id === 'tournament' && canonTour){
-      var availTiers = Object.keys(canonTour).filter(function(tid){ return lvl >= (canonTour[tid].min_level || 1); });
-      if (availTiers.length > 0){
-        var topTierId = availTiers[availTiers.length - 1];
-        var topTier = canonTour[topTierId];
-        labelStr = topTier.label + ' (3 rounds)';
-        badgeStr = topTier.entry_fee + 'V → ' + topTier.prize + 'V';
-        g._canonTier = topTier;
-      }
-    }
-    return { icon: g.icon, label: labelStr, badge: badgeStr, _game: g, _locked: locked };
+    return { icon: g.icon, label: labelStr, badge: badgeStr, _game: g, _locked: false };
   });
   _aaaListSubScreen({
     theme: 'tavern',
@@ -34882,8 +34855,8 @@ function _tavernShowGames(p){
     items: items,
     onPick: function(item){
       var g = item._game;
-      var cost = g._canonTier ? g._canonTier.entry_fee : g.cost;
-      var payout = g._canonTier ? g._canonTier.prize : g.payout;
+      var cost = g.cost;
+      var payout = g.payout;
       var introText = '';
       // Canonical XGTE intro texts
       if (g.id === 'xgte' && canonXGTE && canonXGTE.xgte_intro_texts && canonXGTE.xgte_intro_texts.length){
@@ -34894,34 +34867,63 @@ function _tavernShowGames(p){
         desc: introText + g.desc + '<br>Custo: ' + cost + ' <span class="vi vi-coin sm"></span> · Vitória: ' + payout + ' <span class="vi vi-coin sm"></span>',
         cost: cost,
         onConfirm: function(){
-          var preGold = p.gold;
-          if (!_pay(p, cost)) return;
-          var win = Math.random() < g.win_chance;
-          if (win) p.gold += payout;
-          refreshHud();
-          var rewards = win && payout >= 5 ? [{ type:'gold', amount: payout, label: 'Prêmio' }] : null;
-          // canonical: xgte_victory_texts / xgte_defeat_texts — narrativa canonical para XGTE non-repeating
-          var canonNarrative = null;
-          if (g.id === 'xgte' && canonXGTEExtra){
-            var pool = win ? canonXGTEExtra.xgte_victory_texts : canonXGTEExtra.xgte_defeat_texts;
-            if (pool && pool.length){
-              window._xgteTextsHeard = window._xgteTextsHeard || {};
-              canonNarrative = _pickNonRepeating(win ? 'xgte_victory' : 'xgte_defeat', pool, window._xgteTextsHeard);
-            }
+          // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
+          // valida+cobra+resolve+paga+streak via 'service.tavern_game'; o cliente só
+          // anima. ANTES: _pay + Math.random()<win_chance + p.gold += payout no
+          // cliente (fabricação de estado p/ os 8 jogos).
+          if (!window.vCityServer || !window.vCityServer.isRemote()){
+            if (typeof vToast === 'function') vToast('Indisponível offline'); return;
           }
-          var fallbackNarrative = win
-            ? '<b>Vitória!</b> Recebe ' + payout + ' Valdoritas.<br><i>Aplausos espalhados.</i>'
-            : '<b>Derrota.</b> Aposta perdida.<br><i>"Mais sorte na próxima."</i>';
-          var narrativeText = canonNarrative
-            ? ('<i>' + canonNarrative + '</i><br><br>' + (win ? '+' + payout + ' Valdoritas.' : 'Aposta perdida.'))
-            : fallbackNarrative;
-          _showServiceResultPopup({
-            icon: win ? '🏆' : '💔', npc: 'Mesa de Jogos',
-            narrative: narrativeText,
-            deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,p.gold,1), bar: false }],
-            rewards: rewards,
-            onContinue: function(){ navigateBack(); }
-          });
+          var preGold = p.gold;
+          window.vCityServer.cityAction('service.tavern_game', { game_id: g.id }).then(function(res){
+            if (!res || !res.ok){
+              var emsg = (res && res.error === 'locked') ? ('Precisa de uma sequência de ' + (res.min_streak || 3) + ' vitórias.')
+                       : (res && res.error === 'no_funds') ? 'Sem Valdoritas para a aposta.'
+                       : (res && res.error === 'bad_game') ? 'Jogo indisponível.'
+                       : 'Não foi possível jogar agora.';
+              if (typeof vToast === 'function') vToast(emsg); return;
+            }
+            if (typeof res.gold === 'number') p.gold = res.gold;
+            var win = !!res.win;
+            var realPayout = res.payout || 0;
+            if (typeof refreshHud === 'function') refreshHud();
+            var rewards = (win && realPayout >= 5) ? [{ type:'gold', amount: realPayout, label: 'Prêmio' }] : null;
+            // narrativa canonical XGTE non-repeating (cartas)
+            var canonNarrative = null;
+            if (g.id === 'xgte' && canonXGTEExtra){
+              var pool = win ? canonXGTEExtra.xgte_victory_texts : canonXGTEExtra.xgte_defeat_texts;
+              if (pool && pool.length){
+                window._xgteTextsHeard = window._xgteTextsHeard || {};
+                canonNarrative = _pickNonRepeating(win ? 'xgte_victory' : 'xgte_defeat', pool, window._xgteTextsHeard);
+              }
+            }
+            // Jogo de dados: mostra a rolagem oposta real (d20+CAR vs d20+oponente)
+            var rollLine = '';
+            var diceObj = null;
+            if (res.mode === 'dice'){
+              var pSign = (res.p_bonus >= 0 ? '+' : '') + res.p_bonus;
+              rollLine = '<br><b>Você:</b> ' + res.p_roll + ' (d20' + pSign + ') vs <b>' +
+                (res.opponent || 'oponente') + ':</b> ' + res.n_roll + ' (d20+' + res.opp_bonus + ')';
+              diceObj = { formula: 'd20' + pSign + ' vs ' + res.n_roll, sides: 20, value: res.p_raw, total: res.p_roll };
+            }
+            var headline = res.draw ? '<b>EMPATE!</b> Aposta devolvida.'
+                         : (win ? '<b>Vitória!</b> +' + realPayout + ' Valdoritas.'
+                                : '<b>Derrota.</b> Aposta perdida.');
+            if (res.mode === 'dice' && win && res.multiplier >= 2.5){
+              headline = (res.multiplier >= 3 ? '🌟 <b>JACKPOT! Natural 20!</b> ' : '💪 <b>VITÓRIA ESMAGADORA!</b> ') + '+' + realPayout + ' Valdoritas.';
+            }
+            var narrativeText = canonNarrative
+              ? ('<i>' + canonNarrative + '</i><br><br>' + headline + rollLine)
+              : (headline + rollLine + (win ? '<br><i>Aplausos espalhados.</i>' : (res.draw ? '' : '<br><i>"Mais sorte na próxima."</i>')));
+            _showServiceResultPopup({
+              icon: res.draw ? '🤝' : (win ? '🏆' : '💔'), npc: 'Mesa de Jogos',
+              narrative: narrativeText,
+              dice: diceObj,
+              deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,p.gold,1), bar: false }],
+              rewards: rewards,
+              onContinue: function(){ navigateBack(); }
+            });
+          }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na mesa de jogos.'); });
         }
       });
     }
@@ -38950,20 +38952,41 @@ function _tavernShowMeal(p){
     desc: 'Ensopado de carne com pão. Quente, simples, satisfatório.<br>+5 HP imediato.<br>Custo: 3 Valdoritas',
     cost: 3,
     onConfirm: function(){
+      // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR cobra
+      // e cura via 'service.tavern_meal'; o cliente só anima. ANTES: _pay + p.hp += 5
+      // no cliente (fabricação de estado). HP cheio → servidor não cobra (honesto).
+      if (!window.vCityServer || !window.vCityServer.isRemote()){
+        if (typeof vToast === 'function') vToast('Indisponível offline'); return;
+      }
       var preGold = p.gold;
-      if (!_pay(p, 3)) return;
       var preHp = p.hp || 0;
-      p.hp = Math.min(p.hpMax || preHp + 5, preHp + 5);
-      refreshHud();
-      _showServiceResultPopup({
-        icon: _heralIco('ic-bolsa'), npc: 'Cozinheira',
-        narrative: '<i>Você come com vontade. O ensopado aquece de dentro.</i><br><br>+5 HP recuperado.',
-        deltas: [
-          { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false },
-          { type:'hp',   label:'HP',    from: preHp, to: p.hp,   max: p.hpMax || p.hp, bar: false }
-        ],
-        onContinue: function(){ navigateBack(); }
-      });
+      window.vCityServer.cityAction('service.tavern_meal', {}).then(function(res){
+        if (!res || !res.ok){
+          var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para a refeição.' : 'Não foi possível comer agora.';
+          if (typeof vToast === 'function') vToast(emsg); return;
+        }
+        if (typeof res.gold === 'number') p.gold = res.gold;
+        if (typeof res.hp === 'number') p.hp = res.hp;
+        if (typeof refreshHud === 'function') refreshHud();
+        if (res.already_full){
+          _showServiceResultPopup({
+            icon: '🍖', npc: 'Cozinheira',
+            narrative: '<i>— Você está saciado, aventureiro. Guarde suas Valdoritas para quando a fome apertar.</i>',
+            deltas: [],
+            onContinue: function(){ navigateBack(); }
+          });
+          return;
+        }
+        _showServiceResultPopup({
+          icon: _heralIco('ic-bolsa'), npc: 'Cozinheira',
+          narrative: '<i>Você come com vontade. O ensopado aquece de dentro.</i><br><br>+' + (res.healed || 0) + ' HP recuperado.',
+          deltas: [
+            { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false },
+            { type:'hp',   label:'HP',    from: preHp, to: p.hp, max: res.max_hp || p.hpMax || p.hp, bar: false }
+          ],
+          onContinue: function(){ navigateBack(); }
+        });
+      }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao comer.'); });
     }
   });
 }
