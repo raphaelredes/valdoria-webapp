@@ -38892,56 +38892,51 @@ function _tavernShowPitfight(p){
               '<i>Vitória: paga 2× aposta + ganha XP. Derrota: aposta perdida + dano.</i>',
         cost: totalCost,
         onConfirm: function(){
+          // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
+          // cobra (taxa+aposta), rola DC=5+2d10 + os 3 d20 (FOR/DES/CON), resolve o
+          // resultado (PIT_FIGHT_RESULTS), paga/leva a aposta e aplica lesão via
+          // 'service.pit_fight'; o cliente só anima. ANTES: _pay + Math.random do
+          // DC/checks + payout/dano no cliente (fabricação de estado).
+          if (!window.vCityServer || !window.vCityServer.isRemote()){
+            if (typeof vToast === 'function') vToast('Indisponível offline'); return;
+          }
           var preGold = p.gold;
           var preHp = p.hp || 0;
-          if (!_pay(p, totalCost)) return;
-          // Roll DC: 5 + 2d10 (canonical)
-          var dc = 5 + (1 + Math.floor(Math.random() * 10)) + (1 + Math.floor(Math.random() * 10));
-          // 3 checks: STR / DEX / CON
-          var checks = ['str', 'dex', 'con'].map(function(stat){
-            var rolled = 1 + Math.floor(Math.random() * 20);
-            var mod = (p.stats && p.stats[stat]) ? Math.floor((p.stats[stat] - 10) / 2) : 0;
-            return { stat: stat.toUpperCase(), rolled: rolled, mod: mod, total: rolled + mod, success: (rolled + mod) >= dc };
-          });
-          var wins = checks.filter(function(c){ return c.success; }).length;
-          var win = wins >= 2;  // canonical: 2/3 = vitória
-          var checkLog = checks.map(function(c){
-            return (c.success ? '✅' : '❌') + ' ' + c.stat + ': ' + c.rolled + '+' + c.mod + '=' + c.total + ' vs DC ' + dc;
-          }).join('<br>');
-          // canonical: tavern_pit_fight_data.py — usa INTRO_LINES + RESULTS canonical.
-          var canonExtra = (typeof CANON_PIT_FIGHT_EXTRA !== 'undefined') ? CANON_PIT_FIGHT_EXTRA : null;
-          function pickFrom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
-          var resultKey = win ? (wins === 3 ? 'flawless' : 'win') : (wins === 0 ? 'crushed' : 'loss');
-          var resultsTable = (canonExtra && canonExtra.pit_fight_results) || {};
-          var resultData = resultsTable[resultKey] || resultsTable[win ? 'win' : 'loss'] || {};
-          var resultText = resultData.text || (win ? 'A multidão grita. Vitória.' : 'Briga eclode. Derrota.');
-          if (win) {
-            var payout = b.amount * 2;
-            p.gold += payout;
-            refreshHud();
+          window.vCityServer.cityAction('service.pit_fight', { bet: b.amount }).then(function(res){
+            if (!res || !res.ok){
+              var emsg = (res && res.error === 'cooldown') ? ('A rinha precisa descansar. Volte em ' + (res.remaining || 3) + ' turnos.')
+                       : (res && res.error === 'no_funds') ? 'Sem Valdoritas para a taxa + aposta.'
+                       : 'Não foi possível lutar agora.';
+              if (typeof vToast === 'function') vToast(emsg); return;
+            }
+            if (typeof res.gold === 'number') p.gold = res.gold;
+            if (typeof res.hp === 'number') p.hp = res.hp;
+            var oppName = res.opponent || opp;
+            var checks = res.checks || [];
+            var checkLog = checks.map(function(c){
+              return (c.success ? '✅' : '❌') + ' ' + (c.stat || c.skill || '') + ': ' +
+                c.rolled + (c.mod >= 0 ? '+' : '') + c.mod + '=' + c.total + ' vs DC ' + c.dc;
+            }).join('<br>');
+            var win = (res.successes || 0) >= 2;
+            var resultText = res.outcome_text || (win ? 'VITÓRIA!' : 'DERROTA');
+            var narrative = '<b>DC ' + res.dc + '</b> (5 + 2d10)<br>' + checkLog + '<br><br>' +
+              '<b>' + resultText + '</b> (' + (res.successes || 0) + '/3 sucessos)';
+            if (res.injury) narrative += '<br><i>Você saiu ferido da luta (-1 HP).</i>';
+            if (res.reputation) narrative += '<br><i>A taverna inteira grita seu nome!</i>';
+            narrative = narrative.replace(/\{opponent\}/g, oppName);
+            var deltas = [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }];
+            if (p.hp !== preHp) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || preHp, bar: false });
+            if (typeof refreshHud === 'function') refreshHud();
+            var firstChk = checks[0] || { rolled: 0, total: 0 };
             _showServiceResultPopup({
-              icon: _heralIco('ic-bolsa'), npc: 'Mestre da Rinha',
-              narrative: '<b>DC ' + dc + '</b> (5 + 2d10)<br>' + checkLog + '<br><br>' +
-                '<b>VITÓRIA!</b> (' + wins + '/3 sucessos)<br><i>' + resultText.replace(/\{opponent\}/g, opp) + '</i>',
-              deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
-              rewards: payout >= 5 ? [{ type:'gold', amount: payout, label: 'Prêmio da rinha' }] : null,
+              icon: res.outcome_icon || (win ? '🏆' : '💀'), npc: 'Mestre da Rinha',
+              narrative: narrative,
+              dice: { formula: '3× 1d20 vs DC ' + res.dc, sides: 20, value: firstChk.rolled, total: firstChk.total },
+              deltas: deltas,
+              rewards: (win && res.payout > 0) ? [{ type:'gold', amount: res.payout, label: 'Prêmio da rinha' }] : null,
               onContinue: function(){ navigateBack(); }
             });
-          } else {
-            var dmg = 2 + Math.floor(Math.random() * 4) + 1 + Math.floor(Math.random() * 4);
-            p.hp = Math.max(1, preHp - dmg);
-            refreshHud();
-            _showServiceResultPopup({
-              icon: _heralIco('ic-bolsa'), npc: 'Mestre da Rinha',
-              narrative: '<b>DC ' + dc + '</b> (5 + 2d10)<br>' + checkLog + '<br><br>' +
-                '<b>DERROTA</b> (' + wins + '/3 sucessos)<br><i>' + resultText.replace(/\{opponent\}/g, opp) + '</i><br><br>-' + dmg + ' HP.',
-              deltas: [
-                { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false },
-                { type:'hp',   label:'HP',    from: preHp, to: p.hp, max: p.hpMax || preHp, bar: false }
-              ],
-              onContinue: function(){ navigateBack(); }
-            });
-          }
+          }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na rinha.'); });
         }
       });
     }
