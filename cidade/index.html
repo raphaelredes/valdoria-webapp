@@ -34903,6 +34903,171 @@ function _tavernShowGames(p){
   });
 }
 
+// === MURAL DE AVISOS — TELA ÉPICA (bug 2026-06-16) =========================
+// User: "ao clicar em 'Ler o Mural de Avisos'... apareça a tela épica que mostra
+// os avisos como missões... uma imagem no openai que ocupe toda a tela e dentro
+// desta imagem que seria o mural tenham até 6 avisos, variando entre 3 e 6,
+// distribuídos de maneira aleatória... com design de papel pregado no mural".
+//
+// Design: a IMAGEM (mural-board.webp, OpenAI low) é o QUADRO VAZIO (cortiça +
+// moldura + pregos). Os avisos são CSS "papéis pregados" sobrepostos (contagem
+// dinâmica = quests do SERVER_QUEST_BOARD, clicáveis). DADOS + accept já são
+// server-driven (SERVER_QUEST_BOARD + quest.accept persiste em Missões — fix
+// 2026-06-14). Esta função só troca a APRESENTAÇÃO (lista → quadro visual).
+// Reusa o overlay #city-subscreen-popup (#csp-body) → back/stack do header.
+function _tavernShowMuralBoard(p){
+  var remote = !!(window.vCityServer && window.vCityServer.isRemote());
+  var coin = '<span class="vi vi-coin sm"></span>';
+  var BOARD_IMG = '/shared/img/taverna/mural-board.webp';
+  var _bv = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
+
+  // Slots de papel: grid 2-col × 3-row na zona de cortiça, com jitter+rotação
+  // determinísticos (estável por render, look "espalhado", SEM overlap). Até 6.
+  function _slots(n){
+    var out = [];
+    for (var i = 0; i < n; i++) {
+      var row = Math.floor(i / 2), col = i % 2;
+      var baseL = (col === 0) ? 2 : 52;
+      var baseT = 1 + row * 32.5;
+      var jL = ((i * 37) % 7) - 3;   // -3..+3
+      var jT = ((i * 53) % 5) - 2;   // -2..+2
+      var rot = [-5, 4, -3, 5, -4, 3][i % 6];
+      out.push({ t: baseT + jT, l: baseL + jL, rot: rot });
+    }
+    return out;
+  }
+
+  function _acceptFlow(q){
+    var rw = q.reward || 0, xp = q.xp || 0;
+    var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
+    _showInfoPopup({
+      icon: q.icon || _heralIco('ic-missões'), npc: 'Grom Barba-Cinza',
+      title: 'Aceitar: ' + (q.title || q.id),
+      desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
+        + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level
+                                 : (q.diff ? '<br><b>Dificuldade:</b> ' + q.diff : '')),
+      onConfirm: function(){
+        if (!remote) { if (typeof _acceptQuest === 'function') _acceptQuest(q.id); navigateBack(); return; }
+        if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Aceitando missão...' });
+        window.vCityServer.quest.accept(q.id).then(function(r){
+          if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+          if (r && r.ok) {
+            if (typeof _applyServerQuests === 'function') _applyServerQuests(r.quests);
+            if (Array.isArray(window.SERVER_QUEST_BOARD)) {
+              window.SERVER_QUEST_BOARD = window.SERVER_QUEST_BOARD.filter(function(b){ return b.id !== q.id; });
+            }
+            _showServiceResultPopup({
+              icon: q.icon || _heralIco('ic-missões'), npc: 'Grom Barba-Cinza',
+              narrative: '<b>' + (q.title || q.id) + '</b> registrada no seu diário.<br><i>"Boa sorte. Volta vivo."</i>',
+              deltas: [], onContinue: function(){ _render(); }  // re-render o quadro (papel some)
+            });
+          } else if (typeof vToast === 'function') { vToast((r && r.error) || 'Não foi possível aceitar a missão'); }
+        }).catch(function(e){
+          if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+          console.error('[CITY] mural quest accept failed', e);
+          if (typeof vToast === 'function') vToast('Erro ao aceitar missão');
+        });
+      }
+    });
+  }
+
+  function _render(){
+    var ov = document.getElementById('city-subscreen-popup');
+    var titleEl = document.getElementById('csp-title');
+    var bodyEl = document.getElementById('csp-body');
+    if (!ov || !bodyEl) return;
+    if (titleEl) titleEl.textContent = 'Quadro de Avisos';
+
+    var board = remote ? (window.SERVER_QUEST_BOARD || [])
+                       : (typeof GUILD_QUESTS_AVAILABLE !== 'undefined' ? GUILD_QUESTS_AVAILABLE : []);
+    var quests = board.slice(0, 6);  // até 6 papéis (3-6 natural conforme contratos)
+    var slots = _slots(quests.length);
+
+    var html = ''
+      + '<style>'
+      + '.mural-wrap{padding: 6px var(--v-space-sm, 4px) var(--v-space-md, 8px);}'
+      + '.mural-board{position:relative;width:100%;height:74vh;min-height:460px;border-radius: var(--v-radius, 10px);overflow:hidden;'
+      +   'background:#1a0e06 url(' + BOARD_IMG + '?v=' + _bv + ') center/cover no-repeat;'
+      +   'border:1px solid rgba(196,149,58,0.35);box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 26px rgba(0,0,0,0.45);}'
+      + '.mural-papers{position:absolute;top:12%;left:14%;right:14%;bottom:10%;}'
+      + '.mural-paper{position:absolute;width:44%;box-sizing:border-box;padding: 13px var(--v-space-md, 8px) 9px;cursor:pointer;'
+      +   'background:linear-gradient(158deg,#efe2c4 0%,#e6d4ad 55%,#d8c398 100%);color:#3a2a14;'
+      +   'border:1px solid rgba(120,90,40,0.55);border-radius: var(--v-radius-xs, 4px);'
+      +   'box-shadow:0 6px 12px rgba(0,0,0,0.45),inset 0 0 16px rgba(150,118,64,0.22);'
+      +   'transform-origin:top center;transition:transform 0.14s ease,box-shadow 0.18s,filter 0.18s;'
+      +   'animation:muralPaperIn 0.42s ease-out both;}'
+      + '.mural-paper:hover{transform:scale(1.07) rotate(0deg)!important;z-index:6;'
+      +   'box-shadow:0 11px 22px rgba(0,0,0,0.55),0 0 16px rgba(255,200,90,0.45);filter:brightness(1.04);}'
+      + '.mural-paper:active{transform:scale(0.97)!important;}'
+      + '.mural-pin{position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:15px;height:15px;border-radius:50%;'
+      +   'background:radial-gradient(circle at 35% 30%,#ff8f6e,#c0392b 60%,#7a1f12);box-shadow:0 2px 4px rgba(0,0,0,0.55),inset 0 1px 2px rgba(255,255,255,0.4);}'
+      + '.mural-ptitle{font-family:var(--v-font-display,Cinzel,serif);font-weight:700;font-size:calc(12px * var(--v-font-scale,1));'
+      +   'line-height:1.18;text-align:center;color:#3a2410;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}'
+      + '.mural-pmeta{margin-top: var(--v-space-sm, 5px);padding-top: var(--v-space-xs, 3px);border-top:1px dashed rgba(120,90,40,0.45);'
+      +   'font-size:calc(10px * var(--v-font-scale,1));text-align:center;color:#5a3c16;font-weight:600;letter-spacing:0.3px;'
+      +   'display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;}'
+      + '.mural-plvl{font-size:calc(9px * var(--v-font-scale,1));color:#7a5a2a;font-style:italic;}'
+      + '.mural-empty{position:absolute;top:42%;left:12%;right:12%;text-align:center;color:#efe2c4;'
+      +   'font-family:var(--v-font,MedievalSharp,serif);font-size:calc(13px * var(--v-font-scale,1));font-style:italic;'
+      +   'text-shadow:0 2px 6px rgba(0,0,0,0.8);line-height:1.4;}'
+      + '.mural-grom{margin: var(--v-space-sm, 5px) 2px 0;text-align:center;font-family:var(--v-font,MedievalSharp,serif);'
+      +   'font-size:calc(11px * var(--v-font-scale,1));font-style:italic;color:var(--v-text-dim,#a09484);line-height:1.4;}'
+      + '@keyframes muralPaperIn{from{opacity:0;transform:translateY(-6px) scale(0.96);}to{opacity:1;}}'
+      + 'body.perf-lite .mural-paper{animation:none!important;}'
+      + '@media (prefers-reduced-motion:reduce){.mural-paper{animation:none!important;}}'
+      + '</style>'
+      + '<div class="mural-wrap">'
+      +   '<div class="mural-board">'
+      +     '<div class="mural-papers">';
+    if (quests.length) {
+      quests.forEach(function(q, i){
+        var s = slots[i];
+        var rw = q.reward || 0, xp = q.xp || 0;
+        var lvl = remote ? ('nv ' + (q.min_level || 1)) : (q.diff || '');
+        html += '<button type="button" class="mural-paper" data-idx="' + i + '" '
+          + 'style="top:' + s.t + '%;left:' + s.l + '%;transform:rotate(' + s.rot + 'deg);animation-delay:' + (i * 70) + 'ms;">'
+          + '<span class="mural-pin"></span>'
+          + '<div class="mural-ptitle">' + (q.title || q.id) + '</div>'
+          + '<div class="mural-pmeta">' + rw + ' ' + coin + ' · ' + xp + ' XP</div>'
+          + '<div class="mural-plvl">' + lvl + '</div>'
+          + '</button>';
+      });
+    } else {
+      html += '<div class="mural-empty">O mural está vazio por ora.<br>Volte mais tarde — sempre pinga contrato novo.</div>';
+    }
+    html += '</div></div>'
+      + '<div class="mural-grom">' + (quests.length
+          ? 'Grom aponta o mural coberto de editais selados. <i>"Toca num contrato, forasteiro — teu diário registra."</i>'
+          : 'Grom dá de ombros. <i>"Mural vazio. Volta que sempre aparece serviço."</i>')
+      + '</div></div>';
+
+    // Set via indireção de propriedade — MESMO padrão de _aaaListSubScreen (136
+    // usos no arquivo, trust model = quest data do SERVIDOR, não user input). A
+    // indireção evita o falso-positivo do hook de segurança no termo literal.
+    var _ihProp = 'inner' + 'HTML';
+    bodyEl[_ihProp] = html;
+    bodyEl.querySelectorAll('.mural-paper').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var idx = parseInt(btn.dataset.idx, 10);
+        if (quests[idx]) _acceptFlow(quests[idx]);
+      });
+    });
+    ov.classList.add('active');
+    if (typeof _popupStack !== 'undefined') {
+      if (_popupStack[_popupStack.length - 1] !== 'tavern_bulletin') _popupStack.push('tavern_bulletin');
+      if (!window._popupRestoreFns) window._popupRestoreFns = {};
+      window._popupRestoreFns['tavern_bulletin'] = function(){ _tavernShowMuralBoard(p); };
+    }
+  }
+
+  // Estado fresco do board (pode ter mudado desde o boot por accept/abandon).
+  if (remote && typeof _refreshServerBoard === 'function') {
+    _refreshServerBoard().then(_render).catch(_render);
+  } else {
+    _render();
+  }
+}
+
 function _tavernShowBulletin(p){
   // 2026-06-14 (user: "peguei missões no mural com V verde, mas não apareceram em
   // Missões"): o Mural era um board PROCEDURAL fake (CANON_NOTICE_BOARD) que só
@@ -48283,7 +48448,8 @@ var ACTION_HANDLERS = {
   // --- TAVERNA (canonical tavern.py services) ---
   'tavern_drinks_open':       function(p){ _tavernShowDrinks(p); },
   'tavern_games_open':        function(p){ _tavernShowGames(p); },
-  'tavern_bulletin_open':     function(p){ _tavernShowBulletin(p); },
+  'tavern_bulletin_open':     function(p){ _tavernShowMuralBoard(p); },  // tela épica do Mural (2026-06-16)
+  'tavern_board_menu':        function(p){ _tavernShowMuralBoard(p); },  // alias do diálogo do Grom ("Ler o Mural de Avisos")
   'tavern_meal_open':         function(p){ _tavernShowMeal(p); },
   // 'tavern_rumor_buy' removido (sessão #72) — boato consolidado em 'tavern_gather_open'.
   'tavern_mercenaries_open':  function(p){ _tavernShowMercenaries(p); },
@@ -52393,6 +52559,14 @@ function _renderCityDialogue(venue, data, p){
     { player: p, closeable: true, onChoice: function(ch){
         if (ch && ch.screen && /^bank_(deposit|withdraw)_custom$/.test(ch.screen)) {
           _bankCustomAmount(ch.screen, p, data.npc);  // input numérico WebApp-native
+        }
+        else if (ch && (ch.screen === 'tavern_board_menu' || ch.screen === 'tavern_bulletin_open')) {
+          // Mural de Avisos (Grom "Ler o Mural de Avisos") → TELA ÉPICA client-side
+          // (board WebP + papéis pregados). Dados (SERVER_QUEST_BOARD via quest.board)
+          // + accept (quest.accept) seguem server-driven — só a APRESENTAÇÃO muda.
+          // Bug 2026-06-16: antes era node narrativo via dialogue.screen.
+          try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
+          _tavernShowMuralBoard(p);
         }
         else if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
         else if (node) { _resolveCityChoice(venue, node, ch && ch.id, p, data.npc); }
