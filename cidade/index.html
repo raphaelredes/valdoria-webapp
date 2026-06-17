@@ -10300,10 +10300,10 @@ var CITY_DISCOVERY_QUESTS = {
       choices:[{ label:'Aguardarei o sinal.', next:'unlock' }] }
   ]},
   q_disc_inn: { id:'q_disc_inn', name:'O Quarto Reservado', targetCb:'inn', stages:[
-    { id:'s1', speaker:'Grom Barba-Cinza, taverneiro',
+    { id:'s1', speaker:'Grom, o Caolho, taverneiro',
       text:'Vejo nos teus olhos quem dormiu no chão da estrada, forasteiro. Cerveja e calor eu sirvo, mas cama de verdade só a Martha dá — Estalagem da Pena-Dourada, a quatro portas daqui.',
       choices:[{ label:'Onde fica?', next:'s2' }] },
-    { id:'s2', speaker:'Grom Barba-Cinza, taverneiro',
+    { id:'s2', speaker:'Grom, o Caolho, taverneiro',
       text:'Sai pela praça, vira na rua de paralelepípedos, segue o cheiro de pão fresco. Martha tem quartos limpos, banho quente e bom desjejum. Cobra justo. Diz que eu te mandei — talvez ela desconte uma moeda.',
       choices:[{ label:'Vou procurar Martha.', next:'unlock' }] }
   ]},
@@ -17282,7 +17282,7 @@ function _buildTempleMockData(player){
 var TAVERN_NPCS = [
   {
     id: 'tav_grom',
-    name: 'Grom Barba-Cinza',
+    name: 'Grom, o Caolho',
     role: '<img src="/shared/img/npcs/taverneiro.webp" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Taverneiro',
     desc: 'Anão robusto com barba grisalha trançada, esfrega canecas com pano sujo.',
     greetings: [
@@ -20097,7 +20097,7 @@ function _buildArenaMockData(player){
 // Sessão #26 (2026-05-22) P1 #77: adicionado portraitImg (PNG quando disponível, fallback role-based)
 var RELATIONS_NPCS = [
   { id: 'rel_martha',  icon: '<img src="/shared/img/npcs/estalajadeira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.webp' },
-  { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/grom-anao.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom Barba-Cinza',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/grom-anao.webp' },
+  { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/grom-anao.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom, o Caolho',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/grom-anao.webp' },
   { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/guarda-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Guarda Aldric',   role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/guarda-aldric.webp' },
   { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.webp' },
   { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
@@ -34713,7 +34713,7 @@ function _tavernShowDrinks(p){
             ? [{ type:'item', amount: 1, label: ce.label || 'Bônus de bebida' }]
             : null;
           _showServiceResultPopup({
-            icon: d.icon, npc: 'Grom Barba-Cinza',
+            icon: d.icon, npc: 'Grom, o Caolho',
             narrative: '<i>' + (d.flavor || 'Grom entrega a caneca.') + '</i>' + ceLabel,
             deltas: deltas,
             rewards: rewards,
@@ -34941,7 +34941,7 @@ function _tavernShowMuralBoard(p){
     var rw = q.reward || 0, xp = q.xp || 0;
     var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
     _showInfoPopup({
-      icon: q.icon || _heralIco('ic-missões'), npc: 'Grom Barba-Cinza',
+      icon: q.icon || _heralIco('ic-missões'), npc: 'Grom, o Caolho',
       title: 'Aceitar: ' + (q.title || q.id),
       desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
         + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level
@@ -34957,7 +34957,7 @@ function _tavernShowMuralBoard(p){
               window.SERVER_QUEST_BOARD = window.SERVER_QUEST_BOARD.filter(function(b){ return b.id !== q.id; });
             }
             _showServiceResultPopup({
-              icon: q.icon || _heralIco('ic-missões'), npc: 'Grom Barba-Cinza',
+              icon: q.icon || _heralIco('ic-missões'), npc: 'Grom, o Caolho',
               narrative: '<b>' + (q.title || q.id) + '</b> registrada no seu diário.<br><i>"Boa sorte. Volta vivo."</i>',
               deltas: [], onContinue: function(){ _render(); }  // re-render o quadro (papel some)
             });
@@ -35100,7 +35100,7 @@ function _tavernShowBulletin(p){
         var rw = q.reward || 0, xp = q.xp || 0;
         var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
         _showInfoPopup({
-          icon: q.icon || _heralIco('ic-missões'), npc: 'Grom Barba-Cinza',
+          icon: q.icon || _heralIco('ic-missões'), npc: 'Grom, o Caolho',
           title: 'Aceitar: ' + (q.title || q.id),
           desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
             + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level
@@ -35121,7 +35121,7 @@ function _tavernShowBulletin(p){
                   window.SERVER_QUEST_BOARD = window.SERVER_QUEST_BOARD.filter(function(b){ return b.id !== q.id; });
                 }
                 _showServiceResultPopup({
-                  icon: q.icon || _heralIco('ic-missões'), npc: 'Grom Barba-Cinza',
+                  icon: q.icon || _heralIco('ic-missões'), npc: 'Grom, o Caolho',
                   narrative: '<b>' + (q.title || q.id) + '</b> registrada no seu diário.<br><i>"Boa sorte. Volta vivo."</i>',
                   deltas: [], onContinue: function(){ navigateBack(); }
                 });
@@ -35149,7 +35149,7 @@ function _tavernShowBulletin(p){
 
 function _tavernShowRoom(p){
   _showConfirmPurchase({
-    icon: _heralIco('ic-estalagem'), npc: 'Grom Barba-Cinza', title: 'Aluguel de Quarto',
+    icon: _heralIco('ic-estalagem'), npc: 'Grom, o Caolho', title: 'Aluguel de Quarto',
     desc: 'Quarto modesto no andar de cima. Cama, jarro de água, chave.<br>' +
           'Permite descanso longo (recupera HP/MP totais).<br>Custo: 5 Valdoritas',
     cost: 5,
@@ -53267,7 +53267,7 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
 var _NPC_DEFAULTS = {
   aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/guarda-aldric.webp',  icon: 'ic-paladino' },
   martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/estalajadeira.webp',  icon: 'ic-estalajadeira' },
-  grom:        { name: 'Grom Barba-Cinza',    desc: 'Taverneiro anão do Javali Sangrento', portrait: '/shared/img/npcs/grom-anao.webp',    icon: 'ic-barbaro' },
+  grom:        { name: 'Grom, o Caolho',    desc: 'Taverneiro anão do Javali Sangrento', portrait: '/shared/img/npcs/grom-anao.webp',    icon: 'ic-barbaro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/irma-elara.webp',   icon: 'ic-clerigo' },
   thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
   mirena:      { name: 'Mirena Virelle',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
