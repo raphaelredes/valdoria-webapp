@@ -38691,33 +38691,37 @@ function _tavernShowGather(p){
               '<b>Sucesso:</b> ' + t.bonus,
         cost: t.cost,
         onConfirm: function(){
-          var preGold = p.gold;
-          if (!_pay(p, t.cost)) return;
-          var rolled = 1 + Math.floor(Math.random() * 20);
-          var modCha = (p.stats && p.stats.cha) ? Math.floor((p.stats.cha - 10) / 2) : 0;
-          var total = rolled + modCha;
-          var success = total >= t.dc;
-          // canonical: SUCCESS_LINES / FAILURE_LINES por topic_id
-          var pool = success
-            ? (canonExtra && canonExtra.gather_success_lines && canonExtra.gather_success_lines[t.id])
-            : (canonExtra && canonExtra.gather_failure_lines && canonExtra.gather_failure_lines[t.id]);
-          var resultLine = pool && pool.length
-            ? pickFrom(pool)
-            : (success ? 'Grom sussurra informação útil.<br>Bônus: ' + t.bonus
-                       : 'Grom dá uma resposta vaga e inútil.');
-          if (success){
-            // Aplica buff em metadata canonical
-            p.metadata = p.metadata || {};
-            p.metadata.gather_buff = { key: (canon && canon.gather_topics && canon.gather_topics[t.id] && canon.gather_topics[t.id].bonus_key) || ('gather_' + t.id) };
+          // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
+          // rola o d20, cobra o custo e aplica o bônus + cooldown via o intent
+          // 'service.gather' (city_action_api_routes → TavernGatherInfoManager.
+          // resolve_gather). O cliente só anima o dado retornado (PADRAO_DADOS) e
+          // renderiza. ANTES: Math.random + _pay + buff aplicados no cliente (fabricação).
+          if (!window.vCityServer || !window.vCityServer.isRemote()){
+            if (typeof vToast === 'function') vToast('Indisponível offline'); return;
           }
-          _showServiceResultPopup({
-            icon: success ? '✅' : '❌', npc: 'Grom',
-            narrative: '<i>' + resultLine.replace(/\n/g, '<br>') + '</i>',
-            dice: { formula: '1d20' + (modCha>=0?'+':'') + modCha + ' vs DC ' + t.dc, sides: 20, value: rolled, total: total },
-            deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
-            rewards: success ? [{ type:'item', amount: 1, label: t.bonus }] : null,
-            onContinue: function(){ navigateBack(); }
-          });
+          var preGold = p.gold;
+          window.vCityServer.cityAction('service.gather', { topic: t.id }).then(function(res){
+            if (!res || !res.ok){
+              var emsg = (res && res.error === 'cooldown')
+                  ? ('Você já investigou recentemente. Volte em ' + (res.remaining || 5) + ' turnos.')
+                  : (res && res.error === 'no_funds') ? 'Sem Valdoritas suficientes.'
+                  : 'Não foi possível investigar agora.';
+              if (typeof vToast === 'function') vToast(emsg);
+              return;
+            }
+            if (typeof res.gold === 'number') p.gold = res.gold;
+            if (res.success && res.bonus_key){ p.metadata = p.metadata || {}; p.metadata.gather_buff = { key: res.bonus_key }; }
+            if (typeof refreshHud === 'function') refreshHud();
+            var mod = (typeof res.modifier === 'number') ? res.modifier : 0;
+            _showServiceResultPopup({
+              icon: res.success ? '✅' : '❌', npc: 'Grom, o Caolho',
+              narrative: '<i>' + String(res.flavor || '').replace(/\n/g, '<br>') + '</i>',
+              dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total },
+              deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
+              rewards: res.success ? [{ type:'item', amount: 1, label: res.bonus_desc || t.bonus }] : null,
+              onContinue: function(){ navigateBack(); }
+            });
+          }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao investigar.'); });
         }
       });
     }
