@@ -45817,6 +45817,31 @@ function closeCityPopup(silent){
 //   - 'inn_rest' → 3 tiles + playInnAnimation (Fase 8.1)
 //   - 'temple'   → renderTempleHub canonical (Fase 9.1)
 //   - default    → renderSubScreen genérico (SUBSCREEN_DATA[key])
+// Bug 2026-06-16: ao ABRIR o templo, pergunta ao SERVIDOR se a Irmã Elara deve
+// entregar o veneno de ratos (quest do porão da Martha, caminho do veneno). O
+// servidor GATEIA + concede + narra (SUPREME RULE #0); o cliente só renderiza o
+// encounter da Elara (PADRAO_ALDRIC). Antes esse fluxo só existia no bot legado, então
+// Martha mandava procurar a Elara mas não havia entrega no WebApp da cidade.
+function _maybeElaraPoisonDelivery(){
+  try {
+    if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) return;
+    window.vCityServer.cityAction('temple.elara_poison', {}).then(function(res){
+      if (res && res.granted && res.result_script && res.result_script.length
+          && window.vEncounter && window.vEncounter.render) {
+        setTimeout(function(){   // deixa o render do templo assentar antes do encounter
+          try {
+            window.vEncounter.render(
+              { npc: res.npc, script: res.result_script,
+                choices: [{ id: 'ok', label: 'Tenho o veneno. Obrigado, Irmã.', cb: 'close' }] },
+              { closeable: true, onChoice: function(){ try { window.vEncounter.close(); } catch(_c){} } }
+            );
+          } catch(_r){ console.warn('[CITY] elara_poison render failed', _r); }
+        }, 350);
+      }
+    }).catch(function(e){ console.warn('[CITY] elara_poison check failed', e); });
+  } catch(_e) {}
+}
+
 function _renderCityPopup(key){
   var titleEl = document.getElementById('csp-title');
   var bodyEl  = document.getElementById('csp-body');
@@ -45826,6 +45851,7 @@ function _renderCityPopup(key){
   if (key === 'temple' && typeof renderTempleHub === 'function') {
     if (titleEl) titleEl.textContent = 'Templo dos Quatro';
     renderTempleHub(bodyEl, _buildTempleMockData(window.CITY_MOCK_PLAYER));
+    _maybeElaraPoisonDelivery();  // Elara entrega o veneno da quest do porão (server-gated)
     return;
   }
   if (key === 'bank' && typeof renderBankHub === 'function') {
