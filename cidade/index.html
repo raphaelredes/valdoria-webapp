@@ -10185,6 +10185,16 @@ function _isCTA(btn) {
       // Antes o d20 rolava no cliente (_marketAttemptHaggle).
       haggle: function(npcKey){ return window.vCityServer.cityAction('service.market_haggle', { npc_key: npcKey }); }
     },
+    workshop: {  // Oficina (coleta + craft) server-authoritative (#0, 2026-06-18) — antes o
+      // cliente fabricava TUDO: a coleta dava loot fake ('2 madeira') com o d20 rolado no
+      // cliente + contador num window global bypassável por reload; o craft rolava o d20 no
+      // cliente e o item craftado NUNCA persistia. Agora o SERVIDOR rola, adiciona itens
+      // REAIS, mantém o contador (reset no descanso longo) e concede o item; o cliente busca
+      // o estado (forma B: receitas/ferramentas/materiais reais) via state e anima (PADRAO_DADOS).
+      state:  function(){ return window.vCityServer.cityAction('service.workshop_state', {}); },
+      gather: function(toolKey){ return window.vCityServer.cityAction('service.workshop_gather', { tool_key: toolKey }); },
+      craft:  function(recipeId){ return window.vCityServer.cityAction('service.workshop_craft', { recipe_id: recipeId }); }
+    },
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
       state: function(){ return window.vCityServer.cityAction('flag.state', {}); }
@@ -44204,7 +44214,23 @@ function _guildTrainSession(p){
 }
 
 // --- OFICINA ---
+// Estação do cliente (workshop_smith) → ferramenta canônica do servidor (smith_tools).
+var WORKSHOP_STATION_TO_TOOL = {
+  'workshop_smith': 'smith_tools', 'workshop_alchemy': 'alchemist_supplies',
+  'workshop_leather': 'leatherworker_tools', 'workshop_carpentry': 'woodcarver_tools',
+  'workshop_jeweler': 'jeweler_tools', 'workshop_herbalism': 'herbalism_kit',
+  'workshop_cook': 'cook_utensils', 'workshop_tinker': 'tinker_tools'
+};
+
 function _workshopShowRecipes(p, toolKey, toolName, toolIcon){
+  // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE as receitas vêm do servidor
+  // (reais, filtradas por proficiência+nível) e o craft é resolvido lá (rola+consome+
+  // concede o item REAL). LOCAL (file://) mantém o mock WORKSHOP_RECIPES pro dev tool.
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+      && window.vCityServer.workshop && window.vCityServer.workshop.craft) {
+    _workshopShowRecipesRemote(p, toolKey, toolName, toolIcon);
+    return;
+  }
   var recipes = WORKSHOP_RECIPES[toolKey] || [];
   if (recipes.length === 0) {
     vToast('🔧 Nenhuma receita disponível.');
@@ -44258,6 +44284,14 @@ function _workshopShowMaterials(p){
 }
 
 function _workshopGather(p){
+  // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE o SERVIDOR rola, adiciona itens
+  // REAIS e mantém o contador (reset no descanso longo); o cliente busca as ferramentas
+  // de coleta e anima. LOCAL (file://) mantém o mock (loot fake + window counter) pro dev tool.
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+      && window.vCityServer.workshop && window.vCityServer.workshop.gather) {
+    _workshopGatherRemote(p);
+    return;
+  }
   if (!window._workshopGatherDone) window._workshopGatherDone = 0;
   if (window._workshopGatherDone >= 3) {
     vToast('🌿 Limite diário (3/3) atingido. Volte amanhã.');
@@ -44276,6 +44310,128 @@ function _workshopGather(p){
       });
     }
   });
+}
+
+// SERVER-AUTHORITATIVE Oficina (#0, 2026-06-18) — coleta + craft resolvidos no servidor.
+function _workshopGatherRemote(p){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Verificando ferramentas...' }); } catch(_){} }
+  window.vCityServer.workshop.state().then(function(st){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    var tools = (st && st.gather_tools) || [];
+    var remaining = (st && typeof st.gathers_remaining === 'number') ? st.gathers_remaining : 0;
+    var maxG = (st && st.max_gathers) || 3;
+    if (!tools.length) {
+      _showInfoPopup({ icon: _heralIco('ic-druida'), npc: 'Coleta', title: 'Coletar Materiais',
+        desc: 'Você não possui proficiência em ferramentas de coleta.<br><br><i>Aprenda uma na Guilda (treinamento) para colher materiais na cidade.</i>',
+        onConfirm: function(){} });
+      return;
+    }
+    if (remaining <= 0) {
+      vToast('🌿 Limite diário de coleta atingido (' + maxG + '/' + maxG + '). Descanse para renovar.');
+      return;
+    }
+    if (tools.length === 1) { _workshopDoGatherRemote(p, tools[0].key, remaining, maxG); return; }
+    _squareShowListPopup({
+      stackKey: 'workshop_gather_tools', icon: _heralIco('ic-druida'), title: 'Coletar Materiais',
+      flavor: '<i>Restam ' + remaining + '/' + maxG + ' coletas hoje. Escolha a ferramenta.</i>',
+      items: tools.map(function(t){ return { icon: t.emoji, label: t.name, badge: '', _k: t.key }; }),
+      onPick: function(item){ _workshopDoGatherRemote(p, item._k, remaining, maxG); }
+    });
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] workshop state failed', _e); if (typeof vToast === 'function') vToast('Erro na oficina.', 'warn'); });
+}
+
+function _workshopDoGatherRemote(p, toolKey){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Coletando...' }); } catch(_){} }
+  window.vCityServer.workshop.gather(toolKey).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'exhausted') ? 'Limite diário de coleta atingido. Descanse para renovar.'
+               : (res && res.error === 'bad_tool') ? 'Esta ferramenta não permite coleta na cidade.'
+               : 'Não foi possível coletar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      return;
+    }
+    var items = res.found_items || [];
+    var itemsHtml = items.length
+      ? items.map(function(it){ return (it.emoji || '📦') + ' <b>' + it.name + '</b>'; }).join('<br>')
+      : '';
+    var narrative = (items.length
+        ? '<i>Você vasculha os arredores com paciência.</i><br><br><b>Encontrou:</b><br>' + itemsHtml
+        : '<i>Você vasculha, mas desta vez volta de mãos vazias.</i>')
+      + '<br><br><span style="opacity:.65">Coletas restantes hoje: ' + res.remaining + '/' + res.max_gathers + '</span>';
+    _showServiceResultPopup({
+      icon: res.tool_emoji || _heralIco('ic-druida'), npc: res.tool_name || 'Coleta',
+      narrative: narrative,
+      dice: { formula: '1d20 ' + (res.ability_mod >= 0 ? '+' : '') + res.ability_mod + ' +' + res.prof_bonus + ' (' + (res.attr_name || '') + ')', sides: 20, value: res.d20, total: res.total },
+      onContinue: function(){ navigateBack(); }
+    });
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] workshop gather failed', _e); if (typeof vToast === 'function') vToast('Erro ao coletar.', 'warn'); });
+}
+
+function _workshopShowRecipesRemote(p, stationKey, toolName, toolIcon){
+  var backendTool = WORKSHOP_STATION_TO_TOOL[stationKey] || stationKey;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Carregando receitas...' }); } catch(_){} }
+  window.vCityServer.workshop.state().then(function(st){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    var recipes = ((st && st.recipes) || []).filter(function(r){ return r.tool === backendTool; });
+    if (!recipes.length) {
+      _showInfoPopup({ icon: toolIcon, npc: toolName, title: toolName + ' — Receitas',
+        desc: 'Você ainda não pode fabricar nada aqui.<br><br><i>É preciso proficiência em ' + toolName + ' (Guilda → treinamento) e o nível adequado.</i>',
+        onConfirm: function(){} });
+      return;
+    }
+    var items = recipes.map(function(r){
+      var ready = r.has_materials && r.can_afford;
+      return { icon: toolIcon, label: r.name + (ready ? '' : ' 🔒'),
+               badge: (r.cost_gp || 0) + 'V · DC ' + r.dc, _r: r };
+    });
+    _squareShowListPopup({
+      stackKey: 'workshop_recipes_' + backendTool, icon: toolIcon, title: toolName + ' — Receitas',
+      flavor: '<i>Receitas reais do servidor. 🔒 = faltam materiais ou Valdoritas.</i>',
+      items: items,
+      onPick: function(item){
+        var r = item._r;
+        var ingStr = (r.ingredients || []).map(function(i){ return i.qty + 'x ' + i.item; }).join(', ');
+        var warn = '';
+        if (!r.has_materials) warn += '<br><span style="color:#d98">⚠ Faltam: ' + ((r.missing || []).join(', ') || 'materiais') + '</span>';
+        if (!r.can_afford) warn += '<br><span style="color:#d98">⚠ Valdoritas insuficientes</span>';
+        _showConfirmPurchase({
+          icon: toolIcon, npc: 'Artesão', title: 'Fabricar ' + r.name,
+          desc: '<b>' + r.name + '</b><br>Materiais: ' + (ingStr || '—') + '<br>Custo: ' + (r.cost_gp || 0) + ' Valdoritas<br>Teste: 1d20 + atributo vs DC ' + r.dc + warn,
+          cost: r.cost_gp || 0,
+          onConfirm: function(){ _workshopDoCraftRemote(p, r); }
+        });
+      }
+    });
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] workshop recipes failed', _e); if (typeof vToast === 'function') vToast('Erro na oficina.', 'warn'); });
+}
+
+function _workshopDoCraftRemote(p, r){
+  var preGold = p.gold;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Fabricando...' }); } catch(_){} }
+  window.vCityServer.workshop.craft(r.id).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'no_gold') ? 'Valdoritas insuficientes.'
+               : (res && res.error === 'no_materials') ? ('Materiais insuficientes: ' + ((res.missing || []).join(', ') || '—'))
+               : (res && res.error === 'no_proficiency') ? 'Você não tem proficiência nesta ferramenta.'
+               : (res && res.error === 'low_level') ? ('Nível mínimo: ' + res.min_level + '.')
+               : 'Não foi possível fabricar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      return;
+    }
+    if (typeof res.gold === 'number') { p.gold = res.gold; refreshHud(); }
+    var narrative = res.success
+      ? '<i>A peça toma forma sob mãos hábeis.</i><br><br><b>' + res.output_name + '</b>' + (res.output_qty > 1 ? ' ×' + res.output_qty : '') + ' fabricado!' + (res.is_crit ? ' <span style="color:#e8c45a">(crítico — qualidade superior!)</span>' : '')
+      : '<i>Os materiais se perdem no processo.</i>' + (res.is_fumble ? ' <span style="color:#c66">(falha crítica)</span>' : '') + (res.refund ? '<br><br>Reembolso parcial: <b>' + res.refund + '</b> Valdoritas.' : '');
+    _showServiceResultPopup({
+      icon: res.success ? (res.output_emoji || '✅') : '❌', npc: res.tool_name || 'Artesão',
+      narrative: narrative,
+      dice: { formula: '1d20 ' + (res.ability_mod >= 0 ? '+' : '') + res.ability_mod + ' +' + res.prof_bonus + ' vs DC ' + res.dc, sides: 20, value: res.d20, total: res.total },
+      deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }],
+      onContinue: function(){ navigateBack(); }
+    });
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] workshop craft failed', _e); if (typeof vToast === 'function') vToast('Erro ao fabricar.', 'warn'); });
 }
 
 // --- RUNAS (canonical: src/game/economy/rune_data.py + market_rune_scribe.py) ---
