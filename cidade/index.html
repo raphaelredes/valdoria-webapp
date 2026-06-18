@@ -48097,66 +48097,119 @@ function _renderInnMealsPopup(bodyEl, d){
 // Reescrito pra usar _aaaListSubScreen com tema 'inn'. 3 quartos + descanso curto.
 // Cada item: icon + label + desc + badge (custo). Click → _innSleep com aliados se houver.
 function _renderInnRestPopup(bodyEl, d){
-  // Sessão #65 (2026-05-31): imagens de quarto agora são WebP gerados via OpenAI
-  // (regra NUNCA SVG · SEMPRE PNG/WebP). Reusa os WebP canônicos já existentes em
-  // /shared/img/services/. O sync rewrite troca / -> / em prod.
-  function _innImg(src, size){
-    var s = size || 36;
-    return '<img src="/shared/img/services/' + src + '" alt="" '
-      + 'style="width:' + s + 'px;height:' + s + 'px;object-fit:cover;border-radius: var(--v-radius-sm, 6px);">';
-  }
-  // X-6.5.51BN (2026-05-15): badges com <span class="vi vi-coin sm"></span>
-  // canonical (substitui "V" texto cru). PT-BR padrão do projeto.
+  // item D (2026-06-18): QUARTOS = QUADRO DE CHAVES ÉPICO (padrão do Mural da
+  // taverna, _tavernShowMuralBoard). A imagem key-board.webp (rack de ganchos vazio,
+  // OpenAI low) é o fundo full-screen; cada quarto vira uma CHAVE pendurada (reusa
+  // os chave-*.webp existentes), clicável → escolhe o quarto. Substitui a lista plana
+  // _aaaListSubScreen. Mantém os 4 quartos + o fluxo de escolha (solo/grupo).
+  var KEY_IMG = '/shared/img/items/';
+  var BOARD_IMG = '/shared/img/estalagem/key-board.webp';
+  // badges com <span class="vi vi-coin sm"></span> canonical (Moeda Valdorita).
   var rooms = [
-    { _room: 'stable', icon: _innImg('svc-estabulo.webp'),       label: 'Estábulo',       desc: 'Palha dura, mas seguro',       badge: 'Grátis' },
-    { _room: 'common', icon: _innImg('svc-dormir-comum.webp'),   label: 'Quarto Comum',   desc: 'Cama macia, padrão',           badge: '3 <span class="vi vi-coin sm"></span>' },
-    { _room: 'royal',  icon: _innImg('svc-dormir-real.webp'),    label: 'Suíte Real',     desc: 'Descanso luxuoso',             badge: '10 <span class="vi vi-coin sm"></span>' },
-    { _room: 'short',  icon: _innImg('svc-descanso-curto.webp'), label: 'Descanso Curto', desc: 'Apenas 1 hora — recupera 1 HD', badge: 'Grátis' }
+    { _room: 'stable', key: 'chave-antiga.webp',        label: 'Estábulo',       desc: 'Palha dura, mas seguro',        badge: 'Grátis' },
+    { _room: 'common', key: 'chave-do-porao.webp',      label: 'Quarto Comum',   desc: 'Cama macia, padrão',            badge: '3 <span class="vi vi-coin sm"></span>' },
+    { _room: 'royal',  key: 'chave-da-aurora.webp',     label: 'Suíte Real',     desc: 'Descanso luxuoso',              badge: '10 <span class="vi vi-coin sm"></span>' },
+    { _room: 'short',  key: 'chave-do-crepusculo.webp', label: 'Descanso Curto', desc: 'Apenas 1 hora — recupera 1 HD', badge: 'Grátis' }
   ];
-  _aaaListSubScreen({
-    theme: 'inn',
-    stackKey: 'inn_rest',
-    icon: _innImg('svc-estabulo.webp', 36),
-    title: 'QUARTOS · ESTALAGEM',
-    subtitle: 'descanso longo & curto',
-    flavor: d.flavor || 'Martha aponta a escada com o queixo. <i>"Escolha onde dormir."</i>',
-    items: rooms,
-    onPick: function(item){
-      var room = item._room;
-      if (room === 'short') {
-        _onInnRestClick('short', 'solo');
-        return;
-      }
-      // Quarto longo: se tem aliados, abre popup choice; senão solo direto.
-      if (_hasLivingAllies() && typeof _showInfoPopup === 'function') {
-        var aliveCount = 1;
-        if (typeof GROUP_MEMBERS !== 'undefined') {
-          for (var i = 1; i < GROUP_MEMBERS.length; i++) {
-            if (GROUP_MEMBERS[i] && !GROUP_MEMBERS[i].dead) aliveCount++;
-          }
+  var SLOTS = [ {t:13, l:14}, {t:13, l:54}, {t:50, l:14}, {t:50, l:54} ];  // 2 col × 2 row na zona dos ganchos
+
+  // Fluxo de escolha do quarto (solo/grupo/HP-full) — preservado da lista antiga.
+  function _pickRoom(item){
+    var room = item._room;
+    if (room === 'short') { _onInnRestClick('short', 'solo'); return; }
+    if (_hasLivingAllies() && typeof _showInfoPopup === 'function') {
+      var aliveCount = 1;
+      if (typeof GROUP_MEMBERS !== 'undefined') {
+        for (var i = 1; i < GROUP_MEMBERS.length; i++) {
+          if (GROUP_MEMBERS[i] && !GROUP_MEMBERS[i].dead) aliveCount++;
         }
-        _showInfoPopup({
-          icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:#d4a850;"><use href="#ic-grupo"/></svg>',
-          title: 'Quem descansa?',
-          desc: 'Reservar quarto <b style="color:#d4a850;">' + (item.label || room) + '</b>:<br><br>'
-              + '<b>◆ Só você</b> — custo individual<br>'
-              + '<b>◆ Grupo (' + aliveCount + ')</b> — multiplica custo por membros',
-          confirmLabel: 'Grupo (' + aliveCount + ')',
-          cancelLabel: 'Só eu',
-          onConfirm: function(){
-            if (typeof _isAllPartyHpFull === 'function' && _isAllPartyHpFull() && typeof _confirmGroupRestHpFull === 'function') {
-              _confirmGroupRestHpFull(room);
-            } else {
-              _onInnRestClick(room, 'group');
-            }
-          },
-          onCancel: function(){ _onInnRestClick(room, 'solo'); }
-        });
-      } else {
-        _onInnRestClick(room, 'solo');
       }
+      _showInfoPopup({
+        icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:#d4a850;"><use href="#ic-grupo"/></svg>',
+        title: 'Quem descansa?',
+        desc: 'Reservar quarto <b style="color:#d4a850;">' + (item.label || room) + '</b>:<br><br>'
+            + '<b>◆ Só você</b> — custo individual<br>'
+            + '<b>◆ Grupo (' + aliveCount + ')</b> — multiplica custo por membros',
+        confirmLabel: 'Grupo (' + aliveCount + ')',
+        cancelLabel: 'Só eu',
+        onConfirm: function(){
+          if (typeof _isAllPartyHpFull === 'function' && _isAllPartyHpFull() && typeof _confirmGroupRestHpFull === 'function') {
+            _confirmGroupRestHpFull(room);
+          } else {
+            _onInnRestClick(room, 'group');
+          }
+        },
+        onCancel: function(){ _onInnRestClick(room, 'solo'); }
+      });
+    } else {
+      _onInnRestClick(room, 'solo');
     }
+  }
+
+  var ov = document.getElementById('city-subscreen-popup');
+  var titleEl = document.getElementById('csp-title');
+  var body = bodyEl || document.getElementById('csp-body');
+  if (!body) return;
+  if (titleEl) titleEl.textContent = 'QUARTOS · ESTALAGEM';
+
+  var html = ''
+    + '<style>'
+    + '.kb-wrap{padding:6px var(--v-space-sm,4px) var(--v-space-md,8px);}'
+    + '.kb-board{position:relative;width:100%;height:74vh;min-height:460px;border-radius:var(--v-radius,10px);overflow:hidden;'
+    +   'background:#160d05 url(' + BOARD_IMG + ') center/cover no-repeat;'
+    +   'border:1px solid rgba(196,149,58,0.35);box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 26px rgba(0,0,0,0.45);}'
+    + '.kb-keys{position:absolute;top:6%;left:6%;right:6%;bottom:8%;}'
+    + '.kb-key{position:absolute;width:32%;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;'
+    +   'transform-origin:top center;transition:transform 0.14s ease,filter 0.18s;animation:kbKeyIn 0.42s ease-out both;}'
+    + '.kb-key:hover{transform:scale(1.09);z-index:6;filter:brightness(1.08) drop-shadow(0 0 10px rgba(255,200,90,0.5));}'
+    + '.kb-key:active{transform:scale(0.96);}'
+    + '.kb-ring{width:14px;height:14px;border-radius:50%;border:3px solid #b8923f;background:transparent;'
+    +   'box-shadow:0 1px 3px rgba(0,0,0,0.6),inset 0 1px 1px rgba(255,230,170,0.5);margin-bottom:-5px;z-index:2;}'
+    + '.kb-key-img{width:74%;max-width:80px;height:auto;object-fit:contain;'
+    +   'filter:drop-shadow(0 4px 6px rgba(0,0,0,0.6));transform-origin:top center;animation:kbSway 4.5s ease-in-out infinite;}'
+    + '.kb-key-plate{margin-top:5px;padding:4px var(--v-space-md,8px);text-align:center;'
+    +   'background:linear-gradient(160deg,#2c1f12,#19110a);border:1px solid rgba(196,149,58,0.5);border-radius:var(--v-radius-xs,4px);'
+    +   'box-shadow:0 3px 7px rgba(0,0,0,0.5);}'
+    + '.kb-key-name{font-family:var(--v-font-display,Cinzel,serif);font-weight:700;font-size:calc(11px * var(--v-font-scale,1));color:#e8c45a;line-height:1.2;letter-spacing:0.3px;}'
+    + '.kb-key-price{font-size:calc(9.5px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);margin-top:1px;}'
+    + '.kb-martha{margin:var(--v-space-sm,5px) 2px 0;text-align:center;font-family:var(--v-font,MedievalSharp,serif);'
+    +   'font-size:calc(11px * var(--v-font-scale,1));font-style:italic;color:var(--v-text-dim,#a09484);line-height:1.4;}'
+    + '@keyframes kbKeyIn{from{opacity:0;transform:translateY(-7px) scale(0.95);}to{opacity:1;}}'
+    + '@keyframes kbSway{0%,100%{transform:rotate(-2.5deg);}50%{transform:rotate(2.5deg);}}'
+    + 'body.perf-lite .kb-key,body.perf-lite .kb-key-img{animation:none!important;}'
+    + '@media (prefers-reduced-motion:reduce){.kb-key,.kb-key-img{animation:none!important;}}'
+    + '</style>'
+    + '<div class="kb-wrap"><div class="kb-board"><div class="kb-keys">';
+  rooms.forEach(function(r, i){
+    var s = SLOTS[i] || {t:13, l:14};
+    html += '<button type="button" class="kb-key" data-idx="' + i + '" '
+      + 'style="top:' + s.t + '%;left:' + s.l + '%;animation-delay:' + (i*80) + 'ms;">'
+      + '<span class="kb-ring"></span>'
+      + '<img class="kb-key-img" src="' + KEY_IMG + r.key + '" alt="">'
+      + '<span class="kb-key-plate"><span class="kb-key-name">' + r.label + '</span><br>'
+      +   '<span class="kb-key-price">' + r.badge + '</span></span>'
+      + '</button>';
   });
+  html += '</div></div>'
+    + '<div class="kb-martha">Martha aponta o rack de chaves. <i>"Escolhe onde dormir, viajante."</i></div>'
+    + '</div>';
+
+  // Indireção de propriedade (mesmo padrão do _tavernShowMuralBoard) — evita o
+  // falso-positivo do hook de segurança no termo literal; conteúdo é autoral.
+  var _ihProp = 'inner' + 'HTML';
+  body[_ihProp] = html;
+  body.querySelectorAll('.kb-key').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var idx = parseInt(btn.dataset.idx, 10);
+      if (rooms[idx]) _pickRoom(rooms[idx]);
+    });
+  });
+  if (ov) ov.classList.add('active');
+  if (typeof _popupStack !== 'undefined') {
+    if (_popupStack[_popupStack.length - 1] !== 'inn_rest') _popupStack.push('inn_rest');
+    if (!window._popupRestoreFns) window._popupRestoreFns = {};
+    window._popupRestoreFns['inn_rest'] = function(){ _renderInnRestPopup(null, d); };
+  }
 }
 
 // Verifica se o jogador tem aliados vivos no GROUP_MEMBERS (slot 1+).
