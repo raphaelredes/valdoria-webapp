@@ -10137,7 +10137,11 @@ function _isCTA(btn) {
       // Table) — antes o d20 rolava no cliente (anti-cheat) e o ouro era 100% local.
       // magicOffer trava o roll por item (anti reroll-farming); sellMagic vende ao preço travado.
       magicOffer: function(npcKey, itemName){ return window.vCityServer.cityAction('service.market_magic_offer', { npc_key: npcKey, item_name: itemName }); },
-      sellMagic:  function(npcKey, itemName){ return window.vCityServer.cityAction('service.market_sell_magic', { npc_key: npcKey, item_name: itemName }); }
+      sellMagic:  function(npcKey, itemName){ return window.vCityServer.cityAction('service.market_sell_magic', { npc_key: npcKey, item_name: itemName }); },
+      // PECHINCHA (anti-cheat): o SERVIDOR rola a Persuasão (perform_haggle, per-NPC,
+      // 1×/visita) e grava o desconto — que a compra (calculate_price) já aplica.
+      // Antes o d20 rolava no cliente (_marketAttemptHaggle).
+      haggle: function(npcKey){ return window.vCityServer.cityAction('service.market_haggle', { npc_key: npcKey }); }
     },
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
@@ -41466,6 +41470,11 @@ function _showShopItemDetail(name, npcId){
   // X-6.5.51CD (2026-05-18): wiring dos botões D&D 5e skill checks
   var haggleBtn = document.getElementById('shop-haggle-btn');
   if (haggleBtn) haggleBtn.addEventListener('click', function(){
+    // #0 anti-cheat (2026-06-18): em REMOTE o SERVIDOR rola a Persuasão (per-NPC).
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.market && window.vCityServer.market.haggle){
+      _marketHaggleRemote(name, npcId, p);
+      return;
+    }
     var res = _marketAttemptHaggle(name, npcId, p, 'persuasion');
     if (res.blocked){ vToast('⚠️ ' + res.reason, 'warn'); return; }
     _marketShowHaggleResult(name, npcId, res, function(){
@@ -41475,12 +41484,55 @@ function _showShopItemDetail(name, npcId){
   });
   var intimBtn = document.getElementById('shop-intimidate-btn');
   if (intimBtn) intimBtn.addEventListener('click', function(){
+    // REMOTE: per-NPC perform_haggle é só Persuasão — intimidação cai na mesma pechincha.
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.market && window.vCityServer.market.haggle){
+      _marketHaggleRemote(name, npcId, p);
+      return;
+    }
     var res = _marketAttemptHaggle(name, npcId, p, 'intimidation');
     if (res.blocked){ vToast('⚠️ ' + res.reason, 'warn'); return; }
     _marketShowHaggleResult(name, npcId, res, function(){
       _showShopItemDetail(name, npcId);
     });
   });
+}
+
+// Pechincha REMOTE (#0, anti-cheat): o SERVIDOR rola a Persuasão (per-NPC) e grava o
+// desconto. O cliente só exibe o d20 do servidor; a compra já aplica o desconto.
+function _marketHaggleRemote(name, npcId, p){
+  var shop = CANON_MARKET_SHOPS[npcId];
+  var npc = shop ? shop.npc : 'Mercador';
+  var icon = shop ? shop.icon : (typeof _heralIco === 'function' ? _heralIco('ic-bolsa') : '🛒');
+  var _proc = (typeof vProcessing !== 'undefined' && vProcessing) ? vProcessing : null;
+  if (_proc) _proc.show({ text: 'Pechinchando...' });
+  window.vCityServer.market.haggle(npcId).then(function(res){
+    if (_proc) _proc.hide();
+    if (!res || res.already_tried){
+      vToast(res && res.message ? res.message : 'Você já pechinchou com este comerciante.', 'warn');
+      return;
+    }
+    var disc = res.discount || 0;
+    var color = res.success ? (disc >= 15 ? '#7cdb7c' : 'var(--v-gold, #c4953a)') : (disc < 0 ? '#c44020' : '#a09484');
+    var bonus = (typeof res.mod === 'number') ? res.mod : 0;
+    var rollHtml = '<div style="display:flex;align-items:center;gap:var(--v-space-md, 8px);margin:6px 0;justify-content:center;">'
+      + '<span style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">💬 Persuasão d20:</span>'
+      + '<span style="font-family:Cinzel,serif;font-size:calc(18px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);font-weight:700;">' + res.roll + '</span>'
+      + '<span style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">' + (bonus >= 0 ? '+' : '') + bonus + ' = </span>'
+      + '<span style="font-family:Cinzel,serif;font-size:calc(22px * var(--v-font-scale, 1));color:' + color + ';font-weight:700;">' + res.total + '</span>'
+      + '<span style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">vs DC ' + res.dc + '</span></div>';
+    var discLine = '';
+    if (disc){
+      var sign = disc < 0 ? '+' : '−';
+      var dcolor = disc < 0 ? '#c44020' : '#7cdb7c';
+      discLine = '<div style="margin-top:6px;text-align:center;color:' + dcolor + ';font-weight:600;">' + sign + Math.abs(disc) + '% nas compras com este mercador</div>';
+    }
+    _showServiceResultPopup({
+      icon: icon, npc: npc,
+      narrative: rollHtml + (res.message || '') + discLine,
+      deltas: [],
+      onContinue: function(){ if (typeof _showShopItemDetail === 'function') _showShopItemDetail(name, npcId); }
+    });
+  }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] haggle', e); });
 }
 
 // Mostra o resultado do skill check com dice 3D + narrativa PADRAO_ALDRIC
