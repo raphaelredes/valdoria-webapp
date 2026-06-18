@@ -10106,6 +10106,13 @@ function _isCTA(btn) {
       gold: function(delta, id){ return window.vCityServer.cityAction('service.gold', { delta: delta, service_id: id || '' }); },
       xp:   function(amount, id){ return window.vCityServer.cityAction('service.xp', { amount: amount, service_id: id || '' }); }
     },
+    bank: {  // Banco server-authoritative (#0, 2026-06-18) — cofre REAL persistido
+      // (player.bank_gold) + taxa de saque 2% no SERVIDOR. Antes o cofre era um global
+      // do cliente (window._bank, começava em 0) e o ouro movia LOCAL sem persistir.
+      state:    function(){ return window.vCityServer.cityAction('service.bank_state', {}); },
+      deposit:  function(amount){ return window.vCityServer.cityAction('service.bank_deposit', { amount: amount }); },
+      withdraw: function(amount){ return window.vCityServer.cityAction('service.bank_withdraw', { amount: amount }); }
+    },
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
       state: function(){ return window.vCityServer.cityAction('flag.state', {}); }
@@ -33344,6 +33351,32 @@ function _bankDeposit(p, amountOrAll){
     onConfirm: function(){
       var preGold = p.gold;
       var preBank = window._bank || 0;
+      // SERVER-AUTHORITATIVE (#0): em REMOTE o SERVIDOR move o ouro real (Bolsa →
+      // Cofre player.bank_gold, persiste) e devolve o cofre real; o cliente só anima.
+      if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.bank) {
+        if (window.vProcessing) { try { window.vProcessing.show({ text: 'Depositando...' }); } catch(_){} }
+        window.vCityServer.bank.deposit(amt).then(function(res){
+          if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+          if (!res || !res.ok) {
+            if (res && typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+            if (typeof vToast === 'function') vToast(res && res.error === 'insufficient_gold' ? 'Bolsa insuficiente.' : 'Não foi possível depositar.', 'warn');
+            return;
+          }
+          p.gold = res.gold; window._bank = res.bank_gold; refreshHud();
+          _showServiceResultPopup({
+            icon: _heralIco('ic-bolsa'), npc: 'Aldwin — Banqueiro',
+            narrative: '<i>' + (res.aldwin_line || 'Aldwin anota no livro com precisão meticulosa.') + '</i><br><br>' +
+                       '<b>Cofre #047</b> — depósito de <b>' + (res.deposited || amt) + ' Valdoritas</b> registrado.',
+            deltas: [
+              { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false },
+              { type:'gold', label:'Cofre', from: preBank, to: window._bank, max: Math.max(window._bank, 1), bar: false }
+            ],
+            onContinue: _bankTxnReturnToHub
+          });
+        }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] bank deposit failed', _e); if (typeof vToast === 'function') vToast('Erro ao depositar.', 'warn'); });
+        return;
+      }
+      // ── LOCAL (file://) fallback — mock client-side ──
       p.gold -= amt;
       window._bank = preBank + amt;
       refreshHud();
@@ -45115,6 +45148,36 @@ function _bankWithdraw(p, amount){
     onConfirm: function(){
       var preGold = p.gold;
       var preBank = window._bank || 0;
+      // SERVER-AUTHORITATIVE (#0): em REMOTE o SERVIDOR debita o cofre real, aplica a
+      // taxa de 2% (ceil) e credita o líquido na Bolsa (persiste); o cliente só anima
+      // com os valores REAIS devolvidos (net/fee do servidor — não o floor do cliente).
+      if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.bank) {
+        if (window.vProcessing) { try { window.vProcessing.show({ text: 'Sacando...' }); } catch(_){} }
+        window.vCityServer.bank.withdraw(amount).then(function(res){
+          if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+          if (!res || !res.ok) {
+            if (res && typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+            var emsg = (res && res.error === 'insufficient_bank') ? 'Saldo insuficiente no cofre.'
+                     : (res && res.error === 'amount_too_low') ? 'Valor muito baixo (a taxa consumiria tudo).'
+                     : 'Não foi possível sacar.';
+            if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
+          }
+          p.gold = res.gold; window._bank = res.bank_gold; refreshHud();
+          var rNet = res.net, rFee = res.fee, rAmt = res.withdrawn || amount;
+          _showServiceResultPopup({
+            icon: _heralIco('ic-bolsa'), npc: 'Aldwin — Banqueiro',
+            narrative: '<i>' + (res.aldwin_line || 'Aldwin entrega as moedas com precisão de joalheiro.') + '</i><br><br>' +
+                       '<b>Retirada</b>: ' + rAmt + ' <span class="vi vi-coin sm"></span> debitadas · <b>Taxa</b>: ' + rFee + ' <span class="vi vi-coin sm"></span> · <b>Líquido</b>: ' + rNet + ' <span class="vi vi-coin sm"></span>.',
+            deltas: [
+              { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold, 1), bar: false },
+              { type:'gold', label:'Cofre', from: preBank, to: window._bank, max: Math.max(preBank, 1), bar: false }
+            ],
+            onContinue: _bankTxnReturnToHub
+          });
+        }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] bank withdraw failed', _e); if (typeof vToast === 'function') vToast('Erro ao sacar.', 'warn'); });
+        return;
+      }
+      // ── LOCAL (file://) fallback — mock client-side ──
       window._bank = preBank - amount;
       p.gold = preGold + net;
       refreshHud();
@@ -46473,6 +46536,17 @@ function _renderCityPopup(key){
   }
   if (key === 'bank' && typeof renderBankHub === 'function') {
     if (titleEl) titleEl.textContent = 'Banco de Valdoria';
+    // SERVER-AUTHORITATIVE (#0, 2026-06-18): hidrata o cofre REAL (player.bank_gold)
+    // do servidor. Antes window._bank começava em 0 (mock client) e nunca batia com
+    // o saldo persistido. Renderiza já (valor atual) e re-renderiza ao chegar o real.
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.bank) {
+      window.vCityServer.bank.state().then(function(st){
+        if (st && st.ok && typeof st.bank_gold === 'number' && st.bank_gold !== (window._bank || 0)) {
+          window._bank = st.bank_gold;
+          if (typeof renderBankHub === 'function' && bodyEl) renderBankHub(bodyEl, _buildBankMockData(window.CITY_MOCK_PLAYER));
+        }
+      }).catch(function(){});
+    }
     renderBankHub(bodyEl, _buildBankMockData(window.CITY_MOCK_PLAYER));
     // canonical: bank_dialogue.py — BANK_TUTORIAL_TEXT mostrado uma única vez
     // quando jogador chega no banco com >100 Valdoritas pela primeira vez.
