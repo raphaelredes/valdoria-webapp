@@ -11250,6 +11250,22 @@ function buildMockHubScreen(player){
     // Sessão #56 (Demand A): badge label dinâmico — não mais "Covil dos Lobos"
     // (masmorra). Agora reflete o desafio do dia (caça/coleta).
     daily_challenge_badge: (function(){
+      // SUPREME RULE #0: em REMOTE o badge vem do SERVIDOR (CITY_DAILY_STATE.challenge,
+      // hidratado por _refreshDailyState via daily.state), NÃO do pool MOCK do cliente
+      // (DAILY_CHALLENGE_POOL é divergente do servidor — mostrava objetivos que não
+      // existem mais em DAILY_CHALLENGE_OBJECTIVES, ex.: "Gemas Brutas" stale). show=false
+      // (completo ou nível baixo) → dungeon_name '' → o render esconde o badge.
+      try {
+        if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+          var srv = window.CITY_DAILY_STATE && window.CITY_DAILY_STATE.challenge;
+          if (srv) {
+            return { completed: !!srv.completed,
+                     dungeon_name: srv.show ? (srv.badge_label || 'Desafio do Dia') : '' };
+          }
+          return { completed: false, dungeon_name: '' };  // REMOTE sem hidratar ainda: nada (evita mock stale)
+        }
+      } catch(_e0){}
+      // LOCAL (file://) dev tool: mock client-side.
       try {
         var ch = (typeof _dailyChallengeForToday === 'function') ? _dailyChallengeForToday() : null;
         if (ch) {
@@ -21283,7 +21299,12 @@ function _refreshServerBoard(){
 function _refreshDailyState(){
   if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
   return window.vCityServer.daily.state().then(function(r){
-    if (r && r.ok && r.daily){ window.CITY_DAILY_STATE = r.daily; }
+    if (r && r.ok && r.daily){
+      window.CITY_DAILY_STATE = r.daily;
+      // #0: o badge do Desafio do Dia (r.daily.challenge) vem do servidor — re-renderiza
+      // o hub pra trocar o badge MOCK stale ("Gemas Brutas") pelo objetivo REAL.
+      if (typeof renderCurrentScreen === 'function') { try { renderCurrentScreen(); } catch(_re){} }
+    }
   }).catch(function(e){ console.warn('[CITY] daily state failed', e); });
 }
 // FASE 3 server-driven: estado de descoberta (discovered/completed/active) do servidor.
