@@ -20562,8 +20562,9 @@ function _shadowShowCrime(p){
                   p.gold = Math.max(0, p.gold - comp.gold_loss);
                 }
                 if (comp.flag){
-                  p.metadata = p.metadata || {};
-                  p.metadata[comp.flag] = true;
+                  // SERVER-AUTHORITATIVE (#0, Fatia 2 NPC Interaction): persiste o flag
+                  // narrativo de complicação do Vulto (research_false_info/spy etc.) via servidor.
+                  _persistNarrativeFlag(p, comp.flag, true);
                 }
                 narrative += '<br><br><b>⚠️ Complicação:</b> <i>' + comp.text + '</i><br>(' + comp.effect + ')';
               }
@@ -21262,6 +21263,27 @@ function _refreshAchProgress(){
     }
   }).catch(function(e){ console.warn('[CITY] ach progress failed', e); });
 }
+// SERVER-AUTHORITATIVE (#0, 2026-06-18, Fatia 2 NPC Interaction): helper canonical
+// pra persistir QUALQUER flag narrativa em metadata['city_flags']. Antes os flags
+// de complicação (Vulto: roubo/perseguição; Market magic: aura suspeita/maldição/
+// roubado; Research: info falsa/espião) eram setados LOCAL apenas — perdiam o efeito
+// narrativo a cada reload. Agora persistem server-side via flag.set (FASE 7 infra
+// existente). LOCAL escreve em p.metadata pra acesso imediato; REMOTE espelha no
+// servidor. Idempotente — flag.set sobrescreve com o valor mais recente.
+function _persistNarrativeFlag(p, name, value){
+  if (!name) return;
+  if (!p) return;
+  p.metadata = p.metadata || {};
+  p.metadata[name] = (value === undefined ? true : value);
+  try {
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && window.vCityServer.flag && window.vCityServer.flag.set){
+      window.vCityServer.flag.set(name, (value === undefined ? true : value))
+        .catch(function(e){ console.warn('[CITY] persist narrative flag failed', name, e); });
+    }
+  } catch(_){}
+}
+
 // FASE 7 server-driven: achata metadata['city_flags'] do servidor → p.metadata.<flag>
 // (convenção existente: o código lê p.metadata.town_lia_helped).
 function _refreshCityFlags(){
@@ -22285,13 +22307,8 @@ function _npcApplyTalkEffects(p, npc, opt){
     } catch(_){}
   }
   if (npc.id === 'square_child' && opt.id === 'help'){
-    p.metadata = p.metadata || {};
-    p.metadata.town_lia_helped = true;
-    try {
-      if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
-        window.vCityServer.flag.set('town_lia_helped', true);
-      }
-    } catch (_) {}
+    // Fatia 2: usa o helper canonical (local + servidor) ao invés do inline original.
+    _persistNarrativeFlag(p, 'town_lia_helped', true);
   }
   var msgExtra = '';
   if (opt._grantsXp){
@@ -22525,15 +22542,9 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
     }
     // canonical: quest progression flags — town_lia_helped quando jogador clica "Ajudar" Lia.
     // Próxima visita usa CANON_PLAZA_LIA_OVERRIDE (estado pós-quest).
+    // Fatia 2: usa o helper canonical (local + servidor) ao invés do inline original.
     if (npc.id === 'square_child' && opt.id === 'help'){
-      p.metadata = p.metadata || {};
-      p.metadata.town_lia_helped = true;
-      // FASE 7: persiste flag narrativa no servidor (sobrevive reload/troca de device)
-      try {
-        if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
-          window.vCityServer.flag.set('town_lia_helped', true);
-        }
-      } catch (_) {}
+      _persistNarrativeFlag(p, 'town_lia_helped', true);
     }
     // canonical: opt._grantsXp (intro de UNIQUE NPC) ou opt._isUniqueFinish (rewards)
     var preXp = p.xp || 0;
@@ -38952,8 +38963,9 @@ function _marketRollMagicComplication(player){
   }
   var flagLine = '';
   if (c.flag){
-    player.metadata = player.metadata || {};
-    player.metadata[c.flag] = true;
+    // SERVER-AUTHORITATIVE (#0, Fatia 2 NPC Interaction): persiste o flag narrativo de
+    // complicação de item mágico (market_guard_suspicion/market_cursed_doubt/...) via servidor.
+    _persistNarrativeFlag(player, c.flag, true);
     flagLine = '<br><i>(Flag registrada: ' + c.flag + ')</i>';
   }
   var deltas = c.gold_loss
@@ -43739,8 +43751,9 @@ function _guildShowResearch(p){
               p.gold = Math.max(0, p.gold - comp.gold_loss);
             }
             if (comp.flag){
-              p.metadata = p.metadata || {};
-              p.metadata[comp.flag] = true;
+              // SERVER-AUTHORITATIVE (#0, Fatia 2 NPC Interaction): persiste o flag
+              // narrativo de complicação de pesquisa (research_false_info/spy) via servidor.
+              _persistNarrativeFlag(p, comp.flag, true);
             }
             compLine = '<br><br><b>⚠️ Complicação:</b> <i>' + comp.text + '</i><br>(' + comp.effect + ')';
           }
