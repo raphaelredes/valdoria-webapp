@@ -10129,6 +10129,20 @@ function _isCTA(btn) {
         var body = { user_id: a.uid, action: 'hire_' + npcId };
         var env = _env(); if (env) body.env = env;
         return _post('/api/guild/action', body);
+      },
+      // Estado do grupo REAL (party com npc_ids) via /api/guild/start (serialize_main_menu).
+      start: function(){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/start', body);
+      },
+      // Dispensar aliado (servidor remove do party + libera o NPC ao pool + devolve equip).
+      fire: function(npcId){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'fire_' + npcId };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
       }
     }
   };
@@ -42901,9 +42915,105 @@ function _guildShowParty(p){
   // Replica canonical guild_party_menu — gerenciar grupo (até 3 aliados).
   // #71e: PADRAO_LOCAIS — lista de cards com brasão heráldico da classe de cada
   // aliado (nunca emoji de pessoa) + banner-cenário + voz da Tavira.
-  var aliveAllies = (window.GROUP_MEMBERS || []).slice(1).filter(function(m){ return m && !m.dead; });
-  // Map classe (PT-BR, com/sem acento) -> brasão heráldico ic-*.
+  // Map classe (PT-BR, com/sem acento) -> brasão heráldico ic-* (hoisted; usado tb
+  // pelo branch REMOTE abaixo).
   function _allyClsIco(cls){
+    var k = (cls || '').toLowerCase();
+    var map = {
+      guerreiro:'ic-guerreiro', clerigo:'ic-clerigo', 'clériga':'ic-clerigo', clériga:'ic-clerigo',
+      ladino:'ic-ladino', mago:'ic-mago', druida:'ic-druida',
+      patrulheiro:'ic-patrulheiro', patrulheira:'ic-patrulheiro', paladino:'ic-paladino',
+      'bárbaro':'ic-barbaro', barbaro:'ic-barbaro', monge:'ic-monge', bardo:'ic-bardo',
+      feiticeiro:'ic-feiticeiro', feiticeira:'ic-feiticeiro', bruxo:'ic-bruxo'
+    };
+    return _heralIco(map[k] || 'ic-grupo');
+  }
+  // SERVER-AUTHORITATIVE (migração 2026-06-17): em REMOTE busca o grupo REAL (party com
+  // npc_ids) via /api/guild/start e DISPENSA via /api/guild/action fire_<id> (servidor
+  // remove do party + libera o NPC ao pool + devolve equipamento). ANTES: a tela só
+  // listava GROUP_MEMBERS e o onPick era placeholder ("gestão completa chega em breve").
+  // Mock só em LOCAL (file://).
+  var _gpRemote = !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.guild);
+  if (_gpRemote) {
+    var _gpCap = function(c){ c = String(c || 'Aventureiro'); return c.charAt(0).toUpperCase() + c.slice(1); };
+    var _gpFire = function(m){
+      if (window.vProcessing) { try { window.vProcessing.show({ text: 'Dispensando...' }); } catch(_){} }
+      window.vCityServer.guild.fire(m.id).then(function(res){
+        if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+        if (!res || res.error) { if (typeof vToast === 'function') vToast((res && res.msg) || 'Não foi possível dispensar.', 'warn'); return; }
+        // Reflete no painel (servidor já persistiu; re-sync no próximo load via state.allies).
+        if (window.GROUP_MEMBERS) {
+          window.GROUP_MEMBERS = window.GROUP_MEMBERS.filter(function(gm, idx){ return idx === 0 || (gm && gm.name !== m.n); });
+        }
+        if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
+        _showServiceResultPopup({
+          icon: _allyClsIco(m.c), npc: 'Mestra Tavira',
+          narrative: (res.msg ? '<i>"' + res.msg + '"</i>' : '<i>' + (m.n || 'O aliado') + ' foi dispensado do grupo.</i>') + '<br><br><i>A vaga está livre de novo.</i>',
+          deltas: [], onContinue: function(){ _guildShowParty(p); }
+        });
+      }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao dispensar.', 'warn'); });
+    };
+    if (window.vProcessing) { try { window.vProcessing.show({ text: 'Consultando o registro...' }); } catch(_){} }
+    window.vCityServer.guild.start().then(function(data){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      if (!data || data.error) { if (typeof vToast === 'function') vToast('Não foi possível abrir o grupo.', 'warn'); return; }
+      var party = (data.party || []).filter(function(m){ return m && !m.dead; });
+      var pmax = data.party_max || 3;
+      if (!party.length) {
+        _squareShowListPopup({
+          stackKey: 'guild_party', icon: _heralIco('ic-grupo', null, '38px'), title: 'Meu Grupo',
+          subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
+          flavor: 'Tavira folheia o registro e te encara. <i>(bate a pena no balcão)</i> "Marchas sozinho, aventureiro. Recruta aliados aqui ou na Taverna antes que a estrada te engula."',
+          items: [], onPick: function(){}
+        });
+        return;
+      }
+      var items = party.map(function(m){
+        return { icon: _allyClsIco(m.c), label: m.n || '?',
+          desc: _gpCap(m.c) + ' · Nível ' + (m.l || 1) + ' · HP ' + (m.hp || 0) + '/' + (m.mhp || 0), _m: m };
+      });
+      _squareShowListPopup({
+        stackKey: 'guild_party', icon: _heralIco('ic-grupo', null, '38px'),
+        title: 'Meu Grupo (' + party.length + '/' + pmax + ')',
+        subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
+        flavor: 'Tavira aponta os nomes no registro. <i>(meio-sorriso)</i> "Eis os que marcham contigo. Toca num nome pra ver a ficha ou dispensar."',
+        sectionLabel: 'Aventureiros no grupo', items: items,
+        onPick: function(item){
+          var m = item._m;
+          if (!(window.vEncounter && typeof window.vEncounter.render === 'function')) {
+            _showConfirmPurchase({
+              icon: _allyClsIco(m.c), npc: 'Mestra Tavira', title: 'Dispensar ' + (m.n || 'aliado'),
+              desc: '<b>' + _gpCap(m.c) + ' · Nível ' + (m.l || 1) + '</b><br><br>Dispensar libera a vaga (o equipamento volta à mochila). Recontratar depois sai mais barato.',
+              cost: 0, creditMode: true, onConfirm: function(){ _gpFire(m); }
+            });
+            return;
+          }
+          var portrait = null; try { portrait = _discoverySpeakerPortrait('Mestra Tavira Guilda'); } catch(_){}
+          var npc = { id: 'guild_tavira', name: 'Mestra Tavira', desc: 'Salão da Guilda', portrait: portrait || '', portraitHTML: _allyClsIco(m.c) };
+          var script = [
+            { type: 'narration', text: 'Tavira corre o dedo pelo registro e para no nome.' },
+            { type: 'speech', speaker: 'Mestra Tavira', text: '— ' + (m.n || 'Este') + ', ' + _gpCap(m.c) + ' nível ' + (m.l || 1) + '. HP ' + (m.hp || 0) + '/' + (m.mhp || 0) + (m.mmp ? ' · MP ' + (m.mp || 0) + '/' + (m.mmp || 0) : '') + '. <i>Dispensar libera a vaga — o equipamento dele volta à tua mochila, e recontratar depois sai mais barato.</i>' }
+          ];
+          var choices = [
+            { id: 'dismiss', label: '🚪 Dispensar ' + (m.n || 'aliado') },
+            { id: 'leave', label: '↩ "Fica, por ora."' }
+          ];
+          window.vEncounter.render({ npc: npc, script: script, choices: choices }, {
+            player: p, closeable: true,
+            onChoice: function(ch){
+              try { window.vEncounter.close(); } catch(_){}
+              if (ch && ch.id === 'dismiss') { _gpFire(m); }
+            }
+          });
+        }
+      });
+    }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] guild party failed', _e); if (typeof vToast === 'function') vToast('Erro ao abrir o grupo.', 'warn'); });
+    return;
+  }
+  // ── LOCAL (file://) fallback — mock client-side (dev tool, sem servidor) ──
+  var aliveAllies = (window.GROUP_MEMBERS || []).slice(1).filter(function(m){ return m && !m.dead; });
+  // (helper _allyClsIco já declarado/hoisted acima)
+  function _allyClsIcoLegacy(cls){
     var k = (cls || '').toLowerCase();
     var map = {
       guerreiro:'ic-guerreiro', clerigo:'ic-clerigo', 'clériga':'ic-clerigo', clériga:'ic-clerigo',
