@@ -10113,6 +10113,11 @@ function _isCTA(btn) {
       deposit:  function(amount){ return window.vCityServer.cityAction('service.bank_deposit', { amount: amount }); },
       withdraw: function(amount){ return window.vCityServer.cityAction('service.bank_withdraw', { amount: amount }); }
     },
+    temple: {  // Templo (serviços curativos) server-authoritative (#0, 2026-06-18) — o
+      // SERVIDOR valida+cobra+rola(1d8+3/1d4)+aplica HP/buff/condição REAL e persiste.
+      // Antes o cliente fabricava o efeito LOCAL (só o ouro persistia via service.gold).
+      service: function(svc){ return window.vCityServer.cityAction('service.temple_service', { service: svc }); }
+    },
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
       state: function(){ return window.vCityServer.cityAction('flag.state', {}); }
@@ -33235,6 +33240,65 @@ function _aldwinPick(category, fallback){
 // canonical: temple_data.py / temple_data_extra via CANON_TEMPLE_DATA(_EXTRA)
 // Pick texto canonical do Templo (no_gold/full_hp/debt_paid/debt_block/temple_flavors/etc)
 // Substitui {npc_name} pelo nome do NPC (Padre Brevon/Irmã Elara/etc).
+// SERVER-AUTHORITATIVE (#0, 2026-06-18): resolve um serviço CURATIVO do templo no
+// SERVIDOR (valida+cobra+rola+aplica HP/buff/condição REAL e persiste via
+// service.temple_service) e ANIMA o resultado. Chamado por _temple_process em REMOTE.
+function _templeServiceRemote(p, sid, s){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Invocando luz divina...' }); } catch(_){} }
+  window.vCityServer.temple.service(sid).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'no_gold') ? 'Valdoritas insuficientes.'
+               : (res && res.error === 'hp_full') ? 'Você já está com HP cheio.'
+               : (res && res.error === 'npc_absent') ? ((res.npc || 'O sacerdote') + ' não está no templo hoje.')
+               : (res && res.error === 'debt_block') ? 'Quite sua dívida no templo primeiro.'
+               : 'Serviço indisponível agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    var back = function(){ if (_popupStack[_popupStack.length-1] === 'temple') _renderCityPopup('temple'); };
+    if (sid === 'heal') {
+      var preHp = p.hp;
+      if (typeof res.hp === 'number') p.hp = res.hp; else p.hp = preHp + (res.hp_gained || 0);
+      _animateGroupCardHeal(0, res.hp_gained || 0); refreshHud();
+      _showServiceResultPopup({ icon: s.icon, npc: s.npc,
+        narrative: '<i>"' + s.npc + ' canaliza a luz divina. Suas mãos brilham sobre seus ferimentos."</i>',
+        dice: res.dice ? { formula: res.dice.formula, total: res.dice.total, sides: 8, value: Math.max(1, (res.dice.total || 4) - 3) } : null,
+        deltas: [{ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax }], onContinue: back });
+    } else if (sid === 'bless') {
+      var bv = res.bless_val || (res.dice && res.dice.total) || 0;
+      p.bless_atk = (p.bless_atk || 0) + bv; p.bless_save = (p.bless_save || 0) + bv;
+      _markServiceUsedAtRest('CITY_TEMPLE_BLESS_AT_REST'); refreshHud();
+      _showServiceResultPopup({ icon: s.icon, npc: s.npc,
+        narrative: '<i>"' + s.npc + ' sussurra uma oração antiga. Uma aura dourada envolve você."</i><br><br>'
+          + '⚔️ +' + bv + ' em ataques<br>🛡️ +' + bv + ' em saves<br>'
+          + '<span style="color:var(--v-text-dim, #a09484);font-size:calc(11px * var(--v-font-scale, 1))">— Até o próximo descanso longo —</span>',
+        dice: res.dice ? { formula: res.dice.formula, total: res.dice.total, sides: 4 } : null,
+        deltas: [], onContinue: back });
+    } else if (sid === 'greater_restoration') {
+      var preExh = p.exh || 0;
+      if (typeof res.exhaustion === 'number') p.exh = res.exhaustion; else p.exh = 0;
+      refreshHud();
+      _showServiceResultPopup({ icon: s.icon, npc: s.npc,
+        narrative: '<i>"' + s.npc + ' canaliza um brilho avassalador de energia sagrada. Você sente a exaustão sendo arrancada de seu corpo."</i>'
+          + (res.removed_one ? '<br><br>🌟 ' + res.removed_one + ' removido!' : ''),
+        deltas: [{ type:'exh', label:'Exaustão', from: preExh, to: (p.exh || 0), max: 6, bar: false }], onContinue: back });
+    } else {  // cure_poison / remove_curse — servidor removeu a condição REAL; cliente narra
+      var glyph = (sid === 'cure_poison') ? '🧪' : '🔮';
+      var removedTxt = (res.removed && res.removed.length)
+        ? (res.removed.join(', ') + ' removido(s) ✓')
+        : ((sid === 'cure_poison') ? 'Corpo limpo — nada a purificar.' : 'Alma livre — nenhuma maldição.');
+      refreshHud();
+      _showServiceResultPopup({ icon: s.icon, npc: s.npc,
+        narrative: '<i>"' + s.npc + (sid === 'cure_poison'
+          ? ' toca sua testa com dedos brilhantes. Uma luz dourada percorre seu corpo."'
+          : ' ergue um símbolo sagrado e entoa palavras de poder."') + '</i><br><br>'
+          + glyph + ' <span style="color:#88c878">' + removedTxt + '</span>',
+        deltas: [], onContinue: back });
+    }
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] temple service failed', _e); if (typeof vToast === 'function') vToast('Erro no serviço do templo.', 'warn'); });
+}
+
 function _templePick(category, fallback, npcName){
   var canonExtra = (typeof CANON_TEMPLE_DATA_EXTRA !== 'undefined') ? CANON_TEMPLE_DATA_EXTRA : null;
   var canonBase  = (typeof CANON_TEMPLE_DATA !== 'undefined') ? CANON_TEMPLE_DATA : null;
@@ -48581,6 +48645,18 @@ var ACTION_HANDLERS = {
   '_temple_process': function(p, sid){
     var s = TEMPLE_NPCS_DB[sid];
     if (!s) return;
+    // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE os serviços CURATIVOS são
+    // resolvidos pelo SERVIDOR (valida+cobra+rola+aplica HP/buff/condição REAL e
+    // persiste); o cliente só anima. raise_dead NÃO passa aqui (diverge: servidor
+    // revive o player, cliente revive um aliado) — fica no caminho LOCAL abaixo.
+    var _curativeT = (sid === 'heal' || sid === 'cure_poison' || sid === 'bless'
+                      || sid === 'remove_curse' || sid === 'greater_restoration');
+    if (_curativeT && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && window.vCityServer.temple && typeof _templeServiceRemote === 'function') {
+      _templeServiceRemote(p, sid, s);
+      return;
+    }
+    // ── LOCAL (file://) fallback — mock client-side ──
     if (!_pay(p, s.cost)) return;  // safety net (já validado em confirm)
     if (sid === 'heal') {
       var dieFace = 1 + Math.floor(Math.random()*8);  // d8 face: 1-8
