@@ -19411,7 +19411,11 @@ function _marketShowTransient(p, npc){
       dialogueChoices.push({
         id: 'buy_' + it.key,
         label: '⚒ ' + it.name + ' · ' + it.value + ' V',
-        cb: 'transient-buy:' + npc.id + ':' + it.key
+        cb: 'transient-buy:' + npc.id + ':' + it.key,
+        // item I (2026-06-18): thumbnail + detalhe do item na choice de compra.
+        itemName: it.name, itemIcon: it.icon,
+        mysterious: _isMysteriousItem(it),
+        itemInfo: _encItemInfo(it.name)
       });
     });
     dialogueChoices.push({ id: 'leave', label: '↩ "Outra hora."', cb: 'close' });
@@ -35107,6 +35111,41 @@ function _squareShowGambleResult(p, stake, res, preGoldBeforeStake){
   });
 }
 
+// item I (2026-06-18): itemInfo estruturado pro DETALHE do item nas escolhas
+// de COMPRA (PADRAO_ALDRIC). Mesma fonte do _showItemDetail (getItemData), mas
+// SEM ações de inventário — é só leitura no mercado. encounter-popup.js renderiza
+// o detalhe (top-layer) a partir deste objeto. Retorna null se o item não existe.
+function _encItemInfo(name){
+  try {
+    var it = getItemData(name);
+    if (!it) return null;
+    var rarity = it.r || 'common';
+    var lines = [];
+    if (it.s) lines.push('<b>Slot:</b> ' + (CANON_SLOT_NAMES[it.s] || it.s));
+    if (it.dd) lines.push('<b>Dano:</b> ' + it.dd);
+    if (it.ac) lines.push('<b>CA:</b> +' + it.ac);
+    if (it.b)  lines.push('<b>Ataque:</b> +' + it.b);
+    if (it.hb) lines.push('<b>HP:</b> +' + it.hb);
+    if (it.mb) lines.push('<b>MP:</b> +' + it.mb);
+    if (it.sk) lines.push('<b>Slots de Gema:</b> ' + it.sk);
+    lines.push('<b>Valor:</b> ' + (it.v || 0) + ' <span class="vi vi-coin sm"></span>');
+    return {
+      rarityColor: getRarityColor(rarity),
+      rarityLabel: getRarityLabel(rarity),
+      lines: lines,
+      desc: it.desc || '',
+      tags: (it.t || []).map(function(t){ return getTagLabel(t); })
+    };
+  } catch(_e){ return null; }
+}
+// item I: item misterioso/não-identificado NÃO revela detalhe (sem spoiler).
+function _isMysteriousItem(it){
+  if (!it) return false;
+  if (it.mysterious === true) return true;
+  var s = ((it.name || '') + ' ' + (it.desc || '')).toLowerCase();
+  return /misterios[oa]|n[ãa]o[\s-]?identificad/.test(s);
+}
+
 // === 5. VENDEDOR ITINERANTE — rotação diária canonical (AMBULANT_VENDORS) ====
 // #16 (sessão #70): PADRAO_LOCAIS + PADRAO_ALDRIC — o vendedor (Faelis e os 7
 // rotativos) abre via vEncounter (narração + fala + escolhas) em vez do list-popup
@@ -35168,7 +35207,14 @@ function _squareShowVendorPopup(p){
       { type: 'speech', speaker: vendor.name, text: '— ' + _d + ' Dá uma olhada, viajante: mercadoria boa, preço justo. <i>Só por hoje.</i>' }
     ];
     var choices = vendor.items.map(function(it){
-      return { id: 'buy', label: '⚒ ' + it.name + ' · ' + it.value + ' V', _item: it };
+      // item I (2026-06-18): a choice carrega o item p/ o thumbnail + detalhe
+      // (encounter-popup.js renderiza). itemIcon = fallback se não houver WebP.
+      return {
+        id: 'buy', label: '⚒ ' + it.name + ' · ' + it.value + ' V', _item: it,
+        itemName: it.name, itemIcon: it.icon,
+        mysterious: _isMysteriousItem(it),
+        itemInfo: _encItemInfo(it.name)
+      };
     });
     choices.push({ id: 'leave', label: '↩ "Quem sabe outra hora."' });
     window.vEncounter.render({ npc: npc, script: script, choices: choices }, {

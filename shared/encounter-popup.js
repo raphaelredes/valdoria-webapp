@@ -13,7 +13,9 @@
  *   ~200  _typewriter(el, text, charMs, onDone) — char-by-char com pausa em <i>
  *   ~310  _sanitizeDialogueHTML(html) — whitelist REAL (#88): escape + i/em/b/strong/br/u/s/code
  *   ~325  _SKILL_LABEL_PT + _skillLabelPT(s) — keys EN → PT-BR no badge de CD
- *   ~390  openChoices(choices, opts) — sub-overlay AAA (badge CD, label fallback)
+ *   ~490  _buildRewardBlockEl(line) — bloco RECOMPENSA épico (gold/xp/item WebP)
+ *   ~530  _openItemDetailDialog/_buildChoiceItemThumb (item I) — thumb+detalhe de COMPRA
+ *   ~390  openChoices(choices, opts) — sub-overlay AAA (badge CD, label fallback, thumb item)
  *   ~500  vEncounter.render(dialogue) — entry principal (check_hint preproc #88)
  *   ~720  renderPage(idx) — linhas narration/speech/dm + GUARD anti speaker-key (#88)
  *   ~960  renderActions() — choices (fallback Fechar se vazio #88) + cb dispatch
@@ -526,6 +528,105 @@
   }
 
   // ──────────────────────────────────────────────────────────────────────
+  // Item detail mini-dialog (item I, 2026-06-18) — nas escolhas de COMPRA o
+  // thumbnail do item é clicável e abre ESTE detalhe (imagem grande + stats +
+  // descrição). É um <dialog> PRÓPRIO em showModal() → empilha ACIMA do
+  // enc-choices-overlay (top-layer nativo) e ao fechar volta pra lista de
+  // compra que continua aberta embaixo. Item misterioso/não-identificado NÃO
+  // chega aqui (sem spoiler). Alimentado por
+  // ch.itemInfo = { rarityColor, rarityLabel, lines:[html], desc, tags:[label] }.
+  // ──────────────────────────────────────────────────────────────────────
+  function _itemImgSrc(slug) {
+    return ((window.vItemsConfig && window.vItemsConfig.pngBase) || '/shared/img/items/') + slug + '.webp';
+  }
+  function _ensureItemDetailOverlay() {
+    var ov = document.getElementById('enc-item-detail-overlay');
+    if (ov && ov.tagName.toLowerCase() === 'dialog') return ov;
+    if (ov) ov.parentNode.removeChild(ov);
+    ov = document.createElement('dialog');
+    ov.id = 'enc-item-detail-overlay';
+    ov.innerHTML = '<div class="enc-id-card" role="document"></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e) { if (e.target === ov) _closeItemDetail(); });
+    ov.addEventListener('cancel', function(e) { e.preventDefault(); _closeItemDetail(); });
+    return ov;
+  }
+  function _closeItemDetail() {
+    var ov = document.getElementById('enc-item-detail-overlay');
+    if (!ov) return;
+    try { if (ov.close && ov.open) ov.close(); } catch (_e) {}
+    ov.classList.remove('active');
+  }
+  function _openItemDetailDialog(ch) {
+    if (!ch || !ch.itemName || ch.mysterious) return;
+    var ov = _ensureItemDetailOverlay();
+    var card = ov.querySelector('.enc-id-card');
+    if (!card) return;
+    var info = ch.itemInfo || {};
+    var slug = _rewardItemSlug(ch.itemName);
+    var hasImg = !!(slug && window.vItems && typeof window.vItems.has === 'function' && window.vItems.has(slug));
+    var rarityCol = info.rarityColor || '#d4c8b0';
+    var nameEsc = String(ch.itemName).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    card.innerHTML =
+      '<button class="enc-id-close" type="button" aria-label="Fechar">✕</button>' +
+      (hasImg
+        ? '<div class="enc-id-img-wrap"><img class="enc-id-img" alt="" src="' + _itemImgSrc(slug) + '"></div>'
+        : '<div class="enc-id-img-wrap enc-id-img-fallback">' + (ch.itemIcon || '🎁') + '</div>') +
+      '<div class="enc-id-name" style="color:' + rarityCol + '">' + nameEsc + '</div>' +
+      (info.rarityLabel ? '<div class="enc-id-rarity" style="color:' + rarityCol + '">' + info.rarityLabel + '</div>' : '') +
+      ((info.lines && info.lines.length) ? '<div class="enc-id-divider"></div><div class="enc-id-stats">' + info.lines.join('<br>') + '</div>' : '') +
+      (info.desc ? '<div class="enc-id-divider"></div><div class="enc-id-desc">' + info.desc + '</div>' : '') +
+      ((info.tags && info.tags.length) ? '<div class="enc-id-tags">' + info.tags.map(function (t) { return '<span class="enc-id-tag">' + t + '</span>'; }).join('') + '</div>' : '');
+    var cb = card.querySelector('.enc-id-close');
+    if (cb) cb.addEventListener('click', _closeItemDetail);
+    if (typeof ov.showModal === 'function') {
+      try { if (!ov.open) ov.showModal(); } catch (_e) { ov.classList.add('active'); }
+    } else { ov.classList.add('active'); }
+  }
+  /* item I: thumbnail clicável do item numa choice de COMPRA (qualquer choice
+     com ch.itemName). Retorna o <span> do thumb, ou null se não é item. */
+  function _buildChoiceItemThumb(ch) {
+    if (!ch || !ch.itemName) return null;
+    var thumb = document.createElement('span');
+    thumb.className = 'enc-cho-item-thumb';
+    if (ch.mysterious) {
+      thumb.classList.add('enc-cho-item-mys');
+      thumb.textContent = '?';
+      thumb.setAttribute('aria-label', 'Item misterioso');
+      thumb.setAttribute('title', 'Item misterioso');
+      thumb.addEventListener('click', function (e) {
+        e.stopPropagation(); e.preventDefault();
+        if (typeof window.vToast === 'function') window.vToast('Item misterioso — descubra ao adquirir.', 'info');
+      });
+      return thumb;
+    }
+    var slug = _rewardItemSlug(ch.itemName);
+    if (slug && window.vItems && typeof window.vItems.has === 'function' && window.vItems.has(slug)) {
+      var img = document.createElement('img');
+      img.className = 'enc-cho-item-img';
+      img.alt = '';
+      img.loading = 'lazy';
+      img.src = _itemImgSrc(slug);
+      img.setAttribute('onerror', "this.style.display='none';this.parentNode.classList.add('enc-cho-item-fallback');this.parentNode.textContent='\\uD83C\\uDF81';");
+      thumb.appendChild(img);
+    } else if (ch.itemIcon) {
+      thumb.classList.add('enc-cho-item-fallback');
+      thumb.innerHTML = ch.itemIcon;
+    } else {
+      thumb.classList.add('enc-cho-item-fallback');
+      thumb.textContent = '🎁';
+    }
+    thumb.classList.add('enc-cho-item-thumb--clickable');
+    thumb.setAttribute('role', 'button');
+    thumb.setAttribute('title', 'Ver detalhes');
+    thumb.addEventListener('click', function (e) {
+      e.stopPropagation(); e.preventDefault();
+      _openItemDetailDialog(ch);
+    });
+    return thumb;
+  }
+
+  // ──────────────────────────────────────────────────────────────────────
   // Choice sub-overlay AAA (task #49) — module-level public API.
   // Reabrível, fechável via ✕ / ESC / backdrop / botão Voltar.
   // z-index 9700 (acima do encounter 9500 e city popup 9000).
@@ -654,6 +755,11 @@
           (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
         '</span>' +
         '<span class="enc-cho-row-chev">›</span>';
+      // item I (2026-06-18): choice de COMPRA → thumbnail do item à esquerda
+      // (tap = detalhe top-layer, exceto misterioso). Genérico: qualquer choice
+      // com ch.itemName. stopPropagation no thumb evita disparar a compra.
+      var _thumb = _buildChoiceItemThumb(ch);
+      if (_thumb) row.insertBefore(_thumb, row.firstChild);
       row.addEventListener('click', function() {
         closeChoices(); // sempre fecha primeiro pra UX consistente
         if (typeof opts.onChoice === 'function') opts.onChoice(ch);

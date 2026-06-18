@@ -1107,6 +1107,149 @@ body.perf-lite #encounter-overlay.active .enc-card {
   transform: translateX(3px);
 }
 
+/* item I (2026-06-18): thumbnail do item nas escolhas de COMPRA + detalhe
+   (top-layer dialog). PADRAO_ALDRIC + PADRAO_WEBP. */
+.enc-cho-item-thumb {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--v-gold-40);
+  border-radius: var(--v-radius-sm, 6px);
+  background: radial-gradient(circle at 50% 38%, var(--v-gold-15), rgba(15, 12, 8, 0.55));
+  overflow: hidden;
+  font-size: calc(20px * var(--v-font-scale, 1));
+}
+.enc-cho-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+.enc-cho-item-fallback { font-size: calc(22px * var(--v-font-scale, 1)); }
+.enc-cho-item-fallback svg { width: 72%; height: 72%; }
+.enc-cho-item-thumb--clickable {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.enc-cho-item-thumb--clickable:hover {
+  border-color: #c4953a;
+  box-shadow: 0 0 12px var(--v-gold-30);
+  transform: scale(1.05);
+}
+.enc-cho-item-mys {
+  color: var(--v-gold, #c4953a);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: calc(22px * var(--v-font-scale, 1));
+  cursor: help;
+}
+body.perf-lite .enc-cho-item-thumb--clickable { transition: none; }
+body.perf-lite .enc-cho-item-thumb--clickable:hover { transform: none; }
+
+/* Item detail mini-dialog (empilha acima do enc-choices-overlay via showModal). */
+#enc-item-detail-overlay {
+  border: none;
+  background: transparent;
+  padding: 0;
+  max-width: 100vw;
+  max-height: 100vh;
+  margin: auto;
+  overflow: visible;
+}
+#enc-item-detail-overlay::backdrop { background: rgba(8, 6, 4, 0.72); }
+.enc-id-card {
+  position: relative;
+  width: min(86vw, 320px);
+  max-height: 86vh;
+  overflow-y: auto;
+  margin: 0 auto;
+  padding: 20px 18px 18px;
+  background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: var(--v-radius-lg, 12px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 14px var(--v-gold-15);
+  text-align: center;
+  color: var(--v-text, #d4c8b0);
+  font-family: 'Georgia', serif;
+}
+.enc-id-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background: rgba(15, 12, 8, 0.6);
+  border: 1px solid var(--v-gold-40);
+  border-radius: 50%;
+  color: var(--v-gold, #c4953a);
+  font-size: var(--v-font-base, 15px);
+  cursor: pointer;
+  line-height: 1;
+}
+.enc-id-img-wrap {
+  width: 96px;
+  height: 96px;
+  margin: 4px auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--v-gold-30);
+  border-radius: var(--v-radius, 10px);
+  background: radial-gradient(circle at 50% 38%, var(--v-gold-15), rgba(15, 12, 8, 0.5));
+}
+.enc-id-img {
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+.enc-id-img-fallback { font-size: 46px; }
+.enc-id-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: var(--v-font-lg, 16px);
+  letter-spacing: 0.5px;
+}
+.enc-id-rarity {
+  font-size: var(--v-font-xs, 11px);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+.enc-id-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--v-gold-35), transparent);
+  margin: 10px 0;
+}
+.enc-id-stats {
+  font-size: var(--v-font-sm, 13px);
+  line-height: 1.7;
+  text-align: left;
+}
+.enc-id-desc {
+  font-size: var(--v-font-sm, 13px);
+  font-style: italic;
+  color: var(--v-text-dim, #a09484);
+  line-height: 1.5;
+}
+.enc-id-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.enc-id-tag {
+  font-size: var(--v-font-xs, 11px);
+  padding: 2px 8px;
+  border: 1px solid var(--v-gold-30);
+  border-radius: var(--v-radius-pill, 20px);
+  color: var(--v-gold, #c4953a);
+}
+
 /* "Voltar à narrativa" button (bottom). */
 .enc-cho-back {
   width: 100%;
