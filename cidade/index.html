@@ -10207,6 +10207,13 @@ function _isCTA(btn) {
       remove:   function(slot){ return window.vCityServer.cityAction('service.rune_remove', { slot: slot }); },
       buy:      function(tier){ return window.vCityServer.cityAction('service.rune_buy', { tier: tier }); }
     },
+    research: {  // Pesquisa da Guilda (downtime XGtE) server-authoritative (#0, 2026-06-18) —
+      // antes o cliente rolava o d20, aplicava o buff em metadata (divergente de
+      // narrative.flags), dava +30 XP que o backend NÃO dá, ignorava o cooldown e usava
+      // 25% de complicação (backend ~10%). Agora o SERVIDOR resolve tudo; cliente anima.
+      state:   function(){ return window.vCityServer.cityAction('service.research_state', {}); },
+      resolve: function(topic){ return window.vCityServer.cityAction('service.research_resolve', { topic: topic }); }
+    },
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
       state: function(){ return window.vCityServer.cityAction('flag.state', {}); }
@@ -43877,7 +43884,71 @@ function _guildShowRecruits(p){
   });
 }
 
+// SERVER-AUTHORITATIVE Pesquisa da Guilda (#0, 2026-06-18) — resolvida no servidor.
+function _guildResearchRemote(p){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Consultando a biblioteca...' }); } catch(_){} }
+  window.vCityServer.research.state().then(function(st){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!st || !st.ok) { if (typeof vToast === 'function') vToast('Erro na biblioteca.', 'warn'); return; }
+    if (!st.available) {
+      _showInfoPopup({ icon: _heralIco('ic-mochila'), npc: 'Veterano Braun', title: 'Biblioteca da Guilda',
+        desc: '<i>Braun balança a cabeça: "Os tomos precisam de repouso. Volte em <b>' + (st.cooldown_remaining || 1) + '</b> turno(s)."</i>',
+        onConfirm: function(){} });
+      return;
+    }
+    var topics = st.topics || [];
+    _squareShowListPopup({
+      stackKey: 'guild_research', icon: _heralIco('ic-mochila'), title: 'Pesquisa',
+      flavor: '<i>' + (st.intro || 'O Veterano Braun ajusta os óculos.') + '</i><br><i>Cada tópico: teste DC ' + st.dc + ' INT · custo ' + st.cost + ' V.</i>',
+      items: topics.map(function(t){ return { icon: t.emoji || '📚', label: t.name, badge: st.cost + ' V · DC ' + st.dc, desc: t.desc, _k: t.key }; }),
+      onPick: function(item){ _guildResearchConfirmRemote(p, item._k, item, st); }
+    });
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] research state failed', _e); if (typeof vToast === 'function') vToast('Erro na biblioteca.', 'warn'); });
+}
+
+function _guildResearchConfirmRemote(p, topicKey, topic, st){
+  _showConfirmPurchase({
+    icon: topic.emoji || '📚', npc: 'Veterano Braun', title: topic.name,
+    desc: '<b>' + topic.name + '</b><br><i>' + (topic.desc || '') + '</i><br><br><b>Teste:</b> 1d20 + INT vs DC ' + st.dc + '<br><b>Custo:</b> ' + st.cost + ' Valdoritas',
+    cost: st.cost,
+    onConfirm: function(){
+      var preGold = p.gold;
+      if (window.vProcessing) { try { window.vProcessing.show({ text: 'Pesquisando...' }); } catch(_){} }
+      window.vCityServer.research.resolve(topicKey).then(function(res){
+        if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+        if (!res || !res.ok) {
+          var emsg = (res && res.error === 'no_gold') ? 'Valdoritas insuficientes.'
+                   : (res && res.error === 'cooldown') ? ('A biblioteca precisa repousar (' + (res.remaining || 1) + ' turno(s)).')
+                   : 'Não foi possível pesquisar agora.';
+          if (typeof vToast === 'function') vToast(emsg, 'warn');
+          return;
+        }
+        if (typeof res.gold === 'number') { p.gold = res.gold; refreshHud(); }
+        var bonusLine = res.success
+          ? ('<br><br>📖 Bônus: <b>+' + res.bonus_value + '</b> em testes relacionados por <b>' + res.bonus_duration + '</b> turnos.')
+          : (res.refund ? ('<br><br>Reembolso: <b>' + res.refund + '</b> Valdoritas.') : '');
+        var compLine = res.complication ? ('<br><br><b>⚠️ Complicação:</b> <i>' + res.complication.text + '</i><br>(' + res.complication.effect + ')') : '';
+        _showServiceResultPopup({
+          icon: res.success ? '📚' : '⚠️', npc: 'Veterano Braun',
+          narrative: '<i>' + (res.result_text || '') + '</i>' + bonusLine + compLine,
+          dice: { formula: '1d20' + (res.bonus >= 0 ? '+' : '') + res.bonus + ' (' + res.skill_label + ') vs DC ' + res.dc, sides: 20, value: res.roll, total: res.total },
+          deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+          onContinue: function(){ navigateBack(); }
+        });
+      }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] research resolve failed', _e); if (typeof vToast === 'function') vToast('Erro ao pesquisar.', 'warn'); });
+    }
+  });
+}
+
 function _guildShowResearch(p){
+  // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE o SERVIDOR valida cooldown+ouro,
+  // rola, aplica o bônus (narrative.flags) e marca o downtime; o cliente busca os tópicos+
+  // cooldown e anima o d20 (PADRAO_DADOS). LOCAL (file://) mantém o mock pro dev tool.
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+      && window.vCityServer.research && window.vCityServer.research.resolve) {
+    _guildResearchRemote(p);
+    return;
+  }
   // canonical: guild_research_data.py Research Downtime via CANON_RESEARCH
   // RESEARCH_COST_GP=50, RESEARCH_DC=15, 4 topics × bonus_key/value=2/duration=5 turnos
   // 3 skills (investigation/history/arcana — todas INT)
