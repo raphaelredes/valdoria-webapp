@@ -10132,7 +10132,12 @@ function _isCTA(btn) {
       // 10%) + remove o item + credita o líquido. Antes a venda era 100% LOCAL (nem
       // persistia). sellQuote é read-only (oferta da confirmação — exibir o net do servidor).
       sellQuote: function(npcKey, itemName, qty){ return window.vCityServer.cityAction('service.market_sell_quote', { npc_key: npcKey, item_name: itemName, qty: qty || 1 }); },
-      sell:      function(npcKey, itemName, qty){ return window.vCityServer.cityAction('service.market_sell', { npc_key: npcKey, item_name: itemName, qty: qty || 1 }); }
+      sell:      function(npcKey, itemName, qty){ return window.vCityServer.cityAction('service.market_sell', { npc_key: npcKey, item_name: itemName, qty: qty || 1 }); },
+      // VENDA MÁGICA (Fatia 3): o SERVIDOR rola a Persuasão (XGtE Magic Item Offer
+      // Table) — antes o d20 rolava no cliente (anti-cheat) e o ouro era 100% local.
+      // magicOffer trava o roll por item (anti reroll-farming); sellMagic vende ao preço travado.
+      magicOffer: function(npcKey, itemName){ return window.vCityServer.cityAction('service.market_magic_offer', { npc_key: npcKey, item_name: itemName }); },
+      sellMagic:  function(npcKey, itemName){ return window.vCityServer.cityAction('service.market_sell_magic', { npc_key: npcKey, item_name: itemName }); }
     },
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
@@ -42790,7 +42795,74 @@ function _marketShowSell(p){
 }
 
 // XGtE Magic Item Offer Table — flow: pré-roll info → confirm → roll d20 → resultado
+// Venda mágica REMOTE (#0, Fatia 3): o SERVIDOR rola a Persuasão (XGtE) E vende
+// atômico. magicOffer trava o roll por item (vê/aceita/recusa sem re-rolar). O
+// cliente só exibe o roll do servidor + anima. Mock LOCAL fica no corpo abaixo.
+function _marketSellMagicRollHtml(off){
+  var bonusShown = (off.total - off.roll);
+  var bonusStr = (bonusShown >= 0 ? '+' : '') + bonusShown;
+  return '<div style="display:flex;align-items:center;gap:var(--v-space-md, 8px);margin:var(--v-space-sm, 4px) 0;justify-content:center;">'
+    + '<span style="font-size:calc(14px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">🎲 d20:</span> '
+    + '<span style="font-family:Cinzel,serif;font-size:calc(20px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);font-weight:700;">' + off.roll + '</span>'
+    + '<span style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">' + bonusStr + ' = </span>'
+    + '<span style="font-family:Cinzel,serif;font-size:calc(22px * var(--v-font-scale, 1));color:#ffd700;font-weight:700;">' + off.total + '</span></div>'
+    + '<div style="text-align:center;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);letter-spacing:2px;margin-bottom:var(--v-space-sm, 4px);">'
+    + '◆ ' + String(off.label || '').toUpperCase() + ' · ' + Math.round((off.pct || 0) * 100) + '% ◆</div>';
+}
+function _marketSellMagicRemote(p, it, spec){
+  _showInfoPopup({
+    icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
+    title: 'Item Mágico: Negociar Venda',
+    desc: '<b>' + it.n + '</b><br><i>Valor estimado:</i> ' + (it.value || 0) + ' <span class="vi vi-coin sm"></span><br><br>'
+        + '<i>Itens mágicos exigem negociação cuidadosa. O mercador pesa cada peça antes de fazer uma oferta.</i><br><br>'
+        + '<i>"O resultado decide o quanto ele paga — de uma fração até o dobro do valor. Se ninguém quiser comprar hoje, volte outro dia."</i>',
+    confirmLabel: '🎲 Rolar Persuasão', cancelLabel: 'Voltar',
+    onConfirm: function(){
+      var _proc = (typeof vProcessing !== 'undefined' && vProcessing) ? vProcessing : null;
+      if (_proc) _proc.show({ text: 'Negociando...' });
+      window.vCityServer.market.magicOffer(spec.key, it.n).then(function(off){
+        if (_proc) _proc.hide();
+        if (!off || !off.ok){
+          vToast(off && off.error === 'protected' ? 'Item protegido.' : off && off.error === 'not_owned' ? 'Você não tem esse item.' : 'Não foi possível negociar.', 'warn');
+          return;
+        }
+        var rollHtml = _marketSellMagicRollHtml(off);
+        if (off.no_buyer){
+          _showServiceResultPopup({ icon: spec.icon, npc: spec.npc, narrative: rollHtml + off.narrative + '<br><br><i>Item permanece na sua bolsa.</i>', deltas: [], onContinue: function(){ navigateBack(); } });
+          return;
+        }
+        _showConfirmPurchase({
+          icon: spec.icon, npc: spec.npc + ' — ' + spec.role, title: 'Aceitar oferta?',
+          desc: rollHtml + off.narrative + '<br><b>Oferta:</b> ' + _fmtV(off.net) + ' <span class="vi vi-coin sm"></span>',
+          cost: off.net, creditMode: true,
+          onConfirm: function(){
+            var preGold = p.gold;
+            if (_proc) _proc.show({ text: 'Vendendo...' });
+            window.vCityServer.market.sellMagic(spec.key, it.n).then(function(res){
+              if (_proc) _proc.hide();
+              if (!res || !res.ok){
+                vToast(res && res.error === 'no_buyer' ? 'Sem comprador hoje.' : res && res.error === 'not_owned' ? 'Você não tem mais esse item.' : 'Não foi possível vender.', 'warn');
+                return;
+              }
+              p.gold = res.gold;
+              if (typeof _removeItemFromInventory === 'function') _removeItemFromInventory(it.n, 1);
+              if (typeof refreshHud === 'function') refreshHud();
+              var reactionLine = (typeof _marketNpcLine === 'function') ? _marketNpcLine(spec.key, 'sell', spec.cat) : '<i>"Bom negócio."</i>';
+              _showServiceResultPopup({ icon: spec.icon, npc: spec.npc, narrative: reactionLine + '<br><br><b>+' + _fmtV(res.net) + ' Valdoritas</b>', deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }], onContinue: function(){ navigateBack(); } });
+            }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] sellMagic', e); });
+          }
+        });
+      }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] magicOffer', e); });
+    }
+  });
+}
+
 function _marketSellMagicWithPersuasion(p, it, spec){
+  // #0 (2026-06-18, Fatia 3): em REMOTE o servidor rola a Persuasão + vende atômico.
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.market && window.vCityServer.market.sellMagic){
+    _marketSellMagicRemote(p, it, spec);
+    return;
+  }
   var cha = (p && p.ab && typeof p.ab.h === 'number') ? p.ab.h
             : (p && p.stats && typeof p.stats.cha === 'number') ? p.stats.cha : 10;
   var chaMod = Math.floor((cha - 10) / 2);
