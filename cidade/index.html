@@ -10143,6 +10143,25 @@ function _isCTA(btn) {
         var body = { user_id: a.uid, action: 'fire_' + npcId };
         var env = _env(); if (env) body.env = env;
         return _post('/api/guild/action', body);
+      },
+      // Treinamento XGtE (idiomas/ferramentas) — menu/início/sessão.
+      training: function(){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'training_menu' };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
+      },
+      trainStart: function(category, name){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'train_start_' + category, name: name };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
+      },
+      trainSession: function(){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'train_session' };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
       }
     }
   };
@@ -10539,6 +10558,8 @@ var _NAMED_NPC_PORTRAITS = {
   'estudiosa maeve': 'npcs/estudiosa-maeve.webp',
   'silvana a bardisa': 'npcs/silvana-bardisa.webp',
   'tavira a mestra': 'npcs/mestra-tavira.webp',
+  'mestra tavira': 'npcs/mestra-tavira.webp',  // forma "Mestra Tavira" (encontro de dispensa do grupo)
+  'tavira valeriax': 'npcs/mestra-tavira.webp',
   'vorhan o veterano': 'npcs/mestre-vorhan.webp',
   'thessil o mercador': 'npcs/mestre-thessil.webp',
   'garrick o cacador': 'npcs/mestre-garrick.webp',
@@ -43071,8 +43092,17 @@ function _guildShowParty(p){
 }
 
 function _guildShowTraining(p){
+  // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): em REMOTE abre o
+  // treinamento XGtE REAL (aprender idioma/ferramenta em N sessões) via
+  // /api/guild/action (training_menu/train_start_<cat>/train_session) — o SERVIDOR
+  // cobra por sessão e CONCEDE a proficiência ao concluir. ANTES: _pay(25) no cliente
+  // + narrava "+1 ATK por 7 dias" que NUNCA era aplicado (cobra e não entrega).
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.guild && window.vCityServer.guild.training) {
+    _guildTrainingMenu(p);
+    return;
+  }
   // #71e: PADRAO_ALDRIC — o Veterano Braun (quartelmestre da Guilda) conduz o treino.
-  // Ícone de combate (ic-guerreiro), não mochila genérica.
+  // ── LOCAL (file://) fallback — mock client-side (dev tool, sem servidor) ──
   _showConfirmPurchase({
     icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Treinamento de Armas',
     desc: 'Braun rola os ombros e ergue uma espada de treino. <i>"Postura errada mata mais que inimigo. Vem — uma semana de suor vale o preço."</i>'
@@ -43091,6 +43121,102 @@ function _guildShowTraining(p){
       });
     }
   });
+}
+
+// Treinamento XGtE server-driven (Veterano Braun): menu → escolher idioma/ferramenta
+// → train_start → train_session (loop até concluir). O servidor cobra por sessão e
+// concede a proficiência REAL ao concluir (corrige o mock que cobrava e não entregava).
+function _guildTrainingMenu(p){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Consultando o Veterano Braun...' }); } catch(_){} }
+  window.vCityServer.guild.training().then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || data.error) { if (typeof vToast === 'function') vToast('Não foi possível abrir o treinamento.', 'warn'); return; }
+    var coin = '<span class="vi vi-coin sm"></span>';
+    var cost = data.cost || 25;
+    var total = data.sessions_total || 0;
+    if (data.active) {  // treino em andamento → continuar sessão
+      var a = data.active;
+      _showConfirmPurchase({
+        icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Treino: ' + a.n,
+        desc: 'Braun cruza os braços. <i>"Ainda não acabamos."</i><br><br>' +
+              '<b>' + a.n + '</b> — sessão <b>' + a.done + '/' + a.total + '</b><br>' +
+              'Cada sessão custa <b>' + cost + ' ' + coin + '</b>.',
+        cost: cost, onConfirm: function(){ _guildTrainSession(p); }
+      });
+      return;
+    }
+    if (!data.can_train) {  // cooldown
+      _showInfoPopup({ icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Treinamento',
+        desc: 'Braun balança a cabeça. <i>"Descansa, aventureiro. Treino exige tempo entre as sessões. Volta em ' + (data.cooldown || 'algumas horas') + '."</i>',
+        onConfirm: function(){} });
+      return;
+    }
+    var items = [];
+    (data.languages || []).forEach(function(x){ if (!x.known) items.push({ icon: _heralIco('ic-escriba'), label: x.n, badge: 'Idioma', _cat: 'language', _name: x.n }); });
+    (data.tools || []).forEach(function(x){ if (!x.known) items.push({ icon: _heralIco('ic-mochila'), label: x.n, badge: 'Ferramenta', _cat: 'tool', _name: x.n }); });
+    if (!items.length) {
+      _showInfoPopup({ icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Treinamento',
+        desc: 'Braun te avalia de cima a baixo. <i>"Já domina tudo que posso ensinar, aventureiro. Volta quando houver algo novo no mundo."</i>', onConfirm: function(){} });
+      return;
+    }
+    _squareShowListPopup({
+      stackKey: 'guild_training', icon: _heralIco('ic-guerreiro', null, '38px'), title: 'Treinamento (XGtE)',
+      subtitle: 'Veterano Braun · Guilda', bannerImg: '../shared/img/guilda/guilda-banner.webp',
+      flavor: 'Braun rola os ombros e aponta o pátio. <i>"Idiomas, ferramentas — escolhe o que aprender. ' + total + ' sessões de suor, ' + cost + ' ' + coin + ' cada. No fim, a habilidade é tua de verdade."</i>',
+      sectionLabel: 'O que aprender', items: items,
+      onPick: function(item){
+        _showConfirmPurchase({
+          icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Aprender ' + item._name,
+          desc: 'Braun assente. <i>"' + item._name + '? Boa escolha. ' + total + ' sessões, ' + cost + ' ' + coin + ' cada — começamos pela primeira agora."</i>',
+          cost: cost, onConfirm: function(){ _guildTrainStart(p, item._cat, item._name); }
+        });
+      }
+    });
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] guild training failed', _e); if (typeof vToast === 'function') vToast('Erro no treinamento.', 'warn'); });
+}
+
+function _guildTrainStart(p, category, name){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Iniciando treino...' }); } catch(_){} }
+  window.vCityServer.guild.trainStart(category, name).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || res.error) {
+      var emsg = (res && res.error === 'already_training') ? 'Você já tem um treinamento em andamento.'
+               : (res && res.msg) || 'Não foi possível iniciar o treino.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
+    }
+    _guildTrainSession(p);  // já faz a 1ª sessão
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao iniciar treino.', 'warn'); });
+}
+
+function _guildTrainSession(p){
+  var preGold = p.gold;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Treinando...' }); } catch(_){} }
+  window.vCityServer.guild.trainSession().then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || res.error) {
+      var emsg = (res && res.error === 'not_enough_gold') ? (res.msg || 'Sem Valdoritas para a sessão.')
+               : (res && res.msg) || 'Não foi possível treinar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
+    }
+    if (typeof res.cost === 'number') p.gold = Math.max(0, p.gold - res.cost);
+    if (typeof refreshHud === 'function') refreshHud();
+    var compl = res.complication ? ('<br><br>⚠️ <i>' + ((res.complication && res.complication.text) || res.complication) + '</i>') : '';
+    if (res.completed) {
+      _showServiceResultPopup({
+        icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun',
+        narrative: 'Braun assente — raro nele. <i>"Aprendeste. A habilidade é tua agora."</i><br><br><b>' + (res.msg || 'Treinamento concluído!') + '</b>' + compl,
+        deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+        onContinue: function(){ navigateBack(); }
+      });
+    } else {
+      _showServiceResultPopup({
+        icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun',
+        narrative: 'Mais uma sessão de suor. <i>(corrige tua postura com um tapa no ombro)</i> "De novo."<br><br>Progresso: <b>' + res.sessions_done + '/' + res.sessions_total + '</b> sessões.' + compl,
+        deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+        onContinue: function(){ _guildTrainingMenu(p); }
+      });
+    }
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao treinar.', 'warn'); });
 }
 
 // --- OFICINA ---
