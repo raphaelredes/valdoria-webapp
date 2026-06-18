@@ -16,7 +16,7 @@
  *   Sessão #72: o boato simples ('tavern_rumor_buy' / node 'rumor') foi REMOVIDO —
  *   o boato canônico é a XGtE Gather Info ('tavern_gather_open' → node 'gather').
  *
- * NPC: Grom Barba-Cinza. Doc: docs/sistemas/padrao-servidor.md
+ * NPC: Grom, o Caolho. Doc: docs/sistemas/padrao-servidor.md
  *
  * MAPA_IA:
  *   ~30  TAVERN_SVC_META   — svc.cb REAL do backend -> PNG icon path
@@ -86,7 +86,7 @@ function _tavBuildCenario(data) {
   nameEl.textContent = 'Taverna do Javali Bêbado';
   titulo.appendChild(nameEl);
   var subEl = vCity.el('div', 'sub');
-  subEl.textContent = 'Estabelecimento de Grom Barba-Cinza · Bairro do Mercado';
+  subEl.textContent = 'Estabelecimento de Grom, o Caolho · Bairro do Mercado';
   titulo.appendChild(subEl);
   cenarioEl.appendChild(titulo);
   return cenarioEl;
@@ -97,8 +97,8 @@ function _tavBuildNpcRow(data) {
   var row = vCity.el('div', 'row-npc');
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = vCity.el('img');
-  img.src = '../shared/img/npcs/taverneiro.webp';
-  img.alt = 'Grom Barba-Cinza';
+  img.src = '../shared/img/npcs/grom-anao.webp';  // retrato canônico do anão caolho (era o genérico taverneiro.webp)
+  img.alt = 'Grom, o Caolho';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };
   portraitWrap.appendChild(img);
@@ -106,7 +106,7 @@ function _tavBuildNpcRow(data) {
 
   var info = vCity.el('div', 'npc-info');
   var name = vCity.el('div', 'name');
-  name.textContent = 'Grom Barba-Cinza';
+  name.textContent = 'Grom, o Caolho';
   info.appendChild(name);
   var quote = vCity.el('div', 'quote');
   quote.textContent = '"Senta antes que eu mude de ideia."';
