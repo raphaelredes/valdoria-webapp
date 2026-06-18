@@ -10119,7 +10119,12 @@ function _isCTA(btn) {
     temple: {  // Templo (serviços curativos) server-authoritative (#0, 2026-06-18) — o
       // SERVIDOR valida+cobra+rola(1d8+3/1d4)+aplica HP/buff/condição REAL e persiste.
       // Antes o cliente fabricava o efeito LOCAL (só o ouro persistia via service.gold).
-      service: function(svc){ return window.vCityServer.cityAction('service.temple_service', { service: svc }); }
+      service: function(svc){ return window.vCityServer.cityAction('service.temple_service', { service: svc }); },
+      // Pagar Dívida (#0, 2026-06-18): o débito de ressurreição (flags['temple_debt']) é
+      // REAL no servidor — o cliente renderizava um MOCK (CITY_TEMPLE_DEBT). debtState lê o
+      // débito real ao abrir o Templo; payDebt quita via servidor (modify_gold + zera flags).
+      debtState: function(){ return window.vCityServer.cityAction('service.temple_debt_state', {}); },
+      payDebt: function(){ return window.vCityServer.cityAction('service.temple_pay_debt', {}); }
     },
     market: {  // Mercado (COMPRA) server-authoritative (#0, 2026-06-18, Fatia 1, opção A)
       // — o SERVIDOR precifica (registro global + reputação) E concede o item ATÔMICO.
@@ -33352,6 +33357,58 @@ function _templeServiceRemote(p, sid, s){
   }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] temple service failed', _e); if (typeof vToast === 'function') vToast('Erro no serviço do templo.', 'warn'); });
 }
 
+// SERVER-AUTHORITATIVE (#0, 2026-06-18): paga o débito REAL de ressurreição via servidor.
+// CITY_TEMPLE_DEBT foi hidratado em _renderCityPopup('temple') com o valor real (debtState),
+// então o confirm mostra o custo certo. O servidor quita (modify_gold + zera flags['temple_debt']
+// + recupera reputação) e devolve narrative_text (DEBT_PAID_LINES) + gold; o cliente só anima.
+function _templePayDebtRemote(p){
+  var debt = window.CITY_TEMPLE_DEBT || 0;
+  if (debt <= 0) {
+    _showServiceResultPopup({
+      icon: _heralIco('ic-mochila'), npc: 'Templo',
+      narrative: '<i>"Nenhuma dívida pendente. Que os deuses te abençoem."</i>',
+      deltas: []
+    });
+    return;
+  }
+  _showConfirmPurchase({
+    icon: _heralIco('ic-mochila'), npc: 'Padre Brevon', title: 'Quitar Dívida',
+    desc: 'Pagar <b>' + debt + ' Valdoritas</b> ao Templo. Os serviços voltam a ficar disponíveis.',
+    cost: debt,
+    onConfirm: function(){
+      var preGold = p.gold;
+      if (window.vProcessing) { try { window.vProcessing.show({ text: 'Quitando a dívida...' }); } catch(_){} }
+      window.vCityServer.temple.payDebt().then(function(res){
+        if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+        if (!res || !res.ok) {
+          if (res && res.error === 'no_debt') window.CITY_TEMPLE_DEBT = 0;
+          if (res && typeof res.debt === 'number') window.CITY_TEMPLE_DEBT = res.debt;
+          var emsg = (res && res.error === 'no_gold') ? 'Valdoritas insuficientes para quitar a dívida.'
+                   : (res && res.error === 'no_debt') ? 'Nenhuma dívida pendente.'
+                   : 'Não foi possível pagar a dívida agora.';
+          if (typeof vToast === 'function') vToast(emsg, 'warn');
+          if (_popupStack[_popupStack.length-1] === 'temple') _renderCityPopup('temple');
+          return;
+        }
+        if (typeof res.gold === 'number') p.gold = res.gold;
+        window.CITY_TEMPLE_DEBT = 0;
+        refreshHud();
+        _showServiceResultPopup({
+          icon: _heralIco('ic-bolsa'), npc: 'Padre Brevon',
+          narrative: res.narrative_text || ('⛪ Padre Brevon aceita o pagamento com um aceno solene.\n\n'
+            + '<i>"Sua dívida está quitada. Que os deuses guiem seus passos."</i>'),
+          deltas: [{ type:'gold', label:'Valdoritas', from:preGold, to:p.gold, max:Math.max(preGold, 1), bar:false }],
+          onContinue: function(){ if (_popupStack[_popupStack.length-1] === 'temple') _renderCityPopup('temple'); }
+        });
+      }).catch(function(_e){
+        if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+        console.error('[CITY] temple pay debt failed', _e);
+        if (typeof vToast === 'function') vToast('Erro ao pagar a dívida.', 'warn');
+      });
+    }
+  });
+}
+
 function _templePick(category, fallback, npcName){
   var canonExtra = (typeof CANON_TEMPLE_DATA_EXTRA !== 'undefined') ? CANON_TEMPLE_DATA_EXTRA : null;
   var canonBase  = (typeof CANON_TEMPLE_DATA !== 'undefined') ? CANON_TEMPLE_DATA : null;
@@ -46935,6 +46992,19 @@ function _renderCityPopup(key){
   // === AREA_REGISTRY dispatch (canonical renderers) ===
   if (key === 'temple' && typeof renderTempleHub === 'function') {
     if (titleEl) titleEl.textContent = 'Templo dos Quatro';
+    // SERVER-AUTHORITATIVE (#0, 2026-06-18): hidrata o débito REAL de ressurreição
+    // (flags['temple_debt']) do servidor. Antes CITY_TEMPLE_DEBT começava em 0 (mock) e
+    // NUNCA batia com o débito persistido — o jogador ficava preso (serviços bloqueados
+    // mas sem dívida visível pra pagar). Renderiza já e re-renderiza ao chegar o real.
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && window.vCityServer.temple && window.vCityServer.temple.debtState) {
+      window.vCityServer.temple.debtState().then(function(st){
+        if (st && st.ok && typeof st.debt === 'number' && st.debt !== (window.CITY_TEMPLE_DEBT || 0)) {
+          window.CITY_TEMPLE_DEBT = st.debt;
+          if (typeof renderTempleHub === 'function' && bodyEl) renderTempleHub(bodyEl, _buildTempleMockData(window.CITY_MOCK_PLAYER));
+        }
+      }).catch(function(){});
+    }
     renderTempleHub(bodyEl, _buildTempleMockData(window.CITY_MOCK_PLAYER));
     _maybeElaraPoisonDelivery();  // Elara entrega o veneno da quest do porão (server-gated)
     return;
@@ -49182,6 +49252,14 @@ var ACTION_HANDLERS = {
   },
   // === Pagar dívida + downtime (com confirm popup obrigatório) ===
   'temple_pay_debt': function(p){
+    // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE quita o débito REAL via servidor
+    // (flags['temple_debt']). Antes pagava só o MOCK (CITY_TEMPLE_DEBT) e o débito real
+    // nunca zerava → serviços do Templo ficavam bloqueados pra sempre. LOCAL (file://) usa o mock.
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && window.vCityServer.temple && window.vCityServer.temple.payDebt) {
+      _templePayDebtRemote(p);
+      return;
+    }
     var debt = window.CITY_TEMPLE_DEBT || 0;
     if (debt <= 0) {
       _showServiceResultPopup({
