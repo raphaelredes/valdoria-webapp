@@ -38697,7 +38697,7 @@ function _tavernShowCarousing(p){
           var preGold = p.gold;
           window.vCityServer.cityAction('service.carousing', { tier: l.id }).then(function(res){
             if (!res || !res.ok){
-              var emsg = (res && res.error === 'cooldown') ? ('Você já fez farra. Volte em ' + (res.remaining || 5) + ' turnos.')
+              var emsg = (res && res.error === 'cooldown') ? ('Você já fez farra. Volte em ' + (res.remaining || 10) + ' turnos.')
                        : (res && res.error === 'no_funds') ? 'Sem Valdoritas suficientes.'
                        : 'Não foi possível socializar agora.';
               if (typeof vToast === 'function') vToast(emsg); return;
