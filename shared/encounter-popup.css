@@ -471,8 +471,40 @@ body.perf-lite #encounter-overlay.active .enc-card {
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--v-text-dim, #a09484);
-  margin-bottom: var(--v-space-sm, 4px);
 }
+/* G (2026-06-18): linha de recompensa com ícone/imagem (moeda Valdorita / ✦ XP /
+   imagem WebP do item) à esquerda + valor/label à direita. Mais épico que o texto
+   puro anterior. */
+.enc-reward-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v-space-md, 8px);
+  margin: var(--v-space-sm, 4px) auto;
+  max-width: 300px;
+}
+.enc-reward-col { text-align: left; min-width: 0; }
+.enc-reward-icon {
+  flex-shrink: 0;
+  width: calc(34px * var(--v-font-scale, 1));
+  height: calc(34px * var(--v-font-scale, 1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(22px * var(--v-font-scale, 1));
+  color: var(--v-gold, #c4953a);
+  filter: drop-shadow(0 0 8px var(--v-gold-45, rgba(196,149,58,0.45)));
+}
+.enc-reward-icon-xp { color: #88c878; filter: drop-shadow(0 0 8px rgba(136,200,120,0.5)); }
+.enc-reward-item-img {
+  width: calc(34px * var(--v-font-scale, 1));
+  height: calc(34px * var(--v-font-scale, 1));
+  object-fit: contain;
+  border-radius: var(--v-radius-xs, 4px);
+}
+.enc-reward-val-gold { color: var(--v-gold, #ffd680); }
+.enc-reward-val-xp   { color: #88c878; }
+.enc-reward-val-item { font-size: calc(16px * var(--v-font-scale, 1)); }
 
 .enc-sentence {
   display: inline;

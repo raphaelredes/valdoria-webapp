@@ -448,12 +448,54 @@
      `<div style>`/`<b style>` em narração e vazava como texto (bug 2026-06-11).
      Estilo via classes .enc-reward* (encounter-popup.css) — zero inline style.
      Retorna HTMLElement (ou null se sem recompensa). */
+  /* Resolve o slug canônico de um item (espelha o slugify do items-resolver) p/
+     achar a imagem WebP da recompensa. */
+  function _rewardItemSlug(name) {
+    try {
+      return String(name).normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    } catch (_e) { return ''; }
+  }
+
+  /* Monta o nó de ícone de uma recompensa (DOM-safe, sem innerHTML em texto do
+     usuário): gold→moeda Valdorita, xp→✦, item→imagem WebP (vItems), effect→◆. */
+  function _rewardIconEl(kind, name) {
+    var ic = document.createElement('span');
+    ic.className = 'enc-reward-icon enc-reward-icon-' + kind;
+    if (kind === 'gold') {
+      var coin = document.createElement('span');
+      coin.className = 'vi vi-coin';   /* coin-icon.css: moeda dourada V */
+      ic.appendChild(coin);
+    } else if (kind === 'xp') {
+      ic.textContent = '✦';
+    } else if (kind === 'item') {
+      var slug = _rewardItemSlug(name);
+      var img = null;
+      if (slug && window.vItems && typeof window.vItems.has === 'function' && window.vItems.has(slug)) {
+        img = document.createElement('img');
+        img.className = 'enc-reward-item-img';
+        img.alt = '';
+        img.loading = 'lazy';
+        img.src = ((window.vItemsConfig && window.vItemsConfig.pngBase) || '/shared/img/items/') + slug + '.webp';
+        img.setAttribute('onerror', "this.style.display='none';this.parentNode.textContent='\\uD83C\\uDF81';");
+        ic.appendChild(img);
+      } else {
+        ic.textContent = '🎁';   /* 🎁 fallback */
+      }
+    } else {
+      ic.textContent = '◆';
+    }
+    return ic;
+  }
+
   function _buildRewardBlockEl(line) {
+    /* [kind, valor, label] — kind controla o ícone (G, 2026-06-18: user pediu
+       exibição épica de XP/item/Valdoritas com ícone/imagem em vez de texto puro). */
     var rows = [];
-    if (line.xp && line.xp > 0) rows.push(['+' + (line.xp | 0) + ' XP', 'Experiência']);
-    if (line.gold && line.gold > 0) rows.push(['+' + (line.gold | 0) + ' Valdoritas', 'Tesouro']);
-    (line.items || []).forEach(function (it) { if (it) rows.push([String(it), 'Item']); });
-    if (line.effect) rows.push([String(line.effect), '']);
+    if (line.gold && line.gold > 0) rows.push(['gold', '+' + (line.gold | 0) + ' Valdoritas', 'Tesouro']);
+    if (line.xp && line.xp > 0) rows.push(['xp', '+' + (line.xp | 0) + ' XP', 'Experiência']);
+    (line.items || []).forEach(function (it) { if (it) rows.push(['item', String(it), 'Item']); });
+    if (line.effect) rows.push(['effect', String(line.effect), '']);
     if (!rows.length) return null;
     var box = document.createElement('div');
     box.className = 'enc-reward';
@@ -462,16 +504,23 @@
     title.textContent = '◆ Recompensa ◆';
     box.appendChild(title);
     rows.forEach(function (r) {
+      var row = document.createElement('div');
+      row.className = 'enc-reward-row';
+      row.appendChild(_rewardIconEl(r[0], r[1]));
+      var col = document.createElement('div');
+      col.className = 'enc-reward-col';
       var val = document.createElement('div');
-      val.className = 'enc-reward-val';
-      val.textContent = r[0];           /* textContent = escape nativo, sem XSS */
-      box.appendChild(val);
-      if (r[1]) {
+      val.className = 'enc-reward-val enc-reward-val-' + r[0];
+      val.textContent = r[1];           /* textContent = escape nativo, sem XSS */
+      col.appendChild(val);
+      if (r[2]) {
         var lbl = document.createElement('div');
         lbl.className = 'enc-reward-lbl';
-        lbl.textContent = r[1];
-        box.appendChild(lbl);
+        lbl.textContent = r[2];
+        col.appendChild(lbl);
       }
+      row.appendChild(col);
+      box.appendChild(row);
     });
     return box;
   }
