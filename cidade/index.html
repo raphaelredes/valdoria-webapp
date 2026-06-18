@@ -48121,6 +48121,7 @@ function _innShowKeyBoard(opts){
     +   'border:1px solid rgba(196,149,58,0.35);box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 26px rgba(0,0,0,0.45);}'
     + '.kb-keys{position:absolute;top:6%;left:6%;right:6%;bottom:8%;}'
     + '.kb-key{position:absolute;width:32%;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;'
+    +   'background:transparent;border:none;padding:0;'  /* <button> não pode ter fundo branco padrão atrás da chave transparente */
     +   'transform-origin:top center;transition:transform 0.14s ease,filter 0.18s;animation:kbKeyIn 0.42s ease-out both;}'
     + '.kb-key:hover{transform:scale(1.09);z-index:6;filter:brightness(1.08) drop-shadow(0 0 10px rgba(255,200,90,0.5));}'
     + '.kb-key:active{transform:scale(0.96);}'
