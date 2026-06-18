@@ -10175,6 +10175,13 @@ function _isCTA(btn) {
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
       state: function(){ return window.vCityServer.cityAction('flag.state', {}); }
     },
+    npc: {  // NPC Interaction (#0, 2026-06-18, Fatia 1) — antes a "Concluir História"
+      // de NPC único aplicava o reward LOCAL (XP via service.xp escapava; gold+item
+      // só no cliente, próximo reload sumia). Agora o SERVIDOR concede UMA vez por
+      // (player, npc_key) — flag `town_unique_<key>_finished` persistida bloqueia
+      // farm de reset-localStorage.
+      uniqueFinish: function(npcKey){ return window.vCityServer.cityAction('service.npc_unique_finish', { npc_key: npcKey }); }
+    },
     ach: {  // FASE 5 — progresso de conquistas por chain (read-only, best-effort)
       progress: function(){ return window.vCityServer.cityAction('ach.progress', {}); }
     },
@@ -22293,13 +22300,38 @@ function _npcApplyTalkEffects(p, npc, opt){
   if (opt._isUniqueFinish && opt._reward){
     var r = opt._reward;
     var rewardLines = [];
-    if (r.xp){ _gainXp(p, r.xp); rewardLines.push('✨ +' + r.xp + ' XP'); }
-    if (r.gold){ p.gold += r.gold; rewardLines.push('<span class="vi vi-coin sm"></span> +' + r.gold + ' Valdoritas'); }
-    if (r.item){ p.inventory = p.inventory || []; p.inventory.push(r.item); rewardLines.push('🎒 Obteve: ' + r.item); }
-    if (rewardLines.length){ msgExtra = '<br><br>' + rewardLines.join('<br>'); }
+    // SERVER-AUTHORITATIVE (#0, 2026-06-18, Fatia 1 NPC Interaction): antes os rewards
+    // de "Concluir História" eram LOCAL — só o XP escapava via service.xp; gold + item
+    // sumiam no próximo reload e o usuário podia farmar resetando localStorage
+    // (_uniqueNpcsFinished). Agora o SERVIDOR concede UMA vez por (player, npc_key)
+    // via vCityServer.npc.uniqueFinish — flag persistente town_unique_<key>_finished
+    // bloqueia repeats. O cliente faz otimismo (UX) e re-hidrata gold/level do servidor.
+    var alreadyDoneLocal = !!(npc._canonKey && window._uniqueNpcsFinished && window._uniqueNpcsFinished[npc._canonKey]);
+    if (!alreadyDoneLocal){
+      if (r.xp){ _gainXp(p, r.xp); rewardLines.push('✨ +' + r.xp + ' XP'); }
+      if (r.gold){ p.gold += r.gold; rewardLines.push('<span class="vi vi-coin sm"></span> +' + r.gold + ' Valdoritas'); }
+      if (r.item){ p.inventory = p.inventory || []; p.inventory.push(r.item); rewardLines.push('🎒 Obteve: ' + r.item); }
+      if (rewardLines.length){ msgExtra = '<br><br>' + rewardLines.join('<br>'); }
+    }
     if (npc._canonKey){
       window._uniqueNpcsFinished[npc._canonKey] = true;
       if (typeof window._persistUniqueFinished === 'function') { window._persistUniqueFinished(); }
+      // Persiste no SERVIDOR (autoridade da flag + reward gold/item). XP já foi por
+      // _gainXp/service.xp acima. Re-hidrata gold/level se o servidor devolver.
+      try {
+        if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+            && window.vCityServer.npc && window.vCityServer.npc.uniqueFinish){
+          window.vCityServer.npc.uniqueFinish(npc._canonKey).then(function(res){
+            if (res && res.ok){
+              if (typeof res.gold === 'number') p.gold = res.gold;
+              if (typeof res.level === 'number') p.level = res.level;
+              if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_){} }
+            }
+            // res.error==='already_finished' é OK: cliente já tinha aplicado o reward
+            // anteriormente; o servidor confirma e não duplica. Sem mutação adicional.
+          }).catch(function(e){ console.error('[CITY] npc unique_finish failed', e); });
+        }
+      } catch(_){}
     }
   }
   if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_){} }
@@ -22535,11 +22567,26 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
       // Marca finalizado (canonical: town_unique_<id>_finished flag)
       // task #80 (2026-05-20): persiste em localStorage char-namespaced
       // pra NUNCA repetir intro/finish em refresh/relog.
+      // SERVER-AUTHORITATIVE (#0, 2026-06-18, Fatia 1): também persiste server-side
+      // a flag + reward gold/item via vCityServer.npc.uniqueFinish. XP já vai por
+      // _gainXp/service.xp acima. Defesa contra farm via reset-localStorage.
       if (npc._canonKey){
         window._uniqueNpcsFinished[npc._canonKey] = true;
         if (typeof window._persistUniqueFinished === 'function') {
           window._persistUniqueFinished();
         }
+        try {
+          if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+              && window.vCityServer.npc && window.vCityServer.npc.uniqueFinish){
+            window.vCityServer.npc.uniqueFinish(npc._canonKey).then(function(res){
+              if (res && res.ok){
+                if (typeof res.gold === 'number') p.gold = res.gold;
+                if (typeof res.level === 'number') p.level = res.level;
+                if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_){} }
+              }
+            }).catch(function(e){ console.error('[CITY] npc unique_finish failed', e); });
+          }
+        } catch(_){}
       }
       refreshHud();
     }
