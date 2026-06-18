@@ -1683,8 +1683,11 @@ LOG SINK (Fase 7):
     .srp-dice {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;            /* J: não estoura/corta a label em telas estreitas */
       gap: var(--v-space-md, 8px);
       padding: 6px 14px;
+      max-width: 100%;            /* J: confina dentro do card (antes podia transbordar) */
       background: rgba(196,149,58,0.15);
       border: 1px solid rgba(196,149,58,0.5);
       border-radius: var(--v-radius-sm, 6px);
@@ -1692,7 +1695,8 @@ LOG SINK (Fase 7):
       color: #ffd700;
       font-size: var(--v-font-base, 13px);
       letter-spacing: 0.06em;
-      margin-bottom: 14px;
+      text-align: center;
+      margin: 0 auto 14px;        /* J: centraliza (era margin-bottom só) */
       animation: srp-dice-roll 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes srp-dice-roll {
@@ -1852,6 +1856,12 @@ LOG SINK (Fase 7):
       cursor: pointer;
       box-shadow: 0 4px 14px rgba(196,149,58,0.4), inset 0 1px 0 rgba(255,230,180,0.3);
       text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      /* J (2026-06-18): CTA sempre visível — fica grudado no fundo do card mesmo
+         quando o conteúdo rola (antes o botão era empurrado pra fora e "cortado"). */
+      position: sticky;
+      bottom: 0;
+      margin-top: var(--v-space-sm, 4px);
+      flex-shrink: 0;
     }
     .srp-continue-btn:hover {
       transform: translateY(-1px);
@@ -2332,13 +2342,17 @@ LOG SINK (Fase 7):
        ============================================================ */
     .srp-dice-3d {
       width: 100%;
-      min-height: clamp(150px, 56vw, 230px);
+      /* Responsivo à ALTURA também (J, 2026-06-18): em telas curtas o dado 3D
+         grande empurrava narrativa+deltas+rewards+botão pra fora do card (88vh) e
+         o CONTINUAR ficava "cortado". Agora encolhe por vh. */
+      min-height: clamp(120px, 34vh, 200px);
+      max-height: 38vh;
       margin: var(--v-space-sm, 4px) auto 14px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .srp-dice-3d canvas { display: block; }
+    .srp-dice-3d canvas { display: block; max-width: 100%; max-height: 38vh; }
 
     /* ============================================================
        === Ally Loan Modal (Fase 9.3 — SPLIT entre múltiplos aliados)
