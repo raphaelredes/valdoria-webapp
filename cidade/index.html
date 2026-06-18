@@ -10127,7 +10127,12 @@ function _isCTA(btn) {
       // só pro MOCK_PLAYER_INVENTORY do cliente que não persistia → "perde ouro+item some".
       // price é read-only (preço da tela de confirmação — exibir, NÃO recalcular).
       price: function(npcKey, itemName){ return window.vCityServer.cityAction('service.market_price', { npc_key: npcKey, item_name: itemName }); },
-      buy:   function(npcKey, itemName, qty){ return window.vCityServer.cityAction('service.market_buy', { npc_key: npcKey, item_name: itemName, qty: qty || 1 }); }
+      buy:   function(npcKey, itemName, qty){ return window.vCityServer.cityAction('service.market_buy', { npc_key: npcKey, item_name: itemName, qty: qty || 1 }); },
+      // VENDA (Fatia 2): o servidor valida posse + precifica (multiplicador PHB + taxa
+      // 10%) + remove o item + credita o líquido. Antes a venda era 100% LOCAL (nem
+      // persistia). sellQuote é read-only (oferta da confirmação — exibir o net do servidor).
+      sellQuote: function(npcKey, itemName, qty){ return window.vCityServer.cityAction('service.market_sell_quote', { npc_key: npcKey, item_name: itemName, qty: qty || 1 }); },
+      sell:      function(npcKey, itemName, qty){ return window.vCityServer.cityAction('service.market_sell', { npc_key: npcKey, item_name: itemName, qty: qty || 1 }); }
     },
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
@@ -42610,6 +42615,54 @@ function _rewardItemName(v){
 }
 window._rewardItemName = _rewardItemName;
 
+// Venda REMOTE server-authoritative (#0, Fatia 2): consulta a oferta (net após taxa
+// 10%) e vende via o servidor (valida posse + remove item + credita ouro ATOMICO).
+// NÃO faz p.gold += sellPrice local (servidor é a autoridade). Mock LOCAL fica no
+// corpo de _marketShowSell.
+function _marketSellConfirmRemote(p, it, spec){
+  var _proc = (typeof vProcessing !== 'undefined' && vProcessing) ? vProcessing : null;
+  if (_proc) _proc.show({ text: 'Avaliando o item...' });
+  window.vCityServer.market.sellQuote(spec.key, it.n, 1).then(function(q){
+    if (_proc) _proc.hide();
+    if (!q || !q.ok){
+      vToast(q && q.error === 'protected' ? 'Item protegido — não pode vender.'
+           : q && q.error === 'not_owned' ? 'Você não tem esse item disponível.'
+           : 'Não dá pra vender isso.', 'warn');
+      return;
+    }
+    var net = q.net;
+    var taxLine = (q.tax > 0) ? '<br><i>Taxa do mercado (10%): -' + _fmtV(q.tax) + ' <span class="vi vi-coin sm"></span></i>' : '';
+    _showConfirmPurchase({
+      icon: spec.icon, npc: spec.npc + ' — ' + spec.role, title: 'Vender ' + it.n,
+      desc: '<b>' + it.n + '</b>' + taxLine + '<br><b>Oferta final:</b> <b>' + _fmtV(net) + '</b> <span class="vi vi-coin sm"></span>',
+      cost: net, creditMode: true,
+      onConfirm: function(){
+        var preGold = p.gold;
+        if (_proc) _proc.show({ text: 'Vendendo...' });
+        window.vCityServer.market.sell(spec.key, it.n, 1).then(function(res){
+          if (_proc) _proc.hide();
+          if (!res || !res.ok){
+            vToast(res && res.error === 'not_owned' ? 'Você não tem mais esse item.'
+                 : res && res.error === 'protected' ? 'Item protegido.'
+                 : 'Não foi possível vender.', 'warn');
+            return;
+          }
+          p.gold = res.gold;
+          if (typeof _removeItemFromInventory === 'function') _removeItemFromInventory(it.n, 1);  // espelha no mock p/ a UI
+          if (typeof refreshHud === 'function') refreshHud();
+          var reactionLine = (typeof _marketNpcLine === 'function') ? _marketNpcLine(spec.key, 'sell', spec.cat) : '<i>"Bom negócio."</i>';
+          _showServiceResultPopup({
+            icon: spec.icon, npc: spec.npc,
+            narrative: reactionLine + '<br><br><b>+' + _fmtV(res.net) + ' Valdoritas</b>',
+            deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
+            onContinue: function(){ navigateBack(); }
+          });
+        }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] market.sell', e); });
+      }
+    });
+  }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] market.sellQuote', e); });
+}
+
 function _marketShowSell(p){
   var inv = MOCK_PLAYER_INVENTORY;
   if (inv.length === 0) {
@@ -42670,6 +42723,12 @@ function _marketShowSell(p){
       }
 
       // ===== MUNDANE / GEM SELL =====
+      // #0 (2026-06-18, Fatia 2): em REMOTE o servidor valida posse + precifica (taxa
+      // 10%) + remove o item + credita o liquido ATOMICO. Mock LOCAL (file://) abaixo.
+      if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.market && window.vCityServer.market.sell){
+        _marketSellConfirmRemote(p, it, spec);
+        return;
+      }
       var sellPrice = _marketCalculateSellPrice(it.n, spec.key, p);
       var breakdown = _marketPriceBreakdown(it.n, spec.key, p, 'sell');
       var isFullValue = _marketIsFullValueCategory((getItemData(it.n) || {}).t || []);
