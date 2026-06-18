@@ -10162,6 +10162,25 @@ function _isCTA(btn) {
         var body = { user_id: a.uid, action: 'train_session' };
         var env = _env(); if (env) body.env = env;
         return _post('/api/guild/action', body);
+      },
+      // Caçadas (Tavira — Recompensas): listar prontas/em-andamento + entregar (turn-in real).
+      bounties: function(){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'bounty_list' };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
+      },
+      bountyTurnin: function(questId){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'bounty_turnin_' + questId };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
+      },
+      bountyBatch: function(){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'bounty_batch' };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
       }
     }
   };
@@ -42621,7 +42640,18 @@ function _guildShowQuests(p){
 }
 
 function _guildShowRewards(p){
-  // Mock: jogador tem 1 missão completa pra entregar
+  // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): em REMOTE abre o
+  // turn-in REAL das caçadas (contratos de caça) na Tavira via /api/guild/action
+  // (bounty_list / bounty_turnin_<id> / bounty_batch). O SERVIDOR valida o
+  // bounty_ready_, consome itens, completa a quest (complete_quest = autoridade da
+  // recompensa), limpa metadata e conta a relação; o cliente só anima. ANTES: o
+  // cliente fabricava +50 Valdoritas + 80 XP p/ uma caçada "Caçar 3 lobos" FAKE,
+  // não persistia (#0) e cobrava a recompensa em TODO clique (sem idempotência).
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.guild && window.vCityServer.guild.bounties) {
+    _guildBountiesMenu(p);
+    return;
+  }
+  // ── LOCAL (file://) fallback — mock client-side (dev tool, sem servidor) ──
   var preGold = p.gold;
   var preXp = p.xp || 0;
   _showInfoPopup({
@@ -42642,6 +42672,129 @@ function _guildShowRewards(p){
       });
     }
   });
+}
+
+// Caçadas server-driven (Tavira — Recompensas): lista contratos prontos p/ entrega
+// + em andamento; entrega 1 ou todas → servidor concede a recompensa real.
+function _guildBountiesMenu(p){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Consultando a Mestra Tavira...' }); } catch(_){} }
+  window.vCityServer.guild.bounties().then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || data.error) { if (typeof vToast === 'function') vToast('Não foi possível abrir as recompensas.', 'warn'); return; }
+    var coin = '<span class="vi vi-coin sm"></span>';
+    var ready = data.ready || [];
+    var active = data.active || [];
+
+    // Nenhum contrato pronto nem em andamento → mensagem honesta (sem fabricar nada).
+    if (!ready.length && !active.length) {
+      _showInfoPopup({ icon: _heralIco('ic-trofeu'), npc: 'Mestra Tavira', title: 'Recompensas',
+        desc: (data.greeting ? '<i>' + data.greeting + '</i><br><br>' : '')
+          + 'Nenhum contrato de caça ativo agora. Aceite caçadas no <b>Quadro de Missões</b> e volte aqui quando concluí-las — a recompensa é paga na entrega.',
+        onConfirm: function(){} });
+      return;
+    }
+
+    var items = [];
+    // "Entregar Todas" como 1º item quando há 2+ prontos (batch turn-in server-side).
+    if (ready.length >= 2) {
+      items.push({ icon: _heralIco('ic-trofeu'), label: 'Entregar Todas (' + ready.length + ')',
+        badge: '✅ entrega em lote', desc: 'Recebe a recompensa de todos os contratos prontos', _batch: true });
+    }
+    ready.forEach(function(b){
+      items.push({ icon: _heralIco('ic-trofeu'), label: b.title,
+        badge: '✅ ' + (b.gold || 0) + ' ' + coin + ' + ' + (b.xp || 0) + ' XP',
+        desc: 'Pronto para entrega', _b: b, _ready: true });
+    });
+    active.forEach(function(b){
+      items.push({ icon: _heralIco('ic-missões'), label: b.title,
+        badge: (b.gold || 0) + ' ' + coin + ' + ' + (b.xp || 0) + ' XP',
+        desc: '⏳ ' + (b.progress || 'em andamento'), _b: b, _ready: false });
+    });
+
+    var flavorMsg = ready.length
+      ? 'Tavira corre o dedo pela lista de contratos selados. <i>(meio-sorriso)</i> "' + (ready.length === 1 ? 'Um contrato pronto' : ready.length + ' contratos prontos') + ' pra entrega. Boa caça paga bem."'
+      : 'Tavira ergue os olhos do livro. <i>(dá de ombros)</i> "Ainda no rastro, hein? Volta quando fechar o contrato — eu pago na entrega."';
+
+    function _openMenu(){
+      _squareShowListPopup({
+        stackKey: 'guild_bounties', icon: _heralIco('ic-trofeu', null, '38px'), title: 'Recompensas (Caçadas)',
+        subtitle: 'Mestra Tavira · ' + (data.stage_label || 'Guilda'),
+        bannerImg: '../shared/img/guilda/guilda-banner.webp',
+        flavor: flavorMsg,
+        sectionLabel: 'Contratos',
+        items: items,
+        onPick: function(item){
+          // Jogador Mínimo Trabalho: tocar = intenção. Lote/contrato pronto → entrega
+          // direto (sem 2º clique); só o contrato em andamento abre info (não entrega).
+          if (item._batch) { _guildBountyBatch(p); return; }
+          var b = item._b;
+          if (!item._ready) {
+            _showInfoPopup({ icon: _heralIco('ic-missões'), npc: 'Mestra Tavira', title: b.title,
+              desc: '<b>Em andamento.</b><br>' + (b.progress || '') + '<br><br>Recompensa na entrega: <b>' + (b.gold || 0) + ' ' + coin + ' + ' + (b.xp || 0) + ' XP</b>.',
+              onConfirm: function(){} });
+            return;
+          }
+          _guildBountyTurnin(p, b.id);
+        }
+      });
+    }
+    _openMenu();
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] guild bounties failed', _e); if (typeof vToast === 'function') vToast('Erro ao abrir recompensas.', 'warn'); });
+}
+
+function _guildBountyTurnin(p, questId){
+  var preGold = p.gold, preXp = p.xp || 0;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Entregando contrato...' }); } catch(_){} }
+  window.vCityServer.guild.bountyTurnin(questId).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'not_ready') ? 'Este contrato ainda não está pronto para entrega.'
+               : (res && res.msg) || 'Não foi possível entregar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
+    }
+    // Servidor já concedeu/persistiu ouro+XP. Reflete otimista p/ animar as deltas.
+    if (typeof res.gold === 'number') p.gold = preGold + res.gold;
+    if (typeof res.xp === 'number') { p.xp = preXp + res.xp; p._lastXpGain = res.xp; }
+    if (typeof refreshHud === 'function') refreshHud();
+    var lvlUp = res.leveled ? '<br><br>🎉 <b>SUBIU DE NÍVEL!</b>' : '';
+    var itemsTxt = (res.items && res.items.length) ? ('<br>' + res.items.join('<br>')) : '';
+    _showServiceResultPopup({
+      icon: _heralIco('ic-bolsa'), npc: 'Mestra Tavira',
+      narrative: '<i>' + (res.tavira_line || 'Tavira anota no livro e entrega a bolsa.') + '</i><br><br><b>Contrato "' + (res.title || '') + '" entregue.</b>' + itemsTxt + lvlUp,
+      deltas: [
+        { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
+        { type:'gold', label:'XP', from: preXp, to: preXp + (res.xp || 0), max: Math.max(preXp + (res.xp || 0), 1), bar: false }
+      ],
+      onContinue: function(){ _guildBountiesMenu(p); }
+    });
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao entregar contrato.', 'warn'); });
+}
+
+function _guildBountyBatch(p){
+  var preGold = p.gold, preXp = p.xp || 0;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Entregando contratos...' }); } catch(_){} }
+  window.vCityServer.guild.bountyBatch().then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'no_ready') ? 'Nenhum contrato pronto para entrega.'
+               : (res && res.msg) || 'Não foi possível entregar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
+    }
+    if (typeof res.total_gold === 'number') p.gold = preGold + res.total_gold;
+    if (typeof res.total_xp === 'number') { p.xp = preXp + res.total_xp; p._lastXpGain = res.total_xp; }
+    if (typeof refreshHud === 'function') refreshHud();
+    var lvlUp = res.leveled ? '<br><br>🎉 <b>SUBIU DE NÍVEL!</b>' : '';
+    var titlesTxt = (res.titles && res.titles.length) ? ('<br>📋 ' + res.titles.join('<br>📋 ')) : '';
+    _showServiceResultPopup({
+      icon: _heralIco('ic-bolsa'), npc: 'Mestra Tavira',
+      narrative: '<i>' + (res.tavira_line || '') + '</i><br><br><b>' + (res.count || 0) + ' contratos entregues.</b>' + titlesTxt + lvlUp,
+      deltas: [
+        { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
+        { type:'gold', label:'XP', from: preXp, to: preXp + (res.total_xp || 0), max: Math.max(preXp + (res.total_xp || 0), 1), bar: false }
+      ],
+      onContinue: function(){ _guildBountiesMenu(p); }
+    });
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao entregar contratos.', 'warn'); });
 }
 
 function _guildShowRecruits(p){
