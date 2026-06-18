@@ -41628,9 +41628,11 @@ function _shopConfirmBuyRemote(name, npcId, it, shop, p){
           if (typeof refreshHud === 'function') refreshHud();
           var npcKey2 = (typeof MARKET_NPC_LIBRARY !== 'undefined' && MARKET_NPC_LIBRARY[npcId]) ? npcId : 'generic';
           var reactionLine = (typeof _marketNpcLine === 'function') ? _marketNpcLine(npcKey2, 'buy', _marketItemCat(it)) : '<i>"Tome. Bom uso."</i>';
+          // Bjorn eureka (3a barraca) — o servidor sinaliza; mostramos a narração dele.
+          var eurekaLine = res.bjorn_eureka ? ('<br><br>💡 ' + (res.bjorn_eureka_msg || 'Bjorn desbloqueou o Kit de Acampamento!')) : '';
           _showServiceResultPopup({
             icon: shop.icon || it.e || '🛒', npc: shop.npc,
-            narrative: reactionLine + '<br><br><b>' + (res.item_added || name) + '</b> vai pra mochila.',
+            narrative: reactionLine + '<br><br><b>' + (res.item_added || name) + '</b> vai pra mochila.' + eurekaLine,
             deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
             onContinue: function(){ if (window._currentShopNpcId === npcId) _renderShopPopup(); }
           });
