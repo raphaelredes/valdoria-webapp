@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-16T21:38:20Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-18T03:26:25Z - do not edit directly, edit source -->
 
 
 
@@ -14988,6 +14988,16 @@ window.__explFetchTO = function(url, opts, ms) {
       if (!tok) return { error: 'no_motor_token' };
       console.info('[E-REM:API-STATE] send motor_tok=' + tok.slice(0, 8) + '...');
       return await _get('/api/exploracao/state?token=' + encodeURIComponent(tok));
+    },
+
+    // GET /api/exploracao/state?token=X&known=1 — hidratação sob demanda do known
+    // set (cartografia). Server-authoritative (#0): a cartografia chama isto ao abrir
+    // se __EXPLORE_KNOWN sumiu (init fire-and-forget / re-entrada sem re-init).
+    knownLocations: async function() {
+      var tok = _motorToken();
+      if (!tok) return null;
+      var res = await _get('/api/exploracao/state?token=' + encodeURIComponent(tok) + '&known=1');
+      return (res && Array.isArray(res.known_locations)) ? res.known_locations : null;
     },
 
     // POST /api/exploracao/finish
@@ -38490,7 +38500,15 @@ function _stepsForDistance() {
 // vagada (_stepsForDistance). Ao chegar (ou ser socorrido ao sucumbir) dispara
 // o retorno REAL (_returnToCityNow). O #journey-overlay legado foi REMOVIDO.
 function startReturnToCity() {
-  if (window.JourneyRunner && JourneyRunner.isActive && JourneyRunner.isActive()) return;
+  // FM1 fix (2026-06-18): NÃO fazer no-op silencioso quando há jornada "ativa". O
+  // JourneyRunner só limpa _j em _close(); uma jornada abandonada/interrompida
+  // (overlay fechado sem completar, combate raro sem redirect) deixa isActive()
+  // preso true PRA SEMPRE — então TODO "Voltar pra Cidade" virava clique morto
+  // (bug recorrente). Como a cartografia/popup de retorno são mutuamente exclusivos
+  // com o overlay de jornada, qualquer _j aqui é resíduo: força close e segue.
+  if (window.JourneyRunner && JourneyRunner.isActive && JourneyRunner.isActive()) {
+    try { if (typeof JourneyRunner.close === 'function') JourneyRunner.close(); } catch (_) {}
+  }
   var biome = (S && S.mapDef && S.mapDef.biome) ? S.mapDef.biome
             : ((S && S.biome) ? S.biome : 'plains');
   if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
@@ -38542,6 +38560,15 @@ function _returnToCityNow() {
         && ExploracaoAPI.hasToken && ExploracaoAPI.hasToken()) {
       ExploracaoAPI.finish().then(_doRedirect).catch(_doRedirect);
       setTimeout(_doRedirect, 2000);  // failsafe se finish() travar
+    } else if (location.protocol !== 'file:' && window.__EXPLORE_MODE === 'remote'
+               && typeof triggerReturnToCity === 'function') {
+      // FM2 fix (2026-06-18): SEM motor token, /finish não roda → in_explore_webapp
+      // fica setado no DB → a cidade dá BOUNCE de volta pra exploração (loop), e o
+      // "Voltar pra Cidade" parece falhar. O caminho canônico /api/webapp/transition
+      // é PERMISSIVO (valida por game-token/uid), limpa as flags POR UID e auto-cura
+      // o token → retorno robusto (Game Hub). Só pro caso sem token (raro: token já
+      // consumido por finish anterior, ou re-entrada pós-combate sem re-init).
+      triggerReturnToCity({ reason: 'cart_no_motor_token' });
     } else {
       _doRedirect();
     }
@@ -38612,6 +38639,13 @@ function _journeyLaunchRareCombatLocal(enemyId, biome) {
       context: { source: 'journey', biome: biome, dayPhase: (window.S && S.dayPhase) },
       onLose: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Emboscado durante a viagem.'); }
     });
+  } else {
+    // FM1 fix (2026-06-18): sem combate disponível (não redireciona) → a jornada
+    // ficaria PRESA ativa (o rare-combat sai sem _close, confiando no redirect).
+    // Fecha o runner pra não travar futuros "Voltar pra Cidade"/edge. A jornada é
+    // abandonada (raríssimo: triggerCombatScreen ausente) mas o jogador NÃO trava —
+    // pode tocar "Voltar pra Cidade" de novo (agora funciona, _j limpo).
+    try { if (window.JourneyRunner && typeof JourneyRunner.close === 'function') JourneyRunner.close(); } catch (_) {}
   }
 }
 
@@ -40138,6 +40172,27 @@ var _xcartCanvas = null;
 var _xcartCtx = null;
 var _xcartDpr = 1;            // DPR efetivo (capado) — passado ao motor p/ base cache HiDPI
 
+// SERVER-AUTHORITATIVE (#0, 2026-06-18): busca o known set REAL do servidor quando
+// __EXPLORE_KNOWN não está hidratado (init é fire-and-forget e pode não ter resolvido
+// ao abrir o mapa; ou re-entrada sem re-init). Sem isto + fail-closed, a cartografia
+// mostraria só a origem; com isto, mostra os locais realmente descobertos. LOCAL
+// (file://) não tem servidor → mantém o comportamento sandbox (null → mostra tudo).
+// Map server→cart espelha o de [E-REM:API-INIT] (~L14918).
+function _hydrateExploreKnown(){
+  if (window.__EXPLORE_MODE !== 'remote') return;
+  if (Array.isArray(window.__EXPLORE_KNOWN)) return;  // já hidratado
+  if (!(window.ExploracaoAPI && typeof ExploracaoAPI.knownLocations === 'function')) return;
+  try {
+    ExploracaoAPI.knownLocations().then(function(arr){
+      if (!Array.isArray(arr)) return;
+      var m = { 'city_gates': 'plains', 'whispering_woods': 'forest', 'misty_marshes': 'swamp', 'golden_sands': 'desert', 'underground_passage': 'cave', 'stone_peaks': 'mountain', 'ancient_cemetery': 'graveyard', 'frozen_waste': 'snow', 'burning_crater': 'volcanic' };
+      window.__EXPLORE_KNOWN = arr.map(function(k){ return m[k] || k; });
+      console.info('[E-REM:CART-KNOWN] hydrated on open: ' + window.__EXPLORE_KNOWN.length + ' [' + window.__EXPLORE_KNOWN.join(',') + ']');
+      if (typeof _xcartDraw === 'function' && typeof _xcartCtx !== 'undefined' && _xcartCtx) { try { _xcartDraw(); } catch (_) {} }
+    }).catch(function () {});
+  } catch (_) {}
+}
+
 function openCartography() {
   // Reset zoom/pan
   _cartZoom = 1.0; _cartPanX = 0; _cartPanY = 0;
@@ -40196,6 +40251,7 @@ function openCartography() {
 
   _xcartWireEvents();
   _xcartDraw();
+  _hydrateExploreKnown();  // #0: busca o known set real se sumiu (redesenha ao chegar)
 }
 
 // Render usando _drawScrollBgV2 + halos + biome art + paths + nodes + pin
@@ -40242,7 +40298,17 @@ var _xcartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShare
   // direto da URL como fallback p/ garantir que o fetch de map-coords (posições
   // do editor) sempre vá pro bot, nunca pra origin relativa (Cloudflare Pages).
   apiBase: (window.__EXPLORE_API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
-  getKnownLocations: function(){ return (window.__EXPLORE_KNOWN != null) ? window.__EXPLORE_KNOWN : null; },
+  // FAIL-CLOSED (#0, 2026-06-18): em REMOTE, se o known set do servidor ainda não
+  // chegou (array), NÃO retorna null — retorna [] pra a cartografia mostrar SÓ a
+  // origem sob névoa (igual ao mapa da cidade), nunca TODOS os locais. null só em
+  // LOCAL/file:// (sandbox dev sem servidor). Antes: null em REMOTE → fail-open →
+  // mapa mostrava tudo liberado (bug recorrente). _hydrateExploreKnown() (na
+  // abertura da cartografia) busca o set real e redesenha.
+  getKnownLocations: function(){
+    var k = window.__EXPLORE_KNOWN;
+    if (Array.isArray(k)) return k;
+    return (window.__EXPLORE_MODE === 'remote') ? [] : null;
+  },
   getPlayerBiomeKey: _cartGetPlayerBiomeV2,
   onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartDraw === 'function') _xcartDraw(); }
 }) : null;
