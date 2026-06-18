@@ -10185,6 +10185,12 @@ function _isCTA(btn) {
     ach: {  // FASE 5 — progresso de conquistas por chain (read-only, best-effort)
       progress: function(){ return window.vCityServer.cityAction('ach.progress', {}); }
     },
+    festival: {  // Festival mini-jogo (#0, 2026-06-18) — antes o cliente rolava o d20
+      // (Math.random) + creditava o gold local + window._festivalDone localStorage
+      // (reset = re-jogar). Agora o SERVIDOR rola+aplica gold/XP REAL e marca played
+      // em metadata['festival']; o cliente só anima (PADRAO_DADOS com o roll do servidor).
+      play: function(eventId){ return window.vCityServer.cityAction('service.festival_event', { event_id: eventId }); }
+    },
     guild: {  // Guild API server-authoritative (POST /api/guild/action) — recrutas/
       // contratação REAIS (pool multiplayer + lock atômico + party_status). Migração
       // 2026-06-17: o cliente usava GUILD_RECRUITS/GROUP_MEMBERS mock; agora busca a
@@ -44462,6 +44468,14 @@ function _festivalEvent(p, ev){
           'Custo: ' + evCost + ' Valdoritas',
     cost: evCost,
     onConfirm: function(){
+      // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE o SERVIDOR cobra+rola+aplica
+      // gold/XP REAL e marca played; o cliente só anima com o roll do servidor. LOCAL
+      // (file://) mantém o mock client-side abaixo pro dev tool.
+      if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+          && window.vCityServer.festival && window.vCityServer.festival.play) {
+        _festivalEventRemote(p, ev.id, evName, evIcon);
+        return;
+      }
       var preGold = p.gold;
       var preXp = p.xp || 0;
       if (!_pay(p, evCost)) return;
@@ -44508,6 +44522,50 @@ function _festivalEvent(p, ev){
         onContinue: function(){ _renderCityPopup('festival'); }
       });
     }
+  });
+}
+
+// SERVER-AUTHORITATIVE (#0, 2026-06-18): resolve o mini-jogo do festival no servidor
+// (cobra+rola+aplica gold/XP REAL + marca played em metadata['festival']); o cliente
+// anima o d20 (PADRAO_DADOS) com o roll do servidor + reflete gold/level reais.
+function _festivalEventRemote(p, eventId, evName, evIcon){
+  var preGold = p.gold;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Participando...' }); } catch(_){} }
+  window.vCityServer.festival.play(eventId).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'no_gold') ? 'Valdoritas insuficientes.'
+               : (res && res.error === 'already_played') ? 'Já participou desta atividade hoje.'
+               : (res && res.error === 'no_festival') ? 'Nenhum festival ativo agora.'
+               : 'Não foi possível participar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      if (res && typeof res.gold === 'number') { p.gold = res.gold; refreshHud(); }
+      return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    if (typeof res.level === 'number') p.level = res.level;
+    // Otimismo: marca played localmente (badge "✅ já participou" no hub). O servidor
+    // é a autoridade (metadata['festival']['played']) e rejeita re-jogar (already_played).
+    window._festivalDone = window._festivalDone || [];
+    if (window._festivalDone.indexOf(eventId) === -1) window._festivalDone.push(eventId);
+    refreshHud();
+    var rewards = [];
+    if (res.reward_gold >= 5) rewards.push({ type:'gold', amount: res.reward_gold, label: 'Recompensa do festival' });
+    if (res.reward_xp >= 10)  rewards.push({ type:'xp',   amount: res.reward_xp,   label: 'Experiência' });
+    _showServiceResultPopup({
+      icon: res.success ? '🏆' : '⚠️', npc: res.event_name || evName,
+      narrative: '<i>' + (res.result_text || '') + '</i>',
+      dice: { formula: '1d20' + (res.modifier>=0?'+':'') + res.modifier + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total },
+      deltas: [
+        { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }
+      ],
+      rewards: rewards.length > 0 ? rewards : null,
+      onContinue: function(){ _renderCityPopup('festival'); }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] festival event failed', _e);
+    if (typeof vToast === 'function') vToast('Erro no festival.', 'warn');
   });
 }
 
