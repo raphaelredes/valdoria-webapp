@@ -21236,11 +21236,21 @@ function _refreshNpcState(){
       var c = r.city_npc;
       window._npcDialoguesUsed = window._npcDialoguesUsed || {};
       window._uniqueNpcsFinished = window._uniqueNpcsFinished || {};
+      window._uniqueNpcsVisitCount = window._uniqueNpcsVisitCount || {};
       if (c.dialogues_used && typeof c.dialogues_used === 'object'){
         for (var k in c.dialogues_used){ if (Array.isArray(c.dialogues_used[k])) window._npcDialoguesUsed[k] = c.dialogues_used[k]; }
       }
       if (c.finished && typeof c.finished === 'object'){
         for (var f in c.finished){ if (c.finished[f] === true) window._uniqueNpcsFinished[f] = true; }
+      }
+      // Fatia 3 (2026-06-18): hidrata o visit count dos UNIQUE NPCs do servidor
+      // (intro vs resume) — servidor é a fonte; merge com o local (máximo vence).
+      if (c.visits && typeof c.visits === 'object'){
+        for (var v in c.visits){
+          if (typeof c.visits[v] === 'number'){
+            window._uniqueNpcsVisitCount[v] = Math.max(window._uniqueNpcsVisitCount[v] || 0, c.visits[v]);
+          }
+        }
       }
     }
   }).catch(function(e){ console.warn('[CITY] npc state failed', e); });
@@ -22301,10 +22311,8 @@ function _npcApplyTalkEffects(p, npc, opt){
   if (npc._isCanonUnique && npc._canonKey){
     window._uniqueNpcsVisitCount = window._uniqueNpcsVisitCount || {};
     window._uniqueNpcsVisitCount[npc._canonKey] = (window._uniqueNpcsVisitCount[npc._canonKey] || 0) + 1;
-    try {
-      var vcKey = 'valdoria_unique_npcs_visits_' + (window._charId || 'default');
-      localStorage.setItem(vcKey, JSON.stringify(window._uniqueNpcsVisitCount));
-    } catch(_){}
+    // Fatia 3: persiste o visit count (local + servidor) — fecha o farm de re-ver intro.
+    if (typeof window._persistUniqueVisits === 'function') window._persistUniqueVisits();
   }
   if (npc.id === 'square_child' && opt.id === 'help'){
     // Fatia 2: usa o helper canonical (local + servidor) ao invés do inline original.
@@ -22531,14 +22539,12 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
     _npcMarkUsed(npc.id, opt.id);
     // canonical: town_square_events_resolve._resolve_unique_npc — increment visit count
     // task #80 (2026-05-20): persiste em localStorage char-namespaced.
-    // Antes era in-memory only → refresh resetava → intro voltava.
+    // Fatia 3 (2026-06-18): também persiste server-side (metadata['city_npc']['visits'])
+    // via _persistUniqueVisits — fecha o farm de re-ver intro + re-ganhar +5 XP.
     if (npc._isCanonUnique && npc._canonKey){
       window._uniqueNpcsVisitCount = window._uniqueNpcsVisitCount || {};
       window._uniqueNpcsVisitCount[npc._canonKey] = (window._uniqueNpcsVisitCount[npc._canonKey] || 0) + 1;
-      try {
-        var vcKey = 'valdoria_unique_npcs_visits_' + (window._charId || 'default');
-        localStorage.setItem(vcKey, JSON.stringify(window._uniqueNpcsVisitCount));
-      } catch(_){}
+      if (typeof window._persistUniqueVisits === 'function') window._persistUniqueVisits();
     }
     // canonical: quest progression flags — town_lia_helped quando jogador clica "Ajudar" Lia.
     // Próxima visita usa CANON_PLAZA_LIA_OVERRIDE (estado pós-quest).
@@ -34385,6 +34391,22 @@ window._uniqueNpcsVisitCount = window._uniqueNpcsVisitCount || {};
     }
   } catch(_){}
 })();
+// SERVER-AUTHORITATIVE (#0, 2026-06-18, Fatia 3 NPC Interaction): persiste o visit
+// count dos UNIQUE NPCs (intro vs resume) no servidor. Antes vivia só no localStorage
+// → reset-localStorage permitia re-ver o intro e re-ganhar o +5 XP do 'unique_talk'
+// (que persiste via service.xp). Agora o servidor (metadata['city_npc']['visits']) é a
+// fonte; _refreshNpcState hidrata no boot. Mesmo padrão de _persistUniqueFinished.
+window._persistUniqueVisits = function(){
+  try {
+    var key = 'valdoria_unique_npcs_visits_' + (window._charId || 'default');
+    localStorage.setItem(key, JSON.stringify(window._uniqueNpcsVisitCount));
+  } catch(_){}
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+      && window.vCityServer.npc && window.vCityServer.npc.sync) {
+    window.vCityServer.npc.sync({ visits: window._uniqueNpcsVisitCount })
+      .catch(function(_e){ console.warn('[CITY] npc visits sync', _e); });
+  }
+};
 
 // Adapta REGULAR_NPC canonical pra formato simulator (talkOptions[]).
 // Resposta vem de CANON_INTERACTION_RESULTS[npc_key][interaction_id] (lista de variantes).
