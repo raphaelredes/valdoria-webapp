@@ -34064,52 +34064,50 @@ function _squareShowExploreEvent(p){
     items: items,
     onPick: function(item){
       var ch = item._ch;
-      var success = true;
-      var rolledLine = '';
-      var diceData = null;
-      if (ch.stat && ch.dc){
-        var statVal = (p.stats && p.stats[STAT_KEY[ch.stat]]) || 10;
-        var mod = Math.floor((statVal - 10) / 2);
-        var roll = 1 + Math.floor(Math.random() * 20);
-        var total = roll + mod;
-        success = total >= ch.dc;
-        rolledLine = '🎲 ' + ch.stat + ': ' + roll + (mod >= 0 ? '+' : '') + mod + ' = <b>' + total + '</b> vs DC ' + ch.dc + ' — ' + (success ? '✅ Sucesso!' : '❌ Falha.') + '<br><br>';
-        // canonical: 3D Dice rule (CLAUDE.md) — TODA rolagem visivel usa Dice3D
-        diceData = {
-          formula: '1d20' + (mod >= 0 ? '+' : '') + mod + ' vs DC ' + ch.dc,
-          sides: 20, value: roll, total: total
-        };
+      // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR rola o
+      // teste de habilidade e aplica gold/HP/XP/poção (RANGES roladas no servidor) via
+      // 'service.square_explore_event'. ANTES: Math.random + p.gold/p.hp/_gainXp no
+      // cliente (fabricação) — e a poção prometida no texto NUNCA era entregue.
+      if (!window.vCityServer || !window.vCityServer.isRemote()){
+        if (typeof vToast === 'function') vToast('Indisponível offline'); return;
       }
-      var outcome = success ? ch.success : (ch.failure || ch.success);
-      var preGold = p.gold;
-      var preXp = p.xp || 0;
-      var preHp = p.hp || 0;
-      if (outcome.gold)      p.gold = Math.max(0, p.gold + outcome.gold);
-      if (outcome.hp_heal)   p.hp = Math.min(p.hpMax || 999, (p.hp || 0) + outcome.hp_heal);
-      if (outcome.hp_damage) p.hp = Math.max(0, (p.hp || 0) - outcome.hp_damage);
-      if (outcome.xp)        _gainXp(p, outcome.xp);
-      refreshHud();
-      var deltas = [];
-      var rewards = [];
-      if (outcome.gold && outcome.gold > 0){
-        deltas.push({ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false });
-        rewards.push({ type:'gold', amount: outcome.gold, label: 'Valdoritas' });
-      } else if (outcome.gold && outcome.gold < 0){
-        deltas.push({ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false });
-      }
-      if (outcome.hp_heal || outcome.hp_damage) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || 999 });
-      if (outcome.xp){
-        deltas.push(_lastXpDelta(p));
-        rewards.push({ type:'xp', amount: outcome.xp, label: 'Experiência' });
-      }
-      _showServiceResultPopup({
-        icon: ev.icon, npc: ev.title,
-        narrative: rolledLine + outcome.text,
-        deltas: deltas,
-        rewards: rewards.length > 0 ? rewards : null,
-        dice: diceData,
-        onContinue: _refreshSquarePopupIfOpen
-      });
+      var preGold = p.gold, preHp = p.hp || 0;
+      window.vCityServer.cityAction('service.square_explore_event', { event_id: ev.id, choice_id: ch.id }).then(function(res){
+        if (!res || !res.ok){ if (typeof vToast === 'function') vToast('Não foi possível agir agora.'); return; }
+        if (typeof res.gold === 'number') p.gold = res.gold;
+        if (typeof res.hp === 'number') p.hp = res.hp;
+        if (res.xp_granted) p.xp = (p.xp || 0) + res.xp_granted;
+        if (typeof refreshHud === 'function') refreshHud();
+        var rolledLine = '';
+        var diceData = null;
+        if (res.has_check){
+          rolledLine = '🎲 ' + (ch.stat || res.stat) + ': ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
+            ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — ' + (res.success ? '✅ Sucesso!' : '❌ Falha.') + '<br><br>';
+          diceData = { formula: '1d20' + (res.modifier >= 0 ? '+' : '') + res.modifier + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total };
+        }
+        var deltas = [];
+        var rewards = [];
+        if (res.gold_delta){
+          deltas.push({ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false });
+          if (res.gold_delta > 0) rewards.push({ type:'gold', amount: res.gold_delta, label: 'Valdoritas' });
+        }
+        if (res.hp_heal || res.hp_damage) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: res.max_hp || p.hpMax || 999 });
+        if (res.xp_granted) rewards.push({ type:'xp', amount: res.xp_granted, label: 'Experiência' });
+        if (res.items_granted && res.items_granted.length){
+          res.items_granted.forEach(function(nm){
+            if (Array.isArray(p.inventory)) p.inventory.push(nm);
+            rewards.push({ type:'item', amount: 1, label: nm });
+          });
+        }
+        _showServiceResultPopup({
+          icon: ev.icon, npc: ev.title,
+          narrative: rolledLine + (res.text || ''),
+          deltas: deltas,
+          rewards: rewards.length > 0 ? rewards : null,
+          dice: diceData,
+          onContinue: _refreshSquarePopupIfOpen
+        });
+      }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro no evento.'); });
     }
   });
 }
@@ -34181,24 +34179,29 @@ function _squareShowObjectsPopup(p){
           desc: '<i>"' + obj.action_msg + '"</i><br><br><b>Custo:</b> ' + obj.cost + ' Valdoritas',
           cost: obj.cost,
           onConfirm: function(){
-            var preGold = p.gold;
-            var preXp = p.xp || 0;
-            if (!_pay(p, obj.cost)) return;
-            var outcome = obj.outcomes[Math.floor(Math.random() * obj.outcomes.length)];
-            if (outcome.xp) _gainXp(p, outcome.xp);
-            refreshHud();
-            var deltas = [
-              { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
-            ];
-            if (outcome.xp){
-              deltas.push(_lastXpDelta(p));
+            // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
+            // cobra, rola o outcome e concede XP via 'service.square_fountain'. ANTES:
+            // _pay + Math.random outcome + _gainXp no cliente (fabricação de estado).
+            if (!window.vCityServer || !window.vCityServer.isRemote()){
+              if (typeof vToast === 'function') vToast('Indisponível offline'); return;
             }
-            _showServiceResultPopup({
-              icon: icon, npc: obj.name,
-              narrative: outcome.text.replace(/\n/g, '<br>'),
-              deltas: deltas,
-              onContinue: _squareTxnReturnToHub
-            });
+            var preGold = p.gold;
+            window.vCityServer.cityAction('service.square_fountain', {}).then(function(res){
+              if (!res || !res.ok){
+                var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para o desejo.' : 'Não foi possível jogar a moeda agora.';
+                if (typeof vToast === 'function') vToast(emsg); return;
+              }
+              if (typeof res.gold === 'number') p.gold = res.gold;
+              if (res.xp_granted) p.xp = (p.xp || 0) + res.xp_granted;
+              if (typeof refreshHud === 'function') refreshHud();
+              _showServiceResultPopup({
+                icon: icon, npc: obj.name,
+                narrative: (res.outcome_text || '').replace(/\n/g, '<br>'),
+                deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+                rewards: res.xp_granted ? [{ type:'xp', amount: res.xp_granted, label: 'Experiência' }] : null,
+                onContinue: _squareTxnReturnToHub
+              });
+            }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na fonte.'); });
           }
         });
       }
@@ -34296,40 +34299,41 @@ function _squareShowBulletinPopup(p){
                 '<b>Teste:</b> ' + statAbbr + ' DC ' + d.dc + '<br>' +
                 '<b>Recompensa:</b> ' + d.reward_gold + ' V + ' + d.reward_xp + ' XP',
                 onConfirm: function(){
-            // Roll d20 + mod vs DC
-            var STAT_KEY = (window.DndRules && DndRules.STAT_KEY_PT) || { FOR: 'strength', DES: 'dexterity', CON: 'constitution',
-                              INT: 'intelligence', SAB: 'wisdom', CAR: 'charisma' };  // FASE 9/M8 single-source
-            var statVal = (p.stats && p.stats[STAT_KEY[statAbbr]]) || 10;
-            var mod = Math.floor((statVal - 10) / 2);
-            var roll = 1 + Math.floor(Math.random() * 20);
-            var total = roll + mod;
-            var success = total >= d.dc;
-            var preGold = p.gold;
-            var preXp = p.xp || 0;
-            if (success){
-              p.gold += d.reward_gold;
-              _gainXp(p, d.reward_xp);
+            // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
+            // rola o teste e concede XP+gold (1×/dia via flag help_done) via
+            // 'service.bulletin_help'. ANTES: Math.random + p.gold += + _gainXp no
+            // cliente. Falha agora dá XP de esforço (paridade com resolve_help).
+            if (!window.vCityServer || !window.vCityServer.isRemote()){
+              if (typeof vToast === 'function') vToast('Indisponível offline'); return;
             }
-            refreshHud();
-            var rewards = success ? [
-              { type:'gold', amount: d.reward_gold, label: 'Valdoritas' },
-              { type:'xp',   amount: d.reward_xp,   label: 'Experiência' }
-            ] : null;
-            _showServiceResultPopup({
-              icon: d.icon, npc: 'Pedido' + (success ? ' Concluído' : ' Falhou'),
-              narrative: '🎲 ' + statAbbr + ': ' + roll + (mod >= 0 ? '+' : '') + mod +
-                         ' = <b>' + total + '</b> vs DC ' + d.dc + ' — ' +
-                         (success ? '✅ Sucesso!' : '❌ Falha.') + '<br><br>' +
-                         (success ? 'Você ajuda como pode. O pedinte agradece com gratidão.'
-                                  : 'Mesmo tentando, você não consegue. O pedinte agradece a intenção.'),
-              deltas: success ? [
-                { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false },
-                _lastXpDelta(p)
-              ] : [],
-              rewards: rewards,
-              dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' vs DC ' + d.dc, sides: 20, value: roll, total: total },
-              onContinue: _squareTxnReturnToHub
-            });
+            var preGold = p.gold;
+            window.vCityServer.cityAction('service.bulletin_help', {}).then(function(res){
+              if (!res || !res.ok){
+                var emsg = (res && res.error === 'already_done') ? 'Você já ajudou alguém hoje. Volte amanhã.' : 'Não foi possível ajudar agora.';
+                if (typeof vToast === 'function') vToast(emsg); return;
+              }
+              if (typeof res.gold === 'number') p.gold = res.gold;
+              if (res.reward_xp) p.xp = (p.xp || 0) + res.reward_xp;
+              if (typeof refreshHud === 'function') refreshHud();
+              var success = !!res.success;
+              var rewards = [];
+              if (success && res.reward_gold) rewards.push({ type:'gold', amount: res.reward_gold, label: 'Valdoritas' });
+              if (res.reward_xp) rewards.push({ type:'xp', amount: res.reward_xp, label: success ? 'Experiência' : 'Experiência (esforço)' });
+              _showServiceResultPopup({
+                icon: d.icon, npc: 'Pedido' + (success ? ' Concluído' : ' Falhou'),
+                narrative: '🎲 ' + statAbbr + ': ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
+                           ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — ' +
+                           (success ? '✅ Sucesso!' : '❌ Falha.') + '<br><br>' +
+                           (success ? 'Você ajuda como pode. O pedinte agradece com gratidão.'
+                                    : 'Mesmo tentando, você não consegue. O pedinte agradece a intenção.'),
+                deltas: (success && res.reward_gold) ? [
+                  { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }
+                ] : [],
+                rewards: rewards.length ? rewards : null,
+                dice: { formula: '1d20' + (res.modifier>=0?'+':'') + res.modifier + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total },
+                onContinue: _squareTxnReturnToHub
+              });
+            }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro no pedido.'); });
           }
         });
       } else if (kind === 'announce'){
@@ -34550,18 +34554,35 @@ function _squareShowVendorPopup(p){
             '<b>Preço:</b> ' + it.value + ' Valdoritas',
       cost: it.value,
       onConfirm: function(){
+        // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
+        // cobra E ADICIONA o item ao inventário via 'service.vendor_buy'. ANTES: _pay
+        // no cliente + narração "adicionado à bolsa" SEM nunca adicionar (item perdido).
+        if (!window.vCityServer || !window.vCityServer.isRemote()){
+          if (typeof vToast === 'function') vToast('Indisponível offline'); return;
+        }
         var preGold = p.gold;
-        if (!_pay(p, it.value)) return;
-        _showServiceResultPopup({
-          icon: it.icon, npc: v.name,
-          narrative: '<i>' + v.name.split(',')[0] + ' embrulha o item em pano grosso.</i><br><br>' +
-                     '<b>' + it.name + '</b> adicionado à sua bolsa.<br>' +
-                     '<i>"' + it.desc + '"</i>',
-          deltas: [
-            { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
-          ],
-          onContinue: _squareTxnReturnToHub
-        });
+        var itemIdx = (v.items || []).indexOf(it);
+        window.vCityServer.cityAction('service.vendor_buy', { item_idx: itemIdx }).then(function(res){
+          if (!res || !res.ok){
+            var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para comprar.'
+                     : (res && res.error === 'bad_item') ? 'Item indisponível.'
+                     : 'Não foi possível comprar agora.';
+            if (typeof vToast === 'function') vToast(emsg); return;
+          }
+          if (typeof res.gold === 'number') p.gold = res.gold;
+          if (Array.isArray(p.inventory) && res.item_name) p.inventory.push(res.item_name);
+          if (typeof refreshHud === 'function') refreshHud();
+          _showServiceResultPopup({
+            icon: it.icon, npc: v.name,
+            narrative: '<i>' + v.name.split(',')[0] + ' embrulha o item em pano grosso.</i><br><br>' +
+                       '<b>' + (res.item_name || it.name) + '</b> adicionado à sua bolsa.<br>' +
+                       '<i>"' + it.desc + '"</i>',
+            deltas: [
+              { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
+            ],
+            onContinue: _squareTxnReturnToHub
+          });
+        }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao comprar.'); });
       }
     });
   };
@@ -34649,51 +34670,52 @@ function _squareConfirmJob(p, job){
     cost: 0,
     creditMode: true,
     onConfirm: function(){
+      // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR rola o
+      // teste (DC 5+2d10, tiers), escala a recompensa por nível, aplica complicação e
+      // é dono do COOLDOWN diário (downtime) via 'service.square_work'. ANTES:
+      // Math.random + p.gold += + _gainXp + window._squareJobsDone no cliente (limite
+      // resetava no reload). XGtE Work = 1 turno por período de descanso.
+      if (!window.vCityServer || !window.vCityServer.isRemote()){
+        if (typeof vToast === 'function') vToast('Indisponível offline'); return;
+      }
       var preGold = p.gold;
-      var preXp = p.xp || 0;
-      // Stat check
-      var success = true;
-      var rolled = 0;
-      if (job.stat && job.dc) {
-        rolled = 1 + Math.floor(Math.random() * 20);
-        var modAttr = (p.stats && p.stats[job.stat.toLowerCase()]) ? Math.floor((p.stats[job.stat.toLowerCase()] - 10) / 2) : 0;
-        success = (rolled + modAttr) >= job.dc;
-      }
-      var actualReward = success ? job.reward : Math.floor(job.reward / 2);
-      var actualXp = success ? job.xp : Math.floor(job.xp / 2);
-      p.gold += actualReward;
-      _gainXp(p, actualXp);
-      window._squareJobsDone.push(job.id);
-      refreshHud();
-      var narrative;
-      if (job.stat) {
-        narrative = '<b>Teste de ' + job.stat + ':</b> rolou ' + rolled +
-                    ' vs DC ' + job.dc + ' — <b>' + (success ? 'SUCESSO' : 'falha parcial') + '</b><br><br>' +
-                    (success
-                      ? '<i>"Bom trabalho. Tome sua paga."</i>'
-                      : '<i>"Não foi grande coisa, mas algo é algo. Metade da paga."</i>');
-      } else {
-        narrative = '<i>Você completa o trabalho com cuidado.</i><br>' +
-                    '<i>"Bom serviço. Aqui está sua paga."</i>';
-      }
-      var diceData = job.stat && job.dc ? {
-        formula: '1d20 vs DC ' + job.dc, sides: 20, value: rolled, total: rolled
-      } : null;
-      _showServiceResultPopup({
-        icon: success ? '✅' : '⚠️',
-        npc: job.label,
-        narrative: narrative,
-        dice: diceData,
-        deltas: [
-          { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold, 1), bar: false },
-          _lastXpDelta(p)
-        ],
-        rewards: [
-          { type:'gold', amount: actualReward, label: 'Pagamento' },
-          { type:'xp', amount: actualXp, label: 'Experiência' }
-        ],
-        onContinue: _squareTxnReturnToHub
-      });
+      var _markAllDone = function(){ if (typeof SQUARE_JOBS !== 'undefined') window._squareJobsDone = SQUARE_JOBS.map(function(j){ return j.id; }); };
+      window.vCityServer.cityAction('service.square_work', { job_id: job.id }).then(function(res){
+        if (!res || !res.ok){
+          var emsg = (res && res.error === 'cooldown') ? 'Você já fez um turno de trabalho. Descanse antes de pegar outro.'
+                   : (res && res.error === 'no_job') ? 'Trabalho indisponível.'
+                   : 'Não foi possível trabalhar agora.';
+          if (typeof vToast === 'function') vToast(emsg);
+          if (res && res.error === 'cooldown') _markAllDone();
+          return;
+        }
+        if (typeof res.gold === 'number') p.gold = res.gold;
+        if (res.xp_reward) p.xp = (p.xp || 0) + res.xp_reward;
+        if (typeof res.hp === 'number') p.hp = res.hp;
+        _markAllDone();  // servidor: 1 turno por cooldown → "sem mais trabalho hoje"
+        if (typeof refreshHud === 'function') refreshHud();
+        var hasCheck = !!(res.rolled && res.dc);
+        var narrative = (job.stat
+          ? '<b>Teste de ' + job.stat + ':</b> ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
+            ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — <b>' + (res.success ? 'SUCESSO' : 'parcial') + '</b><br><br>'
+          : '') + '<i>' + (res.flavor || '') + '</i>';
+        if (res.complication) {
+          narrative += '<br><br>⚠️ <b>Complicação!</b><br><i>' + res.complication.text + '</i>' +
+                       (res.complication.effect ? '<br>' + res.complication.effect : '');
+        }
+        if (res.hp_loss) narrative += '<br><i>−' + res.hp_loss + ' HP.</i>';
+        var rewards = [{ type:'gold', amount: res.gold_reward, label: res.reward_label || 'Pagamento' }];
+        if (res.xp_reward) rewards.push({ type:'xp', amount: res.xp_reward, label: 'Experiência' });
+        _showServiceResultPopup({
+          icon: res.success ? '✅' : '⚠️',
+          npc: job.label,
+          narrative: narrative,
+          dice: hasCheck ? { formula: '1d20' + (res.modifier >= 0 ? '+' : '') + res.modifier + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total } : null,
+          deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold, preGold, 1), bar: false }],
+          rewards: rewards,
+          onContinue: _squareTxnReturnToHub
+        });
+      }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro no trabalho.'); });
     }
   });
 }
