@@ -10114,7 +10114,16 @@ function _isCTA(btn) {
       withdraw: function(amount){ return window.vCityServer.cityAction('service.bank_withdraw', { amount: amount }); },
       // Seguro: o SERVIDOR debita o prêmio do COFRE (não da Bolsa) + persiste a cobertura.
       insuranceState:    function(){ return window.vCityServer.cityAction('service.bank_insurance_state', {}); },
-      insuranceActivate: function(){ return window.vCityServer.cityAction('service.bank_insurance_activate', {}); }
+      insuranceActivate: function(){ return window.vCityServer.cityAction('service.bank_insurance_activate', {}); },
+      // Investimentos (#0, 2026-06-18): antes o cliente tinha um MOCK
+      // (window._bankInvestments, zerado a cada reload) que cobrava o min_amount via
+      // service.gold e NUNCA tinha caminho de coleta — o jogador perdia ouro num buraco.
+      // Agora o SERVIDOR move ouro real (player.bank_gold ↔ player.bank_investments) e
+      // calcula juros/penalidade. investState é read-only.
+      investState:   function(){             return window.vCityServer.cityAction('service.bank_invest_state',  {}); },
+      investStart:   function(tierId, amt){  return window.vCityServer.cityAction('service.bank_invest_start',  { tier_id: tierId, amount: amt }); },
+      investCollect: function(idx){          return window.vCityServer.cityAction('service.bank_invest_collect',{ index: idx }); },
+      investCancel:  function(idx){          return window.vCityServer.cityAction('service.bank_invest_cancel', { index: idx }); }
     },
     temple: {  // Templo (serviços curativos) server-authoritative (#0, 2026-06-18) — o
       // SERVIDOR valida+cobra+rola(1d8+3/1d4)+aplica HP/buff/condição REAL e persiste.
@@ -45714,10 +45723,20 @@ var BANK_INVESTMENT_TIERS = [
 ];
 
 function _bankShowInvestments(p){
-  // canonical: bank_investments_data.py via CANON_INVESTMENT_TIERS — flow ativo de comprar investimento.
-  // Lista 3 tiers via _squareShowListPopup, click abre confirm com cost = min_amount.
-  // Field mapping canonical → local: min_amount→min, lock_turns→lock, min_level→min_lvl.
-  // Fallback: BANK_INVESTMENT_TIERS legacy se canonical nao carregar.
+  // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE o SERVIDOR é dono dos investimentos
+  // (player.bank_investments persistido + ouro real player.bank_gold) e libera coleta
+  // quando madura. Antes era um MOCK do cliente (window._bankInvestments, zerado a cada
+  // reload) que cobrava o min_amount e NUNCA dava o ouro de volta — o jogador perdia
+  // ouro num buraco. LOCAL (file://) mantém o mock pra dev tool.
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.bank && window.vCityServer.bank.investState){
+    _bankShowInvestmentsRemote(p);
+    return;
+  }
+  _bankShowInvestmentsLocal(p);
+}
+
+// ── LOCAL (file://) fallback — mock client-side preservado pro dev tool ──
+function _bankShowInvestmentsLocal(p){
   var canon = (typeof CANON_INVESTMENT_TIERS !== 'undefined' && CANON_INVESTMENT_TIERS.length) ? CANON_INVESTMENT_TIERS : null;
   var tiers = canon
     ? canon.map(function(ct){
@@ -45794,6 +45813,229 @@ function _bankShowInvestments(p){
         }
       });
     }
+  });
+}
+
+// ── REMOTE — usa o servidor como autoridade (investState/Start/Collect/Cancel) ──
+function _bankShowInvestmentsRemote(p){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Carregando investimentos...' }); } catch(_){} }
+  window.vCityServer.bank.investState().then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      if (typeof vToast === 'function') vToast('Não foi possível carregar os investimentos.', 'warn');
+      return;
+    }
+    // Hidrata o cofre real no cliente (espelha bank.state()).
+    if (typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    refreshHud();
+    var active = res.active || [];
+    var tiers = res.tiers || [];
+    var slotsUsed = res.slots_used || 0;
+    var slotsMax = res.slots_max || 3;
+    // Lista: investimentos ativos primeiro (com badge de status), depois tiers disponíveis.
+    var items = [];
+    active.forEach(function(inv){
+      var statusIcon = inv.mature ? '✅' : '⏳';
+      var statusBadge = inv.mature
+        ? ('Pronto · +' + inv.profit + ' V')
+        : (inv.progress_pct + '% · ' + inv.turns_left + 't');
+      items.push({
+        icon: inv.emoji || statusIcon,
+        label: statusIcon + ' ' + inv.tier_name + ' (' + inv.amount + ' V)',
+        badge: statusBadge,
+        _kind: 'active', _inv: inv
+      });
+    });
+    tiers.forEach(function(t){
+      var unlocked = !!t.unlocked;
+      var slotOpen = slotsUsed < slotsMax;
+      var canApply = unlocked && slotOpen;
+      var badge = unlocked
+        ? (t.min_amount + ' V · +' + t.rate_pct + '%')
+        : ('Nv ' + t.min_level);
+      items.push({
+        icon: canApply ? (t.emoji || '<span class="vi vi-coin sm"></span>') : '🔒',
+        label: t.name,
+        badge: badge,
+        _kind: 'tier', _tier: t, _unlocked: unlocked, _slotOpen: slotOpen
+      });
+    });
+    _squareShowListPopup({
+      stackKey: 'bank_invest_list', icon: _heralIco('ic-mochila'),
+      title: 'Investimentos · ' + slotsUsed + '/' + slotsMax,
+      flavor: '<i>Aldwin abre um livro grosso de couro escuro.</i> "Quem aplica bem hoje, dorme tranquilo amanhã. Limite: ' + slotsMax + ' ativos. Saque antecipado paga ' + (res.early_penalty_pct || 10) + '% de multa."',
+      items: items,
+      onPick: function(item){
+        if (item._kind === 'active') {
+          _bankInvestmentDetailRemote(p, item._inv);
+        } else {
+          _bankInvestmentTierPickRemote(p, item._tier, item._unlocked, item._slotOpen, slotsUsed, slotsMax);
+        }
+      }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] bank invest state failed', _e);
+    if (typeof vToast === 'function') vToast('Erro ao carregar investimentos.', 'warn');
+  });
+}
+
+function _bankInvestmentTierPickRemote(p, t, unlocked, slotOpen, slotsUsed, slotsMax){
+  if (!unlocked){
+    _showInfoPopup({
+      icon: _heralIco('ic-mochila'), npc: 'Aldwin', title: t.name + ' — Bloqueado',
+      desc: 'Requer nível <b>' + t.min_level + '</b>.',
+      onConfirm: function(){}
+    });
+    return;
+  }
+  if (!slotOpen){
+    _showInfoPopup({
+      icon: _heralIco('ic-mochila'), npc: 'Aldwin', title: 'Limite Atingido',
+      desc: 'Você já tem <b>' + slotsMax + '</b> investimentos ativos. Colete (ou cancele) um antes de aplicar mais.',
+      onConfirm: function(){}
+    });
+    return;
+  }
+  if ((p.bank_gold || window._bank || 0) < t.min_amount){
+    _showInfoPopup({
+      icon: _heralIco('ic-mochila'), npc: 'Aldwin', title: t.name,
+      desc: '<i>"Cofre insuficiente, ' + (p.name || 'aventureiro') + '."</i><br><br>É preciso ter pelo menos <b>' + t.min_amount + ' Valdoritas</b> no Cofre.',
+      onConfirm: function(){}
+    });
+    return;
+  }
+  var profitEx = Math.floor(t.min_amount * t.rate);
+  _showConfirmPurchase({
+    icon: t.emoji || _heralIco('ic-mochila'), npc: 'Aldwin', title: t.name,
+    desc: '<i>' + (t.desc || '') + '</i><br><br>' +
+          '<b>Aplicar:</b> ' + t.min_amount + ' Valdoritas <i>(do Cofre)</i><br>' +
+          '<b>Trava:</b> ' + t.lock_turns + ' turnos' + (t.real_time ? ' (~' + t.real_time + ')' : '') + '<br>' +
+          '<b>Retorno:</b> +' + t.rate_pct + '% (lucro <b>+' + profitEx + ' V</b>, total <b>' + (t.min_amount + profitEx) + ' V</b>)<br>' +
+          '<b>Risco:</b> ' + (t.risk || 'Médio'),
+    cost: 0,  // Cofre, não Bolsa — não usa _pay
+    onConfirm: function(){
+      _bankInvestStartRemote(p, t);
+    }
+  });
+}
+
+function _bankInvestStartRemote(p, t){
+  var preBank = window._bank || 0;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Aplicando ' + t.min_amount + ' V...' }); } catch(_){} }
+  window.vCityServer.bank.investStart(t.id, t.min_amount).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      if (res && typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+      var emsg = (res && res.error === 'insufficient_bank') ? 'Cofre insuficiente.'
+               : (res && res.error === 'slots_full') ? 'Você já atingiu o limite de investimentos ativos.'
+               : (res && res.error === 'level_too_low') ? 'Nível insuficiente.'
+               : (res && res.error === 'below_min') ? 'Valor abaixo do mínimo.'
+               : 'Não foi possível aplicar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    if (typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+    refreshHud();
+    _showServiceResultPopup({
+      icon: res.emoji || t.emoji || _heralIco('ic-mochila'), npc: 'Aldwin',
+      narrative: '<i>' + (res.aldwin_line || 'Aldwin anota tudo no livro de couro escuro.') + '</i><br><br>' +
+                 '<b>' + (res.tier_name || t.name) + '</b> · ' + res.amount + ' V aplicados · trava de ' + res.lock_turns + ' turnos · retorno esperado <b>+' + res.profit + ' V</b>.',
+      deltas: [{ type:'gold', label:'Cofre', from: preBank, to: window._bank, max: Math.max(preBank, 1), bar: false }],
+      onContinue: function(){ _bankShowInvestmentsRemote(p); }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] bank invest start failed', _e);
+    if (typeof vToast === 'function') vToast('Erro ao aplicar investimento.', 'warn');
+  });
+}
+
+function _bankInvestmentDetailRemote(p, inv){
+  if (inv.mature){
+    var totalReturn = inv.total_return;
+    _showConfirmPurchase({
+      icon: inv.emoji || _heralIco('ic-mochila'), npc: 'Aldwin',
+      title: 'Coletar — ' + inv.tier_name,
+      desc: '<i>"Pronto, ' + (p.name || 'aventureiro') + '. Hora de receber o que é seu."</i><br><br>' +
+            '<b>Principal:</b> ' + inv.amount + ' V<br>' +
+            '<b>Lucro:</b> +' + inv.profit + ' V (' + inv.rate_pct + '%)<br>' +
+            '<b>Total ao Cofre:</b> <b>' + totalReturn + ' V</b>',
+      cost: 0,
+      onConfirm: function(){ _bankInvestCollectRemote(p, inv); }
+    });
+    return;
+  }
+  _showConfirmPurchase({
+    icon: inv.emoji || _heralIco('ic-mochila'), npc: 'Aldwin',
+    title: 'Resgate Antecipado — ' + inv.tier_name,
+    desc: '<i>"Resgatar agora paga multa, ' + (p.name || 'aventureiro') + '. Tem certeza?"</i><br><br>' +
+          '<b>Investido:</b> ' + inv.amount + ' V<br>' +
+          '<b>Progresso:</b> ' + inv.progress_pct + '% (' + inv.turns_left + ' turnos restantes)<br>' +
+          '<b>Penalidade:</b> -' + inv.penalty + ' V<br>' +
+          '<b>Recebe (Cofre):</b> <b>' + inv.early_net + ' V</b> (sem lucro)',
+    cost: 0,
+    onConfirm: function(){ _bankInvestCancelRemote(p, inv); }
+  });
+}
+
+function _bankInvestCollectRemote(p, inv){
+  var preBank = window._bank || 0;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Coletando...' }); } catch(_){} }
+  window.vCityServer.bank.investCollect(inv.idx).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      if (res && typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+      var emsg = (res && res.error === 'not_mature') ? ('Ainda faltam ' + (res.turns_left || '?') + ' turnos.')
+               : (res && res.error === 'bad_index') ? 'Investimento inválido.'
+               : 'Não foi possível coletar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    if (typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+    refreshHud();
+    _showServiceResultPopup({
+      icon: inv.emoji || _heralIco('ic-mochila'), npc: 'Aldwin',
+      narrative: '<i>' + (res.aldwin_line || 'Aldwin sorri ao fechar o registro. "Bom investimento."') + '</i><br><br>' +
+                 '<b>Principal:</b> ' + res.principal + ' V · <b>Lucro:</b> +' + res.profit + ' V · <b>Total recebido:</b> <b>' + res.total_return + ' V</b>',
+      deltas: [{ type:'gold', label:'Cofre', from: preBank, to: window._bank, max: Math.max(window._bank, 1), bar: false }],
+      onContinue: function(){ _bankShowInvestmentsRemote(p); }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] bank invest collect failed', _e);
+    if (typeof vToast === 'function') vToast('Erro ao coletar.', 'warn');
+  });
+}
+
+function _bankInvestCancelRemote(p, inv){
+  var preBank = window._bank || 0;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Resgatando...' }); } catch(_){} }
+  window.vCityServer.bank.investCancel(inv.idx).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      if (res && typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+      var emsg = (res && res.error === 'bad_index') ? 'Investimento inválido.' : 'Não foi possível resgatar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    if (typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+    refreshHud();
+    _showServiceResultPopup({
+      icon: inv.emoji || _heralIco('ic-mochila'), npc: 'Aldwin',
+      narrative: '<i>"Aldwin suspira e fecha o livro. \'Que isso não se repita.\'"</i><br><br>' +
+                 '<b>Principal:</b> ' + res.principal + ' V · <b>Multa:</b> -' + res.penalty + ' V · <b>Recebido (Cofre):</b> <b>' + res.net + ' V</b>',
+      deltas: [{ type:'gold', label:'Cofre', from: preBank, to: window._bank, max: Math.max(window._bank, 1), bar: false }],
+      onContinue: function(){ _bankShowInvestmentsRemote(p); }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] bank invest cancel failed', _e);
+    if (typeof vToast === 'function') vToast('Erro ao resgatar.', 'warn');
   });
 }
 
