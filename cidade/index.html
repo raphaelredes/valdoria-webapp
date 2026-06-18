@@ -10111,7 +10111,10 @@ function _isCTA(btn) {
       // do cliente (window._bank, começava em 0) e o ouro movia LOCAL sem persistir.
       state:    function(){ return window.vCityServer.cityAction('service.bank_state', {}); },
       deposit:  function(amount){ return window.vCityServer.cityAction('service.bank_deposit', { amount: amount }); },
-      withdraw: function(amount){ return window.vCityServer.cityAction('service.bank_withdraw', { amount: amount }); }
+      withdraw: function(amount){ return window.vCityServer.cityAction('service.bank_withdraw', { amount: amount }); },
+      // Seguro: o SERVIDOR debita o prêmio do COFRE (não da Bolsa) + persiste a cobertura.
+      insuranceState:    function(){ return window.vCityServer.cityAction('service.bank_insurance_state', {}); },
+      insuranceActivate: function(){ return window.vCityServer.cityAction('service.bank_insurance_activate', {}); }
     },
     temple: {  // Templo (serviços curativos) server-authoritative (#0, 2026-06-18) — o
       // SERVIDOR valida+cobra+rola(1d8+3/1d4)+aplica HP/buff/condição REAL e persiste.
@@ -33590,6 +33593,27 @@ function _bankShowItemListPopup(opts){
 // Sempre abre popup. Se cofre <50, mostra warning + Confirm desabilitado;
 // se cofre OK, calcula prêmio (2% do saldo, min 5) e segue confirm normal.
 function _bankShowInsurancePopup(p){
+  // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE hidrata o estado REAL do seguro
+  // (servidor) antes de renderizar — o cofre/ativo passam a refletir player.bank_gold
+  // + player.metadata['insurance'], não os globais do cliente. A contratação debita o
+  // COFRE (não a Bolsa). LOCAL/file:// mantém o mock.
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+      && window.vCityServer.bank && window.vCityServer.bank.insuranceState) {
+    if (window.vProcessing) { try { window.vProcessing.show({ text: 'Consultando Aldwin...' }); } catch(_){} }
+    window.vCityServer.bank.insuranceState().then(function(st){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      if (st && st.ok) {
+        if (typeof st.bank_gold === 'number') window._bank = st.bank_gold;
+        window._bankInsurance = st.active ? { turns_left: st.turns_left } : null;
+      }
+      _bankInsurancePopupRender(p);
+    }).catch(function(){ _bankInsurancePopupRender(p); });
+    return;
+  }
+  _bankInsurancePopupRender(p);
+}
+
+function _bankInsurancePopupRender(p){
   // canonical: bank_insurance.py via CANON_BANK_INSURANCE
   // INSURANCE_DURATION (turnos), INSURANCE_RATE (% do banco), INSURANCE_MIN_PREMIUM (chao),
   // INSURANCE_MIN_BANK (saldo minimo pra contratar)
@@ -33636,8 +33660,40 @@ function _bankShowInsurancePopup(p){
           'Cobertura: <b>' + DURATION + ' turnos</b> (protege contra perdas).<br>' +
           '<i>"Selo lacre da Guilda dos Banqueiros — proteção formal."</i>',
     cost: premium,
+    creditMode: true,  // o prêmio sai do COFRE, não da Bolsa (não cobrar a Bolsa no confirm)
     onConfirm: function(){
       var preGold = p.gold;
+      var preBank = window._bank || 0;
+      // SERVER-AUTHORITATIVE (#0): o SERVIDOR debita o prêmio do COFRE (player.bank_gold)
+      // — antes o cliente debitava a Bolsa (bug) — e persiste a cobertura.
+      if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+          && window.vCityServer.bank && window.vCityServer.bank.insuranceActivate) {
+        if (window.vProcessing) { try { window.vProcessing.show({ text: 'Contratando seguro...' }); } catch(_){} }
+        window.vCityServer.bank.insuranceActivate().then(function(res){
+          if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+          if (!res || !res.ok) {
+            if (res && typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+            if (typeof vToast === 'function') vToast(res && res.error === 'min_bank'
+              ? ('Cofre insuficiente (mín ' + MIN_BANK + ' Valdoritas).') : 'Não foi possível contratar o seguro.', 'warn');
+            return;
+          }
+          if (typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+          window._bankInsurance = { turns_left: res.turns_left || res.duration || DURATION };
+          refreshHud();
+          _showServiceResultPopup({
+            icon: _heralIco('ic-bolsa'), npc: 'Aldwin — Banqueiro',
+            narrative: '<i>' + (res.aldwin_line || 'Aldwin estampa o selo lacre no documento.') + '</i><br><br>' +
+                       'Seguro do <b>Cofre #047</b> contratado por <b>' + (res.duration || DURATION) + ' turnos</b>.<br>' +
+                       'Prêmio cobrado: <b>' + (res.premium || premium) + ' Valdoritas</b> (do cofre).',
+            deltas: [
+              { type:'gold', label:'Cofre', from: preBank, to: (window._bank || 0), max: Math.max(preBank, 1), bar: false }
+            ],
+            onContinue: _bankTxnReturnToHub
+          });
+        }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] bank insurance failed', _e); if (typeof vToast === 'function') vToast('Erro ao contratar seguro.', 'warn'); });
+        return;
+      }
+      // ── LOCAL (file://) fallback — mock client-side (debita a Bolsa, legado) ──
       p.gold -= premium;
       window._bankInsurance = { turns_left: DURATION };
       refreshHud();
