@@ -10123,7 +10123,15 @@ function _isCTA(btn) {
       investState:   function(){             return window.vCityServer.cityAction('service.bank_invest_state',  {}); },
       investStart:   function(tierId, amt){  return window.vCityServer.cityAction('service.bank_invest_start',  { tier_id: tierId, amount: amt }); },
       investCollect: function(idx){          return window.vCityServer.cityAction('service.bank_invest_collect',{ index: idx }); },
-      investCancel:  function(idx){          return window.vCityServer.cityAction('service.bank_invest_cancel', { index: idx }); }
+      investCancel:  function(idx){          return window.vCityServer.cityAction('service.bank_invest_cancel', { index: idx }); },
+      // Empréstimos (#0, 2026-06-18): antes a cidade WebApp dava ouro de GRAÇA
+      // (window._bankActiveLoan + p.gold += amt LOCAL; a dívida nunca vencia/cobrava).
+      // Agora o SERVIDOR credita ouro real (player.modify_gold), persiste a dívida
+      // (player.metadata['bank_loan']) e o auto-charge do vencido cobra do Cofre real.
+      // loanState é read-only (mas dispara o overdue check no servidor).
+      loanState: function(){          return window.vCityServer.cityAction('service.bank_loan_state', {}); },
+      loanTake:  function(tierId){    return window.vCityServer.cityAction('service.bank_loan_take',  { tier_id: tierId }); },
+      loanPay:   function(amt){       return window.vCityServer.cityAction('service.bank_loan_pay',   (amt === 'all') ? { all: true } : { amount: amt }); }
     },
     temple: {  // Templo (serviços curativos) server-authoritative (#0, 2026-06-18) — o
       // SERVIDOR valida+cobra+rola(1d8+3/1d4)+aplica HP/buff/condição REAL e persiste.
@@ -46041,7 +46049,19 @@ function _bankInvestCancelRemote(p, inv){
 
 // canonical: bank_loans.py LOAN_TIERS — emprestimo com juros + due_turns.
 // 3 tiers (50V/10%/40t/nv1, 200V/15%/80t/nv3, 500V/20%/120t/nv5).
+// SERVER-AUTHORITATIVE (#0, 2026-06-18): REMOTE usa vCityServer.bank.loanState/
+// loanTake/loanPay. LOCAL (file://) preserva o mock pro dev tool. Antes a cidade
+// dava ouro de GRAÇA (window._bankActiveLoan + p.gold += amt local, dívida nunca
+// vencia/cobrava) — agora o servidor é dono.
 function _bankShowLoans(p){
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.bank && window.vCityServer.bank.loanState){
+    _bankShowLoansRemote(p);
+    return;
+  }
+  _bankShowLoansLocal(p);
+}
+
+function _bankShowLoansLocal(p){
   var lvl = p.level || 1;
   var loans = (typeof CANON_LOAN_TIERS !== 'undefined' && CANON_LOAN_TIERS.length)
               ? CANON_LOAN_TIERS : [];
@@ -46123,6 +46143,198 @@ function _bankShowLoans(p){
         }
       });
     }
+  });
+}
+
+// ── REMOTE — servidor é autoridade (loanState/Take/Pay) ──
+function _bankShowLoansRemote(p){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Verificando o livro de dívidas...' }); } catch(_){} }
+  window.vCityServer.bank.loanState().then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      if (typeof vToast === 'function') vToast('Não foi possível carregar os empréstimos.', 'warn');
+      return;
+    }
+    // Hidrata Bolsa + Cofre reais no cliente.
+    if (typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    refreshHud();
+    // Se o servidor auto-cobrou ao abrir (vencido), avisa o jogador.
+    if (res.overdue_msg && typeof vToast === 'function') {
+      vToast(res.overdue_msg.replace(/<[^>]+>/g,''), 'warn');
+    }
+    var active = res.active;
+    if (active){
+      _bankShowLoanActiveRemote(p, active);
+      return;
+    }
+    var tiers = res.tiers || [];
+    var items = tiers.map(function(t){
+      var unlocked = !!t.unlocked;
+      return {
+        icon: unlocked ? '🪙' : '🔒',
+        label: t.name,
+        badge: unlocked ? (t.amount + ' V · ' + t.rate_pct + '%')
+                         : ('Nv ' + t.min_level),
+        _tier: t, _unlocked: unlocked
+      };
+    });
+    _squareShowListPopup({
+      stackKey: 'bank_loan_list', icon: _heralIco('ic-mochila'),
+      title: 'Empréstimos',
+      flavor: '<i>Aldwin abre um livro de couro com selo de cera.</i> "Tomar emprestado é fácil. Pagar é onde a alma se perde. Escolha com cuidado."',
+      items: items,
+      onPick: function(item){
+        var t = item._tier;
+        if (!item._unlocked){
+          _showInfoPopup({
+            icon: _heralIco('ic-stat-ac'), npc: 'Aldwin', title: t.name + ' — Bloqueado',
+            desc: 'Requer nível <b>' + t.min_level + '</b>.',
+            onConfirm: function(){}
+          });
+          return;
+        }
+        _showConfirmPurchase({
+          icon: t.emoji || _heralIco('ic-bolsa'), npc: 'Aldwin', title: t.name,
+          desc: '<i>"' + t.name + '. Aceita?"</i><br><br>' +
+                '<b>Receber:</b> ' + t.amount + ' Valdoritas <i>(direto na Bolsa)</i><br>' +
+                '<b>Pagar:</b> ' + t.total_due + ' V em ' + t.due_turns + ' turnos<br>' +
+                '<b>Juros:</b> ' + t.rate_pct + '%<br><br>' +
+                '<i>(Vencimento → cobrança automática do Cofre.)</i>',
+          cost: 0,  // recebe, não paga
+          onConfirm: function(){ _bankLoanTakeRemote(p, t); }
+        });
+      }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] bank loan state failed', _e);
+    if (typeof vToast === 'function') vToast('Erro ao carregar empréstimos.', 'warn');
+  });
+}
+
+function _bankLoanTakeRemote(p, t){
+  var preGold = p.gold;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Aldwin abre o cofre...' }); } catch(_){} }
+  window.vCityServer.bank.loanTake(t.id).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'already_has_loan') ? 'Você já tem um empréstimo ativo.'
+               : (res && res.error === 'level_too_low') ? 'Nível insuficiente.'
+               : 'Não foi possível pegar o empréstimo agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    if (typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+    refreshHud();
+    _showServiceResultPopup({
+      icon: res.emoji || _heralIco('ic-bolsa'), npc: 'Aldwin',
+      narrative: '<i>' + (res.aldwin_line || 'Aldwin desliza ' + res.amount + ' Valdoritas pelo balcão.') + '</i><br><br>' +
+                 '<i>"Lembre-se: ' + res.due_turns + ' turnos. Não me decepcione, sombra."</i><br><br>' +
+                 '<b>A pagar:</b> ' + res.total_due + ' V (juros ' + res.rate_pct + '%)',
+      deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }],
+      onContinue: function(){ _bankShowLoansRemote(p); }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] bank loan take failed', _e);
+    if (typeof vToast === 'function') vToast('Erro ao pegar empréstimo.', 'warn');
+  });
+}
+
+function _bankShowLoanActiveRemote(p, l){
+  // Lista com 1 item "Pagar" — pra reusar o padrão _squareShowListPopup.
+  var statusLine = l.overdue
+    ? '⚠️ <b>VENCIDO</b> — Aldwin vai cobrar do Cofre'
+    : ('⏳ <b>' + l.turns_left + '</b> turnos restantes');
+  var debt = l.debt;
+  var amounts = [];
+  [10, 50, 100].forEach(function(v){
+    if (v <= debt && v <= p.gold) amounts.push(v);
+  });
+  var items = amounts.map(function(amt){
+    return { icon: '<span class="vi vi-coin sm"></span>', label: 'Pagar ' + amt + ' V', badge: '', _amount: amt };
+  });
+  if (debt <= p.gold && debt > 0) {
+    items.push({ icon: '✅', label: 'Quitar TUDO (' + debt + ' V)', badge: '', _amount: 'all' });
+  }
+  if (!items.length) {
+    items.push({ icon: '🚫', label: 'Sem Bolsa pra pagar', badge: 'Bolsa: ' + p.gold + ' V', _amount: null });
+  }
+  _squareShowListPopup({
+    stackKey: 'bank_loan_pay', icon: _heralIco('ic-mochila'),
+    title: 'Empréstimo Ativo · ' + debt + ' V',
+    flavor: '<i>Aldwin folheia o livro de dívidas.</i><br><br>' +
+            '<b>Total a pagar:</b> ' + l.total_due + ' V (juros ' + l.rate_pct + '%) · <b>Já pago:</b> ' + l.paid + ' V<br>' +
+            statusLine,
+    items: items,
+    onPick: function(item){
+      if (!item._amount) return;
+      _bankLoanPayRemote(p, item._amount);
+    }
+  });
+}
+
+function _bankLoanPayRemote(p, amt){
+  var preGold = p.gold;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Pagando...' }); } catch(_){} }
+  window.vCityServer.bank.loanPay(amt).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'insufficient_gold') ? 'Valdoritas insuficientes.'
+               : (res && res.error === 'no_loan') ? 'Sem empréstimo ativo.'
+               : 'Não foi possível pagar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    if (typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+    refreshHud();
+    var narrative = res.paid_off
+      ? ('<i>' + (res.aldwin_line || 'Aldwin fecha o livro de dívidas com um aceno.') + '</i><br><br><b>Dívida QUITADA</b> — você está livre.')
+      : ('<i>"Aceito, sombra. Anotado."</i><br><br><b>Pago agora:</b> ' + res.paid + ' V · <b>Restante:</b> ' + res.debt + ' V');
+    _showServiceResultPopup({
+      icon: _heralIco('ic-bolsa'), npc: 'Aldwin',
+      narrative: narrative,
+      deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+      onContinue: function(){ _bankShowLoansRemote(p); }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] bank loan pay failed', _e);
+    if (typeof vToast === 'function') vToast('Erro ao pagar.', 'warn');
+  });
+}
+
+function _bankLoanPayRemote(p, amt){
+  var preGold = p.gold;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Pagando...' }); } catch(_){} }
+  window.vCityServer.bank.loanPay(amt).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'insufficient_gold') ? 'Valdoritas insuficientes.'
+               : (res && res.error === 'no_loan') ? 'Sem empréstimo ativo.'
+               : 'Não foi possível pagar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    if (typeof res.bank_gold === 'number') window._bank = res.bank_gold;
+    refreshHud();
+    var narrative = res.paid_off
+      ? ('<i>' + (res.aldwin_line || 'Aldwin fecha o livro de dívidas com um aceno.') + '</i><br><br><b>Dívida QUITADA</b> — você está livre.')
+      : ('<i>"Aceito, sombra. Anotado."</i><br><br><b>Pago agora:</b> ' + res.paid + ' V · <b>Restante:</b> ' + res.debt + ' V');
+    _showServiceResultPopup({
+      icon: _heralIco('ic-bolsa'), npc: 'Aldwin',
+      narrative: narrative,
+      deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+      onContinue: function(){ _bankShowLoansRemote(p); }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] bank loan pay failed', _e);
+    if (typeof vToast === 'function') vToast('Erro ao pagar.', 'warn');
   });
 }
 
