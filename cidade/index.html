@@ -22834,7 +22834,7 @@ function _squareGetDailyVendor(){
 // canonical: town_square_buffs.py ARTIST_BUFFS (5 artistas × stat_bonus)
 // Dar gorjeta (BUFF_CHANCE=40%) pode conceder buff +1 em ability até descanso longo.
 var SQUARE_ARTIST_BUFFS = [
-  { id: 'bard_jaskier',  icon: _heralIco('ic-musica'), name: 'Taviel, o Bardo',           buff: 'Inspiração Bárdica',  stat: 'CAR', desc: '+1 em testes de Carisma e Persuasão' },
+  { id: 'bard_taviel',  icon: _heralIco('ic-musica'), name: 'Taviel, o Bardo',           buff: 'Inspiração Bárdica',  stat: 'CAR', desc: '+1 em testes de Carisma e Persuasão' },
   { id: 'dancer_lyra',   icon: '🎶', name: 'Wrenna Caelwyn',              buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
   { id: 'fire_eater',    icon: _heralIco('ic-tochas'), name: 'Drask, Engolidor de Fogo',  buff: 'Coragem do Fogo',      stat: 'CON', desc: '+1 em testes de Constituição' },
   { id: 'flutist',       icon: '🎶', name: 'Sylwen, a Flautista',       buff: 'Melodia Calmante',     stat: 'SAB', desc: '+1 em testes de Sabedoria' },
@@ -26605,7 +26605,7 @@ var CANON_REGULAR_NPCS = {
       }
     ]
   },
-  "bard_jaskier": {
+  "bard_taviel": {
     "name": "Taviel",
     "role": "🎵 Bardo",
     "desc": "O bardo Taviel dedilha seu alaúde gasto junto à fonte da praça, arrancando acordes que fazem os transeuntes pararem no meio do passo. Sua voz grave conta a saga de um cavaleiro que vendeu a própria sombra a um feiticeiro, e o cheiro de resina das cordas novas se mistura ao aroma de castanhas assadas de uma barraca vizinha.",
@@ -27518,7 +27518,7 @@ var CANON_INTERACTION_RESULTS = {
       "Você agita os braços como um moinho de vento!\n\n🐦 <b>PRU! PRU!</b>\n\nOs pombos voam em círculo ao redor da praça e pousam a dois metros de distância, te encarando com o que só pode ser descrito como desprezo coletivo. Um deles arrulha com deboche."
     ]
   },
-  "bard_jaskier": {
+  "bard_taviel": {
     "listen": [
       "Você se senta num barril próximo e escuta.\n\n🎵 <i>\"...e o cavaleiro beijou a lâmina antes da última carga, pois sabia que a espada era mais fiel que qualquer amante...\"</i>\n\nA balada arranca suspiros de duas comerciantes e faz um guarda enxugar o olho.",
       "Você para no meio do caminho, atraído pela melodia.\n\n🎵 <i>\"...e a serpente da montanha desceu sobre Valdória, mas a pastora não correu — ela cantou...\"</i>\n\nAs cordas do alaúde tremem numa nota grave e o silêncio da plateia diz tudo.",
