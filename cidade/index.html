@@ -20334,21 +20334,73 @@ function _relationTier(interactions){
   return                         { name: 'Círculo Íntimo',   affinity: 5, status: 'parente em alma' };
 }
 
+// item F (2026-06-18): mapeia o id do RELATIONS_NPC → a key do NPC na afinidade
+// REAL do servidor (city_relationships_data.py NPC_INFO). Banqueiro e Escriba não
+// têm afinidade no servidor (não constam no sistema de relacionamento) → sem key.
+var REL_SERVER_KEY = {
+  rel_martha: 'npc_inn_martha', rel_grom: 'npc_tavern_grom', rel_aldric: 'npc_gate_aldric',
+  rel_elara: 'npc_temple_elara', rel_thorne: 'blacksmith', rel_mirena: 'alchemist',
+  rel_tavira: 'npc_guild_tavira'
+};
+// item F: tier por afinidade 0-100 (espelha AFFINITY_TIERS do servidor). Um NPC que
+// aparece aqui JÁ foi conhecido (afinidade registrada) → mínimo "Conhecido", nunca
+// "Estranho" (estranhos são FILTRADOS — sem spoiler de quem nunca se encontrou).
+function _relAffTier(aff){
+  aff = aff || 0;
+  if (aff >= 80) return { label: 'Amigo Próximo', stars: '★★★★★' };
+  if (aff >= 60) return { label: 'Familiar',      stars: '★★★★☆' };
+  if (aff >= 40) return { label: 'Confiante',     stars: '★★★☆☆' };
+  if (aff >= 20) return { label: 'Cordial',       stars: '★★☆☆☆' };
+  return                { label: 'Conhecido',     stars: '★☆☆☆☆' };
+}
+
 function _buildRelationsMockData(player){
+  // item F (2026-06-18, SUPREME RULE #0): mostra SÓ NPCs com quem o personagem JÁ
+  // interagiu — afinidade/reputação REAIS (server-authoritative, hidratadas de
+  // player.narrative em metadata.npc_affinity/npc_reputation), OU diálogo já usado.
+  // ANTES listava TODOS os 9 fixos como "★☆☆☆☆ Estranho" — vazava NPCs nunca conhecidos.
+  player = player || {};
+  var md = player.metadata || {};
+  var aff = md.npc_affinity || {};
+  var rep = md.npc_reputation || {};
+  var dlg = window._npcDialoguesUsed || {};
+  var services = RELATIONS_NPCS.filter(function(r){
+    var sk = REL_SERVER_KEY[r.id];
+    return (sk && (sk in aff || sk in rep)) || ((dlg[r.ref_id] || []).length > 0);
+  }).map(function(r){
+    var sk = REL_SERVER_KEY[r.id];
+    var a = (sk && typeof aff[sk] === 'number') ? aff[sk]
+          : ((dlg[r.ref_id] || []).length * 12);  // sinal de diálogo → afinidade aproximada
+    var tier = _relAffTier(a);
+    return {
+      icon: r.icon,
+      label: r.name + ' (' + r.role + ')',
+      cb: 'rel_view_' + r.id,
+      badge: tier.stars + ' ' + tier.label,
+      _aff: a
+    };
+  }).sort(function(x, y){ return (y._aff || 0) - (x._aff || 0); });
   return {
     type: 'hub',
-    flavor: '<i>Reflete sobre os laços que construiu. Diálogos e gestos constroem confiança — perguntas únicas, gestos genuínos.</i>',
-    services: RELATIONS_NPCS.map(function(r){
-      var interactions = ((window._npcDialoguesUsed || {})[r.ref_id] || []).length;
-      var tier = _relationTier(interactions);
-      return {
-        icon: r.icon,
-        label: r.name + ' (' + r.role + ')',
-        cb: 'rel_view_' + r.id,
-        badge: '★'.repeat(tier.affinity) + '☆'.repeat(5 - tier.affinity) + ' ' + tier.name
-      };
-    })
+    flavor: '<i>Os laços que você cultivou em Valdoria. Diálogos e gestos genuínos constroem confiança.</i>',
+    services: services
   };
+}
+
+// item F: empty-state ÉPICO (PADRAO_ALDRIC) — personagem ainda sem vínculos.
+// Substitui o genérico "Nada disponível no momento." do renderSquareHub.
+function _relationsRenderEmpty(container){
+  if (!container) return;
+  while (container.firstChild) container.removeChild(container.firstChild);
+  container.innerHTML = ''
+    + '<div class="subscreen" style="text-align:center;padding:34px 20px;">'
+    +   '<div style="font-size:46px;color:var(--v-gold,#c4953a);opacity:0.75;margin-bottom:12px;line-height:1;">&#10086;</div>'
+    +   '<div style="font-family:\'Cinzel\',serif;font-size:var(--v-font-lg,16px);font-weight:700;color:var(--v-gold,#c4953a);letter-spacing:1px;margin-bottom:12px;">O Pavilhão Aguarda</div>'
+    +   '<p style="font-size:var(--v-font-sm,13px);color:var(--v-text-dim,#a09484);line-height:1.65;max-width:280px;margin:0 auto;">'
+    +     'Nenhum nome foi inscrito ainda. <i>Os la&ccedil;os nascem da conversa</i> &mdash; procure os habitantes de Valdoria, '
+    +     'fa&ccedil;a perguntas genu&iacute;nas, e seus v&iacute;nculos surgir&atilde;o nestas p&aacute;ginas.'
+    +   '</p>'
+    + '</div>';
 }
 
 // ============================================================================
@@ -47905,7 +47957,13 @@ function _renderCityPopup(key){
   }
   if (key === 'relations' && typeof renderSquareHub === 'function') {
     if (titleEl) titleEl.textContent = 'Vínculos com NPCs';
-    renderSquareHub(bodyEl, _buildRelationsMockData(window.CITY_MOCK_PLAYER));
+    // item F (2026-06-18): só NPCs já interagidos; vazio → empty-state ÉPICO.
+    var relData = _buildRelationsMockData(window.CITY_MOCK_PLAYER);
+    if (!relData.services || relData.services.length === 0) {
+      _relationsRenderEmpty(bodyEl);
+    } else {
+      renderSquareHub(bodyEl, relData);
+    }
     return;
   }
   if (key === 'gates') {
