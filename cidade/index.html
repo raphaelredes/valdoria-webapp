@@ -10112,6 +10112,24 @@ function _isCTA(btn) {
     },
     ach: {  // FASE 5 — progresso de conquistas por chain (read-only, best-effort)
       progress: function(){ return window.vCityServer.cityAction('ach.progress', {}); }
+    },
+    guild: {  // Guild API server-authoritative (POST /api/guild/action) — recrutas/
+      // contratação REAIS (pool multiplayer + lock atômico + party_status). Migração
+      // 2026-06-17: o cliente usava GUILD_RECRUITS/GROUP_MEMBERS mock; agora busca a
+      // lista real e contrata via o servidor.
+      recruits: function(page, classFilter){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'recruit_list', page: page || 0 };
+        if (classFilter) body.class_filter = classFilter;
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
+      },
+      hire: function(npcId){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'hire_' + npcId };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
+      }
     }
   };
 })();
@@ -42592,6 +42610,93 @@ function _guildShowRewards(p){
 }
 
 function _guildShowRecruits(p){
+  // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): em REMOTE, busca a
+  // lista REAL de recrutas (pool multiplayer) e contrata via /api/guild/action — o
+  // SERVIDOR cobra (custo dinâmico), faz lock atômico (anti double-hire entre
+  // jogadores) e adiciona ao party_status real (persiste). ANTES: GUILD_RECRUITS mock
+  // + _pay + GROUP_MEMBERS.push no cliente (não persistia / aliado fabricado).
+  var _gRemote = !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.guild);
+  if (_gRemote) {
+    if (window.vProcessing) { try { window.vProcessing.show({ text: 'Consultando o Salão...' }); } catch(_){} }
+    window.vCityServer.guild.recruits().then(function(data){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      if (!data || data.error) { if (typeof vToast === 'function') vToast('Não foi possível abrir o Salão.', 'warn'); return; }
+      var coin = '<span class="vi vi-coin sm"></span>';
+      var list = (data.items || []).filter(function(it){ return !it.hired; });
+      var vagas = Math.max(0, (data.party_max || 3) - (data.party_count || 0));
+      var _clsCap = function(c){ c = String(c || 'Aventureiro'); return c.charAt(0).toUpperCase() + c.slice(1); };
+      if (!list.length) {
+        _squareShowListPopup({
+          stackKey: 'guild_recruits', icon: _heralIco('ic-grupo', null, '38px'), title: 'Recrutar Aliados',
+          subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
+          flavor: 'Tavira corre o dedo pela lista e fecha o livro. <i>(dá de ombros)</i> "Por ora, todo aventureiro disponível já marcha contigo. Volta mais tarde — sempre chega gente nova ao Salão."',
+          items: [], onPick: function(){}
+        });
+        return;
+      }
+      var items = list.map(function(it){
+        return { icon: (it.ico || _heralIco('ic-grupo')), label: it.n,
+          desc: _clsCap(it.c) + ' · Nível ' + (it.l || 1) + (it.rehire ? ' · (recontratar)' : ''),
+          badge: it.cost + ' ' + coin, _it: it };
+      });
+      _squareShowListPopup({
+        stackKey: 'guild_recruits', icon: _heralIco('ic-grupo', null, '38px'), title: 'Recrutar Aliados',
+        subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
+        flavor: (vagas > 0
+          ? 'Tavira aponta o quadro com os contratos selados. <i>(meio-sorriso)</i> "Estes estão prontos pra marchar. ' + (vagas === 1 ? 'Tens uma vaga' : 'Tens ' + vagas + ' vagas') + ' no grupo. Escolhe bem — pagas uma vez, e seguem contigo."'
+          : 'Tavira ergue os olhos do livro. <i>(suspira)</i> "Teu grupo já está completo. Dispensa alguém antes de fechar novo contrato."'),
+        sectionLabel: 'Aventureiros à disposição', items: items,
+        onPick: function(item){
+          var it = item._it;
+          if (vagas <= 0) { if (typeof vToast === 'function') vToast('⚠️ Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn'); return; }
+          var sheet = '<b>' + _clsCap(it.c) + ' · Nível ' + (it.l || 1) + '</b>'
+            + '<br><br>Tavira inclina a cabeça em direção a ele.'
+            + '<br><br>Custo de contrato: <b>' + it.cost + ' ' + coin + '</b>' + (it.rehire ? ' <i>(recontratação com desconto)</i>' : '');
+          _showConfirmPurchase({
+            icon: (it.ico || _heralIco('ic-grupo')), npc: 'Mestra Tavira', title: 'Recrutar ' + it.n, desc: sheet, cost: it.cost,
+            onConfirm: function(){
+              if (window.vProcessing) { try { window.vProcessing.show({ text: 'Selando contrato...' }); } catch(_){} }
+              window.vCityServer.guild.hire(it.id).then(function(res){
+                if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+                if (!res || res.error){
+                  var emsg = (res && res.error === 'party_full') ? 'Grupo cheio (3/3 aliados).'
+                           : (res && res.error === 'not_enough_gold') ? (res.msg || 'Valdoritas insuficientes.')
+                           : (res && res.error === 'npc_not_found') ? 'Este aventureiro não está mais disponível.'
+                           : 'Não foi possível contratar agora.';
+                  if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
+                }
+                var preGold = p.gold;
+                if (typeof res.cost === 'number') p.gold = Math.max(0, p.gold - res.cost);
+                // Servidor já persistiu o aliado (re-sync no próximo load via state.allies).
+                // Reflete otimisticamente no painel (mesmo padrão do vendedor/inventário).
+                if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length < 4){
+                  var allyClass = String(it.c || 'guerreiro').toLowerCase();
+                  var hpByClass = { guerreiro:12, clerigo:10, ladino:9, mago:8, druida:10, patrulheiro:10, paladino:12, barbaro:14, monge:9, bardo:10, feiticeiro:8, bruxo:9 };
+                  var baseHp = hpByClass[allyClass] || 10;
+                  var allyHp = baseHp + Math.floor(((it.l || 1) - 1) * (baseHp * 0.65));
+                  window.GROUP_MEMBERS.push({ name: it.n, cls: allyClass, lvl: (it.l || 1), hp: allyHp, hpMax: allyHp, mp: 12, mpMax: 12, xp: 0, xpNext: 300, gold: 0, icon: it.ico });
+                }
+                if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
+                if (typeof refreshHud === 'function') refreshHud();
+                _showServiceResultPopup({
+                  icon: (it.ico || _heralIco('ic-grupo')), npc: it.n,
+                  narrative: '<i>"Aceito. Encontro você nos portões ao amanhecer."</i><br><br><b>' + it.n + '</b> contratado e adicionado ao grupo.',
+                  deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+                  onContinue: function(){ navigateBack(); }
+                });
+              }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao contratar.', 'warn'); });
+            }
+          });
+        }
+      });
+    }).catch(function(_e){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      console.error('[CITY] guild recruits failed', _e);
+      if (typeof vToast === 'function') vToast('Erro ao abrir o Salão.', 'warn');
+    });
+    return;
+  }
+  // ── LOCAL (file://) fallback — mock client-side (dev tool, sem servidor) ──
   // 2026-05-12 BUG #19: lista FILTRADA por GROUP_MEMBERS — recrutas já no grupo somem.
   // Antes a lista era estática (GUILD_RECRUITS direto), permitindo re-recrutar
   // infinitamente o mesmo ally com perda de gold sem efeito.
