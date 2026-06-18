@@ -10121,6 +10121,14 @@ function _isCTA(btn) {
       // Antes o cliente fabricava o efeito LOCAL (só o ouro persistia via service.gold).
       service: function(svc){ return window.vCityServer.cityAction('service.temple_service', { service: svc }); }
     },
+    market: {  // Mercado (COMPRA) server-authoritative (#0, 2026-06-18, Fatia 1, opção A)
+      // — o SERVIDOR precifica (registro global + reputação) E concede o item ATÔMICO.
+      // Antes a compra em REMOTE debitava o ouro (service.gold via _pay) mas o item ia
+      // só pro MOCK_PLAYER_INVENTORY do cliente que não persistia → "perde ouro+item some".
+      // price é read-only (preço da tela de confirmação — exibir, NÃO recalcular).
+      price: function(npcKey, itemName){ return window.vCityServer.cityAction('service.market_price', { npc_key: npcKey, item_name: itemName }); },
+      buy:   function(npcKey, itemName, qty){ return window.vCityServer.cityAction('service.market_buy', { npc_key: npcKey, item_name: itemName, qty: qty || 1 }); }
+    },
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
       state: function(){ return window.vCityServer.cityAction('flag.state', {}); }
@@ -41483,11 +41491,75 @@ function _marketShowHaggleResult(itemName, npcKey, res, onContinue){
   });
 }
 
+// Categoria do item p/ a fala PADRAO_ALDRIC do NPC (reusada por LOCAL e REMOTE).
+function _marketItemCat(it){
+  var t = (it && it.t) || [];
+  if (t.indexOf('weapon') !== -1 || t.indexOf('martial_weapon') !== -1 || t.indexOf('simple_weapon') !== -1) return 'weapon';
+  if (t.indexOf('armor') !== -1 || t.indexOf('shield') !== -1) return 'armor';
+  if (t.indexOf('potion') !== -1 || t.indexOf('healing') !== -1) return 'potion';
+  if (t.indexOf('alchemy') !== -1 || t.indexOf('consumable') !== -1) return 'alchemy';
+  if (t.indexOf('gem') !== -1) return 'gem';
+  if (t.indexOf('jewelry') !== -1 || t.indexOf('accessory') !== -1) return 'jewelry';
+  if (t.indexOf('map') !== -1) return 'map';
+  if (t.indexOf('scroll') !== -1) return 'scroll';
+  if (t.indexOf('camping') !== -1) return 'camping';
+  if (t.indexOf('tool') !== -1) return 'tool';
+  return 'generic';
+}
+
+// Compra REMOTE server-authoritative (#0, Fatia 1, opção A): o SERVIDOR precifica E
+// concede o item ATÔMICO. NÃO chamar _pay aqui (o servidor debita = seria duplo
+// débito). Exibe o preço REAL do servidor (não recalcula client-side). O mock LOCAL
+// (file://) continua no corpo de _shopConfirmBuy abaixo.
+function _shopConfirmBuyRemote(name, npcId, it, shop, p){
+  var _proc = (typeof vProcessing !== 'undefined' && vProcessing) ? vProcessing : null;
+  if (_proc) _proc.show({ text: 'Consultando o mercador...' });
+  window.vCityServer.market.price(npcId, name).then(function(ps){
+    if (_proc) _proc.hide();
+    if (!ps || !ps.ok){ vToast(ps && ps.error === 'unknown_item' ? 'Item indisponível.' : 'Mercado indisponível.', 'warn'); return; }
+    if (ps.stock_left <= 0){ vToast('Estoque esgotado, volte outro dia.', 'warn'); return; }
+    var finalPrice = ps.unit_price;
+    _showConfirmPurchase({
+      icon: shop.icon || it.e || '🛒', npc: shop.npc, title: 'Comprar ' + name,
+      desc: '<b>' + name + '</b><br><i>' + (it.desc || '') + '</i><br><b>Preço:</b> ' + _fmtV(finalPrice) + ' <span class="vi vi-coin sm"></span>',
+      cost: finalPrice,
+      onConfirm: function(){
+        var preGold = p.gold;
+        if (_proc) _proc.show({ text: 'Comprando...' });
+        window.vCityServer.market.buy(npcId, name, 1).then(function(res){
+          if (_proc) _proc.hide();
+          if (!res || !res.ok){
+            vToast(res && res.error === 'no_funds' ? 'Valdoritas insuficientes.'
+                 : res && res.error === 'no_stock' ? 'Estoque esgotado.'
+                 : 'Não foi possível comprar.', 'warn');
+            return;
+          }
+          p.gold = res.gold;
+          if (typeof refreshHud === 'function') refreshHud();
+          var npcKey2 = (typeof MARKET_NPC_LIBRARY !== 'undefined' && MARKET_NPC_LIBRARY[npcId]) ? npcId : 'generic';
+          var reactionLine = (typeof _marketNpcLine === 'function') ? _marketNpcLine(npcKey2, 'buy', _marketItemCat(it)) : '<i>"Tome. Bom uso."</i>';
+          _showServiceResultPopup({
+            icon: shop.icon || it.e || '🛒', npc: shop.npc,
+            narrative: reactionLine + '<br><br><b>' + (res.item_added || name) + '</b> vai pra mochila.',
+            deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+            onContinue: function(){ if (window._currentShopNpcId === npcId) _renderShopPopup(); }
+          });
+        }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] market.buy', e); });
+      }
+    });
+  }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] market.price', e); });
+}
+
 function _shopConfirmBuy(name, npcId){
   var it = getItemData(name);
   var p = window.CITY_MOCK_PLAYER;
   var shop = CANON_MARKET_SHOPS[npcId];
   if (!p || !it || !shop) return;
+  // #0 (2026-06-18): em REMOTE o servidor é a autoridade de preço + grant.
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.market){
+    _shopConfirmBuyRemote(name, npcId, it, shop, p);
+    return;
+  }
   // X-6.5.51CC/CD (2026-05-18): D&D 5e canonical pricing — CHA + rep + skill checks
   var basePrice = it.v || 0;
   var finalPrice = _marketCalculateBuyPrice(name, npcId, p);
