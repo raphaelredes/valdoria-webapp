@@ -10141,7 +10141,13 @@ function _isCTA(btn) {
       // REAL no servidor — o cliente renderizava um MOCK (CITY_TEMPLE_DEBT). debtState lê o
       // débito real ao abrir o Templo; payDebt quita via servidor (modify_gold + zera flags).
       debtState: function(){ return window.vCityServer.cityAction('service.temple_debt_state', {}); },
-      payDebt: function(){ return window.vCityServer.cityAction('service.temple_pay_debt', {}); }
+      payDebt: function(){ return window.vCityServer.cityAction('service.temple_pay_debt', {}); },
+      // Reviver Aliado (#0, 2026-06-18): antes o cliente revivia local (GROUP_MEMBERS
+      // mock), o aliado REAL (player.party_status) nunca era restaurado. Agora o SERVIDOR
+      // restaura o aliado (hp=1 + status='active' + raise_dead_penalty=4 PHB) + cobra
+      // ouro real. raiseDeadState lista os caídos pra escolha; raiseDead aplica.
+      raiseDeadState: function(){          return window.vCityServer.cityAction('service.temple_raise_dead_state', {}); },
+      raiseDead:      function(allyId){    return window.vCityServer.cityAction('service.temple_raise_dead', { ally_id: allyId }); }
     },
     market: {  // Mercado (COMPRA) server-authoritative (#0, 2026-06-18, Fatia 1, opção A)
       // — o SERVIDOR precifica (registro global + reputação) E concede o item ATÔMICO.
@@ -33374,6 +33380,119 @@ function _templeServiceRemote(p, sid, s){
   }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] temple service failed', _e); if (typeof vToast === 'function') vToast('Erro no serviço do templo.', 'warn'); });
 }
 
+// SERVER-AUTHORITATIVE (#0, 2026-06-18): revive um ALIADO caído via servidor.
+// Antes o cliente fazia ally.dead=false; ally.hp=1 LOCAL no GROUP_MEMBERS — mock que
+// nunca persistia (next reload zerava). Agora o SERVIDOR busca os aliados reais caídos
+// (player.party_status com status='dead' ou hp<=0), oferece escolha (1+ aliado), valida
+// (lvl 10+, sem debt, ouro >= 1000) e revive (hp=1 + status='active' + raise_dead_penalty=4).
+// Cliente só anima. Migração 2026-06-18.
+function _templeRaiseDeadRemote(p){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Consultando o Oráculo...' }); } catch(_){} }
+  window.vCityServer.temple.raiseDeadState().then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      if (typeof vToast === 'function') vToast('Não foi possível consultar o Oráculo.', 'warn');
+      return;
+    }
+    // Hidrata ouro real.
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    refreshHud();
+    if (!res.available) {
+      _showServiceResultPopup({
+        icon: _heralIco('ic-templo'), npc: res.npc || 'Oráculo Orenthia',
+        narrative: '<i>"Este ritual exige nível <b>' + res.min_level + '</b> ou mais. Volte quando estiver pronto."</i>',
+        deltas: []
+      });
+      return;
+    }
+    if (res.has_temple_debt) {
+      _showServiceResultPopup({
+        icon: _heralIco('ic-templo'), npc: res.npc || 'Oráculo Orenthia',
+        narrative: '<i>"Sua dívida com o templo (' + res.temple_debt + ' V) precisa ser quitada antes de mais rituais."</i>',
+        deltas: []
+      });
+      return;
+    }
+    var dead = res.dead_allies || [];
+    if (!dead.length) {
+      _showServiceResultPopup({
+        icon: _heralIco('ic-templo'), npc: res.npc || 'Oráculo Orenthia',
+        narrative: '<i>"Não há aliado caído entre seus companheiros, filho. Que assim permaneça."</i>',
+        deltas: []
+      });
+      return;
+    }
+    var cost = res.cost;
+    // Lista: cada caído como item; confirma com cost.
+    var items = dead.map(function(a){
+      return {
+        icon: _heralIco('ic-templo'),
+        label: a.name,
+        badge: (a.class || '') + ' · ' + cost + ' V',
+        _ally: a
+      };
+    });
+    _squareShowListPopup({
+      stackKey: 'temple_raise_dead', icon: _heralIco('ic-templo'),
+      title: 'Reviver Caído · ' + cost + ' V',
+      flavor: '<i>O Oráculo Orenthia ergue os olhos do oráculo.</i> "Quem você traz de volta? O preço é o mesmo: ' + cost + ' V e a alma fica marcada — penalidade -4 em d20 por ' + (4) + ' descansos longos."',
+      items: items,
+      onPick: function(item){
+        var ally = item._ally;
+        _showConfirmPurchase({
+          icon: _heralIco('ic-templo'), npc: res.npc || 'Oráculo Orenthia',
+          title: 'Reviver ' + ally.name,
+          desc: '<i>"' + ally.name + ' — ' + (ally.class || '') + '."</i><br><br>' +
+                '<b>Custo:</b> ' + cost + ' V<br>' +
+                '<b>Resultado:</b> ' + ally.name + ' retorna com <b>1 HP</b><br>' +
+                '<span style="color:#e87050;font-size:calc(11px * var(--v-font-scale, 1))">⚠️ Penalidade: -4 em d20 por 4 descansos longos.</span>',
+          cost: cost,
+          onConfirm: function(){ _templeRaiseDeadExecRemote(p, ally); }
+        });
+      }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] temple raise_dead state failed', _e);
+    if (typeof vToast === 'function') vToast('Erro ao consultar o Oráculo.', 'warn');
+  });
+}
+
+function _templeRaiseDeadExecRemote(p, ally){
+  var preGold = p.gold;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Ritual em curso...' }); } catch(_){} }
+  window.vCityServer.temple.raiseDead(ally.ally_id).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || !res.ok) {
+      var emsg = (res && res.error === 'no_gold') ? 'Valdoritas insuficientes.'
+               : (res && res.error === 'ally_not_dead') ? 'Esse aliado não está caído.'
+               : (res && res.error === 'ally_not_in_party') ? 'Aliado não está no seu grupo.'
+               : (res && res.error === 'debt_block') ? 'Quite a dívida do templo antes.'
+               : (res && res.error === 'level_too_low') ? 'Nível insuficiente.'
+               : (res && res.error === 'npc_absent') ? 'O Oráculo não está disponível hoje.'
+               : 'Não foi possível realizar o ritual.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn');
+      return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    refreshHud();
+    _showServiceResultPopup({
+      icon: _heralIco('ic-templo'), npc: res.npc || 'Oráculo Orenthia',
+      narrative: '<i>"' + (res.npc || 'O Oráculo') + ' invoca os deuses ancestrais. ' + res.ally_name + ' abre os olhos lentamente."</i><br><br>' +
+                 '<span style="color:#e87050;font-size:calc(11px * var(--v-font-scale, 1))">⚠️ -4 em d20 por ' + res.penalty_rests + ' descansos longos</span>',
+      deltas: [
+        { type:'hp', label: res.ally_name, from: 0, to: res.hp, max: res.max_hp || 1 },
+        { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
+      ],
+      onContinue: function(){ if (_popupStack[_popupStack.length-1] === 'temple') _renderCityPopup('temple'); }
+    });
+  }).catch(function(_e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] temple raise_dead exec failed', _e);
+    if (typeof vToast === 'function') vToast('Erro no ritual.', 'warn');
+  });
+}
+
 // SERVER-AUTHORITATIVE (#0, 2026-06-18): paga o débito REAL de ressurreição via servidor.
 // CITY_TEMPLE_DEBT foi hidratado em _renderCityPopup('temple') com o valor real (debtState),
 // então o confirm mostra o custo certo. O servidor quita (modify_gold + zera flags['temple_debt']
@@ -49512,13 +49631,19 @@ var ACTION_HANDLERS = {
     if (!s) return;
     // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE os serviços CURATIVOS são
     // resolvidos pelo SERVIDOR (valida+cobra+rola+aplica HP/buff/condição REAL e
-    // persiste); o cliente só anima. raise_dead NÃO passa aqui (diverge: servidor
-    // revive o player, cliente revive um aliado) — fica no caminho LOCAL abaixo.
+    // persiste); o cliente só anima. raise_dead também é REMOTE — revive o aliado
+    // real (party_status[ally_id]) e persiste; a versão LOCAL abaixo mexe só no
+    // GROUP_MEMBERS mock pra dev tool file://.
     var _curativeT = (sid === 'heal' || sid === 'cure_poison' || sid === 'bless'
                       || sid === 'remove_curse' || sid === 'greater_restoration');
     if (_curativeT && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
         && window.vCityServer.temple && typeof _templeServiceRemote === 'function') {
       _templeServiceRemote(p, sid, s);
+      return;
+    }
+    if (sid === 'raise_dead' && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && window.vCityServer.temple && window.vCityServer.temple.raiseDeadState) {
+      _templeRaiseDeadRemote(p);
       return;
     }
     // ── LOCAL (file://) fallback — mock client-side ──
@@ -49682,6 +49807,15 @@ var ACTION_HANDLERS = {
     });
   },
   'temple_svc_raise_dead': function(p){
+    // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE o SERVIDOR é dono dos aliados
+    // reais (player.party_status). _templeRaiseDeadRemote busca os caídos REAIS,
+    // monta a lista de escolha + confirma + revive (party_status[ally_id]). LOCAL
+    // (file://) continua no mock GROUP_MEMBERS abaixo pra dev tool.
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && window.vCityServer.temple && window.vCityServer.temple.raiseDeadState) {
+      _templeRaiseDeadRemote(p);
+      return;
+    }
     var s = TEMPLE_NPCS_DB.raise_dead;
     var deadAlly = null;
     for (var i = 1; i < GROUP_MEMBERS.length; i++) {
