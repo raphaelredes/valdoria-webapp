@@ -19387,6 +19387,34 @@ function _marketShowTransient(p, npc){
             cost: item.value,
             onConfirm: function(){
               var preGold = p.gold;
+              // #0 (2026-06-18, Fatia 4): em REMOTE o servidor COBRA + CONCEDE o item
+              // ATÔMICO. Bug histórico: o transiente pagava (_pay→service.gold persiste)
+              // e NÃO adicionava NADA → "paga e não recebe". Agora vai pelo servidor.
+              if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.market && window.vCityServer.market.buy){
+                var _proc = (typeof vProcessing !== 'undefined' && vProcessing) ? vProcessing : null;
+                if (_proc) _proc.show({ text: 'Comprando...' });
+                window.vCityServer.market.buy(npc.key || 'transient', item.name, 1).then(function(res){
+                  if (_proc) _proc.hide();
+                  if (!res || !res.ok){
+                    vToast(res && res.error === 'no_funds' ? 'Valdoritas insuficientes.'
+                         : res && res.error === 'no_stock' ? 'Estoque esgotado.'
+                         : res && res.error === 'unknown_item' ? 'Item indisponível.'
+                         : 'Não foi possível comprar.', 'warn');
+                    return;
+                  }
+                  p.gold = res.gold;
+                  if (typeof refreshHud === 'function') refreshHud();
+                  _showServiceResultPopup({
+                    icon: purchaseIcon, npc: npc.name,
+                    narrative: '<i>' + npc.name + ' embrulha o item com cuidado.</i><br><br>'
+                             + '<b>' + (res.item_added || item.name) + '</b> vai pra sua bolsa.',
+                    deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+                    onContinue: function(){ _marketShowTransient(p, npc); }
+                  });
+                }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] transient buy', e); });
+                return;
+              }
+              // LOCAL (file://): mock
               if (!_pay(p, item.value)) return;
               _showServiceResultPopup({
                 icon: purchaseIcon, npc: npc.name,
