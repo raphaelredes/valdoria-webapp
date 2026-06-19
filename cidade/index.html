@@ -35454,7 +35454,21 @@ function _isMysteriousItem(it){
 // rotativos) abre via vEncounter (narração + fala + escolhas) em vez do list-popup
 // plano. Mantém o fluxo de compra (confirma → paga → resultado PADRAO_DADOS-ready).
 function _squareShowVendorPopup(p){
-  var vendor = _squareGetDailyVendor();
+  // SERVER-AUTHORITATIVE (SUPREME RULE #0): em REMOTE o SERVIDOR escolhe o vendedor do
+  // dia (seed game-time MD5). O cliente DEVE renderizar ESSE vendedor — senão o mock
+  // (seed JS, lista de 8 com Kaelthar) diverge do servidor e o item_idx erra (bug: comprava
+  // Frasco de Ácido do Grimshaw e recebia Corda de Cânhamo do Torvik). LOCAL usa o mock.
+  if (window.vCityServer && window.vCityServer.isRemote()) {
+    window.vCityServer.cityAction('service.vendor_get', {}).then(function(res){
+      var vid = res && res.id;
+      var sv = vid ? SQUARE_AMBULANT_VENDORS.filter(function(v){ return v.id === vid; })[0] : null;
+      _squareRenderVendor(p, sv || _squareGetDailyVendor());
+    }).catch(function(){ _squareRenderVendor(p, _squareGetDailyVendor()); });
+    return;
+  }
+  _squareRenderVendor(p, _squareGetDailyVendor());
+}
+function _squareRenderVendor(p, vendor){
   window._squareVendorVisited = true;
   // SERVER-AUTHORITATIVE (SUPREME RULE #0): o SERVIDOR cobra E adiciona o item via
   // 'service.vendor_buy'. Resultado via _showServiceResultPopup (ícone = WEBP do item,
@@ -35515,7 +35529,7 @@ function _squareShowVendorPopup(p){
     }, {
       player: p, closeable: true,
       onChoice: function(ch){
-        if (!ch || ch.id === 'back') { _squareShowVendorPopup(p); return; }
+        if (!ch || ch.id === 'back') { _squareRenderVendor(p, v); return; }
         try { window.vEncounter.close(); } catch(_){}
         _vendorDoBuy(it, v);
       }
