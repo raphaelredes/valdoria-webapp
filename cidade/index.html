@@ -33508,26 +33508,36 @@ function _buildSquareMockData(player){
   var gambleRem = Math.max(0, 3 - window._squareGambleCount);
   var jobsLeft = SQUARE_JOBS.length - window._squareJobsDone.length;
   var activeBuff = (player.metadata && player.metadata.artist_buff_active) || null;
+  // Fix (user 2026-06-19): os cards da Praça usavam _heralIco('ic-praca') p/ TODOS
+  // — o icons-resolver trocava o <use> por <img> mas parentava no .sqr-card (não no
+  // .sqr-card-icon 32x32), deixando o slot vazio (pontinho). Cards de LOCAL renderizam
+  // por <img> direto (sem resolver) e funcionam. Aqui idem: <img> direto da ui/<slug>.webp
+  // (existe no ICON_MAP), 1 ícone DISTINTO por opção (antes era o mesmo p/ todos). O sync
+  // reescreve / -> / no webapp.
+  var _sqIco = function(s){
+    return '<img src="/shared/img/ui/' + s + '.webp" alt="" '
+      + 'style="width:100%;height:100%;object-fit:contain;display:block" onerror="this.remove()">';
+  };
   return {
     type: 'hub',
     flavor: flavor,
     rep_label: _squareRepLabel(player),
     buff: activeBuff ? ('✨ ' + (player.metadata.artist_buff_name || 'Inspiração de Artista')) : '',
     services: [
-      { icon: _heralIco('ic-praca'), label: 'Investigar (NPCs)',  cb: 'square_investigate_open' },
-      { icon: _heralIco('ic-praca'), label: 'Explorar Área',      cb: 'square_explore_open' },
-      { icon: _heralIco('ic-praca'), label: 'Quadro de Avisos',   cb: 'square_bulletin_open',
+      { icon: _sqIco('dialogo'),  label: 'Investigar (NPCs)',  cb: 'square_investigate_open' },
+      { icon: _sqIco('praca'),    label: 'Explorar Área',      cb: 'square_explore_open' },
+      { icon: _sqIco('mensagem'), label: 'Quadro de Avisos',   cb: 'square_bulletin_open',
         badge: '' },  // canonical: rotativo diário (rumores+bounty+help+aviso)
       // canonical: data/plaza_objects_data.py — 3 objetos interativos (fonte/quadro/estátua)
-      { icon: _heralIco('ic-praca'), label: 'Objetos da Praça',   cb: 'square_objects_open' },
-      { icon: _heralIco('ic-praca'), label: 'Mesa de Dados',      cb: 'square_gamble_open',
+      { icon: _sqIco('fonte'),    label: 'Objetos da Praça',   cb: 'square_objects_open' },
+      { icon: _sqIco('bolsa'),    label: 'Mesa de Dados',      cb: 'square_gamble_open',
         badge: gambleRem > 0 ? gambleRem + '/3' : '✓' },
-      { icon: _heralIco('ic-praca'), label: 'Vendedor Itinerante',cb: 'square_vendor_open',
+      { icon: _sqIco('mercado'),  label: 'Vendedor Itinerante',cb: 'square_vendor_open',
         badge: window._squareVendorVisited ? '' : 'Novo!' },
-      { icon: _heralIco('ic-praca'), label: 'Artistas de Rua',    cb: 'square_artists_open',
+      { icon: _sqIco('som'),      label: 'Artistas de Rua',    cb: 'square_artists_open',
         badge: activeBuff ? '✓' : '' },
-      { icon: _heralIco('ic-praca'), label: 'Mural dos Aventureiros', cb: 'square_mural_open' },
-      { icon: _heralIco('ic-praca'), label: 'Trabalhos Diários',  cb: 'square_jobs_open',
+      { icon: _sqIco('coroa'),    label: 'Mural dos Aventureiros', cb: 'square_mural_open' },
+      { icon: _sqIco('desafio'),  label: 'Trabalhos Diários',  cb: 'square_jobs_open',
         badge: jobsLeft > 0 ? jobsLeft + '/' + SQUARE_JOBS.length : '✓' }
     ]
   };
