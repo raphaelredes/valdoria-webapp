@@ -10887,6 +10887,44 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('bardo') >= 0 && s.indexOf('itinerante') >= 0) return '/shared/img/npcs/plaza/bardo_praca.webp';
   if (s.indexOf('batedor') >= 0) return '/shared/img/npcs/plaza/batedor_carteira.webp';
   if (s.indexOf('velha') >= 0 && s.indexOf('oculto') >= 0) return '/shared/img/npcs/plaza/velha_oculto.webp';
+  // Plaza ROLES -> retrato plaza/archetype (sweep #2 2026-06-19: "Pessoas na Praca"
+  // mal feita — lista usava aldeao repetido, dialogo sem retrato/lightbox). Da um
+  // retrato SENSIVEL por PAPEL a todo NPC da praca. Vem ANTES dos fallbacks genericos,
+  // DEPOIS dos NPCs nomeados (que ja retornaram). Todos os webp existem em npcs/plaza/.
+  var _pz = '/shared/img/npcs/plaza/';
+  var _np = '/shared/img/npcs/';
+  if (s.indexOf('dancarin') >= 0 || s.indexOf('dançarin') >= 0 || s.indexOf('bailarin') >= 0) return _pz + 'dancer_exotic.webp';
+  if (s.indexOf('ex-ladr') >= 0 || s.indexOf('ladrao') >= 0 || s.indexOf('ladrão') >= 0 || s.indexOf('mao leve') >= 0 || s.indexOf('mão leve') >= 0 || s.indexOf('gatuno') >= 0) return _pz + 'thief_repentant.webp';
+  if (s.indexOf('veteran') >= 0 || s.indexOf('sgt') >= 0 || s.indexOf('sargent') >= 0) return _pz + 'guard_veteran.webp';
+  if (s.indexOf('aventureir') >= 0) return _pz + 'survivor_wolves.webp';
+  if (s.indexOf('vidente') >= 0 || s.indexOf('oraculo') >= 0 || s.indexOf('oráculo') >= 0) return _pz + 'seer_blind.webp';
+  if (s.indexOf('cozinheir') >= 0 || s.indexOf('gourmet') >= 0) return _pz + 'gourmet.webp';
+  if (s.indexOf('pintor') >= 0 || s.indexOf('pintora') >= 0) return _pz + 'painter_visionary.webp';
+  if (s.indexOf('escultor') >= 0) return _pz + 'sculptor.webp';
+  if (s.indexOf('coveir') >= 0) return _pz + 'gravedigger.webp';
+  if (s.indexOf('lenhador') >= 0) return _pz + 'woodcutter.webp';
+  if (s.indexOf('mineir') >= 0) return _pz + 'miner_gold.webp';
+  if (s.indexOf('pescador') >= 0) return _pz + 'fisher_old.webp';
+  if (s.indexOf('orf') >= 0 || s.indexOf('órf') >= 0) return _pz + 'orphan_doll.webp';
+  if (s.indexOf('fracas') >= 0 || s.indexOf('falhad') >= 0) return _pz + 'wizard_failed.webp';
+  if (s.indexOf('ilusionist') >= 0) return _pz + 'illusionist.webp';
+  if (s.indexOf('domador') >= 0 || s.indexOf('feras') >= 0) return _pz + 'beast_tamer.webp';
+  if (s.indexOf('malabarist') >= 0 || s.indexOf('circo') >= 0 || s.indexOf('cospe') >= 0 || s.indexOf('pirotecn') >= 0 || s.indexOf('pirotécn') >= 0 || s.indexOf('engolidor') >= 0) return _pz + 'juggler_fire.webp';
+  if (s.indexOf('pedinte') >= 0 || s.indexOf('mendig') >= 0 || s.indexOf('morador de rua') >= 0) return _pz + 'mendigo_praca.webp';
+  if (s.indexOf('serpente') >= 0 || s.indexOf('encantador') >= 0) return _pz + 'snake_charmer.webp';
+  if (s.indexOf('nobre') >= 0 || s.indexOf('exilad') >= 0) return _pz + 'noble_exile.webp';
+  if (s.indexOf('monge') >= 0) return _pz + 'monk_peace.webp';
+  if (s.indexOf('peregrin') >= 0) return _pz + 'pilgrim_lost.webp';
+  if (s.indexOf('andarilh') >= 0 || s.indexOf('viajante') >= 0 || s.indexOf('visitante') >= 0 || s.indexOf('forasteir') >= 0) return _pz + 'square_wanderer.webp';
+  if (s.indexOf('queijeir') >= 0) return _np + 'quinto-queijeiro.webp';
+  if (s.indexOf('curtidor') >= 0 || s.indexOf('trabalhador') >= 0) return _np + 'torvin-trabalhador.webp';
+  if (s.indexOf('livreir') >= 0) return _np + 'orion-livreiro.webp';
+  if (s.indexOf('cartograf') >= 0 || s.indexOf('cartógraf') >= 0) return _np + 'varneth-cartografo.webp';
+  if (s.indexOf('patrulh') >= 0 || s.indexOf('sentinel') >= 0) return _pz + 'guarda_barricada.webp';
+  if (s.indexOf('poeta') >= 0 || s.indexOf('flautist') >= 0 || s.indexOf('músic') >= 0 || s.indexOf('music') >= 0 || s.indexOf('trovador') >= 0) return _pz + 'bardo_praca.webp';
+  if (s.indexOf('filosof') >= 0 || s.indexOf('filósof') >= 0 || s.indexOf('estudios') >= 0 || s.indexOf('arauto') >= 0) return _pz + 'librarian.webp';
+  if (s.indexOf('especiari') >= 0 || s.indexOf('mercador') >= 0 || s.indexOf('vendedor') >= 0 || s.indexOf('comerciante') >= 0 || s.indexOf('mascate') >= 0) return _np + 'mercador-errante.webp';
+  if (s.indexOf('pombos') >= 0 || s.indexOf('pomba') >= 0) return _np + 'animal1.webp';
   // Fallback role-based (PNGs genéricos quando NPC não tem portrait dedicado)
   if (s.indexOf('grom') >= 0)        return '/shared/img/npcs/grom-anao.webp';  /* Grom, o Caolho — taverneiro ANÃO (retrato dedicado, ANTES do fallback generico de taverneiro). */
   if (s.indexOf('taverneir') >= 0)   return '/shared/img/npcs/taverneiro.webp';
@@ -22925,6 +22963,9 @@ function _showSharedNpcListPopup(opts){
     // aldeão. Antes: todos usavam #ic-aldeao (mesma silhueta repetida).
     var avatar;
     var _photo = npc.portraitImg || _plazaPhotoFor(npc);
+    // sweep #2 2026-06-19: fallback pro resolver por nome/papel (mesmo do dialogo) —
+    // antes a lista caia direto no heraldico (aldeao repetido) p/ NPCs sem slug plaza.
+    if (!_photo) { try { _photo = _discoverySpeakerPortrait((npc.name || '') + ' ' + (npc.role || '')); } catch (_e) {} }
     if (_photo) {
       avatar = '<span class="sb-icon sb-icon-img"><img src="' + _photo + '" alt="" loading="lazy" '
         + 'style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--v-gold-40,rgba(196,149,58,0.45));" '
