@@ -8205,6 +8205,29 @@ body.perf-lite .vc-action-btn { transition: none; }
   // garante que mockup/simulador também tenha namespace consistente.
   window._charId = params.get('char') || params.get('char_id') || 'default';
 
+  // ARENA → de volta à cidade (2026-06-18): combat2 redireciona pra /cidade/?from=arena
+  // ao fim de uma luta. Mostra um toast com a recompensa de TIER aplicada server-side
+  // (o combat2 já mostrou vitória/derrota + XP/loot do combate em si). Deferido pra
+  // garantir vToast + HUD prontos. Os rewards já estão no Player (HUD re-hidrata).
+  if (params.get('from') === 'arena') {
+    (function(){
+      var _av = params.get('ar_v'), _ag = params.get('ar_g'), _ax = params.get('ar_x');
+      setTimeout(function(){
+        try {
+          if (typeof vToast !== 'function') return;
+          if (_av === '1') {
+            var _bits = [];
+            if (_ag && +_ag > 0) _bits.push('+' + _ag + ' Valdoritas');
+            if (_ax && +_ax > 0) _bits.push('+' + _ax + ' XP');
+            vToast('🏟️ Vitória na arena!' + (_bits.length ? ' ' + _bits.join(' · ') : ''), 'ok');
+          } else if (_av === '0') {
+            vToast('🏟️ Derrota na arena. Treine e volte mais forte.', 'warn');
+          }
+        } catch (_) {}
+      }, 1400);
+    })();
+  }
+
   // === HOSTNAME-FORCED ENV (DEFESA CROSS-ENV 2026-05-10) ==================
   // Telegram WebView pode cachear URL antiga do menu button com ?env errado
   // (ex: jogo.lendasdevaldoria.com.br/cidade/?env=dev). Para impedir
@@ -10380,6 +10403,16 @@ function _isCTA(btn) {
       if (action.indexOf('srvcomplete_') === 0) { _srvCompleteQuest(action.slice(12)); return; }
       if (action.indexOf('srvabandon_') === 0) { _srvAbandonQuest(action.slice(11)); return; }
       if (action.indexOf('quest_open_srv_') === 0) { _srvQuestDetail(action.slice(15)); return; }  // quest do servidor → detalhe dinâmico
+      // 1.6 ARENA → combat2 REAL (server-authoritative, 2026-06-18). Em REMOTE as
+      //     lutas (arena_fight_*) encenam um combate REAL no servidor em vez do mock
+      //     client-side (Math.random decidia vitória + p.gold+=/p.hp-= fabricados =
+      //     viola SUPREME RULE #0). Em LOCAL (file://) cai no ACTION_HANDLERS mock (dev).
+      if (action.indexOf('arena_fight_') === 0
+          && window.vCityServer && vCityServer.isRemote && vCityServer.isRemote()
+          && typeof window._triggerArenaFightRemote === 'function') {
+        window._triggerArenaFightRemote();
+        return;
+      }
       // 1. Prefixo nav: → openCityPopup direto
       if (action.indexOf('nav:') === 0) { navigateTo(action.substring(4)); return; }
       // 2. ACTION_HANDLERS (state mutation: rest_X, buy_X, gates_explore, open_cartografia, etc.)
@@ -51563,6 +51596,37 @@ var ACTION_HANDLERS = {
 };
 
 // --- State helpers ---
+// ARENA → combat2 REAL (server-authoritative, 2026-06-18). Em REMOTE encena um
+// combate REAL no servidor (POST /api/arena/stage_combat) e redireciona pro combat2,
+// em vez do mock client-side arena_fight_* (Math.random decidia vitória + p.gold+=/
+// p.hp-= fabricados = viola SUPREME RULE #0). O servidor valida cooldown/gold, paga a
+// taxa, monta o desafiante do tier e devolve a redirect_url; os rewards (tier+streak)
+// são aplicados em /api/combat2/complete (origin='arena') ao fim da luta.
+window._triggerArenaFightRemote = function(){
+  var a = window.__CITY_AUTH || {};
+  if (!a.token || !a.uid) { vToast('Sessão inválida — recarregue a cidade.', 'err'); return; }
+  try { if (window.vProcessing && vProcessing.show) vProcessing.show({ text: 'Entrando na arena…' }); } catch (_) {}
+  fetch((a.api || '') + '/api/arena/stage_combat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: a.token, user_id: a.uid })
+  }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+    .then(function(res){
+      var d = res.j || {};
+      if (res.ok && d.redirect_url) {
+        window.__valdoria_transitioning = true;  // suprime close beacon na transição
+        window.location.href = d.redirect_url;
+        return;
+      }
+      try { if (window.vProcessing && vProcessing.hide) vProcessing.hide(); } catch (_) {}
+      vToast(d.message || 'Não foi possível entrar na arena agora.', 'warn');
+    })
+    .catch(function(e){
+      try { if (window.vProcessing && vProcessing.hide) vProcessing.hide(); } catch (_) {}
+      console.error('[CITY] arena_stage_combat', e);
+      vToast('Erro ao entrar na arena.', 'err');
+    });
+};
 function _pay(p, cost){
   if (p.gold < cost) { vToast('<span class="vi vi-coin sm"></span> Valdoritas insuficientes (' + cost + ' Valdoritas necessárias).'); return false; }
   p.gold -= cost;
