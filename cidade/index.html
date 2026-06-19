@@ -21103,7 +21103,7 @@ function _buildTravelersMockData(player){
 // Top names mostrados são mock representando o feed do DB (cache 5min do bot DEV).
 var MURAL_RANKINGS = {
   level: {
-    label: '🏆 Nível Mais Alto', desc: 'Os aventureiros mais experientes de Valdoria',
+    icon: _heralIco('ic-coroa'), label: 'Nível Mais Alto', desc: 'Os aventureiros mais experientes de Valdoria',
     top: [
       { rank: 1, name: 'Veldra Coroa-de-Tempestades', cls: 'Mago',     val: 'Nível 18' },
       { rank: 2, name: 'Drogan Aurmund',           cls: 'Paladino', val: 'Nível 16' },
@@ -21113,7 +21113,7 @@ var MURAL_RANKINGS = {
     ]
   },
   gold: {
-    label: '🪙 Maior Fortuna', desc: 'Os mais ricos do reino',
+    icon: _heralIco('ic-bolsa'), label: 'Maior Fortuna', desc: 'Os mais ricos do reino',
     top: [
       { rank: 1, name: 'Borek Saco-Pesado',     cls: 'Bardo',    val: '24.500 <span class="vi vi-coin sm"></span>' },
       { rank: 2, name: 'Drogan Aurmund',    cls: 'Paladino', val: '18.200 <span class="vi vi-coin sm"></span>' },
@@ -21123,7 +21123,7 @@ var MURAL_RANKINGS = {
     ]
   },
   monsters: {
-    label: '⚔️ Caçador Supremo', desc: 'Os maiores matadores de monstros',
+    icon: _heralIco('ic-stat-attack'), label: 'Caçador Supremo', desc: 'Os maiores matadores de monstros',
     top: [
       { rank: 1, name: 'Brand Stengar',     cls: 'Guerreiro', val: '247 monstros' },
       { rank: 2, name: 'Rhylla Rosa-de-Aço',    cls: 'Bárbara',   val: '198 monstros' },
@@ -21133,7 +21133,7 @@ var MURAL_RANKINGS = {
     ]
   },
   items: {
-    label: '🎒 Colecionador', desc: 'Quem possui mais itens únicos',
+    icon: _heralIco('ic-mochila'), label: 'Colecionador', desc: 'Quem possui mais itens únicos',
     top: [
       { rank: 1, name: 'Velgar Nyctel',    cls: 'Mago',     val: '89 itens únicos' },
       { rank: 2, name: 'Sira Sirvane',   cls: 'Ladina',   val: '76 itens únicos' },
@@ -21143,7 +21143,7 @@ var MURAL_RANKINGS = {
     ]
   },
   locations: {
-    label: '🗺️ Explorador', desc: 'Quem descobriu mais locais',
+    icon: _heralIco('ic-cartografia'), label: 'Explorador', desc: 'Quem descobriu mais locais',
     top: [
       { rank: 1, name: 'Thessan Caminhos-Longos', cls: 'Patrulheiro', val: '42 locais' },
       { rank: 2, name: 'Aenir Zephyrael',       cls: 'Patrulheiro', val: '38 locais' },
@@ -21175,12 +21175,12 @@ function _buildHeroesWallMockData(player){
   return {
     type: 'hub',
     flavor: '<i>Mural de pedra negra na Praça Central, nomes gravados em ouro. Aqui ficam os mais notáveis aventureiros de Valdoria — quem subiu mais alto, quem matou mais monstros, quem juntou mais ouro, quem viu mais do mundo.</i>',
-    rep_label: '🏛️ 5 categorias de ranking · Top 10 por categoria · ' + MURAL_TITLES.length + ' títulos por conquista',
+    rep_label: _heralIco('ic-praca') + ' 5 categorias de ranking · Top 10 por categoria · ' + MURAL_TITLES.length + ' títulos por conquista',
     services: Object.keys(MURAL_RANKINGS).map(function(k){
       var r = MURAL_RANKINGS[k];
       return {
-        icon: r.label.split(' ')[0],
-        label: r.label.replace(/^[^\s]+ /, ''),
+        icon: r.icon,
+        label: r.label,
         cb: 'heroes_rank_' + k,
         badge: '#1 ' + (r.top[0] ? r.top[0].name.split(' ')[0] : '—')
       };
@@ -23326,9 +23326,9 @@ function _squareGetDailyVendor(){
 // Dar gorjeta (BUFF_CHANCE=40%) pode conceder buff +1 em ability até descanso longo.
 var SQUARE_ARTIST_BUFFS = [
   { id: 'bard_taviel',  icon: _heralIco('ic-musica'), name: 'Taviel, o Bardo',           buff: 'Inspiração Bárdica',  stat: 'CAR', desc: '+1 em testes de Carisma e Persuasão' },
-  { id: 'dancer_lyra',   icon: '🎶', name: 'Wrenna Caelwyn',              buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
+  { id: 'dancer_lyra',   icon: _heralIco('ic-musica'), name: 'Wrenna Caelwyn',              buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
   { id: 'fire_eater',    icon: _heralIco('ic-tochas'), name: 'Drask, Engolidor de Fogo',  buff: 'Coragem do Fogo',      stat: 'CON', desc: '+1 em testes de Constituição' },
-  { id: 'flutist',       icon: '🎶', name: 'Sylwen, a Flautista',       buff: 'Melodia Calmante',     stat: 'SAB', desc: '+1 em testes de Sabedoria' },
+  { id: 'flutist',       icon: _heralIco('ic-musica'), name: 'Sylwen, a Flautista',       buff: 'Melodia Calmante',     stat: 'SAB', desc: '+1 em testes de Sabedoria' },
   { id: 'poet',          icon: _heralIco('ic-escriba'), name: 'Velmar, o Poeta',           buff: 'Sorte do Artista',     stat: 'INT', desc: '+1 em testes de Inteligência' }
 ];
 var SQUARE_ARTIST_BUFF_CHANCE = 0.40;
@@ -23859,6 +23859,16 @@ var CANON_BULLETIN_ANNOUNCEMENTS = [
   "Novas rotas comerciais para o sul. Caravanas recrutando."
 ];
 
+// Bounty target -> heraldico de criatura (sweep praca 2026-06-19: zero emoji-icone)
+function _bountyHeraldic(target){
+  var t = (target || '').toLowerCase();
+  if (t.indexOf('lobo') >= 0) return _heralIco('ic-lobo');
+  if (t.indexOf('goblin') >= 0) return _heralIco('ic-goblin');
+  if (t.indexOf('esqueleto') >= 0) return _heralIco('ic-esqueleto');
+  if (t.indexOf('bandido') >= 0) return _heralIco('ic-bandido');
+  if (t.indexOf('aranha') >= 0) return _heralIco('ic-aranha');
+  return _heralIco('ic-inimigo');
+}
 // canonical: town_square_bulletin.py BulletinBoardManager._get_daily_content
 // Seleciona conteudo rotativo do dia: 3 rumores aleatorios, 1 bounty, 1 help, 1 announcement.
 function _bulletinDailySeed(){
@@ -34943,7 +34953,7 @@ function _squareShowObjectsPopup(p){
   var keys = Object.keys(CANON_PLAZA_OBJECTS);
   var ICONS = {
     fountain: _heralIco('ic-praca'),     // fonte → brasão da praça
-    board:    _heralIco('ic-missões'),   // quadro de avisos
+    board:    _heralIco('ic-mensagem'),   // quadro de avisos
     statue:   _heralIco('ic-paladino')   // estátua de aventureiro/cavaleiro
   };
   var items = keys.map(function(k){
@@ -35045,7 +35055,7 @@ function _squareShowBulletinPopup(p){
   // Rumores (3 do dia)
   content.rumors.forEach(function(r, idx){
     items.push({
-      icon: r.icon,
+      icon: _heralIco('ic-mensagem'),
       label: 'Rumor: ' + r.text,
       badge: '',
       _kind: 'rumor', _data: r
@@ -35055,7 +35065,7 @@ function _squareShowBulletinPopup(p){
   // Bounty do dia
   var b = content.bounty;
   items.push({
-    icon: b.emoji,
+    icon: _bountyHeraldic(b.target),
     label: 'Caçada: ' + b.target + ' ×' + b.count,
     badge: b.reward_gold + ' V',
     _kind: 'bounty', _data: b
@@ -35064,7 +35074,7 @@ function _squareShowBulletinPopup(p){
   // Help request do dia
   var h = content.help_req;
   items.push({
-    icon: h.icon,
+    icon: _heralIco('ic-cidadao'),
     label: 'Pedido: ' + h.text,
     badge: h.reward_gold + ' V',
     _kind: 'help', _data: h
@@ -35073,7 +35083,7 @@ function _squareShowBulletinPopup(p){
   // Announcement do dia
   var a = content.announce;
   items.push({
-    icon: _heralIco('ic-missões'),
+    icon: _heralIco('ic-mensagem'),
     label: 'Aviso: ' + a,
     badge: '',
     _kind: 'announce', _data: a
@@ -35091,20 +35101,20 @@ function _squareShowBulletinPopup(p){
       var kind = item._kind;
       if (kind === 'rumor'){
         _showInfoPopup({
-          icon: d.icon, npc: 'Quadro de Avisos',
+          icon: _heralIco('ic-mensagem'), npc: 'Quadro de Avisos',
           title: 'Rumor',
           desc: '<i>"' + d.text + '"</i><br><br><span style="opacity:.7">— Dito por viajantes hoje.</span>',
                 onConfirm: function(){}
         });
       } else if (kind === 'bounty'){
         _showInfoPopup({
-          icon: d.emoji, npc: 'Quadro de Avisos',
+          icon: _bountyHeraldic(d.target), npc: 'Quadro de Avisos',
           title: 'Caçada: ' + d.target,
           desc: d.desc + '<br><br>Caçar <b>' + d.count + '×</b> ' + d.target +
                 '<br><b>Recompensa:</b> ' + d.reward_gold + ' Valdoritas + ' + d.reward_xp + ' XP',
                 onConfirm: function(){
             _showServiceResultPopup({
-              icon: d.emoji, npc: 'Caçada Aceita',
+              icon: _bountyHeraldic(d.target), npc: 'Caçada Aceita',
               narrative: '<b>' + d.target + ' ×' + d.count + '</b> adicionada ao seu diário.<br>' +
                          '<i>Pague-os pra resgatar a recompensa.</i>',
               deltas: [], onContinue: _squareTxnReturnToHub
@@ -35117,7 +35127,7 @@ function _squareShowBulletinPopup(p){
                               intelligence: 'INT', wisdom: 'SAB', charisma: 'CAR' };
         var statAbbr = STAT_TO_ABBR[d.stat] || d.stat.toUpperCase();
         _showInfoPopup({
-          icon: d.icon, npc: 'Quadro de Avisos',
+          icon: _heralIco('ic-cidadao'), npc: 'Quadro de Avisos',
           title: 'Pedido de Ajuda',
           desc: '<i>"' + d.text + '"</i><br><br>' +
                 '<b>Teste:</b> ' + statAbbr + ' DC ' + d.dc + '<br>' +
@@ -35351,7 +35361,7 @@ function _squareShowGambleResult(p, stake, res, preGoldBeforeStake){
     ? [{ type: 'gold', amount: payout, label: 'Aposta paga' }]
     : null;
   _showServiceResultPopup({
-    icon: win ? '🏆' : (tie ? '🤝' : '💔'),
+    icon: win ? _heralIco('ic-coroa') : _heralIco('ic-cartas'),
     npc: (gt && CANON_GAMBLE_NPC) ? CANON_GAMBLE_NPC.name : 'Velho Apostador',
     narrative: narrative,
     dice: { formula: 'Você 1d20 vs Casa 1d20', sides: 20, value: playerRoll, total: playerRoll },
@@ -46426,7 +46436,7 @@ function _heroesShowRanking(p, key){
     return '<b>#' + e.rank + '</b> ' + ic + ' ' + e.name + ' <i>(' + e.cls + ')</i> — <b>' + e.val + '</b>';
   }).join('<br>');
   _showInfoPopup({
-    icon: r.label.split(' ')[0], npc: 'Mural dos Aventureiros',
+    icon: r.icon, npc: 'Mural dos Aventureiros',
     title: r.label,
     desc: '<i>' + r.desc + '</i><br><br>' + (rows || '<i>Nenhum aventureiro classificado ainda.</i>') +
           '<br><br><i>Sua posição é atualizada conforme você joga.</i>',
@@ -46434,6 +46444,14 @@ function _heroesShowRanking(p, key){
   });
 }
 
+// Title id -> brasao heraldico (sweep praca 2026-06-19: zero emoji-icone nos titulos)
+function _titleHeraldic(id){
+  var M = { aprendiz:'ic-ach-erudito', colecionador:'ic-ach-colecionador', cacador_reliquias:'ic-ach-cacador',
+            portador_lendas:'ic-ach-mestre', mestre_runas:'ic-runas', completista:'ic-ach-forjador',
+            primeira_vitoria:'ic-stat-attack', lenda_vivente:'ic-ach-indomavel', explorador_mundo:'ic-ach-andarilho',
+            mestre_comercio:'ic-ach-cofreiro', sobrevivente:'ic-ach-sobrevivente' };
+  return _heralIco(M[id] || 'ic-coroa');
+}
 function _heroesShowTitles(p){
   // canonical: heroes_wall_data.py TITLES via CANON_HEROES_FULL.titles (11 entries).
   // Fallback: MURAL_TITLES legacy se canonical nao tiver entry.
@@ -46446,7 +46464,7 @@ function _heroesShowTitles(p){
                 ? CANON_HEROES_FULL.title_order : Object.keys(canon);
     titlesArr = order.map(function(k){
       var t = canon[k];
-      return { id: k, icon: t.icon || '🎖️', label: t.label, desc: t.description || '', threshold: t.threshold };
+      return { id: k, icon: _titleHeraldic(k), label: t.label, desc: t.description || '', threshold: t.threshold };
     }).filter(function(x){ return !!x.label; });
   } else {
     titlesArr = MURAL_TITLES;
