@@ -10433,6 +10433,16 @@ function _isCTA(btn) {
         window._triggerCityActivityRemote(action);
         return;
       }
+      // 1.8 CARTÓGRAFO (loja do Corvus) → server-authoritative (#0, 2026-06-18). Em
+      //     REMOTE, comprar mapa/ferramenta encena no SERVIDOR (valida gating + rola
+      //     o skill-check + concede o item REAL persistido) em vez do mock client-side
+      //     (Math.random no check + item ia pro mock). LOCAL mantém o mock.
+      if (action.indexOf('buy_corvus_') === 0
+          && window.vCityServer && vCityServer.isRemote && vCityServer.isRemote()
+          && typeof window._triggerCartographerBuyRemote === 'function') {
+        window._triggerCartographerBuyRemote(action);
+        return;
+      }
       // 1. Prefixo nav: → openCityPopup direto
       if (action.indexOf('nav:') === 0) { navigateTo(action.substring(4)); return; }
       // 2. ACTION_HANDLERS (state mutation: rest_X, buy_X, gates_explore, open_cartografia, etc.)
@@ -51679,6 +51689,22 @@ window._triggerCityActivityRemote = function(activityId){
       }
     }).catch(function(e){ console.error('[CITY] city_activity ' + activityId, e); vToast('Erro na atividade.', 'err'); });
   } catch (e) { console.error('[CITY] city_activity ' + activityId, e); }
+};
+// CARTÓGRAFO (loja do Corvus) server-authoritative (#0, 2026-06-18). Em REMOTE, a
+// compra de mapa/ferramenta encena no SERVIDOR: valida gating + rola o skill-check
+// (tier 2/mestre) + concede o item REAL persistido — em vez do mock client-side
+// (Math.random no check + item ia pro MOCK_PLAYER_INVENTORY que NÃO persistia, só o
+// ouro saía via _pay). LOCAL (file://) mantém o ACTION_HANDLERS mock (dev tool).
+window._triggerCartographerBuyRemote = function(cb){
+  try {
+    if (!(window.vCityServer && vCityServer.cityAction)) return;
+    vCityServer.cityAction('service.cartographer_buy', { cb: cb }).then(function(res){
+      if (!res) return;
+      if (res.toast) vToast(res.toast, res.toast_type || 'ok');
+      var p = window.CITY_MOCK_PLAYER;
+      if (p && res.ok && typeof res.gold === 'number') { p.gold = res.gold; if (typeof refreshHud === 'function') refreshHud(); }
+    }).catch(function(e){ console.error('[CITY] cartographer_buy ' + cb, e); vToast('Erro na compra.', 'err'); });
+  } catch (e) { console.error('[CITY] cartographer_buy ' + cb, e); }
 };
 function _pay(p, cost){
   if (p.gold < cost) { vToast('<span class="vi vi-coin sm"></span> Valdoritas insuficientes (' + cost + ' Valdoritas necessárias).'); return false; }
