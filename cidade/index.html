@@ -21249,9 +21249,19 @@ var MURAL_TITLES = [
 ];
 
 function _buildHeroesWallMockData(player){
+  // Campeão do Reino — destaque ÉPICO do #1 de "Nível Mais Alto" (showcase no topo).
+  var _champ = (MURAL_RANKINGS.level && MURAL_RANKINGS.level.top && MURAL_RANKINGS.level.top[0]) || null;
+  var _champLine = _champ
+    ? '<div style="text-align:center;margin:var(--v-space-sm,6px) 0 0;font-family:var(--v-font-display,\'Cinzel\'),serif;color:var(--v-gold,#c4953a);font-size:var(--v-font-body,14px);">'
+        + _heralIco('ic-coroa') + ' <b>Campeão do Reino:</b> ' + _champ.name
+        + ' <span style="color:var(--v-text-dim,#a09484)">— ' + _champ.val + '</span></div>'
+    : '';
   return {
     type: 'hub',
-    flavor: '<i>Mural de pedra negra na Praça Central, nomes gravados em ouro. Aqui ficam os mais notáveis aventureiros de Valdoria — quem subiu mais alto, quem matou mais monstros, quem juntou mais ouro, quem viu mais do mundo.</i>',
+    // Banner-cenário épico (PADRAO_LOCAIS faceta A) — reusa a cena da Praça Central.
+    bannerImg: '/shared/img/city/praca-banner.webp',
+    bannerTitle: 'MURAL DOS AVENTUREIROS',
+    flavor: '<i>Mural de pedra negra na Praça Central, nomes gravados em ouro. Aqui ficam os mais notáveis aventureiros de Valdoria — quem subiu mais alto, quem matou mais monstros, quem juntou mais ouro, quem viu mais do mundo.</i>' + _champLine,
     rep_label: _heralIco('ic-praca') + ' 5 categorias de ranking · Top 10 por categoria · ' + MURAL_TITLES.length + ' títulos por conquista',
     services: Object.keys(MURAL_RANKINGS).map(function(k){
       var r = MURAL_RANKINGS[k];
@@ -33559,6 +33569,14 @@ function renderSquareHub(container, data){
   if (!data) { container.innerHTML = ''; return; }
   while (container.firstChild) container.removeChild(container.firstChild);
   var html = '<div class="subscreen">';
+  // Banner-cenário épico OPCIONAL (PADRAO_LOCAIS faceta A): imagem full-bleed +
+  // gradiente escuro + título em Cinzel. Só renderiza se data.bannerImg (os outros
+  // callers do hub — praça/relações/missões — não passam, então não mudam).
+  if (data.bannerImg) {
+    html += '<div class="hub-cenario" style="position:relative;background-image:linear-gradient(180deg,rgba(10,8,5,0.18),rgba(10,8,5,0.85)),url(' + data.bannerImg + ');background-size:cover;background-position:center 30%;min-height:128px;display:flex;align-items:flex-end;justify-content:center;border-radius:var(--v-radius,10px);overflow:hidden;border:1px solid var(--v-border,#4a3828);margin-bottom:var(--v-space-md,10px);">'
+      + (data.bannerTitle ? '<div style="padding:var(--v-space-md,10px) var(--v-space-sm,6px);font-family:var(--v-font-display,\'Cinzel\'),serif;font-weight:700;letter-spacing:4px;font-size:var(--v-font-lg,16px);color:var(--v-gold,#c4953a);text-align:center;text-shadow:0 2px 10px rgba(0,0,0,0.9)">' + data.bannerTitle + '</div>' : '')
+      + '</div>';
+  }
   if (data.flavor)    html += '<p class="subscreen-flavor">' + data.flavor + '</p>';
   if (data.npc)       html += '<div class="subscreen-npc">' + data.npc + '</div>';
   if (data.rep_label) html += '<div class="subscreen-rep">' + data.rep_label + '</div>';
@@ -34960,73 +34978,93 @@ function _squareShowExploreEvent(p){
   window._plazaEventCooldown[ev.id] = now;
   // Constrói lista de escolhas com hint de chance pra cada skill check
   var STAT_KEY = (window.DndRules && DndRules.STAT_KEY_PT) || { FOR: 'strength', DES: 'dexterity', CON: 'constitution', INT: 'intelligence', SAB: 'wisdom', CAR: 'charisma' };  // FASE 9/M8 single-source
-  var items = ev.choices.map(function(ch){
-    var hint = '';
-    if (ch.stat && ch.dc){
-      var statVal = (p.stats && p.stats[STAT_KEY[ch.stat]]) || 10;
-      var mod = Math.floor((statVal - 10) / 2);
-      var chance = Math.max(5, Math.min(95, (21 - (ch.dc - mod)) * 5));
-      hint = ch.stat + ' DC ' + ch.dc + ' · ' + chance + '%';
+  function _hint(ch){
+    if (!(ch.stat && ch.dc)) return '';
+    var statVal = (p.stats && p.stats[STAT_KEY[ch.stat]]) || 10;
+    var mod = Math.floor((statVal - 10) / 2);
+    var chance = Math.max(5, Math.min(95, (21 - (ch.dc - mod)) * 5));
+    return ch.stat + ' DC ' + ch.dc + ' · ' + chance + '%';
+  }
+  // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR rola o teste
+  // e aplica gold/HP/XP/poção (RANGES roladas no servidor) via 'service.square_explore_event'.
+  // Resultado RICO (dado 3D + outcome narrado sucesso/FALHA, Disco Elysium) via SRP.
+  function _resolve(ch){
+    if (!window.vCityServer || !window.vCityServer.isRemote()){
+      if (typeof vToast === 'function') vToast('Indisponível offline'); return;
     }
-    // Canonical labels têm prefixo emoji (ex: "🤚 Espiar"). Extrai pro icon
-    // e remove do label pra evitar duplicação visual.
-    var lblText = ch.label;
-    var lblIcon = '•';
+    var preGold = p.gold, preHp = p.hp || 0;
+    window.vCityServer.cityAction('service.square_explore_event', { event_id: ev.id, choice_id: ch.id }).then(function(res){
+      if (!res || !res.ok){ if (typeof vToast === 'function') vToast('Não foi possível agir agora.'); return; }
+      if (typeof res.gold === 'number') p.gold = res.gold;
+      if (typeof res.hp === 'number') p.hp = res.hp;
+      if (res.xp_granted) p.xp = (p.xp || 0) + res.xp_granted;
+      if (typeof refreshHud === 'function') refreshHud();
+      var rolledLine = '';
+      var diceData = null;
+      if (res.has_check){
+        rolledLine = '🎲 ' + (ch.stat || res.stat) + ': ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
+          ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — ' + (res.success ? '✅ Sucesso!' : '❌ Falha.') + '<br><br>';
+        diceData = { formula: '1d20' + (res.modifier >= 0 ? '+' : '') + res.modifier + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total };
+      }
+      var deltas = [];
+      var rewards = [];
+      if (res.gold_delta){
+        deltas.push({ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false });
+        if (res.gold_delta > 0) rewards.push({ type:'gold', amount: res.gold_delta, label: 'Valdoritas' });
+      }
+      if (res.hp_heal || res.hp_damage) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: res.max_hp || p.hpMax || 999 });
+      if (res.xp_granted) rewards.push({ type:'xp', amount: res.xp_granted, label: 'Experiência' });
+      if (res.items_granted && res.items_granted.length){
+        res.items_granted.forEach(function(nm){
+          if (Array.isArray(p.inventory)) p.inventory.push(nm);
+          rewards.push({ type:'item', amount: 1, label: nm });
+        });
+      }
+      _showServiceResultPopup({
+        icon: ev.icon, npc: ev.title,
+        narrative: rolledLine + (res.text || ''),
+        deltas: deltas,
+        rewards: rewards.length > 0 ? rewards : null,
+        dice: diceData,
+        onContinue: _refreshSquarePopupIfOpen
+      });
+    }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro no evento.'); });
+  }
+  // PADRAO_ALDRIC: o evento é narrado via vEncounter (narração 3a pessoa tipada +
+  // escolhas), não mais lista simples. ev.desc = narração; o outcome (sucesso/falha
+  // narrado) vem no SRP com dado 3D. Mantém a lista como fallback LOCAL (file://).
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    var choices = ev.choices.map(function(ch){
+      var h = _hint(ch);
+      return { id: ch.id, label: ch.label + (h ? '  ·  ' + h : ''), _ch: ch };
+    });
+    window.vEncounter.render({
+      npc: { name: ev.title, desc: 'Praça Central', id: 'pz_' + ev.id },
+      script: [{ type: 'narration', text: ev.desc }],
+      choices: choices
+    }, {
+      player: p, closeable: true,
+      onChoice: function(c){
+        var ch = (c && c._ch) || ((ev.choices || []).filter(function(x){ return x.id === (c && c.id); })[0]);
+        if (!ch) { try { window.vEncounter.close(); } catch(_){} return; }
+        try { window.vEncounter.close(); } catch(_){}
+        _resolve(ch);
+      }
+    });
+    return;
+  }
+  // Fallback LOCAL (sem vEncounter): lista simples
+  var items = ev.choices.map(function(ch){
+    var lblText = ch.label, lblIcon = '•';
     var m = ch.label.match(/^(\S+)\s+(.*)$/);
     if (m) { lblIcon = m[1]; lblText = m[2]; }
-    return { icon: lblIcon, label: lblText, badge: hint, _ch: ch };
+    return { icon: lblIcon, label: lblText, badge: _hint(ch), _ch: ch };
   });
   _squareShowListPopup({
     stackKey: 'square_pz_' + ev.id, icon: ev.icon, title: ev.title,
     flavor: '<i>' + ev.desc + '</i>',
     items: items,
-    onPick: function(item){
-      var ch = item._ch;
-      // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR rola o
-      // teste de habilidade e aplica gold/HP/XP/poção (RANGES roladas no servidor) via
-      // 'service.square_explore_event'. ANTES: Math.random + p.gold/p.hp/_gainXp no
-      // cliente (fabricação) — e a poção prometida no texto NUNCA era entregue.
-      if (!window.vCityServer || !window.vCityServer.isRemote()){
-        if (typeof vToast === 'function') vToast('Indisponível offline'); return;
-      }
-      var preGold = p.gold, preHp = p.hp || 0;
-      window.vCityServer.cityAction('service.square_explore_event', { event_id: ev.id, choice_id: ch.id }).then(function(res){
-        if (!res || !res.ok){ if (typeof vToast === 'function') vToast('Não foi possível agir agora.'); return; }
-        if (typeof res.gold === 'number') p.gold = res.gold;
-        if (typeof res.hp === 'number') p.hp = res.hp;
-        if (res.xp_granted) p.xp = (p.xp || 0) + res.xp_granted;
-        if (typeof refreshHud === 'function') refreshHud();
-        var rolledLine = '';
-        var diceData = null;
-        if (res.has_check){
-          rolledLine = '🎲 ' + (ch.stat || res.stat) + ': ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
-            ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — ' + (res.success ? '✅ Sucesso!' : '❌ Falha.') + '<br><br>';
-          diceData = { formula: '1d20' + (res.modifier >= 0 ? '+' : '') + res.modifier + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total };
-        }
-        var deltas = [];
-        var rewards = [];
-        if (res.gold_delta){
-          deltas.push({ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false });
-          if (res.gold_delta > 0) rewards.push({ type:'gold', amount: res.gold_delta, label: 'Valdoritas' });
-        }
-        if (res.hp_heal || res.hp_damage) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: res.max_hp || p.hpMax || 999 });
-        if (res.xp_granted) rewards.push({ type:'xp', amount: res.xp_granted, label: 'Experiência' });
-        if (res.items_granted && res.items_granted.length){
-          res.items_granted.forEach(function(nm){
-            if (Array.isArray(p.inventory)) p.inventory.push(nm);
-            rewards.push({ type:'item', amount: 1, label: nm });
-          });
-        }
-        _showServiceResultPopup({
-          icon: ev.icon, npc: ev.title,
-          narrative: rolledLine + (res.text || ''),
-          deltas: deltas,
-          rewards: rewards.length > 0 ? rewards : null,
-          dice: diceData,
-          onContinue: _refreshSquarePopupIfOpen
-        });
-      }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro no evento.'); });
-    }
+    onPick: function(item){ _resolve(item._ch); }
   });
 }
 
