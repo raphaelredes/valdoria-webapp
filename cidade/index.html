@@ -8238,6 +8238,45 @@ body.perf-lite .vc-action-btn { transition: none; }
     })();
   }
 
+  // DERROTA LETAL → cena de despertar no Templo (2026-06-19): combat2 redireciona pra
+  // /cidade/?from=defeat_awaken. Server-driven (PADRAO_SERVIDOR + ALDRIC): busca
+  // service.temple_awakening (narrativa rica + dívida) e RENDERIZA via vEncounter, com
+  // "🛐 Erguer-se do Altar" → service.temple_rise (limpa o estado). A ressurreição
+  // MECÂNICA já ocorreu server-side (full_restore + temple_debt). Mirror do from=arena.
+  if (params.get('from') === 'defeat_awaken') {
+    (function(){
+      function _showTempleAwakening(){
+        if (!window.vCityServer || !window.vCityServer.isRemote() ||
+            !window.vEncounter || typeof window.vEncounter.render !== 'function') return;
+        window.vCityServer.cityAction('service.temple_awakening', {}).then(function(res){
+          if (!res || !res.ok || !res.script || !window.vEncounter) return;
+          window.vEncounter.render({
+            npc: { name: 'Sacerdote do Templo', desc: 'Despertar no Templo de Valdoria',
+                   id: 'temple_awakening',
+                   portraitImg: '/shared/img/npcs/sumo-sacerdote.webp' },
+            script: res.script,
+            choices: [{ id: 'rise', label: '🛐 Erguer-se do Altar' }]
+          }, {
+            player: window.CITY_MOCK_PLAYER, closeable: false,
+            onChoice: function(){
+              window.vCityServer.cityAction('service.temple_rise', {}).then(function(){
+                try { window.vEncounter.close(); } catch(_){}
+              }).catch(function(){ try { window.vEncounter.close(); } catch(_){} });
+            }
+          });
+        }).catch(function(_e){ if (window.console && console.warn) console.warn('[CITY] temple_awakening', _e); });
+      }
+      var _tries = 0;
+      (function _waitLoading(){
+        var l = document.getElementById('loading');
+        var gone = (!l || l.offsetParent === null);
+        if (gone) { setTimeout(_showTempleAwakening, 600); return; }
+        if (_tries++ > 70) { _showTempleAwakening(); return; }
+        setTimeout(_waitLoading, 200);
+      })();
+    })();
+  }
+
   // === HOSTNAME-FORCED ENV (DEFESA CROSS-ENV 2026-05-10) ==================
   // Telegram WebView pode cachear URL antiga do menu button com ?env errado
   // (ex: jogo.lendasdevaldoria.com.br/cidade/?env=dev). Para impedir
