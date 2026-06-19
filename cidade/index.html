@@ -10222,6 +10222,12 @@ function _isCTA(btn) {
       state: function(){ return window.vCityServer.cityAction('service.shadow_state', {}); },
       buy:   function(itemKey){ return window.vCityServer.cityAction('service.shadow_buy', { item: itemKey }); }
     },
+    wandering: {  // Diário de Viajantes (NPCs ambulantes) server-authoritative (#0, 2026-06-18)
+      // — antes o cliente usava um pool MOCK estático (TRAVELERS_KNOWN) de 4 viajantes
+      // INVENTADOS. Agora busca o pool REAL do servidor (refresh_pool diário) com localização
+      // + atividade + tier. read-only do ponto de vista do cliente (o refresh persiste server-side).
+      state: function(){ return window.vCityServer.cityAction('service.wandering_state', {}); }
+    },
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
       state: function(){ return window.vCityServer.cityAction('flag.state', {}); }
@@ -20972,17 +20978,57 @@ var TRAVELERS_KNOWN = [
   { id: 'wnp_silvia',  icon: '<img src="/shared/img/combat/bruxo.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Silvia Capuz-de-Lua',     archetype: 'mysterious',  schedule: 'rogue',    loc_now: 'town_square', activity: 'observa os transeuntes como quem procura alguém — ou foge de alguém' }
 ];
 
+// Archetype (personality) -> ícone heráldico (8 personalities). Regra "No NPC Emotes":
+// brasão da "vibe"/classe, nunca emoji de pessoa.
+var _TRAVELER_ARCH_ICON = {
+  adventurous: 'ic-patrulheiro', scholarly: 'ic-escriba', mercantile: 'ic-mercado',
+  mysterious: 'ic-bruxo', cautious: 'ic-ladino', jovial: 'ic-bardo',
+  stoic: 'ic-guerreiro', devout: 'ic-clerigo'
+};
+
+// SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE busca o pool REAL de NPCs ambulantes do
+// servidor e re-renderiza o diário (guard "changed" evita loop). Registra os handlers de
+// view dos viajantes reais (ids dinâmicos wnpc_*). LOCAL usa TRAVELERS_KNOWN (mock dev tool).
+function _hydrateTravelers(){
+  if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && window.vCityServer.wandering)) return;
+  window.vCityServer.wandering.state().then(function(st){
+    if (!st || !st.ok || !st.travelers) return;
+    var prev = window._travelersServer;
+    var mapped = st.travelers.map(function(t){
+      return {
+        id: t.id, name: t.name, archetype: t.archetype, hero_class: t.hero_class,
+        loc_now: t.loc_now || null, schedule: t.schedule || '', activity: t.activity || '',
+        tier: t.tier, icon: _heralIco(_TRAVELER_ARCH_ICON[t.archetype] || 'ic-grupo')
+      };
+    });
+    window._travelersServer = mapped;
+    mapped.forEach(function(tr){
+      if (typeof ACTION_HANDLERS !== 'undefined') {
+        ACTION_HANDLERS['travelers_view_' + tr.id] = (function(t){ return function(p){ _travelersView(p, t); }; })(tr);
+      }
+    });
+    var changed = !prev || prev.length !== mapped.length
+      || prev.some(function(t, i){ return !mapped[i] || t.id !== mapped[i].id; });
+    if (changed && typeof renderCurrentScreen === 'function') { try { renderCurrentScreen(); } catch(_re){} }
+  }).catch(function(_e){ console.warn('[CITY] wandering state failed', _e); });
+}
+
 function _buildTravelersMockData(player){
+  _hydrateTravelers();  // REMOTE: busca os viajantes REAIS do servidor (no-op em LOCAL)
+  var pool = (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+              && window._travelersServer && window._travelersServer.length)
+             ? window._travelersServer : TRAVELERS_KNOWN;
   return {
     type: 'hub',
-    flavor: '<i>Diário pessoal de couro gasto. Você anota nele os viajantes que encontra em Valdoria — onde estavam, o que faziam, no que pareciam viver. Hoje o livro tem ' + TRAVELERS_KNOWN.length + ' entradas ativas.</i>',
-    rep_label: '📓 ' + TRAVELERS_KNOWN.length + ' viajantes circulando hoje · Pool renova ao amanhecer',
-    services: TRAVELERS_KNOWN.map(function(t){
+    flavor: '<i>Diário pessoal de couro gasto. Você anota nele os viajantes que encontra em Valdoria — onde estavam, o que faziam, no que pareciam viver. Hoje o livro tem ' + pool.length + ' entradas ativas.</i>',
+    rep_label: '📓 ' + pool.length + ' viajantes circulando hoje · Pool renova ao amanhecer',
+    services: pool.map(function(t){
       return {
         icon: t.icon,
         label: t.name,
         cb: 'travelers_view_' + t.id,
-        badge: '📍 ' + (t.loc_now || '???')
+        badge: '📍 ' + (t.loc_now || 'fora da cidade')
       };
     })
   };
@@ -46123,8 +46169,11 @@ function _shadowBuyItem(p, item){
 
 // --- TRAVELERS JOURNAL ---
 
-// Helper: tier de familiaridade do traveler (mock — usa interactions count)
+// Helper: tier de familiaridade do traveler.
 function _travelerTier(traveler){
+  // SERVER-AUTHORITATIVE (#0, 2026-06-18): em REMOTE o tier vem do servidor
+  // (get_familiarity_tier via encounters reais). LOCAL deriva do interactions count (mock).
+  if (traveler && traveler.tier) return traveler.tier;
   // canonical: wandering_npcs.py get_familiarity_tier — stranger/acquaintance/familiar/friend
   var interactions = ((window._npcDialoguesUsed || {})['wnp_' + traveler.id] || []).length;
   if (interactions >= 6) return 'friend';
