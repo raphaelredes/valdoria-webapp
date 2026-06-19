@@ -22711,7 +22711,7 @@ function _showSharedNpcDialogue(opts, internalState){
     if (internalState && internalState.answer) {
       script = [{ type: 'speech', speaker: npc.name || '', text: internalState.answer.text }];
     } else {
-      var greeting = _npcGreet(npc) || ('<i>"' + (npc.desc || 'Olá, viajante.') + '"</i>');
+      var greeting = _npcGreet(npc) || '— Saudações, viajante.';  // PADRAO_ALDRIC: fallback NÃO usa a descrição física como fala (o desc vira narração abaixo)
       script = [{ type: 'speech', speaker: npc.name || '', text: greeting }];
       if (npc.desc && npc.desc !== greeting) {
         script.push({ type: 'narration', text: npc.desc });
@@ -22758,7 +22758,7 @@ function _showSharedNpcDialogue(opts, internalState){
   }
 
   var available = _npcAvailableOptions(npc);
-  var greeting = _npcGreet(npc) || ('<i>"' + (npc.desc || 'Olá, viajante.') + '"</i>');
+  var greeting = _npcGreet(npc) || '— Saudações, viajante.';  // PADRAO_ALDRIC: fallback NÃO usa a descrição física como fala
   var html = '<div class="city-subscreen">';
   // Greeting / desc
   html += '<p class="subscreen-flavor">' + greeting + '</p>';
@@ -34787,7 +34787,9 @@ function _adaptCanonicalRegularNpc(npcKey, npcData){
     name: npcData.short_name || npcData.name,
     role: npcData.role,
     desc: npcData.desc,
-    greetings: ['<i>' + npcData.desc + '</i>'],
+    // PADRAO_ALDRIC: greeting NÃO é o desc (NPC não fala a própria aparência — o desc
+    // vira NARRAÇÃO no renderer). Regular sem fala canônica -> saudação neutra.
+    greetings: ['— Saudações, viajante.'],
     talkOptions: talkOptions,
     _isCanonRegular: true,
     _canonKey: npcKey
@@ -34848,7 +34850,9 @@ function _adaptCanonicalUniqueNpc(npcKey, npcData){
     name: npcData.short_name || npcData.name,
     role: npcData.role,
     desc: npcData.desc,
-    greetings: ['<i>' + npcData.desc + '</i>'],
+    // PADRAO_ALDRIC: greeting NÃO é o desc (vira NARRAÇÃO no renderer). Único usa a fala
+    // canônica do intro como saudação (dialogue.intro), senão neutra.
+    greetings: (introLines.length ? [introLines[0]] : ['— Saudações, viajante.']),
     talkOptions: talkOptions,
     _isCanonUnique: true,
     _canonKey: npcKey
@@ -35548,10 +35552,14 @@ function _squareRenderVendor(p, vendor){
       id: 'vendor_' + vendor.id
     };
     var _d = (vendor.desc || '').trim();
+    // PADRAO_ALDRIC: a descrição FÍSICA do NPC é NARRAÇÃO 3a pessoa, nunca a fala dele
+    // (bug: Brokk "falava" a própria aparência "Um meio-orc musculoso..."). A fala é só
+    // o pitch de venda.
     var script = [
-      { type: 'narration', text: 'Um pano de feira se abre sobre o calçamento da praça, e a mercadoria reluz à luz da tarde.' },
-      { type: 'speech', speaker: vendor.name, text: '— ' + _d + ' Dá uma olhada, viajante: mercadoria boa, preço justo. <i>Só por hoje.</i>' }
+      { type: 'narration', text: 'Um pano de feira se abre sobre o calçamento da praça, e a mercadoria reluz à luz da tarde.' }
     ];
+    if (_d) script.push({ type: 'narration', text: _d });
+    script.push({ type: 'speech', speaker: vendor.name, text: '— Dá uma olhada, viajante: mercadoria boa, preço justo. <i>Só por hoje.</i>' });
     var choices = vendor.items.map(function(it){
       // item I (2026-06-18): a choice carrega o item p/ o thumbnail + detalhe
       // (encounter-popup.js renderiza). itemIcon = fallback se não houver WebP.
