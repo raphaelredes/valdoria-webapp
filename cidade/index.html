@@ -35456,43 +35456,68 @@ function _isMysteriousItem(it){
 function _squareShowVendorPopup(p){
   var vendor = _squareGetDailyVendor();
   window._squareVendorVisited = true;
+  // SERVER-AUTHORITATIVE (SUPREME RULE #0): o SERVIDOR cobra E adiciona o item via
+  // 'service.vendor_buy'. Resultado via _showServiceResultPopup (ícone = WEBP do item,
+  // não o heráldico genérico it.icon — bug da imagem errada reportado).
+  var _vendorDoBuy = function(it, v){
+    if (!window.vCityServer || !window.vCityServer.isRemote()){
+      if (typeof vToast === 'function') vToast('Indisponível offline'); return;
+    }
+    var preGold = p.gold;
+    var itemIdx = (v.items || []).indexOf(it);
+    window.vCityServer.cityAction('service.vendor_buy', { item_idx: itemIdx }).then(function(res){
+      if (!res || !res.ok){
+        var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para comprar.'
+                 : (res && res.error === 'bad_item') ? 'Item indisponível.'
+                 : 'Não foi possível comprar agora.';
+        if (typeof vToast === 'function') vToast(emsg); return;
+      }
+      if (typeof res.gold === 'number') p.gold = res.gold;
+      if (Array.isArray(p.inventory) && res.item_name) p.inventory.push(res.item_name);
+      if (typeof refreshHud === 'function') refreshHud();
+      _showServiceResultPopup({
+        icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.name, '48px')) || it.icon, npc: v.name,
+        narrative: '<i>' + v.name.split(',')[0] + ' embrulha o item em pano grosso.</i><br><br>' +
+                   '<b>' + (res.item_name || it.name) + '</b> adicionado à sua bolsa.<br>' +
+                   '<i>"' + it.desc + '"</i>',
+        deltas: [
+          { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
+        ],
+        onContinue: _squareTxnReturnToHub
+      });
+    }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao comprar.'); });
+  };
+  // Confirmação DENTRO do diálogo (vEncounter), não popup separado. Antes:
+  // _showConfirmPurchase = <div z-index> que abria ATRAS do <dialog> top-layer do
+  // vEncounter (invisível -> "não funciona") + usava it.icon heráldico em vez do webp.
+  // Agora: 2o render no MESMO diálogo (Voltar/Confirmar) + thumbnail webp via itemName.
   var _buyItem = function(it, v){
-    _showConfirmPurchase({
-      icon: it.icon, npc: v.name,
-      title: 'Comprar ' + it.name,
-      desc: '<b>' + it.name + '</b><br><i>' + it.desc + '</i><br><br>' +
-            '<b>Preço:</b> ' + it.value + ' Valdoritas',
-      cost: it.value,
-      onConfirm: function(){
-        // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
-        // cobra E ADICIONA o item ao inventário via 'service.vendor_buy'. ANTES: _pay
-        // no cliente + narração "adicionado à bolsa" SEM nunca adicionar (item perdido).
-        if (!window.vCityServer || !window.vCityServer.isRemote()){
-          if (typeof vToast === 'function') vToast('Indisponível offline'); return;
-        }
-        var preGold = p.gold;
-        var itemIdx = (v.items || []).indexOf(it);
-        window.vCityServer.cityAction('service.vendor_buy', { item_idx: itemIdx }).then(function(res){
-          if (!res || !res.ok){
-            var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para comprar.'
-                     : (res && res.error === 'bad_item') ? 'Item indisponível.'
-                     : 'Não foi possível comprar agora.';
-            if (typeof vToast === 'function') vToast(emsg); return;
-          }
-          if (typeof res.gold === 'number') p.gold = res.gold;
-          if (Array.isArray(p.inventory) && res.item_name) p.inventory.push(res.item_name);
-          if (typeof refreshHud === 'function') refreshHud();
-          _showServiceResultPopup({
-            icon: it.icon, npc: v.name,
-            narrative: '<i>' + v.name.split(',')[0] + ' embrulha o item em pano grosso.</i><br><br>' +
-                       '<b>' + (res.item_name || it.name) + '</b> adicionado à sua bolsa.<br>' +
-                       '<i>"' + it.desc + '"</i>',
-            deltas: [
-              { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
-            ],
-            onContinue: _squareTxnReturnToHub
-          });
-        }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao comprar.'); });
+    if (!window.vEncounter || typeof window.vEncounter.render !== 'function') {
+      // fallback LOCAL (file:// sem vEncounter): popup legado
+      _showConfirmPurchase({ icon: it.icon, npc: v.name, title: 'Comprar ' + it.name,
+        desc: '<b>' + it.name + '</b><br><i>' + it.desc + '</i><br><br><b>Preço:</b> ' + it.value + ' Valdoritas',
+        cost: it.value, onConfirm: function(){ _vendorDoBuy(it, v); } });
+      return;
+    }
+    window.vEncounter.render({
+      npc: { name: v.name, desc: 'Confirmar compra',
+             portraitImg: '/shared/img/npcs/plaza/vendor_' + v.id + '.webp',
+             id: 'vendor_' + v.id },
+      script: [
+        { type: 'narration', text: 'Você examina <b>' + it.name + '</b> de perto.<br><i>' + it.desc + '</i>' },
+        { type: 'speech', speaker: v.name, text: '— Sai por <b>' + it.value + ' Valdoritas</b>. Fechado?' }
+      ],
+      choices: [
+        { id: 'confirm', label: '✓ Confirmar · ' + it.value + ' V',
+          itemName: it.name, itemIcon: it.icon, itemInfo: _encItemInfo(it.name), mysterious: _isMysteriousItem(it) },
+        { id: 'back', label: '↩ Voltar' }
+      ]
+    }, {
+      player: p, closeable: true,
+      onChoice: function(ch){
+        if (!ch || ch.id === 'back') { _squareShowVendorPopup(p); return; }
+        try { window.vEncounter.close(); } catch(_){}
+        _vendorDoBuy(it, v);
       }
     });
   };
