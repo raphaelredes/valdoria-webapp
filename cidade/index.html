@@ -8212,7 +8212,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   if (params.get('from') === 'arena') {
     (function(){
       var _av = params.get('ar_v'), _ag = params.get('ar_g'), _ax = params.get('ar_x');
-      setTimeout(function(){
+      function _showArenaToast(){
         try {
           if (typeof vToast !== 'function') return;
           if (_av === '1') {
@@ -8224,7 +8224,17 @@ body.perf-lite .vc-action-btn { transition: none; }
             vToast('🏟️ Derrota na arena. Treine e volte mais forte.', 'warn');
           }
         } catch (_) {}
-      }, 1400);
+      }
+      // Espera o loading (magic-circle, min 5s) SUMIR antes de mostrar — senao o toast
+      // dispara cedo demais (sob o loading) e some antes de o jogador ver.
+      var _tries = 0;
+      (function _waitLoading(){
+        var l = document.getElementById('loading');
+        var gone = (!l || l.offsetParent === null);
+        if (gone && typeof vToast === 'function') { setTimeout(_showArenaToast, 700); return; }
+        if (_tries++ > 70) { _showArenaToast(); return; }  // fallback ~14s
+        setTimeout(_waitLoading, 200);
+      })();
     })();
   }
 
