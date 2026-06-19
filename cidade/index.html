@@ -28515,7 +28515,7 @@ var PLAZA_OFFER_EVENTS = [
     },
     script: [
       { type: 'narration', text: 'Uma mulher de meia-idade com lenço amarelo na cabeça arruma maçãs vermelhas brilhantes numa cesta de vime. Ela ergue uma das maçãs ao te ver.' },
-      { type: 'speech', speaker: 'Marília', text: '— Ô viajante, prova essa maçã. <i>(ela polis ela na manga do avental)</i> Veio das colinas verdes, colhida ontem mesmo. Açúcar puro.' },
+      { type: 'speech', speaker: 'Marília', text: '— Ô viajante, prova essa maçã. <i>(ela esfrega a maçã na manga do avental)</i> Veio das colinas verdes, colhida ontem mesmo. Açúcar puro.' },
       { type: 'narration', text: 'A maçã é grande, com cor vibrante quase artificial. Você sente o cheiro frutado a metros de distância.' }
     ],
     choices: [
@@ -35435,8 +35435,12 @@ function _squareShowVendorPopup(p){
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     var npc = {
       name: vendor.name, desc: vendor.desc,
-      portraitImg: '/shared/img/npcs/plaza/vendor_' + vendor.id + '.webp',  // #16: foto WebP (PADRAO_WEBP)
-      portraitHTML: vendor.icon,  // fallback brasão heráldico (SVG markup)
+      // PADRAO_LOCAIS #2: foto WebP dedicada (plaza/vendor_<id>.webp existe p/ os 7
+      // ambulantes) renderiza INLINE + lightbox. NUNCA passar portraitHTML junto: o
+      // vEncounter prioriza portraitHTML (ícone) no inline e relega o webp só ao
+      // lightbox — bug reportado: retrato do vendedor só aparecia ao clicar. O
+      // onerror do <img> (_ENC_IMG_ONERR) já degrada se algum webp faltar.
+      portraitImg: '/shared/img/npcs/plaza/vendor_' + vendor.id + '.webp',
       id: 'vendor_' + vendor.id
     };
     var _d = (vendor.desc || '').trim();
@@ -55426,13 +55430,24 @@ function _arrivalChoice(choiceId){
       if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
       if (!res || !res.ok || res.proceed || !res.node) { _arrivalFinish(); return; }
       var node = res.node;
-      // rolagem mostrada como linha de narração (mesmo padrão da cena do Porão)
-      if (res.dice) {
+      // PADRAO_DADOS: TODO skill check de diálogo rola o dado 3D (SRP canonical) —
+      // NUNCA mostra o resultado sem a animação. Fase 1 = dado 3D + fórmula; fase 2
+      // (onContinue) = o nó-resultado (narração + fala do NPC) via vEncounter.
+      if (res.dice && typeof _showServiceResultPopup === 'function') {
         var d = res.dice;
-        node.script = [{ type: 'narration',
-          text: '🎲 ' + (d.skill || 'TESTE') + ': d20 ' + d.d20 + ' ' + (d.modifier >= 0 ? '+' : '') + d.modifier
-              + ' = <b>' + d.total + '</b> vs CD ' + d.dc + ' — ' + (d.success ? '✅ Sucesso' : '❌ Falha') }
-        ].concat(node.script || []);
+        var _mod = (d.modifier >= 0 ? '+' : '') + d.modifier;
+        var _skl = d.skill || 'Teste';
+        _showServiceResultPopup({
+          npc: node.npc,
+          dice: { sides: 20, value: d.d20, total: d.total, formula: 'd20 ' + d.d20 + ' ' + _mod },
+          narrative: '🔍 <b>' + _skl + '</b> — '
+              + (d.success
+                  ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
+                  : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
+              + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>',
+          onContinue: function(){ _arrivalRenderNode(node); }
+        });
+        return;
       }
       _arrivalRenderNode(node);
     })
