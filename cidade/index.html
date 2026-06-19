@@ -10423,6 +10423,16 @@ function _isCTA(btn) {
         window._triggerArenaFightRemote();
         return;
       }
+      // 1.7 MINI-ATIVIDADES → server-authoritative (#0, 2026-06-18). Em REMOTE, aposta/
+      //     jogo/coleta/flavor/evento/invest encenam no SERVIDOR (rola + aplica reward
+      //     com teto diário) em vez do mock client-side (Math.random + p.gold+=/_gainXp).
+      //     LOCAL (file://) cai no ACTION_HANDLERS mock (dev tool).
+      if (window.CITY_ACTIVITY_IDS && window.CITY_ACTIVITY_IDS[action]
+          && window.vCityServer && vCityServer.isRemote && vCityServer.isRemote()
+          && typeof window._triggerCityActivityRemote === 'function') {
+        window._triggerCityActivityRemote(action);
+        return;
+      }
       // 1. Prefixo nav: → openCityPopup direto
       if (action.indexOf('nav:') === 0) { navigateTo(action.substring(4)); return; }
       // 2. ACTION_HANDLERS (state mutation: rest_X, buy_X, gates_explore, open_cartografia, etc.)
@@ -51636,6 +51646,39 @@ window._triggerArenaFightRemote = function(){
       console.error('[CITY] arena_stage_combat', e);
       vToast('Erro ao entrar na arena.', 'err');
     });
+};
+// MINI-ATIVIDADES server-authoritative (#0, 2026-06-18). Em REMOTE, aposta/jogo/coleta/
+// flavor/evento/invest encenam no SERVIDOR (rola o resultado + aplica o reward com teto
+// diário) em vez do mock client-side (Math.random decidia + p.gold+=/_gainXp fabricados).
+// LOCAL (file://) mantém os ACTION_HANDLERS mock (dev tool). O set DEVE bater com
+// city_activities_data.CITY_ACTIVITY_IDS (preflight check_city_activities_server_authoritative).
+window.CITY_ACTIVITY_IDS = {
+  play_dragon_bones:1, play_xgte_cards:1, circus_bet:1, circus_perform:1, circus_watch:1,
+  oldtom_card:1, oldtom_dice:1, oldtom_talk:1, fest_food:1, fest_archery:1, fest_stories:1,
+  lostchild_help:1, lostchild_bread:1, lostchild_guard:1,
+  gather_forest:1, gather_cave:1, gather_swamp:1, gather_mountain:1, gather_graveyard:1,
+  gather_volcanic:1, gather_people:1, gather_places:1, gather_treasure:1, gather_events:1,
+  rel_martha_deep_talk:1, rel_grom_deep_talk:1, rel_aldwin_invest:1,
+  wanderer_rumor:1, wanderer_map:1, wanderer_fortune:1, square_random_event:1
+};
+window._triggerCityActivityRemote = function(activityId){
+  try {
+    if (!(window.vCityServer && vCityServer.cityAction)) return;
+    vCityServer.cityAction('service.city_activity', { id: activityId }).then(function(res){
+      if (!res) return;
+      if (res.toast) vToast(res.toast, res.toast_type || 'ok');
+      // HUD reflete o estado server-side (gold/xp/level/hp vêm no res). Level-up é
+      // tratado automaticamente por vCityServer.cityAction (res.levelup.url).
+      var p = window.CITY_MOCK_PLAYER;
+      if (p && res.ok) {
+        if (typeof res.gold === 'number') p.gold = res.gold;
+        if (typeof res.xp === 'number') p.xp = res.xp;
+        if (typeof res.level === 'number') p.level = res.level;
+        if (typeof res.hp === 'number') p.hp = res.hp;
+        if (typeof refreshHud === 'function') refreshHud();
+      }
+    }).catch(function(e){ console.error('[CITY] city_activity ' + activityId, e); vToast('Erro na atividade.', 'err'); });
+  } catch (e) { console.error('[CITY] city_activity ' + activityId, e); }
 };
 function _pay(p, cost){
   if (p.gold < cost) { vToast('<span class="vi vi-coin sm"></span> Valdoritas insuficientes (' + cost + ' Valdoritas necessárias).'); return false; }
