@@ -35056,7 +35056,7 @@ function _squareShowBulletinPopup(p){
   var b = content.bounty;
   items.push({
     icon: b.emoji,
-    label: 'Bounty: ' + b.target + ' ×' + b.count,
+    label: 'Caçada: ' + b.target + ' ×' + b.count,
     badge: b.reward_gold + ' V',
     _kind: 'bounty', _data: b
   });
@@ -35099,12 +35099,12 @@ function _squareShowBulletinPopup(p){
       } else if (kind === 'bounty'){
         _showInfoPopup({
           icon: d.emoji, npc: 'Quadro de Avisos',
-          title: 'Bounty: ' + d.target,
+          title: 'Caçada: ' + d.target,
           desc: d.desc + '<br><br>Caçar <b>' + d.count + '×</b> ' + d.target +
                 '<br><b>Recompensa:</b> ' + d.reward_gold + ' Valdoritas + ' + d.reward_xp + ' XP',
                 onConfirm: function(){
             _showServiceResultPopup({
-              icon: d.emoji, npc: 'Bounty Aceita',
+              icon: d.emoji, npc: 'Caçada Aceita',
               narrative: '<b>' + d.target + ' ×' + d.count + '</b> adicionada ao seu diário.<br>' +
                          '<i>Pague-os pra resgatar a recompensa.</i>',
               deltas: [], onContinue: _squareTxnReturnToHub
@@ -35498,6 +35498,9 @@ function _squareShowMuralPopup(p){
   navigateTo('heroes_wall');
 }
 
+// STR/DEX/WIS/CHA (chaves internas do check) -> abreviacoes PT-BR so p/ DISPLAY (sweep praca 2026-06-19)
+function _statAbbrPT(s){ var M={STR:'FOR',DEX:'DES',CON:'CON',INT:'INT',WIS:'SAB',CHA:'CAR'}; return M[String(s||'').toUpperCase()]||s; }
+
 // === 7. TRABALHOS — 3 jobs/dia ===============================================
 function _squareShowJobsPopup(p){
   var available = SQUARE_JOBS.filter(function(j){
@@ -35513,7 +35516,7 @@ function _squareShowJobsPopup(p){
     return;
   }
   var items = available.map(function(j){
-    var statBadge = j.stat ? (j.stat + ' DC ' + j.dc) : 'Sem teste';
+    var statBadge = j.stat ? (_statAbbrPT(j.stat) + ' DC ' + j.dc) : 'Sem teste';
     return {
       icon: j.icon,
       label: j.label,
@@ -35566,7 +35569,7 @@ function _squareConfirmJob(p, job){
         if (typeof refreshHud === 'function') refreshHud();
         var hasCheck = !!(res.rolled && res.dc);
         var narrative = (job.stat
-          ? '<b>Teste de ' + job.stat + ':</b> ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
+          ? '<b>Teste de ' + _statAbbrPT(job.stat) + ':</b> ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
             ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — <b>' + (res.success ? 'SUCESSO' : 'parcial') + '</b><br><br>'
           : '') + '<i>' + (res.flavor || '') + '</i>';
         if (res.complication) {
