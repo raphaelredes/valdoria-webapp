@@ -10782,7 +10782,7 @@ var _NAMED_NPC_PORTRAITS = {
   'garrick o cacador': 'npcs/mestre-garrick.webp',
   'comerciante brael': 'npcs/comerciante-brael.webp',
   'mestra miriana': 'npcs/mestra-miriana.webp',
-  'mestre corvus': 'merchants/corvus.webp',
+  'mestre corvus': 'merchants/corvus-veltharion.webp',
   'ferreiro da praca': 'npcs/ferreiro.webp',
   'quinto o queijeiro': 'npcs/quinto-queijeiro.webp',
   'velha do oculto': 'npcs/velha-oculto.webp',
@@ -10848,7 +10848,7 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('elara') >= 0)   return '/shared/img/npcs/irma-elara.webp';
   if (s.indexOf('theron') >= 0)  return '/shared/img/npcs/acolito-theron.webp';
   if (s.indexOf('miriel') >= 0)  return '/shared/img/npcs/sacerdotisa-miriel.webp';
-  if (s.indexOf('corvus') >= 0)  return '/shared/img/merchants/corvus.webp';  /* canonical = retrato do mercado (cartógrafo humano). corvus-livreiro.webp (tiefling) era colisão — reservado p/ NPC tiefling. */
+  if (s.indexOf('corvus') >= 0)  return '/shared/img/merchants/corvus-veltharion.webp';  /* canonical = retrato do mercado (cartógrafo humano). corvus-livreiro.webp (tiefling) era colisão — reservado p/ NPC tiefling. */
   if (s.indexOf('garlen') >= 0) return '/shared/img/merchants/garlen.webp';  /* CY1: Garlen é CAMBISTA (não cartógrafo — esse é o Corvus, acima). Retrato consistente com o card do mercado (_merchantPortrait). */
   if (s.indexOf('vorhan') >= 0)  return '/shared/img/npcs/mestre-vorhan.webp';
   if (s.indexOf('garrick') >= 0) return '/shared/img/npcs/mestre-garrick.webp';
@@ -18301,7 +18301,7 @@ var MERCHANT_NAME_MAP = {
 // Override de filename quando o retrato canônico do mercador NÃO é merchants/{id}.webp
 // (Bjorn foi convertido em ANÃO → bjorn-anao.webp; merchants/ é Tier A immutable, então
 // um filename novo busta o cache. Manter sincronizado com check_npc_merchant_portrait_consistency).
-var _MERCHANT_PORTRAIT_FILE = { bjorn: 'bjorn-anao.webp' };
+var _MERCHANT_PORTRAIT_FILE = { bjorn: 'bjorn-anao.webp', corvus: 'corvus-veltharion.webp' };
 function _merchantPortrait(id){
   var fullName = MERCHANT_NAME_MAP[id] || id;
   var file = _MERCHANT_PORTRAIT_FILE[id] || (id + '.webp');
@@ -55124,7 +55124,7 @@ var RECURRING_NPCS = {
   },
   mer_corvus: {
     name: 'Corvus Veltharion',
-    portraitImg: '/shared/img/merchants/corvus.webp',
+    portraitImg: '/shared/img/merchants/corvus-veltharion.webp',
     desc: 'Homem alto e magro, manto preto, mãos manchadas de tinta. Vê estradas onde outros veem mato — e cobra caro pela visão.'
   },
   mer_bjorn: {
@@ -56250,7 +56250,7 @@ var _NPC_DEFAULTS = {
   thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
   mirena:      { name: 'Mirena Virelle',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
   velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.webp', icon: 'ic-mago' },
-  corvus:      { name: 'Corvus Veltharion',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus.webp',   icon: 'ic-ladino' },
+  corvus:      { name: 'Corvus Veltharion',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus-veltharion.webp',   icon: 'ic-ladino' },
   bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Anão selador e coureiro',            portrait: '/shared/img/merchants/bjorn-anao.webp', icon: 'ic-patrulheiro' },
   alchemist:   { name: 'Velithra',            desc: 'Alquimista do Mercado',              portrait: '/shared/img/merchants/velithra.webp',     icon: 'ic-feiticeiro' },
   gossip:      { name: 'Velho Mendigo',       desc: 'Boateiro da Praça',                  portrait: '',  icon: 'ic-aldeao' },
