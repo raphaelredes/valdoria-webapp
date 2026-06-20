@@ -10554,6 +10554,10 @@ var CITY_LOCATIONS = {
   gates:           { sector:'combate', levelReq:3, discoveryQuestId:'q_disc_gates',    label:'Portões',   cb:'gates' },
   arena:           { sector:'combate', levelReq:3, discoveryQuestId:'q_disc_arena',    label:'Arena',     cb:'arena' },
   daily_challenge: { sector:'combate', levelReq:5, discoveryQuestId:'q_disc_desafio',  label:'Desafio',   cb:'daily_challenge' },
+  // questGated: aparece SÓ com missão de esgoto ativa (bounty 'Praga de Ratos'
+  // OU 'Sons do Esgoto'). Server-driven: a entrada espelha QUESTS_ACTIVE (estado
+  // do servidor) e a cena/combate é 100% resolvida em /api/sewer/* (sewer_api_routes).
+  passagem:        { sector:'combate', levelReq:1, questGated:['bounty_rat_tails','quest_rce_sewer_echo'], discoveryQuestId:null, label:'Esgoto', cb:'sewer' },
   // === ESPÍRITO ===
   temple:        { sector:'espirito', levelReq:1, discoveryQuestId:null,              label:'Templo',    cb:'temple' },
   square:        { sector:'espirito', levelReq:2, discoveryQuestId:'q_disc_praca',    label:'Praça',     cb:'square' },
@@ -10721,9 +10725,25 @@ function _findLocByCb(cb){
   return null;
 }
 
+// Local atrelado a missão (Esgoto/Passagem Subterrânea): visível SÓ quando uma
+// das missões em loc.questGated está ATIVA. A autoridade é o servidor — QUESTS_ACTIVE
+// é hidratado de picked.quests (estado real). Em LOCAL (file://) QUESTS_ACTIVE é mock,
+// então a entrada não aparece (dev). Sem nível mínimo (questGated ignora levelReq).
+function _hasActiveGatedQuest(ids){
+  if (typeof QUESTS_ACTIVE === 'undefined' || !Array.isArray(ids)) return false;
+  for (var i = 0; i < QUESTS_ACTIVE.length; i++){
+    var q = QUESTS_ACTIVE[i];
+    if (!q) continue;
+    var sid = q.serverId || String(q.id || '').replace(/^qa_/, '');
+    if (ids.indexOf(sid) >= 0) return true;
+  }
+  return false;
+}
+
 function _getLocationState(loc){
   var p = _ensureCityState();
   if (!p) return 'hidden';
+  if (loc.questGated) return _hasActiveGatedQuest(loc.questGated) ? 'unlocked' : 'hidden';
   if ((p.level || 1) < (loc.levelReq || 1)) return 'hidden';
   if (!loc.discoveryQuestId) return 'unlocked';
   if (p.completed_locations.indexOf(loc.cb) >= 0) return 'unlocked';
@@ -55579,6 +55599,73 @@ function _handleCellarResult(p, data){
 }
 
 // ============================================================================
+// Passagem Subterrânea (esgoto) — cena server-driven (sewer_api_routes.py)
+// ============================================================================
+// A entrada 'Esgoto' (CITY_LOCATIONS.passagem, questGated → aparece SÓ com
+// missão de esgoto ativa) chama _enterSewer → /api/sewer/init: o servidor manda
+// a descida + choices (combater / recuar) e resolve cada escolha em /choice.
+// SUPREME RULE #0: o servidor decide tudo (quest ativa, trigger de combate,
+// loot/quest). Cliente só renderiza + anima. Sem NPC (ninguém vive no esgoto) →
+// vEncounter com npc:null (narration neutra). Reusa _cellarPost/_goToCombatFromCity
+// (helpers genéricos da cena do porão). LOCAL (file://) é dev → toast.
+function _enterSewer(p){
+  p = p || window.CITY_MOCK_PLAYER;
+  if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
+    if (typeof vToast === 'function') vToast('A Passagem Subterrânea abre no jogo.', 'info');
+    return;
+  }
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Descendo ao esgoto...' }); } catch(_){} }
+  _cellarPost('/api/sewer/init', {}).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || !data.ok) {
+      if (typeof vToast === 'function') vToast('A Passagem está fechada — sem missão de esgoto ativa.', 'warn');
+      return;
+    }
+    if (window.vEncounter && window.vEncounter.render) {
+      window.vEncounter.render(
+        { npc: null, script: data.script, choices: data.choices },
+        { player: p, closeable: true, onChoice: function(ch){ _resolveSewerChoice(p, ch && ch.id); } }
+      );
+    }
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[SEWER] init failed', e);
+    if (typeof vToast === 'function') vToast('Erro ao abrir a Passagem Subterrânea.', 'warn');
+  });
+}
+
+function _resolveSewerChoice(p, choiceId){
+  if (!choiceId) return;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Resolvendo...' }); } catch(_){} }
+  _cellarPost('/api/sewer/choice', { choice: choiceId }).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível agir no esgoto.', 'warn'); return; }
+    _handleSewerResult(p, data);
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[SEWER] choice failed', e);
+    if (typeof vToast === 'function') vToast('Erro ao agir no esgoto.', 'warn');
+  });
+}
+
+function _handleSewerResult(p, data){
+  var res = data.result;
+  if (res === 'combat' && data.combat_url) { _goToCombatFromCity(data.combat_url); return; }
+  // retreat → cena final da subida + fecha + refresh HUD
+  var script = Array.isArray(data.script) ? data.script : [];
+  window.vEncounter.render(
+    { npc: null, script: script, choices: [{ id: 'done', label: '↩ Voltar' }] },
+    { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
+  );
+}
+
+// Wire: a entrada 'Esgoto' (cb 'sewer') → _enterSewer. doAction('sewer') cai no
+// ACTION_HANDLERS (cidade.html standalone define o único doAction, REMOTE+LOCAL).
+if (typeof ACTION_HANDLERS !== 'undefined') {
+  ACTION_HANDLERS['sewer'] = function(pl){ _enterSewer(pl || window.CITY_MOCK_PLAYER); };
+}
+
+// ============================================================================
 // === Encontros de CHEGADA server-driven (city arrival encounters) ===========
 // ============================================================================
 // Disparam ANTES de abrir um local (Taverna/Estalagem/Mercado/Templo/Portões —
@@ -61218,6 +61305,7 @@ var _LOC_MAP = (function(){
         'templo':           { ico: S('ic-templo'),   nm: 'Templo' },
         'gates':            { ico: S('ic-portoes'),  nm: 'Portões' },
         'portoes':          { ico: S('ic-portoes'),  nm: 'Portões' },
+        'sewer':            { ico: S('ic-portoes'),  nm: 'Esgoto' },
         'square':           { ico: S('ic-praca'),    nm: 'Praça' },
         'praca':            { ico: S('ic-praca'),    nm: 'Praça' },
         'bank':             { ico: S('ic-banco'),    nm: 'Banco' },

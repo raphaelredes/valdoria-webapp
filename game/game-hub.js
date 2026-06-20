@@ -64,6 +64,7 @@ var _LOC_MAP = (function(){
         'templo':           { ico: S('ic-templo'),   nm: 'Templo' },
         'gates':            { ico: S('ic-portoes'),  nm: 'Portões' },
         'portoes':          { ico: S('ic-portoes'),  nm: 'Portões' },
+        'sewer':            { ico: S('ic-portoes'),  nm: 'Esgoto' },
         'square':           { ico: S('ic-praca'),    nm: 'Praça' },
         'praca':            { ico: S('ic-praca'),    nm: 'Praça' },
         'bank':             { ico: S('ic-banco'),    nm: 'Banco' },
