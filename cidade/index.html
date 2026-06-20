@@ -10566,6 +10566,7 @@ var CITY_LOCATIONS = {
   warlock_rift:    { sector:'combate', levelReq:1, questGated:['quest_class_warlock'],  discoveryQuestId:null, label:'Fenda do Além',   cb:'warlock_rift' },
   mirena_field:    { sector:'combate', levelReq:1, questGated:['quest_mirena_experiment'], discoveryQuestId:null, label:'Teste de Campo', cb:'mirena_field' },
   rogue_tunnels:   { sector:'combate', levelReq:1, questGated:['quest_class_rogue'],    discoveryQuestId:null, label:'Túneis do Ladrão', cb:'rogue_tunnels' },
+  shadow_agent:    { sector:'combate', levelReq:1, questGated:['quest_martha_shadow'],  discoveryQuestId:null, label:'Agente das Sombras', cb:'shadow_agent' },
   // === ESPÍRITO ===
   temple:        { sector:'espirito', levelReq:1, discoveryQuestId:null,              label:'Templo',    cb:'temple' },
   square:        { sector:'espirito', levelReq:2, discoveryQuestId:'q_disc_praca',    label:'Praça',     cb:'square' },
@@ -55742,6 +55743,7 @@ if (typeof ACTION_HANDLERS !== 'undefined') {
   ACTION_HANDLERS['warlock_rift']  = function(pl){ _enterQuestCombat('quest_class_warlock', pl || window.CITY_MOCK_PLAYER); };
   ACTION_HANDLERS['mirena_field']  = function(pl){ _enterQuestCombat('quest_mirena_experiment', pl || window.CITY_MOCK_PLAYER); };
   ACTION_HANDLERS['rogue_tunnels'] = function(pl){ _enterQuestCombat('quest_class_rogue', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['shadow_agent']  = function(pl){ _enterQuestCombat('quest_martha_shadow', pl || window.CITY_MOCK_PLAYER); };
 }
 
 // ============================================================================
