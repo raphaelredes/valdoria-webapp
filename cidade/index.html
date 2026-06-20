@@ -10579,6 +10579,12 @@ var CITY_LOCATIONS = {
   mirena_field:    { sector:'combate', levelReq:1, questGated:['quest_mirena_experiment'], discoveryQuestId:null, label:'Teste de Campo', cb:'mirena_field' },
   rogue_tunnels:   { sector:'combate', levelReq:1, questGated:['quest_class_rogue'],    discoveryQuestId:null, label:'Túneis do Ladrão', cb:'rogue_tunnels' },
   shadow_agent:    { sector:'combate', levelReq:1, questGated:['quest_martha_shadow'],  discoveryQuestId:null, label:'Agente das Sombras', cb:'shadow_agent' },
+  // questGated: aparecem SÓ com a quest de TURN-IN ATIVA. Entrega/relato 100%
+  // server-driven via /api/quest_turnin/* (quest_turnin_api_routes, motor genérico)
+  // → a escolha do jogador completa a quest. cb mapeado a _enterQuestTurnin('<qid>').
+  report_tavira:   { sector:'combate', levelReq:1, questGated:['quest_tavira_recruit'],   discoveryQuestId:null, label:'Relatar a Tavira', cb:'report_tavira' },
+  report_aldric:   { sector:'combate', levelReq:1, questGated:['quest_aldric_smugglers'], discoveryQuestId:null, label:'Relatar a Aldric', cb:'report_aldric' },
+  cleric_blessing: { sector:'espirito', levelReq:1, questGated:['quest_class_cleric'],     discoveryQuestId:null, label:'Bênção de Elara', cb:'cleric_blessing' },
   // === ESPÍRITO ===
   temple:        { sector:'espirito', levelReq:1, discoveryQuestId:null,              label:'Templo',    cb:'temple' },
   square:        { sector:'espirito', levelReq:2, discoveryQuestId:'q_disc_praca',    label:'Praça',     cb:'square' },
@@ -55775,6 +55781,90 @@ if (typeof ACTION_HANDLERS !== 'undefined') {
   ACTION_HANDLERS['mirena_field']  = function(pl){ _enterQuestCombat('quest_mirena_experiment', pl || window.CITY_MOCK_PLAYER); };
   ACTION_HANDLERS['rogue_tunnels'] = function(pl){ _enterQuestCombat('quest_class_rogue', pl || window.CITY_MOCK_PLAYER); };
   ACTION_HANDLERS['shadow_agent']  = function(pl){ _enterQuestCombat('quest_martha_shadow', pl || window.CITY_MOCK_PLAYER); };
+}
+
+// ============================================================================
+// M-turnin GENÉRICO (quest_tavira_recruit, quest_aldric_smugglers, ...) — server-driven
+// ============================================================================
+// Irmão do M-combat. Entradas questGated (CITY_LOCATIONS) com cb mapeado a
+// _enterQuestTurnin('<qid>') chamam /api/quest_turnin/init {quest_id}: o servidor
+// manda a cena de aproximação + choices (entregar/decidir / ainda não) e resolve em
+// /choice {quest_id, choice}. Na entrega, o servidor seta o flag de DESTINO
+// <qid>_cleared E completa a quest (SUPREME RULE #0). Cliente só renderiza + anima.
+// Reusa _cellarPost/vEncounter. LOCAL (file://) é dev → toast. Um único motor serve
+// TODAS as quests de turn-in (config em quest_turnin_data.py).
+function _enterQuestTurnin(questId, p){
+  p = p || window.CITY_MOCK_PLAYER;
+  if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
+    if (typeof vToast === 'function') vToast('Esta entrega acontece no jogo.', 'info');
+    return;
+  }
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Indo até o local...' }); } catch(_){} }
+  _cellarPost('/api/quest_turnin/init', { quest_id: questId }).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || !data.ok) {
+      if (typeof vToast === 'function') vToast('A entrega não está disponível agora.', 'warn');
+      return;
+    }
+    if (window.vEncounter && window.vEncounter.render) {
+      window.vEncounter.render(
+        { npc: data.npc || null, script: data.script, choices: data.choices },
+        { player: p, closeable: true, onChoice: function(ch){ _resolveQuestTurninChoice(questId, p, ch && ch.id); } }
+      );
+    }
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[QUEST-TURNIN] init failed', e);
+    if (typeof vToast === 'function') vToast('Erro ao iniciar a entrega.', 'warn');
+  });
+}
+
+function _resolveQuestTurninChoice(questId, p, choiceId){
+  if (!choiceId) return;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Resolvendo...' }); } catch(_){} }
+  _cellarPost('/api/quest_turnin/choice', { quest_id: questId, choice: choiceId }).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível agir.', 'warn'); return; }
+    _handleQuestTurninResult(p, data);
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[QUEST-TURNIN] choice failed', e);
+    if (typeof vToast === 'function') vToast('Erro na entrega.', 'warn');
+  });
+}
+
+function _handleQuestTurninResult(p, data){
+  var res = data.result;
+  // 'later' → cena de adiar + fecha + refresh. 'complete' → narração de conclusão.
+  if (res === 'later') {
+    var ls = Array.isArray(data.script) ? data.script : [];
+    window.vEncounter.render(
+      { npc: data.npc || null, script: ls, choices: [{ id: 'done', label: '↩ Voltar' }] },
+      { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
+    );
+    return;
+  }
+  // complete: mostra a mensagem de conclusão como narração + Voltar; depois
+  // re-hidrata quests/board (a quest agora está concluída no servidor).
+  var done = [{ type: 'narration', text: data.message || '<b>Missão concluída!</b>' }];
+  window.vEncounter.render(
+    { npc: data.npc || null, script: done, choices: [{ id: 'done', label: '↩ Voltar' }] },
+    { player: p, onChoice: function(){
+        try { window.vEncounter.close(); } catch(_){}
+        // re-hidrata o estado do servidor (quest concluída sai das ativas)
+        try { if (window.vCityServer && window.vCityServer.quest && window.vCityServer.quest.state) { window.vCityServer.quest.state().then(function(r){ if (r && r.quests && typeof _applyServerQuests === 'function') _applyServerQuests(r.quests); if (typeof renderCurrentScreen === 'function') renderCurrentScreen(); }); } } catch(_){}
+        if (typeof refreshHud === 'function') refreshHud();
+      } }
+  );
+}
+
+// Wire: cada entrada questGated de TURN-IN mapeia seu cb a _enterQuestTurnin('<qid>').
+//   report_tavira → quest_tavira_recruit · report_aldric → quest_aldric_smugglers
+//   cleric_blessing → quest_class_cleric
+if (typeof ACTION_HANDLERS !== 'undefined') {
+  ACTION_HANDLERS['report_tavira']   = function(pl){ _enterQuestTurnin('quest_tavira_recruit', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['report_aldric']   = function(pl){ _enterQuestTurnin('quest_aldric_smugglers', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['cleric_blessing'] = function(pl){ _enterQuestTurnin('quest_class_cleric', pl || window.CITY_MOCK_PLAYER); };
 }
 
 // ============================================================================
