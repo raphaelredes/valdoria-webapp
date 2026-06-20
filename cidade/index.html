@@ -10558,10 +10558,11 @@ var CITY_LOCATIONS = {
   // OU 'Sons do Esgoto'). Server-driven: a entrada espelha QUESTS_ACTIVE (estado
   // do servidor) e a cena/combate é 100% resolvida em /api/sewer/* (sewer_api_routes).
   passagem:        { sector:'combate', levelReq:1, questGated:['bounty_rat_tails','quest_rce_sewer_echo'], discoveryQuestId:null, label:'Esgoto', cb:'sewer' },
-  // questGated: aparece SÓ com a quest_grom_brawl ATIVA (Provação da Taverna —
-  // enfrente o líder dos provocadores). Combate encenado 100% server-driven em
-  // /api/tavern/brawl/* (tavern_brawl_api_routes) → on_victory completa a quest.
-  provocadores:    { sector:'combate', levelReq:1, questGated:['quest_grom_brawl'], discoveryQuestId:null, label:'Provocadores', cb:'tavern_brawl' },
+  // questGated: aparecem SÓ com a quest de combate ATIVA. Combate encenado 100%
+  // server-driven via /api/quest_combat/* (quest_combat_api_routes, motor genérico)
+  // → on_victory completa a quest. cb mapeado a _enterQuestCombat('<qid>').
+  provocadores:    { sector:'combate', levelReq:1, questGated:['quest_grom_brawl'],    discoveryQuestId:null, label:'Provocadores', cb:'tavern_brawl' },
+  arena_fighter:   { sector:'combate', levelReq:1, questGated:['quest_class_fighter'], discoveryQuestId:null, label:'Provação do Aço', cb:'arena_fighter' },
   // === ESPÍRITO ===
   temple:        { sector:'espirito', levelReq:1, discoveryQuestId:null,              label:'Templo',    cb:'temple' },
   square:        { sector:'espirito', levelReq:2, discoveryQuestId:'q_disc_praca',    label:'Praça',     cb:'square' },
@@ -55670,56 +55671,56 @@ if (typeof ACTION_HANDLERS !== 'undefined') {
 }
 
 // ============================================================================
-// Confronto dos Provocadores (quest_grom_brawl) — cena server-driven
+// M-combat GENÉRICO (quest_grom_brawl, quest_class_fighter, ...) — server-driven
 // ============================================================================
-// A entrada 'Provocadores' (CITY_LOCATIONS.provocadores, questGated → aparece SÓ
-// com quest_grom_brawl ATIVA) chama _enterTavernBrawl → /api/tavern/brawl/init: o
-// servidor manda a aproximação + choices (enfrentar / recuar) e resolve cada
-// escolha em /choice. SUPREME RULE #0: o servidor decide tudo (quest ativa,
-// trigger de combate, conclusão via on_victory). Cliente só renderiza + anima.
-// Reusa _cellarPost/_goToCombatFromCity (helpers genéricos). LOCAL (file://) é dev
-// → toast. Espelha _enterSewer.
-function _enterTavernBrawl(p){
+// Entradas questGated (CITY_LOCATIONS) com cb mapeado a _enterQuestCombat('<qid>')
+// chamam /api/quest_combat/init {quest_id}: o servidor manda a aproximação +
+// choices (enfrentar / recuar) e resolve em /choice {quest_id, choice}. Na
+// vitória, o on_victory completa a quest (SUPREME RULE #0 — servidor decide tudo).
+// Cliente só renderiza + anima. Reusa _cellarPost/_goToCombatFromCity (helpers
+// genéricos). LOCAL (file://) é dev → toast. Espelha _enterSewer; um único motor
+// serve TODAS as quests de combate (config em quest_combat_data.py).
+function _enterQuestCombat(questId, p){
   p = p || window.CITY_MOCK_PLAYER;
   if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
-    if (typeof vToast === 'function') vToast('O confronto com os provocadores acontece no jogo.', 'info');
+    if (typeof vToast === 'function') vToast('Este confronto acontece no jogo.', 'info');
     return;
   }
-  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Indo ao encontro dos provocadores...' }); } catch(_){} }
-  _cellarPost('/api/tavern/brawl/init', {}).then(function(data){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Indo ao confronto...' }); } catch(_){} }
+  _cellarPost('/api/quest_combat/init', { quest_id: questId }).then(function(data){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     if (!data || !data.ok) {
-      if (typeof vToast === 'function') vToast('Os provocadores não estão aqui agora.', 'warn');
+      if (typeof vToast === 'function') vToast('O confronto não está disponível agora.', 'warn');
       return;
     }
     if (window.vEncounter && window.vEncounter.render) {
       window.vEncounter.render(
         { npc: data.npc || null, script: data.script, choices: data.choices },
-        { player: p, closeable: true, onChoice: function(ch){ _resolveTavernBrawlChoice(p, ch && ch.id); } }
+        { player: p, closeable: true, onChoice: function(ch){ _resolveQuestCombatChoice(questId, p, ch && ch.id); } }
       );
     }
   }).catch(function(e){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
-    console.error('[TAVERN-BRAWL] init failed', e);
-    if (typeof vToast === 'function') vToast('Erro ao confrontar os provocadores.', 'warn');
+    console.error('[QUEST-COMBAT] init failed', e);
+    if (typeof vToast === 'function') vToast('Erro ao iniciar o confronto.', 'warn');
   });
 }
 
-function _resolveTavernBrawlChoice(p, choiceId){
+function _resolveQuestCombatChoice(questId, p, choiceId){
   if (!choiceId) return;
   if (window.vProcessing) { try { window.vProcessing.show({ text: 'Resolvendo...' }); } catch(_){} }
-  _cellarPost('/api/tavern/brawl/choice', { choice: choiceId }).then(function(data){
+  _cellarPost('/api/quest_combat/choice', { quest_id: questId, choice: choiceId }).then(function(data){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível agir.', 'warn'); return; }
-    _handleTavernBrawlResult(p, data);
+    _handleQuestCombatResult(p, data);
   }).catch(function(e){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
-    console.error('[TAVERN-BRAWL] choice failed', e);
+    console.error('[QUEST-COMBAT] choice failed', e);
     if (typeof vToast === 'function') vToast('Erro no confronto.', 'warn');
   });
 }
 
-function _handleTavernBrawlResult(p, data){
+function _handleQuestCombatResult(p, data){
   var res = data.result;
   if (res === 'combat' && data.combat_url) { _goToCombatFromCity(data.combat_url); return; }
   // retreat → cena final da retirada + fecha + refresh HUD
@@ -55730,9 +55731,11 @@ function _handleTavernBrawlResult(p, data){
   );
 }
 
-// Wire: a entrada 'Provocadores' (cb 'tavern_brawl') → _enterTavernBrawl.
+// Wire: cada entrada questGated mapeia seu cb a _enterQuestCombat('<qid>').
+//   provocadores  → quest_grom_brawl   ·   arena_fighter → quest_class_fighter
 if (typeof ACTION_HANDLERS !== 'undefined') {
-  ACTION_HANDLERS['tavern_brawl'] = function(pl){ _enterTavernBrawl(pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['tavern_brawl']  = function(pl){ _enterQuestCombat('quest_grom_brawl', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['arena_fighter'] = function(pl){ _enterQuestCombat('quest_class_fighter', pl || window.CITY_MOCK_PLAYER); };
 }
 
 // ============================================================================
