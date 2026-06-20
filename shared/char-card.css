@@ -25,7 +25,7 @@
 }
 .vcc-card.is-self {
   border-color: #e8c45a;
-  box-shadow: 0 4px 20px rgba(196, 149, 58, 0.4), inset 0 0 0 1px rgba(255, 248, 192, 0.28);
+  box-shadow: 0 4px 20px var(--v-gold-40), inset 0 0 0 1px rgba(255, 248, 192, 0.28);
 }
 
 /* nome (banner topo, igual .c-name) */
@@ -144,4 +144,4 @@
 }
 .vcc-stat-val--hp-low { animation: vccHpLowBlink 1.2s ease-in-out infinite; }
 @keyframes vccHpLowBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
-.vcc-stat--ac .vcc-stat-val { color: #ffd688; text-shadow: 0 0 5px rgba(196, 149, 58, 0.5), 0 1px 2px rgba(0, 0, 0, 0.95); }
+.vcc-stat--ac .vcc-stat-val { color: #ffd688; text-shadow: 0 0 5px var(--v-gold-50), 0 1px 2px rgba(0, 0, 0, 0.95); }
