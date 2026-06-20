@@ -10585,6 +10585,16 @@ var CITY_LOCATIONS = {
   report_tavira:   { sector:'combate', levelReq:1, questGated:['quest_tavira_recruit'],   discoveryQuestId:null, label:'Relatar a Tavira', cb:'report_tavira' },
   report_aldric:   { sector:'combate', levelReq:1, questGated:['quest_aldric_smugglers'], discoveryQuestId:null, label:'Relatar a Aldric', cb:'report_aldric' },
   cleric_blessing: { sector:'espirito', levelReq:1, questGated:['quest_class_cleric'],     discoveryQuestId:null, label:'Bênção de Elara', cb:'cleric_blessing' },
+  sorcerer_awakening:   { sector:'espirito', levelReq:1, questGated:['quest_class_sorcerer'],     discoveryQuestId:null, label:'Despertar Arcano',  cb:'sorcerer_awakening' },
+  report_tavira_traitor:{ sector:'combate',  levelReq:1, questGated:['quest_tavira_traitor'],     discoveryQuestId:null, label:'Expor o Espião',    cb:'report_tavira_traitor' },
+  velithra_necklace:    { sector:'comercio', levelReq:1, questGated:['quest_velithra_heist'],      discoveryQuestId:null, label:'Devolver o Colar',  cb:'velithra_necklace' },
+  mirena_rival_report:  { sector:'comercio', levelReq:1, questGated:['quest_mirena_rival'],        discoveryQuestId:null, label:'Avisar Mirena',     cb:'mirena_rival_report' },
+  nature_city_pact:     { sector:'combate',  levelReq:1, questGated:['quest_cross_nature_city'],   discoveryQuestId:null, label:'Propor o Pacto',    cb:'nature_city_pact' },
+  grom_past_varnok:     { sector:'convivio', levelReq:1, questGated:['quest_grom_past'],           discoveryQuestId:null, label:'O Passado de Grom', cb:'grom_past_varnok' },
+  martha_orb:           { sector:'convivio', levelReq:1, questGated:['quest_martha_relic'],        discoveryQuestId:null, label:'O Orbe de Obsidiana', cb:'martha_orb' },
+  velithra_patron_choice:{ sector:'comercio',levelReq:1, questGated:['quest_velithra_patron'],     discoveryQuestId:null, label:'O Patrono',        cb:'velithra_patron_choice' },
+  sylthara_balance_choice:{ sector:'combate',levelReq:1, questGated:['quest_sylthara_balance'],    discoveryQuestId:null, label:'O Grande Equilíbrio', cb:'sylthara_balance_choice' },
+  plague_cure_choice:   { sector:'comercio', levelReq:1, questGated:['quest_moral_plague_cure'],   discoveryQuestId:null, label:'A Cura Proibida',   cb:'plague_cure_choice' },
   // === ESPÍRITO ===
   temple:        { sector:'espirito', levelReq:1, discoveryQuestId:null,              label:'Templo',    cb:'temple' },
   square:        { sector:'espirito', levelReq:2, discoveryQuestId:'q_disc_praca',    label:'Praça',     cb:'square' },
@@ -55865,6 +55875,16 @@ if (typeof ACTION_HANDLERS !== 'undefined') {
   ACTION_HANDLERS['report_tavira']   = function(pl){ _enterQuestTurnin('quest_tavira_recruit', pl || window.CITY_MOCK_PLAYER); };
   ACTION_HANDLERS['report_aldric']   = function(pl){ _enterQuestTurnin('quest_aldric_smugglers', pl || window.CITY_MOCK_PLAYER); };
   ACTION_HANDLERS['cleric_blessing'] = function(pl){ _enterQuestTurnin('quest_class_cleric', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['sorcerer_awakening']    = function(pl){ _enterQuestTurnin('quest_class_sorcerer', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['report_tavira_traitor'] = function(pl){ _enterQuestTurnin('quest_tavira_traitor', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['velithra_necklace']     = function(pl){ _enterQuestTurnin('quest_velithra_heist', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['mirena_rival_report']   = function(pl){ _enterQuestTurnin('quest_mirena_rival', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['nature_city_pact']      = function(pl){ _enterQuestTurnin('quest_cross_nature_city', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['grom_past_varnok']        = function(pl){ _enterQuestTurnin('quest_grom_past', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['martha_orb']              = function(pl){ _enterQuestTurnin('quest_martha_relic', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['velithra_patron_choice']  = function(pl){ _enterQuestTurnin('quest_velithra_patron', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['sylthara_balance_choice'] = function(pl){ _enterQuestTurnin('quest_sylthara_balance', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['plague_cure_choice']      = function(pl){ _enterQuestTurnin('quest_moral_plague_cure', pl || window.CITY_MOCK_PLAYER); };
 }
 
 // ============================================================================
