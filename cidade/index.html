@@ -10595,6 +10595,8 @@ var CITY_LOCATIONS = {
   velithra_patron_choice:{ sector:'comercio',levelReq:1, questGated:['quest_velithra_patron'],     discoveryQuestId:null, label:'O Patrono',        cb:'velithra_patron_choice' },
   sylthara_balance_choice:{ sector:'combate',levelReq:1, questGated:['quest_sylthara_balance'],    discoveryQuestId:null, label:'O Grande Equilíbrio', cb:'sylthara_balance_choice' },
   plague_cure_choice:   { sector:'comercio', levelReq:1, questGated:['quest_moral_plague_cure'],   discoveryQuestId:null, label:'A Cura Proibida',   cb:'plague_cure_choice' },
+  prisoner_fate:        { sector:'combate',  levelReq:1, questGated:['quest_moral_prisoner'],       discoveryQuestId:null, label:'O Prisioneiro',     cb:'prisoner_fate' },
+  temple_secret_choice: { sector:'espirito', levelReq:1, questGated:['quest_moral_temple_secret'],  discoveryQuestId:null, label:'O Segredo do Templo', cb:'temple_secret_choice' },
   // === ESPÍRITO ===
   temple:        { sector:'espirito', levelReq:1, discoveryQuestId:null,              label:'Templo',    cb:'temple' },
   square:        { sector:'espirito', levelReq:2, discoveryQuestId:'q_disc_praca',    label:'Praça',     cb:'square' },
@@ -55885,6 +55887,8 @@ if (typeof ACTION_HANDLERS !== 'undefined') {
   ACTION_HANDLERS['velithra_patron_choice']  = function(pl){ _enterQuestTurnin('quest_velithra_patron', pl || window.CITY_MOCK_PLAYER); };
   ACTION_HANDLERS['sylthara_balance_choice'] = function(pl){ _enterQuestTurnin('quest_sylthara_balance', pl || window.CITY_MOCK_PLAYER); };
   ACTION_HANDLERS['plague_cure_choice']      = function(pl){ _enterQuestTurnin('quest_moral_plague_cure', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['prisoner_fate']           = function(pl){ _enterQuestTurnin('quest_moral_prisoner', pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['temple_secret_choice']    = function(pl){ _enterQuestTurnin('quest_moral_temple_secret', pl || window.CITY_MOCK_PLAYER); };
 }
 
 // ============================================================================
