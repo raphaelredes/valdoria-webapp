@@ -8869,6 +8869,18 @@ body.perf-lite .vc-action-btn { transition: none; }
           _logCity('server quests hydrated: ' + QUESTS_ACTIVE.length);
         }
       } catch(_sqhe){ console.warn('[CITY] hydrate server quests failed', _sqhe); }
+      // 2026-06-20 (user report PANIN: "Feitas somem no reload"): picked.quests
+      // (web_auth) serializa SÓ status=='active' → a aba "Feitas" (QUESTS_HISTORY)
+      // nunca era populada no load → completed sumiam ao recarregar. Busca o estado
+      // AUTORITATIVO (active+completed) e popula QUESTS_ACTIVE + QUESTS_HISTORY via
+      // _applyServerQuests. Async (não bloqueia o boot); o diário lê os arrays ao abrir.
+      try {
+        if (window.vCityServer && window.vCityServer.quest && window.vCityServer.quest.state) {
+          window.vCityServer.quest.state().then(function(r){
+            if (r && r.ok && r.quests && typeof _applyServerQuests === 'function') _applyServerQuests(r.quests);
+          }).catch(function(_qse){ console.warn('[CITY] quest.state hydrate failed', _qse); });
+        }
+      } catch(_qse2){ console.warn('[CITY] quest.state hydrate exception', _qse2); }
       // FASE 1 server-driven: carrega o board CANÔNICO do servidor (quest.board)
       // pra a aba "Disponíveis" do diário renderizar quests reais (não hardcoded).
       try { _refreshServerBoard(); } catch(_brde){ console.warn('[CITY] board fetch failed', _brde); }
@@ -21736,6 +21748,25 @@ function _srvCompleteQuest(serverId){
 }
 function _srvAbandonQuest(serverId){
   if (!window.vCityServer || !window.vCityServer.isRemote()){ if (typeof vToast==='function') vToast('Indisponível offline'); return; }
+  // 2026-06-20 (user report PANIN): abandono era IMEDIATO (sem confirmação) — ação
+  // destrutiva (perde progresso) merece confirmar. Espelha o _showInfoPopup do
+  // abandono legacy (quest_*_abandon). Sem _showInfoPopup, degrada p/ abandono direto.
+  var _sqA = (typeof QUESTS_ACTIVE!=='undefined') ? QUESTS_ACTIVE.filter(function(q){return q.serverId===serverId;})[0] : null;
+  var _qTitle = (_sqA && _sqA.title) || 'esta missão';
+  var _doAbandon = function(){ _srvAbandonQuestConfirmed(serverId); };
+  if (typeof _showInfoPopup === 'function') {
+    _showInfoPopup({
+      icon: '⚠️',
+      title: 'Abandonar Missão?',
+      desc: 'Tens certeza que queres abandonar <b>"' + _qTitle + '"</b>?<br><br>'
+          + '<span style="color:#d4574a">A missão sairá das ativas e o progresso será perdido.</span>',
+      confirmLabel: 'Sim, abandonar',
+      cancelLabel: 'Cancelar',
+      onConfirm: _doAbandon
+    });
+  } else { _doAbandon(); }
+}
+function _srvAbandonQuestConfirmed(serverId){
   if (window._srvQuestBusy) return;  // guard anti-double-fire
   window._srvQuestBusy = true;
   if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Abandonando missão...' });
