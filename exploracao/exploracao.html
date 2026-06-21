@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T19:08:23Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T19:37:50Z - do not edit directly, edit source -->
 
 
 
@@ -39157,6 +39157,15 @@ function doLongRest() {
       window.ExploracaoAPI.restLong().then(function(res){
         if (res && res.ok) {
           console.info('[CAMP] rest_long server ok healed_hp=' + (res.healed && res.healed.hp));
+        } else if (res && res.reason === 'no_camp_gear') {
+          // 2026-06-21: servidor RECUSOU (sem Barraca/Kit) → REVERTE o heal otimista e
+          // avisa o motivo. O Descanso Longo no campo exige equipamento (D&D 5e).
+          p.hp = preHp; p.mp = preMp; p.exh = preExh; p.hd = preHd;
+          try { if (typeof updateHud === 'function') updateHud(); } catch (_eh) {}
+          try { if (typeof render === 'function') render(); } catch (_er) {}
+          if (typeof vToast === 'function') vToast(res.message || 'Você precisa de uma Barraca ou Kit de Acampamento para o Descanso Longo no campo.');
+          var _cst = document.getElementById('camp-footer-status');
+          if (_cst) _cst.textContent = '⚠️ Sem equipamento de acampamento (Barraca ou Kit).';
         } else {
           console.warn('[CAMP] rest_long server fail:', res);
         }

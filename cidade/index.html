@@ -46751,7 +46751,56 @@ function _heraldicForClass(cls){
   return ic ? '<svg class="v-heraldic"><use href="#' + ic + '"/></svg>' : '';
 }
 
+// 2026-06-21: class_key (ASCII) → label PT-BR p/ os cards do Mural (Canonical Keys).
+var _MURAL_CLS_PT = { guerreiro:'Guerreiro', mago:'Mago', clerigo:'Clérigo', ladino:'Ladino',
+  barbaro:'Bárbaro', bardo:'Bardo', druida:'Druida', monge:'Monge', paladino:'Paladino',
+  patrulheiro:'Patrulheiro', feiticeiro:'Feiticeiro', bruxo:'Bruxo' };
+var _MURAL_MEDALS = { 1:'🥇', 2:'🥈', 3:'🥉' };
+
+function _renderMuralRankingCards(res){
+  var cards = (res.entries || []).map(function(e){
+    var ck = e.class_key || 'guerreiro';
+    var webp = '/shared/img/combat/' + ck + '.webp';
+    var rankBadge = _MURAL_MEDALS[e.rank] || ('#' + e.rank);
+    var clsPT = (typeof _classLabelPT === 'function') ? _classLabelPT(ck) : (_MURAL_CLS_PT[ck] || ck);
+    var nameEsc = _esc(e.name);
+    var meCard = e.me ? 'border-color:var(--v-gold,#c4953a);box-shadow:0 0 12px rgba(196,149,58,0.45);' : '';
+    var lbDesc = 'Nível ' + e.level + ' · ' + _esc(clsPT) + ' · ' + _esc(e.score);
+    return '<div class="mural-card" style="display:flex;align-items:center;gap:10px;padding:8px;margin-bottom:6px;'
+      + 'background:rgba(30,22,14,0.7);border:1px solid var(--v-border,#4a3828);border-radius:10px;' + meCard + '">'
+      + '<img src="' + webp + '" alt="" data-name="' + nameEsc + '" data-desc="' + lbDesc + '" '
+      + 'style="width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid var(--v-gold-35);cursor:pointer;flex:0 0 auto;" '
+      + 'onclick="if(window.showLightbox)window.showLightbox(this.src,this.dataset.name,this.dataset.desc);" '
+      + 'onerror="this.style.display=\'none\';">'
+      + '<div style="flex:1;min-width:0;text-align:left;">'
+      + '<div style="font-weight:700;color:var(--v-gold-light,#dbb668);font-size:calc(13px*var(--v-font-scale,1));">' + rankBadge + ' ' + nameEsc + (e.me ? ' <span style="color:var(--v-gold,#c4953a);">(você)</span>' : '') + '</div>'
+      + '<div style="color:var(--v-text-dim,#a09484);font-size:calc(11px*var(--v-font-scale,1));">Nível ' + e.level + ' · ' + _esc(clsPT) + '</div>'
+      + '<div style="color:var(--v-gold,#c4953a);font-size:calc(12px*var(--v-font-scale,1));font-weight:600;">' + _esc(e.score) + '</div>'
+      + '</div></div>';
+  }).join('');
+  var posNote = (res.player_pos > 0)
+    ? '<div style="text-align:center;color:var(--v-text-dim,#a09484);margin-top:8px;font-size:calc(12px*var(--v-font-scale,1));">📊 Sua posição: <b style="color:var(--v-gold,#c4953a);">#' + res.player_pos + '</b> de ' + res.player_total + ' aventureiros</div>'
+    : '';
+  _showInfoPopup({
+    npc: 'Mural dos Aventureiros',
+    title: res.label,
+    desc: '<i>' + _esc(res.description) + '</i><br><br>' + (cards || '<i>Nenhum aventureiro classificado ainda.</i>') + posNote,
+    onConfirm: function(){}
+  });
+}
+
 function _heroesShowRanking(p, key){
+  // 2026-06-21 (user "mostre os personagens e infos REAIS do rank, com imagem clicável"):
+  // em REMOTE o ranking vem do servidor (cards com retrato WebP da classe + lightbox);
+  // o mock MURAL_RANKINGS é só LOCAL (file://).
+  var _isRemote = window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote();
+  if (_isRemote && window.vCityServer.cityAction) {
+    window.vCityServer.cityAction('service.mural_ranking', { category: key }).then(function(res){
+      if (!res || !res.ok) { if (typeof vToast === 'function') vToast('Ranking indisponível agora.'); return; }
+      _renderMuralRankingCards(res);
+    }).catch(function(e){ console.warn('[MURAL] ranking', e); if (typeof vToast === 'function') vToast('Erro ao carregar o ranking.'); });
+    return;
+  }
   var r = MURAL_RANKINGS[key];
   if (!r) return;
   var rows = (r.top || []).map(function(e){
@@ -55986,7 +56035,12 @@ var _ARRIVAL_VENUE = {
   'inn': 'open_inn', 'open_inn': 'open_inn', 'estalagem': 'open_inn',
   'market': 'open_market', 'mercado': 'open_market',
   'temple': 'open_temple', 'templo': 'open_temple',
-  'gates': 'action_city_gates', 'portoes': 'action_city_gates'
+  'gates': 'action_city_gates', 'portoes': 'action_city_gates',
+  // 2026-06-21: a CTA "Partir para aventura" checa o encontro DETERMINÍSTICO de
+  // primeira-partida (Aldric→Pergaminho do Viajante→Mestre Corvus). Venue sintético
+  // 'first_departure' (NÃO probabilístico): o servidor só dispara na 1ª vez sem mapa
+  // (map_level==0 + flag não-vista). Reusa todo o pipeline arrival.* (render + proceed).
+  'explore_main': 'first_departure', 'gates_explore': 'first_departure'
 };
 var _arrivalState = null;      // { encId, action }
 var _arrivalSkipOnce = false;  // guarda anti-reentrada ao navegar pro local
