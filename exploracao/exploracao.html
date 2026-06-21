@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-18T03:26:25Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T10:35:23Z - do not edit directly, edit source -->
 
 
 
@@ -38954,6 +38954,50 @@ function _rollDie(sides) {
 // (rest aparenta no-op sem feedback claro) OU listener silencioso.
 // Fix: vToast SEMPRE dispara com resultado visível + serverLog pra diagnosticar
 // futuras reclamações + persistência imediata via __exploreRewards baseline.
+// H2 (auditoria 2026-06-21): tamanho do Dado de Vida por classe (PHB) — espelha
+// http_rest.py _HIT_DIE_BY_CLASS. Usado SÓ no fallback LOCAL (DEV tool); em
+// REMOTE o servidor é autoridade e devolve healed.die.
+function _shortRestDieFor(clsKey) {
+  var k = String(clsKey || '').toLowerCase();
+  if (k === 'barbaro') return 12;
+  if (k === 'guerreiro' || k === 'paladino' || k === 'patrulheiro') return 10;
+  if (k === 'mago' || k === 'feiticeiro') return 6;
+  return 8;
+}
+
+function _shortRestError() {
+  var status = document.getElementById('camp-footer-status');
+  var m = 'Descanso curto falhou (rede). Tente novamente.';
+  if (status) status.textContent = m;
+  if (typeof vToast === 'function') vToast('💤 ' + m, 'warn');
+}
+
+// H2: aplica o resultado AUTORITATIVO do servidor (cliente só renderiza).
+function _applyServerShortRest(p, healed, serverState) {
+  var preHp = p.hp;
+  if (serverState && typeof serverState.hp === 'number') p.hp = serverState.hp;
+  else p.hp = Math.min(p.mhp, p.hp + (healed.hp || 0));
+  if (typeof healed.hit_dice_left === 'number') p.hd = healed.hit_dice_left;
+  else if (serverState && typeof serverState.hit_dice === 'number') p.hd = serverState.hit_dice;
+  var actual = p.hp - preHp;
+  var die = healed.die || _shortRestDieFor(p.cls_key);
+  var conMod = (typeof healed.con_mod === 'number') ? healed.con_mod : 0;
+  var rawRoll = (typeof healed.rolled === 'number') ? Math.max(0, healed.rolled - conMod) : null;
+  var fullHpNote = (actual === 0 && p.hp === p.mhp) ? ' (HP já cheio — HD gasto)' : '';
+  var rollTxt = (rawRoll !== null ? '1d' + die + '=' + rawRoll : '1d' + die)
+    + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ')';
+  var status = document.getElementById('camp-footer-status');
+  var msg = '💤 Descanso Curto: ' + rollTxt + ' = +' + actual + ' HP' + fullHpNote
+    + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
+  if (status) status.textContent = msg;
+  if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
+  try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done_server',
+    { die: die, rolled: healed.rolled, heal_actual: actual, hp: p.hp, hd: p.hd }); } catch (_) {}
+  _updateCampHud();
+  _updateCampDetails();
+  if (typeof updateHud === 'function') updateHud();
+}
+
 function doShortRest() {
   const p = S.player;
   if (!p) {
@@ -38969,7 +39013,35 @@ function doShortRest() {
     if (typeof vToast === 'function') vToast('💤 ' + msg, 'warn');
     return;
   }
-  const dieSides = 8;
+
+  // H2 (auditoria 2026-06-21, SUPREME RULE #0 + D&D fidelity): em REMOTE o
+  // SERVIDOR rola o descanso curto (hit_die CORRETO por classe + CON) e aplica
+  // HP/HD. O cliente NÃO rola nem aplica localmente — antes rolava _rollDie(8)
+  // HARDCODED (errado p/ Mago d6, Guerreiro d10, Bárbaro d12) e ignorava
+  // res.healed, exibindo um valor ≠ do que o servidor aplicava no próximo /move.
+  // Falha de rede → erro recuperável (NUNCA fabricar cura).
+  if (window.__EXPLORE_MODE === 'remote'
+      && window.ExploracaoAPI && typeof window.ExploracaoAPI.restShort === 'function') {
+    window.ExploracaoAPI.restShort().then(function(res){
+      if (!res || !res.ok || !res.healed) { _shortRestError(); return; }
+      if (res.healed.no_hit_dice) {
+        var st = document.getElementById('camp-footer-status');
+        var m = 'Sem Dado de Vida disponível. Use Descanso Longo.';
+        if (st) st.textContent = m;
+        if (typeof vToast === 'function') vToast('💤 ' + m, 'warn');
+        if (res.state && typeof res.state.hit_dice === 'number') p.hd = res.state.hit_dice;
+        _updateCampHud(); _updateCampDetails();
+        if (typeof updateHud === 'function') updateHud();
+        return;
+      }
+      _applyServerShortRest(p, res.healed, res.state);
+    }).catch(function(err){ console.warn('[CAMP] rest_short server err:', err); _shortRestError(); });
+    return;
+  }
+
+  // LOCAL (file://) — DEV tool: rola no cliente com o hit_die CORRETO por classe
+  // (antes d8 fixo). Não-autoritativo; só pra testar visualmente sem bot.
+  const dieSides = _shortRestDieFor(p.cls_key);
   const conMod = (p.mods && typeof p.mods.con === 'number') ? p.mods.con : 0;
   const roll = _rollDie(dieSides);
   const heal = Math.max(1, roll + conMod);
@@ -38984,18 +39056,8 @@ function doShortRest() {
     + ' HP' + fullHpNote + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
   if (status) status.textContent = msg;
   if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
-  try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done',
+  try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done_local',
     { roll: roll, conMod: conMod, heal_actual: actual, hp: p.hp, hd: p.hd }); } catch (_) {}
-
-  /* USER REPORT 2026-05-17: persist short rest no server (mesmo motivo de
-     doLongRest fix). Server simplifica pra cura fixa 6 HP (média 1d8+2). */
-  try {
-    if (window.ExploracaoAPI && typeof window.ExploracaoAPI.restShort === 'function') {
-      window.ExploracaoAPI.restShort().then(function(res){
-        if (res && res.ok) console.info('[CAMP] rest_short server ok healed=' + (res.healed && res.healed.hp));
-      }).catch(function(err){ console.warn('[CAMP] rest_short server err:', err); });
-    }
-  } catch (e) { console.error('[CAMP] doShortRest server sync throw:', e); }
 
   _updateCampHud();
   _updateCampDetails();
