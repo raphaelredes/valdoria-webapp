@@ -148,6 +148,7 @@
     // Pocoes/Frascos
     'base-potion-bottle': 'pocao-de-cura',
     'base-potion-vial': 'pocao-de-cura',
+    'base-potion-mana': 'pocao-de-mana',  // 2026-06-21: poção de mana = arte azul própria (não cura)
     'base-thrown-flask': 'pocao-de-cura',
     'base-poison-bottle': 'pseudopode-preservado',
     'base-powder-jar': 'pote-de-po-magico',

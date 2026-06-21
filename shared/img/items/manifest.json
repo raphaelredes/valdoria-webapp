@@ -3980,10 +3980,16 @@
       "source": "missing_item_gen_2026-06-12",
       "quality": "low",
       "category": "generated"
+    },
+    "pocao-de-mana": {
+      "timestamp": "2026-06-21T17:57:58.805264",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "potion"
     }
   },
-  "last_run": "2026-06-12T10:40:40.942575",
-  "total_cost": 3.947225,
+  "last_run": "2026-06-21T17:57:58.806800",
+  "total_cost": 3.952075,
   "last_updated": "2026-05-17T21:30:13.724922",
   "count": 675
 }

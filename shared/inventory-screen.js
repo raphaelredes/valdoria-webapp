@@ -1421,6 +1421,10 @@
     if (/\bpergaminho\b/.test(n)) return 'ic-it-base-scroll';
     if (/\bgrimório\b|\bgrimorio\b|\btomo\b/.test(n)) return 'ic-it-base-tome';
     if (/\bmapa\b/.test(n)) return 'ic-it-base-map';
+    /* 2026-06-21 (user "poção de mana com desenho de poção de vida"): poções de
+       mana/recurso NÃO podem cair no frasco vermelho de cura. Roteia mana/recurso/
+       arcano pro WebP de poção de mana (azul) antes do fallback genérico. */
+    if ((/\bpoção\b|\bpocao\b|\belixir\b/.test(n)) && /\bmana\b|recurso|arcan/.test(n)) return 'ic-it-base-potion-mana';
     if (/\bpoção\b|\bpocao\b/.test(n)) return 'ic-it-base-potion-vial';
     if (/\banel\b/.test(n)) return 'ic-it-base-ring-band';
     if (/\bamuleto\b|\bpingente\b/.test(n)) return 'ic-it-base-amulet';
