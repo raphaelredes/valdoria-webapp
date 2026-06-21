@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T17:48:13Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T19:08:23Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -404,7 +404,8 @@
     if (window.Telegram && window.Telegram.WebApp) {
       window.Telegram.WebApp.ready();
       window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.enableClosingConfirmation();
+      // 2026-06-21: confirmação de saída é IN-GAME (exit-confirm.js), não o popup nativo.
+      try { window.Telegram.WebApp.disableClosingConfirmation(); } catch (_dc) {}
     }
   } catch (_) { /* fallback silencioso */ }
 </script>
@@ -614,6 +615,11 @@ document.write('<script src="' + BASE + '/shared/scheduler.js?v=' + v + '"><\/sc
    abaixo quando token + api + uid estiverem definidos. */
 document.write('<script src="' + BASE + '/shared/device-id.js?v=' + v + '"><\/script>');
 document.write('<script src="' + BASE + '/shared/session-heartbeat.js?v=' + v + '"><\/script>');
+/* 2026-06-21 (user "botão nativo = fechar, confirmação DENTRO do jogo"): exit-confirm.js
+   intercepta BackButton/gesto-voltar com overlay in-game (respeita __valdoria_transitioning).
+   Mostra o BackButton logo após. enableClosingConfirmation (popup nativo) removido. */
+document.write('<script src="' + BASE + '/shared/exit-confirm.js?v=' + v + '"><\/script>');
+document.write('<script>try{var _tgBB=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.BackButton;if(_tgBB&&_tgBB.show)_tgBB.show();}catch(_eBB){}<\/script>');
 /* REFACTOR-1 Phase 2: vAuthTokenStore — read by the __COMBAT_TOKEN getter
    below (localStorage game token, falls back to ?token=). Loads here so it is
    defined before the getter runs. Backend _resolve_combat_auth accepts the

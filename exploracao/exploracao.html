@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T12:51:18Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T19:08:23Z - do not edit directly, edit source -->
 
 
 
@@ -719,7 +719,8 @@
     if (window.Telegram && window.Telegram.WebApp) {
       window.Telegram.WebApp.ready();
       window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.enableClosingConfirmation();
+      // 2026-06-21: confirmação de saída é IN-GAME (exit-confirm.js), não o popup nativo.
+      try { window.Telegram.WebApp.disableClosingConfirmation(); } catch (_dc) {}
     }
   } catch (_) { /* fallback silencioso */ }
 </script>
@@ -766,6 +767,12 @@
     document.write('<script src="../shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    /* 2026-06-21 (user "botão nativo = fechar, confirmação DENTRO do jogo"): exit-confirm.js
+       intercepta BackButton/gesto-voltar com overlay in-game. SINGLE load (relativo) pra
+       NÃO executar o IIFE 2x (o dual CDN+relativo duplicaria o overlay). Mostra o BackButton
+       logo após. enableClosingConfirmation (popup nativo) removido. */
+    document.write('<script src="../shared/exit-confirm.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script>try{var _tgBB=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.BackButton;if(_tgBB&&_tgBB.show)_tgBB.show();}catch(_eBB){}<\/script>');
     /* REFACTOR-1 Phase 2: vAuthTokenStore — read by the __EXPLORE_TOKEN getter
        (localStorage game token, falls back to ?token=). Backend accepts the
        game token via the _validate_source_session game fallback. */
@@ -37221,6 +37228,8 @@ async function triggerReturnToCity(opts) {
         try {
           var _u = new URL(_ret, location.href);
           if (!_u.searchParams.has('nointro')) _u.searchParams.set('nointro', '1');
+          // 2026-06-21: botão Hall do footer → abre o Hall de personagens na cidade.
+          if (window.__explore_want_hall) _u.searchParams.set('showHall', '1');
           _ret = _u.toString();
         } catch(_eU) { /* URL parsing falhou — usa data.url original */ }
         window.location.replace(_ret);
@@ -38533,9 +38542,14 @@ function _stepsForDistance() {
   var tc = (md && typeof md.spawnCol === 'number') ? md.spawnCol : Math.floor((COLS || 20) / 2);
   var tr = (md && typeof md.spawnRow === 'number') ? md.spawnRow : Math.floor((ROWS || 24) / 2);
   var dist = Math.abs(p.col - tc) + Math.abs(p.row - tr);
-  if (dist <= 6) return 3;
-  if (dist <= 14) return 4;
-  return 5;
+  // 2026-06-21 (user "voltei pro hexágono ao lado e disse 3 etapas, sendo a cidade que
+  // acabei de sair"): piso baixado p/ 1. O hex de retorno fica SOBRE o spawn (dist=0),
+  // então voltar pela porta da cidade custa 1 etapa; só viagens longas (vaguear fundo no
+  // mapa) escalam. Antes o piso 3 deixava TODO retorno em ≥3 etapas.
+  if (dist <= 2) return 1;
+  if (dist <= 6) return 2;
+  if (dist <= 14) return 3;
+  return 4;
 }
 
 // PADRAO_VIAGEM (#90): retorno à cidade ("Rumo a Valdoria") delega ao runner
@@ -38582,8 +38596,11 @@ function _returnToCityNow() {
   }
   function _doRedirect() {
     try {
+      // 2026-06-21: botão Hall do footer da exploração → volta pra cidade JÁ abrindo o
+      // Hall de personagens (a cidade auto-abre com ?showHall=1 no pageshow).
+      var _wantHall = !!window.__explore_want_hall;
       if (location.protocol === 'file:') {
-        window.location.replace('./cidade.html?back=exploration');
+        window.location.replace('./cidade.html?back=exploration' + (_wantHall ? '&showHall=1' : ''));
         return;
       }
       var qs = new URLSearchParams(location.search);
@@ -38593,6 +38610,7 @@ function _returnToCityNow() {
       });
       nqs.set('back', 'exploration');
       nqs.set('nointro', '1');
+      if (_wantHall) nqs.set('showHall', '1');
       window.location.replace('/cidade/?' + nqs.toString());
     } catch (eR) {
       console.error('[RETURN-CITY] redirect failed:', eR);
@@ -40709,11 +40727,25 @@ function openLocationPopup(mapId) {
     // eventos acontecendo, inclusive encontros em uma linha do tempo".
     closeLocationPopup();
     closeCartography();
+    // 2026-06-21 (user "ajuste inteligente de proporcionalidade"): etapas proporcionais
+    // à distância REAL entre os nós no mapa-mundo (worldPos normalizado 0-1). Antes a
+    // cartografia não passava totalSteps → caía no random 3-5 do runner, sem sentido pra
+    // destino adjacente. Adjacente ≈ 1 etapa; quanto mais longe, mais etapas (até 4).
+    var _travelSteps = 1;
+    try {
+      var _curWP = (window.S && S.mapDef && S.mapDef.worldPos) || null;
+      var _tgtWP = (m && m.worldPos) || null;
+      if (_curWP && _tgtWP && typeof _curWP.x === 'number' && typeof _tgtWP.x === 'number') {
+        var _dWP = Math.sqrt(Math.pow(_curWP.x - _tgtWP.x, 2) + Math.pow(_curWP.y - _tgtWP.y, 2));
+        _travelSteps = Math.max(1, Math.min(4, Math.round(_dWP * 5)));
+      }
+    } catch (_eTS) {}
     // PADRAO_VIAGEM (#90): map-to-map usa o runner UNICO (mesma engine ida/volta).
     if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
       JourneyRunner.start({
         biome: m.biome,
         displayName: m.name,
+        totalSteps: _travelSteps,
         player: function () { return (window.S && S.player) || {}; },
         confirm: true,
         audioBiome: true,
@@ -41852,6 +41884,11 @@ function renderExploreFooter() {
     + '<button class="fb-btn" data-action="cartografia" title="Mapa de Valdoria">'
     +   _heralB('ic-cartografia', '#b8956a') + '<span>Mapa</span>'
     + '</button>'
+    // 2026-06-21 (user "abrir... ir para o hall de personagens" pelo mesmo menu da
+    // cidade): botão Hall — volta pra cidade já abrindo o Hall de personagens.
+    + '<button class="fb-btn" data-action="hall" title="Hall de Personagens">'
+    +   '<img class="fb-ico-img" src="../shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
+    + '</button>'
     + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
     +   '<span class="fb-ico">⚙</span>'
     + '</button>';
@@ -41898,6 +41935,13 @@ function _onExploreFooterAction(action) {
       else if (typeof openCampOverlay === 'function') openCampOverlay();
       break;
     case 'cartografia': if (typeof _openCartographyWithPrompt === 'function') _openCartographyWithPrompt(); break;
+    case 'hall':
+      // Volta pra cidade encerrando a sessão de exploração (rewards/quest já aplicados
+      // no /finish) e sinaliza pra cidade abrir o Hall de personagens (?showHall=1).
+      window.__explore_want_hall = true;
+      if (typeof triggerReturnToCity === 'function') triggerReturnToCity();
+      else if (typeof _returnToCityNow === 'function') _returnToCityNow();
+      break;
     case 'settings':    if (typeof _showExploreSettings === 'function') _showExploreSettings(); break;
     default: break;
   }

@@ -611,12 +611,13 @@ LOG SINK (Fase 7):
        confirmação ao fechar. (USER REQUEST 2026-05-04) -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    // Confirma fechamento via popup nativo do Telegram. Sem efeito fora do TG.
+    // 2026-06-21: confirmação de saída é IN-GAME (shared/exit-confirm.js), não o popup
+    // nativo do Telegram — por isso NÃO chamamos enableClosingConfirmation aqui.
     try {
       if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
-        window.Telegram.WebApp.enableClosingConfirmation();
+        try { window.Telegram.WebApp.disableClosingConfirmation(); } catch (_dc) {}
       }
     } catch (_) { /* fallback silencioso */ }
   </script>
@@ -664,6 +665,13 @@ LOG SINK (Fase 7):
        success (quando temos token+api+uid validados). */
     document.write('<script src="/shared/device-id.js?v=' + __vEarly + '"><\/script>');
     document.write('<script src="/shared/session-heartbeat.js?v=' + __vEarly + '"><\/script>');
+    /* 2026-06-21 (user "botão nativo = fechar o jogo, mas confirmação DENTRO do jogo,
+       não do Telegram"): exit-confirm.js intercepta o BackButton + o gesto de voltar e
+       mostra o overlay in-game "Encerrar Aventura?" (respeita __valdoria_transitioning
+       → transições entre WebApps NÃO confirmam). Mostra o BackButton (botão de fechar
+       visível) logo após. enableClosingConfirmation (popup NATIVO) foi removido. */
+    document.write('<script src="/shared/exit-confirm.js?v=' + __vEarly + '"><\/script>');
+    document.write('<script>try{var _tgBB=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.BackButton;if(_tgBB&&_tgBB.show)_tgBB.show();}catch(_eBB){}<\/script>');
     /* Proactive guard: se servidor em manutenção, mostra tela ANTES do JS bootar. */
     setTimeout(function(){
         try{
@@ -8742,6 +8750,15 @@ body.perf-lite .vc-action-btn { transition: none; }
           if (chars[i].id === _wantedChar || chars[i].char_id === _wantedChar){ picked = chars[i]; break; }
         }
       }
+      // FIX identity swap 2026-06-21 (Lelumen→Pakon): se ?char= faltou/não casou,
+      // preferir o char ATIVO marcado pelo servidor (active=true) ANTES de cair no
+      // 1º char do DB cego. Sem isto, voltar da exploração sem ?char= mostrava o char
+      // errado (Server Authority #0).
+      if (!picked){
+        var _activeC = null;
+        for (var _ai = 0; _ai < chars.length; _ai++){ if (chars[_ai] && chars[_ai].active){ _activeC = chars[_ai]; break; } }
+        if (_activeC){ picked = _activeC; _cityLog('warn', 'char_param_missing_used_active', {active: _activeC.id, wanted: _wantedChar || ''}); }
+      }
       if (!picked) picked = chars[0];
       // BUG FIX 2026-06-16 (user: "voltei pra cidade e apareceu o tutorial de
       // novo"): a identidade p/ chaves localStorage por-personagem (tutorial,
@@ -9093,6 +9110,12 @@ body.perf-lite .vc-action-btn { transition: none; }
           for (var i = 0; i < payload.characters.length; i++){
             var c = payload.characters[i];
             if (c.id === _wantedChar || c.char_id === _wantedChar){ picked = c; break; }
+          }
+        }
+        // FIX identity swap 2026-06-21: preferir o char ATIVO do servidor antes de chars[0].
+        if (!picked){
+          for (var _ai2 = 0; _ai2 < payload.characters.length; _ai2++){
+            if (payload.characters[_ai2] && payload.characters[_ai2].active){ picked = payload.characters[_ai2]; break; }
           }
         }
         if (!picked) picked = payload.characters[0];
@@ -10471,6 +10494,7 @@ function _isCTA(btn) {
       if (action.indexOf('srvcomplete_') === 0) { _srvCompleteQuest(action.slice(12)); return; }
       if (action.indexOf('srvabandon_') === 0) { _srvAbandonQuest(action.slice(11)); return; }
       if (action.indexOf('quest_open_srv_') === 0) { _srvQuestDetail(action.slice(15)); return; }  // quest do servidor → detalhe dinâmico
+      if (action.indexOf('quest_done_srv_') === 0) { _srvQuestDoneDetail(action.slice(15)); return; }  // missão FEITA → info read-only
       // 1.6 ARENA → combat2 REAL (server-authoritative, 2026-06-18). Em REMOTE as
       //     lutas (arena_fight_*) encenam um combate REAL no servidor em vez do mock
       //     client-side (Math.random decidia vitória + p.gold+=/p.hp-= fabricados =
@@ -21588,8 +21612,8 @@ function _applyServerQuests(q){
     q.completed.forEach(function(sq){
       if (!sq || !sq.id) return;
       QUESTS_HISTORY.push({
-        id: 'qh_' + sq.id, title: sq.title || sq.id, icon: '',
-        date: '', reward: sq.reward || 0, xp: sq.xp || 0
+        id: 'qh_' + sq.id, serverId: sq.id, title: sq.title || sq.id, icon: '',
+        desc: sq.desc || '', date: sq.date || '', reward: sq.reward || 0, xp: sq.xp || 0
       });
     });
   }
@@ -21836,6 +21860,23 @@ function _srvQuestDetail(serverId){
   }
 }
 
+// 2026-06-21 (user "sem conseguir clicar em missões feitas"): detalhe READ-ONLY de uma
+// missão concluída. Sem botões de abandonar/entregar (já está feita) — só info.
+function _srvQuestDoneDetail(serverId){
+  var sq = (typeof QUESTS_HISTORY!=='undefined') ? QUESTS_HISTORY.filter(function(q){return (q.serverId||'')===serverId;})[0] : null;
+  if (!sq){ if (typeof vToast==='function') vToast('Missão não encontrada'); return; }
+  var coin = '<span class="vi vi-coin sm"></span>';
+  if (typeof SUBSCREEN_DATA !== 'undefined'){
+    SUBSCREEN_DATA['quest_done_srv_' + serverId] = {
+      header: '✓ Missão Concluída: ' + (sq.title || serverId),
+      flavor: '<i>' + (sq.desc || 'Você completou esta missão com êxito.') + '</i>',
+      npcInfo: 'Recompensa recebida: ' + (sq.reward||0) + ' ' + coin + ' + ' + (sq.xp||0) + ' XP',
+      buttons: []
+    };
+    navigateTo('quest_done_srv_' + serverId);
+  }
+}
+
 function _normalizeQuests(){
   var out = [];
   (QUESTS_ACTIVE || []).forEach(function(q){
@@ -21860,13 +21901,15 @@ function _normalizeQuests(){
   // na hora, sem contexto, gerando missões que o jogador "não pegou".
   (QUESTS_HISTORY || []).forEach(function(q){
     out.push({
-      id: q.id, icon: q.icon, title: q.title, desc: '',
+      id: q.id, serverId: q.serverId || '', icon: q.icon, title: q.title, desc: q.desc || '',
       status: 'history',
       progress: '✓ Concluída',
       reward: q.reward || 0, xp: q.xp || 0,
       npc: '', date: q.date || '',
       level: 0,
-      cb: ''  // Concluídas não clicáveis
+      // 2026-06-21 (user "sem conseguir clicar em missões feitas"): Feitas viram
+      // clicáveis → abrem um popup read-only (já concluída, sem abandonar/entregar).
+      cb: q.serverId ? ('quest_done_srv_' + q.serverId) : ''
     });
   });
   return out;
@@ -22053,7 +22096,8 @@ function _renderQuestDiary(bodyEl){
         available: 'Disponível' + (q.level ? ' · Nível ' + q.level : ''),
         history:   '✓ Concluída' + (q.date ? ' · ' + q.date : '')
       }[q.status] || '';
-      var clickable = q.cb && q.status !== 'history';
+      // 2026-06-21: Feitas agora são clicáveis (cb quest_done_srv_) → popup read-only.
+      var clickable = !!q.cb;
       var prog = _parseProgress(q.progress);
       // Border gradient color baseado em status
       var borderColor = q.status === 'ready' ? '#7cdb7c'
