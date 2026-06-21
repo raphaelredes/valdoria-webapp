@@ -8259,9 +8259,16 @@ body.perf-lite .vc-action-btn { transition: none; }
           }, {
             player: window.CITY_MOCK_PLAYER, closeable: false,
             onChoice: function(){
-              window.vCityServer.cityAction('service.temple_rise', {}).then(function(){
+              // 2026-06-21 (user): após "Erguer-se do Altar", a TELA ATUAL deve ser o
+              // TEMPLO (não o hub principal). openCityPopup('temple') dismissa o encounter
+              // e renderiza renderTempleHub (server-hidratado: dívida de ressurreição).
+              function _toTemple(){
                 try { window.vEncounter.close(); } catch(_){}
-              }).catch(function(){ try { window.vEncounter.close(); } catch(_){} });
+                try {
+                  if (typeof openCityPopup === 'function') openCityPopup('temple');
+                } catch(_t){ if (window.console && console.warn) console.warn('[CITY] defeat->temple', _t); }
+              }
+              window.vCityServer.cityAction('service.temple_rise', {}).then(_toTemple).catch(_toTemple);
             }
           });
         }).catch(function(_e){ if (window.console && console.warn) console.warn('[CITY] temple_awakening', _e); });

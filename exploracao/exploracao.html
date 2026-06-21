@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T10:57:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T12:51:18Z - do not edit directly, edit source -->
 
 
 
@@ -19716,10 +19716,11 @@ const FIXED_MAPS = {
       { col: 23, row: 14, targetMap: 'misty_marshes', label: 'Pântano Nebuloso' },
       { col: 0, row: 15, targetMap: 'underground_passage', label: 'Passagem Subterrânea' },
       { col: 23, row: 15, targetMap: 'golden_sands', label: 'Deserto Dourado' },
-      // req5 (user 2026-06-16): hexágono dedicado de RETORNO À CIDADE, perto do
-      // spawn (12,14). Renderiza DOURADO (≠ verde dos edges de mato) e roteia pra
+      // req5 (user 2026-06-16) + TAREFA D (user 2026-06-21): hexágono de RETORNO À
+      // CIDADE EXATAMENTE no hex de spawn central (12,14) — o personagem surge sobre
+      // ele. Renderiza DOURADO (≠ verde dos edges de mato) e roteia pra
       // startReturnToCity (não é transição de mapa). targetMap sentinela.
-      { col: 12, row: 16, targetMap: '__return_city__', label: 'Voltar a Valdoria' }
+      { col: 12, row: 14, targetMap: '__return_city__', label: 'Voltar a Valdoria' }
     ]
   },
   green_fields: {
@@ -20925,6 +20926,11 @@ function initState() {
   const newMapDef = FIXED_MAPS[mapId];
   const mapEdges = (newMapDef && newMapDef.edges) ? newMapDef.edges : [];
   let spawnSource = 'default';
+  // TAREFA D (user 2026-06-21): no city_gates (Portões de Valdoria) o personagem
+  // surge SEMPRE no CENTRO do mapa (= hex de retorno à cidade), NÃO na 1ª edge no
+  // canto. Override PONTUAL da V1.5.2 — só este mapa; os demais 21 mantêm edge-spawn.
+  // (back-edge continua válido se city_gates for alcançado de outro mapa.)
+  const _isCityGates = (mapId === 'city_gates');
   if (fromMap && mapEdges.length > 0) {
     const backEdge = mapEdges.find(function(e) { return e.targetMap === fromMap; });
     if (backEdge && typeof backEdge.col === 'number' && typeof backEdge.row === 'number') {
@@ -20932,7 +20938,7 @@ function initState() {
       spawnRow = backEdge.row;
       spawnSource = 'back-edge from=' + fromMap;
     }
-  } else if (mapEdges.length > 0) {
+  } else if (!_isCityGates && mapEdges.length > 0) {
     // Sem _fromMap: usa primeira edge — nunca centro do mapa.
     const firstEdge = mapEdges.find(function(e) {
       return typeof e.col === 'number' && typeof e.row === 'number';
@@ -20942,6 +20948,11 @@ function initState() {
       spawnRow = firstEdge.row;
       spawnSource = 'first-edge target=' + (firstEdge.targetMap || '?');
     }
+  } else if (_isCityGates) {
+    // city_gates entrada fresca da cidade: CENTRO (map.spawnCol/Row = 12,14).
+    spawnCol = map.spawnCol;
+    spawnRow = map.spawnRow;
+    spawnSource = 'city-gates-center';
   }
   LOG('BOOT', 'initState spawn col=' + spawnCol + ' row=' + spawnRow + ' source=' + spawnSource);
   setupChoices._fromMap = null;  // consumido

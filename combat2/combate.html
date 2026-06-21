@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T12:17:52Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T12:44:48Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -23147,11 +23147,13 @@ function openWildShapePicker(forms, usesLeft) {
 }
 function _localWildShapeApply(p, form) {
     p._wsBackup = {
-        n: p.n, ico: p.ico, mhp: p.mhp, ac: p.ac, atk: p.atk, die: p.die,
+        n: p.n, ico: p.ico, portrait: p.portrait, mhp: p.mhp, ac: p.ac, atk: p.atk, die: p.die,
         dmgMod: p.dmgMod, str: p.str, dex: p.dex, con: p.con, wildBiteDice: p.wildBiteDice
     };
     var originalHp = p.hp | 0;
     p.n = form.name; p.ico = form.ico;
+    /* 2026-06-21: card mostra a ARTE do animal (WebP da forma); espelha o motor. */
+    if (form.img) p.portrait = form.img;
     p.hp = form.hp; p.mhp = form.hp;
     p.ac = form.ac; p.atk = form.atk;
     p.die = form.die; p.dmgMod = form.flat;
@@ -23165,6 +23167,9 @@ function _localWildShapeRevert(p, excess) {
     var ws = p.wildShape, bk = p._wsBackup;
     if (!ws || !bk) return;
     for (var k in bk) { if (bk[k] != null) p[k] = bk[k]; }
+    /* 2026-06-21: o loop pula valores null — sem isto o card ficaria preso na arte
+       do animal ao reverter (o player normalmente não tinha portrait). */
+    if (bk.portrait == null) { try { delete p.portrait; } catch (e0) { p.portrait = null; } }
     if (bk.wildBiteDice == null) { try { delete p.wildBiteDice; } catch (e) { p.wildBiteDice = 1; } }
     var orig = ws.original_hp | 0;
     p.hp = Math.max(0, orig - (excess | 0));

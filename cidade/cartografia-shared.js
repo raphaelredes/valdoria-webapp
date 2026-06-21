@@ -1856,7 +1856,12 @@
     // === END PER-KEY UNIQUE PICTOGRAMS ===========================
 
     if (b.biome === 'plains' || b.key === 'plains') {
-      // CASTELO DE VALDORIA — torre central alta + 2 torres laterais +
+      // 2026-06-21 (user "exclua o desenho vetorial da cidade"): o CASTELO VETORIAL
+      // procedural da cidade foi REMOVIDO. A cartografia mostra SÓ a imagem OpenAI
+      // (plains.webp via _drawLocArt). Este pictograma causava o "desenho antigo"
+      // que o user via (flash antes da webp carregar / file://). Não desenha nada.
+      ctx.restore(); return;
+      // [CASTELO DE VALDORIA legado abaixo — código morto, mantido só como referência]
       // muralha com crenelações + portão arqueado + 3 casas no entorno.
       // Look: vista 3/4 medieval, elementos com volume via hatching.
       // Casas pequenas atrás (3 com telhado triangular)
@@ -3630,8 +3635,14 @@
     }
     function _drawLocArt(ctx, b, w, h, isHover){
       var ic = _locArt && _locArt[b.key];
+      var _isCity = (b.key === 'plains' || b.biome === 'plains');
       if (!ic || ic === false || !ic.complete || !ic.naturalWidth) {
-        _drawBiomeArt(ctx, b, w, h);  // fallback procedural — sem regressão
+        // 2026-06-21 (user): a CIDADE (origem/plains) mostra SÓ a imagem OpenAI
+        // (plains.webp). NÃO cair no castelo VETORIAL procedural — ele dava um FLASH
+        // do desenho antigo antes da webp carregar (e em file://). Nada é desenhado;
+        // o redraw assíncrono (_onLoad) pinta a webp quando chega. Demais biomas
+        // mantêm o pictograma fallback.
+        if (!_isCity) _drawBiomeArt(ctx, b, w, h);
         return;
       }
       var ov = _locCoords[b.key] || {};
@@ -3648,7 +3659,7 @@
         ctx.drawImage(ic, cx - iw / 2, cy - ih / 2, iw, ih);
         if (isHover) ctx.restore();
       }
-      catch (_) { _drawBiomeArt(ctx, b, w, h); }
+      catch (_) { if (!_isCity) _drawBiomeArt(ctx, b, w, h); }
     }
 
     // Orquestrador — FUNDO world-map.webp (cover, sob pan/zoom) + ícones/nodes/paths/
