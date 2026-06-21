@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T12:44:48Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T16:45:34Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2537,6 +2537,16 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   background: rgba(44,22,22,0.9);
 }
 .cell.v8-card .c-cond-chip.debuff:hover { border-color: #e08080; box-shadow: 0 0 6px rgba(200,90,90,0.55); }
+/* Forma Selvagem (transformado) — realce verde druídico pulsante no card (2026-06-21). */
+.cell.v8-card .c-cond-chip.c-cond-chip--wildshape {
+  border-color: rgba(150,210,90,0.85);
+  background: radial-gradient(circle at 50% 30%, rgba(60,90,30,0.95), rgba(26,36,16,0.95));
+  box-shadow: 0 0 7px rgba(150,210,90,0.5);
+  animation: wsChipPulse 2.2s ease-in-out infinite;
+}
+.cell.v8-card .c-cond-chip.c-cond-chip--wildshape:hover { border-color: #b8e878; box-shadow: 0 0 10px rgba(150,210,90,0.7); }
+@keyframes wsChipPulse { 0%,100% { box-shadow: 0 0 6px rgba(150,210,90,0.4); } 50% { box-shadow: 0 0 11px rgba(170,230,120,0.7); } }
+@media (prefers-reduced-motion: reduce) { .cell.v8-card .c-cond-chip--wildshape { animation: none; } }
 .cell.v8-card .c-cond-tl {
   position: absolute;
   top: -4px; right: -4px;
@@ -8854,6 +8864,24 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .ws-detail-btns .mm-confirm-btn-cancel { flex: 0 0 auto; }
 .ws-transform-btn { flex: 1; padding: 11px var(--v-space-md-lg, 10px); background: linear-gradient(180deg, rgba(196,149,58,0.95), rgba(139,100,32,0.95)); border: 1px solid rgba(255,220,140,0.8); border-radius: var(--v-radius, 10px); color: #1a1510; font-family: var(--v-font, 'MedievalSharp'), serif; font-weight: 700; font-size: calc(13px * var(--v-font-scale, 1)); cursor: pointer; transition: transform 0.12s ease, box-shadow 0.2s ease; }
 .ws-transform-btn:hover { transform: translateY(-1px); box-shadow: 0 0 18px rgba(196,149,58,0.6); }
+/* ── Forma Selvagem: realce ÉPICO da tela de informações (2026-06-21, user "melhore o
+   design visual"). Aditivo — tema druídico verde+dourado, sem mexer no layout existente. */
+.wildshape-card { background: radial-gradient(circle at 50% 0%, rgba(60,80,30,0.22), rgba(26,21,16,0) 60%), var(--v-bg-card, #2e2520); }
+.wildshape-card .mm-confirm-title { background: linear-gradient(180deg, #f0e08a, #c4953a); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 18px rgba(160,200,80,0.25); }
+.wildshape-grid { margin-top: var(--v-space-md, 8px); }
+.wildshape-form-btn { position: relative; overflow: hidden; }
+.wildshape-form-btn::after { content: ''; position: absolute; inset: 0; border-radius: 12px; box-shadow: inset 0 -18px 22px -16px rgba(120,200,70,0.5); pointer-events: none; }
+.wildshape-form-btn:hover { border-color: rgba(170,230,120,0.9); box-shadow: 0 0 16px rgba(120,200,70,0.45), 0 4px 14px rgba(0,0,0,0.4); }
+.ws-card-imgwrap { border: 1px solid rgba(120,180,70,0.4); }
+.ws-detail-imgwrap { border-color: rgba(150,210,90,0.6); box-shadow: 0 0 26px rgba(120,200,70,0.38), inset 0 0 30px rgba(40,30,16,0.5); animation: wsPortraitPulse 2.6s ease-in-out infinite; }
+@keyframes wsPortraitPulse { 0%,100% { box-shadow: 0 0 22px rgba(120,200,70,0.30), inset 0 0 30px rgba(40,30,16,0.5); } 50% { box-shadow: 0 0 34px rgba(150,220,90,0.55), inset 0 0 30px rgba(40,30,16,0.5); } }
+.ws-detail-name { background: linear-gradient(180deg, #f0e08a, #c4953a); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.ws-detail-cr::before, .ws-detail-cr::after { content: '\2766'; color: rgba(150,210,90,0.7); margin: 0 7px; font-size: 0.85em; }
+.ws-stat-chip { border-left: 2px solid rgba(150,210,90,0.6); transition: border-color 0.2s ease, background 0.2s ease; }
+.ws-stat-chip:hover { background: rgba(40,30,16,0.85); border-left-color: rgba(170,230,120,0.95); }
+.ws-stat-chip .ws-stat-v { color: #e8c45a; font-weight: 700; }
+.wildshape-card[data-reduce='1'] .ws-detail-imgwrap { animation: none; }
+@media (prefers-reduced-motion: reduce) { .ws-detail-imgwrap { animation: none; } }
 /* Variante FORCE (Mísseis Mágicos) — roxo arcano explícito */
 .mm-confirm-overlay--force { background: radial-gradient(ellipse at center, rgba(20,10,35,0.72), rgba(0,0,0,0.88)); }
 .mm-confirm-card--force {
@@ -18028,7 +18056,10 @@ function buildCellInnerHTML(u, utype, opt, uid) {
                     saveDc: st.saveDc || null, saveAbility: st.saveAbility || ''
                 };
                 var payloadAttr = escHtml(JSON.stringify(popPayload));
-                inner += '<button type="button" class="c-cond-chip ' + kindCls + '"' +
+                /* 2026-06-21: Forma Selvagem ganha realce próprio no card (verde druídico)
+                   pra deixar claro que o personagem está TRANSFORMADO. */
+                var wsCls = (st.id === 'forma_selvagem') ? ' c-cond-chip--wildshape' : '';
+                inner += '<button type="button" class="c-cond-chip ' + kindCls + wsCls + '"' +
                          ' data-cond-payload="' + payloadAttr + '"' +
                          ' aria-label="' + escHtml(label) + '"' +
                          ' title="' + escHtml(label) + ' — clique para detalhes">' +
@@ -23212,7 +23243,21 @@ async function useWildShapeSkill(skill, opts) {
     _localWildShapeApply(p, form);
     var sL2 = currentState; simLogPushTurnHeader(sL2, p);
     sL2.log.push(form.ico + ' ' + oldName + ' assume a forma de ' + form.name + '! (PV ' + form.hp + ' · CA ' + form.ac + ')');
-    p.actionSpent = true; render(sL2); _actionTaken = false; await _maybeAdvanceOrStay();
+    p.actionSpent = true; render(sL2); _actionTaken = false;
+    /* 2026-06-21 (user "animação épica da transformação"): VFX de natureza no card do
+       druida (círculo druídico + folhas/runas + shockwave verde-dourado). A arte do
+       card já virou o animal (portrait). Pausa pra a animação ser vista (Human Reading
+       Time). É o path LIVE no PIVOT (combate roda local). */
+    try {
+        var _wsEl = document.querySelector('[data-unit-id="' + (p.id || 'player') + '"]')
+                 || document.querySelector('[data-unit-id="player"]');
+        if (window._combatVfx && _wsEl && typeof window._combatVfx.wildShapeTransform === 'function') {
+            window._combatVfx.wildShapeTransform(_wsEl);
+            if (typeof _vaPlaySFX === 'function') { try { _vaPlaySFX('buff'); } catch (_s) {} }
+            await new Promise(function (r) { setTimeout(r, 1300); });
+        }
+    } catch (_eWs) { if (window.console) console.warn('[WILDSHAPE] vfx', _eWs); }
+    await _maybeAdvanceOrStay();
 }
 
 async function useSkill(skill, opts) {
