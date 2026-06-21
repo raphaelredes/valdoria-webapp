@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T10:35:23Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T10:57:04Z - do not edit directly, edit source -->
 
 
 
@@ -33135,38 +33135,58 @@ function onMoveEnd(col, row) {
   // Skeleton em AMBIENT_TIP_POOLS — extensível só adicionando entries.
   try { _maybeShowAmbientTip(); } catch (_) {}
 
-  if (S.steps % 12 === 0 && Math.random() < 0.45) {
-    const pool = (S.mapDef && S.mapDef.weather_pool) || ['s', 'r', 'f', 't'];
-    const next = pickRandom(pool);
-    LOG('WEATHER', 'step=' + S.steps + ' pool=' + JSON.stringify(pool) + ' picked=' + next + ' current=' + S.weather);
-    if (next !== S.weather) {
-      LOG('WEATHER', 'CHANGE ' + S.weather + ' -> ' + next);
-      S.weather = next;
-      // 2026-04-27: Atualiza áudio ambiente de clima quando muda.
-      _updateWeatherAmbient(next);
-      // 2026-04-27 USER FIX: tempestade começou e tocha está acesa? agenda extinção.
-      // Tempestade acabou? cancela timer pendente.
-      if (next === 't') {
-        _scheduleTorchStormExtinguish();
-      } else {
-        _cancelTorchStormExtinguish();
-      }
-      // Narração contextual por bioma
-      const biomeNarr = {
+  // H5 (auditoria 2026-06-21, SUPREME RULE #0): converte clima do SERVIDOR
+  // (nome completo) → código de 1 char do cliente. Snow não tem código próprio
+  // no cliente → 'f' (névoa reduz o raio de visão igual à neve, server radius 1).
+  function _serverWeatherToClientCode(w) {
+    switch (String(w || '').toLowerCase()) {
+      case 'clear': return 's';
+      case 'rain': return 'r';
+      case 'fog': return 'f';
+      case 'storm': return 't';
+      case 'snow': return 'f';
+      default: return null;
+    }
+  }
+  // H5: aplica um código de clima (set + áudio + tocha + narração). Usado tanto
+  // pelo roll LOCAL quanto pela aplicação do clima AUTORITATIVO do servidor.
+  function _applyWeatherCode(code, narrate) {
+    if (!code || code === S.weather) return;
+    var prev = S.weather;
+    LOG('WEATHER', 'CHANGE ' + prev + ' -> ' + code);
+    S.weather = code;
+    if (typeof _updateWeatherAmbient === 'function') _updateWeatherAmbient(code);
+    if (code === 't') { if (typeof _scheduleTorchStormExtinguish === 'function') _scheduleTorchStormExtinguish(); }
+    else { if (typeof _cancelTorchStormExtinguish === 'function') _cancelTorchStormExtinguish(); }
+    if (narrate) {
+      var biomeNarr = {
         desert: { s: 'O sol volta a brilhar forte sobre as dunas.', t: 'Uma tempestade de areia se aproxima ao horizonte!', r: 'Uma chuva rara cai sobre o deserto — uma bênção breve.', f: 'Uma névoa morna envolve as dunas.' },
         snow: { s: 'O céu de inverno se abre — raios frios cortam o ar.', f: 'Uma nevasca gelada se forma ao redor.', t: 'Tempestade polar — o vento uiva com força assustadora!', r: 'A chuva cai congelada sobre a neve.' },
         volcanic: { s: 'O calor sobe em ondas trêmulas — o ar é seco.', t: 'Trovões secos ecoam entre as rochas vulcânicas.', f: 'Vapor sulfúrico se levanta da cratera.', r: 'Chuva ácida cai sobre a cratera — evaporando ao tocar a rocha.' }
       };
-      const defaultNarr = {
+      var defaultNarr = {
         s: 'As nuvens se dissipam. O céu clareia.',
         r: 'Gotas começam a cair. A chuva se intensifica.',
         f: 'Uma névoa densa se forma ao redor.',
         t: 'Trovões ecoam ao longe. Uma tempestade se aproxima!'
       };
-      const bi = biomeNarr[S.biome];
-      const txt = (bi && bi[next]) || defaultNarr[next];
-      dmNarrate({ text: txt, type: 'ambient' });
+      var bi = biomeNarr[S.biome];
+      var txt = (bi && bi[code]) || defaultNarr[code];
+      if (txt) dmNarrate({ text: txt, type: 'ambient' });
     }
+  }
+
+  // H5: em REMOTE o clima é AUTORIDADE DO SERVIDOR (re-rolado no /move) — o
+  // cliente NÃO rola mais (antes Math.random a cada 12 passos decidia o raio de
+  // visão localmente). O clima do servidor é aplicado no .then do move abaixo.
+  // LOCAL (file:// DEV tool) mantém o roll client.
+  var _weatherClientRoll = !(window.__EXPLORE_MODE === 'remote'
+    && window.ExploracaoAPI && window.ExploracaoAPI.hasToken());
+  if (_weatherClientRoll && S.steps % 12 === 0 && Math.random() < 0.45) {
+    const pool = (S.mapDef && S.mapDef.weather_pool) || ['s', 'r', 'f', 't'];
+    const next = pickRandom(pool);
+    LOG('WEATHER', 'step=' + S.steps + ' pool=' + JSON.stringify(pool) + ' picked=' + next + ' current=' + S.weather);
+    _applyWeatherCode(next, true);
   }
   tickDayPhase();
 
@@ -33221,6 +33241,14 @@ function onMoveEnd(col, row) {
               var pair = res.state.visited[i];
               if (pair && pair.length === 2) S.visited.add(fogKey(pair[0], pair[1]));
             }
+          }
+          // H5 (auditoria 2026-06-21): clima AUTORITATIVO do servidor (o cliente
+          // não rola mais em REMOTE). Reflete no S.weather → raio de visão/fog.
+          if (typeof res.state.weather === 'string' && res.state.weather) {
+            try {
+              var _wc = _serverWeatherToClientCode(res.state.weather);
+              if (_wc) _applyWeatherCode(_wc, true);
+            } catch (eW) { LOGW('WEATHER', 'server_apply err=' + (eW && eW.message)); }
           }
           updateHud();
         } catch (eS) {
@@ -36292,6 +36320,20 @@ function onConfirmBack() {
   _setEventChoicesDisabled(false);
 }
 
+// M6 (auditoria 2026-06-21, SUPREME RULE #0): erro RECUPERÁVEL quando a API de
+// evento falha em REMOTE. Antes o cliente fabricava a resolução (rollSkillCheck +
+// applyChoiceOutcome com Math.random) — resolvia o evento 100% no cliente justo
+// em rede ruim (foco do projeto), forjando skill check + reward. Agora NÃO
+// fabrica: avisa e reabilita as escolhas pro jogador retentar (servidor decide).
+function _remoteEventChoiceError(reason) {
+  LOGW('API', 'event_choice recoverable_error reason=' + (reason || '?')
+    + ' — NÃO fabrica resolução client-side (SUPREME RULE #0)');
+  try {
+    if (typeof vToast === 'function') vToast('⚠️ Falha ao resolver (rede). Toque na opção novamente.', 'warn');
+  } catch (_) {}
+  try { _setEventChoicesDisabled(false); } catch (_) {}
+}
+
 function resolveChoice(idx) {
   const ch = S.event.choices[idx];
 
@@ -36303,12 +36345,7 @@ function resolveChoice(idx) {
     LOG('API', 'remote_event_choice idx=' + idx + ' label=' + (ch.label || '?'));
     window.ExploracaoAPI.eventChoice(idx).then(function(res) {
       if (!res || res.error) {
-        LOGW('API', 'event_choice err=' + (res && res.error));
-        if (ch.skill) {
-          rollSkillCheck(ch, function(success, total) { applyChoiceOutcome(ch, success, total, ch.dc); });
-        } else {
-          applyChoiceOutcome(ch, true, null, null);
-        }
+        _remoteEventChoiceError(res && res.error);  // M6: não fabrica — erro recuperável
         return;
       }
       var oc = res.outcome || {};
@@ -36338,12 +36375,7 @@ function resolveChoice(idx) {
         _remoteShowOutcome(ch, oc);
       }
     }).catch(function(e) {
-      LOGE('API', 'event_choice rejected msg=' + (e && e.message));
-      if (ch.skill) {
-        rollSkillCheck(ch, function(success, total) { applyChoiceOutcome(ch, success, total, ch.dc); });
-      } else {
-        applyChoiceOutcome(ch, true, null, null);
-      }
+      _remoteEventChoiceError((e && e.message) || 'rejected');  // M6: não fabrica
     });
     return;
   }
