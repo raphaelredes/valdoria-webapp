@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T22:44:14Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T23:44:28Z - do not edit directly, edit source -->
 
 
 
@@ -17877,11 +17877,11 @@ const EVENTS_POOL = {
                 choices: [
                   { label: 'Comprar tinturas medicinais (10 moedas)', flavor: 'Frascos de vidro com líquido âmbar — útil em ferimentos.',
                     ok: 'Você paga 10 moedas e leva 2 frascos. {Ele} agradece efusivo. Pode usar mais tarde.',
-                    okItem: 'healing_potion', okGold: [-10, -10] },
+                    okItem: 'Poção de Cura', okGold: [-10, -10] },
                   { label: 'Trocar info de estrada por desconto (Persuasão)', skill: 'cha', dc: 13,
                     desc: 'Oferecer o que sabe de bandidos/patrulhas em troca de melhor preço.',
                     ok: '{Ele} adora o trato — ouve avidamente sobre o caminho à frente, deixa o frasco quase pelo custo. Sabedoria de estrada vale prata.',
-                    okItem: 'healing_potion', okGold: [-3, -3], okXp: [10, 14],
+                    okItem: 'Poção de Cura', okGold: [-3, -3], okXp: [10, 14],
                     fail: '{Ele} ouve mas já sabia tudo. "Boa tentativa, mas estou nesta estrada há vinte anos." Cobra preço cheio.', failExh: 0 },
                   { label: 'Apenas seguir caminho', flavor: 'Sem moedas pra gastar agora.',
                     ok: 'Você agradece e prossegue. {Ele} acena triste e empurra a carroça adiante.', okXp: [3, 5] }
@@ -17891,7 +17891,7 @@ const EVENTS_POOL = {
             { label: 'Oferecer ajuda com a carroça (Atletismo)', skill: 'athletics', dc: 11,
               desc: 'Empurrar junto até o próximo descanso — gratidão sincera vale mais que moedas.',
               ok: 'Você empurra junto por meia hora. {Ele} conta histórias, ri, oferece água. Quando se separam, te dá um pequeno objeto de presente — "amuleto de proteção que comprei em terra distante. Use bem."',
-              okItem: 'rune_protection', okXp: [12, 18],
+              okItem: 'Runa de Proteção', okXp: [12, 18],
               chainOk: {
                 id: 'meet2_gratitude',
                 body: '{Ele} hesita antes de seguir, depois volta-se: "Espera. Tem algo mais que posso fazer."',
@@ -18019,7 +18019,7 @@ const EVENTS_POOL = {
                   { label: 'Procurar o que ele defendia (Investigação)', skill: 'investigation', dc: 13,
                     desc: 'Criaturas territoriais defendem algo de valor.',
                     ok: 'Atrás de uma rocha, escondido por folhas: um pequeno tesouro — moedas, um anel, ossos antigos. Vale o risco que correu.',
-                    okGold: [15, 30], okItem: 'rune_protection', okXp: [10, 14],
+                    okGold: [15, 30], okItem: 'Runa de Proteção', okXp: [10, 14],
                     fail: 'Você procura mas só encontra restos comuns. {Ele} talvez defendesse só território, não tesouro.', failExh: 1 },
                   { label: 'Sair antes que ele volte', flavor: 'Sorte é recurso fininho.',
                     ok: 'Você prossegue rápido. Vitória é o suficiente.', okXp: [6, 8] }
@@ -18206,7 +18206,7 @@ const EVENTS_POOL = {
                 choices: [
                   { label: 'Aceitar gratidão tangível (item ou Valdoritas)', flavor: 'Recompensa material direta.',
                     ok: '{Ele} desamarra um pequeno talismã do pescoço. "Era da minha avó. Você merece." Você guarda com peso emocional.',
-                    okItem: 'rune_protection', okXp: [10, 14] },
+                    okItem: 'Runa de Proteção', okXp: [10, 14] },
                   { label: 'Pedir favor pra cobrar mais tarde (Persuasão)', skill: 'cha', dc: 11,
                     desc: 'Aliança vale mais que objeto.',
                     ok: '{Ele} jura: "Se precisares de mim, qualquer coisa, em qualquer cidade — meu nome é {npc}. Procure-me."',
@@ -34097,6 +34097,79 @@ function _outcomeGainsSummary(ops) {
   return parts.join(' · ');
 }
 
+// 2026-06-21 (user: "recebi uma poção de cura mas a tela estava mal feita e escrito
+// healing_potion"): card de RECOMPENSA épico AAA — mostra o(s) item(ns) com IMAGEM real
+// (vItems.iconHTML — PNG OpenAI), nome resolvido, raridade colorida e chips de ganhos
+// (XP/Valdoritas/PV/PM). Substitui o toast de texto cru quando o outcome dá item.
+function _exploreRarityMeta(name) {
+  var DB = window.ITEMS_DB || {};
+  var d = DB[name] || {};
+  var RC = {
+    'Incomum': '#5a9a3e', 'uncommon': '#5a9a3e',
+    'Raro': '#3e7ab8', 'rare': '#3e7ab8',
+    'Muito Raro': '#a85ab8', 'very_rare': '#a85ab8', 'Épico': '#a85ab8', 'epic': '#a85ab8',
+    'Lendário': '#d68538', 'legendary': '#d68538',
+    'Comum': '#a09484', 'common': '#a09484',
+  };
+  var rar = d.rarity || d.raridade || 'Comum';
+  var RL = { common: 'Comum', uncommon: 'Incomum', rare: 'Raro', very_rare: 'Muito Raro', epic: 'Épico', legendary: 'Lendário' };
+  return { color: RC[rar] || '#a09484', label: RL[rar] || rar, emoji: d.emoji || '🎁', desc: d.desc || d.descricao || '' };
+}
+
+function _showExploreRewardCard(items, deltas, onContinue) {
+  items = (items || []).filter(Boolean);
+  if (!items.length) { if (typeof onContinue === 'function') onContinue(); return; }
+  if (document.getElementById('explore-reward-overlay')) return;  // anti-reentrada
+  var topColor = _exploreRarityMeta(items[0]).color;
+
+  var rowsHtml = items.map(function (name) {
+    var m = _exploreRarityMeta(name);
+    var slug = (typeof _vinvExpSlug === 'function') ? _vinvExpSlug(name) : String(name).toLowerCase().replace(/\s+/g, '-');
+    var hasPng = !!(window.vItems && typeof vItems.has === 'function' && vItems.has(slug));
+    var visual = hasPng
+      ? vItems.iconHTML(slug, name)
+      : '<span style="font-size:calc(42px*var(--v-font-scale,1));line-height:1;">' + m.emoji + '</span>';
+    return '<div style="display:flex;align-items:center;gap:12px;margin:8px 0;padding:8px;background:rgba(255,255,255,0.04);border:1px solid ' + m.color + '66;border-radius:10px;position:relative;">'
+      + '<div style="width:64px;height:64px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,' + m.color + '22,transparent 70%);border-radius:8px;filter:drop-shadow(0 0 10px ' + m.color + '99);">' + visual + '</div>'
+      + '<div style="flex:1;min-width:0;text-align:left;">'
+      +   '<div style="font-family:Cinzel,serif;font-weight:700;font-size:calc(15px*var(--v-font-scale,1));color:#f0e0c0;line-height:1.2;text-shadow:0 0 8px ' + m.color + '88;">' + name + '</div>'
+      +   '<div style="font-size:calc(10px*var(--v-font-scale,1));letter-spacing:1.5px;text-transform:uppercase;color:' + m.color + ';font-weight:700;margin-top:2px;">' + m.label + (m.desc ? '' : '') + '</div>'
+      +   (m.desc ? '<div style="font-style:italic;font-size:calc(11px*var(--v-font-scale,1));color:#a89878;margin-top:3px;line-height:1.4;">' + m.desc + '</div>' : '')
+      + '</div></div>';
+  }).join('');
+
+  var d = deltas || {};
+  var chips = [];
+  function chip(txt, col) { return '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:14px;background:rgba(255,255,255,0.05);border:1px solid ' + col + '66;color:' + col + ';font-weight:700;font-size:calc(12px*var(--v-font-scale,1));">' + txt + '</span>'; }
+  if (d.xp) chips.push(chip('★ +' + d.xp + ' XP', '#d4b870'));
+  if (d.gold) chips.push(chip('+' + d.gold + ' Valdoritas', '#c4953a'));
+  if (d.hp) chips.push(chip('♥ +' + d.hp + ' PV', '#6ab554'));
+  if (d.mp) chips.push(chip('◆ +' + d.mp + ' PM', '#5a9aaa'));
+
+  var ov = document.createElement('div');
+  ov.id = 'explore-reward-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9600;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(8,6,4,0.82);animation:exrwFade 0.25s ease;';
+  ov.innerHTML =
+    '<style>@keyframes exrwFade{from{opacity:0}to{opacity:1}}@keyframes exrwPop{from{opacity:0;transform:scale(0.9) translateY(8px)}to{opacity:1;transform:none}}</style>'
+    + '<div style="max-width:380px;width:100%;max-height:88vh;overflow-y:auto;background:linear-gradient(180deg,rgba(40,32,22,0.96),rgba(22,18,12,0.98));border:2px solid ' + topColor + ';border-radius:16px;box-shadow:0 0 26px ' + topColor + '66,inset 0 0 30px rgba(0,0,0,0.4);padding:18px 16px;position:relative;animation:exrwPop 0.32s cubic-bezier(0.34,1.4,0.5,1);">'
+    +   '<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,' + topColor + '1f 0%,transparent 60%);pointer-events:none;border-radius:16px;"></div>'
+    +   '<div style="text-align:center;font-family:Cinzel,serif;font-weight:700;font-size:calc(17px*var(--v-font-scale,1));color:' + topColor + ';letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 14px ' + topColor + '88;margin-bottom:4px;position:relative;">✦ Recompensa ✦</div>'
+    +   '<div style="text-align:center;color:#a09484;font-size:calc(11px*var(--v-font-scale,1));margin-bottom:10px;position:relative;">Você recebeu</div>'
+    +   '<div style="position:relative;">' + rowsHtml + '</div>'
+    +   (chips.length ? '<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px;position:relative;">' + chips.join('') + '</div>' : '')
+    +   '<button id="explore-reward-continue" style="margin-top:14px;width:100%;padding:11px;border:none;border-radius:10px;background:linear-gradient(180deg,' + topColor + ',' + topColor + 'cc);color:#1a1208;font-family:Cinzel,serif;font-weight:700;font-size:calc(14px*var(--v-font-scale,1));letter-spacing:1px;cursor:pointer;box-shadow:0 3px 10px ' + topColor + '55;position:relative;">Continuar</button>'
+    + '</div>';
+
+  function _close() { try { ov.remove(); } catch (_) {} if (typeof onContinue === 'function') onContinue(); }
+  if (typeof vOverlay !== 'undefined' && vOverlay.add) { try { vOverlay.add(ov); } catch (_) { document.body.appendChild(ov); } }
+  else document.body.appendChild(ov);
+  var btn = ov.querySelector('#explore-reward-continue');
+  if (btn) btn.addEventListener('click', _close);
+  ov.addEventListener('click', function (e) { if (e.target === ov) _close(); });
+  // garante swap SVG→PNG (manifest assíncrono) caso o item resolva pra fallback
+  try { if (window.vItems && vItems.upgrade) vItems.upgrade(ov); } catch (_) {}
+}
+
 function _processChoiceOutcome(choice, outcome, isSuccess) {
   if (!choice || !outcome) return;
   // 1. Auto-bump archetype track baseado em skill da choice
@@ -34116,10 +34189,29 @@ function _processChoiceOutcome(choice, outcome, isSuccess) {
   // 3. PADRAO_LOCAIS — feedback VISÍVEL de ganhos/perdas + atualizar HUD (HP/MP/ouro).
   //    Antes: a escolha aplicava o efeito mas o jogador não via nada acontecer.
   try {
-    var summary = _outcomeGainsSummary(outcome.ops);
-    if (summary && typeof vToast === 'function') {
-      var _hasLoss = /-\d/.test(summary);
-      vToast(summary, _hasLoss ? 'warn' : 'info');
+    // 2026-06-21: ganho de ITEM → card épico AAA (imagem + nome + raridade + chips);
+    // ganho puro de stat (sem item) → toast textual (comportamento anterior).
+    var _rwItems = [], _rwDelta = { xp: 0, gold: 0, hp: 0, mp: 0 };
+    if (Array.isArray(outcome.ops)) {
+      outcome.ops.forEach(function (op) {
+        if (!op || !op.op) return;
+        if (op.op === 'item' && op.id) {
+          var nm = (window.ITEMS_DB && window.ITEMS_DB[op.id] && window.ITEMS_DB[op.id].name) || op.id;
+          _rwItems.push(nm);
+        } else if (op.op === 'gold' && op.delta > 0) _rwDelta.gold += op.delta;
+        else if (op.op === 'xp' && op.delta > 0) _rwDelta.xp += op.delta;
+        else if (op.op === 'hp' && op.delta > 0) _rwDelta.hp += op.delta;
+        else if (op.op === 'mp' && op.delta > 0) _rwDelta.mp += op.delta;
+      });
+    }
+    if (_rwItems.length && typeof _showExploreRewardCard === 'function') {
+      _showExploreRewardCard(_rwItems, _rwDelta);
+    } else {
+      var summary = _outcomeGainsSummary(outcome.ops);
+      if (summary && typeof vToast === 'function') {
+        var _hasLoss = /-\d/.test(summary);
+        vToast(summary, _hasLoss ? 'warn' : 'info');
+      }
     }
     if (typeof updateHud === 'function') updateHud();
   } catch (_) { }
