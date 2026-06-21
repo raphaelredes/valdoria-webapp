@@ -3986,10 +3986,16 @@
       "cost": 0.004850000000000001,
       "quality": "low",
       "category": "potion"
+    },
+    "pao-elfico": {
+      "timestamp": "2026-06-21T18:17:06.937482",
+      "cost": 0.004845,
+      "quality": "low",
+      "category": "potion"
     }
   },
-  "last_run": "2026-06-21T17:57:58.806800",
-  "total_cost": 3.952075,
+  "last_run": "2026-06-21T18:17:06.939064",
+  "total_cost": 3.9569199999999998,
   "last_updated": "2026-05-17T21:30:13.724922",
   "count": 675
 }
