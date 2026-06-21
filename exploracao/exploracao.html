@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T20:48:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T22:44:14Z - do not edit directly, edit source -->
 
 
 
@@ -10882,6 +10882,14 @@ window.__onIntroTap = function() {
           if (window.S.ph !== 'defeat') window.S.ph = 'idle';
         }
       }
+    }
+    // 2026-06-21 belt-and-suspenders: o stub fechou e o ph ficou ÓRFÃO em 'event' sem
+    // S.event (closeEventModal não resetou / chain stale / tile-object setou ph sem
+    // dado) → força idle aqui mesmo, sem esperar o watchdog. NÃO toca chain legítimo
+    // (S.event presente) nem 'defeat'.
+    if (window.S && window.S.ph === 'event' && !window.S.event) {
+      window.S.ph = 'idle';
+      try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}
     }
   }
 
@@ -32864,10 +32872,16 @@ if (typeof window._fsmWatchdogInterval === 'undefined') {
         try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}
       }
     } else if (S.ph === 'event') {
-      // Event should have modal showing. No modal + ph=event >3s = stuck (popup
-      // closed sem reset, ou auto-trigger setou ph mas modal não abriu).
-      if (!_isAnyEventModalVisible() && elapsed > 3000) {
-        try { LOGE('FSM-WATCHDOG', 'STUCK on event without modal for ' + elapsed + 'ms — forcing idle. event=' + (S.event && S.event.id || 'null')); } catch (_) {}
+      // Event should have modal showing. No modal + ph=event = stuck (popup fechou
+      // sem reset, ou auto-trigger de tile-object setou ph mas o modal não abriu).
+      // 2026-06-21: recupera MAIS RÁPIDO o caso ÓRFÃO (S.event=null = tile-object setou
+      // ph='event' sem dado de evento nem modal — não há o que renderizar) em 1.5s; o
+      // caso com S.event presente (evento REMOTE / cinemática de boss que pode levar
+      // >1.5s pra mostrar o modal) mantém a margem de 3s pra não recuperar cedo demais.
+      var _orphanEvent = !S.event;
+      var _evLimit = _orphanEvent ? 1500 : 3000;
+      if (!_isAnyEventModalVisible() && elapsed > _evLimit) {
+        try { LOGE('FSM-WATCHDOG', 'STUCK on event without modal for ' + elapsed + 'ms — forcing idle. event=' + (S.event && S.event.id || 'null') + ' orphan=' + _orphanEvent); } catch (_) {}
         S.event = null;
         _setPhase('idle', 'watchdog_recovery_event_no_modal');
         try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}

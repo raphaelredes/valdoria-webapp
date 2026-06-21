@@ -12703,6 +12703,18 @@ var TUTORIAL_STEPS = [
 ];
 
 function _maybeShowFirstTimeTutorial(){
+  // 2026-06-21 (user: "impeça que o tutorial da cidade reapareça caso o jogador esteja
+  // nível 2 ou mais"): nível 2+ = o jogador já jogou e evoluiu → NUNCA mostra o tutorial
+  // de primeira-vez. Gate por NÍVEL é robusto mesmo se a flag localStorage por-personagem
+  // falhar (bug histórico do window._charId caindo em 'default' → chave do tutorial muda →
+  // tutorial reaparecia). Também grava a flag como vista pra evitar re-checagem.
+  try {
+    var _pLvl = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.level) || 0;
+    if (_pLvl >= 2) {
+      try { localStorage.setItem(_tutorialStorageKey(), '1'); } catch (_) {}
+      return;
+    }
+  } catch (_) {}
   try {
     if (localStorage.getItem(_tutorialStorageKey()) === '1') return;
   } catch(e){ /* localStorage indisponível — segue mesmo assim */ }
