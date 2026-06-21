@@ -22315,7 +22315,27 @@ function _dcDailyPng(ch){
 }
 
 function _dailyChallengeForToday(){
-  // Seed determinístico: YYYYMMDD vira índice no pool (rotação diária).
+  // 2026-06-21 (user: badge "Abater 5x Lobos" ≠ popup "Goblins"): em REMOTE o desafio é
+  // SERVER-AUTHORITATIVE (CITY_DAILY_STATE.challenge). Mapeia pro schema do popup pra
+  // o popup mostrar O MESMO do badge. O pool mock só vale em LOCAL (file://).
+  try {
+    var _srvIsRemote = window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote();
+    var _srvCh = window.CITY_DAILY_STATE && window.CITY_DAILY_STATE.challenge;
+    if (_srvIsRemote && _srvCh && _srvCh.title) {
+      return {
+        seed: _srvCh.seed || 'today',
+        kind: (_srvCh.type === 'find') ? 'gather' : 'hunt',
+        title: _srvCh.title,
+        target: _srvCh.target_display || _srvCh.badge_label || _srvCh.title,
+        count: _srvCh.count || 1,
+        theme: _srvCh.theme || '',
+        flavor: _srvCh.flavor || '',
+        started: !!_srvCh.started,
+        _server: true
+      };
+    }
+  } catch (_eSrvDc) {}
+  // Seed determinístico: YYYYMMDD vira índice no pool (rotação diária). LOCAL-only.
   var d = new Date();
   var dayStr = d.getFullYear() + ('0' + (d.getMonth()+1)).slice(-2) + ('0' + d.getDate()).slice(-2);
   var seed = parseInt(dayStr, 10);
@@ -46248,6 +46268,15 @@ function _dailyStartCombat(p){
   // FIX: zero coin-flip, ZERO mutação de HP/gold/XP no cliente. O popup explica
   // que o desafio é cumprido jogando; a recompensa vem do servidor ao concluir.
   if (typeof _dailyChallengeForToday !== 'function') return;
+  // 2026-06-21 (user: missão aparecia ANTES de "Iniciar Caçada"): só AGORA marca o
+  // desafio como iniciado no servidor → daí ele vira missão no Diário (gate server-side).
+  try {
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+      window.vCityServer.cityAction('daily.start', {}).then(function(r){
+        if (r && r.ok && r.quests && typeof _applyServerQuests === 'function') _applyServerQuests(r.quests);
+      }).catch(function(){});
+    }
+  } catch (_eDs) {}
   var ch = _dailyChallengeForToday();
   var isHunt = ch.kind === 'hunt';
   _showInfoPopup({
