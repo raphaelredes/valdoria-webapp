@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T16:45:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T17:48:13Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2062,6 +2062,8 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .fill.fill-res-vigor   { background: linear-gradient(90deg, #803030, #c04040); }
 .fill.fill-res-furia   { background: linear-gradient(90deg, #903030, #d04040); }
 .bar-num.res { font-size: var(--v-font-xs, 10px); }
+/* PV temporários — badge ciano "+N" ao lado do PV (2026-06-21). */
+.bar-temphp { color: #7fd6ff; font-weight: 700; margin-left: 4px; font-size: 0.86em; text-shadow: 0 0 5px rgba(127,214,255,0.55); }
 .bar-num.res.mp      { color: #80b0e0; }
 .bar-num.res.energia { color: #f0c060; }
 .bar-num.res.vigor   { color: #d06060; }
@@ -17972,7 +17974,13 @@ function buildCellInnerHTML(u, utype, opt, uid) {
     var hpPct = Math.max(0, Math.min(100, Math.round((hpVal / u.mhp) * 100)));
     var hpCls = vBarHpClass(hpPct);  /* FASE 4 single-source 60/25 */
     var fillCls = 'fill-' + vBarHpClass(hpPct);  /* FASE 4 single-source 60/25 */
-    inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + fillCls + '" style="width:' + hpPct + '%"></div></div><div class="bar-num ' + hpCls + '">' + hpVal + '/' + u.mhp + '</div></div>';
+    /* 2026-06-21: PV temporários visíveis no card (badge "+N" ciano). Lê u.tempHp ao
+       vivo — some sozinho quando o pool zera (absorção). Resolve "tempHp setado mas card
+       não mostrava nada" (Pão Élfico, Forma Selvagem, Agathys, etc.). */
+    var _tmpHpBadge = (u.tempHp && u.tempHp > 0)
+        ? '<span class="bar-temphp" title="PV temporários — absorvem dano antes do PV real (PHB p.198)">+' + (u.tempHp | 0) + '</span>'
+        : '';
+    inner += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + fillCls + '" style="width:' + hpPct + '%"></div></div><div class="bar-num ' + hpCls + '">' + hpVal + '/' + u.mhp + _tmpHpBadge + '</div></div>';
     if (u.res && u.res.max > 0) {
         var rPct = Math.max(0, Math.min(100, Math.round((u.res.value / u.res.max) * 100)));
         var rCls = u.res.type === 'mp' ? 'fill-res-mp' : (u.res.type === 'energia' ? 'fill-res-energia' : (u.res.type === 'vigor' ? 'fill-res-vigor' : 'fill-res-furia'));
@@ -23983,6 +23991,22 @@ async function useItem(idx) {
             if (window._combatVfx && manaEl) window._combatVfx.potionMana(manaEl);
         } catch (eM) { console.warn('[SIM]', 'vfx_potion_mana_failed', eM || ''); }
     }
+    if (it.effect && it.effect.tmp != null) {
+        /* 2026-06-21 (user "pão élfico não deu os 10 PV temporários"): aplica PV
+           temporários do consumível. PHB p.198: NÃO empilham — pega o MAIOR (Math.max),
+           nunca soma. A maquinaria de absorção/render de tempHp já existe (skills tipo
+           Forma Selvagem/Agathys). Em REMOTE o motor (combat2.py use_item ramo tmp) é a
+           autoridade; aqui é o path LIVE do PIVOT (combate roda no cliente). */
+        var tmpAmt = it.effect.tmp | 0;
+        var _tmpBefore = p.tempHp | 0;
+        p.tempHp = Math.max(_tmpBefore, tmpAmt);
+        sub = '+' + tmpAmt + ' PV temporários · agora ' + p.tempHp;
+        try {
+            ensureCombatVfxRuntime();
+            var tmpEl = document.querySelector('[data-unit-id="player"]');
+            if (window._combatVfx && tmpEl && typeof window._combatVfx.buffDefense === 'function') window._combatVfx.buffDefense(tmpEl);
+        } catch (eT) { console.warn('[SIM]', 'vfx_potion_temphp_failed', eT || ''); }
+    }
     if (it.kind === 'buff' && it.effect && (it.effect.atk != null || it.effect.dmg != null)) {
         var vfxKey = 'generic';
         if (it.effect.atk != null) {
@@ -24021,7 +24045,7 @@ async function useItem(idx) {
     render(currentState);
     await showMessage('🎒 ' + msg, 'hit', sub);
     // ≥1s pós-VFX de poção/item antes de avançar turno.
-    if (it.effect && it.effect.res) await sleep(SIM_VFX_POST_DELAY_MS);
+    if (it.effect && (it.effect.res || it.effect.tmp != null)) await sleep(SIM_VFX_POST_DELAY_MS);
     await runNpcsUntilPlayer();
 }
 
@@ -24552,7 +24576,13 @@ function playHitVFX(uid, crit, dmgType, opts) {
             }
             // 1) habilidades icônicas dedicadas
             if (skName === 'Mísseis Mágicos' && fromEl) {
-                window._combatVfx.magicMissiles(fromEl, el, 3);
+                /* 2026-06-21 (user): nº de projéteis = nº de dardos (PHB 3 + upcast,
+                   cap 7), não mais 3 fixo. simMagicMissileDarts é a contagem canônica. */
+                var _mmActor = (currentState && currentState.order)
+                    ? currentState.order.filter(function (u) { return u && u.id === actorUid; })[0] : null;
+                var _mmN = (typeof simMagicMissileDarts === 'function')
+                    ? (simMagicMissileDarts(skill, _mmActor) || 3) : 3;
+                window._combatVfx.magicMissiles(fromEl, el, _mmN);
             } else if (skName === 'Bola de Fogo') {
                 window._combatVfx.fireballAoE(el);
             } else if (skName === 'Raio Gélido' && fromEl) {
@@ -24795,39 +24825,44 @@ function showMagicMissileVolleyOverlay(actor, darts, groupList, s, perDart) {
             if (ov.parentNode) ov.parentNode.removeChild(ov);
             resolve();
         }
-        function rollDartIdx(i) {
+        /* 2026-06-21 (user "mude para que misseis magicos mostre N dados girando ao
+           mesmo tempo... a quantidade de misseis girando igual ao numero de dados"):
+           em vez de rolar 1 dado por dardo em sequencia (~2.3s cada → 3 dardos ~7s),
+           rola TODOS os N dados d4 SIMULTANEAMENTE via rollMultiple e funde no dano
+           total (regra "3D Dice System / Multi-Dice Consistency"). N = nº de dardos =
+           nº de misseis na orbita E nos projeteis. Acerto automatico (PHB), 1d4+1/dardo:
+           o dado mostra a face d4, o +1/dardo entra so no total (igual 2d6+3). */
+        function rollAllDarts() {
             if (closed) return;
-            if (i >= darts.length) {
-                // Summary
+            var n = darts.length;
+            var totalDmg = darts.reduce(function (a, d) { return a + (d.dmg || 0); }, 0);
+            function showSummary() {
+                if (closed) return;
                 while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
                 resultEl.className = 'dice-result-label visible dmg-result-stack';
                 appendMagicMissileVolleySummary(resultEl, groupList, darts, s);
                 dartLabel.textContent = '';
-                setTimeout(function () { continueBtn.style.display = ''; }, 400);
+                setTimeout(function () { if (!closed) continueBtn.style.display = ''; }, 400);
+            }
+            if (typeof sfxDiceRoll === 'function') { try { sfxDiceRoll(); } catch (_eMmS) {} }
+            try { dice3d && dice3d.dispose(); } catch (e) {}
+            dice3d = new Dice3D(container, { size: 180, dieType: 'd4', duration: 1500 });
+            if (n <= 1) {
+                dartLabel.textContent = '1 dardo · 1d4+1 · acerto automático';
+                dice3d.roll((darts[0] && darts[0].rolls && darts[0].rolls[0]) || 1, showSummary);
                 return;
             }
-            var dart = darts[i];
-            // Sincroniza carrossel com o alvo do dardo atual
-            var gi = groupList.findIndex(function (g) { return g.tIdx === dart.tIdx; });
-            if (gi >= 0) carousel.setIndex(gi);
-            var tName = s.order[dart.tIdx] ? s.order[dart.tIdx].n : '';
-            dartLabel.textContent = 'Dardo ' + (i + 1) + '/' + darts.length + ' → ' + tName;
-            try { dice3d && dice3d.dispose(); } catch (e) {}
-            /* 2026-04-19: timing estendido. Antes era duration:700 + setTimeout(780) = 80ms
-               de breathing entre dardos → "troca extremamente rapida" (reclamado pelo
-               usuario). Agora: 1500ms animacao + 800ms pra ver a face do dado antes do
-               proximo dardo (total 2300ms por dardo → 3 dardos = ~7s). */
-            /* Phase 5b polish v4 (2026-04-26): user reportou "som de rolagem nao
-               toca em rolagens de dano de Misseis Magicos". Causa: showMagicMissile
-               VolleyOverlay tem fluxo proprio (nao chama showDamageDice). Adicionado
-               sfxDiceRoll() pra cada dardo — replicando comportamento do showDamage
-               Dice (line 20844). */
-            if (typeof sfxDiceRoll === 'function') {
-                try { sfxDiceRoll(); } catch (_eMmS) {}
-            }
-            dice3d = new Dice3D(container, { size: 150, dieType: 'd' + dart.d, duration: 1500 });
-            dice3d.roll(dart.rolls[0] || 1);
-            setTimeout(function () { rollDartIdx(i + 1); }, 2300);
+            dartLabel.textContent = n + ' dardos · 1d4+1 cada · acerto automático';
+            var configs = darts.map(function (d) { return { value: (d.rolls && d.rolls[0]) || 1 }; });
+            dice3d.rollMultiple(configs, function () {
+                if (closed) return;
+                // mostra as faces individuais ('2 + 4 + 1') antes da fusao no total
+                dartLabel.textContent = configs.map(function (c) { return c.value; }).join(' + ') + ' (+1/dardo)';
+                setTimeout(function () {
+                    if (closed) return;
+                    dice3d.fusionTo(totalDmg, showSummary);
+                }, 800);
+            });
         }
         continueBtn.addEventListener('click', async function () {
             continueBtn.style.display = 'none';
@@ -24839,8 +24874,8 @@ function showMagicMissileVolleyOverlay(actor, darts, groupList, s, perDart) {
             // 3. Fecha overlay (dano já aplicado pelo launch)
             closeOverlay();
         });
-        // Dispara a sequência
-        setTimeout(function () { rollDartIdx(0); }, 280);
+        // Dispara a rolagem de TODOS os dardos ao mesmo tempo
+        setTimeout(function () { rollAllDarts(); }, 280);
     });
 }
 

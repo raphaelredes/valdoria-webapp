@@ -1182,7 +1182,7 @@ var Dice3D = (function () {
             return this.roll(configs && configs[0] ? configs[0].value : 1, onDone);
         }
         var self = this;
-        var count = Math.min(configs.length, 5);
+        var count = Math.min(configs.length, 7);
         // Som canonical (idem .roll() — auto pra todos os usos)
         Dice3DInstance._playRollSfx();
         this._showingResult = false;
@@ -1222,10 +1222,13 @@ var Dice3D = (function () {
             3: [[-0.9, -0.45], [0.9, -0.45], [0, 0.6]],
             4: [[-0.8, -0.55], [0.8, -0.55], [-0.8, 0.55], [0.8, 0.55]],
             5: [[-1.0, -0.55], [0, -0.55], [1.0, -0.55], [-0.55, 0.55], [0.55, 0.55]],
+            // 2026-06-21: até 7 dados simultâneos (Mísseis Mágicos com upcast, cap PHB 7).
+            6: [[-1.05, -0.55], [0, -0.55], [1.05, -0.55], [-1.05, 0.55], [0, 0.55], [1.05, 0.55]],
+            7: [[-1.15, -0.55], [-0.38, -0.55], [0.38, -0.55], [1.15, -0.55], [-0.78, 0.6], [0, 0.6], [0.78, 0.6]],
         };
-        var positions = layouts[count] || layouts[5];
-        this._camera.position.z = count <= 2 ? 4.5 : count === 3 ? 4.8 : count === 4 ? 5.0 : 5.4;
-        var baseScale = count <= 2 ? 0.85 : count === 3 ? 0.78 : count === 4 ? 0.72 : 0.65;
+        var positions = layouts[count] || layouts[7];
+        this._camera.position.z = count <= 2 ? 4.5 : count === 3 ? 4.8 : count === 4 ? 5.0 : count === 5 ? 5.4 : count === 6 ? 5.9 : 6.4;
+        var baseScale = count <= 2 ? 0.85 : count === 3 ? 0.78 : count === 4 ? 0.72 : count === 5 ? 0.65 : count === 6 ? 0.58 : 0.52;
         var builder = BUILDERS[this._dieType] || BUILDERS.d20;
         var staggerMs = 80;
         for (var i = 0; i < count; i++) {

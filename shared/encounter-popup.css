@@ -694,6 +694,16 @@ body.perf-lite #encounter-overlay.active .enc-card {
 .enc-nav #enc-prev:disabled {
   display: none;
 }
+/* sessão (user 2026-06-21): quando "Continuar →" é o ÚNICO botão (Anterior
+   desabilitado/oculto na 1ª/única página), ele preenche TODA a largura — antes
+   ficava encolhido no canto ESQUERDO por causa do justify-content:space-between.
+   Quando há "← Anterior" (página 2+), o seletor não casa → Continuar mantém a
+   largura de conteúdo e o space-between o joga pro canto DIREITO (nunca esquerdo).
+   Pure-CSS via irmão-adjacente + :disabled (sem :has(), WebView-safe). */
+.enc-nav #enc-prev:disabled + .enc-nav-btn-next {
+  flex: 1 1 100%;
+  width: 100%;
+}
 
 .enc-actions {
   padding: var(--v-space-lg, 12px) 14px;

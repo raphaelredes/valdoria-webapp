@@ -6978,7 +6978,7 @@ Busca rápida:
             const costText = skill.cost > 0 ? `${skill.cost} MP` : 'Truque (sem custo de mana)';
             const safeName = skillName.replace(/'/g, "\\'");
 
-            let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeL1SkillDetail()">\u2190 Voltar</button>`;
+            let html = ``;
             /* Banner epico identico outras telas */
             html += `<div class="v-step-banner">`;
             html += `<span class="v-step-line"></span>`;
@@ -7012,6 +7012,10 @@ Busca rápida:
                                   : (atQuota ? `Quota atingida (${quota}/${quota})`
                                              : '\u2728 Selecionar Magia');
             html += `<button class="v-btn ${btnClass}" style="width:90%; margin: 0 5% var(--v-space-md, 8px); font-family:var(--v-font-display,Cinzel,serif); letter-spacing:1.5px;" ${btnDisabled} onclick="toggleL1Skill('${safeName}'); closeL1SkillDetail();">${btnText}</button>`;
+            /* 2026-06-21 (user): "Voltar" logo ABAIXO do "Selecionar Magia" — antes ficava
+               no TOPO (acima do nome da magia), posição ruim e fora de padrão. Mesmo
+               padrão visual do botão Selecionar (width:90% + margin 0 5% + Cinzel). */
+            html += `<button class="v-btn v-btn-secondary" style="width:90%; margin: 0 5% var(--v-space-md, 8px); font-family:var(--v-font-display,Cinzel,serif); letter-spacing:1.5px;" onclick="closeL1SkillDetail()">← Voltar</button>`;
 
             document.getElementById('l1skillSelectContent').innerHTML = html;
         }
