@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-19T12:26:52Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T12:17:52Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -16822,6 +16822,21 @@ function checkEnd(s) {
     if (!s.order.some(function (c) { return c.t === 'e' && c.alive; })) {
         s.ph = 'victory';
         s.rewards = computeRewards(s);
+        /* Diag XP da tela de vitória (auditoria 2026-06-21): loga o que o cliente
+           recebeu (p.xp/xpNext/xpPrev do spec do servidor) + o que vai exibir
+           (r.newXp/threshold/newLvl). Relayed pro bot.log via [C-REM:*] em REMOTE.
+           Revela se o spec chegou null (→ fallback tabela = XP errado) ou se a
+           conta diverge. Remover após diagnosticar. */
+        try {
+            var _vp = s.order[s.p_idx], _vr = s.rewards;
+            console.info('[C-REM:VICTORY-XP] mode=' + (window.__EXPLORE_MODE || window.__COMBAT_MODE || '?')
+                + ' p.lvl=' + (_vp && _vp.lvl) + ' p.xp=' + (_vp && _vp.xp)
+                + ' p.xpNext=' + (_vp && _vp.xpNext) + ' p.xpPrev=' + (_vp && _vp.xpPrev)
+                + ' | gained=' + (_vr && _vr.xp) + ' oldXp=' + (_vr && _vr.oldXp)
+                + ' newXp=' + (_vr && _vr.newXp) + ' threshold=' + (_vr && _vr.threshold)
+                + ' oldLvl=' + (_vr && _vr.oldLvl) + ' newLvl=' + (_vr && _vr.newLvl)
+                + ' levelUp=' + (_vr && _vr.levelUp));
+        } catch (_eVx) {}
         return true;
     }
     if (!partyAnyoneStanding(s) && !partyHasPendingDeathSaves(s)) {
