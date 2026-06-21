@@ -56161,6 +56161,56 @@ function _openCityDialogue(venue, node, p){
 // item D (2026-06-18): node 'rooms' (server-driven) → QUADRO DE CHAVES épico.
 // As chaves vêm das choices REAIS do servidor; o clique posta dialogue.choice
 // (servidor cobra + descansa). #0 preservada — só a APRESENTAÇÃO muda (lista→quadro).
+// 2026-06-21 (user: "ao escolher a chave do quarto só aparece o diálogo da Martha, sem
+// animação de dormir; restaure a animação e volte à Estalagem ao terminar"). A migração
+// server-driven da Estalagem PERDEU a cinemática de dormir (playInnAnimation) — o
+// onPick do quadro de chaves só chamava _resolveCityChoice (renderiza a fala da Martha).
+// Aqui: descanso LONGO (poor/modest/wealthy) aplica o descanso no SERVIDOR (dialogue.choice),
+// roda a animação de dormir canonical (inn-animation.js), e ao terminar VOLTA pra tela da
+// Estalagem (_renderCityPopup('inn')). Descanso curto / outras escolhas → fluxo normal.
+function _innPickRoomRemote(venue, data, id, p){
+  var TIER_BY_ID = { rest_poor: 'poor', rest_modest: 'modest', rest_wealthy: 'wealthy' };
+  var tier = TIER_BY_ID[id];
+  var node = (data && data.node) || 'rooms';
+  if (!tier || typeof playInnAnimation !== 'function') {
+    // descanso curto / escolha sem cinemática → diálogo normal (server-driven)
+    _resolveCityChoice(venue, node, id, p, data && data.npc);
+    return;
+  }
+  var preHp = (p && p.hp) || 0, preMp = (p && p.mp) || 0, preExh = (p && p.exh) || 0;
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Reservando o quarto...' }); } catch (_) {} }
+  window.vCityServer.cityAction('dialogue.choice', { venue: venue, node: node, choice_id: id }).then(function (res) {
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch (_) {} }
+    if (!res || !res.ok) {
+      if (typeof vToast === 'function') vToast((res && res.message) || 'Não foi possível descansar.', 'warn');
+      _openCityDialogue(venue, 'rooms', p);  // reabre o quadro de chaves
+      return;
+    }
+    // servidor aplicou o descanso → atualiza HP/MP/gold antes da cinemática.
+    try { if (typeof _applyHudFromDialogue === 'function') _applyHudFromDialogue(res); } catch (_) {}
+    try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch (_) {}
+    playInnAnimation({
+      tier: tier,
+      player_name: (p && p.name) || 'Aventureiro',
+      start_hp: preHp, max_hp: (p && p.hpMax) || preHp, final_hp: (p && p.hp) || preHp,
+      start_mp: preMp, max_mp: (p && p.mpMax) || preMp, final_mp: (p && p.mp) || preMp,
+      start_exhaustion: preExh, final_exhaustion: 0,
+      rest_count: 0
+    }, function () {
+      // onDone (mesmo se a animação for pulada): atualiza HUD + VOLTA pra Estalagem.
+      if (typeof refreshHud === 'function') refreshHud();
+      var csp = document.getElementById('city-subscreen-popup');
+      if (csp) csp.classList.add('active');
+      _renderCityPopup('inn');
+    });
+  }).catch(function (e) {
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch (_) {} }
+    console.error('[INN] room rest remote failed', e);
+    if (typeof vToast === 'function') vToast('Erro ao descansar.', 'warn');
+    _openCityDialogue(venue, 'rooms', p);
+  });
+}
+
 function _innRenderRoomKeyBoardRemote(venue, data, p){
   var KEY_IMG = '/shared/img/items/';
   var KEY_BY_ID = { rest_poor: 'chave-antiga.webp', rest_modest: 'chave-do-porao.webp', rest_wealthy: 'chave-da-aurora.webp' };
@@ -56181,7 +56231,7 @@ function _innRenderRoomKeyBoardRemote(venue, data, p){
     title: 'QUARTOS · ESTALAGEM',
     marthaLine: marthaLine,
     keys: keys,
-    onPick: function(id){ _resolveCityChoice(venue, data.node, id, p, data.npc); },
+    onPick: function(id){ _innPickRoomRemote(venue, data, id, p); },
     restoreKey: 'inn_rooms',
     restoreFn: function(){ _openCityDialogue(venue, 'rooms', p); }
   });
