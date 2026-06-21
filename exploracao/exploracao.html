@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T19:37:50Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T20:48:32Z - do not edit directly, edit source -->
 
 
 
@@ -4358,6 +4358,44 @@ body.footer-collapsed #hex-nav { bottom: 10px; }
   opacity: 0.4;
   animation: eventTextReveal 1300ms cubic-bezier(0.55, 0.08, 0.3, 1) forwards;
 }
+/* PADRAO_ALDRIC (2026-06-21): fala estruturada (script[] type=speech) ganha o NOME do
+   NPC em dourado acima da fala — igual ao vEncounter.render da cidade/prólogo. */
+.event-text-speech[data-speaker]::before {
+  content: attr(data-speaker);
+  display: block;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-weight: 700;
+  font-size: var(--v-font-xs, 11px);
+  color: var(--v-gold, #c4953a);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 3px;
+}
+/* Banner do NPC (retrato + nome) no topo do card de evento — paridade com vEncounter. */
+.event-npc {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-md, 8px);
+  margin: 0 0 var(--v-space-md, 8px);
+  padding-bottom: var(--v-space-md, 8px);
+  border-bottom: 1px solid var(--v-border, #4a3828);
+}
+.event-npc-portrait {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--v-radius-sm, 6px);
+  object-fit: cover;
+  border: 1px solid var(--v-gold-35, rgba(196, 149, 58, 0.35));
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+.event-npc-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-weight: 700;
+  font-size: var(--v-font-md, 14px);
+  color: var(--v-gold-light, #dbb668);
+  text-align: left;
+}
 /* Performance tier guard: dispositivos lite/reduce-motion não animam reveal
    das 9 sentenças simultâneas (cascata de 700ms × 9 ≈ 6s de animação total
    pode causar layout thrashing em smartphone fraco). */
@@ -8651,6 +8689,9 @@ window.__onIntroTap = function() {
   <div id="event-modal">
     <div class="event-card">
       <div class="event-badge-row"><span class="event-type-badge" id="event-badge">Encontro</span></div>
+      <!-- PADRAO_ALDRIC (2026-06-21): banner do NPC (retrato + nome) — visível só quando
+           o evento tem ev.npc{name,portrait}. Eventos ambientais (sem NPC) ficam ocultos. -->
+      <div class="event-npc hidden" id="event-npc"></div>
       <h2 class="event-title" id="event-title"></h2>
       <div class="event-divider"><span class="gem">◆</span></div>
       <p class="event-text" id="event-text"></p>
@@ -36032,6 +36073,72 @@ function _renderEventTextAsAldric(elId, fullText, opts) {
   });
 }
 
+// PADRAO_ALDRIC (2026-06-21): renderiza um script[] ESTRUTURADO (narration/speech) no
+// modal de evento — narração em itálico cinza, fala em card dourado COM o nome do NPC
+// (igual ao vEncounter.render de cidade/prólogo). Usado por openEventModal quando
+// ev.script existe; senão cai no _renderEventTextAsAldric (split do texto plano legacy).
+// Reusa as classes .event-text-narration / .event-text-speech (já estilizadas).
+function _renderEventScriptAsAldric(elOrId, script, opts) {
+  opts = opts || {};
+  var el = (typeof elOrId === 'string') ? document.getElementById(elOrId) : elOrId;
+  if (!el) return;
+  el.innerHTML = '';
+  if (!Array.isArray(script) || !script.length) return;
+  var baseDelay = opts.delayBase || 0;
+  var stepDelay = opts.stepDelay || 700;
+  var acc = baseDelay;
+  var _san = (window.vEncounter && typeof window.vEncounter.sanitize === 'function')
+    ? window.vEncounter.sanitize : null;
+  script.forEach(function(line) {
+    if (!line) return;
+    var clean = String(line.text || '').trim();
+    if (!clean) return;
+    var span = document.createElement('span');
+    var isSpeech = (line.type === 'speech');
+    if (isSpeech) {
+      span.className = 'event-text-speech';
+      var spk = String(line.speaker || '').trim();
+      // guard anti-vazamento: nunca renderiza key snake_case pura como speaker (#88)
+      if (spk && !/^[a-z0-9_]+$/.test(spk)) span.setAttribute('data-speaker', spk);
+    } else {
+      span.className = 'event-text-narration';
+    }
+    if (_san) { span.innerHTML = _san(clean); } else { span.textContent = clean; }
+    span.style.animationDelay = acc + 'ms';
+    var n = clean.length;
+    span.style.animationDuration = (isSpeech
+      ? Math.max(1100, Math.min(2400, n * 16 + 500))
+      : Math.max(900, Math.min(2200, n * 14 + 400))) + 'ms';
+    el.appendChild(span);
+    acc += stepDelay;
+  });
+}
+
+// Popula o banner do NPC (#event-npc) a partir de ev.npc{name,portrait}. DOM-built
+// (injection-safe). Oculta quando o evento não tem NPC (ambiental). Retrato → lightbox.
+function _renderEventNpcBanner(ev) {
+  var el = document.getElementById('event-npc');
+  if (!el) return;
+  el.innerHTML = '';
+  var npc = ev && ev.npc;
+  if (!npc || !npc.name) { el.classList.add('hidden'); return; }
+  if (npc.portrait) {
+    var img = document.createElement('img');
+    img.className = 'event-npc-portrait';
+    img.src = String(npc.portrait);
+    img.alt = '';
+    img.dataset.name = String(npc.name);
+    img.onerror = function () { this.style.display = 'none'; };
+    img.onclick = function () { if (window.showLightbox) window.showLightbox(this.src, this.dataset.name, ''); };
+    el.appendChild(img);
+  }
+  var nm = document.createElement('div');
+  nm.className = 'event-npc-name';
+  nm.textContent = String(npc.name);
+  el.appendChild(nm);
+  el.classList.remove('hidden');
+}
+
 function openEventModal() {
   // V4: enquanto modal aberto, anim mode ativo (dado/animação podem rolar). 60s.
   if (typeof _markActive === 'function') _markActive(60000);
@@ -36045,12 +36152,17 @@ function openEventModal() {
   ev._pickedTitle = ev._pickedTitle || pickFamiliarityVariant(ev, 'title');
 
   document.getElementById('event-title').textContent = ev._pickedTitle;
-  // PADRAO_ALDRIC v12 (2026-05-06): adapter — text agora é renderizado como
-  // multi-linha script com reveal sequencial. Antes: textContent raw.
-  // Agora: split por sentenças (". ") e cada uma vira <span> com
-  // animation-delay cascateado (overlap 45% via cubic-bezier).
-  // Doc: docs/sistemas/dialogue-pattern-aldric.md § "voz DM"
-  _renderEventTextAsAldric('event-text', ev._pickedText);
+  // PADRAO_ALDRIC (2026-06-21): banner do NPC (retrato+nome) se o evento tiver ev.npc.
+  _renderEventNpcBanner(ev);
+  // Narrativa: se o evento tem script[] ESTRUTURADO (narration/speech), renderiza no
+  // padrão canônico (fala dourada com nome do NPC). Senão, fallback automático ao texto
+  // plano legacy dividido em sentenças (_renderEventTextAsAldric). Migração é incremental.
+  if (Array.isArray(ev.script) && ev.script.length) {
+    _renderEventScriptAsAldric('event-text', ev.script);
+  } else {
+    // PADRAO_ALDRIC v12 (2026-05-06): split por sentenças (". ") com reveal cascateado.
+    _renderEventTextAsAldric('event-text', ev._pickedText);
+  }
   // 2026-04-27: tech callout — info mecânica separada da narrativa
   _renderTechCalloutInModal('event-tech', ev.tech);
   // Limpa tech do outcome (será setado quando aplicar choice)
@@ -36533,10 +36645,15 @@ function _remoteShowOutcome(ch, oc) {
       hdr.className = 'outcome-header';
       hdr.textContent = tier === 'success' ? '✦ Sucesso' : tier === 'partial' ? '○ Sucesso Parcial' : '✗ Falha';
       outcomeEl.appendChild(hdr);
-      // Narrativa
+      // Narrativa — PADRAO_ALDRIC (2026-06-21): se o servidor devolveu script[] na
+      // resolução (oc.script), renderiza no padrão canônico; senão, texto plano legacy.
       var narr = document.createElement('p');
       narr.style.margin = '6px 0 0 0';
-      narr.textContent = outcomeText;
+      if (Array.isArray(oc.script) && oc.script.length) {
+        _renderEventScriptAsAldric(narr, oc.script);
+      } else {
+        narr.textContent = outcomeText;
+      }
       outcomeEl.appendChild(narr);
       // Consequences (server delta — gold/xp/hp/mp)
       var consItems = [];
@@ -37055,7 +37172,13 @@ function applyChoiceOutcome(choice, success, total, dc) {
 
   const narr = document.createElement('p');
   narr.style.margin = '6px 0 0 0';
-  narr.textContent = outcomeText;
+  // PADRAO_ALDRIC (2026-06-21): se o outcome tem script[] estruturado (narração/fala da
+  // resolução), renderiza no padrão canônico; senão usa o texto plano (fallback legacy).
+  if (Array.isArray(outcome.script) && outcome.script.length) {
+    _renderEventScriptAsAldric(narr, outcome.script);
+  } else {
+    narr.textContent = outcomeText;
+  }
   outcomeEl.appendChild(narr);
 
   const consItems = [];
