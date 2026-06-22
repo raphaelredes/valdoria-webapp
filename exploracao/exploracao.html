@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T02:01:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T02:37:13Z - do not edit directly, edit source -->
 
 
 
@@ -40829,16 +40829,12 @@ var _xcartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShare
   // abertura da cartografia) busca o set real e redesenha.
   getKnownLocations: function(){
     var k = window.__EXPLORE_KNOWN;
-    if (Array.isArray(k) && k.length) return k;
-    // FAIL-CLOSED (#0): em REMOTE sem o known set ainda (init fire-and-forget não
-    // resolveu / hydrate em andamento), NÃO mostra tudo. Mas inclui a localização
-    // ATUAL (o player está nela) pra não desenhar um mapa 100% sob névoa durante o
-    // race pós-viagem — _hydrateExploreKnown() busca o set completo e redesenha.
-    if (window.__EXPLORE_MODE === 'remote') {
-      var cur = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : null;
-      return cur ? [cur] : [];
-    }
-    return null;
+    if (Array.isArray(k)) return k;
+    // FAIL-CLOSED (#0, 2026-06-18): em REMOTE, se o known set do servidor ainda não
+    // chegou (undefined), retorna [] (mostra só a origem sob névoa, NUNCA todos os
+    // locais). _hydrateExploreKnown() (na abertura, com POLL do motor token — fix do
+    // race pós-viagem) busca o set real e redesenha. null só em LOCAL/file:// (sandbox).
+    return (window.__EXPLORE_MODE === 'remote') ? [] : null;
   },
   getPlayerBiomeKey: _cartGetPlayerBiomeV2,
   onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartDraw === 'function') _xcartDraw(); }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-21T19:08:23Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-22T02:30:39Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14096,6 +14096,11 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
             exhaustionLevel: _exhSeed, turnsLeft: null }] : [],
         dying: hp <= 0, stable: false, isDead: false, deathSaves: { s: 0, f: 0 },
         lvl: lvl,
+        /* 2026-06-21 (user bug "Sem uso para forma selvagem"): usos de Forma Selvagem
+           AUTORITATIVOS do servidor (_serialize_player manda wildShapeUses=2 p/ druida
+           nv>=2). Antes NÃO era seedado → o ternário em useWildShapeSkill caía no default
+           2 sem fonte. null p/ não-druidas (o ternário cai no default, inócuo). */
+        wildShapeUses: (spec.wildShapeUses != null) ? Math.max(0, parseInt(spec.wildShapeUses, 10) || 0) : null,
         /* User sessão #69: XP real do DB (REMOTE) pra tela de vitória usar o limiar
            D&D 5e (PHB Tabela 1-2) em vez do stub level*50. xpNext/xpPrev = limiares
            cumulativos do próximo/atual nível; xp = XP cumulativo atual. */
@@ -23223,17 +23228,60 @@ function _localWildShapeRevert(p, excess) {
     try { delete p._wsBackup; } catch (e3) { p._wsBackup = null; }
     p.se = (p.se || []).filter(function (x) { return x.id !== 'forma_selvagem'; });
 }
+/* 2026-06-21 (user "animação épica da transformação do card do personagem no card do
+   animal"): cross-fade MORPH do retrato — clona o retrato ANTIGO (personagem) por cima
+   do card (que já mostra o animal após o render) e o dissolve com scale+blur+tint verde,
+   revelando o animal. Funciona p/ retrato WebP OU ícone heráldico (clona o outerHTML).
+   Ghost efêmero (auto-remove ~820ms). Respeita prefers-reduced-motion (skip). */
+function _wsMorphPortrait(cardEl, oldHTML) {
+    try {
+        if (window.vReducedMotion) return;  // acessibilidade: sem morph
+        if (!cardEl || !oldHTML) return;
+        var anchor = cardEl.querySelector('.c-portrait') || cardEl.querySelector('.c-portrait-img');
+        if (!anchor) return;
+        var r = anchor.getBoundingClientRect();
+        if (!r || r.width < 4) return;
+        var wrap = document.createElement('div');
+        wrap.innerHTML = oldHTML;
+        var g = wrap.firstElementChild;
+        if (!g) return;
+        g.style.cssText += ';position:fixed;left:' + Math.round(r.left) + 'px;top:' + Math.round(r.top)
+            + 'px;width:' + Math.round(r.width) + 'px;height:' + Math.round(r.height)
+            + 'px;margin:0;z-index:9998;pointer-events:none;border-radius:50%;overflow:hidden;'
+            + 'box-shadow:0 0 18px rgba(96,200,64,0.7);';
+        document.body.appendChild(g);
+        g.getBoundingClientRect();  /* reflow antes da transição */
+        g.style.transition = 'opacity 720ms ease, transform 720ms ease, filter 720ms ease';
+        g.style.opacity = '0';
+        g.style.transform = 'scale(1.45)';
+        g.style.filter = 'blur(8px) hue-rotate(85deg) brightness(1.5) saturate(1.7)';
+        setTimeout(function () { try { g.remove(); } catch (_) {} }, 820);
+    } catch (_eM) { if (window.console) console.warn('[WILDSHAPE] morph', _eM); }
+}
+
 async function useWildShapeSkill(skill, opts) {
     opts = opts || {};
     var p = currentState.order[currentState.p_idx];
     var isRemote = (window.__COMBAT_MODE === 'remote');
+    // 2026-06-21 (user bug: "Sem uso para forma selvagem" + o botão de ação NUNCA
+    // voltava → tela travada): toda RECUSA de Forma Selvagem DEVE restaurar a UI.
+    // Abrir "Habilidades" seta _actionTaken=true (esconde "Agir") e o clique na skill
+    // REMOVE o painel — um bare-return deixava a tela SEM nenhuma ação (travada).
+    // _wsReject traz "Agir" de volta (render + _actionTaken=false) e reabre o painel
+    // de skills (onCancel) pra escolher outra ação (turno não perdido).
+    function _wsReject(msg) {
+        if (typeof vToast === 'function' && msg) vToast(msg);
+        _actionTaken = false;
+        try { render(currentState); } catch (_r) {}
+        if (typeof opts.onCancel === 'function') { try { opts.onCancel(); } catch (e) {} }
+    }
     var slot = -1;
     if (p && p.skills) {
         for (var si = 0; si < p.skills.length; si++) {
             if (p.skills[si] === skill || (p.skills[si] && skill && p.skills[si].n === skill.n)) { slot = si; break; }
         }
     }
-    if (slot < 0) { console.warn('[WILDSHAPE] slot_not_found'); return; }
+    if (slot < 0) { console.warn('[WILDSHAPE] slot_not_found'); _wsReject(); return; }
     /* Já transformado → reverter (reusar a habilidade). */
     if (_wsIsTransformed(p)) {
         if (isRemote) { await __combatRemoteAction({ type: 'skill', slot: slot }); return; }
@@ -23244,28 +23292,40 @@ async function useWildShapeSkill(skill, opts) {
         return;
     }
     var forms = (skill.forms && skill.forms.length) ? skill.forms : wildShapeFormsForLevel(p.lvl | 0);
-    if (!forms.length) { if (typeof vToast === 'function') vToast('Forma Selvagem indisponível neste nível.'); return; }
+    if (!forms.length) { _wsReject('Forma Selvagem indisponível neste nível.'); return; }
     var uses = (p.wildShapeUses != null) ? (p.wildShapeUses | 0) : 2;
-    if (uses <= 0) { if (typeof vToast === 'function') vToast('Sem usos de Forma Selvagem.'); return; }
+    if (uses <= 0) { _wsReject('Sem usos de Forma Selvagem.'); return; }
     var formId = await openWildShapePicker(forms, uses);
-    if (!formId) { if (typeof opts.onCancel === 'function') { try { opts.onCancel(); } catch (e) {} } return; }
+    if (!formId) { _wsReject(); return; }
     if (isRemote) { await __combatRemoteAction({ type: 'skill', slot: slot, form: formId }); return; }
     var form = forms.filter(function (f) { return f.id === formId; })[0];
-    if (!form) return;
+    if (!form) { _wsReject(); return; }
     p.wildShapeUses = uses - 1;
     var oldName = p.n;
+    /* 2026-06-21 (user "animação épica da transformação do card do personagem no card
+       do animal"): captura o retrato ATUAL (personagem) do card ANTES do swap, p/ o
+       cross-fade morph dissolver o personagem por cima do animal. */
+    var _wsCardElPre = document.querySelector('[data-unit-id="' + (p.id || 'player') + '"]')
+                    || document.querySelector('[data-unit-id="player"]');
+    var _wsOldPortraitHTML = '';
+    try {
+        var _wsPEl = _wsCardElPre && (_wsCardElPre.querySelector('.c-portrait') || _wsCardElPre.querySelector('.c-portrait-img'));
+        if (_wsPEl) _wsOldPortraitHTML = _wsPEl.outerHTML;
+    } catch (_ePre) {}
     _localWildShapeApply(p, form);
     var sL2 = currentState; simLogPushTurnHeader(sL2, p);
     sL2.log.push(form.ico + ' ' + oldName + ' assume a forma de ' + form.name + '! (PV ' + form.hp + ' · CA ' + form.ac + ')');
     p.actionSpent = true; render(sL2); _actionTaken = false;
-    /* 2026-06-21 (user "animação épica da transformação"): VFX de natureza no card do
-       druida (círculo druídico + folhas/runas + shockwave verde-dourado). A arte do
-       card já virou o animal (portrait). Pausa pra a animação ser vista (Human Reading
-       Time). É o path LIVE no PIVOT (combate roda local). */
+    /* MORPH ÉPICO: cross-fade do retrato (personagem→animal) + VFX de natureza (círculo
+       druídico + folhas/runas + shockwave verde-dourado). A arte do card JÁ virou o
+       animal (render acima); _wsMorphPortrait dissolve o retrato ANTIGO por cima,
+       sincronizado com o VFX. Pausa pra a animação ser vista (Human Reading Time).
+       Path LIVE no PIVOT (combate roda local). */
     try {
         var _wsEl = document.querySelector('[data-unit-id="' + (p.id || 'player') + '"]')
                  || document.querySelector('[data-unit-id="player"]');
         if (window._combatVfx && _wsEl && typeof window._combatVfx.wildShapeTransform === 'function') {
+            if (typeof _wsMorphPortrait === 'function') _wsMorphPortrait(_wsEl, _wsOldPortraitHTML);
             window._combatVfx.wildShapeTransform(_wsEl);
             if (typeof _vaPlaySFX === 'function') { try { _vaPlaySFX('buff'); } catch (_s) {} }
             await new Promise(function (r) { setTimeout(r, 1300); });
@@ -24508,6 +24568,10 @@ var SIM_VFX_CAST_POST_DELAY_MS = 3200;
 /** Pausa curta entre o fechamento do overlay de dado e o início do VFX
  *  do ataque (tempo pro olho reorientar do card de d20 para o impacto). */
 var SIM_POST_DICE_TRANSITION_MS = 650;
+/** 2026-06-21 (user): respiro entre a animação de ATAQUE (slash/impacto) e a
+ *  animação do DANO (número flutuante + dreno de PV). Ordem desejada:
+ *  dados de dano → ataque → +este gap → dano. */
+var SIM_ATTACK_TO_DAMAGE_GAP_MS = 1000;
 
 /** VFX de acerto: dispatcher por skill/ranged/dmgType + delay pós-animação. */
 function playHitVFX(uid, crit, dmgType, opts) {
@@ -29552,6 +29616,32 @@ async function playTurn(aIdx, tIdx, opts) {
             return sk && sk.n === 'Repreensão Infernal' && sk.reactionOnly
                 && target.res && (target.res.value | 0) >= (sk.cost | 0);
         }));
+    /* 2026-06-21 (user: "mostre a animação de ataque só depois dos dados de dano,
+       colocando a animação 1s antes da animação do dano causado"): no acerto NORMAL,
+       a animação de ATAQUE (slash/lunge/impacto) toca AGORA — depois dos dados de dano
+       (showDamageDice acima) e ANTES da animação do dano (applyHpAfterDamage abaixo),
+       com SIM_ATTACK_TO_DAMAGE_GAP_MS de respiro. Antes o playHitVFX vinha no FIM do
+       turno (depois do dano). Escopo: só normal hits — reações (Escudo Arcano/contra-
+       ataque) já tocam o VFX cedo (_hitVfxPlayed) e a Repreensão Infernal tem ordem
+       própria (deferFct); ambas preservadas. */
+    var _atkVfxEarly = false;
+    if (!_rebukeWillOffer && !s._hitVfxPlayed && hitRes.hit) {
+        var _avUid = unitUidForOrderIndex(s, tIdx);
+        var _avFrom = unitUidForOrderIndex(s, aIdx);
+        if (_avUid) {
+            await playHitVFX(_avUid, critForDeath, resolveSkillHitDmgType(actor, atkSkill), {
+                fromUid: _avFrom, skill: atkSkill || null,
+                sneakAttack: !!(atkSkill && atkSkill.sneakAttack && hitRes && hitRes.hit),
+            });
+            /* SFX de impacto casado com o slash (alvo player/aliado). */
+            if (target && (target.t === 'p' || target.t === 'a')) {
+                try { if (critForDeath && typeof sfxCrit === 'function') sfxCrit(); else if (typeof sfxHit === 'function') sfxHit(); } catch (_eSfxE) {}
+            }
+            s._hitVfxPlayed = true;  // suprime o playHitVFX do fim do turno
+            _atkVfxEarly = true;
+            await sleep(SIM_ATTACK_TO_DAMAGE_GAP_MS);  // respiro: ataque → +1s → dano
+        }
+    }
     applyHpAfterDamage(s, target, oldHp, newHp, {
         deathFailCrit: !!critForDeath,
         dmgType: dmgTypeFinal,
@@ -30024,7 +30114,7 @@ async function playTurn(aIdx, tIdx, opts) {
     /* User sessão #69: som de dano quando o INIMIGO acerta o player/aliado. Antes só
        tocava no caminho player→inimigo (via showDamageDice). Gated em alvo da party
        (t==='p'||'a') pra NÃO duplicar com o SFX do ataque do próprio player. */
-    if (target && (target.t === 'p' || target.t === 'a')) {
+    if (!_atkVfxEarly && target && (target.t === 'p' || target.t === 'a')) {
         try {
             if (critForDeath && typeof sfxCrit === 'function') sfxCrit();
             else if (typeof sfxHit === 'function') sfxHit();
