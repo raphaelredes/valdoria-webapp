@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T19:56:37Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T20:49:44Z - do not edit directly, edit source -->
 
 
 
@@ -2827,6 +2827,34 @@ body.perf-lite #top-danger { animation: none !important; }
   justify-content: center;
 }
 .footer-row.footer-quick { gap: var(--v-space-xs, 2px); }
+/* M10 (PHB p.182-183): seletor de Ritmo de Viagem (3 segmentos) na footer-nav. */
+.pace-selector {
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--v-space-xs, 2px); width: 100%;
+}
+.pace-selector .pace-lbl {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(10px * var(--v-font-scale, 1)); font-weight: 700;
+  color: var(--v-text-dim, #a09484); text-transform: uppercase;
+  letter-spacing: 0.5px; margin-right: var(--v-space-xs, 2px);
+}
+.pace-btn {
+  flex: 1 1 0; min-height: 30px;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(11px * var(--v-font-scale, 1)); font-weight: 700;
+  color: var(--v-text-dim, #a09484);
+  background: linear-gradient(180deg, rgba(58,48,40,0.6), rgba(42,36,32,0.6));
+  border: 1px solid var(--v-border, #4a3828);
+  border-radius: var(--v-radius-sm, 6px);
+  padding: 4px var(--v-space-sm, 6px); cursor: pointer;
+  transition: all var(--v-transition, 0.2s) ease;
+}
+.pace-btn.active {
+  color: var(--v-gold, #c4953a);
+  background: linear-gradient(180deg, rgba(80,62,30,0.95), rgba(56,44,22,0.92));
+  border-color: var(--v-gold, #c4953a);
+  box-shadow: 0 0 8px rgba(196,149,58,0.25);
+}
 .footer-row.footer-nav {
   gap: var(--v-space-xs, 2px);
   padding-top: var(--v-space-xs, 2px);
@@ -15209,7 +15237,10 @@ window.__explFetchTO = function(url, opts, ms) {
       console.info('[E-REM:API-MOVE] send col=' + col + ' row=' + row
         + ' motor_tok=' + tok.slice(0, 8) + '...');
       var res = await _post('/api/exploracao/move',
-        { token: tok, col: col, row: row });
+        // M10 (PHB p.182-183): manda o ritmo de viagem escolhido (servidor valida + modula
+        // a cadência de encontros). Default 'normal' se nada selecionado.
+        { token: tok, col: col, row: row,
+          pace: (window.S && window.S.travelPace) || 'normal' });
       if (res && res.state) {
         console.info('[E-REM:API-MOVE] ok pos=(' + res.state.player_col + ',' + res.state.player_row + ')'
           + ' hp=' + res.state.hp + '/' + res.state.mhp
@@ -33543,6 +33574,11 @@ function onMoveEnd(col, row) {
           // M8: condições idem. Reflete no HUD (pips de exaustão + badge de condição).
           if (typeof res.state.exhaustion === 'number') S.player.exh = res.state.exhaustion;
           if (Array.isArray(res.state.conditions)) S.player.conditions = res.state.conditions.slice();
+          // M10: ritmo de viagem é server-authoritative — reflete a seleção confirmada.
+          if (typeof res.state.travel_pace === 'string' && res.state.travel_pace) {
+            S.travelPace = res.state.travel_pace;
+            try { _updatePaceUI(); } catch (_) { /* footer pode não estar montado */ }
+          }
           if (Array.isArray(res.state.visited)) {
             for (var i = 0; i < res.state.visited.length; i++) {
               var pair = res.state.visited[i];
@@ -42617,6 +42653,32 @@ function _applyExploreFooterCollapsedClass() {
     else document.body.classList.remove('footer-collapsed');
   } catch (_) { /* DOM not ready */ }
 }
+// M10: ritmo atual (server-authoritative — sincronizado de res.state.travel_pace nos
+// handlers de /move e /init). Default 'normal'. Em memória (não localStorage: é estado
+// de jogo, vive no servidor; o cliente só reflete + manda no próximo /move).
+var _PACE_LABELS = { cautious: 'Cauteloso', normal: 'Normal', fast: 'Rápido' };
+function _updatePaceUI() {
+  var cur = (window.S && window.S.travelPace) || 'normal';
+  var btns = document.querySelectorAll('#footer-nav .pace-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('active', btns[i].getAttribute('data-pace') === cur);
+  }
+}
+function _setTravelPace(pace) {
+  if (!_PACE_LABELS[pace]) return;
+  if (!window.S) return;
+  if (window.S.travelPace === pace) return;
+  window.S.travelPace = pace;  // aplicado no próximo /move (servidor valida + persiste)
+  _updatePaceUI();
+  try {
+    var msg = 'Ritmo: ' + _PACE_LABELS[pace]
+      + (pace === 'fast' ? ' — mais encontros' : pace === 'cautious' ? ' — menos encontros' : '');
+    if (typeof vToast === 'function') {
+      vToast(msg, 'info', (typeof calcReadTime === 'function' ? calcReadTime(msg, 'toast') : 2000));
+    }
+  } catch (_) { /* toast opcional */ }
+}
+
 function renderExploreFooter() {
   var quickEl = document.getElementById('footer-quick');
   var navEl = document.getElementById('footer-nav');
@@ -42650,7 +42712,26 @@ function renderExploreFooter() {
     +   '<span class="fb-ico">⚙</span>'
     + '</button>';
   quickEl.innerHTML = _html;  // static trusted markup (ver nota acima)
-  if (navEl) navEl.innerHTML = '';
+  // M10 (PHB p.182-183 Travel Pace): seletor de ritmo na footer-nav (3 segmentos).
+  // Cauteloso = menos encontros (furtivo); Rápido = mais encontros (desatento). O ritmo
+  // é mandado no /move e o SERVIDOR valida + modula a cadência (server-authoritative).
+  if (navEl) {
+    navEl.innerHTML = ''
+      + '<div class="pace-selector" role="group" aria-label="Ritmo de viagem">'
+      +   '<span class="pace-lbl">Ritmo:</span>'
+      +   '<button class="pace-btn" data-pace="cautious" title="Cauteloso — avança devagar, menos encontros">Cauteloso</button>'
+      +   '<button class="pace-btn" data-pace="normal" title="Normal — ritmo padrão">Normal</button>'
+      +   '<button class="pace-btn" data-pace="fast" title="Rápido — cobre terreno depressa, mais encontros">Rápido</button>'
+      + '</div>';
+    var _paceBtns = navEl.querySelectorAll('.pace-btn');
+    for (var _pi = 0; _pi < _paceBtns.length; _pi++) {
+      _paceBtns[_pi].addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        _setTravelPace(this.getAttribute('data-pace'));
+      });
+    }
+    try { _updatePaceUI(); } catch (_) { /* S ainda não pronto */ }
+  }
   // PADRAO_VOLUME: força re-embed do va-btn em #footer-quick (igual cidade
   // ~10938). audio-manager.js pode ter caído no botão flutuante (#va-float) se
   // o footer-quick estava vazio no init — agora que está populado, re-embeda.
