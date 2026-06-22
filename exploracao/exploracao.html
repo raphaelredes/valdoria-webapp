@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T02:37:13Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T12:42:06Z - do not edit directly, edit source -->
 
 
 
@@ -10567,6 +10567,134 @@ window.__onIntroTap = function() {
     }
   }
 
+  /* ──────────────────────────────────────────────────────────────────────
+     C1 (SUPREME RULE #0, auditoria 2026-06-21): em REMOTE os tile-objects
+     resolvem no MOTOR (POST /api/exploracao/tile_event_choice), não no
+     cliente. Espelha o fluxo REMOTE dos eventos (resolveChoice ~36597): o
+     servidor rola o skill check + aplica deltas/loot + devolve outcome +
+     combat_redirect; o cliente anima o dado (d20 DO SERVIDOR), aplica o state
+     autoritativo e renderiza. SEM fallback client-side (M6: nunca fabrica —
+     erro de rede vira retry, não resolução local).
+     ────────────────────────────────────────────────────────────────────── */
+  function _remoteTileClr(el) { if (el) { while (el.firstChild) el.removeChild(el.firstChild); } }
+
+  function _remoteTileDice(check) {
+    // Anima o dado 3D com o d20 DO SERVIDOR e resolve quando termina/skip.
+    // Mesmas 3 camadas de safety do _remoteRenderDiceAndResolve (eventos).
+    return new Promise(function (resolve) {
+      var overlay = document.getElementById('dice-overlay');
+      var wrap = document.getElementById('dice-canvas-wrap');
+      var formula = document.getElementById('dice-formula');
+      var result = document.getElementById('dice-result');
+      var skipBtn = document.getElementById('dice-skip-btn');
+      if (!overlay || !check) { resolve(); return; }
+      _remoteTileClr(wrap); _remoteTileClr(formula); _remoteTileClr(result);
+      result.className = ''; result.style.display = 'none';
+      skipBtn.style.display = 'none';
+      overlay.classList.add('visible');
+      var d20 = check.d20, total = check.total, dc = check.dc, success = check.success;
+      var mod = (check.modifier || 0) + (check.proficiency_bonus || 0);
+      var advanced = false;
+      function advance() {
+        if (advanced) return; advanced = true;
+        overlay.classList.remove('visible');
+        setTimeout(resolve, 350);
+      }
+      skipBtn.onclick = function (ev) { ev.stopPropagation(); advance(); };
+      skipBtn.addEventListener('click', function (ev) { ev.stopPropagation(); advance(); });
+      skipBtn.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); advance(); });
+      skipBtn.style.setProperty('pointer-events', 'auto', 'important');
+      skipBtn.style.setProperty('cursor', 'pointer', 'important');
+      skipBtn.style.setProperty('z-index', '999', 'important');
+      result.onclick = function () { advance(); };
+      result.style.cursor = 'pointer'; result.style.userSelect = 'none';
+      var shown = false;
+      function showResult() {
+        if (shown) return; shown = true;
+        _remoteTileClr(formula);
+        var modStr = (mod >= 0 ? '+' : '') + mod;
+        formula.appendChild(document.createTextNode('d20 ' + d20 + ' ' + modStr + ' = '));
+        var b = document.createElement('b'); b.textContent = String(total); formula.appendChild(b);
+        formula.appendChild(document.createTextNode(' vs CD ' + dc));
+        result.className = success ? 'success' : 'failure';
+        result.textContent = success ? 'SUCESSO' : 'FALHA';
+        result.style.display = 'inline-block';
+        skipBtn.textContent = 'Continuar';
+        skipBtn.style.setProperty('display', 'inline-block', 'important');
+        skipBtn.style.setProperty('visibility', 'visible', 'important');
+        skipBtn.style.setProperty('opacity', '1', 'important');
+      }
+      var safetyTimer = setTimeout(showResult, 3000);
+      function wrappedShow() { clearTimeout(safetyTimer); showResult(); }
+      if (window.Dice3D) {
+        try {
+          var dice = new window.Dice3D(wrap, { size: 200, dieType: 'd20', duration: 1500 });
+          dice.roll(d20, wrappedShow);
+          return;
+        } catch (e) { /* fallback timer abaixo */ }
+      }
+      setTimeout(wrappedShow, 900);
+    });
+  }
+
+  function _remoteTileResolveServer(choice, rt) {
+    // SEMPRE resolve a promise (nunca rejeita): erro → {mode:'remote', _error:true}
+    // (o caller restaura o popup, não fabrica). Sucesso → {success, mode:'remote',
+    // _serverOutcome, _combatRedirect}; anima o dado se houve skill check.
+    var tileKey = rt.type + '.' + rt.state;
+    var apiBase = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+    var url = apiBase + '/api/exploracao/tile_event_choice';
+    var bodyJson = JSON.stringify({
+      token: window.__EXPLORE_TOKEN, tile_key: tileKey,
+      choice_id: choice.id, hex_id: rt.hexId || ''
+    });
+    if (window.TileLog) window.TileLog.info('STUB-EVT', 'remote_tile_resolve', {
+      tile: tileKey, choice: choice.id, hex: rt.hexId
+    });
+    return window.__explFetchTO(url, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN, 'Content-Type': 'application/json' },
+      body: bodyJson
+    }, 12000).then(function (resp) { return resp.json(); }).then(function (res) {
+      if (!res || res.error) { throw new Error('server:' + ((res && res.error) || 'no_response')); }
+      var so = res.outcome || {};
+      if (res.state) {
+        try {
+          var p = (window.S && window.S.player) ? window.S.player : null;
+          if (p && typeof res.state.hp === 'number') p.hp = res.state.hp;
+          if (p && typeof res.state.mp === 'number') p.mp = res.state.mp;
+          if (typeof res.state.gold === 'number') {
+            if (window.S) window.S.gold = res.state.gold;
+            if (p) p.gold = res.state.gold;
+          }
+          if (p && typeof res.state.xp === 'number') p.xp = res.state.xp;
+          if (p && typeof res.state.exhaustion === 'number') p.exh = res.state.exhaustion;
+          if (typeof updateHud === 'function') updateHud();
+        } catch (eS) {
+          if (window.TileLog) window.TileLog.warn('STUB-EVT', 'remote_tile_state_sync_err', { e: String(eS && eS.message) });
+        }
+      }
+      var ret = {
+        success: (so.tier !== 'failure'), mode: 'remote',
+        _serverOutcome: so, _combatRedirect: res.combat_redirect || null
+      };
+      if (so.check && choice.skill) {
+        return _remoteTileDice(so.check).then(function () { return ret; });
+      }
+      return ret;
+    }).catch(function (e) {
+      if (window.TileLog) window.TileLog.warn('STUB-EVT', 'remote_tile_resolve_error', { err: String((e && e.message) || e) });
+      return { mode: 'remote', _error: true };
+    });
+  }
+
+  function _remoteTileRestore(container, popupCard) {
+    // M6: erro de rede NÃO fabrica resolução — restaura o popup pra retry.
+    try { if (typeof vToast === 'function') vToast('⚠️ Falha ao resolver (rede). Toque na opção novamente.', 'warn'); } catch (_) {}
+    if (container) { container.style.pointerEvents = ''; container.style.transition = ''; container.style.opacity = '1'; container.style.visibility = ''; }
+    if (popupCard) { popupCard.style.transition = ''; popupCard.style.opacity = '1'; popupCard.style.visibility = ''; }
+  }
+
   function _onChoiceClickEnhanced(choice, rt) {
     if (window.TileLog) window.TileLog.info('STUB-EVT', 'choice', {
       choiceId: choice.id, hex: rt.hexId, source: rt.source
@@ -10591,8 +10719,17 @@ window.__onIntroTap = function() {
       _popupCard.style.opacity = '0';
       _popupCard.style.visibility = 'hidden';
     }
+    // C1 (SUPREME RULE #0): em REMOTE, tile-objects resolvem no MOTOR. LOCAL (file://)
+    // mantém o fluxo client-side (rollChoice + OutcomeApplier) como DEV tool.
+    var _remoteTile = (window.__EXPLORE_MODE === 'remote'
+      && rt && rt.source === 'tile_object' && rt.type && rt.state
+      && choice && choice.id
+      && window.__EXPLORE_TOKEN && window.__EXPLORE_API_BASE
+      && typeof window.__explFetchTO === 'function');
     var rollPromise;
-    if (choice.skill && typeof choice.dc === 'number' && window.SkillCheckResolver) {
+    if (_remoteTile) {
+      rollPromise = _remoteTileResolveServer(choice, rt);
+    } else if (choice.skill && typeof choice.dc === 'number' && window.SkillCheckResolver) {
       rollPromise = window.SkillCheckResolver.rollChoice(
         choice,
         (window.S && window.S.player) ? window.S.player : {}
@@ -10601,8 +10738,24 @@ window.__onIntroTap = function() {
       rollPromise = Promise.resolve({ success: true, mode: 'noroll' });
     }
     rollPromise.then(function (rollResult) {
-      var outcome = rollResult.success ? choice.outcome_ok : choice.outcome_fail;
-      if (!outcome) outcome = choice.outcome_ok || { ops: [], fsm: null, flavor: '' };
+      // C1: erro de rede em REMOTE → restaura popup, NÃO fabrica resolução (M6).
+      if (rollResult && rollResult._error) { _remoteTileRestore(container, _popupCard); return; }
+      var outcome;
+      if (rollResult && rollResult.mode === 'remote') {
+        // Servidor já aplicou deltas/loot. Reconstrói o outcome só com o que o cliente
+        // ainda aplica/renderiza: flags (mirror p/ gating client-side) + fsm (lifecycle
+        // do tile dormant→cleared) + flavor/chain/tech. SEM ops de delta (anti double-apply).
+        var _so = rollResult._serverOutcome || {};
+        var _mirrorFlags = (_so.flags || []).map(function (fid) { return { op: 'flag', id: fid, scope: 'session' }; });
+        outcome = {
+          ops: _mirrorFlags, fsm: _so.fsm || null,
+          flavor: _so.flavor || '', chain: _so.chain || null,
+          tech: _so.tech || null, script: _so.script || null
+        };
+      } else {
+        outcome = rollResult.success ? choice.outcome_ok : choice.outcome_fail;
+        if (!outcome) outcome = choice.outcome_ok || { ops: [], fsm: null, flavor: '' };
+      }
       /* 2026-05-06: Persistir choice (anti-cheat save-scumming).
          Skipa eventos com rt.repeatable=true (campfire_rest, descansos etc.).
          Skipa showcase (sem hexId/legacyId estável → eventKey null → no-op). */
@@ -10708,6 +10861,19 @@ window.__onIntroTap = function() {
             choiceId: choice.id, hex: rt.hexId
           });
           if (bodyEl) bodyEl.classList.remove('stub-popup-outcome-ok', 'stub-popup-outcome-fail');
+          // C1 (SUPREME RULE #0): em REMOTE o combate já foi staged no MOTOR
+          // (combat_redirect). Navega pra URL server-authoritative em vez de
+          // triggerCombatScreen client-side (que rodaria combate LOCAL sem token).
+          if (rollResult && rollResult.mode === 'remote'
+              && rollResult._combatRedirect && rollResult._combatRedirect.redirect_url) {
+            if (window.TileLog) window.TileLog.info('STUB-EVT', 'finalize_combat_redirect', {
+              enemy: rollResult._combatRedirect.enemy_id, hex: rt.hexId
+            });
+            _close();
+            try { window.__valdoria_transitioning = true; } catch (_) {}
+            window.location.href = rollResult._combatRedirect.redirect_url;
+            return;
+          }
           // Sessão #67 (regra #0 servidor autoridade): o StubEventLayer só fazia
           // _close() — o combate do evento (failCombat/okCombat → dungeon_combat)
           // NUNCA disparava (bug do user "Finalizar não faz nada e volta pra
