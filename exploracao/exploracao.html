@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T23:59:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T01:40:37Z - do not edit directly, edit source -->
 
 
 
@@ -40561,17 +40561,33 @@ var _xcartDpr = 1;            // DPR efetivo (capado) — passado ao motor p/ ba
 // Map server→cart espelha o de [E-REM:API-INIT] (~L14918).
 function _hydrateExploreKnown(){
   if (window.__EXPLORE_MODE !== 'remote') return;
-  if (Array.isArray(window.__EXPLORE_KNOWN)) return;  // já hidratado
+  // 2026-06-21 (user bug: após CAMINHAR até um mapa, a cartografia mostrava só 1 nó):
+  // rehidrata se AUSENTE *ou* se só tem a origem (<=1). Antes: early-return em QUALQUER
+  // array → não cobria o estado fail-closed []/[origem] pós-VIAGEM. Edge travel usa
+  // nointro=1 → o mapa abre ANTES do /init (fire-and-forget) resolver → known fica
+  // vazio. E knownLocations() exige o motor token (que vem do MESMO /init pendente),
+  // então um único fetch falhava silenciosamente. Agora faz POLL curto pelo token.
+  var _k0 = window.__EXPLORE_KNOWN;
+  if (Array.isArray(_k0) && _k0.length > 1) return;  // já tem mais que a origem
   if (!(window.ExploracaoAPI && typeof ExploracaoAPI.knownLocations === 'function')) return;
-  try {
-    ExploracaoAPI.knownLocations().then(function(arr){
-      if (!Array.isArray(arr)) return;
-      var m = { 'city_gates': 'plains', 'whispering_woods': 'forest', 'misty_marshes': 'swamp', 'golden_sands': 'desert', 'underground_passage': 'cave', 'stone_peaks': 'mountain', 'ancient_cemetery': 'graveyard', 'frozen_waste': 'snow', 'burning_crater': 'volcanic' };
-      window.__EXPLORE_KNOWN = arr.map(function(k){ return m[k] || k; });
-      console.info('[E-REM:CART-KNOWN] hydrated on open: ' + window.__EXPLORE_KNOWN.length + ' [' + window.__EXPLORE_KNOWN.join(',') + ']');
-      if (typeof _xcartDraw === 'function' && typeof _xcartCtx !== 'undefined' && _xcartCtx) { try { _xcartDraw(); } catch (_) {} }
-    }).catch(function () {});
-  } catch (_) {}
+  var _tries = 0;
+  (function _attempt(){
+    var tok = (typeof _motorToken === 'function') ? _motorToken() : (window.__EXPLORE_MOTOR_TOKEN || '');
+    if (!tok) { if (_tries++ < 30) setTimeout(_attempt, 200); return; }  // ~6s aguardando o /init setar o motor token
+    try {
+      ExploracaoAPI.knownLocations().then(function(arr){
+        if (!Array.isArray(arr)) return;
+        var m = { 'city_gates': 'plains', 'whispering_woods': 'forest', 'misty_marshes': 'swamp', 'golden_sands': 'desert', 'underground_passage': 'cave', 'stone_peaks': 'mountain', 'ancient_cemetery': 'graveyard', 'frozen_waste': 'snow', 'burning_crater': 'volcanic' };
+        var _mapped = arr.map(function(k){ return m[k] || k; });
+        // nunca REDUZ o known set (o servidor é autoridade; se já tínhamos mais, mantém)
+        if (!Array.isArray(window.__EXPLORE_KNOWN) || _mapped.length >= window.__EXPLORE_KNOWN.length) {
+          window.__EXPLORE_KNOWN = _mapped;
+        }
+        console.info('[E-REM:CART-KNOWN] hydrated on open: ' + window.__EXPLORE_KNOWN.length + ' [' + window.__EXPLORE_KNOWN.join(',') + ']');
+        if (typeof _xcartDraw === 'function' && typeof _xcartCtx !== 'undefined' && _xcartCtx) { try { _xcartDraw(); } catch (_) {} }
+      }).catch(function () {});
+    } catch (_) {}
+  })();
 }
 
 function openCartography() {
@@ -40687,8 +40703,16 @@ var _xcartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShare
   // abertura da cartografia) busca o set real e redesenha.
   getKnownLocations: function(){
     var k = window.__EXPLORE_KNOWN;
-    if (Array.isArray(k)) return k;
-    return (window.__EXPLORE_MODE === 'remote') ? [] : null;
+    if (Array.isArray(k) && k.length) return k;
+    // FAIL-CLOSED (#0): em REMOTE sem o known set ainda (init fire-and-forget não
+    // resolveu / hydrate em andamento), NÃO mostra tudo. Mas inclui a localização
+    // ATUAL (o player está nela) pra não desenhar um mapa 100% sob névoa durante o
+    // race pós-viagem — _hydrateExploreKnown() busca o set completo e redesenha.
+    if (window.__EXPLORE_MODE === 'remote') {
+      var cur = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : null;
+      return cur ? [cur] : [];
+    }
+    return null;
   },
   getPlayerBiomeKey: _cartGetPlayerBiomeV2,
   onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartDraw === 'function') _xcartDraw(); }
