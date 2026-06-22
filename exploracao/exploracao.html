@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T17:53:49Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T19:56:37Z - do not edit directly, edit source -->
 
 
 
@@ -33539,6 +33539,10 @@ function onMoveEnd(col, row) {
           if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
           if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
           if (typeof res.state.gold === 'number') S.gold = res.state.gold;
+          // M9: exaustão é SERVER-AUTHORITATIVE (marcha forçada pode tê-la elevado);
+          // M8: condições idem. Reflete no HUD (pips de exaustão + badge de condição).
+          if (typeof res.state.exhaustion === 'number') S.player.exh = res.state.exhaustion;
+          if (Array.isArray(res.state.conditions)) S.player.conditions = res.state.conditions.slice();
           if (Array.isArray(res.state.visited)) {
             for (var i = 0; i < res.state.visited.length; i++) {
               var pair = res.state.visited[i];
@@ -33557,6 +33561,24 @@ function onMoveEnd(col, row) {
         } catch (eS) {
           LOGE('API', 'state_sync err=' + (eS && eS.message));
         }
+      }
+      // M9 (PHB p.181): Marcha Forçada — o servidor resolveu teste(s) de CON pós-move.
+      // Não é modal (penalidade passiva de viagem, igual ao log do world_travel) — só um
+      // toast + os pips de exaustão do HUD (já sincronizados acima). vToast usa o tempo
+      // de leitura canônico. Server-authoritative: o cliente só narra o que veio.
+      if (res.forced_march && res.forced_march.triggered) {
+        try {
+          var _fm = res.forced_march;
+          var _gain = _fm.gained_exhaustion || 0;
+          var _msg = _gain > 0
+            ? '⚠️ Marcha forçada: o cansaço do dia te alcança (Exaustão +' + _gain + ').'
+            : '🏃 Marcha forçada: você resiste ao cansaço do dia (teste de Constituição).';
+          if (typeof vToast === 'function') {
+            vToast(_msg, _gain > 0 ? 'warn' : 'info',
+                   (typeof calcReadTime === 'function' ? calcReadTime(_msg, 'toast-warn') : 4000));
+          }
+          LOG('API', 'forced_march gained_exh=' + _gain + ' exhaustion=' + (_fm.exhaustion != null ? _fm.exhaustion : '?'));
+        } catch (eFM) { LOGW('API', 'forced_march_toast err=' + (eFM && eFM.message)); }
       }
       // Event: server rolou → abre modal (sobrepõe local, que não rodou)
       if (res.event && S.ph !== 'event') {
