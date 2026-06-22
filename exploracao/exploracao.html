@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T21:07:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T23:14:23Z - do not edit directly, edit source -->
 
 
 
@@ -363,6 +363,23 @@
 =================================================================================
   HISTÓRICO DE VERSÕES (mais recente no topo)
 =================================================================================
+
+  V2.7 — #12 Fase 1: eventos HAZARD via vEncounter (2026-06-22):
+   * Eventos de tipo 'hazard' em REMOTE deixam o openEventModal (System B,
+     #event-modal legado) e passam a renderizar pelo vEncounter.render CANONICO
+     (PADRAO_ALDRIC: script[] + npc) + dado 3D do d20 do SERVIDOR (PADRAO_DADOS).
+     Servidor segue autoridade (#0): resolve_choice rola/aplica; M6 (sem fabricar).
+   * Gate em onMoveEnd (.then do /move): `_explEventUsesVEncounter(S.event)` →
+     `_explShowEventVEnc` se hazard; senao openEventModal (outros tipos).
+   * Funcoes novas (grep "#12 FASE 1" ou "_explShowEventVEnc"):
+       _EXPL_VENC_EVENT_TYPES (allowlist por tipo — so 'hazard' na Fase 1)
+       _explEventUsesVEncounter / _explEventHeaderNpc / _explEventBodyNode
+       _explShowEventVEnc (corpo) / _explEventVEncResolve (server resolve)
+       _explShowOutcomeVEnc (outcome) / _explOutcomeRewardBlock
+       _explEventVEncFinish / _explFinalizeCombatRedirect / _explSyncStateFromServer
+       _remoteRenderDiceAndResolve ganhou 3o param OPCIONAL onDone (DRY do dado).
+   * Doc: docs/sistemas/explore-events-vencounter-migration.md. StubEventLayer
+     (System A) segue so LOCAL/DEV. Proximas fases: social/discovery/tile/dungeon.
 
   V2.6 — Avoiding-centro + Mata Isolation Fog (2026-04-27):
    * USER RULE: "o foco dos hex tiles é não ficar no centro, pois lá estará
@@ -33618,10 +33635,17 @@ function onMoveEnd(col, row) {
       }
       // Event: server rolou → abre modal (sobrepõe local, que não rodou)
       if (res.event && S.ph !== 'event') {
-        LOG('API', 'motor_event id=' + res.event.id + ' biome=' + res.event.biome);
+        LOG('API', 'motor_event id=' + res.event.id + ' biome=' + res.event.biome + ' type=' + res.event.type);
         S.event = Object.assign({}, res.event, { resolved: null, __remote: true });
         S.ph = 'event';
-        try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
+        // #12 Fase 1 (2026-06-22): tipos migrados (hazard) renderizam pelo
+        // vEncounter canonico (PADRAO_ALDRIC + dado 3D do servidor). Os demais
+        // seguem no openEventModal (System B) ate as fases seguintes.
+        if (_explEventUsesVEncounter(S.event)) {
+          _explShowEventVEnc(S.event);
+        } else {
+          try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
+        }
       }
     }).catch(function(e) {
       LOGE('API', 'remote_move rejected msg=' + (e && e.message));
@@ -36985,7 +37009,12 @@ function resolveChoice(idx) {
 // safety: handlers redundantes + pointer-events + safety timeout +
 // wrappedShow clearTimeout. Aplicado AQUI o MESMO pattern pra paridade
 // total entre LOCAL e REMOTE — Continuar SEMPRE aparece, dice 3D ou não.
-function _remoteRenderDiceAndResolve(ch, oc) {
+// #12 Fase 1 (2026-06-22): 3o param OPCIONAL onDone — quando ausente mantem o
+// comportamento legado (_remoteShowOutcome em #event-modal/System B). O render
+// via vEncounter (eventos hazard) passa onDone pra animar este MESMO dado 3D do
+// servidor (PADRAO_DADOS, 3 camadas de safety) e depois renderizar o outcome no
+// vEncounter. DRY: um unico animador de dado server-d20, dois renderizadores.
+function _remoteRenderDiceAndResolve(ch, oc, onDone) {
   var overlay = document.getElementById('dice-overlay');
   var wrap = document.getElementById('dice-canvas-wrap');
   var formula = document.getElementById('dice-formula');
@@ -37004,7 +37033,10 @@ function _remoteRenderDiceAndResolve(ch, oc) {
     if (advanced) return;
     advanced = true;
     overlay.classList.remove('visible');
-    setTimeout(function() { _remoteShowOutcome(ch, oc); }, 350);
+    setTimeout(function() {
+      if (typeof onDone === 'function') { onDone(); }
+      else { _remoteShowOutcome(ch, oc); }
+    }, 350);
   }
   // SAFETY 1: handlers redundantes (paridade com LOCAL rollSkillCheck V2.7).
   // User reportou trava em REMOTE — onclick às vezes não dispara em mobile
@@ -37249,6 +37281,235 @@ function _remoteShowOutcome(ch, oc) {
       } catch (_) {}
     }, 2000);
   }
+}
+
+// ============================================================================
+// #12 FASE 1 (2026-06-22) — eventos de HAZARD em REMOTE renderizam pelo
+// vEncounter.render CANONICO (mesmo da cidade/prologo/arrival), fechando
+// PADRAO_ALDRIC (script[] tipado + npc) e PADRAO_DADOS (dado 3D do d20 do
+// SERVIDOR). O servidor continua a AUTORIDADE (#0): resolve_choice rola o d20,
+// aplica deltas/loot, devolve combat_redirect. SEM fallback que fabrica (M6):
+// erro de rede = retry, nunca resolucao local. openEventModal (System B) segue
+// pros OUTROS tipos (flag por tipo abaixo); StubEventLayer = so LOCAL/DEV.
+// Mold: arrival encounters (_arrivalRenderNode/_arrivalChoice) + dado reusa
+// _remoteRenderDiceAndResolve(ch, oc, onDone). Doc: docs/sistemas/
+// explore-events-vencounter-migration.md.
+// ============================================================================
+
+// Allowlist por tipo (EVENT_TYPES do servidor: hazard/social/discovery/...).
+// Fase 1 = so 'hazard'. Fases seguintes ligam social/discovery/tile/dungeon.
+var _EXPL_VENC_EVENT_TYPES = { hazard: true };
+var _explVEncResolving = false;
+
+function _explEventUsesVEncounter(ev) {
+  return !!(ev && ev.type && _EXPL_VENC_EVENT_TYPES[ev.type]
+    && window.__EXPLORE_MODE === 'remote'
+    && window.ExploracaoAPI && window.ExploracaoAPI.hasToken()
+    && window.vEncounter && typeof window.vEncounter.render === 'function');
+}
+
+// npc do header: NPC real do evento se houver; senao o TITULO (hazards sao
+// ambientais, sem NPC) — a narrativa vive no script[]. NUNCA inventa retrato.
+function _explEventHeaderNpc(ev) {
+  if (ev && ev.npc && ev.npc.name) return ev.npc;
+  return { name: (ev && ev.title) ? ev.title : 'Perigo' };
+}
+
+function _explEventBodyNode(ev) {
+  var script = (Array.isArray(ev.script) && ev.script.length)
+    ? ev.script
+    : [{ type: 'narration', text: ev.text || ev.title || '' }];
+  var choices = (ev.choices || []).map(function (ch, i) {
+    var c = { id: '__expl_ch_' + i, label: ch.label || ('Opcao ' + (i + 1)), _idx: i };
+    if (ch.skill && typeof ch.dc === 'number') { c.skill = ch.skill; c.dc = ch.dc; }
+    return c;
+  });
+  return { npc: _explEventHeaderNpc(ev), script: script, choices: choices };
+}
+
+// Renderiza o CORPO do evento via vEncounter. Defensivo: se o render lancar,
+// cai pro openEventModal (System B, tambem server-authoritative) — nunca deixa
+// o jogador preso sem o evento.
+function _explShowEventVEnc(ev) {
+  _explVEncResolving = false;
+  try {
+    window.vEncounter.render(_explEventBodyNode(ev), {
+      player: S.player, closeable: false, inlineChoices: true,
+      onChoice: function (ch) { _explEventVEncResolve(ev, ch); }
+    });
+    LOG('EVENT', 'vencounter_render id=' + ev.id + ' type=' + ev.type);
+  } catch (e) {
+    LOGE('EVENT', 'vencounter_render_failed id=' + ev.id + ' err=' + (e && e.message)
+      + ' -> fallback openEventModal');
+    try {
+      document.getElementById('event-modal').classList.add('visible');
+      openEventModal();
+    } catch (_) {}
+  }
+}
+
+// Resolve a escolha no MOTOR; anima o d20 do servidor; renderiza o outcome no
+// vEncounter. _explVEncResolving guarda contra duplo-clique (1 resolucao por vez).
+function _explEventVEncResolve(ev, ch) {
+  if (_explVEncResolving) return;
+  var idx = (ch && typeof ch._idx === 'number') ? ch._idx : -1;
+  if (idx < 0 || !ev.choices || !ev.choices[idx]) {
+    LOGW('EVENT', 'vencounter_bad_choice idx=' + idx);
+    return;
+  }
+  if (!(window.ExploracaoAPI && window.ExploracaoAPI.hasToken())) {
+    // Sem token = nao-remoto: o gate nao deveria deixar chegar aqui (defensivo).
+    LOGW('EVENT', 'vencounter_resolve_no_token');
+    return;
+  }
+  _explVEncResolving = true;
+  var realCh = ev.choices[idx];
+  LOG('API', 'vencounter_event_choice idx=' + idx + ' label=' + (realCh.label || '?'));
+  window.ExploracaoAPI.eventChoice(idx).then(function (res) {
+    if (!res || res.error) { _explEventVEncError(ev, res && res.error); return; }
+    var oc = res.outcome || {};
+    _explSyncStateFromServer(res.state);
+    if (res.combat_redirect) { oc._combat_redirect = res.combat_redirect; }
+    if (oc.flavor && !oc.text) { oc.text = oc.flavor; }
+    // Fecha o corpo ANTES do dado (o #dice-overlay aparece limpo, sem o card atras).
+    try { window.vEncounter.close(); } catch (_) {}
+    if (oc.check && realCh.skill) {
+      // Reusa o animador canonico do d20 do servidor; onDone renderiza o outcome.
+      _remoteRenderDiceAndResolve(realCh, oc, function () { _explShowOutcomeVEnc(ev, oc); });
+    } else {
+      _explShowOutcomeVEnc(ev, oc);
+    }
+  }).catch(function (e) {
+    _explEventVEncError(ev, (e && e.message) || 'rejected');
+  });
+}
+
+// M6 (SUPREME RULE #0): erro RECUPERAVEL — NUNCA fabrica. Avisa e reabre o corpo
+// pro jogador retentar (o servidor decide a resolucao).
+function _explEventVEncError(ev, reason) {
+  _explVEncResolving = false;
+  LOGW('API', 'vencounter_event_choice recoverable_error reason=' + (reason || '?')
+    + ' — nao fabrica (SUPREME RULE #0)');
+  try { if (typeof vToast === 'function') vToast('⚠️ Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
+  _explShowEventVEnc(ev);
+}
+
+// Bloco de recompensa (PADRAO_ALDRIC) a partir do delta/loot do SERVIDOR. So
+// ganhos POSITIVOS viram card (perdas ja foram sincronizadas no HUD). null se nada.
+function _explOutcomeRewardBlock(oc) {
+  var d = oc.delta || {};
+  var items = [];
+  if (Array.isArray(oc.loot) && oc.loot.length) {
+    var seen = {};
+    oc.loot.forEach(function (li) {
+      var n = li && (li.item_id || li.name || li.id);
+      if (n && !seen[n]) { seen[n] = 1; items.push(n); }
+    });
+  }
+  var hasReward = (d.gold > 0) || (d.xp > 0) || (d.hp > 0) || (d.mp > 0) || items.length;
+  if (!hasReward) return null;
+  var rb = { type: 'reward' };
+  if (d.gold > 0) rb.gold = d.gold;
+  if (d.xp > 0) rb.xp = d.xp;
+  if (items.length) rb.items = items;
+  var eff = [];
+  if (d.hp > 0) eff.push('+' + d.hp + ' PV');
+  if (d.mp > 0) eff.push('+' + d.mp + ' Mana');
+  if (eff.length) rb.effect = eff.join(' · ');
+  return rb;
+}
+
+// Outcome via vEncounter (narrativa do servidor + bloco de recompensa + Continuar).
+// Sem cb:'close' na escolha de propósito: o dispatch do vEncounter roda cb ANTES
+// do onChoice, entao um cb 'close' pularia o _explEventVEncFinish (reset de fase +
+// combat_redirect). Confiamos so no onChoice.
+function _explShowOutcomeVEnc(ev, oc) {
+  var script = (Array.isArray(oc.script) && oc.script.length)
+    ? oc.script.slice()
+    : [{ type: 'narration', text: oc.text || oc.flavor || '' }];
+  var rb = _explOutcomeRewardBlock(oc);
+  if (rb) script.push(rb);
+  var node = {
+    npc: _explEventHeaderNpc(ev),
+    script: script,
+    choices: [{ id: '__expl_continue', label: 'Continuar' }]
+  };
+  try {
+    window.vEncounter.render(node, {
+      player: S.player, closeable: false, inlineChoices: true,
+      onChoice: function () { _explEventVEncFinish(oc); }
+    });
+  } catch (e) {
+    LOGE('EVENT', 'vencounter_outcome_failed err=' + (e && e.message));
+    _explEventVEncFinish(oc);  // garante o reset de fase mesmo se o render falhar
+  }
+}
+
+// Aplica o state autoritativo do servidor no cliente (HP/MP/gold/xp/exh/cond).
+function _explSyncStateFromServer(state) {
+  if (!state) return;
+  try {
+    if (typeof state.hp === 'number') S.player.hp = state.hp;
+    if (typeof state.mp === 'number') S.player.mp = state.mp;
+    if (typeof state.gold === 'number') { S.gold = state.gold; if (S.player) S.player.gold = state.gold; }
+    if (typeof state.xp === 'number' && S.player) S.player.xp = state.xp;
+    if (typeof state.exhaustion === 'number' && S.player) S.player.exh = state.exhaustion;
+    if (Array.isArray(state.conditions) && S.player) S.player.conditions = state.conditions.slice();
+    updateHud();
+  } catch (e) { LOGE('API', 'vencounter_state_sync err=' + (e && e.message)); }
+}
+
+// Continuar -> fecha o vEncounter, reseta a fase e (se houve) navega pro combate.
+function _explEventVEncFinish(oc) {
+  _explVEncResolving = false;
+  try { window.vEncounter.close(); } catch (_) {}
+  S.event = null;
+  if (S.ph !== 'defeat') { try { _setPhase('idle', 'vencounter_event_finish'); } catch (_) { S.ph = 'idle'; } }
+  updateHud();
+  scheduleRender();
+  if (oc && oc.combat_trigger) { _explFinalizeCombatRedirect(oc); }
+}
+
+// Navega pro combate apos um outcome de evento que dispara combate. Espelha o
+// caminho de _remoteShowOutcome (linha ~37199): redirect server-authoritative
+// (com token) ou re-encena via /stage_combat; NUNCA lanca combate tokenless.
+function _explFinalizeCombatRedirect(oc) {
+  LOG('API', 'vencounter combat_redirect enemy=' + oc.combat_trigger.enemy_id);
+  setTimeout(function () {
+    try {
+      if (oc._combat_redirect && oc._combat_redirect.redirect_url) {
+        window.__valdoria_transitioning = true;
+        window.location.href = oc._combat_redirect.redirect_url;
+        return;
+      }
+      var _tok = window.__EXPLORE_TOKEN, _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+      if (window.__EXPLORE_MODE === 'remote' && _tok && _api) {
+        fetch(_api + '/api/exploracao/stage_combat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
+          body: JSON.stringify({
+            token: _tok, enemy: oc.combat_trigger.enemy_id,
+            count: (oc.combat_trigger.enemy_count || undefined),
+            surprise: !!oc.combat_trigger.surprise
+          })
+        }).then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (d && d.redirect_url) {
+              window.__valdoria_transitioning = true;
+              window.location.href = d.redirect_url;
+            } else if (typeof vToast === 'function') {
+              vToast('Nao foi possivel iniciar o combate. Tente se mover de novo.', 'err');
+            }
+          })
+          .catch(function () {
+            if (typeof vToast === 'function') vToast('Nao foi possivel iniciar o combate. Tente se mover de novo.', 'err');
+          });
+        return;
+      }
+      window.__valdoria_transitioning = true;
+      window.location.href = 'combate.html?enemy=' + encodeURIComponent(oc.combat_trigger.enemy_id);
+    } catch (_) {}
+  }, 1200);
 }
 
 // Dice overlay estilo check-overlay do combate (formula + result pill + skip btn)
