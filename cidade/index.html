@@ -3661,6 +3661,25 @@ LOG SINK (Fase 7):
     .subscreen-btn .sb-text { flex: 1; }
     .subscreen-btn .sb-info { font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); flex-shrink: 0; }
     .subscreen-back-row { text-align: center; margin-top: 6px; }
+    /* #11 (2026-06-22): cards de ranking do Mural (detalhe via service.mural_ranking). */
+    .mural-rank-list { display: flex; flex-direction: column; gap: var(--v-space-sm, 6px); text-align: left; }
+    .mural-rank-card { display: flex; align-items: center; gap: var(--v-space-sm, 6px);
+      background: linear-gradient(180deg, rgba(58,48,40,0.5), rgba(42,36,32,0.5));
+      border: 1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px);
+      padding: var(--v-space-xs, 4px) var(--v-space-sm, 6px); }
+    .mural-rank-card--me { border-color: var(--v-gold, #c4953a); box-shadow: 0 0 8px rgba(196,149,58,0.25); }
+    .mural-rank-medal { flex: 0 0 26px; text-align: center; font-weight: 700;
+      font-family: var(--v-font-display, 'Cinzel', serif); color: var(--v-gold, #c4953a);
+      font-size: var(--v-font-body, 14px); }
+    .mural-rank-portrait { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%;
+      object-fit: cover; border: 1px solid var(--v-border, #4a3828);
+      background: rgba(20,16,12,0.5); }
+    .mural-rank-info { display: flex; flex-direction: column; min-width: 0; }
+    .mural-rank-name { color: var(--v-text, #d4c8b0); font-size: var(--v-font-body, 14px);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mural-rank-sub { color: var(--v-text-dim, #a09484); font-size: var(--v-font-xs, 11px); }
+    .mural-rank-mypos { margin-top: var(--v-space-sm, 6px); text-align: center;
+      color: var(--v-text-dim, #a09484); font-size: var(--v-font-secondary, 13px); }
     .subscreen-back {
       background: transparent;
       border: 1px solid var(--v-border, #4a3828);
@@ -21377,6 +21396,56 @@ function _buildHeroesWallMockData(player){
       { icon: _heralIco('ic-mochila'), label: 'Títulos por Conquista', cb: 'heroes_titles' }
     ])
   };
+}
+
+// #11 (2026-06-22): detalhe de ranking do Mural — dados REAIS do servidor
+// (intent service.mural_ranking → world_discoveries.get_ranking). Cards com retrato
+// de classe (WebP) clicável (lightbox) + medalha + nível + score. Substitui o mock
+// text-only. Server-authoritative (#0): o cliente só renderiza o que o servidor mandou.
+function _muralRankDetail(cat){
+  var _pBase = (location.protocol === 'file:') ? '../shared/img/combat/' : '/shared/img/combat/';
+  function _render(data){
+    var entries = (data && data.entries) || [];
+    var html = '';
+    if (!entries.length){
+      html = '<div style="text-align:center;color:var(--v-text-dim,#a09484);padding:var(--v-space-md,10px)">'
+           + '<i>Nenhum aventureiro registrado neste ranking ainda.</i></div>';
+    } else {
+      html = '<div class="mural-rank-list">';
+      entries.forEach(function(e){
+        var medal = e.rank === 1 ? '🥇' : e.rank === 2 ? '🥈' : e.rank === 3 ? '🥉' : (e.rank + 'º');
+        var ck = String(e.class_key || '');
+        var nm = _esc(e.name);
+        var portrait = ck
+          ? '<img class="mural-rank-portrait" src="' + _pBase + ck + '.webp" alt="" data-n="' + nm + '" '
+            + 'style="cursor:pointer" onclick="event.stopPropagation();if(window.showLightbox)window.showLightbox(this.src,this.dataset.n,\'\');" '
+            + 'onerror="this.style.visibility=\'hidden\'">'
+          : '<span class="mural-rank-portrait"></span>';
+        html += '<div class="mural-rank-card' + (e.me ? ' mural-rank-card--me' : '') + '">'
+          + '<span class="mural-rank-medal">' + medal + '</span>'
+          + portrait
+          + '<span class="mural-rank-info"><b class="mural-rank-name">' + nm + '</b>'
+          + '<span class="mural-rank-sub">Nível ' + (e.level | 0) + ' · ' + _esc(e.score) + '</span></span>'
+          + '</div>';
+      });
+      html += '</div>';
+      if (data.player_pos && data.player_total){
+        html += '<div class="mural-rank-mypos">📊 Sua posição: <b>#' + (data.player_pos | 0)
+              + '</b> de ' + (data.player_total | 0) + ' aventureiros</div>';
+      }
+    }
+    if (typeof _showInfoPopup === 'function'){
+      _showInfoPopup({ icon: _heralIco('ic-coroa'), title: (data && data.label) || 'Ranking',
+                       desc: html, singleButton: true, cancelLabel: 'Fechar' });
+    }
+  }
+  if (window.vCityServer && typeof window.vCityServer.cityAction === 'function'){
+    window.vCityServer.cityAction('service.mural_ranking', { category: cat })
+      .then(function(res){ _render((res && res.ok) ? res : { entries: [] }); })
+      .catch(function(){ _render({ entries: [] }); });
+  } else {
+    _render({ entries: [] });  // LOCAL/dev sem servidor
+  }
 }
 
 // canonical: inn.py L83-94 — Martha greeting é dinâmico (rep_status alto:
@@ -52807,6 +52876,11 @@ function _wireSubScreenContentOnce(){
     if (cb === '__back') { navigateBack(); return; }
     // Nav prefix → sub-sub-screen (drill-down popup)
     if (cb.indexOf('nav:') === 0) { navigateTo(cb.substring(4)); return; }
+    // #11 (2026-06-22): ranking do Mural → detalhe REAL (service.mural_ranking) com
+    // cards + retrato de classe + lightbox. cb = 'heroes_rank_<categoria>'.
+    if (cb.indexOf('heroes_rank_') === 0 && typeof _muralRankDetail === 'function') {
+      _muralRankDetail(cb.substring('heroes_rank_'.length)); return;
+    }
     // Action handler → state mutation
     if (ACTION_HANDLERS[cb]) {
       _logCity('action: ' + cb);
