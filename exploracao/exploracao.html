@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T12:42:06Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T13:43:07Z - do not edit directly, edit source -->
 
 
 
@@ -33292,6 +33292,16 @@ function onMoveEnd(col, row) {
           + ' repeatable=' + !!enc.repeatable);
         S.ph = 'event';
         S.event = Object.assign({}, enc, { resolved: null });
+        // H1 (SUPREME RULE #0, 2026-06-22): em REMOTE marca o encounter pra resolver
+        // no MOTOR (resolveChoice → ramo dungeon → POST /api/exploracao/dungeon_event_choice).
+        // LOCAL (file://) fica SEM __remote = DEV tool (applyChoiceOutcome client-side).
+        if (window.__EXPLORE_MODE === 'remote') {
+          S.event.__remote = true;
+          S.event.__dungeon = true;
+          S.event._mapId = S.mapId;
+          S.event._encId = enc.id;
+          S.event._hexId = enc.col + ',' + enc.row;
+        }
         // Phase 5b polish v4 (2026-04-26): boss intro cinematic — quando entra
         // no hex do trono, dispara fade-to-dark + flash radial vermelho antes do
         // modal abrir. Nos outros encontros, abre direto sem cinematic.
@@ -36764,6 +36774,53 @@ function _remoteEventChoiceError(reason) {
 
 function resolveChoice(idx) {
   const ch = S.event.choices[idx];
+
+  // H1 (SUPREME RULE #0, 2026-06-22): DUNGEON encounter em REMOTE → resolve no MOTOR
+  // (rota dedicada /dungeon_event_choice; o ramo procedural abaixo é só pra eventos
+  // de bioma). Reusa o render REMOTE do modal de evento (_remoteRenderDiceAndResolve /
+  // _remoteShowOutcome) e o mecanismo de chain (S._eventChain → closeEventModal reabre).
+  // SEM fallback client-side (M6: erro = retry, nunca fabrica).
+  if (S.event && S.event.__dungeon && S.event.__remote && window.__EXPLORE_MODE === 'remote'
+      && window.__EXPLORE_TOKEN && window.__EXPLORE_API_BASE && typeof window.__explFetchTO === 'function') {
+    LOG('API', 'remote_dungeon_choice idx=' + idx + ' enc=' + (S.event._encId || '?'));
+    var _apiD = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+    var _mapD = S.event._mapId, _encD = S.event._encId, _hexD = S.event._hexId || '';
+    var _bodyD = JSON.stringify({
+      token: window.__EXPLORE_TOKEN, map_id: _mapD, encounter_id: _encD,
+      choice_idx: idx, hex_id: _hexD
+    });
+    window.__explFetchTO(_apiD + '/api/exploracao/dungeon_event_choice', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN, 'Content-Type': 'application/json' },
+      body: _bodyD
+    }, 12000).then(function (resp) { return resp.json(); }).then(function (res) {
+      if (!res || res.error) { _remoteEventChoiceError(res && res.error); return; }
+      var oc = res.outcome || {};
+      if (res.state) {
+        try {
+          if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
+          if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
+          if (typeof res.state.gold === 'number') { S.gold = res.state.gold; if (S.player) S.player.gold = res.state.gold; }
+          if (typeof res.state.xp === 'number' && S.player) S.player.xp = res.state.xp;
+          if (typeof res.state.exhaustion === 'number' && S.player) S.player.exh = res.state.exhaustion;
+          updateHud();
+        } catch (eS) { LOGE('API', 'dungeon_state_sync err=' + (eS && eS.message)); }
+      }
+      if (res.combat_redirect) { oc._combat_redirect = res.combat_redirect; }
+      if (oc.flavor && !oc.text) { oc.text = oc.flavor; }  // _remoteShowOutcome lê oc.text
+      // chain multi-step: marca S._eventChain (dungeon-aware) → o botão Continuar
+      // (closeEventModal) reabre o próximo passo, cujas choices voltam por este ramo.
+      if (oc.chain && oc.chain.choices) {
+        S._eventChain = Object.assign({}, oc.chain, {
+          resolved: null, __remote: true, __dungeon: true,
+          _mapId: _mapD, _encId: _encD, _hexId: _hexD
+        });
+      }
+      if (oc.check && ch.skill) { _remoteRenderDiceAndResolve(ch, oc); }
+      else { _remoteShowOutcome(ch, oc); }
+    }).catch(function (e) { _remoteEventChoiceError((e && e.message) || 'rejected'); });
+    return;
+  }
 
   // X-4.5: em REMOTE (event veio do servidor), delega resolução pro motor.
   // Server roda skill check + aplica deltas + devolve outcome + combat_redirect.
