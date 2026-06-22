@@ -283,7 +283,9 @@
     }
     var body = narr;
     if (dmgApplied > 0) {
-      body += ' <span style="color:#d85848;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;white-space:nowrap;">(−' + dmgApplied + ' HP)</span>';
+      // O texto vai pro vEncounter, cujo _san só permite i/b/em/br/strong/u/s/code —
+      // <span style> era STRIPPADO + logava '[ENC] HTML bloqueado'. Usa <b> (permitida).
+      body += ' <b>(−' + dmgApplied + ' HP)</b>';
     }
     // Morte na jornada. AUTORIDADE do desfecho:
     //  • opts.onDefeat presente (exploração REMOTE) → o CALLER decide (triggerDefeat:
