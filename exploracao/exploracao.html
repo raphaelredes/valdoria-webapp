@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T23:14:23Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T23:39:00Z - do not edit directly, edit source -->
 
 
 
@@ -37316,14 +37316,33 @@ function _explEventHeaderNpc(ev) {
 }
 
 function _explEventBodyNode(ev) {
+  // Copia o script (NAO muta o ev do servidor). Fallback ao texto plano.
   var script = (Array.isArray(ev.script) && ev.script.length)
-    ? ev.script
+    ? ev.script.slice()
     : [{ type: 'narration', text: ev.text || ev.title || '' }];
+  // Tech callout (mecanica) como linha de narracao — paridade com openEventModal.
+  if (ev.tech && ev.tech.text) {
+    script.push({ type: 'narration', text: '<b>' + (ev.tech.label || 'Mecanica') + '</b> — ' + ev.tech.text });
+  }
   var choices = (ev.choices || []).map(function (ch, i) {
     var c = { id: '__expl_ch_' + i, label: ch.label || ('Opcao ' + (i + 1)), _idx: i };
     if (ch.skill && typeof ch.dc === 'number') { c.skill = ch.skill; c.dc = ch.dc; }
     return c;
   });
+  // PADRAO_DADOS: o botao INLINE do vEncounter (hazard = 1 choice) NAO mostra o
+  // badge de pericia/CD (so o openChoices overlay mostra, e esse e usado com 2+
+  // choices). check_hint anuncia o teste numa sub-linha dourada antes das choices
+  // (mesma info do badge do openEventModal: pericia + CD + % de sucesso).
+  var skillCh = (ev.choices || []).filter(function (c) { return c && c.skill && typeof c.dc === 'number'; });
+  if (skillCh.length === 1 && script.length) {
+    var sc = skillCh[0];
+    var lbl = (typeof skillLabelOf === 'function') ? skillLabelOf(sc.skill) : sc.skill;
+    var pct = null;
+    try { if (typeof calcSuccessPct === 'function' && window.S && window.S.player) pct = calcSuccessPct(sc, window.S.player); } catch (_) {}
+    var phrase = lbl + ' · CD ' + sc.dc + (pct != null ? ' · ' + pct + '%' : '');
+    var li = script.length - 1;
+    script[li] = Object.assign({}, script[li], { check_hint: { phrase: phrase } });
+  }
   return { npc: _explEventHeaderNpc(ev), script: script, choices: choices };
 }
 
@@ -37334,7 +37353,7 @@ function _explShowEventVEnc(ev) {
   _explVEncResolving = false;
   try {
     window.vEncounter.render(_explEventBodyNode(ev), {
-      player: S.player, closeable: false, inlineChoices: true,
+      player: S.player, closeable: false,
       onChoice: function (ch) { _explEventVEncResolve(ev, ch); }
     });
     LOG('EVENT', 'vencounter_render id=' + ev.id + ' type=' + ev.type);
@@ -37436,7 +37455,7 @@ function _explShowOutcomeVEnc(ev, oc) {
   };
   try {
     window.vEncounter.render(node, {
-      player: S.player, closeable: false, inlineChoices: true,
+      player: S.player, closeable: false,
       onChoice: function () { _explEventVEncFinish(oc); }
     });
   } catch (e) {
