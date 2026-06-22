@@ -45917,50 +45917,90 @@ function _arenaShowRules(p){
 }
 
 // --- PORTÕES — Preparar Viagem ---
+// 2026-06-21 (user "tela extremamente tosca → épica"): redesign seguindo PADRAO_ALDRIC
+// (banner do NPC Aldric + fala tipada), PADRAO_LOCAIS (banner→seção→grid), Design System
+// (tokens var(--v-*), Cinzel/ouro), ícones heráldicos existentes (ic-*) e responsivo.
+// CSS injetado uma vez via _gatesPrepEnsureCss (classes .gtp-*).
+function _gatesPrepEnsureCss(){
+  if (document.getElementById('gtp-css')) return;
+  var st = document.createElement('style'); st.id = 'gtp-css';
+  st.textContent = [
+    '.gtp-wrap{display:flex;flex-direction:column;gap:var(--v-space-md,8px);}',
+    '.gtp-banner{margin-bottom:0;border-radius:var(--v-radius,10px);border:1px solid var(--v-gold-35,rgba(196,149,58,0.35));background:rgba(15,12,8,0.5);}',
+    '.gtp-speech{position:relative;padding:11px 13px;background:rgba(74,56,40,0.35);border-left:3px solid var(--v-gold,#c4953a);border-radius:7px;color:#e6dac0;font-style:italic;font-size:var(--v-font-base,13px);line-height:1.55;box-shadow:0 2px 8px rgba(0,0,0,0.3);}',
+    '.gtp-speech::before{content:attr(data-speaker);display:block;font-family:var(--v-font-display,"Cinzel",serif);font-weight:800;font-size:calc(12px*var(--v-font-scale,1));color:var(--v-gold,#c4953a);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;text-shadow:0 0 6px var(--v-gold-40,rgba(196,149,58,0.4));font-style:normal;}',
+    '.gtp-speech b{color:#f0d890;font-style:normal;}',
+    '.gtp-section{text-align:center;font-family:var(--v-font-display,"Cinzel",serif);font-weight:700;color:var(--v-gold,#c4953a);font-size:var(--v-font-md,14px);letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 12px var(--v-gold-40,rgba(196,149,58,0.4));margin:var(--v-space-sm,6px) 0 2px;}',
+    '.gtp-grid{display:flex;flex-direction:column;gap:var(--v-space-sm,6px);}',
+    '.gtp-card{display:flex;align-items:center;gap:var(--v-space-md,10px);width:100%;text-align:left;padding:10px 12px;background:linear-gradient(180deg,rgba(40,32,22,0.55),rgba(22,18,12,0.78));border:1px solid var(--v-gold-35,rgba(196,149,58,0.35));border-radius:var(--v-radius,10px);cursor:pointer;transition:all var(--v-transition-base,0.2s ease);font-family:inherit;}',
+    '.gtp-card:hover{border-color:var(--v-gold,#c4953a);transform:translateY(-1px);box-shadow:0 4px 14px rgba(196,149,58,0.28);}',
+    '.gtp-card:active{transform:translateY(0);}',
+    '.gtp-icon{width:46px;height:46px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(196,149,58,0.2),transparent 72%);border-radius:8px;filter:drop-shadow(0 0 6px rgba(196,149,58,0.4));}',
+    '.gtp-icon svg{width:30px;height:30px;}',
+    '.gtp-info{display:flex;flex-direction:column;min-width:0;flex:1;}',
+    '.gtp-name{font-family:var(--v-font-display,"Cinzel",serif);font-weight:700;color:#f0e0c0;font-size:var(--v-font-body,14px);}',
+    '.gtp-desc{font-style:italic;color:var(--v-text-dim,#a09484);font-size:var(--v-font-base,13px);line-height:1.4;margin-top:2px;}',
+    '.gtp-cost{margin-left:auto;display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;color:var(--v-gold,#c4953a);font-weight:700;font-size:var(--v-font-base,13px);white-space:nowrap;}',
+    '.gtp-cta{width:100%;margin-top:var(--v-space-md,8px);padding:13px;border:none;border-radius:var(--v-radius,10px);background:linear-gradient(180deg,#d4a850,#c4953a);color:#1a1208;font-family:var(--v-font-display,"Cinzel",serif);font-weight:800;font-size:var(--v-font-md,15px);letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(196,149,58,0.4);transition:all var(--v-transition-base,0.2s ease);}',
+    '.gtp-cta:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(196,149,58,0.6);}',
+    '.gtp-cta svg{width:18px;height:18px;}',
+    '@media (prefers-reduced-motion: reduce){.gtp-card,.gtp-cta{transition:none;}}'
+  ].join('');
+  document.head.appendChild(st);
+}
 // Quando opts.beforeTravel === true, adiciona botão "Continuar para Viagem"
 // que fecha o popup e abre o exit modal (Viajar). Caso contrário, é só uma
 // loja normal de itens de viagem (chamada via Portões → Preparar Viagem).
 function _gatesShowPrep(p, opts){
   opts = opts || {};
-  var items = GATES_PREP_ITEMS.map(function(it){
-    return { icon: it.icon, label: it.name, badge: it.cost + ' V', _it: it };
-  });
-  // Renderiza popup custom (não usa _squareShowListPopup pra poder adicionar
-  // botão "Continuar para Viagem" no final)
+  _gatesPrepEnsureCss();
+  var items = GATES_PREP_ITEMS;
+  // Popup custom (banner épico do Aldric + grid de itens + CTA "Partir em Jornada").
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.innerHTML = _heralIco('ic-mochila', null, '20px') + ' Preparar Viagem';  // 2026-05-06: heraldic em vez de emoji
-  var flavor = opts.beforeTravel
-    ? '<i>Antes de partir, revise seu equipamento. Aldric aponta os itens essenciais. <b>Aventureiro precavido volta vivo.</b></i>'
-    : '<i>Aldric aponta. "Aventureiro precavido volta vivo. Compre o necessário antes de partir."</i>';
-  var html = '<div class="city-subscreen">';
-  html += '<p class="subscreen-flavor">' + flavor + '</p>';
-  html += '<div class="bnk-item-list">';
+  if (titleEl) titleEl.innerHTML = _heralIco('ic-mochila', null, '20px') + ' Preparar Viagem';
+  var _aldricPortrait = '/shared/img/npcs/guarda-aldric.webp';
+  var _speech = opts.beforeTravel
+    ? 'Antes de cruzar os portões, revise o que carrega. A estrada não perdoa o desprevenido — <b>aventureiro precavido volta vivo</b>.'
+    : 'Compre o necessário antes de partir. A estrada é longa e raramente gentil. <b>Aventureiro precavido volta vivo.</b>';
+  var html = '<div class="gtp-wrap">';
+  // Banner do Aldric — PADRAO_ALDRIC (.enc-header canônico: retrato circular gold-ring + Cinzel)
+  html += '<div class="enc-header gtp-banner">'
+    + '<div class="enc-portrait" title="Capitão dos Portões"><img src="' + _aldricPortrait + '" alt=""></div>'
+    + '<div class="enc-meta"><div class="enc-name">Guarda Aldric</div>'
+    + '<div class="enc-desc">Capitão dos Portões de Valdoria</div></div>'
+    + '</div>';
+  // Fala tipada do Aldric (PADRAO_ALDRIC — label dourado + speech)
+  html += '<div class="gtp-speech" data-speaker="Guarda Aldric">' + _speech + '</div>';
+  // Seção
+  html += '<div class="gtp-section">✦ Equipamento Essencial ✦</div>';
+  // Grid de cards épicos (ícone heráldico + nome + porquê + custo)
+  html += '<div class="gtp-grid">';
   items.forEach(function(item, idx){
-    html += '<button class="subscreen-btn bnk-item-btn" data-idx="' + idx + '">'
-      + '<span class="sb-icon">' + item.icon + '</span>'
-      + '<span class="sb-text">' + item.label + '</span>'
-      + '<span class="sb-info">' + item.badge + '</span>'
+    html += '<button class="gtp-card" data-idx="' + idx + '">'
+      + '<span class="gtp-icon">' + item.icon + '</span>'
+      + '<span class="gtp-info"><span class="gtp-name">' + item.name + '</span>'
+      + '<span class="gtp-desc">' + item.desc + '</span></span>'
+      + '<span class="gtp-cost"><span class="vi vi-coin sm"></span>' + item.cost + '</span>'
       + '</button>';
   });
   html += '</div>';
-  // Botão "Continuar para Viagem" só aparece quando beforeTravel === true
+  // CTA "Partir em Jornada" só quando beforeTravel === true
   if (opts.beforeTravel) {
-    html += '<div style="margin-top: var(--v-space-xl, 16px);padding-top: var(--v-space-lg, 12px);border-top:1px solid rgba(196,149,58,0.3);">'
-      + '<button class="cpp-btn cpp-btn-confirm" id="prep-continue-btn" style="width:100%;">'
-      + '🗺️ Continuar para Viagem'
-      + '</button>'
-      + '</div>';
+    html += '<button class="gtp-cta" id="prep-continue-btn">' + _heralIco('ic-cartografia', null, '18px') + ' Partir em Jornada</button>';
   }
-  html += '<div class="subscreen-back-row"><button class="subscreen-back" data-cb="__back">← Voltar</button></div>'
-    + '</div>';
+  html += '<div class="subscreen-back-row"><button class="subscreen-back" data-cb="__back">← Voltar</button></div>';
+  html += '</div>';
   bodyEl.innerHTML = html;
-  bodyEl.querySelectorAll('.bnk-item-btn').forEach(function(btn){
+  // Fallback heráldico se o retrato do Aldric falhar (paridade com o vEncounter)
+  var _apImg = bodyEl.querySelector('.enc-portrait img');
+  if (_apImg) _apImg.onerror = function(){ this.style.display = 'none'; if (this.parentNode) this.parentNode.classList.add('enc-portrait-fallback'); };
+  bodyEl.querySelectorAll('.gtp-card').forEach(function(btn){
     btn.addEventListener('click', function(){
       var idx = parseInt(btn.dataset.idx, 10);
-      var it = items[idx]._it;
+      var it = items[idx];
       _showConfirmPurchase({
         icon: it.icon, npc: 'Aldric — Capitão',
         title: 'Comprar ' + it.name,
@@ -45982,12 +46022,11 @@ function _gatesShowPrep(p, opts){
       });
     });
   });
-  // Wire "Continuar para Viagem" button
+  // Wire "Partir em Jornada"
   if (opts.beforeTravel) {
     var contBtn = document.getElementById('prep-continue-btn');
     if (contBtn) {
       contBtn.addEventListener('click', function(){
-        // Fecha o popup de prep e abre o modal de Viajar
         closeCityPopup(true);
         openCityExitModal();
       });
