@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T20:49:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T21:07:01Z - do not edit directly, edit source -->
 
 
 
@@ -8576,27 +8576,27 @@ window.__onIntroTap = function() {
          embeda no footer-quick via audio-manager.js — sem botão flutuante solto. -->
     <!-- HP row SEMPRE VISÍVEL — não colapsa com o toggle -->
     <div class="hud-row" title="Vida (HP)">
-      <svg class="hud-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.5c-.3 0-.5-.1-.7-.3L2.4 9.3C1 7.9 1 5.7 2.4 4.3c1.3-1.3 3.4-1.3 4.7 0L8 5.2l.9-.9c1.3-1.3 3.4-1.3 4.7 0 1.4 1.4 1.4 3.6 0 5l-4.9 4.9c-.2.2-.4.3-.7.3z"/></svg>
+      <img class="hud-ico" src="../shared/img/ui/stat-hp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
       <span class="hud-lbl">VIDA</span>
       <div class="hud-bar"><div class="hud-bar-fill hp" id="hp-fill"></div></div>
       <span class="hud-val" id="hp-val">0/0</span>
     </div>
     <div id="hud-float-content">
       <div class="hud-row" title="Mana / Recurso (MP)">
-        <svg class="hud-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5s-5 5.5-5 9a5 5 0 0 0 10 0c0-3.5-5-9-5-9z"/></svg>
+        <img class="hud-ico" src="../shared/img/ui/stat-mp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
         <span class="hud-lbl">MANA</span>
         <div class="hud-bar"><div class="hud-bar-fill mp" id="mp-fill"></div></div>
         <span class="hud-val" id="mp-val">0/0</span>
       </div>
       <div class="hud-row" title="Exaustão (D&D 5e, 0 a 6)">
-        <svg class="hud-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 5c1.5-1 3-1 4.5 0C8 6 9.5 6 11 5s3-1 4.5 0M2 9c1.5-1 3-1 4.5 0 1.5 1 3 1 4.5 0s3-1 4.5 0M2 13c1.5-1 3-1 4.5 0 1.5 1 3 1 4.5 0s3-1 4.5 0" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
+        <img class="hud-ico" src="../shared/img/ui/stat-exhaustion.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
         <span class="hud-lbl">EXAUS</span>
         <div class="hud-pips" id="exh-pips"></div>
         <span class="hud-val" id="exh-val">0/6</span>
       </div>
       <!-- X-6.5.51k: barra de XP com nível + progresso pro proximo -->
       <div class="hud-row" title="Experiência (XP) e Nível">
-        <svg class="hud-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1l2.1 4.5 4.9.5-3.7 3.4 1.1 4.8L8 11.7 3.6 14.2 4.7 9.4 1 6l4.9-.5z"/></svg>
+        <img class="hud-ico" src="../shared/img/ui/stat-xp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
         <span class="hud-lvl" id="hud-level">N1</span>
         <div class="hud-bar"><div class="hud-bar-fill xp" id="xp-fill"></div></div>
         <span class="hud-val" id="xp-val">0/300</span>
@@ -8638,22 +8638,22 @@ window.__onIntroTap = function() {
          2026-05-06: emojis → ícones heráldicos canonical (regra "Heraldic Icons
          Only"). Ver docs/sistemas/heraldic-icons-index.md pra mapa completo. -->
     <button class="quick-btn" id="btn-party" title="Grupo (membros do partido)" aria-label="Grupo">
-      <svg class="qb-icon" style="color:#8a98a8" aria-hidden="true"><use href="#ic-grupo"></use></svg>
+      <img class="qb-icon" src="../shared/img/ui/grupo.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
     </button>
     <!-- MN3 (2026-06-07): Mochila avulsa REMOVIDA — já existe no menu fixo (footer
          #footer-quick data-action=inventory, o MESMO menu da cidade). User pediu
          pra não duplicar. A ação de inventário continua disponível pelo footer. -->
     <div class="light-btn-wrap" id="light-wrap">
       <button class="quick-btn" id="btn-light" title="Fontes de Luz" aria-label="Tochas">
-        <svg class="qb-icon" style="color:#e85020" aria-hidden="true"><use href="#ic-tochas"></use></svg>
+        <img class="qb-icon" src="../shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
       </button>
       <div class="light-menu" id="light-menu"></div>
     </div>
     <button class="quick-btn" id="btn-camp" title="Acampar" aria-label="Acampar">
-      <svg class="qb-icon" style="color:#8a6840" aria-hidden="true"><use href="#ic-acampamento"></use></svg>
+      <img class="qb-icon" src="../shared/img/ui/acampamento.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
     </button>
     <button class="quick-btn" id="btn-cartografia" title="Mapa de Valdoria" aria-label="Mapa de Valdoria">
-      <svg class="qb-icon" style="color:#b8956a" aria-hidden="true"><use href="#ic-cartografia"></use></svg>
+      <img class="qb-icon" src="../shared/img/ui/cartografia.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
     </button>
     <!-- V2.7: btn-download-log removido (user req). Logs continuam salvando em
          logs/exploracao/ via sink server. Console ainda tem downloadExploracaoLogs(). -->
@@ -8825,7 +8825,7 @@ window.__onIntroTap = function() {
   <div id="inv-overlay">
     <div class="inv-card">
       <div class="inv-header">
-        <h2 class="inv-title"><svg class="inv-title-icon" style="color:#7a5028" aria-hidden="true"><use href="#ic-mochila"></use></svg>Mochila</h2>
+        <h2 class="inv-title"><img class="inv-title-icon" src="../shared/img/ui/mochila.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">Mochila</h2>
         <div class="inv-subtitle" id="inv-subtitle">— itens</div>
       </div>
       <div class="inv-body" id="inv-body">
@@ -42686,8 +42686,13 @@ function renderExploreFooter() {
   // Brasão heráldico inline (mesmos symbols ic-* já presentes no SVG sprite).
   // Cores naturais por função (couro/grupo/fogo/mapa) — regra No NPC Emotes:
   // ícone representa a FUNÇÃO, não pessoa.
-  function _heralB(id, color) {
-    return '<svg class="fb-heraldic" viewBox="0 0 120 120" style="color:' + color + ';" aria-hidden="true"><use href="#' + id + '"/></svg>';
+  function _heralB(id, _color) {
+    // M13 (regra "Tudo Visível é Imagem OpenAI"): ícone heráldico do footer = imagem
+    // OpenAI (WebP em /shared/img/ui/), não mais SVG <use>. Mapeia ic-<slug> → <slug>.webp
+    // (grupo/mochila/acampamento/cartografia já existem). onerror oculta gracioso.
+    var slug = String(id).replace(/^ic-/, '');
+    return '<img class="fb-heraldic" src="../shared/img/ui/' + slug
+      + '.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">';
   }
   // Ações da exploração + Config. Volume (va-btn) é embedado por audio-manager.
   var _html = ''
@@ -43182,7 +43187,7 @@ function bindQuickActions() {
     // cor natural inline. "Apagar" reusa ic-tochas + slash CSS (CSS faz grayscale).
     const offBtn = document.createElement('button');
     offBtn.className = 'light-opt off' + (!S.lightSource ? ' selected' : '');
-    offBtn.innerHTML = '<svg class="lo-icon" style="color:#e85020" aria-hidden="true"><use href="#ic-tochas"></use></svg>'
+    offBtn.innerHTML = '<img class="lo-icon" src="../shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">'
                      + '<span class="lo-label">Apagar</span>';
     offBtn.title = 'Apagar luz (extinguir tocha/feitiço)';
     offBtn.addEventListener('click', () => selectLightSource(null));
@@ -43192,7 +43197,10 @@ function bindQuickActions() {
       const btn = document.createElement('button');
       btn.className = 'light-opt' + (S.lightSource === ls.id ? ' selected' : '');
       const meta = _LIGHT_HERALDIC_ICON[ls.id] || { id: 'ic-tochas', color: '#e85020' };
-      btn.innerHTML = '<svg class="lo-icon" style="color:' + meta.color + '" aria-hidden="true"><use href="#' + meta.id + '"></use></svg>'
+      // M13: ícone da fonte de luz = imagem OpenAI (WebP), não SVG <use>. slug = id sem 'ic-'.
+      var _lslug = String(meta.id).replace(/^ic-/, '');
+      btn.innerHTML = '<img class="lo-icon" src="../shared/img/ui/' + _lslug
+                    + '.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">'
                     + '<span class="lo-label">' + ls.label + '</span>';
       btn.title = ls.label + ' — ' + ls.desc;
       btn.addEventListener('click', () => selectLightSource(ls.id));
@@ -43239,17 +43247,16 @@ function bindQuickActions() {
   }
 
   function updateLightButtonVisual() {
-    // 2026-05-06: ícone heráldico SVG (sem emoji) + cor natural inline pra cada fonte.
+    // M13: ícone da fonte de luz ativa = imagem OpenAI (WebP), não SVG <use>.
     const meta = (S.lightSource && _LIGHT_HERALDIC_ICON[S.lightSource])
               || { id: 'ic-tochas', color: '#e85020' };
-    let svg = lightBtn.querySelector('svg.qb-icon');
-    if (!svg) {
-      // Re-injeta SVG caso tenha sido limpo por algum render legado
-      lightBtn.innerHTML = '<svg class="qb-icon" style="color:' + meta.color + '" aria-hidden="true"><use href="#' + meta.id + '"></use></svg>';
+    const _lsrc = '../shared/img/ui/' + String(meta.id).replace(/^ic-/, '') + '.webp';
+    let imgEl = lightBtn.querySelector('img.qb-icon');
+    if (!imgEl) {
+      lightBtn.innerHTML = '<img class="qb-icon" src="' + _lsrc + '" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">';
     } else {
-      svg.style.color = meta.color;
-      const useEl = svg.querySelector('use');
-      if (useEl) useEl.setAttribute('href', '#' + meta.id);
+      imgEl.src = _lsrc;
+      imgEl.style.display = '';  // re-exibe se um onerror anterior tinha ocultado
     }
     if (S.lightSource && LIGHT_SOURCES[S.lightSource]) {
       lightBtn.classList.add('active');
