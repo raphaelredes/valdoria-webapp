@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T01:40:37Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T02:01:00Z - do not edit directly, edit source -->
 
 
 
@@ -4353,6 +4353,12 @@ body.footer-collapsed #hex-nav { bottom: 10px; }
   font-size: var(--v-font-body, 14px);
   line-height: 1.7;
   letter-spacing: 0.3px;
+  /* 2026-06-21 PADRAO_ALDRIC: bloco de citação igual ao .enc-narration canônico
+     (cidade/prólogo) — borda lateral dourada + fundo escuro sutil. Antes era texto
+     plano (sem borda/fundo) → divergia visualmente do diálogo da cidade. */
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+  border-left: 2px solid var(--v-gold-40, rgba(196, 149, 58, 0.4));
+  background: rgba(0, 0, 0, 0.2);
   clip-path: inset(0 100% 0 0);
   -webkit-clip-path: inset(0 100% 0 0);
   opacity: 0.4;
@@ -4364,12 +4370,15 @@ body.footer-collapsed #hex-nav { bottom: 10px; }
   content: attr(data-speaker);
   display: block;
   font-family: var(--v-font-display, 'Cinzel', serif);
-  font-weight: 700;
-  font-size: var(--v-font-xs, 11px);
+  /* 2026-06-21 PADRAO_ALDRIC: label do speaker idêntico ao .enc-speech::before
+     canônico (cidade/prólogo) — weight 800, 13px escalável, glow dourado. */
+  font-weight: 800;
+  font-size: calc(13px * var(--v-font-scale, 1));
   color: var(--v-gold, #c4953a);
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 3px;
+  letter-spacing: 1.2px;
+  margin-bottom: 5px;
+  text-shadow: 0 0 6px var(--v-gold-40, rgba(196, 149, 58, 0.4));
 }
 /* Banner do NPC (retrato + nome) no topo do card de evento — paridade com vEncounter. */
 .event-npc {
@@ -36227,22 +36236,39 @@ function _renderEventNpcBanner(ev) {
   if (!el) return;
   el.innerHTML = '';
   var npc = ev && ev.npc;
-  if (!npc || !npc.name) { el.classList.add('hidden'); return; }
+  // 2026-06-21 (user: "diálogos da exploração continuam sem seguir PADRAO_ALDRIC"):
+  // o banner agora reusa o header CANÔNICO do vEncounter (.enc-header/.enc-portrait/
+  // .enc-name/.enc-desc — mesmas classes que CIDADE e PRÓLOGO usam, já carregadas via
+  // encounter-popup.css). Antes era .event-npc-portrait (48px QUADRADO, nome plain)
+  // → divergia. Agora: retrato 44px CIRCULAR gold-ring + glow + fallback heráldico ◆
+  // + nome Cinzel UPPERCASE + desc itálica. #event-npc VIRA o .enc-header.
+  if (!npc || !npc.name) { el.className = 'enc-header hidden'; return; }
+  el.className = 'enc-header';
+  var _san = (window.vEncounter && typeof window.vEncounter.sanitize === 'function')
+    ? window.vEncounter.sanitize : function (s) { return String(s == null ? '' : s); };
+  var _portraitHtml = '';
   if (npc.portrait) {
-    var img = document.createElement('img');
-    img.className = 'event-npc-portrait';
-    img.src = String(npc.portrait);
-    img.alt = '';
-    img.dataset.name = String(npc.name);
-    img.onerror = function () { this.style.display = 'none'; };
-    img.onclick = function () { if (window.showLightbox) window.showLightbox(this.src, this.dataset.name, ''); };
-    el.appendChild(img);
+    var _safeURL = String(npc.portrait).replace(/"/g, '&quot;');
+    var _safeName = String(npc.name).replace(/"/g, '&quot;');
+    _portraitHtml = '<img src="' + _safeURL + '" alt="" data-name="' + _safeName + '">';
   }
-  var nm = document.createElement('div');
-  nm.className = 'event-npc-name';
-  nm.textContent = String(npc.name);
-  el.appendChild(nm);
-  el.classList.remove('hidden');
+  el.innerHTML =
+    '<div class="enc-portrait"' + (npc.portrait ? ' title="Clique pra ampliar"' : '') + '>' + _portraitHtml + '</div>' +
+    '<div class="enc-meta">' +
+      '<div class="enc-name">' + _san(npc.name) + '</div>' +
+      (npc.desc ? '<div class="enc-desc">' + _san(npc.desc) + '</div>' : '') +
+    '</div>';
+  // lightbox + fallback heráldico no erro (paridade com o canônico)
+  var _imgEl = el.querySelector('.enc-portrait img');
+  if (_imgEl) {
+    _imgEl.onerror = function () {
+      this.style.display = 'none';
+      var pp = this.parentNode; if (pp) pp.classList.add('enc-portrait-fallback');
+    };
+    _imgEl.onclick = function () {
+      if (window.showLightbox) window.showLightbox(this.src, this.getAttribute('data-name') || '', '');
+    };
+  }
 }
 
 function openEventModal() {
@@ -40035,6 +40061,102 @@ function openCartography() {
 
 function closeCartography() {
   document.getElementById('cartography-overlay').classList.remove('visible');
+  // 2026-06-21 (user bug): também desfaz os popups de localidade pendurados
+  // (#location-popup z-280 + #cart-loc-popup) — senão reaparecem POR CIMA da
+  // exploração ao fechar o mapa (era o "popup INIMIGOS/MATERIAIS que surgia
+  // depois de fechar o mapa"). closeCartography() só removia o overlay do mapa.
+  try { if (typeof closeLocationPopup === 'function') closeLocationPopup(); } catch (_) {}
+  try { if (typeof _closeCartLocationPopup === 'function') _closeCartLocationPopup(); } catch (_) {}
+}
+
+// 2026-06-21 — TRAVEL pela cartografia DENTRO da exploração (1 popup → 1 clique →
+// viagem REAL). Antes: o "Viajar pra X" do popup #1 (cart-loc-popup) encadeava o
+// popup #2 (location-popup INIMIGOS/MATERIAIS) cujo botão fazia JourneyRunner.
+// onArrive→boot() LOCAL — em REMOTE o servidor NUNCA trocava o mapa (a viagem "não
+// acontecia", viola SUPREME RULE #0) + o popup #2 ficava pendurado e reaparecia.
+// Agora o popup #1 chama _cartTravelTo direto: em REMOTE usa o MESMO caminho
+// server-authoritative do edge travel (/api/webapp/transition — o servidor cobra
+// turnos por distância de grafo e boota o novo mapa, aceitando destino NÃO-adjacente);
+// em LOCAL (file://) faz o reboot client-side com etapas (sandbox dev).
+function _cartTravelTo(mapId){
+  var m = (typeof FIXED_MAPS !== 'undefined') ? FIXED_MAPS[mapId] : null;
+  if (!m) { try { console.warn('[E-REM:CART-TRAVEL] no FIXED_MAPS for ' + mapId); } catch (_) {} return; }
+  if (window.S && S.mapId === mapId) return;  // já está aqui
+  // fecha TODOS os overlays do mapa (anti-popup-pendurado)
+  try { _closeCartLocationPopup(); } catch (_) {}
+  try { if (typeof closeLocationPopup === 'function') closeLocationPopup(); } catch (_) {}
+  closeCartography();
+  var _isRemote = (window.__EXPLORE_MODE === 'remote' && !!window.__EXPLORE_TOKEN && !!window.__EXPLORE_API_BASE);
+  if (_isRemote) {
+    _remoteTravelToMap(mapId, m.name);  // server-authoritative (loader + redirect)
+    return;
+  }
+  // LOCAL: etapas proporcionais à distância real (worldPos 0-1) + reboot client-side
+  var _travelSteps = 1;
+  try {
+    var _curWP = (window.S && S.mapDef && S.mapDef.worldPos) || null;
+    var _tgtWP = (m && m.worldPos) || null;
+    if (_curWP && _tgtWP && typeof _curWP.x === 'number' && typeof _tgtWP.x === 'number') {
+      var _dWP = Math.sqrt(Math.pow(_curWP.x - _tgtWP.x, 2) + Math.pow(_curWP.y - _tgtWP.y, 2));
+      _travelSteps = Math.max(1, Math.min(4, Math.round(_dWP * 5)));
+    }
+  } catch (_eTS) {}
+  if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
+    JourneyRunner.start({
+      biome: m.biome, displayName: m.name, totalSteps: _travelSteps,
+      player: function () { return (window.S && S.player) || {}; },
+      confirm: false,  // o clique em "Viajar pra X" no popup JÁ é a confirmação (Jogador Mínimo Trabalho)
+      audioBiome: true,
+      refreshHud: (typeof updateHud === 'function') ? updateHud : null,
+      onArrive: function () {
+        setupChoices.map = mapId;
+        if (typeof dmNarrate === 'function') dmNarrate({ text: 'Você chega às terras de ' + m.name + '.', type: 'action' });
+        if (typeof boot === 'function') boot();
+      },
+      onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na viagem.'); }
+    });
+  } else {
+    setupChoices.map = mapId;
+    if (typeof boot === 'function') boot();
+  }
+}
+
+// Troca de mapa server-authoritative (espelha o branch REMOTE de confirmEdgeTransition):
+// POST /api/webapp/transition {from_map,target_map,rewards} → data.url +nointro=1 →
+// location.replace. _exploracao_to_exploracao ACEITA destino não-adjacente (cobra
+// distância de GRAFO em turnos). Fallback: triggerReturnToCity se não vier url.
+async function _remoteTravelToMap(targetMap, label){
+  if (window._vTransitionLoader) window._vTransitionLoader.show('Viajando para ' + (label || 'novo destino') + '…');
+  try {
+    if (window.__exploreLogRelay && window.__exploreLogRelay.forceFlushBeacon) window.__exploreLogRelay.forceFlushBeacon();
+    window.__valdoria_transitioning = true;
+    var rewards = (typeof window.__buildRewardsDelta === 'function') ? window.__buildRewardsDelta() : {};
+    var resp = await window.__explFetchTO(window.__EXPLORE_API_BASE + '/api/webapp/transition', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN },
+      body: JSON.stringify({
+        from: 'exploracao', to: 'exploracao',
+        user_id: window.__EXPLORE_USER_ID, token: window.__EXPLORE_TOKEN,
+        payload: { from_map: window.__EXPLORE_MAP_ID || '', target_map: targetMap, rewards: rewards }
+      }),
+      keepalive: true
+    }, 12000);
+    var data = await resp.json().catch(function(){ return {}; });
+    try { console.info('[E-REM:CART-TRAVEL] transition code=' + resp.status + ' has_url=' + (data && data.url ? 'yes' : 'no') + ' target=' + targetMap); } catch (_) {}
+    if (data && data.url) {
+      try { localStorage.removeItem('valdoria_exploracao_session'); } catch (_) {}
+      var _u = data.url;
+      try { var _U = new URL(_u, location.href); if (!_U.searchParams.has('nointro')) _U.searchParams.set('nointro', '1'); _u = _U.toString(); } catch (_) {}
+      window.location.replace(_u);
+      return;
+    }
+    try { LOGE('EDGE', 'cart_travel sem url — fallback return'); } catch (_) {}
+  } catch (e) {
+    try { LOGE('EDGE', 'cart_travel failed ' + ((e && e.message) || e)); } catch (_) {}
+  }
+  if (window._vTransitionLoader) window._vTransitionLoader.hide();
+  window.__valdoria_transitioning = false;
+  if (typeof triggerReturnToCity === 'function') triggerReturnToCity({ reason: 'cart_travel_fallback' });
 }
 
 // Renderiza o grafo de mapas como pergaminho com nodes posicionados via worldPos.
@@ -40450,7 +40572,11 @@ function _closeCartLocationPopup(){
       if (action === 'back') { _closeCartLocationPopup(); return; }
       if (action === 'travel' && biome) {
         _closeCartLocationPopup();
-        if (typeof handleCartographyNodeClick === 'function') { handleCartographyNodeClick(biome.key); }
+        // 2026-06-21: viaja DIRETO (1 clique = 1 confirmação). Antes chamava
+        // handleCartographyNodeClick → openLocationPopup (2º popup INIMIGOS/MATERIAIS
+        // redundante que ficava pendurado/reaparecia). _cartTravelTo faz a viagem
+        // REAL (server-authoritative em REMOTE via /api/webapp/transition).
+        if (typeof _cartTravelTo === 'function') { _cartTravelTo(biome.key); }
       }
     });
   });
