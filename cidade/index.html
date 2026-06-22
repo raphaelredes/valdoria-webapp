@@ -21443,7 +21443,7 @@ var GATES_PREP_ITEMS = [
   { id: 'rations', icon: _heralIco('ic-mochila'), name: 'Rações 7 dias',     cost: 10, desc: 'Sem fome em viagem longa.' },
   { id: 'torches', icon: _heralIco('ic-tochas'),  name: 'Tochas (5)',        cost: 5,  desc: 'Iluminam dungeons escuros.' },
   { id: 'rope',    icon: _heralIco('ic-cordas'),  name: 'Corda 15m',         cost: 10, desc: 'Útil pra escalar / amarrar.' },
-  { id: 'potion',  icon: _heralIco('ic-poção'),   name: 'Poção emergência',  cost: 50, desc: 'Restaura 2d4+2 HP em combate.' }
+  { id: 'potion',  icon: _heralIco('ic-poção'),   name: 'Poção de Cura',  cost: 50, desc: 'Restaura 2d4+2 HP em combate.' }
 ];
 
 // ============================================================================
@@ -50504,7 +50504,7 @@ var SUBSCREEN_DATA = {
       [_heralIco('ic-mochila'), 'Rações 7 dias', '10 <span class="vi vi-coin sm"></span> — sem fome em viagem', 'prep_rations'],
       [_heralIco('ic-mochila'), 'Tochas (5)', '5 <span class="vi vi-coin sm"></span> — escuridão', 'prep_torches'],
       [_heralIco('ic-mochila'), 'Corda 15m', '10 <span class="vi vi-coin sm"></span> — escalar', 'prep_rope'],
-      [_heralIco('ic-poção'), 'Poção emergência', '50 <span class="vi vi-coin sm"></span> — 2d4+2 HP', 'prep_potion']
+      [_heralIco('ic-poção'), 'Poção de Cura', '50 <span class="vi vi-coin sm"></span> — 2d4+2 HP', 'prep_potion']
     ]
   },
 
@@ -51788,7 +51788,7 @@ var ACTION_HANDLERS = {
   'prep_rations':           function(p){ if (!_pay(p, 10)) return; vToast('🍞 Rações 7 dias compradas. Sem fome em viagem.'); },
   'prep_torches':           function(p){ if (!_pay(p, 5)) return; vToast('🔥 5 tochas. Iluminam dungeons escuros.'); },
   'prep_rope':              function(p){ if (!_pay(p, 10)) return; vToast('🧵 Corda 15m. Útil pra escalar / amarrar.'); },
-  'prep_potion':            function(p){ if (!_pay(p, 50)) return; vToast('🍵 Poção emergência. Usar no combate restaura 2d4+2 HP.'); },
+  'prep_potion':            function(p){ if (!_pay(p, 50)) return; vToast('🍵 Poção de Cura. Usar no combate restaura 2d4+2 HP.'); },
 
   // Quests
   'quest_open_wolves':      function(p){ navigateTo('quest_open_wolves'); },
