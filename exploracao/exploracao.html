@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T23:44:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-21T23:59:46Z - do not edit directly, edit source -->
 
 
 
@@ -36782,6 +36782,26 @@ function _remoteShowOutcome(ch, oc) {
           cons.appendChild(ditem);
         }
         outcomeEl.appendChild(cons);
+      }
+      // 2026-06-21: loot server-rolled (oc.loot) → card de recompensa épico AAA
+      // (imagem real do item + nome + raridade + chips de ganho). Antes, em REMOTE, os
+      // itens ganhos NÃO apareciam no outcome — só iam pro inventário (vistos só no
+      // /finish). Mesmo card do path client-side (_processChoiceOutcome).
+      try {
+        if (Array.isArray(oc.loot) && oc.loot.length && typeof _showExploreRewardCard === 'function') {
+          var _seenLoot = {}, _lootNames = [];
+          oc.loot.forEach(function (li) {
+            var n = li && (li.item_id || li.name || li.id);
+            if (n && !_seenLoot[n]) { _seenLoot[n] = 1; _lootNames.push(n); }
+          });
+          var _ld = oc.delta || {};
+          if (_lootNames.length) _showExploreRewardCard(_lootNames, {
+            xp: _ld.xp > 0 ? _ld.xp : 0, gold: _ld.gold > 0 ? _ld.gold : 0,
+            hp: _ld.hp > 0 ? _ld.hp : 0, mp: _ld.mp > 0 ? _ld.mp : 0,
+          });
+        }
+      } catch (_eLoot) {
+        try { LOGE('EVENT', '_remoteShowOutcome loot-card err=' + (_eLoot && _eLoot.message)); } catch (_) {}
       }
     }
   } catch (eOC) {
