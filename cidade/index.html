@@ -20724,20 +20724,25 @@ function _buildRelationsMockData(player){
     return (sk && (sk in aff || sk in rep)) || ((dlg[r.ref_id] || []).length > 0);
   }).map(function(r){
     var sk = REL_SERVER_KEY[r.id];
-    // Tier por afinidade REAL (server, 0-100) quando hidratada; senão NPC conhecido por
-    // REPUTAÇÃO usa o default narrativo Neutro (50) — afinidade não foi mexida, mas há
-    // relação registrada (≠ proxy de diálogo, que daria 0 = tier mais baixo, enganoso);
-    // por último, sinal de diálogo aproximado. (Afinidade e reputação são eixos distintos:
-    // a tela tiering por afinidade; a reputação só inclui o NPC + ancora em Neutro.)
-    var a = (sk && typeof aff[sk] === 'number') ? aff[sk]
-          : (sk && typeof rep[sk] === 'number') ? 50
+    var realAff = (sk && typeof aff[sk] === 'number');
+    var repVal = (sk && typeof rep[sk] === 'number') ? rep[sk] : null;
+    // Estrelas por afinidade EFETIVA (0-100): afinidade REAL quando hidratada; senão
+    // derivada da REPUTAÇÃO (eixo real -100..+100) como delta do Neutro 50 → clamp(50 + rep/2);
+    // por último, sinal de diálogo aproximado. Assim a MAGNITUDE da reputação MOVE o tier
+    // (proporcional à escala real: rep ±20 cruza uma banda de 20), em vez de ancorar em Neutro fixo.
+    var a = realAff ? aff[sk]
+          : (repVal !== null) ? Math.max(0, Math.min(100, 50 + repVal / 2))
           : ((dlg[r.ref_id] || []).length * 12);
     var tier = _relAffTier(a);
+    // Surface o Renome concreto (eixo distinto da afinidade) p/ a magnitude ser visível
+    // mesmo dentro de uma banda de estrelas (ex.: +5 e -1 caem em "Confiante", mas o nº difere).
+    var badge = tier.stars + ' ' + tier.label;
+    if (repVal !== null && repVal !== 0) badge += ' · Renome ' + (repVal > 0 ? '+' : '') + repVal;
     return {
       icon: r.icon,
       label: r.name + ' (' + r.role + ')',
       cb: 'rel_view_' + r.id,
-      badge: tier.stars + ' ' + tier.label,
+      badge: badge,
       _aff: a
     };
   }).sort(function(x, y){ return (y._aff || 0) - (x._aff || 0); });
