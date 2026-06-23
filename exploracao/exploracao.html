@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T23:00:56Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T23:16:43Z - do not edit directly, edit source -->
 
 
 
@@ -15263,8 +15263,21 @@ window.__explFetchTO = function(url, opts, ms) {
         }
         // #map-toast (2026-06-23): o servidor avisa quando ESTA chegada revelou um local NOVO →
         // notificação padrão (PADRAO_NOTIFICACOES) nomeando o local + que dá pra voltar pela viagem.
-        if (res.newly_discovered && res.newly_discovered.name && typeof window.vToast === 'function') {
-          try { window.vToast('🗺️ ' + res.newly_discovered.name + ' foi desenhado no mapa — agora você pode voltar direto pela viagem do mapa.', 'ok'); } catch (_etoast) {}
+        // DEFER: o /init resolve DURANTE a tela de carregamento (5s) — firar já esconderia o toast
+        // atrás dela. Poll curto até (loading sumir + vToast pronto + >=5s), aí dispara 1x.
+        if (res.newly_discovered && res.newly_discovered.name) {
+          window.__pendingDiscoveryToast = res.newly_discovered.name;
+          (function _fireDiscoveryToast(tries){
+            tries = tries || 0;
+            var _ld = document.getElementById('loading') || document.querySelector('.loading-overlay');
+            var _loadingGone = !_ld || _ld.style.display === 'none' || !_ld.offsetParent;
+            if (tries >= 10 && _loadingGone && typeof window.vToast === 'function' && window.__pendingDiscoveryToast) {
+              try { window.vToast('🗺️ ' + window.__pendingDiscoveryToast + ' foi desenhado no mapa — agora você pode voltar direto pela viagem do mapa.', 'ok'); } catch (_et) {}
+              window.__pendingDiscoveryToast = null;
+              return;
+            }
+            if (tries < 70 && window.__pendingDiscoveryToast) setTimeout(function(){ _fireDiscoveryToast(tries + 1); }, 500);
+          })();
         }
         console.info('[E-REM:API-INIT] ok motor_token=' + res.token.slice(0, 8) + '...'
           + ' state_pos=(' + res.state.player_col + ',' + res.state.player_row + ')'
