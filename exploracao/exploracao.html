@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T00:23:35Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T00:59:27Z - do not edit directly, edit source -->
 
 
 
@@ -33414,14 +33414,22 @@ function onMoveEnd(col, row) {
         // Phase 5b polish v4 (2026-04-26): boss intro cinematic — quando entra
         // no hex do trono, dispara fade-to-dark + flash radial vermelho antes do
         // modal abrir. Nos outros encontros, abre direto sem cinematic.
-        if (enc.id === 'brakthar_throne' && typeof _bossIntroCinematic === 'function') {
-          _bossIntroCinematic(function () {
+        // #12 Fase 3 (2026-06-22): em REMOTE o encounter de dungeon renderiza pelo
+        // vEncounter (S.event tem __dungeon → onChoice resolve no /dungeon_event_choice).
+        // LOCAL (file://) ou vEncounter ausente → openEventModal (System B).
+        var _openDungeonEnc = function () {
+          if (window.__EXPLORE_MODE === 'remote' && window.vEncounter
+              && typeof window.vEncounter.render === 'function') {
+            _explShowEventVEnc(S.event);
+          } else {
             document.getElementById('event-modal').classList.add('visible');
             openEventModal();
-          });
+          }
+        };
+        if (enc.id === 'brakthar_throne' && typeof _bossIntroCinematic === 'function') {
+          _bossIntroCinematic(_openDungeonEnc);
         } else {
-          document.getElementById('event-modal').classList.add('visible');
-          openEventModal();
+          _openDungeonEnc();
         }
         updateHud(); updateHexNav(); scheduleRender();
         return;
@@ -37313,8 +37321,16 @@ function _remoteShowOutcome(ch, oc) {
 // ============================================================================
 
 // Allowlist por tipo (EVENT_TYPES do servidor: hazard/social/discovery/...).
-// Fase 1 = so 'hazard'. Fases seguintes ligam social/discovery/tile/dungeon.
-var _EXPL_VENC_EVENT_TYPES = { hazard: true };
+// Fase 1 = 'hazard'. Fase 2 += 'social'/'discovery'. Fase 4 (2026-06-22) +=
+// 'combat_optional'/'quest_hook' (choice-based, mesmo path do social: choices →
+// /event_choice; "lutar" volta combat_redirect, tratado por _explFinalizeCombatRedirect).
+// 'combat_forced' NÃO entra: NÃO tem choices (botão único "Enfrentar!") — o guard de
+// 0-choices do _explShowEventVEnc já cai pro openEventModal, que tem o _engageForcedCombat.
+// Tile-objects (StubEventLayer) + LOCAL/DEV continuam fora (migração separada).
+var _EXPL_VENC_EVENT_TYPES = {
+  hazard: true, social: true, discovery: true,
+  combat_optional: true, quest_hook: true
+};
 var _explVEncResolving = false;
 
 function _explEventUsesVEncounter(ev) {
@@ -37340,26 +37356,40 @@ function _explEventBodyNode(ev) {
   if (ev.tech && ev.tech.text) {
     script.push({ type: 'narration', text: '<b>' + (ev.tech.label || 'Mecanica') + '</b> — ' + ev.tech.text });
   }
-  var choices = (ev.choices || []).map(function (ch, i) {
+  // Fase 2: filtra choices por classe/background/alinhamento/aliado (paridade com
+  // openEventModal via classCanTakeChoice) — esconde opcoes que o player atual nao
+  // pode tomar. _idx PRESERVA o indice ORIGINAL em ev.choices (o servidor resolve
+  // por choice_idx; nunca usar o indice da lista filtrada).
+  var p = (window.S && window.S.player) || {};
+  var clsKey = p.cls_key, bg = p.background, align = p.alignment;
+  var allies = (window.S && window.S.allies) || [];
+  var displayed = [];
+  (ev.choices || []).forEach(function (ch, i) {
+    if (typeof classCanTakeChoice === 'function' && !classCanTakeChoice(ch, clsKey, bg, align, allies)) return;
     var c = { id: '__expl_ch_' + i, label: ch.label || ('Opcao ' + (i + 1)), _idx: i };
-    if (ch.skill && typeof ch.dc === 'number') { c.skill = ch.skill; c.dc = ch.dc; }
-    return c;
+    if (ch.skill && typeof ch.dc === 'number') {
+      // PT-BR pro badge do openChoices (2+ choices): pre-traduz via skillLabelOf
+      // (mesmo do openEventModal) — vEncounter passa o label adiante.
+      c.skill = (typeof skillLabelOf === 'function') ? skillLabelOf(ch.skill) : ch.skill;
+      c.dc = ch.dc;
+    }
+    displayed.push(c);
   });
-  // PADRAO_DADOS: o botao INLINE do vEncounter (hazard = 1 choice) NAO mostra o
-  // badge de pericia/CD (so o openChoices overlay mostra, e esse e usado com 2+
-  // choices). check_hint anuncia o teste numa sub-linha dourada antes das choices
-  // (mesma info do badge do openEventModal: pericia + CD + % de sucesso).
-  var skillCh = (ev.choices || []).filter(function (c) { return c && c.skill && typeof c.dc === 'number'; });
-  if (skillCh.length === 1 && script.length) {
-    var sc = skillCh[0];
-    var lbl = (typeof skillLabelOf === 'function') ? skillLabelOf(sc.skill) : sc.skill;
-    var pct = null;
-    try { if (typeof calcSuccessPct === 'function' && window.S && window.S.player) pct = calcSuccessPct(sc, window.S.player); } catch (_) {}
-    var phrase = lbl + ' · CD ' + sc.dc + (pct != null ? ' · ' + pct + '%' : '');
-    var li = script.length - 1;
-    script[li] = Object.assign({}, script[li], { check_hint: { phrase: phrase } });
+  // PADRAO_DADOS: com 1 choice EXIBIDA (botao inline, SEM badge) anuncia o teste
+  // via check_hint dourado. Com 2+ choices o openChoices overlay ja mostra o badge
+  // pericia·CD·% por escolha (sem check_hint redundante).
+  if (displayed.length === 1 && script.length) {
+    var only = ev.choices[displayed[0]._idx];
+    if (only && only.skill && typeof only.dc === 'number') {
+      var lbl = (typeof skillLabelOf === 'function') ? skillLabelOf(only.skill) : only.skill;
+      var pct = null;
+      try { if (typeof calcSuccessPct === 'function' && window.S && window.S.player) pct = calcSuccessPct(only, window.S.player); } catch (_) {}
+      var phrase = lbl + ' · CD ' + only.dc + (pct != null ? ' · ' + pct + '%' : '');
+      var li = script.length - 1;
+      script[li] = Object.assign({}, script[li], { check_hint: { phrase: phrase } });
+    }
   }
-  return { npc: _explEventHeaderNpc(ev), script: script, choices: choices };
+  return { npc: _explEventHeaderNpc(ev), script: script, choices: displayed };
 }
 
 // Renderiza o CORPO do evento via vEncounter. Defensivo: se o render lancar,
@@ -37368,11 +37398,26 @@ function _explEventBodyNode(ev) {
 function _explShowEventVEnc(ev) {
   _explVEncResolving = false;
   try {
-    window.vEncounter.render(_explEventBodyNode(ev), {
+    var node = _explEventBodyNode(ev);
+    // Se TODAS as choices foram filtradas (nenhuma elegivel pro player atual), o
+    // openEventModal (System B) sabe lidar (combat_forced / botao unico) — nao
+    // deixa o jogador preso num vEncounter so com "Fechar".
+    if (!node.choices || node.choices.length === 0) {
+      LOGW('EVENT', 'vencounter_no_eligible_choices id=' + ev.id + ' -> fallback openEventModal');
+      document.getElementById('event-modal').classList.add('visible');
+      openEventModal();
+      return;
+    }
+    window.vEncounter.render(node, {
       player: S.player, closeable: false,
-      onChoice: function (ch) { _explEventVEncResolve(ev, ch); }
+      onChoice: function (ch) {
+        // Fase 3: encounter de DUNGEON (REMOTE) resolve no /dungeon_event_choice
+        // (chain-aware); os demais tipos no /event_choice.
+        if (ev && ev.__dungeon) { _explDungeonVEncResolve(ev, ch); }
+        else { _explEventVEncResolve(ev, ch); }
+      }
     });
-    LOG('EVENT', 'vencounter_render id=' + ev.id + ' type=' + ev.type);
+    LOG('EVENT', 'vencounter_render id=' + ev.id + ' type=' + (ev.type || (ev.__dungeon ? 'dungeon' : '?')) + ' choices=' + node.choices.length);
   } catch (e) {
     LOGE('EVENT', 'vencounter_render_failed id=' + ev.id + ' err=' + (e && e.message)
       + ' -> fallback openEventModal');
@@ -37427,6 +37472,58 @@ function _explEventVEncError(ev, reason) {
     + ' — nao fabrica (SUPREME RULE #0)');
   try { if (typeof vToast === 'function') vToast('⚠️ Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
   _explShowEventVEnc(ev);
+}
+
+// Fase 3 (2026-06-22): encounter de DUNGEON em REMOTE resolve no MOTOR via
+// /dungeon_event_choice (rota dedicada do H1) — espelha o ramo dungeon do
+// resolveChoice (~36924) mas renderiza pelo vEncounter. Chain-aware: marca
+// S._eventChain (__venc) pro Continuar (_explEventVEncFinish) renderizar o
+// proximo passo via vEncounter. SEM fabricar (M6).
+function _explDungeonVEncResolve(ev, ch) {
+  if (_explVEncResolving) return;
+  var idx = (ch && typeof ch._idx === 'number') ? ch._idx : -1;
+  if (idx < 0 || !ev.choices || !ev.choices[idx]) {
+    LOGW('EVENT', 'vencounter_dungeon_bad_choice idx=' + idx);
+    return;
+  }
+  var _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+  var _tok = window.__EXPLORE_TOKEN;
+  if (!_tok || !_api || typeof window.__explFetchTO !== 'function') {
+    LOGW('EVENT', 'vencounter_dungeon_no_token');
+    return;
+  }
+  _explVEncResolving = true;
+  var realCh = ev.choices[idx];
+  var _body = JSON.stringify({
+    token: _tok, map_id: ev._mapId, encounter_id: ev._encId,
+    choice_idx: idx, hex_id: ev._hexId || ''
+  });
+  LOG('API', 'vencounter_dungeon_choice idx=' + idx + ' enc=' + (ev._encId || '?'));
+  window.__explFetchTO(_api + '/api/exploracao/dungeon_event_choice', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + _tok, 'Content-Type': 'application/json' },
+    body: _body
+  }, 12000).then(function (resp) { return resp.json(); }).then(function (res) {
+    if (!res || res.error) { _explEventVEncError(ev, res && res.error); return; }
+    var oc = res.outcome || {};
+    _explSyncStateFromServer(res.state);
+    if (res.combat_redirect) { oc._combat_redirect = res.combat_redirect; }
+    if (oc.flavor && !oc.text) { oc.text = oc.flavor; }
+    // chain multi-step: o Continuar (_explEventVEncFinish) renderiza o proximo
+    // passo via vEncounter (mantem _mapId/_encId/_hexId + __dungeon pro resolve).
+    if (oc.chain && oc.chain.choices) {
+      S._eventChain = Object.assign({}, oc.chain, {
+        resolved: null, __remote: true, __dungeon: true, __venc: true,
+        _mapId: ev._mapId, _encId: ev._encId, _hexId: ev._hexId
+      });
+    }
+    try { window.vEncounter.close(); } catch (_) {}
+    if (oc.check && realCh.skill) {
+      _remoteRenderDiceAndResolve(realCh, oc, function () { _explShowOutcomeVEnc(ev, oc); });
+    } else {
+      _explShowOutcomeVEnc(ev, oc);
+    }
+  }).catch(function (e) { _explEventVEncError(ev, (e && e.message) || 'rejected'); });
 }
 
 // Bloco de recompensa (PADRAO_ALDRIC) a partir do delta/loot do SERVIDOR. So
@@ -37494,9 +37591,21 @@ function _explSyncStateFromServer(state) {
   } catch (e) { LOGE('API', 'vencounter_state_sync err=' + (e && e.message)); }
 }
 
-// Continuar -> fecha o vEncounter, reseta a fase e (se houve) navega pro combate.
+// Continuar -> renderiza o proximo passo da chain (dungeon multi-step) OU fecha o
+// vEncounter, reseta a fase e (se houve) navega pro combate.
 function _explEventVEncFinish(oc) {
   _explVEncResolving = false;
+  // Fase 3: chain multi-step marcada pra vEncounter (__venc) — NAO fecha; renderiza
+  // o proximo passo (mantem o fluxo continuo, BG3/Pathfinder). O __dungeon roteia o
+  // resolve do proximo passo pro /dungeon_event_choice (via onChoice de _explShowEventVEnc).
+  var chain = S._eventChain;
+  if (chain && chain.__venc && chain.choices && chain.choices.length) {
+    S._eventChain = null;
+    S.event = chain;
+    if (typeof _setPhase === 'function') { try { _setPhase('event', 'vencounter_chain_next'); } catch (_) { S.ph = 'event'; } } else { S.ph = 'event'; }
+    _explShowEventVEnc(chain);
+    return;
+  }
   try { window.vEncounter.close(); } catch (_) {}
   S.event = null;
   if (S.ph !== 'defeat') { try { _setPhase('idle', 'vencounter_event_finish'); } catch (_) { S.ph = 'idle'; } }
