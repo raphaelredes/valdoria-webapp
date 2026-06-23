@@ -20724,8 +20724,14 @@ function _buildRelationsMockData(player){
     return (sk && (sk in aff || sk in rep)) || ((dlg[r.ref_id] || []).length > 0);
   }).map(function(r){
     var sk = REL_SERVER_KEY[r.id];
+    // Tier por afinidade REAL (server, 0-100) quando hidratada; senão NPC conhecido por
+    // REPUTAÇÃO usa o default narrativo Neutro (50) — afinidade não foi mexida, mas há
+    // relação registrada (≠ proxy de diálogo, que daria 0 = tier mais baixo, enganoso);
+    // por último, sinal de diálogo aproximado. (Afinidade e reputação são eixos distintos:
+    // a tela tiering por afinidade; a reputação só inclui o NPC + ancora em Neutro.)
     var a = (sk && typeof aff[sk] === 'number') ? aff[sk]
-          : ((dlg[r.ref_id] || []).length * 12);  // sinal de diálogo → afinidade aproximada
+          : (sk && typeof rep[sk] === 'number') ? 50
+          : ((dlg[r.ref_id] || []).length * 12);
     var tier = _relAffTier(a);
     return {
       icon: r.icon,
