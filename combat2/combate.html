@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-23T11:28:48Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-23T23:44:58Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -28475,12 +28475,13 @@ function showIntroChoicePopup() {
        setHTML — evita reescrever o array literal). currentState.narrative vem do
        servidor (setup.narrative → newCombatFromSetup). Narração 3ª pessoa pura;
        combates sem narrativa mantêm o fluxo clássico (CTAs já visíveis). */
+    /* #intro-no-narr (2026-06-23, user): a descrição pré-luta ("Dois indivíduos…") foi REMOVIDA
+       da tela COMBATE INICIADO — a tela vai DIRETO pros CTAs (Começar Rolagens / Pular Todas).
+       A narrativa do servidor (currentState.narrative) não é mais exibida aqui. _introNarr fica
+       '' e _hasNarr false → os blocos de injeção/typewriter abaixo ficam inertes; os CTAs não
+       são mais ocultados (c2-cta-hidden) → aparecem imediatamente. */
     var _introNarr = '';
-    try {
-        _introNarr = (currentState && currentState.narrative)
-            ? String(currentState.narrative).trim() : '';
-    } catch (_eN) { _introNarr = ''; }
-    var _hasNarr = _introNarr.length > 0;
+    var _hasNarr = false;
     var _ctasEl = card.querySelector('.iop-start-wrap');
     var _narrEl = null, _hintEl = null;
     if (_hasNarr && _ctasEl) {
