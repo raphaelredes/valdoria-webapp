@@ -20689,14 +20689,23 @@ var RELATIONS_NPCS = [
   { id: 'rel_bjorn',    icon: '<img src="/shared/img/merchants/bjorn.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',           name: 'Bjorn',    role: 'Tendeiro',   ref_id: 'market_bjorn',    portraitImg: '/shared/img/merchants/bjorn.webp' }
 ];
 
-// Tiers canonical wandering_npcs.py get_familiarity_tier
-function _relationTier(interactions){
-  if (interactions === 0) return { name: 'Estranho',         affinity: 0, status: 'sem vínculo' };
-  if (interactions < 2)   return { name: 'Conhecido',        affinity: 1, status: 'apresentado' };
-  if (interactions < 4)   return { name: 'Aceito',           affinity: 2, status: 'cordial' };
-  if (interactions < 6)   return { name: 'Confiante',        affinity: 3, status: 'amigo' };
-  if (interactions < 8)   return { name: 'Aliado',           affinity: 4, status: 'aliado leal' };
-  return                         { name: 'Círculo Íntimo',   affinity: 5, status: 'parente em alma' };
+// (removido #92: _relationTier — tier 0-5 por contagem de diálogo — virou dead code quando
+//  Vínculos passou a tierar pela afinidade EFETIVA do servidor via _relAffTier; sem callers.)
+
+// #92b (2026-06-23): retratos dos NPCs do mundo-2 que aparecem na lista server-driven de
+// Vínculos (relations.list) mas NÃO estão no RELATIONS_NPCS. key (NPC_INFO) → slug WebP
+// (gerado por scripts/_gen_world2_relations_npcs.py). Sem entrada → ícone heráldico fallback.
+var NPC_PORTRAIT_BY_KEY = {
+  npc_citizen_tessa: 'tessa-fruteira', npc_traveler_bram: 'bram-marinheiro',
+  npc_citizen_lyra: 'lyra-costureira', npc_citizen_wenn: 'wenn-carpinteiro',
+  npc_beggar_kira: 'kira-mendiga', npc_traveler_olen: 'olen-trovador',
+  npc_citizen_pip: 'pip-recadeiro', npc_citizen_greta: 'greta-padeira',
+  npc_beggar_drax: 'drax-veterano', npc_citizen_nyssa: 'nyssa-curandeira',
+  npc_druid_sylthara: 'sylthara-druida'
+};
+function _world2Portrait(key){
+  var slug = NPC_PORTRAIT_BY_KEY[key];
+  return slug ? '/shared/img/npcs/' + slug + '.webp' : null;
 }
 
 // item F (2026-06-18): mapeia o id do RELATIONS_NPC → a key do NPC na afinidade
@@ -20737,16 +20746,20 @@ function _buildRelationsMockData(player){
     var _fallbackIco = (typeof _heralIco === 'function') ? _heralIco('ic-dialogo', null, '38px') : '';
     var srvServices = window.CITY_SERVER_RELATIONS.map(function(rel){
       var rn = _byKey[rel.key];
+      var w2 = rn ? null : _world2Portrait(rel.key);  // retrato do mundo-2 (#92b), se houver
+      var portraitImg = rn ? rn.portraitImg : w2;
+      var icon = rn ? rn.icon
+               : (w2 ? '<img src="' + w2 + '" alt="" style="width:38px;height:38px;object-fit:contain;">' : _fallbackIco);
       var eff = (typeof rel.eff_affinity === 'number') ? rel.eff_affinity : 50;
       var tier = _relAffTier(eff);
       var badge = tier.stars + ' ' + tier.label;
       if (typeof rel.reputation === 'number' && rel.reputation !== 0) badge += ' · Renome ' + (rel.reputation > 0 ? '+' : '') + rel.reputation;
       return {
-        icon: rn ? rn.icon : _fallbackIco,
+        icon: icon,
         label: rel.name + ' (' + rel.role + ')',
         cb: rn ? ('rel_view_' + rn.id) : ('rel_view_srv_' + rel.key),
         badge: badge, _aff: eff,
-        portraitImg: rn ? rn.portraitImg : null
+        portraitImg: portraitImg
       };
     });
     return {
@@ -47113,7 +47126,8 @@ function _relationsShow(p, relId){
     srvRel = window.CITY_SERVER_RELATIONS.find(function(x){ return x.key === _srvKey; });
     if (srvRel) {
       r = { id: relId, name: srvRel.name, role: srvRel.role, ref_id: srvRel.key,
-            icon: (typeof _heralIco === 'function') ? _heralIco('ic-dialogo', null, '96px') : '', portraitImg: null };
+            icon: (typeof _heralIco === 'function') ? _heralIco('ic-dialogo', null, '96px') : '',
+            portraitImg: _world2Portrait(srvRel.key) };  // #92b: retrato real se houver, senão heráldico
     }
   }
   if (!r) return;
