@@ -22500,6 +22500,14 @@ function _dailyChallengeForToday(){
         count: _srvCh.count || 1,
         theme: _srvCh.theme || '',
         flavor: _srvCh.flavor || '',
+        // #93 (2026-06-23): o popup (_showDailyChallengeEpicPopup) e o badge
+        // (_buildDailyChallengeMockData) leem ch.desc/ch.biome/ch.reward_gold/ch.reward_xp.
+        // O mapeamento REMOTE OMITIA esses 4 campos → tela do desafio mostrava "undefined"
+        // na descrição, no 📍 local e em "+undefined 🪙 / +undefined XP". Mapeados do servidor:
+        desc: _srvCh.flavor || _srvCh.title || '',
+        biome: _srvCh.biome_label || _srvCh.theme || '',
+        reward_gold: parseInt(_srvCh.reward_gold, 10) || 0,
+        reward_xp: parseInt(_srvCh.reward_xp, 10) || 0,
         started: !!_srvCh.started,
         _server: true
       };
