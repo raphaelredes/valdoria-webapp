@@ -20676,7 +20676,12 @@ var RELATIONS_NPCS = [
   { id: 'rel_thorne',  icon: '<img src="/shared/img/merchants/thorne.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/merchants/thorne.webp' },
   { id: 'rel_mirena',  icon: '<img src="/shared/img/merchants/mirena.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/merchants/mirena.webp' },
   { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Valeriax',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.webp' },
-  { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.webp' }
+  { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.webp' },
+  // Mercadores TIER 2.0 com reputação REAL no servidor (cartographer/jeweler/tentmaker em
+  // NPC_INFO) — antes AUSENTES do RELATIONS_NPCS → nunca apareciam em Vínculos mesmo com renome.
+  { id: 'rel_corvus',   icon: '<img src="/shared/img/merchants/corvus-veltharion.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Corvus',   role: 'Cartógrafo', ref_id: 'market_corvus',   portraitImg: '/shared/img/merchants/corvus-veltharion.webp' },
+  { id: 'rel_velithra', icon: '<img src="/shared/img/merchants/velithra.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',        name: 'Velithra', role: 'Joalheira',  ref_id: 'market_velithra', portraitImg: '/shared/img/merchants/velithra.webp' },
+  { id: 'rel_bjorn',    icon: '<img src="/shared/img/merchants/bjorn.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',           name: 'Bjorn',    role: 'Tendeiro',   ref_id: 'market_bjorn',    portraitImg: '/shared/img/merchants/bjorn.webp' }
 ];
 
 // Tiers canonical wandering_npcs.py get_familiarity_tier
@@ -20695,7 +20700,8 @@ function _relationTier(interactions){
 var REL_SERVER_KEY = {
   rel_martha: 'npc_inn_martha', rel_grom: 'npc_tavern_grom', rel_aldric: 'npc_gate_aldric',
   rel_elara: 'npc_temple_elara', rel_thorne: 'blacksmith', rel_mirena: 'alchemist',
-  rel_tavira: 'npc_guild_tavira'
+  rel_tavira: 'npc_guild_tavira',
+  rel_corvus: 'cartographer', rel_velithra: 'jeweler', rel_bjorn: 'tentmaker'
 };
 // item F: tier por afinidade 0-100 (espelha AFFINITY_TIERS do servidor). Um NPC que
 // aparece aqui JÁ foi conhecido (afinidade registrada) → mínimo "Conhecido", nunca
@@ -47056,10 +47062,25 @@ function _heroesShowTitles(p){
 function _relationsShow(p, relId){
   var r = RELATIONS_NPCS.find(function(x){ return x.id === relId; });
   if (!r) return;
+  // SUPREME RULE #0 (2026-06-23): afinidade/tier vêm do SERVIDOR (Player.narrative,
+  // hidratado em metadata.npc_affinity/npc_reputation) — MESMA lógica do _buildRelationsMockData.
+  // ANTES o detalhe derivava o tier da CONTAGEM DE DIÁLOGO local (_npcDialoguesUsed),
+  // contradizendo a lista server-driven: um NPC com afinidade alta via quest aparecia
+  // "Estranho"/baixo aqui. Agora ambos usam a afinidade EFETIVA do servidor.
+  var md = (p && p.metadata) || {};
+  var aff = md.npc_affinity || {};
+  var rep = md.npc_reputation || {};
+  var sk = REL_SERVER_KEY[relId];
+  var realAff = (sk && typeof aff[sk] === 'number');
+  var repVal = (sk && typeof rep[sk] === 'number') ? rep[sk] : null;
   var interactions = ((window._npcDialoguesUsed || {})[r.ref_id] || []).length;
-  var tier = _relationTier(interactions);
-  var nextTier = _relationTier(interactions + 2);
-  // Encontra o NPC referenciado (em qualquer pool) pra info detalhada
+  // afinidade EFETIVA 0-100: real > reputação (delta do Neutro, escala real ±100) > proxy de diálogo
+  var effAff = realAff ? aff[sk]
+             : (repVal !== null) ? (50 + repVal / 2)
+             : (interactions * 12);
+  effAff = Math.max(0, Math.min(100, effAff));
+  var tier = _relAffTier(effAff);  // {label, stars} — MESMO tier da lista (0-100, 5 bandas)
+  // Conta diálogos DESCOBERTOS (info secundária; NÃO dirige mais o tier)
   var allNpcs = (typeof TAVERN_NPCS !== 'undefined' ? TAVERN_NPCS : [])
     .concat(typeof MARKET_MERCHANTS !== 'undefined' ? MARKET_MERCHANTS : [])
     .concat(typeof GUILD_NPCS !== 'undefined' ? GUILD_NPCS : [])
@@ -47068,14 +47089,8 @@ function _relationsShow(p, relId){
     .concat(typeof GATES_NPCS !== 'undefined' ? GATES_NPCS : []);
   var npcRef = allNpcs.find(function(n){ return n.id === r.ref_id; });
   var totalDialogs = npcRef && npcRef.talkOptions ? npcRef.talkOptions.length : 0;
-  // Sessão #26 (2026-05-22) P1 #77: AAA upgrade — prefere PNG portrait grande
-  // quando disponível, fallback ao SVG heráldico inline. Adiciona barra de afinidade
-  // visual gradiente gold + status colorido por tier.
   var iconHtml = r.icon;
   if (r.portraitImg) {
-    // Sessão #26 fix: onerror só esconde IMG se PNG falhar (sem replace HTML —
-    // double-quotes do SVG breaks onerror attribute parser. Fallback aceitável:
-    // user vê broken-image hint se PNG 404, mas todos PNGs já validados existir).
     iconHtml = '<img src="' + r.portraitImg + '" alt="' + r.name + '" ' +
                'style="width:96px;height:96px;border-radius:50%;object-fit:cover;' +
                'border:2px solid var(--v-gold,#c4953a);' +
@@ -47083,27 +47098,29 @@ function _relationsShow(p, relId){
                'loading="lazy" ' +
                'onerror="this.style.display=\'none\'"/>';
   }
-  var tierColor = tier.affinity >= 5 ? '#ffd700' :
-                  tier.affinity >= 4 ? '#c4953a' :
-                  tier.affinity >= 2 ? '#a09484' : '#7a6850';
-  var affPct = (tier.affinity / 5) * 100;
+  var tierColor = effAff >= 80 ? '#ffd700' :
+                  effAff >= 60 ? '#c4953a' :
+                  effAff >= 40 ? '#a09484' : '#7a6850';
   var affBar = '<div style="margin: var(--v-space-md, 8px) 0 var(--v-space-lg, 12px);background:rgba(0,0,0,0.4);height:6px;border-radius:3px;overflow:hidden;border:1px solid rgba(196,149,58,0.3);">' +
-               '<div style="width:' + affPct + '%;height:100%;background:linear-gradient(90deg,#8a5a18,' + tierColor + ');' +
+               '<div style="width:' + effAff + '%;height:100%;background:linear-gradient(90deg,#8a5a18,' + tierColor + ');' +
                'box-shadow:0 0 6px ' + tierColor + ';transition:width 0.3s ease;"></div></div>';
+  var repLine = (repVal !== null && repVal !== 0)
+    ? '<div style="color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md, 8px);">Renome: <b style="color:' + (repVal > 0 ? '#8fbf6a' : '#d08a6a') + ';">' + (repVal > 0 ? '+' : '') + repVal + '</b></div>'
+    : '';
   _showInfoPopup({
     icon: iconHtml, npc: r.name, title: 'Vínculo: ' + r.name,
     desc: '<b style="color:' + tierColor + ';font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:0.5px;">' + r.name + '</b> <span style="color:var(--v-text-dim, #a09484);">— ' + r.role + '</span><br>' +
-          '<div style="margin-top: var(--v-space-md, 8px);color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));">Afinidade ' + tier.affinity + '/5</div>' + affBar +
-          '<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:calc(12px * var(--v-font-scale, 1));">' +
-          '<span style="color:' + tierColor + ';font-weight:600;">' + tier.name + '</span>' +
-          '<span style="color:var(--v-text-dim, #a09484);font-style:italic;">' + tier.status + '</span></div>' +
+          '<div style="margin-top: var(--v-space-md, 8px);display:flex;justify-content:space-between;font-size:calc(12px * var(--v-font-scale, 1));">' +
+          '<span style="color:' + tierColor + ';font-weight:600;">' + tier.stars + ' ' + tier.label + '</span>' +
+          '<span style="color:var(--v-text-dim, #a09484);">Afinidade ' + Math.round(effAff) + '/100</span></div>' + affBar +
+          repLine +
           '<div style="color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md-lg, 10px);">Diálogos: <b style="color:var(--v-text, #d4c8b0);">' + interactions + '</b>' + (totalDialogs > 0 ? ' / ' + totalDialogs + ' descobertos' : '') + '</div>' +
-          (interactions === 0
-            ? '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(0,0,0,0.25);border-left:2px solid rgba(196,149,58,0.4);border-radius: var(--v-radius-xs, 4px);font-style:italic;color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));">Você ainda não conversou com ' + r.name + '. Visite a área correspondente e converse pra construir vínculo.</div>'
-            : interactions >= 8
-              ? '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(196,149,58,0.12);border-left:2px solid ' + tierColor + ';border-radius: var(--v-radius-xs, 4px);font-style:italic;color:#f4d896;font-size:calc(12px * var(--v-font-scale, 1));">⭐ Vínculo no nível máximo. ' + r.name + ' confia plenamente em você.</div>'
-              : '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(0,0,0,0.25);border-left:2px solid ' + tierColor + ';border-radius: var(--v-radius-xs, 4px);font-style:italic;color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));">Próximo tier <b style="color:' + tierColor + ';">"' + nextTier.name + '"</b> em <b>' + Math.max(0, [0,2,4,6,8][tier.affinity + 1] - interactions) + '</b> diálogos.</div>'),
-    // Sessão #26 (2026-05-22) P0 #75: popup informativo (read-only) — esconde Confirmar redundante
+          (effAff < 20
+            ? '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(0,0,0,0.25);border-left:2px solid rgba(196,149,58,0.4);border-radius: var(--v-radius-xs, 4px);font-style:italic;color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));">Seu v&iacute;nculo com ' + r.name + ' ainda &eacute; incipiente. Converse, ajude e cumpra miss&otilde;es pra fortalec&ecirc;-lo.</div>'
+            : effAff >= 80
+              ? '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(196,149,58,0.12);border-left:2px solid ' + tierColor + ';border-radius: var(--v-radius-xs, 4px);font-style:italic;color:#f4d896;font-size:calc(12px * var(--v-font-scale, 1));">&#11088; V&iacute;nculo no auge. ' + r.name + ' confia plenamente em voc&ecirc;.</div>'
+              : '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(0,0,0,0.25);border-left:2px solid ' + tierColor + ';border-radius: var(--v-radius-xs, 4px);font-style:italic;color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));">Continue cultivando este v&iacute;nculo &mdash; gestos genu&iacute;nos e miss&otilde;es aprofundam a confian&ccedil;a de ' + r.name + '.</div>'),
+    // popup informativo (read-only) — esconde Confirmar redundante
     singleButton: true,
     cancelLabel: 'Voltar'
   });
