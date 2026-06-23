@@ -34915,6 +34915,13 @@ function _aaaListSubScreen(opts){
     + '.aaa-sub-iico{flex:0 0 30px;width:30px;height:30px;display:grid;place-items:center;color:' + th.primary + ';}'
     + '.aaa-sub-iico svg{width:30px;height:30px;}'
     + '.aaa-sub-iico img{width:30px;height:30px;object-fit:cover;border-radius: var(--v-radius-sm, 6px);}'
+    // #95 FASE 3: variante com RETRATO grande (card de aventureiro estilo Martha/Grom)
+    + '.aaa-sub-item.has-portrait{gap: var(--v-space-md, 8px);padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);}'
+    + '.aaa-sub-item.has-portrait .aaa-sub-iico{position:relative;flex:0 0 clamp(48px,14vw,58px);width:clamp(48px,14vw,58px);height:clamp(48px,14vw,58px);}'
+    + '.aaa-sub-item.has-portrait .aaa-sub-iico img{width:100%;height:100%;object-fit:cover;border-radius: var(--v-radius-sm, 6px);border:1px solid rgba(196,149,58,0.55);box-shadow:0 2px 8px rgba(0,0,0,0.45);}'
+    + '.aaa-sub-item.has-portrait .aaa-sub-iico .aaa-sub-pfb{position:absolute;inset:0;display:grid;place-items:center;z-index:-1;}'
+    + '.aaa-sub-item.has-portrait .aaa-sub-ilbl{font-size:calc(clamp(14px,4vw,15px) * var(--v-font-scale, 1));white-space:normal;}'
+    + '.aaa-sub-item.has-portrait .aaa-sub-idesc{font-style:normal;white-space:normal;line-height:1.4;margin-top:3px;}'
     + '.aaa-sub-itxt{flex:1;min-width:0;}'
     + '.aaa-sub-ilbl{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(13px * var(--v-font-scale, 1));font-weight:600;color:var(--v-text-bright,#e8dcc8);letter-spacing:0.4px;'
     +   'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
@@ -34958,10 +34965,16 @@ function _aaaListSubScreen(opts){
     var desc = item.desc ? '<div class="aaa-sub-idesc">' + item.desc + '</div>' : '';
     var badge = item.badge ? '<div class="aaa-sub-ibadge">' + item.badge + '</div>' : '';
     var chev = item.disabled ? '' : '<div class="aaa-sub-ichev">›</div>';
-    html += '<button class="aaa-sub-item" data-idx="' + idx + '"'
+    // #95 FASE 3: item.portrait => card com retrato grande (fallback p/ item.icon se a img falhar)
+    var hasPort = !!item.portrait;
+    var iicoInner = hasPort
+      ? '<img src="' + item.portrait + '" alt="" onerror="this.style.display=\'none\';">'
+        + '<span class="aaa-sub-pfb">' + (item.icon || '·') + '</span>'
+      : (item.icon || '·');
+    html += '<button class="aaa-sub-item' + (hasPort ? ' has-portrait' : '') + '" data-idx="' + idx + '"'
       + (item.disabled ? ' disabled' : '') + ' type="button"'
       + ' style="animation-delay:' + (idx * 40) + 'ms">'
-      + '<div class="aaa-sub-iico">' + (item.icon || '·') + '</div>'
+      + '<div class="aaa-sub-iico">' + iicoInner + '</div>'
       + '<div class="aaa-sub-itxt">'
       +   '<div class="aaa-sub-ilbl">' + (item.label || item.name || '') + '</div>'
       +   desc
@@ -44412,8 +44425,11 @@ function _guildShowRecruits(p){
         return;
       }
       var items = list.map(function(it){
-        return { icon: (it.ico || _heralIco('ic-grupo')), label: it.n,
-          desc: _clsCap(it.c) + ' · Nível ' + (it.l || 1) + (it.rehire ? ' · (recontratar)' : ''),
+        // #95 FASE 3: card épico (retrato à esquerda + nome + "Nível N · Classe · Raça")
+        var raceStr = it.race ? (' · ' + it.race) : '';
+        var port = it.port ? ('../shared/img/adventurers/' + it.port + '.webp') : '';
+        return { portrait: port, icon: (it.ico || _heralIco('ic-grupo')), label: it.n,
+          desc: 'Nível ' + (it.l || 1) + ' · ' + _clsCap(it.c) + raceStr + (it.rehire ? ' · (recontratar)' : ''),
           badge: it.cost + ' ' + coin, _it: it };
       });
       _squareShowListPopup({
