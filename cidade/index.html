@@ -46403,9 +46403,9 @@ function _showDailyChallengeEpicPopup(p){
         + '@media (prefers-reduced-motion:reduce){.dc-rune,#dcCta,#dcCta::before{animation:none !important;}}'
         + '</style>'
 
-        // === BANNER topo: "◆ DESAFIO DO DIA · CAÇA ◆" ===
+        // === BANNER topo: "◆ DESAFIO DO DIA · CAÇA ◆" === (#94: fontes maiores, sem letras miúdas)
         + '<div style="display:flex;align-items:center;justify-content:center;gap: var(--v-space-md, 8px);margin: var(--v-space-xs, 2px) 0 var(--v-space-lg, 12px);'
-        + 'font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));'
+        + 'font-family:var(--v-font-display,Cinzel,serif);font-size:calc(12px * var(--v-font-scale, 1));'
         + 'color:var(--v-gold,#c4953a);letter-spacing:2.5px;text-transform:uppercase;">'
         + '<span style="flex:0 0 24px;height:1px;background:linear-gradient(90deg,transparent,rgba(196,149,58,0.6));"></span>'
         + '<span class="dc-rune">◆</span>'
@@ -46416,83 +46416,76 @@ function _showDailyChallengeEpicPopup(p){
 
         // === FLAVOR LORE ===
         + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);'
-        + 'font-size:calc(12px * var(--v-font-scale, 1));margin: 0 var(--v-space-md, 8px) var(--v-space-md-lg, 10px);line-height:1.5;">'
+        + 'font-size:calc(14px * var(--v-font-scale, 1));margin: 0 var(--v-space-md, 8px) var(--v-space-lg, 12px);line-height:1.65;">'
         + '"' + ch.desc + '"'
         + '</div>'
 
         // === ALVO BOX (target + biome highlighted) ===
-        + '<div style="margin: var(--v-space-md, 8px) 0 0;padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);'
+        + '<div style="margin: var(--v-space-md, 8px) 0 0;padding: var(--v-space-lg, 12px) var(--v-space-lg, 12px);'
         + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,30,18,0.55) 100%);'
         + 'border:1px solid var(--v-border,#4a3828);border-left:3px solid var(--v-gold,#c4953a);'
-        + 'border-radius:5px;">'
+        + 'border-radius:6px;">'
         + '  <div style="display:flex;align-items:center;justify-content:space-between;gap: var(--v-space-md, 8px);'
-        + '  font-family:var(--v-font,MedievalSharp,serif);font-size:calc(15px * var(--v-font-scale, 1));'
+        + '  font-family:var(--v-font,MedievalSharp,serif);font-size:calc(17px * var(--v-font-scale, 1));'
         + '  color:#e8dcc8;">'
-        + '    <span style="display:inline-flex;align-items:center;gap:6px;">'
+        + '    <span style="display:inline-flex;align-items:center;gap:7px;">'
         + '      <span class="dc-rune">🎯</span>'
         + '      <b>' + verb + '</b>'
         + '    </span>'
-        + '    <span style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(20px * var(--v-font-scale, 1));'
+        + '    <span style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(24px * var(--v-font-scale, 1));'
         + '    font-weight:700;color:var(--v-gold,#c4953a);text-shadow:0 0 8px rgba(255,210,90,0.45);">'
         + '      ' + ch.count + 'x'
         + '    </span>'
         + '  </div>'
-        + '  <div style="margin-top:5px;font-size:calc(11px * var(--v-font-scale, 1));'
-        + '  color:var(--v-text-dim,#a09484);display:flex;align-items:center;gap: var(--v-space-sm, 4px);">'
+        + '  <div style="margin-top:8px;font-size:calc(14px * var(--v-font-scale, 1));'
+        + '  color:var(--v-text,#d4c8b0);display:flex;align-items:center;gap: var(--v-space-sm, 4px);">'
         + '    📍 <span>' + ch.biome + '</span>'
         + '  </div>'
-        + '  <div style="margin-top:3px;font-size:calc(10px * var(--v-font-scale, 1));'
-        + '  color:var(--v-text-dim,#a09484);display:flex;align-items:center;gap: var(--v-space-sm, 4px);opacity:0.85;">'
+        + '  <div style="margin-top:6px;font-size:calc(12px * var(--v-font-scale, 1));'
+        + '  color:var(--v-text-dim,#a09484);display:flex;align-items:center;gap: var(--v-space-sm, 4px);opacity:0.9;">'
         + '    ⏰ <span>Reseta à meia-noite</span>'
         + '  </div>'
         + '</div>'
 
         // === RECOMPENSAS BOX ===
-        + '<div style="margin: var(--v-space-md, 8px) 0 0;padding: 9px var(--v-space-lg, 12px);'
+        + '<div style="margin: var(--v-space-md-lg, 10px) 0 0;padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);'
         + 'background:linear-gradient(180deg,rgba(255,210,90,0.10) 0%,rgba(42,30,18,0.55) 100%);'
-        + 'border:1px solid rgba(196,149,58,0.4);border-radius:5px;">'
-        + '  <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));'
-        + '  color:var(--v-gold,#c4953a);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;'
+        + 'border:1px solid rgba(196,149,58,0.4);border-radius:6px;">'
+        + '  <div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(12px * var(--v-font-scale, 1));'
+        + '  color:var(--v-gold,#c4953a);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;'
         + '  text-align:center;">'
         + '    <span class="dc-rune">◆</span> Recompensas <span class="dc-rune">◆</span>'
         + '  </div>'
-        + '  <div style="display:flex;justify-content:center;gap:18px;align-items:center;'
-        + '  font-size:calc(13px * var(--v-font-scale, 1));">'
+        + '  <div style="display:flex;justify-content:center;gap:22px;align-items:center;'
+        + '  font-size:calc(15px * var(--v-font-scale, 1));">'
         + '    <span style="display:inline-flex;align-items:center;gap: var(--v-space-sm, 4px);">'
-        + '      <b style="color:var(--v-gold,#c4953a);font-size:calc(15px * var(--v-font-scale, 1));'
+        + '      <b style="color:var(--v-gold,#c4953a);font-size:calc(18px * var(--v-font-scale, 1));'
         + '      text-shadow:0 0 8px rgba(255,210,90,0.45);">+' + ch.reward_gold + '</b>'
         + '      <span class="vi vi-coin sm"></span>'
         + '    </span>'
         + '    <span style="color:var(--v-text-dim,#a09484);">·</span>'
         + '    <span style="display:inline-flex;align-items:center;gap: var(--v-space-sm, 4px);">'
-        + '      <b style="color:#9adfa3;font-size:calc(15px * var(--v-font-scale, 1));'
+        + '      <b style="color:#9adfa3;font-size:calc(18px * var(--v-font-scale, 1));'
         + '      text-shadow:0 0 8px rgba(154,223,163,0.45);">+' + ch.reward_xp + '</b>'
-        + '      <span style="color:#9adfa3;font-size:calc(11px * var(--v-font-scale, 1));">XP</span>'
+        + '      <span style="color:#9adfa3;font-size:calc(13px * var(--v-font-scale, 1));">XP</span>'
         + '    </span>'
         + '  </div>'
         + '</div>'
 
         // === ACTION BUTTONS (2 custom + Voltar via popup nativo) ===
-        + '<div style="display:flex;gap:6px;margin-top: var(--v-space-lg, 12px);">'
-        + '  <button id="dcCta"' + (doneToday ? ' disabled' : '') + ' style="flex:2;padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);'
+        // #94: SÓ "Aceitar Desafio" (full-width, épico) — MAPA removido (user). Voltar = botão nativo do popup.
+        + '<div style="margin-top: var(--v-space-lg, 12px);">'
+        + '  <button id="dcCta"' + (doneToday ? ' disabled' : '') + ' style="width:100%;padding: 14px var(--v-space-lg, 12px);'
         + '  background:' + (doneToday ? 'rgba(74,56,40,0.45)' : 'linear-gradient(180deg,#c4953a,#8a6420)') + ';'
         + '  border:1px solid ' + (doneToday ? 'var(--v-border,#4a3828)' : 'var(--v-gold,#c4953a)') + ';'
-        + '  border-radius:5px;color:' + (doneToday ? 'var(--v-text-dim,#a09484)' : '#1a1410') + ';'
-        + '  font-family:var(--v-font-display,Cinzel,serif);font-size:calc(13px * var(--v-font-scale, 1));'
-        + '  font-weight:700;letter-spacing:1.2px;text-transform:uppercase;'
+        + '  border-radius:6px;color:' + (doneToday ? 'var(--v-text-dim,#a09484)' : '#1a1410') + ';'
+        + '  font-family:var(--v-font-display,Cinzel,serif);font-size:calc(15px * var(--v-font-scale, 1));'
+        + '  font-weight:700;letter-spacing:1.4px;text-transform:uppercase;'
         + '  cursor:' + (doneToday ? 'not-allowed' : 'pointer') + ';'
         + (doneToday ? '' : 'animation:dcCtaGlow 3s ease-in-out infinite;')
-        + '  display:inline-flex;align-items:center;justify-content:center;gap:6px;">'
-        + '    <svg viewBox="0 0 120 120" style="width:16px;height:16px;color:inherit;"><use href="#' + ctaIcon + '"/></svg>'
-        + '    <span>' + (doneToday ? '✓ Concluído Hoje' : ctaLabel) + '</span>'
-        + '  </button>'
-        + '  <button id="dcMap" style="flex:1;padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);'
-        + '  background:rgba(124,180,219,0.10);border:1px solid rgba(124,180,219,0.45);'
-        + '  border-radius:5px;color:#7cb4db;'
-        + '  font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));'
-        + '  font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;'
-        + '  display:inline-flex;align-items:center;justify-content:center;gap:5px;">'
-        + '    🗺️ <span>Mapa</span>'
+        + '  display:inline-flex;align-items:center;justify-content:center;gap:8px;">'
+        + '    <svg viewBox="0 0 120 120" style="width:19px;height:19px;color:inherit;"><use href="#' + ctaIcon + '"/></svg>'
+        + '    <span>' + (doneToday ? '✓ Concluído Hoje' : 'Aceitar Desafio') + '</span>'
         + '  </button>'
         + '</div>',
     singleButton: true,
@@ -46503,22 +46496,12 @@ function _showDailyChallengeEpicPopup(p){
   // Wire CTA + Mapa buttons após popup renderizar
   setTimeout(function(){
     var ctaBtn = document.getElementById('dcCta');
-    var mapBtn = document.getElementById('dcMap');
     if (ctaBtn && !doneToday) {
       ctaBtn.addEventListener('click', function(){
         // Fecha popup atual + dispara combat handler
         var ov = document.getElementById('confirm-purchase-overlay');
         if (ov) ov.classList.remove('active');
         setTimeout(function(){ _dailyStartCombat(p); }, 200);
-      });
-    }
-    if (mapBtn) {
-      mapBtn.addEventListener('click', function(){
-        var ov = document.getElementById('confirm-purchase-overlay');
-        if (ov) ov.classList.remove('active');
-        setTimeout(function(){
-          if (typeof navigateTo === 'function') navigateTo('cartografia');
-        }, 200);
       });
     }
   }, 100);
