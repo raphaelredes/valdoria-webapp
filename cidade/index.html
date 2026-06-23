@@ -44549,7 +44549,7 @@ function _guildHireFromFicha(d, p){
     if (typeof refreshHud === 'function') refreshHud();
     _showServiceResultPopup({
       icon: (d.ico || _heralIco('ic-grupo')), npc: d.n,
-      narrative: '<i>"Aceito. Encontro você nos portões ao amanhecer."</i><br><br><b>' + d.n + '</b> contratado e adicionado ao grupo.',
+      narrative: '<i>"' + ((res && res.accept_line) || 'Aceito. Encontro você nos portões ao amanhecer.') + '"</i><br><br><b>' + d.n + '</b> contratado e adicionado ao grupo.',
       deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
       onContinue: function(){ navigateBack(); }
     });
