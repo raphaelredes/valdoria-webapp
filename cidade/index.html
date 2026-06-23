@@ -10639,17 +10639,19 @@ var CITY_LOCATIONS = {
   // === CONVÍVIO === (essenciais + tier 2)
   tavern:        { sector:'convivio', levelReq:1, discoveryQuestId:null,             label:'Taverna',    cb:'tavern' },
   action_quests: { sector:'convivio', levelReq:1, discoveryQuestId:null,             label:'Missões',    cb:'action_quests' },
-  inn:           { sector:'convivio', levelReq:2, discoveryQuestId:'q_disc_inn',     label:'Estalagem',  cb:'inn' },
+  // #95: locais FÍSICOS começam OCULTOS (npcReveal) — revelados pelo NPC informante via
+  // arrival.check (discovery-quests q_disc_* removidas). Vínculos (meta) NÃO entra.
+  inn:           { sector:'convivio', levelReq:2, discoveryQuestId:null, npcReveal:true, label:'Estalagem',  cb:'inn' },
   rel_main:      { sector:'convivio', levelReq:2, discoveryQuestId:'q_disc_rel',     label:'Vínculos',   cb:'rel_main' },
   // === COMÉRCIO === (gates progressivos)
   market:        { sector:'comercio', levelReq:1, discoveryQuestId:null,             label:'Mercado',    cb:'market' },
-  bank:          { sector:'comercio', levelReq:4, discoveryQuestId:'q_disc_bank',    label:'Banco',      cb:'bank' },
-  open_workshop: { sector:'comercio', levelReq:6, discoveryQuestId:'q_disc_oficina', label:'Oficina',    cb:'open_workshop' },
-  rune_scribe:   { sector:'comercio', levelReq:8, discoveryQuestId:'q_disc_runas',   label:'Runas',      cb:'rune_scribe' },
+  bank:          { sector:'comercio', levelReq:4, discoveryQuestId:null, npcReveal:true, label:'Banco',      cb:'bank' },
+  open_workshop: { sector:'comercio', levelReq:6, discoveryQuestId:null, npcReveal:true, label:'Oficina',    cb:'open_workshop' },
+  rune_scribe:   { sector:'comercio', levelReq:8, discoveryQuestId:null, npcReveal:true, label:'Runas',      cb:'rune_scribe' },
   // === COMBATE === (lv 3 unlocked)
-  guild:           { sector:'combate', levelReq:2, discoveryQuestId:'q_disc_guild',    label:'Guilda',    cb:'guild' },
-  gates:           { sector:'combate', levelReq:3, discoveryQuestId:'q_disc_gates',    label:'Portões',   cb:'gates' },
-  arena:           { sector:'combate', levelReq:3, discoveryQuestId:'q_disc_arena',    label:'Arena',     cb:'arena' },
+  guild:           { sector:'combate', levelReq:2, discoveryQuestId:null, npcReveal:true, label:'Guilda',    cb:'guild' },
+  gates:           { sector:'combate', levelReq:3, discoveryQuestId:null, npcReveal:true, label:'Portões',   cb:'gates' },
+  arena:           { sector:'combate', levelReq:3, discoveryQuestId:null, npcReveal:true, label:'Arena',     cb:'arena' },
   daily_challenge: { sector:'combate', levelReq:5, discoveryQuestId:'q_disc_desafio',  label:'Desafio',   cb:'daily_challenge' },
   // questGated: aparece SÓ com missão de esgoto ativa (bounty 'Praga de Ratos'
   // OU 'Sons do Esgoto'). Server-driven: a entrada espelha QUESTS_ACTIVE (estado
@@ -10869,6 +10871,9 @@ function _getLocationState(loc){
   if (!p) return 'hidden';
   if (loc.questGated) return _hasActiveGatedQuest(loc.questGated) ? 'unlocked' : 'hidden';
   if ((p.level || 1) < (loc.levelReq || 1)) return 'hidden';
+  // #95: locais físicos (npcReveal) ficam OCULTOS até o NPC informante revelar (servidor →
+  // completed_locations). Sem o gate, discoveryQuestId:null cairia direto em 'unlocked'.
+  if (loc.npcReveal && (p.completed_locations || []).indexOf(loc.cb) < 0) return 'hidden';
   if (!loc.discoveryQuestId) return 'unlocked';
   if (p.completed_locations.indexOf(loc.cb) >= 0) return 'unlocked';
   if (p.discovered_locations.indexOf(loc.cb) >= 0) return 'in_progress';
@@ -56587,10 +56592,17 @@ function _tryArrivalEncounter(action){
   }
   window._encounterActive = true;            // trava reentrada durante o round-trip
   if (window.vProcessing) { try { window.vProcessing.show({ text: 'Atravessando a cidade...' }); } catch(_){} }
-  window.vCityServer.cityAction('arrival.check', { venue: venue })
+  // #95: informant_fresh = 1ª arrival.check pós-boot → servidor reseta o cap de informantes/visita.
+  var _infFresh = !window._informantVisitStarted; window._informantVisitStarted = true;
+  window.vCityServer.cityAction('arrival.check', { venue: venue, informant_fresh: _infFresh })
     .then(function(res){
       if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
       if (!res || !res.ok || !res.encounter) { _arrivalState = null; window._encounterActive = false; _arrivalProceed(action); return; }
+      // #95: informante revelou um local físico → reflete já no estado (o botão aparece ao
+      // voltar ao hub). O servidor já persistiu em completed_locations; isto é só otimista.
+      if (res.encounter.reveals) {
+        try { var _cp = _ensureCityState(); if (_cp && Array.isArray(_cp.completed_locations) && _cp.completed_locations.indexOf(res.encounter.reveals) < 0) _cp.completed_locations.push(res.encounter.reveals); } catch(_e){}
+      }
       _arrivalState = { encId: res.encounter.id, action: action };
       _arrivalRenderNode({ npc: res.encounter.npc, script: res.encounter.script, choices: res.encounter.choices });
     })
