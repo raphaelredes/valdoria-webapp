@@ -44436,7 +44436,7 @@ function _guildRenderFicha(d, p){
   var coin = '<span class="vi vi-coin sm"></span>';
   var port = d.port ? ('../shared/img/adventurers/' + d.port + '.webp') : '';
   var ico = d.ico || _heralIco('ic-grupo');
-  var heroImg = port
+  var portraitImg = port
     ? '<img src="' + port + '" alt="" style="width:clamp(96px,28vw,128px);height:clamp(96px,28vw,128px);object-fit:cover;border-radius: var(--v-radius, 10px);border:1px solid var(--v-gold,#c4953a);box-shadow:0 4px 14px rgba(0,0,0,0.5);" onerror="this.style.display=\'none\';">'
     : ico;
   var ST = [['str','FOR'],['dex','DES'],['con','CON'],['int','INT'],['wis','SAB'],['cha','CAR']];
@@ -44477,7 +44477,7 @@ function _guildRenderFicha(d, p){
     + haggleRow
     + hireBtn;
 
-  _showInfoPopup({ icon: heroImg, npc: 'Salão de Mestra Tavira', title: d.n, desc: desc, singleButton: true, cancelLabel: 'Voltar', onCancel: function(){} });
+  _showInfoPopup({ icon: portraitImg, npc: 'Salão de Mestra Tavira', title: d.n, desc: desc, singleButton: true, cancelLabel: 'Voltar', onCancel: function(){} });
   setTimeout(function(){
     var bP = document.getElementById('gfHagP'); if (bP) bP.addEventListener('click', function(){ _guildHaggle(d, p, 'persuasion'); });
     var bI = document.getElementById('gfHagI'); if (bI) bI.addEventListener('click', function(){ _guildHaggle(d, p, 'intimidation'); });
