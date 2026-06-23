@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T00:59:27Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T01:28:06Z - do not edit directly, edit source -->
 
 
 
@@ -11096,6 +11096,20 @@ window.__onIntroTap = function() {
       try { if (typeof vToast === 'function') vToast('Você já resolveu o que havia aqui.', 'info'); } catch (_) { }
       return;
     }
+    // #12 Fase 3b (2026-06-22): em REMOTE o tile-object renderiza pelo vEncounter
+    // canônico (PADRAO_ALDRIC: typewriter char-by-char + npc/script), IGUAL aos
+    // outros eventos do mapa. Antes usava o StubEventLayer (corpo em textContent /
+    // fade — sem o typewriter; user reportou "revela todas as linhas de uma vez").
+    // LOCAL/DEV ou vEncounter ausente → StubEventLayer. Fallback defensivo se o
+    // render do vEncounter lançar (nunca deixa o tile sem popup).
+    if (window.__EXPLORE_MODE === 'remote' && window.vEncounter
+        && typeof window.vEncounter.render === 'function'
+        && typeof window._explShowTileVEnc === 'function') {
+      try { window._explShowTileVEnc(rt); return; }
+      catch (eTV) {
+        if (window.TileLog) window.TileLog.warn('STUB-EVT', 'tile_venc_fallback', { e: String(eTV && eTV.message) });
+      }
+    }
     // Sub-projeto #4 v9: tile-object popup = força interação, evita evasão.
     _forceInteraction = true;
     _showRuntimeEvent(rt);
@@ -11627,7 +11641,12 @@ window.__onIntroTap = function() {
     GENERIC_STUB: GENERIC_STUB,
     /* PADRAO_ALDRIC */
     _showRuntimeEventPaginated: _showRuntimeEventPaginated,
-    _groupScriptIntoPages: _groupScriptIntoPages
+    _groupScriptIntoPages: _groupScriptIntoPages,
+    /* #12 Fase 3b: reusados pelo path vEncounter dos tile-objects (resolução no
+       motor com o dado + anti-repeat do texto de outcome) — evita duplicar o
+       POST /tile_event_choice (que tem o fix do motor token). */
+    _remoteTileResolveServer: _remoteTileResolveServer,
+    _pickOutcomeVariant: _pickOutcomeVariant
   };
 
   if (window.TileLog) window.TileLog.info('STUB-EVT', 'stubeventlayer_init', {
@@ -37654,6 +37673,189 @@ function _explFinalizeCombatRedirect(oc) {
       window.location.href = 'combate.html?enemy=' + encodeURIComponent(oc.combat_trigger.enemy_id);
     } catch (_) {}
   }, 1200);
+}
+
+// ============================================================================
+// #12 FASE 3b (2026-06-22) — TILE-OBJECTS em REMOTE pelo vEncounter
+// (PADRAO_ALDRIC: typewriter char-by-char + npc/script), IGUAL aos outros
+// eventos do mapa. User: tile-objects revelavam o texto todo de uma vez (sem o
+// efeito de digitacao) porque o StubEventLayer renderiza rt.body em textContent.
+// REUSA a logica de estado que JA funciona (NAO reescreve): resolucao no motor
+// via StubEventLayer._remoteTileResolveServer (POST /tile_event_choice com o
+// motor token + dado 3D), FSM via OutcomeApplier, anti-replay via
+// EventChoicePersistence, hooks via _processChoiceOutcome. So o RENDER muda
+// (corpo+outcome) pro vEncounter. Combate em REMOTE = combat_redirect (navega);
+// o dispatch client (dungeon_combat/okCombat) e LOCAL e fica no StubEventLayer.
+// M6: erro = retry (reabre o corpo), nunca fabrica. StubEventLayer = LOCAL/DEV +
+// fallback defensivo (o gate em showTileObjectEvent cai pra ele se isto lancar).
+// ============================================================================
+
+function _explTileHeaderNpc(rt) {
+  if (rt && rt.npc && rt.npc.name) return rt.npc;
+  var title = rt && rt.title;
+  try {
+    if (rt && rt.source === 'tile_object' && rt.type && typeof TYPE_DISPLAY_NAMES !== 'undefined' && TYPE_DISPLAY_NAMES[rt.type]) {
+      title = TYPE_DISPLAY_NAMES[rt.type];
+    }
+  } catch (_) {}
+  return { name: title || 'Evento' };
+}
+
+function _explTileBodyNode(rt) {
+  // script: rt.script[] (PADRAO_ALDRIC) OU rt.body como narracao.
+  var script = (Array.isArray(rt.script) && rt.script.length) ? rt.script.slice() : null;
+  // voiceLine = fala do PROPRIO personagem (VoiceLineLayer) → narracao italica no topo.
+  if (rt.voiceLine) {
+    if (!script) script = (rt.body ? [{ type: 'narration', text: rt.body }] : []);
+    script.unshift({ type: 'narration', text: '<i>' + rt.voiceLine + '</i>' });
+  }
+  // Reusa _explEventBodyNode (filtro de choices por classe/bg/align + check_hint +
+  // tech) via shape ev-like. npc = npc real do tile OU titulo (TYPE_DISPLAY_NAMES).
+  return _explEventBodyNode({
+    npc: rt.npc, title: _explTileHeaderNpc(rt).name, text: rt.body,
+    script: script, tech: rt.tech, choices: rt.choices
+  });
+}
+
+// Renderiza o CORPO do tile via vEncounter. Lanca se nao ha choices elegiveis (o
+// gate em showTileObjectEvent cai pro StubEventLayer).
+function _explShowTileVEnc(rt) {
+  if (!rt) return;
+  _explVEncResolving = false;
+  var node = _explTileBodyNode(rt);
+  if (!node.choices || !node.choices.length) { throw new Error('tile_no_eligible_choices'); }
+  window.vEncounter.render(node, {
+    player: S.player, closeable: false,
+    onChoice: function (ch) { _explTileVEncResolve(rt, ch); }
+  });
+  LOG('TILE', 'vencounter_render hex=' + (rt.hexId || '?') + ' type=' + (rt.type || '?') + ' choices=' + node.choices.length);
+}
+
+function _explTileVEncError(rt) {
+  _explVEncResolving = false;
+  LOGW('API', 'tile_venc recoverable_error — nao fabrica (SUPREME RULE #0)');
+  try { if (typeof vToast === 'function') vToast('⚠️ Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
+  try { _explShowTileVEnc(rt); } catch (_) { /* sem como reabrir — desiste silencioso */ }
+}
+
+function _explTileVEncResolve(rt, choice) {
+  if (_explVEncResolving) return;
+  var idx = (choice && typeof choice._idx === 'number') ? choice._idx : -1;
+  if (idx < 0 || !rt.choices || !rt.choices[idx]) { LOGW('EVENT', 'tile_venc_bad_choice idx=' + idx); return; }
+  var realCh = rt.choices[idx];
+  _explVEncResolving = true;
+  var SE = window.StubEventLayer || {};
+  // REMOTE: resolve no motor (POST + dado, reusa o _remoteTileResolveServer que tem
+  // o fix do motor token). LOCAL: SkillCheckResolver (DEV).
+  var _remoteTile = (window.__EXPLORE_MODE === 'remote' && rt.source === 'tile_object'
+    && rt.type && rt.state && realCh.id && window.__EXPLORE_TOKEN && window.__EXPLORE_API_BASE
+    && typeof window.__explFetchTO === 'function' && typeof SE._remoteTileResolveServer === 'function');
+  // Fecha o corpo ANTES do dado (o _remoteTileResolveServer mostra o #dice-overlay,
+  // que precisa do vEncounter fechado pra ficar visivel).
+  try { window.vEncounter.close(); } catch (_) {}
+  var rollPromise;
+  if (_remoteTile) {
+    rollPromise = SE._remoteTileResolveServer(realCh, rt);
+  } else if (realCh.skill && typeof realCh.dc === 'number' && window.SkillCheckResolver) {
+    rollPromise = window.SkillCheckResolver.rollChoice(realCh, (window.S && window.S.player) ? window.S.player : {});
+  } else {
+    rollPromise = Promise.resolve({ success: true, mode: 'noroll' });
+  }
+  rollPromise.then(function (rollResult) {
+    if (rollResult && rollResult._error) { _explTileVEncError(rt); return; }
+    // Reconstroi o outcome (espelha _onChoiceClickEnhanced): REMOTE = do servidor
+    // (flags/fsm/flavor/chain/tech/script/delta/loot — SEM ops de delta, ja aplicado);
+    // LOCAL = do choice.outcome_ok/fail.
+    var outcome;
+    if (rollResult && rollResult.mode === 'remote') {
+      var _so = rollResult._serverOutcome || {};
+      var _mirrorFlags = (_so.flags || []).map(function (fid) { return { op: 'flag', id: fid, scope: 'session' }; });
+      outcome = {
+        ops: _mirrorFlags, fsm: _so.fsm || null, flavor: _so.flavor || '',
+        chain: _so.chain || null, tech: _so.tech || null, script: _so.script || null,
+        text_variants: _so.text_variants || null, delta: _so.delta || null, loot: _so.loot || null
+      };
+    } else {
+      outcome = rollResult.success ? realCh.outcome_ok : realCh.outcome_fail;
+      if (!outcome) outcome = realCh.outcome_ok || { ops: [], fsm: null, flavor: '' };
+    }
+    // Anti-replay + FSM (lifecycle dormant→cleared) + hooks — REUSA o que JA funciona.
+    try { if (window.EventChoicePersistence) window.EventChoicePersistence.recordChoice(rt, realCh, !!rt.repeatable, outcome.flavor || '', !!rollResult.success); } catch (_) {}
+    try { if (window.OutcomeApplier) window.OutcomeApplier.apply(outcome, { player: (window.S && window.S.player) ? window.S.player : {}, hexId: rt.hexId, choiceId: realCh.id }); } catch (_) {}
+    try { if (typeof _processChoiceOutcome === 'function') _processChoiceOutcome(realCh, outcome, !!rollResult.success); } catch (_) {}
+    try { if (typeof updateHud === 'function') updateHud(); } catch (_) {}
+    _explShowTileOutcomeVEnc(rt, realCh, outcome, rollResult);
+  }).catch(function (e) { _explTileVEncError(rt); });
+}
+
+function _explShowTileOutcomeVEnc(rt, choice, outcome, rollResult) {
+  var success = !!(rollResult && rollResult.success);
+  var SE = window.StubEventLayer || {};
+  // Texto: text_variants anti-repeat (reusa _pickOutcomeVariant) OU flavor.
+  var outText = outcome.flavor;
+  if (outcome.text_variants && outcome.text_variants.length && typeof SE._pickOutcomeVariant === 'function') {
+    outText = SE._pickOutcomeVariant((rt.hexId || rt.legacyId || 'ev') + ':' + (choice.id || choice.label || 'c'), outcome.text_variants) || outcome.flavor;
+  }
+  var script = (Array.isArray(outcome.script) && outcome.script.length) ? outcome.script.slice()
+    : [{ type: 'narration', text: outText || (success ? 'Sucesso.' : 'Falha.') }];
+  if (outcome.tech && outcome.tech.text) {
+    script.push({ type: 'narration', text: '<b>' + (outcome.tech.label || 'Mecanica') + '</b> — ' + outcome.tech.text });
+  }
+  var rb = _explOutcomeRewardBlock(outcome);  // ganhos do servidor (delta/loot), se houver
+  if (rb) script.push(rb);
+  var chain = outcome.chain || outcome._chainTo;
+  var node = {
+    npc: _explTileHeaderNpc(rt), script: script,
+    choices: [{ id: '__expl_tile_continue', label: chain ? 'Continuar' : 'Finalizar' }]
+  };
+  try {
+    window.vEncounter.render(node, {
+      player: S.player, closeable: false,
+      onChoice: function () { _explTileVEncFinish(rt, choice, outcome, rollResult, chain); }
+    });
+  } catch (e) {
+    LOGE('EVENT', 'tile_outcome_render_failed err=' + (e && e.message));
+    _explTileVEncFinish(rt, choice, outcome, rollResult, chain);
+  }
+}
+
+// Constroi o rt do proximo passo da chain (espelha StubEventLayer._showChainStep).
+function _explBuildTileChainRt(chain, parentRt) {
+  var bodyParts = [];
+  if (chain.text) bodyParts.push(chain.text);
+  if (chain.flavor) bodyParts.push(chain.flavor);
+  var body = chain.body || bodyParts.join(' — ') || '';
+  var choices = (chain.choices || []).map(function (ch) {
+    if (window.EventNormalizer && window.EventNormalizer._normChoice) return window.EventNormalizer._normChoice(ch);
+    return ch;
+  });
+  return {
+    hexId: parentRt.hexId, source: parentRt.source, type: parentRt.type, state: parentRt.state,
+    legacyId: chain.id || parentRt.legacyId, title: chain.title || parentRt.title,
+    body: body, voiceLine: chain.voiceLine || null, choices: choices, npc: chain.npc || parentRt.npc,
+    archetype: parentRt.archetype, _chainDepth: (parentRt._chainDepth || 0) + 1, repeatable: parentRt.repeatable
+  };
+}
+
+function _explTileVEncFinish(rt, choice, outcome, rollResult, chain) {
+  _explVEncResolving = false;
+  // Chain multi-step: renderiza o proximo passo via vEncounter (mesmo overlay).
+  if (chain) {
+    try { _explShowTileVEnc(_explBuildTileChainRt(chain, rt)); return; }
+    catch (e) { /* chain sem choices elegiveis — fecha abaixo */ }
+  }
+  try { window.vEncounter.close(); } catch (_) {}
+  // Combate em REMOTE: o servidor ja encenou (combat_redirect) → navega
+  // server-authoritative (com token). Dispatch client (dungeon_combat/okCombat) e
+  // LOCAL e fica no StubEventLayer (este path so roda em REMOTE).
+  if (rollResult && rollResult.mode === 'remote' && rollResult._combatRedirect
+      && rollResult._combatRedirect.redirect_url) {
+    LOG('API', 'tile_venc combat_redirect enemy=' + (rollResult._combatRedirect.enemy_id || '?'));
+    try { window.__valdoria_transitioning = true; } catch (_) {}
+    window.location.href = rollResult._combatRedirect.redirect_url;
+    return;
+  }
+  try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}
 }
 
 // Dice overlay estilo check-overlay do combate (formula + result pill + skip btn)
