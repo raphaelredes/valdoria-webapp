@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-22T02:30:39Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-23T03:34:40Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14253,6 +14253,11 @@ function _gatherCheckpointSnapshot(state) {
            pra restaurar a iniciativa sem re-rolar. */
         var snap = {
             id: c.id || '',
+            /* Reconciliação server-side do desfecho (2026-06-23): o servidor identifica
+               o PLAYER no checkpoint por 't' (o array allies MISTURA player+aliados+
+               invocações ordenados por iniciativa — allies[0] NÃO é o player). 'p'=player,
+               'a'=aliado, 'e'=inimigo. Sem isto o /complete não reconcilia (fail-safe). */
+            t: c.t || '',
             hp: c.hp | 0,
             alive: (c.alive !== false),
             init: (typeof c.init === 'number') ? c.init : 0,
@@ -14565,6 +14570,10 @@ function newCombatFromSetup(cfg) {
              /* #17 (sessao #70): narrativa do evento (ex: "Tres orcs saltam...")
                 vinda do setup.narrative -> exibida via typewriter na intro do combate. */
              narrative: cfg.narrative || '',
+             /* Bug XP (2026-06-23): XP EXATO autoritativo do servidor (já capado/recomputado
+                pelo /complete). REMOTE manda setup.victoryXpExact; LOCAL/file:// não → null,
+                computeRewards cai no fallback de soma por inimigo. */
+             victoryXpExact: (cfg.victoryXpExact != null ? parseInt(cfg.victoryXpExact, 10) : null),
              /* V1 Invocações Phase 1 — dict[caster_idx -> list[attached_summon]] */
              attachedSummons: {},
              /* Phase 5b polish v3 — flag global do encontro pra UI mostrar
@@ -16926,6 +16935,11 @@ function computeRewards(s) {
             if (pool.length) items.push(pick(pool));
         }
     });
+    /* Bug XP (2026-06-23): em REMOTE o servidor manda o XP EXATO da vitória
+       (setup.victoryXpExact, já capado/recomputado no /complete). Sobrescreve a soma por
+       inimigo (que é só o fallback LOCAL/file://) pra a tela mostrar EXATAMENTE o que o
+       servidor concede no DB — fim da divergência tela-de-vitória x XP gravado. */
+    if (s.victoryXpExact != null && s.victoryXpExact >= 0) xp = s.victoryXpExact;
     /* User sessão #69: XP cumulativo D&D 5e (PHB Tabela 1-2). Usa o XP REAL do DB
        (p.xp/p.xpNext/p.xpPrev em REMOTE); fallback pra tabela canônica por nível
        (LOCAL/sim). Antes era stub level*50 → vitória mostrava "136/150" sem sentido. */
