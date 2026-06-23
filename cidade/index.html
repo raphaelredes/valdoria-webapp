@@ -10419,6 +10419,20 @@ function _isCTA(btn) {
         var env = _env(); if (env) body.env = env;
         return _post('/api/guild/action', body);
       },
+      // Ficha completa do recruta (pré-contratação) — retrato + stats + personalidade + contrato.
+      recruitDetail: function(npcId){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'recruit_detail_' + npcId };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
+      },
+      // Barganha de chance ÚNICA (servidor rola o d20). kind: 'persuasion' | 'intimidation'.
+      haggle: function(npcId, kind){
+        var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
+        var body = { user_id: a.uid, action: 'haggle_' + (kind || 'persuasion') + '_' + npcId };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/guild/action', body);
+      },
       // Estado do grupo REAL (party com npc_ids) via /api/guild/start (serialize_main_menu).
       start: function(){
         var a = _auth(); if (!a) return Promise.reject(new Error('guild: sem auth (LOCAL)'));
@@ -44399,6 +44413,149 @@ function _guildBountyBatch(p){
   }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao entregar contratos.', 'warn'); });
 }
 
+// #95 FASE 2b/3b — Ficha completa do recruta + diálogo de contrato (server-driven).
+// Fluxo: card → recruitDetail (servidor) → ficha (retrato + stats + personalidade + saudação)
+// → Pechinchar/Intimidar (barganha chance-única, d20 no servidor + dado 3D) → Contratar.
+function _gfBtnCss(kind){
+  var base = 'flex:1;padding:clamp(10px,3vw,13px) var(--v-space-md,8px);border-radius:var(--v-radius-sm,6px);font-family:var(--v-font-display,Cinzel,serif);font-size:calc(clamp(12px,3.6vw,14px) * var(--v-font-scale,1));font-weight:700;letter-spacing:0.5px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;';
+  if (kind === 'hire') return base + 'width:100%;background:linear-gradient(180deg,#c4953a,#8a6420);border:1px solid var(--v-gold,#c4953a);color:#1a1410;';
+  if (kind === 'disabled') return base + 'width:100%;background:rgba(74,56,40,0.45);border:1px solid var(--v-border,#4a3828);color:var(--v-text-dim,#a09484);cursor:not-allowed;';
+  return base + 'background:rgba(74,56,40,0.4);border:1px solid rgba(196,149,58,0.4);color:var(--v-text-bright,#e8dcc8);';
+}
+
+function _guildShowRecruitFicha(it, p){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Folheando o contrato...' }); } catch(_){} }
+  window.vCityServer.guild.recruitDetail(it.id).then(function(d){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!d || d.error) { if (typeof vToast === 'function') vToast('Não foi possível abrir a ficha.', 'warn'); return; }
+    _guildRenderFicha(d, p);
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] recruitDetail', _e); if (typeof vToast === 'function') vToast('Erro ao abrir a ficha.', 'warn'); });
+}
+
+function _guildRenderFicha(d, p){
+  var coin = '<span class="vi vi-coin sm"></span>';
+  var port = d.port ? ('../shared/img/adventurers/' + d.port + '.webp') : '';
+  var ico = d.ico || _heralIco('ic-grupo');
+  var heroImg = port
+    ? '<img src="' + port + '" alt="" style="width:clamp(96px,28vw,128px);height:clamp(96px,28vw,128px);object-fit:cover;border-radius: var(--v-radius, 10px);border:1px solid var(--v-gold,#c4953a);box-shadow:0 4px 14px rgba(0,0,0,0.5);" onerror="this.style.display=\'none\';">'
+    : ico;
+  var ST = [['str','FOR'],['dex','DES'],['con','CON'],['int','INT'],['wis','SAB'],['cha','CAR']];
+  var statHtml = ST.map(function(s){
+    var v = (d.stats && d.stats[s[0]]) || 10; var m = Math.floor((v - 10) / 2);
+    return '<div style="display:flex;flex-direction:column;align-items:center;padding:5px 2px;background:rgba(74,56,40,0.3);border:1px solid rgba(196,149,58,0.25);border-radius:var(--v-radius-xs,4px);">'
+      + '<span style="font-size:calc(clamp(9px,2.6vw,10px) * var(--v-font-scale,1));color:var(--v-gold,#c4953a);letter-spacing:1px;">' + s[1] + '</span>'
+      + '<span style="font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale,1));font-weight:700;color:var(--v-text-bright,#e8dcc8);">' + v + '</span>'
+      + '<span style="font-size:calc(clamp(9px,2.6vw,10px) * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);">' + (m >= 0 ? '+' : '') + m + '</span>'
+      + '</div>';
+  }).join('');
+  var spellsHtml = (d.spells && d.spells.length)
+    ? '<div style="margin-top:var(--v-space-md,8px);display:flex;flex-wrap:wrap;gap:4px;justify-content:center;">'
+      + d.spells.map(function(sp){ return '<span style="font-size:calc(clamp(10px,3vw,11px) * var(--v-font-scale,1));padding:2px 8px;background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.3);border-radius:var(--v-radius-pill,20px);color:var(--v-text,#d4c8b0);">' + sp + '</span>'; }).join('')
+      + '</div>'
+    : '';
+  var persLabel = d.pers_label ? (' · <span style="color:var(--v-gold,#c4953a);">' + d.pers_label + '</span>') : '';
+  var costLine = '<b style="color:var(--v-gold,#c4953a);font-size:calc(clamp(16px,4.6vw,19px) * var(--v-font-scale,1));">' + d.cost + '</b> ' + coin;
+  if (d.base_cost && d.base_cost !== d.cost) {
+    costLine = '<span style="text-decoration:line-through;opacity:0.6;font-size:calc(clamp(11px,3.2vw,12px) * var(--v-font-scale,1));">' + d.base_cost + '</span> ' + costLine;
+  }
+  var haggleRow = d.haggle_used
+    ? '<div style="text-align:center;font-size:calc(clamp(10px,3vw,11px) * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);font-style:italic;margin-bottom:var(--v-space-sm,6px);">A negociação já foi feita.</div>'
+    : '<div style="display:flex;gap:var(--v-space-sm,6px);margin-bottom:var(--v-space-sm,6px);">'
+      + '<button id="gfHagP" style="' + _gfBtnCss('haggle') + '">🗣️ Pechinchar</button>'
+      + '<button id="gfHagI" style="' + _gfBtnCss('haggle') + '">⚔️ Intimidar</button>'
+      + '</div>';
+  var hireEnabled = d.can_afford && !d.party_full && !d.in_party;
+  var hireLabel = d.in_party ? '✓ Já no grupo' : (d.party_full ? 'Grupo cheio (3/3)' : (!d.can_afford ? ('Faltam ' + Math.max(0, d.cost - d.player_gold) + ' ' + coin) : ('🤝 Contratar · ' + d.cost + ' ' + coin)));
+  var hireBtn = '<button id="gfHire"' + (hireEnabled ? '' : ' disabled') + ' style="' + _gfBtnCss(hireEnabled ? 'hire' : 'disabled') + '">' + hireLabel + '</button>';
+
+  var desc = '<div style="text-align:center;font-size:calc(clamp(11px,3.2vw,12px) * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);margin-bottom:var(--v-space-md,8px);">'
+      + 'Nível ' + d.l + ' · ' + d.c + (d.race ? (' · ' + d.race) : '') + persLabel + '</div>'
+    + '<div style="font-style:italic;text-align:center;color:var(--v-text-bright,#e8dcc8);font-size:calc(clamp(13px,3.7vw,15px) * var(--v-font-scale,1));line-height:1.5;margin-bottom:var(--v-space-lg,12px);padding:0 var(--v-space-sm,4px);">"' + (d.greeting || '') + '"</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;">' + statHtml + '</div>'
+    + spellsHtml
+    + '<div style="text-align:center;margin:var(--v-space-lg,12px) 0 var(--v-space-md,8px);font-size:calc(clamp(12px,3.4vw,13px) * var(--v-font-scale,1));color:var(--v-text,#d4c8b0);">Custo de contrato: ' + costLine + '</div>'
+    + haggleRow
+    + hireBtn;
+
+  _showInfoPopup({ icon: heroImg, npc: 'Salão de Mestra Tavira', title: d.n, desc: desc, singleButton: true, cancelLabel: 'Voltar', onCancel: function(){} });
+  setTimeout(function(){
+    var bP = document.getElementById('gfHagP'); if (bP) bP.addEventListener('click', function(){ _guildHaggle(d, p, 'persuasion'); });
+    var bI = document.getElementById('gfHagI'); if (bI) bI.addEventListener('click', function(){ _guildHaggle(d, p, 'intimidation'); });
+    var bH = document.getElementById('gfHire'); if (bH && hireEnabled) bH.addEventListener('click', function(){ _guildHireFromFicha(d, p); });
+  }, 100);
+}
+
+function _guildHaggle(d, p, kind){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Negociando...' }); } catch(_){} }
+  window.vCityServer.guild.haggle(d.id, kind).then(function(r){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!r || r.error){
+      var emsg = (r && r.error === 'haggle_used') ? (r.msg || 'Você já negociou com este aventureiro.') : 'Não foi possível negociar.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
+    }
+    _guildRollHaggleDice(d, p, r);
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] haggle', _e); if (typeof vToast === 'function') vToast('Erro ao negociar.', 'warn'); });
+}
+
+function _guildRollHaggleDice(d, p, r){
+  function finish(){
+    var d2 = {}; for (var k in d) d2[k] = d[k];
+    d2.cost = r.new_cost; d2.haggle_used = true;
+    d2.can_afford = (typeof r.can_afford === 'boolean') ? r.can_afford : d.can_afford;
+    var skillLabel = r.skill || 'Negociação';
+    var head = '🎲 ' + skillLabel + ': <b>' + r.roll + '</b>' + (r.bonus ? (' + ' + r.bonus + ' = <b>' + r.total + '</b>') : '') + ' vs CD ' + r.dc
+      + ' — <b style="color:' + (r.success ? '#9adfa3' : '#d88') + '">' + (r.success ? 'Sucesso' : 'Falha') + '</b>';
+    _showServiceResultPopup({
+      icon: (d.ico || _heralIco('ic-grupo')), npc: d.n,
+      narrative: head + '<br><br><i>"' + (r.line || '') + '"</i><br><br>Novo custo: <b style="color:var(--v-gold,#c4953a)">' + r.new_cost + '</b> <span class="vi vi-coin sm"></span>',
+      onContinue: function(){ _guildRenderFicha(d2, p); }
+    });
+  }
+  if (typeof Dice3DInstance !== 'undefined' && Dice3DInstance) {
+    var ov = document.createElement('div');
+    ov.id = 'guild-haggle-dice-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:Cinzel,serif;';
+    ov.innerHTML = '<div style="font-size:calc(16px * var(--v-font-scale,1));color:var(--v-gold,#c4953a);margin-bottom:var(--v-space-lg,12px);">🎲 ' + (r.skill || 'Negociação') + '...</div><canvas id="ghd-canvas" width="200" height="200"></canvas>';
+    document.body.appendChild(ov);
+    try {
+      var inst = new Dice3DInstance(document.getElementById('ghd-canvas'), 20);
+      inst.roll(r.roll, function(){ setTimeout(function(){ ov.remove(); finish(); }, 900); });
+    } catch(_e){ ov.remove(); finish(); }
+  } else { finish(); }
+}
+
+function _guildHireFromFicha(d, p){
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Selando contrato...' }); } catch(_){} }
+  window.vCityServer.guild.hire(d.id).then(function(res){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!res || res.error){
+      var emsg = (res && res.error === 'party_full') ? 'Grupo cheio (3/3 aliados).'
+               : (res && res.error === 'not_enough_gold') ? (res.msg || 'Valdoritas insuficientes.')
+               : (res && res.error === 'npc_taken') ? 'Este aventureiro já foi contratado por outro jogador.'
+               : (res && res.error === 'npc_not_found') ? 'Este aventureiro não está mais disponível.'
+               : 'Não foi possível contratar agora.';
+      if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
+    }
+    var preGold = p.gold;
+    if (typeof res.cost === 'number') p.gold = Math.max(0, p.gold - res.cost);
+    if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length < 4){
+      var allyClass = String(d.c || 'guerreiro').toLowerCase();
+      var hpByClass = { guerreiro:12, clerigo:10, ladino:9, mago:8, druida:10, patrulheiro:10, paladino:12, barbaro:14, monge:9, bardo:10, feiticeiro:8, bruxo:9 };
+      var baseHp = hpByClass[allyClass] || 10;
+      var allyHp = baseHp + Math.floor(((d.l || 1) - 1) * (baseHp * 0.65));
+      window.GROUP_MEMBERS.push({ name: d.n, cls: allyClass, lvl: (d.l || 1), hp: allyHp, hpMax: allyHp, mp: 12, mpMax: 12, xp: 0, xpNext: 300, gold: 0, icon: d.ico });
+    }
+    if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
+    if (typeof refreshHud === 'function') refreshHud();
+    _showServiceResultPopup({
+      icon: (d.ico || _heralIco('ic-grupo')), npc: d.n,
+      narrative: '<i>"Aceito. Encontro você nos portões ao amanhecer."</i><br><br><b>' + d.n + '</b> contratado e adicionado ao grupo.',
+      deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+      onContinue: function(){ navigateBack(); }
+    });
+  }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] hire', _e); if (typeof vToast === 'function') vToast('Erro ao contratar.', 'warn'); });
+}
+
 function _guildShowRecruits(p){
   // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): em REMOTE, busca a
   // lista REAL de recrutas (pool multiplayer) e contrata via /api/guild/action — o
@@ -44442,44 +44599,8 @@ function _guildShowRecruits(p){
         onPick: function(item){
           var it = item._it;
           if (vagas <= 0) { if (typeof vToast === 'function') vToast('⚠️ Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn'); return; }
-          var sheet = '<b>' + _clsCap(it.c) + ' · Nível ' + (it.l || 1) + '</b>'
-            + '<br><br>Tavira inclina a cabeça em direção a ele.'
-            + '<br><br>Custo de contrato: <b>' + it.cost + ' ' + coin + '</b>' + (it.rehire ? ' <i>(recontratação com desconto)</i>' : '');
-          _showConfirmPurchase({
-            icon: (it.ico || _heralIco('ic-grupo')), npc: 'Mestra Tavira', title: 'Recrutar ' + it.n, desc: sheet, cost: it.cost,
-            onConfirm: function(){
-              if (window.vProcessing) { try { window.vProcessing.show({ text: 'Selando contrato...' }); } catch(_){} }
-              window.vCityServer.guild.hire(it.id).then(function(res){
-                if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
-                if (!res || res.error){
-                  var emsg = (res && res.error === 'party_full') ? 'Grupo cheio (3/3 aliados).'
-                           : (res && res.error === 'not_enough_gold') ? (res.msg || 'Valdoritas insuficientes.')
-                           : (res && res.error === 'npc_not_found') ? 'Este aventureiro não está mais disponível.'
-                           : 'Não foi possível contratar agora.';
-                  if (typeof vToast === 'function') vToast(emsg, 'warn'); return;
-                }
-                var preGold = p.gold;
-                if (typeof res.cost === 'number') p.gold = Math.max(0, p.gold - res.cost);
-                // Servidor já persistiu o aliado (re-sync no próximo load via state.allies).
-                // Reflete otimisticamente no painel (mesmo padrão do vendedor/inventário).
-                if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length < 4){
-                  var allyClass = String(it.c || 'guerreiro').toLowerCase();
-                  var hpByClass = { guerreiro:12, clerigo:10, ladino:9, mago:8, druida:10, patrulheiro:10, paladino:12, barbaro:14, monge:9, bardo:10, feiticeiro:8, bruxo:9 };
-                  var baseHp = hpByClass[allyClass] || 10;
-                  var allyHp = baseHp + Math.floor(((it.l || 1) - 1) * (baseHp * 0.65));
-                  window.GROUP_MEMBERS.push({ name: it.n, cls: allyClass, lvl: (it.l || 1), hp: allyHp, hpMax: allyHp, mp: 12, mpMax: 12, xp: 0, xpNext: 300, gold: 0, icon: it.ico });
-                }
-                if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
-                if (typeof refreshHud === 'function') refreshHud();
-                _showServiceResultPopup({
-                  icon: (it.ico || _heralIco('ic-grupo')), npc: it.n,
-                  narrative: '<i>"Aceito. Encontro você nos portões ao amanhecer."</i><br><br><b>' + it.n + '</b> contratado e adicionado ao grupo.',
-                  deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
-                  onContinue: function(){ navigateBack(); }
-                });
-              }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao contratar.', 'warn'); });
-            }
-          });
+          // #95 FASE 2b/3b: clicar abre a FICHA completa + diálogo de contrato (servidor)
+          _guildShowRecruitFicha(it, p);
         }
       });
     }).catch(function(_e){
