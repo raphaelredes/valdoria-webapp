@@ -357,7 +357,7 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
   ~6644  var CITY_SECTORS / CITY_SECTOR_ORDER (4 setores: Convívio/     │
          Comércio/Combate/Espírito)                                     │
   ~6653  var CITY_LOCATIONS — 16 locais com sector/levelReq/discoveryQ  │
-  ~6677  var CITY_DISCOVERY_QUESTS — 8 quests multi-stage com lore      │
+  ~6677  var CITY_DISCOVERY_QUESTS — 5 quests multi-stage com lore      │
   ~6770  state helpers: _ensureCityState, _findLocByCb,                 │
          _getLocationState (hidden|newly_available|in_progress|unlocked)│
   ~6790  _getVisibleLocationsForSector / _markLocationSeen              │
@@ -10693,38 +10693,6 @@ var CITY_LOCATIONS = {
 
 // Quests multi-stage (lore). choice.next = stageId ou 'unlock' (completa).
 var CITY_DISCOVERY_QUESTS = {
-  q_disc_bank: { id:'q_disc_bank', name:'A Carta Selada', targetCb:'bank', stages:[
-    { id:'s1', speaker:'Mirena, joalheira',
-      text:'Você está sempre carregando muito ouro consigo? Perigoso, isso. Existe um lugar nas costas da praça onde guardam os bens dos aventureiros que sabem...',
-      choices:[{ label:'Onde fica?', next:'s2' }] },
-    { id:'s2', speaker:'Mirena, joalheira',
-      text:'Procure pela Casa de Tholram. Porta de carvalho com símbolo de balança. O velho aceita depósitos e empresta — mas cobra os juros dele, não os seus.',
-      choices:[{ label:'Vou procurar agora.', next:'unlock' }] }
-  ]},
-  q_disc_oficina: { id:'q_disc_oficina', name:'A Ferramenta Enferrujada', targetCb:'open_workshop', stages:[
-    { id:'s1', speaker:'Thorne, ferreiro',
-      text:'Achou esse martelo de gravação? Era do mestre Bergrim, ferreiro de três gerações. Morreu sem aprendiz. A oficina dele está fechada faz seis luas, mas o filho ainda paga o aluguel...',
-      choices:[{ label:'Posso usar a oficina?', next:'s2' }] },
-    { id:'s2', speaker:'Thorne, ferreiro',
-      text:'Se você for sério em forjar suas próprias coisas — e não vender pro primeiro mercador faminto — eu te apresento ao filho de Bergrim. Mora atrás do banco. Diga que Thorne te mandou.',
-      choices:[{ label:'Vou falar com ele.', next:'unlock' }] }
-  ]},
-  q_disc_runas: { id:'q_disc_runas', name:'Pedra Rúnica Intacta', targetCb:'rune_scribe', stages:[
-    { id:'s1', speaker:'Velithra, alquimista',
-      text:'Hmm. Essa pedra que você trouxe... a runa nela ainda pulsa. Não é toda runa que sobrevive a uma dungeon. Sobrevivente como você merece falar com a Escrivã.',
-      choices:[{ label:'Quem é?', next:'s2' }] },
-    { id:'s2', speaker:'Velithra, alquimista',
-      text:'Sereniel. Mora sobre a torre da praça, lê runas há mais de oitenta anos. Vai querer ver isso. Se gostar de você, ensina a inscrever as suas próprias.',
-      choices:[{ label:'Subir até a torre.', next:'unlock' }] }
-  ]},
-  q_disc_arena: { id:'q_disc_arena', name:'O Pergaminho do Sangue', targetCb:'arena', stages:[
-    { id:'s1', speaker:'Você (lendo)',
-      text:'Um cartaz desbotado pregado na taverna: "TORNEIO REAL DE VALDORIA — Glória, ouro e o respeito da capital aguardam quem ousar pisar na Arena. Procure Tharos, mestre de armas."',
-      choices:[{ label:'Procurar Tharos.', next:'s2' }] },
-    { id:'s2', speaker:'Tharos, mestre de armas',
-      text:'Outro aspirante, hein? A Arena não é teatro de feira, garoto. Mas você passou da porta — então já sabe o que quer. Aceito sua inscrição.',
-      choices:[{ label:'Estou pronto.', next:'unlock' }] }
-  ]},
   q_disc_desafio: { id:'q_disc_desafio', name:'Boletim do Conselho', targetCb:'daily_challenge', stages:[
     { id:'s1', speaker:'Capitã Ysoria',
       text:'Aventureiro com história. Vimos teu nome no quadro da Guilda — três missões resolvidas no mês. O Conselho está abrindo Desafios Diários para os que provam serviço.',
@@ -10757,14 +10725,6 @@ var CITY_DISCOVERY_QUESTS = {
       text:'Jogos, mercado especial, blessing dos deuses, e a oportunidade rara de ganhar Selos do Festival — moeda única. Voltarei a te chamar quando as luas se alinharem.',
       choices:[{ label:'Aguardarei o sinal.', next:'unlock' }] }
   ]},
-  q_disc_inn: { id:'q_disc_inn', name:'O Quarto Reservado', targetCb:'inn', stages:[
-    { id:'s1', speaker:'Grom, o Caolho, taverneiro',
-      text:'Vejo nos teus olhos quem dormiu no chão da estrada, forasteiro. Cerveja e calor eu sirvo, mas cama de verdade só a Martha dá — Estalagem da Pena-Dourada, a quatro portas daqui.',
-      choices:[{ label:'Onde fica?', next:'s2' }] },
-    { id:'s2', speaker:'Grom, o Caolho, taverneiro',
-      text:'Sai pela praça, vira na rua de paralelepípedos, segue o cheiro de pão fresco. Martha tem quartos limpos, banho quente e bom desjejum. Cobra justo. Diz que eu te mandei — talvez ela desconte uma moeda.',
-      choices:[{ label:'Vou procurar Martha.', next:'unlock' }] }
-  ]},
   q_disc_rel: { id:'q_disc_rel', name:'Os Laços que Sustentam', targetCb:'rel_main', stages:[
     { id:'s1', speaker:'Padre Brevon',
       text:'Aventureiro… percebo que ainda caminhas sozinho. Os deuses honram quem firma laços — não há feito maior que voltar pra casa com os companheiros que partiram contigo. Os teus vínculos precisam ser cultivados.',
@@ -10773,44 +10733,6 @@ var CITY_DISCOVERY_QUESTS = {
       text:'O Pavilhão dos Vínculos, atrás do templo, é onde a cidade registra os pactos de alma — quem te acompanhou, a quem deves favor, quem prometeu retornar. Anota lá, e ofereça lembranças aos que importam. Os deuses leem essas páginas.',
       choices:[{ label:'Vou ao Pavilhão.', next:'unlock' }] }
   ]},
-  q_disc_guild: { id:'q_disc_guild', name:'O Brasão Bordado', targetCb:'guild', stages:[
-    { id:'s1', speaker:'Caçadora itinerante',
-      text:'Andas só, forasteiro? Já vi muitos terminarem suas histórias por isso. A Guilda dos Aventureiros é a teia que segura quem caminha por fora dos muros — missões, ouro, ombros pra confiar. Devias procurar a Mestra Tavira.',
-      choices:[{ label:'Onde fica a Guilda?', next:'s2' }] },
-    { id:'s2', speaker:'Caçadora itinerante',
-      text:'Ao norte da arena, prédio com o brasão da águia bordado em vermelho. Bate três vezes na porta lateral. Não tenta impressioná-la com bravata: Tavira cheira mentira a três pedras de distância.',
-      choices:[{ label:'Vou à Guilda.', next:'unlock' }] }
-  ]},
-  q_disc_gates: { id:'q_disc_gates', name:'A Estrada Aberta', targetCb:'gates',
-    // Sessao #68 (2026-05-30): a missao "Falar com Lyana" agora e ADQUIRIDA aqui.
-    // A Ancia (mae de Lyana) intercepta o personagem nos Portoes e confia o
-    // pergaminho selado. Antes a quest aparecia pre-aceita em QUESTS_ACTIVE sem
-    // nenhum contexto de aquisicao (queixa do user). grantsQuest e concedida ao
-    // completar a descoberta (unlock) — ver _advanceDiscoveryStage. iconId resolve
-    // via _heralIco no momento da concessao (runtime), evitando ordem de hoisting.
-    grantsQuest: {
-      id:'qa_lyana', serverId:'quest_lyana_scroll', iconId:'ic-dialogo', title:'Falar com Lyana na Praça',
-      desc:'Entregar o pergaminho selado da mãe dela.', progress:'✓ pronta',
-      reward:20, xp:40, npc:'Mãe de Lyana',
-      whatHappened:'Uma anciã te interceptou nos Portões, antes da estrada. Lyana — a filha dela, que canta junto à fonte da Praça — espera notícias da irmã há três luas. A velha senhora já não tem pernas pra viagem e confiou o pergaminho selado a você.',
-      whatToDo:'Entregar o pergaminho selado em mãos a Lyana, na Praça Central. NÃO abrir nem ler — apenas entregar.' },
-    stages:[
-    { id:'s1', speaker:'Joran, sentinela',
-      text:'Para, forasteiro. Vais sair de Valdoria, é? Os portões abrem ao amanhecer, fecham antes do crepúsculo. Antes de pisar a estrada, fala com o Capitão Drennar — ele anota teu nome, teu destino, e os perigos da semana.',
-      choices:[{ label:'Onde encontro o Capitão?', next:'s2' }] },
-    { id:'s2', speaker:'Joran, sentinela',
-      text:'Na guarita ao lado do portão norte. Sentado num banco de carvalho, lista nas mãos. Diz a ele o rumo — Floresta, Pântano, Estradas — e ele te informa o que esperar. Sem isso, sai por tua conta e risco.',
-      choices:[{ label:'Sigo para a estrada.', next:'s3' }] },
-    { id:'s3', speaker:'Você',
-      text:'Você se volta para a estrada quando dedos finos prendem tua manga. Uma anciã — o xale úmido do sereno, um pergaminho selado tremendo entre os nós dos dedos.',
-      choices:[{ label:'Quem é a senhora?', next:'s4' }] },
-    { id:'s4', speaker:'Anciã',
-      text:'Perdão, viajante. Tu vais pra estrada — vejo na poeira das tuas botas. Minha filha, Lyana, é quem canta junto à fonte da Praça. Há três luas que não chega palavra da irmã dela... e minhas pernas já não fazem a viagem.',
-      choices:[{ label:'O que a senhora precisa?', next:'s5' }] },
-    { id:'s5', speaker:'Anciã',
-      text:'Leva esta carta a ela, em mãos. Não abre, não conta a ninguém — só entrega. É tudo que esta velha te pede.',
-      choices:[{ label:'Aceito — levo a carta a Lyana.', next:'unlock' }] }
-  ]}
 };
 
 // Estado helpers
@@ -21709,7 +21631,7 @@ function _buildCodexMockData(player){
 // falsas) — exatamente o problema "sem contexto pra existir" da Lyana (#68).
 // Missoes ativas agora vem SO de aquisicao real:
 //   - aceitar no quadro da Guilda (GUILD_QUESTS_AVAILABLE -> _acceptQuest: 0/N, acceptedAt=now)
-//   - encontro de descoberta (ex: Lyana via Portoes, q_disc_gates.grantsQuest)
+//   - informante de local (ex: Lyana concedida pelo Guarda Aldric nos Portoes; grant_quest)
 // E o historico popula de verdade conforme o jogador conclui (_completeQuest).
 // qa_wolves removida (nao re-aterrada): redundante com o "Desafio do Dia: Abater
 // 3x Lobos Cinzentos". O quest_diary ja tem empty-states guiados ("Aceite
