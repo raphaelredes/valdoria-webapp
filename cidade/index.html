@@ -35786,29 +35786,35 @@ function _squareRollGambleDice(p, stake, res, preGoldBeforeStake){
   var playerRoll = res.player_roll;
   var houseRoll = res.house_roll;
   var win = res.win;
-  // Show dice 3D animation
-  if (typeof Dice3DInstance !== 'undefined' && Dice3DInstance) {
+  // Show dice 3D animation. PADRAO_DADOS: dado 3D real via window.Dice3D (NÃO Dice3DInstance,
+  // que é o nome INTERNO do módulo, undefined globalmente → caía no fallback sem dado). Container
+  // = DIV (o módulo monta o próprio renderer dentro). Reusa a instância p/ rolar Você e Casa.
+  var D3D = window.Dice3D;
+  if (typeof D3D === 'function') {
     var ov = document.createElement('div');
     ov.id = 'square-gamble-dice-overlay';
-    ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:Cinzel,serif;';
-    ov.innerHTML = '<div style="font-size:calc(18px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin-bottom: var(--v-space-lg, 12px);">🎲 Rolando os dados...</div>'
-      + '<canvas id="sgd-canvas" width="200" height="200"></canvas>'
-      + '<div id="sgd-label" style="margin-top: var(--v-space-lg, 12px);font-size:calc(16px * var(--v-font-scale, 1));">&nbsp;</div>';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(10,8,5,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:var(--v-font-display,Cinzel),serif;';
+    ov.innerHTML = '<div style="font-size:calc(clamp(16px,4.6vw,18px) * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin-bottom: var(--v-space-lg, 12px);">🎲 Rolando os dados...</div>'
+      + '<div id="sgd-host" style="width:clamp(180px,52vw,220px);height:clamp(180px,52vw,220px);"></div>'
+      + '<div id="sgd-label" style="margin-top: var(--v-space-md, 10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale, 1));min-height:1.4em;">&nbsp;</div>';
     document.body.appendChild(ov);
-    var canvas = document.getElementById('sgd-canvas');
-    var instance = new Dice3DInstance(canvas, 20);
-    instance.roll(playerRoll, function(){
-      document.getElementById('sgd-label').innerHTML = 'Você: <b style="color:var(--v-gold, #c4953a)">' + playerRoll + '</b>';
-      setTimeout(function(){
-        instance.roll(houseRoll, function(){
-          document.getElementById('sgd-label').innerHTML = 'Você: <b style="color:var(--v-gold, #c4953a)">' + playerRoll + '</b> vs Casa: <b style="color:#a85050">' + houseRoll + '</b>';
-          setTimeout(function(){
-            ov.remove();
-            _squareShowGambleResult(p, stake, res, preGoldBeforeStake);
-          }, 1200);
-        });
-      }, 800);
-    });
+    var _done = false;
+    var _finish = function(){ if (_done) return; _done = true; if (ov && ov.remove) ov.remove(); _squareShowGambleResult(p, stake, res, preGoldBeforeStake); };
+    try {
+      var instance = new D3D(document.getElementById('sgd-host'), { dieType: 'd20', size: 200 });
+      instance.roll(playerRoll, function(){
+        var lbl = document.getElementById('sgd-label');
+        if (lbl) lbl.innerHTML = 'Você: <b style="color:var(--v-gold, #c4953a)">' + playerRoll + '</b>';
+        setTimeout(function(){
+          instance.roll(houseRoll, function(){
+            var lbl2 = document.getElementById('sgd-label');
+            if (lbl2) lbl2.innerHTML = 'Você: <b style="color:var(--v-gold, #c4953a)">' + playerRoll + '</b> vs Casa: <b style="color:#a85050">' + houseRoll + '</b>';
+            setTimeout(function(){ try { if (instance.dispose) instance.dispose(); } catch(_e){} _finish(); }, 1200);
+          });
+        }, 800);
+      });
+      setTimeout(_finish, 9000);  // safety: nunca trava se algum callback do dado não disparar
+    } catch(_e){ console.warn('[CITY] gamble dice', _e); _finish(); }
   } else {
     // Fallback sem 3D
     _squareShowGambleResult(p, stake, res, preGoldBeforeStake);
