@@ -8962,6 +8962,12 @@ body.perf-lite .vc-action-btn { transition: none; }
         });
         console.log('[CITY] known_locations hydrated from server:', p.known_locations.length, 'locations:', p.known_locations.join(','));
       }
+      // FASE 4 (2026-06-23): afinidade/reputação REAIS de NPC (server-authoritative,
+      // Player.narrative). A tela de Vínculos passa a exibir o valor real (não o proxy
+      // de nº-de-diálogos×12). Aditivo: chave sem match em REL_SERVER_KEY cai no proxy.
+      p.metadata = p.metadata || {};
+      if (picked.npc_affinity && typeof picked.npc_affinity === 'object') p.metadata.npc_affinity = picked.npc_affinity;
+      if (picked.npc_reputation && typeof picked.npc_reputation === 'object') p.metadata.npc_reputation = picked.npc_reputation;
       console.log('[CITY] real player loaded:', p.name, p.cls, p.race, 'lv', p.level);
       // Sessão #66: restaura flags de "primeira vez visto" (Aldric, Vorhan, etc.)
       // do localStorage por char — impede os diálogos de 1º encontro de REPETIREM
@@ -9174,6 +9180,11 @@ body.perf-lite .vc-action-btn { transition: none; }
           });
           console.log('[CITY] known_locations hydrated from server (fallback):', p.known_locations.length, 'locations:', p.known_locations.join(','));
         }
+        // FASE 4 (2026-06-23): afinidade/reputação REAIS de NPC (fallback path) — idem ao
+        // caminho principal; a tela de Vínculos exibe o valor real (não o proxy).
+        p.metadata = p.metadata || {};
+        if (picked.npc_affinity && typeof picked.npc_affinity === 'object') p.metadata.npc_affinity = picked.npc_affinity;
+        if (picked.npc_reputation && typeof picked.npc_reputation === 'object') p.metadata.npc_reputation = picked.npc_reputation;
         // FIX v3: sincronizar GROUP_MEMBERS[0] tambem (player slot)
         if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length > 0){
           window.GROUP_MEMBERS[0] = {
