@@ -10249,6 +10249,11 @@ function _isCTA(btn) {
     equip: {  // FASE 6 — persiste Player.equipment (anti-cheat server-side)
       set: function(eq){ return window.vCityServer.cityAction('equip.set', { equipment: eq || {} }); }
     },
+    inventory: {  // FASE 6 (2026-06-23) — vender/usar item da Mochila persiste no servidor
+      // (apply_sell/apply_use canônicos: 60% PHB, tags protegidas, cura por fórmula).
+      sell: function(name){ return window.vCityServer.cityAction('inventory.sell', { item: name }); },
+      use:  function(name){ return window.vCityServer.cityAction('inventory.use',  { item: name }); }
+    },
     service: {  // FASE 6 — gold/xp delta-based (servidor é autoridade)
       gold: function(delta, id){ return window.vCityServer.cityAction('service.gold', { delta: delta, service_id: id || '' }); },
       xp:   function(amount, id){ return window.vCityServer.cityAction('service.xp', { amount: amount, service_id: id || '' }); }
@@ -40585,7 +40590,7 @@ function _itemTagsOf(name) {
   var it = getItemData(name) || {};
   return it.t || [];
 }
-function _useInventoryItem(name) {
+async function _useInventoryItem(name) {
   var tags = _itemTagsOf(name);
   var it = getItemData(name) || {};
   var canUse = tags.indexOf('consumable') !== -1
@@ -40595,7 +40600,33 @@ function _useInventoryItem(name) {
     if (typeof vToast === 'function') vToast('Esse item não é usável.');
     return false;
   }
-  // Aplica efeito básico: poção de cura → restaura HP até max
+  // 2026-06-23 server-driven (audit #0): em REMOTE o SERVIDOR consome + cura
+  // (apply_use: fórmula de cura PHB + persiste em Player.inventory/hp). HP/MP vêm
+  // do state autoritativo. Antes curava no CITY_MOCK_PLAYER e sumia no reload.
+  if (window.vCityServer && window.vCityServer.isRemote()) {
+    try {
+      var r = await window.vCityServer.inventory.use(name);
+      if (!r || r.ok === false) {
+        if (typeof vToast === 'function') vToast('Não foi possível usar ' + name + '.');
+        return false;
+      }
+      _removeItemFromInventory(name, 1);  // espelha o consumo que o servidor já fez
+      var ps = window.CITY_MOCK_PLAYER || {};
+      if (r.state) {
+        if (r.state.hp != null) ps.hp = r.state.hp;
+        if (r.state.mp != null) ps.mp = r.state.mp;
+      }
+      if (typeof vToast === 'function') vToast(r.msg || ('Você usa ' + name + '.'));
+      if (typeof refreshHud === 'function') refreshHud();
+      try { if (window.vInventory && typeof _vinvBuildConfig === 'function') vInventory.refresh(_vinvBuildConfig().player); } catch (_eR) {}
+      return true;
+    } catch (e) {
+      console.error('[CITY] inventory.use failed', e);
+      if (typeof vToast === 'function') vToast('Falha ao usar (rede).');
+      return false;
+    }
+  }
+  // LOCAL fallback (file:// dev tool) — efeito básico client-side: poção de cura → HP até max
   var p = window.CITY_MOCK_PLAYER || {};
   if (tags.indexOf('potion') !== -1 && /cura/i.test(name)) {
     var preHp = p.hp || 0;
@@ -40681,13 +40712,37 @@ function _unequipItem(name) {
   _syncEquippedToLocalStorage();
   return true;
 }
-function _sellSingleItem(name) {
+async function _sellSingleItem(name) {
   // canonical: PHB Ch.5 sell multiplier 60% + PROTECTED_SELL_TAGS
   if (typeof _isItemSellable === 'function' && !_isItemSellable(name)) {
     if (typeof vToast === 'function') vToast(name + ' não pode ser vendido.');
     return false;
   }
-  // Se equipado, desequipa antes
+  // 2026-06-23 server-driven (audit #0): em REMOTE o SERVIDOR vende (apply_sell:
+  // 60% PHB + tags protegidas + persiste em Player.inventory/gold). Server-first —
+  // só atualiza o display LOCAL após o OK autoritativo; gold vem do state do
+  // servidor. Antes mutava CITY_MOCK_PLAYER + localStorage e SUMIA no reload.
+  if (window.vCityServer && window.vCityServer.isRemote()) {
+    try {
+      var r = await window.vCityServer.inventory.sell(name);
+      if (!r || r.ok === false) {
+        if (typeof vToast === 'function') vToast(name + ' não pôde ser vendido.');
+        return false;
+      }
+      if (_isItemEquipped(name)) _unequipItem(name);
+      _removeItemFromInventory(name, 1);  // espelha a remoção que o servidor já fez
+      if (r.state && window.CITY_MOCK_PLAYER && r.state.gold != null) CITY_MOCK_PLAYER.gold = r.state.gold;
+      if (typeof vToast === 'function') vToast(r.msg || ('Vendeu ' + name));
+      if (typeof refreshHud === 'function') refreshHud();
+      try { if (window.vInventory && typeof _vinvBuildConfig === 'function') vInventory.refresh(_vinvBuildConfig().player); } catch (_eR) {}
+      return true;
+    } catch (e) {
+      console.error('[CITY] inventory.sell failed', e);
+      if (typeof vToast === 'function') vToast('Falha ao vender (rede).');
+      return false;
+    }
+  }
+  // LOCAL fallback (file:// dev tool) — lógica client-side original
   if (_isItemEquipped(name)) _unequipItem(name);
   var it = getItemData(name) || {};
   var val = Math.max(1, Math.floor((it.v || 1) * 0.6));
