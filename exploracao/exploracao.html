@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T02:47:26Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T23:00:56Z - do not edit directly, edit source -->
 
 
 
@@ -15260,6 +15260,11 @@ window.__explFetchTO = function(url, opts, ms) {
           window.__EXPLORE_KNOWN = res.known_locations.map(function (k) { return _S2C[k] || k; });
           console.info('[E-REM:API-INIT] known_locations=' + window.__EXPLORE_KNOWN.length + ' [' + window.__EXPLORE_KNOWN.join(',') + ']');
           if (typeof _xcartDraw === 'function' && typeof _xcartCtx !== 'undefined' && _xcartCtx) { try { _xcartDraw(); } catch (_ekd) {} }
+        }
+        // #map-toast (2026-06-23): o servidor avisa quando ESTA chegada revelou um local NOVO →
+        // notificação padrão (PADRAO_NOTIFICACOES) nomeando o local + que dá pra voltar pela viagem.
+        if (res.newly_discovered && res.newly_discovered.name && typeof window.vToast === 'function') {
+          try { window.vToast('🗺️ ' + res.newly_discovered.name + ' foi desenhado no mapa — agora você pode voltar direto pela viagem do mapa.', 'ok'); } catch (_etoast) {}
         }
         console.info('[E-REM:API-INIT] ok motor_token=' + res.token.slice(0, 8) + '...'
           + ' state_pos=(' + res.state.player_col + ',' + res.state.player_row + ')'
@@ -41018,7 +41023,7 @@ function openCartography() {
   // X-6.5.51l: reset zoom/pan ao abrir pra sempre ver mapa inteiro
   // NOTA: este openCartography é overridden pela versão V2 em ~36746
   // (`overlay.innerHTML = ...` cria xcart-canvas). Mantido por compat.
-  _cartZoom = 1.0; _cartPanX = 0; _cartPanY = 0;
+  _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0;  // #map-zoom: ~160% padrão
   document.getElementById('cartography-overlay').classList.add('visible');
   renderCartography();
   _cartUpdateZoomBtns();
@@ -41131,7 +41136,10 @@ async function _remoteTravelToMap(targetMap, label){
 // player. User feedback: "deixando como estava antes, com design mais
 // parecido com papel, e nao deixe locais em linha reta ou formatos
 // geometrico retos, pois fica pouco realista".
-var _cartZoom = 1.0;
+// #map-zoom (2026-06-23, user): o mapa abre com ~160% (dois passos) por padrão — mais perto,
+// locais maiores/legíveis logo de cara. Vale pros dois mapas (cidade + exploração).
+var CART_ZOOM_DEFAULT = 1.6;
+var _cartZoom = CART_ZOOM_DEFAULT;
 var _cartPanX = 0;
 var _cartPanY = 0;
 var CART_ZOOM_MIN = 0.6;
@@ -41682,8 +41690,8 @@ function _hydrateExploreKnown(){
 }
 
 function openCartography() {
-  // Reset zoom/pan
-  _cartZoom = 1.0; _cartPanX = 0; _cartPanY = 0;
+  // Reset zoom/pan — #map-zoom: abre em ~160% (CART_ZOOM_DEFAULT) por padrão.
+  _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0;
   _xcartHoverNode = null;
 
   var overlay = document.getElementById('cartography-overlay');
@@ -41739,7 +41747,33 @@ function openCartography() {
 
   _xcartWireEvents();
   _xcartDraw();
-  _hydrateExploreKnown();  // #0: busca o known set real se sumiu (redesenha ao chegar)
+  _xcartUpdateZoomInfo();  // #map-zoom: rótulo reflete o ~160% (o HTML hardcoda 100%)
+  // #map-known-fix (2026-06-23): conjunto de locais descobertos DETERMINÍSTICO antes do mapa
+  // "valer" — AGUARDA o /init (que seta __EXPLORE_KNOWN) em vez de só pollar. Elimina o race
+  // que abria o mapa só com a origem (cidade) após viagem pelo hexágono — bug recorrente,
+  // remendado 3x em _hydrateExploreKnown (camada errada). Este fica como fallback de re-entrada.
+  _xcartEnsureKnownThenRedraw();
+}
+
+// #map-known-fix (2026-06-23): aguarda o known set chegar (via /init promise) e redesenha.
+// Substitui a dependência do poll silencioso: o /init é a fonte autoritativa de __EXPLORE_KNOWN.
+async function _xcartEnsureKnownThenRedraw(){
+  if (window.__EXPLORE_MODE !== 'remote') return;            // LOCAL: motor null → mostra tudo (sandbox)
+  var k = window.__EXPLORE_KNOWN;
+  if (Array.isArray(k) && k.length > 1) return;              // já hidratado (> origem)
+  var zi = document.getElementById('xcart-zoom-info');
+  if (zi) zi.textContent = 'Desenhando mapa…';
+  try {
+    if (window.__EXPLORE_INIT_PROMISE && typeof window.__EXPLORE_INIT_PROMISE.then === 'function') {
+      await Promise.race([ window.__EXPLORE_INIT_PROMISE.catch(function(){}),
+                           new Promise(function(r){ setTimeout(r, 8000); }) ]);
+    }
+  } catch (_) {}
+  if (zi) zi.textContent = Math.round(_cartZoom * 100) + '%';
+  try { if (_xcartCtx) _xcartDraw(); } catch (_) {}
+  // re-entrada sem re-init (init já resolveu noutra sessão) → poll+fetch on-demand (fallback)
+  k = window.__EXPLORE_KNOWN;
+  if (!(Array.isArray(k) && k.length > 1)) { try { _hydrateExploreKnown(); } catch (_) {} }
 }
 
 // Render usando _drawScrollBgV2 + halos + biome art + paths + nodes + pin
@@ -41883,7 +41917,7 @@ function _xcartWireEvents() {
   // Botões
   document.getElementById('xcart-zoom-in').onclick = function(){ _xcartSetZoom(_cartZoom * 1.2, _xcartW/2, _xcartH/2); };
   document.getElementById('xcart-zoom-out').onclick = function(){ _xcartSetZoom(_cartZoom * 0.8, _xcartW/2, _xcartH/2); };
-  document.getElementById('xcart-zoom-reset').onclick = function(){ _cartZoom = 1.0; _cartPanX = 0; _cartPanY = 0; _xcartUpdateZoomInfo(); _xcartDraw(); };
+  document.getElementById('xcart-zoom-reset').onclick = function(){ _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0; _xcartUpdateZoomInfo(); _xcartDraw(); };
   document.getElementById('xcart-close-btn').onclick = function(){ closeCartography(); };
   /* 2026-05-18 USER REQUEST (Chrome MCP testing): handler do botão "Voltar pra
      Cidade". Fluxo:
@@ -44138,7 +44172,12 @@ function boot() {
           _initBody.restore_col = S.player.col;
           _initBody.restore_row = S.player.row;
         }
-        window.ExploracaoAPI.init(_initBody).then(function(res) {
+        // #map-known-fix (2026-06-23): GUARDA o promise do /init pra a cartografia poder
+        // AGUARDÁ-LO (determinístico) antes de desenhar — fim do race que abria o mapa só com
+        // a origem (cidade) após viagem pelo hexágono. ExploracaoAPI.init seta __EXPLORE_KNOWN
+        // (de res.known_locations) ANTES de resolver, então await deste promise = known set pronto.
+        window.__EXPLORE_INIT_PROMISE = window.ExploracaoAPI.init(_initBody);
+        window.__EXPLORE_INIT_PROMISE.then(function(res) {
           if (res && res.token) {
             LOG('API', 'motor_init ok motor_token=' + String(res.token).slice(0, 8)
               + '... map=' + S.mapId + ' biome=' + _initBody.biome

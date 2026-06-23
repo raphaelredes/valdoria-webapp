@@ -54640,7 +54640,10 @@ window.startCityJourney = startCityJourney;
 // Aliases pro namespace local em <script> ~1360 (CartShared.*).
 
 // Estado do canvas
-var _cartZoom = 1.0;
+// #map-zoom (2026-06-23, user): o mapa abre com ~160% (dois passos) por padrão — mais perto,
+// locais maiores/legíveis logo de cara. Mesmo padrão na exploração (CART_ZOOM_DEFAULT lá).
+var CART_ZOOM_DEFAULT = 1.6;
+var _cartZoom = CART_ZOOM_DEFAULT;
 var _cartPanX = 0;
 var _cartPanY = 0;
 var _cartCanvas = null;
@@ -54708,8 +54711,8 @@ function renderCartographyCanvas(el){
   _cartW = rect.width;
   _cartH = rect.height;
 
-  // Reset zoom/pan
-  _cartZoom = 1.0;
+  // Reset zoom/pan — #map-zoom: abre em ~160% (CART_ZOOM_DEFAULT).
+  _cartZoom = CART_ZOOM_DEFAULT;
   _cartPanX = 0;
   _cartPanY = 0;
 
@@ -54960,7 +54963,7 @@ function _wireCartEvents(){
   // Botões
   document.getElementById('cart-zoom-in').onclick = function(){ _cartSetZoom(_cartZoom * 1.2, _cartW/2, _cartH/2); };
   document.getElementById('cart-zoom-out').onclick = function(){ _cartSetZoom(_cartZoom * 0.8, _cartW/2, _cartH/2); };
-  document.getElementById('cart-zoom-reset').onclick = function(){ _cartZoom = 1.0; _cartPanX = 0; _cartPanY = 0; _drawCart(); _cartUpdateZoomInfo(); };
+  document.getElementById('cart-zoom-reset').onclick = function(){ _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0; _drawCart(); _cartUpdateZoomInfo(); };
 }
 
 function _cartTouchDist(touches){
