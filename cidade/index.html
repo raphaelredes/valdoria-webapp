@@ -20200,8 +20200,11 @@ var GUILD_RESEARCH = [
   { id: 'rs_traps',     icon: _heralIco('ic-engrenagem'),   label: 'Armadilhas',           cost: 50, effect: '+2 dungeons (5 turnos)' }
 ];
 
-function _buildGuildMockData(player){
+function _buildGuildMockData(player, recruitCount){
   // Replica canonical guild.py L142-197 (GuildManager.get_menu structure)
+  // #95: recruitCount (REMOTE) = contagem REAL do quadro (3-8, ±1 nível) — bate com a tela
+  // "Recrutar Aliados". Sem ele (LOCAL), desc genérica (sem o número falso do GUILD_RECRUITS mock).
+  var _rc = (typeof recruitCount === 'number') ? recruitCount : null;
   var partyCount = (window.GROUP_MEMBERS || []).filter(function(m){ return m && !m.dead; }).length - 1; // -1 = player
   if (partyCount < 0) partyCount = 0;
   return {
@@ -20211,14 +20214,16 @@ function _buildGuildMockData(player){
     party_max: 3,
     fallen_count: 0,
     gold: player.gold,
-    recruit_available: GUILD_RECRUITS.length,
+    recruit_available: (_rc !== null ? _rc : GUILD_RECRUITS.length),
     rotation_hours: 12,
     services: [
       // Ordem canonical (guild.py L151-195)
       { icon: _heralIco('ic-paladino'), label: 'Ver aventureiros disponíveis',
-        desc: GUILD_RECRUITS.length + ' recrutas prontos para aventura',
+        desc: (_rc !== null
+          ? (_rc + ' aventureiro' + (_rc === 1 ? '' : 's') + ' aguardando contrato')
+          : 'Contrate companheiros para o seu grupo'),
         cb: 'guild_recruit_open',
-        badge: GUILD_RECRUITS.length + '' },
+        badge: (_rc !== null ? (_rc + '') : '') },
       { icon: _heralIco('ic-missões'), label: 'Quadro de missões',
         desc: 'Contratos ativos da Guilda',
         cb: 'guild_quests_open',
@@ -44423,6 +44428,18 @@ function _gfBtnCss(kind){
   return base + 'background:rgba(74,56,40,0.4);border:1px solid rgba(196,149,58,0.4);color:var(--v-text-bright,#e8dcc8);';
 }
 
+// #95: ícone = RETRATO IA do aventureiro (fallback heráldico se sem slug/img falhar).
+// Usado nos popups de resultado (barganha/contratação) p/ mostrar a imagem, não o brasão.
+function _guildPortraitIcon(d){
+  if (d && d.port) {
+    return '<img src="../shared/img/adventurers/' + d.port + '.webp" alt="" '
+      + 'style="width:clamp(80px,22vw,104px);height:clamp(80px,22vw,104px);object-fit:cover;'
+      + 'border-radius:var(--v-radius,10px);border:1px solid var(--v-gold,#c4953a);box-shadow:0 4px 12px rgba(0,0,0,0.5);" '
+      + 'onerror="this.style.display=\'none\';">';
+  }
+  return (d && d.ico) || _heralIco('ic-grupo');
+}
+
 function _guildShowRecruitFicha(it, p){
   if (window.vProcessing) { try { window.vProcessing.show({ text: 'Folheando o contrato...' }); } catch(_){} }
   window.vCityServer.guild.recruitDetail(it.id).then(function(d){
@@ -44506,21 +44523,35 @@ function _guildRollHaggleDice(d, p, r){
     var head = '🎲 ' + skillLabel + ': <b>' + r.roll + '</b>' + (r.bonus ? (' + ' + r.bonus + ' = <b>' + r.total + '</b>') : '') + ' vs CD ' + r.dc
       + ' — <b style="color:' + (r.success ? '#9adfa3' : '#d88') + '">' + (r.success ? 'Sucesso' : 'Falha') + '</b>';
     _showServiceResultPopup({
-      icon: (d.ico || _heralIco('ic-grupo')), npc: d.n,
+      icon: _guildPortraitIcon(d), npc: d.n,
       narrative: head + '<br><br><i>"' + (r.line || '') + '"</i><br><br>Novo custo: <b style="color:var(--v-gold,#c4953a)">' + r.new_cost + '</b> <span class="vi vi-coin sm"></span>',
       onContinue: function(){ _guildRenderFicha(d2, p); }
     });
   }
-  if (typeof Dice3DInstance !== 'undefined' && Dice3DInstance) {
+  // PADRAO_DADOS: dado 3D real (window.Dice3D — NÃO Dice3DInstance, que é interno ao módulo).
+  // Container DEVE ser um DIV (o módulo monta o próprio renderer dentro). roll() usa o d20 do servidor.
+  var D3D = window.Dice3D;
+  if (typeof D3D === 'function') {
     var ov = document.createElement('div');
     ov.id = 'guild-haggle-dice-overlay';
-    ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:Cinzel,serif;';
-    ov.innerHTML = '<div style="font-size:calc(16px * var(--v-font-scale,1));color:var(--v-gold,#c4953a);margin-bottom:var(--v-space-lg,12px);">🎲 ' + (r.skill || 'Negociação') + '...</div><canvas id="ghd-canvas" width="200" height="200"></canvas>';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(10,8,5,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:var(--v-font-display,Cinzel),serif;';
+    ov.innerHTML = '<div style="font-size:calc(clamp(15px,4.4vw,17px) * var(--v-font-scale,1));color:var(--v-gold,#c4953a);letter-spacing:1px;margin-bottom:var(--v-space-lg,12px);">🎲 ' + (r.skill || 'Negociação') + '</div>'
+      + '<div id="ghd-host" style="width:clamp(180px,52vw,220px);height:clamp(180px,52vw,220px);"></div>'
+      + '<div id="ghd-label" style="margin-top:var(--v-space-md,10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale,1));min-height:1.4em;">&nbsp;</div>';
     document.body.appendChild(ov);
+    var _done = false;
+    var _go = function(){ if (_done) return; _done = true; if (ov && ov.remove) ov.remove(); finish(); };
     try {
-      var inst = new Dice3DInstance(document.getElementById('ghd-canvas'), 20);
-      inst.roll(r.roll, function(){ setTimeout(function(){ ov.remove(); finish(); }, 900); });
-    } catch(_e){ ov.remove(); finish(); }
+      var inst = new D3D(document.getElementById('ghd-host'), { dieType: 'd20', size: 200 });
+      inst.roll(r.roll, function(){
+        var lbl = document.getElementById('ghd-label');
+        if (lbl) lbl.innerHTML = '<b style="color:' + (r.success ? '#9adfa3' : '#d88') + '">' + r.roll + '</b>'
+          + (r.bonus ? (' + ' + r.bonus + ' = <b>' + r.total + '</b>') : '') + ' vs CD ' + r.dc
+          + ' — <b style="color:' + (r.success ? '#9adfa3' : '#d88') + '">' + (r.success ? 'Sucesso' : 'Falha') + '</b>';
+        setTimeout(function(){ try { if (inst.dispose) inst.dispose(); } catch(_e){} _go(); }, 1300);
+      });
+      setTimeout(_go, 6000);  // safety: nunca trava se o callback do dado não disparar
+    } catch(_e){ console.warn('[CITY] haggle dice', _e); _go(); }
   } else { finish(); }
 }
 
@@ -44548,7 +44579,7 @@ function _guildHireFromFicha(d, p){
     if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
     if (typeof refreshHud === 'function') refreshHud();
     _showServiceResultPopup({
-      icon: (d.ico || _heralIco('ic-grupo')), npc: d.n,
+      icon: _guildPortraitIcon(d), npc: d.n,
       narrative: '<i>"' + ((res && res.accept_line) || 'Aceito. Encontro você nos portões ao amanhecer.') + '"</i><br><br><b>' + d.n + '</b> contratado e adicionado ao grupo.',
       deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
       onContinue: function(){ navigateBack(); }
@@ -49384,7 +49415,17 @@ function _renderCityPopup(key){
   }
   if (key === 'guild' && typeof renderGuildHub === 'function') {
     if (titleEl) titleEl.textContent = 'Guilda dos Aventureiros';
+    // #95: render imediato (sem número), depois busca a contagem REAL do quadro (REMOTE) e
+    // re-renderiza com ela — assim a desc/badge batem com a tela "Recrutar Aliados" (3-8, ±1 nível).
     renderGuildHub(bodyEl, _buildGuildMockData(window.CITY_MOCK_PLAYER));
+    var _gv = window.vCityServer;
+    if (_gv && _gv.isRemote && _gv.isRemote() && _gv.guild) {
+      _gv.guild.recruits().then(function(rd){
+        if (!rd || !rd.items) return;
+        var n = rd.items.filter(function(i){ return !i.hired; }).length;
+        renderGuildHub(bodyEl, _buildGuildMockData(window.CITY_MOCK_PLAYER, n));
+      }).catch(function(){});
+    }
     // 2026-05-21: Spoiler gating — player visitou Guilda → desbloqueia missões do
     // mural visíveis no Quest Diary. Antes, todas missões apareciam direto (spoiler).
     if (typeof window._markQuestsAsSeen === 'function') window._markQuestsAsSeen('guild');
