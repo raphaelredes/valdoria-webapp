@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-23T03:34:40Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-23T11:28:48Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -5206,6 +5206,20 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   font-size: var(--v-font-sm, 12px);
   min-height: 44px;
   padding: var(--v-space-sm, 8px) var(--v-space-xs, 6px);
+}
+/* 2026-06-23: chip de CD/chance no botão Fugir (dificuldade visível "na opção"). */
+.sim-action-sheet .action-btns-grid--secondary .action-btn .act-flee-dc {
+  display: inline-block;
+  margin-left: var(--v-space-xs, 4px);
+  padding: 1px var(--v-space-xs, 5px);
+  font-size: var(--v-font-xs, 10px);
+  font-weight: 700;
+  color: var(--v-text-dim, #a09484);
+  background: rgba(196, 149, 58, 0.14);
+  border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  border-radius: var(--v-radius-pill, 20px);
+  white-space: nowrap;
+  vertical-align: middle;
 }
 /* V1 Invocações Phase 1 — Bonus Action System (2026-04-18, refinado).
    Botões herdam .action-btn base; seção BÔNUS é destacada apenas pelo label
@@ -16619,6 +16633,15 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
         var _wsIco = (target.wildShape.form_ico || '🐾');
         var _wsName = (target.wildShape.form_name || 'forma');
         _localWildShapeRevert(target, _wsExc);
+        /* REVERT ÉPICO ao tomar dano (2026-06-23, user "quando volta ao normal ao tomar
+           dano"): a forma bestial cai a 0 → implosão de natureza no card. Fire-and-forget
+           (este path não é async); o VFX desenha no canvas independente do render. */
+        try {
+            var _wsRvEl = document.querySelector('[data-unit-id="' + (target.id || 'player') + '"]');
+            if (window._combatVfx && _wsRvEl && typeof window._combatVfx.wildShapeRevert === 'function') {
+                window._combatVfx.wildShapeRevert(_wsRvEl);
+            }
+        } catch (_eWsRv) {}
         if (s && s.log) s.log.push(_wsIco + ' A forma de ' + _wsName + ' se desfez!'
             + (_wsExc > 0 ? ' (' + _wsExc + ' dano excedente)' : ''));
         if ((target.hp | 0) > 0) { target.alive = true; clearDownedMeta(target); return; }
@@ -20400,7 +20423,15 @@ function render(s) {
                    sempre deixe Encerrar turno disponível logo acima do botão Agir".
                    Esquivar/Fugir continuam consumindo AÇÃO (PHB p.190). */
                 html += '<button type="button" class="action-btn secondary" data-act="dodge">' + _actBtnIco('acao-esquivar') + 'Esquivar' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="flee">' + _actBtnIco('acao-fugir') + 'Fugir' + actionGlyph + '</button>';
+                /* 2026-06-23 (user "mostrar a dificuldade da fuga na opção"): CD + chance
+                   aprox. direto no botão Fugir (antes só apareciam no modal pós-clique). */
+                var _fleeDc = (typeof simFleeEscapeDc === 'function' && currentState) ? simFleeEscapeDc(currentState) : 0;
+                var _fleePI = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
+                var _fleeDx = _fleePI ? Math.floor(((_fleePI.dex | 0) - 10) / 2) : 0;
+                var _fleeSc = 0; for (var _rf = 1; _rf <= 20; _rf++) { if (_rf + _fleeDx >= _fleeDc) _fleeSc++; }
+                var _fleePct = Math.round((_fleeSc / 20) * 100);
+                var _fleeChip = _fleeDc ? ' <span class="act-flee-dc" title="Fugir: teste de Destreza (Acrobacia) CD ' + _fleeDc + ' — chance aprox. ' + _fleePct + '%">CD ' + _fleeDc + ' · ~' + _fleePct + '%</span>' : '';
+                html += '<button type="button" class="action-btn secondary" data-act="flee">' + _actBtnIco('acao-fugir') + 'Fugir' + _fleeChip + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="Pular as animações de dados (suas, dos inimigos e da iniciativa). Persistente — pode marcar/desmarcar quando quiser.">' +
                     (_skipAllDiceAnim ? '☑ Pular dados' : '☐ Pular dados') + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="log">' + _actBtnIco('acao-log') + 'Log</button>';
@@ -23299,10 +23330,31 @@ async function useWildShapeSkill(skill, opts) {
     /* Já transformado → reverter (reusar a habilidade). */
     if (_wsIsTransformed(p)) {
         if (isRemote) { await __combatRemoteAction({ type: 'skill', slot: slot }); return; }
+        var _wsOldFormHTML = '';
+        try {
+            var _wsRvPre = document.querySelector('[data-unit-id="' + (p.id || 'player') + '"]');
+            var _wsRvPEl = _wsRvPre && (_wsRvPre.querySelector('.c-portrait') || _wsRvPre.querySelector('.c-portrait-img'));
+            if (_wsRvPEl) _wsOldFormHTML = _wsRvPEl.outerHTML;
+        } catch (_ePreRv) {}
         _localWildShapeRevert(p, 0);
         var sL = currentState; simLogPushTurnHeader(sL, p);
         sL.log.push((p.ico || '🌿') + ' ' + p.n + ' reverte à forma normal.');
-        p.actionSpent = true; render(sL); _actionTaken = false; await _maybeAdvanceOrStay();
+        p.actionSpent = true; render(sL); _actionTaken = false;
+        /* REVERT ÉPICO (2026-06-23, user "animação épica tanto quando vira quanto quando
+           volta ao normal"): implosão de natureza (anel verde colapsando + motes pra
+           dentro) + cross-fade morph do retrato (animal→humanoide). Espelha o MORPH da
+           transformação, em sentido inverso. Path LIVE no PIVOT (combate roda local). */
+        try {
+            var _rvEl = document.querySelector('[data-unit-id="' + (p.id || 'player') + '"]')
+                     || document.querySelector('[data-unit-id="player"]');
+            if (window._combatVfx && _rvEl && typeof window._combatVfx.wildShapeRevert === 'function') {
+                if (typeof _wsMorphPortrait === 'function' && _wsOldFormHTML) _wsMorphPortrait(_rvEl, _wsOldFormHTML);
+                window._combatVfx.wildShapeRevert(_rvEl);
+                if (typeof _vaPlaySFX === 'function') { try { _vaPlaySFX('buff'); } catch (_s) {} }
+                await new Promise(function (r) { setTimeout(r, 850); });
+            }
+        } catch (_eRv) { if (window.console) console.warn('[WILDSHAPE] revert vfx', _eRv); }
+        await _maybeAdvanceOrStay();
         return;
     }
     var forms = (skill.forms && skill.forms.length) ? skill.forms : wildShapeFormsForLevel(p.lvl | 0);
