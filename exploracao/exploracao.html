@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-22T23:39:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T00:23:35Z - do not edit directly, edit source -->
 
 
 
@@ -10733,8 +10733,16 @@ window.__onIntroTap = function() {
     var tileKey = rt.type + '.' + rt.state;
     var apiBase = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
     var url = apiBase + '/api/exploracao/tile_event_choice';
+    // 2026-06-22 FIX (bug C1, nunca verificado ao vivo): o corpo DEVE mandar o
+    // token de SESSÃO DO MOTOR (__EXPLORE_MOTOR_TOKEN) — o servidor faz
+    // sess.get_session(body['token']) (http.py handle_tile_event_choice ~1651),
+    // igual a /move e /event_choice. Antes mandava __EXPLORE_TOKEN (token de
+    // AUTH, separado) → get_session() não achava → 404 unknown_token → o jogador
+    // travava em "Falha ao resolver (rede)". O header continua o token de auth
+    // (resolve o uid via bearer, que JÁ funcionava).
+    var motorTok = window.__EXPLORE_MOTOR_TOKEN || '';
     var bodyJson = JSON.stringify({
-      token: window.__EXPLORE_TOKEN, tile_key: tileKey,
+      token: motorTok, tile_key: tileKey,
       choice_id: choice.id, hex_id: rt.hexId || ''
     });
     if (window.TileLog) window.TileLog.info('STUB-EVT', 'remote_tile_resolve', {
@@ -33113,6 +33121,14 @@ function _isAnyEventModalVisible() {
       var st = window.getComputedStyle(stub);
       if (st && st.display !== 'none' && st.visibility !== 'hidden') return true;
     }
+    // #12 Fase 1 (2026-06-22): eventos HAZARD em REMOTE renderizam pelo
+    // vEncounter (#encounter-overlay) e animam o d20 no #dice-overlay — NENHUM
+    // dos dois é o #event-modal/#stub-event-overlay. Sem reconhecê-los aqui, o
+    // watchdog via "ph=event sem modal" e FORÇAVA idle no meio do fluxo do
+    // hazard (regressão: plains_brushfire_01 morria ~3s após render).
+    if (window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) return true;
+    var dice = document.getElementById('dice-overlay');
+    if (dice && dice.classList.contains('visible')) return true;
     // Defeat / boss / outros overlays bloqueantes
     var defeat = document.getElementById('defeat-overlay');
     if (defeat && defeat.classList.contains('visible')) return true;
