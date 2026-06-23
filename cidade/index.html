@@ -8931,6 +8931,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       try { _refreshDiscoveryState(); } catch(_dce){ console.warn('[CITY] discovery state fetch failed', _dce); }
       try { _refreshNpcState(); } catch(_npe){ console.warn('[CITY] npc state fetch failed', _npe); }
       try { _refreshAchProgress(); } catch(_ape){ console.warn('[CITY] ach progress fetch failed', _ape); }
+      try { _refreshRelations(); } catch(_rle){ console.warn('[CITY] relations fetch failed', _rle); }
       try { _refreshCityFlags(); } catch(_cfe){ console.warn('[CITY] city flags fetch failed', _cfe); }
       /* X-6.5.51AU (2026-05-11): aplica known_locations do server pra
          hidratar visibilidade do Mapa de Valdoria. Sem isso, locais
@@ -10264,6 +10265,10 @@ function _isCTA(btn) {
       // (apply_sell/apply_use canônicos: 60% PHB, tags protegidas, cura por fórmula).
       sell: function(name){ return window.vCityServer.cityAction('inventory.sell', { item: name }); },
       use:  function(name){ return window.vCityServer.cityAction('inventory.use',  { item: name }); }
+    },
+    relations: {  // FASE 4 (2026-06-23) — lista de Vínculos montada NO SERVIDOR (de Player.narrative):
+      // qualquer NPC com reputação/afinidade real aparece (sem lista hardcoded no cliente).
+      list: function(){ return window.vCityServer.cityAction('relations.list', {}); }
     },
     service: {  // FASE 6 — gold/xp delta-based (servidor é autoridade)
       gold: function(delta, id){ return window.vCityServer.cityAction('service.gold', { delta: delta, service_id: id || '' }); },
@@ -20721,6 +20726,35 @@ function _buildRelationsMockData(player){
   // player.narrative em metadata.npc_affinity/npc_reputation), OU diálogo já usado.
   // ANTES listava TODOS os 9 fixos como "★☆☆☆☆ Estranho" — vazava NPCs nunca conhecidos.
   player = player || {};
+  // SERVER-DRIVEN (#92, 2026-06-23): em REMOTE a lista vem do SERVIDOR (CITY_SERVER_RELATIONS,
+  // montada de Player.narrative em relations.list) → QUALQUER NPC com reputação/afinidade real
+  // aparece, sem depender da lista hardcoded RELATIONS_NPCS. Retrato se o NPC está mapeado;
+  // senão ícone heráldico neutro (ic-dialogo). LOCAL (file://) cai na lógica client abaixo.
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+      && Array.isArray(window.CITY_SERVER_RELATIONS)) {
+    var _byKey = {};
+    RELATIONS_NPCS.forEach(function(rn){ var k = REL_SERVER_KEY[rn.id]; if (k) _byKey[k] = rn; });
+    var _fallbackIco = (typeof _heralIco === 'function') ? _heralIco('ic-dialogo', null, '38px') : '';
+    var srvServices = window.CITY_SERVER_RELATIONS.map(function(rel){
+      var rn = _byKey[rel.key];
+      var eff = (typeof rel.eff_affinity === 'number') ? rel.eff_affinity : 50;
+      var tier = _relAffTier(eff);
+      var badge = tier.stars + ' ' + tier.label;
+      if (typeof rel.reputation === 'number' && rel.reputation !== 0) badge += ' · Renome ' + (rel.reputation > 0 ? '+' : '') + rel.reputation;
+      return {
+        icon: rn ? rn.icon : _fallbackIco,
+        label: rel.name + ' (' + rel.role + ')',
+        cb: rn ? ('rel_view_' + rn.id) : ('rel_view_srv_' + rel.key),
+        badge: badge, _aff: eff,
+        portraitImg: rn ? rn.portraitImg : null
+      };
+    });
+    return {
+      type: 'hub',
+      flavor: '<i>Os laços que você cultivou em Valdoria. Diálogos e gestos genuínos constroem confiança.</i>',
+      services: srvServices
+    };
+  }
   var md = player.metadata || {};
   var aff = md.npc_affinity || {};
   var rep = md.npc_reputation || {};
@@ -21825,6 +21859,15 @@ function _refreshAchProgress(){
       for (var k in r.ach_progress){ ACH_PROGRESS[k] = r.ach_progress[k]; }  // aplica o real do servidor
     }
   }).catch(function(e){ console.warn('[CITY] ach progress failed', e); });
+}
+// FASE 4 server-driven (#92): a lista de Vínculos é montada NO SERVIDOR (de Player.narrative).
+// Cacheia em window.CITY_SERVER_RELATIONS; _buildRelationsMockData renderiza a partir dela em
+// REMOTE (qualquer NPC com reputação aparece — sem depender da lista hardcoded RELATIONS_NPCS).
+function _refreshRelations(){
+  if (!window.vCityServer || !window.vCityServer.isRemote || !window.vCityServer.isRemote()) return Promise.resolve();
+  return window.vCityServer.relations.list().then(function(r){
+    if (r && r.ok && Array.isArray(r.relations)) window.CITY_SERVER_RELATIONS = r.relations;
+  }).catch(function(e){ console.warn('[CITY] relations list failed', e); });
 }
 // SERVER-AUTHORITATIVE (#0, 2026-06-18, Fatia 2 NPC Interaction): helper canonical
 // pra persistir QUALQUER flag narrativa em metadata['city_flags']. Antes os flags
@@ -47061,21 +47104,34 @@ function _heroesShowTitles(p){
 // --- VÍNCULOS — afinidade dinâmica baseada em diálogos completados ---
 function _relationsShow(p, relId){
   var r = RELATIONS_NPCS.find(function(x){ return x.id === relId; });
+  // SERVER-DRIVEN (#92): NPC sem entrada em RELATIONS_NPCS (mundo-2, sem retrato) vem da lista
+  // do servidor (CITY_SERVER_RELATIONS) via cb 'rel_view_srv_<key>'. Sintetiza um `r` (ícone
+  // heráldico neutro, sem retrato) pra o resto da função renderizar do mesmo jeito.
+  var srvRel = null;
+  if (!r && relId && relId.indexOf('srv_') === 0 && Array.isArray(window.CITY_SERVER_RELATIONS)) {
+    var _srvKey = relId.substring(4);
+    srvRel = window.CITY_SERVER_RELATIONS.find(function(x){ return x.key === _srvKey; });
+    if (srvRel) {
+      r = { id: relId, name: srvRel.name, role: srvRel.role, ref_id: srvRel.key,
+            icon: (typeof _heralIco === 'function') ? _heralIco('ic-dialogo', null, '96px') : '', portraitImg: null };
+    }
+  }
   if (!r) return;
-  // SUPREME RULE #0 (2026-06-23): afinidade/tier vêm do SERVIDOR (Player.narrative,
-  // hidratado em metadata.npc_affinity/npc_reputation) — MESMA lógica do _buildRelationsMockData.
-  // ANTES o detalhe derivava o tier da CONTAGEM DE DIÁLOGO local (_npcDialoguesUsed),
-  // contradizendo a lista server-driven: um NPC com afinidade alta via quest aparecia
-  // "Estranho"/baixo aqui. Agora ambos usam a afinidade EFETIVA do servidor.
+  // SUPREME RULE #0 (2026-06-23): afinidade/tier vêm do SERVIDOR (Player.narrative, hidratado
+  // em metadata.npc_affinity/npc_reputation, ou da lista server-driven) — MESMA lógica do
+  // _buildRelationsMockData. ANTES o detalhe derivava o tier da CONTAGEM DE DIÁLOGO local,
+  // contradizendo a lista (um NPC com afinidade alta via quest aparecia "Estranho").
   var md = (p && p.metadata) || {};
   var aff = md.npc_affinity || {};
   var rep = md.npc_reputation || {};
-  var sk = REL_SERVER_KEY[relId];
+  var sk = REL_SERVER_KEY[relId] || (srvRel ? srvRel.key : null);
   var realAff = (sk && typeof aff[sk] === 'number');
-  var repVal = (sk && typeof rep[sk] === 'number') ? rep[sk] : null;
+  var repVal = (sk && typeof rep[sk] === 'number') ? rep[sk]
+             : (srvRel && typeof srvRel.reputation === 'number') ? srvRel.reputation : null;
   var interactions = ((window._npcDialoguesUsed || {})[r.ref_id] || []).length;
-  // afinidade EFETIVA 0-100: real > reputação (delta do Neutro, escala real ±100) > proxy de diálogo
+  // afinidade EFETIVA 0-100: real > server eff_affinity > reputação (delta do Neutro) > proxy de diálogo
   var effAff = realAff ? aff[sk]
+             : (srvRel && typeof srvRel.eff_affinity === 'number') ? srvRel.eff_affinity
              : (repVal !== null) ? (50 + repVal / 2)
              : (interactions * 12);
   effAff = Math.max(0, Math.min(100, effAff));
@@ -49227,12 +49283,16 @@ function _renderCityPopup(key){
   if (key === 'relations' && typeof renderSquareHub === 'function') {
     if (titleEl) titleEl.textContent = 'Vínculos com NPCs';
     // item F (2026-06-18): só NPCs já interagidos; vazio → empty-state ÉPICO.
-    var relData = _buildRelationsMockData(window.CITY_MOCK_PLAYER);
-    if (!relData.services || relData.services.length === 0) {
-      _relationsRenderEmpty(bodyEl);
-    } else {
-      renderSquareHub(bodyEl, relData);
-    }
+    // #92 (2026-06-23): em REMOTE re-busca a lista do SERVIDOR antes de renderizar (fresca
+    // após ganhar renome na sessão); LOCAL renderiza direto. Depois pinta (server > fallback).
+    var _renderRel = function(){
+      var relData = _buildRelationsMockData(window.CITY_MOCK_PLAYER);
+      if (!relData.services || relData.services.length === 0) _relationsRenderEmpty(bodyEl);
+      else renderSquareHub(bodyEl, relData);
+    };
+    if (typeof _refreshRelations === 'function' && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+      _refreshRelations().then(_renderRel).catch(_renderRel);
+    } else { _renderRel(); }
     return;
   }
   if (key === 'gates') {
