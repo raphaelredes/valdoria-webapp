@@ -215,17 +215,9 @@ function renderGuildHub(container, data) {
     body.appendChild(fallenBox);
   }
 
-  /* === 2d. Status info (party / gold / rotation) === */
-  var stats = _gldEl('div', 'gld-stats');
-  stats.style.cssText = 'display:flex;justify-content:space-around;padding:6px 0;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;border-top:1px solid rgba(196,149,58,0.15);border-bottom:1px solid rgba(196,149,58,0.15);';
-  stats.appendChild(_gldEl('span', '', '👥 Grupo: ' + (data.party_count || 0) + '/' + (data.party_max || 3)));
-  var goldSpan = _gldEl('span', '');
-  goldSpan.textContent = '🪙 ' + (data.gold || 0) + ' V';
-  stats.appendChild(goldSpan);
-  if (data.rotation_hours != null) {
-    stats.appendChild(_gldEl('span', '', '⏰ ' + data.rotation_hours + 'h'));
-  }
-  body.appendChild(stats);
+  /* === 2d. Status info REMOVIDO (user 2026-06-24): a faixa "Grupo 0/3 ·
+     Valdoritas · 12h" era redundante (grupo ja no #city-group-panel + ficha,
+     gold no header da cidade) e poluia o hub. Tambem carregava emoji banido. === */
 
   /* === 2e. Section label === */
   var sectionLbl = _gldEl('div', 'pt-section-label');
