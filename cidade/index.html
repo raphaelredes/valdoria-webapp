@@ -59,6 +59,7 @@ MAPA_IA — navegação rápida para agentes IA (atualizar a CADA commit que mud
     grep "_showSharedNpcListPopup"  → lista de NPCs com tier + dialogues count
     grep "_showConfirmPurchase"     → confirm popup (creditMode pra retirar/sacar)
     grep "_showServiceResultPopup"  → result popup (narrativa + deltas + onContinue)
+    grep "vMissao.show"             → PADRAO_MISSAO: popup ÉPICO de missão (accept/detail/done)
     grep "_squareShowListPopup"     → lista genérica de items (vendor/quests/etc)
     grep "_popupRestoreFns"         → registro pra Voltar funcionar em popups custom
     grep "_npcDialoguesUsed"        → tracking de talkOptions por NPC
@@ -1619,6 +1620,219 @@ LOG SINK (Fase 7):
        Replica fluxo bot DEV: click service → confirm → animação → result.
        Result popup mostra: narrativa NPC + dado rolado + delta HP/MP + Continuar.
        Padrão CSS espelha .csp-* (subscreen-popup) + .dtc-bar (combat damage card). */
+    /* === PADRAO_MISSAO — popup ÉPICO reutilizável (vMissao.show) ============
+       Overlay próprio sobreposto (z acima do subscreen/quadro). Card pergaminho
+       épico: faixa de cabeçalho com quest-scroll.webp, seções com label dourado,
+       reward row, progress bar, botões Cinzel. Tokens do design system. */
+    #vmsn-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 9300; /* acima de service-result-overlay (9100) e do quadro/subscreen */
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(15,12,8,0.96) 0%, rgba(8,6,4,0.99) 100%);
+      animation: vmsn-bg-in 0.22s ease-out;
+    }
+    #vmsn-overlay.active { display: flex; }
+    @keyframes vmsn-bg-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+    .vmsn-card {
+      width: auto;
+      min-width: 268px;
+      max-width: 360px;
+      max-height: 90vh;
+      margin: 0 var(--v-space-lg, 12px);
+      background: linear-gradient(180deg, rgba(44,34,24,0.99), rgba(22,16,11,0.99));
+      border: 1.5px solid var(--v-gold, #c4953a);
+      border-radius: var(--v-radius-lg, 14px);
+      box-shadow: 0 14px 44px rgba(0,0,0,0.72), inset 0 0 16px rgba(196,149,58,0.14);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* faixa de cabeçalho recortada nos cantos do card */
+      animation: vmsn-card-in 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes vmsn-card-in {
+      0%   { opacity: 0; transform: scale(0.92) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    body.perf-lite .vmsn-card,
+    body.perf-lite #vmsn-overlay { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .vmsn-card, #vmsn-overlay { animation: none !important; }
+    }
+    /* Faixa de cabeçalho (banner pergaminho) */
+    .vmsn-banner {
+      position: relative;
+      width: 100%;
+      height: 110px;
+      flex: 0 0 auto;
+      background: var(--v-bg-deep, #160d05) center/cover no-repeat;
+      border-bottom: 1.5px solid var(--v-gold, #c4953a);
+    }
+    .vmsn-banner::after { /* escurece a base p/ legibilidade do rótulo */
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8,6,4,0) 30%, rgba(8,6,4,0.78) 100%);
+    }
+    .vmsn-banner-label {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 7px;
+      z-index: 1;
+      text-align: center;
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-weight: 700;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--v-gold, #c4953a);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 14px rgba(196,149,58,0.5);
+    }
+    /* Corpo scrollável */
+    .vmsn-body {
+      padding: var(--v-space-lg, 12px) var(--v-space-lg, 12px) var(--v-space-md, 8px);
+      overflow-y: auto;
+      flex: 1 1 auto;
+      text-align: center;
+    }
+    .vmsn-title {
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-weight: 700;
+      font-size: calc(16px * var(--v-font-scale, 1));
+      line-height: 1.2;
+      color: var(--v-gold, #c4953a);
+      text-shadow: 0 0 12px rgba(196,149,58,0.35);
+      margin: 0 0 var(--v-space-sm, 4px);
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    /* Ofertante (npc) + retrato opcional */
+    .vmsn-offerer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--v-space-sm, 4px);
+      font-style: italic;
+      font-size: calc(12px * var(--v-font-scale, 1));
+      color: var(--v-text-dim, #a09484);
+      margin-bottom: var(--v-space-md, 8px);
+    }
+    .vmsn-portrait {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--v-gold, #c4953a);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    /* Seções com label dourado */
+    .vmsn-sec-label {
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: calc(11px * var(--v-font-scale, 1));
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--v-gold, #c4953a);
+      text-align: left;
+      margin: var(--v-space-md, 8px) 0 var(--v-space-xs, 3px);
+      opacity: 0.92;
+    }
+    .vmsn-desc {
+      color: var(--v-text, #d4c8b0);
+      font-size: var(--v-font-body, 14px);
+      line-height: 1.5;
+      text-align: left;
+    }
+    /* Progresso (modo detail) */
+    .vmsn-prog-label {
+      text-align: left;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      color: var(--v-text-dim, #a09484);
+      margin-bottom: var(--v-space-xs, 3px);
+    }
+    .vmsn-prog-track {
+      height: 8px;
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--v-border, #4a3828);
+      border-radius: var(--v-radius-pill, 20px);
+      overflow: hidden;
+    }
+    .vmsn-prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8a6a2a, var(--v-gold, #c4953a));
+      border-radius: var(--v-radius-pill, 20px);
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    /* Reward row */
+    .vmsn-reward {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--v-space-sm, 4px);
+      flex-wrap: wrap;
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: calc(13px * var(--v-font-scale, 1));
+      color: var(--v-gold, #c4953a);
+      background: rgba(196,149,58,0.10);
+      border: 1px solid rgba(196,149,58,0.30);
+      border-radius: var(--v-radius-sm, 6px);
+      padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);
+    }
+    .vmsn-reward .vi-coin { vertical-align: middle; }
+    /* Nível / Dificuldade */
+    .vmsn-meta {
+      margin-top: var(--v-space-md, 8px);
+      padding-top: var(--v-space-sm, 4px);
+      border-top: 1px dashed var(--v-border, #4a3828);
+      font-size: calc(11px * var(--v-font-scale, 1));
+      color: var(--v-text-dim, #a09484);
+    }
+    /* Botões (rodapé) */
+    .vmsn-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--v-space-sm, 4px);
+      padding: var(--v-space-md, 8px) var(--v-space-lg, 12px) var(--v-space-lg, 12px);
+      flex: 0 0 auto;
+    }
+    .vmsn-btn {
+      flex: 1 1 auto;
+      min-width: 96px;
+      padding: 9px var(--v-space-md, 8px);
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: calc(13px * var(--v-font-scale, 1));
+      letter-spacing: 0.04em;
+      border-radius: var(--v-radius-sm, 6px);
+      cursor: pointer;
+      border: 1px solid var(--v-border, #4a3828);
+      background: rgba(42,36,32,0.6);
+      color: var(--v-text, #d4c8b0);
+      transition: transform 0.14s ease, box-shadow 0.16s ease, filter 0.16s ease;
+    }
+    .vmsn-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+    .vmsn-btn:active { transform: translateY(0); }
+    .vmsn-btn-primary {
+      border-color: var(--v-gold, #c4953a);
+      background: linear-gradient(180deg, rgba(196,149,58,0.28), rgba(42,36,32,0.6));
+      color: var(--v-gold, #c4953a);
+      font-weight: 700;
+      box-shadow: 0 0 12px rgba(196,149,58,0.28), inset 0 1px 0 rgba(196,149,58,0.4);
+    }
+    .vmsn-btn-danger {
+      border-color: rgba(216,87,72,0.55);
+      color: #d8574a;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .vmsn-btn, .vmsn-prog-fill { transition: none; }
+    }
+
     #service-result-overlay {
       position: absolute;
       inset: 0;
@@ -7918,6 +8132,12 @@ body.perf-lite .vc-action-btn { transition: none; }
         </div>
         <button class="srp-continue-btn" id="srp-continue-btn">Continuar ✓</button>
       </div>
+    </div>
+    <!-- PADRAO_MISSAO — popup ÉPICO e REUTILIZÁVEL pra TODAS as telas de missão.
+         Overlay PRÓPRIO (sobreposto, fecha/volta sozinho). Render via window.vMissao.show.
+         DOM-safe: createElement+textContent pros dados do servidor (zero innerHTML cru). -->
+    <div id="vmsn-overlay">
+      <div class="vmsn-card" id="vmsn-card"></div>
     </div>
     <!-- Ally Loan Modal (Fase 9.3 — SPLIT entre múltiplos aliados) -->
     <div id="ally-loan-modal">
@@ -21962,6 +22182,23 @@ function _srvQuestDetail(serverId){
   var sq = (typeof QUESTS_ACTIVE!=='undefined') ? QUESTS_ACTIVE.filter(function(q){return q.serverId===serverId;})[0] : null;
   if (!sq){ if (typeof vToast==='function') vToast('Missão não encontrada'); return; }
   var ready = (sq.progress||'').indexOf('✓') >= 0;
+  // PADRAO_MISSAO — popup ÉPICO via vMissao.show (modo 'detail'). Server-authoritative:
+  // reusa os MESMOS callbacks de servidor (_srvCompleteQuest/_srvAbandonQuest), que já
+  // tratam closeCityPopup + refresh do board. vMissao tem overlay PRÓPRIO sobreposto
+  // (fecha/volta sozinho), então NÃO depende do nav-stack do SUBSCREEN_DATA — por isso
+  // não chamamos mais navigateTo aqui (evita o subscreen simples antigo). Degrada pro
+  // subscreen legado SÓ se vMissao não existir.
+  if (window.vMissao && typeof window.vMissao.show === 'function') {
+    window.vMissao.show(sq, {
+      mode: 'detail',
+      npc: sq.npc || '',
+      ready: ready,
+      onComplete: function(){ _srvCompleteQuest(serverId); },
+      onAbandon: function(){ _srvAbandonQuest(serverId); }
+    });
+    return;
+  }
+  // Fallback legado (sem vMissao) — subscreen simples + navegação.
   var icoMis = (typeof _heralIco==='function') ? _heralIco('ic-missões') : '';
   var coin = '<span class="vi vi-coin sm"></span>';
   var btns = [];
@@ -21983,6 +22220,17 @@ function _srvQuestDetail(serverId){
 function _srvQuestDoneDetail(serverId){
   var sq = (typeof QUESTS_HISTORY!=='undefined') ? QUESTS_HISTORY.filter(function(q){return (q.serverId||'')===serverId;})[0] : null;
   if (!sq){ if (typeof vToast==='function') vToast('Missão não encontrada'); return; }
+  // PADRAO_MISSAO — popup ÉPICO read-only via vMissao.show (modo 'done'). Overlay
+  // próprio sobreposto (só Voltar). Degrada pro subscreen legado se vMissao faltar.
+  if (window.vMissao && typeof window.vMissao.show === 'function') {
+    var dq = {
+      id: sq.id, title: sq.title || serverId,
+      desc: sq.desc || 'Você completou esta missão com êxito.',
+      reward: sq.reward || 0, xp: sq.xp || 0, icon: sq.icon
+    };
+    window.vMissao.show(dq, { mode: 'done' });
+    return;
+  }
   var coin = '<span class="vi vi-coin sm"></span>';
   if (typeof SUBSCREEN_DATA !== 'undefined'){
     SUBSCREEN_DATA['quest_done_srv_' + serverId] = {
@@ -36363,14 +36611,12 @@ function _tavernShowMuralBoard(p){
   function _reopen(){ _tavernShowMuralBoard(p); }
 
   function _acceptFlow(q){
-    var rw = q.reward || 0, xp = q.xp || 0;
-    var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
-    _showInfoPopup({
-      icon: q.icon || _heralIco('ic-missões'), npc: 'Grom, o Caolho',
-      title: 'Aceitar: ' + (q.title || q.id),
-      desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
-        + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level
-                                 : (q.diff ? '<br><b>Dificuldade:</b> ' + q.diff : '')),
+    // PADRAO_MISSAO — tela de CONFIRMAR épica via vMissao.show. O onConfirm reusa
+    // a MESMA chamada de servidor (quest.accept) e o MESMO fluxo pós-confirm
+    // (_showServiceResultPopup com a narrativa) — só a tela de aceite virou épica.
+    vMissao.show(q, {
+      mode: 'accept',
+      npc: 'Grom, o Caolho',
       onConfirm: function(){
         if (!remote) { if (typeof _acceptQuest === 'function') _acceptQuest(q.id); navigateBack(); return; }
         if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Aceitando missão...' });
@@ -44189,12 +44435,12 @@ function _guildShowQuests(p){
   }
 
   function _acceptFlow(q){
-    var rw = q.reward || 0, xp = q.xp || 0;
-    var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
-    _showInfoPopup({
-      icon: q.icon || _heralIco('ic-missões'), npc: 'Mestra Tavira', title: 'Aceitar: ' + (q.title || q.id),
-      desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
-        + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level : (q.diff ? '<br><b>Dificuldade:</b> ' + q.diff : '')),
+    // PADRAO_MISSAO — tela de CONFIRMAR épica via vMissao.show. O onConfirm reusa
+    // a MESMA chamada de servidor (quest.accept) e o MESMO fluxo pós-confirm
+    // (_showServiceResultPopup) — só a tela de aceite virou épica.
+    vMissao.show(q, {
+      mode: 'accept',
+      npc: 'Mestra Tavira',
       onConfirm: function(){
         if (!remote) {
           // LOCAL mode (file://): fallback mock client-side (dev tool).
@@ -48329,6 +48575,231 @@ function _bankLoanPayRemote(p, amt){
 //     ],
 //     onContinue: function(){ ... }   // opcional, default fecha overlay
 //   });
+
+// ============================================================================
+// === PADRAO_MISSAO — window.vMissao.show — popup ÉPICO reutilizável ==========
+// ============================================================================
+// Popup ÚNICO pra TODAS as telas de missão (aceitar, ativa, concluída). Overlay
+// PRÓPRIO sobreposto (#vmsn-overlay), fecha/volta sozinho. Server-authoritative:
+// só reusa os callbacks existentes (NUNCA fabrica reward/efeito). DOM-safe:
+// createElement + textContent pros dados do servidor (title/desc/npc) — ZERO
+// innerHTML com dados crus. Emoji-free (só glifos ◆/· + a moeda vi-coin).
+//
+// USO:
+//   vMissao.show(mission, opts)
+//   mission: { id, title, desc, reward, xp, icon, min_level, diff, progress }
+//   opts: {
+//     mode: 'accept' | 'detail' | 'done',
+//     npc: 'Grom, o Caolho',
+//     npcPortrait: '../.../retrato.webp',   // opcional → img redonda clicável (lightbox)
+//     ready: true,                          // detail: missão pronta p/ Entregar
+//     onConfirm: fn,   // accept: aceitar (chamada de servidor existente)
+//     onComplete: fn,  // detail: entregar (chamada de servidor existente)
+//     onAbandon: fn,   // detail: abandonar (chamada de servidor existente)
+//     onBack: fn       // opcional: ação extra ao Voltar/X
+//   }
+(function(){
+  var QUEST_SCROLL_IMG = '/shared/img/quests/quest-scroll.webp';
+
+  function _close(ov){
+    if (ov) ov.classList.remove('active');
+  }
+
+  function _show(mission, opts){
+    mission = mission || {};
+    opts = opts || {};
+    var mode = opts.mode || 'accept';
+    var ov = document.getElementById('vmsn-overlay');
+    var card = document.getElementById('vmsn-card');
+    if (!ov || !card) {
+      // Degradação defensiva: sem overlay, cai no info popup simples (não quebra fluxo).
+      if (typeof _showInfoPopup === 'function') {
+        _showInfoPopup({
+          icon: mission.icon || (typeof _heralIco === 'function' ? _heralIco('ic-missões') : '◆'),
+          npc: opts.npc || '',
+          title: mission.title || mission.id || 'Missão',
+          desc: mission.desc || '',
+          onConfirm: (mode === 'accept' && typeof opts.onConfirm === 'function') ? opts.onConfirm : undefined,
+          singleButton: (mode !== 'accept')
+        });
+      }
+      return;
+    }
+
+    // Limpa o card (re-render seguro)
+    while (card.firstChild) card.removeChild(card.firstChild);
+
+    var bv = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
+
+    // --- Faixa de cabeçalho (banner pergaminho) ---
+    var banner = document.createElement('div');
+    banner.className = 'vmsn-banner';
+    var img = new Image();
+    img.onerror = function(){ banner.style.backgroundImage = 'none'; };
+    img.src = QUEST_SCROLL_IMG + '?v=' + bv;
+    banner.style.backgroundImage = "url('" + QUEST_SCROLL_IMG + '?v=' + bv + "')";
+    var label = document.createElement('div');
+    label.className = 'vmsn-banner-label';
+    var LABELS = { accept: '◆ MISSAO ◆', detail: '◆ MISSAO ATIVA ◆', done: '◆ MISSAO CONCLUIDA ◆' };
+    label.textContent = LABELS[mode] || LABELS.accept;
+    banner.appendChild(label);
+    card.appendChild(banner);
+
+    // --- Corpo scrollável ---
+    var body = document.createElement('div');
+    body.className = 'vmsn-body';
+
+    // Título (DOM-safe via textContent)
+    var title = document.createElement('div');
+    title.className = 'vmsn-title';
+    title.textContent = mission.title || mission.id || 'Missão';
+    body.appendChild(title);
+
+    // Ofertante + retrato opcional
+    if (opts.npc || opts.npcPortrait) {
+      var off = document.createElement('div');
+      off.className = 'vmsn-offerer';
+      if (opts.npc) {
+        var offTxt = document.createElement('span');
+        offTxt.textContent = 'Ofertante: ' + opts.npc; // textContent → seguro
+        off.appendChild(offTxt);
+      }
+      if (opts.npcPortrait) {
+        var port = document.createElement('img');
+        port.className = 'vmsn-portrait v-zoomable';
+        port.src = opts.npcPortrait;
+        port.alt = opts.npc || '';
+        port.addEventListener('click', function(){
+          if (typeof window.showLightbox === 'function') {
+            window.showLightbox(port.src, opts.npc || '', '');
+          }
+        });
+        off.appendChild(port);
+      }
+      body.appendChild(off);
+    }
+
+    // Seção Objetivo (narrativa)
+    if (mission.desc) {
+      var objLbl = document.createElement('div');
+      objLbl.className = 'vmsn-sec-label';
+      objLbl.textContent = '◆ Objetivo';
+      body.appendChild(objLbl);
+      var desc = document.createElement('div');
+      desc.className = 'vmsn-desc';
+      desc.textContent = mission.desc; // DOM-safe
+      body.appendChild(desc);
+    }
+
+    // Progresso (modo detail, se "X/Y")
+    if (mode === 'detail' && mission.progress) {
+      var pm = String(mission.progress).match(/(\d+)\s*\/\s*(\d+)/);
+      if (pm) {
+        var cur = parseInt(pm[1], 10), max = parseInt(pm[2], 10);
+        if (max > 0) {
+          var pct = Math.max(0, Math.min(100, Math.round(cur / max * 100)));
+          var pLbl = document.createElement('div');
+          pLbl.className = 'vmsn-sec-label';
+          pLbl.textContent = '◆ Progresso';
+          body.appendChild(pLbl);
+          var pTxt = document.createElement('div');
+          pTxt.className = 'vmsn-prog-label';
+          pTxt.textContent = cur + ' / ' + max;
+          body.appendChild(pTxt);
+          var track = document.createElement('div');
+          track.className = 'vmsn-prog-track';
+          var fill = document.createElement('div');
+          fill.className = 'vmsn-prog-fill';
+          fill.style.width = '0%';
+          track.appendChild(fill);
+          body.appendChild(track);
+          // anima após paint
+          setTimeout(function(){ fill.style.width = pct + '%'; }, 30);
+        }
+      }
+    }
+
+    // Seção Recompensa
+    var rw = mission.reward || 0, xp = mission.xp || 0;
+    if (rw || xp) {
+      var rwLbl = document.createElement('div');
+      rwLbl.className = 'vmsn-sec-label';
+      rwLbl.textContent = '◆ Recompensa';
+      body.appendChild(rwLbl);
+      var reward = document.createElement('div');
+      reward.className = 'vmsn-reward';
+      // moeda vi-coin (ícone), depois texto via textContent
+      var coinEl = document.createElement('span');
+      coinEl.className = 'vi vi-coin sm';
+      reward.appendChild(coinEl);
+      var rwTxt = document.createElement('span');
+      rwTxt.textContent = ' ' + rw + ' · ' + xp + ' XP';
+      reward.appendChild(rwTxt);
+      body.appendChild(reward);
+    }
+
+    // Nível / Dificuldade
+    var metaParts = [];
+    if (mission.min_level) metaParts.push('Nível recomendado: ' + mission.min_level);
+    if (mission.diff) metaParts.push('Dificuldade: ' + mission.diff);
+    if (metaParts.length) {
+      var meta = document.createElement('div');
+      meta.className = 'vmsn-meta';
+      meta.textContent = metaParts.join(' · ');
+      body.appendChild(meta);
+    }
+
+    card.appendChild(body);
+
+    // --- Botões (rodapé) por modo ---
+    var actions = document.createElement('div');
+    actions.className = 'vmsn-actions';
+
+    function _mkBtn(text, cls, fn){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'vmsn-btn' + (cls ? ' ' + cls : '');
+      b.textContent = text;
+      b.addEventListener('click', fn);
+      return b;
+    }
+    function _doBack(){
+      _close(ov);
+      if (typeof opts.onBack === 'function') opts.onBack();
+    }
+
+    if (mode === 'accept') {
+      actions.appendChild(_mkBtn('Confirmar', 'vmsn-btn-primary', function(){
+        _close(ov);
+        if (typeof opts.onConfirm === 'function') opts.onConfirm();
+      }));
+      actions.appendChild(_mkBtn('Voltar', '', _doBack));
+    } else if (mode === 'detail') {
+      if (opts.ready && typeof opts.onComplete === 'function') {
+        actions.appendChild(_mkBtn('Entregar missão', 'vmsn-btn-primary', function(){
+          _close(ov);
+          opts.onComplete();
+        }));
+      }
+      if (typeof opts.onAbandon === 'function') {
+        actions.appendChild(_mkBtn('Abandonar', 'vmsn-btn-danger', function(){
+          _close(ov);
+          opts.onAbandon();
+        }));
+      }
+      actions.appendChild(_mkBtn('Voltar', '', _doBack));
+    } else { // done
+      actions.appendChild(_mkBtn('Voltar', 'vmsn-btn-primary', _doBack));
+    }
+
+    card.appendChild(actions);
+
+    ov.classList.add('active');
+  }
+
+  window.vMissao = { show: _show };
+})();
+
 function _showServiceResultPopup(opts){
   var ov = document.getElementById('service-result-overlay');
   if (!ov) return;
