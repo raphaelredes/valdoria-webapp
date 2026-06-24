@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-23T23:44:58Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-24T00:18:37Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -17765,6 +17765,14 @@ function _combatPortraitHTML(iconId, u, utype) {
     /* #85 (user): retrato CUSTOM do NPC (ex.: Thorne = thorne-armeiro.webp) tem
        prioridade sobre o ícone heráldico de classe. Cai pro SVG do iconId se a
        imagem falhar (onerror). file:// usa ../shared; remoto usa /shared. */
+    /* #wildshape-death-portrait (2026-06-23, user "quando acaba a vida transformado a figura
+       não volta a ser do personagem"): unidade MORTA ainda em Forma Selvagem mostra o retrato
+       do PERSONAGEM (backup), NUNCA o do animal. Troca por uma cópia com o portrait do backup
+       (ou null → cai no ícone heráldico de classe). Defensivo: cobre qualquer caminho de morte
+       que não reverteu a forma antes do render (_localWildShapeRevert pode não rodar em todos). */
+    if (u && u.wildShape && u._wsBackup && (u.isDead || (u.hp | 0) <= 0)) {
+        u = Object.assign({}, u, { portrait: u._wsBackup.portrait || null });
+    }
     if (u && u.portrait) {
         var pSrc = String(u.portrait);
         var pLoc = (typeof location !== 'undefined') ? location.href : '';
@@ -24684,7 +24692,7 @@ function playHitVFX(uid, crit, dmgType, opts) {
     if (typeof spawnSkillImpactLabel === 'function') {
         var _labelText = _skName
             ? _skName.toUpperCase() + '!'
-            : (crit ? 'CRÍTICO!' : 'ATAQUE!');
+            : (crit ? 'CRÍTICO!' : 'ACERTO!');
         spawnSkillImpactLabel(el, _labelText, _impactKindLabel);
     }
 
