@@ -14,7 +14,8 @@
  *   ~310  _sanitizeDialogueHTML(html) — whitelist REAL (#88): escape + i/em/b/strong/br/u/s/code
  *   ~325  _SKILL_LABEL_PT + _skillLabelPT(s) — keys EN → PT-BR no badge de CD
  *   ~490  _buildRewardBlockEl(line) — bloco RECOMPENSA épico (gold/xp/item WebP)
- *   ~530  _openItemDetailDialog/_buildChoiceItemThumb (item I) — thumb+detalhe de COMPRA
+ *   ~530  _buildCharacterSheetEl(line) — bloco FICHA DE PERSONAGEM épico (FASE 5, retrato+stats, DOM-safe)
+ *   ~700  _openItemDetailDialog/_buildChoiceItemThumb (item I) — thumb+detalhe de COMPRA
  *   ~390  openChoices(choices, opts) — sub-overlay AAA (badge CD, label fallback, thumb item)
  *   ~500  vEncounter.render(dialogue) — entry principal (check_hint preproc #88)
  *   ~720  renderPage(idx) — linhas narration/speech/dm + GUARD anti speaker-key (#88)
@@ -527,6 +528,165 @@
     return box;
   }
 
+  /* ──────────────────────────────────────────────────────────────────────
+     Bloco FICHA DE PERSONAGEM estruturado (FASE 5 — "Ver ficha" do recruta da
+     guilda, 2026-06-24). Espelha _buildRewardBlockEl: nó DOM construído via
+     createElement + textContent (DOM-safe, ZERO innerHTML com dados → sem XSS).
+     Layout épico (retrato grande dourado + grid de atributos) que ocupa o
+     card full-height (.enc-full ligado no render quando há character_sheet).
+
+     Contrato (server↔client):
+       { type:'character_sheet',
+         npc: { name, portrait(URL) },
+         character: {
+           class, race, level, hp, mp?, ac?,
+           stats: { for:{v,m}, des:{v,m}, con:{v,m}, int:{v,m}, sab:{v,m}, car:{v,m} },
+           personality:'', spells:[] } }
+     EMOJI-FREE; tokens do design system (estilo via classes .enc-cs-*). */
+  var _CS_STAT_ORDER = [
+    ['for', 'FOR'], ['des', 'DES'], ['con', 'CON'],
+    ['int', 'INT'], ['sab', 'SAB'], ['car', 'CAR']
+  ];
+  function _csFmtMod(m) {
+    var n = (m == null) ? 0 : (m | 0);
+    return (n >= 0 ? '+' : '') + n;
+  }
+  function _buildCharacterSheetEl(line) {
+    var npc = line.npc || {};
+    var ch = line.character || {};
+    var box = document.createElement('div');
+    box.className = 'enc-cs';
+
+    /* Retrato grande dourado (clicável → lightbox). Fallback escondido onerror. */
+    var portraitURL = npc.portrait || '';
+    var pWrap = document.createElement('div');
+    pWrap.className = 'enc-cs-portrait-wrap';
+    if (portraitURL) {
+      var img = document.createElement('img');
+      img.className = 'enc-cs-portrait v-zoomable';
+      img.alt = '';
+      img.loading = 'lazy';
+      img.src = portraitURL;
+      img.setAttribute('data-zoom-name', npc.name || '');
+      img.setAttribute('data-zoom-desc', '');
+      img.setAttribute('onerror', "this.style.display='none';");
+      var _csName = npc.name || '';
+      var _csTap = function (e) {
+        if (e) {
+          if (e.stopPropagation) e.stopPropagation();
+          if (e.preventDefault) e.preventDefault();
+        }
+        if (typeof window.showLightbox === 'function') {
+          window.showLightbox(portraitURL, _csName, '');
+        }
+      };
+      img.addEventListener('click', _csTap);
+      img.addEventListener('pointerup', _csTap);
+      img.style.cursor = 'pointer';
+      pWrap.appendChild(img);
+    }
+    box.appendChild(pWrap);
+
+    /* Nome + sub (classe · raça · Nível N). */
+    var nameEl = document.createElement('div');
+    nameEl.className = 'enc-cs-name';
+    nameEl.textContent = npc.name || 'Aventureiro';
+    box.appendChild(nameEl);
+
+    var subParts = [];
+    if (ch['class']) subParts.push(String(ch['class']));
+    if (ch.race) subParts.push(String(ch.race));
+    if (ch.level != null) subParts.push('Nível ' + (ch.level | 0));
+    if (subParts.length) {
+      var subEl = document.createElement('div');
+      subEl.className = 'enc-cs-sub';
+      subEl.textContent = subParts.join(' · ');
+      box.appendChild(subEl);
+    }
+
+    /* Linha de vitais (PV / CA / PM). */
+    var vitals = [];
+    if (ch.hp != null) vitals.push(['PV', String(ch.hp | 0)]);
+    if (ch.ac != null) vitals.push(['CA', String(ch.ac | 0)]);
+    if (ch.mp != null && (ch.mp | 0) > 0) vitals.push(['PM', String(ch.mp | 0)]);
+    if (vitals.length) {
+      var vRow = document.createElement('div');
+      vRow.className = 'enc-cs-vitals';
+      vitals.forEach(function (v) {
+        var pill = document.createElement('div');
+        pill.className = 'enc-cs-vital';
+        var vl = document.createElement('span');
+        vl.className = 'enc-cs-vital-lbl';
+        vl.textContent = v[0];
+        var vv = document.createElement('span');
+        vv.className = 'enc-cs-vital-val';
+        vv.textContent = v[1];
+        pill.appendChild(vl);
+        pill.appendChild(vv);
+        vRow.appendChild(pill);
+      });
+      box.appendChild(vRow);
+    }
+
+    /* Grid de 6 atributos (valor + modificador). */
+    var stats = ch.stats || {};
+    var grid = document.createElement('div');
+    grid.className = 'enc-cs-grid';
+    _CS_STAT_ORDER.forEach(function (s) {
+      var st = stats[s[0]] || {};
+      var v = (st.v != null) ? (st.v | 0) : 0;
+      var m = (st.m != null) ? (st.m | 0) : 0;
+      var cell = document.createElement('div');
+      cell.className = 'enc-cs-stat';
+      var lbl = document.createElement('div');
+      lbl.className = 'enc-cs-stat-lbl';
+      lbl.textContent = s[1];
+      var val = document.createElement('div');
+      val.className = 'enc-cs-stat-val';
+      val.textContent = String(v);
+      var mod = document.createElement('div');
+      mod.className = 'enc-cs-stat-mod';
+      mod.textContent = _csFmtMod(m);
+      cell.appendChild(lbl);
+      cell.appendChild(val);
+      cell.appendChild(mod);
+      grid.appendChild(cell);
+    });
+    box.appendChild(grid);
+
+    /* Seção Temperamento. */
+    if (ch.personality) {
+      box.appendChild(_csSection('Temperamento', [String(ch.personality)], 'enc-cs-pers'));
+    }
+
+    /* Seção Perícias / Habilidades. */
+    var spells = (ch.spells || []).filter(Boolean).map(String);
+    if (spells.length) {
+      box.appendChild(_csSection('Habilidades', spells, 'enc-cs-skills'));
+    }
+
+    return box;
+  }
+  /* Seção rotulada da ficha (título dourado + chips/linha de itens, DOM-safe). */
+  function _csSection(title, items, chipCls) {
+    var sec = document.createElement('div');
+    sec.className = 'enc-cs-section';
+    var t = document.createElement('div');
+    t.className = 'enc-cs-section-title';
+    t.textContent = title;
+    sec.appendChild(t);
+    var list = document.createElement('div');
+    list.className = 'enc-cs-chips';
+    items.forEach(function (it) {
+      var chip = document.createElement('span');
+      chip.className = 'enc-cs-chip ' + (chipCls || '');
+      chip.textContent = it;
+      list.appendChild(chip);
+    });
+    sec.appendChild(list);
+    return sec;
+  }
+
   // ──────────────────────────────────────────────────────────────────────
   // Item detail mini-dialog (item I, 2026-06-18) — nas escolhas de COMPRA o
   // thumbnail do item é clicável e abre ESTE detalhe (imagem grande + stats +
@@ -860,6 +1020,12 @@
        (regra "Popup DEVE Ocupar Máximo de Espaço"). Usado pela viagem da
        cidade ("Rumo a <destino>") pra ficar épico/imersivo igual à exploração. */
     if (opts.fullHeight) card.classList.add('enc-full');
+    /* FASE 5 (2026-06-24): ficha de personagem ("Ver ficha") ocupa a tela toda
+       (regra "Popup DEVE Ocupar Máximo de Espaço") sem o caller precisar passar
+       opts.fullHeight — basta o script[] ter um bloco character_sheet. */
+    if (_scriptIn.some(function (l) { return l && l.type === 'character_sheet'; })) {
+      card.classList.add('enc-full');
+    }
 
     /* 2026-06-07 EX5 (viagem "Rumo a <destino>"): mostra no TOPO quantas etapas
        faltam até o local. opts.progress = { current, total } (1-based). Banner
@@ -1072,6 +1238,20 @@
             rdiv.className = 'enc-line enc-reward-line';
             rdiv.appendChild(rel);
             body.appendChild(rdiv);
+          }
+          return;
+        }
+        /* FASE 5 (2026-06-24): bloco FICHA DE PERSONAGEM estruturado ("Ver ficha"
+           do recruta). Mesmo padrão do `reward`: nó DOM (createElement/textContent
+           → DOM-safe), estático (sem typewriter), revelado junto da página via
+           .enc-body.revealed. Não entra em `strophes`. */
+        if (line.type === 'character_sheet') {
+          var csel = _buildCharacterSheetEl(line);
+          if (csel) {
+            var csdiv = document.createElement('div');
+            csdiv.className = 'enc-line enc-cs-line';
+            csdiv.appendChild(csel);
+            body.appendChild(csdiv);
           }
           return;
         }

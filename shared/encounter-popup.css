@@ -506,6 +506,167 @@ body.perf-lite #encounter-overlay.active .enc-card {
 .enc-reward-val-xp   { color: #88c878; }
 .enc-reward-val-item { font-size: calc(16px * var(--v-font-scale, 1)); }
 
+/* ── Bloco FICHA DE PERSONAGEM estruturado (FASE 5, "Ver ficha" do recruta) ──
+   Apresentação ÉPICA da ficha (retrato grande dourado + grid de atributos +
+   seções). Construído como nó DOM pelo renderer (_buildCharacterSheetEl —
+   createElement/textContent, zero HTML em texto → sem XSS). Estilo 100% via
+   classes + tokens do design system. Card em .enc-full (ocupa a tela toda).
+   Revelado junto da página (.enc-body.revealed). EMOJI-FREE; smartphone-first. */
+.enc-cs-line {
+  visibility: hidden;            /* revela quando a página termina (.revealed) */
+}
+.enc-body.revealed .enc-cs-line {
+  visibility: visible;
+  animation: encCsIn 0.45s ease both;
+}
+@keyframes encCsIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.enc-cs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--v-space-md, 10px);
+  padding: var(--v-space-sm, 6px) var(--v-space-xs, 2px);
+  text-align: center;
+}
+/* Retrato grande com moldura/glow dourado. */
+.enc-cs-portrait-wrap {
+  width: calc(132px * var(--v-font-scale, 1));
+  height: calc(132px * var(--v-font-scale, 1));
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(160deg, var(--v-gold, #c4953a), var(--v-gold-dark, #8b6420));
+  box-shadow: 0 0 22px var(--v-gold-35, rgba(196, 149, 58, 0.35)),
+              0 6px 18px rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
+}
+.enc-cs-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  background: var(--v-bg-card, #2e2520);
+  display: block;
+}
+.enc-cs-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(22px * var(--v-font-scale, 1));
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--v-gold, #c4953a);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6), 0 0 16px var(--v-gold-45, rgba(196, 149, 58, 0.45));
+}
+.enc-cs-sub {
+  font-size: var(--v-font-sm, 13px);
+  color: var(--v-text-dim, #a09484);
+  letter-spacing: 0.5px;
+  margin-top: -2px;
+}
+/* Vitais (PV / CA / PM) em pílulas. */
+.enc-cs-vitals {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--v-space-sm, 8px);
+}
+.enc-cs-vital {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px var(--v-space-md, 10px);
+  border-radius: var(--v-radius-pill, 20px);
+  background: var(--v-gold-08, rgba(196, 149, 58, 0.08));
+  border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+}
+.enc-cs-vital-lbl {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(10px * var(--v-font-scale, 1));
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+}
+.enc-cs-vital-val {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(15px * var(--v-font-scale, 1));
+  font-weight: 700;
+  color: var(--v-text, #d4c8b0);
+}
+/* Grid de 6 atributos (3 col → 2 col em telas estreitas). */
+.enc-cs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--v-space-sm, 8px);
+  width: 100%;
+  max-width: 360px;
+}
+.enc-cs-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: var(--v-space-sm, 8px) 4px;
+  border-radius: var(--v-radius, 10px);
+  background: linear-gradient(180deg, var(--v-gold-08, rgba(196, 149, 58, 0.08)), rgba(0, 0, 0, 0.18));
+  border: 1px solid var(--v-border, #4a3828);
+}
+.enc-cs-stat-lbl {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(10px * var(--v-font-scale, 1));
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+}
+.enc-cs-stat-val {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(22px * var(--v-font-scale, 1));
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--v-text, #d4c8b0);
+}
+.enc-cs-stat-mod {
+  font-size: calc(11px * var(--v-font-scale, 1));
+  color: var(--v-text-dim, #a09484);
+}
+/* Seções (Temperamento / Habilidades). */
+.enc-cs-section {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+.enc-cs-section-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(11px * var(--v-font-scale, 1));
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+  margin-bottom: 5px;
+}
+.enc-cs-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+}
+.enc-cs-chip {
+  font-size: var(--v-font-sm, 13px);
+  color: var(--v-text, #d4c8b0);
+  padding: 3px var(--v-space-md, 10px);
+  border-radius: var(--v-radius-pill, 20px);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+}
+.enc-cs-pers { color: var(--v-text-dim, #a09484); }
+@media (max-width: 360px) {
+  .enc-cs-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enc-body.revealed .enc-cs-line { animation: none; }
+}
+body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
+
 .enc-sentence {
   display: inline;
 }
