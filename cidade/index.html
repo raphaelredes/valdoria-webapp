@@ -34179,7 +34179,8 @@ function _squareArtistsHub(p, data){
     choices: choices
   }, {
     player: window.CITY_MOCK_PLAYER,
-    onChoice: function(cid){
+    onChoice: function(ch){
+      var cid = (ch && ch.id) || '';
       if (cid && cid.indexOf('pick_') === 0){
         var key = cid.slice(5);
         var perf = data.performers.filter(function(x){ return x.key === key; })[0];
@@ -34203,7 +34204,8 @@ function _squareArtistNode(p, data, perf){
     ]
   }, {
     player: window.CITY_MOCK_PLAYER,
-    onChoice: function(cid){
+    onChoice: function(ch){
+      var cid = (ch && ch.id) || '';
       if (cid === 'tip'){ _squareArtistTip(p, data, perf); }
       else if (cid === 'back'){ try { window.vEncounter.close(); } catch(_e){} _squareArtistsHub(p, data); }
       else { try { window.vEncounter.close(); } catch(_e){} }
@@ -34273,7 +34275,8 @@ function _squareArtistResult(p, data, perf, res){
     ]
   }, {
     player: window.CITY_MOCK_PLAYER,
-    onChoice: function(cid){
+    onChoice: function(ch){
+      var cid = (ch && ch.id) || '';
       try { window.vEncounter.close(); } catch(_e){}
       if (cid === 'back'){ _squareArtistsHub(p, data); }
     }
@@ -35938,7 +35941,8 @@ function _squareShowGamblePopup(p){
       choices: choices
     }, {
       player: window.CITY_MOCK_PLAYER,
-      onChoice: function(choiceId){
+      onChoice: function(ch){
+        var choiceId = (ch && ch.id) || '';
         if (choiceId && choiceId.indexOf('bet_') === 0){
           var bet = parseInt(choiceId.slice(4), 10) || 0;
           _squarePlayGamble(p, bet);
@@ -36040,7 +36044,8 @@ function _squareShowGambleResult(p, stake, res, preGoldBeforeStake){
     choices: choices
   }, {
     player: window.CITY_MOCK_PLAYER,
-    onChoice: function(cid){
+    onChoice: function(ch){
+      var cid = (ch && ch.id) || '';
       try { window.vEncounter.close(); } catch(_e){}
       if (cid === 'again'){ _squareShowGamblePopup(p); }
     }
