@@ -23935,28 +23935,6 @@ function _squareGetDailyVendor(){
   return SQUARE_AMBULANT_VENDORS[seed % SQUARE_AMBULANT_VENDORS.length];
 }
 
-// canonical: town_square_buffs.py ARTIST_BUFFS (5 artistas × stat_bonus)
-// Dar gorjeta (BUFF_CHANCE=40%) pode conceder buff +1 em ability até descanso longo.
-var SQUARE_ARTIST_BUFFS = [
-  { id: 'bard_taviel',  icon: _heralIco('ic-musica'), name: 'Taviel, o Bardo',           buff: 'Inspiração Bárdica',  stat: 'CAR', desc: '+1 em testes de Carisma e Persuasão' },
-  { id: 'dancer_lyra',   icon: _heralIco('ic-musica'), name: 'Wrenna Caelwyn',              buff: 'Graça da Dançarina',   stat: 'DES', desc: '+1 em testes de Destreza' },
-  { id: 'fire_eater',    icon: _heralIco('ic-tochas'), name: 'Drask, Engolidor de Fogo',  buff: 'Coragem do Fogo',      stat: 'CON', desc: '+1 em testes de Constituição' },
-  { id: 'flutist',       icon: _heralIco('ic-musica'), name: 'Sylwen, a Flautista',       buff: 'Melodia Calmante',     stat: 'SAB', desc: '+1 em testes de Sabedoria' },
-  { id: 'poet',          icon: _heralIco('ic-escriba'), name: 'Velmar, o Poeta',           buff: 'Sorte do Artista',     stat: 'INT', desc: '+1 em testes de Inteligência' }
-];
-var SQUARE_ARTIST_BUFF_CHANCE = 0.40;
-var SQUARE_TIP_COST = 5;
-
-// Trabalhos diários — replica canonical WORK_TASKS 
-// 6 tarefas com ability+skill check, recompensa baseada em sucessos.
-var SQUARE_JOBS = [
-  { id: 'carrier',     icon: _heralIco('ic-mochila'), label: 'Carregador',          desc: 'Descarregar carroças de mercadores no mercado.',           stat: 'STR', dc: 12, reward: 10, xp: 10 },
-  { id: 'messenger',   icon: _heralIco('ic-mochila'), label: 'Mensageiro',          desc: 'Entregar cartas e encomendas pela cidade antes do anoitecer.', stat: 'DEX', dc: 12, reward: 10, xp: 10 },
-  { id: 'scribe',      icon: _heralIco('ic-mochila'), label: 'Escriba',             desc: 'Copiar documentos e registros no cartório da praça.',         stat: 'INT', dc: 13, reward: 15, xp: 15 },
-  { id: 'healer_aid',  icon: _heralIco('ic-cura'), label: 'Auxiliar de Curandeiro', desc: 'Auxiliar curandeiros da praça com feridos e doentes.',     stat: 'WIS', dc: 13, reward: 15, xp: 15 },
-  { id: 'entertainer', icon: _heralIco('ic-mochila'), label: 'Artista de Rua',      desc: 'Entreter a multidão com música, malabarismo ou histórias.',   stat: 'CHA', dc: 12, reward: 10, xp: 10 },
-  { id: 'guard_patrol',icon: _heralIco('ic-mochila'), label: 'Patrulha Auxiliar',    desc: 'Acompanhar a guarda da cidade em uma ronda pelos muros.',     stat: 'CON', dc: 14, reward: 15, xp: 15 }
-];
 
 // canonical: town_square_events_investigation.py + data/plaza_events.py PLAZA_EVENTS
 // 22 eventos canonical com 2 escolhas (skill check). Mostramos 10 representativos.
@@ -24216,7 +24194,6 @@ function _squareRepLabel(player){
 
 // Estado runtime — gambling + jobs done por dia
 window._squareGambleCount = window._squareGambleCount || 0;
-window._squareJobsDone = window._squareJobsDone || [];
 window._squareVendorVisited = false;
 window._squareNpcSeed = window._squareNpcSeed || (Math.random() * 1000 | 0);
 
@@ -34137,7 +34114,6 @@ function _buildSquareMockData(player){
   // canonical: dispara entry event ao abrir (max 1/dia, 50% chance)
   if (typeof _squareTryFireEntryEvent === 'function') _squareTryFireEntryEvent(player);
   var gambleRem = Math.max(0, 3 - window._squareGambleCount);
-  var jobsLeft = SQUARE_JOBS.length - window._squareJobsDone.length;
   var activeBuff = (player.metadata && player.metadata.artist_buff_active) || null;
   // Fix (user 2026-06-19): os cards da Praça usavam _heralIco('ic-praca') p/ TODOS
   // — o icons-resolver trocava o <use> por <img> mas parentava no .sqr-card (não no
@@ -34157,7 +34133,7 @@ function _buildSquareMockData(player){
     type: 'hub',
     flavor: flavor,
     rep_label: _squareRepLabel(player),
-    buff: activeBuff ? ('✨ ' + (player.metadata.artist_buff_name || 'Inspiração de Artista')) : '',
+    buff: activeBuff ? (player.metadata.artist_buff_name || 'Inspiração de Artista') : '',
     services: [
       { icon: _sqIco('dialogo'),  label: 'Investigar (NPCs)',  cb: 'square_investigate_open' },
       { icon: _sqIco('tochas'),   label: 'Explorar Área',      cb: 'square_explore_open' },
@@ -34171,74 +34147,135 @@ function _buildSquareMockData(player){
         badge: window._squareVendorVisited ? '' : 'Novo!' },
       { icon: _sqIco('som'),      label: 'Artistas de Rua',    cb: 'square_artists_open',
         badge: activeBuff ? '✓' : '' },
-      { icon: _sqIco('coroa'),    label: 'Mural dos Aventureiros', cb: 'square_mural_open' },
-      { icon: _sqIco('desafio'),  label: 'Trabalhos Diários',  cb: 'square_jobs_open',
-        badge: jobsLeft > 0 ? jobsLeft + '/' + SQUARE_JOBS.length : '✓' }
+      { icon: _sqIco('coroa'),    label: 'Mural dos Aventureiros', cb: 'square_mural_open' }
     ]
   };
 }
 
+// === ARTISTAS DE RUA — diálogo épico (PADRAO_ALDRIC + vEncounter + 3D dice) ====
+// O SERVIDOR constrói a cena + performers nomeados com retrato (service.square_artists_intro)
+// e narra o resultado da gorjeta (res.narration); o cliente renderiza via vEncounter e
+// mantém o dado 3D do teste de inspiração. Mecânica: town_square_buffs.resolve_artist_tip
+// (gorjeta 5 V → 1d20 CD 13 → buff +1 stat até o descanso; só 1 por vez).
 function _squareShowArtistsPopup(p){
-  var items = SQUARE_ARTIST_BUFFS.map(function(a){
-    return { icon: a.icon, label: a.name, badge: SQUARE_TIP_COST + ' V', _a: a };
+  if (!window.vCityServer || !window.vCityServer.isRemote() ||
+      !window.vEncounter || typeof window.vEncounter.render !== 'function'){
+    if (typeof vToast === 'function') vToast('Indisponível offline'); return;
+  }
+  window.vCityServer.cityAction('service.square_artists_intro', {}).then(function(res){
+    if (!res || !res.ok || !res.performers){
+      if (typeof vToast === 'function') vToast('Os artistas recolheram-se por ora.'); return;
+    }
+    _squareArtistsHub(p, res);
+  }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na praça.'); });
+}
+
+function _squareArtistsHub(p, data){
+  var choices = data.performers.map(function(perf){ return { id: 'pick_' + perf.key, label: perf.name }; });
+  choices.push({ id: 'leave', label: 'Seguir caminho' });
+  window.vEncounter.render({
+    npc: { id: 'square_artists', name: 'Artistas de Rua', desc: 'A roda de performers da praça', portraitImg: '' },
+    script: data.scene,
+    choices: choices
+  }, {
+    player: window.CITY_MOCK_PLAYER,
+    onChoice: function(cid){
+      if (cid && cid.indexOf('pick_') === 0){
+        var key = cid.slice(5);
+        var perf = data.performers.filter(function(x){ return x.key === key; })[0];
+        if (perf) _squareArtistNode(p, data, perf);
+      } else { try { window.vEncounter.close(); } catch(_e){} }
+    }
   });
-  _squareShowListPopup({
-    icon: _heralIco('ic-mochila'), stackKey: 'square_artists', title: 'Artistas de Rua',
-    bannerImg: '/shared/img/city/artistas-banner.webp',  // #17: banner-cenário PADRAO_LOCAIS
-    flavor: '<i>Artistas espalhados pela praça apresentam-se em troca de gorjetas. Uma moeda generosa pode trazer mais que aplausos — pode trazer uma bênção fugaz que dura até o próximo descanso.</i>',
-    items: items,
-    onPick: function(item){
-      var a = item._a;
-      _showConfirmPurchase({
-        icon: a.icon, npc: a.name, title: 'Dar gorjeta — ' + a.name,
-        desc: '<i>"' + a.name.split(',')[0] + ' agradece com um sorriso largo e prepara um número especial pra você."</i><br><br>' +
-              '<b>Gorjeta:</b> ' + SQUARE_TIP_COST + ' Valdoritas<br>' +
-              '<b>Possível buff:</b> ' + a.buff + ' (' + a.desc + ')<br>' +
-              '<i>Chance de buff: ' + Math.round(SQUARE_ARTIST_BUFF_CHANCE * 100) + '% — só 1 buff de artista ativo por vez.</i>',
-        cost: SQUARE_TIP_COST,
-        onConfirm: function(){
-          // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
-          // cobra, rola 1d20 e CONCEDE o buff de artista via 'service.square_artist_tip';
-          // o cliente só anima. ANTES: _pay + Math.random do d20 + set
-          // artist_buff_active no cliente (fabricação de estado — o buff é consumido
-          // em combate por overworld_effects).
-          if (!window.vCityServer || !window.vCityServer.isRemote()){
-            if (typeof vToast === 'function') vToast('Indisponível offline'); return;
-          }
-          var preGold = p.gold;
-          window.vCityServer.cityAction('service.square_artist_tip', { npc_key: a.id }).then(function(res){
-            if (!res || !res.ok){
-              var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para a gorjeta.'
-                       : (res && res.error === 'bad_artist') ? 'Artista indisponível.'
-                       : 'Não foi possível dar a gorjeta agora.';
-              if (typeof vToast === 'function') vToast(emsg); return;
-            }
-            if (typeof res.gold === 'number') p.gold = res.gold;
-            if (typeof refreshHud === 'function') refreshHud();
-            var narrative, diceData = null;
-            if (res.already_active){
-              narrative = '<i>O artista agradece com uma reverência, mas você já está sob efeito de outro número de hoje. A magia não dobra.</i>';
-            } else {
-              // PADRAO_DADOS — "Sorte do Artista" via 1d20 visível (servidor rolou)
-              diceData = { formula: 'Sorte do Artista · 1d20', sides: 20, value: res.rolled, total: res.rolled };
-              if (res.granted){
-                narrative = '<i>A apresentação desperta algo em você.</i><br><br>' +
-                            '✨ <b>' + (res.buff_name || a.buff) + '</b> aplicada!<br>' +
-                            '<i>' + (res.buff_desc || a.desc) + ' (até o próximo descanso longo)</i>';
-              } else {
-                narrative = '<i>O artista agradece a gorjeta com uma vênia. A apresentação foi boa, mas nada além disso.</i>';
-              }
-            }
-            _showServiceResultPopup({
-              icon: a.icon, npc: a.name,
-              narrative: narrative,
-              dice: diceData,
-              deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
-              onContinue: _squareTxnReturnToHub
-            });
-          }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao dar gorjeta.'); });
-        }
+}
+
+function _squareArtistNode(p, data, perf){
+  var info = '<i>Possível bênção:</i> <b>' + perf.buff_name + '</b> — ' + perf.buff_desc +
+             '. <i>(Gorjeta ' + data.tip_cost + ' V · teste CD 13 · só 1 bênção de artista por vez.)</i>';
+  var script = perf.script.concat([{ type: 'narration', text: info }]);
+  window.vEncounter.render({
+    npc: { id: 'artist_' + perf.key, name: perf.name, desc: perf.desc, portraitImg: perf.portrait },
+    script: script,
+    choices: [
+      { id: 'tip', label: 'Dar gorjeta — ' + data.tip_cost + ' V' },
+      { id: 'back', label: 'Ver outro artista' },
+      { id: 'leave', label: 'Seguir caminho' }
+    ]
+  }, {
+    player: window.CITY_MOCK_PLAYER,
+    onChoice: function(cid){
+      if (cid === 'tip'){ _squareArtistTip(p, data, perf); }
+      else if (cid === 'back'){ try { window.vEncounter.close(); } catch(_e){} _squareArtistsHub(p, data); }
+      else { try { window.vEncounter.close(); } catch(_e){} }
+    }
+  });
+}
+
+function _squareArtistTip(p, data, perf){
+  // Escolher "Dar gorjeta" JÁ é a confirmação (Jogador Mínimo Trabalho). O SERVIDOR
+  // cobra, rola o teste e concede o buff; o cliente anima o dado 3D e narra.
+  window.vCityServer.cityAction('service.square_artist_tip', { npc_key: perf.key }).then(function(res){
+    if (!res || !res.ok){
+      var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para a gorjeta.'
+               : (res && res.error === 'bad_artist') ? 'Artista indisponível.'
+               : 'Não foi possível dar a gorjeta agora.';
+      if (typeof vToast === 'function') vToast(emsg); return;
+    }
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    if (typeof refreshHud === 'function') refreshHud();
+    if (res.granted){ data.already_active = true; }
+    if (res.already_active || !res.rolled){
+      _squareArtistResult(p, data, perf, res);  // já tinha bênção: sem teste
+    } else {
+      try { window.vEncounter.close(); } catch(_e){}
+      _squareRollArtistDie(p, data, perf, res);  // teste de inspiração 3D
+    }
+  }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na gorjeta.'); });
+}
+
+function _squareRollArtistDie(p, data, perf, res){
+  // PADRAO_DADOS: 1d20 visível (valor rolado pelo SERVIDOR). Reusa window.Dice3D.
+  var D3D = window.Dice3D, rolled = res.rolled;
+  if (typeof D3D === 'function'){
+    var ov = document.createElement('div');
+    ov.id = 'square-artist-dice-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(10,8,5,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:var(--v-font-display,Cinzel),serif;';
+    ov.innerHTML = '<div style="font-size:calc(clamp(16px,4.6vw,18px) * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin-bottom: var(--v-space-lg, 12px);">Teste de inspiração...</div>'
+      + '<div id="sad-host" style="width:clamp(180px,52vw,220px);height:clamp(180px,52vw,220px);"></div>'
+      + '<div id="sad-label" style="margin-top: var(--v-space-md, 10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale, 1));min-height:1.4em;">&nbsp;</div>';
+    document.body.appendChild(ov);
+    var _done = false;
+    var _finish = function(){ if (_done) return; _done = true; if (ov && ov.remove) ov.remove(); _squareArtistResult(p, data, perf, res); };
+    try {
+      var instance = new D3D(document.getElementById('sad-host'), { dieType: 'd20', size: 200 });
+      instance.roll(rolled, function(){
+        var lbl = document.getElementById('sad-label');
+        if (lbl) lbl.innerHTML = '1d20: <b style="color:var(--v-gold, #c4953a)">' + rolled + '</b> vs CD <b>' + (res.dc || 13) + '</b>';
+        setTimeout(function(){ try { if (instance.dispose) instance.dispose(); } catch(_e){} _finish(); }, 1400);
       });
+      setTimeout(_finish, 9000);
+    } catch(_e){ if (window.console && console.warn) console.warn('[CITY] artist die', _e); _finish(); }
+  } else {
+    _squareArtistResult(p, data, perf, res);
+  }
+}
+
+function _squareArtistResult(p, data, perf, res){
+  if (!window.vEncounter || typeof window.vEncounter.render !== 'function'){
+    if (typeof _squareTxnReturnToHub === 'function') _squareTxnReturnToHub(); return;
+  }
+  window.vEncounter.render({
+    npc: { id: 'artist_' + perf.key, name: perf.name, desc: perf.desc, portraitImg: perf.portrait },
+    script: [{ type: 'narration', text: res.narration || '' }],
+    choices: [
+      { id: 'back', label: 'Ver outro artista' },
+      { id: 'leave', label: 'Seguir caminho' }
+    ]
+  }, {
+    player: window.CITY_MOCK_PLAYER,
+    onChoice: function(cid){
+      try { window.vEncounter.close(); } catch(_e){}
+      if (cid === 'back'){ _squareArtistsHub(p, data); }
     }
   });
 }
@@ -35878,84 +35915,60 @@ function _squareShowBulletinPopupLegacy(p){
   });
 }
 
-// === 4. DADOS — gamble com 3D dice ===========================================
-// canonical: town_square_minigames.py BET_OPTIONS=[5,10,25,50] + GAMBLE_TEXTS canonical
-// (intro/rules/disclaimer/cooldown/no_gold). NPC: Velho Apostador (WIS 14, +2 Insight).
+// === 4. MESA DE DADOS — diálogo épico de Vharro (PADRAO_ALDRIC + 3D dice) ======
+// O SERVIDOR constrói a fala + stakes (service.square_gamble_intro) e a reação ao
+// resultado (res.reaction); o cliente renderiza via vEncounter e mantém o dado 3D.
+// Mecânica: town_square_minigames.resolve_gamble (1d20 vs casa, even-money, 3/dia).
 function _squareShowGamblePopup(p){
-  var rem = Math.max(0, 3 - window._squareGambleCount);
-  var gt = (typeof CANON_GAMBLE_TEXTS !== 'undefined') ? CANON_GAMBLE_TEXTS : null;
-  if (rem === 0) {
-    _showConfirmPurchase({
-      icon: _heralIco('ic-cartas'), npc: gt ? CANON_GAMBLE_NPC.name : 'Velho Apostador',
-      title: gt ? gt.header : 'Limite Diário Atingido',
-      desc: gt ? gt.cooldown : 'Você já apostou hoje. Volte amanhã pra mais sorte.',
-      cost: 0,
-      creditMode: true,
-      onConfirm: function(){ /* noop */ }
-    });
-    return;
+  // ÉPICO (PADRAO_ALDRIC + vEncounter): o SERVIDOR constrói a fala de Vharro + as
+  // stakes (service.square_gamble_intro); o cliente só renderiza + mantém o dado 3D.
+  if (!window.vCityServer || !window.vCityServer.isRemote() ||
+      !window.vEncounter || typeof window.vEncounter.render !== 'function'){
+    if (typeof vToast === 'function') vToast('Indisponível offline'); return;
   }
-  // canonical: BET_OPTIONS = [5, 10, 25, 50]
-  var stakes = [
-    { amount: 5,  label: 'Aposta Modesta',   payout: 10 },
-    { amount: 10, label: 'Aposta Comum',     payout: 20 },
-    { amount: 25, label: 'Aposta Pesada',    payout: 50 },
-    { amount: 50, label: 'Aposta Alta',      payout: 100 }
-  ];
-  var items = stakes.map(function(s){
-    return {
-      icon: _heralIco('ic-cartas'),
-      label: s.label,
-      badge: s.amount + ' → ' + s.payout + ' V',
-      _stake: s
-    };
-  });
-  // canonical: GAMBLE_TEXTS.intro + rules + disclaimer + remaining
-  var flavor = gt ? (
-    '<i>"' + gt.intro + '"</i><br>' +
-    gt.rules + '<br>' +
-    '<span style="opacity:.7;font-size:.85em">' + gt.disclaimer + '</span><br>' +
-    gt.remaining.replace('{remaining}', String(rem)).replace('{limit}', '3')
-  ) : 'Velho Apostador convida você a uma aposta. 1d20 vs casa.';
-  _squareShowListPopup({
-    icon: _heralIco('ic-cartas'),
-    title: gt ? gt.header : 'Mesa de Dados',
-    flavor: flavor,
-    items: items,
-    stackKey: 'square_gamble',
-    onPick: function(item){ _squareConfirmGamble(p, item._stake); }
-  });
+  window.vCityServer.cityAction('service.square_gamble_intro', {}).then(function(res){
+    if (!res || !res.ok || !res.script){
+      if (typeof vToast === 'function') vToast('A mesa está fechada agora.'); return;
+    }
+    var choices = (res.choices || []).map(function(c){ return { id: c.id, label: c.label }; });
+    window.vEncounter.render({
+      npc: { id: res.npc.id, name: res.npc.name, desc: res.npc.desc,
+             portraitImg: res.npc.portrait },
+      script: res.script,
+      choices: choices
+    }, {
+      player: window.CITY_MOCK_PLAYER,
+      onChoice: function(choiceId){
+        if (choiceId && choiceId.indexOf('bet_') === 0){
+          var bet = parseInt(choiceId.slice(4), 10) || 0;
+          _squarePlayGamble(p, bet);
+        } else {
+          try { window.vEncounter.close(); } catch(_e){}
+        }
+      }
+    });
+  }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na mesa.'); });
 }
 
-function _squareConfirmGamble(p, stake){
-  _showConfirmPurchase({
-    icon: _heralIco('ic-cartas'), npc: 'Mesa de Dados',
-    title: stake.label,
-    desc: 'Você aposta <b>' + stake.amount + ' Valdoritas</b>. Se vencer, recebe <b>' + stake.payout +
-          '</b>. Se perder, perde a aposta.<br><br><i>"Que Tymora sorria pra você."</i>',
-    cost: stake.amount,
-    onConfirm: function(){
-      // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR é dono
-      // do limite diário, cobra, rola os 2 d20 e paga via 'service.square_gamble'; o
-      // cliente só anima. ANTES: _pay + Math.random + _squareGambleCount no cliente
-      // (limite diário resetava no reload).
-      if (!window.vCityServer || !window.vCityServer.isRemote()){
-        if (typeof vToast === 'function') vToast('Indisponível offline'); return;
-      }
-      var preGold = p.gold;
-      window.vCityServer.cityAction('service.square_gamble', { bet: stake.amount }).then(function(res){
-        if (!res || !res.ok){
-          var emsg = (res && res.error === 'daily_limit') ? 'Você já apostou 3 vezes hoje. Volte amanhã.'
-                   : (res && res.error === 'no_funds') ? 'Sem Valdoritas para a aposta.'
-                   : (res && res.error === 'bad_bet') ? 'Aposta inválida.'
-                   : 'Não foi possível apostar agora.';
-          if (typeof vToast === 'function') vToast(emsg); return;
-        }
-        window._squareGambleCount = 3 - (typeof res.remaining === 'number' ? res.remaining : 0);
-        _squareRollGambleDice(p, stake, res, preGold);  // anima com as rolagens do servidor
-      }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na aposta.'); });
+function _squarePlayGamble(p, bet){
+  // Escolher a stake JÁ é a confirmação (Jogador Mínimo Trabalho — sem 2º clique). O
+  // SERVIDOR é dono do limite diário, cobra, rola os 2 d20 e paga via
+  // 'service.square_gamble', devolvendo também a reação de Vharro (PADRAO_ALDRIC). O
+  // cliente fecha o nó de stakes, anima o dado 3D e renderiza a reação no vEncounter.
+  var preGold = p.gold;
+  window.vCityServer.cityAction('service.square_gamble', { bet: bet }).then(function(res){
+    if (!res || !res.ok){
+      var emsg = (res && res.error === 'daily_limit') ? 'Você já apostou 3 vezes hoje. Volte amanhã.'
+               : (res && res.error === 'no_funds') ? 'Sem Valdoritas para a aposta.'
+               : (res && res.error === 'bad_bet') ? 'Aposta inválida.'
+               : 'Não foi possível apostar agora.';
+      if (typeof vToast === 'function') vToast(emsg); return;
     }
-  });
+    window._squareGambleCount = 3 - (typeof res.remaining === 'number' ? res.remaining : 0);
+    if (typeof res.gold === 'number') p.gold = res.gold;
+    try { window.vEncounter.close(); } catch(_e){}  // o dado 3D (z alto) cobre a tela
+    _squareRollGambleDice(p, { amount: bet }, res, preGold);
+  }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na aposta.'); });
 }
 
 function _squareRollGambleDice(p, stake, res, preGoldBeforeStake){
@@ -35971,7 +35984,7 @@ function _squareRollGambleDice(p, stake, res, preGoldBeforeStake){
     var ov = document.createElement('div');
     ov.id = 'square-gamble-dice-overlay';
     ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(10,8,5,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:var(--v-font-display,Cinzel),serif;';
-    ov.innerHTML = '<div style="font-size:calc(clamp(16px,4.6vw,18px) * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin-bottom: var(--v-space-lg, 12px);">🎲 Rolando os dados...</div>'
+    ov.innerHTML = '<div style="font-size:calc(clamp(16px,4.6vw,18px) * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin-bottom: var(--v-space-lg, 12px);">Rolando os dados...</div>'
       + '<div id="sgd-host" style="width:clamp(180px,52vw,220px);height:clamp(180px,52vw,220px);"></div>'
       + '<div id="sgd-label" style="margin-top: var(--v-space-md, 10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale, 1));min-height:1.4em;">&nbsp;</div>';
     document.body.appendChild(ov);
@@ -35999,41 +36012,38 @@ function _squareRollGambleDice(p, stake, res, preGoldBeforeStake){
 }
 
 function _squareShowGambleResult(p, stake, res, preGoldBeforeStake){
-  // SERVER-AUTHORITATIVE: o servidor já cobrou+pagou (res.gold é o saldo real). O
-  // cliente só REFLETE — NUNCA recalcula gold (antes: p.gold += stake.payout = double).
+  // ÉPICO: Vharro REAGE ao resultado via vEncounter (res.reaction, server-driven +
+  // anti-repeat). O servidor já cobrou+pagou (res.gold é o saldo real); o cliente reflete.
   var playerRoll = res.player_roll, houseRoll = res.house_roll, win = !!res.win, tie = !!res.tie;
-  var payout = res.payout || 0;
   if (typeof res.gold === 'number') p.gold = res.gold;
-  refreshHud();
-  var gt = (typeof CANON_GAMBLE_TEXTS !== 'undefined') ? CANON_GAMBLE_TEXTS : null;
-  var narrative;
-  if (win){
-    narrative = gt && gt.win_body
-      ? gt.win_body.replace('{player}', playerRoll).replace('{npc}', houseRoll).replace(/\{amount\}/g, payout).replace(/\n/g, '<br>')
-      : '🎲 Você: <b>' + playerRoll + '</b> vs NPC: <b>' + houseRoll + '</b><br><br>🎉 <b>VITÓRIA!</b> +' + payout + ' <span class="vi vi-coin sm"></span>';
-  } else if (tie){
-    narrative = (gt && gt.tie_body)
-      ? gt.tie_body.replace('{player}', playerRoll).replace('{npc}', houseRoll).replace(/\n/g, '<br>')
-      : '🎲 Você: <b>' + playerRoll + '</b> vs NPC: <b>' + houseRoll + '</b><br><br>🤝 <b>EMPATE!</b> Aposta devolvida.';
-  } else {
-    narrative = gt && gt.lose_body
-      ? gt.lose_body.replace('{player}', playerRoll).replace('{npc}', houseRoll).replace(/\{amount\}/g, stake.amount).replace(/\n/g, '<br>')
-      : '🎲 Você: <b>' + playerRoll + '</b> vs NPC: <b>' + houseRoll + '</b><br><br>😔 <b>DERROTA.</b>';
+  if (typeof refreshHud === 'function') refreshHud();
+  var outcome = win ? 'Vitória' : (tie ? 'Empate' : 'Derrota');
+  var goldLine = win ? ('Sua bolsa pesa <b>+' + stake.amount + '</b> Valdoritas.')
+               : tie ? 'A aposta volta intacta pra sua bolsa.'
+               : ('A bolsa esvai <b>−' + stake.amount + '</b> Valdoritas.');
+  var script = [
+    { type: 'narration', text: 'Você rolou <b>' + playerRoll + '</b> contra a casa <b>' + houseRoll +
+        '</b> &mdash; <b>' + outcome + '</b>.<br>' + goldLine },
+    { type: 'speech', speaker: 'Vharro, o Apostador', text: res.reaction || '' }
+  ];
+  var canAgain = (typeof res.remaining === 'number' ? res.remaining : 0) > 0;
+  var choices = [];
+  if (canAgain) choices.push({ id: 'again', label: 'Apostar de novo' });
+  choices.push({ id: 'leave', label: 'Encerrar a noite' });
+  if (!window.vEncounter || typeof window.vEncounter.render !== 'function'){
+    if (typeof _squareTxnReturnToHub === 'function') _squareTxnReturnToHub(); return;
   }
-  // Rewards block apenas em vitoria (>= 5 V threshold)
-  var rewards = (win && payout >= 5)
-    ? [{ type: 'gold', amount: payout, label: 'Aposta paga' }]
-    : null;
-  _showServiceResultPopup({
-    icon: win ? _heralIco('ic-coroa') : _heralIco('ic-cartas'),
-    npc: (gt && CANON_GAMBLE_NPC) ? CANON_GAMBLE_NPC.name : 'Velho Apostador',
-    narrative: narrative,
-    dice: { formula: 'Você 1d20 vs Casa 1d20', sides: 20, value: playerRoll, total: playerRoll },
-    deltas: [
-      { type:'gold', label:'Bolsa', from: preGoldBeforeStake, to: p.gold, max: Math.max(preGoldBeforeStake, p.gold, 1), bar: false }
-    ],
-    rewards: rewards,
-    onContinue: _squareTxnReturnToHub
+  window.vEncounter.render({
+    npc: { id: 'square_gambler_vharro', name: 'Vharro, o Apostador',
+           desc: 'Apostador', portraitImg: '../shared/img/npcs/vharro-apostador.webp' },
+    script: script,
+    choices: choices
+  }, {
+    player: window.CITY_MOCK_PLAYER,
+    onChoice: function(cid){
+      try { window.vEncounter.close(); } catch(_e){}
+      if (cid === 'again'){ _squareShowGamblePopup(p); }
+    }
   });
 }
 
@@ -36217,98 +36227,6 @@ function _squareShowMuralPopup(p){
 
 // STR/DEX/WIS/CHA (chaves internas do check) -> abreviacoes PT-BR so p/ DISPLAY (sweep praca 2026-06-19)
 function _statAbbrPT(s){ var M={STR:'FOR',DEX:'DES',CON:'CON',INT:'INT',WIS:'SAB',CHA:'CAR'}; return M[String(s||'').toUpperCase()]||s; }
-
-// === 7. TRABALHOS — 3 jobs/dia ===============================================
-function _squareShowJobsPopup(p){
-  var available = SQUARE_JOBS.filter(function(j){
-    return window._squareJobsDone.indexOf(j.id) === -1;
-  });
-  if (available.length === 0) {
-    _showInfoPopup({
-      icon: _heralIco('ic-mochila'), npc: 'Trabalhos Diários',
-      title: 'Trabalhos Concluídos',
-      desc: 'Você completou todos os trabalhos disponíveis hoje. Volte amanhã.',
-        onConfirm: function(){ /* noop */ }
-    });
-    return;
-  }
-  var items = available.map(function(j){
-    var statBadge = j.stat ? (_statAbbrPT(j.stat) + ' DC ' + j.dc) : 'Sem teste';
-    return {
-      icon: j.icon,
-      label: j.label,
-      badge: '+' + j.reward + ' V · ' + statBadge,
-      _job: j
-    };
-  });
-  _squareShowListPopup({
-    icon: _heralIco('ic-mochila'),
-    title: 'Trabalhos Diários',
-    flavor: 'Mercadores e funcionários da praça contratam ajudantes pra tarefas avulsas.',
-    items: items,
-    stackKey: 'square_jobs',
-    onPick: function(item){ _squareConfirmJob(p, item._job); }
-  });
-}
-
-function _squareConfirmJob(p, job){
-  _showConfirmPurchase({
-    icon: job.icon, npc: 'Trabalho Avulso',
-    title: job.label,
-    desc: job.desc + '<br><br>' +
-          '<b>Recompensa:</b> ' + job.reward + ' Valdoritas + ' + job.xp + ' XP',
-    cost: 0,
-    creditMode: true,
-    onConfirm: function(){
-      // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR rola o
-      // teste (DC 5+2d10, tiers), escala a recompensa por nível, aplica complicação e
-      // é dono do COOLDOWN diário (downtime) via 'service.square_work'. ANTES:
-      // Math.random + p.gold += + _gainXp + window._squareJobsDone no cliente (limite
-      // resetava no reload). XGtE Work = 1 turno por período de descanso.
-      if (!window.vCityServer || !window.vCityServer.isRemote()){
-        if (typeof vToast === 'function') vToast('Indisponível offline'); return;
-      }
-      var preGold = p.gold;
-      var _markAllDone = function(){ if (typeof SQUARE_JOBS !== 'undefined') window._squareJobsDone = SQUARE_JOBS.map(function(j){ return j.id; }); };
-      window.vCityServer.cityAction('service.square_work', { job_id: job.id }).then(function(res){
-        if (!res || !res.ok){
-          var emsg = (res && res.error === 'cooldown') ? 'Você já fez um turno de trabalho. Descanse antes de pegar outro.'
-                   : (res && res.error === 'no_job') ? 'Trabalho indisponível.'
-                   : 'Não foi possível trabalhar agora.';
-          if (typeof vToast === 'function') vToast(emsg);
-          if (res && res.error === 'cooldown') _markAllDone();
-          return;
-        }
-        if (typeof res.gold === 'number') p.gold = res.gold;
-        if (res.xp_reward) p.xp = (p.xp || 0) + res.xp_reward;
-        if (typeof res.hp === 'number') p.hp = res.hp;
-        _markAllDone();  // servidor: 1 turno por cooldown → "sem mais trabalho hoje"
-        if (typeof refreshHud === 'function') refreshHud();
-        var hasCheck = !!(res.rolled && res.dc);
-        var narrative = (job.stat
-          ? '<b>Teste de ' + _statAbbrPT(job.stat) + ':</b> ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
-            ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — <b>' + (res.success ? 'SUCESSO' : 'parcial') + '</b><br><br>'
-          : '') + '<i>' + (res.flavor || '') + '</i>';
-        if (res.complication) {
-          narrative += '<br><br>⚠️ <b>Complicação!</b><br><i>' + res.complication.text + '</i>' +
-                       (res.complication.effect ? '<br>' + res.complication.effect : '');
-        }
-        if (res.hp_loss) narrative += '<br><i>−' + res.hp_loss + ' HP.</i>';
-        var rewards = [{ type:'gold', amount: res.gold_reward, label: res.reward_label || 'Pagamento' }];
-        if (res.xp_reward) rewards.push({ type:'xp', amount: res.xp_reward, label: 'Experiência' });
-        _showServiceResultPopup({
-          icon: res.success ? '✅' : '⚠️',
-          npc: job.label,
-          narrative: narrative,
-          dice: hasCheck ? { formula: '1d20' + (res.modifier >= 0 ? '+' : '') + res.modifier + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total } : null,
-          deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold, preGold, 1), bar: false }],
-          rewards: rewards,
-          onContinue: _squareTxnReturnToHub
-        });
-      }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro no trabalho.'); });
-    }
-  });
-}
 
 // ============================================================================
 // === HELPERS ÁREAS (2026-05-02) ==================================
@@ -52628,7 +52546,6 @@ var ACTION_HANDLERS = {
   'lostchild_bread':        function(p){ if (!_pay(p, 1)) return; _gainXp(p, 10); vToast('🍞 Criança chora menos. +1 morale +10 XP.'); },
   'lostchild_guard':        function(p){ _gainXp(p, 15); vToast('👮 Guarda Aldric cuida da criança. +15 XP.'); },
   'square_random_event':    function(p){ var events=['🏚️ Placa caindo! Você empurra um cidadão. +20 XP +5 Valdoritas','✨ Runa misteriosa toca. +10 HP','🐦 Corvo falante: "Vai pra floresta..." (+15 Valdoritas)','🍎 Maçã suspeita rolando. +5 XP de cuidado','👻 Fantasma! +20 XP de coragem']; vToast(events[Math.floor(Math.random()*events.length)]); _gainXp(p, 10); },
-  'square_work':            function(p){ vToast('⚒️ Trabalhos: Carregar barris (5 Valdoritas), Limpar fonte (3 Valdoritas), Vigiar mercado (10 Valdoritas/dia).'); },
 
   // === Banco — menu handlers (Fase 9.6.R1 — 2026-05-02) ===
   // REMOVIDOS: bank_invest_menu + bank_loan_menu (anacrônicos pra D&D 5e medieval).
@@ -52653,7 +52570,6 @@ var ACTION_HANDLERS = {
   'square_vendor_open':      function(p){ _squareShowVendorPopup(p); },
   'square_artists_open':     function(p){ _squareShowArtistsPopup(p); },
   'square_mural_open':       function(p){ _squareShowMuralPopup(p); },
-  'square_jobs_open':        function(p){ _squareShowJobsPopup(p); },
 
   // === Fase 9.8 — 8 áreas batch (Taverna/Mercado/Guilda/Oficina/Runas/Festival/Arena/Vínculos)
 
