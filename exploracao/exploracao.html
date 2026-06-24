@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-23T23:16:43Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-24T13:10:01Z - do not edit directly, edit source -->
 
 
 
@@ -752,27 +752,33 @@
 <script>
   (function(){
     var __vEarly = Date.now();
+    /* #base-same-origin (2026-06-24): CDN = MESMA origem da pagina (DEV->dev., PROD->jogo.)
+       em vez de 'jogo.' HARDCODED — senao a pagina DEV carregava /shared do PROD (viola
+       Environment Isolation; espelha o fix do combate em combate.html L586). file:// (sim
+       LOCAL) e origin null usam o CDN PROD + o fallback relativo ../valdoria-webapp/shared. */
+    var __EXPBASE = (location.protocol === 'file:' || !location.origin || location.origin === 'null')
+        ? 'https://jogo.lendasdevaldoria.com.br' : location.origin;
     /* Carrega da CDN (production) com fallback local (file://). */
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     /* X-6.5.51AI: server-log canônico */
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     window.SERVER_LOG_AREA = 'exploracao';
     /* MAINTENANCE OVERLAY (SUPREME — bloqueia jogo em manutenção). Patcheia
        window.fetch pra detectar maintenance em qualquer response do servidor.
        Pattern canonical do cidade.html — necessário pra sync_exploracao passar
        no preflight (regra CLAUDE.md "Manutenção é Bloqueio Total"). */
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     /* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     /* Sessão #63 (2026-05-28) BUG-7 fix: Single-device session lock pra
        exploracao. Padrão IMMUTABLE — combat/cidade/levelup já carregam
@@ -780,9 +786,9 @@
        não disparavam displacement, permitindo state corruption.
        SessionHeartbeat.init é chamado mais abaixo quando _EXPLORE_TOKEN +
        _EXPLORE_API_BASE + _EXPLORE_USER_ID estiverem definidos. */
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     /* 2026-06-21 (user "botão nativo = fechar, confirmação DENTRO do jogo"): exit-confirm.js
        intercepta BackButton/gesto-voltar com overlay in-game. SINGLE load (relativo) pra
@@ -793,7 +799,7 @@
     /* REFACTOR-1 Phase 2: vAuthTokenStore — read by the __EXPLORE_TOKEN getter
        (localStorage game token, falls back to ?token=). Backend accepts the
        game token via the _validate_source_session game fallback. */
-    document.write('<script src="https://jogo.lendasdevaldoria.com.br/shared/auth-token-store.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="' + __EXPBASE + '/shared/auth-token-store.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     document.write('<script src="../shared/auth-token-store.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
     setTimeout(function(){
         try{
@@ -890,7 +896,7 @@
 <script>
 (function() {
   var v = (window.VBUNDLE_HASH || Date.now());
-  var cdn = 'https://jogo.lendasdevaldoria.com.br';
+  var cdn = (location.protocol === 'file:' || !location.origin || location.origin === 'null') ? 'https://jogo.lendasdevaldoria.com.br' : location.origin; /* #base-same-origin: CSS da MESMA origem (DEV->dev., PROD->jogo.); file:// usa CDN PROD */
   ['/valdoria-design.css', '/shared/fonts.css', '/shared/status-bars.css', '/shared/coin-icon.css', '/shared/toast.css'].forEach(function(h) {
     var l = document.createElement('link');
     l.rel = 'stylesheet';
@@ -14681,7 +14687,7 @@ function parseRewardString(s) {
    '/shared/toast.js', '/shared/state-checkpoint.js',
    '/shared/clock-skew-guard.js'].forEach(function(src) {
     var s = document.createElement('script');
-    s.src = 'https://jogo.lendasdevaldoria.com.br' + src + '?v=' + v;
+    s.src = ((location.protocol === 'file:' || !location.origin || location.origin === 'null') ? 'https://jogo.lendasdevaldoria.com.br' : location.origin) + src + '?v=' + v; /* #base-same-origin: JS da MESMA origem (DEV->dev., PROD->jogo.); file:// usa CDN PROD */
     s.async = false;
     document.head.appendChild(s);
   });
