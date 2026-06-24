@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-24T00:18:37Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-24T03:50:37Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -585,7 +585,7 @@ html.sim-combat-root #app {
 })();
 
 var v = (window.VBUNDLE_HASH || Date.now());
-var BASE = 'https://jogo.lendasdevaldoria.com.br';
+var BASE = (function(){ /* #base-same-origin (2026-06-24): /shared vem da MESMA origem da pagina (DEV->dev., PROD->jogo.). Antes era jogo. HARDCODED -> a pagina DEV carregava o /shared do PROD (ex.: combat-vfx.js velho -> a "tela verde" da Forma Selvagem nao sumia no DEV mesmo apos deploy + viola Environment Isolation). file:// (sim LOCAL) continua usando o CDN do PROD. */ try { if (location.protocol === 'file:') return 'https://jogo.lendasdevaldoria.com.br'; var o = location.origin; return (o && o !== 'null') ? o : 'https://jogo.lendasdevaldoria.com.br'; } catch(_) { return 'https://jogo.lendasdevaldoria.com.br'; } })();
 function loadCSS(href) {
     var l = document.createElement('link');
     l.rel = 'stylesheet';
