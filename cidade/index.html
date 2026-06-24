@@ -34215,7 +34215,13 @@ function _squareArtistTip(p, data, perf){
     }
     if (typeof res.gold === 'number') p.gold = res.gold;
     if (typeof refreshHud === 'function') refreshHud();
-    if (res.granted){ data.already_active = true; }
+    if (res.granted){
+      data.already_active = true;
+      // espelha o buff no player que o badge da Praça LÊ (CITY_MOCK_PLAYER) p/ refletir ao vivo
+      var _cp = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.metadata) ? window.CITY_MOCK_PLAYER : p;
+      if (_cp && _cp.metadata){ _cp.metadata.artist_buff_active = perf.key; _cp.metadata.artist_buff_name = res.buff_name || perf.buff_name; }
+    }
+    if (typeof _refreshSquarePopupIfOpen === 'function') _refreshSquarePopupIfOpen();  // buff/badge da Praça ao vivo
     if (res.already_active || !res.rolled){
       _squareArtistResult(p, data, perf, res);  // já tinha bênção: sem teste
     } else {
@@ -35962,6 +35968,7 @@ function _squarePlayGamble(p, bet){
     }
     window._squareGambleCount = 3 - (typeof res.remaining === 'number' ? res.remaining : 0);
     if (typeof res.gold === 'number') p.gold = res.gold;
+    if (typeof _refreshSquarePopupIfOpen === 'function') _refreshSquarePopupIfOpen();  // badge da Praça ao vivo (3/3 -> 2/3 ...)
     try { window.vEncounter.close(); } catch(_e){}  // o dado 3D (z alto) cobre a tela
     _squareRollGambleDice(p, { amount: bet }, res, preGold);
   }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na aposta.'); });
