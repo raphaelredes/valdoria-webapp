@@ -34158,48 +34158,38 @@ function _buildSquareMockData(player){
 // mantém o dado 3D do teste de inspiração. Mecânica: town_square_buffs.resolve_artist_tip
 // (gorjeta 5 V → 1d20 CD 13 → buff +1 stat até o descanso; só 1 por vez).
 function _squareShowArtistsPopup(p){
+  // ÉPICO (PADRAO_ALDRIC + vEncounter): o SERVIDOR constrói a cena + os performers
+  // nomeados COM retrato (service.square_artists_intro). CARROSSEL: abre já no 1º
+  // artista (foto à vista); "Ver outro artista" cicla pelos 5. Dado 3D no teste da gorjeta.
   if (!window.vCityServer || !window.vCityServer.isRemote() ||
       !window.vEncounter || typeof window.vEncounter.render !== 'function'){
     if (typeof vToast === 'function') vToast('Indisponível offline'); return;
   }
   window.vCityServer.cityAction('service.square_artists_intro', {}).then(function(res){
-    if (!res || !res.ok || !res.performers){
+    if (!res || !res.ok || !res.performers || !res.performers.length){
       if (typeof vToast === 'function') vToast('Os artistas recolheram-se por ora.'); return;
     }
-    _squareArtistsHub(p, res);
+    _squareArtistShow(p, res, 0, true);
   }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na praça.'); });
 }
 
-function _squareArtistsHub(p, data){
-  var choices = data.performers.map(function(perf){ return { id: 'pick_' + perf.key, label: perf.name }; });
-  choices.push({ id: 'leave', label: 'Seguir caminho' });
-  window.vEncounter.render({
-    npc: { id: 'square_artists', name: 'Artistas de Rua', desc: 'A roda de performers da praça', portraitImg: '' },
-    script: data.scene,
-    choices: choices
-  }, {
-    player: window.CITY_MOCK_PLAYER,
-    onChoice: function(ch){
-      var cid = (ch && ch.id) || '';
-      if (cid && cid.indexOf('pick_') === 0){
-        var key = cid.slice(5);
-        var perf = data.performers.filter(function(x){ return x.key === key; })[0];
-        if (perf) _squareArtistNode(p, data, perf);
-      } else { try { window.vEncounter.close(); } catch(_e){} }
-    }
-  });
-}
-
-function _squareArtistNode(p, data, perf){
-  var info = '<i>Possível bênção:</i> <b>' + perf.buff_name + '</b> — ' + perf.buff_desc +
-             '. <i>(Gorjeta ' + data.tip_cost + ' V · teste CD 13 · só 1 bênção de artista por vez.)</i>';
-  var script = perf.script.concat([{ type: 'narration', text: info }]);
+// Carrossel: mostra UM performer por vez COM o retrato (PADRAO_WEBP). A cena de
+// abertura só aparece na 1ª vez (withScene). "Ver outro artista" avança circularmente.
+function _squareArtistShow(p, data, idx, withScene){
+  var n = data.performers.length;
+  idx = ((idx % n) + n) % n;
+  var perf = data.performers[idx];
+  var script = (withScene && data.scene) ? data.scene.slice() : [];
+  script = script.concat(perf.script || []);
+  script.push({ type: 'narration', text:
+    '<i>Possível bênção:</i> <b>' + perf.buff_name + '</b> — ' + perf.buff_desc +
+    '. <i>(Gorjeta ' + data.tip_cost + ' V · teste CD 13 · só 1 bênção de artista por vez.)</i>' });
   window.vEncounter.render({
     npc: { id: 'artist_' + perf.key, name: perf.name, desc: perf.desc, portraitImg: perf.portrait },
     script: script,
     choices: [
       { id: 'tip', label: 'Dar gorjeta — ' + data.tip_cost + ' V' },
-      { id: 'back', label: 'Ver outro artista' },
+      { id: 'next', label: 'Ver outro artista (' + (idx + 1) + '/' + n + ')' },
       { id: 'leave', label: 'Seguir caminho' }
     ]
   }, {
@@ -34207,7 +34197,7 @@ function _squareArtistNode(p, data, perf){
     onChoice: function(ch){
       var cid = (ch && ch.id) || '';
       if (cid === 'tip'){ _squareArtistTip(p, data, perf); }
-      else if (cid === 'back'){ try { window.vEncounter.close(); } catch(_e){} _squareArtistsHub(p, data); }
+      else if (cid === 'next'){ try { window.vEncounter.close(); } catch(_e){} _squareArtistShow(p, data, idx + 1, false); }
       else { try { window.vEncounter.close(); } catch(_e){} }
     }
   });
@@ -34266,11 +34256,13 @@ function _squareArtistResult(p, data, perf, res){
   if (!window.vEncounter || typeof window.vEncounter.render !== 'function'){
     if (typeof _squareTxnReturnToHub === 'function') _squareTxnReturnToHub(); return;
   }
+  var n = data.performers.length, idx = 0;
+  for (var i = 0; i < n; i++){ if (data.performers[i].key === perf.key){ idx = i; break; } }
   window.vEncounter.render({
     npc: { id: 'artist_' + perf.key, name: perf.name, desc: perf.desc, portraitImg: perf.portrait },
     script: [{ type: 'narration', text: res.narration || '' }],
     choices: [
-      { id: 'back', label: 'Ver outro artista' },
+      { id: 'next', label: 'Ver outro artista' },
       { id: 'leave', label: 'Seguir caminho' }
     ]
   }, {
@@ -34278,7 +34270,7 @@ function _squareArtistResult(p, data, perf, res){
     onChoice: function(ch){
       var cid = (ch && ch.id) || '';
       try { window.vEncounter.close(); } catch(_e){}
-      if (cid === 'back'){ _squareArtistsHub(p, data); }
+      if (cid === 'next'){ _squareArtistShow(p, data, idx + 1, false); }
     }
   });
 }
