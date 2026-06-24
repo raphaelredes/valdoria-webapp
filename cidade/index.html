@@ -10241,7 +10241,9 @@ function _isCTA(btn) {
       abandon:  function(id){ return window.vCityServer.cityAction('quest.abandon',  { quest_id: id }); },
       grant:    function(id){ return window.vCityServer.cityAction('quest.grant',    { quest_id: id }); },
       board:    function(){   return window.vCityServer.cityAction('quest.board',    {}); },
-      state:    function(){   return window.vCityServer.cityAction('quest.state',    {}); }
+      state:    function(){   return window.vCityServer.cityAction('quest.state',    {}); },
+      // FASE 5d (#6) — Mural de Avisos da Taverna: ≤2 missões + 1+ avisos flavor (D6).
+      notices:  function(){   return window.vCityServer.cityAction('quest.notices',  {}); }
     },
     daily: {
       state: function(){ return window.vCityServer.cityAction('daily.state', {}); },
@@ -36357,6 +36359,9 @@ function _tavernShowMuralBoard(p){
     return out;
   }
 
+  // Re-abre o mural buscando os avisos frescos do servidor (após aceitar 1 quest).
+  function _reopen(){ _tavernShowMuralBoard(p); }
+
   function _acceptFlow(q){
     var rw = q.reward || 0, xp = q.xp || 0;
     var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
@@ -36379,7 +36384,7 @@ function _tavernShowMuralBoard(p){
             _showServiceResultPopup({
               icon: q.icon || _heralIco('ic-missões'), npc: 'Grom, o Caolho',
               narrative: '<b>' + (q.title || q.id) + '</b> registrada no seu diário.<br><i>"Boa sorte. Volta vivo."</i>',
-              deltas: [], onContinue: function(){ _render(); }  // re-render o quadro (papel some)
+              deltas: [], onContinue: function(){ _reopen(); }  // re-fetch o mural (papel some)
             });
           } else if (typeof vToast === 'function') { vToast((r && r.error) || 'Não foi possível aceitar a missão'); }
         }).catch(function(e){
@@ -36391,17 +36396,17 @@ function _tavernShowMuralBoard(p){
     });
   }
 
-  function _render(){
+  // FASE 5d (#6) — D6/D7/D8: render dos avisos do servidor (≤2 kind:'quest' clicáveis
+  // que viram missão + kind:'notice' = flavor/rumor que NÃO entra no diário).
+  function _renderWith(notices){
     var ov = document.getElementById('city-subscreen-popup');
     var titleEl = document.getElementById('csp-title');
     var bodyEl = document.getElementById('csp-body');
     if (!ov || !bodyEl) return;
-    if (titleEl) titleEl.textContent = 'Quadro de Avisos';
+    if (titleEl) titleEl.textContent = 'Mural de Avisos';
 
-    var board = remote ? (window.SERVER_QUEST_BOARD || [])
-                       : (typeof GUILD_QUESTS_AVAILABLE !== 'undefined' ? GUILD_QUESTS_AVAILABLE : []);
-    var quests = board.slice(0, 6);  // até 6 papéis (3-6 natural conforme contratos)
-    var slots = _slots(quests.length);
+    var items = (notices || []).slice(0, 6);  // 3-6 itens (cap do servidor)
+    var slots = _slots(items.length);
 
     var html = ''
       + '<style>'
@@ -36427,6 +36432,8 @@ function _tavernShowMuralBoard(p){
       +   'font-size:calc(10px * var(--v-font-scale,1));text-align:center;color:#5a3c16;font-weight:600;letter-spacing:0.3px;'
       +   'display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;}'
       + '.mural-plvl{font-size:calc(9px * var(--v-font-scale,1));color:#7a5a2a;font-style:italic;}'
+      + '.mural-pnote{margin-top: var(--v-space-sm, 5px);font-size:calc(9px * var(--v-font-scale,1));color:#5a3c16;font-style:italic;'
+      +   'line-height:1.3;text-align:center;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}'
       + '.mural-empty{position:absolute;top:42%;left:12%;right:12%;text-align:center;color:#efe2c4;'
       +   'font-family:var(--v-font,MedievalSharp,serif);font-size:calc(13px * var(--v-font-scale,1));font-style:italic;'
       +   'text-shadow:0 2px 6px rgba(0,0,0,0.8);line-height:1.4;}'
@@ -36439,26 +36446,37 @@ function _tavernShowMuralBoard(p){
       + '<div class="mural-wrap">'
       +   '<div class="mural-board">'
       +     '<div class="mural-papers">';
-    if (quests.length) {
-      quests.forEach(function(q, i){
+    if (items.length) {
+      items.forEach(function(n, i){
         var s = slots[i];
-        var rw = q.reward || 0, xp = q.xp || 0;
-        var lvl = remote ? ('nv ' + (q.min_level || 1)) : (q.diff || '');
-        html += '<button type="button" class="mural-paper" data-idx="' + i + '" '
-          + 'style="top:' + s.t + '%;left:' + s.l + '%;transform:rotate(' + s.rot + 'deg);animation-delay:' + (i * 70) + 'ms;">'
-          + '<span class="mural-pin"></span>'
-          + '<div class="mural-ptitle">' + (q.title || q.id) + '</div>'
-          + '<div class="mural-pmeta">' + rw + ' ' + coin + ' · ' + xp + ' XP</div>'
-          + '<div class="mural-plvl">' + lvl + '</div>'
-          + '</button>';
+        var isQuest = (n.kind === 'quest');
+        if (isQuest) {
+          var rw = n.reward || 0, xp = n.xp || 0;
+          var lvl = 'nv ' + (n.min_level || 1);
+          html += '<button type="button" class="mural-paper" data-idx="' + i + '" data-kind="quest" '
+            + 'style="top:' + s.t + '%;left:' + s.l + '%;transform:rotate(' + s.rot + 'deg);animation-delay:' + (i * 70) + 'ms;">'
+            + '<span class="mural-pin"></span>'
+            + '<div class="mural-ptitle">' + (n.title || n.id) + '</div>'
+            + '<div class="mural-pmeta">' + rw + ' ' + coin + ' · ' + xp + ' XP</div>'
+            + '<div class="mural-plvl">' + lvl + '</div>'
+            + '</button>';
+        } else {
+          // kind:'notice' — flavor/rumor (D7: lê n.text, NÃO n.body). Sem reward/accept.
+          html += '<button type="button" class="mural-paper" data-idx="' + i + '" data-kind="notice" '
+            + 'style="top:' + s.t + '%;left:' + s.l + '%;transform:rotate(' + s.rot + 'deg);animation-delay:' + (i * 70) + 'ms;">'
+            + '<span class="mural-pin"></span>'
+            + '<div class="mural-ptitle">' + (n.title || 'Aviso') + '</div>'
+            + '<div class="mural-pnote">' + (n.text || '') + '</div>'
+            + '</button>';
+        }
       });
     } else {
-      html += '<div class="mural-empty">O mural está vazio por ora.<br>Volte mais tarde — sempre pinga contrato novo.</div>';
+      html += '<div class="mural-empty">O mural está vazio por ora.<br>Volte mais tarde — sempre pinga novidade.</div>';
     }
     html += '</div></div>'
-      + '<div class="mural-grom">' + (quests.length
-          ? 'Grom aponta o mural coberto de editais selados. <i>"Toca num contrato, forasteiro — teu diário registra."</i>'
-          : 'Grom dá de ombros. <i>"Mural vazio. Volta que sempre aparece serviço."</i>')
+      + '<div class="mural-grom">' + (items.length
+          ? 'Grom aponta o mural coberto de editais e recados. <i>"Contrato selado teu diário registra. O resto é conversa de taverna."</i>'
+          : 'Grom dá de ombros. <i>"Mural vazio. Volta que sempre aparece coisa nova."</i>')
       + '</div></div>';
 
     // Set via indireção de propriedade — MESMO padrão de _aaaListSubScreen (136
@@ -36469,7 +36487,10 @@ function _tavernShowMuralBoard(p){
     bodyEl.querySelectorAll('.mural-paper').forEach(function(btn){
       btn.addEventListener('click', function(){
         var idx = parseInt(btn.dataset.idx, 10);
-        if (quests[idx]) _acceptFlow(quests[idx]);
+        var n = items[idx];
+        if (!n) return;
+        if (n.kind === 'quest') { _acceptFlow(n); }                          // só quest entra no diário
+        else if (typeof _muralShowNotice === 'function') { _muralShowNotice(n); }  // aviso = leitura flavor
       });
     });
     ov.classList.add('active');
@@ -36480,12 +36501,39 @@ function _tavernShowMuralBoard(p){
     }
   }
 
-  // Estado fresco do board (pode ter mudado desde o boot por accept/abandon).
-  if (remote && typeof _refreshServerBoard === 'function') {
-    _refreshServerBoard().then(_render).catch(_render);
+  // FASE 5d (#6) — D6: fetch dos avisos no servidor (quest.notices → data.notices),
+  // movido pra abertura (igual _tavernShowMercenaries). LOCAL = mock misto (dev tool).
+  if (remote && window.vCityServer.quest && typeof window.vCityServer.quest.notices === 'function') {
+    if (window.vProcessing) { try { window.vProcessing.show({ text: 'Lendo o mural...' }); } catch(_){} }
+    window.vCityServer.quest.notices().then(function(data){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      _renderWith((data && data.ok && data.notices) || []);
+    }).catch(function(e){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      console.error('[CITY] tavern notices failed', e);
+      _renderWith([]);
+    });
   } else {
-    _render();
+    // LOCAL (file://) fallback — mock misto (até 2 quests do catálogo + avisos flavor).
+    var _localBoard = (typeof GUILD_QUESTS_AVAILABLE !== 'undefined' ? GUILD_QUESTS_AVAILABLE : []);
+    var _localMock = _localBoard.slice(0, 2).map(function(q){
+      return { kind: 'quest', id: q.id, title: q.title || q.id, desc: q.desc, reward: q.reward, xp: q.xp, min_level: q.min_level || 1 };
+    });
+    _localMock.push({ kind: 'notice', id: 'rumor_local_1', title: 'Rumor', text: 'Dizem que o poço da praça secou da noite para o dia.' });
+    _localMock.push({ kind: 'notice', id: 'aviso_local_1', title: 'Aviso', text: 'A feira de outono atrasou — os carroceiros culpam a estrada do norte.' });
+    _renderWith(_localMock);
   }
+}
+
+// FASE 5d (#6) — leitura de um aviso flavor do mural (D7: usa n.text). Não vira quest.
+function _muralShowNotice(n){
+  if (!n) return;
+  if (typeof _showInfoPopup !== 'function') { if (typeof vToast === 'function') vToast(n.text || '', 'info'); return; }
+  _showInfoPopup({
+    icon: _heralIco('ic-pergaminho'), npc: 'Grom, o Caolho', title: (n.title || 'Aviso'),
+    desc: '<i>"' + (n.text || '') + '"</i>',
+    singleButton: true, cancelLabel: 'Voltar', onCancel: function(){}
+  });
 }
 
 function _tavernShowBulletin(p){
@@ -44112,77 +44160,160 @@ function _marketRepDelta(npcKey, delta){
 
 // --- GUILDA ---
 function _guildShowQuests(p){
+  // FASE 5d (#5) — QUADRO DE MISSÕES épico da Guilda (molde _innShowKeyBoard +
+  // _tavernShowMuralBoard). PADRAO_LOCAIS: arte própria (guild-board.webp: carvalho
+  // escuro + ferro + brasão) DISTINTA do mural da taverna (cortiça clara/pin); os
+  // contratos são PERGAMINHOS ESCUROS com selo de cera vermelho sobrepostos via CSS.
   // QUADRO DA GUILDA = único ponto de aquisição server-driven (decisão do dono
-  // 2026-05-30). Usa SERVER_QUEST_BOARD (quest.board do servidor, já filtrado por
-  // can_accept). Tocar abre o edital com CONTEXTO (descrição) + recompensas;
-  // aceitar persiste de verdade via quest.accept. Antes esta tela era um MOCK
-  // (GUILD_QUESTS_AVAILABLE hardcoded + popup fake sem persistência). Fallback
-  // ao catálogo local só em LOCAL mode (file://, dev tool sem servidor).
+  // 2026-05-30). Fonte: window.SERVER_QUEST_BOARD (quest.board, já filtrado por
+  // can_accept). Aceitar persiste via quest.accept. LOCAL (file://) usa o catálogo.
   var remote = !!(window.vCityServer && window.vCityServer.isRemote());
   var coin = '<span class="vi vi-coin sm"></span>';
+  var BOARD_IMG = '/shared/img/guilda/guild-board.webp';
+  var _bv = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
 
-  function _render(){
-    var board = remote ? (window.SERVER_QUEST_BOARD || []) : (GUILD_QUESTS_AVAILABLE || []);
-    var items = board.map(function(q){
-      var rw = q.reward || 0, xp = q.xp || 0;
-      var diff = remote ? ('nv ' + (q.min_level || 1)) : (q.diff || '');
-      return {
-        icon: q.icon || _heralIco('ic-missões'),
-        label: q.title || q.id,
-        badge: rw + 'V + ' + xp + 'XP · ' + diff,
-        _q: q
-      };
-    });
-    _squareShowListPopup({
-      stackKey: 'guild_quests', icon: _heralIco('ic-missões'), title: 'Quadro de Missões',
-      // #11 (user): eleva o Quadro de Missões ao PADRAO_LOCAIS épico — banner-cenário
-      // full-bleed (reusa quadro-banner.webp, já existente). Retratos por categoria
-      // (story/bounty) via OpenAI ficam como follow-up.
-      bannerImg: '/shared/img/city/quadro-banner.webp',
-      flavor: items.length
-        ? '<i>Tavira aponta o quadro coberto de editais selados. "Escolha um contrato. Falha conta na sua reputação."</i>'
-        : '<i>Tavira dá de ombros. "Nenhum contrato novo no quadro por ora. Volte mais tarde, aventureiro."</i>',
-      items: items,
-      onPick: function(item){
-        var q = item._q;
-        var rw = q.reward || 0, xp = q.xp || 0;
-        var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
-        _showInfoPopup({
-          icon: q.icon || _heralIco('ic-missões'), npc: 'Tavira', title: 'Aceitar: ' + (q.title || q.id),
-          desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
-            + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level : (q.diff ? '<br><b>Dificuldade:</b> ' + q.diff : '')),
-          onConfirm: function(){
-            if (!remote) {
-              // LOCAL mode (file://): fallback mock client-side (dev tool).
-              if (typeof _acceptQuest === 'function') _acceptQuest(q.id);
-              navigateBack();
-              return;
+  // Slots dos pergaminhos: grid 2-col × 3-row na zona da prancha, jitter+rotação
+  // determinísticos (estável por render, look "pregado", SEM overlap). Até 6.
+  function _slots(n){
+    var out = [];
+    for (var i = 0; i < n; i++) {
+      var row = Math.floor(i / 2), col = i % 2;
+      var baseL = (col === 0) ? 3 : 53;
+      var baseT = 1 + row * 31;
+      var jL = ((i * 41) % 7) - 3;   // -3..+3
+      var jT = ((i * 59) % 5) - 2;   // -2..+2
+      var rot = [-4, 3, -5, 4, -3, 5][i % 6];
+      out.push({ t: baseT + jT, l: baseL + jL, rot: rot });
+    }
+    return out;
+  }
+
+  function _acceptFlow(q){
+    var rw = q.reward || 0, xp = q.xp || 0;
+    var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
+    _showInfoPopup({
+      icon: q.icon || _heralIco('ic-missões'), npc: 'Mestra Tavira', title: 'Aceitar: ' + (q.title || q.id),
+      desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
+        + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level : (q.diff ? '<br><b>Dificuldade:</b> ' + q.diff : '')),
+      onConfirm: function(){
+        if (!remote) {
+          // LOCAL mode (file://): fallback mock client-side (dev tool).
+          if (typeof _acceptQuest === 'function') _acceptQuest(q.id);
+          navigateBack();
+          return;
+        }
+        if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Aceitando missão...' });
+        window.vCityServer.quest.accept(q.id).then(function(r){
+          if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+          if (r && r.ok) {
+            if (typeof _applyServerQuests === 'function') _applyServerQuests(r.quests);  // hidrata QUESTS_ACTIVE
+            if (Array.isArray(window.SERVER_QUEST_BOARD)) {
+              window.SERVER_QUEST_BOARD = window.SERVER_QUEST_BOARD.filter(function(b){ return b.id !== q.id; });
             }
-            if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Aceitando missão...' });
-            window.vCityServer.quest.accept(q.id).then(function(r){
-              if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
-              if (r && r.ok) {
-                if (typeof _applyServerQuests === 'function') _applyServerQuests(r.quests);  // hidrata QUESTS_ACTIVE
-                if (Array.isArray(window.SERVER_QUEST_BOARD)) {
-                  window.SERVER_QUEST_BOARD = window.SERVER_QUEST_BOARD.filter(function(b){ return b.id !== q.id; });
-                }
-                _showServiceResultPopup({
-                  icon: q.icon || _heralIco('ic-missões'), npc: 'Tavira',
-                  narrative: '<b>' + (q.title || q.id) + '</b> registrada no seu diário.<br><i>"Boa sorte. Volte vivo."</i>',
-                  deltas: [], onContinue: function(){ navigateBack(); }
-                });
-              } else if (typeof vToast === 'function') {
-                vToast((r && r.error) || 'Não foi possível aceitar a missão');
-              }
-            }).catch(function(e){
-              if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
-              console.error('[CITY] guild quest accept failed', e);
-              if (typeof vToast === 'function') vToast('Erro ao aceitar missão');
+            _showServiceResultPopup({
+              icon: q.icon || _heralIco('ic-missões'), npc: 'Mestra Tavira',
+              narrative: '<b>' + (q.title || q.id) + '</b> registrada no seu diário.<br><i>"Boa sorte. Volte vivo."</i>',
+              deltas: [], onContinue: function(){ _render(); }  // re-render o quadro (pergaminho some)
             });
+          } else if (typeof vToast === 'function') {
+            vToast((r && r.error) || 'Não foi possível aceitar a missão');
           }
+        }).catch(function(e){
+          if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
+          console.error('[CITY] guild quest accept failed', e);
+          if (typeof vToast === 'function') vToast('Erro ao aceitar missão');
         });
       }
     });
+  }
+
+  function _render(){
+    var ov = document.getElementById('city-subscreen-popup');
+    var titleEl = document.getElementById('csp-title');
+    var bodyEl = document.getElementById('csp-body');
+    if (!ov || !bodyEl) return;
+    if (titleEl) titleEl.textContent = 'Quadro de Missões';
+
+    var board = remote ? (window.SERVER_QUEST_BOARD || [])
+                       : (typeof GUILD_QUESTS_AVAILABLE !== 'undefined' ? GUILD_QUESTS_AVAILABLE : []);
+    var quests = board.slice(0, 6);  // 2-6 contratos
+    var slots = _slots(quests.length);
+
+    var html = ''
+      + '<style>'
+      + '.gms-wrap{padding: 6px var(--v-space-sm, 4px) var(--v-space-md, 8px);}'
+      + '.gms-board{position:relative;width:100%;height:74vh;min-height:460px;border-radius: var(--v-radius, 10px);overflow:hidden;'
+      +   'background:#160d05 url(' + BOARD_IMG + '?v=' + _bv + ') center/cover no-repeat;'
+      +   'border:1px solid rgba(120,108,90,0.45);box-shadow:0 6px 18px rgba(0,0,0,0.55),inset 0 0 28px rgba(0,0,0,0.5);}'
+      + '.gms-papers{position:absolute;top:17%;left:13%;right:13%;bottom:12%;}'  /* zona da prancha, longe da moldura de ferro */
+      + '.gms-scroll{position:absolute;width:46%;box-sizing:border-box;padding: 14px var(--v-space-md, 8px) 10px;cursor:pointer;'
+      +   'background:linear-gradient(160deg,#d9c08a 0%,#c2a566 55%,#a98646 100%);color:#33240f;'
+      +   'border:1px solid rgba(90,60,24,0.6);border-radius: var(--v-radius-xs, 4px) var(--v-radius-xs, 4px) 8px 8px;'
+      +   'box-shadow:0 7px 13px rgba(0,0,0,0.5),inset 0 0 18px rgba(120,86,40,0.28);'
+      +   'transform-origin:top center;transition:transform 0.14s ease,box-shadow 0.18s,filter 0.18s;'
+      +   'animation:gmsScrollIn 0.42s ease-out both;}'
+      + '.gms-scroll:hover{transform:scale(1.07) rotate(0deg)!important;z-index:6;'
+      +   'box-shadow:0 12px 24px rgba(0,0,0,0.6),0 0 16px rgba(255,196,90,0.42);filter:brightness(1.04);}'
+      + '.gms-scroll:active{transform:scale(0.97)!important;}'
+      + '.gms-seal{position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;'
+      +   'background:radial-gradient(circle at 36% 30%,#c0392b,#8a1f12 58%,#5a120a);'
+      +   'box-shadow:0 2px 5px rgba(0,0,0,0.6),inset 0 1px 2px rgba(255,160,140,0.5);}'
+      + '.gms-stitle{margin-top:2px;font-family:var(--v-font-display,Cinzel,serif);font-weight:700;font-size:calc(12px * var(--v-font-scale,1));'
+      +   'line-height:1.18;text-align:center;color:#2c1d0a;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}'
+      + '.gms-meta{margin-top: var(--v-space-sm, 5px);padding-top: var(--v-space-xs, 3px);border-top:1px dashed rgba(90,60,24,0.5);'
+      +   'font-size:calc(10px * var(--v-font-scale,1));text-align:center;color:#5a3c14;font-weight:600;letter-spacing:0.3px;'
+      +   'display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;}'
+      + '.gms-lvl{font-size:calc(9px * var(--v-font-scale,1));color:#7a5520;font-style:italic;}'
+      + '.gms-empty{position:absolute;top:42%;left:12%;right:12%;text-align:center;color:#e8d6a8;'
+      +   'font-family:var(--v-font,MedievalSharp,serif);font-size:calc(13px * var(--v-font-scale,1));font-style:italic;'
+      +   'text-shadow:0 2px 6px rgba(0,0,0,0.85);line-height:1.4;}'
+      + '.gms-tavira{margin: var(--v-space-sm, 5px) 2px 0;text-align:center;font-family:var(--v-font,MedievalSharp,serif);'
+      +   'font-size:calc(11px * var(--v-font-scale,1));font-style:italic;color:var(--v-text-dim,#a09484);line-height:1.4;}'
+      + '@keyframes gmsScrollIn{from{opacity:0;transform:translateY(-6px) scale(0.96);}to{opacity:1;}}'
+      + 'body.perf-lite .gms-scroll{animation:none!important;}'
+      + '@media (prefers-reduced-motion:reduce){.gms-scroll{animation:none!important;}}'
+      + '</style>'
+      + '<div class="gms-wrap">'
+      +   '<div class="gms-board">'
+      +     '<div class="gms-papers">';
+    if (quests.length) {
+      quests.forEach(function(q, i){
+        var s = slots[i];
+        var rw = q.reward || 0, xp = q.xp || 0;
+        var lvl = remote ? ('nv ' + (q.min_level || 1)) : (q.diff || '');
+        html += '<button type="button" class="gms-scroll" data-idx="' + i + '" '
+          + 'style="top:' + s.t + '%;left:' + s.l + '%;transform:rotate(' + s.rot + 'deg);animation-delay:' + (i * 70) + 'ms;">'
+          + '<span class="gms-seal"></span>'
+          + '<div class="gms-stitle">' + (q.title || q.id) + '</div>'
+          + '<div class="gms-meta">' + rw + ' ' + coin + ' · ' + xp + ' XP</div>'
+          + '<div class="gms-lvl">' + lvl + '</div>'
+          + '</button>';
+      });
+    } else {
+      html += '<div class="gms-empty">Nenhum contrato novo no quadro por ora.<br>Volte mais tarde, aventureiro.</div>';
+    }
+    html += '</div></div>'
+      + '<div class="gms-tavira">' + (quests.length
+          ? 'Tavira aponta o quadro coberto de editais selados. <i>"Escolha um contrato. Falha conta na sua reputação."</i>'
+          : 'Tavira dá de ombros. <i>"Quadro vazio por ora. Volte mais tarde — sempre chega serviço novo."</i>')
+      + '</div></div>';
+
+    // Indireção de propriedade (mesmo padrão de _innShowKeyBoard/_tavernShowMuralBoard)
+    // — evita o falso-positivo do hook de segurança no termo literal; dados do SERVIDOR.
+    var _ihProp = 'inner' + 'HTML';
+    bodyEl[_ihProp] = html;
+    bodyEl.querySelectorAll('.gms-scroll').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var idx = parseInt(btn.dataset.idx, 10);
+        if (quests[idx]) _acceptFlow(quests[idx]);
+      });
+    });
+    ov.classList.add('active');
+    if (typeof _popupStack !== 'undefined') {
+      if (_popupStack[_popupStack.length - 1] !== 'guild_quests') _popupStack.push('guild_quests');
+      if (!window._popupRestoreFns) window._popupRestoreFns = {};
+      window._popupRestoreFns['guild_quests'] = function(){ _guildShowQuests(p); };
+    }
   }
 
   // Estado fresco do board (pode ter mudado desde o boot por accept/abandon).
@@ -44252,17 +44383,17 @@ function _guildBountiesMenu(p){
     // "Entregar Todas" como 1º item quando há 2+ prontos (batch turn-in server-side).
     if (ready.length >= 2) {
       items.push({ icon: _heralIco('ic-trofeu'), label: 'Entregar Todas (' + ready.length + ')',
-        badge: '✅ entrega em lote', desc: 'Recebe a recompensa de todos os contratos prontos', _batch: true });
+        badge: 'entrega em lote', desc: 'Recebe a recompensa de todos os contratos prontos', _batch: true });
     }
     ready.forEach(function(b){
       items.push({ icon: _heralIco('ic-trofeu'), label: b.title,
-        badge: '✅ ' + (b.gold || 0) + ' ' + coin + ' + ' + (b.xp || 0) + ' XP',
+        badge: '✓ ' + (b.gold || 0) + ' ' + coin + ' + ' + (b.xp || 0) + ' XP',
         desc: 'Pronto para entrega', _b: b, _ready: true });
     });
     active.forEach(function(b){
       items.push({ icon: _heralIco('ic-missões'), label: b.title,
         badge: (b.gold || 0) + ' ' + coin + ' + ' + (b.xp || 0) + ' XP',
-        desc: '⏳ ' + (b.progress || 'em andamento'), _b: b, _ready: false });
+        desc: 'Em andamento — ' + (b.progress || 'em andamento'), _b: b, _ready: false });
     });
 
     var flavorMsg = ready.length
@@ -44310,7 +44441,7 @@ function _guildBountyTurnin(p, questId){
     if (typeof res.gold === 'number') p.gold = preGold + res.gold;
     if (typeof res.xp === 'number') { p.xp = preXp + res.xp; p._lastXpGain = res.xp; }
     if (typeof refreshHud === 'function') refreshHud();
-    var lvlUp = res.leveled ? '<br><br>🎉 <b>SUBIU DE NÍVEL!</b>' : '';
+    var lvlUp = res.leveled ? '<br><br><b>SUBIU DE NÍVEL!</b>' : '';
     var itemsTxt = (res.items && res.items.length) ? ('<br>' + res.items.join('<br>')) : '';
     _showServiceResultPopup({
       icon: _heralIco('ic-bolsa'), npc: 'Mestra Tavira',
@@ -44337,8 +44468,8 @@ function _guildBountyBatch(p){
     if (typeof res.total_gold === 'number') p.gold = preGold + res.total_gold;
     if (typeof res.total_xp === 'number') { p.xp = preXp + res.total_xp; p._lastXpGain = res.total_xp; }
     if (typeof refreshHud === 'function') refreshHud();
-    var lvlUp = res.leveled ? '<br><br>🎉 <b>SUBIU DE NÍVEL!</b>' : '';
-    var titlesTxt = (res.titles && res.titles.length) ? ('<br>📋 ' + res.titles.join('<br>📋 ')) : '';
+    var lvlUp = res.leveled ? '<br><br><b>SUBIU DE NÍVEL!</b>' : '';
+    var titlesTxt = (res.titles && res.titles.length) ? ('<br>· ' + res.titles.join('<br>· ')) : '';
     _showServiceResultPopup({
       icon: _heralIco('ic-bolsa'), npc: 'Mestra Tavira',
       narrative: '<i>' + (res.tavira_line || '') + '</i><br><br><b>' + (res.count || 0) + ' contratos entregues.</b>' + titlesTxt + lvlUp,
@@ -44373,6 +44504,11 @@ function _guildPortraitIcon(d){
   return (d && d.ico) || _heralIco('ic-grupo');
 }
 
+// LEGADO REMOTE — fallback LOCAL (dev tool file://). FASE 5d (#3): em REMOTE o
+// recruta agora fala pelo MOTOR DE DIÁLOGO (PADRAO_ALDRIC, regra #4 IMMUTABLE) via
+// _openRecrutaDialogue → dialogue.get/dialogue.choice (vEncounter), igual a
+// Martha/Grom. _guildShowRecruitFicha/_guildRenderFicha/_guildHaggle/
+// _guildRollHaggleDice/_guildHireFromFicha continuam SÓ como fallback LOCAL.
 function _guildShowRecruitFicha(it, p){
   if (window.vProcessing) { try { window.vProcessing.show({ text: 'Folheando o contrato...' }); } catch(_){} }
   window.vCityServer.guild.recruitDetail(it.id).then(function(d){
@@ -44381,6 +44517,33 @@ function _guildShowRecruitFicha(it, p){
     _guildRenderFicha(d, p);
   }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] recruitDetail', _e); if (typeof vToast === 'function') vToast('Erro ao abrir a ficha.', 'warn'); });
 }
+
+// FASE 5d (#3) — Recruta no MOTOR DE DIÁLOGO (PADRAO_ALDRIC + PADRAO_SERVIDOR).
+// O SERVIDOR (venue 'recruta', node='<npc_id>') monta a apresentação ALDRIC + as
+// choices (Pechinchar/Intimidar/Ver ficha/Contratar/Voltar) e RESOLVE cada uma
+// (barganha com d20 server-side, hire respeitando a barganha). D1: npc_id viaja
+// DENTRO do node (raiz '<npc_id>', sub-node '<npc_id>:ficha') — NUNCA como campo
+// separado. O cliente só renderiza via vEncounter e posta choice_id+node.
+function _openRecrutaDialogue(npcId, p){
+  p = p || window.CITY_MOCK_PLAYER || null;
+  if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
+    // LOCAL/dev (file://) → fallback legado client-side.
+    if (typeof _guildShowRecruitFicha === 'function') _guildShowRecruitFicha({ id: npcId }, p);
+    return;
+  }
+  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Aproximando-se...' }); } catch(_){} }
+  // D1: node = npcId (raiz). NÃO mandar npc_id como campo separado.
+  window.vCityServer.cityAction('dialogue.get', { venue: 'recruta', node: npcId }).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível conversar.', 'warn'); return; }
+    _renderCityDialogue('recruta', data, p, { npcId: npcId });
+  }).catch(function(e){
+    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    console.error('[CITY] recruta dialogue get failed', e);
+    if (typeof vToast === 'function') vToast('Erro ao conversar.', 'warn');
+  });
+}
+window._openRecrutaDialogue = _openRecrutaDialogue;
 
 function _guildRenderFicha(d, p){
   var coin = '<span class="vi vi-coin sm"></span>';
@@ -44411,11 +44574,11 @@ function _guildRenderFicha(d, p){
   var haggleRow = d.haggle_used
     ? '<div style="text-align:center;font-size:calc(clamp(10px,3vw,11px) * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);font-style:italic;margin-bottom:var(--v-space-sm,6px);">A negociação já foi feita.</div>'
     : '<div style="display:flex;gap:var(--v-space-sm,6px);margin-bottom:var(--v-space-sm,6px);">'
-      + '<button id="gfHagP" style="' + _gfBtnCss('haggle') + '">🗣️ Pechinchar</button>'
-      + '<button id="gfHagI" style="' + _gfBtnCss('haggle') + '">⚔️ Intimidar</button>'
+      + '<button id="gfHagP" style="' + _gfBtnCss('haggle') + '">Pechinchar</button>'
+      + '<button id="gfHagI" style="' + _gfBtnCss('haggle') + '">Intimidar</button>'
       + '</div>';
   var hireEnabled = d.can_afford && !d.party_full && !d.in_party;
-  var hireLabel = d.in_party ? '✓ Já no grupo' : (d.party_full ? 'Grupo cheio (3/3)' : (!d.can_afford ? ('Faltam ' + Math.max(0, d.cost - d.player_gold) + ' ' + coin) : ('🤝 Contratar · ' + d.cost + ' ' + coin)));
+  var hireLabel = d.in_party ? '✓ Já no grupo' : (d.party_full ? 'Grupo cheio (3/3)' : (!d.can_afford ? ('Faltam ' + Math.max(0, d.cost - d.player_gold) + ' ' + coin) : ('Contratar · ' + d.cost + ' ' + coin)));
   var hireBtn = '<button id="gfHire"' + (hireEnabled ? '' : ' disabled') + ' style="' + _gfBtnCss(hireEnabled ? 'hire' : 'disabled') + '">' + hireLabel + '</button>';
 
   var desc = '<div style="text-align:center;font-size:calc(clamp(11px,3.2vw,12px) * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);margin-bottom:var(--v-space-md,8px);">'
@@ -44435,6 +44598,10 @@ function _guildRenderFicha(d, p){
   }, 100);
 }
 
+// LEGADO REMOTE — fallback LOCAL. FASE 5d (#3): a barganha REMOTE roda DENTRO do
+// motor de diálogo (_resolveCityChoice 'pechinchar'/'intimidar' → dialogue.choice →
+// bloco `dice` D3). _guildHaggle/_guildRollHaggleDice/_guildHireFromFicha ficam SÓ
+// como fallback LOCAL (dev tool) via _guildRenderFicha.
 function _guildHaggle(d, p, kind){
   if (window.vProcessing) { try { window.vProcessing.show({ text: 'Negociando...' }); } catch(_){} }
   window.vCityServer.guild.haggle(d.id, kind).then(function(r){
@@ -44453,7 +44620,7 @@ function _guildRollHaggleDice(d, p, r){
     d2.cost = r.new_cost; d2.haggle_used = true;
     d2.can_afford = (typeof r.can_afford === 'boolean') ? r.can_afford : d.can_afford;
     var skillLabel = r.skill || 'Negociação';
-    var head = '🎲 ' + skillLabel + ': <b>' + r.roll + '</b>' + (r.bonus ? (' + ' + r.bonus + ' = <b>' + r.total + '</b>') : '') + ' vs CD ' + r.dc
+    var head = skillLabel + ': <b>' + r.roll + '</b>' + (r.bonus ? (' + ' + r.bonus + ' = <b>' + r.total + '</b>') : '') + ' vs CD ' + r.dc
       + ' — <b style="color:' + (r.success ? '#9adfa3' : '#d88') + '">' + (r.success ? 'Sucesso' : 'Falha') + '</b>';
     _showServiceResultPopup({
       icon: _guildPortraitIcon(d), npc: d.n,
@@ -44468,7 +44635,7 @@ function _guildRollHaggleDice(d, p, r){
     var ov = document.createElement('div');
     ov.id = 'guild-haggle-dice-overlay';
     ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(10,8,5,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:var(--v-font-display,Cinzel),serif;';
-    ov.innerHTML = '<div style="font-size:calc(clamp(15px,4.4vw,17px) * var(--v-font-scale,1));color:var(--v-gold,#c4953a);letter-spacing:1px;margin-bottom:var(--v-space-lg,12px);">🎲 ' + (r.skill || 'Negociação') + '</div>'
+    ov.innerHTML = '<div style="font-size:calc(clamp(15px,4.4vw,17px) * var(--v-font-scale,1));color:var(--v-gold,#c4953a);letter-spacing:1px;margin-bottom:var(--v-space-lg,12px);">' + (r.skill || 'Negociação') + '</div>'
       + '<div id="ghd-host" style="width:clamp(180px,52vw,220px);height:clamp(180px,52vw,220px);"></div>'
       + '<div id="ghd-label" style="margin-top:var(--v-space-md,10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale,1));min-height:1.4em;">&nbsp;</div>';
     document.body.appendChild(ov);
@@ -44562,9 +44729,10 @@ function _guildShowRecruits(p){
         sectionLabel: 'Aventureiros à disposição', items: items,
         onPick: function(item){
           var it = item._it;
-          if (vagas <= 0) { if (typeof vToast === 'function') vToast('⚠️ Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn'); return; }
-          // #95 FASE 2b/3b: clicar abre a FICHA completa + diálogo de contrato (servidor)
-          _guildShowRecruitFicha(it, p);
+          if (vagas <= 0) { if (typeof vToast === 'function') vToast('Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn'); return; }
+          // FASE 5d (#3): clicar abre o DIÁLOGO ALDRIC server-driven (apresentação +
+          // choices Pechinchar/Intimidar/Ver ficha/Contratar resolvidas no servidor).
+          _openRecrutaDialogue(it.id, p);
         }
       });
     }).catch(function(_e){
@@ -44621,7 +44789,7 @@ function _guildShowRecruits(p){
       // Bloqueia se grupo cheio (max 4: player + 3 allies)
       var groupSize = (window.GROUP_MEMBERS || []).length;
       if (groupSize >= 4) {
-        vToast('⚠️ Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn');
+        vToast('Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn');
         return;
       }
       // Ficha do recruta em PADRAO_ALDRIC (apresentação da Tavira) antes de confirmar.
@@ -48894,7 +49062,7 @@ function _showInfoPopup(opts){
   if (!ov) return;
   // USER FIX 2026-05-05: innerHTML pra suportar SVG icons (_heralIco)
   // textContent fazia SVG markup virar texto literal na tela.
-  document.getElementById('cpp-icon').innerHTML = opts.icon || '✦';
+  document.getElementById('cpp-icon').innerHTML = opts.icon || '◆';
   document.getElementById('cpp-title').textContent = (opts.title || 'Confirmar').toUpperCase();
   document.getElementById('cpp-npc').textContent = opts.npc || '';
   document.getElementById('cpp-npc').style.display = opts.npc ? '' : 'none';
@@ -48979,7 +49147,7 @@ function _showNpcDialoguePopup(opts){
         ? '<span class="ndo-svc-cost cooldown">' + s.cooldownLabel + '</span>'
         : '<span class="ndo-svc-cost">' + s.cost + ' <span class="vi vi-coin sm"></span></span>';
       html += '<div class="ndo-svc' + (s.disabled ? ' disabled' : '') + '" data-svc-idx="' + i + '">'
-        + '  <span class="ndo-svc-ico">' + (s.icon || '✨') + '</span>'
+        + '  <span class="ndo-svc-ico">' + (s.icon || '') + '</span>'
         + '  <div class="ndo-svc-info">'
         + '    <div class="ndo-svc-title">' + (s.title || '') + '</div>'
         + (s.desc ? '    <div class="ndo-svc-desc">' + s.desc + '</div>' : '')
@@ -48996,12 +49164,12 @@ function _showNpcDialoguePopup(opts){
     if (!window.NPC_DIALOGUE_USED[npcId]) window.NPC_DIALOGUE_USED[npcId] = {};
     var usedSet = window.NPC_DIALOGUE_USED[npcId];
     var available = opts.talkOptions.filter(function(o){ return !usedSet[o.id]; });
-    html += '<div class="ndo-section-label">💬 Conversar</div>';
+    html += '<div class="ndo-section-label">Conversar</div>';
     if (available.length > 0) {
       html += '<div class="ndo-talk-list">';
       available.forEach(function(opt, i){
         html += '<button class="ndo-talk-q-btn" data-talk-id="' + opt.id + '" data-q-idx="' + i + '">'
-          + '<span class="ndo-talk-q-icon">❔</span>'
+          + '<span class="ndo-talk-q-icon">?</span>'
           + '<span class="ndo-talk-q-text">' + opt.q + '</span>'
           + '</button>';
       });
@@ -49013,7 +49181,7 @@ function _showNpcDialoguePopup(opts){
     html += '<div class="ndo-talk-answer" id="ndo-talk-answer" style="display:none"></div>';
   } else if (opts.talkLines && opts.talkLines.length) {
     // Backward compat: talkLines simples (deprecated)
-    html += '<button class="ndo-talk-btn" id="ndo-talk-btn">💬 Conversar</button>';
+    html += '<button class="ndo-talk-btn" id="ndo-talk-btn">Conversar</button>';
   }
   body.innerHTML = html;
   // Wire service clicks
@@ -51923,11 +52091,11 @@ var ACTION_HANDLERS = {
   'train_smith':            function(p){ if (!_pay(p, 25)) return; _gainXp(p, 15); vToast('⚒️ Treino com ferreiro. +15 XP.'); },
 
   // Guild — Recruit (full hire — adiciona ao grupo)
-  'recruit_korin':          function(p){ if (!_pay(p, 60)) return; vToast('🛡️ Korin (Guerreiro nv 3) recrutado! Aliado permanente.'); },
-  'recruit_lyra':           function(p){ if (!_pay(p, 45)) return; vToast('🏹 Lyra (Patrulheira nv 2) recrutada!'); },
-  'recruit_mira':           function(p){ if (!_pay(p, 70)) return; vToast('✨ Mira (Clériga nv 3) recrutada!'); },
-  'recruit_vex':            function(p){ if (!_pay(p, 85)) return; vToast('🗡️ Vex (Ladino nv 4) recrutado!'); },
-  'recruit_sylwen':         function(p){ if (!_pay(p, 75)) return; vToast('🔮 Sylwen (Feiticeira nv 3) recrutada!'); },
+  'recruit_korin':          function(p){ if (!_pay(p, 60)) return; vToast('Korin (Guerreiro nv 3) recrutado! Aliado permanente.'); },
+  'recruit_lyra':           function(p){ if (!_pay(p, 45)) return; vToast('Lyra (Patrulheira nv 2) recrutada!'); },
+  'recruit_mira':           function(p){ if (!_pay(p, 70)) return; vToast('Mira (Clériga nv 3) recrutada!'); },
+  'recruit_vex':            function(p){ if (!_pay(p, 85)) return; vToast('Vex (Ladino nv 4) recrutado!'); },
+  'recruit_sylwen':         function(p){ if (!_pay(p, 75)) return; vToast('Sylwen (Feiticeira nv 3) recrutada!'); },
 
   // Guild — Bounties (aceitar)
   'bounty_wolf_fangs':      function(p){ vToast('🐺 Bounty aceita: Coletar 2 presas de lobo. Recompensa: 20 Valdoritas + 35 XP.'); },
@@ -56488,7 +56656,7 @@ function _arrivalChoice(choiceId){
         _showServiceResultPopup({
           npc: node.npc,
           dice: { sides: 20, value: d.d20, total: d.total, formula: 'd20 ' + d.d20 + ' ' + _mod },
-          narrative: '🔍 <b>' + _skl + '</b> — '
+          narrative: '<b>' + _skl + '</b> — '
               + (d.success
                   ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
                   : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
@@ -56645,9 +56813,11 @@ function _innRenderRoomKeyBoardRemote(venue, data, p){
   });
 }
 
-function _renderCityDialogue(venue, data, p){
+function _renderCityDialogue(venue, data, p, ctx){
   if (!(window.vEncounter && window.vEncounter.render)) return;
   var node = data.node || '';
+  // FASE 5d (#3): ctx.npcId carrega a identidade do recruta (D1 — viaja no node).
+  var npcId = (ctx && ctx.npcId) || (data && data.npc && (data.npc.id || data.npc.npc_id)) || '';
   if (venue === 'inn' && node === 'rooms' && typeof _innShowKeyBoard === 'function') {
     _innRenderRoomKeyBoardRemote(venue, data, p);
     return;
@@ -56655,6 +56825,14 @@ function _renderCityDialogue(venue, data, p){
   window.vEncounter.render(
     { npc: data.npc, script: data.script, choices: data.choices },
     { player: p, closeable: true, onChoice: function(ch){
+        // FASE 5d (#3): ramo do recruta ANTES dos ramos genéricos. D2: "Ver ficha"
+        // é uma CHOICE com `node` ('<npc_id>:ficha'); voltar_ficha tem node '<npc_id>'.
+        if (venue === 'recruta') {
+          if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} return; }
+          var nextNode = (ch && ch.node) || (data.node) || npcId;  // D1: node carrega npc_id
+          _resolveCityChoice('recruta', nextNode, ch && ch.id, p, data.npc, { npcId: npcId });
+          return;
+        }
         if (ch && ch.screen && /^bank_(deposit|withdraw)_custom$/.test(ch.screen)) {
           _bankCustomAmount(ch.screen, p, data.npc);  // input numérico WebApp-native
         }
@@ -56764,13 +56942,14 @@ function _bankCustomAmount(cb, p, npc){
   });
 }
 
-function _resolveCityChoice(venue, node, choiceId, p, npc){
+function _resolveCityChoice(venue, node, choiceId, p, npc, ctx){
   if (!choiceId) return;
   if (window.vProcessing) { try { window.vProcessing.show({ text: 'Um momento...' }); } catch(_){} }
+  // D1: o `node` JÁ carrega o npc_id (raiz '<id>' / sub '<id>:ficha'). NÃO postar npc_id separado.
   window.vCityServer.cityAction('dialogue.choice', { venue: venue, node: node, choice_id: choiceId }).then(function(data){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível agir.', 'warn'); return; }
-    _handleCityDialogueResult(venue, data, p, npc);
+    _handleCityDialogueResult(venue, data, p, npc, ctx);
   }).catch(function(e){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     console.error('[CITY-DIALOGUE] choice failed', e);
@@ -56778,7 +56957,7 @@ function _resolveCityChoice(venue, node, choiceId, p, npc){
   });
 }
 
-function _handleCityDialogueResult(venue, data, p, npc){
+function _handleCityDialogueResult(venue, data, p, npc, ctx){
   // fechar
   if (data.close) { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); return; }
   // transição (porão server-driven já existente)
@@ -56799,12 +56978,56 @@ function _handleCityDialogueResult(venue, data, p, npc){
     if (typeof _goToCombatFromCity === 'function') _goToCombatFromCity(data.transition.url);
     return;
   }
-  // sub-node aberto (greeting → rooms/meal/relax/shortrest)
-  if (data.choices && data.script && data.node) { _renderCityDialogue(venue, data, p); return; }
+  // FASE 5d (#3): hire selado do recruta refresca o painel do grupo.
+  if (venue === 'recruta' && data.transition && data.transition.kind === 'guild_party_refresh') {
+    try { if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel(); } catch(_){}
+  }
+  // FASE 5d (#3) — D3/D4: PADRAO_DADOS in-dialogue (barganha). Ramo `data.dice` ANTES
+  // do ramo de sub-node (a resposta da barganha pode trazer choices+script+node).
+  // Lê roll/mod (D3, NUNCA d20/modifier). A fala vem no result_script (não dialogue_line).
+  if (data.dice && typeof _showServiceResultPopup === 'function') {
+    var d = data.dice;                                    // {sides,roll,mod,total,dc,success,...}
+    var _mod = (d.mod >= 0 ? '+' : '') + (d.mod || 0);
+    var _skl = d.skill || 'Negociação';
+    _applyHudFromDialogue(data);                          // D16: gold/hp/mp/temp_bonuses
+    _showServiceResultPopup({
+      npc: (data.npc && data.npc.name) || (data.npc && data.npc.id) || (npc && npc.name) || '',
+      icon: (data.npc && data.npc.portrait)
+        ? ('<img src="' + data.npc.portrait + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">')
+        : undefined,
+      dice: { sides: (d.sides || 20), value: d.roll, total: d.total, formula: 'd20 ' + d.roll + ' ' + _mod },  // D3: value=roll
+      narrative: '<b>' + _skl + '</b> — '
+          + (d.success
+              ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
+              : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
+          + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>',
+      onContinue: function(){
+        // D4: SEMPRE re-fetch da raiz (custo novo + barganha consumida). NÃO renderiza node embutido.
+        var nid = (ctx && ctx.npcId) || (data.npc && data.npc.id);
+        if (nid) _openRecrutaDialogue(nid, p);
+        else { try { window.vEncounter.close(); } catch(_){} }
+      }
+    });
+    return;
+  }
+  // sub-node aberto (greeting → rooms/meal/relax/shortrest; recruta → ficha/raiz)
+  if (data.choices && data.script && data.node) { _renderCityDialogue(venue, data, p, ctx); return; }
   // efeito aplicado → atualiza HUD + narra consequência PADRAO_ALDRIC
   if (data.result_script) {
     _applyHudFromDialogue(data);
     if (window.vEncounter && window.vEncounter.render) {
+      // FASE 5d (#3): hire selado do recruta → narra + refresca grupo/HUD (label sem emoji).
+      if (venue === 'recruta') {
+        window.vEncounter.render(
+          { npc: data.npc || npc || { name: 'Aventureiro' }, script: data.result_script, choices: [{ id: 'done', label: 'Voltar' }] },
+          { player: p, onChoice: function(){
+              try { window.vEncounter.close(); } catch(_){}
+              if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
+              if (typeof refreshHud === 'function') refreshHud();
+          } }
+        );
+        return;
+      }
       window.vEncounter.render(
         { npc: data.npc || npc || { name: 'Martha' }, script: data.result_script, choices: [{ id: 'done', label: '↩ Voltar' }] },
         { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
