@@ -56990,6 +56990,11 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
     var _mod = (d.mod >= 0 ? '+' : '') + (d.mod || 0);
     var _skl = d.skill || 'Negociação';
     _applyHudFromDialogue(data);                          // D16: gold/hp/mp/temp_bonuses
+    // FIX (teste live 2026-06-24): fecha o diálogo (#encounter-overlay) ANTES do popup
+    // do dado — senão o #service-result-overlay (dado 3D) renderiza ATRÁS do diálogo
+    // (oclusão; o jogador não vê o dado). onContinue re-abre a raiz via _openRecrutaDialogue
+    // (novo preço + barganha consumida), igual o padrão em ~L35334.
+    try { window.vEncounter.close(); } catch(_){}
     _showServiceResultPopup({
       npc: (data.npc && data.npc.name) || (data.npc && data.npc.id) || (npc && npc.name) || '',
       icon: (data.npc && data.npc.portrait)
