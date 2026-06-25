@@ -9037,6 +9037,8 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.ach_total != null)    p.ach_total = picked.ach_total;
       if (picked.kills != null)        p.kills = picked.kills;
       if (picked.win_streak != null)   p.win_streak = picked.win_streak;
+      // Forasteiro: reputação da praça (server-authoritative) → título sob o banner.
+      if (picked.town_rep != null){ p.metadata = p.metadata || {}; p.metadata.town_rep = picked.town_rep; }
       // Sessão #63 (2026-05-30): equipamento REAL do char → MOCK_PLAYER_EQUIPPED
       // (aba "Equipados" da mochila). Antes o equip era mock fixo (Espada Longa,
       // Cota de Malha) e a aba aparecia vazia, pois _vinvBuildLoadout cruzava com
@@ -33943,6 +33945,7 @@ function _squareArtistTip(p, data, perf){
     }
     if (typeof res.gold === 'number') p.gold = res.gold;
     if (typeof refreshHud === 'function') refreshHud();
+    _applyTownRep(res);  // Forasteiro: gorjeta a artista sobe a reputação
     if (res.granted){
       data.already_active = true;
       // espelha o buff no player que o badge da Praça LÊ (CITY_MOCK_PLAYER) p/ refletir ao vivo
@@ -34786,6 +34789,15 @@ function _refreshSquarePopupIfOpen(){
   }
 }
 
+// Forasteiro: aplica a reputação da praça (server-authoritative) ao player do cliente +
+// atualiza o título sob o banner ao vivo. Chamado nos resolves que sobem a reputação.
+function _applyTownRep(res){
+  if (!res || res.town_rep == null) return;
+  var p = window.CITY_MOCK_PLAYER;
+  if (p){ p.metadata = p.metadata || {}; p.metadata.town_rep = res.town_rep; }
+  if (typeof _refreshSquarePopupIfOpen === 'function') _refreshSquarePopupIfOpen();
+}
+
 // Helper: pós-transação, fecha sub-popup e volta pro hub Praça
 function _squareTxnReturnToHub(){
   if (typeof _popupStack === 'undefined' || !_popupStack.length) return;
@@ -35298,6 +35310,7 @@ function _squareShowExploreEvent(p){
       if (typeof res.hp === 'number') p.hp = res.hp;
       if (res.xp_granted) p.xp = (p.xp || 0) + res.xp_granted;
       if (typeof refreshHud === 'function') refreshHud();
+      _applyTownRep(res);  // Forasteiro: resolver evento da praça sobe a reputação
       var rolledLine = '';
       var diceData = null;
       if (res.has_check){
@@ -35449,6 +35462,7 @@ function _squareShowObjectsPopup(p){
               if (typeof res.gold === 'number') p.gold = res.gold;
               if (res.xp_granted) p.xp = (p.xp || 0) + res.xp_granted;
               if (typeof refreshHud === 'function') refreshHud();
+              _applyTownRep(res);  // Forasteiro: usar a fonte sobe a reputação
               _showServiceResultPopup({
                 icon: icon, npc: obj.name,
                 narrative: (res.outcome_text || '').replace(/\n/g, '<br>'),
@@ -35680,6 +35694,7 @@ function _squareRenderVendor(p, vendor, bought){
       if (typeof res.gold === 'number') p.gold = res.gold;
       if (Array.isArray(p.inventory) && res.item_name) p.inventory.push(res.item_name);
       if (typeof refreshHud === 'function') refreshHud();
+      _applyTownRep(res);  // Forasteiro: comprar do vendedor sobe a reputação
       _showServiceResultPopup({
         icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.name, '48px')) || it.icon, npc: v.name,
         narrative: '<i>' + v.name.split(',')[0] + ' embrulha o item em pano grosso.</i><br><br>' +
