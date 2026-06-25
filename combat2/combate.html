@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-24T03:50:37Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-25T19:55:32Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13042,6 +13042,21 @@ window.__COMBAT_ORIGIN_APP = (function () {
 })();
 window.__COMBAT_ENV = (function () {
     try { return new URLSearchParams(location.search).get('env') || 'dev'; } catch (e) { return 'dev'; }
+})();
+/* Segurança 2026-06-25: token RAW da sessão de jogo DURÁVEL — prova de identidade do
+   recovery read-only do /prepare quando o token de combate efêmero expira. Vai no
+   HEADER X-Game-Session (não na URL — evita vazar credencial em log/referrer). O
+   localStorage guarda um JSON {token,...} (vAuthTokenStore), então extraímos o .token
+   RAW (senão o fingerprint do servidor nunca casa). Ver combat2_pivot_http._recovery_token_ok. */
+window.__COMBAT_GAME_SESSION = (function () {
+    try {
+        if (window.vAuthTokenStore && typeof window.vAuthTokenStore.getToken === 'function') {
+            return window.vAuthTokenStore.getToken() || '';
+        }
+        var raw = localStorage.getItem('valdoria_session_' + window.__COMBAT_ENV);
+        if (!raw) return '';
+        try { return (JSON.parse(raw) || {}).token || ''; } catch (_p) { return raw; }
+    } catch (e) { return ''; }
 })();
 /* Phase 4 dungeons AAA (2026-04-26): from=exploracao identifica combate disparado
    pelo simulador exploracao.html (boss da masmorra). Resolution screen substitui
@@ -30967,13 +30982,13 @@ async function startCombatRemoteCanonical() {
            em 401 e prendia o jogador no loop cidade↔combate. Server: combat2_pivot_http _handle_prepare. */
         var url = window.__COMBAT_API_BASE + '/api/combat2/prepare'
             + (window.__COMBAT_USER_ID ? ('?uid=' + encodeURIComponent(window.__COMBAT_USER_ID)) : '');
-        var r = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + window.__COMBAT_TOKEN,
-                'Accept': 'application/json'
-            }
-        });
+        var _hdrs = {
+            'Authorization': 'Bearer ' + window.__COMBAT_TOKEN,
+            'Accept': 'application/json'
+        };
+        /* prova do recovery read-only via header (não query — anti credential-leak) */
+        if (window.__COMBAT_GAME_SESSION) _hdrs['X-Game-Session'] = window.__COMBAT_GAME_SESSION;
+        var r = await fetch(url, { method: 'GET', headers: _hdrs });
         if (!r.ok) {
             /* X-6.5.45: status no console pra agente IA; UI clean. */
             console.error('[C-REM:PIVOT-BOOT] prepare_failed status=' + r.status);

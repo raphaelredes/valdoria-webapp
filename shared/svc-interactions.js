@@ -313,8 +313,14 @@
         && window.vCityServer.isRemote()
         && typeof window.vCityServer.cityAction === 'function');
     if (_isRemote) {
+      /* Anti-cheat 2026-06-25: para dado de ALIADO, manda ally_class/choice_id
+         pro servidor GRAVAR o resultado autoritativo — depois apply-effect o
+         consome em vez de confiar no success do cliente. */
+      var _allySrc = (opts.ch && opts.ch.ally_source) || null;
       window.vCityServer.cityAction('svc.dice', {
         ability: opts.ability, dc: opts.dc, faction: faction,
+        ally_class: _allySrc ? _allySrc.cls : undefined,
+        choice_id: _allySrc ? _allySrc.choice_id : undefined,
       }).then(function(r){
         if (r && r.ok) {
           _animate({
