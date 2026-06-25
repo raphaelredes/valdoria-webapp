@@ -10815,6 +10815,15 @@ function _isCTA(btn) {
         window._triggerCartographerBuyRemote(action);
         return;
       }
+      // 1.9 BECO SOMBRIO "Andar pelo Beco" → server-authoritative (auditoria 2026-06-25 #4).
+      //     Em REMOTE o SERVIDOR decide se/qual evento dispara + rola + aplica gold +
+      //     persiste; o cliente só anima. LOCAL (file://) cai no _shadowShowEvent mock.
+      if (action === 'shadow_event_open'
+          && window.vCityServer && vCityServer.isRemote && vCityServer.isRemote()
+          && typeof window._triggerShadowEventRemote === 'function') {
+        window._triggerShadowEventRemote();
+        return;
+      }
       // 1. Prefixo nav: → openCityPopup direto
       if (action.indexOf('nav:') === 0) { navigateTo(action.substring(4)); return; }
       // 2. ACTION_HANDLERS (state mutation: rest_X, buy_X, gates_explore, open_cartografia, etc.)
@@ -21199,6 +21208,32 @@ function _shadowShowCrime(p){
                   '<b>Sucesso parcial:</b> metade da recompensa<br>' +
                   '<b>Falha:</b> multa de ' + tier.fine + ' <span class="vi vi-coin sm"></span> (preso pela guarda)',
                     onConfirm: function(){
+              // Auditoria server-driven 2026-06-25 (#3): em REMOTE o SERVIDOR rola
+              // 3×d20 + aplica gold/multa + persiste (service.shadow_crime); o cliente
+              // só anima. LOCAL (file://) mantém o mock Math.random abaixo.
+              if (window.vCityServer && vCityServer.isRemote && vCityServer.isRemote() && vCityServer.cityAction) {
+                var preGoldR = (window.CITY_MOCK_PLAYER ? (CITY_MOCK_PLAYER.gold || 0) : 0);
+                vCityServer.cityAction('service.shadow_crime', { crime: t.id, tier: tier.id }).then(function(res){
+                  if (!res || res.ok === false) {
+                    vToast((res && res.narrative) || 'O trabalho não pôde ser feito agora.', 'warn');
+                    return;
+                  }
+                  var rollsTxt = (res.rolls || []).map(function(r){ return r.roll + '+' + r.bonus + '=' + r.total + (r.ok ? ' ✓' : ' ✗'); }).join(' · ');
+                  var nar = '<i>' + (res.narrative || '') + '</i><br><br>🎲 ' + rollsTxt + ' (' + (res.successes || 0) + '/3)';
+                  if (res.gold_delta) nar += '<br><b>' + (res.gold_delta > 0 ? '+' : '') + res.gold_delta + ' Valdoritas</b>';
+                  if (res.complication) nar += '<br><br><b>Complicação:</b> <i>' + res.complication + '</i>';
+                  var newGold = (typeof res.gold === 'number') ? res.gold : preGoldR;
+                  if (window.CITY_MOCK_PLAYER) { CITY_MOCK_PLAYER.gold = newGold; refreshHud(); }
+                  var lastR = (res.rolls && res.rolls.length) ? res.rolls[res.rolls.length - 1].roll : 0;
+                  _showServiceResultPopup({
+                    icon: t.icon, npc: 'O Vulto', narrative: nar,
+                    dice: { formula: '3× 1d20 vs DC ' + tier.dc, sides: 20, value: lastR, total: lastR },
+                    deltas: [{ type:'gold', label:'Bolsa', from: preGoldR, to: newGold, max: Math.max(preGoldR, newGold, 1), bar: false }],
+                    onContinue: function(){ navigateBack(); }
+                  });
+                }).catch(function(e){ console.error('[CITY] shadow_crime', e); vToast('Erro no trabalho sujo.', 'err'); });
+                return;
+              }
               var passes = 0;
               var rolls = [];
               var lastRoll = 0;
@@ -41284,6 +41319,31 @@ function _showJunkSellerModal(){
     var p = window.CITY_MOCK_PLAYER;
     if (!p) return;
     var preGold = p.gold;
+    // Auditoria server-driven 2026-06-25 (#8): em REMOTE o SERVIDOR vende todo o junk
+    // (apply_sell_junk: 60% PHB, respeita equipado/favorito/locked) + persiste; o cliente
+    // espelha o gold autoritativo. Antes creditava gold + apagava itens só no cliente
+    // (localStorage) e SUMIA no reload. LOCAL (file://) mantém o mock abaixo.
+    if (window.vCityServer && vCityServer.isRemote && vCityServer.isRemote() && vCityServer.cityAction) {
+      vCityServer.cityAction('inventory.sell_junk', {}).then(function(res){
+        ov.classList.remove('active');
+        if (!res || res.ok === false) { vToast('Nada de lixo pra vender.', 'info'); return; }
+        var newGold = (res.state && typeof res.state.gold === 'number') ? res.state.gold : p.gold;
+        info.items.forEach(function(it){
+          var inv = MOCK_PLAYER_INVENTORY.find(function(i){ return i.n === it.n; });
+          if (inv) inv.q = 0;  // espelha a remoção que o servidor já fez
+        });
+        p.gold = newGold; refreshHud();
+        if (typeof _syncInventoryToLocalStorage === 'function') _syncInventoryToLocalStorage();
+        _showServiceResultPopup({
+          icon: _heralIco('ic-bolsa'), npc: 'Mercador',
+          narrative: '<i>O mercador examina os despojos e separa o que vale.</i><br><br>'
+            + (res.msg || ('<b>' + info.count + ' itens</b> de lixo vendidos.')),
+          deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: newGold, max: Math.max(preGold, newGold, 1), bar: false }],
+          onContinue: function(){ if (window._popupStack && _popupStack[_popupStack.length-1] === 'inventory'){ _renderInventoryPopup(); } }
+        });
+      }).catch(function(e){ ov.classList.remove('active'); console.error('[CITY] sell_junk', e); vToast('Erro ao vender lixo.', 'err'); });
+      return;
+    }
     p.gold += info.gold;
     // Remove items from inventory
     info.items.forEach(function(it){
@@ -52685,6 +52745,26 @@ window._triggerArenaTierRemote = function(tierId){
       console.error('[CITY] arena_stage_tier', e);
       vToast('Erro ao entrar na arena.', 'err');
     });
+};
+// BECO SOMBRIO — "Andar pelo Beco" server-authoritative (auditoria 2026-06-25 #4).
+// O SERVIDOR decide se/qual evento + rola + aplica gold + persiste; cliente só anima.
+window._triggerShadowEventRemote = function(){
+  try {
+    if (!(window.vCityServer && vCityServer.cityAction)) return;
+    var preGold = (window.CITY_MOCK_PLAYER ? (CITY_MOCK_PLAYER.gold || 0) : 0);
+    vCityServer.cityAction('service.shadow_event', {}).then(function(res){
+      if (!res || res.ok === false) { vToast('O beco está quieto agora.', 'info'); return; }
+      var newGold = (typeof res.gold === 'number') ? res.gold : preGold;
+      if (window.CITY_MOCK_PLAYER && typeof res.gold === 'number') { CITY_MOCK_PLAYER.gold = newGold; refreshHud(); }
+      var deltas = res.gold_delta ? [{ type:'gold', label:'Bolsa', from: preGold, to: newGold, max: Math.max(preGold, newGold, 1), bar: false }] : [];
+      _showServiceResultPopup({
+        icon: _heralIco('ic-bruxo'), npc: 'Beco Sombrio',
+        narrative: res.narrative || 'Você percorre o beco.',
+        deltas: deltas,
+        onContinue: function(){ if (typeof navigateBack === 'function') navigateBack(); }
+      });
+    }).catch(function(e){ console.error('[CITY] shadow_event', e); vToast('Erro no beco.', 'err'); });
+  } catch (e) { console.error('[CITY] shadow_event', e); }
 };
 // MINI-ATIVIDADES server-authoritative (#0, 2026-06-18). Em REMOTE, aposta/jogo/coleta/
 // flavor/evento/invest encenam no SERVIDOR (rola o resultado + aplica o reward com teto
