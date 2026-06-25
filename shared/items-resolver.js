@@ -74,6 +74,11 @@
    * gerados via _gen_base_templates.py.
    * ============================================================ */
   var BASE_TO_SLUG = {
+    // Ofertas de sabor da praça (auditoria 2026-06-25): reusam webps de comida existentes
+    // (consumíveis triviais — maçã/hidromel batem exato; queijo usa pão como stand-in de comida).
+    'maca-das-colinas-verdes': 'maca',
+    'gole-de-hidromel-da-taverna': 'hidromel-fortificado',
+    'amostra-de-queijo-curado': 'pao-fresco',
     // Espadas
     'base-longsword': 'espada-longa',
     'base-shortsword': 'espada-curta',
