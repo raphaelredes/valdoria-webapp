@@ -4868,9 +4868,34 @@ Busca rápida:
 
             const results = [];
 
+            // Anti-cheat (auditoria server-driven 2026-06-25): em REMOTE o SERVIDOR rola os
+            // 4d6 (/api/character/roll-stats) e o /apply valida que a distribuição final bate
+            // com esse pool. O cliente só ANIMA os dados nos valores reais do servidor; não
+            // confia mais no Math.random local. LOCAL (file://) usa Math.random (dev tool).
+            const _isRemoteCreate = !!(apiBase && token && userId);
+            let _srvSets = null;
+            if (_isRemoteCreate) {
+                try {
+                    const _rh = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+                    if (window.Telegram?.WebApp?.initData) { _rh['X-Telegram-Init-Data'] = Telegram.WebApp.initData; }
+                    const _rr = await fetch(`${apiBase}/api/character/roll-stats`, {
+                        method: 'POST', headers: _rh, body: JSON.stringify({ user_id: userId })
+                    });
+                    const _rj = await _rr.json().catch(() => ({}));
+                    if (_rr.ok && Array.isArray(_rj.sets) && _rj.sets.length === 6) { _srvSets = _rj.sets; }
+                } catch (e) { console.warn('[ATTR_ROLL] server roll failed:', e); }
+                if (!_srvSets) {
+                    ov.remove();
+                    if (typeof window.vToast === 'function') window.vToast('Não foi possível rolar no servidor. Tente novamente.', 'err');
+                    return;
+                }
+            }
+
             for (let i = 0; i < 6; i++) {
                 numEl.textContent = (i + 1);
-                const rolls = [1, 2, 3, 4].map(() => 1 + Math.floor(Math.random() * 6));
+                const rolls = (_srvSets && Array.isArray(_srvSets[i]) && _srvSets[i].length === 4)
+                    ? _srvSets[i].map(Number)
+                    : [1, 2, 3, 4].map(() => 1 + Math.floor(Math.random() * 6));
                 const sorted = [...rolls].sort((a, b) => a - b);
                 const dropped = sorted[0];
                 const total = rolls.reduce((s, n) => s + n, 0) - dropped;
@@ -7869,6 +7894,7 @@ Busca rápida:
                 flaw: sel.flaw || '',
                 alignment: sel.alignment || '',
                 stat_assignment: sel.statAssignment,
+                stat_method: _statMethod || '',  /* anti-cheat 2026-06-25: servidor valida o multiset por método */
                 languages: sel.languages || [],
                 variant_bonuses: sel.variantBonuses || [],
                 variant_skill: sel.variantSkill || '',
