@@ -9269,7 +9269,11 @@ body.perf-lite .vc-action-btn { transition: none; }
           var _a = _realAllies[k - 1];
           if (_a){
             // Converte shape backend (n/c/r/l/hp/mhp/mp/mmp) -> shape mock (name/cls/race/level/...)
+            // Mochila F2 (2026-06-25): id = npc_id REAL do servidor (aliado de party);
+            // chave consistente p/ MOCK_ALLY_EQUIPPED + equip.set_ally. merc/familiar/adv
+            // não têm id (transientes) → cai no fallback name-derived em _getActiveAllies.
             window.GROUP_MEMBERS[k] = {
+              id: _a.id || null,
               name: _a.n || 'Aliado',
               cls: String(_a.c || 'guerreiro').toLowerCase(),
               race: String(_a.r || 'humano').toLowerCase(),
@@ -9289,6 +9293,12 @@ body.perf-lite .vc-action-btn { transition: none; }
               levelUps: _a.lu || 0,
               se: _a.se || []
             };
+            // Mochila F2: hidrata o equipamento REAL do aliado de party (party_status)
+            // → MOCK_ALLY_EQUIPPED[npc_id]. Antes era mock hardcoded nunca persistido.
+            if (_a.id) {
+              if (typeof window.MOCK_ALLY_EQUIPPED !== 'object' || !window.MOCK_ALLY_EQUIPPED) window.MOCK_ALLY_EQUIPPED = {};
+              window.MOCK_ALLY_EQUIPPED[_a.id] = _a.eq || {};
+            }
           } else {
             window.GROUP_MEMBERS[k] = null;
           }
@@ -10484,14 +10494,20 @@ function _isCTA(btn) {
       sync:  function(obj){ return window.vCityServer.cityAction('npc.sync', obj || {}); }
     },
     equip: {  // FASE 6 — persiste Player.equipment (anti-cheat server-side)
-      set: function(eq){ return window.vCityServer.cityAction('equip.set', { equipment: eq || {} }); }
+      set: function(eq){ return window.vCityServer.cityAction('equip.set', { equipment: eq || {} }); },
+      // Mochila F2 (2026-06-25): equipar ALIADO de party persiste em party_status[id]
+      // (reflete em combate). Blob-sync; servidor revalida pool + proficiência do aliado.
+      // ally_class = classe resolvida no boot — fallback p/ recrutas sem 'class' no party_status.
+      setAlly: function(allyId, eq, allyClass){ return window.vCityServer.cityAction('equip.set_ally', { ally_id: allyId, equipment: eq || {}, ally_class: allyClass || '' }); }
     },
     inventory: {  // FASE 6 (2026-06-23) — vender/usar/largar item da Mochila persiste no servidor
       // (apply_sell/apply_use/apply_discard canônicos: 60% PHB, tags protegidas, cura por fórmula).
       sell:    function(name){ return window.vCityServer.cityAction('inventory.sell',    { item: name }); },
       use:     function(name){ return window.vCityServer.cityAction('inventory.use',     { item: name }); },
       // Consolidação client 2026-06-25: largar persiste no servidor (antes só no mock → reaparecia).
-      discard: function(name){ return window.vCityServer.cityAction('inventory.discard', { item: name }); }
+      discard: function(name){ return window.vCityServer.cityAction('inventory.discard', { item: name }); },
+      // F4: fundir 3 gemas → 1 superior persiste (apply_gem_upgrade valida posse das 3).
+      fuseGems: function(gem){ return window.vCityServer.cityAction('inventory.fuse_gems', { gem: gem }); }
     },
     relations: {  // FASE 4 (2026-06-23) — lista de Vínculos montada NO SERVIDOR (de Player.narrative):
       // qualquer NPC com reputação/afinidade real aparece (sem lista hardcoded no cliente).
@@ -40290,7 +40306,12 @@ window._invActiveTarget = window._invActiveTarget || 'player';  // 'player' | 'l
 // canonical: helper retorna equip dict do target ativo (player ou ally).
 function _getCurrentEquipped(){
   if (window._invActiveTarget === 'player') return MOCK_PLAYER_EQUIPPED;
-  return (MOCK_ALLY_EQUIPPED || {})[window._invActiveTarget] || {};
+  // Mochila F2: devolve a referência ARMAZENADA do aliado (não um temp `|| {}`),
+  // senão a mutação `eq[slot]=...` do slot-modal se perde e o equip.set_ally manda vazio.
+  if (typeof MOCK_ALLY_EQUIPPED !== 'object' || !MOCK_ALLY_EQUIPPED) window.MOCK_ALLY_EQUIPPED = {};
+  var t = window._invActiveTarget;
+  if (t && !MOCK_ALLY_EQUIPPED[t]) MOCK_ALLY_EQUIPPED[t] = {};
+  return t ? MOCK_ALLY_EQUIPPED[t] : {};
 }
 
 // canonical: retorna lista de aliados vivos (replica D.allies do inventory.js).
@@ -40301,7 +40322,9 @@ function _getActiveAllies(){
   for (var i = 1; i < GROUP_MEMBERS.length; i++){
     var m = GROUP_MEMBERS[i];
     if (!m || m.dead) continue;
-    var id = (m.name || ('ally' + i)).toLowerCase();
+    // Mochila F2: aliado de party usa o npc_id REAL (m.id) — chave consistente com
+    // MOCK_ALLY_EQUIPPED + party_status no servidor. merc/familiar (sem id) = name-derived.
+    var id = m.id || (m.name || ('ally' + i)).toLowerCase();
     allies.push({
       id: id,
       name: m.name,
@@ -40456,6 +40479,43 @@ function _syncEquippedToLocalStorage() {
       }
     }
   } catch (_) {}
+}
+
+// Mochila F2 (2026-06-25): persiste o equipamento de um ALIADO de party no servidor
+// (equip.set_ally → party_status[id].equipment; reflete em combate via /prepare).
+// Reconcilia o mock com o equip REAL devolvido (o servidor pode recusar por pool/
+// proficiência). merc/familiar (sem party_status) → o servidor responde unknown_ally
+// e o mock fica como está (equip transiente, por design).
+function _syncAllyEquipToServer(allyId) {
+  if (!allyId || allyId === 'player') return;
+  try {
+    if (window._cityEquipReady && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
+        && window.vCityServer.equip && typeof window.vCityServer.equip.setAlly === 'function') {
+      var eq = (window.MOCK_ALLY_EQUIPPED || {})[allyId] || {};
+      // classe do aliado (já resolvida pelo servidor no boot via _getActiveAllies) p/
+      // a proficiência do equip — recrutas hired não têm 'class' no party_status.
+      var _allies = (typeof _getActiveAllies === 'function') ? _getActiveAllies() : [];
+      var _ally = _allies.filter(function(a){ return a.id === allyId; })[0];
+      var _cls = _ally ? (_ally.cls || '') : '';
+      var _p = window.vCityServer.equip.setAlly(allyId, eq, _cls);
+      if (_p && typeof _p.then === 'function') {
+        _p.then(function(res){
+          if (res && res.ok && res.equipment && window.MOCK_ALLY_EQUIPPED) {
+            window.MOCK_ALLY_EQUIPPED[allyId] = res.equipment;
+            if (typeof _renderInventoryPopup === 'function') _renderInventoryPopup();
+          }
+        }).catch(function(){});
+      }
+    }
+  } catch (_) {}
+}
+
+// Dispatcher: persiste o equip do alvo ATIVO da aba Equipar (player → equip.set;
+// aliado → equip.set_ally). Usado pelos caminhos legados de equip (slot-modal/auto).
+function _persistEquipForActiveTarget() {
+  var t = window._invActiveTarget;
+  if (t === 'player') { if (typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage(); }
+  else if (t && typeof _syncAllyEquipToServer === 'function') _syncAllyEquipToServer(t);
 }
 
 // Confirmação de destruição de runa ao desequipar/trocar no WebApp (cidade). O
@@ -41501,17 +41561,41 @@ function _showGemFusionModal(){
   ov.classList.add('active');
   document.getElementById('fusion-cancel-btn').addEventListener('click', function(){ ov.classList.remove('active'); });
   card.querySelectorAll('.fusion-row').forEach(function(row){
-    row.addEventListener('click', function(){
+    row.addEventListener('click', async function(){
       var fromName = row.dataset.from;
       var toName = CANON_GEM_FUSION_MAP[fromName];
       var cost = CANON_GEM_FUSION_COST;
       var inv = MOCK_PLAYER_INVENTORY.find(function(i){ return i.n === fromName; });
       if (!inv || inv.q < cost) return;
-      inv.q -= cost;
-      // Add to inventory
-      var existing = MOCK_PLAYER_INVENTORY.find(function(i){ return i.n === toName; });
-      if (existing) existing.q++;
-      else MOCK_PLAYER_INVENTORY.push({ n: toName, q: 1, get id(){return 'fusion_'+toName;}, get icon(){return getItemData(this.n).e;}, get value(){return getItemData(this.n).v;}, get name(){return this.n;} });
+      function _mirror(){
+        inv.q -= cost;
+        var existing = MOCK_PLAYER_INVENTORY.find(function(i){ return i.n === toName; });
+        if (existing) existing.q++;
+        else MOCK_PLAYER_INVENTORY.push({ n: toName, q: 1, get id(){return 'fusion_'+toName;}, get icon(){return getItemData(this.n).e;}, get value(){return getItemData(this.n).v;}, get name(){return this.n;} });
+      }
+      // Consolidação client F4 (2026-06-25): em REMOTE o SERVIDOR funde (valida posse das
+      // 3 + remove + adiciona a superior). Antes só mutava o MOCK → as 3 gemas SUMIAM no reload.
+      if (window.vCityServer && window.vCityServer.isRemote()) {
+        try {
+          var r = await window.vCityServer.inventory.fuseGems(fromName);
+          if (!r || r.ok === false) {
+            vToast((r && r.msg) || ('Não foi possível fundir ' + fromName + '.'));
+            return;
+          }
+          _mirror();
+          vToast(r.msg || ('💎 3× ' + fromName + ' → 1× ' + toName + '!'));
+          ov.classList.remove('active');
+          try { if (window.vInventory && typeof _vinvBuildConfig === 'function') vInventory.refresh(_vinvBuildConfig().player); } catch (_eR) {}
+          _renderInventoryPopup();
+          return;
+        } catch (e) {
+          console.error('[CITY] inventory.fuse_gems failed', e);
+          vToast('Falha ao fundir (rede).');
+          return;
+        }
+      }
+      // LOCAL fallback (file://)
+      _mirror();
       vToast('💎 3× ' + fromName + ' → 1× ' + toName + '!');
       ov.classList.remove('active');
       _renderInventoryPopup();
@@ -41878,9 +41962,8 @@ function _showSlotModal(slot){
       if (existing) existing.q++;
       else MOCK_PLAYER_INVENTORY.push({ n: current, q: 1, get id(){return 'eq_'+current;}, get icon(){return getItemData(this.n).e;}, get value(){return getItemData(this.n).v;}, get name(){return this.n;} });
       vToast('🛡️ ' + current + ' desequipado de ' + _getActiveTargetName() + '.');
-      // Consolidação client (2026-06-25): persiste o equip do PLAYER no servidor
-      // (equip.set). Guard p/ player — ally é tratado na Fase 2 (party_status).
-      if (window._invActiveTarget === 'player' && typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
+      // Consolidação client: persiste no servidor — player→equip.set, aliado→equip.set_ally.
+      _persistEquipForActiveTarget();
       ov.classList.remove('active');
       _renderInventoryPopup();
     }
@@ -41899,7 +41982,7 @@ function _showSlotModal(slot){
       var inv = MOCK_PLAYER_INVENTORY.find(function(i){ return i.n === name; });
       if (inv) inv.q = Math.max(0, inv.q - 1);
       vToast('⚔️ ' + name + ' equipado em ' + _getActiveTargetName() + '!');
-      if (window._invActiveTarget === 'player' && typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
+      _persistEquipForActiveTarget();  // player→equip.set, aliado→equip.set_ally
       ov.classList.remove('active');
       _renderInventoryPopup();
     });
@@ -41945,9 +42028,8 @@ function _doAutoEquip(){
   });
   if (equipped > 0){
     vToast('✨ ' + equipped + ' equipamento(s) otimizado(s) em ' + _getActiveTargetName() + '!');
-    // Consolidação client (2026-06-25): persiste o auto-equip do PLAYER no servidor
-    // (equip.set). Guard p/ player — ally na Fase 2.
-    if (window._invActiveTarget === 'player' && typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
+    // Consolidação client: persiste o auto-equip — player→equip.set, aliado→equip.set_ally.
+    _persistEquipForActiveTarget();
     _renderInventoryPopup();
   } else {
     vToast('✅ ' + _getActiveTargetName() + ' já está com os melhores!');
