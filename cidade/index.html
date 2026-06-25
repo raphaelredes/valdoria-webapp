@@ -10783,6 +10783,18 @@ function _isCTA(btn) {
         window._triggerArenaFightRemote();
         return;
       }
+      // 1.6b ARENA TIER / DESAFIAR → mesmo combate REAL server-authoritative
+      //     (auditoria server-driven 2026-06-25). O hub épico usa arena_tier_<id> e
+      //     arena_challenge (o 1.6 só pegava o arena_fight_* legado), então estes caíam
+      //     no _arenaTier mock (Math.random decidia vitória + gold/HP fabricados). Agora
+      //     arena_tier_<id> manda o tier escolhido (servidor valida desbloqueio) e
+      //     arena_challenge manda '' (servidor usa o tier do nível). LOCAL → mock (dev).
+      if ((action === 'arena_challenge' || action.indexOf('arena_tier_') === 0)
+          && window.vCityServer && vCityServer.isRemote && vCityServer.isRemote()
+          && typeof window._triggerArenaTierRemote === 'function') {
+        window._triggerArenaTierRemote(action.indexOf('arena_tier_') === 0 ? action.slice(11) : '');
+        return;
+      }
       // 1.7 MINI-ATIVIDADES → server-authoritative (#0, 2026-06-18). Em REMOTE, aposta/
       //     jogo/coleta/flavor/evento/invest encenam no SERVIDOR (rola + aplica reward
       //     com teto diário) em vez do mock client-side (Math.random + p.gold+=/_gainXp).
@@ -48993,7 +49005,13 @@ function _showConfirmPurchase(opts){
     if (GROUP_MEMBERS[j] && !GROUP_MEMBERS[j].dead) allyTotal2 += (GROUP_MEMBERS[j].gold || 0);
   }
   var canBorrow = !canAfford && (p.gold + allyTotal2) >= opts.cost;
-  var canDebt = !canAfford && opts.allowDebt;
+  // Auditoria server-driven 2026-06-25: "Pagar depois" (dívida) roda
+  // _processTempleServiceOnDebt no cliente (Math.random cura/bênção + HP/buff/
+  // condição + dívida mock, SEM servidor) — e não há endpoint server de
+  // cura-a-crédito. Gateado a LOCAL (file://): em REMOTE o jogador pobre recebe a
+  // rejeição honesta, igual ao caminho à-vista que JÁ é server-driven (_templeServiceRemote).
+  var _cppRemote = !!(window.vCityServer && vCityServer.isRemote && vCityServer.isRemote());
+  var canDebt = !canAfford && opts.allowDebt && !_cppRemote;
   if (canAfford) {
     if (creditMode) {
       confirmBtn.innerHTML = 'Confirmar (recebe ' + _fmtV(opts.cost) + ' ' + coinIco + ')';
@@ -52636,6 +52654,35 @@ window._triggerArenaFightRemote = function(){
     .catch(function(e){
       try { if (window.vProcessing && vProcessing.hide) vProcessing.hide(); } catch (_) {}
       console.error('[CITY] arena_stage_combat', e);
+      vToast('Erro ao entrar na arena.', 'err');
+    });
+};
+// ARENA TIER / DESAFIAR server-authoritative (auditoria 2026-06-25). Igual ao
+// _triggerArenaFightRemote, mas manda o tier escolhido (arena_tier_<id>) — o
+// servidor encena o combate REAL do tier (valida desbloqueio) e devolve a URL do
+// combat2. tierId '' → servidor usa o tier do nível (CTA DESAFIAR).
+window._triggerArenaTierRemote = function(tierId){
+  var a = window.__CITY_AUTH || {};
+  if (!a.token || !a.uid) { vToast('Sessão inválida — recarregue a cidade.', 'err'); return; }
+  try { if (window.vProcessing && vProcessing.show) vProcessing.show({ text: 'Entrando na arena…' }); } catch (_) {}
+  fetch((a.api || '') + '/api/arena/stage_combat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: a.token, user_id: a.uid, tier_id: tierId || '' })
+  }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+    .then(function(res){
+      var d = res.j || {};
+      if (res.ok && d.redirect_url) {
+        window.__valdoria_transitioning = true;
+        window.location.href = d.redirect_url;
+        return;
+      }
+      try { if (window.vProcessing && vProcessing.hide) vProcessing.hide(); } catch (_) {}
+      vToast(d.message || 'Não foi possível entrar na arena agora.', 'warn');
+    })
+    .catch(function(e){
+      try { if (window.vProcessing && vProcessing.hide) vProcessing.hide(); } catch (_) {}
+      console.error('[CITY] arena_stage_tier', e);
       vToast('Erro ao entrar na arena.', 'err');
     });
 };
@@ -60977,6 +61024,11 @@ function _resolveOfferChoice(player, offerChoice, subResult) {
 
   if (subResult === 'apply_now' && offerChoice.effect) {
     var ef = offerChoice.effect;
+    // Auditoria server-driven 2026-06-25: persiste os ganhos da oferta da praça no
+    // servidor em REMOTE (antes mutava só o cliente e SUMIA no reload — o XP já
+    // persistia via _gainXp; gold/hp ficavam órfãos). service.gold/service.hp são
+    // capados no backend (anti-fabricação). LOCAL (file://) segue só otimista.
+    var _offRemote = !!(window.vCityServer && vCityServer.isRemote && vCityServer.isRemote());
     if (ef.xp) {
       _gainXp(player, ef.xp);
       pushXpDelta(ef.xp);
@@ -60986,11 +61038,13 @@ function _resolveOfferChoice(player, offerChoice, subResult) {
       player.hp = Math.min(hpMax, (player.hp || 0) + ef.hp_heal);
       deltas.push({ type: 'hp', label: 'HP', from: preHp, to: player.hp,
                     max: hpMax, bar: true });
+      try { if (_offRemote) vCityServer.cityAction('service.hp', { amount: ef.hp_heal, service_id: 'plaza_offer' }); } catch (_) {}
     }
     if (ef.gold) {
       player.gold = (player.gold || 0) + ef.gold;
       deltas.push({ type: 'gold', label: 'Bolsa', from: preGold, to: player.gold,
                     max: Math.max(preGold, player.gold, 1), bar: false });
+      try { if (_offRemote && vCityServer.service && vCityServer.service.gold) vCityServer.service.gold(ef.gold, 'plaza_offer'); } catch (_) {}
     }
   } else if (subResult === 'take_along' && offerChoice.item) {
     _applyBoughtItem(offerChoice.item);
