@@ -10486,10 +10486,12 @@ function _isCTA(btn) {
     equip: {  // FASE 6 — persiste Player.equipment (anti-cheat server-side)
       set: function(eq){ return window.vCityServer.cityAction('equip.set', { equipment: eq || {} }); }
     },
-    inventory: {  // FASE 6 (2026-06-23) — vender/usar item da Mochila persiste no servidor
-      // (apply_sell/apply_use canônicos: 60% PHB, tags protegidas, cura por fórmula).
-      sell: function(name){ return window.vCityServer.cityAction('inventory.sell', { item: name }); },
-      use:  function(name){ return window.vCityServer.cityAction('inventory.use',  { item: name }); }
+    inventory: {  // FASE 6 (2026-06-23) — vender/usar/largar item da Mochila persiste no servidor
+      // (apply_sell/apply_use/apply_discard canônicos: 60% PHB, tags protegidas, cura por fórmula).
+      sell:    function(name){ return window.vCityServer.cityAction('inventory.sell',    { item: name }); },
+      use:     function(name){ return window.vCityServer.cityAction('inventory.use',     { item: name }); },
+      // Consolidação client 2026-06-25: largar persiste no servidor (antes só no mock → reaparecia).
+      discard: function(name){ return window.vCityServer.cityAction('inventory.discard', { item: name }); }
     },
     relations: {  // FASE 4 (2026-06-23) — lista de Vínculos montada NO SERVIDOR (de Player.narrative):
       // qualquer NPC com reputação/afinidade real aparece (sem lista hardcoded no cliente).
@@ -40682,12 +40684,34 @@ async function _sellSingleItem(name) {
   if (typeof refreshHud === 'function') refreshHud();
   return true;
 }
-function _dropItem(name) {
+async function _dropItem(name) {
   var tags = _itemTagsOf(name);
   if (tags.indexOf('no_discard') !== -1 || tags.indexOf('quest') !== -1) {
     if (typeof vToast === 'function') vToast(name + ' não pode ser largado.');
     return false;
   }
+  // Consolidação client (audit #0, 2026-06-25): em REMOTE o SERVIDOR descarta +
+  // persiste (apply_discard: respeita tags protegidas/locked + valida posse). Antes
+  // só removia do MOCK_PLAYER_INVENTORY e o item REAPARECIA no reload.
+  if (window.vCityServer && window.vCityServer.isRemote()) {
+    try {
+      var r = await window.vCityServer.inventory.discard(name);
+      if (!r || r.ok === false) {
+        if (typeof vToast === 'function') vToast((r && r.msg) || (name + ' não pode ser largado.'));
+        return false;
+      }
+      if (_isItemEquipped(name)) _unequipItem(name);
+      _removeItemFromInventory(name, 1);  // espelha o que o servidor já fez
+      if (typeof vToast === 'function') vToast(r.msg || (name + ' largado.'));
+      try { if (window.vInventory && typeof _vinvBuildConfig === 'function') vInventory.refresh(_vinvBuildConfig().player); } catch (_eR) {}
+      return true;
+    } catch (e) {
+      console.error('[CITY] inventory.discard failed', e);
+      if (typeof vToast === 'function') vToast('Falha ao largar (rede).');
+      return false;
+    }
+  }
+  // LOCAL fallback (file:// dev tool) — remoção client-side
   if (_isItemEquipped(name)) _unequipItem(name);
   var removed = _removeItemFromInventory(name, 1);
   if (removed <= 0) {
@@ -41854,6 +41878,9 @@ function _showSlotModal(slot){
       if (existing) existing.q++;
       else MOCK_PLAYER_INVENTORY.push({ n: current, q: 1, get id(){return 'eq_'+current;}, get icon(){return getItemData(this.n).e;}, get value(){return getItemData(this.n).v;}, get name(){return this.n;} });
       vToast('🛡️ ' + current + ' desequipado de ' + _getActiveTargetName() + '.');
+      // Consolidação client (2026-06-25): persiste o equip do PLAYER no servidor
+      // (equip.set). Guard p/ player — ally é tratado na Fase 2 (party_status).
+      if (window._invActiveTarget === 'player' && typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
       ov.classList.remove('active');
       _renderInventoryPopup();
     }
@@ -41872,6 +41899,7 @@ function _showSlotModal(slot){
       var inv = MOCK_PLAYER_INVENTORY.find(function(i){ return i.n === name; });
       if (inv) inv.q = Math.max(0, inv.q - 1);
       vToast('⚔️ ' + name + ' equipado em ' + _getActiveTargetName() + '!');
+      if (window._invActiveTarget === 'player' && typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
       ov.classList.remove('active');
       _renderInventoryPopup();
     });
@@ -41917,6 +41945,9 @@ function _doAutoEquip(){
   });
   if (equipped > 0){
     vToast('✨ ' + equipped + ' equipamento(s) otimizado(s) em ' + _getActiveTargetName() + '!');
+    // Consolidação client (2026-06-25): persiste o auto-equip do PLAYER no servidor
+    // (equip.set). Guard p/ player — ally na Fase 2.
+    if (window._invActiveTarget === 'player' && typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
     _renderInventoryPopup();
   } else {
     vToast('✅ ' + _getActiveTargetName() + ' já está com os melhores!');
@@ -42041,6 +42072,9 @@ function _showItemDetail(name){
         else MOCK_PLAYER_INVENTORY.push({ n: prev, q: 1, get id(){return 'eq_'+prev;}, get icon(){return getItemData(this.n).e;}, get value(){return getItemData(this.n).v;}, get name(){return this.n;} });
       }
       vToast('⚔️ ' + name + ' equipado!');
+      // Consolidação client (2026-06-25): persiste no servidor (equip.set). Muta
+      // MOCK_PLAYER_EQUIPPED direto (sempre player) → sync incondicional.
+      if (typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
       ov.classList.remove('active');
       _renderInventoryPopup();
     }
@@ -42054,25 +42088,22 @@ function _showItemDetail(name){
       if (existing) existing.q++;
       else MOCK_PLAYER_INVENTORY.push({ n: name, q: 1, get id(){return 'eq_'+name;}, get icon(){return getItemData(this.n).e;}, get value(){return getItemData(this.n).v;}, get name(){return this.n;} });
       vToast('🛡️ ' + name + ' desequipado.');
+      if (typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
       ov.classList.remove('active');
       _renderInventoryPopup();
     }
   });
   var useBtn = document.getElementById('inv-detail-use');
   if (useBtn) useBtn.addEventListener('click', function(){
-    var p = window.CITY_MOCK_PLAYER;
-    if (!p) return;
-    var msg = '✨ ' + name + ' usado.';
-    if (it.hb && p.hp < p.hpMax){
-      var heal = Math.min(it.hb, p.hpMax - p.hp);
-      p.hp += heal;
-      refreshHud();
-      msg = '🧪 ' + name + ' usado. +' + heal + ' HP';
-    }
-    if (inv) inv.q = Math.max(0, inv.q - 1);
-    vToast(msg);
+    // Consolidação client (2026-06-25): usar item persiste no SERVIDOR via o caminho
+    // canônico _useInventoryItem (inventory.use → apply_use: cura PHB + consome +
+    // persiste). Antes este handler curava só o CITY_MOCK_PLAYER e SUMIA no reload.
     ov.classList.remove('active');
-    _renderInventoryPopup();
+    if (typeof _useInventoryItem === 'function') {
+      _useInventoryItem(name).then(function(){ if (typeof _renderInventoryPopup === 'function') _renderInventoryPopup(); });
+    } else {
+      _renderInventoryPopup();
+    }
   });
 }
 
