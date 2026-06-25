@@ -35249,8 +35249,8 @@ function _squareGetDailyNpcPool(p){
     }
   });
 
-  // Sorteia 5-7 (canonical TARGET_POOL_SIZE varia)
-  var count = 5 + Math.floor(rng() * 3);  // 5-7
+  // G (2026-06-24): variação de 3 a 7 pessoas na praça (user).
+  var count = 3 + Math.floor(rng() * 5);  // 3-7
   var pool = combined.slice();
   var visible = [];
   for (var i = 0; i < count && pool.length > 0; i++){
@@ -35261,14 +35261,41 @@ function _squareGetDailyNpcPool(p){
 }
 
 function _squareShowInvestigatePopup(p){
+  // G (2026-06-24): tela ÉPICA estilo Recruta (banner-cenário + cards com RETRATO),
+  // SEM ícones cinza (fallback = retrato aldeao.webp). O diálogo segue PADRAO_ALDRIC
+  // (_showSharedNpcDialogue / vEncounter). Variação de 3 a 7 pessoas (_squareGetDailyNpcPool).
   var visible = _squareGetDailyNpcPool(p);
-  _showSharedNpcListPopup({
+  var _portraitFor = function(npc){
+    var ph = npc.portraitImg || (typeof _plazaPhotoFor === 'function' ? _plazaPhotoFor(npc) : '');
+    if (!ph){ try { ph = _discoverySpeakerPortrait((npc.name || '') + ' ' + (npc.role || '')); } catch(_e){} }
+    return ph || '/shared/img/npcs/aldeao.webp';  // retrato genérico, NUNCA ícone
+  };
+  var items = visible.map(function(npc){
+    var more = (typeof _npcHasMore === 'function') ? _npcHasMore(npc) : true;
+    return {
+      portrait: _portraitFor(npc),
+      label: npc.name,
+      desc: (npc.role || 'Cidadão') + (more ? '' : ' · ✓ conhecido'),
+      _npc: npc
+    };
+  });
+  _squareShowListPopup({
     stackKey: 'square_investigate',
-    icon: _heralIco('ic-mochila'),
     title: 'Pessoas na Praça',
-    flavor: 'Você varre a praça com o olhar. ' + visible.length + ' pessoas chamam sua atenção hoje.',
-    npcs: visible,
-    player: p
+    subtitle: 'Largo Central',
+    bannerImg: '/shared/img/city/praca-banner.webp',
+    flavor: 'Você corre os olhos pelo largo. <i>' + visible.length + ' figuras</i> se destacam na multidão — cada qual com uma história a contar a quem se aproxima.',
+    sectionLabel: 'Pessoas presentes',
+    items: items,
+    onPick: function(item){
+      if (item && item._npc){
+        _showSharedNpcDialogue({
+          npc: item._npc,
+          player: p,
+          parentRestoreFn: function(){ _squareShowInvestigatePopup(p); }
+        });
+      }
+    }
   });
 }
 
@@ -47088,6 +47115,34 @@ function _titleHeraldic(id){
   return _heralIco(M[id] || 'ic-coroa');
 }
 function _heroesShowTitles(p){
+  // F (2026-06-24): GATING server-authoritative — destaca os títulos CONQUISTADOS vs os
+  // a conquistar (service.mural_titles: earned/active). Fallback LOCAL = _heroesShowTitlesLocal.
+  if (window.vCityServer && window.vCityServer.isRemote()){
+    window.vCityServer.cityAction('service.mural_titles', {}).then(function(res){
+      if (!res || !res.ok || !res.titles){ _heroesShowTitlesLocal(p); return; }
+      var rows = res.titles.map(function(t){
+        var ic = _titleHeraldic(t.id);
+        if (t.earned){
+          var act = t.active ? ' <span style="color:var(--v-gold,#c4953a)">(ativo)</span>' : '';
+          return '<div style="margin-bottom:10px">' + ic + ' <b style="color:var(--v-gold,#c4953a)">' + t.label + '</b>' + act +
+                 ' <span style="color:var(--v-green, #6fbf73)">✓ conquistado</span><br><i>' + (t.desc || '') + '</i></div>';
+        }
+        return '<div style="margin-bottom:10px;opacity:0.5">' + ic + ' <b>' + t.label + '</b>' +
+               (t.threshold ? ' <span style="opacity:.7">(' + t.threshold + ')</span>' : '') +
+               ' <span style="opacity:.6">— a conquistar</span><br><i>' + (t.desc || '') + '</i></div>';
+      }).join('');
+      _showInfoPopup({
+        icon: _heralIco('ic-coroa'), npc: 'Mural dos Aventureiros',
+        title: 'Títulos · ' + (res.earned_count || 0) + '/' + (res.total || res.titles.length) + ' conquistados',
+        desc: '<i>Cada título é gravado abaixo do seu nome quando você cumpre o feito correspondente.</i><br><br>' + rows,
+        onConfirm: function(){}
+      });
+    }).catch(function(_e){ _heroesShowTitlesLocal(p); });
+    return;
+  }
+  _heroesShowTitlesLocal(p);
+}
+function _heroesShowTitlesLocal(p){
   // canonical: heroes_wall_data.py TITLES via CANON_HEROES_FULL.titles (11 entries).
   // Fallback: MURAL_TITLES legacy se canonical nao tiver entry.
   var canon = (typeof CANON_HEROES_FULL !== 'undefined' && CANON_HEROES_FULL.titles)
