@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-24T13:10:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-25T11:01:56Z - do not edit directly, edit source -->
 
 
 
@@ -15267,6 +15267,17 @@ window.__explFetchTO = function(url, opts, ms) {
           console.info('[E-REM:API-INIT] known_locations=' + window.__EXPLORE_KNOWN.length + ' [' + window.__EXPLORE_KNOWN.join(',') + ']');
           if (typeof _xcartDraw === 'function' && typeof _xcartCtx !== 'undefined' && _xcartCtx) { try { _xcartDraw(); } catch (_ekd) {} }
         }
+        /* Server-Only State (regra #0): o inventário da exploração vem do SERVIDOR no
+           /init (não mais do localStorage da cidade — proibido localStorage como cache
+           de dados do servidor). Converte {i,q,ico,v} (formato do snap.inv) → o formato
+           que _readSharedInventory entrega. LOCAL/old server → res.inv ausente → fica
+           null e cai no fallback localStorage. */
+        if (Array.isArray(res.inv)) {
+          window.__EXPLORE_SERVER_INV = res.inv.map(function (it) {
+            return { name: it.i, quantity: it.q, icon: it.ico || '', value: it.v || 0 };
+          });
+          console.info('[E-REM:API-INIT] server_inv=' + window.__EXPLORE_SERVER_INV.length);
+        }
         // #map-toast (2026-06-23): o servidor avisa quando ESTA chegada revelou um local NOVO →
         // notificação padrão (PADRAO_NOTIFICACOES) nomeando o local + que dá pra voltar pela viagem.
         // DEFER: o /init resolve DURANTE a tela de carregamento (5s) — firar já esconderia o toast
@@ -15612,7 +15623,13 @@ window.__applyExploreSnap = function(S, snap) {
           value: (typeof it.v === 'number') ? it.v : ((typeof _meta.value === 'number') ? _meta.value : 0)
         };
       }).filter(function(x) { return x.name; });
-      if (_sharedSync.length) localStorage.setItem(SHARED_INVENTORY_KEY, JSON.stringify(_sharedSync));
+      if (_sharedSync.length) {
+        localStorage.setItem(SHARED_INVENTORY_KEY, JSON.stringify(_sharedSync));
+        // Server-Only State (regra #0): atualiza TAMBÉM o inventário autoritativo do
+        // servidor que _readSharedInventory prefere — senão a mochila mostraria o
+        // inventário stale do /init em vez do pós-combate (loot novo / itens gastos).
+        window.__EXPLORE_SERVER_INV = _sharedSync;
+      }
     } catch (_eSync) {}
   }
   // Quests ativas (substitui — snap tem autoritativo)
@@ -35241,9 +35258,14 @@ var EXPLORACAO_DEFAULT_INVENTORY = [
   { name: 'Elmo do Protetor Ancestral',  quantity: 1, icon: '⛑️', value: 60 }
 ];
 
-// Reads inventory from shared localStorage (set by cidade.html on boot).
-// Fallback to default mock if empty/invalid.
+// Server-Only State (regra #0): a fonte de verdade do inventário é o SERVIDOR
+// (setado pelo /init em window.__EXPLORE_SERVER_INV). localStorage e o mock só
+// existem como fallback p/ LOCAL (file://) ou server antigo sem res.inv.
 function _readSharedInventory() {
+  // Inventário autoritativo do servidor (mesmo vazio = sem itens, NÃO cai no mock).
+  if (Array.isArray(window.__EXPLORE_SERVER_INV)) {
+    return window.__EXPLORE_SERVER_INV.slice();
+  }
   try {
     var raw = localStorage.getItem(SHARED_INVENTORY_KEY);
     if (raw) {
