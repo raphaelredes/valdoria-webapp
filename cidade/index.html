@@ -26405,17 +26405,6 @@ var CANON_PLAZA_OBJECTS = {
     ],
     "line_key": "sq_fountain"
   },
-  "board": {
-    "name": "Quadro de Avisos",
-    "rumors": [
-      "Procura-se: Matador de Ratos para o porao da Taverna.",
-      "Festival da Colheita acontecera em breve!",
-      "Cuidado com os bosques ao norte a noite.",
-      "Vende-se: Espada usada, levemente enferrujada.",
-      "A Guilda esta recrutando!"
-    ],
-    "line_key": "sq_board"
-  },
   "statue": {
     "name": "Estatua de Eldor, o Primeiro",
     "text": "🗿 <b>Estatua de Eldor, o Primeiro</b>\nErguida em frente a grande catedral de vitrais coloridos, a estatua vigia o mercado.\nA placa diz: <i>\"Aqui fundamos este refugio contra as sombras. Que a luz jamais se apague.\"</i>\nVocê se sente inspirado pela história."
@@ -26433,7 +26422,6 @@ var CANON_PLAZA_LIA_OVERRIDE = {
   ]
 };
 var CANON_PLAZA_OBJECT_FALLBACK = "Você examina o objeto, mas nada acontece.";
-var CANON_PLAZA_BOARD_TEMPLATE = "Você lê os avisos:\n\n📜 <i>\"{rumor}\"</i>";
 
 // canonical: cartographer_data.py — sistema completo do Mestre Cartografo
 var CANON_CARTOGRAPHER = {
@@ -35414,7 +35402,6 @@ function _squareShowObjectsPopup(p){
   var keys = Object.keys(CANON_PLAZA_OBJECTS);
   var ICONS = {
     fountain: _heralIco('ic-praca'),     // fonte → brasão da praça
-    board:    _heralIco('ic-mensagem'),   // quadro de avisos
     statue:   _heralIco('ic-paladino')   // estátua de aventureiro/cavaleiro
   };
   var items = keys.map(function(k){
@@ -35428,7 +35415,7 @@ function _squareShowObjectsPopup(p){
   });
   _squareShowListPopup({
     icon: _heralIco('ic-mochila'), stackKey: 'square_objects', title: 'Objetos da Praça',
-    flavor: '<i>Fonte de pedra, quadro de avisos e estátua de Eldor — cada um com sua história.</i>',
+    flavor: '<i>Fonte de pedra e estátua de Eldor — cada uma com sua história.</i>',
     items: items,
     onPick: function(item){
       var k = item._key;
@@ -35442,18 +35429,6 @@ function _squareShowObjectsPopup(p){
         _showInfoPopup({
           icon: icon, npc: obj.name, title: 'Estátua de Eldor',
           desc: statueText,
-          onConfirm: function(){}
-        });
-        return;
-      }
-
-      // Quadro de avisos: mostra rumor canonical aleatorio (canonical L18-25)
-      if (k === 'board'){
-        var rumor = obj.rumors[Math.floor(Math.random() * obj.rumors.length)];
-        var msg = CANON_PLAZA_BOARD_TEMPLATE.replace('{rumor}', rumor);
-        _showInfoPopup({
-          icon: icon, npc: obj.name, title: 'Quadro Antigo',
-          desc: msg.replace(/\n/g, '<br>'),
           onConfirm: function(){}
         });
         return;
