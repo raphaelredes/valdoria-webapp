@@ -9036,6 +9036,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.ach_unlocked != null) p.ach_unlocked = picked.ach_unlocked;
       if (picked.ach_total != null)    p.ach_total = picked.ach_total;
       if (picked.kills != null)        p.kills = picked.kills;
+      if (picked.kills_by_type != null) p.kills_by_type = picked.kills_by_type;  // #9: abates por espécie REAIS
       if (picked.win_streak != null)   p.win_streak = picked.win_streak;
       // Forasteiro: reputação da praça (server-authoritative) → título sob o banner.
       if (picked.town_rep != null){ p.metadata = p.metadata || {}; p.metadata.town_rep = picked.town_rep; }
@@ -15961,8 +15962,25 @@ function _showKillsPopup(p){
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = 'Abates';
-  var total = KILLS_BY_TYPE.reduce(function(a, b){ return a + b.kills; }, 0);
-  var top = KILLS_BY_TYPE.slice().sort(function(a,b){return b.kills-a.kills;})[0] || {type:'—',kills:0};
+  // Auditoria server-driven 2026-06-25 (#9): breakdown REAL de p.kills_by_type (servidor);
+  // KILLS_BY_TYPE vira só lookup de ícone/png/cr por espécie. REMOTE sem dados → vazio
+  // (NÃO fabrica o mock); total sempre do p.kills real em REMOTE. LOCAL (file://) = mock dev.
+  var _isFileKl = (location.protocol === 'file:');
+  var _kbtSrv = (p && p.kills_by_type && typeof p.kills_by_type === 'object') ? p.kills_by_type : null;
+  var _hasSrvKl = !!(_kbtSrv && Object.keys(_kbtSrv).length > 0);
+  var _klLookup = {};
+  KILLS_BY_TYPE.forEach(function(k){ _klLookup[k.type] = k; });
+  var KBT = _hasSrvKl
+    ? Object.keys(_kbtSrv).map(function(name){
+        var ref = _klLookup[name] || {};
+        return { type: name, kills: (_kbtSrv[name] || 0),
+                 icon: ref.icon || 'ic-inimigo', png: ref.png || '', cr: ref.cr || '?' };
+      }).sort(function(a, b){ return b.kills - a.kills; })
+    : (_isFileKl ? KILLS_BY_TYPE.slice() : []);
+  var total = (!_isFileKl && p && typeof p.kills === 'number')
+    ? p.kills
+    : KBT.reduce(function(a, b){ return a + b.kills; }, 0);
+  var top = KBT.slice().sort(function(a,b){return b.kills-a.kills;})[0] || {type:'—',kills:0};
   // CR cor escalada (verde→amarelo→vermelho→roxo)
   function _crColor(cr){
     var c = parseFloat((cr || '0').toString().replace(/[^\d/.]/g,'')) || 0;
@@ -15974,7 +15992,7 @@ function _showKillsPopup(p){
     return '#7cdb7c';
   }
   // Compute ranking (top 3 ganham medalha)
-  var ranking = KILLS_BY_TYPE.slice().sort(function(a,b){return b.kills-a.kills;});
+  var ranking = KBT.slice().sort(function(a,b){return b.kills-a.kills;});
   var rankMap = {};
   ranking.forEach(function(r, i){ rankMap[r.type] = i + 1; });
   // X-6.5.51BB (2026-05-11): elevou tela Abates pra AAA "Diablo IV Trophy Hall":
@@ -16114,8 +16132,8 @@ function _showKillsPopup(p){
     if (c >= 1)  return 'Novato';
     return 'Iniciante';
   }
-  KILLS_BY_TYPE.forEach(function(k, idx){
-    var pct = Math.round(k.kills / total * 100);
+  KBT.forEach(function(k, idx){
+    var pct = total ? Math.round(k.kills / total * 100) : 0;
     var crCol = _crColor(k.cr);
     var crLbl = _crLabel(k.cr);
     var iconCol = HERALDIC_COLORS[k.icon] || '#8a7a6a';
@@ -61127,8 +61145,19 @@ function _resolveOfferChoice(player, offerChoice, subResult) {
       try { if (_offRemote && vCityServer.service && vCityServer.service.gold) vCityServer.service.gold(ef.gold, 'plaza_offer'); } catch (_) {}
     }
   } else if (subResult === 'take_along' && offerChoice.item) {
-    _applyBoughtItem(offerChoice.item);
-    // Pequeno XP por aceitar (não rejeitar)
+    // Auditoria server-driven 2026-06-25 (#6): em REMOTE o SERVIDOR concede + persiste o
+    // item (inventory.grant_offer, allowlist anti-cheat); o cliente só espelha após o OK.
+    // Antes _applyBoughtItem adicionava ao MOCK_PLAYER_INVENTORY + localStorage e SUMIA
+    // no reload. LOCAL (file://) mantém a concessão direta (dev tool).
+    var _taRemote = !!(window.vCityServer && vCityServer.isRemote && vCityServer.isRemote());
+    if (_taRemote && vCityServer.cityAction) {
+      vCityServer.cityAction('inventory.grant_offer', { item: offerChoice.item }).then(function(res){
+        if (res && res.ok) _applyBoughtItem(offerChoice.item);  // espelha o item que o servidor concedeu
+      }).catch(function(e){ console.error('[CITY] plaza_grant_offer', e); });
+    } else {
+      _applyBoughtItem(offerChoice.item);
+    }
+    // Pequeno XP por aceitar (não rejeitar) — _gainXp já persiste via service.xp em REMOTE
     _gainXp(player, 1);
     pushXpDelta(1);
     deltas.push({ type: 'gold', label: 'Mochila', from: 0, to: 1,
