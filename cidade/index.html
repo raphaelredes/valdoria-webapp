@@ -33874,11 +33874,29 @@ function _squareShowArtistsPopup(p){
     if (typeof vToast === 'function') vToast('Indisponível offline'); return;
   }
   window.vCityServer.cityAction('service.square_artists_intro', {}).then(function(res){
-    if (!res || !res.ok || !res.performers || !res.performers.length){
-      if (typeof vToast === 'function') vToast('Os artistas recolheram-se por ora.'); return;
-    }
+    if (!res || !res.ok){ if (typeof vToast === 'function') vToast('Os artistas recolheram-se por ora.'); return; }
+    // D (2026-06-24): roda ENCERRADA (saciado de arte OU chances do dia esgotadas) -> narração + sair.
+    if (res.closed || !res.performers || !res.performers.length){ _squareArtistClosed(p, res); return; }
     _squareArtistShow(p, res, 0, true);
   }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na praça.'); });
+}
+
+// D (2026-06-24): roda dos artistas ENCERRADA — saciado (já tem bênção) ou gastou as
+// chances do dia. Narração imersiva (servidor) + só "Seguir caminho". O badge "✓" na
+// Praça reflete a bênção ativa enquanto durar (até o descanso).
+function _squareArtistClosed(p, res){
+  if (!window.vEncounter || typeof window.vEncounter.render !== 'function'){
+    if (typeof _squareTxnReturnToHub === 'function') _squareTxnReturnToHub(); return;
+  }
+  var txt = (res && res.scene && res.scene[0] && res.scene[0].text) || 'Os artistas recolheram-se por ora.';
+  window.vEncounter.render({
+    npc: { id: 'artists_closed', name: 'Artistas de Rua', desc: '' },
+    script: [{ type: 'narration', text: txt }],
+    choices: [{ id: 'leave', label: 'Seguir caminho' }]
+  }, {
+    player: window.CITY_MOCK_PLAYER, closeable: true,
+    onChoice: function(){ try { window.vEncounter.close(); } catch(_e){} }
+  });
 }
 
 // Carrossel: mostra UM performer por vez COM o retrato (PADRAO_WEBP). A cena de
@@ -33917,6 +33935,8 @@ function _squareArtistTip(p, data, perf){
   window.vCityServer.cityAction('service.square_artist_tip', { npc_key: perf.key }).then(function(res){
     if (!res || !res.ok){
       var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para a gorjeta.'
+               : (res && res.error === 'already_active') ? 'Você já está saciado de arte por ora.'
+               : (res && res.error === 'already_tipped') ? 'Você já gorjeteou esse artista hoje.'
                : (res && res.error === 'bad_artist') ? 'Artista indisponível.'
                : 'Não foi possível dar a gorjeta agora.';
       if (typeof vToast === 'function') vToast(emsg); return;
@@ -33930,12 +33950,9 @@ function _squareArtistTip(p, data, perf){
       if (_cp && _cp.metadata){ _cp.metadata.artist_buff_active = perf.key; _cp.metadata.artist_buff_name = res.buff_name || perf.buff_name; }
     }
     if (typeof _refreshSquarePopupIfOpen === 'function') _refreshSquarePopupIfOpen();  // buff/badge da Praça ao vivo
-    if (res.already_active || !res.rolled){
-      _squareArtistResult(p, data, perf, res);  // já tinha bênção: sem teste
-    } else {
-      try { window.vEncounter.close(); } catch(_e){}
-      _squareRollArtistDie(p, data, perf, res);  // teste de inspiração 3D
-    }
+    // D: sempre rola o teste (com bênção ativa o servidor já rejeita acima).
+    try { window.vEncounter.close(); } catch(_e){}
+    _squareRollArtistDie(p, data, perf, res);  // teste de inspiração 3D
   }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro na gorjeta.'); });
 }
 
@@ -33970,21 +33987,21 @@ function _squareArtistResult(p, data, perf, res){
   if (!window.vEncounter || typeof window.vEncounter.render !== 'function'){
     if (typeof _squareTxnReturnToHub === 'function') _squareTxnReturnToHub(); return;
   }
-  var n = data.performers.length, idx = 0;
-  for (var i = 0; i < n; i++){ if (data.performers[i].key === perf.key){ idx = i; break; } }
+  // D (2026-06-24): conseguiu a bênção -> SACIADO, encerra (sem "ver outro"). Falhou ->
+  // pode tentar OUTRO artista (re-busca: o gorjeteado some; gastou 1 das 2-5 chances/dia).
+  var choices = res.granted
+    ? [{ id: 'leave', label: 'Seguir caminho, saciado' }]
+    : [{ id: 'next', label: 'Procurar outro artista' }, { id: 'leave', label: 'Seguir caminho' }];
   window.vEncounter.render({
     npc: { id: 'artist_' + perf.key, name: perf.name, desc: perf.desc, portraitImg: perf.portrait },
     script: [{ type: 'narration', text: res.narration || '' }],
-    choices: [
-      { id: 'next', label: 'Ver outro artista' },
-      { id: 'leave', label: 'Seguir caminho' }
-    ]
+    choices: choices
   }, {
     player: window.CITY_MOCK_PLAYER,
     onChoice: function(ch){
       var cid = (ch && ch.id) || '';
       try { window.vEncounter.close(); } catch(_e){}
-      if (cid === 'next'){ _squareArtistShow(p, data, idx + 1, false); }
+      if (cid === 'next'){ _squareShowArtistsPopup(p); }  // re-busca: artista gorjeteado some
     }
   });
 }
@@ -35630,14 +35647,19 @@ function _squareShowVendorPopup(p){
     window.vCityServer.cityAction('service.vendor_get', {}).then(function(res){
       var vid = res && res.id;
       var sv = vid ? SQUARE_AMBULANT_VENDORS.filter(function(v){ return v.id === vid; })[0] : null;
-      _squareRenderVendor(p, sv || _squareGetDailyVendor());
+      _squareRenderVendor(p, sv || _squareGetDailyVendor(), (res && res.bought) || []);
     }).catch(function(){ _squareRenderVendor(p, _squareGetDailyVendor()); });
     return;
   }
   _squareRenderVendor(p, _squareGetDailyVendor());
 }
-function _squareRenderVendor(p, vendor){
+function _squareRenderVendor(p, vendor, bought){
   window._squareVendorVisited = true;
+  // Itens unicos/dia (A): o servidor manda `bought` (indices comprados HOJE) -> somem das
+  // opcoes. _avail preserva o indice ORIGINAL (item_idx enviado ao servidor) ao filtrar.
+  var _bought = bought || (vendor && vendor._bought) || [];
+  var _avail = (vendor.items || []).map(function(it, i){ return { it: it, idx: i }; })
+                 .filter(function(o){ return _bought.indexOf(o.idx) === -1; });
   // SERVER-AUTHORITATIVE (SUPREME RULE #0): o SERVIDOR cobra E adiciona o item via
   // 'service.vendor_buy'. Resultado via _showServiceResultPopup (ícone = WEBP do item,
   // não o heráldico genérico it.icon — bug da imagem errada reportado).
@@ -35650,6 +35672,7 @@ function _squareRenderVendor(p, vendor){
     window.vCityServer.cityAction('service.vendor_buy', { item_idx: itemIdx }).then(function(res){
       if (!res || !res.ok){
         var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para comprar.'
+                 : (res && res.error === 'already_bought') ? 'Você já comprou esse item hoje.'
                  : (res && res.error === 'bad_item') ? 'Item indisponível.'
                  : 'Não foi possível comprar agora.';
         if (typeof vToast === 'function') vToast(emsg); return;
@@ -35697,7 +35720,7 @@ function _squareRenderVendor(p, vendor){
     }, {
       player: p, closeable: true,
       onChoice: function(ch){
-        if (!ch || ch.id === 'back') { _squareRenderVendor(p, v); return; }
+        if (!ch || ch.id === 'back') { _squareRenderVendor(p, v, _bought); return; }
         try { window.vEncounter.close(); } catch(_){}
         _vendorDoBuy(it, v);
       }
@@ -35724,7 +35747,8 @@ function _squareRenderVendor(p, vendor){
     ];
     if (_d) script.push({ type: 'narration', text: _d });
     script.push({ type: 'speech', speaker: vendor.name, text: '— Dá uma olhada, viajante: mercadoria boa, preço justo. <i>Só por hoje.</i>' });
-    var choices = vendor.items.map(function(it){
+    var choices = _avail.map(function(o){
+      var it = o.it;
       // item I (2026-06-18): a choice carrega o item p/ o thumbnail + detalhe
       // (encounter-popup.js renderiza). itemIcon = fallback se não houver WebP.
       return {
@@ -35734,6 +35758,8 @@ function _squareRenderVendor(p, vendor){
         itemInfo: _encItemInfo(it.name)
       };
     });
+    // Itens unicos/dia (A): tudo comprado hoje -> narra esgotado (so resta sair).
+    if (!_avail.length) script.push({ type: 'narration', text: 'O pano de feira esta quase vazio — voce ja levou hoje tudo o que ' + (vendor.name.split(',')[0]) + ' tinha de interessante.' });
     choices.push({ id: 'leave', label: '↩ "Quem sabe outra hora."' });
     window.vEncounter.render({ npc: npc, script: script, choices: choices }, {
       player: p, closeable: true,
@@ -35745,7 +35771,8 @@ function _squareRenderVendor(p, vendor){
     return;
   }
   // Fallback LOCAL (sem vEncounter): list-popup legado
-  var items = vendor.items.map(function(it){
+  var items = _avail.map(function(o){
+    var it = o.it;
     return { icon: it.icon, label: it.name, badge: it.value + ' V', _item: it, _vendor: vendor };
   });
   _squareShowListPopup({
