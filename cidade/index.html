@@ -19977,6 +19977,7 @@ function _marketShowTransient(p, npc){
                     return;
                   }
                   p.gold = res.gold;
+                  if (res.item_added) _applyBoughtItem(res.item_added, res.qty || 1);  // PADRAO_COMPRA
                   if (typeof refreshHud === 'function') refreshHud();
                   _showServiceResultPopup({
                     icon: purchaseIcon, npc: npc.name,
@@ -23209,7 +23210,7 @@ function _npcApplyTalkEffects(p, npc, opt){
     if (!alreadyDoneLocal){
       if (r.xp){ _gainXp(p, r.xp); rewardLines.push('✨ +' + r.xp + ' XP'); }
       if (r.gold){ p.gold += r.gold; rewardLines.push('<span class="vi vi-coin sm"></span> +' + r.gold + ' Valdoritas'); }
-      if (r.item){ p.inventory = p.inventory || []; p.inventory.push(r.item); rewardLines.push('🎒 Obteve: ' + r.item); }
+      if (r.item){ _applyBoughtItem(r.item); rewardLines.push('🎒 Obteve: ' + r.item); }
       if (rewardLines.length){ msgExtra = '<br><br>' + rewardLines.join('<br>'); }
     }
     if (npc._canonKey){
@@ -23445,8 +23446,7 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
         deltas.push({ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false });
       }
       if (r.item){
-        p.inventory = p.inventory || [];
-        p.inventory.push(r.item);
+        _applyBoughtItem(r.item);
         rewardLines.push('🎒 Obteve: ' + r.item);
       }
       if (r.xp){
@@ -35343,7 +35343,7 @@ function _squareShowExploreEvent(p){
       if (res.xp_granted) rewards.push({ type:'xp', amount: res.xp_granted, label: 'Experiência' });
       if (res.items_granted && res.items_granted.length){
         res.items_granted.forEach(function(nm){
-          if (Array.isArray(p.inventory)) p.inventory.push(nm);
+          _applyBoughtItem(nm);
           rewards.push({ type:'item', amount: 1, label: nm });
         });
       }
@@ -35694,7 +35694,9 @@ function _squareRenderVendor(p, vendor, bought){
         if (typeof vToast === 'function') vToast(emsg); return;
       }
       if (typeof res.gold === 'number') p.gold = res.gold;
-      if (Array.isArray(p.inventory) && res.item_name) p.inventory.push(res.item_name);
+      // PADRAO_COMPRA (2026-06-24): espelha no MOCK_PLAYER_INVENTORY o item que o
+      // servidor JA adicionou+persistiu (a mochila le esse array, nao p.inventory).
+      if (res.item_name) _applyBoughtItem(res.item_name);
       if (typeof refreshHud === 'function') refreshHud();
       _applyTownRep(res);  // Forasteiro: comprar do vendedor sobe a reputação
       _showServiceResultPopup({
@@ -39452,6 +39454,17 @@ function _addItemToInventory(itemName, qty){
   }
 }
 
+// PADRAO_COMPRA (2026-06-24): PONTO UNICO p/ espelhar no MOCK_PLAYER_INVENTORY um item
+// que o SERVIDOR ja adicionou + persistiu (qualquer compra/recompensa server-driven:
+// vendedor, mercado, mercado negro, runas, NPC unico, evento da praca, quadro de trocas).
+// A mochila le MOCK_PLAYER_INVENTORY — NUNCA usar p.inventory.push (o item nao aparecia
+// ate o reload, bug reportado 2026-06-24). Refresca a mochila se estiver aberta.
+function _applyBoughtItem(itemName, qty){
+  if (!itemName || typeof _addItemToInventory !== 'function') return;
+  _addItemToInventory(itemName, qty || 1);
+  try { if (window.vInventory && typeof _vinvBuildConfig === 'function') vInventory.refresh(_vinvBuildConfig().player); } catch(_e){}
+}
+
 // X-6.5.51AX (2026-05-11): helper canonical pra remover qty do item.
 // Se q chega a 0, marca como zero (filter em render ignora). NÃO splice
 // pra preservar getters dinâmicos do array.
@@ -42532,6 +42545,7 @@ function _shopConfirmBuyRemote(name, npcId, it, shop, p){
             return;
           }
           p.gold = res.gold;
+          if (res.item_added) _applyBoughtItem(res.item_added, res.qty || 1);  // PADRAO_COMPRA
           if (typeof refreshHud === 'function') refreshHud();
           var npcKey2 = (typeof MARKET_NPC_LIBRARY !== 'undefined' && MARKET_NPC_LIBRARY[npcId]) ? npcId : 'generic';
           var reactionLine = (typeof _marketNpcLine === 'function') ? _marketNpcLine(npcKey2, 'buy', _marketItemCat(it)) : '<i>"Tome. Bom uso."</i>';
@@ -45292,7 +45306,7 @@ function _runeCraft(p, tier){
       var runeData = getItemData(runeName);
       // adiciona ao inventário do player
       p.inventory = p.inventory || [];
-      p.inventory.push(runeName);
+      _applyBoughtItem(runeName);
       var effectText = _formatRuneEffect(runeName);
       _showServiceResultPopup({
         icon: _heralIco('ic-stat-spelldc'), npc: 'Eirik Voz-das-Pedras',
@@ -45457,6 +45471,7 @@ function _runeBuyRemote(p){
             if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
             if (!res || !res.ok) { if (typeof vToast === 'function') vToast((res && res.error === 'no_gold') ? 'Valdoritas insuficientes.' : 'Não foi possível comprar.', 'warn'); return; }
             if (typeof res.gold === 'number') { p.gold = res.gold; refreshHud(); }
+            if (res.fragment) _applyBoughtItem(res.fragment);  // PADRAO_COMPRA
             _hydrateRuneFrags();
             _showServiceResultPopup({
               icon: t.emoji, npc: 'Eirik',
@@ -45714,7 +45729,7 @@ function _runeConfirmRemove(p, slot, runeName){
       delete p.metadata.inscribed_runes[slot];
       // Devolve a runa ao inventário
       p.inventory = p.inventory || [];
-      p.inventory.push(runeName);
+      _applyBoughtItem(runeName);
       vToast('📜 ' + runeName + ' removida e devolvida ao inventário.');
       _renderCityPopup('runes');
     }
@@ -46767,6 +46782,8 @@ function _shadowBuyRemote(p, item){
         if (typeof res.gold === 'number') p.gold = res.gold;
         if (typeof res.hp === 'number') p.hp = res.hp;
         refreshHud();
+        // PADRAO_COMPRA: item normal (kind 'item') o servidor ja adicionou -> espelha.
+        if (res.kind === 'item' && res.name) _applyBoughtItem(res.name);
         var narrative;
         if (res.kind === 'mystery') {
           narrative = '<i>' + (res.suspense || 'Você sacode a caixa. Algo se move lá dentro...') + '</i><br><br>🎲 <b>' + res.loot_name + '</b><br><br><i>' + (res.reveal || '') + '</i>';
@@ -60976,8 +60993,7 @@ function _resolveOfferChoice(player, offerChoice, subResult) {
                     max: Math.max(preGold, player.gold, 1), bar: false });
     }
   } else if (subResult === 'take_along' && offerChoice.item) {
-    player.inventory = player.inventory || [];
-    player.inventory.push(offerChoice.item);
+    _applyBoughtItem(offerChoice.item);
     // Pequeno XP por aceitar (não rejeitar)
     _gainXp(player, 1);
     pushXpDelta(1);
