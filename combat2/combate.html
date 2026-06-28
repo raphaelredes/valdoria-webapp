@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-28T01:26:50Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-28T01:47:31Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -23947,7 +23947,8 @@ function _vinvCombatAdaptBagItem(bagItem, idx) {
     var name = bagItem.n || '';
     var meta = '';
     if (bagItem.effect && bagItem.effect.hp) meta = 'Cura ' + bagItem.effect.hp;
-    else if (bagItem.effect && bagItem.effect.mp) meta = '+' + bagItem.effect.mp + ' PM';
+    // BAGCMB-04: mana vem como effect.res (não effect.mp) — Poção de Mana mostrava meta vazio.
+    else if (bagItem.effect && (bagItem.effect.res || bagItem.effect.mp)) meta = '+' + (bagItem.effect.res || bagItem.effect.mp) + ' recurso';
     return {
         id: _vinvCombatSlug(name) + '-' + idx,  // sufixo idx pra unicidade
         name: name,

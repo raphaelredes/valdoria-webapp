@@ -77,7 +77,8 @@
 # - 12 combat/* SPA legacy
 # - 31 explore/* SPA legacy
 # /inventory/index.html — SPA standalone deletado (mochila canonical em /cidade/)
-# inventory-tabs.js mantido (usado por cidade)
+# inventory-tabs.js REMOVIDO (INV-CITY-07): a cidade REPLICA a lógica inline,
+# nunca carregava o arquivo — o comentário "usado por cidade" era falso.
 /inventory                    /cidade/                     301
 /inventory/                   /cidade/                     301
 /inventory/index.html         /cidade/                     301
