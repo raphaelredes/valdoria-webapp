@@ -9079,6 +9079,14 @@ body.perf-lite .vc-action-btn { transition: none; }
           if (typeof _syncInventoryToLocalStorage === 'function') _syncInventoryToLocalStorage();
         } catch(_inve){ console.warn('[CITY] inventory hydrate failed:', _inve); }
       }
+      // INV-CITY-02 (auditoria 2026-06-27): favoritos/locked REAIS do servidor.
+      // Antes MOCK_PLAYER_FAVORITES/LOCKED eram defaults fixos que NUNCA persistiam
+      // (favorito sumia no reload e o junk-sell server-side vendia o favorito). O
+      // servidor sempre envia as listas (mesmo vazias) → limpa os defaults MOCK em REMOTE.
+      try {
+        if (Array.isArray(picked.favorite_items)) MOCK_PLAYER_FAVORITES = picked.favorite_items.slice();
+        if (Array.isArray(picked.locked_items))   MOCK_PLAYER_LOCKED = picked.locked_items.slice();
+      } catch(_favh){ console.warn('[CITY] fav/lock hydrate failed:', _favh); }
       // FASE 6: libera persistência de equip ao servidor SÓ após hidratar (senão
       // o boot sync dispararia equip.set({}) antes do fetch e apagaria o equip).
       window._cityEquipReady = true;
@@ -10507,7 +10515,11 @@ function _isCTA(btn) {
       // Consolidação client 2026-06-25: largar persiste no servidor (antes só no mock → reaparecia).
       discard: function(name){ return window.vCityServer.cityAction('inventory.discard', { item: name }); },
       // F4: fundir 3 gemas → 1 superior persiste (apply_gem_upgrade valida posse das 3).
-      fuseGems: function(gem){ return window.vCityServer.cityAction('inventory.fuse_gems', { gem: gem }); }
+      fuseGems: function(gem){ return window.vCityServer.cityAction('inventory.fuse_gems', { gem: gem }); },
+      // INV-CITY-02: favoritar/travar item PERSISTE em metadata (antes só MOCK → sumia
+      // no reload e o junk-sell vendia o favorito). `on` true/false explícito.
+      favorite: function(name, on){ return window.vCityServer.cityAction('inventory.favorite', { item: name, on: on }); },
+      lock:     function(name, on){ return window.vCityServer.cityAction('inventory.lock',     { item: name, on: on }); }
     },
     relations: {  // FASE 4 (2026-06-23) — lista de Vínculos montada NO SERVIDOR (de Player.narrative):
       // qualquer NPC com reputação/afinidade real aparece (sem lista hardcoded no cliente).
@@ -42132,11 +42144,17 @@ function _showItemDetail(name){
   });
   var favBtn = document.getElementById('inv-detail-fav');
   if (favBtn) favBtn.addEventListener('click', function(){
+    var _favOn = !fav;  // estado desejado após o toggle
     if (fav) {
       MOCK_PLAYER_FAVORITES = (MOCK_PLAYER_FAVORITES || []).filter(function(n){ return n !== name; });
     } else {
       MOCK_PLAYER_FAVORITES = MOCK_PLAYER_FAVORITES || [];
       MOCK_PLAYER_FAVORITES.push(name);
+    }
+    // INV-CITY-02: PERSISTE no servidor (antes só MOCK → sumia no reload e o junk-sell
+    // server-side vendia o favorito). Otimista: muta local + posta; loga em erro.
+    if (window.vCityServer && vCityServer.isRemote && vCityServer.isRemote()) {
+      vCityServer.inventory.favorite(name, _favOn).catch(function(e){ console.error('[CITY] inventory.favorite failed', e); });
     }
     ov.classList.remove('active');
     _renderInventoryPopup();
