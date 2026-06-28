@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-28T01:47:31Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-28T03:11:40Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -20181,7 +20181,7 @@ function render(s) {
             html += '</div>';
             /* Level up banner */
             if (r.levelUp) {
-                html += '<div class="rr-levelup">⭐ NÍVEL ' + r.newLvl + ' ALCANÇADO ⭐</div>';
+                html += '<div class="rr-levelup">NÍVEL ' + r.newLvl + ' ALCANÇADO</div>';
             }
             /* Gold */
             html += '<div class="rr-loot-row gold"><span class="rr-ico"><span class="vi vi-coin sm" aria-hidden="true"></span></span><span class="rr-name">Valdoritas</span><span class="rr-qty">+' + r.gold + '</span></div>';
@@ -20199,7 +20199,7 @@ function render(s) {
            abre popup fullscreen via openCombatLog() — mesmo mecanismo usado
            durante combate (act='log'). */
         html += '<div class="action-bar action-bar--resolution-log">';
-        html += '<button type="button" class="action-btn secondary full-width" data-act="log">📜 Ver log do combate</button>';
+        html += '<button type="button" class="action-btn secondary full-width" data-act="log">Ver log do combate</button>';
         html += '</div>';
         /* [PIVOT 2026-04-21] IS_REMOTE_SESSION: botão "Continuar" dispara POST
            /api/combat2/complete que aplica HP/MP/rewards ao Player DB + redireciona
@@ -20390,13 +20390,13 @@ function render(s) {
                 if (partyHasConsciousAllyForMedicine(s)) {
                     html += '<button type="button" class="action-btn secondary" data-act="stabilize-med">🩹 Aliado: Medicina CD 10</button>';
                 }
-                html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="log">Log</button>';
                 html += '</div></div>';
             } else if (pCur && (pCur.isDead || (pCur.hp <= 0 && pCur.stable && !pCur.dying))) {
                 html += '<div class="action-bar action-bar--pass-down">';
                 html += '<p class="sim-down-banner">Sem ações (morto ou inconsciente estável a 0 PV).</p>';
                 html += '<div class="action-btns-row"><button type="button" class="action-btn primary" data-act="pass-down">⏭ Avançar turno</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="log">📜 Log</button></div></div>';
+                html += '<button type="button" class="action-btn secondary" data-act="log">Log</button></div></div>';
             } else {
                 html += '<div class="action-bar action-bar--player-dock">';
                 /* V1 Invocações Phase 4 (2026-04-19, b) — HUD de recursos D&D 5e
@@ -22153,7 +22153,7 @@ function openCombatLog() {
     ov.className = 'list-panel-overlay';
     var card = document.createElement('div');
     card.className = 'list-panel-card list-panel-card--log';
-    var html = '<div class="lp-title">📜 Log do combate</div><div class="lp-sub">Por rodada e turno · ordem cronológica</div>';
+    var html = '<div class="lp-title">Log do combate</div><div class="lp-sub">Por rodada e turno · ordem cronológica</div>';
     html += '<div class="lp-log-scroll">';
     html += simBuildCombatLogHtml(s);
     html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
@@ -24206,7 +24206,7 @@ async function useItem(idx) {
     }
     currentState.log.push(p.n + ' usa ' + it.n + '.');
     render(currentState);
-    await showMessage('🎒 ' + msg, 'hit', sub);
+    await showMessage(msg, 'hit', sub);
     // ≥1s pós-VFX de poção/item antes de avançar turno.
     if (it.effect && (it.effect.res || it.effect.tmp != null)) await sleep(SIM_VFX_POST_DELAY_MS);
     await runNpcsUntilPlayer();

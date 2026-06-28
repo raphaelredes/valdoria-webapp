@@ -23719,6 +23719,10 @@ var MOCK_PLAYER_INVENTORY = [
 // pra localStorage compartilhada com exploracao.html. Chamada UMA vez
 // no boot e reaplicada quando user opera o inventário (compras, drops).
 function _syncInventoryToLocalStorage() {
+  // INV-CITY-03 (Server-Only State): em REMOTE o inventário é autoritativo no servidor
+  // (a exploração lê __EXPLORE_SERVER_INV) → NÃO espelhar dados de jogo em localStorage.
+  // O write fica só em LOCAL (file://, dev tool) como bridge entre simuladores.
+  if (window.vCityServer && vCityServer.isRemote && vCityServer.isRemote()) return;
   try {
     var serialized = (MOCK_PLAYER_INVENTORY || []).map(function(it) {
       var data = (typeof getItemData === 'function') ? getItemData(it.n) : null;
@@ -40593,9 +40597,10 @@ function _itemTagsOf(name) {
 async function _useInventoryItem(name) {
   var tags = _itemTagsOf(name);
   var it = getItemData(name) || {};
-  var canUse = tags.indexOf('consumable') !== -1
+  var canUse = (tags.indexOf('consumable') !== -1
     || tags.indexOf('potion') !== -1
-    || tags.indexOf('food') !== -1;
+    || tags.indexOf('food') !== -1)
+    && tags.indexOf('thrown') === -1;  // INV-CITY-05: thrown não é consumido fora de combate
   if (!canUse) {
     if (typeof vToast === 'function') vToast('Esse item não é usável.');
     return false;
@@ -42086,9 +42091,12 @@ function _showItemDetail(name){
     var _attPlayer = window.CITY_MOCK_PLAYER || { metadata: {} };
     var _itemAttuned = (typeof _isAttuned === 'function') && _isAttuned(_attPlayer, name);
     actionsHtml += '<button class="inv-detail-btn" id="inv-detail-attune">'
-      + (_itemAttuned ? '✓ Sintonizado' : '✨ Sintonizar') + '</button>';
+      + (_itemAttuned ? '✓ Sintonizado' : 'Sintonizar') + '</button>';
   }
-  if ((it.t || []).indexOf('consumable') !== -1){
+  // INV-CITY-05: só mostra "Usar" pro que o servidor REALMENTE consome fora de combate
+  // (cura/comida/buff/descanso). Itens 'thrown' (Fogo Alquímico, Ácido, Água Benta) são
+  // de arremesso em combate → apply_use os rejeita; o botão era um no-op.
+  if ((it.t || []).indexOf('consumable') !== -1 && (it.t || []).indexOf('thrown') === -1){
     actionsHtml += '<button class="inv-detail-btn" id="inv-detail-use">Usar</button>';
   }
   actionsHtml += '<button class="inv-detail-btn" id="inv-detail-fav">' + (fav ? '★ Desfav' : '☆ Fav') + '</button>';
@@ -42096,7 +42104,7 @@ function _showItemDetail(name){
   actionsHtml += '</div>';
   card.innerHTML = ''
     + '<div class="inv-detail-emoji">' + (it.e || _heralIco("ic-mochila")) + '</div>'
-    + '<div class="inv-detail-name" style="color:' + rarityCol + '">' + name + (locked ? ' 🔒' : '') + '</div>'
+    + '<div class="inv-detail-name" style="color:' + rarityCol + '">' + name + (locked ? ' · travado' : '') + '</div>'
     + '<div class="inv-detail-rarity" style="color:' + rarityCol + '">' + getRarityLabel(rarity) + (equipped ? ' · EQUIPADO' : '') + '</div>'
     + '<div class="inv-detail-divider"></div>'
     + '<div class="inv-detail-stats">' + statLines.join('<br>') + '</div>'
@@ -42119,7 +42127,7 @@ function _showItemDetail(name){
         if (typeof vToast === 'function') vToast('Sintonização cheia (máx 3). Dessintonize outro item primeiro.', 'warn');
         return;
       }
-      if (typeof vToast === 'function') vToast(nowAtt ? ('✨ Sintonizado com ' + name) : ('Dessintonizado de ' + name), 'ok');
+      if (typeof vToast === 'function') vToast(nowAtt ? ('Sintonizado com ' + name) : ('Dessintonizado de ' + name), 'ok');
       if (typeof refreshHud === 'function') refreshHud();
       if (typeof _renderInventoryPopup === 'function') _renderInventoryPopup();
       ov.classList.remove('active');
@@ -42171,7 +42179,7 @@ function _showItemDetail(name){
         if (prevInv) prevInv.q++;
         else MOCK_PLAYER_INVENTORY.push({ n: prev, q: 1, get id(){return 'eq_'+prev;}, get icon(){return getItemData(this.n).e;}, get value(){return getItemData(this.n).v;}, get name(){return this.n;} });
       }
-      vToast('⚔️ ' + name + ' equipado!');
+      vToast(name + ' equipado!');
       // Consolidação client (2026-06-25): persiste no servidor (equip.set). Muta
       // MOCK_PLAYER_EQUIPPED direto (sempre player) → sync incondicional.
       if (typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
@@ -42187,7 +42195,7 @@ function _showItemDetail(name){
       var existing = MOCK_PLAYER_INVENTORY.find(function(i){ return i.n === name; });
       if (existing) existing.q++;
       else MOCK_PLAYER_INVENTORY.push({ n: name, q: 1, get id(){return 'eq_'+name;}, get icon(){return getItemData(this.n).e;}, get value(){return getItemData(this.n).v;}, get name(){return this.n;} });
-      vToast('🛡️ ' + name + ' desequipado.');
+      vToast(name + ' desequipado.');
       if (typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
       ov.classList.remove('active');
       _renderInventoryPopup();
