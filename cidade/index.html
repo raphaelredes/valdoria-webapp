@@ -11193,9 +11193,9 @@ var _NAMED_NPC_PORTRAITS = {
   'torvin': 'npcs/torvin-trabalhador.webp',
   'thaelwen': 'npcs/aelindra-viajante.webp',
   // 2026-06-13: NPCs humanos convertidos em ANÃO (diversidade entre os principais).
-  'grom barba cinza': 'npcs/grom-o-caolho.webp',
-  'grom o caolho': 'npcs/grom-o-caolho.webp',
-  'grom': 'npcs/grom-o-caolho.webp',
+  'grom barba cinza': 'npcs/grom-o-caolho-v2.webp',
+  'grom o caolho': 'npcs/grom-o-caolho-v2.webp',
+  'grom': 'npcs/grom-o-caolho-v2.webp',
   'bjorn o seleiro': 'merchants/bjorn-anao.webp',
   'bjorn': 'merchants/bjorn-anao.webp',
   // 2026-06-13: nomes de Lyra desambiguados (3 NPCs distintos não podem mais colidir).
@@ -11312,7 +11312,7 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('especiari') >= 0 || s.indexOf('mercador') >= 0 || s.indexOf('vendedor') >= 0 || s.indexOf('comerciante') >= 0 || s.indexOf('mascate') >= 0) return _np + 'mercador-errante.webp';
   if (s.indexOf('pombos') >= 0 || s.indexOf('pomba') >= 0) return _np + 'animal1.webp';
   // Fallback role-based (PNGs genéricos quando NPC não tem portrait dedicado)
-  if (s.indexOf('grom') >= 0)        return '/shared/img/npcs/grom-o-caolho.webp';  /* Grom, o Caolho — taverneiro ANÃO (retrato dedicado, ANTES do fallback generico de taverneiro). */
+  if (s.indexOf('grom') >= 0)        return '/shared/img/npcs/grom-o-caolho-v2.webp';  /* Grom, o Caolho — taverneiro ANÃO (retrato dedicado, ANTES do fallback generico de taverneiro). */
   if (s.indexOf('taverneir') >= 0)   return '/shared/img/npcs/taverneiro.webp';
   if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/estalajadeira.webp';
   if (s.indexOf('banqueir') >= 0) return '/shared/img/npcs/banqueiro.webp';
@@ -18043,7 +18043,7 @@ var TAVERN_NPCS = [
   {
     id: 'tav_grom',
     name: 'Grom, o Caolho',
-    role: '<img src="/shared/img/npcs/grom-o-caolho.webp" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Taverneiro',
+    role: '<img src="/shared/img/npcs/grom-o-caolho-v2.webp" alt="" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;"> Taverneiro',
     desc: 'Anão robusto e caolho de barba ruiva trançada, esfrega canecas com pano sujo.',
     greetings: [
       '<i>Grom larga uma caneca no balcão.</i> "O que vai ser hoje, aventureiro?"',
@@ -20914,7 +20914,7 @@ function _buildArenaMockData(player){
 // Sessão #26 (2026-05-22) P1 #77: adicionado portraitImg (PNG quando disponível, fallback role-based)
 var RELATIONS_NPCS = [
   { id: 'rel_martha',  icon: '<img src="/shared/img/npcs/estalajadeira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.webp' },
-  { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/grom-o-caolho.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom, o Caolho',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/grom-o-caolho.webp' },
+  { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/grom-o-caolho-v2.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom, o Caolho',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/grom-o-caolho-v2.webp' },
   { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/guarda-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Guarda Aldric',   role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/guarda-aldric.webp' },
   { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.webp' },
   { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
@@ -57887,7 +57887,7 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
 var _NPC_DEFAULTS = {
   aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/guarda-aldric.webp',  icon: 'ic-paladino' },
   martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/estalajadeira.webp',  icon: 'ic-estalajadeira' },
-  grom:        { name: 'Grom, o Caolho',    desc: 'Taverneiro anão do Javali Bêbado', portrait: '/shared/img/npcs/grom-o-caolho.webp',    icon: 'ic-taverneiro' },
+  grom:        { name: 'Grom, o Caolho',    desc: 'Taverneiro anão do Javali Bêbado', portrait: '/shared/img/npcs/grom-o-caolho-v2.webp',    icon: 'ic-taverneiro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/irma-elara.webp',   icon: 'ic-clerigo' },
   thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
   mirena:      { name: 'Mirena Virelle',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },

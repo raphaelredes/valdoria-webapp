@@ -97,7 +97,7 @@ function _tavBuildNpcRow(data) {
   var row = vCity.el('div', 'row-npc');
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = vCity.el('img');
-  img.src = '../shared/img/npcs/grom-anao.webp';  // retrato canônico do anão caolho (era o genérico taverneiro.webp)
+  img.src = '../shared/img/npcs/grom-o-caolho-v2.webp';  // retrato canônico do anão caolho (era o genérico taverneiro.webp)
   img.alt = 'Grom, o Caolho';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };
