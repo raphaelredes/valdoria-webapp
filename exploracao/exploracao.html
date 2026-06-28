@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-25T11:01:56Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-28T19:53:22Z - do not edit directly, edit source -->
 
 
 
@@ -744,6 +744,13 @@
 <!-- 2026-05-11: Auth Gate (skip em simuladores file:// via hostname check) -->
 <script src="../shared/auth-gate.js"></script>
 
+<!-- Tiered Cache (SUPREME RULE #0): bundle-version.js carrega PRIMEIRO (no-cache)
+     pra expor window.VBUNDLE_HASH ao boot early — assim os /shared/*.js do bloco
+     abaixo usam o bundle hash ESTÁVEL (Bucket B imutável) em vez de Date.now(),
+     que forçava re-download a cada reload. bundle-version.js NÃO checa matchMedia,
+     então não interfere no spoof de reduced-motion do sim-full-motion abaixo. -->
+<script>document.write('<script src="../bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
+
 <!-- X-6.5.51AG (2026-05-07): bypass de prefers-reduced-motion. Exploração tem
      muitas animações (terreno, hex map, eventos, weather, fog) que o jogador
      PRECISA ver. Mesmo fix portado de combate.html via shared sim-full-motion.js.
@@ -751,7 +758,9 @@
      vReducedMotion=false ANTES de outros scripts checarem. -->
 <script>
   (function(){
-    var __vEarly = Date.now();
+    /* Tiered Cache: bundle hash estável (Bucket B) quando bundle-version.js já
+       carregou acima; Date.now() é só fallback se ele falhar a carregar. */
+    var __vEarly = (window.VBUNDLE_HASH || Date.now());
     /* #base-same-origin (2026-06-24): CDN = MESMA origem da pagina (DEV->dev., PROD->jogo.)
        em vez de 'jogo.' HARDCODED — senao a pagina DEV carregava /shared do PROD (viola
        Environment Isolation; espelha o fix do combate em combate.html L586). file:// (sim
@@ -885,10 +894,9 @@
 })();
 </script>
 
-<!-- Tiered Cache (SUPREME RULE #0): bundle hash estável até qualquer Bucket B mudar.
-     2026-05-20 task #31: cache-bust em bundle-version.js + version-check.js pra
-     evitar browser cache stale (max-age=14400 default CF Pages). -->
-<script>document.write('<script src="../bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
+<!-- Tiered Cache (SUPREME RULE #0): bundle-version.js JÁ carregou no topo (acima do
+     bloco early) pra expor VBUNDLE_HASH cedo aos /shared/*.js. Aqui fica só o
+     version-check. 2026-05-20 task #31: cache-bust no-cache pra evitar stale. -->
 <!-- Version Check (2026-05-20, task #31): auto-detect deploys + force reload.
      LGPD-compliant — só localStorage técnico, sem PII. -->
 <script>document.write('<script src="../shared/version-check.js?_=' + Date.now() + '"><\/script>');</script>
