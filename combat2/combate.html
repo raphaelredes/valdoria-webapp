@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-25T19:55:32Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-06-28T01:26:50Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -20997,6 +20997,13 @@ async function __combatCompleteCanonical(result, origin) {
            o turno-counter atualizado pelo tick de round (combat decrementa
            1 por round em runNpcSegmentUntilPlayerTurn). */
         player_wet_turns_final: (p && typeof p.wetTurns === 'number') ? Math.max(0, p.wetTurns | 0) : 0,
+        /* BAGCMB-01 (auditoria 2026-06-27): bag FINAL do player → o servidor desconta
+           do inventário real o que foi gasto no combate (inclusive a poção usada no
+           GOLPE FINAL, que o checkpoint debounced perdia). Anti-cheat server-side:
+           só desconta itens da bag inicial, capado ao inventory.count. */
+        bag_final: (p && Array.isArray(p.bag))
+            ? p.bag.map(function (b) { return { n: b.n, qty: (b.qty | 0) }; })
+            : null,
         rewards: rewards
     };
     try {
