@@ -11187,6 +11187,12 @@ var _NAMED_NPC_PORTRAITS = {
   'varneth': 'npcs/varneth-cartografo.webp',
   'ilanya': 'npcs/ilanya-florista.webp',
   'pellaren': 'npcs/pellaren-viajante.webp',
+  // 2026-06-28 (user: "NPCs da Praça sem imagem"): retratos OpenAI dedicados pros
+  // NPCs visíveis que caíam no genérico aldeao.webp (ou no substring errado).
+  'dona hessara': 'npcs/hessara-cidada.webp', 'hessara': 'npcs/hessara-cidada.webp',
+  'sussurrador': 'npcs/sussurrador-misterioso.webp',
+  'lord valerius': 'npcs/valerius-exilado.webp', 'valerius': 'npcs/valerius-exilado.webp',
+  'anciao kaelen': 'npcs/kaelen-refugiado.webp', 'kaelen': 'npcs/kaelen-refugiado.webp',
   'krom gronvald': 'npcs/krom-mercenario.webp',
   'krom': 'npcs/krom-mercenario.webp',
   'torvin costas largas': 'npcs/torvin-trabalhador.webp',
@@ -35354,6 +35360,11 @@ function _squareShowInvestigatePopup(p){
   var visible = _squareGetDailyNpcPool(p);
   var _portraitFor = function(npc){
     var ph = npc.portraitImg || (typeof _plazaPhotoFor === 'function' ? _plazaPhotoFor(npc) : '');
+    // BUG 2026-06-28 (user: "Nila tiefling aparecia como velho humano"): resolver
+    // pelo NOME EXATO primeiro (_NAMED_NPC_PORTRAITS). Antes passava "nome + role"
+    // ("Nila Alquimista") -> o match exato falhava e a cadeia de substring casava
+    // 'alquimist' -> retrato GENÉRICO em vez do dedicado (nila-alquimista.webp tiefling).
+    if (!ph && typeof _npcPortraitByName === 'function'){ try { ph = _npcPortraitByName(npc.name || ''); } catch(_e){} }
     if (!ph){ try { ph = _discoverySpeakerPortrait((npc.name || '') + ' ' + (npc.role || '')); } catch(_e){} }
     return ph || '/shared/img/npcs/aldeao.webp';  // retrato genérico, NUNCA ícone
   };
