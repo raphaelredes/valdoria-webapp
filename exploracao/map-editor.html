@@ -73,7 +73,7 @@
   <h1>⚜ Editor do Mapa</h1>
   <button id="btn-save">💾 Salvar posições (JSON)</button>
   <button id="btn-reset">↺ Resetar p/ padrão</button>
-  <span id="scaleBox">Escala do selecionado: <input id="scale" type="range" min="4" max="22" step="0.5" value="10" disabled> <b id="scalev">—</b></span>
+  <span id="scaleBox">Escala do selecionado: <input id="scale" type="range" min="4" max="22" step="0.5" value="5" disabled> <b id="scalev">—</b></span>
   <span id="hint">Arraste locais · roda sobre um local = escala · arraste o fundo = mover · roda no fundo / botões = zoom</span>
 </div>
 <div id="stage-wrap"><div id="stage"></div></div>
@@ -143,6 +143,61 @@ function __editorMain(){
   var TOKEN = _qs('token') || _SR.token || '';
   var UID = _qs('uid') || _SR.user_id || '';
   function _api(path){ return (API ? API.replace(/\/$/, '') : '') + path; }
+
+  // === Autosave de rascunho (2026-06-29) ===================================
+  // O editor não tinha autosave: se o save falhasse (sessão/admin) ou a aba
+  // fechasse, o arranjo em andamento sumia. Agora todo arrasto/escala grava um
+  // rascunho em localStorage (por-env — Environment Isolation). É SÓ um rascunho
+  // de UI do editor, não estado de jogo — permitido pela regra Server-Only State.
+  var ENVK = _qs('env') || (localStorage.getItem('valdoria_session_dev') ? 'dev'
+            : (localStorage.getItem('valdoria_session_prod') ? 'prod' : 'dev'));
+  var DRAFT_KEY = 'valdoria_mapeditor_draft_' + ENVK;
+  var _draftTimer = null;
+  function _coordsOnly(){
+    var o = {};
+    Object.keys(state).forEach(function(k){
+      o[k] = { x: +state[k].x.toFixed(4), y: +state[k].y.toFixed(4), scale: +state[k].scale.toFixed(1) };
+    });
+    return o;
+  }
+  function _saveDraft(){ try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ coords: _coordsOnly(), ts: Date.now() })); } catch(_){} }
+  function _scheduleDraft(){ if (_draftTimer) clearTimeout(_draftTimer); _draftTimer = setTimeout(_saveDraft, 400); }
+  function _clearDraft(){ try { localStorage.removeItem(DRAFT_KEY); } catch(_){} }
+  function _readDraft(){ try { var d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); return (d && d.coords) ? d : null; } catch(_){ return null; } }
+  function _coordsDiffer(a, b){
+    a = a || {}; b = b || {};
+    var ka = Object.keys(a);
+    if (ka.length !== Object.keys(b).length) return true;
+    for (var i = 0; i < ka.length; i++){
+      var k = ka[i], x = a[k], y = b[k];
+      if (!y) return true;
+      if (Math.abs((x.x||0)-(y.x||0)) > 0.001 || Math.abs((x.y||0)-(y.y||0)) > 0.001 || Math.abs((x.scale||0)-(y.scale||0)) > 0.05) return true;
+    }
+    return false;
+  }
+  function _applyDraft(coords){
+    Object.keys(coords).forEach(function(k){
+      if (state[k]) { state[k].x = coords[k].x; state[k].y = coords[k].y; state[k].scale = coords[k].scale; }
+    });
+    layout();
+  }
+  function _maybeOfferDraft(serverCoords){
+    var d = _readDraft();
+    if (!d) return;
+    if (!_coordsDiffer(d.coords, serverCoords || {})) { _clearDraft(); return; }
+    var bn = document.createElement('div');
+    bn.style.cssText = 'position:fixed;left:50%;top:60px;transform:translateX(-50%);z-index:70;background:#1f1812;border:1px solid var(--gold,#c4953a);border-radius:8px;padding:8px 12px;display:flex;gap:10px;align-items:center;font-family:system-ui,sans-serif;font-size:12px;color:#e8dcc8;box-shadow:0 4px 16px rgba(0,0,0,.5);';
+    var ts = '';
+    try { ts = new Date(d.ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); } catch(_){}
+    var msg = document.createElement('span');
+    msg.textContent = 'Rascunho não salvo' + (ts ? ' (' + ts + ')' : '') + ' encontrado.';
+    var bApply = document.createElement('button'); bApply.textContent = 'Aplicar';
+    var bDiscard = document.createElement('button'); bDiscard.textContent = 'Descartar';
+    bApply.onclick = function(){ _applyDraft(d.coords); bn.remove(); };
+    bDiscard.onclick = function(){ _clearDraft(); bn.remove(); };
+    bn.appendChild(msg); bn.appendChild(bApply); bn.appendChild(bDiscard);
+    document.body.appendChild(bn);
+  }
 
   // Nível sugerido (referência existente): min_level da região (REGIONAL_MAP_CATALOG)
   // + tier do local (CART_BIOMES). Sugerido = max(regionMin, tier, 1).
@@ -215,7 +270,7 @@ function __editorMain(){
     state[b.key] = {
       x: (ov && typeof ov.x === 'number') ? ov.x : b.x,
       y: (ov && typeof ov.y === 'number') ? ov.y : b.y,
-      scale: (ov && typeof ov.scale === 'number') ? ov.scale : 10, // % da largura
+      scale: (ov && typeof ov.scale === 'number') ? ov.scale : 5, // % da largura (default 5)
       name: b.name, el: d
     };
     wireDrag(d, b.key);
@@ -251,6 +306,7 @@ function __editorMain(){
       state[key].x = Math.max(0, Math.min(1, nx));
       state[key].y = Math.max(0, Math.min(1, ny));
       layout();
+      _scheduleDraft();
     });
     window.addEventListener('mouseup', function(){ if(dragging){ dragging = false; d.style.cursor = 'grab'; } });
     d.addEventListener('wheel', function(e){
@@ -259,6 +315,7 @@ function __editorMain(){
       state[key].scale = Math.max(4, Math.min(22, state[key].scale + (e.deltaY < 0 ? 0.5 : -0.5)));
       scaleInput.value = state[key].scale; scaleV.textContent = state[key].scale;
       layout();
+      _scheduleDraft();
     }, { passive: false });
   }
 
@@ -268,14 +325,11 @@ function __editorMain(){
     scaleInput.disabled = false; scaleInput.value = state[key].scale; scaleV.textContent = state[key].scale;
   }
   scaleInput.addEventListener('input', function(){
-    if(!sel) return; state[sel].scale = parseFloat(scaleInput.value); scaleV.textContent = scaleInput.value; layout();
+    if(!sel) return; state[sel].scale = parseFloat(scaleInput.value); scaleV.textContent = scaleInput.value; layout(); _scheduleDraft();
   });
 
   document.getElementById('btn-save').addEventListener('click', function(){
-    var o = {};
-    Object.keys(state).forEach(function(k){
-      o[k] = { x: +state[k].x.toFixed(4), y: +state[k].y.toFixed(4), scale: +state[k].scale.toFixed(1) };
-    });
+    var o = _coordsOnly();
     out.style.display = 'block'; out.value = JSON.stringify(o, null, 0);
     // SEMPRE confirma antes de salvar (janela popup).
     if (!window.confirm('Salvar as posições dos locais?\n\nReflete no jogo imediatamente e mantém os últimos 5 backups (5 alterações).')) return;
@@ -292,7 +346,12 @@ function __editorMain(){
     }).then(function(r){ return r.json().catch(function(){ return { error: 'bad_json', status: r.status }; }); })
       .then(function(j){
         btn.disabled = false; btn.textContent = oldTxt;
-        if (j && j.ok) { window.alert('✓ Salvo! As posições já refletem no jogo.\nBackups mantidos: ' + (j.backups != null ? j.backups : '?') + '/5.'); return; }
+        if (j && j.ok) {
+          _clearDraft();
+          var dur = j.seed_written ? '\n\nLayout gravado no seed VERSIONADO (durável) — será levado ao PROD no próximo Deploy.' : '';
+          window.alert('✓ Salvo! As posições já refletem no jogo.\nBackups mantidos: ' + (j.backups != null ? j.backups : '?') + '/5.' + dur);
+          return;
+        }
         // Mensagens claras por causa (não baixa arquivo — o save É via servidor).
         var err = (j && j.error) || '';
         if (err === 'invalid_session') window.alert('Sessão expirada. Reabra o editor a partir do jogo (/play) para renovar a sessão e salvar.');
@@ -303,9 +362,10 @@ function __editorMain(){
   document.getElementById('btn-reset').addEventListener('click', function(){
     Object.keys(state).forEach(function(k){
       var b = BIOMES.find(function(x){ return x.key === k; });
-      if(b){ state[k].x = b.x; state[k].y = b.y; state[k].scale = 10; }
+      if(b){ state[k].x = b.x; state[k].y = b.y; state[k].scale = 5; }
     });
     layout();
+    _scheduleDraft();
   });
   window.addEventListener('resize', layout);
 
@@ -363,7 +423,7 @@ function __editorMain(){
 
   // boot: carrega posições salvas do servidor (se houver sessão), senão usa as
   // coords padrão de CART_BIOMES.
-  function boot(ov){ ov = ov || {}; BIOMES.forEach(function(b){ makeLoc(b, ov[b.key]); }); if (bg.complete) layout(); }
+  function boot(ov){ ov = ov || {}; BIOMES.forEach(function(b){ makeLoc(b, ov[b.key]); }); if (bg.complete) layout(); _maybeOfferDraft(ov); }
   if (API && TOKEN) {
     fetch(_api('/api/exploracao/map-coords') + '?token=' + encodeURIComponent(TOKEN) + '&user_id=' + encodeURIComponent(UID))
       .then(function(r){ return r.ok ? r.json() : {}; })
