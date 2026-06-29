@@ -132,11 +132,14 @@ function __editorMain(){
   // o botão Salvar caía no fallback de download (janela de salvar arquivo) em vez
   // de gravar direto no servidor. Ver shared/auth-token-store.js setToken().
   function _qs(k){ try { return new URL(location.href).searchParams.get(k); } catch(_) { return null; } }
+  // Env canônico: ?env > sessão dev presente > sessão prod presente > 'dev'. A MESMA
+  // fonte alimenta a sessão (API/token/uid) E a chave do rascunho — sem incoerência
+  // (antes a sessão era dev-first incondicional e o rascunho seguia ?env → divergiam).
+  var ENVK = _qs('env') || (localStorage.getItem('valdoria_session_dev') ? 'dev'
+            : (localStorage.getItem('valdoria_session_prod') ? 'prod' : 'dev'));
   function _sessRec(){
-    try {
-      var raw = localStorage.getItem('valdoria_session_dev') || localStorage.getItem('valdoria_session_prod') || '{}';
-      return JSON.parse(raw) || {};
-    } catch(_){ return {}; }
+    try { return JSON.parse(localStorage.getItem('valdoria_session_' + ENVK) || '{}') || {}; }
+    catch(_){ return {}; }
   }
   var _SR = _sessRec();
   var API = _qs('api') || _SR.api_base || '';
@@ -149,8 +152,7 @@ function __editorMain(){
   // fechasse, o arranjo em andamento sumia. Agora todo arrasto/escala grava um
   // rascunho em localStorage (por-env — Environment Isolation). É SÓ um rascunho
   // de UI do editor, não estado de jogo — permitido pela regra Server-Only State.
-  var ENVK = _qs('env') || (localStorage.getItem('valdoria_session_dev') ? 'dev'
-            : (localStorage.getItem('valdoria_session_prod') ? 'prod' : 'dev'));
+  // ENVK (acima) é a fonte única do ambiente → chave do rascunho no mesmo env da sessão.
   var DRAFT_KEY = 'valdoria_mapeditor_draft_' + ENVK;
   var _draftTimer = null;
   function _coordsOnly(){
@@ -186,6 +188,7 @@ function __editorMain(){
     if (!d) return;
     if (!_coordsDiffer(d.coords, serverCoords || {})) { _clearDraft(); return; }
     var bn = document.createElement('div');
+    /* HARDCODED: DEV tool standalone, sem design-system (todo o arquivo usa literais; --gold é o único token, definido inline no :root) */
     bn.style.cssText = 'position:fixed;left:50%;top:60px;transform:translateX(-50%);z-index:70;background:#1f1812;border:1px solid var(--gold,#c4953a);border-radius:8px;padding:8px 12px;display:flex;gap:10px;align-items:center;font-family:system-ui,sans-serif;font-size:12px;color:#e8dcc8;box-shadow:0 4px 16px rgba(0,0,0,.5);';
     var ts = '';
     try { ts = new Date(d.ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); } catch(_){}
@@ -365,7 +368,8 @@ function __editorMain(){
       if(b){ state[k].x = b.x; state[k].y = b.y; state[k].scale = 5; }
     });
     layout();
-    _scheduleDraft();
+    // NÃO grava rascunho no Reset: um reset-sem-salvar não deve reaparecer como
+    // "rascunho recuperado" (confundiria com trabalho real). O Save é que persiste.
   });
   window.addEventListener('resize', layout);
 

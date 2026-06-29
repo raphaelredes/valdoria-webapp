@@ -3651,7 +3651,7 @@
       var ov = _locCoords[b.key] || {};
       var cx = (typeof ov.x === 'number' ? ov.x : b.x) * w;
       var cy = (typeof ov.y === 'number' ? ov.y : b.y) * h;
-      var iw = ((typeof ov.scale === 'number' ? ov.scale : 10) / 100) * w;
+      var iw = ((typeof ov.scale === 'number' ? ov.scale : 5) / 100) * w;  // default 5 (= seed/editor/_DEFAULT_SCALE; evita ícone 2x p/ local sem override)
       // P5 sessão #73: zoom pequeno + glow dourado no HOVER/seleção (user pediu "efeito
       // de zoom ao passar o mouse / clicar no local que deseja ir"). +18%, instant
       // (o hover já dispara redraw). O popup de viagem (P2) complementa no clique.
@@ -3750,7 +3750,7 @@
         // scale% * _S), não um círculo fixo maior. Mínimo de tap-target pra toque no
         // smartphone (~56px) e desktop (~24px) — usabilidade sem estourar a imagem.
         var _ov = _locCoords[b.key] || {};
-        var imgHalf = (((typeof _ov.scale === 'number' ? _ov.scale : 10) / 100) * _S) / 2;
+        var imgHalf = (((typeof _ov.scale === 'number' ? _ov.scale : 5) / 100) * _S) / 2;  // default 5 (igual ao _drawLocArt)
         var radius = isTouch ? Math.max(imgHalf, 28) : Math.max(imgHalf, 12);
         var rsq = radius * radius;
         var dx = wx - bx, dy = wy - by;
