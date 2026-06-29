@@ -44854,9 +44854,13 @@ function _guildResearchRemote(p){
     }
     var topics = st.topics || [];
     _squareShowListPopup({
-      stackKey: 'guild_research', icon: _heralIco('ic-mochila'), title: 'Pesquisa',
-      flavor: '<i>' + (st.intro || 'O Veterano Braun ajusta os óculos.') + '</i><br><i>Cada tópico: teste DC ' + st.dc + ' INT · custo ' + st.cost + ' V.</i>',
-      items: topics.map(function(t){ return { icon: t.emoji || '📚', label: t.name, badge: st.cost + ' V · DC ' + st.dc, desc: t.desc, _k: t.key }; }),
+      stackKey: 'guild_research', theme: 'arcane',
+      icon: _heralIco('ic-ach-erudito'), title: 'Biblioteca da Guilda',
+      subtitle: 'Sala de Pesquisa · Grande Biblioteca',
+      bannerImg: '/shared/img/guilda/library-banner.webp',
+      flavor: '<i>O Veterano Braun ajusta os óculos sob a luz das velas, o dedo correndo por uma lombada gasta.</i> "' + (st.intro || 'Escolhe um tomo, aventureiro. O conhecimento tem preço — e seus riscos.') + '"<br><i>Cada tópico: 1d20 + INT vs DC ' + st.dc + ' · custo ' + st.cost + ' Valdoritas.</i>',
+      sectionLabel: 'Tomos disponíveis',
+      items: topics.map(function(t){ return { icon: _heralIco('ic-ach-erudito'), label: t.name, badge: st.cost + ' V · DC ' + st.dc, desc: t.desc, _k: t.key }; }),
       onPick: function(item){ _guildResearchConfirmRemote(p, item._k, item, st); }
     });
   }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] research state failed', _e); if (typeof vToast === 'function') vToast('Erro na biblioteca.', 'warn'); });
@@ -44935,11 +44939,15 @@ function _guildShowResearch(p){
     });
   }
   var items = topics.map(function(t){
-    return { icon: t.icon, label: t.label, badge: t.cost + ' V · DC ' + t.dc + ' INT', _t: t };
+    return { icon: _heralIco('ic-ach-erudito'), label: t.label, badge: t.cost + ' V · DC ' + t.dc + ' INT', _t: t };
   });
   _squareShowListPopup({
-    stackKey: 'guild_research', icon: _heralIco('ic-mochila'), title: 'Pesquisa',
-    flavor: '<i>' + introLine + '</i><br><i>Cada tópico: teste DC ' + canonDC + ' + buff +' + (canonTopics ? 2 : 1) + ' por 5 turnos.</i>',
+    stackKey: 'guild_research', theme: 'arcane',
+    icon: _heralIco('ic-ach-erudito'), title: 'Biblioteca da Guilda',
+    subtitle: 'Sala de Pesquisa · Grande Biblioteca',
+    bannerImg: '/shared/img/guilda/library-banner.webp',
+    flavor: '<i>O Veterano Braun ajusta os óculos sob a luz das velas.</i> "' + introLine + '"<br><i>Cada tópico: DC ' + canonDC + ' INT · buff +' + (canonTopics ? 2 : 1) + ' por 5 turnos.</i>',
+    sectionLabel: 'Tomos disponíveis',
     items: items,
     onPick: function(item){
       var t = item._t;
@@ -45233,9 +45241,9 @@ function _guildTrainingMenu(p){
       return;
     }
     _squareShowListPopup({
-      stackKey: 'guild_training', icon: _heralIco('ic-guerreiro', null, '38px'), title: 'Treinamento (XGtE)',
-      subtitle: 'Veterano Braun · Guilda', bannerImg: '../shared/img/guilda/guilda-banner.webp',
-      flavor: 'Braun rola os ombros e aponta o pátio. <i>"Idiomas, ferramentas — escolhe o que aprender. ' + total + ' sessões de suor, ' + cost + ' ' + coin + ' cada. No fim, a habilidade é tua de verdade."</i>',
+      stackKey: 'guild_training', icon: _heralIco('ic-guerreiro', null, '38px'), title: 'Sala de Treinamento',
+      subtitle: 'Pátio de Armas · Veterano Braun', bannerImg: '/shared/img/guilda/training-banner.webp',
+      flavor: '<i>Braun rola os ombros marcados de cicatrizes e aponta o pátio de areia, racks de armas reluzindo na luz.</i> "Idiomas, ferramentas — escolhe o que aprender. ' + total + ' sessões de suor, ' + cost + ' ' + coin + ' cada. No fim, a habilidade é tua de verdade."',
       sectionLabel: 'O que aprender', items: items,
       onPick: function(item){
         _showConfirmPurchase({
