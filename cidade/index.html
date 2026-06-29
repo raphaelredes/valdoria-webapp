@@ -49966,11 +49966,28 @@ function _renderInnMealsPopup(bodyEl, d){
 // Usado por DOIS caminhos: REMOTE (server-driven, _renderCityDialogue node 'rooms'
 // → key click posta dialogue.choice; #0 preservada) e LOCAL (_renderInnRestPopup).
 // opts: { title, marthaLine, keys:[{id,name,badge,keyImg}], onPick(id), restoreKey, restoreFn }.
+// Benefícios por tipo de quarto (popup de detalhe ao clicar a chave). Aceita os
+// ids REMOTE (rest_poor/modest/wealthy) e LOCAL (stable/common/royal/short).
+function _innRoomInfo(id){
+  var k = String(id || '').toLowerCase();
+  if (/poor|stable|estabulo/.test(k))   return { name:'Estábulo',       body:'Dormir na palha, entre os cavalos.<br>◆ Restaura parte do HP · +1 MP<br>◆ Recupera 50% dos Dados de Vida<br>◆ Risco de sono interrompido (ratos, frio)' };
+  if (/modest|common|comum/.test(k))    return { name:'Quarto Comum',   body:'Um quarto simples, cama de verdade.<br>◆ Restaura HP e MP completos<br>◆ Recupera 50% dos Dados de Vida<br>◆ Reduz 1 nível de exaustão' };
+  if (/wealthy|royal|real|suite/.test(k)) return { name:'Suíte Real',   body:'Banho quente, lençóis de seda, luxo imperial.<br>◆ HP, MP e Dados de Vida completos<br>◆ Concede <b style="color:#e8c45a;">Inspirado</b> (vantagem no próximo teste)<br>◆ Reduz 1 nível de exaustão' };
+  if (/short|crepusculo|curto/.test(k)) return { name:'Descanso Curto',  body:'Uma soneca rápida, sem trocar de roupa.<br>◆ Gasta Dados de Vida pra recuperar HP' };
+  return { name:'Quarto', body:'Descansar e recuperar as energias.' };
+}
+
 function _innShowKeyBoard(opts){
   opts = opts || {};
   var keys = opts.keys || [];
   var BOARD_IMG = '/shared/img/estalagem/key-board.webp';
-  var SLOTS = [ {t:13, l:14}, {t:13, l:54}, {t:50, l:14}, {t:50, l:54} ];  // 2 col × 2 row na zona dos ganchos
+  // Posições dos GANCHOS reais no key-board.webp (% do quadro — o board usa
+  // background-size 100% 100%, então % do board == % da imagem). O ANEL da chave
+  // (kb-ring) assenta no gancho; a chave pende abaixo. Layout por contagem de chaves.
+  var HOOKS3 = [ {x:33, y:24}, {x:64, y:24}, {x:48, y:53} ];           // rail1 esq/dir + rail3 centro (placa)
+  var HOOKS4 = [ {x:33, y:24}, {x:64, y:24}, {x:33, y:53}, {x:64, y:53} ]; // 2 col × 2 rail (1 e 3)
+  var HOOKS = (keys.length <= 3) ? HOOKS3 : HOOKS4;
+  var KEY_W = 30;  // % largura da .kb-key (anel centrado horizontalmente)
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
   var body = document.getElementById('csp-body');
@@ -49980,11 +49997,11 @@ function _innShowKeyBoard(opts){
   var html = ''
     + '<style>'
     + '.kb-wrap{padding:6px var(--v-space-sm,4px) var(--v-space-md,8px);}'
-    + '.kb-board{position:relative;width:100%;height:74vh;min-height:460px;border-radius:var(--v-radius,10px);overflow:hidden;'
-    +   'background:#160d05 url(' + BOARD_IMG + ') center/cover no-repeat;'
+    + '.kb-board{position:relative;width:100%;aspect-ratio:512/768;max-height:76vh;margin:0 auto;border-radius:var(--v-radius,10px);overflow:hidden;'
+    +   'background:#160d05 url(' + BOARD_IMG + ') center/100% 100% no-repeat;'  /* 100% 100%: % do board == ganchos da imagem (alinhamento determinístico) */
     +   'border:1px solid rgba(196,149,58,0.35);box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 26px rgba(0,0,0,0.45);}'
-    + '.kb-keys{position:absolute;top:6%;left:6%;right:6%;bottom:8%;}'
-    + '.kb-key{position:absolute;width:32%;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;'
+    + '.kb-keys{position:absolute;inset:0;}'  /* cobre o board inteiro: SLOTS em % batem nos ganchos */
+    + '.kb-key{position:absolute;width:30%;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;'
     +   'background:transparent;border:none;padding:0;'  /* <button> não pode ter fundo branco padrão atrás da chave transparente */
     +   'transform-origin:top center;transition:transform 0.14s ease,filter 0.18s;animation:kbKeyIn 0.42s ease-out both;}'
     + '.kb-key:hover{transform:scale(1.09);z-index:6;filter:brightness(1.08) drop-shadow(0 0 10px rgba(255,200,90,0.5));}'
@@ -50007,9 +50024,10 @@ function _innShowKeyBoard(opts){
     + '</style>'
     + '<div class="kb-wrap"><div class="kb-board"><div class="kb-keys">';
   keys.forEach(function(k, i){
-    var s = SLOTS[i] || {t:13, l:14};
+    var hk = HOOKS[i] || HOOKS[HOOKS.length - 1];
+    var topPct = (hk.y - 1).toFixed(1), leftPct = (hk.x - KEY_W / 2).toFixed(1);  // anel (topo-centro) no gancho
     html += '<button type="button" class="kb-key" data-idx="' + i + '" '
-      + 'style="top:' + s.t + '%;left:' + s.l + '%;animation-delay:' + (i*80) + 'ms;">'
+      + 'style="top:' + topPct + '%;left:' + leftPct + '%;animation-delay:' + (i*80) + 'ms;">'
       + '<span class="kb-ring"></span>'
       + '<img class="kb-key-img" src="' + k.keyImg + '" alt="">'
       + '<span class="kb-key-plate"><span class="kb-key-name">' + k.name + '</span><br>'
@@ -50027,7 +50045,26 @@ function _innShowKeyBoard(opts){
   body.querySelectorAll('.kb-key').forEach(function(btn){
     btn.addEventListener('click', function(){
       var idx = parseInt(btn.dataset.idx, 10);
-      if (keys[idx] && typeof opts.onPick === 'function') opts.onPick(keys[idx].id, keys[idx]);
+      var k = keys[idx];
+      if (!k || typeof opts.onPick !== 'function') return;
+      // User 2026-06-28: clicar numa chave abre um POPUP do quarto (detalhes +
+      // custo + Reservar) ANTES de descansar — em vez de descansar direto.
+      if (typeof _showInfoPopup === 'function') {
+        var info = _innRoomInfo(k.id);
+        _showInfoPopup({
+          icon: '<img src="' + k.keyImg + '" alt="" style="width:50px;height:50px;object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.6));">',
+          npc: 'Martha — Estalagem',
+          title: (k.name || info.name),
+          desc: '<div style="text-align:left;line-height:1.55;color:var(--v-text,#d4c8b0);">' + info.body
+              + (k.badge ? '<div style="margin-top:var(--v-space-md,8px);color:var(--v-text-dim,#a09484);">Custo: <b style="color:var(--v-gold,#c4953a);">' + k.badge + '</b></div>' : '')
+              + '</div>',
+          confirmLabel: 'Reservar',
+          cancelLabel: 'Voltar',
+          onConfirm: function(){ opts.onPick(k.id, k); }
+        });
+      } else {
+        opts.onPick(k.id, k);
+      }
     });
   });
   if (ov) ov.classList.add('active');
