@@ -655,7 +655,10 @@ async function onPlay() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + _authToken
+                'Authorization': 'Bearer ' + _authToken,
+                // WEB-OAUTH-02: prova de identidade p/ o restore gated pós-restart
+                // (server tenta peek primeiro; só usa o uid+token-fp no miss).
+                'X-User-Id': String(_userId)
             },
             body: JSON.stringify({ char_id: _selectedCharId })
         });
@@ -1188,7 +1191,12 @@ async function fetchCharacters() {
     var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
     var timeout = controller ? setTimeout(function () { controller.abort(); }, 15000) : null;
     try {
-        var fopts = { method: 'GET', headers: { 'Authorization': 'Bearer ' + _authToken } };
+        var fopts = { method: 'GET', headers: {
+            'Authorization': 'Bearer ' + _authToken,
+            // WEB-OAUTH-02: prova de identidade p/ o restore gated pós-restart
+            // (server tenta peek primeiro; só usa o uid+token-fp no miss).
+            'X-User-Id': String(_userId)
+        } };
         if (controller) { fopts.signal = controller.signal; }
         var resp = await fetch(_apiBase + '/api/auth/characters', fopts);
         if (timeout) { clearTimeout(timeout); timeout = null; }
