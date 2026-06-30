@@ -10534,9 +10534,16 @@ function _isCTA(btn) {
       advance:  function(stage){ return window.vCityServer.cityAction('discovery.advance', { stage_id: stage || '' }); },
       complete: function(qid, targetCb){ return window.vCityServer.cityAction('discovery.complete', { quest_id: qid, target_cb: targetCb || '' }); }
     },
-    npc: {
+    npc: {  // NPCs vivos + Interacao (#0, 2026-06-18). MESCLADO: havia 2 chaves `npc:`
+      // neste objeto literal (esta + a de uniqueFinish, ex ~L10681); a 2a sobrescrevia
+      // esta, fazendo npc.state/npc.sync virarem undefined e o boot logar
+      // "[CITY] npc state fetch failed" (_refreshNpcState). Agora tudo num bloco so.
       state: function(){ return window.vCityServer.cityAction('npc.state', {}); },
-      sync:  function(obj){ return window.vCityServer.cityAction('npc.sync', obj || {}); }
+      sync:  function(obj){ return window.vCityServer.cityAction('npc.sync', obj || {}); },
+      // uniqueFinish (Fatia 1): conclui a historia de um NPC unico; o SERVIDOR concede o
+      // reward UMA vez por (player, npc_key) via flag town_unique_<key>_finished persistida
+      // (bloqueia farm via reset de localStorage; antes o reward era LOCAL e sumia no reload).
+      uniqueFinish: function(npcKey){ return window.vCityServer.cityAction('service.npc_unique_finish', { npc_key: npcKey }); }
     },
     equip: {  // FASE 6 — persiste Player.equipment (anti-cheat server-side)
       set: function(eq){ return window.vCityServer.cityAction('equip.set', { equipment: eq || {} }); },
@@ -10677,13 +10684,6 @@ function _isCTA(btn) {
     flag: {  // FASE 7 — flags narrativas persistentes (town_lia_helped, etc.)
       set:   function(name, value){ return window.vCityServer.cityAction('flag.set', { name: name, value: (value === undefined ? true : value) }); },
       state: function(){ return window.vCityServer.cityAction('flag.state', {}); }
-    },
-    npc: {  // NPC Interaction (#0, 2026-06-18, Fatia 1) — antes a "Concluir História"
-      // de NPC único aplicava o reward LOCAL (XP via service.xp escapava; gold+item
-      // só no cliente, próximo reload sumia). Agora o SERVIDOR concede UMA vez por
-      // (player, npc_key) — flag `town_unique_<key>_finished` persistida bloqueia
-      // farm de reset-localStorage.
-      uniqueFinish: function(npcKey){ return window.vCityServer.cityAction('service.npc_unique_finish', { npc_key: npcKey }); }
     },
     ach: {  // FASE 5 — progresso de conquistas por chain (read-only, best-effort)
       progress: function(){ return window.vCityServer.cityAction('ach.progress', {}); }
