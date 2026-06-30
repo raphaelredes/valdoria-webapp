@@ -10426,14 +10426,35 @@ function _isCTA(btn) {
   function _env(){
     try { return new URLSearchParams(window.location.search).get('env') || ''; } catch(_) { return ''; }
   }
-  function _post(path, payload){
+  function _post(path, payload, idemKey){
     var a = _auth();
     if (!a) return Promise.reject(new Error('vCityServer: sem auth (LOCAL mode)'));
-    // SÓ Authorization: Bearer — o CORS allow-headers do servidor NÃO inclui
-    // X-Valdoria-Token; enviá-lo faz o preflight do browser bloquear a request.
+    // SÓ Authorization: Bearer + (opcional) X-Idempotency-Key. O CORS allow-headers
+    // do servidor NÃO inclui X-Valdoria-Token (enviá-lo faz o preflight bloquear),
+    // mas X-Idempotency-Key ESTÁ no allow-list (api_middleware._ALLOWED_HEADERS).
     var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + a.token };
+    if (idemKey) headers['X-Idempotency-Key'] = idemKey;  // SESS-ISO-01 follow-up
     return fetch(a.api + path, { method: 'POST', headers: headers, body: JSON.stringify(payload) })
       .then(function(r){ return r.json().catch(function(){ return { ok: false, error: 'http_' + r.status }; }); });
+  }
+
+  // SESS-ISO-01 (follow-up frontend 2026-06-29): proteção de double-charge por
+  // double-tap. Intents que MUTAM estado/cobram gold (svc.callback/dialogue.choice):
+  // se o jogador toca 2x ENQUANTO a 1ª request está em-voo, a 2ª COALESCE na promise
+  // da 1ª — 1 request, 1 cobrança. Ações distintas (cb/choice diferente) ou
+  // sequenciais (após a 1ª concluir) NÃO colidem → compra em massa / repetição
+  // legítima continua funcionando. A idem-key vai no header → o guard server-side
+  // (handle_city_action) deduplica como defense-in-depth se 2 requests alcançarem
+  // o servidor (ex.: 2 abas). NÃO usar bucket de tempo no cliente (deduparia bulk).
+  var _cityInflight = {};
+  var _MUTATING_CITY = { 'svc.callback': 1, 'dialogue.choice': 1 };
+  function _cityIdemKey(){
+    return 'ca-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  }
+  function _citySig(intent, payload){
+    payload = payload || {};
+    var disc = payload.cb || ((payload.venue || '') + '/' + (payload.node || '') + '/' + (payload.choice_id || ''));
+    return intent + '|' + disc;
   }
   window.vCityServer = {
     isRemote: function(){ return !!_auth(); },
@@ -10448,7 +10469,15 @@ function _isCTA(btn) {
       var body = { user_id: a ? a.uid : null, intent: intent };
       if (payload) { for (var k in payload) { if (Object.prototype.hasOwnProperty.call(payload, k)) body[k] = payload[k]; } }
       var env = _env(); if (env) body.env = env;
-      return _post('/api/city/action', body)
+      // SESS-ISO-01 follow-up: coalesce double-tap concorrente de ação mutável.
+      var _mut = !!_MUTATING_CITY[intent];
+      var _sig = _mut ? _citySig(intent, payload) : null;
+      if (_sig && _cityInflight[_sig]) {
+        console.log('[CITY] double-tap coalescido (anti double-charge) sig=' + _sig);
+        return _cityInflight[_sig];
+      }
+      var _idem = _mut ? _cityIdemKey() : null;
+      var _p = _post('/api/city/action', body, _idem)
         .then(function(res){
           // Level-up server-driven (bug 2026-06-16): se a ação subiu de nível (XP
           // do templo / town_square / quest via service.xp etc.), o SERVIDOR anexa
@@ -10470,6 +10499,14 @@ function _isCTA(btn) {
           return res;
         })
         .catch(function(e){ console.error('[CITY] vCityServer.cityAction(' + intent + ') failed', e); throw e; });
+      if (_sig) {
+        // registra em-voo + limpa ao concluir (sucesso OU erro), p/ que uma ação
+        // SEQUENCIAL depois não fique coalescida com esta. (.finally evitado p/ compat.)
+        _cityInflight[_sig] = _p;
+        var _clear = function(){ if (_cityInflight[_sig] === _p) delete _cityInflight[_sig]; };
+        _p.then(_clear, _clear);
+      }
+      return _p;
     },
     /* Sessão #66 FIX (NPC compras/vendas/dados): aplica o EFEITO de um backend_cb
        de serviço (ex: 'tavern_buy_drink_ale') via process_callback server-side.
