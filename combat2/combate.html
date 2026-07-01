@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T16:56:51Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T17:30:37Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -26465,8 +26465,11 @@ async function playTurnUndead(casterIdx, undeadIdxs, skill) {
     if (typeof simLogPushTurnHeader === 'function') simLogPushTurnHeader(s, caster);
     if (skill.cost && caster.res) caster.res.value = Math.max(0, (caster.res.value | 0) - skill.cost);
     if (skill.combatOnceId) {
-        caster.combatOnceUsed = caster.combatOnceUsed || [];
-        if (caster.combatOnceUsed.indexOf(skill.combatOnceId) < 0) caster.combatOnceUsed.push(skill.combatOnceId);
+        /* Sim usa combatOnceUsed como OBJETO/contador (não array) — paridade com
+           _simIsSkillUsable (~22594) e o marking de outras skills (~23579). Array
+           quebraria o gate 1×/combate e, se já fosse objeto, {}.push lançaria. */
+        caster.combatOnceUsed = caster.combatOnceUsed || {};
+        caster.combatOnceUsed[skill.combatOnceId] = (caster.combatOnceUsed[skill.combatOnceId] || 0) + 1;
     }
     caster.actionSpent = true;
     var dc = (typeof simSpellSaveDc === 'function') ? simSpellSaveDc(caster) : 13;
