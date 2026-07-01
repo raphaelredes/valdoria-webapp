@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T12:05:56Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T14:14:54Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -25369,26 +25369,31 @@ function applyMagicMissileDartImpact(dart, s, _staleTargetEl) {
     applyHpAfterDamage(s, t, oldHp, newHp, { dmgType: dmgTypeVariant });
     /* V1.7 Sprint-17 Ronda 31 (2026-04-21 QA log breakdown) — per-dart impact uniformizado. */
     s.log.push((isFireball ? '  → Bola de Fogo (dardo): ' : '  → Dardo de força: ') + dart.dmg + ' em ' + t.n + '.');
-    // Respingo da Bola de Fogo: demais inimigos vivos podem receber dano
-    // reduzido (entre 1 e metade do dano principal, sempre abaixo do total).
-    // Inspirado no PHB: alvos na área rolam TR DES; aqui simplificamos pra
-    // "chance de respingo" + dano aleatório limitado.
+    // PHB p.241: cada criatura na área da Bola de Fogo faz um Teste de Resistência
+    // (CD de magia do conjurador); dano CHEIO em falha, METADE em sucesso. Espelha
+    // o motor _apply_save_damage_shared_roll (mesma rolagem de dano compartilhada).
+    // Antes: probabilidade fixa de 70% + dano aleatorio (mecanica inventada, nao-D&D).
+    // Corrigido 2026-07-01 (o alvo mirado e o centro da explosao: dano cheio).
     var splashVictims = [];
     if (isFireball) {
+        var _svAb = dart.saveAbility || 'dex';
+        var _svDc = dart.saveDc || 12;
         for (var si = 0; si < s.order.length; si++) {
             if (si === dart.tIdx) continue;
             var u = s.order[si];
             if (!u || u.t !== 'e' || !u.alive) continue;
-            if (Math.random() > 0.7) continue; // 70% chance de respingo
-            var maxSplash = Math.max(2, Math.floor(dart.dmg / 2));
-            var splashDmg = rollN(maxSplash);
-            if (splashDmg >= dart.dmg) splashDmg = dart.dmg - 1; // nunca alcança o dano principal
-            if (splashDmg <= 0) continue;
+            var _svMode = (typeof _simSaveAdvState === 'function') ? _simSaveAdvState(u, _svAb) : 'normal';
+            var _svRoll = _simRollD20WithAdv(_svMode, false).r;
+            var _svMod = simSaveMod(u, _svAb);
+            var _svTotal = _svRoll + _svMod;
+            var _svOk = _svTotal >= _svDc;
+            var splashDmg = _svOk ? Math.max(1, Math.floor(dart.dmg / 2)) : dart.dmg;
             var oldHpS = u.hp;
             var newHpS = Math.max(0, oldHpS - splashDmg);
             applyHpAfterDamage(s, u, oldHpS, newHpS, { dmgType: 'fire' });
-            /* V1.7 Sprint-17 Ronda 31 (2026-04-21 QA log breakdown) — respingo uniformizado. */
-            s.log.push('  → Respingo de fogo em ' + u.n + ': ' + splashDmg + ' dano.');
+            s.log.push('  → ' + u.n + ' — TR ' + _svAb.toUpperCase() + ' ' + _svRoll + '+' + _svMod +
+                '=' + _svTotal + ' vs CD ' + _svDc + (_svOk ? ' (sucesso, metade): ' : ' (falha): ') +
+                splashDmg + ' de fogo.');
             splashVictims.push({ idx: si, dmg: splashDmg });
         }
     }
@@ -26442,7 +26447,9 @@ async function playFireballSpellTurn(aIdx, tIdx, skill) {
     var rolls = [];
     for (var i = 0; i < dN; i++) rolls.push(rollN(dD));
     var total = rolls.reduce(function (a, b) { return a + b; }, 0) + dFlat;
-    var dart = { tIdx: tIdx, rolls: rolls, dmg: total, d: dD, flat: dFlat, variant: 'fireball' };
+    var _fbSaveAb = (skill.save && skill.save.ability) || 'dex';
+    var dart = { tIdx: tIdx, rolls: rolls, dmg: total, d: dD, flat: dFlat, variant: 'fireball',
+        saveAbility: _fbSaveAb, saveDc: simSpellSaveDc(actor) };
     await showFireballSpellOverlay(actor, target, dart, s);
     // Espera o efeito de queimadura persistente rolar no card do alvo
     // e nos respingados antes de prosseguir pra próxima ação.
