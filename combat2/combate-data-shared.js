@@ -713,7 +713,14 @@ var CHAR_CLASSES = [
             desc: 'Paralisa humanoide (PHB p.251): TR SAB ou PARALISADO 3 rodadas; TR SAB ao fim do turno.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'wis' },
             helpDnd5e: 'Imobilizar Pessoa / Hold Person (PHB p.251 — 2º nível): alvo humanoide faz TR SAB; em falha fica PARALISADO até o fim da duração (1 min concentração). Ao fim de cada turno, pode repetir TR SAB.\nParalisado (PHB Appendix A): incapacitado (não atk/reação), auto-falha TRs FOR e DES, ataques em 1,5m são críticos automáticos, atacantes têm vantagem.\nArena: 0 dano + debuff Paralisado 3 rodadas com repeatSave SAB + skipTurn + critMelee + targetedAdvantage.',
-            afterAttackEnemyDebuff: { id: 'hold_person_paralyzed', turns: 3, n: 'Paralisado', ico: '🔒', skipTurn: true, critMelee: true, targetedAdvantage: true, autoFailStrDex: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Paralisado (PHB App.A — Imobilizar Pessoa)' } }
+            afterAttackEnemyDebuff: { id: 'hold_person_paralyzed', turns: 3, n: 'Paralisado', ico: '🔒', skipTurn: true, critMelee: true, targetedAdvantage: true, autoFailStrDex: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Paralisado (PHB App.A — Imobilizar Pessoa)' } },
+        /* Fase 4C: Canalizar Divindade — Expulsar Mortos-Vivos (Turn Undead PHB p.58).
+           No FIM da lista de propósito (não desloca slots das skills anteriores). */
+        { n: 'Expulsar Mortos-Vivos', ico: '✝', cost: 0, kind: 'attack', dmgType: 'radiant', minLevel: 2, multiTarget: true, requiresTargetTag: ['undead'], combatOnceId: 'channel_divinity', save: { ability: 'wis' },
+            damageSpec: { n: 0, d: 0 },
+            desc: 'Canalizar Divindade (PHB p.58): mortos-vivos fazem TR de SAB ou são Expulsos (fogem e perdem o turno). 1×/combate.',
+            helpDnd5e: 'Expulsar Mortos-Vivos / Turn Undead (PHB p.58-59 — Canalizar Divindade, Clérigo nv 2): cada morto-vivo que vê/ouve o Clérigo faz um TR de Sabedoria (CD de magia). Em falha, é "expulso" por 1 min ou até sofrer dano — gasta os turnos fugindo e não pode agir.\nArena (sem grelha): TR SAB vs CD; em falha, Expulso (skipTurn 3 rodadas, termina ao sofrer dano). Só afeta mortos-vivos (auto-alveja todos os undead vivos). 1×/combate; sem mortos-vivos, não gasta o uso.',
+            afterAttackEnemyDebuff: { id: 'turned', turns: 3, n: 'Expulso', ico: '👻', skipTurn: true, wakeOnDamage: true, dndCondition: 'Expulso (Turn Undead — PHB p.58)' } }
       ] },
     { cls: 'Paladino', hp: [26, 38], ac: [16, 18], atk: [5, 6], die: 8, dex: [8, 12], ico: '🕯', dmgMod: 2, attr: 'STR',
       /* D&D 5e PHB p.84: Paladino é meio-conjurador — Smite Divino e magias

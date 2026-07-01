@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T16:13:05Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T16:56:51Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -23625,6 +23625,27 @@ async function useSkill(skill, opts) {
                 if (oc2 && oc2.t === 'e' && oc2.alive) aliveIdxs2.push(aix2);
             }
         }
+        // Fase 4C: Expulsar Mortos-Vivos (Turn Undead, PHB p.58) — multiTarget de
+        // CONTROLE que só afeta undead. Auto-alveja TODOS os mortos-vivos vivos (sem
+        // picker); cada um faz TR de SAB vs CD; em falha, Expulso. Sem morto-vivo,
+        // NÃO gasta o uso (refund). Espelha o motor combat2.py (requiresTargetTag).
+        if (skill.requiresTargetTag && skill.multiTarget) {
+            _pendingSkill = null;
+            var _tuWant = skill.requiresTargetTag.map(function (t) { return String(t).toLowerCase(); });
+            var _tuIdxs = aliveIdxs2.filter(function (ix) {
+                var _tt = (currentState.order[ix].tags || []).map(function (x) { return String(x).toLowerCase(); });
+                return _tuWant.some(function (w) { return _tt.indexOf(w) >= 0; });
+            });
+            if (_tuIdxs.length === 0) {
+                currentState.log.push(p.n + ' canaliza poder divino, mas não há mortos-vivos para expulsar.');
+                render(currentState);
+                return;  // refund: NÃO gasta custo/uso 1×/combate
+            }
+            await playTurnUndead(currentState.p_idx, _tuIdxs, skill);
+            if (checkEnd(currentState)) { render(currentState); return; }
+            await _maybeAdvanceOrStay();
+            return;
+        }
         // Raio Gélido: fluxo estilo MM/Fireball — órbita + feixe linear
         if (skill.rayOfFrost) {
             if (aliveIdxs2.length === 0) { _pendingSkill = null; return; }
@@ -26432,6 +26453,52 @@ function applyRayOfFrostImpact(dart, s, _staleTargetEl, hostCoords) {
 /** Bola de Fogo: fluxo estilo Mísseis Mágicos — 1 bola de fogo em órbita,
  *  rolagem 3d6 (rollMultiple + fusionTo), Continue, fly-out em chama para o alvo,
  *  dano fire + fireballAoE no impacto. Reusa a infra do MM volley overlay. */
+/* Fase 4C: Expulsar Mortos-Vivos (Turn Undead, PHB p.58-59). Canalizar Divindade
+   de CONTROLE, sem dano: cada morto-vivo (idx em undeadIdxs) faz um TR de SAB vs a
+   CD de magia do Clérigo; em falha, fica Expulso (skipTurn 3 rodadas; termina ao
+   sofrer dano — wakeOnDamage). Espelha o motor (combat2.py multiTarget +
+   afterAttackEnemyDebuff). Custo/uso consumidos aqui (gate já validou disponibilidade). */
+async function playTurnUndead(casterIdx, undeadIdxs, skill) {
+    var s = currentState;
+    var caster = s.order[casterIdx];
+    if (!caster) return;
+    if (typeof simLogPushTurnHeader === 'function') simLogPushTurnHeader(s, caster);
+    if (skill.cost && caster.res) caster.res.value = Math.max(0, (caster.res.value | 0) - skill.cost);
+    if (skill.combatOnceId) {
+        caster.combatOnceUsed = caster.combatOnceUsed || [];
+        if (caster.combatOnceUsed.indexOf(skill.combatOnceId) < 0) caster.combatOnceUsed.push(skill.combatOnceId);
+    }
+    caster.actionSpent = true;
+    var dc = (typeof simSpellSaveDc === 'function') ? simSpellSaveDc(caster) : 13;
+    var aed = skill.afterAttackEnemyDebuff || {};
+    s.log.push(caster.n + ' ergue o símbolo sagrado e canaliza poder divino contra os mortos-vivos (CD ' + dc + ').');
+    render(s);
+    await sleep(500);
+    for (var i = 0; i < undeadIdxs.length; i++) {
+        var u = s.order[undeadIdxs[i]];
+        if (!u || !u.alive) continue;
+        var _mode = (typeof _simSaveAdvState === 'function') ? _simSaveAdvState(u, 'wis') : 'normal';
+        var _roll = (typeof _simRollD20WithAdv === 'function') ? _simRollD20WithAdv(_mode, false).r : rollN(20);
+        var _mod = (typeof simSaveMod === 'function') ? simSaveMod(u, 'wis') : 0;
+        var _total = _roll + _mod;
+        if (_total >= dc) {
+            s.log.push('  → ' + u.n + ' — TR SAB ' + _roll + '+' + _mod + '=' + _total + ' vs CD ' + dc + ' (resiste à expulsão).');
+        } else {
+            u.se = u.se || [];
+            u.se.push({
+                id: aed.id || 'turned', n: aed.n || 'Expulso', ico: aed.ico || '👻',
+                turnsLeft: aed.turns || 3, skipTurn: aed.skipTurn !== false,
+                wakeOnDamage: !!aed.wakeOnDamage,
+                dndCondition: aed.dndCondition || 'Expulso (Turn Undead — PHB p.58)'
+            });
+            s.log.push('  → ' + u.n + ' — TR SAB ' + _roll + '+' + _mod + '=' + _total + ' vs CD ' + dc + ' (falha): EXPULSO — foge e perde o turno!');
+            if (typeof playBuffVfxOnCell === 'function') { try { playBuffVfxOnCell(u.uid, 'sanctuary'); } catch (e) {} }
+        }
+    }
+    render(s);
+    await sleep(700);
+}
+
 async function playFireballSpellTurn(aIdx, tIdx, skill) {
     var s = currentState;
     var actor = s.order[aIdx];
