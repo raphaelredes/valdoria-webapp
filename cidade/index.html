@@ -40752,7 +40752,11 @@ function _equipItem(name, preferUiSlot) {
   if (current && current !== name) _vinvApplyAcDelta(current, -1);
   if (current !== name) _vinvApplyAcDelta(name, +1);
   if (typeof vToast === 'function') {
-    if (current && current !== name) vToast(current + ' → ' + name + ' (' + slot + ')');
+    // 2026-07-01: slot em PT-BR no toast (antes vazava a key interna, ex. "chest")
+    var _slotPt = { main_hand: 'Mão Princ.', off_hand: 'Mão Sec.', chest: 'Peito',
+      head: 'Cabeça', hands: 'Mãos', feet: 'Pés', legs: 'Pernas', cloak: 'Manto',
+      necklace: 'Colar', ring_1: 'Anel I', ring_2: 'Anel II', belt: 'Cinto', shoulders: 'Ombros' };
+    if (current && current !== name) vToast(current + ' → ' + name + ' (' + (_slotPt[slot] || slot) + ')');
     else vToast(name + ' equipado.');
   }
   if (typeof refreshHud === 'function') refreshHud();
