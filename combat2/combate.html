@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T18:45:46Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T23:03:04Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13607,7 +13607,7 @@ function newCombat() {
     var order = sHolder.order.concat(es);
     /* init pre-calculado mas nao revelado — tela intro mostra "?" */
     order.forEach(function (c) {
-        c.init = rollN(20) + Math.floor((c.dex - 10) / 2);
+        c.init = rollN(20) + Math.floor((c.dex - 10) / 2) + getInitBonusFromStatuses(c);
         c.initRevealed = false;
         c.initRolling = false;
     });
@@ -14061,6 +14061,46 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     }
     var resMax = resMaxBase;
     var resCur = (spec.mp_exact != null) ? Math.max(0, Math.min(resMax, parseInt(spec.mp_exact, 10) || 0)) : resMax;
+    /* 2026-07-01 — canal itemBuffs (spec.itemBuffs, do combat_item_buffs Python):
+       buffs de ITEM consumível seedados como se[] persistentes (turnsLeft null,
+       duram o combate; a duração em COMBATES decrementa no servidor via
+       process_post_combat_buffs no /complete). Ride nos consumidores existentes:
+       atkFlat (getAtkFlatFromStatuses), saveBonus[+saveBonusAbility] (simSaveMod),
+       initBonus (getInitBonusFromStatuses), itemPoisonDie (_simItemPoisonRolls). */
+    var _seSeed = [];
+    if (_exhSeed > 0) {
+        _seSeed.push({ id: 'exhaustion', kind: 'debuff', ico: '😩',
+            n: 'Exaustão (nível ' + _exhSeed + ')',
+            dndCondition: 'Exaustão ' + _exhSeed + ' (PHB p.291)',
+            exhaustionLevel: _exhSeed, turnsLeft: null });
+    }
+    var _ibSeed = (!useRandom && spec.itemBuffs && typeof spec.itemBuffs === 'object') ? spec.itemBuffs : null;
+    if (_ibSeed) {
+        if (_ibSeed.luck) {
+            _seSeed.push({ id: 'item_luck', kind: 'buff', ico: '◆',
+                n: 'Amuleto da Sorte', dndCondition: '+1 em rolagens de d20 (item)',
+                atkFlat: 1, saveBonus: 1, initBonus: 1, turnsLeft: null });
+        }
+        if (_ibSeed.antitoxin) {
+            _seSeed.push({ id: 'item_antitoxin', kind: 'buff', ico: '◆',
+                n: 'Antídoto Potente', dndCondition: '+3 em TR de CON (item)',
+                saveBonus: (_ibSeed.antitoxin | 0) || 3, saveBonusAbility: 'con', turnsLeft: null });
+        }
+        if (_ibSeed.poisonWeapon) {
+            _seSeed.push({ id: 'item_poison_weapon', kind: 'buff', ico: '◆',
+                n: 'Frasco de Veneno', dndCondition: '+1d4 de veneno em ataques de arma (item)',
+                itemPoisonDie: true, turnsLeft: null });
+        }
+    }
+    /* 2026-07-01: save_bonus de EQUIPAMENTO (Anel de Proteção/Manto da
+       Resistência/Pedra da Sorte — spec.equipSaveBonus, attunement-gated no
+       servidor). Antes os TRs da arena ignoravam TODO save_bonus de item. */
+    var _eqSb = (!useRandom && spec.equipSaveBonus != null) ? (parseInt(spec.equipSaveBonus, 10) | 0) : 0;
+    if (_eqSb) {
+        _seSeed.push({ id: 'equip_save_bonus', kind: 'buff', ico: '◆',
+            n: 'Proteção do equipamento', dndCondition: '+' + _eqSb + ' em Testes de Resistência (equipamento)',
+            saveBonus: _eqSb, turnsLeft: null });
+    }
     return {
         t: roleTag, n: n, cls: cdef.cls, subclass: sub,
         /* PHB p.107 Pacto da Corrente — gate do passive chain_familiar + stats do
@@ -14118,11 +14158,9 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         dex: dex, wis: wis, intScore: intSc, cha: cha, str: strSc, con: conSc,
         prof: (function (lv) { lv = Math.max(1, lv | 0); return 2 + Math.floor((lv - 1) / 4); })(lvl),
         alive: hp > 0,
-        /* C4.9 #90: seed da Exaustão real (PHB p.291) — runtime já consome. */
-        se: _exhSeed > 0 ? [{ id: 'exhaustion', kind: 'debuff', ico: '😩',
-            n: 'Exaustão (nível ' + _exhSeed + ')',
-            dndCondition: 'Exaustão ' + _exhSeed + ' (PHB p.291)',
-            exhaustionLevel: _exhSeed, turnsLeft: null }] : [],
+        /* C4.9 #90 + itemBuffs 2026-07-01: seed pré-computado acima (_seSeed) —
+           Exaustão real (PHB p.291) + buffs de item consumível. */
+        se: _seSeed,
         dying: hp <= 0, stable: false, isDead: false, deathSaves: { s: 0, f: 0 },
         lvl: lvl,
         /* 2026-06-21 (user bug "Sem uso para forma selvagem"): usos de Forma Selvagem
@@ -14804,6 +14842,37 @@ function getAtkFlatFromStatuses(u) {
         b += st.atkFlat;
     });
     return b;
+}
+
+/* 2026-07-01 (itemBuffs): bônus de INICIATIVA vindo de se[] (Amuleto da Sorte
+   +1 em rolagens de d20 — iniciativa é um teste de DES com d20, PHB p.189). */
+function getInitBonusFromStatuses(u) {
+    if (!u || !u.se) return 0;
+    var b = 0;
+    u.se.forEach(function (st) {
+        if (st == null || !st.initBonus) return;
+        if (st.turnsLeft != null && st.turnsLeft <= 0) return;
+        b += (st.initBonus | 0);
+    });
+    return b;
+}
+
+/* 2026-07-01 (itemBuffs): Frasco de Veneno — +1d4 de veneno em ataque de ARMA
+   (gate espelha o motor _ability_mod_applies_to_damage: básico OU dmgType
+   físico; magia não envenena a lâmina). Dobra no crit (PHB p.194). Os rolls
+   entram no pool de dados do dano (total/overlay contam naturalmente). */
+function _simItemPoisonRolls(a, crit, skill) {
+    if (!a || !a.se) return [];
+    var has = false;
+    a.se.forEach(function (st) { if (st && st.itemPoisonDie) has = true; });
+    if (!has) return [];
+    if (skill) {
+        var _dt = String(skill.dmgType || 'slashing').toLowerCase();
+        if (_dt !== 'slashing' && _dt !== 'piercing' && _dt !== 'bludgeoning') return [];
+    }
+    var out = [rollN(4)];
+    if (crit) out.push(rollN(4));
+    return out;
 }
 
 function getDmgFlatFromStatuses(u) {
@@ -16019,7 +16088,8 @@ function rollDamage(a, crit, skill) {
            dobram corretamente na rolagem de crítico. */
         var rollCount = crit ? n * 2 : n;
         for (i = 0; i < rollCount; i++) rolls2.push(rollN(d));
-        return rolls2;
+        /* 2026-07-01 (itemBuffs): Frasco de Veneno em skills de ARMA (dmgType físico). */
+        return rolls2.concat(_simItemPoisonRolls(a, crit, skill));
     }
     // FASE 8 / Forma Selvagem: a mordida/garra da fera rola N dados (ex.: Lobo 2d4).
     // `wildBiteDice` é setado ao transformar (espelha o motor _roll_damage). Crit dobra.
@@ -16036,7 +16106,8 @@ function rollDamage(a, crit, skill) {
             a._savageExtra = _sav;
         }
     }
-    return rolls3;
+    /* 2026-07-01 (itemBuffs): Frasco de Veneno no ataque básico de arma. */
+    return rolls3.concat(_simItemPoisonRolls(a, crit, skill));
 }
 
 function simProficiencyBonus(lvl) {
@@ -16128,9 +16199,12 @@ function simSaveMod(defender, ability) {
        (mesmo buff roda d4 em atk E em save — overpowered vs PHB "ou", mas
        flavor-fiel pro save). */
     if (defender && defender.se && defender.se.length) {
+        var _abLower = (ability || '').toLowerCase();
         defender.se.forEach(function (st) {
             if (!st || (st.turnsLeft != null && st.turnsLeft <= 0)) return;
-            if (st.saveBonus) mod += (st.saveBonus | 0);
+            /* 2026-07-01 (itemBuffs): saveBonusAbility restringe o bônus a UM
+               atributo (Antídoto Potente = só CON). Sem o campo → todos (compat). */
+            if (st.saveBonus && (!st.saveBonusAbility || String(st.saveBonusAbility).toLowerCase() === _abLower)) mod += (st.saveBonus | 0);
             if (st.saveBonusFromCasterCha) {
                 var chaScore = (defender.cha != null) ? defender.cha : 14;
                 var chaMod = Math.floor((chaScore - 10) / 2);
@@ -30386,7 +30460,7 @@ async function runNpcSegmentUntilPlayerTurn() {
             if (c.delayedTurns <= 0) {
                 c._isReinforcement = false;
                 if (c.initPending) {
-                    c.init = rollN(20) + Math.floor((c.dex - 10) / 2);
+                    c.init = rollN(20) + Math.floor((c.dex - 10) / 2) + getInitBonusFromStatuses(c);
                     c.initRevealed = true;
                     c.initRolling = false;
                     c.initPending = false;

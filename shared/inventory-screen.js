@@ -1231,6 +1231,14 @@
     } else if (isEquippable && !isEquipped) {
       btns.push({ act: 'ItemEquip', label: 'Equipar', cls: 'primary' });
     }
+    // 2026-07-01 (UNEQUIP-ALLY-INVERSE): cópia equipada num ALIADO — o detail
+    // antes não mostrava nada (equipped lê só o loadout do player) e o Equipar
+    // podia falhar no pool sem explicação. O adapter injeta it.allyEquipped
+    // ({id, name, slot}) e o caller passa onItemUnequipAlly.
+    if (it.allyEquipped && !isEquipped && cfg.onItemUnequipAlly) {
+      btns.push({ act: 'ItemUnequipAlly',
+        label: 'Desequipar de ' + (it.allyEquipped.name || 'aliado'), cls: '' });
+    }
     if (canUse) btns.push({ act: 'ItemUse', label: 'Usar', cls: 'primary' });
     if (canSell) btns.push({ act: 'ItemSell', label: 'Vender', cls: '' });
     if (canDrop) btns.push({ act: 'ItemDrop', label: 'Largar', cls: 'danger' });

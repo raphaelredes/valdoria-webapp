@@ -84,6 +84,14 @@
     'base-shortsword': 'espada-curta',
     'base-greatsword': 'espada-elfica',
     'base-training-sword': 'espada-de-treino',
+    // Itens legitimados do CANON (2026-07-01) — reusam webp existente visualmente
+    // compatível (regra: nunca deixar item do ITEMS_DB sem imagem).
+    'espada-de-mithral': 'espada-longa-+2',
+    'peitoral-de-mithral': 'peitoral-da-furia-das-montanhas',
+    'elmo-de-cavaleiro': 'elmo-de-protecao',
+    'manoplas-de-ferro': 'manoplas-de-mithral',
+    'amuleto-de-protecao': 'amuleto-de-armadura-natural',
+    'capa-do-vento': 'capa-de-deslocamento',
     // Adagas/Punhais
     'base-dagger': 'adaga',
     'base-cerimonial-dagger': 'adaga',

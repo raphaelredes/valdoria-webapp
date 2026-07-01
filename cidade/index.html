@@ -24045,7 +24045,7 @@ var SQUARE_AMBULANT_VENDORS = [
     items: [
       { name: 'Anel de Proteção',      value: 200, icon: _heralIco('ic-ach-colecionador'),  desc: '+1 CA e em todos os saves.' },
       { name: 'Amuleto de Vitalidade', value: 300, icon: _heralIco('ic-stat-hp'),           desc: 'CON 19 enquanto usado.' },
-      { name: 'Amuleto da Sorte',      value: 250, icon: _heralIco('ic-stat-cha'),          desc: 'Refazer 1 d20 falho por dia.' }
+      { name: 'Amuleto da Sorte',      value: 250, icon: _heralIco('ic-stat-cha'),          desc: '+1 em rolagens de d20 por 3 combates.' }
     ] },
   // 2026-06-13: DRACONATO (9a raca D&D — ate entao 0 NPCs nomeados). Itens reusados
   // de outros vendedores (ja em ITEMS_DB). Raca na desc, como os pares (Lunara tiefling,
@@ -33223,15 +33223,16 @@ var CANON_ITEMS_DB = {
   'Espada de Mithral':  {e: _heralIco('ic-liga-mithral'), v:500, r:'very_rare',t:['weapon','martial_weapon','versatile','magic'], s:'main_hand', dd:'1d8', b:2, desc:'Lâmina de mithral azulado. +2 ataque, leve como pluma.'},
   // === ARMADURAS — Thorne ===
   'Cota de Malha':      {e: _heralIco('ic-mochila'), v:75,  r:'common',  t:['armor','heavy_armor'],             s:'chest',     ac:6,  desc:'Cota de malha de ferro. CA base 16.'},
-  'Peitoral de Mithral':{e: _heralIco('ic-liga-mithral'), v:500, r:'rare',    t:['armor','medium_armor','magic'],    s:'chest',     ac:6, b:1, desc:'Peitoral leve e impenetrável de mithral forjado.'},
+  // 2026-07-01: ac 6→4 (Peitoral PHB = CA 14 média; mithral remove a penalidade, não sobe CA) + b:1 removido (armadura não dá bônus de ataque)
+  'Peitoral de Mithral':{e: _heralIco('ic-liga-mithral'), v:500, r:'rare',    t:['armor','medium_armor','magic'],    s:'chest',     ac:4, desc:'Peitoral leve e impenetrável de mithral forjado.'},
   'Elmo Enferrujado':   {e: _heralIco('ic-mochila'), v:25,  r:'common',  t:['armor','medium_armor'],             s:'head',      ac:2,  desc:'Elmo simples de ferro. +2 CA.'},
-  'Elmo de Cavaleiro':  {e: _heralIco('ic-mochila'), v:150, r:'uncommon',t:['armor'],                            s:'head',      ac:2,  desc:'Elmo de aço polido com viseira. +2 CA.'},
+  'Elmo de Cavaleiro':  {e: _heralIco('ic-mochila'), v:150, r:'uncommon',t:['armor','medium_armor'],             s:'head',      ac:2,  desc:'Elmo de aço polido com viseira. +2 CA.'},
   'Grevas de Ferro':    {e: _heralIco('ic-mochila'), v:45,  r:'common',  t:['armor','medium_armor'],             s:'legs',      ac:2,  desc:'Proteções de pernas em ferro. +2 CA.'},
   'Botas Pesadas':      {e: _heralIco('ic-mochila'), v:35,  r:'common',  t:['armor'],                            s:'feet',      ac:1,  desc:'Botas de couro reforçado. +1 CA.'},
-  'Manoplas de Ferro':  {e: _heralIco('ic-mochila'), v:30,  r:'common',  t:['armor'],                            s:'hands',     ac:1,  desc:'Manoplas de ferro. +1 CA.'},
+  'Manoplas de Ferro':  {e: _heralIco('ic-mochila'), v:30,  r:'common',  t:['armor','medium_armor'],             s:'hands',     ac:1,  desc:'Manoplas de ferro. +1 CA.'},
   // === CONSUMIVEIS — Mirena Alquimista ===
-  'Pedra de Afiar':       {e: _heralIco('ic-oficina'), v:100, r:'uncommon',t:['tool','consumable'],              desc:'+1 dano no próximo ataque.'},
-  'Kit de Reparo':        {e: _heralIco('ic-engrenagem'), v:150, r:'common', t:['tool','consumable','field_kit'],   desc:'Restaura 5 HP imediatos.'},
+  'Pedra de Afiar':       {e: _heralIco('ic-oficina'), v:25, r:'uncommon',t:['tool','consumable'],              desc:'+1 dano no próximo ataque.'},
+  'Kit de Reparo':        {e: _heralIco('ic-engrenagem'), v:40, r:'common', t:['tool','consumable','field_kit'],   desc:'Restaura 5 HP imediatos.'},
   'Poção de Cura':        {e: _heralIco('ic-mochila'), v:50,  r:'common', t:['consumable','potion','healing'],   hb:7,  desc:'Recupera 2d4+2 HP fora de combate.'},
   'Poção de Cura Maior':  {e: _heralIco('ic-mochila'), v:150, r:'uncommon',t:['consumable','potion','healing'],  hb:14, desc:'Recupera 4d4+4 HP fora de combate.'},
   'Poção de Cura Superior':{e: _heralIco('ic-mochila'),v:450, r:'rare',   t:['consumable','potion','healing'],   hb:28, desc:'Recupera 8d4+8 HP fora de combate.'},
@@ -33259,14 +33260,14 @@ var CANON_ITEMS_DB = {
   'Mapa das Planícies':    {e: _heralIco('ic-cartografia'), v:30,  r:'common',  t:['map','tool'], desc:'Rotas e acampamentos da região central.'},
   'Mapa da Floresta':       {e: _heralIco('ic-cartografia'), v:35,  r:'common',  t:['map','tool'], desc:'Florestas densas e ruínas escondidas.'},
   'Mapa do Deserto':        {e: _heralIco('ic-cartografia'), v:20,  r:'common',  t:['map','tool'], desc:'Trilhas e oásis raros das areias.'},
-  'Mapa do Pântano':        {e: _heralIco('ic-cartografia'), v:40,  r:'uncommon',t:['map','tool'], desc:'Caminhos secos sobre lama e perigo.'},
-  'Mapa do Ermo Gelado':    {e: _heralIco('ic-cartografia'), v:30,  r:'uncommon',t:['map','tool'], desc:'Trilhas pelo gelo eterno do norte.'},
-  'Mapa das Montanhas':     {e: _heralIco('ic-cartografia'), v:60,  r:'rare',   t:['map','tool'], desc:'Picos e cavernas do Brakenhall.'},
-  'Mapa Vulcânico':         {e: _heralIco('ic-cartografia'), v:55,  r:'rare',   t:['map','tool'], desc:'Terras vulcânicas. Cuidado com gases.'},
+  'Mapa do Pântano':        {e: _heralIco('ic-cartografia'), v:35,  r:'uncommon',t:['map','tool'], desc:'Caminhos secos sobre lama e perigo.'},
+  'Mapa do Ermo Gelado':    {e: _heralIco('ic-cartografia'), v:25,  r:'uncommon',t:['map','tool'], desc:'Trilhas pelo gelo eterno do norte.'},
+  'Mapa das Montanhas':     {e: _heralIco('ic-cartografia'), v:45,  r:'rare',   t:['map','tool'], desc:'Picos e cavernas do Brakenhall.'},
+  'Mapa Vulcânico':         {e: _heralIco('ic-cartografia'), v:40,  r:'rare',   t:['map','tool'], desc:'Terras vulcânicas. Cuidado com gases.'},
   // === SELEIRO — Bjorn ===
-  'Mochila Reforçada':      {e: _heralIco('ic-mochila'), v:25,  r:'common',  t:['tool','camping'],     desc:'Comporta 30kg sem incomodar costas.'},
+  'Mochila Reforçada':      {e: _heralIco('ic-mochila'), v:75,  r:'common',  t:['tool','camping'],     desc:'Comporta 30kg sem incomodar costas.'},
   'Tenda de Couro':         {e: _heralIco('ic-mochila'), v:50,  r:'common',  t:['tool','camping'],     desc:'Abriga 2 pessoas. Resistente à chuva.'},
-  'Saco de Dormir':         {e: _heralIco('ic-mochila'), v:20,  r:'common',  t:['tool','camping'],     desc:'Mantém aquecido em noites frias.'},
+  'Saco de Dormir':         {e: _heralIco('ic-mochila'), v:15,  r:'common',  t:['tool','camping'],     desc:'Mantém aquecido em noites frias.'},
   'Corda de Cânhamo 15m':   {e: _heralIco('ic-cordas'), v:10,  r:'common',  t:['tool','camping'],     desc:'Suporta 100kg. Vantagem em Atletismo.'},
   'Pederneira':             {e: _heralIco('ic-tochas'), v:5,   r:'common',  t:['tool','camping'],     desc:'Faz fogo em qualquer condição.'},
   'Kit de Escalada':        {e: _heralIco('ic-cordas'), v:25,  r:'common',  t:['tool','camping'],     desc:'Vantagem em escalada e travessias.'},
@@ -33302,31 +33303,33 @@ var CANON_ITEMS_DB = {
   'Ferro Bruto':       {e: _heralIco('ic-mochila'), v:10,   r:'common', t:['trade_good','material','metal'],        desc:'Lingote de ferro bruto. Matéria-prima das forjas.'},
   'Cobre Bruto':       {e: _heralIco('ic-mochila'), v:50,   r:'common', t:['trade_good','material','metal'],        desc:'Lingote de cobre avermelhado. Bom condutor — alquimistas pagam bem.'},
   'Linho':             {e: _heralIco('ic-mochila'), v:5,    r:'common', t:['trade_good','material','cloth'],        desc:'Tecido de linho fino, pronto pra alfaiataria.'},
-  'Couro Curtido':     {e: _heralIco('ic-mochila'), v:8,    r:'common', t:['trade_good','material','leather'],      desc:'Couro tratado, maleável — para botas, cintos, encadernação.'},
+  'Couro Curtido':     {e: _heralIco('ic-mochila'), v:12,    r:'common', t:['trade_good','material','leather'],      desc:'Couro tratado, maleável — para botas, cintos, encadernação.'},
   'Especiarias':       {e: _heralIco('ic-mochila'), v:200,  r:'uncommon', t:['trade_good','food','exotic'],         desc:'Mistura de pimenta, cravo, canela. Sempre tem comprador.'},
   'Açafrão':           {e: _heralIco('ic-mochila'), v:1500, r:'rare',   t:['trade_good','food','exotic','valuable'], desc:'Flor seca, dourada, perfumada. Pesa pouco — vale muito.'},
   'Prata Bruta':       {e: _heralIco('ic-mochila'), v:500,  r:'uncommon', t:['trade_good','material','metal','valuable'], desc:'Lingote de prata. Reservado, pesado, brilho frio.'},
   'Ouro Bruto':        {e: _heralIco('ic-mochila'), v:5000, r:'rare',   t:['trade_good','material','metal','valuable'], desc:'Lingote de ouro. Pesa o suficiente pra mudar a balança da feira.'},
   'Pelagem de Lobo':   {e: _heralIco('ic-lobo'),    v:25,   r:'common', t:['trade_good','material','leather'],      desc:'Pele de lobo cinzento, curtida pra manto. Quente, durável.'},
-  'Madeira de Lei':    {e: _heralIco('ic-mochila'), v:30,   r:'uncommon', t:['trade_good','material','wood'],       desc:'Toras de madeira nobre — carvalho centenário ou mogno escuro.'},
+  'Madeira de Lei':    {e: _heralIco('ic-mochila'), v:8,   r:'uncommon', t:['trade_good','material','wood'],       desc:'Toras de madeira nobre — carvalho centenário ou mogno escuro.'},
 
   // === MISC ===
-  'Anel de Sorte':      {e: _heralIco('ic-mochila'), v:200, r:'rare',     t:['accessory','magic'],   s:'ring_1', b:1, desc:'+1 em testes de habilidade.'},
+  // 2026-07-01: slot ring (canônico), b:1 removido e desc honesta (bônus de teste de habilidade não tem engine)
+  'Anel de Sorte':      {e: _heralIco('ic-mochila'), v:200, r:'rare',     t:['accessory','magic'],   s:'ring', desc:'Um anel simples que dizem atrair boa fortuna.'},
   'Amuleto de Proteção':{e: _heralIco('ic-mochila'), v:300, r:'rare',     t:['accessory','magic'],   s:'necklace', ac:1, desc:'+1 CA. Incrustado com runa.'},
-  'Capa do Vento':      {e: _heralIco('ic-mochila'), v:180, r:'uncommon', t:['armor','magic'],       s:'cloak',  desc:'Vantagem em testes de Furtividade noturnos.'},
+  // 2026-07-01: tag clothing (capa não é armadura) + desc honesta (vantagem em Furtividade não tem engine)
+  'Capa do Vento':      {e: _heralIco('ic-mochila'), v:180, r:'uncommon', t:['clothing','magic'],    s:'cloak',  desc:'Capa leve que ondula mesmo sem vento. Favorita de batedores noturnos.'},
   // === SET PIECES (canonical: src/game/economy/item_sets_data.py) ===
   // Conjunto do Lobo Selvagem (DEX +2 / +1 atk / +1 dano)
   'Garras do Lobo Selvagem': {e: _heralIco('ic-trofeu'), v:600, r:'rare', t:['weapon','set','set_lobo_selvagem','finesse'], s:'main_hand', dd:'1d6', b:1, si:'lobo_selvagem', desc:'Garras forjadas com presas de lobo terrível. Peça do Conjunto do Lobo Selvagem.'},
-  'Gibão do Lobo Selvagem':  {e: _heralIco('ic-lobo'), v:550, r:'rare', t:['armor','set','set_lobo_selvagem','light_armor'], s:'chest', ac:3, si:'lobo_selvagem', desc:'Couro reforçado com pelos cinzentos. Peça do Conjunto do Lobo Selvagem.'},
+  'Gibão do Lobo Selvagem':  {e: _heralIco('ic-lobo'), v:500, r:'rare', t:['armor','set','set_lobo_selvagem','light_armor'], s:'chest', ac:3, si:'lobo_selvagem', desc:'Couro reforçado com pelos cinzentos. Peça do Conjunto do Lobo Selvagem.'},
   'Botas do Lobo Selvagem':  {e: _heralIco('ic-lobo'), v:400, r:'rare', t:['armor','set','set_lobo_selvagem'], s:'feet', ac:1, si:'lobo_selvagem', desc:'Pisadas silenciosas como o lobo. Peça do Conjunto do Lobo Selvagem.'},
   // Conjunto do Protetor Ancestral (CA +1 / HP +5 / +1 save)
-  'Escudo do Protetor Ancestral':  {e: _heralIco('ic-mochila'), v:700, r:'rare', t:['armor','set','set_protetor_ancestral','shield'], s:'off_hand', ac:3, si:'protetor_ancestral', desc:'Escudo cerimonial dos guardiões. Peça do Conjunto do Protetor.'},
-  'Couraça do Protetor Ancestral': {e: _heralIco('ic-mochila'), v:800, r:'rare', t:['armor','set','set_protetor_ancestral','heavy_armor'], s:'chest', ac:7, si:'protetor_ancestral', desc:'Aço reluzente do Forte de Valdrenor. Peça do Conjunto do Protetor.'},
-  'Elmo do Protetor Ancestral':    {e: _heralIco('ic-mochila'), v:500, r:'rare', t:['armor','set','set_protetor_ancestral'], s:'head', ac:2, si:'protetor_ancestral', desc:'Elmo de aço com runa. Peça do Conjunto do Protetor.'},
+  'Escudo do Protetor Ancestral':  {e: _heralIco('ic-mochila'), v:600, r:'rare', t:['armor','set','set_protetor_ancestral','shield'], s:'off_hand', ac:3, si:'protetor_ancestral', desc:'Escudo cerimonial dos guardiões. Peça do Conjunto do Protetor.'},
+  'Couraça do Protetor Ancestral': {e: _heralIco('ic-mochila'), v:700, r:'rare', t:['armor','set','set_protetor_ancestral','heavy_armor'], s:'chest', ac:7, si:'protetor_ancestral', desc:'Aço reluzente do Forte de Valdrenor. Peça do Conjunto do Protetor.'},
+  'Elmo do Protetor Ancestral':    {e: _heralIco('ic-mochila'), v:400, r:'rare', t:['armor','set','set_protetor_ancestral'], s:'head', ac:2, si:'protetor_ancestral', desc:'Elmo de aço com runa. Peça do Conjunto do Protetor.'},
   // Conjunto do Arcanista (INT +2 / MP +10 / +1 spell DC)
-  'Vestes do Arcanista':   {e: _heralIco('ic-mochila'), v:650, r:'rare', t:['armor','set','set_arcanista','clothing'], s:'chest', mb:5, si:'arcanista', desc:'Vestes encantadas com fios mágicos. Peça do Conjunto do Arcanista.'},
-  'Cetro do Arcanista':    {e: _heralIco('ic-mochila'), v:750, r:'rare', t:['weapon','set','set_arcanista','arcane'], s:'main_hand', dd:'1d6', mb:3, si:'arcanista', desc:'Cetro de cristal arcano. Peça do Conjunto do Arcanista.'},
-  'Pingente do Arcanista': {e: _heralIco('ic-mochila'), v:400, r:'rare', t:['accessory','set','set_arcanista','magic'], s:'necklace', mb:2, si:'arcanista', desc:'Pingente que canaliza arcano. Peça do Conjunto do Arcanista.'},
+  // 2026-07-01: Vestes/Cetro/Pingente do Arcanista REMOVIDOS — peças de set que
+  // NUNCA existiram no servidor (o set arcanista real é Manto/Chapéu/Orbe, que
+  // resolvem via ITEMS_DB_GEN). Ver CANON_ITEM_SETS.arcanista.
   // === STAGE 9: Items SRD canonical D&D 5e (PHB Cap.5 + DMG Cap.7) ===
   // === ARMAS SIMPLES ===
   'Clava':         {e: _heralIco('ic-mochila'), v:1,  r:'common', t:['weapon','simple_weapon','wood'],         s:'main_hand', dd:'1d4', desc:'Arma simples de madeira. Dano contundente.'},
@@ -33354,7 +33357,7 @@ var CANON_ITEMS_DB = {
   'Glaive':        {e: _heralIco('ic-stat-attack'), v:20, r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy','reach'], s:'main_hand', dd:'1d10', desc:'Lâmina em cabo longo. Alcance.'},
   'Pique':         {e: _heralIco('ic-stat-attack'), v:5,  r:'common', t:['weapon','martial_weapon','metal','two_handed','heavy','reach'], s:'main_hand', dd:'1d10', desc:'Lança longa. Alcance + 2 mãos.'},
   'Tridente':      {e: _heralIco('ic-stat-attack'), v:5,  r:'common', t:['weapon','martial_weapon','metal','thrown','versatile'], s:'main_hand', dd:'1d6', desc:'Lança de 3 pontas. Versátil + arremesso.'},
-  'Picareta de Guerra':{e: _heralIco('ic-mochila'), v:5, r:'common', t:['weapon','martial_weapon','metal'],     s:'main_hand', dd:'1d8', desc:'Picareta militar.'},
+  'Picareta de Guerra':{e: _heralIco('ic-mochila'), v:45, r:'common', t:['weapon','martial_weapon','metal'],     s:'main_hand', dd:'1d8', desc:'Picareta militar.'},
   'Chicote':       {e: _heralIco('ic-mochila'), v:2,  r:'common', t:['weapon','martial_weapon','finesse','reach'], s:'main_hand', dd:'1d4', desc:'Chicote longo. Acuidade + alcance.'},
   'Arco Longo':    {e: _heralIco('ic-patrulheiro'), v:50, r:'common', t:['weapon','martial_weapon','wood','ranged','two_handed','heavy'], s:'main_hand', dd:'1d8', desc:'Arco de batalha. Pesado.'},
   'Besta Pesada':  {e: _heralIco('ic-patrulheiro'), v:50, r:'common', t:['weapon','martial_weapon','wood','ranged','two_handed','heavy'], s:'main_hand', dd:'1d10', desc:'Besta militar. 2 mãos + pesada.'},
@@ -33372,7 +33375,7 @@ var CANON_ITEMS_DB = {
   'Cota de Talas':      {e: _heralIco('ic-mochila'), v:200,r:'uncommon',t:['armor','heavy_armor','metal'],    s:'chest', ac:7, desc:'Talas de aço. FOR 15 mín.'},
   'Placa Completa':     {e: _heralIco('ic-mochila'), v:1500,r:'rare', t:['armor','heavy_armor','metal'],     s:'chest', ac:8, desc:'Armadura definitiva. FOR 15 mín.'},
   // === ESCUDOS ===
-  'Escudo de Madeira':  {e: _heralIco('ic-mochila'), v:10, r:'common', t:['armor','shield','wood'],           s:'off_hand', ac:2, desc:'Escudo de madeira reforçado.'},
+  'Escudo de Madeira':  {e: _heralIco('ic-mochila'), v:30, r:'common', t:['armor','shield','wood'],           s:'off_hand', ac:2, desc:'Escudo de madeira reforçado.'},
   'Escudo de Aço':      {e: _heralIco('ic-mochila'), v:25, r:'common', t:['armor','shield','metal'],          s:'off_hand', ac:2, desc:'Escudo de metal pleno.'},
   // === POÇÕES MÁGICAS ===
   'Poção de Heroísmo':         {e: _heralIco('ic-mochila'), v:180,r:'uncommon', t:['consumable','potion','magic'], desc:'+10 HP temporário e Abençoar por 1h.'},
@@ -33382,11 +33385,12 @@ var CANON_ITEMS_DB = {
   'Poção de Invisibilidade':   {e: _heralIco('ic-mochila'), v:500,r:'rare',     t:['consumable','potion','magic'], desc:'Invisível por 1h ou até atacar/conjurar.'},
   'Antídoto':                  {e: _heralIco('ic-mochila'), v:50, r:'common',   t:['consumable','potion'],         desc:'Remove condição envenenado.'},
   // === ITENS MÁGICOS COMUNS ===
-  'Anel de Proteção':  {e: _heralIco('ic-mochila'), v:3500,r:'rare',     t:['accessory','magic','attunement'], s:'ring_1', ac:1, desc:'+1 CA e +1 saves. Sintonização.'},
+  'Anel de Proteção':  {e: _heralIco('ic-mochila'), v:200,r:'rare',     t:['accessory','magic','attunement'], s:'ring_1', ac:1, desc:'+1 CA e +1 saves. Sintonização.'},
   'Capa de Proteção':  {e: _heralIco('ic-mochila'), v:3500,r:'rare',     t:['clothing','magic','attunement'],  s:'cloak',  ac:1, desc:'+1 CA e +1 saves. Sintonização.'},
   'Pérola do Poder':   {e: _heralIco('ic-mochila'), v:1000,r:'uncommon', t:['accessory','magic','attunement'], s:'ring_1', desc:'Recupera 1 espaço de magia/dia.'},
   'Bolsa de Contenção':{e: _heralIco('ic-mochila'), v:500, r:'uncommon', t:['tool','magic'],                   desc:'Carrega 250kg em interior maior que exterior.'},
-  'Pedra da Sorte':    {e: _heralIco('ic-mochila'), v:4200,r:'uncommon', t:['accessory','magic','attunement'], desc:'+1 testes habilidade e saves.'},
+  // 2026-07-01: alinhado ao servidor (v 1000, slot belt, save_bonus via attunement)
+  'Pedra da Sorte':    {e: _heralIco('ic-mochila'), v:1000,r:'uncommon', t:['accessory','magic','attunement'], s:'belt', desc:'+1 em Testes de Resistência enquanto sintonizada.'},
   'Botas Élficas':     {e: _heralIco('ic-elfo'), v:500, r:'uncommon', t:['armor','magic','attunement'],     s:'feet', desc:'Passos silenciosos. Vantagem em Furtividade.'},
   'Manto Élfico':      {e: _heralIco('ic-elfo'), v:500, r:'uncommon', t:['armor','magic','attunement'],     s:'cloak', desc:'Vantagem em Furtividade ao se esconder.'},
   'Amuleto de Saúde':  {e: _heralIco('ic-mochila'), v:500, r:'uncommon', t:['accessory','magic','attunement'], s:'necklace', desc:'Imune a condição doente.'},
@@ -33508,10 +33512,13 @@ var CANON_ITEM_SETS = {
     name: 'Conjunto do Arcanista',
     icon: _heralIco('ic-mochila'),
     desc: 'Relíquias da Torre de Cristal de Aelindra, sede dos magos antigos.',
-    pieces: ['Vestes do Arcanista', 'Cetro do Arcanista', 'Pingente do Arcanista'],
+    // 2026-07-01: alinhado ao servidor (item_sets_data.py — autoridade): peças
+    // reais Manto/Chapéu/Orbe (antes Vestes/Cetro/Pingente, que NÃO existem no
+    // servidor) + thresholds do servidor.
+    pieces: ['Manto do Arcanista', 'Chapéu do Arcanista', 'Orbe do Arcanista'],
     thresholds: {
-      2: { label: '+2 INT · +5 MP', bonuses: { stat_bonus: { intelligence: 2 }, mp_bonus: 5 } },
-      3: { label: '+1 DC de Magia · +5 MP', bonuses: { spell_dc_bonus: 1, mp_bonus: 5 } }
+      2: { label: '+2 INT', bonuses: { stat_bonus: { intelligence: 2 } } },
+      3: { label: '+5 MP · +1 Ataque', bonuses: { mp_bonus: 5, attack_bonus: 1 } }
     }
   }
 };
@@ -40908,6 +40915,28 @@ function _vinvIconId(name) {
   } catch (_) {}
   return 'ic-it-' + _vinvSlug(name);
 }
+// 2026-07-01 (UNEQUIP-ALLY-INVERSE): acha o ALIADO que tem `name` equipado.
+// NÃO mexe em _isItemEquipped/_getCurrentEquipped (player-scoped de propósito —
+// _invActiveTarget fica sujo após visitar a aba de um aliado e inverteria o bug).
+function _allyHoldingItem(name) {
+  var ae = window.MOCK_ALLY_EQUIPPED || {};
+  for (var allyId in ae) {
+    if (!Object.prototype.hasOwnProperty.call(ae, allyId)) continue;
+    var eq = ae[allyId] || {};
+    for (var slot in eq) {
+      if (Object.prototype.hasOwnProperty.call(eq, slot) && eq[slot] === name) {
+        var nm = allyId;
+        try {
+          var allies = (typeof _getActiveAllies === 'function') ? _getActiveAllies() : [];
+          var a = allies.filter(function (x) { return x.id === allyId; })[0];
+          if (a && a.name) nm = a.name;
+        } catch (_e) {}
+        return { id: allyId, name: nm, slot: slot };
+      }
+    }
+  }
+  return null;
+}
 function _vinvAdaptItem(invEntry) {
   var name = invEntry.n;
   var qty = invEntry.q;
@@ -40922,6 +40951,9 @@ function _vinvAdaptItem(invEntry) {
     equipped: !!_isItemEquipped(name),
     favorite: !!_isItemFav(name),
     tags: tags,
+    // 2026-07-01: cópia equipada num ALIADO → detail mostra "Desequipar de X"
+    // (vInventory _buildDetailActions + cfg.onItemUnequipAlly).
+    allyEquipped: _allyHoldingItem(name),
     // 2026-06-12 (user): schema cliente usa `s` — it.slot era SEMPRE undefined
     // → _findSlotAlternatives nunca achava nada → o picker de slot vazio não
     // abria e a swap list do detail ficava vazia.
@@ -41234,6 +41266,23 @@ function _vinvBuildConfig() {
     onItemUnequip: function (item) {
       if (typeof _unequipItem === 'function') _unequipItem(item.name);
       else if (typeof vToast === 'function') vToast('Desequipar ' + item.name);
+      window.vInventory && vInventory.refresh(_vinvBuildConfig().player);
+    },
+    // 2026-07-01 (UNEQUIP-ALLY-INVERSE): desequipa a cópia que está num ALIADO
+    // (pool model — inventário não muda; o servidor persiste via equip.set_ally
+    // e _syncAllyEquipToServer reconcilia o mock com a resposta).
+    onItemUnequipAlly: function (item) {
+      var hold = (typeof _allyHoldingItem === 'function') ? _allyHoldingItem(item.name) : null;
+      if (!hold) {
+        if (typeof vToast === 'function') vToast('Nenhum aliado com ' + item.name + '.', 'warn');
+        return;
+      }
+      try {
+        var eq = (window.MOCK_ALLY_EQUIPPED || {})[hold.id] || {};
+        delete eq[hold.slot];
+        if (typeof _syncAllyEquipToServer === 'function') _syncAllyEquipToServer(hold.id);
+        if (typeof vToast === 'function') vToast(item.name + ' desequipado de ' + hold.name + '.');
+      } catch (e) { console.error('[vinv] unequipAlly:', e); }
       window.vInventory && vInventory.refresh(_vinvBuildConfig().player);
     },
     onItemSwap: function (oldItem, newItem, slot) {

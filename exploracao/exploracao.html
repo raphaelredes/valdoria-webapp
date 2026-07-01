@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-06-30T03:55:55Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-01T23:03:04Z - do not edit directly, edit source -->
 
 
 
@@ -15435,6 +15435,20 @@ window.__explFetchTO = function(url, opts, ms) {
       var res = await _post('/api/exploracao/rest_short', { token: tok });
       if (res && res.ok) {
         console.info('[E-REM:API-REST_SHORT] ok healed_hp=' + (res.healed && res.healed.hp));
+      }
+      return res;
+    },
+
+    /* 2026-07-01 (EXPLORE-USE-DROP-STUB): usa consumível de CURA na trilha —
+       o SERVIDOR valida posse, rola a cura (formula do ITEMS_DB), consome do
+       inventário real e aplica no state da sessão (Server Authority #0). */
+    useItem: async function(itemName) {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      console.info('[E-REM:API-USE_ITEM] send item=' + itemName);
+      var res = await _post('/api/exploracao/use_item', { token: tok, item: itemName });
+      if (res && res.ok) {
+        console.info('[E-REM:API-USE_ITEM] ok healed_hp=' + (res.used && res.used.healed_hp));
       }
       return res;
     },
@@ -35466,12 +35480,60 @@ function _vinvExpBuildConfig() {
     showSearch: true,
     showSort: true,
     inCombat: false,
+    // 2026-07-01 (EXPLORE-USE-DROP-STUB): "Usar" agora é REAL — o servidor
+    // valida posse, rola a cura, consome do inventário e aplica no state da
+    // sessão (POST /api/exploracao/use_item). Antes era stub toast-only (o
+    // jogador "bebia" a poção e nada acontecia). "Largar" foi REMOVIDO do
+    // config: descartar item é ação de cidade — sem callback, o vInventory
+    // esconde o botão (nenhum botão morto).
     onItemUse: function (item) {
-      if (typeof vToast === 'function') vToast('Usar ' + item.name + ' (em trilha)');
-      // TODO: simulador injeta lógica real (consome item, aplica efeito)
-    },
-    onItemDrop: function (item) {
-      if (typeof vToast === 'function') vToast('Largar ' + item.name + ' (perdido)');
+      if (window.__EXPLORE_MODE === 'remote'
+          && window.ExploracaoAPI && typeof window.ExploracaoAPI.useItem === 'function') {
+        window.ExploracaoAPI.useItem(item.name).then(function (res) {
+          if (!res || !res.ok) {
+            var msg = (res && res.error === 'not_usable')
+              ? item.name + ' não é usável na trilha.'
+              : 'Não foi possível usar ' + item.name + '.';
+            if (typeof vToast === 'function') vToast(msg, 'warn');
+            return;
+          }
+          // Aplica o state autoritativo do servidor no HUD da trilha.
+          try {
+            if (res.state && window.S && S.player) {
+              if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
+              if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
+              if (typeof updateHud === 'function') updateHud();
+            }
+          } catch (_eHud) {}
+          // Reflete o consumo no cache do inventário do servidor (fonte da mochila).
+          try {
+            if (Array.isArray(window.__EXPLORE_SERVER_INV)) {
+              for (var i = 0; i < window.__EXPLORE_SERVER_INV.length; i++) {
+                var e = window.__EXPLORE_SERVER_INV[i];
+                if (e && e.name === item.name) {
+                  e.quantity = Math.max(0, (e.quantity || 1) - 1);
+                  break;
+                }
+              }
+            }
+          } catch (_eInv) {}
+          var healed = (res.used && res.used.healed_hp) || 0;
+          var healedMp = (res.used && res.used.healed_mp) || 0;
+          var parts = [];
+          if (healed) parts.push('+' + healed + ' PV');
+          if (healedMp) parts.push('+' + healedMp + ' PM');
+          if (typeof vToast === 'function') {
+            vToast(item.name + (parts.length ? ': ' + parts.join(' · ') : ' usado.'), 'ok');
+          }
+          try { if (window.vInventory && vInventory.isOpen && vInventory.isOpen()) vInventory.refresh(_vinvExpBuildConfig().player); } catch (_eR) {}
+        }).catch(function (err) {
+          console.warn('[vInventory] use_item err:', err);
+          if (typeof vToast === 'function') vToast('Falha ao usar ' + item.name + ' (rede).', 'warn');
+        });
+        return;
+      }
+      // LOCAL (file:// dev tool) — sem servidor: mantém aviso honesto.
+      if (typeof vToast === 'function') vToast('Usar ' + item.name + ' requer sessão no servidor.', 'warn');
     },
     onClose: function () { /* nada */ },
     primaryAction: {
