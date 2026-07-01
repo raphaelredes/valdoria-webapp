@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T17:30:37Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T18:45:46Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -17692,7 +17692,7 @@ var SKILL_PNG_AVAILABLE = {
     'conjurar-animais': 1, 'contagio': 1, 'contramagica': 1, 'corpo-calmo': 1, 'crescimento-espinhoso': 1, 'cura': 1,
     'cura-da-companhia': 1, 'cura-pelas-maos': 1, 'curar': 1, 'curar-ferimentos': 1, 'defesa-paciente': 1, 'desviar-projeteis': 1,
     'disparo-rapido': 1, 'enfeiticar-monstros': 1, 'enfeiticar-pessoa': 1, 'enredar': 1, 'escudo-arcano': 1, 'escudo-da-fe': 1,
-    'espiritos-guardioes': 1, 'esquiva': 1, 'esquiva-sobrenatural': 1, 'estocada-mental': 1, 'explosao-arcana': 1, 'feixe-lunar': 1,
+    'espiritos-guardioes': 1, 'esquiva': 1, 'esquiva-sobrenatural': 1, 'estocada-mental': 1, 'explosao-arcana': 1, 'expulsar-mortos-vivos': 1, 'feixe-lunar': 1,
     'flecha-de-acido': 1, 'forma-selvagem': 1, 'furia': 1, 'furia-devastadora': 1, 'golpe-arcano': 1, 'golpe-atordoante': 1,
     'golpe-de-armadilha': 1, 'golpe-divino': 1, 'golpe-flamejante': 1, 'golpe-fulminante': 1, 'golpe-guidado': 1, 'golpe-irado': 1,
     'golpe-marcante': 1, 'golpe-mortal': 1, 'golpe-preciso': 1, 'golpe-trovejante': 1, 'graxa': 1, 'grito-de-guerra': 1,
@@ -26489,7 +26489,7 @@ async function playTurnUndead(casterIdx, undeadIdxs, skill) {
         } else {
             u.se = u.se || [];
             u.se.push({
-                id: aed.id || 'turned', n: aed.n || 'Expulso', ico: aed.ico || '👻',
+                id: aed.id || 'turned', n: aed.n || 'Expulso', ico: aed.ico || '»',
                 turnsLeft: aed.turns || 3, skipTurn: aed.skipTurn !== false,
                 wakeOnDamage: !!aed.wakeOnDamage,
                 dndCondition: aed.dndCondition || 'Expulso (Turn Undead — PHB p.58)'
