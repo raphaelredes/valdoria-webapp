@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T14:14:54Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T16:13:05Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14221,7 +14221,10 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
         multiAttack: Math.max(1, (spec.multiAttack_exact | 0) || (sc.multiAttack | 0) || (b.multiAttack | 0) || 1),
         sugLvl: (spec.sugLvl_exact != null) ? parseInt(spec.sugLvl_exact, 10) : sugLvl,
         species: spec.species_exact || b.n, simDiff: diff,
-        tags: (b.tags || []),  /* #83: propaga tags do bestiário → fallback heráldico por família (beast/undead/...) no _heraldicIconOf quando não há arte WebP */
+        /* Fase 4A: tags_exact (do servidor, EnemyBase.tags) tem precedência sobre o
+           template do bestiário → gateia bonusVsTag (Golpe Divino) / Turn Undead em
+           REMOTE mesmo sem match de bestiário. Também alimenta o fallback heráldico. */
+        tags: (Array.isArray(spec.tags_exact) && spec.tags_exact.length ? spec.tags_exact : (b.tags || [])),
         xpReward: (spec.xpReward_exact != null ? parseInt(spec.xpReward_exact, 10) : 0),  /* #83: XP canônico D&D 5e (por CR) vindo do backend; 0 em LOCAL → computeRewards usa fallback */
         it: { ic: '⚔️', lb: 'ataca' }
     };
