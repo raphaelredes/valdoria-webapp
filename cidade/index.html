@@ -33222,11 +33222,11 @@ var CANON_ITEMS_DB = {
   'Espada Élfica':      {e: _heralIco('ic-elfo'), v:300, r:'rare',     t:['weapon','martial_weapon','finesse'], s:'main_hand', dd:'1d8', b:1, desc:'Forjada por elfos do Bosque Antigo. +1 ataque.'},
   'Espada de Mithral':  {e: _heralIco('ic-liga-mithral'), v:500, r:'very_rare',t:['weapon','martial_weapon','versatile','magic'], s:'main_hand', dd:'1d8', b:2, desc:'Lâmina de mithral azulado. +2 ataque, leve como pluma.'},
   // === ARMADURAS — Thorne ===
-  'Cota de Malha':      {e: _heralIco('ic-mochila'), v:75,  r:'common',  t:['armor','medium_armor'],            s:'chest',     ac:5,  desc:'Cota de malha de ferro. CA base 16.'},
+  'Cota de Malha':      {e: _heralIco('ic-mochila'), v:75,  r:'common',  t:['armor','heavy_armor'],             s:'chest',     ac:6,  desc:'Cota de malha de ferro. CA base 16.'},
   'Peitoral de Mithral':{e: _heralIco('ic-liga-mithral'), v:500, r:'rare',    t:['armor','medium_armor','magic'],    s:'chest',     ac:6, b:1, desc:'Peitoral leve e impenetrável de mithral forjado.'},
-  'Elmo Enferrujado':   {e: _heralIco('ic-mochila'), v:25,  r:'common',  t:['armor'],                            s:'head',      ac:1,  desc:'Elmo simples de ferro. +1 CA.'},
+  'Elmo Enferrujado':   {e: _heralIco('ic-mochila'), v:25,  r:'common',  t:['armor','medium_armor'],             s:'head',      ac:2,  desc:'Elmo simples de ferro. +2 CA.'},
   'Elmo de Cavaleiro':  {e: _heralIco('ic-mochila'), v:150, r:'uncommon',t:['armor'],                            s:'head',      ac:2,  desc:'Elmo de aço polido com viseira. +2 CA.'},
-  'Grevas de Ferro':    {e: _heralIco('ic-mochila'), v:45,  r:'common',  t:['armor'],                            s:'legs',      ac:1,  desc:'Proteções de pernas em ferro. +1 CA.'},
+  'Grevas de Ferro':    {e: _heralIco('ic-mochila'), v:45,  r:'common',  t:['armor','medium_armor'],             s:'legs',      ac:2,  desc:'Proteções de pernas em ferro. +2 CA.'},
   'Botas Pesadas':      {e: _heralIco('ic-mochila'), v:35,  r:'common',  t:['armor'],                            s:'feet',      ac:1,  desc:'Botas de couro reforçado. +1 CA.'},
   'Manoplas de Ferro':  {e: _heralIco('ic-mochila'), v:30,  r:'common',  t:['armor'],                            s:'hands',     ac:1,  desc:'Manoplas de ferro. +1 CA.'},
   // === CONSUMIVEIS — Mirena Alquimista ===
@@ -33320,8 +33320,8 @@ var CANON_ITEMS_DB = {
   'Gibão do Lobo Selvagem':  {e: _heralIco('ic-lobo'), v:550, r:'rare', t:['armor','set','set_lobo_selvagem','light_armor'], s:'chest', ac:3, si:'lobo_selvagem', desc:'Couro reforçado com pelos cinzentos. Peça do Conjunto do Lobo Selvagem.'},
   'Botas do Lobo Selvagem':  {e: _heralIco('ic-lobo'), v:400, r:'rare', t:['armor','set','set_lobo_selvagem'], s:'feet', ac:1, si:'lobo_selvagem', desc:'Pisadas silenciosas como o lobo. Peça do Conjunto do Lobo Selvagem.'},
   // Conjunto do Protetor Ancestral (CA +1 / HP +5 / +1 save)
-  'Escudo do Protetor Ancestral':  {e: _heralIco('ic-mochila'), v:700, r:'rare', t:['armor','set','set_protetor_ancestral','shield'], s:'off_hand', ac:2, si:'protetor_ancestral', desc:'Escudo cerimonial dos guardiões. Peça do Conjunto do Protetor.'},
-  'Couraça do Protetor Ancestral': {e: _heralIco('ic-mochila'), v:800, r:'rare', t:['armor','set','set_protetor_ancestral','heavy_armor'], s:'chest', ac:6, si:'protetor_ancestral', desc:'Aço reluzente do Forte de Valdrenor. Peça do Conjunto do Protetor.'},
+  'Escudo do Protetor Ancestral':  {e: _heralIco('ic-mochila'), v:700, r:'rare', t:['armor','set','set_protetor_ancestral','shield'], s:'off_hand', ac:3, si:'protetor_ancestral', desc:'Escudo cerimonial dos guardiões. Peça do Conjunto do Protetor.'},
+  'Couraça do Protetor Ancestral': {e: _heralIco('ic-mochila'), v:800, r:'rare', t:['armor','set','set_protetor_ancestral','heavy_armor'], s:'chest', ac:7, si:'protetor_ancestral', desc:'Aço reluzente do Forte de Valdrenor. Peça do Conjunto do Protetor.'},
   'Elmo do Protetor Ancestral':    {e: _heralIco('ic-mochila'), v:500, r:'rare', t:['armor','set','set_protetor_ancestral'], s:'head', ac:2, si:'protetor_ancestral', desc:'Elmo de aço com runa. Peça do Conjunto do Protetor.'},
   // Conjunto do Arcanista (INT +2 / MP +10 / +1 spell DC)
   'Vestes do Arcanista':   {e: _heralIco('ic-mochila'), v:650, r:'rare', t:['armor','set','set_arcanista','clothing'], s:'chest', mb:5, si:'arcanista', desc:'Vestes encantadas com fios mágicos. Peça do Conjunto do Arcanista.'},
@@ -40532,7 +40532,24 @@ function _syncEquippedToLocalStorage() {
       // confirmamos antes (só quando há runa).
       if (_eqp && typeof _eqp.then === 'function') {
         _eqp.then(function(res){
-          if (res && res.confirm_rune_loss && res.confirm_rune_loss.length) _cityConfirmRuneLoss(res);
+          if (res && res.confirm_rune_loss && res.confirm_rune_loss.length) { _cityConfirmRuneLoss(res); return; }
+          // 2026-07-01: reconcilia com o equipamento REAL aplicado — o servidor
+          // pode recusar entradas (slot incompatível/proficiência/Força/pool).
+          // Antes o mock mostrava "equipado" e o item sumia no reload (desync
+          // silencioso). Só reconcilia quando HOUVE recusa (evita clobber de
+          // mutações locais rápidas por respostas em corrida).
+          if (res && res.ok && res.equipment && res.rejected && res.rejected.length) {
+            window.MOCK_PLAYER_EQUIPPED = res.equipment;
+            if (typeof refreshHud === 'function') refreshHud();
+            try { if (window.vInventory && vInventory.isOpen && vInventory.isOpen() && typeof _vinvBuildConfig === 'function') vInventory.refresh(_vinvBuildConfig().player); } catch(_r){}
+            if (typeof vToast === 'function') {
+              var _rejMsgs = { slot: 'slot incompatível', proficiency: 'sem proficiência',
+                strength: 'Força insuficiente', pool: 'sem cópia livre', unknown_item: 'item desconhecido' };
+              res.rejected.slice(0, 2).forEach(function(rj){
+                vToast(rj.item + ': não equipado (' + (_rejMsgs[rj.reason] || rj.reason) + ').', 'warn');
+              });
+            }
+          }
         });
       }
     }
@@ -40805,7 +40822,14 @@ async function _sellSingleItem(name) {
 }
 async function _dropItem(name) {
   var tags = _itemTagsOf(name);
-  if (tags.indexOf('no_discard') !== -1 || tags.indexOf('quest') !== -1) {
+  // 2026-07-01: usa a lista canônica completa (paridade com apply_discard /
+  // economy/protected_tags) — antes só no_discard/quest e chave/mapa passavam
+  // pelo guard client e morriam no servidor (toast de falha).
+  var _protTags = (typeof CANON_PROTECTED_SELL_TAGS !== 'undefined')
+    ? CANON_PROTECTED_SELL_TAGS
+    : ['quest', 'mission_item', 'key', 'map', 'map_fragment', 'no_sell', 'no_discard', 'story_item', 'unique', 'starter_map'];
+  var _protHit = tags.some(function (t) { return _protTags.indexOf(t) !== -1; });
+  if (_protHit) {
     if (typeof vToast === 'function') vToast(name + ' não pode ser largado.');
     return false;
   }
@@ -41160,6 +41184,9 @@ function _vinvBuildConfig() {
     showSort: true,
     showBulkActions: { junk: true, fusion: true },
     inCombat: false,
+    // 2026-07-01: lista canônica de tags protegidas (paridade com o servidor,
+    // economy/protected_tags.py) — Vender/Largar só aparecem quando a ação vale.
+    protectedSellTags: (typeof CANON_PROTECTED_SELL_TAGS !== 'undefined') ? CANON_PROTECTED_SELL_TAGS : null,
     computeJunk: function () {
       try { var info = _getJunkInventory(); return { count: info.count, gold: info.gold }; }
       catch (_) { return { count: 0, gold: 0 }; }

@@ -6,28 +6,30 @@
  * injeta seus dados (player, items) e callbacks (onItemUse, onItemEquip,
  * onSellJunk, onFuseGems, etc.). Lógica de domínio fica nos simuladores.
  *
- * MAPA_IA — navegação rápida (linhas aproximadas, ±20):
- *   ~38    CATEGORIES (match order vs displayOrder) + _displayCategories
- *   ~60    _state (open/config/overlay/activeCategory/activeTab/...)
- *   ~75    window.vInventory API (open/close/refresh/isOpen/setCategory)
- *   ~125   _normalizeConfig (defaults + inCombat flag)
- *   ~146   _slotCombatCost (D&D 5e PHB p.139/144/190)
- *   ~195   _findSlotAlternatives
- *   ~210   _buildOverlay (esqueleto HTML)
- *   ~240   _render (master) — aplica equip-mode class
- *   ~275   _renderHeader / _renderTabs (displayOrder) / _renderFilter
- *   ~370   _renderSearchBar / _renderActionBar (bulk)
- *   ~435   _renderGrid + _buildMeta (cells com badges)
- *   ~500   _renderLoadout + _showEmptySlotPicker
- *   ~615   _renderFooter (toggle Equipados ↔ Voltar à Mochila)
- *   ~675   _showDetail (modal com swap list quando equipped)
- *   ~770   _renderSwapList + _wireSwapList (cost badges D&D 5e)
- *   ~865   _buildDetailActions (Equipar/Desequipar/Usar/Vender/Largar)
- *   ~895   _filterItems / _matchesCategoryRaw / _primaryCategory
- *   ~930   _countByCategory / _sortItems
- *   ~975   _slotLabel / _tagLabel (PT-BR) / _resolveItemIcon (sprite-aware
+ * MAPA_IA — navegação rápida (linhas aproximadas, ±20; atualizado 2026-07-01):
+ *   ~60    CATEGORIES (match order vs displayOrder) + _displayCategories
+ *   ~90    _state (open/config/overlay/activeCategory/activeTab/...)
+ *   ~105   window.vInventory API (open/close/refresh/isOpen/setCategory)
+ *   ~160   _normalizeConfig (defaults + inCombat flag)
+ *   ~312   _slotCombatCost (D&D 5e PHB p.139/144/190)
+ *   ~360   _findSlotAlternatives (ring1/ring2↔ring, amulet↔necklace)
+ *   ~375   _buildOverlay (esqueleto HTML)
+ *   ~440   _render (master) — aplica equip-mode class
+ *   ~480   _renderHeader / _renderTabs (displayOrder) / _renderFilter
+ *   ~586   _renderSearchBar / _renderActionBar (bulk)
+ *   ~654   _renderGrid + _buildMeta (cells com badges)
+ *   ~726   _renderLoadout + _showEmptySlotPicker
+ *   ~882   _renderFooter (toggle Equipados ↔ Voltar à Mochila)
+ *   ~981   _showDetail (modal com swap list quando equipped)
+ *   ~1097  _renderSwapList + _wireSwapList (cost badges D&D 5e)
+ *   ~1198  _buildDetailActions (Equipar por SLOT — fonte única alinhada à
+ *          execução, 2026-07-01; Usar sem thrown fora de combate; Vender/
+ *          Largar via cfg.protectedSellTags — paridade economy/protected_tags)
+ *   ~1249  _filterItems / _matchesCategoryRaw / _primaryCategory
+ *   ~1292  _countByCategory / _sortItems
+ *   ~1332  _slotLabel / _tagLabel (PT-BR) / _resolveItemIcon (sprite-aware
  *          + variantes slug + fallback ic-it-base-*) / UI_ICONS / _uiIcon
- *   ~1020  _esc / _slugify (utils)
+ *   ~1566  _esc / _slugify (utils)
  *
  * Ícones de items: 2026-05-19 — SVG sprite REMOVIDO. PNGs OpenAI direto via
  * `<img src="/shared/img/items/{slug}.png">` (items-resolver.js + manifest).
@@ -365,6 +367,10 @@
       var itSlot = it.slot;
       // ring1/ring2 → ambos slots ring
       if ((slot === 'ring1' || slot === 'ring2') && itSlot === 'ring') return true;
+      // amulet↔necklace: dados usam 'necklace', paper-doll usa 'amulet' —
+      // aceita ambos independente do pre-mapping do caller (2026-07-01).
+      if ((slot === 'amulet' || slot === 'necklace')
+        && (itSlot === 'amulet' || itSlot === 'necklace')) return true;
       return itSlot === slot;
     });
   }
@@ -1195,19 +1201,30 @@
     ctx = ctx || {};
     var btns = [];
     var isEquipped = !!it.equipped;
-    // 2026-06-12 (review): cobre subtipos de arma (simple_weapon/martial_weapon) —
-    // antes um item só com 'simple_weapon' (sem a tag genérica 'weapon') perdia o
-    // botão "Equipar". NÃO usar it.slot como fallback: o Mapa tem slot 'map' e não
-    // deve virar equipável.
-    var _equipTags = ['weapon', 'simple_weapon', 'martial_weapon', 'armor',
-      'light_armor', 'medium_armor', 'heavy_armor', 'shield', 'accessory', 'clothing'];
-    var isEquippable = !!(cfg.onItemEquip && it.tags && _equipTags.some(function (t) {
-      return it.tags.indexOf(t) !== -1;
-    }));
+    // 2026-07-01 (bug "Roupas Comuns"): o SLOT é a fonte única de equipabilidade —
+    // alinhado à execução (_equipItem exige slot). Antes o botão decidia por TAG
+    // (_equipTags) e itens com tag mas SEM slot (Roupas Comuns, trinkets) mostravam
+    // "Equipar" morto ("não pode ser equipado"); e focos de conjurador (Grimório,
+    // Foco Arcano, Símbolo Sagrado — slot off_hand SEM tag) nunca ganhavam o botão.
+    // 'map' segue excluído (Mapa não é vestível via detail).
+    var isEquippable = !!(cfg.onItemEquip && it.slot && it.slot !== 'map');
+    // 2026-07-01: fora de combate, `thrown` não é consumível na cidade (paridade
+    // com _useInventoryItem / apply_use — INV-CITY-05); em combate segue usável
+    // (PHB p.148, arremesso é ataque).
     var canUse = (cfg.onItemUse && it.tags && (it.tags.indexOf('consumable') !== -1
-      || it.tags.indexOf('potion') !== -1 || it.tags.indexOf('food') !== -1));
-    var canSell = (cfg.onItemSell && it.rarity !== 'quest' && (!it.tags || it.tags.indexOf('no_sell') === -1));
-    var canDrop = (cfg.onItemDrop && it.rarity !== 'quest' && (!it.tags || it.tags.indexOf('no_discard') === -1));
+      || it.tags.indexOf('potion') !== -1 || it.tags.indexOf('food') !== -1)
+      && (cfg.inCombat || it.tags.indexOf('thrown') === -1));
+    // 2026-07-01: Vender/Largar validam a lista canônica de tags protegidas
+    // (economy/protected_tags — REG-01/REG-02): antes só quest/no_sell/no_discard
+    // e o clique em chave/mapa falhava com toast (botão morto).
+    var _protectedTags = cfg.protectedSellTags || ['quest', 'mission_item', 'key',
+      'map', 'map_fragment', 'no_sell', 'no_discard', 'story_item', 'unique', 'starter_map'];
+    var _isProtected = it.rarity === 'quest' || (it.tags && it.tags.some(function (t) {
+      return _protectedTags.indexOf(t) !== -1;
+    }));
+    var canSell = !!(cfg.onItemSell && !_isProtected);
+    var canDrop = !!(cfg.onItemDrop && !_isProtected
+      && (!it.tags || it.tags.indexOf('no_discard') === -1));
 
     if (isEquipped && cfg.onItemUnequip) {
       btns.push({ act: 'ItemUnequip', label: 'Desequipar', cls: '' });
