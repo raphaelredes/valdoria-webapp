@@ -506,7 +506,7 @@ var CHAR_CLASSES = [
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '🗡️', dmgMod: 3, attr: 'DEX',
       res: { type: 'energia', name: 'Energia', ico: '⚡', max: 6 },
       skills: [
-        { n: 'Ataque Furtivo', ico: '🗡', cost: 2, kind: 'attack', desc: 'Golpe preciso em um ponto vital. Acumula dados extras de dano conforme você sobe de nível (1d6 no nível 1, 2d6 no 3, 3d6 no 5…).',
+        { n: 'Ataque Furtivo', ico: '🗡', cost: 0, kind: 'attack', desc: 'Golpe preciso em um ponto vital. Acumula dados extras de dano conforme você sobe de nível (1d6 no nível 1, 2d6 no 3, 3d6 no 5…).',
             damageSpec: { n: 'auto', d: 6 },
             sneakAttack: true,
             helpDnd5e: 'Referência: Ataque Furtivo (PHB p.96): (nível+1)//2 d6 ao acertar com arma furtiva se tiver vantagem OU se outro inimigo do alvo estiver a 1,5 m dele.\nNível 1: 1d6 · 3: 2d6 · 5: 3d6 · 7: 4d6 · 9: 5d6 · … · 19: 10d6.\nNo arena: damageSpec.n = "auto" → motor calcula por nível; crítico dobra os dados.' },

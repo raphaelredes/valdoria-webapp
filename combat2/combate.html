@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-06-30T03:55:55Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-01T12:05:56Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -29559,7 +29559,11 @@ async function playTurn(aIdx, tIdx, opts) {
     var mmPack = rollDamage._lastMagicMissiles;
     var isMagicMissiles = !!(mmPack && atkSkill && atkSkill.magicMissiles);
     var dmgDice = dmgRolls.reduce(function (a, b) { return a + b; }, 0);
-    var dmgMod = isMagicMissiles ? 0 : (actor.dmgMod || 0);
+    // PHB p.196: o mod de atributo só soma ao dano de ATAQUE COM ARMA (dano físico);
+    // MAGIA (elemental/energia) não soma — paridade com _ability_mod_applies_to_damage (motor).
+    var _physDmg = !atkSkill || (['slashing', 'piercing', 'bludgeoning']
+        .indexOf(String(atkSkill.dmgType || 'slashing').toLowerCase()) >= 0);
+    var dmgMod = (isMagicMissiles || !_physDmg) ? 0 : (actor.dmgMod || 0);
     var dmgItem = isMagicMissiles ? 0 : getDmgFlatFromStatuses(actor);
     var dspec = atkSkill && atkSkill.damageSpec ? atkSkill.damageSpec : null;
     var dmgSpecFlat = (!isMagicMissiles && dspec && dspec.flat != null) ? (dspec.flat | 0) : 0;
