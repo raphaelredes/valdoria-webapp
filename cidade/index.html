@@ -23415,6 +23415,16 @@ function _npcApplyTalkEffects(p, npc, opt){
 function _showSharedNpcDialogue(opts, internalState){
   var npc = opts.npc;
   var p = opts.player || window.CITY_MOCK_PLAYER;
+  // PADRAO_SERVIDOR (Fase 2, 2026-07-02): NPC REGULAR da Praça (tem _canonKey = chave do
+  // servidor) abre o diálogo SERVER-DRIVEN (venue=square) em REMOTE — o servidor constrói a
+  // fala (INTERACTION_RESULTS, anti-repeat) + registra memória; o cliente só renderiza pelo
+  // vEncounter. Só na abertura inicial (!internalState). LOCAL cai no fluxo client-sim abaixo.
+  if (!internalState && npc && npc._canonKey
+      && typeof window._openCityDialogue === 'function'
+      && typeof window._isRemote === 'function' && window._isRemote()) {
+    window._openCityDialogue('square', npc._canonKey);
+    return;
+  }
   // canonical: town_square_events.process_interaction L62-64 — Lia override quando flag
   // town_lia_helped esta setada (apos ajudar com a boneca). Substitui name/desc/interactions.
   if (npc && npc.id === 'square_child' && p.metadata && p.metadata.town_lia_helped &&
