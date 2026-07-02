@@ -30,7 +30,7 @@ function renderCodexScreen(container, data) {
     var tabs = vCity.el('div', 'cdx-tabs');
     /* "All" tab */
     var allTab = vCity.el('button', 'cdx-tab cdx-tab--active');
-    allTab.textContent = '\uD83D\uDCCB Todos';
+    allTab.textContent = 'Todos';
     allTab.onclick = function() { _codexSwitchTab(null, tabs, entries, data); };
     tabs.appendChild(allTab);
     for (var c = 0; c < cats.length; c++) {
@@ -49,7 +49,7 @@ function renderCodexScreen(container, data) {
   var search = vCity.el('div', 'cdx-search');
   var searchInput = vCity.el('input', 'cdx-search-input');
   searchInput.type = 'text';
-  searchInput.placeholder = '\uD83D\uDD0D Filtrar entradas...';
+  searchInput.placeholder = 'Filtrar entradas...';
   searchInput.oninput = function() {
     _codexSearchTerm = searchInput.value.toLowerCase();
     _codexFilterEntries(entries, data);
@@ -73,7 +73,7 @@ function renderCodexScreen(container, data) {
     }
 
     var icon = vCity.el('div', 'cdx-entry-icon');
-    icon.innerHTML = e.icon || '\u2753';
+    icon.innerHTML = e.icon || '';
     card.appendChild(icon);
 
     var info = vCity.el('div', 'cdx-entry-info');

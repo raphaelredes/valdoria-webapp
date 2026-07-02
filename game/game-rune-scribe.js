@@ -37,7 +37,7 @@ var THESSIL_DIALOGUE = {
   npc: {
     name: 'Eirik',
     desc: 'Escriba Rúnico · trinta e dois anos decifrando glifos antigos',
-    portrait: '../shared/img/npcs/mestre-thessil.webp'
+    portrait: '../shared/img/npcs/eirik-escriba.webp'
   },
   script: [
     { type: 'narration', text: 'A câmara de Eirik é um santuário de pergaminhos e glifos. Estantes alcançam o teto, abarrotadas de manuscritos encadernados em couro escuro. Um cheiro de pena queimada, tinta de carvão e algo metálico — magia em estado bruto — paira no ar. Eirik ergue os olhos de um pergaminho aberto, traça um glifo no ar, e te reconhece.' },
@@ -105,7 +105,7 @@ function renderRuneScribe(container, data) {
   var npcRow = vCity.el('div', 'row-npc');
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = _rnsEl('img');
-  img.src = '../shared/img/npcs/mestre-thessil.webp';
+  img.src = '../shared/img/npcs/eirik-escriba.webp';
   img.alt = 'Eirik';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };

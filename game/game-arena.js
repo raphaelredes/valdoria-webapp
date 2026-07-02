@@ -80,6 +80,14 @@ if (!window._SVC_CONFIG_ARENA) {
   };
 }
 
+/* P4 (2026-07-02): sessão REMOTE = diálogo server-driven (venue 'arena' no
+   city_dialogue_resolver — saudação ROTATIVA anti-repeat + node 'rules' que
+   conserta o cb no-op + transitions pras telas ricas). VORHAN_DIALOGUE abaixo
+   vira fallback LOCAL-only (dev file://). */
+function _arnIsRemote() {
+  return !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote());
+}
+
 var VORHAN_DIALOGUE = {
   npc: {
     name: 'Mestre Vorhan',
@@ -95,9 +103,9 @@ var VORHAN_DIALOGUE = {
     // Antes: 'arena_fight'/'arena_leaderboard' \u2192 n\u00E3o dispatched (silent close).
     // Agora: backend handlers reais \u2192 'arena_challenge' abre tier selection;
     // 'arena_daily_board' abre ranking. 'rules' ainda no-op (sem backend handler).
-    { id: 'fight',   label: '\u2694 "Vim lutar."', cb: 'arena_challenge' },
-    { id: 'rules',   label: '\uD83D\uDCDC "Explica as regras."', cb: 'arena_rules' },
-    { id: 'rank',    label: '\uD83C\uDFC6 "Mostra o ranking."', cb: 'arena_daily_board' },
+    { id: 'fight',   label: '"Vim lutar."', cb: 'arena_challenge' },
+    { id: 'rules',   label: '"Explica as regras."', cb: 'arena_rules' },
+    { id: 'rank',    label: '"Mostra o ranking."', cb: 'arena_daily_board' },
     { id: 'leave',   label: '\u21A9 "Outra hora, Mestre."', cb: 'close' }
   ]
 };
@@ -249,7 +257,10 @@ function _renderArenaMain(el, d) {
     chev.textContent = '›';
     npcRow.appendChild(chev);
     npcRow.addEventListener('click', function(){
-        if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
+        // PADRAO_SERVIDOR (P4): o servidor monta a saudação rotativa do Vorhan e resolve.
+        if (typeof window._openCityDialogue === 'function' && _arnIsRemote()) {
+            window._openCityDialogue('arena', 'vorhan');
+        } else if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
             window._SVC_CONFIG = window._SVC_CONFIG_ARENA;
             window.vEncounter.render(VORHAN_DIALOGUE);
         }
@@ -334,7 +345,7 @@ function _renderArenaMain(el, d) {
     var chCls = (ch.cls || '').toLowerCase().replace(/\s+/g, '-');
     if (chCls) portraitFrame.setAttribute('data-class', chCls);
     var icon = _div('arena-challenger-icon');
-    icon.innerHTML = ch.icon || '\u2694\uFE0F';
+    icon.innerHTML = ch.icon || '';
     portraitFrame.appendChild(icon);
     portraitWrap.appendChild(portraitFrame);
     card.appendChild(portraitWrap);
@@ -351,10 +362,12 @@ function _renderArenaMain(el, d) {
         flavor.textContent = '\u201C' + ch.flavor + '\u201D';
         card.appendChild(flavor);
     }
+    /* P2 (emoji ban 2026-07-01): stat chips sem emoji \u2014 o r\u00F3tulo (HP/CA/ATQ)
+       j\u00E1 identifica; \u25C6 d\u00E1 o acento visual. */
     var cStats = _div('arena-challenger-stats');
-    cStats.appendChild(_cStat('\u2764\uFE0F', ch.hp || 0, 'HP'));
-    cStats.appendChild(_cStat('\uD83D\uDEE1\uFE0F', ch.ac || 0, 'CA'));
-    cStats.appendChild(_cStat('\u2694\uFE0F', '+' + (ch.atk || 0), 'ATQ'));
+    cStats.appendChild(_cStat('\u25C6', ch.hp || 0, 'HP'));
+    cStats.appendChild(_cStat('\u25C6', ch.ac || 0, 'CA'));
+    cStats.appendChild(_cStat('\u25C6', '+' + (ch.atk || 0), 'ATQ'));
     card.appendChild(cStats);
     frag.appendChild(card);
 
@@ -373,7 +386,7 @@ function _renderArenaMain(el, d) {
     /* v-coin icon already present — no "Valdoritas" text needed */
     rewardRow.appendChild(r1);
     var r2 = _div('reward-item reward-xp');
-    r2.textContent = '\u2728 ' + (reward.xp || 0) + ' XP';
+    r2.textContent = '+' + (reward.xp || 0) + ' XP';
     rewardRow.appendChild(r2);
     rewardScroll.appendChild(rewardRow);
     var fee = _div('arena-fee');
@@ -394,7 +407,7 @@ function _renderArenaMain(el, d) {
        resolvidos por ARENA_SVC_META (WebP canonical). */
     if (d.services && d.services.length) {
         var svcLabel = _div('pt-section-label');
-        svcLabel.textContent = '⚔ Serviços do Coliseu ⚔';
+        svcLabel.textContent = 'Serviços do Coliseu';
         frag.appendChild(svcLabel);
         frag.appendChild(_arenaServicesGrid(d.services));
     }
@@ -427,10 +440,10 @@ function _renderArenaMain(el, d) {
         actions.appendChild(cd);
     } else if (!d.can_afford) {
         var ins = _div('arena-insufficient');
-        ins.textContent = '\u274C Valdoritas insuficientes para a taxa';
+        ins.textContent = 'Valdoritas insuficientes para a taxa';
         actions.appendChild(ins);
     } else {
-        var feeText = 'DESAFIAR \u2694 \u2212' + (d.fee || 0) + ' Valdoritas';
+        var feeText = 'DESAFIAR \u00b7 \u2212' + (d.fee || 0) + ' Valdoritas';
         actions.appendChild(_makeBtn(feeText, 'arena_challenge', 'arena-btn--challenge'));
     }
     /* "Ranking do Dia" agora vive no grid de servi\u00E7os (paridade Guilda) \u2014
@@ -449,7 +462,7 @@ function _renderArenaHpWarning(el, d) {
 
     /* Warning icon */
     var warnIcon = _div('arena-hp-warn-icon');
-    warnIcon.textContent = pct <= 25 ? '\uD83D\uDC80' : '\u26A0\uFE0F';
+    warnIcon.textContent = '!';
     wrap.appendChild(warnIcon);
 
     var warnTitle = _div('arena-hp-warn-title');
@@ -460,7 +473,7 @@ function _renderArenaHpWarning(el, d) {
     var panel = _div('arena-hp-status-panel');
 
     var heartIcon = _div('arena-hp-heart');
-    heartIcon.textContent = '\u2764\uFE0F';
+    heartIcon.textContent = 'HP';
     panel.appendChild(heartIcon);
 
     var barWrap = _div('arena-hp-bar-wrap');
@@ -494,19 +507,19 @@ function _renderArenaHpWarning(el, d) {
     }
 
     choices.appendChild(_makeChoiceCard(
-        '\uD83C\uDFE8', 'Ir para Estalagem', 'Descansar e recuperar HP',
+        '', 'Ir para Estalagem', 'Descansar e recuperar HP',
         'open_inn', 'choice-inn'
     ));
 
     choices.appendChild(_makeChoiceCard(
-        '\u2694\uFE0F', 'Lutar Mesmo Assim', 'Alto risco \u2014 HP baixo',
+        '', 'Lutar Mesmo Assim', 'Alto risco \u2014 HP baixo',
         'arena_force_fight', 'choice-fight risky'
     ));
 
     wrap.appendChild(choices);
 
     /* Back button */
-    wrap.appendChild(_makeBtn('\u2B05\uFE0F Voltar', 'arena_main', 'arena-btn--back'));
+    wrap.appendChild(_makeBtn('\u2190 Voltar', 'arena_main', 'arena-btn--back'));
 
     frag.appendChild(wrap);
     el.appendChild(frag);
@@ -547,7 +560,7 @@ function _renderArenaResult(el, d) {
         opLabelEl.textContent = opLabel;
         op.appendChild(opLabelEl);
         var opName = _div('opponent-name');
-        opName.innerHTML = (ch.icon || '\u2694\uFE0F') + ' ' + (ch.name);
+        opName.innerHTML = (ch.icon ? ch.icon + ' ' : '') + (ch.name);
         op.appendChild(opName);
         wrap.appendChild(op);
     }
@@ -588,7 +601,7 @@ function _renderArenaResult(el, d) {
         /* XP */
         var xpCard = _div('arena-reward-card reward-xp');
         var xpIcon = _div('reward-icon');
-        xpIcon.textContent = '\u2728';
+        xpIcon.textContent = 'XP';
         xpCard.appendChild(xpIcon);
         var xpText = _div('reward-text');
         var xpMain = document.createElement('strong');
@@ -607,7 +620,7 @@ function _renderArenaResult(el, d) {
         if (stats.streak > 0) {
             var streakCard = _div('arena-reward-card streak');
             var streakIcon = _div('reward-icon');
-            streakIcon.textContent = '\uD83D\uDD25';
+            streakIcon.textContent = '\u25C6';
             streakCard.appendChild(streakIcon);
             var streakText = _div('reward-text');
             var streakStrong = document.createElement('strong');
@@ -623,7 +636,7 @@ function _renderArenaResult(el, d) {
         /* Daily wins */
         var dailyCard = _div('arena-reward-card');
         var dailyIcon = _div('reward-icon');
-        dailyIcon.textContent = '\uD83D\uDCDC';
+        dailyIcon.textContent = '\u25C6';
         dailyCard.appendChild(dailyIcon);
         var dailyText = _div('reward-text');
         var dailyStrong2 = document.createElement('strong');
@@ -640,8 +653,8 @@ function _renderArenaResult(el, d) {
 
     /* Buttons */
     var actions = _div('arena-actions');
-    actions.appendChild(_makeBtn(victory ? '\u2694 NOVO COMBATE' : '\uD83C\uDFDF\uFE0F Voltar \u00e0 Arena', 'arena_main', 'arena-btn--challenge'));
-    actions.appendChild(_makeBtn('\uD83C\uDFD8\uFE0F Cidade', 'action_city_hub', 'arena-btn--city'));
+    actions.appendChild(_makeBtn(victory ? 'NOVO COMBATE' : 'Voltar \u00e0 Arena', 'arena_main', 'arena-btn--challenge'));
+    actions.appendChild(_makeBtn('Cidade', 'action_city_hub', 'arena-btn--city'));
     wrap.appendChild(actions);
 
     frag.appendChild(wrap);
@@ -675,7 +688,7 @@ function _renderArenaLeaderboard(el, d) {
     if (entries.length === 0) {
         var empty = _div('arena-lb-empty');
         var emptyIcon = _div('arena-lb-empty-icon');
-        emptyIcon.textContent = '\uD83C\uDFDF\uFE0F';
+        emptyIcon.textContent = '\u25C6';
         empty.appendChild(emptyIcon);
         var emptyText = document.createElement('div');
         emptyText.textContent = 'Nenhuma vit\u00f3ria registrada hoje.';
@@ -783,7 +796,7 @@ function _renderArenaLeaderboard(el, d) {
 
     /* Button */
     var actions = _div('arena-actions');
-    actions.appendChild(_makeBtn('\u2B05\uFE0F Voltar \u00e0 Arena', 'arena_main', 'arena-btn--back-main'));
+    actions.appendChild(_makeBtn('\u2190 Voltar \u00e0 Arena', 'arena_main', 'arena-btn--back-main'));
     wrap.appendChild(actions);
 
     frag.appendChild(wrap);
@@ -854,7 +867,7 @@ function _renderArenaRules(el, d) {
     /* Header em pergaminho */
     var header = _div('arena-rules-header');
     var hIcon = _div('arena-rules-icon');
-    hIcon.textContent = '📖';
+    hIcon.textContent = '◆';
     header.appendChild(hIcon);
     var hTitle = _div('arena-rules-title');
     hTitle.textContent = 'REGRAS DO COLISEU';
@@ -866,7 +879,7 @@ function _renderArenaRules(el, d) {
 
     /* Section: Tiers */
     var tiersLabel = _div('pt-section-label');
-    tiersLabel.textContent = '⚔ Tiers de Combate ⚔';
+    tiersLabel.textContent = 'Tiers de Combate';
     wrap.appendChild(tiersLabel);
 
     var tiers = d.tiers || [];
@@ -936,7 +949,7 @@ function _renderArenaRules(el, d) {
         xpStat.appendChild(xpLbl);
         var xpVal = document.createElement('span');
         xpVal.className = 'arena-rules-stat-val';
-        xpVal.textContent = '✨ ' + t.xp;
+        xpVal.textContent = '+' + t.xp;
         xpStat.appendChild(xpVal);
         statRow.appendChild(xpStat);
         info.appendChild(statRow);
@@ -948,26 +961,26 @@ function _renderArenaRules(el, d) {
 
     /* Section: rules of engagement */
     var lawsLabel = _div('pt-section-label');
-    lawsLabel.textContent = '📜 Leis da Areia 📜';
+    lawsLabel.textContent = 'Leis da Areia';
     wrap.appendChild(lawsLabel);
 
     var laws = _div('arena-rules-laws');
-    laws.appendChild(_arenaLawItem('⏳', 'Tempo de Recuperação',
+    laws.appendChild(_arenaLawItem('◆', 'Tempo de Recuperação',
         'Após cada combate, descanse ' + (d.cooldown_turns || 3) +
         ' turno(s) antes de desafiar novamente.'));
     var sg = d.streak_gold_per_win || 5;
     var sx = d.streak_xp_per_win || 10;
     var cap = d.streak_cap || 5;
-    laws.appendChild(_arenaLawItem('🔥', 'Bônus de Sequência',
+    laws.appendChild(_arenaLawItem('◆', 'Bônus de Sequência',
         'Vitórias consecutivas rendem +' + sg + ' Valdoritas e +' + sx +
         ' XP por vitória na sequência, até ' + cap + ' vitórias seguidas.'));
-    laws.appendChild(_arenaLawItem('🩸', 'Derrota Não é Morte',
+    laws.appendChild(_arenaLawItem('◆', 'Derrota Não é Morte',
         'Perder na arena não é fatal — os curandeiros te recuperam, mas a sequência zera.'));
     wrap.appendChild(laws);
 
     /* Back button */
     var actions = _div('arena-actions');
-    actions.appendChild(_makeBtn('⬅️ Voltar à Arena', 'arena_main', 'arena-btn--back-main'));
+    actions.appendChild(_makeBtn('← Voltar à Arena', 'arena_main', 'arena-btn--back-main'));
     wrap.appendChild(actions);
 
     frag.appendChild(wrap);
@@ -1000,7 +1013,7 @@ function _renderArenaRecord(el, d) {
 
     var header = _div('arena-rules-header');
     var hIcon = _div('arena-rules-icon');
-    hIcon.textContent = '🎖️';
+    hIcon.textContent = '◆';
     header.appendChild(hIcon);
     var hTitle = _div('arena-rules-title');
     hTitle.textContent = 'SEUS FEITOS';
@@ -1024,14 +1037,14 @@ function _renderArenaRecord(el, d) {
 
     /* Detail rows */
     var detail = _div('arena-record-detail');
-    detail.appendChild(_arenaRecordRow('🏆', 'Melhor sequência', String(stats.best_streak || 0)));
-    detail.appendChild(_arenaRecordRow('📜', 'Vitórias hoje', String(stats.daily_wins || 0)));
-    detail.appendChild(_arenaRecordRow('⚔', 'Total de combates', String(stats.total || 0)));
-    detail.appendChild(_arenaRecordRow('📊', 'Taxa de vitória', (stats.win_rate || 0) + '%'));
+    detail.appendChild(_arenaRecordRow('◆', 'Melhor sequência', String(stats.best_streak || 0)));
+    detail.appendChild(_arenaRecordRow('◆', 'Vitórias hoje', String(stats.daily_wins || 0)));
+    detail.appendChild(_arenaRecordRow('◆', 'Total de combates', String(stats.total || 0)));
+    detail.appendChild(_arenaRecordRow('◆', 'Taxa de vitória', (stats.win_rate || 0) + '%'));
     wrap.appendChild(detail);
 
     var actions = _div('arena-actions');
-    actions.appendChild(_makeBtn('⬅️ Voltar à Arena', 'arena_main', 'arena-btn--back-main'));
+    actions.appendChild(_makeBtn('← Voltar à Arena', 'arena_main', 'arena-btn--back-main'));
     wrap.appendChild(actions);
 
     frag.appendChild(wrap);
@@ -1063,7 +1076,7 @@ function _renderArenaHistory(el, d) {
 
     var header = _div('arena-rules-header');
     var hIcon = _div('arena-rules-icon');
-    hIcon.textContent = '📜';
+    hIcon.textContent = '◆';
     header.appendChild(hIcon);
     var hTitle = _div('arena-rules-title');
     hTitle.textContent = 'HISTÓRICO DE LUTAS';
@@ -1076,7 +1089,7 @@ function _renderArenaHistory(el, d) {
     if (!entries.length) {
         var empty = _div('arena-lb-empty');
         var emptyIcon = _div('arena-lb-empty-icon');
-        emptyIcon.textContent = '🏟️';
+        emptyIcon.textContent = '◆';
         empty.appendChild(emptyIcon);
         var emptyTxt = document.createElement('div');
         emptyTxt.textContent = 'Nenhum combate registrado ainda.';
@@ -1090,16 +1103,16 @@ function _renderArenaHistory(el, d) {
         var list = _div('arena-history-list');
         entries.forEach(function(e) {
             var row = _div('arena-history-entry ' + (e.victory ? 'is-victory' : 'is-defeat'));
-            /* result icon */
+            /* result glyph (P2 emoji ban: ✓/✗ colorem via is-victory/is-defeat) */
             var res = _div('arena-history-res');
-            res.textContent = e.victory ? '🏆' : '💀';
+            res.textContent = e.victory ? '✓' : '✗';
             row.appendChild(res);
             /* opponent — safe DOM: icon como textContent (emoji) */
             var info = _div('arena-history-info');
             var oppName = _div('arena-history-opp');
             var oppIcon = document.createElement('span');
             oppIcon.className = 'arena-history-opp-ic';
-            oppIcon.textContent = (e.opponent_icon || '⚔️') + ' ';
+            oppIcon.textContent = e.opponent_icon ? (e.opponent_icon + ' ') : '';
             oppName.appendChild(oppIcon);
             oppName.appendChild(document.createTextNode(e.opponent || '???'));
             info.appendChild(oppName);
@@ -1120,7 +1133,7 @@ function _renderArenaHistory(el, d) {
                 out.appendChild(goldOut);
                 var xpOut = document.createElement('div');
                 xpOut.className = 'arena-history-xp';
-                xpOut.textContent = '✨ +' + (e.xp || 0);
+                xpOut.textContent = '+' + (e.xp || 0) + ' XP';
                 out.appendChild(xpOut);
             } else {
                 var lossOut = document.createElement('div');
@@ -1135,7 +1148,7 @@ function _renderArenaHistory(el, d) {
     }
 
     var actions = _div('arena-actions');
-    actions.appendChild(_makeBtn('⬅️ Voltar à Arena', 'arena_main', 'arena-btn--back-main'));
+    actions.appendChild(_makeBtn('← Voltar à Arena', 'arena_main', 'arena-btn--back-main'));
     wrap.appendChild(actions);
 
     frag.appendChild(wrap);

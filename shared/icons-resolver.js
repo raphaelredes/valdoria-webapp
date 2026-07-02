@@ -68,6 +68,7 @@
     'cerveja': 'ui/cerveja.webp',
     'cidadao': 'npcs/aldeao.webp',
     'clerigo': 'combat/clerigo.webp',
+    'comer': 'items/pao-fresco.webp',
     'compendio': 'ui/compendio.webp',
     'cordas': 'ui/cordas.webp',
     'crianca': 'ui/crianca.webp',

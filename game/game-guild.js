@@ -102,7 +102,14 @@ if (!window._SVC_CONFIG_GUILD) {
   };
 }
 
-/* === TAVIRA_DIALOGUE (greeting principal — opens on NPC row click) ====== */
+/* P4 (2026-07-02): sessão REMOTE = diálogo server-driven (venue 'guild' no
+   city_dialogue_resolver — saudação ROTATIVA anti-repeat + transitions pras
+   telas ricas). O objeto TAVIRA_DIALOGUE abaixo vira fallback LOCAL-only. */
+function _gldIsRemote() {
+  return !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote());
+}
+
+/* === TAVIRA_DIALOGUE (fallback LOCAL — REMOTE usa venue 'guild') ======== */
 var TAVIRA_DIALOGUE = {
   npc: {
     name: 'Mestra Tavira',
@@ -180,7 +187,10 @@ function renderGuildHub(container, data) {
   npcRow.appendChild(info);
   npcRow.appendChild(_gldEl('div', 'npc-chev', '›'));
   npcRow.addEventListener('click', function(){
-    if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
+    // PADRAO_SERVIDOR (P4): o servidor monta a saudação rotativa da Tavira e resolve.
+    if (typeof window._openCityDialogue === 'function' && _gldIsRemote()) {
+      window._openCityDialogue('guild', 'tavira');
+    } else if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
       window._SVC_CONFIG = window._SVC_CONFIG_GUILD;
       window.vEncounter.render(TAVIRA_DIALOGUE);
     }
@@ -211,7 +221,7 @@ function renderGuildHub(container, data) {
   if (data.fallen_count > 0) {
     var fallenBox = _gldEl('div', 'gld-fallen-warn');
     fallenBox.style.cssText = 'padding:8px 12px;background:rgba(180,40,40,0.15);border-left:3px solid #b42828;border-radius:4px;color:#e8b08c;font-size:calc(12px * var(--v-font-scale, 1));';
-    fallenBox.textContent = '⚠ ' + data.fallen_count + ' aliado(s) caído(s) em teu grupo';
+    fallenBox.textContent = data.fallen_count + ' aliado(s) caído(s) em teu grupo';
     body.appendChild(fallenBox);
   }
 
@@ -221,7 +231,7 @@ function renderGuildHub(container, data) {
 
   /* === 2e. Section label === */
   var sectionLbl = _gldEl('div', 'pt-section-label');
-  sectionLbl.textContent = '⚜ Serviços da Guilda ⚜';
+  sectionLbl.textContent = 'Serviços da Guilda';
   body.appendChild(sectionLbl);
 
   /* === 2f. Services grid (.services + .svc canonical) === */
@@ -271,7 +281,7 @@ function renderGuildHub(container, data) {
   if (data.recruit_available && data.recruit_available > 0) {
     var rec = _gldEl('div', 'gld-recruit-info');
     rec.style.cssText = 'text-align:center;padding:6px;color:#c4953a;font-size:calc(11px * var(--v-font-scale, 1));font-style:italic;';
-    rec.textContent = '⚔ ' + data.recruit_available + ' aventureiro(s) disponível(eis) hoje';
+    rec.textContent = data.recruit_available + ' aventureiro(s) disponível(eis) hoje';
     body.appendChild(rec);
   }
 
@@ -300,7 +310,7 @@ function _gldClassSlug(cls) {
 /* #71e PADRAO_LOCAIS: brasão heráldico da CLASSE (regra: nunca emoji de pessoa).
    Aceita nome PT-BR (com/sem acento) ou já-key. Retorna SVG <use href="#ic-*">
    reaproveitando os <symbol id="ic-*"> injetados em cidade/index.html + combate.html.
-   Fallback gracioso: data.class_icon do backend, depois '⚔'. */
+   Fallback gracioso: data.class_icon do backend, depois vazio (sem emoji). */
 function _gldClassIcoId(cls) {
   if (!cls) return null;
   var s = String(cls).toLowerCase().trim();
@@ -337,7 +347,7 @@ function _gldClassCrest(cls, size, fallbackIcon) {
     var sz = (size || 34);
     return '<svg viewBox="0 0 120 120" style="width:' + sz + 'px;height:' + sz + 'px;color:' + color + ';display:block;" aria-hidden="true"><use href="#' + id + '"/></svg>';
   }
-  return fallbackIcon || '⚔';
+  return fallbackIcon || '';
 }
 
 function renderGuildAdventurer(container, data) {
@@ -351,7 +361,7 @@ function renderGuildAdventurer(container, data) {
      regra Heraldic Icons Only (nunca emoji de pessoa). Fallback gracioso. */
   var cenario = _gldEl('div', 'gld-adv-cenario');
   var av = _gldEl('div', 'gld-adv-avatar gld-adv-crest ' + _gldClassSlug(data.class_name),
-                  _gldClassCrest(data.class_name, 40, data.class_icon || '⚔'));
+                  _gldClassCrest(data.class_name, 40, data.class_icon || ''));
   cenario.appendChild(av);
   var cenarioTexto = _gldEl('div', 'gld-adv-cenario-texto');
   cenarioTexto.appendChild(_gldEl('div', 'gld-adv-name', data.name || ''));
@@ -440,7 +450,7 @@ function renderGuildAdventurer(container, data) {
 
   var btn = _gldEl('button', 'gld-adv-btn');
   if (data.party_full) {
-    btn.textContent = '🚫 Grupo Completo (3/3)';
+    btn.textContent = 'Grupo Completo (3/3)';
     btn.disabled = true;
     btn.classList.add('disabled');
   } else if (!data.can_afford) {
@@ -472,7 +482,7 @@ function renderGuildHireConfirm(container, data) {
 
   /* #71e: brasão heráldico da classe (SVG hardcoded) — nunca emoji. */
   var iconEl = _gldEl('div', 'gld-confirm-icon gld-adv-crest',
-                      _gldClassCrest(data.class_name, 34, data.class_icon || '⚔'));
+                      _gldClassCrest(data.class_name, 34, data.class_icon || ''));
   card.appendChild(iconEl);
 
   card.appendChild(_gldEl('div', 'gld-confirm-q', 'Contratar?'));
@@ -540,13 +550,13 @@ function renderGuildHireSuccess(container, data) {
   var root = _gldEl('div', 'gld-success-v2');
 
   /* Scene: confetti + brasão heráldico da classe (horizontal compact layout).
-     #71e: avatar = brasão heráldico (nunca emoji de pessoa). Removido o aceno 👋
+     #71e: avatar = brasão heráldico (nunca emoji de pessoa). Removido o aceno
      (emote de pessoa — regra No NPC Emotes); selo dourado ◆ no lugar. */
   var scene = _gldEl('div', 'gld-success-scene');
   scene.appendChild(_gldEl('div', 'gld-success-confetti'));
   var avWrap = _gldEl('div', 'gld-success-av-wrap');
   var av = _gldEl('div', 'gld-success-avatar gld-adv-crest ' + _gldClassSlug(data.class_name),
-                  _gldClassCrest(data.class_name, 34, data.class_icon || '⚔'));
+                  _gldClassCrest(data.class_name, 34, data.class_icon || ''));
   avWrap.appendChild(av);
   avWrap.appendChild(_gldEl('span', 'gld-success-seal', '◆'));
   scene.appendChild(avWrap);
@@ -687,7 +697,7 @@ function renderGuildRecruitList(container, data) {
   }
 
   /* Section label ornamentada. */
-  var sectionLbl = _gldEl('div', 'pt-section-label', data.section_label || '⚜ Aventureiros à disposição ⚜');
+  var sectionLbl = _gldEl('div', 'pt-section-label', data.section_label || 'Aventureiros à disposição');
   body.appendChild(sectionLbl);
 
   var recruits = data.recruits || [];
@@ -704,7 +714,7 @@ function renderGuildRecruitList(container, data) {
 
       /* Brasão heráldico da classe (nunca emoji). Fallback gracioso. */
       var ico = _gldEl('div', 'svc-ico gld-recruit-ico',
-                       _gldClassCrest(r.class_name, 30, r.class_icon || '⚔'));
+                       _gldClassCrest(r.class_name, 30, r.class_icon || ''));
       card.appendChild(ico);
 
       var txt = _gldEl('div', 'svc-text');
@@ -743,7 +753,7 @@ function renderGuildRecruitList(container, data) {
     var pc = data.party_count || 0, pm = data.party_max;
     var vagas = Math.max(0, pm - pc);
     foot.textContent = vagas > 0
-      ? ('⚔ ' + vagas + ' vaga' + (vagas !== 1 ? 's' : '') + ' no grupo (' + pc + '/' + pm + ')')
+      ? (vagas + ' vaga' + (vagas !== 1 ? 's' : '') + ' no grupo (' + pc + '/' + pm + ')')
       : ('Grupo completo — ' + pc + '/' + pm);
     body.appendChild(foot);
   }

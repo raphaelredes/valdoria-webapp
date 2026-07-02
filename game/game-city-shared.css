@@ -89,6 +89,23 @@
   opacity: 0.4;
   pointer-events: none;
 }
+/* P6 (2026-07-02, PADRAO_LOCAIS A6): fita "Novo!" — serviço recém-destravado */
+.vc-service-new {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  padding: 1px var(--v-space-sm, 6px);
+  background: linear-gradient(180deg, var(--v-gold, #c4953a), #8a5a18);
+  color: #1a1510;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-weight: 700;
+  font-size: var(--v-font-xs, 10px);
+  letter-spacing: 0.5px;
+  border-radius: var(--v-radius-pill, 20px);
+  box-shadow: 0 0 8px var(--v-gold-40, rgba(196, 149, 58, 0.4)), 0 1px 3px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: var(--v-z-base, 1);
+}
 .vc-service-icon { font-size: var(--v-font-icon, 20px); line-height: 1; } /* HARDCODED: icon size, no exact token */
 /* 2026-05-18 AAA: merchant portraits PNG (gpt-image-2 generated) */
 .vc-service-icon img.merchant-portrait {

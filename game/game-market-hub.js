@@ -304,7 +304,7 @@ function renderMarketHub(container, data) {
     body.appendChild(vCity.statusAlert(data.message || 'Mercado fechado neste horário', 'warn'));
     if (data.extras && data.extras.length) {
       var lbl = vCity.el('div', 'pt-section-label');
-      lbl.textContent = '⚜ Alternativas ⚜';
+      lbl.textContent = 'Alternativas';
       body.appendChild(lbl);
       body.appendChild(vCity.serviceGrid(data.extras));
     }
@@ -339,13 +339,13 @@ function renderMarketHub(container, data) {
   else goldSpan.textContent += 'V';
   stats.appendChild(goldSpan);
   var itemsSpan = vCity.el('span', '');
-  itemsSpan.textContent = '🎒 ' + (data.item_count || 0);
+  itemsSpan.textContent = (data.item_count || 0) + ' itens';
   stats.appendChild(itemsSpan);
   body.appendChild(stats);
 
   /* Section: Mercadores */
   var sectionLbl = vCity.el('div', 'pt-section-label');
-  sectionLbl.textContent = '⚜ Mercadores Fiéis ⚜';
+  sectionLbl.textContent = 'Mercadores Fiéis';
   body.appendChild(sectionLbl);
 
   /* Multi-NPC grid — cada merchant é uma .row-npc clicável */
@@ -369,7 +369,7 @@ function renderMarketHub(container, data) {
   /* Extras (vender, rune scribe, rumors, etc.) */
   if (data.extras && data.extras.length) {
     var extrasLbl = vCity.el('div', 'pt-section-label');
-    extrasLbl.textContent = '⚜ Outros Serviços ⚜';
+    extrasLbl.textContent = 'Outros Serviços';
     body.appendChild(extrasLbl);
     /* 2026-05-21 — substitui emoji icon por PNG canonical via MARKET_SVC_META. */
     var extrasWithPng = data.extras.map(function(svc){
@@ -390,10 +390,10 @@ function renderMarketHub(container, data) {
      estranho. Mercadores fixos ausentes não viram mais card (filtrados em
      _buildMarketMockData); quem quer saber deles pergunta a um mercador presente
      (tópico de diálogo "Viu os outros mercadores?"). wandering_npcs agora só
-     traz o mercador de passagem do dia → renderizado como "🚶 Viajantes". */
+     traz o mercador de passagem do dia → renderizado como "Viajantes". */
   if (data.wandering_npcs && data.wandering_npcs.length) {
     var wnLbl = vCity.el('div', 'pt-section-label');
-    wnLbl.textContent = '🚶 Viajantes';
+    wnLbl.textContent = 'Viajantes';
     body.appendChild(wnLbl);
     body.appendChild(vCity.actionList(data.wandering_npcs));
   }

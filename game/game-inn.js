@@ -165,8 +165,10 @@ function renderInnHub(container, data) {
   }
 
   /* === 2d. Section label === */
+  /* P2 (2026-07-01, emoji ban): sem fleur-de-lis no texto — o ornamento vem
+     das linhas douradas do ::before/::after do .pt-section-label. */
   var sectionLbl = vCity.el('div', 'pt-section-label');
-  sectionLbl.textContent = '⚜ Serviços da Pena-Dourada ⚜';
+  sectionLbl.textContent = 'Serviços da Pena-Dourada';
   body.appendChild(sectionLbl);
 
   /* === 2e. Services grid (.services + .svc canonical) === */
@@ -186,7 +188,7 @@ function renderInnHub(container, data) {
         var _innMetaImg = ico.querySelector('img');
         if (_innMetaImg) _innMetaImg.style.cssText = 'width:38px;height:38px;object-fit:contain;';
       } else {
-        ico.innerHTML = svc.icon || '🛏';
+        ico.innerHTML = svc.icon || '';
         ico.style.cssText = 'font-size:calc(20px * var(--v-font-scale, 1));';
       }
       card.appendChild(ico);
@@ -224,7 +226,7 @@ function renderInnHub(container, data) {
   /* === 2f. Wandering NPCs === */
   if (data.wandering_npcs && data.wandering_npcs.length) {
     var wnLbl = vCity.el('div', 'pt-section-label');
-    wnLbl.textContent = '🚶 Hóspedes';
+    wnLbl.textContent = 'Hóspedes';
     body.appendChild(wnLbl);
     body.appendChild(vCity.actionList(data.wandering_npcs));
   }

@@ -9730,7 +9730,7 @@ function _isCTA(btn) {
   // Cada categoria tem ícone + cor accent que dá hierarquia visual no toast.
   var _NOTIF_META = {
     'general':      { icon: '🔔', accent: '#c4953a', label: 'Aviso' },
-    'daily_quests': { icon: '📜', accent: '#7dba5b', label: 'Missão' },
+    'daily_quests': { icon: '◆', accent: '#7dba5b', label: 'Missão' },
     'festivals':    { icon: '🎉', accent: '#ffb84d', label: 'Festival' },
     'auction':      { icon: '⚖️', accent: '#9050a0', label: 'Leilão' },
     'trade':        { icon: '🪙', accent: '#5b9dba', label: 'Comércio' }
@@ -11276,10 +11276,9 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('vorhan') >= 0)  return '/shared/img/npcs/mestre-vorhan.webp';
   if (s.indexOf('garrick') >= 0) return '/shared/img/npcs/mestre-garrick.webp';
   if (s.indexOf('thessil') >= 0) return '/shared/img/npcs/mestre-thessil.webp';
-  // Eirik (Escriba Rúnico) — usa o MESMO retrato do hub de runas (game-rune-scribe.js
-  // mantém o asset legado mestre-thessil.webp). Garante que "Conversar com Eirik" e
-  // a row do hub mostrem a mesma face. ANTES do fallback 'escriba' genérico.
-  if (s.indexOf('eirik') >= 0)   return '/shared/img/npcs/mestre-thessil.webp';
+  // Eirik (Escriba Rúnico) — retrato DEDICADO (P6 2026-07-02; antes colidia com a
+  // face do Thessil mercador via mestre-thessil.webp). game-rune-scribe.js usa o mesmo.
+  if (s.indexOf('eirik') >= 0)   return '/shared/img/npcs/eirik-escriba.webp';
   if (s.indexOf('bjorn') >= 0)   return '/shared/img/merchants/bjorn-anao.webp';  /* Bjorn — seleiro ANÃO (convertido 2026-06-13). merchants/bjorn.webp (humano) e bjorn-comerciante.webp (halfling) ficam reservados. */
   if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.webp';
   if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.webp';
@@ -11430,7 +11429,7 @@ function _advanceDiscoveryStage(nextStageId){
             console.warn('[CITY] quest.grant persist failed:', _ge);
           });
         }
-        if (typeof vToast === 'function') vToast('📜 Nova missão: ' + _gq.title);
+        if (typeof vToast === 'function') vToast('Nova missão: ' + _gq.title);
         _logCity('quest granted via discovery: ' + _gq.id);
       }
     }
@@ -11712,8 +11711,8 @@ function buildMockHubScreen(player){
   var sector = window._currentSector || 'convivio';
   var visible = _getVisibleLocationsForSector(sector);
 
-  // CTA sempre na primeira linha
-  var rows = [[{ text: '⚔️ PARTIR PARA AVENTURA', cb: 'explore_main' }]];
+  // CTA sempre na primeira linha (P2 emoji ban: sem pictográfico no botão)
+  var rows = [[{ text: 'PARTIR PARA AVENTURA', cb: 'explore_main' }]];
 
   // 2026-05-11 (AAA quest review): contador DINÂMICO baseado em QUESTS_ACTIVE
   // real (após splice por _deliverQuest/_abandonQuest). Mostra (N) se N>0,
@@ -11730,7 +11729,7 @@ function buildMockHubScreen(player){
     var label = loc.label;
     // Badge missões dinâmico — count real + indicador visual de quest ready
     if (loc.cb === 'action_quests' && activeCount > 0) {
-      label = label + ' (' + activeCount + (readyCount > 0 ? ' • ✅' : '') + ')';
+      label = label + ' (' + activeCount + (readyCount > 0 ? ' • ✓' : '') + ')';
     }
     pair.push({ text: label, cb: loc.cb });
     if (pair.length === 2){ rows.push(pair); pair = []; }
@@ -12482,7 +12481,7 @@ function _showCharactersPopup(){
   });
   var logoutBtn = bodyEl.querySelector('.hall-btn-logout');
   if (logoutBtn) logoutBtn.addEventListener('click', function(){
-    vToast('🚪 Logout: encerra sessão e volta à tela de login.');
+    vToast('Logout: encerra sessão e volta à tela de login.');
   });
 
   // X-6.5.51AL (2026-05-08) — wire delete buttons (cada char card)
@@ -12503,7 +12502,7 @@ function _showCharactersPopup(){
       var expanded = archivedToggle.getAttribute('aria-expanded') === 'true';
       archivedToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
       archivedList.style.display = expanded ? 'none' : 'flex';
-      archivedToggle.innerHTML = '📜 Personagens Arquivados <span id="hall-archived-count" style="opacity:0.6;">'
+      archivedToggle.innerHTML = 'Personagens Arquivados <span id="hall-archived-count" style="opacity:0.6;">'
         + (window._hallArchivedCountText || '') + '</span> ' + (expanded ? '▾' : '▴');
     });
   }
@@ -12903,7 +12902,7 @@ var TUTORIAL_STEPS = [
   },
   {
     selector: '.hub-loc[data-cb="action_quests"], .hub-loc[data-cb="quests"]',
-    title: '📜 Missões',
+    title: 'Missões',
     description: 'Lista de missões disponíveis. Algumas são <b>diárias</b> (resetam todo dia), outras de <b>história</b> '
                 + '(longas, com recompensa épica), e <b>secundárias</b> aceitas com NPCs.'
   },
@@ -13591,7 +13590,7 @@ function _showCharSwitchConfirm(picked){
         window.CITY_MOCK_PLAYER.race = picked.race;
         window.CITY_MOCK_PLAYER.level = picked.level;
       }
-      vToast('🚪 Trocado para ' + picked.name + '. Recarregando…');
+      vToast('Trocado para ' + picked.name + '. Recarregando…');
       setTimeout(function(){
         if (typeof closeCityPopup === 'function') closeCityPopup(true);
         if (typeof navigateTo === 'function') navigateTo('hub');
@@ -20974,7 +20973,7 @@ var RELATIONS_NPCS = [
   { id: 'rel_thorne',  icon: '<img src="/shared/img/merchants/thorne.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/merchants/thorne.webp' },
   { id: 'rel_mirena',  icon: '<img src="/shared/img/merchants/mirena.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/merchants/mirena.webp' },
   { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Valeriax',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.webp' },
-  { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/escriba.webp' },
+  { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/eirik-escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/eirik-escriba.webp' },
   // Mercadores TIER 2.0 com reputação REAL no servidor (cartographer/jeweler/tentmaker em
   // NPC_INFO) — antes AUSENTES do RELATIONS_NPCS → nunca apareciam em Vínculos mesmo com renome.
   { id: 'rel_corvus',   icon: '<img src="/shared/img/merchants/corvus-veltharion.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Corvus',   role: 'Cartógrafo', ref_id: 'market_corvus',   portraitImg: '/shared/img/merchants/corvus-veltharion.webp' },
@@ -21209,8 +21208,11 @@ function _buildShadowAlleyMockData(player){
   }
   return {
     type: 'hub',
+    // P6 (2026-07-02): banner-cenário épico (PADRAO_LOCAIS faceta A)
+    bannerImg: '/shared/img/city/beco-banner.webp',
+    bannerTitle: 'BECO SOMBRIO',
     flavor: flavorText,
-    rep_label: '🌑 ' + SHADOW_ITEMS.length + ' itens disponíveis · 4 fixos + 4 rotativos diariamente',
+    rep_label: SHADOW_ITEMS.length + ' itens disponíveis · 4 fixos + 4 rotativos diariamente',
     services: [
       { icon: _heralIco('ic-bruxo'), label: 'Conversar com O Vulto', cb: 'shadow_npc_shadow_vulto' },
       { icon: _heralIco('ic-bruxo'), label: 'Trabalho Sujo (Crime)', cb: 'shadow_crime_open' },
@@ -21682,13 +21684,13 @@ function _buildTravelersMockData(player){
   return {
     type: 'hub',
     flavor: '<i>Diário pessoal de couro gasto. Você anota nele os viajantes que encontra em Valdoria — onde estavam, o que faziam, no que pareciam viver. Hoje o livro tem ' + pool.length + ' entradas ativas.</i>',
-    rep_label: '📓 ' + pool.length + ' viajantes circulando hoje · Pool renova ao amanhecer',
+    rep_label: pool.length + ' viajantes circulando hoje · Pool renova ao amanhecer',
     services: pool.map(function(t){
       return {
         icon: t.icon,
         label: t.name,
         cb: 'travelers_view_' + t.id,
-        badge: '📍 ' + (t.loc_now || 'fora da cidade')
+        badge: t.loc_now || 'fora da cidade'
       };
     })
   };
@@ -21778,8 +21780,8 @@ function _buildHeroesWallMockData(player){
     : '';
   return {
     type: 'hub',
-    // Banner-cenário épico (PADRAO_LOCAIS faceta A) — reusa a cena da Praça Central.
-    bannerImg: '/shared/img/city/praca-banner.webp',
+    // P6 (2026-07-02): banner PRÓPRIO do memorial (antes reusava a cena da Praça).
+    bannerImg: '/shared/img/city/muralha-banner.webp',
     bannerTitle: 'MURAL DOS AVENTUREIROS',
     flavor: '<i>Mural de pedra negra na Praça Central, nomes gravados em ouro. Aqui ficam os mais notáveis aventureiros de Valdoria — quem subiu mais alto, quem matou mais monstros, quem juntou mais ouro, quem viu mais do mundo.</i>' + _champLine,
     rep_label: _heralIco('ic-praca') + ' 5 categorias de ranking · Top 10 por categoria · ' + MURAL_TITLES.length + ' títulos por conquista',
@@ -21812,7 +21814,9 @@ function _muralRankDetail(cat){
     } else {
       html = '<div class="mural-rank-list">';
       entries.forEach(function(e){
-        var medal = e.rank === 1 ? '🥇' : e.rank === 2 ? '🥈' : e.rank === 3 ? '🥉' : (e.rank + 'º');
+        // P2 (emoji ban 2026-07-01): medalhas viraram posição tipográfica; o
+        // destaque do top-3 fica por conta do CSS/cor da linha.
+        var medal = e.rank + 'º';
         var ck = String(e.class_key || '');
         var nm = _esc(e.name);
         var portrait = ck
@@ -21921,13 +21925,21 @@ var GATES_PREP_ITEMS = [
 // Reusa SUBSCREEN_DATA['codex'] legacy (Bestiário/Locais/Itens/Classes/Raças)
 // + entries mock por categoria. Usa renderCodexScreen canonical.
 var CODEX_DATA = {
-  categories: [
-    { key: 'bestiary',  icon: _heralIco('ic-mochila'), label: 'Bestiário' },
-    { key: 'locations', icon: _heralIco('ic-mochila'), label: 'Locais' },
-    { key: 'items',     icon: _heralIco('ic-mochila'), label: 'Itens' },
-    { key: 'classes',   icon: _heralIco('ic-mochila'), label: 'Classes' },
-    { key: 'races',     icon: '',   label: 'Raças' }
-  ],
+  // P6 (2026-07-02): 1 ícone ÚNICO por categoria (antes 4× ic-mochila genérico
+  // + Raças sem ícone). WebP OpenAI existentes de shared/img/ui/ (custo zero).
+  categories: (function(){
+    var _cdxIco = function(s){
+      return '<img src="/shared/img/ui/' + s + '.webp" alt="" '
+        + 'style="width:14px;height:14px;object-fit:contain;vertical-align:-2px" onerror="this.remove()">';
+    };
+    return [
+      { key: 'bestiary',  icon: _cdxIco('aranha'),      label: 'Bestiário' },
+      { key: 'locations', icon: _cdxIco('localizacao'), label: 'Locais' },
+      { key: 'items',     icon: _cdxIco('mochila'),     label: 'Itens' },
+      { key: 'classes',   icon: _cdxIco('ficha'),       label: 'Classes' },
+      { key: 'races',     icon: _cdxIco('grupo'),       label: 'Raças' }
+    ];
+  })(),
   // Mock entries — alguns desbloqueados, outros lockados
   entries: [
     // Bestiário (12/47) — brasões heráldicos canonical (regra Heraldic Icons Only)
@@ -22246,7 +22258,7 @@ function _srvAcceptQuest(serverId){
     if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
     if (r && r.ok){
       _applyServerQuests(r.quests);
-      if (typeof vToast==='function') vToast(r.toast || '📜 Missão aceita!');
+      if (typeof vToast==='function') vToast(r.toast || 'Missão aceita!');
       _refreshServerBoard().then(function(){ if (typeof renderCurrentScreen==='function') renderCurrentScreen(); });
     } else if (typeof vToast==='function') {
       vToast((r && r.error) || 'Não foi possível aceitar a missão');
@@ -22358,7 +22370,7 @@ function _srvQuestDetail(serverId){
   btns.push([icoMis, 'Abandonar missão', 'desistir', 'srvabandon_' + serverId]);
   if (typeof SUBSCREEN_DATA !== 'undefined') {
     SUBSCREEN_DATA['quest_open_srv_' + serverId] = {
-      header: '📜 Missão: ' + (sq.title || serverId),
+      header: 'Missão: ' + (sq.title || serverId),
       flavor: '<i>' + (sq.desc || '') + '</i>',
       npcInfo: (sq.progress ? '📋 ' + sq.progress + ' · ' : '') + '<span class="vi vi-coin sm"></span> ' + (sq.reward||0) + ' ' + coin + ' + ' + (sq.xp||0) + ' XP',
       buttons: btns
@@ -22599,7 +22611,7 @@ function _renderQuestDiary(bodyEl){
               : 'Nenhuma missão ativa. <i>Aceite contratos na Guilda para começar.</i>');
     html += '<div class="qd-empty" style="text-align:center;padding: 32px var(--v-space-xl, 16px);'
       + 'color:var(--v-text-dim,#a09484);font-style:italic;font-size:calc(13px * var(--v-font-scale, 1));line-height:1.5;">'
-      + '<div style="font-size:calc(42px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md-lg, 10px);opacity:0.5;color:var(--v-gold,#c4953a);">📜</div>'
+      + '<div style="font-size:calc(42px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md-lg, 10px);opacity:0.5;color:var(--v-gold,#c4953a);">◆</div>'
       + '<div>' + emptyMsg + '</div>'
       + '</div>';
   } else {
@@ -22671,7 +22683,7 @@ function _renderQuestDiary(bodyEl){
           + 'style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold-light,#dbb668);margin-top: var(--v-space-sm, 4px);line-height:1.35;'
           + 'padding: var(--v-space-sm, 4px) 7px;background:rgba(0,0,0,0.25);border-left:2px solid var(--v-gold,#c4953a);'
           + 'border-radius:0 3px 3px 0;">'
-          + '<span style="opacity:0.8;font-size:0.85em;letter-spacing:0.5px;text-transform:uppercase;">🎯 Objetivo: </span>'
+          + '<span style="opacity:0.8;font-size:0.85em;letter-spacing:0.5px;text-transform:uppercase;">Objetivo: </span>'
           + q.obj
           + '</div>';
       }
@@ -22761,7 +22773,7 @@ function _renderQuestDiary(bodyEl){
       if (!cb) return;
       // Hook em handlers existentes
       if (typeof doAction === 'function') doAction(cb);
-      else vToast('📜 Abrindo missão (mock).');
+      else vToast('Abrindo missão (mock).');
     });
   });
 }
@@ -22882,7 +22894,7 @@ function _buildDailyChallengeMockData(player){
     flavor: '<img src="' + _dcDailyPng(ch) + '" alt="" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;border-radius:3px;" onerror="this.style.display=\'none\'"> '
           + '<b>Desafio do Dia · ' + kindLabel + '</b><br>'
           + '<i>' + ch.desc + '</i><br><br>'
-          + '🎯 ' + verb + ' <b>' + ch.count + 'x ' + ch.target + '</b> em <b>' + ch.biome + '</b><br>'
+          + verb + ' <b>' + ch.count + 'x ' + ch.target + '</b> em <b>' + ch.biome + '</b><br>'
           + '⏰ Reseta à meia-noite',
     rep_label: '🏆 +' + ch.reward_gold + ' Valdoritas · +' + ch.reward_xp + ' XP',
     services: [
@@ -33781,14 +33793,14 @@ function _shopGetFilters(npcId){
   // Filtros visíveis (apenas os com count > 0)
   // Sessao #37 v13: labels abreviadas pra caber em modo Maior
   var allFilters = [
-    { id:'all',        label:'Todos',         count:counts.all       },
-    { id:'weapon',     label:'⚔️ Armas',      count:counts.weapon    },
-    { id:'armor',      label:'🛡️ Defesa',     count:counts.armor     },
-    { id:'consumable', label:'🧪 Poções',     count:counts.consumable},
-    { id:'gem',        label:'💎 Gemas',      count:counts.gem       },
-    { id:'map',        label:'🗺️ Mapas',      count:counts.map       },
-    { id:'accessory',  label:'💍 Anéis',      count:counts.accessory },
-    { id:'tool',       label:'⛺ Equipamento', count:counts.tool      }
+    { id:'all',        label:'Todos',       count:counts.all       },
+    { id:'weapon',     label:'Armas',       count:counts.weapon    },
+    { id:'armor',      label:'Defesa',      count:counts.armor     },
+    { id:'consumable', label:'Poções',      count:counts.consumable},
+    { id:'gem',        label:'Gemas',       count:counts.gem       },
+    { id:'map',        label:'Mapas',       count:counts.map       },
+    { id:'accessory',  label:'Anéis',       count:counts.accessory },
+    { id:'tool',       label:'Equipamento', count:counts.tool      }
   ];
   return allFilters.filter(function(f){ return f.id === 'all' || f.count > 0; });
 }
@@ -33941,6 +33953,8 @@ function renderSquareHub(container, data){
   if (data.npc)       html += '<div class="subscreen-npc">' + data.npc + '</div>';
   if (data.rep_label) html += '<div class="subscreen-rep">' + data.rep_label + '</div>';
   if (data.buff)      html += '<div class="subscreen-buff">' + data.buff + '</div>';
+  // P6 (2026-07-02): label de seção ornamentado (linhas douradas via CSS ::before/::after)
+  if (data.sectionLabel) html += '<div class="pt-section-label">' + data.sectionLabel + '</div>';
   var services = data.services || [];
   if (services.length === 0) {
     html += '<div class="subscreen-flavor" style="text-align:center;padding:20px;color:var(--v-text-dim, #a09484)">'
@@ -33994,6 +34008,7 @@ function _buildSquareMockData(player){
     flavor: flavor,
     rep_label: _squareRepLabel(player),
     buff: activeBuff ? (player.metadata.artist_buff_name || 'Inspiração de Artista') : '',
+    sectionLabel: 'Atividades da Praça',  // P6: seção ornamentada (PADRAO_LOCAIS A)
     services: [
       { icon: _sqIco('dialogo'),  label: 'Investigar (NPCs)',  cb: 'square_investigate_open' },
       { icon: _sqIco('tochas'),   label: 'Explorar Área',      cb: 'square_explore_open' },
@@ -40315,7 +40330,7 @@ function _tavernShowPitfight(p){
             if (typeof refreshHud === 'function') refreshHud();
             var firstChk = checks[0] || { rolled: 0, total: 0 };
             _showServiceResultPopup({
-              icon: res.outcome_icon || (win ? '🏆' : '💀'), npc: 'Mestre da Rinha',
+              icon: res.outcome_icon || (win ? '✓' : '✗'), npc: 'Mestre da Rinha',
               narrative: narrative,
               dice: { formula: '3× 1d20 vs DC ' + res.dc, sides: 20, value: firstChk.rolled, total: firstChk.total },
               deltas: deltas,
@@ -44633,7 +44648,7 @@ function _guildBountiesMenu(p){
 
     function _openMenu(){
       _squareShowListPopup({
-        stackKey: 'guild_bounties', icon: _heralIco('ic-trofeu', null, '38px'), title: 'Recompensas (Caçadas)',
+        stackKey: 'guild_bounties', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Recompensas (Caçadas)',
         subtitle: 'Mestra Tavira · ' + (data.stage_label || 'Guilda'),
         bannerImg: '../shared/img/guilda/guilda-banner.webp',
         flavor: flavorMsg,
@@ -44936,7 +44951,7 @@ function _guildShowRecruits(p){
       var _clsCap = function(c){ c = String(c || 'Aventureiro'); return c.charAt(0).toUpperCase() + c.slice(1); };
       if (!list.length) {
         _squareShowListPopup({
-          stackKey: 'guild_recruits', icon: _heralIco('ic-grupo', null, '38px'), title: 'Recrutar Aliados',
+          stackKey: 'guild_recruits', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Recrutar Aliados',
           subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
           flavor: 'Tavira corre o dedo pela lista e fecha o livro. <i>(dá de ombros)</i> "Por ora, todo aventureiro disponível já marcha contigo. Volta mais tarde — sempre chega gente nova ao Salão."',
           items: [], onPick: function(){}
@@ -44952,7 +44967,7 @@ function _guildShowRecruits(p){
           badge: it.cost + ' ' + coin, _it: it };
       });
       _squareShowListPopup({
-        stackKey: 'guild_recruits', icon: _heralIco('ic-grupo', null, '38px'), title: 'Recrutar Aliados',
+        stackKey: 'guild_recruits', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Recrutar Aliados',
         subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
         flavor: (vagas > 0
           ? 'Tavira aponta o quadro com os contratos selados. <i>(meio-sorriso)</i> "Estes estão prontos pra marchar. ' + (vagas === 1 ? 'Tens uma vaga' : 'Tens ' + vagas + ' vagas') + ' no grupo. Escolhe bem — pagas uma vez, e seguem contigo."'
@@ -44988,7 +45003,7 @@ function _guildShowRecruits(p){
   var vagas = Math.max(0, 3 - ((window.GROUP_MEMBERS || []).filter(Boolean).length - 1));
   if (available.length === 0) {
     _squareShowListPopup({
-      stackKey: 'guild_recruits', icon: _heralIco('ic-grupo', null, '38px'), title: 'Recrutar Aliados',
+      stackKey: 'guild_recruits', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Recrutar Aliados',
       subtitle: 'Salão de Mestra Tavira',
       bannerImg: '../shared/img/guilda/guilda-banner.webp',
       flavor: 'Tavira corre o dedo pela lista e fecha o livro. <i>(dá de ombros)</i> "Por ora, todo aventureiro disponível já marcha contigo. Volta em 12 horas — sempre chega gente nova ao Salão."',
@@ -45007,7 +45022,7 @@ function _guildShowRecruits(p){
     };
   });
   _squareShowListPopup({
-    stackKey: 'guild_recruits', icon: _heralIco('ic-grupo', null, '38px'), title: 'Recrutar Aliados',
+    stackKey: 'guild_recruits', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Recrutar Aliados',
     subtitle: 'Salão de Mestra Tavira',
     bannerImg: '../shared/img/guilda/guilda-banner.webp',
     flavor: (vagas > 0
@@ -45081,7 +45096,7 @@ function _guildResearchRemote(p){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     if (!st || !st.ok) { if (typeof vToast === 'function') vToast('Erro na biblioteca.', 'warn'); return; }
     if (!st.available) {
-      _showInfoPopup({ icon: _heralIco('ic-mochila'), npc: 'Veterano Braun', title: 'Biblioteca da Guilda',
+      _showInfoPopup({ icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun', title: 'Biblioteca da Guilda',
         desc: '<i>Braun balança a cabeça: "Os tomos precisam de repouso. Volte em <b>' + (st.cooldown_remaining || 1) + '</b> turno(s)."</i>',
         onConfirm: function(){} });
       return;
@@ -45102,7 +45117,7 @@ function _guildResearchRemote(p){
 
 function _guildResearchConfirmRemote(p, topicKey, topic, st){
   _showConfirmPurchase({
-    icon: topic.emoji || '📚', npc: 'Veterano Braun', title: topic.name,
+    icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun', title: topic.name,
     desc: '<b>' + topic.name + '</b><br><i>' + (topic.desc || '') + '</i><br><br><b>Teste:</b> 1d20 + INT vs DC ' + st.dc + '<br><b>Custo:</b> ' + st.cost + ' Valdoritas',
     cost: st.cost,
     onConfirm: function(){
@@ -45123,7 +45138,7 @@ function _guildResearchConfirmRemote(p, topicKey, topic, st){
           : (res.refund ? ('<br><br>Reembolso: <b>' + res.refund + '</b> Valdoritas.') : '');
         var compLine = res.complication ? ('<br><br><b>⚠️ Complicação:</b> <i>' + res.complication.text + '</i><br>(' + res.complication.effect + ')') : '';
         _showServiceResultPopup({
-          icon: res.success ? '📚' : '⚠️', npc: 'Veterano Braun',
+          icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun',
           narrative: '<i>' + (res.result_text || '') + '</i>' + bonusLine + compLine,
           dice: { formula: '1d20' + (res.bonus >= 0 ? '+' : '') + res.bonus + ' (' + res.skill_label + ') vs DC ' + res.dc, sides: 20, value: res.roll, total: res.total },
           deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
@@ -45231,7 +45246,7 @@ function _guildShowResearch(p){
           refreshHud();
           var rewards = success ? [{ type:'xp', amount: 30, label: 'XP' }, { type:'item', amount: 1, label: t.label + ' (+' + (t.bonus_value || 2) + ' por ' + (t.bonus_duration || 5) + ' turnos)' }] : null;
           _showServiceResultPopup({
-            icon: success ? '📚' : '⚠️', npc: 'Veterano Braun',
+            icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun',
             narrative: '<i>' + resultText + '</i>' + compLine,
             dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' (' + skill.label + ') vs DC ' + t.dc, sides: 20, value: rolled, total: total },
             deltas: [
@@ -45297,7 +45312,7 @@ function _guildShowParty(p){
       var pmax = data.party_max || 3;
       if (!party.length) {
         _squareShowListPopup({
-          stackKey: 'guild_party', icon: _heralIco('ic-grupo', null, '38px'), title: 'Meu Grupo',
+          stackKey: 'guild_party', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Meu Grupo',
           subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
           flavor: 'Tavira folheia o registro e te encara. <i>(bate a pena no balcão)</i> "Marchas sozinho, aventureiro. Recruta aliados aqui ou na Taverna antes que a estrada te engula."',
           items: [], onPick: function(){}
@@ -45362,7 +45377,7 @@ function _guildShowParty(p){
   }
   if (aliveAllies.length === 0) {
     _squareShowListPopup({
-      stackKey: 'guild_party', icon: _heralIco('ic-grupo', null, '38px'), title: 'Meu Grupo',
+      stackKey: 'guild_party', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Meu Grupo',
       subtitle: 'Salão de Mestra Tavira',
       bannerImg: '../shared/img/guilda/guilda-banner.webp',
       flavor: 'Tavira folheia o registro e te encara. <i>(bate a pena no balcão)</i> "Marchas sozinho, aventureiro. Recruta aliados aqui ou na Taverna antes que a estrada te engula."',
@@ -45419,7 +45434,7 @@ function _guildShowTraining(p){
   // #71e: PADRAO_ALDRIC — o Veterano Braun (quartelmestre da Guilda) conduz o treino.
   // ── LOCAL (file://) fallback — mock client-side (dev tool, sem servidor) ──
   _showConfirmPurchase({
-    icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Treinamento de Armas',
+    icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun', title: 'Treinamento de Armas',
     desc: 'Braun rola os ombros e ergue uma espada de treino. <i>"Postura errada mata mais que inimigo. Vem — uma semana de suor vale o preço."</i>'
       + '<br><br>Efeito: <b>+1 ATK por 7 dias</b>'
       + '<br>Custo: <b>25 <span class="vi vi-coin sm"></span></b>',
@@ -45461,7 +45476,7 @@ function _guildTrainingMenu(p){
       return;
     }
     if (!data.can_train) {  // cooldown
-      _showInfoPopup({ icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Treinamento',
+      _showInfoPopup({ icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun', title: 'Treinamento',
         desc: 'Braun balança a cabeça. <i>"Descansa, aventureiro. Treino exige tempo entre as sessões. Volta em ' + (data.cooldown || 'algumas horas') + '."</i>',
         onConfirm: function(){} });
       return;
@@ -45470,16 +45485,25 @@ function _guildTrainingMenu(p){
     (data.languages || []).forEach(function(x){ if (!x.known) items.push({ icon: _heralIco('ic-escriba'), label: x.n, badge: 'Idioma', _cat: 'language', _name: x.n }); });
     (data.tools || []).forEach(function(x){ if (!x.known) items.push({ icon: _heralIco('ic-mochila'), label: x.n, badge: 'Ferramenta', _cat: 'tool', _name: x.n }); });
     if (!items.length) {
-      _showInfoPopup({ icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Treinamento',
+      _showInfoPopup({ icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun', title: 'Treinamento',
         desc: 'Braun te avalia de cima a baixo. <i>"Já domina tudo que posso ensinar, aventureiro. Volta quando houver algo novo no mundo."</i>', onConfirm: function(){} });
       return;
     }
+    // P4 (2026-07-02): Braun é conversável — saudação ROTATIVA server-driven
+    // (venue 'guild', node 'braun' no city_dialogue_resolver).
+    items.unshift({ icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">',
+      label: 'Conversar com Braun', badge: 'Diálogo', _cat: '_talk', _name: 'Braun' });
     _squareShowListPopup({
-      stackKey: 'guild_training', icon: _heralIco('ic-guerreiro', null, '38px'), title: 'Sala de Treinamento',
+      stackKey: 'guild_training', icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Sala de Treinamento',
       subtitle: 'Pátio de Armas · Veterano Braun', bannerImg: '/shared/img/guilda/training-banner.webp',
       flavor: '<i>Braun rola os ombros marcados de cicatrizes e aponta o pátio de areia, racks de armas reluzindo na luz.</i> "Idiomas, ferramentas — escolhe o que aprender. ' + total + ' sessões de suor, ' + cost + ' ' + coin + ' cada. No fim, a habilidade é tua de verdade."',
       sectionLabel: 'O que aprender', items: items,
       onPick: function(item){
+        if (item._cat === '_talk') {
+          if (typeof window._openCityDialogue === 'function') { window._openCityDialogue('guild', 'braun'); }
+          else if (typeof vToast === 'function') { vToast('Disponível no jogo.', 'info'); }
+          return;
+        }
         _showConfirmPurchase({
           icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun', title: 'Aprender ' + item._name,
           desc: 'Braun assente. <i>"' + item._name + '? Boa escolha. ' + total + ' sessões, ' + cost + ' ' + coin + ' cada — começamos pela primeira agora."</i>',
@@ -46359,16 +46383,18 @@ function _festivalMerchant(p){
       { id: 'fi_braco_ferro',   icon: _heralIco('ic-stat-str'), name: 'Braço de Ferro',        value: 80,  desc: 'Lembrança do torneio de braço-de-ferro' }
     ],
     starfall: [
-      { id: 'fi_luz_estelar',   icon: '⭐', name: 'Frasco de Luz Estelar', value: 100, desc: 'Brilha fracamente no escuro' },
+      // P2 (emoji ban): ícones de item resolvem via _resolveItemIcon (WebP) no
+      // render; os campos aqui são só fallback — sem emoji.
+      { id: 'fi_luz_estelar',   icon: _heralIco('ic-poção'), name: 'Frasco de Luz Estelar', value: 100, desc: 'Brilha fracamente no escuro' },
       { id: 'fi_capa_meia_noite',icon: _heralIco('ic-sono'), name: 'Capa da Meia-Noite',   value: 150, desc: 'Tecida com fios de luar' }
     ],
     harvest: [
-      { id: 'fi_torta_maca',    icon: '🥧', name: 'Torta de Maçã Dourada', value: 60,  desc: 'Restaura 10 HP ao consumir' },
-      { id: 'fi_espantalho',    icon: '🎃', name: 'Espantalho de Bolso',   value: 40,  desc: 'Um amuleto da colheita para boa sorte' }
+      { id: 'fi_torta_maca',    icon: _heralIco('ic-comer'), name: 'Torta de Maçã Dourada', value: 60,  desc: 'Restaura 10 HP ao consumir' },
+      { id: 'fi_espantalho',    icon: _heralIco('ic-mochila'), name: 'Espantalho de Bolso',   value: 40,  desc: 'Um amuleto da colheita para boa sorte' }
     ],
     lanterns: [
       { id: 'fi_lanterna_enc',  icon: _heralIco('ic-tochas'), name: 'Lanterna Encantada',    value: 90,  desc: 'Flutua ao seu redor suavemente' },
-      { id: 'fi_luvas_la',      icon: '✋', name: 'Luvas de Lã Mágica',    value: 70,  desc: 'Mantém as mãos sempre aquecidas' }
+      { id: 'fi_luvas_la',      icon: _heralIco('ic-mochila'), name: 'Luvas de Lã Mágica',    value: 70,  desc: 'Mantém as mãos sempre aquecidas' }
     ]
   };
   var festItems = FESTIVAL_MERCHANT_ITEMS_DB[key] || FESTIVAL_MERCHANT_ITEMS_DB.harvest;
@@ -46397,6 +46423,33 @@ function _festivalMerchant(p){
       });
       function _doBuyFest(){
           var preGold = p.gold;
+          // SERVER-AUTHORITATIVE (PADRAO_COMERCIO 2026-07-01): em REMOTE o
+          // SERVIDOR valida festival ativo + item + posse + gold e cobra/concede
+          // atômico (service.festival_buy). Antes: _pay client-side (gold sumia
+          // no reload e o item nunca persistia). LOCAL (file://) mantém o mock.
+          if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()){
+            window.vCityServer.cityAction('service.festival_buy', { item_name: f.name }).then(function(res){
+              if (!res || !res.ok){
+                var emsg = (res && res.error === 'no_funds') ? 'Sem Valdoritas para comprar.'
+                         : (res && res.error === 'already_owned') ? 'Você já tem esse item.'
+                         : (res && res.error === 'no_festival') ? 'O comerciante só vende em semana de festival.'
+                         : 'Não foi possível comprar agora.';
+                if (typeof vToast === 'function') vToast(emsg, 'warn');
+                return;
+              }
+              if (typeof res.gold === 'number') p.gold = res.gold;
+              if (typeof _applyBoughtItem === 'function') _applyBoughtItem(res.item_name || f.name);
+              if (typeof refreshHud === 'function') refreshHud();
+              _showServiceResultPopup({
+                icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(f.name, '48px')) || f.icon,
+                npc: 'Comerciante do Festival',
+                narrative: '<i>Embrulha o item em pano colorido.</i><br><br><b>' + (res.item_name || f.name) + '</b> comprado.',
+                deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
+                onContinue: function(){ navigateBack(); }
+              });
+            }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao comprar.', 'err'); });
+            return;
+          }
           if (!_pay(p, f.value)) return;
           // PADRAO_COMERCIO beat 5: ícone = imagem WebP do ITEM comprado.
           _showServiceResultPopup({
@@ -47099,8 +47152,8 @@ function _dailyShowRewards(p){
     desc: '<b>Sucesso base:</b> ' + ch.reward_gold + ' Valdoritas + ' + ch.reward_xp + ' XP<br><br>'
         + '<b>Bônus por HP ao fim:</b><br>'
         + '💎 HP > 75% → +50% recompensa<br>'
-        + '🟡 HP > 50% → +25% recompensa<br>'
-        + '🟢 HP qualquer → recompensa base<br><br>'
+        + 'HP > 50% → +25% recompensa<br>'
+        + 'HP qualquer → recompensa base<br><br>'
         + '<i>Conserve HP para maximizar ganhos.</i>',
     onConfirm: function(){ /* info */ }
   });
@@ -47408,8 +47461,8 @@ function _travelersView(p, traveler){
     inn: 'Estalagem', temple: 'Templo', town_square: 'Praça Central'
   };
   var TIER_LABELS = {
-    stranger: '⚪ Estranho', acquaintance: '🟡 Conhecido',
-    familiar: '🟢 Familiar', friend: '⭐ Amigo'
+    stranger: 'Estranho', acquaintance: 'Conhecido',
+    familiar: 'Familiar', friend: 'Amigo'
   };
   // canonical: wandering_npcs_data.py OBSERVE_PERSONALITY_HINTS + OBSERVE_SCHEDULE_HINTS
   var personalityHint = WNPC_OBSERVE_PERSONALITY_HINTS[traveler.archetype] || '';
@@ -47659,6 +47712,20 @@ function _heroesShowTitlesLocal(p){
 
 
 // --- VÍNCULOS — afinidade dinâmica baseada em diálogos completados ---
+// P5c (2026-07-02): NPC de venue do MOTOR de diálogo é conversável direto do
+// Vínculo — botão "Conversar" abre _openCityDialogue(venue, node) server-driven
+// (saudação rotativa + escolhas reais). server key → [venue, greeting node].
+var _REL_DIALOGUE_VENUE = {
+  npc_inn_martha: ['inn', 'martha'],
+  npc_tavern_grom: ['tavern', 'grom'],
+  npc_gate_aldric: ['gates', 'aldric'],
+  npc_guild_tavira: ['guild', 'tavira'],
+  npc_guild_braun: ['guild', 'braun'],
+  npc_arena_vorhan: ['arena', 'vorhan'],
+  npc_workshop_garrick: ['workshop', 'garrick'],
+  npc_festival_olmiro: ['festival', 'olmiro'],
+  npc_bank_aldwin: ['bank', 'aldwin']
+};
 function _relationsShow(p, relId){
   var r = RELATIONS_NPCS.find(function(x){ return x.id === relId; });
   // SERVER-DRIVEN (#92): NPC sem entrada em RELATIONS_NPCS (mundo-2, sem retrato) vem da lista
@@ -47683,6 +47750,11 @@ function _relationsShow(p, relId){
   var aff = md.npc_affinity || {};
   var rep = md.npc_reputation || {};
   var sk = REL_SERVER_KEY[relId] || (srvRel ? srvRel.key : null);
+  // P5c: venue do motor de diálogo (se o NPC for conversável) — só em REMOTE.
+  var _dlgVenue = (sk && _REL_DIALOGUE_VENUE[sk]
+      && typeof window._openCityDialogue === 'function'
+      && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())
+    ? _REL_DIALOGUE_VENUE[sk] : null;
   var realAff = (sk && typeof aff[sk] === 'number');
   var repVal = (sk && typeof rep[sk] === 'number') ? rep[sk]
              : (srvRel && typeof srvRel.reputation === 'number') ? srvRel.reputation : null;
@@ -47735,8 +47807,11 @@ function _relationsShow(p, relId){
               ? '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(196,149,58,0.12);border-left:2px solid ' + tierColor + ';border-radius: var(--v-radius-xs, 4px);font-style:italic;color:#f4d896;font-size:calc(12px * var(--v-font-scale, 1));">&#11088; V&iacute;nculo no auge. ' + r.name + ' confia plenamente em voc&ecirc;.</div>'
               : '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(0,0,0,0.25);border-left:2px solid ' + tierColor + ';border-radius: var(--v-radius-xs, 4px);font-style:italic;color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));">Continue cultivando este v&iacute;nculo &mdash; gestos genu&iacute;nos e miss&otilde;es aprofundam a confian&ccedil;a de ' + r.name + '.</div>'),
     // popup informativo (read-only) — esconde Confirmar redundante
-    singleButton: true,
-    cancelLabel: 'Voltar'
+    singleButton: !_dlgVenue,
+    cancelLabel: 'Voltar',
+    // P5c: NPC de venue do motor → CTA "Conversar" abre o diálogo server-driven
+    confirmLabel: 'Conversar',
+    onConfirm: _dlgVenue ? function(){ window._openCityDialogue(_dlgVenue[0], _dlgVenue[1]); } : function(){}
   });
 }
 
@@ -51026,16 +51101,16 @@ var SUBSCREEN_DATA = {
     ]
   },
   'relationships': {
-    header: '💝 Vínculos',
+    header: 'Vínculos',
     flavor: 'Pessoas que tu conheces. Suas opiniões e afinidade importam.',
     npcInfo: 'Sistema 6D Emotions: Joy, Trust, Fear, Surprise, Anger, Anticipation',
     buttons: [
-      ['<svg class="v-heraldic"><use href="#ic-estalajadeira"/></svg>', 'Martha — Estalajadeira', '🟢 80 — feliz',     'nav:rel_martha'],
-      ['<svg class="v-heraldic"><use href="#ic-taverneiro"/></svg>',   'Grom — Taverneiro',      '🟡 60 — neutro',    'nav:rel_grom'],
-      ['<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',    'Aldric — Guarda',        '🟢 80 — confiança', 'nav:rel_aldric'],
-      ['<svg class="v-heraldic"><use href="#ic-clerigo"/></svg>',      'Elara — Sacerdotisa',    '⚪ 50 — distante',   'nav:rel_elara'],
-      ['<svg class="v-heraldic"><use href="#ic-banqueiro"/></svg>',    'Aldwin — Banqueiro',     '⚪ 25 — frio',       'nav:rel_aldwin'],
-      ['<svg class="v-heraldic"><use href="#ic-escriba"/></svg>',      'Eirik — Escriba',        '⚪ 40 — curioso',    'nav:rel_eirik']
+      ['<svg class="v-heraldic"><use href="#ic-estalajadeira"/></svg>', 'Martha — Estalajadeira', '80 — feliz',     'nav:rel_martha'],
+      ['<svg class="v-heraldic"><use href="#ic-taverneiro"/></svg>',   'Grom — Taverneiro',      '60 — neutro',    'nav:rel_grom'],
+      ['<svg class="v-heraldic"><use href="#ic-guerreiro"/></svg>',    'Aldric — Guarda',        '80 — confiança', 'nav:rel_aldric'],
+      ['<svg class="v-heraldic"><use href="#ic-clerigo"/></svg>',      'Elara — Sacerdotisa',    '50 — distante',   'nav:rel_elara'],
+      ['<svg class="v-heraldic"><use href="#ic-banqueiro"/></svg>',    'Aldwin — Banqueiro',     '25 — frio',       'nav:rel_aldwin'],
+      ['<svg class="v-heraldic"><use href="#ic-escriba"/></svg>',      'Eirik — Escriba',        '40 — curioso',    'nav:rel_eirik']
     ]
   },
 
@@ -51414,13 +51489,13 @@ var SUBSCREEN_DATA = {
     header: '📜 Missões Disponíveis (9)',
     flavor: 'Aceita pra começar. Recompensa após conclusão.',
     buttons: [
-      [_heralIco('ic-goblin'), 'Caçar 3 goblins', '🟢 nv 1 — 25 <span class="vi vi-coin sm"></span> + 40 XP', 'accept_q_goblins'],
-      [_heralIco('ic-mochila'), 'Coletar ervas raras', '🟢 nv 1 — 15 <span class="vi vi-coin sm"></span> + 25 XP', 'accept_q_herbs'],
+      [_heralIco('ic-goblin'), 'Caçar 3 goblins', 'nv 1 — 25 <span class="vi vi-coin sm"></span> + 40 XP', 'accept_q_goblins'],
+      [_heralIco('ic-mochila'), 'Coletar ervas raras', 'nv 1 — 15 <span class="vi vi-coin sm"></span> + 25 XP', 'accept_q_herbs'],
       // 2026-05-12 BALANCING: 2 missões nv 2 adicionadas
-      [_heralIco('ic-patrulheiro'), 'Patrulhar fronteira', '🟢 nv 2 — 35 <span class="vi vi-coin sm"></span> + 80 XP', 'accept_q_patrol'],
-      [_heralIco('ic-lobo'), 'Limpar cova de ratos', '🟢 nv 2 — 40 <span class="vi vi-coin sm"></span> + 100 XP', 'accept_q_rat_den'],
-      [_heralIco('ic-mochila'), 'Escoltar caravana', '🟡 nv 3 — 50 <span class="vi vi-coin sm"></span> + 60 XP', 'accept_q_escort'],
-      [_heralIco('ic-mochila'), 'Investigar ruínas élficas', '🟡 nv 4 — 80 <span class="vi vi-coin sm"></span> + 80 XP', 'accept_q_ruin'],
+      [_heralIco('ic-patrulheiro'), 'Patrulhar fronteira', 'nv 2 — 35 <span class="vi vi-coin sm"></span> + 80 XP', 'accept_q_patrol'],
+      [_heralIco('ic-lobo'), 'Limpar cova de ratos', 'nv 2 — 40 <span class="vi vi-coin sm"></span> + 100 XP', 'accept_q_rat_den'],
+      [_heralIco('ic-mochila'), 'Escoltar caravana', 'nv 3 — 50 <span class="vi vi-coin sm"></span> + 60 XP', 'accept_q_escort'],
+      [_heralIco('ic-mochila'), 'Investigar ruínas élficas', 'nv 4 — 80 <span class="vi vi-coin sm"></span> + 80 XP', 'accept_q_ruin'],
       [_heralIco('ic-mochila'), 'Matar líder bandido', '🔴 nv 6 — 150 <span class="vi vi-coin sm"></span> + 150 XP', 'accept_q_bandit_lord'],
       [_heralIco('ic-boss'), 'Caçar dragonete', '🔴 nv 8 — 300 <span class="vi vi-coin sm"></span> + 250 XP', 'accept_q_dragonet'],
       [_heralIco('ic-mochila'), 'Defender Campos Verdes', '🔴 nv 10 — 500 <span class="vi vi-coin sm"></span> + 400 XP', 'accept_q_defend']
@@ -51583,7 +51658,7 @@ var SUBSCREEN_DATA = {
   'rel_martha': {
     header: '<svg class="v-heraldic v-h-banner"><use href="#ic-estalajadeira"/></svg> Martha — Estalajadeira',
     flavor: '"Tu sempre foste educada comigo. Aqui tens um quarto reservado."',
-    npcInfo: '🟢 Afinidade 80 — feliz | 6D: Joy 0.8, Trust 0.7, Fear 0.1, Surprise 0.2, Anger 0.0, Anticipation 0.5',
+    npcInfo: 'Afinidade 80 — feliz | 6D: Joy 0.8, Trust 0.7, Fear 0.1, Surprise 0.2, Anger 0.0, Anticipation 0.5',
     buttons: [
       [_heralIco('ic-vínculos'), 'Conversa profunda', 'desbloquear história', 'rel_martha_deep_talk'],
       [_heralIco('ic-vínculos'), 'Dar presente (10 <span class="vi vi-coin sm"></span>)', '+5 afinidade', 'rel_martha_gift'],
@@ -51594,7 +51669,7 @@ var SUBSCREEN_DATA = {
   'rel_grom': {
     header: '<svg class="v-heraldic v-h-banner"><use href="#ic-taverneiro"/></svg> Grom — Taverneiro',
     flavor: '"Mais uma rodada? A casa não pode dar de graça, sabes."',
-    npcInfo: '🟡 Afinidade 60 — neutro | 6D: Joy 0.5, Trust 0.6, Fear 0.0, Surprise 0.1, Anger 0.2, Anticipation 0.3',
+    npcInfo: 'Afinidade 60 — neutro | 6D: Joy 0.5, Trust 0.6, Fear 0.0, Surprise 0.1, Anger 0.2, Anticipation 0.3',
     buttons: [
       [_heralIco('ic-vínculos'), 'Conversa profunda', 'desbloq. fofocas', 'rel_grom_deep_talk'],
       [_heralIco('ic-vínculos'), 'Beber juntos (5 <span class="vi vi-coin sm"></span>)', '+3 afinidade', 'rel_grom_drink'],
@@ -51604,7 +51679,7 @@ var SUBSCREEN_DATA = {
   'rel_aldric': {
     header: '<svg class="v-heraldic v-h-banner"><use href="#ic-guerreiro"/></svg> Aldric — Guarda dos Portões',
     flavor: '"Vês muito longe. Foi guerreiro um dia, eu também. Cuida-te lá fora."',
-    npcInfo: '🟢 Afinidade 80 — confiante | 6D: Joy 0.6, Trust 0.9, Fear 0.0, Surprise 0.1, Anger 0.1, Anticipation 0.7',
+    npcInfo: 'Afinidade 80 — confiante | 6D: Joy 0.6, Trust 0.9, Fear 0.0, Surprise 0.1, Anger 0.1, Anticipation 0.7',
     buttons: [
       [_heralIco('ic-vínculos'), 'Conversa de soldado', 'memórias de guerra', 'rel_aldric_war_talk'],
       [_heralIco('ic-vínculos'), 'Dar presente (15 <span class="vi vi-coin sm"></span>)', '+5 afinidade', 'rel_aldric_gift'],
@@ -52784,7 +52859,7 @@ var ACTION_HANDLERS = {
   'circus_bet':             function(p){ if (!_pay(p, 5)) return; var w=Math.random()<0.5; if (w){p.gold+=12; vToast('<span class="vi vi-coin sm"></span> Acertou aposta! +12 Valdoritas');} else vToast('<span class="vi vi-coin sm"></span> Errou. -5 Valdoritas'); refreshHud(); },
   'circus_perform':         function(p){ if (!_pay(p, 0)) return; var roll=1+Math.floor(Math.random()*20); if (roll>=14){p.gold+=10; _gainXp(p,30); vToast('🎭 DEX '+roll+' vs DC 14 — Sucesso! +10 Valdoritas +30 XP');} else vToast('🎭 DEX '+roll+' vs DC 14 — Falha. Plateia vaia.'); refreshHud(); },
   'wanderer_rumor':         function(p){ if (!_pay(p, 5)) return; var rumors=['"Catacumbas no leste guardam Valdoritas."','"Um lobo branco foi visto na montanha."','"O ferreiro Thorne tem um inimigo secreto."']; vToast('💬 ' + rumors[Math.floor(Math.random()*rumors.length)]); },
-  'wanderer_map':           function(p){ if (!_pay(p, 50)) return; vToast('🗺️ Mapa secreto: localização de tumba antiga revelada.'); },
+  'wanderer_map':           function(p){ if (!_pay(p, 50)) return; vToast('Mapa secreto: localização de tumba antiga revelada.'); },
   'wanderer_fortune':       function(p){ if (!_pay(p, 20)) return; var fortunes=['"Hoje a sorte sorri pra ti."','"Cuidado com escolhas precipitadas hoje."','"Um amigo te procura em segredo."']; vToast('🔮 ' + fortunes[Math.floor(Math.random()*fortunes.length)]); },
   'oldtom_card':            function(p){ if (!_pay(p, 5)) return; var w=Math.random()<0.5; if (w){p.gold+=10; vToast('🃏 Acertou! +10 Valdoritas');} else vToast('🃏 Errou. -5 Valdoritas'); refreshHud(); },
   'oldtom_dice':            function(p){ if (!_pay(p, 3)) return; var w=Math.random()<0.5; if (w){p.gold+=6; vToast('🎲 Sorte! +6 Valdoritas');} else vToast('🎲 Falha. -3 Valdoritas'); refreshHud(); },
@@ -54999,7 +55074,7 @@ function openCityExitModal(){
   if (!el) return;
   el.innerHTML = ''
     + '<div class="cem-card">'
-    + '  <h2>🗺️ Viajar</h2>'
+    + '  <h2>Viajar</h2>'
     + '  <p class="question">Para onde desejas ir?</p>'
     + '  <div class="cem-options">'
     + '    <button class="cem-option" data-target="gates_planice">'
@@ -55519,8 +55594,18 @@ function renderCartographyCanvas(el){
     + '    <button class="subscreen-back" id="cart-back-btn" type="button" aria-label="Voltar para a cidade">← Voltar</button>'
     + '  </div>'
     + '  <div class="cart-header">'
-    + '    <h2>🗺️ Mapa de Valdoria</h2>'
+    + '    <h2>Mapa de Valdoria</h2>'
     + '    <p class="flavor">Toca um destino pra viajar. Roda do mouse ou pinça pra zoom.</p>'
+    /* P3 (2026-07-01, PADRAO_LOCAIS B3): Corvus PRESENTE no mapa — o cartógrafo
+       que desenhou isto tem rosto e serviço (encomendas). Antes o backend de
+       encomendas existia mas a tela nunca o apresentava. */
+    + '    <button id="cart-corvus-chip" type="button" style="display:inline-flex;align-items:center;gap:8px;margin-top:6px;'
+    +        'padding:4px 12px 4px 4px;background:linear-gradient(180deg,rgba(74,56,40,0.55),rgba(42,30,18,0.75));'
+    +        'border:1px solid rgba(196,149,58,0.45);border-radius:20px;color:var(--v-text,#d4c8b0);cursor:pointer;'
+    +        'font-family:inherit;font-size:calc(11px * var(--v-font-scale, 1));">'
+    + '      <img src="../shared/img/merchants/corvus-veltharion.webp" alt="" style="width:26px;height:26px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);" onerror="this.style.display=\'none\'">'
+    + '      <span><b style="color:var(--v-gold,#c4953a)">Corvus</b> · Encomendas de mapas</span>'
+    + '    </button>'
     + '  </div>'
     + '  <div class="cart-canvas-frame">'
     + '    <div class="cart-zoom-info" id="cart-zoom-info">100%</div>'
@@ -55542,6 +55627,20 @@ function renderCartographyCanvas(el){
         e.preventDefault();
         e.stopPropagation();
         navigateBack();
+      });
+    }
+    // P3: chip do Corvus abre as encomendas do cartógrafo (fluxo já existente).
+    var _corvusChip = document.getElementById('cart-corvus-chip');
+    if (_corvusChip) {
+      _corvusChip.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var pl = window.CITY_MOCK_PLAYER;
+        if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['square_cartographer_open']) {
+          ACTION_HANDLERS['square_cartographer_open'](pl);
+        } else if (typeof _openCartographerPopup === 'function') {
+          _openCartographerPopup(pl);
+        }
       });
     }
 

@@ -100,8 +100,33 @@ function goldBalance(gold) {
 
 /* ── Service Grid ── */
 
+/* P6 (2026-07-02, PADRAO_LOCAIS A6): badge "Novo!" quando um serviço TRANSICIONA
+   de travado → liberado (ex.: subiu de nível e o card destravou). Snapshot dos
+   cards vistos travados em localStorage (preferência de UI pura — permitido);
+   o badge persiste até o jogador CLICAR o card (consumo). 1ª visita não polui:
+   sem snapshot prévio → sem badge. */
+var _SVC_LOCK_KEY = 'valdoria_ui_svc_locked';
+function _svcLockSnap() {
+  try { return JSON.parse(localStorage.getItem(_SVC_LOCK_KEY) || '{}'); }
+  catch (_e) { return {}; }
+}
+function _svcLockSave(s) {
+  try { localStorage.setItem(_SVC_LOCK_KEY, JSON.stringify(s)); } catch (_e) {}
+}
+
 function serviceGrid(services) {
   if (!services || !services.length) return el('div', '');
+  var snap = _svcLockSnap(), dirty = false;
+  for (var j = 0; j < services.length; j++) {
+    var s = services[j];
+    if (!s || !s.cb) continue;
+    if (s.disabled) {
+      if (!snap[s.cb]) { snap[s.cb] = 1; dirty = true; }
+    } else if (snap[s.cb]) {
+      s._isNew = true;  // destravou desde a última visita → fita "Novo!"
+    }
+  }
+  if (dirty) _svcLockSave(snap);
   var grid = el('div', 'vc-service-grid');
   for (var i = 0; i < services.length; i++) {
     grid.appendChild(serviceCard(services[i]));
@@ -112,6 +137,15 @@ function serviceGrid(services) {
 function serviceCard(svc) {
   var card = el('div', 'vc-service-card');
   if (svc.disabled) card.classList.add('disabled');
+  if (svc._isNew && !svc.disabled) {
+    var nb = el('div', 'vc-service-new');
+    nb.textContent = 'Novo!';
+    card.appendChild(nb);
+    card.addEventListener('click', (function(cb, badgeEl){ return function(){
+      var s2 = _svcLockSnap(); delete s2[cb]; _svcLockSave(s2);
+      if (badgeEl && badgeEl.parentNode) badgeEl.parentNode.removeChild(badgeEl);
+    }; })(svc.cb, nb), { once: true });
+  }
 
   /* Icon — suporta SVG heraldico, IMG portrait (innerHTML) ou emoji (textContent)
      2026-05-18 BUG FIX: <img> tag (merchant portraits AAA) era escapado como

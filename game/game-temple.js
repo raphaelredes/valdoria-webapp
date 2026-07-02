@@ -397,11 +397,13 @@ function _tmpBuildRepBar(data) {
 }
 
 /* === Tier meta (AAA revamp sessão #24 — 2026-05-22) ===================== */
+/* P2 (emoji ban 2026-07-01): medalhas emoji viraram o losango ◈ (glifo
+   tipográfico permitido) — a COR do tier é quem diferencia, como no mithral. */
 var TEMPLE_TIER_META = {
-  'bronze':  { label: 'Comum',     emoji: '🥉', color: '#cd7f32' },
-  'prata':   { label: 'Veterano',  emoji: '🥈', color: '#c0c0c0' },
-  'ouro':    { label: 'Mestre',    emoji: '🥇', color: '#ffd700' },
-  'mithral': { label: 'Lendário',  emoji: '◈',  color: '#d4ecff' }
+  'bronze':  { label: 'Comum',     emoji: '◈', color: '#cd7f32' },
+  'prata':   { label: 'Veterano',  emoji: '◈', color: '#c0c0c0' },
+  'ouro':    { label: 'Mestre',    emoji: '◈', color: '#ffd700' },
+  'mithral': { label: 'Lendário',  emoji: '◈', color: '#d4ecff' }
 };
 
 /* === Services canonical (.services + .svc PADRAO_TAVERNA) =================
@@ -476,7 +478,7 @@ function _tmpBuildServices(services) {
     }
     if (svc.locked) {
       var lockOv = vCity.el('div', 'tmp-svc-lock');
-      lockOv.textContent = '🔒';
+      lockOv.textContent = 'Nv ' + (svc.min_level || 1);
       ico.appendChild(lockOv);
     }
     card.appendChild(ico);
@@ -513,7 +515,7 @@ function _tmpBuildServices(services) {
     var metaTxt = vCity.el('div', 'svc-meta');
     if (svc.locked) {
       metaTxt.classList.add('tmp-svc-meta-locked');
-      metaTxt.textContent = '🔒 Requer Nv ' + (svc.min_level || 1);
+      metaTxt.textContent = 'Requer Nv ' + (svc.min_level || 1);
     } else {
       var costText = svc.cost !== undefined
         ? (svc.cost === 0 ? 'Grátis' : String(svc.cost) + ' V')
@@ -604,7 +606,7 @@ function renderTempleHub(container, data) {
 
   /* 2e. Section label */
   var sectionLbl = vCity.el('div', 'pt-section-label');
-  sectionLbl.textContent = '⚜ Serviços Sagrados ⚜';
+  sectionLbl.textContent = 'Serviços Sagrados';
   body.appendChild(sectionLbl);
 
   /* 2f. Services grid (PADRAO_TAVERNA canonical) */
@@ -622,7 +624,7 @@ function renderTempleHub(container, data) {
   /* 2h. Downtime button */
   if (data.downtime) {
     var dtLbl = vCity.el('div', 'pt-section-label');
-    dtLbl.textContent = '🙏 Atividade';
+    dtLbl.textContent = 'Atividade';
     body.appendChild(dtLbl);
     body.appendChild(vCity.serviceGrid([data.downtime]));
   }
@@ -630,7 +632,7 @@ function renderTempleHub(container, data) {
   /* 2i. Wandering NPCs */
   if (data.wandering_npcs && data.wandering_npcs.length) {
     var wnLbl = vCity.el('div', 'pt-section-label');
-    wnLbl.textContent = '🚶 Viajantes';
+    wnLbl.textContent = 'Viajantes';
     body.appendChild(wnLbl);
     body.appendChild(vCity.actionList(data.wandering_npcs));
   }

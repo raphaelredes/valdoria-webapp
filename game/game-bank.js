@@ -574,7 +574,7 @@ function renderBankHub(container, data) {
 
   /* 2d. Section label */
   var sectionLbl = vCity.el('div', 'pt-section-label');
-  sectionLbl.textContent = '⚜ Serviços do Banco ⚜';
+  sectionLbl.textContent = 'Serviços do Banco';
   body.appendChild(sectionLbl);
 
   /* 2e. Services grid (PADRAO_TAVERNA canonical) */

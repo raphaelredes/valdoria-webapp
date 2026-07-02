@@ -17,7 +17,7 @@ window.renderDailyChallenge = function (el, dc) {
     var state = dc.state || 'active';
     var obj = dc.objective || {};
     var texts = dc.texts || {};
-    var themeIcon = dc.theme_icon || '⚔️';
+    var themeIcon = dc.theme_icon || '';
     var themeLabel = dc.theme_label || '';
     var themeColor = dc.theme_color || '#c4953a';
 
@@ -45,7 +45,7 @@ window.renderDailyChallenge = function (el, dc) {
     if (state === 'locked') {
         html += '<div class="dc-locked" style="text-align:center;padding:20px 12px;'
             + 'background:rgba(196,83,74,0.08);border:1px solid rgba(196,83,74,0.30);border-radius:6px;">'
-            + '<div style="font-size:24px;margin-bottom:8px;">🔒</div>'
+            + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(13px * var(--v-font-scale, 1));color:#c4534a;letter-spacing:2px;margin-bottom:8px;">BLOQUEADO</div>'
             + '<div style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);">'
             + (texts.level_too_low || 'Nível insuficiente para o desafio de hoje.') + '</div>'
             + '<div style="margin-top:8px;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);">'
@@ -85,7 +85,7 @@ window.renderDailyChallenge = function (el, dc) {
         + 'box-shadow:inset 0 0 14px rgba(196,149,58,0.15);">'
         + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));'
         + 'color:var(--v-gold,#c4953a);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;opacity:0.8;">'
-        + '🎯 ' + (texts.objective_label || 'Objetivo') + '</div>'
+        + (texts.objective_label || 'Objetivo') + '</div>'
         + '<div style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);'
         + 'line-height:1.4;font-weight:600;">'
         + (obj.description || '???') + '</div>';
@@ -117,8 +117,8 @@ window.renderDailyChallenge = function (el, dc) {
 
     // DICA AUTO-TRACK
     var trackHint = obj.type === 'kill'
-        ? '⚔️ Cada inimigo abatido conta automaticamente.'
-        : '🎒 Itens encontrados são contados quando você abre o desafio.';
+        ? 'Cada inimigo abatido conta automaticamente.'
+        : 'Itens encontrados são contados quando você abre o desafio.';
     html += '<div class="dc-hint" style="text-align:center;font-size:calc(11px * var(--v-font-scale, 1));'
         + 'color:var(--v-gold-dim,#8f7338);font-style:italic;padding:4px 8px;">'
         + trackHint + '</div>';

@@ -31,6 +31,13 @@ if (!window._SVC_CONFIG_WORKSHOP) {
   };
 }
 
+/* P5b (2026-07-02): sessão REMOTE = diálogo server-driven (venue 'workshop' no
+   city_dialogue_resolver — saudação rotativa + screen-bridge). O objeto local
+   GARRICK_DIALOGUE abaixo vira fallback LOCAL-only (dev file://). */
+function _isRemote() {
+  return !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote());
+}
+
 var GARRICK_DIALOGUE = {
   npc: {
     name: 'Mestre Garrick',
@@ -72,6 +79,13 @@ function _wksEl(tag, cls, text) {
    Retrato = ícone heráldico do ofício (placeholder até arte dedicada). "Ver
    Receitas" fecha o diálogo e dispatcha o cb do ofício (recipes). */
 function _wksOpenProfession(t){
+  /* P5b (2026-07-02): em REMOTE a narrativa NÃO nasce no cliente (SUPREME RULE
+     #0) — o card vai DIRETO pra tela real do ofício (server-driven) e ainda
+     poupa 1 clique (Jogador Mínimo Trabalho). O mock abaixo fica LOCAL-only. */
+  if (_isRemote()) {
+    if (typeof vCity === 'object' && vCity.act) vCity.act(t.cb);
+    return;
+  }
   if (!(typeof window.vEncounter === 'object' && window.vEncounter.render)) {
     if (typeof vCity === 'object' && vCity.act) vCity.act(t.cb);
     return;
@@ -128,13 +142,43 @@ function renderWorkshopHub(container, data) {
   var body = vCity.el('div', 'wks-body');
   body.style.cssText = 'padding:8px 12px 0;display:flex;flex-direction:column;gap:7px;';
 
-  /* === 2a. Intro multi-profissão (sessão #76) === */
-  /* A oficina é um HUB de 8 ofícios — não só a forja. Cada profissão tem seu
-     mestre artesão (ver grid de Profissões abaixo). O single-NPC Garrick foi
-     substituído por esta intro pra deixar claro que não é só ferraria. */
-  var introEl = _wksEl('div', '', 'Oito mestres artesãos trabalham na Oficina. Toque um ofício abaixo para falar com o mestre e ver suas receitas.');
-  introEl.style.cssText = 'text-align:center;font-style:italic;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;padding:7px 9px;background:rgba(0,0,0,0.18);border-left:2px solid rgba(196,149,58,0.3);border-radius:4px;';
-  body.appendChild(introEl);
+  /* === 2a. NPC row Garrick → diálogo server-driven (P3+P5b 2026-07-02) === */
+  /* PADRAO_LOCAIS: NPC nomeado tem retrato. Garrick é o ferreiro-chefe da
+     Bigorna (anfitrião do local); os 8 mestres de ofício vivem no grid abaixo. */
+  var npcRow = vCity.el('div', 'row-npc');
+  var portraitWrap = vCity.el('div', 'npc-portrait');
+  var gImg = _wksEl('img');
+  gImg.src = '../shared/img/npcs/mestre-garrick.webp';
+  gImg.alt = 'Mestre Garrick';
+  gImg.loading = 'lazy';
+  gImg.onerror = function(){ this.style.display = 'none'; };
+  portraitWrap.appendChild(gImg);
+  npcRow.appendChild(portraitWrap);
+  var gInfo = vCity.el('div', 'npc-info');
+  gInfo.appendChild(_wksEl('div', 'name', 'Mestre Garrick'));
+  gInfo.appendChild(_wksEl('div', 'quote', '"Eu não vendo curiosidade — só trabalho."'));
+  npcRow.appendChild(gInfo);
+  npcRow.appendChild(_wksEl('div', 'npc-chev', '›'));
+  npcRow.addEventListener('click', function(){
+    // PADRAO_SERVIDOR: o servidor monta a saudação rotativa do Garrick e resolve.
+    if (typeof window._openCityDialogue === 'function' && _isRemote()) {
+      window._openCityDialogue('workshop', 'garrick');
+    } else if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
+      // LOCAL (dev file://): preview com o mock client-side.
+      window._SVC_CONFIG = window._SVC_CONFIG_WORKSHOP;
+      window.vEncounter.render(GARRICK_DIALOGUE, {
+        onChoice: function(ch){
+          try { window.vEncounter.close(); } catch(_e){}
+          if (ch && ch.id !== 'leave' && (ch.cb || '') !== 'close' && typeof vCity === 'object' && vCity.act) {
+            vCity.act(ch.cb);
+          }
+        }
+      });
+    } else if (typeof vToast === 'function') {
+      vToast('Disponível no jogo.', 'info');
+    }
+  });
+  body.appendChild(npcRow);
 
   /* === 2b. Rep bar === */
   var renome = (data.renome && typeof data.renome.workshop === 'number') ? data.renome.workshop : (window._PLAYER_RENOWN && window._PLAYER_RENOWN.workshop) || 0;
@@ -158,7 +202,7 @@ function renderWorkshopHub(container, data) {
   if (data.type === 'no_tools' || !data.tools || !data.tools.length) {
     var empty = vCity.el('div', 'wks-empty');
     empty.style.cssText = 'text-align:center;padding:24px 12px;color:#a09484;';
-    empty.appendChild(_wksEl('div', 'wks-empty-icon', '🔨'));
+    empty.appendChild(_wksEl('div', 'wks-empty-icon', ''));
     var emptyTitle = _wksEl('div', 'wks-empty-title', 'Sem Proficiências');
     emptyTitle.style.cssText = 'font-family:Cinzel,serif;font-size:calc(14px * var(--v-font-scale, 1));color:#c4953a;margin:8px 0;';
     empty.appendChild(emptyTitle);
@@ -175,15 +219,16 @@ function renderWorkshopHub(container, data) {
   var stats = data.stats || {};
   var statsRow = vCity.el('div', 'wks-stats');
   statsRow.style.cssText = 'display:flex;justify-content:space-around;padding:6px 0;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;border-top:1px solid rgba(196,149,58,0.15);border-bottom:1px solid rgba(196,149,58,0.15);';
-  statsRow.appendChild(_wksEl('span', '', '📜 ' + (stats.recipes_total || 0) + ' receitas'));
-  statsRow.appendChild(_wksEl('span', '', '✅ ' + (stats.craftable || 0) + ' prontas'));
-  statsRow.appendChild(_wksEl('span', '', '📦 ' + (stats.materials || 0) + ' mat.'));
-  statsRow.appendChild(_wksEl('span', '', '🪙 ' + (data.gold || 0) + ' V'));
+  /* P2 (emoji ban 2026-07-01): chips de texto puro; ✓ é glifo permitido. */
+  statsRow.appendChild(_wksEl('span', '', (stats.recipes_total || 0) + ' receitas'));
+  statsRow.appendChild(_wksEl('span', '', '✓ ' + (stats.craftable || 0) + ' prontas'));
+  statsRow.appendChild(_wksEl('span', '', (stats.materials || 0) + ' mat.'));
+  statsRow.appendChild(_wksEl('span', '', (data.gold || 0) + ' V'));
   body.appendChild(statsRow);
 
   /* === 2e. Section: Profissões === */
   var sectionLbl = vCity.el('div', 'pt-section-label');
-  sectionLbl.textContent = '⚜ Profissões ⚜';
+  sectionLbl.textContent = 'Profissões';
   body.appendChild(sectionLbl);
 
   /* === 2f. Tools grid (.services + .svc canonical) === */
@@ -193,7 +238,7 @@ function renderWorkshopHub(container, data) {
     var card = vCity.el('div', 'svc');
     card.setAttribute('data-svc', t.cb || '');
     var ico = vCity.el('div', 'svc-ico');
-    ico.innerHTML = t.emoji || '🔧';
+    ico.innerHTML = t.emoji || '';
     ico.style.cssText = 'font-size:calc(20px * var(--v-font-scale, 1));';
     card.appendChild(ico);
     var txt = vCity.el('div', 'svc-text');
