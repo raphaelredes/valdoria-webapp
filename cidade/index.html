@@ -11289,6 +11289,10 @@ function _discoverySpeakerPortrait(speaker) {
   // papel (ex.: 'thorne' antes de 'ferreir'). 4 já existiam (anciã/mirena/thorne/
   // velithra); Joran/Tharos/Ysoria/Caçadora gerados via OpenAI low + WebP.
   if (s.indexOf('joran') >= 0)    return '/shared/img/npcs/joran-sentinela.webp';
+  // Kaelen (Ancião Kaelen, refugiado) ANTES de 'anci' — senão "Ancião Kaelen"
+  // colide com ancia-valdoria (NPC diferente). Antes só a tabela exata o protegia;
+  // variante de nome (ex.: "Kaelen o Refugiado") caía no substring errado (2026-07-02).
+  if (s.indexOf('kaelen') >= 0)   return '/shared/img/npcs/kaelen-refugiado.webp';
   if (s.indexOf('anci') >= 0)     return '/shared/img/npcs/ancia-valdoria.webp';
   if (s.indexOf('mirena') >= 0)   return '/shared/img/merchants/mirena.webp';  /* canonical = retrato do mercado (alquimista humana, com faixa do nome). mirena-armadureira.webp (armadureira pequenina) era colisão de raça+papel. */
   if (s.indexOf('thorne') >= 0)   return '/shared/img/merchants/thorne.webp';  /* canonical = retrato do mercado (ferreiro ANÃO). thorne-armeiro.webp (humano) era colisão de raça. */
