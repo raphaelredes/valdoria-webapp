@@ -42800,14 +42800,14 @@ function _marketHaggleRemote(name, npcId, p){
       return;
     }
     var disc = res.discount || 0;
-    var color = res.success ? (disc >= 15 ? '#7cdb7c' : 'var(--v-gold, #c4953a)') : (disc < 0 ? '#c44020' : '#a09484');
     var bonus = (typeof res.mod === 'number') ? res.mod : 0;
-    var rollHtml = '<div style="display:flex;align-items:center;gap:var(--v-space-md, 8px);margin:6px 0;justify-content:center;">'
-      + '<span style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">💬 Persuasão d20:</span>'
-      + '<span style="font-family:Cinzel,serif;font-size:calc(18px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);font-weight:700;">' + res.roll + '</span>'
-      + '<span style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">' + (bonus >= 0 ? '+' : '') + bonus + ' = </span>'
-      + '<span style="font-family:Cinzel,serif;font-size:calc(22px * var(--v-font-scale, 1));color:' + color + ';font-weight:700;">' + res.total + '</span>'
-      + '<span style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">vs DC ' + res.dc + '</span></div>';
+    // PADRAO_DADOS (2026-07-01): Persuasão em CENA FULLSCREEN via opts.dice
+    // (dado 3D + fundo escurecido) — pill de texto aposentada.
+    var _hagDice = {
+      sides: 20, value: res.roll, total: res.total, dc: res.dc,
+      formula: 'd20 ' + res.roll + ' ' + (bonus >= 0 ? '+' : '') + bonus,
+      label: 'Teste de Persuasão'
+    };
     var discLine = '';
     if (disc){
       var sign = disc < 0 ? '+' : '−';
@@ -42816,7 +42816,8 @@ function _marketHaggleRemote(name, npcId, p){
     }
     _showServiceResultPopup({
       icon: icon, npc: npc,
-      narrative: rollHtml + (res.message || '') + discLine,
+      dice: _hagDice,
+      narrative: (res.message || '') + discLine,
       deltas: [],
       onContinue: function(){ if (typeof _showShopItemDetail === 'function') _showShopItemDetail(name, npcId); }
     });
