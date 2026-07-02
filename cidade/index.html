@@ -20852,7 +20852,9 @@ var ARENA_TIERS = [
     { name: 'Kael Ferrolento',         cls: 'Paladino',   icon: _heralIco('ic-paladino'),     flavor: 'Sua armadura carrega os símbolos de uma ordem esquecida.' },
     { name: 'Zhenari Passos-do-Vento', cls: 'Monge',      icon: _heralIco('ic-monge'),        flavor: 'Move-se como o vento — você só percebe o golpe quando já é tarde.' }
   ]},
-  { id: 'mythril', icon: _heralIco('ic-liga-mithral', '#b9d4f2'), name: 'Tier Mithral', entry: 200, xp: 500, reward_min: 400, reward_max: 800, min_lvl: 17, enemies: [
+  /* Fix live 2026-07-02: id era 'mythril' — divergia do backend/asset canonical
+     'mythral' (arena_data.py + tier-mythral.webp) → medalhão 404 no hub. */
+  { id: 'mythral', icon: _heralIco('ic-liga-mithral', '#b9d4f2'), name: 'Tier Mithral', entry: 200, xp: 500, reward_min: 400, reward_max: 800, min_lvl: 17, enemies: [
     { name: 'Aldrakar o Inquebrável',  cls: 'Guerreiro', icon: _heralIco('ic-guerreiro'),  flavor: 'Lenda viva da arena. Dizem que nunca sangrou em combate singular.' },
     { name: 'Velastra Cinza-Eterna',   cls: 'Maga',      icon: _heralIco('ic-mago'),       flavor: 'Mestra de magia arcana, seus feitiços reescrevem a realidade.' },
     { name: 'Gorvath Punho-Sagrado',   cls: 'Paladino',  icon: _heralIco('ic-paladino'),   flavor: 'Cavaleiro abençoado por uma divindade de guerra. Seu brilho cega.' },
