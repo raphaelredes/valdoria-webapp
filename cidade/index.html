@@ -47444,12 +47444,13 @@ function _travelerTier(traveler){
   return 'stranger';
 }
 
-// Helper: pega arc canonical para o archetype
+// Helper LOCAL-only (file:// dev tool): pega arc mock do archetype. Em REMOTE o
+// servidor manda o arco REAL (traveler.arc_desc/arc_line) e _travelerArcView nem chega
+// aqui. NÃO usar este mock para lógica REMOTE (fabrica arc via arcs[0]+Math.random).
 function _travelerGetArc(traveler){
   var archUpper = traveler.archetype.toUpperCase();
   var arcs = window['WNPC_ARCS_' + archUpper];
   if (!arcs || !arcs.length) return null;
-  // pega arc 0 (mock — primeiro arc do archetype)
   return arcs[0];
 }
 
@@ -47488,7 +47489,11 @@ function _travelersView(p, traveler){
   var tier = _travelerTier(traveler);
   var dialogues = WNPC_DIALOGUES[traveler.archetype];
   var sampleLine = '';
-  if (dialogues && dialogues[tier]){
+  if (traveler.arc_line){
+    // server-authoritative: fala REAL do capítulo atual do arco (não fabricada).
+    sampleLine = '<br><br><i>"' + traveler.arc_line.replace(/^"|"$/g, '').replace(/\{player_name\}/g, p.name || 'Aventureiro') + '"</i>';
+  } else if (dialogues && dialogues[tier]){
+    // fallback LOCAL (file://): amostra do pool client-mock (dev tool).
     var line = dialogues[tier][Math.floor(Math.random() * dialogues[tier].length)];
     sampleLine = '<br><br><i>"' + line.replace(/^"|"$/g, '').replace(/\{player_name\}/g, p.name || 'Aventureiro') + '"</i>';
   }
@@ -47530,17 +47535,32 @@ function _travelersView(p, traveler){
   });
 }
 
-// Story Arc viewer — mostra capítulo canonical do arc
+// Story Arc viewer — mostra o capítulo REAL do arco do NPC.
 function _travelerArcView(p, traveler){
+  // server-authoritative (2026-07-02, auditoria §1.1): em REMOTE o servidor manda o
+  // arco REAL do NPC (story_arc + arc_chapter + descrição/fala do capítulo atual via
+  // get_arc_description/get_arc_line). Exibe ISSO — não fabrica arc via arcs[0] +
+  // Math.random no cliente. LOCAL (file://) cai no mock client abaixo (dev tool).
+  if (traveler.arc_desc || traveler.arc_line){
+    var locA = (traveler.activity || '');
+    var fmtS = function(s){ return s ? s.replace(/\{location_activity\}/g, locA).replace(/\{player_name\}/g, p.name || 'Aventureiro') : ''; };
+    _showInfoPopup({
+      icon: traveler.icon, npc: traveler.name, title: 'Conversa',
+      desc: (traveler.arc_desc ? '<i>' + fmtS(traveler.arc_desc) + '</i>' : '') +
+            (traveler.arc_line ? (traveler.arc_desc ? '<br><br>' : '') + '<b>' + traveler.name + ':</b> "' + fmtS(traveler.arc_line).replace(/^"|"$/g, '') + '"' : ''),
+      onConfirm: function(){}
+    });
+    return;
+  }
   var arc = _travelerGetArc(traveler);
   if (!arc){
-    vToast('📖 Sem arco narrativo disponível para este NPC ainda.');
+    vToast('Sem arco narrativo disponível para este NPC ainda.');
     return;
   }
   var tier = _travelerTier(traveler);
   var chapter = _travelerGetChapter(arc, tier);
   if (!chapter){
-    vToast('📖 Capítulo bloqueado — cultive mais a amizade.');
+    vToast('Capítulo bloqueado — cultive mais a amizade.');
     return;
   }
   // Tracking de progresso (mock)
@@ -47564,7 +47584,7 @@ function _travelerArcView(p, traveler){
           (chapter.greet ? '<b>' + traveler.name + ':</b> "' + fmt(chapter.greet).replace(/^"|"$/g, '') + '"<br><br>' : '') +
           (chapter.talk ? '<i>' + fmt(chapter.talk) + '</i><br><br>' : '') +
           (chapter.observe ? '<b>Observação:</b> <i>' + fmt(chapter.observe) + '</i>' : '') +
-          (chapter.hint ? '<br><br>💡 <i>' + fmt(chapter.hint) + '</i>' : ''),
+          (chapter.hint ? '<br><br><i>' + fmt(chapter.hint) + '</i>' : ''),
     onConfirm: function(){}
   });
 }
