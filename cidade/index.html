@@ -20789,7 +20789,7 @@ function _buildFestivalMockData(player){
     fest_key: key,
     day_num: dayNum,
     total_days: fest.total_days,
-    fest_intro: fest.intro + ' (Moeda: ' + fest.currency_emoji + ' ' + fest.currency_name + ')',
+    fest_intro: fest.intro,
     gold: player.gold,
     events: fest.event_ids.map(function(eid){
       var e = FESTIVAL_EVENT_DB[eid];
@@ -21876,15 +21876,16 @@ var GATES_NPCS = [{
 }];
 
 function _buildGatesMockData(player){
+  // P1 (2026-07-01): 'Falar com Aldric' saiu do grid — a NPC row canonical do
+  // renderGatesHub cobre (clique abre o diálogo server-driven 'gates'/'aldric').
   return {
     type: 'hub',
-    flavor: 'Os portões de pedra arqueiam-se 8 metros de altura. O capitão Aldric observa entradas e saídas com o olho que lhe restou, postado ao lado de uma fogueira de carvão que aquece os dois guardas mais jovens.',
+    flavor: 'Os portões de pedra arqueiam-se oito metros acima da estrada. O guarda Aldric observa cada entrada e saída com o olho que lhe restou, postado junto à fogueira de carvão que aquece os guardas mais jovens.',
     actions: [
       { icon: _heralIco('ic-portoes'), label: 'Partir para Aventura', cb: 'gates_explore' },
       { icon: _heralIco('ic-cartografia'), label: 'Mapa de Valdoria',     cb: 'open_cartografia' },
       { icon: _heralIco('ic-mochila'), label: 'Desafio Diário',       cb: 'open_daily_challenge' },
-      { icon: _heralIco('ic-mochila'), label: 'Preparar Viagem',      cb: 'gates_prep_open' },
-      { icon: _heralIco('ic-mochila'), label: 'Falar com Aldric',     cb: 'gates_npc_gates_aldric' }
+      { icon: _heralIco('ic-mochila'), label: 'Preparar Viagem',      cb: 'gates_prep_open' }
     ],
     wandering_npcs: []
   };
@@ -49921,8 +49922,11 @@ function _renderCityPopup(key){
     return;
   }
   if (key === 'festival' && typeof renderFestivalHub === 'function') {
-    if (titleEl) titleEl.textContent = 'Festival da Colheita';
-    renderFestivalHub(bodyEl, _buildFestivalMockData(window.CITY_MOCK_PLAYER));
+    // P1 (2026-07-01): título DINÂMICO pelo festival do calendário (era
+    // 'Festival da Colheita' hardcoded — errado 9 meses por ano).
+    var _fstData = _buildFestivalMockData(window.CITY_MOCK_PLAYER);
+    if (titleEl) titleEl.textContent = _fstData.fest_name || 'Festival de Valdoria';
+    renderFestivalHub(bodyEl, _fstData);
     return;
   }
   if (key === 'arena') {
