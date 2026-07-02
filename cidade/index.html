@@ -42839,15 +42839,16 @@ function _marketShowHaggleResult(itemName, npcKey, res, onContinue){
     return;
   }
   var rollColor = res.excellent ? '#7cdb7c' : (res.success ? '#c4953a' : (res.fumble ? '#c44020' : '#a09484'));
-  var rollHtml = '<div style="display:flex;align-items:center;gap: var(--v-space-md, 8px);margin:6px 0;justify-content:center;">'
-    + '<span style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">' + (res.mode === 'persuasion' ? '💬 Persuasão' : '💪 Intimidação') + ' d20:</span>'
-    + '<span style="font-family:Cinzel,serif;font-size:calc(18px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);font-weight:700;">' + roll.roll + '</span>'
-    + '<span style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">' + (roll.bonus >= 0 ? '+' : '') + roll.bonus + (roll.proficient ? ' (prof.)' : '') + ' = </span>'
-    + '<span style="font-family:Cinzel,serif;font-size:calc(22px * var(--v-font-scale, 1));color:' + rollColor + ';font-weight:700;">' + roll.total + '</span>'
-    + '<span style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">vs DC ' + res.dc + '</span>'
-    + '</div>'
-    + '<div style="text-align:center;font-family:Cinzel,serif;font-size:calc(12px * var(--v-font-scale, 1));color:' + rollColor + ';letter-spacing:2px;margin-bottom: var(--v-space-sm, 4px);">'
+  // PADRAO_DADOS (2026-07-01): rolagem em CENA FULLSCREEN (opts.dice do
+  // _showServiceResultPopup — dado 3D grande + fundo escurecido, cena dos
+  // Artistas). A pill de texto inline foi aposentada; fica só o veredito.
+  var rollHtml = '<div style="text-align:center;font-family:Cinzel,serif;font-size:calc(12px * var(--v-font-scale, 1));color:' + rollColor + ';letter-spacing:2px;margin-bottom: var(--v-space-sm, 4px);">'
     + '◆ ' + res.label.toUpperCase() + ' ◆</div>';
+  var _negDice = {
+    sides: 20, value: roll.roll, total: roll.total, dc: res.dc,
+    formula: 'd20 ' + roll.roll + ' ' + (roll.bonus >= 0 ? '+' : '') + roll.bonus + (roll.proficient ? ' (prof.)' : ''),
+    label: (res.mode === 'persuasion' ? 'Teste de Persuasão' : 'Teste de Intimidação')
+  };
   var priceLine = '';
   if (res.priceDelta !== 0){
     var pct = Math.round(Math.abs(res.priceDelta) * 100);
@@ -42864,6 +42865,7 @@ function _marketShowHaggleResult(itemName, npcKey, res, onContinue){
   }
   _showServiceResultPopup({
     icon: icon, npc: npc,
+    dice: _negDice,
     narrative: rollHtml + res.narrative + priceLine + repLine,
     deltas: [], onContinue: onContinue
   });
@@ -42897,11 +42899,22 @@ function _shopConfirmBuyRemote(name, npcId, it, shop, p){
     if (!ps || !ps.ok){ vToast(ps && ps.error === 'unknown_item' ? 'Item indisponível.' : 'Mercado indisponível.', 'warn'); return; }
     if (ps.stock_left <= 0){ vToast('Estoque esgotado, volte outro dia.', 'warn'); return; }
     var finalPrice = ps.unit_price;
-    _showConfirmPurchase({
-      icon: shop.icon || it.e || '🛒', npc: shop.npc, title: 'Comprar ' + name,
-      desc: '<b>' + name + '</b><br><i>' + (it.desc || '') + '</i><br><b>Preço:</b> ' + _fmtV(finalPrice) + ' <span class="vi vi-coin sm"></span>',
-      cost: finalPrice,
-      onConfirm: function(){
+    // PADRAO_COMERCIO beat 3: exame & acordo via vEncounter (padrão Brokk) —
+    // retrato do mercador + narração de exame + fala da oferta + thumbnail.
+    _commerceConfirm({
+      npcName: shop.npc, npcRole: 'Confirmar compra', itemName: name, mode: 'buy',
+      narration: 'Você examina <b>' + name + '</b> de perto.' + (it.desc ? '<br><i>' + it.desc + '</i>' : ''),
+      speech: '— Sai por <b>' + _fmtV(finalPrice) + ' Valdoritas</b>. Fechado?',
+      confirmLabel: '✓ Confirmar · ' + _fmtV(finalPrice) + ' V',
+      legacy: {
+        icon: shop.icon || it.e || '🛒', npc: shop.npc, title: 'Comprar ' + name,
+        desc: '<b>' + name + '</b><br><i>' + (it.desc || '') + '</i><br><b>Preço:</b> ' + _fmtV(finalPrice) + ' <span class="vi vi-coin sm"></span>',
+        cost: finalPrice,
+        onConfirm: function(){ _doBuy(); }
+      },
+      onConfirm: function(){ _doBuy(); }
+    });
+    function _doBuy(){
         var preGold = p.gold;
         if (_proc) _proc.show({ text: 'Comprando...' });
         window.vCityServer.market.buy(npcId, name, 1).then(function(res){
@@ -42918,16 +42931,18 @@ function _shopConfirmBuyRemote(name, npcId, it, shop, p){
           var npcKey2 = (typeof MARKET_NPC_LIBRARY !== 'undefined' && MARKET_NPC_LIBRARY[npcId]) ? npcId : 'generic';
           var reactionLine = (typeof _marketNpcLine === 'function') ? _marketNpcLine(npcKey2, 'buy', _marketItemCat(it)) : '<i>"Tome. Bom uso."</i>';
           // Bjorn eureka (3a barraca) — o servidor sinaliza; mostramos a narração dele.
-          var eurekaLine = res.bjorn_eureka ? ('<br><br>💡 ' + (res.bjorn_eureka_msg || 'Bjorn desbloqueou o Kit de Acampamento!')) : '';
+          var eurekaLine = res.bjorn_eureka ? ('<br><br>' + (res.bjorn_eureka_msg || 'Bjorn desbloqueou o Kit de Acampamento!')) : '';
+          // PADRAO_COMERCIO beat 5: ícone = IMAGEM WebP do ITEM comprado (padrão
+          // Brokk) — antes usava o ícone da LOJA (genérico).
           _showServiceResultPopup({
-            icon: shop.icon || it.e || '🛒', npc: shop.npc,
+            icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(res.item_added || name, '48px')) || shop.icon || it.e,
+            npc: shop.npc,
             narrative: reactionLine + '<br><br><b>' + (res.item_added || name) + '</b> vai pra mochila.' + eurekaLine,
             deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
             onContinue: function(){ if (window._currentShopNpcId === npcId) _renderShopPopup(); }
           });
         }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] market.buy', e); });
-      }
-    });
+    }
   }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] market.price', e); });
 }
 
@@ -42966,14 +42981,26 @@ function _shopConfirmBuy(name, npcId){
   if (diff < 0) priceNote = '<br><i style="color:var(--v-rarity-uncommon,#4caf50)">↓ ' + diff + ' <span class="vi vi-coin sm"></span> total (CHA/Reputação' + (negData ? '/Skill' : '') + ')</i>';
   else if (diff > 0) priceNote = '<br><i style="color:var(--v-danger,#c44)">↑ +' + diff + ' <span class="vi vi-coin sm"></span> total</i>';
   var breakdownHtml = _marketPriceBreakdown(name, npcId, p, 'buy') + negNoteHtml;
-  _showConfirmPurchase({
-    icon: shop.icon || it.e || '🛒',
-    npc: shop.npc,
-    title: 'Comprar ' + name,
-    desc: '<b>' + name + '</b><br><i>' + (it.desc || '') + '</i><br>' + breakdownHtml + priceNote
-          + '<br><b>Preço final:</b> ' + _fmtV(finalPrice) + ' <span class="vi vi-coin sm"></span>',
-    cost: finalPrice,
-    onConfirm: function(){
+  // PADRAO_COMERCIO beat 3 (LOCAL): mesma cena vEncounter do REMOTE — narração
+  // de exame carrega o breakdown de preço; a fala do mercador fecha a oferta.
+  _commerceConfirm({
+    npcName: shop.npc, npcRole: 'Confirmar compra', itemName: name, mode: 'buy',
+    narration: 'Você examina <b>' + name + '</b> de perto.' + (it.desc ? '<br><i>' + it.desc + '</i>' : '')
+      + '<br>' + breakdownHtml + priceNote,
+    speech: '— Sai por <b>' + _fmtV(finalPrice) + ' Valdoritas</b>. Fechado?',
+    confirmLabel: '✓ Confirmar · ' + _fmtV(finalPrice) + ' V',
+    legacy: {
+      icon: shop.icon || it.e,
+      npc: shop.npc,
+      title: 'Comprar ' + name,
+      desc: '<b>' + name + '</b><br><i>' + (it.desc || '') + '</i><br>' + breakdownHtml + priceNote
+            + '<br><b>Preço final:</b> ' + _fmtV(finalPrice) + ' <span class="vi vi-coin sm"></span>',
+      cost: finalPrice,
+      onConfirm: function(){ _doBuyLocal(); }
+    },
+    onConfirm: function(){ _doBuyLocal(); }
+  });
+  function _doBuyLocal(){
       var preGold = p.gold;
       if (!_pay(p, finalPrice)) return;
       // canonical: haggle flags consumidas após uso (1 desconto/penalty por NPC)
@@ -43018,8 +43045,9 @@ function _shopConfirmBuy(name, npcId){
       var reactionLine2 = (typeof _marketNpcLine === 'function')
         ? _marketNpcLine(npcKey2, 'buy', itCat2)
         : '<i>"Tome. Bom uso."</i>';
+      // PADRAO_COMERCIO beat 5: ícone = imagem WebP do ITEM (padrão Brokk).
       _showServiceResultPopup({
-        icon: shop.icon || it.e || '🛒',
+        icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(name, '48px')) || shop.icon || it.e,
         npc: shop.npc,
         narrative: reactionLine2 + '<br><br><b>' + name + '</b> vai pra mochila.',
         deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
@@ -43030,8 +43058,7 @@ function _shopConfirmBuy(name, npcId){
           }
         }
       });
-    }
-  });
+  }
 }
 
 // =============================================================================
@@ -44008,11 +44035,22 @@ function _marketSellConfirmRemote(p, it, spec){
     }
     var net = q.net;
     var taxLine = (q.tax > 0) ? '<br><i>Taxa do mercado (10%): -' + _fmtV(q.tax) + ' <span class="vi vi-coin sm"></span></i>' : '';
-    _showConfirmPurchase({
-      icon: spec.icon, npc: spec.npc + ' — ' + spec.role, title: 'Vender ' + it.n,
-      desc: '<b>' + it.n + '</b>' + taxLine + '<br><b>Oferta final:</b> <b>' + _fmtV(net) + '</b> <span class="vi vi-coin sm"></span>',
-      cost: net, creditMode: true,
-      onConfirm: function(){
+    // PADRAO_COMERCIO beat 3: o ESPECIALISTA examina o item (vEncounter com
+    // retrato) e faz a oferta em fala — mesma cena da compra do Brokk.
+    _commerceConfirm({
+      npcName: spec.npc, npcRole: spec.role + ' · Confirmar venda', itemName: it.n, mode: 'sell',
+      narration: spec.npc.split(' ')[0] + ' vira <b>' + it.n + '</b> nas mãos, com o olho de quem conhece o ofício.' + taxLine,
+      speech: '— Te dou <b>' + _fmtV(net) + ' Valdoritas</b> por ele. Fechado?',
+      confirmLabel: '✓ Vender · ' + _fmtV(net) + ' V',
+      legacy: {
+        icon: spec.icon, npc: spec.npc + ' — ' + spec.role, title: 'Vender ' + it.n,
+        desc: '<b>' + it.n + '</b>' + taxLine + '<br><b>Oferta final:</b> <b>' + _fmtV(net) + '</b> <span class="vi vi-coin sm"></span>',
+        cost: net, creditMode: true,
+        onConfirm: function(){ _doSellRemote(); }
+      },
+      onConfirm: function(){ _doSellRemote(); }
+    });
+    function _doSellRemote(){
         var preGold = p.gold;
         if (_proc) _proc.show({ text: 'Vendendo...' });
         window.vCityServer.market.sell(spec.key, it.n, 1).then(function(res){
@@ -44027,15 +44065,16 @@ function _marketSellConfirmRemote(p, it, spec){
           if (typeof _removeItemFromInventory === 'function') _removeItemFromInventory(it.n, 1);  // espelha no mock p/ a UI
           if (typeof refreshHud === 'function') refreshHud();
           var reactionLine = (typeof _marketNpcLine === 'function') ? _marketNpcLine(spec.key, 'sell', spec.cat) : '<i>"Bom negócio."</i>';
+          // PADRAO_COMERCIO beat 5: ícone = imagem WebP do ITEM vendido.
           _showServiceResultPopup({
-            icon: spec.icon, npc: spec.npc,
+            icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.n, '48px')) || spec.icon,
+            npc: spec.npc,
             narrative: reactionLine + '<br><br><b>+' + _fmtV(res.net) + ' Valdoritas</b>',
             deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
             onContinue: function(){ navigateBack(); }
           });
         }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] market.sell', e); });
-      }
-    });
+    }
   }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] market.sellQuote', e); });
 }
 
@@ -44061,7 +44100,7 @@ function _marketShowSell(p){
     if (isMagic){
       // Magic items: preço é "Persuasão" — mostra ?? até o check
       sellPrice = '?';
-      badgeExtra = ' · 🎲'; // dado pra indicar negociação obrigatória
+      badgeExtra = ' · d20'; // negociação obrigatória (XGtE)
     } else {
       sellPrice = _marketCalculateSellPrice(it.n || it.name, spec.key, p);
     }
@@ -44070,9 +44109,16 @@ function _marketShowSell(p){
     // alguns items só têm 'n' (sem getter 'name') → label virava undefined e
     // mostrava fragmento de objeto ("{'n':"). Ícone com fallback via getItemData.
     var _itName = it.n || it.name;
-    var _itIcon = it.icon || (typeof getItemData === 'function' ? ((getItemData(_itName) || {}).e || '📦') : '📦');
+    // PADRAO_COMERCIO beat 2 (vitrine, 2026-07-01): imagem WebP REAL do item
+    // (mesma linguagem visual da loja/Brokk) + nome colorido pela raridade —
+    // antes a lista usava emoji de mochila genérico ("bem amadora", dono).
+    var _itData = (typeof getItemData === 'function') ? (getItemData(_itName) || {}) : {};
+    var _itIcon = (typeof _resolveItemIcon === 'function' && _resolveItemIcon(_itName, '30px'))
+      || it.icon || _itData.e || _heralIco('ic-mochila');
+    var _rarCol = (typeof getRarityColor === 'function' && _itData.r) ? getRarityColor(_itData.r) : '';
     return {
-      icon: _itIcon, label: _itName,
+      icon: _itIcon,
+      label: _rarCol ? ('<span style="color:' + _rarCol + '">' + _itName + '</span>') : _itName,
       badge: (isMagic ? '~' : '+') + _fmtV(sellPrice) + ' <span class="vi vi-coin sm"></span> · ' + npcShort + badgeExtra,
       _it: it, _spec: spec, _isMagic: isMagic
     };
@@ -44110,14 +44156,25 @@ function _marketShowSell(p){
       var isFullValue = _marketIsFullValueCategory((getItemData(it.n) || {}).t || []);
       var basePctLabel = isFullValue ? '100% (gema mantém valor cheio)' : '50% (equipamento usado)';
       var specBonusLabel = spec.specBonus > 0 ? ' + ' + Math.round(spec.specBonus * 100) + '% (especialista no ramo)' : '';
-      _showConfirmPurchase({
-        icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
-        title: 'Vender ' + (it.n || it.name),
-        desc: '<b>' + (it.n || it.name) + '</b><br>' + breakdown + '<br>'
-              + '<i>Base:</i> ' + basePctLabel + specBonusLabel + '<br>'
-              + '<b>Oferta final:</b> <b>' + _fmtV(sellPrice) + '</b> <span class="vi vi-coin sm"></span>',
-        cost: sellPrice, creditMode: true,
-        onConfirm: function(){
+      // PADRAO_COMERCIO beat 3 (LOCAL): especialista examina + oferta em fala.
+      _commerceConfirm({
+        npcName: spec.npc, npcRole: spec.role + ' · Confirmar venda', itemName: (it.n || it.name), mode: 'sell',
+        narration: spec.npc.split(' ')[0] + ' vira <b>' + (it.n || it.name) + '</b> nas mãos, com o olho de quem conhece o ofício.<br>'
+          + breakdown + '<br><i>Base:</i> ' + basePctLabel + specBonusLabel,
+        speech: '— Te dou <b>' + _fmtV(sellPrice) + ' Valdoritas</b> por ele. Fechado?',
+        confirmLabel: '✓ Vender · ' + _fmtV(sellPrice) + ' V',
+        legacy: {
+          icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
+          title: 'Vender ' + (it.n || it.name),
+          desc: '<b>' + (it.n || it.name) + '</b><br>' + breakdown + '<br>'
+                + '<i>Base:</i> ' + basePctLabel + specBonusLabel + '<br>'
+                + '<b>Oferta final:</b> <b>' + _fmtV(sellPrice) + '</b> <span class="vi vi-coin sm"></span>',
+          cost: sellPrice, creditMode: true,
+          onConfirm: function(){ _doSellLocal(); }
+        },
+        onConfirm: function(){ _doSellLocal(); }
+      });
+      function _doSellLocal(){
           var preGold = p.gold;
           p.gold += sellPrice;
           _removeItemFromInventory(it.n, 1);
@@ -44125,33 +44182,26 @@ function _marketShowSell(p){
           _marketRepDelta(spec.key, 1);
           refreshHud();
           var reactionLine = _marketNpcLine(spec.key, 'sell', spec.cat);
+          // PADRAO_COMERCIO beat 5: ícone = imagem WebP do ITEM vendido.
           _showServiceResultPopup({
-            icon: spec.icon, npc: spec.npc,
+            icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.n, '48px')) || spec.icon,
+            npc: spec.npc,
             narrative: reactionLine + '<br><br><b>+' + _fmtV(sellPrice) + ' Valdoritas</b>',
             deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
             onContinue: function(){ navigateBack(); }
           });
-        }
-      });
+      }
     }
   });
 }
 
-// XGtE Magic Item Offer Table — flow: pré-roll info → confirm → roll d20 → resultado
+// XGtE Magic Item Offer Table — flow: pré-roll info → roll d20 FULLSCREEN
+// (PADRAO_DADOS via opts.dice) → resultado com oferta → aceite via vEncounter.
 // Venda mágica REMOTE (#0, Fatia 3): o SERVIDOR rola a Persuasão (XGtE) E vende
 // atômico. magicOffer trava o roll por item (vê/aceita/recusa sem re-rolar). O
 // cliente só exibe o roll do servidor + anima. Mock LOCAL fica no corpo abaixo.
-function _marketSellMagicRollHtml(off){
-  var bonusShown = (off.total - off.roll);
-  var bonusStr = (bonusShown >= 0 ? '+' : '') + bonusShown;
-  return '<div style="display:flex;align-items:center;gap:var(--v-space-md, 8px);margin:var(--v-space-sm, 4px) 0;justify-content:center;">'
-    + '<span style="font-size:calc(14px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">🎲 d20:</span> '
-    + '<span style="font-family:Cinzel,serif;font-size:calc(20px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);font-weight:700;">' + off.roll + '</span>'
-    + '<span style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">' + bonusStr + ' = </span>'
-    + '<span style="font-family:Cinzel,serif;font-size:calc(22px * var(--v-font-scale, 1));color:#ffd700;font-weight:700;">' + off.total + '</span></div>'
-    + '<div style="text-align:center;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);letter-spacing:2px;margin-bottom:var(--v-space-sm, 4px);">'
-    + '◆ ' + String(off.label || '').toUpperCase() + ' · ' + Math.round((off.pct || 0) * 100) + '% ◆</div>';
-}
+// (2026-07-01: a pill de texto _marketSellMagicRollHtml foi REMOVIDA — o dado
+// rola em cena fullscreen do _showServiceResultPopup, padrão dos Artistas.)
 function _marketSellMagicRemote(p, it, spec){
   _showInfoPopup({
     icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
@@ -44159,7 +44209,7 @@ function _marketSellMagicRemote(p, it, spec){
     desc: '<b>' + it.n + '</b><br><i>Valor estimado:</i> ' + (it.value || 0) + ' <span class="vi vi-coin sm"></span><br><br>'
         + '<i>Itens mágicos exigem negociação cuidadosa. O mercador pesa cada peça antes de fazer uma oferta.</i><br><br>'
         + '<i>"O resultado decide o quanto ele paga — de uma fração até o dobro do valor. Se ninguém quiser comprar hoje, volte outro dia."</i>',
-    confirmLabel: '🎲 Rolar Persuasão', cancelLabel: 'Voltar',
+    confirmLabel: 'Rolar Persuasão (d20)', cancelLabel: 'Voltar',
     onConfirm: function(){
       var _proc = (typeof vProcessing !== 'undefined' && vProcessing) ? vProcessing : null;
       if (_proc) _proc.show({ text: 'Negociando...' });
@@ -44169,16 +44219,49 @@ function _marketSellMagicRemote(p, it, spec){
           vToast(off && off.error === 'protected' ? 'Item protegido.' : off && off.error === 'not_owned' ? 'Você não tem esse item.' : 'Não foi possível negociar.', 'warn');
           return;
         }
-        var rollHtml = _marketSellMagicRollHtml(off);
+        // PADRAO_DADOS (2026-07-01): a Persuasão XGtE rola em CENA FULLSCREEN
+        // (opts.dice) — a pill de texto (_marketSellMagicRollHtml) aposentou.
+        var _bonusShown = (off.total - off.roll);
+        var _magicDice = {
+          sides: 20, value: off.roll, total: off.total,
+          formula: 'd20 ' + off.roll + ' ' + (_bonusShown >= 0 ? '+' : '') + _bonusShown,
+          label: 'Teste de Persuasão'
+        };
+        var _verdict = '<div style="text-align:center;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);letter-spacing:2px;margin-bottom: var(--v-space-sm, 4px);">'
+          + '◆ ' + String(off.label || '').toUpperCase() + ' · ' + Math.round((off.pct || 0) * 100) + '% ◆</div>';
         if (off.no_buyer){
-          _showServiceResultPopup({ icon: spec.icon, npc: spec.npc, narrative: rollHtml + off.narrative + '<br><br><i>Item permanece na sua bolsa.</i>', deltas: [], onContinue: function(){ navigateBack(); } });
+          _showServiceResultPopup({
+            icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.n, '48px')) || spec.icon,
+            npc: spec.npc, dice: _magicDice,
+            narrative: _verdict + off.narrative + '<br><br><i>Item permanece na sua bolsa.</i>',
+            deltas: [], onContinue: function(){ navigateBack(); } });
           return;
         }
-        _showConfirmPurchase({
-          icon: spec.icon, npc: spec.npc + ' — ' + spec.role, title: 'Aceitar oferta?',
-          desc: rollHtml + off.narrative + '<br><b>Oferta:</b> ' + _fmtV(off.net) + ' <span class="vi vi-coin sm"></span>',
-          cost: off.net, creditMode: true,
-          onConfirm: function(){
+        // Rolagem fullscreen → resultado com a oferta → aceite via vEncounter
+        // (PADRAO_COMERCIO beat 3), no lugar do popup genérico legado.
+        _showServiceResultPopup({
+          icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.n, '48px')) || spec.icon,
+          npc: spec.npc, dice: _magicDice,
+          narrative: _verdict + off.narrative + '<br><br><b>Oferta:</b> ' + _fmtV(off.net) + ' <span class="vi vi-coin sm"></span>',
+          deltas: [],
+          onContinue: function(){
+            _commerceConfirm({
+              npcName: spec.npc, npcRole: spec.role + ' · Oferta por item mágico', itemName: it.n, mode: 'sell',
+              narration: spec.npc.split(' ')[0] + ' pousa <b>' + it.n + '</b> sobre o balcão, decidido.',
+              speech: '— Minha oferta: <b>' + _fmtV(off.net) + ' Valdoritas</b>. É pegar ou guardar.',
+              confirmLabel: '✓ Aceitar · ' + _fmtV(off.net) + ' V',
+              legacy: {
+                icon: spec.icon, npc: spec.npc + ' — ' + spec.role, title: 'Aceitar oferta?',
+                desc: off.narrative + '<br><b>Oferta:</b> ' + _fmtV(off.net) + ' <span class="vi vi-coin sm"></span>',
+                cost: off.net, creditMode: true,
+                onConfirm: function(){ _doSellMagic(); }
+              },
+              onConfirm: function(){ _doSellMagic(); },
+              onBack: function(){ navigateBack(); }
+            });
+          }
+        });
+        function _doSellMagic(){
             var preGold = p.gold;
             if (_proc) _proc.show({ text: 'Vendendo...' });
             window.vCityServer.market.sellMagic(spec.key, it.n).then(function(res){
@@ -44191,10 +44274,14 @@ function _marketSellMagicRemote(p, it, spec){
               if (typeof _removeItemFromInventory === 'function') _removeItemFromInventory(it.n, 1);
               if (typeof refreshHud === 'function') refreshHud();
               var reactionLine = (typeof _marketNpcLine === 'function') ? _marketNpcLine(spec.key, 'sell', spec.cat) : '<i>"Bom negócio."</i>';
-              _showServiceResultPopup({ icon: spec.icon, npc: spec.npc, narrative: reactionLine + '<br><br><b>+' + _fmtV(res.net) + ' Valdoritas</b>', deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }], onContinue: function(){ navigateBack(); } });
+              _showServiceResultPopup({
+                icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.n, '48px')) || spec.icon,
+                npc: spec.npc,
+                narrative: reactionLine + '<br><br><b>+' + _fmtV(res.net) + ' Valdoritas</b>',
+                deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
+                onContinue: function(){ navigateBack(); } });
             }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] sellMagic', e); });
-          }
-        });
+        }
       }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] magicOffer', e); });
     }
   });
@@ -44221,41 +44308,59 @@ function _marketSellMagicWithPersuasion(p, it, spec){
         + '<i>Itens mágicos exigem negociação cuidadosa. O mercador pesa cada peça antes de fazer uma oferta.</i><br><br>'
         + '<b>Teste de Persuasão:</b> d20 + CHA(' + (chaMod >= 0 ? '+' : '') + chaMod + ') + Proficiência(+' + prof + ') = ' + bonusStr + ' bônus<br>'
         + '<br><i>"O resultado decide o quanto ele paga — de uma fração até o dobro do valor. Se ninguém quiser comprar hoje, volte outro dia."</i>',
-    confirmLabel: '🎲 Rolar Persuasão',
+    confirmLabel: 'Rolar Persuasão (d20)',
     cancelLabel: 'Voltar',
     onConfirm: function(){
       var pr = _marketRollPersuasion(p, { proficient: true });
       // Aplica o roll na fórmula canonical
       var sellPrice = _marketCalculateSellPrice(it.n, spec.key, p, { persuasionResult: pr });
-      var rollColorClass = pr.total <= 5 ? 'no-buyer'
-        : (pr.total >= 25 ? 'crit' : (pr.total >= 20 ? 'great' : (pr.total >= 15 ? 'good' : 'meh')));
-      var rollHtml = '<div style="display:flex;align-items:center;gap: var(--v-space-md, 8px);margin: var(--v-space-sm, 4px) 0;justify-content:center;">'
-        + '<span style="font-size:calc(14px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">🎲 d20:</span> '
-        + '<span style="font-family:Cinzel,serif;font-size:calc(20px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);font-weight:700;">' + pr.roll + '</span>'
-        + '<span style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);">' + bonusStr + ' = </span>'
-        + '<span style="font-family:Cinzel,serif;font-size:calc(22px * var(--v-font-scale, 1));color:#ffd700;font-weight:700;">' + pr.total + '</span>'
-        + '</div>'
-        + '<div style="text-align:center;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);letter-spacing:2px;margin-bottom: var(--v-space-sm, 4px);">'
+      // PADRAO_DADOS (2026-07-01): d20 em CENA FULLSCREEN via opts.dice —
+      // pill de texto aposentada; fica só o veredito da tabela XGtE.
+      var _magicDiceL = {
+        sides: 20, value: pr.roll, total: pr.total,
+        formula: 'd20 ' + pr.roll + ' ' + bonusStr,
+        label: 'Teste de Persuasão'
+      };
+      var _verdictL = '<div style="text-align:center;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);letter-spacing:2px;margin-bottom: var(--v-space-sm, 4px);">'
         + '◆ ' + pr.label.toUpperCase() + ' · ' + Math.round(pr.pct * 100) + '% ◆</div>';
 
       if (pr.pct === 0){
         // Sem comprador — não vende
         _showServiceResultPopup({
-          icon: spec.icon, npc: spec.npc,
-          narrative: rollHtml + pr.narrative + '<br><br><i>Item permanece na sua bolsa.</i>',
+          icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.n, '48px')) || spec.icon,
+          npc: spec.npc, dice: _magicDiceL,
+          narrative: _verdictL + pr.narrative + '<br><br><i>Item permanece na sua bolsa.</i>',
           deltas: [], onContinue: function(){ navigateBack(); }
         });
         return;
       }
 
-      // Confirma a oferta antes de executar a venda
-      _showConfirmPurchase({
-        icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
-        title: 'Aceitar oferta?',
-        desc: rollHtml + pr.narrative + '<br>'
-            + '<b>Oferta:</b> ' + _fmtV(sellPrice) + ' <span class="vi vi-coin sm"></span>',
-        cost: sellPrice, creditMode: true,
-        onConfirm: function(){
+      // Rolagem fullscreen → resultado com a oferta → aceite via vEncounter
+      // (PADRAO_COMERCIO beat 3), no lugar do popup genérico legado.
+      _showServiceResultPopup({
+        icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.n, '48px')) || spec.icon,
+        npc: spec.npc, dice: _magicDiceL,
+        narrative: _verdictL + pr.narrative + '<br><br><b>Oferta:</b> ' + _fmtV(sellPrice) + ' <span class="vi vi-coin sm"></span>',
+        deltas: [],
+        onContinue: function(){
+          _commerceConfirm({
+            npcName: spec.npc, npcRole: spec.role + ' · Oferta por item mágico', itemName: it.n, mode: 'sell',
+            narration: spec.npc.split(' ')[0] + ' pousa <b>' + it.n + '</b> sobre o balcão, decidido.',
+            speech: '— Minha oferta: <b>' + _fmtV(sellPrice) + ' Valdoritas</b>. É pegar ou guardar.',
+            confirmLabel: '✓ Aceitar · ' + _fmtV(sellPrice) + ' V',
+            legacy: {
+              icon: spec.icon, npc: spec.npc + ' — ' + spec.role,
+              title: 'Aceitar oferta?',
+              desc: pr.narrative + '<br><b>Oferta:</b> ' + _fmtV(sellPrice) + ' <span class="vi vi-coin sm"></span>',
+              cost: sellPrice, creditMode: true,
+              onConfirm: function(){ _doSellMagicLocal(); }
+            },
+            onConfirm: function(){ _doSellMagicLocal(); },
+            onBack: function(){ navigateBack(); }
+          });
+        }
+      });
+      function _doSellMagicLocal(){
           var preGold = p.gold;
           p.gold += sellPrice;
           _removeItemFromInventory(it.n, 1);
@@ -44265,13 +44370,13 @@ function _marketSellMagicWithPersuasion(p, it, spec){
           refreshHud();
           var reactionLine = _marketNpcLine(spec.key, 'sell', spec.cat);
           _showServiceResultPopup({
-            icon: spec.icon, npc: spec.npc,
+            icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(it.n, '48px')) || spec.icon,
+            npc: spec.npc,
             narrative: reactionLine + '<br><br><b>+' + _fmtV(sellPrice) + ' Valdoritas</b>',
             deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false }],
             onContinue: function(){ navigateBack(); }
           });
-        }
-      });
+      }
     }
   });
 }
@@ -46275,21 +46380,32 @@ function _festivalMerchant(p){
     items: items,
     onPick: function(item){
       var f = item._f;
-      _showConfirmPurchase({
-        icon: f.icon, npc: 'Comerciante', title: 'Comprar ' + f.name,
-        desc: '<b>' + f.name + '</b><br><i>' + f.desc + '</i><br>Custo: ' + f.value + ' Valdoritas',
-        cost: f.value,
-        onConfirm: function(){
+      // PADRAO_COMERCIO beat 3: exame & acordo via vEncounter (padrão Brokk).
+      _commerceConfirm({
+        npcName: 'Comerciante do Festival', npcRole: 'Confirmar compra', itemName: f.name, mode: 'buy',
+        narration: 'Você examina <b>' + f.name + '</b> de perto.<br><i>' + f.desc + '</i>',
+        speech: '— Sai por <b>' + f.value + ' Valdoritas</b>, e só porque a festa pede. Fechado?',
+        confirmLabel: '✓ Confirmar · ' + f.value + ' V',
+        legacy: {
+          icon: f.icon, npc: 'Comerciante', title: 'Comprar ' + f.name,
+          desc: '<b>' + f.name + '</b><br><i>' + f.desc + '</i><br>Custo: ' + f.value + ' Valdoritas',
+          cost: f.value,
+          onConfirm: function(){ _doBuyFest(); }
+        },
+        onConfirm: function(){ _doBuyFest(); }
+      });
+      function _doBuyFest(){
           var preGold = p.gold;
           if (!_pay(p, f.value)) return;
+          // PADRAO_COMERCIO beat 5: ícone = imagem WebP do ITEM comprado.
           _showServiceResultPopup({
-            icon: f.icon, npc: 'Comerciante',
+            icon: (typeof _resolveItemIcon === 'function' && _resolveItemIcon(f.name, '48px')) || f.icon,
+            npc: 'Comerciante do Festival',
             narrative: '<i>Embrulha o item em pano colorido.</i><br><br><b>' + f.name + '</b> comprado.',
             deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
             onContinue: function(){ navigateBack(); }
           });
-        }
-      });
+      }
     }
   });
 }
@@ -48841,58 +48957,85 @@ function _showServiceResultPopup(opts){
     window._srpDice3dInstance = null;
   }
   if (dice3dEl) dice3dEl.innerHTML = '';
+  // PADRAO_COMERCIO/PADRAO_DADOS (2026-07-01, feedback do dono): a rolagem de
+  // diálogo/serviço acontece em TELA CHEIA com fundo escurecido — a mesma cena
+  // dos Artistas de Rua da Praça (referência explícita: "fica muito mais bonito
+  // a rolagem com a tela cheia e fundo escurecido"). Antes o dado rolava DENTRO
+  // do card do resultado (apertado — ex.: barganha da Pyrra na guilda). Fase 1 =
+  // overlay fullscreen (título do teste + dado 3D grande + fórmula vs CD);
+  // fase 2 = card do NPC com narrativa typewriter + deltas (auto, sem clique).
+  var _srpFullscreenDice = false;
   if (hasDice) {
     var sides = opts.dice.sides || 20;
     var dieType = 'd' + sides;
     var canUse3D = (typeof Dice3D !== 'undefined' && Dice3D !== null && typeof THREE !== 'undefined');
-    if (canUse3D && dice3dEl) {
-      // Dice3D canonical (replica combate.html)
+    if (canUse3D) {
       diceEl.style.display = 'none';
-      dice3dEl.style.display = '';
-      try {
-        var _diceSz = Math.max(150, Math.min(Math.round((window.innerWidth || 360) * 0.56), 230));
-        var instance = new Dice3D(dice3dEl, { size: _diceSz, dieType: dieType, duration: 1800 });
-        window._srpDice3dInstance = instance;
-        // Aguarda overlay pintar antes de rolar
-        // FIX D1 (Fase 9.4): Dice3D.roll() espera o VALOR DA FACE (1..sides),
-        // não o total final (face + bônus). Usa opts.dice.value se passado;
-        // fallback opts.dice.total pra casos sem bonus (ex: bless 1d4).
-        var rollFace = (opts.dice.value !== undefined) ? opts.dice.value : opts.dice.total;
-        // Clamp à face do dado pra evitar rolagens inválidas
-        if (rollFace > sides) rollFace = ((rollFace - 1) % sides) + 1;
-        if (rollFace < 1)     rollFace = 1;
-        // PADRAO_DADOS: reveal idempotente + safety timeout. Se o callback do
-        // Dice3D NÃO disparar (aba em background com requestAnimationFrame
-        // throttled, WebGL lento, device fraco), o "Continuar →" aparece mesmo
-        // assim — o jogador NUNCA fica preso na fase 1 do dado.
-        var _diceRevealed = false;
-        function _srpRevealDice(){
-          if (_diceRevealed) return; _diceRevealed = true;
-          try { document.getElementById('srp-dice-formula').textContent = opts.dice.formula; } catch(_e){}
-          try { document.getElementById('srp-dice-total').textContent = opts.dice.total; } catch(_e){}
-          if (diceEl) diceEl.style.display = '';
-          _srpRevealNarrative();
+      if (dice3dEl) dice3dEl.style.display = 'none';
+      _srpFullscreenDice = true;
+      var _fsOv = document.createElement('div');
+      _fsOv.id = 'srp-dice-fullscreen';
+      _fsOv.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(10,8,5,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--v-text,#d4c8b0);font-family:var(--v-font-display,Cinzel),serif;';
+      var _fsTitle = opts.dice.label || 'Rolagem de dado';
+      var _fsDc = (opts.dice.dc !== undefined && opts.dice.dc !== null)
+        ? ' <span style="opacity:0.75">vs CD <b>' + opts.dice.dc + '</b></span>' : '';
+      _fsOv.innerHTML = '<div style="font-size:calc(clamp(16px,4.6vw,18px) * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);letter-spacing:2px;text-transform:uppercase;margin-bottom: var(--v-space-lg, 12px);text-align:center;padding:0 16px;">' + _fsTitle + '</div>'
+        + '<div id="srp-fs-host" style="width:clamp(190px,56vw,240px);height:clamp(190px,56vw,240px);"></div>'
+        + '<div id="srp-fs-label" style="margin-top: var(--v-space-md, 10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale, 1));min-height:1.5em;letter-spacing:1px;text-align:center;">&nbsp;</div>';
+      if (window.vOverlay && typeof window.vOverlay.add === 'function') window.vOverlay.add(_fsOv);
+      else document.body.appendChild(_fsOv);
+      // FIX D1 (Fase 9.4): Dice3D.roll() espera o VALOR DA FACE (1..sides),
+      // não o total final (face + bônus). Usa opts.dice.value se passado;
+      // fallback opts.dice.total pra casos sem bonus (ex: bless 1d4).
+      var rollFace = (opts.dice.value !== undefined) ? opts.dice.value : opts.dice.total;
+      if (rollFace > sides) rollFace = ((rollFace - 1) % sides) + 1;
+      if (rollFace < 1)     rollFace = 1;
+      // Fase 1 → 2 idempotente + safety timeout (aba em background/WebGL lento):
+      // o jogador NUNCA fica preso na tela do dado.
+      var _fsDone = false;
+      var _fsFinish = function(){
+        if (_fsDone) return; _fsDone = true;
+        if (window._srpDice3dInstance) {
+          try { window._srpDice3dInstance.dispose(); } catch(_e){}
+          window._srpDice3dInstance = null;
         }
-        setTimeout(_srpRevealDice, 4000);  // safety: nunca deixa o jogador preso
+        try { _fsOv.remove(); } catch(_e){}
+        // Fase 2: card do NPC com narrativa (typewriter direto — o dado já
+        // teve a cena inteira dele; clique extra aqui seria fricção).
+        ov.classList.add('active');
+        _srpPendingNarrative = false;
+        _srpTypewriterNarrative();
+      };
+      setTimeout(_fsFinish, 9000);  // safety absoluto
+      try {
+        var instance = new Dice3D(document.getElementById('srp-fs-host'), { dieType: dieType, size: 220, duration: 1800 });
+        window._srpDice3dInstance = instance;
         setTimeout(function(){
           try {
             instance.roll(rollFace, function(){
-              // Após rolar, mostra label fórmula+total fixo abaixo + libera Continuar
-              setTimeout(_srpRevealDice, 400);
+              var _fsLbl = document.getElementById('srp-fs-label');
+              if (_fsLbl) {
+                // Chamadores legados embutem " vs DC X" na formula — separa pra
+                // ler na ordem certa: "1d20+2 = 14 vs DC 13".
+                var _fsFormula = String(opts.dice.formula || ('d' + sides));
+                var _fsTail = _fsDc;
+                var _vsIdx = _fsFormula.indexOf(' vs ');
+                if (!_fsTail && _vsIdx > -1) {
+                  _fsTail = ' <span style="opacity:0.75">vs ' + _fsFormula.slice(_vsIdx + 4) + '</span>';
+                }
+                if (_vsIdx > -1) _fsFormula = _fsFormula.slice(0, _vsIdx);
+                _fsLbl.innerHTML = _fsFormula + ' = <b style="color:var(--v-gold, #c4953a)">' + opts.dice.total + '</b>' + _fsTail;
+              }
+              setTimeout(_fsFinish, 1500);
             });
           } catch(eR){
             console.warn('[SRP] Dice3D roll failed:', eR);
-            dice3dEl.style.display = 'none';
-            _srpRevealDice();
+            _fsFinish();
           }
         }, 350);
       } catch(eC){
         console.warn('[SRP] Dice3D construct failed:', eC);
-        dice3dEl.style.display = 'none';
-        document.getElementById('srp-dice-formula').textContent = opts.dice.formula;
-        document.getElementById('srp-dice-total').textContent   = opts.dice.total;
-        diceEl.style.display = '';
-        _srpRevealNarrative();
+        _fsFinish();
       }
     } else {
       // Fallback CSS pill quando THREE.js/Dice3D não carregaram
@@ -49063,7 +49206,9 @@ function _showServiceResultPopup(opts){
     if (_srpTypewriterTimer) { clearTimeout(_srpTypewriterTimer); _srpTypewriterTimer = null; }
     if (typeof opts.onContinue === 'function') opts.onContinue();
   };
-  ov.classList.add('active');
+  // Fase fullscreen do dado (PADRAO_DADOS 2026-07-01): o card só aparece na
+  // fase 2 (_fsFinish) — mostrar aqui o poria ATRÁS do overlay do dado.
+  if (!_srpFullscreenDice) ov.classList.add('active');
   _logCity('service-result npc=' + (opts.npc || '?'));
 }
 
@@ -49305,9 +49450,64 @@ function _showAllyLoanResultPopup(lendersDetailed, onContinue){
 }
 
 // ============================================================================
-// === CONFIRM PURCHASE POPUP (Fase 9.3) — OBRIGATÓRIO em TODA compra =========
+// === PADRAO_COMERCIO (2026-07-01) — beat 3 "Exame & Acordo" =================
+// ============================================================================
+// Confirmação CANONICAL de compra/venda via vEncounter (PADRAO_ALDRIC), no
+// padrão do vendedor ambulante da Praça (Brokk — referência explícita do dono:
+// "o mercado do Brokk está muito mais bem estruturado, profissional"):
+// retrato WebP do mercador + narração de exame do item + fala com a oferta +
+// choice Confirmar com THUMBNAIL WebP do item (itemName/itemInfo do
+// encounter-popup.js). TODO fluxo de comércio confirma por AQUI — o
+// _showConfirmPurchase (popup genérico, abaixo) fica pra SERVIÇOS
+// (templo/empréstimo/dívida) e como fallback LOCAL. Ratchet anti-regressão:
+// check_commerce_confirm_ratchet. Doc: docs/sistemas/padrao-comercio.md
+function _commerceConfirm(o){
+  // o = { npcName, npcRole?, portrait?, itemName, narration, speech,
+  //       confirmLabel, mode:'buy'|'sell', onConfirm, onBack?, legacy? }
+  if (!(window.vEncounter && typeof window.vEncounter.render === 'function')) {
+    // Fallback (file:// sem encounter-popup.js): popup legado se fornecido.
+    if (o.legacy) { _showConfirmPurchase(o.legacy); }
+    else if (typeof vToast === 'function') { vToast('Indisponível offline.', 'warn'); }
+    return;
+  }
+  var portrait = o.portrait
+    || (typeof _discoverySpeakerPortrait === 'function' ? _discoverySpeakerPortrait(o.npcName) : null);
+  var itemIcon = (typeof _resolveItemIcon === 'function' && o.itemName && _resolveItemIcon(o.itemName, '38px')) || null;
+  window.vEncounter.render({
+    npc: {
+      name: o.npcName,
+      desc: o.npcRole || (o.mode === 'sell' ? 'Confirmar venda' : 'Confirmar compra'),
+      portraitImg: portrait || undefined,
+      id: 'merchant_' + String(o.npcName || 'mercador').toLowerCase().replace(/[^a-z0-9]+/g, '_')
+    },
+    script: [
+      { type: 'narration', text: o.narration },
+      { type: 'speech', speaker: o.npcName, text: o.speech }
+    ],
+    choices: [
+      { id: 'confirm', label: o.confirmLabel || '✓ Confirmar',
+        itemName: o.itemName, itemIcon: itemIcon,
+        itemInfo: (typeof _encItemInfo === 'function' && o.itemName) ? _encItemInfo(o.itemName) : undefined },
+      { id: 'back', label: '↩ Voltar' }
+    ]
+  }, {
+    player: window.CITY_MOCK_PLAYER || null, closeable: true,
+    onChoice: function(ch){
+      try { window.vEncounter.close(); } catch(_e){}
+      if (!ch || ch.id !== 'confirm') { if (typeof o.onBack === 'function') o.onBack(); return; }
+      o.onConfirm();
+    }
+  });
+}
+
+// ============================================================================
+// === CONFIRM PURCHASE POPUP (Fase 9.3) — SERVIÇOS (templo/empréstimo/dívida) =
 // ============================================================================
 // Replica fluxo bot DEV temple_services.py L19-63 (get_service_confirmation).
+// ⚠️ PADRAO_COMERCIO (2026-07-01): compra/venda de ITEM confirma via
+// _commerceConfirm (vEncounter, acima) — este popup genérico segue APENAS para
+// serviços com empréstimo/dívida (templo etc.) e fallback LOCAL. NUNCA criar
+// fluxo novo de comércio apontando pra cá (ratchet: check_commerce_confirm_ratchet).
 // USO:
 //   _showConfirmPurchase({
 //     icon: _heralIco('ic-cura'), npc: 'Irmã Elara', title: 'Curar Ferimentos',
@@ -57481,7 +57681,8 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
       icon: (data.npc && data.npc.portrait)
         ? ('<img src="' + data.npc.portrait + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">')
         : undefined,
-      dice: { sides: (d.sides || 20), value: d.roll, total: d.total, formula: 'd20 ' + d.roll + ' ' + _mod },  // D3: value=roll
+      dice: { sides: (d.sides || 20), value: d.roll, total: d.total, formula: 'd20 ' + d.roll + ' ' + _mod,
+              dc: d.dc, label: 'Teste de ' + _skl },  // D3: value=roll · dc/label → cena fullscreen do dado
       narrative: '<b>' + _skl + '</b> — '
           + (d.success
               ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
