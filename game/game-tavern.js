@@ -109,7 +109,18 @@ function _tavBuildNpcRow(data) {
   name.textContent = 'Grom, o Caolho';
   info.appendChild(name);
   var quote = vCity.el('div', 'quote');
-  quote.textContent = '"Senta antes que eu mude de ideia."';
+  // B1 (anti-repeat): teaser rotativo do Grom (o diálogo real é server-driven ao clicar).
+  // Rotação por índice persistido — não repete a mesma linha em visitas seguidas.
+  var _gromTeasers = [
+    '"Senta antes que eu mude de ideia."',
+    '"Bebida, boato ou briga? Escolhe um."',
+    '"Fala logo. O caneco não enche sozinho."',
+    '"Cara nova. Ou cara velha que eu esqueci."',
+    '"Aqui ninguém bebe de graça, nem eu."'
+  ];
+  var _gt = (typeof window._gromTeaserIdx === 'number') ? (window._gromTeaserIdx + 1) : 0;
+  window._gromTeaserIdx = _gt % _gromTeasers.length;
+  quote.textContent = _gromTeasers[window._gromTeaserIdx];
   info.appendChild(quote);
   row.appendChild(info);
 

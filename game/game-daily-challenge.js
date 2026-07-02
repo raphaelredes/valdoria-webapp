@@ -134,7 +134,7 @@ window.renderDailyChallenge = function (el, dc) {
         + 'background:rgba(196,149,58,0.15);border:1px solid rgba(196,149,58,0.40);'
         + 'border-radius:14px;color:var(--v-gold,#c4953a);font-weight:700;'
         + 'font-size:calc(12px * var(--v-font-scale, 1));">'
-        + '✦ ' + dc.xp_est + ' XP</span>'
+        + '◆ ' + dc.xp_est + ' XP</span>'
         + '<span style="display:inline-flex;align-items:center;gap:3px;padding:6px 12px;'
         + 'background:rgba(196,149,58,0.15);border:1px solid rgba(196,149,58,0.40);'
         + 'border-radius:14px;color:var(--v-gold,#c4953a);font-weight:700;'

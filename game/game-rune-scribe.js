@@ -149,7 +149,7 @@ function renderRuneScribe(container, data) {
   body.appendChild(repBar);
 
   /* === 2c. Recipe info === */
-  var recipe = _rnsEl('div', 'rns-recipe', '📜 Receita: 3 fragmentos do mesmo tier = 1 runa aleatória');
+  var recipe = _rnsEl('div', 'rns-recipe', 'Receita: 3 fragmentos do mesmo tier = 1 runa aleatória');
   recipe.style.cssText = 'text-align:center;font-style:italic;font-size:calc(12px * var(--v-font-scale, 1));color:#a09484;padding:6px 8px;background:rgba(0,0,0,0.18);border-left:2px solid rgba(196,149,58,0.3);border-radius:4px;';
   body.appendChild(recipe);
 
@@ -199,15 +199,15 @@ function renderRuneScribe(container, data) {
         /* Craft button */
         var btn = vCity.el('button', 'v-popup-btn');
         if (t.can_craft) {
-          btn.textContent = '✅ Forjar Runa Tier ' + t.tier;
+          btn.textContent = 'Forjar Runa Tier ' + t.tier;
           btn.classList.add('v-popup-btn--primary');
           btn.addEventListener('click', (function(cb){ return function(){ vCity.act(cb); }; })(t.cb));
         } else if (t.locked_level) {
-          btn.textContent = '🔒 Nível ' + t.min_level + ' necessário';
+          btn.textContent = 'Nível ' + t.min_level + ' necessário';
           btn.disabled = true;
           btn.style.opacity = '0.5';
         } else {
-          btn.textContent = '🔒 Faltam ' + Math.max(0, t.cost - t.count) + ' fragmentos';
+          btn.textContent = 'Faltam ' + Math.max(0, t.cost - t.count) + ' fragmentos';
           btn.disabled = true;
           btn.style.opacity = '0.5';
         }

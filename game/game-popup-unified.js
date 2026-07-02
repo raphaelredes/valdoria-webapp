@@ -221,11 +221,13 @@ function _buildPopupBody(data) {
         return el;
     }
 
-    // Wandering NPC encounter
-    if (data._wandering_npc_screen && typeof renderWanderingNpc === 'function') {
-        renderWanderingNpc(el, data._wandering_npc_screen);
-        return el;
-    }
+    // NPCs ERRANTES (wandering): NÃO há renderer server-driven aqui — `renderWanderingNpc`
+    // nunca existiu (era guard fantasma → branch morto). No WebApp, os errantes renderizam
+    // pelo caminho CLIENTE `_showSharedNpcDialogue` (+ pool `WNPC_DIALOGUES`) em
+    // cidade/index.html; o backbone rico (arcs/memória/perks/quests em wandering_npcs_*.py)
+    // só é alcançado pelo caminho inline/legado (handlers.py → _mark_popup). Migração p/ o
+    // motor server-driven `dialogue.*` é item estrutural rastreado:
+    // docs/sistemas/auditoria-cidade-npcs-dialogos-2026-07-02.md §1.1 (decisão do dono).
 
     // Trade Board hub
     if (data._trade_board_screen && typeof renderTradeBoard === 'function') {

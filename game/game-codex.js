@@ -5,6 +5,18 @@
 var _codexActiveTab = null;
 var _codexSearchTerm = '';
 
+/* emoji ban (P6 completo 2026-07-02): ícone de categoria via WebP por KEY, ignorando
+   o emoji que o backend (codex_data.py) ainda envia. Antes os 5 ui/*.webp só existiam
+   no mock LOCAL; agora valem em REMOTE também. */
+var _CODEX_CAT_WEBP = {
+  enemy: 'aranha', location: 'localizacao', item: 'mochila', 'class': 'ficha', race: 'grupo'
+};
+function _codexCatIcon(cat) {
+  var key = _CODEX_CAT_WEBP[cat && cat.key];
+  if (key) return '<img src="../shared/img/ui/' + key + '.webp" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle" onerror="this.style.display=\'none\'">';
+  return '';  // sem emoji fallback (ban) — só o label
+}
+
 function renderCodexScreen(container, data) {
   if (!container || !data) return;
   console.warn('[CITY-CODEX] renderCodexScreen unlocked=' + data.unlocked + '/' + data.total);
@@ -36,7 +48,7 @@ function renderCodexScreen(container, data) {
     for (var c = 0; c < cats.length; c++) {
       (function(cat) {
         var tab = vCity.el('button', 'cdx-tab');
-        tab.innerHTML = cat.icon + ' ' + cat.label;
+        tab.innerHTML = _codexCatIcon(cat) + ' ' + cat.label;
         tab.setAttribute('data-cat', cat.key);
         tab.onclick = function() { _codexSwitchTab(cat.key, tabs, entries, data); };
         tabs.appendChild(tab);

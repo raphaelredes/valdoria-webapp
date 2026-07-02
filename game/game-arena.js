@@ -59,7 +59,7 @@ var ARENA_SVC_META = {
 };
 window._ARENA_SVC_META = ARENA_SVC_META;
 
-var _ARENA_MEDALS = {1: '\uD83E\uDD47', 2: '\uD83E\uDD48', 3: '\uD83E\uDD49'};
+var _ARENA_MEDALS = {1: '1\u00BA', 2: '2\u00BA', 3: '3\u00BA'};
 
 /* === PADRAO_TAVERNA canonical (task #34, 2026-05-20) === */
 if (!window._SVC_CONFIG_ARENA) {
@@ -317,18 +317,27 @@ function _renderArenaMain(el, d) {
     /* Best streak badge (if > 0) */
     if (stats.best_streak > 0) {
         var bestRow = _div('arena-best-streak');
-        bestRow.textContent = '\uD83C\uDFC6 Melhor sequ\u00eancia: ' + stats.best_streak;
+        bestRow.textContent = 'Melhor sequ\u00eancia: ' + stats.best_streak;
         tablet.appendChild(bestRow);
     }
     var daily = _div('arena-daily-wins');
     var dailyPrefix = document.createElement('span');
-    dailyPrefix.textContent = '\uD83D\uDCDC Vit\u00f3rias hoje: ';
+    dailyPrefix.textContent = 'Vit\u00f3rias hoje: ';
     daily.appendChild(dailyPrefix);
     var dailyStrong = document.createElement('strong');
     dailyStrong.textContent = String(stats.daily_wins || 0);
     daily.appendChild(dailyStrong);
     tablet.appendChild(daily);
     frag.appendChild(tablet);
+
+    /* Saldo (A8 — rodapé com Valdoritas; padrão dos demais venues) */
+    var saldo = _div('arena-saldo');
+    saldo.style.cssText = 'text-align:center;font-size:calc(12px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);padding:4px 0;display:flex;align-items:center;justify-content:center;gap:4px;';
+    saldo.appendChild(document.createTextNode('Bolsa: ' + (d.player_gold || 0)));
+    var saldoCoin = document.createElement('span');
+    saldoCoin.className = 'vi vi-coin sm';
+    saldo.appendChild(saldoCoin);
+    frag.appendChild(saldo);
 
     /* Ornamental divider */
     frag.appendChild(_dividerEl());
@@ -417,7 +426,7 @@ function _renderArenaMain(el, d) {
     if (d.cooldown > 0) {
         var cd = _div('arena-cooldown');
         var cdIcon = _div('arena-cooldown-icon');
-        cdIcon.textContent = '\u23F3';
+        cdIcon.textContent = '';
         cd.appendChild(cdIcon);
         var cdText = _div('arena-cooldown-text');
         var cdIntro = document.createElement('span');
@@ -501,7 +510,7 @@ function _renderArenaHpWarning(el, d) {
     if (d.has_potion) {
         var potionSub = d.potion_count ? d.potion_count + ' dispon\u00edvel(is)' : 'Recuperar HP';
         choices.appendChild(_makeChoiceCard(
-            '\uD83E\uDDEA', 'Usar Po\u00e7\u00e3o de Cura', potionSub,
+            '<img src="../shared/img/ui/pocao.webp" alt="" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\'">', 'Usar Po\u00e7\u00e3o de Cura', potionSub,
             'action_use_potion_heal', 'choice-potion'
         ));
     }
@@ -540,7 +549,11 @@ function _renderArenaResult(el, d) {
     /* Crown/Skull with radial glow */
     var crownWrap = _div('arena-result-crown-wrap');
     var crown = _div('arena-result-crown');
-    crown.textContent = victory ? '\uD83C\uDFC6' : '\uD83D\uDC80';
+    if (victory) {
+        crown.innerHTML = '<img src="../shared/img/ui/coroa.webp" alt="" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\'">';
+    } else {
+        crown.textContent = '\u2020';  // marcador tipogr\u00E1fico de derrota (sem webp de caveira)
+    }
     crownWrap.appendChild(crown);
     wrap.appendChild(crownWrap);
 
@@ -675,7 +688,7 @@ function _renderArenaLeaderboard(el, d) {
     /* Header with trophy */
     var header = _div('arena-lb-header');
     var trophy = _div('arena-lb-trophy');
-    trophy.textContent = '\uD83C\uDFC6';
+    trophy.innerHTML = '<img src="../shared/img/arena/arena-crest.webp" alt="" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\'">';
     header.appendChild(trophy);
     var title = _div('arena-lb-title');
     title.textContent = 'HALL DOS CAMPE\u00d5ES';

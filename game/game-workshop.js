@@ -238,7 +238,8 @@ function renderWorkshopHub(container, data) {
     var card = vCity.el('div', 'svc');
     card.setAttribute('data-svc', t.cb || '');
     var ico = vCity.el('div', 'svc-ico');
-    ico.innerHTML = t.emoji || '';
+    // emoji ban: backend não envia mais emoji; fallback WebP genérico da oficina.
+    ico.innerHTML = t.emoji || '<img src="../shared/img/ui/oficina.webp" alt="" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\'">';
     ico.style.cssText = 'font-size:calc(20px * var(--v-font-scale, 1));';
     card.appendChild(ico);
     var txt = vCity.el('div', 'svc-text');

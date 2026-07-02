@@ -43,6 +43,16 @@ function act(cb) {
   if (typeof doAction === 'function' && cb) doAction(cb);
 }
 
+/* _isRemote canonical GLOBAL — WHY: game-bank.js/game-temple.js referenciam `_isRemote`
+   dentro de suas IIFEs, mas as definicoes locais em game-inn/tavern/workshop.js ficam
+   presas nas IIFEs DELAS (nao viram global). Sem este window._isRemote, o `typeof
+   _isRemote === 'function'` do Banco era SEMPRE falso → REMOTE caia no dialogo client-side
+   hardcoded em vez de _openCityDialogue/_openCityScreen server-driven (PADRAO_SERVIDOR). */
+function isRemote() {
+  return !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote());
+}
+window._isRemote = isRemote;
+
 /** Strip HTML tags from NPC text (backend sends <i>, <b> etc. for inline Telegram) */
 function stripTags(str) {
   if (!str) return '';
@@ -173,7 +183,7 @@ function serviceCard(svc) {
   if (svc.cost !== undefined && svc.cost !== null) {
     var price = el('div', 'vc-service-price');
     if (svc.cost === 0) {
-      price.textContent = 'Gratis';
+      price.textContent = 'Grátis';
       price.classList.add('free');
     } else {
       price.textContent = String(svc.cost) + ' ';
@@ -289,7 +299,7 @@ function bar(label, type, fillClass, pct, cur, max) {
 function exhaustionPips(ex) {
   var wrap = el('div', 'vc-exhaustion');
   var lbl = el('div', 'vc-ex-label');
-  lbl.textContent = 'Exaustao';
+  lbl.textContent = 'Exaustão';
   wrap.appendChild(lbl);
   var pips = el('div', 'vc-ex-pips');
   for (var i = 0; i < 6; i++) {

@@ -45968,27 +45968,31 @@ function _runeBuyRemote(p){
     items: tiers.map(function(t){ return { icon: t.emoji, label: t.name, badge: t.cost + ' V', _t: t }; }),
     onPick: function(item){
       var t = item._t;
-      _showConfirmPurchase({
-        icon: t.emoji, npc: 'Eirik', title: 'Comprar ' + t.name,
-        desc: '<b>' + t.name + '</b> (Tier ' + t.tier + ')<br>Custo: ' + t.cost + ' Valdoritas',
-        cost: t.cost,
-        onConfirm: function(){
-          var preGold = p.gold;
-          if (window.vProcessing) { try { window.vProcessing.show({ text: 'Comprando...' }); } catch(_){} }
-          window.vCityServer.rune.buy(t.tier).then(function(res){
-            if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
-            if (!res || !res.ok) { if (typeof vToast === 'function') vToast((res && res.error === 'no_gold') ? 'Valdoritas insuficientes.' : 'Não foi possível comprar.', 'warn'); return; }
-            if (typeof res.gold === 'number') { p.gold = res.gold; refreshHud(); }
-            if (res.fragment) _applyBoughtItem(res.fragment);  // PADRAO_COMPRA
-            _hydrateRuneFrags();
-            _showServiceResultPopup({
-              icon: t.emoji, npc: 'Eirik',
-              narrative: '<i>Eirik entrega o fragmento, embrulhado em pano.</i><br><br><b>' + t.name + '</b> adicionado.',
-              deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
-              onContinue: function(){ _renderCityPopup('runes'); }
-            });
-          }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] rune buy failed', _e); if (typeof vToast === 'function') vToast('Erro ao comprar.', 'warn'); });
-        }
+      var _doFragBuy = function(){
+        var preGold = p.gold;
+        if (window.vProcessing) { try { window.vProcessing.show({ text: 'Comprando...' }); } catch(_){} }
+        window.vCityServer.rune.buy(t.tier).then(function(res){
+          if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+          if (!res || !res.ok) { if (typeof vToast === 'function') vToast((res && res.error === 'no_gold') ? 'Valdoritas insuficientes.' : 'Não foi possível comprar.', 'warn'); return; }
+          if (typeof res.gold === 'number') { p.gold = res.gold; refreshHud(); }
+          if (res.fragment) _applyBoughtItem(res.fragment);  // PADRAO_COMPRA
+          _hydrateRuneFrags();
+          _showServiceResultPopup({
+            itemName: (res.fragment || t.name), icon: t.emoji, npc: 'Eirik',
+            narrative: '<i>Eirik entrega o fragmento, embrulhado em pano.</i><br><br><b>' + t.name + '</b> adicionado.',
+            deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
+            onContinue: function(){ _renderCityPopup('runes'); }
+          });
+        }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] rune buy failed', _e); if (typeof vToast === 'function') vToast('Erro ao comprar.', 'warn'); });
+      };
+      // PADRAO_COMERCIO (2026-07-02): fragmento é ITEM → _commerceConfirm com thumbnail WebP.
+      _commerceConfirm({
+        npcName: 'Eirik', npcRole: 'Escriba Rúnico', itemName: t.name, mode: 'buy',
+        narration: 'Eirik pousa <b>' + t.name + '</b> (Tier ' + t.tier + ') sobre o pano de couro e corre o polegar pela fenda de luz que atravessa a pedra.',
+        speech: 'Não vendia se tivesse escolha. Mas pra quem tem pressa... ' + t.cost + ' Valdoritas, e é teu.',
+        confirmLabel: '✓ Comprar · ' + t.cost + ' V',
+        onConfirm: _doFragBuy,
+        legacy: { icon: t.emoji, npc: 'Eirik', title: 'Comprar ' + t.name, desc: '<b>' + t.name + '</b> (Tier ' + t.tier + ')<br>Custo: ' + t.cost + ' Valdoritas', cost: t.cost, onConfirm: _doFragBuy }
       });
     }
   });
@@ -47314,39 +47318,50 @@ function _shadowBuyRemote(p, item){
   var discount = (p.metadata && p.metadata.shadow_deal_active) ? 0.20 : 0;
   var actualCost = Math.ceil(item.cost * (1 - discount));  // exibição; o servidor cobra o real
   var discountLine = discount > 0 ? '<br><b>Promoção do Vulto:</b> -20%' : '';
-  _showConfirmPurchase({
-    icon: item.icon, npc: 'O Vulto', title: 'Comprar ' + item.name,
-    desc: '<b>' + item.name + '</b><br><i>' + item.desc + '</i><br><br><b>Preço:</b> ' + actualCost + ' Valdoritas' + discountLine + '<br><i>"Sem perguntas. Sem reembolso. Sem testemunhas."</i>',
-    cost: actualCost,
-    onConfirm: function(){
-      var preGold = p.gold;
-      if (window.vProcessing) { try { window.vProcessing.show({ text: 'Negociando...' }); } catch(_){} }
-      window.vCityServer.shadow.buy(key).then(function(res){
-        if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
-        if (!res || !res.ok) {
-          if (typeof vToast === 'function') vToast((res && res.error === 'no_gold') ? 'Valdoritas insuficientes.' : 'Negócio recusado.', 'warn');
-          return;
-        }
-        if (typeof res.gold === 'number') p.gold = res.gold;
-        if (typeof res.hp === 'number') p.hp = res.hp;
-        refreshHud();
-        // PADRAO_COMPRA: item normal (kind 'item') o servidor ja adicionou -> espelha.
-        if (res.kind === 'item' && res.name) _applyBoughtItem(res.name);
-        var narrative;
-        if (res.kind === 'mystery') {
-          narrative = '<i>' + (res.suspense || 'Você sacode a caixa. Algo se move lá dentro...') + '</i><br><br>🎲 <b>' + res.loot_name + '</b><br><br><i>' + (res.reveal || '') + '</i>';
-        } else if (res.kind === 'vigor') {
-          narrative = (res.flavor || '') + '<br><br>❤️ <b>+' + res.heal + ' HP</b> recuperados!';
-        } else {
-          narrative = (res.flavor || '') + '<br><br><b>' + (res.name || item.name) + '</b> adicionado à bolsa.';
-        }
-        if (res.spending_comment) narrative += '<br><br><i>' + res.spending_comment + '</i>';
-        _showServiceResultPopup({
-          icon: item.icon, npc: 'O Vulto', narrative: narrative,
-          deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }],
-          onContinue: function(){ navigateBack(); }
-        });
-      }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] shadow buy failed', _e); if (typeof vToast === 'function') vToast('Erro no Beco.', 'warn'); });
+  // onConfirm compartilhado (usado pelo _commerceConfirm e pelo fallback legado file://).
+  var _doVultoBuy = function(){
+    var preGold = p.gold;
+    if (window.vProcessing) { try { window.vProcessing.show({ text: 'Negociando...' }); } catch(_){} }
+    window.vCityServer.shadow.buy(key).then(function(res){
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+      if (!res || !res.ok) {
+        if (typeof vToast === 'function') vToast((res && res.error === 'no_gold') ? 'Valdoritas insuficientes.' : 'Negócio recusado.', 'warn');
+        return;
+      }
+      if (typeof res.gold === 'number') p.gold = res.gold;
+      if (typeof res.hp === 'number') p.hp = res.hp;
+      refreshHud();
+      // PADRAO_COMPRA: item normal (kind 'item') o servidor ja adicionou -> espelha.
+      if (res.kind === 'item' && res.name) _applyBoughtItem(res.name);
+      var narrative;
+      if (res.kind === 'mystery') {
+        narrative = '<i>' + (res.suspense || 'Você sacode a caixa. Algo se move lá dentro...') + '</i><br><br><b>' + res.loot_name + '</b><br><br><i>' + (res.reveal || '') + '</i>';
+      } else if (res.kind === 'vigor') {
+        narrative = (res.flavor || '') + '<br><br><b>+' + res.heal + ' HP</b> recuperados!';
+      } else {
+        narrative = (res.flavor || '') + '<br><br><b>' + (res.name || item.name) + '</b> adicionado à bolsa.';
+      }
+      if (res.spending_comment) narrative += '<br><br><i>' + res.spending_comment + '</i>';
+      // PADRAO_COMERCIO: resultado com imagem WebP do item (não o brasão heráldico).
+      _showServiceResultPopup({
+        itemName: (res.name || item.name), icon: item.icon, npc: 'O Vulto', narrative: narrative,
+        deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }],
+        onContinue: function(){ navigateBack(); }
+      });
+    }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] shadow buy failed', _e); if (typeof vToast === 'function') vToast('Erro no Beco.', 'warn'); });
+  };
+  // PADRAO_COMERCIO (2026-07-02): compra de ITEM confirma via _commerceConfirm
+  // (retrato do Vulto + exame com thumbnail WebP do item), não no popup genérico.
+  _commerceConfirm({
+    npcName: 'O Vulto', npcRole: 'Mercado das sombras', itemName: item.name, mode: 'buy',
+    narration: 'O Vulto ergue <b>' + item.name + '</b> à meia-luz, entre os barris. <i>' + item.desc + '</i>',
+    speech: actualCost + ' Valdoritas.' + (discount > 0 ? ' Hoje sai com desconto — não te acostumes.' : '') + ' Sem perguntas, sem reembolso, sem testemunhas.',
+    confirmLabel: '✓ Comprar · ' + actualCost + ' V',
+    onConfirm: _doVultoBuy,
+    legacy: {
+      icon: item.icon, npc: 'O Vulto', title: 'Comprar ' + item.name,
+      desc: '<b>' + item.name + '</b><br><i>' + item.desc + '</i><br><br><b>Preço:</b> ' + actualCost + ' Valdoritas' + discountLine + '<br><i>"Sem perguntas. Sem reembolso. Sem testemunhas."</i>',
+      cost: actualCost, onConfirm: _doVultoBuy
     }
   });
 }
@@ -48935,8 +48950,14 @@ function _showServiceResultPopup(opts){
   // FIX 2026-05-05: opts.icon pode ser SVG markup retornado por _heralIco()
   // (ex: '<svg ...><use href="#ic-festival"/></svg>'). textContent escapava
   // HTML → SVG aparecia literal na tela. innerHTML rende corretamente.
-  // Fallback ✨ é emoji puro, igualmente seguro como innerHTML.
-  document.getElementById('srp-icon').innerHTML       = opts.icon || '✨';
+  // PADRAO_COMERCIO (2026-07-02): opts.itemName → thumbnail WebP do ITEM no resultado
+  // de compra/venda (o brasão heráldico vira só fallback quando não há WebP do item).
+  var _srpIcon = opts.icon || '<span style="color:var(--v-gold,#c4953a)">◆</span>';
+  if (opts.itemName && typeof _resolveItemIcon === 'function') {
+    var _srpItemImg = _resolveItemIcon(opts.itemName, '46px');
+    if (_srpItemImg) _srpIcon = _srpItemImg;
+  }
+  document.getElementById('srp-icon').innerHTML       = _srpIcon;
   document.getElementById('srp-npc').textContent      = (opts.npc || '').toUpperCase();
   // 2026-05-22 FIX (user feedback): "Tem que finalizar a animação da rolagem
   // de dado, e somente depois disso que o NPC mostra o diálogo dele."
