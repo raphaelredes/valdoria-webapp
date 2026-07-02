@@ -47507,8 +47507,8 @@ function _travelersView(p, traveler){
   // Menu de ações: info / conversar arc. (2026-05-31: "Dar presente" removido —
   // feature de presentes com diálogos antigos descontinuada, a pedido do user.)
   var items = [
-    { icon: _heralIco('ic-mochila'), label: 'Ver detalhes',      _action: 'info' },
-    { icon: _heralIco('ic-mochila'), label: 'Conversar (arc)',   _action: 'arc' }
+    { icon: _heralIco('ic-mochila'), label: 'Ver detalhes', _action: 'info' },
+    { icon: _heralIco('ic-mochila'), label: 'Conversar',    _action: 'arc' }
   ];
   _squareShowListPopup({
     stackKey: 'traveler_view_' + traveler.id, icon: traveler.icon, title: traveler.name,
@@ -47529,7 +47529,17 @@ function _travelersView(p, traveler){
           onConfirm: function(){}
         });
       } else if (item._action === 'arc'){
-        _travelerArcView(p, traveler);
+        // PADRAO_SERVIDOR (2026-07-02): REMOTE abre a CONVERSA VIVA server-driven
+        // (venue=wandering, node=<npc_id>) — o servidor roda greet/talk/observe/deep/
+        // quest com XP, progressão de arco, memória e perks REAIS via a ponte
+        // wandering_dialogue_bridge; o cliente só renderiza pelo vEncounter. LOCAL cai
+        // no arc-view estático (dev tool).
+        if (typeof window._openCityDialogue === 'function'
+            && typeof window._isRemote === 'function' && window._isRemote()) {
+          window._openCityDialogue('wandering', traveler.id);
+        } else {
+          _travelerArcView(p, traveler);
+        }
       }
     }
   });
