@@ -117,11 +117,16 @@ function renderRuneScribe(container, data) {
   npcRow.appendChild(info);
   npcRow.appendChild(_rnsEl('div', 'npc-chev', '›'));
   npcRow.addEventListener('click', function(){
-    // sessão #76: o retrato/nome do Eirik abre DIRETO a conversa (talkOptions
-    // Q&A: Quem é você / tipos de runas / forja / fragmentos) — o MESMO diálogo
-    // do antigo botão "Conversar com Eirik" (removido do menu de ações). Routing:
-    // rune_npc_rune_eirik → RUNE_NPCS[0] → _showSharedNpcDialogue (cidade.html).
     window._SVC_CONFIG = window._SVC_CONFIG_RUNES;  // reações por reputação
+    // PADRAO_SERVIDOR (2026-07-02): REMOTE abre o diálogo SERVER-DRIVEN (venue=rune,
+    // node=eirik) — saudação rotativa + lore; as escolhas de serviço roteiam pelos
+    // fluxos rune existentes (rune_scribe_menu/catalog) via transition:action.
+    // LOCAL (file://) cai no client-sim _showSharedNpcDialogue (dev tool).
+    if (typeof window._openCityDialogue === 'function'
+        && typeof window._isRemote === 'function' && window._isRemote()) {
+      window._openCityDialogue('rune', 'eirik');
+      return;
+    }
     if (typeof vCity === 'object' && typeof vCity.act === 'function') {
       vCity.act('rune_npc_rune_eirik');
     } else if (typeof window.vEncounter === 'object' && window.vEncounter.render) {

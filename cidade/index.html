@@ -52408,6 +52408,11 @@ var ACTION_HANDLERS = {
   'temple_dialogue_remove_curse':        function(p){ _showTempleNpcDialogue('remove_curse'); },
   'temple_dialogue_greater_restoration': function(p){ _showTempleNpcDialogue('greater_restoration'); },
   'temple_dialogue_raise_dead':          function(p){ _showTempleNpcDialogue('raise_dead'); },
+  // 2026-07-02: confissão/oferta viravam só choices do ALDRIC_DIALOGUE client; agora o
+  // venue 'temple' server-driven roteia essas escolhas por transition:action → estes
+  // handlers abrem os MESMOS diálogos ricos (SERVICE_DIALOGUES_TEMPLE.confess/donate).
+  'temple_dialogue_confess':             function(p){ _showTempleNpcDialogue('confess'); },
+  'temple_dialogue_donate':              function(p){ _showTempleNpcDialogue('donate'); },
 
   // Service handlers: chamados pelo card click → abre confirm popup → process.
   'temple_svc_heal': function(p){

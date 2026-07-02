@@ -356,10 +356,19 @@ function _tmpBuildNpcRow(data) {
   chev.textContent = '›';
   row.appendChild(chev);
 
-  // Click → open ALDRIC_DIALOGUE PADRAO_ALDRIC
+  // Click → diálogo do Padre Aldric.
   row.addEventListener('click', function(){
+    window._SVC_CONFIG = window._SVC_CONFIG_TEMPLE;
+    // PADRAO_SERVIDOR (2026-07-02): REMOTE abre a saudação SERVER-DRIVEN (venue=temple,
+    // node=aldric) — rotativa + lore dos Quatro; as escolhas de serviço roteiam pelos
+    // diálogos ricos existentes (cura/bênção/confissão/oferta) via transition:action
+    // → temple_dialogue_<sid>. LOCAL (file://) cai no ALDRIC_DIALOGUE client (dev tool).
+    if (typeof window._openCityDialogue === 'function'
+        && typeof window._isRemote === 'function' && window._isRemote()) {
+      window._openCityDialogue('temple', 'aldric');
+      return;
+    }
     if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
-      window._SVC_CONFIG = window._SVC_CONFIG_TEMPLE;
       window.vEncounter.render(ALDRIC_DIALOGUE, { dialogues: SERVICE_DIALOGUES_TEMPLE });
     }
   });
