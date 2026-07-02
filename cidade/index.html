@@ -20765,8 +20765,21 @@ function _activeFestivalKey(){
   if (month === 6)  return 'starfall';
   if (month === 9)  return 'harvest';
   if (month === 12) return 'lanterns';
-  // Off-season: rotacionar pra dar acesso pro player testar
-  return ['forge', 'starfall', 'harvest', 'lanterns'][month % 4];
+  // P1 (2026-07-01): entressafra mostra o PRÓXIMO festival do calendário —
+  // coerência com o SERVIDOR (Olmiro fala dos preparativos do próximo via
+  // festival_ctx). Antes era month % 4, que abria um festival divergente da
+  // fala server-driven (ex.: julho mostrava Lanternas; servidor fala Colheita).
+  if (month < 3)  return 'forge';
+  if (month < 6)  return 'starfall';
+  if (month < 9)  return 'harvest';
+  return 'lanterns';
+}
+
+// Festival realmente ATIVO agora? (janela real 10-16 do mês do festival)
+function _festivalIsActive(){
+  var d = new Date(), month = d.getMonth() + 1, day = d.getDate();
+  return (month === 3 || month === 6 || month === 9 || month === 12)
+    && day >= 10 && day <= 16;
 }
 
 // FESTIVAL_EVENTS legacy mantido pra back-compat com handlers antigos
@@ -20783,6 +20796,9 @@ function _buildFestivalMockData(player){
   var fest = FESTIVALS_DB[key];
   var dayNum = Math.min(fest.total_days, Math.max(1, new Date().getDate() - fest.real_start[1] + 1));
   if (dayNum < 1) dayNum = 1;
+  // P1 (2026-07-01): entressafra NÃO mostra "Dia X de Y" (day_num=0 → o
+  // renderer omite o prefixo) — coerência com o Olmiro em modo preparativos.
+  if (!_festivalIsActive()) dayNum = 0;
   return {
     fest_icon: fest.icon,
     fest_name: fest.name,
