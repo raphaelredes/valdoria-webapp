@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-03T19:34:44Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-03T20:53:30Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -17670,8 +17670,10 @@ var COMBAT_PNG_AVAILABLE = {
     'patrulheiro': 1, 'paladino': 1, 'bardo': 1, 'druida': 1, 'monge': 1,
     'feiticeiro': 1, 'bruxo': 1,
     'inimigo': 1, 'boss': 1,
-    'spiritual-weapon': 1, 'summon': 1, 'familiar': 1, 'sprite': 1,
-    'find-steed': 1, 'animal-companion': 1
+    /* Invocações: até 5 variações cada (base + -2..-5). O valor = nº de variações
+       no disco; o resolver escolhe uma estável por unidade. Auditoria 2026-07-03. */
+    'spiritual-weapon': 5, 'summon': 5, 'familiar': 5, 'sprite': 5,
+    'find-steed': 5, 'animal-companion': 5
 };
 /* Per-enemy PNG availability — keyed by SLUGIFIED enemy name.
    2026-06-12 (user "criar todas as imagens"): TODAS as 117 espécies com base
@@ -17951,9 +17953,26 @@ function _combatPortraitHTML(iconId, u, utype) {
            — pedia `.png` mas TODOS os 20 retratos de classe são `.webp` (0 png no
            dir). O onerror sempre disparava → heráldico, tanto no CARD da arena
            quanto no popup. Os retratos de inimigo (acima) já usavam `.webp`. */
-        return '<img class="c-portrait-img" src="' + base2 + slug + '.webp" ' +
-               'alt="" loading="lazy" ' +
-               'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + iconId + '\\\'/></svg>\'">';
+        /* Invocações: até 5 variações cada (COMBAT_PNG_AVAILABLE[slug]=nº); classes=1
+           (base). Índice ESTÁVEL por unidade (hash do id → sem flicker entre renders).
+           onerror em cascata: variação → base → heráldico (variação faltando nunca
+           quebra). Auditoria 2026-07-03. */
+        var _svc = COMBAT_PNG_AVAILABLE[slug] || 1;
+        var _svIdx = 0;
+        if (_svc > 1 && u) {
+            var _sid = String(u.id || u.uid || u.summonId || u.n || slug);
+            var _sh = 0;
+            for (var _sk = 0; _sk < _sid.length; _sk++) { _sh = ((_sh << 5) - _sh + _sid.charCodeAt(_sk)) | 0; }
+            _svIdx = Math.abs(_sh) % _svc;
+        }
+        var _sBase = base2 + slug + '.webp';
+        var _sImg = (_svIdx > 0) ? (base2 + slug + '-' + (_svIdx + 1) + '.webp') : _sBase;
+        var _sSvg = '<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + iconId + '\\\'/></svg>';
+        var _sErr = (_svIdx > 0)
+            ? 'this.onerror=function(){this.onerror=null;this.outerHTML=\'' + _sSvg + '\'};this.src=\'' + _sBase + '\''
+            : 'this.onerror=null;this.outerHTML=\'' + _sSvg + '\'';
+        return '<img class="c-portrait-img" src="' + _sImg + '" ' +
+               'alt="" loading="lazy" onerror="' + _sErr + '">';
     }
     return '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + iconId + '"/></svg>';
 }
