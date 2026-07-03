@@ -3992,10 +3992,82 @@
       "cost": 0.004845,
       "quality": "low",
       "category": "potion"
+    },
+    "azagaia": {
+      "timestamp": "2026-07-02T22:11:22.710848",
+      "cost": 0.004900000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "lanca-de-montaria": {
+      "timestamp": "2026-07-02T22:11:42.796123",
+      "cost": 0.0048000000000000004,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "zarabatana": {
+      "timestamp": "2026-07-02T22:12:07.143645",
+      "cost": 0.004875000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "rede": {
+      "timestamp": "2026-07-02T22:12:32.522409",
+      "cost": 0.004870000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "flechas-(20)": {
+      "timestamp": "2026-07-02T22:21:51.204052",
+      "cost": 0.004995000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "virotes-de-besta-(20)": {
+      "timestamp": "2026-07-02T22:22:16.736036",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "municao-de-funda-(20)": {
+      "timestamp": "2026-07-02T22:22:40.986556",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "agulhas-de-zarabatana-(50)": {
+      "timestamp": "2026-07-02T22:23:05.302410",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "flechas-20": {
+      "timestamp": "2026-07-02T22:21:51.204052",
+      "cost": 0.004995000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "virotes-de-besta-20": {
+      "timestamp": "2026-07-02T22:22:16.736036",
+      "cost": 0.004790000000000001,
+      "quality": "low",
+      "category": "potion"
+    },
+    "municao-de-funda-20": {
+      "timestamp": "2026-07-02T22:22:40.986556",
+      "cost": 0.0048200000000000005,
+      "quality": "low",
+      "category": "potion"
+    },
+    "agulhas-de-zarabatana-50": {
+      "timestamp": "2026-07-02T22:23:05.302410",
+      "cost": 0.004835000000000001,
+      "quality": "low",
+      "category": "potion"
     }
   },
-  "last_run": "2026-06-21T18:17:06.939064",
-  "total_cost": 3.9569199999999998,
+  "last_run": "2026-07-02T22:23:05.305281",
+  "total_cost": 3.995805,
   "last_updated": "2026-05-17T21:30:13.724922",
   "count": 675
 }
