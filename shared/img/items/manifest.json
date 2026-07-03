@@ -4484,10 +4484,22 @@
       "source": "missing_item_gen_2026-06-12",
       "quality": "low",
       "category": "generated"
+    },
+    "clava-grande": {
+      "timestamp": "2026-07-03T18:52:53.695103",
+      "cost": 0.004850000000000001,
+      "quality": "low",
+      "category": "weapon"
+    },
+    "estrela-da-manha": {
+      "timestamp": "2026-07-03T18:53:19.856545",
+      "cost": 0.0048850000000000005,
+      "quality": "low",
+      "category": "weapon"
     }
   },
-  "last_run": "2026-07-02T22:23:05.305281",
-  "total_cost": 3.995805,
+  "last_run": "2026-07-03T18:53:19.858549",
+  "total_cost": 4.00554,
   "last_updated": "2026-05-17T21:30:13.724922",
   "count": 773
 }
