@@ -4064,10 +4064,180 @@
       "cost": 0.004835000000000001,
       "quality": "low",
       "category": "potion"
+    },
+    "geleia-residual": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "limo-corrosivo": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "muco-ocre": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "fragmento-de-placa-runica": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "lasca-de-gargula": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "palha-amaldicoada": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "nucleo-de-pedra-runico": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "placa-de-ferro-encantado": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "presa-de-bugbear": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "tentaculo-de-otyugh": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pena-de-grifo": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "olho-de-basilisco": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "chifre-de-minotauro": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "pena-de-harpia": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "presa-de-lobisomem": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "cauda-de-homem-rato": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "vinha-apodrecida": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "cinza-elemental": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "fragmento-de-rocha-viva": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "essencia-aquosa": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "sopro-cristalizado": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "presa-flamejante": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "ferrao-de-diabrete": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "espinho-de-quasito": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "nevoa-espectral": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "fragmento-de-cranio-ardente": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "colmilho-vampirico": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "cinzas-do-vampiro": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "essencia-mutavel": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "serpente-petrificante": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "totem-de-furia": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "insignia-de-veterano": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "grimorio-rasgado": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
+    },
+    "escoria-de-forja": {
+      "source": "missing_item_gen_2026-06-12",
+      "quality": "low",
+      "category": "generated"
     }
   },
   "last_run": "2026-07-02T22:23:05.305281",
   "total_cost": 3.995805,
   "last_updated": "2026-05-17T21:30:13.724922",
-  "count": 675
+  "count": 723
 }
