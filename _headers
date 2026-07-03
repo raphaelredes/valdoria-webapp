@@ -107,8 +107,9 @@
   X-Content-Type-Options: nosniff
 # Auditoria 2026-07-03: subdirs que estavam SEM header immutable (caíam no default
 # do CF Pages → re-download a cada visita; lore/ sozinho = 30MB / 600 arquivos).
-# Todos append-only = Tier A. city/ e items/ ficam Tier C (regeram) — NÃO listar.
-# Enforcement: preflight check_headers_img_coverage.
+# Append-only = Tier A immutable. EXCETO map/ (world-map.webp pode ser re-otimizado
+# — resize+revert 2026-07-03 provou que muda → Tier C abaixo, junto de items/city).
+# city/ e items/ tambem Tier C. Enforcement: preflight check_headers_img_coverage.
 /shared/img/adventurers/*
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
@@ -119,9 +120,6 @@
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 /shared/img/lore/*
-  Cache-Control: public, max-age=31536000, immutable
-  X-Content-Type-Options: nosniff
-/shared/img/map/*
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 /shared/img/poi/*
@@ -149,6 +147,14 @@
 # City location PNGs (Tier C — ETag-revalidated, allows regen).
 # Mesmo padrão do items/* (Sessão #38): ETag/304 permite revisita barata.
 /shared/img/city/*
+  Cache-Control: no-cache, must-revalidate
+  X-Content-Type-Options: nosniff
+
+# Mapa-mundi (Tier C — world-map.webp pode ser re-otimizado; revalidacao 304 ~200B
+# barata E mudanca de conteudo propaga sem ficar presa no cache immutable. Auditoria
+# 2026-07-03: 512px ficou pixelado -> revert p/ 1024 nao chegava sob immutable).
+# locations/* dentro de map/ tambem revalidam (barato, ~22 arquivos).
+/shared/img/map/*
   Cache-Control: no-cache, must-revalidate
   X-Content-Type-Options: nosniff
 
