@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-03T18:56:32Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-03T19:34:44Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14264,6 +14264,10 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
            REMOTE mesmo sem match de bestiário. Também alimenta o fallback heráldico. */
         tags: (Array.isArray(spec.tags_exact) && spec.tags_exact.length ? spec.tags_exact : (b.tags || [])),
         xpReward: (spec.xpReward_exact != null ? parseInt(spec.xpReward_exact, 10) : 0),  /* #83: XP canônico D&D 5e (por CR) vindo do backend; 0 em LOCAL → computeRewards usa fallback */
+        /* Auditoria 2026-07-03: olhar/sopro petrificante (Basilisco/Górgona). No acerto
+           rola TR CON; falha → 'petrified' no player (repeatSave = recuperação + teto).
+           Espelha combat2_resolve.enemy_condition_on_hit_debuff (motor = spec canônico). */
+        conditionOnHit: (spec.conditionOnHit_exact || b.conditionOnHit || null),
         it: { ic: '⚔️', lb: 'ataca' }
     };
     /* V1.7 Stage-CASTERS (2026-04-21) — propaga skills + res + caster flags.
@@ -30396,6 +30400,33 @@ async function playTurn(aIdx, tIdx, opts) {
             else if (typeof sfxHit === 'function') sfxHit();
         } catch (_eSfx) { /* SFX não-crítico */ }
     }
+    /* Enemy conditionOnHit — olhar/sopro petrificante do Basilisco/Górgona (PHB p.291).
+       No acerto: rola chance + TR CON; falha → 'petrified' no player/ally com repeatSave
+       (recuperação por turno em simResolveEndTurnConditions) + teto de turnos (anti-softlock).
+       Espelha o motor combat2_resolve.enemy_condition_on_hit_debuff (spec canônico). */
+    try {
+        var _coh = actor && actor.t === 'e' && actor.conditionOnHit;
+        if (_coh && target && (target.t === 'p' || target.t === 'a') && target.hp > 0
+                && Math.random() < (+_coh.chance || 0.25)
+                && !(target.se || []).some(function (x) { return x && x.id === (_coh.condition || 'petrified'); })) {
+            var _cohAb = (_coh.ability || 'con');
+            var _cohDc = (+_coh.dc || 12);
+            var _cohTot = _simLuckyD20(_simIsLucky(target)) + simSaveMod(target, _cohAb);
+            if (_cohTot >= _cohDc) {
+                s.log.push(target.n + ' encara o olhar petrificante e RESISTE (TR ' + _cohAb.toUpperCase() + ' ' + _cohTot + ' vs CD ' + _cohDc + ').');
+            } else {
+                (target.se = target.se || []).push({
+                    id: (_coh.condition || 'petrified'), kind: 'debuff', ico: '',
+                    n: 'Petrificado', dndCondition: 'Petrificado (PHB App.A)',
+                    turnsLeft: Math.max(1, (+_coh.turns || 3)), tickCombat2: true,
+                    skipTurn: true, speed0: true, targetedAdvantage: true,
+                    autoFailStrDex: true, resistAllDmg: true,
+                    repeatSave: { ability: _cohAb, saveDc: _cohDc }, saveDc: _cohDc
+                });
+                s.log.push(target.n + ' FALHA no TR (' + _cohAb.toUpperCase() + ' ' + _cohTot + ' vs CD ' + _cohDc + ') e começa a petrificar-se! Recupera com TR CON ao fim de cada turno.');
+            }
+        }
+    } catch (_eCoh) { /* nunca quebra o turno */ }
     /* Reset flag pro próximo ataque */
     s._hitVfxPlayed = false;
 }
@@ -30968,6 +30999,27 @@ async function runNpcsUntilPlayer(opts) {
             return;
         }
     }
+    /* Petrificado (Basilisco/Górgona) — o JOGADOR perde o turno, com TR de recuperação
+       (repeatSave CON via simResolveEndTurnConditions) a cada turno pulado + teto de
+       turnos (anti-softlock: guarda _pg<4 + turnsLeft). Espelha o skip de NPC. Auditoria 2026-07-03. */
+    try {
+        var _pg = 0;
+        while (s.order[s.p_idx] && s.order[s.p_idx].hp > 0 && !s.order[s.p_idx].isDead
+                && _hasSkipTurnStatus(s.order[s.p_idx]) && _pg < 4) {
+            _pg++;
+            var _psk = (s.order[s.p_idx].se || []).find(function (st) { return st && st.skipTurn; });
+            s.log.push(s.order[s.p_idx].n + ' está ' + (_psk && _psk.n ? _psk.n.toLowerCase() : 'incapacitado') + ' e perde o turno.');
+            render(s);
+            await sleep(650);
+            await simResolveEndTurnConditions(s, s.p_idx); /* TR de recuperação (repeatSave CON) + teto de turnos */
+            render(s);
+            if (!_hasSkipTurnStatus(s.order[s.p_idx])) break; /* recuperou / expirou */
+            /* ainda petrificado → inimigos agem de novo, depois re-checa */
+            s.active_idx = (s.p_idx + 1) % s.order.length;
+            if (await runNpcSegmentUntilPlayerTurn()) { _simSkipNonPlayerDice = false; render(s); return; }
+        }
+        if (s.order[s.p_idx] && (s.order[s.p_idx].hp <= 0 || s.order[s.p_idx].isDead)) { render(s); return; }
+    } catch (_ePet) { /* nunca hard-locka o turno do jogador */ }
     /* Volta ao turno do jogador: animações 3D de todos de novo até ele optar por pular só os outros na próxima sequência. */
     _simSkipNonPlayerDice = false;
     _actionTaken = false; // libera o botão Agir no novo turno
