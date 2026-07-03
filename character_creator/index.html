@@ -6255,7 +6255,7 @@ Busca rápida:
             const emoji = fs.icon || '⚔️';
             const sz = sizePx || 64;
             const onErr = "this.onerror=null;this.outerHTML='<span style=\\'font-size:" + Math.floor(sz*0.7) + "px\\'>" + emoji.replace(/'/g, "\\'") + "</span>';";
-            return '<img src="/character_creator/icons/' + fsId + '.png" alt="" ' +
+            return '<img src="/character_creator/icons/' + fsId + '.webp" alt="" ' +
                    'style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain;display:block;margin:0 auto 6px;" ' +
                    'loading="lazy" onerror="' + onErr + '">';
         }
@@ -6310,7 +6310,7 @@ Busca rápida:
             _showCreatorDetailPopup({
                 parentScreen: 'class',
                 title: fs.name,
-                imgUrl: '/character_creator/icons/' + fsId + '.png',
+                imgUrl: '/character_creator/icons/' + fsId + '.webp',
                 subtitle: fs.desc,
                 mechanicsHtml:
                     '<b style="color:var(--v-gold,#c4953a);">⚔️ Mecânicas D&amp;D 5e (Fighting Style PHB p.72/86/91)</b><br>'

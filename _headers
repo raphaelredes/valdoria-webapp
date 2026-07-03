@@ -105,6 +105,34 @@
 /shared/img/ui/*
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
+# Auditoria 2026-07-03: subdirs que estavam SEM header immutable (caíam no default
+# do CF Pages → re-download a cada visita; lore/ sozinho = 30MB / 600 arquivos).
+# Todos append-only = Tier A. city/ e items/ ficam Tier C (regeram) — NÃO listar.
+# Enforcement: preflight check_headers_img_coverage.
+/shared/img/adventurers/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/character_creator/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/festival/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/lore/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/map/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/poi/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/portoes/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+/shared/img/quests/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
 
 # AI-generated item PNGs (Tier C — ETag-revalidated, allows regen).
 # Sessão #28 (2026-05-24): CF Pages override bare `no-cache` em static
