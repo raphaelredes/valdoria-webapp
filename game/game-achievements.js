@@ -25,18 +25,18 @@ var PNG_BASE = '/shared/img/achievements/';
 var FALLBACK_PNG = 'trofeu.webp';
 
 var TIER_META = {
-  'bronze': { label: 'Bronze',  color: '#cd7f32', emoji: '🥉' },
-  'prata':  { label: 'Prata',   color: '#c0c0c0', emoji: '🥈' },
-  'ouro':   { label: 'Ouro',    color: '#ffd700', emoji: '🥇' }
+  'bronze': { label: 'Bronze',  color: '#cd7f32', emoji: '' },
+  'prata':  { label: 'Prata',   color: '#c0c0c0', emoji: '' },
+  'ouro':   { label: 'Ouro',    color: '#ffd700', emoji: '' }
 };
 
 var CATEGORY_META = {
-  'combate':    { label: 'Combate',    emoji: '⚔️', accent: '#c4953a' },
-  'exploracao': { label: 'Exploração', emoji: '🗺️', accent: '#7dba5b' },
-  'social':     { label: 'Social',     emoji: '👥', accent: '#5b9dba' },
-  'economia':   { label: 'Economia',   emoji: '🪙', accent: '#ffb84d' },
-  'missoes':    { label: 'Missões',    emoji: '📜', accent: '#ba5b5b' },
-  'progresso':  { label: 'Progresso',  emoji: '📈', accent: '#b07cc4' }
+  'combate':    { label: 'Combate',    emoji: '', accent: '#c4953a' },
+  'exploracao': { label: 'Exploração', emoji: '', accent: '#7dba5b' },
+  'social':     { label: 'Social',     emoji: '', accent: '#5b9dba' },
+  'economia':   { label: 'Economia',   emoji: '', accent: '#ffb84d' },
+  'missoes':    { label: 'Missões',    emoji: '', accent: '#ba5b5b' },
+  'progresso':  { label: 'Progresso',  emoji: '', accent: '#b07cc4' }
 };
 
 
@@ -67,7 +67,7 @@ function _renderMainView(el, data) {
 
   var title = document.createElement('div');
   title.className = 'v-ach-banner-title';
-  title.textContent = '🏆 Hall da Fama';
+  title.textContent = 'Hall da Fama';
   banner.appendChild(title);
 
   var sub = document.createElement('div');
@@ -145,7 +145,7 @@ function _buildCategoryCard(cat) {
   if (done === total && total > 0) {
     var crown = document.createElement('div');
     crown.className = 'v-ach-cat-crown';
-    crown.textContent = '👑';
+    crown.textContent = '';
     crown.title = 'Categoria 100%';
     card.appendChild(crown);
   }
@@ -221,14 +221,14 @@ function _buildAchievementCard(ach) {
       img.style.display = 'none';
       var emoji = document.createElement('div');
       emoji.className = 'v-ach-emoji-fallback';
-      emoji.textContent = ach.icon || '🏆';
+      emoji.textContent = ach.icon || '';
       artBox.appendChild(emoji);
     });
     artBox.appendChild(img);
   } else {
     var emoji = document.createElement('div');
     emoji.className = 'v-ach-emoji-fallback';
-    emoji.textContent = ach.icon || '🏆';
+    emoji.textContent = ach.icon || '';
     artBox.appendChild(emoji);
   }
 
@@ -236,7 +236,7 @@ function _buildAchievementCard(ach) {
   if (!ach.unlocked) {
     var lockOv = document.createElement('div');
     lockOv.className = 'v-ach-lock-overlay';
-    lockOv.textContent = '🔒';
+    lockOv.textContent = '';
     artBox.appendChild(lockOv);
   }
 
@@ -276,7 +276,7 @@ function _buildAchievementCard(ach) {
   } else {
     var lockTxt = document.createElement('div');
     lockTxt.className = 'v-ach-locked-txt';
-    lockTxt.textContent = '🔒 Bloqueada';
+    lockTxt.textContent = 'Bloqueada';
     body.appendChild(lockTxt);
   }
 

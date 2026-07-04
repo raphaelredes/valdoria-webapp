@@ -116,10 +116,10 @@ function _buildActionsGrid(popup) {
 
     // Canonical slot order for row 1
     var row1Slots = [
-        { t: 'attack', ico: '⚔️',  label: 'Atacar',     primary: true  },
-        { t: 'skill',  ico: '✨',  label: 'Habilidades', primary: false },
-        { t: 'item',   ico: '🎒',  label: 'Itens',       primary: false },
-        { t: 'flee',   ico: '🏃',  label: 'Fugir',       primary: false }
+        { t: 'attack', ico: '',  label: 'Atacar',     primary: true  },
+        { t: 'skill',  ico: '',  label: 'Habilidades', primary: false },
+        { t: 'item',   ico: '',  label: 'Itens',       primary: false },
+        { t: 'flee',   ico: '',  label: 'Fugir',       primary: false }
     ];
 
     row1Slots.forEach(function(slot) {
@@ -148,10 +148,10 @@ function _buildActionsGrid(popup) {
 
     // ── Row 2: static D&D bonus/free actions ─────────────
     var row2 = [
-        { ico: '🛡️', label: 'Esquivar',    t: 'dodge',     primary: false },
-        { ico: '➡️', label: 'Desengajar',  t: 'disengage', primary: false },
+        { ico: '', label: 'Esquivar',    t: 'dodge',     primary: false },
+        { ico: '', label: 'Desengajar',  t: 'disengage', primary: false },
         { ico: '⏭',  label: 'Pular',       t: 'pass',      primary: false },
-        { ico: '📜', label: 'Log',          t: 'log',       primary: false }
+        { ico: '', label: 'Log',          t: 'log',       primary: false }
     ];
 
     row2.forEach(function(def) {

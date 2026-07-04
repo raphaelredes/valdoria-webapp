@@ -161,7 +161,7 @@ function renderRuneScribe(container, data) {
   if (data.type === 'craft_menu') {
     /* === 2d. Section: Fragmentos === */
     var sectionLbl = vCity.el('div', 'pt-section-label');
-    sectionLbl.textContent = '⚜ Fragmentos & Forja ⚜';
+    sectionLbl.textContent = 'Fragmentos & Forja ';
     body.appendChild(sectionLbl);
 
     /* === 2e. Tier cards === */

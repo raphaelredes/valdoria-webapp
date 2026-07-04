@@ -1091,7 +1091,7 @@ Busca rápida:
         }
 
         /* DM Narration bubble */
-        /* Sessao #29 v4 (2026-05-24): dm-bubble com "🎲 Mestre" violava regra
+        /* Sessao #29 v4 (2026-05-24): dm-bubble com "Mestre" violava regra
            "DM nunca fala como personagem" (CLAUDE.md). User pediu remover
            qualquer MESTRE falando com jogador na criacao de personagem.
            Hide via CSS preserva os divs em HTML (compat com buildDmBubbles
@@ -1121,7 +1121,7 @@ Busca rápida:
         }
 
         .dm-bubble::before {
-            content: '🎲 Mestre';
+            content: 'Mestre';
             display: block;
             font-size: var(--v-font-xs, 10px);
             font-weight: 700;
@@ -2713,14 +2713,14 @@ Busca rápida:
             'Runas ancestrais brilham, canalizando o poder da criação...',
             'O livro de classes se abre, revelando caminhos de poder...',
             'Uma nova página na história de Valdoria está prestes a ser escrita...',
-            '⚔️ Dica: Cada raça oferece bônus únicos de atributo e habilidades.',
-            '🛡️ Dica: Escolha uma classe que combine com seu estilo de jogo.',
-            '⚔️ Dica: Atributos altos em Força ou Destreza melhoram seu ataque.',
-            '🛡️ Dica: Constituição alta significa mais pontos de vida.',
-            '⚔️ Dica: Magos usam Inteligência, Clérigos usam Sabedoria.',
-            '🛡️ Dica: Carisma é essencial para Bardos, Feiticeiros e Bruxos.',
-            '⚔️ Dica: A origem do personagem define suas perícias iniciais.',
-            '🛡️ Dica: Não existe escolha errada — cada combinação é viável!',
+            'Dica: Cada raça oferece bônus únicos de atributo e habilidades.',
+            'Dica: Escolha uma classe que combine com seu estilo de jogo.',
+            'Dica: Atributos altos em Força ou Destreza melhoram seu ataque.',
+            'Dica: Constituição alta significa mais pontos de vida.',
+            'Dica: Magos usam Inteligência, Clérigos usam Sabedoria.',
+            'Dica: Carisma é essencial para Bardos, Feiticeiros e Bruxos.',
+            'Dica: A origem do personagem define suas perícias iniciais.',
+            'Dica: Não existe escolha errada — cada combinação é viável!',
         ];
         window._creatorLoadingCtrl = ValdoriaLoadingController({
             overlayId: 'loading',
@@ -3119,7 +3119,7 @@ Busca rápida:
                     <div class="dm-bubble" id="dm-0"></div>
                     <div class="v-step-banner"><span class="v-step-line"></span><span class="v-step-gem">◆</span><span class="v-step-text">Escolha sua Raça</span><span class="help-tip" onclick="showHelp('race')">?</span><span class="v-step-line"></span></div>
                     <div class="v-caption">Cada raça possui bônus e traços únicos. Toque para ver detalhes.</div>
-                    <button class="v-btn v-btn-random btn-block" onclick="randomizeCharacter()">🎲 Personagem Aleatório</button>
+                    <button class="v-btn v-btn-random btn-block" onclick="randomizeCharacter()">Personagem Aleatório</button>
                     <div class="v-card-grid" id="raceGrid"></div>
                 </div>
                 <div class="sub-screen" id="sub-race-detail">
@@ -3150,17 +3150,17 @@ Busca rápida:
                     <!-- Sessao #29 (2026-05-24): filtros por papel D&D 5e -->
                     <div class="class-role-filters" id="classRoleFilters">
                         <button type="button" class="class-role-tab active" data-role="all"
-                                onclick="setClassRoleFilter('all')">⚔️ Todos</button>
+                                onclick="setClassRoleFilter('all')">Todos</button>
                         <button type="button" class="class-role-tab" data-role="tank"
-                                onclick="setClassRoleFilter('tank')">🛡️ Tanque</button>
+                                onclick="setClassRoleFilter('tank')">Tanque</button>
                         <button type="button" class="class-role-tab" data-role="dps"
-                                onclick="setClassRoleFilter('dps')">🗡️ DPS</button>
+                                onclick="setClassRoleFilter('dps')">DPS</button>
                         <button type="button" class="class-role-tab" data-role="healer"
-                                onclick="setClassRoleFilter('healer')">✨ Curador</button>
+                                onclick="setClassRoleFilter('healer')">Curador</button>
                         <button type="button" class="class-role-tab" data-role="support"
-                                onclick="setClassRoleFilter('support')">📜 Suporte</button>
+                                onclick="setClassRoleFilter('support')">Suporte</button>
                         <button type="button" class="class-role-tab" data-role="caster"
-                                onclick="setClassRoleFilter('caster')">🔮 Mágico</button>
+                                onclick="setClassRoleFilter('caster')">Mágico</button>
                     </div>
                     <div class="class-role-count" id="classRoleCount">12 classes disponíveis</div>
                     <div class="v-card-grid" id="classGrid"></div>
@@ -3214,11 +3214,11 @@ Busca rápida:
                         <div class="stat-method-label">Como quer gerar seus atributos?</div>
                         <div class="stat-method-tabs">
                             <button class="stat-method-tab active" data-method="standard"
-                                    onclick="setStatMethod('standard')">📋 Array Padrão</button>
+                                    onclick="setStatMethod('standard')">Array Padrão</button>
                             <button class="stat-method-tab" data-method="roll"
-                                    onclick="setStatMethod('roll')">🎲 Rolar 4d6</button>
+                                    onclick="setStatMethod('roll')">Rolar 4d6</button>
                             <button class="stat-method-tab" data-method="pointbuy"
-                                    onclick="setStatMethod('pointbuy')">⚖️ Point Buy</button>
+                                    onclick="setStatMethod('pointbuy')">Point Buy</button>
                         </div>
                         <div class="stat-method-desc" id="statMethodDesc">15, 14, 13, 12, 10, 8 — distribuídos como preferir.</div>
                     </div>
@@ -3226,8 +3226,8 @@ Busca rápida:
                     <div class="stat-pool" id="statPool"></div>
                     <div id="statSlots"></div>
                     <div class="stat-actions">
-                        <button class="v-btn v-btn-suggest" onclick="suggestStats()">🎯 Sugestão da Classe</button>
-                        <button class="v-btn v-btn-secondary v-btn-clear" onclick="clearStats()">🔄 Limpar</button>
+                        <button class="v-btn v-btn-suggest" onclick="suggestStats()">Sugestão da Classe</button>
+                        <button class="v-btn v-btn-secondary v-btn-clear" onclick="clearStats()">Limpar</button>
                     </div>
                     <button class="v-btn v-btn-primary btn-block hidden" id="statsConfirm" onclick="goScreen(3)">✓
                         Confirmar Atributos</button>
@@ -3334,7 +3334,7 @@ Busca rápida:
                     </div>
                     <div class="align-grid" id="alignGrid"></div>
                     <button class="v-btn v-btn-secondary btn-block" style="margin-top: var(--v-space-lg, 12px)"
-                        onclick="sel.alignment=''; goScreen(5)">⏭️ Pular</button>
+                        onclick="sel.alignment=''; goScreen(5)">Pular</button>
                     <button class="v-btn v-btn-primary btn-block hidden" id="alignConfirm" onclick="goScreen(5)">✓
                         Confirmar Alinhamento</button>
                 </div>
@@ -3382,7 +3382,7 @@ Busca rápida:
                         <input class="v-input" id="nameInput" maxlength="15" placeholder="Nome do personagem">
                         <div class="flex-between">
                             <button class="v-btn v-btn-secondary v-btn-pill" onclick="generateName()"
-                                style="margin-top: var(--v-space-md, 8px)">🎲 Gerar Nome</button>
+                                style="margin-top: var(--v-space-md, 8px)">Gerar Nome</button>
                             <span class="char-limit" id="nameLimit">0/15</span>
                         </div>
                     </div>
@@ -3393,7 +3393,7 @@ Busca rápida:
                         <input class="v-input" id="surnameInput" maxlength="15" placeholder="Sobrenome">
                         <div class="flex-between">
                             <button class="v-btn v-btn-secondary v-btn-pill" onclick="generateSurname()"
-                                style="margin-top: var(--v-space-md, 8px)">🎲 Gerar Sobrenome</button>
+                                style="margin-top: var(--v-space-md, 8px)">Gerar Sobrenome</button>
                             <span class="char-limit" id="surnameLimit">0/15</span>
                         </div>
                     </div>
@@ -4252,7 +4252,7 @@ Busca rápida:
                         'O nome <strong>"'+name+(surname?' '+surname:'')+'"</strong> é um placeholder genérico do sistema e não pode ser usado.<br><br>Escolha um nome próprio para seu personagem.',
                         false);
                 } else {
-                    _showNamePopup('⚠️ Aviso de Banimento',
+                    _showNamePopup('Aviso de Banimento',
                         'O nome <strong>"'+name+(surname?' '+surname:'')+'"</strong> contém termo pejorativo proibido.<br><br><strong>Usar termos ofensivos pode resultar em banimento da sua conta.</strong> Escolha outro nome.',
                         true);
                 }
@@ -4269,7 +4269,7 @@ Busca rápida:
                         var data = await r.json();
                         if (data && !data.ok){
                             var isBan = data.reason === 'profanity';
-                            _showNamePopup(isBan ? '⚠️ Aviso de Banimento' : 'Nome Inválido',
+                            _showNamePopup(isBan ? 'Aviso de Banimento' : 'Nome Inválido',
                                 (data.message || 'Nome inválido') + (isBan ? '<br><br><strong>Termos pejorativos podem resultar em banimento da conta.</strong>' : ''),
                                 isBan);
                             return;
@@ -4521,7 +4521,7 @@ Busca rápida:
                 + 'border-radius:12px; padding: var(--v-space-2xl, 24px); max-width:320px; width:100%; '
                 + 'box-shadow:0 12px 36px rgba(0,0,0,0.8), 0 0 24px rgba(196,149,58,0.2); '
                 + 'animation:vScaleIn 0.25s ease-out; text-align:center;">'
-                + '<div style="font-size:calc(36px * var(--v-font-scale, 1)); margin-bottom: var(--v-space-md, 8px);">⚔️</div>'
+                + '<div style="font-size:calc(36px * var(--v-font-scale, 1)); margin-bottom: var(--v-space-md, 8px);"></div>'
                 + '<div style="font-family:var(--v-font-display,Cinzel,serif); '
                 + 'font-size:calc(16px * var(--v-font-scale, 1)); font-weight:700; '
                 + 'color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase; '
@@ -4732,13 +4732,13 @@ Busca rápida:
         /* Sessao #29 v4: STAT_ICONS — emoji fallback. PNG geradas via OpenAI low
            ficam em /character_creator/icons/{slug}.png (Sessao #29 batch).
            _attrIconHtml usa PNG quando disponivel, fallback automatic em onerror. */
-        const STAT_ICONS = { strength: '💪', dexterity: '🏃', constitution: '🛡️', intelligence: '📚', wisdom: '🙏', charisma: '✨' };
+        const STAT_ICONS = { strength: '', dexterity: '', constitution: '', intelligence: '', wisdom: '', charisma: '' };
         /* 2026-06-07 FIX (user): usar as IMAGENS OpenAI já geradas dos 6 atributos
            (shared/img/levelup/attrs/{ptbr}.webp) em vez de emoji/ícone. Antes apontava
            pra /character_creator/icons/{en}.png (inexistente) -> caía no emoji. */
         const _ATTR_SLUG_PT = { strength: 'forca', dexterity: 'destreza', constitution: 'constituicao', intelligence: 'inteligencia', wisdom: 'sabedoria', charisma: 'carisma' };
         function _attrIconHtml(attrKey, sizePx) {
-            const emoji = STAT_ICONS[attrKey] || '⚔️';
+            const emoji = STAT_ICONS[attrKey] || '';
             const sz = sizePx || 24;
             const ptSlug = _ATTR_SLUG_PT[attrKey] || attrKey;
             const onErr = "this.onerror=null;this.outerHTML='<span style=\\'font-size:" + sz + "px\\'>" + emoji.replace(/'/g, "\\'") + "</span>';";
@@ -5138,7 +5138,7 @@ Busca rápida:
             const usedValues = Object.values(sel.statAssignment);
             if (!_rolledPool || _rolledPool.length === 0) {
                 // Ainda nao rolou — mostra botao
-                poolEl.innerHTML = '<button class="v-btn v-btn-primary" style="width:100%;padding:14px;font-size:calc(14px * var(--v-font-scale, 1));" onclick="rollAttributesNow()">🎲 Rolar Atributos (4d6, descarta o menor)</button>';
+                poolEl.innerHTML = '<button class="v-btn v-btn-primary" style="width:100%;padding:14px;font-size:calc(14px * var(--v-font-scale, 1));" onclick="rollAttributesNow()">Rolar Atributos (4d6, descarta o menor)</button>';
                 return;
             }
             poolEl.innerHTML = '<div style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim);width:100%;margin-bottom: var(--v-space-sm, 4px)">Seus valores rolados — distribua:</div>';
@@ -5162,7 +5162,7 @@ Busca rápida:
             // refeitas. Substitui "Rolar Novamente" por indicador de lock.
             const locked = document.createElement('div');
             locked.style.cssText = 'flex-basis:100%;margin-top: var(--v-space-md, 8px);padding: 6px var(--v-space-md-lg, 10px);font-size:calc(11px * var(--v-font-scale, 1));text-align:center;color:var(--v-text-dim,#a09484);opacity:0.75;border-top:1px solid rgba(196,149,58,0.15);';
-            locked.innerHTML = '🔒 Rolagens salvas — nao podem ser refeitas';
+            locked.innerHTML = 'Rolagens salvas — nao podem ser refeitas';
             poolEl.appendChild(locked);
         }
 
@@ -5295,7 +5295,7 @@ Busca rápida:
             html += `<div class="detail-header">${detailIconHtml}<div class="detail-title">${r.name}</div><div class="detail-subtitle">${r.desc}</div></div>`;
 
             // Attribute bonuses
-            html += `<div class="detail-section"><div class="detail-section-title">📊 Bônus de Atributos</div><div class="bonus-chips">`;
+            html += `<div class="detail-section"><div class="detail-section-title">Bônus de Atributos</div><div class="bonus-chips">`;
             for (const [a, v] of Object.entries(r.bonuses)) {
                 html += `<span class="bonus-chip">+${v} ${ATTR_PT[a]}</span>`;
             }
@@ -5303,20 +5303,20 @@ Busca rápida:
             html += `</div></div>`;
 
             // Characteristics
-            html += `<div class="detail-section"><div class="detail-section-title">📋 Características</div>`;
-            html += `<div class="detail-row"><b>🏃 Velocidade:</b> ${speed_m}m (${r.speed} ft)</div>`;
-            html += `<div class="detail-row"><b>📏 Tamanho:</b> ${r.size}</div>`;
-            html += `<div class="detail-row"><b>🗣️ Idiomas:</b> ${r.langs.join(', ')}</div></div>`;
+            html += `<div class="detail-section"><div class="detail-section-title">Características</div>`;
+            html += `<div class="detail-row"><b>Velocidade:</b> ${speed_m}m (${r.speed} ft)</div>`;
+            html += `<div class="detail-row"><b>Tamanho:</b> ${r.size}</div>`;
+            html += `<div class="detail-row"><b>Idiomas:</b> ${r.langs.join(', ')}</div></div>`;
 
             // Racial traits (collapsed — tap to expand)
-            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">✨ Traços Raciais <span class="section-summary">(${traits.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Traços Raciais <span class="section-summary">(${traits.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
             traits.forEach(t => {
-                html += `<div class="trait-item"><div class="trait-name">🔹 ${t.name}</div><div class="trait-desc">${t.desc}</div></div>`;
+                html += `<div class="trait-item"><div class="trait-name">${t.name}</div><div class="trait-desc">${t.desc}</div></div>`;
             });
             html += `</div></div>`;
 
             // Gameplay impact
-            html += `<div class="detail-section detail-highlight"><div class="detail-section-title">🎯 Impacto na Jornada</div><div class="detail-text">${RACE_IMPACT[key]}</div></div>`;
+            html += `<div class="detail-section detail-highlight"><div class="detail-section-title">Impacto na Jornada</div><div class="detail-text">${RACE_IMPACT[key]}</div></div>`;
 
             // Phase 1 bottom button — proceed to selection or confirm directly
             if (r.halfelf) {
@@ -5357,7 +5357,7 @@ Busca rápida:
             // Back button: fecha sub-subrace-select e volta para sub-race-detail
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="closeSubraceSelect()">← Voltar</button>`;
             // Sessao #29 (2026-05-24) FIX: header da tela de sub-raça usava
-            // r.icon (emoji '🧪' pra Gnomo, '🐲' pra Dragonborn, etc.) em vez
+            // r.icon (emoji '' pra Gnomo, '' pra Dragonborn, etc.) em vez
             // de RACE_HERALDIC_ICON (PNG real). Bug atingia 4 raças com sub-
             // raça/variant: Gnome, Elf, Dwarf, Halfling, Human (variant),
             // HalfElf (bônus), Dragonborn (ancestralidade). Fix: usa PNG
@@ -5402,7 +5402,7 @@ Busca rápida:
 
         function buildSubraceDetailSection(raceKey, race) {
             const details = SUBRACE_DETAILS[raceKey] || {};
-            let html = `<div class="detail-section"><div class="detail-section-title">🔀 Escolha a Sub-raça</div>`;
+            let html = `<div class="detail-section"><div class="detail-section-title">Escolha a Sub-raça</div>`;
             html += `<div class="detail-option-grid" id="subraceOptions">`;
             for (const [sk, sr] of Object.entries(race.subraces)) {
                 const bonusTxt = Object.entries(sr.bonuses).map(([a, v]) => `+${v} ${ATTR_ABBR[a]}`).join(', ');
@@ -5439,7 +5439,7 @@ Busca rápida:
             // Show impact
             const impactEl = document.getElementById('subraceImpact');
             if (details && details[subraceKey]) {
-                impactEl.innerHTML = `<div class="detail-section-title">🎯 ${sr.name}</div><div class="detail-text">${details[subraceKey].impact}</div>`;
+                impactEl.innerHTML = `<div class="detail-section-title">${sr.name}</div><div class="detail-text">${details[subraceKey].impact}</div>`;
                 impactEl.classList.remove('hidden');
             } else {
                 impactEl.classList.add('hidden');
@@ -5466,7 +5466,7 @@ Busca rápida:
         function buildAncestryDetailSection(raceKey, race) {
             // Sessao #38: cada card agora mostra PNG do dragao + texto.
             const _v = (window.VBUNDLE_HASH || Date.now());
-            let html = `<div class="detail-section"><div class="detail-section-title">🐉 Ancestralidade Dracônica</div>`;
+            let html = `<div class="detail-section"><div class="detail-section-title">Ancestralidade Dracônica</div>`;
             html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Toque em um dragão para ver detalhes e confirmar.</div>`;
             html += `<div class="detail-option-grid" id="ancestryOptions">`;
             for (const [sk, sr] of Object.entries(race.subraces)) {
@@ -5502,7 +5502,7 @@ Busca rápida:
                 imgUrl: '/shared/img/character_creator/dragon-' + subraceKey + '.webp?v=' + (window.VBUNDLE_HASH || Date.now()),
                 subtitle: sr.description,
                 mechanicsHtml:
-                    '<b style="color:var(--v-gold,#c4953a);">🐉 Mecânicas D&amp;D 5e (Draconato PHB p.32-35)</b><br>'
+                    '<b style="color:var(--v-gold,#c4953a);">Mecânicas D&amp;D 5e (Draconato PHB p.32-35)</b><br>'
                     + '• <b>Tipo de dano:</b> ' + dmgName + '<br>'
                     + '• <b>Formato do sopro:</b> ' + shapeName + '<br>'
                     + '• <b>Salvaguarda:</b> ' + saveName + ' (alvos)<br>'
@@ -5542,7 +5542,7 @@ Busca rápida:
         function buildHalfElfDetailSection(raceKey) {
             const attrs = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom'];
             halfElfBonuses = []; halfElfSkills = []; // reset
-            let html = `<div class="detail-section"><div class="detail-section-title">🎲 Bônus de Atributo (+1 cada)</div>`;
+            let html = `<div class="detail-section"><div class="detail-section-title">Bônus de Atributo (+1 cada)</div>`;
             html += `<div class="v-caption" style="margin-bottom:6px">Meio-Elfos escolhem 2 atributos diferentes para receber +1 (além do +2 Carisma).</div>`;
             html += `<div class="lang-grid" id="heBonusOptions">`;
             attrs.forEach(a => {
@@ -5550,7 +5550,7 @@ Busca rápida:
             });
             html += `</div></div>`;
             // Sessao #35: Skill Versatility — 2 perícias livres (PHB p.39)
-            html += `<div class="detail-section"><div class="detail-section-title">🎓 Versatilidade (Skill Versatility)</div>`;
+            html += `<div class="detail-section"><div class="detail-section-title">Versatilidade (Skill Versatility)</div>`;
             html += `<div class="v-caption" style="margin-bottom:6px">Meio-Elfos ganham proficiência em <b>2 perícias à escolha</b> (PHB p.39).</div>`;
             html += `<div class="lang-grid" id="heSkillOptions">`;
             const allSkills = Object.keys(SKILL_PT);
@@ -5654,7 +5654,7 @@ Busca rápida:
         let variantFeat = '';
 
         function buildVariantHumanSection(raceKey, race) {
-            let html = `<div class="detail-section"><div class="detail-section-title">🔀 Tipo de Humano</div>`;
+            let html = `<div class="detail-section"><div class="detail-section-title">Tipo de Humano</div>`;
             html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Escolha entre o Humano padrão (+1 em tudo) ou o Variante (mais especializado).</div>`;
             html += `<div class="detail-option-grid" id="humanTypeOptions">`;
             html += `<div class="detail-option" onclick="selectHumanType(false,this)"><div class="detail-option-name">Humano Padrão</div><div class="detail-option-desc">+1 em todos os 6 atributos</div></div>`;
@@ -5668,7 +5668,7 @@ Busca rápida:
                (popup do celular) por chips clicaveis no design do jogo.
                Multi-select max 2, mesmo padrao do skill/lang picker. */
             const attrs = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
-            html += `<div class="detail-section"><div class="detail-section-title">📊 Bônus +1 em 2 Atributos</div>`;
+            html += `<div class="detail-section"><div class="detail-section-title">Bônus +1 em 2 Atributos</div>`;
             html += `<div class="v-caption" style="margin-bottom:6px">Escolha 2 atributos diferentes.</div>`;
             html += `<div class="lang-grid" id="vhBonusOptions">`;
             attrs.forEach(a => {
@@ -5677,7 +5677,7 @@ Busca rápida:
             html += `</div></div>`;
 
             // 1 skill proficiency (any of 18) — collapsible
-            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">📋 Perícia Extra <span class="section-summary" id="vhSkillStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
+            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Perícia Extra <span class="section-summary" id="vhSkillStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
             html += `<div class="section-body">`;
             html += `<div class="lang-grid" id="vhSkillOptions">`;
             const allSkills = Object.keys(SKILL_PT);
@@ -5688,7 +5688,7 @@ Busca rápida:
             html += `</div></div></div>`;
 
             // 1 talento — collapsible (Sessao #33: "Feat" -> "Talento" canonical PT-BR D&D 5e)
-            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🌟 Talento <span class="section-summary" id="vhFeatStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
+            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Talento <span class="section-summary" id="vhFeatStatus">Toque para escolher</span><span class="toggle-arrow">▾</span></div>`;
             html += `<div class="section-body">`;
             html += `<div class="detail-option-grid single-col" id="vhFeatOptions">`;
             for (const [fid, f] of Object.entries(CREATION_FEATS)) {
@@ -5831,7 +5831,7 @@ Busca rápida:
             const allLangs = [...LANGUAGES.standard, ...LANGUAGES.exotic];
             const available = allLangs.filter(l => !known.includes(l.key));
 
-            let html = `<div class="detail-section" id="langSection"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🗣️ Idioma Adicional <span class="section-summary" id="langStatus">Escolha abaixo</span><span class="toggle-arrow">▾</span></div>`;
+            let html = `<div class="detail-section" id="langSection"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Idioma Adicional <span class="section-summary" id="langStatus">Escolha abaixo</span><span class="toggle-arrow">▾</span></div>`;
             html += `<div class="section-body">`;
             html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Escolha 1 idioma extra além de: ${known.join(', ')}.</div>`;
             html += `<div class="lang-grid" id="langOptions">`;
@@ -5918,7 +5918,7 @@ Busca rápida:
                 class_warlock: 'bruxo'
             };
             var slug = MAP[key];
-            var emoji = (typeof CLASSES !== 'undefined' && CLASSES[key] && CLASSES[key].icon) || '⚔️';
+            var emoji = (typeof CLASSES !== 'undefined' && CLASSES[key] && CLASSES[key].icon) || '';
             if (!slug) return emoji;
             var sz = sizePx || 48;
             var onErr = "this.onerror=null;this.outerHTML='" + emoji.replace(/'/g, "\\'") + "';";
@@ -6038,26 +6038,26 @@ Busca rápida:
                 const tipKey = sel.race + '_' + key;
                 const tip = RACE_CLASS_TIPS[tipKey];
                 if (tip) {
-                    html += `<div class="synergy-tip"><div class="synergy-tip-title">💡 Dica do Mestre — ${RACES[sel.race].name} ${c.name}</div>${tip}</div>`;
+                    html += `<div class="synergy-tip"><div class="synergy-tip-title">Dica do Mestre — ${RACES[sel.race].name} ${c.name}</div>${tip}</div>`;
                 }
             }
 
             // Description
-            html += `<div class="detail-section"><div class="detail-section-title">💡 O que faz</div><div class="detail-text">${CLASS_DESC[key]}</div></div>`;
+            html += `<div class="detail-section"><div class="detail-section-title">O que faz</div><div class="detail-text">${CLASS_DESC[key]}</div></div>`;
 
             // HP, Resource & AC
-            html += `<div class="detail-section"><div class="detail-section-title">❤️ Vida, Recurso & Defesa</div>`;
+            html += `<div class="detail-section"><div class="detail-section-title">Vida, Recurso & Defesa</div>`;
             if (stats) {
                 html += `<div class="detail-row"><b>Dado de Vida:</b> ${c.hit_die}</div>`;
                 html += `<div class="detail-row"><b>HP Nível 1:</b> ${stats.hp} <span style="color:var(--v-text-dim);font-size:10px">(${c.hit_die} + mod CON ${mod(stats.constitution) >= 0 ? '+' : ''}${mod(stats.constitution)})</span></div>`;
-                html += `<div class="detail-row"><b>🔮 ${c.res}:</b> ${stats.mp} <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[c.res] ? '— ' + RES_DESC[c.res] : ''}</span></div>`;
+                html += `<div class="detail-row"><b>${c.res}:</b> ${stats.mp} <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[c.res] ? '— ' + RES_DESC[c.res] : ''}</span></div>`;
                 const acInfo = calcAC(key, stats);
-                html += `<div class="detail-row"><b>🛡️ CA:</b> ${acInfo.detail}</div>`;
+                html += `<div class="detail-row"><b>CA:</b> ${acInfo.detail}</div>`;
             } else {
                 html += `<div class="detail-row"><b>Dado de Vida:</b> ${c.hit_die}</div>`;
-                html += `<div class="detail-row"><b>🔮 ${c.res}</b> <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[c.res] ? '— ' + RES_DESC[c.res] : ''}</span></div>`;
+                html += `<div class="detail-row"><b>${c.res}</b> <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[c.res] ? '— ' + RES_DESC[c.res] : ''}</span></div>`;
             }
-            html += `<div class="detail-row"><b>♻️ Descanso Curto:</b> ${RECOVERY_PT[c.rec]}</div></div>`;
+            html += `<div class="detail-row"><b>Descanso Curto:</b> ${RECOVERY_PT[c.rec]}</div></div>`;
 
             // Attributes with bars (collapsed)
             if (stats) {
@@ -6066,7 +6066,7 @@ Busca rápida:
                 // SUGERIDO/prioridade da classe (fallback de calcStatsFor), nao escolha
                 // final. Rotula como "Sugeridos" + caption ate o jogador atribuir os 6.
                 const _statsDefined = !!(sel.statAssignment && Object.keys(sel.statAssignment).length === 6);
-                const _attrTitle = _statsDefined ? '📊 Atributos' : '📊 Atributos Sugeridos';
+                const _attrTitle = _statsDefined ? 'Atributos' : 'Atributos Sugeridos';
                 const _attrCaption = _statsDefined ? '' : `<div class="detail-text" style="font-size:var(--v-font-micro, 11px);color:var(--v-text-dim);margin:-2px 0 6px">Prioridade recomendada desta classe — você define seus valores na etapa de Atributos.</div>`;
                 html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">${_attrTitle}${sel.race ? ' (com bônus de ' + RACES[sel.race].name + ')' : ''}<span class="toggle-arrow">▾</span></div><div class="section-body">${_attrCaption}`;
                 attrs.forEach(a => {
@@ -6083,28 +6083,28 @@ Busca rápida:
             }
 
             // Proficiencies (collapsed)
-            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🛡️ Proficiências<span class="toggle-arrow">▾</span></div><div class="section-body">`;
+            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Proficiências<span class="toggle-arrow">▾</span></div><div class="section-body">`;
             html += `<div class="detail-row"><b>Armaduras:</b> ${c.armor.map(a => ARMOR_PT[a] || a).join(', ') || 'Nenhuma'}</div>`;
             html += `<div class="detail-row"><b>Armas:</b> ${c.weapons.map(w => WEAPON_PT[w] || w).join(', ')}</div>`;
             html += `<div class="detail-row"><b>Salvaguardas:</b> ${c.saves.map(s => SAVE_PT[s]).join(', ')}</div></div></div>`;
 
             // Equipment (collapsed)
-            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🎒 Equipamento Inicial <span class="section-summary">(${c.equip.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Equipamento Inicial <span class="section-summary">(${c.equip.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
             c.equip.forEach(e => { html += `<div class="detail-row">• ${e}</div>`; });
             html += `</div></div>`;
 
             // Level 1 Features (collapsed)
             const lv1 = CLASS_LV1[key];
             if (lv1) {
-                html += `<div class="detail-section detail-highlight collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">⚔️ Habilidades Nível 1 <span class="section-summary">(${lv1.features.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+                html += `<div class="detail-section detail-highlight collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Habilidades Nível 1 <span class="section-summary">(${lv1.features.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
                 lv1.features.forEach(f => {
-                    html += `<div class="trait-item"><div class="trait-name">🔹 ${f.name}</div><div class="trait-desc">${f.desc}</div></div>`;
+                    html += `<div class="trait-item"><div class="trait-name">${f.name}</div><div class="trait-desc">${f.desc}</div></div>`;
                 });
                 html += `</div></div>`;
 
                 // Spells (collapsed)
                 if (lv1.spells.length > 0) {
-                    html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">✨ Magias Iniciais <span class="section-summary">(${lv1.spells.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+                    html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Magias Iniciais <span class="section-summary">(${lv1.spells.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
                     lv1.spells.forEach(sp => {
                         html += `<div class="trait-item"><div class="trait-name"><span class="spell-tag">${sp.type}</span> ${sp.name}</div><div class="trait-desc">${sp.desc}</div></div>`;
                     });
@@ -6113,7 +6113,7 @@ Busca rápida:
             }
 
             // Available skills (collapsed)
-            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">📋 Perícias Disponíveis <span class="section-summary">(${c.skills.count} de ${c.skills.opts.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
+            html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Perícias Disponíveis <span class="section-summary">(${c.skills.count} de ${c.skills.opts.length})</span><span class="toggle-arrow">▾</span></div><div class="section-body">`;
             html += `<div class="detail-row" style="color:var(--v-gold);margin-bottom:6px">Escolha <b>${c.skills.count}</b> de ${c.skills.opts.length} perícias:</div>`;
             c.skills.opts.forEach(s => {
                 const attr = SKILL_ATTR[s];
@@ -6252,7 +6252,7 @@ Busca rápida:
            PNGs geradas via OpenAI low quality em /character_creator/icons/. */
         function _fightingStyleIconHtml(fsId, sizePx) {
             const fs = FIGHTING_STYLES[fsId] || {};
-            const emoji = fs.icon || '⚔️';
+            const emoji = fs.icon || '';
             const sz = sizePx || 64;
             const onErr = "this.onerror=null;this.outerHTML='<span style=\\'font-size:" + Math.floor(sz*0.7) + "px\\'>" + emoji.replace(/'/g, "\\'") + "</span>';";
             return '<img src="/character_creator/icons/' + fsId + '.webp" alt="" ' +
@@ -6313,7 +6313,7 @@ Busca rápida:
                 imgUrl: '/character_creator/icons/' + fsId + '.webp',
                 subtitle: fs.desc,
                 mechanicsHtml:
-                    '<b style="color:var(--v-gold,#c4953a);">⚔️ Mecânicas D&amp;D 5e (Fighting Style PHB p.72/86/91)</b><br>'
+                    '<b style="color:var(--v-gold,#c4953a);">Mecânicas D&amp;D 5e (Fighting Style PHB p.72/86/91)</b><br>'
                     + (_MECHANICS[fsId] || fs.desc || ''),
                 onConfirm: function(){
                     sel.fightingStyle = fsId;
@@ -6419,7 +6419,7 @@ Busca rápida:
             // Grid 2-col (user pediu — antes era 1 por linha).
             const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredEnemy()">← Voltar</button>`;
-            html += `<div class="detail-header"><div class="detail-title">🏹 Inimigo Favorito</div>`;
+            html += `<div class="detail-header"><div class="detail-title">Inimigo Favorito</div>`;
             html += `<div class="detail-subtitle">Patrulheiro — toque em um inimigo para ver detalhes e confirmar.</div></div>`;
             html += `<div class="v-card-grid" style="display:grid; grid-template-columns:1fr 1fr; gap: var(--v-space-md, 8px);">`;
             for (const [feId, fe] of Object.entries(RANGER_FAVORED_ENEMIES)) {
@@ -6445,7 +6445,7 @@ Busca rápida:
                 imgUrl: '/shared/img/character_creator/ranger-enemy-' + feId + '.webp?v=' + (window.VBUNDLE_HASH || Date.now()),
                 subtitle: fe.desc,
                 mechanicsHtml:
-                    '<b style="color:var(--v-gold,#c4953a);">🏹 Mecânicas D&amp;D 5e (Patrulheiro PHB p.91)</b><br>'
+                    '<b style="color:var(--v-gold,#c4953a);">Mecânicas D&amp;D 5e (Patrulheiro PHB p.91)</b><br>'
                     + '• <b>Vantagem</b> em Sabedoria (Sobrevivência) ao rastrear este tipo<br>'
                     + '• <b>+2 dano</b> em ataques de arma contra este tipo<br>'
                     + '• Lembra detalhes úteis sobre ' + fe.name.toLowerCase() + ' que você já enfrentou',
@@ -6480,7 +6480,7 @@ Busca rápida:
             // + 2 colunas no grid.
             const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelFavoredTerrain()">← Voltar</button>`;
-            html += `<div class="detail-header"><div class="detail-title">🗺️ Terreno Favorito</div>`;
+            html += `<div class="detail-header"><div class="detail-title">Terreno Favorito</div>`;
             html += `<div class="detail-subtitle">Patrulheiro — toque em um terreno para ver detalhes e confirmar.</div></div>`;
             html += `<div class="v-card-grid" style="display:grid; grid-template-columns:1fr 1fr; gap: var(--v-space-md, 8px);">`;
             for (const [ftId, ft] of Object.entries(RANGER_FAVORED_TERRAINS)) {
@@ -6507,7 +6507,7 @@ Busca rápida:
                 imgUrl: '/shared/img/character_creator/ranger-terrain-' + ftId + '.webp?v=' + (window.VBUNDLE_HASH || Date.now()),
                 subtitle: ft.desc,
                 mechanicsHtml:
-                    '<b style="color:var(--v-gold,#c4953a);">🗺️ Mecânicas D&amp;D 5e (Patrulheiro PHB p.91)</b><br>'
+                    '<b style="color:var(--v-gold,#c4953a);">Mecânicas D&amp;D 5e (Patrulheiro PHB p.91)</b><br>'
                     + '• <b>Não se perde</b> ao viajar neste terreno (exceto magia/manobras)<br>'
                     + '• <b>Alerta</b> durante viagem mesmo participando de outra atividade<br>'
                     + '• Movendo-se sozinho, pode mover-se em <b>silêncio em ritmo normal</b><br>'
@@ -6547,7 +6547,7 @@ Busca rápida:
         function buildDraconicAncestrySelect() {
             const _v = (window.VBUNDLE_HASH || Date.now());
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelDraconicAncestry()">← Voltar</button>`;
-            html += `<div class="detail-header"><div class="detail-title">🐉 Linhagem Dracônica</div>`;
+            html += `<div class="detail-header"><div class="detail-title">Linhagem Dracônica</div>`;
             html += `<div class="detail-subtitle">Feiticeiro — toque em uma cor para ver detalhes e confirmar.</div></div>`;
             html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">5 cromáticos (malignos) e 5 metálicos (bondosos).</div>`;
             for (const [daId, da] of Object.entries(SORCERER_DRACONIC_ANCESTRY)) {
@@ -6574,7 +6574,7 @@ Busca rápida:
                 imgUrl: '/shared/img/character_creator/dragon-' + daId + '.webp?v=' + (window.VBUNDLE_HASH || Date.now()),
                 subtitle: da.desc,
                 mechanicsHtml:
-                    '<b style="color:var(--v-gold,#c4953a);">🐉 Mecânicas D&amp;D 5e (Feiticeiro Linhagem Dracônica PHB p.103)</b><br>'
+                    '<b style="color:var(--v-gold,#c4953a);">Mecânicas D&amp;D 5e (Feiticeiro Linhagem Dracônica PHB p.103)</b><br>'
                     + '• <b>Tipo de dano:</b> ' + dmgName + '<br>'
                     + '• <b>Resistência a ' + dmgName + '</b> (nível 1)<br>'
                     + '• <b>+1 HP por nível</b> (Resiliência Dracônica)<br>'
@@ -6615,7 +6615,7 @@ Busca rápida:
                 bg.skills.forEach(s => { if (!allSkills.includes(s)) allSkills.push(s); });
             }
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelRogueExpertise()">← Voltar</button>`;
-            html += `<div class="detail-header"><div class="detail-title">🎯 Especialização (Expertise)</div>`;
+            html += `<div class="detail-header"><div class="detail-title">Especialização (Expertise)</div>`;
             html += `<div class="detail-subtitle">Ladino — escolha 2 perícias para dobrar o bônus de proficiência. (PHB p.96)</div></div>`;
             html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)"><b>${(sel.rogueExpertise||[]).length}/2</b> selecionadas. Toque para alternar.</div>`;
             html += `<div class="lang-grid">`;
@@ -6628,7 +6628,7 @@ Busca rápida:
             });
             html += `</div>`;
             const ok = (sel.rogueExpertise || []).length === 2;
-            html += `<button class="v-btn v-btn-primary confirm-btn" id="rogueExpertiseConfirmBtn" ${ok ? '' : 'disabled'} onclick="confirmRogueExpertise()">${ok ? '✓ CONFIRMAR ESPECIALIZAÇÃO' : '⬆️ Escolha 2 perícias'}</button>`;
+            html += `<button class="v-btn v-btn-primary confirm-btn" id="rogueExpertiseConfirmBtn" ${ok ? '' : 'disabled'} onclick="confirmRogueExpertise()">${ok ? '✓ CONFIRMAR ESPECIALIZAÇÃO' : 'Escolha 2 perícias'}</button>`;
             document.getElementById('rogueExpertiseContent').innerHTML = html;
         }
         function toggleRogueExpertise(skill) {
@@ -6734,7 +6734,7 @@ Busca rápida:
                   +   `<div class="equip-header-subtitle">${cls.name} — escolha o kit que define teu começo.</div>`
                   + `</div>`
                   + `</div>`;
-            html += `<div class="equip-hint">${Object.keys(pkgs).length === 2 ? '⚖️ Dois caminhos. Cada um molda tua jornada inicial.' : '⚖️ Escolha um kit pra começar.'}</div>`;
+            html += `<div class="equip-hint">${Object.keys(pkgs).length === 2 ? 'Dois caminhos. Cada um molda tua jornada inicial.' : 'Escolha um kit pra começar.'}</div>`;
             const pkgEntries = Object.entries(pkgs);
             pkgEntries.forEach(([pkgId, pkg], idx) => {
                 const isSelected = sel.equipmentChoice === pkgId;
@@ -6769,7 +6769,7 @@ Busca rápida:
             var hasChoice = !!sel.equipmentChoice;
             html += `<button id="equipConfirmBtn" class="v-btn v-btn-primary confirm-btn"
                 onclick="confirmEquipment()" ${hasChoice ? '' : 'disabled'}>`
-                + (hasChoice ? `⚔️ Confirmar ${sel.equipmentChoice === 'A' ? 'Pacote A' : 'Pacote B'}` : '⬆️ Escolha um pacote acima')
+                + (hasChoice ? `Confirmar ${sel.equipmentChoice === 'A' ? 'Pacote A' : 'Pacote B'}` : 'Escolha um pacote acima')
                 + `</button>`;
             document.getElementById('equipSelectContent').innerHTML = html;
         }
@@ -6909,7 +6909,7 @@ Busca rápida:
                 /* Banner epico canonical igual outras etapas */
                 html += `<div class="v-step-banner">`;
                 html += `<span class="v-step-line"></span>`;
-                html += `<span class="v-step-gem">\u2728</span>`;
+                html += `<span class="v-step-gem"></span>`;
                 html += `<span class="v-step-text">Magias Iniciais</span>`;
                 html += `<span class="v-step-line"></span>`;
                 html += `</div>`;
@@ -6967,7 +6967,7 @@ Busca rápida:
                 const choices = (data.skills || []).filter(s => !s.is_default);
                 html += `<div class="v-step-banner">`;
                 html += `<span class="v-step-line"></span>`;
-                html += `<span class="v-step-gem">\u2728</span>`;
+                html += `<span class="v-step-gem"></span>`;
                 html += `<span class="v-step-text">Habilidade Inicial</span>`;
                 html += `<span class="v-step-line"></span>`;
                 html += `</div>`;
@@ -7035,7 +7035,7 @@ Busca rápida:
             const btnDisabled = atQuota ? 'disabled' : '';
             const btnText = isSel ? '\u2713 Selecionada \u2014 toque para remover'
                                   : (atQuota ? `Quota atingida (${quota}/${quota})`
-                                             : '\u2728 Selecionar Magia');
+                                             : 'Selecionar Magia');
             html += `<button class="v-btn ${btnClass}" style="width:90%; margin: 0 5% var(--v-space-md, 8px); font-family:var(--v-font-display,Cinzel,serif); letter-spacing:1.5px;" ${btnDisabled} onclick="toggleL1Skill('${safeName}'); closeL1SkillDetail();">${btnText}</button>`;
             /* 2026-06-21 (user): "Voltar" logo ABAIXO do "Selecionar Magia" — antes ficava
                no TOPO (acima do nome da magia), posição ruim e fora de padrão. Mesmo
@@ -7135,7 +7135,7 @@ Busca rápida:
             html += `<div class="detail-header"><div class="detail-title">${bg.name}</div><div class="detail-subtitle">${bg.desc}</div></div>`;
 
             // Granted skills — show names inline, details collapsible
-            html += `<div class="detail-section"><div class="detail-section-title">📋 Perícias Concedidas</div>`;
+            html += `<div class="detail-section"><div class="detail-section-title">Perícias Concedidas</div>`;
             html += `<div class="bonus-chips" style="margin-bottom:6px">`;
             bg.skills.forEach(s => {
                 const attr = SKILL_ATTR[s];
@@ -7153,7 +7153,7 @@ Busca rápida:
 
             // Tools (collapsed)
             if (bg.toolChoice || bg.tools) {
-                html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🔧 Ferramentas<span class="toggle-arrow">▾</span></div><div class="section-body">`;
+                html += `<div class="detail-section collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Ferramentas<span class="toggle-arrow">▾</span></div><div class="section-body">`;
                 if (bg.tools) {
                     bg.tools.forEach(t => {
                         const tool = ARTISAN_TOOLS[t] || FIXED_TOOL_NAMES[t];
@@ -7173,7 +7173,7 @@ Busca rápida:
             // Background Feature (collapsed)
             const bgFeat = BG_FEATURES[key];
             if (bgFeat) {
-                html += `<div class="detail-section detail-highlight collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">🏷️ Traço: ${bgFeat.name}<span class="toggle-arrow">▾</span></div><div class="section-body">`;
+                html += `<div class="detail-section detail-highlight collapsed"><div class="detail-section-title section-toggle" onclick="toggleSection(this)">Traço: ${bgFeat.name}<span class="toggle-arrow">▾</span></div><div class="section-body">`;
                 html += `<div class="detail-text">${bgFeat.desc}</div></div></div>`;
             }
 
@@ -7182,7 +7182,7 @@ Busca rápida:
                 const cls = CLASSES[sel.classKey];
                 const overlap = bg.skills.filter(s => cls.skills.opts.includes(s));
                 if (overlap.length > 0) {
-                    html += `<div class="detail-section"><div class="detail-section-title">🎯 Sinergia com ${cls.name}</div>`;
+                    html += `<div class="detail-section"><div class="detail-section-title">Sinergia com ${cls.name}</div>`;
                     html += `<div class="detail-text">Perícias do antecedente (${overlap.map(s => SKILL_PT[s]).join(', ')}) sobrepõem opções da classe. Você terá ${cls.skills.opts.filter(s => !bg.skills.includes(s)).length} perícias disponíveis para escolher (de ${cls.skills.count} necessárias).</div></div>`;
                 }
             }
@@ -7193,7 +7193,7 @@ Busca rápida:
                 const _racePicked = (sel.languages || []);
                 const _allLangs = [...LANGUAGES.standard, ...LANGUAGES.exotic];
                 const _availLangs = _allLangs.filter(l => !_raceKnown.includes(l.key) && !_racePicked.includes(l.key));
-                html += `<div class="detail-section"><div class="detail-section-title">🗣️ Idiomas do Antecedente <span class="section-summary" id="bgLangStatus">0/${bg.languageChoice}</span></div>`;
+                html += `<div class="detail-section"><div class="detail-section-title">Idiomas do Antecedente <span class="section-summary" id="bgLangStatus">0/${bg.languageChoice}</span></div>`;
                 html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Escolha ${bg.languageChoice} idioma(s) — PHB.</div>`;
                 html += `<div class="lang-grid" id="bgLangOptions">`;
                 _availLangs.forEach(l => {
@@ -7246,15 +7246,15 @@ Busca rápida:
             if (!data) { skipPersonality(); return; }
             sel.personalityTrait = ''; sel.ideal = ''; sel.bond = ''; sel.flaw = '';
             const cats = [
-                { key: 'personalityTrait', label: 'Traço de Personalidade', icon: '🎭', items: data.traits },
-                { key: 'ideal', label: 'Ideal', icon: '⚖️', items: data.ideals },
-                { key: 'bond', label: 'Vínculo', icon: '🔗', items: data.bonds },
-                { key: 'flaw', label: 'Defeito', icon: '💔', items: data.flaws }
+                { key: 'personalityTrait', label: 'Traço de Personalidade', icon: '', items: data.traits },
+                { key: 'ideal', label: 'Ideal', icon: '', items: data.ideals },
+                { key: 'bond', label: 'Vínculo', icon: '', items: data.bonds },
+                { key: 'flaw', label: 'Defeito', icon: '', items: data.flaws }
             ];
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="skipPersonality()">← Pular</button>`;
             html += `<div class="v-title-sm" style="margin-top: var(--v-space-md, 8px)">Personalidade</div>`;
             html += `<div class="v-caption">Defina a personalidade do seu personagem. Opcional — toque em cada categoria para expandir.</div>`;
-            html += `<button class="v-btn v-btn-secondary btn-block" style="margin: 0 0 var(--v-space-md-lg, 10px)" onclick="randomizePersonality()">🎲 Aleatório</button>`;
+            html += `<button class="v-btn v-btn-secondary btn-block" style="margin: 0 0 var(--v-space-md-lg, 10px)" onclick="randomizePersonality()">Aleatório</button>`;
             html += `<div class="v-accordion">`;
             cats.forEach(cat => {
                 html += `<div class="v-accordion-section collapsed" id="persSection_${cat.key}">`;
@@ -7378,7 +7378,7 @@ Busca rápida:
             // Show background granted skills
             const bgInfo = document.getElementById('skillBgInfo');
             if (bgSkills.length > 0) {
-                bgInfo.innerHTML = `<div class="detail-section" style="margin-bottom: var(--v-space-lg, 12px)"><div class="detail-section-title" style="font-size:var(--v-space-lg, 12px)">✅ Já incluídas pelo antecedente (${bg.name})</div>${bgSkills.map(s => `<div class="detail-row" style="color:var(--v-success);font-size:11px">• ${SKILL_PT[s]} (${ATTR_ABBR[SKILL_ATTR[s]]})</div>`).join('')}</div>`;
+                bgInfo.innerHTML = `<div class="detail-section" style="margin-bottom: var(--v-space-lg, 12px)"><div class="detail-section-title" style="font-size:var(--v-space-lg, 12px)">Já incluídas pelo antecedente (${bg.name})</div>${bgSkills.map(s => `<div class="detail-row" style="color:var(--v-success);font-size:11px">• ${SKILL_PT[s]} (${ATTR_ABBR[SKILL_ATTR[s]]})</div>`).join('')}</div>`;
             }
 
             const confirmBtn = document.getElementById('skillConfirm');
@@ -7452,7 +7452,7 @@ Busca rápida:
                 const grantedInfo = document.createElement('div');
                 grantedInfo.className = 'detail-section';
                 grantedInfo.style.marginBottom = '12px';
-                let gHtml = `<div class="detail-section-title" style="font-size:12px">✅ Já concedidas</div>`;
+                let gHtml = `<div class="detail-section-title" style="font-size:12px">Já concedidas</div>`;
                 granted.forEach(t => {
                     const tool = ARTISAN_TOOLS[t];
                     if (tool) gHtml += `<div class="detail-row" style="color:var(--v-success);font-size:11px">${tool.icon} ${tool.name}</div>`;
@@ -7626,7 +7626,7 @@ Busca rápida:
             } else {
                 html += `<div class="sheet-name" style="font-size:20px">${fullName}</div>`;
             }
-            html += `<div class="sheet-subtitle">${race.icon} ${raceName} | ${cls.icon} ${cls.name} | 📖 ${bg.name}${alignText}</div>`;
+            html += `<div class="sheet-subtitle">${race.icon} ${raceName} | ${cls.icon} ${cls.name} | ${bg.name}${alignText}</div>`;
             html += `<div class="sheet-subtitle">${g ? g.icon + ' ' + g.name : ''} | Nível 1 | <span class="vi vi-coin sm"></span> +${bg.gold} Valdoritas</div></div>`;
 
             // --- Combat Stats Grid (always visible) ---
@@ -7654,9 +7654,9 @@ Busca rápida:
             // --- 1. HP & Resource (collapsible) ---
             let hpBody = '';
             hpBody += `<div class="detail-row"><b>HP:</b> ${stats.hp} <span style="color:var(--v-text-dim);font-size:10px">(${cls.hit_die} + mod CON)</span></div>`;
-            hpBody += `<div class="detail-row"><b>🔮 ${cls.res}:</b> ${stats.mp} <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[cls.res] ? '— ' + RES_DESC[cls.res] : ''}</span></div>`;
-            hpBody += `<div class="detail-row"><b>♻️</b> ${RECOVERY_PT[cls.rec]}</div>`;
-            html += cSec('❤️', 'Vida & Recurso', '', hpBody, true);
+            hpBody += `<div class="detail-row"><b>${cls.res}:</b> ${stats.mp} <span style="color:var(--v-text-dim);font-size:10px">${RES_DESC[cls.res] ? '— ' + RES_DESC[cls.res] : ''}</span></div>`;
+            hpBody += `<div class="detail-row"><b></b> ${RECOVERY_PT[cls.rec]}</div>`;
+            html += cSec('', 'Vida & Recurso', '', hpBody, true);
 
             // --- 2. Saves (collapsible) ---
             let saveBody = '<div class="save-list">';
@@ -7667,7 +7667,7 @@ Busca rápida:
                 saveBody += `<div class="save-row"><span class="prof-dot${isProf ? ' active' : ''}"></span><span>${sign}${sv}</span><span>${ATTR_PT[a]}</span></div>`;
             });
             saveBody += '</div>';
-            html += cSec('🎯', 'Salvaguardas', '6', saveBody);
+            html += cSec('', 'Salvaguardas', '6', saveBody);
 
             // --- 3. Skills (collapsible) ---
             let skillBody = '<div class="skill-list">';
@@ -7679,19 +7679,19 @@ Busca rápida:
                 skillBody += `<div class="skill-row"><span class="prof-dot${isProf ? ' active' : ''}"></span><span>${SKILL_PT[s]}</span><span class="skill-attr-tag">${ATTR_ABBR[attr]}</span><span class="skill-mod" style="color:${isProf ? 'var(--v-gold)' : 'var(--v-text-dim)'}">${sign}${sv}</span></div>`;
             });
             skillBody += '</div>';
-            html += cSec('📋', 'Perícias', allProfs.length + ' treinadas', skillBody);
+            html += cSec('', 'Perícias', allProfs.length + ' treinadas', skillBody);
 
             // --- 4. Combat — class features + subclass + fighting style + spells (collapsible) ---
             let combatBody = '';
             const lv1 = CLASS_LV1[sel.classKey];
             if (lv1 && lv1.features.length > 0) {
                 lv1.features.forEach(f => {
-                    combatBody += `<div class="trait-item"><div class="trait-name">🔹 ${f.name}</div><div class="trait-desc">${f.desc}</div></div>`;
+                    combatBody += `<div class="trait-item"><div class="trait-name">${f.name}</div><div class="trait-desc">${f.desc}</div></div>`;
                 });
             }
             if (sel.subclass && SUBCLASS_DATA[sel.classKey]) {
                 const sc = SUBCLASS_DATA[sel.classKey][sel.subclass];
-                if (sc) combatBody += `<div class="trait-item"><div class="trait-name">🔹 ${sc.l1.name} <span style="color:var(--v-text-dim);font-size:10px">(${sc.name})</span></div><div class="trait-desc">${sc.l1.desc}</div></div>`;
+                if (sc) combatBody += `<div class="trait-item"><div class="trait-name">${sc.l1.name} <span style="color:var(--v-text-dim);font-size:10px">(${sc.name})</span></div><div class="trait-desc">${sc.l1.desc}</div></div>`;
             }
             if (sel.fightingStyle && FIGHTING_STYLES[sel.fightingStyle]) {
                 const fs = FIGHTING_STYLES[sel.fightingStyle];
@@ -7708,7 +7708,7 @@ Busca rápida:
             }
             if (Array.isArray(sel.rogueExpertise) && sel.rogueExpertise.length === 2) {
                 const skillNames = sel.rogueExpertise.map(s => SKILL_PT[s] || s).join(', ');
-                combatBody += `<div class="trait-item"><div class="trait-name">🎯 Especialização: ${skillNames}</div><div class="trait-desc">Dobra o bônus de proficiência nessas perícias (PHB p.96).</div></div>`;
+                combatBody += `<div class="trait-item"><div class="trait-name">Especialização: ${skillNames}</div><div class="trait-desc">Dobra o bônus de proficiência nessas perícias (PHB p.96).</div></div>`;
             }
             if (sel.draconicAncestry && typeof SORCERER_DRACONIC_ANCESTRY !== 'undefined' && SORCERER_DRACONIC_ANCESTRY[sel.draconicAncestry]) {
                 const da = SORCERER_DRACONIC_ANCESTRY[sel.draconicAncestry];
@@ -7717,7 +7717,7 @@ Busca rápida:
             // Sessao #35 (2026-05-25): Half-Elf Skill Versatility no summary
             if (Array.isArray(sel.halfElfSkills) && sel.halfElfSkills.length === 2) {
                 const skillNames = sel.halfElfSkills.map(s => SKILL_PT[s] || s).join(', ');
-                combatBody += `<div class="trait-item"><div class="trait-name">🎓 Versatilidade Meio-Elfo: ${skillNames}</div><div class="trait-desc">Proficiência em 2 perícias livres (PHB p.39).</div></div>`;
+                combatBody += `<div class="trait-item"><div class="trait-name">Versatilidade Meio-Elfo: ${skillNames}</div><div class="trait-desc">Proficiência em 2 perícias livres (PHB p.39).</div></div>`;
             }
             if (lv1 && lv1.spells.length > 0) {
                 lv1.spells.forEach(sp => {
@@ -7727,26 +7727,26 @@ Busca rápida:
             if (sel.selectedL1Skill && _l1SkillsCache[sel.classKey]) {
                 const skillData = _l1SkillsCache[sel.classKey].skills.find(s => s.id === sel.selectedL1Skill);
                 if (skillData) {
-                    combatBody += `<div class="trait-item"><div class="trait-name">${skillData.effect || '\u2728'} ${skillData.name} <span style="color:var(--v-text-dim);font-size:10px">(escolhida)</span></div><div class="trait-desc">${skillData.description}</div></div>`;
+                    combatBody += `<div class="trait-item"><div class="trait-name">${skillData.effect || ''} ${skillData.name} <span style="color:var(--v-text-dim);font-size:10px">(escolhida)</span></div><div class="trait-desc">${skillData.description}</div></div>`;
                 }
             }
-            if (combatBody) html += cSec('\u2694\ufe0f', `Habilidades de ${cls.name}`, '', combatBody);
+            if (combatBody) html += cSec('', `Habilidades de ${cls.name}`, '', combatBody);
 
             // --- 5. Race & Background traits (collapsible) ---
             let traitBody = '';
             const traits = RACE_TRAITS[sel.race] || [];
             if (traits.length > 0) {
                 traits.forEach(t => {
-                    traitBody += `<div class="trait-item"><div class="trait-name">🔹 ${t.name}</div><div class="trait-desc">${t.desc}</div></div>`;
+                    traitBody += `<div class="trait-item"><div class="trait-name">${t.name}</div><div class="trait-desc">${t.desc}</div></div>`;
                 });
             }
             if (sel.variantFeat && CREATION_FEATS[sel.variantFeat]) {
                 const feat = CREATION_FEATS[sel.variantFeat];
-                traitBody += `<div class="trait-item"><div class="trait-name">🏅 ${feat.name}</div><div class="trait-desc">${feat.desc}</div></div>`;
+                traitBody += `<div class="trait-item"><div class="trait-name">${feat.name}</div><div class="trait-desc">${feat.desc}</div></div>`;
             }
             const bgFeat = BG_FEATURES[sel.bg];
             if (bgFeat) {
-                traitBody += `<div class="trait-item"><div class="trait-name">🏷️ ${bgFeat.name}</div><div class="trait-desc">${bgFeat.desc}</div></div>`;
+                traitBody += `<div class="trait-item"><div class="trait-name">${bgFeat.name}</div><div class="trait-desc">${bgFeat.desc}</div></div>`;
             }
             if (traitBody) html += cSec(`${race.icon}`, 'Traços & Antecedente', '', traitBody);
 
@@ -7757,7 +7757,7 @@ Busca rápida:
                 if (sel.ideal) persBody += `<div class="detail-row"><b>Ideal:</b> ${sel.ideal}</div>`;
                 if (sel.bond) persBody += `<div class="detail-row"><b>Vínculo:</b> ${sel.bond}</div>`;
                 if (sel.flaw) persBody += `<div class="detail-row"><b>Defeito:</b> ${sel.flaw}</div>`;
-                html += cSec('🎭', 'Personalidade', '', persBody);
+                html += cSec('', 'Personalidade', '', persBody);
             }
 
             // --- 7. Equipment & Proficiencies (collapsible) ---
@@ -7770,7 +7770,7 @@ Busca rápida:
                 cls.equip.forEach(e => { equipBody += `<div class="detail-row">• ${e}</div>`; });
             }
             if (sel.toolProfs.length > 0) {
-                equipBody += `<div style="margin-top:6px;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim)"><b>🔧 Ferramentas:</b></div>`;
+                equipBody += `<div style="margin-top:6px;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim)"><b>Ferramentas:</b></div>`;
                 sel.toolProfs.forEach(t => {
                     equipBody += `<div class="detail-row">• ${ARTISAN_TOOLS[t]?.icon || ''} ${ARTISAN_TOOLS[t]?.name || t}</div>`;
                 });
@@ -7782,19 +7782,19 @@ Busca rápida:
                 return l;
             });
             equipBody += `<div class="detail-row"><b>Idiomas:</b> ${langList.join(', ')}</div>`;
-            html += cSec('🎒', 'Equipamento & Proficiências', '', equipBody);
+            html += cSec('', 'Equipamento & Proficiências', '', equipBody);
             html += `</div>`; // close #summarySections
 
             // Re-roll button (only if character was randomly generated)
             if (sel._wasRandom) {
                 html += `<div style="margin-top: var(--v-space-lg, 12px);display:flex;gap: var(--v-space-md, 8px)">`;
-                html += `<button type="button" class="v-btn v-btn-random" style="flex:1;margin-bottom:0" onclick="randomizeCharacter()">🎲 Sortear Outro</button>`;
-                html += `<button type="button" class="v-btn v-btn-secondary" style="flex:1" onclick="resetAndGoStart()">✏️ Criar Manualmente</button>`;
+                html += `<button type="button" class="v-btn v-btn-random" style="flex:1;margin-bottom:0" onclick="randomizeCharacter()">Sortear Outro</button>`;
+                html += `<button type="button" class="v-btn v-btn-secondary" style="flex:1" onclick="resetAndGoStart()">Criar Manualmente</button>`;
                 html += `</div>`;
             }
 
             // Confirm button in sticky footer (always visible at bottom)
-            html += `<div class="summary-footer"><button type="button" class="v-btn v-btn-primary btn-block" id="confirmBtn" onclick="submitCharacter()" style="margin:0;font-size:calc(16px * var(--v-font-scale, 1));padding:14px 0;letter-spacing:1px">⚔️ CONFIRMAR PERSONAGEM</button></div>`;
+            html += `<div class="summary-footer"><button type="button" class="v-btn v-btn-primary btn-block" id="confirmBtn" onclick="submitCharacter()" style="margin:0;font-size:calc(16px * var(--v-font-scale, 1));padding:14px 0;letter-spacing:1px">CONFIRMAR PERSONAGEM</button></div>`;
 
             document.getElementById('summaryContent').innerHTML = html;
 
@@ -7861,7 +7861,7 @@ Busca rápida:
                 _submitting = false;
                 if (_confirmBtn) {
                     _confirmBtn.disabled = false;
-                    _confirmBtn.textContent = '⚔️ CONFIRMAR PERSONAGEM';
+                    _confirmBtn.textContent = 'CONFIRMAR PERSONAGEM';
                     _confirmBtn.style.opacity = '';
                     _confirmBtn.style.pointerEvents = '';
                 }
@@ -8020,7 +8020,7 @@ Busca rápida:
                         _submitting = false;
                         if (_confirmBtn) {
                             _confirmBtn.disabled = false;
-                            _confirmBtn.textContent = '⚔️ CONFIRMAR PERSONAGEM';
+                            _confirmBtn.textContent = 'CONFIRMAR PERSONAGEM';
                             _confirmBtn.style.opacity = '';
                             _confirmBtn.style.pointerEvents = '';
                         }
@@ -8035,7 +8035,7 @@ Busca rápida:
                                 header: '<h2 style="margin:0;color:var(--v-gold,#c4953a);font-family:var(--v-font-display,Cinzel,serif);letter-spacing:2px;text-align:center;">Limite de Personagens</h2>',
                                 body: ''
                                     + '<div style="text-align:center;font-family:var(--v-font,MedievalSharp,serif);line-height:1.6;color:var(--v-text,#d4c8b0);padding: var(--v-space-md, 8px) var(--v-space-sm, 4px);">'
-                                    + '  <div style="font-size:56px;margin: var(--v-space-md, 8px) 0 var(--v-space-xl, 16px);color:var(--v-gold,#c4953a);text-shadow:0 0 20px rgba(196,149,58,0.4);">⚔</div>'
+                                    + '  <div style="font-size:56px;margin: var(--v-space-md, 8px) 0 var(--v-space-xl, 16px);color:var(--v-gold,#c4953a);text-shadow:0 0 20px rgba(196,149,58,0.4);"></div>'
                                     + '  <p style="margin:0 0 14px;font-size:15px;"><strong style="color:var(--v-gold,#c4953a);">Você já tem ' + cur + ' aventureiros ativos.</strong></p>'
                                     + '  <p style="margin:0 0 14px;font-size:14px;">O máximo permitido é <strong>' + lim + ' personagens</strong> por conta.</p>'
                                     + '  <p style="margin: var(--v-space-md, 8px) 0 0;color:var(--v-text-dim,#a09484);font-size:13px;font-style:italic;">'
@@ -8107,7 +8107,7 @@ Busca rápida:
                 else _showValidation('Erro ao enviar dados. Tente novamente.');
                 if (_confirmBtn) {
                     _confirmBtn.disabled = false;
-                    _confirmBtn.textContent = '⚔️ CONFIRMAR PERSONAGEM';
+                    _confirmBtn.textContent = 'CONFIRMAR PERSONAGEM';
                     _confirmBtn.style.opacity = '';
                     _confirmBtn.style.pointerEvents = '';
                 }
@@ -8150,7 +8150,7 @@ Busca rápida:
                         '</div>' +
                         '<p style="font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-text, #d4c8b0);margin:0 0 22px;line-height:1.55;">Pronto para iniciar a jornada? <br>Esta escolha definirá o início da sua aventura em Valdória.</p>' +
                         '<div style="display:flex;gap: var(--v-space-md-lg, 10px);flex-direction:column;">' +
-                            '<button id="__confirm_yes" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding: 14px var(--v-space-2xl, 24px);border-radius:8px;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));font-weight:700;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;min-height:48px;">⚔️ Iniciar Aventura</button>' +
+                            '<button id="__confirm_yes" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding: 14px var(--v-space-2xl, 24px);border-radius:8px;font-family:Cinzel,serif;font-size:calc(13px * var(--v-font-scale, 1));font-weight:700;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;min-height:48px;">Iniciar Aventura</button>' +
                             '<button id="__confirm_no" style="background:transparent;color:var(--v-text-dim, #a09484);border:1px solid rgba(196,149,58,0.3);padding: var(--v-space-lg, 12px) var(--v-space-2xl, 24px);border-radius:8px;font-family:Cinzel,serif;font-size:calc(12px * var(--v-font-scale, 1));letter-spacing:1px;cursor:pointer;min-height:42px;">Voltar para revisar</button>' +
                         '</div>' +
                     '</div>';
@@ -8208,7 +8208,7 @@ Busca rápida:
                 ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding: var(--v-space-2xl, 24px);font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
                 ov.innerHTML =
                     '<div style="max-width:360px;text-align:center;">' +
-                        '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom: var(--v-space-xl, 16px);animation:pulse 1.4s ease-in-out infinite;">⚔️</div>' +
+                        '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom: var(--v-space-xl, 16px);animation:pulse 1.4s ease-in-out infinite;"></div>' +
                         '<h2 style="font-size:calc(18px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin: 0 0 var(--v-space-lg, 12px);letter-spacing:2px;text-transform:uppercase;">Iniciando aventura...</h2>' +
                         '<p style="font-size:calc(13px * var(--v-font-scale, 1));line-height:1.6;margin:0;color:var(--v-text-dim, #a09484);">Seu personagem foi criado. Aguarde a transição para Valdória.</p>' +
                     '</div>';
@@ -8229,7 +8229,7 @@ Busca rápida:
                 overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,12,8,0.96);display:flex;align-items:center;justify-content:center;padding: var(--v-space-2xl, 24px);font-family:Cinzel,Georgia,serif;color:#e0d8c0;';
                 overlay.innerHTML =
                     '<div style="max-width:420px;text-align:center;">' +
-                    '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom: var(--v-space-xl, 16px);">⚔️</div>' +
+                    '<div style="font-size:calc(48px * var(--v-font-scale, 1));margin-bottom: var(--v-space-xl, 16px);"></div>' +
                     '<h2 style="font-size:calc(20px * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin: 0 0 var(--v-space-lg, 12px);letter-spacing:1.5px;text-transform:uppercase;">' + title + '</h2>' +
                     '<p style="font-size:calc(14px * var(--v-font-scale, 1));line-height:1.6;margin:0 0 20px;color:var(--v-text-dim, #a09484);">' + body + '</p>' +
                     '<button id="__creation_close_btn" style="background:linear-gradient(135deg,#c4953a,#9a7530);color:#1a1410;border:none;padding:14px 32px;border-radius: var(--v-radius, 10px);font-family:Cinzel,serif;font-size:calc(14px * var(--v-font-scale, 1));font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;min-height:48px;">Voltar ao chat</button>' +

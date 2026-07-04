@@ -15,11 +15,11 @@ let telegramUser = null;
 
 // Tiers (canonical em contribution_data.py)
 const TIERS = [
-    {id:'supporter',name:'Apoiador',icon:'🤝',color:'#9c8d6a',min:100,max:499,gold:50,items:['1× Poção de Cura'],exclusive:null,exclusiveImg:null,title:null},
-    {id:'copper',name:'Patrono de Cobre',icon:'🟤',color:'#b87333',min:500,max:1499,gold:200,items:['2× Poção de Cura'],exclusive:null,exclusiveImg:null,title:'🟤 Patrono de Cobre'},
-    {id:'silver',name:'Patrono de Prata',icon:'⚪',color:'#c0c0c0',min:1500,max:2999,gold:750,items:['3× Poção de Cura'],exclusive:'💍 Anel do Patrono',exclusiveImg:'img/items/anel_patrono.webp',title:'⚪ Patrono de Prata'},
-    {id:'gold',name:'Patrono de Ouro',icon:'🟡',color:'#c4953a',min:3000,max:4999,gold:2000,items:['5× Poção de Cura'],exclusive:'👘 Manto do Benfeitor',exclusiveImg:'img/items/manto_benfeitor.webp',title:'🟡 Patrono de Ouro'},
-    {id:'platinum',name:'Patrono de Platina',icon:'💎',color:'#7dd3fc',min:5000,max:999999,gold:5000,items:['5× Poção de Cura Superior'],exclusive:'⚔ Lâmina da Generosidade',exclusiveImg:'img/items/lamina_generosidade.webp',title:'💎 Patrono de Platina'},
+    {id:'supporter',name:'Apoiador',icon:'',color:'#9c8d6a',min:100,max:499,gold:50,items:['1× Poção de Cura'],exclusive:null,exclusiveImg:null,title:null},
+    {id:'copper',name:'Patrono de Cobre',icon:'',color:'#b87333',min:500,max:1499,gold:200,items:['2× Poção de Cura'],exclusive:null,exclusiveImg:null,title:'Patrono de Cobre'},
+    {id:'silver',name:'Patrono de Prata',icon:'',color:'#c0c0c0',min:1500,max:2999,gold:750,items:['3× Poção de Cura'],exclusive:'Anel do Patrono',exclusiveImg:'img/items/anel_patrono.webp',title:'Patrono de Prata'},
+    {id:'gold',name:'Patrono de Ouro',icon:'',color:'#c4953a',min:3000,max:4999,gold:2000,items:['5× Poção de Cura'],exclusive:'Manto do Benfeitor',exclusiveImg:'img/items/manto_benfeitor.webp',title:'Patrono de Ouro'},
+    {id:'platinum',name:'Patrono de Platina',icon:'',color:'#7dd3fc',min:5000,max:999999,gold:5000,items:['5× Poção de Cura Superior'],exclusive:'Lâmina da Generosidade',exclusiveImg:'img/items/lamina_generosidade.webp',title:'Patrono de Platina'},
 ];
 
 function getTier(centavos) {
@@ -129,16 +129,16 @@ function updatePreview() {
         '<div class="ap-tier-preview-divider"></div>' +
         '<div class="ap-tier-preview-rewards">' +
             '<div class="ap-tier-preview-reward"><b>+' + tier.gold.toLocaleString('pt-BR') + '</b> Valdoritas</div>' +
-            tier.items.map(function(it) { return '<div class="ap-tier-preview-reward">🧪 ' + it + '</div>'; }).join('');
+            tier.items.map(function(it) { return '<div class="ap-tier-preview-reward">' + it + '</div>'; }).join('');
 
     if (tier.exclusive) {
         html += '<div class="ap-tier-preview-reward ap-tier-preview-exclusive">' +
             (tier.exclusiveImg ? '<img src="' + tier.exclusiveImg + '" alt="" class="ap-tier-preview-itemimg" onerror="this.style.display=\'none\'">' : '') +
-            '<span>⭐ <b>' + tier.exclusive + '</b> <em>(item exclusivo)</em></span>' +
+            '<span><b>' + tier.exclusive + '</b> <em>(item exclusivo)</em></span>' +
             '</div>';
     }
     if (tier.title) {
-        html += '<div class="ap-tier-preview-reward">🏅 Título: <b>' + tier.title + '</b></div>';
+        html += '<div class="ap-tier-preview-reward">Título: <b>' + tier.title + '</b></div>';
     }
     html += '</div>' +
         '<div class="ap-tier-preview-footer">✦ Recompensas entregues a TODOS personagens do seu Telegram</div>' +
@@ -212,7 +212,7 @@ async function generatePix() {
         console.error('[APOIE] Erro ao gerar PIX', e);
         resultDiv.style.display = 'block';
         resultDiv.innerHTML = '<div class="ap-qr-result" style="border-color:var(--v-danger,#e05555)">' +
-            '<div style="color:#e05555;font-size:14px;margin-bottom:8px">❌ ' + vEsc(e.message) + '</div>' +
+            '<div style="color:#e05555;font-size:14px;margin-bottom:8px">' + vEsc(e.message) + '</div>' +
             '<div style="font-size:12px;color:var(--v-text-dim,#a09484)">Verifique sua conexão e tente novamente.</div>' +
             '</div>';
     } finally {
@@ -239,7 +239,7 @@ function showQrResult(data) {
 
     html += '<div class="ap-qr-info">Referência: <b>' + vEsc(data.txid) + '</b></div>' +
         '<div class="ap-code-box" id="brcode-text">' + vEsc(data.brcode) + '</div>' +
-        '<button class="ap-btn-copy" onclick="copyBrcode()">📋 Copiar Código PIX</button>';
+        '<button class="ap-btn-copy" onclick="copyBrcode()">Copiar Código PIX</button>';
 
     if (data.linked) {
         html += '<div class="ap-qr-note ap-qr-note-ok">' +
@@ -319,7 +319,7 @@ function showCopied(btn) {
     if (!btn) return;
     btn.textContent = '✓ Copiado!';
     btn.classList.add('copied');
-    setTimeout(function() { btn.textContent = '📋 Copiar Código PIX'; btn.classList.remove('copied'); }, COPY_FEEDBACK_MS);
+    setTimeout(function() { btn.textContent = 'Copiar Código PIX'; btn.classList.remove('copied'); }, COPY_FEEDBACK_MS);
 }
 
 // === Goals + Stats + Donors ===
@@ -410,7 +410,7 @@ async function loadRecentDonors() {
                 '</div>';
             return;
         }
-        var tierIcon = {supporter:'🤝',copper:'🟤',silver:'⚪',gold:'🟡',platinum:'💎'};
+        var tierIcon = {supporter:'',copper:'',silver:'',gold:'',platinum:''};
         var tierColor = {supporter:'#9c8d6a',copper:'#b87333',silver:'#c0c0c0',gold:'#c4953a',platinum:'#7dd3fc'};
         container.innerHTML = donors.map(function(d, i) {
             var tier = d.tier || 'supporter';

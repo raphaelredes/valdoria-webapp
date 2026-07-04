@@ -580,7 +580,7 @@ function renderCharacterList() {
         var level = c.level || 1;
         var cls = _esc(c.class_name || c.hero_class || '');
         var race = _esc(c.race || '');
-        var emoji = c.emoji || '🧙';
+        var emoji = c.emoji || '';
 
         html += '<div class="wa-char-card' + (_selectedCharId === charId ? ' selected' : '') + '" '
             + 'data-id="' + _esc(charId) + '" onclick="selectChar(this)">'
@@ -674,7 +674,7 @@ async function onPlay() {
         console.error('[WEB-AUTH] Select character error:', e);
         showCharError(_friendlyError(e));
         btn.disabled = false;
-        btn.textContent = '⚔️ Jogar';
+        btn.textContent = 'Jogar';
     }
 }
 
@@ -817,7 +817,7 @@ function showBlockedScreen(retryAfter) {
 
         var shield = document.createElement('div');
         shield.className = 'wa-blocked-icon';
-        shield.textContent = '\uD83D\uDEE1\uFE0F'; /* shield emoji */
+        shield.textContent = ''; /* shield emoji */
 
         var title = document.createElement('h2');
         title.className = 'wa-blocked-title';
@@ -1509,7 +1509,7 @@ async function _initWebAuth() {
         var _envBadge = document.getElementById('wa-env-badge');
         if (_envBadge) {
             _envBadge.setAttribute('data-env', _envId);
-            _envBadge.textContent = _envId === 'dev' ? '⚙ Ambiente DEV' : 'Ambiente PROD';
+            _envBadge.textContent = _envId === 'dev' ? 'Ambiente DEV' : 'Ambiente PROD';
         }
     } catch (e) { /* noqa: preflight */ }
 

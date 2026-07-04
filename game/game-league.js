@@ -37,7 +37,7 @@ var TIER_META = {
 
 var TIER_ORDER = ['bronze', 'prata', 'ouro', 'platina', 'lendaria'];
 
-var RANK_MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' };
+var RANK_MEDALS = { 1: '', 2: '', 3: '' };
 
 
 /**
@@ -81,7 +81,7 @@ function _renderMainView(el, data) {
     medalImg.style.display = 'none';
     var emoji = document.createElement('div');
     emoji.className = 'v-league-medal-emoji';
-    emoji.textContent = data.tier_icon || '🏆';
+    emoji.textContent = data.tier_icon || '';
     medalBox.appendChild(emoji);
   });
   medalBox.appendChild(medalImg);
@@ -108,7 +108,7 @@ function _renderMainView(el, data) {
   xpCard.className = 'v-league-xp-card';
   var xpLabel = document.createElement('div');
   xpLabel.className = 'v-league-xp-label';
-  xpLabel.textContent = '⚡ XP da Semana';
+  xpLabel.textContent = 'XP da Semana';
   xpCard.appendChild(xpLabel);
   var xpVal = document.createElement('div');
   xpVal.className = 'v-league-xp-val';
@@ -123,7 +123,7 @@ function _renderMainView(el, data) {
 
     var rewardTitle = document.createElement('div');
     rewardTitle.className = 'v-league-reward-title';
-    rewardTitle.innerHTML = '🎁 <b>' + (data.pending_reward.title || 'Recompensa Pendente') + '</b>';
+    rewardTitle.innerHTML = '<b>' + (data.pending_reward.title || 'Recompensa Pendente') + '</b>';
     rewardCard.appendChild(rewardTitle);
 
     var rewardGold = document.createElement('div');
@@ -133,7 +133,7 @@ function _renderMainView(el, data) {
 
     var claimBtn = document.createElement('button');
     claimBtn.className = 'v-league-claim-btn';
-    claimBtn.textContent = '✨ Coletar Recompensa';
+    claimBtn.textContent = 'Coletar Recompensa';
     claimBtn.addEventListener('click', function() {
       if (typeof doAction === 'function') doAction('league_claim');
     });
@@ -292,7 +292,7 @@ function _renderClaimView(el, data) {
 
   var title = document.createElement('div');
   title.className = 'v-league-claim-title';
-  title.innerHTML = '🎉 <b>Recompensa Coletada!</b>';
+  title.innerHTML = '<b>Recompensa Coletada!</b>';
   card.appendChild(title);
 
   var rankBadge = document.createElement('div');
@@ -302,7 +302,7 @@ function _renderClaimView(el, data) {
 
   var titleText = document.createElement('div');
   titleText.className = 'v-league-claim-title-text';
-  titleText.textContent = '✨ ' + (data.title || 'Honrado pelos Aventureiros');
+  titleText.textContent = '' + (data.title || 'Honrado pelos Aventureiros');
   card.appendChild(titleText);
 
   var gold = document.createElement('div');

@@ -328,7 +328,7 @@
                 return '<button class="ap-mp-track" data-idx="' + i + '">' +
                     '<span class="ap-mp-track-num">' + (i + 1).toString().padStart(2, '0') + '</span>' +
                     '<span class="ap-mp-track-name">' + t.name + '</span>' +
-                    '<span class="ap-mp-track-icon">♪</span>' +
+                    '<span class="ap-mp-track-icon"></span>' +
                     '</button>';
             }).join('');
             ui.trackListEl.querySelectorAll('.ap-mp-track').forEach(function(el){

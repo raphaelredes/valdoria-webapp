@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-01T23:03:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-04T10:50:31Z - do not edit directly, edit source -->
 
 
 
@@ -476,9 +476,9 @@
         cada log via sendBeacon (fallback fetch keepalive), batch de 1s ou 30
         linhas. Server escuta http://127.0.0.1:8799, aceita CORS *, appenda em
         logs/exploracao/session_<id>.log. AGENTE IA LÊ ESSES ARQUIVOS DIRETO.
-        Indicador visual no botão 📥: dot verde pulsante = live, vermelho = offline.
+        Indicador visual no botão : dot verde pulsante = live, vermelho = offline.
         Health check /status no boot + a cada 30s. Se sink offline, logs ficam
-        só no buffer + localStorage; click no 📥 baixa snapshot.
+        só no buffer + localStorage; click no baixa snapshot.
    * Launcher: scripts\exploracao_log_server.bat (duplo-clique).
    * Funções globais console: downloadExploracaoLogs(), viewExploracaoLogs(N),
      clearExploracaoLogs().
@@ -563,7 +563,7 @@
      flavor_variants, outcome.text_variants, choices class-specific, outcome_partial,
      ally_interaction). Inclui quests cross-map em ~15 dos 22 eventos.
    * ALLY SYSTEM V2.0: S.allies array (persiste via boot), recruitAlly() helper,
-     ally-indicator 👥 (topo direito) + contador + names no tooltip. Ally gate em
+     ally-indicator (topo direito) + contador + names no tooltip. Ally gate em
      ally_interaction choices: só clicáveis com S.allies.length > 0.
      outcome.recruit_ally triggera recrutamento (ex: snow_traveler_01 salva o
      rastreador Brin que vira companheiro).
@@ -584,8 +584,8 @@
 
   V1.9 — eventos imersivos profissionais + sistema de quests + luz D&D 5e:
    * Quest system: S.activeQuests (persiste cross-map), completedQuests (global set),
-     startQuest/completeQuest/checkQuestDelivery helpers. HUD indicator 📜 (topo direito)
-     pulsa com contador. Journal overlay (acessado via 🎒 ou indicator) lista ativas +
+     startQuest/completeQuest/checkQuestDelivery helpers. HUD indicator (topo direito)
+     pulsa com contador. Journal overlay (acessado via ou indicator) lista ativas +
      concluídas com target_map e progress.
    * Event schema rico: title_variants / text_variants / flavor_variants (random per open),
      outcome.text_variants, outcome.starts_quest (dispara quest no sucesso).
@@ -664,7 +664,7 @@
    * Cartografia overlay (pergaminho em canvas): grafo de mapas como nodes
      (biome color + ícone bioma + labels) + edges conectando + bússola +
      legenda. Click em node conectado → viaja. Node atual com halo dourado
-     pulsante. visitedMapIds set persistente entre boots. Botão 🗺️ em quick-actions.
+     pulsante. visitedMapIds set persistente entre boots. Botão em quick-actions.
    * Spec atualizado: docs/superpowers/specs/2026-04-22-exploracao-simulator-regions-plan.md
 
   V1.3 — reuso de assets da produção (player sprite + check-overlay):
@@ -1668,7 +1668,7 @@ html.sim-prod #frame { margin: 0 auto !important; }
 }
 /* 2026-04-27: Tech text — informação mecânica (D&D 5e rules, vantagem,
    condições, "quem move primeiro", etc) renderizada SEPARADA da narrativa.
-   Fonte monospace + cor neutra azulada + ícone ⚙ pra deixar claro que é
+   Fonte monospace + cor neutra azulada + ícone pra deixar claro que é
    regra de jogo, não pensamento do personagem. */
 .stub-popup-tech {
   display: flex;
@@ -1687,7 +1687,7 @@ html.sim-prod #frame { margin: 0 auto !important; }
   letter-spacing: 0.2px;
 }
 .stub-popup-tech::before {
-  content: '⚙';
+  content: '';
   font-size: calc(12px * var(--v-font-scale, 1));
   line-height: 1;
   color: rgba(120, 170, 220, 0.85);
@@ -2222,7 +2222,7 @@ html body .camp-screen {
   background: linear-gradient(180deg, rgba(196, 149, 58, 0.3), rgba(139, 100, 32, 0.2));
 }
 /* X-6.5.51g (2026-04-25): user feedback — "remova o desenho que tem logo
-   antes de PERIGO". Removido ::before com ☠. Mantido label "Perigo" + pips. */
+   antes de PERIGO". Removido ::before com . Mantido label "Perigo" + pips. */
 .tb-danger {
   display: flex;
   align-items: center;
@@ -4895,7 +4895,7 @@ body.perf-lite .event-text-line {
   align-items: center;
   gap: var(--v-space-md, 8px);
 }
-/* 2026-05-06: ícone heráldico ao lado do título Mochila (substitui 🎒).
+/* 2026-05-06: ícone heráldico ao lado do título Mochila (substitui ).
    Cor NATURAL (couro escuro) — não força gold. */
 .inv-title-icon {
   width: 22px;
@@ -5982,7 +5982,7 @@ body.remote-mode #debug-hud { display: none !important; }
   text-shadow: 0 0 6px rgba(196, 149, 58, 0.4);
 }
 /* X-6.5.13: zoom controls na horizontal acima do minimap (era vertical ao lado).
-   Libera espaço vertical embaixo pro hud-quick (🏕️ 🎒 🔥 🗺️) não sobrepor. */
+   Libera espaço vertical embaixo pro hud-quick () não sobrepor. */
 #zoom-controls {
   display: flex;
   flex-direction: row;   /* X-6.5.13: horizontal */
@@ -8467,11 +8467,11 @@ window.__onIntroTap = function() {
     <!-- FASE 5.3 v2 — Popup "Voltar pra Cidade?" (DENTRO do #frame, position:absolute relativo ao game) -->
   <div id="cart-back-prompt">
     <div class="cbp-card">
-      <h2>🚪 Voltar pra Valdoria?</h2>
+      <h2>Voltar pra Valdoria?</h2>
       <p>Os portões da cidade ainda te chamam, aventureiro.<br>Desejas retornar agora — ou ver o mapa de cartografia?</p>
       <div class="cbp-buttons">
-        <button class="cbp-btn cbp-btn-yes" data-cbp="yes">🏙️ Voltar pra Cidade</button>
-        <button class="cbp-btn cbp-btn-no" data-cbp="no">🗺️ Ver Mapa</button>
+        <button class="cbp-btn cbp-btn-yes" data-cbp="yes">Voltar pra Cidade</button>
+        <button class="cbp-btn cbp-btn-no" data-cbp="no">Ver Mapa</button>
       </div>
     </div>
   </div>
@@ -8541,12 +8541,12 @@ window.__onIntroTap = function() {
 
   <!-- X-6.5.51g: top-bar refatorado pra nao quebrar com palavras grandes.
        Biome/weather/phase agora ICON-ONLY (tooltip via title=). Danger
-       continua label + pips (sem ☠ icon — user pediu pra remover). -->
+       continua label + pips (sem icon — user pediu pra remover). -->
   <div id="top-bar">
     <div class="tb-icons">
-      <div class="tb-item tb-biome" id="top-biome" title="Floresta">🌲</div>
-      <div class="tb-item tb-weather" id="top-weather" title="Limpo">☀️</div>
-      <div class="tb-item tb-phase" id="top-phase" title="Dia">☀</div>
+      <div class="tb-item tb-biome" id="top-biome" title="Floresta"></div>
+      <div class="tb-item tb-weather" id="top-weather" title="Limpo"></div>
+      <div class="tb-item tb-phase" id="top-phase" title="Dia"></div>
     </div>
     <div class="tb-item tb-danger" id="top-danger" title="Nível de perigo do mapa">
       <span class="tb-danger-lbl">Perigo</span>
@@ -8602,7 +8602,7 @@ window.__onIntroTap = function() {
   <div id="hud-float" class="hud-pro">
     <button id="btn-hud-float-toggle" title="Recolher status" aria-label="Recolher status">▲</button>
     <!-- Sessão #72 (2026-06-03): #btn-explore-settings REMOVIDO do HUD. Config
-         (Fonte/Som/Vibração) agora vive no footer retrátil (botão ⚙ em
+         (Fonte/Som/Vibração) agora vive no footer retrátil (botão em
          #footer-quick), espelhando o padrão da cidade. O volume (va-btn) também
          embeda no footer-quick via audio-manager.js — sem botão flutuante solto. -->
     <!-- HP row SEMPRE VISÍVEL — não colapsa com o toggle -->
@@ -8640,7 +8640,7 @@ window.__onIntroTap = function() {
       <!-- 2026-04-27: Status MOLHADO badge (D&D 5e DMG p.110). Aparece só quando
            p.wet > 0. Vulnerabilidade frio + resistência fogo em combate. -->
       <div id="hud-float-status" title="Status MOLHADO — vulnerabilidade a frio + resistência a fogo (D&D 5e DMG p.110)">
-        <span class="icon">💧</span>
+        <span class="icon"></span>
         <span class="lbl">MOLHADO</span>
         <span class="turns" id="wet-turns-val">0</span>
       </div>
@@ -8653,7 +8653,7 @@ window.__onIntroTap = function() {
   </div>
 
   <div id="quest-indicator" style="display:none" title="Missões ativas">
-    <span class="qi-icon">📜</span><span class="qi-count">0</span>
+    <span class="qi-icon"></span><span class="qi-count">0</span>
   </div>
   <!-- 2026-05-12 USER REQUEST: ally-indicator removido — btn-party (#hud-quick)
        já serve pra ver o grupo todo. Indicador duplicado tirava espaço sem add valor. -->
@@ -8694,13 +8694,13 @@ window.__onIntroTap = function() {
 
   <div id="right-panel">
     <!-- X-6.5.13: zoom controls movidos PRA CIMA do minimap + layout horizontal
-         pra liberar espaço vertical abaixo pro hud-quick (🏕️🎒🔥🗺️) não
+         pra liberar espaço vertical abaixo pro hud-quick () não
          sobrepor. Ordem dos botões: zoom-out, pin, zoom-in (left-to-right).
          X-6.5.14: botão toggle entre zoom e minimapa pra recolher/mostrar o
          minimapa + coord quando obstrui visão. -->
     <div id="zoom-controls">
       <button class="zoom-btn" id="btn-zoom-out" title="Menos zoom">−</button>
-      <button class="zoom-btn pin" id="btn-pin" title="Centralizar no personagem">📍</button>
+      <button class="zoom-btn pin" id="btn-pin" title="Centralizar no personagem"></button>
       <button class="zoom-btn" id="btn-zoom-in" title="Mais zoom">+</button>
     </div>
     <!-- X-6.5.51f: btn-minimap-toggle DEVOLVIDO pra fora de #minimap-content
@@ -8716,7 +8716,7 @@ window.__onIntroTap = function() {
         <div id="minimap-wrap" role="button" tabindex="0" title="Diário de Missões (clique pra abrir)">
           <canvas id="minimap" width="96" height="130"></canvas>
           <div id="mw-quest-badge" aria-live="polite">
-            <span class="mw-qb-icon">📜</span><span class="mw-qb-count">0</span>
+            <span class="mw-qb-icon"></span><span class="mw-qb-count">0</span>
           </div>
         </div>
         <div id="current-coord">—</div>
@@ -8732,8 +8732,8 @@ window.__onIntroTap = function() {
   <div class="camp-screen" id="camp-screen" role="dialog" aria-label="Acampamento">
     <div class="camp-scene">
       <div class="camp-hud">
-        <div class="camp-hud-bar"><span class="camp-hud-icon">❤️</span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-hp" id="camp-hp-bar"></div></div><span class="camp-hud-val camp-hud-val-hp" id="camp-hp-text"></span></div>
-        <div class="camp-hud-bar"><span class="camp-hud-icon">💧</span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-mp" id="camp-mp-bar"></div></div><span class="camp-hud-val camp-hud-val-mp" id="camp-mp-text"></span></div>
+        <div class="camp-hud-bar"><span class="camp-hud-icon"></span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-hp" id="camp-hp-bar"></div></div><span class="camp-hud-val camp-hud-val-hp" id="camp-hp-text"></span></div>
+        <div class="camp-hud-bar"><span class="camp-hud-icon"></span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-mp" id="camp-mp-bar"></div></div><span class="camp-hud-val camp-hud-val-mp" id="camp-mp-text"></span></div>
       </div>
       <div class="camp-sky"><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div></div>
       <div class="camp-moon"></div>
@@ -8750,7 +8750,7 @@ window.__onIntroTap = function() {
     </div>
     <div class="camp-cards">
       <div class="camp-card camp-card-short" id="camp-btn-short">
-        <div class="camp-card-icon">💤</div>
+        <div class="camp-card-icon"></div>
         <div class="camp-card-info">
           <div class="camp-card-title camp-card-t-short">Descanso Curto</div>
           <div class="camp-card-sub">1 hora — Gasta Dados de Vida</div>
@@ -8759,7 +8759,7 @@ window.__onIntroTap = function() {
         <div class="camp-card-arrow camp-card-t-short">›</div>
       </div>
       <div class="camp-card camp-card-long" id="camp-btn-long">
-        <div class="camp-card-icon">🌙</div>
+        <div class="camp-card-icon"></div>
         <div class="camp-card-info">
           <div class="camp-card-title camp-card-t-long">Descanso Longo</div>
           <div class="camp-card-sub">8 horas — Recuperação total</div>
@@ -8873,7 +8873,7 @@ window.__onIntroTap = function() {
     <!-- X-6.5.51j: cart-card 3-zonas (header sticky + body scrollavel + footer) -->
     <div class="cart-card">
       <div class="cart-header">
-        <h2 class="cart-title">🗺️ Mapa de Valdoria</h2>
+        <h2 class="cart-title">Mapa de Valdoria</h2>
         <div class="cart-subtitle">Toca um destino pra ver — backend canonical (CartShared)</div>
       </div>
       <div class="cart-body">
@@ -8882,7 +8882,7 @@ window.__onIntroTap = function() {
           <!-- X-6.5.51l: zoom controls + center on player -->
           <div class="cart-zoom-controls">
             <button type="button" class="cart-zoom-btn" id="cart-zoom-out" title="Diminuir zoom">−</button>
-            <button type="button" class="cart-zoom-btn cart-pin" id="cart-zoom-center" title="Centralizar onde você esta">📍</button>
+            <button type="button" class="cart-zoom-btn cart-pin" id="cart-zoom-center" title="Centralizar onde você esta"></button>
             <button type="button" class="cart-zoom-btn" id="cart-zoom-in" title="Aumentar zoom">+</button>
           </div>
         </div>
@@ -8913,14 +8913,14 @@ window.__onIntroTap = function() {
       <div class="loc-body">
         <div class="loc-section">
           <div class="loc-section-head">
-            <span class="ls-title">⚔ Inimigos</span>
+            <span class="ls-title">Inimigos</span>
             <span class="ls-count" id="loc-enemy-count">0/0</span>
           </div>
           <div id="loc-enemies" class="bestiary-list"></div>
         </div>
         <div class="loc-section">
           <div class="loc-section-head">
-            <span class="ls-title">📦 Materiais</span>
+            <span class="ls-title">Materiais</span>
             <span class="ls-count" id="loc-mat-count">0/0</span>
           </div>
           <div id="loc-materials" class="bestiary-list"></div>
@@ -8982,7 +8982,7 @@ window.__onIntroTap = function() {
   <div id="tb-condition-popup" role="dialog" aria-label="Detalhes da condição">
     <div class="tb-cp-card">
       <div class="tb-cp-header">
-        <div class="tb-cp-icon" id="tb-cp-icon">🌲</div>
+        <div class="tb-cp-icon" id="tb-cp-icon"></div>
         <div class="tb-cp-titles">
           <div class="tb-cp-kind" id="tb-cp-kind">Bioma</div>
           <div class="tb-cp-name" id="tb-cp-name">Floresta</div>
@@ -10589,7 +10589,7 @@ window.__onIntroTap = function() {
     if (choices.length === 0) return;
 
     /* task #48 (2026-05-20) — PADRAO_ALDRIC canonical: se vEncounter.openChoices
-       disponivel E houver 2+ choices, renderiza UM botao primary "⚔ Escolher
+       disponivel E houver 2+ choices, renderiza UM botao primary "Escolher
        acao" no popup; click abre sub-overlay AAA (z=9700) reabrivel.
        Fallback: inline buttons (1 choice OU vEncounter sem suporte). */
     var useOverlay = (choices.length >= 2)
@@ -10599,7 +10599,7 @@ window.__onIntroTap = function() {
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'stub-popup-choice stub-popup-choice-primary';
-      btn.innerHTML = '<span class="enc-btn-choose-icon">⚔</span>' +
+      btn.innerHTML = '<span class="enc-btn-choose-icon"></span>' +
                       '<span class="enc-btn-choose-label">Escolher ação</span>' +
                       '<span class="enc-btn-choose-count">' + choices.length + '</span>';
       btn.addEventListener('click', function() {
@@ -10802,7 +10802,7 @@ window.__onIntroTap = function() {
 
   function _remoteTileRestore(container, popupCard) {
     // M6: erro de rede NÃO fabrica resolução — restaura o popup pra retry.
-    try { if (typeof vToast === 'function') vToast('⚠️ Falha ao resolver (rede). Toque na opção novamente.', 'warn'); } catch (_) {}
+    try { if (typeof vToast === 'function') vToast('Falha ao resolver (rede). Toque na opção novamente.', 'warn'); } catch (_) {}
     if (container) { container.style.pointerEvents = ''; container.style.transition = ''; container.style.opacity = '1'; container.style.visibility = ''; }
     if (popupCard) { popupCard.style.transition = ''; popupCard.style.opacity = '1'; popupCard.style.visibility = ''; }
   }
@@ -15297,7 +15297,7 @@ window.__explFetchTO = function(url, opts, ms) {
             var _ld = document.getElementById('loading') || document.querySelector('.loading-overlay');
             var _loadingGone = !_ld || _ld.style.display === 'none' || !_ld.offsetParent;
             if (tries >= 10 && _loadingGone && typeof window.vToast === 'function' && window.__pendingDiscoveryToast) {
-              try { window.vToast('🗺️ ' + window.__pendingDiscoveryToast + ' foi desenhado no mapa — agora você pode voltar direto pela viagem do mapa.', 'ok'); } catch (_et) {}
+              try { window.vToast('' + window.__pendingDiscoveryToast + ' foi desenhado no mapa — agora você pode voltar direto pela viagem do mapa.', 'ok'); } catch (_et) {}
               window.__pendingDiscoveryToast = null;
               return;
             }
@@ -15641,7 +15641,7 @@ window.__applyExploreSnap = function(S, snap) {
         return {
           name: _nm,
           quantity: (typeof it.q === 'number') ? it.q : 1,
-          icon: it.ico || _meta.icon || '📦',
+          icon: it.ico || _meta.icon || '',
           value: (typeof it.v === 'number') ? it.v : ((typeof _meta.value === 'number') ? _meta.value : 0)
         };
       }).filter(function(x) { return x.name; });
@@ -16133,28 +16133,28 @@ const CLASSES = {
 // V2.6: BACKGROUNDS — PHB Ch.4. Cada um gera escolhas únicas em eventos e flavor
 // narrativo diferente. 8 escolhidos pra cobrir arquétipos distintos.
 const BACKGROUNDS = {
-  acolyte:    { key: 'acolyte',    name: 'Acólito',       icon: '\ud83d\udcff',
+  acolyte:    { key: 'acolyte',    name: 'Acólito',       icon: '',
     desc: 'Criado em templo. Fala com sacerdotes e decifra iconografia religiosa.',
     prof_bonus: ['wis'] },
-  criminal:   { key: 'criminal',   name: 'Criminoso',     icon: '\ud83d\udd12',
+  criminal:   { key: 'criminal',   name: 'Criminoso',     icon: '',
     desc: 'Espião, ladr\u00e3o ou contrabandista. Conhece c\u00f3digos do submundo.',
     prof_bonus: ['dex'] },
-  folk_hero:  { key: 'folk_hero',  name: 'Her\u00f3i do Povo', icon: '\ud83c\udf3e',
+  folk_hero:  { key: 'folk_hero',  name: 'Her\u00f3i do Povo', icon: '',
     desc: 'Origem humilde com feitos lend\u00e1rios. O povo comum te ajuda.',
     prof_bonus: ['con'] },
-  hermit:     { key: 'hermit',     name: 'Eremita',       icon: '\ud83d\udd6f\ufe0f',
+  hermit:     { key: 'hermit',     name: 'Eremita',       icon: '',
     desc: 'Anos em isolamento. Conhece segredos espirituais e ervas raras.',
     prof_bonus: ['wis'] },
-  noble:      { key: 'noble',      name: 'Nobre',         icon: '\ud83d\udc51',
+  noble:      { key: 'noble',      name: 'Nobre',         icon: '',
     desc: 'Alta estirpe. Guardas e cortes\u00e3os reconhecem sua autoridade.',
     prof_bonus: ['cha'] },
-  outlander:  { key: 'outlander',  name: 'Forasteiro',    icon: '\ud83c\udf32',
+  outlander:  { key: 'outlander',  name: 'Forasteiro',    icon: '',
     desc: 'Criado na natureza selvagem. L\u00ea sinais, rastros, clima.',
     prof_bonus: ['str'] },
-  sage:       { key: 'sage',       name: 'S\u00e1bio',           icon: '\ud83d\udcda',
+  sage:       { key: 'sage',       name: 'S\u00e1bio',           icon: '',
     desc: 'Anos de estudo em bibliotecas. Decifra runas e l\u00ednguas mortas.',
     prof_bonus: ['int'] },
-  soldier:    { key: 'soldier',    name: 'Soldado',       icon: '\u2694\ufe0f',
+  soldier:    { key: 'soldier',    name: 'Soldado',       icon: '',
     desc: 'Veterano de guerra. T\u00e1ticas militares, insignias, cadeia de comando.',
     prof_bonus: ['str'] }
 };
@@ -19526,7 +19526,7 @@ var sessionEventHistory = [];
 //   1. Impressos no console do browser (F12 → Console)
 //   2. Acumulados em buffer circular de memória (_LOG_BUFFER, max 10000 linhas)
 //   3. Salvos periodicamente no localStorage (resistência a F5)
-//   4. Baixáveis como .log.txt via botão 📥 Log OU downloadExploracaoLogs()
+//   4. Baixáveis como .log.txt via botão Log OU downloadExploracaoLogs()
 //   5. Best-effort POST pra /api/explore-log se houver backend (ignora falha em file://)
 // Destino sugerido: logs/exploracao/ (pasta limpa periodicamente).
 // Ver logs/exploracao/README.md pra detalhes.
@@ -20325,7 +20325,7 @@ const FIXED_MAPS = {
       // Long Rest e capado em 1x por dungeon via S._dungeonState.long_rest_used.
       { id: 'campfire_rest', col: 10, row: 12, _hex: 'K13',
         repeatable: true,
-        title: '🔥 Fogueira do Acampamento',
+        title: 'Fogueira do Acampamento',
         text: (
           'A fogueira no centro do patio orc queima alta. As brasas convidam ' +
           'a parar e recuperar forcas — descansar curto pra firmar o folego, ' +
@@ -20340,11 +20340,11 @@ const FIXED_MAPS = {
             desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
             outcome_ok: { _short_rest: true,
               text: 'Você sente o vigor voltar parcialmente. As feridas menores fecham.' } },
-          { id: 'long_rest', label: '🌙 Descanso Longo (1× por masmorra)',
+          { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
             desc: 'HP/MP cheios + remove 1 nível de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: { _long_rest: true,
               text: 'Você dorme as 8 horas inteiras. Acorda renovado, pronto pra batalha.' } },
-          { id: 'leave_camp', label: '🚶 Sair do Acampamento',
+          { id: 'leave_camp', label: 'Sair do Acampamento',
             outcome_ok: { text: 'Você se afasta da fogueira, retornando a exploracao.' } }
         ],
         // class_choices preservado pra extensoes futuras (Patrulheiro Conjurar
@@ -20732,14 +20732,14 @@ const FIXED_MAPS = {
         category: 'danger',
         choices: [
           // ── 1. CONFRONTAR — sem teste, combate direto ──
-          { label: '⚔ Confrontar sem diálogo',
+          { label: 'Confrontar sem diálogo',
             desc: 'Sem rolagem. Combate direto, honra orc.',
             outcome_ok: { text: 'Você se posiciona. Brakthar levanta o greataxe lentamente. "Bom. Sem palavras inúteis." O combate começa.',
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } },
             outcome_fail: null },
           // ── 2. INTIMIDAÇÃO COM CONHECIMENTO RÚNICO ──
           // Sucesso: SURPRESA + boss CA -2 (defesa abalada pela ameaça)
-          { label: '👁 Intimidar com conhecimento das runas',
+          { label: 'Intimidar com conhecimento das runas',
             skill: 'cha', dc: 14,
             desc: 'Carisma (Intimidação) CD 14. Sucesso: ele perde turno inicial + CA reduzida em 2.',
             outcome_ok: { text: '"As runas no teu peito — eu sei como cancelá-las. O xamã não vai te salvar." Brakthar congela. A dúvida racha a fúria — sua guarda baixa. SURPRESA + CA -2.',
@@ -20751,7 +20751,7 @@ const FIXED_MAPS = {
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
           // ── 3. ENTOAR O CÂNTICO DO XAMÃ ──
           // Sucesso: SURPRESA + Investida Furiosa DESABILITADA + Fúria drenada
-          { label: '🎤 Entoar o cântico do xamã',
+          { label: 'Entoar o cântico do xamã',
             skill: 'cha', dc: 13,
             desc: 'Carisma (Atuação) CD 13. Sucesso: ele perde turno + Investida Furiosa cancelada + Fúria zerada.',
             outcome_ok: { text: 'Você entoa as notas em voz baixa, depois alta. Brakthar grita — as runas piscam, a Fúria se esgota. SURPRESA + Investida Furiosa cancelada + recurso drenado.',
@@ -20763,7 +20763,7 @@ const FIXED_MAPS = {
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
           // ── 4. LER A POSTURA (Wis Insight) ──
           // Sucesso: SURPRESA + vantagem no 1° ataque (você lê o ritmo dele)
-          { label: '🧠 Ler a postura de combate',
+          { label: 'Ler a postura de combate',
             skill: 'wis', dc: 13,
             desc: 'Sabedoria (Intuição) CD 13. Sucesso: ele perde turno + você tem vantagem no 1° ataque.',
             outcome_ok: { text: 'Você nota: o ombro esquerdo dele cai depois de cada movimento amplo. SURPRESA + vantagem no 1° ataque (rola 2d20, pega o melhor).',
@@ -20775,7 +20775,7 @@ const FIXED_MAPS = {
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
           // ── 5. INVESTIDA BRUTAL (Str Atletismo) ──
           // Sucesso: SURPRESA + vantagem no 1° ataque (você chega antes da guarda)
-          { label: '💢 Investir antes que ele se levante',
+          { label: 'Investir antes que ele se levante',
             skill: 'str', dc: 14,
             desc: 'Força (Atletismo) CD 14. Sucesso: ele perde turno + você tem vantagem no 1° ataque.',
             outcome_ok: { text: 'Você cruza a tenda em três passadas. Brakthar mal levanta o machado quando seu primeiro golpe acerta. SURPRESA + vantagem no 1° ataque.',
@@ -20786,7 +20786,7 @@ const FIXED_MAPS = {
               xp: 5, hp_loss: 3,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
           // ── 6. NEGOCIAR SAÍDA (alta DC, peaceful exit ou boss enraged) ──
-          { label: '🕊 Negociar saída pacífica',
+          { label: 'Negociar saída pacífica',
             skill: 'cha', dc: 16,
             desc: 'Carisma (Persuasão) CD 16 — muito difícil. Sucesso: evita combate. Falha: boss ENFURECIDO (+2 dano) ataca primeiro.',
             outcome_ok: { text: '"Posso ir embora agora. Tu mantens teu trono, eu mantenho a vida. Ninguém vence aqui hoje." Brakthar encara longo. "...Tu tens coragem. Vai. Mas não volte." Você sai sem combate.',
@@ -21515,84 +21515,84 @@ function initState() {
 // Valores 150-220 GP (DMG uncommon = 100-500 GP).
 var BRAKTHAR_DROPS = {
   'barbaro': {
-    name: 'Machado do Crânio', icon: '🪓',
+    name: 'Machado do Crânio', icon: '',
     type: 'weapon', slot: '1-handed', rarity: 'uncommon',
     desc: 'Machado de mão simples marcado com runas tribais. Brakthar usava apenas o greataxe maior — este foi de um chefe menor que ele matou.',
     bonus: '+1 ataque/dano · 1d8+1 cortante',
     value_gp: 200
   },
   'guerreiro': {
-    name: 'Couraça do Quebrador', icon: '🛡',
+    name: 'Couraça do Quebrador', icon: '',
     type: 'armor', slot: 'body', rarity: 'uncommon',
     desc: 'Armadura de couro cru reforçada por placas de osso. Pertenceu a Brakthar — o orgulho dele agora é seu.',
     bonus: '+1 CA (couro + DEX + 1)',
     value_gp: 175
   },
   'paladino': {
-    name: 'Cinto dos Crânios', icon: '☠',
+    name: 'Cinto dos Crânios', icon: '',
     type: 'belt', slot: 'waist', rarity: 'uncommon',
     desc: 'Cinto troféu — pequenos crânios de inimigos derrotados pendem dele.',
     bonus: '+3 HP máximo',
     value_gp: 175
   },
   'patrulheiro': {
-    name: 'Arco da Sentinela', icon: '🏹',
+    name: 'Arco da Sentinela', icon: '',
     type: 'weapon', slot: 'ranged', rarity: 'uncommon',
     desc: 'Arco curto da sentinela orc. O entalhe da empunhadura tem marcas de uso recente.',
     bonus: '+1 ataque/dano · 1d6+1 perfurante',
     value_gp: 175
   },
   'ladino': {
-    name: 'Adaga Rubra', icon: '🗡',
+    name: 'Adaga Rubra', icon: '',
     type: 'weapon', slot: '1-handed', rarity: 'uncommon',
     desc: 'Adaga ritual encontrada na tenda. Runas tribais no fio.',
     bonus: '+1 ataque/dano · finesse · 1d4+1 perfurante',
     value_gp: 175
   },
   'monge': {
-    name: 'Braceletes dos Totens', icon: '⛓',
+    name: 'Braceletes dos Totens', icon: '',
     type: 'hand', slot: 'wrist', rarity: 'uncommon',
     desc: 'Bracelets entalhados com fragmentos dos 3 totens.',
     bonus: '+1 CA quando desarmado',
     value_gp: 175
   },
   'mago': {
-    name: 'Grimório Tribal do Xamã', icon: '📖',
+    name: 'Grimório Tribal do Xamã', icon: '',
     type: 'offhand', slot: 'book', rarity: 'uncommon',
     desc: 'Pergaminho de cabra com cânticos do xamã. Letras úmidas mas legíveis.',
     bonus: '+1 magia preparada',
     value_gp: 200
   },
   'feiticeiro': {
-    name: 'Pingente Pulsante', icon: '🩸',
+    name: 'Pingente Pulsante', icon: '',
     type: 'neck', slot: 'amulet', rarity: 'uncommon',
     desc: 'Coração runa-marcado preservado em âmbar tribal.',
     bonus: '+1 ponto de feitiçaria máximo',
     value_gp: 200
   },
   'bruxo': {
-    name: 'Olho do Quebrador', icon: '👁',
+    name: 'Olho do Quebrador', icon: '',
     type: 'trinket', slot: 'pocket', rarity: 'uncommon',
     desc: 'Olho do chefe preservado em jarra. Os mortos veem o que os vivos perdem.',
     bonus: '+1 espaço de magia (1° nível)',
     value_gp: 200
   },
   'clerigo': {
-    name: 'Estandarte dos Clãs Caídos', icon: '🏴',
+    name: 'Estandarte dos Clãs Caídos', icon: '',
     type: 'offhand', slot: 'banner', rarity: 'uncommon',
     desc: 'Bandeira tribal com insígnia dos 5 clãs derrotados. A memória dos mortos guia sua fé.',
     bonus: '+1 CD em magias de bênção (Abençoar, Santuário, etc)',
     value_gp: 175
   },
   'druida': {
-    name: 'Talismã do Lobo', icon: '🐺',
+    name: 'Talismã do Lobo', icon: '',
     type: 'neck', slot: 'amulet', rarity: 'uncommon',
     desc: 'Brasão do Clã Picoluno — lobo branco sobre montanha.',
     bonus: 'Vantagem em testes de Forma Selvagem (lobo)',
     value_gp: 175
   },
   'bardo': {
-    name: 'Tambor Tribal', icon: '🥁',
+    name: 'Tambor Tribal', icon: '',
     type: 'offhand', slot: 'instrument', rarity: 'uncommon',
     desc: 'Tambor ritualistico orc. Couro tenso, batidas rituais.',
     bonus: 'Instrumento bárdico · +1 uso de Inspiração Bárdica por descanso curto',
@@ -21647,7 +21647,7 @@ function showBossDropModal(playerCls) {
   var lines = [
     drop.desc,
     '',
-    '⚙ Mecânica: ' + drop.bonus,
+    'Mecânica: ' + drop.bonus,
     '◆ Tipo: ' + typeLabel + (slotLabel ? ' (' + slotLabel + ')' : ''),
     '✦ Raridade: ' + rarityLabel,
     'Valor: ' + (drop.value_gp || 0) + ' Valdoritas'
@@ -21726,7 +21726,7 @@ function _renderBraktharLootCard(drop, rarityLabel, typeLabel, slotLabel) {
     // Header: icon grande + nome
     '<div style="display:flex;align-items:center;gap:14px;margin-bottom: var(--v-space-md-lg, 10px);position:relative">' +
       '<div style="font-size:calc(42px * var(--v-font-scale, 1));line-height:1;flex-shrink:0;filter:drop-shadow(0 0 12px ' + rColor + 'bb)">' +
-        (drop.icon || '⚔') +
+        (drop.icon || '') +
       '</div>' +
       '<div style="flex:1;min-width:0">' +
         '<div style="font-family:Cinzel,serif;font-size:calc(16px * var(--v-font-scale, 1));font-weight:700;letter-spacing:0.5px;color:#f0e0c0;line-height:1.2;text-shadow:0 0 8px ' + rColor + '88">' +
@@ -21743,7 +21743,7 @@ function _renderBraktharLootCard(drop, rarityLabel, typeLabel, slotLabel) {
     '</div>' +
     // Mechanical bonus (highlighted box)
     '<div style="background:rgba(255,255,255,0.04);border:1px solid ' + rColor + '55;border-radius: var(--v-radius-sm, 6px);padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);margin-bottom: var(--v-space-md, 8px);position:relative">' +
-      '<div style="font-size:calc(10px * var(--v-font-scale, 1));letter-spacing:1px;text-transform:uppercase;color:' + rColor + ';margin-bottom:3px">⚙ Mecânica</div>' +
+      '<div style="font-size:calc(10px * var(--v-font-scale, 1));letter-spacing:1px;text-transform:uppercase;color:' + rColor + ';margin-bottom:3px">Mecânica</div>' +
       '<div style="font-size:calc(13px * var(--v-font-scale, 1));color:#f0e0c0;font-weight:600">' + (drop.bonus || '—') + '</div>' +
     '</div>' +
     // Value chip
@@ -21886,7 +21886,7 @@ function showGameOverModal(defeatData) {
     + ' exh=' + p.exh + ' hp=' + p.hp + '/' + p.mhp);
   S.event = {
     id: 'game_over_temple',
-    title: '☠ DERROTADO',
+    title: 'DERROTADO',
     text: (
       'Você caiu sob ' + bossName + '. A escuridao toma conta — ate uma luz dourada penetrar.\n\n' +
       'Sacerdotes de Valdoria carregaram seu corpo ate o templo. Atraves de cantico e bencao, ' +
@@ -21897,7 +21897,7 @@ function showGameOverModal(defeatData) {
     category: 'mystery',
     choices: [
       { id: 'accept_resurrection',
-        label: '🙏 Aceitar Bencao e Retornar a Valdoria',
+        label: 'Aceitar Bencao e Retornar a Valdoria',
         desc: 'HP ' + p.hp + '/' + p.mhp + ' (metade) · MP cheio · Exaustao +1 · -' + goldLost + ' Valdoritas (' + S.gold + ' restante)',
         outcome_ok: { text: 'Você respira fundo. O ar fresco do templo reabilita seu peito. Os sacerdotes te encaminham pra os portoes da cidade.',
           _game_over_to_templo: true } }
@@ -22395,7 +22395,7 @@ function recruitAlly(ally) {
   if (S.allies.some(a => a.id === ally.id)) return false;
   S.allies.push(Object.assign({ recruited_at: Date.now() }, ally));
   updateAllyIndicator();
-  dmNarrate({ text: '👥 Novo aliado: ' + ally.name + ' (' + ally.role + ').', type: 'action' });
+  dmNarrate({ text: 'Novo aliado: ' + ally.name + ' (' + ally.role + ').', type: 'action' });
   saveGame();
   return true;
 }
@@ -26169,7 +26169,7 @@ function drawTileObjMarker(ctx, cx, cy, col, row, family) {
 function drawHexCoords(ctx) {
   // V2.9: coords removidas dos hexes (user req: "faça a coordenada dos hexagonos
   // não aparecer diretamente neles"). A coordenada atual do player continua
-  // visível no #current-coord do HUD (📍 POSIÇÃO M15).
+  // visível no #current-coord do HUD (POSIÇÃO M15).
   // Reativa via window._debugHexCoords = true no console se precisar diagnosticar.
   if (!window._debugHexCoords) return;
   if (HEX_W < 32) return;
@@ -32453,7 +32453,7 @@ function drawWeatherOverlay(ctx) {
 // Fontes de luz com requisitos e bonus de visão. Cave biome é efetivamente 0 sem luz.
 const LIGHT_SOURCES = {
   torch: {
-    id: 'torch', label: 'Tocha', icon: '🔥',
+    id: 'torch', label: 'Tocha', icon: '',
     desc: 'Tocha física — qualquer classe pode carregar.',
     vision_bonus: 1,
     available: function(p) { return true; }
@@ -32465,13 +32465,13 @@ const LIGHT_SOURCES = {
     available: function(p) { return p.cls_key === 'mago' || p.cls_key === 'clerigo'; }
   },
   dancing_lights: {
-    id: 'dancing_lights', label: 'Luzes Dançantes', icon: '💫',
+    id: 'dancing_lights', label: 'Luzes Dançantes', icon: '',
     desc: 'Truque de Mago. Quatro esferas luminosas flutuam ao redor — iluminam área ampla.',
     vision_bonus: 2,
     available: function(p) { return p.cls_key === 'mago'; }
   },
   daylight: {
-    id: 'daylight', label: 'Luz do Dia', icon: '☀',
+    id: 'daylight', label: 'Luz do Dia', icon: '',
     desc: 'Magia Divina de 3º nível (Clérigo). Esfera de luz natural por 1 hora. Consome slot.',
     vision_bonus: 3,
     mp_cost: 3,
@@ -33399,7 +33399,7 @@ function onMoveEnd(col, row) {
     p.wet -= 1;
     if (p.wet === 0) {
       dmNarrate({ text: 'Suas roupas finalmente secaram.', type: 'ambient' });
-      _showWaterStatusToast('💧 <b>Roupas secaram</b><br><span style="font-size:calc(13px * var(--v-font-scale, 1))">Status <b>MOLHADO</b> removido — você está pronto pra enfrentar fogo e frio normalmente.</span>', 0, { centered: true });
+      _showWaterStatusToast('<b>Roupas secaram</b><br><span style="font-size:calc(13px * var(--v-font-scale, 1))">Status <b>MOLHADO</b> removido — você está pronto pra enfrentar fogo e frio normalmente.</span>', 0, { centered: true });
     }
   }
 
@@ -33538,19 +33538,19 @@ function onMoveEnd(col, row) {
     if (!_wasWet) {
       dmNarrate({ text: 'Você ganha o status MOLHADO. Frio causa mais dano; fogo, menos. (5 turnos)', type: 'event' });
       _showWaterStatusToast(
-        '<div style="font-size:calc(32px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md-lg, 10px)">💧</div>'
+        '<div style="font-size:calc(32px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md-lg, 10px)"></div>'
         + '<div style="margin-bottom:14px;font-size:calc(15px * var(--v-font-scale, 1))">' + _waterMsg + '</div>'
         + '<div style="padding: var(--v-space-md-lg, 10px) 14px;background:rgba(80,160,220,0.15);'
         + 'border-left:3px solid #5aacd0;border-radius: var(--v-radius-xs, 4px);text-align:left;'
         + 'font-size:calc(13px * var(--v-font-scale, 1));line-height:1.55">'
         + '<b style="color:#aae0ff">Status MOLHADO (5 turnos)</b><br>'
-        + '⚡ Vulnerabilidade a dano de <b>Frio</b><br>'
-        + '🔥 Resistência a dano de <b>Fogo</b>'
+        + 'Vulnerabilidade a dano de <b>Frio</b><br>'
+        + 'Resistência a dano de <b>Fogo</b>'
         + '</div>', 0, { centered: true });
     } else {
       // Já estava molhado — apenas reforça duração + toast curto
       _showWaterStatusToast(
-        '<div style="font-size:calc(28px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md, 8px)">💧</div>'
+        '<div style="font-size:calc(28px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md, 8px)"></div>'
         + '<div style="margin-bottom:6px"><b>Status MOLHADO renovado</b></div>'
         + '<div style="font-size:calc(13px * var(--v-font-scale, 1));color:#aac8e0">Duração resetada para 5 turnos.</div>',
         0, { centered: true });
@@ -33730,8 +33730,8 @@ function onMoveEnd(col, row) {
           var _fm = res.forced_march;
           var _gain = _fm.gained_exhaustion || 0;
           var _msg = _gain > 0
-            ? '⚠️ Marcha forçada: o cansaço do dia te alcança (Exaustão +' + _gain + ').'
-            : '🏃 Marcha forçada: você resiste ao cansaço do dia (teste de Constituição).';
+            ? 'Marcha forçada: o cansaço do dia te alcança (Exaustão +' + _gain + ').'
+            : 'Marcha forçada: você resiste ao cansaço do dia (teste de Constituição).';
           if (typeof vToast === 'function') {
             vToast(_msg, _gain > 0 ? 'warn' : 'info',
                    (typeof calcReadTime === 'function' ? calcReadTime(_msg, 'toast-warn') : 4000));
@@ -34388,7 +34388,7 @@ function _checkQuestHooks(flagName) {
     LOG('QUEST', 'hook_triggered flag=' + flagName + ' quest=' + hook.id + ' title=' + hook.title);
     // Notifica via toast
     try {
-      _showWaterStatusToast('📜 <b>Nova Missão</b><br>' + hook.title + '<br><small>' + (hook.description || '') + '</small>', 5000);
+      _showWaterStatusToast('<b>Nova Missão</b><br>' + hook.title + '<br><small>' + (hook.description || '') + '</small>', 5000);
     } catch (_) {}
   }
 }
@@ -34419,7 +34419,7 @@ function _checkQuestGoals() {
         if (q.reward.flag) _setPersistedFlag(q.reward.flag, 'pc');
       }
       LOG('QUEST', 'completed id=' + q.id);
-      try { _showWaterStatusToast('✅ <b>Missão Completa</b><br>' + q.title +
+      try { _showWaterStatusToast('<b>Missão Completa</b><br>' + q.title +
         (q.reward && q.reward.gold ? '<br>+' + q.reward.gold + ' Valdoritas' : '') +
         (q.reward && q.reward.xp ? ' • +' + q.reward.xp + ' XP' : ''), 5000); } catch (_) {}
       try { updateHud(); } catch (_) {}
@@ -34507,7 +34507,7 @@ function _outcomeGainsSummary(ops) {
     else if (op.op === 'exh' && d) parts.push((d > 0 ? '+' : '') + d + ' Exaustão');
     else if (op.op === 'item') {
       var nm = (window.ITEMS_DB && op.id && window.ITEMS_DB[op.id] && window.ITEMS_DB[op.id].name) || op.id || 'item';
-      parts.push('🎁 ' + nm);
+      parts.push('' + nm);
     } else if (op.op === 'condition' && op.id) {
       parts.push((op.remove ? '− ' : '+ ') + op.id);
     }
@@ -34531,7 +34531,7 @@ function _exploreRarityMeta(name) {
   };
   var rar = d.rarity || d.raridade || 'Comum';
   var RL = { common: 'Comum', uncommon: 'Incomum', rare: 'Raro', very_rare: 'Muito Raro', epic: 'Épico', legendary: 'Lendário' };
-  return { color: RC[rar] || '#a09484', label: RL[rar] || rar, emoji: d.emoji || '🎁', desc: d.desc || d.descricao || '' };
+  return { color: RC[rar] || '#a09484', label: RL[rar] || rar, emoji: d.emoji || '', desc: d.desc || d.descricao || '' };
 }
 
 function _showExploreRewardCard(items, deltas, onContinue) {
@@ -34561,7 +34561,7 @@ function _showExploreRewardCard(items, deltas, onContinue) {
   function chip(txt, col) { return '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:14px;background:rgba(255,255,255,0.05);border:1px solid ' + col + '66;color:' + col + ';font-weight:700;font-size:calc(12px*var(--v-font-scale,1));">' + txt + '</span>'; }
   if (d.xp) chips.push(chip('★ +' + d.xp + ' XP', '#d4b870'));
   if (d.gold) chips.push(chip('+' + d.gold + ' Valdoritas', '#c4953a'));
-  if (d.hp) chips.push(chip('♥ +' + d.hp + ' PV', '#6ab554'));
+  if (d.hp) chips.push(chip('+' + d.hp + ' PV', '#6ab554'));
   if (d.mp) chips.push(chip('◆ +' + d.mp + ' PM', '#5a9aaa'));
 
   var ov = document.createElement('div');
@@ -35092,7 +35092,7 @@ function _scheduleTorchStormExtinguish() {
     // Apaga
     S.lightSource = null;
     S.torchActive = false;
-    dmNarrate({ text: '⚡ A chuva e o vento apagam sua tocha! Você fica no escuro.', type: 'event' });
+    dmNarrate({ text: 'A chuva e o vento apagam sua tocha! Você fica no escuro.', type: 'event' });
     // 2026-04-27 USER FIX: usar vToast canônico (segue regras CSS do projeto).
     // Antes usava _showWaterStatusToast (azul-água) que era off-theme pra tocha.
     // vToast é o componente oficial do design system — fonte, cores, posição
@@ -35100,10 +35100,10 @@ function _scheduleTorchStormExtinguish() {
     try {
       if (typeof vToast === 'function') {
         // 2026-06-14 (Human Reading Time): duração escala com o texto, não 4000ms fixo.
-        vToast('🔥 Tocha apagada pela tempestade. Reacenda no menu se quiser.', 'warn',
-               (typeof calcReadTime === 'function' ? calcReadTime('🔥 Tocha apagada pela tempestade. Reacenda no menu se quiser.', 'toast-warn') : 4000));
+        vToast('Tocha apagada pela tempestade. Reacenda no menu se quiser.', 'warn',
+               (typeof calcReadTime === 'function' ? calcReadTime('Tocha apagada pela tempestade. Reacenda no menu se quiser.', 'toast-warn') : 4000));
       } else if (typeof _showWaterStatusToast === 'function') {
-        _showWaterStatusToast('🔥 Tocha apagada pela tempestade.', 4000);
+        _showWaterStatusToast('Tocha apagada pela tempestade.', 4000);
       }
     } catch (_) {}
     // Re-reveal fog com novo vision range (sem luz)
@@ -35257,27 +35257,27 @@ window._invFilterExp = window._invFilterExp || 'all';
 // Default fallback inventory — espelha MOCK_PLAYER_INVENTORY de cidade.html
 // (mesmos 21 itens, mesmas quantidades, mesmos ícones canonical).
 var EXPLORACAO_DEFAULT_INVENTORY = [
-  { name: 'Espada Élfica',          quantity: 1, icon: '⚔️', value: 80 },
-  { name: 'Poção de Cura',          quantity: 3, icon: '🧪', value: 25 },
-  { name: 'Poção de Cura Maior',    quantity: 1, icon: '🧪', value: 75 },
-  { name: 'Turquesa',               quantity: 4, icon: '💎', value: 12 },
-  { name: 'Ametista',               quantity: 1, icon: '💎', value: 35 },
-  { name: 'Pergaminho Antigo',      quantity: 1, icon: '📜', value: 50 },
-  { name: 'Pele de Lobo',           quantity: 4, icon: '🪶', value: 8 },
-  { name: 'Presa de Lobo',          quantity: 6, icon: '🦷', value: 5 },
-  { name: 'Orelha de Goblin',       quantity: 3, icon: '👂', value: 3 },
-  { name: 'Adaga Balanceada',       quantity: 1, icon: '🗡️', value: 30 },
-  { name: 'Erva Curativa',          quantity: 5, icon: '🌿', value: 4 },
-  { name: 'Rações de 7 dias',       quantity: 2, icon: '🥖', value: 5 },
-  { name: 'Mapa da Floresta',       quantity: 1, icon: '🗺️', value: 50 },
-  { name: 'Fogo Alquímico',         quantity: 2, icon: '🔥', value: 50 },
-  { name: 'Anel de Sorte',          quantity: 1, icon: '💍', value: 200 },
-  { name: 'Tochas (5)',             quantity: 1, icon: '🕯️', value: 5 },
-  { name: 'Osso',                   quantity: 8, icon: '🦴', value: 1 },
-  { name: 'Vela',                   quantity: 3, icon: '🕯️', value: 1 },
-  { name: 'Garras do Lobo Selvagem',     quantity: 1, icon: '🐾', value: 35 },
-  { name: 'Botas do Lobo Selvagem',      quantity: 1, icon: '👢', value: 40 },
-  { name: 'Elmo do Protetor Ancestral',  quantity: 1, icon: '⛑️', value: 60 }
+  { name: 'Espada Élfica',          quantity: 1, icon: '', value: 80 },
+  { name: 'Poção de Cura',          quantity: 3, icon: '', value: 25 },
+  { name: 'Poção de Cura Maior',    quantity: 1, icon: '', value: 75 },
+  { name: 'Turquesa',               quantity: 4, icon: '', value: 12 },
+  { name: 'Ametista',               quantity: 1, icon: '', value: 35 },
+  { name: 'Pergaminho Antigo',      quantity: 1, icon: '', value: 50 },
+  { name: 'Pele de Lobo',           quantity: 4, icon: '', value: 8 },
+  { name: 'Presa de Lobo',          quantity: 6, icon: '', value: 5 },
+  { name: 'Orelha de Goblin',       quantity: 3, icon: '', value: 3 },
+  { name: 'Adaga Balanceada',       quantity: 1, icon: '', value: 30 },
+  { name: 'Erva Curativa',          quantity: 5, icon: '', value: 4 },
+  { name: 'Rações de 7 dias',       quantity: 2, icon: '', value: 5 },
+  { name: 'Mapa da Floresta',       quantity: 1, icon: '', value: 50 },
+  { name: 'Fogo Alquímico',         quantity: 2, icon: '', value: 50 },
+  { name: 'Anel de Sorte',          quantity: 1, icon: '', value: 200 },
+  { name: 'Tochas (5)',             quantity: 1, icon: '', value: 5 },
+  { name: 'Osso',                   quantity: 8, icon: '', value: 1 },
+  { name: 'Vela',                   quantity: 3, icon: '', value: 1 },
+  { name: 'Garras do Lobo Selvagem',     quantity: 1, icon: '', value: 35 },
+  { name: 'Botas do Lobo Selvagem',      quantity: 1, icon: '', value: 40 },
+  { name: 'Elmo do Protetor Ancestral',  quantity: 1, icon: '', value: 60 }
 ];
 
 // Server-Only State (regra #0): a fonte de verdade do inventário é o SERVIDOR
@@ -35325,11 +35325,11 @@ function _exploracaoItemCategory(item) {
 function _exploracaoItemIcon(item) {
   if (item && item.icon) return item.icon;
   var cat = _exploracaoItemCategory(item);
-  if (cat === 'use') return '🧪';
-  if (cat === 'equip') return '⚔️';
-  if (cat === 'gem') return '💎';
-  if (cat === 'rune') return '✨';
-  return '📦';
+  if (cat === 'use') return '';
+  if (cat === 'equip') return '';
+  if (cat === 'gem') return '';
+  if (cat === 'rune') return '';
+  return '';
 }
 
 // Nome bonito (storage já tem 'name' canonical, fallback heurístico)
@@ -35605,11 +35605,11 @@ function _renderExploracaoInventoryPopup() {
     + '</div>'
     + '<div class="inv-filter-row">'
     +   '<span class="inv-filter-pill' + (filter === 'all' ? ' active' : '') + '" data-filter="all">Todos (' + counts.all + ')</span>'
-    +   '<span class="inv-filter-pill' + (filter === 'equip' ? ' active' : '') + '" data-filter="equip">⚔️ Equip (' + counts.equip + ')</span>'
-    +   '<span class="inv-filter-pill' + (filter === 'use' ? ' active' : '') + '" data-filter="use">🧪 Consum (' + counts.use + ')</span>'
-    +   '<span class="inv-filter-pill' + (filter === 'gem' ? ' active' : '') + '" data-filter="gem">💎 Gemas (' + counts.gem + ')</span>'
-    +   '<span class="inv-filter-pill' + (filter === 'rune' ? ' active' : '') + '" data-filter="rune">✨ Runas (' + (counts.rune || 0) + ')</span>'
-    +   '<span class="inv-filter-pill' + (filter === 'misc' ? ' active' : '') + '" data-filter="misc">📦 Outros (' + counts.misc + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'equip' ? ' active' : '') + '" data-filter="equip">Equip (' + counts.equip + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'use' ? ' active' : '') + '" data-filter="use">Consum (' + counts.use + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'gem' ? ' active' : '') + '" data-filter="gem">Gemas (' + counts.gem + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'rune' ? ' active' : '') + '" data-filter="rune">Runas (' + (counts.rune || 0) + ')</span>'
+    +   '<span class="inv-filter-pill' + (filter === 'misc' ? ' active' : '') + '" data-filter="misc">Outros (' + counts.misc + ')</span>'
     + '</div>';
 
   if (filtered.length === 0) {
@@ -35648,7 +35648,7 @@ function _renderExploracaoInventoryPopup() {
       var idx = parseInt(card.dataset.itemIdx, 10);
       var item = filtered[idx];
       if (item && typeof dmNarrate === 'function') {
-        dmNarrate({ text: '🔍 ' + item.name + ' (×' + item.quantity + ') — '
+        dmNarrate({ text: '' + item.name + ' (×' + item.quantity + ') — '
           + (item.value ? 'Valor: ' + item.value + ' Valdoritas. ' : '')
           + 'Detalhes completos no jogo real.', type: 'ambient' });
       }
@@ -36550,7 +36550,7 @@ function triggerCombatScreen(cfg) {
   }
 }
 
-const SKILL_ICONS = { str: '⚔', dex: '🏹', con: '🛡', int: '📖', wis: '✦', cha: '◉' };
+const SKILL_ICONS = { str: '', dex: '', con: '', int: '', wis: '✦', cha: '◉' };
 const EVENT_CATEGORIES = {
   // encounter, social, discovery, danger, mystery — inferido por id se não especificado
   merchant: 'social', beggar: 'social', child: 'social', hunter: 'social',
@@ -36833,7 +36833,7 @@ function openEventModal() {
         return { good: 'Bom', evil: 'Mau', lawful: 'Leal', chaotic: 'Ca\u00f3tico',
                  neutral_moral: 'Neutro', neutral_conduct: 'Neutro' }[f] || f;
       });
-      at.textContent = '\u2735 ' + lbls.join('/');
+      at.textContent = '' + lbls.join('/');
       btn.appendChild(at);
     }
     // V2.6: tag de ally-class requerida
@@ -36895,7 +36895,7 @@ function openEventModal() {
     _fcBtn.className = 'event-choice';
     const _fcLbl = document.createElement('span');
     _fcLbl.className = 'choice-label';
-    _fcLbl.textContent = '⚔ Enfrentar!';
+    _fcLbl.textContent = 'Enfrentar!';
     _fcBtn.appendChild(_fcLbl);
     _fcBtn.addEventListener('click', () => _engageForcedCombat(ev));
     choicesEl.appendChild(_fcBtn);
@@ -37053,7 +37053,7 @@ function _remoteEventChoiceError(reason) {
   LOGW('API', 'event_choice recoverable_error reason=' + (reason || '?')
     + ' — NÃO fabrica resolução client-side (SUPREME RULE #0)');
   try {
-    if (typeof vToast === 'function') vToast('⚠️ Falha ao resolver (rede). Toque na opção novamente.', 'warn');
+    if (typeof vToast === 'function') vToast('Falha ao resolver (rede). Toque na opção novamente.', 'warn');
   } catch (_) {}
   try { _setEventChoicesDisabled(false); } catch (_) {}
 }
@@ -37314,8 +37314,8 @@ function _remoteShowOutcome(ch, oc) {
       if (typeof d.gold === 'number' && d.gold > 0) consItems.push({ kind: 'reward', ico: '◉', text: '+' + d.gold + ' Valdoritas' });
       else if (typeof d.gold === 'number' && d.gold < 0) consItems.push({ kind: 'penalty', ico: '◉', text: d.gold + ' Valdoritas' });
       if (typeof d.xp === 'number' && d.xp > 0) consItems.push({ kind: 'reward', ico: '★', text: '+' + d.xp + ' XP' });
-      if (typeof d.hp === 'number' && d.hp > 0) consItems.push({ kind: 'reward', ico: '♥', text: '+' + d.hp + ' HP' });
-      else if (typeof d.hp === 'number' && d.hp < 0) consItems.push({ kind: 'penalty', ico: '♥', text: d.hp + ' HP' });
+      if (typeof d.hp === 'number' && d.hp > 0) consItems.push({ kind: 'reward', ico: '', text: '+' + d.hp + ' HP' });
+      else if (typeof d.hp === 'number' && d.hp < 0) consItems.push({ kind: 'penalty', ico: '', text: d.hp + ' HP' });
       if (typeof d.mp === 'number' && d.mp > 0) consItems.push({ kind: 'reward', ico: '◆', text: '+' + d.mp + ' MP' });
       else if (typeof d.mp === 'number' && d.mp < 0) consItems.push({ kind: 'penalty', ico: '◆', text: d.mp + ' MP' });
       if (consItems.length) {
@@ -37402,7 +37402,7 @@ function _remoteShowOutcome(ch, oc) {
         }
         // 2026-06-16 (edge): evento server-rolled SEM combat_redirect (staging do
         // server falhou/retornou null). ANTES caía num URL relativo SEM token
-        // ('combate.html?enemy=') → '🔄 Novo Combate' → rewards NUNCA persistiam +
+        // ('combate.html?enemy=') → 'Novo Combate' → rewards NUNCA persistiam +
         // 404 no hosted. Agora, em REMOTE, RE-ENCENA no servidor via
         // /api/exploracao/stage_combat (token → '✓ Continuar' → /complete persiste).
         // Sem combate tokenless: se o re-staging falhar, avisa e fica na exploração.
@@ -37460,7 +37460,7 @@ function _remoteShowOutcome(ch, oc) {
 // 'combat_optional'/'quest_hook' (choice-based, mesmo path do social: choices →
 // /event_choice; "lutar" volta combat_redirect, tratado por _explFinalizeCombatRedirect).
 // Fase 4-deleção (2026-06-22) += 'combat_forced': NÃO tem choices do servidor — o
-// _explEventBodyNode injeta o botão único "⚔ Enfrentar!" (_forced) e o onChoice o roteia
+// _explEventBodyNode injeta o botão único "Enfrentar!" (_forced) e o onChoice o roteia
 // pro _engageForcedCombat (MESMO trigger do openEventModal: REMOTE eventChoice(0)→
 // combat_redirect / LOCAL triggerCombatScreen). Tira o ÚLTIMO tipo REMOTE do openEventModal.
 // Tile-objects (StubEventLayer) + LOCAL/DEV continuam fora (migração separada).
@@ -37527,10 +37527,10 @@ function _explEventBodyNode(ev) {
     }
   }
   // #12 Fase 4-deleção: combat_forced (emboscada sem fuga) não tem choices do servidor.
-  // Injeta o botão único "⚔ Enfrentar!" (_forced) — paridade com o openEventModal. O
+  // Injeta o botão único "Enfrentar!" (_forced) — paridade com o openEventModal. O
   // onChoice (em _explShowEventVEnc) roteia _forced → _engageForcedCombat (não /event_choice).
   if (!displayed.length && (ev.combat || ev.type === 'combat_forced')) {
-    displayed.push({ id: '__expl_forced', label: '⚔ Enfrentar!', _forced: true });
+    displayed.push({ id: '__expl_forced', label: 'Enfrentar!', _forced: true });
   }
   return { npc: _explEventHeaderNpc(ev), script: script, choices: displayed };
 }
@@ -37555,7 +37555,7 @@ function _explShowEventVEnc(ev) {
     window.vEncounter.render(node, {
       player: S.player, closeable: false,
       onChoice: function (ch) {
-        // #12 Fase 4-deleção: combat_forced — a choice única "⚔ Enfrentar!" (_forced)
+        // #12 Fase 4-deleção: combat_forced — a choice única "Enfrentar!" (_forced)
         // dispara o combate via _engageForcedCombat (reusa o trigger do openEventModal:
         // REMOTE eventChoice(0)→combat_redirect / LOCAL). NÃO resolve via /event_choice.
         if (ch && ch._forced) {
@@ -37622,7 +37622,7 @@ function _explEventVEncError(ev, reason) {
   _explVEncResolving = false;
   LOGW('API', 'vencounter_event_choice recoverable_error reason=' + (reason || '?')
     + ' — nao fabrica (SUPREME RULE #0)');
-  try { if (typeof vToast === 'function') vToast('⚠️ Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
+  try { if (typeof vToast === 'function') vToast('Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
   _explShowEventVEnc(ev);
 }
 
@@ -37867,7 +37867,7 @@ function _explShowTileVEnc(rt) {
 function _explTileVEncError(rt) {
   _explVEncResolving = false;
   LOGW('API', 'tile_venc recoverable_error — nao fabrica (SUPREME RULE #0)');
-  try { if (typeof vToast === 'function') vToast('⚠️ Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
+  try { if (typeof vToast === 'function') vToast('Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
   try { _explShowTileVEnc(rt); } catch (_) { /* sem como reabrir — desiste silencioso */ }
 }
 
@@ -38405,16 +38405,16 @@ function applyChoiceOutcome(choice, success, total, dc) {
 
   const consItems = [];
   if (outcome.reward) consItems.push({ kind: 'reward', ico: '✦', text: outcome.reward });
-  if (outcome.hp_gain) consItems.push({ kind: 'reward', ico: '♥', text: '+' + outcome.hp_gain + ' HP' });
+  if (outcome.hp_gain) consItems.push({ kind: 'reward', ico: '', text: '+' + outcome.hp_gain + ' HP' });
   if (outcome.mp_gain) consItems.push({ kind: 'reward', ico: '◆', text: '+' + outcome.mp_gain + ' MP' });
   // X-6.5.51m: gold/xp diretos (eventos procedurais)
   if (typeof outcome.gold === 'number' && outcome.gold > 0) consItems.push({ kind: 'reward', ico: '◉', text: '+' + outcome.gold + ' Valdoritas' });
   if (typeof outcome.xp === 'number' && outcome.xp > 0) consItems.push({ kind: 'reward', ico: '★', text: '+' + outcome.xp + ' XP' });
-  if (outcome.hp_loss) consItems.push({ kind: 'penalty', ico: '♥', text: '−' + outcome.hp_loss + ' HP' });
+  if (outcome.hp_loss) consItems.push({ kind: 'penalty', ico: '', text: '−' + outcome.hp_loss + ' HP' });
   if (outcome.mp_loss) consItems.push({ kind: 'penalty', ico: '◆', text: '−' + outcome.mp_loss + ' MP' });
-  if (outcome.exh_gain) consItems.push({ kind: 'penalty', ico: '☉', text: '+' + outcome.exh_gain + ' Exaustão' });
+  if (outcome.exh_gain) consItems.push({ kind: 'penalty', ico: '', text: '+' + outcome.exh_gain + ' Exaustão' });
   if (outcome.info) consItems.push({ kind: 'info', ico: '?', text: outcome.info });
-  if (outcome.starts_quest) consItems.push({ kind: 'info', ico: '📜', text: 'Nova missão: ' + outcome.starts_quest.title });
+  if (outcome.starts_quest) consItems.push({ kind: 'info', ico: '', text: 'Nova missão: ' + outcome.starts_quest.title });
   if (consItems.length) {
     const cons = document.createElement('div');
     cons.className = 'outcome-consequences';
@@ -38665,13 +38665,13 @@ function triggerDungeonEntry(dg) {
       '<div style="background:rgba(196,49,49,0.12);border:1px solid rgba(196,49,49,0.4);' +
            'padding: var(--v-space-md-lg, 10px) 14px;border-radius: var(--v-radius-sm, 6px);margin:14px 0;color:#d49595;' +
            'font-family:Cinzel,serif;font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:1.5px;text-transform:uppercase;font-weight:700">' +
-        '⚔ Acampamento Hostil · Brakthar, Quebrador de Cranios' +
+        'Acampamento Hostil · Brakthar, Quebrador de Cranios' +
       '</div>' +
       '<p style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);margin:0">' +
         'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.' +
       '</p>' +
       '</div>';
-    document.getElementById('dungeon-enter').textContent = '⚔ Adentrar';
+    document.getElementById('dungeon-enter').textContent = 'Adentrar';
     const ov = document.getElementById('dungeon-overlay');
     applyBiomeAccent(ov);
     ov.classList.add('visible');
@@ -38819,7 +38819,7 @@ function triggerEdgeTransition(ed) {
     desc = '<div style="text-align:center;line-height:1.65;font-size:calc(13px * var(--v-font-scale, 1))">' +
            '<p style="margin: 0 0 var(--v-space-lg, 12px);color:var(--v-text, #d4c8b0)">Você abandona <strong style="color:var(--v-gold, #c4953a)">' + S.mapDef.name + '</strong> e retorna a <strong style="color:var(--v-gold, #c4953a)">' + tgtNameDung + '</strong>.</p>' +
            '<div style="background:rgba(196,49,49,0.12);border:1px solid rgba(196,49,49,0.4);padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);border-radius: var(--v-radius-sm, 6px);margin: var(--v-space-md-lg, 10px) 0;color:#d49595;font-size:calc(11px * var(--v-font-scale, 1));text-align:left">' +
-             '<strong>⚠ Atenção:</strong> a masmorra permanece hostil. Inimigos voltarao a postos. Voltar mais tarde significa enfrentar tudo de novo.' +
+             '<strong>Atenção:</strong> a masmorra permanece hostil. Inimigos voltarao a postos. Voltar mais tarde significa enfrentar tudo de novo.' +
            '</div>' +
            '</div>';
     document.getElementById('dungeon-title').textContent = title;
@@ -38857,17 +38857,17 @@ function triggerEdgeTransition(ed) {
       // Spoiler-free: para locais não visitados, só narrativa de mistério.
       // Bioma/perigo/clima/dungeons só aparecem após primeira visita.
       if (isKnown) {
-        infoLines.push('🌿 <strong>Bioma:</strong> ' + biomeLabel);
-        infoLines.push('⚠ <strong>Perigo:</strong> ' + dangerPips + ' <em>' + dangerLabel + '</em>');
+        infoLines.push('<strong>Bioma:</strong> ' + biomeLabel);
+        infoLines.push('<strong>Perigo:</strong> ' + dangerPips + ' <em>' + dangerLabel + '</em>');
         if (tgt.dungeons && tgt.dungeons.length > 0) {
-          infoLines.push('🏰 <strong>Locais notáveis:</strong> ' + tgt.dungeons.length + ' masmorra(s) conhecida(s)');
+          infoLines.push('<strong>Locais notáveis:</strong> ' + tgt.dungeons.length + ' masmorra(s) conhecida(s)');
         }
         if (tgt.weather_pool && tgt.weather_pool.length > 0) {
           const wcounts = {};
           tgt.weather_pool.forEach(function(w) { wcounts[w] = (wcounts[w] || 0) + 1; });
-          const wLabels = { s: '☀ sol', r: '🌧 chuva', f: '🌫 névoa', t: '⛈ tempestade' };
+          const wLabels = { s: 'sol', r: 'chuva', f: 'névoa', t: 'tempestade' };
           const sorted = Object.keys(wcounts).sort(function(a, b) { return wcounts[b] - wcounts[a]; });
-          infoLines.push('🌤 <strong>Clima típico:</strong> ' + sorted.map(function(w) { return wLabels[w] || w; }).join(', '));
+          infoLines.push('<strong>Clima típico:</strong> ' + sorted.map(function(w) { return wLabels[w] || w; }).join(', '));
         }
         infoLines.push('<em style="color:#a0d878">✓ Você já esteve aqui</em>');
       } else {
@@ -39034,7 +39034,7 @@ async function confirmEdgeTransition(_skipJourney) {
       // Fallback: re-show overlay pra user tentar de novo
       S._pendingEdge = ed;
       document.getElementById('dungeon-overlay').classList.add('visible');
-      if (typeof vToast === 'function') vToast('⚠ Erro ao viajar — tente novamente');
+      if (typeof vToast === 'function') vToast('Erro ao viajar — tente novamente');
     }
     return;
   }
@@ -39237,7 +39237,7 @@ function startQuest(q) {
   if (completedQuests.has(q.id)) { LOG('QUEST', 'already completed — skip'); return false; }
   S.activeQuests.push(Object.assign({ started_at: Date.now(), progress: 'active' }, q));
   updateQuestIndicator();
-  dmNarrate({ text: '📜 Nova missão: ' + q.title, type: 'event' });
+  dmNarrate({ text: 'Nova missão: ' + q.title, type: 'event' });
   saveGame();
   return true;
 }
@@ -39273,7 +39273,7 @@ function checkQuestDelivery() {
 function openQuestDelivery(q) {
   S.ph = 'event';
   S._pendingDelivery = q;
-  document.getElementById('dungeon-title').textContent = '📜 ' + q.title;
+  document.getElementById('dungeon-title').textContent = '' + q.title;
   const dTxt = q.deliver_text || 'Você chegou ao local onde esta missão pode ser concluída. Cumpre a promessa?';
   document.getElementById('dungeon-desc').textContent = dTxt;
   document.getElementById('dungeon-enter').textContent = 'Concluir';
@@ -39318,89 +39318,89 @@ function updateQuestIndicator() {
 var LORE_FLAGS_DB = {
   // ── DIARIO + INSCRICOES + CANTICO (lore drops Brakthar) ──
   'lore_brakthar_totem_secret':
-    { title: '📜 Diario de Prisioneiro',
+    { title: 'Diario de Prisioneiro',
       desc: 'Brakthar nao come carne — apenas cranios. As runas vermelhas no peito sao renovadas pelo xama a cada lua nova. O segredo esta nos totens.' },
   'lore_brakthar_full_diary':
-    { title: '📖 Diario Completo Decifrado',
+    { title: 'Diario Completo Decifrado',
       desc: 'Pagina apos pagina: "Brakthar nao come carne, apenas cranios. Patrulha sozinho a noite. Marcas no peito — runas rubras renovadas a cada lua nova pelo xama. O segredo esta nos totens: quebra-los enfraquece a magia que protege o chefe."' },
   'lore_brakthar_paranoid':
-    { title: '👁 Brakthar Paranoico',
+    { title: 'Brakthar Paranoico',
       desc: '"Anda nervoso. Diz que ve sombras no espelho. O xama renova as runas a cada lua nova mas... ele nao dorme." Intel valiosa do estado mental do chefe.' },
   // ── TOTENS (3 outcomes possiveis) ──
   'totem_decoded':
-    { title: '🪦 Inscricao Tribal Decifrada',
+    { title: 'Inscricao Tribal Decifrada',
       desc: '"Por sangue, eu Brakthar ergui esta tribo." Destruir os totens enfraquece o ritual de fortificacao do chefe.' },
   'totem_runes_memorized':
-    { title: '🔮 Runas dos Totens Memorizadas',
+    { title: 'Runas dos Totens Memorizadas',
       desc: 'Você memorizou cada simbolo. Brakthar nao sera mais protegido pelos totens — você sabe como cancelar a magia em combate.' },
   'totem_broken':
-    { title: '🪓 Totem Quebrado',
+    { title: 'Totem Quebrado',
       desc: 'Você racha o totem com forca bruta. Energia rubra escapa. O ritual esta enfraquecido.' },
   'totem_burst_resisted':
-    { title: '✊ Resistiu a Explosao Runica',
+    { title: 'Resistiu a Explosao Runica',
       desc: 'Você cerrou os dentes. A energia rubra passou sem ferir. Os totens estao silenciosos agora — a magia de Brakthar foi quebrada.' },
   'totem_essence_absorbed':
-    { title: '🌀 Essencia Rubra Absorvida',
+    { title: 'Essencia Rubra Absorvida',
       desc: 'Você abriu a mente — uma faisca rubra entrou em você. Memorias dos clas caidos. Conhecimento ao custo de presenca.' },
   'totem_communed':
-    { title: '🕯 Comunhao com os Totens',
+    { title: 'Comunhao com os Totens',
       desc: 'Os espiritos ancestrais reconheceram você. As runas continuam ativas, mas nao mais hostis a sua aproximacao.' },
   'spirit_blessing':
-    { title: '✨ Bencao dos Espiritos Caidos',
+    { title: 'Bencao dos Espiritos Caidos',
       desc: 'Os espiritos dos clas caidos abencoaram seu caminho. No combate contra Brakthar, você sentira o peso ancestral guiando seus golpes — vantagem na primeira rodada.' },
   'can_disrupt_brakthar_chant':
-    { title: '🎤 Você pode Cantar o Cantico',
+    { title: 'Você pode Cantar o Cantico',
       desc: 'A energia rubra dos totens responde a sua voz. Cantar durante o boss fight pode fazer Brakthar hesitar (1 turno sem ataque).' },
   // ── CLA PICOLUNO (memorial) ──
   'lore_clan_picoluno_known':
-    { title: '🛡 Cla Picoluno (Memorial)',
+    { title: 'Cla Picoluno (Memorial)',
       desc: 'O lobo branco sobre montanha — emblema do Cla Picoluno. Nao foram derrotados em guerra: foram traidos durante a paz. Sobreviventes podem existir no norte.' },
   // ── ORC JOVEM (4 outcomes) ──
   'orc_youth_ally':
-    { title: '🤝 Orc Jovem Aliado',
+    { title: 'Orc Jovem Aliado',
       desc: '"Brakthar matou meu pai. Ele caira hoje." O orc jovem oferece lutar contigo. Vantagem no 1° ataque vs Brakthar.' },
   'orc_youth_intel':
-    { title: '💬 Intel do Orc Jovem',
+    { title: 'Intel do Orc Jovem',
       desc: '"O xama esta atras da tenda, mas Brakthar esta sozinho no trono."' },
   'orc_youth_spared':
-    { title: '🚶 Orc Jovem Poupado',
+    { title: 'Orc Jovem Poupado',
       desc: 'Você o deixou onde estava. Pode sobreviver ou nao.' },
   'orc_youth_killed':
-    { title: '⚔ Orc Jovem Morto',
+    { title: 'Orc Jovem Morto',
       desc: 'Você executou o orc ferido. Um lampejo de alivio? gratidao? cruzou o rosto antes da queda.' },
   // ── SENTINELA (3 outcomes) ──
   'sentinel_killed':
-    { title: '🗡 Sentinela Morta',
+    { title: 'Sentinela Morta',
       desc: 'A sentinela orc dormindo na trilha foi silenciada antes de despertar.' },
   'sentinel_passed':
-    { title: '👤 Sentinela Burlada',
+    { title: 'Sentinela Burlada',
       desc: 'Você passou pela sentinela adormecida sem fazer ruido.' },
   'sentinel_avoided':
-    { title: '🌿 Sentinela Contornada',
+    { title: 'Sentinela Contornada',
       desc: 'Você leu o terreno e contornou a sentinela por uma trilha paralela. Sem combate.' },
   // ── GUARDAS DO PATIO ──
   'patio_evaded':
-    { title: '🌑 Patio Evitado',
+    { title: 'Patio Evitado',
       desc: 'Você contornou o patio principal sem alertar os guardas.' },
   'guards_killed':
-    { title: '⚔ Guardas Eliminados',
+    { title: 'Guardas Eliminados',
       desc: 'Você avancou silencioso e abateu os guardas antes do grito. O patio esta limpo.' },
   'guards_persuaded':
-    { title: '🗣 Guardas Enganados',
+    { title: 'Guardas Enganados',
       desc: 'Você convenceu os guardas com lábia. Eles abriram passagem sem perceber a manipulacao.' },
   // ── ALARME ──
   'alarm_raised':
-    { title: '🚨 Alarme Geral',
+    { title: 'Alarme Geral',
       desc: 'O alarme do acampamento esta ativo. Brakthar tera reforcos.' },
   // ── BRAKTHAR (boss outcomes) ──
   'brakthar_defeated':
-    { title: '🏆 Brakthar Derrotado',
+    { title: 'Brakthar Derrotado',
       desc: 'O chefe orc caiu. Os 5 clas que ele unificou pelo medo estao livres.' },
   'brakthar_spared':
-    { title: '🤝 Brakthar Poupado',
+    { title: 'Brakthar Poupado',
       desc: '"Tu tens coragem. Vai. Mas nao volte." Você convenceu Brakthar a deixar você sair sem combate. Recompensa minima — vida intacta.' },
   'brakthar_loot_taken':
-    { title: '🪓 Pilhagem do Chefe',
+    { title: 'Pilhagem do Chefe',
       desc: 'Você removeu um item lendario do corpo de Brakthar — o trofeu da sua classe.' },
   'dungeon_completed':
     { title: '✓ Masmorra Completada',
@@ -39456,8 +39456,8 @@ window._exploreQuestDiaryState = window._exploreQuestDiaryState || {
 function openQuestJournal(opts) {
   opts = opts || {};
   const focus = opts.focus || 'quests';
-  // X-6.5.19: quando aberto pelo botão dedicado 📜, mostra SÓ missões
-  // (sem inventário nem reputação). Mochila 🎒 tem seu próprio popup.
+  // X-6.5.19: quando aberto pelo botão dedicado , mostra SÓ missões
+  // (sem inventário nem reputação). Mochila tem seu próprio popup.
   const questsOnly = !!opts.questsOnly;
   const ov = document.getElementById('journal-overlay');
   const list = document.getElementById('journal-list');
@@ -39497,7 +39497,7 @@ function _normalizeExploreQuests() {
     var ready = (q.progress || '').indexOf('✓') >= 0;
     out.push({
       id: q.id,
-      icon: q.icon || '📜',
+      icon: q.icon || '',
       title: q.title || q.id || 'Missão',
       desc: q.desc || '',
       status: ready ? 'ready' : 'active',
@@ -39566,8 +39566,8 @@ function _renderExploreQuestDiary(listEl) {
 
   // === TABS BAR (sticky) — paridade cidade .qd-tabs ===
   var TABS = [
-    { id: 'active',  label: 'Ativas',     emoji: '⚔️', count: counts.active },
-    { id: 'history', label: 'Concluídas', emoji: '📚', count: counts.history }
+    { id: 'active',  label: 'Ativas',     emoji: '', count: counts.active },
+    { id: 'history', label: 'Concluídas', emoji: '', count: counts.history }
   ];
   var html = '<div class="qd-hub" style="padding: var(--v-space-md, 8px) 0 0;">';
 
@@ -39602,7 +39602,7 @@ function _renderExploreQuestDiary(listEl) {
   // Search bar
   html += '<div class="qd-toolbar" '
     + 'style="display:flex; gap: var(--v-space-xs, 2px); padding: 0 var(--v-space-md, 8px) var(--v-space-sm, 6px);">';
-  html += '<input type="search" class="qd-search" placeholder="🔍 Buscar missão..." '
+  html += '<input type="search" class="qd-search" placeholder="Buscar missão..." '
     + 'value="' + (state.search || '').replace(/"/g, '&quot;') + '" '
     + 'style="flex:1; padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
     + 'background: rgba(196,149,58,0.04); border: 1px solid var(--v-border, #4a3828); '
@@ -39655,7 +39655,7 @@ function _renderExploreQuestDiary(listEl) {
         + 'style="font-size: var(--v-font-xl, 18px); flex-shrink: 0; width: 32px; height: 32px; '
         + 'display: flex; align-items: center; justify-content: center; '
         + 'background: var(--v-gold-06, rgba(196,149,58,0.06)); border-radius: var(--v-radius-sm, 6px);">'
-        + (q.icon || '📜')
+        + (q.icon || '')
         + '</div>'
 
         // Info
@@ -39673,9 +39673,9 @@ function _renderExploreQuestDiary(listEl) {
           ? '<div class="qd-desc" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); margin-top: var(--v-space-xs, 2px); line-height: 1.3;">' + q.desc + '</div>'
           : '')
         + (q.npc
-          ? '<div class="qd-npc" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); margin-top: var(--v-space-xs, 2px); line-height: 1.3;">👤 ' + q.npc + (q.location ? ' · 📍 ' + q.location : '') + '</div>'
+          ? '<div class="qd-npc" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); margin-top: var(--v-space-xs, 2px); line-height: 1.3;">' + q.npc + (q.location ? ' · ' + q.location : '') + '</div>'
           : (q.location
-              ? '<div class="qd-loc" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); margin-top: var(--v-space-xs, 2px); line-height: 1.3;">📍 ' + q.location + '</div>'
+              ? '<div class="qd-loc" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); margin-top: var(--v-space-xs, 2px); line-height: 1.3;">' + q.location + '</div>'
               : ''))
         + '</div>'
 
@@ -39722,7 +39722,7 @@ function _renderExploreQuestDiary(listEl) {
       var qid = card.getAttribute('data-qid');
       if (!qid) return;
       if (typeof dmNarrate === 'function') {
-        dmNarrate({ text: '📜 ' + qid + ' — detalhes completos na cidade (visite o NPC).', type: 'ambient' });
+        dmNarrate({ text: '' + qid + ' — detalhes completos na cidade (visite o NPC).', type: 'ambient' });
       }
     });
   });
@@ -39782,7 +39782,7 @@ function _legacyOpenQuestJournal_DEPRECATED(opts) {
   }
 
   // X-6.5.19/20: SECÇÃO 2 e 3 (Inventário + Reputação) só renderizam se
-  // não for questsOnly. Acesso via botão 📜 mostra só missões; botão 🎒
+  // não for questsOnly. Acesso via botão mostra só missões; botão 
   // navega pra /inventory/ real (sistema completo).
   if (!questsOnly) {
     // SECÇÃO 2 — INVENTÁRIO
@@ -40375,7 +40375,7 @@ function _shortRestError() {
   var status = document.getElementById('camp-footer-status');
   var m = 'Descanso curto falhou (rede). Tente novamente.';
   if (status) status.textContent = m;
-  if (typeof vToast === 'function') vToast('💤 ' + m, 'warn');
+  if (typeof vToast === 'function') vToast('' + m, 'warn');
 }
 
 // H2: aplica o resultado AUTORITATIVO do servidor (cliente só renderiza).
@@ -40393,7 +40393,7 @@ function _applyServerShortRest(p, healed, serverState) {
   var rollTxt = (rawRoll !== null ? '1d' + die + '=' + rawRoll : '1d' + die)
     + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ')';
   var status = document.getElementById('camp-footer-status');
-  var msg = '💤 Descanso Curto: ' + rollTxt + ' = +' + actual + ' HP' + fullHpNote
+  var msg = 'Descanso Curto: ' + rollTxt + ' = +' + actual + ' HP' + fullHpNote
     + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
   if (status) status.textContent = msg;
   if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
@@ -40416,7 +40416,7 @@ function doShortRest() {
     const status = document.getElementById('camp-footer-status');
     const msg = 'Sem Dado de Vida disponível. Use Descanso Longo.';
     if (status) status.textContent = msg;
-    if (typeof vToast === 'function') vToast('💤 ' + msg, 'warn');
+    if (typeof vToast === 'function') vToast('' + msg, 'warn');
     return;
   }
 
@@ -40434,7 +40434,7 @@ function doShortRest() {
         var st = document.getElementById('camp-footer-status');
         var m = 'Sem Dado de Vida disponível. Use Descanso Longo.';
         if (st) st.textContent = m;
-        if (typeof vToast === 'function') vToast('💤 ' + m, 'warn');
+        if (typeof vToast === 'function') vToast('' + m, 'warn');
         if (res.state && typeof res.state.hit_dice === 'number') p.hd = res.state.hit_dice;
         _updateCampHud(); _updateCampDetails();
         if (typeof updateHud === 'function') updateHud();
@@ -40457,7 +40457,7 @@ function doShortRest() {
   p.hd = Math.max(0, (p.hd || 0) - 1);
   const fullHpNote = (actual === 0 && p.hp === p.mhp) ? ' (HP já cheio — HD gasto)' : '';
   const status = document.getElementById('camp-footer-status');
-  const msg = '💤 Descanso Curto: 1d' + dieSides + '=' + roll
+  const msg = 'Descanso Curto: 1d' + dieSides + '=' + roll
     + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ') = +' + actual
     + ' HP' + fullHpNote + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
   if (status) status.textContent = msg;
@@ -40520,7 +40520,7 @@ function doLongRest() {
           try { if (typeof render === 'function') render(); } catch (_er) {}
           if (typeof vToast === 'function') vToast(res.message || 'Você precisa de uma Barraca ou Kit de Acampamento para o Descanso Longo no campo.');
           var _cst = document.getElementById('camp-footer-status');
-          if (_cst) _cst.textContent = '⚠️ Sem equipamento de acampamento (Barraca ou Kit).';
+          if (_cst) _cst.textContent = 'Sem equipamento de acampamento (Barraca ou Kit).';
         } else {
           console.warn('[CAMP] rest_long server fail:', res);
         }
@@ -40536,7 +40536,7 @@ function doLongRest() {
   const fullNote = (healHp === 0 && healMp === 0 && hdGain === 0 && preExh === 0 && !_hadConds)
     ? ' (já totalmente descansado)' : '';
   const status = document.getElementById('camp-footer-status');
-  const msg = '🌙 Descanso Longo: HP+' + healHp + ', MP+' + healMp
+  const msg = 'Descanso Longo: HP+' + healHp + ', MP+' + healMp
     + ', HD+' + hdGain + ', Exaustão ' + (preExh > 0 ? '-1' : 'ok')
     + (_hadConds ? ', Condições curadas' : '') + fullNote;
   if (status) status.textContent = msg;
@@ -40558,16 +40558,16 @@ var playerInventory = {};
 var reputation = {};  // factionId → int (positivo=amizade, negativo=hostilidade)
 
 const FACTIONS = {
-  boticarios: { name: 'Boticários de Valdoria', icon: '🧪' },
-  guarda: { name: 'Guarda Real', icon: '🛡' },
-  anoes: { name: 'Clãs de Korthag', icon: '⚒' },
+  boticarios: { name: 'Boticários de Valdoria', icon: '' },
+  guarda: { name: 'Guarda Real', icon: '' },
+  anoes: { name: 'Clãs de Korthag', icon: '' },
   panteao: { name: 'Panteão Divino', icon: '✦' },
-  nobreza: { name: 'Nobreza dos Portões', icon: '👑' },
-  navegadores: { name: 'Guilda dos Navegadores', icon: '⚓' },
-  cisne_branco: { name: 'Ordem do Cisne Branco', icon: '🦢' },
-  sacerdocio: { name: 'Sacerdócio', icon: '📿' },
-  alquimistas: { name: 'Alquimistas', icon: '⚗' },
-  mercadores: { name: 'Caravana de Mercadores', icon: '🐪' }
+  nobreza: { name: 'Nobreza dos Portões', icon: '' },
+  navegadores: { name: 'Guilda dos Navegadores', icon: '' },
+  cisne_branco: { name: 'Ordem do Cisne Branco', icon: '' },
+  sacerdocio: { name: 'Sacerdócio', icon: '' },
+  alquimistas: { name: 'Alquimistas', icon: '' },
+  mercadores: { name: 'Caravana de Mercadores', icon: '' }
 };
 
 function addItem(itemId, count) {
@@ -40734,7 +40734,7 @@ const ENEMIES_DB = {
     name: 'Goblin', cr: '1/4', hp: 7, ac: 15, speed: '9m',
     biomes: ['forest', 'mountain'],
     threat: 'baixo',
-    icon: '👺',
+    icon: '',
     desc: 'Humanoide pequeno e cruel, de olhos amarelos e pele esverdeada. Ataca em bandos para compensar a fragilidade individual.',
     attacks: 'Cimitarra (+4) 1d6+2 cortante; Arco curto (+4) 1d6+2 perfurante',
     known_drops: ['goblin_ear', 'copper_pile', 'crude_dagger'],
@@ -40744,7 +40744,7 @@ const ENEMIES_DB = {
     name: 'Lobo Cinzento', cr: '1/4', hp: 11, ac: 13, speed: '12m',
     biomes: ['forest', 'mountain', 'snow'],
     threat: 'baixo',
-    icon: '🐺',
+    icon: '',
     desc: 'Lobo selvagem de porte médio. Caça em alcateias coordenadas; o lider usa faro e vento a favor.',
     attacks: 'Mordida (+4) 2d4+2 perfurante (Acrobacia CD 11 ou pronado)',
     known_drops: ['wolf_pelt', 'wolf_fang'],
@@ -40754,7 +40754,7 @@ const ENEMIES_DB = {
     name: 'Aranha Gigante', cr: '1', hp: 26, ac: 14, speed: '9m (12m trepando)',
     biomes: ['forest', 'cave'],
     threat: 'médio',
-    icon: '🕷️',
+    icon: '',
     desc: 'Aracnídeo do tamanho de um cão grande. Tece redes entre árvores e injeta veneno paralisante.',
     attacks: 'Mordida (+5) 1d8+3 perfurante + CON CD 11 ou 2d8 veneno; Teia (+5) restrito',
     known_drops: ['spider_silk', 'venom_sac'],
@@ -40765,7 +40765,7 @@ const ENEMIES_DB = {
     name: 'Bandido', cr: '1/8', hp: 11, ac: 12, speed: '9m',
     biomes: ['plains'],
     threat: 'baixo',
-    icon: '🗡️',
+    icon: '',
     desc: 'Humano caído na marginalidade. Sobrevive assaltando estradas com táticas de emboscada.',
     attacks: 'Cimitarra ou besta leve (+3) 1d6+1',
     known_drops: ['worn_coin_pouch', 'stolen_goods'],
@@ -40775,7 +40775,7 @@ const ENEMIES_DB = {
     name: 'Orc Saqueador', cr: '1/2', hp: 15, ac: 13, speed: '9m',
     biomes: ['plains', 'mountain'],
     threat: 'médio',
-    icon: '👹',
+    icon: '',
     desc: 'Orc de tribo nômade. Braços musculosos, presas salientes, agressividade calculada.',
     attacks: 'Machado grande (+5) 1d12+3 cortante; Javelin (+5) 1d6+3',
     known_drops: ['orc_tusk', 'crude_armor_piece'],
@@ -40791,7 +40791,7 @@ const ENEMIES_DB = {
     name: 'Orc Guerreiro', cr: '1', hp: 22, ac: 14, speed: '9m',
     biomes: ['plains', 'mountain'],
     threat: 'médio',
-    icon: '⚔️',
+    icon: '',
     desc: 'Orc veterano da tribo, treinado em batalha. Machado e escudo de couro reforcado, mais disciplinado que o saqueador comum.',
     attacks: 'Machado grande (+5) 1d12+3 cortante; Investida Agressiva (action bonus) — bonus +3 dano',
     known_drops: ['orc_tusk', 'crude_armor_piece', 'iron_axe_head'],
@@ -40804,7 +40804,7 @@ const ENEMIES_DB = {
     name: 'Fogo-Fátuo', cr: '2', hp: 22, ac: 19, speed: '15m voando',
     biomes: ['swamp', 'graveyard'],
     threat: 'alto',
-    icon: '💡',
+    icon: '',
     desc: 'Esfera de luz pálida que atrai viajantes pra morte. Alma não-purificada de mercador afogado, segundo lendas do pântano.',
     attacks: 'Choque (+4) 2d8 elétrico; Consumir Vida em moribundos',
     known_drops: ['wisp_essence', 'old_locket'],
@@ -40814,7 +40814,7 @@ const ENEMIES_DB = {
     name: 'Sapo Gigante', cr: '1', hp: 39, ac: 11, speed: '6m/9m nadando',
     biomes: ['swamp'],
     threat: 'médio',
-    icon: '🐸',
+    icon: '',
     desc: 'Anfíbio do tamanho de um homem adulto. Língua alcança 4m, engole presas pequenas inteiras.',
     attacks: 'Mordida (+4) 1d10+2; Engolir (criatura pequena ou menor)',
     known_drops: ['toad_skin', 'bile_gland'],
@@ -40825,7 +40825,7 @@ const ENEMIES_DB = {
     name: 'Troll', cr: '5', hp: 84, ac: 15, speed: '9m',
     biomes: ['mountain', 'cave'],
     threat: 'muito alto',
-    icon: '🧌',
+    icon: '',
     desc: 'Gigante verde-acinzentado com regeneração mortal — só fogo ou ácido impedem a cura acelerada.',
     attacks: 'Garra (+7) 2d6+4; Mordida (+7) 1d6+4; Regeneração 10/turno',
     known_drops: ['troll_hide', 'bone_club'],
@@ -40835,7 +40835,7 @@ const ENEMIES_DB = {
     name: 'Águia Gigante', cr: '1', hp: 26, ac: 13, speed: '3m/24m voando',
     biomes: ['mountain'],
     threat: 'médio',
-    icon: '🦅',
+    icon: '',
     desc: 'Ave de rapina de envergadura colossal (6m). Inteligente, entende linguagens comuns parcialmente.',
     attacks: 'Bico (+5) 1d6+3; Garras (+5) 2d6+3',
     known_drops: ['eagle_feather'],
@@ -40847,7 +40847,7 @@ const ENEMIES_DB = {
     name: 'Escorpião Gigante', cr: '3', hp: 52, ac: 15, speed: '12m',
     biomes: ['desert'],
     threat: 'alto',
-    icon: '🦂',
+    icon: '',
     desc: 'Aracnídeo de carapaça escura, cauda venenosa. Caça pela vibração do chão — mantenha-se imóvel.',
     attacks: 'Pinça (+4) 1d8+2 (escape CD 12); Ferrão (+4) 1d10+2 + CON CD 12 ou 4d10 veneno',
     known_drops: ['scorpion_shell', 'venom_sac'],
@@ -40857,7 +40857,7 @@ const ENEMIES_DB = {
     name: 'Leão da Areia', cr: '4', hp: 60, ac: 13, speed: '15m',
     biomes: ['desert'],
     threat: 'alto',
-    icon: '🦁',
+    icon: '',
     desc: 'Felino gigante das dunas. Pelagem dourada camufla perfeitamente. Caça a emboscada quando o viajante afunda na areia macia.',
     attacks: 'Garra (+6) 2d6+4; Salto de rastreio (+6) 2d10+4',
     known_drops: ['lion_pelt', 'lion_claw'],
@@ -40870,7 +40870,7 @@ const ENEMIES_DB = {
     name: 'Yeti Congelado', cr: '3', hp: 51, ac: 12, speed: '12m',
     biomes: ['snow'],
     threat: 'alto',
-    icon: '🦣',
+    icon: '',
     desc: 'Gigantesco humanoide branco. Olhos de gelo azul paralisam com medo glacial.',
     attacks: 'Garra (+4) 1d6+3 + 3d6 frio; Olhar Glacial (CON CD 13 ou paralisia)',
     known_drops: ['yeti_fur', 'ice_crystal'],
@@ -40880,7 +40880,7 @@ const ENEMIES_DB = {
     name: 'Lobo da Tundra', cr: '1/2', hp: 18, ac: 14, speed: '15m',
     biomes: ['snow'],
     threat: 'médio',
-    icon: '🐺',
+    icon: '',
     desc: 'Variante ártica de lobo comum. Maior, mais denso, mais feroz. Alcateias grandes no inverno.',
     attacks: 'Mordida (+5) 2d4+3 perfurante',
     known_drops: ['thick_wolf_pelt', 'wolf_fang'],
@@ -40893,7 +40893,7 @@ const ENEMIES_DB = {
     name: 'Troll das Cavernas', cr: '4', hp: 75, ac: 14, speed: '9m',
     biomes: ['cave', 'mountain'],
     threat: 'alto',
-    icon: '🧌',
+    icon: '',
     desc: 'Subespécie de troll adaptada ao subsolo. Pele esverdeada, olhos grandes pra luz escassa.',
     attacks: 'Clava (+6) 2d8+4 bludgeoning; Regeneração 5/turno',
     known_drops: ['troll_hide', 'bone_club', 'cave_fungus'],
@@ -40905,7 +40905,7 @@ const ENEMIES_DB = {
     name: 'Morcego Gigante', cr: '1/4', hp: 22, ac: 13, speed: '3m/18m voando',
     biomes: ['cave'],
     threat: 'baixo',
-    icon: '🦇',
+    icon: '',
     desc: 'Morcego de 2m de envergadura. Usa ecolocalização precisa, impossível de enganar por escuridão.',
     attacks: 'Mordida (+4) 1d6+2',
     known_drops: ['bat_wing', 'echo_gland'],
@@ -40916,7 +40916,7 @@ const ENEMIES_DB = {
     name: 'Cultista do Fogo', cr: '1/2', hp: 19, ac: 12, speed: '9m',
     biomes: ['volcanic'],
     threat: 'médio',
-    icon: '🔥',
+    icon: '',
     desc: 'Humano encapuzado adorador de entidades ígneas. Conhece truques de fogo e invocação menor.',
     attacks: 'Adaga ritual (+3) 1d4+1 + 1d4 fogo; Lança Chamas (3d6 fogo, DEX CD 13 metade)',
     known_drops: ['cult_robe', 'ember_amulet'],
@@ -40928,7 +40928,7 @@ const ENEMIES_DB = {
     name: 'Elemental de Lava (Menor)', cr: '5', hp: 102, ac: 14, speed: '9m',
     biomes: ['volcanic'],
     threat: 'muito alto',
-    icon: '🌋',
+    icon: '',
     desc: 'Corpo de rocha derretida. Cada contato queima. Imune a fogo, vulnerável a frio/água.',
     attacks: 'Golpe (+7) 2d8+4 bludgeoning + 2d8 fogo; Aura 1d6 fogo',
     known_drops: ['fire_essence', 'magma_core'],
@@ -40939,7 +40939,7 @@ const ENEMIES_DB = {
     name: 'Esqueleto', cr: '1/4', hp: 13, ac: 13, speed: '9m',
     biomes: ['graveyard', 'swamp'],
     threat: 'baixo',
-    icon: '💀',
+    icon: '',
     desc: 'Ossada animada por magia necromântica menor. Silencioso, implacável, sem piedade.',
     attacks: 'Espada curta (+4) 1d6+2; Arco curto (+4) 1d6+2',
     known_drops: ['bone_dust', 'ancient_coin'],
@@ -40949,7 +40949,7 @@ const ENEMIES_DB = {
     name: 'Zumbi', cr: '1/4', hp: 22, ac: 8, speed: '6m',
     biomes: ['graveyard', 'swamp'],
     threat: 'baixo',
-    icon: '🧟',
+    icon: '',
     desc: 'Corpo reanimado por necromancia. Resistente (Fortitude Morto-Vivo), mas lento.',
     attacks: 'Golpe (+3) 1d6+1',
     known_drops: ['rotten_cloth', 'ancient_coin'],
@@ -40959,7 +40959,7 @@ const ENEMIES_DB = {
     name: 'Servo do Lich', cr: '6', hp: 120, ac: 17, speed: '9m',
     biomes: ['graveyard'],
     threat: 'muito alto',
-    icon: '💀',
+    icon: '',
     desc: 'Guerreiro morto-vivo de elite, servo do Senhor da Coroa Funesta. Usa armadura antiga e magia de sombras.',
     attacks: 'Espada Sombria (+8) 2d8+5 + 2d6 necrótico; Palavra de Medo',
     known_drops: ['shadow_blade', 'lich_phylactery_piece'],
@@ -40970,99 +40970,99 @@ const ENEMIES_DB = {
 
 const MATERIALS_DB = {
   // === Goblin/Humanoid drops ===
-  goblin_ear: { name: 'Orelha de Goblin', icon: '👂', desc: 'Troféu macabro mas pago pelos caçadores.',
+  goblin_ear: { name: 'Orelha de Goblin', icon: '', desc: 'Troféu macabro mas pago pelos caçadores.',
     uses: ['Vendido: 2 Valdoritas em tavernas', 'Prova de extermínio em missões de guarda', 'Componente de rituais xamanísticos'] },
-  copper_pile: { name: 'Pilha de Cobre', icon: '🪙', desc: 'Moedas emboladas tiradas de vítimas anteriores.',
+  copper_pile: { name: 'Pilha de Cobre', icon: '', desc: 'Moedas emboladas tiradas de vítimas anteriores.',
     uses: ['Converter: 10 moedas = 1 Valdorita em câmbios'] },
-  crude_dagger: { name: 'Adaga Crua', icon: '🗡️', desc: 'Arma mal-forjada, equivalente a adaga goblin.',
+  crude_dagger: { name: 'Adaga Crua', icon: '', desc: 'Arma mal-forjada, equivalente a adaga goblin.',
     uses: ['Vendido: 1 Valdorita', 'Pode ser melhorada por ferreiro (custo 15v)'] },
   // === Wolf drops ===
-  wolf_pelt: { name: 'Pele de Lobo', icon: '🐾', desc: 'Pelagem densa e impermeável.',
+  wolf_pelt: { name: 'Pele de Lobo', icon: '', desc: 'Pelagem densa e impermeável.',
     uses: ['Curtume: 8 Valdoritas', 'Material pra capa de inverno (alfaiate)', 'Componente de poção de resistência'] },
-  wolf_fang: { name: 'Presa de Lobo', icon: '🦷', desc: 'Canino afiado.',
+  wolf_fang: { name: 'Presa de Lobo', icon: '', desc: 'Canino afiado.',
     uses: ['Amuleto de sorte (+1 INT)', 'Componente arcano: Amigável Animal'] },
-  thick_wolf_pelt: { name: 'Pele de Lobo da Tundra', icon: '🐾', desc: 'Mais densa, ideal pra climas extremos.',
+  thick_wolf_pelt: { name: 'Pele de Lobo da Tundra', icon: '', desc: 'Mais densa, ideal pra climas extremos.',
     uses: ['Curtume: 18 Valdoritas', 'Capa anti-exaustão em snow biome'] },
   // === Spider/Venom ===
-  spider_silk: { name: 'Fio de Seda de Aranha', icon: '🕸️', desc: 'Fio resistente e elástico.',
+  spider_silk: { name: 'Fio de Seda de Aranha', icon: '', desc: 'Fio resistente e elástico.',
     uses: ['Fabricar corda mágica', 'Bandagem de primeiros socorros: +1d4 HP'] },
-  venom_sac: { name: 'Saco de Veneno', icon: '🧪', desc: 'Glândula venenosa intacta.',
+  venom_sac: { name: 'Saco de Veneno', icon: '', desc: 'Glândula venenosa intacta.',
     uses: ['Envenenar arma (próxima 1 rodada: +1d4 veneno)', 'Componente de poção neurotóxica'] },
   // === Orc ===
-  orc_tusk: { name: 'Presa de Orc', icon: '🦷', desc: 'Dente salience característico.',
+  orc_tusk: { name: 'Presa de Orc', icon: '', desc: 'Dente salience característico.',
     uses: ['Vendido: 5 Valdoritas', 'Componente de talismã de força'] },
-  crude_armor_piece: { name: 'Peça de Armadura Crua', icon: '🛡️', desc: 'Sucata aproveitável.',
+  crude_armor_piece: { name: 'Peça de Armadura Crua', icon: '', desc: 'Sucata aproveitável.',
     uses: ['Reforço de escudo (+1 temp)', 'Vendido em ferreiro: 6v'] },
   // X-6.5.51AB (2026-04-26): iron_axe_head adicionado pra orc_warrior known_drop.
-  iron_axe_head: { name: 'Cabeça de Machado de Ferro', icon: '🪓', desc: 'Lâmina pesada de machado orc, ainda afiada.',
+  iron_axe_head: { name: 'Cabeça de Machado de Ferro', icon: '', desc: 'Lâmina pesada de machado orc, ainda afiada.',
     uses: ['Forja: 12 Valdoritas em ferreiro', 'Reforjar em machado de batalha (+1 dmg)', 'Componente de arma de duas mãos'] },
   // === Swamp ===
-  wisp_essence: { name: 'Essência de Fogo-Fátuo', icon: '✨', desc: 'Luminescência fantasmagórica capturada.',
+  wisp_essence: { name: 'Essência de Fogo-Fátuo', icon: '', desc: 'Luminescência fantasmagórica capturada.',
     uses: ['Componente de luz perpétua', 'Antídoto contra medo', 'Catalisador de Detectar Mortos-Vivos'] },
-  toad_skin: { name: 'Pele de Sapo Gigante', icon: '🐸', desc: 'Membrana úmida e resistente.',
+  toad_skin: { name: 'Pele de Sapo Gigante', icon: '', desc: 'Membrana úmida e resistente.',
     uses: ['Impermeabilizante de botas (+vantagem em pântano)', 'Alquimia: Poção de Salto'] },
-  bile_gland: { name: 'Bile de Sapo', icon: '🧪', desc: 'Glândula com fluido corrosivo.',
+  bile_gland: { name: 'Bile de Sapo', icon: '', desc: 'Glândula com fluido corrosivo.',
     uses: ['Ácido fraco: 1d4 dano de ácido em 1 ataque'] },
   // === Mountain ===
-  troll_hide: { name: 'Couro de Troll', icon: '🟢', desc: 'Pele regenerativa de troll — ainda pulsa levemente.',
+  troll_hide: { name: 'Couro de Troll', icon: '', desc: 'Pele regenerativa de troll — ainda pulsa levemente.',
     uses: ['Curtume especial: 40 Valdoritas', 'Armadura regenerativa (reforça +3 HP após rest)'] },
   // X-6.5.51AB (2026-04-26): bone_club adicionado pra troll/cave_troll known_drops.
-  bone_club: { name: 'Clava de Osso', icon: '🦴', desc: 'Fêmur reforçado de gigante usado como arma bruta.',
+  bone_club: { name: 'Clava de Osso', icon: '', desc: 'Fêmur reforçado de gigante usado como arma bruta.',
     uses: ['Vendido: 8 Valdoritas em ferreiro', 'Arma improvisada (1d8 bludgeoning)', 'Componente de feitiço de necromancia'] },
-  eagle_feather: { name: 'Pena de Águia Gigante', icon: '🪶', desc: 'Pluma de 60cm, inscrições elficas frequentes.',
+  eagle_feather: { name: 'Pena de Águia Gigante', icon: '', desc: 'Pluma de 60cm, inscrições elficas frequentes.',
     uses: ['Emplumar flecha (+1 atk em longa distância)', 'Componente Voar (magia 3º nível)'] },
   // === Desert ===
-  scorpion_shell: { name: 'Carapaça de Escorpião', icon: '🛡️', desc: 'Quitina dura e flexível.',
+  scorpion_shell: { name: 'Carapaça de Escorpião', icon: '', desc: 'Quitina dura e flexível.',
     uses: ['Armadura leve (+1 CA)', 'Curtume alquímico: 15 Valdoritas'] },
-  lion_pelt: { name: 'Pele de Leão da Areia', icon: '🟤', desc: 'Pelagem dourada e quente.',
+  lion_pelt: { name: 'Pele de Leão da Areia', icon: '', desc: 'Pelagem dourada e quente.',
     uses: ['Manto nobre (+1 CAR)', 'Item colecionável: 30 Valdoritas em nobreza'] },
-  lion_claw: { name: 'Garra de Leão', icon: '🐾', desc: 'Afiada e dura.',
+  lion_claw: { name: 'Garra de Leão', icon: '', desc: 'Afiada e dura.',
     uses: ['Ponta de arma (+1 dano 1x)', 'Amuleto de predador'] },
   // === Snow ===
-  yeti_fur: { name: 'Pelo de Yeti', icon: '⛄', desc: 'Pelagem branca ultra-espessa.',
+  yeti_fur: { name: 'Pelo de Yeti', icon: '', desc: 'Pelagem branca ultra-espessa.',
     uses: ['Manto anti-frio absoluto (imune a hipotermia)', 'Vendido: 50 Valdoritas em tavernas do norte'] },
-  ice_crystal: { name: 'Cristal de Gelo', icon: '🧊', desc: 'Gelo antigo que não derrete.',
+  ice_crystal: { name: 'Cristal de Gelo', icon: '', desc: 'Gelo antigo que não derrete.',
     uses: ['Componente de Cone de Gelo', 'Conservação de alimentos perpétua'] },
   // === Cave ===
-  cave_fungus: { name: 'Cogumelo das Cavernas', icon: '🍄', desc: 'Fungo bioluminescente comestível.',
+  cave_fungus: { name: 'Cogumelo das Cavernas', icon: '', desc: 'Fungo bioluminescente comestível.',
     uses: ['Comer: restaura 2 HP', 'Componente de poção de luz'] },
-  bat_wing: { name: 'Asa de Morcego', icon: '🦇', desc: 'Membrana fina, útil pra feitiçaria.',
+  bat_wing: { name: 'Asa de Morcego', icon: '', desc: 'Membrana fina, útil pra feitiçaria.',
     uses: ['Componente Fly (magia 3º nível)', 'Alquimia: invisibilidade menor'] },
-  echo_gland: { name: 'Glândula Ecoica', icon: '🔔', desc: 'Órgão de ecolocalização.',
+  echo_gland: { name: 'Glândula Ecoica', icon: '', desc: 'Órgão de ecolocalização.',
     uses: ['Alquimia: Visão no Escuro temporária (1h)'] },
   // === Volcanic ===
-  cult_robe: { name: 'Manto Cultista', icon: '👘', desc: 'Veste vermelha com runas de fogo.',
+  cult_robe: { name: 'Manto Cultista', icon: '', desc: 'Veste vermelha com runas de fogo.',
     uses: ['Prova de missão', 'Infiltração futura em outros cultos'] },
-  ember_amulet: { name: 'Amuleto de Brasa', icon: '🔥', desc: 'Amuleto sempre morno.',
+  ember_amulet: { name: 'Amuleto de Brasa', icon: '', desc: 'Amuleto sempre morno.',
     uses: ['+1 resistência ao frio', 'Acende fogueiras automaticamente'] },
-  fire_essence: { name: 'Essência de Fogo Elemental', icon: '🔥', desc: 'Fragmento de elemental capturado.',
+  fire_essence: { name: 'Essência de Fogo Elemental', icon: '', desc: 'Fragmento de elemental capturado.',
     uses: ['Potencializar magias de fogo (+1d6 dmg)', 'Componente raro: Invocar Elemental'] },
-  magma_core: { name: 'Núcleo de Magma', icon: '🟠', desc: 'Pedra escaldante, pulsa com calor.',
+  magma_core: { name: 'Núcleo de Magma', icon: '', desc: 'Pedra escaldante, pulsa com calor.',
     uses: ['Forja mestra: +2 em armas forjadas', 'Material lendário pra Espada Flamejante'] },
-  obsidian_raw: { name: 'Obsidiana Bruta', icon: '⬛', desc: 'Vidro vulcânico cortante.',
+  obsidian_raw: { name: 'Obsidiana Bruta', icon: '', desc: 'Vidro vulcânico cortante.',
     uses: ['Forjar adagas afiadas (+1 crítico)', 'Reagente arcano', 'Ornamento nobre'] },
   // === Graveyard ===
-  bone_dust: { name: 'Pó de Osso', icon: '💀', desc: 'Restos de morto-vivo desintegrado.',
+  bone_dust: { name: 'Pó de Osso', icon: '', desc: 'Restos de morto-vivo desintegrado.',
     uses: ['Componente Ressurreição (3º nível)', 'Dispensar Mortos-Vivos: +1 CD'] },
   // X-6.5.51AB (2026-04-26): rotten_cloth adicionado pra zombie known_drop.
-  rotten_cloth: { name: 'Tecido Apodrecido', icon: '🧻', desc: 'Trapos rasgados de mortalha funerária — fedem a podridão antiga.',
+  rotten_cloth: { name: 'Tecido Apodrecido', icon: '', desc: 'Trapos rasgados de mortalha funerária — fedem a podridão antiga.',
     uses: ['Bandagem temporária (-1d4 HP por infecção)', 'Componente de magia necromântica menor', 'Vendido em alquimista: 2 Valdoritas'] },
-  ancient_coin: { name: 'Moeda Antiga', icon: '🪙', desc: 'Cunhada antes de Valdoria existir.',
+  ancient_coin: { name: 'Moeda Antiga', icon: '', desc: 'Cunhada antes de Valdoria existir.',
     uses: ['Valor de colecionador: 15 Valdoritas', 'Catalisador de História/Lore'] },
-  shadow_blade: { name: 'Lâmina Sombria', icon: '🗡️', desc: 'Espada forjada em trevas — emite frio.',
+  shadow_blade: { name: 'Lâmina Sombria', icon: '', desc: 'Espada forjada em trevas — emite frio.',
     uses: ['Arma: 1d8 cortante + 1d4 necrótico', 'Lendária: não pode ser descartada sem ritual'] },
   // === Event-specific drops ===
-  old_locket: { name: 'Medalhão Antigo', icon: '📿', desc: 'Relíquia de ordem extinta.',
+  old_locket: { name: 'Medalhão Antigo', icon: '', desc: 'Relíquia de ordem extinta.',
     uses: ['Entregar em missão relacionada ao Cisne Branco', 'Colecionável: 20 Valdoritas'] },
-  worn_coin_pouch: { name: 'Bolsa Gasta', icon: '🪙', desc: 'Contém moedas miscelâneas.',
+  worn_coin_pouch: { name: 'Bolsa Gasta', icon: '', desc: 'Contém moedas miscelâneas.',
     uses: ['Abrir: +5-15 Valdoritas randômico'] },
-  stolen_goods: { name: 'Bens Roubados', icon: '📦', desc: 'Pilhagem de viajantes anteriores.',
+  stolen_goods: { name: 'Bens Roubados', icon: '', desc: 'Pilhagem de viajantes anteriores.',
     uses: ['Vendido em mercado negro (+10v)', 'Entregar à guarda: +reputação'] },
-  orc_ear_trophy: { name: 'Orelha de Orc', icon: '👂', desc: 'Equivalente a orelha de goblin mas maior.',
+  orc_ear_trophy: { name: 'Orelha de Orc', icon: '', desc: 'Equivalente a orelha de goblin mas maior.',
     uses: ['Vendido: 5 Valdoritas', 'Prova de caça'] },
-  lich_phylactery_piece: { name: 'Fragmento de Filactério', icon: '🖤', desc: 'Pedaço de relíquia do Senhor da Coroa Funesta.',
+  lich_phylactery_piece: { name: 'Fragmento de Filactério', icon: '', desc: 'Pedaço de relíquia do Senhor da Coroa Funesta.',
     uses: ['LENDÁRIO. Levar ao Arquidiácono dos Portões — pode enfraquecer o Lich.'] },
-  wolf_trophy: { name: 'Troféu de Alcateia', icon: '🏆', desc: 'Sinal de vitória sobre lobos.',
+  wolf_trophy: { name: 'Troféu de Alcateia', icon: '', desc: 'Sinal de vitória sobre lobos.',
     uses: ['Prova em missões de patrulha'] }
 };
 
@@ -41619,12 +41619,12 @@ function _openCartLocationPopup(biome){
   if (!card) return;
   card.innerHTML = ''
     + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
-    + (isCurrent ? '<div class="clp-current-here">📍 VOCÊ ESTÁ AQUI</div>' : '')
+    + (isCurrent ? '<div class="clp-current-here">VOCÊ ESTÁ AQUI</div>' : '')
     + '<h2>' + biome.name + '</h2>'
-    // P-mapa sessão #73: sem badge "⚡ Tier N" (redundante) — a faixa de nível
+    // P-mapa sessão #73: sem badge "Tier N" (redundante) — a faixa de nível
     // recomendado no clp-meta abaixo é mais clara. Alinhado com o popup da cidade.
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
-    + (rec ? '<div class="clp-meta">📊 ' + rec + '<br>🏷️ Bioma: ' + ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key)) + '</div>' : '')
+    + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key)) + '</div>' : '')
     + '<div class="clp-buttons">'
     + (isCurrent
         ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
@@ -41814,7 +41814,7 @@ function openCartography() {
   overlay.innerHTML = ''
     + '<div class="xcart-wrapper">'
     + '  <div class="xcart-header">'
-    + '    <h2>🗺️ Cartografia de Valdoria</h2>'
+    + '    <h2>Cartografia de Valdoria</h2>'
     + '    <p class="xcart-flavor">Pergaminho do mundo conhecido. Toca um destino. Use roda do mouse ou pinça pra zoom.</p>'
     + '  </div>'
     + '  <div class="xcart-canvas-frame">'
@@ -41833,7 +41833,7 @@ function openCartography() {
     // voltar para a CIDADE direto da cartografia. Antes só voltava pra
     // exploração (mapa hex atual ou dungeon) — não havia saída direta pra
     // cidade. Agora botão dedicado faz cleanup + redirect.
-    + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" title="Voltar para os Portões de Valdoria">🏰 Voltar pra Cidade</button>'
+    + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" title="Voltar para os Portões de Valdoria">Voltar pra Cidade</button>'
     + '  </div>'
     + '</div>';
 
@@ -42151,7 +42151,7 @@ function openLocationPopup(mapId) {
   if (!m) return;
   const ov = document.getElementById('location-popup');
   document.getElementById('loc-title').textContent = m.name;
-  const biomeIcons = { plains:'🌾', forest:'🌲', swamp:'🌿', mountain:'⛰', desert:'🏜', snow:'❄', cave:'🕳', volcanic:'🌋', graveyard:'🪦' };
+  const biomeIcons = { plains:'', forest:'', swamp:'', mountain:'', desert:'', snow:'', cave:'', volcanic:'', graveyard:'' };
   document.getElementById('loc-biome').textContent = (biomeIcons[m.biome] || '?') + ' ' + (m.biome || '');
   document.getElementById('loc-danger').textContent = 'Perigo ' + (m.danger != null ? m.danger : '?');
 
@@ -42298,7 +42298,7 @@ function openEnemyDetail(enemyId) {
   });
   document.getElementById('detail-desc').textContent = e.desc;
   const attacksEl = document.getElementById('detail-attacks');
-  attacksEl.innerHTML = '<h4>⚔ Ataques</h4><p>' + (e.attacks || '—') + '</p>';
+  attacksEl.innerHTML = '<h4>Ataques</h4><p>' + (e.attacks || '—') + '</p>';
 
   // Drops — registrados + possíveis
   const dropsEl = document.getElementById('detail-drops');
@@ -42354,7 +42354,7 @@ function openMaterialDetail(itemId) {
   const dropsEl = document.getElementById('detail-drops');
   clearChildren(dropsEl);
   const h = document.createElement('h4');
-  h.textContent = '🔧 Usos Conhecidos';
+  h.textContent = 'Usos Conhecidos';
   dropsEl.appendChild(h);
   (mat.uses || []).forEach(u => {
     const p = document.createElement('p');
@@ -42795,9 +42795,9 @@ function updateCurrentCoord() {
   clearChildren(el);
   const pin = document.createElement('span');
   pin.className = 'cc-pin';
-  pin.textContent = '\u26F3';  // ladle — mais neutro que \ud83d\udccd que estava escuro
+  pin.textContent = '';  // ladle — mais neutro que que estava escuro
   // Actually pin melhor:
-  pin.textContent = '\ud83d\udccd';  // pin 📍
+  pin.textContent = '';  // pin 
   const lbl = document.createElement('span');
   lbl.className = 'cc-lbl';
   lbl.textContent = 'POSI\u00c7\u00c3O';
@@ -42812,31 +42812,31 @@ function updateCurrentCoord() {
 function updateTopBar() {
   /* X-6.5.51g: icon-only pros 3 itens. textContent = icone, title = nome
      completo (tooltip). Phase agora vive em #top-phase separado. */
-  const biomeIco  = { forest: '🌲', plains: '🌾', desert: '🏜️', cave: '🕳️',
-                       mountain: '⛰️', swamp: '🌫️', graveyard: '🪦', snow: '❄️',
-                       volcanic: '🌋' };
+  const biomeIco  = { forest: '', plains: '', desert: '', cave: '',
+                       mountain: '', swamp: '', graveyard: '', snow: '',
+                       volcanic: '' };
   const biomeName = { forest: 'Floresta', plains: 'Planície', desert: 'Deserto',
                        cave: 'Caverna', mountain: 'Montanha', swamp: 'Pântano',
                        graveyard: 'Cemitério', snow: 'Neve', volcanic: 'Vulcânico' };
   const biomeEl = document.getElementById('top-biome');
   if (biomeEl) {
-    biomeEl.textContent = biomeIco[S.biome] || '🗺️';
+    biomeEl.textContent = biomeIco[S.biome] || '';
     biomeEl.title = biomeName[S.biome] || S.biome;
   }
 
-  const wthrIco  = { s: '☀️', r: '🌧️', f: '🌫️', t: '⛈️' };
+  const wthrIco  = { s: '', r: '', f: '', t: '' };
   const wthrName = { s: 'Limpo', r: 'Chuva', f: 'Névoa', t: 'Tempestade' };
   const wthrEl = document.getElementById('top-weather');
   if (wthrEl) {
-    wthrEl.textContent = wthrIco[S.weather] || '☀️';
+    wthrEl.textContent = wthrIco[S.weather] || '';
     wthrEl.title = wthrName[S.weather] || S.weather;
   }
 
-  const phaseIco  = { day: '☀', dusk: '🌅', night: '🌙', dawn: '🌄' };
+  const phaseIco  = { day: '', dusk: '', night: '', dawn: '' };
   const phaseName = { day: 'Dia', dusk: 'Entardecer', night: 'Noite', dawn: 'Aurora' };
   const phaseEl = document.getElementById('top-phase');
   if (phaseEl) {
-    phaseEl.textContent = phaseIco[S.dayPhase] || '☀';
+    phaseEl.textContent = phaseIco[S.dayPhase] || '';
     phaseEl.title = phaseName[S.dayPhase] || S.dayPhase;
   }
 
@@ -42851,27 +42851,27 @@ function updateTopBar() {
    o que essas condições atuais influenciam na jogabilidade durante a
    exploracao". */
 const TB_BIOME_INFO = {
-  forest:    { ico: '🌲', name: 'Floresta',   desc: 'Carvalhos antigos, samambaias e vida selvagem por toda parte. Visibilidade limitada pela copa.', effects: ['Encontros de animais e bandidos comuns', 'Forragear (Sobrevivência DC 12) revela ervas e cogumelos', 'Movimento mais lento em mata densa', 'Vigília (Percepção) pra detectar emboscadas'] },
-  plains:    { ico: '🌾', name: 'Planície',   desc: 'Campos abertos sob o céu, com trilhas suaves e fazendas dispersas.', effects: ['Visibilidade ampla — vê POIs distantes', 'Encontros aleatórios menos frequentes', 'Forragear oferece grãos e frutas (DC 10)', 'Sem cobertura — fugir de combate é mais difícil'] },
-  desert:    { ico: '🏜️', name: 'Deserto',    desc: 'Dunas escaldantes de dia, gélidas de noite. Água é vida.', effects: ['Exaustão (CON DC 12) a cada poucos passos sob o sol', 'Forragear (Sobrevivência DC 16) é raríssimo', 'Tempestades de areia reduzem visibilidade ao mínimo', 'Encontros: bandidos e criaturas adaptadas'] },
-  cave:      { ico: '🕳️', name: 'Caverna',    desc: 'Túneis úmidos onde a luz não alcança. Cuidado com o que espreita.', effects: ['Escuridão total — Tocha/Luz obrigatória', 'Encontros de criaturas das profundezas (CR maior)', 'Quedas e armadilhas frequentes (DEX saves)', 'Eco delata sua presença'] },
-  mountain:  { ico: '⛰️', name: 'Montanha',  desc: 'Picos rochosos e penhascos. O ar fica rarefeito.', effects: ['Terreno difícil — movimento custa o dobro', 'Quedas perigosas (DEX DC 14)', 'Encontros: trolls, ogros, águias', 'Frio noturno (CON saves)'] },
-  swamp:     { ico: '🌫️', name: 'Pântano',    desc: 'Atoleiros e mangues onde a névoa nunca dissipa. O chão te puxa.', effects: ['Movimento severamente lento', 'Doenças (CON DC 13) ao beber água parada', 'Visibilidade reduzida pela névoa', 'Encontros: aranhas gigantes, trolls, ghouls'] },
-  graveyard: { ico: '🪦', name: 'Cemitério',  desc: 'Lápides musgosas onde o véu entre mundos é fino.', effects: ['Encontros mortos-vivos frequentes', 'Saves de Sabedoria contra horror (DC 12)', 'Profanar tumbas tem consequências', 'Mais perigoso à noite'] },
-  snow:      { ico: '❄️', name: 'Neve',       desc: 'Gelo e nevascas que nunca acabam. Cada passo conta.', effects: ['Exaustão por frio (CON DC 13) a cada hora', 'Movimento lento na neve profunda', 'Forragear quase impossível (DC 18)', 'Lobos atrozes e ursos polares'] },
-  volcanic:  { ico: '🌋', name: 'Vulcânico',  desc: 'Cinzas no ar, lava no solo. Tudo aqui quer te queimar.', effects: ['Dano de fogo periódico', 'Visibilidade reduzida por fumaça', 'Hazards de magma (DEX DC 14)', 'Encontros: salamandras, dragões menores'] },
+  forest:    { ico: '', name: 'Floresta',   desc: 'Carvalhos antigos, samambaias e vida selvagem por toda parte. Visibilidade limitada pela copa.', effects: ['Encontros de animais e bandidos comuns', 'Forragear (Sobrevivência DC 12) revela ervas e cogumelos', 'Movimento mais lento em mata densa', 'Vigília (Percepção) pra detectar emboscadas'] },
+  plains:    { ico: '', name: 'Planície',   desc: 'Campos abertos sob o céu, com trilhas suaves e fazendas dispersas.', effects: ['Visibilidade ampla — vê POIs distantes', 'Encontros aleatórios menos frequentes', 'Forragear oferece grãos e frutas (DC 10)', 'Sem cobertura — fugir de combate é mais difícil'] },
+  desert:    { ico: '', name: 'Deserto',    desc: 'Dunas escaldantes de dia, gélidas de noite. Água é vida.', effects: ['Exaustão (CON DC 12) a cada poucos passos sob o sol', 'Forragear (Sobrevivência DC 16) é raríssimo', 'Tempestades de areia reduzem visibilidade ao mínimo', 'Encontros: bandidos e criaturas adaptadas'] },
+  cave:      { ico: '', name: 'Caverna',    desc: 'Túneis úmidos onde a luz não alcança. Cuidado com o que espreita.', effects: ['Escuridão total — Tocha/Luz obrigatória', 'Encontros de criaturas das profundezas (CR maior)', 'Quedas e armadilhas frequentes (DEX saves)', 'Eco delata sua presença'] },
+  mountain:  { ico: '', name: 'Montanha',  desc: 'Picos rochosos e penhascos. O ar fica rarefeito.', effects: ['Terreno difícil — movimento custa o dobro', 'Quedas perigosas (DEX DC 14)', 'Encontros: trolls, ogros, águias', 'Frio noturno (CON saves)'] },
+  swamp:     { ico: '', name: 'Pântano',    desc: 'Atoleiros e mangues onde a névoa nunca dissipa. O chão te puxa.', effects: ['Movimento severamente lento', 'Doenças (CON DC 13) ao beber água parada', 'Visibilidade reduzida pela névoa', 'Encontros: aranhas gigantes, trolls, ghouls'] },
+  graveyard: { ico: '', name: 'Cemitério',  desc: 'Lápides musgosas onde o véu entre mundos é fino.', effects: ['Encontros mortos-vivos frequentes', 'Saves de Sabedoria contra horror (DC 12)', 'Profanar tumbas tem consequências', 'Mais perigoso à noite'] },
+  snow:      { ico: '', name: 'Neve',       desc: 'Gelo e nevascas que nunca acabam. Cada passo conta.', effects: ['Exaustão por frio (CON DC 13) a cada hora', 'Movimento lento na neve profunda', 'Forragear quase impossível (DC 18)', 'Lobos atrozes e ursos polares'] },
+  volcanic:  { ico: '', name: 'Vulcânico',  desc: 'Cinzas no ar, lava no solo. Tudo aqui quer te queimar.', effects: ['Dano de fogo periódico', 'Visibilidade reduzida por fumaça', 'Hazards de magma (DEX DC 14)', 'Encontros: salamandras, dragões menores'] },
 };
 const TB_WEATHER_INFO = {
-  s: { ico: '☀️', name: 'Limpo',      desc: 'Céu aberto, ventos calmos. Condições ideais.', effects: ['Visibilidade total no mapa', 'Sem penalidades de movimento', 'Cura de descanso é eficiente'] },
-  r: { ico: '🌧️', name: 'Chuva',      desc: 'Pingos persistentes encharcam o caminho.', effects: ['Visibilidade reduzida pra POIs distantes', 'Movimento -1 (terreno escorregadio)', 'Fogueira difícil de acender (Sobrevivência DC 13)', 'Rastros são mais fáceis de seguir'] },
-  f: { ico: '🌫️', name: 'Névoa',      desc: 'Branco leitoso engole tudo a poucos metros.', effects: ['Visibilidade severamente reduzida (1-2 hexes)', 'Inimigos podem te surpreender (Percepção desvantagem)', 'Forragear mais difícil (sem ver longe)', 'Lugares secretos podem se revelar'] },
-  t: { ico: '⛈️', name: 'Tempestade', desc: 'Trovões e raios. A natureza te avisa: pare.', effects: ['Movimento muito lento', 'Risco de raio (DEX DC 15) em áreas abertas', 'Visibilidade quase nula', 'Encontros aleatórios reduzidos (criaturas se escondem)'] },
+  s: { ico: '', name: 'Limpo',      desc: 'Céu aberto, ventos calmos. Condições ideais.', effects: ['Visibilidade total no mapa', 'Sem penalidades de movimento', 'Cura de descanso é eficiente'] },
+  r: { ico: '', name: 'Chuva',      desc: 'Pingos persistentes encharcam o caminho.', effects: ['Visibilidade reduzida pra POIs distantes', 'Movimento -1 (terreno escorregadio)', 'Fogueira difícil de acender (Sobrevivência DC 13)', 'Rastros são mais fáceis de seguir'] },
+  f: { ico: '', name: 'Névoa',      desc: 'Branco leitoso engole tudo a poucos metros.', effects: ['Visibilidade severamente reduzida (1-2 hexes)', 'Inimigos podem te surpreender (Percepção desvantagem)', 'Forragear mais difícil (sem ver longe)', 'Lugares secretos podem se revelar'] },
+  t: { ico: '', name: 'Tempestade', desc: 'Trovões e raios. A natureza te avisa: pare.', effects: ['Movimento muito lento', 'Risco de raio (DEX DC 15) em áreas abertas', 'Visibilidade quase nula', 'Encontros aleatórios reduzidos (criaturas se escondem)'] },
 };
 const TB_PHASE_INFO = {
-  day:   { ico: '☀',  name: 'Dia',        desc: 'O sol no zênite ilumina tudo. Aventureiros estão em vantagem.', effects: ['Visibilidade total', 'Encontros mortos-vivos raros', 'NPCs amigáveis estão ativos (Persuasão DC normal)', 'Fácil descansar com segurança'] },
-  dusk:  { ico: '🌅', name: 'Entardecer',  desc: 'O sol declina, lançando sombras longas. A transição.', effects: ['Visibilidade começa a cair', 'Encontros aumentam ligeiramente', 'Hora de buscar abrigo', 'Mortos-vivos começam a despertar'] },
-  night: { ico: '🌙', name: 'Noite',       desc: 'A escuridão domina. Caçadores noturnos estão à solta.', effects: ['Visibilidade muito reduzida (sem Tocha/Luz)', 'Encontros mortos-vivos e predadores frequentes', 'Saves de Sabedoria contra medo (DC 12)', 'Descanso requer vigília'] },
-  dawn:  { ico: '🌄', name: 'Aurora',      desc: 'O primeiro raio dourado. Esperança renova.', effects: ['Visibilidade volta gradualmente', 'Mortos-vivos recuam', 'Bônus pra cura matinal (+1d4 HP)', 'NPCs camponeses começam o dia'] },
+  day:   { ico: '',  name: 'Dia',        desc: 'O sol no zênite ilumina tudo. Aventureiros estão em vantagem.', effects: ['Visibilidade total', 'Encontros mortos-vivos raros', 'NPCs amigáveis estão ativos (Persuasão DC normal)', 'Fácil descansar com segurança'] },
+  dusk:  { ico: '', name: 'Entardecer',  desc: 'O sol declina, lançando sombras longas. A transição.', effects: ['Visibilidade começa a cair', 'Encontros aumentam ligeiramente', 'Hora de buscar abrigo', 'Mortos-vivos começam a despertar'] },
+  night: { ico: '', name: 'Noite',       desc: 'A escuridão domina. Caçadores noturnos estão à solta.', effects: ['Visibilidade muito reduzida (sem Tocha/Luz)', 'Encontros mortos-vivos e predadores frequentes', 'Saves de Sabedoria contra medo (DC 12)', 'Descanso requer vigília'] },
+  dawn:  { ico: '', name: 'Aurora',      desc: 'O primeiro raio dourado. Esperança renova.', effects: ['Visibilidade volta gradualmente', 'Mortos-vivos recuam', 'Bônus pra cura matinal (+1d4 HP)', 'NPCs camponeses começam o dia'] },
 };
 const TB_DANGER_INFO = {
   ico: '◆', name: 'Nível de Perigo',
@@ -43400,7 +43400,7 @@ function bindPinchZoom() {
 // FOOTER RETRÁTIL (Immersive Mode) — Sessão #72 (2026-06-03)
 // ----------------------------------------------------------------------------
 // Espelha o footer da cidade (cidade/index.html renderFooter/_toggleFooter).
-// #footer-quick: Grupo · Mochila · Acampar · Cartografia · Config (⚙). O volume
+// #footer-quick: Grupo · Mochila · Acampar · Cartografia · Config (). O volume
 // (va-btn) embeda aqui via audio-manager.js (remove o botão flutuante solto).
 // Toggle (·) recolhe o panel inteiro → mostra a pill "· Menu". Persistência
 // char-prefixed em localStorage (preferência de UI — permitido por Server-Only
@@ -43483,7 +43483,7 @@ function renderExploreFooter() {
     +   '<img class="fb-ico-img" src="../shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
     + '</button>'
     + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
-    +   '<span class="fb-ico">⚙</span>'
+    +   '<span class="fb-ico"></span>'
     + '</button>';
   quickEl.innerHTML = _html;  // static trusted markup (ver nota acima)
   // M10 (PHB p.182-183 Travel Pace): seletor de ritmo na footer-nav (3 segmentos).
@@ -43640,7 +43640,7 @@ function bindQuickActions() {
     }
   }
 
-  // X-6.5.19: botão dedicado de Diário de Missões (antes bindado no 🎒).
+  // X-6.5.19: botão dedicado de Diário de Missões (antes bindado no ).
   // openQuestJournal agora mostra SÓ missões (opts.questsOnly=true).
   var btnQuestJournal = document.getElementById('btn-quest-journal');
   if (btnQuestJournal) {
@@ -44497,7 +44497,7 @@ function boot() {
         setTimeout(function(){
           try {
             if (typeof vToast === 'function') {
-              vToast('🏕️ Você chegou em ' + _arrLabel);
+              vToast('Você chegou em ' + _arrLabel);
             } else {
               var t = document.createElement('div');
               t.textContent = 'Você chegou em ' + _arrLabel;
@@ -45840,7 +45840,7 @@ body.events-showcase-mode #events-showcase-toggle { display: block; }
     panel.className = 'active';
     panel.innerHTML = ''
       + '<header>'
-      + '  <h3>📜 Events Showcase</h3>'
+      + '  <h3>Events Showcase</h3>'
       + '  <button class="esc-close" id="esc-close-btn">×</button>'
       + '</header>'
       + '<div class="esc-filter">'
@@ -45863,7 +45863,7 @@ body.events-showcase-mode #events-showcase-toggle { display: block; }
     // Toggle button
     var toggle = document.createElement('button');
     toggle.id = 'events-showcase-toggle';
-    toggle.textContent = '📜 Showcase';
+    toggle.textContent = 'Showcase';
     toggle.addEventListener('click', function () {
       panel.classList.toggle('active');
     });
@@ -46553,7 +46553,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
     var hud = document.createElement('div');
     hud.id = 'silhouettes-demo-hud';
     hud.innerHTML = ''
-      + '<h4>🎭 SILHUETAS NO MAPA · DEMO</h4>'
+      + '<h4>SILHUETAS NO MAPA · DEMO</h4>'
       + '<p>Posicionadas em hexes ao redor do spawn — testando legibilidade contra o bioma.</p>'
       + '<button id="sild-toggle-mon">Só Monstros</button>'
       + ' <button id="sild-toggle-npc">Só NPCs</button>'

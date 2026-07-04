@@ -1510,7 +1510,7 @@
 <body>
     <div id="toast" class="toast"></div>
     <div id="fatalError" class="fatal-error">
-        <div class="err-icon">⚠️</div>
+        <div class="err-icon"></div>
         <div class="err-msg" id="fatalMsg">Dados invalidos</div>
         <div class="err-hint">Volte ao bot e tente novamente.</div>
     </div>
@@ -1645,14 +1645,14 @@
         }
         function _skillIconHtml(slug) {
             // Tenta carregar PNG do skills dir; onerror substitui por raio fallback
-            if (!slug) return '⚡';
+            if (!slug) return '';
             return '<img class="skill-png-ico" src="../shared/img/combat/skills/' + slug +
-                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\u26a1\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\'"/>';
         }
         function _featIconHtml(slug) {
-            if (!slug) return '✨';
+            if (!slug) return '';
             return '<img class="skill-png-ico" src="../shared/img/feats/' + slug +
-                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\u2728\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\'"/>';
         }
         // Talentos: nome PT-BR (data.js FEATS[].name) -> slug. Slugify igual a _skillSlug.
         function _featSlug(name) {
@@ -1694,15 +1694,15 @@
             'force': 'Força', 'psychic': 'Psíquico', 'thunder': 'Trovão', 'magical': 'Mágico'
         };
         var ELEMENT_EMOJI_FALLBACK = {
-            'slashing': '🗡️', 'piercing': '🏹', 'bludgeoning': '🔨',
-            'fire': '🔥', 'cold': '❄️', 'lightning': '⚡', 'acid': '🧪',
-            'poison': '🧪', 'necrotic': '💀', 'radiant': '✨',
-            'force': '✨', 'psychic': '🧠', 'thunder': '🔊', 'magical': '✨'
+            'slashing': '', 'piercing': '', 'bludgeoning': '',
+            'fire': '', 'cold': '', 'lightning': '', 'acid': '',
+            'poison': '', 'necrotic': '', 'radiant': '',
+            'force': '', 'psychic': '', 'thunder': '', 'magical': ''
         };
         function _elementIconHtml(type, sz) {
             if (!type || !ELEMENT_PT[type]) return '';
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
-            var fallback = ELEMENT_EMOJI_FALLBACK[type] || '✨';
+            var fallback = ELEMENT_EMOJI_FALLBACK[type] || '';
             return '<img class="' + cls + '" src="../shared/img/combat/elements/' + type +
                    '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'' + fallback + '\'"/>';
         }
@@ -1726,7 +1726,7 @@
             if (!id || !STATUS_PT[id]) return '';
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
             return '<img class="' + cls + '" src="../shared/img/combat/status/' + id +
-                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\u2728\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\'"/>';
         }
 
         // Heurística: detecta elementos no texto effect/tech (PT-BR + EN).
@@ -1838,48 +1838,48 @@
         // ═══════════════════════════════════════════════════════════════════
         var EFFECT_TAG_MAP = {
             // Elements (PNG já existe em combat/elements/)
-            '🔥':    'el:fire',
-            '❄️':   'el:cold',
-            '⚡':    'el:lightning',
-            '⚔️':   'el:slashing',
-            '🗡️':   'el:piercing',
-            '🏹':    'el:piercing',
-            '👊':    'el:bludgeoning',
-            '💀':    'el:necrotic',
-            '✨':    'el:magical',
-            '🌪️':   'el:thunder',
-            '🧪':    'el:acid',
+            '':    'el:fire',
+            '':   'el:cold',
+            '':    'el:lightning',
+            '':   'el:slashing',
+            '':   'el:piercing',
+            '':    'el:piercing',
+            '':    'el:bludgeoning',
+            '':    'el:necrotic',
+            '':    'el:magical',
+            '':   'el:thunder',
+            '':    'el:acid',
             // Effects custom (PNG em combat/effects/)
-            '🛡️':   'fx:defesa',
-            '💨':    'fx:velocidade',
-            '💚':    'fx:cura',
-            '💖':    'fx:cura',
-            '🙏':    'fx:cura',
-            '🌫️':   'fx:teleporte',
-            '🌿':    'fx:natureza',
-            '🍃':    'fx:natureza',
-            '🌵':    'fx:natureza',
-            '👻':    'fx:stealth',
-            '👤':    'fx:stealth',
-            '🎯':    'fx:mira',
-            '🧠':    'fx:mente',
-            '👀':    'fx:visao',
-            '👁️':   'fx:visao',
-            '🧘':    'fx:meditacao',
-            '🐙':    'fx:polvo',
-            '🦁':    'fx:besta',
-            '🐻':    'fx:besta',
-            '🐺':    'fx:besta',
-            '🦅':    'fx:besta',
-            '🌑':    'fx:lua',
-            '🌙':    'fx:lua',
-            '🎵':    'fx:musica',
-            '🎶':    'fx:musica',
-            '💢':    'fx:furia',
-            '😡':    'fx:furia',
-            '💥':    'fx:explosao',
-            '🌊':    'fx:onda',
-            '🚫':    'fx:bloquear'
+            '':   'fx:defesa',
+            '':    'fx:velocidade',
+            '':    'fx:cura',
+            '':    'fx:cura',
+            '':    'fx:cura',
+            '':   'fx:teleporte',
+            '':    'fx:natureza',
+            '':    'fx:natureza',
+            '':    'fx:natureza',
+            '':    'fx:stealth',
+            '':    'fx:stealth',
+            '':    'fx:mira',
+            '':    'fx:mente',
+            '':    'fx:visao',
+            '':   'fx:visao',
+            '':    'fx:meditacao',
+            '':    'fx:polvo',
+            '':    'fx:besta',
+            '':    'fx:besta',
+            '':    'fx:besta',
+            '':    'fx:besta',
+            '':    'fx:lua',
+            '':    'fx:lua',
+            '':    'fx:musica',
+            '':    'fx:musica',
+            '':    'fx:furia',
+            '':    'fx:furia',
+            '':    'fx:explosao',
+            '':    'fx:onda',
+            '':    'fx:bloquear'
         };
 
         function _effectTagIconHtml(slug) {
@@ -2047,7 +2047,7 @@
             var btn = document.getElementById('btnNext');
             var backBtn = document.getElementById('btnBack');
             if (cur === screens.length - 1) {
-                btn.textContent = '⚔️ Confirmar Subida';
+                btn.textContent = 'Confirmar Subida';
             } else {
                 btn.textContent = 'Continuar ▶';
             }
@@ -2172,8 +2172,8 @@
             <div class="lvl-cinema-title">Novo Nível Alcançado</div>
             <div class="lvl-cinema-class"><b>${info.name}</b> &mdash; ${P.name}</div>
             <div class="lvl-gains">
-                ${P.hp_gain ? `<div class="lvl-gain hp">\u2764\ufe0f +${P.hp_gain} HP</div>` : ''}
-                ${P.mp_gain ? `<div class="lvl-gain mp">\ud83d\udd37 +${P.mp_gain} ${info.resource}</div>` : ''}
+                ${P.hp_gain ? `<div class="lvl-gain hp">+${P.hp_gain} HP</div>` : ''}
+                ${P.mp_gain ? `<div class="lvl-gain mp">+${P.mp_gain} ${info.resource}</div>` : ''}
             </div>
         </div>
         <div class="section-title">Escolhas Pendentes</div>
@@ -2303,8 +2303,8 @@
 
             if (hasFeats) {
                 html += `<div class="mode-toggle">
-            <button class="mode-toggle-btn${asiMode === 'asi' ? ' active' : ''}" onclick="setAsiMode('asi')">\ud83d\udcaa Atributos</button>
-            <button class="mode-toggle-btn${asiMode === 'feat' ? ' active' : ''}" onclick="setAsiMode('feat')">\ud83c\udf96\ufe0f Talento</button>
+            <button class="mode-toggle-btn${asiMode === 'asi' ? ' active' : ''}" onclick="setAsiMode('asi')">Atributos</button>
+            <button class="mode-toggle-btn${asiMode === 'feat' ? ' active' : ''}" onclick="setAsiMode('feat')">Talento</button>
         </div>`;
             }
 
@@ -2350,7 +2350,7 @@
         }
 
         function buildFeatPanel(availableFeats) {
-            let html = '<div class="section-title">\ud83c\udf96\ufe0f Talentos</div>';
+            let html = '<div class="section-title">Talentos</div>';
             html += '<div class="hint">Escolher um talento consome 2 pontos de atributo</div>';
 
             if (sel.feat) {
@@ -2432,7 +2432,7 @@
                 <div class="feat-hero-rays"></div>
                 <img class="feat-hero-img" src="${pngSrc}" alt="${f.name}"
                      onerror="this.style.display='none'; this.parentNode.classList.add('no-png')">
-                <div class="feat-hero-medal-fallback">\ud83c\udf96\ufe0f</div>
+                <div class="feat-hero-medal-fallback"></div>
             </div>`;
             html += `<div class="feat-hero-name">${f.name}</div>`;
             html += `<div class="feat-hero-divider">\u27e1 Talento \u27e1</div>`;
@@ -2602,7 +2602,7 @@
                 <div class="feat-hero-rays"></div>
                 <img class="feat-hero-img" src="${pngSrc}" alt="${s.name}"
                      onerror="this.style.display='none'; this.parentNode.classList.add('no-png')">
-                <div class="feat-hero-medal-fallback">\u26a1</div>
+                <div class="feat-hero-medal-fallback"></div>
             </div>`;
             html += `<div class="feat-hero-name">${s.name}</div>`;
             html += `<div class="feat-hero-divider">\u27e1 Habilidade \u27e1</div>`;
@@ -2697,11 +2697,11 @@
         function buildReview(el) {
             const info = CLASS_INFO[P.hero_class] || { name: 'Aventureiro', resource: 'MP' };
             let html = `<div class="dm-bubble">Olhe o que escolheu. <i>O caminho fica registrado em quem voc\u00ea \u00e9, daqui em diante.</i> Confirma?</div>`;
-            html += `<div class="section-title">\ud83d\udcdc Resumo da Subida de N\u00edvel</div>`;
+            html += `<div class="section-title">Resumo da Subida de N\u00edvel</div>`;
 
             // HP/MP gains
             html += `<div class="review-section">
-        <div class="review-section-title">\u2764\ufe0f Vitalidade</div>`;
+        <div class="review-section-title">Vitalidade</div>`;
             if (P.hp_gain) {
                 html += `<div class="review-row"><span class="review-label">HP</span>
         <span class="review-value">${P.max_hp - P.hp_gain} <span class="arrow">\u2192</span> <span class="changed">${P.max_hp}</span></span></div>`;
@@ -2725,7 +2725,7 @@
             if (sel.feat) {
                 const f = FEATS[sel.feat];
                 html += `<div class="review-section">
-            <div class="review-section-title">\ud83c\udf96\ufe0f Talento</div>
+            <div class="review-section-title">Talento</div>
             <div class="review-row"><span class="review-label">Escolha:</span>
             <span class="review-value"><span class="changed">${f ? f.name : sel.feat}</span> <span class="new-badge">Novo</span></span></div>`;
                 if (sel.featStat) {
@@ -2780,7 +2780,7 @@
             _submitted = false;
             var btn = document.getElementById('btnNext');
             btn.disabled = false;
-            btn.textContent = '⚔️ Confirmar Subida';
+            btn.textContent = 'Confirmar Subida';
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 

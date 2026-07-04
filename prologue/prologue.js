@@ -165,7 +165,7 @@ function showError(msg, err) {
   card.style.cssText = 'background:#2a2218;border:1px solid #c4953a;padding:24px;border-radius:12px;max-width:380px;color:#d4c8b0;text-align:center';
   var icon = document.createElement('div');
   icon.style.cssText = 'color:#c02020;font-size:32px;margin-bottom:8px';
-  icon.textContent = '⚠️';
+  icon.textContent = '';
   var p = document.createElement('p');
   p.style.cssText = 'margin:0 0 16px';
   p.textContent = String(msg == null ? '' : msg);
@@ -229,9 +229,9 @@ function showDiceRoll(result) {
         'Você pega uma tocha da carroça tombada e a balança na direção dos lobos, ' +
         'gritando e batendo em um escudo improvisado. O fogo e o barulho os assustam — ' +
         'os predadores recuam entre os arbustos, ganindo.<br><br>' +
-        '<span style="color:var(--v-success);font-weight:700">✨ +100 XP</span>'
+        '<span style="color:var(--v-success);font-weight:700">+100 XP</span>'
       );
-      actions.innerHTML = `<button class="cenario-btn" onclick="haptic('medium'); onDistractSuccess()">🗣️ Falar com o ferreiro</button>`;
+      actions.innerHTML = `<button class="cenario-btn" onclick="haptic('medium'); onDistractSuccess()">Falar com o ferreiro</button>`;
     } else {
       narrative.innerHTML = (
         'Você tenta assustar os lobos, mas o líder da matilha não se intimida. ' +
@@ -244,8 +244,8 @@ function showDiceRoll(result) {
         haptic('heavy');
         onDistractFail();
       };
-      actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkip">⚔️ Lutar!</button>`;
-      /* 2026-06-11 (user): NÃO avança sozinho — só pelo botão "⚔️ Lutar!". */
+      actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkip">Lutar!</button>`;
+      /* 2026-06-11 (user): NÃO avança sozinho — só pelo botão "Lutar!". */
       setTimeout(() => {
         const skipBtn = document.getElementById('distractFailSkip');
         if (skipBtn) { skipBtn.classList.add('visible'); skipBtn.onclick = goFight; }
@@ -276,14 +276,14 @@ function _showDiceRollFallback(result) {
       narrative.innerHTML = 'Você pega uma tocha da carroça tombada e a balança na direção dos lobos, ' +
         'gritando e batendo em um escudo improvisado. O fogo e o barulho os assustam — ' +
         'os predadores recuam entre os arbustos, ganindo.<br><br>' +
-        '<span style="color:var(--v-success);font-weight:700">✨ +100 XP</span>';
-      actions.innerHTML = `<button class="cenario-btn" onclick="haptic('medium'); onDistractSuccess()">🗣️ Falar com o ferreiro</button>`;
+        '<span style="color:var(--v-success);font-weight:700">+100 XP</span>';
+      actions.innerHTML = `<button class="cenario-btn" onclick="haptic('medium'); onDistractSuccess()">Falar com o ferreiro</button>`;
     } else {
       narrative.innerHTML = 'Você tenta assustar os lobos, mas o líder da matilha não se intimida. ' +
         'Ele rosna e avança! Não há outra opção — é lutar ou morrer!';
       let _failDone = false;
       const goFight = () => { if (_failDone) return; _failDone = true; haptic('heavy'); onDistractFail(); };
-      actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkipFb">⚔️ Lutar!</button>`;
+      actions.innerHTML = `<button class="v-skip-btn" id="distractFailSkipFb">Lutar!</button>`;
       /* 2026-06-11 (user): botão only, sem auto-avanço (igual path 3D). */
       setTimeout(() => {
         const skipBtn = document.getElementById('distractFailSkipFb');
@@ -344,7 +344,7 @@ function _sceneIntro() {
   const c = DATA.character || {};
   const l = DATA.lore || {};
   const fullName = `${c.name || ''} ${c.surname || ''}`.trim();
-  const rerollLabel = rerollsLeft > 0 ? `🎲 Sortear Outra (${rerollsLeft})` : '🎲 Limite atingido';
+  const rerollLabel = rerollsLeft > 0 ? `Sortear Outra (${rerollsLeft})` : 'Limite atingido';
   /* Script combina lore intro + classe info como 2 estrofes narrativas. */
   const charLine = (c.class_label || '') + ' · ' + (c.race || '') + ' · Nível ' + (c.level || 1);
   const script = [
@@ -352,7 +352,7 @@ function _sceneIntro() {
     { type: 'narration', text: 'As origens criam escolhas e eventos diferentes durante a jornada.' }
   ];
   const choices = [
-    { id: 'origem', label: '📜 Ver Origem', cb: '__local_lore' }
+    { id: 'origem', label: 'Ver Origem', cb: '__local_lore' }
   ];
   if (rerollsLeft > 0) {
     choices.push({ id: 'reroll', label: rerollLabel, cb: '__local_reroll' });
@@ -391,8 +391,8 @@ function _sceneRoad() {
     npc: { name: 'Emboscada na Estrada', desc: 'A jornada se torna perigosa', portrait: '' },
     script: script,
     choices: [
-      { id: 'fight', label: '⚔️ Lutar contra os lobos!', cb: '__local_road_fight' },
-      { id: 'distract', label: '🛡️ Criar uma distração', cb: '__local_road_distract' }
+      { id: 'fight', label: 'Lutar contra os lobos!', cb: '__local_road_fight' },
+      { id: 'distract', label: 'Criar uma distração', cb: '__local_road_distract' }
     ]
   };
 }
@@ -573,7 +573,7 @@ function _sceneAftermath() {
     },
     script: _filterEmptySegments(script),
     choices: [
-      { id: 'continuar', label: '🏰 Seguir para os Portões', cb: '__local_aftermath_done' }
+      { id: 'continuar', label: 'Seguir para os Portões', cb: '__local_aftermath_done' }
     ]
   };
 }
@@ -945,9 +945,9 @@ async function onGateChoice(key) {
   }
   /* Gate clássico (guarda) — mantém o result overlay. */
   const gateTexts = {
-    refuge: { text: 'O guarda te analisa de cima a baixo e te deixa passar, mas não sem uma inspeção.', effect: '⚠️ Inspeção nos portões' },
+    refuge: { text: 'O guarda te analisa de cima a baixo e te deixa passar, mas não sem uma inspeção.', effect: 'Inspeção nos portões' },
     bribe: { text: 'O guarda pega as moedas rapidamente. "Um cidadão exemplar. A cidade lhe dá as boas-vindas."', effect: '<span class="vi vi-coin sm"></span> Taxa de entrada paga' },
-    intimidate: { text: 'O guarda mais velho não hesita — a coronha da lança acerta seu estômago. A dor acende algo dentro de você.', effect: '⚡ Entrada pela força' },
+    intimidate: { text: 'O guarda mais velho não hesita — a coronha da lança acerta seu estômago. A dor acende algo dentro de você.', effect: 'Entrada pela força' },
   };
   const g = gateTexts[key] || { text: 'Você entra na cidade.', effect: '' };
   if (typeof vEncounter !== 'undefined' && vEncounter.close) vEncounter.close();
@@ -974,7 +974,7 @@ function _sceneLoreOutcome(scriptSegs, effectText) {
       portrait: inter.subject_image || ''
     },
     script: segs,
-    choices: [{ id: 'continue', label: '🏰 Seguir para os Portões', cb: '__local_lore_outcome_done' }]
+    choices: [{ id: 'continue', label: 'Seguir para os Portões', cb: '__local_lore_outcome_done' }]
   };
 }
 
@@ -1073,7 +1073,7 @@ function _showLastRerollPopup() {
   ov.id = 'reroll-limit-overlay';
   ov.innerHTML =
     '<div class="rr-card">'
-    + '  <div class="rr-icon">🎲</div>'
+    + '  <div class="rr-icon"></div>'
     + '  <h3 class="rr-title">Última Sortida</h3>'
     + '  <p class="rr-text">Esta foi a sua última oportunidade de sortear uma nova origem. '
     + 'O destino agora se firmou — mesmo que não goste do resultado, terá que seguir adiante '
@@ -1117,7 +1117,7 @@ function openLoreOverlay() {
       + '  <div class="prol-header">'
       + '    <div class="prol-portrait prol-portrait-orb"></div>'
       + '    <div class="prol-meta">'
-      + '      <h3 class="prol-name">📜 ' + (l.title || 'Sua Origem') + '</h3>'
+      + '      <h3 class="prol-name">' + (l.title || 'Sua Origem') + '</h3>'
       + '      <p class="prol-desc">' + _escapeHtml(fullName) + '</p>'
       + '    </div>'
       + '    <div class="prol-page-ind">' + (curPage + 1) + ' / ' + pages.length + '</div>'

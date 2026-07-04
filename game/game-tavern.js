@@ -248,7 +248,7 @@ function renderTavernHub(container, data) {
   }
 
   var sectionLbl = vCity.el('div', 'pt-section-label');
-  sectionLbl.textContent = '⚜ No balcão e na sala ⚜';
+  sectionLbl.textContent = 'No balcão e na sala ';
   body.appendChild(sectionLbl);
 
   if (data.services && data.services.length) {

@@ -44,7 +44,7 @@ window.showInitiativePrompt = function(onRollClick) {
     var card = _el('div', 'init-popup-card');
     card.classList.add('init-prompt-card');
     var header = _el('div', 'init-popup-header');
-    header.textContent = '\u2694\uFE0F Combate Iminente';
+    header.textContent = 'Combate Iminente';
     card.appendChild(header);
     var orn = _el('div', 'init-popup-sub');
     orn.style.cssText = 'color:rgba(196,149,58,0.3);font-size:10px;letter-spacing:6px;text-align:center;padding:4px 0';
@@ -64,7 +64,7 @@ window.showInitiativePrompt = function(onRollClick) {
     card.appendChild(flavor);
     var footer = _el('div', 'init-popup-footer');
     var rollBtn = _el('button', 'init-popup-proceed');
-    rollBtn.textContent = '\uD83C\uDFB2 Rolar Iniciativa';
+    rollBtn.textContent = 'Rolar Iniciativa';
     var _clicked = false;
     var _promptDice = null;
     rollBtn.addEventListener('click', function() {
@@ -108,7 +108,7 @@ window.showInitiativePopup = function(turnOrder, initiative, onProceed) {
     var card = _el('div', 'init-popup-card');
 
     var header = _el('div', 'init-popup-header');
-    header.textContent = '\u2694\uFE0F Ordem de Combate';
+    header.textContent = 'Ordem de Combate';
     card.appendChild(header);
 
     var sub = _el('div', 'init-popup-sub');
@@ -135,7 +135,7 @@ window.showInitiativePopup = function(turnOrder, initiative, onProceed) {
     footer.id = 'init-popup-footer';
     footer.style.display = 'none';
     var proceedBtn = _el('button', 'init-popup-proceed');
-    proceedBtn.textContent = '\u2694\uFE0F INICIAR COMBATE';
+    proceedBtn.textContent = 'INICIAR COMBATE';
     proceedBtn.onclick = function() {
         _hide();
         if (onProceed) onProceed();
@@ -145,10 +145,10 @@ window.showInitiativePopup = function(turnOrder, initiative, onProceed) {
     if (initiative && (initiative.player_surprised || initiative.enemies_surprised)) {
         var surpriseEl = _el('div', 'init-popup-surprise');
         if (initiative.enemies_surprised) {
-            surpriseEl.textContent = '\u26A1 Emboscada! Inimigos surpreendidos \u2014 perdem o primeiro turno.';
+            surpriseEl.textContent = 'Emboscada! Inimigos surpreendidos \u2014 perdem o primeiro turno.';
             surpriseEl.classList.add('init-surprise-good');
         } else {
-            surpriseEl.textContent = '\u26A0\uFE0F Emboscada! Voc\u00ea foi surpreendido \u2014 perde o primeiro turno.';
+            surpriseEl.textContent = 'Emboscada! Voc\u00ea foi surpreendido \u2014 perde o primeiro turno.';
             surpriseEl.classList.add('init-surprise-bad');
         }
         footer.appendChild(surpriseEl);
@@ -251,7 +251,7 @@ function _buildResultsList(container, sorted, initiative) {
         row.appendChild(pos);
 
         var icon = _el('div', 'init-popup-icon');
-        icon.textContent = e.ico || '\u2694\uFE0F';
+        icon.textContent = e.ico || '';
         row.appendChild(icon);
 
         var info = _el('div', 'init-popup-info');
@@ -275,7 +275,7 @@ function _buildResultsList(container, sorted, initiative) {
     if (initiative && sorted.length > 0) {
         var announce = _el('div', 'init-popup-announce');
         var first = sorted[0];
-        announce.textContent = (first.ico || '\u2694\uFE0F') + ' ' + first.n + ' abre o combate!';
+        announce.textContent = (first.ico || '') + ' ' + first.n + ' abre o combate!';
         container.appendChild(announce);
     }
 }

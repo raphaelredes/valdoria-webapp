@@ -461,11 +461,11 @@ function _buildPopupActions(data) {
 
     // "Voltar" button — only if there is a previous popup in the stack
     if (_popupStack.length > 1) {
-        html += '<button class="v-popup-btn" data-action="popup_back">\u2b05\ufe0f Voltar</button>';
+        html += '<button class="v-popup-btn" data-action="popup_back">Voltar</button>';
     }
 
     // "Fechar" button — ALWAYS present, ALWAYS last
-    html += '<button class="v-popup-btn v-popup-btn--cancel" data-action="popup_close">\ud83c\udfe0 Fechar</button>';
+    html += '<button class="v-popup-btn v-popup-btn--cancel" data-action="popup_close">Fechar</button>';
 
     return html;
 }
@@ -576,7 +576,7 @@ window.renderQuestDetail = function (el, qd) {
             + 'color:var(--v-gold-dim,#8f7338);text-align:center;font-style:italic;'
             + 'padding:6px 10px;border-top:1px dotted var(--v-gold-20, rgba(196,149,58,0.2));'
             + 'border-bottom:1px dotted var(--v-gold-20, rgba(196,149,58,0.2));">'
-            + '\ud83d\udcd6 ' + qd.hint + '</div>';
+            + '' + qd.hint + '</div>';
     }
 
     // RECOMPENSAS
@@ -609,7 +609,7 @@ window.renderQuestDetail = function (el, qd) {
                     + 'background:rgba(124,180,219,0.10);border:1px solid rgba(124,180,219,0.30);'
                     + 'border-radius:12px;color:#7cb4db;font-weight:600;'
                     + 'font-size:calc(11px * var(--v-font-scale, 1));">'
-                    + '\ud83c\udf81 ' + qd.items[k] + '</span>';
+                    + '' + qd.items[k] + '</span>';
             }
         }
         html += '</div></div>';
@@ -617,7 +617,7 @@ window.renderQuestDetail = function (el, qd) {
 
     // STATUS
     var statusLabel = {
-        ready: '\u25c6 Pronta para entregar', active: '\u2694 Em progresso',
+        ready: '\u25c6 Pronta para entregar', active: 'Em progresso',
         completed: '\u2713 Conclu\u00edda', failed: '\u2717 Falhou'
     }[qd.status] || qd.status;
     html += '<div class="qdt-status" style="text-align:center;padding:6px;'
@@ -628,11 +628,11 @@ window.renderQuestDetail = function (el, qd) {
     if (qd.can_turnin && qd.turnin_cb) {
         html += '<button class="v-popup-btn" data-action="' + qd.turnin_cb + '" '
             + 'style="background:linear-gradient(180deg,#3a6e3a,#2a4e2a);border-color:#7cdb7c;color:#fff;font-weight:700;">'
-            + '\ud83d\udcdc Entregar Miss\u00e3o</button>';
+            + 'Entregar Miss\u00e3o</button>';
     }
     if (qd.can_abandon && qd.abandon_cb) {
         html += '<button class="v-popup-btn v-popup-btn--cancel" data-action="' + qd.abandon_cb + '">'
-            + '\u274c Abandonar Miss\u00e3o</button>';
+            + 'Abandonar Miss\u00e3o</button>';
     }
 
     html += '</div>';

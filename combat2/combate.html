@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-03T20:53:30Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-04T10:49:51Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9,7 +9,7 @@
   SIMULADOR DE COMBATE — INDICE RAPIDO (para agentes/IA navegarem o arquivo)
 =================================================================================
 
-  ✅ FONTE CANONICA do frontend combat2 (Fase 1 ativa desde 2026-04-20).
+  FONTE CANONICA do frontend combat2 (Fase 1 ativa desde 2026-04-20).
 
   FASE 7 (2026-04-30): Visual standards mobile-first.
     ~825   :root --v-font-* + --v-btn-h* (design tokens espelhando valdoria-design.css)
@@ -185,7 +185,7 @@
          consertando regressão de target selection quebrada)
   V1-VISUAL Phase 4 (2026-04-19) — diferenciadores visuais para summons/invocações:
   ~9290  buildCell adiciona cell--is-summon / cell--summon-attached / cell--summon-focused-by
-         + summon-focus-marker (🎯 dentro inimigo focado) + summon-attached-chip (⚔️ Xr acima caster)
+         + summon-focus-marker (dentro inimigo focado) + summon-attached-chip (Xr acima caster)
   ~8378  applyHpAfterDamage (noDeathSaves) → cell--summon-dying + setTimeout 720ms remove do order
   ~9915  tickAttachedSummonsDuration (durLeft <= 0) → cell--summon-dying antes de splice
   ~10009 _applyFamiliarFocus → cell--focus-mark-applied (pulse dourado 620ms)
@@ -195,7 +195,7 @@
   ~7549  CHAR_CLASSES Bardo: passives [familiar: Sprite via Magical Secrets PHB p.54+240]
   ~10639 spawnPassivesForClass (RENOMEADO de spawnFamiliarIfMage; alias mantido p/ retrocompat)
   ~10670 _findOwnPassiveSummonIdx (RENOMEADO de _findFamiliarIdxFor; alias mantido)
-  ~10801 Label dinâmico "🎯 Focar [Familiar/Sprite/Companheiro/Montaria]" via _updateActionSheetState
+  ~10801 Label dinâmico "Focar [Familiar/Sprite/Companheiro/Montaria]" via _updateActionSheetState
   ~12187 PAGE_SIZE skill panel ajustado de 5 → 4 (badge + chip aumentaram altura por item)
   V1.6 PHB-FIEL (2026-04-19, d) — adaptações conforme escolhas A1/B1/C1/D2/E2/F1/G1/H1/I1/J2:
   - A1 noAttack:true em Familiar/Sprite (PHB p.240: familiar can't take Attack action)
@@ -315,7 +315,7 @@
   body / viewport lock            Limite 384x694 (Telegram Desktop oficial — X-6.5.50)
   .hit-particle / shake           VFX de ataque (particulas + shake)
   .epic-banner / .epic-title      Banner epico da intro (COMBATE INICIADO)
-  .cell-init / badge              Badge 🎲N da iniciativa nas celulas
+  .cell-init / badge              Badge N da iniciativa nas celulas
   .cell.init-rolling::before/after Seta epica + gem na arena (nao na replica do overlay de dado)
   .epic-cta-overlay / .epic-cta-btn CTA flutuante (Comecar Rolagens/Combate)
   #turn-queue (FLIP)              Timeline de turnos no topo da arena
@@ -344,7 +344,7 @@
   - Design: tokens --v-* (valdoria-design.css); sem excesso de dourado.
 
   =================================================================================
-  ⚠️  EXTRAÇÃO 2026-04-25 — DADOS MOVIDOS PARA combate-data-shared.js
+   EXTRAÇÃO 2026-04-25 — DADOS MOVIDOS PARA combate-data-shared.js
   =================================================================================
   BESTIARY (~old:5014), CHAR_CLASSES (~old:5040), CHAR_NAMES, CHAR_RACES:
   agora vivem em simuladores/combate-data-shared.js (carregado via document.write
@@ -935,7 +935,7 @@ html body .va-backdrop {
 }
 
 /* 2. Popup "Combate Iniciado" (showIntroChoicePopup) — Opção 3 aprovada:
-      ESCUDO BRASONADO. Brasão heráldico emergindo do topo + divisor ❦ +
+      ESCUDO BRASONADO. Brasão heráldico emergindo do topo + divisor +
       botão primary alto (com tag "Ação Padrão") + secundário tracejado. */
 #intro-choice-popup {
     background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
@@ -961,7 +961,7 @@ html body .va-backdrop {
 }
 /* ESCUDO HERÁLDICO emergindo do topo */
 #intro-choice-popup .iop-card::before {
-    content: '⚔';
+    content: '';
     position: absolute;
     top: -32px;
     left: 50%;
@@ -1014,7 +1014,7 @@ html body .va-backdrop {
     text-transform: uppercase !important;
     font-weight: 400 !important;
 }
-/* DIVISOR com ❦ (substitui iop-head-batch__rule) */
+/* DIVISOR com (substitui iop-head-batch__rule) */
 #intro-choice-popup .iop-head-batch__rule {
     height: 1px !important;
     margin: 22px auto !important;
@@ -1024,7 +1024,7 @@ html body .va-backdrop {
     border: none !important;
 }
 #intro-choice-popup .iop-head-batch__rule::after {
-    content: '❦';
+    content: '';
     position: absolute;
     top: -12px;
     left: 50%;
@@ -3656,7 +3656,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
    POSIÇÃO: logo abaixo do header de turno/cenário, antes do battlefield (topo da tela).
    3 pílulas mostram estado dos recursos por turno (PHB p.189-190).
    SÍMBOLOS GEOMÉTRICOS por recurso: ◆ Ação (losango), ▲ Bônus (triângulo),
-   ⬢ Reação (hexágono). Verde=disponível, cinza=gasta. Click abre popup com regra D&D. */
+   Reação (hexágono). Verde=disponível, cinza=gasta. Click abre popup com regra D&D. */
 /* V1.7 HUD-REDESIGN (2026-04-21) — barra profissional com:
    · Background multicamada (gradiente + textura radial + bordas douradas duplas)
    · Pills com bevel edge (inset shadow), tipografia Cinzel maior, spacing respirável
@@ -3757,7 +3757,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 /* Cores DISTINTAS por TIPO (mantidas, glow reforçado em 2 camadas):
    · Action  ◆ = âmbar/dourado (recurso primário, ofensivo)
    · Bonus   ▲ = roxo arcano (magia rápida)
-   · Reaction⬢ = ciano (defesa, Escudo, Contramágica) */
+   · Reaction= ciano (defesa, Escudo, Contramágica) */
 .dnd-res-pill.dnd-res-action.available .dnd-res-glyph {
   color: #ffe080;
   text-shadow:
@@ -3997,7 +3997,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   0%, 100% { opacity: 0.25; transform: scale(1); }
   50%      { opacity: 0.55; transform: scale(1.02); }
 }
-/* Marker 🎯 dentro do inimigo focado pelo Familiar — overlay no canto superior direito
+/* Marker dentro do inimigo focado pelo Familiar — overlay no canto superior direito
    com pulse leve. Indica visualmente qual inimigo o Familiar vai atacar no próximo turno. */
 .summon-focus-marker {
   position: absolute;
@@ -4021,7 +4021,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     0 0 36px rgba(196, 149, 58, .18) !important;
 }
 /* Chip flutuante acima do conjurador com summons attached ativos.
-   Ex.: Cleric com Arma Espiritual mostra "⚔️ 7r" pulsando acima do card. */
+   Ex.: Cleric com Arma Espiritual mostra "7r" pulsando acima do card. */
 .summon-attached-chip {
   position: absolute;
   top: -22px;
@@ -7604,7 +7604,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 /* ============================================================
-   CURA (HOLY) — cruz ✚ rotativa + aura verde-dourada vital
+   CURA (HOLY) — cruz rotativa + aura verde-dourada vital
    ============================================================ */
 .mm-orbit-missile--holy { animation: mmOrbitFireball 2.8s linear infinite; }
 .mm-orbit-missile--holy .mm-orbit-head {
@@ -7798,7 +7798,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 /* ============================================================
-   ESCUDO ARCANO (ARCANE) — hexágono ⬡ místico rotativo
+   ESCUDO ARCANO (ARCANE) — hexágono místico rotativo
    ============================================================ */
 .mm-orbit-missile--arcane { animation: mmOrbitFireball 2.7s linear infinite; }
 .mm-orbit-missile--arcane .mm-orbit-head {
@@ -7996,7 +7996,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
    1. Tremor sutil e aleatório (combatente paralisado pelo terror)
    2. Névoa roxa-escura pulsando ao redor via ::before
    3. Dessaturação do conteúdo do card (filter: saturate + hue-rotate)
-   4. Glifo fantasma ☠ flutuando acima do card via ::after
+   4. Glifo fantasma flutuando acima do card via ::after
    5. Box-shadow negativa interna (como se a luz fosse sugada)
    ============================================================ */
 .cell.card-frightened {
@@ -9728,7 +9728,7 @@ window.__onIntroTap = function() {
     <button class="sim-log-chip" data-filter="tag:CASTER-CAST" title="Caster cycle">CASTER</button>
     <button class="sim-log-chip" data-filter="tag:SHOWCASE" title="Showcase mode">SHOWCASE</button>
     <span class="sim-log-chip-sep">│</span>
-    <button class="sim-log-chip" data-filter="level:warn" title="Apenas warnings">⚠ WARN</button>
+    <button class="sim-log-chip" data-filter="level:warn" title="Apenas warnings">WARN</button>
     <button class="sim-log-chip" data-filter="level:error" title="Apenas errors">✕ ERROR</button>
   </div>
   <div id="sim-log-panel-list" aria-live="polite"></div>
@@ -11818,7 +11818,7 @@ window.ReinforceFSM = (function () {
             wis: 10, str: 10, int: 10, cha: 10,
             ico: b.ico, alive: true, se: [],
             sugLvl: sugLvl, species: b.n,
-            it: { ic: '⚔️', lb: 'ataca' },
+            it: { ic: '', lb: 'ataca' },
             /* Tag pra UI mostrar visual diferente nos primeiros 2 turnos */
             _justArrivedReinforcement: true,
             _reinforcementWaveId: wave.id,
@@ -13487,13 +13487,13 @@ function resolveSkillHitDmgType(actor, skill) {
 /* CHAR_RACES extraído para combate-data-shared.js */
 
 var ITEMS_POOL = [
-    { n: 'Poção de Cura',        ico: '🧪', kind: 'heal', desc: 'Recupera 2d4+2 HP',           effect: { hp: [4, 10] } },
-    { n: 'Poção de Mana',        ico: '💠', kind: 'mp',   desc: 'Recupera 5 pontos de recurso', effect: { res: 5 } },
-    { n: 'Pergaminho de Bênção', ico: '📜', kind: 'buff', desc: '+2 ataque por 3 turnos',      effect: { atk: 2, dur: 3 } },
-    { n: 'Bomba de Fumaça',      ico: '💨', kind: 'util', desc: 'Ganha vantagem no próximo ataque', effect: {} },
-    { n: 'Pão Élfico',           ico: '🍞', kind: 'heal', desc: '+10 HP temporário',            effect: { tmp: 10 } },
-    { n: 'Antídoto',             ico: '💉', kind: 'cure', desc: 'Remove veneno e doença',       effect: {} },
-    { n: 'Pedra de Afiar',       ico: '🪨', kind: 'buff', desc: '+1 dano por 5 turnos',         effect: { dmg: 1, dur: 5 } },
+    { n: 'Poção de Cura',        ico: '', kind: 'heal', desc: 'Recupera 2d4+2 HP',           effect: { hp: [4, 10] } },
+    { n: 'Poção de Mana',        ico: '', kind: 'mp',   desc: 'Recupera 5 pontos de recurso', effect: { res: 5 } },
+    { n: 'Pergaminho de Bênção', ico: '', kind: 'buff', desc: '+2 ataque por 3 turnos',      effect: { atk: 2, dur: 3 } },
+    { n: 'Bomba de Fumaça',      ico: '', kind: 'util', desc: 'Ganha vantagem no próximo ataque', effect: {} },
+    { n: 'Pão Élfico',           ico: '', kind: 'heal', desc: '+10 HP temporário',            effect: { tmp: 10 } },
+    { n: 'Antídoto',             ico: '', kind: 'cure', desc: 'Remove veneno e doença',       effect: {} },
+    { n: 'Pedra de Afiar',       ico: '', kind: 'buff', desc: '+1 dano por 5 turnos',         effect: { dmg: 1, dur: 5 } },
 ];
 
 function randomPlayer() {
@@ -13573,7 +13573,7 @@ function randomEnemies() {
                   attr: b.attr || 'STR',
                   dex: b.dex, con: b.con != null ? b.con : 10, wis: 10, str: 10, int: 10, cha: 10, ico: b.ico, alive: true, se: [],
                   sugLvl: sugLvl, species: b.n,
-                  it: { ic: '⚔️', lb: 'ataca' } };
+                  it: { ic: '', lb: 'ataca' } };
         /* Phase 1 MVP dungeons AAA (2026-04-25) — propaga isBoss + multiAttack +
            skills/res de boss em random encounters também (paridade com setup-frontend). */
         if (b.multiAttack && b.multiAttack > 1) enemy.multiAttack = b.multiAttack;
@@ -13582,7 +13582,7 @@ function randomEnemies() {
             enemy.isCaster = true;
             enemy.castProb = b.castProb != null ? b.castProb : 0.5;
             enemy.skills = (b.skills || []).map(function (sk) { return Object.assign({}, sk); });
-            var baseRes = b.res || { type: 'mp', name: 'Mana', ico: '✨', max: 5 };
+            var baseRes = b.res || { type: 'mp', name: 'Mana', ico: '', max: 5 };
             enemy.res = { type: baseRes.type, name: baseRes.name, ico: baseRes.ico, max: baseRes.max, value: baseRes.max };
             enemy.lvl = enemy.sugLvl;
             enemy.prof = Math.floor((Math.max(1, enemy.sugLvl | 0) - 1) / 4) + 2;
@@ -14069,7 +14069,7 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
        initBonus (getInitBonusFromStatuses), itemPoisonDie (_simItemPoisonRolls). */
     var _seSeed = [];
     if (_exhSeed > 0) {
-        _seSeed.push({ id: 'exhaustion', kind: 'debuff', ico: '😩',
+        _seSeed.push({ id: 'exhaustion', kind: 'debuff', ico: '',
             n: 'Exaustão (nível ' + _exhSeed + ')',
             dndCondition: 'Exaustão ' + _exhSeed + ' (PHB p.291)',
             exhaustionLevel: _exhSeed, turnsLeft: null });
@@ -14268,7 +14268,7 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
            rola TR CON; falha → 'petrified' no player (repeatSave = recuperação + teto).
            Espelha combat2_resolve.enemy_condition_on_hit_debuff (motor = spec canônico). */
         conditionOnHit: (spec.conditionOnHit_exact || b.conditionOnHit || null),
-        it: { ic: '⚔️', lb: 'ataca' }
+        it: { ic: '', lb: 'ataca' }
     };
     /* V1.7 Stage-CASTERS (2026-04-21) — propaga skills + res + caster flags.
        NPCs com isCaster:true têm arsenal mágico e AI decide entre weapon/spell
@@ -14278,7 +14278,7 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
         enemy.isCaster = true;
         enemy.castProb = b.castProb != null ? b.castProb : 0.5;
         enemy.skills = (b.skills || []).map(function (sk) { return Object.assign({}, sk); });
-        var baseRes = b.res || { type: 'mp', name: 'Mana', ico: '✨', max: 5 };
+        var baseRes = b.res || { type: 'mp', name: 'Mana', ico: '', max: 5 };
         enemy.res = { type: baseRes.type, name: baseRes.name, ico: baseRes.ico, max: baseRes.max, value: baseRes.max };
         enemy.lvl = enemy.sugLvl;
         var lvlP = Math.max(1, enemy.sugLvl | 0);
@@ -14946,7 +14946,7 @@ function pushBuffSim(u, sim, skillIco, skillName) {
     u.se.push({
         id: id,
         n: sim.condName || skillName || 'Efeito',
-        ico: skillIco || sim.ico || '✨',
+        ico: skillIco || sim.ico || '',
         turnsLeft: sim.turns != null ? sim.turns : 1,
         turnsMax: sim.turns != null ? sim.turns : 1,
         decOn: sim.decOn || 'round',
@@ -15090,7 +15090,7 @@ function simPushCombat2Debuff(target, cfg, casterIdx, s) {
     var entry = {
         id: aid,
         kind: 'debuff',
-        ico: cfg.ico || '\u26a0',
+        ico: cfg.ico || '',
         n: cfg.n || 'Efeito',
         tickCombat2: true
     };
@@ -15113,7 +15113,7 @@ function simPushCombat2SelfDebuff(actor, cfg, skill) {
     actor.se.push({
         id: aid,
         kind: 'debuff',
-        ico: (skill && skill.ico) || '\u26a0',
+        ico: (skill && skill.ico) || '',
         n: String(cfg.n || 'Penalidade'),
         dndCondition: cfg.dndCondition ? String(cfg.dndCondition) : 'Penalidade à CA',
         turnsLeft: Math.max(1, (cfg.turns != null ? cfg.turns | 0 : 1)),
@@ -15240,7 +15240,7 @@ async function simResolveEndTurnConditions(s, unitIdx) {
             var abPt = ab === 'str' ? 'FOR' : ab === 'con' ? 'CON' : ab === 'int' ? 'INT' :
                 ab === 'wis' ? 'SAB' : ab === 'cha' ? 'CAR' : 'DES';
             var _condLbl = st.n || st.id || 'efeito';
-            var _rsRollTxt = d20 === 20 ? '⚡ NAT 20!' : d20 === 1 ? '💥 NAT 1!' :
+            var _rsRollTxt = d20 === 20 ? 'NAT 20!' : d20 === 1 ? 'NAT 1!' :
                 'd20 ' + d20 + '+' + smod + '=' + total;
             s.log.push(name + ' — TR ' + abPt + ' vs ' + _condLbl + ' (fim do turno): ' + _rsRollTxt +
                 ' vs CD ' + dc + ' ' + (ok ? 'SUCESSO → efeito termina.' : 'FALHA → efeito mantém.'));
@@ -15466,7 +15466,7 @@ function playBuffVfxOnCell(uid, vfxKey, opts) {
                 'filter:drop-shadow(0 0 6px rgba(255,80,30,.85)) drop-shadow(0 0 12px rgba(255,180,40,.5));' +
                 'pointer-events:none;' +
                 'animation:simRallyHornShake 0.6s ease-in-out 4;';
-            horn.textContent = '📣';
+            horn.textContent = '';
             aura.appendChild(ring1);
             aura.appendChild(ring2);
             aura.appendChild(horn);
@@ -15690,11 +15690,11 @@ function _simBreathWeaponSkill(ancestry, lvl) {
     ancestry = ancestry || 'fire';
     lvl = lvl | 0 || 1;
     var n = 2 + (lvl >= 6 ? 1 : 0) + (lvl >= 11 ? 1 : 0) + (lvl >= 16 ? 1 : 0);
-    var ICON = { fire: '🔥', lightning: '⚡', cold: '❄️', acid: '🧪', poison: '☠️' };
+    var ICON = { fire: '', lightning: '', cold: '', acid: '', poison: '' };
     var PT = { fire: 'fogo', lightning: 'relâmpago', cold: 'frio', acid: 'ácido', poison: 'veneno' };
     var saveAb = (ancestry === 'cold' || ancestry === 'poison') ? 'con' : 'dex';
     return {
-        n: 'Sopro Dracônico', ico: ICON[ancestry] || '🐉', cost: 0,
+        n: 'Sopro Dracônico', ico: ICON[ancestry] || '', cost: 0,
         kind: 'attack', dmgType: ancestry, multiTarget: true,
         /* REVIEW [1]: CD = 8 + CON + prof (PHB p.34) — preenchido no build
            (o helper não tem o unit; ver wire do dc em buildCharUnitFromSetup). */
@@ -15711,7 +15711,7 @@ function _simBreathWeaponSkill(ancestry, lvl) {
 // resolve (gate por skill no arsenal).
 function _simTieflingRebukeSkill() {
     return {
-        n: 'Repreensão Infernal', ico: '🔥', cost: 0, kind: 'attack',
+        n: 'Repreensão Infernal', ico: '', cost: 0, kind: 'attack',
         dmgType: 'fire', reactionOnly: true,
         damageSpec: { n: 3, d: 10, flat: 0 },  /* REVIEW [0]: 2º nível = 3d10 (PHB p.43) */
         combatOnceId: 'hellish_rebuke_racial', isRacial: true,
@@ -15729,11 +15729,11 @@ function _simTieflingRebukeSkill() {
 // CARISMA, PHB p.24/43) — calculada no buildCharUnitFromSetup com spec.cha_exact.
 function _simSkillFaerieFire(dc) {
     return {
-        n: 'Fogo Feérico', ico: '✨', cost: 0, kind: 'attack',
+        n: 'Fogo Feérico', ico: '', cost: 0, kind: 'attack',
         castSave: true, damageSpec: { n: 0, d: 0 },
         save: { ability: 'dex', dc: dc },
         afterAttackEnemyDebuff: {
-            id: 'faerie_fire_outlined', turns: 3, n: 'Delineado', ico: '✨',
+            id: 'faerie_fire_outlined', turns: 3, n: 'Delineado', ico: '',
             targetedAdvantage: true, concentration: true,
             dndCondition: 'Delineado (Fogo Feérico — atacado com vantagem)'
         },
@@ -15744,7 +15744,7 @@ function _simSkillFaerieFire(dc) {
 }
 function _simSkillDarkness() {
     return {
-        n: 'Escuridão', ico: '🌑', cost: 0, kind: 'buff',
+        n: 'Escuridão', ico: '', cost: 0, kind: 'buff',
         buffSim: {
             id: 'darkness', turns: 3, attackerDisadvantage: true, concentration: true,
             dndCondition: 'Escuridão (atacantes não te enxergam — desvantagem)'
@@ -15756,7 +15756,7 @@ function _simSkillDarkness() {
 }
 function _simSkillBurningHands(dc) {
     return {
-        n: 'Mãos Flamejantes', ico: '🔥', cost: 0, kind: 'attack',
+        n: 'Mãos Flamejantes', ico: '', cost: 0, kind: 'attack',
         dmgType: 'fire', multiTarget: true,
         save: { ability: 'dex', dc: dc },
         damageSpec: { n: 3, d: 6, flat: 0 },
@@ -15767,12 +15767,12 @@ function _simSkillBurningHands(dc) {
 }
 function _simSkillRayOfSickness(dc) {
     return {
-        n: 'Raio Doentio', ico: '☠️', cost: 0, kind: 'attack',
+        n: 'Raio Doentio', ico: '', cost: 0, kind: 'attack',
         dmgType: 'poison', ranged: true,
         save: { ability: 'con', dc: dc },
         damageSpec: { n: 2, d: 8, flat: 0 },
         afterAttackEnemyDebuff: {
-            id: 'ray_sickness_poisoned', turns: 1, n: 'Envenenado', ico: '☠️',
+            id: 'ray_sickness_poisoned', turns: 1, n: 'Envenenado', ico: '',
             atkDisadvantage: true,
             dndCondition: 'Envenenado (PHB App.A — Raio Doentio)'
         },
@@ -15783,7 +15783,7 @@ function _simSkillRayOfSickness(dc) {
 }
 function _simSkillInvisibility() {
     return {
-        n: 'Invisibilidade', ico: '👤', cost: 0, kind: 'buff',
+        n: 'Invisibilidade', ico: '', cost: 0, kind: 'buff',
         buffSim: {
             id: 'invisibility', turns: 3, atkAdvantage: true,
             attackerDisadvantage: true, endOnAttack: true, concentration: true,
@@ -16726,7 +16726,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
         && (target.t === 'p' || target.t === 'a')
         && typeof _localWildShapeRevert === 'function') {
         var _wsExc = Math.max(0, damageApplied - oldHp);
-        var _wsIco = (target.wildShape.form_ico || '🐾');
+        var _wsIco = (target.wildShape.form_ico || '');
         var _wsName = (target.wildShape.form_name || 'forma');
         _localWildShapeRevert(target, _wsExc);
         /* REVERT ÉPICO ao tomar dano (2026-06-23, user "quando volta ao normal ao tomar
@@ -16779,7 +16779,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
         target.isDead = false;
         target.deathSaves = { s: 0, f: 0 };
         clearDownedMeta(target);
-        if (s && s.log) s.log.push('🛡️ ' + (target.n || 'O aliado') + ' cambaleia ao golpe — mas se recusa a cair. Resta de pé por pura teimosia (1 PV).');
+        if (s && s.log) s.log.push('' + (target.n || 'O aliado') + ' cambaleia ao golpe — mas se recusa a cair. Resta de pé por pura teimosia (1 PV).');
         return;
     }
     if (newHp > 0) {
@@ -16940,7 +16940,7 @@ function describeDeathSavePreview(u, r) {
     }
     if (r === 1) {
         var nf2 = Math.min(3, f0 + 2);
-        return { title: '⚠ NATURAL 1', subHtml: simFormatD20EqualsHTML(r) + ' — duas falhas (total ' + nf2 + '/3).', cls: 'miss' };
+        return { title: 'NATURAL 1', subHtml: simFormatD20EqualsHTML(r) + ' — duas falhas (total ' + nf2 + '/3).', cls: 'miss' };
     }
     if (r >= 10) {
         var ns = Math.min(3, s0 + 1);
@@ -16958,14 +16958,14 @@ function applyDeathSaveFromRoll(s, u, r) {
         u.hp = 1;
         u.alive = true;
         clearDownedMeta(u);
-        s.log.push(u.n + ' — ⚡ NAT 20 no teste de morte (PHB p.197): 1 PV e volta a agir.');
+        s.log.push(u.n + ' — NAT 20 no teste de morte (PHB p.197): 1 PV e volta a agir.');
         return;
     }
     /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — death save progress counter.
        Mostra contadores atuais após cada save: (sucessos X/3 · falhas Y/3). */
     if (r === 1) {
         u.deathSaves.f = Math.min(3, u.deathSaves.f + 2);
-        s.log.push(u.n + ' — 💥 NAT 1 no teste de morte: 2 falhas (agora ' + u.deathSaves.s + '/3 sucessos · ' + u.deathSaves.f + '/3 falhas).');
+        s.log.push(u.n + ' — NAT 1 no teste de morte: 2 falhas (agora ' + u.deathSaves.s + '/3 sucessos · ' + u.deathSaves.f + '/3 falhas).');
     } else if (r >= 10) {
         u.deathSaves.s = Math.min(3, u.deathSaves.s + 1);
         s.log.push(u.n + ' — teste de morte d20=' + r + ' ≥10 SUCESSO (' + u.deathSaves.s + '/3 sucessos · ' + u.deathSaves.f + '/3 falhas).');
@@ -17027,13 +17027,13 @@ function checkEnd(s) {
    (mesma temática de recurso, tem arte). ico fica como fallback se o manifest
    não carregar. Mantém este pool sincronizado com _LOOT_POOL (combat2_endstate.py). */
 var LOOT_POOL = [
-    { n: 'Poção de Cura',       ico: '🧪', rare: 'comum' },
-    { n: 'Raiz de Mana',        ico: '🌿', rare: 'comum' },
-    { n: 'Pão Fresco',          ico: '🍞', rare: 'comum' },
-    { n: 'Adaga',               ico: '🗡', rare: 'incomum' },
-    { n: 'Pergaminho Mágico',   ico: '📜', rare: 'incomum' },
-    { n: 'Anel de Resistência', ico: '💍', rare: 'raro' },
-    { n: 'Esmeralda',           ico: '💎', rare: 'raro' },
+    { n: 'Poção de Cura',       ico: '', rare: 'comum' },
+    { n: 'Raiz de Mana',        ico: '', rare: 'comum' },
+    { n: 'Pão Fresco',          ico: '', rare: 'comum' },
+    { n: 'Adaga',               ico: '', rare: 'incomum' },
+    { n: 'Pergaminho Mágico',   ico: '', rare: 'incomum' },
+    { n: 'Anel de Resistência', ico: '', rare: 'raro' },
+    { n: 'Esmeralda',           ico: '', rare: 'raro' },
 ];
 function computeRewards(s) {
     var p = s.order[s.p_idx];
@@ -18139,7 +18139,7 @@ function buildCellInnerHTML(u, utype, opt, uid) {
        Intent de inimigo removida (2026-04-19): atrapalhava o visual do card heráldico. */
     var showInitBadge = !opt.forceHideInit && currentState && currentState.ph === 'intro';
     if (showInitBadge) {
-        if (u.initRevealed) inner += '<div class="cell-init">🎲' + u.init + '</div>';
+        if (u.initRevealed) inner += '<div class="cell-init">' + u.init + '</div>';
         else if (u.init !== undefined) inner += '<div class="cell-init pending">?</div>';
     }
     if (u.ac !== undefined && !isHeraldic) inner += '<div class="cell-ac">' + escHtml(String(u.ac)) + '</div>';
@@ -18273,7 +18273,7 @@ function buildCellInnerHTML(u, utype, opt, uid) {
         var ds = u.deathSaves;
         var si, pi = '';
         pi += '<div class="cell-death-saves" role="status" aria-live="polite">';
-        pi += '<span class="cds-skull" aria-hidden="true">☠</span>';
+        pi += '<span class="cds-skull" aria-hidden="true"></span>';
         pi += '<div class="cds-tracks">';
         pi += '<div class="cds-track" aria-label="Sucessos no teste de morte"><span class="cds-track-lbl" aria-hidden="true">S</span><span class="cds-pips">';
         for (si = 0; si < 3; si++) pi += '<span class="cds-pip' + (si < (ds.s | 0) ? ' cds-pip--ok' : '') + '"></span>';
@@ -18533,7 +18533,7 @@ function buildCell(cell, activeId) {
     /* V1 Invocações Phase 4 V1-Visual (2026-04-19) — diferenciadores visuais para summons:
        · cell--is-summon: borda dashed sobre a cor heráldica do conjurador (distingue de PC).
        · cell--summon-attached: noTarget+spectral (Arma Espiritual) → borda extra ethereal.
-       · cell--summon-focused-by: marcador 🎯 quando inimigo é focusTarget de algum familiar. */
+       · cell--summon-focused-by: marcador quando inimigo é focusTarget de algum familiar. */
     if (u.summonKind) {
         classes += ' cell--is-summon';
         if (u.noTarget) classes += ' cell--summon-attached';
@@ -18552,18 +18552,18 @@ function buildCell(cell, activeId) {
     if (isFocusedByFamiliar) classes += ' cell--summon-focused-by';
 
     var inner = buildCellInnerHTML(u, utype, {}, uid);
-    /* Marker visual 🎯 dentro de inimigo focado pelo Familiar (sobreposto sem pointer-events) */
+    /* Marker visual dentro de inimigo focado pelo Familiar (sobreposto sem pointer-events) */
     var focusMarkerHtml = isFocusedByFamiliar
-        ? '<div class="summon-focus-marker" aria-label="Foco do Familiar">🎯</div>'
+        ? '<div class="summon-focus-marker" aria-label="Foco do Familiar"></div>'
         : '';
     /* Chip flutuante acima do CONJURADOR com summon attached (Arma Espiritual).
-       Mostra ícone + duração restante (ex.: ⚔️ 7r). PADRÃO ÚNICO pra summons attached. */
+       Mostra ícone + duração restante (ex.: 7r). PADRÃO ÚNICO pra summons attached. */
     var attachedChipHtml = '';
     if (u.t === 'p' && currentState && currentState.attachedSummons) {
         var pAttached = currentState.attachedSummons[currentState.p_idx] || [];
         if (pAttached.length && currentState.order && currentState.order[currentState.p_idx] === u) {
             var chipParts = pAttached.map(function (sw) {
-                return '<span class="sa-chip-item">' + escHtml(sw.ico || '⚔️') + ' <strong>' + (sw.durLeft | 0) + 'r</strong></span>';
+                return '<span class="sa-chip-item">' + escHtml(sw.ico || '') + ' <strong>' + (sw.durLeft | 0) + 'r</strong></span>';
             }).join('');
             attachedChipHtml = '<div class="summon-attached-chip" aria-label="Summon ativo">' + chipParts + '</div>';
         }
@@ -18717,7 +18717,7 @@ async function _maybeAdvanceOrStay() {
 function _resourceGlyphFor(kind) {
     if (kind === 'action') return '◆';
     if (kind === 'bonus') return '▲';
-    if (kind === 'reaction') return '⬢';
+    if (kind === 'reaction') return '';
     return '';
 }
 /* Determina o tipo de recurso consumido por uma skill.
@@ -18743,7 +18743,7 @@ function _skillResourceKind(sk) {
    Símbolos geométricos distintos por recurso:
      · Ação    = ◆ (losango/diamond) — recurso primário decisivo
      · Bônus   = ▲ (triângulo) — pico rápido, ação curta
-     · Reação  = ⬢ (hexágono) — defesa all-around, off-turn principal
+     · Reação  = (hexágono) — defesa all-around, off-turn principal
 
    Modos:
      · default (player turn): mostra 3 pílulas completas + chip PHB p.202 se aplicável
@@ -18771,7 +18771,7 @@ function _buildDndResourcesBarHtml(s, p, opts) {
             /* Refinado 2026-04-19 (c): texto explícito que restrição é APENAS de
                magias leveled — Atacar/Mochila/Esquivar/Fugir/Passar continuam OK.
                Tooltip detalha PHB p.202 inteiro. */
-            html += '<span class="dnd-res-chip" title="PHB p.202: como BA spell já foi castada, magias leveled (Cura, Bola de Fogo, etc.) ficam bloqueadas. Atacar com arma, Usar item, Esquivar, Fugir e cantrips continuam permitidos.">✨ magia: só truque</span>';
+            html += '<span class="dnd-res-chip" title="PHB p.202: como BA spell já foi castada, magias leveled (Cura, Bola de Fogo, etc.) ficam bloqueadas. Atacar com arma, Usar item, Esquivar, Fugir e cantrips continuam permitidos.">magia: só truque</span>';
         }
         html += '</button>';
         /* Pílula Bônus ▲ */
@@ -18782,14 +18782,14 @@ function _buildDndResourcesBarHtml(s, p, opts) {
         html += '<span class="dnd-res-state">' + (baUsed ? '✗' : '✓') + '</span>';
         html += '</button>';
     }
-    /* Pílula Reação ⬢ — sempre visível.
+    /* Pílula Reação — sempre visível.
        PHB p.190: pode ser triggered no SEU turno ou no de OUTRO combatente.
        Em modo compactReaction (turno NPC), recebe label de contexto adicional. */
     var reactionLabel = compactReaction ? 'Reação (off-turn)' : 'Reação';
     html += '<button type="button" class="dnd-res-pill dnd-res-reaction ' + (reactionUsed ? 'spent' : 'available') +
             (compactReaction ? ' dnd-res-pill--compact-only' : '') +
             '" data-act="dnd-res-info" data-res="reaction" aria-label="Reação (1 por rodada)">';
-    html += '<span class="dnd-res-glyph" aria-hidden="true">⬢</span>';
+    html += '<span class="dnd-res-glyph" aria-hidden="true"></span>';
     html += '<span class="dnd-res-label">' + reactionLabel + '</span>';
     html += '<span class="dnd-res-state">' + (reactionUsed ? '✗' : '✓') + '</span>';
     html += '</button>';
@@ -19085,7 +19085,7 @@ async function castSummonPack(s, p, sk) {
     var insertPos = pIdx + 1;
     for (var i = 0; i < count; i++) {
         var summon = {
-            t: 'a', n: ws.name || 'Lobo Espiritual', ico: ws.ico || '🐺',
+            t: 'a', n: ws.name || 'Lobo Espiritual', ico: ws.ico || '',
             hp: ws.hp || 11, mhp: ws.mhp || ws.hp || 11, ac: ws.ac || 13,
             atk: ws.atk || 4, die: ws.die || 4,
             dmgMod: (ws.damageSpec && ws.damageSpec.flat) || 0,
@@ -19099,7 +19099,7 @@ async function castSummonPack(s, p, sk) {
             init: (p.init | 0) - (i + 1) * 0.1,  /* logo após o caster */
             initRevealed: true, initRolling: false,
             species: ws.name || 'Lobo Espiritual', sugLvl: 1,
-            it: { ic: ws.ico || '🐺', lb: summonKind },
+            it: { ic: ws.ico || '', lb: summonKind },
             summonedBy: pIdx,
             summonKind: summonKind,
             iconHeraldic: ws.iconHeraldic || null,
@@ -19123,7 +19123,7 @@ async function castSummonPack(s, p, sk) {
         p.se.push({
             id: 'conc_conjure_animals', concentration: true,
             concSummonSpellId: 'conjure_animals',
-            n: 'Concentração: Conjurar Animais', ico: '🐾',
+            n: 'Concentração: Conjurar Animais', ico: '',
             turnsLeft: null, decOn: 'round', kind: 'buff'
         });
     }
@@ -19338,7 +19338,7 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
                 postResult: function () {
                     if (crit) return { title: '★ NATURAL 20 — CRÍTICO!', subHtml: 'd20=20 → ataque crítico.' + (advMode === 'advantage' ? ' (Pack Tactics: vantagem)' : ''), cls: 'crit' };
                     return {
-                        title: hit ? '✅ ACERTOU' : '❌ ERROU',
+                        title: hit ? 'ACERTOU' : 'ERROU',
                         subHtml: simFormatVsAcHTML(d20, atk, total, target.ac, hit) +
                             (advMode === 'advantage' ? '<div class="drl-crit-rule">Pack Tactics (PHB MM): vantagem se ≥1 aliado vivo.</div>' : ''),
                         cls: hit ? 'hit' : 'miss'
@@ -19350,7 +19350,7 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
 
     if (!hit) {
         /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — miss summon PHB-style */
-        var _smMissAtk = d20 === 1 ? '💥 NAT 1!' : 'd20 ' + d20 + '+' + atk + '=' + total;
+        var _smMissAtk = d20 === 1 ? 'NAT 1!' : 'd20 ' + d20 + '+' + atk + '=' + total;
         s.log.push(summon.n + ' erra ' + target.n + ' — ' + _smMissAtk + ' vs CA ' + target.ac + '.');
     } else {
         var spec = summon.damageSpec || { n: 1, d: 4, flat: 0 };
@@ -19371,13 +19371,13 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
         var oldHp = target.hp;
         applyHpAfterDamage(s, target, oldHp, Math.max(0, oldHp - dmgTotal), { dmgType: summon.dmgType });
         /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — summon attack com breakdown PHB-style. */
-        var _smAtkPart = d20 === 20 ? '⚡ NAT 20!' : 'd20 ' + d20 + '+' + atk + '=' + total;
+        var _smAtkPart = d20 === 20 ? 'NAT 20!' : 'd20 ' + d20 + '+' + atk + '=' + total;
         var _smDiceN = (spec.n | 0 || 1) * (crit ? 2 : 1);
         var _smDiceD = spec.d | 0 || 4;
         var _smRollsDisplay = rolls.join('+');  /* em crit, rolls[i] já vem somado r+r2 */
         var _smFlat = spec.flat | 0;
         var _smModStr = _smFlat > 0 ? '+' + _smFlat : (_smFlat < 0 ? String(_smFlat) : '');
-        var _smVerb = crit ? ' ⚡CRITA ' : ' acerta ';
+        var _smVerb = crit ? ' CRITA ' : ' acerta ';
         s.log.push(summon.n + _smVerb + target.n + ' — ' + _smAtkPart +
             ' vs CA ' + target.ac + ' | ' + _smDiceN + 'd' + _smDiceD + ' [' + _smRollsDisplay + ']' + _smModStr + ' = ' + dmgTotal + ' ' + summon.dmgType + '.');
     }
@@ -19463,7 +19463,7 @@ async function _resolveAttachedSummonAttack(s, attachedIdx, targetIdx) {
                 postResult: function () {
                     if (crit) return { title: '★ NATURAL 20 — CRÍTICO!', subHtml: 'd20=20 → ataque crítico.', cls: 'crit' };
                     return {
-                        title: hit ? '✅ ACERTOU' : '❌ ERROU',
+                        title: hit ? 'ACERTOU' : 'ERROU',
                         subHtml: simFormatVsAcHTML(d20, atk, total, target.ac, hit),
                         cls: hit ? 'hit' : 'miss'
                     };
@@ -19474,7 +19474,7 @@ async function _resolveAttachedSummonAttack(s, attachedIdx, targetIdx) {
 
     if (!hit) {
         /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — SW miss PHB-style */
-        var _swMissAtk = d20 === 1 ? '💥 NAT 1!' : 'd20 ' + d20 + '+' + atk + '=' + total;
+        var _swMissAtk = d20 === 1 ? 'NAT 1!' : 'd20 ' + d20 + '+' + atk + '=' + total;
         s.log.push(sw.name + ' erra ' + target.n + ' — ' + _swMissAtk + ' vs CA ' + target.ac + '.');
     } else {
         var rolls = [];
@@ -19513,12 +19513,12 @@ async function _resolveAttachedSummonAttack(s, attachedIdx, targetIdx) {
         });
         sw.lastTargetIdx = targetIdx;
         /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — SW hit com breakdown PHB-style. */
-        var _swAtkPart = d20 === 20 ? '⚡ NAT 20!' : 'd20 ' + d20 + '+' + atk + '=' + total;
+        var _swAtkPart = d20 === 20 ? 'NAT 20!' : 'd20 ' + d20 + '+' + atk + '=' + total;
         var _swDiceN = (sw.damageSpec.n | 0 || 1) * (crit ? 2 : 1);
         var _swDiceD = sw.damageSpec.d | 0 || 8;
         var _swFlat = sw.damageSpec.flat | 0;
         var _swModStr = _swFlat > 0 ? '+' + _swFlat : (_swFlat < 0 ? String(_swFlat) : '');
-        var _swVerb = crit ? ' ⚡CRITA ' : ' acerta ';
+        var _swVerb = crit ? ' CRITA ' : ' acerta ';
         s.log.push(sw.name + _swVerb + target.n + ' — ' + _swAtkPart +
             ' vs CA ' + target.ac + ' | ' + _swDiceN + 'd' + _swDiceD + ' [' + rolls.join('+') + ']' + _swModStr + ' = ' + dmgTotal + ' ' + sw.dmgType + '.');
         /* V1-Visual Phase 4 — flight VFX (SW card → target → retorno).
@@ -19710,7 +19710,7 @@ function _applyFamiliarFocus(s, familiarIdx, targetIdx) {
     if (!fam || !target) return;
     fam.focusTarget = targetIdx;
     /* V1.5 (2026-04-19, c): log usa nome real do summon (Familiar/Sprite/etc.) */
-    s.log.push('🎯 ' + (fam.n || 'Aliado') + ' focado em ' + target.n + '.');
+    s.log.push('' + (fam.n || 'Aliado') + ' focado em ' + target.n + '.');
     _pendingFocusFamiliar = null;
     _selectingTarget = false;
     render(s);
@@ -19806,7 +19806,7 @@ function _updateActionSheetState(s) {
                 /* V1-Visual Phase 4 (2026-04-19, c) — XSS-safe: createElement em vez
                    de innerHTML para incluir o badge ▲. textContent na label preserva
                    ico + nome; span append no fim faz o glyph. */
-                var lblTxt = document.createTextNode(sw.ico + '🌟 Comandar ' + sw.name + ' (' + sw.durLeft + 'r)');
+                var lblTxt = document.createTextNode(sw.ico + 'Comandar ' + sw.name + ' (' + sw.durLeft + 'r)');
                 btn.appendChild(lblTxt);
                 var bonusBadge = document.createElement('span');
                 bonusBadge.className = 'action-btn-res-icon res-bonus';
@@ -19833,7 +19833,7 @@ function _updateActionSheetState(s) {
            Companheiro/Montaria). Usa o nome real da entidade. */
         if (passiveAlive) {
             var passiveName = s.order[passiveIdx].n || 'Aliado';
-            focusBtn.textContent = '🎯 Focar ' + passiveName;
+            focusBtn.textContent = 'Focar ' + passiveName;
         }
     }
     /* F1 — Botão "Comandar Companheiro" só visível pra Patrulheiro Beast Master
@@ -19876,7 +19876,7 @@ function _updateActionSheetState(s) {
         }
         if (steedIdx >= 0) {
             mountBtn.style.display = 'block';
-            mountBtn.textContent = p.mounted ? '🚶 Desmontar' : '🐴 Montar';
+            mountBtn.textContent = p.mounted ? 'Desmontar' : 'Montar';
             /* PHB: Mount/Dismount é "free action 1×/turno"; aqui modelado como livre
                sem marcar actionSpent. p.mountedThisTurn previne abuso (1× por turno). */
             if (p.mountedThisTurn) {
@@ -19925,7 +19925,7 @@ function showMagicMissileConfirmPopup(picks) {
 
         var title = document.createElement('div');
         title.className = 'mm-confirm-title';
-        title.textContent = '\u2728 Confirmar Mísseis Mágicos';
+        title.textContent = 'Confirmar Mísseis Mágicos';
 
         var sub = document.createElement('div');
         sub.className = 'mm-confirm-sub';
@@ -20338,7 +20338,7 @@ function render(s) {
                           : '↩ Voltar à Exploração';
             html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="back-to-exploration">' + backLabel + '</button></div>';
         } else {
-            html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="restart">🔄 Novo Combate</button></div>';
+            html += '<div class="action-bar"><button class="action-btn primary full-width" data-act="restart">Novo Combate</button></div>';
         }
         html += '</div>';
         setHTML(app, html);
@@ -20369,7 +20369,7 @@ function render(s) {
                em vez de inline overlay. Melhor UX em smartphone (cards ficam
                visíveis acima; popup centralizado). */
         } else if (ph === 'init') {
-            html += '<div class="epic-cta-overlay"><button class="epic-cta-btn" data-act="skip-init"><span class="epic-cta-icon">⏭️</span><span class="epic-cta-text">Pular Todas<br/>as Rolagens</span></button></div>';
+            html += '<div class="epic-cta-overlay"><button class="epic-cta-btn" data-act="skip-init"><span class="epic-cta-icon"></span><span class="epic-cta-text">Pular Todas<br/>as Rolagens</span></button></div>';
         }
         /* ph === 'init_done': escurecimento + ordem + CTA no popup showInitiativeOrderPopup() */
         setHTML(app, html);
@@ -20404,10 +20404,10 @@ function render(s) {
             html += '<div class="current-turn"><span class="ct-ico">' + _ctPortrait + '</span><span class="ct-label">Turno de</span><span class="ct-name">' + escHtml(activeNow.n) + '</span></div>';
         }
     }
-    html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Turno ' + s.rn + '</span> Floresta <span class="weather-badge w-clear">☀️ Limpo</span></div></div>';
+    html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Turno ' + s.rn + '</span> Floresta <span class="weather-badge w-clear">Limpo</span></div></div>';
     /* V1 Invocações Phase 4 (2026-04-19, c) — HUD de recursos D&D 5e no topo:
-         · Player turn: 3 pílulas completas (◆ Ação / ▲ Bônus / ⬢ Reação) — ref completa
-         · NPC turn: pílula compacta ⬢ Reação SOMENTE — PHB p.190 reação pode ser
+         · Player turn: 3 pílulas completas (◆ Ação / ▲ Bônus / Reação) — ref completa
+         · NPC turn: pílula compacta Reação SOMENTE — PHB p.190 reação pode ser
            triggered no turno de outro combatente (Ataque de Oportunidade, Escudo
            Arcano em resposta a ataque, Contramágica em resposta a magia inimiga).
            Fica como lembrete visual de que o player ainda pode reagir. */
@@ -20495,7 +20495,7 @@ function render(s) {
                 ensureDeathSaves(pCur);
                 html += '<div class="action-bar action-bar--death-save">';
                 html += '<div class="sim-death-save-banner">';
-                html += '<div class="sds-title-row"><span class="sds-skull" aria-hidden="true">☠</span><h2 class="sds-title">Teste de morte</h2></div>';
+                html += '<div class="sds-title-row"><span class="sds-skull" aria-hidden="true"></span><h2 class="sds-title">Teste de morte</h2></div>';
                 html += '<p class="sds-lead">Você está a 0 PV. Role 1d20 no seu turno — cada rolagem acumula sucessos ou falhas até você estabilizar ou morrer.</p>';
                 html += '<ul class="sds-rules">';
                 html += '<li><strong>20 natural:</strong> recupera 1 PV e volta à consciência.</li>';
@@ -20506,9 +20506,9 @@ function render(s) {
                     : '<li><strong>Três falhas:</strong> morte. Sem aliado consciente no grupo, ninguém pode tentar te estabilizar com Medicina.</li>';
                 html += '</ul></div>';
                 html += '<div class="sds-actions">';
-                html += '<button type="button" class="action-btn primary" data-act="death-save">🎲 Rolar teste de morte</button>';
+                html += '<button type="button" class="action-btn primary" data-act="death-save">Rolar teste de morte</button>';
                 if (partyHasConsciousAllyForMedicine(s)) {
-                    html += '<button type="button" class="action-btn secondary" data-act="stabilize-med">🩹 Aliado: Medicina CD 10</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="stabilize-med">Aliado: Medicina CD 10</button>';
                 }
                 html += '<button type="button" class="action-btn secondary" data-act="log">Log</button>';
                 html += '</div></div>';
@@ -20540,7 +20540,7 @@ function render(s) {
                    V1-Visual Phase 4 (2026-04-19, c): mini-badge ◆ em cada botão de
                    ação principal para o jogador saber que vai consumir AÇÃO.
                    c-fix 2026-04-19: PHB p.202 só afeta MAGIAS — Atacar/Mochila/Esquivar/
-                   Fugir/Passar permanecem OK. Apenas Habilidades (✨) ganha sub-indicador
+                   Fugir/Passar permanecem OK. Apenas Habilidades () ganha sub-indicador
                    "só truque" quando bonusActionWasSpell ativo (botão segue clicável,
                    skills bloqueadas têm chip individual; cantrips ficam disponíveis). */
                 var anySkillOk = (typeof _simAnySkillUsable === 'function') ? _simAnySkillUsable(s, pCur) : true;
@@ -20576,7 +20576,7 @@ function render(s) {
                 var _fleeChip = _fleeDc ? ' <span class="act-flee-dc" title="Fugir: teste de Destreza (Acrobacia) CD ' + _fleeDc + ' — chance aprox. ' + _fleePct + '%">CD ' + _fleeDc + ' · ~' + _fleePct + '%</span>' : '';
                 html += '<button type="button" class="action-btn secondary" data-act="flee">' + _actBtnIco('acao-fugir') + 'Fugir' + _fleeChip + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="Pular as animações de dados (suas, dos inimigos e da iniciativa). Persistente — pode marcar/desmarcar quando quiser.">' +
-                    (_skipAllDiceAnim ? '☑ Pular dados' : '☐ Pular dados') + '</button>';
+                    (_skipAllDiceAnim ? 'Pular dados' : 'Pular dados') + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="log">' + _actBtnIco('acao-log') + 'Log</button>';
                 html += '</div>';
                 /* V1 Invocações Phase 1+2 — seção BÔNUS + Encerrar Turno (oculto até estado).
@@ -20599,7 +20599,7 @@ function render(s) {
                 if (_actionSheetOpen) {
                     html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="close-action-sheet">✕ Fechar</button></div>';
                 } else if (!_actionTaken) {
-                    html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="toggle-actions">⚔ Agir</button></div>';
+                    html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="toggle-actions">Agir</button></div>';
                 }
                 // else: popup/ação em andamento → dock vazio (Agir escondido temporariamente)
                 html += '</div>';
@@ -20894,7 +20894,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             effectHtml = 'Escudo Arcano <strong>anula todo</strong> o dano dos dardos (PHB p.275: <em>"you take no damage from magic missile"</em>).';
             warnHtml = 'A barreira persiste com +5 CA contra pr\u00f3ximos ataques at\u00e9 o in\u00edcio do seu pr\u00f3ximo turno.';
             acceptLbl = 'Aceitar dardos';
-            useLbl = '\u2B22 Absorver';
+            useLbl = 'Absorver';
         } else if (variant === 'crit') {
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Escudo Arcano';
             triggerLabel = 'Cr\u00edtico Natural';
@@ -20902,7 +20902,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             effectHtml = '+5 CA aplicado, mas <strong>cr\u00edtico natural atravessa qualquer CA</strong> (PHB p.194). O golpe cr\u00edtico ainda passa.';
             warnHtml = 'A barreira +5 CA persiste contra <em>pr\u00f3ximos ataques</em> da rodada \u2014 pode compensar a rea\u00e7\u00e3o gasta.';
             acceptLbl = 'Aceitar cr\u00edtico';
-            useLbl = '\u2B22 Usar (buff persiste)';
+            useLbl = 'Usar (buff persiste)';
         } else if (variant === 'contramagica') {
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Contram\u00e1gica';
             triggerLabel = 'Magia Inimiga';
@@ -20911,7 +20911,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             effectHtml = '+3 CA e vantagem em TR contra magia por 2 rodadas (PHB p.237 simplificado).';
             warnHtml = 'Sua rea\u00e7\u00e3o desta rodada ser\u00e1 gasta.';
             acceptLbl = 'Deixar passar';
-            useLbl = '\u2B22 Usar Contram\u00e1gica';
+            useLbl = 'Usar Contram\u00e1gica';
         } else if (variant === 'rebuke') {
             /* Hellish Rebuke PHB p.250 — reação OFENSIVA (dano no atacante). */
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Repreens\u00e3o Infernal';
@@ -20920,7 +20920,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             effectHtml = '<strong>' + esc(aName) + '</strong> faz TR DES; em falha sofre <strong>2d10 de fogo</strong>, em sucesso metade (PHB p.250).';
             warnHtml = 'Dano retroativo sobre quem acabou de te atingir \u2014 n\u00e3o pode ser anulado por CA. Gasta sua rea\u00e7\u00e3o.';
             acceptLbl = 'Deixar passar';
-            useLbl = '\uD83D\uDD25 Queimar';
+            useLbl = 'Queimar';
         } else if (variant === 'deflect') {
             /* V1.7 Sprint-2 (2026-04-21) — Desviar Projéteis PHB p.78 Monge nv3.
                Reação ao ser acertado por ataque à distância: reduz dano 1d10+DEX+nvMonge.
@@ -20931,7 +20931,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             effectHtml = 'Voc\u00ea reduz o dano em <strong>1d10 + mod DES + n\u00edvel Monge</strong> (PHB p.78). Se zerar, o proj\u00e9til cai no ch\u00e3o inofensivo.';
             warnHtml = 'N\u00e3o anula o acerto \u2014 apenas o dano. Gasta sua rea\u00e7\u00e3o. Sem custo de Ki para desviar.';
             acceptLbl = 'Aceitar dano';
-            useLbl = '\uD83D\uDEE1 Desviar';
+            useLbl = 'Desviar';
         } else if (variant === 'cutting') {
             /* V1.7 Sprint-2 (2026-04-21) — Palavras Cortantes PHB p.55 Bardo Colégio do Saber nv3.
                Reação quando inimigo rola ataque/teste/dano: subtrai 1 Inspiração (1d6-1d12) da rolagem. */
@@ -20941,7 +20941,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             effectHtml = 'Subtrai <strong>1d6</strong> do total do ataque (PHB p.55 \u2014 escala d8 nv 5, d10 nv 10, d12 nv 15). Pode transformar o acerto em erro retroativamente.';
             warnHtml = 'Gasta 1 uso de Inspira\u00e7\u00e3o + sua rea\u00e7\u00e3o. N\u00e3o funciona se o alvo for imune a efeitos encantadores.';
             acceptLbl = 'Deixar passar';
-            useLbl = '\uD83D\uDDEF Cortar';
+            useLbl = 'Cortar';
         } else if (variant === 'uncanny') {
             /* V1.7 Sprint-9 (2026-04-21 closeout) — Esquiva Sobrenatural PHB p.96 Ladino nv5.
                Reação quando atacante visível acerta: reduz dano à METADE. */
@@ -20951,7 +20951,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             effectHtml = 'Reduz o dano do ataque \u00e0 <strong>METADE</strong> (arredondado pra baixo) \u2014 PHB p.96. N\u00e3o anula o acerto.';
             warnHtml = 'S\u00f3 funciona em ataques vistos. N\u00e3o reduz dano de TR (\u00e1reas). Gasta sua rea\u00e7\u00e3o.';
             acceptLbl = 'Aceitar dano';
-            useLbl = '\uD83D\uDCA8 Esquivar';
+            useLbl = 'Esquivar';
         } else {
             /* shield (default) — ataque normal, +5 CA retroativo PHB p.275 */
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Escudo Arcano';
@@ -20960,18 +20960,18 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             effectHtml = '+5 CA aplicado ao ataque-gatilho e a todos os ataques at\u00e9 o in\u00edcio do seu pr\u00f3ximo turno (PHB p.275).';
             warnHtml = 'Se (CA + 5) &gt; total do ataque, o golpe vira erro retroativamente.';
             acceptLbl = 'Aceitar golpe';
-            useLbl = '\u2B22 Usar Escudo';
+            useLbl = 'Usar Escudo';
         }
 
         var html = '';
-        html += '<div class="tcc-title"><span class="tcc-rx-hex">\u2B22</span>' + titleTxt + '</div>';
+        html += '<div class="tcc-title"><span class="tcc-rx-hex"></span>' + titleTxt + '</div>';
         html += '<div class="tcc-rx-trigger">';
         html += '<span class="tcc-rx-trigger-label">' + esc(triggerLabel) + '</span>';
         html += '<div class="tcc-rx-trigger-who">' + triggerWho + '</div>';
         if (mathHtml) html += '<div class="tcc-rx-math">' + mathHtml + '</div>';
         html += '</div>';
         html += '<div class="tcc-rx-effect">';
-        html += '<span class="tcc-rx-cost">' + (skCost | 0) + ' \uD83D\uDD35 Mana</span>';
+        html += '<span class="tcc-rx-cost">' + (skCost | 0) + ' Mana</span>';
         html += '<p class="tcc-rx-effect-body">' + effectHtml + '</p>';
         html += '</div>';
         html += '<div class="tcc-rx-warn">' + warnHtml + '</div>';
@@ -21018,7 +21018,7 @@ function __combatShowErrorOverlay(title, detailsHtml) {
         card.className = 'combat-msg-card miss';
         var txt = document.createElement('div');
         txt.className = 'combat-msg-text';
-        txt.textContent = '\u26A0\uFE0F ' + title;
+        txt.textContent = '' + title;
         card.appendChild(txt);
         var s = document.createElement('div');
         s.className = 'combat-msg-sub';
@@ -21847,7 +21847,7 @@ function onBtnClick(ev) {
     }
     if (act === 'skip-init') {
         document.body.classList.add('sim-paused-bg');
-        confirmSimDiceSkip('Pular as animações de dados (iniciativa e todo o combate, incluindo as suas)? Fica salvo — você pode reativar quando quiser no botão "☑ Pular dados".').then(function (ok) {
+        confirmSimDiceSkip('Pular as animações de dados (iniciativa e todo o combate, incluindo as suas)? Fica salvo — você pode reativar quando quiser no botão "Pular dados".').then(function (ok) {
             document.body.classList.remove('sim-paused-bg');
             if (!ok) return;
             _skipInit = true;
@@ -21870,7 +21870,7 @@ function onBtnClick(ev) {
         var _sdBtn = document.querySelector('[data-act="toggle-skip-dice"]');
         if (_sdBtn) {
             _sdBtn.setAttribute('aria-pressed', _skipAllDiceAnim ? 'true' : 'false');
-            _sdBtn.textContent = (_skipAllDiceAnim ? '☑ Pular dados' : '☐ Pular dados');
+            _sdBtn.textContent = (_skipAllDiceAnim ? 'Pular dados' : 'Pular dados');
         }
         return;
     }
@@ -22026,10 +22026,10 @@ function onBtnClick(ev) {
                MAGIAS leveled — outras ações (Atacar, Mochila, Esquivar, Fugir,
                Passar) continuam permitidas mesmo com a regra ativa. */
             var phbBlock = pDr && pDr.bonusActionWasSpell
-                ? '<p style="color:#ffe080"><strong>✨ PHB p.202 (BA Spell Rule):</strong></p>' +
+                ? '<p style="color:#ffe080"><strong>PHB p.202 (BA Spell Rule):</strong></p>' +
                   '<p style="color:#ffe080">Você castou uma magia com tempo de Ação Bônus neste turno. Como sua ação principal:</p>' +
-                  '<p style="color:#a0e8a0">✅ <strong>Permitido:</strong> Atacar com arma, Usar item da Mochila, Esquivar, Fugir, Passar turno, ou castar um <strong>TRUQUE</strong> (cantrip).</p>' +
-                  '<p style="color:#e0a0a0">❌ <strong>Bloqueado:</strong> Castar qualquer outra magia leveled (Cura, Bola de Fogo, Bênção, etc.).</p>' +
+                  '<p style="color:#a0e8a0"><strong>Permitido:</strong> Atacar com arma, Usar item da Mochila, Esquivar, Fugir, Passar turno, ou castar um <strong>TRUQUE</strong> (cantrip).</p>' +
+                  '<p style="color:#e0a0a0"><strong>Bloqueado:</strong> Castar qualquer outra magia leveled (Cura, Bola de Fogo, Bênção, etc.).</p>' +
                   '<p style="color:var(--v-text-dim, #a09484); font-size:0.95em">A restrição reseta no início do seu próximo turno.</p>'
                 : '';
             info = {
@@ -22047,7 +22047,7 @@ function onBtnClick(ev) {
             };
         } else if (resKind === 'reaction') {
             info = {
-                title: '⬢ Reação',
+                title: 'Reação',
                 rule: 'PHB p.190 — Resposta INSTANTÂNEA a um trigger; pode ocorrer no SEU turno OU no de OUTRO combatente.<br><br>' +
                       '<strong>Regras:</strong><br>' +
                       '· 1 reação por RODADA (não por turno).<br>' +
@@ -22151,7 +22151,7 @@ function onBtnClick(ev) {
             (pMt.se = pMt.se || []).push({
                 id: 'montado',
                 n: 'Montado',
-                ico: '🐴',
+                ico: '',
                 turnsLeft: null,  /* persistente até desmontar */
                 kind: 'buff',
                 atkAdvantage: true,  /* PHB p.198: vantagem em corpo-a-corpo do alto */
@@ -22207,7 +22207,7 @@ async function runPlayerStabilizeMedicine() {
             postResult: function () {
                 var ok = tot >= DC;
                 return {
-                    title: ok ? '✅ Estabilizado' : '❌ Falhou',
+                    title: ok ? 'Estabilizado' : 'Falhou',
                     subHtml: simFormatVsDcHTML(r, mod, tot, DC, ok) +
                         '<div class="drl-crit-rule">PHB: Sabedoria (Medicina) CD 10. Aliado: ' + escHtml(stabilizer.n) + ' · alvo: ' + escHtml(p.n) + '.</div>',
                     cls: ok ? 'hit' : 'miss'
@@ -22253,7 +22253,7 @@ async function passPlayerMetaAction(kind) {
             kind: 'buff',
             condName: 'Esquivar (ação)',
             condRule: 'PHB — Até o início do seu próximo turno: ataques contra você têm desvantagem se você vir o atacante; TR de DES com vantagem. Estado na ficha; rolagens seguem o fluxo atual do combate.'
-        }, '🛡️', 'Esquivar');
+        }, '', 'Esquivar');
         s.log.push(p.n + ' usa Esquivar (desvantagem em ataques se ver o atacante; vantagem em TR de Destreza até o próximo turno).');
         render(s);
         await playBuffVfxOnCell('player', 'dodge', { durationMs: 2400 });
@@ -22675,7 +22675,7 @@ function _simIsSkillUsable(s, p, sk) {
     /* (0) V1.7 (2026-04-21) — Skills reactionOnly (Escudo Arcano, Contramágica)
           NÃO são castáveis em ação/bônus própria: só triggadas por reação
           quando inimigo ataca/casta magia (PHB p.275, p.237). Aparecem no
-          painel como desativadas com badge "⬢ Só como reação" pro jogador
+          painel como desativadas com badge "Só como reação" pro jogador
           entender que existem mas só funcionam off-turn. */
     if (sk.reactionOnly) return false;
     /* (1) MP/recurso */
@@ -22747,7 +22747,7 @@ function _simSkillDisabledReason(s, p, sk) {
     /* V1.7 (2026-04-21) — reactionOnly: só triggada off-turn via prompt.
        Badge clarifica que a habilidade EXISTE (player entende que tem
        Escudo/Contramágica) mas não pode ser gastada proativamente. */
-    if (sk.reactionOnly) return '\u2B22 S\u00F3 como rea\u00E7\u00E3o';
+    if (sk.reactionOnly) return 'S\u00F3 como rea\u00E7\u00E3o';
     var resVal = (p.res && (p.res.value | 0)) || 0;
     if (resVal < (sk.cost | 0)) return 'Sem ' + ((p.res && p.res.name) || 'MP');
     if (sk.bonus) {
@@ -22784,7 +22784,7 @@ function _simSkillDisabledReason(s, p, sk) {
 }
 
 /* True se ao menos UMA skill do player está utilizável. Usado pra desativar o
-   botão "✨ Habilidades" no action sheet quando NENHUMA pode ser usada. */
+   botão "Habilidades" no action sheet quando NENHUMA pode ser usada. */
 function _simAnySkillUsable(s, p) {
     if (!p || !p.skills || !p.skills.length) return false;
     for (var i = 0; i < p.skills.length; i++) {
@@ -22796,12 +22796,12 @@ function _simAnySkillUsable(s, p) {
 /* 6 categorias D&D 5e + "Todas". Apenas as com count>0 aparecem no carrossel. */
 var _SKILL_FILTERS = [
     { k: 'all',     lbl: 'Todas',      ico: '✦' },
-    { k: 'attack',  lbl: 'Ofensivas',  ico: '⚔' },
-    { k: 'defense', lbl: 'Defensivas', ico: '🛡' },
-    { k: 'heal',    lbl: 'Cura',       ico: '💚' },
-    { k: 'support', lbl: 'Apoio',      ico: '✨' },
-    { k: 'control', lbl: 'Controle',   ico: '🕸' },
-    { k: 'utility', lbl: 'Utilidade',  ico: '🧭' }
+    { k: 'attack',  lbl: 'Ofensivas',  ico: '' },
+    { k: 'defense', lbl: 'Defensivas', ico: '' },
+    { k: 'heal',    lbl: 'Cura',       ico: '' },
+    { k: 'support', lbl: 'Apoio',      ico: '' },
+    { k: 'control', lbl: 'Controle',   ico: '' },
+    { k: 'utility', lbl: 'Utilidade',  ico: '' }
 ];
 
 /* Identifica o TEMA visual épico da skill (match com popups de confirmação).
@@ -22893,12 +22893,12 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
         var canUse = pCur ? _simIsSkillUsable(sCur, pCur, sk) : (resValue >= sk.cost);
         var blockReason = (!canUse && pCur) ? _simSkillDisabledReason(sCur, pCur, sk) : null;
         var theme = _skillThemeOf(sk);
-        /* V1-Visual Phase 4 (2026-04-19, c) — badge de recurso (◆/▲/⬢) ao lado da
+        /* V1-Visual Phase 4 (2026-04-19, c) — badge de recurso (◆/▲/) ao lado da
            skill, deixa explícito o que vai consumir antes de selecionar. */
         var resKind = _skillResourceKind(sk);
         var resGlyph = _resourceGlyphFor(resKind);
         var resBadgeHtml = '<span class="lp-item-res-badge res-' + resKind + '" title="' +
-            (resKind === 'bonus' ? 'Ação Bônus (▲)' : resKind === 'reaction' ? 'Reação (⬢)' : 'Ação (◆)') +
+            (resKind === 'bonus' ? 'Ação Bônus (▲)' : resKind === 'reaction' ? 'Reação ()' : 'Ação (◆)') +
             '" aria-hidden="true">' + resGlyph + '</span>';
         html += '<div class="lp-item-wrap" data-cat="' + cat + '">';
         html += '<button type="button" class="lp-item lp-item--' + theme + (canUse ? '' : ' disabled') + '" data-skill="' + i + '"' + (canUse ? '' : ' disabled') + (blockReason ? ' title="' + escHtml(blockReason) + '"' : '') + '>';
@@ -22961,7 +22961,7 @@ function openSkillsPanel() {
     var currentPage = 1;
     /* BUGFIX 2026-04-19 (c): pageSize=5 cortava o último item (Relâmpago) no
        Mago — necessitava scroll. Reduzido pra 4 garantindo cabimento sem scroll
-       considerando o aumento de altura dos itens (badge ◆/▲/⬢ + chip de razão
+       considerando o aumento de altura dos itens (badge ◆/▲/+ chip de razão
        quando bloqueado).
 
        FIX 2026-04-20: 4 ainda overflowa em Telegram WebApp viewport (~430x700-750
@@ -23061,7 +23061,7 @@ function openSkillsPanel() {
         });
     }
 
-    var html = '<div class="lp-title">🎯 Habilidades</div>';
+    var html = '<div class="lp-title">Habilidades</div>';
     html += '<div class="lp-sub">' + p.res.ico + ' ' + p.res.value + '/' + p.res.max + ' ' + p.res.name + '</div>';
     html += '<div class="lp-filter-dd" role="group" aria-label="Filtro de habilidades">';
     html += '<button type="button" class="lp-filter-dd-trigger" aria-haspopup="listbox" aria-expanded="false">';
@@ -23137,11 +23137,11 @@ function showSkillUseConfirmPopup(skill) {
                 _img.src = _base + _slug + '.webp';
                 _img.alt = '';
                 _img.loading = 'lazy';
-                var _emoji = skill.ico || '✨';
+                var _emoji = skill.ico || '';
                 _img.onerror = function () { _img.onerror = null; _img.replaceWith(document.createTextNode(_emoji)); };
                 icoWrap.appendChild(_img);
             } else {
-                icoWrap.textContent = skill.ico || '✨';
+                icoWrap.textContent = skill.ico || '';
             }
         })();
         var title = document.createElement('div');
@@ -23192,7 +23192,7 @@ function showSkillUseConfirmPopup(skill) {
    Em REMOTE o motor manda forms enriquecidos via skill.forms; este é o fallback LOCAL. */
 var WILD_SHAPE_FORMS_JS = {
     wolf: {
-        id: 'wolf', name: 'Lobo', ico: '🐺', cr: 0.25, hp: 11, ac: 13, atk: 4,
+        id: 'wolf', name: 'Lobo', ico: '', cr: 0.25, hp: 11, ac: 13, atk: 4,
         diceN: 2, die: 4, flat: 1, dmgType: 'piercing',
         str: 12, dex: 15, con: 12, int: 3, wis: 12, cha: 6,
         minLevel: 2, desc: 'Ágil predador com mordida poderosa.',
@@ -23205,7 +23205,7 @@ var WILD_SHAPE_FORMS_JS = {
         img: '/shared/img/combat/wildshape/wolf.webp'
     },
     boar: {
-        id: 'boar', name: 'Javali', ico: '🐗', cr: 0.25, hp: 11, ac: 11, atk: 3,
+        id: 'boar', name: 'Javali', ico: '', cr: 0.25, hp: 11, ac: 11, atk: 3,
         diceN: 1, die: 6, flat: 1, dmgType: 'slashing',
         str: 13, dex: 11, con: 12, int: 2, wis: 9, cha: 5,
         minLevel: 2, desc: 'Resistente e feroz no corpo-a-corpo.',
@@ -23218,7 +23218,7 @@ var WILD_SHAPE_FORMS_JS = {
         img: '/shared/img/combat/wildshape/boar.webp'
     },
     black_bear: {
-        id: 'black_bear', name: 'Urso Negro', ico: '🐻', cr: 0.5, hp: 19, ac: 11, atk: 3,
+        id: 'black_bear', name: 'Urso Negro', ico: '', cr: 0.5, hp: 19, ac: 11, atk: 3,
         diceN: 2, die: 4, flat: 2, dmgType: 'slashing',
         str: 15, dex: 10, con: 14, int: 2, wis: 12, cha: 7,
         minLevel: 4, desc: 'Fera poderosa com garras devastadoras.',
@@ -23231,7 +23231,7 @@ var WILD_SHAPE_FORMS_JS = {
         img: '/shared/img/combat/wildshape/black_bear.webp'
     },
     crocodile: {
-        id: 'crocodile', name: 'Crocodilo', ico: '🐊', cr: 0.5, hp: 19, ac: 12, atk: 4,
+        id: 'crocodile', name: 'Crocodilo', ico: '', cr: 0.5, hp: 19, ac: 12, atk: 4,
         diceN: 1, die: 10, flat: 1, dmgType: 'piercing',
         str: 15, dex: 10, con: 13, int: 2, wis: 10, cha: 5,
         minLevel: 4, desc: 'Predador aquático com mordida esmagadora.',
@@ -23244,7 +23244,7 @@ var WILD_SHAPE_FORMS_JS = {
         img: '/shared/img/combat/wildshape/crocodile.webp'
     },
     giant_spider: {
-        id: 'giant_spider', name: 'Aranha Gigante', ico: '🕷️', cr: 1.0, hp: 26, ac: 14, atk: 5,
+        id: 'giant_spider', name: 'Aranha Gigante', ico: '', cr: 1.0, hp: 26, ac: 14, atk: 5,
         diceN: 1, die: 8, flat: 3, dmgType: 'piercing',
         str: 14, dex: 16, con: 12, int: 2, wis: 11, cha: 4,
         minLevel: 8, desc: 'Predadora ágil com veneno paralisante.',
@@ -23258,7 +23258,7 @@ var WILD_SHAPE_FORMS_JS = {
         img: '/shared/img/combat/wildshape/giant_spider.webp'
     },
     dire_wolf: {
-        id: 'dire_wolf', name: 'Lobo Atroz', ico: '🐺', cr: 1.0, hp: 37, ac: 14, atk: 5,
+        id: 'dire_wolf', name: 'Lobo Atroz', ico: '', cr: 1.0, hp: 37, ac: 14, atk: 5,
         diceN: 2, die: 6, flat: 3, dmgType: 'piercing',
         str: 17, dex: 15, con: 15, int: 3, wis: 12, cha: 7,
         minLevel: 8, desc: 'Lobo ancestral de tamanho monstruoso.',
@@ -23306,7 +23306,7 @@ function openWildShapePicker(forms, usesLeft) {
         function clearCard() { while (card.firstChild) card.removeChild(card.firstChild); }
         function formImg(f, cls) {
             var wrap = document.createElement('div'); wrap.className = cls;
-            var emo = document.createElement('span'); emo.className = 'ws-ico'; emo.textContent = f.ico || '🐾';
+            var emo = document.createElement('span'); emo.className = 'ws-ico'; emo.textContent = f.ico || '';
             if (f.img) {
                 var im = document.createElement('img'); im.className = 'ws-img'; im.alt = f.name; im.loading = 'lazy'; im.src = f.img;
                 emo.style.display = 'none';
@@ -23318,7 +23318,7 @@ function openWildShapePicker(forms, usesLeft) {
         }
         function renderGrid() {
             clearCard();
-            var t = document.createElement('div'); t.className = 'mm-confirm-title'; t.textContent = '🐺 Forma Selvagem'; card.appendChild(t);
+            var t = document.createElement('div'); t.className = 'mm-confirm-title'; t.textContent = 'Forma Selvagem'; card.appendChild(t);
             var s = document.createElement('div'); s.className = 'mm-confirm-sub'; s.style.opacity = '.85';
             s.textContent = 'Escolha a forma bestial' + (usesLeft != null ? (' · ' + usesLeft + ' uso(s)') : '') + ' (PHB p.66)';
             card.appendChild(s);
@@ -23340,7 +23340,7 @@ function openWildShapePicker(forms, usesLeft) {
         function renderDetail(f) {
             clearCard();
             card.appendChild(formImg(f, 'ws-detail-imgwrap'));
-            var nm = document.createElement('div'); nm.className = 'mm-confirm-title ws-detail-name'; nm.textContent = (f.ico || '🐾') + ' ' + f.name; card.appendChild(nm);
+            var nm = document.createElement('div'); nm.className = 'mm-confirm-title ws-detail-name'; nm.textContent = (f.ico || '') + ' ' + f.name; card.appendChild(nm);
             var cr = document.createElement('div'); cr.className = 'ws-detail-cr'; cr.textContent = 'Nível de Desafio ' + _wsCrLabel(f.cr); card.appendChild(cr);
             if (f.epicDesc || f.desc) { var ep = document.createElement('div'); ep.className = 'ws-detail-flavor'; ep.textContent = f.epicDesc || f.desc; card.appendChild(ep); }
             var sb = document.createElement('div'); sb.className = 'ws-detail-statgrid';
@@ -23382,7 +23382,7 @@ function openWildShapePicker(forms, usesLeft) {
             var btnRow = document.createElement('div'); btnRow.className = 'ws-detail-btns';
             var back = document.createElement('button'); back.type = 'button'; back.className = 'mm-confirm-btn-cancel'; back.textContent = '← Voltar';
             back.addEventListener('click', renderGrid); btnRow.appendChild(back);
-            var go = document.createElement('button'); go.type = 'button'; go.className = 'ws-transform-btn'; go.textContent = '🐾 Transformar em ' + f.name;
+            var go = document.createElement('button'); go.type = 'button'; go.className = 'ws-transform-btn'; go.textContent = 'Transformar em ' + f.name;
             go.addEventListener('click', function () { done(f.id); }); btnRow.appendChild(go);
             card.appendChild(btnRow);
         }
@@ -23488,7 +23488,7 @@ async function useWildShapeSkill(skill, opts) {
         } catch (_ePreRv) {}
         _localWildShapeRevert(p, 0);
         var sL = currentState; simLogPushTurnHeader(sL, p);
-        sL.log.push((p.ico || '🌿') + ' ' + p.n + ' reverte à forma normal.');
+        sL.log.push((p.ico || '') + ' ' + p.n + ' reverte à forma normal.');
         p.actionSpent = true; render(sL); _actionTaken = false;
         /* REVERT ÉPICO (2026-06-23, user "animação épica tanto quando vira quanto quando
            volta ao normal"): implosão de natureza (anel verde colapsando + motes pra
@@ -23667,7 +23667,7 @@ async function useSkill(skill, opts) {
         var sLogC = currentState;
         simLogPushTurnHeader(sLogC, p);
         if (_removed.length) {
-            sLogC.log.push(p.n + ' usa ' + (skill.ico || '🧘') + ' ' + skill.n + ' — remove: ' + _removed.join(', ') + ' (PHB).');
+            sLogC.log.push(p.n + ' usa ' + (skill.ico || '') + ' ' + skill.n + ' — remove: ' + _removed.join(', ') + ' (PHB).');
         } else {
             sLogC.log.push(p.n + ' usa ' + skill.n + ' — nenhum efeito a remover.');
         }
@@ -23706,7 +23706,7 @@ async function useSkill(skill, opts) {
         p.actionSpent = false;
         var sLog = currentState;
         simLogPushTurnHeader(sLog, p);
-        sLog.log.push(p.n + ' usa ' + (skill.ico || '⚡') + ' ' + skill.n + ' — ganha uma AÇÃO EXTRA este turno (PHB).');
+        sLog.log.push(p.n + ' usa ' + (skill.ico || '') + ' ' + skill.n + ' — ganha uma AÇÃO EXTRA este turno (PHB).');
         /* VFX: bless/rage pulse no card do personagem */
         try {
             if (window._combatVfx && window._combatVfx.buffRage) {
@@ -23898,7 +23898,7 @@ async function useSkill(skill, opts) {
                 }
                 if (!allyIdxs.length) {
                     _pendingSkill = null;
-                    await showMessage('⚠ Sem alvos', 'miss', 'Nenhum aliado vivo disponível.');
+                    await showMessage('Sem alvos', 'miss', 'Nenhum aliado vivo disponível.');
                     return;
                 }
                 if (allyIdxs.length === 1) {
@@ -23984,7 +23984,7 @@ async function useSkill(skill, opts) {
             if (!sim) {
                 s.log.push(p.n + ' usa ' + skill.n + ' (efeito genérico).');
                 render(s);
-                await showMessage('✨ ' + skill.n.toUpperCase(), 'hit', skill.desc);
+                await showMessage('' + skill.n.toUpperCase(), 'hit', skill.desc);
                 /* V1.7 Sprint-17 (2026-04-21, QA resource audit) — BA PHB p.189 */
                 if (skill.bonus) {
                     p.bonusActionSpent = true;
@@ -24463,7 +24463,7 @@ async function attemptFlee() {
             postResult: function () {
                 var ok = totalFlee >= DC;
                 return {
-                    title: ok ? '✅ Passou — escapou' : '❌ Falhou — sofre OA',
+                    title: ok ? 'Passou — escapou' : 'Falhou — sofre OA',
                     subHtml: simFormatVsDcHTML(r, dexMod, totalFlee, DC, ok) +
                         '<div class="drl-crit-rule">Adaptação do PHB: abrir caminho para sair do encontro (sem grade). CD reflete hostis vivos na cena.</div>',
                     cls: ok ? 'hit' : 'miss'
@@ -24480,7 +24480,7 @@ async function attemptFlee() {
     }
     s.log.push(p.n + ' falha em se desvencilhar (' + totalFlee + ' < CD ' + DC + ') — ataques de oportunidade!');
     render(s);
-    await showMessage('⚠ Falha na fuga', 'miss', 'Os inimigos aproveitam a abertura (ataques de oportunidade).');
+    await showMessage('Falha na fuga', 'miss', 'Os inimigos aproveitam a abertura (ataques de oportunidade).');
 
     /* Cada inimigo vivo faz 1 ataque de oportunidade (PHB: sair do alcance sem Desengajar). */
     for (var i = 0; i < s.order.length; i++) {
@@ -24575,7 +24575,7 @@ function showTargetConfirm(tgtIdx) {
     var immunities = u.immunities || [];
 
     var html = '';
-    html += '<div class="tcc-title">' + (skill ? '🎯 Usar ' + escHtml(skill.n) : 'Atacar este alvo?') + '</div>';
+    html += '<div class="tcc-title">' + (skill ? 'Usar ' + escHtml(skill.n) : 'Atacar este alvo?') + '</div>';
 
     /* Preview do alvo
        X-6.5.51AB (2026-04-26): tcc-ico agora usa SVG heraldico (ic-boss/ic-inimigo
@@ -24599,7 +24599,7 @@ function showTargetConfirm(tgtIdx) {
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
     html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
     if (reductions.length) {
-        html += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">🛡 Resistente</span><span class="tcc-dmg-val">' + reductions.join(', ') + ' (½ dano)</span></div>';
+        html += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">Resistente</span><span class="tcc-dmg-val">' + reductions.join(', ') + ' (½ dano)</span></div>';
     }
     if (immunities.length) {
         html += '<div class="tcc-dmg-row immunity"><span class="tcc-dmg-lbl">✦ Imune</span><span class="tcc-dmg-val">' + immunities.join(', ') + ' (0 dano)</span></div>';
@@ -24611,7 +24611,7 @@ function showTargetConfirm(tgtIdx) {
 
     html += '<div class="tcc-actions">';
     html += '<button class="action-btn" data-tcc="cancel">✕ Cancelar</button>';
-    html += '<button class="action-btn primary" data-tcc="confirm">⚔ Confirmar</button>';
+    html += '<button class="action-btn primary" data-tcc="confirm">Confirmar</button>';
     html += '</div>';
     setHTML(card, html);
     ov.appendChild(card);
@@ -25815,9 +25815,9 @@ async function playAllySpellTurn(aIdx, tIdx, skill, themeKey) {
 
 function showAllySpellOverlay(actor, target, dart, s, skill, themeKey) {
     var themeLabels = {
-        holy:    { title: '✚ ' + (skill.n || 'Cura'),      vsLabel: (dart.rolls.length || 1) + 'd' + (dart.d || 8) + ' cura' },
+        holy:    { title: '' + (skill.n || 'Cura'),      vsLabel: (dart.rolls.length || 1) + 'd' + (dart.d || 8) + ' cura' },
         radiant: { title: '✦ ' + (skill.n || 'Bênção'),    vsLabel: 'Aplicando bênção' },
-        arcane:  { title: '⬡ ' + (skill.n || 'Escudo'),    vsLabel: 'Escudo arcano' }
+        arcane:  { title: '' + (skill.n || 'Escudo'),    vsLabel: 'Escudo arcano' }
     };
     var lbl = themeLabels[themeKey] || themeLabels.holy;
     if (!window.Dice3D) {
@@ -26062,7 +26062,7 @@ function applyAllySpellImpact(dart, s, targetEl, skill, themeKey, srcRect) {
         el.classList.add('card-warded');
         setTimeout(function () { el.classList.remove('card-warded'); }, 2200);
         _asSpawnThematicBurst(host, cx, cy, 'arcane', 12, 'hex');
-        _asSpawnFloatLabel(host, cx, cy - 20, '⬡ ' + skill.n, 'ward');
+        _asSpawnFloatLabel(host, cx, cy - 20, '' + skill.n, 'ward');
     }
     // VFX canvas complementar (existente)
     ensureCombatVfxRuntime();
@@ -26097,14 +26097,14 @@ async function playSummonBeastTurn(aIdx, skill) {
         dmgMod: sb.dmgMod || 0, attr: sb.attr || 'DEX',
         dex: sb.dex || 12, con: sb.con || 10, wis: sb.wis || 10,
         str: sb.str || 10, int: sb.int || 6, cha: sb.cha || 6,
-        ico: sb.ico || '🐺', alive: true, se: [],
+        ico: sb.ico || '', alive: true, se: [],
         damageSpec: sb.damageSpec || { n: 1, d: 6 },
         flat: sb.flat | 0,
         multiAttack: 1,
         _summon: true,
         _summonBy: actor.n,
         _summonUntilRound: (s.rn | 0) + (sb.duration | 0 || 3),
-        it: { ic: '🐺', lb: 'morde' }
+        it: { ic: '', lb: 'morde' }
     };
     // Insere logo depois do conjurador na order. Ajusta active_idx se estava
     // apontando para alguém à frente (splice desloca índices >= aIdx+1).
@@ -26475,7 +26475,7 @@ function showRayOfFrostOverlay(actor, target, dart, s) {
             while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
             var titleEl = document.createElement('div');
             titleEl.className = 'drl-rollup mm-summary-title mm-summary-title--ice';
-            titleEl.textContent = '❄ Raio Gélido — ' + dart.dmg + ' de frio';
+            titleEl.textContent = 'Raio Gélido — ' + dart.dmg + ' de frio';
             resultEl.appendChild(titleEl);
             var row = document.createElement('div');
             row.className = 'drl-rollup mm-summary-row';
@@ -26726,7 +26726,7 @@ function showFireballSpellOverlay(actor, target, dart, s) {
                         while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
                         var titleEl = document.createElement('div');
                         titleEl.className = 'drl-rollup mm-summary-title mm-summary-title--fire';
-                        titleEl.textContent = '🔥 Bola de Fogo — ' + dart.dmg + ' de fogo';
+                        titleEl.textContent = 'Bola de Fogo — ' + dart.dmg + ' de fogo';
                         resultEl.appendChild(titleEl);
                         var row = document.createElement('div');
                         row.className = 'drl-rollup mm-summary-row';
@@ -26985,7 +26985,7 @@ function _showEndTurnConfirm(s, onConfirm) {
     card.className = 'end-turn-confirm-card' + (hasAvailable ? ' etc-warn-state' : '');
 
     var html = '';
-    html += '<div class="etc-title">' + (hasAvailable ? '⚠ Encerrar Turno?' : 'Encerrar Turno') + '</div>';
+    html += '<div class="etc-title">' + (hasAvailable ? 'Encerrar Turno?' : 'Encerrar Turno') + '</div>';
     if (hasAvailable) {
         html += '<div class="etc-subtitle">Você ainda pode usar:</div>';
         html += '<ul class="etc-list">';
@@ -27395,7 +27395,7 @@ function showDice(value, cb, actor, context, opts) {
     /* V1.7 (2026-04-21, QA feedback "jogador não lê log durante combate") —
        Detecta VANTAGEM / DESVANTAGEM para renderizar 2 dados 3D lado-a-lado
        (não apenas 1 dado com badge numérico). Opts: advMode ('advantage'|
-       'disadvantage'), advRaw1, advRaw2. Label "⬆ VANTAGEM" / "⬇ DESVANTAGEM"
+       'disadvantage'), advRaw1, advRaw2. Label "VANTAGEM" / "DESVANTAGEM"
        aparece ACIMA do par de dados. Depois da animação dos 2 dados, o dado
        escolhido (maior p/ vantagem, menor p/ desvantagem) ganha glow/scale e
        o descartado fade + linha diagonal cortando. */
@@ -27405,7 +27405,7 @@ function showDice(value, cb, actor, context, opts) {
         /* Label acima (substitui o antigo badge numérico — dados vão mostrar valores) */
         var advLabel = document.createElement('div');
         advLabel.className = 'dice-canvas-holder--dual-label dice-canvas-holder--dual-label--' + opts.advMode;
-        advLabel.textContent = (opts.advMode === 'advantage') ? '⬆ VANTAGEM' : '⬇ DESVANTAGEM';
+        advLabel.textContent = (opts.advMode === 'advantage') ? 'VANTAGEM' : 'DESVANTAGEM';
         ov.appendChild(advLabel);
     }
     if (actor) {
@@ -27596,7 +27596,7 @@ function showDice(value, cb, actor, context, opts) {
         if (typeof sfxDiceRoll === 'function') {
             try { sfxDiceRoll(); } catch (_eS) {}
         }
-        hint.textContent = manualPlayerDice ? '⚡ Aguarde os dados pararem...' : '';
+        hint.textContent = manualPlayerDice ? 'Aguarde os dados pararem...' : '';
 
         /* V1.7 (2026-04-21, QA) — DUAL MODE: rolar 2 dados em paralelo. */
         if (isDualDice) {
@@ -27631,7 +27631,7 @@ function showDice(value, cb, actor, context, opts) {
                 if (elapsed / d._rollDuration >= INTERACT_MAX) {
                     container.classList.add('locked');
                     container.classList.remove('clickable');
-                    hint.textContent = '🎲 Aguarde o resultado...';
+                    hint.textContent = 'Aguarde o resultado...';
                     clearInterval(lockTimer); lockTimer = null;
                 }
             }, 80);
@@ -27648,7 +27648,7 @@ function showDice(value, cb, actor, context, opts) {
                 dA = new Dice3D(dualSlotA, { size: 140, dieType: 'd20', duration: duration });
                 dB = new Dice3D(dualSlotB, { size: 140, dieType: 'd20', duration: duration });
                 if (manualPlayerDice) {
-                    hint.textContent = '🎲 Toque nos dados para começar a rolar';
+                    hint.textContent = 'Toque nos dados para começar a rolar';
                     container.addEventListener('click', function () {
                         if (!started) startRoll();
                     });
@@ -27661,7 +27661,7 @@ function showDice(value, cb, actor, context, opts) {
             /* SINGLE MODE (comportamento legado preservado) */
             d = new Dice3D(container, { size: 180, dieType: 'd20', duration: duration });
             if (manualPlayerDice) {
-                hint.textContent = '🎲 Toque no dado para começar a rolar';
+                hint.textContent = 'Toque no dado para começar a rolar';
                 container.addEventListener('click', function () {
                     if (!started) { startRoll(); return; }
                     if (!d || !d._rolling) return;
@@ -27684,7 +27684,7 @@ function showDice(value, cb, actor, context, opts) {
                     d._endEuler.z += Math.PI * 2 * 1 * d._spinDir.z;
                     d._rollStart = performance.now();
                     d._rollDuration = 2000;
-                    hint.textContent = '⚡ Acelerado! Solte para desacelerar';
+                    hint.textContent = 'Acelerado! Solte para desacelerar';
                     hint.classList.remove('pulse'); void hint.offsetWidth; hint.classList.add('pulse');
                 });
             } else {
@@ -28383,10 +28383,10 @@ function openUnitDetail(uid) {
     /* Condição (PV + efeitos D&D / simulador com duração em turnos ou rodadas) */
     html += '<div class="udc-section"><div class="udc-section-title">Condição</div>';
     var conds = [];
-    if (!u.alive) conds.push({ ico: '💀', n: 'Inconsciente' });
-    else if (hpPct <= 25) conds.push({ ico: '🩸', n: 'Ferido grave' });
-    else if (hpPct <= 60) conds.push({ ico: '🤕', n: 'Ferido' });
-    else conds.push({ ico: '✨', n: 'Saudável' });
+    if (!u.alive) conds.push({ ico: '', n: 'Inconsciente' });
+    else if (hpPct <= 25) conds.push({ ico: '', n: 'Ferido grave' });
+    else if (hpPct <= 60) conds.push({ ico: '', n: 'Ferido' });
+    else conds.push({ ico: '', n: 'Saudável' });
     html += '<div class="udc-conds">';
     conds.forEach(function (c) { html += '<span class="udc-cond"><span>' + c.ico + '</span> ' + escHtml(c.n) + '</span>'; });
     html += '</div>';
@@ -28555,7 +28555,7 @@ function showInitiativeOrderPopup() {
     card.className = 'iop-card iop-card--batch-summary';
     var parts = [
         '<header class="iop-head-batch" aria-labelledby="c2-init-order-title">',
-        '<span class="iop-head-batch__orn" aria-hidden="true">\u2694</span>',
+        '<span class="iop-head-batch__orn" aria-hidden="true"></span>',
         '<div class="iop-head-batch__text">',
         '<h2 class="iop-head-batch__title" id="c2-init-order-title">',
         '<span class="iop-head-batch__line1">Ordem de iniciativa</span>',
@@ -28591,7 +28591,7 @@ function showInitiativeOrderPopup() {
             parts.push('<span class="iop-ico">' + (c.ico || '') + '</span>');
         }
         parts.push('<span class="iop-name">' + escHtml(c.n) + '</span>');
-        parts.push('<span class="iop-roll">\ud83c\udfb2 ' + c.init + '</span>');
+        parts.push('<span class="iop-roll">' + c.init + '</span>');
         parts.push('</div>');
     });
     parts.push('</div>');
@@ -28676,7 +28676,7 @@ function showIntroChoicePopup() {
     card.className = 'iop-card iop-card--batch-summary';
     /* [MOCKUP OPÇÃO 3 aprovada 2026-04-21] ESCUDO BRASONADO:
        brasão emerge do topo (via CSS ::before do card), título grande gold,
-       subtítulo espaçado, divisor ❦, botão primary com tag "Ação Padrão",
+       subtítulo espaçado, divisor , botão primary com tag "Ação Padrão",
        botão secundário tracejado discreto. CSS em style do <head>. */
     var parts = [
         '<header class="iop-head-batch" aria-labelledby="c2-intro-choice-title">',
@@ -28787,7 +28787,7 @@ function showAttackSkipSummaryIOPLayout(rows) {
         var card = document.createElement('div');
         card.className = 'iop-card iop-card--batch-summary';
         var html = '<header class="iop-head-batch" aria-labelledby="atk-skip-iop-title">';
-        html += '<span class="iop-head-batch__orn" aria-hidden="true">\u2694</span>';
+        html += '<span class="iop-head-batch__orn" aria-hidden="true"></span>';
         html += '<div class="iop-head-batch__text">';
         html += '<h2 class="iop-head-batch__title" id="atk-skip-iop-title">';
         html += '<span class="iop-head-batch__line1">Ataque</span>';
@@ -29204,24 +29204,24 @@ async function playTurn(aIdx, tIdx, opts) {
                     postResult: function () {
                         if (hitRes.crit) {
                             return {
-                                title: '⚡ ACERTO CRÍTICO',
+                                title: 'ACERTO CRÍTICO',
                                 subHtml: simFormatVsAcHTML(20, atkShown, hitRes.total, effAc, true) +
                                     '<div class="drl-crit-rule">' + critDmgRuleLine + '</div>',
                                 cls: 'crit'
                             };
                         }
                         if (hitRes.hit) {
-                            return { title: '✅ ACERTOU', subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, true), cls: 'hit' };
+                            return { title: 'ACERTOU', subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, true), cls: 'hit' };
                         }
                         if (hitRes.reason === 'falha_critica') {
                             return {
-                                title: '⚠ FALHA CRÍTICA',
+                                title: 'FALHA CRÍTICA',
                                 subHtml: simFormatD20EqualsHTML(1) + ' <span class="drl-miss-strong">— falha automática</span>',
                                 cls: 'miss'
                             };
                         }
                         return {
-                            title: '🛡 ' + target.n.toUpperCase() + ' DEFENDEU',
+                            title: '' + target.n.toUpperCase() + ' DEFENDEU',
                             subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, false),
                             cls: 'miss'
                         };
@@ -29294,9 +29294,9 @@ async function playTurn(aIdx, tIdx, opts) {
                 effAc = _nNewHitRes.effAc != null ? _nNewHitRes.effAc : _nNewEffAc;
                 hitRes = _nNewHitRes;
                 if (hitRes.hit) {
-                    s.log.push(target.n + ' conjura ✨ Escudo Arcano (reação, +5 CA) — ataque ainda conecta (' + hitRes.total + ' vs CA ' + effAc + ').');
+                    s.log.push(target.n + ' conjura Escudo Arcano (reação, +5 CA) — ataque ainda conecta (' + hitRes.total + ' vs CA ' + effAc + ').');
                 } else {
-                    s.log.push(target.n + ' conjura ✨ Escudo Arcano (reação, +5 CA) — ataque ERRA (' + hitRes.total + ' vs CA ' + effAc + ').');
+                    s.log.push(target.n + ' conjura Escudo Arcano (reação, +5 CA) — ataque ERRA (' + hitRes.total + ' vs CA ' + effAc + ').');
                 }
                 render(s);
                 await sleep(900);
@@ -29361,7 +29361,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         kind: 'buff',
                         vfx: 'arcane',
                         n: 'Escudo',
-                        ico: '\uD83D\uDD35',
+                        ico: '',
                         condName: 'Escudo (magia)',
                         condRule: 'PHB p.275 \u2014 Rea\u00e7\u00e3o: +5 CA at\u00e9 o in\u00edcio do pr\u00f3ximo turno do conjurador.',
                         decOn: 'after_npc'
@@ -29382,13 +29382,13 @@ async function playTurn(aIdx, tIdx, opts) {
                            total — o caller (fluxo MM) DEVE pular a aplicação de dano
                            quando vê _shieldMmAbsorbed=true. */
                         _shieldMmAbsorbed = true;
-                        s.log.push(target.n + ' conjura \u2728 Escudo Arcano como rea\u00e7\u00e3o \u2014 absorve TODOS os M\u00edsseis M\u00e1gicos! 0 dano.');
+                        s.log.push(target.n + ' conjura Escudo Arcano como rea\u00e7\u00e3o \u2014 absorve TODOS os M\u00edsseis M\u00e1gicos! 0 dano.');
                         render(s);
                         await sleep(900);
                     } else if (_isNatCrit) {
                         /* PHB p.194: nat 20 acerta independente da CA. Crit passa;
                            hitRes permanece hit=true crit=true. Buff vale pra próximos. */
-                        s.log.push(target.n + ' conjura \u2728 Escudo Arcano como rea\u00e7\u00e3o (+5 CA) \u2014 cr\u00edtico natural atravessa, mas a barreira persiste contra pr\u00f3ximos ataques.');
+                        s.log.push(target.n + ' conjura Escudo Arcano como rea\u00e7\u00e3o (+5 CA) \u2014 cr\u00edtico natural atravessa, mas a barreira persiste contra pr\u00f3ximos ataques.');
                         render(s);
                         await sleep(900);
                     } else {
@@ -29399,10 +29399,10 @@ async function playTurn(aIdx, tIdx, opts) {
                         effAc = _newHitRes.effAc != null ? _newHitRes.effAc : _newEffAc;
                         hitRes = _newHitRes;
                         if (hitRes.hit) {
-                            s.log.push(target.n + ' conjura \u2728 Escudo Arcano como rea\u00e7\u00e3o (+5 CA)! Ataque ainda conecta ('
+                            s.log.push(target.n + ' conjura Escudo Arcano como rea\u00e7\u00e3o (+5 CA)! Ataque ainda conecta ('
                                 + hitRes.total + ' vs CA ' + effAc + ').');
                         } else {
-                            s.log.push(target.n + ' conjura \u2728 Escudo Arcano como rea\u00e7\u00e3o (+5 CA)! Ataque agora ERRA ('
+                            s.log.push(target.n + ' conjura Escudo Arcano como rea\u00e7\u00e3o (+5 CA)! Ataque agora ERRA ('
                                 + hitRes.total + ' vs CA ' + effAc + ').');
                         }
                         render(s);
@@ -29473,10 +29473,10 @@ async function playTurn(aIdx, tIdx, opts) {
                 }
                 if (_newHit) {
                     hitRes = { hit: true, crit: hitRes.crit, total: _newTotal, effAc: effAc, reason: 'cutting_still_hits' };
-                    s.log.push(target.n + ' usa 🗯 Palavras Cortantes (−' + _cutRoll + ' no d' + _cutDieSize + ') — ataque ainda conecta (' + _newTotal + ' vs CA ' + effAc + ').');
+                    s.log.push(target.n + ' usa Palavras Cortantes (−' + _cutRoll + ' no d' + _cutDieSize + ') — ataque ainda conecta (' + _newTotal + ' vs CA ' + effAc + ').');
                 } else {
                     hitRes = { hit: false, crit: false, total: _newTotal, effAc: effAc, reason: 'cutting_miss' };
-                    s.log.push(target.n + ' usa 🗯 Palavras Cortantes (−' + _cutRoll + ' no d' + _cutDieSize + ') — ataque agora ERRA retroativamente (' + _newTotal + ' vs CA ' + effAc + ').');
+                    s.log.push(target.n + ' usa Palavras Cortantes (−' + _cutRoll + ' no d' + _cutDieSize + ') — ataque agora ERRA retroativamente (' + _newTotal + ' vs CA ' + effAc + ').');
                 }
                 render(s);
                 await sleep(900);
@@ -29533,7 +29533,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         }
                     } catch (_eVU2) {}
                 }
-                s.log.push(target.n + ' usa 💨 Esquiva Sobrenatural (reação) — dano reduzido à METADE (PHB p.96).');
+                s.log.push(target.n + ' usa Esquiva Sobrenatural (reação) — dano reduzido à METADE (PHB p.96).');
                 render(s);
                 await sleep(700);
             }
@@ -29598,7 +29598,7 @@ async function playTurn(aIdx, tIdx, opts) {
                             }
                         } catch (_eVD2) {}
                     }
-                    s.log.push(target.n + ' usa 🛡 Desviar Projéteis (reação) — reduz dano em ' + _deflectReduction + ' (1d10=' + _deflRoll + '+DES=' + _dexMod + '+nv=' + _monkLvl + ').');
+                    s.log.push(target.n + ' usa Desviar Projéteis (reação) — reduz dano em ' + _deflectReduction + ' (1d10=' + _deflRoll + '+DES=' + _dexMod + '+nv=' + _monkLvl + ').');
                     render(s);
                     await sleep(700);
                 }
@@ -29633,7 +29633,7 @@ async function playTurn(aIdx, tIdx, opts) {
             if (useRebuke) {
                 target.res.value = Math.max(0, (target.res.value | 0) - (rebukeSk.cost | 0));
                 target.reactionSpent = true;
-                s.log.push(target.n + ' lança 🔥 Repreensão Infernal (reação) contra ' + actor.n + '!');
+                s.log.push(target.n + ' lança Repreensão Infernal (reação) contra ' + actor.n + '!');
                 var _chaScore = (target.cha != null) ? target.cha : 14;
                 var _chaMod = Math.floor((_chaScore - 10) / 2);
                 var _rebukeDc = 8 + (target.prof | 0 || 2) + _chaMod;
@@ -29659,7 +29659,7 @@ async function playTurn(aIdx, tIdx, opts) {
                 var _rebukeD2 = _rebukeRolls.length > 1 ? _rebukeRolls.slice(1).join('+') : '0';
                 if (_rebukeSaveSuccess) _rebukeDmg = Math.floor(_rebukeDmg / 2);
                 /* V1.7 Sprint-17 Ronda 31 (2026-04-21 QA log breakdown) — NAT 20/1 em Repreensão Infernal. */
-                var _rebRollTxt = _rebukeSaveRoll === 20 ? '⚡ NAT 20!' : _rebukeSaveRoll === 1 ? '💥 NAT 1!' :
+                var _rebRollTxt = _rebukeSaveRoll === 20 ? 'NAT 20!' : _rebukeSaveRoll === 1 ? 'NAT 1!' :
                     'd20 ' + _rebukeSaveRoll + '+' + _rebukeSaveMod + '=' + _rebukeSaveTotal;
                 s.log.push(actor.n + ' — TR DES vs Repreensão Infernal CD ' + _rebukeDc + ': ' + _rebRollTxt +
                     (_rebukeSaveSuccess ? ' SUCESSO (½).' : ' FALHA (dano total).'));
@@ -29700,7 +29700,7 @@ async function playTurn(aIdx, tIdx, opts) {
         var _missAtkPart = 'd20 ' + r + '+' + actor.atk +
             (atkExtra ? '+' + atkExtra : '') + '=' + hitRes.total +
             ' vs CA ' + effAc + (effAc !== target.ac ? ' (incl. bônus)' : '');
-        if (r === 1) _missAtkPart = '💥 NAT 1! vs CA ' + effAc;
+        if (r === 1) _missAtkPart = 'NAT 1! vs CA ' + effAc;
         /* User sessão #69: errar = a rolagem não passou a CA → o alvo DESVIOU/o golpe
            passou (D&D 5e), NÃO que "defendeu". NAT 1 = o atacante erra feio. */
         if (r === 1) s.log.push(actor.n + ' erra feio o golpe contra ' + target.n + ' — ' + _missAtkPart + '.');
@@ -30028,7 +30028,7 @@ async function playTurn(aIdx, tIdx, opts) {
                 /* Spend MP + reaction */
                 target.res.value = Math.max(0, (target.res.value | 0) - (rebukeSkP.cost | 0));
                 target.reactionSpent = true;
-                s.log.push(target.n + ' lança 🔥 Repreensão Infernal (reação PÓS-DANO) contra ' + actor.n + '!');
+                s.log.push(target.n + ' lança Repreensão Infernal (reação PÓS-DANO) contra ' + actor.n + '!');
                 /* CD de magia PHB: 8 + prof + mod de conjuração (CHA pro Bruxo) */
                 var _chaScoreP = (target.cha != null) ? target.cha : 14;
                 var _chaModP = Math.floor((_chaScoreP - 10) / 2);
@@ -30053,7 +30053,7 @@ async function playTurn(aIdx, tIdx, opts) {
                 var _rebukeD2P = _rebukeRollsP.length > 1 ? _rebukeRollsP.slice(1).join('+') : '0';
                 if (_rebukeSaveSuccessP) _rebukeDmgP = Math.floor(_rebukeDmgP / 2);
                 /* V1.7 Sprint-17 Ronda 31 (2026-04-21 QA log breakdown) — NAT 20/1 em Repreensão PÓS-DANO. */
-                var _rebRollTxtP = _rebukeSaveRollP === 20 ? '⚡ NAT 20!' : _rebukeSaveRollP === 1 ? '💥 NAT 1!' :
+                var _rebRollTxtP = _rebukeSaveRollP === 20 ? 'NAT 20!' : _rebukeSaveRollP === 1 ? 'NAT 1!' :
                     'd20 ' + _rebukeSaveRollP + '+' + _rebukeSaveModP + '=' + _rebukeSaveTotalP;
                 s.log.push(actor.n + ' — TR DES vs Repreensão Infernal (pós-dano) CD ' + _rebukeDcP + ': ' + _rebRollTxtP +
                     (_rebukeSaveSuccessP ? ' SUCESSO (½).' : ' FALHA (dano total).'));
@@ -30158,8 +30158,8 @@ async function playTurn(aIdx, tIdx, opts) {
                 var sonSuccess = sonTotal >= sonCd;
                 /* V1.7 Sprint-17 Ronda 31 (2026-04-21 QA log breakdown) — save-on-hit com NAT 20/1. */
                 var abPt = ab === 'con' ? 'CON' : ab === 'dex' ? 'DES' : ab === 'wis' ? 'SAB' : ab === 'int' ? 'INT' : ab === 'cha' ? 'CAR' : 'FOR';
-                var _sonRollTxt = sonRoll === 20 ? '⚡ NAT 20! (' + sonRoll + '+' + sonMod + '=' + sonTotal + ')'
-                                : sonRoll === 1 ? '💥 NAT 1! (' + sonRoll + '+' + sonMod + '=' + sonTotal + ')'
+                var _sonRollTxt = sonRoll === 20 ? 'NAT 20! (' + sonRoll + '+' + sonMod + '=' + sonTotal + ')'
+                                : sonRoll === 1 ? 'NAT 1! (' + sonRoll + '+' + sonMod + '=' + sonTotal + ')'
                                 : 'd20 ' + sonRoll + '+' + sonMod + '=' + sonTotal;
                 s.log.push(target.n + ' — TR ' + abPt + ' (on-hit) ' + _sonRollTxt + ' vs CD ' + sonCd + ' ' +
                     (sonSuccess ? 'SUCESSO → ' + (aed.n || 'condição') + ' NÃO aplica.' : 'FALHA → ' + (aed.n || 'condição') + ' aplica.'));
@@ -30258,7 +30258,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         actor.se.splice(_ocI, 1);
                     }
                     actor.se.push({
-                        id: 'conc_' + (_debuffEntry.id || 'cond'), kind: 'buff', ico: '🧠',
+                        id: 'conc_' + (_debuffEntry.id || 'cond'), kind: 'buff', ico: '',
                         n: 'Concentração (' + (_debuffEntry.n || 'condição') + ')',
                         concentration: true,
                         linkedTargetIdx: (typeof tIdx === 'number' ? tIdx : (s && s.order ? s.order.indexOf(target) : -1)),
@@ -30338,9 +30338,9 @@ async function playTurn(aIdx, tIdx, opts) {
         if (_svAutoFail) {
             _svRollTxt = 'AUTO-FALHA ' + _sabPt + ' (PHB App.A)';
         } else if (saveRoll === 20) {
-            _svRollTxt = '⚡ NAT 20! TR ' + _sabPt + ' ' + saveRoll + '+' + saveMod + '=' + saveTotal + ' vs CD ' + saveDc + ' SUCESSO (½)';
+            _svRollTxt = 'NAT 20! TR ' + _sabPt + ' ' + saveRoll + '+' + saveMod + '=' + saveTotal + ' vs CD ' + saveDc + ' SUCESSO (½)';
         } else if (saveRoll === 1) {
-            _svRollTxt = '💥 NAT 1! TR ' + _sabPt + ' ' + saveRoll + '+' + saveMod + '=' + saveTotal + ' vs CD ' + saveDc + ' ' + (saveSuccess ? 'SUCESSO (½)' : 'FALHA');
+            _svRollTxt = 'NAT 1! TR ' + _sabPt + ' ' + saveRoll + '+' + saveMod + '=' + saveTotal + ' vs CD ' + saveDc + ' ' + (saveSuccess ? 'SUCESSO (½)' : 'FALHA');
         } else {
             _svRollTxt = 'TR ' + _sabPt + ' ' + saveRoll + '+' + saveMod + '=' + saveTotal + ' vs CD ' + saveDc + ' ' + (saveSuccess ? 'SUCESSO (½)' : 'FALHA');
         }
@@ -30381,11 +30381,11 @@ async function playTurn(aIdx, tIdx, opts) {
            PHB-fiel: mostra d20 cru + bônus = total vs CA + dados de dano rolados + mod.
            Antes era "Guerreiro causa X em Goblin" (sem breakdown). Agora:
            "Guerreiro acerta Goblin — d20 15+3=18 vs CA 15 | 2d10 [7+3]+3 = 13"
-           "Guerreiro ⚡CRITA Goblin — NAT 20! vs CA 15 | 4d10 [7+3+5+2]+3 = 20" */
+           "Guerreiro CRITA Goblin — NAT 20! vs CA 15 | 4d10 [7+3+5+2]+3 = 20" */
         var _atkPart = 'd20 ' + r + '+' + actor.atk +
             (atkExtra ? '+' + atkExtra : '') + '=' + hitRes.total +
             ' vs CA ' + effAc;
-        if (r === 20) _atkPart = '⚡ NAT 20! vs CA ' + effAc;
+        if (r === 20) _atkPart = 'NAT 20! vs CA ' + effAc;
         var _dmgDiceN = dmgRolls.length;
         var _dmgDiceD = dmgDieDisplay;
         var _dmgDicePart = _dmgDiceN + 'd' + _dmgDiceD + ' [' + dmgRolls.join('+') + '=' + dmgDice + ']';
@@ -30394,7 +30394,7 @@ async function playTurn(aIdx, tIdx, opts) {
         if (_flatMod > 0) _modPart = '+' + _flatMod;
         else if (_flatMod < 0) _modPart = String(_flatMod);
         var _dmgPart = _dmgDicePart + _modPart + ' = ' + total;
-        var _verb = hitRes.crit ? ' ⚡CRITA ' : ' acerta ';
+        var _verb = hitRes.crit ? ' CRITA ' : ' acerta ';
         s.log.push(actor.n + _verb + target.n + ' — ' + _atkPart + ' | ' + _dmgPart + bonusTag + '.');
     }
     s.last = { a: actor.n, t: target.n, r: r, hit: true, dmg: total, crit: critForDeath, tIdx: tIdx };
@@ -30799,13 +30799,13 @@ async function runNpcSegmentUntilPlayerTurn() {
                                     var _csTotal = _csRoll + _csProf + _csMod;
                                     _csSuccess = _csTotal >= _csDc;
                                     /* V1.7 Sprint-17 Ronda 31 (2026-04-21 QA log breakdown) — NAT 20/1 em Contramágica. */
-                                    var _csRollTxt = _csRoll === 20 ? '⚡ NAT 20!' : _csRoll === 1 ? '💥 NAT 1!' :
+                                    var _csRollTxt = _csRoll === 20 ? 'NAT 20!' : _csRoll === 1 ? 'NAT 1!' :
                                         'd20 ' + _csRoll + '+prof ' + _csProf + '+mod ' + _csMod + '=' + _csTotal;
                                     s.log.push(pCS.n + ' — Contramágica (magia nv ' + _cspellLvl + '): ' + _csRollTxt +
                                         ' vs CD ' + _csDc + ' ' + (_csSuccess ? 'SUCESSO' : 'FALHA') + ' (PHB p.228).');
                                 }
                                 if (_csSuccess) {
-                                    s.log.push(pCS.n + ' conjura ✨ Contramágica (reação) — dissipa ' + npcSkillChoice.n + ' do ' + c.n + '!');
+                                    s.log.push(pCS.n + ' conjura Contramágica (reação) — dissipa ' + npcSkillChoice.n + ' do ' + c.n + '!');
                                     counterspellUsed = true;
                                 } else {
                                     s.log.push(pCS.n + ' — Contramágica FALHA (' + npcSkillChoice.n + ' do ' + c.n + ' prossegue).');
@@ -30883,7 +30883,7 @@ async function runNpcSegmentUntilPlayerTurn() {
                             /* Push condição persistente — badge no card via render */
                             if (npcSkillChoice.buffSim && typeof pushBuffSim === 'function') {
                                 pushBuffSim(bu, npcSkillChoice.buffSim,
-                                    npcSkillChoice.ico || '✨',
+                                    npcSkillChoice.ico || '',
                                     npcSkillChoice.n || 'Efeito');
                             }
                         });

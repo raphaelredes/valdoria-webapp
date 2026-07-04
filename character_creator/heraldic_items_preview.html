@@ -11,26 +11,26 @@
   AGENTES IA — LEIA OBRIGATORIAMENTE ANTES DE EDITAR ESTE ARQUIVO
   ============================================================================
 
-  📐 REGRAS DE CRIAÇÃO (geometria, paleta, anti-patterns, workflow):
+  REGRAS DE CRIAÇÃO (geometria, paleta, anti-patterns, workflow):
      → docs/sistemas/heraldic-icons-creation-rules.md
 
-  📚 INVENTÁRIO DE IDs JÁ EXISTENTES (reuso > criação):
+  INVENTÁRIO DE IDs JÁ EXISTENTES (reuso > criação):
      → docs/sistemas/heraldic-icons-index.md
 
   Companion: docs/sistemas/INDEX.md (entradas 36a + 36b)
              MEMORY.md trigger: "icone heraldico" / "criar item SVG"
 
   REGRAS SOBERANAS (resumo — detalhes na doc de regras):
-   ❌ Sombra abaixo do item (cy=11x ellipse, drop-shadow Y>0) — PROIBIDA
-   ❌ Anel oval (rx≠ry) — usar <circle r=X>
-   ❌ Gold em items comuns — usar paleta rh-* diversa
-   ❌ Highlight tipo "blob" pequeno — usar arco curvo <path A>
-   ❌ Emoji como ícone heráldico — sempre SVG custom
-   ❌ Filter próprio em SVG — halo/aura via CSS por raridade automático
-   ✅ viewBox "0 0 120 120" sempre (centro 60,60)
-   ✅ Naming items: ic-it-NOME (snake-case)
-   ✅ Reusar bases (ic-it-base-*) sempre que possível
-   ✅ Items novos → atualizar ITEMS_DB em src/game/economy/item_registry_data.py
+   Sombra abaixo do item (cy=11x ellipse, drop-shadow Y>0) — PROIBIDA
+   Anel oval (rx≠ry) — usar <circle r=X>
+   Gold em items comuns — usar paleta rh-* diversa
+   Highlight tipo "blob" pequeno — usar arco curvo <path A>
+   Emoji como ícone heráldico — sempre SVG custom
+   Filter próprio em SVG — halo/aura via CSS por raridade automático
+   viewBox "0 0 120 120" sempre (centro 60,60)
+   Naming items: ic-it-NOME (snake-case)
+   Reusar bases (ic-it-base-*) sempre que possível
+   Items novos → atualizar ITEMS_DB em src/game/economy/item_registry_data.py
 
   ============================================================================
   MAPA_IA — heraldic_items_preview.html
@@ -15678,7 +15678,7 @@
       <!-- Compass label "DUNGEON" -->
       <text x="60" y="84" font-size="3" fill="#3a2810" text-anchor="middle" font-family="serif">MASMORRA</text>
       <!-- Mystery sigils on corner -->
-      <text x="22" y="46" font-size="6" fill="#3a2810" text-anchor="middle" font-family="serif" opacity="0.7">⚔</text>
+      <text x="22" y="46" font-size="6" fill="#3a2810" text-anchor="middle" font-family="serif" opacity="0.7"></text>
     </symbol>
 
     <!-- Other tools -->
@@ -20667,17 +20667,17 @@
     SVG heráldico AAA, sem gold forçado, mesmo padrão dos ícones de classe/raça.<br>
     Cada slot do inventário renderiza a 54×54 — preview mostra demo + grid grande por categoria.
   </p>
-  <input type="text" class="search-box" placeholder="🔍 Buscar item por nome..." id="search">
+  <input type="text" class="search-box" placeholder="Buscar item por nome..." id="search">
   <nav class="cat-nav">
-    <a href="#cat-weapon" class="active">⚔️ Armas + Focos</a>
-    <a href="#cat-armor">🛡️ Armaduras + Escudos</a>
-    <a href="#cat-consumable">🧪 Poções & Consumíveis</a>
-    <a href="#cat-gemrune">💎 Gemas & Runas</a>
-    <a href="#cat-accessory">💍 Acessórios</a>
-    <a href="#cat-loot">🏆 Loot & Troféus</a>
-    <a href="#cat-material">🪨 Materiais & Crafting</a>
-    <a href="#cat-tool">🗝️ Ferramentas & Quest</a>
-      <a href="#cat-needs-design">🆕 Batch 10 (Novos)</a>
+    <a href="#cat-weapon" class="active">Armas + Focos</a>
+    <a href="#cat-armor">Armaduras + Escudos</a>
+    <a href="#cat-consumable">Poções & Consumíveis</a>
+    <a href="#cat-gemrune">Gemas & Runas</a>
+    <a href="#cat-accessory">Acessórios</a>
+    <a href="#cat-loot">Loot & Troféus</a>
+    <a href="#cat-material">Materiais & Crafting</a>
+    <a href="#cat-tool">Ferramentas & Quest</a>
+      <a href="#cat-needs-design">Batch 10 (Novos)</a>
   </nav>
 </header>
 
@@ -20688,7 +20688,7 @@
 
   <!-- ═══════ CATEGORIA: ARMAS + FOCOS MÁGICOS ═══════ -->
   <section id="cat-weapon">
-    <h2>⚔️ Armas + Focos Mágicos <span style="color:#6a5a4a;font-size:14px">(Batch 1 — 99 itens)</span></h2>
+    <h2>Armas + Focos Mágicos <span style="color:#6a5a4a;font-size:14px">(Batch 1 — 99 itens)</span></h2>
 
     <!-- Faixa demo: tamanho real do slot do inventário (54×54) -->
     <div class="real-size-strip">
@@ -20864,7 +20864,7 @@
 
   <!-- ═══════ CATEGORIA: ARMADURAS + ESCUDOS ═══════ -->
   <section id="cat-armor">
-    <h2>🛡️ Armaduras + Escudos + Elmos <span style="color:#6a5a4a;font-size:14px">(Batch 2 — 47 itens)</span></h2>
+    <h2>Armaduras + Escudos + Elmos <span style="color:#6a5a4a;font-size:14px">(Batch 2 — 47 itens)</span></h2>
 
     <!-- Demo strip 54×54 -->
     <div class="real-size-strip">
@@ -20979,7 +20979,7 @@
 
   <!-- ═══════ CATEGORIA: POÇÕES & CONSUMÍVEIS ═══════ -->
   <section id="cat-consumable">
-    <h2>🧪 Poções & Consumíveis <span style="color:#6a5a4a;font-size:14px">(Batch 3 — 41 itens)</span></h2>
+    <h2>Poções & Consumíveis <span style="color:#6a5a4a;font-size:14px">(Batch 3 — 41 itens)</span></h2>
 
     <!-- Demo strip 54×54 -->
     <div class="real-size-strip">
@@ -21078,7 +21078,7 @@
 
   <!-- ═══════ CATEGORIA: GEMAS & RUNAS ═══════ -->
   <section id="cat-gemrune">
-    <h2>💎 Gemas & Runas <span style="color:#6a5a4a;font-size:14px">(Batch 4 — 22 itens)</span></h2>
+    <h2>Gemas & Runas <span style="color:#6a5a4a;font-size:14px">(Batch 4 — 22 itens)</span></h2>
 
     <div class="real-size-strip">
       <div class="lbl">Demo: como aparecem nos slots reais (54×54px)</div>
@@ -21150,7 +21150,7 @@
 
   <!-- ═══════ CATEGORIA: ACESSÓRIOS ═══════ -->
   <section id="cat-accessory">
-    <h2>💍 Acessórios <span style="color:#6a5a4a;font-size:14px">(Batch 5 — 33 itens)</span></h2>
+    <h2>Acessórios <span style="color:#6a5a4a;font-size:14px">(Batch 5 — 33 itens)</span></h2>
 
     <div class="real-size-strip">
       <div class="lbl">Demo: como aparecem nos slots reais (54×54px)</div>
@@ -21237,7 +21237,7 @@
 
   <!-- ═══════ CATEGORIA: LOOT & TROFÉUS ═══════ -->
   <section id="cat-loot">
-    <h2>🏆 Loot & Troféus <span style="color:#6a5a4a;font-size:14px">(Batch 6 — 60+ itens)</span></h2>
+    <h2>Loot & Troféus <span style="color:#6a5a4a;font-size:14px">(Batch 6 — 60+ itens)</span></h2>
 
     <div class="real-size-strip">
       <div class="lbl">Demo: como aparecem nos slots reais (54×54px)</div>
@@ -21377,7 +21377,7 @@
 
   <!-- ═══════ CATEGORIA: MATERIAIS & CRAFTING ═══════ -->
   <section id="cat-material">
-    <h2>🪨 Materiais & Crafting <span style="color:#6a5a4a;font-size:14px">(Batch 7 — 18 itens)</span></h2>
+    <h2>Materiais & Crafting <span style="color:#6a5a4a;font-size:14px">(Batch 7 — 18 itens)</span></h2>
 
     <div class="real-size-strip">
       <div class="lbl">Demo: como aparecem nos slots reais (54×54px)</div>
@@ -21429,7 +21429,7 @@
 
   <!-- ═══════ CATEGORIA: FERRAMENTAS & QUEST ═══════ -->
   <section id="cat-tool">
-    <h2>🗝️ Ferramentas & Quest <span style="color:#6a5a4a;font-size:14px">(Batch 8 — 35 itens)</span></h2>
+    <h2>Ferramentas & Quest <span style="color:#6a5a4a;font-size:14px">(Batch 8 — 35 itens)</span></h2>
 
     <div class="real-size-strip">
       <div class="lbl">Demo: como aparecem nos slots reais (54×54px)</div>
@@ -21510,7 +21510,7 @@
 
                 <!-- ═══════ BATCH 10 — Novos ícones AAA (2026-05-15) ═══════ -->
   <section id="cat-needs-design" class="cat-needs-design">
-    <h2>🆕 Batch 10 — Novos Ícones AAA <span style="color:#7aa030;font-size:14px">(cobertura 100% • 160 itens novos)</span></h2>
+    <h2>Batch 10 — Novos Ícones AAA <span style="color:#7aa030;font-size:14px">(cobertura 100% • 160 itens novos)</span></h2>
     <p style="color:var(--v-text-dim, #a09484);margin: var(--v-space-md, 8px) 0 14px;font-size:13px;">
       <b style="color:#a8d050;">✓ Todos os 540 itens de ITEMS_DB agora têm ícone heráldico próprio.</b><br>
       Estes 160 ícones foram criados em <code>scripts/icon_library_batch10.py</code> seguindo o padrão
@@ -22039,8 +22039,8 @@
 <footer>
   <p><strong>Preview Heráldicos AAA — Lendas de Valdoria</strong></p>
   <p>Batches 1-9 ENTREGUES · ~340 itens com SVG heráldico AAA</p>
-  <p>📋 Batch 1 (99 armas+focos) · Batch 2 (47 armaduras+escudos+elmos) · Batch 3 (41 consumíveis) · Batch 4 (22 gemas+runas) · Batch 5 (33 acessórios) · Batch 6 (60+ loot/troféus) · Batch 7 (18 materiais) · Batch 8 (35 ferramentas+quest)</p>
-  <p>🐺 Batch 9 (sets) — 11 set pieces de armadura no Batch 2 + 4 set weapons no Batch 1 + 2 set foci no Batch 1 = TODOS os 24 set pieces dos 8 conjuntos cobertos</p>
+  <p>Batch 1 (99 armas+focos) · Batch 2 (47 armaduras+escudos+elmos) · Batch 3 (41 consumíveis) · Batch 4 (22 gemas+runas) · Batch 5 (33 acessórios) · Batch 6 (60+ loot/troféus) · Batch 7 (18 materiais) · Batch 8 (35 ferramentas+quest)</p>
+  <p>Batch 9 (sets) — 11 set pieces de armadura no Batch 2 + 4 set weapons no Batch 1 + 2 set foci no Batch 1 = TODOS os 24 set pieces dos 8 conjuntos cobertos</p>
   <p style="margin-top: var(--v-space-md, 8px);color:var(--v-border, #4a3828)">Abra via <code style="color:#a89478">file://</code> — sem necessidade de servidor.</p>
 </footer>
 
