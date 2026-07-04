@@ -185,7 +185,7 @@ function renderHubScreen(el, screen) {
         if (_isCTA(allBtns[ci])) { ctaBtn = allBtns[ci]; break; }
     }
     if (ctaBtn) {
-        var ctaEl = _hubBtn('hub-cta', ctaBtn.text || '\u2694\uFE0F PARTIR PARA AVENTURA', ctaBtn.cb);
+        var ctaEl = _hubBtn('hub-cta', ctaBtn.text || 'PARTIR PARA AVENTURA', ctaBtn.cb);
         frag.appendChild(ctaEl);
     }
 
@@ -199,7 +199,7 @@ function renderHubScreen(el, screen) {
             || nText.indexOf('descansar') >= 0 || nText.indexOf('ferida') >= 0
             || nText.indexOf('critico') >= 0 || nText.indexOf('cr\u00edtico') >= 0) {
             var alertEl = _hubDiv('hub-alert');
-            alertEl.textContent = '\u26A0\uFE0F ' + n.text;
+            alertEl.textContent = n.text;
             frag.appendChild(alertEl);
             break; /* mostra apenas o primeiro alerta */
         }
@@ -382,7 +382,7 @@ function _buildHubAlly(a) {
     if (a.dead) card.classList.add('dead');
 
     /* Emoji icon */
-    var ico = _hubSpan('ha-ico', a.ico || '\u2694\uFE0F');
+    var ico = _hubSpan('ha-ico', a.ico || '');
     card.appendChild(ico);
 
     /* Info column: name + bars */
@@ -547,7 +547,7 @@ function _buildQuestRow(q) {
     /* Status indicator */
     var statusEl = _hubSpan('hq-status');
     if (q.ready) {
-        statusEl.textContent = '\u2705'; /* check mark — pronta para entregar */
+        statusEl.textContent = '\u2713'; /* check mark — pronta para entregar */
     } else {
         statusEl.textContent = (q.stage || 0) + '/' + (q.total || 0);
     }
