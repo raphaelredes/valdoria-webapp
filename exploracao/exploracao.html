@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-04T12:03:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-04T19:47:13Z - do not edit directly, edit source -->
 
 
 
@@ -34538,7 +34538,10 @@ function _expMatIco(mat) {
 function _expEnemyIco(e) {
   var s = _expIcoSlug(e && e.name);
   if (!s) return '';
-  return '<img class="exp-ico-img" src="/shared/img/combat/enemies/' + s + '.webp" alt="" onerror="this.style.display=\'none\'">';
+  // nomes-variante (ex.: "Lobo Cinzento") podem não ter webp próprio -> fallback p/ ícone
+  // genérico de inimigo (combat/inimigo.webp) em vez de sumir; 2º erro = esconde.
+  return '<img class="exp-ico-img" src="/shared/img/combat/enemies/' + s + '.webp" alt="" '
+    + 'onerror="if(this.dataset.fb){this.style.display=\'none\';}else{this.dataset.fb=1;this.src=\'/shared/img/combat/inimigo.webp\';}">';
 }
 function _exploreRarityMeta(name) {
   var DB = window.ITEMS_DB || {};
