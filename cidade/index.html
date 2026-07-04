@@ -4885,7 +4885,11 @@ body.perf-lite .vc-action-btn { transition: none; }
       border-radius: var(--v-radius-sm, 6px);
       color: var(--v-gold, #c4953a);
       cursor: pointer;
-      font-size: var(--v-font-base, 13px);
+      /* 2026-07-03: label textual "Auto" (era emoji ✨) — fonte menor p/ caber em 32px. */
+      font-size: var(--v-font-xs, 10px);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -5421,6 +5425,11 @@ body.perf-lite .vc-action-btn { transition: none; }
     .city-sector-tab .cst-ico-img { width: 16px; height: 16px; vertical-align: middle; object-fit: contain; display: inline-block; }
     /* Helper genérico de ícone UI webp (ex.: botão Viajar). */
     .ui-ico-img { width: 14px; height: 14px; vertical-align: middle; object-fit: contain; display: inline-block; }
+    /* 2026-07-03: aba Equipar/Aliados — emoji → webp (stat icons + retrato de classe). */
+    .eq-stat-ico { width: 13px; height: 13px; vertical-align: middle; object-fit: contain; display: inline-block; }
+    .eq-tgt-ico { width: 16px; height: 16px; vertical-align: middle; object-fit: cover; border-radius: 3px; display: inline-block; }
+    .ally-portrait-ico { width: 18px; height: 18px; vertical-align: middle; object-fit: cover; border-radius: 4px; display: inline-block; }
+    .ally-ico .ally-portrait-ico { width: 22px; height: 22px; }
 
     /* Sessão #38 (2026-05-26) bug fix — empty-state quando sector sem locations.
        Antes: tabs + grid sumiam → dead-end. Agora: tabs continuam + info card explica. */
@@ -40453,7 +40462,9 @@ function _getActiveAllies(){
       level: m.level || 1,
       hp: m.hp || 0, hpMax: m.hpMax || 0,
       mp: m.mp || 0, mpMax: m.mpMax || 0,
-      ico: m.ico || (m.cls === 'guerreiro' ? '⚔️' : m.cls === 'sacerdotisa' ? '✨' : m.cls === 'mago' ? '🔮' : '🛡️')
+      // Retrato de classe (WebP via _allyClassIco) substitui o emoji de classe
+      // (regra "Emojis Permanentemente Banidos"). ico fica só p/ backend familiares/mercs.
+      ico: m.ico || ''
     });
   }
   return allies;
@@ -41953,18 +41964,18 @@ function _renderEquipTabHtml(){
     var p = window.CITY_MOCK_PLAYER;
     var pName = p ? (p.name || 'Personagem') : 'Personagem';
     switcherHtml = '<div class="eq-target-switcher">'
-      + '<button class="eq-target-btn' + (window._invActiveTarget === 'player' ? ' active' : '') + '" data-target="player">⚜️ ' + pName + '</button>';
+      + '<button class="eq-target-btn' + (window._invActiveTarget === 'player' ? ' active' : '') + '" data-target="player">' + _uiIcoImg('coroa', 'eq-tgt-ico') + ' ' + pName + '</button>';
     allies.forEach(function(a){
-      switcherHtml += '<button class="eq-target-btn' + (window._invActiveTarget === a.id ? ' active' : '') + '" data-target="' + a.id + '">' + (a.ico || '🛡️') + ' ' + a.name + '</button>';
+      switcherHtml += '<button class="eq-target-btn' + (window._invActiveTarget === a.id ? ' active' : '') + '" data-target="' + a.id + '">' + _allyClassIco(a.cls, 'eq-tgt-ico') + ' ' + a.name + '</button>';
     });
     switcherHtml += '</div>';
   }
   var totals = _calcEquipStatsSummary();
   var summaryParts = [];
-  if (totals.ac)  summaryParts.push('🛡️ CA <b>+' + totals.ac + '</b>');
-  if (totals.atk) summaryParts.push('⚔️ ATK <b>+' + totals.atk + '</b>');
-  if (totals.hp)  summaryParts.push('❤️ HP <b>+' + totals.hp + '</b>');
-  if (totals.mp)  summaryParts.push('💧 MP <b>+' + totals.mp + '</b>');
+  if (totals.ac)  summaryParts.push(_uiIcoImg('stat-ac', 'eq-stat-ico') + ' CA <b>+' + totals.ac + '</b>');
+  if (totals.atk) summaryParts.push(_uiIcoImg('stat-attack', 'eq-stat-ico') + ' ATK <b>+' + totals.atk + '</b>');
+  if (totals.hp)  summaryParts.push(_uiIcoImg('stat-hp', 'eq-stat-ico') + ' HP <b>+' + totals.hp + '</b>');
+  if (totals.mp)  summaryParts.push(_uiIcoImg('stat-mp', 'eq-stat-ico') + ' MP <b>+' + totals.mp + '</b>');
   // Stats + Auto-equip em ROW única compacta (otimizado pra viewport ~384px).
   // Stats inline (CA/ATK/HP/MP) + botão Auto à direita.
   var statsInlineHtml = summaryParts.length
@@ -41972,7 +41983,7 @@ function _renderEquipTabHtml(){
     : '<span class="eq-stats-empty">— Sem bônus equipados —</span>';
   var headerRowHtml = '<div class="eq-header-row">'
     + '<div class="eq-stats-inline">' + statsInlineHtml + '</div>'
-    + '<button class="eq-auto-btn-compact" id="eq-auto-btn" title="Auto-Equipar">✨</button>'
+    + '<button class="eq-auto-btn-compact" id="eq-auto-btn" title="Auto-Equipar">Auto</button>'
     + '</div>';
   // Body silhouette: 2-col grid (mesmo SLOT_ORDER do webapp) — usa current target
   var eq = _getCurrentEquipped();
@@ -42054,28 +42065,28 @@ function _renderAlliesTabHtml(){
     window._invActiveTarget = prevTarget;
     var ac = 10 + totals.ac;
     var hpBar = '<div class="ally-bar-row">'
-      + '<span class="ally-bar-label">❤️ ' + a.hp + '/' + a.hpMax + '</span>'
+      + '<span class="ally-bar-label">' + _uiIcoImg('stat-hp', 'ui-ico-img') + ' ' + a.hp + '/' + a.hpMax + '</span>'
       + '<div class="ally-bar-track"><div class="ally-bar-fill ' + hpCls + '" style="width:' + hpPct + '%"></div></div>'
       + '</div>';
     var mpBar = '';
     if (a.mpMax > 0){
       var mpPct = Math.round(a.mp / a.mpMax * 100);
       mpBar = '<div class="ally-bar-row">'
-        + '<span class="ally-bar-label">💧 ' + a.mp + '/' + a.mpMax + '</span>'
+        + '<span class="ally-bar-label">' + _uiIcoImg('stat-mp', 'ui-ico-img') + ' ' + a.mp + '/' + a.mpMax + '</span>'
         + '<div class="ally-bar-track"><div class="ally-bar-fill bar-mp" style="width:' + mpPct + '%"></div></div>'
         + '</div>';
     }
     html += '<div class="ally-card" data-ally="' + a.id + '">'
       + '<div class="ally-header">'
-      +   '<span class="ally-ico">' + (a.ico || '🛡️') + '</span>'
+      +   '<span class="ally-ico">' + _allyClassIco(a.cls) + '</span>'
       +   '<div class="ally-name-col">'
       +     '<span class="ally-name">' + a.name + '</span>'
       +     '<span class="ally-class">' + a.cls + ' · Nv ' + a.level + '</span>'
       +   '</div>'
-      +   '<span class="ally-ac">🛡️ CA ' + ac + '</span>'
+      +   '<span class="ally-ac">' + _uiIcoImg('stat-ac', 'ui-ico-img') + ' CA ' + ac + '</span>'
       + '</div>'
       + '<div class="ally-bars">' + hpBar + mpBar + '</div>'
-      + '<div class="ally-action-hint">⚔️ Tocar para gerenciar equipamento</div>'
+      + '<div class="ally-action-hint">' + _uiIcoImg('acao-atacar', 'ui-ico-img') + ' Tocar para gerenciar equipamento</div>'
       + '</div>';
   });
   html += '</div>';
@@ -54491,6 +54502,18 @@ function _cgpHeraldicIcon(cls){
     barbaro: 'ic-barbaro'
   };
   return MAP[k] || 'ic-guerreiro';  // fallback aliado/desconhecido
+}
+// Retrato de classe do aliado (WebP) — substitui o emoji de classe na aba
+// Equipar/Aliados (regra "Emojis Permanentemente Banidos"). cls PT-BR -> combat/<key>.webp.
+// Reusa _cgpClsKey p/ normalizar; fallback 'guerreiro' (igual _cgpHeraldicIcon).
+var _ALLY_PORTRAIT_KEYS = { sacerdotisa: 'clerigo', sacerdote: 'clerigo', aliado: 'guerreiro', 'meio-elfo': 'guerreiro' };
+var _ALLY_PORTRAIT_VALID = { barbaro:1, bardo:1, bruxo:1, clerigo:1, druida:1, feiticeiro:1, guerreiro:1, ladino:1, mago:1, monge:1, paladino:1, patrulheiro:1 };
+function _allyClassIco(cls, extraCls){
+  var k = _cgpClsKey(cls);
+  k = _ALLY_PORTRAIT_KEYS[k] || k;
+  if (!_ALLY_PORTRAIT_VALID[k]) k = 'guerreiro';
+  return '<img class="' + (extraCls || 'ally-portrait-ico') + '" src="/shared/img/combat/'
+       + k + '.webp" alt="" onerror="this.style.display=\'none\'">';
 }
 /* 2026-05-11 (user request): "garanta que tudo esteja em PT-BR".
    Traduz race + class de EN -> PT-BR canonical (per CLAUDE.md "Nomes de
