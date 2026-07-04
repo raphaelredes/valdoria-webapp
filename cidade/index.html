@@ -8474,9 +8474,9 @@ body.perf-lite .vc-action-btn { transition: none; }
             var _bits = [];
             if (_ag && +_ag > 0) _bits.push('+' + _ag + ' Valdoritas');
             if (_ax && +_ax > 0) _bits.push('+' + _ax + ' XP');
-            vToast('🏟️ Vitória na arena!' + (_bits.length ? ' ' + _bits.join(' · ') : ''), 'ok');
+            vToast('Vitória na arena!' + (_bits.length ? ' ' + _bits.join(' · ') : ''), 'ok');
           } else if (_av === '0') {
-            vToast('🏟️ Derrota na arena. Treine e volte mais forte.', 'warn');
+            vToast('Derrota na arena. Treine e volte mais forte.', 'warn');
           }
         } catch (_) {}
       }
@@ -9742,12 +9742,14 @@ function _isCTA(btn) {
   // Se Geral=OFF, suprime tudo. Se Geral=ON, cada sub-categoria controla.
   // Sessão #23 (2026-05-22): rich notifications — prefixo visual por categoria.
   // Cada categoria tem ícone + cor accent que dá hierarquia visual no toast.
+  // 2026-07-03: emoji -> ui/*.webp (regra "Emojis Permanentemente Banidos").
+  // iconWebp = nome do webp; icon = glifo tipográfico permitido (◆). Render em vNotify.
   var _NOTIF_META = {
-    'general':      { icon: '🔔', accent: '#c4953a', label: 'Aviso' },
-    'daily_quests': { icon: '◆', accent: '#7dba5b', label: 'Missão' },
-    'festivals':    { icon: '🎉', accent: '#ffb84d', label: 'Festival' },
-    'auction':      { icon: '⚖️', accent: '#9050a0', label: 'Leilão' },
-    'trade':        { icon: '🪙', accent: '#5b9dba', label: 'Comércio' }
+    'general':      { iconWebp: 'sino',       accent: '#c4953a', label: 'Aviso' },
+    'daily_quests': { icon: '◆',              accent: '#7dba5b', label: 'Missão' },
+    'festivals':    { iconWebp: 'recompensa', accent: '#ffb84d', label: 'Festival' },
+    'auction':      { iconWebp: 'cofre',      accent: '#9050a0', label: 'Leilão' },
+    'trade':        { iconWebp: 'bolsa',      accent: '#5b9dba', label: 'Comércio' }
   };
   window.vNotify = function(category, message, opts){
     opts = opts || {};
@@ -9758,8 +9760,9 @@ function _isCTA(btn) {
     if (!subOn && !opts.force) return;
     if (typeof window.vToast === 'function') {
       var meta = _NOTIF_META[category] || _NOTIF_META.general;
-      // Rich: ícone + label colorido + mensagem
-      var rich = '<span style="color:' + meta.accent + ';font-weight:700;letter-spacing:0.5px;">' + meta.icon + ' ' + meta.label + ':</span> ' + message;
+      // Rich: ícone (webp ou glifo) + label colorido + mensagem
+      var metaIco = meta.iconWebp ? _uiIcoImg(meta.iconWebp, 'ui-ico-img') : (meta.icon || '');
+      var rich = '<span style="color:' + meta.accent + ';font-weight:700;letter-spacing:0.5px;">' + metaIco + ' ' + meta.label + ':</span> ' + message;
       window.vToast(rich, opts.type || 'ok', opts.duration);
     }
     // Vibração leve em notif (se vibração ON)
@@ -11426,7 +11429,7 @@ function _advanceDiscoveryStage(nextStageId){
     _closeDiscoveryPopup();
     var locKey = _findLocByCb(quest.targetCb);
     var locLabel = (locKey && CITY_LOCATIONS[locKey]) ? CITY_LOCATIONS[locKey].label : quest.targetCb;
-    if (typeof vToast === 'function') vToast('✨ ' + locLabel + ' liberado!');
+    if (typeof vToast === 'function') vToast(_uiIcoImg('sucesso','ui-ico-img') + ' ' + locLabel + ' liberado!');
     // Sessao #68: descoberta pode CONCEDER uma missao ao completar (data-driven
     // via quest.grantsQuest). Usado pelos Portoes -> a Ancia confia o pergaminho
     // de Lyana. Idempotente (nao duplica se ja ativa). Como a descoberta e
@@ -11707,7 +11710,7 @@ function _applyDiscoveryAnimations(rootEl){
         cell.classList.add('hub-loc--new');     // Badge "NOVO!" SO na primeira vez
         cell.classList.add('discovering');      // Sparkle animation
         _markLocationSeen(matched.cb);          // Registra (proximas renders NAO mostram "NOVO!")
-        if (typeof vToast === 'function') vToast('✨ Você descobriu ' + matched.label + '!');
+        if (typeof vToast === 'function') vToast(_uiIcoImg('sucesso','ui-ico-img') + ' Você descobriu ' + matched.label + '!');
       }
       // Sessão #66 (FIX badge reaparece): local JÁ VISTO + descoberta NÃO iniciada
       // → SEM badge. Antes adicionava hub-loc--inprogress (📜), que ficava nagando
@@ -12453,7 +12456,7 @@ function _showCharactersPopup(){
     var creationToken = token;  // fallback se handshake falhar
     var charId = '';
     try {
-      vToast('🎭 Preparando criação...');
+      vToast('Preparando criação...');
       var apiTrim = api.replace(/\/$/, '');
       var resp = await fetch(apiTrim + '/api/character/new_session', {
         method: 'POST',
@@ -12470,18 +12473,18 @@ function _showCharactersPopup(){
           charId = data.char_id || '';
         } else {
           _cityCreatorBootHide();
-          vToast('⚠️ Sessão inválida. Faça login no bot.');
+          vToast(_uiIcoImg('alerta','ui-ico-img') + ' Sessão inválida. Faça login no bot.');
           return;
         }
       } else {
         _cityCreatorBootHide();
-        vToast('⚠️ Erro de sessão (' + resp.status + ').');
+        vToast(_uiIcoImg('alerta','ui-ico-img') + ' Erro de sessão (' + resp.status + ').');
         return;
       }
     } catch (e) {
       _cityCreatorBootHide();
       console.warn('[CITY] new_session handshake failed:', e);
-      vToast('⚠️ Erro de conexão.');
+      vToast(_uiIcoImg('alerta','ui-ico-img') + ' Erro de conexão.');
       return;
     }
     var newParams = new URLSearchParams();
@@ -12594,7 +12597,7 @@ function _doDeleteChar(charId, charName){
     if (window._hallSelectedId === charId){
       window._hallSelectedId = window._mockCharacters[0] ? window._mockCharacters[0].id : null;
     }
-    vToast('🗑 ' + _titleCase(charName) + ' arquivado.');
+    vToast('' + _titleCase(charName) + ' arquivado.');
     _showCharactersPopup();  // re-render
     return;
   }
@@ -12675,7 +12678,7 @@ function _doDeleteChar(charId, charName){
           if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
           // Auto-switch falhou — usuário precisa selecionar manualmente.
           // Mostra Hall (com nenhum char marcado active) + toast explicativo.
-          vToast('⚠️ Selecione um personagem pra continuar.');
+          vToast(_uiIcoImg('alerta','ui-ico-img') + ' Selecione um personagem pra continuar.');
           console.warn('[CITY] auto-switch after delete failed:', err);
           window._hallSelectedId = _firstRemaining ? _firstRemaining.id : null;
           _showCharactersPopup();
@@ -12697,11 +12700,11 @@ function _doDeleteChar(charId, charName){
       // active continua false em todos.
       window._hallSelectedId = _firstRemaining ? _firstRemaining.id : null;
     }
-    vToast('🗑 ' + _titleCase(charName) + ' arquivado.');
+    vToast('' + _titleCase(charName) + ' arquivado.');
     _showCharactersPopup();  // re-render (mostra na lista de arquivados)
   }).catch(function(err){
     if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
-    vToast('❌ Falha: ' + (err.message || err));
+    vToast(_uiIcoImg('falha','ui-ico-img') + ' Falha: ' + (err.message || err));
     console.error('[CITY] delete-character failed:', err);
   });
 }
@@ -12828,7 +12831,7 @@ function _loadHallArchivedChars(){
         ev.stopPropagation();
         var nm = btn.getAttribute('data-arch-name') || 'este personagem';
         if (typeof vToast === 'function') {
-          vToast('📩 Tickets de suporte em breve. Use /ticket no bot Telegram.', 4000);
+          vToast(_uiIcoImg('mensagem','ui-ico-img') + ' Tickets de suporte em breve. Use /ticket no bot Telegram.', 4000);
         } else {
           alert('Tickets de suporte: use /ticket no bot Telegram para restaurar ' + nm + '.');
         }
@@ -12877,7 +12880,7 @@ function _doRestoreChar(charId, charName){
     _showCharactersPopup();  // re-render
   }).catch(function(err){
     if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
-    vToast('❌ ' + (err.message || err));
+    vToast(_uiIcoImg('falha','ui-ico-img') + ' ' + (err.message || err));
     console.error('[CITY] restore-character failed:', err);
   });
 }
@@ -13217,7 +13220,7 @@ function _showFirstTimeTutorial(stepIdx){
       haptic('light');
       _markTutorialSeen();
       ov.remove();
-      vToast('💡 Tutorial pode ser visto depois em Menu → Guia.', 3500);
+      vToast(_uiIcoImg('info','ui-ico-img') + ' Tutorial pode ser visto depois em Menu → Guia.', 3500);
     });
     document.getElementById('ft-prev').addEventListener('click', function(){
       haptic('light');
@@ -13232,7 +13235,7 @@ function _showFirstTimeTutorial(stepIdx){
       } else {
         _markTutorialSeen();
         ov.remove();
-        vToast('🎉 Tutorial concluído! Boa aventura.', 3000);
+        vToast(_uiIcoImg('recompensa','ui-ico-img') + ' Tutorial concluído! Boa aventura.', 3000);
       }
     });
   }
@@ -13724,7 +13727,7 @@ function _linkGoogleStart(){
   var token = params.get('token') || '';
   var api = (params.get('api') || '').replace(/\/$/, '');
   if (!token || !api){
-    vToast('⚠️ Sessão expirada. Reabra o jogo.');
+    vToast(_uiIcoImg('alerta','ui-ico-img') + ' Sessão expirada. Reabra o jogo.');
     return;
   }
   try {
@@ -13745,7 +13748,7 @@ function _linkGoogleStart(){
   try {
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openLink){
       Telegram.WebApp.openLink(linkUrl, { try_instant_view: false });
-      vToast('🔗 Abrindo Google em nova janela…');
+      vToast('Abrindo Google em nova janela…');
       return;
     }
   } catch(_e){}
@@ -13760,7 +13763,7 @@ function _linkTelegramStart(){
   var token = params.get('token') || '';
   var api = (params.get('api') || '').replace(/\/$/, '');
   if (!token || !api){
-    vToast('⚠️ Sessão expirada. Reabra o jogo.');
+    vToast(_uiIcoImg('alerta','ui-ico-img') + ' Sessão expirada. Reabra o jogo.');
     return;
   }
   var tg = window.Telegram && Telegram.WebApp;
@@ -13771,7 +13774,7 @@ function _linkTelegramStart(){
     // mas pro link precisamos do raw HMAC string que será validado server-side.
     var user = tg.initDataUnsafe && tg.initDataUnsafe.user;
     if (!user || !user.id){
-      vToast('⚠️ Dados do Telegram indisponíveis.');
+      vToast(_uiIcoImg('alerta','ui-ico-img') + ' Dados do Telegram indisponíveis.');
       return;
     }
     // Reconstrói tg_data compatível com _verify_telegram_login (formato
@@ -13781,7 +13784,7 @@ function _linkTelegramStart(){
     var hash = tgParams.get('hash') || '';
     var authDate = tgParams.get('auth_date') || '';
     if (!hash){
-      vToast('⚠️ Hash Telegram ausente.');
+      vToast(_uiIcoImg('alerta','ui-ico-img') + ' Hash Telegram ausente.');
       return;
     }
     var tg_data = {
@@ -13833,13 +13836,13 @@ function _linkTelegramStart(){
       });
     }).catch(function(err){
       if (typeof vProcessing !== 'undefined' && vProcessing.hide) vProcessing.hide();
-      vToast('⚠️ Erro de rede: ' + (err.message || err));
+      vToast(_uiIcoImg('alerta','ui-ico-img') + ' Erro de rede: ' + (err.message || err));
     });
     return;
   }
   // Caso 2: fora do TG WebApp — instrução pra abrir o bot manualmente
   // (futuro: implementar polling igual ao apoie, requer token KV).
-  vToast('🔗 Abra o jogo dentro do Telegram pra vincular esta conta TG.');
+  vToast('Abra o jogo dentro do Telegram pra vincular esta conta TG.');
 }
 
 // === CONFIGURAÇÕES — replica fiel do bot DEV/PROD (game-settings-popup) ===
@@ -14567,7 +14570,7 @@ function _showStatusPopup(memberIdx){
   // FIX 2026-05-04: persiste memberIdx pra refreshHud() re-renderizar mesmo membro
   window._fichaMemberIdx = memberIdx;
   var m = _getFichaMember(memberIdx);
-  if (!m) { vToast('❌ Membro não encontrado.'); return; }
+  if (!m) { vToast(_uiIcoImg('falha','ui-ico-img') + ' Membro não encontrado.'); return; }
 
   // Sessão #56 (2026-05-28) — Demand D: header "Ficha" → "Ficha do Aventureiro"
   if (titleEl) titleEl.textContent = 'Ficha do Aventureiro';
@@ -41595,7 +41598,7 @@ function _getJunkInventory(){
 
 function _showJunkSellerModal(){
   var info = _getJunkInventory();
-  if (info.count === 0){ vToast('🗑️ Nada de lixo pra vender.'); return; }
+  if (info.count === 0){ vToast('Nada de lixo pra vender.'); return; }
   var ov = document.getElementById('inv-detail-overlay');
   var card = document.getElementById('inv-detail-card');
   if (!ov || !card) return;
@@ -42232,7 +42235,7 @@ function _doAutoEquip(){
     }
   });
   if (equipped > 0){
-    vToast('✨ ' + equipped + ' equipamento(s) otimizado(s) em ' + _getActiveTargetName() + '!');
+    vToast(_uiIcoImg('sucesso','ui-ico-img') + ' ' + equipped + ' equipamento(s) otimizado(s) em ' + _getActiveTargetName() + '!');
     // Consolidação client: persiste o auto-equip — player→equip.set, aliado→equip.set_ally.
     _persistEquipForActiveTarget();
     _renderInventoryPopup();
@@ -42813,7 +42816,7 @@ function _showShopItemDetail(name, npcId){
       return;
     }
     var res = _marketAttemptHaggle(name, npcId, p, 'persuasion');
-    if (res.blocked){ vToast('⚠️ ' + res.reason, 'warn'); return; }
+    if (res.blocked){ vToast(_uiIcoImg('alerta','ui-ico-img') + ' ' + res.reason, 'warn'); return; }
     _marketShowHaggleResult(name, npcId, res, function(){
       // re-render detail card pra mostrar negNote atualizado
       _showShopItemDetail(name, npcId);
@@ -42827,7 +42830,7 @@ function _showShopItemDetail(name, npcId){
       return;
     }
     var res = _marketAttemptHaggle(name, npcId, p, 'intimidation');
-    if (res.blocked){ vToast('⚠️ ' + res.reason, 'warn'); return; }
+    if (res.blocked){ vToast(_uiIcoImg('alerta','ui-ico-img') + ' ' + res.reason, 'warn'); return; }
     _marketShowHaggleResult(name, npcId, res, function(){
       _showShopItemDetail(name, npcId);
     });
@@ -44184,7 +44187,7 @@ function _marketShowSell(p){
       var isMagic = item._isMagic;
 
       if (_isItemEquipped(it.n)) {
-        vToast('⚠️ Item equipado. Desequipe antes de vender.', 'warn');
+        vToast(_uiIcoImg('alerta','ui-ico-img') + ' Item equipado. Desequipe antes de vender.', 'warn');
         return;
       }
 
@@ -46986,7 +46989,7 @@ function _questsShowTab(p, tab){
 
 function _showDailyChallengeEpicPopup(p){
   if (typeof _dailyChallengeForToday !== 'function') {
-    vToast('⚠️ Desafio Diário indisponível.');
+    vToast(_uiIcoImg('alerta','ui-ico-img') + ' Desafio Diário indisponível.');
     return;
   }
   var ch = _dailyChallengeForToday();
@@ -52908,7 +52911,7 @@ var ACTION_HANDLERS = {
   'guild_ranking':          function(p){ vToast('🏆 Ranking guilda — Posição #47 / 142 membros ativos. Top 33%.'); },
 
   // Temple misc
-  'temple_talk_elara':      function(p){ vToast('✨ Elara: "A luz divina protege quem busca o bem. Mantém-te no caminho."'); _gainXp(p, 5); },
+  'temple_talk_elara':      function(p){ vToast(_uiIcoImg('sucesso','ui-ico-img') + ' Elara: "A luz divina protege quem busca o bem. Mantém-te no caminho."'); _gainXp(p, 5); },
   'temple_debt':            function(p){ ACTION_HANDLERS['temple_pay_debt'](p); },  // legacy → Fase 9.1
   // Temple priest deep talks (sub-screens novos)
   'rel_temple_aldric_talk': function(p){ vToast('🛡️ Aldric: "O veneno tem cura, mas o melhor é prevenção. Carrega antídotos."'); },
@@ -52947,7 +52950,7 @@ var ACTION_HANDLERS = {
   // Square — interactions
   'circus_watch':           function(p){ vToast('👀 Performance encantadora. +1 morale.'); _gainXp(p, 5); },
   'circus_bet':             function(p){ if (!_pay(p, 5)) return; var w=Math.random()<0.5; if (w){p.gold+=12; vToast('<span class="vi vi-coin sm"></span> Acertou aposta! +12 Valdoritas');} else vToast('<span class="vi vi-coin sm"></span> Errou. -5 Valdoritas'); refreshHud(); },
-  'circus_perform':         function(p){ if (!_pay(p, 0)) return; var roll=1+Math.floor(Math.random()*20); if (roll>=14){p.gold+=10; _gainXp(p,30); vToast('🎭 DEX '+roll+' vs DC 14 — Sucesso! +10 Valdoritas +30 XP');} else vToast('🎭 DEX '+roll+' vs DC 14 — Falha. Plateia vaia.'); refreshHud(); },
+  'circus_perform':         function(p){ if (!_pay(p, 0)) return; var roll=1+Math.floor(Math.random()*20); if (roll>=14){p.gold+=10; _gainXp(p,30); vToast('DEX '+roll+' vs DC 14 — Sucesso! +10 Valdoritas +30 XP');} else vToast('DEX '+roll+' vs DC 14 — Falha. Plateia vaia.'); refreshHud(); },
   'wanderer_rumor':         function(p){ if (!_pay(p, 5)) return; var rumors=['"Catacumbas no leste guardam Valdoritas."','"Um lobo branco foi visto na montanha."','"O ferreiro Thorne tem um inimigo secreto."']; vToast('💬 ' + rumors[Math.floor(Math.random()*rumors.length)]); },
   'wanderer_map':           function(p){ if (!_pay(p, 50)) return; vToast('Mapa secreto: localização de tumba antiga revelada.'); },
   'wanderer_fortune':       function(p){ if (!_pay(p, 20)) return; var fortunes=['"Hoje a sorte sorri pra ti."','"Cuidado com escolhas precipitadas hoje."','"Um amigo te procura em segredo."']; vToast('🔮 ' + fortunes[Math.floor(Math.random()*fortunes.length)]); },
@@ -53323,7 +53326,7 @@ var ACTION_HANDLERS = {
   'codex_class_fighter':    function(p){ vToast('⚔️ Guerreiro — Mestre do combate. Action Surge, Second Wind.'); },
   'codex_class_ranger':     function(p){ vToast('🏹 Patrulheiro — Caçador da natureza. Favored Enemy, Tracking.'); },
   'codex_class_wizard':     function(p){ vToast('🔮 Mago — Estudioso arcano. Spellbook, Arcane Recovery.'); },
-  'codex_class_cleric':     function(p){ vToast('✨ Clérigo — Servo divino. Channel Divinity, Domains.'); },
+  'codex_class_cleric':     function(p){ vToast(_uiIcoImg('sucesso','ui-ico-img') + ' Clérigo — Servo divino. Channel Divinity, Domains.'); },
   'codex_class_rogue':      function(p){ vToast('🗡️ Ladino — Especialista furtivo. Sneak Attack, Cunning Action.'); },
   'codex_race_human':       function(p){ vToast('Humano — versátil. +1 todos atributos OU 2 atributos +1 + skill + feat.'); },
   'codex_race_elf':         function(p){ vToast('🧝 Elfo — gracioso, longevo. +2 DEX. Trance (4h sleep). Darkvision. Fey ancestry.'); },
@@ -53386,7 +53389,7 @@ var ACTION_HANDLERS = {
   'rel_aldric_war_talk':    function(p){ vToast('🛡️ Aldric: "A última guerra... vi coisas. Mas paz tem preço também."'); _gainXp(p, 15); },
   'rel_aldric_gift':        function(p){ if (!_pay(p, 15)) return; vToast('🎁 Presente a Aldric. +5 affinity (80 → 85).'); },
   'rel_aldric_route':       function(p){ vToast('🗺️ Aldric desenha rota segura: pela ponte velha, evitar caminho do norte.'); },
-  'rel_elara_spirit':       function(p){ vToast('✨ Elara: "Há equilíbrio em toda dor. Aceita a luz pra não te perder."'); _gainXp(p, 10); },
+  'rel_elara_spirit':       function(p){ vToast(_uiIcoImg('sucesso','ui-ico-img') + ' Elara: "Há equilíbrio em toda dor. Aceita a luz pra não te perder."'); _gainXp(p, 10); },
   'rel_elara_donate':       function(p){ if (!_pay(p, 10)) return; vToast('🙏 Doação ao templo. +4 affinity com Elara (50 → 54).'); },
   'rel_aldwin_invest':      function(p){ if (!_pay(p, 100)) return; window._bank = (window._bank || 0) + 105; vToast('📈 Investimento de 100 Valdoritas cresce pra 105 Valdoritas. +1 affinity Aldwin.'); },
   'rel_aldwin_loans':       function(p){ vToast('📜 Aldwin: "Empréstimos exigem garantias. Tens algo?"'); },
@@ -53551,7 +53554,7 @@ function _gainXp(p, amt){
   var preXp = p.xp || 0;
   var preXpNext = p.xpNext || 100;
   p.xp += amt;
-  if (p.xp >= p.xpNext) { p.level += 1; p.xp -= p.xpNext; p.xpNext = Math.floor(p.xpNext * 1.5); vToast('🎉 SUBIU DE NÍVEL! Agora nv ' + p.level); }
+  if (p.xp >= p.xpNext) { p.level += 1; p.xp -= p.xpNext; p.xpNext = Math.floor(p.xpNext * 1.5); vToast(_uiIcoImg('recompensa','ui-ico-img') + ' SUBIU DE NÍVEL! Agora nv ' + p.level); }
   p._lastXpGain = { gain: amt, preXp: preXp, preLevel: preLevel, preXpNext: preXpNext, leveledUp: (p.level || 1) > preLevel };
   refreshHud();
   // FASE 6: persiste o XP no servidor (delta — autoridade aplica level-up canônico).
@@ -53780,7 +53783,7 @@ function _deliverQuest(questId, gold, xp, msg){
   if (!p) return;
   p.completed_quests = p.completed_quests || [];
   if (p.completed_quests.indexOf(questId) >= 0) {
-    vToast('⚠️ Essa missão já foi concluída.', 'warn');
+    vToast(_uiIcoImg('alerta','ui-ico-img') + ' Essa missão já foi concluída.', 'warn');
     if (typeof closeCityPopup === 'function') closeCityPopup();
     return;
   }
@@ -53845,12 +53848,12 @@ function _abandonQuest(questId, displayName, consequencia){
   p.abandoned_quests = p.abandoned_quests || [];
   p.completed_quests = p.completed_quests || [];
   if (p.abandoned_quests.indexOf(questId) >= 0) {
-    vToast('⚠️ Essa missão já foi abandonada.', 'warn');
+    vToast(_uiIcoImg('alerta','ui-ico-img') + ' Essa missão já foi abandonada.', 'warn');
     if (typeof closeCityPopup === 'function') closeCityPopup();
     return;
   }
   if (p.completed_quests.indexOf(questId) >= 0) {
-    vToast('⚠️ Não dá pra abandonar — missão já foi concluída.', 'warn');
+    vToast(_uiIcoImg('alerta','ui-ico-img') + ' Não dá pra abandonar — missão já foi concluída.', 'warn');
     if (typeof closeCityPopup === 'function') closeCityPopup();
     return;
   }
@@ -53863,7 +53866,7 @@ function _abandonQuest(questId, displayName, consequencia){
         if (idx >= 0) QUESTS_ACTIVE.splice(idx, 1);
       }
     } catch(e) { console.warn('[CIDADE] _abandonQuest state update failed:', e); }
-    vToast('❌ Missão abandonada. ' + (consequencia || ''), 'warn');
+    vToast(_uiIcoImg('falha','ui-ico-img') + ' Missão abandonada. ' + (consequencia || ''), 'warn');
     if (typeof closeCityPopup === 'function') closeCityPopup();
     // Re-render hub p/ atualizar badge dinâmico (mesma razão de _deliverQuest)
     if (typeof renderCurrentScreen === 'function' && _currentScreen === 'hub') {
@@ -53901,26 +53904,26 @@ function _acceptQuest(qid){
   if (!p) return;
   var d = (typeof GUILD_QUEST_DETAILS !== 'undefined' && GUILD_QUEST_DETAILS[qid]) || null;
   if (!d) {
-    vToast('⚠️ Missão indisponível: ' + qid, 'warn');
+    vToast(_uiIcoImg('alerta','ui-ico-img') + ' Missão indisponível: ' + qid, 'warn');
     return;
   }
   // Nível mínimo
   if ((p.level || 1) < (d.lvlReq || 1)) {
-    vToast('⚠️ Requer nível ' + d.lvlReq + ' (você é nível ' + (p.level || 1) + ').', 'warn');
+    vToast(_uiIcoImg('alerta','ui-ico-img') + ' Requer nível ' + d.lvlReq + ' (você é nível ' + (p.level || 1) + ').', 'warn');
     return;
   }
   // Duplicata em ACTIVE
   if (typeof QUESTS_ACTIVE !== 'undefined') {
     var alreadyActive = QUESTS_ACTIVE.some(function(q){ return q && q.id === 'qa_' + qid; });
     if (alreadyActive) {
-      vToast('⚠️ Essa missão já está nas ativas.', 'warn');
+      vToast(_uiIcoImg('alerta','ui-ico-img') + ' Essa missão já está nas ativas.', 'warn');
       if (typeof closeCityPopup === 'function') closeCityPopup();
       return;
     }
   }
   // Já completada/abandonada nessa sessão
   if (_isQuestCompletedOrAbandoned(qid)) {
-    vToast('⚠️ Essa missão já foi resolvida (concluída ou abandonada).', 'warn');
+    vToast(_uiIcoImg('alerta','ui-ico-img') + ' Essa missão já foi resolvida (concluída ou abandonada).', 'warn');
     return;
   }
   // Adicionar a QUESTS_ACTIVE
@@ -54264,12 +54267,14 @@ var GROUP_MEMBERS = (function(){
 
 // --- HOTBAR FAVORITOS — 5 favs + "mais" ---
 // Atalhos rápidos. Ordem importa visualmente.
+// 2026-07-03: emoji -> ui/*.webp (regra "Emojis Permanentemente Banidos").
+// icoWebp = nome do webp em shared/img/ui/; render via _uiIcoImg (renderCityHotbar).
 var HOTBAR_FAVS = [
-  { ico: '⚔️', label: 'Aventura',    cb: 'open_exit_modal' },
-  { ico: '🍺', label: 'Taverna',     cb: 'nav:tavern' },
-  { ico: '🏪', label: 'Mercado',     cb: 'nav:market' },
-  { ico: '📜', label: 'Missões',     cb: 'nav:quests',   badge: '3' },
-  { ico: '⛪', label: 'Templo',      cb: 'nav:temple' }
+  { icoWebp: 'acao-atacar', label: 'Aventura',    cb: 'open_exit_modal' },
+  { icoWebp: 'cerveja',     label: 'Taverna',     cb: 'nav:tavern' },
+  { icoWebp: 'mercado',     label: 'Mercado',     cb: 'nav:market' },
+  { icoWebp: 'missoes',     label: 'Missões',     cb: 'nav:quests',   badge: '3' },
+  { icoWebp: 'templo',      label: 'Templo',      cb: 'nav:temple' }
 ];
 
 // --- City Top Bar ---
@@ -55239,7 +55244,7 @@ function renderCityHotbar(){
   var html = '';
   HOTBAR_FAVS.forEach(function(f){
     html += '<button class="chb-fav" data-cb="' + f.cb + '">'
-      + '  <span class="ico">' + f.ico + '</span>'
+      + '  <span class="ico">' + (f.icoWebp ? _uiIcoImg(f.icoWebp, 'ui-ico-img') : (f.ico || '')) + '</span>'
       + '  <span class="label">' + f.label + '</span>'
       + (f.badge ? '<span class="badge">' + f.badge + '</span>' : '')
       + '</button>';
@@ -61530,7 +61535,7 @@ function _renderEncounterChoices(enc, originalAction, player, actionsEl) {
   if (useOverlay) {
     var btn = document.createElement('button');
     btn.className = 'enc-btn enc-btn-primary enc-btn-choose';
-    btn.innerHTML = '<span class="enc-btn-choose-icon">⚔</span>' +
+    btn.innerHTML = '<span class="enc-btn-choose-icon">' + _uiIcoImg('acao-atacar', 'ui-ico-img') + '</span>' +
                     '<span class="enc-btn-choose-label">Escolher ação</span>' +
                     '<span class="enc-btn-choose-count">' + choices.length + '</span>';
     btn.onclick = function() {
@@ -61791,7 +61796,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     if (typeof _acceptQuest === 'function' && choice._questId) {
       _acceptQuest(choice._questId);
     } else if (typeof vToast === 'function') {
-      vToast('⚠️ Missão indisponível: ' + (choice._questId || '?'), 'warn');
+      vToast(_uiIcoImg('alerta','ui-ico-img') + ' Missão indisponível: ' + (choice._questId || '?'), 'warn');
     }
   } else if (choice.result === 'discovery_defer') {
     // Player adia a discovery — quest fica em estado in_progress pra
