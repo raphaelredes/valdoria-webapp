@@ -12295,7 +12295,7 @@ function _showCharactersPopup(){
       + 'transition: border-color var(--v-transition, 0.2s), color var(--v-transition, 0.2s);" '
       + 'onmouseover="this.style.borderColor=\'#5a1810\'; this.style.color=\'#a04030\'" '
       + 'onmouseout="this.style.borderColor=\'var(--v-border, #4a3828)\'; this.style.color=\'var(--v-text-dim, #a09484)\'">'
-      + '🗑'
+      + '×'
       + '</button>'
 
       + '</div>';
@@ -63610,7 +63610,8 @@ function _buildQuestRow(q) {
     row.style.cursor = 'pointer';
 
     /* Icon */
-    var icoEl = _hubSpan('hq-ico', '\uD83D\uDCDC');
+    var icoEl = _hubSpan('hq-ico');
+    icoEl.innerHTML = _uiIcoImg('missoes', 'ui-ico-img');
     row.appendChild(icoEl);
 
     /* Title text */
@@ -63621,7 +63622,7 @@ function _buildQuestRow(q) {
     /* Status indicator */
     var statusEl = _hubSpan('hq-status');
     if (q.ready) {
-        statusEl.textContent = '\u2705'; /* check mark — pronta para entregar */
+        statusEl.textContent = '\u2713'; /* check mark — pronta para entregar */
     } else {
         statusEl.textContent = (q.stage || 0) + '/' + (q.total || 0);
     }
