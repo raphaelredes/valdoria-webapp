@@ -3011,8 +3011,9 @@ LOG SINK (Fase 7):
       filter: brightness(0.92);
     }
     .c-chat-zone .c-chat-icon {
-      font-size: calc(24px * var(--v-font-scale, 1));
-      line-height: 1;
+      width: calc(26px * var(--v-font-scale, 1));
+      height: calc(26px * var(--v-font-scale, 1));
+      object-fit: contain;
       filter: drop-shadow(0 0 5px rgba(196, 149, 58, 0.45));
     }
     .c-chat-zone .c-chat-label {
@@ -5416,6 +5417,10 @@ body.perf-lite .vc-action-btn { transition: none; }
     }
     .city-sector-tab:active { transform: scale(0.95); }
     .city-sector-tab .cst-ico { font-size: var(--v-font-base, 14px); }
+    /* 2026-07-03: emoji das abas de setor → ui/*.webp (SUPREME RULE: zero emoji player-visible). */
+    .city-sector-tab .cst-ico-img { width: 16px; height: 16px; vertical-align: middle; object-fit: contain; display: inline-block; }
+    /* Helper genérico de ícone UI webp (ex.: botão Viajar). */
+    .ui-ico-img { width: 14px; height: 14px; vertical-align: middle; object-fit: contain; display: inline-block; }
 
     /* Sessão #38 (2026-05-26) bug fix — empty-state quando sector sem locations.
        Antes: tabs + grid sumiam → dead-end. Agora: tabs continuam + info card explica. */
@@ -10928,11 +10933,13 @@ function _isCTA(btn) {
 //   'in_progress'      — quest em curso (clique continua de onde parou)
 //   'unlocked'         — sem quest OU quest completa (normal)
 
+// 2026-07-03: icoImg = ui/*.webp (emoji banido). cerveja=Convívio, mercado=Comércio,
+// acao-atacar=Combate (espadas cruzadas), templo=Espírito. Render via _uiIcoImg.
 var CITY_SECTORS = {
-  convivio:  { id:'convivio',  label:'Convívio',  ico:'🍺' },
-  comercio:  { id:'comercio',  label:'Comércio',  ico:'🏪' },
-  combate:   { id:'combate',   label:'Combate',   ico:'⚔️' },
-  espirito:  { id:'espirito',  label:'Espírito',  ico:'⛪' }
+  convivio:  { id:'convivio',  label:'Convívio',  icoImg:'cerveja' },
+  comercio:  { id:'comercio',  label:'Comércio',  icoImg:'mercado' },
+  combate:   { id:'combate',   label:'Combate',   icoImg:'acao-atacar' },
+  espirito:  { id:'espirito',  label:'Espírito',  icoImg:'templo' }
 };
 var CITY_SECTOR_ORDER = ['convivio','comercio','combate','espirito'];
 
@@ -11629,7 +11636,7 @@ function _renderSectorTabs(rootEl){
     var sec = CITY_SECTORS[sid];
     var btn = document.createElement('button');
     btn.className = 'city-sector-tab' + (sid === window._currentSector ? ' active' : '');
-    btn.innerHTML = '<span class="cst-ico">' + sec.ico + '</span><span class="cst-lbl">' + sec.label + '</span>';
+    btn.innerHTML = '<span class="cst-ico">' + _uiIcoImg(sec.icoImg, 'cst-ico-img') + '</span><span class="cst-lbl">' + sec.label + '</span>';
     btn.addEventListener('click', function(){
       if (window._currentSector === sid) return;
       window._currentSector = sid;
@@ -11898,10 +11905,10 @@ function renderFooter(){
     +   '<img class="fb-ico-img" src="/shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
     + '</button>'
     + '<button class="fb-btn fb-icon-only" data-action="help" title="Ajuda">'
-    +   '<span class="fb-ico">❓</span>'
+    +   '<img class="fb-ico-img" src="/shared/img/ui/ajuda.webp" alt="Ajuda" onerror="this.style.display=\'none\'">'
     + '</button>'
     + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
-    +   '<span class="fb-ico">⚙</span>'
+    +   '<img class="fb-ico-img" src="/shared/img/ui/configuracoes.webp" alt="Config" onerror="this.style.display=\'none\'">'
     + '</button>';
   // Nav row agora vazio (todos botoes movidos pra quick em linha unica)
   navEl.innerHTML = '';
@@ -54331,16 +54338,16 @@ function _getGameWeather(dayOfYear){
 //                         crepúsculo=🌆 noite=🌙
 // Weather emojis canonical: ensolarado=☀️ nublado=⛅ chuva=🌧️
 //                          tempestade=⛈️ neve=🌨️ névoa=🌫️
+// FIX 2026-07-03: chaveado pelas 4 chaves EN que _getGamePeriod() REALMENTE
+// retorna (dawn/day/dusk/night). Antes estava em PT ('noite'/'madrugada'/…) →
+// TOPBAR_PERIOD_PNG[period] era SEMPRE undefined → periodSlug undefined →
+// _ctbIconHTML devolvia o emoji cru e as period-*.webp ficavam mortas em toda
+// tela do HUD. day→period-noon (sol a pino). Mismatch clássico Canonical Keys PT/EN.
 var TOPBAR_PERIOD_PNG = {
-  'madrugada':   'period-dawn',
-  'manha':       'period-morning',
-  'manhã':       'period-morning',
-  'meio-dia':    'period-noon',
-  'tarde':       'period-afternoon',
-  'crepusculo':  'period-dusk',
-  'crepúsculo':  'period-dusk',
-  'anoitecer':   'period-dusk',
-  'noite':       'period-night',
+  dawn:  'period-dawn',
+  day:   'period-noon',
+  dusk:  'period-dusk',
+  night: 'period-night',
 };
 var TOPBAR_WEATHER_PNG = {
   'ensolarado':  'weather-sunny',
@@ -54366,6 +54373,15 @@ function _ctbIconHTML(slug, fallbackEmoji){
        + 'style="width:14px;height:14px;vertical-align:middle;display:inline-block;object-fit:contain;" '
        + 'onerror="this.outerHTML=\'' + emojiEsc + '\'" '
        + 'alt="">';
+}
+
+// UI webp icon helper — SUPREME RULE 2026-06-24 (zero emoji player-visible):
+// substitui emojis de chrome (abas de setor, familiar, ajuda/config, viajar) pela
+// ui/*.webp gerada via OpenAI (mesmo padrão dos fb-ico-img do footer). Path
+// reescrito p/ /shared/… no sync; onerror esconde a img (degrada pro label ao lado).
+function _uiIcoImg(name, cls){
+  return '<img class="' + (cls || 'ui-ico-img') + '" src="/shared/img/ui/'
+       + name + '.webp" alt="" onerror="this.style.display=\'none\'">';
 }
 
 // === Contador de Valdoritas (sessão #70) — topo-direito em TODAS as telas/subtelas.
@@ -55055,7 +55071,7 @@ function renderCityGroupPanel(){
       html += '    <button class="c-chat-zone" data-chat-idx="' + i + '" type="button"'
         + ' title="Conversar com ' + safeName + '"'
         + ' aria-label="Conversar com ' + safeName + '">'
-        + '<span class="c-chat-icon">💬</span>'
+        + '<img class="c-chat-icon" src="/shared/img/ui/dialogo.webp" alt="" onerror="this.style.display=\'none\'">'
         + '<span class="c-chat-label">Conversar</span>'
         + '</button>';
     } else {
@@ -55128,7 +55144,7 @@ function renderCityGroupPanel(){
 function renderCityExitBtn(){
   var el = document.getElementById('city-exit-btn');
   if (!el) return;
-  el.innerHTML = '🗺️ VIAJAR';
+  el.innerHTML = _uiIcoImg('cartografia') + ' VIAJAR';
   el.onclick = function(){
     if (typeof _openCityExitModalWithPrep === 'function') {
       _openCityExitModalWithPrep();
