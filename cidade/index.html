@@ -1604,7 +1604,7 @@ LOG SINK (Fase 7):
       margin-bottom: var(--v-space-md-lg, 10px) !important;
     }
     .vc-alert--danger::before {
-      content: '⚠️ ';
+      content: '';
       margin-right: var(--v-space-sm, 4px);
     }
 
@@ -2130,7 +2130,7 @@ LOG SINK (Fase 7):
     .vc-service-card.disabled::after,
     .tmp-service.disabled::after,
     .v-service-card.disabled::after {
-      content: '🔒';
+      content: '';
       position: absolute;
       top: 6px; right: 6px;
       font-size: calc(14px * var(--v-font-scale, 1));
@@ -5484,7 +5484,7 @@ body.perf-lite .vc-action-btn { transition: none; }
 
     /* Badge "EM CURSO" para in_progress (quest iniciada mas não finalizada) */
     .hub-loc--inprogress::after {
-      content: '📜';
+      content: '';
       position: absolute;
       top: -4px; right: -4px;
       background: var(--v-bg-card, #2e2520);
@@ -8121,7 +8121,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     <!-- Service Result Overlay (Fase 9.3 — feedback visual + dice 3D) -->
     <div id="service-result-overlay">
       <div class="srp-card">
-        <div class="srp-icon" id="srp-icon">⛪</div>
+        <div class="srp-icon" id="srp-icon"></div>
         <div class="srp-npc" id="srp-npc">NPC</div>
         <div class="srp-divider">─ ◆ ─</div>
         <div class="srp-narrative" id="srp-narrative"></div>
@@ -8170,7 +8170,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     <!-- Confirm Purchase Popup (Fase 9.3 — obrigatório em TODA compra) -->
     <div id="confirm-purchase-overlay">
       <div class="cpp-card">
-        <div class="cpp-icon" id="cpp-icon">⚖️</div>
+        <div class="cpp-icon" id="cpp-icon"></div>
         <h3 class="cpp-title" id="cpp-title">Confirmar Compra</h3>
         <p class="cpp-npc" id="cpp-npc"></p>
         <div class="cpp-desc" id="cpp-desc"></div>
@@ -9958,16 +9958,16 @@ function _isCTA(btn) {
       + '<div style="margin: 0 0 var(--v-space-md-lg, 10px);">'
       + '<div style="font-size:calc(11px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); letter-spacing:2px; text-transform:uppercase; margin-bottom: var(--v-space-md, 8px); padding: 0 var(--v-space-sm, 4px); text-align:center; font-family:var(--v-font-display,Cinzel,serif);">⚜ O Mundo te Espera</div>'
       + '<div style="display:flex; flex-direction:column; gap:5px;">'
-      + _fLsFeature('⚔', 'Combate D&D 5e', 'Sistema completo de RPG de mesa')
-      + _fLsFeature('🛡', 'Aliados Vivos', 'Companheiros que evoluem com você')
-      + _fLsFeature('🗺', 'Exploração Imersiva', 'Eventos, conquistas, missões épicas')
+      + _fLsFeature(_uiIcoImg('acao-atacar','ui-ico-img'), 'Combate D&D 5e', 'Sistema completo de RPG de mesa')
+      + _fLsFeature(_uiIcoImg('grupo','ui-ico-img'), 'Aliados Vivos', 'Companheiros que evoluem com você')
+      + _fLsFeature(_uiIcoImg('cartografia','ui-ico-img'), 'Exploração Imersiva', 'Eventos, conquistas, missões épicas')
       + '</div>'
       + '</div>'
 
       // === SEÇÃO: PRIVACIDADE LGPD — resumo curto + link destacado ===
       + '<div style="padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px); background:linear-gradient(135deg, rgba(74,56,40,0.35), rgba(42,36,32,0.5)); border:1px solid var(--v-border,#4a3828); border-left:3px solid #7dba5b; border-radius:5px;">'
       + '<div style="display:flex; align-items:center; gap: var(--v-space-md, 8px); margin-bottom:6px;">'
-      + '<span style="font-size:calc(15px * var(--v-font-scale, 1)); color:#7dba5b;">🔒</span>'
+      + '<span style="font-size:calc(15px * var(--v-font-scale, 1)); color:#7dba5b;">' + _uiIcoImg('privacy-policy','ui-ico-img') + '</span>'
       + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(12px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase;">'
       + 'Privacidade · LGPD'
       + '</span>'
@@ -9976,7 +9976,7 @@ function _isCTA(btn) {
       // Mensagem condicional: update vs primeira visita
       + (window._fLsIsUpdate
           ? '<div style="font-size:calc(12px * var(--v-font-scale, 1)); color:#9fda7d; line-height:1.5; margin-bottom: var(--v-space-md, 8px); padding: 6px var(--v-space-md, 8px); background:rgba(125,186,91,0.10); border-radius: var(--v-radius-xs, 4px);">'
-            + '<b>⚠ Nossa política foi atualizada.</b> Revise os termos abaixo antes de continuar.'
+            + '<b>' + _uiIcoImg('alerta','ui-ico-img') + ' Nossa política foi atualizada.</b> Revise os termos abaixo antes de continuar.'
             + '</div>'
           : '<div style="font-size:calc(12px * var(--v-font-scale, 1)); color:var(--v-text,#d4c8b0); line-height:1.5; margin-bottom: var(--v-space-md, 8px);">'
             + 'Não coletamos dados pessoais. Apenas seu progresso fica salvo no dispositivo.'
@@ -9986,7 +9986,7 @@ function _isCTA(btn) {
       + '<a href="https://jogo.lendasdevaldoria.com.br/privacidade/" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:center; gap:6px; padding: var(--v-space-md, 8px) 14px; background:rgba(125,186,91,0.10); color:#9fda7d; border:1px solid #7dba5b88; border-radius:5px; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(12px * var(--v-font-scale, 1)); letter-spacing:1px; text-decoration:none; transition:background 0.2s;" '
       + 'onmouseover="this.style.background=\'rgba(125,186,91,0.20)\'" '
       + 'onmouseout="this.style.background=\'rgba(125,186,91,0.10)\'">'
-      + '<span style="font-size:calc(14px * var(--v-font-scale, 1));">📜</span>'
+      + '<span style="font-size:calc(14px * var(--v-font-scale, 1));">' + _uiIcoImg('compendio','ui-ico-img') + '</span>'
       + '<span>Ler política completa</span>'
       + '<span style="font-size:calc(13px * var(--v-font-scale, 1));">→</span>'
       + '</a>'
@@ -10191,7 +10191,7 @@ function _isCTA(btn) {
       + '</div>';
     window._showInfoPopup({
       icon: _heralIco('ic-stat-cha', null, '32px'),
-      npc: '✨ Aldric',
+      npc: 'Aldric',
       title: 'Cinco horas pela aventura',
       desc: EPIC_HTML,
       confirmLabel: 'Enviar avaliação',
@@ -11538,7 +11538,7 @@ function _renderDiscoveryStage(){
     triggers: [],
     script: script,
     choices: [
-      { id: 'unlock', label: '✨ ' + unlockLabel,    result: 'discovery_unlock', _questId: quest.id },
+      { id: 'unlock', label: unlockLabel,    result: 'discovery_unlock', _questId: quest.id },
       { id: 'defer',  label: 'Adiar — outro momento', result: 'discovery_defer',  _questId: quest.id }
     ],
     onDone: function(){}
@@ -12326,7 +12326,7 @@ function _showCharactersPopup(){
     + 'font-family: var(--v-font, MedievalSharp, serif); font-size: var(--v-font-base, 13px); '
     + 'cursor: pointer; padding: var(--v-space-md, 8px) 0; text-align: center; min-height: 36px;" '
     + 'aria-expanded="false">'
-    + '🗑 Personagens Apagados <span id="hall-archived-count" style="opacity:0.6;"></span> ▾'
+    + 'Personagens Apagados <span id="hall-archived-count" style="opacity:0.6;"></span> ▾'
     + '</button>'
     + '<div id="hall-archived-list" style="display:none; flex-direction:column; gap: 6px; margin-top: var(--v-space-md, 8px);"></div>'
     + '</div>';
@@ -12551,7 +12551,7 @@ function _showDeleteCharConfirm(charId, charName){
     return;
   }
   _showInfoPopup({
-    icon: '🗑',
+    icon: '',
     title: 'Apagar Personagem?',
     npc: 'Hall de Personagens',
     desc: '<div style="text-align:left;">'
@@ -12567,7 +12567,7 @@ function _showDeleteCharConfirm(charId, charName){
       + '</div>'
       + '<div style="background: rgba(180,80,80,0.08); border: 1px solid rgba(180,80,80,0.25); '
       + 'border-radius: var(--v-radius-sm, 6px); padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px); margin-bottom: var(--v-space-md-lg, 10px);">'
-      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: #d08070; font-weight: 700;">📩 Após 15 dias — via ticket</p>'
+      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: #d08070; font-weight: 700;">' + _uiIcoImg('mensagem','ui-ico-img') + ' Após 15 dias — via ticket</p>'
       + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); line-height: 1.5;">'
       + 'Entre 15 e 180 dias, restauração apenas via ticket de suporte (apenas '
       + 'personagens nível 2+).'
@@ -12578,7 +12578,7 @@ function _showDeleteCharConfirm(charId, charName){
       + 'Um backup completo é criado automaticamente antes do apagamento. '
       + 'Após 180 dias, exclusão permanente.'
       + '</p></div>',
-    confirmLabel: '🗑 Apagar',
+    confirmLabel: 'Apagar',
     cancelLabel: 'Cancelar',
     onConfirm: function(){
       _doDeleteChar(charId, charName);
@@ -12912,14 +12912,14 @@ function _tutorialStorageKey(){
 var TUTORIAL_STEPS = [
   {
     selector: null,  // welcome screen (no spotlight)
-    title: '🏰 Bem-vindo a Valdoria',
+    title: 'Bem-vindo a Valdoria',
     description: 'Esta é a sua cidade base. Aqui você descansa, prepara aventuras, e vive entre aventuras. '
                 + 'Vou te mostrar rapidamente o que cada elemento faz — depois você joga sozinho.'
   },
   {
     /* 2026-05-21: selector corrigido vs DOM real (linha ~52320: _hubBtn('hub-cta',...)). */
     selector: '.hub-cta',
-    title: '⚔️ Partir para Aventura',
+    title: 'Partir para Aventura',
     description: 'O coração do jogo. Clique aqui para abrir o <b>Mapa de Valdoria</b> e escolher uma região '
                 + 'para explorar — bosques, montanhas, ruínas. É onde você ganha XP, Valdoritas e itens.'
   },
@@ -12931,7 +12931,7 @@ var TUTORIAL_STEPS = [
   },
   {
     selector: '.hub-loc[data-cb="taverna"], .hub-loc[data-cb="tavern"]',
-    title: '🍺 Taverna',
+    title: 'Taverna',
     description: 'Onde aventureiros se encontram. Beba para ganhar bônus temporários, ouça boatos sobre '
                 + 'tesouros escondidos, ou jogue dados com outros para ganhar (ou perder) ouro.'
   },
@@ -12943,7 +12943,7 @@ var TUTORIAL_STEPS = [
        Mercado (steps que auto-switch pra outras abas). Spotlight em
        .city-sector-tabs (sempre presente no DOM em todas as abas). */
     selector: '.city-sector-tabs',
-    title: '🗂️ Setores da Cidade',
+    title: 'Setores da Cidade',
     description: 'A cidade está dividida em <b>4 áreas</b>: <b>Convívio</b> (taverna, missões), '
                 + '<b>Comércio</b> (mercado, banco), <b>Combate</b> (guilda, arena) e '
                 + '<b>Espírito</b> (templo, praça). Clique nas abas para ver os locais de cada área.'
@@ -12952,27 +12952,27 @@ var TUTORIAL_STEPS = [
     /* 2026-05-22: levelReq:2 — cross-ref CITY_LOCATIONS.inn (line ~8995).
        Sem filtro, popup flasha 750ms e some (target hidden no DOM). */
     selector: '.hub-loc[data-cb="estalagem"], .hub-loc[data-cb="inn"]',
-    title: '🛏️ Estalagem',
+    title: 'Estalagem',
     description: 'Descanso longo (recupera HP/MP totais + remove exaustão). Custa Valdoritas, mas é '
                 + 'essencial após aventuras pesadas. Quartos melhores recuperam mais.',
     levelReq: 2
   },
   {
     selector: '.hub-loc[data-cb="market"], .hub-loc[data-cb="mercado"]',
-    title: '🏪 Mercado',
+    title: 'Mercado',
     description: 'Compre poções, armas, armaduras. Venda itens que não usa. Os preços variam — '
                 + 'aprenda a barganhar. Forja, alquimista e ferreiro estão aqui.'
   },
   {
     selector: '.hub-loc[data-cb="temple"], .hub-loc[data-cb="templo"]',
-    title: '⛪ Templo',
+    title: 'Templo',
     description: 'Cure ferimentos graves, remova venenos e maldições. Sacerdotes oferecem bênçãos divinas. '
                 + 'Doações geram favor com os deuses (e ganhos passivos).'
   },
   {
     /* 2026-05-22: levelReq:4 — cross-ref CITY_LOCATIONS.bank (line ~8999). */
     selector: '.hub-loc[data-cb="bank"], .hub-loc[data-cb="banco"]',
-    title: '🏦 Banco',
+    title: 'Banco',
     description: 'Guarde Valdoritas com segurança (não perde ao morrer). Empréstimos para emergências, '
                 + 'investimentos para ganho passivo. Empreste com sabedoria — juros são reais.',
     levelReq: 4
@@ -12980,7 +12980,7 @@ var TUTORIAL_STEPS = [
   {
     /* 2026-05-22: levelReq:3 — cross-ref CITY_LOCATIONS.guild (line ~9003). */
     selector: '.hub-loc[data-cb="guild"], .hub-loc[data-cb="guilda"]',
-    title: '🛡️ Guilda dos Aventureiros',
+    title: 'Guilda dos Aventureiros',
     description: 'Recrute aliados (mercenários, especialistas) para suas aventuras. Suba de rank na guilda '
                 + 'desbloqueando contratos mais lucrativos.',
     levelReq: 3
@@ -12988,7 +12988,7 @@ var TUTORIAL_STEPS = [
   {
     /* 2026-05-22: levelReq:2 — cross-ref CITY_LOCATIONS.square (line ~9009). */
     selector: '.hub-loc[data-cb="praca"], .hub-loc[data-cb="square"]',
-    title: '⛲ Praça Central',
+    title: 'Praça Central',
     description: 'O coração social da cidade. NPCs falando, eventos aleatórios, festivais ocasionais. '
                 + 'Bom lugar para ouvir boatos sobre o mundo.',
     levelReq: 2
@@ -12998,21 +12998,21 @@ var TUTORIAL_STEPS = [
        #bottom-panel display:none. Auto-expand antes de medir + pointar pro panel. */
     selector: '#bottom-panel, .footer-row.footer-quick',
     expandFooter: true,
-    title: '⚡ Atalhos rápidos',
+    title: 'Atalhos rápidos',
     description: 'Barra inferior com <b>Mochila</b>, <b>Ficha</b> e <b>Grupo</b> — atalhos pros recursos mais usados. '
                 + 'O botão <b>· Menu</b> recolhe pra ganhar mais espaço de tela.'
   },
   {
     /* 2026-05-21 (fix v2): cards estão em #city-group-panel (verificado DOM live). */
     selector: '#city-group-panel',
-    title: '❤️ Cards do seu grupo',
+    title: 'Cards do seu grupo',
     description: 'Topo da tela: cards de cada personagem com <b>HP</b> (vida vermelha), <b>MP</b> (mana/fé/vigor), '
                 + '<b>XP</b> (progresso de nível) e <b>Valdoritas</b> (moeda). Quando HP fica baixo, descanse na '
                 + 'estalagem ou cure no templo.'
   },
   {
     selector: null,  // closing slide
-    title: '🎲 Tudo pronto!',
+    title: 'Tudo pronto!',
     description: 'Você está pronto pra começar. <b>Dica final:</b> sempre que tiver dúvida, clique no '
                 + 'menu (≡) → <em>Guia</em> para reler tutoriais e referências de regras.'
   }
@@ -13829,7 +13829,7 @@ function _linkTelegramStart(){
               });
               return;
             }
-            msg = '⚠️ Esta conta Telegram já está vinculada a outra conta.';
+            msg = _uiIcoImg('alerta','ui-ico-img') + ' Esta conta Telegram já está vinculada a outra conta.';
           }
           vToast(msg);
         }
