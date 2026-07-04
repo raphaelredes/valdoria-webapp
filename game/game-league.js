@@ -37,7 +37,13 @@ var TIER_META = {
 
 var TIER_ORDER = ['bronze', 'prata', 'ouro', 'platina', 'lendaria'];
 
-var RANK_MEDALS = { 1: '', 2: '', 3: '' };
+// 2026-07-04: medalhas de rank 1-3 restauradas p/ WebP (medals/) — eram emoji.
+var _RANK_MEDAL_STYLE = 'width:20px;height:20px;vertical-align:middle;object-fit:contain;';
+var RANK_MEDALS = {
+  1: '<img src="' + MEDAL_BASE + 'gold.webp" alt="1o" style="' + _RANK_MEDAL_STYLE + '">',
+  2: '<img src="' + MEDAL_BASE + 'silver.webp" alt="2o" style="' + _RANK_MEDAL_STYLE + '">',
+  3: '<img src="' + MEDAL_BASE + 'bronze.webp" alt="3o" style="' + _RANK_MEDAL_STYLE + '">'
+};
 
 
 /**
@@ -242,7 +248,7 @@ function _renderStandingsView(el, data) {
 
     var rankBox = document.createElement('div');
     rankBox.className = 'v-league-rank-num';
-    rankBox.textContent = RANK_MEDALS[rank] || ('#' + rank);
+    if (RANK_MEDALS[rank]) { rankBox.innerHTML = RANK_MEDALS[rank]; } else { rankBox.textContent = '#' + rank; }
     row.appendChild(rankBox);
 
     var info = document.createElement('div');
@@ -297,7 +303,7 @@ function _renderClaimView(el, data) {
 
   var rankBadge = document.createElement('div');
   rankBadge.className = 'v-league-claim-rank';
-  rankBadge.textContent = RANK_MEDALS[data.rank] || ('#' + data.rank);
+  if (RANK_MEDALS[data.rank]) { rankBadge.innerHTML = RANK_MEDALS[data.rank]; } else { rankBadge.textContent = '#' + data.rank; }
   card.appendChild(rankBadge);
 
   var titleText = document.createElement('div');

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-04T10:50:31Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-04T12:03:34Z - do not edit directly, edit source -->
 
 
 
@@ -5600,6 +5600,11 @@ body.remote-mode #debug-hud { display: none !important; }
   border-bottom: 1px solid rgba(196, 149, 58, 0.25);
   display: flex; align-items: center; gap: var(--v-space-lg, 12px);
 }
+/* 2026-07-04: ícones restaurados (materiais via vItems -> items/*.webp; inimigos -> combat/enemies/*.webp). */
+.inv-ico img { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
+.bc-icon img { width: 32px; height: 32px; object-fit: contain; }
+.detail-icon img { width: 40px; height: 40px; object-fit: contain; }
+.exp-ico-img { object-fit: contain; vertical-align: middle; }
 .detail-icon {
   font-size: calc(32px * var(--v-font-scale, 1));
   width: 50px; height: 50px;
@@ -34519,6 +34524,22 @@ function _outcomeGainsSummary(ops) {
 // healing_potion"): card de RECOMPENSA épico AAA — mostra o(s) item(ns) com IMAGEM real
 // (vItems.iconHTML — PNG OpenAI), nome resolvido, raridade colorida e chips de ganhos
 // (XP/Valdoritas/PV/PM). Substitui o toast de texto cru quando o outcome dá item.
+// 2026-07-04: restauração de ícones (pós-strip de emoji). Materiais -> items/*.webp
+// via vItems (resolver compartilhado); inimigos -> combat/enemies/<slug>.webp.
+function _expIcoSlug(name) {
+  return String(name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+function _expMatIco(mat) {
+  var s = _expIcoSlug(mat && mat.name);
+  if (s && window.vItems && typeof vItems.has === 'function' && vItems.has(s)) return vItems.iconHTML(s, mat.name);
+  return '';
+}
+function _expEnemyIco(e) {
+  var s = _expIcoSlug(e && e.name);
+  if (!s) return '';
+  return '<img class="exp-ico-img" src="/shared/img/combat/enemies/' + s + '.webp" alt="" onerror="this.style.display=\'none\'">';
+}
 function _exploreRarityMeta(name) {
   var DB = window.ITEMS_DB || {};
   var d = DB[name] || {};
@@ -39803,7 +39824,7 @@ function _legacyOpenQuestJournal_DEPRECATED(opts) {
         if (!mat) return;
         const row = document.createElement('div');
         row.className = 'inv-row';
-        row.innerHTML = '<span class="inv-ico">' + mat.icon + '</span>'
+        row.innerHTML = '<span class="inv-ico">' + _expMatIco(mat) + '</span>'
           + '<span class="inv-name">' + mat.name + '</span>'
           + '<span class="inv-count">×' + playerInventory[id] + '</span>';
         row.addEventListener('click', () => openMaterialDetail(id));
@@ -42167,7 +42188,7 @@ function openLocationPopup(mapId) {
     const e = ENEMIES_DB[eId];
     const card = document.createElement('div');
     card.className = 'bestiary-card discovered';
-    card.innerHTML = '<span class="bc-icon">' + e.icon + '</span>'
+    card.innerHTML = '<span class="bc-icon">' + _expEnemyIco(e) + '</span>'
       + '<div class="bc-info"><div class="bc-name">' + e.name + '</div>'
       + '<div class="bc-meta">CR ' + e.cr + ' · ' + e.threat + '</div></div>'
       + '<span class="bc-count">×' + (enemyEncounterStats[eId] ? enemyEncounterStats[eId].count : 1) + '</span>';
@@ -42196,7 +42217,7 @@ function openLocationPopup(mapId) {
     if (!mat) return;
     const card = document.createElement('div');
     card.className = 'bestiary-card discovered material';
-    card.innerHTML = '<span class="bc-icon">' + mat.icon + '</span>'
+    card.innerHTML = '<span class="bc-icon">' + _expMatIco(mat) + '</span>'
       + '<div class="bc-info"><div class="bc-name">' + mat.name + '</div>'
       + '<div class="bc-meta">' + (mat.uses ? mat.uses.length + ' uso(s) conhecido(s)' : '') + '</div></div>'
       + '<span class="bc-count">×' + (materialFoundStats[id] ? materialFoundStats[id].count : 1) + '</span>';
@@ -42286,7 +42307,7 @@ function openEnemyDetail(enemyId) {
   if (!e) return;
   const stats = enemyEncounterStats[enemyId] || { count: 0, drops: {} };
   const ov = document.getElementById('detail-popup');
-  document.getElementById('detail-icon').textContent = e.icon;
+  document.getElementById('detail-icon').innerHTML = _expEnemyIco(e);
   document.getElementById('detail-title').textContent = e.name;
   document.getElementById('detail-subtitle').textContent = 'CR ' + e.cr + ' · Ameaça ' + e.threat;
   const statsEl = document.getElementById('detail-stats');
@@ -42342,7 +42363,7 @@ function openMaterialDetail(itemId) {
   if (!mat) return;
   const stats = materialFoundStats[itemId] || { count: 0, sources: new Set() };
   const ov = document.getElementById('detail-popup');
-  document.getElementById('detail-icon').textContent = mat.icon;
+  document.getElementById('detail-icon').innerHTML = _expMatIco(mat);
   document.getElementById('detail-title').textContent = mat.name;
   document.getElementById('detail-subtitle').textContent = 'Material · Encontrado ×' + stats.count;
   const statsEl = document.getElementById('detail-stats');
