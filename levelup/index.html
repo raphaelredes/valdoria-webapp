@@ -1647,12 +1647,12 @@
             // Tenta carregar PNG do skills dir; onerror substitui por raio fallback
             if (!slug) return '';
             return '<img class="skill-png-ico" src="../shared/img/combat/skills/' + slug +
-                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\'"/>';
         }
         function _featIconHtml(slug) {
             if (!slug) return '';
             return '<img class="skill-png-ico" src="../shared/img/feats/' + slug +
-                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\'"/>';
         }
         // Talentos: nome PT-BR (data.js FEATS[].name) -> slug. Slugify igual a _skillSlug.
         function _featSlug(name) {
@@ -1726,7 +1726,7 @@
             if (!id || !STATUS_PT[id]) return '';
             var cls = (sz === 'lg') ? 'skill-png-ico-lg' : 'skill-png-ico';
             return '<img class="' + cls + '" src="../shared/img/combat/status/' + id +
-                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\\'"/>';
+                   '.webp" alt="" loading="lazy" onerror="this.outerHTML=\'\'"/>';
         }
 
         // Heurística: detecta elementos no texto effect/tech (PT-BR + EN).
