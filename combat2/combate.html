@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-04T10:49:51Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-07-05T15:58:50Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -5220,6 +5220,18 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   border-radius: var(--v-radius-pill, 20px);
   white-space: nowrap;
   vertical-align: middle;
+}
+/* 2026-07-05 (user "o botão Pular dados não tá funcionando direito"): estado
+   ATIVO visível do toggle "Pular dados" (aria-pressed=true). Antes o label era
+   idêntico nos 2 estados E não havia CSS de pressed → clicar não mudava nada na
+   tela e parecia quebrado. Gold-fill + borda dourada deixam claro que a pref
+   de pular animações está LIGADA. */
+.sim-action-sheet .action-btns-grid .action-btn[aria-pressed="true"] {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.34), rgba(196, 149, 58, 0.16));
+  border: 1px solid var(--v-gold, #c4953a);
+  color: var(--v-gold-bright, #e8c45a);
+  box-shadow: inset 0 0 0 1px var(--v-gold-30, rgba(196, 149, 58, 0.3));
+  font-weight: 700;
 }
 /* V1 Invocações Phase 1 — Bonus Action System (2026-04-18, refinado).
    Botões herdam .action-btn base; seção BÔNUS é destacada apenas pelo label
@@ -20575,8 +20587,8 @@ function render(s) {
                 var _fleePct = Math.round((_fleeSc / 20) * 100);
                 var _fleeChip = _fleeDc ? ' <span class="act-flee-dc" title="Fugir: teste de Destreza (Acrobacia) CD ' + _fleeDc + ' — chance aprox. ' + _fleePct + '%">CD ' + _fleeDc + ' · ~' + _fleePct + '%</span>' : '';
                 html += '<button type="button" class="action-btn secondary" data-act="flee">' + _actBtnIco('acao-fugir') + 'Fugir' + _fleeChip + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="Pular as animações de dados (suas, dos inimigos e da iniciativa). Persistente — pode marcar/desmarcar quando quiser.">' +
-                    (_skipAllDiceAnim ? 'Pular dados' : 'Pular dados') + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="' + (_skipAllDiceAnim ? 'Animações de dados DESLIGADAS — o resultado é aplicado na hora. Toque para voltar a ver as rolagens 3D.' : 'Pular as animações de dados (suas, dos inimigos e da iniciativa) — vê só o resultado final. Persistente; pode marcar/desmarcar quando quiser.') + '">' +
+                    (_skipAllDiceAnim ? '✓ Pulando dados' : 'Pular dados') + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="log">' + _actBtnIco('acao-log') + 'Log</button>';
                 html += '</div>';
                 /* V1 Invocações Phase 1+2 — seção BÔNUS + Encerrar Turno (oculto até estado).
@@ -21870,7 +21882,12 @@ function onBtnClick(ev) {
         var _sdBtn = document.querySelector('[data-act="toggle-skip-dice"]');
         if (_sdBtn) {
             _sdBtn.setAttribute('aria-pressed', _skipAllDiceAnim ? 'true' : 'false');
-            _sdBtn.textContent = (_skipAllDiceAnim ? 'Pular dados' : 'Pular dados');
+            /* 2026-07-05: label + title REFLETEM o estado (antes eram idênticos
+               nos 2 ramos → o toggle parecia não fazer nada). ✓ é glifo permitido. */
+            _sdBtn.textContent = (_skipAllDiceAnim ? '✓ Pulando dados' : 'Pular dados');
+            _sdBtn.setAttribute('title', _skipAllDiceAnim
+                ? 'Animações de dados DESLIGADAS — o resultado é aplicado na hora. Toque para voltar a ver as rolagens 3D.'
+                : 'Pular as animações de dados (suas, dos inimigos e da iniciativa) — vê só o resultado final. Persistente; pode marcar/desmarcar quando quiser.');
         }
         return;
     }
@@ -25074,8 +25091,9 @@ async function playMagicMissileVolleyTurn(aIdx, picks, skill) {
 
 /** Overlay da volley: dice roll + carrossel VS + summary + fly-out ao Continuar. */
 function showMagicMissileVolleyOverlay(actor, darts, groupList, s, perDart) {
-    // Fallback sem Dice3D: aplica direto.
-    if (!window.Dice3D) {
+    /* Fallback sem Dice3D OU pref "Pular dados" (_skipAllDiceAnim): aplica o
+       dano direto e resolve instantâneo — jogador vê só o resultado final. */
+    if (!window.Dice3D || _skipAllDiceAnim) {
         groupList.forEach(function (g) {
             var t = s.order[g.tIdx];
             var oldHp = t.hp;
@@ -25820,7 +25838,8 @@ function showAllySpellOverlay(actor, target, dart, s, skill, themeKey) {
         arcane:  { title: '' + (skill.n || 'Escudo'),    vsLabel: 'Escudo arcano' }
     };
     var lbl = themeLabels[themeKey] || themeLabels.holy;
-    if (!window.Dice3D) {
+    /* Sem Dice3D OU pref "Pular dados": aplica o efeito direto, sem overlay 3D. */
+    if (!window.Dice3D || _skipAllDiceAnim) {
         applyAllySpellImpact(dart, s, null, skill, themeKey, null);
         return Promise.resolve();
     }
@@ -26133,7 +26152,9 @@ async function playSummonBeastTurn(aIdx, skill) {
 
 /* Overlay épico da invocação — usa tema radiant + label "INVOCADO" no VS */
 function _sbShowSummonOverlay(actor, beast, s) {
-    if (!window.Dice3D) return Promise.resolve();
+    /* Sem Dice3D OU pref "Pular dados": pula o overlay (o beast já foi
+       adicionado ao estado antes desta chamada — nada de dano/dado a aplicar). */
+    if (!window.Dice3D || _skipAllDiceAnim) return Promise.resolve();
     return new Promise(function (resolve) {
         var ov = document.createElement('div');
         ov.className = 'dice-overlay';
@@ -26378,13 +26399,14 @@ async function playRayOfFrostTurn(aIdx, tIdx, skill) {
     var total = rolls.reduce(function (a, b) { return a + b; }, 0) + dFlat;
     var dart = { tIdx: tIdx, rolls: rolls, dmg: total, d: dD, flat: dFlat, variant: 'ice' };
     await showRayOfFrostOverlay(actor, target, dart, s);
-    await sleep(1200); // espera frost persistente assentar
+    if (!_skipAllDiceAnim) await sleep(1200); // espera frost persistente assentar (pulado se "Pular dados")
     s.last = { a: actor.n, t: target.n, hit: true, dmg: total, crit: false, tIdx: tIdx };
     render(s);
 }
 
 function showRayOfFrostOverlay(actor, target, dart, s) {
-    if (!window.Dice3D) {
+    /* Sem Dice3D OU pref "Pular dados": aplica o efeito direto, sem overlay 3D. */
+    if (!window.Dice3D || _skipAllDiceAnim) {
         applyRayOfFrostImpact(dart, s, null, null);
         return Promise.resolve();
     }
@@ -26642,14 +26664,15 @@ async function playFireballSpellTurn(aIdx, tIdx, skill) {
         saveAbility: _fbSaveAb, saveDc: simSpellSaveDc(actor) };
     await showFireballSpellOverlay(actor, target, dart, s);
     // Espera o efeito de queimadura persistente rolar no card do alvo
-    // e nos respingados antes de prosseguir pra próxima ação.
-    await sleep(1900);
+    // e nos respingados antes de prosseguir pra próxima ação (pulado se "Pular dados").
+    if (!_skipAllDiceAnim) await sleep(1900);
     s.last = { a: actor.n, t: target.n, hit: true, dmg: total, crit: false, tIdx: tIdx };
     render(s);
 }
 
 function showFireballSpellOverlay(actor, target, dart, s) {
-    if (!window.Dice3D) {
+    /* Sem Dice3D OU pref "Pular dados": aplica o efeito (dano + AoE por TR) direto. */
+    if (!window.Dice3D || _skipAllDiceAnim) {
         applyMagicMissileDartImpact(dart, s, null);
         return Promise.resolve();
     }
@@ -28942,8 +28965,14 @@ async function playTurn(aIdx, tIdx, opts) {
         });
     } catch (_eLt) {}
     simLogPushTurnHeader(s, actor);
-    var skipDiceThisActor = simShouldSkipDiceForActor(actor);
-    await sleep(200);
+    /* 2026-07-05 (user "Pular dados... jogador veja somente o resultado final"):
+       a pref persistente _skipAllDiceAnim também pula o overlay de d20 E a pausa
+       de transição DESTE ator — não só os dados de NÃO-jogador (_simSkipNonPlayerDice
+       via simShouldSkipDiceForActor). O dano usa skipDmgAnim próprio (abaixo): com
+       _skipAllDiceAnim, showDamageDice curto-circuita sozinho → aplica direto sem
+       card de resumo. */
+    var skipDiceThisActor = simShouldSkipDiceForActor(actor) || _skipAllDiceAnim;
+    await sleep(_skipAllDiceAnim ? 60 : 200);
 
     /* V1.7 Sprint-17 (2026-04-21 QA PHB p.272) — SANTUÁRIO (Sanctuary):
        Se target tem buff sanctuary:true, attacker rola TR SAB antes do ataque.
