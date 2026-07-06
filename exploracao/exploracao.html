@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T14:12:54Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T14:30:47Z - do not edit directly, edit source -->
 
 
 
@@ -4395,12 +4395,18 @@ body.footer-collapsed #hex-nav { bottom: 56px; }  /* acima da pill #footer-resto
    player (beginMove→centerOnPlayer), então trocar o "centralizar" manual por este
    toggle é seguro; ao recolher também recentra no personagem (JS). */
 #hex-nav-inner.nav-collapsed { pointer-events: none; }            /* área vazia deixa o mapa receber toques */
+/* Recolhido: some com as 6 setas + botões −/+. `transition: none` é CRÍTICO — a
+   base `.hex-dir { transition: all }` + o render loop da exploração re-disparam a
+   transição a cada frame, deixando a opacity PRESA perto de 1 (transição
+   perpetuamente reiniciada). Diagnóstico ao vivo (getAnimations): 2 CSSTransition
+   de opacity/transform em `running` sem nunca terminar. Sem transição, opacity +
+   visibility caem pra hidden INSTANTANEAMENTE e ficam — e voltam ao expandir. */
 #hex-nav-inner.nav-collapsed .hex-dir,
 #hex-nav-inner.nav-collapsed .hex-size-btn {
   opacity: 0;
-  transform: scale(0.35);
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: none;
 }
 #hex-nav-inner.nav-collapsed #hex-nav-center {
   pointer-events: auto;                                           /* só o ◉ continua clicável (pra expandir) */
