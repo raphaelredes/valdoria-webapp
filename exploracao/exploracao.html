@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T03:38:12Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T03:50:54Z - do not edit directly, edit source -->
 
 
 
@@ -44129,6 +44129,11 @@ function bindQuickActions() {
       });
     });
   }
+  // 2026-07-06 FIX: _showExploreSettings é NESTED nesta função de boot, então o
+  // botão Config do footer (_onExploreFooterAction, top-level) NÃO alcançava —
+  // Config estava quebrado silenciosamente (bug pré-existente, exposto agora que o
+  // Ritmo de Viagem vive no popup de Config). Expõe no window pro footer chamar.
+  window._showExploreSettings = _showExploreSettings;
   // Sessão #72 (2026-06-03): #btn-explore-settings removido — Config agora abre
   // pelo footer retrátil (data-action="settings" → _onExploreFooterAction →
   // _showExploreSettings). Guard preservado por robustez (botão não existe mais).
