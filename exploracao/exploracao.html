@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T10:50:10Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T12:23:17Z - do not edit directly, edit source -->
 
 
 
@@ -26676,9 +26676,9 @@ function _getHexBaseCache(tile, color, heightPx) {
   }
   // Grid lines (só desenha se HEX_W médio+grande; em low-zoom pula — opt 5)
   if (HEX_W >= 25) {
-    // 2026-07-06 (user "faça a linha dos hexágonos ser mais transparente"):
-    // alpha 0.4 → 0.2 — contorno do hex mais sutil.
-    hctx.strokeStyle = 'rgba(15,12,8,0.2)';
+    // 2026-07-06 (user "faça a linha dos hexágonos ser mais transparente" +
+    // "pode reduzir mais"): alpha 0.4 → 0.2 → 0.1 — contorno do hex bem sutil.
+    hctx.strokeStyle = 'rgba(15,12,8,0.1)';
     hctx.lineWidth = 0.6;
     hctx.beginPath();
     hctx.moveTo(topV[0].x, topV[0].y);
