@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T17:49:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T18:57:19Z - do not edit directly, edit source -->
 
 
 
@@ -23457,10 +23457,14 @@ function renderFrame(ts) {
       });
     }
   }
+  // ── TERRAIN LIFE — água cintila + grama balança ao vento (2026-07-06) ─────
+  // Overlays leves sobre os tiles cacheados (não tocam o scene-cache). Água só em
+  // medium+; vento em TODOS os tiers (barato) pra o mapa ter vida até no lite.
+  if (typeof drawWaterShimmer === 'function') { try { drawWaterShimmer(mainCtx); } catch (_) {} }
+  if (typeof drawWindGrass === 'function') { try { drawWindGrass(mainCtx); } catch (_) {} }
   // ── MOVE OVERLAY (tap-to-move, 2026-07-06) ───────────────────────────────
   // Indicadores dos vizinhos alcançáveis + marcador do destino (trilha + hex-alvo +
-  // herói-fantasma + ping + ✓), acima de tiles+player. Vizinhos são adjacentes ao
-  // herói (visíveis), então aparecem nítidos.
+  // ping + ✓), acima de tiles+player. Vizinhos são adjacentes ao herói (visíveis).
   if (typeof drawMoveOverlay === 'function') { try { drawMoveOverlay(mainCtx); } catch (_) {} }
   // ── AMBIENT GROUND (mapa vivo — re-religado 2026-06-14) ───────────────────
   // Camadas ambientes órfãs (cortadas num A/B FPS-test antigo) religadas ao
@@ -23989,6 +23993,83 @@ function _drawDistantHaze(ctx) {
 
 // Pollen motes: 3-6 dust motes flutuando em GRASS hexes durante o dia.
 // Tier: EPIC only. Custo: arc per mote per visible grass hex (escasso).
+// ── TERRAIN LIFE (2026-07-06, "ambientes vivos") ─────────────────────────────
+// Overlays LEVES sobre os tiles cacheados (NÃO tocam o scene-cache). Enumeram um raio
+// ao redor do player (como o pollen) + fog check + draws em batch. Custo baixo.
+
+// Água: 2 glints que deslizam sobre tiles 'w'/'W' (luz na água ondulando). Medium+.
+function drawWaterShimmer(ctx) {
+  var tier = window._valdoriaPerformanceTier;
+  if (tier === 'lite' || window.vReducedMotion) return;
+  if (!S || !S.grid || !S.player || !S.fogState) return;
+  var px = S.player.col, py = S.player.row, maxDist = 6;
+  ctx.save();
+  ctx.lineCap = 'round';
+  for (var r = Math.max(0, py - maxDist); r <= Math.min(ROWS - 1, py + maxDist); r++) {
+    var rowArr = S.grid[r]; if (!rowArr) continue;
+    for (var c = Math.max(0, px - maxDist); c <= Math.min(COLS - 1, px + maxDist); c++) {
+      var t = rowArr[c];
+      if (t !== 'w' && t !== 'W') continue;
+      var fs = S.fogState[c + ',' + r];
+      if (fs !== 'visible' && fs !== 'dim') continue;
+      var pos = hexToScreen(c, r);
+      var cy = pos.y - effectiveTileHeightPx(c, r);
+      var ph = ((c * 13 + r * 7) & 0xFF) * 0.1;
+      for (var k = 0; k < 2; k++) {
+        var gx = pos.x + Math.sin(_animTime * 0.0011 + ph + k * 2.1) * HEX_W * 0.22;
+        var gy = cy + Math.cos(_animTime * 0.0009 + ph + k * 1.3) * HEX_H * 0.10 - HEX_H * 0.02;
+        var a = 0.09 + 0.09 * (0.5 + 0.5 * Math.sin(_animTime * 0.002 + ph + k));
+        ctx.strokeStyle = 'rgba(200,230,245,' + a.toFixed(3) + ')';
+        ctx.lineWidth = Math.max(1, HEX_W * 0.03);
+        ctx.beginPath();
+        ctx.moveTo(gx - HEX_W * 0.10, gy);
+        ctx.quadraticCurveTo(gx, gy - HEX_H * 0.03, gx + HEX_W * 0.10, gy);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+// Vento: lâminas de grama que balançam em tiles '.'/'g' perto do player. TODOS os
+// tiers (barato — batch num único stroke) pra o mapa ter vida até no lite.
+function drawWindGrass(ctx) {
+  if (window.vReducedMotion) return;
+  if (!S || !S.grid || !S.player || !S.fogState) return;
+  var tier = window._valdoriaPerformanceTier;
+  var maxDist = (tier === 'lite') ? 3 : 5;
+  var cap = (tier === 'lite') ? 16 : 44;
+  var px = S.player.col, py = S.player.row, n = 0;
+  var windAng = Math.sin(_animTime * 0.0002);   // direção global do vento (gira lento)
+  ctx.save();
+  ctx.strokeStyle = 'rgba(228,238,188,0.13)';
+  ctx.lineWidth = Math.max(0.8, HEX_W * 0.012);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (var r = Math.max(0, py - maxDist); r <= Math.min(ROWS - 1, py + maxDist) && n < cap; r++) {
+    var rowArr = S.grid[r]; if (!rowArr) continue;
+    for (var c = Math.max(0, px - maxDist); c <= Math.min(COLS - 1, px + maxDist) && n < cap; c++) {
+      var t = rowArr[c];
+      if (t !== '.' && t !== 'g') continue;
+      var fs = S.fogState[c + ',' + r];
+      if (fs !== 'visible') continue;
+      var seed = (c * 13 + r * 29 + 7) & 0xFF;
+      if ((seed & 0x03) !== 0) continue;   // ~1/4 dos hexes de grama tem uma lâmina
+      var pos = hexToScreen(c, r);
+      var by = pos.y - effectiveTileHeightPx(c, r) + HEX_H * 0.06;
+      var bx = pos.x + ((seed & 0x0F) - 8) * (HEX_W * 0.02);
+      var sway = Math.sin(_animTime * 0.003 + seed) * HEX_W * 0.05;
+      var len = HEX_H * 0.14;
+      ctx.moveTo(bx, by);
+      ctx.quadraticCurveTo(bx + sway * 0.5 + windAng * len * 0.4, by - len * 0.6,
+                           bx + sway + windAng * len * 0.6, by - len);
+      n++;
+    }
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
 function _drawAmbientPollenMotes(ctx) {
   var tier = window._valdoriaPerformanceTier;
   if (tier !== 'full') return;
@@ -26175,14 +26256,21 @@ function updateCritters() {
 }
 
 function spawnCritter() {
-  // V2.8: butterfly adicionado (só apropriado em planícies/dia)
-  let types = ['rabbit', 'fox', 'bird'];
-  if (S && S.biome === 'plains' && S.dayPhase !== 'night') {
-    types = ['rabbit', 'fox', 'bird', 'butterfly', 'butterfly'];  // 2x peso pra ver mais
-  } else if (S && S.biome === 'forest' && S.dayPhase !== 'night') {
-    // 2026-06-15 (user): na MATA, mais pássaros voando entre as árvores.
-    types = ['bird', 'bird', 'bird', 'rabbit', 'butterfly'];
-  }
+  // 2026-07-06 (user "ambientes vivos"): FAUNA POR BIOMA — cada bioma tem fauna
+  // ambiente característica. Tipos novos: bat (voador errático), scorpion (rasteiro),
+  // firefly (vaga-lume que pisca — lindo à noite/pântano). Reusa rabbit/fox/bird/butterfly.
+  var bi = S && S.biome, night = S && S.dayPhase === 'night';
+  let types;
+  if (bi === 'plains')        types = night ? ['firefly', 'firefly', 'bat']              : ['rabbit', 'fox', 'bird', 'butterfly', 'butterfly'];
+  else if (bi === 'forest')   types = night ? ['firefly', 'firefly', 'bat']              : ['bird', 'bird', 'bird', 'rabbit', 'butterfly'];
+  else if (bi === 'desert')   types = night ? ['scorpion', 'scorpion', 'bat']            : ['scorpion', 'bird', 'rabbit'];
+  else if (bi === 'swamp')    types = night ? ['firefly', 'firefly', 'firefly', 'bat']   : ['butterfly', 'firefly', 'bird'];
+  else if (bi === 'snow')     types = ['rabbit', 'bird', 'bird'];
+  else if (bi === 'cave')     types = ['bat', 'bat', 'firefly'];
+  else if (bi === 'graveyard')types = ['bat', 'firefly', 'firefly'];
+  else if (bi === 'volcanic') types = ['bat', 'bat'];
+  else if (bi === 'mountain') types = ['bird', 'bird', 'rabbit'];
+  else                        types = ['rabbit', 'fox', 'bird'];
   const type = types[Math.floor(Math.random() * types.length)];
   const side = Math.floor(Math.random() * 4); // 0=top,1=right,2=bot,3=left
   let x, y, vx, vy;
@@ -26311,6 +26399,46 @@ function drawCritterSprite(ctx, cr, s) {
     ctx.moveTo(cr.x + 1 * s, cr.y - 3 * s);
     ctx.lineTo(cr.x + 3 * s, cr.y - 3 * s - flap);
     ctx.stroke();
+  } else if (cr.type === 'bat') {
+    // Morcego — voa acima do chão, asas de membrana batendo rápido
+    const flap = Math.sin(t * 16) * 2.2 * s;
+    ctx.fillStyle = '#1a1518';
+    ctx.beginPath(); ctx.ellipse(cr.x, cr.y - 3 * s, 0.7 * s, 1.0 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cr.x, cr.y - 3 * s);
+    ctx.quadraticCurveTo(cr.x - 2.6 * s, cr.y - 3 * s - flap, cr.x - 3.6 * s, cr.y - 1.8 * s);
+    ctx.quadraticCurveTo(cr.x - 1.8 * s, cr.y - 2.6 * s, cr.x, cr.y - 2.2 * s);
+    ctx.moveTo(cr.x, cr.y - 3 * s);
+    ctx.quadraticCurveTo(cr.x + 2.6 * s, cr.y - 3 * s - flap, cr.x + 3.6 * s, cr.y - 1.8 * s);
+    ctx.quadraticCurveTo(cr.x + 1.8 * s, cr.y - 2.6 * s, cr.x, cr.y - 2.2 * s);
+    ctx.fill();
+  } else if (cr.type === 'scorpion') {
+    // Escorpião — rasteiro, pinça na frente + cauda curvada com ferrão que oscila
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.beginPath(); ctx.ellipse(cr.x, cr.y + 1, 2.4 * s, 0.7 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#3a2418';
+    ctx.beginPath(); ctx.ellipse(cr.x, cr.y, 1.7 * s, 0.95 * s, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cr.x + 2.1 * s, cr.y - 0.4 * s, 0.65 * s, 0, Math.PI * 2); ctx.fill();
+    const sting = Math.sin(t * 5) * 0.4 * s;
+    ctx.strokeStyle = '#3a2418'; ctx.lineWidth = 0.9 * s; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cr.x - 1.4 * s, cr.y);
+    ctx.quadraticCurveTo(cr.x - 3 * s, cr.y - 1.4 * s + sting, cr.x - 2.1 * s, cr.y - 2.4 * s + sting);
+    ctx.stroke();
+  } else if (cr.type === 'firefly') {
+    // Vaga-lume — pontinho que pisca e flutua (glow radial). ~1 gradient/frame.
+    const blink = 0.35 + 0.65 * Math.abs(Math.sin(t * 3 + (cr.spawnT || 0) * 0.001));
+    const bob = Math.sin(t * 2 + (cr.spawnT || 0)) * 1.5;
+    const fy = cr.y - 3 * s + bob;
+    ctx.globalAlpha = blink;
+    const gr = ctx.createRadialGradient(cr.x, fy, 0, cr.x, fy, 4 * s);
+    gr.addColorStop(0, 'rgba(214,240,130,0.9)');
+    gr.addColorStop(1, 'rgba(214,240,130,0)');
+    ctx.fillStyle = gr;
+    ctx.beginPath(); ctx.arc(cr.x, fy, 4 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#eaffb4';
+    ctx.beginPath(); ctx.arc(cr.x, fy, 0.7 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
   }
   ctx.restore();
 }
@@ -26322,8 +26450,10 @@ function drawDayNightTint(ctx) {
   if (shouldLogD) LOG('DAYPHASE', 'drawDayNightTint phase=' + phase);
   if (phase === 'day') { if (shouldLogD) LOG('DAYPHASE', 'skipped (day = no tint)'); return; }
   let r, g, b, a;
-  if (phase === 'dusk') { r = 200; g = 100; b = 50; a = 0.15; }
-  else if (phase === 'dawn') { r = 255; g = 180; b = 100; a = 0.08; }
+  // 2026-07-06 (user "ambientes vivos"): golden-hour um pouco mais presente — o
+  // amanhecer/entardecer ganham mais âmbar (midday continua neutro, noite fria).
+  if (phase === 'dusk') { r = 206; g = 98; b = 42; a = 0.18; }
+  else if (phase === 'dawn') { r = 255; g = 178; b = 102; a = 0.11; }
   else { r = 20; g = 30; b = 60; a = 0.28; }  // night
   // Flicker noturno leve
   if (phase === 'night') a += Math.sin(_animTime * 0.003) * 0.04;
