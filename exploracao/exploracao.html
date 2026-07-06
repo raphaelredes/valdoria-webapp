@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T15:33:31Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T16:42:32Z - do not edit directly, edit source -->
 
 
 
@@ -972,7 +972,6 @@ html.editor-mode #hud-top,
 html.editor-mode #hud-bottom,
 html.editor-mode #hud-float,
 html.editor-mode #hud-quick,
-html.editor-mode #hex-nav,
 html.editor-mode #bottom-panel,
 html.editor-mode #footer-collapse-toggle,
 html.editor-mode #footer-restore,
@@ -4236,194 +4235,9 @@ body.perf-lite .hud-cond-chip .dot, body.reduced-motion .hud-cond-chip .dot { an
   background: rgba(60, 48, 32, 0.95);
 }
 
-/* ====== HEX-NAV (6 dirs + center) ===================================== */
-#hex-nav {
-  position: absolute;
-  left: 0; right: 0;
-  /* Sessão #72 (2026-06-03): subido de bottom:10px → 64px pra os controles de
-     movimento não ficarem por baixo do footer retrátil (#bottom-panel ~56px).
-     2026-07-06 (user "os botões de navegação ficam ACIMA do botão de recolher/expandir"):
-     64→94 pra o botão ABERTO/dir-S ficar ACIMA do #footer-collapse-toggle (centralizado,
-     bottom:56, topo ~84 do fundo). Recolhido desce pra 56px — ACIMA da pill "· Menu". */
-  bottom: 94px;
-  z-index: 15;
-  display: flex; justify-content: center;
-  pointer-events: none;
-  transition: bottom 0.2s ease;
-}
-body.footer-collapsed #hex-nav { bottom: 56px; }  /* acima da pill #footer-restore (bottom:10, topo ~46) */
-#hex-nav-inner {
-  /* X-6.5.51e: height 148 -> 188 (mais separacao vertical entre N-NE-SE-S
-     pra ficar formato HEXAGONO real, nao quase-quadrado).
-     2026-04-27 USER RULE: scale dinâmico (3 níveis: 0.6 / 0.78 / 1.0)
-     controlado pelos botões #btn-hex-size-dec/-inc.
-     2026-05-12 USER REQUEST: default agora é MAX (1.0) — antes era 0.78.
-     "primeira vez no exploracao deve estar no tamanho maior, e ao mudar
-     ficar fixado no que escolheu" (como o volume). JS setupHexNavSizeButtons
-     trata isso e persiste em localStorage 'valdoria_explore_hex_nav_scale_level'. */
-  position: relative;
-  width: 240px; height: 188px;
-  pointer-events: auto;
-  transform: scale(1.0);  /* 2026-05-12: era 0.78 — agora max default */
-  transform-origin: center center;
-  transition: transform 0.2s ease;
-}
-/* Size control buttons (− / +) — flanqueiam o hex-dir S (data-dir="3"). */
-.hex-size-btn {
-  position: absolute;
-  bottom: 0;
-  height: 34px;
-  width: 42px;
-  padding: 0;
-  background: linear-gradient(180deg, rgba(40, 32, 24, 0.96), rgba(22, 18, 14, 0.95));
-  border: 1px solid rgba(196, 149, 58, 0.35);
-  border-radius: 8px;
-  color: var(--v-gold, #c4953a);
-  font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: calc(18px * var(--v-font-scale, 1));
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* 2026-07-06: mesma correção do .hex-dir — transição explícita p/ opacity/visibility
-     não ficarem presas na base 'all' + render loop ao recolher/expandir. */
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
-  pointer-events: auto;
-}
-.hex-size-btn:hover:not(:disabled) {
-  border-color: var(--v-gold, #c4953a);
-  background: linear-gradient(180deg, rgba(60, 48, 32, 0.98), rgba(32, 26, 20, 0.97));
-  box-shadow: 0 2px 12px rgba(196, 149, 58, 0.35);
-  color: #fbd770;
-}
-.hex-size-btn:active:not(:disabled) { transform: scale(0.92); }
-.hex-size-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-#btn-hex-size-dec { left: 8px; }
-#btn-hex-size-inc { right: 8px; }
-.hex-dir {
-  position: absolute;
-  height: 34px;
-  background: linear-gradient(180deg, rgba(40, 32, 24, 0.96), rgba(22, 18, 14, 0.95));
-  border: 1px solid rgba(196, 149, 58, 0.35);
-  border-radius: 8px;
-  color: var(--v-text, #d4c8b0);
-  font-family: var(--v-font-display, 'Cinzel', serif);
-  font-size: calc(10px * var(--v-font-scale, 1));
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  gap: 5px;
-  padding: 0 6px;
-  /* 2026-07-06: transição EXPLÍCITA (sem opacity/visibility/transform). A base
-     'transition: all' + o render loop da exploração re-disparavam a transição de
-     opacity a cada frame, deixando-a presa (setas não sumiam/voltavam ao recolher/
-     expandir o hex-nav). Só cor/borda/sombra do hover transicionam; opacity/
-     visibility passam a ser INSTANTÂNEAS (e o toggle do ◉ funciona nos 2 sentidos). */
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-  text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
-}
-.hex-dir:hover:not(.blocked) {
-  border-color: var(--v-gold, #c4953a);
-  background: linear-gradient(180deg, rgba(60, 48, 32, 0.98), rgba(32, 26, 20, 0.97));
-  box-shadow: 0 2px 12px rgba(196, 149, 58, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  color: var(--v-gold, #c4953a);
-}
-.hex-dir:active:not(.blocked) { transform: scale(0.95); }
-.hex-dir.blocked {
-  opacity: 0.45;
-  cursor: not-allowed;
-  color: var(--v-text-dim);
-  border-color: rgba(180, 70, 60, 0.3);
-}
-.hex-dir.blocked .label::before { content: '⊘ '; color: #c44; }
-/* X-6.5.19: disabled (durante animação de move OU evento aberto) — pure
-   DOM pseudo, click não dispatcha. Cinzento sutil diferenciado de blocked. */
-.hex-dir:disabled {
-  opacity: 0.4;
-  cursor: wait;
-  pointer-events: none;
-  filter: grayscale(0.6);
-}
-/* V2.7: shake de feedback quando bot\u00e3o n\u00e3o pode ser acionado */
-@keyframes hexDirShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-4px); }
-  40% { transform: translateX(4px); }
-  60% { transform: translateX(-3px); }
-  80% { transform: translateX(2px); }
-}
-.hex-dir.shake { animation: hexDirShake 0.3s ease; }
-/* V2.7 flat-top layout — container 240×148px:
- *   [   N (80w centered top)    ]
- *   [NW 72w]            [NE 72w]
- *   [SW 72w]            [SE 72w]
- *   [   S (80w centered bot)    ]
- */
-/* X-6.5.51e: offsets 38 -> 50 + container 148 -> 188.
-   Resultado em 188h: N=0..34, NE/NW=50..84 (gap 16), SE/SW=104..138
-   (gap NE-SE = 20), S=154..188 (gap SE-S = 16). Hexagon shape. */
-.hex-dir[data-dir="0"] { top: 0;       left: 80px; width: 80px; }   /* N  topo-centro */
-.hex-dir[data-dir="5"] { top: 50px;    left: 0;    width: 72px; }   /* NW esquerda-topo */
-.hex-dir[data-dir="1"] { top: 50px;    right: 0;   width: 72px; }   /* NE direita-topo */
-.hex-dir[data-dir="4"] { bottom: 50px; left: 0;    width: 72px; }   /* SW esquerda-fundo */
-.hex-dir[data-dir="2"] { bottom: 50px; right: 0;   width: 72px; }   /* SE direita-fundo */
-.hex-dir[data-dir="3"] { bottom: 0;    left: 80px; width: 80px; }   /* S  fundo-centro */
-.hex-dir .arrow { font-size: calc(12px * var(--v-font-scale, 1)); opacity: 0.85; }
-.hex-dir .label { font-size: calc(9px * var(--v-font-scale, 1)); opacity: 0.9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 52px; }
-
-#hex-nav-center {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: rgba(26, 21, 16, 0.95);
-  border: 1.5px solid var(--v-gold, #c4953a);
-  color: var(--v-gold, #c4953a);
-  font-size: calc(14px * var(--v-font-scale, 1));
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
-}
-#hex-nav-center:active { transform: translate(-50%, -50%) scale(0.92); }
-/* 2026-07-06 (user "faça o botão central do sistema de navegação recolher o sistema,
-   ou seja, os botões sumirem"): o ◉ passa a ALTERNAR o estado RECOLHIDO do hex-nav.
-   Recolhido: as 6 setas + os botões −/+ somem (fade + encolhem); só o ◉ fica, agora
-   como affordance de EXPANDIR (borda tracejada + pulso dourado). A câmera já segue o
-   player (beginMove→centerOnPlayer), então trocar o "centralizar" manual por este
-   toggle é seguro; ao recolher também recentra no personagem (JS). */
-#hex-nav-inner.nav-collapsed { pointer-events: none; }            /* área vazia deixa o mapa receber toques */
-/* Recolhido: some com as 6 setas + botões −/+. `transition: none` é CRÍTICO — a
-   base `.hex-dir { transition: all }` + o render loop da exploração re-disparam a
-   transição a cada frame, deixando a opacity PRESA perto de 1 (transição
-   perpetuamente reiniciada). Diagnóstico ao vivo (getAnimations): 2 CSSTransition
-   de opacity/transform em `running` sem nunca terminar. Sem transição, opacity +
-   visibility caem pra hidden INSTANTANEAMENTE e ficam — e voltam ao expandir. */
-#hex-nav-inner.nav-collapsed .hex-dir,
-#hex-nav-inner.nav-collapsed .hex-size-btn {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: none;
-}
-#hex-nav-inner.nav-collapsed #hex-nav-center {
-  pointer-events: auto;                                           /* só o ◉ continua clicável (pra expandir) */
-  border-style: dashed;
-  animation: hexNavCollapsedPulse 2.2s ease-in-out infinite;
-}
-@keyframes hexNavCollapsedPulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(196,149,58,0.10), 0 0 12px rgba(196,149,58,0.30); }
-  50%      { box-shadow: 0 0 0 5px rgba(196,149,58,0.20), 0 0 18px rgba(196,149,58,0.52); }
-}
+/* HEX-NAV (D-pad de 6 direcoes) REMOVIDO 2026-07-06 (user: "remover o sistema
+   de movimentacao antigo"). Substituido pelo movimento por TOQUE (marcar +
+   confirmar no proprio mapa): setupTapToMove() + drawMoveOverlay(). */
 
 /* ====== EVENT MODAL =================================================== */
 #event-modal, #confirm-overlay {
@@ -8894,21 +8708,10 @@ window.__onIntroTap = function() {
        bindQuickActions: btn-inventory faz window.location.href pra
        /inventory/?token=...&return=exploracao. -->
 
-  <div id="hex-nav">
-    <div id="hex-nav-inner">
-      <button class="hex-dir" data-dir="0"><span class="arrow">↑</span><span class="label">—</span></button>
-      <button class="hex-dir" data-dir="1"><span class="arrow">↗</span><span class="label">—</span></button>
-      <button class="hex-dir" data-dir="2"><span class="arrow">↘</span><span class="label">—</span></button>
-      <button class="hex-dir" data-dir="3"><span class="arrow">↓</span><span class="label">—</span></button>
-      <button class="hex-dir" data-dir="4"><span class="arrow">↙</span><span class="label">—</span></button>
-      <button class="hex-dir" data-dir="5"><span class="arrow">↖</span><span class="label">—</span></button>
-      <button id="hex-nav-center" title="Centralizar no personagem">◉</button>
-      <!-- 2026-04-27 USER RULE: 3 níveis de tamanho do hex-nav (0.6/0.78/1.0).
-           Botões flanqueiam o hex-dir S (data-dir="3" no centro-bottom). -->
-      <button class="hex-size-btn" id="btn-hex-size-dec" title="Diminuir tamanho dos controles" aria-label="Diminuir tamanho dos controles">−</button>
-      <button class="hex-size-btn" id="btn-hex-size-inc" title="Aumentar tamanho dos controles" aria-label="Aumentar tamanho dos controles">+</button>
-    </div>
-  </div>
+  <!-- HEX-NAV (D-pad de 6 direções) REMOVIDO 2026-07-06 (user: "remover o sistema de
+       movimentação antigo"). Movimento agora é por TOQUE no mapa: 1º toque num hex
+       vizinho marca, 2º confirma (setupTapToMove + drawMoveOverlay no canvas). -->
+
 
   <!-- V3.0: #dm-toast removido \u2014 user prefere os eventos em popup -->
 
@@ -23633,10 +23436,11 @@ function renderFrame(ts) {
       });
     }
   }
-  // ── MOVE INTENT (arrastar+confirmar, 2026-07-06) ─────────────────────────
-  // Marcadores de intenção (trilha + hex-alvo + herói-fantasma + ✓) acima de
-  // tiles+player. Alvo é sempre adjacente ao herói (visível), então aparece nítido.
-  if (typeof drawMoveIntent === 'function') { try { drawMoveIntent(mainCtx); } catch (_) {} }
+  // ── MOVE OVERLAY (tap-to-move, 2026-07-06) ───────────────────────────────
+  // Indicadores dos vizinhos alcançáveis + marcador do destino (trilha + hex-alvo +
+  // herói-fantasma + ping + ✓), acima de tiles+player. Vizinhos são adjacentes ao
+  // herói (visíveis), então aparecem nítidos.
+  if (typeof drawMoveOverlay === 'function') { try { drawMoveOverlay(mainCtx); } catch (_) {} }
   // ── AMBIENT GROUND (mapa vivo — re-religado 2026-06-14) ───────────────────
   // Camadas ambientes órfãs (cortadas num A/B FPS-test antigo) religadas ao
   // pipeline. _ambientOK é calculado UMA ÚNICA vez por frame: _shouldRenderAmbient()
@@ -33959,37 +33763,9 @@ function maybeRollWanderingMonster() {
   return true;
 }
 
-function updateHexNav() {
-  const n = getNeighbors(S.player.col, S.player.row);
-  // V2.7 flat-top: 0=N, 1=NE, 2=SE, 3=S, 4=SW, 5=NW
-  const arrows = ['\u2191', '\u2197', '\u2198', '\u2193', '\u2199', '\u2196'];
-  for (let i = 0; i < 6; i++) {
-    const btn = document.querySelector('.hex-dir[data-dir="' + i + '"]');
-    if (!btn) continue;
-    const [c, r] = n[i];
-    const ae = btn.querySelector('.arrow');
-    const le = btn.querySelector('.label');
-    ae.textContent = arrows[i];
-    if (c < 0 || c >= COLS || r < 0 || r >= ROWS) {
-      le.textContent = '—';
-      btn.classList.add('blocked');
-      continue;
-    }
-    const t = tileAt(c, r);
-    const tooTall = effectiveTileHeightPx(c, r) > IMPASSABLE_HEIGHT_PX;
-    le.textContent = tooTall ? (TERRAIN_NAMES[t] || '?') + ' ↑' : (TERRAIN_NAMES[t] || '?');
-    if (isTileImpassable(c, r)) btn.classList.add('blocked');
-    else btn.classList.remove('blocked');
-  }
-  // X-6.5.19: mantém disabled sync com S.ph. Chamado em vários paths
-  // (onMoveEnd, fechar modal, resolveChoice) → reabilita botões sempre
-  // que o estado volta pra 'idle'. Durante 'moving'/'event' permanece
-  // disabled (beginMove seta explicitamente; fim de evento → idle → aqui).
-  try {
-    const shouldDisable = (S.ph !== 'idle');
-    _setHexNavDisabled(shouldDisable);
-  } catch (_) {}
-}
+function updateHexNav() { /* no-op: D-pad de 6 direcoes REMOVIDO 2026-07-06.
+  Shell mantido porque varios fluxos chamam (onMoveEnd/resolveChoice/close-modal).
+  Movimento agora e tap-to-move: setupTapToMove() + drawMoveOverlay(). */ }
 
 // X-6.5.51c (2026-04-25): _setHexNavDisabled REMOVIDO (no-op).
 // User feedback: "remova essa funcao de desativar os botoes durante a
@@ -34022,8 +33798,8 @@ function _setHexNavDisabled(_disabled) {
 // (herói-fantasma + anel pulsante + badge ✓ + trilha); 2º TOQUE no mesmo hex (ou no
 // ✓) CONFIRMA o passo. Toque em outro vizinho re-marca; toque no herói/vazio
 // cancela. ARRASTAR o dedo = pan do mapa (detectado por TAP_SLOP, não vira toque) →
-// zero conflito com o pan. Coexiste com o hex-nav. Espaço de canvas (hexToScreen/
-// drawPlayer). Só ativo em S.ph==='idle' e fora do editor.
+// zero conflito com o pan. ÚNICO sistema de movimento (D-pad removido 2026-07-06).
+// Espaço de canvas (hexToScreen/drawPlayer). Só ativo em S.ph==='idle' e fora do editor.
 function _mvHeroPos() { return hexToScreen(S.player.col, S.player.row); }
 function _mvNeighborIndex(c, r) {
   const ns = getNeighbors(S.player.col, S.player.row);
@@ -34031,44 +33807,99 @@ function _mvNeighborIndex(c, r) {
   return S.player.facing;
 }
 
-// Desenha a intenção de movimento (chamado no renderFrame, acima de tiles+player).
-function drawMoveIntent(ctx) {
-  if (!_moveIntent || !S || S.ph !== 'idle') return;
-  const mi = _moveIntent;
-  if (!isValidMove(mi.col, mi.row)) { _moveIntent = null; return; }  // alvo ficou inválido → limpa
-  const s = hexToScreen(mi.col, mi.row), h = _mvHeroPos();
-  const pending = (mi.phase === 'pending');
-  const t = ((_animTime || 0) % 1300) / 1300, pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+// ===== VFX do movimento por toque (renderFrame, acima de tiles+player) ==========
+// Herói-fantasma encapuzado (silhueta dourada) centrado em (x,y).
+function _drawGhostHero(ctx, x, y, scale, alpha) {
   ctx.save();
-  // trilha tracejada herói → alvo
-  ctx.strokeStyle = 'rgba(232,200,100,' + (pending ? 0.85 : 0.55) + ')';
-  ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.setLineDash([2, 8]);
+  ctx.globalAlpha = alpha;
+  ctx.translate(x, y); ctx.scale(scale, scale);
+  ctx.fillStyle = '#e8c864';
+  ctx.beginPath();                                   // manto
+  ctx.moveTo(0, -8);
+  ctx.quadraticCurveTo(8.5, 1, 6, 10);
+  ctx.lineTo(-6, 10);
+  ctx.quadraticCurveTo(-8.5, 1, 0, -8);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, -9.5, 3.3, 0, Math.PI * 2); ctx.fill();   // cabeça/capuz
+  ctx.restore();
+}
+
+// Indicadores sutis nos 6 vizinhos VÁLIDOS — mostram onde dá pra tocar (assume o
+// papel que o D-pad tinha de indicar as direções possíveis). Tier-aware (lite pula
+// o gradiente). Estático quando idle (o render pausa); pulsa quando o loop está ativo.
+function drawMovableHexes(ctx) {
+  const p = S.player, ns = getNeighbors(p.col, p.row);
+  const tier = window._valdoriaPerformanceTier || 'full';
+  const t = ((_animTime || 0) % 2000) / 2000, breathe = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+  ctx.save();
+  for (let i = 0; i < ns.length; i++) {
+    if (!isValidMove(ns[i][0], ns[i][1])) continue;
+    const s = hexToScreen(ns[i][0], ns[i][1]);
+    if (tier !== 'lite') {
+      const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, HEX_W * 0.24);
+      g.addColorStop(0, 'rgba(232,200,100,' + (0.15 + 0.08 * breathe) + ')');
+      g.addColorStop(1, 'rgba(232,200,100,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(s.x, s.y, HEX_W * 0.24, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(232,200,100,' + (0.42 + 0.22 * breathe) + ')';     // dot central
+    ctx.beginPath(); ctx.arc(s.x, s.y, HEX_W * 0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(232,200,100,' + (0.20 + 0.12 * breathe) + ')';   // anelzinho
+    ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(s.x, s.y, HEX_W * (0.13 + 0.02 * breathe), 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Destino MARCADO (aguardando confirmação): trilha + hex-alvo brilhante (contorno
+// duplo) + herói-fantasma + ping expansivo + badge ✓ ("toque de novo pra confirmar").
+function drawMarkedDestination(ctx, mi) {
+  const s = hexToScreen(mi.col, mi.row), h = _mvHeroPos();
+  const tier = window._valdoriaPerformanceTier || 'full';
+  const t = ((_animTime || 0) % 1200) / 1200, pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(232,200,100,0.9)';                    // trilha herói → alvo
+  ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.setLineDash([3, 8]);
   ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.lineTo(s.x, s.y); ctx.stroke();
   ctx.setLineDash([]);
-  // contorno do hex-alvo (flat-top)
-  const v = hexTopVertices(s.x, s.y);
+  const v = hexTopVertices(s.x, s.y);                           // hex-alvo
   ctx.beginPath(); ctx.moveTo(v[0].x, v[0].y);
   for (let i = 1; i < v.length; i++) ctx.lineTo(v[i].x, v[i].y);
   ctx.closePath();
-  ctx.fillStyle = 'rgba(232,200,100,' + (pending ? 0.15 + 0.10 * pulse : 0.11) + ')';
+  if (tier !== 'lite') {
+    const rg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, HEX_W * 0.5);
+    rg.addColorStop(0, 'rgba(232,200,100,' + (0.20 + 0.10 * pulse) + ')');
+    rg.addColorStop(1, 'rgba(232,200,100,0.04)');
+    ctx.fillStyle = rg;
+  } else { ctx.fillStyle = 'rgba(232,200,100,0.15)'; }
   ctx.fill();
-  ctx.strokeStyle = 'rgba(232,200,100,' + (pending ? 0.7 + 0.3 * pulse : 0.55) + ')';
-  ctx.lineWidth = pending ? 2.6 : 2; ctx.stroke();
-  // herói-fantasma no alvo
-  ctx.globalAlpha = pending ? 0.62 : 0.42;
-  ctx.fillStyle = 'rgba(26,21,16,0.7)'; ctx.strokeStyle = '#e8c864'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(s.x, s.y - HEX_H * 0.12, HEX_W * 0.15, 0, Math.PI * 2);
-  ctx.fill(); ctx.stroke();
-  ctx.globalAlpha = 1;
-  if (pending) {
-    // badge ✓ acima do alvo — sinaliza "toque de novo pra confirmar"
-    const bx = s.x, by = s.y - HEX_H * 0.62, br = 12;
-    ctx.fillStyle = 'rgba(26,21,16,0.96)'; ctx.strokeStyle = '#e8c864'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = '#e8c864'; ctx.lineWidth = 2.6; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(bx - 5, by); ctx.lineTo(bx - 1.5, by + 4.5); ctx.lineTo(bx + 5.5, by - 5); ctx.stroke();
+  ctx.strokeStyle = 'rgba(232,200,100,' + (0.30 + 0.25 * pulse) + ')'; ctx.lineWidth = 6; ctx.stroke();  // glow
+  ctx.strokeStyle = 'rgba(255,240,190,0.95)'; ctx.lineWidth = 2; ctx.stroke();                            // linha clara
+  if (tier !== 'lite') {                                        // ping expansivo (sonar)
+    const pr = HEX_W * (0.32 + 0.30 * t);
+    ctx.strokeStyle = 'rgba(232,200,100,' + (0.45 * (1 - t)) + ')'; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.arc(s.x, s.y, pr, 0, Math.PI * 2); ctx.stroke();
   }
+  _drawGhostHero(ctx, s.x, s.y - HEX_H * 0.08, 1.05, 0.5 + 0.18 * pulse);   // herói-fantasma
+  const bx = s.x, by = s.y - HEX_H * 0.66, br = 12.5;           // badge ✓
+  if (tier !== 'lite') {
+    ctx.strokeStyle = 'rgba(232,200,100,' + (0.25 + 0.30 * pulse) + ')'; ctx.lineWidth = 3.5;
+    ctx.beginPath(); ctx.arc(bx, by, br + 3, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(26,21,16,0.97)'; ctx.strokeStyle = 'rgba(255,240,190,0.95)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = '#fff0be'; ctx.lineWidth = 2.8; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(bx - 5, by + 0.5); ctx.lineTo(bx - 1.5, by + 4.5); ctx.lineTo(bx + 5.5, by - 4.5); ctx.stroke();
   ctx.restore();
+}
+
+// Dispatcher (chamado no renderFrame): destino marcado → marcador polido; senão →
+// indicadores sutis nos vizinhos alcançáveis.
+function drawMoveOverlay(ctx) {
+  if (!S || S.ph !== 'idle') return;
+  if (_moveIntent && !isValidMove(_moveIntent.col, _moveIntent.row)) _moveIntent = null;  // alvo ficou inválido
+  if (_moveIntent) drawMarkedDestination(ctx, _moveIntent);
+  else drawMovableHexes(ctx);
 }
 
 function setupTapToMove() {
@@ -34130,41 +33961,10 @@ function setupTapToMove() {
   canvas.addEventListener('mouseup', function (e) { if (_touchGuard || e.button !== 0) return; up(e.clientX, e.clientY); });
 }
 
+// 2026-07-06: o D-pad de 6 direções foi REMOVIDO (user). O único sistema de
+// movimento agora é o TOQUE no mapa (marcar + confirmar). bindHexNav mantém só o
+// nome (chamado no init) e liga o tap-to-move. Idempotente.
 function bindHexNav() {
-  for (let i = 0; i < 6; i++) {
-    const btn = document.querySelector('.hex-dir[data-dir="' + i + '"]');
-    if (!btn) continue;
-    btn.addEventListener('click', () => {
-      _markActive();  // V4: input wake from idle
-      // Shake só para erros reais: direção bloqueada OU evento/transição aberto
-      if (btn.classList.contains('blocked')) { shakeBlockedDir(btn); return; }
-      // X-6.5.19: durante moving, botão está disabled (sem click disparando).
-      // Este if é defense-in-depth se animação/estado falhar por algum motivo.
-      if (S.ph !== 'idle') { shakeBlockedDir(btn); return; }
-      const n = getNeighbors(S.player.col, S.player.row);
-      const [c, r] = n[i];
-      if (!isValidMove(c, r)) { shakeBlockedDir(btn); return; }
-      S.player.facing = i;
-      beginMove(c, r);
-    });
-  }
-  const centerBtn = document.getElementById('hex-nav-center');
-  if (centerBtn) centerBtn.addEventListener('click', () => {
-    _markActive();
-    // 2026-07-06 (user "o botão central recolhe o sistema — os botões somem"): o ◉
-    // alterna o estado recolhido do hex-nav (setas + −/+ somem). Ao RECOLHER, também
-    // recentra no personagem (preserva a utilidade antiga do ◉); a câmera já segue o
-    // player em beginMove, então nada de navegação se perde.
-    const inner = document.getElementById('hex-nav-inner');
-    if (!inner) { centerOnPlayer(true); return; }
-    const willCollapse = !inner.classList.contains('nav-collapsed');
-    inner.classList.toggle('nav-collapsed');
-    centerBtn.setAttribute('title', willCollapse
-      ? 'Mostrar controles de movimento'
-      : 'Recolher controles de movimento');
-    if (willCollapse) centerOnPlayer(true);
-  });
-  // 2026-07-06: liga o MARCAR(toque)+CONFIRMAR (coexiste com o D-pad; idempotente).
   setupTapToMove();
 }
 
@@ -44334,42 +44134,7 @@ function bindQuickActions() {
   // 2026-04-27 USER RULE: hex-nav size controls — 3 níveis (0.6 / 0.78 / 1.0).
   // Botões − e + flanqueiam o hex-dir S (centro-bottom). Estado salvo em
   // localStorage 'valdoria_explore_hex_nav_scale_level' (0..2).
-  (function setupHexNavSizeButtons() {
-    var SCALE_LEVELS = [0.6, 0.78, 1.0];
-    // 2026-05-12 USER REQUEST: "hex-nav esteja sempre no tamanho maior na
-    // primeira vez que o jogador acessar o exploracao, e quando mudar ficar
-    // fixado no que escolheu, assim como funciona com o volume".
-    // Default agora é MAX (1.0) — primeira vez sem localStorage → tamanho max.
-    // Após user clicar − / +, valor persiste em localStorage (já funcionava).
-    var DEFAULT_LEVEL = SCALE_LEVELS.length - 1;  // 2 = 1.0 (max)
-    var STORAGE_KEY = 'valdoria_explore_hex_nav_scale_level';
-    var inner = document.getElementById('hex-nav-inner');
-    var btnDec = document.getElementById('btn-hex-size-dec');
-    var btnInc = document.getElementById('btn-hex-size-inc');
-    if (!inner || !btnDec || !btnInc) return;
-    var level = DEFAULT_LEVEL;
-    try {
-      var saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
-      if (!isNaN(saved) && saved >= 0 && saved < SCALE_LEVELS.length) level = saved;
-    } catch (_e) { /* localStorage bloqueado */ }
-    function applyHexNavScale() {
-      var scale = SCALE_LEVELS[level];
-      inner.style.transform = 'scale(' + scale + ')';
-      inner.style.transformOrigin = 'center center';
-      btnDec.disabled = (level === 0);
-      btnInc.disabled = (level === SCALE_LEVELS.length - 1);
-      try { localStorage.setItem(STORAGE_KEY, String(level)); } catch (_e) {}
-    }
-    btnDec.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (level > 0) { level -= 1; applyHexNavScale(); }
-    });
-    btnInc.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (level < SCALE_LEVELS.length - 1) { level += 1; applyHexNavScale(); }
-    });
-    applyHexNavScale();
-  })();
+  /* setupHexNavSizeButtons removido 2026-07-06 (controlava o tamanho do D-pad). */
   document.getElementById('btn-cartografia').addEventListener('click', _openCartographyWithPrompt);
   // V2.7: btn-download-log removido. Console global downloadExploracaoLogs() continua.
   document.getElementById('cart-close-btn').addEventListener('click', closeCartography);
