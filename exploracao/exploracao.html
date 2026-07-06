@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T13:19:14Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T14:12:54Z - do not edit directly, edit source -->
 
 
 
@@ -4385,6 +4385,31 @@ body.footer-collapsed #hex-nav { bottom: 56px; }  /* acima da pill #footer-resto
   font-size: calc(14px * var(--v-font-scale, 1));
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+#hex-nav-center:active { transform: translate(-50%, -50%) scale(0.92); }
+/* 2026-07-06 (user "faça o botão central do sistema de navegação recolher o sistema,
+   ou seja, os botões sumirem"): o ◉ passa a ALTERNAR o estado RECOLHIDO do hex-nav.
+   Recolhido: as 6 setas + os botões −/+ somem (fade + encolhem); só o ◉ fica, agora
+   como affordance de EXPANDIR (borda tracejada + pulso dourado). A câmera já segue o
+   player (beginMove→centerOnPlayer), então trocar o "centralizar" manual por este
+   toggle é seguro; ao recolher também recentra no personagem (JS). */
+#hex-nav-inner.nav-collapsed { pointer-events: none; }            /* área vazia deixa o mapa receber toques */
+#hex-nav-inner.nav-collapsed .hex-dir,
+#hex-nav-inner.nav-collapsed .hex-size-btn {
+  opacity: 0;
+  transform: scale(0.35);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+#hex-nav-inner.nav-collapsed #hex-nav-center {
+  pointer-events: auto;                                           /* só o ◉ continua clicável (pra expandir) */
+  border-style: dashed;
+  animation: hexNavCollapsedPulse 2.2s ease-in-out infinite;
+}
+@keyframes hexNavCollapsedPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(196,149,58,0.10), 0 0 12px rgba(196,149,58,0.30); }
+  50%      { box-shadow: 0 0 0 5px rgba(196,149,58,0.20), 0 0 18px rgba(196,149,58,0.52); }
 }
 
 /* ====== EVENT MODAL =================================================== */
@@ -33987,7 +34012,21 @@ function bindHexNav() {
     });
   }
   const centerBtn = document.getElementById('hex-nav-center');
-  if (centerBtn) centerBtn.addEventListener('click', () => { _markActive(); centerOnPlayer(true); });
+  if (centerBtn) centerBtn.addEventListener('click', () => {
+    _markActive();
+    // 2026-07-06 (user "o botão central recolhe o sistema — os botões somem"): o ◉
+    // alterna o estado recolhido do hex-nav (setas + −/+ somem). Ao RECOLHER, também
+    // recentra no personagem (preserva a utilidade antiga do ◉); a câmera já segue o
+    // player em beginMove, então nada de navegação se perde.
+    const inner = document.getElementById('hex-nav-inner');
+    if (!inner) { centerOnPlayer(true); return; }
+    const willCollapse = !inner.classList.contains('nav-collapsed');
+    inner.classList.toggle('nav-collapsed');
+    centerBtn.setAttribute('title', willCollapse
+      ? 'Mostrar controles de movimento'
+      : 'Recolher controles de movimento');
+    if (willCollapse) centerOnPlayer(true);
+  });
 }
 
 // 2026-04-29 V4: bind global input wake — qualquer interação do user despertar
