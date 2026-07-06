@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T16:42:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T17:02:17Z - do not edit directly, edit source -->
 
 
 
@@ -33808,22 +33808,6 @@ function _mvNeighborIndex(c, r) {
 }
 
 // ===== VFX do movimento por toque (renderFrame, acima de tiles+player) ==========
-// Herói-fantasma encapuzado (silhueta dourada) centrado em (x,y).
-function _drawGhostHero(ctx, x, y, scale, alpha) {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.translate(x, y); ctx.scale(scale, scale);
-  ctx.fillStyle = '#e8c864';
-  ctx.beginPath();                                   // manto
-  ctx.moveTo(0, -8);
-  ctx.quadraticCurveTo(8.5, 1, 6, 10);
-  ctx.lineTo(-6, 10);
-  ctx.quadraticCurveTo(-8.5, 1, 0, -8);
-  ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.arc(0, -9.5, 3.3, 0, Math.PI * 2); ctx.fill();   // cabeça/capuz
-  ctx.restore();
-}
-
 // Indicadores sutis nos 6 vizinhos VÁLIDOS — mostram onde dá pra tocar (assume o
 // papel que o D-pad tinha de indicar as direções possíveis). Tier-aware (lite pula
 // o gradiente). Estático quando idle (o render pausa); pulsa quando o loop está ativo.
@@ -33852,7 +33836,7 @@ function drawMovableHexes(ctx) {
 }
 
 // Destino MARCADO (aguardando confirmação): trilha + hex-alvo brilhante (contorno
-// duplo) + herói-fantasma + ping expansivo + badge ✓ ("toque de novo pra confirmar").
+// duplo) + ping expansivo + badge ✓ ("toque de novo pra confirmar").
 function drawMarkedDestination(ctx, mi) {
   const s = hexToScreen(mi.col, mi.row), h = _mvHeroPos();
   const tier = window._valdoriaPerformanceTier || 'full';
@@ -33880,7 +33864,6 @@ function drawMarkedDestination(ctx, mi) {
     ctx.strokeStyle = 'rgba(232,200,100,' + (0.45 * (1 - t)) + ')'; ctx.lineWidth = 2.2;
     ctx.beginPath(); ctx.arc(s.x, s.y, pr, 0, Math.PI * 2); ctx.stroke();
   }
-  _drawGhostHero(ctx, s.x, s.y - HEX_H * 0.08, 1.05, 0.5 + 0.18 * pulse);   // herói-fantasma
   const bx = s.x, by = s.y - HEX_H * 0.66, br = 12.5;           // badge ✓
   if (tier !== 'lite') {
     ctx.strokeStyle = 'rgba(232,200,100,' + (0.25 + 0.30 * pulse) + ')'; ctx.lineWidth = 3.5;
