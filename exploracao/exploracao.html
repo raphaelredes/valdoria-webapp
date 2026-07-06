@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T00:51:06Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T02:33:56Z - do not edit directly, edit source -->
 
 
 
@@ -9043,6 +9043,23 @@ window.__onIntroTap = function() {
       </div>
     </div>
   </div>
+
+  <!-- 2026-07-05 FIX (user "a barra de menu não aparece na exploração"): FOOTER
+       RETRÁTIL canonical (mesmo padrão da cidade, "Collapsible Panel / Immersive
+       Mode"). Estrutura: toggle (·) FORA do panel + #bottom-panel (#footer-quick
+       Grupo/Mochila/Acampar/Cartografia/Hall/Config) + #footer-restore (pill "·
+       Menu"); audio-manager.js embeda o va-btn (volume) em #footer-quick.
+       DEVE ficar DENTRO do #frame — antes estava aninhado por engano no
+       #sim-log-panel (dev log panel removido fora do modo DEV), então o footer
+       NUNCA renderizava em jogo (bindExploreFooter dava early-return sem
+       #footer-quick). Aliases data-alias=immersive-toggle/immersive-restore
+       satisfazem o preflight check_webapp_immersive_mode_complete. -->
+  <button id="footer-collapse-toggle" data-alias="immersive-toggle" aria-label="Recolher menu" title="Recolher menu">·</button>
+  <div id="bottom-panel">
+    <div id="footer-quick" class="footer-row footer-quick"></div>
+    <div id="footer-nav" class="footer-row footer-nav"></div>
+  </div>
+  <button id="footer-restore" data-alias="immersive-restore" aria-label="Expandir menu">· Menu</button>
 </div>
 
 <!-- X-6.5.51f: dev log panel a direita do #frame (replica visual do
@@ -9124,20 +9141,6 @@ window.__onIntroTap = function() {
       <div id="sim-log-panel-list-verbose" aria-live="polite"></div>
     </div>
   </div>
-
-  <!-- Sessão #72 (2026-06-03): FOOTER RETRÁTIL canonical (mesmo padrão da cidade,
-       regra "Collapsible Panel (Immersive Mode)"). Estrutura: toggle (·) FORA do
-       panel + #bottom-panel (#footer-quick com Grupo/Mochila/Acampar/Cartografia/
-       Config) + #footer-restore (pill "· Menu"). audio-manager.js embeda o va-btn
-       (volume) em #footer-quick automaticamente, removendo o botão flutuante solto.
-       Aliases data-alias=immersive-toggle/immersive-restore satisfazem o preflight
-       check_webapp_immersive_mode_complete. -->
-  <button id="footer-collapse-toggle" data-alias="immersive-toggle" aria-label="Recolher menu" title="Recolher menu">·</button>
-  <div id="bottom-panel">
-    <div id="footer-quick" class="footer-row footer-quick"></div>
-    <div id="footer-nav" class="footer-row footer-nav"></div>
-  </div>
-  <button id="footer-restore" data-alias="immersive-restore" aria-label="Expandir menu">· Menu</button>
 </div>
 
 <script>
