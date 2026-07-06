@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T14:35:38Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T15:01:43Z - do not edit directly, edit source -->
 
 
 
@@ -19618,6 +19618,13 @@ var mainCanvas, mainCtx, fogCanvas, fogCtx, maskCanvas, maskCtx;
 var canvasW = 0, canvasH = 0;
 var playerAnim = null;
 var _animTime = 0;
+// 2026-07-06 (user "implemente a opção 2 ARRASTAR, mas com clique de confirmação"):
+// movimento por ARRASTAR o herói + CONFIRMAR (coexiste com o D-pad de 6 direções).
+// _moveIntent = o hex vizinho escolhido. phase 'drag' = arrastando; 'pending' =
+// solto, aguardando 2º toque no alvo (ou no ✓) pra confirmar. Ver setupDragMove()
+// + drawMoveIntent(). Movimento é adjacente-only (isValidMove exige isAdjacent).
+var _moveIntent = null;        // null | { col, row, phase:'drag'|'pending' }
+var _moveDragActive = false;
 var _zoom = DEFAULT_ZOOM;
 // [R2 2026-04-23] Ring buffer expandido de 3 → 5 eventos pra evitar repetição
 // imediata. Combinado com history persistente (event_history_delta enviado em
@@ -23626,6 +23633,10 @@ function renderFrame(ts) {
       });
     }
   }
+  // ── MOVE INTENT (arrastar+confirmar, 2026-07-06) ─────────────────────────
+  // Marcadores de intenção (trilha + hex-alvo + herói-fantasma + ✓) acima de
+  // tiles+player. Alvo é sempre adjacente ao herói (visível), então aparece nítido.
+  if (typeof drawMoveIntent === 'function') { try { drawMoveIntent(mainCtx); } catch (_) {} }
   // ── AMBIENT GROUND (mapa vivo — re-religado 2026-06-14) ───────────────────
   // Camadas ambientes órfãs (cortadas num A/B FPS-test antigo) religadas ao
   // pipeline. _ambientOK é calculado UMA ÚNICA vez por frame: _shouldRenderAmbient()
@@ -34006,6 +34017,135 @@ function _setHexNavDisabled(_disabled) {
   }
 }
 
+// ===== ARRASTAR + CONFIRMAR (2026-07-06) ==================================
+// Movimento alternativo ao D-pad: o jogador ARRASTA o herói na direção de um hex
+// vizinho válido; ao soltar, o alvo fica PENDENTE (herói-fantasma + anel pulsante
+// + badge ✓). Um 2º toque no alvo (ou no ✓) CONFIRMA o passo. Coexiste com o
+// hex-nav (as setas continuam movendo direto). Tudo em espaço de canvas (mesmo de
+// hexToScreen/drawPlayer). Só ativo em S.ph==='idle' e fora do editor.
+function _mvHeroPos() { return hexToScreen(S.player.col, S.player.row); }
+function _mvNearestValidNeighbor(cx, cy) {
+  const ns = getNeighbors(S.player.col, S.player.row);
+  let best = null, bd = Infinity;
+  for (let i = 0; i < ns.length; i++) {
+    if (!isValidMove(ns[i][0], ns[i][1])) continue;
+    const s = hexToScreen(ns[i][0], ns[i][1]);
+    const d = Math.hypot(s.x - cx, s.y - cy);
+    if (d < bd) { bd = d; best = { col: ns[i][0], row: ns[i][1], dist: d }; }
+  }
+  return best;
+}
+function _mvNeighborIndex(c, r) {
+  const ns = getNeighbors(S.player.col, S.player.row);
+  for (let i = 0; i < ns.length; i++) if (ns[i][0] === c && ns[i][1] === r) return i;
+  return S.player.facing;
+}
+
+// Desenha a intenção de movimento (chamado no renderFrame, acima de tiles+player).
+function drawMoveIntent(ctx) {
+  if (!_moveIntent || !S || S.ph !== 'idle') return;
+  const mi = _moveIntent;
+  if (!isValidMove(mi.col, mi.row)) { _moveIntent = null; return; }  // alvo ficou inválido → limpa
+  const s = hexToScreen(mi.col, mi.row), h = _mvHeroPos();
+  const pending = (mi.phase === 'pending');
+  const t = ((_animTime || 0) % 1300) / 1300, pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+  ctx.save();
+  // trilha tracejada herói → alvo
+  ctx.strokeStyle = 'rgba(232,200,100,' + (pending ? 0.85 : 0.55) + ')';
+  ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.setLineDash([2, 8]);
+  ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.lineTo(s.x, s.y); ctx.stroke();
+  ctx.setLineDash([]);
+  // contorno do hex-alvo (flat-top)
+  const v = hexTopVertices(s.x, s.y);
+  ctx.beginPath(); ctx.moveTo(v[0].x, v[0].y);
+  for (let i = 1; i < v.length; i++) ctx.lineTo(v[i].x, v[i].y);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(232,200,100,' + (pending ? 0.15 + 0.10 * pulse : 0.11) + ')';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(232,200,100,' + (pending ? 0.7 + 0.3 * pulse : 0.55) + ')';
+  ctx.lineWidth = pending ? 2.6 : 2; ctx.stroke();
+  // herói-fantasma no alvo
+  ctx.globalAlpha = pending ? 0.62 : 0.42;
+  ctx.fillStyle = 'rgba(26,21,16,0.7)'; ctx.strokeStyle = '#e8c864'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(s.x, s.y - HEX_H * 0.12, HEX_W * 0.15, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.globalAlpha = 1;
+  if (pending) {
+    // badge ✓ acima do alvo — sinaliza "toque de novo pra confirmar"
+    const bx = s.x, by = s.y - HEX_H * 0.62, br = 12;
+    ctx.fillStyle = 'rgba(26,21,16,0.96)'; ctx.strokeStyle = '#e8c864'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#e8c864'; ctx.lineWidth = 2.6; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(bx - 5, by); ctx.lineTo(bx - 1.5, by + 4.5); ctx.lineTo(bx + 5.5, by - 5); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function setupDragMove() {
+  const canvas = document.getElementById('map');
+  if (!canvas || canvas._dragMoveBound) return;
+  canvas._dragMoveBound = true;
+  let _touchGuard = false;
+  function toCanvas(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: (clientX - rect.left) * (canvas.width / rect.width),
+             y: (clientY - rect.top) * (canvas.height / rect.height) };
+  }
+  // true = gesto consumido (herói/confirm) → cancela o pan nativo do #map-viewport
+  function onDown(clientX, clientY) {
+    if (!S || S.ph !== 'idle' || window._editorMode) return false;
+    const pc = toCanvas(clientX, clientY), h = _mvHeroPos();
+    if (Math.hypot(pc.x - h.x, pc.y - h.y) < HEX_W * 0.55) {   // pegou o herói → arrasta
+      _markActive(); _moveDragActive = true; _moveIntent = null; scheduleRender();
+      return true;
+    }
+    if (_moveIntent && _moveIntent.phase === 'pending') {
+      const ps = hexToScreen(_moveIntent.col, _moveIntent.row);
+      if (Math.hypot(pc.x - ps.x, pc.y - ps.y) < HEX_W * 0.62) {   // 2º toque no alvo → confirma
+        _markActive();
+        const tc = _moveIntent.col, tr = _moveIntent.row; _moveIntent = null;
+        if (isValidMove(tc, tr)) { S.player.facing = _mvNeighborIndex(tc, tr); beginMove(tc, tr); }
+        scheduleRender();
+        return true;
+      }
+      const nn = _mvNearestValidNeighbor(pc.x, pc.y);   // toque em outro vizinho válido → re-seleciona
+      _moveIntent = (nn && nn.dist < HEX_W * 0.62) ? { col: nn.col, row: nn.row, phase: 'pending' } : null;
+      scheduleRender();
+      return true;
+    }
+    return false;   // deixa o pan nativo rolar
+  }
+  function onMove(clientX, clientY) {
+    if (!_moveDragActive) return false;
+    const pc = toCanvas(clientX, clientY), h = _mvHeroPos();
+    const out = Math.hypot(pc.x - h.x, pc.y - h.y) > HEX_W * 0.30;
+    const nn = out ? _mvNearestValidNeighbor(pc.x, pc.y) : null;
+    // só mira se o ponteiro está perto de um vizinho válido (arrastar p/ parede = sem alvo)
+    _moveIntent = (nn && nn.dist < HEX_W) ? { col: nn.col, row: nn.row, phase: 'drag' } : null;
+    scheduleRender();
+    return true;
+  }
+  function onUp() {
+    if (!_moveDragActive) return;
+    _moveDragActive = false;
+    if (_moveIntent && _moveIntent.phase === 'drag') _moveIntent.phase = 'pending';  // aguarda confirmação
+    else _moveIntent = null;
+    scheduleRender();
+  }
+  canvas.addEventListener('touchstart', function (e) {
+    _touchGuard = true; const t = e.touches[0]; if (!t) return;
+    if (onDown(t.clientX, t.clientY)) e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchmove', function (e) {
+    const t = e.touches[0]; if (!t) return;
+    if (onMove(t.clientX, t.clientY)) e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchend', function () { onUp(); setTimeout(function () { _touchGuard = false; }, 450); }, { passive: false });
+  canvas.addEventListener('mousedown', function (e) { if (_touchGuard || e.button !== 0) return; onDown(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', function (e) { if (_touchGuard || !_moveDragActive) return; onMove(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', function () { if (_touchGuard) return; onUp(); });
+}
+
 function bindHexNav() {
   for (let i = 0; i < 6; i++) {
     const btn = document.querySelector('.hex-dir[data-dir="' + i + '"]');
@@ -34040,6 +34180,8 @@ function bindHexNav() {
       : 'Recolher controles de movimento');
     if (willCollapse) centerOnPlayer(true);
   });
+  // 2026-07-06: liga o ARRASTAR+CONFIRMAR (coexiste com o D-pad; idempotente).
+  setupDragMove();
 }
 
 // 2026-04-29 V4: bind global input wake — qualquer interação do user despertar
