@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T19:16:40Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T19:57:58Z - do not edit directly, edit source -->
 
 
 
@@ -34049,12 +34049,17 @@ function setupTapToMove() {
   const canvas = document.getElementById('map');
   if (!canvas || canvas._tapMoveBound) return;
   canvas._tapMoveBound = true;
-  const TAP_SLOP = 12;   // px: acima disso o gesto é ARRASTO (pan do mapa), não toque
+  const TAP_SLOP = 14;   // px (CSS): acima disso o gesto é ARRASTO (pan do mapa), não toque
   let _downX = 0, _downY = 0, _moved = false, _touchGuard = false;
+  // 2026-07-06 (user "não funciona em smartphones/touch"): BUG de DPR. O canvas é
+  // buffer=totalW*dpr + setTransform(dpr), então hexToScreen desenha em coords LÓGICAS
+  // (CSS). O toCanvas ANTIGO multiplicava por (canvas.width/rect.width)=dpr → devolvia
+  // coords DEVICE, 2-3× maiores no celular → tappedCell nunca achava o hex (funcionava
+  // só no desktop dpr=1). Agora devolve coords LÓGICAS (clientX-rect.left), casando com
+  // hexToScreen em qualquer dpr.
   function toCanvas(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
-    return { x: (clientX - rect.left) * (canvas.width / rect.width),
-             y: (clientY - rect.top) * (canvas.height / rect.height) };
+    return { x: clientX - rect.left, y: clientY - rect.top };
   }
   // Qual célula (herói ou um dos 6 vizinhos) foi tocada — a mais próxima dentro do
   // raio de acerto; null se caiu longe (área vazia). Adjacente-only → basta testar
@@ -43901,11 +43906,22 @@ function _onExploreFooterAction(action) {
     case 'inventory':   if (typeof _showExploracaoInventoryPopup === 'function') _showExploracaoInventoryPopup(); break;
     case 'status':      if (typeof _showExploreFicha === 'function') _showExploreFicha(); break;
     case 'characters':
-      // Hall — volta pra cidade encerrando a sessão de exploração (rewards/quest já
-      // aplicados no /finish) e sinaliza pra cidade abrir o Hall de personagens.
-      window.__explore_want_hall = true;
-      if (typeof triggerReturnToCity === 'function') triggerReturnToCity();
-      else if (typeof _returnToCityNow === 'function') _returnToCityNow();
+      // 2026-07-06 (user: "clicar em Hall tirou o personagem da exploração pra cidade —
+      // erro que nunca poderia acontecer"). O Hall (troca de personagem) é uma tela da
+      // CIDADE, então SAIR da aventura é inerente — mas nunca pode ser ACIDENTAL. Agora
+      // pede CONFIRMAÇÃO antes de encerrar a exploração (rewards/quest já salvos).
+      _showExploreConfirm({
+        title: 'Ir ao Hall de personagens?',
+        msg: 'Você vai <b>sair da aventura</b> e voltar à cidade pra escolher ou trocar de personagem. '
+           + 'Seu progresso (XP, itens, missões) já está <b>salvo</b>.',
+        yesLabel: 'Sair e ir ao Hall',
+        noLabel: 'Continuar explorando',
+        onYes: function () {
+          window.__explore_want_hall = true;
+          if (typeof triggerReturnToCity === 'function') triggerReturnToCity();
+          else if (typeof _returnToCityNow === 'function') _returnToCityNow();
+        }
+      });
       break;
     case 'help':        if (typeof _showExploreHelp === 'function') _showExploreHelp(); break;
     case 'settings':    if (typeof _showExploreSettings === 'function') _showExploreSettings(); break;
@@ -43986,7 +44002,7 @@ function _showExploreHelp() {
     + '<div class="em-head"><span class="em-title">Ajuda — Exploração</span><button class="em-close" id="exh-close" aria-label="Fechar">✕</button></div>'
     + '<div class="em-body">'
     + '<div class="em-section first">Como explorar</div>'
-    + tip('<b>Mover:</b> toque nas setas ao redor do centro pra caminhar pelos hexágonos. Cada passo pode revelar eventos, trilhas e perigos.')
+    + tip('<b>Mover:</b> toque num hexágono vizinho pra <b>marcar</b> o destino e toque de novo pra <b>confirmar</b> o passo. Arrastar o dedo desloca o mapa. Cada passo pode revelar eventos, trilhas e perigos.')
     + tip('<b>Ritmo de viagem:</b> no Grupo (menu à direita), escolha Cauteloso (menos encontros), Normal ou Rápido (mais encontros).')
     + tip('<b>Acampar:</b> use a fogueira (menu à direita) pra Descanso Curto (gasta Dado de Vida) ou Longo (recupera tudo).')
     + tip('<b>Luz:</b> em cavernas e à noite, acenda uma tocha ou feitiço de luz (menu à direita) pra enxergar mais longe.')
@@ -44002,6 +44018,34 @@ function _showExploreHelp() {
   frame.appendChild(ov);
   ov.addEventListener('click', function (e) { if (e.target === ov) _closeExploreModal('explore-help-overlay'); });
   var cb = ov.querySelector('#exh-close'); if (cb) cb.addEventListener('click', function () { _closeExploreModal('explore-help-overlay'); });
+}
+
+// 2026-07-06: confirmação self-contained (mesmo visual dos modais Ficha/Ajuda) — usada
+// pelo botão Hall pra evitar sair da aventura por acidente. opts:{title,msg,yesLabel,noLabel,onYes}
+function _showExploreConfirm(opts) {
+  opts = opts || {};
+  _closeExploreModal('explore-confirm-overlay');
+  var frame = document.getElementById('frame');
+  if (!frame) return;
+  var _b = 'padding:10px;border-radius:9px;font-family:var(--v-font-display,Cinzel,serif);font-size:13px;cursor:pointer;flex:1;';
+  var h = '<div class="em-card" role="dialog" aria-modal="true">'
+    + '<div class="em-head"><span class="em-title">' + (opts.title || 'Confirmar') + '</span>'
+    +   '<button class="em-close" id="exc-close" aria-label="Fechar">✕</button></div>'
+    + '<div class="em-body"><p style="margin:2px 0 6px;line-height:1.55;color:var(--v-text,#d4c8b0);">' + (opts.msg || '') + '</p></div>'
+    + '<div style="display:flex;gap:10px;padding:12px;border-top:1px solid var(--v-border,#4a3828);">'
+    +   '<button id="exc-no" style="' + _b + 'border:1px solid var(--v-border,#4a3828);background:linear-gradient(180deg,#332a22,#241d17);color:var(--v-text,#d4c8b0);">' + (opts.noLabel || 'Cancelar') + '</button>'
+    +   '<button id="exc-yes" style="' + _b + 'border:1px solid var(--v-gold,#c4953a);background:linear-gradient(180deg,#4a3a24,#2e2418);color:var(--v-gold-lt,#e8c864);font-weight:700;">' + (opts.yesLabel || 'Confirmar') + '</button>'
+    + '</div></div>';
+  var ov = document.createElement('div');
+  ov.id = 'explore-confirm-overlay';
+  ov.className = 'explore-modal-overlay';
+  ov.innerHTML = h;
+  frame.appendChild(ov);
+  function close() { _closeExploreModal('explore-confirm-overlay'); }
+  ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+  ov.querySelector('#exc-close').addEventListener('click', close);
+  ov.querySelector('#exc-no').addEventListener('click', close);
+  ov.querySelector('#exc-yes').addEventListener('click', function () { close(); try { if (opts.onYes) opts.onYes(); } catch (_) {} });
 }
 
 // ============================================================================
