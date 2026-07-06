@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T19:57:58Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T21:30:59Z - do not edit directly, edit source -->
 
 
 
@@ -54,7 +54,8 @@
   Boss danger banner topbar                  updateBossDangerBanner     18536
   HUD HP/MP/XP                               updateHud                  34681
   Top-bar bioma/weather/phase                updateTopBar               34850
-  Hex nav (NW/N/NE/W/E/SW/S/SE)              updateHexNav / bindHexNav  29249 / 29307
+  Movimento por TOQUE (marcar+confirmar)     setupTapToMove/drawMoveOverlay 34046 / 34039
+  Vizinhos alcançáveis + destino marcado     drawMovableHexes/drawMarkedDestination 33972 / 33998
   Minimapa                                   drawMinimap                34755
   Coord label "L26" sob minimapa             updateCurrentCoord         34829
   Debug HUD (backtick)                       drawDebugHud               19817
@@ -700,7 +701,7 @@
   ESTRUTURA:
   [COMENT]  1–50      Este índice
   [HEAD]    51–100    CDN + meta
-  [STYLE]   101–800   Viewport+canvas, HUD, hex-nav, eventos, confirm overlay
+  [STYLE]   101–800   Viewport+canvas, HUD, tap-to-move, eventos, confirm overlay
   [BODY]    801–880   DOM
   [SCRIPT]  881–fim   Engine
 
@@ -712,7 +713,7 @@
    ~1340  STATE + initState + generateGrid
    ~1400  RENDER (drawTiles/drawTile/drawTileDecoration/drawPlayer)
    ~1620  FOG (buildFogMask/drawFogComposite/revealFogAt)
-   ~1700  MOVEMENT + hex-nav
+   ~1700  MOVEMENT (tap-to-move: setupTapToMove/drawMoveOverlay)
    ~1800  DM + EVENTS (com confirm + %)
    ~2000  HUD
    ~2080  ZOOM + CAMERA (wheel/pinch/centerOnPlayer)
@@ -2990,7 +2991,7 @@ body.footer-collapsed #footer-collapse-toggle { display: none; }
 #footer-restore:active { transform: translateX(-50%) scale(0.96); }
 body.footer-collapsed #bottom-panel { display: none; }
 body.footer-collapsed #footer-restore { display: block; }
-/* (editor-mode hide do footer está na lista canonical ~html.editor-mode #hex-nav) */
+/* (editor-mode hide do footer/UI está nas regras canonical ~html.editor-mode) */
 /* #22: overlay de configuracoes da exploracao (dentro do #frame, position:relative) */
 /* 2026-07-06: popups Ficha + Ajuda da exploração (ações 'status'/'help' do footer,
    igual cidade). Card medieval self-contained, mesmo visual do popup de Config. */
@@ -23470,10 +23471,6 @@ function renderFrame(ts) {
   // medium+; vento em TODOS os tiers (barato) pra o mapa ter vida até no lite.
   if (typeof drawWaterShimmer === 'function') { try { drawWaterShimmer(mainCtx); } catch (_) {} }
   if (typeof drawWindGrass === 'function') { try { drawWindGrass(mainCtx); } catch (_) {} }
-  // ── MOVE OVERLAY (tap-to-move, 2026-07-06) ───────────────────────────────
-  // Indicadores dos vizinhos alcançáveis + marcador do destino (trilha + hex-alvo +
-  // ping + ✓), acima de tiles+player. Vizinhos são adjacentes ao herói (visíveis).
-  if (typeof drawMoveOverlay === 'function') { try { drawMoveOverlay(mainCtx); } catch (_) {} }
   // ── AMBIENT GROUND (mapa vivo — re-religado 2026-06-14) ───────────────────
   // Camadas ambientes órfãs (cortadas num A/B FPS-test antigo) religadas ao
   // pipeline. _ambientOK é calculado UMA ÚNICA vez por frame: _shouldRenderAmbient()
@@ -23523,6 +23520,11 @@ function renderFrame(ts) {
     });
     _runStep('drawHardFogOnUnexplored', () => drawHardFogOnUnexplored(mainCtx));
   }
+  // ── MOVE OVERLAY (tap-to-move) — ACIMA do fog (2026-07-06 review) ─────────
+  // Indicadores dos vizinhos alcançáveis + marcador do destino. DEVE ficar acima do
+  // fog: é UI de interação (hexes adjacentes ao herói, sempre alcançáveis). Antes era
+  // desenhado ANTES do fog → os pontos dourados escureciam em vizinhos no estado 'dim'.
+  if (typeof drawMoveOverlay === 'function') { try { drawMoveOverlay(mainCtx); } catch (_) {} }
   if (F.player_aura)      _runStep('drawPlayerLightAura', () => drawPlayerLightAura(mainCtx));
   // ── SKY/ATMOSFÉRICO (mapa vivo): nuvens, raios de sol, AVES voando ────────
   // Acima do fog/aura (efeitos no ar), abaixo do tint dia/noite (a noite escurece
@@ -24004,6 +24006,21 @@ function _drawDistantHaze(ctx) {
 // ── TERRAIN LIFE (2026-07-06, "ambientes vivos") ─────────────────────────────
 // Overlays LEVES sobre os tiles cacheados (NÃO tocam o scene-cache). Enumeram um raio
 // ao redor do player (como o pollen) + fog check + draws em batch. Custo baixo.
+
+// Glow do vaga-lume BAKED uma única vez (offscreen canvas) — evita createRadialGradient
+// por firefly por frame (anti-pattern mobile). Blitado escalado no hot-path (só medium+
+// chega no draw via _ambientOK; lite nunca gera firefly). (2026-07-06 review)
+var _fireflyGlowCanvas = null;
+function _fireflyGlowSprite() {
+  if (_fireflyGlowCanvas) return _fireflyGlowCanvas;
+  var R = 24, c = document.createElement('canvas'); c.width = c.height = R * 2;
+  var g = c.getContext('2d');
+  var gr = g.createRadialGradient(R, R, 0, R, R, R);
+  gr.addColorStop(0, 'rgba(214,240,130,0.9)');
+  gr.addColorStop(1, 'rgba(214,240,130,0)');
+  g.fillStyle = gr; g.beginPath(); g.arc(R, R, R, 0, Math.PI * 2); g.fill();
+  _fireflyGlowCanvas = c; return c;
+}
 
 // Água: 2 glints que deslizam sobre tiles 'w'/'W' (luz na água ondulando). Medium+.
 function drawWaterShimmer(ctx) {
@@ -26434,16 +26451,14 @@ function drawCritterSprite(ctx, cr, s) {
     ctx.quadraticCurveTo(cr.x - 3 * s, cr.y - 1.4 * s + sting, cr.x - 2.1 * s, cr.y - 2.4 * s + sting);
     ctx.stroke();
   } else if (cr.type === 'firefly') {
-    // Vaga-lume — pontinho que pisca e flutua (glow radial). ~1 gradient/frame.
+    // Vaga-lume — pontinho que pisca e flutua. Glow BAKED (sprite) em vez de
+    // createRadialGradient por frame (2026-07-06 review): blit escalado é barato.
     const blink = 0.35 + 0.65 * Math.abs(Math.sin(t * 3 + (cr.spawnT || 0) * 0.001));
     const bob = Math.sin(t * 2 + (cr.spawnT || 0)) * 1.5;
     const fy = cr.y - 3 * s + bob;
+    const rad = 4 * s;
     ctx.globalAlpha = blink;
-    const gr = ctx.createRadialGradient(cr.x, fy, 0, cr.x, fy, 4 * s);
-    gr.addColorStop(0, 'rgba(214,240,130,0.9)');
-    gr.addColorStop(1, 'rgba(214,240,130,0)');
-    ctx.fillStyle = gr;
-    ctx.beginPath(); ctx.arc(cr.x, fy, 4 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.drawImage(_fireflyGlowSprite(), cr.x - rad, fy - rad, rad * 2, rad * 2);
     ctx.fillStyle = '#eaffb4';
     ctx.beginPath(); ctx.arc(cr.x, fy, 0.7 * s, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 1;
@@ -33442,13 +33457,6 @@ function beginMove(col, row) {
   }, dur + 10);
 }
 
-// V2.7: shake-feedback quando player tenta mover pra direção bloqueada
-function shakeBlockedDir(btn) {
-  if (!btn) return;
-  btn.classList.add('shake');
-  setTimeout(() => btn.classList.remove('shake'), 300);
-}
-
 // Sessão #66 (reload fix): mantém ?col/?row na URL sincronizado com a posição
 // atual. Assim, ao recarregar a página (F5), o boot REMOTE restaura de onde o
 // player parou em vez de voltar ao spawn. history.replaceState NÃO recarrega.
@@ -33944,13 +33952,9 @@ function updateHexNav() { /* no-op: D-pad de 6 direcoes REMOVIDO 2026-07-06.
 // (beginMove enable/disable + updateHexNav sync). Agente IA: ao limpar
 // callsites futuramente, esta funcao pode ser deletada inteira.
 function _setHexNavDisabled(_disabled) {
-  // No-op intencional. Botoes hex-nav NUNCA ficam disabled (user req X-6.5.51c).
-  // Forca enable em todos os botoes (caso algum codigo legacy os tenha
-  // disabled antes desta funcao ser chamada).
-  for (let i = 0; i < 6; i++) {
-    const btn = document.querySelector('.hex-dir[data-dir="' + i + '"]');
-    if (btn && btn.disabled) btn.disabled = false;
-  }
+  // No-op real: o D-pad hex-nav foi REMOVIDO 2026-07-06 (tap-to-move). Antes esta
+  // função varria 6× `.hex-dir` (elementos inexistentes) a cada move — DOM query morta.
+  // Mantida só p/ compat de call-sites (beginMove enable/disable). (2026-07-06 review)
 }
 
 // ===== MARCAR (toque) + CONFIRMAR (2026-07-06) ============================
@@ -38703,6 +38707,7 @@ function closeEventModal() {
   }
   document.getElementById('event-modal').classList.remove('visible');
   S.event = null;
+  _moveIntent = null;  // 2026-07-06 review: limpa marcação de destino pendente ao fechar evento (sem marcador órfão ao voltar pro idle)
   if (S.ph !== 'defeat') S.ph = 'idle';
   updateHud();
   scheduleRender();
