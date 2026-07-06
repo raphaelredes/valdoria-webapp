@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T18:57:19Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T19:16:40Z - do not edit directly, edit source -->
 
 
 
@@ -23187,30 +23187,38 @@ function _updateAdaptiveFps() {
 var _autoThrottleAmbient = false;
 var _autoThrottleHysteresis = 0;
 function _shouldRenderAmbient() {
-  // Hysteresis: muda estado apos 5 frames consecutivos cruzando threshold
-  // pra evitar piscar entre on/off
-  var fps = (typeof _fpsValue !== 'undefined' && _fpsValue > 0) ? _fpsValue : 30;
+  // 2026-07-06 (user: "aves da floresta congelam no idle, só animam quando movo, param
+  // de novo depois"): ANTES decidia por _fpsValue (FPS medido). No idle o loop roda
+  // devagar DE PROPÓSITO (6.6fps lite / ~22fps capaz via setTimeout), então FPS<25
+  // desligava TODO o ambiente e pássaros/vaga-lumes/borboletas/água CONGELAVAM — só
+  // voltavam quando o player mexia (FPS subia), parando de novo ao ficar idle. AGORA
+  // decide pelo TRABALHO REAL do frame (_perfFrameMs — só o tempo de desenho, sem o
+  // idle-tick): desliga o ambiente APENAS quando o device sofre de verdade (frame
+  // pesado); nunca por causa do ritmo idle. Assim a vida do mapa segue animando parada.
+  // Hysteresis: 8 frames consecutivos cruzando o limite (evita piscar on/off).
+  var work = (typeof _perfFrameMs === 'number' && _perfFrameMs > 0) ? _perfFrameMs : 0;
   if (_autoThrottleAmbient) {
-    // Atualmente desativado — só re-ativa se FPS > 30 sustentado
-    if (fps > 30) {
+    // desligado — só religa quando os frames voltam a ser leves (< 26ms)
+    if (work > 0 && work < 26) {
       _autoThrottleHysteresis++;
-      if (_autoThrottleHysteresis > 5) {
+      if (_autoThrottleHysteresis > 8) {
         _autoThrottleAmbient = false;
         _autoThrottleHysteresis = 0;
-        try { LOG('PERF', 'auto_throttle_OFF — ambient layers re-enabled (fps=' + fps + ')'); } catch (_) {}
+        try { LOG('PERF', 'auto_throttle_OFF — ambient re-enabled (frame=' + work.toFixed(1) + 'ms)'); } catch (_) {}
       }
     } else {
       _autoThrottleHysteresis = 0;
     }
     return !_autoThrottleAmbient;
   } else {
-    // Atualmente ativo — só desativa se FPS < 25 sustentado
-    if (fps < 25 && fps > 0) {
+    // ligado — só desliga com frame GENUINAMENTE pesado (> 42ms de trabalho = device
+    // não sustenta ~24fps nem a full rate). O idle-tick (150ms) NÃO conta como pesado.
+    if (work > 42) {
       _autoThrottleHysteresis++;
-      if (_autoThrottleHysteresis > 5) {
+      if (_autoThrottleHysteresis > 8) {
         _autoThrottleAmbient = true;
         _autoThrottleHysteresis = 0;
-        try { LOG('PERF', 'auto_throttle_ON — ambient layers disabled (fps=' + fps + ')'); } catch (_) {}
+        try { LOG('PERF', 'auto_throttle_ON — ambient disabled (frame=' + work.toFixed(1) + 'ms)'); } catch (_) {}
       }
     } else {
       _autoThrottleHysteresis = 0;
