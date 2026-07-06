@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-04T19:47:13Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T00:51:06Z - do not edit directly, edit source -->
 
 
 
@@ -2103,14 +2103,17 @@ html body .camp-screen {
    configuracoes hover apenas; adicione um popup que fornece as informacoes,
    pode aproveitar e informar o que essas condições atuais influenciam na
    jogabilidade durante a exploracao". */
+/* 2026-07-05: bioma/clima/fase renderizam TEXTO PT-BR (nome curto), não mais
+   emoji (banido). Tamanho compacto p/ os 3 labels + o badge de Perigo caberem
+   no viewport de 390px sem quebrar linha (#top-bar tem flex-wrap:nowrap). */
 .tb-biome, .tb-weather, .tb-phase {
-  font-size: calc(18px * var(--v-font-scale, 1));
-  letter-spacing: 0;
-  filter: drop-shadow(0 0 6px rgba(196, 149, 58, 0.3));
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+  letter-spacing: 0.6px;
   cursor: pointer;
   pointer-events: auto;
-  transition: transform 0.15s ease;
-  padding: var(--v-space-xs, 2px);
+  transition: transform 0.15s ease, color 0.2s ease;
+  padding: var(--v-space-xs, 2px) 3px;
+  white-space: nowrap;
 }
 .tb-biome:active, .tb-weather:active, .tb-phase:active { transform: scale(0.92); }
 .tb-biome { color: var(--v-gold, #c4953a); }
@@ -4843,6 +4846,20 @@ body.perf-lite .event-text-line {
 @keyframes resultReveal {
   0% { transform: scale(0.7); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
+}
+/* 2026-07-05: Descanso Curto (Dado de Vida) — tint verde-dourado de cura no
+   overlay do dado + badge dourado "HP cheio" quando o HD é gasto sem ganho. */
+#dice-overlay.dice-heal {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(74, 170, 136, 0.22), rgba(0, 0, 0, 0) 62%),
+    #2a2420;
+}
+#dice-result.heal-full {
+  color: var(--v-gold, #c4953a);
+  background: rgba(196, 149, 58, 0.14);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  box-shadow: 0 0 16px rgba(196, 149, 58, 0.28);
+  text-shadow: 0 0 8px rgba(196, 149, 58, 0.4);
 }
 /* MOCHILA POPUP v12.5 (2026-05-06) — fix: position absolute pra ficar
    DENTRO do #frame do jogo (não do viewport todo). User reportou
@@ -38260,15 +38277,19 @@ function applyChoiceOutcome(choice, success, total, dc) {
     var p = S.player;
     if (p.hd > 0) {
       var conMod = (p.mods && typeof p.mods.con === 'number') ? p.mods.con : 0;
-      var hdRoll = 1 + Math.floor(Math.random() * 8);  // d8 (PHB padrao)
+      // 2026-07-05 (D&D 5e fidelity): Dado de Vida por CLASSE (Bárbaro d12,
+      // Guerreiro/Paladino/Patrulheiro d10, Mago/Feiticeiro d6, demais d8) —
+      // antes era d8 fixo pra todas as classes (desvio do PHB).
+      var _hdSides = (typeof _shortRestDieFor === 'function') ? _shortRestDieFor(p.cls_key) : 8;
+      var hdRoll = 1 + Math.floor(Math.random() * _hdSides);
       var hpGain = Math.max(1, hdRoll + conMod);
       var newHp = Math.min(p.mhp, p.hp + hpGain);
       var actualGain = newHp - p.hp;
       p.hp = newHp;
       p.hd = Math.max(0, p.hd - 1);
-      LOG('DUNGEON', 'short_rest applied roll=1d8(' + hdRoll + ')+CON(' + conMod
+      LOG('DUNGEON', 'short_rest applied roll=1d' + _hdSides + '(' + hdRoll + ')+CON(' + conMod
         + ')=' + hpGain + ' actualGain=' + actualGain + ' hp=' + p.hp + '/' + p.mhp + ' hd=' + p.hd);
-      S.event.resolved.text = 'Você gasta 1 HD: rolou 1d8+CON = ' + hdRoll + '+' + conMod
+      S.event.resolved.text = 'Você gasta 1 HD: rolou 1d' + _hdSides + '+CON = ' + hdRoll + '+' + conMod
         + ' = +' + actualGain + ' HP (agora ' + p.hp + '/' + p.mhp + '). HD restantes: ' + p.hd + '/' + p.mhd + '.';
     } else {
       LOG('DUNGEON', 'short_rest skipped — no HD available');
@@ -40402,6 +40423,126 @@ function _shortRestError() {
   if (typeof vToast === 'function') vToast('' + m, 'warn');
 }
 
+// 2026-07-05: estiliza o botão "Continuar" do #dice-overlay (mesma aparência
+// prominente do skill check, com !important pra não herdar o position:absolute
+// buggy do .v-skip-btn). Reusado pelo animador do Dado de Vida.
+function _diceOverlayContinueBtn(skipBtn) {
+  skipBtn.textContent = 'Continuar';
+  var s = skipBtn.style;
+  s.setProperty('display', 'inline-block', 'important');
+  s.setProperty('visibility', 'visible', 'important');
+  s.setProperty('opacity', '1', 'important');
+  s.setProperty('position', 'absolute', 'important');
+  s.setProperty('bottom', '40px', 'important');
+  s.setProperty('left', '50%', 'important');
+  s.setProperty('transform', 'translateX(-50%)', 'important');
+  s.setProperty('top', 'auto', 'important');
+  s.setProperty('right', 'auto', 'important');
+  s.setProperty('width', 'auto', 'important');
+  s.setProperty('min-width', '140px', 'important');
+  s.setProperty('max-width', '220px', 'important');
+  s.setProperty('height', 'auto', 'important');
+  s.setProperty('min-height', 'auto', 'important');
+  s.setProperty('max-height', 'none', 'important');
+  s.setProperty('flex', '0 0 auto', 'important');
+  s.setProperty('font-size', '12px', 'important');
+  s.setProperty('padding', '8px 24px', 'important');
+  s.setProperty('letter-spacing', '1.5px', 'important');
+  s.setProperty('background', 'linear-gradient(180deg, rgba(196,149,58,0.30), rgba(196,149,58,0.12))', 'important');
+  s.setProperty('border', '1px solid var(--v-gold, #c4953a)', 'important');
+  s.setProperty('color', '#e8dcc8', 'important');
+  s.setProperty('font-weight', '600', 'important');
+  s.setProperty('box-shadow', '0 0 14px rgba(196,149,58,0.30)', 'important');
+  s.setProperty('cursor', 'pointer', 'important');
+  s.setProperty('pointer-events', 'auto', 'important');
+  s.setProperty('z-index', '999', 'important');
+  s.setProperty('margin-top', '8px', 'important');
+}
+
+// 2026-07-05 (user "no acampamento o descanso curto deve MOSTRAR OS DADOS
+// GIRANDO pra recuperação de vida — melhorias épicas"): anima o Dado de Vida
+// (D&D 5e: descanso curto gasta EXATAMENTE 1 HD → 1 dado, dice.roll single) em
+// 3D antes de aplicar a cura. Reusa o #dice-overlay (mesmo motor do skill check)
+// com tint verde-dourado de cura (.dice-heal) + badge "+N PV". O SERVIDOR é a
+// autoridade (rola d6/d8/d10/d12 por classe + CON e devolve die/rolled/con_mod);
+// aqui só ANIMAMOS o valor que ele rolou. callback() aplica o resultado no fim
+// (ou ao tocar Continuar). Nunca bloqueia a cura: sem overlay/valor → aplica direto.
+//   dieSize  = lados do dado (6/8/10/12)     rawRoll = face crua (sem CON)
+//   conMod   = modificador de CON            actualHeal = PV realmente ganhos
+//   fullHp   = true se HD foi gasto com HP já cheio (0 de ganho)
+function _animateHealDie(dieSize, rawRoll, conMod, actualHeal, fullHp, callback) {
+  function _done() { try { callback(); } catch (_e) {} }
+  var lite = document.body.classList.contains('perf-lite');
+  var overlay = document.getElementById('dice-overlay');
+  var wrap = document.getElementById('dice-canvas-wrap');
+  var formula = document.getElementById('dice-formula');
+  var result = document.getElementById('dice-result');
+  var skipBtn = document.getElementById('dice-skip-btn');
+  if (!overlay || !wrap || !formula || !result || !skipBtn
+      || typeof rawRoll !== 'number' || !(dieSize > 0)) {
+    _done();  // DOM ausente / valor inválido → aplica sem animar (nunca perde a cura)
+    return;
+  }
+  while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+  while (formula.firstChild) formula.removeChild(formula.firstChild);
+  while (result.firstChild) result.removeChild(result.firstChild);
+  result.className = '';
+  result.style.display = 'none';
+  result.onclick = null; result.style.cursor = '';
+  skipBtn.style.display = 'none';
+  overlay.classList.add('visible');
+  overlay.classList.add('dice-heal');
+
+  var advanced = false;
+  function advance() {
+    if (advanced) return;
+    advanced = true;
+    overlay.classList.remove('visible');
+    overlay.classList.remove('dice-heal');
+    skipBtn.style.cssText = '';  // reseta overrides pro próximo uso do overlay
+    setTimeout(_done, 0);
+  }
+  // Guard de double-fire + skip só válido após 500ms (Human Reading Time).
+  skipBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); advance(); };
+  skipBtn.addEventListener('click', function (ev) { if (ev) ev.stopPropagation(); advance(); });
+  skipBtn.addEventListener('pointerdown', function (ev) { if (ev) ev.stopPropagation(); advance(); });
+
+  var resultShown = false;
+  function showResult() {
+    if (resultShown) return;
+    resultShown = true;
+    var conStr = (conMod >= 0 ? '+' : '') + conMod;
+    formula.appendChild(document.createTextNode('1d' + dieSize + '  ' + rawRoll + '   CON ' + conStr + '   =   '));
+    var bold = document.createElement('b');
+    bold.textContent = (actualHeal > 0 ? '+' + actualHeal + ' PV' : (fullHp ? 'HP cheio' : '+0 PV'));
+    formula.appendChild(bold);
+    if (actualHeal > 0) {
+      result.className = 'success';
+      result.textContent = '+' + actualHeal + ' PV';
+    } else {
+      result.className = 'heal-full';
+      result.textContent = fullHp ? 'HP JÁ CHEIO' : 'SEM GANHO';
+    }
+    result.style.display = 'inline-block';
+    _diceOverlayContinueBtn(skipBtn);
+  }
+
+  var safety = setTimeout(showResult, 3000);
+  function wrappedShow() { clearTimeout(safety); showResult(); }
+
+  if (lite) { setTimeout(wrappedShow, 250); return; }  // perf-lite: sem 3D
+  if (window.Dice3D) {
+    try {
+      var dice = new window.Dice3D(wrap, { size: 200, dieType: 'd' + dieSize, duration: 1500 });
+      dice.roll(rawRoll, wrappedShow);
+      return;
+    } catch (e) {
+      try { window.serverLog && window.serverLog('exploracao', 'warn', 'heal_dice3d_failed', { err: e && e.message }); } catch (_) {}
+    }
+  }
+  setTimeout(wrappedShow, 600);  // sem Dice3D: fallback timing
+}
+
 // H2: aplica o resultado AUTORITATIVO do servidor (cliente só renderiza).
 function _applyServerShortRest(p, healed, serverState) {
   var preHp = p.hp;
@@ -40464,34 +40605,54 @@ function doShortRest() {
         if (typeof updateHud === 'function') updateHud();
         return;
       }
-      _applyServerShortRest(p, res.healed, res.state);
+      // 2026-07-05: anima o Dado de Vida em 3D ANTES de aplicar (o SERVIDOR já
+      // rolou — só animamos o valor autoritativo). rawRoll = face crua (rolled
+      // - CON). O heal projetado alimenta o badge "+N PV"; a aplicação real
+      // (HP/HD via _applyServerShortRest) roda no callback ao fim da animação.
+      var _h = res.healed;
+      var _die = _h.die || _shortRestDieFor(p.cls_key);
+      var _con = (typeof _h.con_mod === 'number') ? _h.con_mod : 0;
+      var _raw = (typeof _h.rolled === 'number') ? Math.max(0, _h.rolled - _con) : null;
+      var _preHp = p.hp;
+      var _projHp = (res.state && typeof res.state.hp === 'number')
+        ? res.state.hp : Math.min(p.mhp, p.hp + (_h.hp || 0));
+      var _actual = Math.max(0, _projHp - _preHp);
+      var _full = (_actual === 0 && _projHp >= p.mhp);
+      _animateHealDie(_die, _raw, _con, _actual, _full, function () {
+        _applyServerShortRest(p, res.healed, res.state);
+      });
     }).catch(function(err){ console.warn('[CAMP] rest_short server err:', err); _shortRestError(); });
     return;
   }
 
   // LOCAL (file://) — DEV tool: rola no cliente com o hit_die CORRETO por classe
   // (antes d8 fixo). Não-autoritativo; só pra testar visualmente sem bot.
+  // 2026-07-05: também anima o Dado de Vida em 3D (paridade com REMOTE); a
+  // aplicação de HP/HD roda no callback ao fim da animação.
   const dieSides = _shortRestDieFor(p.cls_key);
   const conMod = (p.mods && typeof p.mods.con === 'number') ? p.mods.con : 0;
   const roll = _rollDie(dieSides);
   const heal = Math.max(1, roll + conMod);
   const preHp = p.hp;
-  p.hp = Math.min(p.mhp, p.hp + heal);
-  const actual = p.hp - preHp;
-  p.hd = Math.max(0, (p.hd || 0) - 1);
-  const fullHpNote = (actual === 0 && p.hp === p.mhp) ? ' (HP já cheio — HD gasto)' : '';
-  const status = document.getElementById('camp-footer-status');
-  const msg = 'Descanso Curto: 1d' + dieSides + '=' + roll
-    + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ') = +' + actual
-    + ' HP' + fullHpNote + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
-  if (status) status.textContent = msg;
-  if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
-  try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done_local',
-    { roll: roll, conMod: conMod, heal_actual: actual, hp: p.hp, hd: p.hd }); } catch (_) {}
-
-  _updateCampHud();
-  _updateCampDetails();
-  if (typeof updateHud === 'function') updateHud();
+  const projHp = Math.min(p.mhp, p.hp + heal);
+  const actual = projHp - preHp;
+  const fullHp = (actual === 0 && projHp >= p.mhp);
+  _animateHealDie(dieSides, roll, conMod, actual, fullHp, function () {
+    p.hp = projHp;
+    p.hd = Math.max(0, (p.hd || 0) - 1);
+    const fullHpNote = (actual === 0 && p.hp === p.mhp) ? ' (HP já cheio — HD gasto)' : '';
+    const status = document.getElementById('camp-footer-status');
+    const msg = 'Descanso Curto: 1d' + dieSides + '=' + roll
+      + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ') = +' + actual
+      + ' HP' + fullHpNote + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
+    if (status) status.textContent = msg;
+    if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
+    try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done_local',
+      { roll: roll, conMod: conMod, heal_actual: actual, hp: p.hp, hd: p.hd }); } catch (_) {}
+    _updateCampHud();
+    _updateCampDetails();
+    if (typeof updateHud === 'function') updateHud();
+  });
 }
 
 function doLongRest() {
@@ -42834,33 +42995,32 @@ function updateCurrentCoord() {
 }
 
 function updateTopBar() {
-  /* X-6.5.51g: icon-only pros 3 itens. textContent = icone, title = nome
-     completo (tooltip). Phase agora vive em #top-phase separado. */
-  const biomeIco  = { forest: '', plains: '', desert: '', cave: '',
-                       mountain: '', swamp: '', graveyard: '', snow: '',
-                       volcanic: '' };
+  /* 2026-07-05 FIX (regressão sweep emoji round 7): os 3 itens do top-bar
+     (bioma / clima / fase-do-dia) eram ICON-ONLY (textContent = emoji). O sweep
+     zerou os emojis (biomeIco/wthrIco/phaseIco viraram '' e o fallback || '') →
+     os 3 renderizavam VAZIO e o jogador só via o "Perigo" (único com label de
+     texto). Agora renderizam o NOME PT-BR como TEXTO (emoji-ban ok), igual ao
+     Perigo. Mantém o title= (tooltip) e o popup contextual ao tocar. */
   const biomeName = { forest: 'Floresta', plains: 'Planície', desert: 'Deserto',
                        cave: 'Caverna', mountain: 'Montanha', swamp: 'Pântano',
                        graveyard: 'Cemitério', snow: 'Neve', volcanic: 'Vulcânico' };
   const biomeEl = document.getElementById('top-biome');
   if (biomeEl) {
-    biomeEl.textContent = biomeIco[S.biome] || '';
+    biomeEl.textContent = biomeName[S.biome] || S.biome || '';
     biomeEl.title = biomeName[S.biome] || S.biome;
   }
 
-  const wthrIco  = { s: '', r: '', f: '', t: '' };
   const wthrName = { s: 'Limpo', r: 'Chuva', f: 'Névoa', t: 'Tempestade' };
   const wthrEl = document.getElementById('top-weather');
   if (wthrEl) {
-    wthrEl.textContent = wthrIco[S.weather] || '';
+    wthrEl.textContent = wthrName[S.weather] || S.weather || '';
     wthrEl.title = wthrName[S.weather] || S.weather;
   }
 
-  const phaseIco  = { day: '', dusk: '', night: '', dawn: '' };
   const phaseName = { day: 'Dia', dusk: 'Entardecer', night: 'Noite', dawn: 'Aurora' };
   const phaseEl = document.getElementById('top-phase');
   if (phaseEl) {
-    phaseEl.textContent = phaseIco[S.dayPhase] || '';
+    phaseEl.textContent = phaseName[S.dayPhase] || S.dayPhase || '';
     phaseEl.title = phaseName[S.dayPhase] || S.dayPhase;
   }
 
@@ -43435,8 +43595,12 @@ function bindPinchZoom() {
 var _exploreFooterCollapsed = (function () {
   try {
     var charId = (new URLSearchParams(location.search)).get('char') || 'default';
-    var v = localStorage.getItem('valdoria_footer_collapsed_' + charId);
-    if (v === null) v = localStorage.getItem('valdoria_footer_collapsed');
+    // 2026-07-05 FIX (user "a barra de menu não aparece na exploração"): a
+    // exploração usa uma CHAVE PRÓPRIA, independente da cidade. Antes lia
+    // valdoria_footer_collapsed_* (compartilhada) → se o jogador recolhesse o
+    // menu na CIDADE, a exploração bootava recolhida (só a pílula "· Menu"
+    // aparecia) e parecia "sem barra". Agora é independente e DEFAULT = expandido.
+    var v = localStorage.getItem('valdoria_explore_footer_collapsed_' + charId);
     return v === '1';
   } catch (_) { return false; }
 })();
@@ -43507,7 +43671,9 @@ function renderExploreFooter() {
     +   '<img class="fb-ico-img" src="../shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
     + '</button>'
     + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
-    +   '<span class="fb-ico"></span>'
+    // 2026-07-05: ícone real (antes era <span> vazio → botão em branco pós
+    // emoji-ban). Mesma imagem WebP da cidade (renderFooter).
+    +   '<img class="fb-ico-img" src="../shared/img/ui/configuracoes.webp" alt="Config" onerror="this.style.display=\'none\'">'
     + '</button>';
   quickEl.innerHTML = _html;  // static trusted markup (ver nota acima)
   // M10 (PHB p.182-183 Travel Pace): seletor de ritmo na footer-nav (3 segmentos).
@@ -43555,8 +43721,9 @@ function _toggleExploreFooter() {
   try {
     var charId = (new URLSearchParams(location.search)).get('char') || 'default';
     var val = _exploreFooterCollapsed ? '1' : '0';
-    localStorage.setItem('valdoria_footer_collapsed_' + charId, val);
-    localStorage.setItem('valdoria_footer_collapsed', val);
+    // Chave PRÓPRIA da exploração (ver _exploreFooterCollapsed) — não escreve na
+    // chave compartilhada da cidade pra não reacoplar as duas preferências.
+    localStorage.setItem('valdoria_explore_footer_collapsed_' + charId, val);
   } catch (_e) { /* localStorage cheio — não fatal */ }
   try { if (window.vHaptic) window.vHaptic('light'); } catch (_) {}
 }
@@ -44413,8 +44580,13 @@ function boot() {
               hp: S.player.hp,
               mp: S.player.mp,
               gold: S.gold,
-              col: S.player_col,
-              row: S.player_row,
+              // 2026-07-05 FIX: a posição vive em S.player.col/.row (onMoveEnd:
+              // p.col=col; p.row=row). Antes lia S.player_col/S.player_row —
+              // vars que NUNCA são atribuídas → col/row iam undefined, o
+              // JSON.stringify os dropava e o servidor nunca persistia
+              // explore_col/explore_row (fallback do retorno pós-combate morto).
+              col: S.player.col,
+              row: S.player.row,
               map_id: S.mapId,
               exhaustion: S.player.exhaustion || 0,
             };
