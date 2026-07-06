@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T12:23:17Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T12:45:29Z - do not edit directly, edit source -->
 
 
 
@@ -2934,8 +2934,10 @@ body.perf-lite #top-danger { animation: none !important; }
 #footer-collapse-toggle {
   position: absolute;
   bottom: 56px;
-  left: 50%;
-  transform: translateX(-50%);
+  /* 2026-07-06 (user "o botão de recolher o menu está misturado com o botão de
+     navegação para baixo"): saiu do CENTRO (colidia com o hex-dir S / botão
+     ABERTO, ambos centralizados) pro canto INFERIOR-ESQUERDO — área livre. */
+  left: 14px;
   z-index: var(--v-z-dropdown-high, 51);
   width: 28px;
   height: 28px;
@@ -2955,13 +2957,14 @@ body.perf-lite #top-danger { animation: none !important; }
   transition: border-color var(--v-transition, 0.15s), color var(--v-transition, 0.15s), transform 0.1s;
 }
 #footer-collapse-toggle:hover { border-color: var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); }
-#footer-collapse-toggle:active { transform: translateX(-50%) scale(0.96); }
+#footer-collapse-toggle:active { transform: scale(0.96); }
 body.footer-collapsed #footer-collapse-toggle { display: none; }
 /* Restore pill (modo recolhido) */
 #footer-restore {
   position: absolute;
-  bottom: var(--v-space-md, 10px); left: 50%;
-  transform: translateX(-50%);
+  /* 2026-07-06: mesmo motivo do #footer-collapse-toggle — canto inferior-esquerdo,
+     fora da coluna central do hex-nav (que desce pra bottom:10 quando recolhido). */
+  bottom: var(--v-space-md, 10px); left: 14px;
   z-index: var(--v-z-dropdown-high, 51);
   display: none;
   background: rgba(28,22,16,0.95);
@@ -2983,7 +2986,7 @@ body.footer-collapsed #footer-collapse-toggle { display: none; }
   box-shadow: 0 2px 12px rgba(0,0,0,0.5), 0 0 18px var(--v-gold-50, rgba(196,149,58,0.5));
   border-color: var(--v-gold, #c4953a);
 }
-#footer-restore:active { transform: translateX(-50%) scale(0.96); }
+#footer-restore:active { transform: scale(0.96); }
 body.footer-collapsed #bottom-panel { display: none; }
 body.footer-collapsed #footer-restore { display: block; }
 /* (editor-mode hide do footer está na lista canonical ~html.editor-mode #hex-nav) */
@@ -26674,18 +26677,10 @@ function _getHexBaseCache(tile, color, heightPx) {
     // depth cue Imhof — corner ellipses eram redundância visual + bug.
     // Bonus perf: remove clip + 2 ellipse fills por hex (× ~80 hexes visíveis).
   }
-  // Grid lines (só desenha se HEX_W médio+grande; em low-zoom pula — opt 5)
-  if (HEX_W >= 25) {
-    // 2026-07-06 (user "faça a linha dos hexágonos ser mais transparente" +
-    // "pode reduzir mais"): alpha 0.4 → 0.2 → 0.1 — contorno do hex bem sutil.
-    hctx.strokeStyle = 'rgba(15,12,8,0.1)';
-    hctx.lineWidth = 0.6;
-    hctx.beginPath();
-    hctx.moveTo(topV[0].x, topV[0].y);
-    for (let i = 1; i < topV.length; i++) hctx.lineTo(topV[i].x, topV[i].y);
-    hctx.closePath();
-    hctx.stroke();
-  }
+  // Grid lines: 2026-07-06 (user "faça as bordas entre os tiles ficarem 100%
+  // transparentes"): contorno do hex REMOVIDO. Histórico do alpha: 0.4 → 0.2 →
+  // 0.1 → 0 (sem borda). Os hexes são definidos pela cor do bioma + gloss +
+  // rim-light/shadow (elevados) + decorações. Bônus: menos 1 stroke por hex.
   // Gloss top
   hctx.save();
   hctx.beginPath();
