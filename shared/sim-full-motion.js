@@ -37,6 +37,18 @@
        com vestibular issues, fotossensibilidade) + battery-saver-mode em Android
        low-end (que automaticamente ativa reduce-motion). Detection inline
        porque este script carrega ANTES de loading-guard.js no <head>. */
+    /* Opt-out EXPLÍCITO de a11y (2026-07-06): se o jogador LIGOU "reduzir animações"
+       dentro do jogo (settings → valdoria_reduce_motion=1), respeitamos SEMPRE, em
+       qualquer tier. Esta é a escolha REAL de motion-sensitivity — diferente do
+       battery-saver do SO, que liga prefers-reduced-motion por energia, não por
+       enjoo. Damos ao jogador o controle explícito em vez de adivinhar pelo SO. */
+    try {
+        if (localStorage.getItem('valdoria_reduce_motion') === '1') {
+            try { console.info('[SIM:FULL-MOTION] opt-out do jogador (valdoria_reduce_motion=1) — respeitando reduced-motion'); } catch (_) {}
+            return;
+        }
+    } catch (_) {}
+
     var __spoofTier;
     try {
         var __pref = localStorage.getItem('valdoria_loading_lite');
@@ -50,8 +62,16 @@
             else __spoofTier = 'full';
         }
     } catch (_) { __spoofTier = 'full'; }
-    if (__spoofTier !== 'full') {
-        try { console.info('[SIM:FULL-MOTION] tier=' + __spoofTier + ' — respeitando prefers-reduced-motion (a11y)'); } catch (_) {}
+    /* Sessão #38 → REVISTO 2026-07-06: o bypass agora vale pra MEDIUM + FULL.
+       Só LITE respeita prefers-reduced-motion (perf real + é onde mora o caso
+       "battery-saver de Android fraco auto-liga reduce-motion"). MEDIUM é um
+       telefone CAPAZ — ex.: Galaxy S20 FE (8 núcleos / 6GB → deviceMemory=4 =
+       medium). Matar TODA a animação do cenário só porque o battery-saver ligou
+       reduce-motion é UX ruim: animação de gameplay (grama ao vento, fog, fauna,
+       eventos, weather) NÃO é decoração, o jogador precisa vê-la. Quem tem
+       sensibilidade vestibular usa o opt-out explícito acima. */
+    if (__spoofTier === 'lite') {
+        try { console.info('[SIM:FULL-MOTION] tier=lite — respeitando prefers-reduced-motion (a11y + perf)'); } catch (_) {}
         return;
     }
 
