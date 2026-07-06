@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T14:30:47Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T14:35:38Z - do not edit directly, edit source -->
 
 
 
@@ -4286,7 +4286,9 @@ body.footer-collapsed #hex-nav { bottom: 56px; }  /* acima da pill #footer-resto
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  /* 2026-07-06: mesma correção do .hex-dir — transição explícita p/ opacity/visibility
+     não ficarem presas na base 'all' + render loop ao recolher/expandir. */
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
   pointer-events: auto;
@@ -4319,7 +4321,12 @@ body.footer-collapsed #hex-nav { bottom: 56px; }  /* acima da pill #footer-resto
   display: flex; align-items: center; justify-content: center;
   gap: 5px;
   padding: 0 6px;
-  transition: all 0.15s ease;
+  /* 2026-07-06: transição EXPLÍCITA (sem opacity/visibility/transform). A base
+     'transition: all' + o render loop da exploração re-disparavam a transição de
+     opacity a cada frame, deixando-a presa (setas não sumiam/voltavam ao recolher/
+     expandir o hex-nav). Só cor/borda/sombra do hover transicionam; opacity/
+     visibility passam a ser INSTANTÂNEAS (e o toggle do ◉ funciona nos 2 sentidos). */
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   text-transform: uppercase;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
