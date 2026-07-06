@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T03:50:54Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T10:33:44Z - do not edit directly, edit source -->
 
 
 
@@ -3017,10 +3017,12 @@ body.footer-collapsed #footer-restore { display: block; }
 .exf-ab b { color: var(--v-gold,#c4953a); font-weight: 700; }
 .exf-tip { font-size: calc(13px * var(--v-font-scale,1)); line-height: 1.55; color: var(--v-text,#d4c8b0); margin-bottom: 9px; }
 .exf-tip b { color: var(--v-gold,#c4953a); }
-/* Ritmo de Viagem (movido do footer-nav pro popup de Configurações) */
-#explore-settings-overlay .exs-pace-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
-#explore-settings-overlay .exs-pace-btn { padding: var(--v-space-md, 8px) 4px; border-radius: var(--v-radius-sm,6px); background: rgba(196,149,58,0.04); border: 1px solid var(--v-border,#4a3828); color: var(--v-text,#d4c8b0); font-family: var(--v-font,serif); font-size: calc(12px * var(--v-font-scale,1)); cursor: pointer; min-height: 38px; }
-#explore-settings-overlay .exs-pace-btn.active { background: rgba(196,149,58,0.15); border-color: var(--v-gold,#c4953a); color: var(--v-gold,#c4953a); font-weight: 700; }
+/* Ritmo de Viagem (PHB p.182) — dentro do popup do Grupo (#party-popup) */
+.party-pace { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--v-gold-12, rgba(196,149,58,0.12)); }
+.party-pace-title { font-family: var(--v-font-display, Cinzel, serif); font-size: calc(10px * var(--v-font-scale,1)); color: var(--v-gold,#c4953a); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 7px; text-align: center; }
+.party-pace-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+.party-pace-btn { padding: var(--v-space-md, 8px) 4px; border-radius: var(--v-radius-sm,6px); background: rgba(196,149,58,0.04); border: 1px solid var(--v-border,#4a3828); color: var(--v-text,#d4c8b0); font-family: var(--v-font,serif); font-size: calc(12px * var(--v-font-scale,1)); cursor: pointer; min-height: 38px; transition: all var(--v-transition, 0.15s); }
+.party-pace-btn.active { background: rgba(196,149,58,0.15); border-color: var(--v-gold,#c4953a); color: var(--v-gold,#c4953a); font-weight: 700; }
 #explore-settings-overlay {
   position: absolute; inset: 0; z-index: 9100; display: flex; align-items: center; justify-content: center;
   background: rgba(10,8,5,0.80); padding: var(--v-space-xl, 16px); pointer-events: auto;
@@ -3807,7 +3809,13 @@ body.perf-lite .hud-cond-chip .dot, body.reduced-motion .hud-cond-chip .dot { an
 #hud-quick {
   position: absolute;
   right: 10px;
-  bottom: 200px;   /* 2026-05-12: era 140 — subido pra fim do overlap com hex-nav */
+  /* 2026-07-06 (user "esses botões mais abaixo, logo acima do footer, pra ter
+     espaço pro minimapa mesmo na tela do Telegram"): descido de 200px → 90px. Fica
+     logo acima do #bottom-panel (footer ~82px) e LIBERA o espaço vertical de cima
+     pro #right-panel (minimapa), que colidia com o hud-quick em viewport curto. O
+     hex-nav é center + pointer-events:none no container, então NÃO há sobreposição
+     de clique nem visual (hud-quick fica na coluna da direita, hex-nav no centro). */
+  bottom: 90px;
   z-index: 15;
   display: flex; flex-direction: column;
   gap: var(--v-space-md, 8px);
@@ -40243,6 +40251,31 @@ function renderPartyPopup() {
       isSelf: false
     }));
   });
+
+  // 2026-07-06 (user "coloque o ritmo de viagem junto da tela do grupo"): seletor
+  // de Ritmo de Viagem (PHB p.182) DENTRO do popup do Grupo. Cauteloso = menos
+  // encontros, Rápido = mais. O ritmo é mandado no /move (servidor valida + persiste).
+  var _paceSec = document.createElement('div');
+  _paceSec.className = 'party-pace';
+  var _curPace = (window.S && S.travelPace) || 'normal';
+  var _PLBL = { cautious: 'Cauteloso', normal: 'Normal', fast: 'Rápido' };
+  var _PHINT = { cautious: 'menos encontros', normal: 'ritmo padrão', fast: 'mais encontros' };
+  var _pin = '<div class="party-pace-title">Ritmo de Viagem</div><div class="party-pace-row">';
+  ['cautious', 'normal', 'fast'].forEach(function (pc) {
+    _pin += '<button type="button" class="party-pace-btn' + (pc === _curPace ? ' active' : '')
+      + '" data-pace="' + pc + '" title="' + _PLBL[pc] + ' — ' + _PHINT[pc] + '">'
+      + _PLBL[pc] + '</button>';
+  });
+  _pin += '</div>';
+  _paceSec.innerHTML = _pin;
+  body.appendChild(_paceSec);
+  _paceSec.querySelectorAll('.party-pace-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (typeof _setTravelPace === 'function') _setTravelPace(b.getAttribute('data-pace'));
+      if (window.vHaptic) window.vHaptic('light');
+      renderPartyPopup();  // re-render pra atualizar o botão ativo
+    });
+  });
 }
 
 function _partyMemberCard(m) {
@@ -43660,9 +43693,9 @@ function _applyExploreFooterCollapsedClass() {
 var _PACE_LABELS = { cautious: 'Cauteloso', normal: 'Normal', fast: 'Rápido' };
 function _updatePaceUI() {
   var cur = (window.S && window.S.travelPace) || 'normal';
-  // 2026-07-06: o seletor de Ritmo saiu do footer-nav (footer agora = cidade) e vive
-  // no popup de Configurações — query genérica pega os .pace-btn onde estiverem.
-  var btns = document.querySelectorAll('.pace-btn');
+  // 2026-07-06: o seletor de Ritmo vive no popup do Grupo (.party-pace-btn). O
+  // popup re-renderiza ao trocar, mas atualizamos aqui também por robustez.
+  var btns = document.querySelectorAll('.party-pace-btn');
   for (var i = 0; i < btns.length; i++) {
     btns[i].classList.toggle('active', btns[i].getAttribute('data-pace') === cur);
   }
@@ -43833,7 +43866,7 @@ function _showExploreHelp() {
     + '<div class="em-body">'
     + '<div class="em-section first">Como explorar</div>'
     + tip('<b>Mover:</b> toque nas setas ao redor do centro pra caminhar pelos hexágonos. Cada passo pode revelar eventos, trilhas e perigos.')
-    + tip('<b>Ritmo de viagem:</b> em Configurações, escolha Cauteloso (menos encontros), Normal ou Rápido (mais encontros).')
+    + tip('<b>Ritmo de viagem:</b> no Grupo (menu à direita), escolha Cauteloso (menos encontros), Normal ou Rápido (mais encontros).')
     + tip('<b>Acampar:</b> use a fogueira (menu à direita) pra Descanso Curto (gasta Dado de Vida) ou Longo (recupera tudo).')
     + tip('<b>Luz:</b> em cavernas e à noite, acenda uma tocha ou feitiço de luz (menu à direita) pra enxergar mais longe.')
     + tip('<b>Mapa de Valdoria:</b> abra a cartografia (menu à direita) pra viajar entre regiões.')
@@ -44068,19 +44101,8 @@ function bindQuickActions() {
     h += _exsToggleRow('Efeitos Sonoros', !sfxMuted, 'sfx');
     if (!sfxMuted) h += _exsSliderRow('Volume Efeitos', sfxVol, 'sfx_vol');
     h += '<div class="exs-section">Jogo</div>'
-      + _exsToggleRow('Vibração', haptic, 'haptic');
-    // 2026-07-06: Ritmo de Viagem (PHB p.182) movido do footer-nav pra cá — o
-    // footer agora é IDÊNTICO ao da cidade. O ritmo é mandado no /move (servidor
-    // valida + modula a cadência de encontros). Cauteloso = menos, Rápido = mais.
-    var _curPace = (window.S && window.S.travelPace) || 'normal';
-    h += '<div class="exs-section">Ritmo de Viagem</div><div class="exs-pace-row">';
-    ['cautious', 'normal', 'fast'].forEach(function (pc) {
-      h += '<button class="exs-pace-btn' + (pc === _curPace ? ' active' : '')
-        + '" data-pace="' + pc + '" title="' + _PACE_LABELS[pc]
-        + (pc === 'fast' ? ' — mais encontros' : pc === 'cautious' ? ' — menos encontros' : ' — ritmo padrão')
-        + '">' + _PACE_LABELS[pc] + '</button>';
-    });
-    h += '</div></div></div>';
+      + _exsToggleRow('Vibração', haptic, 'haptic')
+      + '</div></div>';
     var ov = document.createElement('div');
     ov.id = 'explore-settings-overlay';
     ov.innerHTML = h;
@@ -44119,14 +44141,6 @@ function bindQuickActions() {
         }
       });
       sl.addEventListener('change', function () { _showExploreSettings(); });
-    });
-    // 2026-07-06: Ritmo de Viagem (seção nova) — clica → _setTravelPace + re-render.
-    ov.querySelectorAll('.exs-pace-btn').forEach(function (b) {
-      b.addEventListener('click', function () {
-        if (typeof _setTravelPace === 'function') _setTravelPace(b.getAttribute('data-pace'));
-        if (window.vHaptic) window.vHaptic('light');
-        _showExploreSettings();
-      });
     });
   }
   // 2026-07-06 FIX: _showExploreSettings é NESTED nesta função de boot, então o
