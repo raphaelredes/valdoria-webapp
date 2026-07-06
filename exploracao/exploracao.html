@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T21:30:59Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T22:28:27Z - do not edit directly, edit source -->
 
 
 
@@ -19442,7 +19442,9 @@ var _animTime = 0;
 // CONFIRMA e anda. Arrastar o dedo = pan do mapa (não vira toque). Coexiste com o
 // D-pad. Adjacente-only (isValidMove exige isAdjacent). Ver setupTapToMove() +
 // drawMoveIntent().
-var _moveIntent = null;        // null | { col, row, phase:'pending' } — hex marcado aguardando confirmação
+var _moveIntent = null;        // null | { col, row, phase:'pending', path:[...] } — hex marcado aguardando confirmação
+var _moveQueue = null;         // M11: fila de passos de um movimento multi-hex (ritmo)
+var _pendingServerMove = null; // M11: promise do /move do passo atual (REMOTE) — o queue aguarda antes do próximo
 var _zoom = DEFAULT_ZOOM;
 // [R2 2026-04-23] Ring buffer expandido de 3 → 5 eventos pra evitar repetição
 // imediata. Combinado com history persistente (event_history_delta enviado em
@@ -32662,6 +32664,11 @@ function getVisionRange() {
     const adverse = biome === 'cave' || phase === 'night' || weather === 'r' || weather === 't' || weather === 'f';
     if (adverse) base += LIGHT_SOURCES[src].vision_bonus;
   }
+  // M11 (Fase 1 ritmo, PHB p.182): o ritmo modula a percepção do OVERWORLD —
+  // Cauteloso +1 hex (nota tudo antes), Rápido −1 (avança mais cego). Não afeta
+  // cave (base 0), mata/dungeon (retornam antes) nem cega o Rápido (piso 1).
+  var _pd = _curPace() === 'cautious' ? 1 : _curPace() === 'fast' ? -1 : 0;
+  if (base > 0 && _pd) base = Math.max(1, base + _pd);
   return Math.max(0, base);
 }
 
@@ -33389,6 +33396,89 @@ function isValidMove(col, row) {
 // - Camera follow: centerOnPlayer(true) com smooth scroll no fim do move.
 // - Landing "squash" curto via campo playerAnim.landingT.
 // - Facing rotation gradual durante move (sprite gira de facing anterior pro novo).
+// M11 (Fase 1 ritmo, 2026-07-06): FONTE ÚNICA do ritmo de viagem. S.travelPace é o
+// campo AUTORITATIVO (seletor + servidor via res.state.travel_pace). O antigo S.pace
+// ficava preso em 'normal' (init) e NUNCA era atualizado → duração/percepção/surpresa
+// por ritmo estavam MORTAS. _curPace() lê o campo certo e espelha em S.pace por
+// robustez de call-sites legados.
+function _curPace() {
+  var pc = (window.S && (S.travelPace || S.pace)) || 'normal';
+  try { if (window.S) S.pace = pc; } catch (_) {}
+  return pc;
+}
+// M11: alcance de movimento por ritmo (PHB p.182 — Fast cobre mais terreno).
+function _paceRange() {
+  var pc = _curPace();
+  return pc === 'fast' ? 3 : pc === 'cautious' ? 1 : 2;
+}
+// M11: BFS dos hexes alcançáveis dentro do alcance do ritmo (passáveis, in-bounds).
+// Memoizado por (pos + ritmo + fase + exaustão) — recomputa só quando muda. Barato.
+var _reachCache = null, _reachKey = '';
+function _reachableSet() {
+  var p = S.player;
+  var key = p.col + ',' + p.row + '|' + _curPace() + '|' + S.ph + '|' + p.exh;
+  if (_reachCache && _reachKey === key) return _reachCache;
+  var R = _paceRange();
+  var start = p.col + ',' + p.row;
+  var seen = {}; seen[start] = { col: p.col, row: p.row, dist: 0, parent: null };
+  var frontier = [[p.col, p.row]];
+  for (var d = 0; d < R; d++) {
+    var next = [];
+    for (var f = 0; f < frontier.length; f++) {
+      var nb = getNeighbors(frontier[f][0], frontier[f][1]);
+      for (var i = 0; i < nb.length; i++) {
+        var c = nb[i][0], r = nb[i][1], k = c + ',' + r;
+        if (c < 0 || c >= COLS || r < 0 || r >= ROWS) continue;
+        if (seen[k]) continue;
+        if (isTileImpassable(c, r)) continue;
+        seen[k] = { col: c, row: r, dist: d + 1, parent: frontier[f][0] + ',' + frontier[f][1] };
+        next.push([c, r]);
+      }
+    }
+    frontier = next;
+  }
+  delete seen[start];
+  _reachCache = seen; _reachKey = key;
+  return seen;
+}
+// M11: caminho player→(col,row) dentro do alcance, ou null se fora de alcance/bloqueado.
+function _pacePath(col, row) {
+  var set = _reachableSet(), k = col + ',' + row;
+  if (!set[k]) return null;
+  var path = [], cur = k;
+  while (cur && set[cur]) { path.unshift({ col: set[cur].col, row: set[cur].row }); cur = set[cur].parent; }
+  return path;  // ordenado player→dest (exclui o hex do player)
+}
+// M11: fila de movimento multi-hex — cada passo é um beginMove; o próximo só roda
+// quando o anterior terminou E (REMOTE) o servidor respondeu, parando se um evento
+// abriu (ph != idle). Assim um passo Rápido de 3 hexes rola encontro POR hex.
+function _startMoveQueue(path) {
+  if (!path || !path.length) return;
+  _moveQueue = path.slice();
+  _advanceMoveQueue();
+}
+function _advanceMoveQueue() {
+  if (!_moveQueue || !_moveQueue.length) { _moveQueue = null; return; }
+  if (!S || S.ph !== 'idle') { _moveQueue = null; return; }          // evento/transição interrompeu a viagem
+  var next = _moveQueue[0];
+  if (!isValidMove(next.col, next.row)) { _moveQueue = null; return; } // mundo mudou entre passos
+  _moveQueue.shift();
+  _pendingServerMove = null;
+  S.player.facing = _mvNeighborIndex(next.col, next.row);
+  beginMove(next.col, next.row);   // completion → _afterStep → _advanceMoveQueue
+}
+// M11: chamado ao fim de cada passo (após onMoveEnd). Em REMOTE aguarda o /move do
+// passo (o encontro é AUTORIDADE do servidor) antes de decidir continuar.
+function _afterStep() {
+  if (!_moveQueue) return;
+  if (_pendingServerMove) {
+    Promise.resolve(_pendingServerMove)
+      .then(function () { _pendingServerMove = null; _advanceMoveQueue(); })
+      .catch(function () { _pendingServerMove = null; _advanceMoveQueue(); });
+  } else {
+    _advanceMoveQueue();
+  }
+}
 function getMoveDurationFor(toCol, toRow, fromCol, fromRow) {
   const tile = tileAt(toCol, toRow);
   const fromTile = tileAt(fromCol, fromRow);
@@ -33402,8 +33492,8 @@ function getMoveDurationFor(toCol, toRow, fromCol, fromRow) {
   // Subir terreno íngreme: adiciona pequena penalidade
   const dH = effectiveTileHeightPx(toCol, toRow) - effectiveTileHeightPx(fromCol, fromRow);
   if (dH > 0) base += Math.min(120, dH * 2);
-  // Pace override (S.pace = 'fast' | 'normal' | 'cautious')
-  const paceMul = S.pace === 'fast' ? 0.75 : S.pace === 'cautious' ? 1.3 : 1.0;
+  // Pace override — usa _curPace() (S.travelPace autoritativo; S.pace estava morto).
+  const paceMul = _curPace() === 'fast' ? 0.75 : _curPace() === 'cautious' ? 1.3 : 1.0;
   return Math.round(base * paceMul);
 }
 
@@ -33440,8 +33530,10 @@ function beginMove(col, row) {
     playerAnim = null;
     try {
       onMoveEnd(tc, tr);
+      try { _afterStep(); } catch (_) {}   // M11: multi-hex — dá sequência à fila do passo
     } catch (e) {
       try { LOGE('MOVE', 'onMoveEnd threw — forcing idle. err=' + (e && e.message)); } catch (_) {}
+      _moveQueue = null;  // M11: aborta a viagem se o passo falhou
       // onMoveEnd não chegou ao final (não setou ph). Force idle aqui pra
       // não travar. Watchdog também pegaria mas é melhor recuperar agora.
       if (S.ph === 'moving') _setPhase('idle', 'onMoveEnd_threw');
@@ -33777,7 +33869,9 @@ function onMoveEnd(col, row) {
   // Server pode: (a) retornar state atualizado (HP/MP/gold/visible),
   // (b) retornar event rolado → abre modal com o event do servidor.
   if (_remoteAuthoritative) {
-    window.ExploracaoAPI.move(col, row).then(function(res) {
+    // M11: captura a promise pra fila multi-hex aguardar a decisão de encontro do
+    // servidor ANTES do próximo passo (o encontro é autoridade do servidor).
+    _pendingServerMove = window.ExploracaoAPI.move(col, row).then(function(res) {
       if (!res || res.error) {
         LOGW('API', 'remote_move err=' + (res && res.error));
         return;
@@ -33976,23 +34070,28 @@ function _mvNeighborIndex(c, r) {
 // papel que o D-pad tinha de indicar as direções possíveis). Tier-aware (lite pula
 // o gradiente). Estático quando idle (o render pausa); pulsa quando o loop está ativo.
 function drawMovableHexes(ctx) {
-  const p = S.player, ns = getNeighbors(p.col, p.row);
+  const p = S.player;
+  const set = _reachableSet();               // M11: alcance do ritmo (1/2/3), não só os 6 vizinhos
   const tier = window._valdoriaPerformanceTier || 'full';
   const t = ((_animTime || 0) % 2000) / 2000, breathe = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+  const R = _paceRange();
   ctx.save();
-  for (let i = 0; i < ns.length; i++) {
-    if (!isValidMove(ns[i][0], ns[i][1])) continue;
-    const s = hexToScreen(ns[i][0], ns[i][1]);
-    if (tier !== 'lite') {
+  for (var k in set) {
+    if (!set[k]) continue;
+    var node = set[k];
+    const s = hexToScreen(node.col, node.row);
+    // Mais longe = mais fraco → leitura de "alcance" do ritmo (dist1≈1.0 .. distR≈0.6)
+    var fo = 1 - (node.dist - 1) / Math.max(1, R) * 0.5;
+    if (tier !== 'lite' && node.dist === 1) {   // glow só no anel adjacente (barato + destaca o próximo passo)
       const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, HEX_W * 0.24);
       g.addColorStop(0, 'rgba(232,200,100,' + (0.15 + 0.08 * breathe) + ')');
       g.addColorStop(1, 'rgba(232,200,100,0)');
       ctx.fillStyle = g;
       ctx.beginPath(); ctx.arc(s.x, s.y, HEX_W * 0.24, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.fillStyle = 'rgba(232,200,100,' + (0.42 + 0.22 * breathe) + ')';     // dot central
+    ctx.fillStyle = 'rgba(232,200,100,' + ((0.42 + 0.22 * breathe) * fo) + ')';     // dot central
     ctx.beginPath(); ctx.arc(s.x, s.y, HEX_W * 0.05, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(232,200,100,' + (0.20 + 0.12 * breathe) + ')';   // anelzinho
+    ctx.strokeStyle = 'rgba(232,200,100,' + ((0.20 + 0.12 * breathe) * fo) + ')';   // anelzinho
     ctx.lineWidth = 1.4;
     ctx.beginPath(); ctx.arc(s.x, s.y, HEX_W * (0.13 + 0.02 * breathe), 0, Math.PI * 2); ctx.stroke();
   }
@@ -34007,8 +34106,15 @@ function drawMarkedDestination(ctx, mi) {
   const t = ((_animTime || 0) % 1200) / 1200, pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
   ctx.save();
   ctx.strokeStyle = 'rgba(232,200,100,0.9)';                    // trilha herói → alvo
-  ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.setLineDash([3, 8]);
-  ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.lineTo(s.x, s.y); ctx.stroke();
+  ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash([3, 8]);
+  ctx.beginPath(); ctx.moveTo(h.x, h.y);
+  if (mi.path && mi.path.length) {                              // M11: polilinha por cada hex do caminho
+    for (var pi = 0; pi < mi.path.length; pi++) {
+      var ps = hexToScreen(mi.path[pi].col, mi.path[pi].row);
+      ctx.lineTo(ps.x, ps.y);
+    }
+  } else { ctx.lineTo(s.x, s.y); }
+  ctx.stroke();
   ctx.setLineDash([]);
   const v = hexTopVertices(s.x, s.y);                           // hex-alvo
   ctx.beginPath(); ctx.moveTo(v[0].x, v[0].y);
@@ -34044,7 +34150,8 @@ function drawMarkedDestination(ctx, mi) {
 // indicadores sutis nos vizinhos alcançáveis.
 function drawMoveOverlay(ctx) {
   if (!S || S.ph !== 'idle') return;
-  if (_moveIntent && !isValidMove(_moveIntent.col, _moveIntent.row)) _moveIntent = null;  // alvo ficou inválido
+  // M11: alvo pode estar a 2-3 hexes → valida por ALCANCE (path), não por adjacência.
+  if (_moveIntent && !_pacePath(_moveIntent.col, _moveIntent.row)) _moveIntent = null;  // alvo saiu do alcance
   if (_moveIntent) drawMarkedDestination(ctx, _moveIntent);
   else drawMovableHexes(ctx);
 }
@@ -34071,7 +34178,9 @@ function setupTapToMove() {
   function tappedCell(cx, cy) {
     const p = S.player;
     const cells = [{ col: p.col, row: p.row, hero: true }];
-    getNeighbors(p.col, p.row).forEach(function (n) { cells.push({ col: n[0], row: n[1], hero: false }); });
+    // M11: multi-hex — testa TODOS os hexes alcançáveis no alcance do ritmo (não só os 6 vizinhos).
+    var set = _reachableSet();
+    for (var k in set) { if (set[k]) cells.push({ col: set[k].col, row: set[k].row, hero: false }); }
     let best = null, bd = HEX_W * 0.56;
     cells.forEach(function (c) {
       const s = hexToScreen(c.col, c.row);
@@ -34087,15 +34196,16 @@ function setupTapToMove() {
     const hit = tappedCell(pc.x, pc.y);
     // toque fora / no próprio herói → cancela a marcação
     if (!hit || hit.hero) { if (_moveIntent) { _moveIntent = null; scheduleRender(); } return; }
-    if (!isValidMove(hit.col, hit.row)) return;   // vizinho bloqueado → ignora
+    // M11: destino multi-hex — precisa de um caminho passável dentro do alcance do ritmo.
+    var path = _pacePath(hit.col, hit.row);
+    if (!path || !path.length) return;   // fora de alcance / bloqueado
     if (_moveIntent && _moveIntent.col === hit.col && _moveIntent.row === hit.row) {
-      // 2º toque no MESMO hex → CONFIRMA e anda
-      const tc = hit.col, tr = hit.row; _moveIntent = null;
-      S.player.facing = _mvNeighborIndex(tc, tr);
-      beginMove(tc, tr);
+      // 2º toque no MESMO hex → CONFIRMA e percorre o caminho (encontro rola por hex)
+      _moveIntent = null;
+      _startMoveQueue(path);
     } else {
-      // 1º toque (ou toque em outro vizinho válido) → MARCA o destino
-      _moveIntent = { col: hit.col, row: hit.row, phase: 'pending' };
+      // 1º toque (ou outro destino) → MARCA e guarda o caminho pra desenhar a trilha
+      _moveIntent = { col: hit.col, row: hit.row, phase: 'pending', path: path };
     }
     scheduleRender();
   }
@@ -36286,12 +36396,12 @@ function triggerSurpriseAmbush(ev) {
   // ou se a Percepção passiva supera a furtividade do emboscador (DC 14).
   const AMBUSH_STEALTH_DC = 14;
   const passivePP = _ambushPassivePerception(p);
-  const cautious = (window.S && window.S.pace === 'cautious');
+  const cautious = (_curPace() === 'cautious');
   const playerNoticed = cautious || (passivePP >= AMBUSH_STEALTH_DC);
   const playerSurprised = !playerNoticed;
 
   LOG('COMBAT', 'ambush prep enemy=' + enemyId + ' count=' + enemyCount
-    + ' passivePP=' + passivePP + ' pace=' + (window.S && window.S.pace)
+    + ' passivePP=' + passivePP + ' pace=' + _curPace()
     + ' noticed=' + playerNoticed);
   console.info('[E-REM:COMBAT] ambush enemy=' + enemyId + ' count=' + enemyCount
     + ' playerSurprised=' + playerSurprised);
@@ -43836,12 +43946,25 @@ function _setTravelPace(pace) {
   if (!window.S) return;
   if (window.S.travelPace === pace) return;
   window.S.travelPace = pace;  // aplicado no próximo /move (servidor valida + persiste)
+  window.S.pace = pace;        // espelho p/ mecânicas (duração/percepção/surpresa)
   _updatePaceUI();
+  // Feedback IMEDIATO: re-revela o fog no raio de percepção do novo ritmo (Cauteloso
+  // +1 mostra mais na hora; Rápido −1 fecha um pouco) + atualiza o alcance de toque.
+  // Faz a escolha do ritmo ser SENTIDA sem esperar o próximo passo.
   try {
-    var msg = 'Ritmo: ' + _PACE_LABELS[pace]
-      + (pace === 'fast' ? ' — mais encontros' : pace === 'cautious' ? ' — menos encontros' : '');
+    if (S.player) revealFogAt(S.player.col, S.player.row, getVisionRange());
+    scheduleRender();
+  } catch (_) {}
+  try {
+    var _tradeoff = {
+      cautious: 'Cauteloso — enxerga mais longe e evita surpresas; menos encontros, porém mais lento',
+      normal:   'Normal — ritmo equilibrado',
+      fast:     'Rápido — cobre mais terreno, mas vê menos e atrai mais encontros'
+    };
+    var msg = _tradeoff[pace] || ('Ritmo: ' + _PACE_LABELS[pace]);
     if (typeof vToast === 'function') {
-      vToast(msg, 'info', (typeof calcReadTime === 'function' ? calcReadTime(msg, 'toast') : 2000));
+      vToast(msg, pace === 'fast' ? 'warn' : 'info',
+             (typeof calcReadTime === 'function' ? calcReadTime(msg, 'toast') : 3000));
     }
   } catch (_) { /* toast opcional */ }
 }
