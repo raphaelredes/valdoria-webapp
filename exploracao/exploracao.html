@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T23:23:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T23:53:27Z - do not edit directly, edit source -->
 
 
 
@@ -3046,6 +3046,18 @@ body.footer-collapsed #footer-restore { display: block; }
   color: var(--v-gold,#c4953a); font-weight: 700; box-shadow: inset 0 0 8px rgba(196,149,58,0.12); }
 #pace-bar .pace-seg:active { transform: scale(0.96); }
 @media (prefers-reduced-motion: reduce) { #pace-bar .pace-seg { transition: none; } }
+/* M13 (Fase 2): Forragear — pílula acima do pace-bar, SÓ no ritmo Cauteloso. */
+#btn-forage { position: absolute; left: 50%; transform: translateX(-50%); bottom: 132px; z-index: 16;
+  display: none; min-height: 30px; padding: 6px 18px; border-radius: var(--v-radius-pill,20px);
+  background: linear-gradient(180deg, rgba(46,60,36,0.95), rgba(30,40,22,0.92));
+  border: 1px solid var(--v-border,#4a3828); color: var(--v-gold,#c4953a);
+  font-family: var(--v-font,serif); font-size: calc(12.5px * var(--v-font-scale,1)); font-weight: 700;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.45); cursor: pointer; white-space: nowrap;
+  transition: all var(--v-transition,0.15s); }
+body.pace-cautious #btn-forage { display: block; }
+#btn-forage:active { transform: translateX(-50%) scale(0.96); }
+#btn-forage:disabled { opacity: 0.5; cursor: default; }
+@media (prefers-reduced-motion: reduce) { #btn-forage { transition: none; } }
 #explore-settings-overlay {
   position: absolute; inset: 0; z-index: 9100; display: flex; align-items: center; justify-content: center;
   background: rgba(10,8,5,0.80); padding: var(--v-space-xl, 16px); pointer-events: auto;
@@ -8615,6 +8627,10 @@ window.__onIntroTap = function() {
     <button type="button" class="party-pace-btn pace-seg" data-pace="normal" title="Normal — ritmo equilibrado; 2 hexes">Normal</button>
     <button type="button" class="party-pace-btn pace-seg" data-pace="fast" title="Rápido — cobre 3 hexes, mas vê menos e atrai mais encontros">Rápido</button>
   </div>
+
+  <!-- M13 (Fase 2): Forragear — recompensa do Cauteloso (só visível nesse ritmo, via
+       body.pace-cautious). Teste de Sobrevivência server-authoritative → recupera PV. -->
+  <button type="button" id="btn-forage" title="Forragear (Sobrevivência) — recupera PV; só no ritmo Cauteloso">Forragear</button>
 
   <div id="hud-quick">
     <!-- X-6.5.51f (2026-04-25): btn-quest-journal REMOVIDO. User feedback:
@@ -15372,6 +15388,21 @@ window.__explFetchTO = function(url, opts, ms) {
       if (res && res.ok) {
         console.info('[E-REM:API-REST_LONG] ok healed_hp=' + (res.healed && res.healed.hp)
           + ' healed_mp=' + (res.healed && res.healed.mp));
+      }
+      return res;
+    },
+
+    /* M13 (Fase 2 ritmo): FORRAGEAR (Cauteloso) — POST /api/exploracao/forage.
+       Teste de Sobrevivência server-authoritative; recupera PV + reduz exaustão. */
+    forage: async function() {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      console.info('[E-REM:API-FORAGE] send motor_tok=' + tok.slice(0, 8) + '...');
+      var res = await _post('/api/exploracao/forage', { token: tok });
+      if (res) {
+        console.info('[E-REM:API-FORAGE] ok=' + res.ok + ' success=' + (res.forage && res.forage.success)
+          + ' hp_gain=' + (res.forage && res.forage.hp_gain) + ' dc=' + (res.check && res.check.dc)
+          + ' total=' + (res.check && res.check.total));
       }
       return res;
     },
@@ -43980,7 +44011,51 @@ function _updatePaceUI() {
   for (var i = 0; i < btns.length; i++) {
     btns[i].classList.toggle('active', btns[i].getAttribute('data-pace') === cur);
   }
+  // M13: o botão Forragear só aparece no ritmo Cauteloso (recompensa de ir devagar).
+  try { document.body.classList.toggle('pace-cautious', cur === 'cautious'); } catch (_) {}
 }
+// M13 (Fase 2): FORRAGEAR (Cauteloso) — POST server-authoritative; recupera PV + reduz
+// exaustão. Aplica o state do servidor + narra + toast com a rolagem de Sobrevivência.
+function _doForage() {
+  if (!S || S.ph !== 'idle') return;
+  if (_curPace() !== 'cautious') { if (typeof vToast === 'function') vToast('Forragear exige o ritmo Cauteloso.', 'warn'); return; }
+  var btn = document.getElementById('btn-forage');
+  var _reenable = function () { if (btn) btn.disabled = false; };
+  if (!window.ExploracaoAPI || typeof window.ExploracaoAPI.forage !== 'function') return;
+  if (btn) btn.disabled = true;
+  window.ExploracaoAPI.forage().then(function (res) {
+    _reenable();
+    if (!res || res.error) { if (typeof vToast === 'function') vToast('Não foi possível forragear agora.', 'warn'); return; }
+    if (res.ok === false && res.reason === 'not_cautious') { if (typeof vToast === 'function') vToast(res.message || 'Forragear exige o ritmo Cauteloso.', 'warn'); return; }
+    if (res.state) {
+      try {
+        if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
+        if (typeof res.state.exhaustion === 'number') S.player.exh = res.state.exhaustion;
+        updateHud();
+      } catch (_) {}
+    }
+    var fo = res.forage || {}, chk = res.check || {};
+    if (fo.limit_reached) {
+      if (typeof dmNarrate === 'function') dmNarrate({ text: res.narrative, type: 'ambient' });
+      if (typeof vToast === 'function') vToast(res.narrative || 'Sem mais o que colher hoje.', 'info');
+      return;
+    }
+    if (typeof dmNarrate === 'function') dmNarrate({ text: res.narrative, type: fo.success ? 'event' : 'ambient' });
+    var roll = 'Sobrevivência ' + (chk.total != null ? chk.total : '?') + ' vs CD ' + (chk.dc != null ? chk.dc : '?');
+    var msg = fo.success
+      ? ('Forrageou: +' + fo.hp_gain + ' PV' + (fo.exh_reduced ? ' · −1 Exaustão' : '') + '  (' + roll + ')')
+      : ('Nada encontrado  (' + roll + ')');
+    if (typeof vToast === 'function') vToast(msg, fo.success ? 'ok' : 'warn', (typeof calcReadTime === 'function' ? calcReadTime(msg, 'toast') : 3500));
+    scheduleRender();
+  }).catch(function (e) { _reenable(); if (typeof LOGW === 'function') LOGW('API', 'forage err=' + (e && e.message)); });
+}
+function _bindForage() {
+  var b = document.getElementById('btn-forage');
+  if (!b || b._bound) return;
+  b._bound = true;
+  b.addEventListener('click', function (e) { e.preventDefault(); _doForage(); });
+}
+document.addEventListener('DOMContentLoaded', _bindForage);
 // M11: liga os cliques do #pace-bar (Ritmo em primeiro plano) a _setTravelPace.
 // Idempotente; reusa .party-pace-btn (o mesmo _updatePaceUI marca o ativo).
 function _bindPaceBar() {
