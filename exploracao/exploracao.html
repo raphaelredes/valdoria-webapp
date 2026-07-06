@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T15:01:43Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T15:33:31Z - do not edit directly, edit source -->
 
 
 
@@ -19618,13 +19618,13 @@ var mainCanvas, mainCtx, fogCanvas, fogCtx, maskCanvas, maskCtx;
 var canvasW = 0, canvasH = 0;
 var playerAnim = null;
 var _animTime = 0;
-// 2026-07-06 (user "implemente a opção 2 ARRASTAR, mas com clique de confirmação"):
-// movimento por ARRASTAR o herói + CONFIRMAR (coexiste com o D-pad de 6 direções).
-// _moveIntent = o hex vizinho escolhido. phase 'drag' = arrastando; 'pending' =
-// solto, aguardando 2º toque no alvo (ou no ✓) pra confirmar. Ver setupDragMove()
-// + drawMoveIntent(). Movimento é adjacente-only (isValidMove exige isAdjacent).
-var _moveIntent = null;        // null | { col, row, phase:'drag'|'pending' }
-var _moveDragActive = false;
+// 2026-07-06 (user: "clicar para marcar onde quer ir e clicar de novo para
+// confirmar" — o arrasto conflitava com o pan do mapa). Movimento por TOQUE: 1º
+// toque num hex vizinho válido MARCA o destino; 2º toque no mesmo hex (ou no ✓)
+// CONFIRMA e anda. Arrastar o dedo = pan do mapa (não vira toque). Coexiste com o
+// D-pad. Adjacente-only (isValidMove exige isAdjacent). Ver setupTapToMove() +
+// drawMoveIntent().
+var _moveIntent = null;        // null | { col, row, phase:'pending' } — hex marcado aguardando confirmação
 var _zoom = DEFAULT_ZOOM;
 // [R2 2026-04-23] Ring buffer expandido de 3 → 5 eventos pra evitar repetição
 // imediata. Combinado com history persistente (event_history_delta enviado em
@@ -34017,24 +34017,14 @@ function _setHexNavDisabled(_disabled) {
   }
 }
 
-// ===== ARRASTAR + CONFIRMAR (2026-07-06) ==================================
-// Movimento alternativo ao D-pad: o jogador ARRASTA o herói na direção de um hex
-// vizinho válido; ao soltar, o alvo fica PENDENTE (herói-fantasma + anel pulsante
-// + badge ✓). Um 2º toque no alvo (ou no ✓) CONFIRMA o passo. Coexiste com o
-// hex-nav (as setas continuam movendo direto). Tudo em espaço de canvas (mesmo de
-// hexToScreen/drawPlayer). Só ativo em S.ph==='idle' e fora do editor.
+// ===== MARCAR (toque) + CONFIRMAR (2026-07-06) ============================
+// Movimento alternativo ao D-pad: 1º TOQUE num hex vizinho válido MARCA o destino
+// (herói-fantasma + anel pulsante + badge ✓ + trilha); 2º TOQUE no mesmo hex (ou no
+// ✓) CONFIRMA o passo. Toque em outro vizinho re-marca; toque no herói/vazio
+// cancela. ARRASTAR o dedo = pan do mapa (detectado por TAP_SLOP, não vira toque) →
+// zero conflito com o pan. Coexiste com o hex-nav. Espaço de canvas (hexToScreen/
+// drawPlayer). Só ativo em S.ph==='idle' e fora do editor.
 function _mvHeroPos() { return hexToScreen(S.player.col, S.player.row); }
-function _mvNearestValidNeighbor(cx, cy) {
-  const ns = getNeighbors(S.player.col, S.player.row);
-  let best = null, bd = Infinity;
-  for (let i = 0; i < ns.length; i++) {
-    if (!isValidMove(ns[i][0], ns[i][1])) continue;
-    const s = hexToScreen(ns[i][0], ns[i][1]);
-    const d = Math.hypot(s.x - cx, s.y - cy);
-    if (d < bd) { bd = d; best = { col: ns[i][0], row: ns[i][1], dist: d }; }
-  }
-  return best;
-}
 function _mvNeighborIndex(c, r) {
   const ns = getNeighbors(S.player.col, S.player.row);
   for (let i = 0; i < ns.length; i++) if (ns[i][0] === c && ns[i][1] === r) return i;
@@ -34081,69 +34071,63 @@ function drawMoveIntent(ctx) {
   ctx.restore();
 }
 
-function setupDragMove() {
+function setupTapToMove() {
   const canvas = document.getElementById('map');
-  if (!canvas || canvas._dragMoveBound) return;
-  canvas._dragMoveBound = true;
-  let _touchGuard = false;
+  if (!canvas || canvas._tapMoveBound) return;
+  canvas._tapMoveBound = true;
+  const TAP_SLOP = 12;   // px: acima disso o gesto é ARRASTO (pan do mapa), não toque
+  let _downX = 0, _downY = 0, _moved = false, _touchGuard = false;
   function toCanvas(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
     return { x: (clientX - rect.left) * (canvas.width / rect.width),
              y: (clientY - rect.top) * (canvas.height / rect.height) };
   }
-  // true = gesto consumido (herói/confirm) → cancela o pan nativo do #map-viewport
-  function onDown(clientX, clientY) {
-    if (!S || S.ph !== 'idle' || window._editorMode) return false;
-    const pc = toCanvas(clientX, clientY), h = _mvHeroPos();
-    if (Math.hypot(pc.x - h.x, pc.y - h.y) < HEX_W * 0.55) {   // pegou o herói → arrasta
-      _markActive(); _moveDragActive = true; _moveIntent = null; scheduleRender();
-      return true;
-    }
-    if (_moveIntent && _moveIntent.phase === 'pending') {
-      const ps = hexToScreen(_moveIntent.col, _moveIntent.row);
-      if (Math.hypot(pc.x - ps.x, pc.y - ps.y) < HEX_W * 0.62) {   // 2º toque no alvo → confirma
-        _markActive();
-        const tc = _moveIntent.col, tr = _moveIntent.row; _moveIntent = null;
-        if (isValidMove(tc, tr)) { S.player.facing = _mvNeighborIndex(tc, tr); beginMove(tc, tr); }
-        scheduleRender();
-        return true;
-      }
-      const nn = _mvNearestValidNeighbor(pc.x, pc.y);   // toque em outro vizinho válido → re-seleciona
-      _moveIntent = (nn && nn.dist < HEX_W * 0.62) ? { col: nn.col, row: nn.row, phase: 'pending' } : null;
-      scheduleRender();
-      return true;
-    }
-    return false;   // deixa o pan nativo rolar
+  // Qual célula (herói ou um dos 6 vizinhos) foi tocada — a mais próxima dentro do
+  // raio de acerto; null se caiu longe (área vazia). Adjacente-only → basta testar
+  // herói + vizinhos.
+  function tappedCell(cx, cy) {
+    const p = S.player;
+    const cells = [{ col: p.col, row: p.row, hero: true }];
+    getNeighbors(p.col, p.row).forEach(function (n) { cells.push({ col: n[0], row: n[1], hero: false }); });
+    let best = null, bd = HEX_W * 0.56;
+    cells.forEach(function (c) {
+      const s = hexToScreen(c.col, c.row);
+      const d = Math.hypot(s.x - cx, s.y - cy);
+      if (d < bd) { bd = d; best = c; }
+    });
+    return best;
   }
-  function onMove(clientX, clientY) {
-    if (!_moveDragActive) return false;
-    const pc = toCanvas(clientX, clientY), h = _mvHeroPos();
-    const out = Math.hypot(pc.x - h.x, pc.y - h.y) > HEX_W * 0.30;
-    const nn = out ? _mvNearestValidNeighbor(pc.x, pc.y) : null;
-    // só mira se o ponteiro está perto de um vizinho válido (arrastar p/ parede = sem alvo)
-    _moveIntent = (nn && nn.dist < HEX_W) ? { col: nn.col, row: nn.row, phase: 'drag' } : null;
-    scheduleRender();
-    return true;
-  }
-  function onUp() {
-    if (!_moveDragActive) return;
-    _moveDragActive = false;
-    if (_moveIntent && _moveIntent.phase === 'drag') _moveIntent.phase = 'pending';  // aguarda confirmação
-    else _moveIntent = null;
+  function onTap(clientX, clientY) {
+    if (!S || S.ph !== 'idle' || window._editorMode) return;
+    _markActive();
+    const pc = toCanvas(clientX, clientY);
+    const hit = tappedCell(pc.x, pc.y);
+    // toque fora / no próprio herói → cancela a marcação
+    if (!hit || hit.hero) { if (_moveIntent) { _moveIntent = null; scheduleRender(); } return; }
+    if (!isValidMove(hit.col, hit.row)) return;   // vizinho bloqueado → ignora
+    if (_moveIntent && _moveIntent.col === hit.col && _moveIntent.row === hit.row) {
+      // 2º toque no MESMO hex → CONFIRMA e anda
+      const tc = hit.col, tr = hit.row; _moveIntent = null;
+      S.player.facing = _mvNeighborIndex(tc, tr);
+      beginMove(tc, tr);
+    } else {
+      // 1º toque (ou toque em outro vizinho válido) → MARCA o destino
+      _moveIntent = { col: hit.col, row: hit.row, phase: 'pending' };
+    }
     scheduleRender();
   }
-  canvas.addEventListener('touchstart', function (e) {
-    _touchGuard = true; const t = e.touches[0]; if (!t) return;
-    if (onDown(t.clientX, t.clientY)) e.preventDefault();
-  }, { passive: false });
-  canvas.addEventListener('touchmove', function (e) {
-    const t = e.touches[0]; if (!t) return;
-    if (onMove(t.clientX, t.clientY)) e.preventDefault();
-  }, { passive: false });
-  canvas.addEventListener('touchend', function () { onUp(); setTimeout(function () { _touchGuard = false; }, 450); }, { passive: false });
-  canvas.addEventListener('mousedown', function (e) { if (_touchGuard || e.button !== 0) return; onDown(e.clientX, e.clientY); });
-  window.addEventListener('mousemove', function (e) { if (_touchGuard || !_moveDragActive) return; onMove(e.clientX, e.clientY); });
-  window.addEventListener('mouseup', function () { if (_touchGuard) return; onUp(); });
+  // Toque vs arrasto: guarda a posição no down; se moveu pouco até o up, é TOQUE
+  // (marca/confirma). Se moveu muito, foi ARRASTO → o #map-viewport já fez o pan e
+  // NÃO tratamos como toque (nada de preventDefault → o pan nativo segue livre).
+  function down(x, y) { _downX = x; _downY = y; _moved = false; }
+  function move(x, y) { if (Math.abs(x - _downX) > TAP_SLOP || Math.abs(y - _downY) > TAP_SLOP) _moved = true; }
+  function up(x, y) { if (!_moved) onTap(x, y); }
+  canvas.addEventListener('touchstart', function (e) { _touchGuard = true; const t = e.touches[0]; if (t) down(t.clientX, t.clientY); }, { passive: true });
+  canvas.addEventListener('touchmove', function (e) { const t = e.touches[0]; if (t) move(t.clientX, t.clientY); }, { passive: true });
+  canvas.addEventListener('touchend', function (e) { const t = e.changedTouches[0]; if (t) up(t.clientX, t.clientY); setTimeout(function () { _touchGuard = false; }, 450); }, { passive: true });
+  canvas.addEventListener('mousedown', function (e) { if (_touchGuard || e.button !== 0) return; down(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', function (e) { if (_touchGuard) return; move(e.clientX, e.clientY); });
+  canvas.addEventListener('mouseup', function (e) { if (_touchGuard || e.button !== 0) return; up(e.clientX, e.clientY); });
 }
 
 function bindHexNav() {
@@ -34180,8 +34164,8 @@ function bindHexNav() {
       : 'Recolher controles de movimento');
     if (willCollapse) centerOnPlayer(true);
   });
-  // 2026-07-06: liga o ARRASTAR+CONFIRMAR (coexiste com o D-pad; idempotente).
-  setupDragMove();
+  // 2026-07-06: liga o MARCAR(toque)+CONFIRMAR (coexiste com o D-pad; idempotente).
+  setupTapToMove();
 }
 
 // 2026-04-29 V4: bind global input wake — qualquer interação do user despertar
