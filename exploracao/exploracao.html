@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T12:45:29Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T13:19:14Z - do not edit directly, edit source -->
 
 
 
@@ -2934,10 +2934,11 @@ body.perf-lite #top-danger { animation: none !important; }
 #footer-collapse-toggle {
   position: absolute;
   bottom: 56px;
-  /* 2026-07-06 (user "o botão de recolher o menu está misturado com o botão de
-     navegação para baixo"): saiu do CENTRO (colidia com o hex-dir S / botão
-     ABERTO, ambos centralizados) pro canto INFERIOR-ESQUERDO — área livre. */
-  left: 14px;
+  /* 2026-07-06 (user "coloque o botão de recolher/expandir centralizado; os botões
+     de navegação ficam ACIMA dele"): toggle CENTRALIZADO (como a cidade). Não colide
+     mais porque o #hex-nav foi subido (bottom:64→94) — o botão ABERTO/dir-S fica ACIMA. */
+  left: 50%;
+  transform: translateX(-50%);
   z-index: var(--v-z-dropdown-high, 51);
   width: 28px;
   height: 28px;
@@ -2957,14 +2958,15 @@ body.perf-lite #top-danger { animation: none !important; }
   transition: border-color var(--v-transition, 0.15s), color var(--v-transition, 0.15s), transform 0.1s;
 }
 #footer-collapse-toggle:hover { border-color: var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); }
-#footer-collapse-toggle:active { transform: scale(0.96); }
+#footer-collapse-toggle:active { transform: translateX(-50%) scale(0.96); }
 body.footer-collapsed #footer-collapse-toggle { display: none; }
 /* Restore pill (modo recolhido) */
 #footer-restore {
   position: absolute;
-  /* 2026-07-06: mesmo motivo do #footer-collapse-toggle — canto inferior-esquerdo,
-     fora da coluna central do hex-nav (que desce pra bottom:10 quando recolhido). */
-  bottom: var(--v-space-md, 10px); left: 14px;
+  /* 2026-07-06: CENTRALIZADA (como o toggle). O hex-nav recolhido foi subido
+     (bottom:10→56) pra o botão de navegação ficar ACIMA desta pill. */
+  bottom: var(--v-space-md, 10px); left: 50%;
+  transform: translateX(-50%);
   z-index: var(--v-z-dropdown-high, 51);
   display: none;
   background: rgba(28,22,16,0.95);
@@ -2986,7 +2988,7 @@ body.footer-collapsed #footer-collapse-toggle { display: none; }
   box-shadow: 0 2px 12px rgba(0,0,0,0.5), 0 0 18px var(--v-gold-50, rgba(196,149,58,0.5));
   border-color: var(--v-gold, #c4953a);
 }
-#footer-restore:active { transform: scale(0.96); }
+#footer-restore:active { transform: translateX(-50%) scale(0.96); }
 body.footer-collapsed #bottom-panel { display: none; }
 body.footer-collapsed #footer-restore { display: block; }
 /* (editor-mode hide do footer está na lista canonical ~html.editor-mode #hex-nav) */
@@ -4240,15 +4242,16 @@ body.perf-lite .hud-cond-chip .dot, body.reduced-motion .hud-cond-chip .dot { an
   left: 0; right: 0;
   /* Sessão #72 (2026-06-03): subido de bottom:10px → 64px pra os controles de
      movimento não ficarem por baixo do footer retrátil (#bottom-panel ~56px).
-     Quando o footer está recolhido (só a pill "· Menu"), o hex-nav desce de
-     volta pra 10px (regra abaixo) — aproveita o espaço liberado. */
-  bottom: 64px;
+     2026-07-06 (user "os botões de navegação ficam ACIMA do botão de recolher/expandir"):
+     64→94 pra o botão ABERTO/dir-S ficar ACIMA do #footer-collapse-toggle (centralizado,
+     bottom:56, topo ~84 do fundo). Recolhido desce pra 56px — ACIMA da pill "· Menu". */
+  bottom: 94px;
   z-index: 15;
   display: flex; justify-content: center;
   pointer-events: none;
   transition: bottom 0.2s ease;
 }
-body.footer-collapsed #hex-nav { bottom: 10px; }
+body.footer-collapsed #hex-nav { bottom: 56px; }  /* acima da pill #footer-restore (bottom:10, topo ~46) */
 #hex-nav-inner {
   /* X-6.5.51e: height 148 -> 188 (mais separacao vertical entre N-NE-SE-S
      pra ficar formato HEXAGONO real, nao quase-quadrado).
