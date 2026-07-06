@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T17:02:17Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T17:49:51Z - do not edit directly, edit source -->
 
 
 
@@ -15984,6 +15984,20 @@ const TILE_HEIGHT = {
 
 const IMPASSABLE = new Set(['#', 'W', 'M', 'L']);
 const FOG_COLOR = 'rgba(26,21,16,0.92)';
+// 2026-07-06 (revisão de renderização — "ambientes vivos"): tint SUTIL da névoa das
+// bordas por bioma. Mesma escuridão/alpha do FOG_COLOR (fica legível), só um leve
+// deslocamento de matiz pra dar identidade ambiental — funciona em TODOS os tiers
+// (inclusive lite, onde o mapa é estático) a custo ZERO (lookup const, sem alocação).
+const FOG_COLOR_BIOME = {
+  forest:    'rgba(20,26,18,0.92)',   // verde-musgo escuro
+  swamp:     'rgba(20,25,18,0.93)',   // pântano turvo
+  desert:    'rgba(31,25,16,0.92)',   // poeira quente
+  snow:      'rgba(27,30,34,0.92)',   // gélido azulado
+  cave:      'rgba(16,18,24,0.94)',   // breu azul-escuro
+  volcanic:  'rgba(30,18,14,0.93)',   // brasa/fumo
+  graveyard: 'rgba(24,19,26,0.93)',   // roxo-doentio
+  mountain:  'rgba(25,24,22,0.92)'    // cinza-pedra
+};
 
 // ============================================================================
 // CLASSES / BIOMES / NARRATIONS
@@ -23399,7 +23413,14 @@ function renderFrame(ts) {
           var prScreen = hexToScreen(0, playerRow);
           splitScreenY = Math.max(0, Math.min(canvasH, prScreen.y + HEX_H * 0.55));
         }
-        var srcSplitY = splitScreenY * cacheScale;
+        // 2026-07-06 (user: "linha horizontal no centro da tela"): o split do scene-cache
+        // é blitado em 2 metades (acima/abaixo do player) e o player é desenhado entre elas
+        // (depth sort). Com splitScreenY/srcSplitY FRACIONÁRIOS, as 2 drawImage caíam num
+        // limite sub-pixel exatamente na altura do player (= centro da viewport, pois a
+        // câmera segue o player) → sobra/gap de 1px = linha horizontal. Fix: snap a inteiro
+        // no DEST (elimina o gap) e no SRC (evita fuzz de bilinear na borda).
+        splitScreenY = Math.round(splitScreenY);
+        var srcSplitY = Math.round(splitScreenY * cacheScale);
         if (splitScreenY > 0) {
           mainCtx.drawImage(_sceneCacheCanvas, 0, 0, cacheW, srcSplitY,
                                                 0, 0, canvasW, splitScreenY);
@@ -32790,7 +32811,8 @@ function drawFogComposite() {
     // Agora marrom-escuro 95%: ainda mais fechado/denso que o fog normal (0.92),
     // mas o jogador enxerga os hexes ao redor e navega. Combina com a vision 2-3
     // da mata e o falloff suavizado.
-    var _matFogColor = _inMataFog ? 'rgba(14,11,8,0.95)' : FOG_COLOR;
+    var _biomeFog = (S && FOG_COLOR_BIOME[S.biome]) || FOG_COLOR;   // tint sutil por bioma
+    var _matFogColor = _inMataFog ? 'rgba(14,11,8,0.95)' : _biomeFog;
     fogCtx.globalCompositeOperation = 'source-in';
     fogCtx.fillStyle = _matFogColor;
     fogCtx.fillRect(0, 0, canvasW, canvasH);
