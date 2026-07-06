@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T02:47:22Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T03:38:12Z - do not edit directly, edit source -->
 
 
 
@@ -2988,6 +2988,39 @@ body.footer-collapsed #bottom-panel { display: none; }
 body.footer-collapsed #footer-restore { display: block; }
 /* (editor-mode hide do footer está na lista canonical ~html.editor-mode #hex-nav) */
 /* #22: overlay de configuracoes da exploracao (dentro do #frame, position:relative) */
+/* 2026-07-06: popups Ficha + Ajuda da exploração (ações 'status'/'help' do footer,
+   igual cidade). Card medieval self-contained, mesmo visual do popup de Config. */
+.explore-modal-overlay {
+  position: absolute; inset: 0; z-index: 9100; display: flex; align-items: center; justify-content: center;
+  background: rgba(10,8,5,0.80); padding: var(--v-space-xl, 16px); pointer-events: auto;
+}
+.explore-modal-overlay .em-card {
+  width: 100%; max-width: 360px; max-height: 90%; overflow-y: auto;
+  background: linear-gradient(180deg, var(--v-bg-card,#2e2520), var(--v-bg,#2a2420));
+  border: 1px solid var(--v-gold,#c4953a); border-radius: var(--v-radius,10px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 0 20px rgba(196,149,58,0.08);
+}
+.explore-modal-overlay .em-head { display: flex; align-items: center; justify-content: space-between; padding: var(--v-space-lg, 12px) 14px; border-bottom: 1px solid var(--v-border,#4a3828); }
+.explore-modal-overlay .em-title { font-family: var(--v-font-display,Cinzel,serif); font-size: calc(15px * var(--v-font-scale,1)); color: var(--v-gold,#c4953a); letter-spacing: 1px; text-transform: uppercase; }
+.explore-modal-overlay .em-close { background: none; border: none; color: var(--v-text-dim,#a09484); font-size: calc(18px * var(--v-font-scale,1)); cursor: pointer; line-height: 1; padding: 0 var(--v-space-sm, 4px); }
+.explore-modal-overlay .em-close:hover { color: var(--v-gold,#c4953a); }
+.explore-modal-overlay .em-body { padding: var(--v-space-md-lg, 10px) 14px 14px; }
+.explore-modal-overlay .em-section { font-family: var(--v-font-display,Cinzel,serif); font-size: calc(10px * var(--v-font-scale,1)); color: var(--v-gold,#c4953a); letter-spacing: 1.5px; text-transform: uppercase; margin: var(--v-space-lg, 12px) 0 6px; padding-top: 6px; border-top: 1px solid var(--v-gold-12,rgba(196,149,58,0.12)); }
+.explore-modal-overlay .em-section.first { margin-top: 0; border-top: none; padding-top: 0; }
+.exf-name { font-family: var(--v-font-display,Cinzel,serif); font-size: calc(18px * var(--v-font-scale,1)); color: var(--v-text,#d4c8b0); }
+.exf-sub { font-size: calc(12px * var(--v-font-scale,1)); color: var(--v-text-dim,#a09484); margin-top: 2px; }
+.exf-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: calc(13px * var(--v-font-scale,1)); color: var(--v-text,#d4c8b0); border-bottom: 1px solid rgba(196,149,58,0.06); }
+.exf-row b { color: var(--v-gold,#c4953a); font-weight: 700; }
+.exf-abs { display: flex; flex-wrap: wrap; gap: 6px; }
+.exf-ab { flex: 1 1 28%; min-width: 72px; display: flex; align-items: center; justify-content: space-between; padding: 5px 9px; background: rgba(0,0,0,0.25); border: 1px solid rgba(196,149,58,0.18); border-radius: var(--v-radius-sm,6px); font-size: calc(12px * var(--v-font-scale,1)); }
+.exf-ab-k { color: var(--v-text-dim,#a09484); letter-spacing: 1px; }
+.exf-ab b { color: var(--v-gold,#c4953a); font-weight: 700; }
+.exf-tip { font-size: calc(13px * var(--v-font-scale,1)); line-height: 1.55; color: var(--v-text,#d4c8b0); margin-bottom: 9px; }
+.exf-tip b { color: var(--v-gold,#c4953a); }
+/* Ritmo de Viagem (movido do footer-nav pro popup de Configurações) */
+#explore-settings-overlay .exs-pace-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+#explore-settings-overlay .exs-pace-btn { padding: var(--v-space-md, 8px) 4px; border-radius: var(--v-radius-sm,6px); background: rgba(196,149,58,0.04); border: 1px solid var(--v-border,#4a3828); color: var(--v-text,#d4c8b0); font-family: var(--v-font,serif); font-size: calc(12px * var(--v-font-scale,1)); cursor: pointer; min-height: 38px; }
+#explore-settings-overlay .exs-pace-btn.active { background: rgba(196,149,58,0.15); border-color: var(--v-gold,#c4953a); color: var(--v-gold,#c4953a); font-weight: 700; }
 #explore-settings-overlay {
   position: absolute; inset: 0; z-index: 9100; display: flex; align-items: center; justify-content: center;
   background: rgba(10,8,5,0.80); padding: var(--v-space-xl, 16px); pointer-events: auto;
@@ -43627,7 +43660,9 @@ function _applyExploreFooterCollapsedClass() {
 var _PACE_LABELS = { cautious: 'Cauteloso', normal: 'Normal', fast: 'Rápido' };
 function _updatePaceUI() {
   var cur = (window.S && window.S.travelPace) || 'normal';
-  var btns = document.querySelectorAll('#footer-nav .pace-btn');
+  // 2026-07-06: o seletor de Ritmo saiu do footer-nav (footer agora = cidade) e vive
+  // no popup de Configurações — query genérica pega os .pace-btn onde estiverem.
+  var btns = document.querySelectorAll('.pace-btn');
   for (var i = 0; i < btns.length; i++) {
     btns[i].classList.toggle('active', btns[i].getAttribute('data-pace') === cur);
   }
@@ -43651,62 +43686,29 @@ function renderExploreFooter() {
   var quickEl = document.getElementById('footer-quick');
   var navEl = document.getElementById('footer-nav');
   if (!quickEl) return;
-  // Brasão heráldico inline (mesmos symbols ic-* já presentes no SVG sprite).
-  // Cores naturais por função (couro/grupo/fogo/mapa) — regra No NPC Emotes:
-  // ícone representa a FUNÇÃO, não pessoa.
-  function _heralB(id, _color) {
-    // M13 (regra "Tudo Visível é Imagem OpenAI"): ícone heráldico do footer = imagem
-    // OpenAI (WebP em /shared/img/ui/), não mais SVG <use>. Mapeia ic-<slug> → <slug>.webp
-    // (grupo/mochila/acampamento/cartografia já existem). onerror oculta gracioso.
-    var slug = String(id).replace(/^ic-/, '');
-    return '<img class="fb-heraldic" src="../shared/img/ui/' + slug
-      + '.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">';
-  }
-  // Ações da exploração + Config. Volume (va-btn) é embedado por audio-manager.
-  var _html = ''
-    + '<button class="fb-btn" data-action="party" title="Grupo">'
-    +   _heralB('ic-grupo', '#8a98a8') + '<span>Grupo</span>'
+  // 2026-07-06 (user "o menu da exploração deve ser EXATAMENTE o mesmo da cidade,
+  // todas as opções iguais"): footer-quick IDÊNTICO ao renderFooter da cidade —
+  // [Mochila][Ficha][Hall][Ajuda][Config] + volume (embedado pelo audio-manager),
+  // nav VAZIO. As ações específicas da exploração (Grupo/Tochas/Acampar/Cartografia)
+  // vivem no #hud-quick (lado direito); o Ritmo de Viagem foi pro popup de Config.
+  // Mesmos ícones WebP, data-actions e ordem da cidade (cidade/index.html:11909).
+  quickEl.innerHTML = ''
+    + '<button class="fb-btn" data-action="inventory">'
+    +   '<img class="fb-ico-img" src="../shared/img/ui/mochila.webp" alt="" onerror="this.style.display=\'none\'"><span>Mochila</span>'
     + '</button>'
-    + '<button class="fb-btn" data-action="inventory" title="Mochila">'
-    +   _heralB('ic-mochila', '#7a5028') + '<span>Mochila</span>'
+    + '<button class="fb-btn" data-action="status">'
+    +   '<img class="fb-ico-img" src="../shared/img/items/pergaminho-antigo.webp" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
     + '</button>'
-    + '<button class="fb-btn" data-action="camp" title="Acampar">'
-    +   _heralB('ic-acampamento', '#8a6840') + '<span>Acampar</span>'
-    + '</button>'
-    + '<button class="fb-btn" data-action="cartografia" title="Mapa de Valdoria">'
-    +   _heralB('ic-cartografia', '#b8956a') + '<span>Mapa</span>'
-    + '</button>'
-    // 2026-06-21 (user "abrir... ir para o hall de personagens" pelo mesmo menu da
-    // cidade): botão Hall — volta pra cidade já abrindo o Hall de personagens.
-    + '<button class="fb-btn" data-action="hall" title="Hall de Personagens">'
+    + '<button class="fb-btn" data-action="characters">'
     +   '<img class="fb-ico-img" src="../shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
     + '</button>'
+    + '<button class="fb-btn fb-icon-only" data-action="help" title="Ajuda">'
+    +   '<img class="fb-ico-img" src="../shared/img/ui/ajuda.webp" alt="Ajuda" onerror="this.style.display=\'none\'">'
+    + '</button>'
     + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
-    // 2026-07-05: ícone real (antes era <span> vazio → botão em branco pós
-    // emoji-ban). Mesma imagem WebP da cidade (renderFooter).
     +   '<img class="fb-ico-img" src="../shared/img/ui/configuracoes.webp" alt="Config" onerror="this.style.display=\'none\'">'
     + '</button>';
-  quickEl.innerHTML = _html;  // static trusted markup (ver nota acima)
-  // M10 (PHB p.182-183 Travel Pace): seletor de ritmo na footer-nav (3 segmentos).
-  // Cauteloso = menos encontros (furtivo); Rápido = mais encontros (desatento). O ritmo
-  // é mandado no /move e o SERVIDOR valida + modula a cadência (server-authoritative).
-  if (navEl) {
-    navEl.innerHTML = ''
-      + '<div class="pace-selector" role="group" aria-label="Ritmo de viagem">'
-      +   '<span class="pace-lbl">Ritmo:</span>'
-      +   '<button class="pace-btn" data-pace="cautious" title="Cauteloso — avança devagar, menos encontros">Cauteloso</button>'
-      +   '<button class="pace-btn" data-pace="normal" title="Normal — ritmo padrão">Normal</button>'
-      +   '<button class="pace-btn" data-pace="fast" title="Rápido — cobre terreno depressa, mais encontros">Rápido</button>'
-      + '</div>';
-    var _paceBtns = navEl.querySelectorAll('.pace-btn');
-    for (var _pi = 0; _pi < _paceBtns.length; _pi++) {
-      _paceBtns[_pi].addEventListener('click', function (ev) {
-        ev.stopPropagation();
-        _setTravelPace(this.getAttribute('data-pace'));
-      });
-    }
-    try { _updatePaceUI(); } catch (_) { /* S ainda não pronto */ }
-  }
+  if (navEl) navEl.innerHTML = '';  // nav VAZIO — igual cidade (.footer-nav:empty some)
   // PADRAO_VOLUME: força re-embed do va-btn em #footer-quick (igual cidade
   // ~10938). audio-manager.js pode ter caído no botão flutuante (#va-float) se
   // o footer-quick estava vazio no init — agora que está populado, re-embeda.
@@ -43739,23 +43741,19 @@ function _toggleExploreFooter() {
   try { if (window.vHaptic) window.vHaptic('light'); } catch (_) {}
 }
 function _onExploreFooterAction(action) {
+  // 2026-07-06: MESMAS data-actions do footer da cidade (inventory/status/
+  // characters/help/settings). Roteadas pros equivalentes da exploração.
   switch (action) {
-    case 'party':       if (typeof openPartyPopup === 'function') openPartyPopup(); break;
     case 'inventory':   if (typeof _showExploracaoInventoryPopup === 'function') _showExploracaoInventoryPopup(); break;
-    case 'camp':
-      // Reusa o botão #btn-camp (mantém o phase-guard + toast da quick action).
-      var _cb = document.getElementById('btn-camp');
-      if (_cb) _cb.click();
-      else if (typeof openCampOverlay === 'function') openCampOverlay();
-      break;
-    case 'cartografia': if (typeof _openCartographyWithPrompt === 'function') _openCartographyWithPrompt(); break;
-    case 'hall':
-      // Volta pra cidade encerrando a sessão de exploração (rewards/quest já aplicados
-      // no /finish) e sinaliza pra cidade abrir o Hall de personagens (?showHall=1).
+    case 'status':      if (typeof _showExploreFicha === 'function') _showExploreFicha(); break;
+    case 'characters':
+      // Hall — volta pra cidade encerrando a sessão de exploração (rewards/quest já
+      // aplicados no /finish) e sinaliza pra cidade abrir o Hall de personagens.
       window.__explore_want_hall = true;
       if (typeof triggerReturnToCity === 'function') triggerReturnToCity();
       else if (typeof _returnToCityNow === 'function') _returnToCityNow();
       break;
+    case 'help':        if (typeof _showExploreHelp === 'function') _showExploreHelp(); break;
     case 'settings':    if (typeof _showExploreSettings === 'function') _showExploreSettings(); break;
     default: break;
   }
@@ -43776,6 +43774,80 @@ function bindExploreFooter() {
   if (fct && !fct._footerBound) { fct._footerBound = true; fct.addEventListener('click', _toggleExploreFooter); }
   var fr = document.getElementById('footer-restore');
   if (fr && !fr._footerBound) { fr._footerBound = true; fr.addEventListener('click', _toggleExploreFooter); }
+}
+
+// ============================================================================
+// FICHA + AJUDA (ações 'status'/'help' do footer — MESMO menu da cidade, 2026-07-06)
+// Top-level pra serem acessíveis de _onExploreFooterAction. Popups self-contained
+// (.explore-modal-overlay / .em-*), sem dependência do popup de Config.
+// ============================================================================
+function _closeExploreModal(id) {
+  var ov = document.getElementById(id);
+  if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+}
+function _showExploreFicha() {
+  _closeExploreModal('explore-ficha-overlay');
+  var frame = document.getElementById('frame');
+  if (!frame || typeof S === 'undefined' || !S.player) return;
+  var p = S.player;
+  // Nome do recurso canônico por classe (PHB / regra D&D 5e Fidelity).
+  var RES = { bruxo: 'Pacto', monge: 'Ki', barbaro: 'Fúria', guerreiro: 'Vigor', bardo: 'Inspiração', ladino: 'Energia' };
+  var resName = RES[p.cls_key] || 'Mana';
+  function _pretty(s) { return String(s || '').split('-').map(function (w) { return w ? (w.charAt(0).toUpperCase() + w.slice(1)) : w; }).join('-'); }
+  function _sign(n) { return (n >= 0 ? '+' : '') + n; }
+  function _row(k, v) { return '<div class="exf-row"><span>' + k + '</span><b>' + v + '</b></div>'; }
+  var m = p.mods || {};
+  var AB = [['str', 'FOR'], ['dex', 'DES'], ['con', 'CON'], ['int', 'INT'], ['wis', 'SAB'], ['cha', 'CAR']];
+  var abHtml = AB.map(function (a) {
+    return (m[a[0]] == null) ? '' : '<div class="exf-ab"><span class="exf-ab-k">' + a[1] + '</span><b>' + _sign(m[a[0]]) + '</b></div>';
+  }).join('');
+  var h = '<div class="em-card" role="dialog" aria-modal="true">'
+    + '<div class="em-head"><span class="em-title">Ficha</span><button class="em-close" id="exf-close" aria-label="Fechar">✕</button></div>'
+    + '<div class="em-body">'
+    + '<div class="exf-name">' + (p.name || 'Aventureiro') + '</div>'
+    + '<div class="exf-sub">' + (p.cls || '') + ' · ' + _pretty(p.race) + ' · Nível ' + (p.lvl || p.level || 1) + '</div>'
+    + '<div class="em-section first">Vitalidade</div>'
+    + _row('Vida', p.hp + ' / ' + p.mhp)
+    + _row(resName, p.mp + ' / ' + p.mmp)
+    + _row('Dados de Vida', (p.hd || 0) + ' / ' + (p.mhd || '?'))
+    + _row('Exaustão', (p.exh || 0) + ' / 6')
+    + _row('Valdoritas', (S.gold || 0))
+    + _row('Experiência', (p.xp || 0) + ' XP')
+    + (abHtml ? '<div class="em-section">Atributos</div><div class="exf-abs">' + abHtml + '</div>' : '')
+    + '</div></div>';
+  var ov = document.createElement('div');
+  ov.id = 'explore-ficha-overlay';
+  ov.className = 'explore-modal-overlay';
+  ov.innerHTML = h;
+  frame.appendChild(ov);
+  ov.addEventListener('click', function (e) { if (e.target === ov) _closeExploreModal('explore-ficha-overlay'); });
+  var cb = ov.querySelector('#exf-close'); if (cb) cb.addEventListener('click', function () { _closeExploreModal('explore-ficha-overlay'); });
+}
+function _showExploreHelp() {
+  _closeExploreModal('explore-help-overlay');
+  var frame = document.getElementById('frame');
+  if (!frame) return;
+  function tip(t) { return '<div class="exf-tip">' + t + '</div>'; }
+  var h = '<div class="em-card" role="dialog" aria-modal="true">'
+    + '<div class="em-head"><span class="em-title">Ajuda — Exploração</span><button class="em-close" id="exh-close" aria-label="Fechar">✕</button></div>'
+    + '<div class="em-body">'
+    + '<div class="em-section first">Como explorar</div>'
+    + tip('<b>Mover:</b> toque nas setas ao redor do centro pra caminhar pelos hexágonos. Cada passo pode revelar eventos, trilhas e perigos.')
+    + tip('<b>Ritmo de viagem:</b> em Configurações, escolha Cauteloso (menos encontros), Normal ou Rápido (mais encontros).')
+    + tip('<b>Acampar:</b> use a fogueira (menu à direita) pra Descanso Curto (gasta Dado de Vida) ou Longo (recupera tudo).')
+    + tip('<b>Luz:</b> em cavernas e à noite, acenda uma tocha ou feitiço de luz (menu à direita) pra enxergar mais longe.')
+    + tip('<b>Mapa de Valdoria:</b> abra a cartografia (menu à direita) pra viajar entre regiões.')
+    + tip('<b>Testes de perícia:</b> eventos usam rolagens de d20 + modificadores (D&D 5e). Sucesso e falha são narrados.')
+    + '<div class="em-section">Menu</div>'
+    + tip('<b>Mochila:</b> itens e equipamento. <b>Ficha:</b> seus atributos. <b>Hall:</b> volta pra cidade / troca de personagem.')
+    + '</div></div>';
+  var ov = document.createElement('div');
+  ov.id = 'explore-help-overlay';
+  ov.className = 'explore-modal-overlay';
+  ov.innerHTML = h;
+  frame.appendChild(ov);
+  ov.addEventListener('click', function (e) { if (e.target === ov) _closeExploreModal('explore-help-overlay'); });
+  var cb = ov.querySelector('#exh-close'); if (cb) cb.addEventListener('click', function () { _closeExploreModal('explore-help-overlay'); });
 }
 
 // ============================================================================
@@ -43996,8 +44068,19 @@ function bindQuickActions() {
     h += _exsToggleRow('Efeitos Sonoros', !sfxMuted, 'sfx');
     if (!sfxMuted) h += _exsSliderRow('Volume Efeitos', sfxVol, 'sfx_vol');
     h += '<div class="exs-section">Jogo</div>'
-      + _exsToggleRow('Vibração', haptic, 'haptic')
-      + '</div></div>';
+      + _exsToggleRow('Vibração', haptic, 'haptic');
+    // 2026-07-06: Ritmo de Viagem (PHB p.182) movido do footer-nav pra cá — o
+    // footer agora é IDÊNTICO ao da cidade. O ritmo é mandado no /move (servidor
+    // valida + modula a cadência de encontros). Cauteloso = menos, Rápido = mais.
+    var _curPace = (window.S && window.S.travelPace) || 'normal';
+    h += '<div class="exs-section">Ritmo de Viagem</div><div class="exs-pace-row">';
+    ['cautious', 'normal', 'fast'].forEach(function (pc) {
+      h += '<button class="exs-pace-btn' + (pc === _curPace ? ' active' : '')
+        + '" data-pace="' + pc + '" title="' + _PACE_LABELS[pc]
+        + (pc === 'fast' ? ' — mais encontros' : pc === 'cautious' ? ' — menos encontros' : ' — ritmo padrão')
+        + '">' + _PACE_LABELS[pc] + '</button>';
+    });
+    h += '</div></div></div>';
     var ov = document.createElement('div');
     ov.id = 'explore-settings-overlay';
     ov.innerHTML = h;
@@ -44036,6 +44119,14 @@ function bindQuickActions() {
         }
       });
       sl.addEventListener('change', function () { _showExploreSettings(); });
+    });
+    // 2026-07-06: Ritmo de Viagem (seção nova) — clica → _setTravelPace + re-render.
+    ov.querySelectorAll('.exs-pace-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (typeof _setTravelPace === 'function') _setTravelPace(b.getAttribute('data-pace'));
+        if (window.vHaptic) window.vHaptic('light');
+        _showExploreSettings();
+      });
     });
   }
   // Sessão #72 (2026-06-03): #btn-explore-settings removido — Config agora abre
