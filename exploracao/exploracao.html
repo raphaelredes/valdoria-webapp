@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T02:33:56Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T02:47:22Z - do not edit directly, edit source -->
 
 
 
@@ -2919,6 +2919,11 @@ body.perf-lite #top-danger { animation: none !important; }
 .fb-btn:active { transform: scale(0.96); }
 .fb-btn.fb-icon-only { flex: 0 0 32px; max-width: 32px; min-width: 32px; padding: var(--v-space-xs, 2px); }
 .fb-btn .fb-heraldic { width: 18px; height: 18px; flex-shrink: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7)); }
+/* 2026-07-05: os ícones <img> do footer (Hall/Config) precisam do mesmo teto de
+   tamanho das heráldicas — senão renderizam no natural (512x512) e estouram o
+   footer. Bug só apareceu depois que o footer passou a renderizar (antes estava
+   aninhado no #sim-log-panel, escondido). */
+.fb-btn .fb-ico-img { width: 18px; height: 18px; flex-shrink: 0; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7)); }
 .fb-btn .fb-ico {
   font-size: calc(14px * var(--v-font-scale, 1));
   line-height: 1;
@@ -4784,7 +4789,10 @@ body.perf-lite .event-text-line {
   align-items: center; justify-content: center;
   flex-direction: column;
   gap: var(--v-space-md-lg, 10px);
-  z-index: 200;
+  /* 2026-07-05: a rolagem de dados é um modal transiente — sempre topmost. Era
+     z:200 (abaixo do #camp-screen z:1000), então o dado do Descanso Curto rolava
+     ATRÁS da tela de acampamento (invisível). Acima de camp/inv (9700). */
+  z-index: 9800;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.35s ease;
