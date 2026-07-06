@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T22:40:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T22:58:54Z - do not edit directly, edit source -->
 
 
 
@@ -3030,6 +3030,22 @@ body.footer-collapsed #footer-restore { display: block; }
 .party-pace-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
 .party-pace-btn { padding: var(--v-space-md, 8px) 4px; border-radius: var(--v-radius-sm,6px); background: rgba(196,149,58,0.04); border: 1px solid var(--v-border,#4a3828); color: var(--v-text,#d4c8b0); font-family: var(--v-font,serif); font-size: calc(12px * var(--v-font-scale,1)); cursor: pointer; min-height: 38px; transition: all var(--v-transition, 0.15s); }
 .party-pace-btn.active { background: rgba(196,149,58,0.15); border-color: var(--v-gold,#c4953a); color: var(--v-gold,#c4953a); font-weight: 700; }
+/* M11 (Fase 1 ritmo): seletor de Ritmo em primeiro plano (pílula bottom-center,
+   zona do polegar). Não colide com hud-quick (bottom-right) por ser centrado + max-width. */
+#pace-bar { position: absolute; left: 50%; transform: translateX(-50%); bottom: 92px; z-index: 16;
+  display: flex; gap: 2px; padding: 3px; max-width: min(74vw, 278px); width: max-content;
+  background: linear-gradient(180deg, rgba(20,16,12,0.95), rgba(26,21,16,0.9));
+  border: 1px solid var(--v-border,#4a3828); border-radius: var(--v-radius-pill,20px);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.45); pointer-events: auto; }
+#pace-bar .pace-seg { flex: 1 1 0; min-width: 0; min-height: 30px; padding: 5px 8px;
+  border: 1px solid transparent; background: transparent; color: var(--v-text-dim,#a09484);
+  font-family: var(--v-font,serif); font-size: calc(12.5px * var(--v-font-scale,1));
+  border-radius: var(--v-radius-pill,20px); cursor: pointer; white-space: nowrap;
+  transition: all var(--v-transition,0.15s); }
+#pace-bar .pace-seg.active { background: rgba(196,149,58,0.16); border-color: var(--v-gold,#c4953a);
+  color: var(--v-gold,#c4953a); font-weight: 700; box-shadow: inset 0 0 8px rgba(196,149,58,0.12); }
+#pace-bar .pace-seg:active { transform: scale(0.96); }
+@media (prefers-reduced-motion: reduce) { #pace-bar .pace-seg { transition: none; } }
 #explore-settings-overlay {
   position: absolute; inset: 0; z-index: 9100; display: flex; align-items: center; justify-content: center;
   background: rgba(10,8,5,0.80); padding: var(--v-space-xl, 16px); pointer-events: auto;
@@ -8590,6 +8606,15 @@ window.__onIntroTap = function() {
   <!-- 2026-05-12 USER REQUEST: ally-indicator removido — btn-party (#hud-quick)
        já serve pra ver o grupo todo. Indicador duplicado tirava espaço sem add valor. -->
 
+
+  <!-- M11 (Fase 1 ritmo, 2026-07-06): seletor de Ritmo de Viagem EM PRIMEIRO PLANO
+       (zona do polegar, sempre visível). Reusa .party-pace-btn → _updatePaceUI já
+       marca o ativo; _bindPaceBar liga o clique a _setTravelPace. -->
+  <div id="pace-bar" role="group" aria-label="Ritmo de viagem">
+    <button type="button" class="party-pace-btn pace-seg" data-pace="cautious" title="Cauteloso — vê mais longe, evita surpresas; 1 hex, menos encontros">Cauteloso</button>
+    <button type="button" class="party-pace-btn pace-seg" data-pace="normal" title="Normal — ritmo equilibrado; 2 hexes">Normal</button>
+    <button type="button" class="party-pace-btn pace-seg" data-pace="fast" title="Rápido — cobre 3 hexes, mas vê menos e atrai mais encontros">Rápido</button>
+  </div>
 
   <div id="hud-quick">
     <!-- X-6.5.51f (2026-04-25): btn-quest-journal REMOVIDO. User feedback:
@@ -43935,14 +43960,29 @@ function _applyExploreFooterCollapsedClass() {
 // de jogo, vive no servidor; o cliente só reflete + manda no próximo /move).
 var _PACE_LABELS = { cautious: 'Cauteloso', normal: 'Normal', fast: 'Rápido' };
 function _updatePaceUI() {
-  var cur = (window.S && window.S.travelPace) || 'normal';
-  // 2026-07-06: o seletor de Ritmo vive no popup do Grupo (.party-pace-btn). O
-  // popup re-renderiza ao trocar, mas atualizamos aqui também por robustez.
+  var cur = _curPace();
+  // M11: o seletor de Ritmo vive em DOIS lugares — o #pace-bar em primeiro plano
+  // (sempre visível) e o popup do Grupo. Ambos usam .party-pace-btn → um único
+  // toggle marca o ativo nos dois.
   var btns = document.querySelectorAll('.party-pace-btn');
   for (var i = 0; i < btns.length; i++) {
     btns[i].classList.toggle('active', btns[i].getAttribute('data-pace') === cur);
   }
 }
+// M11: liga os cliques do #pace-bar (Ritmo em primeiro plano) a _setTravelPace.
+// Idempotente; reusa .party-pace-btn (o mesmo _updatePaceUI marca o ativo).
+function _bindPaceBar() {
+  var bar = document.getElementById('pace-bar');
+  if (!bar || bar._bound) return;
+  bar._bound = true;
+  bar.addEventListener('click', function (e) {
+    var b = (e.target && e.target.closest) ? e.target.closest('.party-pace-btn') : null;
+    var pc = b && b.getAttribute('data-pace');
+    if (pc) _setTravelPace(pc);
+  });
+  _updatePaceUI();
+}
+document.addEventListener('DOMContentLoaded', _bindPaceBar);
 function _setTravelPace(pace) {
   if (!_PACE_LABELS[pace]) return;
   if (!window.S) return;
