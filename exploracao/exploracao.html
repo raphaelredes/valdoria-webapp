@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-06T23:53:27Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-07T00:01:13Z - do not edit directly, edit source -->
 
 
 
@@ -15398,7 +15398,8 @@ window.__explFetchTO = function(url, opts, ms) {
       var tok = _motorToken();
       if (!tok) return { error: 'no_motor_token' };
       console.info('[E-REM:API-FORAGE] send motor_tok=' + tok.slice(0, 8) + '...');
-      var res = await _post('/api/exploracao/forage', { token: tok });
+      var res = await _post('/api/exploracao/forage',
+        { token: tok, pace: (window.S && window.S.travelPace) || 'normal' });
       if (res) {
         console.info('[E-REM:API-FORAGE] ok=' + res.ok + ' success=' + (res.forage && res.forage.success)
           + ' hp_gain=' + (res.forage && res.forage.hp_gain) + ' dc=' + (res.check && res.check.dc)
