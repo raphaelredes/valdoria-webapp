@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-07T00:17:57Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-07T00:25:40Z - do not edit directly, edit source -->
 
 
 
@@ -34027,6 +34027,26 @@ function onMoveEnd(col, row) {
                  (typeof calcReadTime === 'function' ? calcReadTime(_avMsg, 'toast') : 3000));
           LOG('API', 'encounter_avoided_cautious');
         } catch (_eAv) { LOGW('API', 'encounter_avoided narrate err=' + (_eAv && _eAv.message)); }
+      }
+      // M15 (Fase 3): PERDER-SE — Rápido/Normal(clima ruim) em ermo vagou (server-auth).
+      if (res.got_lost) {
+        try {
+          var _lostMsg = 'Você perde a trilha e vagueia sem rumo — o ermo confunde seus passos.';
+          if (typeof dmNarrate === 'function') dmNarrate({ text: _lostMsg, type: 'event' });
+          if (typeof vToast === 'function') vToast('Você se perdeu — mais exposto a encontros', 'warn',
+                 (typeof calcReadTime === 'function' ? calcReadTime(_lostMsg, 'toast') : 3200));
+          LOG('API', 'navigation_lost');
+        } catch (_eL) { LOGW('API', 'got_lost narrate err=' + (_eL && _eL.message)); }
+      }
+      // M16 (Fase 3): CLIMA EXTREMO — tempestade em ermo hostil drenou forças (+Exaustão).
+      if (res.weather_exhaustion) {
+        try {
+          var _wxMsg = 'A fúria do clima cobra seu preço — o esforço te deixa mais exausto.';
+          if (typeof dmNarrate === 'function') dmNarrate({ text: _wxMsg, type: 'event' });
+          if (typeof vToast === 'function') vToast('Clima extremo: Exaustão +1', 'warn',
+                 (typeof calcReadTime === 'function' ? calcReadTime(_wxMsg, 'toast') : 3200));
+          LOG('API', 'weather_exhaustion');
+        } catch (_eW) { LOGW('API', 'weather_exhaustion narrate err=' + (_eW && _eW.message)); }
       }
       // Event: server rolou → abre modal (sobrepõe local, que não rodou)
       if (res.event && S.ph !== 'event') {
