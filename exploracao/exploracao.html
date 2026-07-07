@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-07T00:25:40Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-07T00:58:48Z - do not edit directly, edit source -->
 
 
 
@@ -44126,6 +44126,9 @@ function _setTravelPace(pace) {
   if (window.S.travelPace === pace) return;
   window.S.travelPace = pace;  // aplicado no próximo /move (servidor valida + persiste)
   window.S.pace = pace;        // espelho p/ mecânicas (duração/percepção/surpresa)
+  // Auditoria: trocar de ritmo ABORTA um movimento multi-hex em curso — o caminho foi
+  // comprometido no ritmo antigo e o alcance mudou; não percorre alcance obsoleto.
+  try { _moveQueue = null; } catch (_) {}
   _updatePaceUI();
   // Feedback IMEDIATO: re-revela o fog no raio de percepção do novo ritmo (Cauteloso
   // +1 mostra mais na hora; Rápido −1 fecha um pouco) + atualiza o alcance de toque.
