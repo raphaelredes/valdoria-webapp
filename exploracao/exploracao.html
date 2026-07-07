@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-07T00:01:13Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-07T00:10:29Z - do not edit directly, edit source -->
 
 
 
@@ -33470,35 +33470,63 @@ function _paceRange() {
   var pc = _curPace();
   return pc === 'fast' ? 3 : pc === 'cautious' ? 1 : 2;
 }
-// M11: BFS dos hexes alcançáveis dentro do alcance do ritmo (passáveis, in-bounds).
-// Memoizado por (pos + ritmo + fase + exaustão) — recomputa só quando muda. Barato.
+// M14 (Fase 3): custo de MOVIMENTO por hex (PHB — terreno difícil custa 2). Lama/água,
+// vegetação densa, rocha, areia, gelo comem o dobro do alcance multi-hex.
+function _tileMoveCost(col, row) {
+  var t = tileAt(col, row);
+  if (t === '~' || t === 'w' || t === 'W' || t === 'T' || t === 't' ||
+      t === 'b' || t === 'r' || t === 'R' || t === 'v' || t === 'S' || t === 'i') return 2;
+  return 1;
+}
+// M14 (Fase 3, DMG Cap.5): clima ruim (tempestade/névoa) = viagem difícil → −1 no
+// alcance do ritmo (chuva leve não). O mundo reage: correr na tempestade rende menos.
+function _weatherMovePenalty() {
+  var w = window.S && S.weather;
+  return (w === 't' || w === 'f') ? 1 : 0;
+}
+// M14: orçamento de movimento = alcance do ritmo − penalidade de clima (mín. 1 hex).
+function _paceBudget() {
+  return Math.max(1, _paceRange() - _weatherMovePenalty());
+}
+// M11+M14: hexes alcançáveis dentro do ORÇAMENTO do ritmo, com custo por terreno
+// (Dijkstra: terreno difícil custa 2). O PRIMEIRO passo é sempre permitido (mínimo 1
+// hex, mesmo em terreno difícil) — a dificuldade só corta o ALCANCE de Normal/Rápido.
+// Memoizado por (pos + ritmo + fase + exaustão + clima + budget). `dist` = CUSTO acumulado.
 var _reachCache = null, _reachKey = '';
 function _reachableSet() {
   var p = S.player;
-  var key = p.col + ',' + p.row + '|' + _curPace() + '|' + S.ph + '|' + p.exh;
+  var budget = _paceBudget();
+  var key = p.col + ',' + p.row + '|' + _curPace() + '|' + S.ph + '|' + p.exh + '|' + (window.S && S.weather) + '|' + budget;
   if (_reachCache && _reachKey === key) return _reachCache;
-  var R = _paceRange();
   var start = p.col + ',' + p.row;
-  var seen = {}; seen[start] = { col: p.col, row: p.row, dist: 0, parent: null };
-  var frontier = [[p.col, p.row]];
-  for (var d = 0; d < R; d++) {
-    var next = [];
-    for (var f = 0; f < frontier.length; f++) {
-      var nb = getNeighbors(frontier[f][0], frontier[f][1]);
-      for (var i = 0; i < nb.length; i++) {
-        var c = nb[i][0], r = nb[i][1], k = c + ',' + r;
-        if (c < 0 || c >= COLS || r < 0 || r >= ROWS) continue;
-        if (seen[k]) continue;
-        if (isTileImpassable(c, r)) continue;
-        seen[k] = { col: c, row: r, dist: d + 1, parent: frontier[f][0] + ',' + frontier[f][1] };
-        next.push([c, r]);
+  var best = {}; best[start] = { col: p.col, row: p.row, dist: 0, parent: null };
+  var frontier = [{ k: start, cost: 0 }];
+  while (frontier.length) {
+    var mi = 0;
+    for (var j = 1; j < frontier.length; j++) if (frontier[j].cost < frontier[mi].cost) mi = j;
+    var cur = frontier.splice(mi, 1)[0];
+    var node = best[cur.k];
+    if (!node || cur.cost > node.dist) continue;      // entrada obsoleta (Dijkstra)
+    var isStart = (cur.k === start);
+    if (cur.cost >= budget && !isStart) continue;     // sem budget pra ir além (o START sempre dá 1 passo)
+    var nb = getNeighbors(node.col, node.row);
+    for (var i = 0; i < nb.length; i++) {
+      var c = nb[i][0], r = nb[i][1], k = c + ',' + r;
+      if (c < 0 || c >= COLS || r < 0 || r >= ROWS) continue;
+      if (isTileImpassable(c, r)) continue;
+      var nc = cur.cost + _tileMoveCost(c, r);
+      // O START sempre alcança o vizinho adjacente (mínimo 1 hex, mesmo difícil);
+      // a partir daí o custo do terreno limita quão longe se vai.
+      if (nc > budget && !isStart) continue;
+      if (!best[k] || nc < best[k].dist) {
+        best[k] = { col: c, row: r, dist: nc, parent: node.col + ',' + node.row };
+        frontier.push({ k: k, cost: nc });
       }
     }
-    frontier = next;
   }
-  delete seen[start];
-  _reachCache = seen; _reachKey = key;
-  return seen;
+  delete best[start];
+  _reachCache = best; _reachKey = key;
+  return best;
 }
 // M11: caminho player→(col,row) dentro do alcance, ou null se fora de alcance/bloqueado.
 function _pacePath(col, row) {
@@ -34145,13 +34173,13 @@ function drawMovableHexes(ctx) {
   const set = _reachableSet();               // M11: alcance do ritmo (1/2/3), não só os 6 vizinhos
   const tier = window._valdoriaPerformanceTier || 'full';
   const t = ((_animTime || 0) % 2000) / 2000, breathe = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
-  const R = _paceRange();
+  const R = _paceBudget();  // M14: orçamento (alcance − clima); dist agora é CUSTO acumulado
   ctx.save();
   for (var k in set) {
     if (!set[k]) continue;
     var node = set[k];
     const s = hexToScreen(node.col, node.row);
-    // Mais longe = mais fraco → leitura de "alcance" do ritmo (dist1≈1.0 .. distR≈0.6)
+    // Mais longe/caro = mais fraco → leitura do "alcance" do ritmo (custo 1≈1.0 .. budget≈0.6)
     var fo = 1 - (node.dist - 1) / Math.max(1, R) * 0.5;
     if (tier !== 'lite' && node.dist === 1) {   // glow só no anel adjacente (barato + destaca o próximo passo)
       const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, HEX_W * 0.24);
