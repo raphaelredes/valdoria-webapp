@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-31T12:52:56Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-31T13:03:21Z - do not edit directly, edit source -->
 
 
 
@@ -41836,17 +41836,22 @@ function openCartography() {
   if (typeof ResizeObserver !== 'undefined' && _xcartCanvas.parentElement) {
     var ro = new ResizeObserver(function(){
       if (document.getElementById('cartography-overlay') && document.getElementById('cartography-overlay').classList.contains('visible')) {
-        if (syncXDims()) _xcartCenterOnPlayer();
+        syncXDims();
+        _xcartCenterOnPlayer();
       }
     });
     ro.observe(_xcartCanvas.parentElement);
   }
 
-  if (typeof requestAnimationFrame === 'function') {
-    requestAnimationFrame(function(){
-      if (syncXDims()) _xcartCenterOnPlayer();
-    });
-  }
+  [20, 80, 200, 450, 800].forEach(function(delay){
+    setTimeout(function(){
+      var ov = document.getElementById('cartography-overlay');
+      if (ov && ov.classList.contains('visible')) {
+        syncXDims();
+        _xcartCenterOnPlayer();
+      }
+    }, delay);
+  });
 
   _xcartEnsureKnownThenRedraw();
 }

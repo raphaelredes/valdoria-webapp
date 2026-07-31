@@ -55813,17 +55813,21 @@ function renderCartographyCanvas(el){
   if (typeof ResizeObserver !== 'undefined' && _cartCanvas.parentElement) {
     var ro = new ResizeObserver(function(){
       if (document.body.classList.contains('state-cart')) {
-        if (syncDims()) _cartCenterOnPlayer();
+        syncDims();
+        _cartCenterOnPlayer();
       }
     });
     ro.observe(_cartCanvas.parentElement);
   }
 
-  if (typeof requestAnimationFrame === 'function') {
-    requestAnimationFrame(function(){
-      if (syncDims()) _cartCenterOnPlayer();
-    });
-  }
+  [20, 80, 200, 450, 800].forEach(function(delay){
+    setTimeout(function(){
+      if (document.body.classList.contains('state-cart')) {
+        syncDims();
+        _cartCenterOnPlayer();
+      }
+    }, delay);
+  });
 }
 
 // === QUEST FOCUS HALO (X-6.5.51BJ 2026-05-15) ====================
