@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-31T12:38:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-31T12:52:56Z - do not edit directly, edit source -->
 
 
 
@@ -41754,686 +41754,14 @@ function possibleMaterialsForMap(mapId) {
 var visitedMapIds = new Set();
 
 function openCartography() {
-  // X-6.5.51l: reset zoom/pan ao abrir pra sempre ver mapa inteiro
-  // NOTA: este openCartography é overridden pela versão V2 em ~36746
-  // (`overlay.innerHTML = ...` cria xcart-canvas). Mantido por compat.
-  _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0;  // #map-zoom: ~160% padrão
-  document.getElementById('cartography-overlay').classList.add('visible');
-  renderCartography();
-  _cartUpdateZoomBtns();
-}
-
-function closeCartography() {
-  document.getElementById('cartography-overlay').classList.remove('visible');
-  // 2026-06-21 (user bug): também desfaz os popups de localidade pendurados
-  // (#location-popup z-280 + #cart-loc-popup) — senão reaparecem POR CIMA da
-  // exploração ao fechar o mapa (era o "popup INIMIGOS/MATERIAIS que surgia
-  // depois de fechar o mapa"). closeCartography() só removia o overlay do mapa.
-  try { if (typeof closeLocationPopup === 'function') closeLocationPopup(); } catch (_) {}
-  try { if (typeof _closeCartLocationPopup === 'function') _closeCartLocationPopup(); } catch (_) {}
-}
-
-// 2026-06-21 — TRAVEL pela cartografia DENTRO da exploração (1 popup → 1 clique →
-// viagem REAL). Antes: o "Viajar pra X" do popup #1 (cart-loc-popup) encadeava o
-// popup #2 (location-popup INIMIGOS/MATERIAIS) cujo botão fazia JourneyRunner.
-// onArrive→boot() LOCAL — em REMOTE o servidor NUNCA trocava o mapa (a viagem "não
-// acontecia", viola SUPREME RULE #0) + o popup #2 ficava pendurado e reaparecia.
-// Agora o popup #1 chama _cartTravelTo direto: em REMOTE usa o MESMO caminho
-// server-authoritative do edge travel (/api/webapp/transition — o servidor cobra
-// turnos por distância de grafo e boota o novo mapa, aceitando destino NÃO-adjacente);
-// em LOCAL (file://) faz o reboot client-side com etapas (sandbox dev).
-function _cartTravelTo(mapId){
-  var m = (typeof FIXED_MAPS !== 'undefined') ? FIXED_MAPS[mapId] : null;
-  if (!m) { try { console.warn('[E-REM:CART-TRAVEL] no FIXED_MAPS for ' + mapId); } catch (_) {} return; }
-  if (window.S && S.mapId === mapId) return;  // já está aqui
-  // fecha TODOS os overlays do mapa (anti-popup-pendurado)
-  try { _closeCartLocationPopup(); } catch (_) {}
-  try { if (typeof closeLocationPopup === 'function') closeLocationPopup(); } catch (_) {}
-  closeCartography();
-  var _isRemote = (window.__EXPLORE_MODE === 'remote' && !!window.__EXPLORE_TOKEN && !!window.__EXPLORE_API_BASE);
-  if (_isRemote) {
-    _remoteTravelToMap(mapId, m.name);  // server-authoritative (loader + redirect)
-    return;
-  }
-  // LOCAL: etapas proporcionais à distância real (worldPos 0-1) + reboot client-side
-  var _travelSteps = 1;
-  try {
-    var _curWP = (window.S && S.mapDef && S.mapDef.worldPos) || null;
-    var _tgtWP = (m && m.worldPos) || null;
-    if (_curWP && _tgtWP && typeof _curWP.x === 'number' && typeof _tgtWP.x === 'number') {
-      var _dWP = Math.sqrt(Math.pow(_curWP.x - _tgtWP.x, 2) + Math.pow(_curWP.y - _tgtWP.y, 2));
-      _travelSteps = Math.max(1, Math.min(4, Math.round(_dWP * 5)));
-    }
-  } catch (_eTS) {}
-  if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
-    JourneyRunner.start({
-      biome: m.biome, displayName: m.name, totalSteps: _travelSteps,
-      player: function () { return (window.S && S.player) || {}; },
-      confirm: false,  // o clique em "Viajar pra X" no popup JÁ é a confirmação (Jogador Mínimo Trabalho)
-      audioBiome: true,
-      refreshHud: (typeof updateHud === 'function') ? updateHud : null,
-      onArrive: function () {
-        setupChoices.map = mapId;
-        if (typeof dmNarrate === 'function') dmNarrate({ text: 'Você chega às terras de ' + m.name + '.', type: 'action' });
-        if (typeof boot === 'function') boot();
-      },
-      onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na viagem.'); }
-    });
-  } else {
-    setupChoices.map = mapId;
-    if (typeof boot === 'function') boot();
-  }
-}
-
-// Troca de mapa server-authoritative (espelha o branch REMOTE de confirmEdgeTransition):
-// POST /api/webapp/transition {from_map,target_map,rewards} → data.url +nointro=1 →
-// location.replace. _exploracao_to_exploracao ACEITA destino não-adjacente (cobra
-// distância de GRAFO em turnos). Fallback: triggerReturnToCity se não vier url.
-async function _remoteTravelToMap(targetMap, label){
-  if (window._vTransitionLoader) window._vTransitionLoader.show('Viajando para ' + (label || 'novo destino') + '…');
-  try {
-    if (window.__exploreLogRelay && window.__exploreLogRelay.forceFlushBeacon) window.__exploreLogRelay.forceFlushBeacon();
-    window.__valdoria_transitioning = true;
-    var rewards = (typeof window.__buildRewardsDelta === 'function') ? window.__buildRewardsDelta() : {};
-    var resp = await window.__explFetchTO(window.__EXPLORE_API_BASE + '/api/webapp/transition', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN },
-      body: JSON.stringify({
-        from: 'exploracao', to: 'exploracao',
-        user_id: window.__EXPLORE_USER_ID, token: window.__EXPLORE_TOKEN,
-        payload: { from_map: window.__EXPLORE_MAP_ID || '', target_map: targetMap, rewards: rewards }
-      }),
-      keepalive: true
-    }, 12000);
-    var data = await resp.json().catch(function(){ return {}; });
-    try { console.info('[E-REM:CART-TRAVEL] transition code=' + resp.status + ' has_url=' + (data && data.url ? 'yes' : 'no') + ' target=' + targetMap); } catch (_) {}
-    if (data && data.url) {
-      try { localStorage.removeItem('valdoria_exploracao_session'); } catch (_) {}
-      var _u = data.url;
-      try { var _U = new URL(_u, location.href); if (!_U.searchParams.has('nointro')) _U.searchParams.set('nointro', '1'); _u = _U.toString(); } catch (_) {}
-      window.location.replace(_u);
-      return;
-    }
-    try { LOGE('EDGE', 'cart_travel sem url — fallback return'); } catch (_) {}
-  } catch (e) {
-    try { LOGE('EDGE', 'cart_travel failed ' + ((e && e.message) || e)); } catch (_) {}
-  }
-  if (window._vTransitionLoader) window._vTransitionLoader.hide();
-  window.__valdoria_transitioning = false;
-  if (typeof triggerReturnToCity === 'function') triggerReturnToCity({ reason: 'cart_travel_fallback' });
-}
-
-// Renderiza o grafo de mapas como pergaminho com nodes posicionados via worldPos.
-// Geografia espelha hub-data.js do jogo real (LOCATION_COORDS normalizado).
-// X-6.5.51l (2026-04-25): cartografia REDESIGN — fundo de pergaminho cream
-// + caminhos curvos organicos (Bezier) entre locais + zoom pan + center on
-// player. User feedback: "deixando como estava antes, com design mais
-// parecido com papel, e nao deixe locais em linha reta ou formatos
-// geometrico retos, pois fica pouco realista".
-// #map-zoom (2026-06-23, user): o mapa abre com ~160% (dois passos) por padrão — mais perto,
-// locais maiores/legíveis logo de cara. Vale pros dois mapas (cidade + exploração).
-var CART_ZOOM_DEFAULT = 1.6;
-var _cartZoom = CART_ZOOM_DEFAULT;
-var _cartPanX = 0;
-var _cartPanY = 0;
-var CART_ZOOM_MIN = 0.6;
-var CART_ZOOM_MAX = 3.0;
-
-// Helper: aplica transform de zoom+pan sobre coords logicas
-function _cartTx(x, w) { return (x - w / 2) * _cartZoom + w / 2 + _cartPanX; }
-function _cartTy(y, h) { return (y - h / 2) * _cartZoom + h / 2 + _cartPanY; }
-
-function renderCartography() {
-  // v12.5 (2026-05-06) — REWRITE pra usar CartShared canonical (mesmo
-  // backend de cidade.html). User reportou "o mapa de valdoria na
-  // exploracao.html mostra muito mais locais que da cidade.html".
-  // Cause: antes iterava Object.keys(FIXED_MAPS) — 30+ maps incluindo
-  // dungeons. Agora itera apenas CART_BIOMES_V2 (= CartShared.CART_BIOMES,
-  // 22 locais oficiais do mundo) — paridade total com cidade.
-  // NOTA: este renderCartography é reassinado pra _xcartDraw em ~37008.
-  // Mantido por compat (caso outros codepath chamem direto). xcartDraw
-  // já usa HiDPI corretamente via _xcartInit.
-  const canvas = document.getElementById('cart-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
-
-  // STAGE 1: pergaminho velho manchado (canonical CartShared, mesmo de cidade)
-  if (window.CartShared && CartShared._drawAgedParchment) {
-    CartShared._drawAgedParchment(ctx, w, h);
-  } else {
-    // Fallback simples
-    ctx.fillStyle = '#e0c590';
-    ctx.fillRect(0, 0, w, h);
-  }
-
-  // STAGE 2: pan/zoom transform
-  ctx.save();
-  ctx.translate(_cartPanX, _cartPanY);
-  ctx.scale(_cartZoom, _cartZoom);
-
-  // Pictogramas dos biomes (todos 22 conhecidos no exploracao — diferente
-  // de cidade que tem visibility filter via known_locations)
-  if (typeof CART_BIOMES_V2 !== 'undefined' && CartShared && CartShared._drawBiomeArt) {
-    CART_BIOMES_V2.forEach(function(b){
-      CartShared._drawBiomeArt(ctx, b, w, h);
-    });
-  }
-  // Paths
-  if (typeof CART_PATHS_V2 !== 'undefined' && CartShared && CartShared._drawCartPath) {
-    CART_PATHS_V2.forEach(function(p){
-      CartShared._drawCartPath(ctx, p[0], p[1], w, h, CART_BIOMES_V2);
-    });
-  }
-  // Nodes (label + dot)
-  if (CART_BIOMES_V2 && CartShared._drawCartNode) {
-    CART_BIOMES_V2.forEach(function(b){
-      CartShared._drawCartNode(ctx, b, w, h, _xcartHoverNode === b);
-    });
-  }
-  // Player pin no biome atual (look up by S.biome ou S.mapDef.biome)
-  if (CART_BIOMES_V2 && CartShared._drawPlayerPin) {
-    var pBiome = (S && (S.biome || (S.mapDef && S.mapDef.biome))) || 'plains';
-    var playerNode = CART_BIOMES_V2.find(function(b){
-      return b.key === pBiome || b.biome === pBiome;
-    });
-    if (playerNode) CartShared._drawPlayerPin(ctx, playerNode, w, h);
-  }
-  ctx.restore();
-
-  // STAGE 3: Compass + título flavor
-  if (CartShared && CartShared._drawCartCompass) {
-    CartShared._drawCartCompass(ctx, w, h);
-  }
-  ctx.font = 'italic 10px serif';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(60, 35, 12, 0.85)';
-  ctx.fillText('"Aqui jazem as terras conhecidas de Valdoria..."', w / 2, 14);
-
-  // STAGE 4: scorched edges (mesmo final de cidade)
-  if (CartShared && CartShared._drawScorchedEdge) {
-    CartShared._drawScorchedEdge(ctx, w, h, 0.38);
-  }
-}
-
-
-// X-6.5.51l: zoom controls + center on player no cart-canvas
-function _cartUpdateZoomBtns() {
-  const inBtn = document.getElementById('cart-zoom-in');
-  const outBtn = document.getElementById('cart-zoom-out');
-  if (inBtn) {
-    if (_cartZoom >= CART_ZOOM_MAX - 0.001) inBtn.setAttribute('disabled', 'disabled');
-    else inBtn.removeAttribute('disabled');
-  }
-  if (outBtn) {
-    if (_cartZoom <= CART_ZOOM_MIN + 0.001) outBtn.setAttribute('disabled', 'disabled');
-    else outBtn.removeAttribute('disabled');
-  }
-}
-
-function _cartSetZoom(z) {
-  const old = _cartZoom;
-  _cartZoom = Math.max(CART_ZOOM_MIN, Math.min(CART_ZOOM_MAX, z));
-  if (Math.abs(_cartZoom - old) < 0.001) {
-    _cartUpdateZoomBtns();
-    return;
-  }
-  // Ajusta pan se o zoom diminuiu pra nao deixar mapa fora do canvas
-  if (_cartZoom <= 1.001) { _cartPanX = 0; _cartPanY = 0; }
-  _cartUpdateZoomBtns();
-  renderCartography();
-}
-
-function _cartCenterOnPlayer() {
-  // Centraliza o pan no mapa atual do jogador
-  if (!S || !S.mapId) return;
-  const m = FIXED_MAPS[S.mapId];
-  if (!m || !m.worldPos) return;
-  const canvas = document.getElementById('cart-canvas');
-  if (!canvas) return;
-  const w = canvas.width, h = canvas.height;
-  const margin = 34;
-  const mw = w - margin * 2;
-  const mh = h - margin * 2 - 18;
-  const topOffset = 22;
-  const lx = margin + m.worldPos.x * mw;
-  const ly = topOffset + margin + m.worldPos.y * mh;
-  // Zoom em 1.6x se ainda nao for grande, e centraliza
-  if (_cartZoom < 1.5) _cartZoom = 1.6;
-  // Pan pra que o ponto logico (lx, ly) caia no centro do canvas
-  // x_screen = (lx - w/2) * zoom + w/2 + pan -> queremos x_screen = w/2
-  _cartPanX = -(lx - w / 2) * _cartZoom;
-  _cartPanY = -(ly - h / 2) * _cartZoom;
-  _cartUpdateZoomBtns();
-  renderCartography();
-}
-
-/* X-6.5.51j (2026-04-25): rosa-dos-ventos AJUSTADA pro fundo DARK do
-   cart-canvas refatorado (X-6.5.51j). Antes cores escuras (pra fundo cream);
-   agora gold/light pra contraste com fundo dark. User feedback: "mova a
-   rosa dos ventos um pouco para a esquerda pois ficou encostada na linha". */
-function drawCompassRose(ctx, cx, cy, size) {
-  ctx.save();
-
-  // Anel externo + interno (double border decorativo, gold)
-  ctx.strokeStyle = 'rgba(196, 149, 58, 0.7)';
-  ctx.lineWidth = 1.4;
-  ctx.beginPath();
-  ctx.arc(cx, cy, size + 3, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.lineWidth = 0.8;
-  ctx.beginPath();
-  ctx.arc(cx, cy, size, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // Petalas intercardinais (NE/SE/SW/NW) — DEBAIXO, mais finas
-  const interAngles = [Math.PI/4, Math.PI*3/4, Math.PI*5/4, Math.PI*7/4];
-  interAngles.forEach(a => {
-    const tipX = cx + Math.cos(a) * size * 0.78;
-    const tipY = cy + Math.sin(a) * size * 0.78;
-    const baseLeftX = cx + Math.cos(a + 0.18) * size * 0.18;
-    const baseLeftY = cy + Math.sin(a + 0.18) * size * 0.18;
-    const baseRightX = cx + Math.cos(a - 0.18) * size * 0.18;
-    const baseRightY = cy + Math.sin(a - 0.18) * size * 0.18;
-    /* Light side (parchment golden) */
-    ctx.fillStyle = 'rgba(232, 212, 160, 0.55)';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(baseLeftX, baseLeftY);
-    ctx.lineTo(tipX, tipY);
-    ctx.closePath();
-    ctx.fill();
-    /* Dark side (deep brown shadow) */
-    ctx.fillStyle = 'rgba(40, 28, 16, 0.7)';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(tipX, tipY);
-    ctx.lineTo(baseRightX, baseRightY);
-    ctx.closePath();
-    ctx.fill();
-  });
-
-  // Petalas cardinais (N/S/L/O) — POR CIMA, maiores
-  const cardAngles = [-Math.PI/2, 0, Math.PI/2, Math.PI];
-  cardAngles.forEach(a => {
-    const tipX = cx + Math.cos(a) * size * 0.95;
-    const tipY = cy + Math.sin(a) * size * 0.95;
-    const baseLeftX = cx + Math.cos(a + 0.20) * size * 0.22;
-    const baseLeftY = cy + Math.sin(a + 0.20) * size * 0.22;
-    const baseRightX = cx + Math.cos(a - 0.20) * size * 0.22;
-    const baseRightY = cy + Math.sin(a - 0.20) * size * 0.22;
-    /* Light side (gold bright) */
-    ctx.fillStyle = 'rgba(232, 212, 160, 0.85)';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(baseLeftX, baseLeftY);
-    ctx.lineTo(tipX, tipY);
-    ctx.closePath();
-    ctx.fill();
-    /* Dark side (deep brown) */
-    ctx.fillStyle = 'rgba(30, 22, 12, 0.85)';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(tipX, tipY);
-    ctx.lineTo(baseRightX, baseRightY);
-    ctx.closePath();
-    ctx.fill();
-    /* Outline da petala pra contraste */
-    ctx.strokeStyle = 'rgba(196, 149, 58, 0.6)';
-    ctx.lineWidth = 0.6;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(baseLeftX, baseLeftY);
-    ctx.lineTo(tipX, tipY);
-    ctx.lineTo(baseRightX, baseRightY);
-    ctx.closePath();
-    ctx.stroke();
-  });
-
-  // Disco central (gem dourada)
-  const gemGrad = ctx.createRadialGradient(cx - 1, cy - 1, 0, cx, cy, size * 0.13);
-  gemGrad.addColorStop(0, '#fbd770');
-  gemGrad.addColorStop(0.5, '#c4953a');
-  gemGrad.addColorStop(1, '#5a3e22');
-  ctx.fillStyle = gemGrad;
-  ctx.beginPath();
-  ctx.arc(cx, cy, size * 0.13, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(196, 149, 58, 0.9)';
-  ctx.lineWidth = 0.8;
-  ctx.stroke();
-
-  // Fleur-de-lis estilizada acima do N (linhas gold pra contraste com dark)
-  const fdlY = cy - size * 1.05;
-  ctx.strokeStyle = 'rgba(196, 149, 58, 0.9)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(cx - 3, fdlY + 3);
-  ctx.lineTo(cx, fdlY - 2);
-  ctx.lineTo(cx + 3, fdlY + 3);
-  ctx.stroke();
-
-  // Letras N/S/L/O em gold pra contraste com fundo dark
-  ctx.fillStyle = '#fbd770';
-  ctx.font = 'bold 11px "Cinzel", serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-  ctx.shadowBlur = 3;
-  ctx.fillText('N', cx, cy - size - 14);
-  ctx.fillText('S', cx, cy + size + 14);
-  ctx.fillText('L', cx + size + 12, cy);
-  ctx.fillText('O', cx - size - 12, cy);
-  ctx.shadowBlur = 0;
-
-  ctx.restore();
-}
-
-var _cartNodes = [];
-
-function onCartographyClick(e) {
-  const canvas = document.getElementById('cart-canvas');
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const cx = (e.clientX - rect.left) * scaleX;
-  const cy = (e.clientY - rect.top) * scaleY;
-  for (const n of _cartNodes) {
-    const dx = cx - n.x, dy = cy - n.y;
-    if (dx * dx + dy * dy <= n.r * n.r) {
-      handleCartographyNodeClick(n.id);
-      return;
-    }
-  }
-}
-
-// ============================================================================
-// CARTOGRAFIA V2 (port da cidade.html — visual melhorado)
-// Substitui o renderCartography original com:
-// - Fundo pergaminho cream + textura vintage
-// - Halos radiais por bioma (transição orgânica via alpha)
-// - Desenhos de fundo por bioma (planície/floresta/caverna/etc.)
-// - Paths Bezier dashed entre biomas conectados
-// - Nodes com gold ring + emoji + label
-// ============================================================================
-
-// 9 biomas com posições ORGÂNICAS (coords normalizadas 0-1)
-// Posições sincronizadas com cidade.html CART_BIOMES (Fase 7.3 — 2026-04-30)
-// === CART_BIOMES_V2 moved to cartografia-shared.js (Fase 7.3) ===
-
-// === CART_PATHS_V2 moved to cartografia-shared.js (Fase 7.3) ===
-
-var _cartHoverNodeV2 = null;
-
-// Seeded random pra desenhos consistentes
-// === _cartSeedRandV2 moved to cartografia-shared.js (Fase 7.3) ===
-
-// === DRAWING FUNCTIONS V2 ===
-// === _drawScrollBgV2 moved to cartografia-shared.js (Fase 7.3) ===
-
-// === _drawBiomeHaloV2 moved to cartografia-shared.js (Fase 7.3) ===
-
-// === _drawBiomeArtV2 moved to cartografia-shared.js (Fase 7.3) ===
-
-// === _drawCartPathV2 moved to cartografia-shared.js (Fase 7.3) ===
-
-function _drawCartNodeV2(ctx, b, w, h){
-  var bx = b.x * w, by = b.y * h;
-  var isHover = _cartHoverNodeV2 === b;
-  var isOrigin = b.isOrigin;
-  ctx.beginPath();
-  ctx.arc(bx, by, 22, 0, Math.PI*2);
-  ctx.fillStyle = isHover ? 'rgba(255, 220, 130, 0.95)' : 'rgba(50, 35, 22, 0.92)';
-  ctx.fill();
-  ctx.lineWidth = isOrigin ? 3 : 2;
-  ctx.strokeStyle = isHover ? '#fff' : (isOrigin ? '#fbd770' : '#c4953a');
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(bx, by, 14, 0, Math.PI*2);
-  ctx.fillStyle = b.color;
-  ctx.fill();
-  ctx.font = '18px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(b.ico, bx, by);
-  ctx.font = '10px Cinzel, serif';
-  ctx.textBaseline = 'top';
-  ctx.fillStyle = isHover ? '#1a1510' : 'rgba(40, 25, 12, 0.9)';
-  ctx.fillText(b.name.split(' ')[0], bx, by + 26);
-  if (b.tier) {
-    ctx.font = 'bold 8px Cinzel, serif';
-    ctx.fillStyle = 'rgba(80, 50, 20, 0.7)';
-    ctx.fillText('T' + b.tier, bx, by + 38);
-  }
-}
-
-
-// === Pin do personagem V2 (Fase 5.4 — "VOCÊ ESTÁ AQUI") ===
-function _cartGetPlayerBiomeV2(){
-  // Tenta state da exploracao (S.biome ou S.mapId.biome)
-  if (typeof S !== 'undefined' && S && S.biome) return S.biome;
-  if (typeof S !== 'undefined' && S && S.mapId && typeof FIXED_MAPS !== 'undefined') {
-    var m = FIXED_MAPS[S.mapId];
-    if (m && m.biome) return m.biome;
-  }
-  // Cidade default: player está em Valdoria (plains)
-  return 'plains';
-}
-
-// === _drawPlayerPinV2 moved to cartografia-shared.js (Fase 7.3) ===
-
-
-// === Popup de Localidade na Cartografia (Fase 5.5) ===
-// Build HTML do card baseado no bioma clicado
-function _openCartLocationPopup(biome){
-  var el = document.getElementById('cart-loc-popup');
-  if (!el) return;
-  var isCurrent = (_cartGetPlayerBiomeV2()) === biome.key;
-  var rec = '';
-  if (biome.tier) {
-    rec = biome.tier <= 1 ? 'Iniciante (nv 1-2)' :
-          biome.tier <= 3 ? 'Aventureiro (nv 2-4)' :
-          biome.tier <= 5 ? 'Veterano (nv 4-7)' :
-          biome.tier <= 7 ? 'Experiente (nv 7-10)' :
-                            'Lendário (nv 10+)';
-  }
-  var card = document.getElementById('clp-card-content');
-  if (!card) return;
-  card.innerHTML = ''
-    + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
-    + (isCurrent ? '<div class="clp-current-here">VOCÊ ESTÁ AQUI</div>' : '')
-    + '<h2>' + biome.name + '</h2>'
-    // P-mapa sessão #73: sem badge "Tier N" (redundante) — a faixa de nível
-    // recomendado no clp-meta abaixo é mais clara. Alinhado com o popup da cidade.
-    + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
-    + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key)) + '</div>' : '')
-    + '<div class="clp-buttons">'
-    + (isCurrent
-        ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
-        : '<button class="clp-btn clp-btn-travel" data-clp="travel">Viajar pra ' + biome.name.split(' ')[0] + '</button>'
-          + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
-       )
-    + '</div>';
-  el.classList.add('active');
-  window._cartCurrentLocBiome = biome;
-}
-function _closeCartLocationPopup(){
-  var el = document.getElementById('cart-loc-popup');
-  if (el) el.classList.remove('active');
-  window._cartCurrentLocBiome = null;
-}
-// Listener attached UMA VEZ via DOMContentLoaded
-(function(){
-  document.addEventListener('DOMContentLoaded', function(){
-    var el = document.getElementById('cart-loc-popup');
-    if (!el) return;
-    el.addEventListener('click', function(e){
-      if (!el.classList.contains('active')) return;
-      // Click no backdrop fora do card → fecha
-      if (e.target.id === 'cart-loc-popup') { _closeCartLocationPopup(); return; }
-      var btn = e.target.closest('[data-clp]');
-      if (!btn) return;
-      var action = btn.dataset.clp;
-      var biome = window._cartCurrentLocBiome;
-      if (action === 'back') { _closeCartLocationPopup(); return; }
-      if (action === 'travel' && biome) {
-        _closeCartLocationPopup();
-        // 2026-06-21: viaja DIRETO (1 clique = 1 confirmação). Antes chamava
-        // handleCartographyNodeClick → openLocationPopup (2º popup INIMIGOS/MATERIAIS
-        // redundante que ficava pendurado/reaparecia). _cartTravelTo faz a viagem
-        // REAL (server-authoritative em REMOTE via /api/webapp/transition).
-        if (typeof _cartTravelTo === 'function') { _cartTravelTo(biome.key); }
-      }
-    });
-  });
-})();
-
-// === RENDER PRINCIPAL V2 ===
-function _renderCartographyV2(){
-  var canvas = document.getElementById('cart-canvas');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var w = canvas.width, h = canvas.height;
-  ctx.save();
-  ctx.clearRect(0, 0, w, h);
-  _drawScrollBgV2(ctx, w, h);
-  // Apply existing pan/zoom (uses existing globals)
-  ctx.translate(_cartPanX, _cartPanY);
-  ctx.scale(_cartZoom, _cartZoom);
-  CART_BIOMES_V2.forEach(function(b){ _drawBiomeHaloV2(ctx, b, w, h); });
-  CART_BIOMES_V2.forEach(function(b){ _drawBiomeArtV2(ctx, b, w, h); });
-  CART_PATHS_V2.forEach(function(p){ _drawCartPathV2(ctx, p[0], p[1], w, h); });
-  CART_BIOMES_V2.forEach(function(b){ _drawCartNodeV2(ctx, b, w, h); });
-  // Player pin "VOCÊ ESTÁ AQUI" (Fase 5.4) — desenhado por último, fica em cima
-  var playerBiomeKey = _cartGetPlayerBiomeV2();
-  var playerNode = CART_BIOMES_V2.find(function(b){ return b.key === playerBiomeKey; });
-  if (playerNode) _drawPlayerPinV2(ctx, playerNode, w, h);
-  ctx.restore();
-}
-
-// (Fase 5.6: override movido pra novo openCartography com xcart-*)
-
-// Click handler: pega coords do canvas, encontra bioma, navega
-(function(){
-  document.addEventListener('DOMContentLoaded', function(){
-    var canvas = document.getElementById('cart-canvas');
-    if (!canvas) return;
-    canvas.addEventListener('click', function(e){
-      // Skip se overlay não está visível
-      var overlay = document.getElementById('cartography-overlay');
-      if (!overlay || !overlay.classList.contains('visible')) return;
-      var rect = canvas.getBoundingClientRect();
-      var mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-      var my = (e.clientY - rect.top) * (canvas.height / rect.height);
-      // Reverte pan/zoom pra coords lógicas
-      var wx = (mx - _cartPanX) / _cartZoom;
-      var wy = (my - _cartPanY) / _cartZoom;
-      // Find biome at coords (raio 22)
-      var w = canvas.width, h = canvas.height;
-      var found = null;
-      for (var i = 0; i < CART_BIOMES_V2.length; i++) {
-        var b = CART_BIOMES_V2[i];
-        var bx = b.x * w, by = b.y * h;
-        if ((wx-bx)*(wx-bx) + (wy-by)*(wy-by) <= 24*24) { found = b; break; }
-      }
-      if (!found) return;
-      // FASE 5.5: abre popup com info do local + opções viajar/voltar
-      _openCartLocationPopup(found);
-    });
-    // Hover detection (rAF throttle)
-    var hoverRaf = 0;
-    canvas.addEventListener('mousemove', function(e){
-      if (hoverRaf) return;
-      hoverRaf = requestAnimationFrame(function(){
-        hoverRaf = 0;
-        var overlay = document.getElementById('cartography-overlay');
-        if (!overlay || !overlay.classList.contains('visible')) return;
-        var rect = canvas.getBoundingClientRect();
-        var mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-        var my = (e.clientY - rect.top) * (canvas.height / rect.height);
-        var wx = (mx - _cartPanX) / _cartZoom, wy = (my - _cartPanY) / _cartZoom;
-        var w = canvas.width, h = canvas.height;
-        var found = null;
-        for (var i = 0; i < CART_BIOMES_V2.length; i++) {
-          var b = CART_BIOMES_V2[i];
-          var bx = b.x * w, by = b.y * h;
-          if ((wx-bx)*(wx-bx) + (wy-by)*(wy-by) <= 24*24) { found = b; break; }
-        }
-        if (found !== _cartHoverNodeV2) {
-          _cartHoverNodeV2 = found;
-          if (typeof renderCartography === 'function') renderCartography();
-        }
-      });
-    });
-  });
-})();
-
-
-// === FASE 5.6 — openCartography V2 com layout idêntico à cidade.html ===
-// Substitui o open antigo (que usava .cart-card layout próprio) por cópia
-// EXATA do renderCartographyCanvas da cidade. Mesma estrutura, mesmos
-// eventos, mesmo visual.
-
-var _xcartHoverNode = null;
-var _xcartHoverRaf = 0;
-var _xcartIsDragging = false;
-var _xcartDragStartX = 0;
-var _xcartDragStartY = 0;
-var _xcartLastPinchDist = 0;
-var _xcartW = 0, _xcartH = 0;
-var _xcartCanvas = null;
-var _xcartCtx = null;
-var _xcartDpr = 1;            // DPR efetivo (capado) — passado ao motor p/ base cache HiDPI
-
-// SERVER-AUTHORITATIVE (#0, 2026-06-18): busca o known set REAL do servidor quando
-// __EXPLORE_KNOWN não está hidratado (init é fire-and-forget e pode não ter resolvido
-// ao abrir o mapa; ou re-entrada sem re-init). Sem isto + fail-closed, a cartografia
-// mostraria só a origem; com isto, mostra os locais realmente descobertos. LOCAL
-// (file://) não tem servidor → mantém o comportamento sandbox (null → mostra tudo).
-// Map server→cart espelha o de [E-REM:API-INIT] (~L14918).
-function _hydrateExploreKnown(){
-  if (window.__EXPLORE_MODE !== 'remote') return;
-  // 2026-06-21 (user bug: após CAMINHAR até um mapa, a cartografia mostrava só 1 nó):
-  // rehidrata se AUSENTE *ou* se só tem a origem (<=1). Antes: early-return em QUALQUER
-  // array → não cobria o estado fail-closed []/[origem] pós-VIAGEM. Edge travel usa
-  // nointro=1 → o mapa abre ANTES do /init (fire-and-forget) resolver → known fica
-  // vazio. E knownLocations() exige o motor token (que vem do MESMO /init pendente),
-  // então um único fetch falhava silenciosamente. Agora faz POLL curto pelo token.
-  var _k0 = window.__EXPLORE_KNOWN;
-  if (Array.isArray(_k0) && _k0.length > 1) return;  // já tem mais que a origem
-  if (!(window.ExploracaoAPI && typeof ExploracaoAPI.knownLocations === 'function')) return;
-  var _tries = 0;
-  (function _attempt(){
-    var tok = (typeof _motorToken === 'function') ? _motorToken() : (window.__EXPLORE_MOTOR_TOKEN || '');
-    if (!tok) { if (_tries++ < 30) setTimeout(_attempt, 200); return; }  // ~6s aguardando o /init setar o motor token
-    try {
-      ExploracaoAPI.knownLocations().then(function(arr){
-        if (!Array.isArray(arr)) return;
-        var m = { 'city_gates': 'plains', 'whispering_woods': 'forest', 'misty_marshes': 'swamp', 'golden_sands': 'desert', 'underground_passage': 'cave', 'stone_peaks': 'mountain', 'ancient_cemetery': 'graveyard', 'frozen_waste': 'snow', 'burning_crater': 'volcanic' };
-        var _mapped = arr.map(function(k){ return m[k] || k; });
-        // nunca REDUZ o known set (o servidor é autoridade; se já tínhamos mais, mantém)
-        if (!Array.isArray(window.__EXPLORE_KNOWN) || _mapped.length >= window.__EXPLORE_KNOWN.length) {
-          window.__EXPLORE_KNOWN = _mapped;
-        }
-        console.info('[E-REM:CART-KNOWN] hydrated on open: ' + window.__EXPLORE_KNOWN.length + ' [' + window.__EXPLORE_KNOWN.join(',') + ']');
-        if (typeof _xcartDraw === 'function' && typeof _xcartCtx !== 'undefined' && _xcartCtx) { try { _xcartDraw(); } catch (_) {} }
-      }).catch(function () {});
-    } catch (_) {}
-  })();
-}
-
-function openCartography() {
-  // Reset zoom/pan — #map-zoom: abre em ~160% (CART_ZOOM_DEFAULT) por padrão.
   _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0;
   _xcartHoverNode = null;
 
   var overlay = document.getElementById('cartography-overlay');
   if (!overlay) return;
-  overlay.classList.add('xcart-v2');  // ativa CSS novo
+  overlay.classList.add('xcart-v2');
   overlay.classList.add('visible');
 
-  // Substitui innerHTML por estrutura IDÊNTICA à cidade
   overlay.innerHTML = ''
     + '<div class="xcart-wrapper">'
     + '  <div class="xcart-header">'
@@ -42452,57 +41780,77 @@ function openCartography() {
     + '  </div>'
     + '  <div class="xcart-back-row">'
     + '    <button class="xcart-back-btn" id="xcart-close-btn">← Voltar pra Exploração</button>'
-    // 2026-05-18 USER REQUEST (Chrome MCP testing session): adicionar opção de
-    // voltar para a CIDADE direto da cartografia. Antes só voltava pra
-    // exploração (mapa hex atual ou dungeon) — não havia saída direta pra
-    // cidade. Agora botão dedicado faz cleanup + redirect.
     + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" title="Voltar para os Portões de Valdoria">Voltar pra Cidade</button>'
     + '  </div>'
     + '</div>';
 
   _xcartCanvas = document.getElementById('xcart-canvas');
-  _xcartCtx = _xcartCanvas.getContext('2d');
+  if (!_xcartCanvas) return;
 
-  // HiDPI canvas setup — 2026-05-06: cap DPR em 2 + safety 8000px backing
-  // (GPU limit). Em smartphones com DPR=3 + rect grande, sem cap o backing
-  // pode causar fallback pra software rendering (FPS catastrofica).
-  var rect = _xcartCanvas.getBoundingClientRect();
-  var rectW = Math.max(1, rect.width);
-  var rectH = Math.max(1, rect.height);
-  var rawDpr = window.devicePixelRatio || 1;
-  var safeDpr = 8000 / Math.max(rectW, rectH);
-  var dpr = Math.max(1, Math.min(rawDpr, 2, safeDpr));
-  _xcartCanvas.width = Math.round(rectW * dpr);
-  _xcartCanvas.height = Math.round(rectH * dpr);
-  _xcartCtx.scale(dpr, dpr);
-  _xcartDpr = dpr;
-  _xcartW = rectW;
-  _xcartH = rectH;
-
-  _xcartWireEvents();
-  _xcartCenterOnPlayer();
-  _xcartUpdateZoomInfo();  // #map-zoom: rótulo reflete o ~160% (o HTML hardcoda 100%)
-  if (typeof requestAnimationFrame === 'function') {
-    requestAnimationFrame(function(){
-      if (_xcartCanvas) {
-        var rect2 = _xcartCanvas.getBoundingClientRect();
-        if (rect2.width > 0 && rect2.height > 0 && (rect2.width !== _xcartW || rect2.height !== _xcartH)) {
-          _xcartW = rect2.width;
-          _xcartH = rect2.height;
-        }
-      }
-      _xcartCenterOnPlayer();
+  if (!_xcartEngine && window.CartShared && CartShared.createWorldCart) {
+    _xcartEngine = CartShared.createWorldCart({
+      apiBase: (window.__EXPLORE_API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
+      getKnownLocations: function(){
+        var k = window.__EXPLORE_KNOWN;
+        if (Array.isArray(k)) return k;
+        return (window.__EXPLORE_MODE === 'remote') ? [] : null;
+      },
+      getPlayerBiomeKey: _cartGetPlayerBiomeV2,
+      onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartCenterOnPlayer === 'function') _xcartCenterOnPlayer(); }
     });
   }
-  // #map-known-fix (2026-06-23): conjunto de locais descobertos DETERMINÍSTICO antes do mapa
-  // "valer" — AGUARDA o /init (que seta __EXPLORE_KNOWN) em vez de só pollar. Elimina o race
-  // que abria o mapa só com a origem (cidade) após viagem pelo hexágono — bug recorrente,
-  // remendado 3x em _hydrateExploreKnown (camada errada). Este fica como fallback de re-entrada.
+
+  _xcartCtx = _xcartCanvas.getContext('2d', { alpha: false });
+  if (_xcartEngine) _xcartEngine.invalidateBase();
+
+  function syncXDims(){
+    if (!_xcartCanvas) return false;
+    var rect = _xcartCanvas.getBoundingClientRect();
+    var parentRect = _xcartCanvas.parentElement ? _xcartCanvas.parentElement.getBoundingClientRect() : rect;
+    var w = Math.max(100, rect.width || parentRect.width || window.innerWidth || 360);
+    var h = Math.max(100, rect.height || parentRect.height || (window.innerHeight - 150) || 500);
+
+    var rawDpr = window.devicePixelRatio || 1;
+    var safeDpr = 8000 / Math.max(w, h);
+    var dpr = Math.max(1, Math.min(rawDpr, 2, safeDpr));
+
+    var targetW = Math.round(w * dpr);
+    var targetH = Math.round(h * dpr);
+
+    var changed = (_xcartCanvas.width !== targetW || _xcartCanvas.height !== targetH || _xcartW !== w || _xcartH !== h);
+    if (changed) {
+      _xcartDpr = dpr;
+      _xcartCanvas.width = targetW;
+      _xcartCanvas.height = targetH;
+      _xcartCtx.scale(dpr, dpr);
+      _xcartW = w;
+      _xcartH = h;
+    }
+    return changed;
+  }
+
+  syncXDims();
+  _xcartWireEvents();
+  _xcartCenterOnPlayer();
+
+  if (typeof ResizeObserver !== 'undefined' && _xcartCanvas.parentElement) {
+    var ro = new ResizeObserver(function(){
+      if (document.getElementById('cartography-overlay') && document.getElementById('cartography-overlay').classList.contains('visible')) {
+        if (syncXDims()) _xcartCenterOnPlayer();
+      }
+    });
+    ro.observe(_xcartCanvas.parentElement);
+  }
+
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(function(){
+      if (syncXDims()) _xcartCenterOnPlayer();
+    });
+  }
+
   _xcartEnsureKnownThenRedraw();
 }
 
-// #map-known-fix (2026-06-23): aguarda o known set chegar (via /init promise) e redesenha.
-// Substitui a dependência do poll silencioso: o /init é a fonte autoritativa de __EXPLORE_KNOWN.
 async function _xcartEnsureKnownThenRedraw(){
   if (window.__EXPLORE_MODE !== 'remote') return;            // LOCAL: motor null → mostra tudo (sandbox)
   var k = window.__EXPLORE_KNOWN;

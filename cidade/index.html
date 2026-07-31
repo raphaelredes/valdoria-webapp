@@ -55727,9 +55727,6 @@ function renderCartographyCanvas(el){
     + '  <div class="cart-header">'
     + '    <h2>Mapa de Valdoria</h2>'
     + '    <p class="flavor">Toca um destino pra viajar. Roda do mouse ou pinça pra zoom.</p>'
-    /* P3 (2026-07-01, PADRAO_LOCAIS B3): Corvus PRESENTE no mapa — o cartógrafo
-       que desenhou isto tem rosto e serviço (encomendas). Antes o backend de
-       encomendas existia mas a tela nunca o apresentava. */
     + '    <button id="cart-corvus-chip" type="button" style="display:inline-flex;align-items:center;gap:8px;margin-top:6px;'
     +        'padding:4px 12px 4px 4px;background:linear-gradient(180deg,rgba(74,56,40,0.55),rgba(42,30,18,0.75));'
     +        'border:1px solid rgba(196,149,58,0.45);border-radius:20px;color:var(--v-text,#d4c8b0);cursor:pointer;'
@@ -55749,78 +55746,84 @@ function renderCartographyCanvas(el){
     + '    </div>'
     + '  </div>'
     + '</div>';
-    /* FIX 2026-05-04: Voltar como botão overlay top-left (CSS já tem
-       .subscreen-back-row absolute em state-cart). Footer foi reduzido
-       a [Personagens][Ajuda][Settings] e não tem mais Voltar. */
-    var _backBtn = document.getElementById('cart-back-btn');
-    if (_backBtn) {
-      _backBtn.addEventListener('click', function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        navigateBack();
-      });
-    }
-    // P3: chip do Corvus abre as encomendas do cartógrafo (fluxo já existente).
-    var _corvusChip = document.getElementById('cart-corvus-chip');
-    if (_corvusChip) {
-      _corvusChip.addEventListener('click', function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        var pl = window.CITY_MOCK_PLAYER;
-        if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['square_cartographer_open']) {
-          ACTION_HANDLERS['square_cartographer_open'](pl);
-        } else if (typeof _openCartographerPopup === 'function') {
-          _openCartographerPopup(pl);
-        }
-      });
-    }
 
-  _cartCanvas = document.getElementById('cart-canvas');
-  // Perf #3 (cartografia-perf.md): {alpha:false} — base pinta sépia opaca, browser
-  // pula alpha blending do backdrop. Perf #1 invalida o base cache (dims podem mudar).
-  _cartCtx = _cartCanvas.getContext('2d', { alpha: false });
-  if (_cartEngine) _cartEngine.invalidateBase();  // dims/dpr podem mudar — força rebuild da base
-  // Set canvas resolution (HiDPI-aware) — Perf #2: cap DPR. Em telas 3x (Android)
-  // a área de fill seria 9× os pixels CSS (380 grain → ~3400 efetivos). Lite=1, resto=2.
-  var rect = _cartCanvas.getBoundingClientRect();
-  var dpr = Math.min(window.devicePixelRatio || 1, (window._valdoriaPerformanceTier === 'lite') ? 1 : 2);
-  _cartDpr = dpr;
-  _cartCanvas.width = rect.width * dpr;
-  _cartCanvas.height = rect.height * dpr;
-  _cartCtx.scale(dpr, dpr);
-  _cartW = rect.width;
-  _cartH = rect.height;
-
-  // Reset zoom/pan — #map-zoom: abre em ~160% (CART_ZOOM_DEFAULT), centralizado no jogador.
-  _cartZoom = CART_ZOOM_DEFAULT;
-  _cartPanX = 0;
-  _cartPanY = 0;
-
-  _wireCartEvents();
-  _cartCenterOnPlayer();
-  if (typeof requestAnimationFrame === 'function') {
-    requestAnimationFrame(function(){
-      if (_cartCanvas) {
-        var rect2 = _cartCanvas.getBoundingClientRect();
-        if (rect2.width > 0 && rect2.height > 0 && (rect2.width !== _cartW || rect2.height !== _cartH)) {
-          var dpr = Math.min(window.devicePixelRatio || 1, (window._valdoriaPerformanceTier === 'lite') ? 1 : 2);
-          _cartDpr = dpr;
-          _cartCanvas.width = rect2.width * dpr;
-          _cartCanvas.height = rect2.height * dpr;
-          _cartCtx.scale(dpr, dpr);
-          _cartW = rect2.width;
-          _cartH = rect2.height;
-        }
-      }
-      _cartCenterOnPlayer();
+  var _backBtn = document.getElementById('cart-back-btn');
+  if (_backBtn) {
+    _backBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      try { closeCityPopup(true); } catch(_e){}
+      navigateTo('hub');
     });
   }
-  // P-mapa sessão #73 (user): NÃO disparar descoberta de local ao ABRIR o mapa. O
-  // popup "Acampamento de Veteranos!" aparecia só por abrir a cartografia, sem o
-  // personagem ter feito nada — não fazia sentido. A descoberta agora acontece SÓ
-  // quando algo REAL acontece: ao VIAJAR/explorar (hook _maybeRollDiscovery ~37788,
-  // roda quando o jogador parte pra explorar) ou via rumor na cidade. Abrir o mapa
-  // apenas MOSTRA o que já foi descoberto.
+
+  var corvusBtn = document.getElementById('cart-corvus-chip');
+  if (corvusBtn) {
+    corvusBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof _openCorvusGreetingDialog === 'function') _openCorvusGreetingDialog();
+    };
+  }
+
+  _cartCanvas = document.getElementById('cart-canvas');
+  if (!_cartCanvas) return;
+
+  if (!_cartEngine && window.CartShared && CartShared.createWorldCart) {
+    _cartEngine = CartShared.createWorldCart({
+      apiBase: (window._VALDORIA_API_BASE || window._API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
+      getKnownLocations: function(){ return (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || []; },
+      getPlayerBiomeKey: _cartGetPlayerBiome,
+      getQuestFocus: function(){ return (window._questFocusLoc && window._questFocusLoc.key) ? { key: window._questFocusLoc.key, title: window._questFocusLoc.questTitle || 'Missão' } : null; },
+      drawQuestHalo: _drawQuestFocusHalo,
+      onAsyncRedraw: function(){ if (_cartCtx && typeof _cartCenterOnPlayer === 'function') _cartCenterOnPlayer(); }
+    });
+  }
+
+  _cartCtx = _cartCanvas.getContext('2d', { alpha: false });
+  if (_cartEngine) _cartEngine.invalidateBase();
+
+  function syncDims(){
+    if (!_cartCanvas) return false;
+    var rect = _cartCanvas.getBoundingClientRect();
+    var parentRect = _cartCanvas.parentElement ? _cartCanvas.parentElement.getBoundingClientRect() : rect;
+    var w = Math.max(100, rect.width || parentRect.width || window.innerWidth || 360);
+    var h = Math.max(100, rect.height || parentRect.height || (window.innerHeight - 150) || 500);
+
+    var dpr = Math.min(window.devicePixelRatio || 1, (window._valdoriaPerformanceTier === 'lite') ? 1 : 2);
+    var targetW = Math.round(w * dpr);
+    var targetH = Math.round(h * dpr);
+
+    var changed = (_cartCanvas.width !== targetW || _cartCanvas.height !== targetH || _cartW !== w || _cartH !== h);
+    if (changed) {
+      _cartDpr = dpr;
+      _cartCanvas.width = targetW;
+      _cartCanvas.height = targetH;
+      _cartCtx.scale(dpr, dpr);
+      _cartW = w;
+      _cartH = h;
+    }
+    return changed;
+  }
+
+  syncDims();
+  _wireCartEvents();
+  _cartCenterOnPlayer();
+
+  if (typeof ResizeObserver !== 'undefined' && _cartCanvas.parentElement) {
+    var ro = new ResizeObserver(function(){
+      if (document.body.classList.contains('state-cart')) {
+        if (syncDims()) _cartCenterOnPlayer();
+      }
+    });
+    ro.observe(_cartCanvas.parentElement);
+  }
+
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(function(){
+      if (syncDims()) _cartCenterOnPlayer();
+    });
+  }
 }
 
 // === QUEST FOCUS HALO (X-6.5.51BJ 2026-05-15) ====================
