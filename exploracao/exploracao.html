@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-07T00:58:48Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-31T12:29:38Z - do not edit directly, edit source -->
 
 
 
@@ -42480,8 +42480,20 @@ function openCartography() {
   _xcartH = rectH;
 
   _xcartWireEvents();
-  _xcartDraw();
+  _xcartCenterOnPlayer();
   _xcartUpdateZoomInfo();  // #map-zoom: rótulo reflete o ~160% (o HTML hardcoda 100%)
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(function(){
+      if (_xcartCanvas) {
+        var rect2 = _xcartCanvas.getBoundingClientRect();
+        if (rect2.width > 0 && rect2.height > 0 && (rect2.width !== _xcartW || rect2.height !== _xcartH)) {
+          _xcartW = rect2.width;
+          _xcartH = rect2.height;
+        }
+      }
+      _xcartCenterOnPlayer();
+    });
+  }
   // #map-known-fix (2026-06-23): conjunto de locais descobertos DETERMINÍSTICO antes do mapa
   // "valer" — AGUARDA o /init (que seta __EXPLORE_KNOWN) em vez de só pollar. Elimina o race
   // que abria o mapa só com a origem (cidade) após viagem pelo hexágono — bug recorrente,
@@ -42651,7 +42663,7 @@ function _xcartWireEvents() {
   // Botões
   document.getElementById('xcart-zoom-in').onclick = function(){ _xcartSetZoom(_cartZoom * 1.2, _xcartW/2, _xcartH/2); };
   document.getElementById('xcart-zoom-out').onclick = function(){ _xcartSetZoom(_cartZoom * 0.8, _xcartW/2, _xcartH/2); };
-  document.getElementById('xcart-zoom-reset').onclick = function(){ _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0; _xcartUpdateZoomInfo(); _xcartDraw(); };
+  document.getElementById('xcart-zoom-reset').onclick = function(){ _cartZoom = CART_ZOOM_DEFAULT; _xcartCenterOnPlayer(); _xcartUpdateZoomInfo(); };
   document.getElementById('xcart-close-btn').onclick = function(){ closeCartography(); };
   /* 2026-05-18 USER REQUEST (Chrome MCP testing): handler do botão "Voltar pra
      Cidade". Fluxo:
@@ -42677,6 +42689,18 @@ function _xcartWireEvents() {
     };
   }
 }
+
+function _xcartCenterOnPlayer(){
+  if (!_xcartEngine || !_xcartCanvas || !_xcartW || !_xcartH) return;
+  var playerKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
+  var pos = (_xcartEngine && typeof _xcartEngine.getNodePos === 'function') ? _xcartEngine.getNodePos(playerKey, _xcartW, _xcartH) : null;
+  if (!pos) return;
+  _cartPanX = (_xcartW / 2) - (pos.x * _cartZoom);
+  _cartPanY = (_xcartH / 2) - (pos.y * _cartZoom);
+  _xcartClampPan();
+  _xcartDraw();
+}
+
 
 function _xcartTouchDist(touches){
   var dx = touches[0].clientX - touches[1].clientX;

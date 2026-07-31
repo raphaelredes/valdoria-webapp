@@ -55791,13 +55791,30 @@ function renderCartographyCanvas(el){
   _cartW = rect.width;
   _cartH = rect.height;
 
-  // Reset zoom/pan — #map-zoom: abre em ~160% (CART_ZOOM_DEFAULT).
+  // Reset zoom/pan — #map-zoom: abre em ~160% (CART_ZOOM_DEFAULT), centralizado no jogador.
   _cartZoom = CART_ZOOM_DEFAULT;
   _cartPanX = 0;
   _cartPanY = 0;
 
   _wireCartEvents();
-  _drawCart();
+  _cartCenterOnPlayer();
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(function(){
+      if (_cartCanvas) {
+        var rect2 = _cartCanvas.getBoundingClientRect();
+        if (rect2.width > 0 && rect2.height > 0 && (rect2.width !== _cartW || rect2.height !== _cartH)) {
+          var dpr = Math.min(window.devicePixelRatio || 1, (window._valdoriaPerformanceTier === 'lite') ? 1 : 2);
+          _cartDpr = dpr;
+          _cartCanvas.width = rect2.width * dpr;
+          _cartCanvas.height = rect2.height * dpr;
+          _cartCtx.scale(dpr, dpr);
+          _cartW = rect2.width;
+          _cartH = rect2.height;
+        }
+      }
+      _cartCenterOnPlayer();
+    });
+  }
   // P-mapa sessão #73 (user): NÃO disparar descoberta de local ao ABRIR o mapa. O
   // popup "Acampamento de Veteranos!" aparecia só por abrir a cartografia, sem o
   // personagem ter feito nada — não fazia sentido. A descoberta agora acontece SÓ
@@ -56043,7 +56060,18 @@ function _wireCartEvents(){
   // Botões
   document.getElementById('cart-zoom-in').onclick = function(){ _cartSetZoom(_cartZoom * 1.2, _cartW/2, _cartH/2); };
   document.getElementById('cart-zoom-out').onclick = function(){ _cartSetZoom(_cartZoom * 0.8, _cartW/2, _cartH/2); };
-  document.getElementById('cart-zoom-reset').onclick = function(){ _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0; _drawCart(); _cartUpdateZoomInfo(); };
+  document.getElementById('cart-zoom-reset').onclick = function(){ _cartZoom = CART_ZOOM_DEFAULT; _cartCenterOnPlayer(); _cartUpdateZoomInfo(); };
+}
+
+function _cartCenterOnPlayer(){
+  if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
+  var playerKey = (typeof _cartGetPlayerBiome === 'function') ? _cartGetPlayerBiome() : 'plains';
+  var pos = (_cartEngine && typeof _cartEngine.getNodePos === 'function') ? _cartEngine.getNodePos(playerKey, _cartW, _cartH) : null;
+  if (!pos) return;
+  _cartPanX = (_cartW / 2) - (pos.x * _cartZoom);
+  _cartPanY = (_cartH / 2) - (pos.y * _cartZoom);
+  _cartClampPan();
+  _drawCart();
 }
 
 function _cartTouchDist(touches){

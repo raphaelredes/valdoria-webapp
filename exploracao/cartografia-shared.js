@@ -3760,9 +3760,28 @@
       return best;
     }
 
+    function getNodePos(key, w, h){
+      var RB = CART_BIOMES.map(_resolved);
+      var b = RB.find(function(item){ return item.key === key; });
+      if (!b) {
+        b = RB.find(function(item){ return item.isOrigin || item.key === 'plains'; }) || RB[0];
+      }
+      if (!b) return null;
+      var _mr = _cartWorldMapRect(w, h);
+      var bx = (typeof b.x === 'number' ? b.x : 0.5);
+      var by = (typeof b.y === 'number' ? b.y : 0.5);
+      return {
+        x: _mr.x + bx * _mr.s,
+        y: _mr.y + by * _mr.s,
+        rawX: bx,
+        rawY: by
+      };
+    }
+
     return {
       draw: draw,
       findNodeAt: findNodeAt,
+      getNodePos: getNodePos,
       invalidateBase: function(){ _baseCache = null; },
       ensureLocArt: _ensureLocArt
     };
