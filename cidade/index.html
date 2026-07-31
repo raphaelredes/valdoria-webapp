@@ -56065,13 +56065,19 @@ function _wireCartEvents(){
 
 function _cartCenterOnPlayer(){
   if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
+  var _S = Math.min(_cartW, _cartH);
+  var minCover = Math.max(_cartW, _cartH) / _S;
+  if (_cartZoom < minCover) _cartZoom = Math.max(1.6, minCover);
+
   var playerKey = (typeof _cartGetPlayerBiome === 'function') ? _cartGetPlayerBiome() : 'plains';
   var pos = (_cartEngine && typeof _cartEngine.getNodePos === 'function') ? _cartEngine.getNodePos(playerKey, _cartW, _cartH) : null;
   if (!pos) return;
+
   _cartPanX = (_cartW / 2) - (pos.x * _cartZoom);
   _cartPanY = (_cartH / 2) - (pos.y * _cartZoom);
   _cartClampPan();
   _drawCart();
+  _cartUpdateZoomInfo();
 }
 
 function _cartTouchDist(touches){
@@ -56095,12 +56101,29 @@ function _cartSetZoom(newZoom, anchorX, anchorY){
 // Pan clamp — não permite arrastar mapa pra fora da view (defensiva)
 // Limita pan a ±50% do canvas dimensions, escalado pelo zoom
 function _cartClampPan(){
-  var maxOffsetX = _cartW * 0.6 * _cartZoom;
-  var maxOffsetY = _cartH * 0.6 * _cartZoom;
-  if (_cartPanX > maxOffsetX) _cartPanX = maxOffsetX;
-  if (_cartPanX < -maxOffsetX) _cartPanX = -maxOffsetX;
-  if (_cartPanY > maxOffsetY) _cartPanY = maxOffsetY;
-  if (_cartPanY < -maxOffsetY) _cartPanY = -maxOffsetY;
+  if (!_cartW || !_cartH) return;
+  var _S = Math.min(_cartW, _cartH);
+  var _offX = (_cartW - _S) / 2;
+  var _offY = (_cartH - _S) / 2;
+  var mapW = _S * _cartZoom;
+  var mapH = _S * _cartZoom;
+
+  var minPanX = _cartW - (_offX * _cartZoom) - mapW;
+  var maxPanX = - (_offX * _cartZoom);
+  var minPanY = _cartH - (_offY * _cartZoom) - mapH;
+  var maxPanY = - (_offY * _cartZoom);
+
+  if (mapW < _cartW) {
+    _cartPanX = (_cartW - mapW) / 2 - (_offX * _cartZoom);
+  } else {
+    _cartPanX = Math.max(minPanX, Math.min(maxPanX, _cartPanX));
+  }
+
+  if (mapH < _cartH) {
+    _cartPanY = (_cartH - mapH) / 2 - (_offY * _cartZoom);
+  } else {
+    _cartPanY = Math.max(minPanY, Math.min(maxPanY, _cartPanY));
+  }
 }
 function _cartUpdateZoomInfo(){
   var el = document.getElementById('cart-zoom-info');
@@ -56381,7 +56404,7 @@ var _cartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShared
   getPlayerBiomeKey: _cartGetPlayerBiome,
   getQuestFocus: function(){ return (window._questFocusLoc && window._questFocusLoc.key) ? { key: window._questFocusLoc.key, title: window._questFocusLoc.questTitle || 'Missão' } : null; },
   drawQuestHalo: _drawQuestFocusHalo,
-  onAsyncRedraw: function(){ if (_cartCtx && typeof _drawCart === 'function') _drawCart(); }
+  onAsyncRedraw: function(){ if (_cartCtx && typeof _cartCenterOnPlayer === 'function') _cartCenterOnPlayer(); }
 }) : null;
 function _drawCart(){
   if (!_cartCtx || !_cartEngine) return;

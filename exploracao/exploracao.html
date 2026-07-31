@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-31T12:29:38Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-31T12:38:04Z - do not edit directly, edit source -->
 
 
 
@@ -42582,7 +42582,7 @@ var _xcartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShare
     return (window.__EXPLORE_MODE === 'remote') ? [] : null;
   },
   getPlayerBiomeKey: _cartGetPlayerBiomeV2,
-  onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartDraw === 'function') _xcartDraw(); }
+  onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartCenterOnPlayer === 'function') _xcartCenterOnPlayer(); }
 }) : null;
 function _xcartDraw() {
   if (!_xcartCtx || !_xcartEngine) return;
@@ -42692,13 +42692,19 @@ function _xcartWireEvents() {
 
 function _xcartCenterOnPlayer(){
   if (!_xcartEngine || !_xcartCanvas || !_xcartW || !_xcartH) return;
+  var _S = Math.min(_xcartW, _xcartH);
+  var minCover = Math.max(_xcartW, _xcartH) / _S;
+  if (_cartZoom < minCover) _cartZoom = Math.max(1.6, minCover);
+
   var playerKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
   var pos = (_xcartEngine && typeof _xcartEngine.getNodePos === 'function') ? _xcartEngine.getNodePos(playerKey, _xcartW, _xcartH) : null;
   if (!pos) return;
+
   _cartPanX = (_xcartW / 2) - (pos.x * _cartZoom);
   _cartPanY = (_xcartH / 2) - (pos.y * _cartZoom);
   _xcartClampPan();
   _xcartDraw();
+  _xcartUpdateZoomInfo();
 }
 
 
@@ -42720,12 +42726,29 @@ function _xcartSetZoom(newZoom, anchorX, anchorY){
 }
 
 function _xcartClampPan(){
-  var maxOffsetX = _xcartW * 0.6 * _cartZoom;
-  var maxOffsetY = _xcartH * 0.6 * _cartZoom;
-  if (_cartPanX > maxOffsetX) _cartPanX = maxOffsetX;
-  if (_cartPanX < -maxOffsetX) _cartPanX = -maxOffsetX;
-  if (_cartPanY > maxOffsetY) _cartPanY = maxOffsetY;
-  if (_cartPanY < -maxOffsetY) _cartPanY = -maxOffsetY;
+  if (!_xcartW || !_xcartH) return;
+  var _S = Math.min(_xcartW, _xcartH);
+  var _offX = (_xcartW - _S) / 2;
+  var _offY = (_xcartH - _S) / 2;
+  var mapW = _S * _cartZoom;
+  var mapH = _S * _cartZoom;
+
+  var minPanX = _xcartW - (_offX * _cartZoom) - mapW;
+  var maxPanX = - (_offX * _cartZoom);
+  var minPanY = _xcartH - (_offY * _cartZoom) - mapH;
+  var maxPanY = - (_offY * _cartZoom);
+
+  if (mapW < _xcartW) {
+    _cartPanX = (_xcartW - mapW) / 2 - (_offX * _cartZoom);
+  } else {
+    _cartPanX = Math.max(minPanX, Math.min(maxPanX, _cartPanX));
+  }
+
+  if (mapH < _xcartH) {
+    _cartPanY = (_xcartH - mapH) / 2 - (_offY * _cartZoom);
+  } else {
+    _cartPanY = Math.max(minPanY, Math.min(maxPanY, _cartPanY));
+  }
 }
 
 function _xcartUpdateZoomInfo(){
