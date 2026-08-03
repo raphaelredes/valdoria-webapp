@@ -3636,9 +3636,11 @@ LOG SINK (Fase 7):
       z-index: 6;
       max-width: 180px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-      display: none;
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
     }
-    .cart-tooltip.active { display: block; }
+    .cart-tooltip.active { display: none !important; }
     .cart-tooltip strong { color: #c4953a; }
     .cart-tooltip .tier {
       display: inline-block;
@@ -55776,7 +55778,11 @@ function renderCartographyCanvas(el){
       getPlayerBiomeKey: _cartGetPlayerBiome,
       getQuestFocus: function(){ return (window._questFocusLoc && window._questFocusLoc.key) ? { key: window._questFocusLoc.key, title: window._questFocusLoc.questTitle || 'Missão' } : null; },
       drawQuestHalo: _drawQuestFocusHalo,
-      onAsyncRedraw: function(){ if (_cartCtx && typeof _cartCenterOnPlayer === 'function') _cartCenterOnPlayer(); }
+      // FIX mapa preto: chama _drawCart() direto (não _cartCenterOnPlayer) — o
+      // callback pode disparar antes de _cartW/_cartH estarem prontos (race com
+      // imagem em cache no parse-time), e _cartCenterOnPlayer tem guards que
+      // abortam sem desenhar. _drawCart só precisa de _cartCtx + _cartEngine.
+      onAsyncRedraw: function(){ if (_cartCtx && _cartEngine) _drawCart(); }
     });
   }
 
@@ -55810,24 +55816,70 @@ function renderCartographyCanvas(el){
   _wireCartEvents();
   _cartCenterOnPlayer();
 
+  if (typeof requestAnimationFrame !== 'undefined') {
+    requestAnimationFrame(function(){
+      if (document.body.classList.contains('state-cart')) {
+        syncDims();
+        _cartCenterOnPlayer();
+        _drawCart();
+      }
+    });
+  }
+
   if (typeof ResizeObserver !== 'undefined' && _cartCanvas.parentElement) {
     var ro = new ResizeObserver(function(){
       if (document.body.classList.contains('state-cart')) {
         syncDims();
         _cartCenterOnPlayer();
+        _drawCart();
       }
     });
     ro.observe(_cartCanvas.parentElement);
   }
+
+  // Force a one-time zoom-out execution when map is loaded (user directive)
+  setTimeout(function(){
+    if (document.body.classList.contains('state-cart')) {
+      syncDims();
+      _cartSetZoom(_cartZoom * 0.85, _cartW / 2, _cartH / 2);
+    }
+  }, 60);
 
   [20, 80, 200, 450, 800].forEach(function(delay){
     setTimeout(function(){
       if (document.body.classList.contains('state-cart')) {
         syncDims();
         _cartCenterOnPlayer();
+        _drawCart();
       }
     }, delay);
   });
+
+  // FIX mapa preto (race condition): o callback _onWorldMapLoad é registrado no
+  // parse-time (var _cartEngine = createWorldCart(...)). Se world-map.webp já
+  // estava em cache, o callback dispara ANTES de _cartCtx/_cartW/_cartH existirem
+  // → o redraw falha e o callback é consumido sem re-tentar. Este polling verifica
+  // a cada 150ms se o mapa ficou pronto E se a base-cache está stale, e força um
+  // redraw. Auto-encerra em até 8s ou ao sair da cartografia.
+  var _cartMapPollStart = Date.now();
+  var _cartMapPollReady = false;
+  var _cartMapPoll = setInterval(function(){
+    if (!document.body.classList.contains('state-cart')) {
+      clearInterval(_cartMapPoll);
+      return;
+    }
+    if (Date.now() - _cartMapPollStart > 8000) {
+      clearInterval(_cartMapPoll);
+      return;
+    }
+    var _ready = !!(window.CartShared && CartShared.worldMapReady && CartShared.worldMapReady());
+    if (_ready && !_cartMapPollReady) {
+      _cartMapPollReady = true;
+      if (_cartEngine) _cartEngine.invalidateBase();
+      syncDims();
+      _drawCart();
+    }
+  }, 150);
 }
 
 // === QUEST FOCUS HALO (X-6.5.51BJ 2026-05-15) ====================
@@ -56078,7 +56130,11 @@ function _cartCenterOnPlayer(){
 
   var playerKey = (typeof _cartGetPlayerBiome === 'function') ? _cartGetPlayerBiome() : 'plains';
   var pos = (_cartEngine && typeof _cartEngine.getNodePos === 'function') ? _cartEngine.getNodePos(playerKey, _cartW, _cartH) : null;
-  if (!pos) return;
+  if (!pos) {
+    _cartClampPan();
+    _drawCart();
+    return;
+  }
 
   _cartPanX = (_cartW / 2) - (pos.x * _cartZoom);
   _cartPanY = (_cartH / 2) - (pos.y * _cartZoom);
@@ -56159,17 +56215,10 @@ function _cartHandleHover(mx, my){
   _cartHoverRaf = requestAnimationFrame(function(){
     _cartHoverRaf = 0;
     var node = _cartFindNodeAt(mx, my);
+    _cartHideTooltip();
     if (node !== _cartHoverNode) {
       _cartHoverNode = node;
-      if (node) _cartShowTooltip(node, mx, my);
-      else _cartHideTooltip();
       _drawCart();
-    } else if (node) {
-      var tip = document.getElementById('cart-tooltip');
-      if (tip) {
-        tip.style.left = (mx + 12) + 'px';
-        tip.style.top = (my + 12) + 'px';
-      }
     }
   });
 }
@@ -56187,30 +56236,15 @@ function _cartFindNodeAt(mx, my){
   return _cartEngine.findNodeAt({ w: _cartW, h: _cartH, panX: _cartPanX, panY: _cartPanY, zoom: _cartZoom }, mx, my);
 }
 function _cartShowTooltip(b, mx, my){
-  var tip = document.getElementById('cart-tooltip');
-  if (!tip) return;
-  // 2026-05-04 FIX: locais desconhecidos NÃO devem revelar nome/descrição
-  // (BUG 1 da revisão). Tooltip genérico mantém o mistério.
-  var p = window.CITY_MOCK_PLAYER || {};
-  var knownLocs = p.known_locations || [];
-  var isKnown = knownLocs.indexOf(b.key) >= 0 || b.isOrigin;
-  if (!isKnown) {
-    tip.innerHTML = '<strong style="color:var(--v-text-dim, #a09484)">Local Desconhecido</strong><br>'
-      + '<span style="font-size:calc(10px * var(--v-font-scale, 1));font-style:italic;color:#6a5a4a">'
-      + 'Clique para mais informações</span>';
-  } else {
-    // P-mapa sessão #73 (user): o NOME + NÍVEL já aparecem no pill ao passar o mouse
-    // sobre o local — o tooltip mostra SÓ a descrição (textContent, sem repetir info).
-    tip.textContent = b.desc || '';
-    tip.style.fontStyle = 'italic';
-  }
-  tip.style.left = (mx + 12) + 'px';
-  tip.style.top = (my + 12) + 'px';
-  tip.classList.add('active');
+  _cartHideTooltip();
 }
 function _cartHideTooltip(){
   var tip = document.getElementById('cart-tooltip');
-  if (tip) tip.classList.remove('active');
+  if (tip) {
+    tip.classList.remove('active');
+    tip.style.display = 'none';
+    tip.textContent = '';
+  }
 }
 
 
@@ -56297,11 +56331,11 @@ function _openCartLocationPopup(biome){
     if (biome.tier === 0) {
       rec = 'Origem (Cidade Segura)';
     } else {
-      rec = biome.tier <= 1 ? 'Iniciante (nv 1-2)' :
-            biome.tier <= 3 ? 'Aventureiro (nv 2-4)' :
-            biome.tier <= 5 ? 'Veterano (nv 4-7)' :
-            biome.tier <= 7 ? 'Experiente (nv 7-10)' :
-                              'Lendário (nv 10+)';
+      rec = biome.tier <= 1 ? 'Iniciante (Nível 1 a 2)' :
+            biome.tier <= 3 ? 'Aventureiro (Nível 2 a 4)' :
+            biome.tier <= 5 ? 'Veterano (Nível 4 a 7)' :
+            biome.tier <= 7 ? 'Experiente (Nível 7 a 10)' :
+                              'Lendário (Nível 10+)';
     }
   }
   // 2026-05-05 v10: Portões de Valdoria (origem) é EXPLORÁVEL como bioma
@@ -56411,7 +56445,9 @@ var _cartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShared
   getPlayerBiomeKey: _cartGetPlayerBiome,
   getQuestFocus: function(){ return (window._questFocusLoc && window._questFocusLoc.key) ? { key: window._questFocusLoc.key, title: window._questFocusLoc.questTitle || 'Missão' } : null; },
   drawQuestHalo: _drawQuestFocusHalo,
-  onAsyncRedraw: function(){ if (_cartCtx && typeof _cartCenterOnPlayer === 'function') _cartCenterOnPlayer(); }
+  // FIX mapa preto: _drawCart() direto em vez de _cartCenterOnPlayer() — ver
+  // comentário no onAsyncRedraw de renderCartographyCanvas acima.
+  onAsyncRedraw: function(){ if (_cartCtx && _cartEngine) _drawCart(); }
 }) : null;
 function _drawCart(){
   if (!_cartCtx || !_cartEngine) return;

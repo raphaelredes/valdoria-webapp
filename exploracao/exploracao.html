@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-31T13:03:21Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-07-31T14:58:20Z - do not edit directly, edit source -->
 
 
 
@@ -41796,7 +41796,9 @@ function openCartography() {
         return (window.__EXPLORE_MODE === 'remote') ? [] : null;
       },
       getPlayerBiomeKey: _cartGetPlayerBiomeV2,
-      onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartCenterOnPlayer === 'function') _xcartCenterOnPlayer(); }
+      // FIX mapa preto: _xcartDraw() direto (não _xcartCenterOnPlayer) — o callback
+      // pode disparar antes do canvas estar pronto (race com imagem em cache).
+      onAsyncRedraw: function(){ if (_xcartCtx && _xcartEngine) _xcartDraw(); }
     });
   }
 
@@ -41833,15 +41835,36 @@ function openCartography() {
   _xcartWireEvents();
   _xcartCenterOnPlayer();
 
+  if (typeof requestAnimationFrame !== 'undefined') {
+    requestAnimationFrame(function(){
+      var ov = document.getElementById('cartography-overlay');
+      if (ov && ov.classList.contains('visible')) {
+        syncXDims();
+        _xcartCenterOnPlayer();
+        _xcartDraw();
+      }
+    });
+  }
+
   if (typeof ResizeObserver !== 'undefined' && _xcartCanvas.parentElement) {
     var ro = new ResizeObserver(function(){
       if (document.getElementById('cartography-overlay') && document.getElementById('cartography-overlay').classList.contains('visible')) {
         syncXDims();
         _xcartCenterOnPlayer();
+        _xcartDraw();
       }
     });
     ro.observe(_xcartCanvas.parentElement);
   }
+
+  // Force a one-time zoom-out execution when map is loaded (user directive)
+  setTimeout(function(){
+    var ov = document.getElementById('cartography-overlay');
+    if (ov && ov.classList.contains('visible')) {
+      syncXDims();
+      _xcartSetZoom(_cartZoom * 0.85, _xcartW / 2, _xcartH / 2);
+    }
+  }, 60);
 
   [20, 80, 200, 450, 800].forEach(function(delay){
     setTimeout(function(){
@@ -41849,11 +41872,33 @@ function openCartography() {
       if (ov && ov.classList.contains('visible')) {
         syncXDims();
         _xcartCenterOnPlayer();
+        _xcartDraw();
       }
     }, delay);
   });
 
   _xcartEnsureKnownThenRedraw();
+}
+
+function _xcartCenterOnPlayer(){
+  if (!_xcartEngine || !_xcartCanvas || !_xcartW || !_xcartH) return;
+  var _S = Math.min(_xcartW, _xcartH);
+  var minCover = Math.max(_xcartW, _xcartH) / _S;
+  if (_cartZoom < minCover) _cartZoom = Math.max(1.6, minCover);
+
+  var playerKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
+  var pos = (_xcartEngine && typeof _xcartEngine.getNodePos === 'function') ? _xcartEngine.getNodePos(playerKey, _xcartW, _xcartH) : null;
+  if (!pos) {
+    _xcartClampPan();
+    _xcartDraw();
+    return;
+  }
+
+  _cartPanX = (_xcartW / 2) - (pos.x * _cartZoom);
+  _cartPanY = (_xcartH / 2) - (pos.y * _cartZoom);
+  _xcartClampPan();
+  _xcartDraw();
+  _xcartUpdateZoomInfo();
 }
 
 async function _xcartEnsureKnownThenRedraw(){
@@ -41935,7 +41980,8 @@ var _xcartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShare
     return (window.__EXPLORE_MODE === 'remote') ? [] : null;
   },
   getPlayerBiomeKey: _cartGetPlayerBiomeV2,
-  onAsyncRedraw: function(){ if (_xcartCtx && typeof _xcartCenterOnPlayer === 'function') _xcartCenterOnPlayer(); }
+  // FIX mapa preto: _xcartDraw() direto (não _xcartCenterOnPlayer) — ver comentário acima.
+  onAsyncRedraw: function(){ if (_xcartCtx && _xcartEngine) _xcartDraw(); }
 }) : null;
 function _xcartDraw() {
   if (!_xcartCtx || !_xcartEngine) return;
@@ -42043,22 +42089,7 @@ function _xcartWireEvents() {
   }
 }
 
-function _xcartCenterOnPlayer(){
-  if (!_xcartEngine || !_xcartCanvas || !_xcartW || !_xcartH) return;
-  var _S = Math.min(_xcartW, _xcartH);
-  var minCover = Math.max(_xcartW, _xcartH) / _S;
-  if (_cartZoom < minCover) _cartZoom = Math.max(1.6, minCover);
 
-  var playerKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
-  var pos = (_xcartEngine && typeof _xcartEngine.getNodePos === 'function') ? _xcartEngine.getNodePos(playerKey, _xcartW, _xcartH) : null;
-  if (!pos) return;
-
-  _cartPanX = (_xcartW / 2) - (pos.x * _cartZoom);
-  _cartPanY = (_xcartH / 2) - (pos.y * _cartZoom);
-  _xcartClampPan();
-  _xcartDraw();
-  _xcartUpdateZoomInfo();
-}
 
 
 function _xcartTouchDist(touches){
@@ -42114,17 +42145,10 @@ function _xcartHandleHover(mx, my){
   _xcartHoverRaf = requestAnimationFrame(function(){
     _xcartHoverRaf = 0;
     var node = _xcartFindNodeAt(mx, my);
+    _xcartHideTooltip();
     if (node !== _xcartHoverNode) {
       _xcartHoverNode = node;
-      if (node) _xcartShowTooltip(node, mx, my);
-      else _xcartHideTooltip();
       _xcartDraw();
-    } else if (node) {
-      var tip = document.getElementById('xcart-tooltip');
-      if (tip) {
-        tip.style.left = (mx + 12) + 'px';
-        tip.style.top = (my + 12) + 'px';
-      }
     }
   });
 }
@@ -42144,20 +42168,16 @@ function _xcartFindNodeAt(mx, my){
 }
 
 function _xcartShowTooltip(b, mx, my){
-  var tip = document.getElementById('xcart-tooltip');
-  if (!tip) return;
-  // P-mapa sessão #73 (user): o NOME + NÍVEL já aparecem no pill ao passar o mouse
-  // sobre o local — o tooltip mostra SÓ a descrição (textContent, sem repetir info).
-  tip.textContent = b.desc || '';
-  tip.style.fontStyle = 'italic';
-  tip.style.left = (mx + 12) + 'px';
-  tip.style.top = (my + 12) + 'px';
-  tip.classList.add('active');
+  _xcartHideTooltip();
 }
 
 function _xcartHideTooltip(){
   var tip = document.getElementById('xcart-tooltip');
-  if (tip) tip.classList.remove('active');
+  if (tip) {
+    tip.classList.remove('active');
+    tip.style.display = 'none';
+    tip.textContent = '';
+  }
 }
 
 // Override renderCartography pra usar V2 também (caso outros código chamem)
@@ -44041,12 +44061,18 @@ function bindQuickActions() {
   var cZoomOut = document.getElementById('cart-zoom-out');
   var cZoomCenter = document.getElementById('cart-zoom-center');
   if (cZoomIn) cZoomIn.addEventListener('click', function() {
-    if (_cartZoom >= CART_ZOOM_MAX - 0.001) return;
-    _cartSetZoom(_cartZoom + 0.3);
+    if (typeof _xcartSetZoom === 'function') {
+      _xcartSetZoom(_cartZoom * 1.2, _xcartW / 2, _xcartH / 2);
+    } else if (typeof _cartSetZoom === 'function') {
+      _cartSetZoom(_cartZoom * 1.2, _cartW / 2, _cartH / 2);
+    }
   });
   if (cZoomOut) cZoomOut.addEventListener('click', function() {
-    if (_cartZoom <= CART_ZOOM_MIN + 0.001) return;
-    _cartSetZoom(_cartZoom - 0.3);
+    if (typeof _xcartSetZoom === 'function') {
+      _xcartSetZoom(_cartZoom * 0.8, _xcartW / 2, _xcartH / 2);
+    } else if (typeof _cartSetZoom === 'function') {
+      _cartSetZoom(_cartZoom * 0.8, _cartW / 2, _xcartH / 2);
+    }
   });
   if (cZoomCenter) cZoomCenter.addEventListener('click', _cartCenterOnPlayer);
   // Drag pra panorar quando zoom > 1

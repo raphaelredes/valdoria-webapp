@@ -389,7 +389,13 @@
         var cbs = _cartWorldMapCbs; _cartWorldMapCbs = [];
         cbs.forEach(function(cb){ try { cb(); } catch(_){} });
       };
-      _im.onerror = function(){ _cartWorldMap = null; };
+      _im.onerror = function(){
+        if (_im.src && _im.src.indexOf('../shared/') === -1 && _im.src.indexOf('/shared/') !== -1) {
+          _im.src = _im.src.replace('/shared/', '../shared/');
+        } else {
+          _cartWorldMap = null;
+        }
+      };
       _im.src = '/shared/img/map/world-map.webp';
     } catch(_e){ _cartWorldMap = null; }
   })();
@@ -877,8 +883,8 @@
   // função que adiciona elementos baseados no biome/key) — alimenta
   // todos os pictogramas existentes sem editar cada um individualmente.
   function _drawBiomeArt(ctx, b, w, h) {
-    _drawBiomeArtCore(ctx, b, w, h);
-    _drawBiomeAtmosphere(ctx, b, w, h);
+    // Deprecated legacy vector drawing: no-op to prevent legacy map artwork from rendering
+    return;
   }
 
   // === _drawBiomeArtCore (renamed do antigo _drawBiomeArt) ===========
@@ -3269,10 +3275,10 @@
     // sem badge (cidade segura).
     var hasLvl = (typeof b.tier === 'number' && b.tier > 0);
     var lvlRange = !hasLvl ? '' :
-                   (b.tier <= 1) ? 'nv 1–2' :
-                   (b.tier <= 3) ? 'nv 2–4' :
-                   (b.tier <= 5) ? 'nv 4–7' :
-                   (b.tier <= 7) ? 'nv 7–10' : 'nv 10+';
+                   (b.tier <= 1) ? 'Nível 1 a 2' :
+                   (b.tier <= 3) ? 'Nível 2 a 4' :
+                   (b.tier <= 5) ? 'Nível 4 a 7' :
+                   (b.tier <= 7) ? 'Nível 7 a 10' : 'Nível 10+';
     var lvlW = 0;
     if (hasLvl) { ctx.font = 'italic 8px serif'; lvlW = ctx.measureText(lvlRange).width; ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif'; }
     var pillW = Math.max(tw, lvlW) + 12;
@@ -3619,7 +3625,13 @@
       CART_BIOMES.forEach(function (b) {
         var im = new Image();
         im.onload = function () { try { _onLoad(); } catch (_) { } };
-        im.onerror = function () { _locArt[b.key] = false; };
+        im.onerror = function () {
+          if (im.src && im.src.indexOf('../shared/') === -1 && im.src.indexOf('/shared/') !== -1) {
+            im.src = im.src.replace('/shared/', '../shared/');
+          } else {
+            _locArt[b.key] = false;
+          }
+        };
         im.src = '/shared/img/map/locations/' + b.key + '.webp';
         _locArt[b.key] = im;
       });
@@ -3638,14 +3650,9 @@
     }
     function _drawLocArt(ctx, b, w, h, isHover){
       var ic = _locArt && _locArt[b.key];
-      var _isCity = (b.key === 'plains' || b.biome === 'plains');
       if (!ic || ic === false || !ic.complete || !ic.naturalWidth) {
-        // 2026-06-21 (user): a CIDADE (origem/plains) mostra SÓ a imagem OpenAI
-        // (plains.webp). NÃO cair no castelo VETORIAL procedural — ele dava um FLASH
-        // do desenho antigo antes da webp carregar (e em file://). Nada é desenhado;
-        // o redraw assíncrono (_onLoad) pinta a webp quando chega. Demais biomas
-        // mantêm o pictograma fallback.
-        if (!_isCity) _drawBiomeArt(ctx, b, w, h);
+        // Nunca renderiza o mapa procedural/vetorial legado (_drawBiomeArt).
+        // Nada é desenhado enquanto a imagem carrega; o _onLoad pinta a WebP quando pronta.
         return;
       }
       var ov = _locCoords[b.key] || {};
@@ -3662,7 +3669,7 @@
         ctx.drawImage(ic, cx - iw / 2, cy - ih / 2, iw, ih);
         if (isHover) ctx.restore();
       }
-      catch (_) { if (!_isCity) _drawBiomeArt(ctx, b, w, h); }
+      catch (_) { }
     }
 
     // Orquestrador — FUNDO world-map.webp (cover, sob pan/zoom) + ícones/nodes/paths/
