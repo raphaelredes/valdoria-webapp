@@ -2,448 +2,1438 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#2a2420">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#181411">
     <meta http-equiv="Cache-Control" content="no-cache">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Lendas de Valdoria — Documentação</title>
+    <title>Lendas de Valdoria — Portal de Documentação</title>
+    
+    <!-- Fontes Oficiais do Projeto -->
     <link rel="preload" href="../shared/fonts/marcellus.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../shared/fonts/cinzel.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="../shared/fonts.css">
-    <link rel="stylesheet" href="../valdoria-design.css">
+    
+    <!-- Parser de Markdown com Fallback -->
     <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
-    <style>
-        :root {
-            --sidebar-w: 320px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            height: 100%;
-            background: var(--v-bg);
-            color: var(--v-text);
-            font-family: var(--v-font);
-            font-size: 15px;
-            line-height: 1.7;
-        }
-        @media (min-width: 1024px) {
-            html, body { font-size: 16px; }
-        }
-        .app { display: flex; height: 100vh; overflow: hidden; }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: var(--sidebar-w); min-width: var(--sidebar-w);
-            background: var(--v-bg-raised);
-            border-right: 1px solid var(--v-border);
-            display: flex; flex-direction: column;
-            overflow: hidden; transition: transform var(--v-transition-base); z-index: var(--v-z-header, 100);
+    <style>
+        /* ==========================================================================
+           VALDORIA DOCS DESIGN SYSTEM (Widescreen Pro Documentation)
+           ========================================================================== */
+        :root {
+            /* Paleta Medieval Warm Dark */
+            --doc-bg: #16120f;
+            --doc-bg-subtle: #1c1713;
+            --doc-bg-surface: #231c17;
+            --doc-bg-card: #28211b;
+            --doc-bg-card-hover: #332a22;
+            --doc-bg-code: #110e0c;
+            
+            /* Ouro e Acentos */
+            --doc-gold: #c4953a;
+            --doc-gold-light: #e5c07b;
+            --doc-gold-dim: #9a7530;
+            --doc-gold-faint: rgba(196, 149, 58, 0.08);
+            --doc-gold-glow: rgba(196, 149, 58, 0.25);
+            
+            /* Bordas */
+            --doc-border: #3d3126;
+            --doc-border-light: #524233;
+            --doc-border-gold: rgba(196, 149, 58, 0.3);
+            
+            /* Textos */
+            --doc-text: #ded4c3;
+            --doc-text-bright: #ffffff;
+            --doc-text-dim: #a69885;
+            --doc-text-muted: #786b5c;
+            
+            /* Status Callouts */
+            --doc-info: #3b82f6;
+            --doc-success: #10b981;
+            --doc-warning: #f59e0b;
+            --doc-danger: #ef4444;
+            --doc-purple: #8b5cf6;
+
+            /* Tipografia */
+            --font-display: 'Cinzel', 'Marcellus', 'Georgia', serif;
+            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+            /* Dimensões Layout */
+            --header-h: 60px;
+            --sidebar-w: 300px;
+            --toc-w: 240px;
+            --content-max-w: 960px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
         }
-        .sidebar-header {
-            padding: 20px var(--v-space-xl, 16px) var(--v-space-lg, 12px);
-            border-bottom: 1px solid var(--v-border);
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--doc-bg);
+            color: var(--doc-text);
+            font-family: var(--font-body);
+            font-size: 15px;
+            line-height: 1.65;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scrollbars elegantes */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--doc-bg-subtle);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--doc-border);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--doc-gold-dim);
+        }
+
+        /* ==========================================================================
+           ESTRUTURA GERAL (GRID / FLEX)
+           ========================================================================== */
+        .doc-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* TOPBAR / HEADER */
+        .doc-header {
+            height: var(--header-h);
+            background: var(--doc-bg-subtle);
+            border-bottom: 1px solid var(--doc-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 50;
             flex-shrink: 0;
         }
-        .sidebar-header h1 {
-            font-family: var(--v-font-display);
-            color: var(--v-gold); font-size: 18px; letter-spacing: 1px; margin-bottom: var(--v-space-sm, 4px);
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            cursor: pointer;
         }
-        .sidebar-header .subtitle { font-size: 12px; color: var(--v-text-dim); }
-        .search-box {
-            padding: var(--v-space-md-lg, 10px) var(--v-space-xl, 16px); border-bottom: 1px solid var(--v-border); flex-shrink: 0;
+        .header-logo-icon {
+            font-size: 22px;
+            filter: drop-shadow(0 0 8px var(--doc-gold-glow));
         }
-        .search-box input {
-            width: 100%; padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
-            background: var(--v-bg); border: 1px solid var(--v-border);
-            border-radius: var(--v-radius-sm); color: var(--v-text);
-            font-family: var(--v-font); font-size: 13px; outline: none;
-            transition: border-color var(--v-transition);
+        .header-title {
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--doc-gold-light);
+            text-transform: uppercase;
         }
-        .search-box input:focus { border-color: var(--v-gold-dim); }
-        .search-box input::placeholder { color: var(--v-text-dim); }
-        .nav-list { flex: 1; overflow-y: auto; padding: var(--v-space-md, 8px) 0; }
-        .nav-list::-webkit-scrollbar { width: 4px; }
-        .nav-list::-webkit-scrollbar-track { background: transparent; }
-        .nav-list::-webkit-scrollbar-thumb { background: var(--v-border); border-radius: var(--v-radius-sm); }
-        .nav-category {
-            padding: var(--v-space-lg, 12px) var(--v-space-xl, 16px) 6px;
-            font-family: var(--v-font-display); font-size: 11px;
-            text-transform: uppercase; letter-spacing: 2px; color: var(--v-gold-dim);
-            cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px;
-        }
-        .nav-category:hover { color: var(--v-gold); }
-        .nav-category .arrow { font-size: 9px; transition: transform var(--v-transition); }
-        .nav-category.collapsed .arrow { transform: rotate(-90deg); }
-        .nav-category-items { overflow: hidden; transition: max-height var(--v-transition-base); }
-        .nav-category.collapsed + .nav-category-items { max-height: 0 !important; }
-        .nav-item {
-            display: block; padding: 7px var(--v-space-xl, 16px) 7px var(--v-space-2xl, 24px);
-            color: var(--v-text-dim); text-decoration: none; font-size: 13px;
-            cursor: pointer; transition: all var(--v-transition-fast);
-            border-left: 3px solid transparent; line-height: 1.4;
-        }
-        .nav-item:hover { background: var(--v-bg-card-hover); color: var(--v-text); }
-        .nav-item.active {
-            background: var(--v-bg-card); color: var(--v-gold-light);
-            border-left-color: var(--v-gold);
+        .header-badge {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            background: rgba(196, 149, 58, 0.12);
+            color: var(--doc-gold);
+            border: 1px solid var(--doc-border-gold);
+            padding: 2px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
         }
 
-        /* MAIN — flex container for content + toc */
-        .main { flex: 1; overflow: hidden; padding: 0; display: flex; }
-        .main::-webkit-scrollbar { width: 6px; }
-        .main::-webkit-scrollbar-track { background: var(--v-bg); }
-        .main::-webkit-scrollbar-thumb { background: var(--v-border); border-radius: var(--v-radius-sm); }
-        .main-scroll { flex: 1; overflow-y: auto; }
-        .main-scroll::-webkit-scrollbar { width: 6px; }
-        .main-scroll::-webkit-scrollbar-track { background: var(--v-bg); }
-        .main-scroll::-webkit-scrollbar-thumb { background: var(--v-border); border-radius: var(--v-radius-sm); }
-        .content { max-width: 1100px; margin: 0 auto; padding: 32px 48px 80px; }
+        .header-center {
+            flex: 1;
+            max-width: 480px;
+            margin: 0 32px;
+        }
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+        .search-input {
+            width: 100%;
+            height: 38px;
+            padding: 0 40px 0 38px;
+            background: var(--doc-bg-surface);
+            border: 1px solid var(--doc-border);
+            border-radius: var(--radius-md);
+            color: var(--doc-text-bright);
+            font-size: 13.5px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .search-input:focus {
+            border-color: var(--doc-gold);
+            box-shadow: 0 0 0 3px var(--doc-gold-glow);
+            background: var(--doc-bg-card);
+        }
+        .search-input::placeholder {
+            color: var(--doc-text-muted);
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--doc-text-muted);
+            font-size: 14px;
+            pointer-events: none;
+        }
+        .search-kbd {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            font-family: var(--font-mono);
+            background: var(--doc-bg-card);
+            border: 1px solid var(--doc-border);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--doc-text-dim);
+            pointer-events: none;
+        }
 
-        /* WELCOME */
-        .welcome { text-align: center; padding: 80px 20px; }
-        .welcome h2 {
-            font-family: var(--v-font-display); color: var(--v-gold);
-            font-size: 34px; margin-bottom: var(--v-space-xl, 16px);
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .welcome p { color: var(--v-text-dim); font-size: 15px; margin-bottom: 32px; }
-        .welcome .stats { display: flex; gap: var(--v-space-2xl, 24px); justify-content: center; flex-wrap: wrap; }
-        .stat-card {
-            background: var(--v-bg-card); border: 1px solid var(--v-border);
-            border-radius: var(--v-radius); padding: var(--v-space-2xl, 24px) 36px; text-align: center; min-width: 160px;
+        .header-btn {
+            background: var(--doc-bg-surface);
+            border: 1px solid var(--doc-border);
+            color: var(--doc-text);
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
         }
-        .stat-card .number { font-family: var(--v-font-display); font-size: 40px; color: var(--v-gold); }
-        .stat-card .label { font-size: 12px; color: var(--v-text-dim); margin-top: var(--v-space-sm, 4px); }
+        .header-btn:hover {
+            border-color: var(--doc-gold-dim);
+            color: var(--doc-gold-light);
+            background: var(--doc-bg-card-hover);
+        }
+        .header-btn.primary {
+            background: var(--doc-gold-dim);
+            border-color: var(--doc-gold);
+            color: #1a140e;
+            font-weight: 600;
+        }
+        .header-btn.primary:hover {
+            background: var(--doc-gold);
+            color: #000;
+        }
 
-        /* MARKDOWN */
-        .md-content h1 {
-            font-family: var(--v-font-display); color: var(--v-gold);
-            font-size: 30px; margin-bottom: var(--v-space-md, 8px); padding-bottom: var(--v-space-md-lg, 10px);
-            border-bottom: 2px solid var(--v-border);
+        /* CORPO PRINCIPAL (3 COLUNAS) */
+        .doc-body {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - var(--header-h));
+            overflow: hidden;
+            position: relative;
         }
-        .md-content h2 {
-            font-family: var(--v-font-display); color: var(--v-gold-light);
-            font-size: 22px; margin-top: 32px; margin-bottom: var(--v-space-lg, 12px);
-            padding-bottom: 6px; border-bottom: 1px solid rgba(74, 56, 40, 0.5);
-        }
-        .md-content h3 { color: var(--v-text-bright); font-size: 18px; margin-top: var(--v-space-2xl, 24px); margin-bottom: var(--v-space-md, 8px); }
-        .md-content h4 { color: var(--v-text); font-size: 14px; margin-top: 20px; margin-bottom: 6px; }
-        .md-content p { margin-bottom: var(--v-space-lg, 12px); }
-        .md-content a { color: var(--v-gold); text-decoration: none; }
-        .md-content a:hover { color: var(--v-gold-light); text-decoration: underline; }
-        .md-content strong { color: var(--v-text-bright); }
-        .md-content em { color: var(--v-text-dim); font-style: italic; }
-        .md-content ul, .md-content ol { padding-left: var(--v-space-2xl, 24px); margin-bottom: var(--v-space-lg, 12px); }
-        .md-content li { margin-bottom: var(--v-space-sm, 4px); }
-        .md-content li::marker { color: var(--v-gold-dim); }
-        .md-content blockquote {
-            border-left: 3px solid var(--v-gold-dim); padding: var(--v-space-md, 8px) var(--v-space-xl, 16px);
-            margin: var(--v-space-lg, 12px) 0; background: rgba(196, 149, 58, 0.05);
-            border-radius: 0 var(--v-radius-sm, 6px) var(--v-radius-sm, 6px) 0; color: var(--v-text-dim);
-        }
-        .md-content hr { border: none; border-top: 1px solid var(--v-border); margin: var(--v-space-2xl, 24px) 0; }
-        .md-content code {
-            font-family: var(--v-font-mono); background: rgba(0, 0, 0, 0.3);
-            padding: var(--v-space-xs, 2px) 6px; border-radius: var(--v-radius-sm); font-size: 13px; color: var(--v-gold-light);
-        }
-        .md-content pre {
-            background: #1a1612; border: 1px solid var(--v-border);
-            border-radius: var(--v-radius-sm); padding: var(--v-space-xl, 16px); overflow-x: auto; margin: var(--v-space-lg, 12px) 0;
-        }
-        .md-content pre code {
-            background: none; padding: 0; font-size: 13px; line-height: 1.5; color: var(--v-text);
-        }
-        .md-content table { width: 100%; border-collapse: collapse; margin: var(--v-space-lg, 12px) 0; font-size: 13px; }
-        .md-content thead th {
-            background: var(--v-bg-raised); color: var(--v-gold);
-            font-family: var(--v-font-display); font-size: 12px;
-            text-transform: uppercase; letter-spacing: 0.5px;
-            padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px); text-align: left;
-            border-bottom: 2px solid var(--v-border);
-            position: sticky; top: 0;
-        }
-        .md-content tbody td {
-            padding: var(--v-space-md, 8px) var(--v-space-lg, 12px); border-bottom: 1px solid rgba(74, 56, 40, 0.3); vertical-align: top;
-        }
-        .md-content tbody tr:hover { background: rgba(74, 56, 40, 0.1); }
-        .md-content tbody td code { font-size: 12px; }
 
-        /* ASCII diagrams */
-        .md-content pre code {
+        /* ==========================================================================
+           SIDEBAR ESQUERDA (NAVEGAÇÃO)
+           ========================================================================== */
+        .doc-sidebar {
+            width: var(--sidebar-w);
+            min-width: var(--sidebar-w);
+            background: var(--doc-bg-subtle);
+            border-right: 1px solid var(--doc-border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+            z-index: 40;
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-quick-filters {
+            padding: 12px 16px 8px;
+            border-bottom: 1px solid var(--doc-border);
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+        .sidebar-quick-filters::-webkit-scrollbar {
+            height: 3px;
+        }
+        .filter-chip {
+            background: var(--doc-bg-surface);
+            border: 1px solid var(--doc-border);
+            color: var(--doc-text-dim);
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .filter-chip:hover {
+            border-color: var(--doc-gold-dim);
+            color: var(--doc-text-bright);
+        }
+        .filter-chip.active {
+            background: var(--doc-gold-faint);
+            border-color: var(--doc-gold);
+            color: var(--doc-gold-light);
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 8px 30px;
+        }
+
+        .nav-group {
+            margin-bottom: 16px;
+        }
+        .nav-group-header {
+            padding: 8px 12px;
+            font-family: var(--font-display);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--doc-gold-dim);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s;
+        }
+        .nav-group-header:hover {
+            background: var(--doc-bg-surface);
+            color: var(--doc-gold-light);
+        }
+        .nav-group-header .group-arrow {
+            font-size: 9px;
+            transition: transform 0.2s ease;
+        }
+        .nav-group.collapsed .group-arrow {
+            transform: rotate(-90deg);
+        }
+        .nav-group-items {
+            margin-top: 2px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .nav-group.collapsed .nav-group-items {
+            display: none;
+        }
+
+        .nav-link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 12px 7px 16px;
+            color: var(--doc-text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-left: 2px solid transparent;
+            line-height: 1.4;
+        }
+        .nav-link-item:hover {
+            background: var(--doc-bg-card-hover);
+            color: var(--doc-text-bright);
+            padding-left: 18px;
+        }
+        .nav-link-item.active {
+            background: var(--doc-bg-card);
+            color: var(--doc-gold-light);
+            border-left-color: var(--doc-gold);
+            font-weight: 500;
+            box-shadow: inset 1px 0 0 var(--doc-gold);
+        }
+        .nav-link-item .item-badge {
+            font-size: 10px;
+            opacity: 0.6;
+        }
+
+        /* ==========================================================================
+           ÁREA CENTRAL (MAIN CONTENT)
+           ========================================================================== */
+        .doc-main {
+            flex: 1;
+            height: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--doc-bg);
+            position: relative;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: var(--content-max-w);
+            margin: 0 auto;
+            padding: 40px 48px 120px;
+        }
+
+        /* BREADCRUMB & METADATA */
+        .content-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            color: var(--doc-text-muted);
+            margin-bottom: 16px;
+        }
+        .content-breadcrumb a {
+            color: var(--doc-gold-dim);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .content-breadcrumb a:hover {
+            color: var(--doc-gold-light);
+            text-decoration: underline;
+        }
+
+        .doc-meta-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 12px 18px;
+            background: var(--doc-bg-surface);
+            border: 1px solid var(--doc-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 32px;
+            font-size: 12.5px;
+            color: var(--doc-text-dim);
+        }
+        .meta-tags {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .meta-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .meta-tag code {
+            font-family: var(--font-mono);
+            background: var(--doc-bg-code);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--doc-gold-light);
+            border: 1px solid var(--doc-border);
+        }
+        .copy-path-btn {
+            background: transparent;
+            border: 1px solid var(--doc-border);
+            color: var(--doc-text-dim);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .copy-path-btn:hover {
+            border-color: var(--doc-gold-dim);
+            color: var(--doc-gold-light);
+        }
+
+        /* ==========================================================================
+           TIPOGRAFIA & RENDERIZAÇÃO DO MARKDOWN
+           ========================================================================== */
+        .markdown-rendered h1 {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--doc-gold-light);
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--doc-border-gold);
+            line-height: 1.3;
+        }
+
+        .markdown-rendered h2 {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--doc-gold);
+            margin-top: 40px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--doc-border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .markdown-rendered h3 {
+            font-family: var(--font-display);
+            font-size: 17px;
+            color: var(--doc-text-bright);
+            margin-top: 28px;
+            margin-bottom: 12px;
+        }
+
+        .markdown-rendered h4 {
+            font-size: 14.5px;
+            color: var(--doc-gold-light);
+            margin-top: 20px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .markdown-rendered p {
+            margin-bottom: 16px;
+            color: var(--doc-text);
+        }
+
+        .markdown-rendered a {
+            color: var(--doc-gold-light);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: color 0.15s;
+        }
+        .markdown-rendered a:hover {
+            color: #fff;
+        }
+
+        .markdown-rendered strong {
+            color: var(--doc-text-bright);
+            font-weight: 600;
+        }
+
+        .markdown-rendered ul, .markdown-rendered ol {
+            padding-left: 24px;
+            margin-bottom: 20px;
+        }
+        .markdown-rendered li {
+            margin-bottom: 6px;
+        }
+        .markdown-rendered li::marker {
+            color: var(--doc-gold-dim);
+        }
+
+        .markdown-rendered blockquote {
+            margin: 20px 0;
+            padding: 14px 20px;
+            background: rgba(196, 149, 58, 0.05);
+            border-left: 4px solid var(--doc-gold);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            color: var(--doc-text-dim);
+            font-style: italic;
+        }
+
+        .markdown-rendered hr {
+            border: none;
+            border-top: 1px solid var(--doc-border);
+            margin: 36px 0;
+        }
+
+        /* TABELAS */
+        .markdown-rendered table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 24px 0;
+            border: 1px solid var(--doc-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            font-size: 13.5px;
+            background: var(--doc-bg-surface);
+        }
+        .markdown-rendered th {
+            background: var(--doc-bg-card);
+            color: var(--doc-gold-light);
+            font-family: var(--font-display);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--doc-border);
+        }
+        .markdown-rendered td {
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(61, 49, 38, 0.5);
+            color: var(--doc-text);
+            vertical-align: top;
+        }
+        .markdown-rendered tr:last-child td {
+            border-bottom: none;
+        }
+        .markdown-rendered tr:hover td {
+            background: var(--doc-bg-card-hover);
+        }
+
+        /* CÓDIGOS & BLOCOS */
+        .markdown-rendered code:not(pre code) {
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            background: var(--doc-bg-card);
+            color: var(--doc-gold-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--doc-border);
+        }
+
+        .code-block-wrapper {
+            position: relative;
+            margin: 20px 0;
+            background: var(--doc-bg-code);
+            border: 1px solid var(--doc-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        .code-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 14px;
+            background: #181411;
+            border-bottom: 1px solid var(--doc-border);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--doc-text-muted);
+            text-transform: uppercase;
+        }
+        .copy-code-btn {
+            background: transparent;
+            border: none;
+            color: var(--doc-text-dim);
+            cursor: pointer;
+            font-size: 11px;
+            font-family: var(--font-body);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .copy-code-btn:hover {
+            color: var(--doc-gold-light);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .markdown-rendered pre {
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 0;
+            background: transparent;
+        }
+        .markdown-rendered pre code {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.55;
+            color: #d1c7b7;
             white-space: pre;
             word-wrap: normal;
         }
 
-        /* TOPBAR mobile */
-        .topbar {
-            display: none; background: var(--v-bg-raised);
-            border-bottom: 1px solid var(--v-border);
-            padding: var(--v-space-md-lg, 10px) var(--v-space-xl, 16px); align-items: center; gap: var(--v-space-lg, 12px);
-            position: sticky; top: 0; z-index: var(--v-z-sticky, 50);
+        /* CALLOUTS / ALERT BOXES (GitHub Style) */
+        .doc-alert {
+            margin: 20px 0;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            border-left: 4px solid;
+            background: var(--doc-bg-surface);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
-        .topbar .menu-btn {
-            background: none; border: 1px solid var(--v-border);
-            color: var(--v-gold); font-size: 18px; padding: var(--v-space-sm, 4px) var(--v-space-md-lg, 10px);
-            border-radius: var(--v-radius-sm); cursor: pointer;
+        .doc-alert-title {
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .topbar h1 { font-family: var(--v-font-display); color: var(--v-gold); font-size: 15px; flex: 1; }
+        .doc-alert.note { border-color: var(--doc-info); background: rgba(59, 130, 246, 0.08); }
+        .doc-alert.note .doc-alert-title { color: #60a5fa; }
+        .doc-alert.tip { border-color: var(--doc-success); background: rgba(16, 185, 129, 0.08); }
+        .doc-alert.tip .doc-alert-title { color: #34d399; }
+        .doc-alert.important { border-color: var(--doc-purple); background: rgba(139, 92, 246, 0.08); }
+        .doc-alert.important .doc-alert-title { color: #a78bfa; }
+        .doc-alert.warning { border-color: var(--doc-warning); background: rgba(245, 158, 11, 0.08); }
+        .doc-alert.warning .doc-alert-title { color: #fbbf24; }
+        .doc-alert.caution { border-color: var(--doc-danger); background: rgba(239, 68, 68, 0.08); }
+        .doc-alert.caution .doc-alert-title { color: #f87171; }
+
+        /* ==========================================================================
+           TOC DIREITA (ON THIS PAGE)
+           ========================================================================== */
+        .doc-toc {
+            width: var(--toc-w);
+            min-width: var(--toc-w);
+            padding: 40px 16px 40px 20px;
+            border-left: 1px solid var(--doc-border);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .toc-title {
+            font-family: var(--font-display);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--doc-gold-dim);
+            margin-bottom: 12px;
+        }
+        .toc-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .toc-link {
+            font-size: 12.5px;
+            color: var(--doc-text-dim);
+            text-decoration: none;
+            line-height: 1.4;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border-left: 2px solid transparent;
+            transition: all 0.15s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .toc-link:hover {
+            color: var(--doc-text-bright);
+            background: var(--doc-bg-surface);
+        }
+        .toc-link.active {
+            color: var(--doc-gold-light);
+            border-left-color: var(--doc-gold);
+            background: var(--doc-bg-surface);
+            font-weight: 500;
+        }
+        .toc-link.depth-3 {
+            padding-left: 18px;
+            font-size: 11.5px;
+            opacity: 0.85;
+        }
+
+        /* ==========================================================================
+           TELA INICIAL / WELCOME DASHBOARD
+           ========================================================================== */
+        .welcome-hero {
+            text-align: center;
+            padding: 40px 0 50px;
+            border-bottom: 1px solid var(--doc-border);
+            margin-bottom: 40px;
+        }
+        .welcome-badge {
+            display: inline-block;
+            background: var(--doc-gold-faint);
+            border: 1px solid var(--doc-border-gold);
+            color: var(--doc-gold);
+            font-family: var(--font-display);
+            font-size: 11px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .welcome-hero h1 {
+            font-family: var(--font-display);
+            font-size: 38px;
+            color: var(--doc-gold-light);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        .welcome-hero p {
+            font-size: 16px;
+            color: var(--doc-text-dim);
+            max-width: 680px;
+            margin: 0 auto 28px;
+            line-height: 1.6;
+        }
+
+        .welcome-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        .stat-box {
+            background: var(--doc-bg-surface);
+            border: 1px solid var(--doc-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .stat-box:hover {
+            transform: translateY(-2px);
+            border-color: var(--doc-gold-dim);
+        }
+        .stat-num {
+            font-family: var(--font-display);
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--doc-gold);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .stat-lbl {
+            font-size: 12px;
+            color: var(--doc-text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .welcome-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .portal-card {
+            background: var(--doc-bg-surface);
+            border: 1px solid var(--doc-border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .portal-card:hover {
+            border-color: var(--doc-gold);
+            background: var(--doc-bg-card-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .card-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 18px;
+            color: var(--doc-gold-light);
+            margin-bottom: 8px;
+        }
+        .card-desc {
+            font-size: 13px;
+            color: var(--doc-text-dim);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .card-link-action {
+            font-size: 12px;
+            color: var(--doc-gold);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* BOTÃO VOLTAR AO TOPO */
+        .btn-back-top {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--doc-bg-card);
+            border: 1px solid var(--doc-gold-dim);
+            color: var(--doc-gold);
+            font-size: 18px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            z-index: 90;
+        }
+        .btn-back-top:hover {
+            background: var(--doc-gold);
+            color: #000;
+            transform: translateY(-2px);
+        }
+        .btn-back-top.visible {
+            display: flex;
+        }
+
+        /* TOGGLE MOBILE */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--doc-border);
+            color: var(--doc-gold);
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 18px;
+            cursor: pointer;
+        }
 
         .sidebar-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6); z-index: var(--v-z-sticky, 99);
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 35;
         }
 
-        /* TOC — right sidebar, flows in flex layout */
-        .toc {
-            width: 240px; min-width: 240px;
-            overflow-y: auto; padding: var(--v-space-2xl, 24px) 0 var(--v-space-2xl, 24px) 0;
-            border-left: 1px solid var(--v-border);
-            background: var(--v-bg);
-            align-self: stretch;
-        }
-        .toc::-webkit-scrollbar { width: 3px; }
-        .toc::-webkit-scrollbar-thumb { background: var(--v-border); }
-        .toc-title {
-            font-family: var(--v-font-display); font-size: 10px;
-            text-transform: uppercase; letter-spacing: 1.5px;
-            color: var(--v-gold-dim); padding: 0 var(--v-space-lg, 12px) var(--v-space-md, 8px);
-        }
-        .toc a {
-            display: block; padding: 3px var(--v-space-lg, 12px); font-size: 12px;
-            color: var(--v-text-dim); text-decoration: none; line-height: 1.4;
-            transition: color var(--v-transition-fast); border-left: 2px solid transparent; margin-left: -1px;
-        }
-        .toc a:hover { color: var(--v-text); }
-        .toc a.active { color: var(--v-gold); border-left-color: var(--v-gold); }
-        .toc a.depth-3 { padding-left: var(--v-space-2xl, 24px); font-size: 11px; }
-
-        .breadcrumb { font-size: 12px; color: var(--v-text-dim); margin-bottom: var(--v-space-xl, 16px); }
-        .breadcrumb span { color: var(--v-gold-dim); }
-
-        .doc-meta {
-            display: flex; gap: var(--v-space-xl, 16px); flex-wrap: wrap;
-            font-size: 12px; color: var(--v-text-dim);
-            margin-bottom: 20px; padding: var(--v-space-md, 8px) 0;
-            border-bottom: 1px solid rgba(74, 56, 40, 0.3);
+        /* ==========================================================================
+           RESPONSIVIDADE (TABLETS E CELULARES)
+           ========================================================================== */
+        @media (max-width: 1200px) {
+            .doc-toc {
+                display: none;
+            }
         }
 
-        .back-to-top {
-            position: fixed; bottom: 24px; right: 24px;
-            width: 40px; height: 40px;
-            background: var(--v-bg-raised); border: 1px solid var(--v-border);
-            border-radius: 50%; color: var(--v-gold); font-size: 18px;
-            cursor: pointer; display: none; align-items: center;
-            justify-content: center; transition: opacity var(--v-transition); z-index: var(--v-z-sticky, 50);
-        }
-        .back-to-top.visible { display: flex; }
-
-        /* Print styles */
-        @media print {
-            .sidebar, .topbar, .toc, .back-to-top, .sidebar-overlay { display: none !important; }
-            .main { overflow: visible; }
-            .content { max-width: 100%; padding: 20px; }
-            .md-content pre { white-space: pre-wrap; }
-        }
-
-        @media (max-width: 1200px) { .toc { display: none; } }
-        @media (min-width: 1600px) { .content { max-width: 1300px; } .toc { width: 260px; min-width: 260px; } }
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed; left: 0; top: 0; bottom: 0;
+        @media (max-width: 900px) {
+            .header-center {
+                max-width: 260px;
+                margin: 0 12px;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+            .doc-sidebar {
+                position: fixed;
+                top: var(--header-h);
+                bottom: 0;
+                left: 0;
                 transform: translateX(-100%);
             }
-            .sidebar.open { transform: translateX(0); }
-            .sidebar-overlay.open { display: block; }
-            .topbar { display: flex; }
-            .content { padding: 20px var(--v-space-xl, 16px) 60px; }
-            .main { flex-direction: column; }
-            .main-scroll { flex: 1; overflow-y: auto; }
-            .welcome { padding: 40px var(--v-space-xl, 16px); }
-            .welcome h2 { font-size: 22px; }
+            .doc-sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.open {
+                display: block;
+            }
+            .main-container {
+                padding: 24px 20px 80px;
+            }
+            .welcome-hero h1 {
+                font-size: 28px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="app">
-        <div class="sidebar-overlay" id="sidebarOverlay"></div>
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h1>Lendas de Valdoria</h1>
-                <div class="subtitle">Documentação Interna</div>
+    <div class="doc-layout">
+        <!-- HEADER SUPERIOR -->
+        <header class="doc-header">
+            <div class="header-brand" id="brandHomeBtn">
+                <span class="header-logo-icon">⚔️</span>
+                <span class="header-title">Lendas de Valdoria</span>
+                <span class="header-badge">Docs v1.7</span>
             </div>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Buscar documentos... (Ctrl+K)">
-            </div>
-            <nav class="nav-list" id="navList"></nav>
-        </aside>
-        <div class="main" id="mainOuter">
-            <div class="main-scroll" id="mainPanel">
-            <div class="topbar">
-                <button class="menu-btn" id="menuBtn">&#9776;</button>
-                <h1>Documentação</h1>
-            </div>
-            <div class="content" id="content">
-                <div class="welcome" id="welcomeScreen">
-                    <h2>Documentação de Sistemas</h2>
-                    <p>Selecione um documento no menu lateral para começar.</p>
-                    <div class="stats" id="statsContainer"></div>
+
+            <div class="header-center">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="globalSearchInput" class="search-input" placeholder="Buscar sistemas, mecânicas, rotas... (Ctrl + K)">
+                    <span class="search-kbd">Ctrl K</span>
                 </div>
             </div>
-        </div>
+
+            <div class="header-actions">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir Menu">☰</button>
+                <button class="header-btn" id="homeTopBtn">🏛️ Início</button>
+                <a class="header-btn primary" href="https://github.com" target="_blank" rel="noopener">GitHub ↗</a>
             </div>
-        <div class="toc" id="toc"></div>
-        <button class="back-to-top" id="backToTop">&uarr;</button>
+        </header>
+
+        <!-- CORPO PRINCIPAL -->
+        <div class="doc-body">
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+            <!-- SIDEBAR ESQUERDA -->
+            <aside class="doc-sidebar" id="docSidebar">
+                <div class="sidebar-quick-filters">
+                    <button class="filter-chip active" data-filter="all">Todos</button>
+                    <button class="filter-chip" data-filter="core">🌟 Core</button>
+                    <button class="filter-chip" data-filter="combat">⚔️ Combate</button>
+                    <button class="filter-chip" data-filter="world">🗺️ Mundo</button>
+                    <button class="filter-chip" data-filter="city">🏰 Cidade</button>
+                    <button class="filter-chip" data-filter="server">⚙️ Backend</button>
+                </div>
+                <nav class="sidebar-nav" id="sidebarNavList">
+                    <!-- Gerado dinamicamente via JS -->
+                </nav>
+            </aside>
+
+            <!-- CONTEÚDO CENTRAL -->
+            <main class="doc-main" id="mainContentPanel">
+                <div class="main-container" id="contentView">
+                    <!-- Renderizado dinamicamente via JS (Welcome ou Doc) -->
+                </div>
+                <button class="btn-back-top" id="btnBackTop" title="Voltar ao topo">↑</button>
+            </main>
+
+            <!-- TABELA DE CONTEÚDO DIREITA (TOC) -->
+            <aside class="doc-toc" id="docTocPanel">
+                <div class="toc-title">Nesta Página</div>
+                <div class="toc-list" id="tocLinksList">
+                    <!-- Gerado dinamicamente dos cabeçalhos H2/H3 -->
+                </div>
+            </aside>
+        </div>
     </div>
 
+    <!-- CARREGAMENTO DOS DADOS EMBUTIDOS -->
     <script src="docs-data.js"></script>
+
     <script>
     (function() {
         "use strict";
+
+        // Elementos DOM
         var docs = window.DOCS_DATA || [];
-        var sistemas = docs.filter(function(d) { return d.category === "sistemas"; });
-        var detalhados = docs.filter(function(d) { return d.category === "detalhado"; });
-
-        marked.setOptions({ gfm: true, breaks: false });
-
-        var navList = document.getElementById("navList");
-        var content = document.getElementById("content");
-        var mainPanel = document.getElementById("mainPanel");
-        var searchInput = document.getElementById("searchInput");
-        var sidebarEl = document.getElementById("sidebar");
+        var sidebarNav = document.getElementById("sidebarNavList");
+        var contentView = document.getElementById("contentView");
+        var mainPanel = document.getElementById("mainContentPanel");
+        var searchInput = document.getElementById("globalSearchInput");
+        var sidebarEl = document.getElementById("docSidebar");
         var overlayEl = document.getElementById("sidebarOverlay");
-        var menuBtn = document.getElementById("menuBtn");
-        var tocEl = document.getElementById("toc");
-        var backToTop = document.getElementById("backToTop");
+        var mobileMenuBtn = document.getElementById("mobileMenuBtn");
+        var tocListEl = document.getElementById("tocLinksList");
+        var btnBackTop = document.getElementById("btnBackTop");
+        var brandHomeBtn = document.getElementById("brandHomeBtn");
+        var homeTopBtn = document.getElementById("homeTopBtn");
+        var currentFilter = "all";
+        var activeDocSlug = null;
 
-        function buildNav(filteredDocs) {
-            navList.innerHTML = "";
-            var categories = [
-                { key: "sistemas", label: "Sistemas (Compacto)", items: [] },
-                { key: "detalhado", label: "Documentação Detalhada", items: [] }
-            ];
-            var filtered = filteredDocs || docs;
-            filtered.forEach(function(d) {
-                var cat = categories.find(function(c) { return c.key === d.category; });
-                if (cat) cat.items.push(d);
-            });
-            categories.forEach(function(cat) {
-                if (cat.items.length === 0) return;
-                var catEl = document.createElement("div");
-                catEl.className = "nav-category";
-                catEl.innerHTML = "<span class=\"arrow\">\u25BC</span> " + cat.label + " (" + cat.items.length + ")";
-                catEl.onclick = function() { catEl.classList.toggle("collapsed"); };
-                navList.appendChild(catEl);
-
-                var itemsContainer = document.createElement("div");
-                itemsContainer.className = "nav-category-items";
-                itemsContainer.style.maxHeight = "9999px";
-
-                cat.items.forEach(function(doc) {
-                    var item = document.createElement("a");
-                    item.className = "nav-item";
-                    item.dataset.slug = doc.slug;
-                    item.textContent = doc.system_name || doc.title;
-                    item.onclick = function(e) {
-                        e.preventDefault();
-                        loadDoc(doc);
-                        closeMobileSidebar();
-                    };
-                    itemsContainer.appendChild(item);
-                });
-                navList.appendChild(itemsContainer);
+        // Configuração do Marked Markdown Parser
+        if (typeof marked !== "undefined") {
+            marked.setOptions({
+                gfm: true,
+                breaks: false,
+                headerIds: true
             });
         }
 
-        function loadDoc(doc) {
-            document.querySelectorAll(".nav-item").forEach(function(el) {
+        // Mapeamento Inteligente de Categorias
+        var CATEGORY_DEFINITIONS = [
+            { id: "core", label: "🌟 Comece Aqui & Essenciais", filter: "core", match: ["agent_start_here", "claude", "agents", "index", "ciclo-basico", "padrao-servidor", "dialogue-pattern-aldric", "padrao-locais"] },
+            { id: "combat", label: "⚔️ Combate & D&D 5e", filter: "combat", match: ["combate", "combat2", "subclasses", "class-balance", "arena", "skills", "pvp", "bestiario", "geracao-imagens-criaturas"] },
+            { id: "world", label: "🗺️ Exploração & Cartografia", filter: "world", match: ["exploracao", "explore", "navigate", "trilhas", "dungeons", "viagem", "hex", "mata-isolation"] },
+            { id: "city", label: "🏰 Cidade & Serviços", filter: "city", match: ["cidade", "plaza", "taverna", "templo", "mercado", "esgoto", "prologo", "cartografia-aaa"] },
+            { id: "character", label: "🧙 Personagem & Classes", filter: "core", match: ["personagem", "levelup", "heroClass", "character", "legacy-reward"] },
+            { id: "quests", label: "📜 Missões & Narrativa", filter: "core", match: ["quests", "missao", "narrativa", "dialogo", "npc", "lore", "codex", "gossip"] },
+            { id: "economy", label: "💰 Economia & Equipamentos", filter: "city", match: ["economia", "inventario", "inventory", "crafting", "mochila", "items", "heraldic"] },
+            { id: "server", label: "⚙️ Infraestrutura, Servidor & GUI", filter: "server", match: ["game-hub-api", "bot-transport", "sessao", "device-registry", "cache", "preflight", "logging", "error-reporter", "gui-manager", "deploy", "environments"] },
+            { id: "detalhado", label: "📚 Documentação Detalhada", filter: "all", match: [] }
+        ];
+
+        function categorizeDoc(doc) {
+            var slug = (doc.slug || "").toLowerCase();
+            var filename = (doc.filename || "").toLowerCase();
+            var title = (doc.title || "").toLowerCase();
+            
+            for (var i = 0; i < CATEGORY_DEFINITIONS.length - 1; i++) {
+                var cat = CATEGORY_DEFINITIONS[i];
+                for (var j = 0; j < cat.match.length; j++) {
+                    var m = cat.match[j];
+                    if (slug.indexOf(m) >= 0 || filename.indexOf(m) >= 0 || title.indexOf(m) >= 0) {
+                        return cat;
+                    }
+                }
+            }
+            return CATEGORY_DEFINITIONS[CATEGORY_DEFINITIONS.length - 1]; // Detalhado
+        }
+
+        // Renderiza a Sidebar de Navegação
+        function renderSidebar(filterTerm, categoryFilter) {
+            sidebarNav.innerHTML = "";
+            var search = (filterTerm || "").toLowerCase().trim();
+            
+            // Agrupar documentos
+            var groups = {};
+            CATEGORY_DEFINITIONS.forEach(function(c) { groups[c.id] = { meta: c, docs: [] }; });
+
+            docs.forEach(function(doc) {
+                var cat = categorizeDoc(doc);
+                
+                // Filtro de Categoria
+                if (categoryFilter && categoryFilter !== "all") {
+                    if (cat.filter !== categoryFilter && cat.id !== categoryFilter) return;
+                }
+
+                // Filtro de Busca
+                if (search) {
+                    var t = (doc.title || doc.system_name || "").toLowerCase();
+                    var d = (doc.description || "").toLowerCase();
+                    var f = (doc.filename || "").toLowerCase();
+                    var body = (doc.content || "").toLowerCase();
+                    if (t.indexOf(search) === -1 && d.indexOf(search) === -1 && f.indexOf(search) === -1 && body.indexOf(search) === -1) {
+                        return;
+                    }
+                }
+
+                groups[cat.id].docs.push(doc);
+            });
+
+            // Gerar HTML da Sidebar
+            CATEGORY_DEFINITIONS.forEach(function(cat) {
+                var g = groups[cat.id];
+                if (!g || g.docs.length === 0) return;
+
+                var groupEl = document.createElement("div");
+                groupEl.className = "nav-group";
+
+                var headerEl = document.createElement("div");
+                headerEl.className = "nav-group-header";
+                headerEl.innerHTML = "<span>" + cat.label + " (" + g.docs.length + ")</span><span class=\"group-arrow\">▼</span>";
+                headerEl.onclick = function() {
+                    groupEl.classList.toggle("collapsed");
+                };
+                groupEl.appendChild(headerEl);
+
+                var itemsEl = document.createElement("div");
+                itemsEl.className = "nav-group-items";
+
+                g.docs.forEach(function(doc) {
+                    var link = document.createElement("a");
+                    link.className = "nav-link-item" + (activeDocSlug === doc.slug ? " active" : "");
+                    link.dataset.slug = doc.slug;
+                    link.innerHTML = "<span>" + (doc.system_name || doc.title || doc.filename) + "</span>";
+                    link.onclick = function(e) {
+                        e.preventDefault();
+                        openDoc(doc);
+                        closeMobileMenu();
+                    };
+                    itemsEl.appendChild(link);
+                });
+
+                groupEl.appendChild(itemsEl);
+                sidebarNav.appendChild(groupEl);
+            });
+
+            if (sidebarNav.children.length === 0) {
+                sidebarNav.innerHTML = "<div style=\"padding: 24px 16px; text-align: center; color: var(--doc-text-muted); font-size: 13px;\">Nenhum documento encontrado para esta busca.</div>";
+            }
+        }
+
+        // Renderiza a Tela Inicial / Dashboard
+        function renderWelcomeScreen() {
+            activeDocSlug = null;
+            location.hash = "";
+            document.querySelectorAll(".nav-link-item").forEach(function(el) { el.classList.remove("active"); });
+            tocListEl.innerHTML = "<div style=\"color: var(--doc-text-muted); font-size: 12px;\">Selecione um tópico no menu lateral para visualizar seu sumário.</div>";
+
+            var sistemasCount = docs.filter(function(d) { return d.category === "sistemas"; }).length;
+            var detalhadosCount = docs.filter(function(d) { return d.category !== "sistemas"; }).length;
+
+            contentView.innerHTML = 
+                "<div class=\"welcome-hero\">" +
+                    "<span class=\"welcome-badge\">Biblioteca de Engenharia & Arquitetura</span>" +
+                    "<h1>Lendas de Valdoria</h1>" +
+                    "<p>Portal canônico com o mapeamento completo de regras, autoridade do servidor, motor de combate D&D 5e, exploração hexagonal e arquitetura técnica do jogo.</p>" +
+                "</div>" +
+                "<div class=\"welcome-stats\">" +
+                    "<div class=\"stat-box\"><div class=\"stat-num\">" + docs.length + "</div><div class=\"stat-lbl\">Documentos Mapeados</div></div>" +
+                    "<div class=\"stat-box\"><div class=\"stat-num\">116</div><div class=\"stat-lbl\">Rotas de API Ativas</div></div>" +
+                    "<div class=\"stat-box\"><div class=\"stat-num\">74+</div><div class=\"stat-lbl\">Habilidades D&D 5e</div></div>" +
+                    "<div class=\"stat-box\"><div class=\"stat-num\">176</div><div class=\"stat-lbl\">Missões Integradas</div></div>" +
+                "</div>" +
+                "<h2 style=\"font-family: var(--font-display); color: var(--doc-gold-light); font-size: 20px; margin-bottom: 20px;\">Sistemas Principais do Jogo</h2>" +
+                "<div class=\"welcome-grid\">" +
+                    "<div class=\"portal-card\" onclick=\"window.valOpenSlug('sistemas/combat2-master-index')\">" +
+                        "<div>" +
+                            "<div class=\"card-icon\">⚔️</div>" +
+                            "<div class=\"card-title\">Motor de Combate (Combat2)</div>" +
+                            "<div class=\"card-desc\">Regras D&D 5e oficiais, 12 classes, 40 subclasses, 15 condições, economia de ações e resolução matemática autoritativa no servidor.</div>" +
+                        "</div>" +
+                        "<div class=\"card-link-action\">Acessar Índice de Combate →</div>" +
+                    "</div>" +
+                    "<div class=\"portal-card\" onclick=\"window.valOpenSlug('sistemas/exploracao-master-index')\">" +
+                        "<div>" +
+                            "<div class=\"card-icon\">🗺️</div>" +
+                            "<div class=\"card-title\">Exploração & Hex Map</div>" +
+                            "<div class=\"card-desc\">Navegação em mapa hexagonal, algoritmo de custo Dijkstra, ritmo de viagem (PHB p.182), clima e eventos procedurais.</div>" +
+                        "</div>" +
+                        "<div class=\"card-link-action\">Acessar Exploração →</div>" +
+                    "</div>" +
+                    "<div class=\"portal-card\" onclick=\"window.valOpenSlug('sistemas/cidade-locais')\">" +
+                        "<div>" +
+                            "<div class=\"card-icon\">🏰</div>" +
+                            "<div class=\"card-title\">Cidade de Valdoria (Hub)</div>" +
+                            "<div class=\"card-desc\">16 locais ilustrados, Taverna, Mercado com cálculo de persuasão D20, Templo, Banco e diálogos PADRAO_SERVIDOR.</div>" +
+                        "</div>" +
+                        "<div class=\"card-link-action\">Acessar Hub da Cidade →</div>" +
+                    "</div>" +
+                    "<div class=\"portal-card\" onclick=\"window.valOpenSlug('sistemas/personagem')\">" +
+                        "<div>" +
+                            "<div class=\"card-icon\">🧙</div>" +
+                            "<div class=\"card-title\">Criação & LevelUp</div>" +
+                            "<div class=\"card-desc\">Escolhas canônicas L1 (Estilos de Luta, Domínios Divinos, Ancestrais Dracônicos) e progressão fiel ao PHB.</div>" +
+                        "</div>" +
+                        "<div class=\"card-link-action\">Acessar Personagem →</div>" +
+                    "</div>" +
+                    "<div class=\"portal-card\" onclick=\"window.valOpenSlug('sistemas/dialogue-pattern-aldric')\">" +
+                        "<div>" +
+                            "<div class=\"card-icon\">📜</div>" +
+                            "<div class=\"card-title\">PADRAO_ALDRIC & Narrativa</div>" +
+                            "<div class=\"card-desc\">Motor cinematográfico de narrativa, máquina de escrever, classificação de fala vs narração e testes estilo Disco Elysium.</div>" +
+                        "</div>" +
+                        "<div class=\"card-link-action\">Acessar Padrão Narrativo →</div>" +
+                    "</div>" +
+                    "<div class=\"portal-card\" onclick=\"window.valOpenSlug('sistemas/agent_start_here')\">" +
+                        "<div>" +
+                            "<div class=\"card-icon\">🧭</div>" +
+                            "<div class=\"card-title\">Guia de Arquitetura (Start Here)</div>" +
+                            "<div class=\"card-desc\">Tabela de autoridade, cadeias de fluxo frontend ↔ rota ↔ backend ↔ banco de dados e invariantes supremas.</div>" +
+                        "</div>" +
+                        "<div class=\"card-link-action\">Entender o Jogo em 1 min →</div>" +
+                    "</div>" +
+                "</div>";
+            
+            mainPanel.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        // Abre e Renderiza um Documento Markdown
+        function openDoc(doc) {
+            activeDocSlug = doc.slug;
+            location.hash = "#" + doc.slug;
+
+            // Atualiza active na sidebar
+            document.querySelectorAll(".nav-link-item").forEach(function(el) {
                 el.classList.toggle("active", el.dataset.slug === doc.slug);
             });
-            var html = marked.parse(doc.content);
-            var catLabel = doc.category === "sistemas" ? "Sistemas" : "Detalhado";
-            content.innerHTML =
-                "<div class=\"breadcrumb\">" + catLabel + " <span>\u203A</span> " + (doc.system_name || doc.title) + "</div>" +
-                "<div class=\"doc-meta\">" +
-                    "<span>\uD83D\uDCC4 " + doc.filename + "</span> &nbsp; " +
-                    "<span>\uD83D\uDCC2 " + (doc.category === "sistemas" ? "docs/sistemas/" : "docs/") + "</span>" +
+
+            var cat = categorizeDoc(doc);
+            var rawContent = doc.content || "";
+
+            // Transforma alertas GitHub style (> [!NOTE]) em callouts HTML estilizados
+            rawContent = rawContent.replace(/>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*([\s\S]*?)(?=\n\n|$)/gi, function(match, type, body) {
+                var t = type.toLowerCase();
+                var titles = {
+                    note: "ℹ️ NOTA",
+                    tip: "💡 DICA",
+                    important: "📌 IMPORTANTE",
+                    warning: "⚠️ ATENÇÃO",
+                    caution: "🛑 CUIDADO"
+                };
+                return "<div class=\"doc-alert " + t + "\"><div class=\"doc-alert-title\">" + (titles[t] || type) + "</div><div>" + body.trim().replace(/^>\s?/gm, '') + "</div></div>\n";
+            });
+
+            // Parse Markdown
+            var html = (typeof marked !== "undefined") ? marked.parse(rawContent) : "<pre>" + rawContent + "</pre>";
+
+            var filepath = (doc.category === "sistemas" ? "docs/sistemas/" : "docs/") + doc.filename;
+
+            contentView.innerHTML = 
+                "<div class=\"content-breadcrumb\">" +
+                    "<a onclick=\"window.valShowWelcome()\">Documentação</a> <span>›</span> " +
+                    "<span>" + cat.label.replace(/^[^\s]+\s/, '') + "</span> <span>›</span> " +
+                    "<strong style=\"color: var(--doc-text-bright);\">" + (doc.system_name || doc.title) + "</strong>" +
                 "</div>" +
-                "<div class=\"md-content\">" + html + "</div>";
+                "<div class=\"doc-meta-banner\">" +
+                    "<div class=\"meta-tags\">" +
+                        "<div class=\"meta-tag\"><span>📄 Arquivo:</span> <code>" + filepath + "</code></div>" +
+                        "<div class=\"meta-tag\"><span>🏷️ Categoria:</span> <strong>" + cat.label.replace(/^[^\s]+\s/, '') + "</strong></div>" +
+                    "</div>" +
+                    "<button class=\"copy-path-btn\" onclick=\"window.valCopyText('" + filepath + "')\">📋 Copiar Caminho</button>" +
+                "</div>" +
+                "<div class=\"markdown-rendered\" id=\"renderedMdBody\">" + html + "</div>";
+
+            // Envolve blocos de código com barra de cabeçalho e botão de cópia
+            wrapCodeBlocks();
+
+            // Monta o Sumário (TOC)
             buildTOC();
-            mainPanel.scrollTo(0, 0);
-            history.replaceState(null, "", "#" + doc.slug);
-        }
 
-        function buildTOC() {
-            var headings = content.querySelectorAll(".md-content h2, .md-content h3");
-            if (headings.length < 2) { tocEl.innerHTML = ""; return; }
-            var html = "<div class=\"toc-title\">Nesta Página</div>";
-            headings.forEach(function(h, i) {
-                var id = "toc-" + i;
-                h.id = id;
-                var depth = h.tagName === "H3" ? "depth-3" : "";
-                html += "<a href=\"#" + id + "\" class=\"" + depth + "\">" + h.textContent + "</a>";
-            });
-            tocEl.innerHTML = html;
-
-            tocEl.querySelectorAll("a").forEach(function(a) {
-                a.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    var target = document.getElementById(a.getAttribute("href").slice(1));
-                    if (target) target.scrollIntoView({ behavior: "smooth" });
-                });
-            });
-        }
-
-        searchInput.addEventListener("input", function() {
-            var q = searchInput.value.toLowerCase().trim();
-            if (!q) { buildNav(); return; }
-            var filtered = docs.filter(function(d) {
-                var title = (d.system_name || d.title || "").toLowerCase();
-                var desc = (d.description || "").toLowerCase();
-                var body = (d.content || "").toLowerCase();
-                return title.indexOf(q) >= 0 || desc.indexOf(q) >= 0 || body.indexOf(q) >= 0;
-            });
-            buildNav(filtered);
-        });
-
-        function closeMobileSidebar() {
-            sidebarEl.classList.remove("open");
-            overlayEl.classList.remove("open");
-        }
-        menuBtn.addEventListener("click", function() {
-            sidebarEl.classList.toggle("open");
-            overlayEl.classList.toggle("open");
-        });
-        overlayEl.addEventListener("click", closeMobileSidebar);
-
-        mainPanel.addEventListener("scroll", function() {
-            backToTop.classList.toggle("visible", mainPanel.scrollTop > 300);
-        });
-        backToTop.addEventListener("click", function() {
             mainPanel.scrollTo({ top: 0, behavior: "smooth" });
-        });
+        }
 
-        document.addEventListener("keydown", function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-                e.preventDefault();
-                searchInput.focus();
+        // Botão de Copiar Código em Blocos <pre>
+        function wrapCodeBlocks() {
+            var pres = contentView.querySelectorAll(".markdown-rendered pre");
+            pres.forEach(function(pre) {
+                var wrapper = document.createElement("div");
+                wrapper.className = "code-block-wrapper";
+                pre.parentNode.insertBefore(wrapper, pre);
+                
+                var codeEl = pre.querySelector("code");
+                var lang = "código";
+                if (codeEl) {
+                    var classes = (codeEl.className || "").split(" ");
+                    classes.forEach(function(c) {
+                        if (c.indexOf("language-") === 0) lang = c.replace("language-", "");
+                    });
+                }
+
+                var header = document.createElement("div");
+                header.className = "code-block-header";
+                header.innerHTML = "<span>" + lang + "</span><button class=\"copy-code-btn\">📋 Copiar</button>";
+                
+                header.querySelector(".copy-code-btn").onclick = function() {
+                    var text = codeEl ? codeEl.innerText : pre.innerText;
+                    navigator.clipboard.writeText(text).then(function() {
+                        header.querySelector(".copy-code-btn").innerHTML = "✅ Copiado!";
+                        setTimeout(function() {
+                            header.querySelector(".copy-code-btn").innerHTML = "📋 Copiar";
+                        }, 2000);
+                    });
+                };
+
+                wrapper.appendChild(header);
+                wrapper.appendChild(pre);
+            });
+        }
+
+        // Constrói Sumário Interativo (TOC) à Direita
+        function buildTOC() {
+            var headings = contentView.querySelectorAll(".markdown-rendered h2, .markdown-rendered h3");
+            if (headings.length < 2) {
+                tocListEl.innerHTML = "<div style=\"color: var(--doc-text-muted); font-size: 12px;\">Documento sem seções secundárias.</div>";
+                return;
+            }
+
+            tocListEl.innerHTML = "";
+            headings.forEach(function(h, index) {
+                var id = "heading-sec-" + index;
+                h.id = id;
+                var link = document.createElement("a");
+                link.className = "toc-link" + (h.tagName === "H3" ? " depth-3" : "");
+                link.textContent = h.textContent.replace(/^#+\s*/, '');
+                link.href = "#" + id;
+                link.onclick = function(e) {
+                    e.preventDefault();
+                    document.getElementById(id).scrollIntoView({ behavior: "smooth", block: "start" });
+                };
+                tocListEl.appendChild(link);
+            });
+        }
+
+        // ScrollSpy para destacar o heading ativo no TOC
+        mainPanel.addEventListener("scroll", function() {
+            var scrollPos = mainPanel.scrollTop;
+            btnBackTop.classList.toggle("visible", scrollPos > 350);
+
+            var headings = contentView.querySelectorAll(".markdown-rendered h2, .markdown-rendered h3");
+            var currentId = null;
+
+            headings.forEach(function(h) {
+                var offset = h.offsetTop - 120;
+                if (scrollPos >= offset) {
+                    currentId = h.id;
+                }
+            });
+
+            if (currentId) {
+                document.querySelectorAll(".toc-link").forEach(function(a) {
+                    a.classList.toggle("active", a.getAttribute("href") === "#" + currentId);
+                });
             }
         });
 
-        function showStats() {
-            var el = document.getElementById("statsContainer");
-            if (!el) return;
-            el.innerHTML =
-                "<div class=\"stat-card\"><div class=\"number\">" + sistemas.length + "</div><div class=\"label\">Docs de Sistema</div></div>" +
-                "<div class=\"stat-card\"><div class=\"number\">" + detalhados.length + "</div><div class=\"label\">Docs Detalhados</div></div>" +
-                "<div class=\"stat-card\"><div class=\"number\">" + docs.length + "</div><div class=\"label\">Total</div></div>";
+        // Eventos de Busca
+        searchInput.addEventListener("input", function() {
+            renderSidebar(searchInput.value, currentFilter);
+        });
+
+        // Chips de Filtro
+        document.querySelectorAll(".filter-chip").forEach(function(chip) {
+            chip.addEventListener("click", function() {
+                document.querySelectorAll(".filter-chip").forEach(function(c) { c.classList.remove("active"); });
+                chip.classList.add("active");
+                currentFilter = chip.dataset.filter;
+                renderSidebar(searchInput.value, currentFilter);
+            });
+        });
+
+        // Atalhos de Teclado (Ctrl + K para focar na busca)
+        document.addEventListener("keydown", function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            } else if (e.key === "Escape") {
+                if (document.activeElement === searchInput) {
+                    searchInput.blur();
+                }
+                closeMobileMenu();
+            }
+        });
+
+        // Controle Mobile
+        function closeMobileMenu() {
+            sidebarEl.classList.remove("open");
+            overlayEl.classList.remove("open");
+        }
+        mobileMenuBtn.addEventListener("click", function() {
+            sidebarEl.classList.toggle("open");
+            overlayEl.classList.toggle("open");
+        });
+        overlayEl.addEventListener("click", closeMobileMenu);
+
+        // Ações de Botões Globais
+        brandHomeBtn.addEventListener("click", function() { renderWelcomeScreen(); });
+        homeTopBtn.addEventListener("click", function() { renderWelcomeScreen(); });
+        btnBackTop.addEventListener("click", function() { mainPanel.scrollTo({ top: 0, behavior: "smooth" }); });
+
+        // Helpers Públicos na Janela
+        window.valOpenSlug = function(slug) {
+            var doc = docs.find(function(d) { return d.slug === slug || d.slug.indexOf(slug) >= 0 || (d.filename && d.filename.indexOf(slug) >= 0); });
+            if (doc) openDoc(doc);
+        };
+        window.valShowWelcome = function() {
+            renderWelcomeScreen();
+        };
+        window.valCopyText = function(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert("Caminho copiado para a área de transferência:\n" + text);
+            });
+        };
+
+        // Inicialização
+        renderSidebar("", "all");
+
+        // Rota inicial por Hash da URL
+        var initialHash = location.hash.replace(/^#/, "");
+        if (initialHash) {
+            var targetDoc = docs.find(function(d) { return d.slug === initialHash || d.slug.indexOf(initialHash) >= 0; });
+            if (targetDoc) {
+                openDoc(targetDoc);
+            } else {
+                renderWelcomeScreen();
+            }
+        } else {
+            renderWelcomeScreen();
         }
 
-        buildNav();
-        showStats();
-
-        var hash = location.hash.replace("#", "");
-        if (hash) {
-            var doc = docs.find(function(d) { return d.slug === hash; });
-            if (doc) loadDoc(doc);
-        }
     })();
     </script>
 </body>
