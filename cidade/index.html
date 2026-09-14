@@ -55642,7 +55642,18 @@ function startCityJourney(mapId, displayName, finalUrl) {
       refreshHud: (typeof refreshHud === 'function') ? refreshHud : null,
       toast: (typeof vToast === 'function') ? vToast : null,
       onArrive: function () { _cityJourneyArrive(mapId, displayName, finalUrl); },
-      onCancel: function () { if (typeof _logCity === 'function') _logCity('city journey cancelled'); }
+      onCancel: function () {
+        if (typeof _logCity === 'function') _logCity('city journey cancelled');
+        try {
+          if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.play) {
+            var s = (typeof _currentScreen !== 'undefined' && _currentScreen) || 'hub';
+            var tk = (typeof SCREEN_AUDIO_MAP !== 'undefined' && SCREEN_AUDIO_MAP[s]) || 'city';
+            if (typeof ValdoriaAudio.getCurrentTrack === 'function' && ValdoriaAudio.getCurrentTrack() !== tk) {
+              ValdoriaAudio.play(tk);
+            }
+          }
+        } catch(e) {}
+      }
     });
     return;
   }

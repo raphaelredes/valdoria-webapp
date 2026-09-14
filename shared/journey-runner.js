@@ -53,13 +53,10 @@
     opts = opts || {};
     var biome = opts.biome || 'plains';
     var total = opts.totalSteps || (3 + Math.floor(Math.random() * 3));  // 3-5 etapas
+    var prevTrack = (global.ValdoriaAudio && typeof ValdoriaAudio.getCurrentTrack === 'function')
+      ? ValdoriaAudio.getCurrentTrack() : null;
     _j = { opts: opts, biome: biome, displayName: opts.displayName || 'destino',
-           total: total, step: 0, usedHaz: [], usedSafe: [] };
-    try {
-      if (opts.audioBiome && global.ValdoriaAudio && typeof ValdoriaAudio.playBiome === 'function') {
-        ValdoriaAudio.playBiome(biome);
-      }
-    } catch (e) { _log('biome music failed: ' + e.message); }
+           total: total, step: 0, usedHaz: [], usedSafe: [], prevTrack: prevTrack };
     if (opts.confirm === false) _departure();
     else _confirm();
   }
@@ -99,13 +96,26 @@
 
   function _cancel() {
     var cb = _j && _j.opts.onCancel;
+    var prev = _j && _j.prevTrack;
     _close();
+    if (prev && global.ValdoriaAudio && typeof ValdoriaAudio.play === 'function') {
+      try {
+        if (typeof ValdoriaAudio.getCurrentTrack === 'function' && ValdoriaAudio.getCurrentTrack() !== prev) {
+          ValdoriaAudio.play(prev);
+        }
+      } catch (e) { _log('restore music on cancel failed: ' + e.message); }
+    }
     if (typeof cb === 'function') { try { cb(); } catch (e) {} }
   }
 
   // Partida — narração cinematográfica PADRAO_ALDRIC ("Rumo a <destino>").
   function _departure() {
     var j = _j; if (!j) return;
+    try {
+      if (j.opts.audioBiome && global.ValdoriaAudio && typeof ValdoriaAudio.playBiome === 'function') {
+        ValdoriaAudio.playBiome(j.biome);
+      }
+    } catch (e) { _log('biome music failed: ' + e.message); }
     var dep = (JD().pickDeparture) ? JD().pickDeparture(j.biome, _player(), []) : null;
     var script = (dep || []).map(function (l) { return { type: l.type || 'narration', text: l.text }; });
     if (!script.length) script = [{ type: 'narration', text: 'Você parte rumo a ' + j.displayName + '.' }];
