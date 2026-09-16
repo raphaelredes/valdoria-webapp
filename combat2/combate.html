@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-07-05T15:58:50Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-09-16T23:02:14Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -45,7 +45,7 @@
    - docs/sistemas/combat2-master-index.md ← ENTRY POINT para agentes IA
      (índice de TODAS as funções + linha + tag log + 15 fixes + FAQs)
    - docs/sistemas/combat2-arch-canonical-proposal.md (proposta + estado)
-   - docs/sistemas/combat2-canonical-changelog.md (changelog das fases)
+   - docs/sistemas/combat2-habilidades-progresso.md (estado skills + progresso)
    - docs/sistemas/combat2-debug-via-bot-log.md (workflow grep bot.log)
 
   Fonte da verdade (mecanica + contrato API): src/game/combat2.py +
@@ -93,9 +93,9 @@
 
   DOCS DO PROJETO:
   - CLAUDE.md                           Regras canonicas + workflow
-  - AGENTS.md                           Indice multi-ferramenta (Cursor, Copilot)
-  - .agent/rules/lendas-de-valdoria.md  Regras mestras (GSIA, D&D 5e)
-  - .agent/rules/PROJECT_GUIDELINES.md  Valores D&D 5e canonicos
+  - AGENTS.md                           Indice multi-ferramenta + regras
+  - docs/sistemas/class-balance-d&d-5e.md  Valores D&D 5e canonicos
+  - docs/sistemas/combat2-master-index.md  Entry point Combat2
 
   MEMORIA DE AGENTE (~/.claude/projects/.../memory/):
   - feedback_simulator_first_workflow.md  REGRA SOBERANA: simulador primeiro
@@ -14113,8 +14113,39 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
             n: 'Proteção do equipamento', dndCondition: '+' + _eqSb + ' em Testes de Resistência (equipamento)',
             saveBonus: _eqSb, turnsLeft: null });
     }
+
+    // Detecção de Two-Weapon Fighting (DND-C1)
+    var main_hand = useRandom ? (cdef.cls === 'Ladino' ? 'Espada Curta' : 'Espada Curta') : spec.main_hand;
+    var off_hand = useRandom ? (cdef.cls === 'Ladino' ? 'Espada Curta' : 'Escudo de Madeira') : spec.off_hand;
+
+    var LIGHT_WEAPONS = {
+        'Espada Curta': 6, 'Cimitarra': 6, 'Adaga': 4, 'Clava': 4,
+        'Martelo Leve': 4, 'Machadinha': 6, 'Foice Leve': 4,
+        'Espada Curta +1': 6, 'Cimitarra +1': 6, 'Adaga +1': 4
+    };
+
+    var isTwfEligible = false;
+    var offhandDie = 4;
+    if (main_hand && off_hand) {
+        if (LIGHT_WEAPONS[main_hand] && LIGHT_WEAPONS[off_hand]) {
+            isTwfEligible = true;
+            offhandDie = LIGHT_WEAPONS[off_hand];
+        }
+    }
+
+    if (isTwfEligible) {
+        skillsCopy = skillsCopy.filter(function(sk) { return sk.n !== 'Ataque Secundário'; });
+        var twfSk = Object.assign({}, _TWF_SKILL);
+        twfSk.damageSpec = { n: 1, d: offhandDie };
+        skillsCopy.push(twfSk);
+    } else {
+        skillsCopy = skillsCopy.filter(function(sk) { return sk.n !== 'Ataque Secundário'; });
+    }
+
     return {
         t: roleTag, n: n, cls: cdef.cls, subclass: sub,
+        main_hand: main_hand || null,
+        off_hand: off_hand || null,
         /* PHB p.107 Pacto da Corrente — gate do passive chain_familiar + stats do
            familiar (do Python). Passados ao unit pra spawnPassivesForClass ler. */
         warlock_pact: (spec.warlock_pact && String(spec.warlock_pact).trim().toLowerCase()) || '',
@@ -19941,7 +19972,7 @@ function showMagicMissileConfirmPopup(picks) {
 
         var sub = document.createElement('div');
         sub.className = 'mm-confirm-sub';
-        sub.textContent = 'Cada dardo acerta automaticamente.';
+        sub.textContent = 'Cada míssil acerta automaticamente.';
 
         var list = document.createElement('div');
         list.className = 'mm-confirm-list';
@@ -19955,7 +19986,7 @@ function showMagicMissileConfirmPopup(picks) {
             row.className = 'mm-confirm-row';
             var lbl = document.createElement('span');
             lbl.className = 'mm-dart-label';
-            lbl.textContent = 'Dardo ' + (idx + 1);
+            lbl.textContent = 'Míssel ' + (idx + 1);
             var tgt = document.createElement('span');
             tgt.className = 'mm-dart-target';
             tgt.textContent = name;
@@ -20672,7 +20703,10 @@ function bindActions() {
                 // abre popup de confirmação. Cancel reseta círculos; Confirm lança.
                 if (_pendingSkill && _pendingSkill.magicMissiles) {
                     var mmCfg = _pendingSkill.magicMissiles;
-                    var needed = (mmCfg.count | 0) || 3;
+                    var pActor = currentState && currentState.order && currentState.order[currentState.p_idx];
+                    var needed = (typeof simMagicMissileDarts === 'function')
+                        ? (simMagicMissileDarts(_pendingSkill, pActor) || 3)
+                        : ((mmCfg.count | 0) || 3);
                     if (!_mmTargets) _mmTargets = [];
                     if (_mmTargets.length >= needed) return; // trava extra
                     _mmTargets.push(idx);
@@ -22321,6 +22355,12 @@ async function confirmAndAttack(tgtIdx) {
     _selectingTarget = false;
     var skill = _pendingSkill;
     _pendingSkill = null;
+    // PHB Magic Missile multi-alvo: tgtIdx pode ser {__mmTargets: [idx,...]}.
+    var mmTargets = null;
+    if (tgtIdx && typeof tgtIdx === 'object' && tgtIdx.__mmTargets) {
+        mmTargets = tgtIdx.__mmTargets.slice();
+        tgtIdx = mmTargets[0];
+    }
     /* [C-REM:ATTACK] REMOTE MODE: troca engine local por POST /api/combat2.
        Reusa __combatRemoteAction pra logging + state apply + events drain. */
     if (window.__COMBAT_MODE === 'remote') {
@@ -22330,19 +22370,14 @@ async function confirmAndAttack(tgtIdx) {
         if (typeof _pendingPowerAttack !== 'undefined') _pendingPowerAttack = false;
         console.info('[C-REM:ATTACK] dispatch tgtIdx=' + tgtIdx
             + ' slot=' + slot + ' powerAttack=' + pa
+            + ' targets=' + (mmTargets ? JSON.stringify(mmTargets) : '(none)')
             + ' skill=' + (skill ? skill.n : '(none)'));
         render(currentState);
         var action = (slot != null && slot >= 0)
-            ? { type: 'skill', slot: slot, target: tgtIdx }
+            ? { type: 'skill', slot: slot, target: tgtIdx, targets: mmTargets || undefined }
             : { type: 'attack', target: tgtIdx, powerAttack: pa };
         await __combatRemoteAction(action);
         return;
-    }
-    // PHB Magic Missile multi-alvo: tgtIdx pode ser {__mmTargets: [idx,...]}.
-    var mmTargets = null;
-    if (tgtIdx && typeof tgtIdx === 'object' && tgtIdx.__mmTargets) {
-        mmTargets = tgtIdx.__mmTargets.slice();
-        tgtIdx = mmTargets[0];
     }
     var p = currentState.order[currentState.p_idx];
     /* V1 Invocações Phase 4 (2026-04-19) — marca ação principal como gasta.
@@ -29790,6 +29825,12 @@ async function playTurn(aIdx, tIdx, opts) {
     var _physDmg = !atkSkill || (['slashing', 'piercing', 'bludgeoning']
         .indexOf(String(atkSkill.dmgType || 'slashing').toLowerCase()) >= 0);
     var dmgMod = (isMagicMissiles || !_physDmg) ? 0 : (actor.dmgMod || 0);
+    if (atkSkill && atkSkill.n === 'Ataque Secundário') {
+        var hasStyle = actor.acquired && actor.acquired.indexOf('fighting_style_two_weapon') >= 0;
+        if (dmgMod > 0 && !hasStyle) {
+            dmgMod = 0;
+        }
+    }
     var dmgItem = isMagicMissiles ? 0 : getDmgFlatFromStatuses(actor);
     var dspec = atkSkill && atkSkill.damageSpec ? atkSkill.damageSpec : null;
     var dmgSpecFlat = (!isMagicMissiles && dspec && dspec.flat != null) ? (dspec.flat | 0) : 0;

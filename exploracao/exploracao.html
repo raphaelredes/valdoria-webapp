@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-16T22:38:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-16T23:03:05Z - do not edit directly, edit source -->
 
 
 
@@ -23014,6 +23014,7 @@ function setupCanvases() {
     LOG('CANVAS', 'window resize — re-resizing canvases');
     resizeCanvases();
     scheduleRender();
+    if (typeof centerOnPlayer === 'function') centerOnPlayer(false);
   });
   LOG('CANVAS', 'setupCanvases done');
 }
@@ -23030,16 +23031,24 @@ function resizeCanvases() {
   // ROWS*HEX_H + HEX_H/2. Trees de row 0 podem cortar topo levemente
   // (acceitável em editor — gameplay PROD intocado mantém maxTileH offset).
   const editorMode = !!window._editorMode;
+  const vp = document.getElementById('map-viewport');
+  const vpW = (vp && vp.clientWidth) || window.innerWidth || 400;
+  const vpH = (vp && vp.clientHeight) || window.innerHeight || 800;
+  // 2026-09-16 (user request): em gameplay normal, adiciona margem igual a metade
+  // do viewport (padX/padY) em cada lado para que qualquer hex (mesmo nas bordas
+  // extremas do mapa) possa ficar centralizado na tela, evitando que o HUD cubra o herói.
+  const padX = editorMode ? 0 : Math.round(vpW / 2);
+  const padY = editorMode ? 0 : Math.round(vpH / 2);
   const editorPadding = 0;
   const topConstant = editorMode ? 0 : 30;
   const bottomConstant = editorMode ? 0 : 60;
   const topMaxTile = editorMode ? 0 : maxTileH;
   // V2.7 flat-top: col drive horizontal (col * HEX_W*0.75 + HEX_W/2 pra last point);
   // row drive vertical (row * HEX_H + HEX_H/2 pra offset de odd cols).
-  const totalW = COLS * (HEX_W * 0.75) + HEX_W / 4 + HEX_W / 2 + 20 + editorPadding * 2;
-  const totalH = ROWS * HEX_H + HEX_H / 2 + topMaxTile + bottomConstant + editorPadding * 2;
-  MAP_OFFSET_X = 10 + editorPadding;
-  MAP_OFFSET_Y = topMaxTile + topConstant + editorPadding;
+  const totalW = COLS * (HEX_W * 0.75) + HEX_W / 4 + HEX_W / 2 + 20 + padX * 2 + editorPadding * 2;
+  const totalH = ROWS * HEX_H + HEX_H / 2 + topMaxTile + bottomConstant + padY * 2 + editorPadding * 2;
+  MAP_OFFSET_X = padX + 10 + editorPadding;
+  MAP_OFFSET_Y = padY + topMaxTile + topConstant + editorPadding;
   canvasW = totalW;
   canvasH = totalH;
 

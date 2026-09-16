@@ -1509,6 +1509,22 @@ var CHAR_CLASSES = [
 
 var CHAR_RACES = ['Humano', 'Anão', 'Elfo', 'Gnomo', 'Meio-Elfo', 'Meio-Orc', 'Draconato', 'Tiefling', 'Halfling'];
 
+// Regra Geral D&D 5e: Combate com Duas Armas (PHB p.165)
+// Registra Ataque Secundário em todas as classes para ser filtrado em buildCharUnitFromSetup
+var _TWF_SKILL = {
+    n: 'Ataque Secundário',
+    ico: '🗡️',
+    cost: 0,
+    kind: 'attack',
+    bonus: true,
+    offhand: true,
+    requiresActionTaken: true,
+    desc: 'Ataque bônus com a arma secundária (não soma modificador de atributo no dano, exceto se negativo ou se possuir o estilo correspondente).',
+    helpDnd5e: 'Combate com Duas Armas (PHB p.165): quando você usa a ação Atacar com uma arma leve em uma mão, pode usar uma ação bônus para atacar com uma arma leve diferente na outra mão.\nNão adiciona o modificador de atributo ao dano do ataque bônus, a menos que ele seja negativo, ou que você possua o Estilo de Combate correspondente.'
+};
+
+// A skill _TWF_SKILL é mantida global neste arquivo e injetada dinamicamente em buildCharUnitFromSetup.
+
 /* Belt-and-suspenders: garantir window.X ainda em strict-mode contexts. */
 if (typeof window !== 'undefined') {
     window.BESTIARY = BESTIARY;
