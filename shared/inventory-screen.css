@@ -1040,6 +1040,73 @@
 
 }
 
+.vinv-desc-min {
+  font-size: calc(9px * var(--v-font-scale, 1));
+  color: var(--vinv-text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin-top: 1px;
+  line-height: 1.15;
+  text-align: center;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vinv-desc-min .vinv-die {
+  background: var(--v-gold-15);
+  color: var(--vinv-gold);
+  border-radius: var(--v-radius-xs, 4px);
+  padding: 0 var(--v-space-sm, 4px);
+  font-size: calc(9px * var(--v-font-scale, 1));
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.vinv-desc-min .vinv-ac {
+  color: var(--vinv-r-rare);
+  font-weight: 600;
+}
+
+.vinv-desc-min .vinv-heal {
+  color: #4cd137;
+  font-weight: 600;
+}
+
+.vinv-desc-min .vinv-dt {
+  color: var(--vinv-text-dim);
+  font-size: calc(8.5px * var(--v-font-scale, 1));
+}
+
+.vinv-desc-min .vinv-bonus {
+  color: var(--vinv-gold-bright);
+  font-weight: 700;
+}
+
+.vinv-desc-min .vinv-stat-text {
+  font-size: calc(8.5px * var(--v-font-scale, 1));
+  color: var(--vinv-text-dim);
+  letter-spacing: 0.2px;
+}
+
+.vinv-price-line {
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+  color: var(--vinv-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 1px;
+}
+
+.vinv-price-line.quest {
+  font-size: calc(8.5px * var(--v-font-scale, 1));
+  color: var(--vinv-r-quest);
+}
+
 
 
 /* ================================================================
@@ -1395,6 +1462,85 @@
 }
 
 .vinv-detail-overlay.active { display: flex; }
+
+.vinv-confirm-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 5, 3, 0.86);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 30;
+}
+
+.vinv-confirm-overlay.active {
+  display: flex;
+}
+
+.vinv-confirm-card {
+  background: linear-gradient(180deg, #3a2c20 0%, #261c14 100%);
+  border: 2px solid var(--vinv-gold);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75), 0 0 30px var(--v-gold-40);
+  padding: 16px 14px;
+  text-align: center;
+  position: relative;
+  gap: 8px;
+}
+
+.vinv-confirm-title {
+  font-family: var(--vinv-font-display);
+  font-size: calc(12.5px * var(--v-font-scale, 1));
+  color: var(--vinv-gold);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.vinv-confirm-icon {
+  width: 48px;
+  height: 48px;
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vinv-confirm-icon img,
+.vinv-confirm-icon svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.vinv-confirm-msg {
+  font-size: calc(11px * var(--v-font-scale, 1));
+  color: var(--vinv-text-bright);
+  line-height: 1.35;
+}
+
+.vinv-confirm-sub {
+  font-size: calc(10px * var(--v-font-scale, 1));
+  color: #4cd137;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.vinv-confirm-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.vinv-confirm-actions .vinv-btn {
+  flex: 1;
+}
 
 
 

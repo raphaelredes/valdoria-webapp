@@ -397,6 +397,9 @@
       +   '<div class="vinv-detail-overlay" data-region="detail" role="dialog" aria-modal="true" aria-label="Detalhe do item">'
       +     '<div class="vinv-detail-card" data-region="detail-card"></div>'
       +   '</div>'
+      +   '<div class="vinv-confirm-overlay" data-region="confirm" role="dialog" aria-modal="true" aria-label="Confirmar uso">'
+      +     '<div class="vinv-confirm-card" data-region="confirm-card"></div>'
+      +   '</div>'
       + '</div>';
     // 2026-05-17: mount inside simulator frame container (#frame em exploracao,
     // #app em combate/cidade) ao invés de body. Isso garante que a mochila fica
@@ -417,6 +420,12 @@
     ov.addEventListener('click', function (e) {
       if (e.target === ov) window.vInventory.close();
     });
+    var confirmEl = ov.querySelector('[data-region="confirm"]');
+    if (confirmEl) {
+      confirmEl.addEventListener('click', function (e) {
+        if (e.target === confirmEl) confirmEl.classList.remove('active');
+      });
+    }
     // ESC fecha (a11y + keyboard navigation)
     document.addEventListener('keydown', _onKeyDown);
 
@@ -426,6 +435,12 @@
   function _onKeyDown(e) {
     if (!_state.open) return;
     if (e.key === 'Escape' || e.keyCode === 27) {
+      var confirmEl = _state.overlay && _state.overlay.querySelector('[data-region="confirm"]');
+      if (confirmEl && confirmEl.classList.contains('active')) {
+        confirmEl.classList.remove('active');
+        e.preventDefault();
+        return;
+      }
       // Se detail aberto, fecha detail primeiro
       var detail = _state.overlay && _state.overlay.querySelector('[data-region="detail"]');
       if (detail && detail.classList.contains('active')) {
@@ -679,7 +694,8 @@
         : '';
       var favBadge = fav ? '<span class="vinv-badge fav">★</span>' : '';
 
-      var metaHtml = _buildMeta(it);
+      var minDesc = _buildMinDesc(it);
+      var priceHtml = _buildPriceLine(it);
 
       var ariaLabel = it.name + (it.qty > 1 ? ' (×' + it.qty + ')' : '')
         + (equipped ? ' — equipado' : '')
@@ -692,8 +708,9 @@
         +   (equipBadge || questBadge)
         +   favBadge
         +   '<div class="vinv-icon" aria-hidden="true">' + _iconSrc(iconId, it.name) + '</div>'
-        +   '<div class="vinv-name">' + _esc(it.name) + '</div>'
-        +   (metaHtml ? '<div class="vinv-meta">' + metaHtml + '</div>' : '')
+        +   '<div class="vinv-name" title="' + _esc(it.name) + '">' + _esc(it.name) + '</div>'
+        +   (minDesc ? '<div class="vinv-desc-min">' + minDesc + '</div>' : '')
+        +   priceHtml
         + '</div>';
     });
     el.innerHTML = html;
@@ -710,13 +727,109 @@
     });
   }
 
+  function _formatDmgType(dt) {
+    if (!dt) return '';
+    var map = {
+      slashing: 'cortante', piercing: 'perfurante', bludgeoning: 'concussão',
+      fire: 'fogo', cold: 'frio', lightning: 'elétrico', acid: 'ácido',
+      poison: 'veneno', necrotic: 'necrótico', radiant: 'radiante',
+      force: 'energia', psychic: 'psíquico', thunder: 'trovão',
+    };
+    return map[String(dt).toLowerCase()] || dt;
+  }
+
+  function _buildMinDesc(it) {
+    if (it.meta) return '<span class="vinv-stat-text">' + _esc(it.meta) + '</span>';
+
+    // 1. Armas: dado de dano + tipo de dano (D&D 5e) + bônus
+    if (it.dmg_die) {
+      var wStr = '<span class="vinv-die">' + _esc(it.dmg_die) + '</span>';
+      if (it.bonus) wStr += ' <span class="vinv-bonus">+' + it.bonus + '</span>';
+      var dt = it.dmg_type || it.dt;
+      if (dt) wStr += ' <span class="vinv-dt">' + _esc(_formatDmgType(dt)) + '</span>';
+      return wStr;
+    }
+
+    // 2. Armaduras / Escudos / Defesa: CA (D&D 5e)
+    if (it.ac_bonus != null && it.ac_bonus !== '') {
+      var acVal = parseInt(it.ac_bonus, 10);
+      if (acVal > 0) return '<span class="vinv-ac">+' + acVal + ' CA</span>';
+    }
+
+    // 3. Poções e Consumíveis com cura
+    if (it.heal) {
+      return '<span class="vinv-heal">' + _esc(it.heal) + ' PV</span>';
+    }
+
+    // 4. Vestimentas ou equipamentos com slot
+    if (it.slot && it.slot !== 'main_hand' && it.slot !== 'off_hand') {
+      if (it.bonus) return '<span class="vinv-bonus">+' + it.bonus + '</span>';
+      var sl = _slotLabel(it.slot);
+      if (sl) return '<span class="vinv-stat-text">' + _esc(sl) + '</span>';
+    }
+
+    // 5. Categorias D&D 5e baseadas em tags
+    var tags = it.tags || [];
+    if (tags.indexOf('food') !== -1 || tags.indexOf('ration') !== -1) {
+      return '<span class="vinv-stat-text">Alimento</span>';
+    }
+    if (tags.indexOf('potion') !== -1) {
+      return '<span class="vinv-stat-text">Poção</span>';
+    }
+    if (tags.indexOf('scroll') !== -1) {
+      return '<span class="vinv-stat-text">Pergaminho</span>';
+    }
+    if (tags.indexOf('gem') !== -1) {
+      return '<span class="vinv-stat-text">Gema</span>';
+    }
+    if (tags.indexOf('rune') !== -1) {
+      return '<span class="vinv-stat-text">Runa</span>';
+    }
+    if (tags.indexOf('tool') !== -1) {
+      return '<span class="vinv-stat-text">Ferramenta</span>';
+    }
+    if (tags.indexOf('material') !== -1) {
+      return '<span class="vinv-stat-text">Material</span>';
+    }
+    if (tags.indexOf('alchemy') !== -1) {
+      return '<span class="vinv-stat-text">Alquimia</span>';
+    }
+    if (tags.indexOf('valuable') !== -1) {
+      return '<span class="vinv-stat-text">Tesouro</span>';
+    }
+    if (tags.indexOf('accessory') !== -1) {
+      return '<span class="vinv-stat-text">Acessório</span>';
+    }
+    if (it.rarity === 'quest' || tags.indexOf('quest') !== -1) {
+      return '<span class="vinv-stat-text" style="color:var(--vinv-r-quest)">Missão</span>';
+    }
+
+    return '<span class="vinv-stat-text">Item</span>';
+  }
+
+  function _buildPriceLine(it) {
+    if (it.value != null && it.value > 0) {
+      return '<div class="vinv-price-line"><span class="vinv-coin mini">V</span><span>' + it.value + '</span></div>';
+    }
+    if (it.rarity === 'quest') {
+      return '<div class="vinv-price-line quest"><span style="color:var(--vinv-r-quest)">Missão</span></div>';
+    }
+    return '<div class="vinv-price-line"><span class="vinv-coin mini">V</span><span>0</span></div>';
+  }
+
   function _buildMeta(it) {
     var parts = [];
     if (it.meta) return _esc(it.meta);
-    if (it.dmg_die) parts.push('<span class="vinv-die">' + _esc(it.dmg_die) + '</span>');
+    if (it.dmg_die) {
+      var dStr = '<span class="vinv-die">' + _esc(it.dmg_die) + '</span>';
+      var dt = it.dmg_type || it.dt;
+      if (dt) dStr += ' ' + _esc(_formatDmgType(dt));
+      parts.push(dStr);
+    }
     if (it.ac_bonus) parts.push('<span class="vinv-ac">+' + it.ac_bonus + ' CA</span>');
+    if (it.heal) parts.push('<span class="vinv-heal">' + _esc(it.heal) + ' PV</span>');
     if (it.bonus) parts.push('+' + it.bonus + ' ATQ');
-    if (it.value && !parts.length) parts.push('<span class="vinv-coin mini">V</span>' + it.value);
+    if (it.value) parts.push('<span class="vinv-coin mini">V</span>' + it.value);
     if (it.rarity === 'quest' && !parts.length) parts.push('<span style="color:var(--vinv-r-quest)">Missão</span>');
     return parts.join(' ');
   }
@@ -998,8 +1111,14 @@
     var statsHtml = '';
     if (it.type) statsHtml += _detailStat('Tipo', it.type);
     if (it.slot) statsHtml += _detailStat('Slot', _slotLabel(it.slot));
-    if (it.dmg_die) statsHtml += _detailStat('Dano', it.dmg_die);
+    if (it.dmg_die) {
+      var dLabel = it.dmg_die;
+      var dType = it.dmg_type || it.dt;
+      if (dType) dLabel += ' (' + _formatDmgType(dType) + ')';
+      statsHtml += _detailStat('Dano', dLabel);
+    }
     if (it.ac_bonus) statsHtml += _detailStat('CA', '+' + it.ac_bonus);
+    if (it.heal) statsHtml += _detailStat('Cura', it.heal + ' PV');
     if (it.bonus) statsHtml += _detailStat('Ataque', '+' + it.bonus);
     if (it.weight) statsHtml += _detailStat('Peso', it.weight + ' kg');
     if (it.value) statsHtml += _detailStat('Valor',
@@ -1077,20 +1196,67 @@
       btn.addEventListener('click', function () {
         var act = btn.dataset.detailAction;
         var fn = cfg['on' + act.charAt(0).toUpperCase() + act.slice(1)];
-        if (typeof fn === 'function') {
-          var result = fn(it);
-          if (result && result.then) {
-            result.then(function () { window.vInventory.refresh(); _hideDetail(); });
-          } else {
-            window.vInventory.refresh();
-            _hideDetail();
-          }
-        } else {
-          _hideDetail();
+        if (act === 'ItemUse') {
+          _showUseConfirmModal(it, function () {
+            _executeDetailAction(fn, it);
+          });
+          return;
         }
+        _executeDetailAction(fn, it);
       });
     });
     _wireSwapList(card, it, slotKey, cfg);
+  }
+
+  function _executeDetailAction(fn, it) {
+    if (typeof fn === 'function') {
+      var result = fn(it);
+      if (result && result.then) {
+        result.then(function () { window.vInventory.refresh(); _hideDetail(); });
+      } else {
+        window.vInventory.refresh();
+        _hideDetail();
+      }
+    } else {
+      _hideDetail();
+    }
+  }
+
+  function _showUseConfirmModal(it, onConfirm) {
+    var ov = _state.overlay && _state.overlay.querySelector('[data-region="confirm"]');
+    var card = _state.overlay && _state.overlay.querySelector('[data-region="confirm-card"]');
+    if (!ov || !card) {
+      if (typeof onConfirm === 'function') onConfirm();
+      return;
+    }
+    var iconId = _resolveItemIcon(it);
+    var subHtml = '';
+    if (it.heal) {
+      subHtml = '<div class="vinv-confirm-sub">Restaura ' + _esc(it.heal) + ' PV</div>';
+    } else if (it.desc) {
+      subHtml = '<div class="vinv-confirm-sub">' + _esc(it.desc.slice(0, 90)) + '</div>';
+    }
+    card.innerHTML = ''
+      + '<div class="vinv-confirm-title">Confirmar Uso</div>'
+      + '<div class="vinv-confirm-icon">' + _iconSrc(iconId, it.name) + '</div>'
+      + '<div class="vinv-confirm-msg">Deseja realmente usar <strong>' + _esc(it.name) + '</strong>?</div>'
+      + subHtml
+      + '<div class="vinv-confirm-actions">'
+      +   '<button type="button" class="vinv-btn" data-action="confirm-cancel">Cancelar</button>'
+      +   '<button type="button" class="vinv-btn primary" data-action="confirm-ok">Usar</button>'
+      + '</div>';
+
+    ov.classList.add('active');
+
+    function _closeConfirm() {
+      ov.classList.remove('active');
+    }
+
+    card.querySelector('[data-action="confirm-cancel"]').addEventListener('click', _closeConfirm);
+    card.querySelector('[data-action="confirm-ok"]').addEventListener('click', function () {
+      _closeConfirm();
+      if (typeof onConfirm === 'function') onConfirm();
+    });
   }
 
   // ============================================================

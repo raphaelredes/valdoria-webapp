@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-16T23:03:05Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-16T23:46:07Z - do not edit directly, edit source -->
 
 
 
@@ -6290,6 +6290,7 @@ document.write('<link rel="stylesheet" href="../shared/inventory-screen.css?v=' 
    asset-resolver pra upgrade automatico via MutationObserver. */
 document.write('<script src="../shared/items-resolver.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../shared/icons-resolver.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/items-db-generated.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../shared/asset-resolver.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/script>');
 
@@ -35769,11 +35770,17 @@ function _exploracaoItemCategory(item) {
   var name = ((typeof item === 'string') ? item : (item.name || item.id || '')).toLowerCase();
   if (name.indexOf('poção') >= 0 || name.indexOf('elixir') >= 0
       || name.indexOf('erva') >= 0 || name.indexOf('rações') >= 0
+      || name.indexOf('ração') >= 0 || name.indexOf('pão') >= 0
+      || name.indexOf('carne') >= 0 || name.indexOf('refeição') >= 0
+      || name.indexOf('maçã') >= 0 || name.indexOf('queijo') >= 0
+      || name.indexOf('hidromel') >= 0 || name.indexOf('cogumelo') >= 0
       || name.indexOf('fogo alquímico') >= 0) return 'use';
   if (name.indexOf('espada') >= 0 || name.indexOf('adaga') >= 0
       || name.indexOf('arco') >= 0 || name.indexOf('elmo') >= 0
       || name.indexOf('botas') >= 0 || name.indexOf('cota') >= 0
-      || name.indexOf('escudo') >= 0 || name.indexOf('garras') >= 0) return 'equip';
+      || name.indexOf('escudo') >= 0 || name.indexOf('garras') >= 0
+      || name.indexOf('machado') >= 0 || name.indexOf('martelo') >= 0
+      || name.indexOf('peitoral') >= 0 || name.indexOf('armadura') >= 0) return 'equip';
   if (name.indexOf('turquesa') >= 0 || name.indexOf('ametista') >= 0
       || name.indexOf('rubi') >= 0 || name.indexOf('esmeralda') >= 0
       || name.indexOf('diamante') >= 0 || name.indexOf('safira') >= 0) return 'gem';
@@ -35817,7 +35824,7 @@ function _vinvExpCategoryToTags(cat) {
     'equip': ['weapon'],  // genérico — pode ser arma OU armadura
     'gem':   ['gem', 'valuable'],
     'rune':  ['magic'],
-    'misc':  ['tool'],
+    'misc':  ['material'],
   })[cat] || [];
 }
 // Sessão #67: normalização defensiva do nome. Loot malformado (dict {n,ico,rare}
@@ -35833,19 +35840,47 @@ function _vinvExpNormalizeName(item) {
   }
   return nm;
 }
+
+function _vinvExpGetDbItem(name) {
+  if (!name) return null;
+  if (window.CANON_ITEMS_DB && window.CANON_ITEMS_DB[name]) return window.CANON_ITEMS_DB[name];
+  if (window.ITEMS_DB_GEN && window.ITEMS_DB_GEN[name]) return window.ITEMS_DB_GEN[name];
+  return null;
+}
+
 function _vinvExpAdaptItem(item) {
   var name = _vinvExpNormalizeName(item);
-  var qty  = item.quantity || 0;
-  var cat  = _exploracaoItemCategory(item);
-  var tags = item.tags || _vinvExpCategoryToTags(cat);
+  var qty  = (item.quantity != null) ? item.quantity : (item.q != null ? item.q : 1);
+  var db   = _vinvExpGetDbItem(name) || {};
+  var tags = item.tags || item.t || db.t || (db.tags ? db.tags : null);
+  if (!tags || !tags.length) {
+    var cat = _exploracaoItemCategory(item);
+    tags = _vinvExpCategoryToTags(cat);
+  }
+  var value = (item.value != null) ? item.value : (item.v != null ? item.v : (db.v != null ? db.v : (db.value || 0)));
+  var desc = item.desc || db.desc || '';
+  var slot = item.slot || item.s || db.s || db.slot || '';
+  var dmgDie = item.dmg_die || item.dd || db.dd || db.dmg_die || '';
+  var dmgType = item.dmg_type || item.dt || db.dt || db.dmg_type || '';
+  var acBonus = (item.ac_bonus != null) ? item.ac_bonus : (item.ac != null ? item.ac : (db.ac != null ? db.ac : db.ac_bonus));
+  var heal = item.heal || db.heal || '';
+  var bonus = item.bonus || item.b || db.b || db.bonus || 0;
+  var rarity = item.rarity || item.r || db.r || db.rarity || 'common';
+
   return {
     id: item.id || _vinvExpSlug(name),
     name: name,
     qty: qty,
-    rarity: item.rarity || 'common',
+    rarity: rarity,
     tags: tags,
-    value: item.value || 0,
-    desc: item.desc || '',
+    value: value,
+    desc: desc,
+    slot: slot,
+    dmg_die: dmgDie,
+    dmg_type: dmgType,
+    ac_bonus: acBonus,
+    heal: heal,
+    bonus: bonus,
     iconId: 'ic-it-' + _vinvExpSlug(name),
   };
 }
@@ -35929,7 +35964,7 @@ function _vinvExpBuildConfig() {
   var loadout = _vinvExpReadLoadout(items);
   var hasLoadout = Object.keys(loadout).length > 0;
   return {
-    title: 'MOCHILA — TRILHA',
+    title: 'MOCHILA',
     player: {
       gold: gold,
       items: items,
@@ -35944,10 +35979,8 @@ function _vinvExpBuildConfig() {
     inCombat: false,
     // 2026-07-01 (EXPLORE-USE-DROP-STUB): "Usar" agora é REAL — o servidor
     // valida posse, rola a cura, consome do inventário e aplica no state da
-    // sessão (POST /api/exploracao/use_item). Antes era stub toast-only (o
-    // jogador "bebia" a poção e nada acontecia). "Largar" foi REMOVIDO do
-    // config: descartar item é ação de cidade — sem callback, o vInventory
-    // esconde o botão (nenhum botão morto).
+    // sessão (POST /api/exploracao/use_item).
+    // 2026-09-16: Animação 3D dos dados de cura via Dice3D rollMultiple + fusionTo.
     onItemUse: function (item) {
       if (window.__EXPLORE_MODE === 'remote'
           && window.ExploracaoAPI && typeof window.ExploracaoAPI.useItem === 'function') {
@@ -35959,49 +35992,90 @@ function _vinvExpBuildConfig() {
             if (typeof vToast === 'function') vToast(msg, 'warn');
             return;
           }
-          // Aplica o state autoritativo do servidor no HUD da trilha.
-          try {
-            if (res.state && window.S && S.player) {
-              if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
-              if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
-              if (typeof updateHud === 'function') updateHud();
-            }
-          } catch (_eHud) {}
-          // Reflete o consumo no cache do inventário do servidor (fonte da mochila).
-          try {
-            if (Array.isArray(window.__EXPLORE_SERVER_INV)) {
-              for (var i = 0; i < window.__EXPLORE_SERVER_INV.length; i++) {
-                var e = window.__EXPLORE_SERVER_INV[i];
-                if (e && e.name === item.name) {
-                  e.quantity = Math.max(0, (e.quantity || 1) - 1);
-                  break;
+
+          if (window.vInventory && typeof vInventory.close === 'function') {
+            vInventory.close();
+          }
+
+          var usedData = res.used || {};
+          var rolls = usedData.rolls || [];
+          var die = usedData.die || 'd4';
+          var bonus = usedData.bonus || 0;
+          var healed = (usedData.healed_hp != null) ? usedData.healed_hp : 0;
+          var healedMp = (usedData.healed_mp != null) ? usedData.healed_mp : 0;
+          var formula = usedData.formula || '';
+
+          function _applyAfterRoll() {
+            // Aplica o state autoritativo do servidor no HUD da trilha.
+            try {
+              if (res.state && window.S && S.player) {
+                if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
+                if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
+                if (typeof updateHud === 'function') updateHud();
+              }
+            } catch (_eHud) {}
+            // Reflete o consumo no cache do inventário do servidor (fonte da mochila).
+            try {
+              if (Array.isArray(window.__EXPLORE_SERVER_INV)) {
+                for (var i = 0; i < window.__EXPLORE_SERVER_INV.length; i++) {
+                  var e = window.__EXPLORE_SERVER_INV[i];
+                  if (e && (e.name === item.name || e.i === item.name)) {
+                    if (e.quantity != null) e.quantity = Math.max(0, e.quantity - 1);
+                    if (e.q != null) e.q = Math.max(0, e.q - 1);
+                    break;
+                  }
                 }
               }
+            } catch (_eInv) {}
+            var parts = [];
+            if (healed) parts.push('+' + healed + ' PV');
+            if (healedMp) parts.push('+' + healedMp + ' PM');
+            if (typeof vToast === 'function') {
+              vToast(item.name + (parts.length ? ': ' + parts.join(' · ') : ' usado.'), 'ok');
             }
-          } catch (_eInv) {}
-          var healed = (res.used && res.used.healed_hp) || 0;
-          var healedMp = (res.used && res.used.healed_mp) || 0;
-          var parts = [];
-          if (healed) parts.push('+' + healed + ' PV');
-          if (healedMp) parts.push('+' + healedMp + ' PM');
-          if (typeof vToast === 'function') {
-            vToast(item.name + (parts.length ? ': ' + parts.join(' · ') : ' usado.'), 'ok');
+            try {
+              if (window.vInventory && typeof vInventory.open === 'function') {
+                vInventory.open(_vinvExpBuildConfig());
+              }
+            } catch (_eR) {}
           }
-          try { if (window.vInventory && vInventory.isOpen && vInventory.isOpen()) vInventory.refresh(_vinvExpBuildConfig().player); } catch (_eR) {}
+
+          if (rolls && rolls.length > 0 && typeof _animatePotionHealDice === 'function') {
+            _animatePotionHealDice(rolls, die, bonus, healed, formula, item.name, _applyAfterRoll);
+          } else {
+            _applyAfterRoll();
+          }
         }).catch(function (err) {
           console.warn('[vInventory] use_item err:', err);
           if (typeof vToast === 'function') vToast('Falha ao usar ' + item.name + ' (rede).', 'warn');
         });
         return;
       }
-      // LOCAL (file:// dev tool) — sem servidor: mantém aviso honesto.
-      if (typeof vToast === 'function') vToast('Usar ' + item.name + ' requer sessão no servidor.', 'warn');
+      // LOCAL (file:// dev tool) — fallback com simulação de 3D dice
+      if (window.vInventory && typeof vInventory.close === 'function') {
+        vInventory.close();
+      }
+      var localRolls = [Math.floor(Math.random() * 4) + 1, Math.floor(Math.random() * 4) + 1];
+      var localBonus = 2;
+      var localTotal = localRolls[0] + localRolls[1] + localBonus;
+      if (typeof _animatePotionHealDice === 'function') {
+        _animatePotionHealDice(localRolls, 'd4', localBonus, localTotal, '2d4+2', item.name, function () {
+          if (window.S && S.player) {
+            S.player.hp = Math.min(S.player.mhp || 20, (S.player.hp || 10) + localTotal);
+            if (typeof updateHud === 'function') updateHud();
+          }
+          if (typeof vToast === 'function') vToast(item.name + ': +' + localTotal + ' PV [Modo Local]', 'ok');
+          try {
+            if (window.vInventory && typeof vInventory.open === 'function') {
+              vInventory.open(_vinvExpBuildConfig());
+            }
+          } catch (_) {}
+        });
+      } else {
+        if (typeof vToast === 'function') vToast('Usar ' + item.name + ' requer sessão no servidor.', 'warn');
+      }
     },
     onClose: function () { /* nada */ },
-    primaryAction: {
-      label: 'Continuar Trilha',
-      onClick: function () { window.vInventory && vInventory.close(); }
-    },
     secondaryAction: { label: 'Voltar', icon: 'back' },
   };
 }
@@ -40988,6 +41062,116 @@ function _animateHealDie(dieSize, rawRoll, conMod, actualHeal, fullHp, callback)
     }
   }
   setTimeout(wrappedShow, 600);  // sem Dice3D: fallback timing
+}
+
+// Animação 3D do consumo de Poção de Cura (Dice3D multi-dice rollMultiple + fusionTo).
+// Reusa o mesmo #dice-overlay (.dice-heal) do descanso curto / skill checks.
+function _animatePotionHealDice(rolls, dieSize, bonus, actualHeal, formulaStr, itemName, callback) {
+  function _done() { try { callback(); } catch (_e) {} }
+  var lite = document.body.classList.contains('perf-lite');
+  var overlay = document.getElementById('dice-overlay');
+  var wrap = document.getElementById('dice-canvas-wrap');
+  var formula = document.getElementById('dice-formula');
+  var result = document.getElementById('dice-result');
+  var skipBtn = document.getElementById('dice-skip-btn');
+
+  if (!overlay || !wrap || !formula || !result || !skipBtn) {
+    _done();
+    return;
+  }
+
+  if (!Array.isArray(rolls) || rolls.length === 0) {
+    _done();
+    return;
+  }
+
+  var numSides = parseInt(String(dieSize).replace(/\D/g, ''), 10) || 4;
+  var dType = 'd' + numSides;
+
+  while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+  while (formula.firstChild) formula.removeChild(formula.firstChild);
+  while (result.firstChild) result.removeChild(result.firstChild);
+  result.className = '';
+  result.style.display = 'none';
+  result.onclick = null; result.style.cursor = '';
+  skipBtn.style.display = 'none';
+  overlay.classList.add('visible');
+  overlay.classList.add('dice-heal');
+
+  var advanced = false;
+  function advance() {
+    if (advanced) return;
+    advanced = true;
+    overlay.classList.remove('visible');
+    overlay.classList.remove('dice-heal');
+    skipBtn.style.cssText = '';
+    setTimeout(_done, 0);
+  }
+
+  skipBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); advance(); };
+  skipBtn.addEventListener('click', function (ev) { if (ev) ev.stopPropagation(); advance(); });
+  skipBtn.addEventListener('pointerdown', function (ev) { if (ev) ev.stopPropagation(); advance(); });
+
+  var totalRoll = rolls.reduce(function (a, b) { return a + b; }, 0) + (bonus || 0);
+
+  var resultShown = false;
+  function showResult() {
+    if (resultShown) return;
+    resultShown = true;
+    var rollSum = rolls.join(' + ') + (bonus ? ' +' + bonus : '');
+    formula.textContent = (itemName ? itemName + ' · ' : '')
+      + (formulaStr ? formulaStr + ' (' : '')
+      + rollSum
+      + (formulaStr ? ')' : '') + ' = ';
+    var bold = document.createElement('b');
+    bold.textContent = (actualHeal > 0 ? '+' + actualHeal + ' PV' : 'HP cheio');
+    formula.appendChild(bold);
+
+    if (actualHeal > 0) {
+      result.className = 'success';
+      result.textContent = '+' + actualHeal + ' PV';
+    } else {
+      result.className = 'heal-full';
+      result.textContent = 'HP JÁ CHEIO';
+    }
+    result.style.display = 'inline-block';
+    _diceOverlayContinueBtn(skipBtn);
+  }
+
+  var safety = setTimeout(showResult, 4000);
+  function wrappedShow() { clearTimeout(safety); showResult(); }
+
+  if (lite) { setTimeout(wrappedShow, 250); return; }
+
+  if (window.Dice3D) {
+    try {
+      if (rolls.length === 1) {
+        var dice = new window.Dice3D(wrap, { size: 200, dieType: dType, duration: 1500 });
+        dice.roll(rolls[0], wrappedShow);
+        return;
+      } else {
+        var configs = rolls.map(function (val) {
+          return { value: val, dieType: dType };
+        });
+        var dice = new window.Dice3D(wrap, { size: 200, dieType: dType, duration: 1500 });
+        dice.rollMultiple(configs, function () {
+          formula.textContent = (itemName ? itemName + ': ' : '') + rolls.join(' + ') + (bonus ? ' +' + bonus : '');
+          setTimeout(function () {
+            if (typeof dice.fusionTo === 'function') {
+              dice.fusionTo(totalRoll, wrappedShow);
+            } else {
+              wrappedShow();
+            }
+          }, 700);
+        });
+        return;
+      }
+    } catch (e) {
+      try { window.serverLog && window.serverLog('exploracao', 'warn', 'potion_dice3d_failed', { err: e && e.message }); } catch (_) {}
+    }
+  }
+
+  setTimeout(wrappedShow, 600);
 }
 
 // H2: aplica o resultado AUTORITATIVO do servidor (cliente só renderiza).
