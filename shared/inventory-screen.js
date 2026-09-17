@@ -70,12 +70,32 @@
     arrow.innerHTML = '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 12L2 6h12z" fill="currentColor"/></svg>';
     panelEl.appendChild(arrow);
 
+    var _fadeTimer = null;
+    var _fadedOnPointerDown = false;
+
+    function _scheduleFade() {
+      if (_fadeTimer) clearTimeout(_fadeTimer);
+      _fadeTimer = setTimeout(function () {
+        if (arrow && !arrow.classList.contains('hidden')) {
+          arrow.classList.add('faded');
+        }
+      }, 2500);
+    }
+
+    function _wakeArrow() {
+      if (!arrow) return;
+      arrow.classList.remove('faded');
+      _scheduleFade();
+    }
+
     function update() {
       if (!scrollEl.isConnected) return;
       var atBottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 6;
       var hasScroll = scrollEl.scrollHeight > scrollEl.clientHeight + 4;
       if (!hasScroll) {
         arrow.classList.add('hidden');
+        arrow.classList.remove('faded');
+        if (_fadeTimer) { clearTimeout(_fadeTimer); _fadeTimer = null; }
         return;
       }
       arrow.classList.remove('hidden');
@@ -88,9 +108,35 @@
         arrow.classList.add('down');
         arrow.setAttribute('aria-label', 'Há mais itens abaixo — rolar');
       }
+      _wakeArrow();
     }
 
-    arrow.addEventListener('click', function () {
+    // Hover no PC acorda imediatamente e congela o fade enquanto o cursor estiver sobre o botão
+    arrow.addEventListener('mouseenter', function () {
+      arrow.classList.remove('faded');
+      if (_fadeTimer) clearTimeout(_fadeTimer);
+    });
+    arrow.addEventListener('mouseleave', function () {
+      if (!arrow.classList.contains('hidden')) {
+        _scheduleFade();
+      }
+    });
+
+    // Detecta no pointerdown se a seta estava transparente no momento do toque
+    arrow.addEventListener('pointerdown', function () {
+      _fadedOnPointerDown = arrow.classList.contains('faded');
+    });
+
+    arrow.addEventListener('click', function (e) {
+      if (_fadedOnPointerDown) {
+        // Estava quase transparente: primeiro toque apenas acorda a seta (sem rolar a tela)
+        e.preventDefault();
+        e.stopPropagation();
+        _fadedOnPointerDown = false;
+        _wakeArrow();
+        return;
+      }
+      _wakeArrow();
       if (arrow.classList.contains('up')) {
         scrollEl.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -770,6 +816,27 @@
 
     // 5. Categorias D&D 5e baseadas em tags
     var tags = it.tags || [];
+    if (tags.indexOf('spellbook') !== -1) {
+      return '<span class="vinv-stat-text">Grimório</span>';
+    }
+    if (tags.indexOf('holy_symbol') !== -1) {
+      return '<span class="vinv-stat-text">Símbolo Sagrado</span>';
+    }
+    if (tags.indexOf('arcane_focus') !== -1 || tags.indexOf('druidic_focus') !== -1 || tags.indexOf('spell_focus') !== -1 || tags.indexOf('focus') !== -1) {
+      return '<span class="vinv-stat-text">Foco Mágico</span>';
+    }
+    if (tags.indexOf('book') !== -1) {
+      return '<span class="vinv-stat-text">Livro</span>';
+    }
+    if (tags.indexOf('ammo') !== -1) {
+      return '<span class="vinv-stat-text">Munição</span>';
+    }
+    if (tags.indexOf('musical_instrument') !== -1 || tags.indexOf('instrument') !== -1) {
+      return '<span class="vinv-stat-text">Instrumento</span>';
+    }
+    if (tags.indexOf('thieves_tools') !== -1) {
+      return '<span class="vinv-stat-text">Ferramentas de Ladrão</span>';
+    }
     if (tags.indexOf('food') !== -1 || tags.indexOf('ration') !== -1) {
       return '<span class="vinv-stat-text">Alimento</span>';
     }
@@ -800,8 +867,18 @@
     if (tags.indexOf('accessory') !== -1) {
       return '<span class="vinv-stat-text">Acessório</span>';
     }
+    if (tags.indexOf('key') !== -1) {
+      return '<span class="vinv-stat-text">Chave</span>';
+    }
+    if (tags.indexOf('map') !== -1 || tags.indexOf('regional_map') !== -1 || tags.indexOf('starter_map') !== -1) {
+      return '<span class="vinv-stat-text">Mapa</span>';
+    }
     if (it.rarity === 'quest' || tags.indexOf('quest') !== -1) {
       return '<span class="vinv-stat-text" style="color:var(--vinv-r-quest)">Missão</span>';
+    }
+    if (tags.length > 0) {
+      var primaryTag = _tagLabel(tags[0]);
+      if (primaryTag) return '<span class="vinv-stat-text">' + _esc(primaryTag) + '</span>';
     }
 
     return '<span class="vinv-stat-text">Item</span>';
@@ -1109,7 +1186,7 @@
     }[rarity];
 
     var statsHtml = '';
-    if (it.type) statsHtml += _detailStat('Tipo', it.type);
+    if (it.type) statsHtml += _detailStat('Tipo', _tagLabel(it.type) || it.type);
     if (it.slot) statsHtml += _detailStat('Slot', _slotLabel(it.slot));
     if (it.dmg_die) {
       var dLabel = it.dmg_die;
@@ -1519,28 +1596,73 @@
   }
 
   var _TAG_LABELS = {
+    // Armas e propriedades de combate
     weapon: 'Arma', simple_weapon: 'Arma Simples', martial_weapon: 'Arma Marcial',
-    versatile: 'Versátil', finesse: 'Acuidade', light: 'Leve', heavy: 'Pesada',
+    blade: 'Lâmina', versatile: 'Versátil', finesse: 'Acuidade', light: 'Leve', heavy: 'Pesada',
     two_handed: 'Duas Mãos', thrown: 'Arremesso', ranged: 'À Distância', reach: 'Alcance',
+    ammo: 'Munição', net: 'Rede', combat: 'Combate', military: 'Militar',
+
+    // Armaduras, vestimentas e partes de vestuário
     armor: 'Armadura', light_armor: 'Armadura Leve', medium_armor: 'Armadura Média',
-    heavy_armor: 'Armadura Pesada', shield: 'Escudo', clothing: 'Vestimenta',
-    consumable: 'Consumível', potion: 'Poção', healing: 'Cura', food: 'Comida',
-    forage: 'Forrageio', alchemy: 'Alquimia', antidote: 'Antídoto', poison: 'Veneno',
-    scroll: 'Pergaminho', field_kit: 'Kit de Campo',
-    camping: 'Acampamento', tool: 'Ferramenta', map: 'Mapa',
-    gem: 'Gema', socketable: 'Encaixável', valuable: 'Valioso',
-    magic: 'Mágico', arcane: 'Arcano', holy: 'Sagrado',
+    heavy_armor: 'Armadura Pesada', shield: 'Escudo', clothing: 'Vestimenta', cloth: 'Tecido',
+    chest: 'Peitoral', head: 'Cabeça', off_hand: 'Mão Secundária',
+
+    // Grimórios, focos arcanos/mágicos e livros
+    spellbook: 'Grimório', book: 'Livro', wand: 'Varinha', orb: 'Orbe',
+    focus: 'Foco Mágico', spell_focus: 'Foco de Magia',
+    arcane_focus: 'Foco Arcano', druidic_focus: 'Foco Druídico', holy_symbol: 'Símbolo Sagrado',
+    magic: 'Mágico', arcane: 'Arcano', holy: 'Sagrado', religious: 'Religioso',
     attunement: 'Sintonização', inscribable: 'Inscritível',
-    monster_part: 'Parte de Monstro', material: 'Material',
-    leather: 'Couro', bone: 'Osso', metal: 'Metal', wood: 'Madeira', fabric: 'Tecido',
-    junk: 'Sucata', trophy: 'Troféu', no_sell: 'Não Vendável', no_discard: 'Indispensável',
-    crafting: 'Artesanato', accessory: 'Acessório',
-    set: 'Conjunto',
+
+    // Consumíveis, poções, alimentação e cura
+    consumable: 'Consumível', potion: 'Poção', mp_potion: 'Poção de Mana', healing: 'Cura',
+    food: 'Alimento', ration: 'Ração', cooked: 'Cozido', cooking: 'Culinária', drink: 'Bebida',
+    forage: 'Forrageio', alchemy: 'Alquimia', antidote: 'Antídoto', poison: 'Veneno',
+
+    // Pergaminhos, mapas e escrita
+    scroll: 'Pergaminho', map: 'Mapa', regional_map: 'Mapa Regional',
+    starter_map: 'Mapa Inicial', map_fragment: 'Fragmento de Mapa',
+    writing: 'Escrita', paper: 'Papel', lore: 'Conhecimento',
+
+    // Ferramentas, kits, equipamentos e sobrevivência
+    tool: 'Ferramenta', field_kit: 'Kit de Campo', camping: 'Acampamento',
+    thieves_tools: 'Ferramentas de Ladrão', artisan: 'Artesão',
+    proficiency_tool: 'Ferramenta de Perícia', labor: 'Trabalho', leverage: 'Alavanca',
+    container: 'Recipiente', pack: 'Mochila', gear: 'Equipamento',
+    supply: 'Suprimento', survival: 'Sobrevivência', exploration: 'Exploração',
+
+    // Instrumentos musicais
+    instrument: 'Instrumento', musical_instrument: 'Instrumento Musical',
+
+    // Joias, gemas, runas e acessórios
+    gem: 'Gema', socketable: 'Encaixável', rune: 'Runa', rune_fragment: 'Fragmento de Runa',
+    jewelry: 'Joia', ring: 'Anel', necklace: 'Amuleto', accessory: 'Acessório',
+
+    // Materiais, colheita e artesanato
+    material: 'Material', crafting: 'Artesanato', metal: 'Metal', wood: 'Madeira',
+    stone: 'Pedra', leather: 'Couro', bone: 'Osso', fabric: 'Tecido', plant: 'Planta',
+    fuel: 'Combustível', mining: 'Mineração', monster_part: 'Parte de Monstro',
+
+    // Tesouros, comércio e diversos
+    valuable: 'Tesouro', gold: 'Ouro', trade_good: 'Mercadoria', key: 'Chave',
+    junk: 'Sucata', trophy: 'Troféu', misc: 'Diversos', gamble: 'Jogos de Azar',
+    festival: 'Festivo', companion: 'Companheiro', noble: 'Nobre',
+
+    // Elementos e danos
+    fire: 'Fogo', cold: 'Gelo', lightning: 'Elétrico',
+
+    // Conjuntos de equipamento
+    set: 'Conjunto', set_item: 'Item de Conjunto',
     set_lobo_selvagem: 'Conj. Lobo Selvagem',
     set_protetor_ancestral: 'Conj. Protetor Ancestral',
     set_arcanista: 'Conj. Arcanista',
-    rune: 'Runa', rune_fragment: 'Fragmento de Runa',
-    quest: 'Missão', unavailable: 'Indisponível', fairy: 'Feérico',
+
+    // Missões, restrições e raridade/especiais
+    quest: 'Missão', mission_item: 'Item de Missão',
+    no_sell: 'Não Vendável', no_discard: 'Indispensável',
+    stealth: 'Furtividade', disguise: 'Disfarce', exotic: 'Exótico',
+    illegal: 'Ilegal', special: 'Especial', unique: 'Único',
+    rare: 'Raro', uncommon: 'Incomum', unavailable: 'Indisponível', fairy: 'Feérico',
   };
   function _tagLabel(t) {
     if (!t) return '';
