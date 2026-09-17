@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-17T02:30:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-17T20:09:44Z - do not edit directly, edit source -->
 
 
 
@@ -15256,6 +15256,9 @@ window.__explFetchTO = function(url, opts, ms) {
         if (res.equipment && typeof res.equipment === 'object') {
           window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
           console.info('[E-REM:API-INIT] server_equipped=' + Object.keys(res.equipment).length);
+        }
+        if (typeof res.ac === 'number') {
+          window.__EXPLORE_SERVER_AC = res.ac;
         }
         // #map-toast (2026-06-23): o servidor avisa quando ESTA chegada revelou um local NOVO →
         // notificação padrão (PADRAO_NOTIFICACOES) nomeando o local + que dá pra voltar pela viagem.
@@ -35937,6 +35940,8 @@ function _vinvExpAdaptItem(item) {
  *  chars do mesmo user). Fallback pra legacy key sem prefix pra compat. */
 function _expCharIdSafe(){
   try {
+    if (window.S && window.S.player && window.S.player.char_id) return window.S.player.char_id;
+    if (window.S && window.S.char_id) return window.S.char_id;
     var qs = new URLSearchParams(location.search);
     return qs.get('char') || qs.get('char_id') || 'default';
   } catch(_e){ return 'default'; }
@@ -35961,16 +35966,21 @@ function _vinvExpReadLoadout(allItems) {
       if (!name) return;
       var found = (allItems || []).find(function (it) { return it.name === name; });
       if (!found) {
-        found = {
-          id: _vinvExpSlug(name),
-          name: name,
-          qty: 1,
-          rarity: 'common',
-          equipped: true,
-          tags: [],
-          slot: slotMap[slot] || slot,
-          iconId: 'ic-it-' + _vinvExpSlug(name),
-        };
+        if (typeof _vinvExpAdaptItem === 'function') {
+          found = _vinvExpAdaptItem({ name: name, quantity: 1, slot: slotMap[slot] || slot });
+          found.equipped = true;
+        } else {
+          found = {
+            id: _vinvExpSlug(name),
+            name: name,
+            qty: 1,
+            rarity: 'common',
+            equipped: true,
+            tags: [],
+            slot: slotMap[slot] || slot,
+            iconId: 'ic-it-' + _vinvExpSlug(name),
+          };
+        }
       } else {
         found.equipped = true;
         found.slot = found.slot || slotMap[slot] || slot;
@@ -35996,17 +36006,22 @@ function _vinvExpReadLoadout(allItems) {
   return loadout;
 }
 function _vinvExpReadStats() {
+  var s = {};
   try {
     // Sessão #55: per-char key com fallback legacy.
     var raw = _expLocalStorageWithFallback('valdoria_shared_stats_v1');
-    if (!raw) return {};
-    var s = JSON.parse(raw);
-    return {
-      ca: s.ac || '—',
-      pv: (s.hp != null ? s.hp : '—') + ' / ' + (s.max_hp != null ? s.max_hp : '—'),
-      pm: (s.mp != null ? s.mp : '—') + ' / ' + (s.max_mp != null ? s.max_mp : '—'),
-    };
-  } catch (_) { return {}; }
+    if (raw) s = JSON.parse(raw) || {};
+  } catch (_) {}
+  var curHp = (typeof S !== 'undefined' && S.hp != null) ? S.hp : (s.hp != null ? s.hp : '—');
+  var maxHp = (typeof S !== 'undefined' && S.mhp != null) ? S.mhp : (s.max_hp != null ? s.max_hp : '—');
+  var curMp = (typeof S !== 'undefined' && S.mp != null) ? S.mp : (s.mp != null ? s.mp : '—');
+  var maxMp = (typeof S !== 'undefined' && S.mmp != null) ? S.mmp : (s.max_mp != null ? s.max_mp : '—');
+  var ac = (typeof window.__EXPLORE_SERVER_AC === 'number') ? window.__EXPLORE_SERVER_AC : (s.ac || '—');
+  return {
+    ca: ac,
+    pv: curHp + ' / ' + maxHp,
+    pm: curMp + ' / ' + maxMp,
+  };
 }
 
 function _vinvExpBuildConfig() {

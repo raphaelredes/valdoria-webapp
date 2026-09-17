@@ -9065,6 +9065,9 @@ body.perf-lite .vc-action-btn { transition: none; }
           Object.keys(_eqReal).forEach(function(_slot){
             window.MOCK_PLAYER_EQUIPPED[_slot] = _eqReal[_slot];
           });
+          if (typeof _syncEquippedToLocalStorage === 'function') {
+            _syncEquippedToLocalStorage();
+          }
         } catch(_eqe){ console.warn('[CITY] equip hydrate failed:', _eqe); }
       }
       // Sessão #64 (2026-05-31): inventário REAL do char → MOCK_PLAYER_INVENTORY
@@ -40618,6 +40621,7 @@ function _syncEquippedToLocalStorage() {
     var eqKey = _sharedKeyForChar(SHARED_EQUIPPED_KEY_BASE);
     var stKey = _sharedKeyForChar(SHARED_STATS_KEY_BASE);
     localStorage.setItem(eqKey, JSON.stringify(window.MOCK_PLAYER_EQUIPPED || {}));
+    localStorage.setItem(SHARED_EQUIPPED_KEY_BASE, JSON.stringify(window.MOCK_PLAYER_EQUIPPED || {}));
     if (window.CITY_MOCK_PLAYER) {
       var p = window.CITY_MOCK_PLAYER;
       var stats = {
@@ -40627,6 +40631,7 @@ function _syncEquippedToLocalStorage() {
         mp: p.mp, max_mp: p.max_mp,
       };
       localStorage.setItem(stKey, JSON.stringify(stats));
+      localStorage.setItem(SHARED_STATS_KEY_BASE, JSON.stringify(stats));
     }
   } catch (_) { /* localStorage off / cota cheia */ }
   // FASE 6: persiste equipamento no servidor (autoridade) quando remoto.
