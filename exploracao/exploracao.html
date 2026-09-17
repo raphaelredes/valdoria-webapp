@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-16T23:46:07Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-17T02:30:28Z - do not edit directly, edit source -->
 
 
 
@@ -15253,6 +15253,10 @@ window.__explFetchTO = function(url, opts, ms) {
           });
           console.info('[E-REM:API-INIT] server_inv=' + window.__EXPLORE_SERVER_INV.length);
         }
+        if (res.equipment && typeof res.equipment === 'object') {
+          window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
+          console.info('[E-REM:API-INIT] server_equipped=' + Object.keys(res.equipment).length);
+        }
         // #map-toast (2026-06-23): o servidor avisa quando ESTA chegada revelou um local NOVO →
         // notificação padrão (PADRAO_NOTIFICACOES) nomeando o local + que dá pra voltar pela viagem.
         // DEFER: o /init resolve DURANTE a tela de carregamento (5s) — firar já esconderia o toast
@@ -19685,6 +19689,9 @@ var _perfFrameMs = 0;     // tempo total do frame anterior
 // (drawHardFogOnUnexplored, drawImage fog, _drawDistantHaze, etc).
 // Setado em renderFrame, consumido por outras funcoes pra clip viewport.
 var _vpBoundsCurrent = null;
+var _zoomCssRatio = 1;
+var _zoomCssOriginX = 0;
+var _zoomCssOriginY = 0;
 // 2026-04-29 PERF FASE A.3: ground layer offscreen cache.
 // Bake TODOS os hexes (tiles + walls) num canvas full-grid UMA VEZ.
 // Per-frame: 1 drawImage(_groundCacheCanvas) viewport-clipped em vez de
@@ -23344,13 +23351,47 @@ function renderFrame(ts) {
   // Off-screen content é invisível, ninguem ve se nao limpa.
   var _vp = document.getElementById('map-viewport');
   var _vpBounds = null;
+  var _ratio = (typeof _zoomCssRatio === 'number' && _zoomCssRatio > 0) ? _zoomCssRatio : 1;
+  var _isCssZooming = Math.abs(_ratio - 1) > 0.001;
   if (_vp) {
-    _vpBounds = {
-      x: _vp.scrollLeft - 50,
-      y: _vp.scrollTop - 50,
-      w: _vp.clientWidth + 100,
-      h: _vp.clientHeight + 100
-    };
+    var _vx = _vp.scrollLeft;
+    var _vy = _vp.scrollTop;
+    var _vw = _vp.clientWidth;
+    var _vh = _vp.clientHeight;
+    if (_isCssZooming) {
+      // Zoom CSS ativo (pinch/wheel/botões +/-): calcula bounds reais no espaço lógico do canvas
+      var _ox = (typeof _zoomCssOriginX === 'number') ? _zoomCssOriginX : 0;
+      var _oy = (typeof _zoomCssOriginY === 'number') ? _zoomCssOriginY : 0;
+      if (!_ox && !_oy && S && S.player && typeof hexToScreen === 'function') {
+        try {
+          var _p = hexToScreen(S.player.col, S.player.row);
+          if (_p && isFinite(_p.x) && isFinite(_p.y)) { _ox = _p.x; _oy = _p.y; }
+        } catch (_) {}
+      }
+      var _cLeft   = _ox + (_vx - _ox) / _ratio;
+      var _cRight  = _ox + (_vx + _vw - _ox) / _ratio;
+      var _cTop    = _oy + (_vy - _oy) / _ratio;
+      var _cBottom = _oy + (_vy + _vh - _oy) / _ratio;
+      var _minX = Math.min(_cLeft, _cRight);
+      var _maxX = Math.max(_cLeft, _cRight);
+      var _minY = Math.min(_cTop, _cBottom);
+      var _maxY = Math.max(_cTop, _cBottom);
+      var _bufX = Math.max(300, Math.round(_vw / _ratio * 0.35));
+      var _bufY = Math.max(300, Math.round(_vh / _ratio * 0.35));
+      var _bx = Math.max(0, Math.floor(_minX - _bufX));
+      var _by = Math.max(0, Math.floor(_minY - _bufY));
+      var _bw = Math.min(canvasW, Math.ceil(_maxX + _bufX)) - _bx;
+      var _bh = Math.min(canvasH, Math.ceil(_maxY + _bufY)) - _by;
+      _vpBounds = { x: _bx, y: _by, w: Math.max(0, _bw), h: Math.max(0, _bh) };
+    } else {
+      // 2026-09-17: buffer generoso de 250px (ao menos 2.5 hexes) para nunca revelar bordas em scroll
+      var _buf = Math.max(250, Math.round(Math.max(_vw, _vh) * 0.3));
+      var _bx2 = Math.max(0, Math.floor(_vx - _buf));
+      var _by2 = Math.max(0, Math.floor(_vy - _buf));
+      var _bw2 = Math.min(canvasW, Math.ceil(_vx + _vw + _buf)) - _bx2;
+      var _bh2 = Math.min(canvasH, Math.ceil(_vy + _vh + _buf)) - _by2;
+      _vpBounds = { x: _bx2, y: _by2, w: Math.max(0, _bw2), h: Math.max(0, _bh2) };
+    }
   }
   // 2026-04-29 PERF: expor pra outras funcs draw consumirem (sem precisar
   // refazer DOM lookup). drawHardFogOnUnexplored, _drawDistantHaze,
@@ -23358,10 +23399,9 @@ function renderFrame(ts) {
   _vpBoundsCurrent = _vpBounds;
   var _frameStartT = performance.now();
   try {
-    // V1.7.5 rev11 (2026-05-02): em editor mode pintar canvas inteiro
-    // (não só viewport bounds) — senão áreas fora do scroll inicial ficam
-    // pretas (cor default do drawing buffer).
-    if (_vpBounds && !window._editorMode) {
+    // V1.7.5 rev11 + 2026-09-17: se zooming por CSS, ou editor mode, ou bounds cobrem canvas,
+    // limpar canvas full para prevenir bordas e artefatos de corte
+    if (_vpBounds && !window._editorMode && !_isCssZooming && _vpBounds.w < canvasW && _vpBounds.h < canvasH) {
       mainCtx.clearRect(_vpBounds.x, _vpBounds.y, _vpBounds.w, _vpBounds.h);
       mainCtx.fillStyle = '#1e1a16';
       mainCtx.fillRect(_vpBounds.x, _vpBounds.y, _vpBounds.w, _vpBounds.h);
@@ -23574,7 +23614,9 @@ function renderFrame(ts) {
   if (_fogActive) {
     _runStep('drawFogComposite', () => drawFogComposite());
     _runStep('drawImage(fogCanvas)', () => {
-      if (_vpBoundsCurrent) {
+      var _ratioFog = (typeof _zoomCssRatio === 'number' && _zoomCssRatio > 0) ? _zoomCssRatio : 1;
+      var _isCssZoomFog = Math.abs(_ratioFog - 1) > 0.001;
+      if (_vpBoundsCurrent && !_isCssZoomFog && _vpBoundsCurrent.w < canvasW && _vpBoundsCurrent.h < canvasH) {
         var sx = Math.max(0, _vpBoundsCurrent.x), sy = Math.max(0, _vpBoundsCurrent.y);
         var sw = Math.min(canvasW - sx, _vpBoundsCurrent.w), sh = Math.min(canvasH - sy, _vpBoundsCurrent.h);
         // BUG FIX (sessao #76, tela preta exploracao em dpr>1): fogCanvas e device-resolution
@@ -24005,22 +24047,15 @@ function _drawDistantHaze(ctx) {
   else if (S.biome === 'cave' || S.biome === 'graveyard') hazeColor = '20, 15, 12';  // escuro
   else hazeColor = '120, 130, 100';                            // verde-cinza padrão
 
-  var _vpb = _vpBoundsCurrent;
-  var hx, hy, hw, hh;
-  if (_vpb) {
-    hx = Math.max(0, _vpb.x);
-    hy = Math.max(0, _vpb.y);
-    hw = Math.min(canvasW - hx, _vpb.w);
-    hh = Math.min(canvasH - hy, _vpb.h);
-  } else {
-    hx = 0; hy = 0; hw = canvasW; hh = canvasH;
-  }
+  // 2026-09-17 FIX (artefato de "quadro de filtro"): distant haze deve sempre
+  // aplicar nas bordas reais do canvas (0..canvasW, 0..canvasH) — NUNCA preso
+  // a _vpBoundsCurrent, que criava 4 barras retangulares com borda dura visível
+  // no meio do viewport durante zoom out.
+  var hx = 0, hy = 0, hw = canvasW, hh = canvasH;
   if (hw <= 0 || hh <= 0) return;
 
-  // Cache key inclui viewport snap 32px — recria apenas quando player move >32px
-  var key = canvasW + 'x' + canvasH + ':' + hazeColor
-          + ':' + Math.round(hx/32) + ',' + Math.round(hy/32)
-          + ',' + Math.round(hw/32) + ',' + Math.round(hh/32);
+  // Cache key por canvas dims + cor (estático por zoom/hora — sem recriação a cada 32px)
+  var key = canvasW + 'x' + canvasH + ':' + hazeColor;
   if (_hazeGradientKey !== key) {
     _hazeGradientCache = null;
     _hazeGradientKey = key;
@@ -26555,10 +26590,14 @@ function drawDayNightTint(ctx) {
   try {
     ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
     // 2026-04-29 USER PERF: viewport-clipped fillRect (era full canvas)
+    // 2026-09-17: durante zoom CSS, preenche canvas completo para evitar quadro retangular
     var _vpDN = document.getElementById('map-viewport');
-    if (_vpDN) {
-      ctx.fillRect(_vpDN.scrollLeft - 50, _vpDN.scrollTop - 50,
-                   _vpDN.clientWidth + 100, _vpDN.clientHeight + 100);
+    var _ratioDN = (typeof _zoomCssRatio === 'number' && _zoomCssRatio > 0) ? _zoomCssRatio : 1;
+    var _isCssZoomDN = Math.abs(_ratioDN - 1) > 0.001;
+    if (_vpDN && !_isCssZoomDN) {
+      var _bufDN = 250;
+      ctx.fillRect(_vpDN.scrollLeft - _bufDN, _vpDN.scrollTop - _bufDN,
+                   _vpDN.clientWidth + _bufDN * 2, _vpDN.clientHeight + _bufDN * 2);
     } else {
       ctx.fillRect(0, 0, canvasW, canvasH);
     }
@@ -32606,9 +32645,12 @@ function drawWeatherOverlay(ctx) {
     // 2026-04-29 USER PERF: viewport-clipped (era full canvas).
     ctx.fillStyle = 'rgba(220, 225, 235, 0.32)';
     var _vpFog = document.getElementById('map-viewport');
-    if (_vpFog) {
-      ctx.fillRect(_vpFog.scrollLeft - 50, _vpFog.scrollTop - 50,
-                   _vpFog.clientWidth + 100, _vpFog.clientHeight + 100);
+    var _ratioFogOvl = (typeof _zoomCssRatio === 'number' && _zoomCssRatio > 0) ? _zoomCssRatio : 1;
+    var _isCssZoomFogOvl = Math.abs(_ratioFogOvl - 1) > 0.001;
+    if (_vpFog && !_isCssZoomFogOvl) {
+      var _bufFog = 250;
+      ctx.fillRect(_vpFog.scrollLeft - _bufFog, _vpFog.scrollTop - _bufFog,
+                   _vpFog.clientWidth + _bufFog * 2, _vpFog.clientHeight + _bufFog * 2);
     } else {
       ctx.fillRect(0, 0, canvasW, canvasH);
     }
@@ -32833,7 +32875,9 @@ function drawSimpleFog(ctx) {
   }
   if (!_fogV6Canvas) return;
   // Per frame: 1 drawImage. Viewport-clipped pra não copiar pixels off-screen.
-  if (_vpBoundsCurrent) {
+  var _ratioSF = (typeof _zoomCssRatio === 'number' && _zoomCssRatio > 0) ? _zoomCssRatio : 1;
+  var _isCssZoomSF = Math.abs(_ratioSF - 1) > 0.001;
+  if (_vpBoundsCurrent && !_isCssZoomSF && _vpBoundsCurrent.w < canvasW && _vpBoundsCurrent.h < canvasH) {
     var vp = _vpBoundsCurrent;
     var sx = Math.max(0, vp.x), sy = Math.max(0, vp.y);
     var sw = Math.min(canvasW - sx, vp.w), sh = Math.min(canvasH - sy, vp.h);
@@ -33096,7 +33140,9 @@ function drawHardFogOnUnexplored(ctx) {
   // 2026-04-29 PERF: viewport-clip — copia so a porcao visivel.
   // Mesmo motivo de drawImage(fogCanvas): canvas full pode ser 9M pixels;
   // viewport ~480K pixels. drawImage 9-arg deixa GPU copiar so o que precisa.
-  if (_vpBoundsCurrent) {
+  var _ratioHF = (typeof _zoomCssRatio === 'number' && _zoomCssRatio > 0) ? _zoomCssRatio : 1;
+  var _isCssZoomHF = Math.abs(_ratioHF - 1) > 0.001;
+  if (_vpBoundsCurrent && !_isCssZoomHF && _vpBoundsCurrent.w < canvasW && _vpBoundsCurrent.h < canvasH) {
     var _hsx = Math.max(0, _vpBoundsCurrent.x), _hsy = Math.max(0, _vpBoundsCurrent.y);
     var _hsw = Math.min(canvasW - _hsx, _vpBoundsCurrent.w);
     var _hsh = Math.min(canvasH - _hsy, _vpBoundsCurrent.h);
@@ -35907,18 +35953,14 @@ function _expLocalStorageWithFallback(baseKey){
 }
 function _vinvExpReadLoadout(allItems) {
   var loadout = {};
-  try {
-    var raw = _expLocalStorageWithFallback('valdoria_shared_equipped_v1');
-    if (!raw) return loadout;
-    var equipped = JSON.parse(raw);  // {slot: itemName}
-    var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet' };
+  var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet' };
+  function _applyEquippedDict(equipped) {
+    if (!equipped || typeof equipped !== 'object') return;
     Object.keys(equipped).forEach(function (slot) {
       var name = equipped[slot];
       if (!name) return;
-      // Tenta achar o item no inventory adaptado primeiro
       var found = (allItems || []).find(function (it) { return it.name === name; });
       if (!found) {
-        // Item equipado não está no inventory exploração — cria stub mínimo
         found = {
           id: _vinvExpSlug(name),
           name: name,
@@ -35935,7 +35977,22 @@ function _vinvExpReadLoadout(allItems) {
       }
       loadout[slotMap[slot] || slot] = found;
     });
-  } catch (_) { /* localStorage off / JSON inválido */ }
+  }
+
+  // 1. Tenta server-equipped primeiro se disponível
+  if (window.__EXPLORE_SERVER_EQUIPPED && typeof window.__EXPLORE_SERVER_EQUIPPED === 'object') {
+    _applyEquippedDict(window.__EXPLORE_SERVER_EQUIPPED);
+  }
+  // 2. Se vazio, fallback no localStorage da cidade
+  if (Object.keys(loadout).length === 0) {
+    try {
+      var raw = _expLocalStorageWithFallback('valdoria_shared_equipped_v1');
+      if (raw) {
+        var equippedLocal = JSON.parse(raw);
+        _applyEquippedDict(equippedLocal);
+      }
+    } catch (_) { /* localStorage off / JSON inválido */ }
+  }
   return loadout;
 }
 function _vinvExpReadStats() {
@@ -35962,7 +36019,6 @@ function _vinvExpBuildConfig() {
   // S.gold direto). Fallback: tenta S.gold primeiro, S.player.gold depois.
   var gold = (typeof S !== 'undefined' && (S.gold || (S.player && S.player.gold))) || 0;
   var loadout = _vinvExpReadLoadout(items);
-  var hasLoadout = Object.keys(loadout).length > 0;
   return {
     title: 'MOCHILA',
     player: {
@@ -35971,9 +36027,9 @@ function _vinvExpBuildConfig() {
       loadout: loadout,
       stats: _vinvExpReadStats(),
     },
-    // Tab equip ativada read-only quando há loadout sincronizado da cidade.
-    // SEM onItemSwap → swap list não aparece (apenas visualização).
-    tabs: hasLoadout ? ['items', 'equip'] : ['items'],
+    // Tab equip sempre acessível: visualização dos slots do personagem (paper-doll).
+    // SEM onItemSwap → swap list não aparece (apenas visualização segura).
+    tabs: ['items', 'equip'],
     showSearch: true,
     showSort: true,
     inCombat: false,
@@ -43934,11 +43990,15 @@ function _applyCssZoom(ratio) {
     // V8.4: transform-origin no PLAYER (não 0,0) → zoom pivota nele, mapa não
     // desliza pra direita-baixo durante gesto. Player permanece visualmente fixo.
     var origin = '0 0';
+    _zoomCssOriginX = 0;
+    _zoomCssOriginY = 0;
     if (ratio !== 1 && S && S.player && typeof hexToScreen === 'function') {
       try {
         var p = hexToScreen(S.player.col, S.player.row);
         if (p && isFinite(p.x) && isFinite(p.y)) {
           origin = p.x + 'px ' + p.y + 'px';
+          _zoomCssOriginX = p.x;
+          _zoomCssOriginY = p.y;
         }
       } catch (_) {}
     }
@@ -43949,6 +44009,8 @@ function _applyCssZoom(ratio) {
     try { LOGE('ZOOM', 'applyCssZoom failed:', e && e.message); } catch (_) {}
     // Reset state pra estado limpo
     _zoomCssRatio = 1;
+    _zoomCssOriginX = 0;
+    _zoomCssOriginY = 0;
     try {
       var m = document.getElementById('map'); if (m) m.style.transform = '';
       var s = document.getElementById('tile-overlay-layer'); if (s) s.style.transform = '';
@@ -43980,6 +44042,7 @@ function setZoom(z) {
   _applyCssZoom(clamped / _zoom);
   showZoomIndicator();
   updateZoomButtonsState();
+  scheduleRender();
   // Cancela debounce anterior (resetar timer cada wheel tick)
   if (_zoomDebounceTimer) { clearTimeout(_zoomDebounceTimer); _zoomDebounceTimer = null; }
   // Failsafe: gesto longo sem commit força aplicar pra evitar CSS scale extremo
@@ -44044,6 +44107,8 @@ function _commitZoomNow() {
     // Recovery: reset CSS pra evitar canvas distorcido visualmente
     try {
       _zoomCssRatio = 1;
+      _zoomCssOriginX = 0;
+      _zoomCssOriginY = 0;
       var m = document.getElementById('map'); if (m) m.style.transform = '';
       var s = document.getElementById('tile-overlay-layer'); if (s) s.style.transform = '';
     } catch (_) {}
