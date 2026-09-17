@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-17T21:05:36Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-17T23:24:08Z - do not edit directly, edit source -->
 
 
 
@@ -8823,6 +8823,10 @@ window.__onIntroTap = function() {
       </div>
       <div class="camp-sky"><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div></div>
       <div class="camp-moon"></div>
+      <div class="camp-ground" id="camp-ground">
+        <div class="camp-ground-terrain"></div>
+        <div class="camp-ground-firepit"></div>
+      </div>
       <div class="camp-fire-area">
         <div class="camp-ground-glow"></div>
         <div class="camp-logs"><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log-ember"></div></div>
@@ -15551,6 +15555,17 @@ window.__explFetchTO = function(url, opts, ms) {
       var res = await _post('/api/exploracao/use_item', { token: tok, item: itemName });
       if (res && res.ok) {
         console.info('[E-REM:API-USE_ITEM] ok healed_hp=' + (res.used && res.used.healed_hp));
+      }
+      return res;
+    },
+
+    /* 2026-09-17: EQUIPAR / TROCAR na trilha (Server Authority #0) —
+       o SERVIDOR valida regras D&D 5e e persiste no Player.equipment. */
+    equip: async function(equipment) {
+      console.info('[E-REM:API-EQUIP] send equipment keys=' + Object.keys(equipment || {}).join(','));
+      var res = await _post('/api/exploracao/equip', { equipment: equipment });
+      if (res && res.ok) {
+        console.info('[E-REM:API-EQUIP] ok ac=' + res.ac);
       }
       return res;
     },
@@ -36148,14 +36163,119 @@ function _vinvExpReadStats() {
   };
 }
 
+function _vinvExpNormalizeSlot(rawSlot, itemName) {
+  var s = String(rawSlot || '').toLowerCase();
+  if (s === 'boots' || s === 'feet') return 'feet';
+  if (s === 'amulet' || s === 'necklace') return 'necklace';
+  if (s === 'ring1' || s === 'ring_1') return 'ring_1';
+  if (s === 'ring2' || s === 'ring_2') return 'ring_2';
+  if (!s && itemName) {
+    var it = (typeof getItemData === 'function') ? getItemData(itemName) : null;
+    if (it && (it.s || it.slot)) return _vinvExpNormalizeSlot(it.s || it.slot, itemName);
+  }
+  return s || 'chest';
+}
+
+function _vinvExpEquipItem(newItem, oldItem, slotKey) {
+  if (!newItem || !newItem.name) return;
+  var targetSlot = _vinvExpNormalizeSlot(slotKey || newItem.slot, newItem.name);
+  var curEq = Object.assign({}, (window.__EXPLORE_SERVER_EQUIPPED || (window.S && window.S.player && window.S.player.equipment) || {}));
+  curEq[targetSlot] = newItem.name;
+
+  if (targetSlot === 'feet') curEq['boots'] = newItem.name;
+  if (targetSlot === 'boots') curEq['feet'] = newItem.name;
+  if (targetSlot === 'necklace') curEq['amulet'] = newItem.name;
+  if (targetSlot === 'amulet') curEq['necklace'] = newItem.name;
+  if (targetSlot === 'ring_1') curEq['ring1'] = newItem.name;
+  if (targetSlot === 'ring_2') curEq['ring2'] = newItem.name;
+
+  window.__EXPLORE_SERVER_EQUIPPED = curEq;
+  if (window.S && window.S.player) window.S.player.equipment = curEq;
+
+  try {
+    var cid = (window.S && window.S.player && window.S.player.char_id) || 'default';
+    var raw = JSON.stringify(curEq);
+    localStorage.setItem('valdoria_shared_equipped_v1_' + cid, raw);
+    localStorage.setItem('valdoria_shared_equipped_v1', raw);
+  } catch (_) {}
+
+  if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && typeof window.ExploracaoAPI.equip === 'function') {
+    window.ExploracaoAPI.equip(curEq).then(function (res) {
+      if (res && res.ok) {
+        if (typeof res.ac === 'number') {
+          window.__EXPLORE_SERVER_AC = res.ac;
+        }
+        if (res.equipment && typeof res.equipment === 'object') {
+          window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
+          if (window.S && window.S.player) window.S.player.equipment = res.equipment;
+        }
+        if (res.rejected && res.rejected.length && typeof vToast === 'function') {
+          var rej = res.rejected[0];
+          vToast('Não foi possível equipar ' + rej.item + ' (' + rej.reason + ').', 'warn');
+        }
+      }
+    }).catch(function (err) {
+      console.warn('[vInventory] equip remote error:', err);
+    });
+  }
+
+  if (typeof vToast === 'function') {
+    var msg = oldItem ? ('Troca: ' + oldItem.name + ' → ' + newItem.name) : (newItem.name + ' equipado.');
+    vToast(msg, 'ok');
+  }
+
+  try { if (typeof updateHud === 'function') updateHud(); } catch (_) {}
+  try {
+    if (window.vInventory && typeof vInventory.refresh === 'function') {
+      vInventory.refresh(_vinvExpBuildConfig().player);
+    }
+  } catch (_) {}
+}
+
+function _vinvExpUnequipItem(item) {
+  if (!item || !item.name) return;
+  var curEq = Object.assign({}, (window.__EXPLORE_SERVER_EQUIPPED || (window.S && window.S.player && window.S.player.equipment) || {}));
+  var foundKey = null;
+  for (var k in curEq) {
+    if (curEq[k] === item.name) {
+      delete curEq[k];
+      foundKey = k;
+    }
+  }
+  if (!foundKey) return;
+
+  window.__EXPLORE_SERVER_EQUIPPED = curEq;
+  if (window.S && window.S.player) window.S.player.equipment = curEq;
+
+  try {
+    var cid = (window.S && window.S.player && window.S.player.char_id) || 'default';
+    var raw = JSON.stringify(curEq);
+    localStorage.setItem('valdoria_shared_equipped_v1_' + cid, raw);
+    localStorage.setItem('valdoria_shared_equipped_v1', raw);
+  } catch (_) {}
+
+  if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && typeof window.ExploracaoAPI.equip === 'function') {
+    window.ExploracaoAPI.equip(curEq).then(function (res) {
+      if (res && res.ok && typeof res.ac === 'number') {
+        window.__EXPLORE_SERVER_AC = res.ac;
+      }
+    }).catch(function () {});
+  }
+
+  if (typeof vToast === 'function') vToast(item.name + ' desequipado.');
+  try { if (typeof updateHud === 'function') updateHud(); } catch (_) {}
+  try {
+    if (window.vInventory && typeof vInventory.refresh === 'function') {
+      vInventory.refresh(_vinvExpBuildConfig().player);
+    }
+  } catch (_) {}
+}
+
 function _vinvExpBuildConfig() {
   var inv = _readSharedInventory();
   var items = (inv || [])
     .filter(function (e) { return (e.quantity || 0) > 0; })
     .map(_vinvExpAdaptItem);
-  // 2026-05-18 BUG FIX (Chrome MCP review): wallet mostrava V0 quando player
-  // tinha 6574 valdoritas. Causa: S.player nao tem .gold (snap hidrata em
-  // S.gold direto). Fallback: tenta S.gold primeiro, S.player.gold depois.
   var gold = (typeof S !== 'undefined' && (S.gold || (S.player && S.player.gold))) || 0;
   var loadout = _vinvExpReadLoadout(items);
   return {
@@ -36166,12 +36286,19 @@ function _vinvExpBuildConfig() {
       loadout: loadout,
       stats: _vinvExpReadStats(),
     },
-    // Tab equip sempre acessível: visualização dos slots do personagem (paper-doll).
-    // SEM onItemSwap → swap list não aparece (apenas visualização segura).
     tabs: ['items', 'equip'],
     showSearch: true,
     showSort: true,
     inCombat: false,
+    onItemEquip: function (item, slotKey) {
+      _vinvExpEquipItem(item, null, slotKey);
+    },
+    onItemSwap: function (oldItem, newItem, slotKey) {
+      _vinvExpEquipItem(newItem, oldItem, slotKey);
+    },
+    onItemUnequip: function (item) {
+      _vinvExpUnequipItem(item);
+    },
     // 2026-07-01 (EXPLORE-USE-DROP-STUB): "Usar" agora é REAL — o servidor
     // valida posse, rola a cura, consome do inventário e aplica no state da
     // sessão (POST /api/exploracao/use_item).
@@ -41091,9 +41218,8 @@ function openCampOverlay() {
   // bioma do mapa atual durante a exploracao".
   // Remove biome-* classes antigas e adiciona a do bioma atual
   ov.className = ov.className.replace(/\bbiome-\w+/g, '').trim();
-  if (S && S.biome) {
-    ov.classList.add('biome-' + S.biome);
-  }
+  var curBiome = (S && (S.biome || (S.mapDef && S.mapDef.biome))) || 'plains';
+  ov.classList.add('biome-' + curBiome);
   // Aplica classe da fase do dia (phase-day, phase-dusk, phase-dawn, phase-night)
   ov.className = ov.className.replace(/\bphase-\w+/g, '').trim();
   ov.classList.add('phase-' + currentPhase);

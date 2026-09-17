@@ -83,119 +83,116 @@
         this.swayPhase = Math.random() * Math.PI * 2;
     };
 
+    // ── Pre-rendered soft flame textures (zero GC overhead in animation loop) ──
+    var _spriteCore = null;
+    var _spriteFlame = null;
+    var _spriteEmber = null;
+
+    function _buildSprites() {
+        var sz = 64;
+        var half = sz * 0.5;
+
+        // 1. Core Sprite: Núcleo incandescente branco -> ouro
+        var c1 = document.createElement('canvas');
+        c1.width = sz; c1.height = sz;
+        var ctx1 = c1.getContext('2d');
+        var g1 = ctx1.createRadialGradient(half, half, 0, half, half, half);
+        g1.addColorStop(0, 'rgba(255, 255, 245, 1.0)');
+        g1.addColorStop(0.2, 'rgba(255, 235, 140, 0.9)');
+        g1.addColorStop(0.5, 'rgba(255, 150, 20, 0.45)');
+        g1.addColorStop(0.8, 'rgba(230, 60, 0, 0.12)');
+        g1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx1.fillStyle = g1;
+        ctx1.fillRect(0, 0, sz, sz);
+        _spriteCore = c1;
+
+        // 2. Flame Sprite: Ouro brilhante -> laranja vivo -> rubro
+        var c2 = document.createElement('canvas');
+        c2.width = sz; c2.height = sz;
+        var ctx2 = c2.getContext('2d');
+        var g2 = ctx2.createRadialGradient(half, half, 0, half, half, half);
+        g2.addColorStop(0, 'rgba(255, 205, 50, 0.95)');
+        g2.addColorStop(0.25, 'rgba(255, 120, 15, 0.7)');
+        g2.addColorStop(0.6, 'rgba(215, 45, 0, 0.25)');
+        g2.addColorStop(0.85, 'rgba(130, 15, 0, 0.06)');
+        g2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx2.fillStyle = g2;
+        ctx2.fillRect(0, 0, sz, sz);
+        _spriteFlame = c2;
+
+        // 3. Ember Sprite: Vermelho rubro -> brasa residual
+        var c3 = document.createElement('canvas');
+        c3.width = sz; c3.height = sz;
+        var ctx3 = c3.getContext('2d');
+        var g3 = ctx3.createRadialGradient(half, half, 0, half, half, half);
+        g3.addColorStop(0, 'rgba(255, 100, 15, 0.7)');
+        g3.addColorStop(0.35, 'rgba(190, 30, 0, 0.35)');
+        g3.addColorStop(0.7, 'rgba(90, 10, 0, 0.1)');
+        g3.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx3.fillStyle = g3;
+        ctx3.fillRect(0, 0, sz, sz);
+        _spriteEmber = c3;
+    }
+
     /**
-     * Advance one frame.  Returns true when the particle has expired and
-     * needs to be reset.
-     *
-     * X-6.5.51BQ: vy decay reduzido pra metade (0.004 vs 0.008) — acelera
-     * MUITO devagar conforme sobe (vela acendida natural). Sway horizontal
-     * sin-based pra movimento orgânico de flame.
+     * Advance one frame. Returns true when the particle has expired.
      */
     Particle.prototype.update = function () {
         this.x += this.vx;
         this.y += this.vy;
-        // X-6.5.51BS: turbulência menor (mais calma) + decay vy ainda mais suave.
-        this.vx += this.windX + (Math.random() - 0.5) * 0.03;  // antes 0.05
-        this.vy -= 0.0025;                                       // antes 0.004 (acelera muito devagar)
-        // Sway sinusoidal — adiciona oscilação horizontal sem afetar vx persistente
-        this.x += Math.sin(this.life * this.swayFreq + this.swayPhase) * this.swayAmp * 0.12;
+        this.vx += this.windX + (Math.random() - 0.5) * 0.02;
+        this.vy -= 0.003;
+        // Sway sinusoidal suave para ondulação natural e fluida
+        this.x += Math.sin(this.life * this.swayFreq + this.swayPhase) * this.swayAmp * 0.15;
         this.life++;
         return this.life >= this.maxLife;
     };
 
     /**
-     * 2026-05-18 (user request "melhore o efeito da chama"):
-     *
-     * Render improvements vs prior version:
-     * - Particles renderizadas como ELIPSE vertical-alongada (scaleY 1.6-2.2)
-     *   em vez de círculos perfeitos → silhueta de chama natural
-     * - Núcleo branco-quente com brilho boostado (alpha pico próximo de 1)
-     * - Halo radial gradient ao redor de cada partícula → glow + soft edges
-     * - Heat distortion sutil (offset horizontal por sin(y)) → fogo "subindo"
-     * - Curva de paleta refinada com transição mais rápida ouro→laranja
-     *   (pico de brilho mais visível) + ash/smoke residual no fim
+     * Renderiza a partícula usando textura pré-renderizada e blend aditivo.
+     * 100% fluído a 60 FPS, sem círculos toscos e com fusão orgânica de calor.
      */
     Particle.prototype.draw = function (ctx) {
         var t = this.life / this.maxLife;
-        // Tamanho com curva mais natural — pico no início, encolhe no fim.
         var sizeCurve;
-        if (t < 0.08) sizeCurve = 1.0 + (0.08 - t) * 1.5;
-        else sizeCurve = 1 - Math.pow((t - 0.08) / 0.92, 1.8) * 0.85;
+        if (t < 0.1) sizeCurve = 0.9 + t * 2.0;
+        else sizeCurve = 1.1 - Math.pow((t - 0.1) / 0.9, 1.5) * 0.85;
         var r = this.size * sizeCurve;
-        if (r < 0.5) return;
+        if (r < 0.6) return;
 
-        // Alpha — pico inicial + fade suave longo
         var alpha;
-        if (t < 0.05) {
-            alpha = 0.5 + t * 7.0;
-        } else if (t < 0.18) {
-            alpha = 0.85 - (t - 0.05) * 0.3;
-        } else {
-            var fadeT = (t - 0.18) / 0.82;
-            alpha = 0.81 * (1 - fadeT * fadeT);
-        }
-        if (alpha <= 0.01) return;
-
-        var cr, cg, cb;
-
         if (t < 0.08) {
-            // Núcleo branco puro incandescente
-            cr = 255;
-            cg = 250 - t * 80;
-            cb = 235 - t * 700;
-        } else if (t < 0.25) {
-            // Branco → ouro brilhante
-            var p1 = (t - 0.08) / 0.17;
-            cr = 255;
-            cg = Math.max(195, 244 - p1 * 49);
-            cb = Math.max(80, 179 - p1 * 99);
-        } else if (t < 0.50) {
-            // Ouro → laranja vivo
-            var p2 = (t - 0.25) / 0.25;
-            cr = 255;
-            cg = Math.max(95, 195 - p2 * 100);
-            cb = Math.max(15, 80 - p2 * 65);
-        } else if (t < 0.78) {
-            // Laranja → vermelho rubro
-            var p3 = (t - 0.50) / 0.28;
-            cr = Math.max(155, 255 - p3 * 100);
-            cg = Math.max(28, 95 - p3 * 67);
-            cb = Math.max(8, 15 - p3 * 7);
+            alpha = 0.4 + (t / 0.08) * 0.55;
+        } else if (t < 0.35) {
+            alpha = 0.95 - (t - 0.08) * 0.4;
         } else {
-            // Vermelho → cinza/smoke residual
-            var p4 = (t - 0.78) / 0.22;
-            cr = Math.max(35, 155 - p4 * 120);
-            cg = Math.max(18, 28 - p4 * 10);
-            cb = Math.max(14, 8 + p4 * 10);
-            alpha *= (1 - p4 * 0.85);
+            var fadeT = (t - 0.35) / 0.65;
+            alpha = 0.84 * (1 - fadeT * fadeT);
         }
+        if (alpha <= 0.005) return;
 
-        // Heat distortion sutil — offset horizontal baseado em altura
+        // Ondulação de calor ascendente sutil
         var heatPos = (this.y / _H);
-        var heatDx = Math.sin(this.life * 0.08 + this.swayPhase) * (1 - heatPos) * 0.9;
+        var heatDx = Math.sin(this.life * 0.07 + this.swayPhase) * (1 - heatPos) * 1.1;
         var drawX = this.x + heatDx;
 
-        // Formato verticalmente alongado com bordas 100% difusas via gradiente radial
-        // Elimina completamente "círculos toscos" através de queda suave de opacidade
-        var stretch = 1.7 + (1 - t) * 0.8;
-        var rx = r * 0.82;
-        var ry = r * stretch;
+        // Alongamento vertical suave da chama
+        var stretch = 1.6 + (1 - t) * 0.7;
+        var w = r * 1.7;
+        var h = r * stretch * 1.7;
 
-        ctx.save();
-        ctx.translate(drawX, this.y);
-        ctx.scale(1, ry / rx);
+        // Transição de sprites por estágio de combustão
+        var sprite;
+        if (t < 0.22) {
+            sprite = _spriteCore;
+        } else if (t < 0.65) {
+            sprite = _spriteFlame;
+        } else {
+            sprite = _spriteEmber;
+        }
 
-        var grad = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
-        grad.addColorStop(0, 'rgba(255, 255, 220, ' + alpha.toFixed(3) + ')');
-        grad.addColorStop(0.28, 'rgba(' + ~~cr + ',' + ~~cg + ',' + ~~cb + ',' + (alpha * 0.85).toFixed(3) + ')');
-        grad.addColorStop(0.68, 'rgba(' + Math.max(0, ~~cr - 35) + ',' + Math.max(0, ~~cg - 55) + ', 0, ' + (alpha * 0.35).toFixed(3) + ')');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, rx, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        ctx.globalAlpha = Math.min(1, alpha);
+        ctx.drawImage(sprite, drawX - w * 0.5, this.y - h * 0.5, w, h);
     };
 
     // ── Animation loop ───────────────────────────────────────────────────
@@ -203,50 +200,24 @@
     function _frame() {
         if (!_ctx) return;
 
-        // Clear canvas (full transparent)
+        // Clear canvas
         _ctx.clearRect(0, 0, _W, _H);
 
-        // Additive blending for fire glow
+        // Additive blending: partículas sobrepostas criam núcleo quente brilhante
         _ctx.globalCompositeOperation = 'lighter';
 
-        // 1. Chama viva contínua e pulsante na base dos troncos (root flame)
-        var time = performance.now() * 0.003;
+        // Brilho quente basal sutil na fogueira
+        var time = performance.now() * 0.0025;
         var baseCenterX = _W * 0.5;
         var baseCenterY = _H - (_H * 0.12);
-        var baseFlicker = Math.sin(time * 3.8) * 2.2 + Math.cos(time * 5.4) * 1.5;
-
-        var bedGrad = _ctx.createRadialGradient(baseCenterX, baseCenterY + 3, 0, baseCenterX, baseCenterY + 3, 34 + baseFlicker);
-        bedGrad.addColorStop(0, 'rgba(255, 245, 190, 0.75)');
-        bedGrad.addColorStop(0.35, 'rgba(255, 145, 25, 0.5)');
-        bedGrad.addColorStop(0.75, 'rgba(220, 55, 0, 0.18)');
-        bedGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        _ctx.fillStyle = bedGrad;
-        _ctx.beginPath();
-        _ctx.ellipse(baseCenterX, baseCenterY + 3, 36, 16 + baseFlicker * 0.5, 0, 0, Math.PI * 2);
-        _ctx.fill();
-
-        // 2. Línguas de fogo orgânicas centrais que lambem para cima
-        for (var f = -1; f <= 1; f++) {
-            var tongueX = baseCenterX + f * 11 + Math.sin(time * 4.2 + f * 2.1) * 3;
-            var tongueH = 26 + Math.sin(time * 5.8 + f * 3.2) * 7 + (f === 0 ? 8 : 0);
-            var tongueW = 11 + Math.cos(time * 4.9 + f) * 2;
-            var tongueY = baseCenterY - tongueH * 0.5;
-            _ctx.save();
-            _ctx.translate(tongueX, tongueY);
-            _ctx.scale(1, tongueH / tongueW);
-            var tGrad = _ctx.createRadialGradient(0, 0, 0, 0, 0, tongueW);
-            tGrad.addColorStop(0, 'rgba(255, 255, 235, 0.85)');
-            tGrad.addColorStop(0.32, 'rgba(255, 185, 35, 0.6)');
-            tGrad.addColorStop(0.7, 'rgba(255, 75, 12, 0.25)');
-            tGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            _ctx.fillStyle = tGrad;
-            _ctx.beginPath();
-            _ctx.arc(0, 0, tongueW, 0, Math.PI * 2);
-            _ctx.fill();
-            _ctx.restore();
+        var basePulse = 1.0 + Math.sin(time * 3.2) * 0.08;
+        if (_spriteCore) {
+            _ctx.globalAlpha = 0.45 * basePulse;
+            var bW = 60 * basePulse;
+            var bH = 26 * basePulse;
+            _ctx.drawImage(_spriteFlame, baseCenterX - bW * 0.5, baseCenterY - bH * 0.5, bW, bH);
         }
 
-        // 3. Partículas de chama ascendentes com gradientes radiais suaves
         var i, dead;
         for (i = 0; i < _particles.length; i++) {
             dead = _particles[i].update();
@@ -256,7 +227,8 @@
             _particles[i].draw(_ctx);
         }
 
-        // Restore default composite mode
+        // Restaura transparência padrão
+        _ctx.globalAlpha = 1.0;
         _ctx.globalCompositeOperation = 'source-over';
 
         _rafId = requestAnimationFrame(_frame);
@@ -295,6 +267,10 @@
         _ctx = _canvas.getContext('2d');
         _W = _canvas.width || 160;
         _H = _canvas.height || 160;
+
+        if (!_spriteCore) {
+            _buildSprites();
+        }
 
         // Base particle size scales with canvas (reference: 160px → ~3.5)
         _baseSize = Math.max(1.5, (_W / 160) * 3.5);

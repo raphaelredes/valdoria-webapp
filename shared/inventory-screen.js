@@ -938,7 +938,7 @@
     // manter a Cabeça centrada. Grid 3-col (.vinv-loadout-avatar).
     //   [   ] Cabeça [   ]
     //   Ombros Amuleto Capa
-    //   MãoEsq Peito  MãoDir
+    //   MãoDir Peito  MãoEsq
     //   Mãos   Cinto  Pernas
     //   AnelI  Botas  AnelII
     var slotDef = [
@@ -946,9 +946,9 @@
       { key: 'shoulders', label: 'Ombros' },
       { key: 'amulet',    label: 'Amuleto' },
       { key: 'cloak',     label: 'Capa' },
-      { key: 'off_hand',  label: 'Mão Esq.' },
-      { key: 'chest',     label: 'Peito' },
       { key: 'main_hand', label: 'Mão Dir.' },
+      { key: 'chest',     label: 'Peito' },
+      { key: 'off_hand',  label: 'Mão Esq.' },
       { key: 'hands',     label: 'Mãos' },
       { key: 'belt',      label: 'Cinto' },
       { key: 'legs',      label: 'Pernas' },
@@ -1282,6 +1282,12 @@
           });
           return;
         }
+        if (act === 'ItemEquip') {
+          _showEquipConfirmModal(null, it, it.slot, function () {
+            _executeDetailAction(fn, it);
+          });
+          return;
+        }
         _executeDetailAction(fn, it);
       });
     });
@@ -1324,6 +1330,45 @@
       + '<div class="vinv-confirm-actions">'
       +   '<button type="button" class="vinv-btn" data-action="confirm-cancel">Cancelar</button>'
       +   '<button type="button" class="vinv-btn primary" data-action="confirm-ok">Usar</button>'
+      + '</div>';
+
+    ov.classList.add('active');
+
+    function _closeConfirm() {
+      ov.classList.remove('active');
+    }
+
+    card.querySelector('[data-action="confirm-cancel"]').addEventListener('click', _closeConfirm);
+    card.querySelector('[data-action="confirm-ok"]').addEventListener('click', function () {
+      _closeConfirm();
+      if (typeof onConfirm === 'function') onConfirm();
+    });
+  }
+
+  function _showEquipConfirmModal(currentItem, newItem, slotKey, onConfirm) {
+    var ov = _state.overlay && _state.overlay.querySelector('[data-region="confirm"]');
+    var card = _state.overlay && _state.overlay.querySelector('[data-region="confirm-card"]');
+    if (!ov || !card) {
+      if (typeof onConfirm === 'function') onConfirm();
+      return;
+    }
+    var iconId = _resolveItemIcon(newItem);
+    var title = currentItem ? 'Confirmar Troca' : 'Confirmar Equipamento';
+    var msg = currentItem
+      ? ('Deseja substituir <strong>' + _esc(currentItem.name) + '</strong> por <strong>' + _esc(newItem.name) + '</strong>?')
+      : ('Deseja equipar <strong>' + _esc(newItem.name) + '</strong>?');
+    var subHtml = '';
+    if (newItem.desc) {
+      subHtml = '<div class="vinv-confirm-sub">' + _esc(newItem.desc.slice(0, 95)) + '</div>';
+    }
+    card.innerHTML = ''
+      + '<div class="vinv-confirm-title">' + title + '</div>'
+      + '<div class="vinv-confirm-icon">' + _iconSrc(iconId, newItem.name) + '</div>'
+      + '<div class="vinv-confirm-msg">' + msg + '</div>'
+      + subHtml
+      + '<div class="vinv-confirm-actions">'
+      +   '<button type="button" class="vinv-btn" data-action="confirm-cancel">Cancelar</button>'
+      +   '<button type="button" class="vinv-btn primary" data-action="confirm-ok">Equipar</button>'
       + '</div>';
 
     ov.classList.add('active');
@@ -1412,20 +1457,22 @@
         var idx = parseInt(row.dataset.swapIdx, 10);
         var newItem = alternatives[idx];
         if (!newItem) return;
-        if (typeof cfg.onItemSwap === 'function') {
-          var result = cfg.onItemSwap(currentItem, newItem, slotKey, cost);
-          if (result && result.then) {
-            result.then(function () { window.vInventory.refresh(); _hideDetail(); });
-          } else {
-            window.vInventory.refresh();
-            _hideDetail();
+        _showEquipConfirmModal(currentItem, newItem, slotKey, function () {
+          if (typeof cfg.onItemSwap === 'function') {
+            var result = cfg.onItemSwap(currentItem, newItem, slotKey, cost);
+            if (result && result.then) {
+              result.then(function () { window.vInventory.refresh(); _hideDetail(); });
+            } else {
+              window.vInventory.refresh();
+              _hideDetail();
+            }
+          } else if (typeof cfg.onItemEquip === 'function') {
+            // Fallback: chama onItemEquip do novo item
+            var r = cfg.onItemEquip(newItem, slotKey);
+            if (r && r.then) r.then(function () { window.vInventory.refresh(); _hideDetail(); });
+            else { window.vInventory.refresh(); _hideDetail(); }
           }
-        } else if (typeof cfg.onItemEquip === 'function') {
-          // Fallback: chama onItemEquip do novo item
-          var r = cfg.onItemEquip(newItem);
-          if (r && r.then) r.then(function () { window.vInventory.refresh(); _hideDetail(); });
-          else { window.vInventory.refresh(); _hideDetail(); }
-        }
+        });
       });
     });
   }
