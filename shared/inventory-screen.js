@@ -417,6 +417,9 @@
       // aceita ambos independente do pre-mapping do caller (2026-07-01).
       if ((slot === 'amulet' || slot === 'necklace')
         && (itSlot === 'amulet' || itSlot === 'necklace')) return true;
+      // feet↔boots: ITEMS_DB usa 'feet', paper-doll usa 'boots' (2026-09-17).
+      if ((slot === 'feet' || slot === 'boots')
+        && (itSlot === 'feet' || itSlot === 'boots')) return true;
       return itSlot === slot;
     });
   }

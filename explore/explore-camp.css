@@ -60,11 +60,11 @@
 .camp-hud-val-hp { color: #d55; }
 .camp-hud-val-mp { color: #5a9ae8; }
 
-/* Stars */
+/* Stars & Sky */
 .camp-sky {
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 120px;
+  height: 100%;
   pointer-events: none;
 }
 .camp-star {
@@ -85,14 +85,87 @@
   50% { opacity: 0.7; }
 }
 
-/* Moon */
+/* Celestial body (Moon at night / Sun during day) */
 .camp-moon {
   position: absolute;
   top: 16px; right: 38px;
   width: 28px; height: 28px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #f0e6c0 0%, var(--v-gold, #c4953a) 80%);
-  opacity: 0.22;
+  opacity: 0.6;
+  box-shadow: 0 0 16px rgba(240, 230, 192, 0.3);
+  transition: all 0.4s ease;
+}
+
+/* ── Day Phases (Dia / Entardecer / Alvorada / Noite) ── */
+.camp-screen.phase-day .camp-scene {
+  background:
+    radial-gradient(ellipse at 50% 70%, rgba(245, 158, 11, 0.12) 0%, transparent 60%),
+    linear-gradient(180deg, transparent 40%, rgba(35, 25, 15, 0.8) 75%, #18120c 100%);
+}
+.camp-screen.phase-day .camp-sky {
+  background: linear-gradient(180deg, #1c4d8c 0%, #357ec7 42%, #6bb5f0 72%, #d2a679 100%);
+}
+.camp-screen.phase-day .camp-star {
+  display: none !important;
+}
+.camp-screen.phase-day .camp-moon {
+  width: 34px;
+  height: 34px;
+  top: 18px;
+  right: 40px;
+  background: radial-gradient(circle at 45% 45%, #ffffff 0%, #fffbe8 25%, #fde047 55%, #f59e0b 80%, rgba(245, 158, 11, 0) 100%);
+  box-shadow: 0 0 35px rgba(253, 224, 71, 0.85), 0 0 70px rgba(245, 158, 11, 0.45);
+  opacity: 1;
+}
+
+.camp-screen.phase-dusk .camp-scene {
+  background:
+    radial-gradient(ellipse at 50% 65%, rgba(234, 88, 12, 0.16) 0%, transparent 55%),
+    linear-gradient(180deg, transparent 40%, rgba(25, 15, 10, 0.85) 75%, #0f0a08 100%);
+}
+.camp-screen.phase-dusk .camp-sky {
+  background: linear-gradient(180deg, #181438 0%, #3e1e4a 35%, #882b26 65%, #d9681e 90%, #f59e0b 100%);
+}
+.camp-screen.phase-dusk .camp-star {
+  opacity: 0.15;
+}
+.camp-screen.phase-dusk .camp-moon {
+  width: 30px;
+  height: 30px;
+  top: 36px;
+  right: 44px;
+  background: radial-gradient(circle at 45% 45%, #fff1a8 0%, #fb923c 45%, #ea580c 75%, rgba(234, 88, 12, 0) 100%);
+  box-shadow: 0 0 30px rgba(251, 146, 60, 0.75);
+  opacity: 0.9;
+}
+
+.camp-screen.phase-dawn .camp-scene {
+  background:
+    radial-gradient(ellipse at 50% 65%, rgba(249, 115, 22, 0.12) 0%, transparent 55%),
+    linear-gradient(180deg, transparent 40%, rgba(20, 15, 25, 0.85) 75%, #0d0a12 100%);
+}
+.camp-screen.phase-dawn .camp-sky {
+  background: linear-gradient(180deg, #12182c 0%, #2a224a 35%, #6a2a5e 65%, #c85a48 85%, #f4a261 100%);
+}
+.camp-screen.phase-dawn .camp-star {
+  opacity: 0.1;
+}
+.camp-screen.phase-dawn .camp-moon {
+  width: 28px;
+  height: 28px;
+  top: 34px;
+  right: 44px;
+  background: radial-gradient(circle at 45% 45%, #ffffff 0%, #fed7aa 35%, #f97316 75%, rgba(249, 115, 22, 0) 100%);
+  box-shadow: 0 0 28px rgba(253, 186, 116, 0.7);
+  opacity: 0.95;
+}
+
+.camp-screen.phase-night .camp-star {
+  opacity: 0.6;
+}
+.camp-screen.phase-night .camp-moon {
+  opacity: 0.85;
 }
 
 /* Fire area */

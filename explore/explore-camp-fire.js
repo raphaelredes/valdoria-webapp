@@ -118,71 +118,84 @@
     Particle.prototype.draw = function (ctx) {
         var t = this.life / this.maxLife;
         // Tamanho com curva mais natural — pico no início, encolhe no fim.
-        // Boost size no início (0.05) pra pico de chama mais visível.
         var sizeCurve;
-        if (t < 0.08) sizeCurve = 1.0 + (0.08 - t) * 1.5;  // pico até 1.12x
+        if (t < 0.08) sizeCurve = 1.0 + (0.08 - t) * 1.5;
         else sizeCurve = 1 - Math.pow((t - 0.08) / 0.92, 1.8) * 0.85;
         var r = this.size * sizeCurve;
-        if (r < 0.4) return;
+        if (r < 0.5) return;
 
-        // Alpha — pico mais alto (0.92 em t=0.05) + fade longo
+        // Alpha — pico inicial + fade suave longo
         var alpha;
         if (t < 0.05) {
-            alpha = 0.6 + t * 6.4;  // 0.6 → 0.92 (rápido e forte)
-        } else if (t < 0.15) {
-            alpha = 0.92 - (t - 0.05) * 0.3;  // 0.92 → 0.89 (sustain)
+            alpha = 0.5 + t * 7.0;
+        } else if (t < 0.18) {
+            alpha = 0.85 - (t - 0.05) * 0.3;
         } else {
-            // Fade quadrático a partir de t=0.15
-            var fadeT = (t - 0.15) / 0.85;
-            alpha = 0.89 * (1 - fadeT * fadeT);
+            var fadeT = (t - 0.18) / 0.82;
+            alpha = 0.81 * (1 - fadeT * fadeT);
         }
+        if (alpha <= 0.01) return;
+
         var cr, cg, cb;
 
         if (t < 0.08) {
-            // Núcleo branco puro incandescente (boost amarelo)
+            // Núcleo branco puro incandescente
             cr = 255;
-            cg = 250 - t * 80;        // 250 → 244
-            cb = 235 - t * 700;        // 235 → 179
+            cg = 250 - t * 80;
+            cb = 235 - t * 700;
         } else if (t < 0.25) {
-            // Branco → ouro brilhante (transição mais rápida)
+            // Branco → ouro brilhante
             var p1 = (t - 0.08) / 0.17;
             cr = 255;
-            cg = Math.max(195, 244 - p1 * 49);   // 244 → 195
-            cb = Math.max(80, 179 - p1 * 99);    // 179 → 80
+            cg = Math.max(195, 244 - p1 * 49);
+            cb = Math.max(80, 179 - p1 * 99);
         } else if (t < 0.50) {
-            // Ouro → laranja vivo (mais saturado)
+            // Ouro → laranja vivo
             var p2 = (t - 0.25) / 0.25;
             cr = 255;
-            cg = Math.max(95, 195 - p2 * 100);   // 195 → 95
-            cb = Math.max(15, 80 - p2 * 65);     // 80 → 15
+            cg = Math.max(95, 195 - p2 * 100);
+            cb = Math.max(15, 80 - p2 * 65);
         } else if (t < 0.78) {
             // Laranja → vermelho rubro
             var p3 = (t - 0.50) / 0.28;
-            cr = Math.max(155, 255 - p3 * 100);  // 255 → 155
-            cg = Math.max(28, 95 - p3 * 67);     // 95 → 28
-            cb = Math.max(8, 15 - p3 * 7);       // 15 → 8
+            cr = Math.max(155, 255 - p3 * 100);
+            cg = Math.max(28, 95 - p3 * 67);
+            cb = Math.max(8, 15 - p3 * 7);
         } else {
             // Vermelho → cinza/smoke residual
             var p4 = (t - 0.78) / 0.22;
-            cr = Math.max(35, 155 - p4 * 120);   // 155 → 35
-            cg = Math.max(18, 28 - p4 * 10);     // 28 → 18
-            cb = Math.max(14, 8 + p4 * 10);      // 8 → 18 (azulado de smoke)
+            cr = Math.max(35, 155 - p4 * 120);
+            cg = Math.max(18, 28 - p4 * 10);
+            cb = Math.max(14, 8 + p4 * 10);
             alpha *= (1 - p4 * 0.85);
         }
 
         // Heat distortion sutil — offset horizontal baseado em altura
-        // (partículas mais altas têm sway maior, criando curl natural)
-        var heatPos = (this.y / _H);  // 1 base → 0 topo
-        var heatDx = Math.sin(this.life * 0.08 + this.swayPhase) * (1 - heatPos) * 0.8;
+        var heatPos = (this.y / _H);
+        var heatDx = Math.sin(this.life * 0.08 + this.swayPhase) * (1 - heatPos) * 0.9;
         var drawX = this.x + heatDx;
 
-        // ELIPSE vertical-alongada (em vez de círculo) — formato de chama
-        // ScaleY 1.6-2.2 (mais alongado nas partículas mais altas/quentes)
-        var stretch = 1.6 + (1 - t) * 0.6;  // 2.2 no início → 1.6 no fim
-        ctx.fillStyle = 'rgba(' + ~~cr + ',' + ~~cg + ',' + ~~cb + ',' + alpha.toFixed(3) + ')';
+        // Formato verticalmente alongado com bordas 100% difusas via gradiente radial
+        // Elimina completamente "círculos toscos" através de queda suave de opacidade
+        var stretch = 1.7 + (1 - t) * 0.8;
+        var rx = r * 0.82;
+        var ry = r * stretch;
+
+        ctx.save();
+        ctx.translate(drawX, this.y);
+        ctx.scale(1, ry / rx);
+
+        var grad = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+        grad.addColorStop(0, 'rgba(255, 255, 220, ' + alpha.toFixed(3) + ')');
+        grad.addColorStop(0.28, 'rgba(' + ~~cr + ',' + ~~cg + ',' + ~~cb + ',' + (alpha * 0.85).toFixed(3) + ')');
+        grad.addColorStop(0.68, 'rgba(' + Math.max(0, ~~cr - 35) + ',' + Math.max(0, ~~cg - 55) + ', 0, ' + (alpha * 0.35).toFixed(3) + ')');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.ellipse(drawX, this.y, r * 0.75, r * stretch * 0.75, 0, 0, Math.PI * 2);
+        ctx.arc(0, 0, rx, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
     };
 
     // ── Animation loop ───────────────────────────────────────────────────
@@ -196,6 +209,44 @@
         // Additive blending for fire glow
         _ctx.globalCompositeOperation = 'lighter';
 
+        // 1. Chama viva contínua e pulsante na base dos troncos (root flame)
+        var time = performance.now() * 0.003;
+        var baseCenterX = _W * 0.5;
+        var baseCenterY = _H - (_H * 0.12);
+        var baseFlicker = Math.sin(time * 3.8) * 2.2 + Math.cos(time * 5.4) * 1.5;
+
+        var bedGrad = _ctx.createRadialGradient(baseCenterX, baseCenterY + 3, 0, baseCenterX, baseCenterY + 3, 34 + baseFlicker);
+        bedGrad.addColorStop(0, 'rgba(255, 245, 190, 0.75)');
+        bedGrad.addColorStop(0.35, 'rgba(255, 145, 25, 0.5)');
+        bedGrad.addColorStop(0.75, 'rgba(220, 55, 0, 0.18)');
+        bedGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        _ctx.fillStyle = bedGrad;
+        _ctx.beginPath();
+        _ctx.ellipse(baseCenterX, baseCenterY + 3, 36, 16 + baseFlicker * 0.5, 0, 0, Math.PI * 2);
+        _ctx.fill();
+
+        // 2. Línguas de fogo orgânicas centrais que lambem para cima
+        for (var f = -1; f <= 1; f++) {
+            var tongueX = baseCenterX + f * 11 + Math.sin(time * 4.2 + f * 2.1) * 3;
+            var tongueH = 26 + Math.sin(time * 5.8 + f * 3.2) * 7 + (f === 0 ? 8 : 0);
+            var tongueW = 11 + Math.cos(time * 4.9 + f) * 2;
+            var tongueY = baseCenterY - tongueH * 0.5;
+            _ctx.save();
+            _ctx.translate(tongueX, tongueY);
+            _ctx.scale(1, tongueH / tongueW);
+            var tGrad = _ctx.createRadialGradient(0, 0, 0, 0, 0, tongueW);
+            tGrad.addColorStop(0, 'rgba(255, 255, 235, 0.85)');
+            tGrad.addColorStop(0.32, 'rgba(255, 185, 35, 0.6)');
+            tGrad.addColorStop(0.7, 'rgba(255, 75, 12, 0.25)');
+            tGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            _ctx.fillStyle = tGrad;
+            _ctx.beginPath();
+            _ctx.arc(0, 0, tongueW, 0, Math.PI * 2);
+            _ctx.fill();
+            _ctx.restore();
+        }
+
+        // 3. Partículas de chama ascendentes com gradientes radiais suaves
         var i, dead;
         for (i = 0; i < _particles.length; i++) {
             dead = _particles[i].update();

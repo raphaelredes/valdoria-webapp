@@ -962,11 +962,19 @@
 
 }
 
-.vinv-icon svg {
+.vinv-icon svg,
+.vinv-icon img,
+.vinv-icon .vitem-icon {
 
   width: 100%;
 
   height: 100%;
+
+  max-width: 100%;
+
+  max-height: 100%;
+
+  object-fit: contain;
 
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 
@@ -1670,11 +1678,19 @@
 
 }
 
-.vinv-detail-portrait svg {
+.vinv-detail-portrait svg,
+.vinv-detail-portrait img,
+.vinv-detail-portrait .vitem-icon {
 
   width: 80px;
 
   height: 80px;
+
+  max-width: 80px;
+
+  max-height: 80px;
+
+  object-fit: contain;
 
   filter: drop-shadow(0 0 10px var(--v-gold-50));
 
@@ -2035,7 +2051,21 @@
 
 }
 
-.vinv-slot-icon svg { width: 100%; height: 100%; }
+.vinv-slot-icon svg,
+.vinv-slot-icon img,
+.vinv-slot-icon .vitem-icon {
+
+  width: 100%;
+
+  height: 100%;
+
+  max-width: 100%;
+
+  max-height: 100%;
+
+  object-fit: contain;
+
+}
 
 .vinv-slot.empty .vinv-slot-empty-glyph {
 
@@ -2423,15 +2453,15 @@
 
 .vinv-swap-list {
 
-  padding: var(--v-space-lg, 12px) 14px;
+  padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
 
   border-top: 1px solid var(--vinv-border-soft);
 
   background: rgba(0, 0, 0, 0.18);
 
-  flex: 0 0 auto;
+  flex: 1 1 auto;
 
-  max-height: 220px;
+  max-height: clamp(220px, 48vh, 360px);
 
   overflow-y: auto;
 
@@ -2491,9 +2521,13 @@
 
   align-items: center;
 
-  gap: var(--v-space-md-lg, 10px);
+  gap: var(--v-space-md, 8px);
 
   padding: 6px var(--v-space-md, 8px);
+
+  min-height: 52px;
+
+  box-sizing: border-box;
 
   background: var(--vinv-bg-card);
 
@@ -2543,13 +2577,23 @@
 
 }
 
-.vinv-swap-row svg {
+.vinv-swap-row svg,
+.vinv-swap-row img,
+.vinv-swap-row .vitem-icon {
 
-  width: 36px;
+  width: 42px;
 
-  height: 36px;
+  height: 42px;
 
-  flex: 0 0 36px;
+  max-width: 42px;
+
+  max-height: 42px;
+
+  flex: 0 0 42px;
+
+  object-fit: contain;
+
+  border-radius: 6px;
 
 }
 

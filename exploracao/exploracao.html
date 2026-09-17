@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-17T20:09:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-17T21:05:36Z - do not edit directly, edit source -->
 
 
 
@@ -6024,33 +6024,144 @@ body.remote-mode #debug-hud { display: none !important; }
    melhorias epicas para que tambem possa representar o que esta acontecendo
    no bioma do mapa atual". */
 
-/* Sky gradient varia por bioma (override do default azul-noite do explore-camp.css) */
-.camp-screen.biome-forest .camp-sky {
+/* Sky gradient varia por bioma e por fase do dia (dia / entardecer / alvorada / noite) */
+
+/* ── NOITE (padrão escuro por bioma) ── */
+.camp-screen.biome-forest .camp-sky, .camp-screen.phase-night.biome-forest .camp-sky {
   background: linear-gradient(180deg, #0a1810 0%, #142818 40%, #1a3018 100%) !important;
 }
-.camp-screen.biome-plains .camp-sky {
+.camp-screen.biome-plains .camp-sky, .camp-screen.phase-night.biome-plains .camp-sky {
   background: linear-gradient(180deg, #0c1018 0%, #1a2030 50%, #2a2820 100%) !important;
 }
-.camp-screen.biome-swamp .camp-sky {
+.camp-screen.biome-swamp .camp-sky, .camp-screen.phase-night.biome-swamp .camp-sky {
   background: linear-gradient(180deg, #050810 0%, #182018 60%, #243018 100%) !important;
 }
-.camp-screen.biome-mountain .camp-sky {
+.camp-screen.biome-mountain .camp-sky, .camp-screen.phase-night.biome-mountain .camp-sky {
   background: linear-gradient(180deg, #050810 0%, #1a1c28 50%, #2a3038 100%) !important;
 }
-.camp-screen.biome-desert .camp-sky {
+.camp-screen.biome-desert .camp-sky, .camp-screen.phase-night.biome-desert .camp-sky {
   background: linear-gradient(180deg, #1a1228 0%, #3a2430 40%, #5a3a28 100%) !important;
 }
-.camp-screen.biome-snow .camp-sky {
+.camp-screen.biome-snow .camp-sky, .camp-screen.phase-night.biome-snow .camp-sky {
   background: linear-gradient(180deg, #0a1830 0%, #1c2c44 50%, #34445c 100%) !important;
 }
-.camp-screen.biome-cave .camp-sky {
+.camp-screen.biome-cave .camp-sky, .camp-screen.phase-night.biome-cave .camp-sky {
   background: linear-gradient(180deg, #050505 0%, #181818 100%) !important;
 }
-.camp-screen.biome-graveyard .camp-sky {
+.camp-screen.biome-graveyard .camp-sky, .camp-screen.phase-night.biome-graveyard .camp-sky {
   background: linear-gradient(180deg, #0a0810 0%, #181020 50%, #28182a 100%) !important;
 }
-.camp-screen.biome-volcanic .camp-sky {
+.camp-screen.biome-volcanic .camp-sky, .camp-screen.phase-night.biome-volcanic .camp-sky {
   background: linear-gradient(180deg, #1c0808 0%, #341818 50%, #4a2010 100%) !important;
+}
+
+/* ── DIA (Céu límpido iluminado com variações por bioma) ── */
+.camp-screen.phase-day .camp-sky {
+  background: linear-gradient(180deg, #1c4d8c 0%, #357ec7 42%, #6bb5f0 72%, #d2a679 100%) !important;
+}
+.camp-screen.phase-day.biome-forest .camp-sky {
+  background: linear-gradient(180deg, #184e88 0%, #2e7bb8 45%, #62a8dc 70%, #90b878 100%) !important;
+}
+.camp-screen.phase-day.biome-plains .camp-sky {
+  background: linear-gradient(180deg, #1c4d8c 0%, #357ec7 42%, #6bb5f0 72%, #d2a679 100%) !important;
+}
+.camp-screen.phase-day.biome-swamp .camp-sky {
+  background: linear-gradient(180deg, #264058 0%, #466572 45%, #768a7a 75%, #5a6842 100%) !important;
+}
+.camp-screen.phase-day.biome-mountain .camp-sky {
+  background: linear-gradient(180deg, #0e3570 0%, #1e5fa0 45%, #509ad4 75%, #a4b8cc 100%) !important;
+}
+.camp-screen.phase-day.biome-desert .camp-sky {
+  background: linear-gradient(180deg, #1a5ca4 0%, #3a8cd4 40%, #76bef4 70%, #f0bb78 100%) !important;
+}
+.camp-screen.phase-day.biome-snow .camp-sky {
+  background: linear-gradient(180deg, #1c4878 0%, #3a72a4 45%, #78a8d0 75%, #d8e8f4 100%) !important;
+}
+.camp-screen.phase-day.biome-graveyard .camp-sky {
+  background: linear-gradient(180deg, #203044 0%, #3d4a58 45%, #5d6770 75%, #423842 100%) !important;
+}
+.camp-screen.phase-day.biome-volcanic .camp-sky {
+  background: linear-gradient(180deg, #241414 0%, #48241c 45%, #783820 75%, #a84818 100%) !important;
+}
+.camp-screen.phase-day.biome-cave .camp-sky {
+  background: linear-gradient(180deg, #050505 0%, #181818 100%) !important;
+}
+
+/* ── ENTARDECER (Dusk: Pôr do sol avermelhado / âmbar) ── */
+.camp-screen.phase-dusk .camp-sky {
+  background: linear-gradient(180deg, #181438 0%, #3e1e4a 35%, #882b26 65%, #d9681e 90%, #f59e0b 100%) !important;
+}
+.camp-screen.phase-dusk.biome-desert .camp-sky {
+  background: linear-gradient(180deg, #241038 0%, #581848 35%, #9e2a2b 65%, #ea6922 90%, #f8a145 100%) !important;
+}
+.camp-screen.phase-dusk.biome-snow .camp-sky {
+  background: linear-gradient(180deg, #141634 0%, #2d2650 35%, #6a3d60 65%, #b45e68 90%, #e89890 100%) !important;
+}
+.camp-screen.phase-dusk.biome-cave .camp-sky {
+  background: linear-gradient(180deg, #050505 0%, #181818 100%) !important;
+}
+
+/* ── ALVORADA (Dawn: Tons rosados / dourados matinais) ── */
+.camp-screen.phase-dawn .camp-sky {
+  background: linear-gradient(180deg, #12182c 0%, #2a224a 35%, #6a2a5e 65%, #c85a48 85%, #f4a261 100%) !important;
+}
+.camp-screen.phase-dawn.biome-forest .camp-sky {
+  background: linear-gradient(180deg, #101c2e 0%, #1e2e4a 35%, #484a60 65%, #948060 85%, #d4b070 100%) !important;
+}
+.camp-screen.phase-dawn.biome-mountain .camp-sky {
+  background: linear-gradient(180deg, #0e1832 0%, #242250 35%, #623668 65%, #c05c60 85%, #f6ae74 100%) !important;
+}
+.camp-screen.phase-dawn.biome-cave .camp-sky {
+  background: linear-gradient(180deg, #050505 0%, #181818 100%) !important;
+}
+
+/* ── Sol, Lua e Estrelas por Fase ── */
+.camp-screen.phase-day .camp-star {
+  display: none !important;
+}
+.camp-screen.phase-day .camp-moon {
+  width: 34px !important;
+  height: 34px !important;
+  top: 18px !important;
+  right: 40px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 45% 45%, #ffffff 0%, #fffbe8 25%, #fde047 55%, #f59e0b 80%, rgba(245, 158, 11, 0) 100%) !important;
+  box-shadow: 0 0 35px rgba(253, 224, 71, 0.85), 0 0 70px rgba(245, 158, 11, 0.45) !important;
+  opacity: 1 !important;
+}
+
+.camp-screen.phase-dusk .camp-star {
+  opacity: 0.15 !important;
+}
+.camp-screen.phase-dusk .camp-moon {
+  width: 30px !important;
+  height: 30px !important;
+  top: 36px !important;
+  right: 44px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 45% 45%, #fff1a8 0%, #fb923c 45%, #ea580c 75%, rgba(234, 88, 12, 0) 100%) !important;
+  box-shadow: 0 0 30px rgba(251, 146, 60, 0.75) !important;
+  opacity: 0.9 !important;
+}
+
+.camp-screen.phase-dawn .camp-star {
+  opacity: 0.1 !important;
+}
+.camp-screen.phase-dawn .camp-moon {
+  width: 28px !important;
+  height: 28px !important;
+  top: 34px !important;
+  right: 44px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 45% 45%, #ffffff 0%, #fed7aa 35%, #f97316 75%, rgba(249, 115, 22, 0) 100%) !important;
+  box-shadow: 0 0 28px rgba(253, 186, 116, 0.7) !important;
+  opacity: 0.95 !important;
+}
+
+/* Bioma Caverna: sem sol/lua nem estrelas */
+.camp-screen.biome-cave .camp-moon,
+.camp-screen.biome-cave .camp-star {
+  display: none !important;
 }
 
 /* Silhueta da paisagem (camada atras da fogueira). Usa ::before do .camp-scene
@@ -6147,11 +6258,11 @@ body.remote-mode #debug-hud { display: none !important; }
 /* Lua varia por bioma — escondida em cave (sem ceu) e volcanic (substituida
    por sol vermelho) */
 .camp-screen.biome-cave .camp-moon { display: none !important; }
-.camp-screen.biome-volcanic .camp-moon {
+.camp-screen.biome-volcanic:not(.phase-day) .camp-moon {
   background: radial-gradient(circle at 35% 35%, #ff8838, #b03818 60%, #6a1808) !important;
   box-shadow: 0 0 24px rgba(255, 100, 40, 0.6) !important;
 }
-.camp-screen.biome-snow .camp-moon {
+.camp-screen.biome-snow:not(.phase-day) .camp-moon {
   background: radial-gradient(circle at 35% 35%, #f8fcff, #c8d8e8 60%, #98a8c0) !important;
   box-shadow: 0 0 30px rgba(200, 230, 255, 0.5) !important;
 }
@@ -6257,7 +6368,7 @@ body.remote-mode #debug-hud { display: none !important; }
      cards de descanso). LOCAL file:// usa path relativo; REMOTE (via bot DEV)
      o webapp deploya o mesmo arquivo em /explore/explore-camp.css. Tentamos
      ambos — browser ignora o que não existir. -->
-<link rel="stylesheet" href="../valdoria-webapp/explore/explore-camp.css?v=local">
+<link rel="stylesheet" href="../explore/explore-camp.css?v=local">
 <link rel="stylesheet" href="/explore/explore-camp.css?v=remote" onerror="this.remove()">
 <!-- cartografia-shared.js e Bucket B (immutable). Carregar COM ?v=<bundle hash>
      senao o browser serve a copia STALE do cache immutable (bug sessao #73: a
@@ -14676,7 +14787,7 @@ function parseRewardString(s) {
 (function() {
   var v = (window.VBUNDLE_HASH || Date.now());
   var s1 = document.createElement('script');
-  s1.src = '../valdoria-webapp/explore/explore-camp-fire.js?v=' + v;
+  s1.src = '../explore/explore-camp-fire.js?v=' + v;
   s1.async = false;
   s1.onerror = function() {
     var s2 = document.createElement('script');
@@ -15255,6 +15366,7 @@ window.__explFetchTO = function(url, opts, ms) {
         }
         if (res.equipment && typeof res.equipment === 'object') {
           window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
+          if (window.S && window.S.player) window.S.player.equipment = res.equipment;
           console.info('[E-REM:API-INIT] server_equipped=' + Object.keys(res.equipment).length);
         }
         if (typeof res.ac === 'number') {
@@ -35958,7 +36070,7 @@ function _expLocalStorageWithFallback(baseKey){
 }
 function _vinvExpReadLoadout(allItems) {
   var loadout = {};
-  var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet' };
+  var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet', boots: 'feet' };
   function _applyEquippedDict(equipped) {
     if (!equipped || typeof equipped !== 'object') return;
     Object.keys(equipped).forEach(function (slot) {
@@ -35985,13 +36097,25 @@ function _vinvExpReadLoadout(allItems) {
         found.equipped = true;
         found.slot = found.slot || slotMap[slot] || slot;
       }
-      loadout[slotMap[slot] || slot] = found;
+      var targetSlot = slotMap[slot] || slot;
+      loadout[targetSlot] = found;
+      // Aliases bidirecionais pra bater com qualquer slotDef do paper-doll
+      if (targetSlot === 'feet') loadout['boots'] = found;
+      if (targetSlot === 'boots') loadout['feet'] = found;
+      if (targetSlot === 'amulet') loadout['necklace'] = found;
+      if (targetSlot === 'necklace') loadout['amulet'] = found;
+      if (targetSlot === 'ring1') loadout['ring_1'] = found;
+      if (targetSlot === 'ring2') loadout['ring_2'] = found;
     });
   }
 
   // 1. Tenta server-equipped primeiro se disponível
   if (window.__EXPLORE_SERVER_EQUIPPED && typeof window.__EXPLORE_SERVER_EQUIPPED === 'object') {
     _applyEquippedDict(window.__EXPLORE_SERVER_EQUIPPED);
+  }
+  // 1b. Tenta S.player.equipment se disponível
+  if (Object.keys(loadout).length === 0 && window.S && window.S.player && window.S.player.equipment) {
+    _applyEquippedDict(window.S.player.equipment);
   }
   // 2. Se vazio, fallback no localStorage da cidade
   if (Object.keys(loadout).length === 0) {
@@ -40949,11 +41073,15 @@ function _updateCampDetails() {
 function openCampOverlay() {
   const ov = document.getElementById('camp-screen');
   if (!ov) return;
-  // Atualizar bioma display
+  // Atualizar bioma e fase do dia display
+  var currentPhase = (S && S.dayPhase) || 'day';
   const biomeEl = document.getElementById('camp-biome-text');
   if (biomeEl) {
     const mapDef = S && S.mapDef;
-    biomeEl.textContent = mapDef && mapDef.name ? mapDef.name : '';
+    var phaseNames = { day: 'Dia', dusk: 'Entardecer', dawn: 'Alvorada', night: 'Noite' };
+    var phaseStr = phaseNames[currentPhase] || currentPhase;
+    var mapName = (mapDef && mapDef.name) ? mapDef.name : '';
+    biomeEl.textContent = mapName ? (mapName + ' · ' + phaseStr) : phaseStr;
   }
   _updateCampHud();
   _updateCampDetails();
@@ -40966,11 +41094,9 @@ function openCampOverlay() {
   if (S && S.biome) {
     ov.classList.add('biome-' + S.biome);
   }
-  // Tambem adiciona classe pro phase (dia/noite/etc) se quiser variar
-  if (S && S.dayPhase) {
-    ov.className = ov.className.replace(/\bphase-\w+/g, '').trim();
-    ov.classList.add('phase-' + S.dayPhase);
-  }
+  // Aplica classe da fase do dia (phase-day, phase-dusk, phase-dawn, phase-night)
+  ov.className = ov.className.replace(/\bphase-\w+/g, '').trim();
+  ov.classList.add('phase-' + currentPhase);
   ov.classList.add('active');
   // Particle fire canvas (explore-camp-fire.js carregado no <head>)
   try {
@@ -45454,6 +45580,11 @@ function boot() {
                 }
                 if (_ss.background) S.player.background = _ss.background;
                 if (_ss.alignment) S.player.alignment = _ss.alignment;
+                if (_ss.char_id) S.player.char_id = _ss.char_id;
+                if (res.equipment && typeof res.equipment === 'object') {
+                  window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
+                  S.player.equipment = res.equipment;
+                }
                 // Identidade pode ter mudado → refresca HUD/render sempre.
                 try { if (typeof updateHud === 'function') updateHud(); } catch (_eHudId) {}
                 try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_eRenId) {}
