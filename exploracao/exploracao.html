@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T10:41:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T12:15:33Z - do not edit directly, edit source -->
 
 
 
@@ -36467,12 +36467,14 @@ function _vinvExpAutoEquipSmart() {
 
   var isDwarf = (race.indexOf('ana') !== -1 || race.indexOf('dwarf') !== -1);
   var isElf = (race.indexOf('elf') !== -1);
+  var isDrow = isElf && (subrace.indexOf('drow') !== -1);
+  var isHighWoodElf = isElf && !isDrow;
   var isMountainDwarf = isDwarf && (subrace.indexOf('mountain') !== -1 || subrace.indexOf('montanha') !== -1);
 
   // Proficiências de Armadura D&D 5e
   var profHeavy = (cls === 'guerreiro' || cls === 'paladino');
   var profMedium = profHeavy || (cls === 'clerigo' || cls === 'druida' || cls === 'patrulheiro' || cls === 'barbaro' || isMountainDwarf);
-  var profLight = profMedium || (cls === 'bardo' || cls === 'ladino' || cls === 'bruxo');
+  var profLight = profMedium || (cls === 'bardo' || cls === 'ladino' || cls === 'bruxo' || isMountainDwarf);
   var profShield = (cls === 'guerreiro' || cls === 'paladino' || cls === 'clerigo' || cls === 'druida' || cls === 'patrulheiro' || cls === 'barbaro');
   var profMartial = (cls === 'guerreiro' || cls === 'paladino' || cls === 'patrulheiro' || cls === 'barbaro');
 
@@ -36494,7 +36496,7 @@ function _vinvExpAutoEquipSmart() {
     if (tags.indexOf('heavy_armor') !== -1) {
       if (!profHeavy) return false;
       // Checagem de Força mínima D&D 5e (Cota de Malha exige 13, Placas exige 15)
-      var n = it.name.toLowerCase();
+      var n = (it.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       var minStr = 0;
       if (n.indexOf('malha') !== -1) minStr = 13;
       else if (n.indexOf('placa') !== -1 || n.indexOf('tala') !== -1) minStr = 15;
@@ -36511,9 +36513,13 @@ function _vinvExpAutoEquipSmart() {
     var martial = tags.indexOf('martial_weapon') !== -1 || tags.indexOf('martial') !== -1;
     if (!martial) return true;
     if (profMartial) return true;
-    var n = it.name.toLowerCase();
-    if (isElf && (n.indexOf('espada') !== -1 || n.indexOf('arco') !== -1)) return true;
-    if ((cls === 'ladino' || cls === 'bardo') && (n.indexOf('rapieira') !== -1 || n.indexOf('curta') !== -1 || n.indexOf('longa') !== -1 || n.indexOf('adaga') !== -1)) return true;
+    var n = (it.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    // D&D 5e PHB p.20: Dwarven Combat Training
+    if (isDwarf && (n.indexOf('machado de batalha') !== -1 || n.indexOf('martelo de guerra') !== -1)) return true;
+    // D&D 5e PHB p.23-24: Elf Weapon Training & Drow Weapon Training
+    if (isHighWoodElf && (n.indexOf('espada longa') !== -1 || n.indexOf('espada curta') !== -1 || n.indexOf('arco longo') !== -1 || n.indexOf('arco curto') !== -1)) return true;
+    if (isDrow && (n.indexOf('rapieira') !== -1 || n.indexOf('espada curta') !== -1 || n.indexOf('besta de mao') !== -1)) return true;
+    if ((cls === 'ladino' || cls === 'bardo') && (n.indexOf('rapieira') !== -1 || n.indexOf('espada curta') !== -1 || n.indexOf('espada longa') !== -1 || n.indexOf('besta de mao') !== -1)) return true;
     return false;
   }
 
@@ -36546,7 +36552,7 @@ function _vinvExpAutoEquipSmart() {
       if (cls === 'druida' && tags.indexOf('metal') !== -1) return -1;
       return (it.ac_bonus || 2) * 5;
     }
-    // Focos arcanos / grimório / símbolos sagrados
+    // Focos arcanos / grimório / símbolos sagrados / instrumentos
     var ft = {
       mago: ['spellbook', 'arcane_focus', 'arcane', 'focus'],
       feiticeiro: ['arcane_focus', 'arcane', 'focus'],
@@ -36554,14 +36560,14 @@ function _vinvExpAutoEquipSmart() {
       clerigo: ['holy_symbol', 'focus'],
       paladino: ['holy_symbol', 'focus'],
       druida: ['druidic_focus', 'focus'],
-      bardo: ['focus', 'instrument']
+      bardo: ['focus', 'instrument', 'musical_instrument']
     }[cls] || [];
     var match = ft.some(function (tag) { return tags.indexOf(tag) !== -1; });
-    var n = (it.name || '').toLowerCase();
+    var n = (it.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     var isArcane = (cls === 'mago' || cls === 'feiticeiro' || cls === 'bruxo' || cls === 'bardo');
     var isDivine = (cls === 'clerigo' || cls === 'paladino');
     var isDruid = (cls === 'druida');
-    if (isArcane && (n.indexOf('grimor') !== -1 || n.indexOf('foco') !== -1 || n.indexOf('varinha') !== -1 || n.indexOf('orbe') !== -1)) match = true;
+    if (isArcane && (n.indexOf('grimor') !== -1 || n.indexOf('foco') !== -1 || n.indexOf('varinha') !== -1 || n.indexOf('orbe') !== -1 || n.indexOf('alaude') !== -1 || n.indexOf('lira') !== -1 || n.indexOf('flauta') !== -1)) match = true;
     if (isDivine && (n.indexOf('simbol') !== -1 || n.indexOf('relicari') !== -1)) match = true;
     if (isDruid && (n.indexOf('totem') !== -1 || n.indexOf('visco') !== -1)) match = true;
     if (!match) return -1;
@@ -36598,6 +36604,11 @@ function _vinvExpAutoEquipSmart() {
         }
         score = armAc * 4 + (c.bonus || 0);
       } else if (targetSlot === 'off_hand') {
+        var mhName = curEq.main_hand;
+        if (mhName) {
+          var mhIt = pool.find(function(p) { return p.name === mhName; });
+          if (mhIt && (mhIt.tags || []).indexOf('two_handed') !== -1) return;
+        }
         score = offHandScore(c);
         if (score < 0) return;
       } else {
