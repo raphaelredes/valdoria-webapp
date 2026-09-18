@@ -984,16 +984,18 @@
 
     // Stats consolidados
     var stats = cfg.player.stats || {};
-    if (stats.ca || stats.dano || stats.atq || stats.pv || stats.pm || stats.peso) {
+    if (stats.ca || stats.dano || stats.atq || stats.pv || stats.pm || stats.peso || stats.atq_mag || stats.cd_mag) {
       html += '<div class="vinv-loadout-stats">'
         +   '<div class="vinv-loadout-stats-title">Atributos do Equipamento</div>'
         +   '<div class="vinv-loadout-stats-grid">';
       if (stats.ca) html += _statRow('CA', stats.ca);
-      if (stats.dano) html += _statRow('DANO', stats.dano);
-      if (stats.atq) html += _statRow('ATQ', stats.atq);
       if (stats.pv) html += _statRow('PV', stats.pv);
       if (stats.pm) html += _statRow('PM', stats.pm);
+      if (stats.atq) html += _statRow('ATQ', stats.atq);
+      if (stats.dano) html += _statRow('DANO', stats.dano);
       if (stats.peso) html += _statRow('PESO', stats.peso);
+      if (stats.atq_mag) html += _statRow('ATQ MÁG', stats.atq_mag);
+      if (stats.cd_mag) html += _statRow('CD MAG', stats.cd_mag);
       html += '</div></div>';
     }
 

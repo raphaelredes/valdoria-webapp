@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T02:36:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T10:41:32Z - do not edit directly, edit source -->
 
 
 
@@ -15366,7 +15366,26 @@ window.__explFetchTO = function(url, opts, ms) {
            null e cai no fallback localStorage. */
         if (Array.isArray(res.inv)) {
           window.__EXPLORE_SERVER_INV = res.inv.map(function (it) {
-            return { name: it.i, quantity: it.q, icon: it.ico || '', value: it.v || 0 };
+            return {
+              name: it.i,
+              quantity: it.q,
+              icon: it.ico || '',
+              value: it.v || 0,
+              tags: it.t || [],
+              slot: it.s || '',
+              desc: it.desc || '',
+              dmg_die: it.dd || '',
+              dmg_type: it.dt || '',
+              ac_bonus: it.ac || 0,
+              bonus: it.b || 0,
+              spell_bonus: it.sb || 0,
+              spell_dc: it.sdc || 0,
+              mp_bonus: it.mb || 0,
+              heal_bonus: it.hlb || 0,
+              heal: it.heal || '',
+              weight: it.w || 0,
+              rarity: it.r || 'common',
+            };
           });
           console.info('[E-REM:API-INIT] server_inv=' + window.__EXPLORE_SERVER_INV.length);
         }
@@ -15378,6 +15397,13 @@ window.__explFetchTO = function(url, opts, ms) {
         if (typeof res.ac === 'number') {
           window.__EXPLORE_SERVER_AC = res.ac;
         }
+        window.__EXPLORE_SERVER_STATS = {
+          ac: res.ac,
+          spell_attack_bonus: res.spell_attack_bonus,
+          spell_save_dc: res.spell_save_dc,
+          attack_bonus: res.attack_bonus,
+          damage_die: res.damage_die,
+        };
         // #map-toast (2026-06-23): o servidor avisa quando ESTA chegada revelou um local NOVO →
         // notificação padrão (PADRAO_NOTIFICACOES) nomeando o local + que dá pra voltar pela viagem.
         // DEFER: o /init resolve DURANTE a tela de carregamento (5s) — firar já esconderia o toast
@@ -21631,7 +21657,8 @@ function initState() {
         lvl: lvl,
         background: setupChoices.background || 'folk_hero',
         alignment: setupChoices.alignment || 'NG',
-        name: setupChoices.name || (S && S.player && S.player.name) || (window.__EXPLORE_MODE === 'remote' ? 'Aventureiro' : randomFantasyName())
+        name: setupChoices.name || (S && S.player && S.player.name) || (window.__EXPLORE_MODE === 'remote' ? 'Aventureiro' : randomFantasyName()),
+        equipment: (window.__EXPLORE_SERVER_EQUIPPED && typeof window.__EXPLORE_SERVER_EQUIPPED === 'object') ? Object.assign({}, window.__EXPLORE_SERVER_EQUIPPED) : (typeof _vinvExpGetEquippedDict === 'function' ? _vinvExpGetEquippedDict() : {})
       };
     })(),
     grid: map.grid,
@@ -36062,6 +36089,11 @@ function _vinvExpAdaptItem(item) {
   var acBonus = (item.ac_bonus != null) ? item.ac_bonus : (item.ac != null ? item.ac : (db.ac != null ? db.ac : db.ac_bonus));
   var heal = item.heal || db.heal || '';
   var bonus = item.bonus || item.b || db.b || db.bonus || 0;
+  var spellBonus = (item.spell_bonus != null) ? item.spell_bonus : (item.sb != null ? item.sb : (db.sb != null ? db.sb : (db.spell_bonus || 0)));
+  var spellDc = (item.spell_dc != null) ? item.spell_dc : (item.sdc != null ? item.sdc : (db.sdc != null ? db.sdc : (db.spell_dc || 0)));
+  var mpBonus = (item.mp_bonus != null) ? item.mp_bonus : (item.mb != null ? item.mb : (db.mb != null ? db.mb : (db.mp_bonus || 0)));
+  var healBonus = (item.heal_bonus != null) ? item.heal_bonus : (item.hlb != null ? item.hlb : (db.hlb != null ? db.hlb : (db.heal_bonus || 0)));
+  var weight = (item.weight != null) ? item.weight : (item.w != null ? item.w : (db.w != null ? db.w : (db.weight || 0)));
   var rarity = item.rarity || item.r || db.r || db.rarity || 'common';
 
   return {
@@ -36078,6 +36110,11 @@ function _vinvExpAdaptItem(item) {
     ac_bonus: acBonus,
     heal: heal,
     bonus: bonus,
+    spell_bonus: spellBonus,
+    spell_dc: spellDc,
+    mp_bonus: mpBonus,
+    heal_bonus: healBonus,
+    weight: weight,
     iconId: 'ic-it-' + _vinvExpSlug(name),
   };
 }
@@ -36104,6 +36141,38 @@ function _expLocalStorageWithFallback(baseKey){
     return localStorage.getItem(baseKey);
   } catch(_e){ return null; }
 }
+function _vinvExpGetEquippedDict() {
+  var eq = {};
+  // 1. Fallback inicial: localStorage compartilhado (char_id ou global)
+  try {
+    var raw = _expLocalStorageWithFallback('valdoria_shared_equipped_v1');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        Object.keys(parsed).forEach(function (k) {
+          var norm = _vinvExpNormalizeSlot(k, parsed[k]);
+          if (parsed[k] && norm) eq[norm] = parsed[k];
+        });
+      }
+    }
+  } catch (_) {}
+  // 2. Estado em S.player.equipment se presente
+  if (window.S && window.S.player && window.S.player.equipment && typeof window.S.player.equipment === 'object') {
+    Object.keys(window.S.player.equipment).forEach(function (k) {
+      var norm = _vinvExpNormalizeSlot(k, window.S.player.equipment[k]);
+      if (window.S.player.equipment[k] && norm) eq[norm] = window.S.player.equipment[k];
+    });
+  }
+  // 3. Estado do servidor se presente
+  if (window.__EXPLORE_SERVER_EQUIPPED && typeof window.__EXPLORE_SERVER_EQUIPPED === 'object') {
+    Object.keys(window.__EXPLORE_SERVER_EQUIPPED).forEach(function (k) {
+      var norm = _vinvExpNormalizeSlot(k, window.__EXPLORE_SERVER_EQUIPPED[k]);
+      if (window.__EXPLORE_SERVER_EQUIPPED[k] && norm) eq[norm] = window.__EXPLORE_SERVER_EQUIPPED[k];
+    });
+  }
+  return eq;
+}
+
 function _vinvExpReadLoadout(allItems) {
   var loadout = {};
   var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet', boots: 'feet', offhand: 'off_hand', mainhand: 'main_hand' };
@@ -36149,24 +36218,8 @@ function _vinvExpReadLoadout(allItems) {
     });
   }
 
-  // 1. Tenta server-equipped primeiro se disponível
-  if (window.__EXPLORE_SERVER_EQUIPPED && typeof window.__EXPLORE_SERVER_EQUIPPED === 'object') {
-    _applyEquippedDict(window.__EXPLORE_SERVER_EQUIPPED);
-  }
-  // 1b. Tenta S.player.equipment se disponível
-  if (Object.keys(loadout).length === 0 && window.S && window.S.player && window.S.player.equipment) {
-    _applyEquippedDict(window.S.player.equipment);
-  }
-  // 2. Se vazio, fallback no localStorage da cidade / char ativo
-  if (Object.keys(loadout).length === 0) {
-    try {
-      var raw = _expLocalStorageWithFallback('valdoria_shared_equipped_v1');
-      if (raw) {
-        var equippedLocal = JSON.parse(raw);
-        _applyEquippedDict(equippedLocal);
-      }
-    } catch (_) { /* localStorage off / JSON inválido */ }
-  }
+  var eqDict = _vinvExpGetEquippedDict();
+  _applyEquippedDict(eqDict);
   return loadout;
 }
 function _vinvExpReadStats() {
@@ -36182,16 +36235,86 @@ function _vinvExpReadStats() {
   var curMp = (p && p.mp != null) ? p.mp : ((typeof S !== 'undefined' && S && S.mp != null) ? S.mp : (s.mp != null ? s.mp : 0));
   var maxMp = (p && p.mmp != null) ? p.mmp : ((typeof S !== 'undefined' && S && S.mmp != null) ? S.mmp : (s.max_mp != null ? s.max_mp : 0));
 
-  // CA: se não vier do server ou S.player.ac, calcula baseada em D&D 5e: 10 + dexMod
+  var srv = window.__EXPLORE_SERVER_STATS || {};
   var ac = (typeof window.__EXPLORE_SERVER_AC === 'number') ? window.__EXPLORE_SERVER_AC : ((p && typeof p.ac === 'number') ? p.ac : (s.ac != null ? s.ac : null));
   if (ac == null || ac === '—') {
     var dexMod = (p && p.mods && typeof p.mods.dex === 'number') ? p.mods.dex : 0;
     ac = 10 + dexMod;
   }
+
+  // D&D 5e: calcula bônus dinâmicos de equipamento
+  var eq = _vinvExpGetEquippedDict();
+  var spellBonus = 0;
+  var spellDcBonus = 0;
+  var mpBonus = 0;
+  var hpBonus = 0;
+  var weaponBonus = 0;
+  var weaponDie = '';
+  var weaponDmgType = '';
+
+  Object.keys(eq).forEach(function (slot) {
+    var itName = eq[slot];
+    if (!itName) return;
+    var itData = _vinvExpGetDbItem(itName) || {};
+    spellBonus += (itData.sb || itData.spell_bonus || 0);
+    spellDcBonus += (itData.sdc || itData.spell_dc || 0);
+    mpBonus += (itData.mb || itData.mp_bonus || 0);
+    hpBonus += (itData.hb || itData.hp_bonus || 0);
+    if (slot === 'main_hand') {
+      weaponBonus += (itData.b || itData.bonus || 0);
+      weaponDie = itData.dd || itData.dmg_die || '';
+      weaponDmgType = itData.dt || itData.dmg_type || '';
+    }
+  });
+
+  var cls = String((p && (p.hero_class || p.cls || p.class_name)) || (window.S && window.S.hero_class) || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  var isCaster = (cls === 'mago' || cls === 'bruxo' || cls === 'feiticeiro' || cls === 'clerigo' || cls === 'druida' || cls === 'bardo' || cls === 'paladino' || cls === 'patrulheiro');
+  var lvl = (p && p.lvl) || (p && p.level) || 3;
+  var prof = Math.floor((lvl - 1) / 4) + 2;
+
+  var castAttrMod = 0;
+  if (p && p.mods) {
+    if (cls === 'clerigo' || cls === 'druida' || cls === 'patrulheiro') castAttrMod = p.mods.wis || 0;
+    else if (cls === 'paladino' || cls === 'bardo' || cls === 'feiticeiro' || cls === 'bruxo') castAttrMod = p.mods.cha || 0;
+    else castAttrMod = p.mods.int || 0;
+  }
+
+  var atqMag = null;
+  var cdMag = null;
+  if (srv.spell_attack_bonus != null) {
+    atqMag = (srv.spell_attack_bonus >= 0 ? '+' : '') + srv.spell_attack_bonus;
+  } else if (isCaster) {
+    var totSpellAtk = prof + castAttrMod + spellBonus;
+    atqMag = (totSpellAtk >= 0 ? '+' : '') + totSpellAtk;
+  }
+
+  if (srv.spell_save_dc != null) {
+    cdMag = String(srv.spell_save_dc);
+  } else if (isCaster) {
+    cdMag = String(8 + prof + castAttrMod + spellDcBonus);
+  }
+
+  var atq = null;
+  var strMod = (p && p.mods && typeof p.mods.str === 'number') ? p.mods.str : 0;
+  var dexModVal = (p && p.mods && typeof p.mods.dex === 'number') ? p.mods.dex : 0;
+  if (srv.attack_bonus != null) {
+    atq = (srv.attack_bonus >= 0 ? '+' : '') + srv.attack_bonus;
+  } else if (weaponDie) {
+    var modVal = (dexModVal > strMod) ? dexModVal : strMod;
+    var totAtk = prof + modVal + weaponBonus;
+    atq = (totAtk >= 0 ? '+' : '') + totAtk;
+  }
+
+  var dano = srv.damage_die || weaponDie || null;
+
   return {
     ca: ac,
-    pv: curHp + ' / ' + maxHp,
-    pm: curMp + ' / ' + maxMp,
+    pv: curHp + ' / ' + (maxHp + (srv.max_hp ? 0 : hpBonus)),
+    pm: curMp + ' / ' + (maxMp + (srv.max_mp ? 0 : mpBonus)),
+    atq: atq,
+    dano: dano,
+    atq_mag: atqMag,
+    cd_mag: cdMag,
   };
 }
 
@@ -36201,8 +36324,10 @@ function _vinvExpNormalizeSlot(rawSlot, itemName) {
   if (s === 'amulet' || s === 'necklace') return 'necklace';
   if (s === 'ring1' || s === 'ring_1') return 'ring_1';
   if (s === 'ring2' || s === 'ring_2') return 'ring_2';
+  if (s === 'mainhand' || s === 'main_hand') return 'main_hand';
+  if (s === 'offhand' || s === 'off_hand') return 'off_hand';
   if (!s && itemName) {
-    var it = (typeof getItemData === 'function') ? getItemData(itemName) : null;
+    var it = (typeof _vinvExpGetDbItem === 'function') ? _vinvExpGetDbItem(itemName) : null;
     if (it && (it.s || it.slot)) return _vinvExpNormalizeSlot(it.s || it.slot, itemName);
   }
   return s || 'chest';
@@ -36211,15 +36336,8 @@ function _vinvExpNormalizeSlot(rawSlot, itemName) {
 function _vinvExpEquipItem(newItem, oldItem, slotKey) {
   if (!newItem || !newItem.name) return;
   var targetSlot = _vinvExpNormalizeSlot(slotKey || newItem.slot, newItem.name);
-  var curEq = Object.assign({}, (window.__EXPLORE_SERVER_EQUIPPED || (window.S && window.S.player && window.S.player.equipment) || {}));
+  var curEq = _vinvExpGetEquippedDict();
   curEq[targetSlot] = newItem.name;
-
-  if (targetSlot === 'feet') curEq['boots'] = newItem.name;
-  if (targetSlot === 'boots') curEq['feet'] = newItem.name;
-  if (targetSlot === 'necklace') curEq['amulet'] = newItem.name;
-  if (targetSlot === 'amulet') curEq['necklace'] = newItem.name;
-  if (targetSlot === 'ring_1') curEq['ring1'] = newItem.name;
-  if (targetSlot === 'ring_2') curEq['ring2'] = newItem.name;
 
   window.__EXPLORE_SERVER_EQUIPPED = curEq;
   if (window.S && window.S.player) window.S.player.equipment = curEq;
@@ -36237,6 +36355,7 @@ function _vinvExpEquipItem(newItem, oldItem, slotKey) {
         if (typeof res.ac === 'number') {
           window.__EXPLORE_SERVER_AC = res.ac;
         }
+        window.__EXPLORE_SERVER_STATS = res;
         if (res.equipment && typeof res.equipment === 'object') {
           window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
           if (window.S && window.S.player) window.S.player.equipment = res.equipment;
@@ -36245,6 +36364,11 @@ function _vinvExpEquipItem(newItem, oldItem, slotKey) {
           var rej = res.rejected[0];
           vToast('Não foi possível equipar ' + rej.item + ' (' + rej.reason + ').', 'warn');
         }
+        try {
+          if (window.vInventory && typeof vInventory.refresh === 'function') {
+            vInventory.refresh(_vinvExpBuildConfig().player);
+          }
+        } catch (_) {}
       }
     }).catch(function (err) {
       console.warn('[vInventory] equip remote error:', err);
@@ -36266,7 +36390,7 @@ function _vinvExpEquipItem(newItem, oldItem, slotKey) {
 
 function _vinvExpUnequipItem(item) {
   if (!item || !item.name) return;
-  var curEq = Object.assign({}, (window.__EXPLORE_SERVER_EQUIPPED || (window.S && window.S.player && window.S.player.equipment) || {}));
+  var curEq = _vinvExpGetEquippedDict();
   var foundKey = null;
   for (var k in curEq) {
     if (curEq[k] === item.name) {
@@ -36288,8 +36412,20 @@ function _vinvExpUnequipItem(item) {
 
   if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && typeof window.ExploracaoAPI.equip === 'function') {
     window.ExploracaoAPI.equip(curEq).then(function (res) {
-      if (res && res.ok && typeof res.ac === 'number') {
-        window.__EXPLORE_SERVER_AC = res.ac;
+      if (res && res.ok) {
+        if (typeof res.ac === 'number') {
+          window.__EXPLORE_SERVER_AC = res.ac;
+        }
+        window.__EXPLORE_SERVER_STATS = res;
+        if (res.equipment && typeof res.equipment === 'object') {
+          window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
+          if (window.S && window.S.player) window.S.player.equipment = res.equipment;
+        }
+        try {
+          if (window.vInventory && typeof vInventory.refresh === 'function') {
+            vInventory.refresh(_vinvExpBuildConfig().player);
+          }
+        } catch (_) {}
       }
     }).catch(function () {});
   }
@@ -36340,7 +36476,7 @@ function _vinvExpAutoEquipSmart() {
   var profShield = (cls === 'guerreiro' || cls === 'paladino' || cls === 'clerigo' || cls === 'druida' || cls === 'patrulheiro' || cls === 'barbaro');
   var profMartial = (cls === 'guerreiro' || cls === 'paladino' || cls === 'patrulheiro' || cls === 'barbaro');
 
-  var curEq = Object.assign({}, (window.__EXPLORE_SERVER_EQUIPPED || p.equipment || {}));
+  var curEq = _vinvExpGetEquippedDict();
   var inv = _readSharedInventory() || [];
   var pool = inv.filter(function (e) { return (e.quantity || 0) > 0; }).map(_vinvExpAdaptItem);
 
@@ -36404,7 +36540,7 @@ function _vinvExpAutoEquipSmart() {
 
   function offHandScore(it) {
     var tags = it.tags || [];
-    var isShield = tags.indexOf('shield') !== -1 || (it.ac_bonus || 0) > 0;
+    var isShield = tags.indexOf('shield') !== -1 || ((it.ac_bonus || 0) > 0 && tags.indexOf('focus') === -1 && tags.indexOf('spellbook') === -1);
     if (isShield) {
       if (!profShield || cls === 'monge') return -1;
       if (cls === 'druida' && tags.indexOf('metal') !== -1) return -1;
@@ -36421,8 +36557,15 @@ function _vinvExpAutoEquipSmart() {
       bardo: ['focus', 'instrument']
     }[cls] || [];
     var match = ft.some(function (tag) { return tags.indexOf(tag) !== -1; });
+    var n = (it.name || '').toLowerCase();
+    var isArcane = (cls === 'mago' || cls === 'feiticeiro' || cls === 'bruxo' || cls === 'bardo');
+    var isDivine = (cls === 'clerigo' || cls === 'paladino');
+    var isDruid = (cls === 'druida');
+    if (isArcane && (n.indexOf('grimor') !== -1 || n.indexOf('foco') !== -1 || n.indexOf('varinha') !== -1 || n.indexOf('orbe') !== -1)) match = true;
+    if (isDivine && (n.indexOf('simbol') !== -1 || n.indexOf('relicari') !== -1)) match = true;
+    if (isDruid && (n.indexOf('totem') !== -1 || n.indexOf('visco') !== -1)) match = true;
     if (!match) return -1;
-    return 10 + (it.spell_bonus || 0) * 4 + (it.spell_dc || 0) * 4 + (it.mp_bonus || 0) + (it.heal_bonus || 0) * 3;
+    return 10 + (it.spell_bonus || 0) * 5 + (it.spell_dc || 0) * 5 + (it.mp_bonus || 0) * 2 + (it.heal_bonus || 0) * 3 + (it.bonus || 0);
   }
 
   function bestItemForSlot(targetSlot, excludeName) {
@@ -36432,6 +36575,8 @@ function _vinvExpAutoEquipSmart() {
       if (targetSlot === 'ring_1' || targetSlot === 'ring_2') return s === 'ring' || s === 'ring1' || s === 'ring2' || s === 'ring_1' || s === 'ring_2';
       if (targetSlot === 'necklace') return s === 'amulet' || s === 'necklace';
       if (targetSlot === 'feet') return s === 'feet' || s === 'boots';
+      if (targetSlot === 'off_hand') return s === 'off_hand' || s === 'offhand' || s === 'shield';
+      if (targetSlot === 'main_hand') return s === 'main_hand' || s === 'mainhand' || s === 'weapon';
       return s === targetSlot;
     });
     if (!candidates.length) return null;
@@ -36494,8 +36639,20 @@ function _vinvExpAutoEquipSmart() {
 
   if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && typeof window.ExploracaoAPI.equip === 'function') {
     window.ExploracaoAPI.equip(curEq).then(function (res) {
-      if (res && res.ok && typeof res.ac === 'number') {
-        window.__EXPLORE_SERVER_AC = res.ac;
+      if (res && res.ok) {
+        if (typeof res.ac === 'number') {
+          window.__EXPLORE_SERVER_AC = res.ac;
+        }
+        window.__EXPLORE_SERVER_STATS = res;
+        if (res.equipment && typeof res.equipment === 'object') {
+          window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
+          if (window.S && window.S.player) window.S.player.equipment = res.equipment;
+        }
+        try {
+          if (window.vInventory && typeof vInventory.refresh === 'function') {
+            vInventory.refresh(_vinvExpBuildConfig().player);
+          }
+        } catch (_) {}
       }
     }).catch(function () {});
   }
