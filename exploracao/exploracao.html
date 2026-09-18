@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T14:34:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T14:48:59Z - do not edit directly, edit source -->
 
 
 
@@ -36089,8 +36089,10 @@ function _vinvExpAdaptItem(item) {
     var cat = _exploracaoItemCategory(item);
     tags = _vinvExpCategoryToTags(cat, name);
   }
+  var value = (item.value != null) ? item.value : (item.v != null ? item.v : (db.v != null ? db.v : (db.value || 0)));
+  var desc = item.desc || db.desc || '';
   var slot = item.slot || item.s || db.s || db.slot || '';
-  if (slot === 'chest' && (!tags || (!tags.includes('armor') && !tags.includes('light_armor') && !tags.includes('medium_armor') && !tags.includes('heavy_armor')))) {
+  if (slot === 'chest' && (!tags || (tags.indexOf('armor') === -1 && tags.indexOf('light_armor') === -1 && tags.indexOf('medium_armor') === -1 && tags.indexOf('heavy_armor') === -1))) {
     if (!tags || !tags.length || tags.indexOf('material') !== -1 || tags.indexOf('misc') !== -1) {
       tags = ['clothing'];
     }
