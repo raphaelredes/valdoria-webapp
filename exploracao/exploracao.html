@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T14:48:59Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T17:14:13Z - do not edit directly, edit source -->
 
 
 
@@ -15404,6 +15404,27 @@ window.__explFetchTO = function(url, opts, ms) {
           attack_bonus: res.attack_bonus,
           damage_die: res.damage_die,
         };
+        if (window.S) {
+          if (!window.S.player) window.S.player = {};
+          if (res.player) {
+            window.S.player.char_class = res.player.hero_class || res.player.char_class || window.S.player.char_class || '';
+            window.S.player.hero_class = window.S.player.char_class;
+            window.S.player.cls = window.S.player.char_class;
+            window.S.player.race = res.player.race || window.S.player.race || '';
+            window.S.player.subrace = res.player.subrace || window.S.player.subrace || '';
+            if (res.player.abilities) window.S.player.abilities = Object.assign(window.S.player.abilities || {}, res.player.abilities);
+            if (res.player.stats) window.S.player.stats = Object.assign(window.S.player.stats || {}, res.player.stats);
+          } else if (res.state) {
+            if (res.state.char_class) {
+              window.S.player.char_class = res.state.char_class;
+              window.S.player.hero_class = res.state.char_class;
+              window.S.player.cls = res.state.char_class;
+            }
+            if (res.state.abilities) {
+              window.S.player.abilities = Object.assign(window.S.player.abilities || {}, res.state.abilities);
+            }
+          }
+        }
         // #map-toast (2026-06-23): o servidor avisa quando ESTA chegada revelou um local NOVO →
         // notificação padrão (PADRAO_NOTIFICACOES) nomeando o local + que dá pra voltar pela viagem.
         // DEFER: o /init resolve DURANTE a tela de carregamento (5s) — firar já esconderia o toast
@@ -36051,9 +36072,33 @@ function _vinvExpCategoryToTags(cat, name) {
   if (n.indexOf('roupa') >= 0 || n.indexOf('veste') >= 0 || n.indexOf('vestimenta') >= 0 || n.indexOf('traje') >= 0 || n.indexOf('tunica') >= 0 || n.indexOf('túnica') >= 0) {
     return ['clothing'];
   }
+  if (n.indexOf('peitoral') >= 0 || n.indexOf('armadura') >= 0 || n.indexOf('cota') >= 0 || n.indexOf('couraça') >= 0 || n.indexOf('couraca') >= 0 || n.indexOf('brunea') >= 0) {
+    if (n.indexOf('malha') >= 0 || n.indexOf('placa') >= 0 || n.indexOf('tala') >= 0) {
+      return ['armor', 'heavy_armor', 'metal'];
+    }
+    if (n.indexOf('escama') >= 0 || n.indexOf('camisão') >= 0 || n.indexOf('camisao') >= 0) {
+      return ['armor', 'medium_armor', 'metal'];
+    }
+    if (n.indexOf('couro') >= 0 || n.indexOf('acolchoada') >= 0) {
+      return ['armor', 'light_armor', 'leather'];
+    }
+    return ['armor', 'medium_armor'];
+  }
+  if (n.indexOf('escudo') >= 0) {
+    return ['armor', 'shield'];
+  }
+  if (n.indexOf('elmo') >= 0) {
+    return ['armor', 'head'];
+  }
+  if (n.indexOf('botas') >= 0) {
+    return ['armor', 'feet'];
+  }
+  if (n.indexOf('luvas') >= 0) {
+    return ['armor', 'hands'];
+  }
   return ({
     'use':   ['consumable'],
-    'equip': ['weapon'],  // genérico — pode ser arma OU armadura
+    'equip': ['weapon'],
     'gem':   ['gem', 'valuable'],
     'rune':  ['magic'],
     'misc':  ['misc'],
@@ -36075,8 +36120,17 @@ function _vinvExpNormalizeName(item) {
 
 function _vinvExpGetDbItem(name) {
   if (!name) return null;
-  if (window.CANON_ITEMS_DB && window.CANON_ITEMS_DB[name]) return window.CANON_ITEMS_DB[name];
-  if (window.ITEMS_DB_GEN && window.ITEMS_DB_GEN[name]) return window.ITEMS_DB_GEN[name];
+  var db = window.CANON_ITEMS_DB || {};
+  if (db[name]) return db[name];
+  var gen = window.ITEMS_DB_GEN || {};
+  if (gen[name]) return gen[name];
+  var low = String(name).toLowerCase().trim();
+  for (var k in gen) {
+    if (k.toLowerCase() === low) return gen[k];
+  }
+  for (var k2 in db) {
+    if (k2.toLowerCase() === low) return db[k2];
+  }
   return null;
 }
 
@@ -36092,6 +36146,20 @@ function _vinvExpAdaptItem(item) {
   var value = (item.value != null) ? item.value : (item.v != null ? item.v : (db.v != null ? db.v : (db.value || 0)));
   var desc = item.desc || db.desc || '';
   var slot = item.slot || item.s || db.s || db.slot || '';
+  var lowName = String(name).toLowerCase();
+  // Se for armadura no peito, NUNCA pode carregar tag 'weapon'
+  if (lowName.indexOf('peitoral') >= 0 || lowName.indexOf('armadura') >= 0 || lowName.indexOf('cota') >= 0 || lowName.indexOf('couraça') >= 0 || lowName.indexOf('couraca') >= 0) {
+    slot = slot || 'chest';
+    if (!tags || tags.indexOf('weapon') !== -1 || (tags.indexOf('armor') === -1 && tags.indexOf('clothing') === -1)) {
+      if (lowName.indexOf('couro') >= 0 || lowName.indexOf('acolchoada') >= 0) {
+        tags = ['armor', 'light_armor', 'leather'];
+      } else if (lowName.indexOf('malha') >= 0 || lowName.indexOf('placa') >= 0 || lowName.indexOf('tala') >= 0) {
+        tags = ['armor', 'heavy_armor', 'metal'];
+      } else {
+        tags = ['armor', 'medium_armor'];
+      }
+    }
+  }
   if (slot === 'chest' && (!tags || (tags.indexOf('armor') === -1 && tags.indexOf('light_armor') === -1 && tags.indexOf('medium_armor') === -1 && tags.indexOf('heavy_armor') === -1))) {
     if (!tags || !tags.length || tags.indexOf('material') !== -1 || tags.indexOf('misc') !== -1) {
       tags = ['clothing'];
@@ -39031,6 +39099,14 @@ function _explSyncStateFromServer(state) {
     if (typeof state.xp === 'number' && S.player) S.player.xp = state.xp;
     if (typeof state.exhaustion === 'number' && S.player) S.player.exh = state.exhaustion;
     if (Array.isArray(state.conditions) && S.player) S.player.conditions = state.conditions.slice();
+    if (state.char_class && S.player) {
+      S.player.char_class = state.char_class;
+      S.player.hero_class = state.char_class;
+      S.player.cls = state.char_class;
+    }
+    if (state.abilities && S.player) {
+      S.player.abilities = Object.assign(S.player.abilities || {}, state.abilities);
+    }
     updateHud();
   } catch (e) { LOGE('API', 'vencounter_state_sync err=' + (e && e.message)); }
 }

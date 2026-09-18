@@ -1207,13 +1207,36 @@
     var hasMedium = hasHeavy || isMountainDwarf || (cls === 'clerigo' || cls === 'druida' || cls === 'patrulheiro' || cls === 'barbaro' || cls === 'cleric' || cls === 'druid' || cls === 'ranger' || cls === 'barbarian');
     var hasLight = hasMedium || (cls === 'bardo' || cls === 'ladino' || cls === 'bruxo' || cls === 'bard' || cls === 'rogue' || cls === 'warlock');
 
-    var itTags = (item && item.tags) || [];
+    var itTags = (item && item.tags) ? item.tags.slice() : [];
+    var iName = String((item && item.name) || '').toLowerCase();
+    // Fallback defensivo de identificação canônica de armaduras
+    if (iName.indexOf('peitoral de couro') >= 0 || iName.indexOf('armadura de couro') >= 0 || iName.indexOf('acolchoada') >= 0) {
+      if (itTags.indexOf('light_armor') === -1) itTags.push('light_armor');
+      if (itTags.indexOf('armor') === -1) itTags.push('armor');
+      if (itTags.indexOf('leather') === -1) itTags.push('leather');
+    } else if (iName.indexOf('cota de malha') >= 0 || iName.indexOf('armadura de placas') >= 0 || iName.indexOf('cota de talas') >= 0) {
+      if (itTags.indexOf('heavy_armor') === -1) itTags.push('heavy_armor');
+      if (itTags.indexOf('armor') === -1) itTags.push('armor');
+      if (itTags.indexOf('metal') === -1) itTags.push('metal');
+    } else if (iName.indexOf('peitoral') >= 0 || iName.indexOf('camisão') >= 0 || iName.indexOf('camisao') >= 0 || iName.indexOf('cota de escamas') >= 0 || iName.indexOf('brunea') >= 0) {
+      if (itTags.indexOf('medium_armor') === -1) itTags.push('medium_armor');
+      if (itTags.indexOf('armor') === -1) itTags.push('armor');
+      if (itTags.indexOf('metal') === -1) itTags.push('metal');
+    } else if (iName.indexOf('roupas comuns') >= 0 || iName.indexOf('veste') >= 0 || iName.indexOf('vestimenta') >= 0 || iName.indexOf('túnica') >= 0 || iName.indexOf('tunica') >= 0) {
+      if (itTags.indexOf('clothing') === -1) itTags.push('clothing');
+    }
+    // Remove tag 'weapon' espúria se estiver no peito
+    var wIdx = itTags.indexOf('weapon');
+    if (wIdx !== -1 && (slotKey === 'chest' || (item && item.slot === 'chest'))) {
+      itTags.splice(wIdx, 1);
+    }
+
     var isHeavyArmor = itTags.indexOf('heavy_armor') !== -1;
     var isMediumArmor = itTags.indexOf('medium_armor') !== -1;
     var isLightArmor = itTags.indexOf('light_armor') !== -1;
     var isShield = (slotKey === 'off_hand' || itTags.indexOf('shield') !== -1);
-    var isArmor = isHeavyArmor || isMediumArmor || isLightArmor;
-    var isClothing = (slotKey === 'chest' && !isArmor) || itTags.indexOf('clothing') !== -1;
+    var isArmor = isHeavyArmor || isMediumArmor || isLightArmor || itTags.indexOf('armor') !== -1;
+    var isClothing = (!isArmor && (slotKey === 'chest' || itTags.indexOf('clothing') !== -1));
     var isMetal = itTags.indexOf('metal') !== -1;
 
     var loadout = p.loadout || {};
@@ -1244,7 +1267,7 @@
           formula = (10 + cBonus) + ' + DES (máx +2)';
         } else {
           base = 10 + cBonus + dexMod;
-          formula = (10 + cBonus) + ' + DES';
+          formula = (10 + cBonus) + ' + DES (' + (dexMod >= 0 ? '+' : '') + dexMod + ')';
         }
       } else {
         if ((cls === 'monge' || cls === 'monk') && (!offIt || oBonus === 0)) {
@@ -1280,18 +1303,24 @@
     if (cls === 'monge' || cls === 'monk') {
       if (isArmor) {
         warnings.push({
+          title: 'Quebra Defesa sem Armadura',
           text: 'Quebra a Defesa sem Armadura de Monge (perde o bônus de Sabedoria na CA).',
+          techText: 'PERDA DE DEFESA SEM ARMADURA: CA não somará o modificador de Sabedoria.',
           shortText: '⚠️ Quebra Defesa sem Armadura',
           type: 'warn'
         });
         warnings.push({
+          title: 'Desativa Artes Marciais',
           text: 'Desativa Artes Marciais e Movimento sem Armadura de Monge (PHB p.78).',
+          techText: 'DESATIVA ARTES MARCIAIS: Golpes desarmados e agilidade mística desativados (PHB p.78).',
           shortText: '⚠️ Desativa Artes Marciais',
           type: 'warn'
         });
       } else if (isShield) {
         warnings.push({
+          title: 'Desativa Artes Marciais',
           text: 'Escudos desativam a Defesa sem Armadura e Artes Marciais de Monge.',
+          techText: 'DESATIVA ARTES MARCIAIS: Empunhar escudo desativa benefícios de Monge.',
           shortText: '⚠️ Desativa Habilidades de Monge',
           type: 'warn'
         });
@@ -1299,14 +1328,18 @@
     } else if (cls === 'barbaro' || cls === 'barbarian') {
       if (isArmor && deltaAc < 0) {
         warnings.push({
+          title: 'Quebra Defesa sem Armadura',
           text: 'Quebra a Defesa sem Armadura de Bárbaro, reduzindo sua CA em ' + Math.abs(deltaAc) + ' pontos.',
+          techText: 'PERDA DE DEFESA SEM ARMADURA: Perda líquida de ' + Math.abs(deltaAc) + ' CA ao vestir armadura.',
           shortText: '⚠️ Quebra Defesa sem Armadura (-' + Math.abs(deltaAc) + ' CA)',
           type: 'warn'
         });
       }
       if (isHeavyArmor) {
         warnings.push({
+          title: 'Desativa Fúria de Bárbaro',
           text: 'Armaduras pesadas desativam os benefícios da Fúria de Bárbaro (PHB p.48).',
+          techText: 'DESATIVA FÚRIA: Bônus de dano de fúria e resistências a dano desativados (PHB p.48).',
           shortText: '⚠️ Desativa Bônus de Fúria',
           type: 'warn'
         });
@@ -1314,12 +1347,16 @@
     } else if (cls === 'mago' || cls === 'wizard' || cls === 'feiticeiro' || cls === 'sorcerer') {
       if (isArmor && !hasLight) {
         warnings.push({
-          text: 'Sem proficiência em armaduras: Você NÃO poderá conjurar magias (PHB p.144)!',
+          title: 'Bloqueio Total de Magias',
+          text: 'Sem proficiência em armaduras: Você NÃO poderá conjurar nenhuma magia enquanto vesti-la (PHB p.144)!',
+          techText: 'BLOQUEIO TOTAL DE MAGIAS: Impossível conjurar qualquer feitiço, truque ou ritual enquanto vestir armadura sem proficiência (PHB p.144).',
           shortText: '❌ Bloqueia Conjuração de Magias',
           type: 'danger'
         });
         warnings.push({
-          text: 'Desvantagem em qualquer teste ou ataque envolvendo Força ou Destreza.',
+          title: 'Desvantagem em Força e Destreza',
+          text: 'Desvantagem em qualquer teste de atributo, salvaguarda ou ataque envolvendo Força ou Destreza (PHB p.144).',
+          techText: 'DESVANTAGEM: Todas as jogadas e testes de Força e Destreza sofrem Desvantagem contínua (PHB p.144).',
           shortText: '❌ Desvantagem em FOR e DES',
           type: 'danger'
         });
@@ -1327,7 +1364,9 @@
     } else if (cls === 'druida' || cls === 'druid') {
       if (isMetal && (isArmor || isShield)) {
         warnings.push({
+          title: 'Tabu Sagrado de Druida',
           text: 'Druidas têm tabu sagrado e não vestem armaduras nem usam escudos de metal (PHB p.65).',
+          techText: 'TABU SAGRADO: Druidas recusam usar armaduras ou escudos metálicos (PHB p.65).',
           shortText: '❌ Druida: Proibido Metal',
           type: 'danger'
         });
@@ -1336,7 +1375,9 @@
 
     if (isHeavyArmor && strScore < 13 && !isMountainDwarf && race !== 'anao' && race !== 'dwarf') {
       warnings.push({
+        title: 'Penalidade de Deslocamento',
         text: 'Força insuficiente (< 13): reduz sua velocidade de deslocamento em 3 metros (PHB p.144).',
+        techText: 'PENALIDADE DE VELOCIDADE: Redução de 3 metros no deslocamento (PHB p.144).',
         shortText: '⚠️ Força Baixa (-3m)',
         type: 'warn'
       });
@@ -1397,6 +1438,15 @@
       // 2026-09-18: Exibe explicitamente a CA proporcionada ao usar vestimenta / sem armadura (D&D 5e)
       var acVal = dndInfo.projectedAc || dndInfo.currentAc || 10;
       statsHtml += _detailStat('CA Resultante', acVal + ' (' + (dndInfo.formulaLabel || 'Defesa sem Armadura') + ')', 'bonus');
+    } else if (dndInfo && dndInfo.isArmor && (it.slot === 'chest' || slotKey === 'chest')) {
+      var acTypeSuffix = dndInfo.armorTypeLabel ? ' (' + dndInfo.armorTypeLabel + ')' : '';
+      var acVal = it.equipped ? dndInfo.currentAc : dndInfo.projectedAc;
+      if (it.ac_bonus != null) {
+        statsHtml += _detailStat('Bônus Base', '+' + it.ac_bonus + acTypeSuffix);
+      }
+      if (acVal != null) {
+        statsHtml += _detailStat('CA Resultante', acVal + (dndInfo.formulaLabel ? ' (' + dndInfo.formulaLabel + ')' : ''), 'bonus');
+      }
     } else if (it.ac_bonus) {
       var acTypeSuffix = (dndInfo && dndInfo.armorTypeLabel) ? ' (' + dndInfo.armorTypeLabel + ')' : '';
       statsHtml += _detailStat('CA', '+' + it.ac_bonus + acTypeSuffix);
@@ -1413,11 +1463,19 @@
 
     var tagsHtml = '';
     if (it.tags && it.tags.length) {
-      tagsHtml = '<div class="vinv-detail-tags">'
-        + it.tags.slice(0, 8).map(function (t) {
-            return '<span class="vinv-dtag">' + _esc(_tagLabel(t)) + '</span>';
-          }).join('')
-        + '</div>';
+      var displayTags = it.tags.filter(function (t) {
+        if (((dndInfo && dndInfo.isArmor) || it.slot === 'chest' || slotKey === 'chest') && t === 'weapon') {
+          return false;
+        }
+        return true;
+      });
+      if (displayTags.length) {
+        tagsHtml = '<div class="vinv-detail-tags">'
+          + displayTags.slice(0, 8).map(function (t) {
+              return '<span class="vinv-dtag">' + _esc(_tagLabel(t)) + '</span>';
+            }).join('')
+          + '</div>';
+      }
     }
 
     var dndNoticeHtml = '';
@@ -1430,10 +1488,17 @@
         + '</div>'
         + '</div>';
     } else if (dndInfo && dndInfo.warnings && dndInfo.warnings.length) {
-      dndNoticeHtml = '<div class="vinv-dnd-notice warn">'
-        + '<div class="vinv-dnd-notice-title">⚠️ Penalidades D&D 5e para sua classe:</div>'
+      var hasDanger = dndInfo.warnings.some(function (w) { return w.type === 'danger'; });
+      dndNoticeHtml = '<div class="vinv-dnd-notice' + (hasDanger ? ' danger' : ' warn') + '">'
+        + '<div class="vinv-dnd-notice-title">⚠️ ' + (hasDanger ? 'Penalidades Graves' : 'Penalidades') + ' D&D 5e para sua classe:</div>'
         + '<ul class="vinv-dnd-notice-list">'
-        +   dndInfo.warnings.map(function (w) { return '<li>' + _esc(w.text) + '</li>'; }).join('')
+        +   dndInfo.warnings.map(function (w) {
+              var wHtml = _esc(w.text);
+              if (w.techText) {
+                wHtml += '<br><span class="vinv-warn-tech">⚠️ ' + _esc(w.techText) + '</span>';
+              }
+              return '<li>' + wHtml + '</li>';
+            }).join('')
         + '</ul>'
         + '</div>';
     }
@@ -1581,7 +1646,22 @@
     }
     var cfg = _state.config;
     var iconId = _resolveItemIcon(newItem);
-    var title = currentItem ? 'Confirmar Troca' : 'Confirmar Equipamento';
+
+    var dndEval = (slotKey === 'chest' || slotKey === 'off_hand' || newItem.slot === 'chest' || newItem.slot === 'off_hand')
+      ? _evaluateItemDnd(newItem, slotKey || newItem.slot, cfg, currentItem)
+      : null;
+
+    var isDetrimental = false;
+    var hasDanger = false;
+    if (dndEval && (dndEval.deltaAc < 0 || (dndEval.warnings && dndEval.warnings.length > 0))) {
+      isDetrimental = true;
+      hasDanger = dndEval.warnings && dndEval.warnings.some(function (w) { return w.type === 'danger'; });
+    }
+
+    var title = currentItem
+      ? (isDetrimental ? '⚠️ Atenção: Troca Prejudicial' : 'Confirmar Troca')
+      : (isDetrimental ? '⚠️ Atenção: Item Prejudicial' : 'Confirmar Equipamento');
+
     var msg = currentItem
       ? ('Deseja substituir <strong>' + _esc(currentItem.name) + '</strong> por <strong>' + _esc(newItem.name) + '</strong>?')
       : ('Deseja equipar <strong>' + _esc(newItem.name) + '</strong>?');
@@ -1590,24 +1670,35 @@
       subHtml = '<div class="vinv-confirm-sub">' + _esc(newItem.desc.slice(0, 95)) + '</div>';
     }
 
-    var dndEval = (slotKey === 'chest' || slotKey === 'off_hand' || newItem.slot === 'chest' || newItem.slot === 'off_hand')
-      ? _evaluateItemDnd(newItem, slotKey || newItem.slot, cfg, currentItem)
-      : null;
     var warnBox = '';
-    var isDetrimental = false;
-    if (dndEval && (dndEval.deltaAc < 0 || (dndEval.warnings && dndEval.warnings.length > 0))) {
-      isDetrimental = true;
+    if (isDetrimental && dndEval) {
       var wList = [];
       if (dndEval.deltaAc < 0) {
-        wList.push('Sua CA cairá de <strong>' + dndEval.currentAc + '</strong> para <strong>' + dndEval.projectedAc + '</strong> (' + dndEval.deltaAc + ' CA).');
+        wList.push({
+          title: 'Queda na Classe de Armadura',
+          text: 'Sua CA cairá de <strong>' + dndEval.currentAc + '</strong> para <strong>' + dndEval.projectedAc + '</strong> (' + dndEval.deltaAc + ' CA).',
+          techText: 'REDUÇÃO DEFENSIVA: Perda de ' + Math.abs(dndEval.deltaAc) + ' pontos de CA ao equipar este item.'
+        });
       }
       if (dndEval.warnings && dndEval.warnings.length) {
-        dndEval.warnings.forEach(function (w) { wList.push(w.text); });
+        dndEval.warnings.forEach(function (w) {
+          wList.push(w);
+        });
       }
-      warnBox = '<div class="vinv-confirm-warn">'
-        + '<div class="vinv-confirm-warn-title">⚠️ Atenção — Regras D&D 5e (' + _esc(dndEval.className || 'sua classe') + '):</div>'
+      warnBox = '<div class="vinv-confirm-warn' + (hasDanger ? ' danger' : '') + '">'
+        + '<div class="vinv-confirm-warn-title">⚠️ ' + (hasDanger ? 'Penalidades Graves' : 'Atenção') + ' — Regras D&D 5e (' + _esc(dndEval.className || 'sua classe') + '):</div>'
         + '<ul class="vinv-confirm-warn-list">'
-        +   wList.map(function (txt) { return '<li>' + txt + '</li>'; }).join('')
+        +   wList.map(function (w) {
+              var h = '';
+              if (w.title) {
+                h += '<div class="vinv-warn-tech-title"><strong>' + _esc(w.title) + '</strong></div>';
+              }
+              h += '<div class="vinv-confirm-warn-sub">' + (w.text || '') + '</div>';
+              if (w.techText) {
+                h += '<div class="vinv-warn-tech">⚠️ ' + _esc(w.techText) + '</div>';
+              }
+              return '<li>' + h + '</li>';
+            }).join('')
         + '</ul>'
         + '</div>';
     }
@@ -1616,7 +1707,7 @@
     var btnCls = isDetrimental ? 'vinv-btn warn-danger' : 'vinv-btn primary';
 
     card.innerHTML = ''
-      + '<div class="vinv-confirm-title">' + title + '</div>'
+      + '<div class="vinv-confirm-title' + (isDetrimental ? ' danger' : '') + '">' + title + '</div>'
       + '<div class="vinv-confirm-icon">' + _iconSrc(iconId, newItem.name) + '</div>'
       + '<div class="vinv-confirm-msg">' + msg + '</div>'
       + subHtml
