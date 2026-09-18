@@ -925,24 +925,17 @@
        (cidade) implementa a inteligência D&D (proficiências por classe,
        Unarmored Defense, finesse, foco de conjurador) em cfg.onAutoEquip e faz
        o refresh com o player atualizado. Só aparece quando o callback existe. */
-    var autoHtml = '';
-    if (typeof cfg.onAutoEquip === 'function') {
-      autoHtml = '<button type="button" class="vinv-btn primary vinv-autoequip" '
-        + 'data-action="auto-equip" style="width:100%;margin:0 0 8px;">'
-        + '⚔ Auto-Equipar (melhor conjunto)</button>';
-    }
-    // 2026-06-12 (user): paper-doll medieval com TODOS os slots vestíveis do
-    // ITEMS_DB, centralizado como uma silhueta — Cabeça no topo-CENTRO e Botas no
-    // rodapé-CENTRO (coluna do meio, junto de amuleto/peito/cinto); acessórios e
-    // armas nas laterais. Os `spacer` ocupam as células laterais da 1ª linha pra
-    // manter a Cabeça centrada. Grid 3-col (.vinv-loadout-avatar).
-    //   [   ] Cabeça [   ]
-    //   Ombros Amuleto Capa
-    //   MãoDir Peito  MãoEsq
-    //   Mãos   Cinto  Pernas
-    //   AnelI  Botas  AnelII
+    /* 2026-06-12 / 2026-09-17: paper-doll medieval com TODOS os slots vestíveis do
+       ITEMS_DB, centralizado como uma silhueta.
+       Ao lado do slot Cabeça (topo-direita), opção AUTO-EQUIPAR inteligente (D&D 5e).
+       Grid 3-col (.vinv-loadout-avatar):
+         [   ] Cabeça [⚡Auto]
+         Ombros Amuleto Capa
+         MãoDir Peito  MãoEsq
+         Mãos   Cinto  Pernas
+         AnelI  Botas  AnelII */
     var slotDef = [
-      { spacer: true }, { key: 'head', label: 'Cabeça' }, { spacer: true },
+      { spacer: true }, { key: 'head', label: 'Cabeça' }, { autoEquip: true },
       { key: 'shoulders', label: 'Ombros' },
       { key: 'amulet',    label: 'Amuleto' },
       { key: 'cloak',     label: 'Capa' },
@@ -956,8 +949,20 @@
       { key: 'feet',      label: 'Botas' },
       { key: 'ring2',     label: 'Anel II' },
     ];
-    var html = autoHtml + '<div class="vinv-loadout-avatar">';
+    var html = '<div class="vinv-loadout-avatar">';
     slotDef.forEach(function (s) {
+      if (s.autoEquip) {
+        if (typeof cfg.onAutoEquip === 'function') {
+          html += '<button type="button" class="vinv-slot-autoequip" data-action="auto-equip" '
+            + 'title="Auto-Equipar: escolhe as melhores opções de acordo com raça e classe, evitando penalidades">'
+            +   '<span class="vinv-autoequip-icon">⚡</span>'
+            +   '<span class="vinv-autoequip-label">Auto</span>'
+            + '</button>';
+        } else {
+          html += '<div class="vinv-slot-spacer" aria-hidden="true"></div>';
+        }
+        return;
+      }
       // célula invisível (mantém Cabeça/Botas centradas na coluna do meio)
       if (s.spacer) { html += '<div class="vinv-slot-spacer" aria-hidden="true"></div>'; return; }
       var it = loadout[s.key];
@@ -1198,6 +1203,10 @@
       statsHtml += _detailStat('Dano', dLabel);
     }
     if (it.ac_bonus) statsHtml += _detailStat('CA', '+' + it.ac_bonus);
+    if (it.spell_bonus) statsHtml += _detailStat('Ataque Mágico', '+' + it.spell_bonus, 'bonus');
+    if (it.spell_dc) statsHtml += _detailStat('CD de Magia', '+' + it.spell_dc, 'bonus');
+    if (it.mp_bonus) statsHtml += _detailStat('Bônus de PM', '+' + it.mp_bonus + ' PM', 'bonus');
+    if (it.heal_bonus) statsHtml += _detailStat('Cura Divina', '+' + it.heal_bonus + ' PV', 'bonus');
     if (it.heal) statsHtml += _detailStat('Cura', it.heal + ' PV');
     if (it.bonus) statsHtml += _detailStat('Ataque', '+' + it.bonus);
     if (it.weight) statsHtml += _detailStat('Peso', it.weight + ' kg');
@@ -1207,7 +1216,7 @@
     var tagsHtml = '';
     if (it.tags && it.tags.length) {
       tagsHtml = '<div class="vinv-detail-tags">'
-        + it.tags.slice(0, 6).map(function (t) {
+        + it.tags.slice(0, 8).map(function (t) {
             return '<span class="vinv-dtag">' + _esc(_tagLabel(t)) + '</span>';
           }).join('')
         + '</div>';
@@ -1252,20 +1261,22 @@
     }
     card.innerHTML = ''
       + '<div class="vinv-detail-close" data-action="close-detail">' + _uiIcon('close', 13) + '</div>'
-      + '<div class="vinv-detail-header">'
-      +   '<div class="' + _portraitCls + '"' + _portraitAttr + '>' + _detailIcon + '</div>'
-      +   '<div class="vinv-detail-name">' + _esc(it.name) + '</div>'
-      +   '<div class="vinv-detail-rarity ' + rarity + '">' + rarityLabel + '</div>'
-      +   (it.equipped ? '<div style="margin-top:6px"><span class="vinv-cost-badge action" style="background:rgba(196,149,58,0.2);color:var(--vinv-gold);border:1px solid var(--vinv-gold)">EQUIPADO</span></div>' : '')
-      + '</div>'
-      + (statsHtml
+      + '<div class="vinv-detail-body">'
+      +   '<div class="vinv-detail-header">'
+      +     '<div class="' + _portraitCls + '"' + _portraitAttr + '>' + _detailIcon + '</div>'
+      +     '<div class="vinv-detail-name">' + _esc(it.name) + '</div>'
+      +     '<div class="vinv-detail-rarity ' + rarity + '">' + rarityLabel + '</div>'
+      +     (it.equipped ? '<div style="margin-top:6px"><span class="vinv-cost-badge action" style="background:rgba(196,149,58,0.2);color:var(--vinv-gold);border:1px solid var(--vinv-gold)">EQUIPADO</span></div>' : '')
+      +   '</div>'
+      +   (statsHtml
         ? '<div class="vinv-detail-stats">' + statsHtml + '</div>'
         : '')
-      + (it.desc
+      +   (it.desc
         ? '<div class="vinv-detail-desc"><div class="vinv-detail-desc-text">' + _esc(it.desc) + '</div></div>'
-        : '<div class="vinv-detail-desc" style="flex:0 0 auto;min-height:0;padding:0"></div>')
-      + tagsHtml
-      + swapHtml
+        : '')
+      +   tagsHtml
+      +   swapHtml
+      + '</div>'
       + actions;
 
     ov.classList.add('active');

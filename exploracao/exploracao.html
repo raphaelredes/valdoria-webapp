@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T01:36:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T02:36:28Z - do not edit directly, edit source -->
 
 
 
@@ -36303,6 +36303,217 @@ function _vinvExpUnequipItem(item) {
   } catch (_) {}
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   AUTO-EQUIPAR INTELIGENTE EM EXPLORAÇÃO (D&D 5e)
+   Avalia inventário e seleciona a melhor combinação para classe, raça,
+   sub-raça e atributos, evitando penalidades:
+   - Proficiência de Armadura por classe e raça
+   - Força Mínima para Armaduras Pesadas (anões imunes à perda de velocidade)
+   - Defesa sem Armadura (Monge e Bárbaro)
+   - Restrição de metal para Druidas
+   - Armas simples vs marciais, finesse/ranged se DES > FOR
+   - Focos arcanos / grimórios para conjuradores
+   ════════════════════════════════════════════════════════════════════════ */
+function _vinvExpAutoEquipSmart() {
+  var p = (window.S && window.S.player) || {};
+  var cls = String(p.hero_class || p.class_name || (window.S && window.S.hero_class) || 'guerreiro')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  var race = String(p.race || p.race_name || 'humano')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  var subrace = String(p.subrace || p.sub_race || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  var stats = p.stats || (window.S && window.S.stats) || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
+
+  var strMod = Math.floor(((stats.str || 10) - 10) / 2);
+  var dexMod = Math.floor(((stats.dex || 10) - 10) / 2);
+  var conMod = Math.floor(((stats.con || 10) - 10) / 2);
+  var wisMod = Math.floor(((stats.wis || 10) - 10) / 2);
+
+  var isDwarf = (race.indexOf('ana') !== -1 || race.indexOf('dwarf') !== -1);
+  var isElf = (race.indexOf('elf') !== -1);
+  var isMountainDwarf = isDwarf && (subrace.indexOf('mountain') !== -1 || subrace.indexOf('montanha') !== -1);
+
+  // Proficiências de Armadura D&D 5e
+  var profHeavy = (cls === 'guerreiro' || cls === 'paladino');
+  var profMedium = profHeavy || (cls === 'clerigo' || cls === 'druida' || cls === 'patrulheiro' || cls === 'barbaro' || isMountainDwarf);
+  var profLight = profMedium || (cls === 'bardo' || cls === 'ladino' || cls === 'bruxo');
+  var profShield = (cls === 'guerreiro' || cls === 'paladino' || cls === 'clerigo' || cls === 'druida' || cls === 'patrulheiro' || cls === 'barbaro');
+  var profMartial = (cls === 'guerreiro' || cls === 'paladino' || cls === 'patrulheiro' || cls === 'barbaro');
+
+  var curEq = Object.assign({}, (window.__EXPLORE_SERVER_EQUIPPED || p.equipment || {}));
+  var inv = _readSharedInventory() || [];
+  var pool = inv.filter(function (e) { return (e.quantity || 0) > 0; }).map(_vinvExpAdaptItem);
+
+  // Adiciona itens atualmente equipados no pool se não estiverem nele
+  Object.keys(curEq).forEach(function (slot) {
+    var name = curEq[slot];
+    if (name && !pool.some(function (it) { return it.name === name; })) {
+      pool.push(_vinvExpAdaptItem({ name: name, quantity: 1, slot: slot }));
+    }
+  });
+
+  function canWearArmor(it) {
+    var tags = it.tags || [];
+    if (cls === 'druida' && tags.indexOf('metal') !== -1) return false;
+    if (tags.indexOf('heavy_armor') !== -1) {
+      if (!profHeavy) return false;
+      // Checagem de Força mínima D&D 5e (Cota de Malha exige 13, Placas exige 15)
+      var n = it.name.toLowerCase();
+      var minStr = 0;
+      if (n.indexOf('malha') !== -1) minStr = 13;
+      else if (n.indexOf('placa') !== -1 || n.indexOf('tala') !== -1) minStr = 15;
+      if (!isDwarf && (stats.str || 10) < minStr) return false; // Evita penalidade de -3m de velocidade!
+      return true;
+    }
+    if (tags.indexOf('medium_armor') !== -1) return profMedium;
+    if (tags.indexOf('light_armor') !== -1) return profLight;
+    return true; // Roupas normais
+  }
+
+  function canUseWeapon(it) {
+    var tags = it.tags || [];
+    var martial = tags.indexOf('martial_weapon') !== -1 || tags.indexOf('martial') !== -1;
+    if (!martial) return true;
+    if (profMartial) return true;
+    var n = it.name.toLowerCase();
+    if (isElf && (n.indexOf('espada') !== -1 || n.indexOf('arco') !== -1)) return true;
+    if ((cls === 'ladino' || cls === 'bardo') && (n.indexOf('rapieira') !== -1 || n.indexOf('curta') !== -1 || n.indexOf('longa') !== -1 || n.indexOf('adaga') !== -1)) return true;
+    return false;
+  }
+
+  function weaponScore(it) {
+    var tags = it.tags || [];
+    var isFinesse = tags.indexOf('finesse') !== -1;
+    var isRanged = tags.indexOf('ranged') !== -1;
+    var useDex = isRanged || (isFinesse && dexMod > strMod);
+    var mod = useDex ? dexMod : strMod;
+    var avgDie = 3.5;
+    var m = String(it.dmg_die || '').match(/^(\d+)d(\d+)/);
+    if (m) avgDie = (parseInt(m[1], 10) * (parseInt(m[2], 10) + 1)) / 2;
+    return avgDie + mod + (it.bonus || 0) + (it.value || 0) / 1000;
+  }
+
+  function armorScore(it) {
+    var tags = it.tags || [];
+    var baseAc = it.ac_bonus || 0;
+    if (tags.indexOf('heavy_armor') !== -1) return baseAc;
+    if (tags.indexOf('medium_armor') !== -1) return baseAc + Math.min(2, dexMod);
+    if (tags.indexOf('light_armor') !== -1) return baseAc + dexMod;
+    return baseAc + dexMod;
+  }
+
+  function offHandScore(it) {
+    var tags = it.tags || [];
+    var isShield = tags.indexOf('shield') !== -1 || (it.ac_bonus || 0) > 0;
+    if (isShield) {
+      if (!profShield || cls === 'monge') return -1;
+      if (cls === 'druida' && tags.indexOf('metal') !== -1) return -1;
+      return (it.ac_bonus || 2) * 5;
+    }
+    // Focos arcanos / grimório / símbolos sagrados
+    var ft = {
+      mago: ['spellbook', 'arcane_focus', 'arcane', 'focus'],
+      feiticeiro: ['arcane_focus', 'arcane', 'focus'],
+      bruxo: ['arcane_focus', 'arcane', 'focus'],
+      clerigo: ['holy_symbol', 'focus'],
+      paladino: ['holy_symbol', 'focus'],
+      druida: ['druidic_focus', 'focus'],
+      bardo: ['focus', 'instrument']
+    }[cls] || [];
+    var match = ft.some(function (tag) { return tags.indexOf(tag) !== -1; });
+    if (!match) return -1;
+    return 10 + (it.spell_bonus || 0) * 4 + (it.spell_dc || 0) * 4 + (it.mp_bonus || 0) + (it.heal_bonus || 0) * 3;
+  }
+
+  function bestItemForSlot(targetSlot, excludeName) {
+    var candidates = pool.filter(function (it) {
+      if (excludeName && it.name === excludeName) return false;
+      var s = it.slot;
+      if (targetSlot === 'ring_1' || targetSlot === 'ring_2') return s === 'ring' || s === 'ring1' || s === 'ring2' || s === 'ring_1' || s === 'ring_2';
+      if (targetSlot === 'necklace') return s === 'amulet' || s === 'necklace';
+      if (targetSlot === 'feet') return s === 'feet' || s === 'boots';
+      return s === targetSlot;
+    });
+    if (!candidates.length) return null;
+
+    var best = null;
+    var bestScore = -999;
+    candidates.forEach(function (c) {
+      var score = 0;
+      if (targetSlot === 'main_hand') {
+        if (!canUseWeapon(c)) return;
+        score = weaponScore(c);
+      } else if (targetSlot === 'chest') {
+        if (cls === 'monge') return; // Monge nunca usa armadura (Unarmored Defense)
+        if (!canWearArmor(c)) return;
+        var armAc = armorScore(c);
+        if (cls === 'barbaro') {
+          var unarmoredAc = 10 + dexMod + conMod;
+          if (armAc <= unarmoredAc) return; // Bárbaro só usa armadura se der mais CA que Unarmored Defense!
+        }
+        score = armAc * 4 + (c.bonus || 0);
+      } else if (targetSlot === 'off_hand') {
+        score = offHandScore(c);
+        if (score < 0) return;
+      } else {
+        score = (c.ac_bonus || 0) * 4 + (c.bonus || 0) * 2 + (c.heal || 0) + (c.value || 0) / 1000;
+        if (score <= 0 && !c.ac_bonus && !c.bonus) score = 0.5;
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        best = c;
+      }
+    });
+    return best;
+  }
+
+  var slotsToEquip = ['main_hand', 'chest', 'off_hand', 'head', 'necklace', 'cloak', 'feet', 'ring_1', 'ring_2'];
+  var changes = [];
+  var ring1Item = null;
+
+  slotsToEquip.forEach(function (slotKey) {
+    var pick = bestItemForSlot(slotKey, (slotKey === 'ring_2' && ring1Item) ? ring1Item.name : null);
+    if (slotKey === 'ring_1') ring1Item = pick;
+    if (!pick) return;
+    var currentName = curEq[slotKey];
+    if (currentName === pick.name) return;
+    curEq[slotKey] = pick.name;
+    changes.push(pick.name);
+  });
+
+  // Salva e sincroniza
+  window.__EXPLORE_SERVER_EQUIPPED = curEq;
+  if (window.S && window.S.player) window.S.player.equipment = curEq;
+
+  try {
+    var cid = (window.S && window.S.player && window.S.player.char_id) || 'default';
+    var raw = JSON.stringify(curEq);
+    localStorage.setItem('valdoria_shared_equipped_v1_' + cid, raw);
+    localStorage.setItem('valdoria_shared_equipped_v1', raw);
+  } catch (_) {}
+
+  if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && typeof window.ExploracaoAPI.equip === 'function') {
+    window.ExploracaoAPI.equip(curEq).then(function (res) {
+      if (res && res.ok && typeof res.ac === 'number') {
+        window.__EXPLORE_SERVER_AC = res.ac;
+      }
+    }).catch(function () {});
+  }
+
+  if (typeof vToast === 'function') {
+    vToast(changes.length
+      ? '⚡ Auto-equipado: ' + changes.length + ' item(ns) otimizado(s)!'
+      : '✓ Você já está com o melhor conjunto para sua classe e raça.', 'ok');
+  }
+
+  try { if (typeof updateHud === 'function') updateHud(); } catch (_) {}
+  try {
+    if (window.vInventory && typeof vInventory.refresh === 'function') {
+      vInventory.refresh(_vinvExpBuildConfig().player);
+    }
+  } catch (_) {}
+}
+
 function _vinvExpBuildConfig() {
   var inv = _readSharedInventory();
   var items = (inv || [])
@@ -36322,6 +36533,9 @@ function _vinvExpBuildConfig() {
     showSearch: true,
     showSort: true,
     inCombat: false,
+    onAutoEquip: function () {
+      _vinvExpAutoEquipSmart();
+    },
     onItemEquip: function (item, slotKey) {
       _vinvExpEquipItem(item, null, slotKey);
     },

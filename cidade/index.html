@@ -41174,10 +41174,19 @@ function _aeArmorCat(tags) {
   if (tags.indexOf('light_armor') !== -1) return 'light';
   return null; // armadura sem categoria → trata como leve (roupas reforçadas)
 }
-function _aeCanWearArmor(cls, tags) {
+function _aeCanWearArmor(cls, tags, name, stats, race) {
   var cat = _aeArmorCat(tags) || 'light';
   if (cls === 'druida' && tags.indexOf('metal') !== -1) return false; // PHB p.65
-  if (cat === 'heavy') return !!_AE_HEAVY[cls];
+  if (cat === 'heavy') {
+    if (!_AE_HEAVY[cls]) return false;
+    var n = (name || '').toLowerCase();
+    var minStr = 0;
+    if (n.indexOf('malha') !== -1) minStr = 13;
+    else if (n.indexOf('placa') !== -1 || n.indexOf('tala') !== -1) minStr = 15;
+    var isDwarf = String(race || '').toLowerCase().indexOf('ana') !== -1 || String(race || '').toLowerCase().indexOf('dwarf') !== -1;
+    if (!isDwarf && stats && (stats.str || 10) < minStr) return false; // Evita penalidade de -3m de velocidade!
+    return true;
+  }
   if (cat === 'medium') return !!_AE_MEDIUM[cls];
   return !!_AE_LIGHT[cls];
 }
@@ -41236,7 +41245,12 @@ function _vinvAutoEquipSmart() {
         score = _aeWeaponScore(c.it, stats);
       } else if (slotKey === 'chest') {
         if (cls === 'monge') return;                       // Defesa sem Armadura
-        if (!_aeCanWearArmor(cls, c.tags)) return;          // proficiência PHB
+        if (!_aeCanWearArmor(cls, c.tags, c.name, stats, p.race || p.race_name)) return; // proficiência PHB + Força mínima
+        if (cls === 'barbaro') {
+          var unarmored = 10 + _aeMod(stats.dex) + _aeMod(stats.con);
+          var armScore = (c.it.ac || 0) + (c.tags.indexOf('medium_armor') !== -1 ? Math.min(2, _aeMod(stats.dex)) : _aeMod(stats.dex));
+          if (armScore <= unarmored) return; // Bárbaro só usa armadura se der mais CA que Unarmored Defense!
+        }
         score = _aeGenericScore(c.it);
       } else if (slotKey === 'off_hand') {
         var isShield = c.tags.indexOf('shield') !== -1 || (c.it.s === 'off_hand' && (c.it.ac || 0) > 0 && c.tags.indexOf('focus') === -1);
