@@ -200,9 +200,248 @@
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
 }
 
-/* ── Terrain by Biome ── */
+/* ── Scenery Silhouettes & Ambient Backdrops by Hexagon Type ── */
+.camp-scenery {
+  position: absolute;
+  left: 0; right: 0; bottom: 50px; top: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.camp-scenery-item {
+  position: absolute;
+  bottom: 0;
+  pointer-events: none;
+}
+
+/* 1. Floresta / Bosque / Árvores (Tile 'T') */
+.camp-screen.hex-forest .camp-scenery {
+  background-image:
+    radial-gradient(ellipse 70px 140px at 8% 100%, rgba(10, 20, 8, 0.9) 0%, transparent 85%),
+    radial-gradient(ellipse 90px 160px at 92% 100%, rgba(10, 20, 8, 0.9) 0%, transparent 85%),
+    radial-gradient(ellipse 60px 110px at 25% 100%, rgba(15, 28, 12, 0.75) 0%, transparent 85%),
+    radial-gradient(ellipse 65px 120px at 75% 100%, rgba(15, 28, 12, 0.75) 0%, transparent 85%);
+}
+.camp-screen.hex-forest .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 160px 40px at 50% 75%, rgba(45, 30, 15, 0.9) 0%, transparent 80%),
+    linear-gradient(180deg, #1b3017 0%, #132410 35%, #0b1509 75%, #060b05 100%);
+  border-top: 2px solid #2e5227;
+  box-shadow: inset 0 2px 5px rgba(46, 82, 39, 0.5);
+}
+
+/* 2. Ruínas Ancestrais (Tile 'R') */
+.camp-screen.hex-ruins .camp-scenery {
+  background-image:
+    linear-gradient(90deg, transparent 6%, rgba(20, 18, 16, 0.85) 6%, rgba(20, 18, 16, 0.85) 12%, transparent 12%, transparent 16%, rgba(20, 18, 16, 0.7) 16%, rgba(20, 18, 16, 0.7) 20%, transparent 20%, transparent 80%, rgba(20, 18, 16, 0.85) 80%, rgba(20, 18, 16, 0.85) 86%, transparent 86%, transparent 90%, rgba(20, 18, 16, 0.75) 90%, rgba(20, 18, 16, 0.75) 94%, transparent 94%);
+  background-size: 100% 120px;
+  background-repeat: no-repeat;
+  background-position: bottom;
+}
+.camp-screen.hex-ruins .camp-ground-terrain {
+  background:
+    repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,0,0,0.4) 40px, rgba(0,0,0,0.4) 42px),
+    linear-gradient(180deg, #3d3b36 0%, #292723 35%, #1b1917 75%, #0f0e0d 100%);
+  border-top: 2px solid #5a564e;
+  box-shadow: inset 0 2px 4px rgba(90, 86, 78, 0.4);
+}
+
+/* 3. Montanha / Picos (Tile 'M') */
+.camp-screen.hex-mountain .camp-scenery {
+  background-image:
+    linear-gradient(135deg, transparent 45%, rgba(20, 24, 30, 0.9) 45%),
+    linear-gradient(225deg, transparent 48%, rgba(15, 18, 24, 0.95) 48%);
+  background-size: 55% 140px, 60% 160px;
+  background-repeat: no-repeat;
+  background-position: bottom left, bottom right;
+}
+.camp-screen.hex-mountain .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 140px 35px at 50% 75%, rgba(25, 28, 35, 0.9) 0%, transparent 80%),
+    linear-gradient(180deg, #444a56 0%, #2e333c 35%, #1e2128 75%, #101216 100%);
+  border-top: 2px solid #626a7a;
+  box-shadow: inset 0 2px 4px rgba(98, 106, 122, 0.4);
+}
+
+/* 4. Rochas / Colina Pedregosa (Tile 'r') */
+.camp-screen.hex-rocks .camp-scenery {
+  background-image:
+    radial-gradient(ellipse 110px 80px at 12% 100%, rgba(25, 26, 30, 0.9) 0%, transparent 80%),
+    radial-gradient(ellipse 130px 90px at 88% 100%, rgba(22, 23, 27, 0.92) 0%, transparent 80%);
+}
+.camp-screen.hex-rocks .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 150px 40px at 50% 75%, rgba(35, 30, 25, 0.9) 0%, transparent 80%),
+    linear-gradient(180deg, #483f35 0%, #322b24 35%, #201b16 75%, #120f0d 100%);
+  border-top: 2px solid #685b4c;
+}
+
+/* 5. Deserto / Areia (Tile 's', 'S') */
+.camp-screen.hex-desert .camp-scenery,
+.camp-screen.hex-dunes .camp-scenery {
+  background-image:
+    radial-gradient(ellipse 180px 60px at 20% 100%, rgba(60, 40, 15, 0.75) 0%, transparent 80%),
+    radial-gradient(ellipse 200px 70px at 80% 100%, rgba(50, 32, 12, 0.8) 0%, transparent 80%);
+}
+.camp-screen.hex-desert .camp-ground-terrain,
+.camp-screen.hex-dunes .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 160px 45px at 50% 75%, rgba(70, 45, 15, 0.85) 0%, transparent 80%),
+    linear-gradient(180deg, #bf8836 0%, #946522 35%, #624012 70%, #382207 100%);
+  border-top: 2px solid #dfa54e;
+  box-shadow: inset 0 2px 5px rgba(223, 165, 78, 0.4);
+}
+
+/* 6. Neve / Gelo (Tile 'i') */
+.camp-screen.hex-snow .camp-scenery {
+  background-image:
+    linear-gradient(145deg, transparent 50%, rgba(18, 28, 40, 0.8) 50%),
+    linear-gradient(215deg, transparent 52%, rgba(15, 22, 34, 0.85) 52%);
+  background-size: 50% 110px, 50% 130px;
+  background-repeat: no-repeat;
+  background-position: bottom left, bottom right;
+}
+.camp-screen.hex-snow .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 140px 35px at 50% 75%, rgba(60, 70, 80, 0.6) 0%, transparent 75%),
+    linear-gradient(180deg, #d3e2f0 0%, #9cb8d4 30%, #587595 65%, #2c4258 100%);
+  border-top: 2px solid #ffffff;
+  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.8);
+}
+
+/* 7. Pântano / Lama (Tile '~') */
+.camp-screen.hex-swamp .camp-scenery {
+  background-image:
+    radial-gradient(ellipse 120px 90px at 15% 100%, rgba(15, 22, 12, 0.85) 0%, transparent 80%),
+    radial-gradient(ellipse 140px 100px at 85% 100%, rgba(12, 18, 10, 0.9) 0%, transparent 80%);
+}
+.camp-screen.hex-swamp .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 150px 40px at 50% 75%, rgba(20, 25, 15, 0.9) 0%, transparent 80%),
+    linear-gradient(180deg, #2a3820 0%, #1c2615 35%, #11180d 70%, #080c06 100%);
+  border-top: 2px solid #425732;
+  box-shadow: inset 0 2px 4px rgba(66, 87, 50, 0.4);
+}
+
+/* 8. Rocha Vulcânica / Basalto (Tile 'v') */
+.camp-screen.hex-volcanic .camp-scenery {
+  background-image:
+    linear-gradient(130deg, transparent 52%, rgba(35, 12, 8, 0.9) 52%),
+    linear-gradient(230deg, transparent 54%, rgba(30, 10, 6, 0.92) 54%);
+  background-size: 45% 130px, 50% 140px;
+  background-repeat: no-repeat;
+  background-position: bottom left, bottom right;
+}
+.camp-screen.hex-volcanic .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 80px 15px at 25% 65%, rgba(255, 80, 15, 0.4), transparent 70%),
+    radial-gradient(ellipse 100px 16px at 75% 75%, rgba(255, 60, 10, 0.35), transparent 70%),
+    linear-gradient(180deg, #24120e 0%, #190a07 40%, #100503 75%, #080201 100%);
+  border-top: 2px solid #662014;
+  box-shadow: inset 0 1px 6px rgba(255, 90, 25, 0.6);
+}
+
+/* 9. Cristais / Geodo (Tile 'c') */
+.camp-screen.hex-crystals .camp-scenery {
+  background-image:
+    linear-gradient(110deg, transparent 65%, rgba(80, 40, 120, 0.7) 65%, rgba(130, 80, 190, 0.85) 75%, transparent 75%),
+    linear-gradient(250deg, transparent 65%, rgba(60, 80, 140, 0.7) 65%, rgba(90, 130, 220, 0.85) 75%, transparent 75%);
+  background-size: 40% 120px, 40% 130px;
+  background-repeat: no-repeat;
+  background-position: bottom left, bottom right;
+}
+.camp-screen.hex-crystals .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 130px 30px at 50% 75%, rgba(40, 25, 55, 0.9) 0%, transparent 80%),
+    linear-gradient(180deg, #322644 0%, #22192e 40%, #150f1c 75%, #0a070e 100%);
+  border-top: 2px solid #6a4f8c;
+  box-shadow: inset 0 2px 6px rgba(138, 95, 190, 0.5);
+}
+
+/* 10. Cemitério / Lápides (Tile 'l') */
+.camp-screen.hex-graveyard .camp-scenery {
+  background-image:
+    linear-gradient(90deg, transparent 15%, rgba(18, 15, 20, 0.88) 15%, rgba(18, 15, 20, 0.88) 22%, transparent 22%, transparent 78%, rgba(18, 15, 20, 0.88) 78%, rgba(18, 15, 20, 0.88) 85%, transparent 85%);
+  background-size: 100% 75px;
+  background-repeat: no-repeat;
+  background-position: bottom;
+}
+.camp-screen.hex-graveyard .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 140px 35px at 50% 75%, rgba(35, 28, 40, 0.9) 0%, transparent 80%),
+    linear-gradient(180deg, #2e2636 0%, #1f1925 40%, #130f17 75%, #0a080d 100%);
+  border-top: 2px solid #4a3e56;
+  box-shadow: inset 0 2px 4px rgba(74, 62, 86, 0.4);
+}
+
+/* 11. Entrada de Masmorra (Tile 'D') */
+.camp-screen.hex-dungeon .camp-scenery {
+  background-image:
+    radial-gradient(ellipse 120px 100px at 50% 100%, rgba(5, 5, 6, 0.98) 0%, rgba(15, 14, 18, 0.9) 70%, transparent 85%);
+}
+.camp-screen.hex-dungeon .camp-ground-terrain {
+  background:
+    linear-gradient(180deg, #282424 0%, #1c1818 40%, #121010 75%, #0a0808 100%);
+  border-top: 2px solid #423b3b;
+}
+
+/* 12. Casa / Cabana Rústica (Tile 'H') */
+.camp-screen.hex-house .camp-scenery {
+  background-image:
+    linear-gradient(135deg, transparent 48%, rgba(25, 18, 12, 0.88) 48%),
+    linear-gradient(225deg, transparent 48%, rgba(25, 18, 12, 0.88) 48%);
+  background-size: 35% 110px, 35% 110px;
+  background-repeat: no-repeat;
+  background-position: bottom 8% left 15%, bottom 8% left 27%;
+}
+.camp-screen.hex-house .camp-ground-terrain {
+  background:
+    repeating-linear-gradient(90deg, transparent, transparent 32px, rgba(0,0,0,0.35) 32px, rgba(0,0,0,0.35) 34px),
+    linear-gradient(180deg, #3e2818 0%, #2c1c10 40%, #1a1009 75%, #0d0704 100%);
+  border-top: 2px solid #624026;
+}
+
+/* 13. Terras Ermas / Ossadas (Tile 'b') */
+.camp-screen.hex-bones .camp-scenery {
+  background-image:
+    radial-gradient(ellipse 70px 110px at 15% 100%, rgba(28, 22, 18, 0.85) 0%, transparent 80%),
+    radial-gradient(ellipse 80px 120px at 85% 100%, rgba(28, 22, 18, 0.85) 0%, transparent 80%);
+}
+.camp-screen.hex-bones .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 140px 35px at 50% 75%, rgba(40, 30, 22, 0.9) 0%, transparent 80%),
+    linear-gradient(180deg, #3d3228 0%, #2a221a 40%, #19140f 75%, #0c0a07 100%);
+  border-top: 2px solid #584a3b;
+}
+
+/* 14. Trilha / Caminho (Tile 'p') */
+.camp-screen.hex-trail .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 110px 45px at 50% 50%, #463422 0%, #302214 60%, transparent 90%),
+    linear-gradient(180deg, #2c4420 0%, #1e3016 35%, #13200d 75%, #0a1106 100%);
+  border-top: 2px solid #4a6a38;
+}
+
+/* 15. Planície / Gramado Aberto (Tile '.', 'g', 't', 'F') */
+.camp-screen.hex-plains .camp-scenery,
+.camp-screen.hex-camp .camp-scenery {
+  background-image:
+    radial-gradient(ellipse 160px 45px at 20% 100%, rgba(15, 28, 10, 0.6) 0%, transparent 80%),
+    radial-gradient(ellipse 180px 50px at 80% 100%, rgba(15, 28, 10, 0.6) 0%, transparent 80%);
+}
+.camp-screen.hex-plains .camp-ground-terrain,
+.camp-screen.hex-camp .camp-ground-terrain {
+  background:
+    radial-gradient(ellipse 160px 40px at 50% 75%, rgba(65, 45, 25, 0.9) 0%, transparent 80%),
+    linear-gradient(180deg, #345e28 0%, #25461c 30%, #182e12 65%, #0f1c0b 100%);
+  border-top: 2px solid #4a8238;
+  box-shadow: inset 0 2px 4px rgba(74, 130, 56, 0.4);
+}
+
+/* ── Terrain by Biome (Fallback) ── */
 /* Campos Verdes / Plains */
-.camp-screen.biome-plains .camp-ground-terrain {
+.camp-screen.biome-plains:not([class*="hex-"]) .camp-ground-terrain {
   background:
     radial-gradient(ellipse 160px 40px at 50% 75%, rgba(65, 45, 25, 0.9) 0%, transparent 80%),
     linear-gradient(180deg, #345e28 0%, #25461c 30%, #182e12 65%, #0f1c0b 100%);
@@ -211,7 +450,7 @@
 }
 
 /* Floresta / Forest */
-.camp-screen.biome-forest .camp-ground-terrain {
+.camp-screen.biome-forest:not([class*="hex-"]) .camp-ground-terrain {
   background:
     radial-gradient(ellipse 150px 35px at 50% 75%, rgba(55, 35, 20, 0.85) 0%, transparent 80%),
     linear-gradient(180deg, #243c1e 0%, #1a2d16 35%, #101c0e 70%, #0a1208 100%);
@@ -219,14 +458,14 @@
 }
 
 /* Montanha / Mountain */
-.camp-screen.biome-mountain .camp-ground-terrain {
+.camp-screen.biome-mountain:not([class*="hex-"]) .camp-ground-terrain {
   background:
     linear-gradient(180deg, #424752 0%, #2f333a 35%, #1f2126 70%, #121317 100%);
   border-top: 2px solid #585e6c;
 }
 
 /* Deserto / Desert */
-.camp-screen.biome-desert .camp-ground-terrain {
+.camp-screen.biome-desert:not([class*="hex-"]) .camp-ground-terrain {
   background:
     linear-gradient(180deg, #c48c3e 0%, #9c6c28 35%, #6a4414 70%, #3d2408 100%);
   border-top: 2px solid #e0aa5a;
@@ -234,7 +473,7 @@
 }
 
 /* Neve / Snow */
-.camp-screen.biome-snow .camp-ground-terrain {
+.camp-screen.biome-snow:not([class*="hex-"]) .camp-ground-terrain {
   background:
     radial-gradient(ellipse 130px 30px at 50% 75%, rgba(80, 70, 60, 0.6) 0%, transparent 75%),
     linear-gradient(180deg, #dbe6f2 0%, #a8c0d8 30%, #6884a0 65%, #354a60 100%);
@@ -243,28 +482,28 @@
 }
 
 /* Pântano / Swamp */
-.camp-screen.biome-swamp .camp-ground-terrain {
+.camp-screen.biome-swamp:not([class*="hex-"]) .camp-ground-terrain {
   background:
     linear-gradient(180deg, #28331e 0%, #1c2415 35%, #12180e 70%, #0a0e08 100%);
   border-top: 2px solid #3c4d2d;
 }
 
 /* Caverna / Cave */
-.camp-screen.biome-cave .camp-ground-terrain {
+.camp-screen.biome-cave:not([class*="hex-"]) .camp-ground-terrain {
   background:
     linear-gradient(180deg, #282424 0%, #1c1818 40%, #121010 75%, #0a0808 100%);
   border-top: 2px solid #3c3636;
 }
 
 /* Cemitério / Graveyard */
-.camp-screen.biome-graveyard .camp-ground-terrain {
+.camp-screen.biome-graveyard:not([class*="hex-"]) .camp-ground-terrain {
   background:
     linear-gradient(180deg, #2c2634 0%, #201b26 40%, #141118 75%, #0c0a0e 100%);
   border-top: 2px solid #433b50;
 }
 
 /* Vulcânico / Volcanic */
-.camp-screen.biome-volcanic .camp-ground-terrain {
+.camp-screen.biome-volcanic:not([class*="hex-"]) .camp-ground-terrain {
   background:
     radial-gradient(ellipse 90px 15px at 30% 60%, rgba(255, 90, 20, 0.35), transparent 70%),
     radial-gradient(ellipse 110px 18px at 70% 75%, rgba(255, 70, 10, 0.3), transparent 70%),

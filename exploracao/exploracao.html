@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-17T23:24:08Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T01:02:48Z - do not edit directly, edit source -->
 
 
 
@@ -8823,6 +8823,7 @@ window.__onIntroTap = function() {
       </div>
       <div class="camp-sky"><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div></div>
       <div class="camp-moon"></div>
+      <div class="camp-scenery" id="camp-scenery"></div>
       <div class="camp-ground" id="camp-ground">
         <div class="camp-ground-terrain"></div>
         <div class="camp-ground-firepit"></div>
@@ -36085,16 +36086,17 @@ function _expLocalStorageWithFallback(baseKey){
 }
 function _vinvExpReadLoadout(allItems) {
   var loadout = {};
-  var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet', boots: 'feet' };
+  var slotMap = { ring_1: 'ring1', ring_2: 'ring2', necklace: 'amulet', boots: 'feet', offhand: 'off_hand', mainhand: 'main_hand' };
   function _applyEquippedDict(equipped) {
     if (!equipped || typeof equipped !== 'object') return;
     Object.keys(equipped).forEach(function (slot) {
       var name = equipped[slot];
       if (!name) return;
       var found = (allItems || []).find(function (it) { return it.name === name; });
+      var targetSlot = slotMap[slot] || slot;
       if (!found) {
         if (typeof _vinvExpAdaptItem === 'function') {
-          found = _vinvExpAdaptItem({ name: name, quantity: 1, slot: slotMap[slot] || slot });
+          found = _vinvExpAdaptItem({ name: name, quantity: 1, slot: targetSlot });
           found.equipped = true;
         } else {
           found = {
@@ -36104,15 +36106,14 @@ function _vinvExpReadLoadout(allItems) {
             rarity: 'common',
             equipped: true,
             tags: [],
-            slot: slotMap[slot] || slot,
+            slot: targetSlot,
             iconId: 'ic-it-' + _vinvExpSlug(name),
           };
         }
       } else {
         found.equipped = true;
-        found.slot = found.slot || slotMap[slot] || slot;
+        found.slot = found.slot || targetSlot;
       }
-      var targetSlot = slotMap[slot] || slot;
       loadout[targetSlot] = found;
       // Aliases bidirecionais pra bater com qualquer slotDef do paper-doll
       if (targetSlot === 'feet') loadout['boots'] = found;
@@ -36120,7 +36121,11 @@ function _vinvExpReadLoadout(allItems) {
       if (targetSlot === 'amulet') loadout['necklace'] = found;
       if (targetSlot === 'necklace') loadout['amulet'] = found;
       if (targetSlot === 'ring1') loadout['ring_1'] = found;
+      if (targetSlot === 'ring_1') loadout['ring1'] = found;
       if (targetSlot === 'ring2') loadout['ring_2'] = found;
+      if (targetSlot === 'ring_2') loadout['ring2'] = found;
+      if (targetSlot === 'main_hand') loadout['mainhand'] = found;
+      if (targetSlot === 'off_hand') loadout['offhand'] = found;
     });
   }
 
@@ -36132,7 +36137,7 @@ function _vinvExpReadLoadout(allItems) {
   if (Object.keys(loadout).length === 0 && window.S && window.S.player && window.S.player.equipment) {
     _applyEquippedDict(window.S.player.equipment);
   }
-  // 2. Se vazio, fallback no localStorage da cidade
+  // 2. Se vazio, fallback no localStorage da cidade / char ativo
   if (Object.keys(loadout).length === 0) {
     try {
       var raw = _expLocalStorageWithFallback('valdoria_shared_equipped_v1');
@@ -36146,16 +36151,23 @@ function _vinvExpReadLoadout(allItems) {
 }
 function _vinvExpReadStats() {
   var s = {};
+  var p = (typeof S !== 'undefined' && S && S.player) ? S.player : null;
   try {
     // Sessão #55: per-char key com fallback legacy.
     var raw = _expLocalStorageWithFallback('valdoria_shared_stats_v1');
     if (raw) s = JSON.parse(raw) || {};
   } catch (_) {}
-  var curHp = (typeof S !== 'undefined' && S.hp != null) ? S.hp : (s.hp != null ? s.hp : '—');
-  var maxHp = (typeof S !== 'undefined' && S.mhp != null) ? S.mhp : (s.max_hp != null ? s.max_hp : '—');
-  var curMp = (typeof S !== 'undefined' && S.mp != null) ? S.mp : (s.mp != null ? s.mp : '—');
-  var maxMp = (typeof S !== 'undefined' && S.mmp != null) ? S.mmp : (s.max_mp != null ? s.max_mp : '—');
-  var ac = (typeof window.__EXPLORE_SERVER_AC === 'number') ? window.__EXPLORE_SERVER_AC : (s.ac || '—');
+  var curHp = (p && p.hp != null) ? p.hp : ((typeof S !== 'undefined' && S && S.hp != null) ? S.hp : (s.hp != null ? s.hp : 10));
+  var maxHp = (p && p.mhp != null) ? p.mhp : ((typeof S !== 'undefined' && S && S.mhp != null) ? S.mhp : (s.max_hp != null ? s.max_hp : 10));
+  var curMp = (p && p.mp != null) ? p.mp : ((typeof S !== 'undefined' && S && S.mp != null) ? S.mp : (s.mp != null ? s.mp : 0));
+  var maxMp = (p && p.mmp != null) ? p.mmp : ((typeof S !== 'undefined' && S && S.mmp != null) ? S.mmp : (s.max_mp != null ? s.max_mp : 0));
+
+  // CA: se não vier do server ou S.player.ac, calcula baseada em D&D 5e: 10 + dexMod
+  var ac = (typeof window.__EXPLORE_SERVER_AC === 'number') ? window.__EXPLORE_SERVER_AC : ((p && typeof p.ac === 'number') ? p.ac : (s.ac != null ? s.ac : null));
+  if (ac == null || ac === '—') {
+    var dexMod = (p && p.mods && typeof p.mods.dex === 'number') ? p.mods.dex : 0;
+    ac = 10 + dexMod;
+  }
   return {
     ca: ac,
     pv: curHp + ' / ' + maxHp,
@@ -41197,29 +41209,77 @@ function _updateCampDetails() {
   }
 }
 
+function _getCampTileInfo(tile) {
+  var t = String(tile || '.');
+  var map = {
+    'T': { cls: 'forest', name: 'Bosque de Árvores' },
+    't': { cls: 'plains', name: 'Arbustos e Matagal' },
+    'g': { cls: 'plains', name: 'Mata Aberta' },
+    '.': { cls: 'plains', name: 'Planície Aberta' },
+    'p': { cls: 'trail', name: 'Trilha Batida' },
+    'R': { cls: 'ruins', name: 'Ruínas Ancestrais' },
+    'r': { cls: 'rocks', name: 'Encosta Rochosa' },
+    'M': { cls: 'mountain', name: 'Picos da Montanha' },
+    's': { cls: 'desert', name: 'Areias do Deserto' },
+    'S': { cls: 'dunes', name: 'Dunas Onduladas' },
+    'i': { cls: 'snow', name: 'Gelo e Neve' },
+    '~': { cls: 'swamp', name: 'Brejo Pantanoso' },
+    'v': { cls: 'volcanic', name: 'Basalto Vulcânico' },
+    'c': { cls: 'crystals', name: 'Caverna de Cristais' },
+    'l': { cls: 'graveyard', name: 'Cemitério Antigo' },
+    'D': { cls: 'dungeon', name: 'Entrada da Masmorra' },
+    'H': { cls: 'house', name: 'Cabana Rústica' },
+    'b': { cls: 'bones', name: 'Terras Ermas' },
+    'F': { cls: 'camp', name: 'Acampamento Prévio' },
+    '#': { cls: 'ruins', name: 'Muralha de Pedra' },
+    'C': { cls: 'plains', name: 'Clareira do Baú' },
+    'E': { cls: 'trail', name: 'Passagem entre Terras' },
+    '*': { cls: 'crystals', name: 'Fenda com Clarabóia' }
+  };
+  return map[t] || { cls: 'plains', name: 'Terra Firme' };
+}
+
 function openCampOverlay() {
   const ov = document.getElementById('camp-screen');
   if (!ov) return;
-  // Atualizar bioma e fase do dia display
+
+  // 2026-09-17: Bloqueio estrito de acampamento em hexágonos de água e lava (ordem do usuário)
+  var curTile = (S && S.player && S.grid && S.grid[S.player.row]) ? S.grid[S.player.row][S.player.col] : '.';
+  if (curTile === 'w' || curTile === 'W') {
+    if (typeof vToast === 'function') {
+      vToast('🌊 Não é possível acampar sobre a água! Procure terra firme para descansar.', 'warn');
+    }
+    return;
+  }
+  if (curTile === 'L') {
+    if (typeof vToast === 'function') {
+      vToast('🔥 Não é possível acampar sobre a lava derretida!', 'warn');
+    }
+    return;
+  }
+
+  var tileInfo = _getCampTileInfo(curTile);
   var currentPhase = (S && S.dayPhase) || 'day';
   const biomeEl = document.getElementById('camp-biome-text');
   if (biomeEl) {
     const mapDef = S && S.mapDef;
     var phaseNames = { day: 'Dia', dusk: 'Entardecer', dawn: 'Alvorada', night: 'Noite' };
     var phaseStr = phaseNames[currentPhase] || currentPhase;
-    var mapName = (mapDef && mapDef.name) ? mapDef.name : '';
-    biomeEl.textContent = mapName ? (mapName + ' · ' + phaseStr) : phaseStr;
+    var mapName = (mapDef && mapDef.name) ? mapDef.name : (S && S.biome ? S.biome : '');
+    biomeEl.textContent = tileInfo.name + (mapName ? (' · ' + mapName) : '') + ' · ' + phaseStr;
   }
   _updateCampHud();
   _updateCampDetails();
-  // X-6.5.51m: variar cena por bioma do mapa atual. User feedback: "no
-  // camp-screen so existe imagem do acampamento a noite, faca melhorias
-  // epicas para que tambem possa representar o que esta acontecendo no
-  // bioma do mapa atual durante a exploracao".
-  // Remove biome-* classes antigas e adiciona a do bioma atual
+
+  // Aplica classe do hexágono atual (hex-forest, hex-ruins, hex-mountain, etc.)
+  ov.className = ov.className.replace(/\bhex-[\w-]+\b/g, '').trim();
+  ov.classList.add('hex-' + tileInfo.cls);
+
+  // Remove biome-* classes antigas e adiciona a do bioma atual (fallback)
   ov.className = ov.className.replace(/\bbiome-\w+/g, '').trim();
   var curBiome = (S && (S.biome || (S.mapDef && S.mapDef.biome))) || 'plains';
   ov.classList.add('biome-' + curBiome);
+
   // Aplica classe da fase do dia (phase-day, phase-dusk, phase-dawn, phase-night)
   ov.className = ov.className.replace(/\bphase-\w+/g, '').trim();
   ov.classList.add('phase-' + currentPhase);
@@ -44982,6 +45042,19 @@ function bindQuickActions() {
       }
       return;
     }
+    var curTile = (S && S.player && S.grid && S.grid[S.player.row]) ? S.grid[S.player.row][S.player.col] : '.';
+    if (curTile === 'w' || curTile === 'W') {
+      if (typeof vToast === 'function') {
+        vToast('🌊 Não é possível acampar sobre a água! Procure terra firme para descansar.', 'warn');
+      }
+      return;
+    }
+    if (curTile === 'L') {
+      if (typeof vToast === 'function') {
+        vToast('🔥 Não é possível acampar sobre a lava derretida!', 'warn');
+      }
+      return;
+    }
     openCampOverlay();
   });
   // X-6.5.19: IDs do HTML real portado de explore/index.html
@@ -45711,6 +45784,32 @@ function boot() {
                   window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
                   S.player.equipment = res.equipment;
                 }
+                if (typeof res.ac === 'number') {
+                  window.__EXPLORE_SERVER_AC = res.ac;
+                }
+                // Persistência resiliente no localStorage por char_id
+                try {
+                  var _cidKey = (S.player && S.player.char_id) ? String(S.player.char_id) : 'default';
+                  if (res.equipment) {
+                    var _rawEq = JSON.stringify(res.equipment);
+                    localStorage.setItem('valdoria_shared_equipped_v1_' + _cidKey, _rawEq);
+                    localStorage.setItem('valdoria_shared_equipped_v1', _rawEq);
+                  }
+                  var _stObj = {
+                    hp: S.player.hp, max_hp: S.player.mhp,
+                    mp: S.player.mp, max_mp: S.player.mmp,
+                    ac: window.__EXPLORE_SERVER_AC || 10
+                  };
+                  var _rawSt = JSON.stringify(_stObj);
+                  localStorage.setItem('valdoria_shared_stats_v1_' + _cidKey, _rawSt);
+                  localStorage.setItem('valdoria_shared_stats_v1', _rawSt);
+                } catch (_) {}
+                // Se a Mochila (vInventory) estiver aberta na tela, atualiza imediatamente
+                try {
+                  if (window.vInventory && typeof window.vInventory.isOpen === 'function' && window.vInventory.isOpen()) {
+                    window.vInventory.refresh(_vinvExpBuildConfig().player);
+                  }
+                } catch (_) {}
                 // Identidade pode ter mudado → refresca HUD/render sempre.
                 try { if (typeof updateHud === 'function') updateHud(); } catch (_eHudId) {}
                 try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_eRenId) {}
