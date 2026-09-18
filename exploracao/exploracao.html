@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T01:02:48Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T01:36:34Z - do not edit directly, edit source -->
 
 
 
@@ -6369,7 +6369,7 @@ body.remote-mode #debug-hud { display: none !important; }
      o webapp deploya o mesmo arquivo em /explore/explore-camp.css. Tentamos
      ambos — browser ignora o que não existir. -->
 <link rel="stylesheet" href="../explore/explore-camp.css?v=local">
-<link rel="stylesheet" href="/explore/explore-camp.css?v=remote" onerror="this.remove()">
+<script>document.write('<link rel="stylesheet" href="/explore/explore-camp.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '" onerror="this.remove()">');</script>
 <!-- cartografia-shared.js e Bucket B (immutable). Carregar COM ?v=<bundle hash>
      senao o browser serve a copia STALE do cache immutable (bug sessao #73: a
      exploracao ficava com a versao antiga do shared - sem createWorldCart - e o
@@ -8824,6 +8824,7 @@ window.__onIntroTap = function() {
       <div class="camp-sky"><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div></div>
       <div class="camp-moon"></div>
       <div class="camp-scenery" id="camp-scenery"></div>
+      <div class="camp-weather-layer" id="camp-weather-layer"></div>
       <div class="camp-ground" id="camp-ground">
         <div class="camp-ground-terrain"></div>
         <div class="camp-ground-firepit"></div>
@@ -15736,6 +15737,25 @@ window.__applyExploreSnap = function(S, snap) {
   if (snap.bg)    p.background = snap.bg;
   if (snap.align) p.alignment = snap.align;
   if (Array.isArray(snap.conds)) p.conditions = snap.conds.slice();
+  // 2026-09-17: Hidratação síncrona de identidade/equipamentos/CA vindos do snap
+  if (snap.char_id) {
+    p.char_id = snap.char_id;
+    S.char_id = snap.char_id;
+  }
+  if (snap.eq && typeof snap.eq === 'object') {
+    p.equipment = snap.eq;
+    window.__EXPLORE_SERVER_EQUIPPED = snap.eq;
+    try {
+      var _cidK = p.char_id || 'default';
+      var _rawEq = JSON.stringify(snap.eq);
+      localStorage.setItem('valdoria_shared_equipped_v1_' + _cidK, _rawEq);
+      localStorage.setItem('valdoria_shared_equipped_v1', _rawEq);
+    } catch (_) {}
+  }
+  if (typeof snap.ac === 'number') {
+    p.ac = snap.ac;
+    window.__EXPLORE_SERVER_AC = snap.ac;
+  }
   // Inventory (sobrescreve — snap tem o estado autoritativo do perfil)
   if (Array.isArray(snap.inv)) {
     S.inventory = snap.inv.map(function(it) { return { id: it.i, count: it.q }; });
@@ -41209,34 +41229,71 @@ function _updateCampDetails() {
   }
 }
 
-function _getCampTileInfo(tile) {
+function _getCampTileInfo(tile, biome) {
   var t = String(tile || '.');
+  var b = String(biome || (typeof S !== 'undefined' && S && (S.biome || (S.mapDef && S.mapDef.biome))) || 'plains').toLowerCase();
   var map = {
+    // Bosques, matas e vegetação densa
     'T': { cls: 'forest', name: 'Bosque de Árvores' },
-    't': { cls: 'plains', name: 'Arbustos e Matagal' },
-    'g': { cls: 'plains', name: 'Mata Aberta' },
-    '.': { cls: 'plains', name: 'Planície Aberta' },
+    'g': { cls: 'forest', name: 'Mata Fechada' },
+    't': { cls: 'forest', name: 'Arbustos e Bosque' },
+
+    // Trilhas e estradas
     'p': { cls: 'trail', name: 'Trilha Batida' },
+    'E': { cls: 'trail', name: 'Passagem entre Terras' },
+
+    // Ruínas e construções antigas
     'R': { cls: 'ruins', name: 'Ruínas Ancestrais' },
-    'r': { cls: 'rocks', name: 'Encosta Rochosa' },
+    '#': { cls: 'ruins', name: 'Muralha de Pedra' },
+
+    // Montanhas e rochas
     'M': { cls: 'mountain', name: 'Picos da Montanha' },
+    'r': { cls: 'rocks', name: 'Encosta Rochosa' },
+
+    // Deserto e dunas
     's': { cls: 'desert', name: 'Areias do Deserto' },
     'S': { cls: 'dunes', name: 'Dunas Onduladas' },
+
+    // Neve e gelo
     'i': { cls: 'snow', name: 'Gelo e Neve' },
+
+    // Pântano e lodaçal
     '~': { cls: 'swamp', name: 'Brejo Pantanoso' },
+    'm': { cls: 'swamp', name: 'Lodaçal Úmido' },
+
+    // Terrenos vulcânicos
     'v': { cls: 'volcanic', name: 'Basalto Vulcânico' },
+
+    // Cavernas e cristais
     'c': { cls: 'crystals', name: 'Caverna de Cristais' },
+    '*': { cls: 'crystals', name: 'Fenda com Cristais' },
+
+    // Cemitério
     'l': { cls: 'graveyard', name: 'Cemitério Antigo' },
+
+    // Masmorra
     'D': { cls: 'dungeon', name: 'Entrada da Masmorra' },
+
+    // Estruturas e POIs
     'H': { cls: 'house', name: 'Cabana Rústica' },
-    'b': { cls: 'bones', name: 'Terras Ermas' },
     'F': { cls: 'camp', name: 'Acampamento Prévio' },
-    '#': { cls: 'ruins', name: 'Muralha de Pedra' },
-    'C': { cls: 'plains', name: 'Clareira do Baú' },
-    'E': { cls: 'trail', name: 'Passagem entre Terras' },
-    '*': { cls: 'crystals', name: 'Fenda com Clarabóia' }
+    'b': { cls: 'bones', name: 'Terras Ermas com Ossadas' },
+    'C': { cls: 'plains', name: 'Clareira do Baú' }
   };
-  return map[t] || { cls: 'plains', name: 'Terra Firme' };
+
+  if (map[t]) return map[t];
+
+  // Se o tile for '.' ou chão básico, adapta ao bioma do mapa
+  if (b === 'forest') return { cls: 'forest', name: 'Clareira na Floresta' };
+  if (b === 'mountain') return { cls: 'mountain', name: 'Planalto Rochoso' };
+  if (b === 'swamp') return { cls: 'swamp', name: 'Terra Firme no Pântano' };
+  if (b === 'desert') return { cls: 'desert', name: 'Oásis no Deserto' };
+  if (b === 'snow') return { cls: 'snow', name: 'Campo Nevado' };
+  if (b === 'volcanic') return { cls: 'volcanic', name: 'Planalto Vulcânico' };
+  if (b === 'graveyard') return { cls: 'graveyard', name: 'Clareira do Cemitério' };
+  if (b === 'cave') return { cls: 'crystals', name: 'Salão da Caverna' };
+
+  return { cls: 'plains', name: 'Planície Aberta' };
 }
 
 function openCampOverlay() {
@@ -41258,15 +41315,26 @@ function openCampOverlay() {
     return;
   }
 
-  var tileInfo = _getCampTileInfo(curTile);
+  var curBiome = (S && (S.biome || (S.mapDef && S.mapDef.biome))) || 'plains';
+  var tileInfo = _getCampTileInfo(curTile, curBiome);
   var currentPhase = (S && S.dayPhase) || 'day';
+
+  // 2026-09-17: Reconhecimento e aplicação do clima no acampamento (Chuva, Tempestade, Névoa, Neve, Céu Limpo)
+  var wCode = (S && S.weather) || 's';
+  var weatherCls = 'weather-clear';
+  var weatherLabel = 'Céu Limpo';
+  if (wCode === 'r' || wCode === 'rain') { weatherCls = 'weather-rain'; weatherLabel = 'Chuva'; }
+  else if (wCode === 't' || wCode === 'storm') { weatherCls = 'weather-storm'; weatherLabel = 'Tempestade'; }
+  else if (wCode === 'f' || wCode === 'fog') { weatherCls = 'weather-fog'; weatherLabel = 'Névoa'; }
+  else if (wCode === 'snow') { weatherCls = 'weather-snow'; weatherLabel = 'Neve'; }
+
   const biomeEl = document.getElementById('camp-biome-text');
   if (biomeEl) {
     const mapDef = S && S.mapDef;
     var phaseNames = { day: 'Dia', dusk: 'Entardecer', dawn: 'Alvorada', night: 'Noite' };
     var phaseStr = phaseNames[currentPhase] || currentPhase;
-    var mapName = (mapDef && mapDef.name) ? mapDef.name : (S && S.biome ? S.biome : '');
-    biomeEl.textContent = tileInfo.name + (mapName ? (' · ' + mapName) : '') + ' · ' + phaseStr;
+    var mapName = (mapDef && mapDef.name) ? mapDef.name : (curBiome || '');
+    biomeEl.textContent = tileInfo.name + (mapName ? (' · ' + mapName) : '') + ' · ' + weatherLabel + ' · ' + phaseStr;
   }
   _updateCampHud();
   _updateCampDetails();
@@ -41277,12 +41345,16 @@ function openCampOverlay() {
 
   // Remove biome-* classes antigas e adiciona a do bioma atual (fallback)
   ov.className = ov.className.replace(/\bbiome-\w+/g, '').trim();
-  var curBiome = (S && (S.biome || (S.mapDef && S.mapDef.biome))) || 'plains';
   ov.classList.add('biome-' + curBiome);
 
   // Aplica classe da fase do dia (phase-day, phase-dusk, phase-dawn, phase-night)
   ov.className = ov.className.replace(/\bphase-\w+/g, '').trim();
   ov.classList.add('phase-' + currentPhase);
+
+  // 2026-09-17: Aplica classe do clima atual (weather-rain, weather-storm, weather-fog, weather-snow, weather-clear)
+  ov.className = ov.className.replace(/\bweather-[\w-]+\b/g, '').trim();
+  ov.classList.add(weatherCls);
+
   ov.classList.add('active');
   // Particle fire canvas (explore-camp-fire.js carregado no <head>)
   try {

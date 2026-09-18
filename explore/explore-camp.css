@@ -207,21 +207,22 @@
   pointer-events: none;
   z-index: 1;
   overflow: hidden;
+  background-size: 100% 160px;
+  background-repeat: no-repeat;
+  background-position: bottom;
 }
 
-.camp-scenery-item {
+.camp-weather-layer {
   position: absolute;
-  bottom: 0;
+  left: 0; right: 0; top: 0; bottom: 0;
   pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
 }
 
-/* 1. Floresta / Bosque / Árvores (Tile 'T') */
+/* 1. Floresta / Bosque / Árvores (Tile 'T', 'g', 't') */
 .camp-screen.hex-forest .camp-scenery {
-  background-image:
-    radial-gradient(ellipse 70px 140px at 8% 100%, rgba(10, 20, 8, 0.9) 0%, transparent 85%),
-    radial-gradient(ellipse 90px 160px at 92% 100%, rgba(10, 20, 8, 0.9) 0%, transparent 85%),
-    radial-gradient(ellipse 60px 110px at 25% 100%, rgba(15, 28, 12, 0.75) 0%, transparent 85%),
-    radial-gradient(ellipse 65px 120px at 75% 100%, rgba(15, 28, 12, 0.75) 0%, transparent 85%);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpath%20d='M0%2C160%20L0%2C85%20Q15%2C75%2030%2C82%20Q50%2C68%2070%2C80%20Q90%2C65%20115%2C78%20Q135%2C70%20155%2C82%20Q180%2C60%20205%2C75%20Q230%2C68%20250%2C80%20Q275%2C62%20300%2C76%20Q330%2C65%20355%2C80%20Q380%2C72%20405%2C82%20Q430%2C60%20455%2C75%20Q480%2C68%20505%2C82%20Q535%2C65%20565%2C78%20Q585%2C72%20600%2C80%20L600%2C160%20Z'%20fill='rgba%2810%2C%2022%2C%2012%2C%200.65%29'/%3E%20%3Cpath%20d='M15%2C160%20L35%2C65%20L55%2C160%20Z%20M70%2C160%20L95%2C50%20L120%2C160%20Z%20M140%2C160%20L160%2C70%20L180%2C160%20Z%20M420%2C160%20L445%2C55%20L470%2C160%20Z%20M490%2C160%20L515%2C45%20L540%2C160%20Z%20M555%2C160%20L575%2C65%20L595%2C160%20Z'%20fill='rgba%2814%2C%2028%2C%2014%2C%200.85%29'/%3E%20%3Cpath%20d='M0%2C160%20L10%2C120%20Q-5%2C90%2020%2C70%20Q45%2C55%2075%2C65%20Q100%2C60%20115%2C80%20Q130%2C105%20105%2C130%20L115%2C160%20Z'%20fill='rgba%2812%2C%2025%2C%2012%2C%200.92%29'/%3E%20%3Cpath%20d='M490%2C160%20L500%2C125%20Q485%2C95%20510%2C72%20Q535%2C52%20565%2C65%20Q590%2C58%20600%2C75%20L600%2C160%20Z'%20fill='rgba%2812%2C%2025%2C%2012%2C%200.92%29'/%3E%20%3Cpath%20d='M95%2C50%20L80%2C75%20L110%2C75%20Z%20M95%2C70%20L75%2C100%20L115%2C100%20Z%20M95%2C95%20L68%2C130%20L122%2C130%20Z%20M515%2C45%20L500%2C70%20L530%2C70%20Z%20M515%2C65%20L495%2C95%20L535%2C95%20Z%20M515%2C90%20L488%2C125%20L542%2C125%20Z'%20fill='rgba%288%2C%2018%2C%209%2C%200.96%29'/%3E%20%3Crect%20x='91'%20y='125'%20width='8'%20height='35'%20fill='rgba%286%2C%2012%2C%206%2C%200.98%29'/%3E%20%3Crect%20x='511'%20y='120'%20width='8'%20height='40'%20fill='rgba%286%2C%2012%2C%206%2C%200.98%29'/%3E%20%3Crect%20x='41'%20y='130'%20width='10'%20height='30'%20fill='rgba%286%2C%2012%2C%206%2C%200.98%29'/%3E%20%3Crect%20x='555'%20y='130'%20width='10'%20height='30'%20fill='rgba%286%2C%2012%2C%206%2C%200.98%29'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-forest .camp-ground-terrain {
   background:
@@ -231,13 +232,9 @@
   box-shadow: inset 0 2px 5px rgba(46, 82, 39, 0.5);
 }
 
-/* 2. Ruínas Ancestrais (Tile 'R') */
+/* 2. Ruínas Ancestrais (Tile 'R', '#') */
 .camp-screen.hex-ruins .camp-scenery {
-  background-image:
-    linear-gradient(90deg, transparent 6%, rgba(20, 18, 16, 0.85) 6%, rgba(20, 18, 16, 0.85) 12%, transparent 12%, transparent 16%, rgba(20, 18, 16, 0.7) 16%, rgba(20, 18, 16, 0.7) 20%, transparent 20%, transparent 80%, rgba(20, 18, 16, 0.85) 80%, rgba(20, 18, 16, 0.85) 86%, transparent 86%, transparent 90%, rgba(20, 18, 16, 0.75) 90%, rgba(20, 18, 16, 0.75) 94%, transparent 94%);
-  background-size: 100% 120px;
-  background-repeat: no-repeat;
-  background-position: bottom;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpath%20d='M0%2C160%20L0%2C95%20L60%2C95%20L70%2C110%20L140%2C110%20L150%2C90%20L220%2C90%20L230%2C120%20L370%2C120%20L380%2C95%20L460%2C95%20L470%2C115%20L540%2C115%20L550%2C90%20L600%2C90%20L600%2C160%20Z'%20fill='rgba%2825%2C%2022%2C%2020%2C%200.65%29'/%3E%20%3Crect%20x='30'%20y='40'%20width='18'%20height='120'%20fill='rgba%2835%2C%2030%2C%2026%2C%200.92%29'/%3E%20%3Crect%20x='75'%20y='45'%20width='18'%20height='115'%20fill='rgba%2835%2C%2030%2C%2026%2C%200.92%29'/%3E%20%3Cpath%20d='M25%2C45%20Q62%2C20%2098%2C45%20L98%2C55%20Q62%2C32%2025%2C55%20Z'%20fill='rgba%2830%2C%2026%2C%2022%2C%200.95%29'/%3E%20%3Crect%20x='500'%20y='35'%20width='22'%20height='125'%20fill='rgba%2835%2C%2030%2C%2026%2C%200.92%29'/%3E%20%3Crect%20x='495'%20y='30'%20width='32'%20height='10'%20fill='rgba%2845%2C%2038%2C%2032%2C%200.95%29'/%3E%20%3Crect%20x='545'%20y='75'%20width='20'%20height='85'%20fill='rgba%2830%2C%2026%2C%2022%2C%200.9%29'/%3E%20%3Cpolygon%20points='120%2C150%20145%2C135%20160%2C150%20135%2C160'%20fill='rgba%2840%2C%2034%2C%2028%2C%200.95%29'/%3E%20%3Cpolygon%20points='460%2C152%20485%2C142%20495%2C155%20470%2C160'%20fill='rgba%2840%2C%2034%2C%2028%2C%200.95%29'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-ruins .camp-ground-terrain {
   background:
@@ -249,12 +246,7 @@
 
 /* 3. Montanha / Picos (Tile 'M') */
 .camp-screen.hex-mountain .camp-scenery {
-  background-image:
-    linear-gradient(135deg, transparent 45%, rgba(20, 24, 30, 0.9) 45%),
-    linear-gradient(225deg, transparent 48%, rgba(15, 18, 24, 0.95) 48%);
-  background-size: 55% 140px, 60% 160px;
-  background-repeat: no-repeat;
-  background-position: bottom left, bottom right;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpolygon%20points='0%2C160%2080%2C45%20160%2C160'%20fill='rgba%2825%2C%2032%2C%2045%2C%200.55%29'/%3E%20%3Cpolygon%20points='120%2C160%20220%2C30%20320%2C160'%20fill='rgba%2828%2C%2036%2C%2050%2C%200.65%29'/%3E%20%3Cpolygon%20points='280%2C160%20380%2C40%20480%2C160'%20fill='rgba%2825%2C%2032%2C%2045%2C%200.55%29'/%3E%20%3Cpolygon%20points='420%2C160%20520%2C25%20600%2C140%20600%2C160'%20fill='rgba%2830%2C%2038%2C%2055%2C%200.7%29'/%3E%20%3Cpolygon%20points='220%2C30%20205%2C55%20215%2C50%20220%2C58%20228%2C50%20235%2C55'%20fill='rgba%28200%2C%20220%2C%20245%2C%200.45%29'/%3E%20%3Cpolygon%20points='520%2C25%20505%2C50%20515%2C46%20520%2C54%20528%2C47%20535%2C52'%20fill='rgba%28200%2C%20220%2C%20245%2C%200.45%29'/%3E%20%3Cpolygon%20points='0%2C160%200%2C90%2090%2C65%20180%2C160'%20fill='rgba%2820%2C%2024%2C%2032%2C%200.88%29'/%3E%20%3Cpolygon%20points='430%2C160%20510%2C60%20600%2C85%20600%2C160'%20fill='rgba%2820%2C%2024%2C%2032%2C%200.9%29'/%3E%20%3Cpolygon%20points='150%2C160%20250%2C90%20350%2C160'%20fill='rgba%2816%2C%2020%2C%2028%2C%200.85%29'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-mountain .camp-ground-terrain {
   background:
@@ -266,9 +258,7 @@
 
 /* 4. Rochas / Colina Pedregosa (Tile 'r') */
 .camp-screen.hex-rocks .camp-scenery {
-  background-image:
-    radial-gradient(ellipse 110px 80px at 12% 100%, rgba(25, 26, 30, 0.9) 0%, transparent 80%),
-    radial-gradient(ellipse 130px 90px at 88% 100%, rgba(22, 23, 27, 0.92) 0%, transparent 80%);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpolygon%20points='0%2C160%2050%2C75%20120%2C110%20180%2C160'%20fill='rgba%2835%2C%2030%2C%2025%2C%200.75%29'/%3E%20%3Cpolygon%20points='400%2C160%20480%2C70%20560%2C115%20600%2C160'%20fill='rgba%2835%2C%2030%2C%2025%2C%200.75%29'/%3E%20%3Cpolygon%20points='20%2C160%2080%2C60%20140%2C160'%20fill='rgba%2828%2C%2024%2C%2020%2C%200.92%29'/%3E%20%3Cpolygon%20points='460%2C160%20520%2C55%20580%2C160'%20fill='rgba%2828%2C%2024%2C%2020%2C%200.92%29'/%3E%20%3Cellipse%20cx='100'%20cy='140'%20rx='50'%20ry='22'%20fill='rgba%2822%2C%2018%2C%2015%2C%200.95%29'/%3E%20%3Cellipse%20cx='490'%20cy='142'%20rx='55'%20ry='24'%20fill='rgba%2822%2C%2018%2C%2015%2C%200.95%29'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-rocks .camp-ground-terrain {
   background:
@@ -277,12 +267,10 @@
   border-top: 2px solid #685b4c;
 }
 
-/* 5. Deserto / Areia (Tile 's', 'S') */
+/* 5. Deserto / Areia / Dunas (Tile 's', 'S') */
 .camp-screen.hex-desert .camp-scenery,
 .camp-screen.hex-dunes .camp-scenery {
-  background-image:
-    radial-gradient(ellipse 180px 60px at 20% 100%, rgba(60, 40, 15, 0.75) 0%, transparent 80%),
-    radial-gradient(ellipse 200px 70px at 80% 100%, rgba(50, 32, 12, 0.8) 0%, transparent 80%);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpath%20d='M40%2C160%20L40%2C90%20L90%2C85%20L130%2C95%20L130%2C160%20Z'%20fill='rgba%2865%2C%2040%2C%2018%2C%200.55%29'/%3E%20%3Cpath%20d='M460%2C160%20L460%2C80%20L520%2C75%20L560%2C88%20L560%2C160%20Z'%20fill='rgba%2865%2C%2040%2C%2018%2C%200.55%29'/%3E%20%3Cpath%20d='M0%2C160%20Q120%2C80%20260%2C115%20Q380%2C145%20600%2C85%20L600%2C160%20Z'%20fill='rgba%2880%2C%2050%2C%2020%2C%200.75%29'/%3E%20%3Cpath%20d='M0%2C160%20Q180%2C105%20340%2C95%20Q480%2C88%20600%2C130%20L600%2C160%20Z'%20fill='rgba%2895%2C%2060%2C%2024%2C%200.88%29'/%3E%20%3Cpath%20d='M0%2C160%20Q140%2C120%20280%2C130%20Q440%2C142%20600%2C110%20L600%2C160%20Z'%20fill='rgba%28110%2C%2072%2C%2028%2C%200.95%29'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-desert .camp-ground-terrain,
 .camp-screen.hex-dunes .camp-ground-terrain {
@@ -295,127 +283,100 @@
 
 /* 6. Neve / Gelo (Tile 'i') */
 .camp-screen.hex-snow .camp-scenery {
-  background-image:
-    linear-gradient(145deg, transparent 50%, rgba(18, 28, 40, 0.8) 50%),
-    linear-gradient(215deg, transparent 52%, rgba(15, 22, 34, 0.85) 52%);
-  background-size: 50% 110px, 50% 130px;
-  background-repeat: no-repeat;
-  background-position: bottom left, bottom right;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpolygon%20points='0%2C160%2090%2C40%20180%2C160'%20fill='rgba%2835%2C%2045%2C%2060%2C%200.55%29'/%3E%20%3Cpolygon%20points='150%2C160%20270%2C30%20390%2C160'%20fill='rgba%2840%2C%2052%2C%2070%2C%200.65%29'/%3E%20%3Cpolygon%20points='380%2C160%20490%2C35%20600%2C150%20600%2C160'%20fill='rgba%2835%2C%2045%2C%2060%2C%200.55%29'/%3E%20%3Cpath%20d='M20%2C160%20L45%2C55%20L70%2C160%20Z%20M75%2C160%20L105%2C45%20L135%2C160%20Z%20M460%2C160%20L490%2C40%20L520%2C160%20Z%20M525%2C160%20L555%2C50%20L585%2C160%20Z'%20fill='rgba%2820%2C%2028%2C%2038%2C%200.9%29'/%3E%20%3Cpolygon%20points='45%2C55%2035%2C80%2055%2C80'%20fill='rgba%28220%2C%20235%2C%20250%2C%200.85%29'/%3E%20%3Cpolygon%20points='105%2C45%2092%2C72%20118%2C72'%20fill='rgba%28220%2C%20235%2C%20250%2C%200.85%29'/%3E%20%3Cpolygon%20points='490%2C40%20478%2C68%20502%2C68'%20fill='rgba%28220%2C%20235%2C%20250%2C%200.85%29'/%3E%20%3Cpolygon%20points='555%2C50%20542%2C75%20568%2C75'%20fill='rgba%28220%2C%20235%2C%20250%2C%200.85%29'/%3E%20%3Cpath%20d='M0%2C160%20Q120%2C125%20240%2C140%20Q400%2C120%20600%2C135%20L600%2C160%20Z'%20fill='rgba%28215%2C%20230%2C%20245%2C%200.75%29'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-snow .camp-ground-terrain {
   background:
-    radial-gradient(ellipse 140px 35px at 50% 75%, rgba(60, 70, 80, 0.6) 0%, transparent 75%),
-    linear-gradient(180deg, #d3e2f0 0%, #9cb8d4 30%, #587595 65%, #2c4258 100%);
-  border-top: 2px solid #ffffff;
-  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.8);
+    radial-gradient(ellipse 150px 40px at 50% 75%, rgba(200, 220, 240, 0.6) 0%, transparent 80%),
+    linear-gradient(180deg, #b0c6db 0%, #7d96af 35%, #465b71 70%, #202d3c 100%);
+  border-top: 2px solid #d4e5f7;
+  box-shadow: inset 0 2px 6px rgba(212, 229, 247, 0.6);
 }
 
-/* 7. Pântano / Lama (Tile '~') */
+/* 7. Pântano / Brejo / Lodaçal (Tile '~', 'm') */
 .camp-screen.hex-swamp .camp-scenery {
-  background-image:
-    radial-gradient(ellipse 120px 90px at 15% 100%, rgba(15, 22, 12, 0.85) 0%, transparent 80%),
-    radial-gradient(ellipse 140px 100px at 85% 100%, rgba(12, 18, 10, 0.9) 0%, transparent 80%);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpath%20d='M0%2C160%20Q150%2C100%20300%2C120%20Q450%2C105%20600%2C125%20L600%2C160%20Z'%20fill='rgba%2818%2C%2026%2C%2016%2C%200.65%29'/%3E%20%3Cpath%20d='M0%2C160%20L15%2C110%20Q5%2C80%2030%2C55%20Q50%2C75%2040%2C105%20Q60%2C85%2075%2C70%20Q90%2C95%2070%2C120%20L85%2C160%20Z'%20fill='rgba%2814%2C%2020%2C%2012%2C%200.92%29'/%3E%20%3Cpath%20d='M25%2C75%20Q20%2C110%2023%2C125%20M38%2C70%20Q42%2C100%2040%2C120%20M65%2C80%20Q62%2C110%2066%2C125'%20stroke='rgba%2825%2C%2038%2C%2020%2C%200.85%29'%20stroke-width='3'%20fill='none'/%3E%20%3Cpath%20d='M520%2C160%20L535%2C115%20Q515%2C85%20540%2C50%20Q565%2C70%20555%2C100%20Q580%2C75%20595%2C65%20L600%2C85%20Q585%2C115%20570%2C130%20L585%2C160%20Z'%20fill='rgba%2814%2C%2020%2C%2012%2C%200.92%29'/%3E%20%3Cpath%20d='M535%2C70%20Q530%2C105%20533%2C125%20M550%2C65%20Q554%2C95%20552%2C118%20M575%2C80%20Q572%2C110%20576%2C128'%20stroke='rgba%2825%2C%2038%2C%2020%2C%200.85%29'%20stroke-width='3'%20fill='none'/%3E%20%3Cpath%20d='M140%2C160%20L145%2C115%20M150%2C160%20L152%2C105%20M158%2C160%20L163%2C118%20M420%2C160%20L423%2C110%20M430%2C160%20L428%2C102%20M438%2C160%20L442%2C115'%20stroke='rgba%2816%2C%2024%2C%2014%2C%200.95%29'%20stroke-width='2'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-swamp .camp-ground-terrain {
   background:
-    radial-gradient(ellipse 150px 40px at 50% 75%, rgba(20, 25, 15, 0.9) 0%, transparent 80%),
-    linear-gradient(180deg, #2a3820 0%, #1c2615 35%, #11180d 70%, #080c06 100%);
-  border-top: 2px solid #425732;
-  box-shadow: inset 0 2px 4px rgba(66, 87, 50, 0.4);
+    radial-gradient(ellipse 160px 45px at 50% 70%, rgba(20, 40, 18, 0.95) 0%, transparent 80%),
+    linear-gradient(180deg, #1f2f18 0%, #152210 35%, #0d160a 75%, #050a04 100%);
+  border-top: 2px solid #334d28;
+  box-shadow: inset 0 2px 5px rgba(51, 77, 40, 0.5);
 }
 
-/* 8. Rocha Vulcânica / Basalto (Tile 'v') */
+/* 8. Vulcânico / Basalto (Tile 'v') */
 .camp-screen.hex-volcanic .camp-scenery {
-  background-image:
-    linear-gradient(130deg, transparent 52%, rgba(35, 12, 8, 0.9) 52%),
-    linear-gradient(230deg, transparent 54%, rgba(30, 10, 6, 0.92) 54%);
-  background-size: 45% 130px, 50% 140px;
-  background-repeat: no-repeat;
-  background-position: bottom left, bottom right;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpolygon%20points='0%2C160%2060%2C60%20140%2C75%20220%2C160'%20fill='rgba%2835%2C%2018%2C%2014%2C%200.65%29'/%3E%20%3Cpolygon%20points='380%2C160%20480%2C50%20540%2C65%20600%2C160'%20fill='rgba%2835%2C%2018%2C%2014%2C%200.65%29'/%3E%20%3Cpolygon%20points='20%2C160%2045%2C40%2070%2C160'%20fill='rgba%2824%2C%2012%2C%2010%2C%200.92%29'/%3E%20%3Cpolygon%20points='90%2C160%20115%2C55%20140%2C160'%20fill='rgba%2824%2C%2012%2C%2010%2C%200.92%29'/%3E%20%3Cpolygon%20points='460%2C160%20485%2C45%20510%2C160'%20fill='rgba%2824%2C%2012%2C%2010%2C%200.92%29'/%3E%20%3Cpolygon%20points='530%2C160%20555%2C35%20580%2C160'%20fill='rgba%2824%2C%2012%2C%2010%2C%200.92%29'/%3E%20%3Cpolygon%20points='0%2C160%20100%2C135%20250%2C148%20400%2C138%20600%2C145%20600%2C160'%20fill='rgba%2820%2C%208%2C%206%2C%200.98%29'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-volcanic .camp-ground-terrain {
   background:
-    radial-gradient(ellipse 80px 15px at 25% 65%, rgba(255, 80, 15, 0.4), transparent 70%),
-    radial-gradient(ellipse 100px 16px at 75% 75%, rgba(255, 60, 10, 0.35), transparent 70%),
-    linear-gradient(180deg, #24120e 0%, #190a07 40%, #100503 75%, #080201 100%);
-  border-top: 2px solid #662014;
-  box-shadow: inset 0 1px 6px rgba(255, 90, 25, 0.6);
+    radial-gradient(ellipse 160px 40px at 50% 75%, rgba(220, 60, 20, 0.8) 0%, transparent 80%),
+    linear-gradient(180deg, #2b1c18 0%, #1a100d 35%, #0f0806 75%, #050202 100%);
+  border-top: 2px solid #ea580c;
+  box-shadow: inset 0 2px 6px rgba(234, 88, 12, 0.7);
 }
 
-/* 9. Cristais / Geodo (Tile 'c') */
+/* 9. Caverna / Cristais (Tile 'c', '*') */
 .camp-screen.hex-crystals .camp-scenery {
-  background-image:
-    linear-gradient(110deg, transparent 65%, rgba(80, 40, 120, 0.7) 65%, rgba(130, 80, 190, 0.85) 75%, transparent 75%),
-    linear-gradient(250deg, transparent 65%, rgba(60, 80, 140, 0.7) 65%, rgba(90, 130, 220, 0.85) 75%, transparent 75%);
-  background-size: 40% 120px, 40% 130px;
-  background-repeat: no-repeat;
-  background-position: bottom left, bottom right;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpolygon%20points='40%2C160%2060%2C50%2080%2C160'%20fill='rgba%2830%2C%2045%2C%2065%2C%200.55%29'/%3E%20%3Cpolygon%20points='100%2C160%20130%2C35%20160%2C160'%20fill='rgba%2845%2C%2030%2C%2065%2C%200.6%29'/%3E%20%3Cpolygon%20points='440%2C160%20470%2C30%20500%2C160'%20fill='rgba%2830%2C%2050%2C%2070%2C%200.6%29'/%3E%20%3Cpolygon%20points='520%2C160%20545%2C55%20570%2C160'%20fill='rgba%2845%2C%2030%2C%2065%2C%200.55%29'/%3E%20%3Cpolygon%20points='15%2C160%2040%2C25%2055%2C160'%20fill='rgba%2835%2C%2055%2C%2080%2C%200.88%29'/%3E%20%3Cpolygon%20points='40%2C25%2055%2C160%2048%2C160'%20fill='rgba%2865%2C%20110%2C%20160%2C%200.75%29'/%3E%20%3Cpolygon%20points='50%2C160%2075%2C45%2095%2C160'%20fill='rgba%2855%2C%2035%2C%2080%2C%200.88%29'/%3E%20%3Cpolygon%20points='75%2C45%2095%2C160%2088%2C160'%20fill='rgba%28110%2C%2070%2C%20160%2C%200.75%29'/%3E%20%3Cpolygon%20points='505%2C160%20530%2C20%20545%2C160'%20fill='rgba%2835%2C%2060%2C%2085%2C%200.9%29'/%3E%20%3Cpolygon%20points='530%2C20%20545%2C160%20538%2C160'%20fill='rgba%2875%2C%20130%2C%20185%2C%200.8%29'/%3E%20%3Cpolygon%20points='540%2C160%20565%2C40%20585%2C160'%20fill='rgba%2860%2C%2035%2C%2085%2C%200.9%29'/%3E%20%3Cpolygon%20points='100%2C0%20115%2C35%20130%2C0'%20fill='rgba%2820%2C%2025%2C%2035%2C%200.9%29'/%3E%20%3Cpolygon%20points='480%2C0%20495%2C40%20510%2C0'%20fill='rgba%2820%2C%2025%2C%2035%2C%200.9%29'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-crystals .camp-ground-terrain {
   background:
-    radial-gradient(ellipse 130px 30px at 50% 75%, rgba(40, 25, 55, 0.9) 0%, transparent 80%),
-    linear-gradient(180deg, #322644 0%, #22192e 40%, #150f1c 75%, #0a070e 100%);
-  border-top: 2px solid #6a4f8c;
-  box-shadow: inset 0 2px 6px rgba(138, 95, 190, 0.5);
+    radial-gradient(ellipse 150px 40px at 50% 75%, rgba(80, 40, 120, 0.7) 0%, transparent 80%),
+    linear-gradient(180deg, #281d38 0%, #1a1226 35%, #100b19 75%, #08050d 100%);
+  border-top: 2px solid #9333ea;
+  box-shadow: inset 0 2px 6px rgba(147, 51, 234, 0.5);
 }
 
-/* 10. Cemitério / Lápides (Tile 'l') */
+/* 10. Cemitério Antigo (Tile 'l') */
 .camp-screen.hex-graveyard .camp-scenery {
-  background-image:
-    linear-gradient(90deg, transparent 15%, rgba(18, 15, 20, 0.88) 15%, rgba(18, 15, 20, 0.88) 22%, transparent 22%, transparent 78%, rgba(18, 15, 20, 0.88) 78%, rgba(18, 15, 20, 0.88) 85%, transparent 85%);
-  background-size: 100% 75px;
-  background-repeat: no-repeat;
-  background-position: bottom;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpath%20d='M0%2C160%20Q120%2C110%20240%2C125%20Q400%2C100%20600%2C130%20L600%2C160%20Z'%20fill='rgba%2820%2C%2016%2C%2024%2C%200.65%29'/%3E%20%3Cpath%20d='M60%2C160%20L75%2C95%20Q50%2C75%2035%2C50%20Q55%2C60%2070%2C80%20Q80%2C50%2090%2C30%20Q92%2C55%2085%2C82%20Q110%2C65%20125%2C45%20Q115%2C70%2095%2C92%20L105%2C160%20Z'%20fill='rgba%2818%2C%2014%2C%2022%2C%200.92%29'/%3E%20%3Crect%20x='160'%20y='80'%20width='8'%20height='60'%20fill='rgba%2828%2C%2024%2C%2032%2C%200.95%29'/%3E%20%3Crect%20x='152'%20y='92'%20width='24'%20height='6'%20fill='rgba%2828%2C%2024%2C%2032%2C%200.95%29'/%3E%20%3Ccircle%20cx='164'%20cy='95'%20r='10'%20stroke='rgba%2828%2C%2024%2C%2032%2C%200.95%29'%20stroke-width='3'%20fill='none'/%3E%20%3Cpath%20d='M210%2C160%20L210%2C115%20Q225%2C100%20240%2C115%20L240%2C160%20Z'%20fill='rgba%2832%2C%2028%2C%2036%2C%200.92%29'/%3E%20%3Cpath%20d='M440%2C160%20L440%2C110%20Q455%2C95%20470%2C110%20L470%2C160%20Z'%20fill='rgba%2832%2C%2028%2C%2036%2C%200.92%29'/%3E%20%3Cpolygon%20points='520%2C80%20528%2C78%20522%2C145%20514%2C147'%20fill='rgba%2828%2C%2024%2C%2032%2C%200.95%29'/%3E%20%3Cpolygon%20points='508%2C96%20534%2C92%20532%2C98%20506%2C102'%20fill='rgba%2828%2C%2024%2C%2032%2C%200.95%29'/%3E%20%3Cpath%20d='M300%2C160%20L300%2C120%20M315%2C160%20L315%2C120%20M330%2C160%20L330%2C120%20M345%2C160%20L345%2C120%20M360%2C160%20L360%2C120%20M295%2C130%20L365%2C130%20M295%2C145%20L365%2C145'%20stroke='rgba%2825%2C%2020%2C%2030%2C%200.95%29'%20stroke-width='2'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-graveyard .camp-ground-terrain {
   background:
-    radial-gradient(ellipse 140px 35px at 50% 75%, rgba(35, 28, 40, 0.9) 0%, transparent 80%),
-    linear-gradient(180deg, #2e2636 0%, #1f1925 40%, #130f17 75%, #0a080d 100%);
-  border-top: 2px solid #4a3e56;
-  box-shadow: inset 0 2px 4px rgba(74, 62, 86, 0.4);
+    radial-gradient(ellipse 150px 40px at 50% 75%, rgba(30, 25, 35, 0.9) 0%, transparent 80%),
+    linear-gradient(180deg, #24222a 0%, #18161d 35%, #100f14 75%, #08080a 100%);
+  border-top: 2px solid #4a4555;
+  box-shadow: inset 0 2px 4px rgba(74, 69, 85, 0.4);
 }
 
-/* 11. Entrada de Masmorra (Tile 'D') */
+/* 11. Masmorra / Dungeon (Tile 'D') */
 .camp-screen.hex-dungeon .camp-scenery {
-  background-image:
-    radial-gradient(ellipse 120px 100px at 50% 100%, rgba(5, 5, 6, 0.98) 0%, rgba(15, 14, 18, 0.9) 70%, transparent 85%);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Crect%20x='0'%20y='30'%20width='600'%20height='130'%20fill='rgba%2822%2C%2020%2C%2024%2C%200.85%29'/%3E%20%3Cpath%20d='M220%2C160%20L220%2C80%20Q300%2C25%20380%2C80%20L380%2C160%20Z'%20fill='rgba%288%2C%206%2C%2010%2C%200.98%29'/%3E%20%3Cpath%20d='M210%2C160%20L210%2C75%20Q300%2C15%20390%2C75%20L390%2C160%20L375%2C160%20L375%2C82%20Q300%2C32%20225%2C82%20L225%2C160%20Z'%20fill='rgba%2845%2C%2040%2C%2048%2C%200.95%29'/%3E%20%3Cpolygon%20points='290%2C20%20310%2C20%20315%2C40%20285%2C40'%20fill='rgba%2865%2C%2058%2C%2070%2C%200.95%29'/%3E%20%3Cline%20x1='245'%20y1='65'%20x2='245'%20y2='160'%20stroke='rgba%2870%2C%2065%2C%2075%2C%200.85%29'%20stroke-width='4'/%3E%20%3Cline%20x1='275'%20y1='48'%20x2='275'%20y2='160'%20stroke='rgba%2870%2C%2065%2C%2075%2C%200.85%29'%20stroke-width='4'/%3E%20%3Cline%20x1='305'%20y1='40'%20x2='305'%20y2='160'%20stroke='rgba%2870%2C%2065%2C%2075%2C%200.85%29'%20stroke-width='4'/%3E%20%3Cline%20x1='335'%20y1='48'%20x2='335'%20y2='160'%20stroke='rgba%2870%2C%2065%2C%2075%2C%200.85%29'%20stroke-width='4'/%3E%20%3Cline%20x1='365'%20y1='65'%20x2='365'%20y2='160'%20stroke='rgba%2870%2C%2065%2C%2075%2C%200.85%29'%20stroke-width='4'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-dungeon .camp-ground-terrain {
   background:
-    linear-gradient(180deg, #282424 0%, #1c1818 40%, #121010 75%, #0a0808 100%);
-  border-top: 2px solid #423b3b;
+    linear-gradient(180deg, #26242b 0%, #1a181e 35%, #100f13 75%, #09080a 100%);
+  border-top: 2px solid #474350;
 }
 
-/* 12. Casa / Cabana Rústica (Tile 'H') */
+/* 12. Cabana Rústica (Tile 'H') */
 .camp-screen.hex-house .camp-scenery {
-  background-image:
-    linear-gradient(135deg, transparent 48%, rgba(25, 18, 12, 0.88) 48%),
-    linear-gradient(225deg, transparent 48%, rgba(25, 18, 12, 0.88) 48%);
-  background-size: 35% 110px, 35% 110px;
-  background-repeat: no-repeat;
-  background-position: bottom 8% left 15%, bottom 8% left 27%;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpath%20d='M0%2C160%20Q80%2C95%20160%2C110%20Q280%2C85%20400%2C105%20Q500%2C90%20600%2C100%20L600%2C160%20Z'%20fill='rgba%2815%2C%2025%2C%2015%2C%200.65%29'/%3E%20%3Cpolygon%20points='40%2C75%20110%2C35%20180%2C75'%20fill='rgba%2845%2C%2032%2C%2022%2C%200.95%29'/%3E%20%3Crect%20x='50'%20y='75'%20width='120'%20height='75'%20fill='rgba%2835%2C%2024%2C%2016%2C%200.92%29'/%3E%20%3Crect%20x='140'%20y='25'%20width='16'%20height='35'%20fill='rgba%2845%2C%2040%2C%2042%2C%200.95%29'/%3E%20%3Ccircle%20cx='148'%20cy='18'%20r='7'%20fill='rgba%28200%2C%20200%2C%20200%2C%200.25%29'/%3E%20%3Ccircle%20cx='154'%20cy='10'%20r='10'%20fill='rgba%28200%2C%20200%2C%20200%2C%200.18%29'/%3E%20%3Crect%20x='95'%20y='105'%20width='25'%20height='45'%20fill='rgba%2822%2C%2014%2C%208%2C%200.98%29'/%3E%20%3Crect%20x='60'%20y='90'%20width='20'%20height='20'%20fill='rgba%28245%2C%20180%2C%2050%2C%200.65%29'/%3E%20%3Cpath%20d='M190%2C160%20L190%2C125%20M240%2C160%20L240%2C128%20M290%2C160%20L290%2C125%20M180%2C135%20L300%2C132%20M180%2C148%20L300%2C146'%20stroke='rgba%2838%2C%2026%2C%2018%2C%200.95%29'%20stroke-width='3'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-house .camp-ground-terrain {
   background:
-    repeating-linear-gradient(90deg, transparent, transparent 32px, rgba(0,0,0,0.35) 32px, rgba(0,0,0,0.35) 34px),
-    linear-gradient(180deg, #3e2818 0%, #2c1c10 40%, #1a1009 75%, #0d0704 100%);
-  border-top: 2px solid #624026;
+    radial-gradient(ellipse 150px 40px at 50% 75%, rgba(60, 40, 20, 0.85) 0%, transparent 80%),
+    linear-gradient(180deg, #382c1e 0%, #251c13 35%, #17110a 75%, #0c0805 100%);
+  border-top: 2px solid #5a4530;
 }
 
-/* 13. Terras Ermas / Ossadas (Tile 'b') */
+/* 13. Terras Ermas com Ossadas (Tile 'b') */
 .camp-screen.hex-bones .camp-scenery {
-  background-image:
-    radial-gradient(ellipse 70px 110px at 15% 100%, rgba(28, 22, 18, 0.85) 0%, transparent 80%),
-    radial-gradient(ellipse 80px 120px at 85% 100%, rgba(28, 22, 18, 0.85) 0%, transparent 80%);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpath%20d='M0%2C160%20L0%2C110%20L80%2C95%20L180%2C125%20L320%2C105%20L460%2C130%20L600%2C100%20L600%2C160%20Z'%20fill='rgba%2832%2C%2025%2C%2022%2C%200.7%29'/%3E%20%3Cpath%20d='M40%2C160%20Q25%2C80%2080%2C60%20Q65%2C110%2060%2C160'%20fill='rgba%28190%2C%20180%2C%20165%2C%200.75%29'/%3E%20%3Cpath%20d='M80%2C160%20Q65%2C75%20120%2C55%20Q105%2C105%20100%2C160'%20fill='rgba%28200%2C%20190%2C%20175%2C%200.82%29'/%3E%20%3Cpath%20d='M120%2C160%20Q105%2C70%20160%2C50%20Q145%2C100%20140%2C160'%20fill='rgba%28210%2C%20200%2C%20185%2C%200.88%29'/%3E%20%3Cpath%20d='M160%2C160%20Q145%2C75%20200%2C55%20Q185%2C105%20180%2C160'%20fill='rgba%28200%2C%20190%2C%20175%2C%200.82%29'/%3E%20%3Cpath%20d='M460%2C160%20L480%2C115%20Q520%2C70%20560%2C95%20Q580%2C115%20570%2C145%20L580%2C160%20Z'%20fill='rgba%28200%2C%20190%2C%20175%2C%200.85%29'/%3E%20%3Cpath%20d='M520%2C80%20Q560%2C40%20595%2C45%20Q565%2C65%20545%2C85%20Z'%20fill='rgba%28175%2C%20160%2C%20140%2C%200.9%29'/%3E%20%3Ccircle%20cx='515'%20cy='110'%20r='8'%20fill='rgba%2820%2C%2015%2C%2012%2C%200.95%29'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-bones .camp-ground-terrain {
   background:
-    radial-gradient(ellipse 140px 35px at 50% 75%, rgba(40, 30, 22, 0.9) 0%, transparent 80%),
-    linear-gradient(180deg, #3d3228 0%, #2a221a 40%, #19140f 75%, #0c0a07 100%);
-  border-top: 2px solid #584a3b;
+    radial-gradient(ellipse 150px 40px at 50% 75%, rgba(55, 45, 35, 0.85) 0%, transparent 80%),
+    linear-gradient(180deg, #3d352b 0%, #29231c 35%, #1a1611 75%, #0e0c09 100%);
+  border-top: 2px solid #5e5242;
 }
 
-/* 14. Trilha / Caminho (Tile 'p') */
+/* 14. Trilha Batida (Tile 'p', 'E') */
+.camp-screen.hex-trail .camp-scenery {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpath%20d='M0%2C160%20Q140%2C105%20280%2C120%20Q420%2C95%20600%2C115%20L600%2C160%20Z'%20fill='rgba%2825%2C%2030%2C%2020%2C%200.65%29'/%3E%20%3Crect%20x='60'%20y='70'%20width='8'%20height='90'%20fill='rgba%2842%2C%2030%2C%2020%2C%200.95%29'/%3E%20%3Cpolygon%20points='50%2C75%20110%2C75%20125%2C85%20110%2C95%2050%2C95'%20fill='rgba%2855%2C%2040%2C%2026%2C%200.95%29'/%3E%20%3Cpolygon%20points='15%2C98%2075%2C98%2060%2C108%2075%2C118%2015%2C118'%20fill='rgba%2850%2C%2036%2C%2024%2C%200.92%29'/%3E%20%3Cellipse%20cx='520'%20cy='152'%20rx='28'%20ry='10'%20fill='rgba%2845%2C%2042%2C%2040%2C%200.95%29'/%3E%20%3Cellipse%20cx='520'%20cy='140'%20rx='22'%20ry='8'%20fill='rgba%2855%2C%2052%2C%2048%2C%200.95%29'/%3E%20%3Cellipse%20cx='520'%20cy='130'%20rx='16'%20ry='6'%20fill='rgba%2865%2C%2060%2C%2056%2C%200.95%29'/%3E%20%3Cellipse%20cx='520'%20cy='122'%20rx='10'%20ry='5'%20fill='rgba%2875%2C%2070%2C%2065%2C%200.95%29'/%3E%20%3Cpath%20d='M180%2C160%20L180%2C130%20M250%2C160%20L250%2C132%20M320%2C160%20L320%2C130%20M170%2C140%20L330%2C138'%20stroke='rgba%2840%2C%2030%2C%2020%2C%200.9%29'%20stroke-width='2'/%3E%20%3C/svg%3E");
+}
 .camp-screen.hex-trail .camp-ground-terrain {
   background:
     radial-gradient(ellipse 110px 45px at 50% 50%, #463422 0%, #302214 60%, transparent 90%),
@@ -423,12 +384,10 @@
   border-top: 2px solid #4a6a38;
 }
 
-/* 15. Planície / Gramado Aberto (Tile '.', 'g', 't', 'F') */
+/* 15. Planície / Gramado Aberto (Tile '.', 'C', 'F') */
 .camp-screen.hex-plains .camp-scenery,
 .camp-screen.hex-camp .camp-scenery {
-  background-image:
-    radial-gradient(ellipse 160px 45px at 20% 100%, rgba(15, 28, 10, 0.6) 0%, transparent 80%),
-    radial-gradient(ellipse 180px 50px at 80% 100%, rgba(15, 28, 10, 0.6) 0%, transparent 80%);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20160'%20preserveAspectRatio='none'%3E%20%3Cpath%20d='M0%2C160%20Q150%2C95%20320%2C110%20Q450%2C90%20600%2C115%20L600%2C160%20Z'%20fill='rgba%2822%2C%2038%2C%2018%2C%200.65%29'/%3E%20%3Cpolygon%20points='460%2C110%20465%2C65%20480%2C65%20485%2C110'%20fill='rgba%2825%2C%2040%2C%2020%2C%200.85%29'/%3E%20%3Cline%20x1='472'%20y1='65'%20x2='455'%20y2='45'%20stroke='rgba%2825%2C%2040%2C%2020%2C%200.85%29'%20stroke-width='2'/%3E%20%3Cline%20x1='472'%20y1='65'%20x2='490'%20y2='85'%20stroke='rgba%2825%2C%2040%2C%2020%2C%200.85%29'%20stroke-width='2'/%3E%20%3Cline%20x1='472'%20y1='65'%20x2='490'%20y2='45'%20stroke='rgba%2825%2C%2040%2C%2020%2C%200.85%29'%20stroke-width='2'/%3E%20%3Cline%20x1='472'%20y1='65'%20x2='455'%20y2='85'%20stroke='rgba%2825%2C%2040%2C%2020%2C%200.85%29'%20stroke-width='2'/%3E%20%3Cpath%20d='M0%2C160%20Q200%2C115%20400%2C125%20Q500%2C118%20600%2C130%20L600%2C160%20Z'%20fill='rgba%2828%2C%2048%2C%2022%2C%200.85%29'/%3E%20%3Cpath%20d='M50%2C160%20L50%2C125%20M110%2C160%20L110%2C128%20M170%2C160%20L170%2C125%20M230%2C160%20L230%2C127%20M40%2C136%20L240%2C134%20M40%2C148%20L240%2C146'%20stroke='rgba%2842%2C%2032%2C%2020%2C%200.95%29'%20stroke-width='2.5'/%3E%20%3Cpath%20d='M270%2C160%20Q268%2C145%20265%2C140%20M270%2C160%20Q273%2C143%20276%2C138%20M350%2C160%20Q347%2C144%20344%2C139%20M350%2C160%20Q353%2C142%20357%2C137'%20stroke='rgba%2835%2C%2058%2C%2028%2C%200.95%29'%20stroke-width='2'/%3E%20%3C/svg%3E");
 }
 .camp-screen.hex-plains .camp-ground-terrain,
 .camp-screen.hex-camp .camp-ground-terrain {
@@ -437,6 +396,118 @@
     linear-gradient(180deg, #345e28 0%, #25461c 30%, #182e12 65%, #0f1c0b 100%);
   border-top: 2px solid #4a8238;
   box-shadow: inset 0 2px 4px rgba(74, 130, 56, 0.4);
+}
+
+/* ── Weather Overrides on Camp Screen ── */
+/* 1. Chuva (Rain) */
+.camp-screen.weather-rain.phase-day .camp-scene {
+  background: linear-gradient(180deg, #2b3644 0%, #3e4d5e 40%, #58697a 70%, #4a5445 100%) !important;
+}
+.camp-screen.weather-rain.phase-day .camp-sky {
+  background: linear-gradient(180deg, #232c38 0%, #354250 45%, #4b5866 75%, #59584e 100%) !important;
+}
+.camp-screen.weather-rain.phase-dusk .camp-scene {
+  background: linear-gradient(180deg, #1c1a26 0%, #2b232e 45%, #3d2f2d 75%, #24221d 100%) !important;
+}
+.camp-screen.weather-rain.phase-dawn .camp-scene {
+  background: linear-gradient(180deg, #1f2530 0%, #2f3742 45%, #444547 75%, #33362d 100%) !important;
+}
+.camp-screen.weather-rain.phase-night .camp-scene {
+  background: linear-gradient(180deg, #0b0e13 0%, #12171e 45%, #181d24 75%, #0f1213 100%) !important;
+}
+.camp-screen.weather-rain .camp-moon {
+  display: none !important;
+}
+.camp-screen.weather-rain .camp-weather-layer {
+  background-image:
+    repeating-linear-gradient(108deg, transparent, transparent 20px, rgba(160, 200, 240, 0.35) 21px, rgba(160, 200, 240, 0.35) 22px, transparent 23px),
+    radial-gradient(ellipse at 50% 95%, rgba(180, 210, 245, 0.15) 0%, transparent 75%);
+  background-size: 180px 140px, 100% 100%;
+  animation: campRainAnim 0.45s linear infinite;
+}
+.camp-screen.weather-rain .camp-ground-terrain {
+  filter: brightness(0.85) contrast(1.1);
+  box-shadow: inset 0 3px 10px rgba(90, 140, 190, 0.4);
+}
+
+/* 2. Tempestade (Storm) */
+.camp-screen.weather-storm .camp-scene {
+  background: linear-gradient(180deg, #12151b 0%, #1a2027 40%, #252b34 70%, #1a1d1b 100%) !important;
+  animation: campLightningFlash 8s ease-in-out infinite;
+}
+.camp-screen.weather-storm .camp-sky {
+  background: linear-gradient(180deg, #0e1116 0%, #161a22 45%, #202630 75%, #181b16 100%) !important;
+}
+.camp-screen.weather-storm .camp-moon {
+  display: none !important;
+}
+.camp-screen.weather-storm .camp-weather-layer {
+  background-image:
+    repeating-linear-gradient(112deg, transparent, transparent 15px, rgba(180, 220, 255, 0.5) 16px, rgba(180, 220, 255, 0.5) 17.5px, transparent 19px),
+    radial-gradient(ellipse at 50% 95%, rgba(190, 225, 255, 0.25) 0%, transparent 70%);
+  background-size: 140px 120px, 100% 100%;
+  animation: campRainAnim 0.3s linear infinite;
+}
+.camp-screen.weather-storm .camp-ground-terrain {
+  filter: brightness(0.75) contrast(1.2);
+  box-shadow: inset 0 4px 14px rgba(70, 110, 160, 0.5);
+}
+
+/* 3. Névoa (Fog) */
+.camp-screen.weather-fog .camp-scene {
+  background: linear-gradient(180deg, #444a52 0%, #5c626c 45%, #767d8a 75%, #585a53 100%) !important;
+}
+.camp-screen.weather-fog .camp-moon {
+  opacity: 0.18 !important;
+  filter: blur(8px) !important;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.4) !important;
+}
+.camp-screen.weather-fog .camp-weather-layer {
+  background:
+    radial-gradient(ellipse 260px 120px at 25% 65%, rgba(210, 220, 230, 0.35) 0%, transparent 80%),
+    radial-gradient(ellipse 280px 130px at 75% 55%, rgba(210, 220, 230, 0.3) 0%, transparent 80%);
+  animation: campFogDriftAnim 16s ease-in-out infinite alternate;
+}
+
+/* 4. Neve (Snow) */
+.camp-screen.weather-snow .camp-scene {
+  background: linear-gradient(180deg, #323d4c 0%, #465466 45%, #627285 75%, #4f5a54 100%) !important;
+}
+.camp-screen.weather-snow .camp-moon {
+  opacity: 0.45 !important;
+  filter: blur(4px) !important;
+}
+.camp-screen.weather-snow .camp-weather-layer {
+  background-image:
+    radial-gradient(2px 2px at 20px 25px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 50px 75px, rgba(255,255,255,0.85), rgba(0,0,0,0)),
+    radial-gradient(3px 3px at 80px 140px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 120px 45px, rgba(255,255,255,0.9), rgba(0,0,0,0)),
+    radial-gradient(3px 3px at 150px 95px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 190px 130px, rgba(255,255,255,0.75), rgba(0,0,0,0));
+  background-size: 220px 180px;
+  animation: campSnowAnim 5s linear infinite;
+}
+
+@keyframes campRainAnim {
+  0% { background-position: 0 0, center; }
+  100% { background-position: -45px 140px, center; }
+}
+
+@keyframes campLightningFlash {
+  0%, 93%, 95%, 100% { filter: brightness(1); }
+  94% { filter: brightness(2.8) contrast(1.4); }
+  96% { filter: brightness(1.7); }
+}
+
+@keyframes campFogDriftAnim {
+  0% { transform: translateX(-20px); opacity: 0.8; }
+  100% { transform: translateX(20px); opacity: 1; }
+}
+
+@keyframes campSnowAnim {
+  0% { background-position: 0 0; }
+  100% { background-position: 35px 180px; }
 }
 
 /* ── Terrain by Biome (Fallback) ── */
