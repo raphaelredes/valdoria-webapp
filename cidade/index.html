@@ -33398,6 +33398,7 @@ var CANON_ITEMS_DB = {
   // === MISC ===
   // 2026-07-01: slot ring (canônico), b:1 removido e desc honesta (bônus de teste de habilidade não tem engine)
   'Anel de Sorte':      {e: _heralIco('ic-mochila'), v:200, r:'rare',     t:['accessory','magic'],   s:'ring', desc:'Um anel simples que dizem atrair boa fortuna.'},
+  'Roupas Comuns':      {e: _heralIco('ic-mochila'), v:5,   r:'common',   t:['clothing'], s:'chest', ac:0, desc:'Vestimentas simples de trabalhador comum. Não atraem atenção. Preserva a Defesa sem Armadura, Artes Marciais e Conjuração Livre.'},
   'Amuleto de Proteção':{e: _heralIco('ic-mochila'), v:300, r:'rare',     t:['accessory','magic'],   s:'necklace', ac:1, desc:'+1 CA. Incrustado com runa.'},
   // 2026-07-01: tag clothing (capa não é armadura) + desc honesta (vantagem em Furtividade não tem engine)
   'Capa do Vento':      {e: _heralIco('ic-mochila'), v:180, r:'uncommon', t:['clothing','magic'],    s:'cloak',  desc:'Capa leve que ondula mesmo sem vento. Favorita de batedores noturnos.'},
@@ -41067,8 +41068,12 @@ function _vinvAdaptItem(invEntry) {
     dmg_die: it.dd || it.dmg_die,
     ac_bonus: it.ac || it.ac_bonus,
     bonus: it.b || it.bonus,
+    spell_bonus: it.sb || it.spell_bonus || 0,
+    spell_dc: it.sdc || it.spell_dc || 0,
+    mp_bonus: it.mb || it.mp_bonus || 0,
+    heal_bonus: it.hlb || it.heal_bonus || 0,
     value: it.v || 0,
-    weight: it.w || it.weight,
+    weight: it.w || it.weight || 0,
     desc: it.desc || '',
     iconId: _vinvIconId(name),
   };
@@ -41114,10 +41119,43 @@ function _vinvBuildStats() {
   // p.hpMax). Antes lia p.max_hp (sempre null) → mostrava "10 / —".
   var hpMax = (p.hpMax != null) ? p.hpMax : (p.max_hp != null ? p.max_hp : '—');
   var mpMax = (p.mpMax != null) ? p.mpMax : (p.max_mp != null ? p.max_mp : '—');
+  var stats = p.stats || {};
+  var cls = String(p.cls || p.class_name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  var isCaster = (cls === 'mago' || cls === 'bruxo' || cls === 'feiticeiro' || cls === 'clerigo' || cls === 'druida' || cls === 'bardo' || cls === 'paladino' || cls === 'patrulheiro');
+  var lvl = p.level || p.lvl || 1;
+  var prof = 2 + Math.floor((Math.max(1, lvl) - 1) / 4);
+
+  var castAttrMod = 0;
+  if (cls === 'clerigo' || cls === 'druida' || cls === 'patrulheiro') castAttrMod = Math.floor(((stats.wis || 10) - 10) / 2);
+  else if (cls === 'paladino' || cls === 'bardo' || cls === 'feiticeiro' || cls === 'bruxo') castAttrMod = Math.floor(((stats.cha || 10) - 10) / 2);
+  else castAttrMod = Math.floor(((stats.int || 10) - 10) / 2);
+
+  var eq = (typeof _getCurrentEquipped === 'function') ? _getCurrentEquipped() : (window.MOCK_PLAYER_EQUIPPED || {});
+  var spellBonus = 0, spellDcBonus = 0;
+  Object.keys(eq || {}).forEach(function(slot) {
+    var itName = eq[slot];
+    if (!itName) return;
+    var it = (typeof getItemData === 'function') ? getItemData(itName) : null;
+    if (it) {
+      if (it.sb) spellBonus += it.sb;
+      if (it.sdc) spellDcBonus += it.sdc;
+    }
+  });
+
+  var atqMag = null;
+  var cdMag = null;
+  if (isCaster) {
+    var totSpellAtk = prof + castAttrMod + spellBonus;
+    atqMag = (totSpellAtk >= 0 ? '+' : '') + totSpellAtk;
+    cdMag = String(8 + prof + castAttrMod + spellDcBonus);
+  }
+
   return {
     ca: p.ac || p.armor_class || '—',
     pv: ((p.hp != null) ? p.hp : '—') + ' / ' + hpMax,
     pm: ((p.mp != null) ? p.mp : '—') + ' / ' + mpMax,
+    atq_mag: atqMag,
+    cd_mag: cdMag,
   };
 }
 /* ════════════════════════════════════════════════════════════════════════
@@ -41160,7 +41198,7 @@ var _AE_FOCUS_TAGS = {
   clerigo: ['holy_symbol', 'focus'],
   paladino: ['holy_symbol', 'focus'],
   druida: ['druidic_focus', 'focus'],
-  bardo: ['focus', 'instrument'],
+  bardo: ['focus', 'instrument', 'musical_instrument'],
 };
 function _aeMod(score) { return Math.floor(((score || 10) - 10) / 2); }
 function _aeAvgDie(dd) {
@@ -41174,28 +41212,51 @@ function _aeArmorCat(tags) {
   if (tags.indexOf('light_armor') !== -1) return 'light';
   return null; // armadura sem categoria → trata como leve (roupas reforçadas)
 }
-function _aeCanWearArmor(cls, tags, name, stats, race) {
+function _aeCanWearArmor(cls, tags, name, stats, race, subrace) {
   var cat = _aeArmorCat(tags) || 'light';
   if (cls === 'druida' && tags.indexOf('metal') !== -1) return false; // PHB p.65
+  var r = String(race || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var sub = String(subrace || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var isDwarf = r.indexOf('ana') !== -1 || r.indexOf('dwarf') !== -1;
+  var isMountainDwarf = isDwarf && (sub.indexOf('montanha') !== -1 || sub.indexOf('mountain') !== -1 || r.indexOf('montanha') !== -1);
+
   if (cat === 'heavy') {
     if (!_AE_HEAVY[cls]) return false;
-    var n = (name || '').toLowerCase();
+    var n = (name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     var minStr = 0;
     if (n.indexOf('malha') !== -1) minStr = 13;
     else if (n.indexOf('placa') !== -1 || n.indexOf('tala') !== -1) minStr = 15;
-    var isDwarf = String(race || '').toLowerCase().indexOf('ana') !== -1 || String(race || '').toLowerCase().indexOf('dwarf') !== -1;
     if (!isDwarf && stats && (stats.str || 10) < minStr) return false; // Evita penalidade de -3m de velocidade!
     return true;
   }
-  if (cat === 'medium') return !!_AE_MEDIUM[cls];
-  return !!_AE_LIGHT[cls];
+  if (cat === 'medium') return !!_AE_MEDIUM[cls] || isMountainDwarf;
+  return !!_AE_LIGHT[cls] || isMountainDwarf;
 }
-function _aeCanUseWeapon(cls, name, tags) {
+function _aeCanUseWeapon(cls, name, tags, race, subrace) {
   var martial = tags.indexOf('martial_weapon') !== -1 || tags.indexOf('martial') !== -1;
   if (!martial) return true; // armas simples: todos
   if (_AE_MARTIAL[cls]) return true;
+
+  var n = (name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var r = String(race || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var sub = String(subrace || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var isDwarf = r.indexOf('ana') !== -1 || r.indexOf('dwarf') !== -1;
+  var isElf = r.indexOf('elf') !== -1;
+  var isDrow = isElf && sub.indexOf('drow') !== -1;
+
+  // D&D 5e PHB p.20: Dwarven Combat Training
+  if (isDwarf && (n.indexOf('machado de batalha') !== -1 || n.indexOf('martelo de guerra') !== -1)) return true;
+
+  // D&D 5e PHB p.23-24: Elf Weapon Training & Drow Weapon Training
+  if (isElf) {
+    if (isDrow) {
+      if (n.indexOf('rapieira') !== -1 || n.indexOf('espada curta') !== -1 || n.indexOf('besta de mao') !== -1) return true;
+    } else {
+      if (n.indexOf('espada longa') !== -1 || n.indexOf('espada curta') !== -1 || n.indexOf('arco longo') !== -1 || n.indexOf('arco curto') !== -1) return true;
+    }
+  }
+
   var allow = _AE_WEAPON_ALLOW[cls] || [];
-  var n = _aeClsKey(name);
   for (var i = 0; i < allow.length; i++) {
     if (n.indexOf(_aeClsKey(allow[i])) !== -1) return true;
   }
@@ -41209,7 +41270,7 @@ function _aeWeaponScore(it, stats) {
   return _aeAvgDie(it.dd) + mod + (it.b || 0) + (it.v || 0) / 1000;
 }
 function _aeGenericScore(it) {
-  return (it.ac || 0) * 2 + (it.hb || 0) + (it.mb || 0) + (it.b || 0) + (it.v || 0) / 1000;
+  return (it.ac || 0) * 4 + (it.sb || 0) * 4 + (it.sdc || 0) * 4 + (it.mb || 0) * 2 + (it.hlb || 0) * 2 + (it.b || 0) * 2 + (it.v || 0) / 1000;
 }
 function _vinvAutoEquipSmart() {
   var p = window.CITY_MOCK_PLAYER || {};
@@ -41241,11 +41302,11 @@ function _vinvAutoEquipSmart() {
       if (excludeName && c.name === excludeName) return;
       var score;
       if (slotKey === 'main_hand') {
-        if (!_aeCanUseWeapon(cls, c.name, c.tags)) return;
+        if (!_aeCanUseWeapon(cls, c.name, c.tags, p.race || p.race_name, p.subrace || p.sub_race)) return;
         score = _aeWeaponScore(c.it, stats);
       } else if (slotKey === 'chest') {
         if (cls === 'monge') return;                       // Defesa sem Armadura
-        if (!_aeCanWearArmor(cls, c.tags, c.name, stats, p.race || p.race_name)) return; // proficiência PHB + Força mínima
+        if (!_aeCanWearArmor(cls, c.tags, c.name, stats, p.race || p.race_name, p.subrace || p.sub_race)) return; // proficiência PHB + Força mínima
         if (cls === 'barbaro') {
           var unarmored = 10 + _aeMod(stats.dex) + _aeMod(stats.con);
           var armScore = (c.it.ac || 0) + (c.tags.indexOf('medium_armor') !== -1 ? Math.min(2, _aeMod(stats.dex)) : _aeMod(stats.dex));
@@ -41253,18 +41314,31 @@ function _vinvAutoEquipSmart() {
         }
         score = _aeGenericScore(c.it);
       } else if (slotKey === 'off_hand') {
-        var isShield = c.tags.indexOf('shield') !== -1 || (c.it.s === 'off_hand' && (c.it.ac || 0) > 0 && c.tags.indexOf('focus') === -1);
+        var mhName = eq.main_hand;
+        if (mhName) {
+          var mhIt = getItemData(mhName) || {};
+          var mhTags = mhIt.t || mhIt.tags || [];
+          if (mhTags.indexOf('two_handed') !== -1) return;
+        }
+        var isShield = c.tags.indexOf('shield') !== -1 || (c.it.s === 'off_hand' && (c.it.ac || 0) > 0 && c.tags.indexOf('focus') === -1 && c.tags.indexOf('spellbook') === -1);
         if (isShield) {
           if (!_AE_SHIELD[cls] || cls === 'monge') return;  // sem prof → nunca
           if (cls === 'druida' && c.tags.indexOf('metal') !== -1) return;
-          score = _aeGenericScore(c.it) + 1;                // escudo prioriza CA
+          score = (c.it.ac || 2) * 5;                // escudo prioriza CA
         } else {
-          // foco de conjuração: só se compatível com a classe
+          // foco de conjuração: compatível com a classe ou por tags/nome
           var ft = _AE_FOCUS_TAGS[cls] || [];
           var match = false;
           for (var i = 0; i < ft.length; i++) { if (c.tags.indexOf(ft[i]) !== -1) { match = true; break; } }
+          var n = (c.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          var isArcane = (cls === 'mago' || cls === 'feiticeiro' || cls === 'bruxo' || cls === 'bardo');
+          var isDivine = (cls === 'clerigo' || cls === 'paladino');
+          var isDruid = (cls === 'druida');
+          if (isArcane && (n.indexOf('foco') !== -1 || n.indexOf('grimor') !== -1 || n.indexOf('varinha') !== -1 || n.indexOf('orbe') !== -1 || n.indexOf('alaude') !== -1 || n.indexOf('lira') !== -1 || n.indexOf('flauta') !== -1)) match = true;
+          if (isDivine && (n.indexOf('simbol') !== -1 || n.indexOf('relicari') !== -1)) match = true;
+          if (isDruid && (n.indexOf('totem') !== -1 || n.indexOf('visco') !== -1)) match = true;
           if (!match) return;
-          score = 1 + (c.it.mb || 0) * 2 + (c.it.b || 0);   // foco habilita conjuração
+          score = 10 + (c.it.sb || 0) * 5 + (c.it.sdc || 0) * 5 + (c.it.mb || 0) * 2 + (c.it.hlb || 0) * 3 + (c.it.b || 0);
         }
       } else {
         score = _aeGenericScore(c.it);
@@ -41327,13 +41401,18 @@ function _vinvBuildConfig() {
   var items = (MOCK_PLAYER_INVENTORY || [])
     .filter(function (e) { return e.q > 0; })
     .map(_vinvAdaptItem);
+  var cp = window.CITY_MOCK_PLAYER || {};
   return {
     title: 'MOCHILA',
     player: {
-      gold: (window.CITY_MOCK_PLAYER || {}).gold || 0,
+      gold: cp.gold || 0,
       items: items,
       loadout: _vinvBuildLoadout(),
       stats: _vinvBuildStats(),
+      hero_class: cp.cls || cp.char_class || cp.class_name || '',
+      race: cp.race || '',
+      subrace: cp.subrace || '',
+      abilities: cp.stats || cp.abilities || {},
     },
     tabs: ['items', 'equip', 'allies'],   // 3 tabs canonical cidade
     showSearch: true,

@@ -1175,6 +1175,190 @@
   }
 
   // ============================================================
+  //  D&D 5e — AVALIAÇÃO DE EQUIPAMENTOS, CA E PENALIDADES
+  //  Calcula a CA projetada e valida restrições PHB (Defesa sem
+  //  Armadura, proficiências, penalidades de conjuração).
+  // ============================================================
+  function _evaluateItemDnd(item, slotKey, cfg, currentItem) {
+    if (!item) return null;
+    var p = (cfg && cfg.player) || {};
+    var rawCls = p.hero_class || p.cls || p.char_class || p.class_name || '';
+    var cls = String(rawCls).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    var rawRace = p.race || '';
+    var race = String(rawRace).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    var rawSub = p.subrace || '';
+    var subrace = String(rawSub).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    var isMountainDwarf = (race === 'anao' || race === 'dwarf') && (subrace.indexOf('montanha') >= 0 || subrace.indexOf('mountain') >= 0);
+
+    var stats = p.abilities || p.stats || {};
+    function _getMod(val) {
+      if (val == null) return 0;
+      var num = parseInt(val, 10);
+      if (isNaN(num)) return 0;
+      if (num >= 6) return Math.floor((num - 10) / 2);
+      return num;
+    }
+    var dexMod = _getMod(stats.dex != null ? stats.dex : (stats.dexterity != null ? stats.dexterity : 10));
+    var wisMod = _getMod(stats.wis != null ? stats.wis : (stats.wisdom != null ? stats.wisdom : 10));
+    var conMod = _getMod(stats.con != null ? stats.con : (stats.constitution != null ? stats.constitution : 10));
+    var strScore = parseInt(stats.str != null ? stats.str : (stats.strength != null ? stats.strength : 10), 10);
+
+    var hasHeavy = (cls === 'guerreiro' || cls === 'paladino' || cls === 'fighter' || cls === 'paladin');
+    var hasMedium = hasHeavy || isMountainDwarf || (cls === 'clerigo' || cls === 'druida' || cls === 'patrulheiro' || cls === 'barbaro' || cls === 'cleric' || cls === 'druid' || cls === 'ranger' || cls === 'barbarian');
+    var hasLight = hasMedium || (cls === 'bardo' || cls === 'ladino' || cls === 'bruxo' || cls === 'bard' || cls === 'rogue' || cls === 'warlock');
+
+    var itTags = (item && item.tags) || [];
+    var isHeavyArmor = itTags.indexOf('heavy_armor') !== -1;
+    var isMediumArmor = itTags.indexOf('medium_armor') !== -1;
+    var isLightArmor = itTags.indexOf('light_armor') !== -1;
+    var isShield = (slotKey === 'off_hand' || itTags.indexOf('shield') !== -1);
+    var isArmor = isHeavyArmor || isMediumArmor || isLightArmor;
+    var isClothing = (slotKey === 'chest' && !isArmor) || itTags.indexOf('clothing') !== -1;
+    var isMetal = itTags.indexOf('metal') !== -1;
+
+    var loadout = p.loadout || {};
+    var currentChest = (slotKey === 'chest') ? (currentItem || loadout.chest) : loadout.chest;
+    var currentOff = (slotKey === 'off_hand') ? (currentItem || loadout.off_hand) : loadout.off_hand;
+
+    function _simAc(chestIt, offIt) {
+      var cTags = (chestIt && chestIt.tags) || [];
+      var cH = cTags.indexOf('heavy_armor') !== -1;
+      var cM = cTags.indexOf('medium_armor') !== -1;
+      var cL = cTags.indexOf('light_armor') !== -1;
+      var cArm = cH || cM || cL;
+      var cBonus = (chestIt && chestIt.ac_bonus != null) ? parseInt(chestIt.ac_bonus, 10) : 0;
+      if (isNaN(cBonus)) cBonus = 0;
+
+      var oBonus = (offIt && offIt.ac_bonus != null) ? parseInt(offIt.ac_bonus, 10) : 0;
+      if (isNaN(oBonus)) oBonus = 0;
+
+      var base = 10;
+      var formula = '';
+      if (cArm) {
+        if (cH) {
+          base = 10 + cBonus;
+          formula = (10 + cBonus) + ' (Pesada)';
+        } else if (cM) {
+          var cDex = Math.min(dexMod, 2);
+          base = 10 + cBonus + cDex;
+          formula = (10 + cBonus) + ' + DES (máx +2)';
+        } else {
+          base = 10 + cBonus + dexMod;
+          formula = (10 + cBonus) + ' + DES';
+        }
+      } else {
+        if ((cls === 'monge' || cls === 'monk') && (!offIt || oBonus === 0)) {
+          base = 10 + dexMod + wisMod;
+          formula = '10 + DES (' + (dexMod >= 0 ? '+' : '') + dexMod + ') + SAB (' + (wisMod >= 0 ? '+' : '') + wisMod + ')';
+        } else if (cls === 'barbaro' || cls === 'barbarian') {
+          base = 10 + dexMod + conMod;
+          formula = '10 + DES (' + (dexMod >= 0 ? '+' : '') + dexMod + ') + CON (' + (conMod >= 0 ? '+' : '') + conMod + ')';
+        } else {
+          base = 10 + dexMod;
+          formula = '10 + DES (' + (dexMod >= 0 ? '+' : '') + dexMod + ')';
+        }
+      }
+      base += oBonus;
+      return { ac: base, formula: formula, wearingArmor: cArm };
+    }
+
+    var currentSim = _simAc(currentChest, currentOff);
+    var newChest = (slotKey === 'chest') ? item : currentChest;
+    var newOff = (slotKey === 'off_hand') ? item : currentOff;
+    var newSim = _simAc(newChest, newOff);
+
+    var currentRealAc = null;
+    if (p.stats && typeof p.stats.ca === 'number') currentRealAc = p.stats.ca;
+    else if (p.stats && typeof p.stats.ca === 'string' && parseInt(p.stats.ca, 10) > 0) currentRealAc = parseInt(p.stats.ca, 10);
+    else if (typeof p.ac === 'number') currentRealAc = p.ac;
+
+    var deltaAc = newSim.ac - currentSim.ac;
+    var finalCurrentAc = currentRealAc != null ? currentRealAc : currentSim.ac;
+    var finalProjectedAc = finalCurrentAc + deltaAc;
+
+    var warnings = [];
+    if (cls === 'monge' || cls === 'monk') {
+      if (isArmor) {
+        warnings.push({
+          text: 'Quebra a Defesa sem Armadura de Monge (perde o bônus de Sabedoria na CA).',
+          shortText: '⚠️ Quebra Defesa sem Armadura',
+          type: 'warn'
+        });
+        warnings.push({
+          text: 'Desativa Artes Marciais e Movimento sem Armadura de Monge (PHB p.78).',
+          shortText: '⚠️ Desativa Artes Marciais',
+          type: 'warn'
+        });
+      } else if (isShield) {
+        warnings.push({
+          text: 'Escudos desativam a Defesa sem Armadura e Artes Marciais de Monge.',
+          shortText: '⚠️ Desativa Habilidades de Monge',
+          type: 'warn'
+        });
+      }
+    } else if (cls === 'barbaro' || cls === 'barbarian') {
+      if (isArmor && deltaAc < 0) {
+        warnings.push({
+          text: 'Quebra a Defesa sem Armadura de Bárbaro, reduzindo sua CA em ' + Math.abs(deltaAc) + ' pontos.',
+          shortText: '⚠️ Quebra Defesa sem Armadura (-' + Math.abs(deltaAc) + ' CA)',
+          type: 'warn'
+        });
+      }
+      if (isHeavyArmor) {
+        warnings.push({
+          text: 'Armaduras pesadas desativam os benefícios da Fúria de Bárbaro (PHB p.48).',
+          shortText: '⚠️ Desativa Bônus de Fúria',
+          type: 'warn'
+        });
+      }
+    } else if (cls === 'mago' || cls === 'wizard' || cls === 'feiticeiro' || cls === 'sorcerer') {
+      if (isArmor && !hasLight) {
+        warnings.push({
+          text: 'Sem proficiência em armaduras: Você NÃO poderá conjurar magias (PHB p.144)!',
+          shortText: '❌ Bloqueia Conjuração de Magias',
+          type: 'danger'
+        });
+        warnings.push({
+          text: 'Desvantagem em qualquer teste ou ataque envolvendo Força ou Destreza.',
+          shortText: '❌ Desvantagem em FOR e DES',
+          type: 'danger'
+        });
+      }
+    } else if (cls === 'druida' || cls === 'druid') {
+      if (isMetal && (isArmor || isShield)) {
+        warnings.push({
+          text: 'Druidas têm tabu sagrado e não vestem armaduras nem usam escudos de metal (PHB p.65).',
+          shortText: '❌ Druida: Proibido Metal',
+          type: 'danger'
+        });
+      }
+    }
+
+    if (isHeavyArmor && strScore < 13 && !isMountainDwarf && race !== 'anao' && race !== 'dwarf') {
+      warnings.push({
+        text: 'Força insuficiente (< 13): reduz sua velocidade de deslocamento em 3 metros (PHB p.144).',
+        shortText: '⚠️ Força Baixa (-3m)',
+        type: 'warn'
+      });
+    }
+
+    var isDowngrade = (deltaAc < 0) || (warnings.length > 0 && isArmor);
+
+    return {
+      currentAc: finalCurrentAc,
+      projectedAc: finalProjectedAc,
+      deltaAc: deltaAc,
+      formulaLabel: newSim.formula,
+      isUnarmored: isClothing,
+      isArmor: isArmor,
+      armorTypeLabel: isHeavyArmor ? 'Pesada' : (isMediumArmor ? 'Média' : (isLightArmor ? 'Leve' : '')),
+      warnings: warnings,
+      isDowngrade: isDowngrade,
+      className: rawCls || cls
+    };
+  }
+
+  // ============================================================
   //  DETAIL MODAL
   //  @param {object} [ctx]  Contexto opcional:
   //    - fromLoadout: true se veio do clique num slot
@@ -1195,6 +1379,11 @@
       epic: 'ÉPICO', legendary: 'LENDÁRIO', quest: 'MISSÃO',
     }[rarity];
 
+    var slotKey = ctx.slotKey || (it.equipped ? it.slot : (it.slot || null));
+    var dndInfo = (slotKey === 'chest' || slotKey === 'off_hand' || it.slot === 'chest' || it.slot === 'off_hand')
+      ? _evaluateItemDnd(it, slotKey || it.slot, cfg, it.equipped ? it : null)
+      : null;
+
     var statsHtml = '';
     if (it.type) statsHtml += _detailStat('Tipo', _tagLabel(it.type) || it.type);
     if (it.slot) statsHtml += _detailStat('Slot', _slotLabel(it.slot));
@@ -1204,7 +1393,14 @@
       if (dType) dLabel += ' (' + _formatDmgType(dType) + ')';
       statsHtml += _detailStat('Dano', dLabel);
     }
-    if (it.ac_bonus) statsHtml += _detailStat('CA', '+' + it.ac_bonus);
+    if (dndInfo && dndInfo.isUnarmored && (it.slot === 'chest' || slotKey === 'chest')) {
+      // 2026-09-18: Exibe explicitamente a CA proporcionada ao usar vestimenta / sem armadura (D&D 5e)
+      var acVal = dndInfo.projectedAc || dndInfo.currentAc || 10;
+      statsHtml += _detailStat('CA Resultante', acVal + ' (' + (dndInfo.formulaLabel || 'Defesa sem Armadura') + ')', 'bonus');
+    } else if (it.ac_bonus) {
+      var acTypeSuffix = (dndInfo && dndInfo.armorTypeLabel) ? ' (' + dndInfo.armorTypeLabel + ')' : '';
+      statsHtml += _detailStat('CA', '+' + it.ac_bonus + acTypeSuffix);
+    }
     if (it.spell_bonus) statsHtml += _detailStat('Ataque Mágico', '+' + it.spell_bonus, 'bonus');
     if (it.spell_dc) statsHtml += _detailStat('CD de Magia', '+' + it.spell_dc, 'bonus');
     if (it.mp_bonus) statsHtml += _detailStat('Bônus de PM', '+' + it.mp_bonus + ' PM', 'bonus');
@@ -1224,10 +1420,27 @@
         + '</div>';
     }
 
+    var dndNoticeHtml = '';
+    if (dndInfo && dndInfo.isUnarmored && (it.slot === 'chest' || slotKey === 'chest')) {
+      dndNoticeHtml = '<div class="vinv-dnd-notice">'
+        + '<span class="vinv-dnd-notice-icon">🛡️</span>'
+        + '<div class="vinv-dnd-notice-content">'
+        +   '<div class="vinv-dnd-notice-title">Vestimenta (Sem Armadura) — D&D 5e</div>'
+        +   '<div class="vinv-dnd-notice-text">Preserva a <strong>Defesa sem Armadura</strong>, <strong>Artes Marciais</strong> e a <strong>Conjuração Livre de Magias</strong>.</div>'
+        + '</div>'
+        + '</div>';
+    } else if (dndInfo && dndInfo.warnings && dndInfo.warnings.length) {
+      dndNoticeHtml = '<div class="vinv-dnd-notice warn">'
+        + '<div class="vinv-dnd-notice-title">⚠️ Penalidades D&D 5e para sua classe:</div>'
+        + '<ul class="vinv-dnd-notice-list">'
+        +   dndInfo.warnings.map(function (w) { return '<li>' + _esc(w.text) + '</li>'; }).join('')
+        + '</ul>'
+        + '</div>';
+    }
+
     // Swap list: se item equipado E há callback onItemSwap (ou onItemEquip
     // como fallback). Sem callback → read-only mode (sem swap UI).
     var swapHtml = '';
-    var slotKey = ctx.slotKey || (it.equipped ? it.slot : null);
     var canSwap = (typeof cfg.onItemSwap === 'function')
       || (typeof cfg.onItemEquip === 'function');
     if (it.equipped && slotKey && canSwap) {
@@ -1277,6 +1490,7 @@
         ? '<div class="vinv-detail-desc"><div class="vinv-detail-desc-text">' + _esc(it.desc) + '</div></div>'
         : '')
       +   tagsHtml
+      +   dndNoticeHtml
       +   swapHtml
       + '</div>'
       + actions;
@@ -1365,6 +1579,7 @@
       if (typeof onConfirm === 'function') onConfirm();
       return;
     }
+    var cfg = _state.config;
     var iconId = _resolveItemIcon(newItem);
     var title = currentItem ? 'Confirmar Troca' : 'Confirmar Equipamento';
     var msg = currentItem
@@ -1374,14 +1589,41 @@
     if (newItem.desc) {
       subHtml = '<div class="vinv-confirm-sub">' + _esc(newItem.desc.slice(0, 95)) + '</div>';
     }
+
+    var dndEval = (slotKey === 'chest' || slotKey === 'off_hand' || newItem.slot === 'chest' || newItem.slot === 'off_hand')
+      ? _evaluateItemDnd(newItem, slotKey || newItem.slot, cfg, currentItem)
+      : null;
+    var warnBox = '';
+    var isDetrimental = false;
+    if (dndEval && (dndEval.deltaAc < 0 || (dndEval.warnings && dndEval.warnings.length > 0))) {
+      isDetrimental = true;
+      var wList = [];
+      if (dndEval.deltaAc < 0) {
+        wList.push('Sua CA cairá de <strong>' + dndEval.currentAc + '</strong> para <strong>' + dndEval.projectedAc + '</strong> (' + dndEval.deltaAc + ' CA).');
+      }
+      if (dndEval.warnings && dndEval.warnings.length) {
+        dndEval.warnings.forEach(function (w) { wList.push(w.text); });
+      }
+      warnBox = '<div class="vinv-confirm-warn">'
+        + '<div class="vinv-confirm-warn-title">⚠️ Atenção — Regras D&D 5e (' + _esc(dndEval.className || 'sua classe') + '):</div>'
+        + '<ul class="vinv-confirm-warn-list">'
+        +   wList.map(function (txt) { return '<li>' + txt + '</li>'; }).join('')
+        + '</ul>'
+        + '</div>';
+    }
+
+    var btnLabel = isDetrimental ? 'Equipar Mesmo Assim' : 'Equipar';
+    var btnCls = isDetrimental ? 'vinv-btn warn-danger' : 'vinv-btn primary';
+
     card.innerHTML = ''
       + '<div class="vinv-confirm-title">' + title + '</div>'
       + '<div class="vinv-confirm-icon">' + _iconSrc(iconId, newItem.name) + '</div>'
       + '<div class="vinv-confirm-msg">' + msg + '</div>'
       + subHtml
+      + warnBox
       + '<div class="vinv-confirm-actions">'
       +   '<button type="button" class="vinv-btn" data-action="confirm-cancel">Cancelar</button>'
-      +   '<button type="button" class="vinv-btn primary" data-action="confirm-ok">Equipar</button>'
+      +   '<button type="button" class="' + btnCls + '" data-action="confirm-ok">' + btnLabel + '</button>'
       + '</div>';
 
     ov.classList.add('active');
@@ -1434,14 +1676,48 @@
     alternatives.forEach(function (alt, i) {
       var iconId = _resolveItemIcon(alt);
       var altRarity = alt.rarity || 'common';
-      html += '<div class="vinv-swap-row r-' + altRarity + (blocked ? ' blocked' : '') + '" data-swap-idx="' + i + '">'
-        // 2026-06-12 (review): usa o NOME do alternativo (alt.name) — antes usava
-        // `it` (não existe neste escopo) → o slug do PNG saía errado e a swap list
-        // mostrava ícone do item atual / fallback SVG em vez do ícone do alternativo.
+      var dndEval = (slotKey === 'chest' || slotKey === 'off_hand' || alt.slot === 'chest' || alt.slot === 'off_hand')
+        ? _evaluateItemDnd(alt, slotKey || alt.slot, cfg, currentItem)
+        : null;
+
+      var deltaBadge = '';
+      var warnsHtml = '';
+      var isDowngrade = false;
+
+      if (dndEval) {
+        isDowngrade = dndEval.isDowngrade;
+        if (dndEval.deltaAc < 0) {
+          deltaBadge = '<span class="vinv-swap-delta neg" title="Reduz sua Classe de Armadura">🔻 ' + dndEval.deltaAc + ' CA (' + dndEval.projectedAc + ')</span>';
+        } else if (dndEval.deltaAc > 0) {
+          deltaBadge = '<span class="vinv-swap-delta pos" title="Aumenta sua Classe de Armadura">🔺 +' + dndEval.deltaAc + ' CA (' + dndEval.projectedAc + ')</span>';
+        } else if (dndEval.projectedAc != null) {
+          deltaBadge = '<span class="vinv-swap-delta eq" title="Mesma Classe de Armadura">(=) CA ' + dndEval.projectedAc + '</span>';
+        }
+
+        if (dndEval.warnings && dndEval.warnings.length) {
+          warnsHtml = '<div class="vinv-swap-warns">'
+            + dndEval.warnings.map(function (w) {
+                return '<span class="vinv-warn-pill ' + (w.type || 'warn') + '">' + _esc(w.shortText || w.text) + '</span>';
+              }).join('')
+            + '</div>';
+        }
+      }
+
+      var metaParts = [];
+      if (deltaBadge) metaParts.push(deltaBadge);
+      var standardMeta = _buildMeta(alt);
+      if (standardMeta) metaParts.push(standardMeta);
+
+      var rowCls = 'vinv-swap-row r-' + altRarity + (blocked ? ' blocked' : '') + (isDowngrade ? ' downgrade' : '');
+      html += '<div class="' + rowCls + '" data-swap-idx="' + i + '">'
         +   _iconSrc(iconId, alt.name || iconId)
         +   '<div class="vinv-swap-info">'
-        +     '<div class="vinv-swap-name">' + _esc(alt.name) + '</div>'
-        +     '<div class="vinv-swap-meta">' + _buildMeta(alt) + '</div>'
+        +     '<div class="vinv-swap-name-row">'
+        +       '<div class="vinv-swap-name">' + _esc(alt.name) + '</div>'
+        +       (isDowngrade ? '<span class="vinv-badge-downgrade">Pior</span>' : '')
+        +     '</div>'
+        +     '<div class="vinv-swap-meta">' + metaParts.join(' · ') + '</div>'
+        +     warnsHtml
         +   '</div>'
         + '</div>';
     });
@@ -1667,7 +1943,7 @@
 
     // Armaduras, vestimentas e partes de vestuário
     armor: 'Armadura', light_armor: 'Armadura Leve', medium_armor: 'Armadura Média',
-    heavy_armor: 'Armadura Pesada', shield: 'Escudo', clothing: 'Vestimenta', cloth: 'Tecido',
+    heavy_armor: 'Armadura Pesada', shield: 'Escudo', clothing: 'Vestimenta (Sem Armadura)', cloth: 'Tecido',
     chest: 'Peitoral', head: 'Cabeça', off_hand: 'Mão Secundária',
 
     // Grimórios, focos arcanos/mágicos e livros

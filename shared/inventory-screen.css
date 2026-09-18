@@ -2664,3 +2664,182 @@
 
 .vinv-swap-meta .vinv-ac { color: var(--vinv-r-rare); font-weight: 600; }
 
+/* ════════════════════════════════════════════════════════════
+   D&D 5e — Delta de CA, Alertas de Regras e Avisos
+   ════════════════════════════════════════════════════════════ */
+.vinv-swap-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.vinv-badge-downgrade {
+  font-size: calc(8.5px * var(--v-font-scale, 1));
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(220, 60, 50, 0.18);
+  border: 1px solid rgba(220, 60, 50, 0.4);
+  color: #ff756d;
+  flex-shrink: 0;
+}
+
+.vinv-swap-delta {
+  font-weight: 700;
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+  border-radius: 4px;
+  padding: 1px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.vinv-swap-delta.neg {
+  color: #ff6b6b;
+  background: rgba(220, 60, 50, 0.15);
+  border: 1px solid rgba(220, 60, 50, 0.35);
+}
+.vinv-swap-delta.pos {
+  color: #5cd870;
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+}
+.vinv-swap-delta.eq {
+  color: var(--vinv-text-muted);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.vinv-swap-warns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.vinv-warn-pill {
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1.3;
+}
+.vinv-warn-pill.warn {
+  color: #f5b061;
+  background: rgba(235, 145, 40, 0.15);
+  border: 1px solid rgba(235, 145, 40, 0.35);
+}
+.vinv-warn-pill.danger {
+  color: #ff6e6e;
+  background: rgba(225, 50, 50, 0.15);
+  border: 1px solid rgba(225, 50, 50, 0.4);
+}
+
+.vinv-swap-row.downgrade {
+  border-left: 3px solid #d9534f;
+  background: rgba(35, 20, 15, 0.4);
+}
+
+/* Caixa de aviso D&D no Detalhe do Item */
+.vinv-dnd-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 0 6px;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, rgba(45, 34, 22, 0.8), rgba(30, 22, 14, 0.9));
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 7px;
+  font-size: calc(11px * var(--v-font-scale, 1));
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+.vinv-dnd-notice-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.vinv-dnd-notice-content {
+  flex: 1;
+  min-width: 0;
+}
+.vinv-dnd-notice-title {
+  font-family: var(--vinv-font-display);
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+  font-weight: 700;
+  color: var(--vinv-gold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.vinv-dnd-notice-text {
+  color: var(--vinv-text);
+}
+.vinv-dnd-notice-text strong {
+  color: #f7d58b;
+}
+
+.vinv-dnd-notice.warn {
+  flex-direction: column;
+  background: rgba(45, 22, 18, 0.8);
+  border-color: rgba(220, 80, 60, 0.45);
+}
+.vinv-dnd-notice.warn .vinv-dnd-notice-title {
+  color: #ff756d;
+}
+.vinv-dnd-notice-list {
+  margin: 3px 0 0 16px;
+  padding: 0;
+  color: #ffcccc;
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+}
+.vinv-dnd-notice-list li {
+  margin-bottom: 2px;
+}
+
+/* Modal de Confirmação com Advertência D&D */
+.vinv-confirm-warn {
+  margin: 10px 0 4px;
+  padding: 8px 12px;
+  background: rgba(50, 20, 18, 0.6);
+  border: 1px solid rgba(220, 60, 50, 0.45);
+  border-radius: 7px;
+  text-align: left;
+  font-size: calc(11px * var(--v-font-scale, 1));
+  line-height: 1.4;
+}
+.vinv-confirm-warn-title {
+  font-family: var(--vinv-font-display);
+  font-weight: 700;
+  color: #ff756d;
+  font-size: calc(11px * var(--v-font-scale, 1));
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+}
+.vinv-confirm-warn-row {
+  color: #f5b061;
+  margin-bottom: 4px;
+}
+.vinv-confirm-warn-list {
+  margin: 4px 0 0 16px;
+  padding: 0;
+  color: #f8c8c5;
+}
+.vinv-confirm-warn-list li {
+  margin-bottom: 3px;
+}
+
+.vinv-btn.warn-danger {
+  background: linear-gradient(180deg, #8c2a25, #631915);
+  border-color: #b03a35;
+  color: #fff;
+}
+.vinv-btn.warn-danger:hover {
+  background: linear-gradient(180deg, #9e302a, #731e1a);
+  border-color: #c94640;
+}
+

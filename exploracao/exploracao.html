@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T12:15:33Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T14:34:51Z - do not edit directly, edit source -->
 
 
 
@@ -36004,7 +36004,11 @@ function _exploracaoItemCategory(item) {
       || name.indexOf('botas') >= 0 || name.indexOf('cota') >= 0
       || name.indexOf('escudo') >= 0 || name.indexOf('garras') >= 0
       || name.indexOf('machado') >= 0 || name.indexOf('martelo') >= 0
-      || name.indexOf('peitoral') >= 0 || name.indexOf('armadura') >= 0) return 'equip';
+      || name.indexOf('peitoral') >= 0 || name.indexOf('armadura') >= 0
+      || name.indexOf('roupa') >= 0 || name.indexOf('veste') >= 0
+      || name.indexOf('vestimenta') >= 0 || name.indexOf('traje') >= 0
+      || name.indexOf('túnica') >= 0 || name.indexOf('tunica') >= 0
+      || name.indexOf('capa') >= 0 || name.indexOf('manto') >= 0) return 'equip';
   if (name.indexOf('turquesa') >= 0 || name.indexOf('ametista') >= 0
       || name.indexOf('rubi') >= 0 || name.indexOf('esmeralda') >= 0
       || name.indexOf('diamante') >= 0 || name.indexOf('safira') >= 0) return 'gem';
@@ -36042,13 +36046,17 @@ function _vinvExpSlug(s) {
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
-function _vinvExpCategoryToTags(cat) {
+function _vinvExpCategoryToTags(cat, name) {
+  var n = String(name || '').toLowerCase();
+  if (n.indexOf('roupa') >= 0 || n.indexOf('veste') >= 0 || n.indexOf('vestimenta') >= 0 || n.indexOf('traje') >= 0 || n.indexOf('tunica') >= 0 || n.indexOf('túnica') >= 0) {
+    return ['clothing'];
+  }
   return ({
     'use':   ['consumable'],
     'equip': ['weapon'],  // genérico — pode ser arma OU armadura
     'gem':   ['gem', 'valuable'],
     'rune':  ['magic'],
-    'misc':  ['material'],
+    'misc':  ['misc'],
   })[cat] || [];
 }
 // Sessão #67: normalização defensiva do nome. Loot malformado (dict {n,ico,rare}
@@ -36079,11 +36087,14 @@ function _vinvExpAdaptItem(item) {
   var tags = item.tags || item.t || db.t || (db.tags ? db.tags : null);
   if (!tags || !tags.length) {
     var cat = _exploracaoItemCategory(item);
-    tags = _vinvExpCategoryToTags(cat);
+    tags = _vinvExpCategoryToTags(cat, name);
   }
-  var value = (item.value != null) ? item.value : (item.v != null ? item.v : (db.v != null ? db.v : (db.value || 0)));
-  var desc = item.desc || db.desc || '';
   var slot = item.slot || item.s || db.s || db.slot || '';
+  if (slot === 'chest' && (!tags || (!tags.includes('armor') && !tags.includes('light_armor') && !tags.includes('medium_armor') && !tags.includes('heavy_armor')))) {
+    if (!tags || !tags.length || tags.indexOf('material') !== -1 || tags.indexOf('misc') !== -1) {
+      tags = ['clothing'];
+    }
+  }
   var dmgDie = item.dmg_die || item.dd || db.dd || db.dmg_die || '';
   var dmgType = item.dmg_type || item.dt || db.dt || db.dmg_type || '';
   var acBonus = (item.ac_bonus != null) ? item.ac_bonus : (item.ac != null ? item.ac : (db.ac != null ? db.ac : db.ac_bonus));
@@ -36688,6 +36699,9 @@ function _vinvExpBuildConfig() {
     .filter(function (e) { return (e.quantity || 0) > 0; })
     .map(_vinvExpAdaptItem);
   var gold = (typeof S !== 'undefined' && (S.gold || (S.player && S.player.gold))) || 0;
+  var pl = (typeof S !== 'undefined' && S && S.player) || {};
+  var heroCls = pl.char_class || pl.hero_class || pl.cls || '';
+  var abilities = pl.abilities || pl.stats || {};
   var loadout = _vinvExpReadLoadout(items);
   return {
     title: 'MOCHILA',
@@ -36696,6 +36710,10 @@ function _vinvExpBuildConfig() {
       items: items,
       loadout: loadout,
       stats: _vinvExpReadStats(),
+      hero_class: heroCls,
+      race: pl.race || '',
+      subrace: pl.subrace || '',
+      abilities: abilities,
     },
     tabs: ['items', 'equip'],
     showSearch: true,
