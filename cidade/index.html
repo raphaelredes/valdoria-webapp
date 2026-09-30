@@ -51092,9 +51092,21 @@ function _innConsumeMeal(p, mealKey){
   if (count === 1 && meal.first_taste_speech) {
     flavor = '<i>Martha: "' + meal.first_taste_speech + '"</i><br><br>' + flavor;
   }
-  if (hpGain > 0) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || (preHp + hpGain) });
-  if (mpGain > 0) deltas.push({ type:'mp', label:'MP', from: preMp, to: p.mp, max: preMpMax });
-  if (cost > 0) deltas.push({ type:'gold', label:'Bolsa', from: preGold + cost, to: p.gold, max: Math.max(preGold + cost, 1), bar: false });
+  if (hpGain > 0 && preHp < (p.hpMax || preHp)) {
+    deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || (preHp + hpGain) });
+  } else {
+    rewards.push({ type:'item', amount: 0, label: '❤️ HP: ' + p.hp + '/' + (p.hpMax || preHp) + ' (máximo)' });
+  }
+  if (mpGain > 0 && preMp < preMpMax) {
+    deltas.push({ type:'mp', label:'MP', from: preMp, to: p.mp, max: preMpMax });
+  } else if (preMpMax > 0) {
+    rewards.push({ type:'item', amount: 0, label: '💧 MP: ' + p.mp + '/' + preMpMax + ' (máximo)' });
+  }
+  if (cost > 0) {
+    deltas.push({ type:'gold', label:'Bolsa', from: preGold + cost, to: p.gold, max: Math.max(preGold + cost, 1), bar: false });
+  } else {
+    rewards.push({ type:'item', amount: 0, label: '🪙 Custo: Grátis (' + p.gold + ' Valdoritas na bolsa)' });
+  }
   rewards.push({ type:'item', amount: 0, label: '🍴 Status: Saciado (1 refeição por descanso)' });
 
   if (typeof vToast === 'function') {
@@ -58268,7 +58280,16 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
       }
       window.vEncounter.render(
         { npc: data.npc || npc || { name: 'Martha' }, script: data.result_script, choices: [{ id: 'done', label: '↩ Voltar' }] },
-        { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
+        { player: p, onChoice: function(){
+            try { window.vEncounter.close(); } catch(_){}
+            if (typeof refreshHud === 'function') refreshHud();
+            if (venue === 'inn' && typeof _renderCityPopup === 'function') {
+              var csp = document.getElementById('city-subscreen-popup');
+              if (csp && csp.classList.contains('active')) {
+                _renderCityPopup('inn');
+              }
+            }
+        } }
       );
     }
     return;
@@ -58284,6 +58305,10 @@ function _applyHudFromDialogue(d){
     if (typeof d.mp === 'number') p.mp = d.mp;
     if (typeof d.max_hp === 'number') { p.hpMax = d.max_hp; p.maxHp = d.max_hp; }
     if (typeof d.max_mp === 'number') { p.mpMax = d.max_mp; p.maxMp = d.max_mp; }
+    if (typeof d.inn_meal_eaten === 'boolean') {
+      p.metadata = p.metadata || {};
+      p.metadata.inn_meal_eaten = d.inn_meal_eaten;
+    }
     // PADRAO_LOCAIS (indicador de bônus ativo): reflete os efeitos temporários do
     // servidor (boato/etc.) na ficha + card. O servidor é a autoridade.
     if (d.temp_bonuses && typeof d.temp_bonuses === 'object') p.temp_bonuses = d.temp_bonuses;
