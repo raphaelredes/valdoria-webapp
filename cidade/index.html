@@ -30254,7 +30254,7 @@ var CANON_MEALS_DB = {
   "pao_mel": {
     "name": "Pão com Mel",
     "emoji": "",
-    "cost": 2,
+    "cost": 1,
     "hp": 1,
     "mp": 1,
     "desc": "Pão fresco da manhã com mel silvestre. Simples e reconfortante.",
@@ -50968,6 +50968,17 @@ function _innShowDreamPopup(player, tier, allies){
 // flavor_good (default), flavor_great (buff_chance hit), flavor_bad (debuff_chance hit).
 // Mostra resultado via _showServiceResultPopup com rewards block (HP/MP delta).
 function _innConsumeMeal(p, mealKey){
+  if (p && p.metadata && p.metadata.inn_meal_eaten){
+    if (typeof vToast === 'function') {
+      vToast('Você já comeu nesta visita! Descanse em um quarto para recomeçar o dia.', 'info');
+    }
+    _showServiceResultPopup({
+      icon: '🍽️', npc: 'Martha',
+      narrative: '<i>"Calma, meu bem! Você acabou de limpar o prato. Deixa essa comida assentar no bucho antes de pensar em repetir!"</i>',
+      onContinue: function(){ navigateBack(); }
+    });
+    return;
+  }
   var meals = (typeof CANON_MEALS_DB !== 'undefined') ? CANON_MEALS_DB : null;
   // Fallback se canonical nao tiver a entry esperada
   if (!meals || !meals[mealKey]){
@@ -50985,6 +50996,8 @@ function _innConsumeMeal(p, mealKey){
   var mpGain = meal.mp || 0;
   p.hp = Math.min(p.hpMax || (preHp + hpGain), preHp + hpGain);
   p.mp = Math.min(preMpMax, preMp + mpGain);
+  p.metadata = p.metadata || {};
+  p.metadata.inn_meal_eaten = true;
   // Rolagem buff/debuff canonical
   var rollBuff = Math.random();
   var rollDebuff = Math.random();
@@ -51410,7 +51423,7 @@ var SUBSCREEN_DATA = {
       [_heralIco('ic-mochila'), 'Ensopado de Javali', '1 <span class="vi vi-coin sm"></span> — +3 HP / +1 ATK 30%', 'meal_stew'],
       [_heralIco('ic-mochila'), 'Torta de Cogumelos', '1 <span class="vi vi-coin sm"></span> — +2 HP / +1 MP', 'meal_pie'],
       [_heralIco('ic-mochila'), 'Costela Defumada', '2 <span class="vi vi-coin sm"></span> — +5 HP / +2 HP temp', 'meal_ribs'],
-      [_heralIco('ic-mochila'), 'Pão com Mel', 'Grátis — +1 HP / +1 MP', 'meal_bread'],
+      [_heralIco('ic-mochila'), 'Pão com Mel', '1 <span class="vi vi-coin sm"></span> — +1 HP / +1 MP', 'meal_bread'],
       [_heralIco('ic-mochila'), 'Peixe Grelhado', '1 <span class="vi vi-coin sm"></span> — +2 HP / +1 INT', 'meal_fish'],
       [_heralIco('ic-mochila'), 'Caldo de Carne', '1 <span class="vi vi-coin sm"></span> — +4 HP / +1 CON Save', 'meal_broth'],
       [_heralIco('ic-mochila'), 'Queijo c/ Frutas', '1 <span class="vi vi-coin sm"></span> — +1 HP / +2 MP', 'meal_cheese'],
