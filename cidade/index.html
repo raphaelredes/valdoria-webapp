@@ -9172,6 +9172,30 @@ body.perf-lite .vc-action-btn { transition: none; }
       // pra a aba "Disponíveis" do diário renderizar quests reais (não hardcoded).
       try { _refreshServerBoard(); } catch(_brde){ console.warn('[CITY] board fetch failed', _brde); }
       try { _refreshDailyState(); } catch(_dse){ console.warn('[CITY] daily state fetch failed', _dse); }
+      // FASE 3: se o snapshot do /api/auth/characters já trouxe city_discovery, hidrata imediatamente!
+      if (picked.city_discovery && typeof picked.city_discovery === 'object') {
+        var _pcd = picked.city_discovery;
+        if (Array.isArray(_pcd.completed_locations)) {
+          _pcd.completed_locations.forEach(function(cb){
+            if (p.completed_locations.indexOf(cb) < 0) p.completed_locations.push(cb);
+          });
+        }
+        if (Array.isArray(_pcd.discovered_locations)) {
+          _pcd.discovered_locations.forEach(function(cb){
+            if (p.discovered_locations.indexOf(cb) < 0) p.discovered_locations.push(cb);
+          });
+        }
+        if (Array.isArray(_pcd.seen_locations)) {
+          _pcd.seen_locations.forEach(function(cb){
+            if (p.seen_locations.indexOf(cb) < 0) p.seen_locations.push(cb);
+          });
+        }
+        try {
+          var _cKey = 'valdoria_completed_locations_' + (window._charId || 'default');
+          localStorage.setItem(_cKey, JSON.stringify(p.completed_locations));
+        } catch(_){}
+        p._discoveryHydrated = true;
+      }
       try { _refreshDiscoveryState(); } catch(_dce){ console.warn('[CITY] discovery state fetch failed', _dce); }
       try { _refreshNpcState(); } catch(_npe){ console.warn('[CITY] npc state fetch failed', _npe); }
       try { _refreshAchProgress(); } catch(_ape){ console.warn('[CITY] ach progress fetch failed', _ape); }
@@ -11105,6 +11129,22 @@ function _ensureCityState(){
         if (Array.isArray(arr)) {
           arr.forEach(function(cb){
             if (p.seen_locations.indexOf(cb) < 0) p.seen_locations.push(cb);
+          });
+        }
+      }
+    } catch(_){}
+  }
+  // Hydrate completed_locations from localStorage (síncrono na inicialização por char)
+  if (!p._completedLocationsHydrated) {
+    p._completedLocationsHydrated = true;
+    try {
+      var cKey = 'valdoria_completed_locations_' + (window._charId || 'default');
+      var cStored = localStorage.getItem(cKey);
+      if (cStored) {
+        var cArr = JSON.parse(cStored);
+        if (Array.isArray(cArr)) {
+          cArr.forEach(function(cb){
+            if (p.completed_locations.indexOf(cb) < 0) p.completed_locations.push(cb);
           });
         }
       }
@@ -22197,9 +22237,25 @@ function _refreshDiscoveryState(){
         srvSeen.forEach(function(cb){ if (merged.indexOf(cb) < 0) merged.push(cb); });
         p.seen_locations = merged;
         p.discovered_locations = (d.discovered_locations || []).slice();
-        p.completed_locations = (d.completed_locations || []).slice();
+        var prevCompleted = (p.completed_locations || []).slice();
+        var srvCompleted = Array.isArray(d.completed_locations) ? d.completed_locations : [];
+        srvCompleted.forEach(function(cb){
+          if (p.completed_locations.indexOf(cb) < 0) p.completed_locations.push(cb);
+        });
         p.active_discovery = d.active_discovery || null;
         p._discoveryHydrated = true;
+
+        try {
+          var cKey = 'valdoria_completed_locations_' + (window._charId || 'default');
+          localStorage.setItem(cKey, JSON.stringify(p.completed_locations));
+        } catch(_){}
+
+        // Se novos locais foram revelados ou a lista mudou enquanto no hub,
+        // re-renderiza imediatamente para não exigir troca de abas!
+        var hasNew = p.completed_locations.some(function(cb){ return prevCompleted.indexOf(cb) < 0; });
+        if (hasNew && _currentScreen === 'hub' && typeof renderCurrentScreen === 'function') {
+          try { renderCurrentScreen(); } catch(_rcse){}
+        }
       }
     }
   }).catch(function(e){ console.warn('[CITY] discovery state failed', e); });
