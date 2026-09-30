@@ -506,6 +506,68 @@ body.perf-lite #encounter-overlay.active .enc-card {
 .enc-reward-val-xp   { color: #88c878; }
 .enc-reward-val-item { font-size: calc(16px * var(--v-font-scale, 1)); }
 
+/* ── Bloco de ALTERAÇÃO DE STATUS / NOTIFICAÇÃO TÉCNICA ──────────────
+   Exibe deltas técnicos (HP/MP recuperados ou perdidos, ouro pago, buffs,
+   condições removidas ou "sem efeito / saciado").
+   Aparece de forma clara, explícita e elegante no diálogo. */
+.enc-technical-line {
+  visibility: hidden;
+  text-align: center;
+}
+.enc-body.revealed .enc-technical-line {
+  visibility: visible;
+  animation: encRewardIn 0.45s ease both;
+}
+.enc-technical {
+  padding: var(--v-space-sm, 6px) var(--v-space-md, 10px);
+  margin: var(--v-space-sm, 6px) 0;
+  border-radius: var(--v-radius, 8px);
+  border: 1px solid rgba(212, 168, 80, 0.35);
+  background: rgba(30, 24, 18, 0.75);
+}
+.enc-technical-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.enc-technical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.enc-technical-item {
+  font-family: var(--v-font-body, 'Marcellus', serif);
+  font-size: calc(12.5px * var(--v-font-scale, 1));
+  line-height: 1.35;
+  color: #e2d9cd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.enc-tech-gain {
+  color: #7ece7e;
+  font-weight: 600;
+}
+.enc-tech-loss {
+  color: #df7262;
+  font-weight: 600;
+}
+.enc-tech-warn {
+  color: #e8c45a;
+  font-style: italic;
+}
+.enc-tech-neutral {
+  color: #bfaea0;
+}
+
 /* ── Bloco FICHA DE PERSONAGEM estruturado (FASE 5, "Ver ficha" do recruta) ──
    Apresentação ÉPICA da ficha (retrato grande dourado + grid de atributos +
    seções). Construído como nó DOM pelo renderer (_buildCharacterSheetEl —

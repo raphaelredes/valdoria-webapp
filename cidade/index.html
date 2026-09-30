@@ -50568,12 +50568,18 @@ function _renderCityPopup(key){
 }
 
 function _renderInnMealsPopup(bodyEl, d){
+  var p = (typeof vPlayer !== 'undefined' ? vPlayer : window.CITY_MOCK_PLAYER) || {};
+  var isEaten = !!(p.metadata && p.metadata.inn_meal_eaten);
   // Converte buttons tuples [icon, label, info, cb] → items[] AAA
   var items = (d.buttons || []).map(function(btn){
     var info = btn[2] || '';
     var parts = info.split(' — ');
     var badge = parts[0] || '';   // ex: "1 <coin>" ou "Grátis"
     var desc  = parts.slice(1).join(' — ') || '';  // ex: "+3 HP / +1 ATK 30%"
+    if (isEaten) {
+      badge = 'Saciado';
+      desc = 'Sem efeito adicional — Personagem já alimentado (1 refeição por descanso)';
+    }
     return {
       icon: btn[0],
       label: btn[1],
@@ -50582,18 +50588,21 @@ function _renderInnMealsPopup(bodyEl, d){
       _cb: btn[3]
     };
   });
+  var flavor = isEaten
+    ? '<i>Martha sorri carinhosamente: "Você já está forrado, meu bem! Deixa essa comida assentar no bucho antes de comer de novo. Se precisar recuperar mais vida, recomendo descansar num quarto."</i>'
+    : (d.flavor || '<i>"Cardápio rotativo do dia," diz Martha. "Tudo fresquinho."</i>');
   _aaaListSubScreen({
     theme: 'inn',
     stackKey: 'inn_meals',
     icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:#d4a850;"><use href="#ic-mochila"/></svg>',
     title: 'CARDÁPIO · ESTALAGEM',
-    subtitle: 'pratos do dia',
-    flavor: d.flavor || '<i>"Cardápio rotativo do dia," diz Martha. "Tudo fresquinho."</i>',
+    subtitle: isEaten ? 'já alimentado' : 'pratos do dia',
+    flavor: flavor,
     items: items,
     onPick: function(item){
       var cb = item._cb;
       if (window.ACTION_HANDLERS && typeof window.ACTION_HANDLERS[cb] === 'function') {
-        window.ACTION_HANDLERS[cb](window.CITY_MOCK_PLAYER || {});
+        window.ACTION_HANDLERS[cb](p);
       } else if (cb && cb.indexOf('nav:') === 0 && typeof navigateTo === 'function') {
         navigateTo(cb.slice(4));
       }
@@ -50970,11 +50979,13 @@ function _innShowDreamPopup(player, tier, allies){
 function _innConsumeMeal(p, mealKey){
   if (p && p.metadata && p.metadata.inn_meal_eaten){
     if (typeof vToast === 'function') {
-      vToast('Você já comeu nesta visita! Descanse em um quarto para recomeçar o dia.', 'info');
+      vToast('⚠️ Sem efeito: Você já comeu nesta visita! Descanse em um quarto para recomeçar o dia.', 'warn');
     }
     _showServiceResultPopup({
       icon: '🍽️', npc: 'Martha',
       narrative: '<i>"Calma, meu bem! Você acabou de limpar o prato. Deixa essa comida assentar no bucho antes de pensar em repetir!"</i>',
+      deltas: [],
+      rewards: [{ type: 'item', amount: 0, label: '⚠️ Sem efeito técnico — Estômago saciado (1 refeição por descanso)' }],
       onContinue: function(){ navigateBack(); }
     });
     return;
@@ -50998,6 +51009,11 @@ function _innConsumeMeal(p, mealKey){
   p.mp = Math.min(preMpMax, preMp + mpGain);
   p.metadata = p.metadata || {};
   p.metadata.inn_meal_eaten = true;
+  // Tracking persistente de refeições consumidas
+  p.metadata.inn_meal_history = p.metadata.inn_meal_history || {};
+  var count = (p.metadata.inn_meal_history[mealKey] || 0) + 1;
+  p.metadata.inn_meal_history[mealKey] = count;
+
   // Rolagem buff/debuff canonical
   var rollBuff = Math.random();
   var rollDebuff = Math.random();
@@ -51010,18 +51026,30 @@ function _innConsumeMeal(p, mealKey){
   if (buffChance > 0 && rollBuff < buffChance && meal.buff){
     flavor = meal.flavor_great || meal.flavor_good || meal.desc;
     rewards.push({ type:'item', amount: 1, label: meal.buff.label + ' — ' + (meal.buff.desc || '+' + meal.buff.value) });
-    p.metadata = p.metadata || {};
     p.metadata.meal_buff = { key: meal.buff.key, value: meal.buff.value, turns: meal.buff.turns };
   } else if (debuffChance > 0 && rollDebuff < debuffChance && meal.debuff){
     flavor = meal.flavor_bad || meal.desc;
-    p.metadata = p.metadata || {};
     p.metadata.meal_debuff = { key: meal.debuff.key, value: meal.debuff.value, turns: meal.debuff.turns };
   } else {
     flavor = meal.flavor_good || meal.desc;
   }
+  if (count === 1 && meal.first_taste_speech) {
+    flavor = '<i>Martha: "' + meal.first_taste_speech + '"</i><br><br>' + flavor;
+  }
   if (hpGain > 0) deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || (preHp + hpGain) });
   if (mpGain > 0) deltas.push({ type:'mp', label:'MP', from: preMp, to: p.mp, max: preMpMax });
   if (cost > 0) deltas.push({ type:'gold', label:'Bolsa', from: preGold + cost, to: p.gold, max: Math.max(preGold + cost, 1), bar: false });
+  rewards.push({ type:'item', amount: 0, label: '🍴 Status: Saciado (1 refeição por descanso)' });
+
+  if (typeof vToast === 'function') {
+    var toastParts = [];
+    if (hpGain > 0) toastParts.push('+' + hpGain + ' HP');
+    if (mpGain > 0) toastParts.push('+' + mpGain + ' MP');
+    if (cost > 0) toastParts.push('-' + cost + ' Valdoritas');
+    toastParts.push('Saciado');
+    vToast(toastParts.join(' · '), 'ok');
+  }
+
   refreshHud();
   _showServiceResultPopup({
     icon: meal.emoji || '', npc: meal.name || 'Refeição',
@@ -58164,6 +58192,11 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
   // efeito aplicado → atualiza HUD + narra consequência PADRAO_ALDRIC
   if (data.result_script) {
     _applyHudFromDialogue(data);
+    if (data.stat_changes && data.stat_changes.length && typeof vToast === 'function') {
+      var tmsg = data.stat_changes.map(function(s){ return s.text; }).join(' · ');
+      var ttype = data.stat_changes.some(function(s){ return s.type === 'no_effect'; }) ? 'warn' : 'ok';
+      vToast(tmsg, ttype);
+    }
     if (window.vEncounter && window.vEncounter.render) {
       // FASE 5d (#3): hire selado do recruta → narra + refresca grupo/HUD (label sem emoji).
       if (venue === 'recruta') {

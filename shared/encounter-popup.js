@@ -528,6 +528,44 @@
     return box;
   }
 
+  /* Bloco de NOTIFICAÇÃO TÉCNICA / ALTERAÇÃO DE STATUS estruturado.
+     Exibe deltas técnicos (HP/MP, Valdoritas, buffs, saciedade, avisos de sem efeito)
+     com apresentação clara e segura (DOM-safe, textContent). */
+  function _buildTechnicalBlockEl(line) {
+    var items = (line.items && Array.isArray(line.items)) ? line.items : [];
+    if (!items.length && line.text) {
+      items = String(line.text).replace(/<[^>]*>/g, '\n').split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
+    }
+    if (!items.length) return null;
+    var box = document.createElement('div');
+    box.className = 'enc-technical';
+    var title = document.createElement('div');
+    title.className = 'enc-technical-title';
+    title.textContent = line.title || '◆ Alteração de Status ◆';
+    box.appendChild(title);
+    var list = document.createElement('div');
+    list.className = 'enc-technical-list';
+    items.forEach(function (it) {
+      var itemEl = document.createElement('div');
+      itemEl.className = 'enc-technical-item';
+      var text = (typeof it === 'string') ? it : (it.text || '');
+      if (!text || text.indexOf('◆ Alteração') !== -1) return;
+      if (text.indexOf('+') !== -1 || text.indexOf('restaurad') !== -1) {
+        itemEl.classList.add('enc-tech-gain');
+      } else if (text.indexOf('-') !== -1 || text.indexOf('perdeu') !== -1) {
+        itemEl.classList.add('enc-tech-loss');
+      } else if (text.indexOf('⚠️') !== -1 || text.indexOf('Sem efeito') !== -1 || text.indexOf('Saciado') !== -1) {
+        itemEl.classList.add('enc-tech-warn');
+      } else {
+        itemEl.classList.add('enc-tech-neutral');
+      }
+      itemEl.textContent = text;
+      list.appendChild(itemEl);
+    });
+    box.appendChild(list);
+    return box;
+  }
+
   /* ──────────────────────────────────────────────────────────────────────
      Bloco FICHA DE PERSONAGEM estruturado (FASE 5 — "Ver ficha" do recruta da
      guilda, 2026-06-24). Espelha _buildRewardBlockEl: nó DOM construído via
@@ -1252,6 +1290,18 @@
             csdiv.className = 'enc-line enc-cs-line';
             csdiv.appendChild(csel);
             body.appendChild(csdiv);
+          }
+          return;
+        }
+        /* Bloco NOTIFICAÇÃO TÉCNICA estruturado (deltas de status / saciedade / sem efeito).
+           Renderizado via DOM-safe createElement/textContent, revelado junto da página. */
+        if (line.type === 'technical') {
+          var tel = _buildTechnicalBlockEl(line);
+          if (tel) {
+            var tdiv = document.createElement('div');
+            tdiv.className = 'enc-line enc-technical-line';
+            tdiv.appendChild(tel);
+            body.appendChild(tdiv);
           }
           return;
         }
