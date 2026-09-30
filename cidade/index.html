@@ -51095,19 +51095,19 @@ function _innConsumeMeal(p, mealKey){
   if (hpGain > 0 && preHp < (p.hpMax || preHp)) {
     deltas.push({ type:'hp', label:'HP', from: preHp, to: p.hp, max: p.hpMax || (preHp + hpGain) });
   } else {
-    rewards.push({ type:'item', amount: 0, label: '❤️ HP: ' + p.hp + '/' + (p.hpMax || preHp) + ' (máximo)' });
+    rewards.push({ type:'item', amount: 0, label: '◆ HP: ' + p.hp + '/' + (p.hpMax || preHp) + ' (máximo)' });
   }
   if (mpGain > 0 && preMp < preMpMax) {
     deltas.push({ type:'mp', label:'MP', from: preMp, to: p.mp, max: preMpMax });
   } else if (preMpMax > 0) {
-    rewards.push({ type:'item', amount: 0, label: '💧 MP: ' + p.mp + '/' + preMpMax + ' (máximo)' });
+    rewards.push({ type:'item', amount: 0, label: '◆ MP: ' + p.mp + '/' + preMpMax + ' (máximo)' });
   }
   if (cost > 0) {
     deltas.push({ type:'gold', label:'Bolsa', from: preGold + cost, to: p.gold, max: Math.max(preGold + cost, 1), bar: false });
   } else {
-    rewards.push({ type:'item', amount: 0, label: '🪙 Custo: Grátis (' + p.gold + ' Valdoritas na bolsa)' });
+    rewards.push({ type:'item', amount: 0, label: '◆ Custo: Grátis (' + p.gold + ' Valdoritas na bolsa)' });
   }
-  rewards.push({ type:'item', amount: 0, label: '🍴 Status: Saciado (1 refeição por descanso)' });
+  rewards.push({ type:'item', amount: 0, label: '◆ Status: Saciado (1 refeição por descanso)' });
 
   if (typeof vToast === 'function') {
     var toastParts = [];
