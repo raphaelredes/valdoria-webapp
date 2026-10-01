@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T05:09:37Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T05:22:37Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9641,10 +9641,29 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   font-family: var(--v-font-ui, sans-serif);
   font-size: 10px;
   font-weight: 700;
-  fill: #86efac;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+.battlefield-hex-arena .hex-tile--difficult {
+  fill: rgba(75, 45, 20, 0.58) !important;
+  stroke: rgba(210, 130, 45, 0.5) !important;
+  stroke-dasharray: 4 2;
+}
+
+.battlefield-hex-arena .hex-tile--difficult.hex-tile--reachable {
+  fill: rgba(85, 105, 40, 0.52) !important;
+  stroke: #a3e635 !important;
+}
+
+.battlefield-hex-arena .hex-diff-label {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  fill: rgba(240, 165, 75, 0.85);
   text-anchor: middle;
   pointer-events: none;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+  letter-spacing: 0.5px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
 }
 
 .battlefield-hex-arena .hex-tokens-layer {
@@ -17906,6 +17925,44 @@ function hexDistanceFeet(c1, r1, c2, r2) {
     return hexDistance(c1, r1, c2, r2) * 5;
 }
 
+function cubeToHex(x, y, z) {
+    var col = x;
+    var row = z + Math.floor((col - (col & 1)) / 2);
+    return { col: col, row: row };
+}
+
+function hexLine(c1, r1, c2, r2) {
+    var d = hexDistance(c1, r1, c2, r2);
+    if (d === 0) return [{ col: c1, row: r1 }];
+    var a = hexToCube(c1, r1);
+    var b = hexToCube(c2, r2);
+    var results = [];
+    var x1 = a.x + 1e-6, y1 = a.y + 2e-6, z1 = a.z - 3e-6;
+    for (var i = 0; i <= d; i++) {
+        var t = i / d;
+        var cx = x1 + (b.x - x1) * t;
+        var cy = y1 + (b.y - y1) * t;
+        var cz = z1 + (b.z - z1) * t;
+        var rx = Math.round(cx), ry = Math.round(cy), rz = Math.round(cz);
+        var x_diff = Math.abs(rx - cx), y_diff = Math.abs(ry - cy), z_diff = Math.abs(rz - cz);
+        if (x_diff > y_diff && x_diff > z_diff) rx = -ry - rz;
+        else if (y_diff > z_diff) ry = -rx - rz;
+        else rz = -rx - ry;
+        results.push(cubeToHex(rx, ry, rz));
+    }
+    return results;
+}
+
+function calculateHexMovementCost(fromC, fromR, toC, toR, difficultMap) {
+    var line = hexLine(fromC, fromR, toC, toR);
+    var cost = 0;
+    for (var i = 1; i < line.length; i++) {
+        var k = line[i].col + ',' + line[i].row;
+        cost += (difficultMap && difficultMap[k]) ? 2 : 1;
+    }
+    return cost;
+}
+
 function assignInitialPositions(order, cols, rows) {
     cols = cols || HEX_COLS_DEFAULT;
     rows = rows || HEX_ROWS_DEFAULT;
@@ -18197,6 +18254,16 @@ function buildBattlefield(s) {
         }
     });
 
+    // Difficult terrain map
+    var difficultMap = {};
+    if (s.battlefield && s.battlefield.difficult_terrain) {
+        s.battlefield.difficult_terrain.forEach(function (dt) {
+            if (dt && dt.col != null && dt.row != null) {
+                difficultMap[dt.col + ',' + dt.row] = dt;
+            }
+        });
+    }
+
     // Reachable hexes for active player movement
     var reachableMap = {};
     if (isPlayerActiveTurn && playerUnit && playerUnit.pos && (playerUnit.movement_left || 0) > 0) {
@@ -18207,9 +18274,9 @@ function buildBattlefield(s) {
             for (var rr = 0; rr < bRows; rr++) {
                 if (rc === pCol && rr === pRow) continue;
                 if (occupiedMap[rc + ',' + rr]) continue;
-                var d = hexDistance(pCol, pRow, rc, rr);
-                if (d <= moveLeft) {
-                    reachableMap[rc + ',' + rr] = d;
+                var cost = calculateHexMovementCost(pCol, pRow, rc, rr, difficultMap);
+                if (cost <= moveLeft) {
+                    reachableMap[rc + ',' + rr] = cost;
                 }
             }
         }
@@ -18271,9 +18338,11 @@ function buildBattlefield(s) {
             var tileCls = 'hex-tile';
             var isReachable = reachableMap[hexKey] != null;
             var isInReach = inReachMap[hexKey] != null;
+            var dtTile = difficultMap[hexKey];
 
             if (isReachable) tileCls += ' hex-tile--reachable';
             if (isInReach) tileCls += ' hex-tile--in-reach';
+            if (dtTile) tileCls += ' hex-tile--difficult';
             if (row < Math.floor(bRows / 2)) tileCls += ' hex-tile--enemy-zone';
             else tileCls += ' hex-tile--ally-zone';
 
@@ -18282,6 +18351,11 @@ function buildBattlefield(s) {
             // Subtle coordinate marker (e.g. A1, B2)
             var coordLabel = (colLetters[col] || col) + (row + 1);
             html += '<text x="' + center.cx + '" y="' + (center.cy - 18) + '" class="hex-coord">' + coordLabel + '</text>';
+
+            // Terreno Difícil (custo 10 pés / 2 hexes, PHB p. 190)
+            if (dtTile && !occupiedMap[hexKey]) {
+                html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-diff-label">⚠️ 10ft</text>';
+            }
 
             // If reachable movement, display movement cost badge (e.g., 5ft, 10ft)
             if (isReachable) {
