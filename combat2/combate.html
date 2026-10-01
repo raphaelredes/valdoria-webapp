@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T20:10:13Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T20:58:12Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1606,7 +1606,7 @@ html.sim-prod .sim-side-panel { display: none !important; }
   max-width: 100% !important;
 }
 /* Acima do .sim-side-panel (9999), do #vfxCanvas e do #app — rolagens sempre visiveis */
-.dice-overlay { background: radial-gradient(ellipse at center, rgba(42,36,32,.92), rgba(15,12,8,.96)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--v-space-md-lg, 10px); z-index: 101000; padding: 20px; text-align: center; font-family: var(--v-font, 'MedievalSharp', serif); animation: diceOvIn .3s ease; }
+.dice-overlay { background: radial-gradient(ellipse at center, rgba(46,38,32,.80), rgba(20,16,12,.86)); backdrop-filter: blur(2px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--v-space-md-lg, 10px); z-index: 101000; padding: 20px; text-align: center; font-family: var(--v-font, 'MedievalSharp', serif); animation: diceOvIn .3s ease; }
 .dice-overlay.dice-overlay--frozen, .dice-overlay.dice-overlay--frozen * { animation-play-state: paused !important; transition: none !important; }
 body.sim-paused-bg, body.sim-paused-bg * { animation-play-state: paused !important; }
 body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confirm-overlay * { animation-play-state: running !important; }
@@ -6667,7 +6667,8 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
   z-index: 10050;
   padding: var(--v-space-md, 12px);
   box-sizing: border-box;
-  background: rgba(8, 6, 4, 0.92);
+  background: rgba(18, 14, 10, 0.68);
+  backdrop-filter: blur(2.5px);
   animation: udcFadeIn .28s ease;
   /* V1 Invocações Phase 3 (2026-04-18) — popup cobre tela toda (era top:22px). */
   top: 0 !important;
@@ -9563,10 +9564,10 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .battlefield-hex-arena {
   position: relative;
   margin: 0 auto;
-  background: radial-gradient(ellipse at 50% 45%, #251e18 0%, #16120e 65%, #0b0907 100%);
-  border: 3px solid #6b5330;
+  background: radial-gradient(ellipse at 50% 45%, #382e24 0%, #292119 60%, #1e1712 100%);
+  border: 3px solid #7d633b;
   border-radius: 14px;
-  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9), 0 10px 35px rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.45), 0 10px 30px rgba(0, 0, 0, 0.7);
   user-select: none;
   overflow: hidden;
   box-sizing: border-box;
@@ -9588,25 +9589,25 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .hex-tile {
-  fill: rgba(32, 25, 18, 0.55);
-  stroke: rgba(196, 149, 58, 0.22);
+  fill: rgba(56, 45, 34, 0.68);
+  stroke: rgba(212, 175, 55, 0.35);
   stroke-width: 1.5;
   transition: fill 0.18s ease, stroke 0.18s ease;
 }
 
 .battlefield-hex-arena .hex-tile:hover {
-  fill: rgba(212, 175, 55, 0.14);
-  stroke: rgba(212, 175, 55, 0.65);
+  fill: rgba(212, 175, 55, 0.22);
+  stroke: rgba(212, 175, 55, 0.75);
 }
 
 .battlefield-hex-arena .hex-tile--enemy-zone {
-  fill: rgba(40, 22, 20, 0.5);
-  stroke: rgba(180, 80, 70, 0.25);
+  fill: rgba(65, 34, 30, 0.58);
+  stroke: rgba(210, 95, 80, 0.35);
 }
 
 .battlefield-hex-arena .hex-tile--ally-zone {
-  fill: rgba(22, 32, 28, 0.5);
-  stroke: rgba(80, 160, 120, 0.25);
+  fill: rgba(30, 52, 42, 0.58);
+  stroke: rgba(90, 180, 135, 0.35);
 }
 
 .battlefield-hex-arena .hex-tile--reachable {
@@ -18280,6 +18281,111 @@ function assignInitialPositions(order, cols, rows) {
     });
 }
 
+function getProceduralHexFeature(col, row, biome) {
+    var bStr = String(biome || 'forest').toLowerCase();
+    var seed = 0;
+    for (var i = 0; i < bStr.length; i++) seed = (seed * 31 + bStr.charCodeAt(i)) & 0x7fffffff;
+    var h = (Math.imul(col ^ 0x45d9f3b, 0x27d4eb2d) ^ Math.imul(row ^ seed, 0x165667b1)) >>> 0;
+    var rnd = (h % 1000) / 1000;
+    if (rnd < 0.12) {
+        var names;
+        if (bStr.indexOf('swamp') >= 0 || bStr.indexOf('pântano') >= 0 || bStr.indexOf('pantano') >= 0) {
+            names = ['Lamaçal Profundo', 'Água Turva', 'Charco Traiçoeiro'];
+        } else if (bStr.indexOf('crypt') >= 0 || bStr.indexOf('dungeon') >= 0 || bStr.indexOf('masmorra') >= 0 || bStr.indexOf('ruinas') >= 0) {
+            names = ['Entulho de Pedra', 'Lajes Rachadas', 'Escombros Antigos'];
+        } else if (bStr.indexOf('mountain') >= 0 || bStr.indexOf('montanha') >= 0) {
+            names = ['Cascalho Íngreme', 'Rocha Escorregadia', 'Pedregulho'];
+        } else if (bStr.indexOf('desert') >= 0 || bStr.indexOf('deserto') >= 0) {
+            names = ['Areia Movediça', 'Duna Íngreme', 'Rochedo Cortante'];
+        } else {
+            names = ['Raízes e Espinheiros', 'Mata Fechada', 'Tronco Caído'];
+        }
+        var name = names[h % names.length];
+        return { col: col, row: row, name: name, cost: 2 };
+    }
+    return null;
+}
+
+function ensureProceduralBattlefield(s) {
+    if (!s) return false;
+    s.battlefield = s.battlefield || { cols: HEX_COLS_DEFAULT, rows: HEX_ROWS_DEFAULT };
+    if (!s.battlefield.cols) s.battlefield.cols = HEX_COLS_DEFAULT;
+    if (!s.battlefield.rows) s.battlefield.rows = HEX_ROWS_DEFAULT;
+    if (!s.battlefield.difficult_terrain) s.battlefield.difficult_terrain = [];
+
+    var minC = Infinity, maxC = -Infinity, minR = Infinity, maxR = -Infinity;
+    (s.order || []).forEach(function (u) {
+        if (u && u.alive && !u.isDead && u.pos && u.pos.col != null && u.pos.row != null) {
+            if (u.pos.col < minC) minC = u.pos.col;
+            if (u.pos.col > maxC) maxC = u.pos.col;
+            if (u.pos.row < minR) minR = u.pos.row;
+            if (u.pos.row > maxR) maxR = u.pos.row;
+        }
+    });
+    if (minC === Infinity) return false;
+
+    var expanded = false;
+
+    // Expansão para a direita se aproximando da borda máxima
+    if (maxC + 2 >= s.battlefield.cols) {
+        s.battlefield.cols = maxC + 4;
+        expanded = true;
+    }
+
+    // Expansão para baixo se aproximando da borda máxima
+    if (maxR + 2 >= s.battlefield.rows) {
+        s.battlefield.rows = maxR + 4;
+        expanded = true;
+    }
+
+    // Expansão para a esquerda se atingir a borda 0
+    if (minC <= 0) {
+        var shiftC = 2;
+        s.battlefield.cols += shiftC;
+        (s.order || []).forEach(function (u) {
+            if (u && u.pos && u.pos.col != null) u.pos.col += shiftC;
+        });
+        s.battlefield.difficult_terrain.forEach(function (dt) {
+            if (dt && dt.col != null) dt.col += shiftC;
+        });
+        expanded = true;
+    }
+
+    // Expansão para cima se atingir a borda 0
+    if (minR <= 0) {
+        var shiftR = 2;
+        s.battlefield.rows += shiftR;
+        (s.order || []).forEach(function (u) {
+            if (u && u.pos && u.pos.row != null) u.pos.row += shiftR;
+        });
+        s.battlefield.difficult_terrain.forEach(function (dt) {
+            if (dt && dt.row != null) dt.row += shiftR;
+        });
+        expanded = true;
+    }
+
+    if (expanded) {
+        var dtMap = {};
+        s.battlefield.difficult_terrain.forEach(function (dt) {
+            if (dt && dt.col != null && dt.row != null) dtMap[dt.col + ',' + dt.row] = true;
+        });
+        var biomeStr = s.biome || 'forest';
+        for (var c = 0; c < s.battlefield.cols; c++) {
+            for (var r = 0; r < s.battlefield.rows; r++) {
+                var k = c + ',' + r;
+                if (!dtMap[k]) {
+                    var feat = getProceduralHexFeature(c, r, biomeStr);
+                    if (feat) {
+                        s.battlefield.difficult_terrain.push(feat);
+                        dtMap[k] = true;
+                    }
+                }
+            }
+        }
+    }
+    return expanded;
+}
+
 async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
     if (!tokenEl || !path || path.length <= 1) return;
     var stepMs = stepDurationMs || 140;
@@ -18372,6 +18478,7 @@ async function handlePlayerMoveTo(tCol, tRow) {
     p.movement_left = Math.max(0, p.movement_left - totalCost);
     var dest = validPath[validPath.length - 1];
     p.pos = { col: dest.col, row: dest.row };
+    ensureProceduralBattlefield(currentState);
 
     var dHexes = validPath.length - 1;
     var dFeet = dHexes * 5;
@@ -18638,6 +18745,9 @@ function buildBattlefield(s) {
 
     // Ensure positions and movement speeds are assigned
     assignInitialPositions(s.order, bCols, bRows);
+    ensureProceduralBattlefield(s);
+    bCols = s.battlefield.cols;
+    bRows = s.battlefield.rows;
 
     var activeId = null;
     var active = s.order[s.active_idx];
@@ -18727,7 +18837,11 @@ function buildBattlefield(s) {
     var midY = Math.round(stageH / 2);
     html += '<line x1="' + HEX_PAD_X + '" y1="' + midY + '" x2="' + (stageW - HEX_PAD_X) + '" y2="' + midY + '" class="hex-divider-line" />';
 
-    var colLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    function getHexColLetter(c) {
+        var aCode = 65;
+        if (c < 26) return String.fromCharCode(aCode + c);
+        return String.fromCharCode(aCode + Math.floor(c / 26) - 1) + String.fromCharCode(aCode + (c % 26));
+    }
 
     for (var col = 0; col < bCols; col++) {
         for (var row = 0; row < bRows; row++) {
@@ -18754,13 +18868,13 @@ function buildBattlefield(s) {
 
             html += '<polygon points="' + pts + '" class="' + tileCls + '" data-col="' + col + '" data-row="' + row + '" />';
 
-            // Subtle coordinate marker (e.g. A1, B2)
-            var coordLabel = (colLetters[col] || col) + (row + 1);
+            // Subtle coordinate marker (e.g. A1, B2, K5, AA1)
+            var coordLabel = getHexColLetter(col) + (row + 1);
             html += '<text x="' + center.cx + '" y="' + (center.cy - 18) + '" class="hex-coord">' + coordLabel + '</text>';
 
             // Terreno Difícil (custo 10 pés / 2 hexes, PHB p. 190)
             if (dtTile && !occupiedMap[hexKey]) {
-                html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-diff-label">⚠️ 10ft</text>';
+                html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-diff-label">◆ 10ft</text>';
             }
 
             // If reachable movement, display movement cost badge (e.g., 5ft, 10ft)
@@ -21300,24 +21414,58 @@ function mountBattlefieldPanZoom() {
     };
     var fitAll = function () {
         var vpW = vp.clientWidth || 430;
-        var vpH = vp.clientHeight || 0;
-        /* Frente 7 (#83): fit baseado no CONTEÚDO REAL do stage (scrollWidth/Height,
-           que já reflete --v-font-scale + fileiras/colunas colapsadas) em vez de
-           assumir 4 colunas fixas. E o boost de foco é CLAMPADO ao que cabe (fitX,
-           fitY) — antes o boost ×1.6 estourava o viewport e cortava cards quando
-           havia ≤4 ocupados (3-4 numa fileira). Espelha a lógica correta do
-           shared/combat-battlefield-pan-zoom.js (fitToViewport). */
-        var sw = stage.scrollWidth || 652;
-        var sh = stage.scrollHeight || 0;
-        var fitX = (vpW - 8) / sw;
-        var fitY = (vpH > 40 && sh > 0) ? (vpH - 8) / sh : fitX;
-        var z = Math.min(fitX, fitY, 1);
-        var occ = countOccupied();
-        if (occ > 0 && occ <= FOCUSED_THRESHOLD) {
-            z = Math.min(z * FOCUSED_BOOST, MAX_ZOOM, fitX, fitY);
+        var vpH = vp.clientHeight || 500;
+
+        // Limites da bounding box de todos os combatentes ativos (player + inimigos + aliados)
+        var minCol = Infinity, maxCol = -Infinity, minRow = Infinity, maxRow = -Infinity;
+        var hasUnits = false;
+        if (currentState && currentState.order) {
+            currentState.order.forEach(function (u) {
+                if (u && u.alive && !u.isDead && u.pos && u.pos.col != null && u.pos.row != null) {
+                    hasUnits = true;
+                    if (u.pos.col < minCol) minCol = u.pos.col;
+                    if (u.pos.col > maxCol) maxCol = u.pos.col;
+                    if (u.pos.row < minRow) minRow = u.pos.row;
+                    if (u.pos.row > maxRow) maxRow = u.pos.row;
+                }
+            });
         }
-        z = Math.max(MIN_ZOOM, z);
-        applyZoom(z);
+
+        var sw = stage.scrollWidth || 652;
+        var sh = stage.scrollHeight || 650;
+
+        if (hasUnits && minCol !== Infinity && typeof hexCenter === 'function') {
+            // Converte col/row para pontos no stage
+            var pMin = hexCenter(minCol, minRow);
+            var pMax = hexCenter(maxCol, maxRow);
+
+            // Margem confortável em torno dos combatentes para enquadramento nítido
+            var padPxX = (typeof HEX_W !== 'undefined' ? HEX_W : 64) * 1.05;
+            var padPxY = (typeof HEX_H !== 'undefined' ? HEX_H : 60) * 1.05;
+
+            var boxW = Math.max((typeof HEX_W !== 'undefined' ? HEX_W : 64) * 2.5, (pMax.cx - pMin.cx) + padPxX * 2);
+            var boxH = Math.max((typeof HEX_H !== 'undefined' ? HEX_H : 60) * 2.5, (pMax.cy - pMin.cy) + padPxY * 2);
+            var centerX = (pMin.cx + pMax.cx) / 2;
+            var centerY = (pMin.cy + pMax.cy) / 2;
+
+            // Zoom máximo possível respeitando o viewport do dispositivo
+            var fitX = (vpW - 16) / boxW;
+            var fitY = (vpH > 60) ? (vpH - 16) / boxH : fitX;
+            var optimalZoom = Math.min(fitX, fitY);
+
+            // Garante visual próximo e dinâmico, sem extrapolar nem cortar (responsivo)
+            optimalZoom = Math.max(0.65, Math.min(1.65, optimalZoom));
+            applyZoom(optimalZoom);
+
+            // Centraliza a visão exatamente nos combatentes
+            vp.scrollLeft = Math.max(0, (centerX * currentZoom) - (vpW / 2));
+            vp.scrollTop = Math.max(0, (centerY * currentZoom) - (vpH / 2));
+        } else {
+            var fitX = (vpW - 8) / sw;
+            var fitY = (vpH > 40 && sh > 0) ? (vpH - 8) / sh : fitX;
+            var z = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.min(fitX, fitY)));
+            applyZoom(z);
+        }
     };
     fitAll();
     /* 2026-05-18 USER REQUEST: botoes UI zoom in/out/fit. Bind aos botoes
@@ -30336,6 +30484,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         }
                     }
                     actor.pos = { col: stepRes.col, row: stepRes.row };
+                    ensureProceduralBattlefield(s);
                     actor.movement_left = Math.max(0, mLeft - stepRes.steps);
                     s.log.push(actor.n + ' avança ' + (stepRes.steps * 5) + ' pés em direção a ' + target.n + '.');
                     render(s);
@@ -33317,6 +33466,7 @@ async function __combatAnimateOneEvent(ev) {
         if (actorUnit) {
             actorUnit.pos = { col: ev.toCol, row: ev.toRow };
             if (ev.movementLeft != null) actorUnit.movement_left = ev.movementLeft;
+            ensureProceduralBattlefield(currentState);
         }
         render(currentState);
         return;
