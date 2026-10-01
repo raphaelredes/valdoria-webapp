@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T20:58:12Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T21:16:30Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -22104,27 +22104,6 @@ function bindActions() {
                 handlePlayerMoveTo(tCol, tRow);
             }
         });
-    }
-    /* Monta dado 3D real no CTA "Comecar Rolagens" (intro). Loop infinito
-       de roll() — sempre que pousa, re-rola um valor novo. */
-    var ctaMount = document.getElementById('ctaDiceMount');
-    if (ctaMount && window.Dice3D && !ctaMount._d3d) {
-        try {
-            var dCta = new Dice3D(ctaMount, { size: 56, dieType: 'd20', duration: 2400, silent: true });
-            ctaMount._d3d = dCta;
-            function loopCta() {
-                if (!ctaMount._d3d || ctaMount._d3d !== dCta) return;
-                if (!document.body.contains(ctaMount)) {
-                    try { dCta.dispose(); } catch (e) {}
-                    ctaMount._d3d = null;
-                    return;
-                }
-                var v = 1 + Math.floor(Math.random() * 20);
-                dCta.roll(v, function () { setTimeout(loopCta, 600); });
-            }
-            loopCta();
-        } catch (e) { console.warn('[SIM] CTA Dice3D falhou', e); }
-    }
     mountBattlefieldPanZoom();
 }
 
@@ -28772,9 +28751,15 @@ function confirmSimDiceSkip(message, title) {
 /* Liberta WebGL do CTA antes das rolagens (evita 2º Dice3D invisivel / falha de contexto). */
 function disposeCtaDice3d() {
     var cm = document.getElementById('ctaDiceMount');
-    if (!cm || !cm._d3d) return;
-    try { cm._d3d.dispose(); } catch (e) { console.warn('[SIM] dispose CTA Dice3D', e); }
-    cm._d3d = null;
+    if (!cm) return;
+    if (cm._rafId) {
+        try { cancelAnimationFrame(cm._rafId); } catch (_eR) {}
+        cm._rafId = null;
+    }
+    if (cm._d3d) {
+        try { cm._d3d.dispose(); } catch (e) { console.warn('[SIM] dispose CTA Dice3D', e); }
+        cm._d3d = null;
+    }
 }
 
 /* ========= VFX + Dice 3D ========= */
@@ -30207,6 +30192,8 @@ function showIntroChoicePopup() {
         var ctaMount = document.getElementById('ctaDiceMount');
         if (ctaMount && window.Dice3D && !ctaMount._d3d) {
             var dCta = new Dice3D(ctaMount, { size: 68, dieType: 'd20', silent: true });
+            /* Silêncio absoluto garantido: nenhum som de rolagem neste modo vitrine */
+            dCta._playRollSfx = function () {};
             ctaMount._d3d = dCta;
             var _rafId = null;
             function spinIntroDiceTurntable() {
@@ -30214,18 +30201,21 @@ function showIntroChoicePopup() {
                     if (_rafId) cancelAnimationFrame(_rafId);
                     try { dCta.dispose(); } catch (e) {}
                     ctaMount._d3d = null;
+                    ctaMount._rafId = null;
                     return;
                 }
                 if (dCta._dieMesh) {
-                    dCta._dieMesh.rotation.y += 0.007;
+                    dCta._dieMesh.rotation.y += 0.005;
                     dCta._dieMesh.rotation.x = 0.28;
                     if (dCta._renderer && dCta._scene && dCta._camera) {
                         dCta._renderer.render(dCta._scene, dCta._camera);
                     }
                 }
                 _rafId = requestAnimationFrame(spinIntroDiceTurntable);
+                ctaMount._rafId = _rafId;
             }
             _rafId = requestAnimationFrame(spinIntroDiceTurntable);
+            ctaMount._rafId = _rafId;
         }
     } catch (_eD) { console.warn('[SIM] Dice3D no topo do popup de intro falhou', _eD); }
     /* #17: dispara o typewriter da narrativa; CTAs revelam ao terminar (ou skip
@@ -30259,9 +30249,15 @@ function showIntroChoicePopup() {
 
 function closeIntroChoicePopup() {
     var cm = document.getElementById('ctaDiceMount');
-    if (cm && cm._d3d) {
-        try { cm._d3d.dispose(); } catch (e) {}
-        cm._d3d = null;
+    if (cm) {
+        if (cm._rafId) {
+            try { cancelAnimationFrame(cm._rafId); } catch (_eR) {}
+            cm._rafId = null;
+        }
+        if (cm._d3d) {
+            try { cm._d3d.dispose(); } catch (e) {}
+            cm._d3d = null;
+        }
     }
     var el = document.getElementById('intro-choice-popup');
     if (el) el.remove();
