@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T17:03:36Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T17:20:52Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9629,6 +9629,55 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   stroke-width: 2 !important;
 }
 
+.battlefield-hex-arena .hex-tile--occupied-player {
+  stroke: #ffd700 !important;
+  stroke-width: 2.5 !important;
+  fill: rgba(255, 215, 0, 0.16) !important;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.45));
+}
+
+.battlefield-hex-arena .hex-tile--occupied-ally {
+  stroke: #5dade2 !important;
+  stroke-width: 2.5 !important;
+  fill: rgba(93, 173, 226, 0.16) !important;
+  filter: drop-shadow(0 0 6px rgba(93, 173, 226, 0.45));
+}
+
+.battlefield-hex-arena .hex-tile--occupied-enemy {
+  stroke: #e74c3c !important;
+  stroke-width: 2.5 !important;
+  fill: rgba(231, 76, 60, 0.16) !important;
+  filter: drop-shadow(0 0 6px rgba(231, 76, 60, 0.45));
+}
+
+.battlefield-hex-arena .hex-tile--occupied-boss {
+  stroke: #f39c12 !important;
+  stroke-width: 3 !important;
+  fill: rgba(243, 156, 18, 0.22) !important;
+  filter: drop-shadow(0 0 8px rgba(243, 156, 18, 0.55));
+}
+
+.battlefield-hex-arena .hex-tile--in-reach.hex-tile--occupied-enemy {
+  stroke: #ff5722 !important;
+  stroke-width: 3 !important;
+  fill: rgba(255, 87, 34, 0.26) !important;
+  filter: drop-shadow(0 0 8px rgba(255, 87, 34, 0.6));
+}
+
+.battlefield-hex-arena .hex-tile--in-reach.hex-tile--occupied-boss {
+  stroke: #ff9800 !important;
+  stroke-width: 3.5 !important;
+  fill: rgba(255, 152, 0, 0.3) !important;
+  filter: drop-shadow(0 0 10px rgba(255, 152, 0, 0.7));
+}
+
+.battlefield-hex-arena .hex-tile--in-reach.hex-tile--occupied-ally {
+  stroke: #00e5ff !important;
+  stroke-width: 3 !important;
+  fill: rgba(0, 229, 255, 0.25) !important;
+  filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.6));
+}
+
 .battlefield-hex-arena .hex-coord {
   font-family: var(--v-font-display, 'Cinzel'), serif;
   font-size: 9px;
@@ -9676,14 +9725,17 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 /* TOKEN MINIATURA DE MESA (HEXAGONAL D&D 5e) */
-.battlefield-hex-arena .cell.hex-token {
+.battlefield-hex-arena .cell.hex-token,
+.battlefield-hex-arena .cell.occupied.hex-token,
+.battlefield-hex-arena .cell.v8-card.hex-token,
+.battlefield-hex-arena .cell.occupied.v8-card.hex-token {
   position: absolute;
-  width: 62px !important;
-  height: 54px !important;
-  min-width: 62px !important;
-  max-width: 62px !important;
-  min-height: 54px !important;
-  max-height: 54px !important;
+  width: 76px !important;
+  height: 66px !important;
+  min-width: 76px !important;
+  max-width: 76px !important;
+  min-height: 66px !important;
+  max-height: 66px !important;
   border-radius: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -9695,6 +9747,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   transform-origin: center center;
   transition: transform 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28), filter 0.2s ease;
   box-shadow: none !important;
+  overflow: visible !important;
 }
 
 .battlefield-hex-arena .cell.hex-token:hover {
@@ -9722,8 +9775,8 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .token-hex, .token-disc {
   position: relative;
-  width: 62px;
-  height: 54px;
+  width: 76px;
+  height: 66px;
   box-sizing: border-box;
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
   background: #18130e;
@@ -9943,79 +9996,87 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .token-hp-badge {
   position: absolute;
-  bottom: -8px;
+  bottom: -9px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(14, 11, 8, 0.94);
-  border: 1px solid #6b5330;
-  border-radius: 6px;
-  padding: 1px 5px;
+  background: rgba(14, 11, 8, 0.96);
+  border: 1.5px solid #6b5330;
+  border-radius: 8px;
+  padding: 2px 7px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  z-index: 12;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  gap: 5px;
+  z-index: 24;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .token-hp-track {
-  width: 26px;
-  height: 3.5px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 2px;
+  width: 32px;
+  height: 4.5px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 3px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .token-hp-fill {
   display: block;
   height: 100%;
-  border-radius: 2px;
+  border-radius: 3px;
   transition: width 0.3s ease;
 }
 
 .token-hp-text {
   font-family: var(--v-font-ui, sans-serif);
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 700;
   white-space: nowrap;
   letter-spacing: 0.3px;
+  line-height: 1;
 }
 
 .token-ac-chip {
   position: absolute;
   top: -6px;
-  right: -5px;
-  background: #2a2219;
+  right: -6px;
+  background: #1c1611;
   border: 1.5px solid #d4af37;
-  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-  border-radius: 0 !important;
-  width: 22px;
+  border-radius: 6px;
+  min-width: 28px;
   height: 20px;
+  padding: 0 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 2px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 700;
   color: #f7e7b4;
-  z-index: 15;
+  z-index: 25;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .token-ac-chip span {
-  font-size: 7px;
-  margin-right: 1px;
+  font-size: 8px;
+  line-height: 1;
+  display: inline-block;
 }
 
 .token-init-chip {
   position: absolute;
   top: -6px;
-  left: -5px;
+  left: -6px;
   background: #1a1612;
   border: 1.5px solid #a88438;
-  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-  border-radius: 0 !important;
-  width: 22px;
+  border-radius: 6px;
+  min-width: 22px;
   height: 20px;
+  padding: 0 3px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10023,40 +10084,43 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   font-size: 9px;
   font-weight: 700;
   color: #e5c387;
-  z-index: 15;
+  z-index: 25;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .token-dist-chip {
   position: absolute;
-  top: -16px;
+  top: -18px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(18, 14, 10, 0.92);
-  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: rgba(18, 14, 10, 0.94);
+  border: 1px solid rgba(212, 175, 55, 0.55);
   border-radius: 4px;
   font-family: var(--v-font-ui, sans-serif);
-  font-size: 8px;
+  font-size: 8.5px;
   color: #eed5a1;
-  padding: 0 4px;
+  padding: 1px 5px;
   white-space: nowrap;
   pointer-events: none;
-  z-index: 15;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+  z-index: 25;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.75);
 }
 
 .token-nameplate {
   position: absolute;
-  bottom: -21px;
+  bottom: -24px;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 9px;
-  color: #e5c387;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #f0deb4;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.9);
   white-space: nowrap;
   pointer-events: none;
-  z-index: 11;
+  z-index: 22;
   letter-spacing: 0.4px;
 }
 
@@ -18238,8 +18302,8 @@ async function handlePlayerMoveTo(tCol, tRow) {
             }
             tokenEl.style.transition = 'left ' + (stepDurationMs * 0.9) + 'ms ease-in-out, top ' + (stepDurationMs * 0.9) + 'ms ease-in-out, transform ' + (stepDurationMs * 0.45) + 'ms ease-out';
             tokenEl.style.transform = 'scale(1.12) translateY(-4px)';
-            tokenEl.style.left = (stepCenter.cx - 31) + 'px';
-            tokenEl.style.top = (stepCenter.cy - 27) + 'px';
+            tokenEl.style.left = (stepCenter.cx - Math.round(HEX_W / 2)) + 'px';
+            tokenEl.style.top = (stepCenter.cy - Math.round(HEX_H / 2)) + 'px';
             await new Promise(function (r) { setTimeout(r, Math.round(stepDurationMs * 0.5)); });
             tokenEl.style.transform = 'scale(1) translateY(0px)';
             await new Promise(function (r) { setTimeout(r, Math.round(stepDurationMs * 0.5)); });
@@ -18395,15 +18459,18 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
 
     // CA Badge
     var acBadge = '';
-    if (u.ac != null && !u.noTarget) {
-        acBadge = '<div class="token-ac-chip" title="Classe de Armadura: ' + u.ac + '"><span>🛡</span>' + u.ac + '</div>';
+    if (!u.noTarget && (u.ac != null || typeof getEffectiveAc === 'function')) {
+        var displayAc = (typeof getEffectiveAc === 'function') ? getEffectiveAc(u) : u.ac;
+        if (displayAc != null) {
+            acBadge = '<div class="token-ac-chip" title="Classe de Armadura: ' + displayAc + '"><span>🛡</span>' + displayAc + '</div>';
+        }
     }
 
     // Name label
     var nameLabel = escHtml(u.n || u.cls || '—');
 
-    var tokenLeft = cx - 31;
-    var tokenTop = cy - 27;
+    var tokenLeft = cx - Math.round(HEX_W / 2);
+    var tokenTop = cy - Math.round(HEX_H / 2);
 
     var html = '<div class="' + classes + '" data-unit-id="' + uid + '" data-clickable="1" ' +
                'style="left:' + tokenLeft + 'px; top:' + tokenTop + 'px;">';
@@ -18549,6 +18616,12 @@ function buildBattlefield(s) {
             var isReachable = reachableMap[hexKey] != null;
             var isInReach = inReachMap[hexKey] != null;
             var dtTile = difficultMap[hexKey];
+            var occInfo = occupiedMap[hexKey];
+
+            if (occInfo && occInfo.unit) {
+                var occUtype = (occInfo.unit.t === 'p') ? 'player' : (occInfo.unit.t === 'a' ? 'ally' : (occInfo.unit.isBoss ? 'boss' : 'enemy'));
+                tileCls += ' hex-tile--occupied hex-tile--occupied-' + occUtype;
+            }
 
             if (isReachable) tileCls += ' hex-tile--reachable';
             if (isInReach) tileCls += ' hex-tile--in-reach';
@@ -33073,8 +33146,8 @@ async function __combatAnimateOneEvent(ev) {
                 for (var p = 1; p < path.length; p++) {
                     var stepCoord = path[p];
                     var stepCenter = hexCenter(stepCoord.col, stepCoord.row);
-                    var tLeft = stepCenter.cx - 31;
-                    var tTop = stepCenter.cy - 27;
+                    var tLeft = stepCenter.cx - Math.round(HEX_W / 2);
+                    var tTop = stepCenter.cy - Math.round(HEX_H / 2);
 
                     if (typeof sfxStep === 'function') {
                         try { sfxStep(); } catch (_) {}
