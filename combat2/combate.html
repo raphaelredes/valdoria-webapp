@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T11:58:47Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T12:57:17Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -28646,19 +28646,14 @@ function showDice(value, cb, actor, context, opts) {
             }
         }
         hint.textContent = '';
+        /* Limpa safety timer: rolagem completada com sucesso, aguardando clique do usuário */
+        if (_safetyTimer) { clearTimeout(_safetyTimer); _safetyTimer = null; }
         /* Sempre mostra Continuar — jogador controla pacing (player ou NPC) */
         continueBtn.style.display = '';
         if (skipChainBtn && manualPlayerDice) skipChainBtn.style.display = 'block';
-        /* Sessão #66 (FIX combate travado): iniciativa AVANÇA SOZINHA — era a
-           intenção original (ver comentário no topo de showDice: "todos rolam em
-           sequencia automatica"). Sem auto-advance, o jogador precisava clicar
-           "Continuar" a CADA d20 de iniciativa; se o botão ficasse fora da
-           viewport no smartphone, o combate parecia travado em "Rolando
-           Iniciativa...". O botão Continuar continua visível p/ quem quiser
-           acelerar antes do timer. */
-        if (initiativeSequence && !closed) {
-            setTimeout(function () { if (!closed) close(); }, 1300);
-        }
+        /* Ordem do Usuário (2026-10): PROIBIDO avanço automático quando há botão Continuar.
+           O jogador controla o pacing de leitura e decide quando clicar em Continuar.
+           (Removido o antigo setTimeout de 1300ms de iniciativa que fechava a tela sozinho). */
     }
 
     function startRoll() {
@@ -29646,9 +29641,17 @@ function showInitiativeOrderPopup() {
     ov.setAttribute('aria-labelledby', 'c2-init-order-title');
     var card = document.createElement('div');
     card.className = 'iop-card iop-card--batch-summary';
+    var _uloc = (typeof location !== 'undefined') ? location.href : '';
+    var uiBase = '/shared/img/combat/ui/';
+    if (_uloc.indexOf('file://') === 0) {
+        uiBase = '../shared/img/combat/ui/';
+    }
+    var d20ImgHtml = '<img src="' + uiBase + 'dice-d20.webp" alt="d20" ' +
+        'style="width:32px;height:32px;object-fit:contain;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));" ' +
+        'onerror="if(this.src.indexOf(\'valdoria-webapp\')===-1)this.src=\'../shared/img/combat/ui/dice-d20.webp\';">';
     var parts = [
         '<header class="iop-head-batch" aria-labelledby="c2-init-order-title">',
-        '<span class="iop-head-batch__orn" aria-hidden="true"></span>',
+        '<span class="iop-head-batch__orn" aria-hidden="true">' + d20ImgHtml + '</span>',
         '<div class="iop-head-batch__text">',
         '<h2 class="iop-head-batch__title" id="c2-init-order-title">',
         '<span class="iop-head-batch__line1">Ordem de iniciativa</span>',
