@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T17:41:25Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T17:55:32Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9677,6 +9677,13 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.6));
 }
 
+.battlefield-hex-arena .hex-tile--stepping {
+  stroke: #f1c40f !important;
+  stroke-width: 2.8 !important;
+  fill: rgba(241, 196, 15, 0.22) !important;
+  filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.7));
+}
+
 .battlefield-hex-arena .hex-coord {
   font-family: var(--v-font-display, 'Cinzel'), serif;
   font-size: 9px;
@@ -18273,6 +18280,59 @@ function assignInitialPositions(order, cols, rows) {
     });
 }
 
+async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
+    if (!tokenEl || !path || path.length <= 1) return;
+    var stepMs = stepDurationMs || 240;
+    tokenEl.style.zIndex = '60';
+
+    for (var p = 1; p < path.length; p++) {
+        var stepCoord = path[p];
+        var stepCenter = hexCenter(stepCoord.col, stepCoord.row);
+        var targetLeft = (stepCenter.cx - Math.round(HEX_W / 2)) + 'px';
+        var targetTop = (stepCenter.cy - Math.round(HEX_H / 2)) + 'px';
+
+        // Som de passo / pulo
+        if (typeof sfxStep === 'function') {
+            try { sfxStep(); } catch (_) {}
+        }
+
+        // FASE 1: Arco de elevação do pulo (hop up)
+        tokenEl.style.transition = 'left ' + Math.round(stepMs * 0.95) + 'ms cubic-bezier(0.22, 0.61, 0.36, 1), top ' + Math.round(stepMs * 0.95) + 'ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ' + Math.round(stepMs * 0.5) + 'ms cubic-bezier(0.18, 0.89, 0.32, 1.28), filter ' + Math.round(stepMs * 0.5) + 'ms ease-out';
+        tokenEl.style.transform = 'translateY(-14px) scale(1.18)';
+        tokenEl.style.filter = 'drop-shadow(0 14px 10px rgba(0, 0, 0, 0.75))';
+        tokenEl.style.left = targetLeft;
+        tokenEl.style.top = targetTop;
+
+        // Highlight sutil do hexágono pisado
+        var stepTile = document.querySelector('.hex-grid-svg polygon[data-col="' + stepCoord.col + '"][data-row="' + stepCoord.row + '"]');
+        if (stepTile) {
+            stepTile.classList.add('hex-tile--stepping');
+            (function (el) {
+                setTimeout(function () { el.classList.remove('hex-tile--stepping'); }, Math.round(stepMs * 0.9));
+            })(stepTile);
+        }
+
+        // Aguarda atingir o ápice do pulo
+        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.52)); });
+
+        // FASE 2: Queda e aterrissagem no centro do hexágono (hop land)
+        tokenEl.style.transition = 'transform ' + Math.round(stepMs * 0.38) + 'ms cubic-bezier(0.25, 1, 0.5, 1), filter ' + Math.round(stepMs * 0.38) + 'ms ease-in';
+        tokenEl.style.transform = 'translateY(0px) scale(0.96)';
+        tokenEl.style.filter = 'drop-shadow(0 2px 5px rgba(0, 0, 0, 0.85))';
+
+        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.36)); });
+
+        // FASE 3: Descompressão / repouso normal
+        tokenEl.style.transform = 'translateY(0px) scale(1)';
+        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.12)); });
+    }
+
+    tokenEl.style.zIndex = '';
+    tokenEl.style.transition = '';
+    tokenEl.style.transform = '';
+    tokenEl.style.filter = '';
+}
+
 async function handlePlayerMoveTo(tCol, tRow) {
     if (!currentState || currentState.ph !== 'active') return;
     if (currentState.active_idx !== currentState.p_idx) return;
@@ -18282,34 +18342,12 @@ async function handlePlayerMoveTo(tCol, tRow) {
     var d = hexDistance(p.pos.col, p.pos.row, tCol, tRow);
     if (d <= 0 || d > (p.movement_left || 0)) return;
 
-    if (window.__COMBAT_MODE === 'remote' && typeof __combatRemoteAction === 'function') {
-        __combatRemoteAction({ type: 'move', col: tCol, row: tRow });
-        return;
-    }
-
     var fromCol = p.pos.col, fromRow = p.pos.row;
     var path = hexLine(fromCol, fromRow, tCol, tRow);
     var tokenEl = document.querySelector('[data-unit-id="player"]');
     if (tokenEl && path && path.length > 1) {
-        tokenEl.style.zIndex = '60';
-        var stepDurationMs = 170;
-        for (var i = 1; i < path.length; i++) {
-            var stepCoord = path[i];
-            var stepCenter = hexCenter(stepCoord.col, stepCoord.row);
-            if (typeof sfxStep === 'function') {
-                try { sfxStep(); } catch (_) {}
-            }
-            tokenEl.style.transition = 'left ' + (stepDurationMs * 0.9) + 'ms ease-in-out, top ' + (stepDurationMs * 0.9) + 'ms ease-in-out, transform ' + (stepDurationMs * 0.45) + 'ms ease-out';
-            tokenEl.style.transform = 'scale(1.12) translateY(-4px)';
-            tokenEl.style.left = (stepCenter.cx - Math.round(HEX_W / 2)) + 'px';
-            tokenEl.style.top = (stepCenter.cy - Math.round(HEX_H / 2)) + 'px';
-            await new Promise(function (r) { setTimeout(r, Math.round(stepDurationMs * 0.5)); });
-            tokenEl.style.transform = 'scale(1) translateY(0px)';
-            await new Promise(function (r) { setTimeout(r, Math.round(stepDurationMs * 0.5)); });
-        }
-        tokenEl.style.zIndex = '';
-        tokenEl.style.transition = '';
-        tokenEl.style.transform = '';
+        var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 130 : 240;
+        await animateUnitHexMovement(tokenEl, path, stepDurationMs);
     }
 
     p.movement_left -= d;
@@ -18317,6 +18355,9 @@ async function handlePlayerMoveTo(tCol, tRow) {
 
     var dFeet = d * 5;
     currentState.log.push('Você se moveu ' + dFeet + ' pés (' + d + ' ' + (d > 1 ? 'hexágonos' : 'hexágono') + '). Movimento restante: ' + ((p.movement_left || 0) * 5) + ' pés.');
+    if (typeof sendBattleCheckpoint === 'function') {
+        try { sendBattleCheckpoint(currentState); } catch (_) {}
+    }
     render(currentState);
 }
 
@@ -18327,6 +18368,7 @@ function findHexPathStep(startCol, startRow, targetCol, targetRow, maxSteps, occ
     var curC = startCol, curR = startRow;
     var stepsTaken = 0;
     var occ = occupiedSet || {};
+    var path = [{ col: curC, row: curR }];
 
     for (var s = 0; s < maxSteps; s++) {
         if (hexDistance(curC, curR, targetCol, targetRow) <= stopAtReach) break;
@@ -18357,8 +18399,9 @@ function findHexPathStep(startCol, startRow, targetCol, targetRow, maxSteps, occ
         curR = best.row;
         occ[curC + ',' + curR] = true;
         stepsTaken++;
+        path.push({ col: curC, row: curR });
     }
-    return { col: curC, row: curR, steps: stepsTaken };
+    return { col: curC, row: curR, steps: stepsTaken, path: path };
 }
 
 function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
@@ -30190,12 +30233,19 @@ async function playTurn(aIdx, tIdx, opts) {
                 });
                 var stepRes = findHexPathStep(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row, mLeft, occMap, (s.battlefield ? s.battlefield.cols : 8), (s.battlefield ? s.battlefield.rows : 10), reach);
                 if (stepRes.steps > 0) {
+                    if (stepRes.path && stepRes.path.length > 1) {
+                        var actorUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (aIdx === s.p_idx ? 'player' : 'enemy_' + aIdx);
+                        var actorEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
+                        if (actorEl) {
+                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 130 : 240;
+                            await animateUnitHexMovement(actorEl, stepRes.path, hopDurationMs);
+                        }
+                    }
                     actor.pos = { col: stepRes.col, row: stepRes.row };
                     actor.movement_left = Math.max(0, mLeft - stepRes.steps);
-                    if (typeof sfxStep === 'function') { try { sfxStep(); } catch (_) {} }
                     s.log.push(actor.n + ' avança ' + (stepRes.steps * 5) + ' pés em direção a ' + target.n + '.');
                     render(s);
-                    await sleep(_skipAllDiceAnim ? 100 : 250);
+                    await sleep(_skipAllDiceAnim ? 60 : 150);
                 }
             }
             dist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
@@ -33166,30 +33216,8 @@ async function __combatAnimateOneEvent(ev) {
         if (tokenEl && ev.fromCol != null && ev.fromRow != null && ev.toCol != null && ev.toRow != null) {
             var path = hexLine(ev.fromCol, ev.fromRow, ev.toCol, ev.toRow);
             if (path && path.length > 1) {
-                tokenEl.style.zIndex = '60';
-                var stepDurationMs = 180;
-                for (var p = 1; p < path.length; p++) {
-                    var stepCoord = path[p];
-                    var stepCenter = hexCenter(stepCoord.col, stepCoord.row);
-                    var tLeft = stepCenter.cx - Math.round(HEX_W / 2);
-                    var tTop = stepCenter.cy - Math.round(HEX_H / 2);
-
-                    if (typeof sfxStep === 'function') {
-                        try { sfxStep(); } catch (_) {}
-                    }
-
-                    tokenEl.style.transition = 'left ' + (stepDurationMs * 0.9) + 'ms ease-in-out, top ' + (stepDurationMs * 0.9) + 'ms ease-in-out, transform ' + (stepDurationMs * 0.45) + 'ms ease-out';
-                    tokenEl.style.transform = 'scale(1.12) translateY(-4px)';
-                    tokenEl.style.left = tLeft + 'px';
-                    tokenEl.style.top = tTop + 'px';
-
-                    await new Promise(function (r) { setTimeout(r, Math.round(stepDurationMs * 0.5)); });
-                    tokenEl.style.transform = 'scale(1) translateY(0px)';
-                    await new Promise(function (r) { setTimeout(r, Math.round(stepDurationMs * 0.5)); });
-                }
-                tokenEl.style.zIndex = '';
-                tokenEl.style.transition = '';
-                tokenEl.style.transform = '';
+                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 130 : 240;
+                await animateUnitHexMovement(tokenEl, path, stepDurationMs);
             }
         }
         if (actorUnit) {
