@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T11:12:02Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T11:58:47Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9800,6 +9800,145 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     opacity: 1;
     filter: drop-shadow(0 0 18px rgba(241, 196, 15, 1));
   }
+}
+
+/* ========================================================================
+   HEX TOKEN COMBAT VFX & ACTION FEEDBACK (Card-behavior parity for hexes)
+   ======================================================================== */
+@keyframes hexHitFlash {
+  0% { filter: brightness(1); }
+  25% { filter: brightness(2.4) saturate(1.8) drop-shadow(0 0 16px var(--dmg-color, #ff3333)) drop-shadow(0 0 28px var(--dmg-shadow, #ff5533)); }
+  100% { filter: brightness(1); }
+}
+.cell.hex-token.hit-flash .token-hex,
+.cell.hex-token[class*="dmg-flash"] .token-hex,
+.token-hex.hit-flash,
+.token-hex[class*="dmg-flash"] {
+  animation: hexHitFlash 0.42s ease-out;
+}
+
+@keyframes hexShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px) rotate(-4deg); }
+  40% { transform: translateX(6px) rotate(4deg); }
+  60% { transform: translateX(-4px) rotate(-2deg); }
+  80% { transform: translateX(4px) rotate(2deg); }
+}
+@keyframes hexShakeHeavy {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-9px, 3px) scale(1.12) rotate(-6deg); }
+  35% { transform: translate(8px, -4px) scale(0.96) rotate(5deg); }
+  55% { transform: translate(-6px, 2px) rotate(-3deg); }
+  75% { transform: translate(5px, -2px) rotate(2deg); }
+}
+.cell.hex-token.dmg-shake .token-hex,
+.token-hex.dmg-shake {
+  animation: hexShake 0.45s ease-out;
+}
+.cell.hex-token.enemy-hit-heavy .token-hex,
+.token-hex.enemy-hit-heavy {
+  animation: hexShakeHeavy 0.55s ease-out;
+}
+
+@keyframes hexDodge {
+  0%, 100% { transform: translateX(0); }
+  30% { transform: translateX(12px) scale(0.94); opacity: 0.72; }
+}
+@keyframes hexMissFlash {
+  0% { filter: brightness(1); }
+  30% { filter: brightness(1.7) grayscale(0.8) drop-shadow(0 0 14px rgba(200, 210, 235, 0.85)); }
+  100% { filter: brightness(1); }
+}
+.cell.hex-token.dodged .token-hex,
+.token-hex.dodged {
+  animation: hexDodge 0.45s ease-out;
+}
+.cell.hex-token.miss-target-flash .token-hex,
+.token-hex.miss-target-flash {
+  animation: hexMissFlash 0.5s ease-out;
+}
+
+@keyframes hexHealFlash {
+  0% { filter: brightness(1); }
+  30% { filter: brightness(2) drop-shadow(0 0 20px #40ff70) drop-shadow(0 0 35px #20cc50); transform: scale(1.08); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+@keyframes hexBuffFlash {
+  0% { filter: brightness(1); }
+  30% { filter: brightness(2) drop-shadow(0 0 22px #ffe066) drop-shadow(0 0 38px #d4af37); transform: scale(1.08); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+.cell.hex-token.heal-flash .token-hex,
+.token-hex.heal-flash {
+  animation: hexHealFlash 0.62s ease-out;
+}
+.cell.hex-token.buff-flash .token-hex,
+.token-hex.buff-flash {
+  animation: hexBuffFlash 0.55s ease-out;
+}
+
+@keyframes hexMmImpactFlash {
+  0% { filter: brightness(1); }
+  25% { filter: brightness(2.4) drop-shadow(0 0 24px #c060ff) drop-shadow(0 0 38px #8020e0); transform: scale(1.12); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+@keyframes hexFbImpactFlash {
+  0% { filter: brightness(1); }
+  25% { filter: brightness(2.6) drop-shadow(0 0 30px #ff6020) drop-shadow(0 0 50px #ff2000); transform: scale(1.18); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+.cell.hex-token.mm-impact-flash .token-hex,
+.token-hex.mm-impact-flash {
+  animation: hexMmImpactFlash 0.45s ease-out;
+}
+.cell.hex-token.fb-impact-flash .token-hex,
+.token-hex.fb-impact-flash {
+  animation: hexFbImpactFlash 0.6s ease-out;
+}
+
+@keyframes hexSkillImpactFlash {
+  0% { filter: brightness(1); }
+  20% { filter: brightness(2.2) saturate(1.6) drop-shadow(0 0 20px rgba(255, 200, 60, 0.9)); }
+  100% { filter: brightness(1); }
+}
+@keyframes hexSkillImpactFlashCrit {
+  0% { filter: brightness(1); }
+  15% { filter: brightness(2.6) saturate(1.8) drop-shadow(0 0 28px rgba(255, 220, 80, 1)) drop-shadow(0 0 45px rgba(255, 140, 40, 0.8)); }
+  100% { filter: brightness(1); }
+}
+@keyframes hexSkillImpactFlashBoss {
+  0% { filter: brightness(1); }
+  15% { filter: brightness(2.5) saturate(1.8) drop-shadow(0 0 28px rgba(255, 60, 30, 0.95)) drop-shadow(0 0 45px rgba(200, 20, 10, 0.8)); }
+  100% { filter: brightness(1); }
+}
+.cell.hex-token.cell-skill-impact-flash--active .token-hex,
+.token-hex.cell-skill-impact-flash--active {
+  animation: hexSkillImpactFlash 0.7s ease-out;
+}
+.cell.hex-token.cell-skill-impact-flash--crit .token-hex,
+.token-hex.cell-skill-impact-flash--crit {
+  animation: hexSkillImpactFlashCrit 0.7s ease-out;
+}
+.cell.hex-token.cell-skill-impact-flash--boss .token-hex,
+.token-hex.cell-skill-impact-flash--boss {
+  animation: hexSkillImpactFlashBoss 0.7s ease-out;
+}
+
+@keyframes hexAttackPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.22); filter: brightness(1.4) drop-shadow(0 0 16px var(--v-gold, #c4953a)); }
+  100% { transform: scale(1); filter: none; }
+}
+.cell.hex-token.token-casting .token-hex,
+.token-hex.token-casting {
+  animation: hexAttackPulse 0.4s ease-out;
+}
+
+.floating-dmg {
+  z-index: 99999 !important;
+}
+.cell-skill-impact-label {
+  z-index: 99999 !important;
 }
 
 .token-hp-badge {
@@ -25786,6 +25925,11 @@ function playHitVFX(uid, crit, dmgType, opts) {
     var magicDt = ['fire', 'cold', 'lightning', 'force', 'radiant', 'necrotic', 'psychic', 'thunder', 'acid', 'poison'];
     if (!ranged && magicDt.indexOf(dmgType) >= 0) ranged = true;
 
+    // Avanço (lunge) do token atacante em melee ou pulso em magia/longo alcance
+    if (fromEl && el && typeof animHexTokenAttack === 'function') {
+        try { animHexTokenAttack(fromEl, el, ranged); } catch (_) {}
+    }
+
     if (window._combatVfx) {
         try {
             var skName = (skill && skill.n) || '';
@@ -25805,8 +25949,16 @@ function playHitVFX(uid, crit, dmgType, opts) {
             if (skName === 'Mísseis Mágicos' && fromEl) {
                 /* 2026-06-21 (user): nº de projéteis = nº de dardos (PHB 3 + upcast,
                    cap 7), não mais 3 fixo. simMagicMissileDarts é a contagem canônica. */
-                var _mmActor = (currentState && currentState.order)
-                    ? currentState.order.filter(function (u) { return u && u.id === actorUid; })[0] : null;
+                var _mmActor = null;
+                if (currentState && currentState.order) {
+                    for (var _mi = 0; _mi < currentState.order.length; _mi++) {
+                        var _mu = currentState.order[_mi];
+                        if (_mu && (_mu.id === actorUid || (typeof unitUidForOrderIndex === 'function' && unitUidForOrderIndex(currentState, _mi) === actorUid))) {
+                            _mmActor = _mu;
+                            break;
+                        }
+                    }
+                }
                 var _mmN = (typeof simMagicMissileDarts === 'function')
                     ? (simMagicMissileDarts(skill, _mmActor) || 3) : 3;
                 window._combatVfx.magicMissiles(fromEl, el, _mmN);
@@ -30685,6 +30837,17 @@ async function playTurn(aIdx, tIdx, opts) {
         else s.log.push(target.n + ' se desvia do golpe de ' + actor.n + ' — ' + _missAtkPart + '.');
         s.last = { a: actor.n, t: target.n, r: r, hit: false, tIdx: tIdx };
         var missUid = unitUidForOrderIndex(s, tIdx);
+        var actorUid = unitUidForOrderIndex(s, aIdx);
+        if (actorUid && missUid) {
+            try {
+                var elFrom = document.querySelector('[data-unit-id="' + actorUid + '"]');
+                var elTgt = document.querySelector('[data-unit-id="' + missUid + '"]');
+                var isR = !!(atkSkill && (atkSkill.range === 'ranged' || atkSkill.ranged || atkSkill.isSpell || (atkSkill.cost | 0) > 0));
+                if (elFrom && elTgt && typeof animHexTokenAttack === 'function') {
+                    animHexTokenAttack(elFrom, elTgt, isR);
+                }
+            } catch (_) {}
+        }
         if (missUid) await playMissVFX(missUid, target);
         return;
     }
@@ -32737,6 +32900,126 @@ if (typeof document !== 'undefined') {
     }
 })();
 
+/** Anima o token atacante avançando (lunge) em direção ao alvo para combate corpo a corpo,
+ *  ou pulsando com energia para ataques à distância/magias. */
+async function animHexTokenAttack(fromEl, targetEl, isRanged) {
+    if (!fromEl) return;
+    if (isRanged || !targetEl) {
+        fromEl.classList.add('token-casting');
+        await new Promise(function (r) { setTimeout(r, 260); });
+        fromEl.classList.remove('token-casting');
+        return;
+    }
+    try {
+        var rA = fromEl.getBoundingClientRect();
+        var rT = targetEl.getBoundingClientRect();
+        var dx = (rT.left + rT.width / 2) - (rA.left + rA.width / 2);
+        var dy = (rT.top + rT.height / 2) - (rA.top + rA.height / 2);
+        var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        var lungeDist = Math.min(24, Math.max(12, dist * 0.35));
+        var lx = (dx / dist) * lungeDist;
+        var ly = (dy / dist) * lungeDist;
+
+        fromEl.style.zIndex = '55';
+        fromEl.style.transition = 'transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.2)';
+        fromEl.style.transform = 'translate(' + lx.toFixed(1) + 'px, ' + ly.toFixed(1) + 'px) scale(1.12)';
+        await new Promise(function (r) { setTimeout(r, 160); });
+        fromEl.style.transition = 'transform 0.22s ease-in';
+        fromEl.style.transform = 'translate(0, 0) scale(1)';
+        await new Promise(function (r) { setTimeout(r, 140); });
+        fromEl.style.transition = '';
+        fromEl.style.transform = '';
+        fromEl.style.zIndex = '';
+    } catch (_eLunge) {
+        if (fromEl) {
+            fromEl.style.transition = '';
+            fromEl.style.transform = '';
+            fromEl.style.zIndex = '';
+        }
+    }
+}
+
+/** Vôo dos Mísseis Mágicos com projéteis arcanos em curva, rastro bruxuleante
+ *  e impactos escalonados com som, tremor e dano flutuante por dardo. */
+async function animLaunchMagicMissiles(fromEl, targetEl, darts, tU) {
+    if (!fromEl || !targetEl || !darts || !darts.length) return;
+    var fRect = fromEl.getBoundingClientRect();
+    var tRect = targetEl.getBoundingClientRect();
+    var sx = fRect.left + fRect.width / 2;
+    var sy = fRect.top + fRect.height / 2;
+    var tx = tRect.left + tRect.width / 2;
+    var ty = tRect.top + tRect.height / 2;
+
+    var STAGGER_MS = 140;
+    var FLIGHT_MS = 460;
+
+    // Dispara projéteis de força e partículas no Canvas simultaneamente
+    if (window._combatVfx) {
+        try { window._combatVfx.magicMissiles(fromEl, targetEl, darts.length); } catch (_) {}
+    }
+
+    var promises = darts.map(function (dart, i) {
+        return new Promise(function (resolve) {
+            setTimeout(function () {
+                var fly = document.createElement('div');
+                fly.className = 'mm-flying-missile';
+                var head = document.createElement('div');
+                head.className = 'mm-orbit-head';
+                var trail = document.createElement('div');
+                trail.className = 'mm-orbit-trail';
+                fly.appendChild(trail);
+                fly.appendChild(head);
+
+                fly.style.position = 'fixed';
+                fly.style.left = sx + 'px';
+                fly.style.top = sy + 'px';
+                fly.style.zIndex = '99999';
+                fly.style.pointerEvents = 'none';
+                var ang = Math.atan2(ty - sy, tx - sx) * 180 / Math.PI;
+                fly.style.transform = 'translate(-50%, -50%) rotate(' + ang + 'deg)';
+                document.body.appendChild(fly);
+
+                var arcOffset = (i - (darts.length - 1) / 2) * 20;
+                fly.style.transition = 'left ' + FLIGHT_MS + 'ms cubic-bezier(.34,1.18,.64,1), top ' + FLIGHT_MS + 'ms cubic-bezier(.34,1.18,.64,1)';
+                void fly.offsetWidth;
+                fly.style.left = (tx + arcOffset * 0.4) + 'px';
+                fly.style.top = (ty + arcOffset * 0.2) + 'px';
+
+                setTimeout(function () {
+                    if (fly.parentNode) fly.parentNode.removeChild(fly);
+
+                    var hexEl = targetEl.querySelector('.token-hex') || targetEl;
+                    targetEl.classList.remove('mm-impact-flash', 'dmg-shake');
+                    hexEl.classList.remove('mm-impact-flash', 'dmg-shake');
+                    void hexEl.offsetWidth;
+                    targetEl.classList.add('mm-impact-flash', 'dmg-shake');
+                    hexEl.classList.add('mm-impact-flash', 'dmg-shake');
+                    setTimeout(function () {
+                        targetEl.classList.remove('mm-impact-flash', 'dmg-shake');
+                        hexEl.classList.remove('mm-impact-flash', 'dmg-shake');
+                    }, 480);
+
+                    if (typeof sfxDamageType === 'function') {
+                        try { sfxDamageType('force'); } catch (_) {}
+                    }
+                    if (window._combatVfx) {
+                        try { window._combatVfx.impact(targetEl, 'force'); } catch (_) {}
+                    }
+                    if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
+                        try {
+                            _spawnFloatingDmgNumber(tU, (dart.dmg | 0) || 3, { dmgType: 'force' });
+                        } catch (_) {}
+                    }
+                    resolve();
+                }, FLIGHT_MS);
+            }, i * STAGGER_MS);
+        });
+    });
+
+    await Promise.all(promises);
+    await new Promise(function (r) { setTimeout(r, 220); });
+}
+
 async function __combatAnimateOneEvent(ev) {
     var kind = ev.kind;
     if (kind === 'move') {
@@ -32784,7 +33067,7 @@ async function __combatAnimateOneEvent(ev) {
         return;
     }
     if (kind === 'attack' || kind === 'oa') {
-        /* Mostra o d20 do ataque (dice 3D se disponível), depois flash + FCT. */
+        /* Mostra o d20 do ataque (dice 3D se disponível), depois lunge/cast + hit VFX + FCT. */
         var tUid = 'enemy_' + ev.tIdx;
         var tU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
         if (tU && tU.t === 'p') tUid = 'player';
@@ -32793,6 +33076,14 @@ async function __combatAnimateOneEvent(ev) {
         var aU = currentState && currentState.order ? currentState.order[ev.aIdx] : null;
         if (aU && aU.t === 'p') aUid = 'player';
         else if (aU && aU.t === 'a') aUid = 'ally_' + ev.aIdx;
+
+        var elA = document.querySelector('[data-unit-id="' + aUid + '"]');
+        var elT = document.querySelector('[data-unit-id="' + tUid + '"]');
+        var isRanged = !!(ev.ranged || ev.isRanged || (ev.skillName && (ev.skillName.indexOf('Mísseis') >= 0 || ev.skillName.indexOf('Fogo') >= 0 || ev.skillName.indexOf('Raio') >= 0 || ev.skillName.indexOf('Flecha') >= 0 || ev.skillName.indexOf('Disparo') >= 0)));
+        var isMagicMissile = !!((ev.darts && ev.darts.length) || (ev.skillName && ev.skillName.indexOf('Mísseis') >= 0));
+        var isFireball = !!(ev.skillName && ev.skillName.indexOf('Bola de Fogo') >= 0);
+        var isRayOfFrost = !!(ev.skillName && ev.skillName.indexOf('Raio Gélido') >= 0);
+
         /* [C-REM:HP-REWIND] (2026-04-21 REMOTE-only, opção B aprovada pelo autor)
            Antes da animação do d20 + damage dice, volta u.hp pra oldHp pra barra
            do card renderizar o estado PRE-ataque. Após damage dice, commita newHp
@@ -32803,8 +33094,43 @@ async function __combatAnimateOneEvent(ev) {
             tU.hp = ev.oldHp | 0;
             tU.alive = tU.hp > 0;
             render(currentState);
+            elA = document.querySelector('[data-unit-id="' + aUid + '"]');
+            elT = document.querySelector('[data-unit-id="' + tUid + '"]');
         }
-        /* D20 animation se temos o valor. Pula em OAs (rapid-fire). */
+
+        /* 1) ROTA ESPECIAL: MÍSSEIS MÁGICOS (Volley de dardos arcanos escalonados) */
+        if (isMagicMissile) {
+            var darts = ev.darts || [];
+            if (!darts.length && ev.dmgTotal) {
+                darts = [{ dmg: ev.dmgTotal }];
+            }
+            if (elA) {
+                elA.classList.add('token-casting');
+                setTimeout(function () { elA.classList.remove('token-casting'); }, 400);
+            }
+            if (typeof showDamageDice === 'function' && ev.dmgRolls && ev.dmgRolls.length) {
+                try {
+                    await showDamageDice(
+                        ev.dmgRolls, 4, false,
+                        aU || { n: ev.actorName, atk: ev.atk },
+                        tU || { n: ev.targetName, hp: ev.oldHp, ac: ev.ac },
+                        ev.oldHp | 0, ev.newHp | 0, 0
+                    );
+                } catch (_) {}
+            }
+            if (typeof animLaunchMagicMissiles === 'function' && elA && elT) {
+                await animLaunchMagicMissiles(elA, elT, darts, tU);
+            }
+            if (_remoteMode && tU && ev.newHp != null) {
+                tU.hp = ev.newHp | 0;
+                tU.alive = tU.hp > 0;
+            }
+            render(currentState);
+            await new Promise(function (r) { setTimeout(r, 350); });
+            return;
+        }
+
+        /* 2) D20 animation se temos o valor. Pula em OAs (rapid-fire). */
         if (typeof showDice === 'function' && ev.d20 != null && kind !== 'oa') {
             var actorForDice = aU || { n: ev.actorName, t: (ev.actorName || '').indexOf('Orc') >= 0 ? 'e' : 'p' };
             var targetForDice = tU || { n: ev.targetName };
@@ -32835,18 +33161,18 @@ async function __combatAnimateOneEvent(ev) {
                 } catch (eDi) { rD(); }
             });
         }
-        var elT = document.querySelector('[data-unit-id="' + tUid + '"]');
+
+        /* 3) MISS (ERROU) */
         if (ev.hit === false) {
+            if (typeof animHexTokenAttack === 'function' && elA && elT) {
+                await animHexTokenAttack(elA, elT, isRanged);
+            }
             /* [SFX 2026-04-21] miss */
             if (typeof sfxMiss === 'function') sfxMiss();
-            if (elT) elT.classList.add('dodged');
-            setTimeout(function () { if (elT) elT.classList.remove('dodged'); }, 520);
-            /* X-6.5.51AD fix (2026-05-07): "Errou" label correto.
-               Antes: _spawnFloatingDmgNumber(tUid, 'ERROU', 'miss') — uid string +
-               texto + kind string. A função espera (target_object, dmg_number, opts);
-               com uid string o lookup currentState.order[i] === target nunca casa
-               (string vs objeto) → silent return em `if (!uid) return;`.
-               Agora: spawnMissFloatLabel(el) replica o pattern LOCAL playMissVFX. */
+            if (elT) {
+                elT.classList.add('dodged', 'miss-target-flash');
+                setTimeout(function () { if (elT) elT.classList.remove('dodged', 'miss-target-flash'); }, 600);
+            }
             if (elT && typeof spawnMissFloatLabel === 'function') {
                 try { spawnMissFloatLabel(elT); } catch (eMS) {}
             }
@@ -32856,24 +33182,18 @@ async function __combatAnimateOneEvent(ev) {
                     try { window._combatVfx.dodgeEvade(elT); } catch (eDE) {}
                 }
             }
-            if (elT) elT.classList.add('miss-target-flash');
-            setTimeout(function () { if (elT) elT.classList.remove('miss-target-flash'); }, 700);
+            await new Promise(function (r) { setTimeout(r, 450); });
             render(currentState);
-            await new Promise(function (r) { setTimeout(r, 420); });
+            await new Promise(function (r) { setTimeout(r, 200); });
             return;
         }
-        /* Hit: mostra DAMAGE dice antes do flash. Usa showDamageDice do simulator
-           com dados já resolvidos pelo server (ev.dmgRolls + ev.dmgDie + ev.dmgMod). */
+
+        /* 4) HIT: mostra DAMAGE dice antes do flash */
         if (typeof showDamageDice === 'function' && ev.dmgRolls && ev.dmgRolls.length) {
             var aUnit = currentState && currentState.order ? currentState.order[ev.aIdx] : null;
             var tUnit = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
             var dmgModCombined = (ev.dmgMod | 0) + (ev.dmgSpecFlat | 0);
             var dmgDieSize = (ev.dmgDie | 0) || 6;
-            console.info('[C-REM:DMG] showDamageDice rolls=' + JSON.stringify(ev.dmgRolls)
-                + ' die=' + dmgDieSize
-                + ' crit=' + !!ev.crit
-                + ' mod=' + dmgModCombined
-                + ' total=' + ev.dmgTotal);
             try {
                 await showDamageDice(
                     ev.dmgRolls,
@@ -32889,54 +33209,77 @@ async function __combatAnimateOneEvent(ev) {
                 console.warn('[C-REM:DMG] showDamageDice falhou', eDmg && eDmg.message);
             }
         }
-        /* [C-REM:HP-COMMIT] (2026-04-21 REMOTE-only, opção B) barra cai pra newHp
-           junto com flash/FCT abaixo. Só muta se houve rewind (ev.hit !== false). */
-        if (_remoteMode && tU && ev.hit !== false && ev.newHp != null) {
-            tU.hp = ev.newHp | 0;
-            tU.alive = tU.hp > 0;
+
+        // Atacante avança (lunge) em direção ao alvo em melee ou pulsa em magia/arco
+        if (typeof animHexTokenAttack === 'function' && elA && elT) {
+            await animHexTokenAttack(elA, elT, isRanged);
         }
-        /* [SFX 2026-04-21] hit / crit / damage-by-type */
+
+        // SFX hit/crit/type
         if (ev.crit && typeof sfxCrit === 'function') sfxCrit();
         else if (typeof sfxHit === 'function') sfxHit();
         if (ev.dmgType && typeof sfxDamageType === 'function') sfxDamageType(ev.dmgType);
-        if (elT) elT.classList.add('hit-flash');
-        setTimeout(function () { if (elT) elT.classList.remove('hit-flash'); }, 420);
-        /* X-6.5.51AD fix (2026-05-07): floating-dmg + impact VFX paridade LOCAL.
-           Antes: _spawnFloatingDmgNumber(tUid, dtxt, kind_string) — uid string em
-           vez de target object → função silently retorna (loop currentState.order[i]
-           === target nunca casa string vs objeto). E nunca chamava playHitVFX
-           → sem impact label "ATAQUE!"/"CRÍTICO!", sem flash, sem canvas particles.
-           Agora: chamada com signature correta (target object, dmg number, opts) +
-           playHitVFX assíncrono (mostra "ATAQUE!"/"[SKILL]!" sobre o card +
-           skill impact flash + meleeSlash/projectile/impact canvas particles). */
+
+        // Flash e tremor no hexágono alvo
+        var dmgType = ev.dmgType || 'slashing';
+        var flashCls = (typeof _dmgFlashClassSim === 'function') ? _dmgFlashClassSim(dmgType) : 'dmg-flash';
+        var shakeCls = ev.crit ? 'enemy-hit-heavy' : 'dmg-shake';
+        if (elT) {
+            elT.classList.add('hit-flash', flashCls, shakeCls);
+            if (isFireball) elT.classList.add('fb-impact-flash', 'fb-impact-shake');
+            setTimeout(function () {
+                if (elT) elT.classList.remove('hit-flash', flashCls, shakeCls, 'fb-impact-flash', 'fb-impact-shake');
+            }, 600);
+        }
+        if (typeof _shakeAppSim === 'function') {
+            _shakeAppSim(ev.crit ? 'heavy' : 'light');
+        }
+
+        // Projéteis e Slashes no Canvas
+        if (window._combatVfx && elT) {
+            try {
+                if (isFireball) {
+                    window._combatVfx.fireballAoE(elT);
+                } else if (isRayOfFrost && elA) {
+                    window._combatVfx.rayOfFrost(elA, elT, { crit: !!ev.crit });
+                } else if (isRanged && elA) {
+                    window._combatVfx.projectile(elA, elT, dmgType, { crit: !!ev.crit });
+                } else if (elA) {
+                    window._combatVfx.meleeSlash(elA, elT, dmgType, { crit: !!ev.crit });
+                } else {
+                    window._combatVfx.impact(elT, dmgType, { crit: !!ev.crit });
+                }
+                if (ev.crit && window._combatVfx.critBurst) {
+                    window._combatVfx.critBurst(elT, dmgType);
+                }
+            } catch (_eVfx) {}
+        }
+
+        // Labels de impacto DOM e Números de Dano Flutuante
+        if (typeof spawnSkillImpactLabel === 'function' && elT) {
+            var _lblTxt = ev.crit ? 'CRÍTICO!' : (ev.skillName ? ev.skillName.toUpperCase() + '!' : 'ATAQUE!');
+            spawnSkillImpactLabel(elT, _lblTxt, ev.crit ? 'crit' : 'attack');
+        }
         if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
             try {
                 _spawnFloatingDmgNumber(tU, ev.dmgTotal | 0, {
                     crit: !!ev.crit,
-                    dmgType: ev.dmgType || ''
+                    dmgType: dmgType
                 });
             } catch (eFCT) { console.warn('[C-REM:VFX] _spawnFloatingDmgNumber failed', eFCT); }
         }
-        if (typeof playHitVFX === 'function') {
-            try {
-                var _skillObj = ev.skillName ? { n: ev.skillName, ranged: !!ev.ranged } : null;
-                playHitVFX(tUid, !!ev.crit, ev.dmgType || 'slashing', {
-                    fromUid: aUid,
-                    skill: _skillObj,
-                    sneakAttack: !!ev.sneakAttack,
-                    isBossSkill: !!(ev.actorIsBoss || ev.isBossSkill)
-                });
-            } catch (eVFX) { console.warn('[C-REM:VFX] playHitVFX failed', eVFX); }
+
+        // Pausa para o impacto visual ser absorvido antes de consolidar o DOM
+        await new Promise(function (r) { setTimeout(r, 650); });
+
+        // Commit HP
+        if (_remoteMode && tU && ev.hit !== false && ev.newHp != null) {
+            tU.hp = ev.newHp | 0;
+            tU.alive = tU.hp > 0;
         }
-        /* [SFX REMOVE 2026-04-21] sfxEnemyDeath desabilitado (remote mode) —
-           autor reportou "chiado muito alto" ao matar \u00faltimo inimigo. */
-        /*
-        if (tU && tU.t === 'e' && (ev.newHp | 0) <= 0 && typeof sfxEnemyDeath === 'function') {
-            sfxEnemyDeath();
-        }
-        */
+
         render(currentState);
-        await new Promise(function (r) { setTimeout(r, 420); });
+        await new Promise(function (r) { setTimeout(r, 200); });
         return;
     }
     if (kind === 'heal') {
@@ -32993,22 +33336,28 @@ async function __combatAnimateOneEvent(ev) {
         setTimeout(function () { if (elH) elH.classList.remove('heal-flash'); }, 620);
         /* X-6.5.51AD fix (2026-05-07): heal float label correto.
            _spawnFloatingDmgNumber é só pra dano (cor vermelha). Heal usa
-           cell-float-label.heal (verde, sobe do card). Antes: chamada com
-           uid string + texto + 'heal' kind → silent return da função. */
+           cell-float-label.heal (verde, sobe do card). */
         if (elH && (ev.healGained | 0) > 0) {
             try {
                 var _hLbl = document.createElement('div');
                 _hLbl.className = 'cell-float-label heal';
                 _hLbl.textContent = '+' + (ev.healGained | 0) + ' PV';
-                /* X-6.5.51AE: força animation-duration inline (ver _spawnFloatingDmgNumber). */
                 _hLbl.style.setProperty('animation-duration', '1.4s', 'important');
                 _hLbl.style.setProperty('animation-iteration-count', '1', 'important');
                 elH.appendChild(_hLbl);
                 setTimeout(function () { if (_hLbl.parentNode) _hLbl.parentNode.removeChild(_hLbl); }, 1450);
             } catch (eHL) {}
         }
+        if (typeof sfxHeal === 'function') {
+            try { sfxHeal(); } catch (_) {}
+        }
+        if (window._combatVfx && elH) {
+            try { window._combatVfx.healBurst(elH); } catch (_) {}
+        }
+        // Respiro visual para que a cura e as partículas sejam vistas antes do render recriar o DOM
+        await new Promise(function (r) { setTimeout(r, 680); });
         render(currentState);
-        await new Promise(function (r) { setTimeout(r, 620); });
+        await new Promise(function (r) { setTimeout(r, 160); });
         return;
     }
     if (kind === 'death_save') {
@@ -33094,19 +33443,26 @@ async function __combatAnimateOneEvent(ev) {
         }
         if (elA) elA.classList.add('buff-flash');
         setTimeout(function () { if (elA) elA.classList.remove('buff-flash'); }, 520);
-        /* X-6.5.51AD fix (2026-05-07): item_use heal float label correto. Mesma
-           razão do bloco 'heal': cell-float-label.heal direto no cell DOM em
-           vez de _spawnFloatingDmgNumber (que silently retorna com uid string). */
+        if (window._combatVfx && elA) {
+            try {
+                if (ev.subtype === 'defense') window._combatVfx.buffDefense(elA);
+                else if (ev.subtype === 'resource') window._combatVfx.potionMana(elA);
+                else window._combatVfx.buff(elA);
+            } catch (_) {}
+        }
+        /* X-6.5.51AD fix (2026-05-07): item_use heal float label correto. */
         if (_remoteMode_b && kind === 'item_use' && (ev.healGained | 0) > 0) {
             var _tUid = 'player';
             if (_tU && _tU.t === 'a') _tUid = 'ally_' + _tgtIdx;
             var _elHi = document.querySelector('[data-unit-id="' + _tUid + '"]');
             if (_elHi) {
+                if (window._combatVfx) {
+                    try { window._combatVfx.healBurst(_elHi); } catch (_) {}
+                }
                 try {
                     var _iLbl = document.createElement('div');
                     _iLbl.className = 'cell-float-label heal';
                     _iLbl.textContent = '+' + (ev.healGained | 0) + ' PV';
-                    /* X-6.5.51AE: força animation-duration inline (ver _spawnFloatingDmgNumber). */
                     _iLbl.style.setProperty('animation-duration', '1.4s', 'important');
                     _iLbl.style.setProperty('animation-iteration-count', '1', 'important');
                     _elHi.appendChild(_iLbl);
@@ -33114,8 +33470,9 @@ async function __combatAnimateOneEvent(ev) {
                 } catch (eIL) {}
             }
         }
+        await new Promise(function (r) { setTimeout(r, 620); });
         render(currentState);
-        await new Promise(function (r) { setTimeout(r, 420); });
+        await new Promise(function (r) { setTimeout(r, 160); });
         return;
     }
     if (kind === 'round') {
