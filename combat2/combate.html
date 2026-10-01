@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T19:38:47Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T20:10:13Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -18282,7 +18282,7 @@ function assignInitialPositions(order, cols, rows) {
 
 async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
     if (!tokenEl || !path || path.length <= 1) return;
-    var stepMs = stepDurationMs || 240;
+    var stepMs = stepDurationMs || 140;
     tokenEl.style.zIndex = '60';
 
     for (var p = 1; p < path.length; p++) {
@@ -18308,7 +18308,7 @@ async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
         if (stepTile) {
             stepTile.classList.add('hex-tile--stepping');
             (function (el) {
-                setTimeout(function () { el.classList.remove('hex-tile--stepping'); }, Math.round(stepMs * 0.9));
+                setTimeout(function () { el.classList.remove('hex-tile--stepping'); }, Math.round(stepMs * 0.85));
             })(stepTile);
         }
 
@@ -18316,15 +18316,15 @@ async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
         await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.52)); });
 
         // FASE 2: Queda e aterrissagem no centro do hexágono (hop land)
-        tokenEl.style.transition = 'transform ' + Math.round(stepMs * 0.38) + 'ms cubic-bezier(0.25, 1, 0.5, 1), filter ' + Math.round(stepMs * 0.38) + 'ms ease-in';
+        tokenEl.style.transition = 'transform ' + Math.round(stepMs * 0.36) + 'ms cubic-bezier(0.25, 1, 0.5, 1), filter ' + Math.round(stepMs * 0.36) + 'ms ease-in';
         tokenEl.style.transform = 'translateY(0px) scale(0.96)';
         tokenEl.style.filter = 'drop-shadow(0 2px 5px rgba(0, 0, 0, 0.85))';
 
-        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.36)); });
+        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.34)); });
 
         // FASE 3: Descompressão / repouso normal
         tokenEl.style.transform = 'translateY(0px) scale(1)';
-        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.12)); });
+        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.14)); });
     }
 
     tokenEl.style.zIndex = '';
@@ -18339,69 +18339,150 @@ async function handlePlayerMoveTo(tCol, tRow) {
     var p = currentState.order[currentState.p_idx];
     if (!p || !p.alive || p.hp <= 0) return;
     if (!p.pos) p.pos = { col: 0, row: 0 };
-    var d = hexDistance(p.pos.col, p.pos.row, tCol, tRow);
-    if (d <= 0 || d > (p.movement_left || 0)) return;
-
     var fromCol = p.pos.col, fromRow = p.pos.row;
     var path = hexLine(fromCol, fromRow, tCol, tRow);
-    var tokenEl = document.querySelector('[data-unit-id="player"]');
-    if (tokenEl && path && path.length > 1) {
-        var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 130 : 240;
-        await animateUnitHexMovement(tokenEl, path, stepDurationMs);
+    if (!path || path.length <= 1) return;
+
+    var difficultMap = {};
+    if (currentState.battlefield && currentState.battlefield.difficult_terrain) {
+        currentState.battlefield.difficult_terrain.forEach(function (dt) {
+            if (dt && dt.col != null && dt.row != null) difficultMap[dt.col + ',' + dt.row] = dt;
+        });
     }
 
-    p.movement_left -= d;
-    p.pos = { col: tCol, row: tRow };
+    var validPath = [path[0]];
+    var totalCost = 0;
+    var moveLeft = p.movement_left || 0;
+    for (var i = 1; i < path.length; i++) {
+        var stepCoord = path[i];
+        var stepCost = (difficultMap[stepCoord.col + ',' + stepCoord.row]) ? 2 : 1;
+        if (totalCost + stepCost > moveLeft) break;
+        totalCost += stepCost;
+        validPath.push(stepCoord);
+    }
 
-    var dFeet = d * 5;
-    currentState.log.push('Você se moveu ' + dFeet + ' pés (' + d + ' ' + (d > 1 ? 'hexágonos' : 'hexágono') + '). Movimento restante: ' + ((p.movement_left || 0) * 5) + ' pés.');
+    if (validPath.length <= 1) return;
+
+    var tokenEl = document.querySelector('[data-unit-id="player"]');
+    if (tokenEl) {
+        var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 140;
+        await animateUnitHexMovement(tokenEl, validPath, stepDurationMs);
+    }
+
+    p.movement_left = Math.max(0, p.movement_left - totalCost);
+    var dest = validPath[validPath.length - 1];
+    p.pos = { col: dest.col, row: dest.row };
+
+    var dHexes = validPath.length - 1;
+    var dFeet = dHexes * 5;
+    var costFeet = totalCost * 5;
+    var costNote = (costFeet !== dFeet) ? ' (custo: ' + costFeet + ' pés por terreno difícil)' : '';
+    currentState.log.push('Você se moveu ' + dFeet + ' pés' + costNote + '. Deslocamento restante: ' + ((p.movement_left || 0) * 5) + ' pés.');
     if (typeof sendBattleCheckpoint === 'function') {
         try { sendBattleCheckpoint(currentState); } catch (_) {}
     }
     render(currentState);
 }
 
-function findHexPathStep(startCol, startRow, targetCol, targetRow, maxSteps, occupiedSet, cols, rows, stopAtReach) {
+function hexNeighbors(c, r) {
+    c = c | 0; r = r | 0;
+    if (c & 1) { // ímpar
+        return [
+            { col: c, row: r - 1 },
+            { col: c + 1, row: r },
+            { col: c + 1, row: r + 1 },
+            { col: c, row: r + 1 },
+            { col: c - 1, row: r + 1 },
+            { col: c - 1, row: r }
+        ];
+    } else { // par
+        return [
+            { col: c, row: r - 1 },
+            { col: c + 1, row: r - 1 },
+            { col: c + 1, row: r },
+            { col: c, row: r + 1 },
+            { col: c - 1, row: r },
+            { col: c - 1, row: r - 1 }
+        ];
+    }
+}
+
+function findHexPathStep(startCol, startRow, targetCol, targetRow, maxSteps, occupiedSet, cols, rows, stopAtReach, difficultMap) {
     if (stopAtReach == null) stopAtReach = 1;
     if (cols == null) cols = 8;
     if (rows == null) rows = 10;
-    var curC = startCol, curR = startRow;
-    var stepsTaken = 0;
     var occ = occupiedSet || {};
-    var path = [{ col: curC, row: curR }];
+    var dt = difficultMap || {};
 
-    for (var s = 0; s < maxSteps; s++) {
-        if (hexDistance(curC, curR, targetCol, targetRow) <= stopAtReach) break;
-        var neighbors = [
-            { col: curC + 1, row: curR },
-            { col: curC + 1, row: (curC % 2 !== 0) ? curR + 1 : curR - 1 },
-            { col: curC, row: curR - 1 },
-            { col: curC - 1, row: (curC % 2 !== 0) ? curR + 1 : curR - 1 },
-            { col: curC - 1, row: curR },
-            { col: curC, row: curR + 1 }
-        ];
-        var valid = [];
-        for (var i = 0; i < neighbors.length; i++) {
-            var nc = neighbors[i].col, nr = neighbors[i].row;
-            if (nc < 0 || nc >= cols || nr < 0 || nr >= rows) continue;
-            var key = nc + ',' + nr;
-            if (occ[key] && (nc !== curC || nr !== curR)) continue;
-            if (nc === targetCol && nr === targetRow) continue;
-            var dist = hexDistance(nc, nr, targetCol, targetRow);
-            valid.push({ d: dist, col: nc, row: nr });
-        }
-        if (!valid.length) break;
-        valid.sort(function (a, b) { return a.d - b.d; });
-        var best = valid[0];
-        if (best.d >= hexDistance(curC, curR, targetCol, targetRow)) break;
-        delete occ[curC + ',' + curR];
-        curC = best.col;
-        curR = best.row;
-        occ[curC + ',' + curR] = true;
-        stepsTaken++;
-        path.push({ col: curC, row: curR });
+    if (hexDistance(startCol, startRow, targetCol, targetRow) <= stopAtReach) {
+        return { col: startCol, row: startRow, steps: 0, path: [{ col: startCol, row: startRow }] };
     }
-    return { col: curC, row: curR, steps: stepsTaken, path: path };
+
+    var startKey = startCol + ',' + startRow;
+    var queue = [{ col: startCol, row: startRow }];
+    var visited = {};
+    visited[startKey] = null;
+
+    var closestNode = { col: startCol, row: startRow };
+    var closestDist = hexDistance(startCol, startRow, targetCol, targetRow);
+    var reachedGoal = null;
+
+    while (queue.length > 0) {
+        var curr = queue.shift();
+        var cDist = hexDistance(curr.col, curr.row, targetCol, targetRow);
+
+        if (cDist <= stopAtReach) {
+            reachedGoal = curr;
+            break;
+        }
+
+        if (cDist < closestDist) {
+            closestDist = cDist;
+            closestNode = curr;
+        }
+
+        var neighbors = hexNeighbors(curr.col, curr.row);
+        for (var i = 0; i < neighbors.length; i++) {
+            var n = neighbors[i];
+            var nc = n.col, nr = n.row;
+            if (nc < 0 || nc >= cols || nr < 0 || nr >= rows) continue;
+            var nKey = nc + ',' + nr;
+            if (nKey in visited) continue;
+            if (occ[nKey] && (nc !== startCol || nr !== startRow)) continue;
+            if (nc === targetCol && nr === targetRow) continue;
+
+            visited[nKey] = curr;
+            queue.push({ col: nc, row: nr });
+        }
+    }
+
+    var dest = reachedGoal || closestNode;
+    if (dest.col === startCol && dest.row === startRow) {
+        return { col: startCol, row: startRow, steps: 0, path: [{ col: startCol, row: startRow }] };
+    }
+
+    // Reconstrução do caminho (BFS shortest path)
+    var fullPath = [];
+    var currNode = dest;
+    while (currNode) {
+        fullPath.push(currNode);
+        var pKey = currNode.col + ',' + currNode.row;
+        currNode = visited[pKey];
+    }
+    fullPath.reverse();
+
+    var stepsTaken = 0;
+    var finalPath = [fullPath[0]];
+    for (var p = 1; p < fullPath.length; p++) {
+        var stepCoord = fullPath[p];
+        var cost = (dt && dt[stepCoord.col + ',' + stepCoord.row]) ? 2 : 1;
+        if (stepsTaken + cost > maxSteps) break;
+        stepsTaken += cost;
+        finalPath.push(stepCoord);
+    }
+
+    var lastNode = finalPath[finalPath.length - 1];
+    return { col: lastNode.col, row: lastNode.row, steps: stepsTaken, path: finalPath };
 }
 
 function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
@@ -30238,13 +30319,19 @@ async function playTurn(aIdx, tIdx, opts) {
                 (s.order || []).forEach(function (u) {
                     if (u && u.alive && u.pos) occMap[u.pos.col + ',' + u.pos.row] = true;
                 });
-                var stepRes = findHexPathStep(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row, mLeft, occMap, (s.battlefield ? s.battlefield.cols : 8), (s.battlefield ? s.battlefield.rows : 10), reach);
+                var dtMap = {};
+                if (s.battlefield && s.battlefield.difficult_terrain) {
+                    s.battlefield.difficult_terrain.forEach(function (dt) {
+                        if (dt && dt.col != null && dt.row != null) dtMap[dt.col + ',' + dt.row] = dt;
+                    });
+                }
+                var stepRes = findHexPathStep(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row, mLeft, occMap, (s.battlefield ? s.battlefield.cols : 8), (s.battlefield ? s.battlefield.rows : 10), reach, dtMap);
                 if (stepRes.steps > 0) {
                     if (stepRes.path && stepRes.path.length > 1) {
                         var actorUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (aIdx === s.p_idx ? 'player' : 'enemy_' + aIdx);
                         var actorEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
                         if (actorEl) {
-                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 130 : 240;
+                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 140;
                             await animateUnitHexMovement(actorEl, stepRes.path, hopDurationMs);
                         }
                     }
@@ -33223,7 +33310,7 @@ async function __combatAnimateOneEvent(ev) {
         if (tokenEl && ev.fromCol != null && ev.fromRow != null && ev.toCol != null && ev.toRow != null) {
             var path = hexLine(ev.fromCol, ev.fromRow, ev.toCol, ev.toRow);
             if (path && path.length > 1) {
-                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 130 : 240;
+                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 140;
                 await animateUnitHexMovement(tokenEl, path, stepDurationMs);
             }
         }
