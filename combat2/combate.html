@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T23:15:02Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T23:41:34Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -16286,6 +16286,22 @@ function _simAttackAdvState(actor, target) {
             if (st.attackerDisadvantage) dis = true;
         });
     }
+    /* PHB p.292: Alvo prostrado (prone) — vantagem corpo a corpo (<= 1 hex / melee), desvantagem a distância (> 1 hex / ranged) */
+    var targetProne = target && target.se && target.se.some(function (st) { return st && st.prone; });
+    if (targetProne) {
+        var simDist = null;
+        if (actor && actor.pos && target && target.pos && typeof hexDistance === 'function') {
+            simDist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
+        }
+        if (simDist !== null) {
+            if (simDist <= 1) adv = true;
+            else dis = true;
+        } else {
+            var isRanged = actor && actor.weaponReach && actor.weaponReach > 1;
+            if (isRanged) dis = true;
+            else adv = true;
+        }
+    }
     /* G1 (escolha autor 2026-04-19) — Pack Tactics PHB MM p.341 (Wolf):
        advantage no ataque sempre que ≥1 aliado vivo (combat2 abstrai posicionamento).
        Aplicada no Animal Companion (Patrulheiro Beast Master). */
@@ -17165,6 +17181,38 @@ function clearDownedMeta(u) {
     u.stable = false;
     u.isDead = false;
     u.deathSaves = { s: 0, f: 0 };
+    if (u.se && Array.isArray(u.se)) {
+        u.se = u.se.filter(function (st) { return !st || st.id !== 'prone_downed'; });
+    }
+}
+
+/** PHB pp. 203–204: Encerra concentração ativa e liberta alvos linkados. */
+function simDropConcentration(s, caster, logReason) {
+    if (!caster || !caster.se) return [];
+    var lost = [];
+    caster.se = caster.se.filter(function (x) {
+        if (x && x.concentration) {
+            lost.push(x.id || 'buff');
+            if (x.concSummonSpellId && typeof _dissipateConjuredSummons === 'function') {
+                _dissipateConjuredSummons(s, caster, x.concSummonSpellId);
+            }
+            if (x.linkedConditionId != null && x.linkedTargetIdx != null && s && s.order && s.order[x.linkedTargetIdx]) {
+                var lkT = s.order[x.linkedTargetIdx];
+                var lkBefore = (lkT.se || []).length;
+                lkT.se = (lkT.se || []).filter(function (y) { return !y || y.id !== x.linkedConditionId; });
+                if ((lkT.se || []).length < lkBefore && s.log) {
+                    s.log.push((lkT.n || '?') + ' se liberta — a concentração de ' + (caster.n || '?') + ' foi encerrada (PHB p.203).');
+                }
+            }
+            return false;
+        }
+        return true;
+    });
+    if (lost.length && s && s.log) {
+        if (logReason) s.log.push(logReason);
+        else s.log.push((caster.n || '?') + ' encerra concentração — ' + lost.join(', ') + ' (PHB p.203).');
+    }
+    return lost;
 }
 
 function ensureDeathSaves(u) {
@@ -17538,7 +17586,12 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             }
         }
     }
-    if (target.t !== 'p' && target.t !== 'a') return;
+    if (target.t !== 'p' && target.t !== 'a') {
+        if (oldHp > 0 && newHp <= 0) {
+            simDropConcentration(s, target, (target.n || 'Inimigo') + ' é derrotado — concentração encerrada (PHB p.203).');
+        }
+        return;
+    }
     if (target.isDead) return;
     /* V1 Invocações Phase 3 — summons sem death saves morrem direto. */
     if (target.noDeathSaves) {
@@ -17606,6 +17659,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             target.dying = false;
             target.stable = false;
             target.deathSaves = { s: 0, f: 0 };
+            simDropConcentration(s, target, target.n + ' sofre dano massivo — concentração encerrada (PHB p.203).');
             s.log.push(target.n + ' sofre DANO MASSIVO (' + damageApplied + ' total, ' + _remainingDmg +
                 ' além do 0 PV vs ' + _mhpCheck + ' PV máx) — MORTE INSTANTÂNEA (PHB p.197).');
             return;
@@ -17622,13 +17676,25 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             target.dying = false;
             target.stable = false;
             target.deathSaves = { s: 0, f: 0 };
+            simDropConcentration(s, target, target.n + ' cai a 0 PV — concentração encerrada (PHB p.203).');
             s.log.push(target.n + ' cai a 0 PV sem ninguém para socorrê-lo — a morte é inevitável. Será levado ao templo.');
             return;
         }
+        simDropConcentration(s, target, target.n + ' cai a 0 PV — concentração encerrada (PHB p.203).');
         target.dying = true;
         target.stable = false;
         target.deathSaves = { s: 0, f: 0 };
-        s.log.push(target.n + ' cai a 0 PV — inconsciente (teste de morte no turno).');
+        if (!target.se) target.se = [];
+        target.se.push({
+            id: 'prone_downed',
+            kind: 'debuff',
+            n: 'Prostrado (Inconsciente)',
+            ico: '🔻',
+            prone: true,
+            dndCondition: 'Prostrado (Inconsciente a 0 PV — PHB p.197)',
+            turnsLeft: null,
+        });
+        s.log.push(target.n + ' cai a 0 PV — inconsciente e prostrado (teste de morte no turno).');
         return;
     }
     if (oldHp <= 0 && newHp <= 0) {
