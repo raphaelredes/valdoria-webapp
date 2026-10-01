@@ -43,16 +43,6 @@ function act(cb) {
   if (typeof doAction === 'function' && cb) doAction(cb);
 }
 
-/* _isRemote canonical GLOBAL — WHY: game-bank.js/game-temple.js referenciam `_isRemote`
-   dentro de suas IIFEs, mas as definicoes locais em game-inn/tavern/workshop.js ficam
-   presas nas IIFEs DELAS (nao viram global). Sem este window._isRemote, o `typeof
-   _isRemote === 'function'` do Banco era SEMPRE falso → REMOTE caia no dialogo client-side
-   hardcoded em vez de _openCityDialogue/_openCityScreen server-driven (PADRAO_SERVIDOR). */
-function isRemote() {
-  return !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote());
-}
-window._isRemote = isRemote;
-
 /** Strip HTML tags from NPC text (backend sends <i>, <b> etc. for inline Telegram) */
 function stripTags(str) {
   if (!str) return '';
@@ -110,33 +100,8 @@ function goldBalance(gold) {
 
 /* ── Service Grid ── */
 
-/* P6 (2026-07-02, PADRAO_LOCAIS A6): badge "Novo!" quando um serviço TRANSICIONA
-   de travado → liberado (ex.: subiu de nível e o card destravou). Snapshot dos
-   cards vistos travados em localStorage (preferência de UI pura — permitido);
-   o badge persiste até o jogador CLICAR o card (consumo). 1ª visita não polui:
-   sem snapshot prévio → sem badge. */
-var _SVC_LOCK_KEY = 'valdoria_ui_svc_locked';
-function _svcLockSnap() {
-  try { return JSON.parse(localStorage.getItem(_SVC_LOCK_KEY) || '{}'); }
-  catch (_e) { return {}; }
-}
-function _svcLockSave(s) {
-  try { localStorage.setItem(_SVC_LOCK_KEY, JSON.stringify(s)); } catch (_e) {}
-}
-
 function serviceGrid(services) {
   if (!services || !services.length) return el('div', '');
-  var snap = _svcLockSnap(), dirty = false;
-  for (var j = 0; j < services.length; j++) {
-    var s = services[j];
-    if (!s || !s.cb) continue;
-    if (s.disabled) {
-      if (!snap[s.cb]) { snap[s.cb] = 1; dirty = true; }
-    } else if (snap[s.cb]) {
-      s._isNew = true;  // destravou desde a última visita → fita "Novo!"
-    }
-  }
-  if (dirty) _svcLockSave(snap);
   var grid = el('div', 'vc-service-grid');
   for (var i = 0; i < services.length; i++) {
     grid.appendChild(serviceCard(services[i]));
@@ -147,15 +112,6 @@ function serviceGrid(services) {
 function serviceCard(svc) {
   var card = el('div', 'vc-service-card');
   if (svc.disabled) card.classList.add('disabled');
-  if (svc._isNew && !svc.disabled) {
-    var nb = el('div', 'vc-service-new');
-    nb.textContent = 'Novo!';
-    card.appendChild(nb);
-    card.addEventListener('click', (function(cb, badgeEl){ return function(){
-      var s2 = _svcLockSnap(); delete s2[cb]; _svcLockSave(s2);
-      if (badgeEl && badgeEl.parentNode) badgeEl.parentNode.removeChild(badgeEl);
-    }; })(svc.cb, nb), { once: true });
-  }
 
   /* Icon — suporta SVG heraldico, IMG portrait (innerHTML) ou emoji (textContent)
      2026-05-18 BUG FIX: <img> tag (merchant portraits AAA) era escapado como
@@ -183,7 +139,7 @@ function serviceCard(svc) {
   if (svc.cost !== undefined && svc.cost !== null) {
     var price = el('div', 'vc-service-price');
     if (svc.cost === 0) {
-      price.textContent = 'Grátis';
+      price.textContent = 'Gratis';
       price.classList.add('free');
     } else {
       price.textContent = String(svc.cost) + ' ';
@@ -299,7 +255,7 @@ function bar(label, type, fillClass, pct, cur, max) {
 function exhaustionPips(ex) {
   var wrap = el('div', 'vc-exhaustion');
   var lbl = el('div', 'vc-ex-label');
-  lbl.textContent = 'Exaustão';
+  lbl.textContent = 'Exaustao';
   wrap.appendChild(lbl);
   var pips = el('div', 'vc-ex-pips');
   for (var i = 0; i < 6; i++) {

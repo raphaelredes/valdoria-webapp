@@ -536,7 +536,8 @@ function _buildQuestRow(q) {
     row.style.cursor = 'pointer';
 
     /* Icon */
-    var icoEl = _hubSpan('hq-ico', '\uD83D\uDCDC');
+    var icoEl = _hubSpan('hq-ico');
+    icoEl.innerHTML = _uiIcoImg('missoes', 'ui-ico-img');
     row.appendChild(icoEl);
 
     /* Title text */

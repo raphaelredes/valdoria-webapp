@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T12:57:17Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T17:03:36Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14980,9 +14980,41 @@ function sendBattleCheckpoint(state) {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + window.__COMBAT_TOKEN, 'Content-Type': 'application/json' },
             body: JSON.stringify(snap)
-        }).catch(function(e){ console.warn('[C-REM:CP] checkpoint send fail', e); });
-    } catch (e) { console.warn('[C-REM:CP] checkpoint send sync fail', e); }
+        }).then(function(r) {
+            if (r.ok) {
+                window.__lastFailedCombatCheckpoint = null;
+            } else {
+                window.__lastFailedCombatCheckpoint = snap;
+            }
+        }).catch(function(e){
+            console.warn('[C-REM:CP] checkpoint send fail (offline/network)', e);
+            window.__lastFailedCombatCheckpoint = snap;
+        });
+    } catch (e) {
+        console.warn('[C-REM:CP] checkpoint send sync fail', e);
+        window.__lastFailedCombatCheckpoint = snap;
+    }
 }
+
+// Resiliência de Conexão no Combate (Online/Offline) — Re-envio de Checkpoint Pendente
+window.addEventListener('online', function() {
+    console.info('[C-REM:NET] Conexão restabelecida (evento online).');
+    if (window.__lastFailedCombatCheckpoint && window.__COMBAT_IS_REMOTE_SESSION && window.__COMBAT_API_BASE && window.__COMBAT_TOKEN) {
+        console.info('[C-REM:NET] Re-enviando último checkpoint pendente...');
+        fetch(window.__COMBAT_API_BASE + '/api/combat2/checkpoint', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + window.__COMBAT_TOKEN, 'Content-Type': 'application/json' },
+            body: JSON.stringify(window.__lastFailedCombatCheckpoint)
+        }).then(function(r) {
+            if (r.ok) {
+                window.__lastFailedCombatCheckpoint = null;
+                console.info('[C-REM:NET] Checkpoint sincronizado com sucesso após reconexão.');
+            }
+        }).catch(function(e) {
+            console.warn('[C-REM:NET] Retry de checkpoint falhou:', e);
+        });
+    }
+});
 function applyBattleCheckpoint(state, cp) {
     if (!state || !state.order || !cp) return false;
     var allyMap = {}, enemyMap = {};

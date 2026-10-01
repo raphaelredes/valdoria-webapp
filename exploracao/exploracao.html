@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-09-18T17:14:13Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-01T17:00:46Z - do not edit directly, edit source -->
 
 
 
@@ -15627,6 +15627,27 @@ window.__explFetchTO = function(url, opts, ms) {
     + ' peek_tok=' + (PEEK_TOKEN ? PEEK_TOKEN.slice(0, 8) + '...' : '(empty)')
     + ' api_base=' + API_BASE);
 })();
+
+// Resiliência de Conexão (Online/Offline) — Recuperação Automática de Estado
+window.addEventListener('online', function() {
+  console.info('[E-REM:NET] Conexão reestabelecida (online).');
+  if (window.ExploracaoAPI && typeof window.ExploracaoAPI.move === 'function' && window.S && window.S.player) {
+    var _c = (window.__pendingExplorationSync && typeof window.__pendingExplorationSync.col === 'number')
+      ? window.__pendingExplorationSync.col : S.player.col;
+    var _r = (window.__pendingExplorationSync && typeof window.__pendingExplorationSync.row === 'number')
+      ? window.__pendingExplorationSync.row : S.player.row;
+    window.ExploracaoAPI.move(_c, _r).then(function(res) {
+      if (res && res.state) {
+        window.__pendingExplorationSync = null;
+        if (typeof vToast === 'function') {
+          vToast('Conexão restabelecida. Posição sincronizada com o servidor.', 'info', 3200);
+        }
+      }
+    }).catch(function(e) {
+      console.warn('[E-REM:NET] Falha ao sincronizar após reconexão:', e);
+    });
+  }
+});
 
 // ---- SNAP DECODER (boot hidratação em remote) -----------------------------
 // Snap = base64(JSON compacto com perfil do player). JSON puro, sem zlib,
@@ -34217,8 +34238,12 @@ function onMoveEnd(col, row) {
     _pendingServerMove = window.ExploracaoAPI.move(col, row).then(function(res) {
       if (!res || res.error) {
         LOGW('API', 'remote_move err=' + (res && res.error));
+        if (!res || res._network_error || res.error === 'network' || res.error === 'timeout') {
+          window.__pendingExplorationSync = { col: col, row: row };
+        }
         return;
       }
+      window.__pendingExplorationSync = null;
       // Sync state HP/MP/gold/xp + visible do servidor
       if (res.state) {
         try {
@@ -34319,6 +34344,7 @@ function onMoveEnd(col, row) {
       }
     }).catch(function(e) {
       LOGE('API', 'remote_move rejected msg=' + (e && e.message));
+      window.__pendingExplorationSync = { col: col, row: row };
     });
   }
 }
@@ -46330,6 +46356,34 @@ function boot() {
                 if (_ss.background) S.player.background = _ss.background;
                 if (_ss.alignment) S.player.alignment = _ss.alignment;
                 if (_ss.char_id) S.player.char_id = _ss.char_id;
+                // Persistência server-authoritative de posição (col/row) e fog (visited/visible)
+                if (typeof _ss.player_col === 'number' && typeof _ss.player_row === 'number') {
+                  var _oldCol = S.player.col;
+                  var _oldRow = S.player.row;
+                  S.player.col = _ss.player_col;
+                  S.player.row = _ss.player_row;
+                  if (Array.isArray(_ss.visited)) {
+                    for (var _vi = 0; _vi < _ss.visited.length; _vi++) {
+                      var _vk = _ss.visited[_vi];
+                      if (_vk && _vk.length === 2 && S.visited && typeof S.visited.add === 'function') {
+                        S.visited.add(fogKey(_vk[0], _vk[1]));
+                      }
+                    }
+                  }
+                  if (Array.isArray(_ss.visible)) {
+                    for (var _vsi = 0; _vsi < _ss.visible.length; _vsi++) {
+                      var _vsk = _ss.visible[_vsi];
+                      if (_vsk && _vsk.length === 2 && S.visible && typeof S.visible.add === 'function') {
+                        S.visible.add(fogKey(_vsk[0], _vsk[1]));
+                      }
+                    }
+                  }
+                  if (_oldCol !== _ss.player_col || _oldRow !== _ss.player_row) {
+                    try { if (typeof computeFov === 'function') computeFov(S.player.col, S.player.row); } catch (_) {}
+                    try { if (typeof centerOnPlayer === 'function') centerOnPlayer(false); } catch (_) {}
+                    try { if (typeof updateHexNav === 'function') updateHexNav(); } catch (_) {}
+                  }
+                }
                 if (res.equipment && typeof res.equipment === 'object') {
                   window.__EXPLORE_SERVER_EQUIPPED = res.equipment;
                   S.player.equipment = res.equipment;

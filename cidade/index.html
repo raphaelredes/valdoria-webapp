@@ -10836,6 +10836,51 @@ function _isCTA(btn) {
   };
 })();
 
+// Resiliência de Conexão na Cidade (Online/Offline) — Sincronização Automática
+function syncCityPlayerFromServerState(st) {
+  if (!st || !window.CITY_MOCK_PLAYER) return;
+  var p = window.CITY_MOCK_PLAYER;
+  if (st.hud) {
+    if (st.hud.hp != null)     p.hp = st.hud.hp;
+    if (st.hud.max_hp != null) p.hpMax = st.hud.max_hp;
+    if (st.hud.mp != null)     p.mp = st.hud.mp;
+    if (st.hud.max_mp != null) p.mpMax = st.hud.max_mp;
+    if (st.hud.gold != null)   p.gold = st.hud.gold;
+    if (st.hud.xp != null)     p.xp = st.hud.xp;
+    if (st.hud.level != null)  p.level = st.hud.level;
+    if (st.hud.name)           p.name = st.hud.name;
+  }
+  if (st.player) {
+    var pl = st.player;
+    if (pl.hp != null)     p.hp = pl.hp;
+    if (pl.max_hp != null) p.hpMax = pl.max_hp;
+    if (pl.mp != null)     p.mp = pl.mp;
+    if (pl.max_mp != null) p.mpMax = pl.max_mp;
+    if (pl.gold != null)   p.gold = pl.gold;
+    if (pl.xp != null)     p.xp = pl.xp;
+    if (pl.level != null)  p.level = pl.level;
+    if (pl.name)           p.name = pl.name;
+    if (pl.exhaustion != null) p.exh = pl.exhaustion;
+  }
+  if (typeof refreshHud === 'function') refreshHud();
+}
+
+window.addEventListener('online', function() {
+  console.info('[CITY:NET] Conexão reestabelecida (evento online).');
+  if (window.vCityServer && typeof window.vCityServer.getState === 'function' && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+    window.vCityServer.getState().then(function(st) {
+      if (st) {
+        syncCityPlayerFromServerState(st);
+        if (typeof vToast === 'function') {
+          vToast('Conexão restabelecida. Estado sincronizado com o servidor.', 'info', 3000);
+        }
+      }
+    }).catch(function(e) {
+      console.warn('[CITY:NET] Falha ao sincronizar após reconexão:', e);
+    });
+  }
+});
+
 (function setupMocks(){
   // haptic legacy → delega pra vHaptic (respeita Settings)
   if (typeof window.haptic === 'undefined') { window.haptic = function(kind){ if (window.vHaptic) window.vHaptic(kind); }; }
