@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T17:55:32Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T19:38:47Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -29973,23 +29973,30 @@ function showIntroChoicePopup() {
        Chamamos novamente pra os botões do popup serem escutados. Idempotente:
        addEventListener em elementos já listados é no-op se mesmo handler. */
     if (typeof bindActions === 'function') bindActions();
-    /* Mount dice3d no topo do popup COMBATE INICIADO com animação de rolagem contínua */
+    /* Mount dice3d no topo do popup COMBATE INICIADO: modo vitrine (turntable suave e silencioso) */
     try {
         var ctaMount = document.getElementById('ctaDiceMount');
         if (ctaMount && window.Dice3D && !ctaMount._d3d) {
-            var dCta = new Dice3D(ctaMount, { size: 68, dieType: 'd20', duration: 2400, silent: true });
+            var dCta = new Dice3D(ctaMount, { size: 68, dieType: 'd20', silent: true });
             ctaMount._d3d = dCta;
-            function loopIntroDice() {
-                if (!ctaMount._d3d || ctaMount._d3d !== dCta) return;
-                if (!document.body.contains(ctaMount)) {
+            var _rafId = null;
+            function spinIntroDiceTurntable() {
+                if (!ctaMount._d3d || ctaMount._d3d !== dCta || !document.body.contains(ctaMount)) {
+                    if (_rafId) cancelAnimationFrame(_rafId);
                     try { dCta.dispose(); } catch (e) {}
                     ctaMount._d3d = null;
                     return;
                 }
-                var v = 1 + Math.floor(Math.random() * 20);
-                dCta.roll(v, function () { setTimeout(loopIntroDice, 700); });
+                if (dCta._dieMesh) {
+                    dCta._dieMesh.rotation.y += 0.007;
+                    dCta._dieMesh.rotation.x = 0.28;
+                    if (dCta._renderer && dCta._scene && dCta._camera) {
+                        dCta._renderer.render(dCta._scene, dCta._camera);
+                    }
+                }
+                _rafId = requestAnimationFrame(spinIntroDiceTurntable);
             }
-            loopIntroDice();
+            _rafId = requestAnimationFrame(spinIntroDiceTurntable);
         }
     } catch (_eD) { console.warn('[SIM] Dice3D no topo do popup de intro falhou', _eD); }
     /* #17: dispara o typewriter da narrativa; CTAs revelam ao terminar (ou skip
