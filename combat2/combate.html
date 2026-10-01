@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T23:41:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T23:51:16Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -22293,21 +22293,39 @@ function __combatShowShieldPrompt(ev) {
             + '+' + (ev.atk != null ? ev.atk : '?')
             + '=' + (ev.total != null ? ev.total : '?');
         var esc = (typeof escHtml === 'function') ? escHtml : function (s) { return String(s); };
-        var html = '<div class="tcc-title">Reação — Escudo Arcano</div>';
+
+        var title = 'Reação — D&D 5e';
+        var desc = '';
+        if (ev.subtype === 'uncanny_dodge' || ev.uncannyAvailable) {
+            title = 'Reação — Esquiva Sobrenatural';
+            desc = '<p class="c2-info-intro c2-info-intro--inline">Usar sua reação de Ladino para <strong>reduzir o dano deste ataque pela metade</strong> (PHB p.96)?</p>';
+        } else if (ev.subtype === 'rebuke' || ev.rebukeAvailable) {
+            title = 'Reação — Repreensão Infernal';
+            desc = '<p class="c2-info-intro c2-info-intro--inline">Usar sua reação para infligir 2d10 de dano de fogo no atacante (PHB p.250)?</p>';
+        } else {
+            title = 'Reação — Escudo Arcano';
+            desc = '<p class="c2-info-intro c2-info-intro--inline">Gastar <strong>' + (ev.shieldCost | 0) + '</strong> de mana para somar +5 à CA contra este ataque (PHB)?</p>';
+        }
+
+        var html = '<div class="tcc-title">' + esc(title) + '</div>';
         html += '<p class="c2-info-intro c2-info-intro--inline"><strong>'
             + esc(nm) + '</strong> acerta em você (' + esc(tot)
             + ' vs CA ' + (ev.ac != null ? ev.ac : '?') + ').</p>';
-        html += '<p class="c2-info-intro c2-info-intro--inline">Gastar <strong>'
-            + (ev.shieldCost | 0) + '</strong> de mana para somar +5 à CA contra este ataque (PHB)?</p>';
+        html += desc;
         html += '<div class="tcc-actions">';
-        html += '<button type="button" class="action-btn" data-rs="0">Não usar</button>';
-        html += '<button type="button" class="action-btn primary" data-rs="1">Usar Escudo</button>';
+        html += '<button type="button" class="action-btn" data-rs="none">Não usar</button>';
+        if (ev.shieldAvailable || ev.subtype === 'shield') {
+            html += '<button type="button" class="action-btn primary" data-rs="shield">Usar Escudo (+5 CA)</button>';
+        }
+        if (ev.uncannyAvailable || ev.subtype === 'uncanny_dodge') {
+            html += '<button type="button" class="action-btn primary" data-rs="uncanny_dodge">Usar Esquiva (½ Dano)</button>';
+        }
+        if (ev.rebukeAvailable || ev.subtype === 'rebuke') {
+            html += '<button type="button" class="action-btn primary" data-rs="rebuke">Repreensão (2d10 Fogo)</button>';
+        }
         html += '</div>';
         setHTML(card, html);
         ov.appendChild(card);
-        /* V1.7 (2026-04-21) — REGRA SOBERANA: TUDO dentro do #app (smartphone).
-           Ordem de prioridade: mountInGameFrame → vOverlay → #app direto.
-           NUNCA cai no document.body sem ao menos tentar #app. */
         if (typeof mountInGameFrame === 'function') {
             mountInGameFrame(ov);
         } else if (typeof vOverlay !== 'undefined' && vOverlay.add) {
@@ -22318,11 +22336,14 @@ function __combatShowShieldPrompt(ev) {
         }
         function done(v) {
             try { ov.remove(); } catch (eR) {}
-            resolve(!!v);
+            resolve(v);
         }
-        ov.addEventListener('click', function (e) { if (e.target === ov) done(false); });
-        card.querySelector('[data-rs="0"]').addEventListener('click', function () { done(false); });
-        card.querySelector('[data-rs="1"]').addEventListener('click', function () { done(true); });
+        ov.addEventListener('click', function (e) { if (e.target === ov) done('none'); });
+        card.querySelectorAll('button[data-rs]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                done(btn.getAttribute('data-rs'));
+            });
+        });
     });
 }
 
@@ -34002,22 +34023,21 @@ async function __combatAnimateOneEvent(ev) {
         render(currentState);
         return;
     }
-    if (kind === 'reaction_prompt' && ev.subtype === 'shield') {
-        /* [C-REM:REACTION] Escudo Arcano — pergunta ao jogador se quer gastar MP
-           pra +5 CA no ataque. Envia reaction_resolve pra server. Paridade
-           combat2.js promptShieldReaction. */
-        console.info('[C-REM:REACTION] shield_prompt actor=' + ev.actorName
+    if (kind === 'reaction_prompt') {
+        /* [C-REM:REACTION] Reação D&D 5e — Escudo Arcano, Esquiva Sobrenatural ou Repreensão Infernal.
+           Exibe modal interativo e despacha reaction_resolve ao servidor. */
+        console.info('[C-REM:REACTION] prompt actor=' + ev.actorName
             + ' d20=' + ev.d20 + ' total=' + ev.total + ' ac=' + ev.ac
-            + ' cost=' + ev.shieldCost);
-        var useShield = await __combatShowShieldPrompt(ev);
-        console.info('[C-REM:REACTION] user_choice useShield=' + useShield
-            + ' — dispatching reaction_resolve');
-        /* Envia decisão ao server — retorna novos events (hit/miss atualizado). */
+            + ' subtype=' + ev.subtype);
+        var reactionChoice = await __combatShowShieldPrompt(ev);
+        console.info('[C-REM:REACTION] user_choice=' + reactionChoice + ' — dispatching reaction_resolve');
         try {
-            var resp = await __combatServerCall('POST', {
+            var payload = {
                 type: 'reaction_resolve',
-                useShield: !!useShield
-            });
+                subtype: (reactionChoice && reactionChoice !== 'none') ? reactionChoice : 'none',
+                useShield: (reactionChoice === 'shield')
+            };
+            var resp = await __combatServerCall('POST', payload);
             if (resp && !resp.error) {
                 currentState = resp.state;
                 render(currentState);
@@ -34032,12 +34052,6 @@ async function __combatAnimateOneEvent(ev) {
         } catch (eR) {
             console.error('[C-REM:REACTION] exception', eR && eR.message);
         }
-        return;
-    }
-    if (kind === 'reaction_prompt') {
-        /* Outros tipos de reaction não-shield: skip por hora. */
-        console.info('[C-REM:REACTION] unsupported_subtype=' + ev.subtype + ' — skip');
-        await new Promise(function (r) { setTimeout(r, 250); });
         return;
     }
     if (kind === 'fled' || kind === 'flee') {
