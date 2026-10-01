@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T22:52:07Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T23:15:02Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -16844,6 +16844,22 @@ function simSpellSaveDc(actor) {
     return 8 + prof + Math.floor((score - 10) / 2);
 }
 
+/** Bônus de ataque de magia (PHB p.205): proficiência + mod de conjuração da classe. */
+function simSpellAttackBonus(actor) {
+    if (!actor) return 0;
+    var prof = actor.prof != null ? (actor.prof | 0) : (typeof simProficiencyBonus === 'function' ? simProficiencyBonus(actor.lvl | 0) : 2);
+    var abilityKey = _simSpellcastingAbility(actor && actor.cls);
+    var score = (actor && actor[abilityKey] != null) ? (actor[abilityKey] | 0) : 14;
+    var b = prof + Math.floor((score - 10) / 2);
+    if (Array.isArray(actor.se)) {
+        for (var i = 0; i < actor.se.length; i++) {
+            if (actor.se[i] && actor.se[i].atkFlat) b += (actor.se[i].atkFlat | 0);
+        }
+    }
+    if (actor.itemBuffs && actor.itemBuffs.luck) b += (actor.itemBuffs.luck | 0);
+    return b;
+}
+
 /** Pontuacao de atributo para TR (alinhado a combat2_conditions / PHB). */
 function simAbilityScore(defender, ability) {
     var ab = (ability || 'dex').toLowerCase();
@@ -31256,7 +31272,8 @@ async function playTurn(aIdx, tIdx, opts) {
         if (typeof sfxMiss === 'function') { try { sfxMiss(); } catch (_eS) {} }
         /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — miss log com NAT 1.
            Formato consistente com hit log: d20 cru + bônus = total vs CA. NAT 1 destacado. */
-        var _missAtkPart = 'd20 ' + r + '+' + actor.atk +
+        var _missAtkBonus = (ev && ev.atk != null) ? ev.atk : actor.atk;
+        var _missAtkPart = 'd20 ' + r + '+' + _missAtkBonus +
             (atkExtra ? '+' + atkExtra : '') + '=' + hitRes.total +
             ' vs CA ' + effAc + (effAc !== target.ac ? ' (incl. bônus)' : '');
         if (r === 1) _missAtkPart = 'NAT 1! vs CA ' + effAc;
@@ -31958,7 +31975,8 @@ async function playTurn(aIdx, tIdx, opts) {
            Antes era "Guerreiro causa X em Goblin" (sem breakdown). Agora:
            "Guerreiro acerta Goblin — d20 15+3=18 vs CA 15 | 2d10 [7+3]+3 = 13"
            "Guerreiro CRITA Goblin — NAT 20! vs CA 15 | 4d10 [7+3+5+2]+3 = 20" */
-        var _atkPart = 'd20 ' + r + '+' + actor.atk +
+        var _hitAtkBonus = (ev && ev.atk != null) ? ev.atk : actor.atk;
+        var _atkPart = 'd20 ' + r + '+' + _hitAtkBonus +
             (atkExtra ? '+' + atkExtra : '') + '=' + hitRes.total +
             ' vs CA ' + effAc;
         if (r === 20) _atkPart = 'NAT 20! vs CA ' + effAc;
