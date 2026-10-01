@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T17:20:52Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T17:41:25Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -959,24 +959,23 @@ html body .va-backdrop {
     0% { opacity: 0; transform: scale(0.85) translateY(-14px); }
     100% { opacity: 1; transform: scale(1) translateY(0); }
 }
-/* ESCUDO HERÁLDICO emergindo do topo */
+/* DADO 3D emergindo do topo (substitui o antigo brasão/silhueta plana) */
 #intro-choice-popup .iop-card::before {
-    content: '';
+    display: none !important;
+}
+#intro-choice-popup .intro-choice-dice-mount {
     position: absolute;
-    top: -32px;
+    top: -42px;
     left: 50%;
     transform: translateX(-50%);
-    width: 64px;
-    height: 72px;
-    clip-path: polygon(50% 0%, 100% 20%, 100% 70%, 50% 100%, 0% 70%, 0% 20%);
-    background: linear-gradient(180deg, #c4953a 0%, #7a5620 100%);
+    width: 80px;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1a1005;
-    font-size: calc(26px * var(--v-font-scale, 1));
-    box-shadow: 0 6px 16px rgba(0,0,0,0.7);
-    z-index: 2;
+    z-index: 10;
+    pointer-events: none;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.85));
 }
 /* Header: título + subtítulo (sem ornamento extra) */
 #intro-choice-popup .iop-head-batch {
@@ -29875,11 +29874,12 @@ function showIntroChoicePopup() {
     ov.setAttribute('aria-labelledby', 'c2-intro-choice-title');
     var card = document.createElement('div');
     card.className = 'iop-card iop-card--batch-summary';
-    /* [MOCKUP OPÇÃO 3 aprovada 2026-04-21] ESCUDO BRASONADO:
-       brasão emerge do topo (via CSS ::before do card), título grande gold,
+    /* [MOCKUP OPÇÃO 3 aprovada 2026-04-21] ESCUDO BRASONADO / DADO 3D:
+       dado 3D funcional rola continuamente no topo do card, título grande gold,
        subtítulo espaçado, divisor , botão primary com tag "Ação Padrão",
        botão secundário tracejado discreto. CSS em style do <head>. */
     var parts = [
+        '<div id="ctaDiceMount" class="intro-choice-dice-mount" aria-hidden="true"></div>',
         '<header class="iop-head-batch" aria-labelledby="c2-intro-choice-title">',
         '<h2 class="iop-head-batch__title" id="c2-intro-choice-title">',
         '<span class="iop-head-batch__line1">Combate Iniciado</span>',
@@ -29930,13 +29930,25 @@ function showIntroChoicePopup() {
        Chamamos novamente pra os botões do popup serem escutados. Idempotente:
        addEventListener em elementos já listados é no-op se mesmo handler. */
     if (typeof bindActions === 'function') bindActions();
-    /* Mount dice3d no ícone do botão "Começar" se disponível (efeito visual). */
+    /* Mount dice3d no topo do popup COMBATE INICIADO com animação de rolagem contínua */
     try {
-        var ctaMount = document.getElementById('ctaDiceMountPopup');
-        if (ctaMount && window.Dice3D && !ctaMount._d3d && typeof window.Dice3D.createDiceForDom === 'function') {
-            ctaMount._d3d = window.Dice3D.createDiceForDom(ctaMount, { dieType: 'd20' });
+        var ctaMount = document.getElementById('ctaDiceMount');
+        if (ctaMount && window.Dice3D && !ctaMount._d3d) {
+            var dCta = new Dice3D(ctaMount, { size: 68, dieType: 'd20', duration: 2400, silent: true });
+            ctaMount._d3d = dCta;
+            function loopIntroDice() {
+                if (!ctaMount._d3d || ctaMount._d3d !== dCta) return;
+                if (!document.body.contains(ctaMount)) {
+                    try { dCta.dispose(); } catch (e) {}
+                    ctaMount._d3d = null;
+                    return;
+                }
+                var v = 1 + Math.floor(Math.random() * 20);
+                dCta.roll(v, function () { setTimeout(loopIntroDice, 700); });
+            }
+            loopIntroDice();
         }
-    } catch (_eD) { /* sem dice3d — OK, botão funciona sem animação */ }
+    } catch (_eD) { console.warn('[SIM] Dice3D no topo do popup de intro falhou', _eD); }
     /* #17: dispara o typewriter da narrativa; CTAs revelam ao terminar (ou skip
        por tap após 500ms). Variáveis _introNarr/_narrEl/_hintEl/_ctasEl vêm do
        bloco acima (escopo de função). */
@@ -29967,6 +29979,11 @@ function showIntroChoicePopup() {
 }
 
 function closeIntroChoicePopup() {
+    var cm = document.getElementById('ctaDiceMount');
+    if (cm && cm._d3d) {
+        try { cm._d3d.dispose(); } catch (e) {}
+        cm._d3d = null;
+    }
     var el = document.getElementById('intro-choice-popup');
     if (el) el.remove();
 }
@@ -29987,8 +30004,16 @@ function showAttackSkipSummaryIOPLayout(rows) {
         ov.setAttribute('aria-labelledby', 'atk-skip-iop-title');
         var card = document.createElement('div');
         card.className = 'iop-card iop-card--batch-summary';
+        var _uloc = (typeof location !== 'undefined') ? location.href : '';
+        var uiBase = '/shared/img/combat/ui/';
+        if (_uloc.indexOf('file://') === 0) {
+            uiBase = '../shared/img/combat/ui/';
+        }
+        var swordImgHtml = '<img src="' + uiBase + 'damage-sword.webp" alt="Ataque" ' +
+            'style="width:32px;height:32px;object-fit:contain;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));" ' +
+            'onerror="if(this.src.indexOf(\'valdoria-webapp\')===-1)this.src=\'../shared/img/combat/ui/damage-sword.webp\';">';
         var html = '<header class="iop-head-batch" aria-labelledby="atk-skip-iop-title">';
-        html += '<span class="iop-head-batch__orn" aria-hidden="true"></span>';
+        html += '<span class="iop-head-batch__orn" aria-hidden="true">' + swordImgHtml + '</span>';
         html += '<div class="iop-head-batch__text">';
         html += '<h2 class="iop-head-batch__title" id="atk-skip-iop-title">';
         html += '<span class="iop-head-batch__line1">Ataque</span>';
