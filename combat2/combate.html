@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T21:16:30Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T22:52:07Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -21966,6 +21966,8 @@ function render(s) {
                    handler). User feedback: "remova o botão Passar turno e
                    sempre deixe Encerrar turno disponível logo acima do botão Agir".
                    Esquivar/Fugir continuam consumindo AÇÃO (PHB p.190). */
+                html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + 'Disparada' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + 'Desengajar' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="dodge">' + _actBtnIco('acao-esquivar') + 'Esquivar' + actionGlyph + '</button>';
                 /* 2026-06-23 (user "mostrar a dificuldade da fuga na opção"): CD + chance
                    aprox. direto no botão Fugir (antes só apareciam no modal pós-clique). */
@@ -22968,6 +22970,11 @@ function onBtnClick(ev) {
             _actionTaken = true;
             render(currentState);
             void __combatRemoteAction({ type: 'pass' });
+            return;
+        } else if (act === 'dash') {
+            _actionSheetOpen = false;
+            render(currentState);
+            void __combatRemoteAction({ type: 'dash' });
             return;
         } else if (act === 'dodge') {
             _actionSheetOpen = false;
