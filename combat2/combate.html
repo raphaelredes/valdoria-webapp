@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-09-16T23:02:14Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-01T05:09:37Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9556,6 +9556,377 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   pointer-events: auto;
 }
 .sim-btn-agir { min-width: 200px; font-weight: 700; letter-spacing: 2px; text-transform: none; }
+
+/* =========================================================================
+   COMBATE TÁTICO D&D 5e — HEX GRID ARENA & TABLETOP TOKENS (2026-10-01)
+   Mesa de RPG Clássica com Hexágonos, Miniaturas e Posicionamento
+   ========================================================================= */
+.battlefield-hex-arena {
+  position: relative;
+  margin: 0 auto;
+  background: radial-gradient(ellipse at 50% 45%, #251e18 0%, #16120e 65%, #0b0907 100%);
+  border: 3px solid #6b5330;
+  border-radius: 14px;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9), 0 10px 35px rgba(0, 0, 0, 0.85);
+  user-select: none;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.battlefield-hex-arena .hex-grid-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.battlefield-hex-arena .hex-divider-line {
+  stroke: rgba(212, 140, 60, 0.35);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+.battlefield-hex-arena .hex-tile {
+  fill: rgba(32, 25, 18, 0.55);
+  stroke: rgba(196, 149, 58, 0.22);
+  stroke-width: 1.5;
+  transition: fill 0.18s ease, stroke 0.18s ease;
+}
+
+.battlefield-hex-arena .hex-tile:hover {
+  fill: rgba(212, 175, 55, 0.14);
+  stroke: rgba(212, 175, 55, 0.65);
+}
+
+.battlefield-hex-arena .hex-tile--enemy-zone {
+  fill: rgba(40, 22, 20, 0.5);
+  stroke: rgba(180, 80, 70, 0.25);
+}
+
+.battlefield-hex-arena .hex-tile--ally-zone {
+  fill: rgba(22, 32, 28, 0.5);
+  stroke: rgba(80, 160, 120, 0.25);
+}
+
+.battlefield-hex-arena .hex-tile--reachable {
+  fill: rgba(38, 120, 85, 0.38) !important;
+  stroke: #52c496 !important;
+  stroke-width: 2.2 !important;
+  cursor: pointer !important;
+  filter: drop-shadow(0 0 6px rgba(82, 196, 150, 0.45));
+}
+
+.battlefield-hex-arena .hex-tile--reachable:hover {
+  fill: rgba(48, 160, 115, 0.6) !important;
+  stroke: #86efac !important;
+}
+
+.battlefield-hex-arena .hex-tile--in-reach {
+  fill: rgba(180, 70, 40, 0.28) !important;
+  stroke: rgba(240, 100, 70, 0.75) !important;
+  stroke-width: 2 !important;
+}
+
+.battlefield-hex-arena .hex-coord {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  fill: rgba(212, 175, 55, 0.35);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.battlefield-hex-arena .hex-move-cost {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 10px;
+  font-weight: 700;
+  fill: #86efac;
+  text-anchor: middle;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+.battlefield-hex-arena .hex-tokens-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* TOKEN MINIATURA DE MESA */
+.battlefield-hex-arena .cell.hex-token {
+  position: absolute;
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: none !important;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 10;
+  transform-origin: center center;
+  transition: transform 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28), filter 0.2s ease;
+  box-shadow: none !important;
+}
+
+.battlefield-hex-arena .cell.hex-token:hover {
+  transform: scale(1.15);
+  z-index: 35;
+}
+
+.battlefield-hex-arena .cell.hex-token.selectable {
+  animation: tokenSelectablePulse 1.4s ease-in-out infinite;
+}
+
+.battlefield-hex-arena .cell.hex-token.selectable-heal {
+  animation: tokenHealPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tokenSelectablePulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(230, 80, 50, 0.7)); }
+  50% { filter: drop-shadow(0 0 16px rgba(255, 60, 30, 1)) drop-shadow(0 0 22px rgba(255, 120, 50, 0.8)); }
+}
+
+@keyframes tokenHealPulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(46, 204, 113, 0.7)); }
+  50% { filter: drop-shadow(0 0 16px rgba(39, 174, 96, 1)) drop-shadow(0 0 22px rgba(100, 240, 150, 0.8)); }
+}
+
+.token-disc {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: #18130e;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.9), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+.token-ring--player {
+  border: 3.5px solid #d4af37;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.65), inset 0 0 6px rgba(212, 175, 55, 0.35);
+}
+
+.token-ring--ally {
+  border: 3.5px solid #5dade2;
+  box-shadow: 0 0 12px rgba(93, 173, 226, 0.6), inset 0 0 6px rgba(93, 173, 226, 0.35);
+}
+
+.token-ring--enemy {
+  border: 3.5px solid #c0392b;
+  box-shadow: 0 0 10px rgba(192, 57, 43, 0.65), inset 0 0 6px rgba(192, 57, 43, 0.35);
+}
+
+.token-ring--boss {
+  border: 4px solid #f39c12;
+  box-shadow: 0 0 16px rgba(243, 156, 18, 0.85), inset 0 0 8px rgba(243, 156, 18, 0.55);
+}
+
+.token-portrait {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.token-portrait .c-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.token-portrait svg {
+  width: 72%;
+  height: 72%;
+  display: block;
+}
+
+.token-pulse-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2.5px solid #f1c40f;
+  animation: tokenTurnGlowAnim 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes tokenTurnGlowAnim {
+  0%, 100% { transform: scale(1); opacity: 0.6; box-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
+  50% { transform: scale(1.08); opacity: 1; box-shadow: 0 0 18px rgba(241, 196, 15, 0.95); }
+}
+
+.token-hp-badge {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14, 11, 8, 0.94);
+  border: 1px solid #6b5330;
+  border-radius: 6px;
+  padding: 1px 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 12;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.token-hp-track {
+  width: 26px;
+  height: 3.5px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.token-hp-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.token-hp-text {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 8.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.token-ac-chip {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #2a2219;
+  border: 1.5px solid #d4af37;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #f7e7b4;
+  z-index: 15;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+}
+
+.token-ac-chip span {
+  font-size: 7px;
+  margin-right: 1px;
+}
+
+.token-init-chip {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  background: #1a1612;
+  border: 1.5px solid #a88438;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #e5c387;
+  z-index: 15;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+}
+
+.token-dist-chip {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(18, 14, 10, 0.92);
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 4px;
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 8px;
+  color: #eed5a1;
+  padding: 0 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 15;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.token-nameplate {
+  position: absolute;
+  bottom: -21px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  color: #e5c387;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 11;
+  letter-spacing: 0.4px;
+}
+
+.hex-turn-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(18, 14, 10, 0.92);
+  border: 1px solid #7c5c2d;
+  border-radius: 8px;
+  padding: 6px 14px;
+  margin: 8px auto 4px auto;
+  max-width: 520px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 11px;
+  color: #eed5a1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.hex-turn-hud .hth-speed {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hex-turn-hud .hth-hint {
+  font-size: 9.5px;
+  color: #86efac;
+  font-family: var(--v-font-ui, sans-serif);
+}
+
+/* Grayscale and animations for conditions on tokens */
+.cell.hex-token.cell--dead-perm {
+  filter: grayscale(1) opacity(0.55) !important;
+  pointer-events: none !important;
+}
+
+.cell.hex-token.cell--dying {
+  animation: tokenDyingPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes tokenDyingPulse {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(220, 50, 40, 0.6)); }
+  50% { filter: drop-shadow(0 0 14px rgba(255, 30, 20, 0.95)); }
+}
 </style>
 <script>
 /* Garante classe no <html> (copias antigas) e reaplica skin no fim da cascata após todos os CSS do CDN. */
@@ -13628,7 +13999,9 @@ function newCombat() {
     order.forEach(function (c) {
         if (c.summonKind) c.summonedBy = p_idx;
     });
+    assignInitialPositions(order, 8, 10);
     var _state = { ph: 'intro', order: order, p_idx: p_idx, active_idx: 0, rn: 0, _wrapsSeen: 0, log: [], last: null, bio: 'forest',
+             battlefield: { cols: 8, rows: 10 },
              /* V1 Invocações Phase 1 — dict[caster_idx -> list[attached_summon]] */
              attachedSummons: {},
              /* Sub-projeto #1 (2026-04-26): reinforcement queue + caps */
@@ -14563,6 +14936,7 @@ function newCombatFromSetup(cfg) {
     }
 
     var order = [p].concat(allies).concat(enemies);
+    assignInitialPositions(order, 8, 10);
     /* IDs estáveis por posição de origem (player→aliados→inimigos). O snapshot
        de checkpoint referencia unidades por id; sem ids o restore de HP era
        no-op silencioso (bug user 2026-06-10: lobo morto revivia ao reabrir o
@@ -14696,6 +15070,7 @@ function newCombatFromSetup(cfg) {
              /* Phase 5b polish v3 — flag global do encontro pra UI mostrar
                 "SURPRESA" no banner de iniciativa. */
              _surprisedRound: cfg.surprise === true ? true : false,
+             battlefield: { cols: 8, rows: 10 },
              /* Sub-projeto #1 (2026-04-26): reinforcement queue + caps */
              reinforcementQueue: [],
              reinforcementCaps: null  /* lazy: ReinforceFSM populates DEFAULT_CAPS */ };
@@ -17475,68 +17850,399 @@ function buildAllyIntroLines(s) {
     return html;
 }
 
-function buildBattlefield(s) {
-    var COLS = 4;
-    var FILL_ORDER = [1, 2, 0, 3];  // center-out dentro da fileira
-    /* 2026-06-12 (user): fileiras DINÂMICAS — arena até 20 por lado, responsiva.
-       Coleta unidades por lado (preserva uids 'enemy_'+idx / 'player' / 'ally_'+idx
-       usados em targeting/animações). */
-    var enemyUnits = [], allyUnits = [];
-    s.order.forEach(function (c, idx) {
-        if (c.t === 'e') enemyUnits.push({ uid: 'enemy_' + idx, utype: 'enemy', u: c });
+/* =========================================================================
+   COMBATE TÁTICO D&D 5e — HEX GRID BATTLEFIELD MATH & HELPERS (2026-10-01)
+   Flat-top odd-q hex grid (1 hex = 5 ft / 1.5 m).
+   Autoridade matemática idêntica a src/game/combat2_math.py.
+   ========================================================================= */
+var HEX_COLS_DEFAULT = 8;
+var HEX_ROWS_DEFAULT = 10;
+var HEX_W = 76;
+var HEX_H = 66; // Math.round(76 * 0.866)
+var HEX_COL_STEP = 57; // HEX_W * 0.75
+var HEX_ROW_STEP = 66; // HEX_H
+var HEX_PAD_X = 40;
+var HEX_PAD_Y = 36;
+var HEX_STAGE_W = (HEX_COLS_DEFAULT - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2; // 555px
+var HEX_STAGE_H = HEX_ROWS_DEFAULT * HEX_ROW_STEP + Math.round(HEX_H / 2) + HEX_PAD_Y * 2; // 765px
+
+function hexCenter(col, row) {
+    var offsetY = (col % 2 === 1) ? (HEX_H / 2) : 0;
+    var cx = HEX_PAD_X + col * HEX_COL_STEP + (HEX_W / 2);
+    var cy = HEX_PAD_Y + row * HEX_ROW_STEP + offsetY + (HEX_H / 2);
+    return { cx: Math.round(cx), cy: Math.round(cy) };
+}
+
+function hexPolygonPoints(cx, cy) {
+    var hw = HEX_W / 2;
+    var qw = HEX_W / 4;
+    var hh = HEX_H / 2;
+    return [
+        (cx - qw).toFixed(1) + ',' + (cy - hh).toFixed(1),
+        (cx + qw).toFixed(1) + ',' + (cy - hh).toFixed(1),
+        (cx + hw).toFixed(1) + ',' + cy.toFixed(1),
+        (cx + qw).toFixed(1) + ',' + (cy + hh).toFixed(1),
+        (cx - qw).toFixed(1) + ',' + (cy + hh).toFixed(1),
+        (cx - hw).toFixed(1) + ',' + cy.toFixed(1)
+    ].join(' ');
+}
+
+function hexToCube(col, row) {
+    var q = col;
+    var r = row - Math.floor((col - (col & 1)) / 2);
+    var x = q;
+    var z = r;
+    var y = -x - z;
+    return { x: x, y: y, z: z };
+}
+
+function hexDistance(c1, r1, c2, r2) {
+    var a = hexToCube(c1, r1);
+    var b = hexToCube(c2, r2);
+    return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y), Math.abs(a.z - b.z));
+}
+
+function hexDistanceFeet(c1, r1, c2, r2) {
+    return hexDistance(c1, r1, c2, r2) * 5;
+}
+
+function assignInitialPositions(order, cols, rows) {
+    cols = cols || HEX_COLS_DEFAULT;
+    rows = rows || HEX_ROWS_DEFAULT;
+    var allies = [];
+    var enemies = [];
+    order.forEach(function (c) {
+        if (!c) return;
+        if (c.t === 'p' || c.t === 'a') allies.push(c);
+        else if (c.t === 'e') enemies.push(c);
     });
-    var p = s.order[s.p_idx];
-    allyUnits.push({ uid: 'player', utype: 'player', u: p });
-    s.order.forEach(function (c, idx) {
-        if (c.t === 'a') allyUnits.push({ uid: 'ally_' + idx, utype: 'ally', u: c });
-    });
-    /* Mín 2 fileiras por lado preserva o layout dos combates pequenos (1v1..8v8
-       idênticos ao anterior: 2 fileiras inimigas + 2 aliadas, retaguarda colapsa
-       quando vazia). Cresce só com >8 de um lado (ex.: Conjurar Animais 8 lobos).
-       O auto-fit do pan/zoom (min fitX,fitY) escala o stage mais alto → tudo cabe
-       em qualquer tela; zoom +/− pra detalhe. */
-    var enemyRows = Math.max(2, Math.ceil(enemyUnits.length / COLS));
-    var allyRows = Math.max(2, Math.ceil(allyUnits.length / COLS));
-    var totalRows = enemyRows + allyRows;
-    var grid = [];
-    for (var gr = 0; gr < totalRows; gr++) {
-        grid.push([]);
-        for (var gc = 0; gc < COLS; gc++) grid[gr].push(null);
+
+    var occupied = {};
+    function key(c, r) { return c + ',' + r; }
+
+    function placeGroup(group, baseRows, centerCol) {
+        var colOffsets = [0, 1, -1, 2, -2, 3, -3, 4];
+        group.forEach(function (c) {
+            if (c.pos && c.pos.col != null && c.pos.row != null) {
+                occupied[key(c.pos.col, c.pos.row)] = true;
+                return;
+            }
+            var placed = false;
+            for (var ri = 0; ri < baseRows.length && !placed; ri++) {
+                var r = baseRows[ri];
+                for (var ci = 0; ci < colOffsets.length; ci++) {
+                    var candCol = centerCol + colOffsets[ci];
+                    if (candCol >= 0 && candCol < cols && !occupied[key(candCol, r)]) {
+                        c.pos = { col: candCol, row: r };
+                        occupied[key(candCol, r)] = true;
+                        placed = true;
+                        break;
+                    }
+                }
+            }
+            if (!placed) {
+                for (var fr = 0; fr < rows && !placed; fr++) {
+                    for (var fc = 0; fc < cols; fc++) {
+                        if (!occupied[key(fc, fr)]) {
+                            c.pos = { col: fc, row: fr };
+                            occupied[key(fc, fr)] = true;
+                            placed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        });
     }
-    function placeInRow(rowArr, cell) {
-        for (var i = 0; i < FILL_ORDER.length; i++) {
-            var cc = FILL_ORDER[i];
-            if (cc < COLS && rowArr[cc] === null) { rowArr[cc] = cell; return true; }
+
+    placeGroup(allies, [rows - 2, rows - 1, rows - 3], Math.floor(cols / 2) - 1);
+    placeGroup(enemies, [1, 2, 0], Math.floor(cols / 2));
+
+    order.forEach(function (c) {
+        if (!c) return;
+        if (c.speed == null) c.speed = 6;
+        if (c.movement_left == null) c.movement_left = c.speed;
+    });
+}
+
+function handlePlayerMoveTo(tCol, tRow) {
+    if (!currentState || currentState.ph !== 'active') return;
+    if (currentState.active_idx !== currentState.p_idx) return;
+    var p = currentState.order[currentState.p_idx];
+    if (!p || !p.alive || p.hp <= 0) return;
+    if (!p.pos) p.pos = { col: 0, row: 0 };
+    var d = hexDistance(p.pos.col, p.pos.row, tCol, tRow);
+    if (d <= 0 || d > (p.movement_left || 0)) return;
+
+    if (window.__COMBAT_MODE === 'remote' && typeof __combatRemoteAction === 'function') {
+        __combatRemoteAction({ type: 'move', col: tCol, row: tRow });
+        return;
+    }
+
+    p.movement_left -= d;
+    p.pos = { col: tCol, row: tRow };
+
+    var dFeet = d * 5;
+    if (typeof sfxStep === 'function') {
+        try { sfxStep(); } catch (_) {}
+    }
+    currentState.log.push('Você se moveu ' + dFeet + ' pés (' + d + ' ' + (d > 1 ? 'hexágonos' : 'hexágono') + '). Movimento restante: ' + ((p.movement_left || 0) * 5) + ' pés.');
+    render(currentState);
+}
+
+function findHexPathStep(startCol, startRow, targetCol, targetRow, maxSteps, occupiedSet, cols, rows, stopAtReach) {
+    if (stopAtReach == null) stopAtReach = 1;
+    if (cols == null) cols = 8;
+    if (rows == null) rows = 10;
+    var curC = startCol, curR = startRow;
+    var stepsTaken = 0;
+    var occ = occupiedSet || {};
+
+    for (var s = 0; s < maxSteps; s++) {
+        if (hexDistance(curC, curR, targetCol, targetRow) <= stopAtReach) break;
+        var neighbors = [
+            { col: curC + 1, row: curR },
+            { col: curC + 1, row: (curC % 2 !== 0) ? curR + 1 : curR - 1 },
+            { col: curC, row: curR - 1 },
+            { col: curC - 1, row: (curC % 2 !== 0) ? curR + 1 : curR - 1 },
+            { col: curC - 1, row: curR },
+            { col: curC, row: curR + 1 }
+        ];
+        var valid = [];
+        for (var i = 0; i < neighbors.length; i++) {
+            var nc = neighbors[i].col, nr = neighbors[i].row;
+            if (nc < 0 || nc >= cols || nr < 0 || nr >= rows) continue;
+            var key = nc + ',' + nr;
+            if (occ[key] && (nc !== curC || nr !== curR)) continue;
+            if (nc === targetCol && nr === targetRow) continue;
+            var dist = hexDistance(nc, nr, targetCol, targetRow);
+            valid.push({ d: dist, col: nc, row: nr });
         }
-        return false;
+        if (!valid.length) break;
+        valid.sort(function (a, b) { return a.d - b.d; });
+        var best = valid[0];
+        if (best.d >= hexDistance(curC, curR, targetCol, targetRow)) break;
+        delete occ[curC + ',' + curR];
+        curC = best.col;
+        curR = best.row;
+        occ[curC + ',' + curR] = true;
+        stepsTaken++;
     }
-    /* Inimigos preenchem a FRENTE primeiro (fileira inimiga mais perto do divisor
-       = última fileira inimiga), recuando pra retaguarda conforme lota. */
-    var ei = 0;
-    for (var er = enemyRows - 1; er >= 0 && ei < enemyUnits.length; er--) {
-        while (ei < enemyUnits.length && placeInRow(grid[er], enemyUnits[ei])) ei++;
+    return { col: curC, row: curR, steps: stepsTaken };
+}
+
+function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
+    var pUnit = s && s.order && s.order[s.p_idx];
+    var isPlayer = (utype === 'player');
+    var isEnemy = (utype === 'enemy');
+    var isAlly = (utype === 'ally');
+    var isActive = (uid === activeId);
+
+    var classes = 'cell occupied ' + utype + ' hex-token';
+    var heraldicSlug = _heraldicClsSlugOf(u, utype);
+    if (heraldicSlug) classes += ' v8-card ' + heraldicSlug;
+
+    if (isActive) {
+        classes += ' active-turn';
+        if (isPlayer && s.ph === 'active') classes += ' player-turn-active';
     }
-    /* Aliados (player primeiro) preenchem a FRENTE aliada primeiro (1ª fileira
-       aliada, logo abaixo do divisor), recuando conforme lota. */
-    var ai = 0;
-    for (var ar = 0; ar < allyRows && ai < allyUnits.length; ar++) {
-        while (ai < allyUnits.length && placeInRow(grid[enemyRows + ar], allyUnits[ai])) ai++;
+    if (u.initRolling) classes += ' init-rolling';
+
+    if (u.t === 'e' && (!u.alive || u.hp <= 0)) classes += ' dead cell--dead-perm';
+    else if (u.t === 'p' || u.t === 'a') {
+        if (u.isDead) classes += ' dead cell--dead-perm';
+        else if (u.hp <= 0 && u.dying && !u.stable) classes += ' cell--dying';
+        else if (u.hp <= 0 && u.stable) classes += ' cell--stable';
+    } else if (!u.alive) classes += ' dead';
+
+    // Conditions
+    if (u.alive && u.se && u.se.length) {
+        u.se.forEach(function (st) {
+            if (!st || (st.turnsLeft != null && st.turnsLeft <= 0)) return;
+            var cond = (st.dndCondition || '') + ' ' + (st.n || '');
+            if (/Amedrontad|Medo|Frightened/i.test(cond)) classes += ' card-frightened';
+            if (/Sono|Adormecid|Inconscient|Sleep|Stun/i.test(cond)) classes += ' card-sleeping';
+            if (/Prostrad|Caíd|Prone/i.test(cond)) classes += ' card-prostrate';
+            if (/Zombad|Mock/i.test(cond)) classes += ' card-mocked';
+        });
     }
+
+    // Target Selection
+    var allyBuffPick = (_selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
+        (_pendingSkill.blessSpell || _pendingSkill.shieldSpell));
+    var healPick = (_selectingTarget && _pendingSkill && _pendingSkill.kind === 'heal') ||
+        (_selectingTarget && _pendingHealItem) || allyBuffPick;
+
+    if (healPick && (isPlayer || isAlly)) {
+        var canHeal = false;
+        if (_pendingHealItem) canHeal = isPotionHealValidTarget(u);
+        else if (allyBuffPick) canHeal = !!u.alive;
+        else if (_pendingSkill && _pendingSkill.kind === 'heal') {
+            canHeal = (_pendingSkill.healTargets === 'self') ? (isPlayer && !!u.alive) : (!!u.alive || (u.hp != null && u.hp <= 0));
+        }
+        if (canHeal) classes += ' selectable-heal';
+    } else if (_selectingTarget && isEnemy && u.alive && !allyBuffPick) {
+        if (_pendingSkill && _pendingSkill.magicMissiles) {
+            classes += ' selectable-mm';
+            var enemyIdx = parseInt(uid.slice(6), 10);
+            if (_mmTargets && !isNaN(enemyIdx) && _mmTargets.indexOf(enemyIdx) !== -1) {
+                classes += ' selected-mm';
+            }
+        } else {
+            classes += ' selectable';
+        }
+    }
+
+    if (u.summonKind) {
+        classes += ' cell--is-summon';
+        if (u.noTarget) classes += ' cell--summon-attached';
+    }
+
+    // Faction ring class
+    var ringCls = isPlayer ? 'token-ring--player' : (isAlly ? 'token-ring--ally' : (u.isBoss ? 'token-ring--boss' : 'token-ring--enemy'));
+
+    // Portrait
+    var iconId = _heraldicIconOf(u, utype);
+    var portraitHtml = _combatPortraitHTML(iconId, u, utype);
+
+    // HP calculation
+    var hpVal = u.hp != null ? u.hp : 0;
+    var hpPct = u.mhp > 0 ? Math.max(0, Math.min(100, Math.round((hpVal / u.mhp) * 100))) : 0;
+    var hpCls = (typeof vBarHpClass === 'function') ? vBarHpClass(hpPct) : (hpPct > 50 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low'));
+    var fillCls = 'fill-' + hpCls;
+
+    // Distance to player
+    var distBadge = '';
+    if (pUnit && pUnit.pos && u.pos && uid !== 'player') {
+        var dist = hexDistance(pUnit.pos.col, pUnit.pos.row, u.pos.col, u.pos.row);
+        var distFt = dist * 5;
+        distBadge = '<span class="token-dist-chip" title="Distância até você">' + distFt + 'ft · ' + dist + 'h</span>';
+    }
+
+    // Initiative badge during intro
+    var initBadge = '';
+    if (s && s.ph === 'intro') {
+        var initVal = u.initRevealed ? u.init : '?';
+        initBadge = '<div class="token-init-chip" title="Iniciativa">' + initVal + '</div>';
+    }
+
+    // CA Badge
+    var acBadge = '';
+    if (u.ac != null && !u.noTarget) {
+        acBadge = '<div class="token-ac-chip" title="Classe de Armadura: ' + u.ac + '"><span>🛡</span>' + u.ac + '</div>';
+    }
+
+    // Name label
+    var nameLabel = escHtml(u.n || u.cls || '—');
+
+    var tokenLeft = cx - 30;
+    var tokenTop = cy - 30;
+
+    var html = '<div class="' + classes + '" data-unit-id="' + uid + '" data-clickable="1" ' +
+               'style="left:' + tokenLeft + 'px; top:' + tokenTop + 'px;">';
+
+    html += '<div class="token-disc ' + ringCls + '">';
+    html += '<div class="token-portrait">' + portraitHtml + '</div>';
+    if (isActive) html += '<div class="token-pulse-glow"></div>';
+    html += '</div>';
+
+    // HP Bar
+    html += '<div class="token-hp-badge">';
+    html += '<div class="token-hp-track"><div class="token-hp-fill ' + fillCls + '" style="width:' + hpPct + '%;"></div></div>';
+    html += '<span class="token-hp-text ' + hpCls + '">' + hpVal + '/' + u.mhp + '</span>';
+    html += '</div>';
+
+    // Badges: AC, Init, Distance
+    if (acBadge) html += acBadge;
+    if (initBadge) html += initBadge;
+    if (distBadge) html += distBadge;
+
+    // Nameplate underneath
+    html += '<div class="token-nameplate">' + nameLabel + '</div>';
+
+    // Fallback hidden DOM elements for backward compatibility with VFX & querySelectors
+    html += '<div class="cell-bars" style="display:none !important;">';
+    html += '<div class="bar-row"><div class="mini-bar"><div class="fill ' + fillCls + '" style="width:' + hpPct + '%;"></div></div>';
+    html += '<div class="bar-num ' + hpCls + '">' + hpVal + '/' + u.mhp + '</div></div></div>';
+
+    html += '<div class="c-stats" style="display:none !important;">';
+    html += '<div class="c-stat c-stat--hp" data-bar-target="' + hpPct + '"><span class="c-stat-val">' + hpVal + '/' + u.mhp + '</span></div>';
+    html += '</div>';
+
+    html += '</div>';
+    return html;
+}
+
+function buildBattlefield(s) {
+    if (!s) return '';
+    s.battlefield = s.battlefield || { cols: HEX_COLS_DEFAULT, rows: HEX_ROWS_DEFAULT };
+    var bCols = s.battlefield.cols || HEX_COLS_DEFAULT;
+    var bRows = s.battlefield.rows || HEX_ROWS_DEFAULT;
+
+    // Ensure positions and movement speeds are assigned
+    assignInitialPositions(s.order, bCols, bRows);
 
     var activeId = null;
     var active = s.order[s.active_idx];
     if (active && active.alive) activeId = unitUidForOrderIndex(s, s.active_idx);
 
-    var html = '<div class="bf-pan-viewport" data-bf-pan-viewport aria-label="Área de combate — arraste para mover, pinça ou roda do mouse para zoom">';
-    /* 2026-05-18 USER REQUEST: 3 botões UI para zoom (mobile-friendly).
-       Touch já funciona via pinça, mas botões dão fallback explícito + acesso desktop. */
-    html += '<div class="bf-zoom-controls" aria-label="Controles de zoom da arena">';
+    var playerUnit = s.order[s.p_idx];
+    var isPlayerActiveTurn = (s.ph === 'active' && s.active_idx === s.p_idx && playerUnit && playerUnit.alive && playerUnit.hp > 0);
+
+    // Occupied map
+    var occupiedMap = {};
+    s.order.forEach(function (c, idx) {
+        if (c && c.alive && c.pos && c.pos.col != null && c.pos.row != null) {
+            occupiedMap[c.pos.col + ',' + c.pos.row] = { unit: c, idx: idx, uid: unitUidForOrderIndex(s, idx) };
+        }
+    });
+
+    // Reachable hexes for active player movement
+    var reachableMap = {};
+    if (isPlayerActiveTurn && playerUnit && playerUnit.pos && (playerUnit.movement_left || 0) > 0) {
+        var pCol = playerUnit.pos.col;
+        var pRow = playerUnit.pos.row;
+        var moveLeft = playerUnit.movement_left;
+        for (var rc = 0; rc < bCols; rc++) {
+            for (var rr = 0; rr < bRows; rr++) {
+                if (rc === pCol && rr === pRow) continue;
+                if (occupiedMap[rc + ',' + rr]) continue;
+                var d = hexDistance(pCol, pRow, rc, rr);
+                if (d <= moveLeft) {
+                    reachableMap[rc + ',' + rr] = d;
+                }
+            }
+        }
+    }
+
+    // Target selection reach
+    var inReachMap = {};
+    if (_selectingTarget && playerUnit && playerUnit.pos) {
+        var reachLimit = 1; // Default melee reach 5 ft (1 hex)
+        if (_pendingSkill) {
+            if (_pendingSkill.rangeFeet) reachLimit = Math.max(1, Math.round(_pendingSkill.rangeFeet / 5));
+            else if (_pendingSkill.rangeHexes) reachLimit = _pendingSkill.rangeHexes;
+            else if (_pendingSkill.magicMissiles || _pendingSkill.kind === 'spell' || _pendingSkill.isRanged) reachLimit = 12; // 60 ft
+        }
+        for (var tc = 0; tc < bCols; tc++) {
+            for (var tr = 0; tr < bRows; tr++) {
+                var td = hexDistance(playerUnit.pos.col, playerUnit.pos.row, tc, tr);
+                if (td <= reachLimit) inReachMap[tc + ',' + tr] = td;
+            }
+        }
+    }
+
+    var html = '<div class="bf-pan-viewport" data-bf-pan-viewport aria-label="Mesa Tática de Combate D&D 5e — arraste para mover, roda ou botões para zoom">';
+    html += '<div class="bf-zoom-controls" aria-label="Controles de zoom da mesa">';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomIn" title="Aproximar (+)" aria-label="Aproximar">+</button>';
-    /* 2026-06-07 (user): botão "Ajustar tela" (⌂ recentralizar) REMOVIDO — não faz
-       sentido na arena (poucos inimigos, mapa pequeno). Só zoom +/−. */
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomOut" title="Afastar (−)" aria-label="Afastar">−</button>';
     html += '</div>';
-    html += '<div class="bf-pan-stage" data-bf-pan-stage>';
+
+    var stageW = (bCols - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2;
+    var stageH = bRows * HEX_ROW_STEP + Math.round(HEX_H / 2) + HEX_PAD_Y * 2;
+
+    html += '<div class="bf-pan-stage" data-bf-pan-stage style="width:' + stageW + 'px; height:' + stageH + 'px;">';
+
     var bfExtra = '';
     if (_selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
         (_pendingSkill.blessSpell || _pendingSkill.shieldSpell)) {
@@ -17544,51 +18250,75 @@ function buildBattlefield(s) {
     } else if (_selectingTarget && ((_pendingSkill && _pendingSkill.kind === 'heal') || _pendingHealItem)) {
         bfExtra = ' picker-heal';
     }
-    /* Sessão #67 (2026-06-01): colapso de COLUNA vazia (par com o colapso de
-       fileira). occupiedCols = colunas com >=1 unidade em qualquer fileira. As
-       colunas totalmente vazias viram trilha de 0px no grid-template → o
-       tabuleiro se compacta à largura REAL do combate. Um 1v1 usa 1 coluna
-       (cards grandes) em vez de 4 (cards minúsculos espremidos num viewport de
-       celular). Largura (4 col x 160px = ~758px) era o gargalo real em telas
-       <=440px, não a altura. Template idêntico entre fileiras = alinhamento
-       mantido. Cells vazias usam width:auto (CSS) → 0px na coluna colapsada,
-       slot de 160px na coluna ocupada. Fallback p/ grid cheio se nada ocupado. */
-    var occupiedCols = [];
-    for (var oc0 = 0; oc0 < COLS; oc0++) occupiedCols.push(false);
-    for (var orow = 0; orow < totalRows; orow++) {
-        for (var ocol = 0; ocol < COLS; ocol++) {
-            if (grid[orow][ocol] !== null) occupiedCols[ocol] = true;
+
+    html += '<div class="battlefield-hex-arena' + bfExtra + '" style="width:' + stageW + 'px; height:' + stageH + 'px;">';
+
+    // SVG Hex Grid Layer
+    html += '<svg class="hex-grid-svg" width="' + stageW + '" height="' + stageH + '" viewBox="0 0 ' + stageW + ' ' + stageH + '">';
+
+    // Territory tint zones (Enemies top rows 0..4, Allies bottom rows 5..9)
+    var midY = Math.round(stageH / 2);
+    html += '<line x1="' + HEX_PAD_X + '" y1="' + midY + '" x2="' + (stageW - HEX_PAD_X) + '" y2="' + midY + '" class="hex-divider-line" />';
+
+    var colLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+
+    for (var col = 0; col < bCols; col++) {
+        for (var row = 0; row < bRows; row++) {
+            var center = hexCenter(col, row);
+            var pts = hexPolygonPoints(center.cx, center.cy);
+            var hexKey = col + ',' + row;
+
+            var tileCls = 'hex-tile';
+            var isReachable = reachableMap[hexKey] != null;
+            var isInReach = inReachMap[hexKey] != null;
+
+            if (isReachable) tileCls += ' hex-tile--reachable';
+            if (isInReach) tileCls += ' hex-tile--in-reach';
+            if (row < Math.floor(bRows / 2)) tileCls += ' hex-tile--enemy-zone';
+            else tileCls += ' hex-tile--ally-zone';
+
+            html += '<polygon points="' + pts + '" class="' + tileCls + '" data-col="' + col + '" data-row="' + row + '" />';
+
+            // Subtle coordinate marker (e.g. A1, B2)
+            var coordLabel = (colLetters[col] || col) + (row + 1);
+            html += '<text x="' + center.cx + '" y="' + (center.cy - 18) + '" class="hex-coord">' + coordLabel + '</text>';
+
+            // If reachable movement, display movement cost badge (e.g., 5ft, 10ft)
+            if (isReachable) {
+                var moveCostFeet = reachableMap[hexKey] * 5;
+                html += '<text x="' + center.cx + '" y="' + (center.cy + 18) + '" class="hex-move-cost">' + moveCostFeet + 'ft</text>';
+            }
         }
     }
-    if (!occupiedCols.some(function (o) { return o; })) {
-        for (var oz = 0; oz < COLS; oz++) occupiedCols[oz] = true;
-    }
-    var _bfCellW = 'calc(160px * var(--v-font-scale, 1))';
-    var _bfColTemplate = occupiedCols.map(function (o) { return o ? _bfCellW : '0px'; }).join(' ');
-    var _bfRowStyle = ' style="grid-template-columns: ' + _bfColTemplate + ' !important"';
+    html += '</svg>';
 
-    html += '<div class="battlefield' + bfExtra + '">';
-    for (var row = 0; row < totalRows; row++) {
-        var isEnemyRow = row < enemyRows;
-        var zoneClass = isEnemyRow ? ' enemy-zone' : ' ally-zone';
-        var isFrontRow = isEnemyRow ? (row === enemyRows - 1) : (row === enemyRows);
-        var rowLabel = isEnemyRow ? (isFrontRow ? 'frente inimiga' : 'retaguarda inimiga')
-                                  : (isFrontRow ? 'frente aliada' : 'retaguarda aliada');
-        /* Qualquer fileira totalmente vazia colapsa (height 0) — com preenchimento
-           front-first as fileiras vazias ficam sempre na retaguarda, então não há
-           reflow ao morrer unidade na frente. DOM preservado (cells no DOM, índices
-           intactos p/ targeting/animações); some só visualmente via CSS. */
-        var rowVacant = !grid[row].some(function (c) { return c !== null; });
-        var collapseCls = rowVacant ? ' bf-row--collapsed' : '';
-        html += '<div class="row-label' + zoneClass + collapseCls + '">' + escHtml(rowLabel) + '</div>';
-        html += '<div class="bf-row' + collapseCls + '"' + _bfRowStyle + '>';
-        for (var col = 0; col < COLS; col++) {
-            html += buildCell(grid[row][col], activeId);
+    // Tokens Layer (Miniaturas de Mesa)
+    html += '<div class="hex-tokens-layer">';
+    s.order.forEach(function (c, idx) {
+        if (!c) return;
+        var uid = unitUidForOrderIndex(s, idx);
+        var utype = (c.t === 'p') ? 'player' : (c.t === 'a' ? 'ally' : 'enemy');
+        var pos = c.pos || { col: 0, row: 0 };
+        var center = hexCenter(pos.col, pos.row);
+
+        html += buildHexTokenHTML(c, utype, uid, activeId, center.cx, center.cy, s);
+    });
+    html += '</div>'; // .hex-tokens-layer
+
+    // Battlefield HUD Header / Distance helper
+    if (isPlayerActiveTurn && playerUnit) {
+        html += '<div class="hex-turn-hud" aria-live="polite">';
+        html += '<span class="hth-speed"><span class="hth-icon">👣</span> Movimento: <strong>' + ((playerUnit.movement_left || 0) * 5) + '</strong> / ' + ((playerUnit.speed || 6) * 5) + ' pés (' + (playerUnit.movement_left || 0) + 'h)</span>';
+        if ((playerUnit.movement_left || 0) > 0) {
+            html += '<span class="hth-hint">Toque em um hexágono verde para mover</span>';
         }
         html += '</div>';
-        if (row === enemyRows - 1) html += '<div class="bf-divider"></div>';
     }
-    html += '</div></div></div>';
+
+    html += '</div>'; // .battlefield-hex-arena
+    html += '</div>'; // .bf-pan-stage
+    html += '</div>'; // .bf-pan-viewport
+
     return html;
 }
 
@@ -20733,6 +21463,18 @@ function bindActions() {
                 return;
             }
             openUnitDetail(uid);
+        });
+    }
+    /* Hexágonos de movimentação alcançáveis no turno do jogador */
+    var reachableTiles = document.querySelectorAll('.hex-tile.hex-tile--reachable');
+    for (var ri = 0; ri < reachableTiles.length; ri++) {
+        reachableTiles[ri].addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var tCol = parseInt(this.getAttribute('data-col'), 10);
+            var tRow = parseInt(this.getAttribute('data-row'), 10);
+            if (!isNaN(tCol) && !isNaN(tRow)) {
+                handlePlayerMoveTo(tCol, tRow);
+            }
         });
     }
     /* Monta dado 3D real no CTA "Comecar Rolagens" (intro). Loop infinito
@@ -28402,6 +29144,22 @@ function openUnitDetail(uid) {
     if (u.init !== undefined && u.initRevealed) {
         html += '<div class="udc-stat"><span class="udc-stat-lbl">Iniciativa</span><span class="udc-stat-val">' + u.init + '</span></div>';
     }
+    if (u.pos) {
+        var colLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        var posLabel = (colLetters[u.pos.col] || u.pos.col) + (u.pos.row + 1);
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Posição</span><span class="udc-stat-val">' + posLabel + ' (col ' + u.pos.col + ', lin ' + u.pos.row + ')</span></div>';
+        if (currentState && currentState.order && currentState.order[currentState.p_idx]) {
+            var pU = currentState.order[currentState.p_idx];
+            if (pU && pU.pos && u !== pU) {
+                var dFt = hexDistanceFeet(pU.pos.col, pU.pos.row, u.pos.col, u.pos.row);
+                var dH = hexDistance(pU.pos.col, pU.pos.row, u.pos.col, u.pos.row);
+                html += '<div class="udc-stat"><span class="udc-stat-lbl">Distância</span><span class="udc-stat-val">' + dFt + ' pés (' + dH + 'h)</span></div>';
+            }
+        }
+    }
+    if (u.speed != null) {
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Deslocamento</span><span class="udc-stat-val">' + (u.speed * 5) + ' pés (' + u.speed + ' hexes)</span></div>';
+    }
     html += '</div></div>';
 
     /* Habilidades — X-6.5.51AB (2026-04-26): paginacao quando lista excede
@@ -29008,6 +29766,37 @@ async function playTurn(aIdx, tIdx, opts) {
        card de resumo. */
     var skipDiceThisActor = simShouldSkipDiceForActor(actor) || _skipAllDiceAnim;
     await sleep(_skipAllDiceAnim ? 60 : 200);
+
+    /* D&D 5e: Posicionamento e movimentação tática no grid hexagonal */
+    if (actor && target && actor.pos && target.pos && !opts.oa) {
+        var reach = (actor.is_ranged || actor.ranged || (opts.skill && (opts.skill.is_ranged || opts.skill.ranged || opts.skill.isSpell))) ? 16 : 1;
+        var dist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
+        if (dist > reach) {
+            var mLeft = (actor.movement_left != null) ? actor.movement_left : (actor.speed || 6);
+            if (mLeft > 0) {
+                var occMap = {};
+                (s.order || []).forEach(function (u) {
+                    if (u && u.alive && u.pos) occMap[u.pos.col + ',' + u.pos.row] = true;
+                });
+                var stepRes = findHexPathStep(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row, mLeft, occMap, (s.battlefield ? s.battlefield.cols : 8), (s.battlefield ? s.battlefield.rows : 10), reach);
+                if (stepRes.steps > 0) {
+                    actor.pos = { col: stepRes.col, row: stepRes.row };
+                    actor.movement_left = Math.max(0, mLeft - stepRes.steps);
+                    if (typeof sfxStep === 'function') { try { sfxStep(); } catch (_) {} }
+                    s.log.push(actor.n + ' avança ' + (stepRes.steps * 5) + ' pés em direção a ' + target.n + '.');
+                    render(s);
+                    await sleep(_skipAllDiceAnim ? 100 : 250);
+                }
+            }
+            dist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
+            if (dist > reach) {
+                s.log.push(actor.n + ' tenta atacar ' + target.n + ', mas o alvo está fora de alcance (' + (dist * 5) + ' pés > alcance ' + (reach * 5) + ' pés).');
+                render(s);
+                await sleep(500);
+                return;
+            }
+        }
+    }
 
     /* V1.7 Sprint-17 (2026-04-21 QA PHB p.272) — SANTUÁRIO (Sanctuary):
        Se target tem buff sanctuary:true, attacker rola TR SAB antes do ataque.
@@ -31036,6 +31825,12 @@ async function runNpcSegmentUntilPlayerTurn() {
             }
         }
         s.active_idx = nxt;
+        if (s.order && s.order[nxt]) {
+            s.order[nxt].movement_left = s.order[nxt].speed || 6;
+        }
+    }
+    if (s.order && s.order[s.p_idx]) {
+        s.order[s.p_idx].movement_left = s.order[s.p_idx].speed || 6;
     }
     tickBuffsAfterNpcPhase(s);
     render(s);
