@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T22:51:42Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T23:24:14Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10377,6 +10377,42 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   0%, 100% { filter: drop-shadow(0 0 5px rgba(220, 50, 40, 0.6)); }
   50% { filter: drop-shadow(0 0 14px rgba(255, 30, 20, 0.95)); }
 }
+
+/* Larian / Baldur's Gate 3 Style: Round Splash Banner */
+.combat-round-splash {
+  position: fixed;
+  top: 18%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  pointer-events: none;
+  animation: crsEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.combat-round-splash.crs-fade-out {
+  opacity: 0;
+  transform: translate(-50%, -60%);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.crs-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, rgba(30, 22, 14, 0.96), rgba(48, 36, 24, 0.96));
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85), 0 0 18px rgba(212, 175, 55, 0.45);
+  color: #f7e7b4;
+  font-family: 'Cinzel', serif, Georgia;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+@keyframes crsEnter {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.85); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
 </style>
 <script>
 /* Garante classe no <html> (copias antigas) e reaplica skin no fim da cascata após todos os CSS do CDN. */
@@ -13867,10 +13903,8 @@ window.__COMBAT_USER_ID = (function () {
 window.__COMBAT_ORIGIN_APP = (function () {
     try {
         var qs = new URLSearchParams(location.search);
-        /* Server envia `origin=navigate` (navigate_api_routes.py:370) OU `o=` (legacy).
-           FIX 2026-04-20: aceita ambos — antes só `o=` fazia "Continuar" voltar ao
-           Game Hub por default em vez do mapa hex de onde veio. */
-        return qs.get('origin') || qs.get('o') || '';
+        /* Server envia `origin=navigate` / `origin=exploracao` OU `o=` (legacy) OU `from=exploracao` (exploracao.html). */
+        return qs.get('origin') || qs.get('o') || qs.get('from') || '';
     } catch (e) { return ''; }
 })();
 window.__COMBAT_ENV = (function () {
@@ -17848,6 +17882,8 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
     /* V1 Invocações Phase 3 — summons sem death saves morrem direto. */
     if (target.noDeathSaves) {
         target.isDead = true;
+        target.alive = false;
+        target.hp = 0;
         target.dying = false;
         target.stable = false;
         target.deathSaves = { s: 0, f: 0 };
@@ -17856,10 +17892,10 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
         } else {
             s.log.push(target.n + ' (invocação) foi dissipado!');
         }
-        /* V1-Visual Phase 4 (2026-04-19) — fade-out animation: aplica `cell--summon-dying`
-           ao DOM da cell, espera 700ms (animação termina), remove do s.order pra cell
-           sumir permanentemente. Defesa: try/catch porque DOM pode não estar pronto se
-           dano é aplicado fora de render. */
+        /* Fade-out visual: aplica cell--summon-dying ao DOM da cell.
+           NUNCA fazer s.order.splice() via setTimeout assíncrono no meio do combate:
+           mutar s.order durante a execução de turnos desalinha p_idx e active_idx,
+           causando pulo/perda de turnos do jogador e duplo ataque dos inimigos! */
         try {
             var deadIdx = -1;
             for (var di = 0; di < s.order.length; di++) {
@@ -17869,33 +17905,19 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
                 var deadUid = unitUidForOrderIndex(s, deadIdx);
                 var deadEl = deadUid ? document.querySelector('[data-unit-id="' + deadUid + '"]') : null;
                 if (deadEl) deadEl.classList.add('cell--summon-dying');
-                setTimeout(function () {
-                    /* Re-localiza pelo objeto (índice pode ter mudado entre callbacks) */
-                    if (!s || !s.order) return;
-                    for (var ri = s.order.length - 1; ri >= 0; ri--) {
-                        if (s.order[ri] === target) {
-                            s.order.splice(ri, 1);
-                            if (s.p_idx > ri) s.p_idx--;
-                            if (s.active_idx > ri) s.active_idx--;
-                            break;
-                        }
-                    }
-                    /* Limpa attachedSummons órfãos (caso o atacante tenha morrido e era
-                       caster de Arma Espiritual — improvável aqui já que estamos lidando
-                       com o summon morrendo, não o caster, mas defesa). */
-                    if (target.summonKind && s.attachedSummons) {
-                        var keys = Object.keys(s.attachedSummons);
-                        for (var ki = 0; ki < keys.length; ki++) {
-                            var lst = s.attachedSummons[keys[ki]] || [];
-                            s.attachedSummons[keys[ki]] = lst.filter(function (sw) {
-                                return sw.id !== target.summonKind;
-                            });
-                            if (!s.attachedSummons[keys[ki]].length) delete s.attachedSummons[keys[ki]];
-                        }
-                    }
-                    if (typeof render === 'function') render(s);
-                }, 720);
             }
+            /* Limpa attachedSummons órfãos sincronicamente */
+            if (target.summonKind && s.attachedSummons) {
+                var keys = Object.keys(s.attachedSummons);
+                for (var ki = 0; ki < keys.length; ki++) {
+                    var lst = s.attachedSummons[keys[ki]] || [];
+                    s.attachedSummons[keys[ki]] = lst.filter(function (sw) {
+                        return sw.id !== target.summonKind;
+                    });
+                    if (!s.attachedSummons[keys[ki]].length) delete s.attachedSummons[keys[ki]];
+                }
+            }
+            if (typeof render === 'function') render(s);
         } catch (eFade) { console.warn('[SIM] summon_die_fade_failed', eFade || ''); }
         return;
     }
@@ -22413,7 +22435,7 @@ function render(s) {
             html += '<div class="current-turn"><span class="ct-ico">' + _ctPortrait + '</span><span class="ct-label">Turno de</span><span class="ct-name">' + escHtml(activeNow.n) + '</span></div>';
         }
     }
-    html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Turno ' + s.rn + '</span> Floresta <span class="weather-badge w-clear">Limpo</span></div></div>';
+    html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Rodada ' + s.rn + '</span> Floresta <span class="weather-badge w-clear">Limpo</span></div></div>';
     /* V1 Invocações Phase 4 (2026-04-19, c) — HUD de recursos D&D 5e no topo:
          · Player turn: 3 pílulas completas (◆ Ação / ▲ Bônus / Reação) — ref completa
          · NPC turn: pílula compacta Reação SOMENTE — PHB p.190 reação pode ser
@@ -30703,9 +30725,10 @@ function beginCombatAfterInitOrder() {
     currentState.rn = 1;
     /* Primeiro wrap da ordem (indice 0) apos iniciativa ainda e o mesmo turno de combate #1. */
     currentState._wrapsSeen = 0;
-    currentState._simLogHdrKey = null;
     currentState.log.push('::SIM_OPEN::');
     currentState.log.push('::SIM_ROUND::1');
+    currentState.log.push('◆ INÍCIO DA RODADA 1 ◆');
+    if (typeof _spawnRoundSplashBanner === 'function') _spawnRoundSplashBanner(1);
     _actionSheetOpen = false;
     /* V1 Invocações Phase 3 (2026-04-18) — fix iniciativa: começar pelo idx 0
        (vencedor da iniciativa, conforme popup mostra). Se for o player, espera
@@ -32819,6 +32842,55 @@ function _hasSkipTurnStatus(unit) {
     return false;
 }
 
+/* Larian / Baldur's Gate 3 Style: Banner e avanço determinístico de rodada */
+function _spawnRoundSplashBanner(rn) {
+    try {
+        var existing = document.getElementById('combat-round-splash');
+        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+        var b = document.createElement('div');
+        b.id = 'combat-round-splash';
+        b.className = 'combat-round-splash';
+        b.innerHTML = '<div class="crs-inner"><span class="crs-icon">⚔️</span> <span class="crs-text">RODADA ' + rn + '</span> <span class="crs-icon">⚔️</span></div>';
+        document.body.appendChild(b);
+        setTimeout(function () {
+            if (b && b.parentNode) {
+                b.classList.add('crs-fade-out');
+                setTimeout(function () {
+                    if (b && b.parentNode) b.parentNode.removeChild(b);
+                }, 400);
+            }
+        }, 1200);
+    } catch (_) {}
+}
+
+function simAdvanceToRound(s) {
+    if (!s) return;
+    s.rn = (s.rn | 0) + 1;
+    s._simLogHdrKey = null;
+    s.log.push('::SIM_ROUND::' + s.rn);
+    s.log.push('◆ INÍCIO DA RODADA ' + s.rn + ' ◆');
+    tickBuffsOnNewRound(s);
+    if (s.order && s.order.length) {
+        s.order.forEach(function (_u) {
+            if (_u) {
+                _u.movement_left = _u.speed || 6;
+                if (_u.wetTurns > 0) {
+                    _u.wetTurns -= 1;
+                    if (_u.wetTurns === 0 && s.log) {
+                        s.log.push(_u.n + ' não está mais MOLHADO — roupas secaram (vulnerabilidade frio / resistência fogo removidas).');
+                    }
+                }
+            }
+        });
+    }
+    tickAttachedSummonsDuration(s);
+    tickConjuredSummonsDuration(s);
+    try {
+        if (window.ReinforceFSM) window.ReinforceFSM.decrementWaves(s);
+    } catch (_eRF2) {}
+    _spawnRoundSplashBanner(s.rn);
+}
+
 async function runNpcSegmentUntilPlayerTurn() {
     var s = currentState;
     /* Sub-projeto #1 (2026-04-26 v8) — decrementWaves agora é DETERMINÍSTICO
@@ -32916,6 +32988,8 @@ async function runNpcSegmentUntilPlayerTurn() {
             render(s);
             await sleep(550);
         } else if (c && c.hp > 0 && c.alive) {
+            simLogPushTurnHeader(s, c);
+            render(s);
             try {
             /* X-6.5.51AC: log entrada turno NPC (qualquer NPC: aliado, inimigo, boss) */
             try {
@@ -33259,7 +33333,18 @@ async function runNpcSegmentUntilPlayerTurn() {
                     var tgt = pickNpcAttackTarget(s, s.active_idx);
                     /* V1.7 Sprint-8: Charmed retorna -1 = sem alvo válido; pula turno */
                     if (tgt == null || tgt < 0) break;
-                    await playTurn(s.active_idx, tgt);
+                    if (atkCount > 1) {
+                        var _tgtName = (s.order[tgt] && s.order[tgt].n) || 'alvo';
+                        s.log.push('⚔️ ' + c.n + ' desfere Ataque Múltiplo (' + (mi + 1) + '/' + atkCount + ') contra ' + _tgtName + ' (D&D 5e MM p.11).');
+                        try {
+                            var _actorUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, s.active_idx) : null;
+                            var _actorEl = _actorUid ? document.querySelector('[data-unit-id="' + _actorUid + '"]') : null;
+                            if (_actorEl && typeof spawnSkillImpactLabel === 'function') {
+                                spawnSkillImpactLabel(_actorEl, 'ATAQUE MÚLTIPLO (' + (mi + 1) + '/' + atkCount + ')', 'attack');
+                            }
+                        } catch (_eMa) {}
+                    }
+                    await playTurn(s.active_idx, tgt, { multiAttackCurrent: mi + 1, multiAttackTotal: atkCount });
                     if (checkEnd(s)) return true;
                 }
             }
@@ -33288,38 +33373,8 @@ async function runNpcSegmentUntilPlayerTurn() {
         }
         var nxt = (s.active_idx + 1) % s.order.length;
         if (nxt === 0) {
-            s._wrapsSeen = (s._wrapsSeen || 0) + 1;
-            if (s._wrapsSeen > 1) {
-                s.rn++;
-                s._simLogHdrKey = null;
-                s.log.push('::SIM_ROUND::' + s.rn);
-                tickBuffsOnNewRound(s);
-                /* 2026-04-27: tick Wet status (D&D 5e DMG p.110). Decrementa
-                   wetTurns por round. Quando zera, narra "secou" + remove.
-                   ~1 round = ~1 turno de exploração; combate longo seca o player. */
-                if (s.order && s.order.length) {
-                    s.order.forEach(function (_u) {
-                        if (_u && _u.wetTurns > 0) {
-                            _u.wetTurns -= 1;
-                            if (_u.wetTurns === 0) {
-                                if (s.log) s.log.push(_u.n + ' não está mais MOLHADO — roupas secaram (vulnerabilidade frio / resistência fogo removidas).');
-                            }
-                        }
-                    });
-                }
-                /* V1 Invocações Phase 2 — tick durLeft das attached summons. */
-                tickAttachedSummonsDuration(s);
-                /* W2 (escolha autor 2026-04-20) — tick duração das criaturas conjuradas
-                   (Conjure Animals lobos). 5 turnos por padrão; remove ao expirar. */
-                tickConjuredSummonsDuration(s);
-                /* Sub-projeto #1 v8 (2026-04-26): re-evalua waves AGORA que rn
-                   incrementou. decrementWaves é idempotente — recalcula
-                   delayedTurns deterministicamente. */
-                try {
-                    if (window.ReinforceFSM) window.ReinforceFSM.decrementWaves(s);
-                } catch (_eRF2) { /* silent */ }
-                await sleep(300);
-            }
+            simAdvanceToRound(s);
+            await sleep(300);
         }
         s.active_idx = nxt;
         if (s.order && s.order[nxt]) {
@@ -33388,7 +33443,11 @@ async function runNpcsUntilPlayer(opts) {
         if (!opts.skipResolvePlayer) {
             await simResolveEndTurnConditions(s, s.p_idx);
         }
-        s.active_idx = (s.p_idx + 1) % s.order.length;
+        var nextIdx = (s.p_idx + 1) % s.order.length;
+        if (nextIdx === 0) {
+            simAdvanceToRound(s);
+        }
+        s.active_idx = nextIdx;
         if (await _runNpcSegmentWithWatchdog(s, 15000)) {
             _simSkipNonPlayerDice = false;
             await sleep(1800);
@@ -33399,7 +33458,11 @@ async function runNpcsUntilPlayer(opts) {
         if (p && (p.isDead || (p.hp <= 0 && p.stable && !p.dying)) && partyAnyoneStanding(s)) {
             if (p.isDead) s.log.push(p.n + ' está morto — o combate segue com os aliados.');
             else s.log.push(p.n + ' inconsciente (estável) — sem ações; o combate segue.');
-            s.active_idx = (s.p_idx + 1) % s.order.length;
+            var nextIdx2 = (s.p_idx + 1) % s.order.length;
+            if (nextIdx2 === 0) {
+                simAdvanceToRound(s);
+            }
+            s.active_idx = nextIdx2;
             if (await _runNpcSegmentWithWatchdog(s, 15000)) {
                 _simSkipNonPlayerDice = false;
                 await sleep(1800);
@@ -33423,7 +33486,11 @@ async function runNpcsUntilPlayer(opts) {
                 render(s);
                 if (!_hasSkipTurnStatus(s.order[s.p_idx])) break; /* recuperou / expirou */
                 /* ainda petrificado → inimigos agem de novo, depois re-checa */
-                s.active_idx = (s.p_idx + 1) % s.order.length;
+                var nextIdx3 = (s.p_idx + 1) % s.order.length;
+                if (nextIdx3 === 0) {
+                    simAdvanceToRound(s);
+                }
+                s.active_idx = nextIdx3;
                 if (await _runNpcSegmentWithWatchdog(s, 15000)) { _simSkipNonPlayerDice = false; await sleep(1800); render(s); return; }
             }
             if (s.order[s.p_idx] && (s.order[s.p_idx].hp <= 0 || s.order[s.p_idx].isDead)) { render(s); return; }
