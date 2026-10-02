@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T18:26:41Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T20:04:38Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -31544,7 +31544,7 @@ async function playTurn(aIdx, tIdx, opts) {
         if (typeof sfxMiss === 'function') { try { sfxMiss(); } catch (_eS) {} }
         /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — miss log com NAT 1.
            Formato consistente com hit log: d20 cru + bônus = total vs CA. NAT 1 destacado. */
-        var _missAtkBonus = (ev && ev.atk != null) ? ev.atk : actor.atk;
+        var _missAtkBonus = (typeof ev !== 'undefined' && ev && ev.atk != null) ? ev.atk : ((opts && opts.atk != null) ? opts.atk : (actor.atk != null ? actor.atk : 0));
         var _missAtkPart = 'd20 ' + r + '+' + _missAtkBonus +
             (atkExtra ? '+' + atkExtra : '') + '=' + hitRes.total +
             ' vs CA ' + effAc + (effAc !== target.ac ? ' (incl. bônus)' : '');
@@ -32247,7 +32247,7 @@ async function playTurn(aIdx, tIdx, opts) {
            Antes era "Guerreiro causa X em Goblin" (sem breakdown). Agora:
            "Guerreiro acerta Goblin — d20 15+3=18 vs CA 15 | 2d10 [7+3]+3 = 13"
            "Guerreiro CRITA Goblin — NAT 20! vs CA 15 | 4d10 [7+3+5+2]+3 = 20" */
-        var _hitAtkBonus = (ev && ev.atk != null) ? ev.atk : actor.atk;
+        var _hitAtkBonus = (typeof ev !== 'undefined' && ev && ev.atk != null) ? ev.atk : ((opts && opts.atk != null) ? opts.atk : (actor.atk != null ? actor.atk : 0));
         var _atkPart = 'd20 ' + r + '+' + _hitAtkBonus +
             (atkExtra ? '+' + atkExtra : '') + '=' + hitRes.total +
             ' vs CA ' + effAc;
