@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T20:29:45Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T20:47:08Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -30263,14 +30263,15 @@ function beginCombatAfterInitOrder() {
     currentState.active_idx = 0;
     render(currentState);
     if (currentState.active_idx !== currentState.p_idx) {
-        /* 2026-06-07 FIX (turno travado): era `void runNpcSegmentUntilPlayerTurn()`
-           — fire-and-forget, SEM await, SEM try/catch e SEM o tail de reset que
-           devolve o turno ao jogador. Qualquer erro no segmento (ou o fim normal)
-           deixava o combate sem liberar o botão Agir → turno travado. Agora espelha
-           o tail de runNpcsUntilPlayer (libera Agir + render). */
+        /* 2026-06-07 / 2026-10 FIX (turno travado): loop de NPCs no início de combate com
+           watchdog circuit breaker e bloco finally incondicional pra garantir que o jogador
+           nunca fique preso sem o botão Agir liberado. */
         (async function () {
             try {
-                if (await runNpcSegmentUntilPlayerTurn()) {
+                var watchdogFn = (typeof _runNpcSegmentWithWatchdog === 'function')
+                    ? _runNpcSegmentWithWatchdog
+                    : runNpcSegmentUntilPlayerTurn;
+                if (await watchdogFn(currentState, 15000)) {
                     _simSkipNonPlayerDice = false;
                     render(currentState);
                     return;
@@ -30278,11 +30279,12 @@ function beginCombatAfterInitOrder() {
             } catch (_eNpc) {
                 console.error('[SIM:ANTI-FREEZE] runNpcSegment (início de combate) erro:', _eNpc);
                 currentState.active_idx = currentState.p_idx;
+            } finally {
+                _simSkipNonPlayerDice = false;
+                _actionTaken = false;
+                if (typeof _resetActionFlags === 'function') _resetActionFlags(currentState);
+                render(currentState);
             }
-            _simSkipNonPlayerDice = false;
-            _actionTaken = false;
-            if (typeof _resetActionFlags === 'function') _resetActionFlags(currentState);
-            render(currentState);
         })();
     }
 }
@@ -32872,6 +32874,30 @@ async function runNpcSegmentUntilPlayerTurn() {
     return false;
 }
 
+/* COMBAT-WATCHDOG (2026-10): Circuito de segurança watchdog para segmentos de NPC.
+   Garante que nenhum turno de NPC, animação pendente ou promise perdida prenda o
+   combate por mais de 15 segundos. Se o segmento não concluir no tempo limite,
+   o watchdog dispara, registra telemetria, recupera o estado seguro, força o turno
+   para o jogador e garante que a UI reapareça destravada. */
+async function _runNpcSegmentWithWatchdog(s, timeoutMs) {
+    timeoutMs = timeoutMs || 15000;
+    var _timer = null;
+    var _watchdogPromise = new Promise(function (_, reject) {
+        _timer = setTimeout(function () {
+            reject(new Error('[COMBAT-WATCHDOG] Segmento de NPC excedeu o teto de ' + timeoutMs + 'ms sem concluir.'));
+        }, timeoutMs);
+    });
+
+    try {
+        return await Promise.race([
+            runNpcSegmentUntilPlayerTurn(),
+            _watchdogPromise
+        ]);
+    } finally {
+        if (_timer) clearTimeout(_timer);
+    }
+}
+
 async function runDeathSaveTurnForUnit(s, aIdx) {
     var u = s.order[aIdx];
     if (!u || u.isDead || !u.dying || u.stable) return;
@@ -32903,7 +32929,7 @@ async function runNpcsUntilPlayer(opts) {
             await simResolveEndTurnConditions(s, s.p_idx);
         }
         s.active_idx = (s.p_idx + 1) % s.order.length;
-        if (await runNpcSegmentUntilPlayerTurn()) {
+        if (await _runNpcSegmentWithWatchdog(s, 15000)) {
             _simSkipNonPlayerDice = false;
             render(s);
             return;
@@ -32913,7 +32939,7 @@ async function runNpcsUntilPlayer(opts) {
             if (p.isDead) s.log.push(p.n + ' está morto — o combate segue com os aliados.');
             else s.log.push(p.n + ' inconsciente (estável) — sem ações; o combate segue.');
             s.active_idx = (s.p_idx + 1) % s.order.length;
-            if (await runNpcSegmentUntilPlayerTurn()) {
+            if (await _runNpcSegmentWithWatchdog(s, 15000)) {
                 _simSkipNonPlayerDice = false;
                 render(s);
                 return;
@@ -32936,7 +32962,7 @@ async function runNpcsUntilPlayer(opts) {
                 if (!_hasSkipTurnStatus(s.order[s.p_idx])) break; /* recuperou / expirou */
                 /* ainda petrificado → inimigos agem de novo, depois re-checa */
                 s.active_idx = (s.p_idx + 1) % s.order.length;
-                if (await runNpcSegmentUntilPlayerTurn()) { _simSkipNonPlayerDice = false; render(s); return; }
+                if (await _runNpcSegmentWithWatchdog(s, 15000)) { _simSkipNonPlayerDice = false; render(s); return; }
             }
             if (s.order[s.p_idx] && (s.order[s.p_idx].hp <= 0 || s.order[s.p_idx].isDead)) { render(s); return; }
         } catch (_ePet) { /* nunca hard-locka o turno do jogador */ }
@@ -32946,6 +32972,9 @@ async function runNpcsUntilPlayer(opts) {
             _simLog('[SIM:ERR]', { event: 'run_npcs_critical_error', err: String(_eRunNpcs && _eRunNpcs.message || _eRunNpcs) });
         } catch (_) {}
         s.active_idx = s.p_idx;
+        if (s.order && s.order[s.p_idx]) {
+            s.order[s.p_idx].movement_left = s.order[s.p_idx].speed || 6;
+        }
     } finally {
         /* Volta ao turno do jogador: animações 3D de todos de novo até ele optar por pular só os outros na próxima sequência. */
         _simSkipNonPlayerDice = false;
