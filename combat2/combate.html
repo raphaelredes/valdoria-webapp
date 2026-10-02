@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T20:47:08Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T21:53:14Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14466,9 +14466,18 @@ function trySetupFromUrl() {
     } catch (e) { return null; }
 }
 
+function _normClsStr(s) {
+    return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
 function getClassDefByName(clsName) {
+    if (!clsName) return CHAR_CLASSES[0];
     for (var ci = 0; ci < CHAR_CLASSES.length; ci++) {
         if (CHAR_CLASSES[ci].cls === clsName) return CHAR_CLASSES[ci];
+    }
+    var norm = _normClsStr(clsName);
+    for (var ci2 = 0; ci2 < CHAR_CLASSES.length; ci2++) {
+        if (_normClsStr(CHAR_CLASSES[ci2].cls) === norm) return CHAR_CLASSES[ci2];
     }
     return CHAR_CLASSES[0];
 }
@@ -14486,14 +14495,15 @@ function getClassDefByName(clsName) {
 function _classResMaxByLevel(clsName, baseMax, lvl) {
     lvl = Math.max(1, Math.min(20, lvl | 0));
     baseMax = Math.max(1, baseMax | 0);
+    var norm = _normClsStr(clsName);
     // Monge: Ki = level (PHB p.78)
-    if (clsName === 'Monge') return Math.max(2, lvl);
+    if (norm === 'monge') return Math.max(2, lvl);
     // Feiticeiro: Sorcery Points = level (PHB p.99)
-    if (clsName === 'Feiticeiro') return Math.max(2, lvl);
+    if (norm === 'feiticeiro') return Math.max(2, lvl);
     // Barbaro: Rage uses (PHB p.49 table)
     // Lvl 20 PHB e "Unlimited" (Persistent Rage) mas usar 99 quebra HUD ("99/99").
     // Cap pratico em 6 (= teto lvls 17-19) — suficiente pra qualquer encontro.
-    if (clsName === 'Bárbaro') {
+    if (norm === 'barbaro') {
         if (lvl < 3)  return 2;
         if (lvl < 6)  return 3;
         if (lvl < 12) return 4;
@@ -14501,7 +14511,7 @@ function _classResMaxByLevel(clsName, baseMax, lvl) {
         return 6;
     }
     // Bruxo: Pact Magic slots (PHB p.107) — fewer but higher level
-    if (clsName === 'Bruxo') {
+    if (norm === 'bruxo') {
         if (lvl < 2)  return 1;
         if (lvl < 11) return 2;
         if (lvl < 17) return 3;
@@ -14509,12 +14519,12 @@ function _classResMaxByLevel(clsName, baseMax, lvl) {
     }
     // Full caster (Mago/Clerigo/Druida/Bardo) — total spell slots PHB Table
     // Aprox: 4 at lvl 1 → 22 at lvl 20 = +0.95 por lvl
-    if (clsName === 'Mago' || clsName === 'Clérigo' || clsName === 'Druida' || clsName === 'Bardo') {
+    if (norm === 'mago' || norm === 'clerigo' || norm === 'druida' || norm === 'bardo') {
         return Math.max(baseMax, baseMax + Math.floor((lvl - 1) * 0.9));
     }
     // Half caster (Paladino/Patrulheiro) — half spell slots
     // Aprox: 0 at lvl 1 → 11 at lvl 20 = +0.6 por lvl
-    if (clsName === 'Paladino' || clsName === 'Patrulheiro') {
+    if (norm === 'paladino' || norm === 'patrulheiro') {
         return Math.max(baseMax, baseMax + Math.floor((lvl - 1) * 0.6));
     }
     // Default (Guerreiro/Ladino — Vigor/Energia): +1 a cada 4 niveis
@@ -21204,7 +21214,7 @@ var _pendingAttachedSummon = null;
    Patrulheiro Animal Companion, Bardo Find Familiar via Magical Secrets, etc.).
    `it.lb` agora reflete o id do passive (não hardcoded 'familiar') pra logs/debug. */
 function spawnPassivesForClass(state, playerEntry) {
-    var cls = CHAR_CLASSES.find(function (c) { return c.cls === playerEntry.cls; });
+    var cls = getClassDefByName(playerEntry && playerEntry.cls);
     if (!cls || !cls.passives) return;
     cls.passives.forEach(function (passive) {
         if (passive.kind !== 'summon_combatant_passive') return;
@@ -33211,7 +33221,15 @@ async function startCombatRemoteCanonical() {
             + ' biome=' + data.setup.biome
             + ' origin=' + window.__COMBAT_PIVOT_ORIGIN);
         /* Engine LOCAL assume daqui em diante — idêntico ao simulator file://. */
-        currentState = newCombatFromSetup(data.setup);
+        try {
+            currentState = newCombatFromSetup(data.setup);
+        } catch (eBoot) {
+            console.error('[C-REM:BOOT-ERROR] newCombatFromSetup threw: '
+                + ((eBoot && eBoot.message) || eBoot)
+                + ' | ' + ((eBoot && eBoot.stack) || '').split('\n').slice(1, 4).join(' << ')
+                + ' | setupKeys=' + (data.setup ? Object.keys(data.setup).join(',') : 'none'));
+            currentState = newCombat();
+        }
         if (data.setup.biome) currentState.bio = data.setup.biome;
         /* 2026-05-21 ANTI-CHEAT: restaurar checkpoint mid-battle se servidor
            enviou. Bloqueia farming por reload (combate resetava de inicio).
