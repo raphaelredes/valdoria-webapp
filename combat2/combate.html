@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T17:46:31Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T18:26:41Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9722,6 +9722,106 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
 }
 
+.battlefield-hex-arena .hex-tile--obstacle {
+  cursor: not-allowed !important;
+}
+
+.battlefield-hex-arena .hex-tile--obstacle-total {
+  fill: rgba(35, 45, 60, 0.85) !important;
+  stroke: #718096 !important;
+  stroke-width: 2.2 !important;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.7));
+}
+
+.battlefield-hex-arena .hex-tile--obstacle-three_quarters {
+  fill: rgba(55, 65, 80, 0.78) !important;
+  stroke: #cbd5e0 !important;
+  stroke-width: 2 !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.battlefield-hex-arena .hex-tile--obstacle-half {
+  fill: rgba(70, 50, 30, 0.75) !important;
+  stroke: #d69e2e !important;
+  stroke-width: 1.8 !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.battlefield-hex-arena .hex-obstacle-symbol {
+  font-size: 15px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.95));
+}
+
+.battlefield-hex-arena .hex-obstacle-label {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  fill: #e2e8f0;
+  text-anchor: middle;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
+}
+
+.battlefield-hex-arena .hex-tile--hazard {
+  stroke: #f59e0b !important;
+  stroke-dasharray: 4 2;
+  animation: hazardPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes hazardPulse {
+  0%, 100% { stroke: #f59e0b; }
+  50% { stroke: #ef4444; }
+}
+
+.battlefield-hex-arena .hex-hazard-badge {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 8.5px;
+  font-weight: 700;
+  fill: #fbbf24;
+  text-anchor: middle;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
+}
+
+.hth-stand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: #fff;
+  border: 1px solid #f59e0b;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-family: var(--v-font-ui, sans-serif);
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.hth-stand-btn:hover:not(.disabled) {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.hth-stand-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+.action-btn--stand-up {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  border-color: #f59e0b !important;
+  color: #fff !important;
+}
+
 .battlefield-hex-arena .hex-tokens-layer {
   position: absolute;
   top: 0;
@@ -18537,6 +18637,12 @@ async function handlePlayerMoveTo(tCol, tRow) {
     if (!p || !p.alive || p.hp <= 0) return;
     if (!p.pos) p.pos = { col: 0, row: 0 };
     var fromCol = p.pos.col, fromRow = p.pos.row;
+
+    if (window.__COMBAT_MODE === 'remote') {
+        void __combatRemoteAction({ type: 'move', col: tCol, row: tRow });
+        return;
+    }
+
     var path = hexLine(fromCol, fromRow, tCol, tRow);
     if (!path || path.length <= 1) return;
 
@@ -18767,8 +18873,8 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
     var distBadge = '';
     if (pUnit && pUnit.pos && u.pos && uid !== 'player') {
         var dist = hexDistance(pUnit.pos.col, pUnit.pos.row, u.pos.col, u.pos.row);
-        var distFt = dist * 5;
-        distBadge = '<span class="token-dist-chip" title="Distância até você">' + distFt + 'ft · ' + dist + 'h</span>';
+        var distM = formatHexDistanceMeters(dist);
+        distBadge = '<span class="token-dist-chip" title="Distância até você">' + distM + ' · ' + dist + 'h</span>';
     }
 
     // Initiative badge during intro
@@ -18865,6 +18971,16 @@ function buildBattlefield(s) {
         });
     }
 
+    // Physical obstacles map (D&D 5e Cover rules - PHB p. 196)
+    var obstacleMap = {};
+    if (s.battlefield && s.battlefield.obstacles) {
+        s.battlefield.obstacles.forEach(function (obs) {
+            if (obs && obs.col != null && obs.row != null) {
+                obstacleMap[obs.col + ',' + obs.row] = obs;
+            }
+        });
+    }
+
     // Reachable hexes for active player movement
     var reachableMap = {};
     if (isPlayerActiveTurn && playerUnit && playerUnit.pos && (playerUnit.movement_left || 0) > 0) {
@@ -18875,6 +18991,7 @@ function buildBattlefield(s) {
             for (var rr = 0; rr < bRows; rr++) {
                 if (rc === pCol && rr === pRow) continue;
                 if (occupiedMap[rc + ',' + rr]) continue;
+                if (obstacleMap[rc + ',' + rr]) continue; // Obstáculo físico bloqueia movimento
                 var cost = calculateHexMovementCost(pCol, pRow, rc, rr, difficultMap);
                 if (cost <= moveLeft) {
                     reachableMap[rc + ',' + rr] = cost;
@@ -18883,14 +19000,14 @@ function buildBattlefield(s) {
         }
     }
 
-    // Target selection reach
+    // Target selection reach (D&D 5e: 1 hex = 1,5m)
     var inReachMap = {};
     if (_selectingTarget && playerUnit && playerUnit.pos) {
-        var reachLimit = 1; // Default melee reach 5 ft (1 hex)
+        var reachLimit = 1; // Alcance corpo a corpo padrão de 1,5m (1 hex)
         if (_pendingSkill) {
             if (_pendingSkill.rangeFeet) reachLimit = Math.max(1, Math.round(_pendingSkill.rangeFeet / 5));
             else if (_pendingSkill.rangeHexes) reachLimit = _pendingSkill.rangeHexes;
-            else if (_pendingSkill.magicMissiles || _pendingSkill.kind === 'spell' || _pendingSkill.isRanged) reachLimit = 12; // 60 ft
+            else if (_pendingSkill.magicMissiles || _pendingSkill.kind === 'spell' || _pendingSkill.isRanged) reachLimit = 12; // 18 metros
         }
         for (var tc = 0; tc < bCols; tc++) {
             for (var tr = 0; tr < bRows; tr++) {
@@ -18944,6 +19061,7 @@ function buildBattlefield(s) {
             var isReachable = reachableMap[hexKey] != null;
             var isInReach = inReachMap[hexKey] != null;
             var dtTile = difficultMap[hexKey];
+            var obsTile = obstacleMap[hexKey];
             var occInfo = occupiedMap[hexKey];
 
             if (occInfo && occInfo.unit) {
@@ -18953,7 +19071,12 @@ function buildBattlefield(s) {
 
             if (isReachable) tileCls += ' hex-tile--reachable';
             if (isInReach) tileCls += ' hex-tile--in-reach';
-            if (dtTile) tileCls += ' hex-tile--difficult';
+            if (obsTile) {
+                tileCls += ' hex-tile--obstacle hex-tile--obstacle-' + (obsTile.cover || 'half');
+            } else if (dtTile) {
+                tileCls += ' hex-tile--difficult';
+                if (dtTile.hazard_kind) tileCls += ' hex-tile--hazard';
+            }
             if (row < Math.floor(bRows / 2)) tileCls += ' hex-tile--enemy-zone';
             else tileCls += ' hex-tile--ally-zone';
 
@@ -18963,9 +19086,27 @@ function buildBattlefield(s) {
             var coordLabel = getHexColLetter(col) + (row + 1);
             html += '<text x="' + center.cx + '" y="' + (center.cy - 18) + '" class="hex-coord">' + coordLabel + '</text>';
 
-            // Terreno Difícil (custo 3m / 2 hexes, PHB p. 190)
-            if (dtTile && !occupiedMap[hexKey]) {
-                html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-diff-label">◆ 3m</text>';
+            // Se for obstáculo físico com cobertura (PHB p. 196)
+            if (obsTile) {
+                var obsSym = obsTile.symbol || '🪨';
+                var obsCov = (obsTile.cover === 'total') ? 'TOTAL' : ((obsTile.cover === 'three_quarters') ? '+5 CA' : '+2 CA');
+                html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-obstacle-symbol">' + obsSym + '</text>';
+                html += '<text x="' + center.cx + '" y="' + (center.cy + 17) + '" class="hex-obstacle-label">' + obsCov + '</text>';
+            } else if (dtTile && !occupiedMap[hexKey]) {
+                // Terreno Difícil (custo 3m / 2 hexes, PHB p. 190) ou Perigo Ativo (DMG p. 110-112)
+                if (dtTile.hazard_kind === 'damage') {
+                    var hSym = dtTile.symbol || '🌵';
+                    var hDmg = dtTile.damage_dice || '1d4';
+                    html += '<text x="' + center.cx + '" y="' + (center.cy + 2) + '" class="hex-hazard-badge">' + hSym + ' ' + hDmg + '</text>';
+                    html += '<text x="' + center.cx + '" y="' + (center.cy + 15) + '" class="hex-diff-label">◆ 3m</text>';
+                } else if (dtTile.hazard_kind === 'save_prone') {
+                    var hSym2 = dtTile.symbol || '🧊';
+                    var hDc = dtTile.save_dc || 10;
+                    html += '<text x="' + center.cx + '" y="' + (center.cy + 2) + '" class="hex-hazard-badge">' + hSym2 + ' CD ' + hDc + ' DES</text>';
+                    html += '<text x="' + center.cx + '" y="' + (center.cy + 15) + '" class="hex-diff-label">◆ 3m</text>';
+                } else {
+                    html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-diff-label">◆ 3m</text>';
+                }
             }
 
             // Se for hexágono alcançável, exibe o custo de movimento em metros (ex.: 1,5m, 3m)
@@ -18992,9 +19133,16 @@ function buildBattlefield(s) {
 
     // Battlefield HUD Header / Distance helper
     if (isPlayerActiveTurn && playerUnit) {
+        var isPlayerProne = (playerUnit.se || []).some(function (st) { return st && (st.prone || st.id === 'prone'); });
+        var standCostHexes = Math.floor((playerUnit.speed || 6) / 2);
+        var standCostM = formatHexDistanceMeters(standCostHexes);
+        var canStand = (playerUnit.movement_left || 0) >= standCostHexes;
+
         html += '<div class="hex-turn-hud" aria-live="polite">';
         html += '<span class="hth-speed"><span class="hth-icon">👣</span> Movimento: <strong>' + formatHexDistanceMeters(playerUnit.movement_left || 0) + '</strong> / ' + formatHexDistanceMeters(playerUnit.speed || 6) + ' (' + (playerUnit.movement_left || 0) + 'h)</span>';
-        if ((playerUnit.movement_left || 0) > 0) {
+        if (isPlayerProne) {
+            html += '<button type="button" class="hth-stand-btn' + (canStand ? '' : ' disabled') + '" data-act="stand-up" title="Gasta metade do deslocamento (' + standCostM + ') para se levantar (PHB p. 190)">🧎 Levantar-se (' + standCostM + ')</button>';
+        } else if ((playerUnit.movement_left || 0) > 0) {
             html += '<span class="hth-hint">Toque em um hexágono verde para mover</span>';
         }
         html += '</div>';
@@ -22052,6 +22200,13 @@ function render(s) {
                 html += '</div>';
                 html += '<div class="sim-action-sheet-sep" aria-hidden="true"></div>';
                 html += '<div class="action-btns-grid action-btns-grid--secondary">';
+                var isPlayerProneSheet = pCur && (pCur.se || []).some(function (st) { return st && (st.prone || st.id === 'prone'); });
+                if (isPlayerProneSheet) {
+                    var standCostHexesSheet = Math.floor((pCur.speed || 6) / 2);
+                    var standCostMSheet = formatHexDistanceMeters(standCostHexesSheet);
+                    var canStandSheet = (pCur.movement_left || 0) >= standCostHexesSheet;
+                    html += '<button type="button" class="action-btn action-btn--stand-up primary' + (canStandSheet ? '' : ' spent') + '" data-act="stand-up"' + (canStandSheet ? '' : ' aria-disabled="true" title="Deslocamento insuficiente para se levantar"') + '>🧎 Levantar-se (' + standCostMSheet + ')</button>';
+                }
                 /* X-6.5.51AB (2026-04-26): "Passar turno" REMOVIDO — Encerrar Turno
                    no fim do sheet cobre o caso (envia 'pass' pro server, mesmo
                    handler). User feedback: "remova o botão Passar turno e
@@ -23084,6 +23239,11 @@ function onBtnClick(ev) {
             render(currentState);
             void __combatRemoteAction({ type: 'pass' });
             return;
+        } else if (act === 'stand-up') {
+            _actionSheetOpen = false;
+            render(currentState);
+            void __combatRemoteAction({ type: 'stand_up' });
+            return;
         } else if (act === 'dash') {
             _actionSheetOpen = false;
             render(currentState);
@@ -23491,6 +23651,21 @@ function onBtnClick(ev) {
             if (ok) { void passPlayerMetaAction('pass'); }
             else { _actionTaken = false; render(currentState); }
         });
+        return;
+    }
+    if (act === 'stand-up') {
+        _actionSheetOpen = false;
+        var pSu = currentState.order[currentState.p_idx];
+        if (!pSu) return;
+        var standCost = Math.floor((pSu.speed || 6) / 2);
+        if ((pSu.movement_left || 0) < standCost) {
+            if (typeof showToast === 'function') showToast('Deslocamento insuficiente para se levantar (' + formatHexDistanceMeters(standCost) + ' necessários).');
+            return;
+        }
+        pSu.movement_left = Math.max(0, (pSu.movement_left || 0) - standCost);
+        pSu.se = (pSu.se || []).filter(function (st) { return !(st && (st.prone || st.id === 'prone')); });
+        currentState.log.push(pSu.n + ' gasta ' + formatHexDistanceMeters(standCost) + ' de deslocamento e se levanta.');
+        render(currentState);
         return;
     }
     if (act === 'dodge') {
@@ -33587,6 +33762,72 @@ async function __combatAnimateOneEvent(ev) {
             ensureProceduralBattlefield(currentState);
         }
         render(currentState);
+        return;
+    }
+    if (kind === 'stand_up') {
+        var suActorIdx = ev.actorIdx != null ? ev.actorIdx : 0;
+        var suActorUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, suActorIdx)
+            : (suActorIdx === (currentState.p_idx || 0) ? 'player' : 'enemy_' + suActorIdx);
+        var suActorUnit = (currentState && currentState.order) ? currentState.order[suActorIdx] : null;
+        if (suActorUnit) {
+            suActorUnit.se = (suActorUnit.se || []).filter(function (st) { return !(st && (st.prone || st.id === 'prone')); });
+            if (ev.movementLeft != null) suActorUnit.movement_left = ev.movementLeft;
+        }
+        var suEl = document.querySelector('[data-unit-id="' + suActorUid + '"]');
+        if (suEl) {
+            suEl.classList.remove('token-prone');
+            suEl.classList.add('token-standing-up');
+            setTimeout(function () { suEl.classList.remove('token-standing-up'); }, 400);
+        }
+        if (typeof sfxStep === 'function') { try { sfxStep(); } catch (_) {} }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 220); });
+        return;
+    }
+    if (kind === 'hazard_damage') {
+        var hzActorIdx = ev.actorIdx != null ? ev.actorIdx : 0;
+        var hzActorUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, hzActorIdx)
+            : (hzActorIdx === (currentState.p_idx || 0) ? 'player' : 'enemy_' + hzActorIdx);
+        var hzActorUnit = (currentState && currentState.order) ? currentState.order[hzActorIdx] : null;
+        if (hzActorUnit && ev.newHp != null) {
+            hzActorUnit.hp = ev.newHp;
+            hzActorUnit.alive = hzActorUnit.hp > 0;
+        }
+        var hzEl = document.querySelector('[data-unit-id="' + hzActorUid + '"]');
+        if (hzEl) {
+            hzEl.classList.add('dmg-flash');
+            setTimeout(function () { hzEl.classList.remove('dmg-flash'); }, 350);
+            if (typeof _spawnFloatingDmgNumber === 'function') {
+                _spawnFloatingDmgNumber(hzEl, ev.damage, false, ev.damageType || 'perfurante');
+            }
+        }
+        if (typeof sfxDamageType === 'function') sfxDamageType(ev.damageType || 'perfurante');
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 250); });
+        return;
+    }
+    if (kind === 'hazard_fall') {
+        var hfActorIdx = ev.actorIdx != null ? ev.actorIdx : 0;
+        var hfActorUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, hfActorIdx)
+            : (hfActorIdx === (currentState.p_idx || 0) ? 'player' : 'enemy_' + hfActorIdx);
+        var hfActorUnit = (currentState && currentState.order) ? currentState.order[hfActorIdx] : null;
+        if (hfActorUnit) {
+            (hfActorUnit.se = hfActorUnit.se || []).push({ id: 'prone', n: 'Caído', prone: true, kind: 'debuff', ico: '🧎' });
+        }
+        var hfEl = document.querySelector('[data-unit-id="' + hfActorUid + '"]');
+        if (hfEl) {
+            hfEl.classList.add('token-prone');
+            hfEl.classList.add('miss-target-flash');
+            setTimeout(function () { hfEl.classList.remove('miss-target-flash'); }, 400);
+            if (typeof spawnMissFloatLabel === 'function') {
+                spawnMissFloatLabel(hfEl, '🧎 Caído!');
+            }
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 300); });
         return;
     }
     if (kind === 'attack' || kind === 'oa') {
