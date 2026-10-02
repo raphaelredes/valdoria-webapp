@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T21:53:14Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T22:26:59Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -16345,8 +16345,25 @@ function formatTurnsLeftLabel(st) {
    halfDmg / selfAtkVulnerable de buffs/debuffs em actor.se e target.se.
    Cancelamento PHB: vantagem + desvantagem = rolagem normal.
    ============================================================ */
-function _simAttackAdvState(actor, target) {
+function _simAttackAdvState(actor, target, skill) {
     var adv = false, dis = false;
+
+    /* D&D 5e Tactical Hex Grid (PHB p. 195):
+       Desvantagem em ataques à distância quando há inimigo hostil a 5 pés (1 hex). */
+    var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(actor, skill) : null;
+    var isRanged = reachInfo ? reachInfo.isRanged : (actor && (actor.is_ranged || actor.ranged));
+    if (isRanged && typeof simHasHostileAdjacent === 'function' && currentState && currentState.order) {
+        if (simHasHostileAdjacent(actor, currentState.order)) {
+            dis = true;
+        }
+    }
+
+    var simDist = null;
+    if (actor && actor.pos && target && target.pos && typeof hexDistance === 'function') {
+        simDist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
+    }
+    var targetProne = target && target.se && target.se.some(function (st) { return st && st.prone; });
+
     /* C3.4 #90: Assassinar (Assassino, PHB p.97) — vantagem na 1ª rodada
        (aprox. de 'criatura que ainda não agiu'). Espelha o motor. */
     if (actor && _subclassKeyNorm(actor.subclass) === 'assassin'
@@ -16390,26 +16407,47 @@ function _simAttackAdvState(actor, target) {
                ataques contra alvo ganham vantagem. Aplicado em:
                Restrained (p.291), Paralyzed (p.291), Unconscious (p.292), Stunned (p.290),
                Blinded (p.290), Charmed-helper (social), Prone melee (p.292). */
-            if (st.targetedAdvantage) adv = true;
+            if (st.targetedAdvantage) {
+                if (targetProne && simDist !== null) {
+                    if (simDist <= 1) adv = true;
+                    else dis = true;
+                } else {
+                    adv = true;
+                }
+            }
             /* V1.7 Sprint-6 (2026-04-21 closeout) — PHB p.255 Invisível (target):
                "attack rolls against the creature have disadvantage" — flag PHB. */
             if (st.attackerDisadvantage) dis = true;
         });
     }
     /* PHB p.292: Alvo prostrado (prone) — vantagem corpo a corpo (<= 1 hex / melee), desvantagem a distância (> 1 hex / ranged) */
-    var targetProne = target && target.se && target.se.some(function (st) { return st && st.prone; });
     if (targetProne) {
-        var simDist = null;
-        if (actor && actor.pos && target && target.pos && typeof hexDistance === 'function') {
-            simDist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
-        }
         if (simDist !== null) {
             if (simDist <= 1) adv = true;
             else dis = true;
         } else {
-            var isRanged = actor && actor.weaponReach && actor.weaponReach > 1;
             if (isRanged) dis = true;
             else adv = true;
+        }
+    }
+    /* PHB p.72: Estilo de Luta Proteção (Protection Fighting Style) */
+    if (target && currentState && currentState.order) {
+        var targetTeam = target.t;
+        for (var pi = 0; pi < currentState.order.length; pi++) {
+            var ally = currentState.order[pi];
+            if (ally && ally !== target && ally.alive && !ally.isDead && ally.t === targetTeam) {
+                var acq = ally.acquired || [];
+                if (acq.indexOf('fighting_style_protection') >= 0 && (ally.hasShield || ally.has_shield) && !ally.reaction_spent) {
+                    var allyIncap = ally.se && ally.se.some(function(st) {
+                        return st && (st.skipTurn || st.incapacitated || st.paralyzed || st.stunned || st.unconscious);
+                    });
+                    if (!allyIncap && typeof hexDistance === 'function' && target.pos && ally.pos) {
+                        if (hexDistance(target.pos.col, target.pos.row, ally.pos.col, ally.pos.row) <= 1) {
+                            dis = true;
+                        }
+                    }
+                }
+            }
         }
     }
     /* G1 (escolha autor 2026-04-19) — Pack Tactics PHB MM p.341 (Wolf):
@@ -18385,6 +18423,89 @@ function hexDistanceMeters(c1, r1, c2, r2) {
     return formatHexDistanceMeters(hexDistance(c1, r1, c2, r2));
 }
 
+/**
+ * D&D 5e (PHB p. 195, DMG p. 252): Alcance tático e classificação de ataque à distância.
+ * - Corpo a corpo padrão: 1 hex (1,5m / 5 pés)
+ * - Armas Reach (Alabarda, Pique, Chicote): 2 hexes (3m / 10 pés)
+ * - Magias: Mísseis Mágicos (24 hexes = 120 pés = 36m), Bola de Fogo (30 hexes = 150 pés = 45m),
+ *   Raio Gélido / truques (12 hexes = 60 pés = 18m), Toque (1 hex = 5 pés = 1,5m).
+ * - Armas à distância (Arco, Besta, Dardo, etc.): 16 hexes (80 pés = 24m) ou range_feet // 5.
+ */
+function simGetAttackReach(unit, skill) {
+    if (skill) {
+        if (skill.rangeHexes) return { reach: Math.max(1, skill.rangeHexes | 0), isRanged: (skill.ranged !== false && skill.is_ranged !== false) };
+        if (skill.rangeFeet) return { reach: Math.max(1, Math.floor(skill.rangeFeet / 5)), isRanged: (skill.ranged !== false && skill.is_ranged !== false) };
+        if (skill.reachFeet) return { reach: Math.max(1, Math.floor(skill.reachFeet / 5)), isRanged: false };
+        if (skill.magicMissiles) return { reach: 24, isRanged: true }; // 120 ft = 24 hexes (36m)
+        if (skill.fireball) return { reach: 30, isRanged: true }; // 150 ft = 30 hexes (45m)
+        if (skill.rayOfFrost) return { reach: 12, isRanged: true }; // 60 ft = 12 hexes (18m)
+        if (skill.isTouch || skill.touch || skill.martialArtsDie || skill.smite || skill.sneakAttack) return { reach: 1, isRanged: false };
+        if (skill.ranged || skill.is_ranged || skill.isRanged || skill.range === 'ranged') return { reach: 16, isRanged: true };
+        if (skill.kind === 'spell') {
+            if (skill.isTouch || skill.touch) return { reach: 1, isRanged: false };
+            return { reach: 12, isRanged: true }; // 60 ft padrão
+        }
+        if (skill.scale === 'cantrip') {
+            var dtc = String(skill.dmgType || '').toLowerCase();
+            if (dtc !== 'slashing' && dtc !== 'bludgeoning' && dtc !== 'piercing') {
+                return { reach: 12, isRanged: true }; // 60 ft padrão de truques de ataque
+            }
+        }
+        if (skill.save && !skill.isTouch) return { reach: 12, isRanged: true };
+        var dt = String(skill.dmgType || '').toLowerCase();
+        if (dt && ['fire', 'cold', 'lightning', 'force', 'acid', 'thunder', 'radiant', 'necrotic', 'psychic'].indexOf(dt) >= 0 && !skill.isTouch) {
+            return { reach: 12, isRanged: true }; // 60 ft padrão de magias elementais
+        }
+        if (skill.kind === 'heal' || skill.kind === 'buff') {
+            if (skill.healTargets === 'self') return { reach: 0, isRanged: false };
+            if (skill.isTouch || skill.touch) return { reach: 1, isRanged: false };
+            return { reach: 6, isRanged: true }; // 30 ft padrão para curas/buffs a aliados
+        }
+    }
+    var w = (unit && (unit.main_hand || unit.weapon)) || '';
+    if (typeof w === 'string') {
+        var wl = w.toLowerCase();
+        if (wl.indexOf('arco') >= 0 || wl.indexOf('besta') >= 0 || wl.indexOf('dardo') >= 0 || wl.indexOf('funda') >= 0 || wl.indexOf('zarabatana') >= 0) {
+            return { reach: 16, isRanged: true }; // 80 ft (16 hexes)
+        }
+        if (wl.indexOf('alabarda') >= 0 || wl.indexOf('pique') >= 0 || wl.indexOf('chicote') >= 0 || wl.indexOf('glaive') >= 0) {
+            return { reach: 2, isRanged: false }; // 10 ft reach (2 hexes)
+        }
+    } else if (typeof w === 'object' && w) {
+        if (w.is_ranged || w.ranged) {
+            var rFt = w.range_feet || w.range_normal || 80;
+            return { reach: Math.max(1, Math.floor(rFt / 5)), isRanged: true };
+        }
+        if (w.reach || (w.reach_feet && w.reach_feet > 5)) {
+            return { reach: 2, isRanged: false };
+        }
+    }
+    if (unit && (unit.is_ranged || unit.ranged)) return { reach: 16, isRanged: true };
+    return { reach: 1, isRanged: false };
+}
+
+/**
+ * D&D 5e PHB p. 195 (Ranged Attacks in Close Combat):
+ * Verifica se há algum inimigo hostil e consciente a 5 pés (1 hexágono) de distância.
+ */
+function simHasHostileAdjacent(unit, order) {
+    if (!unit || !unit.pos || !order || !Array.isArray(order)) return false;
+    var c1 = unit.pos.col, r1 = unit.pos.row;
+    var ut = unit.t;
+    for (var i = 0; i < order.length; i++) {
+        var other = order[i];
+        if (!other || !other.alive || other.isDead || (other.hp | 0) <= 0) continue;
+        var ot = other.t;
+        var isHostile = (ut === 'e' && (ot === 'p' || ot === 'a')) || ((ut === 'p' || ut === 'a') && ot === 'e');
+        if (!isHostile) continue;
+        if (!other.pos) continue;
+        if (typeof hexDistance === 'function' && hexDistance(c1, r1, other.pos.col, other.pos.row) === 1) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function cubeToHex(x, y, z) {
     var col = x;
     var row = z + Math.floor((col - (col & 1)) / 2);
@@ -19013,12 +19134,10 @@ function buildBattlefield(s) {
     // Target selection reach (D&D 5e: 1 hex = 1,5m)
     var inReachMap = {};
     if (_selectingTarget && playerUnit && playerUnit.pos) {
-        var reachLimit = 1; // Alcance corpo a corpo padrão de 1,5m (1 hex)
-        if (_pendingSkill) {
-            if (_pendingSkill.rangeFeet) reachLimit = Math.max(1, Math.round(_pendingSkill.rangeFeet / 5));
-            else if (_pendingSkill.rangeHexes) reachLimit = _pendingSkill.rangeHexes;
-            else if (_pendingSkill.magicMissiles || _pendingSkill.kind === 'spell' || _pendingSkill.isRanged) reachLimit = 12; // 18 metros
-        }
+        var reachInfo = (typeof simGetAttackReach === 'function')
+            ? simGetAttackReach(playerUnit, _pendingSkill)
+            : { reach: 1, isRanged: false };
+        var reachLimit = reachInfo.reach || 1;
         for (var tc = 0; tc < bCols; tc++) {
             for (var tr = 0; tr < bRows; tr++) {
                 var td = hexDistance(playerUnit.pos.col, playerUnit.pos.row, tc, tr);
@@ -26312,8 +26431,22 @@ function showTargetConfirm(tgtIdx) {
     html += '</div></div>';
 
     /* Bloco de previsao de dano */
+    var advMode = (typeof _simAttackAdvState === 'function') ? _simAttackAdvState(p, u, skill) : 'normal';
+    var advBadge = '';
+    if (advMode === 'advantage') {
+        advBadge = ' <span class="badge adv" style="background:#2e7d32;color:#fff;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:bold;letter-spacing:0.5px;">VANTAGEM</span>';
+    } else if (advMode === 'disadvantage') {
+        advBadge = ' <span class="badge dis" style="background:#c62828;color:#fff;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:bold;letter-spacing:0.5px;">DESVANTAGEM</span>';
+    }
+
+    var distHex = (p.pos && u.pos && typeof hexDistance === 'function') ? hexDistance(p.pos.col, p.pos.row, u.pos.col, u.pos.row) : null;
+    var distStr = distHex !== null ? (distHex * 1.5).toFixed(1).replace('.0', '') + 'm (' + distHex + ' hexes)' : '';
+
     html += '<div class="tcc-dmg">';
-    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span> + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CA ' + u.ac + '</span></span></div>';
+    if (distStr) {
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância</span><span class="tcc-dmg-val">' + distStr + '</span></div>';
+    }
+    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CA ' + u.ac + '</span></span></div>';
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
     html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
     if (reductions.length) {
@@ -31000,7 +31133,7 @@ async function playTurn(aIdx, tIdx, opts) {
     } else {
         // Vantagem/desvantagem via status (Surto de Ação, Ação Ardilosa,
         // Juramento de Inimizade, Passo Oculto, Temerário, Zombaria, Prostrado, Rugido Feroz)
-        var advMode = _simAttackAdvState(actor, target);
+        var advMode = _simAttackAdvState(actor, target, atkSkill);
         var d20Pack = _simRollD20WithAdv(advMode, _simIsLucky(actor));  // C1.5 #90
         r = d20Pack.r;
         if (advMode !== 'normal') {
