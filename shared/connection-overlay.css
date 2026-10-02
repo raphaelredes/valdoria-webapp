@@ -77,7 +77,7 @@ body.perf-lite .v-conn-spark{display:none}
 .v-conn-progress-fill{height:100%;width:0;background:var(--v-gold,#c4953a);border-radius:2px;opacity:0.7}
 
 /* -- Buttons -- */
-.v-conn-btn{display:none;margin-top:var(--v-space-lg,12px);padding:var(--v-space-md,8px) var(--v-space-xl,16px);min-height:44px;min-width:160px;border:1px solid var(--v-gold-25);border-radius:var(--v-radius,8px);background:var(--v-bg-raised,#332a22);color:var(--v-gold-light,#dbb668);font-family:var(--v-font,"Marcellus",serif);font-size:var(--v-font-body,14px);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all var(--v-transition-fast,0.15s) ease}
+.v-conn-btn{display:none;margin:var(--v-space-lg,12px) auto 0 auto;padding:var(--v-space-md,8px) var(--v-space-xl,16px);min-height:44px;min-width:160px;border:1px solid var(--v-gold-25);border-radius:var(--v-radius,8px);background:var(--v-bg-raised,#332a22);color:var(--v-gold-light,#dbb668);font-family:var(--v-font,"Marcellus",serif);font-size:var(--v-font-body,14px);cursor:pointer;text-align:center;align-self:center;-webkit-tap-highlight-color:transparent;transition:all var(--v-transition-fast,0.15s) ease}
 .v-conn-btn:active{transform:scale(0.97);opacity:0.9}
 .v-conn-btn.visible{display:block}
 .v-conn-btn--secondary{border-color:var(--v-border,#4a3828);color:var(--v-text-dim,#a09484);font-size:var(--v-font-sm,12px)}

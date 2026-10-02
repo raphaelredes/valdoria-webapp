@@ -295,7 +295,8 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
         if (elapsed > 18000 && !_epicState.errored){
           var retryEl = document.getElementById('loading-retry');
           if (retryEl){
-            retryEl.style.display = 'inline-block';
+            retryEl.style.display = 'block';
+            retryEl.style.margin = '16px auto 0 auto';
             retryEl.textContent = 'Tentar novamente';
           }
         }
@@ -381,6 +382,8 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
         + '.loading-progress-track{position:relative;}'
         + '.loading-progress-fill{background:linear-gradient(90deg,#8a5a20 0%,#c4953a 30%,#ffd700 60%,#ffe9a0 100%) !important;box-shadow:0 0 8px rgba(255,215,0,0.55),inset 0 1px 1px rgba(255,255,255,0.4) !important;position:relative;transition:width 0.18s linear !important;}'
         + '.loading-progress-fill::after{content:"";position:absolute;top:0;right:0;width:14px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,235,160,0.9),transparent);animation:epicBarShimmer 1.6s linear infinite;filter:blur(2px);}'
+        + '.loading-tip-area{display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;text-align:center !important;width:100% !important;margin:0 auto !important;}'
+        + '.loading-retry{margin:16px auto 0 auto !important;text-align:center !important;align-self:center !important;}'
         ;
       newOv.appendChild(st);
       // % counter (após a track de progress)
@@ -818,7 +821,8 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
         setStage('Reconectando ao servidor…');
         setTip('Sem resposta — nova tentativa em 3s (tentativa ' + _retryAttempt + ')');
         if (_retryAttempt >= 3 && retryEl){
-          retryEl.style.display = 'inline-block';
+          retryEl.style.display = 'block';
+          retryEl.style.margin = '16px auto 0 auto';
           retryEl.textContent = 'Tentar novamente';
         }
         sendLog('info', 'auth_retry_scheduled', {attempt: _retryAttempt, delay_ms: 3000, msg: msg.slice(0, 200)});
@@ -837,7 +841,8 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
       setStage('Sessão expirou');
       setTip('Feche este WebApp e abra novamente pelo /start do bot.');
       if (retryEl){
-        retryEl.style.display = 'inline-block';
+        retryEl.style.display = 'block';
+        retryEl.style.margin = '16px auto 0 auto';
         retryEl.textContent = 'Recarregar';
       }
     });

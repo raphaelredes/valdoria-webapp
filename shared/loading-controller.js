@@ -100,9 +100,18 @@ window.ValdoriaLoadingController = function(config) {
         retryBtn.className = 'loading-retry';
         retryBtn.textContent = 'Tentar novamente';
         retryBtn.style.display = 'none';
+        retryBtn.style.margin = '16px auto 0 auto';
+        retryBtn.style.textAlign = 'center';
         var tipArea = overlay.querySelector('.loading-tip-area');
-        if (tipArea) tipArea.appendChild(retryBtn);
-        else overlay.appendChild(retryBtn);
+        if (tipArea) {
+            tipArea.style.display = 'flex';
+            tipArea.style.flexDirection = 'column';
+            tipArea.style.alignItems = 'center';
+            tipArea.style.textAlign = 'center';
+            tipArea.appendChild(retryBtn);
+        } else {
+            overlay.appendChild(retryBtn);
+        }
     }
     if (retryBtn) {
         retryBtn.style.display = 'none';
@@ -168,7 +177,10 @@ window.ValdoriaLoadingController = function(config) {
 
     _timers.retry = setTimeout(function() {
         if (_state === 'hiding' || _state === 'hidden') return;
-        if (retryBtn) retryBtn.style.display = '';
+        if (retryBtn) {
+            retryBtn.style.display = 'block';
+            retryBtn.style.margin = '16px auto 0 auto';
+        }
     }, RETRY_DELAY_MS);
 
     _timers.timeout = setTimeout(function() { _handleTimeout(); }, TIMEOUT_MS);
@@ -190,7 +202,10 @@ window.ValdoriaLoadingController = function(config) {
         console.warn('[LOADING] EXHAUSTED after ' + AUTO_RETRY_MAX + ' auto-retries — manual retry only');
         if(window._loadDbg)_loadDbg('state: EXHAUSTED after ' + AUTO_RETRY_MAX + ' auto-retries ('+TIMEOUT_MS+'ms)');
         if (tipEl) tipEl.textContent = '⚠️ Sem conexão. Toque para tentar novamente.';
-        if (retryBtn) retryBtn.style.display = '';
+        if (retryBtn) {
+            retryBtn.style.display = 'block';
+            retryBtn.style.margin = '16px auto 0 auto';
+        }
         // Circuit breaker visual: stop rings, error gem
         if (overlay) {
             var _rings = overlay.querySelectorAll('.mc-ring');
@@ -202,7 +217,10 @@ window.ValdoriaLoadingController = function(config) {
         else {
             // Safety net: show actionable error when no onTimeout handler provided
             if (tipEl) tipEl.textContent = '⚠️ Sem conexão. Toque para tentar novamente.';
-            if (retryBtn) retryBtn.style.display = '';
+            if (retryBtn) {
+                retryBtn.style.display = 'block';
+                retryBtn.style.margin = '16px auto 0 auto';
+            }
         }
     }
 

@@ -166,7 +166,7 @@ window.ValdoriaLoadingHTML = function(opts) {
       + '</div></div>';
 
     if (hasStage) h += '<div id="' + stageId + '" class="loading-stage"></div>';
-    if (hasRetry) h += '<button id="' + retryId + '" class="loading-retry" style="display:none">Tentar novamente</button>';
+    if (hasRetry) h += '<button id="' + retryId + '" class="loading-retry" style="display:none;margin:var(--v-space-lg,16px) auto 0 auto;text-align:center">Tentar novamente</button>';
 
     h += '<div class="loading-tip-area"><div id="' + tipId + '" class="loading-tip" role="status" aria-live="polite">' + defaultTip + '</div></div>';
     h += '</div>';
