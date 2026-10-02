@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T17:30:19Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T17:46:31Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -18266,6 +18266,15 @@ function hexDistanceFeet(c1, r1, c2, r2) {
     return hexDistance(c1, r1, c2, r2) * 5;
 }
 
+function formatHexDistanceMeters(hexCount) {
+    var m = (hexCount || 0) * 1.5;
+    return (m % 1 === 0 ? m : m.toFixed(1)).toString().replace('.', ',') + 'm';
+}
+
+function hexDistanceMeters(c1, r1, c2, r2) {
+    return formatHexDistanceMeters(hexDistance(c1, r1, c2, r2));
+}
+
 function cubeToHex(x, y, z) {
     var col = x;
     var row = z + Math.floor((col - (col & 1)) / 2);
@@ -18563,10 +18572,10 @@ async function handlePlayerMoveTo(tCol, tRow) {
     ensureProceduralBattlefield(currentState);
 
     var dHexes = validPath.length - 1;
-    var dFeet = dHexes * 5;
-    var costFeet = totalCost * 5;
-    var costNote = (costFeet !== dFeet) ? ' (custo: ' + costFeet + ' pés por terreno difícil)' : '';
-    currentState.log.push('Você se moveu ' + dFeet + ' pés' + costNote + '. Deslocamento restante: ' + ((p.movement_left || 0) * 5) + ' pés.');
+    var dM = formatHexDistanceMeters(dHexes);
+    var costM = formatHexDistanceMeters(totalCost);
+    var costNote = (totalCost !== dHexes) ? ' (custo: ' + costM + ' por terreno difícil)' : '';
+    currentState.log.push('Você se moveu ' + dM + costNote + '. Deslocamento restante: ' + formatHexDistanceMeters(p.movement_left || 0) + '.');
     if (typeof sendBattleCheckpoint === 'function') {
         try { sendBattleCheckpoint(currentState); } catch (_) {}
     }
@@ -18954,15 +18963,15 @@ function buildBattlefield(s) {
             var coordLabel = getHexColLetter(col) + (row + 1);
             html += '<text x="' + center.cx + '" y="' + (center.cy - 18) + '" class="hex-coord">' + coordLabel + '</text>';
 
-            // Terreno Difícil (custo 10 pés / 2 hexes, PHB p. 190)
+            // Terreno Difícil (custo 3m / 2 hexes, PHB p. 190)
             if (dtTile && !occupiedMap[hexKey]) {
-                html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-diff-label">◆ 10ft</text>';
+                html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-diff-label">◆ 3m</text>';
             }
 
-            // If reachable movement, display movement cost badge (e.g., 5ft, 10ft)
+            // Se for hexágono alcançável, exibe o custo de movimento em metros (ex.: 1,5m, 3m)
             if (isReachable) {
-                var moveCostFeet = reachableMap[hexKey] * 5;
-                html += '<text x="' + center.cx + '" y="' + (center.cy + 18) + '" class="hex-move-cost">' + moveCostFeet + 'ft</text>';
+                var moveCostM = formatHexDistanceMeters(reachableMap[hexKey]);
+                html += '<text x="' + center.cx + '" y="' + (center.cy + 18) + '" class="hex-move-cost">' + moveCostM + '</text>';
             }
         }
     }
@@ -18984,7 +18993,7 @@ function buildBattlefield(s) {
     // Battlefield HUD Header / Distance helper
     if (isPlayerActiveTurn && playerUnit) {
         html += '<div class="hex-turn-hud" aria-live="polite">';
-        html += '<span class="hth-speed"><span class="hth-icon">👣</span> Movimento: <strong>' + ((playerUnit.movement_left || 0) * 5) + '</strong> / ' + ((playerUnit.speed || 6) * 5) + ' pés (' + (playerUnit.movement_left || 0) + 'h)</span>';
+        html += '<span class="hth-speed"><span class="hth-icon">👣</span> Movimento: <strong>' + formatHexDistanceMeters(playerUnit.movement_left || 0) + '</strong> / ' + formatHexDistanceMeters(playerUnit.speed || 6) + ' (' + (playerUnit.movement_left || 0) + 'h)</span>';
         if ((playerUnit.movement_left || 0) > 0) {
             html += '<span class="hth-hint">Toque em um hexágono verde para mover</span>';
         }
@@ -24720,7 +24729,7 @@ var WILD_SHAPE_FORMS_JS = {
         diceN: 2, die: 4, flat: 1, dmgType: 'piercing',
         str: 12, dex: 15, con: 12, int: 3, wis: 12, cha: 6,
         minLevel: 2, desc: 'Ágil predador com mordida poderosa.',
-        speedText: '12m (40 pés)', senses: 'Percepção passiva 13',
+        speedText: '12m', senses: 'Percepção passiva 13',
         abilities: [
             { name: 'Faro e Audição Aguçados', desc: 'Vantagem em testes de Percepção que dependem de audição ou olfato.' },
             { name: 'Táticas de Matilha', desc: 'Vantagem no ataque contra um alvo se um aliado seu estiver a até 1,5m dele.' }
@@ -24733,7 +24742,7 @@ var WILD_SHAPE_FORMS_JS = {
         diceN: 1, die: 6, flat: 1, dmgType: 'slashing',
         str: 13, dex: 11, con: 12, int: 2, wis: 9, cha: 5,
         minLevel: 2, desc: 'Resistente e feroz no corpo-a-corpo.',
-        speedText: '12m (40 pés)', senses: 'Percepção passiva 9',
+        speedText: '12m', senses: 'Percepção passiva 9',
         abilities: [
             { name: 'Investida', desc: 'Se mover 6m em linha reta antes de atacar com a presa, causa dano extra e pode derrubar o alvo.' },
             { name: 'Implacável', desc: 'Ao receber dano que o reduziria a 0 PV (até 7), permanece com 1 PV (1×/combate).' }
@@ -24746,7 +24755,7 @@ var WILD_SHAPE_FORMS_JS = {
         diceN: 2, die: 4, flat: 2, dmgType: 'slashing',
         str: 15, dex: 10, con: 14, int: 2, wis: 12, cha: 7,
         minLevel: 4, desc: 'Fera poderosa com garras devastadoras.',
-        speedText: '12m (40 pés), escalar 9m', senses: 'Percepção passiva 13',
+        speedText: '12m, escalar 9m', senses: 'Percepção passiva 13',
         abilities: [
             { name: 'Faro Aguçado', desc: 'Vantagem em testes de Percepção que dependem de olfato.' },
             { name: 'Ataque Múltiplo', desc: 'Combina mordida e garras numa investida feroz de garras devastadoras.' }
@@ -24759,7 +24768,7 @@ var WILD_SHAPE_FORMS_JS = {
         diceN: 1, die: 10, flat: 1, dmgType: 'piercing',
         str: 15, dex: 10, con: 13, int: 2, wis: 10, cha: 5,
         minLevel: 4, desc: 'Predador aquático com mordida esmagadora.',
-        speedText: '6m (20 pés), nadar 9m', senses: 'Percepção passiva 10',
+        speedText: '6m, nadar 9m', senses: 'Percepção passiva 10',
         abilities: [
             { name: 'Prender a Respiração', desc: 'Pode prender a respiração por até 15 minutos — emboscadas aquáticas perfeitas.' },
             { name: 'Mordida Agarradora', desc: 'A mordida agarra o alvo, prendendo-o até que se solte (Teste de Atletismo/Acrobacia).' }
@@ -24772,7 +24781,7 @@ var WILD_SHAPE_FORMS_JS = {
         diceN: 1, die: 8, flat: 3, dmgType: 'piercing',
         str: 14, dex: 16, con: 12, int: 2, wis: 11, cha: 4,
         minLevel: 8, desc: 'Predadora ágil com veneno paralisante.',
-        speedText: '9m (30 pés), escalar 9m', senses: 'Visão no escuro 18m, Percepção passiva 10',
+        speedText: '9m, escalar 9m', senses: 'Visão no escuro 18m, Percepção passiva 10',
         abilities: [
             { name: 'Andar nas Teias', desc: 'Ignora restrição de movimento causada por teias e escala superfícies difíceis livremente.' },
             { name: 'Sentido de Teia', desc: 'Percebe a localização exata de qualquer criatura em contato com sua teia.' },
@@ -24786,7 +24795,7 @@ var WILD_SHAPE_FORMS_JS = {
         diceN: 2, die: 6, flat: 3, dmgType: 'piercing',
         str: 17, dex: 15, con: 15, int: 3, wis: 12, cha: 7,
         minLevel: 8, desc: 'Lobo ancestral de tamanho monstruoso.',
-        speedText: '15m (50 pés)', senses: 'Percepção passiva 13',
+        speedText: '15m', senses: 'Percepção passiva 13',
         abilities: [
             { name: 'Faro e Audição Aguçados', desc: 'Vantagem em testes de Percepção que dependem de audição ou olfato.' },
             { name: 'Táticas de Matilha', desc: 'Vantagem no ataque contra um alvo se um aliado seu estiver a até 1,5m dele.' }
@@ -29895,14 +29904,14 @@ function openUnitDetail(uid) {
         if (currentState && currentState.order && currentState.order[currentState.p_idx]) {
             var pU = currentState.order[currentState.p_idx];
             if (pU && pU.pos && u !== pU) {
-                var dFt = hexDistanceFeet(pU.pos.col, pU.pos.row, u.pos.col, u.pos.row);
                 var dH = hexDistance(pU.pos.col, pU.pos.row, u.pos.col, u.pos.row);
-                html += '<div class="udc-stat"><span class="udc-stat-lbl">Distância</span><span class="udc-stat-val">' + dFt + ' pés (' + dH + 'h)</span></div>';
+                var dM = formatHexDistanceMeters(dH);
+                html += '<div class="udc-stat"><span class="udc-stat-lbl">Distância</span><span class="udc-stat-val">' + dM + ' (' + dH + 'h)</span></div>';
             }
         }
     }
     if (u.speed != null) {
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Deslocamento</span><span class="udc-stat-val">' + (u.speed * 5) + ' pés (' + u.speed + ' hexes)</span></div>';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Deslocamento</span><span class="udc-stat-val">' + formatHexDistanceMeters(u.speed) + ' (' + u.speed + 'h)</span></div>';
     }
     html += '</div></div>';
 
@@ -30593,14 +30602,14 @@ async function playTurn(aIdx, tIdx, opts) {
                     actor.pos = { col: stepRes.col, row: stepRes.row };
                     ensureProceduralBattlefield(s);
                     actor.movement_left = Math.max(0, mLeft - stepRes.steps);
-                    s.log.push(actor.n + ' avança ' + (stepRes.steps * 5) + ' pés em direção a ' + target.n + '.');
+                    s.log.push(actor.n + ' avança ' + formatHexDistanceMeters(stepRes.steps) + ' em direção a ' + target.n + '.');
                     render(s);
                     await sleep(_skipAllDiceAnim ? 60 : 150);
                 }
             }
             dist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
             if (dist > reach) {
-                s.log.push(actor.n + ' tenta atacar ' + target.n + ', mas o alvo está fora de alcance (' + (dist * 5) + ' pés > alcance ' + (reach * 5) + ' pés).');
+                s.log.push(actor.n + ' tenta atacar ' + target.n + ', mas o alvo está fora de alcance (' + formatHexDistanceMeters(dist) + ' > alcance ' + formatHexDistanceMeters(reach) + ').');
                 render(s);
                 await sleep(500);
                 return;
