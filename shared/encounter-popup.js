@@ -1413,44 +1413,13 @@
         });
       });
 
-      // Pre-measure (forçar reflow pra calcular altura)
-      strophes.forEach(function(s) {
-        s.container.classList.add('typing-started');
-        s.container.style.visibility = 'hidden';
-        s.container.innerHTML = s.sentences.map(function(t, i) {
-          var sep = (i > 0) ? ' ' : '';
-          return sep + '<span class="enc-sentence">' + t + '</span>';
-        }).join('');
-      });
-      var measuredHeight = body.scrollHeight;
-      /* Sessao #42 (2026-05-27): clamp minHeight DINAMICO baseado no que esta
-         REALMENTE ocupando viewport. Bug raiz: clamp fixo (200px) assumia
-         header ~50px + nav ~50px + actions ~100px. Mas em fonte 1.4x-1.6x,
-         header wrap pra 2-3 linhas (~120-150px), nome NPC longo + desc.
-         Reserva fixa era insuficiente -> nav era cortada por overflow:hidden.
-
-         Medida dinamica: header.offsetHeight + nav.offsetHeight + reserva
-         actions (100px choices em ultima pagina). Tolerance extra 40px pra
-         padding/border. Resultado: body shrink quando texto excede,
-         overflow-y:auto ativa scroll interno, nav+actions FICAM VISIVEIS. */
-      var headerH = header ? header.offsetHeight : 60;
-      var navOuterH = card.querySelector('.enc-nav')?.offsetHeight || 50;
-      var ACTIONS_RESERVED = (idx === pages.length - 1) ? 100 : 0;
-      var PADDING_TOLERANCE = 40;
-      var maxAllowed = Math.max(
-        120,
-        window.innerHeight - headerH - navOuterH - ACTIONS_RESERVED - PADDING_TOLERANCE
-      );
-      var clampedMinH = Math.min(measuredHeight, maxAllowed);
-      body.style.minHeight = clampedMinH + 'px';
+      body.style.minHeight = '';
       strophes.forEach(function(s) {
         s.container.innerHTML = '';
         s.container.classList.remove('typing-started');
         /* 2026-06-08 (user): a estrofe so aparece quando A SUA digitacao comecar.
            Mantem o box escondido (sem fundo/borda visivel) ate typeNextSentence
-           (ou _instantReveal) revelar. Inline visibility e SCOPED a esta engine
-           (renderPage) -> NAO afeta o renderer legacy da cidade (clip-path) que
-           tinha o bug do default visibility:hidden em 2026-05-20. */
+           (ou _instantReveal) revelar. */
         s.container.style.visibility = 'hidden';
       });
 

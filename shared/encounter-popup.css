@@ -382,20 +382,16 @@ body.perf-lite #encounter-overlay.active .enc-card {
 
 .enc-body {
   position: relative;
-  padding: 14px var(--v-space-xl, 16px) 22px;
-  /* Sessao #42 (2026-05-27): flex:1 1 0 + min-height:0 permite encolher quando
-     card chega no max-height (95dvh). Sem min-height:0, flex item nao encolhe
-     abaixo do seu min-content e estoura layout (bug raiz). max-height removido:
-     era 320px arbitrario que conflitava com style.minHeight dinamico do JS. */
-  flex: 1 1 auto;
+  padding: 14px var(--v-space-xl, 16px) 14px;
+  /* flex: 1 1 0 com flex-basis zero permite que o item encolha perfeitamente
+     e nunca empurre a nav bar para fora do card, capado em 95dvh - 140px. */
+  flex: 1 1 0;
   min-height: 0;
+  max-height: calc(95dvh - 140px);
   display: flex;
   flex-direction: column;
   gap: var(--v-space-md-lg, 10px);
-  /* PADRAO_LOCAIS (user #71f): diálogos/narrativas CENTRALIZADOS verticalmente —
-     conteúdo curto fica no meio (antes colava no topo com muito espaço sobrando).
-     `safe center` não corta: se o texto for longo, alinha no topo (scrollável). */
-  justify-content: safe center;
+  justify-content: flex-start;
   overflow-y: auto;
   /* Indicação visual de scroll quando texto excede body */
   scrollbar-width: thin;
@@ -827,6 +823,7 @@ body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
   border-top: 1px solid var(--v-gold-35);
   background: rgba(15, 12, 8, 0.55);
   flex-shrink: 0;
+  min-height: 48px;
   margin-top: auto;
   z-index: 10;
   display: flex;
