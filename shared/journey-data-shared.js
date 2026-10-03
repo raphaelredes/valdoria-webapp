@@ -1278,10 +1278,10 @@ var DEPARTURES = {
     /* -------- narrativa por traco (by_subclass > by_subrace > by_class > by_race > by_alignment > by_background > default) -------- */
     function _traits(player) {
         var p = player || {};
-        var ck = (global.DndRules && DndRules.classKey) ? DndRules.classKey(p.cls || p.class || p.hero_class || p.char_class) : String(p.cls || '').toLowerCase();
-        var rk = (global.DndRules && DndRules.raceKey) ? DndRules.raceKey(p.race || p.raca) : String(p.race || '').toLowerCase();
-        var srk = (global.DndRules && DndRules.subraceKey) ? DndRules.subraceKey(p.subrace || p.sub_race) : String(p.subrace || '').toLowerCase();
-        var sck = (global.DndRules && DndRules.subclassKey) ? DndRules.subclassKey(p.subclass || p.sub_class) : String(p.subclass || '').toLowerCase();
+        var ck = (global.DndRules && DndRules.classKey) ? DndRules.classKey(p.cls || p.class || p.hero_class || p.char_class) : String(p.cls || p.class || p.hero_class || p.char_class || '').toLowerCase();
+        var rk = (global.DndRules && DndRules.raceKey) ? DndRules.raceKey(p.race || p.raca) : String(p.race || p.raca || '').toLowerCase();
+        var srk = (global.DndRules && DndRules.subraceKey) ? DndRules.subraceKey(p.subrace || p.sub_race) : String(p.subrace || p.sub_race || '').toLowerCase();
+        var sck = (global.DndRules && DndRules.subclassKey) ? DndRules.subclassKey(p.subclass || p.sub_class) : String(p.subclass || p.sub_class || '').toLowerCase();
         return {
             cls: ck,
             race: rk,
@@ -1423,7 +1423,7 @@ var DEPARTURES = {
         if (t.cls === 'guerreiro') return 'Você confere o peso do aço e a amarração da armadura, pronto para reagir em fração de segundo a qualquer emboscada.';
         if (t.cls === 'ladino' || t.cls === 'ladrao') return 'Você confere as lâminas curtas e elimina qualquer ponto de reflexo metálico ou ruído no equipamento.';
         if (t.cls === 'patrulheiro') return 'Você inspeciona as marcas na saída dos portões e fareja o ar para antecipar o clima e as feras da região.';
-        if (t.cls === 'mago') return 'Você ajusta o grimório e revisa os componentes arcanos na algibeira, preparado para tecer a trama mágica na estrada.';
+        if (t.cls === 'mago') return 'Você ajusta o grimório e revisa seus componentes arcanos na algibeira, atento às correntes invisíveis da Trama Mágica — a rede de energia primordial que permeia o mundo —, pronto para pressentir qualquer anomalia na estrada.';
         if (t.cls === 'clerigo') return 'Você murmura uma prece de proteção divina para abençoar a senda e afastar as aflições do caminho.';
         if (t.cls === 'paladino') return 'Sua armadura brilha com convicção sagrada; você firma a postura com prontidão honrada.';
         if (t.cls === 'barbaro') return 'Seus instintos selvagens farejam a liberdade dos descampados; você avança sem medo de perigos ou intempéries.';
@@ -1444,6 +1444,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_scout',
                 label: 'Postura de Batedor: Rastreio e vigilância avançada',
+                desc: 'Analisa pegadas, relevo e fauna para antecipar perigos da trilha (Vantagem no 1º teste com Sabedoria).',
                 isPrep: true,
                 stat: 'wis',
                 prepText: 'Você assume a vanguarda como batedor experiente, estudando pegadas frescas, galhos quebrados e o voo das aves para antecipar armadilhas e emboscadas.'
@@ -1452,6 +1453,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_stealth',
                 label: 'Postura de Infiltração: Marcha velada pelas sombras',
+                desc: 'Avança com passos amortecidos e discretos para evitar emboscadas (Vantagem no 1º teste com Destreza).',
                 isPrep: true,
                 stat: 'dex',
                 prepText: 'Você amortece cada fivela metálica com tiras de tecido e avança de cobertura em cobertura, movendo-se com extrema sutileza.'
@@ -1460,6 +1462,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_guard',
                 label: 'Postura de Sentinela: Guarda alta e prontidão de armas',
+                desc: 'Mantém armas a postos e postura firme para reagir a emboscadas na estrada (Vantagem no 1º teste com Força).',
                 isPrep: true,
                 stat: 'str',
                 prepText: 'Você mantém a empunhadura firme e postura marcial impecável, pronto para desembainhar e reagir em fração de segundo a qualquer assalto.'
@@ -1468,6 +1471,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_primal',
                 label: 'Postura Primal: Sentidos selvagens à flor da pele',
+                desc: 'Aguça os sentidos e confia no vigor bruto para resistir aos ermos (Vantagem no 1º teste com Constituição).',
                 isPrep: true,
                 stat: 'con',
                 prepText: 'Você aguça os ouvidos e dilata as narinas contra o vento, farejando predadores e confiando nos reflexos brutos do seu corpo.'
@@ -1475,15 +1479,17 @@ var DEPARTURES = {
         } else if (t.cls === 'mago') {
             preps.push({
                 id: 'prep_arcane',
-                label: 'Postura de Vigília Arcana: Sensibilidade à trama mágica',
+                label: 'Postura de Vigília Arcana: Sentir energias e perigos mágicos',
+                desc: 'Sintoniza a Trama Mágica (fluxo de energia arcana do mundo) para pressentir anomalias e armadilhas (Vantagem no 1º teste com Inteligência).',
                 isPrep: true,
                 stat: 'int',
-                prepText: 'Você entreabre a percepção mística para sentir perturbações no éter e anomalias arcanas antes que elas se manifestem na estrada.'
+                prepText: 'Você expande sua percepção mística ao longo da Trama Mágica — o fluxo invisível de energia pura que permeia o mundo —, pressentindo perturbações arcanas e armadilhas antes que se manifestem na estrada.'
             });
         } else if (t.cls === 'clerigo') {
             preps.push({
                 id: 'prep_sacred',
                 label: 'Postura Litúrgica: Bênção de proteção aos caminhantes',
+                desc: 'Invoca o favor divino para resguardar a travessia contra infortúnios (Vantagem no 1º teste com Sabedoria).',
                 isPrep: true,
                 stat: 'wis',
                 prepText: 'Você unge seu cajado ou escudo com uma prece sagrada, invocando o manto protetor da sua divindade sobre a rota.'
@@ -1492,6 +1498,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_bastion',
                 label: 'Postura de Bastião: Juramento de vigília inabalável',
+                desc: 'Irradia a convicção do seu juramento para repelir o medo e ameaças (Vantagem no 1º teste com Carisma).',
                 isPrep: true,
                 stat: 'cha',
                 prepText: 'Você firma o peitoral e canaliza o fervor do seu juramento sagrado, irradiando determinação que espanta o medo e a hesitação.'
@@ -1500,6 +1507,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_communion',
                 label: 'Postura de Comunhão: Harmonia com as forças do bioma',
+                desc: 'Sintoniza com árvores, solo e fauna para decifrar alertas da natureza (Vantagem no 1º teste com Sabedoria).',
                 isPrep: true,
                 stat: 'wis',
                 prepText: 'Você sintoniza sua audição com o murmúrio das folhas e a terra úmida, compreendendo os sinais de alerta que a natureza emite.'
@@ -1508,6 +1516,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_tempo',
                 label: 'Postura de Cadência: Ritmo estimulante de travessia',
+                desc: 'Marca um compasso marcial animado para manter o ânimo e a mente afiados (Vantagem no 1º teste com Carisma).',
                 isPrep: true,
                 stat: 'cha',
                 prepText: 'Você marca mentalmente um compasso marcial vigoroso, mantendo o ânimo elevado e a mente ágil diante de imprevistos.'
@@ -1516,6 +1525,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_focus',
                 label: 'Postura Meditativa: Passo sereno e fluxo de ki',
+                desc: 'Sincroniza respiração e reflexos corporais para esquivar de perigos (Vantagem no 1º teste com Destreza).',
                 isPrep: true,
                 stat: 'dex',
                 prepText: 'Você sincroniza sua respiração ao ritmo das passadas, com a mente serena e o corpo preparado para desviar de qualquer ameaça.'
@@ -1524,6 +1534,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_omen',
                 label: 'Postura Sobrenatural: Presságios e visões do pacto',
+                desc: 'Abre a mente aos sussurros do patrono para prever armadilhas e traições (Vantagem no 1º teste com Carisma).',
                 isPrep: true,
                 stat: 'cha',
                 prepText: 'Você abre sua mente aos sussurros do patrono de outro mundo, captando alertas ocultos sobre armadilhas e traições na trilha.'
@@ -1532,6 +1543,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_flare',
                 label: 'Postura Elemental: Prontidão da centelha inata',
+                desc: 'Mantém a magia instintiva pronta para reação ou barreira emergencial (Vantagem no 1º teste com Constituição).',
                 isPrep: true,
                 stat: 'con',
                 prepText: 'Você mantém sua centelha mágica em ponto de ignição, pronta para rebentar num escudo instintivo ou rajada de pura energia.'
@@ -1543,6 +1555,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_stone',
                 label: 'Postura da Rocha: Julgar a firmeza e estabilidade do solo',
+                desc: 'Tradição anã de engenharia de rochas para evitar deslizamentos e quedas (Vantagem no 1º teste com Constituição).',
                 isPrep: true,
                 stat: 'con',
                 prepText: 'Com séculos de tradição anã em minas e desfiladeiros, você lê a densidade do solo e evita deslizamentos ou terreno traiçoeiro.'
@@ -1551,6 +1564,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_keen',
                 label: 'Postura da Corça: Sentidos élficos despertos',
+                desc: 'Visão e audição aguçadas para captar ruídos e presenças à distância (Vantagem no 1º teste com Sabedoria).',
                 isPrep: true,
                 stat: 'wis',
                 prepText: 'Sua visão e audição élficas captam o menor tremor nas folhagens e o eco de passos a grandes distâncias.'
@@ -1559,6 +1573,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_luck',
                 label: 'Postura Oportuna: Intuição para passagens seguras',
+                desc: 'Astúcia e sorte tradicional para escolher atalhos discretos e desviar de perigos (Vantagem no 1º teste com Destreza).',
                 isPrep: true,
                 stat: 'dex',
                 prepText: 'A célebre sorte e astúcia do seu povo apontam trilhas secundárias e atalhos menos visados pelos perigos da estrada.'
@@ -1567,6 +1582,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_dragon',
                 label: 'Postura Régia: Imposição e bravura dracônica',
+                desc: 'Marcha imponente para intimidar predadores e criaturas menores na rota (Vantagem no 1º teste com Carisma).',
                 isPrep: true,
                 stat: 'cha',
                 prepText: 'Você infla o peito e marcha com imponência imutável, coagindo feras menores a manterem distância da sua rota.'
@@ -1575,6 +1591,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_tenacity',
                 label: 'Postura Feroz: Resiliência contra intempéries',
+                desc: 'Resistência muscular brutal para absorver impactos e a fadiga da marcha (Vantagem no 1º teste com Constituição).',
                 isPrep: true,
                 stat: 'con',
                 prepText: 'Seu sangue resistente de meio-orc endurece sua casca contra a fadiga, preparado para absorver o impacto de qualquer perigo.'
@@ -1583,6 +1600,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_infernal',
                 label: 'Postura Infernal: Rastreio de calor e auras hostis',
+                desc: 'Percepção sobrenatural para detectar variações térmicas e venenos no ar (Vantagem no 1º teste com Inteligência).',
                 isPrep: true,
                 stat: 'int',
                 prepText: 'Sua percepção sobrenatural de tiefling detecta variações súbitas de temperatura e resquícios venenosos no ar.'
@@ -1591,6 +1609,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_ingenuity',
                 label: 'Postura de Engenho: Análise minuciosa de suprimentos e rota',
+                desc: 'Cálculo metódico de peso, rota e contingências para antecipar imprevistos (Vantagem no 1º teste com Inteligência).',
                 isPrep: true,
                 stat: 'int',
                 prepText: 'Você reavalia com meticulosidade gnomica as cargas da mochila, pontos de apoio e probabilidades de tempo ao longo da rota.'
@@ -1599,6 +1618,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_adapt',
                 label: 'Postura Versátil: Adaptação reflexiva ao terreno',
+                desc: 'Flexibilidade de marcha para se adaptar com agilidade às mudanças do caminho (Vantagem no 1º teste com Sabedoria).',
                 isPrep: true,
                 stat: 'wis',
                 prepText: 'Com o equilíbrio dos dois mundos, você ajusta seu ritmo de marcha com flexibilidade às surpresas do caminho.'
@@ -1607,6 +1627,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_grit',
                 label: 'Postura Obstinada: Determinação férrea de caminhada',
+                desc: 'Fôlego e disciplina constantes para manter o ritmo sem esmorecer (Vantagem no 1º teste com Constituição).',
                 isPrep: true,
                 stat: 'con',
                 prepText: 'Sua disciplina e determinação humana recusam a exaustão, mantendo passos firmes mesmo sob vento forte e terreno pedregoso.'
@@ -1633,7 +1654,11 @@ var DEPARTURES = {
         if (cFlavor) script.push({ type: 'narration', text: cFlavor });
 
         var choices = [
-            { id: 'jrn_go', label: 'Partir em marcha padrão' }
+            {
+                id: 'jrn_go',
+                label: 'Partir em marcha padrão',
+                desc: 'Avançar no ritmo comum da estrada, sem preparação tática especial.'
+            }
         ];
 
         var prepChoices = _getPreparationChoices(t, biome);
@@ -1641,9 +1666,18 @@ var DEPARTURES = {
             choices.push(prepChoices[i]);
         }
 
-        choices.push({ id: 'jrn_cancel', label: 'Permanecer na cidade' });
+        choices.push({
+            id: 'jrn_cancel',
+            label: 'Permanecer na cidade',
+            desc: 'Suspender a viagem e continuar em segurança dentro dos muros da cidade.'
+        });
 
-        return { script: script, choices: choices };
+        return {
+            script: script,
+            choices: choices,
+            choicesTitle: 'Preparação de Viagem',
+            choicesSubtitle: 'Rumo a ' + dest
+        };
     }
 
     global.JourneyData = {

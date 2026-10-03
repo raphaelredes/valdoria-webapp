@@ -1610,13 +1610,14 @@
         // Single primary button → opens choice-overlay
         var btn = document.createElement('button');
         btn.className = 'enc-btn enc-btn-primary enc-btn-choose';
+        var _chooseBtnText = (dialogue && dialogue.choicesBtnLabel) || 'Escolher ação';
         btn.innerHTML = '<span class="enc-btn-choose-icon">⚔</span>' +
-                        '<span class="enc-btn-choose-label">Escolher ação</span>' +
+                        '<span class="enc-btn-choose-label">' + _chooseBtnText + '</span>' +
                         '<span class="enc-btn-choose-count">' + choices.length + '</span>';
         btn.addEventListener('click', function() {
           openChoices(choices, {
-            title: 'Escolher ação',
-            npcName: (dialogue.npc && dialogue.npc.name) || '',
+            title: (dialogue && (dialogue.choicesTitle || dialogue.title)) || 'Escolher ação',
+            npcName: (dialogue && dialogue.choicesSubtitle) || (dialogue && dialogue.npc && dialogue.npc.name) || '',
             onChoice: _handleChoiceInternal
           });
         });

@@ -73,7 +73,14 @@
       prog = { current: _j.step, total: _j.total };
     }
     global.vEncounter.render(
-      { npc: cfg.npc || null, script: cfg.script || [], choices: cfg.choices || [] },
+      {
+        npc: cfg.npc || null,
+        script: cfg.script || [],
+        choices: cfg.choices || [],
+        choicesTitle: cfg.choicesTitle || null,
+        choicesSubtitle: cfg.choicesSubtitle || null,
+        choicesBtnLabel: cfg.choicesBtnLabel || null
+      },
       {
         player: _player(), showGold: false, fullHeight: true, progress: prog,
         showHp: true,  /* #90 (user): barra de vida estilo combate abaixo do diálogo */
@@ -98,6 +105,8 @@
     _vRender({
       script: script,
       choices: choices,
+      choicesTitle: (content && content.choicesTitle) || 'Preparação de Viagem',
+      choicesSubtitle: (content && content.choicesSubtitle) || (j.displayName ? ('Rumo a ' + j.displayName) : ''),
       inline: choices.length <= 2,
       noProgress: true,
       onChoice: function (ch) {
