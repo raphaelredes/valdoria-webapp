@@ -17,7 +17,8 @@
 #encounter-overlay {
   /* Reset <dialog> defaults */
   margin: 0;
-  padding: var(--v-space-lg, 12px);
+  padding: 10px 14px;
+  box-sizing: border-box;
   border: 0;
   background: transparent;
   color: inherit;
@@ -49,41 +50,26 @@
   background: linear-gradient(180deg, #3a2e22, #2a2218);
   border: 1px solid var(--v-gold-60);
   border-radius: 12px;
-  width: 100%;
-  max-width: 410px;
-  /* Sessao #42 (2026-05-27): dvh > vh em mobile (Telegram WebView address bar
-     muda 100vh dinamicamente, dvh respeita isso). 95dvh em vez de 92vh garante
-     mais espaço útil em desktop Telegram (~600px viewport). */
-  max-height: 95dvh;
-  /* Garante que conteudo nao caia fora do card mesmo em viewports apertados.
-     Bug raiz da sessao #42: com fonte grande + texto longo, o .enc-BODY forçava
-     min-height: 465px+, somava-se com header/nav/actions e empurrava buttons
-     PRA FORA do card (overflow: hidden cortava). Fix permanente: .enc-body
-     mantém min-height: 0 + overflow-y: auto; nav/actions ficam flex-shrink: 0.
-     Sessao #67 (2026-05-30): min-height responsivo NO CARD (nao no body). Em
-     fonte grande o dialogo ficava minusculo e centralizado ("a tela inteira
-     para preencher, a tela ficou minuscula" — queixa do user). Piso 330px @fs1
-     / 429px @fs1.3, SEMPRE capado em 95dvh via min() pra nunca exceder o
-     max-height (senao em viewport curto o card sairia da tela). Seguro vs bug
-     #42: o piso e no card; o body continua encolhendo+scrollando, entao os
-     botoes nunca saem. Conteudo curto: body (flex:1) preenche o piso. */
-  min-height: min(95dvh, calc(330px * var(--v-font-scale, 1)));
+  width: min(calc(100vw - 28px), 430px);
+  max-width: 430px;
+  /* Responsividade vertical máxima (Ordem do Usuário 2026-10):
+     Ocupa quase a altura inteira da tela (calc(100% - 12px) / max 96dvh),
+     eliminando vazios gigantes e scroll desnecessário em textos longos.
+     Preserva respiro lateral de ~14px para evidenciar popup modal flutuante. */
+  height: calc(100% - 12px);
+  max-height: calc(96dvh - 8px);
+  min-height: min(88dvh, calc(460px * var(--v-font-scale, 1)));
   overflow: hidden;
   display: flex;
   flex-direction: column;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 30px var(--v-gold-20);
 }
 
-/* sessão #77: enc-full — viagem "Rumo a <destino>" (opts.fullHeight=true).
-   sessão #90 (user, 2026-06-15): NÃO forçar mais `height: 92dvh`. Com conteúdo
-   curto isso criava um VOID enorme E empurrava a faixa de ação pra TRÁS da barra
-   inferior do Telegram WebView (botão "Escolher ação"/"Continuar viagem" cortado).
-   Agora é CONTENT-SIZED: cresce com o conteúdo até 92dvh (body scrolla se exceder),
-   com piso modesto pra ter presença sem void. Combinado com a faixa de ação ÚNICA
-   (renderActions coloca a ação na nav band), os botões SEMPRE cabem na área visível. */
+/* sessão #77: enc-full — viagem / fichas de personagem */
 .enc-card.enc-full {
-  min-height: min(92dvh, calc(340px * var(--v-font-scale, 1)));
-  max-height: 92dvh;
+  height: calc(100% - 12px);
+  min-height: min(92dvh, calc(480px * var(--v-font-scale, 1)));
+  max-height: calc(96dvh - 8px);
 }
 
 /* 2026-06-07 EX5: banner de progresso da viagem ("Rumo a <destino>") — TOPO do
@@ -383,11 +369,11 @@ body.perf-lite #encounter-overlay.active .enc-card {
 .enc-body {
   position: relative;
   padding: 14px var(--v-space-xl, 16px) 14px;
-  /* flex: 1 1 0px com flex-basis zero permite que o item encolha perfeitamente
-     e nunca empurre a nav bar para fora do card, capado em 95dvh - 135px. */
+  /* flex: 1 1 0px permite que o corpo preencha toda a altura interna do card,
+     scrollando suavemente apenas se o texto ou escolhas ultrapassarem o espaço. */
   flex: 1 1 0px !important;
   min-height: 0px !important;
-  max-height: calc(95dvh - 135px);
+  max-height: none !important;
   display: flex;
   flex-direction: column;
   gap: var(--v-space-md-lg, 10px);
@@ -1027,7 +1013,8 @@ body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
 #enc-choices-overlay {
   /* Reset <dialog> defaults */
   margin: 0;
-  padding: var(--v-space-lg, 12px);
+  padding: 10px 14px;
+  box-sizing: border-box;
   border: 0;
   background: transparent;
   color: inherit;
@@ -1078,9 +1065,10 @@ body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
 /* Card — "Pergaminho" parchment look with runic gold border + glow. */
 .enc-cho-card {
   position: relative;
-  width: 100%;
-  max-width: 420px;
-  max-height: 92vh;
+  width: min(calc(100vw - 28px), 430px);
+  max-width: 430px;
+  max-height: calc(96dvh - 8px);
+  box-sizing: border-box;
   overflow-y: auto;
   padding: 22px 18px var(--v-space-xl, 16px);
   background:

@@ -61494,22 +61494,12 @@ function _renderEncounterPopup(enc, originalAction, player) {
       // de animation em display:none → display:flex transitions. Compatível com
       // shared/encounter-popup.css que agora também não usa animation.
       + '#encounter-overlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.85);'
-      + '  display:flex;align-items:center;justify-content:center;padding: var(--v-space-md, 8px);opacity:1}'
-      // X-6.5.51BW (2026-05-15): card cresce com o conteúdo até o limite do
-      // viewport. NÃO mais força height:100% (que ocupava tela toda mesmo com
-      // 1 linha de diálogo). Pequenas falas = card pequeno; diálogos longos
-      // com várias choices = card expande até max-height e scroll interno.
+      + '  display:flex;align-items:center;justify-content:center;padding:10px 14px;box-sizing:border-box;opacity:1}'
       + '.enc-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
       + '  border:1px solid rgba(196,149,58,0.6);border-radius:12px;'
-      + '  width:100%;max-width:min(100vw - 16px, 480px);'
-      // Sessão #67 (2026-05-30): min-height ESCALA com --v-font-scale, capado em
-      // 95dvh via min() — PAR com shared/encounter-popup.css (.enc-card canonical
-      // vive lá e VENCE o cascade; este inline é fallback de preview standalone).
-      // Antes divergiam (inline 100dvh-16 vs shared 95dvh + min-height:0) → meu
-      // fix #64 ficava morto. Em fonte grande o card ocupa mais tela; body mantém
-      // min-height:0 + overflow-y:auto → botões nunca saem (bug sessão #42).
-      + '  height:auto;min-height:min(95dvh, calc(330px * var(--v-font-scale, 1)));'
-      + '  max-height:95dvh;overflow:hidden;'
+      + '  width:min(calc(100vw - 28px), 430px);max-width:430px;'
+      + '  height:calc(100% - 12px);min-height:min(88dvh, calc(460px * var(--v-font-scale, 1)));'
+      + '  max-height:calc(96dvh - 8px);overflow:hidden;'
       + '  display:flex;flex-direction:column;'
       + '  box-shadow:0 12px 40px rgba(0,0,0,0.7),0 0 30px rgba(196,149,58,0.15)}'
       + '.enc-header{display:flex;gap: var(--v-space-lg, 12px);padding: 14px var(--v-space-xl, 16px);'
@@ -61537,13 +61527,8 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '  letter-spacing:1.5px;flex-shrink:0;text-align:right;'
       + '  padding: 6px var(--v-space-md-lg, 10px);border:1px solid rgba(196,149,58,0.3);border-radius: var(--v-radius-xs, 4px);'
       + '  background:rgba(15,12,8,0.45)}'
-      // X-6.5.51BT: body cresce pra preencher altura (flex:1) e tem min
-      // maior pra acomodar diálogos longos sem scroll prematuro.
-      // X-6.5.51BW: body cresce naturalmente com o conteúdo (min-height:0 pra
-      // não forçar altura mínima). Mantém flex:1 + overflow-y:auto pra scroll
-      // interno quando card atinge max-height do viewport.
       + '.enc-body{padding:14px 16px 14px;flex:1 1 0px !important;display:flex;flex-direction:column;'
-      + '  gap:14px;overflow-y:auto !important;min-height:0px !important;max-height:calc(95dvh - 135px);justify-content:flex-start}'
+      + '  gap:14px;overflow-y:auto !important;min-height:0px !important;max-height:none !important;justify-content:flex-start}'
       // Phase 6.6.x dialogue pagination 2026-05-05: fonte maior + animação
       // por página. 2026-05-05 update: revelação HORIZONTAL (clip-path
       // wipe esquerda→direita) com duração dinâmica via --reveal-dur.
