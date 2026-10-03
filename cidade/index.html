@@ -61473,7 +61473,9 @@ function _renderEncounterPopup(enc, originalAction, player) {
     + '      <h3 class="enc-name">' + npc.name + '</h3>'
     + '      <p class="enc-desc">' + npc.desc + '</p>'
     + '    </div>'
-    + '    <div class="enc-page-indicator" id="enc-page-ind">1 / ' + pages.length + '</div>'
+    + (pages.length > 1
+      ? '    <div class="enc-page-indicator" id="enc-page-ind">1 / ' + pages.length + '</div>'
+      : '    <div class="enc-page-indicator" id="enc-page-ind" style="display:none"></div>')
     + '  </div>'
     + '  <div class="enc-body" id="enc-body"></div>'
     + '  <div class="enc-nav" id="enc-nav">'
@@ -61696,7 +61698,14 @@ function _renderEncounterPopup(enc, originalAction, player) {
       cumulativeDelay += Math.round(revealDur * 0.6);
     });
 
-    pageIndEl.textContent = (idx + 1) + ' / ' + pages.length;
+    if (pageIndEl) {
+      if (pages.length > 1) {
+        pageIndEl.textContent = (idx + 1) + ' / ' + pages.length;
+        pageIndEl.style.display = '';
+      } else {
+        pageIndEl.style.display = 'none';
+      }
+    }
     prevBtn.disabled = (idx === 0);
 
     // Última página: aguarda totalDelay (start da última linha) +

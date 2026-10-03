@@ -1151,7 +1151,9 @@
       '</div>' +
       '<div class="enc-rightcol">' +
         _encGold +
-        '<div class="enc-page-indicator" id="enc-page-ind">' + (currentPage + 1) + ' / ' + pages.length + '</div>' +
+        (pages.length > 1
+          ? '<div class="enc-page-indicator" id="enc-page-ind">' + (currentPage + 1) + ' / ' + pages.length + '</div>'
+          : '<div class="enc-page-indicator" id="enc-page-ind" style="display:none"></div>') +
       '</div>';
     card.appendChild(header);
 
@@ -1446,7 +1448,14 @@
       typeNextSentence();
 
       var pageInd = document.getElementById('enc-page-ind');
-      if (pageInd) pageInd.textContent = (idx + 1) + ' / ' + pages.length;
+      if (pageInd) {
+        if (pages.length > 1) {
+          pageInd.textContent = (idx + 1) + ' / ' + pages.length;
+          pageInd.style.display = '';
+        } else {
+          pageInd.style.display = 'none';
+        }
+      }
       var prevBtn = document.getElementById('enc-prev');
       if (prevBtn) {
         prevBtn.disabled = idx === 0;
