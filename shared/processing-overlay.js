@@ -67,7 +67,7 @@ function _buildOverlay() {
             tipId: 'vp-tip',
             retryId: 'vp-retry',
             progressId: 'vp-progress',
-            defaultTip: 'Reunindo o grupo…',
+            defaultTip: 'Consultando o Mestre…',
             hasStage: true,
             hasRetry: true,
             icon: 'magic-circle',
@@ -328,6 +328,10 @@ function show(opts) {
 
     _textEl.textContent = _originalText;
     _textEl.className = 'v-processing-text';
+    var _tipEl = _overlayEl ? _overlayEl.querySelector('#vp-tip') : null;
+    if (_tipEl) {
+        _tipEl.textContent = opts.tip || 'Consultando o Mestre…';
+    }
     _retryEl.classList.remove('visible');
     _overlayEl.classList.remove('hiding');
     _overlayEl.style.display = 'flex';

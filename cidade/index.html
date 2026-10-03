@@ -58088,26 +58088,167 @@ window._tryArrivalEncounter = _tryArrivalEncounter;
 // ============================================================================
 // === PADRAO_SERVIDOR — Diálogos server-driven genéricos (sessão #71) ========
 // ============================================================================
-// Generaliza o padrão do Porão: o SERVIDOR monta {npc, script, choices} (estado
-// vivo: preços/cardápio/gating reais) e RESOLVE cada escolha (efeito real via
-// process_callback + consequência narrada). O cliente só renderiza via
-// vEncounter e posta o id da escolha — o servidor re-deriva o cb (anti-cheat).
-// venue: 'inn' agora; 'tavern' no Plano 2. Doc: docs/sistemas/padrao-servidor.md
+// Regra Padrão (Ordem do Usuário 2026-10): PROIBIDO exibir telas de carregamento
+// de boot/viagem (vProcessing com 'Reunindo o grupo...') para diálogos. Todo diálogo
+// abre IMEDIATAMENTE com a narrativa sensorial de aproximação do Mestre (D&D 5e).
+var _CITY_APPROACH_SCENES = {
+  // ── TAVERNA DO JAVALI BÊBADO ───────────────────────────────────────────
+  'tavern:bard': {
+    npc: { name: 'Lyra Cantarriba', desc: 'Bardisa · broche de pena do Conservatório de Valdoria', portrait: '../shared/img/npcs/lyra-bardisa.webp' },
+    narration: 'Você abre caminho entre as mesas apinhadas da taverna, sentindo o calor das canecas e o aroma de malte defumado. No tablado modesto ao canto, Lyra Cantarriba afina as cordas de seu alaúde, atenta à sua aproximação...'
+  },
+  'tavern:drinks': {
+    npc: { name: 'Grom, o Caolho', desc: 'Taverneiro · Taverna do Javali Bêbado', portrait: '../shared/img/npcs/grom-o-caolho-v2.webp' },
+    narration: 'Você se aproxima do balcão de carvalho maciço. As torneiras de bronze brilham sob a luz dos candelabros enquanto Grom repousa o pano e ergue o olho são em sua direção...'
+  },
+  'tavern:games': {
+    npc: { name: 'Grom, o Caolho', desc: 'Taverneiro · Taverna do Javali Bêbado', portrait: '../shared/img/npcs/grom-o-caolho-v2.webp' },
+    narration: 'O som ritmado de dados de osso rolando sobre o feltro e o tilintar de moedas te atraem para as mesas de apostas ao canto do salão...'
+  },
+  'tavern:pitfight': {
+    npc: { name: 'Grom, o Caolho', desc: 'Taverneiro · Taverna do Javali Bêbado', portrait: '../shared/img/npcs/grom-o-caolho-v2.webp' },
+    narration: 'O som abafado de torcida e impactos pesados sobe pela escada ferrada que leva ao porão de combate. Grom te observa e aponta a entrada com um aceno...'
+  },
+  'tavern:carousing': {
+    npc: { name: 'Grom, o Caolho', desc: 'Taverneiro · Taverna do Javali Bêbado', portrait: '../shared/img/npcs/grom-o-caolho-v2.webp' },
+    narration: 'Risos altos e canecas erguidas preenchem o centro do salão. Você se aproxima das mesas principais onde aventureiros e locais compartilham histórias e bebidas...'
+  },
+  'tavern:gather': {
+    npc: { name: 'Grom, o Caolho', desc: 'Taverneiro · Taverna do Javali Bêbado', portrait: '../shared/img/npcs/grom-o-caolho-v2.webp' },
+    narration: 'Você se aproxima discretamente, apurando os ouvidos para a teia de sussurros e boatos que circulam entre as mesas da taverna...'
+  },
+  'tavern:mercenaries': {
+    npc: { name: 'Grom, o Caolho', desc: 'Taverneiro · Taverna do Javali Bêbado', portrait: '../shared/img/npcs/grom-o-caolho-v2.webp' },
+    narration: 'Pela porta lateral que dá para o pátio, você observa figuras experientes em armas encostadas nas paredes de pedra, aguardando um contratante...'
+  },
+  'tavern:adventurers': {
+    npc: { name: 'Grom, o Caolho', desc: 'Taverneiro · Taverna do Javali Bêbado', portrait: '../shared/img/npcs/grom-o-caolho-v2.webp' },
+    narration: 'Grom puxa uma pasta encadernada em couro com o selo do Conservatório dos Mapas. Você se inclina para examinar os perfis dos exploradores...'
+  },
+  'tavern:bulletin': {
+    npc: { name: 'Grom, o Caolho', desc: 'Taverneiro · Taverna do Javali Bêbado', portrait: '../shared/img/npcs/grom-o-caolho-v2.webp' },
+    narration: 'Você caminha até a cortiça escura ao lado da lareira, onde pergaminhos pregados com cera e pregos trazem pedidos e contratos de Valdoria...'
+  },
+  'tavern:grom': {
+    npc: { name: 'Grom, o Caolho', desc: 'Taverneiro · Taverna do Javali Bêbado', portrait: '../shared/img/npcs/grom-o-caolho-v2.webp' },
+    narration: 'Você se apoia no balcão da Taverna do Javali Bêbado. Grom larga a caneca que limpava e te encara com sua expressão severa e atenta...'
+  },
+
+  // ── ESTALAGEM DA PENA-DOURADA ──────────────────────────────────────────
+  'inn:martha': {
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '../shared/img/npcs/martha.webp' },
+    narration: 'O calor acolhedor da lareira e o aroma reconfortante de ensopado te recebem na Estalagem da Pena-Dourada. Martha abre um sorriso acolhedor ao te ver chegar...'
+  },
+  'inn:rooms': {
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '../shared/img/npcs/martha.webp' },
+    narration: 'Você se aproxima do balcão de mogno, observando o quadro de chaves de latão polido em busca de um leito seguro para o descanso...'
+  },
+  'inn:meals': {
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '../shared/img/npcs/martha.webp' },
+    narration: 'O cheiro apetitoso de pão quente e caldo fervejante enche a sala. Martha limpa o balcão e aponta o cardápio do dia...'
+  },
+  'inn:relax': {
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '../shared/img/npcs/martha.webp' },
+    narration: 'Você busca um momento de calmaria longe do peso das armas e da poeira da estrada, aproximando-se da área de descanso reservada...'
+  },
+  'inn:martha_concern': {
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '../shared/img/npcs/martha.webp' },
+    narration: 'Martha limpa o balcão com movimentos lentos, os olhos perdidos na chama da vela. Percebendo seus passos, ela suspira com discrição...'
+  },
+
+  // ── TEMPLO DOS QUATRO ──────────────────────────────────────────────────
+  'temple:aldric': {
+    npc: { name: 'Padre Aldric', desc: 'Clérigo · Templo dos Quatro', portrait: '../shared/img/npcs/padre-aldric.webp' },
+    narration: 'O eco suave de preces e a luz filtrada pelos vitrais sagrados preenchem a nave do templo. Você se aproxima do sacerdote...'
+  },
+  'temple:elara': {
+    npc: { name: 'Irmã Elara', desc: 'Sacerdotisa · Templo dos Quatro', portrait: '../shared/img/npcs/elara-sacerdotisa.webp' },
+    narration: 'Entre frascos de bálsamo e ervas curativas, a Irmã Elara ergue os olhos serenos de suas orações ao notar sua presença...'
+  },
+
+  // ── PORTÕES DE VALDORIA ────────────────────────────────────────────────
+  'gates:aldric': {
+    npc: { name: 'Guarda Aldric', desc: 'Vigilante dos Portões · Portões de Valdoria', portrait: '../shared/img/npcs/aldric-guarda.webp' },
+    narration: 'O vento das colinas agita os estandartes das muralhas da cidade. O Guarda Aldric mantém a postura vigilante e se vira ao notar sua chegada...'
+  },
+
+  // ── GUILDA DOS MERCENÁRIOS ─────────────────────────────────────────────
+  'guild:tavira': {
+    npc: { name: 'Tavira', desc: 'Mestra de Contratos · Guilda dos Mercenários', portrait: '../shared/img/npcs/tavira-guilda.webp' },
+    narration: 'O salão de pedra da Guilda ressoa com passos pesados e conversas de mercenários veteranos. Tavira ajusta os pergaminhos de contratos na mesa...'
+  },
+
+  // ── OFICINA E FORJA ────────────────────────────────────────────────────
+  'workshop:garrick': {
+    npc: { name: 'Garrick', desc: 'Mestre Artífice · Oficina', portrait: '../shared/img/npcs/ferreiro-garrick.webp' },
+    narration: 'O calor da fornalha e o ritmo compassado da bigorna dominam o ar da oficina. Garrick descansa a ferramenta e enxuga o suor ao te receber...'
+  },
+
+  // ── CASA DE THOLRAM (BANCO) ────────────────────────────────────────────
+  'bank:aldwin': {
+    npc: { name: 'Aldwin de Tholram', desc: 'Banqueiro · Casa de Tholram', portrait: '../shared/img/npcs/banqueiro.webp' },
+    narration: 'A serenidade austera e o eco de balanças de precisão marcam os cofres da Casa de Tholram. Aldwin ajusta seus óculos de leitura...'
+  },
+
+  // ── ESCRIBA RÚNICO ─────────────────────────────────────────────────────
+  'rune:eirik': {
+    npc: { name: 'Eirik', desc: 'Escriba Rúnico · Santuário das Runas', portrait: '../shared/img/npcs/escriba-eirik.webp' },
+    narration: 'Traços luminosos de tinta rúnica ainda cintilam nos pergaminhos da mesa. O Escriba Eirik ergue o olhar concentrado...'
+  },
+
+  // ── FESTIVAL ───────────────────────────────────────────────────────────
+  'festival:olmiro': {
+    npc: { name: 'Olmiro', desc: 'Mestre de Cerimônias · Praça do Festival', portrait: '../shared/img/npcs/olmiro-festival.webp' },
+    narration: 'Entre guirlandas coloridas, risadas e música animada, Olmiro gesticula com teatralidade acolhedora ao te notar...'
+  }
+};
+
+function _getCityApproachScene(venue, node){
+  var key = (venue || '') + ':' + (node || '');
+  if (_CITY_APPROACH_SCENES[key]) return _CITY_APPROACH_SCENES[key];
+  var fallbackKey = (venue || '') + ':*';
+  if (_CITY_APPROACH_SCENES[fallbackKey]) return _CITY_APPROACH_SCENES[fallbackKey];
+  return {
+    npc: { name: 'Valdoria', desc: 'Cenário e Ambiente', portrait: '' },
+    narration: 'Você se aproxima com calma, observando os detalhes ao redor e preparando suas palavras para a conversa...'
+  };
+}
+
 function _openCityDialogue(venue, node, p){
   p = p || window.CITY_MOCK_PLAYER || null;
   if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
     if (typeof vToast === 'function') vToast('Disponível no jogo.', 'info');
     return;
   }
-  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Um momento...' }); } catch(_){} }
+  
+  // Regra Padrão (Ordem do Usuário 2026-10): PROIBIDO exibir tela de loading
+  // de boot (vProcessing/ValdoriaLoadingHTML com 'Reunindo o grupo...').
+  // O diálogo abre IMEDIATAMENTE com a narrativa sensorial de aproximação do Mestre.
+  var approach = _getCityApproachScene(venue, node);
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render({
+      npc: approach.npc,
+      script: [{ type: 'dm', text: approach.narration }],
+      choices: []
+    }, { player: p, closeable: true });
+  }
+
   window.vCityServer.cityAction('dialogue.get', { venue: venue, node: node }).then(function(data){
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
-    if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível abrir o diálogo.', 'warn'); return; }
+    if (!data || !data.ok) {
+      if (typeof vToast === 'function') vToast('Não foi possível abrir o diálogo.', 'warn');
+      try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
+      return;
+    }
+    // Prepend a narrativa de aproximação do Mestre como Página 1 da conversa:
+    // o jogador tem a descrição narrativa sensorial antes das falas dos personagens.
+    if (data.script && Array.isArray(data.script) && approach.narration) {
+      data.script = [{ type: 'dm', text: approach.narration }].concat(data.script);
+    }
     _renderCityDialogue(venue, data, p);
   }).catch(function(e){
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     console.error('[CITY-DIALOGUE] get failed', e);
     if (typeof vToast === 'function') vToast('Erro ao abrir o diálogo.', 'warn');
+    try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
   });
 }
 
@@ -58233,15 +58374,12 @@ function _renderCityDialogue(venue, data, p, ctx){
 // uma choice 'screen' → repete o ciclo (multi-step funciona).
 function _openCityScreen(venue, cb, p, npc){
   if (!cb) return;
-  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Um momento...' }); } catch(_){} }
   window.vCityServer.cityAction('dialogue.screen', { venue: venue, cb: cb }).then(function(data){
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível abrir.', 'warn'); return; }
     if (data.transition) { _handleCityDialogueResult(venue, data, p, npc); return; }
     _applyHudFromDialogue(data);
     _renderCityDialogue(venue, data, p);
   }).catch(function(e){
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     console.error('[CITY-DIALOGUE] screen failed', e);
     if (typeof vToast === 'function') vToast('Erro ao abrir.', 'warn');
   });
@@ -58321,14 +58459,13 @@ function _bankCustomAmount(cb, p, npc){
 
 function _resolveCityChoice(venue, node, choiceId, p, npc, ctx){
   if (!choiceId) return;
-  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Um momento...' }); } catch(_){} }
+  // Regra Padrão (Ordem do Usuário 2026-10): PROIBIDO exibir tela de loading
+  // de boot (vProcessing) ao resolver escolhas em diálogo. O diálogo segue aberto e imersivo.
   // D1: o `node` JÁ carrega o npc_id (raiz '<id>' / sub '<id>:ficha'). NÃO postar npc_id separado.
   window.vCityServer.cityAction('dialogue.choice', { venue: venue, node: node, choice_id: choiceId }).then(function(data){
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível agir.', 'warn'); return; }
     _handleCityDialogueResult(venue, data, p, npc, ctx);
   }).catch(function(e){
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     console.error('[CITY-DIALOGUE] choice failed', e);
     if (typeof vToast === 'function') vToast('Erro ao agir.', 'warn');
   });
@@ -62064,8 +62201,9 @@ function _renderEncounterChoices(enc, originalAction, player, actionsEl) {
         n._original = c; // preserva ref pro dispatch
         return n;
       });
+      var modalTitle = (enc && (enc.title || enc.name)) || 'Escolher ação';
       window.vEncounter.openChoices(normChoices, {
-        title: 'Escolher ação',
+        title: modalTitle,
         npcName: (enc.npc_data && enc.npc_data.name) || (enc.npc && (typeof RECURRING_NPCS !== 'undefined' && RECURRING_NPCS[enc.npc]) && RECURRING_NPCS[enc.npc].name) || '',
         onChoice: function(normCh) {
           // Dispatch usando o choice ORIGINAL (preserva todos os campos legacy)
