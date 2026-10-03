@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-02T23:24:14Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-03T00:19:06Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2052,6 +2052,112 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 @keyframes ctFade { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; } }
 @keyframes playerTurnGlow { 0%,100% { box-shadow: 0 0 10px rgba(196,149,58,.2); } 50% { box-shadow: 0 0 18px rgba(196,149,58,.45); } }
 @keyframes ctChevron { 0%,100% { transform: translateX(0); opacity: .55; } 50% { transform: translateX(3px); opacity: .9; } }
+
+/* Indicador de turno da Inteligência Artificial (Ordem do Usuário 2026-10) */
+.current-turn.ai-turn {
+  background: linear-gradient(90deg, transparent, rgba(136, 19, 19, 0.4), transparent);
+  border-color: rgba(220, 38, 38, 0.65);
+  color: #fca5a5;
+  animation: ctFade 0.3s ease, aiTurnGlow 1.8s ease-in-out infinite alternate;
+}
+.current-turn.ai-turn.ai-turn--ally {
+  background: linear-gradient(90deg, transparent, rgba(30, 64, 175, 0.4), transparent);
+  border-color: rgba(59, 130, 246, 0.65);
+  color: #93c5fd;
+  animation: ctFade 0.3s ease, aiAllyTurnGlow 1.8s ease-in-out infinite alternate;
+}
+.ai-turn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(18, 14, 10, 0.9);
+  border: 1px solid rgba(220, 38, 38, 0.7);
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.current-turn.ai-turn.ai-turn--ally .ai-turn-pill {
+  border-color: rgba(59, 130, 246, 0.7);
+}
+.ai-turn-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+  animation: aiPulseDot 1s infinite alternate;
+}
+.current-turn.ai-turn.ai-turn--ally .ai-turn-pulse {
+  background: #3b82f6;
+  box-shadow: 0 0 8px #3b82f6;
+}
+@keyframes aiPulseDot {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
+@keyframes aiTurnGlow {
+  0% { box-shadow: inset 0 0 8px rgba(220, 38, 38, 0.2); }
+  100% { box-shadow: inset 0 0 16px rgba(220, 38, 38, 0.5); }
+}
+@keyframes aiAllyTurnGlow {
+  0% { box-shadow: inset 0 0 8px rgba(59, 130, 246, 0.2); }
+  100% { box-shadow: inset 0 0 16px rgba(59, 130, 246, 0.5); }
+}
+
+.bf-ai-banner {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 45;
+  background: rgba(20, 14, 10, 0.95);
+  border: 1.5px solid rgba(220, 38, 38, 0.75);
+  border-radius: 20px;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 11px;
+  color: #fca5a5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+  animation: ctFade 0.3s ease-out;
+  white-space: nowrap;
+}
+.bf-ai-banner.bf-ai-banner--ally {
+  border-color: rgba(59, 130, 246, 0.75);
+  color: #93c5fd;
+}
+.bf-ai-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+  animation: aiPulseDot 1s infinite alternate;
+}
+.bf-ai-banner--ally .bf-ai-pulse {
+  background: #3b82f6;
+  box-shadow: 0 0 6px #3b82f6;
+}
+
+/* Destaque pulsante na unidade IA ativa no grid */
+.cell.hex-token.ai-turn-active {
+  animation: aiTokenPulse 1.4s ease-in-out infinite alternate !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.9), inset 0 0 10px rgba(239, 68, 68, 0.45) !important;
+  border-color: #ef4444 !important;
+}
+.cell.hex-token.ai-turn-active.ally {
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.9), inset 0 0 10px rgba(59, 130, 246, 0.45) !important;
+  border-color: #3b82f6 !important;
+}
+@keyframes aiTokenPulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.06); filter: brightness(1.2); }
+}
 
 /* Turno do player ativo — seta epica + label SEU TURNO acima do card */
 .cell.occupied.player.player-turn-active { position: relative; }
@@ -19173,6 +19279,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
     if (isActive) {
         classes += ' active-turn';
         if (isPlayer && s.ph === 'active') classes += ' player-turn-active';
+        else if (!isPlayer && s.ph === 'active') classes += ' ai-turn-active';
     }
     if (u.initRolling) classes += ' init-rolling';
 
@@ -19389,7 +19496,22 @@ function buildBattlefield(s) {
     html += '<div class="bf-zoom-controls" aria-label="Controles de zoom da mesa">';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomIn" title="Aproximar (+)" aria-label="Aproximar">+</button>';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomOut" title="Afastar (−)" aria-label="Afastar">−</button>';
+    html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="fit" title="Visão Geral do Cenário (Ajustar)" aria-label="Visão Geral">⛶</button>';
     html += '</div>';
+
+    // AI Turn Floating Banner (Padrão Larian / Feedback Visual de Automação)
+    if (!isPlayerActiveTurn && active && active.alive && !active.isDead) {
+        var _aiType = (active.t === 'a') ? 'ally' : 'enemy';
+        var _aiTypeLabel = (_aiType === 'ally') ? 'ALIADO' : 'INIMIGO';
+        var _aiActionDesc = (active.n && active.n.toLowerCase().indexOf('lobo') !== -1)
+            ? 'está farejando e caçando...'
+            : 'está calculando a melhor jogada...';
+        html += '<div class="bf-ai-banner bf-ai-banner--' + _aiType + '">';
+        html += '<span class="bf-ai-pulse"></span>';
+        html += '<span class="bf-ai-text">TURNO DA IA (' + _aiTypeLabel + '): <strong>' + escHtml(active.n) + '</strong> ' + _aiActionDesc + '</span>';
+        html += '</div>';
+    }
+
     html += '<div class="bf-pan-viewport" data-bf-pan-viewport aria-label="Mesa Tática de Combate D&D 5e — arraste para mover, roda ou botões para zoom">';
 
     var stageW = (bCols - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2;
@@ -19515,14 +19637,11 @@ function buildBattlefield(s) {
         var standCostM = formatHexDistanceMeters(standCostHexes);
         var canStand = (playerUnit.movement_left || 0) >= standCostHexes;
 
-        html += '<div class="hex-turn-hud" aria-live="polite">';
-        html += '<span class="hth-speed"><span class="hth-icon">👣</span> Movimento: <strong>' + formatHexDistanceMeters(playerUnit.movement_left || 0) + '</strong> / ' + formatHexDistanceMeters(playerUnit.speed || 6) + ' (' + (playerUnit.movement_left || 0) + 'h)</span>';
         if (isPlayerProne) {
+            html += '<div class="hex-turn-hud" aria-live="polite">';
             html += '<button type="button" class="hth-stand-btn' + (canStand ? '' : ' disabled') + '" data-act="stand-up" title="Gasta metade do deslocamento (' + standCostM + ') para se levantar (PHB p. 190)">🧎 Levantar-se (' + standCostM + ')</button>';
-        } else if ((playerUnit.movement_left || 0) > 0) {
-            html += '<span class="hth-hint">Toque em um hexágono verde para mover</span>';
+            html += '</div>';
         }
-        html += '</div>';
     }
 
     html += '</div>'; // .battlefield-hex-arena
@@ -22027,23 +22146,48 @@ function mountBattlefieldPanZoom() {
 
     /* STAGE_W calculado dinamicamente em fitAll (escala com --v-font-scale) — Sessão #66 */
     var MIN_ZOOM = 0.4;
-    var MAX_ZOOM = 2.0;
-    var currentZoom = 1;
+    var MAX_ZOOM = 1.6;
+    var currentZoom = (window.__bfPanState && window.__bfPanState.currentZoom) ? window.__bfPanState.currentZoom : 1;
+
+    var savePanState = function () {
+        window.__bfPanState = {
+            initialized: true,
+            currentZoom: currentZoom,
+            scrollLeft: vp ? vp.scrollLeft : 0,
+            scrollTop: vp ? vp.scrollTop : 0
+        };
+    };
 
     var applyZoom = function (z) {
         currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z));
         stage.style.zoom = currentZoom;
         stage.style.transform = 'none';
+        savePanState();
     };
-    /* 2026-05-18 USER REQUEST: combate com poucos combatentes (<=4 cards
-       ocupados) ganha boost de zoom inicial pra focar. Threshold 4 cobre:
-       1v1 (2 cells), 1v2 (3 cells), 2v2 (4 cells). 5+ cells: zoom normal. */
-    var FOCUSED_THRESHOLD = 4;
-    var FOCUSED_BOOST = 1.6;
-    var countOccupied = function () {
-        try { return stage.querySelectorAll('.cell.occupied').length || 0; } catch (_) { return 0; }
+
+    var fitOverview = function () {
+        var vpW = vp.clientWidth || 430;
+        var vpH = vp.clientHeight || 500;
+        var sw = stage.scrollWidth || 555;
+        var sh = stage.scrollHeight || 580;
+
+        var fitX = (vpW - 20) / Math.max(320, sw);
+        var fitY = (vpH > 60) ? (vpH - 20) / Math.max(320, sh) : fitX;
+        var overviewZ = Math.max(0.60, Math.min(0.85, Math.min(fitX, fitY)));
+        applyZoom(overviewZ);
+        vp.scrollLeft = Math.max(0, ((sw * currentZoom) - vpW) / 2);
+        vp.scrollTop = Math.max(0, ((sh * currentZoom) - vpH) / 2);
+        savePanState();
     };
-    var fitAll = function () {
+
+    var fitAll = function (force) {
+        if (!force && window.__bfPanState && window.__bfPanState.initialized) {
+            applyZoom(window.__bfPanState.currentZoom);
+            vp.scrollLeft = window.__bfPanState.scrollLeft || 0;
+            vp.scrollTop = window.__bfPanState.scrollTop || 0;
+            return;
+        }
+
         var vpW = vp.clientWidth || 430;
         var vpH = vp.clientHeight || 500;
 
@@ -22071,43 +22215,111 @@ function mountBattlefieldPanZoom() {
             var pMax = hexCenter(maxCol, maxRow);
 
             // Margem confortável em torno dos combatentes para enquadramento nítido
-            var padPxX = (typeof HEX_W !== 'undefined' ? HEX_W : 64) * 1.05;
-            var padPxY = (typeof HEX_H !== 'undefined' ? HEX_H : 60) * 1.05;
+            var padPxX = (typeof HEX_W !== 'undefined' ? HEX_W : 64) * 1.5;
+            var padPxY = (typeof HEX_H !== 'undefined' ? HEX_H : 60) * 1.5;
 
-            var boxW = Math.max((typeof HEX_W !== 'undefined' ? HEX_W : 64) * 2.5, (pMax.cx - pMin.cx) + padPxX * 2);
-            var boxH = Math.max((typeof HEX_H !== 'undefined' ? HEX_H : 60) * 2.5, (pMax.cy - pMin.cy) + padPxY * 2);
+            var boxW = Math.max((typeof HEX_W !== 'undefined' ? HEX_W : 64) * 4.0, (pMax.cx - pMin.cx) + padPxX * 2);
+            var boxH = Math.max((typeof HEX_H !== 'undefined' ? HEX_H : 60) * 3.5, (pMax.cy - pMin.cy) + padPxY * 2);
             var centerX = (pMin.cx + pMax.cx) / 2;
             var centerY = (pMin.cy + pMax.cy) / 2;
 
-            // Zoom máximo possível respeitando o viewport do dispositivo
-            var fitX = (vpW - 16) / boxW;
-            var fitY = (vpH > 60) ? (vpH - 16) / boxH : fitX;
+            // Zoom confortável e equilibrado: máximo de 0.96 para NUNCA cortar o cenário nem aproximar em excesso (Ordem do Usuário 2026-10)
+            var fitX = (vpW - 20) / boxW;
+            var fitY = (vpH > 60) ? (vpH - 20) / boxH : fitX;
             var optimalZoom = Math.min(fitX, fitY);
 
-            // Garante visual próximo e dinâmico, sem extrapolar nem cortar (responsivo)
-            optimalZoom = Math.max(0.65, Math.min(1.65, optimalZoom));
+            optimalZoom = Math.max(0.65, Math.min(0.96, optimalZoom));
             applyZoom(optimalZoom);
 
             // Centraliza a visão exatamente nos combatentes
             vp.scrollLeft = Math.max(0, (centerX * currentZoom) - (vpW / 2));
             vp.scrollTop = Math.max(0, (centerY * currentZoom) - (vpH / 2));
+            savePanState();
         } else {
-            var fitX = (vpW - 8) / sw;
-            var fitY = (vpH > 40 && sh > 0) ? (vpH - 8) / sh : fitX;
-            var z = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.min(fitX, fitY)));
-            applyZoom(z);
+            fitOverview();
         }
     };
     fitAll();
+
+    function smoothAnimateCamera(targetZ, targetX, targetY, durationMs) {
+        return new Promise(function (resolve) {
+            if (!vp || !stage) { resolve(); return; }
+            durationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : (durationMs || 600);
+            if (durationMs <= 30) {
+                applyZoom(targetZ);
+                vp.scrollLeft = targetX;
+                vp.scrollTop = targetY;
+                savePanState();
+                resolve();
+                return;
+            }
+            var startZ = currentZoom;
+            var startX = vp.scrollLeft || 0;
+            var startY = vp.scrollTop || 0;
+            var startT = performance.now();
+            function easeInOutCubic(t) {
+                return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            }
+            function step(now) {
+                var elapsed = now - startT;
+                var progress = Math.min(1, elapsed / durationMs);
+                var eased = easeInOutCubic(progress);
+                var zNow = startZ + (targetZ - startZ) * eased;
+                var xNow = startX + (targetX - startX) * eased;
+                var yNow = startY + (targetY - startY) * eased;
+                stage.style.zoom = zNow;
+                currentZoom = zNow;
+                vp.scrollLeft = xNow;
+                vp.scrollTop = yNow;
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    applyZoom(targetZ);
+                    vp.scrollLeft = targetX;
+                    vp.scrollTop = targetY;
+                    savePanState();
+                    resolve();
+                }
+            }
+            requestAnimationFrame(step);
+        });
+    }
+
+    window.bfCameraFocusOverview = async function (durationMs) {
+        var vpW = vp.clientWidth || 430;
+        var vpH = vp.clientHeight || 500;
+        var sw = stage.scrollWidth || 555;
+        var sh = stage.scrollHeight || 580;
+        var fitX = (vpW - 20) / Math.max(320, sw);
+        var fitY = (vpH > 60) ? (vpH - 20) / Math.max(320, sh) : fitX;
+        var z = Math.max(0.60, Math.min(0.85, Math.min(fitX, fitY)));
+        var x = Math.max(0, ((sw * z) - vpW) / 2);
+        var y = Math.max(0, ((sh * z) - vpH) / 2);
+        await smoothAnimateCamera(z, x, y, durationMs);
+    };
+
+    window.bfCameraFocusUnit = async function (unit, targetZoom, durationMs) {
+        if (!unit || !unit.pos) return;
+        var vpW = vp.clientWidth || 430;
+        var vpH = vp.clientHeight || 500;
+        var z = targetZoom || 0.92;
+        z = Math.max(0.65, Math.min(0.96, z));
+        var cCenter = hexCenter(unit.pos.col, unit.pos.row);
+        var x = Math.max(0, (cCenter.cx * z) - (vpW / 2));
+        var y = Math.max(0, (cCenter.cy * z) - (vpH / 2));
+        await smoothAnimateCamera(z, x, y, durationMs);
+    };
+
     var zoomControls = (vp.parentElement && vp.parentElement.querySelector('.bf-zoom-controls')) || vp.querySelector('.bf-zoom-controls') || document.querySelector('.bf-zoom-controls');
     var zoomBtns = zoomControls ? zoomControls.querySelectorAll('.bf-zoom-btn') : vp.querySelectorAll('.bf-zoom-btn');
     zoomBtns.forEach(function (btn) {
         btn.addEventListener('click', function (ev) {
             ev.stopPropagation();
             var act = btn.getAttribute('data-bf-zoom-act');
-            if (act === 'zoomIn') applyZoom(currentZoom * 1.25);
-            else if (act === 'zoomOut') applyZoom(currentZoom / 1.25);
-            else if (act === 'fit') fitAll();
+            if (act === 'zoomIn') applyZoom(currentZoom * 1.2);
+            else if (act === 'zoomOut') applyZoom(currentZoom / 1.2);
+            else if (act === 'fit') fitOverview();
+            savePanState();
         });
     });
 
@@ -22214,6 +22426,7 @@ function mountBattlefieldPanZoom() {
         }
         if (activePointers.size === 0) {
             pinchStartDist = 0;
+            savePanState();
         }
     };
     vp.addEventListener('pointerdown', onPointerDown);
@@ -22432,7 +22645,14 @@ function render(s) {
             var _ctUtype = activeNow.t === 'p' ? 'player' : (activeNow.t === 'a' ? 'ally' : 'enemy');
             var _ctIcoId = (typeof _heraldicIconOf === 'function') ? _heraldicIconOf(activeNow, _ctUtype) : null;
             var _ctPortrait = _ctIcoId ? _combatPortraitHTML(_ctIcoId, activeNow, _ctUtype) : escHtml(activeNow.ico || '');
-            html += '<div class="current-turn"><span class="ct-ico">' + _ctPortrait + '</span><span class="ct-label">Turno de</span><span class="ct-name">' + escHtml(activeNow.n) + '</span></div>';
+            var _isAiEnemy = (_ctUtype === 'enemy');
+            var _aiBadge = _isAiEnemy ? 'TURNO DA IA (INIMIGO)' : 'TURNO DA IA (ALIADO)';
+            var _aiClass = _isAiEnemy ? 'ai-turn--enemy' : 'ai-turn--ally';
+            html += '<div class="current-turn ai-turn ' + _aiClass + '">' +
+                '<span class="ai-turn-pill"><span class="ai-turn-pulse"></span>' + _aiBadge + '</span>' +
+                '<span class="ct-ico">' + _ctPortrait + '</span>' +
+                '<span class="ct-name">' + escHtml(activeNow.n) + '</span>' +
+                '</div>';
         }
     }
     html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Rodada ' + s.rn + '</span> Floresta <span class="weather-badge w-clear">Limpo</span></div></div>';
@@ -31246,7 +31466,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         var actorUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (aIdx === s.p_idx ? 'player' : 'enemy_' + aIdx);
                         var actorEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
                         if (actorEl) {
-                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 140;
+                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 340;
                             await animateUnitHexMovement(actorEl, stepRes.path, hopDurationMs);
                         }
                     }
@@ -31255,7 +31475,7 @@ async function playTurn(aIdx, tIdx, opts) {
                     actor.movement_left = Math.max(0, mLeft - stepRes.steps);
                     s.log.push(actor.n + ' avança ' + formatHexDistanceMeters(stepRes.steps) + ' em direção a ' + target.n + '.');
                     render(s);
-                    await sleep(_skipAllDiceAnim ? 60 : 150);
+                    await sleep(_skipAllDiceAnim ? 60 : 300);
                 }
             }
             dist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
@@ -32990,6 +33210,23 @@ async function runNpcSegmentUntilPlayerTurn() {
         } else if (c && c.hp > 0 && c.alive) {
             simLogPushTurnHeader(s, c);
             render(s);
+
+            /* Apresentação Cinematográfica do Turno da IA (Ordem do Usuário 2026-10):
+               1. Mostra o cenário todo primeiro (Overview).
+               2. Aguarda pelo menos 2 segundos para o jogador ver o posicionamento geral.
+               3. Dá um zoom devagar focando no combatente ativo.
+               4. Só depois inicia a movimentação e ataques. */
+            try {
+                if (typeof window.bfCameraFocusOverview === 'function') {
+                    await window.bfCameraFocusOverview((typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 450);
+                }
+                await sleep((typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 2000);
+                if (typeof window.bfCameraFocusUnit === 'function') {
+                    await window.bfCameraFocusUnit(c, 0.95, (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 800);
+                    await sleep((typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 250);
+                }
+            } catch (_eCamCinematic) {}
+
             try {
             /* X-6.5.51AC: log entrada turno NPC (qualquer NPC: aliado, inimigo, boss) */
             try {
@@ -33386,6 +33623,11 @@ async function runNpcSegmentUntilPlayerTurn() {
     }
     tickBuffsAfterNpcPhase(s);
     render(s);
+    if (typeof window.bfCameraFocusUnit === 'function' && s.order && s.order[s.p_idx]) {
+        try {
+            await window.bfCameraFocusUnit(s.order[s.p_idx], 0.92, (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 400);
+        } catch (_) {}
+    }
     return false;
 }
 
