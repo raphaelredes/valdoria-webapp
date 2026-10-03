@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-03T12:38:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-03T13:22:56Z - do not edit directly, edit source -->
 
 
 
@@ -41558,6 +41558,12 @@ function _checkJourneyResume(_attempt) {
   } else if (jr.direction === 'edge' && jr.targetMap) {
     S._pendingEdge = { targetMap: jr.targetMap, label: jr.edgeLabel || '' };
     if (typeof confirmEdgeTransition === 'function') confirmEdgeTransition(true);
+  } else if (jr.direction === 'city_to_map') {
+    try {
+      if (typeof vToast === 'function') {
+        vToast('Você superou a batalha na estrada e chegou a ' + (jr.displayName || 'seu destino') + '!', 'success');
+      }
+    } catch (_) {}
   }
 }
 document.addEventListener('DOMContentLoaded', function () {
@@ -46540,24 +46546,38 @@ function boot() {
                   if (Array.isArray(_ss.visited)) {
                     for (var _vi = 0; _vi < _ss.visited.length; _vi++) {
                       var _vk = _ss.visited[_vi];
-                      if (_vk && _vk.length === 2 && S.visited && typeof S.visited.add === 'function') {
-                        S.visited.add(fogKey(_vk[0], _vk[1]));
+                      if (_vk && _vk.length === 2) {
+                        var _fKey = fogKey(_vk[0], _vk[1]);
+                        if (S.visited && typeof S.visited.add === 'function') S.visited.add(_fKey);
+                        if (S.fogState && !S.fogState[_fKey]) S.fogState[_fKey] = 'dim';
                       }
                     }
                   }
                   if (Array.isArray(_ss.visible)) {
                     for (var _vsi = 0; _vsi < _ss.visible.length; _vsi++) {
                       var _vsk = _ss.visible[_vsi];
-                      if (_vsk && _vsk.length === 2 && S.visible && typeof S.visible.add === 'function') {
-                        S.visible.add(fogKey(_vsk[0], _vsk[1]));
+                      if (_vsk && _vsk.length === 2) {
+                        var _fvKey = fogKey(_vsk[0], _vsk[1]);
+                        if (S.visible && typeof S.visible.add === 'function') S.visible.add(_fvKey);
+                        if (S.fogState) S.fogState[_fvKey] = 'visible';
                       }
                     }
                   }
-                  if (_oldCol !== _ss.player_col || _oldRow !== _ss.player_row) {
-                    try { if (typeof computeFov === 'function') computeFov(S.player.col, S.player.row); } catch (_) {}
-                    try { if (typeof centerOnPlayer === 'function') centerOnPlayer(false); } catch (_) {}
-                    try { if (typeof updateHexNav === 'function') updateHexNav(); } catch (_) {}
+                  // Revela o fog ao redor do hexágono real do jogador (elimina tela preta de fog of war)
+                  var _visRad = (typeof getVisionRange === 'function') ? getVisionRange() : 2;
+                  if (typeof revealFogAt === 'function') {
+                    revealFogAt(S.player.col, S.player.row, _visRad);
                   }
+                  window._fogV6Dirty = true;
+                  if (typeof _fogMaskDirty !== 'undefined') _fogMaskDirty = true;
+                  if (typeof _hardFogDirty !== 'undefined') _hardFogDirty = true;
+                  try { if (typeof centerOnPlayer === 'function') centerOnPlayer(false); } catch (_) {}
+                  try { if (typeof updateHexNav === 'function') updateHexNav(); } catch (_) {}
+                  try {
+                    if (window.TileRenderer && typeof window.TileRenderer.refreshAll === 'function') {
+                      window.TileRenderer.refreshAll();
+                    }
+                  } catch (_) {}
                 }
                 if (res.equipment && typeof res.equipment === 'object') {
                   window.__EXPLORE_SERVER_EQUIPPED = res.equipment;

@@ -261,6 +261,11 @@
   // Resolve a escolha: check D&D (JourneyData=DndRules, ODDS IGUAIS) → dado 3D → desfecho.
   function _resolve(hz, ch) {
     var p = _player();
+    // COMBATE DIRETO (user 2026-10): se a escolha for combate (isCombat / combat)
+    if (ch && (ch.isCombat || ch.combat)) {
+      _triggerHazardCombat(hz, ch);
+      return;
+    }
     var checkOpts = {};
     if (ch && (ch.advantage || ch.adv)) checkOpts.advantage = true;
     if (_j && _j.prep && _j.prep.advantageOnFirst) {
@@ -270,6 +275,38 @@
     var roll = JD().resolveJourneyCheck ? JD().resolveJourneyCheck(p, ch, checkOpts) : null;
     if (!roll) { _outcome(hz, ch, true, null); return; }
     _dice(roll, function () { _outcome(hz, ch, roll.success, roll); });
+  }
+
+  // Combate originado de escolha em perigo/evento de jornada
+  function _triggerHazardCombat(hz, ch) {
+    var j = _j; if (!j) return;
+    var enemyId = (ch && ch.enemyId) || (hz && hz.enemyId) || (hz && hz.npc && hz.npc.enemyId) || 'bandit_leader';
+    var jinfo = {
+      biome: j.biome,
+      displayName: j.displayName,
+      step: j.step,
+      total: j.total,
+      enemyId: enemyId,
+      title: (hz && hz.title) || 'Perigo no Caminho',
+      isHazardChoice: true
+    };
+    var foeName = (hz && hz.npc && hz.npc.name) || (hz && hz.title) || 'Inimigos';
+    _vRender({
+      npc: (hz && hz.npc) || null,
+      script: [
+        { type: 'narration', text: 'Você desembainha suas armas e assume postura de combate contra <b>' + foeName + '</b>!' }
+      ],
+      choices: [{ id: 'jrn_fight_now', label: '⚔️ Iniciar combate' }],
+      inline: true,
+      onChoice: function () {
+        var cb = j.opts.onCombat;
+        if (typeof cb === 'function') {
+          try { cb(jinfo); } catch (e) { _log('onCombat failed: ' + e.message); }
+        } else {
+          _outcome(hz, ch, true, null);
+        }
+      }
+    });
   }
 
   // Popup de dado 3D — DOM seguro (createElement/textContent, SEM innerHTML).

@@ -55921,6 +55921,17 @@ function startCityJourney(mapId, displayName, finalUrl) {
       log: (typeof _logCity === 'function') ? _logCity : null,
       refreshHud: (typeof refreshHud === 'function') ? refreshHud : null,
       toast: (typeof vToast === 'function') ? vToast : null,
+      onCombat: function (jinfo) {
+        _cityLaunchJourneyCombat({
+          mapId: mapId,
+          displayName: displayName,
+          finalUrl: finalUrl,
+          biome: (jinfo && jinfo.biome) || info.biome,
+          enemyId: (jinfo && jinfo.enemyId) || 'bandit_leader',
+          step: (jinfo && jinfo.step) || 1,
+          total: (jinfo && jinfo.total) || info.steps
+        });
+      },
       onArrive: function () { _cityJourneyArrive(mapId, displayName, finalUrl); },
       onCancel: function () {
         if (typeof _logCity === 'function') _logCity('city journey cancelled');
@@ -55939,6 +55950,75 @@ function startCityJourney(mapId, displayName, finalUrl) {
   }
   // Fallback defensivo (runner ausente): vai direto pro destino.
   _cityJourneyArrive(mapId, displayName, finalUrl);
+}
+
+function _cityLaunchJourneyCombat(rs) {
+  var saveObj = {
+    ts: Date.now(),
+    direction: 'city_to_map',
+    mapId: rs.mapId,
+    displayName: rs.displayName,
+    finalUrl: rs.finalUrl,
+    biome: rs.biome || 'plains',
+    enemyId: rs.enemyId || 'bandit_leader',
+    step: rs.step || 1,
+    total: rs.total || 3
+  };
+  try { localStorage.setItem('valdoria_journey_resume', JSON.stringify(saveObj)); } catch (e) {}
+  if (typeof _logCity === 'function') _logCity('journey combat triggered -> enemy=' + rs.enemyId + ' map=' + rs.mapId);
+
+  var a = window.__CITY_AUTH || {};
+  var isRemote = (a.token && a.uid && a.api);
+  if (isRemote) {
+    if (window._vTransitionLoader) {
+      try { window._vTransitionLoader.show('Inimigos se aproximam! Entrando em combate…'); } catch (_) {}
+    }
+    fetch((a.api || '') + '/api/exploracao/journey_combat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + a.token
+      },
+      body: JSON.stringify({
+        token: a.token,
+        user_id: a.uid,
+        map_id: rs.mapId,
+        enemy_id: rs.enemyId,
+        direction: 'city_to_map',
+        narrative: 'Inimigos bloqueiam seu caminho até ' + rs.displayName + '!'
+      })
+    }).then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res && res.combat_redirect && res.combat_redirect.redirect_url) {
+          window.__valdoria_transitioning = true;
+          window.location.href = res.combat_redirect.redirect_url;
+          return;
+        }
+        _cityLaunchJourneyCombatFallback(rs);
+      })
+      .catch(function (err) {
+        console.warn('[CITY] journey_combat remote failed -> fallback', err);
+        _cityLaunchJourneyCombatFallback(rs);
+      });
+    return;
+  }
+  _cityLaunchJourneyCombatFallback(rs);
+}
+
+function _cityLaunchJourneyCombatFallback(rs) {
+  var isLocal = (location.protocol === 'file:');
+  var combatUrl = isLocal ? './combate.html' : '/combat2/combate.html';
+  var q = new URLSearchParams();
+  q.set('enemy', rs.enemyId || 'bandit_leader');
+  q.set('biome', rs.biome || 'plains');
+  q.set('origin', 'exploracao');
+  q.set('back', 'cidade');
+  var a = window.__CITY_AUTH || {};
+  if (a.token) q.set('token', a.token);
+  if (a.uid) q.set('uid', a.uid);
+  if (a.api) q.set('api', a.api);
+  window.__valdoria_transitioning = true;
+  window.location.href = combatUrl + '?' + q.toString();
 }
 
 // Chegada: cobre o gap silhueta->exploração com o magic-circle loader ANTES do

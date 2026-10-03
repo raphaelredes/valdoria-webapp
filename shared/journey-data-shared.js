@@ -177,6 +177,8 @@ var HAZARDS = {
             evil: 'Você os intimida com cálculo frio: descreve a tortura que receberão se forem capturados. Eles recuam, pálidos.'
           },
           fNarr: 'Sua lábia é fraca. O líder cospe e avança. Sangue antes da fuga.', dmg: 5 },
+        { i: '⚔️', t: 'Enfrentar os bandidos', isCombat: true, enemyId: 'bandit_leader',
+          desc: 'Desembainhar as armas e combater o bando em confronto direto.' },
         { i: '🏃', t: 'Romper e fugir', stat: 'dex', dc: 12,
           desc: 'Surpreender com velocidade — ganhar a brecha entre os dois flanqueadores.',
           sNarr: 'Você dispara entre eles antes que percebam. Vinte metros depois, no trigal alto, eles desistem.',
@@ -370,6 +372,8 @@ var HAZARDS = {
           desc: 'Exibir imponência e ferocidade inabaláveis perante a fera.',
           sNarr: 'Sua presença avassaladora e postura ameaçadora fazem o lobo vacilar e recuar com a cauda entre as pernas.',
           fNarr: 'O lobo avança em investida rápida antes de se afastar, mordendo de raspão.', dmg: 3 },
+        { i: '⚔️', t: 'Enfrentar a fera', isCombat: true, enemyId: 'dire_wolf',
+          desc: 'Ficar em posição de guarda e combater o lobo feroz.' },
         { i: '🏃', t: 'Recuar devagar', stat: 'wis', dc: 12,
           desc: 'Não correr. Recuar passo a passo, sem virar de costas.',
           sNarr: 'Você recua sem provocar, olhando ele direto sem ameaça. O lobo perde interesse — não vale o esforço hoje.',
@@ -422,7 +426,9 @@ var HAZARDS = {
           sNarr_by_subrace: {
             drow: 'Acostumado à escuridão do subterrâneo profundo, você distingue o ruído de garras na pedra e antecipa a criatura com facilidade.'
           },
-          fNarr: 'Você não localiza. Quando segue, sente algo seguindo a passos atrás. Não vira pra ver.', dmg: 3 } ] }
+          fNarr: 'Você não localiza. Quando segue, sente algo seguindo a passos atrás. Não vira pra ver.', dmg: 3 },
+        { i: '⚔️', t: 'Investir contra o perseguidor', isCombat: true, enemyId: 'troglodyte',
+          desc: 'Girar com a arma em punho e atacar a criatura das sombras.' } ] }
   ],
 
   graveyard: [
@@ -459,7 +465,9 @@ var HAZARDS = {
         { i: '🏃', t: 'Correr através', stat: 'dex', dc: 12,
           desc: 'Velocidade pura. Não dar tempo deles te tocarem.',
           sNarr: 'Você corre. Vinte segundos depois, está do outro lado, ofegante mas inteiro.',
-          fNarr: 'Um toque gelado nas costas drena sua energia. Você chega exausto.', dmg: 4 } ] },
+          fNarr: 'Um toque gelado nas costas drena sua energia. Você chega exausto.', dmg: 4 },
+        { i: '⚔️', t: 'Banir os espectros pela lâmina', isCombat: true, enemyId: 'skeleton',
+          desc: 'Desembainhar sua arma e purificar as aparições em combate.' } ] },
 
     { title: 'Lápide Trincada',
       script: [
@@ -532,7 +540,9 @@ var HAZARDS_EXTRA = {
         { i: '🏹', t: 'Subir uma árvore', stat: 'str', dc: 13,
           desc: 'Tronco grosso a três metros — escalada rápida.',
           sNarr: 'Você sobe rápido, agarra galho firme. Os lobos passam embaixo, sem olhar pra cima.',
-          fNarr: 'A casca cede sob seus dedos. Você cai e bate as costas contra raízes.', dmg: 5 } ] },
+          fNarr: 'A casca cede sob seus dedos. Você cai e bate as costas contra raízes.', dmg: 5 },
+        { i: '⚔️', t: 'Enfrentar a matilha de lobos', isCombat: true, enemyId: 'dire_wolf',
+          desc: 'Desembainhar sua arma e interceptar os lobos em combate aberto.' } ] },
 
     { title: 'O Andarilho Cego',
       npc: { name: 'Velho Andarilho', desc: 'Eremita cego que conhece a floresta de cor', portrait: '../shared/img/npcs/velho-andarilho.webp' },
@@ -808,7 +818,9 @@ var HAZARDS_EXTRA = {
         { i: '🏜', t: 'Desviar — rota alternativa', stat: 'wis', dc: 12,
           desc: 'Não vale arriscar. Tomar volta longa pelas dunas.',
           sNarr: 'Você toma rota mais longa pelas dunas. Cansativo, mas chega seguro.',
-          fNarr: 'Você se perde nas dunas. Acaba voltando ao caminho original — onde a caravana já passou.', dmg: 2 } ] }
+          fNarr: 'Você se perde nas dunas. Acaba voltando ao caminho original — onde a caravana já passou.', dmg: 2 },
+        { i: '⚔️', t: 'Enfrentar os bandidos do deserto', isCombat: true, enemyId: 'bandit_leader',
+          desc: 'Desembainhar as armas e combater o grupo armado.' } ] }
   ]
 };
 
