@@ -277,6 +277,8 @@
     return _getSeenTexts().has(hash);
   }
 
+  var _activeEncounterInstance = null;
+
   /* Agrupa estrofes em páginas (canonical PADRAO_ALDRIC):
      - Até 2 estrofes por página
      - Até 10 sentences por página
@@ -1458,7 +1460,7 @@
              atualiza nextBtn (mesma logica do _instantReveal). Em ultima pagina,
              actions assume o lugar (renderActions abaixo); em intermediaria,
              nextBtn vira "Continuar ▸" sem hint "(pular)" do CSS. */
-          var nextBtnNat = document.getElementById('enc-next');
+          var nextBtnNat = card.querySelector('#enc-next');
           if (nextBtnNat) {
             if (state.isLastPage) {
               nextBtnNat.style.visibility = 'hidden';
@@ -1482,6 +1484,26 @@
           setTimeout(typeNextSentence, GAP_BETWEEN_STROPHES);
           return;
         }
+
+        // Ordem do Usuário 2026-10: Estrofe repetida já ouvida/lida NÃO reexecuta
+        // máquina de escrever lenta — exibe o texto instantaneamente (0ms) e avança!
+        if (state.sentenceIdx === 0 && sd.line && sd.line.text && _isTextSeen(sd.line.text)) {
+          sd.container.classList.add('typing-started');
+          sd.container.style.visibility = '';
+          sd.container.innerHTML = '';
+          for (var sIdx = 0; sIdx < sd.sentences.length; sIdx++) {
+            if (sIdx > 0) sd.container.appendChild(document.createTextNode(' '));
+            var spanSeen = document.createElement('span');
+            spanSeen.className = 'enc-sentence';
+            spanSeen.innerHTML = sd.sentences[sIdx];
+            sd.container.appendChild(spanSeen);
+          }
+          state.stropheIdx++;
+          state.sentenceIdx = 0;
+          typeNextSentence();
+          return;
+        }
+
         if (state.sentenceIdx === 0) {
           sd.container.classList.add('typing-started');
           sd.container.style.visibility = '';  /* revela a estrofe ao INICIAR a digitacao */
@@ -1534,7 +1556,7 @@
         }
       });
 
-      var pageInd = document.getElementById('enc-page-ind');
+      var pageInd = card.querySelector('#enc-page-ind');
       if (pageInd) {
         if (pages.length > 1) {
           pageInd.textContent = (idx + 1) + ' / ' + pages.length;
@@ -1543,7 +1565,7 @@
           pageInd.style.display = 'none';
         }
       }
-      var prevBtn = document.getElementById('enc-prev');
+      var prevBtn = card.querySelector('#enc-prev');
       if (prevBtn) {
         prevBtn.disabled = idx === 0;
         /* Sessao #42 (2026-05-27): esconde "Anterior" se 1 pagina (nao tem
@@ -1551,7 +1573,7 @@
            pra UI ficar limpa. */
         prevBtn.style.visibility = (idx === 0) ? 'hidden' : 'visible';
       }
-      var nextBtn = document.getElementById('enc-next');
+      var nextBtn = card.querySelector('#enc-next');
       var isLastPage = idx === pages.length - 1;
       /* sessão #90: ao (re)renderizar QUALQUER página, limpa a ação que
          renderActions tinha colocado na nav band da última página e restaura o
@@ -1640,7 +1662,7 @@
       /* Sessao #42 (2026-05-27) + Fix 2026-10: apos pular typewriter, atualiza nextBtn:
          - Ultima pagina -> hidden + display:none (actions choices aparece em renderActions)
          - Pagina intermediaria -> "Continuar ▸" com visibilidade e display garantidos */
-      var nextBtn = document.getElementById('enc-next');
+      var nextBtn = card.querySelector('#enc-next');
       if (nextBtn) {
         if (st.isLastPage) {
           nextBtn.style.visibility = 'hidden';
@@ -1690,9 +1712,17 @@
          typewriter-finish + click-to-skip) — sem isso, duplicaria o botão. */
       var prevNavAction = nav.querySelector('.enc-nav-action');
       if (prevNavAction) prevNavAction.remove();
-      var encNext = document.getElementById('enc-next');
+      var encNext = card.querySelector('#enc-next');
       var choices = dialogue.choices || [];
       if (choices.length === 0) {
+        if (opts.pendingRemote) {
+          if (encNext) {
+            encNext.style.display = '';
+            encNext.style.visibility = 'visible';
+            encNext.textContent = 'Continuar ▸';
+          }
+          return;
+        }
         /* Anti-trap (sessão #88): última página sem choices virava modal SEM
            SAÍDA no mobile (<dialog> showModal, sem ESC no Telegram WebView,
            nextBtn hidden, X só com opts.closeable). Fallback: botão Fechar. */
@@ -1796,8 +1826,8 @@
       close();
     }
 
-    var prevBtn = document.getElementById('enc-prev');
-    var nextBtn = document.getElementById('enc-next');
+    var prevBtn = card.querySelector('#enc-prev');
+    var nextBtn = card.querySelector('#enc-next');
     if (prevBtn) prevBtn.onclick = function(e) {
       if (e) e.stopPropagation();
       if (currentPage > 0) { currentPage--; renderPage(currentPage); }
@@ -1805,10 +1835,7 @@
     if (nextBtn) nextBtn.onclick = function(e) {
       if (e) e.stopPropagation();
       /* Sessao #42 (2026-05-27): UX visual-novel — primeiro click PULA typewriter
-         se ainda rodando, segundo click avanca. Antes: click avancava direto sem
-         dar chance de ver texto, OU travava sem pular em viewport pequeno + fonte
-         grande quando nav original (opacity:0) ficava invisivel. Agora nav
-         sempre visivel + skip-then-advance funciona consistente. */
+         se ainda rodando, segundo click avanca. */
       var st = _currentRenderState;
       if (st && !st.skipped && !body.classList.contains('revealed')) {
         _instantReveal();
@@ -1818,6 +1845,89 @@
     };
 
     renderPage(0);
+
+    _activeEncounterInstance = {
+      dialogue: dialogue,
+      opts: opts,
+      card: card,
+      getPages: function() { return pages; },
+      setPages: function(p) { pages = p; },
+      getCurrentPage: function() { return currentPage; },
+      setCurrentPage: function(cp) { currentPage = cp; },
+      renderPage: renderPage,
+      renderActions: renderActions
+    };
+  }
+
+  /* Conexão transparente com dados remotos (Ordem do Usuário 2026-10):
+     Permite que o diálogo abra a 0ms com narração de aproximação do Mestre e,
+     quando a rota HTTP/WebSocket retornar dados dinâmicos, anexe as falas e
+     escolhas sem resetar o card, sem reiniciar a animação e sem cortar botões. */
+  function attachData(data, newOpts) {
+    if (!_activeEncounterInstance || !isOpen()) return false;
+    var inst = _activeEncounterInstance;
+    var dialogue = inst.dialogue;
+    newOpts = newOpts || {};
+
+    if (data.choices) dialogue.choices = data.choices;
+    if (newOpts.onChoice) inst.opts.onChoice = newOpts.onChoice;
+
+    if (data.npc && (!dialogue.npc || !dialogue.npc.name || dialogue.npc.name === 'Valdoria')) {
+      dialogue.npc = _vNpcResolve(data.npc, inst.opts) || data.npc;
+      var nameEl = inst.card.querySelector('.enc-name');
+      if (nameEl && dialogue.npc.name) nameEl.textContent = dialogue.npc.name;
+      var descEl = inst.card.querySelector('.enc-desc');
+      if (descEl && dialogue.npc.desc) descEl.textContent = dialogue.npc.desc;
+    }
+
+    var existingScript = dialogue.script || [];
+    var incomingScript = (data.script && Array.isArray(data.script)) ? data.script : [];
+    var combinedScript = existingScript.slice();
+    incomingScript.forEach(function(incLine) {
+      if (!incLine) return;
+      var isDup = combinedScript.some(function(extLine) {
+        return extLine && extLine.text && _normalizeTextForSeen(extLine.text) === _normalizeTextForSeen(incLine.text);
+      });
+      if (!isDup) {
+        combinedScript.push(incLine);
+      }
+    });
+    dialogue.script = combinedScript;
+
+    var newPages = _groupScriptIntoPages(combinedScript);
+    inst.setPages(newPages);
+
+    var curPage = inst.getCurrentPage();
+    var isLastPage = curPage >= newPages.length - 1;
+
+    var pageInd = inst.card.querySelector('#enc-page-ind');
+    if (pageInd) {
+      if (newPages.length > 1) {
+        pageInd.textContent = (curPage + 1) + ' / ' + newPages.length;
+        pageInd.style.display = '';
+      } else {
+        pageInd.style.display = 'none';
+      }
+    }
+
+    var st = _currentRenderState;
+    if (st) {
+      st.isLastPage = isLastPage;
+      var nextBtn = inst.card.querySelector('#enc-next');
+      if (nextBtn) {
+        if (!isLastPage) {
+          var staleAction = inst.card.querySelector('.enc-nav-action');
+          if (staleAction) staleAction.remove();
+          nextBtn.style.visibility = 'visible';
+          nextBtn.style.display = '';
+          nextBtn.removeAttribute('disabled');
+          nextBtn.textContent = 'Continuar ▸';
+        } else if (st.skipped) {
+          inst.renderActions();
+        }
+      }
+    }
+    return true;
   }
 
   function close() {
@@ -1830,6 +1940,7 @@
     // task #69: use <dialog>.close() nativo (libera top-layer, restaura focus)
     _closeOverlay(ov);
     _currentRenderState = null;
+    _activeEncounterInstance = null;
   }
 
   function isOpen() {
@@ -1841,6 +1952,7 @@
   // === Public API ===========================================================
   window.vEncounter = {
     render: render,
+    attachData: attachData,
     close: close,
     isOpen: isOpen,
     /* task #49 (2026-05-20) — Choice sub-overlay AAA: módulo público

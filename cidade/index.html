@@ -58240,7 +58240,7 @@ function _openCityDialogue(venue, node, p){
       npc: approach.npc,
       script: [{ type: 'dm', text: approach.narration }],
       choices: []
-    }, { player: p, closeable: true });
+    }, { player: p, closeable: true, pendingRemote: true });
   }
 
   window.vCityServer.cityAction('dialogue.get', { venue: venue, node: node }).then(function(data){
@@ -58249,12 +58249,39 @@ function _openCityDialogue(venue, node, p){
       try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
       return;
     }
-    // Prepend a narrativa de aproximação do Mestre como Página 1 da conversa:
-    // o jogador tem a descrição narrativa sensorial antes das falas dos personagens.
-    if (data.script && Array.isArray(data.script) && approach.narration) {
-      data.script = [{ type: 'dm', text: approach.narration }].concat(data.script);
+
+    var choiceHandler = function(ch){
+      var npcId = (data && data.npc && (data.npc.id || data.npc.npc_id)) || '';
+      if (venue === 'recruta') {
+        if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} return; }
+        var nextNode = (ch && ch.node) || (data.node) || npcId;
+        _resolveCityChoice('recruta', nextNode, ch && ch.id, p, data.npc, { npcId: npcId });
+        return;
+      }
+      if (ch && ch.screen && /^bank_(deposit|withdraw)_custom$/.test(ch.screen)) {
+        _bankCustomAmount(ch.screen, p, data.npc);
+      }
+      else if (ch && (ch.screen === 'tavern_board_menu' || ch.screen === 'tavern_bulletin_open')) {
+        try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
+        _tavernShowMuralBoard(p);
+      }
+      else if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
+      else if (data && data.node) { _resolveCityChoice(venue, data.node, ch && ch.id, p, data.npc); }
+      else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
+    };
+
+    var attached = false;
+    if (window.vEncounter && typeof window.vEncounter.attachData === 'function') {
+      attached = window.vEncounter.attachData(data, { onChoice: choiceHandler });
     }
-    _renderCityDialogue(venue, data, p);
+    if (!attached) {
+      // Prepend a narrativa de aproximação do Mestre como Página 1 da conversa:
+      // o jogador tem a descrição narrativa sensorial antes das falas dos personagens.
+      if (data.script && Array.isArray(data.script) && approach.narration) {
+        data.script = [{ type: 'dm', text: approach.narration }].concat(data.script);
+      }
+      _renderCityDialogue(venue, data, p);
+    }
   }).catch(function(e){
     console.error('[CITY-DIALOGUE] get failed', e);
     if (typeof vToast === 'function') vToast('Erro ao abrir o diálogo.', 'warn');
