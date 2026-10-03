@@ -383,16 +383,17 @@ body.perf-lite #encounter-overlay.active .enc-card {
 .enc-body {
   position: relative;
   padding: 14px var(--v-space-xl, 16px) 14px;
-  /* flex: 1 1 0 com flex-basis zero permite que o item encolha perfeitamente
-     e nunca empurre a nav bar para fora do card, capado em 95dvh - 140px. */
-  flex: 1 1 0;
-  min-height: 0;
-  max-height: calc(95dvh - 140px);
+  /* flex: 1 1 0px com flex-basis zero permite que o item encolha perfeitamente
+     e nunca empurre a nav bar para fora do card, capado em 95dvh - 135px. */
+  flex: 1 1 0px !important;
+  min-height: 0px !important;
+  max-height: calc(95dvh - 135px);
   display: flex;
   flex-direction: column;
   gap: var(--v-space-md-lg, 10px);
   justify-content: flex-start;
-  overflow-y: auto;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
   /* Indicação visual de scroll quando texto excede body */
   scrollbar-width: thin;
   scrollbar-color: var(--v-gold-30) transparent;
@@ -822,7 +823,7 @@ body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
   padding: 9px 14px;
   border-top: 1px solid var(--v-gold-35);
   background: rgba(15, 12, 8, 0.55);
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
   min-height: 48px;
   margin-top: auto;
   z-index: 10;

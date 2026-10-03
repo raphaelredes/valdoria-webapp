@@ -224,9 +224,20 @@
   var _SEEN_TEXTS_STORAGE_KEY = 'valdoria_seen_dialogues_v1';
   var _seenTextsSet = null;
 
-  function _dialogueTextHash(text) {
+  function _normalizeTextForSeen(text) {
     if (!text) return '';
-    var str = String(text).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+    return String(text)
+      .replace(/<[^>]+>/g, '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function _dialogueTextHash(text) {
+    var str = _normalizeTextForSeen(text);
+    if (!str) return '';
     var h = 0;
     for (var i = 0; i < str.length; i++) {
       h = Math.imul(31, h) + str.charCodeAt(i) | 0;
@@ -1494,9 +1505,11 @@
       var textLines = page.filter(function(l) {
         return l && (l.type === 'speech' || l.type === 'narration' || l.type === 'dm') && l.text;
       });
-      var isPageRepeated = textLines.length > 0 && textLines.every(function(l) {
-        return _isTextSeen(l.text);
-      });
+      var hasSpeech = textLines.some(function(l) { return l.type === 'speech'; });
+      var isPageRepeated = textLines.length > 0 && (
+        (hasSpeech && textLines.some(function(l) { return l.type === 'speech' && _isTextSeen(l.text); })) ||
+        textLines.every(function(l) { return _isTextSeen(l.text); })
+      );
 
       if (isPageRepeated) {
         _instantReveal();
@@ -1507,6 +1520,18 @@
       // Marca textos desta página como vistos para as próximas visitas
       textLines.forEach(function(l) {
         _markTextSeen(l.text);
+      });
+
+      // Safety layout preventivo: garante que body nunca empurre nav para fora do card
+      requestAnimationFrame(function() {
+        var headerEl = card.querySelector('.enc-header');
+        var navEl = card.querySelector('.enc-nav');
+        var hH = headerEl ? headerEl.offsetHeight : 70;
+        var nH = navEl ? navEl.offsetHeight : 48;
+        var maxAllowedBody = card.clientHeight - hH - nH;
+        if (maxAllowedBody > 60 && body.scrollHeight > maxAllowedBody) {
+          body.style.maxHeight = maxAllowedBody + 'px';
+        }
       });
 
       var pageInd = document.getElementById('enc-page-ind');
