@@ -58553,8 +58553,26 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
         );
         return;
       }
+      var targetNpc = data.npc || npc || { name: 'Martha' };
+      // Guarda Anti-Incoerência (Ordem do Usuário 2026-10): se o script de resultado
+      // tiver falas de um personagem específico (ex: Lyra Cantarriba), o cabeçalho do
+      // diálogo JAMAIS pode exibir o dono do estabelecimento (ex: Grom, o Caolho).
+      var speeches = (data.result_script || []).filter(function(s){ return s && s.type === 'speech' && s.speaker; });
+      if (speeches.length > 0) {
+        var spkName = speeches[0].speaker;
+        var allSame = speeches.every(function(s){ return s.speaker === spkName; });
+        if (allSame && targetNpc.name !== spkName) {
+          if (npc && npc.name === spkName) {
+            targetNpc = npc;
+          } else if (typeof _CITY_APPROACH_SCENES !== 'undefined' && _CITY_APPROACH_SCENES[venue + ':' + (data.node || '')] && _CITY_APPROACH_SCENES[venue + ':' + (data.node || '')].npc && _CITY_APPROACH_SCENES[venue + ':' + (data.node || '')].npc.name === spkName) {
+            targetNpc = _CITY_APPROACH_SCENES[venue + ':' + (data.node || '')].npc;
+          } else if (spkName === 'Lyra Cantarriba') {
+            targetNpc = { name: 'Lyra Cantarriba', desc: 'Bardisa · broche de pena do Conservatório de Valdoria', portrait: '../shared/img/npcs/lyra-bardisa.webp' };
+          }
+        }
+      }
       window.vEncounter.render(
-        { npc: data.npc || npc || { name: 'Martha' }, script: data.result_script, choices: [{ id: 'done', label: '↩ Voltar' }] },
+        { npc: targetNpc, script: data.result_script, choices: [{ id: 'done', label: '↩ Voltar' }] },
         { player: p, onChoice: function(){
             try { window.vEncounter.close(); } catch(_){}
             if (typeof refreshHud === 'function') refreshHud();

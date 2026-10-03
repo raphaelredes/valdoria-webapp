@@ -1107,6 +1107,27 @@
       var _nrmNpc = _vNpcResolve(dialogue.npc, opts);
       if (_nrmNpc) dialogue.npc = _nrmNpc;
     }
+    // Guarda Anti-Incoerência no motor vEncounter (Ordem do Usuário 2026-10):
+    // Se o dialogue.script tem falas onde TODOS os falantes são um único personagem
+    // nomeado (ex: 'Lyra Cantarriba'), mas dialogue.npc tem outro nome (ex: 'Grom, o Caolho'),
+    // NUNCA exibir o NPC incongruente no cabeçalho do encontro.
+    var _speeches = (_scriptIn || []).filter(function(s){ return s && s.type === 'speech' && s.speaker; });
+    if (_speeches.length > 0) {
+      var _firstSpk = _speeches[0].speaker;
+      var _allSame = _speeches.every(function(s){ return s.speaker === _firstSpk; });
+      if (_allSame && dialogue.npc && dialogue.npc.name && dialogue.npc.name !== _firstSpk) {
+        if (opts && opts.fallbackNpc && opts.fallbackNpc.name === _firstSpk) {
+          dialogue.npc = _vNpcResolve(opts.fallbackNpc, opts) || dialogue.npc;
+        } else if (_firstSpk === 'Lyra Cantarriba') {
+          dialogue.npc = {
+            id: 'npc_tavern_lyra',
+            name: 'Lyra Cantarriba',
+            desc: 'Bardisa · broche de pena do Conservatório de Valdoria',
+            portrait: '../shared/img/npcs/lyra-bardisa.webp'
+          };
+        }
+      }
+    }
     var npcPortrait = (dialogue.npc && dialogue.npc.portrait) || '';
     /* Sessão #28 (2026-05-24): suporte a portraitHTML — HTML pronto (ex: SVG
        sprite ou <img> de PNG de classe) em vez de URL pra <img src=...>.
