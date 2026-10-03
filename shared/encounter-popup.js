@@ -218,6 +218,54 @@
     return parts.map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
   }
 
+  /* Sistema de Histórico de Textos Vistos (Ordem do Usuário 2026-10):
+     Evita repetição maçante de efeito de máquina de escrever para diálogos/narrativas
+     que o jogador já leu anteriormente. Hashes compactos persistidos em localStorage. */
+  var _SEEN_TEXTS_STORAGE_KEY = 'valdoria_seen_dialogues_v1';
+  var _seenTextsSet = null;
+
+  function _dialogueTextHash(text) {
+    if (!text) return '';
+    var str = String(text).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+    var h = 0;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+    }
+    return (h >>> 0).toString(36);
+  }
+
+  function _getSeenTexts() {
+    if (_seenTextsSet) return _seenTextsSet;
+    try {
+      var raw = localStorage.getItem(_SEEN_TEXTS_STORAGE_KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      _seenTextsSet = new Set(Array.isArray(arr) ? arr : []);
+    } catch (_e) {
+      _seenTextsSet = new Set();
+    }
+    return _seenTextsSet;
+  }
+
+  function _markTextSeen(text) {
+    var hash = _dialogueTextHash(text);
+    if (!hash) return;
+    var set = _getSeenTexts();
+    if (!set.has(hash)) {
+      set.add(hash);
+      try {
+        var arr = Array.from(set);
+        if (arr.length > 2000) arr = arr.slice(arr.length - 2000);
+        localStorage.setItem(_SEEN_TEXTS_STORAGE_KEY, JSON.stringify(arr));
+      } catch (_e) {}
+    }
+  }
+
+  function _isTextSeen(text) {
+    var hash = _dialogueTextHash(text);
+    if (!hash) return false;
+    return _getSeenTexts().has(hash);
+  }
+
   /* Agrupa estrofes em páginas (canonical PADRAO_ALDRIC):
      - Até 2 estrofes por página
      - Até 10 sentences por página
@@ -1387,7 +1435,7 @@
          overflow-y:auto ativa scroll interno, nav+actions FICAM VISIVEIS. */
       var headerH = header ? header.offsetHeight : 60;
       var navOuterH = card.querySelector('.enc-nav')?.offsetHeight || 50;
-      var ACTIONS_RESERVED = 100;
+      var ACTIONS_RESERVED = (idx === pages.length - 1) ? 100 : 0;
       var PADDING_TOLERANCE = 40;
       var maxAllowed = Math.max(
         120,
@@ -1425,6 +1473,7 @@
         if (state.stropheIdx >= state.strophes.length) {
           state.skipped = true;
           body.classList.add('revealed');
+          body.style.minHeight = '';
           /* Sessao #42 (2026-05-27): apos typewriter natural completar,
              atualiza nextBtn (mesma logica do _instantReveal). Em ultima pagina,
              actions assume o lugar (renderActions abaixo); em intermediaria,
@@ -1433,8 +1482,12 @@
           if (nextBtnNat) {
             if (state.isLastPage) {
               nextBtnNat.style.visibility = 'hidden';
+              nextBtnNat.style.display = 'none';
             } else {
               nextBtnNat.textContent = 'Continuar ▸';
+              nextBtnNat.style.visibility = 'visible';
+              nextBtnNat.style.display = '';
+              nextBtnNat.removeAttribute('disabled');
             }
           }
           // task #55 (2026-05-20) — user pediu: "Escolher ação" só APÓS dialogue
@@ -1466,7 +1519,26 @@
         });
         state.activeTypewriters.push(tw);
       }
-      typeNextSentence();
+
+      /* Ordem do Usuário 2026-10: Diálogos/narrativas que estão repetindo não precisam
+         mostrar animação de escrita de texto (design visual) pois o jogador já leu. */
+      var textLines = page.filter(function(l) {
+        return l && (l.type === 'speech' || l.type === 'narration' || l.type === 'dm') && l.text;
+      });
+      var isPageRepeated = textLines.length > 0 && textLines.every(function(l) {
+        return _isTextSeen(l.text);
+      });
+
+      if (isPageRepeated) {
+        _instantReveal();
+      } else {
+        typeNextSentence();
+      }
+
+      // Marca textos desta página como vistos para as próximas visitas
+      textLines.forEach(function(l) {
+        _markTextSeen(l.text);
+      });
 
       var pageInd = document.getElementById('enc-page-ind');
       if (pageInd) {
@@ -1570,27 +1642,44 @@
         st.sentenceIdx = 0;
       }
       body.classList.add('revealed');
-      /* Sessao #42 (2026-05-27): apos pular typewriter, atualiza nextBtn:
-         - Ultima pagina -> hidden (actions choices aparece em renderActions)
-         - Pagina intermediaria -> "Continuar ▸" (sem mais hint "(pular)"
-           pois CSS :not(.revealed) deixou de matchar quando .revealed foi
-           adicionada). */
+      body.style.minHeight = '';
+      /* Sessao #42 (2026-05-27) + Fix 2026-10: apos pular typewriter, atualiza nextBtn:
+         - Ultima pagina -> hidden + display:none (actions choices aparece em renderActions)
+         - Pagina intermediaria -> "Continuar ▸" com visibilidade e display garantidos */
       var nextBtn = document.getElementById('enc-next');
       if (nextBtn) {
         if (st.isLastPage) {
           nextBtn.style.visibility = 'hidden';
+          nextBtn.style.display = 'none';
         } else {
           nextBtn.textContent = 'Continuar ▸';
+          nextBtn.style.visibility = 'visible';
+          nextBtn.style.display = '';
+          nextBtn.removeAttribute('disabled');
         }
       }
       // task #55 (2026-05-20) — user pediu: "Escolher ação" só APÓS dialogue
       // terminar. Em click-to-skip também precisa mostrar actions.
       if (st.isLastPage) renderActions();
     }
-    body.addEventListener('click', function(e) {
-      if (e.target.closest('button, a')) return;
-      if (body.classList.contains('revealed')) return;
-      _instantReveal();
+
+    /* Navegação por toque em card/corpo (Ordem do Usuário 2026-10):
+       1) Toque durante typewriter -> revela texto imediatamente.
+       2) Toque quando já revelado em página intermediária -> avança para a próxima página. */
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('button, a, input, select, textarea, .enc-portrait, .enc-card-close, [data-interactive]')) {
+        return;
+      }
+      var st = _currentRenderState;
+      if (!st) return;
+      if (!st.skipped && !body.classList.contains('revealed')) {
+        _instantReveal();
+        return;
+      }
+      if (currentPage < pages.length - 1) {
+        currentPage++;
+        renderPage(currentPage);
+      }
     });
 
     /* 2026-05-20 task #49 — AAA choice sub-overlay (reabrível).
@@ -1715,10 +1804,12 @@
 
     var prevBtn = document.getElementById('enc-prev');
     var nextBtn = document.getElementById('enc-next');
-    if (prevBtn) prevBtn.onclick = function() {
+    if (prevBtn) prevBtn.onclick = function(e) {
+      if (e) e.stopPropagation();
       if (currentPage > 0) { currentPage--; renderPage(currentPage); }
     };
-    if (nextBtn) nextBtn.onclick = function() {
+    if (nextBtn) nextBtn.onclick = function(e) {
+      if (e) e.stopPropagation();
       /* Sessao #42 (2026-05-27): UX visual-novel — primeiro click PULA typewriter
          se ainda rodando, segundo click avanca. Antes: click avancava direto sem
          dar chance de ver texto, OU travava sem pular em viewport pequeno + fonte
