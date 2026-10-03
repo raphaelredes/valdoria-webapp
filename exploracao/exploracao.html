@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-03T00:46:59Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-03T03:53:26Z - do not edit directly, edit source -->
 
 
 
@@ -15412,6 +15412,7 @@ window.__explFetchTO = function(url, opts, ms) {
             window.S.player.cls = window.S.player.char_class;
             window.S.player.race = res.player.race || window.S.player.race || '';
             window.S.player.subrace = res.player.subrace || window.S.player.subrace || '';
+            window.S.player.subclass = res.player.subclass || window.S.player.subclass || '';
             if (res.player.abilities) window.S.player.abilities = Object.assign(window.S.player.abilities || {}, res.player.abilities);
             if (res.player.stats) window.S.player.stats = Object.assign(window.S.player.stats || {}, res.player.stats);
           } else if (res.state) {
@@ -15420,6 +15421,9 @@ window.__explFetchTO = function(url, opts, ms) {
               window.S.player.hero_class = res.state.char_class;
               window.S.player.cls = res.state.char_class;
             }
+            if (res.state.race) window.S.player.race = res.state.race;
+            if (res.state.subrace) window.S.player.subrace = res.state.subrace;
+            if (res.state.subclass) window.S.player.subclass = res.state.subclass;
             if (res.state.abilities) {
               window.S.player.abilities = Object.assign(window.S.player.abilities || {}, res.state.abilities);
             }
@@ -40679,6 +40683,27 @@ function classCanTakeChoice(ch, clsKey, bg, align, allies) {
   if (ch.ally_interaction) {
     if (!allies || allies.length === 0) return false;
   }
+  // only_race: string ou array
+  if (ch.only_race) {
+    const curRace = (window.S && window.S.player && (window.S.player.race || window.S.player.raca)) || '';
+    const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const list = (Array.isArray(ch.only_race) ? ch.only_race : [ch.only_race]).map(norm);
+    if (!list.includes(norm(curRace))) return false;
+  }
+  // only_subrace: string ou array
+  if (ch.only_subrace) {
+    const curSubrace = (window.S && window.S.player && window.S.player.subrace) || '';
+    const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/-/g, '_');
+    const list = (Array.isArray(ch.only_subrace) ? ch.only_subrace : [ch.only_subrace]).map(norm);
+    if (!list.includes(norm(curSubrace))) return false;
+  }
+  // only_subclass: string ou array
+  if (ch.only_subclass) {
+    const curSubclass = (window.S && window.S.player && window.S.player.subclass) || '';
+    const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/-/g, '_');
+    const list = (Array.isArray(ch.only_subclass) ? ch.only_subclass : [ch.only_subclass]).map(norm);
+    if (!list.includes(norm(curSubclass))) return false;
+  }
   // class_tags legado: 'arcane'=mago, 'martial'=guerreiro, 'stealth'=ladino, 'divine'=clerigo
   if (ch.class_tags) {
     const tagMap = { mago: 'arcane', guerreiro: 'martial', ladino: 'stealth', clerigo: 'divine' };
@@ -46490,6 +46515,8 @@ function boot() {
                 }
                 if (_ss.name) S.player.name = _ss.name;
                 if (_ss.race) S.player.race = _ss.race;
+                if (_ss.subrace) S.player.subrace = _ss.subrace;
+                if (_ss.subclass) S.player.subclass = _ss.subclass;
                 if (typeof _ss.level === 'number' && _ss.level > 0) {
                   S.player.level = _ss.level; S.player.lvl = _ss.level;
                 }
