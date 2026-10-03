@@ -10715,7 +10715,7 @@ window.__onIntroTap = function() {
           }
         } catch(_e) {}
         window.vEncounter.openChoices(normChoices, {
-          title: 'Escolher ação',
+          title: (rt && (rt.title || (rt.event && rt.event.title))) || 'Escolher ação',
           npcName: npcName,
           onChoice: function(normCh) {
             var original = normCh._original || normCh;
