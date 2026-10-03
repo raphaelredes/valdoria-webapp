@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-01T17:00:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-03T00:46:59Z - do not edit directly, edit source -->
 
 
 
@@ -15628,9 +15628,62 @@ window.__explFetchTO = function(url, opts, ms) {
     + ' api_base=' + API_BASE);
 })();
 
-// Resiliência de Conexão (Online/Offline) — Recuperação Automática de Estado
+// Resiliência de Conexão (Online/Offline) — Fila de Ações e Recuperação Automática de Estado
+window.__queueOfflineAction = function(action) {
+  try {
+    var raw = localStorage.getItem('valdoria_offline_actions_v1');
+    var q = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(q)) q = [];
+    q.push(action);
+    localStorage.setItem('valdoria_offline_actions_v1', JSON.stringify(q));
+    console.info('[OFFLINE_QUEUE] Ação enfileirada:', action.type);
+  } catch (e) {
+    console.warn('[OFFLINE_QUEUE] Falha ao enfileirar ação offline:', e);
+  }
+};
+
+window.__flushOfflineQueue = async function() {
+  try {
+    var raw = localStorage.getItem('valdoria_offline_actions_v1');
+    if (!raw) return;
+    var q = JSON.parse(raw);
+    if (!Array.isArray(q) || q.length === 0) return;
+    console.info('[OFFLINE_QUEUE] Sincronizando ' + q.length + ' ações offline com o servidor...');
+    while (q.length > 0) {
+      var act = q[0];
+      if (act.type === 'rest_short') {
+        if (window.ExploracaoAPI && typeof window.ExploracaoAPI.restShort === 'function') {
+          var res = await window.ExploracaoAPI.restShort();
+          if (res && res.ok && window.S && S.player && typeof _applyServerShortRest === 'function') {
+            _applyServerShortRest(S.player, res.healed, res.state);
+          }
+        }
+      } else if (act.type === 'rest_long') {
+        if (window.ExploracaoAPI && typeof window.ExploracaoAPI.restLong === 'function') {
+          await window.ExploracaoAPI.restLong();
+        }
+      } else if (act.type === 'use_item' && act.item) {
+        if (window.ExploracaoAPI && typeof window.ExploracaoAPI.useItem === 'function') {
+          await window.ExploracaoAPI.useItem(act.item);
+        }
+      }
+      q.shift();
+      localStorage.setItem('valdoria_offline_actions_v1', JSON.stringify(q));
+    }
+    localStorage.removeItem('valdoria_offline_actions_v1');
+    if (typeof vToast === 'function') {
+      vToast('Ações offline sincronizadas com o servidor.', 'info', 3000);
+    }
+  } catch (e) {
+    console.warn('[OFFLINE_QUEUE] Erro no flush da fila offline:', e);
+  }
+};
+
 window.addEventListener('online', function() {
   console.info('[E-REM:NET] Conexão reestabelecida (online).');
+  if (typeof window.__flushOfflineQueue === 'function') {
+    window.__flushOfflineQueue();
+  }
   if (window.ExploracaoAPI && typeof window.ExploracaoAPI.move === 'function' && window.S && window.S.player) {
     var _c = (window.__pendingExplorationSync && typeof window.__pendingExplorationSync.col === 'number')
       ? window.__pendingExplorationSync.col : S.player.col;
@@ -36862,6 +36915,7 @@ function _vinvExpBuildConfig() {
                 if (typeof res.state.hp === 'number') S.player.hp = res.state.hp;
                 if (typeof res.state.mp === 'number') S.player.mp = res.state.mp;
                 if (typeof updateHud === 'function') updateHud();
+                if (typeof _persistLocalStats === 'function') _persistLocalStats();
               }
             } catch (_eHud) {}
             // Reflete o consumo no cache do inventário do servidor (fonte da mochila).
@@ -36896,8 +36950,11 @@ function _vinvExpBuildConfig() {
             _applyAfterRoll();
           }
         }).catch(function (err) {
-          console.warn('[vInventory] use_item err:', err);
-          if (typeof vToast === 'function') vToast('Falha ao usar ' + item.name + ' (rede).', 'warn');
+          console.warn('[vInventory] use_item err, offline queue:', err);
+          if (typeof window.__queueOfflineAction === 'function') {
+            window.__queueOfflineAction({ type: 'use_item', item: item.name, ts: Date.now() });
+          }
+          if (typeof vToast === 'function') vToast('Falha na rede ao usar ' + item.name + ' (enfileirado para sincronização).', 'warn');
         });
         return;
       }
@@ -36913,6 +36970,7 @@ function _vinvExpBuildConfig() {
           if (window.S && S.player) {
             S.player.hp = Math.min(S.player.mhp || 20, (S.player.hp || 10) + localTotal);
             if (typeof updateHud === 'function') updateHud();
+            if (typeof _persistLocalStats === 'function') _persistLocalStats();
           }
           if (typeof vToast === 'function') vToast(item.name + ': +' + localTotal + ' PV [Modo Local]', 'ok');
           try {
@@ -42133,6 +42191,61 @@ function _animatePotionHealDice(rolls, dieSize, bonus, actualHeal, formulaStr, i
   setTimeout(wrappedShow, 600);
 }
 
+// Persistência local imediata de vitais (resiliência contra fechamento de janela e modo offline)
+function _persistLocalStats() {
+  try {
+    if (!window.S || !S.player) return;
+    var p = S.player;
+    var _cidKey = (p.char_id) ? String(p.char_id) : 'default';
+    var _stObj = {
+      hp: (typeof p.hp === 'number') ? p.hp : 10,
+      max_hp: (typeof p.mhp === 'number') ? p.mhp : 10,
+      mp: (typeof p.mp === 'number') ? p.mp : 0,
+      max_mp: (typeof p.mmp === 'number') ? p.mmp : 0,
+      hd: (typeof p.hd === 'number') ? p.hd : 1,
+      max_hd: (typeof p.mhd === 'number') ? p.mhd : 1,
+      exhaustion: (typeof p.exh === 'number') ? p.exh : 0,
+      ac: (typeof window.__EXPLORE_SERVER_AC === 'number') ? window.__EXPLORE_SERVER_AC : (p.ac || 10)
+    };
+    var _rawSt = JSON.stringify(_stObj);
+    localStorage.setItem('valdoria_shared_stats_v1_' + _cidKey, _rawSt);
+    localStorage.setItem('valdoria_shared_stats_v1', _rawSt);
+    if (typeof saveGame === 'function') saveGame();
+  } catch (e) {
+    console.warn('[SAVE] _persistLocalStats failed:', e);
+  }
+}
+
+function _doOfflineShortRest(p) {
+  var dieSides = _shortRestDieFor(p.cls_key);
+  var conMod = (p.mods && typeof p.mods.con === 'number') ? p.mods.con : 0;
+  var roll = _rollDie(dieSides);
+  var heal = Math.max(1, roll + conMod);
+  var preHp = p.hp;
+  var projHp = Math.min(p.mhp, p.hp + heal);
+  var actual = projHp - preHp;
+  var fullHp = (actual === 0 && projHp >= p.mhp);
+
+  _animateHealDie(dieSides, roll, conMod, actual, fullHp, function () {
+    p.hp = projHp;
+    p.hd = Math.max(0, (p.hd || 0) - 1);
+    var fullHpNote = (actual === 0 && p.hp === p.mhp) ? ' (HP já cheio — HD gasto)' : '';
+    var status = document.getElementById('camp-footer-status');
+    var msg = 'Descanso Curto (Offline): 1d' + dieSides + '=' + roll
+      + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ') = +' + actual
+      + ' HP' + fullHpNote + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
+    if (status) status.textContent = msg;
+    if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
+    _persistLocalStats();
+    if (typeof window.__queueOfflineAction === 'function') {
+      window.__queueOfflineAction({ type: 'rest_short', ts: Date.now() });
+    }
+    _updateCampHud();
+    _updateCampDetails();
+    if (typeof updateHud === 'function') updateHud();
+  });
+}
+
 // H2: aplica o resultado AUTORITATIVO do servidor (cliente só renderiza).
 function _applyServerShortRest(p, healed, serverState) {
   var preHp = p.hp;
@@ -42140,6 +42253,7 @@ function _applyServerShortRest(p, healed, serverState) {
   else p.hp = Math.min(p.mhp, p.hp + (healed.hp || 0));
   if (typeof healed.hit_dice_left === 'number') p.hd = healed.hit_dice_left;
   else if (serverState && typeof serverState.hit_dice === 'number') p.hd = serverState.hit_dice;
+  if (serverState && typeof serverState.mp === 'number') p.mp = serverState.mp;
   var actual = p.hp - preHp;
   var die = healed.die || _shortRestDieFor(p.cls_key);
   var conMod = (typeof healed.con_mod === 'number') ? healed.con_mod : 0;
@@ -42154,6 +42268,7 @@ function _applyServerShortRest(p, healed, serverState) {
   if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
   try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done_server',
     { die: die, rolled: healed.rolled, heal_actual: actual, hp: p.hp, hd: p.hd }); } catch (_) {}
+  _persistLocalStats();
   _updateCampHud();
   _updateCampDetails();
   if (typeof updateHud === 'function') updateHud();
@@ -42180,17 +42295,22 @@ function doShortRest() {
   // HP/HD. O cliente NÃO rola nem aplica localmente — antes rolava _rollDie(8)
   // HARDCODED (errado p/ Mago d6, Guerreiro d10, Bárbaro d12) e ignorava
   // res.healed, exibindo um valor ≠ do que o servidor aplicava no próximo /move.
-  // Falha de rede → erro recuperável (NUNCA fabricar cura).
+  // Falha de rede → erro recuperável via fila offline (NUNCA perder progresso).
   if (window.__EXPLORE_MODE === 'remote'
       && window.ExploracaoAPI && typeof window.ExploracaoAPI.restShort === 'function') {
+    if (navigator && navigator.onLine === false) {
+      _doOfflineShortRest(p);
+      return;
+    }
     window.ExploracaoAPI.restShort().then(function(res){
-      if (!res || !res.ok || !res.healed) { _shortRestError(); return; }
+      if (!res || !res.ok || !res.healed) { _doOfflineShortRest(p); return; }
       if (res.healed.no_hit_dice) {
         var st = document.getElementById('camp-footer-status');
         var m = 'Sem Dado de Vida disponível. Use Descanso Longo.';
         if (st) st.textContent = m;
         if (typeof vToast === 'function') vToast('' + m, 'warn');
         if (res.state && typeof res.state.hit_dice === 'number') p.hd = res.state.hit_dice;
+        _persistLocalStats();
         _updateCampHud(); _updateCampDetails();
         if (typeof updateHud === 'function') updateHud();
         return;
@@ -42211,7 +42331,10 @@ function doShortRest() {
       _animateHealDie(_die, _raw, _con, _actual, _full, function () {
         _applyServerShortRest(p, res.healed, res.state);
       });
-    }).catch(function(err){ console.warn('[CAMP] rest_short server err:', err); _shortRestError(); });
+    }).catch(function(err){
+      console.warn('[CAMP] rest_short server err, using resilient offline rest:', err);
+      _doOfflineShortRest(p);
+    });
     return;
   }
 
@@ -42239,6 +42362,7 @@ function doShortRest() {
     if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
     try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done_local',
       { roll: roll, conMod: conMod, heal_actual: actual, hp: p.hp, hd: p.hd }); } catch (_) {}
+    _persistLocalStats();
     _updateCampHud();
     _updateCampDetails();
     if (typeof updateHud === 'function') updateHud();
@@ -42275,6 +42399,8 @@ function doLongRest() {
   const healMp = p.mp - preMp;
   const hdGain = p.hd - preHd;
 
+  _persistLocalStats();
+
   /* USER REPORT 2026-05-17 FIX: doLongRest atualizava S.player localmente
      mas server (state.hp via session) mantinha valor antigo → próximo
      /move retornava HP velho, revertendo o restore. Fix: chamar endpoint
@@ -42283,25 +42409,42 @@ function doLongRest() {
      restore, server sync ocorre em background. Se falhar, log apenas. */
   try {
     if (window.ExploracaoAPI && typeof window.ExploracaoAPI.restLong === 'function') {
-      window.ExploracaoAPI.restLong().then(function(res){
-        if (res && res.ok) {
-          console.info('[CAMP] rest_long server ok healed_hp=' + (res.healed && res.healed.hp));
-        } else if (res && res.reason === 'no_camp_gear') {
-          // 2026-06-21: servidor RECUSOU (sem Barraca/Kit) → REVERTE o heal otimista e
-          // avisa o motivo. O Descanso Longo no campo exige equipamento (D&D 5e).
-          p.hp = preHp; p.mp = preMp; p.exh = preExh; p.hd = preHd;
-          p.conditions = preConditions;  // M8: restaura condições no revert sem-equipamento
-          try { if (typeof updateHud === 'function') updateHud(); } catch (_eh) {}
-          try { if (typeof render === 'function') render(); } catch (_er) {}
-          if (typeof vToast === 'function') vToast(res.message || 'Você precisa de uma Barraca ou Kit de Acampamento para o Descanso Longo no campo.');
-          var _cst = document.getElementById('camp-footer-status');
-          if (_cst) _cst.textContent = 'Sem equipamento de acampamento (Barraca ou Kit).';
-        } else {
-          console.warn('[CAMP] rest_long server fail:', res);
+      if (navigator && navigator.onLine === false) {
+        if (typeof window.__queueOfflineAction === 'function') {
+          window.__queueOfflineAction({ type: 'rest_long', ts: Date.now() });
         }
-      }).catch(function(err){
-        console.warn('[CAMP] rest_long server error:', err);
-      });
+      } else {
+        window.ExploracaoAPI.restLong().then(function(res){
+          if (res && res.ok) {
+            console.info('[CAMP] rest_long server ok healed_hp=' + (res.healed && res.healed.hp));
+            if (res.state) {
+              if (typeof res.state.hp === 'number') p.hp = res.state.hp;
+              if (typeof res.state.mp === 'number') p.mp = res.state.mp;
+              if (typeof res.state.hit_dice === 'number') p.hd = res.state.hit_dice;
+              if (typeof res.state.exhaustion === 'number') p.exh = res.state.exhaustion;
+              _persistLocalStats();
+            }
+          } else if (res && res.reason === 'no_camp_gear') {
+            // 2026-06-21: servidor RECUSOU (sem Barraca/Kit) → REVERTE o heal otimista e
+            // avisa o motivo. O Descanso Longo no campo exige equipamento (D&D 5e).
+            p.hp = preHp; p.mp = preMp; p.exh = preExh; p.hd = preHd;
+            p.conditions = preConditions;  // M8: restaura condições no revert sem-equipamento
+            _persistLocalStats();
+            try { if (typeof updateHud === 'function') updateHud(); } catch (_eh) {}
+            try { if (typeof render === 'function') render(); } catch (_er) {}
+            if (typeof vToast === 'function') vToast(res.message || 'Você precisa de uma Barraca ou Kit de Acampamento para o Descanso Longo no campo.');
+            var _cst = document.getElementById('camp-footer-status');
+            if (_cst) _cst.textContent = 'Sem equipamento de acampamento (Barraca ou Kit).';
+          } else {
+            console.warn('[CAMP] rest_long server fail:', res);
+          }
+        }).catch(function(err){
+          console.warn('[CAMP] rest_long server error, queuing offline sync:', err);
+          if (typeof window.__queueOfflineAction === 'function') {
+            window.__queueOfflineAction({ type: 'rest_long', ts: Date.now() });
+          }
+        });
+      }
     } else {
       console.warn('[CAMP] ExploracaoAPI.restLong não disponível — apenas local');
     }
@@ -42322,6 +42465,7 @@ function doLongRest() {
   if (typeof vToast === 'function') vToast(msg, hadEffect ? 'success' : 'info');
   try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_long_done',
     { heal_hp: healHp, heal_mp: healMp, hd_gain: hdGain, exh_after: p.exh }); } catch (_) {}
+  _persistLocalStats();
   _updateCampHud();
   _updateCampDetails();
   if (typeof updateHud === 'function') updateHud();
@@ -46320,6 +46464,10 @@ function boot() {
                 if (typeof _ss.mhp === 'number') S.player.mhp = _ss.mhp;
                 if (typeof _ss.mp === 'number')  S.player.mp  = _ss.mp;
                 if (typeof _ss.mmp === 'number') S.player.mmp = _ss.mmp;
+                if (typeof _ss.hit_dice === 'number') S.player.hd = _ss.hit_dice;
+                if (typeof _ss.max_hit_dice === 'number') S.player.mhd = _ss.max_hit_dice;
+                if (typeof _ss.exhaustion === 'number') S.player.exh = _ss.exhaustion;
+                if (Array.isArray(_ss.conditions)) S.player.conditions = _ss.conditions.slice();
                 // X-6.5.9: gold/xp também vem do DB (Wilzen tem 235 Valdoritas)
                 if (typeof _ss.gold === 'number') S.gold = _ss.gold;
                 if (typeof _ss.xp === 'number' && S.player.xp !== undefined) {
@@ -46402,11 +46550,14 @@ function boot() {
                   var _stObj = {
                     hp: S.player.hp, max_hp: S.player.mhp,
                     mp: S.player.mp, max_mp: S.player.mmp,
+                    hd: S.player.hd, max_hd: S.player.mhd,
+                    exhaustion: S.player.exh,
                     ac: window.__EXPLORE_SERVER_AC || 10
                   };
                   var _rawSt = JSON.stringify(_stObj);
                   localStorage.setItem('valdoria_shared_stats_v1_' + _cidKey, _rawSt);
                   localStorage.setItem('valdoria_shared_stats_v1', _rawSt);
+                  if (typeof _persistLocalStats === 'function') _persistLocalStats();
                 } catch (_) {}
                 // Se a Mochila (vInventory) estiver aberta na tela, atualiza imediatamente
                 try {
