@@ -55,13 +55,31 @@ var HAZARDS = {
             ladrao: 'Você reconhece o nó imediatamente — trabalho de caçador veterano. Em três movimentos precisos, o gatilho é neutralizado. Profissional reconhece profissional.',
             patrulheiro: 'Você sorri ao ver a armadilha — usaria a mesma. Desfaz o gatilho com afeto profissional, e até guarda o cordão pra reusar.'
           },
+          sNarr_by_subrace: {
+            wood: 'Seus pés leves de elfo silvestre mal chegaram a tensionar o laço. Você se abaixa com calma e desfaz o nó com destreza natural.'
+          },
+          sNarr_by_race: {
+            elf: 'Com graça élfica, você encontra o ponto de alívio do gatilho antes do galho subir.'
+          },
           fNarr: 'A corda corta sua perna ao apertar. Sangue quente escorre — o nó travou no movimento errado.', dmg: 3 },
+        { i: '🗡', t: 'Cortar cordão mestre', stat: 'dex', dc: 11,
+          requires_class: ['ladino', 'ladrao', 'patrulheiro'],
+          desc: 'Lâmina afiada desfaz o laço antes da tensão subir.',
+          sNarr: 'Um talho rápido na fibra mestra desativa o mecanismo instantaneamente.',
+          sNarr_by_subclass: {
+            assassin: 'Com precisão cirúrgica de lâmina curta, você decepa a corda no ângulo cego sem produzir som.'
+          },
+          fNarr: 'A corda chicoteia e corta seu antebraço antes de partir.', dmg: 2 },
         { i: '💪', t: 'Romper a corda', stat: 'str', dc: 13,
           desc: 'Esforço bruto: arrebentar a corda antes do galho soltar.',
           sNarr: 'Você arrebenta a corda com força contínua — o galho dobrado solta-se com estalo seco e açoita o ar onde sua cabeça estaria.',
           sNarr_by_class: {
             barbaro: 'Sua fúria desperta. Um único arranco e a corda se parte como linha. O galho açoita inutilmente o ar atrás de você.',
             guerreiro: 'Disciplina muscular. Você tensiona o quadril, transfere o peso, e a corda cede no terceiro puxão.'
+          },
+          sNarr_by_race: {
+            dwarf: 'Com a compleição atarracada de anão, você planta as solas no chão e arrebenta a corda no primeiro arranque.',
+            halforc: 'Um rugido curto e a fibra da corda se rompe sob a força bruta dos seus braços.'
           },
           fNarr: 'A corda lacera sua pele antes de ceder — sangue desce pela bota.', dmg: 4 } ] },
 
@@ -147,6 +165,13 @@ var HAZARDS = {
             paladino: 'Sua aura é inconfundível. O líder cospe no chão mas baixa a espada — não enfrenta um paladino na rota. "Passe. Mas se vir o senhor de Valdoria, lembre que esquecemos quem nos esqueceu."',
             bardo: 'Você canta. Apenas isso — uma canção que ele lutou ouvindo, três décadas atrás. Os olhos dele se enchem. "Passe, viajante. Hoje a estrada é sua."'
           },
+          sNarr_by_subclass: {
+            lore: 'Você recita a antiga anistia dos soldados do vale; surpresos por alguém recordar suas batalhas com exatidão, eles guardam as armas e desejam boa viagem.'
+          },
+          sNarr_by_race: {
+            halfelf: 'Sua habilidade diplomática natural e tom conciliador desarmam a agressividade dos veteranos sem derramar sangue.',
+            dragonborn: 'Sua presença nobre e olhar firme fazem os homens repensarem a tolice de tentar extorquir um guerreiro draconato.'
+          },
           sNarr_by_alignment: {
             good: 'Você não vê inimigos — vê veteranos abandonados. Oferece dois pães da mochila e o nome de um templo que abriga ex-soldados. O líder aceita devagar.',
             evil: 'Você os intimida com cálculo frio: descreve a tortura que receberão se forem capturados. Eles recuam, pálidos.'
@@ -187,7 +212,18 @@ var HAZARDS = {
             druida: 'A lama te conhece. Você sussurra à terra e ela amolece, te oferecendo apoio sólido pra subir.',
             monge: 'Você esvazia a mente. O corpo encontra o ritmo certo: tensionar, relaxar, deslizar. Sai limpo, focado.'
           },
+          sNarr_by_subrace: {
+            lightfoot: 'Sua leveza de halfling impede que você afunde além do calcanhar; com calma, você desliza para solo seguro.'
+          },
+          sNarr_by_race: {
+            gnome: 'Com tamanho pequeno e movimentos contínuos, você evita criar vácuo na lama e emerge ileso.'
+          },
           fNarr: 'O pânico vence. Você se agita e afunda — só sai porque um galho próximo cede ao seu agarro.', dmg: 3 },
+        { i: '🌿', t: 'Tracionar com raízes pantanosas', stat: 'wis', dc: 11,
+          requires_class: ['druida', 'patrulheiro'],
+          desc: 'Encontrar cipós resistentes ocultos sob a vegetação aquática.',
+          sNarr: 'Seus olhos treinados encontram cipós firmes quase invisíveis na lama. Puxando-se com cadência, você se liberta com facilidade.',
+          fNarr: 'O cipó se rompe sob seu peso e você bebe lama antes de alcançar uma raiz sólida.', dmg: 2 },
         { i: '💪', t: 'Forçar saída', stat: 'str', dc: 13,
           desc: 'Não há tempo: arrancar-se da lama com força bruta.',
           sNarr: 'Com esforço brutal você se liberta. Músculos queimam, mas você está inteiro.',
@@ -236,10 +272,24 @@ var HAZARDS = {
         { i: '🏃', t: 'Correr lateral', stat: 'dex', dc: 13,
           desc: 'Procurar a borda lateral do desabamento — fora da linha de queda.',
           sNarr: 'Você dispara em diagonal pra fora da linha de queda. A neve passa rugindo a três metros de você.',
+          sNarr_by_subrace: {
+            wood: 'Seus reflexos élficos te lançam encosta abaixo em saltos leves, desviando com maestria da avalanche.'
+          },
           fNarr: 'A força da neve o derruba e arrasta vinte metros. Você emerge de cabeça pra baixo, gelo nos cabelos.', dmg: 5 },
+        { i: '🏔', t: 'Reconhecer a fenda de abrigo', stat: 'int', dc: 11,
+          requires_race: 'dwarf',
+          desc: 'Identificar a cavidade natural segura na parede da montanha.',
+          sNarr: 'Seus instintos telúricos localizam uma reentrância protegida na rocha. A torrente de neve passa por cima sem atingir você.',
+          sNarr_by_subrace: {
+            mountain: 'Como anão da montanha, você conhece cada tipo de fenda de desabamento; abrigado como uma pedra, você sai impecável.'
+          },
+          fNarr: 'A fenda é rasa demais e o turbilhão de gelo açoita suas costas.', dmg: 3 },
         { i: '🛡', t: 'Proteger-se em rocha', stat: 'con', dc: 12,
           desc: 'Encontrar uma rocha grande e ancorar-se nela.',
           sNarr: 'Você se prensa contra uma rocha-mãe. A neve quebra ao redor mas não te leva. Cinco minutos enterrado, depois você cava pra fora.',
+          sNarr_by_class: {
+            barbaro: 'Você crava as mãos na pedra e aguenta o impacto gelado com músculos retesados, rugindo contra a neve.'
+          },
           fNarr: 'Pedras vêm com a neve. Quebra de costela. Você sobrevive mas dói cada respiração.', dmg: 4 } ] },
 
     { title: 'Fenda Profunda',
@@ -308,7 +358,18 @@ var HAZARDS = {
             druida: 'Você fala — não com palavras. O lobo ouve no idioma dele. Compreende: não é presa hoje. Recua respeitoso.',
             barbaro: 'Sua aura primal é igual à dele, mas mais forte. O lobo reconhece um predador maior. Recua sem virar de costas.'
           },
+          sNarr_by_subclass: {
+            hunter: 'Você ergue o arco em silêncio absoluto. O lobo veterano reconhece a postura de um caçador mortal e se retira.'
+          },
+          sNarr_by_subrace: {
+            mountain: 'Firme como um rochedo invernal, você bate a arma no escudo. O som metálico ecoa e afugenta a fera.'
+          },
           fNarr: 'Ele ataca antes de fugir — dentes na sua perna. Sangue na neve, mas você sobrevive.', dmg: 4 },
+        { i: '🐺', t: 'Impor domínio territorial', stat: 'cha', dc: 12,
+          requires_race: ['dragonborn', 'halforc'],
+          desc: 'Exibir imponência e ferocidade inabaláveis perante a fera.',
+          sNarr: 'Sua presença avassaladora e postura ameaçadora fazem o lobo vacilar e recuar com a cauda entre as pernas.',
+          fNarr: 'O lobo avança em investida rápida antes de se afastar, mordendo de raspão.', dmg: 3 },
         { i: '🏃', t: 'Recuar devagar', stat: 'wis', dc: 12,
           desc: 'Não correr. Recuar passo a passo, sem virar de costas.',
           sNarr: 'Você recua sem provocar, olhando ele direto sem ameaça. O lobo perde interesse — não vale o esforço hoje.',
@@ -336,7 +397,18 @@ var HAZARDS = {
         { i: '🏃', t: 'Esquivar', stat: 'dex', dc: 13,
           desc: 'Sair da zona de impacto antes do peso chegar.',
           sNarr: 'Você se joga pro lado a tempo. A pedra crava no chão onde você estava e se quebra em três pedaços enormes.',
-          fNarr: 'A pedra raspa em você antes de quebrar. Sangue do ombro.', dmg: 4 } ] },
+          sNarr_by_subclass: {
+            shadow: 'Você se funde à sombra da caverna em um salto fluido; a estalactite desaba no vazio.'
+          },
+          sNarr_by_subrace: {
+            drow: 'Habituado às ameaças da escuridão subterrânea, seu corpo reage por instinto puro, desviando com perfeição.'
+          },
+          fNarr: 'A pedra raspa em você antes de quebrar. Sangue do ombro.', dmg: 4 },
+        { i: '⛏', t: 'Prever a fratura da rocha', stat: 'int', dc: 10,
+          requires_race: 'dwarf',
+          desc: 'Conhecimento de pedra: identificar o ponto cego da queda.',
+          sNarr: 'Seus olhos acostumados à pedra profunda calculam o ângulo exato do impacto. Você recua um passo e a rocha se espatifa sem te tocar.',
+          fNarr: 'A rocha trinca em ângulo irregular e lascas cortam seu braço.', dmg: 2 } ] },
 
     { title: 'Eco Estranho',
       script: [
@@ -347,6 +419,9 @@ var HAZARDS = {
         { i: '🧠', t: 'Identificar a fonte', stat: 'int', dc: 13,
           desc: 'Pensar friamente. Bater pedras em ritmos errados pra mapear o intruso.',
           sNarr: 'Você bate pedras em ritmo irregular. O imitador erra um pulso. Você localiza a direção e sai pelo lado oposto, em silêncio.',
+          sNarr_by_subrace: {
+            drow: 'Acostumado à escuridão do subterrâneo profundo, você distingue o ruído de garras na pedra e antecipa a criatura com facilidade.'
+          },
           fNarr: 'Você não localiza. Quando segue, sente algo seguindo a passos atrás. Não vira pra ver.', dmg: 3 } ] }
   ],
 
@@ -365,7 +440,22 @@ var HAZARDS = {
             clerigo: 'Sua presença divina é insuportável pra eles. Os espíritos se dissolvem como cera ao sol — alguns sussurrando "obrigado".',
             paladino: 'Você ergue a mão e fala uma palavra de juramento. Os espíritos se afastam — alguns se ajoelhando antes de sumir.'
           },
+          sNarr_by_race: {
+            elf: 'Sua mente imune ao sono encantado repele com facilidade o assédio dos espíritos.'
+          },
+          sNarr_by_subrace: {
+            high: 'Sua disciplina mental de alto elfo ergue uma barreira impenetrável contra as sombras da névoa.'
+          },
           fNarr: 'O medo paralisa você por instantes. Quando volta a si, sente lágrimas no rosto. Você lembrou de coisas que não devia.', dmg: 3 },
+        { i: '🕯', t: 'Canalizar autoridade espiritual ou arcana', stat: 'wis', dc: 11,
+          requires_class: ['clerigo', 'paladino', 'bruxo', 'mago'],
+          desc: 'Impor reverência ou expulsar as almas com poder sobrenatural.',
+          sNarr: 'Sua autoridade ecoa pelo cemitério. As almas errantes reconhecem o poder em sua voz e abrem passagem com respeito fúnebre.',
+          sNarr_by_subclass: {
+            devotion: 'A luz de seu juramento dissipa a aflição das almas, trazendo-lhes um instante de paz antes de sumirem.',
+            fiend: 'Sua marca infernal arde no ar; os espíritos menores recuam aterrorizados perante o fogo sobrenatural.'
+          },
+          fNarr: 'As vozes das almas ecoam estridentes na sua mente, drenando sua concentração.', dmg: 3 },
         { i: '🏃', t: 'Correr através', stat: 'dex', dc: 12,
           desc: 'Velocidade pura. Não dar tempo deles te tocarem.',
           sNarr: 'Você corre. Vinte segundos depois, está do outro lado, ofegante mas inteiro.',
@@ -397,7 +487,18 @@ var HAZARDS = {
         { i: '🏃', t: 'Saltar pra terra firme', stat: 'dex', dc: 13,
           desc: 'Identificar uma rocha mais alta, salto de fé sobre a fissura.',
           sNarr: 'Você salta pra terra firme antes da lava chegar. Aterrissa pesado, mas inteiro.',
-          fNarr: 'Faíscas queimam suas pernas. Você cruza, mas dói cada passo pelo resto da etapa.', dmg: 5 } ] },
+          sNarr_by_subclass: {
+            champion: 'Com força atlética inabalável, você transpõe a brecha de lava em um único salto magistral.'
+          },
+          sNarr_by_subrace: {
+            rock: 'Você calcula o ponto de aterrissagem mais estável na rocha vulcânica e salta com precisão geométrica.'
+          },
+          fNarr: 'Faíscas queimam suas pernas. Você cruza, mas dói cada passo pelo resto da etapa.', dmg: 5 },
+        { i: '🔥', t: 'Avançar pela fumaça térmica', stat: 'con', dc: 10,
+          requires_race: ['tiefling', 'dragonborn'],
+          desc: 'Aproveitar resistência inata ao calor para cruzar sem recuar.',
+          sNarr: 'Seu sangue resistente ao fogo ignora o bafo abrasador da lava. Você atravessa as cinzas incandescentes com passos firmes.',
+          fNarr: 'O vapor superaquecido atinge seus olhos por um instante, forçando um desvio repentino.', dmg: 2 } ] },
 
     { title: 'Cinzas Quentes',
       script: [
@@ -1047,6 +1148,60 @@ var DEPARTURES = {
         return ((_getUsage(player).departures || {})[biome] || []).indexOf(idx) >= 0;
     }
 
+    function _getDepartureFlavor(t, biome) {
+        if (!t) return '';
+        // 1. Subclasse
+        if (t.subclass === 'gloom_stalker') return 'Seus olhos se adaptam rapidamente aos contrastes do horizonte; a escuridão da trilha é o seu terreno natural.';
+        if (t.subclass === 'hunter') return 'Você estuda a direção do vento e as quebras nas ramagens à margem da trilha, já antecipando os rastros da fauna local.';
+        if (t.subclass === 'assassin') return 'Você memoriza os pontos cegos e potenciais abrigos ao longo da partida; a furtividade é sua primeira linha de defesa.';
+        if (t.subclass === 'thief') return 'Seus pés encontram o atalho mais suave no leito da estrada, sem produzir o menor ruído de cascalho ou metal.';
+        if (t.subclass === 'champion') return 'Cada passada carrega a firmeza de um combatente treinado; você respira o ar dos ermos pronto para qualquer confronto.';
+        if (t.subclass === 'battle_master') return 'Você avalia os gargalos naturais da estrada e as linhas de visão, traçando mentalmente planos de combate tático.';
+        if (t.subclass === 'evoker') return 'Você sente a energia mágica vibrando sob a pele, pronta para ser canalizada em chamas ou raios se perigos surgirem.';
+        if (t.subclass === 'abjurer') return 'Uma barreira translúcida e sutil pulsa levemente ao seu redor, reforçando sua segurança contra emboscadas arcanas.';
+        if (t.subclass === 'life') return 'Uma sensação de vigor e calor no peito renova suas energias, abençoando o início desta longa caminhada.';
+        if (t.subclass === 'war') return 'O aço de sua arma reverbera com devoção; você marcha com a postura firme de quem caminha sob a bênção dos deuses da guerra.';
+        if (t.subclass === 'berserker') return 'A pulsação acelera com o chamado dos ermos; a expectativa de perigo desperta sua fúria interior.';
+        if (t.subclass === 'moon') return 'Você fareja as correntes de ar e sente o solo vivo sob seus pés, em perfeita harmonia com o bioma.';
+        if (t.subclass === 'shadow') return 'Seus movimentos fluem como uma brisa silenciosa, fundindo sua silhueta com as sombras da estrada.';
+        if (t.subclass === 'lore') return 'Você recorda os relatos e baladas antigas sobre as terras além dos portões, prevenido contra lendas que se provam reais.';
+        if (t.subclass === 'devotion') return 'A santidade de sua causa ilumina seus passos; sua presença inspira determinação e serenidade.';
+        if (t.subclass === 'vengeance') return 'Sua mandíbula cerrada e passos pesados denotam determinação implacável; o dever não permite hesitação.';
+
+        // 2. Sub-raça
+        if (t.subrace === 'wood') return 'Com o passo leve dos elfos silvestres, você se move em silêncio absoluto entre as primeiras árvores e arbustos.';
+        if (t.subrace === 'high') return 'Sua percepção refinada de alto elfo capta o fluxo sutil das correntes e da magia ambiental deste caminho.';
+        if (t.subrace === 'drow') return 'Seus olhos treinados no subterrâneo buscam instintivamente as sombras mais densas para avançar com discrição.';
+        if (t.subrace === 'mountain') return 'Com o vigor inato dos anões da montanha, você mede a firmeza do terreno rochoso a cada passada convicta.';
+        if (t.subrace === 'hill') return 'Sua robustez e intuição telúrica de anão da colina garantem estabilidade inabalável diante de qualquer relevo.';
+        if (t.subrace === 'lightfoot') return 'Sua marcha ágil de halfling pés-leves não deixa rastros profundos na terra fresca da saída da cidade.';
+        if (t.subrace === 'stout') return 'Seu passo firme e constituição inabalável de halfling robusto desdenham as primeiras rajadas de vento.';
+        if (t.subrace === 'rock') return 'Sua curiosidade de gnomo da rocha analisa o desgaste das pedras no caminho com aguçada precisão analítica.';
+        if (t.subrace === 'forest') return 'Os pequenos sussurros da relva e dos pássaros acolhem seus passos de gnomo da floresta na partida.';
+
+        // 3. Classe
+        if (t.cls === 'patrulheiro') return 'Seu olhar de patrulheiro examina o horizonte aberto, identificando rotas naturais e possíveis trilhas de caça.';
+        if (t.cls === 'ladino' || t.cls === 'ladrao') return 'Seu instinto de ladino mantém um olho na rota e outro nos pontos de fuga ao longo da estrada.';
+        if (t.cls === 'guerreiro') return 'O peso familiar da armadura e a empunhadura da arma transmitem a costumeira confiança marcial para a marcha.';
+        if (t.cls === 'mago') return 'Você mantém a mente afiada e o grimório protegido da poeira, calculando mentalmente as variáveis da travessia.';
+        if (t.cls === 'clerigo') return 'Com a mão no símbolo divino, você faz uma oração silenciosa de passagem aos espíritos do caminho.';
+        if (t.cls === 'paladino') return 'Sua postura ereta e determinação moral inspiram coragem diante da vastidão incerta das terras selvagens.';
+        if (t.cls === 'barbaro') return 'O ar livre dos ermos infla seus pulmões; longe das muralhas de pedra, você se sente verdadeiramente vivo.';
+        if (t.cls === 'druida') return 'Você toca a relva na beira da estrada e agradece a acolhida da terra no início da travessia.';
+        if (t.cls === 'bardo') return 'Você marca um compasso rítmico com os pés, transformando a fadiga da marcha em melodia estimulante.';
+        if (t.cls === 'monge') return 'Seu passo é sereno e ritmado, sincronizando respiração e movimento num estado contínuo de vigília meditativa.';
+        if (t.cls === 'bruxo') return 'Uma presença invisível parece acompanhar sua sombra na estrada, sussurrando cautela em segredo.';
+        if (t.cls === 'feiticeiro') return 'A magia inata corre pulsante em suas veias; você mantém a centelha sobrenatural alerta e sob controle cuidadoso.';
+
+        // 4. Raça
+        if (t.race === 'dragonborn') return 'Sua postura altiva de draconato e olhar faiscante deixam claro que nenhuma criatura menor deve cruzar seu caminho.';
+        if (t.race === 'halforc') return 'Sua tenacidade de meio-orc acolhe a rusticidade da estrada como um velho desafio a ser superado.';
+        if (t.race === 'tiefling') return 'Suas pupilas sem íris refletem a claridade do céu aberto enquanto você avança com postura desafiadora.';
+        if (t.race === 'halfelf') return 'Adaptável e equilibrado, você encara a vastidão adiante com a serenidade dos elfos e a ousadia humana.';
+        if (t.race === 'human') return 'Com determinação incansável, você aperta as correias da bagagem e foca no horizonte à frente.';
+        return '';
+    }
+
     // B3.5 #90: partida 'Rumo a...' com anti-repeat (sessão + 24h char-namespaced)
     // — antes pickDeparture sorteava puro, igual à queixa "eventos de Rumo a…
     // repetiam". Mesmo mecanismo do pickFreshHazard/pickFreshSafe, por índice.
@@ -1066,7 +1221,12 @@ var DEPARTURES = {
         var pick = idxs[Math.floor(Math.random() * idxs.length)];
         sessionUsed.push(pick);
         _markDepartureUsed(player, biome, pick);
-        return pool[pick];
+        var baseLines = (pool[pick] || []).slice();
+        if (player) {
+            var flavor = _getDepartureFlavor(_traits(player), biome);
+            if (flavor) baseLines.push({ type: 'narration', text: flavor });
+        }
+        return baseLines;
     }
 
     function pickDeparture(biome, player, sessionUsed) {
@@ -1087,10 +1247,15 @@ var DEPARTURES = {
     }
     function _hasCheck(choice) { return !!(choice && choice.stat && choice.dc != null); }
 
-    function resolveJourneyCheck(player, choice) {
+    function resolveJourneyCheck(player, choice, checkOpts) {
         if (!_hasCheck(choice)) return null;  // escolha sem teste (stat:null) -> auto-sucesso (caller)
         if (!(global.DndRules && DndRules.resolveSkillCheck)) return null;
-        return DndRules.resolveSkillCheck(_journeyView(player), { stat: choice.stat, skill: choice.skill, dc: choice.dc });
+        var chk = { stat: choice.stat, skill: choice.skill, dc: choice.dc };
+        if (checkOpts) {
+            if (checkOpts.advantage) chk.advantage = true;
+            if (checkOpts.disadvantage) chk.disadvantage = true;
+        }
+        return DndRules.resolveSkillCheck(_journeyView(player), chk);
     }
     function successPctForChoice(player, choice) {
         if (!_hasCheck(choice)) return null;
@@ -1098,24 +1263,375 @@ var DEPARTURES = {
         return DndRules.successPct(_journeyView(player), { stat: choice.stat, skill: choice.skill, dc: choice.dc });
     }
 
-    /* -------- narrativa por traco (by_class > by_alignment > by_background > default) -------- */
+    /* -------- narrativa por traco (by_subclass > by_subrace > by_class > by_race > by_alignment > by_background > default) -------- */
     function _traits(player) {
         var p = player || {};
-        var ck = (global.DndRules && DndRules.classKey) ? DndRules.classKey(p.cls || p.class || p.hero_class) : String(p.cls || '').toLowerCase();
-        return { cls: ck, alignment: String(p.alignment || '').toLowerCase(), bg: String(p.bg || p.background || '').toLowerCase() };
+        var ck = (global.DndRules && DndRules.classKey) ? DndRules.classKey(p.cls || p.class || p.hero_class || p.char_class) : String(p.cls || '').toLowerCase();
+        var rk = (global.DndRules && DndRules.raceKey) ? DndRules.raceKey(p.race || p.raca) : String(p.race || '').toLowerCase();
+        var srk = (global.DndRules && DndRules.subraceKey) ? DndRules.subraceKey(p.subrace || p.sub_race) : String(p.subrace || '').toLowerCase();
+        var sck = (global.DndRules && DndRules.subclassKey) ? DndRules.subclassKey(p.subclass || p.sub_class) : String(p.subclass || '').toLowerCase();
+        return {
+            cls: ck,
+            race: rk,
+            subrace: srk,
+            subclass: sck,
+            alignment: String(p.alignment || '').toLowerCase(),
+            bg: String(p.bg || p.background || '').toLowerCase(),
+            name: p.name || 'Viajante'
+        };
     }
+
+    function canTakeChoice(player, choice) {
+        if (!choice) return false;
+        var t = _traits(player);
+        function _match(req, actual) {
+            if (!req) return true;
+            if (!actual) return false;
+            if (Array.isArray ? Array.isArray(req) : (req instanceof Array)) {
+                var i;
+                for (i = 0; i < req.length; i++) {
+                    if (String(req[i]).toLowerCase() === actual) return true;
+                }
+                return false;
+            }
+            return String(req).toLowerCase() === actual;
+        }
+        var reqCls = choice.requires_class || choice.only_class;
+        if (reqCls) {
+            var cActual = (t.cls === 'ladrao') ? 'ladino' : t.cls;
+            var reqList = (Array.isArray && Array.isArray(reqCls)) ? reqCls : [reqCls];
+            var matchedCls = false;
+            for (var cIdx = 0; cIdx < reqList.length; cIdx++) {
+                var rc = String(reqList[cIdx]).toLowerCase();
+                if (rc === 'ladrao') rc = 'ladino';
+                if (rc === cActual) { matchedCls = true; break; }
+            }
+            if (!matchedCls) return false;
+        }
+        var reqRace = choice.requires_race || choice.only_race;
+        if (reqRace && !_match(reqRace, t.race)) return false;
+        var reqSubrace = choice.requires_subrace || choice.only_subrace;
+        if (reqSubrace && !_match(reqSubrace, t.subrace)) return false;
+        var reqSubclass = choice.requires_subclass || choice.only_subclass;
+        if (reqSubclass && !_match(reqSubclass, t.subclass)) return false;
+        return true;
+    }
+
     function pickNarrative(choice, player, success) {
         if (!choice) return '';
         var t = _traits(player);
+        var clsKey = t.cls;
+        var clsAlt = (clsKey === 'ladino') ? 'ladrao' : (clsKey === 'ladrao' ? 'ladino' : clsKey);
+
+        function _findIn(obj, key, alt) {
+            if (!obj) return null;
+            if (key && obj[key]) return obj[key];
+            if (alt && obj[alt]) return obj[alt];
+            return null;
+        }
+
         if (success) {
-            if (choice.sNarr_by_class && choice.sNarr_by_class[t.cls]) return choice.sNarr_by_class[t.cls];
-            if (choice.sNarr_by_alignment && choice.sNarr_by_alignment[t.alignment]) return choice.sNarr_by_alignment[t.alignment];
-            if (choice.sNarr_by_background && choice.sNarr_by_background[t.bg]) return choice.sNarr_by_background[t.bg];
+            var snSc = _findIn(choice.sNarr_by_subclass, t.subclass);
+            if (snSc) return snSc;
+            var snSr = _findIn(choice.sNarr_by_subrace, t.subrace);
+            if (snSr) return snSr;
+            var snCl = _findIn(choice.sNarr_by_class, clsKey, clsAlt);
+            if (snCl) return snCl;
+            var snRc = _findIn(choice.sNarr_by_race, t.race);
+            if (snRc) return snRc;
+            var snAl = _findIn(choice.sNarr_by_alignment, t.alignment);
+            if (snAl) return snAl;
+            var snBg = _findIn(choice.sNarr_by_background, t.bg);
+            if (snBg) return snBg;
             return choice.sNarr || '';
         }
-        if (choice.fNarr_by_class && choice.fNarr_by_class[t.cls]) return choice.fNarr_by_class[t.cls];
-        if (choice.fNarr_by_alignment && choice.fNarr_by_alignment[t.alignment]) return choice.fNarr_by_alignment[t.alignment];
+
+        var fnSc = _findIn(choice.fNarr_by_subclass, t.subclass);
+        if (fnSc) return fnSc;
+        var fnSr = _findIn(choice.fNarr_by_subrace, t.subrace);
+        if (fnSr) return fnSr;
+        var fnCl = _findIn(choice.fNarr_by_class, clsKey, clsAlt);
+        if (fnCl) return fnCl;
+        var fnRc = _findIn(choice.fNarr_by_race, t.race);
+        if (fnRc) return fnRc;
+        var fnAl = _findIn(choice.fNarr_by_alignment, t.alignment);
+        if (fnAl) return fnAl;
+        var fnBg = _findIn(choice.fNarr_by_background, t.bg);
+        if (fnBg) return fnBg;
         return choice.fNarr || '';
+    }
+
+    /* -------- Confirmação e Preparação Sensorial PADRAO_ALDRIC (D&D 5e) -------- */
+    function _getRaceConfirmationNarration(t, biome) {
+        if (!t) return '';
+        if (t.subrace === 'mountain') return 'Seus instintos de anão da montanha avaliam a inclinação e a consistência das rochas; você reconhece os perigos da pedra fria.';
+        if (t.subrace === 'hill') return 'Seu sangue de anão da colina sente a firmeza da terra e a vibração do solo sob as solas das botas.';
+        if (t.subrace === 'wood') return 'Seus sentidos de elfo silvestre captam o menor rumor da brisa e a dança das copas distantes além dos muros.';
+        if (t.subrace === 'high') return 'Sua mente refinada de alto elfo detecta as correntes invisíveis e a ressonância ancestral que permeiam a estrada.';
+        if (t.subrace === 'drow') return 'Seus olhos habituados à escuridão calculam cada dobra do terreno onde emboscadores poderiam buscar refúgio.';
+        if (t.subrace === 'lightfoot') return 'Com a leveza inata dos pés-leves, você antecipa trilhas discretas que pouparão esforço e evitarão olhares indiscretos.';
+        if (t.subrace === 'stout') return 'Com o vigor robusto do seu povo, você ajusta as fivelas com entusiasmo, inabalável perante o cansaço da caminhada.';
+        if (t.subrace === 'rock') return 'Seus olhos de gnomo da rocha examinam a mecânica das fivelas e a durabilidade dos apetrechos de marcha com precisão de artífice.';
+        if (t.subrace === 'forest') return 'Sua empatia de gnomo da floresta o faz notar os cantos dos pequenos pássaros prevendo as condições do tempo.';
+
+        if (t.race === 'dwarf') return 'Com a solidez do povo anão, você crava o pé no chão da saída e verifica o peso da bagagem com satisfação prática.';
+        if (t.race === 'elf') return 'Com a graça e acuidade élficas, sua vista perscruta léguas de distância em busca de qualquer alteração no relevo.';
+        if (t.race === 'halfling') return 'Seu otimismo e passos ligeiros de halfling encontram conforto mesmo nas estradas mais rústicas.';
+        if (t.race === 'dragonborn') return 'Seu porte régio de draconato impõe respeito à estrada; o calor elemental em seu peito arde perante o desafio.';
+        if (t.race === 'halforc') return 'A tenacidade de meio-orc vibra em seus músculos. Cicatrizes antigas lembram que as terras selvagens são seu verdadeiro lar.';
+        if (t.race === 'tiefling') return 'Sua herança tiefling desperta uma percepção aguçada para variações térmicas e vibrações sinistras da terra.';
+        if (t.race === 'halfelf') return 'Unindo a diplomacia dos homens à agilidade élfica, você analisa a rota com equilíbrio pragmático e flexibilidade.';
+        if (t.race === 'gnome') return 'Sua mente ágil de gnomo já calcula mentalmente atalhos e estimativas de recursos para a viagem.';
+        if (t.race === 'human') return 'Com a determinação e capacidade de adaptação dos humanos, você revisa seus cantis, ciente de que a resiliência supera qualquer terreno.';
+        return '';
+    }
+
+    function _getClassConfirmationNarration(t, biome) {
+        if (!t) return '';
+        if (t.subclass === 'champion') return 'Você flexiona os punhos e afrouxa a lâmina na bainha com a serenidade de um campeão talhado para confrontos diretos.';
+        if (t.subclass === 'battle_master') return 'Você repassa esquemas táticos de emboscada e linhas de defesa para manter o controle absoluto diante de perigos na rota.';
+        if (t.subclass === 'assassin') return 'Você checa os punhais ocultos e a mobilidade das juntas; na estrada erma, quem ataca primeiro sobrevive.';
+        if (t.subclass === 'thief') return 'Você verifica as gazuas e alivia os cantos das bolsas para mover-se tão silencioso quanto uma sombra viajante.';
+        if (t.subclass === 'gloom_stalker') return 'Você sintoniza sua visão às sombras mais escuras do trajeto, antecipando onde os predadores espreitam.';
+        if (t.subclass === 'hunter') return 'Você estuda a direção do vento e as marcas no chão, já calculando o alcance e as trajetórias do seu arco.';
+        if (t.subclass === 'evoker') return 'Centelhas sutis formigam na ponta dos seus dedos; você mentaliza encantamentos rápidos de destruição protetora.';
+        if (t.subclass === 'abjurer') return 'Fios invisíveis de proteção abjurativa envolvem sua pele; você traça runas de defesa para repelir perigos súbitos.';
+        if (t.subclass === 'necromancer') return 'Você percebe os resquícios de vida e morte ao longo da rota com a impassibilidade de quem domina os véus do além.';
+        if (t.subclass === 'life') return 'Você toca o relicário sagrado, emanando uma centelha de vitalidade curativa para sustentar o corpo contra a fadiga.';
+        if (t.subclass === 'war') return 'Você ora pelo favor da divindade das batalhas, empunhando a fé como um escudo inquebrantável na travessia.';
+        if (t.subclass === 'vengeance') return 'O peso do seu juramento de vingança guia seu passo inflexível; nada entre os portões e o destino deterá sua marcha.';
+        if (t.subclass === 'devotion') return 'Sua lâmina brilha com honra e retidão; você parte como um bastião de luz contra os perigos dos ermos.';
+        if (t.subclass === 'berserker') return 'O sangue ferve na expectativa da violência; seus músculos tremem com fúria contida a cada passada decidida.';
+        if (t.subclass === 'lore') return 'Você recorda baladas antigas sobre as ruínas e perigos desta região, buscando pistas históricas úteis para a travessia.';
+        if (t.subclass === 'moon') return 'Você sente o chamado da fera interior e o influxo dos ciclos selvagens protegendo sua forma mortal.';
+        if (t.subclass === 'shadow') return 'Você respira com calma monástica, alinhando seus passos com a escuridão do terreno para passar despercebido.';
+        if (t.subclass === 'fiend') return 'Um calor sulfuroso reconforta seus sentidos; seu patrono infernal cobra bravura e desdém pelo perigo.';
+        if (t.subclass === 'fey') return 'Ecos zombeteiros do reino feérico dançam ao redor da sua mente, afiando seus reflexos contra ciladas e ilusões.';
+
+        if (t.cls === 'guerreiro') return 'Você confere o peso do aço e a amarração da armadura, pronto para reagir em fração de segundo a qualquer emboscada.';
+        if (t.cls === 'ladino' || t.cls === 'ladrao') return 'Você confere as lâminas curtas e elimina qualquer ponto de reflexo metálico ou ruído no equipamento.';
+        if (t.cls === 'patrulheiro') return 'Você inspeciona as marcas na saída dos portões e fareja o ar para antecipar o clima e as feras da região.';
+        if (t.cls === 'mago') return 'Você ajusta o grimório e revisa os componentes arcanos na algibeira, preparado para tecer a trama mágica na estrada.';
+        if (t.cls === 'clerigo') return 'Você murmura uma prece de proteção divina para abençoar a senda e afastar as aflições do caminho.';
+        if (t.cls === 'paladino') return 'Sua armadura brilha com convicção sagrada; você firma a postura com prontidão honrada.';
+        if (t.cls === 'barbaro') return 'Seus instintos selvagens farejam a liberdade dos descampados; você avança sem medo de perigos ou intempéries.';
+        if (t.cls === 'druida') return 'Você mergulha a mente nos ritmos da terra, árvores e chuvas, pronto para harmonizar com os caprichos naturais do bioma.';
+        if (t.cls === 'bardo') return 'Você afina os sentidos e mentaliza uma cadência de marcha para manter a prontidão e a moral afiadas.';
+        if (t.cls === 'monge') return 'Seu equilíbrio interno e fluxo de ki operam em sintonia perfeita; o corpo é sua arma e seu escudo.';
+        if (t.cls === 'bruxo') return 'Você toca o canalizador do seu pacto misterioso, atraindo olhares arcanos que vigiam seus passos nas sombras.';
+        if (t.cls === 'feiticeiro') return 'A magia inata corre pulsante em suas veias; você mantém a centelha sobrenatural alerta e sob controle cuidadoso.';
+        return '';
+    }
+
+    function _getPreparationChoices(t, biome) {
+        var preps = [];
+        if (!t) return preps;
+
+        // Postura Primária (Classe / Subclasse)
+        if (t.cls === 'patrulheiro') {
+            preps.push({
+                id: 'prep_scout',
+                label: 'Postura de Batedor: Rastreio e vigilância avançada',
+                isPrep: true,
+                stat: 'wis',
+                prepText: 'Você assume a vanguarda como batedor experiente, estudando pegadas frescas, galhos quebrados e o voo das aves para antecipar armadilhas e emboscadas.'
+            });
+        } else if (t.cls === 'ladino' || t.cls === 'ladrao') {
+            preps.push({
+                id: 'prep_stealth',
+                label: 'Postura de Infiltração: Marcha velada pelas sombras',
+                isPrep: true,
+                stat: 'dex',
+                prepText: 'Você amortece cada fivela metálica com tiras de tecido e avança de cobertura em cobertura, movendo-se com extrema sutileza.'
+            });
+        } else if (t.cls === 'guerreiro') {
+            preps.push({
+                id: 'prep_guard',
+                label: 'Postura de Sentinela: Guarda alta e prontidão de armas',
+                isPrep: true,
+                stat: 'str',
+                prepText: 'Você mantém a empunhadura firme e postura marcial impecável, pronto para desembainhar e reagir em fração de segundo a qualquer assalto.'
+            });
+        } else if (t.cls === 'barbaro') {
+            preps.push({
+                id: 'prep_primal',
+                label: 'Postura Primal: Sentidos selvagens à flor da pele',
+                isPrep: true,
+                stat: 'con',
+                prepText: 'Você aguça os ouvidos e dilata as narinas contra o vento, farejando predadores e confiando nos reflexos brutos do seu corpo.'
+            });
+        } else if (t.cls === 'mago') {
+            preps.push({
+                id: 'prep_arcane',
+                label: 'Postura de Vigília Arcana: Sensibilidade à trama mágica',
+                isPrep: true,
+                stat: 'int',
+                prepText: 'Você entreabre a percepção mística para sentir perturbações no éter e anomalias arcanas antes que elas se manifestem na estrada.'
+            });
+        } else if (t.cls === 'clerigo') {
+            preps.push({
+                id: 'prep_sacred',
+                label: 'Postura Litúrgica: Bênção de proteção aos caminhantes',
+                isPrep: true,
+                stat: 'wis',
+                prepText: 'Você unge seu cajado ou escudo com uma prece sagrada, invocando o manto protetor da sua divindade sobre a rota.'
+            });
+        } else if (t.cls === 'paladino') {
+            preps.push({
+                id: 'prep_bastion',
+                label: 'Postura de Bastião: Juramento de vigília inabalável',
+                isPrep: true,
+                stat: 'cha',
+                prepText: 'Você firma o peitoral e canaliza o fervor do seu juramento sagrado, irradiando determinação que espanta o medo e a hesitação.'
+            });
+        } else if (t.cls === 'druida') {
+            preps.push({
+                id: 'prep_communion',
+                label: 'Postura de Comunhão: Harmonia com as forças do bioma',
+                isPrep: true,
+                stat: 'wis',
+                prepText: 'Você sintoniza sua audição com o murmúrio das folhas e a terra úmida, compreendendo os sinais de alerta que a natureza emite.'
+            });
+        } else if (t.cls === 'bardo') {
+            preps.push({
+                id: 'prep_tempo',
+                label: 'Postura de Cadência: Ritmo estimulante de travessia',
+                isPrep: true,
+                stat: 'cha',
+                prepText: 'Você marca mentalmente um compasso marcial vigoroso, mantendo o ânimo elevado e a mente ágil diante de imprevistos.'
+            });
+        } else if (t.cls === 'monge') {
+            preps.push({
+                id: 'prep_focus',
+                label: 'Postura Meditativa: Passo sereno e fluxo de ki',
+                isPrep: true,
+                stat: 'dex',
+                prepText: 'Você sincroniza sua respiração ao ritmo das passadas, com a mente serena e o corpo preparado para desviar de qualquer ameaça.'
+            });
+        } else if (t.cls === 'bruxo') {
+            preps.push({
+                id: 'prep_omen',
+                label: 'Postura Sobrenatural: Presságios e visões do pacto',
+                isPrep: true,
+                stat: 'cha',
+                prepText: 'Você abre sua mente aos sussurros do patrono de outro mundo, captando alertas ocultos sobre armadilhas e traições na trilha.'
+            });
+        } else if (t.cls === 'feiticeiro') {
+            preps.push({
+                id: 'prep_flare',
+                label: 'Postura Elemental: Prontidão da centelha inata',
+                isPrep: true,
+                stat: 'con',
+                prepText: 'Você mantém sua centelha mágica em ponto de ignição, pronta para rebentar num escudo instintivo ou rajada de pura energia.'
+            });
+        }
+
+        // Postura Secundária (Raça / Sub-raça)
+        if (t.race === 'dwarf') {
+            preps.push({
+                id: 'prep_stone',
+                label: 'Postura da Rocha: Julgar a firmeza e estabilidade do solo',
+                isPrep: true,
+                stat: 'con',
+                prepText: 'Com séculos de tradição anã em minas e desfiladeiros, você lê a densidade do solo e evita deslizamentos ou terreno traiçoeiro.'
+            });
+        } else if (t.race === 'elf') {
+            preps.push({
+                id: 'prep_keen',
+                label: 'Postura da Corça: Sentidos élficos despertos',
+                isPrep: true,
+                stat: 'wis',
+                prepText: 'Sua visão e audição élficas captam o menor tremor nas folhagens e o eco de passos a grandes distâncias.'
+            });
+        } else if (t.race === 'halfling') {
+            preps.push({
+                id: 'prep_luck',
+                label: 'Postura Oportuna: Intuição para passagens seguras',
+                isPrep: true,
+                stat: 'dex',
+                prepText: 'A célebre sorte e astúcia do seu povo apontam trilhas secundárias e atalhos menos visados pelos perigos da estrada.'
+            });
+        } else if (t.race === 'dragonborn') {
+            preps.push({
+                id: 'prep_dragon',
+                label: 'Postura Régia: Imposição e bravura dracônica',
+                isPrep: true,
+                stat: 'cha',
+                prepText: 'Você infla o peito e marcha com imponência imutável, coagindo feras menores a manterem distância da sua rota.'
+            });
+        } else if (t.race === 'halforc') {
+            preps.push({
+                id: 'prep_tenacity',
+                label: 'Postura Feroz: Resiliência contra intempéries',
+                isPrep: true,
+                stat: 'con',
+                prepText: 'Seu sangue resistente de meio-orc endurece sua casca contra a fadiga, preparado para absorver o impacto de qualquer perigo.'
+            });
+        } else if (t.race === 'tiefling') {
+            preps.push({
+                id: 'prep_infernal',
+                label: 'Postura Infernal: Rastreio de calor e auras hostis',
+                isPrep: true,
+                stat: 'int',
+                prepText: 'Sua percepção sobrenatural de tiefling detecta variações súbitas de temperatura e resquícios venenosos no ar.'
+            });
+        } else if (t.race === 'gnome') {
+            preps.push({
+                id: 'prep_ingenuity',
+                label: 'Postura de Engenho: Análise minuciosa de suprimentos e rota',
+                isPrep: true,
+                stat: 'int',
+                prepText: 'Você reavalia com meticulosidade gnomica as cargas da mochila, pontos de apoio e probabilidades de tempo ao longo da rota.'
+            });
+        } else if (t.race === 'halfelf') {
+            preps.push({
+                id: 'prep_adapt',
+                label: 'Postura Versátil: Adaptação reflexiva ao terreno',
+                isPrep: true,
+                stat: 'wis',
+                prepText: 'Com o equilíbrio dos dois mundos, você ajusta seu ritmo de marcha com flexibilidade às surpresas do caminho.'
+            });
+        } else {
+            preps.push({
+                id: 'prep_grit',
+                label: 'Postura Obstinada: Determinação férrea de caminhada',
+                isPrep: true,
+                stat: 'con',
+                prepText: 'Sua disciplina e determinação humana recusam a exaustão, mantendo passos firmes mesmo sob vento forte e terreno pedregoso.'
+            });
+        }
+
+        return preps;
+    }
+
+    function getConfirmationContent(player, j) {
+        var t = _traits(player);
+        var dest = (j && j.displayName) || 'destino desconhecido';
+        var steps = (j && j.total) || 3;
+        var biome = (j && j.biome) || 'plains';
+
+        var script = [
+            { type: 'narration', text: 'Você contempla a rota para <b>' + dest + '</b> além dos portões. A travessia pelas terras ermas exigirá <b>' + steps + ' etapas</b> de marcha contínua.' }
+        ];
+
+        var rFlavor = _getRaceConfirmationNarration(t, biome);
+        if (rFlavor) script.push({ type: 'narration', text: rFlavor });
+
+        var cFlavor = _getClassConfirmationNarration(t, biome);
+        if (cFlavor) script.push({ type: 'narration', text: cFlavor });
+
+        var choices = [
+            { id: 'jrn_go', label: 'Partir em marcha padrão' }
+        ];
+
+        var prepChoices = _getPreparationChoices(t, biome);
+        for (var i = 0; i < prepChoices.length; i++) {
+            choices.push(prepChoices[i]);
+        }
+
+        choices.push({ id: 'jrn_cancel', label: 'Permanecer na cidade' });
+
+        return { script: script, choices: choices };
     }
 
     global.JourneyData = {
@@ -1132,6 +1648,8 @@ var DEPARTURES = {
         pickFreshDeparture: pickFreshDeparture,
         resolveJourneyCheck: resolveJourneyCheck,
         successPctForChoice: successPctForChoice,
+        canTakeChoice: canTakeChoice,
+        getConfirmationContent: getConfirmationContent,
         pickNarrative: pickNarrative
     };
 })(typeof window !== 'undefined' ? window : this);

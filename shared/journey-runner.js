@@ -86,11 +86,51 @@
   // Confirmação antes de viajar (user sessão #90: "não tem popup de confirmação").
   function _confirm() {
     var j = _j; if (!j) return;
+    var p = _player();
+    var content = (JD().getConfirmationContent) ? JD().getConfirmationContent(p, j) : null;
+    var script = (content && content.script) || [
+      { type: 'narration', text: 'Preparar viagem para <b>' + j.displayName + '</b>? A jornada terá ' + j.total + ' etapas — perigos podem surgir no caminho.' }
+    ];
+    var choices = (content && content.choices) || [
+      { id: 'jrn_go', label: 'Confirmar viagem' },
+      { id: 'jrn_cancel', label: 'Cancelar' }
+    ];
     _vRender({
-      script: [{ type: 'narration', text: 'Preparar viagem para <b>' + j.displayName + '</b>? A jornada terá ' + j.total + ' etapas — perigos podem surgir no caminho.' }],
-      choices: [{ id: 'jrn_go', label: 'Confirmar viagem' }, { id: 'jrn_cancel', label: 'Cancelar' }],
-      inline: true, noProgress: true,
-      onChoice: function (ch) { if (ch && ch.id === 'jrn_cancel') _cancel(); else _departure(); }
+      script: script,
+      choices: choices,
+      inline: choices.length <= 2,
+      noProgress: true,
+      onChoice: function (ch) {
+        if (ch && ch.id === 'jrn_cancel') {
+          _cancel();
+        } else if (ch && ch.isPrep) {
+          _prepStance(ch);
+        } else {
+          _departure();
+        }
+      }
+    });
+  }
+
+  // Postura de viagem especializada escolhida na confirmação (D&D 5e)
+  function _prepStance(prepChoice) {
+    var j = _j; if (!j) return;
+    j.prep = {
+      id: prepChoice.id,
+      label: prepChoice.label,
+      stat: prepChoice.stat,
+      advantageOnFirst: true
+    };
+    var descText = prepChoice.prepText || 'Você assume uma postura de alerta cuidadoso para a jornada.';
+    _vRender({
+      script: [
+        { type: 'narration', text: descText },
+        { type: 'narration', text: '<i>Postura ativada:</i> <b>' + prepChoice.label + '</b> — concederá <b>Vantagem</b> contra perigos durante o trajeto.' }
+      ],
+      choices: [{ id: 'jrn_go_prep', label: 'Iniciar travessia' }],
+      inline: true,
+      noProgress: true,
+      onChoice: function () { _departure(); }
     });
   }
 
@@ -119,6 +159,9 @@
     var dep = (JD().pickDeparture) ? JD().pickDeparture(j.biome, _player(), []) : null;
     var script = (dep || []).map(function (l) { return { type: l.type || 'narration', text: l.text }; });
     if (!script.length) script = [{ type: 'narration', text: 'Você parte rumo a ' + j.displayName + '.' }];
+    if (j.prep && j.prep.label) {
+      script.push({ type: 'narration', text: 'Sob a postura de <b>' + j.prep.label + '</b>, a marcha se inicia com foco redobrado.' });
+    }
     _vRender({
       script: script, choices: [{ id: 'jrn_partir', label: 'Partir' }],
       inline: true, noProgress: true,
@@ -155,12 +198,16 @@
     });
     if (!script.length && hz.narr) script = [{ type: 'narration', text: hz.narr }];
     if (hz.speech && hz.npc) script.push({ type: 'speech', speaker: hz.npc.name, text: hz.speech });
-    var choices = (hz.choices || []).map(function (ch, i) {
+    var p = _player();
+    var available = (hz.choices || []).filter(function (ch) {
+      return (JD().canTakeChoice) ? JD().canTakeChoice(p, ch) : true;
+    });
+    var choices = available.map(function (ch, i) {
       var out = { id: 'jrn_ch_' + i, label: ch.t, desc: ch.desc || '', _haz: ch };
       if (ch.stat && ch.dc != null) {
         out.dc = ch.dc;
         out.skill = (global.DndRules && DndRules.statLabel) ? DndRules.statLabel(ch.stat) : ch.stat;
-        var pc = JD().successPctForChoice ? JD().successPctForChoice(_player(), ch) : null;
+        var pc = JD().successPctForChoice ? JD().successPctForChoice(p, ch) : null;
         if (pc != null) out.chance = pc;
       }
       return out;
@@ -213,7 +260,14 @@
 
   // Resolve a escolha: check D&D (JourneyData=DndRules, ODDS IGUAIS) → dado 3D → desfecho.
   function _resolve(hz, ch) {
-    var roll = JD().resolveJourneyCheck ? JD().resolveJourneyCheck(_player(), ch) : null;
+    var p = _player();
+    var checkOpts = {};
+    if (ch && (ch.advantage || ch.adv)) checkOpts.advantage = true;
+    if (_j && _j.prep && _j.prep.advantageOnFirst) {
+      checkOpts.advantage = true;
+      _j.prep.advantageOnFirst = false; // consumido no primeiro teste
+    }
+    var roll = JD().resolveJourneyCheck ? JD().resolveJourneyCheck(p, ch, checkOpts) : null;
     if (!roll) { _outcome(hz, ch, true, null); return; }
     _dice(roll, function () { _outcome(hz, ch, roll.success, roll); });
   }
@@ -250,7 +304,8 @@
     function _finish() { if (_done) return; _done = true; if (typeof onDone === 'function') onDone(); }
     function _showResult() {
       while (resEl.firstChild) resEl.removeChild(resEl.firstChild);
-      resEl.appendChild(_mk('div', 'font-size:calc(11px * var(--v-font-scale,1));color:#a09484;letter-spacing:1.5px;margin-bottom:6px;', 'Rolagem d20 ' + roll.d20 + ' ' + (modTotal >= 0 ? '+' : '') + modTotal + ' = ' + roll.total + ' vs CD ' + roll.dc));
+      var rollNote = (roll.advantage ? ' com Vantagem (' + roll.rolls.join(', ') + ')' : (roll.disadvantage ? ' com Desvantagem (' + roll.rolls.join(', ') + ')' : ''));
+      resEl.appendChild(_mk('div', 'font-size:calc(11px * var(--v-font-scale,1));color:#a09484;letter-spacing:1.5px;margin-bottom:6px;', 'Rolagem d20' + rollNote + ' ' + (modTotal >= 0 ? '+' : '') + modTotal + ' = ' + roll.total + ' vs CD ' + roll.dc));
       var statusTxt = roll.d20 === 20 ? 'ACERTO CRÍTICO!' : roll.d20 === 1 ? 'FALHA CRÍTICA' : (roll.success ? 'Sucesso' : 'Falha');
       var statusColor = roll.success ? '#7ad06b' : '#d85848';
       resEl.appendChild(_mk('div', 'font-size:calc(18px * var(--v-font-scale,1));color:' + statusColor + ';font-weight:700;letter-spacing:2px;font-family:Cinzel,serif;', statusTxt));

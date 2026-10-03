@@ -8602,7 +8602,7 @@ body.perf-lite .vc-action-btn { transition: none; }
   })();
 
   var override = {};
-  ['name','cls','race'].forEach(function(k){
+  ['name','cls','race','subrace','subclass','alignment','background'].forEach(function(k){
     var v = params.get(k);
     if (v) override[k] = v;
   });
@@ -9020,6 +9020,10 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.name)       p.name = picked.name;
       if (picked.class_name) p.cls = String(picked.class_name).toLowerCase();
       if (picked.race)       p.race = String(picked.race).toLowerCase();
+      if (picked.subrace)    p.subrace = String(picked.subrace).toLowerCase();
+      if (picked.subclass)   p.subclass = String(picked.subclass).toLowerCase();
+      if (picked.alignment)  p.alignment = String(picked.alignment).toLowerCase();
+      if (picked.background) p.background = String(picked.background).toLowerCase();
       // USER REPORT 2026-05-14 #2 — usar `!= null` em lugar de truthy pra
       // não perder valores legítimos zero (hp=0 = unconscious, gold=0, etc).
       if (picked.level != null)  p.level = picked.level;
@@ -9274,6 +9278,8 @@ body.perf-lite .vc-action-btn { transition: none; }
           name: c.name || '',
           cls: clsKey,
           race: String(c.race || '').toLowerCase(),
+          subrace: String(c.subrace || '').toLowerCase(),
+          subclass: String(c.subclass || '').toLowerCase(),
           level: c.level || 1,
           icon: clsToHeraldic[clsKey] || 'ic-guerreiro',
           active: cid === pickedId
@@ -9285,7 +9291,10 @@ body.perf-lite .vc-action-btn { transition: none; }
         // USER REPORT 2026-05-14 #2 — sincroniza TODOS os campos do DB
         // (stats/ac/atk/dc/prof/hd/pending*) pro slot 0 (player) na party.
         window.GROUP_MEMBERS[0] = {
-          name: p.name, cls: p.cls, race: p.race, level: p.level,
+          name: p.name, cls: p.cls, race: p.race,
+          subrace: p.subrace || '', subclass: p.subclass || '',
+          alignment: p.alignment || '', background: p.background || '',
+          level: p.level,
           hp: p.hp, hpMax: p.hpMax, mp: p.mp, mpMax: p.mpMax,
           exh: p.exh, exhMax: 6,
           xp: p.xp, xpNext: p.xpNext, xpPrev: p.xpPrev || 0,
@@ -9427,6 +9436,10 @@ body.perf-lite .vc-action-btn { transition: none; }
         if (picked.name) p.name = picked.name;
         if (picked.class_name) p.cls = String(picked.class_name).toLowerCase();
         if (picked.race) p.race = String(picked.race).toLowerCase();
+        if (picked.subrace) p.subrace = String(picked.subrace).toLowerCase();
+        if (picked.subclass) p.subclass = String(picked.subclass).toLowerCase();
+        if (picked.alignment) p.alignment = String(picked.alignment).toLowerCase();
+        if (picked.background) p.background = String(picked.background).toLowerCase();
         if (picked.level) p.level = picked.level;
         /* 2026-06-11 (user: ficha mostrava 28/9 PV — "erro grotesco"): hp=0 do
            servidor é FALSY → `if (picked.hp)` descartava o valor real e ficava o

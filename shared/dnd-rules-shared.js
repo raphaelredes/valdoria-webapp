@@ -344,6 +344,70 @@
         return _CLASS_EN_TO_PT[s] || s;
     }
 
+    var _RACE_CANON_MAP = {
+        'anao': 'dwarf', 'dwarf': 'dwarf',
+        'elfo': 'elf', 'elf': 'elf',
+        'humano': 'human', 'human': 'human',
+        'halfling': 'halfling',
+        'draconato': 'dragonborn', 'dragonborn': 'dragonborn',
+        'gnomo': 'gnome', 'gnome': 'gnome',
+        'meioelfo': 'halfelf', 'halfelf': 'halfelf',
+        'meioorc': 'halforc', 'halforc': 'halforc',
+        'tiefling': 'tiefling'
+    };
+
+    function raceKey(race) {
+        if (!race) return '';
+        var s = _stripAccents(String(race)).toLowerCase().replace(/[\s_-]+/g, '');
+        return _RACE_CANON_MAP[s] || s;
+    }
+
+    var _SUBRACE_CANON_MAP = {
+        'colina': 'hill', 'hill': 'hill', 'anaodacolina': 'hill',
+        'montanha': 'mountain', 'mountain': 'mountain', 'anaodamontanha': 'mountain',
+        'alto': 'high', 'high': 'high', 'altoelfo': 'high',
+        'silvestre': 'wood', 'wood': 'wood', 'elfosilvestre': 'wood',
+        'drow': 'drow', 'elfonegro': 'drow',
+        'pesleves': 'lightfoot', 'lightfoot': 'lightfoot',
+        'robusto': 'stout', 'stout': 'stout',
+        'rocha': 'rock', 'rock': 'rock', 'gnomodarocha': 'rock',
+        'floresta': 'forest', 'forest': 'forest', 'gnomodafloresta': 'forest'
+    };
+
+    function subraceKey(subrace) {
+        if (!subrace) return '';
+        var s = _stripAccents(String(subrace)).toLowerCase().replace(/[\s_-]+/g, '');
+        return _SUBRACE_CANON_MAP[s] || s;
+    }
+
+    var _SUBCLASS_CANON_MAP = {
+        'campeao': 'champion', 'champion': 'champion',
+        'mestredebatalha': 'battle_master', 'battlemaster': 'battle_master', 'battle_master': 'battle_master',
+        'evocacao': 'evoker', 'evoker': 'evoker', 'evocador': 'evoker',
+        'abjuracao': 'abjurer', 'abjurer': 'abjurer',
+        'necromancia': 'necromancer', 'necromancer': 'necromancer',
+        'assassino': 'assassin', 'assassin': 'assassin',
+        'ladrao': 'thief', 'thief': 'thief',
+        'vida': 'life', 'life': 'life',
+        'guerra': 'war', 'war': 'war',
+        'cacador': 'hunter', 'hunter': 'hunter',
+        'perseguidorsombrio': 'gloom_stalker', 'gloomstalker': 'gloom_stalker', 'gloom_stalker': 'gloom_stalker',
+        'berserker': 'berserker',
+        'conhecimento': 'lore', 'lore': 'lore',
+        'lua': 'moon', 'moon': 'moon',
+        'sombra': 'shadow', 'shadow': 'shadow',
+        'feerico': 'fey', 'fey': 'fey',
+        'infernal': 'fiend', 'fiend': 'fiend',
+        'vinganca': 'vengeance', 'vengeance': 'vengeance',
+        'devocao': 'devotion', 'devotion': 'devotion'
+    };
+
+    function subclassKey(subclass) {
+        if (!subclass) return '';
+        var s = _stripAccents(String(subclass)).toLowerCase().replace(/[\s_-]+/g, '');
+        return _SUBCLASS_CANON_MAP[s] || s;
+    }
+
     function statBaseForClass(cls, stat) {
         var map = CLASS_STAT_MAP[classKey(cls)];
         if (!map) return 10;  // classe desconhecida -> neutro (mod 0)
@@ -473,11 +537,26 @@
         // A3.2: roteia pelo normalizador (todos os dialetos de descritor).
         var n = normalizeCheck(check) || {};
         var mp = _modAndProf(player, check);
-        var d20 = 1 + Math.floor(Math.random() * 20);
+        var r1 = 1 + Math.floor(Math.random() * 20);
+        var r2 = 1 + Math.floor(Math.random() * 20);
+        var hasAdv = !!(n.advantage || (check && (check.advantage || check.adv)));
+        var hasDis = !!(n.disadvantage || (check && (check.disadvantage || check.dis)));
+        var d20;
+        var rolls = [r1];
+        if (hasAdv && !hasDis) {
+            d20 = Math.max(r1, r2);
+            rolls = [r1, r2];
+        } else if (hasDis && !hasAdv) {
+            d20 = Math.min(r1, r2);
+            rolls = [r1, r2];
+        } else {
+            d20 = r1;
+        }
         var dc = (n.dc != null) ? n.dc : 10;
         var total = d20 + mp.mod + mp.prof;
         return {
-            d20: d20, mod: mp.mod, prof: mp.prof, stat: mp.stat, skill: mp.skill || null,
+            d20: d20, rolls: rolls, advantage: hasAdv && !hasDis, disadvantage: hasDis && !hasAdv,
+            mod: mp.mod, prof: mp.prof, stat: mp.stat, skill: mp.skill || null,
             total: total, dc: dc, success: total >= dc, crit: d20 === 20, critFail: d20 === 1
         };
     }
@@ -494,6 +573,9 @@
         abilityMod: abilityMod,
         proficiencyBonus: proficiencyBonus,
         classKey: classKey,
+        raceKey: raceKey,
+        subraceKey: subraceKey,
+        subclassKey: subclassKey,
         statBaseForClass: statBaseForClass,
         spellcastingAbility: spellcastingAbility,
         classSaveProficiencies: classSaveProficiencies,
