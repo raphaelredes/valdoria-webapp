@@ -384,6 +384,15 @@ body.perf-lite #encounter-overlay.active .enc-card {
   scrollbar-width: thin;
   scrollbar-color: var(--v-gold-30) transparent;
 }
+/* Centralização vertical inteligente (Ordem do Usuário 2026-10):
+   Quando o diálogo for curto e não gerar barra de rolagem, centraliza harmoniosamente no card.
+   Quando houver overflow, margens auto colapsam para 0 e o scroll inicia suavemente do topo. */
+.enc-body > :first-child {
+  margin-top: auto;
+}
+.enc-body > :last-child {
+  margin-bottom: auto;
+}
 .enc-body::-webkit-scrollbar {
   width: 4px;
 }
