@@ -1529,6 +1529,32 @@
   max-height: 100%;
 }
 
+.vinv-confirm-price-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 2px auto 6px;
+  padding: 3px 12px;
+  background: rgba(196, 149, 58, 0.12);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 6px;
+  font-family: var(--vinv-font-ui, Cinzel, serif);
+  font-size: calc(11px * var(--v-font-scale, 1));
+  color: var(--vinv-text-dim, #c8b99d);
+}
+
+.vinv-confirm-price-tag .vinv-price-lbl {
+  color: var(--vinv-text-muted, #9e8f78);
+  font-size: calc(10px * var(--v-font-scale, 1));
+}
+
+.vinv-confirm-price-tag strong {
+  color: var(--vinv-gold, #c4953a);
+  font-size: calc(12px * var(--v-font-scale, 1));
+  font-weight: 700;
+}
+
 .vinv-confirm-msg {
   font-size: calc(11px * var(--v-font-scale, 1));
   color: var(--vinv-text-bright);

@@ -1763,11 +1763,14 @@
       return;
     }
     var iconId = _resolveItemIcon(it);
-    var valHtml = it.value ? (' por <span class="vinv-coin mini">V</span><strong>' + it.value + '</strong>') : '';
+    var valHtml = (it.value != null)
+      ? '<div class="vinv-confirm-price-tag"><span class="vinv-price-lbl">Valor Estimado:</span> <span class="vinv-coin mini">V</span><strong>' + it.value + '</strong></div>'
+      : '';
     card.innerHTML = ''
       + '<div class="vinv-confirm-title">Ir ao Mercado Central</div>'
       + '<div class="vinv-confirm-icon">' + _iconSrc(iconId, it.name) + '</div>'
-      + '<div class="vinv-confirm-msg">Para vender <strong>' + _esc(it.name) + '</strong>' + valHtml + ', você precisa ir até o Mercado Central.</div>'
+      + valHtml
+      + '<div class="vinv-confirm-msg">Para vender <strong>' + _esc(it.name) + '</strong>, você precisa ir até o Mercado Central.</div>'
       + '<div class="vinv-confirm-sub">Deseja caminhar até lá agora?</div>'
       + '<div class="vinv-confirm-actions">'
       +   '<button type="button" class="vinv-btn" data-action="confirm-cancel">Cancelar</button>'
@@ -1795,11 +1798,14 @@
       return;
     }
     var iconId = _resolveItemIcon(it);
-    var valHtml = it.value ? (' por <span class="vinv-coin mini">V</span><strong>' + it.value + '</strong>') : '';
+    var valHtml = (it.value != null)
+      ? '<div class="vinv-confirm-price-tag"><span class="vinv-price-lbl">Preço de Venda:</span> <span class="vinv-coin mini">V</span><strong>' + it.value + '</strong></div>'
+      : '';
     card.innerHTML = ''
       + '<div class="vinv-confirm-title">Confirmar Venda</div>'
       + '<div class="vinv-confirm-icon">' + _iconSrc(iconId, it.name) + '</div>'
-      + '<div class="vinv-confirm-msg">Deseja realmente vender <strong>' + _esc(it.name) + '</strong>' + valHtml + '?</div>'
+      + valHtml
+      + '<div class="vinv-confirm-msg">Deseja realmente vender <strong>' + _esc(it.name) + '</strong>?</div>'
       + '<div class="vinv-confirm-actions">'
       +   '<button type="button" class="vinv-btn" data-action="confirm-cancel">Cancelar</button>'
       +   '<button type="button" class="vinv-btn primary" data-action="confirm-ok">Vender</button>'

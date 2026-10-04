@@ -17053,6 +17053,7 @@ function _playAudioForScreen(screen){
 
 function navigateTo(screen, params){
   if (screen === 'hub' || screen === 'cartografia') {
+    window._isAtMarket = false;
     // Push da tela atual no navStack pra navigateBack funcionar
     // (entrar em cartografia → Voltar volta pra hub)
     if (_currentScreen !== screen) {
@@ -17066,6 +17067,11 @@ function navigateTo(screen, params){
     return;
   }
   // Sub-screen → popup
+  if (screen === 'market' || (typeof screen === 'string' && (screen.indexOf('shop_') === 0 || screen.indexOf('market_') === 0))) {
+    window._isAtMarket = true;
+  } else {
+    window._isAtMarket = false;
+  }
   openCityPopup(screen, params);
   _playAudioForScreen(screen);
 }
@@ -17088,6 +17094,7 @@ function navigateBack(){
       // dialogue, lista de itens, etc.) que registrou um restoreFn, usa ele;
       // senão cai no _renderCityPopup padrão (AREA_REGISTRY/SUBSCREEN_DATA).
       var newTopKey = _popupStack[_popupStack.length - 1];
+      window._isAtMarket = (newTopKey === 'market' || (typeof newTopKey === 'string' && (newTopKey.indexOf('shop_') === 0 || newTopKey.indexOf('market_') === 0)));
       var restoreFn = window._popupRestoreFns && window._popupRestoreFns[newTopKey];
       if (typeof restoreFn === 'function') {
         // Pop pre-emptivo: o restoreFn vai re-empurrar o key (idempotente)
@@ -17097,6 +17104,7 @@ function navigateBack(){
         _renderCityPopup(newTopKey);
       }
     } else {
+      window._isAtMarket = false;
       closeCityPopup(true);
     }
     _logCity('popup back (stack=' + _popupStack.length + ')');
@@ -17105,6 +17113,7 @@ function navigateBack(){
   // Sem popup → volta no nav stack do conteúdo principal
   if (_navStack.length === 0) { _logCity('navigateBack: stack vazio'); return; }
   _currentScreen = _navStack.pop();
+  window._isAtMarket = (_currentScreen === 'market');
   renderCurrentScreen();
   _logCity('navigate back -> ' + _currentScreen);
 }
@@ -41536,6 +41545,29 @@ function _vinvApplyAcDelta(name, sign) {
     p.ac = base + sign * acb;
   } catch (e) { /* best-effort */ }
 }
+function _isPlayerAtMarket() {
+  if (window._isAtMarket === true) return true;
+  if (typeof _popupStack !== 'undefined' && Array.isArray(_popupStack)) {
+    for (var i = 0; i < _popupStack.length; i++) {
+      var k = _popupStack[i] || '';
+      if (k === 'market' || k.indexOf('shop_') === 0 || k.indexOf('market_') === 0) {
+        return true;
+      }
+    }
+  }
+  var csp = document.getElementById('city-subscreen-popup');
+  if (csp && csp.classList.contains('active')) {
+    var titleEl = document.getElementById('csp-title');
+    if (titleEl && (titleEl.textContent.indexOf('Mercado') >= 0 || titleEl.textContent.indexOf('Loja') >= 0)) {
+      return true;
+    }
+    if (csp.querySelector('.market-hub, #market-hub-container, [data-venue="market"]')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function _vinvBuildConfig() {
   var items = (MOCK_PLAYER_INVENTORY || [])
     .filter(function (e) { return e.q > 0; })
@@ -41544,7 +41576,7 @@ function _vinvBuildConfig() {
   return {
     title: 'MOCHILA',
     inCity: true,
-    atMarket: (typeof _popupStack !== 'undefined' && _popupStack.indexOf('market') >= 0),
+    atMarket: _isPlayerAtMarket(),
     onGoToMarket: function (item) {
       _goToMarketWithWalkNarrative(item);
     },
@@ -41651,16 +41683,43 @@ function _vinvBuildConfig() {
   };
 }
 
+// ── ANTI-FARM DE CAMINHADAS URBANAS ─────────────────────────────────────────
+// A chance de encontros diminui a cada repetição da mesma rota até zerar (anti-farm).
+var _CITY_WALK_BASE_CHANCE = 0.20;
+
+function _getCityWalkEncounterChance(routeKey) {
+  routeKey = routeKey || 'market';
+  window._cityWalkHistory = window._cityWalkHistory || {};
+  var count = window._cityWalkHistory[routeKey] || 0;
+  if (count <= 0) return _CITY_WALK_BASE_CHANCE; // 20% na 1ª vez
+  if (count === 1) return 0.08;                 // 8% na 2ª vez
+  if (count === 2) return 0.03;                 // 3% na 3ª vez
+  return 0.0;                                   // 0% a partir da 4ª repetição
+}
+
+function _registerCityWalk(routeKey) {
+  routeKey = routeKey || 'market';
+  window._cityWalkHistory = window._cityWalkHistory || {};
+  window._cityWalkHistory[routeKey] = (window._cityWalkHistory[routeKey] || 0) + 1;
+  try {
+    var p = window.CITY_MOCK_PLAYER;
+    if (p) {
+      p._city_walks = p._city_walks || {};
+      p._city_walks[routeKey] = window._cityWalkHistory[routeKey];
+    }
+  } catch (_) {}
+}
+
 /**
  * Caminhada até o Mercado Central com animação urbana e narrativa D&D 5e.
  *
  * 1. Fecha inventário e qualquer sub-popup aberto.
  * 2. Executa animação medieval de caminhada (cidade com torres, muralhas e tochas).
  * 3. Ao concluir a caminhada:
- *    - Se rolar evento raro (~20%): injeta narrativa lógica de aproximação antes
- *      do diálogo do NPC; ao término, segue para o Mercado Central.
- *    - Se caminho tranquilo (~80%): navega para o Mercado Central e apresenta
- *      a narração sensorial do Mestre descrevendo a chegada e o item a negociar.
+ *    - Se rolar evento raro (com chance decrescente anti-farm): injeta narrativa
+ *      lógica de aproximação antes do diálogo do NPC; ao término, segue para o Mercado.
+ *    - Se caminho tranquilo: navega para o Mercado Central e apresenta a narração
+ *      sensorial do Mestre descrevendo a chegada e o item a negociar.
  */
 function _goToMarketWithWalkNarrative(item) {
   try {
@@ -41685,9 +41744,12 @@ function _goToMarketWithWalkNarrative(item) {
 }
 
 function _resolveMarketArrival(item) {
-  var rollRareEvent = Math.random() < 0.20;
+  var walkChance = _getCityWalkEncounterChance('market');
+  var rollRareEvent = Math.random() < walkChance;
+  // Registra a caminhada para reduzir a chance de encontro na próxima vez (anti-farm)
+  _registerCityWalk('market');
 
-  // Chance rara de encontro a caminho do mercado
+  // Chance rara de encontro a caminho do mercado (mitigada por anti-farm)
   if (rollRareEvent && !window.vReducedMotion) {
     // A) Modo remoto (servidor DEV / prod)
     if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
@@ -41714,6 +41776,7 @@ function _resolveMarketArrival(item) {
                 }
               } catch (_) {}
             }
+            window._isAtMarket = true;
             _arrivalState = { encId: enc.id, action: 'market' };
             _arrivalRenderNode({ npc: enc.npc, script: enc.script, choices: enc.choices });
             return;
@@ -41750,6 +41813,7 @@ function _resolveMarketArrival(item) {
           _showMarketPeacefulArrival(item);
         }
       });
+      window._isAtMarket = true;
       _renderEncounterPopup(encClone, 'nav:market', p);
       return;
     }
@@ -41760,6 +41824,9 @@ function _resolveMarketArrival(item) {
 }
 
 function _showMarketPeacefulArrival(item) {
+  // Marca explicitamente o jogador no Mercado
+  window._isAtMarket = true;
+
   // Abre o Mercado Central
   if (typeof navigateTo === 'function') {
     navigateTo('market');
@@ -50490,11 +50557,17 @@ function openCityPopup(key, params){
   // sendo chamado 2× per click (event bubble ou duplicate trigger) → stack duplica → Voltar
   // precisa pop 2× pra sair do screen. Solução: skip push se top já é o mesmo key (idempotente).
   if (_popupStack.length > 0 && _popupStack[_popupStack.length - 1] === key) {
+    if (key === 'market' || (typeof key === 'string' && (key.indexOf('shop_') === 0 || key.indexOf('market_') === 0))) {
+      window._isAtMarket = true;
+    }
     _logCity('popup open -> ' + key + ' DEDUP (already on top)');
     _renderCityPopup(key);
     var popup0 = document.getElementById('city-subscreen-popup');
     if (popup0) popup0.classList.add('active');
     return;
+  }
+  if (key === 'market' || (typeof key === 'string' && (key.indexOf('shop_') === 0 || key.indexOf('market_') === 0))) {
+    window._isAtMarket = true;
   }
   _popupStack.push(key);
   _renderCityPopup(key);
@@ -50503,6 +50576,7 @@ function openCityPopup(key, params){
   _logCity('popup open -> ' + key + ' (depth=' + _popupStack.length + ')');
 }
 function closeCityPopup(silent){
+  window._isAtMarket = false;
   var popup = document.getElementById('city-subscreen-popup');
   if (popup) popup.classList.remove('active');
   _popupStack = [];
@@ -61087,10 +61161,15 @@ function _playCityWalkAnimation(opts, onComplete) {
     ctx.fillStyle = PAL.ground;
     ctx.fillRect(0, groundY, W, H - groundY);
 
-    // Calçamento v8 (2026-05-05): pedras varia­das tipo paralelepípedo
-    // medieval — não círculos uniformes. Padrão de offset alternado por
-    // linha (running bond). Cada pedra tem highlight + sombra simulando
-    // luz da fonte celestial (sol/lua).
+    // Sombra de contato suave da muralha sobre o calçamento
+    var wallShadow = ctx.createLinearGradient(0, groundY, 0, groundY + 12);
+    wallShadow.addColorStop(0, 'rgba(0,0,0,0.6)');
+    wallShadow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = wallShadow;
+    ctx.fillRect(0, groundY, W, 12);
+
+    // Calçamento v9: pedras tipo paralelepípedo medieval determinísticas no espaço do mundo
+    // (elimina a mudança de cor e o flicker durante a movimentação).
     var stoneW = 14, stoneH = 7;
     var rows = Math.ceil((H - groundY) / stoneH) + 2;
     var lightFromLeft = (PAL.celestial === 'sun' && period !== 'dusk');
@@ -61099,25 +61178,35 @@ function _playCityWalkAnimation(opts, onComplete) {
               period === 'dawn' ? 'rgba(255,210,160,0.14)' :
               'rgba(160,170,200,0.08)';
     var loC = 'rgba(0,0,0,0.45)';
-    var soff = (scroll * 1.5) % (stoneW * 2);
+    var worldScroll = scroll * 1.5;
+
     for (var rg = 0; rg < rows; rg++) {
       var gy = groundY + rg * stoneH;
       // Offset alternando por linha (running bond pattern)
-      var rowOff = (rg % 2) === 0 ? 0 : stoneW / 2;
-      // Perspectiva sutil — pedras maiores conforme aproximam
+      var rowOff = (rg % 2) === 0 ? 0 : (stoneW / 2);
+      // Perspectiva sutil — pedras maiores conforme aproximam da base
       var perspK = 1 + (gy - groundY) / (H - groundY) * 0.4;
       var sw = stoneW * perspK;
       var sh = stoneH * perspK;
-      for (var gxs = -soff + rowOff - sw; gxs < W + sw; gxs += sw + 1) {
-        // Variação aleatória sutil na largura (mais realismo)
-        var wVar = sw + Math.sin(gxs * 0.13 + rg * 0.7) * 1.5;
-        // Pedra individual: corpo + highlight + sombra
-        // Corpo: cor levemente variada (tom mais claro/escuro aleatório)
-        var jitter = Math.sin(gxs * 0.41 + rg * 1.7) * 0.15;
-        ctx.fillStyle = jitter > 0
-          ? 'rgba(' + (jitter > 0.05 ? '90,75,55' : '70,55,40') + ',0.3)'
-          : 'rgba(40,28,18,0.35)';
+      var stepX = sw + 1;
+
+      var firstCol = Math.floor((worldScroll - rowOff - sw * 2) / stepX) - 1;
+      var lastCol = Math.ceil((worldScroll - rowOff + W + sw * 2) / stepX) + 1;
+
+      for (var col = firstCol; col <= lastCol; col++) {
+        var gxs = col * stepX - worldScroll + rowOff;
+        if (gxs + sw < -20 || gxs > W + 20) continue;
+
+        // Hash determinístico baseado EXCLUSIVAMENTE em (col, rg) — a pedra física tem cor e tamanho FIXOS
+        var seedVal = Math.sin(col * 12.9898 + rg * 78.233) * 43758.5453;
+        var rnd = seedVal - Math.floor(seedVal);
+        var wVar = sw + (rnd - 0.5) * 2;
+
+        // Cor fixa por pedra (elimina flicker e transição brusca de cor)
+        var tone = rnd > 0.65 ? '88,72,54' : (rnd > 0.35 ? '68,54,38' : '48,36,26');
+        ctx.fillStyle = 'rgba(' + tone + ',0.35)';
         ctx.fillRect(gxs, gy, wVar, sh - 1);
+
         // Highlight (lado iluminado)
         ctx.fillStyle = hiC;
         ctx.fillRect(gxs, gy, wVar, 0.8);
@@ -61126,19 +61215,20 @@ function _playCityWalkAnimation(opts, onComplete) {
         } else {
           ctx.fillRect(gxs + wVar - 0.8, gy, 0.8, sh - 1);
         }
+
         // Sombra entre pedras
         ctx.fillStyle = loC;
         ctx.fillRect(gxs + wVar - 0.5, gy, 0.5, sh - 1);
         ctx.fillRect(gxs, gy + sh - 1, wVar, 0.6);
       }
     }
+
     // Reflexo de chuva (poças)
     if (IS_RAIN) {
       ctx.fillStyle = 'rgba(140,160,200,0.10)';
       ctx.fillRect(0, groundY, W, H - groundY);
-      // Poças aleatórias com brilho
       for (var pp = 0; pp < 3; pp++) {
-        var ppx = ((pp * 137 + (scroll * 1.2)) % (W + 60)) - 30;
+        var ppx = ((pp * 180 + 40 - (scroll * 1.2)) % (W + 120)) - 30;
         var ppy = groundY + 12 + pp * 18;
         ctx.fillStyle = 'rgba(180,200,230,0.18)';
         ctx.beginPath();
