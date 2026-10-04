@@ -1119,8 +1119,18 @@
     var tabs = cfg.tabs || ['items'];
     var hasEquip = tabs.indexOf('equip') !== -1;
     var hasAllies = tabs.indexOf('allies') !== -1;
+    if (hasAllies) {
+      if (cfg.hasAllies === false) {
+        hasAllies = false;
+      } else if (Array.isArray(cfg.allies) && cfg.allies.length === 0) {
+        hasAllies = false;
+      } else if (cfg.player && Array.isArray(cfg.player.allies) && cfg.player.allies.length === 0 && (!cfg.player.party || cfg.player.party.length <= 1)) {
+        hasAllies = false;
+      }
+    }
     var cur = _state.activeTab;
     var primLabel, primDefault;
+    var showPrimary = true;
     if (cur === 'items') {
       if (hasEquip) {
         primLabel = primAct.label || 'Equipados';
@@ -1129,23 +1139,20 @@
         primLabel = primAct.label || 'Aliados';
         primDefault = function () { _state.activeTab = 'allies'; _render(); };
       } else {
-        primLabel = primAct.label || 'Equipados';
-        primDefault = null;
+        showPrimary = false;
       }
     } else if (cur === 'equip') {
       if (hasAllies) {
         primLabel = 'Aliados';
         primDefault = function () { _state.activeTab = 'allies'; _render(); };
       } else {
-        primLabel = 'Voltar à Mochila';
-        primDefault = function () { _state.activeTab = 'items'; _render(); };
+        // Sem aliados: não exibe botão "Aliados" nem segundo botão redundante de voltar.
+        showPrimary = false;
       }
     } else if (cur === 'allies') {
-      primLabel = 'Voltar à Mochila';
-      primDefault = function () { _state.activeTab = 'items'; _render(); };
+      showPrimary = false;
     } else {
-      primLabel = primAct.label || 'Equipados';
-      primDefault = null;
+      showPrimary = false;
     }
 
     el.innerHTML = encHtml
@@ -1154,9 +1161,11 @@
       +     (secAct.icon ? _uiIcon(secAct.icon, 13) : '')
       +     _esc(secAct.label || 'Voltar')
       +   '</button>'
-      +   '<button class="vinv-btn primary" data-action="primary">'
-      +     _esc(primLabel)
-      +   '</button>'
+      +   (showPrimary
+            ? '<button class="vinv-btn primary" data-action="primary">'
+              + _esc(primLabel)
+              + '</button>'
+            : '')
       + '</div>';
 
     el.querySelector('[data-action="secondary"]').addEventListener('click', function () {
@@ -1167,11 +1176,14 @@
       if (typeof secAct.onClick === 'function') secAct.onClick();
       else window.vInventory.close();
     });
-    el.querySelector('[data-action="primary"]').addEventListener('click', function () {
-      // Custom onClick sobrescreve toggle padrão
-      if (typeof primAct.onClick === 'function') primAct.onClick();
-      else if (primDefault) primDefault();
-    });
+    var primBtn = el.querySelector('[data-action="primary"]');
+    if (primBtn) {
+      primBtn.addEventListener('click', function () {
+        // Custom onClick sobrescreve toggle padrão
+        if (typeof primAct.onClick === 'function') primAct.onClick();
+        else if (primDefault) primDefault();
+      });
+    }
   }
 
   // ============================================================

@@ -41530,7 +41530,9 @@ function _vinvBuildConfig() {
       subrace: cp.subrace || '',
       abilities: cp.stats || cp.abilities || {},
     },
-    tabs: ['items', 'equip', 'allies'],   // 3 tabs canonical cidade
+    tabs: ((typeof _getActiveAllies === 'function' && _getActiveAllies().length > 0) ? ['items', 'equip', 'allies'] : ['items', 'equip']),
+    hasAllies: (typeof _getActiveAllies === 'function' && _getActiveAllies().length > 0),
+    allies: (typeof _getActiveAllies === 'function' ? _getActiveAllies() : []),
     showSearch: true,
     showSort: true,
     showBulkActions: { junk: true, fusion: true },
@@ -58022,6 +58024,34 @@ function _arrivalChoice(choiceId){
   if (!choiceId || !_arrivalState) { _arrivalFinish(); return; }
   window.vCityServer.cityAction('arrival.choice', { encounter_id: _arrivalState.encId, choice_id: choiceId })
     .then(function(res){
+      if (res) {
+        if (Array.isArray(res.inventory) && typeof MOCK_PLAYER_INVENTORY !== 'undefined') {
+          MOCK_PLAYER_INVENTORY.length = 0;
+          res.inventory.forEach(function (e) {
+            MOCK_PLAYER_INVENTORY.push({
+              n: e.name, q: e.count,
+              get id() { return 'inv_' + this.n.replace(/\s+/g, '_').toLowerCase(); },
+              get icon() { return (typeof getItemData === 'function' ? getItemData(this.n).e : ''); },
+              get value() { return (typeof getItemData === 'function' ? getItemData(this.n).v : 0); },
+              get name() { return this.n; }
+            });
+          });
+          if (typeof _syncInventoryToLocalStorage === 'function') {
+            try { _syncInventoryToLocalStorage(); } catch (_) {}
+          }
+          if (window.vInventory && typeof _vinvBuildConfig === 'function' && vInventory.isOpen && vInventory.isOpen()) {
+            try { vInventory.refresh(_vinvBuildConfig().player); } catch (_) {}
+          }
+        } else if (Array.isArray(res.items_granted)) {
+          res.items_granted.forEach(function (it) {
+            if (typeof _applyBoughtItem === 'function') _applyBoughtItem(it, 1);
+          });
+        }
+        if (typeof res.player_gold === 'number' && window.CITY_MOCK_PLAYER) {
+          window.CITY_MOCK_PLAYER.gold = res.player_gold;
+          if (typeof refreshHud === 'function') refreshHud();
+        }
+      }
       if (!res || !res.ok || res.proceed || !res.node) { _arrivalFinish(); return; }
       var node = res.node;
       // PADRAO_DADOS: TODO skill check de diálogo rola o dado 3D (SRP canonical) —
