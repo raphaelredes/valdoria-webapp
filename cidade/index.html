@@ -41198,6 +41198,16 @@ function _vinvAdaptItem(invEntry) {
     mp_bonus: it.mb || it.mp_bonus || 0,
     heal_bonus: it.hlb || it.heal_bonus || 0,
     value: it.v || 0,
+    // Coesão de preços Mochila vs Mercado (Ordem do Usuário 2026-10):
+    // calcula o valor exato pago pelo mercado com base no especialista e regras D&D 5e
+    sell_value: (function(){
+      var spec = (typeof _marketGetSpecialist === 'function') ? _marketGetSpecialist(name) : null;
+      if (typeof _marketCalculateSellPrice === 'function' && spec) {
+        return _marketCalculateSellPrice(name, spec.key, window.CITY_MOCK_PLAYER);
+      }
+      var isFull = (tags.indexOf('gem') !== -1 || tags.indexOf('treasure') !== -1 || tags.indexOf('socketable') !== -1);
+      return Math.max(1, Math.floor((it.v || 0) * (isFull ? 1.0 : 0.5)));
+    })(),
     weight: it.w || it.weight || 0,
     desc: it.desc || '',
     iconId: _vinvIconId(name),
@@ -42193,11 +42203,38 @@ var CANON_PROTECTED_SELL_TAGS = ['quest', 'mission_item', 'key', 'map', 'map_fra
   'no_sell', 'no_discard', 'story_item', 'unique', 'starter_map'];
 
 function _isItemSellable(name){
-  var it = getItemData(name);
-  var tags = it.t || [];
+  if (!name) return false;
+  var it = getItemData(name) || {};
+  var tags = it.t || it.tags || [];
+
+  // 1) Tags protegidas canônicas (protected_tags.py)
   for (var i = 0; i < CANON_PROTECTED_SELL_TAGS.length; i++){
     if (tags.indexOf(CANON_PROTECTED_SELL_TAGS[i]) !== -1) return false;
   }
+
+  // 2) Raridade de missão (quest / story)
+  if (it.r === 'quest' || it.rarity === 'quest') return false;
+
+  // 3) Sem valor comercial (0 Valdoritas)
+  var val = (it.v != null) ? it.v : (it.value != null ? it.value : 0);
+  if (val <= 0) return false;
+
+  // 4) Equipado no jogador principal (Ordem do Usuário 2026-10: não deve nem aparecer)
+  if (typeof _isItemEquipped === 'function' && _isItemEquipped(name)) return false;
+
+  // 5) Equipado em algum aliado do grupo
+  if (typeof _allyHoldingItem === 'function' && _allyHoldingItem(name)) return false;
+  if (typeof MOCK_ALLY_EQUIPPED === 'object' && MOCK_ALLY_EQUIPPED) {
+    for (var allyId in MOCK_ALLY_EQUIPPED) {
+      var allyEq = MOCK_ALLY_EQUIPPED[allyId];
+      if (allyEq && typeof allyEq === 'object') {
+        for (var slot in allyEq) {
+          if (allyEq[slot] === name) return false;
+        }
+      }
+    }
+  }
+
   return true;
 }
 
@@ -43027,33 +43064,54 @@ function _stripPortugueseArticles(slug){
 }
 
 function _resolveItemIcon(name, size){
+  if (!name) return '';
+  size = size || '32px';
+
+  // 1) Catálogo vItems (PNG/WebP oficial do jogo) — Single Source of Truth
+  // Evita ícones em branco quando SVG sprite não tem o símbolo (ex: Poção de Cura).
+  if (window.vItems && typeof window.vItems.has === 'function' && typeof window.vItems.iconHTML === 'function') {
+    var rawSlug = (typeof _vinvSlug === 'function') ? _vinvSlug(name) : String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    var strippedSlug = (typeof _stripPortugueseArticles === 'function') ? _stripPortugueseArticles(rawSlug) : rawSlug;
+    var candidates = [rawSlug, strippedSlug];
+    for (var c = 0; c < candidates.length; c++) {
+      if (candidates[c] && window.vItems.has(candidates[c])) {
+        return window.vItems.iconHTML(candidates[c], name);
+      }
+    }
+  }
+
   if (!window.HeraldicItems || typeof HeraldicItems.iconSvg !== 'function') return '';
-  // 1) Alias hard-coded — usa direto se for um id ic-it-* completo
+
+  // 2) Alias hard-coded — valida existência no sprite antes de usar
   if (_HERALDIC_ITEM_ALIASES[name]){
     var alias = _HERALDIC_ITEM_ALIASES[name];
     if (alias.indexOf('ic-it-') === 0){
-      // É id completo — gera SVG manual
-      return '<svg viewBox="0 0 120 120" style="width:' + size + ';height:' + size +
-        ';display:inline-block;vertical-align:middle"><use href="#' + alias + '"/></svg>';
+      var known = (typeof HeraldicItems.knownIds === 'function') ? HeraldicItems.knownIds() : [];
+      if (known.indexOf(alias) >= 0 || (typeof document !== 'undefined' && document.getElementById(alias))) {
+        return '<svg viewBox="0 0 120 120" style="width:' + size + ';height:' + size +
+          ';display:inline-block;vertical-align:middle"><use href="#' + alias + '"/></svg>';
+      }
+    } else {
+      var aliasSvg = HeraldicItems.iconSvg(alias, size);
+      if (aliasSvg) return aliasSvg;
     }
-    // É name alternativo — tenta resolver
-    var aliasSvg = HeraldicItems.iconSvg(alias, size);
-    if (aliasSvg) return aliasSvg;
   }
-  // 2) Tenta direto (resolve "Adaga", "Cimitarra", etc.)
+
+  // 3) Tenta direto (resolve "Adaga", "Cimitarra", etc.)
   var direct = HeraldicItems.iconSvg(name, size);
   if (direct) return direct;
-  // 3) Tenta nome sem artigos PT-BR
+
+  // 4) Tenta nome sem artigos PT-BR
   if (HeraldicItems.slug){
     var slug = HeraldicItems.slug(name);
     var stripped = _stripPortugueseArticles(slug);
     if (stripped !== slug && HeraldicItems.knownIds){
       var ids = HeraldicItems.knownIds();
-      var candidates = ['ic-it-' + stripped, 'ic-it-base-' + stripped];
-      for (var i = 0; i < candidates.length; i++){
-        if (ids.indexOf(candidates[i]) >= 0){
+      var cands = ['ic-it-' + stripped, 'ic-it-base-' + stripped];
+      for (var i = 0; i < cands.length; i++){
+        if (ids.indexOf(cands[i]) >= 0){
           return '<svg viewBox="0 0 120 120" style="width:' + size + ';height:' + size +
-            ';display:inline-block;vertical-align:middle"><use href="#' + candidates[i] + '"/></svg>';
+            ';display:inline-block;vertical-align:middle"><use href="#' + cands[i] + '"/></svg>';
         }
       }
     }
@@ -44655,35 +44713,53 @@ function _marketShowSell(p){
       sellPrice = _marketCalculateSellPrice(it.n || it.name, spec.key, p);
     }
     var npcShort = spec.npc.split(' ')[0];
-    // sessão #76 FIX: usar it.n||it.name (consistente com o resto da função) —
-    // alguns items só têm 'n' (sem getter 'name') → label virava undefined e
-    // mostrava fragmento de objeto ("{'n':"). Ícone com fallback via getItemData.
     var _itName = it.n || it.name;
-    // PADRAO_COMERCIO beat 2 (vitrine, 2026-07-01): imagem WebP REAL do item
-    // (mesma linguagem visual da loja/Brokk) + nome colorido pela raridade —
-    // antes a lista usava emoji de mochila genérico ("bem amadora", dono).
     var _itData = (typeof getItemData === 'function') ? (getItemData(_itName) || {}) : {};
-    var _itIcon = (typeof _resolveItemIcon === 'function' && _resolveItemIcon(_itName, '30px'))
+    var _itIcon = (typeof _resolveItemIcon === 'function' && _resolveItemIcon(_itName, '36px'))
       || it.icon || _itData.e || _heralIco('ic-mochila');
     var _rarCol = (typeof getRarityColor === 'function' && _itData.r) ? getRarityColor(_itData.r) : '';
+
+    var _subParts = [];
+    if (it.q > 1) _subParts.push('Qtd: <b>' + it.q + '</b>');
+    var _tag = (_itData.t && _itData.t[0]) || '';
+    var _catLabel = (typeof getTagLabel === 'function' && _tag) ? getTagLabel(_tag) : '';
+    if (_catLabel) _subParts.push(_catLabel);
+    _subParts.push('Comprador: ' + spec.npc);
+    var _descLine = _subParts.join(' · ');
+
+    var _labelHtml = _rarCol
+      ? ('<span style="color:' + _rarCol + ';font-weight:600;">' + _itName + '</span>')
+      : ('<span style="font-weight:600;">' + _itName + '</span>');
+    if (it.q > 1) {
+      _labelHtml += ' <span style="font-size:11px;color:var(--v-gold,#c4953a);font-weight:normal;">×' + it.q + '</span>';
+    }
+
     return {
       icon: _itIcon,
-      label: _rarCol ? ('<span style="color:' + _rarCol + '">' + _itName + '</span>') : _itName,
+      label: _labelHtml,
+      desc: _descLine,
       badge: (isMagic ? '~' : '+') + _fmtV(sellPrice) + ' <span class="vi vi-coin sm"></span> · ' + npcShort + badgeExtra,
       _it: it, _spec: spec, _isMagic: isMagic
     };
   });
   _squareShowListPopup({
-    stackKey: 'market_sell', title: 'Vender Itens',
-    flavor: '<i>Equipamento comum vende a metade do valor. Gemas e joias mantêm o valor cheio. Itens mágicos exigem negociação.</i><br>'
-          + '<i>Cada item vai pro mercador certo — especialistas pagam melhor. Sua reputação e charme afetam o preço final.</i>',
+    stackKey: 'market_sell',
+    title: 'Vender Itens',
+    subtitle: 'Bancada de Avaliação & Comércio',
+    icon: (typeof _heralIco === 'function') ? _heralIco('ic-mercado') : '',
+    flavor: '<div style="font-size:12px;line-height:1.5;color:var(--v-text,#d4c8b0);">'
+          + '<div style="color:var(--v-gold,#c4953a);font-weight:700;margin-bottom:3px;letter-spacing:0.5px;">◆ REGRAS DE COMÉRCIO · VALDORIA</div>'
+          + '• <b>Equipamentos usados:</b> avaliados a 50% do valor da tabela D&D 5e.<br>'
+          + '• <b>Gemas e Joias:</b> preservam 100% do seu valor comercial.<br>'
+          + '• <b>Especialistas da praça:</b> compram no ofício correto com bônus de ramo.'
+          + '</div>',
     items: items,
     onPick: function(item){
       var it = item._it;
       var spec = item._spec;
       var isMagic = item._isMagic;
 
-      if (_isItemEquipped(it.n)) {
+      if (_isItemEquipped(it.n || it.name)) {
         vToast(_uiIcoImg('alerta','ui-ico-img') + ' Item equipado. Desequipe antes de vender.', 'warn');
         return;
       }
