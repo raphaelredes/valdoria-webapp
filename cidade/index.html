@@ -58020,10 +58020,8 @@ function _arrivalRenderNode(node){
 
 function _arrivalChoice(choiceId){
   if (!choiceId || !_arrivalState) { _arrivalFinish(); return; }
-  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Um momento...' }); } catch(_){} }
   window.vCityServer.cityAction('arrival.choice', { encounter_id: _arrivalState.encId, choice_id: choiceId })
     .then(function(res){
-      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
       if (!res || !res.ok || res.proceed || !res.node) { _arrivalFinish(); return; }
       var node = res.node;
       // PADRAO_DADOS: TODO skill check de diálogo rola o dado 3D (SRP canonical) —
@@ -58040,7 +58038,10 @@ function _arrivalChoice(choiceId){
           }
           _showServiceResultPopup({
             npc: npcName,
-            dice: { sides: 20, value: d.d20, total: d.total, formula: 'd20 ' + d.d20 + ' ' + _mod, dc: d.dc },
+            icon: (node.npc && node.npc.portrait)
+              ? ('<img src="' + node.npc.portrait + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">')
+              : undefined,
+            dice: { sides: 20, value: d.d20, total: d.total, formula: 'd20 ' + d.d20 + ' ' + _mod, dc: d.dc, label: 'Teste de ' + _skl },
             narrative: '<b>' + _skl + '</b> — '
                 + (d.success
                     ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
@@ -58058,7 +58059,6 @@ function _arrivalChoice(choiceId){
       _arrivalRenderNode(node);
     })
     .catch(function(e){
-      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
       console.warn('[CAE] arrival.choice failed', e);
       _arrivalFinish();
     });
@@ -58074,12 +58074,10 @@ function _tryArrivalEncounter(action){
     return false;                            // LOCAL/dev → legado client-side cuida
   }
   window._encounterActive = true;            // trava reentrada durante o round-trip
-  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Atravessando a cidade...' }); } catch(_){} }
   // #95: informant_fresh = 1ª arrival.check pós-boot → servidor reseta o cap de informantes/visita.
   var _infFresh = !window._informantVisitStarted; window._informantVisitStarted = true;
   window.vCityServer.cityAction('arrival.check', { venue: venue, informant_fresh: _infFresh })
     .then(function(res){
-      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
       if (!res || !res.ok || !res.encounter) { _arrivalState = null; window._encounterActive = false; _arrivalProceed(action); return; }
       // #95: informante revelou um local físico → reflete já no estado (o botão aparece ao
       // voltar ao hub). O servidor já persistiu em completed_locations; isto é só otimista.
@@ -58090,7 +58088,6 @@ function _tryArrivalEncounter(action){
       _arrivalRenderNode({ npc: res.encounter.npc, script: res.encounter.script, choices: res.encounter.choices });
     })
     .catch(function(e){
-      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
       console.warn('[CAE] arrival.check failed', e);
       _arrivalState = null; window._encounterActive = false; _arrivalProceed(action);
     });

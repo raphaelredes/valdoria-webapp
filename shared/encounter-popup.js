@@ -1806,6 +1806,7 @@
         return;
       }
       // External onChoice callback (PADRAO_ALDRIC v2 contrato)
+      var inst = (typeof _activeEncounterInstance !== 'undefined' ? _activeEncounterInstance : null);
       var activeOnChoice = (inst && inst.opts && inst.opts.onChoice) || (opts && opts.onChoice);
       if (typeof activeOnChoice === 'function') {
         activeOnChoice(ch, dialogue);
@@ -1845,8 +1846,6 @@
       if (currentPage < pages.length - 1) { currentPage++; renderPage(currentPage); }
     };
 
-    renderPage(0);
-
     _activeEncounterInstance = {
       dialogue: dialogue,
       opts: opts,
@@ -1858,6 +1857,8 @@
       renderPage: renderPage,
       renderActions: renderActions
     };
+
+    renderPage(0);
   }
 
   /* Conexão transparente com dados remotos (Ordem do Usuário 2026-10):
