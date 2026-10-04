@@ -1585,6 +1585,26 @@
           });
           return;
         }
+        if (act === 'ItemSell') {
+          if (!cfg.atMarket) {
+            _showGoToMarketConfirmModal(it, function () {
+              _hideDetail();
+              if (window.vInventory && typeof window.vInventory.close === 'function') {
+                window.vInventory.close();
+              }
+              if (typeof cfg.onGoToMarket === 'function') {
+                cfg.onGoToMarket(it);
+              } else if (typeof fn === 'function') {
+                _executeDetailAction(fn, it);
+              }
+            });
+            return;
+          }
+          _showSellConfirmModal(it, function () {
+            _executeDetailAction(fn, it);
+          });
+          return;
+        }
         _executeDetailAction(fn, it);
       });
     });
@@ -1720,6 +1740,69 @@
       + '<div class="vinv-confirm-actions">'
       +   '<button type="button" class="vinv-btn" data-action="confirm-cancel">Cancelar</button>'
       +   '<button type="button" class="' + btnCls + '" data-action="confirm-ok">' + btnLabel + '</button>'
+      + '</div>';
+
+    ov.classList.add('active');
+
+    function _closeConfirm() {
+      ov.classList.remove('active');
+    }
+
+    card.querySelector('[data-action="confirm-cancel"]').addEventListener('click', _closeConfirm);
+    card.querySelector('[data-action="confirm-ok"]').addEventListener('click', function () {
+      _closeConfirm();
+      if (typeof onConfirm === 'function') onConfirm();
+    });
+  }
+
+  function _showGoToMarketConfirmModal(it, onConfirm) {
+    var ov = _state.overlay && _state.overlay.querySelector('[data-region="confirm"]');
+    var card = _state.overlay && _state.overlay.querySelector('[data-region="confirm-card"]');
+    if (!ov || !card) {
+      if (typeof onConfirm === 'function') onConfirm();
+      return;
+    }
+    var iconId = _resolveItemIcon(it);
+    var valHtml = it.value ? (' por <span class="vinv-coin mini">V</span><strong>' + it.value + '</strong>') : '';
+    card.innerHTML = ''
+      + '<div class="vinv-confirm-title">Ir ao Mercado Central</div>'
+      + '<div class="vinv-confirm-icon">' + _iconSrc(iconId, it.name) + '</div>'
+      + '<div class="vinv-confirm-msg">Para vender <strong>' + _esc(it.name) + '</strong>' + valHtml + ', você precisa ir até o Mercado Central.</div>'
+      + '<div class="vinv-confirm-sub">Deseja caminhar até lá agora?</div>'
+      + '<div class="vinv-confirm-actions">'
+      +   '<button type="button" class="vinv-btn" data-action="confirm-cancel">Cancelar</button>'
+      +   '<button type="button" class="vinv-btn primary" data-action="confirm-ok">Ir ao Mercado</button>'
+      + '</div>';
+
+    ov.classList.add('active');
+
+    function _closeConfirm() {
+      ov.classList.remove('active');
+    }
+
+    card.querySelector('[data-action="confirm-cancel"]').addEventListener('click', _closeConfirm);
+    card.querySelector('[data-action="confirm-ok"]').addEventListener('click', function () {
+      _closeConfirm();
+      if (typeof onConfirm === 'function') onConfirm();
+    });
+  }
+
+  function _showSellConfirmModal(it, onConfirm) {
+    var ov = _state.overlay && _state.overlay.querySelector('[data-region="confirm"]');
+    var card = _state.overlay && _state.overlay.querySelector('[data-region="confirm-card"]');
+    if (!ov || !card) {
+      if (typeof onConfirm === 'function') onConfirm();
+      return;
+    }
+    var iconId = _resolveItemIcon(it);
+    var valHtml = it.value ? (' por <span class="vinv-coin mini">V</span><strong>' + it.value + '</strong>') : '';
+    card.innerHTML = ''
+      + '<div class="vinv-confirm-title">Confirmar Venda</div>'
+      + '<div class="vinv-confirm-icon">' + _iconSrc(iconId, it.name) + '</div>'
+      + '<div class="vinv-confirm-msg">Deseja realmente vender <strong>' + _esc(it.name) + '</strong>' + valHtml + '?</div>'
+      + '<div class="vinv-confirm-actions">'
+      +   '<button type="button" class="vinv-btn" data-action="confirm-cancel">Cancelar</button>'
+      +   '<button type="button" class="vinv-btn primary" data-action="confirm-ok">Vender</button>'
       + '</div>';
 
     ov.classList.add('active');
@@ -1900,7 +1983,7 @@
     var _isProtected = it.rarity === 'quest' || (it.tags && it.tags.some(function (t) {
       return _protectedTags.indexOf(t) !== -1;
     }));
-    var canSell = !!(cfg.onItemSell && !_isProtected);
+    var canSell = !!(cfg.onItemSell && !_isProtected && cfg.inCity);
     var canDrop = !!(cfg.onItemDrop && !_isProtected
       && (!it.tags || it.tags.indexOf('no_discard') === -1));
 

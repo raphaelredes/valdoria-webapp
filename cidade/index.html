@@ -41543,6 +41543,11 @@ function _vinvBuildConfig() {
   var cp = window.CITY_MOCK_PLAYER || {};
   return {
     title: 'MOCHILA',
+    inCity: true,
+    atMarket: (typeof _popupStack !== 'undefined' && _popupStack.indexOf('market') >= 0),
+    onGoToMarket: function (item) {
+      _goToMarketWithWalkNarrative(item);
+    },
     player: {
       gold: cp.gold || 0,
       items: items,
@@ -41644,6 +41649,160 @@ function _vinvBuildConfig() {
     },
     onClose: function () { /* nada — popup fecha sozinho */ },
   };
+}
+
+/**
+ * Caminhada até o Mercado Central com animação urbana e narrativa D&D 5e.
+ *
+ * 1. Fecha inventário e qualquer sub-popup aberto.
+ * 2. Executa animação medieval de caminhada (cidade com torres, muralhas e tochas).
+ * 3. Ao concluir a caminhada:
+ *    - Se rolar evento raro (~20%): injeta narrativa lógica de aproximação antes
+ *      do diálogo do NPC; ao término, segue para o Mercado Central.
+ *    - Se caminho tranquilo (~80%): navega para o Mercado Central e apresenta
+ *      a narração sensorial do Mestre descrevendo a chegada e o item a negociar.
+ */
+function _goToMarketWithWalkNarrative(item) {
+  try {
+    if (window.vInventory && typeof window.vInventory.close === 'function') {
+      window.vInventory.close();
+    }
+    if (typeof closeCityPopup === 'function') {
+      closeCityPopup(true);
+    }
+  } catch (_) {}
+
+  if (typeof _playCityWalkAnimation === 'function') {
+    _playCityWalkAnimation({
+      title: 'A Caminho do Mercado',
+      subtitle: 'Atravessando as ruelas de Valdoria…'
+    }, function () {
+      _resolveMarketArrival(item);
+    });
+  } else {
+    _resolveMarketArrival(item);
+  }
+}
+
+function _resolveMarketArrival(item) {
+  var rollRareEvent = Math.random() < 0.20;
+
+  // Chance rara de encontro a caminho do mercado
+  if (rollRareEvent && !window.vReducedMotion) {
+    // A) Modo remoto (servidor DEV / prod)
+    if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+      var _infFresh = !window._informantVisitStarted;
+      window._informantVisitStarted = true;
+      window._encounterActive = true;
+      window.vCityServer.cityAction('arrival.check', { venue: 'market', informant_fresh: _infFresh })
+        .then(function (res) {
+          if (res && res.ok && res.encounter) {
+            var enc = res.encounter;
+            var npcName = (enc.npc && (enc.npc.name || enc.npc.title)) || 'uma figura misteriosa';
+            var approachText = 'No caminho em direção ao Mercado Central, entre o movimento das ruelas e o calçamento de pedra irregular, ' + npcName + ' vem em sua direção, chamando sua atenção antes de você alcançar os balcões...';
+            if (Array.isArray(enc.script)) {
+              enc.script.unshift({
+                type: 'narration',
+                text: approachText
+              });
+            }
+            if (enc.reveals) {
+              try {
+                var _cp = _ensureCityState();
+                if (_cp && Array.isArray(_cp.completed_locations) && _cp.completed_locations.indexOf(enc.reveals) < 0) {
+                  _cp.completed_locations.push(enc.reveals);
+                }
+              } catch (_) {}
+            }
+            _arrivalState = { encId: enc.id, action: 'market' };
+            _arrivalRenderNode({ npc: enc.npc, script: enc.script, choices: enc.choices });
+            return;
+          }
+          window._encounterActive = false;
+          _showMarketPeacefulArrival(item);
+        })
+        .catch(function () {
+          window._encounterActive = false;
+          _showMarketPeacefulArrival(item);
+        });
+      return;
+    }
+
+    // B) Modo local / dev (CHANCE_ENCOUNTERS)
+    var p = window.CITY_MOCK_PLAYER;
+    var eligible = (typeof CHANCE_ENCOUNTERS !== 'undefined') ? CHANCE_ENCOUNTERS.filter(function (e) {
+      return e.triggers && (e.triggers.indexOf('nav:market') >= 0 || e.triggers.indexOf('nav:mercado') >= 0)
+        && (!e.condition || e.condition(p) !== false);
+    }) : [];
+
+    if (eligible.length > 0) {
+      var rolled = eligible[Math.floor(Math.random() * eligible.length)];
+      var scriptClone = (rolled.script || []).slice();
+      var npcLabel = (rolled.npc === 'thessil' ? 'Thessil, o Mercador' : (rolled.npc && rolled.npc.name ? rolled.npc.name : 'uma figura no caminho'));
+      scriptClone.unshift({
+        type: 'narration',
+        text: 'No caminho em direção ao Mercado Central, entre o movimento das ruelas e o som das carroças, ' + npcLabel + ' se aproxima com passos firmes em sua direção...'
+      });
+      var encClone = Object.assign({}, rolled, {
+        script: scriptClone,
+        onDone: function (playerObj) {
+          if (typeof rolled.onDone === 'function') rolled.onDone(playerObj);
+          _showMarketPeacefulArrival(item);
+        }
+      });
+      _renderEncounterPopup(encClone, 'nav:market', p);
+      return;
+    }
+  }
+
+  // Caminho tranquilo: chegada direta com narrativa sensorial
+  _showMarketPeacefulArrival(item);
+}
+
+function _showMarketPeacefulArrival(item) {
+  // Abre o Mercado Central
+  if (typeof navigateTo === 'function') {
+    navigateTo('market');
+  } else if (typeof openCityPopup === 'function') {
+    openCityPopup('market');
+  }
+
+  // Apresenta narrativa sensorial de chegada do Mestre
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    var itemEscaped = (item && item.name) ? (typeof _esc === 'function' ? _esc(item.name) : item.name) : '';
+    var itemText = itemEscaped
+      ? ' Com <strong>' + itemEscaped + '</strong> guardado na mochila, você se aproxima das bancadas em busca dos mercadores e avaliadores da praça para fechar negócio.'
+      : ' As barracas de armaduras, armas, poções e mantimentos estão prontas para compra e venda.';
+    window.vEncounter.render(
+      {
+        npc: {
+          name: 'Mercado Central de Valdoria',
+          desc: 'Praça de Mercadores e Artífices',
+          portrait: '../shared/img/npcs/thorne-armeiro.webp'
+        },
+        script: [
+          {
+            type: 'narration',
+            text: 'Você conclui sua caminhada pelas ruelas ladeadas de pedra e alcança a grande praça aberta do Mercado Central.'
+          },
+          {
+            type: 'narration',
+            text: 'O aroma característico de especiarias secas, couro trabalhado e o calor das forjas preenchem o ar. Pregões de comerciantes ecoam sob as lonas coloridas.' + itemText
+          }
+        ],
+        choices: [
+          { id: 'enter_market', label: 'Explorar o Mercado e Negociar', cb: 'close' }
+        ]
+      },
+      {
+        player: window.CITY_MOCK_PLAYER,
+        closeable: true,
+        onChoice: function () {
+          try { window.vEncounter.close(); } catch (_) {}
+        }
+      }
+    );
+  }
 }
 
 function _showInventoryPopup(){
