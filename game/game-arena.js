@@ -272,11 +272,12 @@ function _renderArenaMain(el, d) {
     if (d.renome && typeof d.renome.arena === 'number') renome = d.renome.arena;
     else if (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.arena === 'number') renome = window._PLAYER_RENOWN.arena;
     var tierLbl = 'NEUTRO';
-    if (renome >= 25) tierLbl = 'AMIGÁVEL';
-    else if (renome >= 10) tierLbl = 'CORDIAL';
-    else if (renome < 0 && renome >= -10) tierLbl = 'FRIO';
-    else if (renome < -10) tierLbl = 'HOSTIL';
-    var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
+    if (renome >= 50) tierLbl = 'ALIADO JURADO';
+    else if (renome >= 25) tierLbl = 'CONFIDENTE';
+    else if (renome >= 10) tierLbl = 'AMIGÁVEL';
+    else if (renome < -9) tierLbl = 'HOSTIL';
+    else if (renome < 0) tierLbl = 'DESCONFIADO';
+    var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 60 * 100)));
     var repBar = _div('rep-bar');
     var repLbl = document.createElement('span');
     repLbl.className = 'label';

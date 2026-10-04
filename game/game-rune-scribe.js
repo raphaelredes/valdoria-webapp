@@ -138,11 +138,12 @@ function renderRuneScribe(container, data) {
   /* === 2b. Rep bar === */
   var renome = (data.renome && typeof data.renome.runes === 'number') ? data.renome.runes : (window._PLAYER_RENOWN && window._PLAYER_RENOWN.runes) || 0;
   var tierLbl = 'NEUTRO';
-  if (renome >= 25) tierLbl = 'AMIGÁVEL';
-  else if (renome >= 10) tierLbl = 'CORDIAL';
-  else if (renome < 0 && renome >= -10) tierLbl = 'FRIO';
-  else if (renome < -10) tierLbl = 'HOSTIL';
-  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
+  if (renome >= 50) tierLbl = 'ALIADO JURADO';
+  else if (renome >= 25) tierLbl = 'CONFIDENTE';
+  else if (renome >= 10) tierLbl = 'AMIGÁVEL';
+  else if (renome < -9) tierLbl = 'HOSTIL';
+  else if (renome < 0) tierLbl = 'DESCONFIADO';
+  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 60 * 100)));
   var repBar = vCity.el('div', 'rep-bar');
   repBar.appendChild(_rnsEl('span', 'label', 'Reputação'));
   var track = vCity.el('div', 'bar');

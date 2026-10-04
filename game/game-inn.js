@@ -138,14 +138,33 @@ function renderInnHub(container, data) {
   });
   body.appendChild(npcRow);
 
-  /* === 2b. Rep bar === */
-  var renome = (data.renome && typeof data.renome.inn === 'number') ? data.renome.inn : (window._PLAYER_RENOWN && window._PLAYER_RENOWN.inn) || 0;
+  /* === 2b. Rep bar (Canônico D&D 5e — constants_reputation.py) === */
+  var renome = (data.renome && typeof data.renome.inn === 'number') ? data.renome.inn : null;
+  if (renome === null && window.CITY_SERVER_RELATIONS && Array.isArray(window.CITY_SERVER_RELATIONS)) {
+    var _mRel = window.CITY_SERVER_RELATIONS.find(function(r){ return r.key === 'npc_inn_martha'; });
+    if (_mRel && typeof _mRel.reputation === 'number') renome = _mRel.reputation;
+  }
+  if (renome === null && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.metadata) {
+    var _pMeta = window.CITY_MOCK_PLAYER.metadata;
+    if (_pMeta.npc_reputation && typeof _pMeta.npc_reputation.npc_inn_martha === 'number') {
+      renome = _pMeta.npc_reputation.npc_inn_martha;
+    } else if (typeof _pMeta.inn_rep === 'number') {
+      renome = _pMeta.inn_rep;
+    }
+  }
+  if (renome === null) {
+    renome = (window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.inn === 'number') ? window._PLAYER_RENOWN.inn : 0;
+  }
+
+  // Tiers canônicos: <= -10: HOSTIL | -9..-1: DESCONFIADO | 0..9: NEUTRO | 10..24: AMIGÁVEL | 25..49: CONFIDENTE | 50+: ALIADO JURADO
   var tierLbl = 'NEUTRO';
-  if (renome >= 25) tierLbl = 'AMIGÁVEL';
-  else if (renome >= 10) tierLbl = 'CORDIAL';
-  else if (renome < 0 && renome >= -10) tierLbl = 'FRIO';
-  else if (renome < -10) tierLbl = 'HOSTIL';
-  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 40 * 100)));
+  if (renome >= 50) tierLbl = 'ALIADO JURADO';
+  else if (renome >= 25) tierLbl = 'CONFIDENTE';
+  else if (renome >= 10) tierLbl = 'AMIGÁVEL';
+  else if (renome < -9) tierLbl = 'HOSTIL';
+  else if (renome < 0) tierLbl = 'DESCONFIADO';
+
+  var pct = Math.max(0, Math.min(100, Math.round((renome + 10) / 60 * 100)));
   var repBar = vCity.el('div', 'rep-bar');
   repBar.appendChild(_innEl('span', 'label', 'Reputação'));
   var track = vCity.el('div', 'bar');
