@@ -11373,7 +11373,13 @@ var _NAMED_NPC_PORTRAITS = {
   'bjorn o seleiro': 'merchants/bjorn-anao.webp',
   'bjorn': 'merchants/bjorn-anao.webp',
   // 2026-06-13: nomes de Lyra desambiguados (3 NPCs distintos não podem mais colidir).
-  'lyra sylwen': 'npcs/lyra-herbalista.webp'
+  'lyra sylwen': 'npcs/lyra-herbalista.webp',
+  // Thorne e Padre Brevon (autoridade de retrato canônico)
+  'thorne': 'npcs/thorne-armeiro.webp',
+  'mestre thorne': 'npcs/thorne-armeiro.webp',
+  'ferreiro thorne': 'npcs/thorne-armeiro.webp',
+  'padre brevon': 'npcs/padre-aldric.webp',
+  'brevon': 'npcs/padre-aldric.webp'
 };
 function _npcPortraitByName(name) {
   if (!name) return null;
@@ -11432,7 +11438,7 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('kaelen') >= 0)   return '/shared/img/npcs/kaelen-refugiado.webp';
   if (s.indexOf('anci') >= 0)     return '/shared/img/npcs/ancia-valdoria.webp';
   if (s.indexOf('mirena') >= 0)   return '/shared/img/merchants/mirena.webp';  /* canonical = retrato do mercado (alquimista humana, com faixa do nome). mirena-armadureira.webp (armadureira pequenina) era colisão de raça+papel. */
-  if (s.indexOf('thorne') >= 0)   return '/shared/img/merchants/thorne.webp';  /* canonical = retrato do mercado (ferreiro ANÃO). thorne-armeiro.webp (humano) era colisão de raça. */
+  if (s.indexOf('thorne') >= 0)   return '/shared/img/npcs/thorne-armeiro.webp';  /* CANONICAL: Thorne, ferreiro humano do prelúdio (thorne-armeiro.webp). Imagem única sem duplicidade. */
   if (s.indexOf('velithra') >= 0) return '/shared/img/merchants/velithra.webp';  /* canonical = retrato do mercado (joalheira élfica). velithra-alquimista.webp reservado p/ outra NPC élfica. */
   if (s.indexOf('tharos') >= 0)   return '/shared/img/npcs/tharos-mestre-armas.webp';
   if (s.indexOf('ysoria') >= 0)   return '/shared/img/npcs/capita-ysoria.webp';
@@ -18930,7 +18936,7 @@ function _marketShowAbsentRumor(p, merchant, state){
 // X-6.5.51CJ (2026-05-18): zoom em tela cheia via vLightbox no toque/clique.
 // X-6.5.51CJ (2026-05-18): caption do lightbox usa nome amigável via MERCHANT_NAME_MAP
 var MERCHANT_NAME_MAP = {
-  thorne:   'Thorne Korvaldr · Ferreiro',
+  thorne:   'Thorne · Ferreiro',
   mirena:   'Mirena Virelle · Alquimista',
   velithra: 'Velithra Aelmira · Joalheira',
   corvus:   'Corvus Veltharion · Cartógrafo',
@@ -18938,13 +18944,14 @@ var MERCHANT_NAME_MAP = {
   garlen:   'Garlen Castellor · Cambista'
 };
 // Override de filename quando o retrato canônico do mercador NÃO é merchants/{id}.webp
-// (Bjorn foi convertido em ANÃO → bjorn-anao.webp; merchants/ é Tier A immutable, então
-// um filename novo busta o cache. Manter sincronizado com check_npc_merchant_portrait_consistency).
-var _MERCHANT_PORTRAIT_FILE = { bjorn: 'bjorn-anao.webp', corvus: 'corvus-veltharion.webp' };
+// (Bjorn foi convertido em ANÃO → bjorn-anao.webp; Corvus → corvus-veltharion.webp;
+// Thorne é o ferreiro humano do prelúdio → thorne-armeiro.webp em shared/img/npcs/).
+var _MERCHANT_PORTRAIT_FILE = { bjorn: 'bjorn-anao.webp', corvus: 'corvus-veltharion.webp', thorne: 'thorne-armeiro.webp' };
 function _merchantPortrait(id){
   var fullName = MERCHANT_NAME_MAP[id] || id;
   var file = _MERCHANT_PORTRAIT_FILE[id] || (id + '.webp');
-  return '<img src="/shared/img/merchants/' + file + '" alt="' + fullName +
+  var src = (id === 'thorne') ? ('/shared/img/npcs/' + file) : ('/shared/img/merchants/' + file);
+  return '<img src="' + src + '" alt="' + fullName +
     '" class="merchant-portrait vlb-zoomable" loading="lazy" ' +
     'data-lb-caption="' + fullName.replace(/"/g, '&quot;') + '" title="Toque para ampliar" />';
 }
@@ -19116,9 +19123,9 @@ var MARKET_MERCHANTS = [
   {
     id: 'thorne',
     icon: _merchantPortrait('thorne'),
-    name: 'Thorne Korvaldr',
+    name: 'Thorne',
     role: 'Ferreiro',
-    desc: 'Anão musculoso, avental queimado, martelo sempre na mão.',
+    desc: 'Homem maduro de braços fortes, avental de couro e bigode imponente. O ferreiro mentor do prelúdio que viajou até Valdoria.',
     greetings: [
       '<i>Thorne larga o martelo.</i> "Aço novo? Tem o que precisa aqui."',
       '<i>O ferreiro te encara, suor pingando.</i> "Aventureiro. Vê algo bom?"',
@@ -19128,7 +19135,7 @@ var MARKET_MERCHANTS = [
       { id: 'browse', q: 'Mostra o catálogo', a: '"Espadas de 15 a 300 Valdoritas. Cota de malha 75. Mithral? Tenho um peitoral por 500 — mas só vende pra quem prova valor."' },
       { id: 'metal', q: 'Como conseguiu o mithral?', a: '"Caravana do norte. Caro. Mas a qualidade compensa. Quem usa mithral, sobrevive."' },
       { id: 'repair', q: 'Conserta equipamento? (10 Valdoritas)', a: '<i>Thorne examina.</i> "Pequenos amassados. Conserto sim."', cost: 10 },
-      { id: 'history', q: 'Há quanto tempo é ferreiro?', a: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. Forjei pra dois reis e três bandidos. Bandidos pagaram melhor."' }
+      { id: 'history', q: 'Há quanto tempo é ferreiro?', a: '"Quarenta anos de bigorna. Aprendi com mestres ferreiros nas estradas do norte antes de vir pra Valdoria com Aris. Forjei pra milícias e caravanas."' }
     ]
   },
   {
@@ -21122,7 +21129,7 @@ var RELATIONS_NPCS = [
   { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/guarda-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Guarda Aldric',   role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/guarda-aldric.webp' },
   { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.webp' },
   { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
-  { id: 'rel_thorne',  icon: '<img src="/shared/img/merchants/thorne.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/merchants/thorne.webp' },
+  { id: 'rel_thorne',  icon: '<img src="/shared/img/npcs/thorne-armeiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/npcs/thorne-armeiro.webp' },
   { id: 'rel_mirena',  icon: '<img src="/shared/img/merchants/mirena.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/merchants/mirena.webp' },
   { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Valeriax',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.webp' },
   { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/eirik-escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/eirik-escriba.webp' },
@@ -21130,7 +21137,7 @@ var RELATIONS_NPCS = [
   // NPC_INFO) — antes AUSENTES do RELATIONS_NPCS → nunca apareciam em Vínculos mesmo com renome.
   { id: 'rel_corvus',   icon: '<img src="/shared/img/merchants/corvus-veltharion.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Corvus',   role: 'Cartógrafo', ref_id: 'market_corvus',   portraitImg: '/shared/img/merchants/corvus-veltharion.webp' },
   { id: 'rel_velithra', icon: '<img src="/shared/img/merchants/velithra.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',        name: 'Velithra', role: 'Joalheira',  ref_id: 'market_velithra', portraitImg: '/shared/img/merchants/velithra.webp' },
-  { id: 'rel_bjorn',    icon: '<img src="/shared/img/merchants/bjorn.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',           name: 'Bjorn',    role: 'Tendeiro',   ref_id: 'market_bjorn',    portraitImg: '/shared/img/merchants/bjorn.webp' }
+  { id: 'rel_bjorn',    icon: '<img src="/shared/img/merchants/bjorn-anao.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Bjorn',    role: 'Tendeiro',   ref_id: 'market_bjorn',    portraitImg: '/shared/img/merchants/bjorn-anao.webp' }
 ];
 
 // (removido #92: _relationTier — tier 0-5 por contagem de diálogo — virou dead code quando
@@ -33860,7 +33867,7 @@ function _shopDecrementStock(npcId, itemName){
 // Filtros por NPC: derivam das tags dos items vendidos.
 var CANON_MARKET_SHOPS = {
   thorne: {
-    npc: 'Thorne Korvaldr',
+    npc: 'Thorne',
     role: 'Ferreiro',
     icon: _heralIco('ic-ach-forjador'),
     greeting: '"Aço novo? Tem o que precisa aqui." — Thorne larga o martelo.',
@@ -43752,7 +43759,7 @@ var MARKET_SPECIALIST_RULES = [
 // Atualizar AQUI substitui referencias em todo o mercado.
 var MARKET_NPC_LIBRARY = {
   thorne: {
-    npc: 'Thorne Korvaldr', role: 'Ferreiro',
+    npc: 'Thorne', role: 'Ferreiro',
     icon: _heralIco('ic-ach-forjador'),
     fallback_mult: 0.60
   },
@@ -57802,9 +57809,9 @@ var RECURRING_NPCS = {
   // Usa portraitImg (PNG AI-generated gpt-image-2) em vez de heraldic SVG —
   // identidade visual AAA. Fonte canonical das stats em MARKET_MERCHANTS.
   mer_thorne: {
-    name: 'Thorne Korvaldr',
-    portraitImg: '/shared/img/merchants/thorne.webp',
-    desc: 'Anão musculoso, avental queimado, martelo sempre na mão. Quarenta anos forjando aço — sabe ler o vento na lâmina.'
+    name: 'Thorne',
+    portraitImg: '/shared/img/npcs/thorne-armeiro.webp',
+    desc: 'Ferreiro humano veterano de bigode espesso e avental de couro marcado por faíscas. O mesmo ferreiro que lhe forjou as primeiras armas antes da chegada a Valdoria.'
   },
   mer_mirena: {
     name: 'Mirena Virelle',
@@ -57823,7 +57830,7 @@ var RECURRING_NPCS = {
   },
   mer_bjorn: {
     name: 'Bjorn, o Seleiro',
-    portraitImg: '/shared/img/merchants/bjorn.webp',
+    portraitImg: '/shared/img/merchants/bjorn-anao.webp',
     desc: 'Artesão das terras altas. Costura suas próprias botas, tece suas próprias cordas, e responde a quem ousa duvidar com um sorriso de pelo.'
   },
   // 2026-05-19: Garlen estava faltando em RECURRING_NPCS — _openMerchantDialogue
@@ -58512,33 +58519,33 @@ var _CITY_APPROACH_SCENES = {
 
   // ── ESTALAGEM DA PENA-DOURADA ──────────────────────────────────────────
   'inn:martha': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha-estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
     narration: 'O calor acolhedor da lareira e o aroma reconfortante de ensopado te recebem na Estalagem da Pena-Dourada. Martha abre um sorriso acolhedor ao te ver chegar...'
   },
   'inn:rooms': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha-estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
     narration: 'Você se aproxima do balcão de mogno, observando o quadro de chaves de latão polido em busca de um leito seguro para o descanso...'
   },
   'inn:meals': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha-estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
     narration: 'O cheiro apetitoso de pão quente e caldo fervejante enche a sala. Martha limpa o balcão e aponta o cardápio do dia...'
   },
   'inn:relax': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha-estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
     narration: 'Você busca um momento de calmaria longe do peso das armas e da poeira da estrada, aproximando-se da área de descanso reservada...'
   },
   'inn:martha_concern': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha-estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
     narration: 'Martha limpa o balcão com movimentos lentos, os olhos perdidos na chama da vela. Percebendo seus passos, ela suspira com discrição...'
   },
   'inn:*': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha-estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
     narration: 'O ambiente sereno da Pena-Dourada oferece um refúgio da agitação da cidade. Martha ergue o olhar acolhedor em sua direção...'
   },
 
   // ── TEMPLO DOS QUATRO ──────────────────────────────────────────────────
   'temple:aldric': {
-    npc: { name: 'Padre Aldric', desc: 'Clérigo · Templo dos Quatro', portrait: '/shared/img/npcs/padre-aldric.webp' },
+    npc: { name: 'Padre Brevon', desc: 'Clérigo · Templo dos Quatro', portrait: '/shared/img/npcs/padre-aldric.webp' },
     narration: 'O eco suave de preces e a luz filtrada pelos vitrais sagrados preenchem a nave do templo. Você se aproxima do sacerdote...'
   },
   'temple:elara': {
@@ -58546,7 +58553,7 @@ var _CITY_APPROACH_SCENES = {
     narration: 'Entre frascos de bálsamo e ervas curativas, a Irmã Elara ergue os olhos serenos de suas orações ao notar sua presença...'
   },
   'temple:*': {
-    npc: { name: 'Padre Aldric', desc: 'Clérigo · Templo dos Quatro', portrait: '/shared/img/npcs/padre-aldric.webp' },
+    npc: { name: 'Padre Brevon', desc: 'Clérigo · Templo dos Quatro', portrait: '/shared/img/npcs/padre-aldric.webp' },
     narration: 'A serenidade solene do templo reverbera com o perfume de mirra e o calor tênue das lamparinas votivas...'
   },
 
@@ -58630,11 +58637,11 @@ var _CITY_APPROACH_SCENES = {
     narration: 'O retinir rítmico do martelo na bigorna guia seus passos até a barraca de ferro e aço de Thorne...'
   },
   'market:mirena': {
-    npc: { name: 'Mirena', desc: 'Herbalista e Alquimista · Mercado Central', portrait: '/shared/img/npcs/alquimista.webp' },
+    npc: { name: 'Mirena', desc: 'Herbalista e Alquimista · Mercado Central', portrait: '/shared/img/merchants/mirena.webp' },
     narration: 'Frascos coloridos e raízes secas decoram a tenda de Mirena, que te recebe com um sorriso acolhedor...'
   },
   'market:corvus': {
-    npc: { name: 'Corvus', desc: 'Cartógrafo e Erudito · Mercado Central', portrait: '/shared/img/npcs/corvus-livreiro.webp' },
+    npc: { name: 'Corvus', desc: 'Cartógrafo e Erudito · Mercado Central', portrait: '/shared/img/merchants/corvus-veltharion.webp' },
     narration: 'Pergaminhos enrolados e mapas detalhados cobrem a bancada de madeira escura do velho Corvus...'
   },
   'market:*': {
@@ -59184,15 +59191,15 @@ function _merchantGreeting(merchantId){
     thorne: [
       [
         { type: 'narration', text: 'Thorne larga o martelo no balcão. O som ressoa como um sino grave.' },
-        { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Aço novo? Tem o que precisa aqui."' }
+        { type: 'speech', speaker: 'Thorne', text: '"Aço novo? Tem o que precisa aqui."' }
       ],
       [
         { type: 'narration', text: 'O ferreiro te encara enquanto enxuga a fronte com a manga manchada de fuligem.' },
-        { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Aventureiro. <i>(uma pausa)</i> Vê algo bom?"' }
+        { type: 'speech', speaker: 'Thorne', text: '"Aventureiro. <i>(uma pausa)</i> Vê algo bom?"' }
       ],
       [
         { type: 'narration', text: 'Thorne bate uma peça quente no balcão. O metal ainda assobia.' },
-        { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Acabou de sair da forja. <i>Tá quente ainda.</i>"' }
+        { type: 'speech', speaker: 'Thorne', text: '"Acabou de sair da forja. <i>Tá quente ainda.</i>"' }
       ]
     ],
     mirena: [
@@ -59271,7 +59278,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_thorne',
     script: [
       { type: 'narration', text: '<i>"Como conseguiu o mithral?"</i>' },
-      { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithral, sobrevive."' }
+      { type: 'speech', speaker: 'Thorne', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithral, sobrevive."' }
     ],
     choices: 'auto'  // populated em _openMerchantDialogue
   },
@@ -59280,7 +59287,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_thorne',
     script: [
       { type: 'narration', text: '<i>"Conserta equipamento?"</i>' },
-      { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Pequenos amassados, conserto sim. Dez Valdoritas e fica como novo."' },
+      { type: 'speech', speaker: 'Thorne', text: '"Pequenos amassados, conserto sim. Dez Valdoritas e fica como novo."' },
       { type: 'narration', text: 'Thorne examina suas armas com olhos de quem mede metal por som.' }
     ],
     _cost: 10,
@@ -59298,7 +59305,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_thorne',
     script: [
       { type: 'narration', text: '<i>"Há quanto tempo é ferreiro?"</i>' },
-      { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. <i>Forjei pra dois reis e três bandidos.</i> Bandidos pagaram melhor."' }
+      { type: 'speech', speaker: 'Thorne', text: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. <i>Forjei pra dois reis e três bandidos.</i> Bandidos pagaram melhor."' }
     ],
     choices: 'auto'
   },
@@ -59642,14 +59649,14 @@ var _NPC_DEFAULTS = {
   martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/estalajadeira.webp',  icon: 'ic-estalajadeira' },
   grom:        { name: 'Grom, o Caolho',    desc: 'Taverneiro anão do Javali Bêbado', portrait: '/shared/img/npcs/grom-o-caolho-v2.webp',    icon: 'ic-taverneiro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/irma-elara.webp',   icon: 'ic-clerigo' },
-  thorne:      { name: 'Mestre Thorne',       desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
+  thorne:      { name: 'Thorne',              desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/npcs/thorne-armeiro.webp',   icon: 'ic-guerreiro' },
   mirena:      { name: 'Mirena Virelle',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
   velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.webp', icon: 'ic-mago' },
   corvus:      { name: 'Corvus Veltharion',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus-veltharion.webp',   icon: 'ic-ladino' },
   bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Anão selador e coureiro',            portrait: '/shared/img/merchants/bjorn-anao.webp', icon: 'ic-patrulheiro' },
-  alchemist:   { name: 'Velithra',            desc: 'Alquimista do Mercado',              portrait: '/shared/img/merchants/velithra.webp',     icon: 'ic-feiticeiro' },
+  alchemist:   { name: 'Mirena Virelle',      desc: 'Alquimista do Mercado',              portrait: '/shared/img/merchants/mirena.webp',     icon: 'ic-druida' },
   gossip:      { name: 'Velho Mendigo',       desc: 'Boateiro da Praça',                  portrait: '',  icon: 'ic-aldeao' },
-  npc_herbalist_lyra: { name: 'Lyra Sylwen', desc: 'Conhecedora de plantas',           portrait: '/shared/img/npcs/lyra-herbalista.webp',         icon: 'ic-druida' },
+  npc_herbalist_lyra: { name: 'Sylwen, a Ervanária', desc: 'Conhecedora de plantas',     portrait: '/shared/img/npcs/lyra-herbalista.webp', icon: 'ic-druida' },
   itinerant_merchant: { name: 'Mercador Errante', desc: 'Comerciante de passagem',        portrait: '/shared/img/npcs/mercador-errante.webp',    icon: 'ic-ladino' }
 };
 
