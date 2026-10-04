@@ -1806,8 +1806,9 @@
         return;
       }
       // External onChoice callback (PADRAO_ALDRIC v2 contrato)
-      if (typeof opts.onChoice === 'function') {
-        opts.onChoice(ch, dialogue);
+      var activeOnChoice = (inst && inst.opts && inst.opts.onChoice) || (opts && opts.onChoice);
+      if (typeof activeOnChoice === 'function') {
+        activeOnChoice(ch, dialogue);
         return;
       }
       // task #70 (2026-05-20) — BACKEND DISPATCH FALLBACK
@@ -1870,14 +1871,30 @@
     newOpts = newOpts || {};
 
     if (data.choices) dialogue.choices = data.choices;
-    if (newOpts.onChoice) inst.opts.onChoice = newOpts.onChoice;
+    if (newOpts.onChoice) {
+      inst.opts.onChoice = newOpts.onChoice;
+      if (inst.rawOpts) inst.rawOpts.onChoice = newOpts.onChoice;
+    }
 
-    if (data.npc && (!dialogue.npc || !dialogue.npc.name || dialogue.npc.name === 'Valdoria')) {
-      dialogue.npc = _vNpcResolve(data.npc, inst.opts) || data.npc;
+    if (data.npc) {
+      var resolvedNpc = _vNpcResolve(data.npc, inst.opts) || data.npc;
+      dialogue.npc = Object.assign({}, dialogue.npc || {}, resolvedNpc);
       var nameEl = inst.card.querySelector('.enc-name');
       if (nameEl && dialogue.npc.name) nameEl.textContent = dialogue.npc.name;
       var descEl = inst.card.querySelector('.enc-desc');
       if (descEl && dialogue.npc.desc) descEl.textContent = dialogue.npc.desc;
+      var portWrap = inst.card.querySelector('.enc-portrait');
+      if (portWrap && dialogue.npc.portrait) {
+        var safeUrl = String(dialogue.npc.portrait).replace(/"/g, '&quot;');
+        portWrap.classList.remove('enc-portrait-fallback');
+        var existingImg = portWrap.querySelector('img');
+        if (existingImg) {
+          existingImg.style.display = '';
+          existingImg.src = safeUrl;
+        } else {
+          portWrap.innerHTML = '<img src="' + safeUrl + '" alt="" ' + _ENC_IMG_ONERR + '>';
+        }
+      }
     }
 
     var existingScript = dialogue.script || [];
@@ -1922,7 +1939,7 @@
           nextBtn.style.display = '';
           nextBtn.removeAttribute('disabled');
           nextBtn.textContent = 'Continuar ▸';
-        } else if (st.skipped) {
+        } else if (st.skipped || curPage === newPages.length - 1) {
           inst.renderActions();
         }
       }
