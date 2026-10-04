@@ -58338,6 +58338,7 @@ function _openCityDialogue(venue, node, p){
         _tavernShowGather(p);
       }
       else if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
+      else if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
       else if (data && data.node) { _resolveCityChoice(venue, data.node, ch && ch.id, p, data.npc); }
       else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
     };
@@ -58477,6 +58478,7 @@ function _renderCityDialogue(venue, data, p, ctx){
           _tavernShowGather(p);
         }
         else if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
+        else if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
         else if (node) { _resolveCityChoice(venue, node, ch && ch.id, p, data.npc); }
         else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
     } }

@@ -1020,7 +1020,7 @@
       var _thumb = _buildChoiceItemThumb(ch);
       if (_thumb) row.insertBefore(_thumb, row.firstChild);
       row.addEventListener('click', function() {
-        closeChoices(); // sempre fecha primeiro pra UX consistente
+        closeChoices(true); // fecha imediatamente pra liberar top-layer e evitar bloqueios
         if (typeof opts.onChoice === 'function') opts.onChoice(ch);
       });
       listEl.appendChild(row);
@@ -1041,13 +1041,20 @@
     }, 50);
   }
 
-  function closeChoices() {
+  function closeChoices(immediate) {
     var sub = document.getElementById('enc-choices-overlay');
     if (!sub) return;
     // task #69: check open via <dialog>.open OR .active class (compat)
     var isOpen = (sub.tagName.toLowerCase() === 'dialog' && sub.open) ||
                  sub.classList.contains('active');
     if (!isOpen) return;
+    if (immediate) {
+      if (sub.tagName.toLowerCase() === 'dialog' && typeof sub.close === 'function') {
+        try { if (sub.open) sub.close(); } catch(e){}
+      }
+      sub.classList.remove('active', 'closing', 'opening', 'open');
+      return;
+    }
     sub.classList.add('closing');
     sub.classList.remove('open');
     setTimeout(function() {
@@ -1095,6 +1102,7 @@
 
   function render(dialogue, opts) {
     opts = opts || {};
+    closeChoices(true);
     var ov = _ensureOverlay();
     ov.innerHTML = '';
 
@@ -1775,7 +1783,7 @@
 
     /* Dispatch único usado por renderActions (closure sobre dialogue + opts). */
     function _handleChoiceInternal(ch) {
-      closeChoices(); /* fecha sub-overlay antes de dispatch */
+      closeChoices(true); /* fecha sub-overlay imediatamente antes de dispatch */
       /* sessão #76: diálogos de ALIADO (npc.id 'ally_*') marcam a pergunta de
          LORE como USADA ao escolher — mesmo em falha de skill check → não
          reaparece. B2.2 #90: SÓ marca choices `_oneShot` (perguntas de lore);
@@ -1795,6 +1803,18 @@
           && typeof window._postAllyEffect === 'function') {
         try { window._postAllyEffect(ch.ally_source, null); } catch(_e) {}
       }
+
+      // External onChoice callback (PADRAO_ALDRIC v2 contrato) - SOBERANO
+      // Quando o caller fornece onChoice (ex.: _renderCityDialogue, _arrivalRenderNode, _openRecrutaDialogue, journey-runner),
+      // este callback DEVE ser invocado com a choice selecionada, sem ser interceptado por fallbacks legados.
+      var inst = (typeof _activeEncounterInstance !== 'undefined' ? _activeEncounterInstance : null);
+      var activeOnChoice = (inst && inst.opts && inst.opts.onChoice) || (opts && opts.onChoice);
+      if (typeof activeOnChoice === 'function') {
+        activeOnChoice(ch, dialogue);
+        return;
+      }
+
+      // Fallbacks legados (apenas quando opts.onChoice NÃO foi fornecido):
       if (typeof window._dispatchSvcChoice === 'function') {
         var handled = window._dispatchSvcChoice(ch, dialogue, opts.dialogues || {});
         if (handled) return;
@@ -1803,13 +1823,6 @@
       if (cb === 'close') { close(); return; }
       if (opts.dialogues && opts.dialogues[ch.id]) {
         render(opts.dialogues[ch.id], opts);
-        return;
-      }
-      // External onChoice callback (PADRAO_ALDRIC v2 contrato)
-      var inst = (typeof _activeEncounterInstance !== 'undefined' ? _activeEncounterInstance : null);
-      var activeOnChoice = (inst && inst.opts && inst.opts.onChoice) || (opts && opts.onChoice);
-      if (typeof activeOnChoice === 'function') {
-        activeOnChoice(ch, dialogue);
         return;
       }
       // task #70 (2026-05-20) — BACKEND DISPATCH FALLBACK
@@ -1949,6 +1962,7 @@
   }
 
   function close() {
+    closeChoices(true);
     var ov = document.getElementById(OVERLAY_ID);
     // task #69: idempotent state cleanup (also covers edge case where .close()
     // is called but dialog already closed — close event won't fire then).
