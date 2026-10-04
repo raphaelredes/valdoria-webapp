@@ -40222,6 +40222,7 @@ function _tavernShowCarousing(p){
 }
 
 function _tavernShowGather(p){
+  p = p || (typeof currentPlayer !== 'undefined' ? currentPlayer : null) || window.CITY_MOCK_PLAYER || {};
   // canonical: tavern_gather_info_data.py — XGtE Gather Info.
   // GATHER_COST=5 Valdoritas, GATHER_COOLDOWN_TURNS=5. 4 topics canonical.
   // Pack 6 adiciona INTRO_LINES + SUCCESS_LINES + FAILURE_LINES (textos longos).
@@ -40258,6 +40259,7 @@ function _tavernShowGather(p){
       var t = item._t;
       _showConfirmPurchase({
         icon: t.icon, npc: 'Grom', title: 'Investigar: ' + t.label,
+        player: p,
         desc: '<b>' + t.label + '</b> · DC ' + t.dc + '<br>Custo: ' + t.cost + ' Valdoritas<br>' +
               '<b>Sucesso:</b> ' + t.bonus,
         cost: t.cost,
@@ -49928,7 +49930,7 @@ function _commerceConfirm(o){
 function _showConfirmPurchase(opts){
   var ov = document.getElementById('confirm-purchase-overlay');
   if (!ov) return;
-  var p = window.CITY_MOCK_PLAYER;
+  var p = opts.player || window.CITY_MOCK_PLAYER || {};
   // creditMode: confirm para AÇÕES QUE DÃO Valdoritas (sacar do cofre, vender, recompensa)
   // — o popup mostra "A receber" em vez de "Custo", canAfford sempre true,
   //   sem warning, sem opção de dívida/empréstimo.
@@ -53295,6 +53297,7 @@ var ACTION_HANDLERS = {
   'tavern_adventurers_open':  function(p){ _tavernShowAdventurers(p); },
   'tavern_carousing_open':    function(p){ _tavernShowCarousing(p); },
   'tavern_gather_open':       function(p){ _tavernShowGather(p); },
+  'tavern_gather_menu':       function(p){ _tavernShowGather(p); },  // alias do diálogo do Grom ("Coletar informações")
   'tavern_pitfight_open':     function(p){ _tavernShowPitfight(p); },
   'tavern_bard_open':         function(p){ _tavernShowBard(p); },
 
@@ -58333,6 +58336,10 @@ function _openCityDialogue(venue, node, p){
         try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
         _tavernShowMuralBoard(p);
       }
+      else if (ch && (ch.screen === 'tavern_gather_menu' || ch.screen === 'tavern_gather_open')) {
+        try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
+        _tavernShowGather(p);
+      }
       else if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
       else if (data && data.node) { _resolveCityChoice(venue, data.node, ch && ch.id, p, data.npc); }
       else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
@@ -58467,6 +58474,10 @@ function _renderCityDialogue(venue, data, p, ctx){
           // Bug 2026-06-16: antes era node narrativo via dialogue.screen.
           try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
           _tavernShowMuralBoard(p);
+        }
+        else if (ch && (ch.screen === 'tavern_gather_menu' || ch.screen === 'tavern_gather_open')) {
+          try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
+          _tavernShowGather(p);
         }
         else if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
         else if (node) { _resolveCityChoice(venue, node, ch && ch.id, p, data.npc); }
