@@ -117,7 +117,7 @@ function renderInnHub(container, data) {
   var npcRow = vCity.el('div', 'row-npc');
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = _innEl('img');
-  img.src = '../shared/img/npcs/estalajadeira.webp';
+  img.src = '../shared/img/npcs/martha.webp';
   img.alt = 'Martha';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };
