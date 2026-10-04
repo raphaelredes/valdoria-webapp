@@ -1932,7 +1932,7 @@
 
     return '<div class="vinv-detail-actions">'
       + btns.map(function (b) {
-          return '<button class="vinv-btn ' + b.cls + '" data-detail-action="' + b.act + '">'
+          return '<button type="button" class="vinv-btn ' + b.cls + '" data-detail-action="' + b.act + '" title="' + _esc(b.label) + '">'
             + _esc(b.label) + '</button>';
         }).join('')
       + '</div>';

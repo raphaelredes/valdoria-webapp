@@ -36696,7 +36696,28 @@ function _vinvExpAutoEquipSmart() {
     var avgDie = 3.5;
     var m = String(it.dmg_die || '').match(/^(\d+)d(\d+)/);
     if (m) avgDie = (parseInt(m[1], 10) * (parseInt(m[2], 10) + 1)) / 2;
-    return avgDie + mod + (it.bonus || 0) + (it.value || 0) / 1000;
+    var score = avgDie + mod + (it.bonus || 0) + (it.value || 0) / 1000;
+
+    // D&D 5e: Conjuradores (Mago, Feiticeiro, Bruxo, Druida, Clérigo, Bardo)
+    var isArcane = (cls === 'mago' || cls === 'feiticeiro' || cls === 'bruxo' || cls === 'bardo');
+    var isDivine = (cls === 'clerigo' || cls === 'druida');
+    var isCaster = isArcane || isDivine;
+
+    score += (it.spell_bonus || 0) * 3;
+    score += (it.spell_dc || 0) * 3;
+    score += (it.mp_bonus || 0) * 1.5;
+
+    if (isCaster) {
+      var n = (it.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      var isStaffOrFocus = tags.indexOf('arcane') !== -1 || tags.indexOf('focus') !== -1
+        || tags.indexOf('spell_focus') !== -1 || tags.indexOf('magic') !== -1
+        || tags.indexOf('druidic_focus') !== -1 || tags.indexOf('holy_symbol') !== -1
+        || n.indexOf('cajado') !== -1 || n.indexOf('varinha') !== -1 || n.indexOf('bordao') !== -1;
+      if (isStaffOrFocus) {
+        score += 4.0;
+      }
+    }
+    return score;
   }
 
   function armorScore(it) {

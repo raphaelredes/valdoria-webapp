@@ -41378,12 +41378,35 @@ function _aeCanUseWeapon(cls, name, tags, race, subrace) {
   }
   return false;
 }
-function _aeWeaponScore(it, stats) {
-  var tags = it.t || [];
+function _aeWeaponScore(it, stats, cls) {
+  var tags = it.t || it.tags || [];
   var dexBased = tags.indexOf('ranged') !== -1
     || (tags.indexOf('finesse') !== -1 && (stats.dex || 10) > (stats.str || 10));
   var mod = dexBased ? _aeMod(stats.dex) : _aeMod(stats.str);
-  return _aeAvgDie(it.dd) + mod + (it.b || 0) + (it.v || 0) / 1000;
+  var score = _aeAvgDie(it.dd) + mod + (it.b || 0) + (it.v || 0) / 1000;
+
+  // D&D 5e: Conjuradores (Mago, Feiticeiro, Bruxo, Druida, Clérigo, Bardo)
+  // Armas de foco e cajados canalizam a trama mágica e superam armas mundanas simples
+  var c = _aeClsKey(cls);
+  var isArcane = (c === 'mago' || c === 'feiticeiro' || c === 'bruxo' || c === 'bardo');
+  var isDivine = (c === 'clerigo' || c === 'druida');
+  var isCaster = isArcane || isDivine;
+
+  score += (it.sb || it.spell_bonus || 0) * 3;
+  score += (it.sdc || it.spell_dc || 0) * 3;
+  score += (it.mb || it.mp_bonus || 0) * 1.5;
+
+  if (isCaster) {
+    var n = (it.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    var isStaffOrFocus = tags.indexOf('arcane') !== -1 || tags.indexOf('focus') !== -1
+      || tags.indexOf('spell_focus') !== -1 || tags.indexOf('magic') !== -1
+      || tags.indexOf('druidic_focus') !== -1 || tags.indexOf('holy_symbol') !== -1
+      || n.indexOf('cajado') !== -1 || n.indexOf('varinha') !== -1 || n.indexOf('bordao') !== -1;
+    if (isStaffOrFocus) {
+      score += 4.0;
+    }
+  }
+  return score;
 }
 function _aeGenericScore(it) {
   return (it.ac || 0) * 4 + (it.sb || 0) * 4 + (it.sdc || 0) * 4 + (it.mb || 0) * 2 + (it.hlb || 0) * 2 + (it.b || 0) * 2 + (it.v || 0) / 1000;
@@ -41419,7 +41442,7 @@ function _vinvAutoEquipSmart() {
       var score;
       if (slotKey === 'main_hand') {
         if (!_aeCanUseWeapon(cls, c.name, c.tags, p.race || p.race_name, p.subrace || p.sub_race)) return;
-        score = _aeWeaponScore(c.it, stats);
+        score = _aeWeaponScore(c.it, stats, cls);
       } else if (slotKey === 'chest') {
         if (cls === 'monge') return;                       // Defesa sem Armadura
         if (!_aeCanWearArmor(cls, c.tags, c.name, stats, p.race || p.race_name, p.subrace || p.sub_race)) return; // proficiência PHB + Força mínima
