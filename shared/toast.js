@@ -9,6 +9,21 @@
     var _vToastBarRaf = null;
     var _vToastEl = null;
 
+    function _dismissToast() {
+        var el = _vToastEl || document.getElementById('v-shared-toast');
+        if (!el || el.style.display === 'none') return;
+        if (_vToastTimeout) { clearTimeout(_vToastTimeout); _vToastTimeout = null; }
+        if (_vToastBarRaf) { cancelAnimationFrame(_vToastBarRaf); _vToastBarRaf = null; }
+        el.classList.add('v-toast-hiding');
+        setTimeout(function () {
+            var e2 = _vToastEl || document.getElementById('v-shared-toast');
+            if (e2) {
+                e2.style.display = 'none';
+                e2.classList.remove('v-toast-hiding');
+            }
+        }, 180);
+    }
+
     function _ensureEl() {
         if (_vToastEl && _vToastEl.isConnected) return _vToastEl;
         _vToastEl = document.getElementById('v-shared-toast');
@@ -20,6 +35,12 @@
         } else if (!_vToastEl.querySelector('.v-toast-bar')) {
             // Migrate old DOM (texto direto sem .v-toast-msg/.v-toast-bar)
             _vToastEl.innerHTML = '<div class="v-toast-msg"></div><div class="v-toast-bar"><div class="v-toast-bar-fill"></div></div>';
+        }
+        if (!_vToastEl.__wiredDismiss) {
+            _vToastEl.__wiredDismiss = true;
+            _vToastEl.addEventListener('click', _dismissToast);
+            _vToastEl.setAttribute('role', 'status');
+            _vToastEl.setAttribute('title', 'Toque para fechar');
         }
         return _vToastEl;
     }

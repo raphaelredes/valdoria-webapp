@@ -541,10 +541,10 @@
         img.alt = '';
         img.loading = 'lazy';
         img.src = ((window.vItemsConfig && window.vItemsConfig.pngBase) || '/shared/img/items/') + slug + '.webp';
-        img.setAttribute('onerror', "this.style.display='none';this.parentNode.textContent='\\uD83C\\uDF81';");
+        img.setAttribute('onerror', "this.style.display='none';this.parentNode.innerHTML='<span class=\"vitem-placeholder-symbol\" style=\"font-size:1.2em;color:#dfbf78;font-weight:700;\">?</span>';");
         ic.appendChild(img);
       } else {
-        ic.textContent = '🎁';   /* 🎁 fallback */
+        ic.innerHTML = '<span class="vitem-placeholder-symbol" style="font-size:1.2em;color:#dfbf78;font-weight:700;">?</span>';
       }
     } else {
       ic.textContent = '◆';
@@ -830,7 +830,7 @@
       '<button class="enc-id-close" type="button" aria-label="Fechar">✕</button>' +
       (hasImg
         ? '<div class="enc-id-img-wrap"><img class="enc-id-img" alt="" src="' + _itemImgSrc(slug) + '"></div>'
-        : '<div class="enc-id-img-wrap enc-id-img-fallback">' + (ch.itemIcon || '🎁') + '</div>') +
+        : '<div class="enc-id-img-wrap"><div class="vitem-placeholder"><span class="vitem-placeholder-symbol" style="font-size:38px;">?</span></div></div>') +
       '<div class="enc-id-name" style="color:' + rarityCol + '">' + nameEsc + '</div>' +
       (info.rarityLabel ? '<div class="enc-id-rarity" style="color:' + rarityCol + '">' + info.rarityLabel + '</div>' : '') +
       ((info.lines && info.lines.length) ? '<div class="enc-id-divider"></div><div class="enc-id-stats">' + info.lines.join('<br>') + '</div>' : '') +
@@ -866,14 +866,11 @@
       img.alt = '';
       img.loading = 'lazy';
       img.src = _itemImgSrc(slug);
-      img.setAttribute('onerror', "this.style.display='none';this.parentNode.classList.add('enc-cho-item-fallback');this.parentNode.textContent='\\uD83C\\uDF81';");
+      img.setAttribute('onerror', "this.style.display='none';this.parentNode.classList.add('enc-cho-item-mys');this.parentNode.textContent='?';");
       thumb.appendChild(img);
-    } else if (ch.itemIcon) {
-      thumb.classList.add('enc-cho-item-fallback');
-      thumb.innerHTML = ch.itemIcon;
     } else {
-      thumb.classList.add('enc-cho-item-fallback');
-      thumb.textContent = '🎁';
+      thumb.classList.add('enc-cho-item-mys');
+      thumb.textContent = '?';
     }
     thumb.classList.add('enc-cho-item-thumb--clickable');
     thumb.setAttribute('role', 'button');

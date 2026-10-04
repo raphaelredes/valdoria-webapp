@@ -109,7 +109,6 @@
     'base-battleaxe': 'machado-de-batalha',
     'base-greataxe': 'machado-grande',
     // Outras armas brancas
-    'base-whip': 'foice',
     'base-sickle': 'foice',
     'base-pike': 'lanca',
     'base-spear': 'lanca',
@@ -123,7 +122,6 @@
     'base-light-crossbow': 'besta-leve',
     'base-heavy-crossbow': 'besta-pesada',
     'base-hand-crossbow': 'besta-leve',
-    'base-sling': 'dardo',
     'base-dart': 'dardo',
     'base-broken-arrow': 'flecha-quebrada',
     // Cajados/Focos magicos
@@ -153,7 +151,6 @@
     'base-boot': 'botas-de-couro',
     'base-bracer': 'braceletes-de-defesa',
     // Acessorios
-    'base-amulet': 'amuleto-da-sorte',
     'base-ring-gem': 'anel-de-ouro',
     'base-belt': 'cinto-de-ferro',
     'base-coin-pouch': 'bolsa-de-moedas-falsa',
@@ -165,7 +162,6 @@
     'base-thrown-flask': 'pocao-de-cura',
     'base-poison-bottle': 'pseudopode-preservado',
     'base-powder-jar': 'pote-de-po-magico',
-    'base-honey-jar': 'pocao-de-cura',
     // Comida/Provisoes
     'base-meal-bowl': 'racoes-de-7-dias',
     'base-meat-cooked': 'racoes-de-7-dias',
@@ -240,9 +236,7 @@
     'base-bread': 'racoes-de-7-dias',
     'base-claw': 'garra-de-carnical',
     'base-cloth-hood': 'capuz-de-tecido',
-    'base-club': 'marreta',
     'base-compass': 'fragmento-de-mapa-antigo',
-    'base-crown': 'amuleto-da-sorte',
     'base-ear': 'orelha-de-goblin',
     'base-fang': 'presa-de-javali',
     'base-feather': 'pena-de-cocatrice',
@@ -615,8 +609,17 @@
     var href = useEl.getAttribute('href') || useEl.getAttribute('xlink:href') || '';
     if (href.indexOf('#' + SVG_SPRITE_PREFIX) !== 0) return false;
     var rawSlug = href.substring(1 + SVG_SPRITE_PREFIX.length); // strip "#ic-it-"
-    var slug = _resolveItemSlug(rawSlug);  // 2026-06-14: ID-first + BASE_TO_SLUG + strip-+N
-    if (!slug) return false;
+    if (!slug) {
+      var svgElNoSlug = useEl.closest('svg');
+      if (svgElNoSlug && !svgElNoSlug.closest('defs') && svgElNoSlug.getAttribute('data-img-swapped') !== '1') {
+        svgElNoSlug.setAttribute('data-img-swapped', '1');
+        var ph = document.createElement('div');
+        ph.className = 'vitem-placeholder';
+        ph.innerHTML = '<span class="vitem-placeholder-symbol">?</span>';
+        if (svgElNoSlug.parentNode) svgElNoSlug.parentNode.replaceChild(ph, svgElNoSlug);
+      }
+      return false;
+    }
     var svgEl = useEl.closest('svg');
     if (!svgEl || svgEl.closest('defs')) return false; // skip defs entries
     if (svgEl.getAttribute('data-img-swapped') === '1') return false;
@@ -673,13 +676,19 @@
     });
   }
 
+  function placeholderHTML(altText) {
+    var alt = (altText || '').replace(/"/g, '&quot;');
+    return '<div class="vitem-placeholder" title="' + alt + '" aria-label="' + alt + '">' +
+           '<span class="vitem-placeholder-symbol">?</span></div>';
+  }
+
   function iconHTML(slug, altText, viewBox) {
     // Synchronous: requires manifest already loaded.
-    // Returns the right HTML string (img or svg-use) for embedding.
+    // Returns the right HTML string (img ou placeholder '?') for embedding.
     // Auto-detects player gender from window.vPlayerGender (set by game).
     // If F and {slug}-f.png exists in manifest, uses female version.
+    var alt = (altText || slug || '').replace(/"/g, '&quot;');
     if (manifestState.loaded) {
-      var alt = (altText || slug).replace(/"/g, '&quot;');
       // Try female variant if player is female
       var gender = (typeof window !== 'undefined' && window.vPlayerGender) || 'M';
       if (gender === 'F' && hasManifestSlug(slug + '-f')) {
@@ -692,8 +701,9 @@
                '" style="width:100%;height:100%;object-fit:contain" loading="lazy" data-item-slug="' + slug + '">';
       }
     }
-    return '<svg viewBox="' + (viewBox || '0 0 120 120') +
-           '"><use href="#' + SVG_SPRITE_PREFIX + slug + '"/></svg>';
+    // 2026-10-04 (Ordem do Usuário): se o item não possui imagem oficial,
+    // NUNCA exibir uma imagem errada/chutada. Retorna o placeholder canônico '?'.
+    return placeholderHTML(altText || slug);
   }
 
   function resolve(slug, callback) {
@@ -707,6 +717,7 @@
     resolve: resolve,
     has: hasManifestSlug,
     iconHTML: iconHTML,
+    placeholderHTML: placeholderHTML,
     /* 2026-06-01 (sessão #67): expõe resolveSlug pra que consumidores
        (inventory-screen.js _iconSrc) resolvam `base-*` IDs do design system
        ao slug real do manifest. Sem isto, um item sem PNG direto cai no SVG

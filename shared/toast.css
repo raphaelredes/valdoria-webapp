@@ -60,7 +60,10 @@
        de modais (5000): a notificacao "Esse item nao pode ser equipado" so
        aparecia ao fechar a Mochila (na cidade). Critical (10000) cobre tudo. */
     z-index: var(--v-z-critical, 10000);
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 
     /* Animacao dupla: entry com drift vertical + pulse dourado de "manifestacao" */
     animation:
