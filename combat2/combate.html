@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-05T17:47:12Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-05T18:16:53Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14788,9 +14788,9 @@ function newCombat() {
     order.forEach(function (c) {
         if (c.summonKind) c.summonedBy = p_idx;
     });
-    assignInitialPositions(order, 8, 10);
+    assignInitialPositions(order, typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14, typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12);
     var _state = { ph: 'intro', order: order, p_idx: p_idx, active_idx: 0, rn: 0, _wrapsSeen: 0, log: [], last: null, bio: 'forest',
-             battlefield: { cols: 8, rows: 10 },
+             battlefield: { cols: typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14, rows: typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12 },
              /* V1 Invocações Phase 1 — dict[caster_idx -> list[attached_summon]] */
              attachedSummons: {},
              /* Sub-projeto #1 (2026-04-26): reinforcement queue + caps */
@@ -15707,14 +15707,31 @@ function applyBattleCheckpoint(state, cp) {
     /* Restauração do grid e terreno do campo de batalha */
     if (cp.battlefield && typeof cp.battlefield === 'object') {
         if (!state.battlefield) state.battlefield = {};
-        if (typeof cp.battlefield.cols === 'number') state.battlefield.cols = cp.battlefield.cols;
-        if (typeof cp.battlefield.rows === 'number') state.battlefield.rows = cp.battlefield.rows;
+        if (typeof cp.battlefield.cols === 'number') state.battlefield.cols = Math.max(typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14, cp.battlefield.cols);
+        if (typeof cp.battlefield.rows === 'number') state.battlefield.rows = Math.max(typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12, cp.battlefield.rows);
         if (Array.isArray(cp.battlefield.difficult_terrain)) {
             try { state.battlefield.difficult_terrain = JSON.parse(JSON.stringify(cp.battlefield.difficult_terrain)); } catch (_) {}
         }
         if (Array.isArray(cp.battlefield.obstacles)) {
             try { state.battlefield.obstacles = JSON.parse(JSON.stringify(cp.battlefield.obstacles)); } catch (_) {}
         }
+    }
+    if (!state.battlefield) state.battlefield = {};
+    if (!state.battlefield.cols || state.battlefield.cols < 14) state.battlefield.cols = typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14;
+    if (!state.battlefield.rows || state.battlefield.rows < 12) state.battlefield.rows = typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12;
+
+    /* Blindagem de posicionamento D&D 5e: garante que nenhuma unidade restaurada fique sem pos ou fora do grid */
+    var hasMissingPos = false;
+    (state.order || []).forEach(function(u) {
+        if (!u) return;
+        if (!u.pos || typeof u.pos.col !== 'number' || typeof u.pos.row !== 'number' ||
+            u.pos.col < 0 || u.pos.col >= state.battlefield.cols ||
+            u.pos.row < 0 || u.pos.row >= state.battlefield.rows) {
+            hasMissingPos = true;
+        }
+    });
+    if (hasMissingPos && typeof assignInitialPositions === 'function') {
+        assignInitialPositions(state.order, state.battlefield.cols, state.battlefield.rows, state.battlefield.obstacles);
     }
     /* Reordena state.order pela sequência salva (o sort por iniciativa roda só
        no animInit da sessão original; num resume direto pra ph='active' o array
@@ -15797,7 +15814,7 @@ function newCombatFromSetup(cfg) {
     }
 
     var order = [p].concat(allies).concat(enemies);
-    assignInitialPositions(order, 8, 10);
+    assignInitialPositions(order, typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14, typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12);
     /* IDs estáveis por posição de origem (player→aliados→inimigos). O snapshot
        de checkpoint referencia unidades por id; sem ids o restore de HP era
        no-op silencioso (bug user 2026-06-10: lobo morto revivia ao reabrir o
@@ -15931,7 +15948,7 @@ function newCombatFromSetup(cfg) {
              /* Phase 5b polish v3 — flag global do encontro pra UI mostrar
                 "SURPRESA" no banner de iniciativa. */
              _surprisedRound: cfg.surprise === true ? true : false,
-             battlefield: { cols: 8, rows: 10 },
+             battlefield: { cols: typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14, rows: typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12 },
              /* Sub-projeto #1 (2026-04-26): reinforcement queue + caps */
              reinforcementQueue: [],
              reinforcementCaps: null  /* lazy: ReinforceFSM populates DEFAULT_CAPS */ };
@@ -22631,11 +22648,12 @@ var _actionTaken = false;
 var _bfPanZoomTeardown = null;
 
 function mountBattlefieldPanZoom() {
-    /* V1 Invocações Phase 3 & Refactor 2026-10 (Pan Livre Omnidirecional 60fps):
-       - Universal Pointer Events (mouse, touch, pen) com setPointerCapture para blindagem total contra pull-down/swipe do Telegram WebApp.
-       - Amplitude vertical e horizontal totalmente desimpedida: sem travas artificiais de 220px, permitindo navegar livremente pelo mapa.
+    /* V1 Invocações Phase 3 & Refactor 2026-10 (Pan & Zoom Canônico em Screen Space 60fps):
+       - Universal Pointer Events (mouse, touch, pen) com setPointerCapture para blindagem contra pull-down/swipe do Telegram WebApp.
+       - Pan & Zoom 100% no espaço de tela com transform: translate3d(...) scale(...) e transform-origin: 0 0 (elimina CSS zoom proprietário).
        - Enquadramento ciente do dock inferior (usableVpH): combate centralizado na área útil desobstruída acima do botão Agir.
-       - Multi-touch pinch zoom nativo focado e roda de mouse suave. */
+       - A batalha SEMPRE inicia e é retomada com a Visão Geral do Cenário, enquadrando todos os combatentes (Ordem do Usuário 2026-10).
+       - ResizeObserver no viewport e fallback rAF para re-enquadramento suave após renderização do layout flex do Telegram WebApp. */
     if (_bfPanZoomTeardown) {
         try { _bfPanZoomTeardown(); } catch (ePz) {}
         _bfPanZoomTeardown = null;
@@ -22648,7 +22666,7 @@ function mountBattlefieldPanZoom() {
     vp.scrollLeft = 0;
     vp.scrollTop = 0;
 
-    var MIN_ZOOM = 0.4;
+    var MIN_ZOOM = 0.30;
     var MAX_ZOOM = 1.6;
     var currentZoom = (window.__bfPanState && typeof window.__bfPanState.currentZoom === 'number') ? window.__bfPanState.currentZoom : 1;
     var currentPanX = (window.__bfPanState && typeof window.__bfPanState.panX === 'number') ? window.__bfPanState.panX : 0;
@@ -22663,69 +22681,68 @@ function mountBattlefieldPanZoom() {
     var arenaH = bRowsVal * (typeof HEX_ROW_STEP !== 'undefined' ? HEX_ROW_STEP : 66) + Math.round((typeof HEX_H !== 'undefined' ? HEX_H : 60) / 2) + (typeof HEX_PAD_Y !== 'undefined' ? HEX_PAD_Y : 36) * 2;
 
     var clampPan = function (px, py, z) {
-        var vpW = vp.clientWidth || 430;
+        var vpW = vp.clientWidth || 400;
         var vpH = vp.clientHeight || 500;
+        var usableVpH = Math.max(180, vpH - 80);
         var effZ = z || currentZoom;
 
-        // Área visível útil descontando o dock inferior (~80px)
-        var usableVpH = Math.max(180, vpH - 80);
-
-        // Limites de liberdade total: o usuário pode arrastar o mapa até que qualquer extremidade
-        // (topo com inimigos, base com herói e aliados, flancos laterais) fique confortavelmente no centro da tela.
-        // Margem de segurança de 80px para nunca perder a arena de vista.
-        var minX = (80 / effZ) - padPanX - arenaW;
-        var maxX = ((vpW - 80) / effZ) - padPanX;
-        var minY = (80 / effZ) - padPanY - arenaH;
-        var maxY = ((usableVpH - 40) / effZ) - padPanY;
+        // Limites de liberdade total em Screen Space:
+        // Pelo menos 60px da arena permanecem visíveis na tela em qualquer extremidade
+        var minX = 60 - (padPanX + arenaW) * effZ;
+        var maxX = (vpW - 60) - padPanX * effZ;
+        var minY = 60 - (padPanY + arenaH) * effZ;
+        var maxY = (usableVpH - 40) - padPanY * effZ;
 
         px = Math.max(minX, Math.min(maxX, px));
         py = Math.max(minY, Math.min(maxY, py));
         return { x: px, y: py };
     };
 
-    var savePanState = function () {
+    var savePanState = function (userAdjusted) {
         window.__bfPanState = {
             initialized: true,
+            userAdjusted: !!userAdjusted || (window.__bfPanState && !!window.__bfPanState.userAdjusted),
             currentZoom: currentZoom,
             panX: currentPanX,
             panY: currentPanY
         };
     };
 
-    var applyTransform = function (skipClamp) {
+    var applyTransform = function (skipClamp, userAdjusted) {
         if (!skipClamp) {
             var clamped = clampPan(currentPanX, currentPanY, currentZoom);
             currentPanX = clamped.x;
             currentPanY = clamped.y;
         }
-        stage.style.zoom = currentZoom;
-        stage.style.transform = 'translate3d(' + Math.round(currentPanX) + 'px, ' + Math.round(currentPanY) + 'px, 0)';
-        savePanState();
+        stage.style.zoom = '';
+        stage.style.transformOrigin = '0 0';
+        stage.style.transform = 'translate3d(' + Math.round(currentPanX) + 'px, ' + Math.round(currentPanY) + 'px, 0) scale(' + currentZoom + ')';
+        savePanState(userAdjusted);
     };
 
     var applyZoom = function (z, focalX, focalY) {
         var oldZ = currentZoom;
         currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z));
-        var vpW = vp.clientWidth || 430;
+        var vpW = vp.clientWidth || 400;
         var vpH = vp.clientHeight || 500;
         var usableVpH = Math.max(180, vpH - 80);
 
         if (typeof focalX === 'number' && typeof focalY === 'number') {
-            var localX = (focalX / oldZ) - currentPanX;
-            var localY = (focalY / oldZ) - currentPanY;
-            currentPanX = (focalX / currentZoom) - localX;
-            currentPanY = (focalY / currentZoom) - localY;
+            var localX = (focalX - currentPanX) / oldZ;
+            var localY = (focalY - currentPanY) / oldZ;
+            currentPanX = focalX - localX * currentZoom;
+            currentPanY = focalY - localY * currentZoom;
         } else {
-            var centerLocalX = (vpW / (2 * oldZ)) - currentPanX;
-            var centerLocalY = (usableVpH / (2 * oldZ)) - currentPanY;
-            currentPanX = (vpW / (2 * currentZoom)) - centerLocalX;
-            currentPanY = (usableVpH / (2 * currentZoom)) - centerLocalY;
+            var centerLocalX = (vpW / 2 - currentPanX) / oldZ;
+            var centerLocalY = (usableVpH / 2 - currentPanY) / oldZ;
+            currentPanX = (vpW / 2) - centerLocalX * currentZoom;
+            currentPanY = (usableVpH / 2) - centerLocalY * currentZoom;
         }
-        applyTransform();
+        applyTransform(false, true);
     };
 
     var getOverviewParams = function () {
-        var vpW = vp.clientWidth || 430;
+        var vpW = vp.clientWidth || 400;
         var vpH = vp.clientHeight || 500;
         var usableVpH = Math.max(180, vpH - 80);
 
@@ -22733,11 +22750,14 @@ function mountBattlefieldPanZoom() {
         var fitX = (vpW - 32) / Math.max(320, arenaW);
         var fitY = (usableVpH - 24) / Math.max(320, arenaH);
         var z = Math.min(fitX, fitY);
-        z = Math.max(0.32, Math.min(0.85, z));
+        z = Math.max(0.30, Math.min(0.85, z));
 
-        var x = (vpW / (2 * z)) - (padPanX + arenaW / 2);
-        var y = (usableVpH / (2 * z)) - (padPanY + arenaH / 2);
-        return { z: z, x: x, y: y };
+        var arenaCenterX = padPanX + arenaW / 2;
+        var arenaCenterY = padPanY + arenaH / 2;
+
+        var panX = (vpW / 2) - (arenaCenterX * z);
+        var panY = (usableVpH / 2) - (arenaCenterY * z);
+        return { z: z, x: panX, y: panY };
     };
 
     var fitOverview = async function (animate) {
@@ -22748,7 +22768,7 @@ function mountBattlefieldPanZoom() {
             currentZoom = p.z;
             currentPanX = p.x;
             currentPanY = p.y;
-            applyTransform();
+            applyTransform(false, false);
         }
     };
 
@@ -22765,23 +22785,24 @@ function mountBattlefieldPanZoom() {
         }
         if (!pActor || !pActor.pos || pActor.pos.col == null) return;
 
-        var vpW = vp.clientWidth || 430;
+        var vpW = vp.clientWidth || 400;
         var vpH = vp.clientHeight || 500;
         var usableVpH = Math.max(180, vpH - 80);
 
-        // Zoom tático confortável (0.80) para centralizar no herói
-        var z = 0.80;
+        var z = 0.75;
         var cCenter = hexCenter(pActor.pos.col, pActor.pos.row);
-        var targetX = (vpW / (2 * z)) - (padPanX + cCenter.cx);
-        var targetY = (usableVpH / (2 * z)) - (padPanY + cCenter.cy);
+        var unitLocalX = padPanX + cCenter.cx;
+        var unitLocalY = padPanY + cCenter.cy;
+        var targetPanX = (vpW / 2) - (unitLocalX * z);
+        var targetPanY = (usableVpH / 2) - (unitLocalY * z);
 
         if (animate) {
-            await smoothAnimateCamera(z, targetX, targetY, 350);
+            await smoothAnimateCamera(z, targetPanX, targetPanY, 350);
         } else {
             currentZoom = z;
-            currentPanX = targetX;
-            currentPanY = targetY;
-            applyTransform();
+            currentPanX = targetPanX;
+            currentPanY = targetPanY;
+            applyTransform(false, true);
         }
     };
 
@@ -22793,7 +22814,7 @@ function mountBattlefieldPanZoom() {
 
     var fitAll = function (force) {
         // Batalha SEMPRE começa com a Visão Geral do Cenário (Ordem do Usuário 2026-10)
-        if (isNewCombatSession || !window.__bfPanState || !window.__bfPanState.initialized) {
+        if (isNewCombatSession || !window.__bfPanState || !window.__bfPanState.initialized || !window.__bfPanState.userAdjusted) {
             window.__bfActiveCombatKey = combatUid;
             fitOverview(false);
             return;
@@ -22802,12 +22823,23 @@ function mountBattlefieldPanZoom() {
             currentZoom = window.__bfPanState.currentZoom || 1;
             currentPanX = window.__bfPanState.panX || 0;
             currentPanY = window.__bfPanState.panY || 0;
-            applyTransform();
+            applyTransform(false, window.__bfPanState.userAdjusted);
             return;
         }
         fitOverview(false);
     };
     fitAll();
+
+    // Se o layout do Telegram WebApp ainda não estiver consolidado (dimensões zeradas no mount síncrono), agenda re-fit via rAF
+    if (vp.clientWidth < 100 || vp.clientHeight < 100) {
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                if (vp && stage && (!window.__bfPanState || !window.__bfPanState.userAdjusted)) {
+                    fitOverview(false);
+                }
+            });
+        });
+    }
 
     function smoothAnimateCamera(targetZ, targetPanX, targetPanY, durationMs) {
         return new Promise(function (resolve) {
@@ -22817,7 +22849,7 @@ function mountBattlefieldPanZoom() {
                 currentZoom = targetZ;
                 currentPanX = targetPanX;
                 currentPanY = targetPanY;
-                applyTransform();
+                applyTransform(false, true);
                 resolve();
                 return;
             }
@@ -22839,14 +22871,14 @@ function mountBattlefieldPanZoom() {
                 currentZoom = startZ + (targetZ - startZ) * eased;
                 currentPanX = startX + (targetPanX - startX) * eased;
                 currentPanY = startY + (targetPanY - startY) * eased;
-                applyTransform();
+                applyTransform(false, true);
                 if (progress < 1) {
                     requestAnimationFrame(step);
                 } else {
                     currentZoom = targetZ;
                     currentPanX = targetPanX;
                     currentPanY = targetPanY;
-                    applyTransform();
+                    applyTransform(false, true);
                     resolve();
                 }
             }
@@ -22860,16 +22892,16 @@ function mountBattlefieldPanZoom() {
 
     window.bfCameraFocusCoord = async function (col, row, targetZoom, durationMs) {
         if (col == null || row == null || typeof hexCenter !== 'function') return;
-        var vpW = vp.clientWidth || 430;
+        var vpW = vp.clientWidth || 400;
         var vpH = vp.clientHeight || 500;
         var usableVpH = Math.max(180, vpH - 80);
-        var z = targetZoom || currentZoom || 0.80;
-        z = Math.max(0.50, Math.min(0.96, z));
+        var z = targetZoom || currentZoom || 0.75;
+        z = Math.max(0.40, Math.min(1.2, z));
         var cCenter = hexCenter(col, row);
-        var centerX = padPanX + cCenter.cx;
-        var centerY = padPanY + cCenter.cy;
-        var targetPanX = (vpW / (2 * z)) - centerX;
-        var targetPanY = (usableVpH / (2 * z)) - centerY;
+        var unitLocalX = padPanX + cCenter.cx;
+        var unitLocalY = padPanY + cCenter.cy;
+        var targetPanX = (vpW / 2) - (unitLocalX * z);
+        var targetPanY = (usableVpH / 2) - (unitLocalY * z);
         var clamped = clampPan(targetPanX, targetPanY, z);
         await smoothAnimateCamera(z, clamped.x, clamped.y, durationMs);
     };
@@ -22903,9 +22935,9 @@ function mountBattlefieldPanZoom() {
             ev.preventDefault();
             var act = btn.getAttribute('data-bf-zoom-act');
             if (act === 'zoomIn') {
-                applyZoom(currentZoom * 1.2);
+                applyZoom(currentZoom * 1.25);
             } else if (act === 'zoomOut') {
-                applyZoom(currentZoom / 1.2);
+                applyZoom(currentZoom / 1.25);
             } else if (act === 'focusPlayer') {
                 await focusPlayer(true);
             } else if (act === 'fit') {
@@ -22978,9 +23010,9 @@ function mountBattlefieldPanZoom() {
             }
             if (isDragging) {
                 if (e.cancelable) e.preventDefault();
-                currentPanX = dragPanStartX + (moveDx / currentZoom);
-                currentPanY = dragPanStartY + (moveDy / currentZoom);
-                applyTransform();
+                currentPanX = dragPanStartX + moveDx;
+                currentPanY = dragPanStartY + moveDy;
+                applyTransform(false, true);
             }
         } else if (activePointers.size === 2) {
             if (e.cancelable) e.preventDefault();
@@ -23003,7 +23035,7 @@ function mountBattlefieldPanZoom() {
             primaryPointerId = null;
             isDragging = false;
             vp.style.cursor = 'grab';
-            savePanState();
+            savePanState(true);
         } else if (activePointers.size === 1) {
             var remainingId = activePointers.keys().next().value;
             primaryPointerId = remainingId;
@@ -23030,12 +23062,32 @@ function mountBattlefieldPanZoom() {
     };
     vp.addEventListener('touchmove', onTouchPrevent, { passive: false });
 
-    /* === Resize → re-fit === */
-    var onResize = function () { fitAll(); };
+    /* === Resize e ResizeObserver → re-fit inteligente === */
+    var onResize = function () {
+        if (!window.__bfPanState || !window.__bfPanState.userAdjusted) {
+            fitOverview(false);
+        }
+    };
     window.addEventListener('resize', onResize);
+
+    var _ro = null;
+    if (typeof ResizeObserver !== 'undefined') {
+        _ro = new ResizeObserver(function (entries) {
+            for (var ri = 0; ri < entries.length; ri++) {
+                var cr = entries[ri].contentRect;
+                if (cr && cr.width > 100 && cr.height > 100) {
+                    if (!window.__bfPanState || !window.__bfPanState.userAdjusted) {
+                        fitOverview(false);
+                    }
+                }
+            }
+        });
+        _ro.observe(vp);
+    }
 
     _bfPanZoomTeardown = function () {
         window.removeEventListener('resize', onResize);
+        if (_ro) { try { _ro.disconnect(); } catch (_eRo) {} _ro = null; }
         vp.removeEventListener('wheel', onWheel);
         vp.removeEventListener('pointerdown', onPointerDown);
         vp.removeEventListener('pointermove', onPointerMove);
@@ -34625,6 +34677,9 @@ async function startCombatRemoteCanonical() {
            Checkpoint contém HP/MP/turn/conditions snapshot do estado atual. */
         if (data.resume === true && data.checkpoint && typeof applyBattleCheckpoint === 'function') {
             try {
+                // Ao retomar combate após fechamento do jogo, reseta pan/zoom para forçar a Visão Geral do Cenário
+                window.__bfPanState = null;
+                window.__bfActiveCombatKey = null;
                 applyBattleCheckpoint(currentState, data.checkpoint);
                 console.info('[C-REM:PIVOT-BOOT] CHECKPOINT RESUMED turn=' + data.checkpoint.turn);
             } catch (_eCp) {
