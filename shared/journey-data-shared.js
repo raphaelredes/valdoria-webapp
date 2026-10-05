@@ -841,17 +841,21 @@ var SAFE = {
     'Uma cervinha pequena cruza a trilha vinte metros à frente, te encara, e desaparece sem pressa. Não há predadores na área.',
     'Você passa por uma árvore com cordas atadas em galhos baixos — oferendas dos antigos camponeses. Algumas são novas.',
     'O ar muda — fica adocicado. Você cruza um talhão de cogumelos cor-de-lua, intactos. Bom sinal de solo limpo.',
-    'A trilha sobe um morrinho. Do alto, você vê o trajeto inteiro à frente — três pontos altos antes do destino.'
+    'A trilha sobe um morrinho. Do alto, você vê o trajeto inteiro à frente — três pontos altos antes do destino.',
+    'Pequenos pássaros voam baixo e agitados entre os troncos, buscando abrigo nas folhagens. Pássaros voando baixo significa chuva — e logo uma chuva calma começa a gotejar pelas copas.',
+    'O vento traz o cheiro inconfundível de terra molhada. Começou a chover na mata, lavando o dossel das árvores com um sussurro rítmico e constante.'
   ],
   plains: [
     'O vento ondula o trigal dourado em ondas, longe até onde a vista alcança. O céu hoje é cobalto sem nuvens.',
     'Uma estrada de terra clara se estende ao horizonte. Pegadas frescas — alguém passou há horas. Não muitos.',
-    'Andorinhas cruzam o céu em V. O tempo está bom hoje, dizem os agricultores: pássaros baixos significam chuva, e estes voam alto.',
+    'Andorinhas cruzam o céu em V bem alto. O tempo segue firme sob o sol aberto — pássaros baixos trariam chuva, mas estes voam alto e tranquilos.',
     'Você passa um marco antigo de pedra com inscrições gastas. A direção certa, confirma o símbolo do reino mal visível.',
     'Um agricultor solitário no campo distante levanta o chapéu pra você. Você responde com aceno — código universal de "tudo bem aqui".',
     'O cheiro do trigo maduro é doce, quase inebriante. Você lembra de coisas que não devia lembrar — boas e ruins.',
     'Uma carroça abandonada na lateral da trilha. Sem rodas, sem cavalos. Algum mercador desistiu há meses, talvez anos.',
-    'O vento muda de direção brevemente — você sente perfume de flores selvagens vindo do leste. Boa direção, dizem os antigos.'
+    'O vento muda de direção brevemente — você sente perfume de flores selvagens vindo do leste. Boa direção, dizem os antigos.',
+    'Andorinhas voam baixo em círculos rápidos rente ao capim. Pássaros voando baixo significa chuva, dizem os camponeses — e em minutos começou a chover, refrescando o solo poeirento da estrada.',
+    'Nuvens cinzentas cobrem o horizonte e gotas pesadas começam a cair. Começou a chover sobre a planície aberta, transformando a poeira em terra fértil e úmida.'
   ],
   swamp: [
     'Sapos coaxam nas poças escuras. Você pisa em raízes pra evitar a lama — passo a passo, passo a passo.',
@@ -871,7 +875,8 @@ var SAFE = {
     'Vento entre as fendas faz a montanha cantar. Som baixo, contínuo. Algo entre música e gemido.',
     'Você passa por uma cabana abandonada de pedra, sem teto. Caçador, pastor, eremita — quem sabe, e quem sabe há quanto.',
     'Um carneiro selvagem te observa do topo de uma rocha vinte metros acima. Imóvel. Soberano. Vai onde ele quer.',
-    'A trilha serpenteia em zigue-zague encosta acima. Cada curva revela um novo horizonte mais distante que o anterior.'
+    'A trilha serpenteia em zigue-zague encosta acima. Cada curva revela um novo horizonte mais distante que o anterior.',
+    'Nuvens baixas e densas engolem a encosta da montanha. Uma névoa fria se espalha pelas rochas, cobrindo o caminho de bruma espessa.'
   ],
   desert: [
     'A estrada se estende sob o sol abrasador. Sua sombra é a única companhia — escura, fiel, em movimento sincronizado.',
@@ -1681,6 +1686,95 @@ var DEPARTURES = {
         };
     }
 
+    function _extractJourneyText(input) {
+        if (!input) return '';
+        if (typeof input === 'string') return input;
+        if (Array.isArray(input)) {
+            return input.map(_extractJourneyText).join(' ');
+        }
+        if (typeof input === 'object') {
+            var parts = [];
+            if (input.title) parts.push(input.title);
+            if (input.text) parts.push(input.text);
+            if (input.narr) parts.push(input.narr);
+            if (input.speech) parts.push(input.speech);
+            if (input.sNarr) parts.push(input.sNarr);
+            if (input.fNarr) parts.push(input.fNarr);
+            if (input.script) parts.push(_extractJourneyText(input.script));
+            if (input.choices && Array.isArray(input.choices)) {
+                for (var i = 0; i < input.choices.length; i++) {
+                    var ch = input.choices[i];
+                    if (ch) {
+                        if (ch.sNarr) parts.push(ch.sNarr);
+                        if (ch.fNarr) parts.push(ch.fNarr);
+                    }
+                }
+            }
+            return parts.join(' ');
+        }
+        return String(input);
+    }
+
+    /**
+     * Detecta condição climática ('r', 't', 'f', 's') a partir de textos narrativos
+     * ocorridos durante a jornada (partida, eventos seguros, perigos e desfechos).
+     */
+    function detectWeather(input) {
+        var raw = _extractJourneyText(input);
+        if (!raw) return null;
+        var norm = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        // 1. Tempestade / Tormenta / Raios / Trovões / Vendaval
+        var isStorm = /\b(tempestad\w*|torment\w*|trova\w*|trovo\w*|relampag\w*|vendaval\w*)\b/.test(norm);
+
+        // 2. Detecção de Pássaros:
+        var birdLow = /\b(passaro\w*|andorinha\w*)\b.*?\b(baixo\w*)\b|\b(voa\w*)\s+(baixo\w*)\b/.test(norm);
+        var birdHigh = /\b(passaro\w*|andorinha\w*)\b.*?\b(alto\w*)\b|\b(voa\w*)\s+(alto\w*)\b/.test(norm);
+        var birdLowProverb = /passaro\w*.*?(voa\w*\s+)?baixo\w*.*?(significa\w*|traz\w*|prenuncia\w*).*?chuv\w*/.test(norm);
+
+        // 3. Chuva / Garoa / Chuvisco / Gotas / Pingos
+        var isRain = /\b(chuv\w*|chov\w*|garoa\w*|pingos?|gotas?\s+pesadas?)\b/.test(norm);
+
+        // 4. Névoa / Neblina / Bruma / Nevoeiro
+        var isFog = /\b(nevoa\w*|neblina\w*|bruma\w*|nevoeiro\w*)\b/.test(norm);
+
+        // 5. Céu limpo / Sol / Tempo bom / Sem nuvens
+        var isClear = /\b(ceu\s+(aberto|limpo|azul|cobalto)|sol\s+(aberto|radiante|forte|dourado)|tempo\s+(bom|firme|aberto)|sem\s+nuvens)\b/.test(norm);
+
+        // Se pássaros voam alto e não há menção de chuva ou tempestade ativa:
+        if (birdHigh && /\b(estes|mas|porem|enquanto)\s+(voa\w*|est\w*)\s+alto\b/.test(norm) && !/\b(comec\w*|chove\s+forte|gotas\s+pesadas|temporal)\b/.test(norm)) {
+            return 's';
+        }
+        if (birdHigh && !birdLow && !isRain && !isStorm) {
+            return 's';
+        }
+
+        // Tempestade prevalece sobre chuva comum:
+        if (isStorm) {
+            return 't';
+        }
+
+        // Chuva direta ou sinal de pássaros voando baixo:
+        if (isRain || birdLow || birdLowProverb) {
+            if (/\b(chuva\s+passou|sol\s+(voltou|abriu)|tempo\s+abriu)\b/.test(norm)) {
+                return 's';
+            }
+            return 'r';
+        }
+
+        // Névoa / neblina:
+        if (isFog) {
+            return 'f';
+        }
+
+        // Céu limpo / sol aberto:
+        if (isClear) {
+            return 's';
+        }
+
+        return null;
+    }
+
     global.JourneyData = {
         HAZARDS: HAZARDS,
         HAZARDS_EXTRA: HAZARDS_EXTRA,
@@ -1697,6 +1791,8 @@ var DEPARTURES = {
         successPctForChoice: successPctForChoice,
         canTakeChoice: canTakeChoice,
         getConfirmationContent: getConfirmationContent,
-        pickNarrative: pickNarrative
+        pickNarrative: pickNarrative,
+        detectWeather: detectWeather
     };
 })(typeof window !== 'undefined' ? window : this);
+

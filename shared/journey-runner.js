@@ -56,7 +56,7 @@
     var prevTrack = (global.ValdoriaAudio && typeof ValdoriaAudio.getCurrentTrack === 'function')
       ? ValdoriaAudio.getCurrentTrack() : null;
     _j = { opts: opts, biome: biome, displayName: opts.displayName || 'destino',
-           total: total, step: 0, usedHaz: [], usedSafe: [], prevTrack: prevTrack };
+           total: total, step: 0, usedHaz: [], usedSafe: [], prevTrack: prevTrack, weather: null };
     if (opts.confirm === false) _departure();
     else _confirm();
   }
@@ -174,6 +174,10 @@
     if (j.prep && j.prep.label) {
       script.push({ type: 'narration', text: 'Sob a postura de <b>' + j.prep.label + '</b>, a marcha se inicia com foco redobrado.' });
     }
+    if (JD().detectWeather) {
+      var wDep = JD().detectWeather(script);
+      if (wDep) { j.weather = wDep; _log('journey weather updated on departure -> ' + wDep); }
+    }
     _vRender({
       script: script, choices: [{ id: 'jrn_partir', label: 'Partir' }],
       inline: true, noProgress: true,
@@ -204,6 +208,10 @@
     if (!hz) { _safe(); return; }
     // pickFreshHazard já empurra hz.title em j.usedHaz (anti-repeat sessão+24h).
     j._haz = hz;
+    if (JD().detectWeather && hz) {
+      var wHz = JD().detectWeather(hz);
+      if (wHz) { j.weather = wHz; _log('journey weather updated on hazard -> ' + wHz); }
+    }
     var script = (hz.script || []).map(function (line) {
       if (line.type === 'speech') return { type: 'speech', speaker: (hz.npc && hz.npc.name) || line.speaker || '', text: line.text };
       return { type: 'narration', text: line.text };
@@ -235,6 +243,10 @@
     var j = _j; if (!j) return;
     // pickFreshSafe já empurra o texto em j.usedSafe (anti-repeat sessão+24h).
     var txt = JD().pickFreshSafe ? JD().pickFreshSafe(j.biome, _player(), j.usedSafe) : null;
+    if (JD().detectWeather && txt) {
+      var wSafe = JD().detectWeather(txt);
+      if (wSafe) { j.weather = wSafe; _log('journey weather updated on safe -> ' + wSafe); }
+    }
     _renderContinue([{ type: 'narration', text: txt || 'O caminho segue tranquilo por mais um trecho.' }]);
   }
 
@@ -396,6 +408,10 @@
       }
     }
     var body = narr;
+    if (JD().detectWeather && narr) {
+      var wNarr = JD().detectWeather(narr);
+      if (wNarr) { j.weather = wNarr; _log('journey weather updated on outcome -> ' + wNarr); }
+    }
     if (dmgApplied > 0) {
       // O texto vai pro vEncounter, cujo _san só permite i/b/em/br/strong/u/s/code —
       // <span style> era STRIPPADO + logava '[ENC] HTML bloqueado'. Usa <b> (permitida).
@@ -430,9 +446,10 @@
   function _arrive() {
     var j = _j; if (!j) return;
     var cb = j.opts.onArrive, biome = j.biome, dn = j.displayName;
-    _log('journey complete -> onArrive(' + biome + ')');
+    var meta = { weather: j.weather || null };
+    _log('journey complete -> onArrive(' + biome + ', weather=' + meta.weather + ')');
     _close();
-    if (typeof cb === 'function') { try { cb(biome, dn); } catch (e) {} }
+    if (typeof cb === 'function') { try { cb(biome, dn, meta); } catch (e) {} }
   }
 
   function _close() {

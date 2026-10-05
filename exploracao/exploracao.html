@@ -21589,6 +21589,16 @@ var setupChoices = { region: 'valdoria', map: 'city_gates', weather: 's', phase:
   // V2.6: PHB personality. Default neutro amig\u00e1vel.
   background: 'folk_hero', alignment: 'NG' };
 
+function _normalizeWeatherCode(w) {
+  if (!w) return 's';
+  var s = String(w).trim().toLowerCase();
+  if (s === 'r' || s === 'rain' || s === 'chuva' || s === 'chuvoso') return 'r';
+  if (s === 't' || s === 'storm' || s === 'tempestade' || s === 'tormenta') return 't';
+  if (s === 'f' || s === 'fog' || s === 'nevoa' || s === 'névoa' || s === 'neblina' || s === 'bruma') return 'f';
+  if (s === 's' || s === 'clear' || s === 'sunny' || s === 'sol' || s === 'limpo') return 's';
+  return s.length === 1 ? s : 's';
+}
+
 // X-6.5.51m (2026-04-25): pool de nomes fantasy originais (regra de naming \u2014
 // sem copia de fontes reais). Usados quando setupChoices.name nao foi escolhido.
 var FANTASY_NAMES_PT = [
@@ -40390,7 +40400,13 @@ async function confirmEdgeTransition(_skipJourney) {
       player: function () { return (window.S && S.player) || {}; },
       audioBiome: true,
       refreshHud: (typeof updateHud === 'function') ? updateHud : null,
-      onArrive: function () { S._pendingEdge = ed; confirmEdgeTransition(true); },
+      onArrive: function (biome, dn, meta) {
+        if (meta && meta.weather) {
+          setupChoices.weather = _normalizeWeatherCode(meta.weather);
+          if (window.S) S.weather = setupChoices.weather;
+        }
+        S._pendingEdge = ed; confirmEdgeTransition(true);
+      },
       onCombat: function (jinfo) { _journeyLaunchRareCombat({ direction: 'edge', targetMap: ed.targetMap, edgeLabel: ed.label, biome: (jinfo && jinfo.biome) || _tgtBiome }); },
       onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na travessia para ' + _tgtName + '.'); }
     });
@@ -43150,8 +43166,12 @@ function _cartTravelTo(mapId){
       confirm: false,  // o clique em "Viajar pra X" no popup JÁ é a confirmação (Jogador Mínimo Trabalho)
       audioBiome: true,
       refreshHud: (typeof updateHud === 'function') ? updateHud : null,
-      onArrive: function () {
+      onArrive: function (biome, dn, meta) {
         setupChoices.map = mapId;
+        if (meta && meta.weather) {
+          setupChoices.weather = _normalizeWeatherCode(meta.weather);
+          if (window.S) S.weather = setupChoices.weather;
+        }
         if (typeof dmNarrate === 'function') dmNarrate({ text: 'Você chega às terras de ' + m.name + '.', type: 'action' });
         if (typeof boot === 'function') boot();
       },
@@ -44316,8 +44336,12 @@ function openLocationPopup(mapId) {
         confirm: true,
         audioBiome: true,
         refreshHud: (typeof updateHud === 'function') ? updateHud : null,
-        onArrive: function () {
+        onArrive: function (biome, dn, meta) {
           setupChoices.map = mapId;
+          if (meta && meta.weather) {
+            setupChoices.weather = _normalizeWeatherCode(meta.weather);
+            if (window.S) S.weather = setupChoices.weather;
+          }
           if (typeof dmNarrate === 'function') dmNarrate({ text: 'Você chega às terras de ' + m.name + '.', type: 'action' });
           if (typeof boot === 'function') boot();
         },
@@ -47586,7 +47610,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try { LOG('SETUP', 'no ld_* url params — usando defaults'); } catch (_) {}
       }
       if (qs.get('ld_map')) setupChoices.map = qs.get('ld_map');
-      if (qs.get('ld_weather')) setupChoices.weather = qs.get('ld_weather');
+      var _jWeather = null;
+      try {
+        _jWeather = sessionStorage.getItem('valdoria_journey_weather');
+        if (_jWeather) sessionStorage.removeItem('valdoria_journey_weather');
+      } catch (_) {}
+      var _wVal = qs.get('weather') || qs.get('ld_weather') || _jWeather;
+      if (_wVal) setupChoices.weather = _normalizeWeatherCode(_wVal);
       if (qs.get('ld_phase')) setupChoices.phase = qs.get('ld_phase');
       if (qs.get('ld_bg')) setupChoices.background = qs.get('ld_bg');
       if (qs.get('ld_align')) setupChoices.alignment = qs.get('ld_align');
@@ -47774,6 +47804,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupChoices.map = snap.map_id || window.__EXPLORE_MAP_ID || 'city_gates';
         setupChoices.background = snap.bg || setupChoices.background;
         setupChoices.alignment = snap.align || setupChoices.alignment;
+        if (snap.weather) setupChoices.weather = _normalizeWeatherCode(snap.weather);
         if (typeof REGIONS === 'object' && REGIONS) {
           for (var rid2 in REGIONS) {
             var r2 = REGIONS[rid2];
@@ -47807,7 +47838,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // restaura a posição da URL (resume traz ?col/?row do checkpoint; e cada
     // /move atualiza a URL via _syncExploreUrlPos, então F5 mantém onde parou).
     try {
+      var _jWeatherR = null;
+      try {
+        _jWeatherR = sessionStorage.getItem('valdoria_journey_weather');
+        if (_jWeatherR) sessionStorage.removeItem('valdoria_journey_weather');
+      } catch (_) {}
       var _qsR = new URLSearchParams(location.search);
+      var _wR = _qsR.get('weather') || _qsR.get('ld_weather') || _jWeatherR;
+      if (_wR) {
+        setupChoices.weather = _normalizeWeatherCode(_wR);
+        LOG('BOOT', 'REMOTE weather set/override from journey/URL: ' + setupChoices.weather);
+      }
       var _rCol = _qsR.get('col'), _rRow = _qsR.get('row');
       if (_rCol !== null && _rRow !== null) {
         var _rC = parseInt(_rCol, 10), _rR = parseInt(_rRow, 10);
@@ -47817,7 +47858,7 @@ document.addEventListener('DOMContentLoaded', () => {
           LOG('BOOT', 'REMOTE spawn restore col=' + _rC + ' row=' + _rR);
         }
       }
-    } catch (_eRC) { try { LOGW('BOOT', 'remote col/row parse failed: ' + (_eRC && _eRC.message)); } catch (_) {} }
+    } catch (_eRC) { try { LOGW('BOOT', 'remote col/row/weather parse failed: ' + (_eRC && _eRC.message)); } catch (_) {} }
     boot();
     // X-6.5.51AB (2026-04-26): MutationObserver auto-attacha seta animada de
     // scroll hint em popups com overflow vertical. CSS .v-scroll-hint-arrow

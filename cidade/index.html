@@ -56276,7 +56276,7 @@ function startCityJourney(mapId, displayName, finalUrl) {
           total: (jinfo && jinfo.total) || info.steps
         });
       },
-      onArrive: function () { _cityJourneyArrive(mapId, displayName, finalUrl); },
+      onArrive: function (biome, dn, meta) { _cityJourneyArrive(mapId, displayName, finalUrl, meta); },
       onCancel: function () {
         if (typeof _logCity === 'function') _logCity('city journey cancelled');
         try {
@@ -56367,12 +56367,26 @@ function _cityLaunchJourneyCombatFallback(rs) {
 
 // Chegada: cobre o gap silhueta->exploração com o magic-circle loader ANTES do
 // location.href (destino também mostra loader via ?nointro=1). Args vêm do runner.
-function _cityJourneyArrive(biome, displayName, url) {
+function _cityJourneyArrive(biome, displayName, url, meta) {
+  var targetUrl = url;
+  var w = (meta && meta.weather) || null;
+  if (w) {
+    try { sessionStorage.setItem('valdoria_journey_weather', w); } catch (_) {}
+    try {
+      var u = new URL(targetUrl, window.location.href);
+      u.searchParams.set('weather', w);
+      u.searchParams.set('ld_weather', w);
+      targetUrl = u.toString();
+    } catch (_) {
+      var sep = targetUrl.indexOf('?') >= 0 ? '&' : '?';
+      targetUrl = targetUrl + sep + 'weather=' + encodeURIComponent(w) + '&ld_weather=' + encodeURIComponent(w);
+    }
+  }
   function _doRedirect() {
     if (window._vTransitionLoader) window._vTransitionLoader.show('Chegando ao destino…');
-    if (typeof _logCity === 'function') _logCity('city journey complete -> redirect');
+    if (typeof _logCity === 'function') _logCity('city journey complete -> redirect' + (w ? (' weather=' + w) : ''));
     window.__valdoria_transitioning = true;
-    setTimeout(function () { window.location.href = url; }, 30);
+    setTimeout(function () { window.location.href = targetUrl; }, 30);
   }
   if (typeof playTravelAnimation === 'function') playTravelAnimation(biome, displayName, _doRedirect);
   else _doRedirect();
