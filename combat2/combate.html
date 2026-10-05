@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-05T17:36:11Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-05T17:47:12Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -22724,90 +22724,95 @@ function mountBattlefieldPanZoom() {
         applyTransform();
     };
 
-    var fitOverview = function () {
+    var getOverviewParams = function () {
         var vpW = vp.clientWidth || 430;
         var vpH = vp.clientHeight || 500;
         var usableVpH = Math.max(180, vpH - 80);
 
-        var fitX = (vpW - 24) / Math.max(320, arenaW);
-        var fitY = usableVpH / Math.max(320, arenaH);
-        var overviewZ = Math.max(0.55, Math.min(0.85, Math.min(fitX, fitY)));
-        currentZoom = overviewZ;
-        currentPanX = (vpW / (2 * currentZoom)) - (padPanX + arenaW / 2);
-        currentPanY = (usableVpH / (2 * currentZoom)) - (padPanY + arenaH / 2);
-        applyTransform();
+        // Folga confortável para enquadrar todas as 14 colunas e 12 linhas
+        var fitX = (vpW - 32) / Math.max(320, arenaW);
+        var fitY = (usableVpH - 24) / Math.max(320, arenaH);
+        var z = Math.min(fitX, fitY);
+        z = Math.max(0.32, Math.min(0.85, z));
+
+        var x = (vpW / (2 * z)) - (padPanX + arenaW / 2);
+        var y = (usableVpH / (2 * z)) - (padPanY + arenaH / 2);
+        return { z: z, x: x, y: y };
     };
 
+    var fitOverview = async function (animate) {
+        var p = getOverviewParams();
+        if (animate) {
+            await smoothAnimateCamera(p.z, p.x, p.y, 350);
+        } else {
+            currentZoom = p.z;
+            currentPanX = p.x;
+            currentPanY = p.y;
+            applyTransform();
+        }
+    };
+
+    var focusPlayer = async function (animate) {
+        var pActor = null;
+        if (currentState && currentState.order) {
+            for (var ui = 0; ui < currentState.order.length; ui++) {
+                var u = currentState.order[ui];
+                if (u && u.t === 'p' && u.alive && !u.isDead) { pActor = u; break; }
+            }
+            if (!pActor && typeof currentState.p_idx === 'number') {
+                pActor = currentState.order[currentState.p_idx];
+            }
+        }
+        if (!pActor || !pActor.pos || pActor.pos.col == null) return;
+
+        var vpW = vp.clientWidth || 430;
+        var vpH = vp.clientHeight || 500;
+        var usableVpH = Math.max(180, vpH - 80);
+
+        // Zoom tático confortável (0.80) para centralizar no herói
+        var z = 0.80;
+        var cCenter = hexCenter(pActor.pos.col, pActor.pos.row);
+        var targetX = (vpW / (2 * z)) - (padPanX + cCenter.cx);
+        var targetY = (usableVpH / (2 * z)) - (padPanY + cCenter.cy);
+
+        if (animate) {
+            await smoothAnimateCamera(z, targetX, targetY, 350);
+        } else {
+            currentZoom = z;
+            currentPanX = targetX;
+            currentPanY = targetY;
+            applyTransform();
+        }
+    };
+
+    // Identificador único do combate para detectar novo combate e iniciar em visão geral
+    var combatUid = (currentState && (currentState.combat_id || currentState.id)) ||
+                    (currentState && currentState.order && currentState.order.map(function (u) { return u.n; }).join('_')) ||
+                    'default_combat';
+    var isNewCombatSession = (!window.__bfActiveCombatKey || window.__bfActiveCombatKey !== combatUid);
+
     var fitAll = function (force) {
-        if (!force && window.__bfPanState && window.__bfPanState.initialized && typeof window.__bfPanState.panX === 'number') {
+        // Batalha SEMPRE começa com a Visão Geral do Cenário (Ordem do Usuário 2026-10)
+        if (isNewCombatSession || !window.__bfPanState || !window.__bfPanState.initialized) {
+            window.__bfActiveCombatKey = combatUid;
+            fitOverview(false);
+            return;
+        }
+        if (!force && window.__bfPanState && typeof window.__bfPanState.panX === 'number') {
             currentZoom = window.__bfPanState.currentZoom || 1;
             currentPanX = window.__bfPanState.panX || 0;
             currentPanY = window.__bfPanState.panY || 0;
             applyTransform();
             return;
         }
-
-        var vpW = vp.clientWidth || 430;
-        var vpH = vp.clientHeight || 500;
-        var usableVpH = Math.max(180, vpH - 80);
-
-        // Limites da bounding box de todos os combatentes ativos
-        var minCol = Infinity, maxCol = -Infinity, minRow = Infinity, maxRow = -Infinity;
-        var hasUnits = false;
-        if (currentState && currentState.order) {
-            currentState.order.forEach(function (u) {
-                if (u && u.alive && !u.isDead && u.pos && u.pos.col != null && u.pos.row != null) {
-                    hasUnits = true;
-                    if (u.pos.col < minCol) minCol = u.pos.col;
-                    if (u.pos.col > maxCol) maxCol = u.pos.col;
-                    if (u.pos.row < minRow) minRow = u.pos.row;
-                    if (u.pos.row > maxRow) maxRow = u.pos.row;
-                }
-            });
-        }
-
-        if (hasUnits && minCol !== Infinity && typeof hexCenter === 'function') {
-            var pMin = hexCenter(minCol, minRow);
-            var pMax = hexCenter(maxCol, maxRow);
-
-            var padPxX = (typeof HEX_W !== 'undefined' ? HEX_W : 64) * 1.5;
-            var padPxY = (typeof HEX_H !== 'undefined' ? HEX_H : 60) * 1.5;
-
-            var boxW = Math.max((typeof HEX_W !== 'undefined' ? HEX_W : 64) * 4.0, (pMax.cx - pMin.cx) + padPxX * 2);
-            var boxH = Math.max((typeof HEX_H !== 'undefined' ? HEX_H : 60) * 3.5, (pMax.cy - pMin.cy) + padPxY * 2);
-
-            var targetFocusX = (pMin.cx + pMax.cx) / 2;
-            var targetFocusY = (pMin.cy + pMax.cy) / 2;
-            var curActor = (currentState && currentState.order) ? (currentState.order[currentState.active_idx] || currentState.order[currentState.p_idx]) : null;
-            if (curActor && curActor.pos && curActor.pos.col != null) {
-                var actCenter = hexCenter(curActor.pos.col, curActor.pos.row);
-                targetFocusX = actCenter.cx;
-                targetFocusY = actCenter.cy;
-            }
-
-            var centerX = padPanX + targetFocusX;
-            var centerY = padPanY + targetFocusY;
-
-            var fitX = (vpW - 20) / boxW;
-            var fitY = usableVpH / boxH;
-            var optimalZoom = Math.min(fitX, fitY);
-
-            optimalZoom = Math.max(0.65, Math.min(0.96, optimalZoom));
-            currentZoom = optimalZoom;
-
-            currentPanX = (vpW / (2 * currentZoom)) - centerX;
-            currentPanY = (usableVpH / (2 * currentZoom)) - centerY;
-            applyTransform();
-        } else {
-            fitOverview();
-        }
+        fitOverview(false);
     };
     fitAll();
 
     function smoothAnimateCamera(targetZ, targetPanX, targetPanY, durationMs) {
         return new Promise(function (resolve) {
             if (!vp || !stage) { resolve(); return; }
-            durationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : (durationMs || 500);
+            durationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : (durationMs || 350);
             if (durationMs <= 30 || typeof requestAnimationFrame !== 'function') {
                 currentZoom = targetZ;
                 currentPanX = targetPanX;
@@ -22850,16 +22855,7 @@ function mountBattlefieldPanZoom() {
     }
 
     window.bfCameraFocusOverview = async function (durationMs) {
-        var vpW = vp.clientWidth || 430;
-        var vpH = vp.clientHeight || 500;
-        var usableVpH = Math.max(180, vpH - 80);
-        var fitX = (vpW - 24) / Math.max(320, arenaW);
-        var fitY = usableVpH / Math.max(320, arenaH);
-        var z = Math.max(0.55, Math.min(0.85, Math.min(fitX, fitY)));
-        var targetPanX = (vpW / (2 * z)) - (padPanX + arenaW / 2);
-        var targetPanY = (usableVpH / (2 * z)) - (padPanY + arenaH / 2);
-        var clamped = clampPan(targetPanX, targetPanY, z);
-        await smoothAnimateCamera(z, clamped.x, clamped.y, durationMs);
+        await fitOverview(true);
     };
 
     window.bfCameraFocusCoord = async function (col, row, targetZoom, durationMs) {
@@ -22867,8 +22863,8 @@ function mountBattlefieldPanZoom() {
         var vpW = vp.clientWidth || 430;
         var vpH = vp.clientHeight || 500;
         var usableVpH = Math.max(180, vpH - 80);
-        var z = targetZoom || currentZoom || 0.90;
-        z = Math.max(0.60, Math.min(0.96, z));
+        var z = targetZoom || currentZoom || 0.80;
+        z = Math.max(0.50, Math.min(0.96, z));
         var cCenter = hexCenter(col, row);
         var centerX = padPanX + cCenter.cx;
         var centerY = padPanY + cCenter.cy;
@@ -22883,12 +22879,12 @@ function mountBattlefieldPanZoom() {
         await window.bfCameraFocusCoord(unit.pos.col, unit.pos.row, targetZoom, durationMs);
     };
 
-    // Centralização automática no combatente do turno atual (Ordem do Usuário 2026-10)
-    if (currentState && currentState.order && typeof currentState.active_idx === 'number') {
+    // Centralização automática de turno (apenas após a batalha já ter começado e o usuário já ter iniciado ações)
+    if (currentState && currentState.order && typeof currentState.active_idx === 'number' && !isNewCombatSession) {
         var turnUnit = currentState.order[currentState.active_idx] || currentState.order[currentState.p_idx];
         if (turnUnit && turnUnit.alive && turnUnit.pos && turnUnit.pos.col != null) {
             var turnUnitKey = (turnUnit.id || currentState.active_idx) + '_' + (currentState.turn || 0);
-            if (window.__bfLastTurnFocusKey !== turnUnitKey) {
+            if (window.__bfLastTurnFocusKey !== turnUnitKey && currentState.turn > 1) {
                 window.__bfLastTurnFocusKey = turnUnitKey;
                 setTimeout(function () {
                     if (typeof window.bfCameraFocusUnit === 'function') {
@@ -22902,17 +22898,19 @@ function mountBattlefieldPanZoom() {
     var zoomControls = (vp.parentElement && vp.parentElement.querySelector('.bf-zoom-controls')) || vp.querySelector('.bf-zoom-controls') || document.querySelector('.bf-zoom-controls');
     var zoomBtns = zoomControls ? zoomControls.querySelectorAll('.bf-zoom-btn') : vp.querySelectorAll('.bf-zoom-btn');
     zoomBtns.forEach(function (btn) {
-        btn.addEventListener('click', function (ev) {
+        btn.addEventListener('click', async function (ev) {
             ev.stopPropagation();
+            ev.preventDefault();
             var act = btn.getAttribute('data-bf-zoom-act');
-            if (act === 'zoomIn') applyZoom(currentZoom * 1.2);
-            else if (act === 'zoomOut') applyZoom(currentZoom / 1.2);
-            else if (act === 'focusPlayer') {
-                var pActor = currentState && currentState.order && currentState.order[currentState.p_idx];
-                if (pActor) window.bfCameraFocusUnit(pActor, 0.95, 400);
+            if (act === 'zoomIn') {
+                applyZoom(currentZoom * 1.2);
+            } else if (act === 'zoomOut') {
+                applyZoom(currentZoom / 1.2);
+            } else if (act === 'focusPlayer') {
+                await focusPlayer(true);
+            } else if (act === 'fit') {
+                await fitOverview(true);
             }
-            else if (act === 'fit') fitOverview();
-            savePanState();
         });
     });
 
