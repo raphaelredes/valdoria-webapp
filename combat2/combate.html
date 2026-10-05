@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-05T16:48:15Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-05T17:21:13Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9760,13 +9760,26 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .battlefield-hex-arena {
   position: absolute;
   margin: 0;
-  background: radial-gradient(ellipse at 50% 50%, rgba(56, 45, 34, 0.9) 0%, rgba(35, 27, 20, 0.65) 65%, rgba(20, 15, 11, 0.05) 100%) !important;
+  background: transparent !important;
   border: none !important;
-  border-radius: 20px;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.75), inset 0 0 35px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   user-select: none;
   overflow: visible !important;
   box-sizing: border-box;
+}
+
+/* Névoa de Guerra (Fog of War) nos Tokens de Combate D&D 5e */
+.battlefield-hex-arena .cell.hex-token.token--shrouded-fog {
+  opacity: 0.18 !important;
+  filter: grayscale(1) blur(2px) !important;
+  pointer-events: none !important;
+  transition: opacity 0.35s ease, filter 0.35s ease;
+}
+.battlefield-hex-arena .cell.hex-token.token--dim-fog {
+  opacity: 0.72 !important;
+  filter: saturate(0.65) !important;
+  transition: opacity 0.25s ease, filter 0.25s ease;
 }
 
 /* Range feedback para alvos durante seleção de ação */
@@ -9925,7 +9938,25 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   fill: rgba(56, 45, 34, 0.68);
   stroke: rgba(212, 175, 55, 0.35);
   stroke-width: 1.5;
-  transition: fill 0.18s ease, stroke 0.18s ease;
+  transition: fill 0.18s ease, stroke 0.18s ease, opacity 0.25s ease;
+}
+
+/* Visibilidade e Fog of War nos Hexágonos */
+.battlefield-hex-arena .hex-tile.hex-tile--revealed {
+  transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.25s ease;
+}
+.battlefield-hex-arena .hex-tile.hex-tile--dim {
+  opacity: 0.62;
+  filter: contrast(0.85);
+  transition: opacity 0.25s ease;
+}
+.battlefield-hex-arena .hex-tile.hex-tile--fogged {
+  opacity: 0.16 !important;
+  fill: #140f0c !important;
+  stroke: rgba(75, 60, 48, 0.22) !important;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
 }
 
 .battlefield-hex-arena .hex-tile:hover {
@@ -18803,21 +18834,21 @@ function buildAllyIntroLines(s) {
    Flat-top odd-q hex grid (1 hex = 5 ft / 1.5 m).
    Autoridade matemática idêntica a src/game/combat2_math.py.
    ========================================================================= */
-var HEX_COLS_DEFAULT = 8;
-var HEX_ROWS_DEFAULT = 10;
+var HEX_COLS_DEFAULT = 14;
+var HEX_ROWS_DEFAULT = 12;
 var HEX_W = 76;
 var HEX_H = 66; // Math.round(76 * 0.866)
 var HEX_COL_STEP = 57; // HEX_W * 0.75
 var HEX_ROW_STEP = 66; // HEX_H
 var HEX_PAD_X = 40;
 var HEX_PAD_Y = 36;
-var HEX_STAGE_W = (HEX_COLS_DEFAULT - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2; // 555px
-var HEX_STAGE_H = HEX_ROWS_DEFAULT * HEX_ROW_STEP + Math.round(HEX_H / 2) + HEX_PAD_Y * 2; // 765px
+var HEX_STAGE_W = (HEX_COLS_DEFAULT - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2;
+var HEX_STAGE_H = HEX_ROWS_DEFAULT * HEX_ROW_STEP + Math.round(HEX_H / 2) + HEX_PAD_Y * 2;
 
 /* Margens virtuais para pan "infinito" de mesa tática RPG (D&D AAA - Baldur's Gate 3 / Solasta)
    Permite centralizar qualquer extremidade do tabuleiro procedimental no meio exato do viewport. */
-var BF_PAD_PAN_X = 260;
-var BF_PAD_PAN_Y = 240;
+var BF_PAD_PAN_X = 320;
+var BF_PAD_PAN_Y = 300;
 
 function hexCenter(col, row) {
     var offsetY = (col % 2 === 1) ? (HEX_H / 2) : 0;
@@ -19618,7 +19649,7 @@ function findHexPathStep(startCol, startRow, targetCol, targetRow, maxSteps, occ
     return { col: lastNode.col, row: lastNode.row, steps: stepsTaken, path: finalPath };
 }
 
-function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
+function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     var pUnit = s && s.order && s.order[s.p_idx];
     var isPlayer = (utype === 'player');
     var isEnemy = (utype === 'enemy');
@@ -19628,6 +19659,9 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
     var classes = 'cell occupied ' + utype + ' hex-token';
     var heraldicSlug = _heraldicClsSlugOf(u, utype);
     if (heraldicSlug) classes += ' v8-card ' + heraldicSlug;
+
+    if (fogState === 'shrouded') classes += ' token--shrouded-fog';
+    else if (fogState === 'dim') classes += ' token--dim-fog';
 
     if (isActive) {
         classes += ' active-turn';
@@ -19746,6 +19780,11 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
 
     // Name label
     var nameLabel = escHtml(u.n || u.cls || '—');
+    if (fogState === 'shrouded' && isEnemy) {
+        nameLabel = 'Inimigo Oculto';
+        hpVal = '?';
+        acBadge = '';
+    }
 
     var tokenLeft = cx - Math.round(HEX_W / 2);
     var tokenTop = cy - Math.round(HEX_H / 2);
@@ -19921,13 +19960,70 @@ function buildBattlefield(s) {
         return String.fromCharCode(aCode + Math.floor(c / 26) - 1) + String.fromCharCode(aCode + (c % 26));
     }
 
+    // === D&D 5e: FOG OF WAR & VISIBILIDADE TÁTICA (Influência de Clima e Bioma) ===
+    var curWeather = String(s.weather || 'clear').toLowerCase();
+    var curBiome = String(s.bio || s.biome || 'forest').toLowerCase();
+
+    function calcUnitVisionRange(u) {
+        var baseR = 5; // Limpo / Dia (alcance tático amplo)
+        if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') baseR = 2;
+        else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') baseR = 3;
+        else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') baseR = 4;
+        else if (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('masmorra') >= 0) baseR = 2;
+        else baseR = 5;
+
+        // Bônus racial D&D 5e (Darkvision / Sentidos Aguçados)
+        var raceStr = String(u.race || u.r || '').toLowerCase();
+        if (raceStr.indexOf('elf') >= 0 || raceStr.indexOf('an') >= 0 || raceStr.indexOf('dwarf') >= 0 || raceStr.indexOf('tiefling') >= 0 || raceStr.indexOf('gnom') >= 0) {
+            baseR += 1;
+        }
+        var uName = String(u.n || '').toLowerCase();
+        if (uName.indexOf('lobo') >= 0 || uName.indexOf('wolf') >= 0 || uName.indexOf('goblin') >= 0 || uName.indexOf('orc') >= 0) {
+            baseR += 1;
+        }
+        return Math.max(1, Math.min(7, baseR));
+    }
+
+    var partyVisionMap = {};
+    var friendlyUnits = (s.order || []).filter(function (u) {
+        return u && u.alive && !u.isDead && (u.t === 'p' || u.t === 'a') && u.pos && u.pos.col != null && u.pos.row != null;
+    });
+
+    friendlyUnits.forEach(function (fu) {
+        var vr = calcUnitVisionRange(fu);
+        for (var c = 0; c < bCols; c++) {
+            for (var r = 0; r < bRows; r++) {
+                var d = hexDistance(fu.pos.col, fu.pos.row, c, r);
+                var hk = c + ',' + r;
+                if (d <= vr) {
+                    if (!partyVisionMap[hk] || d < partyVisionMap[hk].dist) {
+                        partyVisionMap[hk] = { visible: true, dim: false, dist: d };
+                    }
+                } else if (d === vr + 1) {
+                    if (!partyVisionMap[hk]) {
+                        partyVisionMap[hk] = { visible: false, dim: true, dist: d };
+                    }
+                }
+            }
+        }
+    });
+
     for (var col = 0; col < bCols; col++) {
         for (var row = 0; row < bRows; row++) {
             var center = hexCenter(col, row);
             var pts = hexPolygonPoints(center.cx, center.cy);
             var hexKey = col + ',' + row;
 
+            var visInfo = partyVisionMap[hexKey];
+            var isRevealed = visInfo && visInfo.visible;
+            var isDim = visInfo && visInfo.dim;
+            var isFogged = !isRevealed && !isDim;
+
             var tileCls = 'hex-tile';
+            if (isFogged) tileCls += ' hex-tile--fogged';
+            else if (isDim) tileCls += ' hex-tile--dim';
+            else tileCls += ' hex-tile--revealed';
+
             var isReachable = reachableMap[hexKey] != null;
             var isInReach = inReachMap[hexKey] != null;
             var dtTile = difficultMap[hexKey];
@@ -19952,17 +20048,19 @@ function buildBattlefield(s) {
 
             html += '<polygon points="' + pts + '" class="' + tileCls + '" data-col="' + col + '" data-row="' + row + '" />';
 
-            // Subtle coordinate marker (e.g. A1, B2, K5, AA1)
-            var coordLabel = getHexColLetter(col) + (row + 1);
-            html += '<text x="' + center.cx + '" y="' + (center.cy - 18) + '" class="hex-coord">' + coordLabel + '</text>';
+            // Subtle coordinate marker (oculto sob névoa)
+            if (!isFogged) {
+                var coordLabel = getHexColLetter(col) + (row + 1);
+                html += '<text x="' + center.cx + '" y="' + (center.cy - 18) + '" class="hex-coord">' + coordLabel + '</text>';
+            }
 
             // Se for obstáculo físico com cobertura (PHB p. 196)
-            if (obsTile) {
+            if (obsTile && !isFogged) {
                 var obsSym = obsTile.symbol || '🪨';
                 var obsCov = (obsTile.cover === 'total') ? 'TOTAL' : ((obsTile.cover === 'three_quarters') ? '+5 CA' : '+2 CA');
                 html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-obstacle-symbol">' + obsSym + '</text>';
                 html += '<text x="' + center.cx + '" y="' + (center.cy + 17) + '" class="hex-obstacle-label">' + obsCov + '</text>';
-            } else if (dtTile && !occupiedMap[hexKey]) {
+            } else if (dtTile && !occupiedMap[hexKey] && !isFogged) {
                 // Terreno Difícil (custo 3m / 2 hexes, PHB p. 190) ou Perigo Ativo (DMG p. 110-112)
                 if (dtTile.hazard_kind === 'damage') {
                     var hSym = dtTile.symbol || '🌵';
@@ -20005,7 +20103,13 @@ function buildBattlefield(s) {
         var pos = c.pos || { col: 0, row: 0 };
         var center = hexCenter(pos.col, pos.row);
 
-        html += buildHexTokenHTML(c, utype, uid, activeId, center.cx, center.cy, s);
+        var posKey = pos.col + ',' + pos.row;
+        var tokenVis = partyVisionMap[posKey];
+        var isShrouded = (c.t === 'e') && (!tokenVis || (!tokenVis.visible && !tokenVis.dim));
+        var isDimToken = (c.t === 'e') && (tokenVis && tokenVis.dim);
+        var fogState = isShrouded ? 'shrouded' : (isDimToken ? 'dim' : 'clear');
+
+        html += buildHexTokenHTML(c, utype, uid, activeId, center.cx, center.cy, s, fogState);
     });
     html += '</div>'; // .hex-tokens-layer
 
@@ -22527,12 +22631,11 @@ var _actionTaken = false;
 var _bfPanZoomTeardown = null;
 
 function mountBattlefieldPanZoom() {
-    /* V1 Invocações Phase 3 (2026-04-19, v4 desktop+mobile robusto):
-       - Default: fit-all (todos os 16 slots visíveis).
-       - Desktop: Ctrl+scroll = zoom; mouse drag = pan.
-       - Mobile: pinch 2 dedos = zoom; drag 1 dedo = pan.
-       - Sem scrollbar visível (UX limpa); scroll programático via JS.
-       - CSS `zoom` em vez de `transform: scale` → texto SEM blur. */
+    /* V1 Invocações Phase 3 & Refactor 2026-10 (Pan Livre Omnidirecional 60fps):
+       - Desktop: Mouse drag = pan livre; roda = zoom suave no cursor.
+       - Mobile / Telegram WebApp: touch drag 1 dedo = pan livre 360° (vertical e horizontal); pinch 2 dedos = zoom.
+       - Posicionamento 100% desacoplado de scrollLeft/scrollTop do navegador via GPU translate3d(panX, panY, 0).
+       - CSS zoom mantido para nitidez absoluta das fontes D&D. */
     if (_bfPanZoomTeardown) {
         try { _bfPanZoomTeardown(); } catch (ePz) {}
         _bfPanZoomTeardown = null;
@@ -22541,47 +22644,104 @@ function mountBattlefieldPanZoom() {
     var stage = document.querySelector('[data-bf-pan-stage]');
     if (!vp || !stage) return;
 
-    /* STAGE_W calculado dinamicamente em fitAll (escala com --v-font-scale) — Sessão #66 */
+    // Reseta scroll residual nativo do viewport
+    vp.scrollLeft = 0;
+    vp.scrollTop = 0;
+
     var MIN_ZOOM = 0.4;
     var MAX_ZOOM = 1.6;
-    var currentZoom = (window.__bfPanState && window.__bfPanState.currentZoom) ? window.__bfPanState.currentZoom : 1;
+    var currentZoom = (window.__bfPanState && typeof window.__bfPanState.currentZoom === 'number') ? window.__bfPanState.currentZoom : 1;
+    var currentPanX = (window.__bfPanState && typeof window.__bfPanState.panX === 'number') ? window.__bfPanState.panX : 0;
+    var currentPanY = (window.__bfPanState && typeof window.__bfPanState.panY === 'number') ? window.__bfPanState.panY : 0;
+
+    var clampPan = function (px, py, z) {
+        var vpW = vp.clientWidth || 430;
+        var vpH = vp.clientHeight || 500;
+        var sw = stage.offsetWidth || stage.clientWidth || 1200;
+        var sh = stage.offsetHeight || stage.clientHeight || 1000;
+        var effZ = z || currentZoom;
+        var MARGIN_X = 220;
+        var MARGIN_Y = 220;
+
+        if (sw * effZ <= vpW) {
+            px = ((vpW / effZ) - sw) / 2;
+        } else {
+            var minX = (vpW / effZ) - sw - MARGIN_X;
+            var maxX = MARGIN_X;
+            px = Math.max(minX, Math.min(maxX, px));
+        }
+
+        if (sh * effZ <= vpH) {
+            py = ((vpH / effZ) - sh) / 2;
+        } else {
+            var minY = (vpH / effZ) - sh - MARGIN_Y;
+            var maxY = MARGIN_Y;
+            py = Math.max(minY, Math.min(maxY, py));
+        }
+        return { x: px, y: py };
+    };
 
     var savePanState = function () {
         window.__bfPanState = {
             initialized: true,
             currentZoom: currentZoom,
-            scrollLeft: vp ? vp.scrollLeft : 0,
-            scrollTop: vp ? vp.scrollTop : 0
+            panX: currentPanX,
+            panY: currentPanY
         };
     };
 
-    var applyZoom = function (z) {
-        currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z));
+    var applyTransform = function (skipClamp) {
+        if (!skipClamp) {
+            var clamped = clampPan(currentPanX, currentPanY, currentZoom);
+            currentPanX = clamped.x;
+            currentPanY = clamped.y;
+        }
         stage.style.zoom = currentZoom;
-        stage.style.transform = 'none';
+        stage.style.transform = 'translate3d(' + Math.round(currentPanX) + 'px, ' + Math.round(currentPanY) + 'px, 0)';
         savePanState();
+    };
+
+    var applyZoom = function (z, focalX, focalY) {
+        var oldZ = currentZoom;
+        currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z));
+        var vpW = vp.clientWidth || 430;
+        var vpH = vp.clientHeight || 500;
+
+        if (typeof focalX === 'number' && typeof focalY === 'number') {
+            var localX = (focalX / oldZ) - currentPanX;
+            var localY = (focalY / oldZ) - currentPanY;
+            currentPanX = (focalX / currentZoom) - localX;
+            currentPanY = (focalY / currentZoom) - localY;
+        } else {
+            var centerLocalX = (vpW / (2 * oldZ)) - currentPanX;
+            var centerLocalY = (vpH / (2 * oldZ)) - currentPanY;
+            currentPanX = (vpW / (2 * currentZoom)) - centerLocalX;
+            currentPanY = (vpH / (2 * currentZoom)) - centerLocalY;
+        }
+        applyTransform();
     };
 
     var fitOverview = function () {
         var vpW = vp.clientWidth || 430;
         var vpH = vp.clientHeight || 500;
-        var sw = stage.scrollWidth || 555;
-        var sh = stage.scrollHeight || 580;
+        var sw = stage.offsetWidth || stage.clientWidth || 1200;
+        var sh = stage.offsetHeight || stage.clientHeight || 1000;
 
         var fitX = (vpW - 20) / Math.max(320, sw);
         var fitY = (vpH > 60) ? (vpH - 20) / Math.max(320, sh) : fitX;
-        var overviewZ = Math.max(0.60, Math.min(0.85, Math.min(fitX, fitY)));
-        applyZoom(overviewZ);
-        vp.scrollLeft = Math.max(0, ((sw * currentZoom) - vpW) / 2);
-        vp.scrollTop = Math.max(0, ((sh * currentZoom) - vpH) / 2);
-        savePanState();
+        var overviewZ = Math.max(0.55, Math.min(0.85, Math.min(fitX, fitY)));
+        currentZoom = overviewZ;
+        currentPanX = (vpW / (2 * currentZoom)) - (sw / 2);
+        currentPanY = (vpH / (2 * currentZoom)) - (sh / 2);
+        applyTransform();
     };
 
     var fitAll = function (force) {
-        if (!force && window.__bfPanState && window.__bfPanState.initialized && (window.__bfPanState.scrollLeft > 0 || window.__bfPanState.scrollTop > 0)) {
-            applyZoom(window.__bfPanState.currentZoom);
-            vp.scrollLeft = window.__bfPanState.scrollLeft || 0;
-            vp.scrollTop = window.__bfPanState.scrollTop || 0;
+        if (!force && window.__bfPanState && window.__bfPanState.initialized && typeof window.__bfPanState.panX === 'number') {
+            currentZoom = window.__bfPanState.currentZoom || 1;
+            currentPanX = window.__bfPanState.panX || 0;
+            currentPanY = window.__bfPanState.panY || 0;
+            applyTransform();
             return;
         }
 
@@ -22603,24 +22763,18 @@ function mountBattlefieldPanZoom() {
             });
         }
 
-        var sw = stage.scrollWidth || 652;
-        var sh = stage.scrollHeight || 650;
-
         if (hasUnits && minCol !== Infinity && typeof hexCenter === 'function') {
-            // Converte col/row para pontos no stage
             var pMin = hexCenter(minCol, minRow);
             var pMax = hexCenter(maxCol, maxRow);
 
-            // Margem confortável em torno dos combatentes para enquadramento nítido
             var padPxX = (typeof HEX_W !== 'undefined' ? HEX_W : 64) * 1.5;
             var padPxY = (typeof HEX_H !== 'undefined' ? HEX_H : 60) * 1.5;
 
             var boxW = Math.max((typeof HEX_W !== 'undefined' ? HEX_W : 64) * 4.0, (pMax.cx - pMin.cx) + padPxX * 2);
             var boxH = Math.max((typeof HEX_H !== 'undefined' ? HEX_H : 60) * 3.5, (pMax.cy - pMin.cy) + padPxY * 2);
-            var padPanX = (typeof BF_PAD_PAN_X !== 'undefined') ? BF_PAD_PAN_X : 260;
-            var padPanY = (typeof BF_PAD_PAN_Y !== 'undefined') ? BF_PAD_PAN_Y : 240;
+            var padPanX = (typeof BF_PAD_PAN_X !== 'undefined') ? BF_PAD_PAN_X : 320;
+            var padPanY = (typeof BF_PAD_PAN_Y !== 'undefined') ? BF_PAD_PAN_Y : 300;
 
-            // Foco centralizado no combatente do turno atual (ou centro do grupo se ausente)
             var targetFocusX = (pMin.cx + pMax.cx) / 2;
             var targetFocusY = (pMin.cy + pMax.cy) / 2;
             var curActor = (currentState && currentState.order) ? (currentState.order[currentState.active_idx] || currentState.order[currentState.p_idx]) : null;
@@ -22633,33 +22787,31 @@ function mountBattlefieldPanZoom() {
             var centerX = padPanX + targetFocusX;
             var centerY = padPanY + targetFocusY;
 
-            // Zoom confortável e equilibrado: máximo de 0.96 para NUNCA cortar o cenário nem aproximar em excesso (Ordem do Usuário 2026-10)
             var fitX = (vpW - 20) / boxW;
             var fitY = (vpH > 60) ? (vpH - 20) / boxH : fitX;
             var optimalZoom = Math.min(fitX, fitY);
 
             optimalZoom = Math.max(0.65, Math.min(0.96, optimalZoom));
-            applyZoom(optimalZoom);
+            currentZoom = optimalZoom;
 
-            // Centraliza a visão exatamente no combatente ativo ou grupo
-            vp.scrollLeft = Math.max(0, (centerX * currentZoom) - (vpW / 2));
-            vp.scrollTop = Math.max(0, (centerY * currentZoom) - (vpH / 2));
-            savePanState();
+            currentPanX = (vpW / (2 * currentZoom)) - centerX;
+            currentPanY = (vpH / (2 * currentZoom)) - centerY;
+            applyTransform();
         } else {
             fitOverview();
         }
     };
     fitAll();
 
-    function smoothAnimateCamera(targetZ, targetX, targetY, durationMs) {
+    function smoothAnimateCamera(targetZ, targetPanX, targetPanY, durationMs) {
         return new Promise(function (resolve) {
             if (!vp || !stage) { resolve(); return; }
-            durationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : (durationMs || 600);
+            durationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : (durationMs || 500);
             if (durationMs <= 30 || typeof requestAnimationFrame !== 'function') {
-                applyZoom(targetZ);
-                vp.scrollLeft = targetX;
-                vp.scrollTop = targetY;
-                savePanState();
+                currentZoom = targetZ;
+                currentPanX = targetPanX;
+                currentPanY = targetPanY;
+                applyTransform();
                 resolve();
                 return;
             }
@@ -22667,8 +22819,8 @@ function mountBattlefieldPanZoom() {
                 return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
             };
             var startZ = currentZoom;
-            var startX = vp.scrollLeft || 0;
-            var startY = vp.scrollTop || 0;
+            var startX = currentPanX;
+            var startY = currentPanY;
             var startT = getTime();
             function easeInOutCubic(t) {
                 return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -22678,20 +22830,17 @@ function mountBattlefieldPanZoom() {
                 var elapsed = curT - startT;
                 var progress = Math.min(1, elapsed / durationMs);
                 var eased = easeInOutCubic(progress);
-                var zNow = startZ + (targetZ - startZ) * eased;
-                var xNow = startX + (targetX - startX) * eased;
-                var yNow = startY + (targetY - startY) * eased;
-                stage.style.zoom = zNow;
-                currentZoom = zNow;
-                vp.scrollLeft = xNow;
-                vp.scrollTop = yNow;
+                currentZoom = startZ + (targetZ - startZ) * eased;
+                currentPanX = startX + (targetPanX - startX) * eased;
+                currentPanY = startY + (targetPanY - startY) * eased;
+                applyTransform();
                 if (progress < 1) {
                     requestAnimationFrame(step);
                 } else {
-                    applyZoom(targetZ);
-                    vp.scrollLeft = targetX;
-                    vp.scrollTop = targetY;
-                    savePanState();
+                    currentZoom = targetZ;
+                    currentPanX = targetPanX;
+                    currentPanY = targetPanY;
+                    applyTransform();
                     resolve();
                 }
             }
@@ -22702,28 +22851,32 @@ function mountBattlefieldPanZoom() {
     window.bfCameraFocusOverview = async function (durationMs) {
         var vpW = vp.clientWidth || 430;
         var vpH = vp.clientHeight || 500;
-        var sw = stage.scrollWidth || 555;
-        var sh = stage.scrollHeight || 580;
+        var sw = stage.offsetWidth || stage.clientWidth || 1200;
+        var sh = stage.offsetHeight || stage.clientHeight || 1000;
         var fitX = (vpW - 20) / Math.max(320, sw);
         var fitY = (vpH > 60) ? (vpH - 20) / Math.max(320, sh) : fitX;
-        var z = Math.max(0.60, Math.min(0.85, Math.min(fitX, fitY)));
-        var x = Math.max(0, ((sw * z) - vpW) / 2);
-        var y = Math.max(0, ((sh * z) - vpH) / 2);
-        await smoothAnimateCamera(z, x, y, durationMs);
+        var z = Math.max(0.55, Math.min(0.85, Math.min(fitX, fitY)));
+        var targetPanX = (vpW / (2 * z)) - (sw / 2);
+        var targetPanY = (vpH / (2 * z)) - (sh / 2);
+        var clamped = clampPan(targetPanX, targetPanY, z);
+        await smoothAnimateCamera(z, clamped.x, clamped.y, durationMs);
     };
 
     window.bfCameraFocusCoord = async function (col, row, targetZoom, durationMs) {
         if (col == null || row == null || typeof hexCenter !== 'function') return;
         var vpW = vp.clientWidth || 430;
         var vpH = vp.clientHeight || 500;
-        var z = targetZoom || currentZoom || 0.92;
-        z = Math.max(0.65, Math.min(0.96, z));
-        var padPanX = (typeof BF_PAD_PAN_X !== 'undefined') ? BF_PAD_PAN_X : 260;
-        var padPanY = (typeof BF_PAD_PAN_Y !== 'undefined') ? BF_PAD_PAN_Y : 240;
+        var z = targetZoom || currentZoom || 0.90;
+        z = Math.max(0.60, Math.min(0.96, z));
+        var padPanX = (typeof BF_PAD_PAN_X !== 'undefined') ? BF_PAD_PAN_X : 320;
+        var padPanY = (typeof BF_PAD_PAN_Y !== 'undefined') ? BF_PAD_PAN_Y : 300;
         var cCenter = hexCenter(col, row);
-        var x = Math.max(0, ((padPanX + cCenter.cx) * z) - (vpW / 2));
-        var y = Math.max(0, ((padPanY + cCenter.cy) * z) - (vpH / 2));
-        await smoothAnimateCamera(z, x, y, durationMs);
+        var centerX = padPanX + cCenter.cx;
+        var centerY = padPanY + cCenter.cy;
+        var targetPanX = (vpW / (2 * z)) - centerX;
+        var targetPanY = (vpH / (2 * z)) - centerY;
+        var clamped = clampPan(targetPanX, targetPanY, z);
+        await smoothAnimateCamera(z, clamped.x, clamped.y, durationMs);
     };
 
     window.bfCameraFocusUnit = async function (unit, targetZoom, durationMs) {
@@ -22764,31 +22917,34 @@ function mountBattlefieldPanZoom() {
         });
     });
 
-    /* === Desktop: roda do mouse = zoom (sem precisar de Ctrl) === */
+    /* === Desktop: roda do mouse = zoom centrado no cursor === */
     var onWheel = function (e) {
         e.preventDefault();
-        var delta = e.deltaY < 0 ? 0.1 : -0.1;
-        applyZoom(currentZoom + delta);
+        var delta = e.deltaY < 0 ? 0.08 : -0.08;
+        var rect = vp.getBoundingClientRect();
+        var mouseX = e.clientX - rect.left;
+        var mouseY = e.clientY - rect.top;
+        applyZoom(currentZoom + delta, mouseX, mouseY);
     };
     vp.addEventListener('wheel', onWheel, { passive: false });
 
-    /* === Mobile / Telegram WebApp: touch drag + pinch zoom nativo ===
-       Crucial: e.preventDefault() em touchmove (com passive: false) impede o
-       WebView do Telegram de capturar o gesto para pull-down / fechar webapp.
-       Threshold de 5px preserva o click em tokens e hexágonos caso o jogador não arraste. */
+    /* === Mobile / Telegram WebApp: touch drag + pinch zoom nativo livre ===
+       e.preventDefault() impede o WebView do Telegram de fechar ou travar a tela.
+       Threshold de 5px preserva o toque rápido para seleção de alvos/skills. */
     var touchStartX = 0, touchStartY = 0;
-    var touchScrollX = 0, touchScrollY = 0;
+    var touchPanStartX = 0, touchPanStartY = 0;
     var touchDragging = false;
     var touchPinchDist = 0;
     var touchPinchZoom = 1;
+    var touchPinchCenterX = 0, touchPinchCenterY = 0;
     var TOUCH_DRAG_THRESHOLD = 5;
 
     var onTouchStart = function (e) {
         if (e.touches.length === 1) {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
-            touchScrollX = vp.scrollLeft;
-            touchScrollY = vp.scrollTop;
+            touchPanStartX = currentPanX;
+            touchPanStartY = currentPanY;
             touchDragging = false;
         } else if (e.touches.length === 2) {
             touchDragging = false;
@@ -22796,6 +22952,9 @@ function mountBattlefieldPanZoom() {
             var dy = e.touches[0].clientY - e.touches[1].clientY;
             touchPinchDist = Math.sqrt(dx * dx + dy * dy);
             touchPinchZoom = currentZoom;
+            var rect = vp.getBoundingClientRect();
+            touchPinchCenterX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+            touchPinchCenterY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
         }
     };
 
@@ -22810,15 +22969,17 @@ function mountBattlefieldPanZoom() {
             }
             if (touchDragging) {
                 if (e.cancelable) e.preventDefault();
-                vp.scrollLeft = touchScrollX - moveDx;
-                vp.scrollTop = touchScrollY - moveDy;
+                currentPanX = touchPanStartX + (moveDx / currentZoom);
+                currentPanY = touchPanStartY + (moveDy / currentZoom);
+                applyTransform();
             }
         } else if (e.touches.length === 2 && touchPinchDist > 0) {
             if (e.cancelable) e.preventDefault();
             var dx2 = e.touches[0].clientX - e.touches[1].clientX;
             var dy2 = e.touches[0].clientY - e.touches[1].clientY;
             var dist = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-            applyZoom(touchPinchZoom * (dist / touchPinchDist));
+            var newZ = touchPinchZoom * (dist / touchPinchDist);
+            applyZoom(newZ, touchPinchCenterX, touchPinchCenterY);
         }
     };
 
@@ -22830,8 +22991,8 @@ function mountBattlefieldPanZoom() {
         } else if (e.touches.length === 1) {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
-            touchScrollX = vp.scrollLeft;
-            touchScrollY = vp.scrollTop;
+            touchPanStartX = currentPanX;
+            touchPanStartY = currentPanY;
             touchDragging = false;
         }
     };
@@ -22841,11 +23002,12 @@ function mountBattlefieldPanZoom() {
     vp.addEventListener('touchend', onTouchEnd, { passive: true });
     vp.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
-    /* === Desktop: Mouse drag = pan (com Pointer Events) === */
+    /* === Desktop: Mouse drag = pan livre (Pointer Events) === */
     var DRAG_THRESHOLD_PX = 6;
     var isDragging = false;
     var dragArmed = false;
-    var startX = 0, startY = 0, scrollX = 0, scrollY = 0;
+    var startX = 0, startY = 0;
+    var dragPanStartX = 0, dragPanStartY = 0;
     var activePointers = new Map();
     var primaryPointerId = null;
 
@@ -22858,8 +23020,8 @@ function mountBattlefieldPanZoom() {
             isDragging = false;
             startX = e.clientX;
             startY = e.clientY;
-            scrollX = vp.scrollLeft;
-            scrollY = vp.scrollTop;
+            dragPanStartX = currentPanX;
+            dragPanStartY = currentPanY;
         }
     };
     var onPointerMove = function (e) {
@@ -22867,9 +23029,9 @@ function mountBattlefieldPanZoom() {
         if (!activePointers.has(e.pointerId)) return;
         activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
         if (activePointers.size === 1 && e.pointerId === primaryPointerId) {
+            var moveDx = e.clientX - startX;
+            var moveDy = e.clientY - startY;
             if (!isDragging && dragArmed) {
-                var moveDx = e.clientX - startX;
-                var moveDy = e.clientY - startY;
                 if (Math.abs(moveDx) >= DRAG_THRESHOLD_PX || Math.abs(moveDy) >= DRAG_THRESHOLD_PX) {
                     isDragging = true;
                     vp.style.cursor = 'grabbing';
@@ -22877,8 +23039,9 @@ function mountBattlefieldPanZoom() {
                 }
             }
             if (isDragging) {
-                vp.scrollLeft = scrollX - (e.clientX - startX);
-                vp.scrollTop = scrollY - (e.clientY - startY);
+                currentPanX = dragPanStartX + (moveDx / currentZoom);
+                currentPanY = dragPanStartY + (moveDy / currentZoom);
+                applyTransform();
             }
         }
     };
