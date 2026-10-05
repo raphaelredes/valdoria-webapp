@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-04T15:48:52Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-05T15:36:17Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2824,22 +2824,19 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 /* Pan / zoom na arena (paridade combat2) */
 html.sim-combat-root .bf-pan-viewport {
   flex: 1 1 0 !important;
-  min-height: 0 !important;
+  min-height: 240px !important;
   width: 100% !important;
   max-width: 100% !important;
-  /* V1 Invocações Phase 3 (2026-04-19, refinado v3): overflow scroll permite pan
-     via JS programático (scrollLeft/Top), mas scrollbars ESCONDIDAS visualmente
-     pra UX limpa. touch-action:none impede o browser de interceptar pinch e
-     deixa nosso JS gerenciar single-finger drag e two-finger pinch. */
   overflow: scroll !important;
   position: relative !important;
   touch-action: none !important;
   -webkit-user-select: none !important;
   user-select: none !important;
   cursor: grab !important;
-  /* Esconde scrollbars (mantém scroll funcional via JS) */
-  scrollbar-width: none;  /* Firefox */
-  -ms-overflow-style: none;  /* IE/Edge legacy */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  background: radial-gradient(ellipse at 50% 50%, #292019 0%, #1a1410 65%, #0e0a07 100%) !important;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9);
 }
 html.sim-combat-root .bf-pan-viewport::-webkit-scrollbar {
   /* Chrome/Safari/Opera — esconde scrollbar visualmente */
@@ -2900,19 +2897,11 @@ html.sim-combat-root .bf-pan-viewport::-webkit-scrollbar {
 .bf-zoom-btn:active { transform: scale(0.92); }
 html.sim-combat-root .bf-pan-viewport:active { cursor: grabbing !important; }
 html.sim-combat-root .bf-pan-stage {
-  /* 2026-06-07 (user): largura = conteúdo (max-content) com min 100%. Antes width:100%
-     travava o scroll horizontal em 0 (scrollWidth==clientWidth) — só o arraste vertical
-     funcionava. Com max-content, fonte grande deixa a arena mais larga que o viewport e
-     o arraste HORIZONTAL passa a ter range. padding dá margem nas bordas (esq/dir, longe
-     dos controles de zoom à direita). */
-  width: max-content !important;
+  /* Dimensões da mesa tática calculadas pelo motor procedural com margens contínuas de pan */
   min-width: 100% !important;
   max-width: none !important;
-  padding: 0 var(--v-space-lg, 16px) !important;
   box-sizing: border-box !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
+  position: relative !important;
   transform-origin: 0 0 !important;
   will-change: transform !important;
   /* Nitidez sob transform:scale — font-smoothing + GPU layer + subpixel rendering */
@@ -5311,72 +5300,102 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .tcc-dmg-row.immunity .tcc-dmg-val { color: #b080e0; }
 .tcc-dmg-val.tcc-none { color: var(--v-text-dim, #a09484); font-weight: 400; font-style: italic; }
 
-/* Folha "Escolha uma acao": 2 botoes por linha, espacamento por tokens (sem primary em linha inteira) */
+/* Folha "Escolha uma acao": 2 botoes simetricos por linha, altura ergonomica uniforme */
 .sim-action-sheet .sim-action-sheet-grids {
   display: flex;
   flex-direction: column;
-  gap: var(--v-space-md, 10px);
+  gap: 8px;
+  padding-bottom: 28px;
 }
 .sim-action-sheet .sim-action-sheet-sep {
   flex-shrink: 0;
   width: 100%;
   height: 0;
-  margin: var(--v-space-xs, 4px) 0;
+  margin: 4px 0;
   border: none;
   border-top: 1px solid var(--v-border, #4a3828);
-  box-shadow: 0 1px 0 rgba(196, 149, 58, 0.1);
+  box-shadow: 0 1px 0 rgba(196, 149, 58, 0.12);
 }
 .sim-action-sheet .action-btns-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: stretch;
-  gap: var(--v-space-md, 10px);
+  gap: 8px;
   padding: 0;
 }
-/* 2026-06-07 (user): ícone de ação = imagem OpenAI (shared/img/ui/) no lugar de
-   emoji. Escala com --v-font-scale; flex-shrink 0 pra não distorcer. */
+/* 2026-06-07 (user): ícone de ação = imagem OpenAI (shared/img/ui/) ou SVG inline.
+   Escala com --v-font-scale; flex-shrink 0 pra não distorcer. */
 .action-btn-ico {
-  width: calc(26px * var(--v-font-scale, 1));
-  height: calc(26px * var(--v-font-scale, 1));
+  width: 22px;
+  height: 22px;
   object-fit: contain;
   display: inline-block;
   vertical-align: middle;
   flex-shrink: 0;
-  margin-right: 5px;
+  margin-right: 6px;
 }
 .sim-action-sheet .action-btns-grid .action-btn {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: var(--v-space-xs, 2px);
+  justify-content: flex-start;
+  gap: 4px;
   margin: 0;
   width: 100%;
-  min-height: 44px;
-  padding: var(--v-space-md, 10px) var(--v-space-sm, 8px);
-  font-size: var(--v-font-sm, 13px);
-  line-height: 1.25;
-  text-align: center;
+  min-height: 42px;
+  height: 42px;
+  padding: 4px 10px;
+  font-size: var(--v-font-sm, 12.5px);
+  line-height: 1.15;
+  text-align: left;
   border-radius: var(--v-radius-sm, 8px);
   box-sizing: border-box;
-  white-space: normal;
-  word-break: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  transition: all 0.15s ease;
+}
+.sim-action-sheet .action-btns-grid .action-btn .action-btn-label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-align: left;
+}
+.sim-action-sheet .action-btns-grid .action-btn .action-btn-res-icon.res-action {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--v-gold, #c4953a);
+  opacity: 0.9;
 }
 .sim-action-sheet .action-btns-grid--main .action-btn {
-  font-size: var(--v-font-body, 14px);
-  min-height: 48px;
+  font-size: var(--v-font-sm, 13px);
+  min-height: 42px;
+  height: 42px;
 }
 .sim-action-sheet .action-btns-grid--secondary .action-btn {
   font-size: var(--v-font-sm, 12px);
-  min-height: 44px;
-  padding: var(--v-space-sm, 8px) var(--v-space-xs, 6px);
+  min-height: 42px;
+  height: 42px;
+  padding: 4px 8px;
+}
+.sim-action-sheet .action-btns-grid--utility .action-btn {
+  font-size: var(--v-font-sm, 12px);
+  min-height: 40px;
+  height: 40px;
+  padding: 4px 8px;
 }
 /* 2026-06-23: chip de CD/chance no botão Fugir (dificuldade visível "na opção"). */
-.sim-action-sheet .action-btns-grid--secondary .action-btn .act-flee-dc {
+.sim-action-sheet .action-btns-grid--secondary .action-btn .act-flee-dc,
+.sim-action-sheet .action-btns-grid .action-btn .act-flee-dc {
   display: inline-block;
-  margin-left: var(--v-space-xs, 4px);
-  padding: 1px var(--v-space-xs, 5px);
-  font-size: var(--v-font-xs, 10px);
+  margin-left: 3px;
+  padding: 1px 4px;
+  font-size: 9.5px;
   font-weight: 700;
   color: var(--v-text-dim, #a09484);
   background: rgba(196, 149, 58, 0.14);
@@ -9727,15 +9746,152 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
    Mesa de RPG Clássica com Hexágonos, Miniaturas e Posicionamento
    ========================================================================= */
 .battlefield-hex-arena {
-  position: relative;
-  margin: 0 auto;
-  background: radial-gradient(ellipse at 50% 45%, #382e24 0%, #292119 60%, #1e1712 100%);
-  border: 3px solid #7d633b;
-  border-radius: 14px;
-  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.45), 0 10px 30px rgba(0, 0, 0, 0.7);
+  position: absolute;
+  margin: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(56, 45, 34, 0.9) 0%, rgba(35, 27, 20, 0.65) 65%, rgba(20, 15, 11, 0.05) 100%) !important;
+  border: none !important;
+  border-radius: 20px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.75), inset 0 0 35px rgba(0, 0, 0, 0.5) !important;
   user-select: none;
-  overflow: hidden;
+  overflow: visible !important;
   box-sizing: border-box;
+}
+
+/* Range feedback para alvos durante seleção de ação */
+.battlefield-hex-arena .cell.hex-token.token--in-range .token-disc {
+  box-shadow: 0 0 0 2px #52c496, 0 0 16px rgba(82, 196, 150, 0.8) !important;
+  animation: tokenTargetPulse 1.2s ease-in-out infinite;
+}
+@keyframes tokenTargetPulse {
+  0%, 100% { box-shadow: 0 0 0 2px #52c496, 0 0 12px rgba(82, 196, 150, 0.5); }
+  50% { box-shadow: 0 0 0 3.5px #86efac, 0 0 22px rgba(134, 239, 172, 0.95); }
+}
+.battlefield-hex-arena .cell.hex-token.token--out-of-range {
+  opacity: 0.62;
+  filter: grayscale(0.45);
+}
+.battlefield-hex-arena .cell.hex-token.token--out-of-range:hover {
+  opacity: 0.82;
+  filter: grayscale(0.2);
+}
+.token-dist-chip {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(20, 16, 12, 0.92);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  color: #dfd5c6;
+  font-size: 9.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 20;
+}
+.token-dist-chip--in {
+  background: rgba(18, 44, 26, 0.95) !important;
+  border-color: #52c496 !important;
+  color: #86efac !important;
+  box-shadow: 0 0 8px rgba(82, 196, 150, 0.4);
+}
+.token-dist-chip--out {
+  background: rgba(44, 18, 18, 0.95) !important;
+  border-color: #f87171 !important;
+  color: #fca5a5 !important;
+}
+
+/* HUD Superior de Seleção de Alvo e Alcance D&D 5e */
+.target-selection-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 12px;
+  background: linear-gradient(180deg, rgba(32, 24, 18, 0.96), rgba(18, 14, 10, 0.98));
+  border-top: 1.5px solid var(--v-gold, #c4953a);
+  border-bottom: 1.5px solid var(--v-gold, #c4953a);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(196, 149, 58, 0.2);
+  user-select: none;
+  z-index: 100;
+  animation: tshSlideDown 0.22s ease-out;
+}
+@keyframes tshSlideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tsh-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tsh-action-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--v-gold-bright, #fcd874);
+  letter-spacing: 0.4px;
+}
+.tsh-action-tag .tsh-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+.tsh-action-tag .tsh-cost {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(196, 149, 58, 0.18);
+  border: 1px solid rgba(196, 149, 58, 0.4);
+  color: #e6dfd5;
+  font-family: system-ui, sans-serif;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+.tsh-reach-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(8, 6, 4, 0.75);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  font-size: 11px;
+}
+.tsh-reach-lbl {
+  color: var(--v-text-dim, #a09484);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.tsh-reach-val {
+  color: #86efac;
+  font-weight: 700;
+  font-family: monospace;
+  font-size: 11.5px;
+}
+.tsh-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--v-text-dim, #b8ab97);
+}
+.tsh-subhint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #e0d5c1;
+}
+.tsh-cancel-hint {
+  font-size: 10px;
+  color: #9c8e7d;
+  font-style: italic;
 }
 
 .battlefield-hex-arena .hex-grid-svg {
@@ -18616,6 +18772,11 @@ var HEX_PAD_Y = 36;
 var HEX_STAGE_W = (HEX_COLS_DEFAULT - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2; // 555px
 var HEX_STAGE_H = HEX_ROWS_DEFAULT * HEX_ROW_STEP + Math.round(HEX_H / 2) + HEX_PAD_Y * 2; // 765px
 
+/* Margens virtuais para pan "infinito" de mesa tática RPG (D&D AAA - Baldur's Gate 3 / Solasta)
+   Permite centralizar qualquer extremidade do tabuleiro procedimental no meio exato do viewport. */
+var BF_PAD_PAN_X = 260;
+var BF_PAD_PAN_Y = 240;
+
 function hexCenter(col, row) {
     var offsetY = (col % 2 === 1) ? (HEX_H / 2) : 0;
     var cx = HEX_PAD_X + col * HEX_COL_STEP + (HEX_W / 2);
@@ -18724,6 +18885,151 @@ function simGetAttackReach(unit, skill) {
     }
     if (unit && (unit.is_ranged || unit.ranged)) return { reach: 16, isRanged: true };
     return { reach: 1, isRanged: false };
+}
+
+/**
+ * Retorna metadados completos de alcance D&D 5e (pés, metros, hexes, rótulo e tipo)
+ * para a ação ou magia atualmente selecionada pelo jogador.
+ */
+function formatDndActionReach(unit, skill) {
+    var reachInfo = (typeof simGetAttackReach === 'function')
+        ? simGetAttackReach(unit, skill)
+        : { reach: 1, isRanged: false };
+    var reachHex = Math.max(1, reachInfo.reach || 1);
+    var meters = (reachHex * 1.5).toFixed(1).replace('.0', '');
+    var feet = reachHex * 5;
+    var label = meters + 'm (' + feet + ' pés · ' + reachHex + 'h)';
+    var actionName = 'Ataque com Arma';
+
+    if (skill) {
+        actionName = skill.n || 'Habilidade';
+        if (skill.healTargets === 'self') {
+            return {
+                actionName: actionName,
+                reachHex: 0,
+                meters: '0m',
+                feet: 0,
+                label: 'Pessoal (Próprio)',
+                badge: 'Pessoal',
+                isSelf: true,
+                isRanged: false,
+                isMelee: false
+            };
+        }
+        if (skill.isTouch || skill.touch) {
+            return {
+                actionName: actionName,
+                reachHex: 1,
+                meters: '1,5m',
+                feet: 5,
+                label: '1,5m (5 pés · Toque)',
+                badge: 'Toque',
+                isTouch: true,
+                isRanged: false,
+                isMelee: true
+            };
+        }
+        if (skill.magicMissiles) {
+            return {
+                actionName: actionName,
+                reachHex: 24,
+                meters: '36m',
+                feet: 120,
+                label: '36m (120 pés · 24h)',
+                badge: '120 pés',
+                isRanged: true,
+                isMelee: false
+            };
+        }
+        if (skill.fireball) {
+            return {
+                actionName: actionName,
+                reachHex: 30,
+                meters: '45m',
+                feet: 150,
+                label: '45m (150 pés · 30h)',
+                badge: '150 pés',
+                isRanged: true,
+                isMelee: false
+            };
+        }
+        if (skill.rayOfFrost) {
+            return {
+                actionName: actionName,
+                reachHex: 12,
+                meters: '18m',
+                feet: 60,
+                label: '18m (60 pés · 12h)',
+                badge: '60 pés',
+                isRanged: true,
+                isMelee: false
+            };
+        }
+        if (reachInfo.isRanged) {
+            return {
+                actionName: actionName,
+                reachHex: reachHex,
+                meters: meters + 'm',
+                feet: feet,
+                label: label,
+                badge: feet + ' pés',
+                isRanged: true,
+                isMelee: false
+            };
+        }
+        return {
+            actionName: actionName,
+            reachHex: reachHex,
+            meters: meters + 'm',
+            feet: feet,
+            label: label,
+            badge: (reachHex >= 2 ? 'Haste' : 'Adjacente'),
+            isRanged: false,
+            isMelee: true
+        };
+    }
+
+    var w = (unit && (unit.main_hand || unit.weapon)) || '';
+    if (typeof w === 'string' && w.trim()) {
+        actionName = 'Ataque (' + w.trim() + ')';
+    } else if (typeof w === 'object' && w && w.name) {
+        actionName = 'Ataque (' + w.name + ')';
+    }
+
+    if (reachInfo.isRanged) {
+        return {
+            actionName: actionName,
+            reachHex: reachHex,
+            meters: meters + 'm',
+            feet: feet,
+            label: label + ' · À Distância',
+            badge: 'Distância',
+            isRanged: true,
+            isMelee: false
+        };
+    }
+    if (reachHex >= 2) {
+        return {
+            actionName: actionName,
+            reachHex: reachHex,
+            meters: meters + 'm',
+            feet: feet,
+            label: label + ' · Alcance de Haste',
+            badge: 'Haste 10ft',
+            isRanged: false,
+            isMelee: true
+        };
+    }
+    return {
+        actionName: actionName,
+        reachHex: 1,
+        meters: '1,5m',
+        feet: 5,
+        label: '1,5m (5 pés · Adjacente)',
+        badge: 'Corpo a Corpo',
+        isRanged: false,
+        isMelee: true
+    };
 }
 
 /**
@@ -19346,12 +19652,33 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s) {
     var hpCls = (typeof vBarHpClass === 'function') ? vBarHpClass(hpPct) : (hpPct > 50 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low'));
     var fillCls = 'fill-' + hpCls;
 
-    // Distance to player
+    // Distance to player & D&D 5e Range Feedback
     var distBadge = '';
     if (pUnit && pUnit.pos && u.pos && uid !== 'player') {
         var dist = hexDistance(pUnit.pos.col, pUnit.pos.row, u.pos.col, u.pos.row);
         var distM = formatHexDistanceMeters(dist);
-        distBadge = '<span class="token-dist-chip" title="Distância até você">' + distM + ' · ' + dist + 'h</span>';
+
+        if (_selectingTarget && u.alive && !u.isDead) {
+            var reachMeta = (typeof formatDndActionReach === 'function')
+                ? formatDndActionReach(pUnit, _pendingSkill)
+                : { reachHex: 1, meters: '1,5m', label: '1,5m (5 pés)' };
+
+            var isRelevantTarget = isEnemy ? !allyBuffPick : ((isPlayer || isAlly) && (healPick || allyBuffPick));
+            if (isRelevantTarget) {
+                var inReach = (dist <= reachMeta.reachHex);
+                if (inReach) {
+                    classes += ' token--in-range';
+                    distBadge = '<span class="token-dist-chip token-dist-chip--in" title="No Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">🎯 ' + distM + ' · No Alcance</span>';
+                } else {
+                    classes += ' token--out-of-range';
+                    distBadge = '<span class="token-dist-chip token-dist-chip--out" title="Fora de Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">⚠️ ' + distM + ' · máx ' + reachMeta.meters + '</span>';
+                }
+            } else {
+                distBadge = '<span class="token-dist-chip" title="Distância até você">' + distM + ' · ' + dist + 'h</span>';
+            }
+        } else {
+            distBadge = '<span class="token-dist-chip" title="Distância até você">' + distM + ' · ' + dist + 'h</span>';
+        }
     }
 
     // Initiative badge during intro
@@ -19493,9 +19820,10 @@ function buildBattlefield(s) {
     }
 
     var html = '<div class="bf-pan-outer">';
-    html += '<div class="bf-zoom-controls" aria-label="Controles de zoom da mesa">';
+    html += '<div class="bf-zoom-controls" aria-label="Controles de zoom e câmera da mesa">';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomIn" title="Aproximar (+)" aria-label="Aproximar">+</button>';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomOut" title="Afastar (−)" aria-label="Afastar">−</button>';
+    html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="focusPlayer" title="Centralizar no seu Personagem (🎯)" aria-label="Focar Personagem">🎯</button>';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="fit" title="Visão Geral do Cenário (Ajustar)" aria-label="Visão Geral">⛶</button>';
     html += '</div>';
 
@@ -19514,10 +19842,14 @@ function buildBattlefield(s) {
 
     html += '<div class="bf-pan-viewport" data-bf-pan-viewport aria-label="Mesa Tática de Combate D&D 5e — arraste para mover, roda ou botões para zoom">';
 
-    var stageW = (bCols - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2;
-    var stageH = bRows * HEX_ROW_STEP + Math.round(HEX_H / 2) + HEX_PAD_Y * 2;
+    var arenaW = (bCols - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2;
+    var arenaH = bRows * HEX_ROW_STEP + Math.round(HEX_H / 2) + HEX_PAD_Y * 2;
+    var padPanX = (typeof BF_PAD_PAN_X !== 'undefined') ? BF_PAD_PAN_X : 260;
+    var padPanY = (typeof BF_PAD_PAN_Y !== 'undefined') ? BF_PAD_PAN_Y : 240;
+    var stageW = arenaW + padPanX * 2;
+    var stageH = arenaH + padPanY * 2;
 
-    html += '<div class="bf-pan-stage" data-bf-pan-stage style="width:' + stageW + 'px; height:' + stageH + 'px;">';
+    html += '<div class="bf-pan-stage" data-bf-pan-stage style="width:' + stageW + 'px; height:' + stageH + 'px; position:relative;">';
 
     var bfExtra = '';
     if (_selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
@@ -19527,14 +19859,14 @@ function buildBattlefield(s) {
         bfExtra = ' picker-heal';
     }
 
-    html += '<div class="battlefield-hex-arena' + bfExtra + '" style="width:' + stageW + 'px; height:' + stageH + 'px;">';
+    html += '<div class="battlefield-hex-arena' + bfExtra + '" style="position:absolute; left:' + padPanX + 'px; top:' + padPanY + 'px; width:' + arenaW + 'px; height:' + arenaH + 'px;">';
 
     // SVG Hex Grid Layer
-    html += '<svg class="hex-grid-svg" width="' + stageW + '" height="' + stageH + '" viewBox="0 0 ' + stageW + ' ' + stageH + '">';
+    html += '<svg class="hex-grid-svg" width="' + arenaW + '" height="' + arenaH + '" viewBox="0 0 ' + arenaW + ' ' + arenaH + '">';
 
     // Territory tint zones (Enemies top rows 0..4, Allies bottom rows 5..9)
-    var midY = Math.round(stageH / 2);
-    html += '<line x1="' + HEX_PAD_X + '" y1="' + midY + '" x2="' + (stageW - HEX_PAD_X) + '" y2="' + midY + '" class="hex-divider-line" />';
+    var midY = Math.round(arenaH / 2);
+    html += '<line x1="' + HEX_PAD_X + '" y1="' + midY + '" x2="' + (arenaW - HEX_PAD_X) + '" y2="' + midY + '" class="hex-divider-line" />';
 
     function getHexColLetter(c) {
         var aCode = 65;
@@ -19944,8 +20276,15 @@ function _skillIconHTML(sk) {
     return sk.ico || '?';
 }
 /* 2026-06-07 (user): ícone de AÇÃO do combate via imagem OpenAI (shared/img/ui/)
-   no lugar de emoji/SVG. Fallback: esconde a <img> (o texto do botão permanece). */
+   no lugar de emoji/SVG. Fallback: SVG temático D&D 5e ou esconde a <img>.
+   2026-10-05: adicionados SVGs inline nítidos para Disparada (Dash) e Desengajar (Disengage). */
 function _actBtnIco(slug) {
+    if (slug === 'acao-disparada') {
+        return '<svg class="action-btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--v-gold-bright, #e8c45a);"><path d="M13 2L3 14h8l-2 8 10-12h-8l2-8z"/></svg>';
+    }
+    if (slug === 'acao-desengajar') {
+        return '<svg class="action-btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#7ee7ff;"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 4 4v2"/></svg>';
+    }
     var loc = (typeof location !== 'undefined') ? location.href : '';
     var base = (loc.indexOf('file://') === 0) ? '../shared/img/ui/' : '/shared/img/ui/';
     return '<img class="action-btn-ico" src="' + base + slug + '.webp" alt="" loading="lazy" '
@@ -21871,7 +22210,7 @@ function _updateActionSheetState(s) {
        (pointer-events:none) quando p.actionSpent. É só preferência de UI: sempre ativo. */
     var ALWAYS_ACTIVE = { 'pass': true, 'toggle-skip-dice': true, 'log': true };
     /* Buttons que requerem ação principal (PHB) */
-    var ACTION_GATED = { 'attack': true, 'dodge': true, 'flee': true, 'bag': true, 'use-item': true };
+    var ACTION_GATED = { 'attack': true, 'dodge': true, 'flee': true, 'bag': true, 'use-item': true, 'dash': true, 'disengage': true };
     for (var bi = 0; bi < mainBtns.length; bi++) {
         var btnEl = mainBtns[bi];
         var actName = btnEl.getAttribute('data-act') || '';
@@ -21881,6 +22220,17 @@ function _updateActionSheetState(s) {
             if (!anySkillOk) {
                 btnEl.setAttribute('aria-disabled', 'true');
                 btnEl.setAttribute('title', 'Nenhuma habilidade utilizável neste turno');
+            } else {
+                btnEl.removeAttribute('aria-disabled');
+                btnEl.removeAttribute('title');
+            }
+        } else if (actName === 'stand-up') {
+            var standCost = Math.floor((p.speed || 6) / 2);
+            var canStand = (p.movement_left || 0) >= standCost;
+            btnEl.classList.toggle('spent', !canStand);
+            if (!canStand) {
+                btnEl.setAttribute('aria-disabled', 'true');
+                btnEl.setAttribute('title', 'Deslocamento insuficiente para se levantar');
             } else {
                 btnEl.removeAttribute('aria-disabled');
                 btnEl.removeAttribute('title');
@@ -22220,8 +22570,10 @@ function mountBattlefieldPanZoom() {
 
             var boxW = Math.max((typeof HEX_W !== 'undefined' ? HEX_W : 64) * 4.0, (pMax.cx - pMin.cx) + padPxX * 2);
             var boxH = Math.max((typeof HEX_H !== 'undefined' ? HEX_H : 60) * 3.5, (pMax.cy - pMin.cy) + padPxY * 2);
-            var centerX = (pMin.cx + pMax.cx) / 2;
-            var centerY = (pMin.cy + pMax.cy) / 2;
+            var padPanX = (typeof BF_PAD_PAN_X !== 'undefined') ? BF_PAD_PAN_X : 260;
+            var padPanY = (typeof BF_PAD_PAN_Y !== 'undefined') ? BF_PAD_PAN_Y : 240;
+            var centerX = padPanX + (pMin.cx + pMax.cx) / 2;
+            var centerY = padPanY + (pMin.cy + pMax.cy) / 2;
 
             // Zoom confortável e equilibrado: máximo de 0.96 para NUNCA cortar o cenário nem aproximar em excesso (Ordem do Usuário 2026-10)
             var fitX = (vpW - 20) / boxW;
@@ -22304,9 +22656,11 @@ function mountBattlefieldPanZoom() {
         var vpH = vp.clientHeight || 500;
         var z = targetZoom || 0.92;
         z = Math.max(0.65, Math.min(0.96, z));
+        var padPanX = (typeof BF_PAD_PAN_X !== 'undefined') ? BF_PAD_PAN_X : 260;
+        var padPanY = (typeof BF_PAD_PAN_Y !== 'undefined') ? BF_PAD_PAN_Y : 240;
         var cCenter = hexCenter(unit.pos.col, unit.pos.row);
-        var x = Math.max(0, (cCenter.cx * z) - (vpW / 2));
-        var y = Math.max(0, (cCenter.cy * z) - (vpH / 2));
+        var x = Math.max(0, ((padPanX + cCenter.cx) * z) - (vpW / 2));
+        var y = Math.max(0, ((padPanY + cCenter.cy) * z) - (vpH / 2));
         await smoothAnimateCamera(z, x, y, durationMs);
     };
 
@@ -22318,6 +22672,10 @@ function mountBattlefieldPanZoom() {
             var act = btn.getAttribute('data-bf-zoom-act');
             if (act === 'zoomIn') applyZoom(currentZoom * 1.2);
             else if (act === 'zoomOut') applyZoom(currentZoom / 1.2);
+            else if (act === 'focusPlayer') {
+                var pActor = currentState && currentState.order && currentState.order[currentState.p_idx];
+                if (pActor) window.bfCameraFocusUnit(pActor, 0.95, 400);
+            }
             else if (act === 'fit') fitOverview();
             savePanState();
         });
@@ -22672,57 +23030,68 @@ function render(s) {
     }
     html += buildBattlefield(s);
     if (_selectingTarget) {
+        var pCurTarget = s.order[s.p_idx];
+        var reachMeta = (typeof formatDndActionReach === 'function')
+            ? formatDndActionReach(pCurTarget, _pendingSkill)
+            : { actionName: 'Ataque', label: '1,5m (5 pés)', reachHex: 1, meters: '1,5m' };
+
+        var hudTitle = reachMeta.actionName || 'Ataque';
+        var hudTypeBadge = 'AÇÃO';
+        if (_pendingSkill && _pendingSkill.isBonusAction) hudTypeBadge = 'AÇÃO BÔNUS';
+        else if (_pendingSkill && _pendingSkill.isReaction) hudTypeBadge = 'REAÇÃO';
+        else if (_pendingHealItem) hudTypeBadge = 'ITEM';
+
+        var hudIconHtml = '';
+        if (_pendingSkill) {
+            hudIconHtml = '<span class="tsh-ico">' + escHtml(_pendingSkill.ico || '⚔️') + '</span> ';
+        } else if (_pendingHealItem) {
+            hudIconHtml = '<span class="tsh-ico">🧪</span> ';
+        } else {
+            hudIconHtml = '<span class="tsh-ico">⚔️</span> ';
+        }
+
+        var hintSub = 'Toque em um alvo dentro do alcance para confirmar o ataque';
+        var themeClass = '';
+
         if (_pendingSkill && _pendingSkill.targetAlly && (_pendingSkill.blessSpell || _pendingSkill.shieldSpell)) {
-            // Inspiração / Proteção Divina com targetAlly etc. — pulse verde-dourado
-            html += '<div class="target-hint target-hint--heal">' +
-                'Toque no aliado (ou em você) para aplicar ' + escHtml(_pendingSkill.n) +
-                '</div>';
+            hintSub = 'Toque no aliado (ou em você) para aplicar ' + escHtml(_pendingSkill.n);
+            themeClass = ' tsh--buff';
         } else if ((_pendingSkill && _pendingSkill.kind === 'heal') || _pendingHealItem) {
-            html += '<div class="target-hint target-hint--heal">' +
-                (_pendingHealItem ? 'Toque no aliado ou em si para usar a poção' : 'Toque no aliado a curar (inclui inconscientes a 0 PV)') +
-                '</div>';
+            hintSub = _pendingHealItem ? 'Toque no aliado ou em si para aplicar a poção de cura' : 'Toque no aliado a curar (inclui caídos a 0 PV)';
+            themeClass = ' tsh--heal';
         } else if (_pendingSkill && _pendingSkill.magicMissiles) {
-            // PHB Mísseis Mágicos: círculos inline acima do hint + texto roxo.
-            /* V1.7 Sprint-17 (2026-04-21 QA PHB p.257) — usa helper dinâmico. */
-            var mmNeeded = simMagicMissileDarts(_pendingSkill, s.order[s.p_idx]);
+            var mmNeeded = simMagicMissileDarts(_pendingSkill, pCurTarget);
             var mmPicked = (_mmTargets && _mmTargets.length) | 0;
             var dotsHtml = '';
             for (var _di = 0; _di < mmNeeded; _di++) {
                 var filled = _di < mmPicked ? ' filled' : '';
                 dotsHtml += '<div class="mm-picker-dot' + filled + '"><span class="mm-picker-spark"></span></div>';
             }
-            html += '<div class="mm-picker-dots mm-picker-dots--inline">' + dotsHtml + '</div>';
-            html += '<div class="target-hint target-hint--mm">Toque em ' + mmNeeded + ' alvos (' + mmPicked + '/' + mmNeeded + ')</div>';
+            hintSub = '<div class="mm-picker-dots mm-picker-dots--inline">' + dotsHtml + '</div><span>Toque em ' + mmNeeded + ' alvos (' + mmPicked + '/' + mmNeeded + ')</span>';
+            themeClass = ' tsh--magic';
         } else if (_pendingAttachedSummon) {
-            /* V1 Invocações Phase 2 — hint dedicado pra Comandar Arma Espiritual.
-               Phase 4 (2026-04-19): faixa herda cor heráldica da classe do conjurador
-               via classe `cls-X` (clerigo gold, mago azul, etc.). _heraldicClsSlugOf
-               JÁ retorna a string completa com prefixo (ex: 'cls-clerigo'), por isso
-               concatenamos direto sem re-prefixar. */
             var swEntry = (s.attachedSummons && s.attachedSummons[s.p_idx]) || [];
             var swName = (swEntry[_pendingAttachedSummon.attachedIdx] || {}).name || 'Arma';
-            var casterCls = (typeof _heraldicClsSlugOf === 'function') ? (_heraldicClsSlugOf(s.order[s.p_idx], 'player') || '') : '';
-            var hintClsSw = casterCls ? (' ' + casterCls) : '';
-            html += '<div class="target-hint target-hint--summon' + hintClsSw + '">Toque no inimigo para a ' + escHtml(swName) + ' atacar</div>';
+            hintSub = 'Toque no inimigo para a ' + escHtml(swName) + ' atacar';
         } else if (_pendingPassiveSummonCmd) {
-            /* F1 — hint pra Comandar Companheiro (Beast Master). */
             var psCmd = _pendingPassiveSummonCmd;
             var psSummon = s.order[psCmd.summonIdx];
             var psName = (psSummon && psSummon.n) || 'Companheiro';
-            var casterClsP = (typeof _heraldicClsSlugOf === 'function') ? (_heraldicClsSlugOf(s.order[s.p_idx], 'player') || '') : '';
-            var hintClsP = casterClsP ? (' ' + casterClsP) : '';
-            html += '<div class="target-hint target-hint--summon' + hintClsP + '">Toque no inimigo para ' + escHtml(psName) + ' atacar (gasta sua ação)</div>';
+            hintSub = 'Toque no inimigo para ' + escHtml(psName) + ' atacar';
         } else if (_pendingFocusFamiliar) {
-            var casterClsF = (typeof _heraldicClsSlugOf === 'function') ? (_heraldicClsSlugOf(s.order[s.p_idx], 'player') || '') : '';
-            var hintClsF = casterClsF ? (' ' + casterClsF) : '';
-            /* V1.5 (2026-04-19, c): label dinâmico — busca o nome do summon focado
-               (Familiar/Sprite/Companheiro/Montaria) em vez de hardcoded "Familiar". */
             var passiveIdxFf = _pendingFocusFamiliar.familiarIdx;
             var passiveName = (s.order[passiveIdxFf] && s.order[passiveIdxFf].n) || 'Aliado';
-            html += '<div class="target-hint target-hint--summon' + hintClsF + '">Toque no inimigo para focar ' + escHtml(passiveName) + '</div>';
-        } else {
-            html += '<div class="target-hint">Toque no inimigo para atacar</div>';
+            hintSub = 'Toque no inimigo para focar ' + escHtml(passiveName);
         }
+
+        html += '<div class="target-selection-hud' + themeClass + '">';
+        html += '<div class="tsh-header">';
+        html += '<span class="tsh-badge-action">' + hudTypeBadge + '</span>';
+        html += '<strong class="tsh-title">' + hudIconHtml + escHtml(hudTitle) + '</strong>';
+        html += '<span class="tsh-reach-chip" title="Regras D&D 5e: alcance máximo desta ação">🎯 Alcance: ' + reachMeta.label + '</span>';
+        html += '</div>';
+        html += '<div class="tsh-instruction">' + hintSub + '</div>';
+        html += '</div>';
     }
 
     var playerTurn = s.active_idx === s.p_idx;
@@ -22811,9 +23180,10 @@ function render(s) {
                 if (pCur && pCur.bonusActionWasSpell && !pCur.actionSpent && anySkillOk) {
                     skillsExtraChip = '<span class="action-btn-sub-chip" title="PHB p.202: só TRUQUE (cantrip) como ação principal — magias leveled bloqueadas até o próximo turno">só truque</span>';
                 }
-                html += '<button type="button" class="action-btn primary" data-act="attack">' + _actBtnIco('acao-atacar') + 'Atacar' + actionGlyph + '</button>';
-                html += '<button type="button" class="' + skillsBtnCls + '" data-act="skills"' + (anySkillOk ? '' : ' aria-disabled="true" title="Nenhuma habilidade utilizável neste turno"') + '>' + _actBtnIco('acao-habilidades') + 'Habilidades' + actionGlyph + skillsExtraChip + '</button>';
-                html += '<button type="button" class="action-btn" data-act="bag">' + _actBtnIco('mochila') + 'Mochila' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn primary" data-act="attack">' + _actBtnIco('acao-atacar') + '<span class="action-btn-label">Atacar</span>' + actionGlyph + '</button>';
+                html += '<button type="button" class="' + skillsBtnCls + '" data-act="skills"' + (anySkillOk ? '' : ' aria-disabled="true" title="Nenhuma habilidade utilizável neste turno"') + '>' + _actBtnIco('acao-habilidades') + '<span class="action-btn-label">Habilidades</span>' + actionGlyph + skillsExtraChip + '</button>';
+                html += '<button type="button" class="action-btn" data-act="bag">' + _actBtnIco('mochila') + '<span class="action-btn-label">Mochila</span>' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="dodge">' + _actBtnIco('acao-esquivar') + '<span class="action-btn-label">Esquivar</span>' + actionGlyph + '</button>';
                 html += '</div>';
                 html += '<div class="sim-action-sheet-sep" aria-hidden="true"></div>';
                 html += '<div class="action-btns-grid action-btns-grid--secondary">';
@@ -22822,28 +23192,21 @@ function render(s) {
                     var standCostHexesSheet = Math.floor((pCur.speed || 6) / 2);
                     var standCostMSheet = formatHexDistanceMeters(standCostHexesSheet);
                     var canStandSheet = (pCur.movement_left || 0) >= standCostHexesSheet;
-                    html += '<button type="button" class="action-btn action-btn--stand-up primary' + (canStandSheet ? '' : ' spent') + '" data-act="stand-up"' + (canStandSheet ? '' : ' aria-disabled="true" title="Deslocamento insuficiente para se levantar"') + '>🧎 Levantar-se (' + standCostMSheet + ')</button>';
+                    html += '<button type="button" class="action-btn action-btn--stand-up primary' + (canStandSheet ? '' : ' spent') + '" style="grid-column: 1 / -1;" data-act="stand-up"' + (canStandSheet ? '' : ' aria-disabled="true" title="Deslocamento insuficiente para se levantar"') + '><span class="action-btn-label">🧎 Levantar-se (' + standCostMSheet + ')</span></button>';
                 }
-                /* X-6.5.51AB (2026-04-26): "Passar turno" REMOVIDO — Encerrar Turno
-                   no fim do sheet cobre o caso (envia 'pass' pro server, mesmo
-                   handler). User feedback: "remova o botão Passar turno e
-                   sempre deixe Encerrar turno disponível logo acima do botão Agir".
-                   Esquivar/Fugir continuam consumindo AÇÃO (PHB p.190). */
-                html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + 'Disparada' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + 'Desengajar' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="dodge">' + _actBtnIco('acao-esquivar') + 'Esquivar' + actionGlyph + '</button>';
-                /* 2026-06-23 (user "mostrar a dificuldade da fuga na opção"): CD + chance
-                   aprox. direto no botão Fugir (antes só apareciam no modal pós-clique). */
+                html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + '<span class="action-btn-label">Disparada</span>' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + '<span class="action-btn-label">Desengajar</span>' + actionGlyph + '</button>';
+                /* 2026-06-23: CD + chance aprox. direto no botão Fugir */
                 var _fleeDc = (typeof simFleeEscapeDc === 'function' && currentState) ? simFleeEscapeDc(currentState) : 0;
                 var _fleePI = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
                 var _fleeDx = _fleePI ? Math.floor(((_fleePI.dex | 0) - 10) / 2) : 0;
                 var _fleeSc = 0; for (var _rf = 1; _rf <= 20; _rf++) { if (_rf + _fleeDx >= _fleeDc) _fleeSc++; }
                 var _fleePct = Math.round((_fleeSc / 20) * 100);
-                var _fleeChip = _fleeDc ? ' <span class="act-flee-dc" title="Fugir: teste de Destreza (Acrobacia) CD ' + _fleeDc + ' — chance aprox. ' + _fleePct + '%">CD ' + _fleeDc + ' · ~' + _fleePct + '%</span>' : '';
-                html += '<button type="button" class="action-btn secondary" data-act="flee">' + _actBtnIco('acao-fugir') + 'Fugir' + _fleeChip + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="' + (_skipAllDiceAnim ? 'Animações de dados DESLIGADAS — o resultado é aplicado na hora. Toque para voltar a ver as rolagens 3D.' : 'Pular as animações de dados (suas, dos inimigos e da iniciativa) — vê só o resultado final. Persistente; pode marcar/desmarcar quando quiser.') + '">' +
-                    (_skipAllDiceAnim ? '✓ Pulando dados' : 'Pular dados') + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="log">' + _actBtnIco('acao-log') + 'Log</button>';
+                var _fleeChip = _fleeDc ? ' <span class="act-flee-dc" title="Fugir: CD ' + _fleeDc + ' · ~' + _fleePct + '%">CD ' + _fleeDc + '</span>' : '';
+                html += '<button type="button" class="action-btn secondary" data-act="flee">' + _actBtnIco('acao-fugir') + '<span class="action-btn-label">Fugir' + _fleeChip + '</span>' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="log">' + _actBtnIco('acao-log') + '<span class="action-btn-label">Log</span></button>';
+                html += '<button type="button" class="action-btn secondary" style="grid-column: 1 / -1;" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="' + (_skipAllDiceAnim ? 'Animações de dados DESLIGADAS — resultado instantâneo. Toque para ver rolagens 3D.' : 'Pular as animações de dados — vê só o resultado final.') + '">' +
+                    '<span class="action-btn-label">' + (_skipAllDiceAnim ? '✓ Pulando dados (Instantâneo)' : '🎲 Pular animações de dados') + '</span></button>';
                 html += '</div>';
                 /* V1 Invocações Phase 1+2 — seção BÔNUS + Encerrar Turno (oculto até estado).
                    X-6.5.51AB (2026-04-26): "Focar Familiar" REMOVIDO — PHB p.240 (Find
@@ -26991,9 +27354,17 @@ function showTargetConfirm(tgtIdx) {
     var distHex = (p.pos && u.pos && typeof hexDistance === 'function') ? hexDistance(p.pos.col, p.pos.row, u.pos.col, u.pos.row) : null;
     var distStr = distHex !== null ? (distHex * 1.5).toFixed(1).replace('.0', '') + 'm (' + distHex + ' hexes)' : '';
 
+    var reachMeta = (typeof formatDndActionReach === 'function')
+        ? formatDndActionReach(p, skill)
+        : { reachHex: 1, label: '1,5m (5 pés)', meters: '1,5m' };
+    var inReach = distHex !== null ? (distHex <= reachMeta.reachHex) : true;
+    var reachStatusBadge = inReach
+        ? ' <span style="color:var(--v-gold-bright,#e8c45a);font-weight:600;">· No Alcance (' + reachMeta.label + ') ✓</span>'
+        : ' <span style="color:#ff6b6b;font-weight:700;">· Fora de Alcance (máx: ' + reachMeta.label + ') ⚠️</span>';
+
     html += '<div class="tcc-dmg">';
     if (distStr) {
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância</span><span class="tcc-dmg-val">' + distStr + '</span></div>';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância</span><span class="tcc-dmg-val">' + distStr + reachStatusBadge + '</span></div>';
     }
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CA ' + u.ac + '</span></span></div>';
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
@@ -27007,18 +27378,36 @@ function showTargetConfirm(tgtIdx) {
     if (!reductions.length && !immunities.length) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Reduções</span><span class="tcc-dmg-val tcc-none">— nenhuma —</span></div>';
     }
+    if (!inReach) {
+        html += '<div class="tcc-dmg-row" style="background:rgba(180,40,30,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
+            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">⚠️ Alvo além do alcance máximo de ' + reachMeta.label + '. Aproxime-se no tabuleiro antes de atacar.</span>' +
+            '</div>';
+    }
     html += '</div>';
 
     html += '<div class="tcc-actions">';
     html += '<button class="action-btn" data-tcc="cancel">✕ Cancelar</button>';
-    html += '<button class="action-btn primary" data-tcc="confirm">Confirmar</button>';
+    if (!inReach) {
+        html += '<button class="action-btn primary disabled" data-tcc="confirm" style="opacity:0.5;filter:grayscale(0.5);" title="Alvo fora de alcance">Fora de Alcance</button>';
+    } else {
+        html += '<button class="action-btn primary" data-tcc="confirm">Confirmar</button>';
+    }
     html += '</div>';
     setHTML(card, html);
     ov.appendChild(card);
     mountInGameFrame(ov);
     ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
     card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { _pendingSkill = null; ov.remove(); });
-    card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () { ov.remove(); confirmAndAttack(tgtIdx); });
+    card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () {
+        if (!inReach) {
+            if (typeof showFloatingToast === 'function') {
+                showFloatingToast('⚠️ Alvo fora de alcance! Alcance máximo: ' + reachMeta.label, 'warn');
+            }
+            return;
+        }
+        ov.remove();
+        confirmAndAttack(tgtIdx);
+    });
 }
 
 /** Confirmacao de alvo de cura (sem rolagem de ataque): formula PV + Confirmar.
