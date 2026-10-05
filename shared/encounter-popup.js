@@ -912,6 +912,187 @@
     return _SKILL_LABEL_PT[String(s).toLowerCase()] || s;
   }
 
+  var _STAT_LABEL_PT = {
+    str: 'Força',
+    dex: 'Destreza',
+    con: 'Constituição',
+    int: 'Inteligência',
+    wis: 'Sabedoria',
+    cha: 'Carisma'
+  };
+
+  /* Choice detail modal (janela menor explicativa) */
+  function _ensureChoiceDetailOverlay() {
+    var ov = document.getElementById('enc-choice-detail-overlay');
+    if (ov && ov.tagName.toLowerCase() === 'dialog') return ov;
+    if (ov) ov.parentNode.removeChild(ov);
+    ov = document.createElement('dialog');
+    ov.id = 'enc-choice-detail-overlay';
+    ov.innerHTML = '<div class="enc-cd-card" role="document"></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e) {
+      if (e.target === ov) _closeChoiceDetailDialog();
+    });
+    ov.addEventListener('cancel', function(e) {
+      e.preventDefault();
+      _closeChoiceDetailDialog();
+    });
+    return ov;
+  }
+
+  function _closeChoiceDetailDialog() {
+    var ov = document.getElementById('enc-choice-detail-overlay');
+    if (!ov) return;
+    try { if (ov.close && ov.open) ov.close(); } catch (_e) {}
+    ov.classList.remove('active');
+  }
+
+  function _openChoiceDetailDialog(ch, opts) {
+    if (!ch) return;
+    var ov = _ensureChoiceDetailOverlay();
+    var card = ov.querySelector('.enc-cd-card');
+    if (!card) return;
+
+    var rawLabel = (ch.label && String(ch.label).trim()) || 'Opção';
+    var titleText = rawLabel;
+    var subtitleText = '';
+    if (rawLabel.indexOf(':') !== -1) {
+      var parts = rawLabel.split(':');
+      titleText = parts[0].trim();
+      subtitleText = parts.slice(1).join(':').trim();
+    } else if (ch.id === 'jrn_go') {
+      subtitleText = 'Marcha Padrão · Ritmo Comum';
+    } else if (ch.id === 'jrn_cancel') {
+      subtitleText = 'Permanecer na Cidade · Cancelar';
+    }
+
+    var statBadge = '';
+    if (ch.stat) {
+      var sName = _STAT_LABEL_PT[ch.stat] || ch.stat.toUpperCase();
+      statBadge = '<span class="enc-cd-badge">Vantagem em ' + sName + '</span>';
+    } else if (ch.isPrep) {
+      statBadge = '<span class="enc-cd-badge">Postura Tática</span>';
+    }
+    if (ch.dc && ch.skill) {
+      statBadge += '<span class="enc-cd-badge">CD ' + ch.dc + ' · ' + _skillLabelPT(ch.skill) + (ch.chance != null ? ' (' + ch.chance + '%)' : '') + '</span>';
+    } else if (ch.cost) {
+      statBadge += '<span class="enc-cd-badge" style="color:#ffd700;">' + ch.cost + ' ' + _VCOIN + '</span>';
+    } else if (ch.renownDelta) {
+      var rd = ch.renownDelta > 0 ? '+' + ch.renownDelta : String(ch.renownDelta);
+      statBadge += '<span class="enc-cd-badge">Renome ' + rd + '</span>';
+    }
+
+    var descHtml = '';
+    if (ch.desc) {
+      descHtml =
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title">Efeito da Escolha</div>' +
+          '<div class="enc-cd-box">' + ch.desc + '</div>' +
+        '</div>';
+    }
+
+    var flavorHtml = '';
+    if (ch.prepText) {
+      flavorHtml =
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title">Concentração na Estrada</div>' +
+          '<div class="enc-cd-flavor">' + ch.prepText + '</div>' +
+        '</div>';
+    }
+
+    var confirmLabel = (ch.isPrep) ? 'Adotar esta Postura'
+      : (ch.id === 'jrn_go') ? 'Partir em Marcha Padrão'
+      : (ch.id === 'jrn_cancel') ? 'Permanecer na Cidade'
+      : 'Confirmar Escolha';
+
+    card.innerHTML =
+      '<button class="enc-cd-close" type="button" aria-label="Fechar">✕</button>' +
+      '<div class="enc-cd-title">' + _coinify(titleText) + '</div>' +
+      (subtitleText ? '<div class="enc-cd-subtitle">' + subtitleText + '</div>' : '') +
+      (statBadge ? '<div class="enc-cd-badge-row">' + statBadge + '</div>' : '') +
+      '<div class="enc-cd-divider"></div>' +
+      descHtml +
+      flavorHtml +
+      '<div class="enc-cd-actions">' +
+        '<button type="button" class="enc-cd-btn-confirm">✔ ' + confirmLabel + '</button>' +
+        '<button type="button" class="enc-cd-btn-back">← Voltar às opções</button>' +
+      '</div>';
+
+    var closeBtn = card.querySelector('.enc-cd-close');
+    var backBtn = card.querySelector('.enc-cd-btn-back');
+    var confirmBtn = card.querySelector('.enc-cd-btn-confirm');
+
+    if (closeBtn) closeBtn.addEventListener('click', _closeChoiceDetailDialog);
+    if (backBtn) backBtn.addEventListener('click', _closeChoiceDetailDialog);
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', function() {
+        _closeChoiceDetailDialog();
+        closeChoices(true);
+        if (opts && typeof opts.onChoice === 'function') {
+          opts.onChoice(ch);
+        }
+      });
+    }
+
+    if (typeof ov.showModal === 'function') {
+      try { if (!ov.open) ov.showModal(); } catch (_e) { ov.classList.add('active'); }
+    } else {
+      ov.classList.add('active');
+    }
+  }
+
+  function _openTravelPrepGuideDialog(choices, opts) {
+    var ov = _ensureChoiceDetailOverlay();
+    var card = ov.querySelector('.enc-cd-card');
+    if (!card) return;
+
+    var choicesSummaryHtml = '';
+    if (choices && choices.length) {
+      choicesSummaryHtml = '<div class="enc-cd-section">' +
+        '<div class="enc-cd-section-title">Opções Disponíveis</div>' +
+        '<div class="enc-cd-box" style="display:flex; flex-direction:column; gap:8px;">';
+      choices.forEach(function(c) {
+        var cLabel = (c.label && String(c.label).trim()) || 'Opção';
+        var cName = cLabel.split(':')[0].trim();
+        var cStat = c.stat ? (' · <span style="color:#ffd700;">Vantagem em ' + (_STAT_LABEL_PT[c.stat] || c.stat) + '</span>') : '';
+        choicesSummaryHtml += '<div style="border-bottom:1px solid rgba(196,149,58,0.15); padding-bottom:6px;">' +
+          '<div style="font-weight:700; color:#e8c872; font-family:\'Cinzel\',serif; font-size:12px;">' + cName + cStat + '</div>' +
+          (c.desc ? '<div style="font-size:11px; color:#a09484; font-style:italic; margin-top:2px; line-height:1.35;">' + c.desc + '</div>' : '') +
+        '</div>';
+      });
+      choicesSummaryHtml += '</div></div>';
+    }
+
+    card.innerHTML =
+      '<button class="enc-cd-close" type="button" aria-label="Fechar">✕</button>' +
+      '<div class="enc-cd-title">PREPARAÇÃO DE VIAGEM</div>' +
+      '<div class="enc-cd-subtitle">Guia Tático D&D 5e</div>' +
+      '<div class="enc-cd-divider"></div>' +
+      '<div class="enc-cd-section">' +
+        '<div class="enc-cd-section-title">Como Funciona a Preparação?</div>' +
+        '<div class="enc-cd-flavor">' +
+          'Antes de cruzar os portões rumo às terras ermas, você escolhe como seu personagem marchará. ' +
+          'Ao assumir uma <b>Postura Tática</b> especializada sintonizada à sua Classe ou Raça, você ganha <b>Vantagem</b> ' +
+          'no primeiro teste do atributo correspondente durante a viagem (para prevenir emboscadas, fadiga ou acidentes).' +
+        '</div>' +
+      '</div>' +
+      choicesSummaryHtml +
+      '<div class="enc-cd-actions">' +
+        '<button type="button" class="enc-cd-btn-confirm">← Entendido / Voltar às opções</button>' +
+      '</div>';
+
+    var closeBtn = card.querySelector('.enc-cd-close');
+    var confirmBtn = card.querySelector('.enc-cd-btn-confirm');
+    if (closeBtn) closeBtn.addEventListener('click', _closeChoiceDetailDialog);
+    if (confirmBtn) confirmBtn.addEventListener('click', _closeChoiceDetailDialog);
+
+    if (typeof ov.showModal === 'function') {
+      try { if (!ov.open) ov.showModal(); } catch (_e) { ov.classList.add('active'); }
+    } else {
+      ov.classList.add('active');
+    }
+  }
+
   /* Ensure choice sub-overlay DOM exists (singleton).
      task #69 (2026-05-20) — MIGRATION HTML <dialog> element.
      Native top-layer rendering elimina conflitos z-index estruturalmente.
@@ -970,20 +1151,53 @@
     opts = opts || {};
     if (!choices || choices.length === 0) return;
     var sub = _ensureChoicesOverlay();
+    var card = sub.querySelector('.enc-cho-card');
     var listEl = sub.querySelector('.enc-cho-list');
     var titleEl = sub.querySelector('.enc-cho-title');
     listEl.innerHTML = '';
 
+    // Remove any previously injected guide button
+    var oldGuide = card ? card.querySelector('.enc-cho-guide-btn') : null;
+    if (oldGuide && oldGuide.parentNode) oldGuide.parentNode.removeChild(oldGuide);
+
     var title = opts.title || 'Escolher ação';
     var ctxName = opts.npcName || '';
+
+    var isCompact = opts.compact === true ||
+                    (typeof title === 'string' && title.toLowerCase().indexOf('prepara') !== -1 && title.toLowerCase().indexOf('viagem') !== -1) ||
+                    choices.some(function(c) { return c && c.isPrep; });
+
+    if (card) {
+      if (isCompact) {
+        card.classList.add('enc-cho-card--compact');
+        listEl.classList.add('enc-cho-list--compact');
+      } else {
+        card.classList.remove('enc-cho-card--compact');
+        listEl.classList.remove('enc-cho-list--compact');
+      }
+    }
+
     titleEl.innerHTML = '<span class="enc-cho-title-orn">✦</span>' +
                         '<span class="enc-cho-title-text">' + title + '</span>' +
                         '<span class="enc-cho-title-orn">✦</span>' +
                         (ctxName ? '<div class="enc-cho-title-sub">' + ctxName + '</div>' : '');
 
+    // Separate guide button if compact
+    if (isCompact && listEl.parentNode) {
+      var guideBtn = document.createElement('button');
+      guideBtn.type = 'button';
+      guideBtn.className = 'enc-cho-guide-btn';
+      guideBtn.innerHTML = '<span class="enc-cho-guide-orn">✦</span><span>Ver Guia e Detalhes das Posturas</span><span class="enc-cho-guide-orn">✦</span>';
+      guideBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        _openTravelPrepGuideDialog(choices, opts);
+      });
+      listEl.parentNode.insertBefore(guideBtn, listEl);
+    }
+
     choices.forEach(function(ch, idx) {
       var row = document.createElement('button');
-      row.className = 'enc-cho-row';
+      row.className = 'enc-cho-row' + (isCompact ? ' enc-cho-row--compact' : '');
       row.style.setProperty('--idx', idx);
       var dcBadge = '';
       if (ch.dc && ch.skill) {
@@ -1001,16 +1215,68 @@
          fallback 'Continuar' + warn pro error-reporter. */
       var _choLabel = (ch.label && String(ch.label).trim()) || 'Continuar';
       if (!ch.label) console.warn('[ENC] choice sem label', ch.id || ch.cb || '');
-      row.innerHTML =
-        /* 2026-06-07 (user): PADRAO_ALDRIC — SEM símbolo (◆) à esquerda das escolhas;
-           o badge de DC/custo vira uma meta-line de LARGURA TOTAL embaixo do título
-           (antes era coluna à direita que espremia o título e ficava mal distribuída). */
-        '<span class="enc-cho-row-body">' +
-          '<span class="enc-cho-row-label">' + _coinify(_choLabel) + '</span>' +
-          (ch.desc ? '<span class="enc-cho-row-desc">' + ch.desc + '</span>' : '') +
-          (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
-        '</span>' +
-        '<span class="enc-cho-row-chev">›</span>';
+
+      if (isCompact) {
+        var titleText = _choLabel;
+        var subText = '';
+        if (_choLabel.indexOf(':') !== -1) {
+          var lp = _choLabel.split(':');
+          titleText = lp[0].trim();
+          subText = lp.slice(1).join(':').trim();
+        } else if (ch.id === 'jrn_go') {
+          titleText = 'Partir em marcha padrão';
+          subText = 'Ritmo normal da estrada · Sem bônus';
+        } else if (ch.id === 'jrn_cancel') {
+          titleText = 'Permanecer na cidade';
+          subText = 'Suspender viagem em segurança';
+        } else if (ch.desc) {
+          subText = ch.desc;
+        }
+
+        var statHint = '';
+        if (ch.stat) {
+          statHint = ' · ' + (_STAT_LABEL_PT[ch.stat] || ch.stat.toUpperCase());
+        }
+
+        row.innerHTML =
+          '<span class="enc-cho-row-body">' +
+            '<span class="enc-cho-row-label">' + _coinify(titleText) + '</span>' +
+            '<span class="enc-cho-row-sub">' + (subText ? subText + statHint : '') + '</span>' +
+            (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
+          '</span>' +
+          ((ch.desc || ch.prepText)
+            ? '<span class="enc-cho-info-btn" role="button" tabindex="0" title="Ver detalhes desta opção" aria-label="Ver detalhes">ℹ</span>'
+            : '') +
+          '<span class="enc-cho-row-chev">›</span>';
+
+        var infoBtn = row.querySelector('.enc-cho-info-btn');
+        if (infoBtn) {
+          infoBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            _openChoiceDetailDialog(ch, opts);
+          });
+          infoBtn.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.stopPropagation();
+              e.preventDefault();
+              _openChoiceDetailDialog(ch, opts);
+            }
+          });
+        }
+      } else {
+        row.innerHTML =
+          /* 2026-06-07 (user): PADRAO_ALDRIC — SEM símbolo (◆) à esquerda das escolhas;
+             o badge de DC/custo vira uma meta-line de LARGURA TOTAL embaixo do título
+             (antes era coluna à direita que espremia o título e ficava mal distribuída). */
+          '<span class="enc-cho-row-body">' +
+            '<span class="enc-cho-row-label">' + _coinify(_choLabel) + '</span>' +
+            (ch.desc ? '<span class="enc-cho-row-desc">' + ch.desc + '</span>' : '') +
+            (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
+          '</span>' +
+          '<span class="enc-cho-row-chev">›</span>';
+      }
+
       // item I (2026-06-18): choice de COMPRA → thumbnail do item à esquerda
       // (tap = detalhe top-layer, exceto misterioso). Genérico: qualquer choice
       // com ch.itemName. stopPropagation no thumb evita disparar a compra.
@@ -1039,6 +1305,7 @@
   }
 
   function closeChoices(immediate) {
+    _closeChoiceDetailDialog();
     var sub = document.getElementById('enc-choices-overlay');
     if (!sub) return;
     // task #69: check open via <dialog>.open OR .active class (compat)
@@ -1757,6 +2024,7 @@
           openChoices(choices, {
             title: (dialogue && (dialogue.choicesTitle || dialogue.title)) || 'Escolher ação',
             npcName: (dialogue && dialogue.choicesSubtitle) || (dialogue && dialogue.npc && dialogue.npc.name) || '',
+            compact: (dialogue && dialogue.compact) || opts.compact || false,
             onChoice: _handleChoiceInternal
           });
         });
@@ -1989,6 +2257,8 @@
     openChoices: openChoices,
     closeChoices: closeChoices,
     isChoicesOpen: isChoicesOpen,
+    openChoiceDetail: _openChoiceDetailDialog,
+    closeChoiceDetail: _closeChoiceDetailDialog,
     /* A1.2 (auditoria #90): sanitizer de diálogo CANÔNICO. Whitelist
        i/em/b/strong/br/u/s/code (sem atributos), case-insensitive, NÃO escapa
        & (entidades &mdash; são legítimas). cidade/exploração delegam a ele. */

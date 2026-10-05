@@ -79,12 +79,14 @@
         choices: cfg.choices || [],
         choicesTitle: cfg.choicesTitle || null,
         choicesSubtitle: cfg.choicesSubtitle || null,
-        choicesBtnLabel: cfg.choicesBtnLabel || null
+        choicesBtnLabel: cfg.choicesBtnLabel || null,
+        compact: cfg.compact || false
       },
       {
         player: _player(), showGold: false, fullHeight: true, progress: prog,
         showHp: true,  /* #90 (user): barra de vida estilo combate abaixo do diálogo */
         inlineChoices: cfg.inline === true,
+        compact: cfg.compact || false,
         onChoice: function (ch) { if (typeof cfg.onChoice === 'function') cfg.onChoice(ch); }
       }
     );
@@ -107,6 +109,7 @@
       choices: choices,
       choicesTitle: (content && content.choicesTitle) || 'Preparação de Viagem',
       choicesSubtitle: (content && content.choicesSubtitle) || (j.displayName ? ('Rumo a ' + j.displayName) : ''),
+      compact: true,
       inline: choices.length <= 2,
       noProgress: true,
       onChoice: function (ch) {

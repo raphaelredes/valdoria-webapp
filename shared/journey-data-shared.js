@@ -1676,7 +1676,8 @@ var DEPARTURES = {
             script: script,
             choices: choices,
             choicesTitle: 'Preparação de Viagem',
-            choicesSubtitle: 'Rumo a ' + dest
+            choicesSubtitle: 'Rumo a ' + dest,
+            compact: true
         };
     }
 
