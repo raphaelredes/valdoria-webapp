@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-06T13:16:45Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-06T15:07:53Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -19952,12 +19952,97 @@ function buildBattlefield(s) {
 
     var arenaW = (bCols - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2;
     var arenaH = bRows * HEX_ROW_STEP + Math.round(HEX_H / 2) + HEX_PAD_Y * 2;
-    var padPanX = (typeof BF_PAD_PAN_X !== 'undefined') ? BF_PAD_PAN_X : 260;
-    var padPanY = (typeof BF_PAD_PAN_Y !== 'undefined') ? BF_PAD_PAN_Y : 240;
+    var padPanX = (typeof BF_PAD_PAN_X !== 'undefined') ? BF_PAD_PAN_X : 320;
+    var padPanY = (typeof BF_PAD_PAN_Y !== 'undefined') ? BF_PAD_PAN_Y : 300;
     var stageW = arenaW + padPanX * 2;
     var stageH = arenaH + padPanY * 2;
 
-    html += '<div class="bf-pan-stage" data-bf-pan-stage style="width:' + stageW + 'px; height:' + stageH + 'px; position:relative;">';
+    // Cálculo e baking do enquadramento inicial da câmera (Visão Geral do Cenário a 0ms — Ordem do Usuário 2026-10)
+    var _initZoom = 1;
+    var _initPanX = 0;
+    var _initPanY = 0;
+
+    if (typeof window !== 'undefined' && window.__bfPanState && window.__bfPanState.initialized && window.__bfPanState.userAdjusted &&
+        typeof window.__bfPanState.currentZoom === 'number' &&
+        typeof window.__bfPanState.panX === 'number' &&
+        typeof window.__bfPanState.panY === 'number') {
+        _initZoom = window.__bfPanState.currentZoom;
+        _initPanX = Math.round(window.__bfPanState.panX);
+        _initPanY = Math.round(window.__bfPanState.panY);
+    } else {
+        var _vpEstW = 390;
+        var _vpEstH = 260;
+        if (typeof window !== 'undefined') {
+            var _curVp = document.querySelector('[data-bf-pan-viewport]');
+            if (_curVp && _curVp.clientWidth >= 100 && _curVp.clientHeight >= 100) {
+                _vpEstW = _curVp.clientWidth;
+                _vpEstH = _curVp.clientHeight;
+            } else {
+                _vpEstW = Math.max(320, (window.innerWidth && window.innerWidth < 600) ? window.innerWidth : 390);
+                _vpEstH = Math.max(200, Math.round((window.innerHeight || 600) * 0.45));
+            }
+        }
+        var _dockEstEl = (typeof document !== 'undefined') ? document.querySelector('.sim-action-dock') : null;
+        var _dockEstH = (_dockEstEl && _dockEstEl.offsetHeight) ? Math.min(80, _dockEstEl.offsetHeight) : 0;
+        var _usableEstH = Math.max(160, _vpEstH - _dockEstH);
+        var _usableEstCenterY = _usableEstH / 2;
+
+        var _alives = [];
+        if (s && s.order && Array.isArray(s.order)) {
+            for (var _ai = 0; _ai < s.order.length; _ai++) {
+                var _u = s.order[_ai];
+                if (_u && (_u.alive !== false) && !_u.isDead &&
+                    (typeof _u.hp !== 'number' || _u.hp > 0 || _u.dying || _u.deathSaves) &&
+                    _u.pos && _u.pos.col != null && _u.pos.row != null) {
+                    _alives.push(_u);
+                }
+            }
+        }
+
+        if (_alives.length > 0) {
+            var _minX = Infinity, _maxX = -Infinity, _minY = Infinity, _maxY = -Infinity;
+            for (var _ui = 0; _ui < _alives.length; _ui++) {
+                var _un = _alives[_ui];
+                var _cc = hexCenter(_un.pos.col, _un.pos.row);
+                var _sx = padPanX + _cc.cx;
+                var _sy = padPanY + _cc.cy;
+                if (_sx < _minX) _minX = _sx;
+                if (_sx > _maxX) _maxX = _sx;
+                if (_sy < _minY) _minY = _sy;
+                if (_sy > _maxY) _maxY = _sy;
+            }
+            var _marginBoxX = 52;
+            var _marginBoxY = 56;
+            var _boxW = Math.max(120, (_maxX + _marginBoxX) - (_minX - _marginBoxX));
+            var _boxH = Math.max(120, (_maxY + _marginBoxY) - (_minY - _marginBoxY));
+            var _cenX = (_minX - _marginBoxX + _maxX + _marginBoxX) / 2;
+            var _cenY = (_minY - _marginBoxY + _maxY + _marginBoxY) / 2;
+            var _fitX = Math.max(120, _vpEstW - 28) / _boxW;
+            var _fitY = Math.max(120, _usableEstH - 28) / _boxH;
+            _initZoom = Math.max(0.25, Math.min(1.05, Math.min(_fitX, _fitY)));
+            _initPanX = Math.round((_vpEstW / 2) - (_cenX * _initZoom));
+            _initPanY = Math.round(_usableEstCenterY - (_cenY * _initZoom));
+        } else {
+            var _cenXAll = padPanX + arenaW / 2;
+            var _cenYAll = padPanY + arenaH / 2;
+            var _fitXAll = Math.max(120, _vpEstW - 32) / Math.max(320, arenaW);
+            var _fitYAll = Math.max(120, _usableEstH - 24) / Math.max(320, arenaH);
+            _initZoom = Math.max(0.25, Math.min(0.85, Math.min(_fitXAll, _fitYAll)));
+            _initPanX = Math.round((_vpEstW / 2) - (_cenXAll * _initZoom));
+            _initPanY = Math.round(_usableEstCenterY - (_cenYAll * _initZoom));
+        }
+        if (typeof window !== 'undefined') {
+            window.__bfPanState = {
+                initialized: true,
+                userAdjusted: false,
+                currentZoom: _initZoom,
+                panX: _initPanX,
+                panY: _initPanY
+            };
+        }
+    }
+
+    html += '<div class="bf-pan-stage" data-bf-pan-stage style="width:' + stageW + 'px; height:' + stageH + 'px; position:relative; transform-origin: 0 0; transform: translate3d(' + _initPanX + 'px, ' + _initPanY + 'px, 0) scale(' + _initZoom + ');">';
 
     var bfExtra = '';
     if (_selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
@@ -22671,7 +22756,7 @@ function mountBattlefieldPanZoom() {
     vp.scrollLeft = 0;
     vp.scrollTop = 0;
 
-    var MIN_ZOOM = 0.30;
+    var MIN_ZOOM = 0.25;
     var MAX_ZOOM = 1.6;
     var currentZoom = (window.__bfPanState && typeof window.__bfPanState.currentZoom === 'number') ? window.__bfPanState.currentZoom : 1;
     var currentPanX = (window.__bfPanState && typeof window.__bfPanState.panX === 'number') ? window.__bfPanState.panX : 0;
@@ -22893,6 +22978,7 @@ function mountBattlefieldPanZoom() {
 
         if (animate) {
             await smoothAnimateCamera(z, clamped.x, clamped.y, 350);
+            if (window.__bfPanState) window.__bfPanState.userAdjusted = true;
         } else {
             currentZoom = z;
             currentPanX = clamped.x;
@@ -22909,12 +22995,12 @@ function mountBattlefieldPanZoom() {
 
     var fitAll = function (force) {
         // Batalha SEMPRE começa com a Visão Geral do Cenário enquadrando todos os combatentes (Ordem do Usuário 2026-10)
-        if (isNewCombatSession || !window.__bfPanState || !window.__bfPanState.initialized || !window.__bfPanState.userAdjusted) {
+        if (force || isNewCombatSession || !window.__bfPanState || !window.__bfPanState.initialized || !window.__bfPanState.userAdjusted) {
             window.__bfActiveCombatKey = combatUid;
             fitOverview(false);
             return;
         }
-        if (!force && window.__bfPanState && typeof window.__bfPanState.panX === 'number') {
+        if (window.__bfPanState && typeof window.__bfPanState.panX === 'number') {
             currentZoom = window.__bfPanState.currentZoom || 1;
             currentPanX = window.__bfPanState.panX || 0;
             currentPanY = window.__bfPanState.panY || 0;
@@ -23014,8 +23100,8 @@ function mountBattlefieldPanZoom() {
         await window.bfCameraFocusCoord(unit.pos.col, unit.pos.row, targetZoom, durationMs);
     };
 
-    // Centralização automática de turno (apenas após a batalha já ter começado e o usuário já ter iniciado ações)
-    if (currentState && currentState.order && typeof currentState.active_idx === 'number' && !isNewCombatSession) {
+    // Centralização automática de turno (apenas se o usuário já estiver ativamente navegando pelo combate)
+    if (currentState && currentState.order && typeof currentState.active_idx === 'number' && !isNewCombatSession && window.__bfUserHasInteracted) {
         var turnUnit = currentState.order[currentState.active_idx] || currentState.order[currentState.p_idx];
         if (turnUnit && turnUnit.alive && turnUnit.pos && turnUnit.pos.col != null) {
             var turnUnitKey = (turnUnit.id || currentState.active_idx) + '_' + (currentState.turn || 0);
@@ -23034,11 +23120,11 @@ function mountBattlefieldPanZoom() {
     var zoomBtns = zoomControls ? zoomControls.querySelectorAll('.bf-zoom-btn') : vp.querySelectorAll('.bf-zoom-btn');
     zoomBtns.forEach(function (btn) {
         var lastActionTime = 0;
-        var btnStartX = 0, btnStartY = 0;
         var onTrigger = async function (ev) {
             var now = Date.now();
-            if (now - lastActionTime < 280) return;
+            if (now - lastActionTime < 250) return;
             lastActionTime = now;
+            window.__bfUserHasInteracted = true;
             if (ev) {
                 if (ev.cancelable) ev.preventDefault();
                 ev.stopPropagation();
@@ -23054,16 +23140,13 @@ function mountBattlefieldPanZoom() {
                 await fitOverview(true);
             }
         };
+        // Evita que o evento de toque/arraste do viewport capture o clique dos botões de controle
         btn.addEventListener('pointerdown', function (ev) {
-            btnStartX = ev.clientX || 0;
-            btnStartY = ev.clientY || 0;
+            ev.stopPropagation();
         });
-        btn.addEventListener('pointerup', function (ev) {
-            var dist = Math.hypot((ev.clientX || 0) - btnStartX, (ev.clientY || 0) - btnStartY);
-            if (dist < 12) {
-                onTrigger(ev);
-            }
-        });
+        btn.addEventListener('touchstart', function (ev) {
+            ev.stopPropagation();
+        }, { passive: true });
         btn.addEventListener('click', onTrigger);
     });
 
@@ -23131,6 +23214,7 @@ function mountBattlefieldPanZoom() {
             }
             if (isDragging) {
                 if (e.cancelable) e.preventDefault();
+                window.__bfUserHasInteracted = true;
                 currentPanX = dragPanStartX + moveDx;
                 currentPanY = dragPanStartY + moveDy;
                 applyTransform(false, true);
@@ -34801,12 +34885,14 @@ async function startCombatRemoteCanonical() {
                 // Ao retomar combate após fechamento do jogo, reseta pan/zoom para forçar a Visão Geral do Cenário
                 window.__bfPanState = null;
                 window.__bfActiveCombatKey = null;
+                window.__bfUserHasInteracted = false;
                 applyBattleCheckpoint(currentState, data.checkpoint);
                 console.info('[C-REM:PIVOT-BOOT] CHECKPOINT RESUMED turn=' + data.checkpoint.turn);
             } catch (_eCp) {
                 console.error('[C-REM:PIVOT-BOOT] checkpoint_apply_fail', _eCp);
             }
         }
+        window.__bfUserHasInteracted = false;
         render(currentState);
         /* Sub-projeto #1 (2026-04-26) — Pre-combat banner se houver waves */
         try {
