@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-06T18:32:36Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-06T22:27:10Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -19769,10 +19769,10 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                 var inReach = (dist <= reachMeta.reachHex);
                 if (inReach) {
                     classes += ' token--in-range';
-                    distBadge = '<span class="token-dist-chip token-dist-chip--in" title="No Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">🎯 ' + distM + ' · No Alcance</span>';
+                    distBadge = '<span class="token-dist-chip token-dist-chip--in" title="No Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">' + _combatTargetIconSVG(10) + ' ' + distM + ' · No Alcance</span>';
                 } else {
                     classes += ' token--out-of-range';
-                    distBadge = '<span class="token-dist-chip token-dist-chip--out" title="Fora de Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">⚠️ ' + distM + ' · máx ' + reachMeta.meters + '</span>';
+                    distBadge = '<span class="token-dist-chip token-dist-chip--out" title="Fora de Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">' + _combatWarningIconSVG(10) + ' ' + distM + ' · máx ' + reachMeta.meters + '</span>';
                 }
             } else {
                 distBadge = '<span class="token-dist-chip" title="Distância até você">' + distM + ' · ' + dist + 'h</span>';
@@ -19794,7 +19794,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     if (!u.noTarget && (u.ac != null || typeof getEffectiveAc === 'function')) {
         var displayAc = (typeof getEffectiveAc === 'function') ? getEffectiveAc(u) : u.ac;
         if (displayAc != null) {
-            acBadge = '<div class="token-ac-chip" title="Classe de Armadura: ' + displayAc + '"><span>🛡</span>' + displayAc + '</div>';
+            acBadge = '<div class="token-ac-chip" title="Classe de Armadura: ' + displayAc + '"><span>' + _combatShieldIconSVG(10) + '</span>' + displayAc + '</div>';
         }
     }
 
@@ -20558,6 +20558,48 @@ function _combatDistanceIconSVG(size) {
         '<polyline points="5.5 5.5 2.5 8 5.5 10.5"></polyline>' +
         '<polyline points="14.5 5.5 17.5 8 14.5 10.5"></polyline>' +
         '<polygon points="10,6 12,8 10,10 8,8" fill="currentColor" stroke="none"></polygon>' +
+        '</svg>';
+}
+function _combatShieldIconSVG(size) {
+    var sz = size || 11;
+    return '<svg viewBox="0 0 16 16" width="' + sz + '" height="' + sz + '" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;" aria-hidden="true">' +
+        '<path d="M8 2 L13 4.5 V8.5 C13 11.5 8 14 8 14 C8 14 3 11.5 3 8.5 V4.5 Z" fill="rgba(212,175,55,0.2)"></path>' +
+        '</svg>';
+}
+function _combatTargetIconSVG(size) {
+    var sz = size || 11;
+    return '<svg viewBox="0 0 16 16" width="' + sz + '" height="' + sz + '" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;" aria-hidden="true">' +
+        '<circle cx="8" cy="8" r="5"></circle>' +
+        '<line x1="8" y1="1" x2="8" y2="4"></line>' +
+        '<line x1="8" y1="12" x2="8" y2="15"></line>' +
+        '<line x1="1" y1="8" x2="4" y2="8"></line>' +
+        '<line x1="12" y1="8" x2="15" y2="8"></line>' +
+        '<circle cx="8" cy="8" r="1.5" fill="currentColor"></circle>' +
+        '</svg>';
+}
+function _combatWarningIconSVG(size) {
+    var sz = size || 11;
+    return '<svg viewBox="0 0 16 16" width="' + sz + '" height="' + sz + '" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;" aria-hidden="true">' +
+        '<path d="M8 2 L14.5 13.5 H1.5 Z" fill="rgba(240,160,40,0.2)"></path>' +
+        '<line x1="8" y1="6" x2="8" y2="9.5"></line>' +
+        '<circle cx="8" cy="11.5" r="0.8" fill="currentColor"></circle>' +
+        '</svg>';
+}
+function _combatActionIconSVG(size) {
+    var sz = size || 13;
+    return '<svg viewBox="0 0 16 16" width="' + sz + '" height="' + sz + '" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;" aria-hidden="true">' +
+        '<line x1="2" y1="2" x2="14" y2="14"></line>' +
+        '<line x1="14" y1="2" x2="2" y2="14"></line>' +
+        '<line x1="2" y1="5" x2="5" y2="2"></line>' +
+        '<line x1="11" y1="2" x2="14" y2="5"></line>' +
+        '</svg>';
+}
+function _combatPotionIconSVG(size) {
+    var sz = size || 13;
+    return '<svg viewBox="0 0 16 16" width="' + sz + '" height="' + sz + '" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;" aria-hidden="true">' +
+        '<rect x="6" y="2" width="4" height="2" rx="0.5"></rect>' +
+        '<path d="M6 4 V6 L3.5 11 C3 12 3.8 13.5 5 13.5 H11 C12.2 13.5 13 12 12.5 11 L10 6 V4 Z" fill="rgba(80,200,120,0.2)"></path>' +
+        '<line x1="5" y1="9.5" x2="11" y2="9.5" stroke-dasharray="1 1"></line>' +
         '</svg>';
 }
 function _slugifyCombat(name) {
@@ -23191,20 +23233,30 @@ function mountBattlefieldPanZoom() {
     var primaryPointerId = null;
 
     var onPointerDown = function (e) {
-        if (e.target && e.target.closest && (e.target.closest('.bf-zoom-controls') || e.target.closest('.sim-action-dock') || e.target.closest('button'))) return;
+        if (e.target && e.target.closest && (
+            e.target.closest('.bf-zoom-controls') ||
+            e.target.closest('.sim-action-dock') ||
+            e.target.closest('button') ||
+            e.target.closest('[data-clickable="1"]') ||
+            e.target.closest('.hex-tile--reachable')
+        )) {
+            window.__bfIsDragging = false;
+            return;
+        }
 
         activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-        try { vp.setPointerCapture(e.pointerId); } catch (_e) {}
 
         if (activePointers.size === 1) {
             primaryPointerId = e.pointerId;
             isDragging = false;
+            window.__bfIsDragging = false;
             startClientX = e.clientX;
             startClientY = e.clientY;
             dragPanStartX = currentPanX;
             dragPanStartY = currentPanY;
         } else if (activePointers.size === 2) {
             isDragging = false;
+            window.__bfIsDragging = false;
             var pts = Array.from(activePointers.values());
             var dx = pts[0].x - pts[1].x;
             var dy = pts[0].y - pts[1].y;
@@ -23226,6 +23278,8 @@ function mountBattlefieldPanZoom() {
             if (!isDragging) {
                 if (Math.abs(moveDx) >= DRAG_THRESHOLD_PX || Math.abs(moveDy) >= DRAG_THRESHOLD_PX) {
                     isDragging = true;
+                    window.__bfIsDragging = true;
+                    try { vp.setPointerCapture(e.pointerId); } catch (_e) {}
                     vp.style.cursor = 'grabbing';
                 }
             }
@@ -23238,6 +23292,7 @@ function mountBattlefieldPanZoom() {
             }
         } else if (activePointers.size === 2) {
             if (e.cancelable) e.preventDefault();
+            window.__bfIsDragging = true;
             var pts = Array.from(activePointers.values());
             var dx = pts[0].x - pts[1].x;
             var dy = pts[0].y - pts[1].y;
@@ -23258,6 +23313,7 @@ function mountBattlefieldPanZoom() {
             isDragging = false;
             vp.style.cursor = 'grab';
             savePanState(true);
+            setTimeout(function () { window.__bfIsDragging = false; }, 120);
         } else if (activePointers.size === 1) {
             var remainingId = activePointers.keys().next().value;
             primaryPointerId = remainingId;
@@ -23553,11 +23609,11 @@ function render(s) {
 
         var hudIconHtml = '';
         if (_pendingSkill) {
-            hudIconHtml = '<span class="tsh-ico">' + escHtml(_pendingSkill.ico || '⚔️') + '</span> ';
+            hudIconHtml = '<span class="tsh-ico">' + _combatActionIconSVG(14) + '</span> ';
         } else if (_pendingHealItem) {
-            hudIconHtml = '<span class="tsh-ico">🧪</span> ';
+            hudIconHtml = '<span class="tsh-ico">' + _combatPotionIconSVG(14) + '</span> ';
         } else {
-            hudIconHtml = '<span class="tsh-ico">⚔️</span> ';
+            hudIconHtml = '<span class="tsh-ico">' + _combatActionIconSVG(14) + '</span> ';
         }
 
         var hintSub = 'Toque em um alvo dentro do alcance para confirmar o ataque';
@@ -23598,7 +23654,7 @@ function render(s) {
         html += '<div class="tsh-header">';
         html += '<span class="tsh-badge-action">' + hudTypeBadge + '</span>';
         html += '<strong class="tsh-title">' + hudIconHtml + escHtml(hudTitle) + '</strong>';
-        html += '<span class="tsh-reach-chip" title="Regras D&D 5e: alcance máximo desta ação">🎯 Alcance: ' + reachMeta.label + '</span>';
+        html += '<span class="tsh-reach-chip" title="Regras D&D 5e: alcance máximo desta ação">' + _combatTargetIconSVG(11) + ' Alcance: ' + reachMeta.label + '</span>';
         html += '</div>';
         html += '<div class="tsh-instruction">' + hintSub + '</div>';
         html += '</div>';
@@ -23759,89 +23815,110 @@ function bindActions() {
     /* Cards clicaveis -> popup de ficha OU selecao de alvo durante ataque */
     var cards = document.querySelectorAll('[data-clickable="1"]');
     for (var j = 0; j < cards.length; j++) {
-        cards[j].addEventListener('click', function (ev) {
-            if (ev.target.closest('button')) return;
-            var uid = this.getAttribute('data-unit-id');
-            var isAllyBuffPick = _selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
-                (_pendingSkill.blessSpell || _pendingSkill.shieldSpell);
-            if (_selectingTarget && (((_pendingSkill && _pendingSkill.kind === 'heal') || _pendingHealItem) || isAllyBuffPick)) {
-                if (uid === 'player') {
-                    showHealTargetConfirm(currentState.p_idx);
-                    return;
-                }
-                if (uid && uid.indexOf('ally_') === 0) {
-                    var aix = parseInt(uid.slice(5), 10);
-                    if (!isNaN(aix)) showHealTargetConfirm(aix);
-                    return;
-                }
-                return;
-            }
-            if (_selectingTarget && uid && uid.indexOf('enemy_') === 0) {
-                var idx = parseInt(uid.slice(6), 10);
-                /* V1 Invocações Phase 2 — Comandar Arma Espiritual (BA): aplica direto. */
-                if (_pendingAttachedSummon) {
-                    var aIdx = _pendingAttachedSummon.attachedIdx;
-                    _resolveAttachedSummonAttack(currentState, aIdx, idx);
-                    return;
-                }
-                /* F1 (escolha autor 2026-04-19) — Comandar Companheiro (Beast Master): aplica direto. */
-                if (_pendingPassiveSummonCmd) {
-                    var sIdx = _pendingPassiveSummonCmd.summonIdx;
-                    _resolvePassiveSummonAttack(currentState, sIdx, idx);
-                    return;
-                }
-                /* V1 Invocações Phase 3 — Focar Familiar: marca focusTarget. */
-                if (_pendingFocusFamiliar) {
-                    _applyFamiliarFocus(currentState, _pendingFocusFamiliar.familiarIdx, idx);
-                    return;
-                }
-                // PHB Magic Missile: acumula N alvos, círculos viram roxo, ao completar
-                // abre popup de confirmação. Cancel reseta círculos; Confirm lança.
-                if (_pendingSkill && _pendingSkill.magicMissiles) {
-                    var mmCfg = _pendingSkill.magicMissiles;
-                    var pActor = currentState && currentState.order && currentState.order[currentState.p_idx];
-                    var needed = (typeof simMagicMissileDarts === 'function')
-                        ? (simMagicMissileDarts(_pendingSkill, pActor) || 3)
-                        : ((mmCfg.count | 0) || 3);
-                    if (!_mmTargets) _mmTargets = [];
-                    if (_mmTargets.length >= needed) return; // trava extra
-                    _mmTargets.push(idx);
-                    flashMmPickFeedback(idx, _mmTargets.length, needed);
-                    // Re-render: preenche círculo N + marca card como selected-mm.
-                    render(currentState);
-                    if (_mmTargets.length >= needed) {
-                        var picks = _mmTargets.slice();
-                        (async function () {
-                            var ok = await showMagicMissileConfirmPopup(picks);
-                            if (ok) {
-                                _mmTargets = null;
-                                confirmAndAttack({ __mmTargets: picks });
-                            } else {
-                                // Cancelar: esvazia os círculos e permite nova seleção.
-                                _mmTargets = [];
-                                render(currentState);
-                            }
-                        })();
+        (function (card) {
+            var lastCardTrigger = 0;
+            var onCardTrigger = function (ev) {
+                var now = Date.now();
+                if (now - lastCardTrigger < 180) return;
+                if (window.__bfIsDragging) return;
+                if (ev.target.closest('button')) return;
+                lastCardTrigger = now;
+                var uid = card.getAttribute('data-unit-id');
+                var isAllyBuffPick = _selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
+                    (_pendingSkill.blessSpell || _pendingSkill.shieldSpell);
+                if (_selectingTarget && (((_pendingSkill && _pendingSkill.kind === 'heal') || _pendingHealItem) || isAllyBuffPick)) {
+                    if (uid === 'player') {
+                        showHealTargetConfirm(currentState.p_idx);
+                        return;
+                    }
+                    if (uid && uid.indexOf('ally_') === 0) {
+                        var aix = parseInt(uid.slice(5), 10);
+                        if (!isNaN(aix)) showHealTargetConfirm(aix);
+                        return;
                     }
                     return;
                 }
-                showTargetConfirm(idx);
-                return;
-            }
-            openUnitDetail(uid);
-        });
+                if (_selectingTarget && uid && uid.indexOf('enemy_') === 0) {
+                    var idx = parseInt(uid.slice(6), 10);
+                    /* V1 Invocações Phase 2 — Comandar Arma Espiritual (BA): aplica direto. */
+                    if (_pendingAttachedSummon) {
+                        var aIdx = _pendingAttachedSummon.attachedIdx;
+                        _resolveAttachedSummonAttack(currentState, aIdx, idx);
+                        return;
+                    }
+                    /* F1 (escolha autor 2026-04-19) — Comandar Companheiro (Beast Master): aplica direto. */
+                    if (_pendingPassiveSummonCmd) {
+                        var sIdx = _pendingPassiveSummonCmd.summonIdx;
+                        _resolvePassiveSummonAttack(currentState, sIdx, idx);
+                        return;
+                    }
+                    /* V1 Invocações Phase 3 — Focar Familiar: marca focusTarget. */
+                    if (_pendingFocusFamiliar) {
+                        _applyFamiliarFocus(currentState, _pendingFocusFamiliar.familiarIdx, idx);
+                        return;
+                    }
+                    // PHB Magic Missile: acumula N alvos, círculos viram roxo, ao completar
+                    // abre popup de confirmação. Cancel reseta círculos; Confirm lança.
+                    if (_pendingSkill && _pendingSkill.magicMissiles) {
+                        var mmCfg = _pendingSkill.magicMissiles;
+                        var pActor = currentState && currentState.order && currentState.order[currentState.p_idx];
+                        var needed = (typeof simMagicMissileDarts === 'function')
+                            ? (simMagicMissileDarts(_pendingSkill, pActor) || 3)
+                            : ((mmCfg.count | 0) || 3);
+                        if (!_mmTargets) _mmTargets = [];
+                        if (_mmTargets.length >= needed) return; // trava extra
+                        _mmTargets.push(idx);
+                        // Re-render: preenche círculo N + marca card como selected-mm.
+                        render(currentState);
+                        flashMmPickFeedback(idx, _mmTargets.length, needed);
+                        if (_mmTargets.length >= needed) {
+                            var picks = _mmTargets.slice();
+                            (async function () {
+                                var ok = await showMagicMissileConfirmPopup(picks);
+                                if (ok) {
+                                    _mmTargets = null;
+                                    confirmAndAttack({ __mmTargets: picks });
+                                } else {
+                                    // Cancelar: esvazia os círculos e permite nova seleção.
+                                    _mmTargets = [];
+                                    render(currentState);
+                                }
+                            })();
+                        }
+                        return;
+                    }
+                    showTargetConfirm(idx);
+                    return;
+                }
+                openUnitDetail(uid);
+            };
+            card.addEventListener('click', onCardTrigger);
+            card.addEventListener('pointerup', onCardTrigger);
+            card.addEventListener('touchend', onCardTrigger);
+        })(cards[j]);
     }
     /* Hexágonos de movimentação alcançáveis no turno do jogador */
     var reachableTiles = document.querySelectorAll('.hex-tile.hex-tile--reachable');
     for (var ri = 0; ri < reachableTiles.length; ri++) {
-        reachableTiles[ri].addEventListener('click', function (ev) {
-            ev.stopPropagation();
-            var tCol = parseInt(this.getAttribute('data-col'), 10);
-            var tRow = parseInt(this.getAttribute('data-row'), 10);
-            if (!isNaN(tCol) && !isNaN(tRow)) {
-                showMoveConfirm(tCol, tRow);
-            }
-        });
+        (function (tile) {
+            var lastTileTrigger = 0;
+            var onTileTrigger = function (ev) {
+                var now = Date.now();
+                if (now - lastTileTrigger < 180) return;
+                if (window.__bfIsDragging) return;
+                lastTileTrigger = now;
+                if (ev.cancelable && ev.type !== 'click') ev.preventDefault();
+                ev.stopPropagation();
+                var tCol = parseInt(tile.getAttribute('data-col'), 10);
+                var tRow = parseInt(tile.getAttribute('data-row'), 10);
+                if (!isNaN(tCol) && !isNaN(tRow)) {
+                    showMoveConfirm(tCol, tRow);
+                }
+            };
+            tile.addEventListener('click', onTileTrigger);
+            tile.addEventListener('pointerup', onTileTrigger);
+            tile.addEventListener('touchend', onTileTrigger);
+        })(reachableTiles[ri]);
     }
     mountBattlefieldPanZoom();
 }
@@ -23852,6 +23929,7 @@ function bindActions() {
    FIX 2026-04-20: ao final, se virou turno do player (active_idx === p_idx),
    reseta _actionTaken=false pra Agir reaparecer (bug "Agir some no turno 2"). */
 async function __combatRemoteAction(action) {
+    if (typeof ensureCombatVfxRuntime === 'function') ensureCombatVfxRuntime();
     var actionType = (action && action.type) || 'unknown';
     var phBefore = currentState && currentState.ph;
     var activeBefore = currentState && currentState.active_idx;
@@ -28620,7 +28698,9 @@ async function launchMissilesFromOrbitToTargets(ov, darts, s) {
             setTimeout(function () {
                 var dart = cap.dart;
                 var srcRect = cap.srcRect;
-                var uid = 'enemy_' + dart.tIdx;
+                var uid = (typeof unitUidForOrderIndex === 'function')
+                    ? unitUidForOrderIndex(s, dart.tIdx)
+                    : ('enemy_' + dart.tIdx);
                 var targetEl = document.querySelector('[data-unit-id="' + uid + '"]');
                 var tRect = targetEl ? targetEl.getBoundingClientRect() : null;
                 if (!srcRect || !tRect) {
@@ -29812,7 +29892,9 @@ function showRayOfFrostOverlay(actor, target, dart, s) {
             // Captura posição da bola orbital + posição do alvo
             var srcEl = ov.querySelector('.mm-orbit-missile--ice');
             var srcRect = srcEl ? srcEl.getBoundingClientRect() : null;
-            var uid = 'enemy_' + dart.tIdx;
+            var uid = (typeof unitUidForOrderIndex === 'function')
+                ? unitUidForOrderIndex(s, dart.tIdx)
+                : ('enemy_' + dart.tIdx);
             var targetEl = document.querySelector('[data-unit-id="' + uid + '"]');
             var tRect = targetEl ? targetEl.getBoundingClientRect() : null;
             // Fade-out do overlay pra revelar arena
@@ -31228,13 +31310,23 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
             ov.appendChild(rb);
         }
         appendDiceCombatHeader(ov, actor, target, null);
+        var hasOrbit = !!(opts.magicMissile || opts.variant);
+        var diceStage = document.createElement('div');
+        diceStage.className = 'mm-dice-stage';
         var container = document.createElement('div');
-        container.className = 'dice-canvas-holder';
-        ov.appendChild(container);
-        // PHB Mísseis Mágicos: 3 mini-mísseis orbitando o dado durante rolagem.
-        if (opts.magicMissile) {
-            attachMagicMissileOrbit(container, opts.dartCount | 0 || 3);
+        container.className = 'dice-canvas-holder' + (rolls.length >= 2 ? ' multi' : '');
+        diceStage.appendChild(container);
+        if (hasOrbit) {
+            var orbitHost = document.createElement('div');
+            orbitHost.className = 'mm-orbit-host';
+            diceStage.appendChild(orbitHost);
+            if (opts.magicMissile) {
+                attachMagicMissileOrbit(orbitHost, opts.dartCount | 0 || 3);
+            } else if (opts.variant) {
+                attachMagicMissileOrbit(orbitHost, opts.dartCount | 0 || 1, null, opts.variant);
+            }
         }
+        ov.appendChild(diceStage);
         var resultEl = document.createElement('div');
         resultEl.className = 'dice-result-label';
         ov.appendChild(resultEl);
@@ -34945,6 +35037,7 @@ async function startCombatRemote() {
         }
         currentState = resp.state;
         window.__combatRemoteReady = true;
+        if (typeof ensureCombatVfxRuntime === 'function') ensureCombatVfxRuntime();
         var s = currentState;
         var orderSummary = (s.order || []).map(function (u, i) {
             return i + ':' + (u.t || '?') + '/' + (u.n || '?') + '/hp=' + (u.hp || 0);
@@ -34989,6 +35082,7 @@ async function startCombatRemote() {
 /* [C-REM:EV] Aplica events do server em remote mode.
    Cada event logged com: index/total, kind, actor, target, dmg, hit, crit, extra. */
 async function __combatApplyEvents(events) {
+    if (typeof ensureCombatVfxRuntime === 'function') ensureCombatVfxRuntime();
     var total = events.length;
     for (var i = 0; i < events.length; i++) {
         var ev = events[i];
@@ -34996,6 +35090,69 @@ async function __combatApplyEvents(events) {
             console.warn('[C-REM:EV] skip[' + i + '] no_kind');
             continue;
         }
+
+        /* 1) ROTA ESPECIAL: MÍSSEIS MÁGICOS (Volley unificado de todos os dardos e alvos) */
+        var isMmEvent = (ev.kind === 'attack' || ev.kind === 'skill') &&
+            ((ev.darts && ev.darts.length) || (ev.skillName && ev.skillName.indexOf('Mísseis') >= 0));
+        if (isMmEvent) {
+            var mmEvents = [ev];
+            while (i + 1 < events.length &&
+                   (events[i + 1].kind === 'attack' || events[i + 1].kind === 'skill') &&
+                   events[i + 1].aIdx === ev.aIdx &&
+                   ((events[i + 1].darts && events[i + 1].darts.length) ||
+                    (events[i + 1].skillName && events[i + 1].skillName.indexOf('Mísseis') >= 0))) {
+                i++;
+                mmEvents.push(events[i]);
+            }
+            var allDarts = [];
+            var groupsMap = {};
+            var groupOrder = [];
+            mmEvents.forEach(function (evM) {
+                var ti = evM.tIdx;
+                if (!groupsMap[ti]) {
+                    groupsMap[ti] = { tIdx: ti, darts: [], total: 0 };
+                    groupOrder.push(ti);
+                }
+                var dList = evM.darts || [];
+                if (!dList.length && evM.dmgTotal) {
+                    var rList = evM.dmgRolls || [Math.max(1, evM.dmgTotal - 1)];
+                    dList = [{ rolls: rList, dmg: evM.dmgTotal, flat: 1 }];
+                }
+                dList.forEach(function (d) {
+                    var dRolls = (d.rolls && d.rolls.length) ? d.rolls : [Math.max(1, (d.dmg || 3) - (d.flat || 1))];
+                    var dartObj = {
+                        tIdx: ti,
+                        rolls: dRolls,
+                        dmg: d.dmg || (dRolls.reduce(function (a, b) { return a + b; }, 0) + (d.flat || 1)),
+                        d: 4,
+                        flat: d.flat != null ? d.flat : 1
+                    };
+                    groupsMap[ti].darts.push(dartObj);
+                    groupsMap[ti].total += dartObj.dmg;
+                    allDarts.push(dartObj);
+                });
+            });
+            var groupList = groupOrder.map(function (ti) { return groupsMap[ti]; });
+            var casterUnit = (currentState && currentState.order && currentState.order[ev.aIdx]) ||
+                             { n: ev.actorName || 'Conjurador', t: 'p' };
+            if (typeof showMagicMissileVolleyOverlay === 'function' && allDarts.length > 0) {
+                await showMagicMissileVolleyOverlay(casterUnit, allDarts, groupList, currentState, { n: 1, d: 4, flat: 1 });
+            } else {
+                for (var mi = 0; mi < mmEvents.length; mi++) {
+                    await __combatAnimateOneEvent(mmEvents[mi]);
+                }
+            }
+            mmEvents.forEach(function (evM) {
+                var tgtU = (currentState && currentState.order) ? currentState.order[evM.tIdx] : null;
+                if (tgtU && evM.newHp != null) {
+                    tgtU.hp = evM.newHp | 0;
+                    tgtU.alive = tgtU.hp > 0;
+                }
+            });
+            render(currentState);
+            continue;
+        }
+
         var extra = '';
         if (ev.dmgTotal != null) extra += ' dmg=' + ev.dmgTotal;
         if (ev.hit != null) extra += ' hit=' + ev.hit;
@@ -35495,6 +35652,7 @@ async function animLaunchMagicMissiles(fromEl, targetEl, darts, tU) {
 }
 
 async function __combatAnimateOneEvent(ev) {
+    if (typeof ensureCombatVfxRuntime === 'function') ensureCombatVfxRuntime();
     var kind = ev.kind;
     if (kind === 'move') {
         var actorIdx = ev.actorIdx != null ? ev.actorIdx : (ev.aIdx != null ? ev.aIdx : 0);
@@ -35585,7 +35743,7 @@ async function __combatAnimateOneEvent(ev) {
         await new Promise(function (r) { setTimeout(r, 300); });
         return;
     }
-    if (kind === 'attack' || kind === 'oa') {
+    if (kind === 'attack' || kind === 'oa' || kind === 'skill') {
         /* Mostra o d20 do ataque (dice 3D se disponível), depois lunge/cast + hit VFX + FCT. */
         var tUid = 'enemy_' + ev.tIdx;
         var tU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
@@ -35633,7 +35791,8 @@ async function __combatAnimateOneEvent(ev) {
                         ev.dmgRolls, 4, false,
                         aU || { n: ev.actorName, atk: ev.atk },
                         tU || { n: ev.targetName, hp: ev.oldHp, ac: ev.ac },
-                        ev.oldHp | 0, ev.newHp | 0, 0
+                        ev.oldHp | 0, ev.newHp | 0, 0,
+                        { magicMissile: true, dartCount: darts.length || 3, theme: 'force' }
                     );
                 } catch (_) {}
             }
@@ -35721,6 +35880,8 @@ async function __combatAnimateOneEvent(ev) {
             var tUnit = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
             var dmgModCombined = (ev.dmgMod | 0) + (ev.dmgSpecFlat | 0);
             var dmgDieSize = (ev.dmgDie | 0) || 6;
+            var spellTheme = isFireball ? 'fire' : (isRayOfFrost ? 'cold' : (ev.dmgType || 'default'));
+            var spellVariant = isFireball ? 'fireball' : (isRayOfFrost ? 'ice' : null);
             try {
                 await showDamageDice(
                     ev.dmgRolls,
@@ -35730,7 +35891,8 @@ async function __combatAnimateOneEvent(ev) {
                     tUnit || { n: ev.targetName, hp: ev.oldHp, ac: ev.ac },
                     ev.oldHp | 0,
                     ev.newHp | 0,
-                    dmgModCombined
+                    dmgModCombined,
+                    { theme: spellTheme, variant: spellVariant, dartCount: spellVariant ? 1 : 0, skill: ev.skillName }
                 );
             } catch (eDmg) {
                 console.warn('[C-REM:DMG] showDamageDice falhou', eDmg && eDmg.message);
