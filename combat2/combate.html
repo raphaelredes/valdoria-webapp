@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-06T17:49:45Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-06T18:32:36Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2037,21 +2037,11 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .current-turn .ct-ico img, .current-turn .ct-ico svg { width: calc(24px * var(--v-font-scale, 1)); height: calc(24px * var(--v-font-scale, 1)); display: inline-block; vertical-align: middle; object-fit: contain; }
 .current-turn .ct-label { color: var(--v-text-dim, #a09484); }
 .current-turn .ct-name { color: #c06a3a; font-weight: 700; letter-spacing: 2px; }
-.current-turn.player-turn { background: linear-gradient(90deg, transparent, rgba(196,149,58,.25), transparent); border-color: var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); font-weight: 700; letter-spacing: 4px; font-size: calc(14px * var(--v-font-scale, 1)); text-shadow: 0 0 10px rgba(196,149,58,.6), 0 1px 2px rgba(0,0,0,.8); animation: ctFade .3s ease, playerTurnGlow 1.6s ease-in-out infinite; }
-.current-turn.player-turn .ct-text { display: inline-block; animation: seuTurnoAttention 3.4s ease-in-out infinite; }
-/* User sessão #69: pulso SUAVE (respiração) em vez dos saltos bruscos de escala
-   em 78-92% (que causavam flicker/zoom rápido como seizure). Escala sutil 1→1.04,
-   sem filter:brightness (caro no mobile). */
-@keyframes seuTurnoAttention {
-    0%, 100% { transform: scale(1); text-shadow: 0 0 10px rgba(196,149,58,.5), 0 1px 2px rgba(0,0,0,.8); }
-    50% { transform: scale(1.04); text-shadow: 0 0 16px rgba(255,215,130,.8), 0 0 26px rgba(196,149,58,.45), 0 1px 2px rgba(0,0,0,.8); }
-}
-/* User sessão #69: setas mais lentas e sutis (eram 1s / 4px — rápidas demais). */
-.current-turn.player-turn .ct-chevron { color: var(--v-gold, #c4953a); font-size: calc(16px * var(--v-font-scale, 1)); animation: ctChevron 2.4s ease-in-out infinite; display: inline-block; }
-.current-turn.player-turn .ct-chevron:last-child { animation-delay: 1.2s; }
+/* Indicador de turno do jogador no topo — nobre, estático e estável (zero piscar ou tremor; Ordem do Usuário 2026-10) */
+.current-turn.player-turn { background: linear-gradient(90deg, transparent, rgba(196,149,58,.25), transparent); border-color: var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); font-weight: 700; letter-spacing: 4px; font-size: calc(14px * var(--v-font-scale, 1)); text-shadow: 0 0 10px rgba(196,149,58,.6), 0 1px 2px rgba(0,0,0,.8); box-shadow: 0 0 12px rgba(196,149,58,.3); }
+.current-turn.player-turn .ct-text { display: inline-block; }
+.current-turn.player-turn .ct-chevron { color: var(--v-gold, #c4953a); font-size: calc(16px * var(--v-font-scale, 1)); display: inline-block; opacity: 0.9; }
 @keyframes ctFade { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; } }
-@keyframes playerTurnGlow { 0%,100% { box-shadow: 0 0 10px rgba(196,149,58,.2); } 50% { box-shadow: 0 0 18px rgba(196,149,58,.45); } }
-@keyframes ctChevron { 0%,100% { transform: translateX(0); opacity: .55; } 50% { transform: translateX(3px); opacity: .9; } }
 
 /* Indicador de turno da Inteligência Artificial (Ordem do Usuário 2026-10) */
 .current-turn.ai-turn {
@@ -2159,11 +2149,10 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   100% { transform: scale(1.06); filter: brightness(1.2); }
 }
 
-/* Turno do player ativo — seta epica + label SEU TURNO acima do card */
+/* Turno do player ativo — seta e badge SEU TURNO firmes e nobres sobre o hexágono (sem saltos de 0.7s nem shimmer estroboscópico; Ordem do Usuário 2026-10) */
 .cell.occupied.player.player-turn-active { position: relative; }
-.cell.occupied.player.player-turn-active::before { content: ''; position: absolute; top: -28px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 16px solid var(--v-gold, #c4953a); filter: drop-shadow(0 0 8px rgba(196,149,58,.9)) drop-shadow(0 0 16px rgba(196,149,58,.5)); animation: arrowBob .7s ease-in-out infinite; z-index: 20; pointer-events: none; }
-.cell.occupied.player.player-turn-active::after { content: 'SEU TURNO'; position: absolute; top: -52px; left: 50%; transform: translateX(-50%); font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: var(--v-font-label, 12px); letter-spacing: 2.5px; color: var(--v-gold, #c4953a); text-shadow: 0 0 10px rgba(196,149,58,.9), 0 0 20px rgba(196,149,58,.5), 0 1px 2px rgba(0,0,0,.9); white-space: nowrap; animation: arrowBob .7s ease-in-out infinite, seuTurnoShimmer 1.4s ease infinite; z-index: 20; pointer-events: none; padding: var(--v-space-xs, 2px) var(--v-space-md, 8px); background: rgba(15,12,8,.7); border: 1px solid rgba(196,149,58,.5); border-radius: var(--v-radius-xs, 4px); }
-@keyframes seuTurnoShimmer { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.5); } }
+.cell.occupied.player.player-turn-active::before { content: ''; position: absolute; top: -28px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 16px solid var(--v-gold, #c4953a); filter: drop-shadow(0 0 8px rgba(196,149,58,.9)) drop-shadow(0 0 16px rgba(196,149,58,.5)); z-index: 20; pointer-events: none; }
+.cell.occupied.player.player-turn-active::after { content: 'SEU TURNO'; position: absolute; top: -52px; left: 50%; transform: translateX(-50%); font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: var(--v-font-label, 12px); letter-spacing: 2.5px; color: var(--v-gold, #c4953a); text-shadow: 0 0 10px rgba(196,149,58,.9), 0 0 20px rgba(196,149,58,.5), 0 1px 2px rgba(0,0,0,.9); white-space: nowrap; z-index: 20; pointer-events: none; padding: var(--v-space-xs, 2px) var(--v-space-md, 8px); background: rgba(15,12,8,.85); border: 1px solid rgba(196,149,58,.6); border-radius: var(--v-radius-xs, 4px); box-shadow: 0 2px 8px rgba(0,0,0,.6); }
 
 /* Barras de recurso (MP / Energia / Vigor / Furia) */
 /* HP/recursos — transição suave no width (AAA-style smooth depletion) */
@@ -3972,9 +3961,15 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   color: #e6dfd5;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
   flex-wrap: wrap;
+.dnd-mov-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--v-gold, #c4953a);
+  flex-shrink: 0;
+  line-height: 1;
 }
-.dnd-mov-icon { font-size: 14px; line-height: 1; }
-.dnd-mov-label {
+.dnd-mov-icon svg, .dnd-mov-svg { display: block; }
   font-family: var(--v-font-display, 'Cinzel'), serif;
   font-size: 11px;
   letter-spacing: 0.8px;
@@ -19478,7 +19473,7 @@ function showMoveConfirm(tCol, tRow) {
     var html = '';
     html += '<div class="tcc-title">Confirmar Movimento</div>';
     html += '<div class="tcc-preview" style="padding:10px 14px;background:rgba(20,15,10,0.6);border-radius:6px;margin-bottom:12px;display:flex;align-items:center;">';
-    html += '<div style="font-size:24px;line-height:1;margin-right:12px;">👣</div>';
+    html += '<div style="margin-right:12px;color:var(--v-gold,#c4953a);display:flex;align-items:center;">' + _combatDistanceIconSVG(24) + '</div>';
     html += '<div class="tcc-info">';
     html += '<div class="tcc-name">Destino: Hexágono ' + destCoordStr + '</div>';
     html += '<div class="tcc-stats"><span class="tcc-n-key">' + dM + '</span> (' + dHexes + ' hexes)</div>';
@@ -19491,7 +19486,7 @@ function showMoveConfirm(tCol, tRow) {
     html += '<div class="tcc-dmg-row crit" style="border-top:1px dashed rgba(196,149,58,0.3);padding-top:6px;"><span class="tcc-dmg-lbl">Restará após mover</span><span class="tcc-dmg-val" style="color:#a3e635;font-weight:bold;">' + remainingAfterM + ' de ' + totalSpeedM + '</span></div>';
     if (willTriggerOA) {
         html += '<div class="tcc-dmg-row" style="background:rgba(180,40,40,0.2);padding:6px 8px;border-radius:4px;margin-top:6px;color:#ff8b8b;font-size:11px;line-height:1.3;">';
-        html += '⚠️ <strong>Atenção:</strong> Sair do combate corpo a corpo sem Desengajar provocará <strong>Ataque de Oportunidade</strong> (PHB p. 195)!';
+        html += '◆ <strong>Atenção:</strong> Sair do combate corpo a corpo sem Desengajar provocará <strong>Ataque de Oportunidade</strong> (PHB p. 195)!';
         html += '</div>';
     }
     html += '</div>';
@@ -20232,7 +20227,7 @@ function buildBattlefield(s) {
 
         if (isPlayerProne) {
             html += '<div class="hex-turn-hud" aria-live="polite">';
-            html += '<button type="button" class="hth-stand-btn' + (canStand ? '' : ' disabled') + '" data-act="stand-up" title="Gasta metade do deslocamento (' + standCostM + ') para se levantar (PHB p. 190)">🧎 Levantar-se (' + standCostM + ')</button>';
+            html += '<button type="button" class="hth-stand-btn' + (canStand ? '' : ' disabled') + '" data-act="stand-up" title="Gasta metade do deslocamento (' + standCostM + ') para se levantar (PHB p. 190)">▲ Levantar-se (' + standCostM + ')</button>';
             html += '</div>';
         }
     }
@@ -20550,6 +20545,20 @@ function _actBtnIco(slug) {
     var base = (loc.indexOf('file://') === 0) ? '../shared/img/ui/' : '/shared/img/ui/';
     return '<img class="action-btn-ico" src="' + base + slug + '.webp" alt="" loading="lazy" '
         + 'onerror="this.onerror=null;this.style.display=\'none\'">';
+}
+/* Indicador vetorial de Distância / Deslocamento tático D&D 5e (substitui emoji de pés; Ordem do Usuário 2026-10).
+   Vetor nítido de medição cartográfica: limites laterais, linha de extensão, setas de cota e losango heráldico central. */
+function _combatDistanceIconSVG(size) {
+    var sz = size || 16;
+    var h = Math.max(10, Math.round(sz * 0.75));
+    return '<svg class="dnd-mov-svg" viewBox="0 0 20 16" width="' + sz + '" height="' + h + '" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<line x1="2" y1="3" x2="2" y2="13"></line>' +
+        '<line x1="18" y1="3" x2="18" y2="13"></line>' +
+        '<line x1="2" y1="8" x2="18" y2="8"></line>' +
+        '<polyline points="5.5 5.5 2.5 8 5.5 10.5"></polyline>' +
+        '<polyline points="14.5 5.5 17.5 8 14.5 10.5"></polyline>' +
+        '<polygon points="10,6 12,8 10,10 8,8" fill="currentColor" stroke="none"></polygon>' +
+        '</svg>';
 }
 function _slugifyCombat(name) {
     if (!name) return '';
@@ -21504,7 +21513,7 @@ function _buildDndResourcesBarHtml(s, p, opts) {
         var maxHexes = p.speed || 6;
         var movPct = Math.min(100, Math.max(0, Math.round((movHexes / Math.max(1, maxHexes)) * 100)));
         html += '<div class="dnd-movement-bar" aria-label="Deslocamento restante no turno">' +
-            '<span class="dnd-mov-icon" aria-hidden="true">👣</span>' +
+            '<span class="dnd-mov-icon" aria-hidden="true">' + _combatDistanceIconSVG(16) + '</span>' +
             '<span class="dnd-mov-label">DESLOCAMENTO:</span>' +
             '<span class="dnd-mov-val"><strong>' + curMovM + '</strong> / ' + maxMovM + '</span>' +
             '<span class="dnd-mov-hexes">(' + movHexes + ' de ' + maxHexes + ' hexes)</span>' +
@@ -23693,7 +23702,7 @@ function render(s) {
                     var standCostHexesSheet = Math.floor((pCur.speed || 6) / 2);
                     var standCostMSheet = formatHexDistanceMeters(standCostHexesSheet);
                     var canStandSheet = (pCur.movement_left || 0) >= standCostHexesSheet;
-                    html += '<button type="button" class="action-btn action-btn--stand-up primary' + (canStandSheet ? '' : ' spent') + '" style="grid-column: 1 / -1;" data-act="stand-up"' + (canStandSheet ? '' : ' aria-disabled="true" title="Deslocamento insuficiente para se levantar"') + '><span class="action-btn-label">🧎 Levantar-se (' + standCostMSheet + ')</span></button>';
+                    html += '<button type="button" class="action-btn action-btn--stand-up primary' + (canStandSheet ? '' : ' spent') + '" style="grid-column: 1 / -1;" data-act="stand-up"' + (canStandSheet ? '' : ' aria-disabled="true" title="Deslocamento insuficiente para se levantar"') + '><span class="action-btn-label">▲ Levantar-se (' + standCostMSheet + ')</span></button>';
                 }
                 html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + '<span class="action-btn-label">Disparada</span>' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + '<span class="action-btn-label">Desengajar</span>' + actionGlyph + '</button>';
@@ -35561,7 +35570,7 @@ async function __combatAnimateOneEvent(ev) {
             : (hfActorIdx === (currentState.p_idx || 0) ? 'player' : 'enemy_' + hfActorIdx);
         var hfActorUnit = (currentState && currentState.order) ? currentState.order[hfActorIdx] : null;
         if (hfActorUnit) {
-            (hfActorUnit.se = hfActorUnit.se || []).push({ id: 'prone', n: 'Caído', prone: true, kind: 'debuff', ico: '🧎' });
+            (hfActorUnit.se = hfActorUnit.se || []).push({ id: 'prone', n: 'Caído', prone: true, kind: 'debuff', ico: '' });
         }
         var hfEl = document.querySelector('[data-unit-id="' + hfActorUid + '"]');
         if (hfEl) {
@@ -35569,7 +35578,7 @@ async function __combatAnimateOneEvent(ev) {
             hfEl.classList.add('miss-target-flash');
             setTimeout(function () { hfEl.classList.remove('miss-target-flash'); }, 400);
             if (typeof spawnMissFloatLabel === 'function') {
-                spawnMissFloatLabel(hfEl, '🧎 Caído!');
+                spawnMissFloatLabel(hfEl, 'Caído!');
             }
         }
         render(currentState);
