@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-06T15:07:53Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-06T17:49:45Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2824,6 +2824,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 /* Pan / zoom na arena (paridade combat2) */
 html.sim-combat-root .bf-pan-viewport {
   flex: 1 1 0 !important;
+  height: 100% !important;
   min-height: 240px !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -2865,6 +2866,8 @@ html.sim-combat-root .bf-pan-viewport::-webkit-scrollbar {
   min-height: 0 !important;
   overflow: hidden !important;
   touch-action: none !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* 2026-05-18 USER REQUEST: botoes UI zoom fixos no canto superior direito da arena.
@@ -22961,8 +22964,18 @@ function mountBattlefieldPanZoom() {
             return;
         }
 
-        var vpW = vp.clientWidth || 390;
-        var vpH = vp.clientHeight || 260;
+        var vpW = vp.clientWidth;
+        var vpH = vp.clientHeight;
+        if (!vpW || !vpH || vpW < 100 || vpH < 100) {
+            var appEl = document.getElementById('app');
+            if (appEl && appEl.clientWidth >= 100 && appEl.clientHeight >= 100) {
+                vpW = appEl.clientWidth;
+                vpH = Math.max(200, Math.round(appEl.clientHeight * 0.55));
+            } else {
+                vpW = Math.max(320, window.innerWidth || 390);
+                vpH = Math.max(220, Math.round((window.innerHeight || 600) * 0.45));
+            }
+        }
         var dockEl = document.querySelector('.sim-action-dock');
         var dockH = (dockEl && dockEl.offsetHeight) ? Math.min(80, dockEl.offsetHeight) : 0;
         var usableVpH = Math.max(160, vpH - dockH);
@@ -23011,16 +23024,14 @@ function mountBattlefieldPanZoom() {
     };
     fitAll();
 
-    // Se o layout do Telegram WebApp ainda não estiver consolidado (dimensões zeradas no mount síncrono), agenda re-fit via rAF e timeout
-    if (vp.clientWidth < 100 || vp.clientHeight < 100) {
+    // Consolidação de layout após mount síncrono no Telegram WebApp
+    requestAnimationFrame(function () {
         requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-                if (vp && stage && (!window.__bfPanState || !window.__bfPanState.userAdjusted)) {
-                    fitOverview(false);
-                }
-            });
+            if (vp && stage && (!window.__bfPanState || !window.__bfPanState.userAdjusted)) {
+                fitOverview(false);
+            }
         });
-    }
+    });
     setTimeout(function () {
         if (vp && stage && (!window.__bfPanState || !window.__bfPanState.userAdjusted)) {
             fitOverview(false);
@@ -23039,19 +23050,19 @@ function mountBattlefieldPanZoom() {
                 resolve();
                 return;
             }
-            var getTime = function () {
-                return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-            };
             var startZ = currentZoom;
             var startX = currentPanX;
             var startY = currentPanY;
-            var startT = getTime();
+            var startTime = null;
             function easeInOutCubic(t) {
                 return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
             }
-            function step(now) {
-                var curT = (typeof now === 'number' && now > 0) ? now : getTime();
-                var elapsed = curT - startT;
+            function step(timestamp) {
+                if (startTime === null) {
+                    startTime = (typeof timestamp === 'number' && timestamp > 0) ? timestamp : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+                }
+                var curTime = (typeof timestamp === 'number' && timestamp > 0) ? timestamp : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+                var elapsed = Math.max(0, curTime - startTime);
                 var progress = Math.min(1, elapsed / durationMs);
                 var eased = easeInOutCubic(progress);
                 currentZoom = startZ + (targetZ - startZ) * eased;
@@ -23122,7 +23133,7 @@ function mountBattlefieldPanZoom() {
         var lastActionTime = 0;
         var onTrigger = async function (ev) {
             var now = Date.now();
-            if (now - lastActionTime < 250) return;
+            if (now - lastActionTime < 180) return;
             lastActionTime = now;
             window.__bfUserHasInteracted = true;
             if (ev) {
@@ -23130,6 +23141,7 @@ function mountBattlefieldPanZoom() {
                 ev.stopPropagation();
             }
             var act = btn.getAttribute('data-bf-zoom-act');
+            console.info('[BF-CAMERA-ACT] triggered act=' + act + ' event=' + (ev ? ev.type : 'none'));
             if (act === 'zoomIn') {
                 applyZoom(currentZoom * 1.25);
             } else if (act === 'zoomOut') {
@@ -23140,14 +23152,10 @@ function mountBattlefieldPanZoom() {
                 await fitOverview(true);
             }
         };
-        // Evita que o evento de toque/arraste do viewport capture o clique dos botões de controle
-        btn.addEventListener('pointerdown', function (ev) {
-            ev.stopPropagation();
-        });
-        btn.addEventListener('touchstart', function (ev) {
-            ev.stopPropagation();
-        }, { passive: true });
+        // Suporte omnidirecional a toque, clique e caneta sem engolir gestos
         btn.addEventListener('click', onTrigger);
+        btn.addEventListener('pointerup', onTrigger);
+        btn.addEventListener('touchend', onTrigger);
     });
 
     /* === Desktop: roda do mouse = zoom centrado no cursor === */
