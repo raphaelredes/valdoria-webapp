@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T03:04:01Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T03:29:12Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10223,22 +10223,29 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   transition: opacity 0.25s ease;
 }
 
-/* Visibilidade e Fog of War nos Hexágonos */
+/* Visibilidade e Fog of War nos Hexágonos (Padrão D&D 5e VTT - Foundry / Solasta) */
 .battlefield-hex-arena .hex-tile.hex-tile--revealed {
   transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.25s ease;
 }
+.battlefield-hex-arena .hex-tile.hex-tile--vision-edge {
+  stroke: rgba(212, 175, 55, 0.48) !important;
+  stroke-width: 1.5 !important;
+  stroke-dasharray: 6 3;
+}
 .battlefield-hex-arena .hex-tile.hex-tile--dim {
-  opacity: 0.62;
-  filter: contrast(0.85);
-  transition: opacity 0.25s ease;
+  opacity: 0.72;
+  filter: brightness(0.62) saturate(0.65) contrast(0.9);
+  stroke: rgba(140, 115, 75, 0.45) !important;
+  stroke-dasharray: 4 2;
+  transition: opacity 0.25s ease, filter 0.25s ease;
 }
 .battlefield-hex-arena .hex-tile.hex-tile--fogged {
-  opacity: 0.16 !important;
-  fill: #140f0c !important;
-  stroke: rgba(75, 60, 48, 0.22) !important;
-  stroke-dasharray: 3 3;
+  opacity: 0.92 !important;
+  fill: #0c0a08 !important;
+  stroke: rgba(48, 38, 28, 0.38) !important;
+  stroke-dasharray: 2 4;
   pointer-events: none;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.35s ease, fill 0.35s ease;
 }
 
 .battlefield-hex-arena .hex-tile:hover {
@@ -10255,11 +10262,11 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   stroke-dasharray: none;
 }
 
-/* Hexágonos de alcance tático D&D 5e — iluminação rúnica medieval e filigrana nobre (sem neon cyberpunk) */
+/* Hexágonos de alcance tático D&D 5e — deslocamento com preenchimento translúcido suave (sem ofuscar visão) */
 .battlefield-hex-arena .hex-tile--reachable {
-  fill: rgba(196, 149, 58, 0.22) !important;
-  stroke: rgba(212, 175, 55, 0.75) !important;
-  stroke-width: 1.8 !important;
+  fill: rgba(196, 149, 58, 0.12) !important;
+  stroke: rgba(212, 175, 55, 0.72) !important;
+  stroke-width: 1.6 !important;
   stroke-dasharray: 5 3;
   cursor: pointer !important;
   filter: drop-shadow(0 0 5px rgba(196, 149, 58, 0.35));
@@ -10393,17 +10400,25 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   stroke: rgba(245, 158, 11, 0.85) !important;
 }
 
-/* Selo / Badge de Escala Tática D&D 5e */
-.bf-scale-badge {
+/* Selos / Badges HUD de Escala e Visão Tática D&D 5e */
+.bf-hud-badges {
   position: absolute;
   top: 10px;
   left: 12px;
   z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  pointer-events: none;
+}
+.bf-scale-badge {
+  position: static;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 3px 10px;
-  background: rgba(18, 14, 10, 0.88);
+  background: rgba(18, 14, 10, 0.9);
   border: 1px solid rgba(196, 149, 58, 0.6);
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
@@ -10421,6 +10436,34 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   color: rgba(235, 214, 167, 0.65);
   letter-spacing: 0.8px;
   border-left: 1px solid rgba(196, 149, 58, 0.4);
+  padding-left: 6px;
+  margin-left: 2px;
+}
+
+.bf-vision-badge {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: rgba(14, 18, 24, 0.9);
+  border: 1px solid rgba(100, 150, 220, 0.55);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  color: #dbeafe;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.bf-vision-badge .bf-vision-icon { font-size: 11px; }
+.bf-vision-badge strong { color: #60a5fa; font-weight: 700; }
+.bf-vision-badge .bf-vision-sub {
+  font-size: 7.5px;
+  color: rgba(191, 219, 254, 0.75);
+  letter-spacing: 0.8px;
+  border-left: 1px solid rgba(100, 150, 220, 0.4);
   padding-left: 6px;
   margin-left: 2px;
 }
@@ -19712,41 +19755,59 @@ function ensureProceduralBattlefield(s) {
 
     var expanded = false;
 
-    // Expansão para a direita se aproximando da borda máxima
-    if (maxC + 2 >= s.battlefield.cols) {
-        s.battlefield.cols = maxC + 4;
-        expanded = true;
-    }
-
-    // Expansão para baixo se aproximando da borda máxima
-    if (maxR + 2 >= s.battlefield.rows) {
-        s.battlefield.rows = maxR + 4;
-        expanded = true;
-    }
-
-    // Expansão para a esquerda se atingir a borda 0
-    if (minC <= 0) {
-        var shiftC = 2;
+    // Expansão para a esquerda se atingir a borda (minC <= 1)
+    if (minC <= 1) {
+        var shiftC = Math.max(1, 4 - minC);
         s.battlefield.cols += shiftC;
+        maxC += shiftC;
         (s.order || []).forEach(function (u) {
             if (u && u.pos && u.pos.col != null) u.pos.col += shiftC;
         });
         s.battlefield.difficult_terrain.forEach(function (dt) {
             if (dt && dt.col != null) dt.col += shiftC;
         });
+        if (s.battlefield.obstacles) {
+            s.battlefield.obstacles.forEach(function (obs) {
+                if (obs && obs.col != null) obs.col += shiftC;
+            });
+        }
+        if (typeof window !== 'undefined' && window.__bfPanState && typeof window.__bfPanState.panX === 'number') {
+            window.__bfPanState.panX -= Math.round(shiftC * HEX_COL_STEP * (window.__bfPanState.currentZoom || 1));
+        }
         expanded = true;
     }
 
-    // Expansão para cima se atingir a borda 0
+    // Expansão para cima se atingir a borda (minR <= 0)
     if (minR <= 0) {
-        var shiftR = 2;
+        var shiftR = 4;
         s.battlefield.rows += shiftR;
+        maxR += shiftR;
         (s.order || []).forEach(function (u) {
             if (u && u.pos && u.pos.row != null) u.pos.row += shiftR;
         });
         s.battlefield.difficult_terrain.forEach(function (dt) {
             if (dt && dt.row != null) dt.row += shiftR;
         });
+        if (s.battlefield.obstacles) {
+            s.battlefield.obstacles.forEach(function (obs) {
+                if (obs && obs.row != null) obs.row += shiftR;
+            });
+        }
+        if (typeof window !== 'undefined' && window.__bfPanState && typeof window.__bfPanState.panY === 'number') {
+            window.__bfPanState.panY -= Math.round(shiftR * HEX_ROW_STEP * (window.__bfPanState.currentZoom || 1));
+        }
+        expanded = true;
+    }
+
+    // Expansão para a direita se aproximando da borda máxima
+    if (maxC + 3 >= s.battlefield.cols) {
+        s.battlefield.cols = maxC + 5;
+        expanded = true;
+    }
+
+    // Expansão para baixo se aproximando da borda máxima
+    if (maxR + 3 >= s.battlefield.rows) {
+        s.battlefield.rows = maxR + 5;
         expanded = true;
     }
 
@@ -19755,11 +19816,17 @@ function ensureProceduralBattlefield(s) {
         s.battlefield.difficult_terrain.forEach(function (dt) {
             if (dt && dt.col != null && dt.row != null) dtMap[dt.col + ',' + dt.row] = true;
         });
+        var obsMap = {};
+        if (s.battlefield.obstacles) {
+            s.battlefield.obstacles.forEach(function (obs) {
+                if (obs && obs.col != null && obs.row != null) obsMap[obs.col + ',' + obs.row] = true;
+            });
+        }
         var biomeStr = s.biome || 'forest';
         for (var c = 0; c < s.battlefield.cols; c++) {
             for (var r = 0; r < s.battlefield.rows; r++) {
                 var k = c + ',' + r;
-                if (!dtMap[k]) {
+                if (!dtMap[k] && !obsMap[k]) {
                     var feat = getProceduralHexFeature(c, r, biomeStr);
                     if (feat) {
                         s.battlefield.difficult_terrain.push(feat);
@@ -20651,6 +20718,58 @@ function buildBattlefield(s) {
         }
     }
 
+    var curBiome = getBattlefieldBiomeKey(s);
+    var curWeather = String(s.weather || 'clear').toLowerCase();
+
+    function calcUnitVisionRange(u) {
+        var baseR = 5; // Limpo / Dia (alcance tático amplo)
+        if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') baseR = 2;
+        else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') baseR = 3;
+        else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') baseR = 4;
+        else if (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('masmorra') >= 0 || curBiome.indexOf('dungeon') >= 0) baseR = 2;
+        else baseR = 5;
+
+        // Bônus racial D&D 5e (Darkvision / Sentidos Aguçados)
+        var raceStr = String((u && (u.race || u.r)) || '').toLowerCase();
+        if (raceStr.indexOf('elf') >= 0 || raceStr.indexOf('an') >= 0 || raceStr.indexOf('dwarf') >= 0 || raceStr.indexOf('tiefling') >= 0 || raceStr.indexOf('gnom') >= 0) {
+            baseR += 1;
+        }
+        var uName = String((u && u.n) || '').toLowerCase();
+        if (uName.indexOf('lobo') >= 0 || uName.indexOf('wolf') >= 0 || uName.indexOf('goblin') >= 0 || uName.indexOf('orc') >= 0) {
+            baseR += 1;
+        }
+        return Math.max(1, Math.min(7, baseR));
+    }
+
+    var friendlyUnits = (s.order || []).filter(function (u) {
+        return u && u.alive && !u.isDead && (u.t === 'p' || u.t === 'a') && u.pos && u.pos.col != null && u.pos.row != null;
+    });
+
+    var maxPartyVr = 0;
+    friendlyUnits.forEach(function (fu) {
+        var vr = calcUnitVisionRange(fu);
+        if (vr > maxPartyVr) maxPartyVr = vr;
+    });
+    if (maxPartyVr === 0) maxPartyVr = playerUnit ? calcUnitVisionRange(playerUnit) : 5;
+    var partyVisionMeters = formatHexDistanceMeters(maxPartyVr);
+
+    var visionConditionLabel = 'LUZ PLENA';
+    var isCave = (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('caverna') >= 0 || curBiome.indexOf('masmorra') >= 0 || curBiome.indexOf('dungeon') >= 0);
+    var pRace = String(playerUnit && (playerUnit.race || playerUnit.r) || '').toLowerCase();
+    var hasDarkvision = (pRace.indexOf('elf') >= 0 || pRace.indexOf('an') >= 0 || pRace.indexOf('dwarf') >= 0 || pRace.indexOf('tiefling') >= 0 || pRace.indexOf('gnom') >= 0);
+
+    if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') {
+        visionConditionLabel = 'NÉVOA DENSA';
+    } else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') {
+        visionConditionLabel = 'TEMPESTADE';
+    } else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') {
+        visionConditionLabel = 'CHUVA FORTE';
+    } else if (isCave) {
+        visionConditionLabel = hasDarkvision ? 'VISÃO NO ESCURO' : 'SUBTERRÂNEO';
+    } else {
+        visionConditionLabel = 'LUZ PLENA';
+    }
+
     var html = '<div class="bf-pan-outer">';
     html += '<div class="bf-zoom-controls" aria-label="Controles de zoom e câmera da mesa">';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomIn" title="Aproximar (+)" aria-label="Aproximar">+</button>';
@@ -20658,7 +20777,10 @@ function buildBattlefield(s) {
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="focusPlayer" title="Centralizar no seu Personagem (🎯)" aria-label="Focar Personagem">🎯</button>';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="fit" title="Visão Geral do Cenário (Ajustar)" aria-label="Visão Geral">⛶</button>';
     html += '</div>';
+    html += '<div class="bf-hud-badges">';
     html += '<div class="bf-scale-badge" title="Regras D&D 5e: 1 Hexágono = 1,5m (5 pés). Zoom tático de confronto!"><span class="bf-scale-icon">📐</span><span class="bf-scale-text">ESCALA D&D 5e: <strong>1 HEX = 1,5m (5 FT)</strong></span><span class="bf-scale-sub">ZOOM DE CONFRONTO</span></div>';
+    html += '<div class="bf-vision-badge" title="Regras D&D 5e (PHB p. 183): Campo de visão ativo da equipe (' + partyVisionMeters + ' / ' + maxPartyVr + ' hexes). Além deste raio, a penumbra e a névoa de guerra encobrem o terreno."><span class="bf-vision-icon">👁️</span><span class="bf-vision-text">VISÃO: <strong>' + partyVisionMeters + ' (' + maxPartyVr + ' HEXES)</strong></span><span class="bf-vision-sub">' + visionConditionLabel + '</span></div>';
+    html += '</div>';
 
     // AI Turn Floating Banner (Padrão Larian / Feedback Visual de Automação)
     if (!isPlayerActiveTurn && active && active.alive && !active.isDead) {
@@ -20799,33 +20921,7 @@ function buildBattlefield(s) {
     }
 
     // === D&D 5e: FOG OF WAR & VISIBILIDADE TÁTICA (Influência de Clima e Bioma) ===
-    var curWeather = String(s.weather || 'clear').toLowerCase();
-
-    function calcUnitVisionRange(u) {
-        var baseR = 5; // Limpo / Dia (alcance tático amplo)
-        if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') baseR = 2;
-        else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') baseR = 3;
-        else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') baseR = 4;
-        else if (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('masmorra') >= 0) baseR = 2;
-        else baseR = 5;
-
-        // Bônus racial D&D 5e (Darkvision / Sentidos Aguçados)
-        var raceStr = String(u.race || u.r || '').toLowerCase();
-        if (raceStr.indexOf('elf') >= 0 || raceStr.indexOf('an') >= 0 || raceStr.indexOf('dwarf') >= 0 || raceStr.indexOf('tiefling') >= 0 || raceStr.indexOf('gnom') >= 0) {
-            baseR += 1;
-        }
-        var uName = String(u.n || '').toLowerCase();
-        if (uName.indexOf('lobo') >= 0 || uName.indexOf('wolf') >= 0 || uName.indexOf('goblin') >= 0 || uName.indexOf('orc') >= 0) {
-            baseR += 1;
-        }
-        return Math.max(1, Math.min(7, baseR));
-    }
-
     var partyVisionMap = {};
-    var friendlyUnits = (s.order || []).filter(function (u) {
-        return u && u.alive && !u.isDead && (u.t === 'p' || u.t === 'a') && u.pos && u.pos.col != null && u.pos.row != null;
-    });
-
     friendlyUnits.forEach(function (fu) {
         var vr = calcUnitVisionRange(fu);
         for (var c = 0; c < bCols; c++) {
@@ -20833,12 +20929,13 @@ function buildBattlefield(s) {
                 var d = hexDistance(fu.pos.col, fu.pos.row, c, r);
                 var hk = c + ',' + r;
                 if (d <= vr) {
+                    var isEdge = (d === vr);
                     if (!partyVisionMap[hk] || d < partyVisionMap[hk].dist) {
-                        partyVisionMap[hk] = { visible: true, dim: false, dist: d };
+                        partyVisionMap[hk] = { visible: true, dim: false, dist: d, isEdge: isEdge };
                     }
                 } else if (d === vr + 1) {
                     if (!partyVisionMap[hk]) {
-                        partyVisionMap[hk] = { visible: false, dim: true, dist: d };
+                        partyVisionMap[hk] = { visible: false, dim: true, dist: d, isEdge: false };
                     }
                 }
             }
@@ -20854,12 +20951,16 @@ function buildBattlefield(s) {
             var visInfo = partyVisionMap[hexKey];
             var isRevealed = visInfo && visInfo.visible;
             var isDim = visInfo && visInfo.dim;
+            var isVisionEdge = isRevealed && visInfo && visInfo.isEdge;
             var isFogged = !isRevealed && !isDim;
 
             var tileCls = 'hex-tile';
             if (isFogged) tileCls += ' hex-tile--fogged';
             else if (isDim) tileCls += ' hex-tile--dim';
-            else tileCls += ' hex-tile--revealed';
+            else {
+                tileCls += ' hex-tile--revealed';
+                if (isVisionEdge) tileCls += ' hex-tile--vision-edge';
+            }
 
             var isReachable = reachableMap[hexKey] != null;
             var isInReach = inReachMap[hexKey] != null;
