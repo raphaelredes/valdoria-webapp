@@ -1647,9 +1647,15 @@ var DEPARTURES = {
         var dest = (j && j.displayName) || 'destino desconhecido';
         var steps = (j && j.total) || 3;
         var biome = (j && j.biome) || 'plains';
+        var isReturn = (dest === 'Valdoria' || (j && j.isReturn) || (j && j.opts && (j.opts.direction === 'return' || j.opts.isReturn)));
 
         var script = [
-            { type: 'narration', text: 'Você contempla a rota para <b>' + dest + '</b> além dos portões. A travessia pelas terras ermas exigirá <b>' + steps + ' etapas</b> de marcha contínua.' }
+            {
+                type: 'narration',
+                text: isReturn
+                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. A travessia de volta exigirá <b>' + steps + ' etapas</b> de marcha atenta através da região.')
+                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A travessia pelas terras ermas exigirá <b>' + steps + ' etapas</b> de marcha contínua.')
+            }
         ];
 
         var rFlavor = _getRaceConfirmationNarration(t, biome);
@@ -1661,8 +1667,10 @@ var DEPARTURES = {
         var choices = [
             {
                 id: 'jrn_go',
-                label: 'Partir em marcha padrão',
-                desc: 'Avançar no ritmo comum da estrada, sem preparação tática especial.'
+                label: isReturn ? 'Iniciar marcha de retorno' : 'Partir em marcha padrão',
+                desc: isReturn
+                    ? 'Avançar com determinação pela estrada de volta aos portões de Valdoria.'
+                    : 'Avançar no ritmo comum da estrada, sem preparação tática especial.'
             }
         ];
 
@@ -1673,15 +1681,17 @@ var DEPARTURES = {
 
         choices.push({
             id: 'jrn_cancel',
-            label: 'Permanecer na cidade',
-            desc: 'Suspender a viagem e continuar em segurança dentro dos muros da cidade.'
+            label: isReturn ? 'Continuar na exploração' : 'Permanecer na cidade',
+            desc: isReturn
+                ? 'Suspender o retorno e continuar explorando as terras ermas.'
+                : 'Suspender a viagem e continuar em segurança dentro dos muros da cidade.'
         });
 
         return {
             script: script,
             choices: choices,
-            choicesTitle: 'Preparação de Viagem',
-            choicesSubtitle: 'Rumo a ' + dest,
+            choicesTitle: isReturn ? 'Retorno a Valdoria' : 'Preparação de Viagem',
+            choicesSubtitle: isReturn ? ('Regresso a ' + dest) : ('Rumo a ' + dest),
             compact: true
         };
     }

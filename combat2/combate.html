@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T12:06:38Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T13:17:29Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -9934,6 +9934,11 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 @keyframes levelUpShimmer { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.4); } }
 .rr-loot-row { display: flex; align-items: center; gap: var(--v-space-md-lg, 10px); padding: 7px var(--v-space-md-lg, 10px); background: rgba(15,12,8,.5); border: 1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); animation: rrLootIn .5s cubic-bezier(.34,1.56,.64,1) 1.2s both; }
 .rr-loot-row.gold { border-color: rgba(196,149,58,.4); }
+.rr-loot-row--clickable { cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
+.rr-loot-row--clickable:hover, .rr-loot-row--clickable:active { background: rgba(196,149,58,.22) !important; border-color: rgba(196,149,58,.75) !important; transform: translateY(-1px); }
+.rr-loot-row--clickable .rr-name { text-decoration: underline dotted rgba(196,149,58,.45); }
+.rr-info-badge { font-size: calc(11px * var(--v-font-scale, 1)); margin-left: 6px; opacity: .7; transition: opacity .15s ease, transform .15s ease; }
+.rr-loot-row--clickable:hover .rr-info-badge { opacity: 1; transform: scale(1.15); }
 @keyframes rrLootIn { 0% { transform: translateX(-20px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
 .rr-ico { font-size: calc(22px * var(--v-font-scale, 1)); flex-shrink: 0; width: 26px; height: 26px; text-align: center; filter: drop-shadow(0 0 6px rgba(196,149,58,.3)); display: flex; align-items: center; justify-content: center; }
 .rr-ico .vi.vi-coin { flex-shrink: 0; }
@@ -11176,6 +11181,7 @@ document.write('<script src="../shared/icons-resolver.js?v=' + _vti + '"><\/scri
 // 2026-05-17: asset-resolver — DOM upgrader pra SVG <use href="#ic-X"> → PNG.
 document.write('<script src="../shared/asset-resolver.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/items-db-generated.js?v=' + _vti + '"><\/script>');
 </script>
 </head>
 <body class="biome-forest sim-combat-layout">
@@ -19928,7 +19934,7 @@ function ensureProceduralBattlefield(s) {
 
 async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
     if (!tokenEl || !path || path.length <= 1) return;
-    var stepMs = stepDurationMs || 380;
+    var stepMs = stepDurationMs || 800;
     tokenEl.style.zIndex = '60';
 
     for (var p = 1; p < path.length; p++) {
@@ -20233,7 +20239,7 @@ async function handlePlayerMoveTo(tCol, tRow) {
     if (validPath.length <= 1) return;
 
     var tokenEl = document.querySelector('[data-unit-id="player"]');
-    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 380;
+    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
 
     var actualReachedSteps = 0;
     var actualSpentCost = 0;
@@ -20308,6 +20314,11 @@ async function handlePlayerMoveTo(tCol, tRow) {
         try { sendBattleCheckpoint(currentState); } catch (_) {}
     }
     render(currentState);
+
+    // Zoom out suave até mostrar toda a tela no final da movimentação (Ordem do Usuário 2026-10)
+    if (actualReachedSteps > 0 && typeof window.bfCameraFocusOverview === 'function') {
+        try { await window.bfCameraFocusOverview(750); } catch (_) {}
+    }
 }
 
 function hexNeighbors(c, r) {
@@ -23859,7 +23870,15 @@ function mountBattlefieldPanZoom() {
             }
         }
 
-        // Se existirem combatentes na mesa, enquadra todos simultaneamente garantindo visibilidade total (Ordem do Usuário 2026-10)
+        // Limites da arena completa
+        var arenaCenterX = padPanX + arenaW / 2;
+        var arenaCenterY = padPanY + arenaH / 2;
+        var fitXAll = (vpW - 32) / Math.max(320, arenaW);
+        var fitYAll = (usableVpH - 24) / Math.max(320, arenaH);
+        var zAll = Math.min(fitXAll, fitYAll);
+        zAll = Math.max(MIN_ZOOM, Math.min(0.85, zAll));
+
+        // Se existirem combatentes na mesa, enquadra todos simultaneamente garantindo visão ampla de todo o cenário (Ordem do Usuário 2026-10)
         if (aliveUnits.length > 0) {
             var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             for (var ui = 0; ui < aliveUnits.length; ui++) {
@@ -23874,53 +23893,52 @@ function mountBattlefieldPanZoom() {
             }
 
             // Margem em torno dos centros dos tokens (inclui miniatura 64x60px + hud/badge de HP e nome)
-            var marginX = 52;
-            var marginY = 56;
+            var marginX = 64;
+            var marginY = 64;
             var boxMinX = minX - marginX;
             var boxMaxX = maxX + marginX;
             var boxMinY = minY - marginY;
             var boxMaxY = maxY + marginY;
 
-            var boxW = Math.max(120, boxMaxX - boxMinX);
-            var boxH = Math.max(120, boxMaxY - boxMinY);
+            var boxW = Math.max(160, boxMaxX - boxMinX);
+            var boxH = Math.max(160, boxMaxY - boxMinY);
             var centerX = (boxMinX + boxMaxX) / 2;
             var centerY = (boxMinY + boxMaxY) / 2;
 
             // Folga de respiro interna no viewport para os tokens não colarem nas bordas da tela
-            var padScreenX = 28;
-            var padScreenY = 28;
+            var padScreenX = 32;
+            var padScreenY = 32;
             var availW = Math.max(120, vpW - padScreenX);
             var availH = Math.max(120, usableVpH - padScreenY);
 
             var fitX = availW / boxW;
             var fitY = availH / boxH;
-            var z = Math.min(fitX, fitY);
-            z = Math.max(MIN_ZOOM, Math.min(1.05, z));
+            var zUnits = Math.min(fitX, fitY);
 
-            var panX = (vpW / 2) - (centerX * z);
-            var panY = usableCenterY - (centerY * z);
+            // Visão Geral / Zoom out suave: enquadra combatentes sem ultrapassar perspectiva ampla do tabuleiro (Ordem do Usuário 2026-10)
+            var maxOverviewZ = Math.min(0.82, Math.max(zAll, zAll * 1.15));
+            var z = Math.max(MIN_ZOOM, Math.min(maxOverviewZ, zUnits));
+
+            var finalCenterX = (centerX * 0.75) + (arenaCenterX * 0.25);
+            var finalCenterY = (centerY * 0.75) + (arenaCenterY * 0.25);
+
+            var panX = (vpW / 2) - (finalCenterX * z);
+            var panY = usableCenterY - (finalCenterY * z);
             var clamped = clampPan(panX, panY, z);
             return { z: z, x: clamped.x, y: clamped.y };
         }
 
         // Fallback: caso não haja combatentes posicionados, enquadra o centro da arena
-        var arenaCenterX = padPanX + arenaW / 2;
-        var arenaCenterY = padPanY + arenaH / 2;
-        var fitXAll = (vpW - 32) / Math.max(320, arenaW);
-        var fitYAll = (usableVpH - 24) / Math.max(320, arenaH);
-        var zAll = Math.min(fitXAll, fitYAll);
-        zAll = Math.max(MIN_ZOOM, Math.min(0.85, zAll));
-
         var panXAll = (vpW / 2) - (arenaCenterX * zAll);
         var panYAll = usableCenterY - (arenaCenterY * zAll);
         var clampedAll = clampPan(panXAll, panYAll, zAll);
         return { z: zAll, x: clampedAll.x, y: clampedAll.y };
     };
 
-    var fitOverview = async function (animate) {
+    var fitOverview = async function (animate, durationMs) {
         var p = getOverviewParams();
         if (animate) {
-            await smoothAnimateCamera(p.z, p.x, p.y, 350);
+            await smoothAnimateCamera(p.z, p.x, p.y, durationMs || 750);
             if (window.__bfPanState) window.__bfPanState.userAdjusted = false;
         } else {
             currentZoom = p.z;
@@ -24026,10 +24044,12 @@ function mountBattlefieldPanZoom() {
         }
     }, 120);
 
+    var cameraAnimToken = 0;
     function smoothAnimateCamera(targetZ, targetPanX, targetPanY, durationMs) {
         return new Promise(function (resolve) {
             if (!vp || !stage) { resolve(); return; }
-            durationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : (durationMs || 350);
+            var myToken = ++cameraAnimToken;
+            durationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : (durationMs || 700);
             if (durationMs <= 30 || typeof requestAnimationFrame !== 'function') {
                 currentZoom = targetZ;
                 currentPanX = targetPanX;
@@ -24046,6 +24066,7 @@ function mountBattlefieldPanZoom() {
                 return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
             }
             function step(timestamp) {
+                if (myToken !== cameraAnimToken) { resolve(); return; }
                 if (startTime === null) {
                     startTime = (typeof timestamp === 'number' && timestamp > 0) ? timestamp : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
                 }
@@ -24072,7 +24093,7 @@ function mountBattlefieldPanZoom() {
     }
 
     window.bfCameraFocusOverview = async function (durationMs) {
-        await fitOverview(true);
+        await fitOverview(true, durationMs || 750);
     };
 
     window.bfCameraFocusCoord = async function (col, row, targetZoom, durationMs) {
@@ -24108,7 +24129,7 @@ function mountBattlefieldPanZoom() {
                 window.__bfLastTurnFocusKey = turnUnitKey;
                 setTimeout(function () {
                     if (typeof window.bfCameraFocusUnit === 'function') {
-                        window.bfCameraFocusUnit(turnUnit, null, 300);
+                        window.bfCameraFocusUnit(turnUnit, null, 450);
                     }
                 }, 30);
             }
@@ -24131,13 +24152,37 @@ function mountBattlefieldPanZoom() {
             var act = btn.getAttribute('data-bf-zoom-act');
             console.info('[BF-CAMERA-ACT] triggered act=' + act + ' event=' + (ev ? ev.type : 'none'));
             if (act === 'zoomIn') {
-                applyZoom(currentZoom * 1.25);
+                var targetZ = Math.min(MAX_ZOOM, currentZoom * 1.25);
+                var vpW = vp.clientWidth || 390;
+                var vpH = vp.clientHeight || 260;
+                var dockEl = document.querySelector('.sim-action-dock');
+                var dockH = (dockEl && dockEl.offsetHeight) ? Math.min(80, dockEl.offsetHeight) : 0;
+                var usableVpH = Math.max(160, vpH - dockH);
+                var usableCenterY = usableVpH / 2;
+                var centerLocalX = (vpW / 2 - currentPanX) / currentZoom;
+                var centerLocalY = (usableCenterY - currentPanY) / currentZoom;
+                var targetPanX = (vpW / 2) - centerLocalX * targetZ;
+                var targetPanY = usableCenterY - centerLocalY * targetZ;
+                var clamped = clampPan(targetPanX, targetPanY, targetZ);
+                await smoothAnimateCamera(targetZ, clamped.x, clamped.y, 480);
             } else if (act === 'zoomOut') {
-                applyZoom(currentZoom / 1.25);
+                var targetZ2 = Math.max(MIN_ZOOM, currentZoom / 1.25);
+                var vpW2 = vp.clientWidth || 390;
+                var vpH2 = vp.clientHeight || 260;
+                var dockEl2 = document.querySelector('.sim-action-dock');
+                var dockH2 = (dockEl2 && dockEl2.offsetHeight) ? Math.min(80, dockEl2.offsetHeight) : 0;
+                var usableVpH2 = Math.max(160, vpH2 - dockH2);
+                var usableCenterY2 = usableVpH2 / 2;
+                var centerLocalX2 = (vpW2 / 2 - currentPanX) / currentZoom;
+                var centerLocalY2 = (usableCenterY2 - currentPanY) / currentZoom;
+                var targetPanX2 = (vpW2 / 2) - centerLocalX2 * targetZ2;
+                var targetPanY2 = usableCenterY2 - centerLocalY2 * targetZ2;
+                var clamped2 = clampPan(targetPanX2, targetPanY2, targetZ2);
+                await smoothAnimateCamera(targetZ2, clamped2.x, clamped2.y, 480);
             } else if (act === 'focusPlayer') {
                 await focusPlayer(true);
             } else if (act === 'fit') {
-                await fitOverview(true);
+                await fitOverview(true, 750);
             }
         };
         // Suporte omnidirecional a toque, clique e caneta sem engolir gestos
@@ -24146,14 +24191,21 @@ function mountBattlefieldPanZoom() {
         btn.addEventListener('touchend', onTrigger);
     });
 
-    /* === Desktop: roda do mouse = zoom centrado no cursor === */
+    /* === Desktop: roda do mouse = zoom centrado no cursor com interpolação suave (padrão RPG tático) === */
     var onWheel = function (e) {
-        e.preventDefault();
-        var delta = e.deltaY < 0 ? 0.08 : -0.08;
+        if (e.cancelable) e.preventDefault();
+        window.__bfUserHasInteracted = true;
         var rect = vp.getBoundingClientRect();
         var mouseX = e.clientX - rect.left;
         var mouseY = e.clientY - rect.top;
-        applyZoom(currentZoom + delta, mouseX, mouseY);
+        var delta = e.deltaY < 0 ? 0.12 : -0.12;
+        var targetZ = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, currentZoom + delta));
+        var localX = (mouseX - currentPanX) / currentZoom;
+        var localY = (mouseY - currentPanY) / currentZoom;
+        var targetPanX = mouseX - localX * targetZ;
+        var targetPanY = mouseY - localY * targetZ;
+        var clamped = clampPan(targetPanX, targetPanY, targetZ);
+        smoothAnimateCamera(targetZ, clamped.x, clamped.y, 220);
     };
     vp.addEventListener('wheel', onWheel, { passive: false });
 
@@ -24424,7 +24476,15 @@ function render(s) {
             html += '<div class="rr-loot-row gold"><span class="rr-ico"><span class="vi vi-coin sm" aria-hidden="true"></span></span><span class="rr-name">Valdoritas</span><span class="rr-qty">+' + r.gold + '</span></div>';
             /* Itens */
             r.items.forEach(function (it, i) {
-                html += '<div class="rr-loot-row" style="animation-delay:' + (1.4 + i * 0.15) + 's"><span class="rr-ico">' + _combatItemIconHTML(it) + '</span><span class="rr-name">' + escHtml(it.n) + '</span><span class="rr-qty rare-' + it.rare + '">' + it.rare + '</span></div>';
+                var itemName = (it && (it.n || it.name)) || '';
+                var gen = (window.ITEMS_DB_GEN && window.ITEMS_DB_GEN[itemName]) || null;
+                var hasDesc = !!((it && it.desc && it.desc.trim().length > 0) || (gen && gen.desc && gen.desc.trim().length > 0));
+                var rowCls = 'rr-loot-row' + (hasDesc ? ' rr-loot-row--clickable' : '');
+                var rowTitle = hasDesc ? 'Toque para ver a descrição e detalhes' : '';
+                var rowDataAttr = hasDesc ? (' data-loot-idx="' + i + '"') : '';
+                var infoBadge = hasDesc ? '<span class="rr-info-badge" aria-hidden="true" title="Ver descrição">ℹ️</span>' : '';
+                var itemRare = (it && (it.rare || it.rarity)) || 'comum';
+                html += '<div class="' + rowCls + '"' + rowDataAttr + ' title="' + escHtml(rowTitle) + '" style="animation-delay:' + (1.4 + i * 0.15) + 's"><span class="rr-ico">' + _combatItemIconHTML(it) + '</span><span class="rr-name">' + escHtml(itemName) + '</span><span class="rr-qty rare-' + itemRare + '">' + escHtml(itemRare) + '</span>' + infoBadge + '</div>';
             });
             if (!r.items.length) {
                 html += '<div class="rr-loot-empty">Nenhum item caiu desta vez.</div>';
@@ -24898,7 +24958,111 @@ function bindActions() {
             tile.addEventListener('click', onTileTrigger);
         })(reachableTiles[ri]);
     }
+    /* Linhas de loot clicáveis na tela de vitória (abre popup com descrição) */
+    var lootRows = document.querySelectorAll('.rr-loot-row--clickable');
+    for (var lri = 0; lri < lootRows.length; lri++) {
+        (function (row) {
+            var lastLootClickTs = 0;
+            var onLootTrigger = function (ev) {
+                var now = Date.now();
+                if (now - lastLootClickTs < 220) return;
+                lastLootClickTs = now;
+                if (ev && ev.cancelable && ev.type !== 'click') ev.preventDefault();
+                var idx = parseInt(row.getAttribute('data-loot-idx'), 10);
+                if (isNaN(idx) || !currentState || !currentState.rewards || !currentState.rewards.items) return;
+                var itemObj = currentState.rewards.items[idx];
+                if (!itemObj) return;
+                _showVictoryItemDetailPopup(itemObj);
+            };
+            row.addEventListener('click', onLootTrigger);
+            row.addEventListener('pointerup', onLootTrigger);
+            row.addEventListener('touchend', onLootTrigger);
+        })(lootRows[lri]);
+    }
     mountBattlefieldPanZoom();
+}
+
+function _showVictoryItemDetailPopup(itemObj) {
+    if (!itemObj) return;
+    var name = itemObj.n || itemObj.name || '';
+    var it = Object.assign({ name: name }, itemObj);
+    if (!it.name) it.name = name;
+
+    // Enriquece com dados do ITEMS_DB_GEN se disponível
+    if (window.ITEMS_DB_GEN && window.ITEMS_DB_GEN[name]) {
+        var g = window.ITEMS_DB_GEN[name];
+        if (!it.desc && g.desc) it.desc = g.desc;
+        if (!it.rarity && (g.r || it.rare)) it.rarity = g.r || it.rare;
+        if (!it.type && g.t && g.t.length) it.type = g.t[0];
+        if (!it.tags && g.t) it.tags = g.t;
+        if (it.value == null && g.v != null) it.value = g.v;
+        if (it.weight == null && g.w != null) it.weight = g.w;
+        if (!it.slot && g.s) it.slot = g.s;
+        if (!it.dmg_die && g.dd) it.dmg_die = g.dd;
+        if (!it.dmg_type && g.dt) it.dmg_type = g.dt;
+        if (it.ac_bonus == null && g.ac != null) it.ac_bonus = g.ac;
+        if (it.heal == null && g.hb != null) it.heal = g.hb;
+    }
+    if (!it.rarity && it.rare) it.rarity = it.rare;
+
+    if (window.vInventory && typeof window.vInventory.showItemDetail === 'function') {
+        window.vInventory.showItemDetail(it, { readOnly: true });
+        return;
+    }
+
+    // Fallback caso vInventory não esteja presente
+    var prev = document.getElementById('victory-item-detail-ov');
+    if (prev) prev.remove();
+
+    var ov = document.createElement('div');
+    ov.id = 'victory-item-detail-ov';
+    ov.className = 'vinv-detail-overlay active vinv-detail-standalone';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+
+    var rarity = it.rarity || it.rare || 'common';
+    var rNorm = { comum: 'common', incomum: 'uncommon', raro: 'rare', epico: 'epic', lendario: 'legendary', missao: 'quest' };
+    if (rNorm[rarity]) rarity = rNorm[rarity];
+    var rLabels = { common: 'COMUM', uncommon: 'INCOMUM', rare: 'RARO', epic: 'ÉPICO', legendary: 'LENDÁRIO', quest: 'MISSÃO' };
+    var rLabel = rLabels[rarity] || 'COMUM';
+
+    var statsHtml = '';
+    if (it.type) statsHtml += '<div class="vinv-detail-stat"><span class="vinv-lbl">Tipo</span><span class="vinv-val">' + escHtml(it.type) + '</span></div>';
+    if (it.slot) statsHtml += '<div class="vinv-detail-stat"><span class="vinv-lbl">Slot</span><span class="vinv-val">' + escHtml(it.slot) + '</span></div>';
+    if (it.dmg_die) statsHtml += '<div class="vinv-detail-stat"><span class="vinv-lbl">Dano</span><span class="vinv-val">' + escHtml(it.dmg_die + (it.dmg_type ? ' ' + it.dmg_type : '')) + '</span></div>';
+    if (it.ac_bonus) statsHtml += '<div class="vinv-detail-stat"><span class="vinv-lbl">CA</span><span class="vinv-val bonus">+' + escHtml(it.ac_bonus) + '</span></div>';
+    if (it.heal) statsHtml += '<div class="vinv-detail-stat"><span class="vinv-lbl">Cura</span><span class="vinv-val">' + escHtml(it.heal) + ' PV</span></div>';
+    if (it.weight) statsHtml += '<div class="vinv-detail-stat"><span class="vinv-lbl">Peso</span><span class="vinv-val">' + escHtml(it.weight) + ' kg</span></div>';
+    if (it.value) statsHtml += '<div class="vinv-detail-stat"><span class="vinv-lbl">Valor</span><span class="vinv-val gold">' + escHtml(it.value) + ' V</span></div>';
+
+    var tagsHtml = '';
+    if (it.tags && it.tags.length) {
+        tagsHtml = '<div class="vinv-detail-tags">' + it.tags.map(function (t) { return '<span class="vinv-dtag">' + escHtml(t) + '</span>'; }).join('') + '</div>';
+    }
+
+    var iconHtml = _combatItemIconHTML(it);
+
+    ov.innerHTML = '<div class="vinv-detail-card">'
+        + '<div class="vinv-detail-close" data-action="close-detail"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 L18 18 M18 6 L6 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+        + '<div class="vinv-detail-body">'
+        +   '<div class="vinv-detail-header">'
+        +     '<div class="vinv-detail-portrait">' + iconHtml + '</div>'
+        +     '<div class="vinv-detail-name">' + escHtml(name) + '</div>'
+        +     '<div class="vinv-detail-rarity ' + rarity + '">' + rLabel + '</div>'
+        +   '</div>'
+        +   (statsHtml ? '<div class="vinv-detail-stats">' + statsHtml + '</div>' : '')
+        +   (it.desc ? '<div class="vinv-detail-desc"><div class="vinv-detail-desc-text">' + escHtml(it.desc) + '</div></div>' : '')
+        +   tagsHtml
+        + '</div>'
+        + '</div>';
+
+    var closeBtn = ov.querySelector('[data-action="close-detail"]');
+    var closeFn = function () { try { ov.remove(); } catch (_) {} };
+    if (closeBtn) closeBtn.addEventListener('click', closeFn);
+    ov.addEventListener('click', function (e) { if (e.target === ov) closeFn(); });
+
+    var host = document.getElementById('app') || document.body;
+    host.appendChild(ov);
 }
 
 /* [C-REM:ACTION] Unified remote action helper.
@@ -33512,7 +33676,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         var actorUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (aIdx === s.p_idx ? 'player' : 'enemy_' + aIdx);
                         var actorEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
                         if (actorEl) {
-                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 380;
+                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
                             await animateUnitHexMovement(actorEl, stepRes.path, hopDurationMs);
                         }
                     }
@@ -33524,6 +33688,10 @@ async function playTurn(aIdx, tIdx, opts) {
                     }
                     s.log.push(actor.n + ' avança ' + formatHexDistanceMeters(stepRes.steps) + ' em direção a ' + target.n + '.');
                     render(s);
+                    // Zoom out suave até mostrar toda a tela no final da movimentação da IA (Ordem do Usuário 2026-10)
+                    if (typeof window.bfCameraFocusOverview === 'function') {
+                        try { await window.bfCameraFocusOverview(750); } catch (_) {}
+                    }
                     await sleep(_skipAllDiceAnim ? 60 : 300);
                 }
             }
@@ -36747,7 +36915,7 @@ async function __combatAnimateOneEvent(ev) {
         if (tokenEl && ev.fromCol != null && ev.fromRow != null && ev.toCol != null && ev.toRow != null) {
             var path = hexLine(ev.fromCol, ev.fromRow, ev.toCol, ev.toRow);
             if (path && path.length > 1) {
-                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 380;
+                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
                 await animateUnitHexMovement(tokenEl, path, stepDurationMs);
             }
         }
@@ -36757,6 +36925,10 @@ async function __combatAnimateOneEvent(ev) {
             ensureProceduralBattlefield(currentState);
         }
         render(currentState);
+        // Zoom out suave até mostrar toda a tela no final da movimentação remota/IA (Ordem do Usuário 2026-10)
+        if (typeof window.bfCameraFocusOverview === 'function') {
+            try { await window.bfCameraFocusOverview(750); } catch (_) {}
+        }
         return;
     }
     if (kind === 'stand_up') {

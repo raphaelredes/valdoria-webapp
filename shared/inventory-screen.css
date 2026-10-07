@@ -1472,6 +1472,12 @@
 
 .vinv-detail-overlay.active { display: flex; }
 
+.vinv-detail-overlay.vinv-detail-standalone {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+}
+
 .vinv-confirm-overlay {
   position: absolute;
   inset: 0;

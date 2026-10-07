@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-03T13:22:56Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T12:59:25Z - do not edit directly, edit source -->
 
 
 
@@ -40293,9 +40293,14 @@ function triggerEdgeTransition(ed) {
   // sistema de edges (placement/walk/click) mas roteia pra startReturnToCity
   // (jornada de volta à cidade) em vez de uma transição de mapa.
   if (ed && ed.targetMap === '__return_city__') {
-    LOG('EDGE', 'return-to-city hex -> startReturnToCity');
+    LOG('EDGE', 'return-to-city hex -> promptConfirmReturnToCity');
     S.ph = 'idle';
-    if (typeof startReturnToCity === 'function') { startReturnToCity(); return; }
+    if (typeof _promptConfirmReturnToCity === 'function') {
+      _promptConfirmReturnToCity();
+    } else if (typeof startReturnToCity === 'function') {
+      startReturnToCity();
+    }
+    return;
   }
   LOG('EDGE', 'triggerEdgeTransition ed=', JSON.stringify({targetMap: ed.targetMap, label: ed.label, col: ed.col, row: ed.row}));
   S.ph = 'event';
@@ -41439,6 +41444,8 @@ function startReturnToCity() {
       player: function () { return (window.S && S.player) || {}; },
       confirm: true,
       audioBiome: true,
+      direction: 'return',
+      isReturn: true,
       totalSteps: _stepsForDistance(),
       refreshHud: (typeof updateHud === 'function') ? updateHud : null,
       onArrive: _returnToCityNow,
@@ -44104,15 +44111,17 @@ function _xcartWireEvents() {
   var cityBtn = document.getElementById('xcart-city-btn');
   if (cityBtn) {
     cityBtn.onclick = function(){
-      try { closeCartography(); } catch(_) {}
-      // #21 (sessão #70): volta à cidade via jornada "Rumo a Valdoria" (mais
-      // longa quanto mais longe vagou + opção de acampar). Ao chegar aos
-      // Portões, a própria jornada dispara _returnToCityNow (finish + redirect,
-      // aplica HP/loot da sessão). Fallback direto se a jornada indisponível.
-      if (typeof startReturnToCity === 'function') {
-        startReturnToCity();
-      } else if (typeof _returnToCityNow === 'function') {
-        _returnToCityNow();
+      if (typeof _promptConfirmReturnToCity === 'function') {
+        _promptConfirmReturnToCity(function(){
+          try { closeCartography(); } catch(_) {}
+        });
+      } else {
+        try { closeCartography(); } catch(_) {}
+        if (typeof startReturnToCity === 'function') {
+          startReturnToCity();
+        } else if (typeof _returnToCityNow === 'function') {
+          _returnToCityNow();
+        }
       }
     };
   }
@@ -49602,12 +49611,50 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 </script>
 
 
-<script>
-// FASE 5.3 v2 — Wrapper do botão Cartografia
-// Intercepta click → mostra popup → user escolhe Voltar pra Cidade OU Ver Mapa
-// FIX 2026-05-04 (audit): popup só aparece quando jogador VEIO da cidade
-// (back=cidade na URL). Caso contrário abre cartografia direto — antes o
-// popup aparecia sempre, mesmo pra quem nunca esteve na cidade.
+// FASE 5.3 v2 — Wrapper do botão Cartografia & Confirmação de Retorno à Cidade
+// Intercepta click → menu claro (Ver Mapa vs Voltar pra Cidade).
+// Se o jogador escolher Voltar pra Cidade, EXIGE confirmação explícita antes de
+// disparar o fluxo de viagem, evitando acidentes e explicando a retenção de dados.
+function _showCartPromptMenu(){
+  var prompt = document.getElementById('cart-back-prompt');
+  if (!prompt) return;
+  var card = prompt.querySelector('.cbp-card');
+  if (card) {
+    card.innerHTML = ''
+      + '<h2>🗺️ Navegação & Retorno</h2>'
+      + '<p>Você está explorando as terras ermas de Valdoria.<br>Deseja consultar o mapa do mundo ou retornar à segurança da cidade?</p>'
+      + '<div class="cbp-buttons">'
+      + '  <button class="cbp-btn cbp-btn-no" data-cbp="open-map" style="background:rgba(196,149,58,0.18);border-color:#c4953a;color:#f0e2cc">🗺️ Ver Mapa de Valdoria (Cartografia)</button>'
+      + '  <button class="cbp-btn cbp-btn-yes" data-cbp="ask-return">🏛️ Voltar para a Cidade</button>'
+      + '  <button class="cbp-btn cbp-btn-no" data-cbp="close-prompt" style="opacity:0.85">✕ Continuar Explorando</button>'
+      + '</div>';
+  }
+  prompt._onConfirmed = null;
+}
+
+function _promptConfirmReturnToCity(onConfirmed){
+  var prompt = document.getElementById('cart-back-prompt');
+  if (!prompt) {
+    if (confirm('Deseja realmente encerrar a exploração e voltar para a cidade de Valdoria?')) {
+      if (typeof onConfirmed === 'function') { try { onConfirmed(); } catch(_) {} }
+      if (typeof startReturnToCity === 'function') startReturnToCity();
+    }
+    return;
+  }
+  var card = prompt.querySelector('.cbp-card');
+  if (card) {
+    card.innerHTML = ''
+      + '<h2>Confirmar Retorno à Cidade?</h2>'
+      + '<p>Você está atualmente em expedição pelas terras ermas.<br>Deseja realmente iniciar a viagem de volta para os portões de <b>Valdoria</b>?<br><br><span style="color:#c4953a;font-size:0.9em;display:inline-block">🛡️ Seus pontos de vida, ouro, experiência e itens acumulados nesta expedição serão preservados com segurança ao retornar.</span></p>'
+      + '<div class="cbp-buttons">'
+      + '  <button class="cbp-btn cbp-btn-yes" data-cbp="confirm-return">✓ Sim, Iniciar Viagem de Volta</button>'
+      + '  <button class="cbp-btn cbp-btn-no" data-cbp="cancel-return">✕ Não, Continuar Explorando</button>'
+      + '</div>';
+  }
+  prompt._onConfirmed = onConfirmed;
+  prompt.classList.add('active');
+}
+
 function _openCartographyWithPrompt(){
   // Sem origem da cidade → abre cartografia direto (comportamento normal)
   if (!window.__BACK_TO_CIDADE) {
@@ -49619,8 +49666,10 @@ function _openCartographyWithPrompt(){
     if (typeof openCartography === 'function') openCartography();
     return;
   }
+  _showCartPromptMenu();
   prompt.classList.add('active');
 }
+
 (function(){
   document.addEventListener('DOMContentLoaded', function(){
     var prompt = document.getElementById('cart-back-prompt');
@@ -49630,19 +49679,26 @@ function _openCartographyWithPrompt(){
       var btn = e.target.closest('[data-cbp]');
       if (!btn) return;
       var action = btn.dataset.cbp;
-      prompt.classList.remove('active');
-      if (action === 'yes') {
-        // #21 (sessão #70): retorno à cidade via jornada "Rumo a Valdoria"
-        // (mais longa quanto mais longe vagou + opção de acampar). Ao chegar
-        // aos Portões, a própria jornada dispara _returnToCityNow (finish +
-        // redirect — limpa flags/in_explore_webapp + aplica loot/HP/gold).
+      if (action === 'open-map' || action === 'no') {
+        prompt.classList.remove('active');
+        if (typeof openCartography === 'function') openCartography();
+      } else if (action === 'ask-return' || action === 'yes') {
+        _promptConfirmReturnToCity(prompt._onConfirmed);
+      } else if (action === 'confirm-return') {
+        prompt.classList.remove('active');
+        var cb = prompt._onConfirmed;
+        prompt._onConfirmed = null;
+        if (typeof cb === 'function') {
+          try { cb(); } catch(_) {}
+        }
         if (typeof startReturnToCity === 'function') {
           startReturnToCity();
         } else if (typeof _returnToCityNow === 'function') {
           _returnToCityNow();
         }
-      } else {
-        if (typeof openCartography === 'function') openCartography();
+      } else if (action === 'cancel-return' || action === 'close-prompt') {
+        prompt.classList.remove('active');
+        prompt._onConfirmed = null;
       }
     });
   });

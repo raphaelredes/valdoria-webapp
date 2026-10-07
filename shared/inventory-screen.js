@@ -325,6 +325,61 @@
       _state.activeTab = 'items';  // sai de equip-mode se estiver
       if (_state.open) _render();
     },
+
+    /**
+     * Exibe o modal popup de detalhes de um item diretamente (sem abrir a mochila inteira).
+     * @param {object|string} itemOrName - objeto do item ou nome do item
+     * @param {object} [options] - opções contextuais ({ readOnly: true, onClose: fn })
+     */
+    showItemDetail: function (itemOrName, options) {
+      if (!itemOrName) return;
+      options = options || {};
+      var it = typeof itemOrName === 'string' ? { name: itemOrName } : Object.assign({}, itemOrName);
+      var name = it.name || it.n || '';
+      if (!it.name) it.name = name;
+
+      // Enriquece com dados do ITEMS_DB_GEN se disponível no ambiente
+      if (window.ITEMS_DB_GEN && window.ITEMS_DB_GEN[name]) {
+        var gen = window.ITEMS_DB_GEN[name];
+        if (!it.desc && gen.desc) it.desc = gen.desc;
+        if (!it.rarity && (gen.r || it.rare)) it.rarity = gen.r || it.rare;
+        if (!it.type && gen.t && gen.t.length) it.type = gen.t[0];
+        if (!it.tags && gen.t) it.tags = gen.t;
+        if (it.value == null && gen.v != null) it.value = gen.v;
+        if (it.weight == null && gen.w != null) it.weight = gen.w;
+        if (!it.slot && gen.s) it.slot = gen.s;
+        if (!it.dmg_die && gen.dd) it.dmg_die = gen.dd;
+        if (!it.dmg_type && gen.dt) it.dmg_type = gen.dt;
+        if (it.ac_bonus == null && gen.ac != null) it.ac_bonus = gen.ac;
+        if (it.heal == null && gen.hb != null) it.heal = gen.hb;
+      }
+      if (!it.rarity && it.rare) it.rarity = it.rare;
+
+      // Normaliza raridades em português ('comum' -> 'common', etc)
+      var rNorm = { comum: 'common', incomum: 'uncommon', raro: 'rare', epico: 'epic', lendario: 'legendary', missao: 'quest' };
+      if (it.rarity && rNorm[it.rarity]) it.rarity = rNorm[it.rarity];
+
+      if (!_state.overlay) _state.overlay = _buildOverlay();
+      _state.selectedItem = it;
+
+      var detailEl = _state.overlay.querySelector('[data-region="detail"]');
+      if (!detailEl) return;
+
+      _showDetail(it, { readOnly: true, fromStandalone: true });
+      detailEl.classList.add('vinv-detail-standalone');
+      detailEl.classList.add('active');
+
+      var _onStandaloneBackdropClick = function (ev) {
+        if (ev.target === detailEl) {
+          _hideDetail();
+          detailEl.removeEventListener('click', _onStandaloneBackdropClick);
+          if (typeof options.onClose === 'function') {
+            try { options.onClose(); } catch (_e) {}
+          }
+        }
+      };
+      detailEl.addEventListener('click', _onStandaloneBackdropClick);
+    },
   };
 
   // ============================================================
@@ -1411,7 +1466,7 @@
   //    - slotKey: nome do slot (pra swap list)
   // ============================================================
   function _showDetail(it, ctx) {
-    var cfg = _state.config;
+    var cfg = _state.config || {};
     ctx = ctx || {};
     _state.selectedItem = it;
     var ov = _state.overlay.querySelector('[data-region="detail"]');
@@ -1953,7 +2008,10 @@
 
   function _hideDetail() {
     var ov = _state.overlay && _state.overlay.querySelector('[data-region="detail"]');
-    if (ov) ov.classList.remove('active');
+    if (ov) {
+      ov.classList.remove('active');
+      ov.classList.remove('vinv-detail-standalone');
+    }
     _state.selectedItem = null;
   }
 
@@ -1966,6 +2024,8 @@
 
   function _buildDetailActions(it, cfg, ctx) {
     ctx = ctx || {};
+    if (ctx.readOnly) return '';
+    cfg = cfg || {};
     var btns = [];
     var isEquipped = !!it.equipped;
     // 2026-07-01 (bug "Roupas Comuns"): o SLOT é a fonte única de equipabilidade —
