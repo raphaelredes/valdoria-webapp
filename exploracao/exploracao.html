@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T20:08:58Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T21:28:03Z - do not edit directly, edit source -->
 
 
 
@@ -12987,6 +12987,12 @@ function parseRewardString(s) {
     function _set(key, val) { if (!w) w = {}; w[key] = val; }
     // only_class — string ou array → cls (mantém forma original)
     if (legacyChoice.only_class) _set('cls', legacyChoice.only_class);
+    // only_race — string ou array
+    if (legacyChoice.only_race) _set('race', legacyChoice.only_race);
+    // only_subrace — string ou array
+    if (legacyChoice.only_subrace) _set('subrace', legacyChoice.only_subrace);
+    // only_subclass — string ou array
+    if (legacyChoice.only_subclass) _set('subclass', legacyChoice.only_subclass);
     // only_background — string ou array
     if (legacyChoice.only_background) _set('background', legacyChoice.only_background);
     // only_alignment — string ou array
@@ -13142,9 +13148,12 @@ function parseRewardString(s) {
     if (when.hasFlag && fr && !fr.has(when.hasFlag)) return false;
     if (when.notFlag && fr && fr.has(when.notFlag)) return false;
     if (when.state && ctx.state && when.state !== ctx.state) return false;
-    // background, cls, alignment — aceitam string ou array (legacy compat)
+    // background, cls, alignment, race — aceitam string ou array (legacy compat)
     if (when.background && !_matchOneOf(when.background, p.background, false)) return false;
     if (when.cls && !_matchOneOf(when.cls, p.cls, true)) return false;
+    if (when.race && !_matchOneOf(when.race, p.race || p.raca, true)) return false;
+    if (when.subrace && !_matchOneOf(when.subrace, p.subrace, true)) return false;
+    if (when.subclass && !_matchOneOf(when.subclass, p.subclass, true)) return false;
     if (when.alignment && !_matchOneOf(when.alignment, p.alignment, false)) return false;
     if (when.archetype) {
       var arch = window.VoiceLineLayer ? window.VoiceLineLayer.getArchetype(p.cls) : null;
@@ -20551,7 +20560,16 @@ const FIXED_MAPS = {
       { col: 10, row: 5, id: 'orc_chief_tent', name: 'Tenda do Chefe', reveal: 'any',
         intro: 'A tenda principal é maciça, feita de peles grossas. Lanças fincadas na terra marcam o limite. Gritos guturais vêm de dentro.' }
     ],
-        edges: [
+    landmarks: [
+      { type: 'bonfire',    col: 10, row: 14, _hex: 'K15' },  // Fogueira de carne assada no centro
+      { type: 'totem',      col: 6,  row: 8,  _hex: 'G9'  },  // Totem tribal oeste
+      { type: 'totem',      col: 14, row: 8,  _hex: 'O9'  },  // Totem tribal leste
+      { type: 'banner',     col: 18, row: 12, _hex: 'S13' },  // Estandarte na entrada de Campos Verdes
+      { type: 'banner',     col: 10, row: 6,  _hex: 'K7'  },  // Estandarte em frente à Tenda do Chefe
+      { type: 'armorpile',  col: 8,  row: 16, _hex: 'I17' },  // Pilha de armas saqueadas
+      { type: 'bonepile',   col: 12, row: 7,  _hex: 'M8'  }   // Pilha de crânios ritual
+    ],
+    edges: [
       { col: 19, row: 12, targetMap: 'green_fields', label: 'Campos Verdes' },
       { col: 10, row: 5, targetMap: 'orc_chief_tent', label: 'Tenda do Chefe' }
     ]
@@ -20691,11 +20709,10 @@ const FIXED_MAPS = {
         repeatable: true,
         title: 'Fogueira do Acampamento',
         text: (
-          'A fogueira no centro do patio orc queima alta. As brasas convidam ' +
-          'a parar e recuperar forcas — descansar curto pra firmar o folego, ' +
-          'ou descansar longo pra refazer o corpo inteiro.\n\n' +
-          'Cuidado: enquanto descansa, você esta vulneravel. Mas a fogueira ' +
-          'tambem afasta inimigos pequenos.'
+          'O estalar pesado de toras grossas de carvalho ressoa no centro do patio orc. ' +
+          'O ar e espesso com cinzas quentes, fumaca de gordura queimada e o cheiro pungente de carne de caca assada. ' +
+          'Ao redor das brasas carmesins, ossos esbranquicados estalam sob o calor constante. ' +
+          'O fogo afasta escorpioes e feras da estepe, criando um breve santuario de descanso antes das profundezas da fortaleza orc.'
         ),
         flavor: 'Acampamento · K13 · Repouso',
         category: 'discovery',
@@ -20703,22 +20720,40 @@ const FIXED_MAPS = {
           { id: 'short_rest', label: '⏸ Descanso Curto (gasta 1 HD)',
             desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
             outcome_ok: { _short_rest: true,
-              text: 'Você sente o vigor voltar parcialmente. As feridas menores fecham.' } },
+              text: 'Você se senta junto as brasas e firma a respiracao. As feridas menores fecham com o calor do fogo.' } },
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
             desc: 'HP/MP cheios + remove 1 nível de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: { _long_rest: true,
-              text: 'Você dorme as 8 horas inteiras. Acorda renovado, pronto pra batalha.' } },
+              text: 'Você monta vigilia intercalada e dorme as 8 horas inteiras. Acorda renovado, pronto para a batalha.' } },
+          { label: 'Consagrar as brasas com prece protetora',
+            only_class: ['paladino', 'clerigo'],
+            desc: 'Prece Divina D&D 5e — abencoar o fogo com luz sagrada purificadora',
+            outcome_ok: { text: 'Você ergue seu simbolo sagrado e murmura uma prece solene. As chamas adquirem um brilho dourado e sereno, dissipando a atmosfera opressiva do acampamento.', hp_gain: 4, mp_gain: 2, xp: 20, _flag: 'hearth_blessed' } },
+          { label: 'Interpretar as cinzas e o vento (Sobrevivência)',
+            only_class: ['patrulheiro', 'druida'],
+            skill: 'wis', dc: 11,
+            desc: 'Sabedoria (Sobrevivencia) CD 11 — ler a direcao da fumaca e os rastros',
+            outcome_ok: { text: 'A fumaca corre para o norte, indicando os tuneis de ventilacao da tenda principal. Você deduz os pontos cegos das patrulhas orcs.', xp: 25, _flag: 'patrols_tracked' },
+            outcome_fail: { text: 'O vento gira bruscamente, soprando fagulhas em seus olhos. Você nao consegue discernir a marcha dos sentinelas.', xp: 5 } },
+          { label: 'Transe Elfico contemplativo (PHB p. 23)',
+            only_race: ['elfo', 'meio_elfo'],
+            desc: 'Meditacao racial — 4 horas de semiconsciencia vigilante',
+            outcome_ok: { text: 'Você mantem a percepcao ativa em transe silencioso. Seu espirito se recupera enquanto seus ouvidos rastreiam os passos ao redor.', hp_gain: 3, mp_gain: 3, xp: 20, _flag: 'elven_trance_refreshed' } },
+          { label: 'Inspecionar a forja improvisada junto ao fogo',
+            only_race: 'anao',
+            skill: 'int', dc: 11,
+            desc: 'Inteligencia (Historia / Metal) CD 11 — avaliar as ferramentas e ligas orcs',
+            outcome_ok: { text: 'Seus olhos de perito mineral identificam pecas roubadas de Valdoria fundidas as pressas. Você nota falhas estruturais criticas no metal das armas orcs.', xp: 25, _flag: 'orc_metal_weakness_known' },
+            outcome_fail: { text: 'Apenas escória de ferro carbonizado sem informacao util.', xp: 5 } },
           { id: 'leave_camp', label: 'Sair do Acampamento',
             outcome_ok: { text: 'Você se afasta da fogueira, retornando a exploracao.' } }
         ],
-        // class_choices preservado pra extensoes futuras (Patrulheiro Conjurar
-        // Animais, Druida Forma Selvagem, etc) sem quebrar schema.
         class_choices: []
       },
       // ── 1. SENTINELA ORC (trilha de aproximacao) ──
       { id: 'sentinel', col: 11, row: 21, _hex: 'L22',
         title: 'Sentinela Adormecida',
-        text: 'Uma sentinela orc dorme apoiada em sua lanca, ressonando alto. O ar cheira a hidromel azedo e suor. A vegetacao da trilha esconde sua presenca — por enquanto. Um movimento errado e ela desperta, alertando o acampamento inteiro.',
+        text: 'A trilha estreita de cascalho e sufocada por arbustos espinhosos. Poucos passos a frente, encostado em uma estaca de madeira fincada na terra, um brutamontes orc ressona pesadamente. O fedor rascante de hidromel azedo, sangue de javali e suor animal impregna o ar umido. A cada respiracao gutural, sua clava pesada de pedra oscila presa por correias de couro surrado. Seus olhos tremeluzem sob as palpebras — qualquer estalo de graveto quebrara o torpor da besta.',
         flavor: 'Trilha de aproximacao · 1 de 5',
         category: 'danger',
         choices: [
@@ -20736,13 +20771,25 @@ const FIXED_MAPS = {
             skill: 'wis', dc: 11,
             desc: 'Sabedoria (Sobrevivencia) CD 11 — rota lenta mas segura',
             outcome_ok: { text: 'Você le o terreno. Uma trilha paralela contorna a sentinela. Demora mais mas evita riscos completamente.', xp: 15, _flag: 'sentinel_avoided' },
-            // X-6.5.51AB (2026-04-26): outcome_fail antes era "voce volta exausto"
-            // sem combate — bug de design (encounter consumido, jogador
-            // progredia sem enfrentar sentinela). Agora: ao voltar, sentinela
-            // ouve seu movimento e acorda → combate forcado, mesmo enemy das
-            // outras opcoes pra consistencia. _flag alarm_raised propaga
-            // reforco como nas outras falhas.
-            outcome_fail: { text: 'O caminho que parecia seguro termina num penhasco. Você volta exausto e desorientado — e nesse retorno, sua bota crocheia um galho. A sentinela acorda no ato, lanca em punho.', xp: 5, hp_loss: 2, exh_gain: 1, _flag: 'alarm_raised', dungeon_combat: { enemy: 'orc_raider', surprise: false } } }
+            outcome_fail: { text: 'O caminho que parecia seguro termina num penhasco. Você volta exausto e desorientado — e nesse retorno, sua bota crocheia um galho. A sentinela acorda no ato, lanca em punho.', xp: 5, hp_loss: 2, exh_gain: 1, _flag: 'alarm_raised', dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
+          { label: 'Ataque Furtivo de precisao cirurgica (Ladino)',
+            only_class: 'ladino',
+            skill: 'dex', dc: 11,
+            desc: 'Destreza (Furtividade) CD 11 — alcancar a carotida sob o colar tribal',
+            outcome_ok: { text: 'Com a lamina deslizando sem reflexo, você encontra a junta desprotegida do pescoco. O orc tomba inerte em seus bracos sem emitir o menor som.', xp: 45, _flag: 'sentinel_killed' },
+            outcome_fail: { text: 'A adaga esbarra no dente de urso do colar dele. O orc acorda rugindo e investe com furia!', xp: 8, hp_loss: 4, _flag: 'alarm_raised', dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
+          { label: 'Murmurar troca de turno em orc gutural (Meio-Orc)',
+            only_race: 'meio_orc',
+            skill: 'cha', dc: 10,
+            desc: 'Carisma (Engano) CD 10 — usar a entonacao aspera dos clas da estepe',
+            outcome_ok: { text: 'Você sibila em dialeto orc aspero: "Dorme, verme. Teu turno acabou." O sentinela resmunga, cospe na terra e tomba em ronco mais pesado.', xp: 35, _flag: 'sentinel_passed' },
+            outcome_fail: { text: 'O orc abre os olhos amarelos e percebe suas feicoes hibridas. "Intruso!", berra em furia.', xp: 8, hp_loss: 3, _flag: 'alarm_raised', dungeon_combat: { enemy: 'orc_raider', surprise: false } } },
+          { label: 'Induzir sono magico profundo (Arcano)',
+            only_class: ['mago', 'bruxo', 'feiticeiro', 'bardo'],
+            skill: 'int', dc: 11,
+            desc: 'Inteligencia (Arcanismo) CD 11 — adensar o torpor com sopro de névoa hipnótica',
+            outcome_ok: { text: 'Um tênue aroma de alfazema e névoa cintilante envolve a cabeca do orc. O queixo dele desaba frouxo em sono magico profundo.', xp: 35, _flag: 'sentinel_passed' },
+            outcome_fail: { text: 'A centelha magica estala com um estalido azulado perto da orelha dele. O sentinela acorda em sobressalto!', xp: 8, hp_loss: 3, _flag: 'alarm_raised', dungeon_combat: { enemy: 'orc_raider', surprise: false } } }
         ]
       },
       // ── 2. PATIO + 2 GUARDAS (entrada sul do patio externo) ──
@@ -20764,7 +20811,7 @@ const FIXED_MAPS = {
       //            C2) Estudar profundo (Int 14) -> SUCCESS lore COMPLETO / FAIL combat (caught)
       { id: 'patio_guards', col: 11, row: 17, _hex: 'L18',
         title: 'Patio Externo',
-        text: 'Você chega ao patio externo. Dois orcs guardas cercam uma fogueira crepitante, machados nas costas, conversando em gutural. Banners tribais penduram cranios humanoides — trofeus de aldeias caidas. Sob uma pedra grande no flanco esquerdo, você nota a borda de um caderno escondido. Eles ainda nao te viram, mas qualquer movimento errado dispara o alarme.',
+        text: 'O terreno se abre num patio lamacento cercado por estacas pontiagudas e peles de urso ressecadas. No centro, dois orcs guardas disputam um naco de carne crua sobre brasas crepitantes, os machados de guerra cravados no chao ao alcance do braco. Banners negros tingidos com sangue seco sustentam cranios humanoides que balancam com ranger sinistro ao vento cortante. Sob uma laje de pedra rachada a esquerda, a quina de couro de um caderno manchado escapa por entre musgos escuros.',
         flavor: 'Patio externo · 2 de 5',
         category: 'social',
         choices: [
@@ -20830,7 +20877,32 @@ const FIXED_MAPS = {
                 ]
               }
             },
-            outcome_fail: { text: 'Você alcanca metade do caminho quando sua bota esmaga um galho seco. O guarda gira na sua direção — vista cruzada, alarme no ato. Você mal teve tempo de notar o caderno antes do combate. Perdeu a oportunidade do diario.', xp: 8, hp_loss: 5, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } }
+            outcome_fail: { text: 'Você alcanca metade do caminho quando sua bota esmaga um galho seco. O guarda gira na sua direção — vista cruzada, alarme no ato. Você mal teve tempo de notar o caderno antes do combate. Perdeu a oportunidade do diario.', xp: 8, hp_loss: 5, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } },
+          // ============ D) D&D 5e Reactive Choices ============
+          { label: 'Exigir passagem com autoridade tribal (Meio-Orc)',
+            only_race: 'meio_orc',
+            skill: 'cha', dc: 11,
+            desc: 'Carisma (Intimidacao) CD 11 — bater no peito e invocar o rito da furia tribal',
+            outcome_ok: { text: 'Você bate a manopla no peito e ruge em dialeto orc com ferocidade inquestionavel. Os guardas recuam intimidados pelo sangue dos antigos guerreiros e dao passagem.', xp: 40, _flag: 'guards_persuaded', _flags: ['lore_brakthar_totem_secret'] },
+            outcome_fail: { text: 'Eles rosnam de volta: "Meio-sangue nao manda aqui!" Machados sao erguidos em combate.', xp: 8, hp_loss: 6, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } },
+          { label: 'Rugido intimidatorio esmagador (Barbaro)',
+            only_class: 'barbaro',
+            skill: 'str', dc: 12,
+            desc: 'Forca (Intimidacao) CD 12 — impor dominancia fisica primal antes do golpe',
+            outcome_ok: { text: 'Você canaliza sua Furia num urro primal que faz as brasas esvoacarem. Os guardas hesitam aterrorizados — você inicia o confronto com vantagem absoluta!', xp: 35, _flag: 'guards_killed', dungeon_combat: { enemy: 'orc_warrior', surprise: true } },
+            outcome_fail: { text: 'Os guardas batem os machados contra os escudos, aceitando o desafio selvagem!', xp: 8, hp_loss: 6, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } },
+          { label: 'Distracao acustica e furto das notas (Ladino/Bardo)',
+            only_class: ['bardo', 'ladino'],
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Prestidigitacao) CD 12 — atirar brasas e fuligem para cegar a dupla e roubar o diario',
+            outcome_ok: { text: 'Com um giro rapido do punho, você atira pedras incandescentes na fogueira. Uma chuva de faiscas cega momentaneamente a dupla. Você apanha o diario e desliza pelas sombras sem alarme!', xp: 45, _flag: 'patio_evaded', _flags: ['lore_brakthar_totem_secret', 'lore_brakthar_full_diary'] },
+            outcome_fail: { text: 'A fagulha estala perto demais. Um dos guardas protege os olhos e te localiza. Alarme soado!', xp: 8, hp_loss: 5, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } },
+          { label: 'Impor presenca sagrada intimidante (Clerigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Intuicao Divina) CD 12 — repreender os guardas com autoridade sagrada',
+            outcome_ok: { text: 'Seus olhos reluzem com poder divino solene. Os guardas recuam murmurando supersticoes sobre maledicoes e abrem espaco sem coragem de te atacar primeiro.', xp: 35, _flag: 'guards_persuaded' },
+            outcome_fail: { text: 'Eles desafiam a fe com cusparadas na terra e avancam com as clavas!', xp: 8, hp_loss: 5, _flag: 'guards_alerted', dungeon_combat: { enemy: 'orc_warrior', surprise: false } } }
         ]
       },
       // ── 3. CAMARA DOS TOTENS (3 totens em circulo, hex central E15) ──
@@ -20838,7 +20910,7 @@ const FIXED_MAPS = {
       // Quebrar -> 2 sub-acoes (resistir/absorver), Comungar -> 2 sub-acoes (favor/conhecimento).
       { id: 'totem_chamber', col: 4, row: 14, _hex: 'E15',
         title: 'Camara dos Totens',
-        text: 'Tres totens entalhados com runas tribais arcaicas formam um circulo sangrento. Aura vermelha pulsa em cada entalhe — você sente a energia sufocante emanando deles. A magia que protege Brakthar emana daqui. Quebra-los, decifra-los ou comungar com eles tera consequencias.',
+        text: 'O ar aqui e sufocante, impregnado com cheiro de cobre fresco e ossos calcinados. Tres totens colossais de madeira negra entalhada erguem-se em semicirculo sobre a terra empapada de sangue ritual. Cada runa talhada pulsa com uma luminescencia escarlate nauseante, vibrando numa frequencia que faz seus dentes doerem. Fios invisiveis de energia mistica drenada da terra ligam esses monumentos diretamente a tenda interior de Brakthar.',
         flavor: 'Camara dos totens · 3 de 5',
         category: 'mystery',
         choices: [
@@ -20922,14 +20994,33 @@ const FIXED_MAPS = {
                 ]
               }
             },
-            outcome_fail: { text: 'Você fecha os olhos mas a aura rubra te repele. Os espiritos estao raivosos com sua presenca.', xp: 5, hp_loss: 3 } }
+            outcome_fail: { text: 'Você fecha os olhos mas a aura rubra te repele. Os espiritos estao raivosos com sua presenca.', xp: 5, hp_loss: 3 } },
+          // ============ D&D 5e Reactive Choices ============
+          { label: 'Dissipar a trama runica arcana (Mago/Bruxo/Feiticeiro)',
+            only_class: ['mago', 'bruxo', 'feiticeiro'],
+            skill: 'int', dc: 12,
+            desc: 'Inteligencia (Arcanismo) CD 12 — romper o no magico que alimenta a barreira do chefe',
+            outcome_ok: { text: 'Você foca sua visao magica nos veios escarlates e corta o fluxo arcano com um gesto firme de contramagica. A luz dos totens se apaga num silvo de vapor cinzento — a barreira do chefe racha completamente!', xp: 50, _flags: ['totem_broken', 'totem_runes_memorized', 'can_disrupt_brakthar_chant'] },
+            outcome_fail: { text: 'O fluxo magico rebate com um coice de estatica necrotica. A barreira persiste, mas você memorizou as frequencias.', xp: 15, hp_loss: 4, _flag: 'totem_decoded' } },
+          { label: 'Purificar a profanacao com luz sagrada (Clerigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Religiao) CD 12 — banir a magia profana com prece purificadora',
+            outcome_ok: { text: 'Luz radiante emana de suas maos. O sangue ritual chia e se evapora em fumaca branca. As vozes atormentadas dos clas mortos agradecem e te abencoam contra o chefe!', xp: 50, _flags: ['totem_broken', 'spirit_blessing', 'lore_clan_picoluno_known'] },
+            outcome_fail: { text: 'O rancor entalhado na madeira resiste a luz imediata, ferindo sua palma com fagulhas rubras.', xp: 12, hp_loss: 3 } },
+          { label: 'Oferecer gota de sangue tribal aos ancestrais (Meio-Orc)',
+            only_race: 'meio_orc',
+            skill: 'wis', dc: 11,
+            desc: 'Sabedoria (Intuicao) CD 11 — ressoar com o sangue dos antigos guerreiros',
+            outcome_ok: { text: 'Você toca o totem com uma gota de sangue da palma da mao. As runas vibram em harmonia com sua linhagem e revelam os segredos da armadura do chefe.', xp: 45, _flags: ['totem_communed', 'spirit_blessing', 'lore_brakthar_full_diary'] },
+            outcome_fail: { text: 'Os espiritos ancestrais rejeitam a oferenda com um rosnar cavernoso.', xp: 10, hp_loss: 3 } }
         ]
       },
       // ── 4. MEMORIAL DOS CLAS + ORC JOVEM (O15) ──
       // 3 abordagens (examinar memorial / cantico / direto ao orc), cada uma com chain.
       { id: 'memorial', col: 14, row: 14, _hex: 'O15',
         title: 'Memorial dos Clas Caidos',
-        text: 'Pilha de armaduras quebradas exibe simbolos de cinco clas diferentes. Numa pele de cabra estendida, fragmentos de uma melodia em notacao tribal — o cantico do xama. Caido contra uma rocha, um orc jovem segura uma ferida no flanco. Nao saca arma. Olha-te com mais cansaco do que medo.',
+        text: 'Sob o abrigo de uma saliência rochosa repousa uma pilha melancólica de armaduras e escudos partidos, marcados com as insígnias despedaçadas de cinco clãs vizinhos dizimados. Sobre uma pele curtida de javali, notas musicais ásperas e rascunhos de um cântico xamânico secam com tinta preta. Caído de costas contra uma pedra coberta de líquen, um jovem guerreiro orc pressiona uma ferida feia no flanco esquerdo. A respiração dele é curta, os olhos marejados de dor e traição. Ele não apanha as armas jogadas no chão — apenas te observa com exaustão e rancor pelo chefe tirano.',
         flavor: 'Memorial · 4 de 5',
         category: 'discovery',
         choices: [
@@ -20977,7 +21068,7 @@ const FIXED_MAPS = {
                     skill: 'cha', dc: 14,
                     desc: 'Carisma (Persuasao) CD 14 — explicar objetivo comum',
                     outcome_ok: { text: '"Eu vou usar contra Brakthar. Posso te ajudar?" Ele encara longo, depois assente. "Entao luta comigo. Ele matou meu pai." Aliado.', xp: 35, _flag: 'orc_youth_ally', hp_gain: 3 },
-                    outcome_fail: { text: 'Ele desconfia. "Estranho aprende cantico sagrado em minutos. Algo nao bate." Permanece neutro.', xp: 8 } },
+                    outcome_fail: { text: 'Ele desvia o olhar desconfiado. "Estranho aprende cantico sagrado depressa demais. Algo nao bate." Permanece neutro.', xp: 8 } },
                   { label: 'Ignorar o orc e seguir',
                     desc: 'Sair do memorial mantendo so o cantico',
                     outcome_ok: { text: 'Você sai sem dialogo. O cantico esta com você mas sem alianca.', xp: 12 },
@@ -21013,13 +21104,30 @@ const FIXED_MAPS = {
                 ]
               }
             },
-            outcome_fail: null }
+            outcome_fail: null },
+          // ============ D&D 5e Reactive Choices ============
+          { label: 'Imposicao de Maos / Cura Divina imediata (Clerigo/Paladino)',
+            only_class: ['paladino', 'clerigo'],
+            desc: 'Acao divina sem rolagem — canalizar poder sagrado para fechar o corte',
+            outcome_ok: { text: 'Você se ajoelha ao lado do jovem orc. A luz sagrada fecha o talho profundo em segundos. O orc pisca atonito: "Os deuses nao esqueceram este vale... Brakthar traiu meu povo durante a paz. Ele morrera hoje, eu juro por meu sangue!" Aliado fervoroso!', xp: 55, hp_gain: 6, _flag: 'orc_youth_ally', _flags: ['orc_youth_intel', 'lore_clan_picoluno_known'] } },
+          { label: 'Reconhecer forja ana do Cla Picoluno (Anao)',
+            only_race: 'anao',
+            skill: 'int', dc: 11,
+            desc: 'Inteligencia (Historia) CD 11 — identificar os brasoes dos antigos parceiros comerciais',
+            outcome_ok: { text: 'Seus olhos de artifice anao reconhecem as marcas de forja: lâminas honestas compradas dos anões da montanha. O orc nota seu brasao: "Vocês eram nossos irmaos de comercio... Brakthar quebrou o juramento." Ele entrega o cantico e jura lutar a seu lado.', xp: 50, _flags: ['lore_clan_picoluno_known', 'can_disrupt_brakthar_chant', 'orc_youth_ally'] },
+            outcome_fail: { text: 'A ferrugem e o sangue coagulado obscurecem a herdade das pecas quebradas.', xp: 10 } },
+          { label: 'Avaliar os ferimentos com olho de veterano (Soldado)',
+            only_background: 'soldado',
+            skill: 'wis', dc: 11,
+            desc: 'Sabedoria (Medicina de Campanha) CD 11 — socorrer o orc e mapear a tenda do chefe',
+            outcome_ok: { text: 'Como veterano de guerra, você aplica um torniquete firme. O orc reconhece um guerreiro de honra: "Brakthar esta sozinho na tenda interior. O ombro esquerdo dele nao tem guarda apos cada golpe."', xp: 45, hp_gain: 4, _flags: ['orc_youth_intel', 'orc_youth_ally'] },
+            outcome_fail: { text: 'O ferimento e lacerante, mas você estanca a hemorragia antes que ele desmaie.', xp: 12 } }
         ]
       },
       // ── 5. PATRULHA SUL (I20) — orc solo na trilha ──
       { id: 'patrol_south', col: 8, row: 19, _hex: 'I20',
         title: 'Orc Patrulheiro',
-        text: 'Um orc solo patrulha a area sul do patio, machado nas costas, olhando ao redor com cautela. Ainda nao te viu mas vai logo se ficar parado.',
+        text: 'Um orc batedor de passadas pesadas ronda o setor sul do acampamento. O rangido das placas de couro cru e o arrastar de sua maca de espigoes ecoam pela trilha pedregosa. O vento sopra a seu favor, trazendo o cheiro de cinzas e escondendo seus passos entre os arbustos densos.',
         flavor: 'Patrulha · zona sul',
         category: 'danger',
         choices: [
@@ -21042,7 +21150,7 @@ const FIXED_MAPS = {
       // ── 6. PATRULHA LESTE (P17) — orc na borda direita do patio ──
       { id: 'patrol_east', col: 15, row: 16, _hex: 'P17',
         title: 'Orc Patrulhando',
-        text: 'Um orc anda devagar pela borda leste do patio, escutando o vento. Ele tem uma faca pendurada na cinta e olhar atento.',
+        text: 'O sentinela da borda leste caminha lentamente rente a palicada de madeira pontiaguda. Ele mastiga raizes amargas e perscruta o horizonte escuro, parando a cada poucos passos para farejar o ar frio da noite. Uma faca curva serrilhada balanca em seu cinto.',
         flavor: 'Patrulha · zona leste',
         category: 'danger',
         choices: [
@@ -21066,7 +21174,7 @@ const FIXED_MAPS = {
       // ── 7. PATRULHA NW (H10) — orc proximo a entrada da tenda ──
       { id: 'patrol_nw', col: 7, row: 9, _hex: 'H10',
         title: 'Orc Guardando o Caminho',
-        text: 'Um orc bloqueia parcialmente o caminho noroeste, machado em punho, atento a qualquer som. Você esta perto da entrada da tenda do chefe.',
+        text: 'Proximo a entrada monumental da tenda do chefe, um guerreiro orc veterano com cicatrizes rituais cruzando a face vigia a passagem com machado em punho. O reflexo das tochas crepita em sua cota de malha remendada. Qualquer ruido aqui ecoara para dentro do trono.',
         flavor: 'Patrulha · zona NW',
         category: 'danger',
         choices: [
@@ -21091,7 +21199,7 @@ const FIXED_MAPS = {
       // ou eficacia das opcoes muda baseado no que voce acumulou nos encontros 1-7.
       { id: 'brakthar_throne', col: 11, row: 3, _hex: 'L4',
         title: 'Brakthar, Quebrador de Crânios',
-        text: 'Couro animal cobre as paredes. O ar cheira a sangue seco e fumaça. Brakthar aguarda em seu trono de madeira tosca, machado em punho. Runas rubras pulsam em seu peito musculoso. Ele te encara sem se levantar — um sorriso lento de quem espera essa luta. "Veio morrer aqui, ou veio negociar?"',
+        text: 'Grossas cortinas de pele de mamute e couro cru bloqueiam o vento exterior. O interior da grande tenda e iluminado pelo brilho sufocante de braseiros de ferro em forma de cranio. O ar e pesado, denso com aroma de sangue coagulado, ervas amargas de xama e madeira queimada. No centro, sobre um trono macico esculpido em troncos petrificados e coroado por cranios com chifres, repousa Brakthar, Quebrador de Crânios. Seus musculos monumentais sao sulcados por cicatrizes de cem batalhas, e no peito largo, runas tribais reluzem em fogo escarlate vivo. O grande machado de duas maos descansa sobre seus joelhos. Ele te encara fixamente com olhos amarelados e predatórios, sem pressa alguma de se erguer. Um sorriso desdenhoso racha seus lábios grotescos: "Veio morrer aqui diante dos deuses da guerra... ou veio negociar com o dono deste vale?"',
         flavor: 'Trono do Chefe · 5 de 5 · BOSS FIGHT',
         category: 'danger',
         choices: [
@@ -21158,7 +21266,68 @@ const FIXED_MAPS = {
             outcome_fail: { text: 'Brakthar ri até as runas tremerem. "Tu pensa que sou rei? Eu sou fúria. Não há negociação." Boss ENFURECIDO (+2 dano), você levou um soco antes do combate.',
               xp: 5, hp_loss: 5,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar',
-                surprise: false, preCombatEffects: ['boss_enraged'] } } }
+                surprise: false, preCombatEffects: ['boss_enraged'] } } },
+          // ── 7. D&D 5e REACTIVE BOSS CHOICES ──
+          { label: 'Desafiar para Duelo Tribal de Linhagem (Meio-Orc)',
+            only_race: 'meio_orc',
+            skill: 'cha', dc: 12,
+            desc: 'Carisma (Intimidacao) CD 12 — invocar o codigo sagrado do combate um-contra-um da estepe',
+            outcome_ok: { text: '"Eu trago o sangue dos antigos clas que tu traiste, Brakthar! Eu te desafio pelo trono perante os espiritos!" Brakthar aceita com respeito tribal — foco mortal no 1º golpe (Vantagem no 1º ataque + SURPRESA)!',
+              xp: 45,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'Brakthar cospe na terra: "Mestico nao tem cla!" Ele ataca em furia cega.',
+              xp: 8,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
+          { label: 'Cobrar o Juramento de Sangue quebrado (Anao)',
+            only_race: 'anao',
+            skill: 'str', dc: 13,
+            desc: 'Forca (Atletismo / Vinganca) CD 13 — erguer o martelo e vingar a traicao do Cla Picoluno',
+            outcome_ok: { text: '"Pelo ferro forjado e pelas cinzas do Cla Picoluno, tua traicao acaba hoje!" A indignacao ana abala a postura de Brakthar — guarda desfeita (CA -2 e Vantagem no 1º ataque)!',
+              xp: 50,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: true, preCombatEffects: ['boss_ac_debuff', 'first_attack_adv'] } },
+            outcome_fail: { text: 'Brakthar gargalha: "Mais anoes para o monturo!" Choque direto.',
+              xp: 10,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
+          { label: 'Canalizar Furia Primal no olhar de predador (Barbaro)',
+            only_class: 'barbaro',
+            skill: 'con', dc: 12,
+            desc: 'Constituicao (Intimidacao Primal) CD 12 — liberar o rugido interior sem vacilar',
+            outcome_ok: { text: 'Seus olhos ardem com o mesmo fogo selvagem das feras do norte. Brakthar reconhece um predador alfa e hesita por um instante critico (SURPRESA + Vantagem no 1º ataque)!',
+              xp: 40,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'Brakthar ruge de volta num berro ensurdecedor. Choque de forcas brutas!',
+              xp: 8,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
+          { label: 'Sentenciar o tirano em nome da Justica Divina (Paladino/Clerigo)',
+            only_class: ['paladino', 'clerigo'],
+            skill: 'cha', dc: 13,
+            desc: 'Carisma (Intimidacao Sagrada) CD 13 — brandir o simbolo sagrado e quebrar o espirito profano',
+            outcome_ok: { text: 'Você proclama a sentenca de Brakthar sob a luz dos deuses. Uma aura dourada ofuscante irrompe na tenda, sufocando as runas de Gruumsh — a Investida Furiosa do chefe e paralisada (Investida cancelada + SURPRESA)!',
+              xp: 45,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: true, preCombatEffects: ['burst_disabled'] } },
+            outcome_fail: { text: 'Brakthar escarra na luz: "Teus deuses nao mandam no meu machado!" Combate imediato.',
+              xp: 8,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
+          { label: 'Identificar a cicatriz da junta no joelho esquerdo (Ladino)',
+            only_class: 'ladino',
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Intuicao / Ponto Cego) CD 12 — explorar a antiga fratura mal curada',
+            outcome_ok: { text: 'Você nota a inclinacao milimetrica da perna esquerda do chefe: uma ponta de lanca partida deforma a patela. Mirar ali quebra o equilibrio dele (SURPRESA + CA -2 + Vantagem no 1º ataque)!',
+              xp: 40,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: true, preCombatEffects: ['boss_ac_debuff', 'first_attack_adv'] } },
+            outcome_fail: { text: 'Brakthar muda de apoio rapidamente, notando o foco de seu olhar. Guarda fechada.',
+              xp: 8,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
+          { label: 'Disrupcao das runas peitorais com contramagica (Arcano)',
+            only_class: ['mago', 'bruxo', 'feiticeiro'],
+            skill: 'int', dc: 13,
+            desc: 'Inteligencia (Arcanismo) CD 13 — desestabilizar as runas rubras que alimentam o poder do chefe',
+            outcome_ok: { text: 'Você dispara um pulso de ressonancia arcana contra as runas no peito de Brakthar. O brilho escarlate engasga e estala como vidro — a Furia se esvai e a Investida Furiosa e anulada (Furia drenada + Investida cancelada + SURPRESA)!',
+              xp: 50,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: true, preCombatEffects: ['fury_drained', 'burst_disabled'] } },
+            outcome_fail: { text: 'A barreira runica deflete o pulso arcano, mas o brilho das runas tremeluz.',
+              xp: 10,
+              dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } }
         ]
       }
     ],
@@ -37386,6 +37555,13 @@ function maybeRollEvent() {
   const ids = Object.keys(EVENTS_POOL).filter(function(id) {
     const ev = EVENTS_POOL[id];
     if (ev.biome !== S.biome) return false;
+    if (ev.requires_map) {
+      if (Array.isArray(ev.requires_map)) {
+        if (!ev.requires_map.includes(S.mapId)) return false;
+      } else {
+        if (ev.requires_map !== S.mapId) return false;
+      }
+    }
     if (ev.requires_tile) {
       if (Array.isArray(ev.requires_tile)) {
         if (!ev.requires_tile.includes(currentTile)) return false;
@@ -38518,6 +38694,16 @@ function openEventModal() {
       const clsName = list.map(k => (CLASSES[k] || {}).name || k).join('/');
       ct.textContent = '\u25c6 ' + clsName;
       btn.appendChild(ct);
+    }
+    // Tag de raça
+    if (ch.only_race) {
+      const rt = document.createElement('span');
+      rt.className = 'class-tag race-tag';
+      const list = Array.isArray(ch.only_race) ? ch.only_race : [ch.only_race];
+      const rMap = { meio_orc: 'Meio-Orc', elfo: 'Elfo', anao: 'Anão', humano: 'Humano', halfling: 'Halfling', draconato: 'Draconato', tiefling: 'Tiefling', gnomo: 'Gnomo', meio_elfo: 'Meio-Elfo' };
+      const rName = list.map(k => rMap[k] || (k.charAt(0).toUpperCase() + k.slice(1))).join('/');
+      rt.textContent = '\u25c6 ' + rName;
+      btn.appendChild(rt);
     }
     // V2.6: tag de background
     if (ch.only_background) {
