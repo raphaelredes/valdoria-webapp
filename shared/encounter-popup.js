@@ -1203,7 +1203,8 @@
       if (ch.dc && ch.skill) {
         /* sessão #88: "CD" (convenção PT-BR do projeto, não "DC") + tradução
            de key EN ('charisma' → 'Carisma') preservando labels já em PT-BR. */
-        dcBadge = '<span class="enc-cho-dc">CD ' + ch.dc + ' · ' + _skillLabelPT(ch.skill) + (ch.chance != null ? ' · ' + ch.chance + '%' : '') + '</span>';
+        var advTag = ch.advantage ? ' · <span class="enc-cho-adv" style="color:#ffd700;font-weight:700;">✦ Vantagem</span>' : '';
+        dcBadge = '<span class="enc-cho-dc">CD ' + ch.dc + ' · ' + _skillLabelPT(ch.skill) + (ch.chance != null ? ' · ' + ch.chance + '%' : '') + advTag + '</span>';
       } else if (ch.cost) {
         dcBadge = '<span class="enc-cho-dc enc-cho-cost">' + ch.cost + ' ' + _VCOIN + '</span>';
       } else if (ch.renownDelta) {
@@ -1215,6 +1216,9 @@
          fallback 'Continuar' + warn pro error-reporter. */
       var _choLabel = (ch.label && String(ch.label).trim()) || 'Continuar';
       if (!ch.label) console.warn('[ENC] choice sem label', ch.id || ch.cb || '');
+      if (ch.badge) {
+        _choLabel = '<span class="enc-cho-badge-pill" style="display:inline-block;padding:1px 6px;margin-right:6px;font-size:10px;font-weight:700;border:1px solid rgba(196,149,58,0.5);border-radius:4px;color:#c4953a;background:rgba(196,149,58,0.12);text-transform:uppercase;letter-spacing:0.5px;">' + ch.badge + '</span>' + _choLabel;
+      }
 
       if (isCompact) {
         var titleText = _choLabel;
@@ -1494,10 +1498,25 @@
        tem aspas escapadas. portraitHTML continua confiado (gerado pelo caller
        via _heralIco/sprite, nunca payload). */
     var _safePortraitURL = String(npcPortrait).replace(/"/g, '&quot;');
+    var _hasPortraitImg = !!npcPortrait;
+    var _hasPortraitHTML = !!npcPortraitHTML;
+    var _portraitInner = '';
+    var _portraitCls = 'enc-portrait';
+    var _portraitTitle = '';
+    if (_hasPortraitHTML) {
+      _portraitInner = npcPortraitHTML;
+    } else if (_hasPortraitImg) {
+      _portraitInner = '<img src="' + _safePortraitURL + '" alt="" ' + _ENC_IMG_ONERR + '>';
+      _portraitTitle = ' title="Clique pra ampliar"';
+    } else {
+      /* Ordem do Usuário 2026-10: NUNCA exibir círculo vazio ou sem imagem.
+         Ativa fallback automático com gradiente e brasão heráldico estilizado. */
+      _portraitCls += ' enc-portrait-fallback';
+      _portraitTitle = ' title="Evento"';
+    }
     header.innerHTML =
-      '<div class="enc-portrait"' + (npcPortrait ? ' title="Clique pra ampliar"' : '') + '>' +
-        (npcPortraitHTML ? npcPortraitHTML
-          : (npcPortrait ? ('<img src="' + _safePortraitURL + '" alt="" ' + _ENC_IMG_ONERR + '>') : '')) +
+      '<div class="' + _portraitCls + '"' + _portraitTitle + '>' +
+        _portraitInner +
       '</div>' +
       '<div class="enc-meta">' +
         '<div class="enc-name">' + _sanitizeDialogueHTML(npcName) + (affinityBadge ? ' ' + affinityBadge : '') + '</div>' +

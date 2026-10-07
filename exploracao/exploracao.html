@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T16:37:58Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T17:56:12Z - do not edit directly, edit source -->
 
 
 
@@ -39031,11 +39031,203 @@ function _explEventUsesVEncounter(ev) {
     && window.vEncounter && typeof window.vEncounter.render === 'function');
 }
 
-// npc do header: NPC real do evento se houver; senao o TITULO (hazards sao
-// ambientais, sem NPC) — a narrativa vive no script[]. NUNCA inventa retrato.
+// Helper de normalização de caminhos de imagens em eventos (local vs remote)
+function _explNormImgPath(src) {
+  if (!src) return '';
+  var isLocal = (typeof location !== 'undefined') && (location.protocol === 'file:' || location.pathname.indexOf('/simuladores/') !== -1);
+  if (isLocal && src.startsWith('../shared/')) {
+    return '../shared/' + src.slice('../shared/'.length);
+  }
+  return src;
+}
+
+// Fallback temático estruturado para retratos de eventos sem imagem explícita
+function _explResolveFallbackEventPortrait(ev) {
+  if (!ev) return '../shared/img/ui/compendio.webp';
+  if (ev.npc && ev.npc.portrait) return _explNormImgPath(ev.npc.portrait);
+  if (ev.portrait) return _explNormImgPath(ev.portrait);
+  if (ev.image) return _explNormImgPath(ev.image);
+
+  var type = (ev.type || '').toLowerCase();
+  var title = (ev.title || '').toLowerCase();
+
+  // Se houver fala de NPC conhecido no script
+  var speaker = '';
+  if (Array.isArray(ev.script)) {
+    for (var i = 0; i < ev.script.length; i++) {
+      if (ev.script[i] && ev.script[i].speaker) {
+        speaker = String(ev.script[i].speaker).toLowerCase();
+        break;
+      }
+    }
+  }
+
+  if (speaker) {
+    if (speaker.indexOf('aldo') !== -1 || speaker.indexOf('refug') !== -1 || speaker.indexOf('campon') !== -1) {
+      return '../shared/img/npcs/kaelen-refugiado.webp';
+    }
+    if (speaker.indexOf('tomas') !== -1 || speaker.indexOf('pastor') !== -1) {
+      return '../shared/img/npcs/berto-lavrador.webp';
+    }
+    if (speaker.indexOf('corvin') !== -1 || speaker.indexOf('pedag') !== -1 || speaker.indexOf('drevek') !== -1) {
+      return '../shared/img/npcs/drevek-atravessador.webp';
+    }
+    if (speaker.indexOf('bran') !== -1 || speaker.indexOf('lenhador') !== -1) {
+      return '../shared/img/npcs/hadric-cacador.webp';
+    }
+    if (speaker.indexOf('selfia') !== -1 || speaker.indexOf('sélfia') !== -1 || speaker.indexOf('driade') !== -1 || speaker.indexOf('dríade') !== -1) {
+      return '../shared/img/npcs/sylthara-druida.webp';
+    }
+    if (speaker.indexOf('elna') !== -1 || speaker.indexOf('coletora') !== -1) {
+      return '../shared/img/npcs/tovrik-ervanario.webp';
+    }
+    if (speaker.indexOf('vondal') !== -1 || speaker.indexOf('guarda') !== -1) {
+      return '../shared/img/npcs/brunnar-forjafria.webp';
+    }
+    if (speaker.indexOf('bretta') !== -1 || speaker.indexOf('pastora') !== -1) {
+      return '../shared/img/npcs/marilia-fruteira.webp';
+    }
+    if (speaker.indexOf('perrin') !== -1 || speaker.indexOf('mercador') !== -1 || speaker.indexOf('hakim') !== -1) {
+      return '../shared/img/npcs/mercador-errante.webp';
+    }
+    if (speaker.indexOf('orien') !== -1 || speaker.indexOf('orin') !== -1 || speaker.indexOf('eremita') !== -1 || speaker.indexOf('cego') !== -1) {
+      return '../shared/img/npcs/othren-recluso.webp';
+    }
+    if (speaker.indexOf('djinn') !== -1 || speaker.indexOf('malhaz') !== -1) {
+      return '../shared/img/npcs/vasheen-djinn.webp';
+    }
+    if (speaker.indexOf('sacerdote') !== -1 || speaker.indexOf('padre') !== -1 || speaker.indexOf('cornelius') !== -1) {
+      return '../shared/img/npcs/padre-othren.webp';
+    }
+    if (speaker.indexOf('espirito') !== -1 || speaker.indexOf('espírito') !== -1 || speaker.indexOf('sentinela') !== -1) {
+      return '../shared/img/npcs/nerith-espirito.webp';
+    }
+    if (speaker.indexOf('ferreiro') !== -1 || speaker.indexOf('draust') !== -1) {
+      return '../shared/img/npcs/ferreiro-garrick.webp';
+    }
+    if (speaker.indexOf('saqueador') !== -1 || speaker.indexOf('ladrao') !== -1 || speaker.indexOf('ladrão') !== -1 || speaker.indexOf('merek') !== -1 || speaker.indexOf('jorab') !== -1) {
+      return '../shared/img/npcs/batedor-carteira.webp';
+    }
+    return '../shared/img/npcs/aldeao.webp';
+  }
+
+  // Fallbacks temáticos por categoria/tipo de evento
+  if (type === 'discovery') {
+    if (title.indexOf('fonte') !== -1 || title.indexOf('agua') !== -1 || title.indexOf('água') !== -1 || title.indexOf('nascente') !== -1) {
+      return '../shared/img/ui/fonte.webp';
+    }
+    if (title.indexOf('bau') !== -1 || title.indexOf('baú') !== -1 || title.indexOf('tesouro') !== -1 || title.indexOf('cofre') !== -1) {
+      return '../shared/img/ui/cofre.webp';
+    }
+    if (title.indexOf('runa') !== -1 || title.indexOf('altar') !== -1 || title.indexOf('monolito') !== -1 || title.indexOf('monólito') !== -1 || title.indexOf('circulo') !== -1 || title.indexOf('círculo') !== -1) {
+      return '../shared/img/ui/runas.webp';
+    }
+    return '../shared/img/ui/compendio.webp';
+  }
+
+  if (type === 'hazard') {
+    if (title.indexOf('armadilha') !== -1 || title.indexOf('perigo') !== -1 || title.indexOf('emboscada') !== -1) {
+      return '../shared/img/ui/alerta.webp';
+    }
+    return '../shared/img/ui/tochas.webp';
+  }
+
+  if (type === 'quest_hook') {
+    return '../shared/img/ui/missoes.webp';
+  }
+
+  if (type === 'combat_forced' || type === 'combat_optional') {
+    if (title.indexOf('lobo') !== -1) {
+      return '../shared/img/combat/enemies/lobo.webp';
+    }
+    if (title.indexOf('esqueleto') !== -1) {
+      return '../shared/img/combat/enemies/esqueleto.webp';
+    }
+    if (title.indexOf('aranha') !== -1) {
+      return '../shared/img/ui/aranha.webp';
+    }
+    return '../shared/img/ui/desafio.webp';
+  }
+
+  if (type === 'social') {
+    return '../shared/img/npcs/aldeao.webp';
+  }
+
+  return '../shared/img/ui/compendio.webp';
+}
+
+// npc do header: sempre fornece nome e retrato temático válido
 function _explEventHeaderNpc(ev) {
-  if (ev && ev.npc && ev.npc.name) return ev.npc;
-  return { name: (ev && ev.title) ? ev.title : 'Perigo' };
+  var portrait = _explResolveFallbackEventPortrait(ev);
+  if (ev && ev.npc && ev.npc.name) {
+    var npc = Object.assign({}, ev.npc);
+    if (!npc.portrait) npc.portrait = portrait;
+    else npc.portrait = _explNormImgPath(npc.portrait);
+    return npc;
+  }
+  return {
+    name: (ev && ev.title) ? ev.title : 'Perigo',
+    portrait: portrait
+  };
+}
+
+// Avalia vantagem D&D 5e client-side para exibição em badges de escolhas
+function checkPlayerAdvantageClient(advCondition, player) {
+  if (!advCondition || !player) return false;
+  var norm = function (s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/-/g, '_'); };
+
+  if (advCondition.race || advCondition.races) {
+    var rList = (Array.isArray(advCondition.races || advCondition.race) ? (advCondition.races || advCondition.race) : [advCondition.races || advCondition.race]).map(norm);
+    if (rList.includes(norm(player.race || player.raca || ''))) return true;
+  }
+  if (advCondition.subrace || advCondition.subraces) {
+    var srList = (Array.isArray(advCondition.subraces || advCondition.subrace) ? (advCondition.subraces || advCondition.subrace) : [advCondition.subraces || advCondition.subrace]).map(norm);
+    if (srList.includes(norm(player.subrace || ''))) return true;
+  }
+  if (advCondition.hero_class || advCondition.class || advCondition.classes) {
+    var clList = (Array.isArray(advCondition.classes || advCondition.hero_class || advCondition.class) ? (advCondition.classes || advCondition.hero_class || advCondition.class) : [advCondition.classes || advCondition.hero_class || advCondition.class]).map(norm);
+    if (clList.includes(norm(player.cls_key || player.char_class || ''))) return true;
+  }
+  if (advCondition.subclass || advCondition.subclasses) {
+    var scList = (Array.isArray(advCondition.subclasses || advCondition.subclass) ? (advCondition.subclasses || advCondition.subclass) : [advCondition.subclasses || advCondition.subclass]).map(norm);
+    if (scList.includes(norm(player.subclass || ''))) return true;
+  }
+  if (advCondition.background || advCondition.backgrounds) {
+    var bgList = (Array.isArray(advCondition.backgrounds || advCondition.background) ? (advCondition.backgrounds || advCondition.background) : [advCondition.backgrounds || advCondition.background]).map(norm);
+    if (bgList.includes(norm(player.background || ''))) return true;
+  }
+  if (advCondition.min_stat || advCondition.stats) {
+    var stats = advCondition.stats || advCondition.min_stat || {};
+    var pStats = player.stats || player.abilities || {};
+    var allMeet = true;
+    for (var sk in stats) {
+      var minVal = Number(stats[sk]) || 0;
+      var pVal = Number(pStats[sk] || pStats[sk.toLowerCase()] || 0);
+      if (pVal < minVal) { allMeet = false; break; }
+    }
+    if (allMeet && Object.keys(stats).length > 0) return true;
+  }
+  if (advCondition.personality_trait || advCondition.trait) {
+    var traitVal = norm(player.personality_trait || '');
+    var targets = (Array.isArray(advCondition.personality_trait || advCondition.trait) ? (advCondition.personality_trait || advCondition.trait) : [advCondition.personality_trait || advCondition.trait]).map(norm);
+    if (targets.some(function (t) { return traitVal.indexOf(t) !== -1; })) return true;
+  }
+  if (advCondition.ideal) {
+    var idealVal = norm(player.ideal || '');
+    var targets = (Array.isArray(advCondition.ideal) ? advCondition.ideal : [advCondition.ideal]).map(norm);
+    if (targets.some(function (t) { return idealVal.indexOf(t) !== -1; })) return true;
+  }
+  if (advCondition.bond) {
+    var bondVal = norm(player.bond || '');
+    var targets = (Array.isArray(advCondition.bond) ? advCondition.bond : [advCondition.bond]).map(norm);
+    if (targets.some(function (t) { return bondVal.indexOf(t) !== -1; })) return true;
+  }
+  if (advCondition.flaw) {
+    var flawVal = norm(player.flaw || '');
+    var targets = (Array.isArray(advCondition.flaw) ? advCondition.flaw : [advCondition.flaw]).map(norm);
+    if (targets.some(function (t) { return flawVal.indexOf(t) !== -1; })) return true;
+  }
+  return false;
 }
 
 function _explEventBodyNode(ev) {
@@ -39063,7 +39255,11 @@ function _explEventBodyNode(ev) {
       // (mesmo do openEventModal) — vEncounter passa o label adiante.
       c.skill = (typeof skillLabelOf === 'function') ? skillLabelOf(ch.skill) : ch.skill;
       c.dc = ch.dc;
+      if (ch.advantage_if && checkPlayerAdvantageClient(ch.advantage_if, p)) {
+        c.advantage = true;
+      }
     }
+    if (ch.badge) c.badge = ch.badge;
     displayed.push(c);
   });
   // PADRAO_DADOS: com 1 choice EXIBIDA (botao inline, SEM badge) anuncia o teste
@@ -39075,7 +39271,8 @@ function _explEventBodyNode(ev) {
       var lbl = (typeof skillLabelOf === 'function') ? skillLabelOf(only.skill) : only.skill;
       var pct = null;
       try { if (typeof calcSuccessPct === 'function' && window.S && window.S.player) pct = calcSuccessPct(only, window.S.player); } catch (_) {}
-      var phrase = lbl + ' · CD ' + only.dc + (pct != null ? ' · ' + pct + '%' : '');
+      var advSuffix = (only.advantage_if && checkPlayerAdvantageClient(only.advantage_if, p)) ? ' · ✦ Vantagem' : '';
+      var phrase = lbl + ' · CD ' + only.dc + (pct != null ? ' · ' + pct + '%' : '') + advSuffix;
       var li = script.length - 1;
       script[li] = Object.assign({}, script[li], { check_hint: { phrase: phrase } });
     }
@@ -40771,15 +40968,18 @@ function pickFamiliarityVariant(ev, fieldName) {
 // V2.6: filtro estendido — class + background + alignment + ally-class.
 // Retorna false se o choice NAO deve aparecer pra este player.
 function classCanTakeChoice(ch, clsKey, bg, align, allies) {
+  var p = (window.S && window.S.player) || {};
+  var norm = function (s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/-/g, '_'); };
+
   // only_class pode ser string OU array
   if (ch.only_class) {
-    const list = Array.isArray(ch.only_class) ? ch.only_class : [ch.only_class];
-    if (!list.includes(clsKey)) return false;
+    const list = (Array.isArray(ch.only_class) ? ch.only_class : [ch.only_class]).map(norm);
+    if (!list.includes(norm(clsKey))) return false;
   }
   // only_background idem
   if (ch.only_background) {
-    const list = Array.isArray(ch.only_background) ? ch.only_background : [ch.only_background];
-    if (!list.includes(bg)) return false;
+    const list = (Array.isArray(ch.only_background) ? ch.only_background : [ch.only_background]).map(norm);
+    if (!list.includes(norm(bg))) return false;
   }
   // only_alignment: string exata (LG/NG/...) OU axis ('good'/'evil'/'lawful'/'chaotic')
   // OU array combinando (['good','CN'])
@@ -40794,38 +40994,93 @@ function classCanTakeChoice(ch, clsKey, bg, align, allies) {
     if (!hasAlly) return false;
   }
   // X-6.5.51i (2026-04-25): ally_interaction precisa de PELO MENOS 1 aliado.
-  // Antes (X-6.5.0 era): renderizava como .locked (cinza/disabled). User
-  // feedback: "esconda as opcoes que o jogador atual nao tem". Agora
-  // filtramos completamente — choice nao aparece se sem aliados.
   if (ch.ally_interaction) {
     if (!allies || allies.length === 0) return false;
   }
   // only_race: string ou array
   if (ch.only_race) {
-    const curRace = (window.S && window.S.player && (window.S.player.race || window.S.player.raca)) || '';
-    const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const curRace = norm(p.race || p.raca || '');
     const list = (Array.isArray(ch.only_race) ? ch.only_race : [ch.only_race]).map(norm);
-    if (!list.includes(norm(curRace))) return false;
+    if (!list.includes(curRace)) return false;
   }
   // only_subrace: string ou array
   if (ch.only_subrace) {
-    const curSubrace = (window.S && window.S.player && window.S.player.subrace) || '';
-    const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/-/g, '_');
+    const curSubrace = norm(p.subrace || '');
     const list = (Array.isArray(ch.only_subrace) ? ch.only_subrace : [ch.only_subrace]).map(norm);
-    if (!list.includes(norm(curSubrace))) return false;
+    if (!list.includes(curSubrace)) return false;
   }
   // only_subclass: string ou array
   if (ch.only_subclass) {
-    const curSubclass = (window.S && window.S.player && window.S.player.subclass) || '';
-    const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/-/g, '_');
+    const curSubclass = norm(p.subclass || '');
     const list = (Array.isArray(ch.only_subclass) ? ch.only_subclass : [ch.only_subclass]).map(norm);
-    if (!list.includes(norm(curSubclass))) return false;
+    if (!list.includes(curSubclass)) return false;
   }
   // class_tags legado: 'arcane'=mago, 'martial'=guerreiro, 'stealth'=ladino, 'divine'=clerigo
   if (ch.class_tags) {
     const tagMap = { mago: 'arcane', guerreiro: 'martial', ladino: 'stealth', clerigo: 'divine' };
     if (!ch.class_tags.includes(tagMap[clsKey])) return false;
   }
+
+  // D&D 5e: requires estruturado (paridade com diálogo da cidade e outcome.py)
+  if (ch.requires && typeof ch.requires === 'object') {
+    var req = ch.requires;
+    if (req.race || req.races) {
+      var rList = (Array.isArray(req.races || req.race) ? (req.races || req.race) : [req.races || req.race]).map(norm);
+      if (!rList.includes(norm(p.race || p.raca || ''))) return false;
+    }
+    if (req.subrace || req.subraces) {
+      var srList = (Array.isArray(req.subraces || req.subrace) ? (req.subraces || req.subrace) : [req.subraces || req.subrace]).map(norm);
+      if (!srList.includes(norm(p.subrace || ''))) return false;
+    }
+    if (req.hero_class || req.class || req.classes) {
+      var clList = (Array.isArray(req.classes || req.hero_class || req.class) ? (req.classes || req.hero_class || req.class) : [req.classes || req.hero_class || req.class]).map(norm);
+      if (!clList.includes(norm(clsKey))) return false;
+    }
+    if (req.subclass || req.subclasses) {
+      var scList = (Array.isArray(req.subclasses || req.subclass) ? (req.subclasses || req.subclass) : [req.subclasses || req.subclass]).map(norm);
+      if (!scList.includes(norm(p.subclass || ''))) return false;
+    }
+    if (req.background || req.backgrounds) {
+      var bgList = (Array.isArray(req.backgrounds || req.background) ? (req.backgrounds || req.background) : [req.backgrounds || req.background]).map(norm);
+      if (!bgList.includes(norm(bg))) return false;
+    }
+    if (req.personality_trait || req.trait) {
+      var traitVal = norm(p.personality_trait || '');
+      var targets = (Array.isArray(req.personality_trait || req.trait) ? (req.personality_trait || req.trait) : [req.personality_trait || req.trait]).map(norm);
+      if (!targets.some(function (t) { return traitVal.indexOf(t) !== -1; })) return false;
+    }
+    if (req.ideal) {
+      var idealVal = norm(p.ideal || '');
+      var targets = (Array.isArray(req.ideal) ? req.ideal : [req.ideal]).map(norm);
+      if (!targets.some(function (t) { return idealVal.indexOf(t) !== -1; })) return false;
+    }
+    if (req.bond) {
+      var bondVal = norm(p.bond || '');
+      var targets = (Array.isArray(req.bond) ? req.bond : [req.bond]).map(norm);
+      if (!targets.some(function (t) { return bondVal.indexOf(t) !== -1; })) return false;
+    }
+    if (req.flaw) {
+      var flawVal = norm(p.flaw || '');
+      var targets = (Array.isArray(req.flaw) ? req.flaw : [req.flaw]).map(norm);
+      if (!targets.some(function (t) { return flawVal.indexOf(t) !== -1; })) return false;
+    }
+    if (req.min_stat || req.stats) {
+      var stats = req.stats || req.min_stat || {};
+      var pStats = p.stats || p.abilities || {};
+      for (var sk in stats) {
+        var minVal = Number(stats[sk]) || 0;
+        var pVal = Number(pStats[sk] || pStats[sk.toLowerCase()] || 0);
+        if (pVal < minVal) return false;
+      }
+    }
+    if (req.skills || req.skill_proficiency) {
+      var reqSkills = req.skills || req.skill_proficiency;
+      var rSkList = Array.isArray(reqSkills) ? reqSkills : [reqSkills];
+      var pSkills = (p.proficiency || p.skill_proficiencies || []).map(norm);
+      if (!rSkList.every(function (sk) { return pSkills.includes(norm(sk)); })) return false;
+    }
+  }
+
   return true;
 }
 
