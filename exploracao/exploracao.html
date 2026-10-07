@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T15:07:14Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T16:37:58Z - do not edit directly, edit source -->
 
 
 
@@ -8844,7 +8844,7 @@ window.__onIntroTap = function() {
       <div class="camp-fire-area">
         <div class="camp-ground-glow"></div>
         <div class="camp-logs"><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log-ember"></div></div>
-        <canvas class="camp-fire-canvas" id="camp-fire-canvas" width="180" height="180"></canvas>
+        <canvas class="camp-fire-canvas" id="camp-fire-canvas" width="200" height="200"></canvas>
         <div class="camp-embers"><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span></div>
       </div>
     </div>
@@ -42102,7 +42102,22 @@ function openCampOverlay() {
   // Particle fire canvas (explore-camp-fire.js carregado no <head>)
   try {
     const canvas = document.getElementById('camp-fire-canvas');
-    if (canvas && window.CampFire) window.CampFire.init(canvas);
+    if (canvas) {
+      if (window.CampFire) {
+        window.CampFire.init(canvas);
+      } else {
+        var _retries = 0;
+        var _campTimer = setInterval(function() {
+          _retries++;
+          if (window.CampFire) {
+            clearInterval(_campTimer);
+            window.CampFire.init(canvas);
+          } else if (_retries > 25) {
+            clearInterval(_campTimer);
+          }
+        }, 80);
+      }
+    }
   } catch (e) {
     console.warn('[CAMP] fire init failed:', e);
   }

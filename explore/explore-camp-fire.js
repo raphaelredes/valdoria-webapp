@@ -57,7 +57,7 @@
         var angle = Math.random() * Math.PI * 2;
         var rx = Math.random() * (W * 0.22);          // antes 0.14
         this.x = W * 0.5 + Math.cos(angle) * rx;
-        this.y = H - (H * 0.11) + Math.random() * (H * 0.04);
+        this.y = H - (H * 0.13) + Math.random() * (H * 0.04);
         this.x0 = this.x;
 
         // X-6.5.51BS: velocidades reduzidas AINDA MAIS (user ainda reportou
@@ -210,16 +210,16 @@
         // Brilho quente basal sutil na fogueira (leito incandescente de brasas)
         var time = performance.now() * 0.0025;
         var baseCenterX = _W * 0.5;
-        var baseCenterY = _H - (_H * 0.12);
+        var baseCenterY = _H - (_H * 0.13);
         var basePulse = 1.0 + Math.sin(time * 3.2) * 0.08;
         if (_spriteCore) {
-            _ctx.globalAlpha = 0.55 * basePulse;
-            var bW = Math.max(70, _W * 0.44) * basePulse;
-            var bH = Math.max(30, _H * 0.18) * basePulse;
+            _ctx.globalAlpha = 0.58 * basePulse;
+            var bW = Math.max(90, _W * 0.55) * basePulse;
+            var bH = Math.max(45, _H * 0.26) * basePulse;
             _ctx.drawImage(_spriteFlame, baseCenterX - bW * 0.5, baseCenterY - bH * 0.5, bW, bH);
-            _ctx.globalAlpha = 0.35 * basePulse;
-            var cW = bW * 0.6;
-            var cH = bH * 0.65;
+            _ctx.globalAlpha = 0.40 * basePulse;
+            var cW = bW * 0.65;
+            var cH = bH * 0.70;
             _ctx.drawImage(_spriteCore, baseCenterX - cW * 0.5, baseCenterY - cH * 0.5, cW, cH);
         }
 
@@ -277,8 +277,8 @@
             _buildSprites();
         }
 
-        // Base particle size scales with canvas (reference: 160px → ~3.5)
-        _baseSize = Math.max(1.5, (_W / 160) * 3.5);
+        // Base particle size scales with canvas (reference: 200px → ~6.4)
+        _baseSize = Math.max(3.2, (_W / 180) * 5.8);
 
         var count = _getParticleCount();
         _particles = [];
