@@ -9411,6 +9411,10 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (picked.max_hit_dice != null)     p.hdMax = picked.max_hit_dice;
       if (picked.pending_skills != null)   p.pendingSkills = picked.pending_skills;
       if (picked.pending_asi != null)      p.pendingAsi = picked.pending_asi;
+      if (picked.pending_level_notification != null) {
+        p.pending_level_notification = picked.pending_level_notification;
+        p.pendingNotification = picked.pending_level_notification;
+      }
       // PADRAO_LOCAIS sessão #71h: efeitos temporários ATIVOS (boato/sonho até
       // descanso longo) REAIS do servidor → card badge + ficha "Efeitos Ativos".
       // Sem isto, um boato comprado em sessão anterior (persistido no DB) não
@@ -9583,6 +9587,8 @@ body.perf-lite .vc-action-btn { transition: none; }
           hd: p.hd, hdMax: p.hdMax,
           pendingSkills: p.pendingSkills || 0,
           pendingAsi: p.pendingAsi || 0,
+          pendingNotification: p.pending_level_notification || p.pendingNotification || null,
+          isPlayer: true,
           dead: false
         };
       }
@@ -9668,6 +9674,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       // Re-render se hub ja foi montado
       if (typeof refreshHud === 'function') refreshHud();
       if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+      if (typeof _checkAndShowLevelUpNotification === 'function') _checkAndShowLevelUpNotification();
       // 2026-06-08: personagem real hidratado + hub re-renderizado → AGORA revela
       // (caso a cobertura tenha sido mantida por falta de state.hud no boot). O
       // jogador só vê o hub já com o personagem — sem flash de hub em branco.
@@ -9751,6 +9758,29 @@ body.perf-lite .vc-action-btn { transition: none; }
           });
           console.log('[CITY] known_locations hydrated from server (fallback):', p.known_locations.length, 'locations:', p.known_locations.join(','));
         }
+        if (picked.stats && typeof picked.stats === 'object') {
+          var _sx = picked.stats;
+          p.stats = {
+            str: _sx.strength != null ? _sx.strength : (_sx.str != null ? _sx.str : 10),
+            dex: _sx.dexterity != null ? _sx.dexterity : (_sx.dex != null ? _sx.dex : 10),
+            con: _sx.constitution != null ? _sx.constitution : (_sx.con != null ? _sx.con : 10),
+            int: _sx.intelligence != null ? _sx.intelligence : (_sx.int != null ? _sx.int : 10),
+            wis: _sx.wisdom != null ? _sx.wisdom : (_sx.wis != null ? _sx.wis : 10),
+            cha: _sx.charisma != null ? _sx.charisma : (_sx.cha != null ? _sx.cha : 10)
+          };
+        }
+        if (picked.armor_class != null)       p.ac = picked.armor_class;
+        if (picked.attack_bonus != null)      p.atk = picked.attack_bonus;
+        if (picked.spell_save_dc != null)     p.dc = picked.spell_save_dc;
+        if (picked.proficiency_bonus != null) p.prof = picked.proficiency_bonus;
+        if (picked.hit_dice != null)          p.hd = picked.hit_dice;
+        if (picked.max_hit_dice != null)      p.hdMax = picked.max_hit_dice;
+        if (picked.pending_skills != null)    p.pendingSkills = picked.pending_skills;
+        if (picked.pending_asi != null)       p.pendingAsi = picked.pending_asi;
+        if (picked.pending_level_notification != null) {
+          p.pending_level_notification = picked.pending_level_notification;
+          p.pendingNotification = picked.pending_level_notification;
+        }
         // FASE 4 (2026-06-23): afinidade/reputação REAIS de NPC (fallback path) — idem ao
         // caminho principal; a tela de Vínculos exibe o valor real (não o proxy).
         p.metadata = p.metadata || {};
@@ -9762,6 +9792,13 @@ body.perf-lite .vc-action-btn { transition: none; }
             name: p.name, cls: p.cls, race: p.race, level: p.level,
             hp: p.hp, hpMax: p.hpMax, mp: p.mp, mpMax: p.mpMax,
             exh: p.exh, exhMax: 6, xp: p.xp, xpNext: p.xpNext, gold: p.gold,
+            stats: p.stats || null,
+            ac: p.ac, atk: p.atk, dc: p.dc, prof: p.prof,
+            hd: p.hd, hdMax: p.hdMax,
+            pendingSkills: p.pendingSkills || 0,
+            pendingAsi: p.pendingAsi || 0,
+            pendingNotification: p.pending_level_notification || p.pendingNotification || null,
+            isPlayer: true,
             dead: false
           };
         }
@@ -9787,6 +9824,7 @@ body.perf-lite .vc-action-btn { transition: none; }
         // FIX v3: forcar re-render apos fallback (antes o hub ficava com mock)
         if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_re){} }
         if (typeof renderCurrentScreen === 'function') { try { renderCurrentScreen(); } catch(_re){} }
+        if (typeof _checkAndShowLevelUpNotification === 'function') { try { _checkAndShowLevelUpNotification(); } catch(_re){} }
       }).catch(function(e){
         console.warn('[CITY] fallback failed:', e);
         _cityLog('critical', 'fallback_chars_fetch_failed', {error: String(e && e.message || e).slice(0, 300)});
@@ -15592,6 +15630,35 @@ function _openLevelUpFlowFromFicha(memberIdx){
           p.stats = newStats;
           p.pendingAsi = 0;
           if (p.pending_level_notification) p.pending_level_notification = null;
+          if (p.pendingNotification) p.pendingNotification = null;
+        }
+        var chosenStatsList = [];
+        for (var attrKey in curAlloc) {
+          for (var a = 0; a < (curAlloc[attrKey] || 0); a++) {
+            chosenStatsList.push(attrKey);
+          }
+        }
+        if (window.vCityServer && typeof window.vCityServer.cityAction === 'function') {
+          window.vCityServer.cityAction('character.apply_asi', { asi_choices: chosenStatsList }).then(function(res){
+            if (res && res.ok) {
+              if (res.stats) {
+                var _rs = res.stats;
+                p.stats = {
+                  str: _rs.strength != null ? _rs.strength : (_rs.str || p.stats.str),
+                  dex: _rs.dexterity != null ? _rs.dexterity : (_rs.dex || p.stats.dex),
+                  con: _rs.constitution != null ? _rs.constitution : (_rs.con || p.stats.con),
+                  int: _rs.intelligence != null ? _rs.intelligence : (_rs.int || p.stats.int),
+                  wis: _rs.wisdom != null ? _rs.wisdom : (_rs.wis || p.stats.wis),
+                  cha: _rs.charisma != null ? _rs.charisma : (_rs.cha || p.stats.cha)
+                };
+                m.stats = p.stats;
+              }
+              if (res.pending_asi != null) { p.pendingAsi = res.pending_asi; m.pendingAsi = res.pending_asi; }
+              if (res.hp != null) { p.hp = res.hp; m.hp = res.hp; }
+              if (res.max_hp != null) { p.hpMax = res.max_hp; m.hpMax = res.max_hp; }
+              if (typeof refreshHud === 'function') refreshHud();
+            }
+          }).catch(function(e){ console.warn('[CITY] apply_asi remote failed:', e); });
         }
         modalEl.remove();
         if (typeof vToast === 'function') vToast('✨ Atributos aprimorados e salvos com sucesso!');
@@ -15719,6 +15786,9 @@ function _openLevelUpCelebrationModal(notifData){
         }
         if (window.GROUP_MEMBERS && window.GROUP_MEMBERS[0]) {
           window.GROUP_MEMBERS[0].pendingNotification = null;
+        }
+        if (window.vCityServer && typeof window.vCityServer.cityAction === 'function') {
+          window.vCityServer.cityAction('character.dismiss_level_notification', {}).catch(function(){});
         }
         try { localStorage.setItem('valdoria_seen_lvl_notif', String(Date.now())); } catch(e){}
         _showStatusPopup(0);
