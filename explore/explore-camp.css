@@ -21,13 +21,21 @@
   background: radial-gradient(ellipse at 50% 60%, var(--v-gold-08) 0%, transparent 50%), #0a0808;
 }
 
-/* HUD bars */
+/* HUD bars — Frosted Glass Medieval Panel */
 .camp-hud {
   position: absolute;
-  top: 14px; left: 16px; right: 16px;
-  z-index: 5;
+  top: 10px; left: 12px; right: 12px;
+  z-index: 10;
   display: flex;
-  gap: var(--v-space-md, 8px);
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: rgba(18, 14, 10, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(196, 149, 58, 0.28);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .camp-hud-bar {
   flex: 1;
@@ -35,30 +43,71 @@
   align-items: center;
   gap: 5px;
 }
-.camp-hud-icon { font-size: var(--v-font-xs, 10px); }
+.camp-hud-icon {
+  font-size: 12px;
+  line-height: 1;
+}
 .camp-hud-track {
   flex: 1;
-  height: 6px;
-  background: rgba(0,0,0,0.5);
-  border-radius: var(--v-radius-sm, 6px);
+  height: 7px;
+  background: rgba(0, 0, 0, 0.65);
+  border-radius: 4px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .camp-hud-fill {
   height: 100%;
-  border-radius: var(--v-radius-sm, 6px);
-  transition: width var(--v-transition-slow) ease;
+  border-radius: 4px;
+  transition: width 0.3s ease;
 }
-.camp-hud-hp { background: linear-gradient(90deg, #b83030, #d44); }
-.camp-hud-mp { background: linear-gradient(90deg, #3a7abb, #5a9ae8); }
+.camp-hud-hp { background: linear-gradient(90deg, #b82525, #ef4444); }
+.camp-hud-mp { background: linear-gradient(90deg, #2563eb, #60a5fa); }
 .camp-hud-val {
-  font-size: var(--v-font-xs, 10px);
-  font-family: var(--v-font);
-  min-width: 40px;
+  font-size: 11px;
+  font-family: var(--v-font, 'Marcellus', serif);
+  min-width: 48px;
+  font-weight: 600;
   text-align: right;
+  letter-spacing: 0.3px;
 }
-.camp-hud-val-hp { color: #d55; }
-.camp-hud-val-mp { color: #5a9ae8; }
+.camp-hud-val-hp { color: #f87171; }
+.camp-hud-val-mp { color: #93c5fd; }
+.camp-hud-hd {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  background: rgba(196, 149, 58, 0.15);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 6px;
+  color: var(--v-gold, #c4953a);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--v-font, 'Marcellus', serif);
+  white-space: nowrap;
+}
+.camp-hud-close {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #a09484;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  transition: all 0.15s ease;
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+.camp-hud-close:hover, .camp-hud-close:active {
+  background: rgba(200, 60, 40, 0.25);
+  border-color: #ef4444;
+  color: #f87171;
+}
 
 /* Stars & Sky */
 .camp-sky {
@@ -387,15 +436,14 @@
 /* 15. Planície / Gramado Aberto (Tile '.', 'C', 'F') */
 .camp-screen.hex-plains .camp-scenery,
 .camp-screen.hex-camp .camp-scenery {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20180'%20preserveAspectRatio='none'%3E%20%3C%21--%20Soft%20Pastoral%20Hills%20--%3E%20%3Cpath%20d='M0%2C180%20Q150%2C105%20320%2C120%20Q460%2C98%20600%2C122%20L600%2C180%20Z'%20fill='rgba%2826%2C45%2C20%2C0.65%29'/%3E%20%3C%21--%20Distant%20Windmill%20on%20the%20Hill%20Right%20--%3E%20%3Cpolygon%20points='465%2C122%20470%2C72%20485%2C72%20490%2C122'%20fill='rgba%2830%2C48%2C24%2C0.88%29'/%3E%20%3Cline%20x1='477'%20y1='72'%20x2='458'%20y2='50'%20stroke='rgba%2830%2C48%2C24%2C0.88%29'%20stroke-width='2.5'/%3E%20%3Cline%20x1='477'%20y1='72'%20x2='496'%20y2='94'%20stroke='rgba%2830%2C48%2C24%2C0.88%29'%20stroke-width='2.5'/%3E%20%3Cline%20x1='477'%20y1='72'%20x2='496'%20y2='50'%20stroke='rgba%2830%2C48%2C24%2C0.88%29'%20stroke-width='2.5'/%3E%20%3Cline%20x1='477'%20y1='72'%20x2='458'%20y2='94'%20stroke='rgba%2830%2C48%2C24%2C0.88%29'%20stroke-width='2.5'/%3E%20%3C%21--%20Rolling%20Meadow%20Foreground%20--%3E%20%3Cpath%20d='M0%2C180%20Q200%2C128%20400%2C138%20Q500%2C130%20600%2C145%20L600%2C180%20Z'%20fill='rgba%2832%2C56%2C25%2C0.88%29'/%3E%20%3C%21--%20Wooden%20Meadow%20Fence%20--%3E%20%3Cpath%20d='M50%2C180%20L50%2C138%20M110%2C180%20L110%2C142%20M170%2C180%20L170%2C138%20M230%2C180%20L230%2C140%20M40%2C150%20L240%2C148%20M40%2C165%20L240%2C162'%20stroke='rgba%2850%2C38%2C24%2C0.95%29'%20stroke-width='2.5'/%3E%20%3C%21--%20Tall%20Wheat%20/%20Grass%20blades%20in%20Foreground%20--%3E%20%3Cpath%20d='M270%2C180%20Q268%2C155%20264%2C148%20M270%2C180%20Q273%2C152%20277%2C146%20M350%2C180%20Q347%2C156%20343%2C150%20M350%2C180%20Q353%2C154%20358%2C148%20M540%2C180%20Q537%2C158%20534%2C152%20M540%2C180%20Q543%2C156%20547%2C150'%20stroke='rgba%2842%2C70%2C32%2C0.98%29'%20stroke-width='2.5'/%3E%20%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20600%20180'%20preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient%20id='plHills'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0%25'%20stop-color='rgba%2820%2C38%2C18%2C0.5%29'/%3E%3Cstop%20offset='100%25'%20stop-color='rgba%2812%2C24%2C10%2C0.85%29'/%3E%3C/linearGradient%3E%3ClinearGradient%20id='plNear'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0%25'%20stop-color='rgba%2825%2C48%2C22%2C0.85%29'/%3E%3Cstop%20offset='100%25'%20stop-color='rgba%2810%2C20%2C8%2C0.98%29'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20d='M0%2C180%20Q140%2C85%20280%2C105%20Q420%2C78%20600%2C100%20L600%2C180%20Z'%20fill='url%28%23plHills%29'/%3E%3Cpath%20d='M45%2C180%20L55%2C75%20L65%2C180%20M75%2C180%20L88%2C68%20L102%2C180%20M115%2C180%20L125%2C82%20L136%2C180'%20stroke='rgba%2818%2C34%2C16%2C0.65%29'%20stroke-width='14'%20stroke-linecap='round'%20fill='none'/%3E%3Cpath%20d='M470%2C180%20L472%2C88%20L488%2C88%20L490%2C180%20Z'%20fill='rgba%2816%2C30%2C14%2C0.75%29'/%3E%3Cpath%20d='M0%2C180%20Q180%2C112%20360%2C125%20Q480%2C110%20600%2C132%20L600%2C180%20Z'%20fill='url%28%23plNear%29'/%3E%3Cpath%20d='M25%2C180%20Q35%2C148%2048%2C180%20M160%2C180%20Q172%2C142%20186%2C180%20M320%2C180%20Q332%2C145%20345%2C180%20M430%2C180%20Q442%2C142%20455%2C180%20M540%2C180%20Q552%2C146%20565%2C180'%20stroke='rgba%2830%2C55%2C25%2C0.95%29'%20stroke-width='3'%20fill='none'/%3E%3C/svg%3E");
 }
 .camp-screen.hex-plains .camp-ground-terrain,
 .camp-screen.hex-camp .camp-ground-terrain {
   background:
     radial-gradient(ellipse 160px 40px at 50% 75%, rgba(65, 45, 25, 0.9) 0%, transparent 80%),
-    linear-gradient(180deg, #345e28 0%, #25461c 30%, #182e12 65%, #0f1c0b 100%);
-  border-top: 2px solid #4a8238;
-  box-shadow: inset 0 2px 4px rgba(74, 130, 56, 0.4);
+    linear-gradient(180deg, #2a4620 0%, #1e3317 30%, #14220f 65%, #0b1308 100%);
+  border-top: none;
 }
 
 /* ── Weather Overrides on Camp Screen ── */
@@ -586,10 +634,10 @@
 /* Fire area */
 .camp-fire-area {
   position: absolute;
-  bottom: 85px;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
-  width: 160px;
+  width: 180px;
   height: 180px;
 }
 
@@ -669,7 +717,7 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
-  width: 160px; height: 160px;
+  width: 180px; height: 180px;
 }
 
 /* Ember sparks */
@@ -710,114 +758,394 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
   100% { opacity: 0; transform: translateY(-120px) translateX(var(--camp-dx1)) scale(0.1); }
 }
 
-/* Title */
-.camp-title-area {
-  position: absolute;
-  bottom: 20px;
-  left: 0; right: 0;
+/* Camp Header Banner (noble presentation above action cards) */
+.camp-header-banner {
   text-align: center;
-  z-index: 5;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(196, 149, 58, 0.18);
+  flex-shrink: 0;
 }
-.camp-title-text {
-  font-size: var(--v-font-xl, 18px);
+.camp-title-badge {
+  font-size: 15px;
   font-family: var(--v-font-display, 'Cinzel', serif);
-  color: var(--v-gold, var(--v-gold, #c4953a));
-  letter-spacing: 4px;
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 3px;
   text-transform: uppercase;
-  text-shadow: 0 0 20px var(--v-gold-30), 0 2px 4px rgba(0,0,0,0.5);
-  font-weight: 600;
+  text-shadow: 0 0 16px rgba(196, 149, 58, 0.35);
+  font-weight: 700;
 }
 .camp-title-biome {
-  font-size: var(--v-font-sm, 12px);
-  font-family: var(--v-font);
-  color: var(--v-text-dim, #a09484);
-  margin-top: 5px;
-  letter-spacing: 1px;
+  font-size: 11.5px;
+  font-family: var(--v-font, 'Marcellus', serif);
+  color: #a09484;
+  margin-top: 3px;
+  letter-spacing: 0.5px;
 }
 
 /* ── Cards section (bottom half) ── */
 .camp-cards {
   flex: 1;
-  padding: var(--v-space-md-lg, 10px) var(--v-space-xl, 16px) var(--v-space-md-lg, 10px);
+  padding: 12px 16px 14px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, transparent 0%, rgba(10,8,6,0.6) 15%, rgba(10,8,6,0.95) 35%);
+  background: linear-gradient(180deg, #120e0a 0%, #0d0a07 60%, #080605 100%);
+  border-top: 1px solid rgba(196, 149, 58, 0.22);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.7);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .camp-card {
-  border-radius: var(--v-radius, 10px);
-  padding: 13px var(--v-space-xl, 16px);
+  border-radius: 12px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   cursor: pointer;
-  transition: all var(--v-transition, 0.2s) ease;
-  margin-bottom: var(--v-space-sm, 6px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 10px;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
-.camp-card:active { transform: scale(0.97); }
+.camp-card:hover {
+  transform: translateY(-1px);
+}
+.camp-card:active {
+  transform: scale(0.98);
+}
+.camp-card-short {
+  background: linear-gradient(135deg, rgba(34, 58, 36, 0.6) 0%, rgba(18, 28, 19, 0.85) 100%);
+  border: 1px solid rgba(74, 154, 85, 0.35);
+}
+.camp-card-short:hover {
+  border-color: rgba(74, 154, 85, 0.6);
+  box-shadow: 0 4px 16px rgba(46, 125, 50, 0.25);
+}
+.camp-card-long {
+  background: linear-gradient(135deg, rgba(58, 44, 24, 0.6) 0%, rgba(28, 20, 10, 0.85) 100%);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+}
+.camp-card-long:hover {
+  border-color: rgba(196, 149, 58, 0.6);
+  box-shadow: 0 4px 16px rgba(196, 149, 58, 0.25);
+}
+.camp-card--no-hd {
+  opacity: 0.55;
+  filter: grayscale(0.3);
+}
 
-.camp-card-short { background: rgba(74,138,75,0.06); border: 1px solid rgba(74,138,75,0.2); }
-.camp-card-long  { background: var(--v-gold-5); border: 1px solid rgba(196,149,58,0.18); }
-.camp-card-guard { background: rgba(100,120,160,0.04); border: 1px solid rgba(100,120,160,0.12); }
-
-.camp-card-icon { font-size: 24px; flex-shrink: 0; }
-.camp-card-info { flex: 1; min-width: 0; }
-.camp-card-title {
-  font-size: var(--v-font-body, 14px);
-  font-weight: 600;
-  font-family: var(--v-font-display, 'Cinzel', serif);
-}
-.camp-card-t-short { color: #5a9a5b; }
-.camp-card-t-long  { color: var(--v-gold, #c4953a); }
-.camp-card-t-guard { color: #8a9aaa; }
-
-.camp-card-sub {
-  font-size: var(--v-font-sm, 12px);
-  color: var(--v-text-dim, #a09484);
-  margin-top: 3px;
-  font-family: var(--v-font);
-}
-.camp-card-detail {
-  font-size: var(--v-font-label, 11px);
-  color: var(--v-text-dim, var(--v-text-dim, #a09484));
-  opacity: 0.7;
-  margin-top: 3px;
-  font-family: var(--v-font);
-}
-.camp-card-arrow {
-  font-size: var(--v-font-2xl, 18px);
-  opacity: 0.4;
+.camp-card-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
-.camp-continue {
-  text-align: center;
-  padding: var(--v-space-lg, 12px) 20px;
-  margin: var(--v-space-md, 8px) auto 0;
-  font-size: var(--v-font-body, 14px);
+.camp-card-icon-short {
+  background: rgba(74, 154, 85, 0.18);
+  border: 1px solid rgba(74, 154, 85, 0.35);
+  color: #6ee7b7;
+}
+.camp-card-icon-long {
+  background: rgba(196, 149, 58, 0.18);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  color: #fcd34d;
+}
+.camp-card-svg {
+  width: 22px;
+  height: 22px;
+}
+
+.camp-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.camp-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.camp-card-title {
+  font-size: 14px;
   font-weight: 700;
-  color: var(--v-gold, #c4953a);
-  background: var(--v-gold-10, rgba(196,149,58,0.1));
-  border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3));
-  border-radius: var(--v-radius, 10px);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  letter-spacing: 0.5px;
+}
+.camp-card-t-short { color: #86efac; }
+.camp-card-t-long { color: #fde047; }
+
+.camp-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-family: var(--v-font, 'Marcellus', serif);
+}
+.camp-pill-short {
+  background: rgba(74, 154, 85, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(74, 154, 85, 0.4);
+}
+.camp-pill-long {
+  background: rgba(196, 149, 58, 0.2);
+  color: #fde047;
+  border: 1px solid rgba(196, 149, 58, 0.4);
+}
+
+.camp-card-sub {
+  font-size: 11px;
+  color: #c4b5a0;
+  margin-top: 3px;
+  font-family: var(--v-font, 'Marcellus', serif);
+  line-height: 1.35;
+}
+.camp-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+.camp-chip {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-family: var(--v-font, 'Marcellus', serif);
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d4c8b0;
+  white-space: nowrap;
+}
+.camp-chip-cost { color: #f87171; border-color: rgba(239, 68, 68, 0.25); background: rgba(239, 68, 68, 0.1); }
+.camp-chip-heal { color: #4ade80; border-color: rgba(74, 222, 128, 0.25); background: rgba(74, 222, 128, 0.1); }
+.camp-chip-hd { color: #fde047; border-color: rgba(253, 224, 71, 0.25); background: rgba(253, 224, 71, 0.1); }
+.camp-chip-full { color: #60a5fa; border-color: rgba(96, 165, 250, 0.25); background: rgba(96, 165, 250, 0.1); }
+.camp-chip-gain { color: #fde047; border-color: rgba(253, 224, 71, 0.25); background: rgba(253, 224, 71, 0.1); }
+.camp-chip-exh { color: #c084fc; border-color: rgba(192, 132, 252, 0.25); background: rgba(192, 132, 252, 0.1); }
+.camp-chip-gear { color: #cbd5e1; border-color: rgba(203, 213, 225, 0.2); background: rgba(203, 213, 225, 0.08); }
+
+.camp-card-chevron {
+  font-size: 18px;
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.camp-card:hover .camp-card-chevron {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.camp-leave-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 18px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #c4953a;
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.12) 0%, rgba(196, 149, 58, 0.04) 100%);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 10px;
   cursor: pointer;
   font-family: var(--v-font-display, 'Cinzel', serif);
   letter-spacing: 1px;
-  transition: all var(--v-transition, 0.2s);
-  max-width: 280px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
-.camp-continue:active {
-  transform: scale(0.97);
-  background: var(--v-gold-20, rgba(196,149,58,0.2));
+.camp-leave-btn:hover {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.2) 0%, rgba(196, 149, 58, 0.08) 100%);
+  border-color: rgba(196, 149, 58, 0.55);
+  color: #fde047;
 }
+.camp-leave-btn:active {
+  transform: scale(0.98);
+}
+.camp-leave-icon {
+  font-size: 15px;
+}
+
 .camp-footer-status {
+  text-align: center;
+  padding: 6px 10px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #a09484;
+  font-family: var(--v-font, 'Marcellus', serif);
+  line-height: 1.4;
+  min-height: 22px;
+  transition: all 0.3s ease;
+}
+.camp-footer-status:not(:empty) {
+  background: rgba(18, 14, 10, 0.7);
+  border: 1px solid rgba(196, 149, 58, 0.25);
+  border-radius: 6px;
+  color: #e5d9c5;
+}
+
+/* ── Confirmation Modal ── */
+.camp-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--v-z-loading, 1000) + 25);
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: var(--v-space-xl, 16px);
-  padding: var(--v-space-xs, 2px) 0 6px;
-  font-size: var(--v-font-label, 11px);
-  color: var(--v-text-dim, var(--v-text-dim, #a09484));
-  opacity: 0.5;
-  font-family: var(--v-font);
+  padding: 16px;
+}
+.camp-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 4, 3, 0.78);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.camp-confirm-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: linear-gradient(180deg, #1c1611 0%, #120e0a 100%);
+  border: 1px solid rgba(196, 149, 58, 0.4);
+  border-radius: 14px;
+  padding: 20px 18px 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 0 24px rgba(196, 149, 58, 0.15);
+  z-index: 1;
+  animation: campModalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes campModalPop {
+  from { opacity: 0; transform: scale(0.92) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.camp-confirm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.camp-confirm-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(196, 149, 58, 0.15);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.camp-confirm-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+.camp-confirm-duration {
+  font-size: 11px;
+  color: #a09484;
+  font-family: var(--v-font, 'Marcellus', serif);
+  margin-top: 2px;
+}
+.camp-confirm-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196, 149, 58, 0.35), transparent);
+  margin: 10px 0 12px;
+}
+.camp-confirm-desc {
+  font-size: 12px;
+  color: #d4c8b0;
+  line-height: 1.45;
+  margin: 0 0 12px;
+  font-family: var(--v-font, 'Marcellus', serif);
+}
+.camp-confirm-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.camp-confirm-fact {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 11.5px;
+  color: #e2d7c5;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: var(--v-font, 'Marcellus', serif);
+  line-height: 1.35;
+}
+.camp-confirm-fact-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.camp-confirm-warning {
+  font-size: 11px;
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 7px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  font-family: var(--v-font, 'Marcellus', serif);
+}
+.camp-confirm-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.camp-confirm-btn {
+  flex: 1;
+  padding: 11px 12px;
+  border-radius: 8px;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+.camp-confirm-btn--cancel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #a09484;
+}
+.camp-confirm-btn--cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.camp-confirm-btn--cancel:active {
+  transform: scale(0.97);
+}
+.camp-confirm-btn--ok {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.35) 0%, rgba(196, 149, 58, 0.15) 100%);
+  border: 1px solid var(--v-gold, #c4953a);
+  color: #fef08a;
+  box-shadow: 0 0 14px rgba(196, 149, 58, 0.25);
+}
+.camp-confirm-btn--ok:hover {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.5) 0%, rgba(196, 149, 58, 0.25) 100%);
+  box-shadow: 0 0 20px rgba(196, 149, 58, 0.45);
+  color: #fff;
+}
+.camp-confirm-btn--ok:active {
+  transform: scale(0.97);
 }
 
 /* ===== Camp Popups (fullscreen, no fire) ===== */

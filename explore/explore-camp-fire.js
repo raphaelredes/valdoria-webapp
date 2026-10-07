@@ -89,45 +89,46 @@
     var _spriteEmber = null;
 
     function _buildSprites() {
-        var sz = 64;
+        var sz = 96;
         var half = sz * 0.5;
 
-        // 1. Core Sprite: Núcleo incandescente branco -> ouro
+        // 1. Core Sprite: Núcleo incandescente branco -> ouro vivo
         var c1 = document.createElement('canvas');
         c1.width = sz; c1.height = sz;
         var ctx1 = c1.getContext('2d');
         var g1 = ctx1.createRadialGradient(half, half, 0, half, half, half);
-        g1.addColorStop(0, 'rgba(255, 255, 245, 1.0)');
-        g1.addColorStop(0.2, 'rgba(255, 235, 140, 0.9)');
-        g1.addColorStop(0.5, 'rgba(255, 150, 20, 0.45)');
-        g1.addColorStop(0.8, 'rgba(230, 60, 0, 0.12)');
+        g1.addColorStop(0, 'rgba(255, 255, 250, 1.0)');
+        g1.addColorStop(0.18, 'rgba(255, 245, 180, 0.95)');
+        g1.addColorStop(0.38, 'rgba(255, 180, 40, 0.7)');
+        g1.addColorStop(0.65, 'rgba(240, 90, 10, 0.25)');
+        g1.addColorStop(0.85, 'rgba(180, 40, 0, 0.06)');
         g1.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx1.fillStyle = g1;
         ctx1.fillRect(0, 0, sz, sz);
         _spriteCore = c1;
 
-        // 2. Flame Sprite: Ouro brilhante -> laranja vivo -> rubro
+        // 2. Flame Sprite: Ouro brilhante -> âmbar rico -> rubro profundo
         var c2 = document.createElement('canvas');
         c2.width = sz; c2.height = sz;
         var ctx2 = c2.getContext('2d');
         var g2 = ctx2.createRadialGradient(half, half, 0, half, half, half);
-        g2.addColorStop(0, 'rgba(255, 205, 50, 0.95)');
-        g2.addColorStop(0.25, 'rgba(255, 120, 15, 0.7)');
-        g2.addColorStop(0.6, 'rgba(215, 45, 0, 0.25)');
-        g2.addColorStop(0.85, 'rgba(130, 15, 0, 0.06)');
+        g2.addColorStop(0, 'rgba(255, 220, 70, 0.98)');
+        g2.addColorStop(0.22, 'rgba(255, 145, 25, 0.82)');
+        g2.addColorStop(0.52, 'rgba(230, 65, 5, 0.45)');
+        g2.addColorStop(0.78, 'rgba(160, 25, 0, 0.12)');
         g2.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx2.fillStyle = g2;
         ctx2.fillRect(0, 0, sz, sz);
         _spriteFlame = c2;
 
-        // 3. Ember Sprite: Vermelho rubro -> brasa residual
+        // 3. Ember Sprite: Vermelho rubro vivo -> brasa incandescente
         var c3 = document.createElement('canvas');
         c3.width = sz; c3.height = sz;
         var ctx3 = c3.getContext('2d');
         var g3 = ctx3.createRadialGradient(half, half, 0, half, half, half);
-        g3.addColorStop(0, 'rgba(255, 100, 15, 0.7)');
-        g3.addColorStop(0.35, 'rgba(190, 30, 0, 0.35)');
-        g3.addColorStop(0.7, 'rgba(90, 10, 0, 0.1)');
+        g3.addColorStop(0, 'rgba(255, 120, 25, 0.85)');
+        g3.addColorStop(0.32, 'rgba(220, 45, 5, 0.55)');
+        g3.addColorStop(0.68, 'rgba(120, 15, 0, 0.2)');
         g3.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx3.fillStyle = g3;
         ctx3.fillRect(0, 0, sz, sz);
@@ -206,16 +207,20 @@
         // Additive blending: partículas sobrepostas criam núcleo quente brilhante
         _ctx.globalCompositeOperation = 'lighter';
 
-        // Brilho quente basal sutil na fogueira
+        // Brilho quente basal sutil na fogueira (leito incandescente de brasas)
         var time = performance.now() * 0.0025;
         var baseCenterX = _W * 0.5;
         var baseCenterY = _H - (_H * 0.12);
         var basePulse = 1.0 + Math.sin(time * 3.2) * 0.08;
         if (_spriteCore) {
-            _ctx.globalAlpha = 0.45 * basePulse;
-            var bW = 60 * basePulse;
-            var bH = 26 * basePulse;
+            _ctx.globalAlpha = 0.55 * basePulse;
+            var bW = Math.max(70, _W * 0.44) * basePulse;
+            var bH = Math.max(30, _H * 0.18) * basePulse;
             _ctx.drawImage(_spriteFlame, baseCenterX - bW * 0.5, baseCenterY - bH * 0.5, bW, bH);
+            _ctx.globalAlpha = 0.35 * basePulse;
+            var cW = bW * 0.6;
+            var cH = bH * 0.65;
+            _ctx.drawImage(_spriteCore, baseCenterX - cW * 0.5, baseCenterY - cH * 0.5, cW, cH);
         }
 
         var i, dead;

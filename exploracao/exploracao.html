@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T14:18:11Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T15:07:14Z - do not edit directly, edit source -->
 
 
 
@@ -6120,14 +6120,14 @@ body.remote-mode #debug-hud { display: none !important; }
   display: none !important;
 }
 .camp-screen.phase-day .camp-moon {
-  width: 34px !important;
-  height: 34px !important;
+  width: 32px !important;
+  height: 32px !important;
   top: 18px !important;
   right: 40px !important;
   border-radius: 50% !important;
-  background: radial-gradient(circle at 45% 45%, #ffffff 0%, #fffbe8 25%, #fde047 55%, #f59e0b 80%, rgba(245, 158, 11, 0) 100%) !important;
-  box-shadow: 0 0 35px rgba(253, 224, 71, 0.85), 0 0 70px rgba(245, 158, 11, 0.45) !important;
-  opacity: 1 !important;
+  background: radial-gradient(circle at 40% 40%, #ffffff 0%, #fff9e6 30%, #fde047 70%, rgba(245, 158, 11, 0) 100%) !important;
+  box-shadow: 0 0 20px rgba(253, 224, 71, 0.45), 0 0 45px rgba(245, 158, 11, 0.2) !important;
+  opacity: 0.85 !important;
 }
 
 .camp-screen.phase-dusk .camp-star {
@@ -8818,8 +8818,20 @@ window.__onIntroTap = function() {
   <div class="camp-screen" id="camp-screen" role="dialog" aria-label="Acampamento">
     <div class="camp-scene">
       <div class="camp-hud">
-        <div class="camp-hud-bar"><span class="camp-hud-icon"></span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-hp" id="camp-hp-bar"></div></div><span class="camp-hud-val camp-hud-val-hp" id="camp-hp-text"></span></div>
-        <div class="camp-hud-bar"><span class="camp-hud-icon"></span><div class="camp-hud-track"><div class="camp-hud-fill camp-hud-mp" id="camp-mp-bar"></div></div><span class="camp-hud-val camp-hud-val-mp" id="camp-mp-text"></span></div>
+        <div class="camp-hud-bar">
+          <span class="camp-hud-icon" title="Pontos de Vida">❤️</span>
+          <div class="camp-hud-track"><div class="camp-hud-fill camp-hud-hp" id="camp-hp-bar"></div></div>
+          <span class="camp-hud-val camp-hud-val-hp" id="camp-hp-text"></span>
+        </div>
+        <div class="camp-hud-bar">
+          <span class="camp-hud-icon" title="Pontos de Mana">🔷</span>
+          <div class="camp-hud-track"><div class="camp-hud-fill camp-hud-mp" id="camp-mp-bar"></div></div>
+          <span class="camp-hud-val camp-hud-val-mp" id="camp-mp-text"></span>
+        </div>
+        <div class="camp-hud-hd" id="camp-hd-badge" title="Dados de Vida disponíveis">
+          <span>🎲</span><span id="camp-hd-text">HD 1/1</span>
+        </div>
+        <button type="button" class="camp-hud-close" id="camp-hud-close-btn" title="Fechar acampamento" aria-label="Fechar">✕</button>
       </div>
       <div class="camp-sky"><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div><div class="camp-star"></div></div>
       <div class="camp-moon"></div>
@@ -8832,35 +8844,98 @@ window.__onIntroTap = function() {
       <div class="camp-fire-area">
         <div class="camp-ground-glow"></div>
         <div class="camp-logs"><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log"></div><div class="camp-log-ember"></div></div>
-        <canvas class="camp-fire-canvas" id="camp-fire-canvas" width="160" height="160"></canvas>
+        <canvas class="camp-fire-canvas" id="camp-fire-canvas" width="180" height="180"></canvas>
         <div class="camp-embers"><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span><span class="camp-spark"></span></div>
-      </div>
-      <div class="camp-title-area">
-        <div class="camp-title-text">Acampamento</div>
-        <div class="camp-title-biome" id="camp-biome-text"></div>
       </div>
     </div>
     <div class="camp-cards">
-      <div class="camp-card camp-card-short" id="camp-btn-short">
-        <div class="camp-card-icon"></div>
-        <div class="camp-card-info">
-          <div class="camp-card-title camp-card-t-short">Descanso Curto</div>
-          <div class="camp-card-sub">1 hora — Gasta Dados de Vida</div>
-          <div class="camp-card-detail" id="camp-short-detail"></div>
-        </div>
-        <div class="camp-card-arrow camp-card-t-short">›</div>
+      <div class="camp-header-banner">
+        <div class="camp-title-badge">✦ ACAMPAMENTO ✦</div>
+        <div class="camp-title-biome" id="camp-biome-text">Planície Aberta · Dia</div>
       </div>
-      <div class="camp-card camp-card-long" id="camp-btn-long">
-        <div class="camp-card-icon"></div>
-        <div class="camp-card-info">
-          <div class="camp-card-title camp-card-t-long">Descanso Longo</div>
-          <div class="camp-card-sub">8 horas — Recuperação total</div>
-          <div class="camp-card-detail" id="camp-long-detail"></div>
+
+      <div class="camp-card camp-card-short" id="camp-btn-short" role="button" tabindex="0">
+        <div class="camp-card-icon-wrap camp-card-icon-short">
+          <svg class="camp-card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
         </div>
-        <div class="camp-card-arrow camp-card-t-long">›</div>
+        <div class="camp-card-info">
+          <div class="camp-card-head">
+            <span class="camp-card-title camp-card-t-short">Descanso Curto</span>
+            <span class="camp-pill camp-pill-short">1 Hora</span>
+          </div>
+          <div class="camp-card-sub">Pausa rápida ao redor do fogo para recuperar fôlego e curar ferimentos.</div>
+          <div class="camp-chips-row">
+            <span class="camp-chip camp-chip-cost" id="camp-short-cost">🎲 1 Dado de Vida</span>
+            <span class="camp-chip camp-chip-heal" id="camp-short-formula">💚 1d8 + CON</span>
+            <span class="camp-chip camp-chip-hd" id="camp-short-hd-badge">HD: 1/1</span>
+          </div>
+          <div class="camp-card-detail" id="camp-short-detail" style="display:none;"></div>
+        </div>
+        <div class="camp-card-chevron camp-card-t-short">▸</div>
       </div>
-      <div class="camp-continue" id="camp-btn-continue">Continuar Explorando ›</div>
+
+      <div class="camp-card camp-card-long" id="camp-btn-long" role="button" tabindex="0">
+        <div class="camp-card-icon-wrap camp-card-icon-long">
+          <svg class="camp-card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+          </svg>
+        </div>
+        <div class="camp-card-info">
+          <div class="camp-card-head">
+            <span class="camp-card-title camp-card-t-long">Descanso Longo</span>
+            <span class="camp-pill camp-pill-long">8 Horas</span>
+          </div>
+          <div class="camp-card-sub">Montagem de acampamento e vigília. Restauração completa de forças.</div>
+          <div class="camp-chips-row">
+            <span class="camp-chip camp-chip-full">✦ 100% PV & PM</span>
+            <span class="camp-chip camp-chip-gain" id="camp-long-hd-gain">🎲 +50% HD</span>
+            <span class="camp-chip camp-chip-exh" id="camp-long-exh-chip">🛡 -1 Exaustão</span>
+            <span class="camp-chip camp-chip-gear">⛺ Barraca/Kit</span>
+          </div>
+          <div class="camp-card-detail" id="camp-long-detail" style="display:none;"></div>
+        </div>
+        <div class="camp-card-chevron camp-card-t-long">▸</div>
+      </div>
+
+      <button type="button" class="camp-leave-btn" id="camp-btn-continue">
+        <span class="camp-leave-icon">↩</span>
+        <span>Retomar Jornada</span>
+      </button>
+
       <div class="camp-footer-status" id="camp-footer-status"></div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação Obrigatória de Descanso (Regra do Jogo) -->
+  <div class="camp-confirm-overlay" id="camp-confirm-modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
+    <div class="camp-confirm-backdrop" id="camp-confirm-backdrop"></div>
+    <div class="camp-confirm-card">
+      <div class="camp-confirm-header">
+        <div class="camp-confirm-icon-box" id="camp-confirm-icon">⏳</div>
+        <div>
+          <h3 class="camp-confirm-title" id="camp-confirm-title">Confirmar Descanso</h3>
+          <div class="camp-confirm-duration" id="camp-confirm-duration">Duração estimada: 1 hora</div>
+        </div>
+      </div>
+      <div class="camp-confirm-divider"></div>
+      <p class="camp-confirm-desc" id="camp-confirm-desc">Tem certeza de que deseja descansar agora?</p>
+
+      <div class="camp-confirm-facts" id="camp-confirm-facts"></div>
+
+      <div class="camp-confirm-warning" id="camp-confirm-warning" style="display:none;"></div>
+
+      <div class="camp-confirm-actions">
+        <button type="button" class="camp-confirm-btn camp-confirm-btn--cancel" id="camp-confirm-cancel">✕ Cancelar</button>
+        <button type="button" class="camp-confirm-btn camp-confirm-btn--ok" id="camp-confirm-ok">✓ Confirmar Descanso</button>
+      </div>
     </div>
   </div>
 
@@ -41844,21 +41919,52 @@ function _updateCampHud() {
   const mpBar = document.getElementById('camp-mp-bar');
   const hpText = document.getElementById('camp-hp-text');
   const mpText = document.getElementById('camp-mp-text');
+  const hdText = document.getElementById('camp-hd-text');
   if (hpBar) hpBar.style.width = hpPct + '%';
   if (mpBar) mpBar.style.width = mpPct + '%';
   if (hpText) hpText.textContent = p.hp + '/' + p.mhp;
   if (mpText) mpText.textContent = p.mp + '/' + (p.mmp || 0);
+  if (hdText) hdText.textContent = 'HD ' + (p.hd || 0) + '/' + (p.mhd || 1);
 }
 
 function _updateCampDetails() {
   const p = S && S.player;
   if (!p) return;
   const conMod = (p.mods && typeof p.mods.con === 'number') ? p.mods.con : 0;
+  const conStr = (conMod >= 0 ? '+' : '') + conMod;
+  const dieSides = (typeof _shortRestDieFor === 'function') ? _shortRestDieFor(p.cls_key) : 8;
+
+  const shortFormula = document.getElementById('camp-short-formula');
+  if (shortFormula) shortFormula.textContent = '💚 1d' + dieSides + ' ' + conStr;
+
+  const shortHdBadge = document.getElementById('camp-short-hd-badge');
+  if (shortHdBadge) shortHdBadge.textContent = 'HD: ' + (p.hd || 0) + '/' + (p.mhd || 1);
+
+  const shortCard = document.getElementById('camp-btn-short');
+  if (shortCard) {
+    if ((p.hd || 0) <= 0) {
+      shortCard.classList.add('camp-card--no-hd');
+    } else {
+      shortCard.classList.remove('camp-card--no-hd');
+    }
+  }
+
+  const longHdGain = document.getElementById('camp-long-hd-gain');
+  if (longHdGain) {
+    const hdRec = Math.max(1, Math.floor((p.mhd || 2) / 2));
+    longHdGain.textContent = '🎲 +' + hdRec + ' HD';
+  }
+
+  const longExhChip = document.getElementById('camp-long-exh-chip');
+  if (longExhChip) {
+    longExhChip.textContent = (p.exh || 0) > 0 ? '🛡 -1 Exaustão (' + p.exh + ')' : '🛡 0 Exaustão';
+  }
+
   const shortD = document.getElementById('camp-short-detail');
   const longD = document.getElementById('camp-long-detail');
   if (shortD) {
     shortD.textContent = (p.hd || 0) > 0
-      ? 'HD disponível: ' + (p.hd || 0) + '/' + (p.mhd || '?') + ' · Cura ~ 1d8' + (conMod >= 0 ? '+' : '') + conMod
+      ? 'HD disponível: ' + (p.hd || 0) + '/' + (p.mhd || '?') + ' · Cura ~ 1d' + dieSides + conStr
       : 'Sem HD (use descanso longo)';
   }
   if (longD) {
@@ -42005,6 +42111,11 @@ function openCampOverlay() {
 function closeCampOverlay() {
   const ov = document.getElementById('camp-screen');
   if (ov) ov.classList.remove('active');
+  const modal = document.getElementById('camp-confirm-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
   try { if (window.CampFire) window.CampFire.destroy(); } catch (_) {}
 }
 
@@ -42347,6 +42458,118 @@ function _applyServerShortRest(p, healed, serverState) {
   _updateCampHud();
   _updateCampDetails();
   if (typeof updateHud === 'function') updateHud();
+}
+
+// 2026-10-07 USER MANDATORY RULE: Janela de confirmação obrigatória para ações de descanso.
+// Apresenta preview explícito de duração, custo de Dado de Vida, fórmula de cura e efeitos.
+function _promptCampActionConfirm(actionType, onConfirm) {
+  var modal = document.getElementById('camp-confirm-modal');
+  if (!modal || typeof onConfirm !== 'function') {
+    if (typeof onConfirm === 'function') onConfirm();
+    return;
+  }
+  var p = (S && S.player) || {};
+  var titleEl = document.getElementById('camp-confirm-title');
+  var durationEl = document.getElementById('camp-confirm-duration');
+  var descEl = document.getElementById('camp-confirm-desc');
+  var iconEl = document.getElementById('camp-confirm-icon');
+  var factsEl = document.getElementById('camp-confirm-facts');
+  var warnEl = document.getElementById('camp-confirm-warning');
+  var okBtn = document.getElementById('camp-confirm-ok');
+  var cancelBtn = document.getElementById('camp-confirm-cancel');
+  var backdrop = document.getElementById('camp-confirm-backdrop');
+
+  var curHd = (typeof p.hd === 'number') ? p.hd : 0;
+  var maxHd = (typeof p.mhd === 'number') ? p.mhd : 1;
+  var curHp = (typeof p.hp === 'number') ? p.hp : 0;
+  var maxHp = (typeof p.mhp === 'number') ? p.mhp : 1;
+  var curMp = (typeof p.mp === 'number') ? p.mp : 0;
+  var maxMp = (typeof p.mmp === 'number') ? p.mmp : 0;
+  var curExh = (typeof p.exh === 'number') ? p.exh : 0;
+  var conMod = (p.mods && typeof p.mods.con === 'number') ? p.mods.con : 0;
+  var dieSides = (typeof _shortRestDieFor === 'function') ? _shortRestDieFor(p.cls_key) : 8;
+  var conStr = (conMod >= 0 ? '+' : '') + conMod;
+
+  if (factsEl) factsEl.innerHTML = '';
+  if (warnEl) { warnEl.style.display = 'none'; warnEl.textContent = ''; }
+
+  function _addFact(icon, text) {
+    if (!factsEl) return;
+    var d = document.createElement('div');
+    d.className = 'camp-confirm-fact';
+    d.innerHTML = '<span class="camp-confirm-fact-icon">' + icon + '</span><span>' + text + '</span>';
+    factsEl.appendChild(d);
+  }
+
+  if (actionType === 'short') {
+    if (titleEl) titleEl.textContent = 'Descanso Curto';
+    if (durationEl) durationEl.textContent = 'Duração: 1 hora no mundo';
+    if (iconEl) iconEl.textContent = '☕';
+    if (descEl) descEl.textContent = 'Você fará uma pausa de 1 hora ao redor da fogueira para recuperar o fôlego, beber água e estancar ferimentos.';
+
+    _addFact('🎲', '<strong>Custo:</strong> Consome 1 Dado de Vida (disponível: ' + curHd + '/' + maxHd + ')');
+    _addFact('💚', '<strong>Cura esperada:</strong> 1d' + dieSides + ' ' + conStr + ' PV (rolagem autoritativa 3D)');
+    _addFact('⏳', '<strong>Tempo:</strong> Avança 1 hora no relógio da exploração');
+
+    if (curHd <= 0) {
+      if (warnEl) {
+        warnEl.style.display = 'block';
+        warnEl.innerHTML = '⚠️ <strong>Atenção:</strong> Você não possui Dados de Vida disponíveis. O descanso curto não recuperará PV. Realize um Descanso Longo para recuperar seus dados.';
+      }
+    } else if (curHp >= maxHp) {
+      if (warnEl) {
+        warnEl.style.display = 'block';
+        warnEl.innerHTML = 'ℹ️ <strong>Nota:</strong> Seus Pontos de Vida já estão no máximo (' + curHp + '/' + maxHp + '). 1 Dado de Vida será consumido mesmo assim.';
+      }
+    }
+  } else {
+    if (titleEl) titleEl.textContent = 'Descanso Longo';
+    if (durationEl) durationEl.textContent = 'Duração: 8 horas no mundo';
+    if (iconEl) iconEl.textContent = '⛺';
+    if (descEl) descEl.textContent = 'Você montará acampamento para 8 horas de sono e descanso prolongado para restaurar energias e curar o corpo.';
+
+    var hdRec = Math.max(1, Math.floor(maxHd / 2));
+    _addFact('✦', '<strong>Recuperação total:</strong> 100% de PV (' + maxHp + ') e PM (' + maxMp + ')');
+    _addFact('🎲', '<strong>Dados de Vida:</strong> Recupera metade do limite (+ ' + hdRec + ' HD, até máx ' + maxHd + ')');
+    _addFact('🛡', '<strong>Condições:</strong> Reduz 1 nível de Exaustão (atual: ' + curExh + ') e remove efeitos temporários');
+    _addFact('⛺', '<strong>Equipamento:</strong> Exige Barraca ou Kit de Acampamento no inventário para o campo');
+    _addFact('⏳', '<strong>Tempo:</strong> Avança 8 horas no relógio da exploração');
+
+    if (curHp >= maxHp && (maxMp === 0 || curMp >= maxMp) && curHd >= maxHd && curExh === 0) {
+      if (warnEl) {
+        warnEl.style.display = 'block';
+        warnEl.innerHTML = 'ℹ️ <strong>Nota:</strong> Você já se encontra com todas as energias e dados de vida no máximo.';
+      }
+    }
+  }
+
+  function _closeModal() {
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    if (okBtn) okBtn.onclick = null;
+    if (cancelBtn) cancelBtn.onclick = null;
+    if (backdrop) backdrop.onclick = null;
+  }
+
+  if (okBtn) {
+    okBtn.onclick = function() {
+      _closeModal();
+      onConfirm();
+    };
+  }
+  if (cancelBtn) {
+    cancelBtn.onclick = function() {
+      _closeModal();
+    };
+  }
+  if (backdrop) {
+    backdrop.onclick = function() {
+      _closeModal();
+    };
+  }
+
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
 }
 
 function doShortRest() {
@@ -45866,9 +46089,20 @@ function bindQuickActions() {
   var _cbs = document.getElementById('camp-btn-short');
   var _cbl = document.getElementById('camp-btn-long');
   var _cbc = document.getElementById('camp-btn-continue');
-  if (_cbs) _cbs.addEventListener('click', doShortRest);
-  if (_cbl) _cbl.addEventListener('click', doLongRest);
+  var _cbClose = document.getElementById('camp-hud-close-btn');
+
+  if (_cbs) {
+    _cbs.addEventListener('click', function () {
+      _promptCampActionConfirm('short', doShortRest);
+    });
+  }
+  if (_cbl) {
+    _cbl.addEventListener('click', function () {
+      _promptCampActionConfirm('long', doLongRest);
+    });
+  }
   if (_cbc) _cbc.addEventListener('click', closeCampOverlay);
+  if (_cbClose) _cbClose.addEventListener('click', closeCampOverlay);
 
   // X-6.5.20 + v12.4 (2026-05-06): mochila abre POPUP fullscreen com mesmo
   // visual de cidade.html#_showInventoryPopup. User pediu "deve ser uma
