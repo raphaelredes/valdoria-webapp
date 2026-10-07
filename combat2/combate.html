@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T00:25:36Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T01:15:34Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -7143,6 +7143,19 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
         0 2px 3px rgba(0,0,0,0.95);
     font-size: calc(14px * var(--v-font-scale, 1));
 }
+.cell-skill-impact-label.cell-skill-impact-condition,
+.cell-skill-impact-label.cell-skill-impact-debuff {
+    color: #ffda79;
+    background: rgba(20, 15, 10, 0.9);
+    border: 1px solid rgba(245, 180, 50, 0.75);
+    border-radius: 6px;
+    padding: 3px 9px;
+    box-shadow: 0 0 16px rgba(245, 160, 30, 0.65), 0 4px 10px rgba(0, 0, 0, 0.95);
+    text-shadow:
+        0 0 8px rgba(255, 190, 60, 0.95),
+        0 2px 4px rgba(0, 0, 0, 0.95);
+    font-size: calc(14px * var(--v-font-scale, 1));
+}
 @keyframes simSkillImpactLabelFloat {
     /* Flash unico de 1.0s: aparece, sobe um pouco, some. Sem rebote ou pulse. */
     0%   { opacity: 0; transform: translate(-50%, 12px) scale(0.7); filter: blur(1px); }
@@ -10471,6 +10484,11 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   15% { filter: brightness(2.5) saturate(1.8) drop-shadow(0 0 28px rgba(255, 60, 30, 0.95)) drop-shadow(0 0 45px rgba(200, 20, 10, 0.8)); }
   100% { filter: brightness(1); }
 }
+@keyframes hexSkillImpactFlashDebuff {
+  0% { filter: brightness(1); }
+  20% { filter: brightness(2.0) saturate(1.8) drop-shadow(0 0 24px rgba(245, 180, 50, 0.95)) drop-shadow(0 0 36px rgba(180, 70, 230, 0.75)); }
+  100% { filter: brightness(1); }
+}
 .cell.hex-token.cell-skill-impact-flash--active .token-hex,
 .token-hex.cell-skill-impact-flash--active {
   animation: hexSkillImpactFlash 0.7s ease-out;
@@ -10482,6 +10500,10 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .cell.hex-token.cell-skill-impact-flash--boss .token-hex,
 .token-hex.cell-skill-impact-flash--boss {
   animation: hexSkillImpactFlashBoss 0.7s ease-out;
+}
+.cell.hex-token.cell-skill-impact-flash--debuff .token-hex,
+.token-hex.cell-skill-impact-flash--debuff {
+  animation: hexSkillImpactFlashDebuff 0.7s ease-out;
 }
 
 @keyframes hexAttackPulse {
@@ -19147,6 +19169,84 @@ function simHasHostileAdjacent(unit, order) {
     return false;
 }
 
+/**
+ * D&D 5e PHB p. 195: Verifica e retorna lista de criaturas hostis que desferem
+ * Ataque de Oportunidade quando o combatente se move de (fromCol, fromRow) para (toCol, toRow).
+ * Requisitos D&D 5e RAW:
+ * - O combatente precisa estar deixando o alcance da criatura (dist_before <= alcance e dist_after > alcance)
+ * - Desengajar previne OA (exceto talento Sentinela)
+ * - Criatura hostil deve ser capaz de VER o alvo ("that you can see" — cego/escuridão total/invisível anulam OA)
+ * - Criatura hostil não pode estar incapacitada (skipTurn, paralyzed, stunned, unconscious)
+ * - Criatura hostil não pode ter gasto sua reação nesta rodada (reactionSpent)
+ */
+function simCheckOpportunityAttacks(moverIdx, fromCol, fromRow, toCol, toRow) {
+    var s = currentState;
+    if (!s || !s.order) return [];
+    var mover = s.order[moverIdx];
+    if (!mover || !mover.alive || mover.isDead || (mover.hp | 0) <= 0) return [];
+
+    var isDisengaged = (mover.se || []).some(function (st) {
+        return st && (st.id === 'desengajar' || st.preventOpportunityAttacks);
+    }) || !!mover.disengaged || !!s._disengaged;
+
+    var moverInvisible = (mover.se || []).some(function (st) {
+        var idLower = String(st && st.id || '').toLowerCase();
+        var nLower = String(st && st.n || '').toLowerCase();
+        return idLower.indexOf('invisib') >= 0 || nLower === 'invisível';
+    });
+
+    var provokingHostiles = [];
+    var mt = mover.t;
+
+    for (var i = 0; i < s.order.length; i++) {
+        if (i === moverIdx) continue;
+        var h = s.order[i];
+        if (!h || !h.alive || h.isDead || (h.hp | 0) <= 0 || !h.pos) continue;
+        var ht = h.t;
+        var isHostile = (mt === 'e' && (ht === 'p' || ht === 'a')) || ((mt === 'p' || mt === 'a') && ht === 'e');
+        if (!isHostile) continue;
+
+        var hFeats = h.feats || [];
+        if (isDisengaged && hFeats.indexOf('sentinel') < 0) continue;
+
+        // Mobile feat: mover atacou este hostil neste turno
+        var moverAttacked = mover._attackedThisTurn || [];
+        if ((mover.feats || []).indexOf('mobile') >= 0 && moverAttacked.indexOf(h.n) >= 0) continue;
+
+        // Incapacitado não pode reagir (PHB p. 290)
+        var isIncapacitated = (h.se || []).some(function (st) {
+            return st && (st.skipTurn || st.paralyzed || st.stunned || st.unconscious || st.id === 'banishment');
+        });
+        if (isIncapacitated) continue;
+
+        // Reação já gasta nesta rodada
+        if (h.reactionSpent || h.reaction_spent) continue;
+
+        // PHB p. 195: Hostil precisa ver o alvo ("that you can see")
+        var isBlinded = (h.se || []).some(function (st) {
+            var idLower = String(st && st.id || '').toLowerCase();
+            var nLower = String(st && st.n || '').toLowerCase();
+            return idLower === 'blindness' || st.blind || nLower === 'cego';
+        });
+        if (isBlinded) continue;
+
+        if (moverInvisible && !h.blindsight && !h.truesight) continue;
+
+        // Alcance de ataque
+        var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(h, null) : { reach: 1 };
+        var hReach = reachInfo.reach || 1;
+
+        var distBefore = hexDistance(fromCol, fromRow, h.pos.col, h.pos.row);
+        var distAfter = hexDistance(toCol, toRow, h.pos.col, h.pos.row);
+
+        // Provocado unicamente quando sai do alcance
+        if (distBefore <= hReach && distAfter > hReach) {
+            provokingHostiles.push({ index: i, unit: h });
+        }
+    }
+    return provokingHostiles;
+}
+
 function cubeToHex(x, y, z) {
     var col = x;
     var row = z + Math.floor((col - (col & 1)) / 2);
@@ -19451,11 +19551,23 @@ function showMoveConfirm(tCol, tRow) {
     var totalSpeedM = formatHexDistanceMeters(p.speed || 6);
 
     // D&D 5e PHB p. 195: Checa se sair do hex atual provoca Ataque de Oportunidade
-    var isDisengaged = (p.se || []).some(function (st) { return st && (st.id === 'desengajar' || st.preventOpportunityAttacks); });
-    var willTriggerOA = false;
-    if (!isDisengaged && typeof simHasHostileAdjacent === 'function' && simHasHostileAdjacent(p, currentState.order)) {
-        willTriggerOA = true;
+    var provokingHostiles = [];
+    var provokingNames = [];
+    if (typeof simCheckOpportunityAttacks === 'function') {
+        for (var pi = 0; pi < path.length - 1; pi++) {
+            var stepA = path[pi];
+            var stepB = path[pi + 1];
+            var oas = simCheckOpportunityAttacks(currentState.p_idx, stepA.col, stepA.row, stepB.col, stepB.row);
+            for (var oi = 0; oi < oas.length; oi++) {
+                var oEntry = oas[oi];
+                if (provokingNames.indexOf(oEntry.unit.n) < 0) {
+                    provokingNames.push(oEntry.unit.n);
+                    provokingHostiles.push(oEntry);
+                }
+            }
+        }
     }
+    var willTriggerOA = provokingHostiles.length > 0;
 
     var prev = document.getElementById('move-confirm-overlay');
     if (prev) prev.remove();
@@ -19486,7 +19598,7 @@ function showMoveConfirm(tCol, tRow) {
     html += '<div class="tcc-dmg-row crit" style="border-top:1px dashed rgba(196,149,58,0.3);padding-top:6px;"><span class="tcc-dmg-lbl">Restará após mover</span><span class="tcc-dmg-val" style="color:#a3e635;font-weight:bold;">' + remainingAfterM + ' de ' + totalSpeedM + '</span></div>';
     if (willTriggerOA) {
         html += '<div class="tcc-dmg-row" style="background:rgba(180,40,40,0.2);padding:6px 8px;border-radius:4px;margin-top:6px;color:#ff8b8b;font-size:11px;line-height:1.3;">';
-        html += '◆ <strong>Atenção:</strong> Sair do combate corpo a corpo sem Desengajar provocará <strong>Ataque de Oportunidade</strong> (PHB p. 195)!';
+        html += '◆ <strong>Atenção:</strong> Sair do alcance de <strong>' + escHtml(provokingNames.join(', ')) + '</strong> sem Desengajar provocará <strong>Ataque de Oportunidade</strong> (PHB p. 195)!';
         html += '</div>';
     }
     html += '</div>';
@@ -19547,20 +19659,76 @@ async function handlePlayerMoveTo(tCol, tRow) {
     if (validPath.length <= 1) return;
 
     var tokenEl = document.querySelector('[data-unit-id="player"]');
-    if (tokenEl) {
-        var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 140;
-        await animateUnitHexMovement(tokenEl, validPath, stepDurationMs);
+    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 140;
+
+    var actualReachedSteps = 0;
+    var actualSpentCost = 0;
+
+    for (var sIdx = 0; sIdx < validPath.length - 1; sIdx++) {
+        var curStep = validPath[sIdx];
+        var nextStep = validPath[sIdx + 1];
+        var stepCost = (difficultMap[nextStep.col + ',' + nextStep.row]) ? 2 : 1;
+
+        // D&D 5e PHB p. 195: OA ocorre antes de sair do alcance do hostil
+        var oas = (typeof simCheckOpportunityAttacks === 'function')
+            ? simCheckOpportunityAttacks(currentState.p_idx, curStep.col, curStep.row, nextStep.col, nextStep.row)
+            : [];
+
+        if (oas.length > 0) {
+            p.pos = { col: curStep.col, row: curStep.row };
+            render(currentState);
+
+            var stoppedBySentinel = false;
+            for (var oi = 0; oi < oas.length; oi++) {
+                var provoker = oas[oi].unit;
+                var provokerIdx = oas[oi].index;
+                if (!provoker || !provoker.alive || provoker.isDead || (provoker.hp | 0) <= 0) continue;
+                if (provoker.reactionSpent || provoker.reaction_spent) continue;
+
+                provoker.reactionSpent = true;
+                provoker.reaction_spent = true;
+
+                currentState.log.push('⚡ ' + provoker.n + ' desfere um Ataque de Oportunidade contra ' + p.n + ' (PHB p. 195)!');
+                render(currentState);
+
+                await playTurn(provokerIdx, currentState.p_idx, { oa: true });
+
+                if (p.hp <= 0 || !p.alive || p.isDead) {
+                    render(currentState);
+                    return;
+                }
+
+                var hasSentinel = (provoker.feats || []).indexOf('sentinel') >= 0;
+                if (hasSentinel && currentState.last && currentState.last.hit) {
+                    stoppedBySentinel = true;
+                    p.movement_left = 0;
+                    currentState.log.push('🛡️ ' + provoker.n + ' — Sentinela: acerta e reduz o deslocamento de ' + p.n + ' a 0 (PHB p. 169)!');
+                    render(currentState);
+                    break;
+                }
+            }
+
+            if (stoppedBySentinel) {
+                break;
+            }
+        }
+
+        actualSpentCost += stepCost;
+        p.movement_left = Math.max(0, p.movement_left - stepCost);
+        p.pos = { col: nextStep.col, row: nextStep.row };
+        actualReachedSteps++;
+
+        if (tokenEl && typeof animateUnitHexMovement === 'function') {
+            await animateUnitHexMovement(tokenEl, [curStep, nextStep], stepDurationMs);
+        }
     }
 
-    p.movement_left = Math.max(0, p.movement_left - totalCost);
-    var dest = validPath[validPath.length - 1];
-    p.pos = { col: dest.col, row: dest.row };
     ensureProceduralBattlefield(currentState);
 
-    var dHexes = validPath.length - 1;
+    var dHexes = actualReachedSteps;
     var dM = formatHexDistanceMeters(dHexes);
-    var costM = formatHexDistanceMeters(totalCost);
-    var costNote = (totalCost !== dHexes) ? ' (custo: ' + costM + ' por terreno difícil)' : '';
+    var costM = formatHexDistanceMeters(actualSpentCost);
+    var costNote = (actualSpentCost !== dHexes) ? ' (custo: ' + costM + ' por terreno difícil)' : '';
     currentState.log.push('Você se moveu ' + dM + costNote + '. Deslocamento restante: ' + formatHexDistanceMeters(p.movement_left || 0) + '.');
     if (typeof sendBattleCheckpoint === 'function') {
         try { sendBattleCheckpoint(currentState); } catch (_) {}
@@ -27959,9 +28127,23 @@ function showTargetConfirm(tgtIdx) {
     if (distStr) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância</span><span class="tcc-dmg-val">' + distStr + reachStatusBadge + '</span></div>';
     }
-    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CA ' + u.ac + '</span></span></div>';
-    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
-    html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
+    var isSaveSpell = !!(skill && skill.save);
+    if (isSaveSpell) {
+        var saveAb = (skill.save.ability || 'con').toUpperCase();
+        var saveDc = (skill.save.dc | 0) || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(p) : 13);
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Salvaguarda</span><span class="tcc-dmg-val"><span class="tcc-n-key">TR ' + saveAb + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CD ' + saveDc + '</span></span></div>';
+        if (minDmg > 0 || maxDmg > 0) {
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (em falha)</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
+        } else if (skill.afterAttackEnemyDebuff) {
+            var debuffN = skill.afterAttackEnemyDebuff.n || 'Condição';
+            var debuffTurns = skill.afterAttackEnemyDebuff.turns || 3;
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Efeito em falha</span><span class="tcc-dmg-val" style="color:#ffb74d;font-weight:600;">' + (skill.afterAttackEnemyDebuff.ico || '👁') + ' ' + escHtml(debuffN) + ' (' + debuffTurns + ' rodadas)</span></div>';
+        }
+    } else {
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CA ' + u.ac + '</span></span></div>';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
+        html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
+    }
     if (reductions.length) {
         html += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">Resistente</span><span class="tcc-dmg-val">' + reductions.join(', ') + ' (½ dano)</span></div>';
     }
@@ -27971,6 +28153,40 @@ function showTargetConfirm(tgtIdx) {
     if (!reductions.length && !immunities.length) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Reduções</span><span class="tcc-dmg-val tcc-none">— nenhuma —</span></div>';
     }
+
+    var hasAdjacentSeeingHostile = false;
+    if (p.pos && s.order) {
+        for (var _hi = 0; _hi < s.order.length; _hi++) {
+            if (_hi === s.p_idx) continue;
+            var _h = s.order[_hi];
+            if (!_h || !_h.alive || _h.isDead || (_h.hp | 0) <= 0 || _h.t !== 'e' || !_h.pos) continue;
+            if (hexDistance(p.pos.col, p.pos.row, _h.pos.col, _h.pos.row) <= 1) {
+                var _hBlind = (_h.se || []).some(function (st) {
+                    var idLower = String(st && st.id || '').toLowerCase();
+                    var nLower = String(st && st.n || '').toLowerCase();
+                    return idLower === 'blindness' || st.blind || nLower === 'cego';
+                });
+                var _hIncap = (_h.se || []).some(function (st) {
+                    return st && (st.skipTurn || st.paralyzed || st.stunned || st.unconscious);
+                });
+                if (!_hBlind && !_hIncap) {
+                    hasAdjacentSeeingHostile = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (hasAdjacentSeeingHostile && reachMeta.isRanged && !isSaveSpell) {
+        html += '<div class="tcc-dmg-row" style="background:rgba(180,40,40,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
+            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">⚠️ <strong>Desvantagem Corpo a Corpo (PHB p. 195):</strong> Ter um inimigo adjacente capaz de vê-lo impõe Desvantagem em ataques à distância.</span>' +
+            '</div>';
+    } else if (hasAdjacentSeeingHostile && reachMeta.isRanged && isSaveSpell) {
+        html += '<div class="tcc-dmg-row" style="background:rgba(210,160,30,0.15);border:1px solid rgba(230,170,40,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
+            '<span style="color:#fcd34d;font-size:11px;line-height:1.3;text-align:center;width:100%;">ℹ️ <strong>D&D 5e:</strong> Magias de Salvaguarda (TR) não sofrem desvantagem por proximidade, mas recuar provocará Ataque de Oportunidade se não desengajar.</span>' +
+            '</div>';
+    }
+
     if (!inReach) {
         html += '<div class="tcc-dmg-row" style="background:rgba(180,40,30,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
             '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">⚠️ Alvo além do alcance máximo de ' + reachMeta.label + '. Aproxime-se no tabuleiro antes de atacar.</span>' +
@@ -28191,7 +28407,7 @@ var SIM_POST_DICE_TRANSITION_MS = 650;
 /** 2026-06-21 (user): respiro entre a animação de ATAQUE (slash/impacto) e a
  *  animação do DANO (número flutuante + dreno de PV). Ordem desejada:
  *  dados de dano → ataque → +este gap → dano. */
-var SIM_ATTACK_TO_DAMAGE_GAP_MS = 1000;
+var SIM_ATTACK_TO_DAMAGE_GAP_MS = 250;
 
 /** VFX de acerto: dispatcher por skill/ranged/dmgType + delay pós-animação. */
 function playHitVFX(uid, crit, dmgType, opts) {
@@ -32441,7 +32657,8 @@ async function playTurn(aIdx, tIdx, opts) {
 
     /* D&D 5e: Posicionamento e movimentação tática no grid hexagonal */
     if (actor && target && actor.pos && target.pos && !opts.oa) {
-        var reach = (actor.is_ranged || actor.ranged || (opts.skill && (opts.skill.is_ranged || opts.skill.ranged || opts.skill.isSpell))) ? 16 : 1;
+        var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(actor, opts.skill) : { reach: 1 };
+        var reach = reachInfo.reach || 1;
         var dist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
         if (dist > reach) {
             var mLeft = (actor.movement_left != null) ? actor.movement_left : (actor.speed || 6);
@@ -32744,26 +32961,27 @@ async function playTurn(aIdx, tIdx, opts) {
                     advRaw1: d20Pack.raw1,
                     advRaw2: d20Pack.raw2,
                     postResult: function () {
+                        var _oaSuffix = opts.oa ? ' (Oportunidade)' : '';
                         if (hitRes.crit) {
                             return {
-                                title: 'ACERTO CRÍTICO',
+                                title: 'ACERTO CRÍTICO' + _oaSuffix,
                                 subHtml: simFormatVsAcHTML(20, atkShown, hitRes.total, effAc, true) +
                                     '<div class="drl-crit-rule">' + critDmgRuleLine + '</div>',
                                 cls: 'crit'
                             };
                         }
                         if (hitRes.hit) {
-                            return { title: 'ACERTOU', subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, true), cls: 'hit' };
+                            return { title: 'ACERTOU' + _oaSuffix, subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, true), cls: 'hit' };
                         }
                         if (hitRes.reason === 'falha_critica') {
                             return {
-                                title: 'FALHA CRÍTICA',
+                                title: 'FALHA CRÍTICA' + _oaSuffix,
                                 subHtml: simFormatD20EqualsHTML(1) + ' <span class="drl-miss-strong">— falha automática</span>',
                                 cls: 'miss'
                             };
                         }
                         return {
-                            title: '' + target.n.toUpperCase() + ' DEFENDEU',
+                            title: '' + target.n.toUpperCase() + ' DESVIOU' + _oaSuffix,
                             subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, false),
                             cls: 'miss'
                         };
@@ -33246,8 +33464,9 @@ async function playTurn(aIdx, tIdx, opts) {
         if (r === 1) _missAtkPart = 'NAT 1! vs CA ' + effAc;
         /* User sessão #69: errar = a rolagem não passou a CA → o alvo DESVIOU/o golpe
            passou (D&D 5e), NÃO que "defendeu". NAT 1 = o atacante erra feio. */
-        if (r === 1) s.log.push(actor.n + ' erra feio o golpe contra ' + target.n + ' — ' + _missAtkPart + '.');
-        else s.log.push(target.n + ' se desvia do golpe de ' + actor.n + ' — ' + _missAtkPart + '.');
+        var _oaLogPrefix = opts.oa ? '⚡ [Ataque de Oportunidade] ' : '';
+        if (r === 1) s.log.push(_oaLogPrefix + actor.n + ' erra feio o golpe contra ' + target.n + ' — ' + _missAtkPart + '.');
+        else s.log.push(_oaLogPrefix + target.n + ' se desvia do golpe de ' + actor.n + ' — ' + _missAtkPart + '.');
         s.last = { a: actor.n, t: target.n, r: r, hit: false, tIdx: tIdx };
         var missUid = unitUidForOrderIndex(s, tIdx);
         var actorUid = unitUidForOrderIndex(s, aIdx);
@@ -33696,6 +33915,11 @@ async function playTurn(aIdx, tIdx, opts) {
             if (atkSkill.save && saveSuccess === true) {
                 applyDebuff = false;
                 if (s && s.log) s.log.push(target.n + ' — TR bem-sucedido: ' + (aed.n || 'debuff') + ' NÃO aplica (PHB RAW).');
+                var _tUidRes = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
+                var _tElRes = _tUidRes ? (document.querySelector('[data-unit-id="' + _tUidRes + '"]') || document.querySelector('[data-uid="' + _tUidRes + '"]')) : null;
+                if (_tElRes && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(_tElRes, '🛡️ RESISTIU!', 'attack');
+                }
             }
             if (applyDebuff && aed.saveOnHit) {
                 var ab = (aed.saveOnHit.ability || 'con').toLowerCase();
@@ -33796,6 +34020,25 @@ async function playTurn(aIdx, tIdx, opts) {
                     }
                 }
                 target.se.push(_debuffEntry);
+
+                // Retorno visual e feedback da condição aplicada (D&D 5e / PHB p. 224)
+                var _tUidDeb = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
+                var _tElDeb = _tUidDeb ? (document.querySelector('[data-unit-id="' + _tUidDeb + '"]') || document.querySelector('[data-uid="' + _tUidDeb + '"]')) : null;
+                var _debIco = _debuffEntry.ico || '👁';
+                var _debName = _debuffEntry.n || 'Condição';
+                var _debLabelText = _debIco + ' ' + _debName.toUpperCase() + '!';
+                if (_tElDeb && typeof spawnSkillImpactLabel === 'function') {
+                    if (total > 0) {
+                        await sleep(1000);
+                    }
+                    spawnSkillImpactLabel(_tElDeb, _debLabelText, 'condition');
+                    if (typeof spawnSkillImpactFlash === 'function') {
+                        spawnSkillImpactFlash(_tElDeb, 'debuff');
+                    }
+                    render(s);
+                    await sleep(1200);
+                }
+
                 /* REVIEW-#90 [7/28] (C4.3 paridade): condição de CONCENTRAÇÃO —
                    marcador no se[] do CASTER linkando a condição aplicada no alvo.
                    Quebrar a concentração do caster (dano → simCheckConcentration
@@ -33956,7 +34199,8 @@ async function playTurn(aIdx, tIdx, opts) {
         else if (_flatMod < 0) _modPart = String(_flatMod);
         var _dmgPart = _dmgDicePart + _modPart + ' = ' + total;
         var _verb = hitRes.crit ? ' CRITA ' : ' acerta ';
-        s.log.push(actor.n + _verb + target.n + ' — ' + _atkPart + ' | ' + _dmgPart + bonusTag + '.');
+        var _oaLogPrefix = opts.oa ? '⚡ [Ataque de Oportunidade] ' : '';
+        s.log.push(_oaLogPrefix + actor.n + _verb + target.n + ' — ' + _atkPart + ' | ' + _dmgPart + bonusTag + '.');
     }
     s.last = { a: actor.n, t: target.n, r: r, hit: true, dmg: total, crit: critForDeath, tIdx: tIdx };
     render(s);

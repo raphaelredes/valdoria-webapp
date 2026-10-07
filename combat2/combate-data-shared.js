@@ -320,11 +320,12 @@ var CHAR_CLASSES = [
             buffSim: { id: 'invisibility', vfx: 'arcane', decOn: 'round', turns: 3, kind: 'buff', condName: 'Invisível', condRule: 'PHB p.255 — atk advantage + atacantes disadv. Quebra ao atacar.', atkAdvantage: true, attackerDisadvantage: true, endOnAttack: true, concentration: true, dndCondition: 'Invisível (PHB App.A — Invisibilidade)' } },
         /* V1.7 Sprint-6 (2026-04-21 closeout) — Cegueira/Surdez (Blindness/Deafness PHB p.224) Mago nv 2.
            Aplica condição CEGO (PHB Appendix A): atk disadv + atacantes adv. TR CON no cast + ao fim de cada turno. */
-        { n: 'Cegueira', ico: '‍', cost: 3, kind: 'attack', minLevel: 3, dmgType: 'necrotic',
-            desc: 'Cega alvo (PHB p.224): TR CON ou CEGO 3 rodadas; TR CON ao fim do turno.',
+        { n: 'Cegueira', ico: '👁', cost: 3, kind: 'attack', minLevel: 3, dmgType: 'necrotic',
+            rangeFeet: 30, rangeHexes: 6, range_feet: 30, range_hexes: 6, ranged: true, is_ranged: true, isSpell: true,
+            desc: 'Cega alvo à distância (PHB p.224): TR CON ou CEGO 3 rodadas; TR CON ao fim do turno.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'con' },
             helpDnd5e: 'Cegueira/Surdez / Blindness-Deafness (PHB p.224 — 2º nível): escolhe Cegueira OU Surdez. Alvo faz TR CON; em falha fica cego (ou surdo) até 1 min. Sem concentração! TR CON repetido ao fim de cada turno.\nCego (PHB Appendix A): não pode ver, atk com desvantagem, atacantes com vantagem, falha auto em checks que requerem visão.\nArena: 0 dano + debuff Cego 3 rodadas com repeatSave CON (sem concentração — diferencial vs Hold Person).',
-            afterAttackEnemyDebuff: { id: 'blindness', turns: 3, n: 'Cego', ico: '‍', atkDisadvantage: true, targetedAdvantage: true, repeatSave: { ability: 'con' }, dndCondition: 'Cego (PHB App.A — Cegueira)' } },
+            afterAttackEnemyDebuff: { id: 'blindness', turns: 3, n: 'Cego', ico: '👁', atkDisadvantage: true, targetedAdvantage: true, repeatSave: { ability: 'con' }, dndCondition: 'Cego (PHB App.A — Cegueira)' } },
         /* V1.7 Sprint-7 (2026-04-21 closeout) — Raio Doentio (Ray of Sickness PHB p.271) Mago nv 1.
            2d8 veneno + TR CON ou ENVENENADO (Poisoned PHB App.A) — atk disadv + ability disadv. */
         { n: 'Raio Doentio', ico: '', cost: 2, kind: 'attack', dmgType: 'poison',
