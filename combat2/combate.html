@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-06T22:27:10Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T00:25:36Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -22722,7 +22722,7 @@ function showMagicMissileConfirmPopup(picks) {
             row.className = 'mm-confirm-row';
             var lbl = document.createElement('span');
             lbl.className = 'mm-dart-label';
-            lbl.textContent = 'Míssel ' + (idx + 1);
+            lbl.textContent = 'Míssil ' + (idx + 1);
             var tgt = document.createElement('span');
             tgt.className = 'mm-dart-target';
             tgt.textContent = name;
@@ -23809,6 +23809,10 @@ function render(s) {
     _updateActionSheetState(s);
 }
 
+/* Debounce global persistente para cards e tiles entre re-renderizações */
+var _lastCardActionTime = 0;
+var _lastTileActionTime = 0;
+
 function bindActions() {
     var btns = document.querySelectorAll('[data-act]');
     for (var i = 0; i < btns.length; i++) btns[i].addEventListener('click', onBtnClick);
@@ -23816,13 +23820,15 @@ function bindActions() {
     var cards = document.querySelectorAll('[data-clickable="1"]');
     for (var j = 0; j < cards.length; j++) {
         (function (card) {
-            var lastCardTrigger = 0;
             var onCardTrigger = function (ev) {
                 var now = Date.now();
-                if (now - lastCardTrigger < 180) return;
+                if (now - _lastCardActionTime < 320) return;
                 if (window.__bfIsDragging) return;
-                if (ev.target.closest('button')) return;
-                lastCardTrigger = now;
+                if (ev && ev.target && ev.target.closest && ev.target.closest('button')) return;
+                _lastCardActionTime = now;
+                if (ev && ev.cancelable && ev.type === 'touchend') {
+                    ev.preventDefault();
+                }
                 var uid = card.getAttribute('data-unit-id');
                 var isAllyBuffPick = _selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
                     (_pendingSkill.blessSpell || _pendingSkill.shieldSpell);
@@ -23901,12 +23907,11 @@ function bindActions() {
     var reachableTiles = document.querySelectorAll('.hex-tile.hex-tile--reachable');
     for (var ri = 0; ri < reachableTiles.length; ri++) {
         (function (tile) {
-            var lastTileTrigger = 0;
             var onTileTrigger = function (ev) {
                 var now = Date.now();
-                if (now - lastTileTrigger < 180) return;
+                if (now - _lastTileActionTime < 320) return;
                 if (window.__bfIsDragging) return;
-                lastTileTrigger = now;
+                _lastTileActionTime = now;
                 if (ev.cancelable && ev.type !== 'click') ev.preventDefault();
                 ev.stopPropagation();
                 var tCol = parseInt(tile.getAttribute('data-col'), 10);
