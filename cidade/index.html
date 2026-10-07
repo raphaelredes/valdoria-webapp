@@ -2956,6 +2956,285 @@ LOG SINK (Fase 7):
       background: rgba(26, 21, 16, 0.5);
       border-bottom: 1px solid rgba(196, 149, 58, 0.2);
     }
+    #city-group-panel.party-count-1 { grid-template-columns: 1fr !important; }
+    #city-group-panel.party-count-2 { grid-template-columns: repeat(2, 1fr) !important; }
+    #city-group-panel.party-count-3 { grid-template-columns: repeat(3, 1fr) !important; }
+    #city-group-panel.party-count-4 { grid-template-columns: repeat(4, 1fr) !important; }
+
+    /* ===== CARD SOLO EXPANDIDO (1 membro no grupo) ===== */
+    .cgp-card.v8-style.cgp-card--solo {
+      height: auto !important;
+      min-height: 104px !important;
+      max-height: none !important;
+      padding: 6px 8px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 5px !important;
+      background: linear-gradient(180deg, rgba(32, 25, 18, 0.96) 0%, rgba(18, 14, 10, 0.96) 100%);
+      border: 1.5px solid var(--v-gold, #c4953a);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(196, 149, 58, 0.25);
+    }
+    .cgp-solo-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px solid rgba(196, 149, 58, 0.25);
+      padding-bottom: 4px;
+    }
+    .cgp-solo-identity {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .cgp-solo-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid var(--v-gold, #c4953a);
+      background: rgba(14, 11, 8, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px rgba(196, 149, 58, 0.35);
+      color: var(--v-gold, #c4953a);
+    }
+    .cgp-solo-avatar svg { width: 22px; height: 22px; }
+    .cgp-solo-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .cgp-solo-name {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--v-gold-bright, #ffd566);
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cgp-solo-subtitle {
+      font-size: 10px;
+      color: var(--v-text-dim, #a09484);
+      font-style: italic;
+      line-height: 1.2;
+    }
+    .cgp-solo-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .cgp-solo-level {
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(196, 149, 58, 0.25);
+      border: 1px solid rgba(196, 149, 58, 0.5);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    /* Grid de conteúdo do Card Solo (2 colunas: barras à esquerda + combate/ouro à direita) */
+    .cgp-solo-content {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .cgp-solo-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .cgp-solo-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      line-height: 1;
+    }
+    .cgp-solo-bar-lbl {
+      width: 32px;
+      font-weight: 700;
+      font-size: 9px;
+      color: var(--v-text-dim, #a09484);
+      text-transform: uppercase;
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      flex-shrink: 0;
+    }
+    .cgp-solo-bar-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 3px;
+      border: 1px solid rgba(196, 149, 58, 0.25);
+      position: relative;
+      overflow: hidden;
+      min-width: 60px;
+    }
+    .cgp-solo-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    .cgp-solo-bar-fill--hp-high { background: linear-gradient(90deg, #5a8a3e, #8ab04e); box-shadow: 0 0 4px #8ab04e; }
+    .cgp-solo-bar-fill--hp-mid  { background: linear-gradient(90deg, #b08038, #d0a040); box-shadow: 0 0 4px #d0a040; }
+    .cgp-solo-bar-fill--hp-low  { background: linear-gradient(90deg, #8a2a20, #c04030); box-shadow: 0 0 4px #c04030; }
+    .cgp-solo-bar-fill--mp      { background: linear-gradient(90deg, #2a6090, #5a9cd8); box-shadow: 0 0 4px #5a9cd8; }
+    .cgp-solo-bar-fill--furia   { background: linear-gradient(90deg, #8a2820, #f06045); box-shadow: 0 0 4px #f06045; }
+    .cgp-solo-bar-fill--vigor   { background: linear-gradient(90deg, #7a5a20, #e8c45a); box-shadow: 0 0 4px #e8c45a; }
+    .cgp-solo-bar-fill--energia { background: linear-gradient(90deg, #7a6820, #e8d260); box-shadow: 0 0 4px #e8d260; }
+    .cgp-solo-bar-fill--ki      { background: linear-gradient(90deg, #3a8590, #a0e5f0); box-shadow: 0 0 4px #a0e5f0; }
+    .cgp-solo-bar-fill--xp      { background: linear-gradient(90deg, #9a7530, #ffcc44); box-shadow: 0 0 4px #ffcc44; }
+
+    .cgp-solo-bar-val {
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    /* Coluna tática de Combate e Moedas */
+    .cgp-solo-tactical {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: flex-end;
+      flex-shrink: 0;
+      border-left: 1px solid rgba(196, 149, 58, 0.2);
+      padding-left: 8px;
+    }
+    .cgp-solo-tac-badges {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .cgp-solo-badge-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(14, 11, 8, 0.7);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+    }
+    .cgp-solo-badge-item img,
+    .cgp-solo-badge-item svg {
+      width: 12px;
+      height: 12px;
+      object-fit: contain;
+    }
+    .cgp-solo-gold-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      margin-top: 2px;
+    }
+
+    /* ===== BORDA PULSANTE LEVEL UP & BADGE ===== */
+    .cgp-card.cgp-card--pending-levelup {
+      animation: cgpLevelUpPulse 1.8s ease-in-out infinite !important;
+      position: relative;
+    }
+    @keyframes cgpLevelUpPulse {
+      0%, 100% {
+        border-color: #ffd700 !important;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.65), inset 0 0 8px rgba(255, 215, 0, 0.3) !important;
+      }
+      50% {
+        border-color: #ff9900 !important;
+        box-shadow: 0 0 22px rgba(255, 153, 0, 0.95), inset 0 0 16px rgba(255, 190, 0, 0.5) !important;
+      }
+    }
+    .cgp-levelup-badge {
+      position: absolute;
+      top: -7px;
+      right: 6px;
+      z-index: 10;
+      background: linear-gradient(135deg, #ffd700 0%, #d49520 100%);
+      color: #1a1208;
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: 0.8px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.5);
+      border: 1px solid #fff;
+      text-transform: uppercase;
+      animation: cgpBadgeShimmer 1.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes cgpBadgeShimmer {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.05); filter: brightness(1.25); }
+    }
+
+    /* ===== LINHA DE INVOCAÇÕES (Summons Bar) ===== */
+    .cgp-summons-bar {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      padding-top: 4px;
+      margin-top: 2px;
+      border-top: 1px solid rgba(196, 149, 58, 0.2);
+    }
+    .cgp-summons-label {
+      font-size: 8px;
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.8;
+      margin-right: 2px;
+    }
+    .cgp-summon-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(22, 17, 13, 0.9);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 10px;
+      padding: 1px 7px;
+      font-size: 9px;
+      color: #d4c8b0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+    .cgp-summon-chip .cgp-summon-ico {
+      font-size: 10px;
+      filter: drop-shadow(0 0 2px rgba(196, 149, 58, 0.5));
+    }
+    .cgp-summon-chip .cgp-summon-name {
+      font-weight: 600;
+      color: #e6dac6;
+    }
+    .cgp-summon-chip .cgp-summon-hp {
+      color: #88dd88;
+      font-size: 8px;
+      font-variant-numeric: tabular-nums;
+    }
     .cgp-card {
       flex: 1;
       position: relative;  /* anchor para .c-portrait (top:2 right:3 absolute) */
@@ -11438,7 +11717,7 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('kaelen') >= 0)   return '/shared/img/npcs/kaelen-refugiado.webp';
   if (s.indexOf('anci') >= 0)     return '/shared/img/npcs/ancia-valdoria.webp';
   if (s.indexOf('mirena') >= 0)   return '/shared/img/merchants/mirena.webp';  /* canonical = retrato do mercado (alquimista humana, com faixa do nome). mirena-armadureira.webp (armadureira pequenina) era colisão de raça+papel. */
-  if (s.indexOf('thorne') >= 0)   return '/shared/img/npcs/thorne-armeiro.webp';  /* CANONICAL: Thorne, ferreiro humano do prelúdio (thorne-armeiro.webp). Imagem única sem duplicidade. */
+  if (s.indexOf('thorne') >= 0)   return '/shared/img/npcs/thorne-armeiro.webp';  /* canonical = ferreiro humano do prelúdio */
   if (s.indexOf('velithra') >= 0) return '/shared/img/merchants/velithra.webp';  /* canonical = retrato do mercado (joalheira élfica). velithra-alquimista.webp reservado p/ outra NPC élfica. */
   if (s.indexOf('tharos') >= 0)   return '/shared/img/npcs/tharos-mestre-armas.webp';
   if (s.indexOf('ysoria') >= 0)   return '/shared/img/npcs/capita-ysoria.webp';
@@ -14859,6 +15138,23 @@ function _showStatusPopup(memberIdx){
     + '</div>'
     + '</div>';
 
+  // Banner de Progressão Pendente (se houver ASI ou Skills para alocar)
+  if (m.pendingAsi > 0 || m.pendingSkills > 0) {
+    html += '<div class="ficha-levelup-banner" style="margin: 6px 10px 4px; padding: 7px 10px; background: linear-gradient(135deg, rgba(196,149,58,0.25), rgba(35,28,20,0.92)); border: 1.5px solid var(--v-gold, #c4953a); border-radius: 6px; box-shadow: 0 0 10px rgba(196,149,58,0.35); text-align: center; animation: cgpLevelUpPulse 2s infinite;">'
+      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:11px; font-weight:800; color:#ffd700; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">'
+      + '▲ Progressão D&D 5e Disponível!'
+      + '</div>'
+      + '<div style="font-size:10px; color:#d4c8b0; margin-bottom:5px;">'
+      + (m.pendingAsi > 0 ? ('<b>+' + m.pendingAsi + ' Pontos de Atributo (ASI)</b>') : '')
+      + ((m.pendingAsi > 0 && m.pendingSkills > 0) ? ' · ' : '')
+      + (m.pendingSkills > 0 ? ('<b>+' + m.pendingSkills + ' Magia(s)/Habilidade(s)</b>') : '')
+      + '</div>'
+      + '<button type="button" class="v-btn v-btn-primary" onclick="_openLevelUpFlowFromFicha(' + memberIdx + ')" style="padding: 4px 14px; font-size: 10px; font-weight: 700; width: 100%; border-radius: 4px; cursor: pointer;">'
+      + '⚔️ Distribuir Pontos & Evoluir Ficha'
+      + '</button>'
+      + '</div>';
+  }
+
   // === RECURSOS — v6 compacto: bars 6px, padding tight ===
   html += '<div class="ficha-section" style="position:relative; z-index:1; padding: var(--v-space-sm, 4px) var(--v-space-md-lg, 10px) 3px;">';
   html += '<div class="ficha-section-title" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
@@ -14892,15 +15188,9 @@ function _showStatusPopup(memberIdx){
 
   html += _barEpic('ic-stat-hp', '#c63d3d', 'Vida', m.hp, m.hpMax, hpPct, 'linear-gradient(90deg,#9a2828,#c63d3d,#f06060)', hpCritical);
   // Sessão #56 (2026-05-28) — Demand C: FIX recurso por classe na ficha.
-  // Antes: hardcoded 'Mana' pra TODOS. Bárbaro Alzan via "22 Mana" sendo
-  // que o card mostrava "22 Fúria" (correto). Ladino → ENERGIA, Monge → KI,
-  // Guerreiro → VIGOR, Bárbaro → FÚRIA, casters → MANA. Cor e gradiente
-  // também ajustados por recurso pra coerência visual.
   if (m.mpMax > 0) {
     var _resInfo = (typeof _resForClass === 'function') ? _resForClass(m.cls) : { name: 'Mana', cls: 'mp' };
     var _resName = _resInfo.name || 'Mana';
-    // Recurso-specific color: mp=azul, fury=vermelho, energy=verde-âmbar,
-    // vigor=âmbar, ki=branco-azulado
     var _resColor, _resGrad;
     switch (_resInfo.cls) {
       case 'fury':   _resColor = '#e85040'; _resGrad = 'linear-gradient(90deg,#8a2820,#c63d35,#f06045)'; break;
@@ -14913,14 +15203,18 @@ function _showStatusPopup(memberIdx){
   }
   if (m.xpNext) html += _barEpic('ic-stat-cha', 'var(--v-gold,#c4953a)', 'Experiência', m.xp || 0, m.xpNext, xpPct, 'linear-gradient(90deg,#9a7530,#c4953a,#e8c45a)', false);
 
-  // Bolsa + Exaustão linha tight
-  html += '<div style="display:flex; justify-content:space-between; gap:6px; margin-top: var(--v-space-sm, 4px); padding-top:3px;'
+  // Bolsa + Dados de Vida + Exaustão linha tight
+  var hitDieKind = (m.cls === 'mago' || m.cls === 'feiticeiro') ? 'd6' : ((m.cls === 'barbaro') ? 'd12' : ((m.cls === 'guerreiro' || m.cls === 'paladino' || m.cls === 'patrulheiro') ? 'd10' : 'd8'));
+  var hdStr = (m.hd != null ? m.hd : m.level) + '/' + (m.hdMax != null ? m.hdMax : m.level) + ' ' + hitDieKind;
+
+  html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top: var(--v-space-sm, 4px); padding-top:3px;'
     + 'border-top:1px solid var(--v-gold-12,rgba(196,149,58,0.12));">';
   if (m.isPlayer) {
     html += _statLine('ic-bolsa', 'var(--v-gold,#c4953a)', 'Bolsa:',
       '<b style="color:var(--v-gold,#c4953a); display:inline-flex; align-items:center; gap:3px;">'
       + _fmtV(m.gold || 0) + '<span class="vi vi-coin sm"></span></b>');
   }
+  html += _statLine('ic-stat-con', 'var(--v-gold,#c4953a)', 'Dados de Vida:', '<b>' + hdStr + '</b>');
   html += '<div style="' + (m.isPlayer ? '' : 'flex:1;') + '">'
     + _statLine('ic-stat-exhaustion', 'var(--v-gold,#c4953a)', 'Exaustão:', '<b>' + (m.exh || 0) + '/6</b>')
     + '</div>';
@@ -14992,6 +15286,49 @@ function _showStatusPopup(memberIdx){
       + (modVal >= 0 ? '+' : '') + modVal + '</span>'
       + '</div>'
       + '</div>'
+      + '</div>';
+  });
+  html += '</div></div>';
+
+  // === SALVAGUARDAS D&D 5E (Saving Throws) ===
+  var SAVING_PROF_MAP = {
+    mago: ['int', 'wis'],
+    guerreiro: ['str', 'con'],
+    ladino: ['dex', 'int'],
+    clerigo: ['wis', 'cha'],
+    paladino: ['wis', 'cha'],
+    barbaro: ['str', 'con'],
+    bardo: ['dex', 'cha'],
+    druida: ['int', 'wis'],
+    monge: ['str', 'dex'],
+    feiticeiro: ['con', 'cha'],
+    bruxo: ['wis', 'cha'],
+    patrulheiro: ['str', 'dex']
+  };
+  var cKey = _cgpClsKey(m.cls);
+  var profSaves = SAVING_PROF_MAP[cKey] || ['str', 'con'];
+
+  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) 3px;">';
+  html += '<div class="ficha-section-title" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
+    + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px;">'
+    + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Salvaguardas (D&D 5e)'
+    + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left: var(--v-space-sm, 4px);"></span>'
+    + '</div>';
+
+  html += '<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:4px;">';
+  STATS_DATA.forEach(function(s){
+    var isProf = profSaves.indexOf(s.key) >= 0;
+    var baseMod = _mod(stats[s.key]);
+    var totalSave = isProf ? (baseMod + prof) : baseMod;
+    var saveStr = (totalSave >= 0 ? '+' : '') + totalSave;
+    var dot = isProf ? '●' : '○';
+    var dotColor = isProf ? '#ffd700' : 'rgba(160,148,132,0.4)';
+    var valColor = isProf ? '#ffd700' : 'var(--v-text,#d4c8b0)';
+
+    html += '<div style="display:flex; align-items:center; justify-content:space-between; padding:3px 6px; background:rgba(30,24,18,0.7); border:1px solid ' + (isProf ? 'rgba(196,149,58,0.4)' : 'rgba(196,149,58,0.15)') + '; border-radius:4px; font-size:10px;">'
+      + '<span style="color:' + dotColor + '; font-size:8px; margin-right:3px;">' + dot + '</span>'
+      + '<span style="color:var(--v-text-dim,#a09484); font-size:9px; font-weight:700;">' + s.label + '</span>'
+      + '<span style="color:' + valColor + '; font-weight:700; font-variant-numeric:tabular-nums;">' + saveStr + '</span>'
       + '</div>';
   });
   html += '</div></div>';
@@ -15131,6 +15468,277 @@ function _showStatusPopup(memberIdx){
 function _showFichaPicker(){
   // Default: mostra player ficha (que já tem switcher inline)
   _showStatusPopup(0);
+}
+
+// ============================================================================
+// D&D 5E EVOLUÇÃO, NOTIFICAÇÃO SEQUENCIAL E ALOCAÇÃO DE ATRIBUTOS (ASI)
+// ============================================================================
+
+// Abre modal interativo de distribuição de pontos de atributo (ASI)
+function _openLevelUpFlowFromFicha(memberIdx){
+  var m = _getFichaMember(memberIdx !== undefined ? memberIdx : 0);
+  if (!m) return;
+  var availableAsi = m.pendingAsi || 0;
+  var p = window.CITY_MOCK_PLAYER;
+
+  if (availableAsi <= 0) {
+    if (typeof vToast === 'function') vToast('Nenhum ponto de atributo pendente no momento.');
+    return;
+  }
+
+  var baseStats = Object.assign({}, m.stats || { str:10, dex:10, con:10, int:10, wis:10, cha:10 });
+  var curAlloc = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
+  var pointsLeft = availableAsi;
+
+  function _mod(s){ return Math.floor((s - 10) / 2); }
+  function _modStr(s){ var v = _mod(s); return (v >= 0 ? '+' : '') + v; }
+
+  var modalId = 'v-asi-modal';
+  var oldModal = document.getElementById(modalId);
+  if (oldModal) oldModal.remove();
+
+  var modalEl = document.createElement('div');
+  modalEl.id = modalId;
+  modalEl.style.cssText = 'position:fixed; inset:0; z-index:99999; background:rgba(10,8,6,0.85); display:flex; align-items:center; justify-content:center; padding:12px; backdrop-filter:blur(3px);';
+
+  function renderModalContent(){
+    var html = '<div style="background:linear-gradient(180deg,#2e2520,#1a1510); border:1.5px solid var(--v-gold,#c4953a); border-radius:8px; width:100%; max-width:400px; padding:16px; box-shadow:0 8px 32px rgba(0,0,0,0.8); font-family:var(--v-font-display,Cinzel,serif); color:#d4c8b0;">';
+    html += '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(196,149,58,0.3); padding-bottom:8px; margin-bottom:12px;">'
+      + '<h3 style="margin:0; font-size:14px; color:#ffd700; letter-spacing:1px; text-transform:uppercase;">Evolução D&D 5e · Atributos</h3>'
+      + '<button type="button" id="v-asi-close" style="background:none; border:none; color:#a09484; font-size:18px; cursor:pointer;">✕</button>'
+      + '</div>';
+
+    html += '<div style="font-size:11px; color:#a09484; line-height:1.4; margin-bottom:10px; font-family:sans-serif;">'
+      + '<b>Regra D&D 5e:</b> Distribua seus pontos de Aumento no Valor de Atributo (máximo 20 por atributo). No D&D oficial atributos nunca são rolados ao subir de nível.'
+      + '</div>';
+
+    html += '<div style="background:rgba(196,149,58,0.15); border:1px solid rgba(196,149,58,0.4); border-radius:6px; padding:6px 10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">'
+      + '<span style="font-size:11px; font-weight:700; color:#ffd700;">Pontos Restantes:</span>'
+      + '<span style="font-size:15px; font-weight:900; color:' + (pointsLeft > 0 ? '#ffd700' : '#88dd88') + ';">' + pointsLeft + '</span>'
+      + '</div>';
+
+    html += '<div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">';
+    var ATTRS = [
+      { k:'str', l:'Força (FOR)' },
+      { k:'dex', l:'Destreza (DES)' },
+      { k:'con', l:'Constituição (CON)' },
+      { k:'int', l:'Inteligência (INT)' },
+      { k:'wis', l:'Sabedoria (SAB)' },
+      { k:'cha', l:'Carisma (CAR)' }
+    ];
+
+    ATTRS.forEach(function(a){
+      var baseVal = baseStats[a.k] || 10;
+      var added = curAlloc[a.k] || 0;
+      var totalVal = baseVal + added;
+      var mod = _modStr(totalVal);
+      var canDec = added > 0;
+      var canInc = pointsLeft > 0 && totalVal < 20;
+
+      html += '<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(20,16,12,0.6); border:1px solid rgba(196,149,58,0.2); border-radius:5px; padding:4px 8px;">'
+        + '<div style="display:flex; flex-direction:column;">'
+        + '<span style="font-size:11px; font-weight:700; color:' + (added > 0 ? '#ffd700' : '#d4c8b0') + ';">' + a.l + '</span>'
+        + '<span style="font-size:9px; color:#8a7a6a;">Base: ' + baseVal + '</span>'
+        + '</div>'
+        + '<div style="display:flex; align-items:center; gap:8px;">'
+        + '<span style="font-size:13px; font-weight:900; color:#fff; width:45px; text-align:right;">' + totalVal + ' <small style="color:' + (mod.indexOf('+')>=0?'#88dd88':'#e07c7c') + '; font-size:10px;">(' + mod + ')</small></span>'
+        + '<button type="button" class="v-asi-dec" data-attr="' + a.k + '" ' + (!canDec ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : 'style="cursor:pointer;"') + ' style="width:24px; height:24px; background:#3a2f26; border:1px solid #c4953a; color:#ffd700; font-weight:900; border-radius:4px;">-</button>'
+        + '<button type="button" class="v-asi-inc" data-attr="' + a.k + '" ' + (!canInc ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : 'style="cursor:pointer;"') + ' style="width:24px; height:24px; background:#3a2f26; border:1px solid #c4953a; color:#ffd700; font-weight:900; border-radius:4px;">+</button>'
+        + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+
+    html += '<button type="button" id="v-asi-confirm" class="v-btn v-btn-primary" ' + (pointsLeft > 0 ? 'disabled style="opacity:0.5; width:100%; padding:8px; cursor:not-allowed;"' : 'style="width:100%; padding:8px; cursor:pointer;"') + '>'
+      + (pointsLeft > 0 ? ('Distribua mais ' + pointsLeft + ' ponto(s)') : '✔ Confirmar e Salvar Atributos')
+      + '</button>';
+
+    html += '</div>';
+    modalEl.innerHTML = html;
+
+    // Listeners
+    modalEl.querySelector('#v-asi-close').onclick = function(){ modalEl.remove(); };
+    modalEl.querySelectorAll('.v-asi-inc').forEach(function(btn){
+      btn.onclick = function(){
+        var attr = btn.getAttribute('data-attr');
+        if (pointsLeft > 0 && (baseStats[attr] + curAlloc[attr]) < 20) {
+          curAlloc[attr]++;
+          pointsLeft--;
+          renderModalContent();
+        }
+      };
+    });
+    modalEl.querySelectorAll('.v-asi-dec').forEach(function(btn){
+      btn.onclick = function(){
+        var attr = btn.getAttribute('data-attr');
+        if (curAlloc[attr] > 0) {
+          curAlloc[attr]--;
+          pointsLeft++;
+          renderModalContent();
+        }
+      };
+    });
+    var confirmBtn = modalEl.querySelector('#v-asi-confirm');
+    if (confirmBtn && pointsLeft === 0) {
+      confirmBtn.onclick = function(){
+        // Aplica os novos atributos
+        var newStats = {};
+        for (var k in baseStats) {
+          newStats[k] = baseStats[k] + (curAlloc[k] || 0);
+        }
+        m.stats = newStats;
+        m.pendingAsi = 0;
+        if (p) {
+          p.stats = newStats;
+          p.pendingAsi = 0;
+          if (p.pending_level_notification) p.pending_level_notification = null;
+        }
+        modalEl.remove();
+        if (typeof vToast === 'function') vToast('✨ Atributos aprimorados e salvos com sucesso!');
+        if (typeof refreshHud === 'function') refreshHud();
+        _showStatusPopup(memberIdx);
+      };
+    }
+  }
+
+  renderModalContent();
+  document.body.appendChild(modalEl);
+}
+
+// Modal sequencial passo a passo que mostra cada nível passado (Regra #10: pacing do jogador sem timer)
+function _openLevelUpCelebrationModal(notifData){
+  if (!notifData) return;
+  var levels = notifData.levels || [];
+  if (levels.length === 0) {
+    levels = [{
+      level: notifData.new_level || 2,
+      hp_gain: 6,
+      mp_gain: 5,
+      is_asi: true,
+      highlights: ['Avanço de Nível D&D 5e']
+    }];
+  }
+
+  var curStep = 0;
+  var totalSteps = levels.length;
+
+  var modalId = 'v-levelup-celebration-modal';
+  var oldModal = document.getElementById(modalId);
+  if (oldModal) oldModal.remove();
+
+  var overlayEl = document.createElement('div');
+  overlayEl.id = modalId;
+  overlayEl.style.cssText = 'position:fixed; inset:0; z-index:99999; background:rgba(8,6,4,0.92); display:flex; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(5px);';
+
+  function renderStep(){
+    var lvlInfo = levels[curStep];
+    var isLast = curStep >= totalSteps - 1;
+
+    var html = '<div style="background:linear-gradient(180deg,#2e2520,#16120e); border:2px solid #ffd700; border-radius:10px; width:100%; max-width:420px; padding:20px; box-shadow:0 0 30px rgba(255,215,0,0.35), 0 10px 40px rgba(0,0,0,0.9); font-family:var(--v-font-display,Cinzel,serif); color:#d4c8b0; text-align:center; position:relative; overflow:hidden;">';
+
+    // Halo místico de topo
+    html += '<div style="position:absolute; top:-40px; left:50%; transform:translateX(-50%); width:220px; height:120px; background:radial-gradient(ellipse at center, rgba(255,215,0,0.25) 0%, transparent 70%); pointer-events:none;"></div>';
+
+    // Header Triunfal
+    html += '<div style="font-size:10px; font-weight:700; color:#ffd700; text-transform:uppercase; letter-spacing:2px; margin-bottom:4px;">'
+      + '✦ Lendas de Valdória ✦'
+      + '</div>';
+
+    html += '<h2 style="margin:0 0 12px; font-size:20px; font-weight:900; color:#fff; text-shadow:0 0 12px rgba(255,215,0,0.6); letter-spacing:1px;">'
+      + 'SUBIU PARA O NÍVEL ' + lvlInfo.level + '!'
+      + '</h2>';
+
+    // Indicador de passos se houver múltiplos níveis
+    if (totalSteps > 1) {
+      html += '<div style="font-size:10px; color:#a09484; margin-bottom:14px; letter-spacing:1px; text-transform:uppercase;">'
+        + 'Passo ' + (curStep + 1) + ' de ' + totalSteps + ' de evolução'
+        + '</div>';
+    }
+
+    // Card de ganhos do nível
+    html += '<div style="background:rgba(20,16,12,0.7); border:1px solid rgba(196,149,58,0.35); border-radius:8px; padding:12px; margin-bottom:16px; text-align:left;">';
+    html += '<div style="font-size:11px; font-weight:700; color:#ffd700; margin-bottom:8px; border-bottom:1px solid rgba(196,149,58,0.2); padding-bottom:4px; text-transform:uppercase;">'
+      + 'Ganhos e Benefícios Alcançados:'
+      + '</div>';
+
+    html += '<div style="display:flex; flex-direction:column; gap:6px; font-size:11px; font-family:sans-serif;">';
+    if (lvlInfo.hp_gain) {
+      html += '<div style="display:flex; align-items:center; gap:6px; color:#88dd88;">'
+        + '<span>❤</span><span><b>+' + lvlInfo.hp_gain + ' Pontos de Vida (PV Máximo)</b></span>'
+        + '</div>';
+    }
+    if (lvlInfo.mp_gain) {
+      html += '<div style="display:flex; align-items:center; gap:6px; color:#70c0f0;">'
+        + '<span>✦</span><span><b>+' + lvlInfo.mp_gain + ' Recursos / Mana Máxima</b></span>'
+        + '</div>';
+    }
+    if (lvlInfo.highlights && lvlInfo.highlights.length) {
+      lvlInfo.highlights.forEach(function(h){
+        html += '<div style="display:flex; align-items:center; gap:6px; color:#ffd700;">'
+          + '<span>⚔</span><span>' + h + '</span>'
+          + '</div>';
+      });
+    }
+    html += '</div>';
+    html += '</div>';
+
+    // Rodapé de Ação (Regra #10: pacing do jogador)
+    if (!isLast) {
+      html += '<button type="button" id="v-lvl-next-btn" class="v-btn v-btn-primary" style="width:100%; padding:10px; font-size:12px; font-weight:700; letter-spacing:1px; cursor:pointer;">'
+        + 'Próximo Nível (Nível ' + levels[curStep + 1].level + ') ▸'
+        + '</button>';
+    } else {
+      html += '<div style="font-size:11px; color:#ffd700; margin-bottom:10px; font-style:italic;">'
+        + '✨ Todas as passagens de nível foram concluídas! Configure sua ficha e distribua seus pontos.'
+        + '</div>';
+      html += '<button type="button" id="v-lvl-finish-btn" class="v-btn v-btn-primary" style="width:100%; padding:10px; font-size:12px; font-weight:700; letter-spacing:1px; cursor:pointer; background:linear-gradient(135deg,#ffd700,#b38600); color:#1a1208; border-color:#fff;">'
+        + '⚔️ Abrir Ficha do Aventureiro & Alocar Pontos'
+        + '</button>';
+    }
+
+    html += '</div>';
+    overlayEl.innerHTML = html;
+
+    // Listeners
+    var nextBtn = overlayEl.querySelector('#v-lvl-next-btn');
+    if (nextBtn) {
+      nextBtn.onclick = function(){
+        curStep++;
+        renderStep();
+      };
+    }
+    var finishBtn = overlayEl.querySelector('#v-lvl-finish-btn');
+    if (finishBtn) {
+      finishBtn.onclick = function(){
+        overlayEl.remove();
+        // Consome notificação pendente
+        var p = window.CITY_MOCK_PLAYER;
+        if (p) {
+          p.pending_level_notification = null;
+          p.pendingNotification = null;
+        }
+        if (window.GROUP_MEMBERS && window.GROUP_MEMBERS[0]) {
+          window.GROUP_MEMBERS[0].pendingNotification = null;
+        }
+        try { localStorage.setItem('valdoria_seen_lvl_notif', String(Date.now())); } catch(e){}
+        _showStatusPopup(0);
+      };
+    }
+  }
+
+  renderStep();
+  document.body.appendChild(overlayEl);
+}
+
+// Checagem automática ao inicializar a cidade
+function _checkAndShowLevelUpNotification(){
+  var p = window.CITY_MOCK_PLAYER;
+  if (!p) return;
+  var notif = p.pending_level_notification || p.pendingNotification;
+  if (!notif) return;
+  // Previne loop se já estiver ativo
+  if (document.getElementById('v-levelup-celebration-modal')) return;
+  _openLevelUpCelebrationModal(notif);
 }
 
 // === PROGRESS STRIP POPUPS — 4 cards do hub bottom (Liga/Conquistas/Abates/Sequência) ===
@@ -18414,8 +19022,22 @@ function _innBuildWindowSVG(period){
 
 function _buildInnMockData(player){
   var p = player || {};
-  // canonical: inn.py L83-94 — Martha greeting varia por rep tier
-  var rep = (p.metadata && p.metadata.inn_rep) || 0;
+  // canonical: D&D 5e constants_reputation.py — Martha rep hidratada do servidor
+  var rep = 0;
+  if (window.CITY_SERVER_RELATIONS && Array.isArray(window.CITY_SERVER_RELATIONS)) {
+    var _mRel = window.CITY_SERVER_RELATIONS.find(function(r){ return r.key === 'npc_inn_martha'; });
+    if (_mRel && typeof _mRel.reputation === 'number') rep = _mRel.reputation;
+  }
+  if (!rep && p.metadata) {
+    if (p.metadata.npc_reputation && typeof p.metadata.npc_reputation.npc_inn_martha === 'number') {
+      rep = p.metadata.npc_reputation.npc_inn_martha;
+    } else if (typeof p.metadata.inn_rep === 'number') {
+      rep = p.metadata.inn_rep;
+    }
+  }
+  if (!rep && window._PLAYER_RENOWN && typeof window._PLAYER_RENOWN.inn === 'number') {
+    rep = window._PLAYER_RENOWN.inn;
+  }
   var greeting;
   if (rep >= 50) {
     greeting = 'Martha te abraça como se fosse parente. <i>"Senta, senta! Tem caldo no fogão. Não quero saber, é por conta da casa."</i>';
@@ -18427,6 +19049,7 @@ function _buildInnMockData(player){
   return {
     type: 'hub',
     flavor: greeting,
+    renome: { inn: rep },
     npc: {
       icon: '<img src="/shared/img/npcs/estalajadeira.webp" alt="" style="width:48px;height:48px;object-fit:contain;">',
       name: 'Martha',
@@ -21152,6 +21775,7 @@ var NPC_PORTRAIT_BY_KEY = {
   npc_beggar_kira: 'kira-mendiga', npc_traveler_olen: 'olen-trovador',
   npc_citizen_pip: 'pip-recadeiro', npc_citizen_greta: 'greta-padeira',
   npc_beggar_drax: 'drax-veterano', npc_citizen_nyssa: 'nyssa-curandeira',
+  npc_citizen_berta: 'berta-cozinheira', cook_berta: 'berta-cozinheira',
   npc_druid_sylthara: 'sylthara-druida'
 };
 function _world2Portrait(key){
@@ -55661,59 +56285,54 @@ function renderCityGroupPanel(){
     hd: p.hd, hdMax: p.hdMax,
     pendingSkills: p.pendingSkills || 0,
     pendingAsi: p.pendingAsi || 0,
+    pendingNotification: p.pending_level_notification || p.pendingNotification || null,
     dead: false,
     isPlayer: true
   };
-  /* 2026-05-11 v3 (user request): card compact 140x140 com XP + Valdoritas
-     DENTRO de c-stats (rows 3-4 full width), logo abaixo do recurso.
-     Layout grid: PV linha 1 col 1 + Recurso linha 2 col 1 + CA col 2 span
-     rows 1-2 + XP linha 3 full + Gold linha 4 full. */
+
   // Map cls do resource (mp/fury/energy/vigor/ki) -> bar-fill suffix (combate PT)
   var RES_BAR_MAP = { mp: 'mp', fury: 'furia', energy: 'energia', vigor: 'vigor', ki: 'ki' };
+
+  // Identifica apenas os membros REAIS do grupo (elimina slots vazios pontilhados)
+  var activeSlots = [];
+  for (var k = 0; k < 4; k++) {
+    if (GROUP_MEMBERS[k]) activeSlots.push({ m: GROUP_MEMBERS[k], idx: k });
+  }
+  var partyCount = activeSlots.length;
+  if (partyCount === 0 && GROUP_MEMBERS[0]) {
+    activeSlots = [{ m: GROUP_MEMBERS[0], idx: 0 }];
+    partyCount = 1;
+  }
+  el.className = 'party-count-' + partyCount;
+
   var html = '';
-  for (var i = 0; i < 4; i++) {
-    var m = GROUP_MEMBERS[i];
-    if (!m) {
-      html += '<div class="cgp-slot empty"><div class="cgp-card empty" data-empty-slot="' + i + '" aria-label="Slot livre"></div></div>';
-      continue;
-    }
+
+  // ===== MODO 1: GRUPO SOLO (Apenas 1 membro - Layout Expandido Rico) =====
+  if (partyCount === 1) {
+    var item = activeSlots[0];
+    var m = item.m;
+    var i = item.idx;
     var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
     var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
-    // USER REPORT 2026-05-14 — XP cumulativo D&D 5e (): barra
-    // mostra progresso DENTRO do nível atual = (xp - xpPrev) / (xpNext - xpPrev).
-    // Ex: Wilzen L9, xp=52473, xpPrev=48000, xpNext=64000 → (4473/16000)=28%.
-    // Card title/val seguem mostrando "xp/xpNext" cumulativo (52473/64000).
     var _xpPrev = m.xpPrev || 0;
     var _xpSpan = (m.xpNext || 0) - _xpPrev;
     var _xpInto = (m.xp || 0) - _xpPrev;
     var xpPct = _xpSpan > 0 ? Math.max(0, Math.min(100, Math.round(100 * _xpInto / _xpSpan))) : 0;
-    var hpThr = vBarHpTier(hpPct);  // FASE 4 single-source threshold (60/25)
-    var deadCls = m.dead ? ' dead' : '';
-    var playerCls = m.isPlayer ? ' player' : '';
-    var clsKey = _cgpClsKey(m.cls);
-    var clsModifier = ' cls-' + clsKey;
+    var hpThr = vBarHpTier(hpPct);
     var heraldicId = _cgpHeraldicIcon(m.cls);
     var res = _resForClass(m.cls);
     var resBarSuffix = RES_BAR_MAP[res.cls] || 'mp';
 
-    /* 2026-05-11 v5 (user request):
-       - Nome SEM sobrenome (split primeiro espaco) — ex: "Wilzen Thunderhoof" -> "Wilzen"
-       - Class tag SEM raca — ex: "Bárbaro · Nv 9" (sem "Anão") */
     var displayName = (m.name || '').split(/\s+/)[0];
     var safeName = _hubEsc(_titleCase(displayName));
     var safeCls = _hubEsc(_classLabelPT(m.cls));
+    var safeRace = _hubEsc(_raceLabelPT(m.race || 'humano'));
     var safeResName = _hubEsc(res.name);
-
-    // USER 2026-05-18: formato 'k' para milhares — _fmtV substitui toLocaleString
     var goldStr = _fmtV(m.gold || 0);
 
-    // PADRAO_LOCAIS (sessão #71h) — indicador de efeitos temporários ATIVOS no
-    // card do player (boato/sonho até descanso longo). User: "como fico sabendo
-    // que está funcionando? indicador no card e ficha". O card é minúsculo (~101px,
-    // 4 linhas densas) e qualquer badge de canto colide com o nome/stats — então
-    // o indicador é um ANEL DOURADO PULSANTE no card (classe has-active-effects),
-    // sem cobrir conteúdo. title lista os efeitos (hover desktop). Detalhe completo
-    // no mobile: tap no card → ficha (seção "Efeitos Ativos"). Server é autoridade.
+    var hasPendingLevelUp = (m.pendingAsi > 0 || m.pendingSkills > 0 || m.pendingNotification != null || (p && (p.pendingAsi > 0 || p.pendingSkills > 0 || p.pending_level_notification != null)));
+    var pulseCls = hasPendingLevelUp ? ' cgp-card--pending-levelup' : '';
+
     var _effClass = '', _effTitle = '';
     if (m.isPlayer && typeof _activeEffectsList === 'function') {
       try {
@@ -55725,68 +56344,184 @@ function renderCityGroupPanel(){
       } catch (_ee) {}
     }
 
-    // ===== Card V8 compact — sem CA, sem raca, sem sobrenome =====
-    // Sessão #28 v2 (2026-05-24): aliado vivo = só nome + classe + ícone classe
-    // + grande botão "Conversar" (sem stats). Player e aliado morto seguem com
-    // stats normais. Click no botão → fullscreen PADRAO_ALDRIC c/ closeable.
-    var isLivingAlly = !m.isPlayer && !m.dead;
-    html += '<div class="cgp-slot" data-slot="' + i + '">'
-      + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + _effClass + (isLivingAlly ? ' chat-only' : '') + '"' + _effTitle + ' data-member="' + i + '">'
-      + '    <div class="c-name">' + safeName + '</div>'
-      + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
-      + '    <div class="c-class-tag">' + safeCls + ' · Nv ' + m.level + '</div>';
-    if (isLivingAlly) {
-      // Aliado vivo: chat zone grande ocupando area dos stats
-      html += '    <button class="c-chat-zone" data-chat-idx="' + i + '" type="button"'
-        + ' title="Conversar com ' + safeName + '"'
-        + ' aria-label="Conversar com ' + safeName + '">'
-        + '<img class="c-chat-icon" src="/shared/img/ui/dialogo.webp" alt="" onerror="this.style.display=\'none\'">'
-        + '<span class="c-chat-label">Conversar</span>'
-        + '</button>';
-    } else {
-      // Player ou aliado morto: stats normais
-      html += '    <div class="c-stats">'
-        // Linha 1: PV (full width — CA removida)
-        + '      <div class="c-stat c-stat--hp" style="--bar-pct:' + hpPct + '%">'
-        + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--hp-' + hpThr + '"></span></div>'
-        + '        <span class="c-stat-label">PV</span>'
-        + '        <span class="c-stat-val c-stat-val--hp c-stat-val--hp-' + hpThr + '">' + m.hp + '/' + m.hpMax + '</span>'
-        + '      </div>';
-      // Linha 2: Recurso — so se mmp > 0
-      if (m.mpMax > 0) {
-        html += '      <div class="c-stat c-stat--' + resBarSuffix + '" style="--bar-pct:' + mpPct + '%">'
-          + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--' + resBarSuffix + '"></span></div>'
-          + '        <span class="c-stat-label">' + safeResName + '</span>'
-          + '        <span class="c-stat-val">' + m.mp + '/' + m.mpMax + '</span>'
-          + '      </div>';
-      }
-      // Linha 3: XP (full width, val branco)
-      html += '      <div class="c-stat c-stat--xp" style="--bar-pct:' + xpPct + '%" title="XP ' + m.xp + '/' + m.xpNext + '">'
-        + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--xp"></span></div>'
-        + '        <span class="c-stat-label">XP</span>'
-        + '        <span class="c-stat-val">' + m.xp + '/' + m.xpNext + '</span>'
-        + '      </div>'
-        // Linha 4: Valdoritas (full width, val branco maior)
-        + '      <div class="c-stat c-stat--gold" title="' + (m.gold || 0) + ' Valdoritas">'
-        + '        <span class="c-stat-val">' + goldStr + '<span class="vi vi-coin sm"></span></span>'
-        + '      </div>'
-        + '    </div>';  // /c-stats
+    var levelupBadgeHtml = hasPendingLevelUp ? '<div class="cgp-levelup-badge">▲ EVOLUIR</div>' : '';
+
+    // Render do Card Solo Expandido
+    html += '<div class="cgp-slot cgp-slot--solo" data-slot="' + i + '" style="width:100%;">'
+      + '  <div class="cgp-card v8-style cgp-card--solo cls-' + _cgpClsKey(m.cls) + ' player' + pulseCls + _effClass + '"' + _effTitle + ' data-member="' + i + '">'
+      + levelupBadgeHtml
+      // Topo do Card Solo: Avatar + Nome + Subtítulo + Nível
+      + '    <div class="cgp-solo-top">'
+      + '      <div class="cgp-solo-identity">'
+      + '        <div class="cgp-solo-avatar"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
+      + '        <div class="cgp-solo-info">'
+      + '          <div class="cgp-solo-name">' + safeName + '</div>'
+      + '          <div class="cgp-solo-subtitle">' + safeCls + ' ' + safeRace + '</div>'
+      + '        </div>'
+      + '      </div>'
+      + '      <div class="cgp-solo-tags">'
+      + '        <span class="cgp-solo-level">Nv ' + m.level + '</span>'
+      + '      </div>'
+      + '    </div>'
+      // Conteúdo: 2 Colunas (Barras à esquerda + Combate/Ouro à direita)
+      + '    <div class="cgp-solo-content">'
+      + '      <div class="cgp-solo-bars">'
+      // Barra PV
+      + '        <div class="cgp-solo-bar-row">'
+      + '          <span class="cgp-solo-bar-lbl">PV</span>'
+      + '          <div class="cgp-solo-bar-track"><div class="cgp-solo-bar-fill cgp-solo-bar-fill--hp-' + hpThr + '" style="width:' + hpPct + '%;"></div></div>'
+      + '          <span class="cgp-solo-bar-val" style="color:var(--v-text-hp,' + (hpThr==='low'?'#e07c7c':'#fff') + ');">' + m.hp + '/' + m.hpMax + '</span>'
+      + '        </div>';
+    // Barra Recurso (se max > 0)
+    if (m.mpMax > 0) {
+      html += '        <div class="cgp-solo-bar-row">'
+        + '          <span class="cgp-solo-bar-lbl">' + safeResName + '</span>'
+        + '          <div class="cgp-solo-bar-track"><div class="cgp-solo-bar-fill cgp-solo-bar-fill--' + resBarSuffix + '" style="width:' + mpPct + '%;"></div></div>'
+        + '          <span class="cgp-solo-bar-val">' + m.mp + '/' + m.mpMax + '</span>'
+        + '        </div>';
     }
-    html += '  </div>'  // /cgp-card
-      + '</div>';  // /cgp-slot
+    // Barra XP
+    html += '        <div class="cgp-solo-bar-row" title="XP ' + m.xp + '/' + m.xpNext + '">'
+      + '          <span class="cgp-solo-bar-lbl">XP</span>'
+      + '          <div class="cgp-solo-bar-track"><div class="cgp-solo-bar-fill cgp-solo-bar-fill--xp" style="width:' + xpPct + '%;"></div></div>'
+      + '          <span class="cgp-solo-bar-val" style="color:#ffd700;">' + m.xp + '/' + m.xpNext + '</span>'
+      + '        </div>'
+      + '      </div>' // /cgp-solo-bars
+      // Coluna Tática (CA, Ataque/DC, Ouro, Exaustão)
+      + '      <div class="cgp-solo-tactical">'
+      + '        <div class="cgp-solo-tac-badges">'
+      + '          <span class="cgp-solo-badge-item" title="Classe de Armadura">🛡️ ' + (m.ac || 10) + ' CA</span>'
+      + (m.atk != null ? ('<span class="cgp-solo-badge-item" title="Bônus de Ataque">⚔️ ' + (m.atk >= 0 ? '+' : '') + m.atk + '</span>') : '')
+      + (m.dc != null ? ('<span class="cgp-solo-badge-item" title="CD de Magia">🔮 ' + m.dc + ' DC</span>') : '')
+      + '        </div>'
+      + '        <div class="cgp-solo-gold-row" title="' + (m.gold || 0) + ' Valdoritas">'
+      + '          <span>' + goldStr + '</span><span class="vi vi-coin sm"></span>'
+      + '        </div>'
+      + '      </div>' // /cgp-solo-tactical
+      + '    </div>' // /cgp-solo-content
+      + '  </div>' // /cgp-card
+      + '</div>'; // /cgp-slot
+  } else {
+    // ===== MODO 2+: GRUPO COM 2, 3 OU 4 MEMBROS (Divisão Igualitária) =====
+    for (var idxActive = 0; idxActive < activeSlots.length; idxActive++) {
+      var item = activeSlots[idxActive];
+      var m = item.m;
+      var i = item.idx;
+      var hpPct = m.hpMax > 0 ? Math.round(100 * m.hp / m.hpMax) : 0;
+      var mpPct = m.mpMax > 0 ? Math.round(100 * m.mp / m.mpMax) : 0;
+      var _xpPrev = m.xpPrev || 0;
+      var _xpSpan = (m.xpNext || 0) - _xpPrev;
+      var _xpInto = (m.xp || 0) - _xpPrev;
+      var xpPct = _xpSpan > 0 ? Math.max(0, Math.min(100, Math.round(100 * _xpInto / _xpSpan))) : 0;
+      var hpThr = vBarHpTier(hpPct);
+      var deadCls = m.dead ? ' dead' : '';
+      var playerCls = m.isPlayer ? ' player' : '';
+      var clsKey = _cgpClsKey(m.cls);
+      var clsModifier = ' cls-' + clsKey;
+      var heraldicId = _cgpHeraldicIcon(m.cls);
+      var res = _resForClass(m.cls);
+      var resBarSuffix = RES_BAR_MAP[res.cls] || 'mp';
+
+      var displayName = (m.name || '').split(/\s+/)[0];
+      var safeName = _hubEsc(_titleCase(displayName));
+      var safeCls = _hubEsc(_classLabelPT(m.cls));
+      var safeResName = _hubEsc(res.name);
+      var goldStr = _fmtV(m.gold || 0);
+
+      var hasPendingLevelUp = (m.pendingAsi > 0 || m.pendingSkills > 0 || (m.levelUps && m.levelUps > 0) || (m.isPlayer && (p && (p.pendingAsi > 0 || p.pendingSkills > 0 || p.pending_level_notification != null))));
+      var pulseCls = hasPendingLevelUp ? ' cgp-card--pending-levelup' : '';
+      var levelupBadgeHtml = hasPendingLevelUp ? '<div class="cgp-levelup-badge">▲ EVOLUIR</div>' : '';
+
+      var _effClass = '', _effTitle = '';
+      if (m.isPlayer && typeof _activeEffectsList === 'function') {
+        try {
+          var _effs = _activeEffectsList(window.CITY_MOCK_PLAYER);
+          if (_effs && _effs.length) {
+            _effClass = ' has-active-effects';
+            _effTitle = ' title="✦ Efeitos ativos: ' + _hubEsc(_effs.join(' · ')) + '"';
+          }
+        } catch (_ee) {}
+      }
+
+      var isLivingAlly = !m.isPlayer && !m.dead;
+      html += '<div class="cgp-slot" data-slot="' + i + '">'
+        + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + _effClass + pulseCls + (isLivingAlly ? ' chat-only' : '') + '"' + _effTitle + ' data-member="' + i + '">'
+        + levelupBadgeHtml
+        + '    <div class="c-name">' + safeName + '</div>'
+        + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
+        + '    <div class="c-class-tag">' + safeCls + ' · Nv ' + m.level + '</div>';
+      if (isLivingAlly) {
+        html += '    <button class="c-chat-zone" data-chat-idx="' + i + '" type="button"'
+          + ' title="Conversar com ' + safeName + '"'
+          + ' aria-label="Conversar com ' + safeName + '">'
+          + '<img class="c-chat-icon" src="/shared/img/ui/dialogo.webp" alt="" onerror="this.style.display=\'none\'">'
+          + '<span class="c-chat-label">Conversar</span>'
+          + '</button>';
+      } else {
+        html += '    <div class="c-stats">'
+          + '      <div class="c-stat c-stat--hp" style="--bar-pct:' + hpPct + '%">'
+          + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--hp-' + hpThr + '"></span></div>'
+          + '        <span class="c-stat-label">PV</span>'
+          + '        <span class="c-stat-val c-stat-val--hp c-stat-val--hp-' + hpThr + '">' + m.hp + '/' + m.hpMax + '</span>'
+          + '      </div>';
+        if (m.mpMax > 0) {
+          html += '      <div class="c-stat c-stat--' + resBarSuffix + '" style="--bar-pct:' + mpPct + '%">'
+            + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--' + resBarSuffix + '"></span></div>'
+            + '        <span class="c-stat-label">' + safeResName + '</span>'
+            + '        <span class="c-stat-val">' + m.mp + '/' + m.mpMax + '</span>'
+            + '      </div>';
+        }
+        html += '      <div class="c-stat c-stat--xp" style="--bar-pct:' + xpPct + '%" title="XP ' + m.xp + '/' + m.xpNext + '">'
+          + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--xp"></span></div>'
+          + '        <span class="c-stat-label">XP</span>'
+          + '        <span class="c-stat-val">' + m.xp + '/' + m.xpNext + '</span>'
+          + '      </div>'
+          + '      <div class="c-stat c-stat--gold" title="' + (m.gold || 0) + ' Valdoritas">'
+          + '        <span class="c-stat-val">' + goldStr + '<span class="vi vi-coin sm"></span></span>'
+          + '      </div>'
+          + '    </div>';
+      }
+      html += '  </div>'
+        + '</div>';
+    }
   }
+
+  // ===== LINHA DE INVOCAÇÕES (Summons - Minions / Familiares) =====
+  var summons = (p && (p.summons || p.minions)) || window.CITY_SUMMONS || [];
+  if (summons && summons.length > 0) {
+    html += '<div class="cgp-summons-bar">';
+    html += '  <span class="cgp-summons-label">Invocações:</span>';
+    for (var sIdx = 0; sIdx < summons.length; sIdx++) {
+      var sm = summons[sIdx];
+      var sIco = sm.icon || '💀';
+      var sName = _hubEsc(sm.name || 'Invocação');
+      var sHp = (sm.hp != null && sm.hpMax != null) ? ' (' + sm.hp + '/' + sm.hpMax + ' PV)' : '';
+      html += '  <div class="cgp-summon-chip"><span class="cgp-summon-ico">' + sIco + '</span><span class="cgp-summon-name">' + sName + '</span><span class="cgp-summon-hp">' + sHp + '</span></div>';
+    }
+    html += '</div>';
+  }
+
   el.innerHTML = html;
-  // FIX 2026-05-04: cards do HUD topo clicáveis → abre ficha do membro
+
+  // Eventos de clique nos cards
   el.querySelectorAll('.cgp-card[data-member]').forEach(function(card){
-    if (card.classList.contains('empty')) return;  // slot vazio não clica
+    if (card.classList.contains('empty')) return;
     card.style.cursor = 'pointer';
     card.addEventListener('click', function(){
       var idx = parseInt(card.getAttribute('data-member'), 10);
+      var mem = GROUP_MEMBERS[idx];
+      // Se tiver notificação de subida de nível pendente, abre a celebração/progressão
+      if (mem && mem.isPlayer && (mem.pendingNotification || (p && p.pending_level_notification))) {
+        var notif = mem.pendingNotification || p.pending_level_notification;
+        if (typeof _openLevelUpCelebrationModal === 'function') {
+          return _openLevelUpCelebrationModal(notif);
+        }
+      }
       if (typeof _showStatusPopup === 'function') _showStatusPopup(idx);
     });
   });
-  // Sessão #28 v2 (2026-05-24): c-chat-zone (botão grande) wire → _showAllyDialogue
-  // fullscreen com closeable. stopPropagation pra não disparar click do card (Ficha).
+
+  // Listener para c-chat-zone de aliados
   el.querySelectorAll('.c-chat-zone').forEach(function(btn){
     btn.addEventListener('click', function(ev){
       ev.stopPropagation();
@@ -55794,16 +56529,15 @@ function renderCityGroupPanel(){
       if (typeof _showAllyDialogue === 'function') _showAllyDialogue(idx);
     });
   });
-  // Sessão #55 (2026-05-28): fade-in após render com state real
-  // Evita flash do placeholder "Aventureiro Mago Elfo Nv 5" antes do
-  // CITY_MOCK_PLAYER carregar do API (REMOTE mode). Painel inicia
-  // invisible no HTML (style="opacity:0;visibility:hidden") e revela
-  // aqui somente quando _cityRealPlayerReady === true.
-  // LOCAL mode: flag setada imediatamente após CITY_MOCK_PLAYER init.
-  // REMOTE mode: flag setada após /api/auth/characters aplicar `picked` real.
+
   if (window._cityRealPlayerReady === true) {
     el.style.visibility = 'visible';
     el.style.opacity = '1';
+  }
+
+  // Verifica notificação de subida de nível automaticamente ao renderizar
+  if (typeof _checkAndShowLevelUpNotification === 'function') {
+    _checkAndShowLevelUpNotification();
   }
 }
 
@@ -58830,7 +59564,6 @@ function _renderCityDialogue(venue, data, p, ctx){
   // FASE 5d (#3): ctx.npcId carrega a identidade do recruta (D1 — viaja no node).
   var npcId = (ctx && ctx.npcId) || (data && data.npc && (data.npc.id || data.npc.npc_id)) || '';
   if (venue === 'inn' && node === 'rooms' && typeof _innShowKeyBoard === 'function') {
-    try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
     _innRenderRoomKeyBoardRemote(venue, data, p);
     return;
   }
@@ -59021,28 +59754,10 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
               : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
           + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>',
       onContinue: function(){
-        if (venue === 'recruta') {
-          var nid = (ctx && ctx.npcId) || (data.npc && data.npc.id);
-          if (nid) _openRecrutaDialogue(nid, p);
-          else { try { window.vEncounter.close(); } catch(_){} }
-          return;
-        }
-        if (data.result_script && data.result_script.length) {
-          _handleCityDialogueResult(venue, {
-            ok: true,
-            npc: data.npc || npc,
-            node: data.node,
-            result_script: data.result_script,
-            stat_changes: data.stat_changes
-          }, p, npc, ctx);
-          return;
-        }
-        if (data.choices && data.script && data.node) {
-          _renderCityDialogue(venue, data, p, ctx);
-          return;
-        }
-        try { window.vEncounter.close(); } catch(_){}
-        if (typeof refreshHud === 'function') refreshHud();
+        // D4: SEMPRE re-fetch da raiz (custo novo + barganha consumida). NÃO renderiza node embutido.
+        var nid = (ctx && ctx.npcId) || (data.npc && data.npc.id);
+        if (nid) _openRecrutaDialogue(nid, p);
+        else { try { window.vEncounter.close(); } catch(_){} }
       }
     });
     return;
@@ -61329,7 +62044,7 @@ function _playCityWalkAnimation(opts, onComplete) {
         var ppy = groundY + 12 + pp * 18;
         ctx.fillStyle = 'rgba(180,200,230,0.18)';
         ctx.beginPath();
-        ctx.ellipse(ppx, ppy, 12, 3, 0, 0, Math.PI * 2);
+        ctx.ellipse(ppx, ppy, 22 + pp * 8, 4 + pp * 1.5, 0, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -61991,13 +62706,13 @@ function _renderEncounterPopup(enc, originalAction, player) {
       // shared/encounter-popup.css que agora também não usa animation.
       + '#encounter-overlay{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.85);'
       + '  display:flex;align-items:center;justify-content:center;padding:10px 14px;box-sizing:border-box;opacity:1}'
-      + '.enc-card{background-color:#291e14;background-image:radial-gradient(ellipse at 50% 25%,rgba(65,48,32,0.5) 0%,rgba(22,15,10,0.95) 80%);'
-      + '  border:1px solid #b88836;border-radius:12px;'
+      + '.enc-card{background:linear-gradient(180deg,#3a2e22,#2a2218);'
+      + '  border:1px solid rgba(196,149,58,0.6);border-radius:12px;'
       + '  width:min(calc(100vw - 28px), 430px);max-width:430px;'
       + '  height:calc(100% - 12px);min-height:min(88dvh, calc(460px * var(--v-font-scale, 1)));'
       + '  max-height:calc(96dvh - 8px);overflow:hidden;'
       + '  display:flex;flex-direction:column;'
-      + '  box-shadow:inset 0 0 45px rgba(12,8,4,0.8),0 0 0 1px rgba(196,149,58,0.25),0 12px 40px rgba(0,0,0,0.8)}'
+      + '  box-shadow:0 12px 40px rgba(0,0,0,0.7),0 0 30px rgba(196,149,58,0.15)}'
       + '.enc-header{display:flex;gap: var(--v-space-lg, 12px);padding: 14px var(--v-space-xl, 16px);'
       + '  background:rgba(15,12,8,0.55);border-bottom:1px solid rgba(196,149,58,0.3);'
       + '  align-items:center;flex-shrink:0}'
@@ -62025,7 +62740,6 @@ function _renderEncounterPopup(enc, originalAction, player) {
       + '  background:rgba(15,12,8,0.45)}'
       + '.enc-body{padding:14px 16px 14px;flex:1 1 0px !important;display:flex;flex-direction:column;'
       + '  gap:14px;overflow-y:auto !important;min-height:0px !important;max-height:none !important;justify-content:flex-start}'
-      + '.enc-body > :first-child{margin-top:auto}.enc-body > :last-child{margin-bottom:auto}'
       // Phase 6.6.x dialogue pagination 2026-05-05: fonte maior + animação
       // por página. 2026-05-05 update: revelação HORIZONTAL (clip-path
       // wipe esquerda→direita) com duração dinâmica via --reveal-dur.
