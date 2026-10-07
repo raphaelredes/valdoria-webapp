@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T01:15:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T01:39:09Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -5314,6 +5314,254 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .tcc-dmg-row.reduction .tcc-dmg-val { color: #80b0e0; }
 .tcc-dmg-row.immunity .tcc-dmg-val { color: #b080e0; }
 .tcc-dmg-val.tcc-none { color: var(--v-text-dim, #a09484); font-weight: 400; font-style: italic; }
+
+/* ============================================================================
+   ATAQUE DE OPORTUNIDADE — Alerta Chamativo & Modal de Regras (D&D 5e PHB p. 195)
+   ============================================================================ */
+.tcc-oa-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(140, 25, 25, 0.45), rgba(45, 12, 12, 0.8));
+    border: 1px solid #e05040;
+    box-shadow: 0 0 14px rgba(224, 80, 64, 0.35), inset 0 0 10px rgba(224, 80, 64, 0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    margin-bottom: 14px;
+    box-sizing: border-box;
+    width: 100%;
+    animation: tccOaPulse 2.4s infinite ease-in-out;
+}
+@keyframes tccOaPulse {
+    0%, 100% {
+        border-color: rgba(224, 80, 64, 0.65);
+        box-shadow: 0 0 12px rgba(224, 80, 64, 0.3), inset 0 0 8px rgba(224, 80, 64, 0.15);
+    }
+    50% {
+        border-color: #ff6e5e;
+        box-shadow: 0 0 18px rgba(255, 110, 94, 0.55), inset 0 0 14px rgba(255, 110, 94, 0.25);
+    }
+}
+.tcc-oa-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.tcc-oa-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #a82020;
+    color: #fff;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.tcc-oa-title {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffb4b4;
+    letter-spacing: 0.8px;
+    text-shadow: 0 0 8px rgba(255, 100, 100, 0.4);
+}
+.tcc-oa-summary {
+    font-family: var(--v-font, 'MedievalSharp'), serif;
+    font-size: 11.5px;
+    line-height: 1.35;
+    color: #fbd2d2;
+    margin: 2px 0;
+}
+.tcc-oa-summary strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+.tcc-oa-summary em {
+    color: #ffd166;
+    font-style: normal;
+    font-weight: 600;
+}
+.tcc-oa-details-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: linear-gradient(180deg, rgba(70, 20, 20, 0.9), rgba(35, 10, 10, 0.95));
+    border: 1px solid rgba(255, 180, 80, 0.65);
+    color: #ffe082;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+.tcc-oa-details-btn:hover {
+    background: linear-gradient(180deg, rgba(110, 30, 30, 0.95), rgba(60, 15, 15, 0.98));
+    border-color: #ffd54f;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(255, 213, 79, 0.45);
+    transform: translateY(-1px);
+}
+.tcc-oa-details-btn .tcc-oa-btn-ico {
+    color: #ffca28;
+    font-size: 12px;
+}
+
+/* Modal de Ajuda / Regras D&D 5e de Ataque de Oportunidade */
+.oa-help-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 8, 6, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 102000;
+    padding: 16px;
+    box-sizing: border-box;
+    animation: udcFadeIn 0.2s ease;
+}
+.oa-help-card {
+    width: 100%;
+    max-width: 340px;
+    max-height: calc(100% - 32px);
+    overflow-y: auto;
+    background: linear-gradient(180deg, #32251c, #221a14);
+    border: 1px solid #c4953a;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.85), 0 0 24px rgba(196,149,58,0.25);
+    padding: 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: udcPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.oa-help-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(196, 149, 58, 0.3);
+    padding-bottom: 10px;
+}
+.oa-help-icon-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: rgba(180, 40, 40, 0.35);
+    border: 1px solid rgba(255, 100, 100, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.oa-help-titles {
+    flex: 1;
+    min-width: 0;
+}
+.oa-help-title {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #ff9e80;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.25;
+}
+.oa-help-subtitle {
+    font-family: var(--v-font, 'MedievalSharp'), serif;
+    font-size: 11px;
+    color: var(--v-text-dim, #a09484);
+    margin-top: 2px;
+}
+.oa-help-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.oa-help-section {
+    background: rgba(15, 12, 8, 0.45);
+    border: 1px solid rgba(196, 149, 58, 0.2);
+    border-radius: 8px;
+    padding: 9px 11px;
+    font-family: var(--v-font, 'MedievalSharp'), serif;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--v-text, #d4c8b0);
+}
+.oa-help-section--alert {
+    background: rgba(120, 20, 20, 0.3);
+    border-color: rgba(220, 70, 70, 0.45);
+    color: #fde8e8;
+}
+.oa-help-section--tips {
+    background: rgba(30, 25, 18, 0.55);
+}
+.oa-help-sec-title {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--v-gold, #c4953a);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+.oa-help-section--alert .oa-help-sec-title {
+    color: #ff8a80;
+}
+.oa-help-section p {
+    margin: 0;
+}
+.oa-help-list {
+    margin: 0;
+    padding-left: 18px;
+}
+.oa-help-list li {
+    margin: 3px 0;
+}
+.oa-help-tip-item {
+    margin-bottom: 7px;
+}
+.oa-help-tip-item:last-child {
+    margin-bottom: 0;
+}
+.oa-help-tip-tag {
+    display: inline-block;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 700;
+    font-size: 10.5px;
+    color: #ffd54f;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+.oa-help-actions {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(196, 149, 58, 0.25);
+}
+.oa-help-close-btn {
+    width: 100%;
+    min-height: 40px;
+    font-size: 12px;
+}
 
 /* Folha "Escolha uma acao": 2 botoes simetricos por linha, altura ergonomica uniforme */
 .sim-action-sheet .sim-action-sheet-grids {
@@ -19508,6 +19756,84 @@ async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
 }
 
 /**
+ * D&D 5e: Modal rico e detalhado de regras de Ataque de Oportunidade (PHB p. 195).
+ * Explica o gatilho, os combatentes que irão golpear e as formas de evitar (Desengajar).
+ */
+function showOpportunityAttackHelpModal(provokingNames, provokingHostiles) {
+    var prev = document.getElementById('oa-help-overlay');
+    if (prev) prev.remove();
+
+    var ov = document.createElement('div');
+    ov.id = 'oa-help-overlay';
+    ov.className = 'oa-help-overlay';
+
+    var card = document.createElement('div');
+    card.className = 'oa-help-card';
+
+    var namesList = (provokingNames && provokingNames.length) ? provokingNames.join(', ') : 'Inimigo adjacente';
+
+    var h = '';
+    h += '<div class="oa-help-header">';
+    h += '  <div class="oa-help-icon-badge">⚔️</div>';
+    h += '  <div class="oa-help-titles">';
+    h += '    <div class="oa-help-title">Ataque de Oportunidade</div>';
+    h += '    <div class="oa-help-subtitle">Livro do Jogador D&amp;D 5e (PHB p. 195)</div>';
+    h += '  </div>';
+    h += '</div>';
+
+    h += '<div class="oa-help-body">';
+
+    // O que vai acontecer
+    h += '  <div class="oa-help-section oa-help-section--alert">';
+    h += '    <div class="oa-help-sec-title">⚠️ O que vai acontecer</div>';
+    h += '    <p>Ao se mover para fora do alcance corpo a corpo de <strong>' + escHtml(namesList) + '</strong>, a criatura usará a <strong>Reação</strong> dela para realizar <strong>1 ataque corpo a corpo imediato</strong> contra você antes de você sair do espaço!</p>';
+    h += '  </div>';
+
+    // Inimigos ameaçadores
+    h += '  <div class="oa-help-section">';
+    h += '    <div class="oa-help-sec-title">🎯 Inimigos que Podem Golpear</div>';
+    h += '    <ul class="oa-help-list">';
+    for (var i = 0; i < provokingNames.length; i++) {
+        h += '      <li>🐺 <strong>' + escHtml(provokingNames[i]) + '</strong>: Consciente, possui visão e Reação disponível.</li>';
+    }
+    h += '    </ul>';
+    h += '  </div>';
+
+    // Dicas / Como Evitar
+    h += '  <div class="oa-help-section oa-help-section--tips">';
+    h += '    <div class="oa-help-sec-title">🛡️ Como Evitar ou Lidar</div>';
+    h += '    <div class="oa-help-tip-item">';
+    h += '      <span class="oa-help-tip-tag">1. Ação Desengajar (Disengage)</span>';
+    h += '      <p>Use a ação <strong>Desengajar</strong> (botão <em>Agir ▸ Desengajar</em>) antes de se mover. Seu deslocamento não provocará ataques de oportunidade pelo restante do turno!</p>';
+    h += '    </div>';
+    h += '    <div class="oa-help-tip-item">';
+    h += '      <span class="oa-help-tip-tag">2. Incapacitar ou Cegar</span>';
+    h += '      <p>Inimigos cegos, atordoados, paralisados ou que já gastaram a Reação nesta rodada <em>não</em> conseguem realizar este ataque.</p>';
+    h += '    </div>';
+    h += '    <div class="oa-help-tip-item">';
+    h += '      <span class="oa-help-tip-tag">3. Manter a Posição</span>';
+    h += '      <p>Se preferir não se arriscar, clique em <strong>Cancelar</strong> e ataque ou conjure no alcance atual.</p>';
+    h += '    </div>';
+    h += '  </div>';
+
+    h += '</div>';
+
+    h += '<div class="oa-help-actions">';
+    h += '  <button type="button" class="action-btn primary oa-help-close-btn" data-act="close-oa-help">↩ Entendido, Voltar</button>';
+    h += '</div>';
+
+    setHTML(card, h);
+    ov.appendChild(card);
+
+    if (typeof mountInGameFrame === 'function') mountInGameFrame(ov);
+    else document.body.appendChild(ov);
+
+    function closeHelp() { try { ov.remove(); } catch (_) {} }
+    ov.addEventListener('click', function (e) { if (e.target === ov) closeHelp(); });
+    card.querySelector('[data-act="close-oa-help"]').addEventListener('click', closeHelp);
+}
+
+/**
  * D&D 5e: Confirmação tática de movimento no grid hexagonal.
  * Exibe quantidade de metros a movimentar, metros restantes após a ação,
  * custo por terreno difícil e alerta de ataque de oportunidade se sair de combate corpo a corpo.
@@ -19591,17 +19917,27 @@ function showMoveConfirm(tCol, tRow) {
     html += '<div class="tcc-stats"><span class="tcc-n-key">' + dM + '</span> (' + dHexes + ' hexes)</div>';
     html += '</div></div>';
 
-    html += '<div class="tcc-dmg" style="margin-bottom:14px;">';
+    html += '<div class="tcc-dmg" style="margin-bottom:12px;">';
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância</span><span class="tcc-dmg-val"><strong>' + dM + '</strong></span></div>';
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Custo de movimento</span><span class="tcc-dmg-val"><strong>' + costM + '</strong>' + (hasDifficult ? ' <span style="color:#f59e0b;font-size:11px;">(Terreno Difícil ◆)</span>' : '') + '</span></div>';
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Disponível agora</span><span class="tcc-dmg-val">' + currentMoveM + '</span></div>';
     html += '<div class="tcc-dmg-row crit" style="border-top:1px dashed rgba(196,149,58,0.3);padding-top:6px;"><span class="tcc-dmg-lbl">Restará após mover</span><span class="tcc-dmg-val" style="color:#a3e635;font-weight:bold;">' + remainingAfterM + ' de ' + totalSpeedM + '</span></div>';
+    html += '</div>';
+
     if (willTriggerOA) {
-        html += '<div class="tcc-dmg-row" style="background:rgba(180,40,40,0.2);padding:6px 8px;border-radius:4px;margin-top:6px;color:#ff8b8b;font-size:11px;line-height:1.3;">';
-        html += '◆ <strong>Atenção:</strong> Sair do alcance de <strong>' + escHtml(provokingNames.join(', ')) + '</strong> sem Desengajar provocará <strong>Ataque de Oportunidade</strong> (PHB p. 195)!';
+        html += '<div class="tcc-oa-banner">';
+        html += '  <div class="tcc-oa-header">';
+        html += '    <span class="tcc-oa-badge">⚠️ PERIGO</span>';
+        html += '    <span class="tcc-oa-title">Ataque de Oportunidade!</span>';
+        html += '  </div>';
+        html += '  <div class="tcc-oa-summary">';
+        html += '    Sair do alcance de <strong>' + escHtml(provokingNames.join(', ')) + '</strong> sem <em>Desengajar</em> provocará um golpe imediato!';
+        html += '  </div>';
+        html += '  <button type="button" class="tcc-oa-details-btn" data-act="oa-details">';
+        html += '    <span class="tcc-oa-btn-ico">⚡</span> Ver Regras D&amp;D 5e e Como Evitar ▸';
+        html += '  </button>';
         html += '</div>';
     }
-    html += '</div>';
 
     html += '<div class="tcc-actions">';
     html += '<button type="button" class="action-btn secondary" data-act="cancel">✕ Cancelar</button>';
@@ -19616,6 +19952,13 @@ function showMoveConfirm(tCol, tRow) {
     function close() { try { ov.remove(); } catch (_) {} }
     ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
     card.querySelector('[data-act="cancel"]').addEventListener('click', close);
+    var oaBtn = card.querySelector('[data-act="oa-details"]');
+    if (oaBtn) {
+        oaBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            showOpportunityAttackHelpModal(provokingNames, provokingHostiles);
+        });
+    }
     card.querySelector('[data-act="confirm"]').addEventListener('click', function () {
         close();
         handlePlayerMoveTo(tCol, tRow);
@@ -23405,8 +23748,10 @@ function mountBattlefieldPanZoom() {
             e.target.closest('.bf-zoom-controls') ||
             e.target.closest('.sim-action-dock') ||
             e.target.closest('button') ||
-            e.target.closest('[data-clickable="1"]') ||
-            e.target.closest('.hex-tile--reachable')
+            e.target.closest('.target-confirm-overlay') ||
+            e.target.closest('.modal-overlay') ||
+            e.target.closest('.oa-help-overlay') ||
+            e.target.closest('.tcc-actions')
         )) {
             window.__bfIsDragging = false;
             return;
@@ -23447,11 +23792,13 @@ function mountBattlefieldPanZoom() {
                 if (Math.abs(moveDx) >= DRAG_THRESHOLD_PX || Math.abs(moveDy) >= DRAG_THRESHOLD_PX) {
                     isDragging = true;
                     window.__bfIsDragging = true;
+                    window.__bfLastDragTs = Date.now();
                     try { vp.setPointerCapture(e.pointerId); } catch (_e) {}
                     vp.style.cursor = 'grabbing';
                 }
             }
             if (isDragging) {
+                window.__bfLastDragTs = Date.now();
                 if (e.cancelable) e.preventDefault();
                 window.__bfUserHasInteracted = true;
                 currentPanX = dragPanStartX + moveDx;
@@ -23461,6 +23808,7 @@ function mountBattlefieldPanZoom() {
         } else if (activePointers.size === 2) {
             if (e.cancelable) e.preventDefault();
             window.__bfIsDragging = true;
+            window.__bfLastDragTs = Date.now();
             var pts = Array.from(activePointers.values());
             var dx = pts[0].x - pts[1].x;
             var dy = pts[0].y - pts[1].y;
@@ -23478,10 +23826,17 @@ function mountBattlefieldPanZoom() {
 
         if (activePointers.size === 0) {
             primaryPointerId = null;
+            var wasDrag = isDragging;
             isDragging = false;
             vp.style.cursor = 'grab';
             savePanState(true);
-            setTimeout(function () { window.__bfIsDragging = false; }, 120);
+            if (wasDrag) {
+                window.__bfLastDragTs = Date.now();
+                window.__bfIsDragging = true;
+                setTimeout(function () { window.__bfIsDragging = false; }, 350);
+            } else {
+                window.__bfIsDragging = false;
+            }
         } else if (activePointers.size === 1) {
             var remainingId = activePointers.keys().next().value;
             primaryPointerId = remainingId;
@@ -23992,9 +24347,10 @@ function bindActions() {
                 var now = Date.now();
                 if (now - _lastCardActionTime < 320) return;
                 if (window.__bfIsDragging) return;
+                if (window.__bfLastDragTs && (now - window.__bfLastDragTs < 350)) return;
                 if (ev && ev.target && ev.target.closest && ev.target.closest('button')) return;
                 _lastCardActionTime = now;
-                if (ev && ev.cancelable && ev.type === 'touchend') {
+                if (ev && ev.cancelable && ev.type !== 'click') {
                     ev.preventDefault();
                 }
                 var uid = card.getAttribute('data-unit-id');
@@ -24067,8 +24423,6 @@ function bindActions() {
                 openUnitDetail(uid);
             };
             card.addEventListener('click', onCardTrigger);
-            card.addEventListener('pointerup', onCardTrigger);
-            card.addEventListener('touchend', onCardTrigger);
         })(cards[j]);
     }
     /* Hexágonos de movimentação alcançáveis no turno do jogador */
@@ -24079,9 +24433,10 @@ function bindActions() {
                 var now = Date.now();
                 if (now - _lastTileActionTime < 320) return;
                 if (window.__bfIsDragging) return;
+                if (window.__bfLastDragTs && (now - window.__bfLastDragTs < 350)) return;
                 _lastTileActionTime = now;
-                if (ev.cancelable && ev.type !== 'click') ev.preventDefault();
-                ev.stopPropagation();
+                if (ev && ev.cancelable && ev.type !== 'click') ev.preventDefault();
+                if (ev) ev.stopPropagation();
                 var tCol = parseInt(tile.getAttribute('data-col'), 10);
                 var tRow = parseInt(tile.getAttribute('data-row'), 10);
                 if (!isNaN(tCol) && !isNaN(tRow)) {
@@ -24089,8 +24444,6 @@ function bindActions() {
                 }
             };
             tile.addEventListener('click', onTileTrigger);
-            tile.addEventListener('pointerup', onTileTrigger);
-            tile.addEventListener('touchend', onTileTrigger);
         })(reachableTiles[ri]);
     }
     mountBattlefieldPanZoom();

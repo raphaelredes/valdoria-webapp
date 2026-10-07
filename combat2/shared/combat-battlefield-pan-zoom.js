@@ -181,7 +181,12 @@
                     viewport.releasePointerCapture(e.pointerId);
                 } catch (err2) {}
             }
-            if (mouseActive.didPan) lastPanTs = Date.now();
+            if (mouseActive.didPan) {
+                lastPanTs = Date.now();
+                global.__bfLastDragTs = Date.now();
+                global.__bfIsDragging = true;
+                setTimeout(function () { global.__bfIsDragging = false; }, 350);
+            }
             mouseActive = null;
         }
 
@@ -192,7 +197,12 @@
         function onLostPointerCapture(e) {
             if (!mouseActive || e.pointerId !== mouseActive.id) return;
             mouseActive.ptrCaptured = false;
-            if (mouseActive.didPan) lastPanTs = Date.now();
+            if (mouseActive.didPan) {
+                lastPanTs = Date.now();
+                global.__bfLastDragTs = Date.now();
+                global.__bfIsDragging = true;
+                setTimeout(function () { global.__bfIsDragging = false; }, 350);
+            }
             mouseActive = null;
         }
 
@@ -269,7 +279,12 @@
         function onTouchEnd(e) {
             if (pinch && e.touches.length < 2) pinch = null;
             if (touchPan) {
-                if (touchPan.didPan) lastPanTs = Date.now();
+                if (touchPan.didPan) {
+                    lastPanTs = Date.now();
+                    global.__bfLastDragTs = Date.now();
+                    global.__bfIsDragging = true;
+                    setTimeout(function () { global.__bfIsDragging = false; }, 350);
+                }
                 if (e.touches.length === 0) touchPan = null;
             }
         }
