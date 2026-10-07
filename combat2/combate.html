@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T03:29:12Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T12:06:38Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10041,8 +10041,8 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 /* Névoa de Guerra (Fog of War) nos Tokens de Combate D&D 5e */
 .battlefield-hex-arena .cell.hex-token.token--shrouded-fog {
-  opacity: 0.18 !important;
-  filter: grayscale(1) blur(2px) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
   pointer-events: none !important;
   transition: opacity 0.35s ease, filter 0.35s ease;
 }
@@ -10246,6 +10246,16 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   stroke-dasharray: 2 4;
   pointer-events: none;
   transition: opacity 0.35s ease, fill 0.35s ease;
+}
+.battlefield-hex-arena .hex-tile.hex-tile--fogged.hex-tile--reachable {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  stroke: rgba(140, 100, 40, 0.4) !important;
+  stroke-dasharray: 3 3;
+}
+.battlefield-hex-arena .hex-tile.hex-tile--fogged.hex-tile--reachable:hover {
+  fill: #14110d !important;
+  stroke: rgba(196, 149, 58, 0.65) !important;
 }
 
 .battlefield-hex-arena .hex-tile:hover {
@@ -10466,6 +10476,19 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   border-left: 1px solid rgba(100, 150, 220, 0.4);
   padding-left: 6px;
   margin-left: 2px;
+}
+.bf-vision-badge.bf-vision-badge--blinded {
+  border-color: rgba(239, 68, 68, 0.75);
+  background: rgba(30, 10, 10, 0.95);
+  color: #fca5a5;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+.bf-vision-badge.bf-vision-badge--blinded strong {
+  color: #ef4444;
+}
+.bf-vision-badge.bf-vision-badge--blinded .bf-vision-sub {
+  color: #f87171;
+  border-left-color: rgba(239, 68, 68, 0.5);
 }
 
 .battlefield-hex-arena .hex-diff-label {
@@ -19735,12 +19758,65 @@ function getProceduralHexFeature(col, row, biome) {
     return null;
 }
 
+function isUnitBlinded(u) {
+    if (!u) return false;
+    return (u.se || []).some(function (st) {
+        if (!st) return false;
+        var idLower = String(st.id || '').toLowerCase();
+        var nLower = String(st.n || '').toLowerCase();
+        return idLower === 'blindness' || idLower === 'blind' || idLower === 'cegueira' ||
+               idLower === 'cego' || !!st.blind || nLower === 'cego' || nLower.indexOf('cegueira') !== -1;
+    });
+}
+
+function calcUnitVisionRange(u, weather, biome) {
+    if (!u) return 0;
+
+    // D&D 5e (PHB p. 290): Condição Cego (Blinded)
+    // "Uma criatura cega não pode ver e falha automaticamente em qualquer teste que exija visão."
+    if (isUnitBlinded(u)) {
+        return 0; // Cego: alcance de visão zero! Não enxerga nada ao redor.
+    }
+
+    // Condição de escuridão profunda / névoa mágica que obstrui visão
+    var isHeavilyObscured = (u.se || []).some(function (st) {
+        if (!st) return false;
+        var idLower = String(st.id || '').toLowerCase();
+        return idLower === 'heavily_obscured' || idLower === 'obscured' || idLower === 'fog_cloud';
+    });
+    if (isHeavilyObscured) {
+        return 1; // 1,5m apenas (toque imediato)
+    }
+
+    var curWeather = String(weather || 'clear').toLowerCase();
+    var curBiome = String(biome || 'forest').toLowerCase();
+
+    var baseR = 6; // Dia / Limpo (alcance tático padrão D&D 5e: 9m / 6 hexes)
+    if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') baseR = 2;
+    else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') baseR = 3;
+    else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') baseR = 4;
+    else if (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('masmorra') >= 0 || curBiome.indexOf('dungeon') >= 0) baseR = 2;
+    else baseR = 6;
+
+    // Bônus racial D&D 5e (Darkvision / Sentidos Aguçados)
+    var raceStr = String(u.race || u.r || '').toLowerCase();
+    if (raceStr.indexOf('elf') >= 0 || raceStr.indexOf('an') >= 0 || raceStr.indexOf('dwarf') >= 0 || raceStr.indexOf('tiefling') >= 0 || raceStr.indexOf('gnom') >= 0) {
+        baseR += 1;
+    }
+    var uName = String(u.n || '').toLowerCase();
+    if (uName.indexOf('lobo') >= 0 || uName.indexOf('wolf') >= 0 || uName.indexOf('goblin') >= 0 || uName.indexOf('orc') >= 0) {
+        baseR += 1;
+    }
+    return Math.max(0, Math.min(8, baseR));
+}
+
 function ensureProceduralBattlefield(s) {
     if (!s) return false;
     s.battlefield = s.battlefield || { cols: HEX_COLS_DEFAULT, rows: HEX_ROWS_DEFAULT };
     if (!s.battlefield.cols) s.battlefield.cols = HEX_COLS_DEFAULT;
     if (!s.battlefield.rows) s.battlefield.rows = HEX_ROWS_DEFAULT;
     if (!s.battlefield.difficult_terrain) s.battlefield.difficult_terrain = [];
+    if (!s.battlefield.obstacles) s.battlefield.obstacles = [];
 
     var minC = Infinity, maxC = -Infinity, minR = Infinity, maxR = -Infinity;
     (s.order || []).forEach(function (u) {
@@ -19753,11 +19829,22 @@ function ensureProceduralBattlefield(s) {
     });
     if (minC === Infinity) return false;
 
+    // A margem de segurança do tabuleiro DEVE comportar integralmente o raio de visão dos combatentes
+    // (D&D 5e: visão de até 6 a 8 hexes / 9m a 12m).
+    // Garante que o círculo de visão nunca encontre a borda física do mapa em nenhuma direção.
+    var requiredMargin = 7;
+    (s.order || []).forEach(function (u) {
+        if (u && (u.t === 'p' || u.t === 'a')) {
+            var vr = calcUnitVisionRange(u, s.weather, s.biome || s.bio);
+            if (vr + 1 > requiredMargin) requiredMargin = vr + 1;
+        }
+    });
+
     var expanded = false;
 
-    // Expansão para a esquerda se atingir a borda (minC <= 1)
-    if (minC <= 1) {
-        var shiftC = Math.max(1, 4 - minC);
+    // Expansão para a esquerda se a margem for menor que o alcance de visão
+    if (minC < requiredMargin) {
+        var shiftC = requiredMargin - minC;
         s.battlefield.cols += shiftC;
         maxC += shiftC;
         (s.order || []).forEach(function (u) {
@@ -19777,9 +19864,9 @@ function ensureProceduralBattlefield(s) {
         expanded = true;
     }
 
-    // Expansão para cima se atingir a borda (minR <= 0)
-    if (minR <= 0) {
-        var shiftR = 4;
+    // Expansão para cima se a margem for menor que o alcance de visão
+    if (minR < requiredMargin) {
+        var shiftR = requiredMargin - minR;
         s.battlefield.rows += shiftR;
         maxR += shiftR;
         (s.order || []).forEach(function (u) {
@@ -19799,15 +19886,15 @@ function ensureProceduralBattlefield(s) {
         expanded = true;
     }
 
-    // Expansão para a direita se aproximando da borda máxima
-    if (maxC + 3 >= s.battlefield.cols) {
-        s.battlefield.cols = maxC + 5;
+    // Expansão para a direita se aproximando da margem de visão
+    if (maxC + requiredMargin >= s.battlefield.cols) {
+        s.battlefield.cols = maxC + requiredMargin + 2;
         expanded = true;
     }
 
-    // Expansão para baixo se aproximando da borda máxima
-    if (maxR + 3 >= s.battlefield.rows) {
-        s.battlefield.rows = maxR + 5;
+    // Expansão para baixo se aproximando da margem de visão
+    if (maxR + requiredMargin >= s.battlefield.rows) {
+        s.battlefield.rows = maxR + requiredMargin + 2;
         expanded = true;
     }
 
@@ -20721,36 +20808,19 @@ function buildBattlefield(s) {
     var curBiome = getBattlefieldBiomeKey(s);
     var curWeather = String(s.weather || 'clear').toLowerCase();
 
-    function calcUnitVisionRange(u) {
-        var baseR = 5; // Limpo / Dia (alcance tático amplo)
-        if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') baseR = 2;
-        else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') baseR = 3;
-        else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') baseR = 4;
-        else if (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('masmorra') >= 0 || curBiome.indexOf('dungeon') >= 0) baseR = 2;
-        else baseR = 5;
-
-        // Bônus racial D&D 5e (Darkvision / Sentidos Aguçados)
-        var raceStr = String((u && (u.race || u.r)) || '').toLowerCase();
-        if (raceStr.indexOf('elf') >= 0 || raceStr.indexOf('an') >= 0 || raceStr.indexOf('dwarf') >= 0 || raceStr.indexOf('tiefling') >= 0 || raceStr.indexOf('gnom') >= 0) {
-            baseR += 1;
-        }
-        var uName = String((u && u.n) || '').toLowerCase();
-        if (uName.indexOf('lobo') >= 0 || uName.indexOf('wolf') >= 0 || uName.indexOf('goblin') >= 0 || uName.indexOf('orc') >= 0) {
-            baseR += 1;
-        }
-        return Math.max(1, Math.min(7, baseR));
-    }
-
     var friendlyUnits = (s.order || []).filter(function (u) {
         return u && u.alive && !u.isDead && (u.t === 'p' || u.t === 'a') && u.pos && u.pos.col != null && u.pos.row != null;
     });
 
+    var isPlayerBlinded = isUnitBlinded(playerUnit);
+    var playerVr = playerUnit ? calcUnitVisionRange(playerUnit, curWeather, curBiome) : 6;
+
     var maxPartyVr = 0;
     friendlyUnits.forEach(function (fu) {
-        var vr = calcUnitVisionRange(fu);
+        var vr = calcUnitVisionRange(fu, curWeather, curBiome);
         if (vr > maxPartyVr) maxPartyVr = vr;
     });
-    if (maxPartyVr === 0) maxPartyVr = playerUnit ? calcUnitVisionRange(playerUnit) : 5;
+    if (friendlyUnits.length === 0) maxPartyVr = playerVr;
     var partyVisionMeters = formatHexDistanceMeters(maxPartyVr);
 
     var visionConditionLabel = 'LUZ PLENA';
@@ -20758,7 +20828,9 @@ function buildBattlefield(s) {
     var pRace = String(playerUnit && (playerUnit.race || playerUnit.r) || '').toLowerCase();
     var hasDarkvision = (pRace.indexOf('elf') >= 0 || pRace.indexOf('an') >= 0 || pRace.indexOf('dwarf') >= 0 || pRace.indexOf('tiefling') >= 0 || pRace.indexOf('gnom') >= 0);
 
-    if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') {
+    if (isPlayerBlinded) {
+        visionConditionLabel = 'CEGO';
+    } else if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') {
         visionConditionLabel = 'NÉVOA DENSA';
     } else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') {
         visionConditionLabel = 'TEMPESTADE';
@@ -20770,6 +20842,15 @@ function buildBattlefield(s) {
         visionConditionLabel = 'LUZ PLENA';
     }
 
+    var visionBadgeCls = 'bf-vision-badge' + (isPlayerBlinded ? ' bf-vision-badge--blinded' : '');
+    var visionIcon = isPlayerBlinded ? '🚫' : '👁️';
+    var visionTitle = isPlayerBlinded
+        ? 'Regras D&D 5e (PHB p. 290): Condição Cego! Você não pode ver o campo de batalha e o terreno ao seu redor está imerso na escuridão total.'
+        : 'Regras D&D 5e (PHB p. 183): Campo de visão ativo da equipe (' + partyVisionMeters + ' / ' + maxPartyVr + ' hexes). Além deste raio, a penumbra e a névoa de guerra encobrem o terreno.';
+    var visionText = isPlayerBlinded
+        ? 'VISÃO: <strong>0m (0 HEXES)</strong>'
+        : 'VISÃO: <strong>' + partyVisionMeters + ' (' + maxPartyVr + ' HEXES)</strong>';
+
     var html = '<div class="bf-pan-outer">';
     html += '<div class="bf-zoom-controls" aria-label="Controles de zoom e câmera da mesa">';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomIn" title="Aproximar (+)" aria-label="Aproximar">+</button>';
@@ -20779,7 +20860,7 @@ function buildBattlefield(s) {
     html += '</div>';
     html += '<div class="bf-hud-badges">';
     html += '<div class="bf-scale-badge" title="Regras D&D 5e: 1 Hexágono = 1,5m (5 pés). Zoom tático de confronto!"><span class="bf-scale-icon">📐</span><span class="bf-scale-text">ESCALA D&D 5e: <strong>1 HEX = 1,5m (5 FT)</strong></span><span class="bf-scale-sub">ZOOM DE CONFRONTO</span></div>';
-    html += '<div class="bf-vision-badge" title="Regras D&D 5e (PHB p. 183): Campo de visão ativo da equipe (' + partyVisionMeters + ' / ' + maxPartyVr + ' hexes). Além deste raio, a penumbra e a névoa de guerra encobrem o terreno."><span class="bf-vision-icon">👁️</span><span class="bf-vision-text">VISÃO: <strong>' + partyVisionMeters + ' (' + maxPartyVr + ' HEXES)</strong></span><span class="bf-vision-sub">' + visionConditionLabel + '</span></div>';
+    html += '<div class="' + visionBadgeCls + '" title="' + visionTitle + '"><span class="bf-vision-icon">' + visionIcon + '</span><span class="bf-vision-text">' + visionText + '</span><span class="bf-vision-sub">' + visionConditionLabel + '</span></div>';
     html += '</div>';
 
     // AI Turn Floating Banner (Padrão Larian / Feedback Visual de Automação)
@@ -20923,7 +21004,15 @@ function buildBattlefield(s) {
     // === D&D 5e: FOG OF WAR & VISIBILIDADE TÁTICA (Influência de Clima e Bioma) ===
     var partyVisionMap = {};
     friendlyUnits.forEach(function (fu) {
-        var vr = calcUnitVisionRange(fu);
+        var vr = calcUnitVisionRange(fu, curWeather, curBiome);
+        if (vr <= 0) {
+            // Unidade cega (D&D 5e PHB p. 290): visão zero. Apenas a sua própria casa imediata é conhecida.
+            var selfK = fu.pos.col + ',' + fu.pos.row;
+            if (!partyVisionMap[selfK]) {
+                partyVisionMap[selfK] = { visible: true, dim: false, dist: 0, isEdge: false };
+            }
+            return;
+        }
         for (var c = 0; c < bCols; c++) {
             for (var r = 0; r < bRows; r++) {
                 var d = hexDistance(fu.pos.col, fu.pos.row, c, r);
@@ -20987,8 +21076,9 @@ function buildBattlefield(s) {
             var bPalList = TACTICAL_BIOME_PALETTES[curBiome] || TACTICAL_BIOME_PALETTES.forest;
             var tVar = bPalList[hexDetails.variant % bPalList.length];
             var polyStyle = 'fill:' + tVar.fill + '; stroke:' + tVar.stroke + ';';
+            var terrainName = isFogged ? (isPlayerBlinded ? 'Escuridão Total (Cego)' : 'Névoa de Guerra') : escHtml(tVar.name);
 
-            html += '<polygon points="' + pts + '" class="' + tileCls + '" data-col="' + col + '" data-row="' + row + '" style="' + polyStyle + '" data-terrain="' + escHtml(tVar.name) + '" title="' + escHtml(tVar.name) + '" />';
+            html += '<polygon points="' + pts + '" class="' + tileCls + '" data-col="' + col + '" data-row="' + row + '" style="' + polyStyle + '" data-terrain="' + terrainName + '" title="' + terrainName + '" />';
 
             // Detalhes procedurais microscópicos de terreno tático D&D 5e (pedras, musgo, trincas, folhas, raízes)
             if (!isFogged) {
@@ -21025,17 +21115,18 @@ function buildBattlefield(s) {
                 }
             }
 
-            // Se for hexágono alcançável, exibe o custo de movimento em badge tático de alta legibilidade
-            if (isReachable) {
+            // Se for hexágono alcançável e não estiver sob névoa de guerra, exibe o custo de deslocamento com prefixo tático
+            if (isReachable && !isFogged) {
                 var moveCostM = formatHexDistanceMeters(reachableMap[hexKey]);
+                var moveBadgeText = '⇥ ' + moveCostM;
                 var isDiff = !!dtTile;
-                var badgeW = moveCostM.length > 4 ? 42 : (moveCostM.length > 3 ? 36 : 28);
+                var badgeW = moveBadgeText.length > 5 ? 44 : (moveBadgeText.length > 4 ? 38 : 32);
                 var badgeH = 16;
                 var bx = Math.round(center.cx - badgeW / 2);
                 var by = center.cy + 9;
                 html += '<g class="hex-badge-group">' +
                     '<rect x="' + bx + '" y="' + by + '" width="' + badgeW + '" height="' + badgeH + '" rx="8" ry="8" class="hex-badge-bg' + (isDiff ? ' hex-badge-bg--diff' : '') + '" />' +
-                    '<text x="' + center.cx + '" y="' + (by + 8) + '" class="hex-badge-text' + (isDiff ? ' hex-badge-text--diff' : '') + '">' + moveCostM + '</text>' +
+                    '<text x="' + center.cx + '" y="' + (by + 8) + '" class="hex-badge-text' + (isDiff ? ' hex-badge-text--diff' : '') + '">' + moveBadgeText + '</text>' +
                     '</g>';
             }
         }
