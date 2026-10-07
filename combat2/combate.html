@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T02:20:42Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T03:04:01Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10212,37 +10212,15 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 /* Biomas de Terreno Medieval no Tabuleiro Tático (Adaptação ao Cenário de RPG) */
-.battlefield-hex-arena.biome-forest .hex-tile,
-body.biome-forest .battlefield-hex-arena .hex-tile {
-  fill: rgba(36, 44, 28, 0.76);
-  stroke: rgba(140, 155, 95, 0.26);
+.battlefield-hex-arena .hex-tile {
+  transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.25s ease;
+  stroke-linejoin: round;
+  stroke-width: 1.2px;
 }
-.battlefield-hex-arena.biome-crypt .hex-tile,
-.battlefield-hex-arena.biome-cave .hex-tile,
-body.biome-cave .battlefield-hex-arena .hex-tile,
-body.biome-masmorra .battlefield-hex-arena .hex-tile {
-  fill: rgba(38, 35, 32, 0.82);
-  stroke: rgba(155, 145, 130, 0.25);
-}
-.battlefield-hex-arena.biome-desert .hex-tile,
-body.biome-desert .battlefield-hex-arena .hex-tile {
-  fill: rgba(56, 44, 28, 0.78);
-  stroke: rgba(190, 145, 80, 0.28);
-}
-.battlefield-hex-arena.biome-mountain .hex-tile,
-body.biome-mountain .battlefield-hex-arena .hex-tile {
-  fill: rgba(44, 40, 36, 0.8);
-  stroke: rgba(160, 150, 135, 0.25);
-}
-.battlefield-hex-arena.biome-swamp .hex-tile,
-body.biome-swamp .battlefield-hex-arena .hex-tile {
-  fill: rgba(30, 38, 28, 0.82);
-  stroke: rgba(120, 140, 90, 0.24);
-}
-.battlefield-hex-arena.biome-plains .hex-tile,
-body.biome-plains .battlefield-hex-arena .hex-tile {
-  fill: rgba(48, 42, 28, 0.75);
-  stroke: rgba(175, 145, 80, 0.26);
+.battlefield-hex-arena .hex-terrain-detail {
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.25s ease;
 }
 
 /* Visibilidade e Fog of War nos Hexágonos */
@@ -10264,18 +10242,17 @@ body.biome-plains .battlefield-hex-arena .hex-tile {
 }
 
 .battlefield-hex-arena .hex-tile:hover {
-  fill: rgba(196, 149, 58, 0.18);
-  stroke: rgba(212, 175, 55, 0.65);
+  fill: rgba(196, 149, 58, 0.28) !important;
+  stroke: rgba(255, 215, 0, 0.85) !important;
 }
 
 .battlefield-hex-arena .hex-tile--enemy-zone {
-  fill: rgba(58, 30, 26, 0.55);
-  stroke: rgba(190, 85, 70, 0.3);
+  /* Divisão tática de território sutil sem ofuscar as variações ricas do terreno */
+  stroke-dasharray: 6 3;
 }
 
 .battlefield-hex-arena .hex-tile--ally-zone {
-  fill: rgba(26, 46, 36, 0.55);
-  stroke: rgba(80, 160, 120, 0.3);
+  stroke-dasharray: none;
 }
 
 /* Hexágonos de alcance tático D&D 5e — iluminação rúnica medieval e filigrana nobre (sem neon cyberpunk) */
@@ -20453,6 +20430,146 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     return html;
 }
 
+/* === PALETA TÁTICA E MICRO-VARIAÇÕES DE TERRENO D&D 5e (Escala de Confronto 1,5m / 5 pés) ===
+   Replica a fidelidade dos biomas do mapa de exploração com zoom de confronto detalhado
+   e variações substantivas procedurais determinísticas entre hexágonos adjacentes. */
+var TACTICAL_BIOME_PALETTES = {
+    forest: [
+        { fill: '#27341d', stroke: '#4b6131', name: 'Humus e terra úmida', detail: 'needles' },
+        { fill: '#334421', stroke: '#5c7637', name: 'Musgo denso aveludado', detail: 'moss' },
+        { fill: '#3d3822', stroke: '#685d33', name: 'Folhagem e terra escura', detail: 'leaf' },
+        { fill: '#2b381f', stroke: '#495d2f', name: 'Tufo de grama rasteira', detail: 'grass' },
+        { fill: '#35291b', stroke: '#59442b', name: 'Terra batida com raiz', detail: 'root' },
+        { fill: '#394925', stroke: '#69843c', name: 'Clareira iluminada', detail: 'pebbles' }
+    ],
+    plains: [
+        { fill: '#465624', stroke: '#6e8634', name: 'Gramado verde vivo', detail: 'grass' },
+        { fill: '#575426', stroke: '#868036', name: 'Capim dourado de estepe', detail: 'needles' },
+        { fill: '#55462a', stroke: '#826a3c', name: 'Trilha de terra batida', detail: 'root' },
+        { fill: '#3d4d21', stroke: '#617b30', name: 'Trevo e pasto rasteiro', detail: 'moss' },
+        { fill: '#4b5928', stroke: '#758b39', name: 'Campina aberta', detail: 'grass' },
+        { fill: '#594e2f', stroke: '#897943', name: 'Flores silvestres e feno', detail: 'flowers' }
+    ],
+    cave: [
+        { fill: '#201e1d', stroke: '#3a3632', name: 'Ardósia escura cinzelada', detail: 'crack' },
+        { fill: '#282522', stroke: '#464038', name: 'Rocha calcária bruta', detail: 'pebbles' },
+        { fill: '#23201e', stroke: '#3d3832', name: 'Cascalho e pedras soltas', detail: 'pebbles' },
+        { fill: '#1b2022', stroke: '#2e383c', name: 'Rocha úmida com limo escuro', detail: 'moss' },
+        { fill: '#262428', stroke: '#403c44', name: 'Veio mineral subterrâneo', detail: 'crack' },
+        { fill: '#2a2724', stroke: '#48423a', name: 'Piso de caverna gasto', detail: 'crack' }
+    ],
+    crypt: [
+        { fill: '#252220', stroke: '#443c34', name: 'Laje de pedra talhada', detail: 'flagstone' },
+        { fill: '#2c2724', stroke: '#4a4036', name: 'Ladrilho com argamassa antiga', detail: 'flagstone' },
+        { fill: '#211f22', stroke: '#3b363e', name: 'Laje sepulcral de basalto', detail: 'crack' },
+        { fill: '#282420', stroke: '#463c34', name: 'Pavimento com fratura milenar', detail: 'crack' },
+        { fill: '#2e2a26', stroke: '#4e443c', name: 'Pedra com poeira fúnebre', detail: 'pebbles' },
+        { fill: '#1d1b1c', stroke: '#343032', name: 'Alvenaria escura esculpida', detail: 'flagstone' }
+    ],
+    desert: [
+        { fill: '#5c4620', stroke: '#927032', name: 'Areia dourada de duna', detail: 'sand' },
+        { fill: '#664c22', stroke: '#a07834', name: 'Ondulação esculpida pelo vento', detail: 'sand' },
+        { fill: '#523c1c', stroke: '#825e2a', name: 'Argila ressecada pelo sol', detail: 'crack' },
+        { fill: '#5e4824', stroke: '#967436', name: 'Cascalho de arenito', detail: 'pebbles' },
+        { fill: '#4a371a', stroke: '#765626', name: 'Solo árido crestado', detail: 'crack' },
+        { fill: '#685026', stroke: '#a6803a', name: 'Sedimento ocre claro', detail: 'sand' }
+    ],
+    mountain: [
+        { fill: '#343230', stroke: '#56524e', name: 'Granito de altitude', detail: 'pebbles' },
+        { fill: '#3c3936', stroke: '#605a54', name: 'Cascalho pontiagudo de ardósia', detail: 'crack' },
+        { fill: '#302e2c', stroke: '#4e4a46', name: 'Rocha matriz escarpada', detail: 'crack' },
+        { fill: '#2c3228', stroke: '#48523e', name: 'Fissura com líquen alpino', detail: 'moss' },
+        { fill: '#383636', stroke: '#5c5858', name: 'Saliente de penhasco cinzento', detail: 'pebbles' },
+        { fill: '#2a2827', stroke: '#44403e', name: 'Pedra fraturada pelo gelo', detail: 'crack' }
+    ],
+    swamp: [
+        { fill: '#202618', stroke: '#364226', name: 'Turfeira de lodo escuro', detail: 'ripple' },
+        { fill: '#1b231b', stroke: '#2e3c2e', name: 'Poça estagnada com limo', detail: 'ripple' },
+        { fill: '#272016', stroke: '#3e3220', name: 'Húmus pantanoso denso', detail: 'root' },
+        { fill: '#232718', stroke: '#384224', name: 'Musgo ensopado e lama', detail: 'moss' },
+        { fill: '#1d2115', stroke: '#2e361e', name: 'Raízes de junco submersas', detail: 'root' },
+        { fill: '#281e14', stroke: '#402e1c', name: 'Lodo fétido de margem', detail: 'ripple' }
+    ],
+    snow: [
+        { fill: '#323a40', stroke: '#52626e', name: 'Crosta de neve compacta', detail: 'needles' },
+        { fill: '#2c343a', stroke: '#485662', name: 'Solo congelado com geada', detail: 'pebbles' },
+        { fill: '#3a444c', stroke: '#5e6e7c', name: 'Acúmulo de neve fresca', detail: 'sand' },
+        { fill: '#2a3640', stroke: '#425868', name: 'Gelo azulado resistente', detail: 'crack' },
+        { fill: '#262a2e', stroke: '#3e464c', name: 'Terra gélida sob o degelo', detail: 'pebbles' },
+        { fill: '#364048', stroke: '#566674', name: 'Neve virgem com cristais', detail: 'needles' }
+    ],
+    volcanic: [
+        { fill: '#2a1814', stroke: '#4c2620', name: 'Basalto vulcânico rugoso', detail: 'crack' },
+        { fill: '#321a16', stroke: '#542820', name: 'Escória negra resfriada', detail: 'pebbles' },
+        { fill: '#201210', stroke: '#361c18', name: 'Obsidiana espelhada', detail: 'crack' },
+        { fill: '#36201a', stroke: '#5c3026', name: 'Cinzas e tufo vulcânico', detail: 'pebbles' },
+        { fill: '#3a1c16', stroke: '#62261e', name: 'Crosta térmica tépida', detail: 'crack' },
+        { fill: '#2c1612', stroke: '#461e18', name: 'Brecha de lava porosa', detail: 'pebbles' }
+    ]
+};
+
+function getBattlefieldBiomeKey(s) {
+    var raw = String((s && (s.bio || s.biome)) || 'forest').toLowerCase();
+    if (raw.indexOf('cave') >= 0 || raw.indexOf('caverna') >= 0 || raw.indexOf('dungeon') >= 0) return 'cave';
+    if (raw.indexOf('crypt') >= 0 || raw.indexOf('cripta') >= 0 || raw.indexOf('tumba') >= 0 || raw.indexOf('graveyard') >= 0 || raw.indexOf('cemiterio') >= 0 || raw.indexOf('masmorra') >= 0) return 'crypt';
+    if (raw.indexOf('desert') >= 0 || raw.indexOf('deserto') >= 0) return 'desert';
+    if (raw.indexOf('mountain') >= 0 || raw.indexOf('montanha') >= 0) return 'mountain';
+    if (raw.indexOf('swamp') >= 0 || raw.indexOf('pantano') >= 0) return 'swamp';
+    if (raw.indexOf('snow') >= 0 || raw.indexOf('neve') >= 0 || raw.indexOf('gelo') >= 0) return 'snow';
+    if (raw.indexOf('volcan') >= 0 || raw.indexOf('vulcan') >= 0 || raw.indexOf('vulcao') >= 0) return 'volcanic';
+    if (raw.indexOf('plain') >= 0 || raw.indexOf('planicie') >= 0 || raw.indexOf('campo') >= 0) return 'plains';
+    return 'forest';
+}
+
+function getHexBiomeDetails(col, row, biome) {
+    var h = ((col * 374761393) ^ (row * 668265263)) >>> 0;
+    h = (h ^ (h >>> 13)) * 1274126177;
+    h = (h ^ (h >>> 16)) >>> 0;
+    var variantIdx = h % 6;
+    var subSeed = (h >>> 4) % 8;
+    return { variant: variantIdx, sub: subSeed, raw: h };
+}
+
+function getHexMicroDetailSvg(cx, cy, detailType, subSeed, isDim) {
+    var opacity = isDim ? '0.12' : '0.34';
+    var svg = '';
+    var offX = (subSeed % 3) * 2 - 2;
+    var offY = ((subSeed >> 2) % 3) * 2 - 2;
+    var x = cx + offX;
+    var y = cy + offY;
+
+    if (detailType === 'flagstone') {
+        svg += '<line x1="' + (x - 20) + '" y1="' + (y - 7) + '" x2="' + (x + 20) + '" y2="' + (y + 6) + '" stroke="rgba(10,8,6,0.48)" stroke-width="1.3" stroke-linecap="round"/>';
+        if (subSeed % 2 === 0) {
+            svg += '<line x1="' + (x - 2) + '" y1="' + (y - 2) + '" x2="' + (x + 3) + '" y2="' + (y + 18) + '" stroke="rgba(10,8,6,0.38)" stroke-width="1.1" stroke-linecap="round"/>';
+        }
+    } else if (detailType === 'crack') {
+        svg += '<path d="M' + (x - 14) + ',' + (y - 9) + ' L' + (x - 4) + ',' + (y - 2) + ' L' + (x + 3) + ',' + (y - 6) + ' L' + (x + 13) + ',' + (y + 6) + '" stroke="rgba(14,11,8,0.42)" fill="none" stroke-width="1.1" stroke-linejoin="round"/>';
+    } else if (detailType === 'grass') {
+        svg += '<path d="M' + (x - 6) + ',' + (y + 7) + ' Q' + (x - 8) + ',' + (y - 1) + ' ' + (x - 12) + ',' + (y - 8) + ' M' + (x - 4) + ',' + (y + 7) + ' Q' + (x - 2) + ',' + (y - 3) + ' ' + (x) + ',' + (y - 10) + ' M' + (x - 2) + ',' + (y + 7) + ' Q' + (x + 4) + ',' + (y) + ' ' + (x + 8) + ',' + (y - 7) + '" stroke="rgba(145,182,75,0.4)" fill="none" stroke-width="1.2" stroke-linecap="round"/>';
+    } else if (detailType === 'needles') {
+        svg += '<line x1="' + (x - 9) + '" y1="' + (y - 4) + '" x2="' + (x - 3) + '" y2="' + (y - 10) + '" stroke="rgba(125,155,75,0.35)" stroke-width="1.2" stroke-linecap="round"/>';
+        svg += '<line x1="' + (x + 3) + '" y1="' + (y + 5) + '" x2="' + (x + 11) + '" y2="' + (y + 2) + '" stroke="rgba(110,135,65,0.3)" stroke-width="1.1" stroke-linecap="round"/>';
+    } else if (detailType === 'root') {
+        svg += '<path d="M' + (x - 22) + ',' + (y + 11) + ' Q' + (x - 7) + ',' + (y + 4) + ' ' + (x + 5) + ',' + (y + 8) + ' T' + (x + 22) + ',' + (y - 5) + '" stroke="rgba(75,52,28,0.45)" fill="none" stroke-width="1.7" stroke-linecap="round"/>';
+    } else if (detailType === 'moss') {
+        svg += '<ellipse cx="' + (x - 4) + '" cy="' + (y + 3) + '" rx="8" ry="4.5" fill="rgba(85,125,50,0.28)"/>';
+    } else if (detailType === 'leaf') {
+        svg += '<path d="M' + (x - 8) + ',' + (y - 4) + ' Q' + (x - 3) + ',' + (y - 8) + ' ' + (x + 4) + ',' + (y - 5) + ' Q' + (x - 1) + ',' + (y) + ' ' + (x - 8) + ',' + (y - 4) + ' Z" fill="rgba(150,115,55,0.32)"/>';
+    } else if (detailType === 'flowers') {
+        svg += '<circle cx="' + (x - 7) + '" cy="' + (y - 5) + '" r="1.6" fill="rgba(235,200,110,0.5)"/><circle cx="' + (x + 8) + '" cy="' + (y + 6) + '" r="1.4" fill="rgba(240,240,225,0.45)"/>';
+    } else if (detailType === 'sand') {
+        svg += '<path d="M' + (x - 16) + ',' + (y - 5) + ' Q' + (x) + ',' + (y - 9) + ' ' + (x + 16) + ',' + (y - 4) + ' M' + (x - 14) + ',' + (y + 6) + ' Q' + (x + 2) + ',' + (y + 2) + ' ' + (x + 14) + ',' + (y + 7) + '" stroke="rgba(180,140,70,0.32)" fill="none" stroke-width="1.1" stroke-linecap="round"/>';
+    } else if (detailType === 'pebbles') {
+        svg += '<ellipse cx="' + (x + 6) + '" cy="' + (y - 4) + '" rx="3.5" ry="2.2" fill="rgba(160,150,140,0.32)" stroke="rgba(40,36,32,0.35)" stroke-width="0.8"/>';
+        svg += '<ellipse cx="' + (x - 7) + '" cy="' + (y + 5) + '" rx="2.5" ry="1.6" fill="rgba(140,130,120,0.28)"/>';
+    } else if (detailType === 'ripple') {
+        svg += '<ellipse cx="' + (x) + '" cy="' + (y + 2) + '" rx="13" ry="6.5" stroke="rgba(70,95,65,0.32)" fill="none" stroke-width="1" stroke-dasharray="7 4"/>';
+    }
+    if (!svg) return '';
+    return '<g class="hex-terrain-detail" pointer-events="none" opacity="' + opacity + '">' + svg + '</g>';
+}
+
 function buildBattlefield(s) {
     if (!s) return '';
     s.battlefield = s.battlefield || { cols: HEX_COLS_DEFAULT, rows: HEX_ROWS_DEFAULT };
@@ -20652,15 +20769,7 @@ function buildBattlefield(s) {
 
     html += '<div class="bf-pan-stage" data-bf-pan-stage style="width:' + stageW + 'px; height:' + stageH + 'px; position:relative; transform-origin: 0 0; transform: translate3d(' + _initPanX + 'px, ' + _initPanY + 'px, 0) scale(' + _initZoom + ');">';
 
-    var rawBio = String(s.bio || s.biome || 'forest').toLowerCase();
-    var curBiome = 'forest';
-    if (rawBio.indexOf('cave') >= 0 || rawBio.indexOf('caverna') >= 0 || rawBio.indexOf('masmorra') >= 0 || rawBio.indexOf('dungeon') >= 0) curBiome = 'cave';
-    else if (rawBio.indexOf('crypt') >= 0 || rawBio.indexOf('cripta') >= 0 || rawBio.indexOf('tumba') >= 0) curBiome = 'crypt';
-    else if (rawBio.indexOf('desert') >= 0 || rawBio.indexOf('deserto') >= 0) curBiome = 'desert';
-    else if (rawBio.indexOf('mountain') >= 0 || rawBio.indexOf('montanha') >= 0) curBiome = 'mountain';
-    else if (rawBio.indexOf('swamp') >= 0 || rawBio.indexOf('pantano') >= 0) curBiome = 'swamp';
-    else if (rawBio.indexOf('plain') >= 0 || rawBio.indexOf('planicie') >= 0 || rawBio.indexOf('campo') >= 0) curBiome = 'plains';
-    else curBiome = 'forest';
+    var curBiome = getBattlefieldBiomeKey(s);
 
     var bfExtra = ' biome-' + curBiome;
     if (_selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
@@ -20773,8 +20882,18 @@ function buildBattlefield(s) {
             }
             if (row < Math.floor(bRows / 2)) tileCls += ' hex-tile--enemy-zone';
             else tileCls += ' hex-tile--ally-zone';
+            var hexDetails = getHexBiomeDetails(col, row, curBiome);
+            var bPalList = TACTICAL_BIOME_PALETTES[curBiome] || TACTICAL_BIOME_PALETTES.forest;
+            var tVar = bPalList[hexDetails.variant % bPalList.length];
+            var polyStyle = 'fill:' + tVar.fill + '; stroke:' + tVar.stroke + ';';
 
-            html += '<polygon points="' + pts + '" class="' + tileCls + '" data-col="' + col + '" data-row="' + row + '" />';
+            html += '<polygon points="' + pts + '" class="' + tileCls + '" data-col="' + col + '" data-row="' + row + '" style="' + polyStyle + '" data-terrain="' + escHtml(tVar.name) + '" title="' + escHtml(tVar.name) + '" />';
+
+            // Detalhes procedurais microscópicos de terreno tático D&D 5e (pedras, musgo, trincas, folhas, raízes)
+            if (!isFogged) {
+                var microSvg = getHexMicroDetailSvg(center.cx, center.cy, tVar.detail, hexDetails.sub, isDim);
+                if (microSvg) html += microSvg;
+            }
 
             // Subtle coordinate marker (oculto sob névoa)
             if (!isFogged) {
@@ -23381,6 +23500,9 @@ function showMagicMissileConfirmPopup(picks) {
         card.appendChild(list);
         card.appendChild(btns);
         ov.appendChild(card);
+        ov.addEventListener('click', function (e) {
+            if (e.target === ov) done(false);
+        });
         mountInGameFrame(ov); // dentro do frame #app (regra: overlays respeitam limite do jogo)
     });
 }
@@ -24306,6 +24428,8 @@ function render(s) {
             var cancelLbl;
             if (cancelHeal) cancelLbl = '✕ Cancelar cura';
             else if (cancelAllyBuff) cancelLbl = '✕ Cancelar ' + _pendingSkill.n;
+            else if (_pendingSkill && _pendingSkill.magicMissiles) cancelLbl = '✕ Cancelar Mísseis Mágicos';
+            else if (_pendingSkill) cancelLbl = '✕ Cancelar ' + (_pendingSkill.n || 'Habilidade');
             else cancelLbl = '✕ Cancelar Ataque';
             html += '<div class="action-bar"><div class="action-btns-row">';
             html += '<button class="action-btn" data-act="cancel-target">' + cancelLbl + '</button>';
@@ -24532,8 +24656,11 @@ function bindActions() {
                                     _mmTargets = null;
                                     confirmAndAttack({ __mmTargets: picks });
                                 } else {
-                                    // Cancelar: esvazia os círculos e permite nova seleção.
-                                    _mmTargets = [];
+                                    // Cancelar: descarta a seleção e devolve o botão Agir para o jogador
+                                    _mmTargets = null;
+                                    _pendingSkill = null;
+                                    _selectingTarget = false;
+                                    _actionTaken = false;
                                     render(currentState);
                                 }
                             })();
@@ -27814,6 +27941,7 @@ async function useSkill(skill, opts) {
                         _mmTargets = null;
                         _pendingSkill = null;
                         _selectingTarget = false;
+                        _actionTaken = false;
                         render(currentState);
                     }
                 })();
@@ -28691,8 +28819,16 @@ function showTargetConfirm(tgtIdx) {
     setHTML(card, html);
     ov.appendChild(card);
     mountInGameFrame(ov);
-    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-    card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { _pendingSkill = null; ov.remove(); });
+    function _cancelTargetConfirm() {
+        _pendingSkill = null;
+        _pendingHealItem = null;
+        _selectingTarget = false;
+        _actionTaken = false;
+        ov.remove();
+        render(currentState);
+    }
+    ov.addEventListener('click', function (e) { if (e.target === ov) _cancelTargetConfirm(); });
+    card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { _cancelTargetConfirm(); });
     card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () {
         if (!inReach) {
             if (typeof showFloatingToast === 'function') {
