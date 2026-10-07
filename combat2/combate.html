@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T01:39:09Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T02:20:42Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2153,6 +2153,12 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .cell.occupied.player.player-turn-active { position: relative; }
 .cell.occupied.player.player-turn-active::before { content: ''; position: absolute; top: -28px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 16px solid var(--v-gold, #c4953a); filter: drop-shadow(0 0 8px rgba(196,149,58,.9)) drop-shadow(0 0 16px rgba(196,149,58,.5)); z-index: 20; pointer-events: none; }
 .cell.occupied.player.player-turn-active::after { content: 'SEU TURNO'; position: absolute; top: -52px; left: 50%; transform: translateX(-50%); font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: var(--v-font-label, 12px); letter-spacing: 2.5px; color: var(--v-gold, #c4953a); text-shadow: 0 0 10px rgba(196,149,58,.9), 0 0 20px rgba(196,149,58,.5), 0 1px 2px rgba(0,0,0,.9); white-space: nowrap; z-index: 20; pointer-events: none; padding: var(--v-space-xs, 2px) var(--v-space-md, 8px); background: rgba(15,12,8,.85); border: 1px solid rgba(196,149,58,.6); border-radius: var(--v-radius-xs, 4px); box-shadow: 0 2px 8px rgba(0,0,0,.6); }
+/* No grid hexagonal, desativa os pseudos flutuantes de 'top: -52px' e 'top: -28px' que invadem o hexágono vizinho */
+.battlefield-hex-arena .cell.hex-token.player-turn-active::before,
+.battlefield-hex-arena .cell.hex-token.player-turn-active::after {
+  display: none !important;
+  content: none !important;
+}
 
 /* Barras de recurso (MP / Energia / Vigor / Furia) */
 /* HP/recursos — transição suave no width (AAA-style smooth depletion) */
@@ -10199,10 +10205,44 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .hex-tile {
-  fill: rgba(56, 45, 34, 0.68);
-  stroke: rgba(212, 175, 55, 0.35);
-  stroke-width: 1.5;
+  fill: rgba(45, 36, 26, 0.72);
+  stroke: rgba(180, 140, 70, 0.28);
+  stroke-width: 1.2;
   transition: fill 0.18s ease, stroke 0.18s ease, opacity 0.25s ease;
+}
+
+/* Biomas de Terreno Medieval no Tabuleiro Tático (Adaptação ao Cenário de RPG) */
+.battlefield-hex-arena.biome-forest .hex-tile,
+body.biome-forest .battlefield-hex-arena .hex-tile {
+  fill: rgba(36, 44, 28, 0.76);
+  stroke: rgba(140, 155, 95, 0.26);
+}
+.battlefield-hex-arena.biome-crypt .hex-tile,
+.battlefield-hex-arena.biome-cave .hex-tile,
+body.biome-cave .battlefield-hex-arena .hex-tile,
+body.biome-masmorra .battlefield-hex-arena .hex-tile {
+  fill: rgba(38, 35, 32, 0.82);
+  stroke: rgba(155, 145, 130, 0.25);
+}
+.battlefield-hex-arena.biome-desert .hex-tile,
+body.biome-desert .battlefield-hex-arena .hex-tile {
+  fill: rgba(56, 44, 28, 0.78);
+  stroke: rgba(190, 145, 80, 0.28);
+}
+.battlefield-hex-arena.biome-mountain .hex-tile,
+body.biome-mountain .battlefield-hex-arena .hex-tile {
+  fill: rgba(44, 40, 36, 0.8);
+  stroke: rgba(160, 150, 135, 0.25);
+}
+.battlefield-hex-arena.biome-swamp .hex-tile,
+body.biome-swamp .battlefield-hex-arena .hex-tile {
+  fill: rgba(30, 38, 28, 0.82);
+  stroke: rgba(120, 140, 90, 0.24);
+}
+.battlefield-hex-arena.biome-plains .hex-tile,
+body.biome-plains .battlefield-hex-arena .hex-tile {
+  fill: rgba(48, 42, 28, 0.75);
+  stroke: rgba(175, 145, 80, 0.26);
 }
 
 /* Visibilidade e Fog of War nos Hexágonos */
@@ -10224,37 +10264,41 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .hex-tile:hover {
-  fill: rgba(212, 175, 55, 0.22);
-  stroke: rgba(212, 175, 55, 0.75);
+  fill: rgba(196, 149, 58, 0.18);
+  stroke: rgba(212, 175, 55, 0.65);
 }
 
 .battlefield-hex-arena .hex-tile--enemy-zone {
-  fill: rgba(65, 34, 30, 0.58);
-  stroke: rgba(210, 95, 80, 0.35);
+  fill: rgba(58, 30, 26, 0.55);
+  stroke: rgba(190, 85, 70, 0.3);
 }
 
 .battlefield-hex-arena .hex-tile--ally-zone {
-  fill: rgba(30, 52, 42, 0.58);
-  stroke: rgba(90, 180, 135, 0.35);
+  fill: rgba(26, 46, 36, 0.55);
+  stroke: rgba(80, 160, 120, 0.3);
 }
 
+/* Hexágonos de alcance tático D&D 5e — iluminação rúnica medieval e filigrana nobre (sem neon cyberpunk) */
 .battlefield-hex-arena .hex-tile--reachable {
-  fill: rgba(38, 120, 85, 0.38) !important;
-  stroke: #52c496 !important;
-  stroke-width: 2.2 !important;
+  fill: rgba(196, 149, 58, 0.22) !important;
+  stroke: rgba(212, 175, 55, 0.75) !important;
+  stroke-width: 1.8 !important;
+  stroke-dasharray: 5 3;
   cursor: pointer !important;
-  filter: drop-shadow(0 0 6px rgba(82, 196, 150, 0.45));
+  filter: drop-shadow(0 0 5px rgba(196, 149, 58, 0.35));
 }
 
 .battlefield-hex-arena .hex-tile--reachable:hover {
-  fill: rgba(48, 160, 115, 0.6) !important;
-  stroke: #86efac !important;
+  fill: rgba(220, 175, 75, 0.42) !important;
+  stroke: #ffd700 !important;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.75));
 }
 
 .battlefield-hex-arena .hex-tile--in-reach {
-  fill: rgba(180, 70, 40, 0.28) !important;
-  stroke: rgba(240, 100, 70, 0.75) !important;
-  stroke-width: 2 !important;
+  fill: rgba(180, 70, 40, 0.25) !important;
+  stroke: rgba(220, 95, 65, 0.75) !important;
+  stroke-width: 1.8 !important;
 }
 
 .battlefield-hex-arena .hex-tile--occupied-player {
@@ -10326,50 +10370,82 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .hex-badge-bg {
-  fill: rgba(14, 22, 12, 0.94);
-  stroke: rgba(132, 204, 22, 0.88);
-  stroke-width: 1.2px;
+  fill: rgba(20, 15, 10, 0.88);
+  stroke: rgba(196, 149, 58, 0.65);
+  stroke-width: 1px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.85));
 }
 
 .battlefield-hex-arena .hex-badge-bg--diff {
-  fill: rgba(28, 18, 8, 0.94);
-  stroke: rgba(245, 158, 11, 0.9);
-  stroke-width: 1.2px;
+  fill: rgba(28, 18, 8, 0.92);
+  stroke: rgba(217, 119, 6, 0.85);
+  stroke-width: 1.1px;
 }
 
 .battlefield-hex-arena .hex-badge-text {
-  font-family: var(--v-font-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
-  font-size: 10px;
-  font-weight: 800;
-  fill: #f7fee7;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  fill: #f6e6bf;
   text-anchor: middle;
   dominant-baseline: central;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
 }
 
 .battlefield-hex-arena .hex-badge-text--diff {
-  fill: #fef3c7;
+  fill: #fed7aa;
 }
 
 .battlefield-hex-arena .hex-move-cost {
-  font-family: var(--v-font-ui, sans-serif);
-  font-size: 10px;
-  font-weight: 800;
-  fill: #f7fee7;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  fill: #f6e6bf;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
 }
 
 .battlefield-hex-arena .hex-tile--difficult {
-  fill: rgba(75, 45, 20, 0.58) !important;
-  stroke: rgba(210, 130, 45, 0.5) !important;
+  fill: rgba(68, 44, 25, 0.65) !important;
+  stroke: rgba(190, 120, 50, 0.5) !important;
   stroke-dasharray: 4 2;
 }
 
 .battlefield-hex-arena .hex-tile--difficult.hex-tile--reachable {
-  fill: rgba(85, 105, 40, 0.52) !important;
-  stroke: #a3e635 !important;
+  fill: rgba(160, 110, 45, 0.38) !important;
+  stroke: rgba(245, 158, 11, 0.85) !important;
+}
+
+/* Selo / Badge de Escala Tática D&D 5e */
+.bf-scale-badge {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: rgba(18, 14, 10, 0.88);
+  border: 1px solid rgba(196, 149, 58, 0.6);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  color: #ebd6a7;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.bf-scale-badge .bf-scale-icon { font-size: 11px; }
+.bf-scale-badge strong { color: #f59e0b; font-weight: 700; }
+.bf-scale-badge .bf-scale-sub {
+  font-size: 7.5px;
+  color: rgba(235, 214, 167, 0.65);
+  letter-spacing: 0.8px;
+  border-left: 1px solid rgba(196, 149, 58, 0.4);
+  padding-left: 6px;
+  margin-left: 2px;
 }
 
 .battlefield-hex-arena .hex-diff-label {
@@ -10511,16 +10587,35 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   background: none !important;
   cursor: pointer;
   pointer-events: auto;
-  z-index: 10;
+  z-index: 15;
   transform-origin: center center;
   transition: transform 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28), filter 0.2s ease;
   box-shadow: none !important;
   overflow: visible !important;
 }
 
-.battlefield-hex-arena .cell.hex-token:hover {
-  transform: scale(1.15);
+/* Hierarquia visual de z-index (Padrão AAA D&D 5e: unidade ativa no topo absoluto) */
+.battlefield-hex-arena .cell.hex-token.enemy {
+  z-index: 15;
+}
+.battlefield-hex-arena .cell.hex-token.ally {
+  z-index: 25;
+}
+.battlefield-hex-arena .cell.hex-token.player {
   z-index: 35;
+}
+.battlefield-hex-arena .cell.hex-token.token--active,
+.battlefield-hex-arena .cell.hex-token.player-turn-active,
+.battlefield-hex-arena .cell.hex-token.ai-turn-active {
+  z-index: 50 !important;
+}
+.battlefield-hex-arena .cell.hex-token.token--inspected {
+  z-index: 55 !important;
+  filter: drop-shadow(0 0 14px rgba(196, 149, 58, 0.95)) !important;
+}
+.battlefield-hex-arena .cell.hex-token:hover {
+  transform: scale(1.12);
+  z-index: 60 !important;
 }
 
 .battlefield-hex-arena .cell.hex-token.selectable {
@@ -10773,16 +10868,16 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .token-hp-badge {
   position: absolute;
-  bottom: -9px;
+  bottom: -4px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(14, 11, 8, 0.96);
   border: 1.5px solid #6b5330;
   border-radius: 8px;
-  padding: 2px 7px;
+  padding: 1.5px 6px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   z-index: 24;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
   white-space: nowrap;
@@ -10887,18 +10982,21 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .token-nameplate {
   position: absolute;
-  bottom: -24px;
+  bottom: -15px;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 700;
   color: #f0deb4;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.9);
   white-space: nowrap;
   pointer-events: none;
   z-index: 22;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hex-turn-hud {
@@ -19699,7 +19797,7 @@ function ensureProceduralBattlefield(s) {
 
 async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
     if (!tokenEl || !path || path.length <= 1) return;
-    var stepMs = stepDurationMs || 140;
+    var stepMs = stepDurationMs || 380;
     tokenEl.style.zIndex = '60';
 
     for (var p = 1; p < path.length; p++) {
@@ -19708,9 +19806,11 @@ async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
         var targetLeft = (stepCenter.cx - Math.round(HEX_W / 2)) + 'px';
         var targetTop = (stepCenter.cy - Math.round(HEX_H / 2)) + 'px';
 
-        // Câmera acompanha o combatente passo a passo em tempo real (Ordem do Usuário 2026-10)
+        // Câmera acompanha o combatente durante a movimentação passo a passo (Ordem do Usuário 2026-10)
         if (typeof window.bfCameraFocusCoord === 'function') {
-            try { window.bfCameraFocusCoord(stepCoord.col, stepCoord.row, null, Math.round(stepMs * 0.9)); } catch (_) {}
+            try {
+                window.bfCameraFocusCoord(stepCoord.col, stepCoord.row, null, Math.round(stepMs * 0.95));
+            } catch (_) {}
         }
 
         // Som de passo / pulo
@@ -20002,7 +20102,7 @@ async function handlePlayerMoveTo(tCol, tRow) {
     if (validPath.length <= 1) return;
 
     var tokenEl = document.querySelector('[data-unit-id="player"]');
-    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 140;
+    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 380;
 
     var actualReachedSteps = 0;
     var actualSpentCost = 0;
@@ -20195,7 +20295,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     else if (fogState === 'dim') classes += ' token--dim-fog';
 
     if (isActive) {
-        classes += ' active-turn';
+        classes += ' active-turn token--active';
         if (isPlayer && s.ph === 'active') classes += ' player-turn-active';
         else if (!isPlayer && s.ph === 'active') classes += ' ai-turn-active';
     }
@@ -20264,7 +20364,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     var hpCls = (typeof vBarHpClass === 'function') ? vBarHpClass(hpPct) : (hpPct > 50 ? 'hp-high' : (hpPct > 25 ? 'hp-mid' : 'hp-low'));
     var fillCls = 'fill-' + hpCls;
 
-    // Distance to player & D&D 5e Range Feedback
+    // Distance to player & D&D 5e Range Feedback (Exibido estritamente durante seleção de alvos; Padrão AAA de Decluttering de Mesa)
     var distBadge = '';
     if (pUnit && pUnit.pos && u.pos && uid !== 'player') {
         var dist = hexDistance(pUnit.pos.col, pUnit.pos.row, u.pos.col, u.pos.row);
@@ -20288,8 +20388,6 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
             } else {
                 distBadge = '<span class="token-dist-chip" title="Distância até você">' + distM + ' · ' + dist + 'h</span>';
             }
-        } else {
-            distBadge = '<span class="token-dist-chip" title="Distância até você">' + distM + ' · ' + dist + 'h</span>';
         }
     }
 
@@ -20443,6 +20541,7 @@ function buildBattlefield(s) {
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="focusPlayer" title="Centralizar no seu Personagem (🎯)" aria-label="Focar Personagem">🎯</button>';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="fit" title="Visão Geral do Cenário (Ajustar)" aria-label="Visão Geral">⛶</button>';
     html += '</div>';
+    html += '<div class="bf-scale-badge" title="Regras D&D 5e: 1 Hexágono = 1,5m (5 pés). Zoom tático de confronto!"><span class="bf-scale-icon">📐</span><span class="bf-scale-text">ESCALA D&D 5e: <strong>1 HEX = 1,5m (5 FT)</strong></span><span class="bf-scale-sub">ZOOM DE CONFRONTO</span></div>';
 
     // AI Turn Floating Banner (Padrão Larian / Feedback Visual de Automação)
     if (!isPlayerActiveTurn && active && active.alive && !active.isDead) {
@@ -20553,18 +20652,32 @@ function buildBattlefield(s) {
 
     html += '<div class="bf-pan-stage" data-bf-pan-stage style="width:' + stageW + 'px; height:' + stageH + 'px; position:relative; transform-origin: 0 0; transform: translate3d(' + _initPanX + 'px, ' + _initPanY + 'px, 0) scale(' + _initZoom + ');">';
 
-    var bfExtra = '';
+    var rawBio = String(s.bio || s.biome || 'forest').toLowerCase();
+    var curBiome = 'forest';
+    if (rawBio.indexOf('cave') >= 0 || rawBio.indexOf('caverna') >= 0 || rawBio.indexOf('masmorra') >= 0 || rawBio.indexOf('dungeon') >= 0) curBiome = 'cave';
+    else if (rawBio.indexOf('crypt') >= 0 || rawBio.indexOf('cripta') >= 0 || rawBio.indexOf('tumba') >= 0) curBiome = 'crypt';
+    else if (rawBio.indexOf('desert') >= 0 || rawBio.indexOf('deserto') >= 0) curBiome = 'desert';
+    else if (rawBio.indexOf('mountain') >= 0 || rawBio.indexOf('montanha') >= 0) curBiome = 'mountain';
+    else if (rawBio.indexOf('swamp') >= 0 || rawBio.indexOf('pantano') >= 0) curBiome = 'swamp';
+    else if (rawBio.indexOf('plain') >= 0 || rawBio.indexOf('planicie') >= 0 || rawBio.indexOf('campo') >= 0) curBiome = 'plains';
+    else curBiome = 'forest';
+
+    var bfExtra = ' biome-' + curBiome;
     if (_selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
         (_pendingSkill.blessSpell || _pendingSkill.shieldSpell)) {
-        bfExtra = ' picker-buff-ally';
+        bfExtra += ' picker-buff-ally';
     } else if (_selectingTarget && ((_pendingSkill && _pendingSkill.kind === 'heal') || _pendingHealItem)) {
-        bfExtra = ' picker-heal';
+        bfExtra += ' picker-heal';
     }
 
     html += '<div class="battlefield-hex-arena' + bfExtra + '" style="position:absolute; left:' + padPanX + 'px; top:' + padPanY + 'px; width:' + arenaW + 'px; height:' + arenaH + 'px;">';
 
     // SVG Hex Grid Layer
     html += '<svg class="hex-grid-svg" width="' + arenaW + '" height="' + arenaH + '" viewBox="0 0 ' + arenaW + ' ' + arenaH + '">';
+    html += '<defs>';
+    html += '<radialGradient id="hexGridAura" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#c4953a" stop-opacity="0.18"/><stop offset="100%" stop-color="#c4953a" stop-opacity="0"/></radialGradient>';
+    html += '<radialGradient id="hexDifficultGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#a06e2d" stop-opacity="0.32"/><stop offset="100%" stop-color="#5a3d16" stop-opacity="0.08"/></radialGradient>';
+    html += '</defs>';
 
     // Territory tint zones (Enemies top rows 0..4, Allies bottom rows 5..9)
     var midY = Math.round(arenaH / 2);
@@ -20578,7 +20691,6 @@ function buildBattlefield(s) {
 
     // === D&D 5e: FOG OF WAR & VISIBILIDADE TÁTICA (Influência de Clima e Bioma) ===
     var curWeather = String(s.weather || 'clear').toLowerCase();
-    var curBiome = String(s.bio || s.biome || 'forest').toLowerCase();
 
     function calcUnitVisionRange(u) {
         var baseR = 5; // Limpo / Dia (alcance tático amplo)
@@ -24343,11 +24455,22 @@ function bindActions() {
     var cards = document.querySelectorAll('[data-clickable="1"]');
     for (var j = 0; j < cards.length; j++) {
         (function (card) {
+            card.addEventListener('pointerdown', function (ev) {
+                card.__pDownX = ev.clientX;
+                card.__pDownY = ev.clientY;
+                card.__pDownTs = Date.now();
+            });
             var onCardTrigger = function (ev) {
                 var now = Date.now();
                 if (now - _lastCardActionTime < 320) return;
                 if (window.__bfIsDragging) return;
-                if (window.__bfLastDragTs && (now - window.__bfLastDragTs < 350)) return;
+                if (window.__bfLastDragTs && (now - window.__bfLastDragTs < 500)) return;
+                if (typeof card.__pDownX === 'number' && typeof card.__pDownY === 'number') {
+                    var cDx = Math.abs(ev.clientX - card.__pDownX);
+                    var cDy = Math.abs(ev.clientY - card.__pDownY);
+                    if (cDx >= 4 || cDy >= 4) return;
+                }
+                if (card.__pDownTs && (now - card.__pDownTs > 550)) return;
                 if (ev && ev.target && ev.target.closest && ev.target.closest('button')) return;
                 _lastCardActionTime = now;
                 if (ev && ev.cancelable && ev.type !== 'click') {
@@ -24429,14 +24552,24 @@ function bindActions() {
     var reachableTiles = document.querySelectorAll('.hex-tile.hex-tile--reachable');
     for (var ri = 0; ri < reachableTiles.length; ri++) {
         (function (tile) {
+            tile.addEventListener('pointerdown', function (ev) {
+                tile.__pDownX = ev.clientX;
+                tile.__pDownY = ev.clientY;
+                tile.__pDownTs = Date.now();
+            });
             var onTileTrigger = function (ev) {
                 var now = Date.now();
                 if (now - _lastTileActionTime < 320) return;
                 if (window.__bfIsDragging) return;
-                if (window.__bfLastDragTs && (now - window.__bfLastDragTs < 350)) return;
+                if (window.__bfLastDragTs && (now - window.__bfLastDragTs < 500)) return;
+                if (typeof tile.__pDownX === 'number' && typeof tile.__pDownY === 'number') {
+                    var tDx = Math.abs(ev.clientX - tile.__pDownX);
+                    var tDy = Math.abs(ev.clientY - tile.__pDownY);
+                    if (tDx >= 4 || tDy >= 4) return;
+                }
+                if (tile.__pDownTs && (now - tile.__pDownTs > 550)) return;
                 _lastTileActionTime = now;
                 if (ev && ev.cancelable && ev.type !== 'click') ev.preventDefault();
-                if (ev) ev.stopPropagation();
                 var tCol = parseInt(tile.getAttribute('data-col'), 10);
                 var tRow = parseInt(tile.getAttribute('data-row'), 10);
                 if (!isNaN(tCol) && !isNaN(tRow)) {
@@ -32272,9 +32405,25 @@ function openUnitDetail(uid) {
     else if (uid && uid.indexOf('ally_') === 0) u = currentState.order[parseInt(uid.slice(5), 10)];
     if (!u) return;
 
+    var prevInspected = document.querySelectorAll('.token--inspected');
+    for (var pi = 0; pi < prevInspected.length; pi++) {
+        prevInspected[pi].classList.remove('token--inspected');
+    }
+    var targetToken = document.querySelector('.hex-token[data-unit-id="' + uid + '"]');
+    if (targetToken) targetToken.classList.add('token--inspected');
+
+    var removeInspected = function () {
+        if (targetToken) targetToken.classList.remove('token--inspected');
+    };
+
     var ov = document.createElement('div');
     ov.className = 'unit-detail-overlay';
-    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+    ov.addEventListener('click', function (e) {
+        if (e.target === ov) {
+            removeInspected();
+            ov.remove();
+        }
+    });
 
     var card = document.createElement('div');
     card.className = 'unit-detail-card';
@@ -32412,7 +32561,10 @@ function openUnitDetail(uid) {
     html += '</div>';
 
     setHTML(card, html);
-    card.querySelector('.udc-close').addEventListener('click', function () { ov.remove(); });
+    card.querySelector('.udc-close').addEventListener('click', function () {
+        removeInspected();
+        ov.remove();
+    });
     /* 2026-06-08 (user): a imagem do detalhe e um THUMBNAIL; tocar abre o lightbox
        (PADRAO_ALDRIC: imagem grande limitada a tela + nome + descricao). So quando
        ha arte raster (img); o crest SVG nao tem o que ampliar. */
@@ -33032,7 +33184,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         var actorUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (aIdx === s.p_idx ? 'player' : 'enemy_' + aIdx);
                         var actorEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
                         if (actorEl) {
-                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 340;
+                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 380;
                             await animateUnitHexMovement(actorEl, stepRes.path, hopDurationMs);
                         }
                     }
@@ -36267,7 +36419,7 @@ async function __combatAnimateOneEvent(ev) {
         if (tokenEl && ev.fromCol != null && ev.fromRow != null && ev.toCol != null && ev.toRow != null) {
             var path = hexLine(ev.fromCol, ev.fromRow, ev.toCol, ev.toRow);
             if (path && path.length > 1) {
-                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 75 : 140;
+                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 380;
                 await animateUnitHexMovement(tokenEl, path, stepDurationMs);
             }
         }
