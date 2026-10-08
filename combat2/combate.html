@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T14:01:57Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T14:58:14Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2166,6 +2166,56 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   z-index: 65 !important;
   pointer-events: none !important;
   will-change: left, top, transform, filter;
+}
+
+/* Botão temporário flutuante no topo central para pular movimentação (Ordem do Usuário 2026-10) */
+.combat-skip-movement-btn {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12000;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(20, 16, 12, 0.95), rgba(38, 30, 20, 0.97));
+  color: #f7e7b4;
+  border: 1px solid rgba(212, 175, 55, 0.75);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.85), 0 0 12px rgba(212, 175, 55, 0.35);
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: combatSkipBtnPopIn 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.18s ease;
+  pointer-events: auto;
+}
+.combat-skip-movement-btn:hover {
+  transform: translateX(-50%) scale(1.05);
+  background: linear-gradient(135deg, rgba(30, 24, 16, 0.98), rgba(58, 46, 28, 0.99));
+  border-color: rgba(255, 215, 0, 0.95);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.9), 0 0 18px rgba(255, 215, 0, 0.5);
+  color: #fff6d6;
+}
+.combat-skip-movement-btn:active {
+  transform: translateX(-50%) scale(0.97);
+}
+.combat-skip-movement-btn.csm-fading {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-8px);
+  pointer-events: none;
+}
+@keyframes combatSkipBtnPopIn {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-14px) scale(0.88); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 
 /* Barras de recurso (MP / Energia / Vigor / Furia) */
@@ -19955,63 +20005,162 @@ function ensureProceduralBattlefield(s) {
     return expanded;
 }
 
+/* Botão temporário flutuante no topo central para pular movimentação (Ordem do Usuário 2026-10) */
+var _activeSkipMovementCallback = null;
+
+function showCombatSkipMovementButton(onSkip) {
+    _activeSkipMovementCallback = onSkip;
+    var existing = document.getElementById('combat-skip-movement-btn');
+    if (existing) {
+        existing.classList.remove('csm-fading');
+        return existing;
+    }
+
+    var btn = document.createElement('button');
+    btn.id = 'combat-skip-movement-btn';
+    btn.className = 'combat-skip-movement-btn';
+    btn.type = 'button';
+    btn.innerHTML = '<span class="csm-icon" style="font-size:14px;line-height:1;">⏭</span> <span>Pular Movimento</span>';
+    btn.setAttribute('aria-label', 'Pular movimentação atual');
+
+    btn.addEventListener('click', function (e) {
+        if (e && e.preventDefault) e.preventDefault();
+        hideCombatSkipMovementButton();
+        if (typeof _activeSkipMovementCallback === 'function') {
+            var cb = _activeSkipMovementCallback;
+            _activeSkipMovementCallback = null;
+            try { cb(); } catch (_) {}
+        }
+    });
+
+    document.body.appendChild(btn);
+    return btn;
+}
+
+function hideCombatSkipMovementButton() {
+    _activeSkipMovementCallback = null;
+    var btn = document.getElementById('combat-skip-movement-btn');
+    if (btn) {
+        btn.classList.add('csm-fading');
+        setTimeout(function () {
+            if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+        }, 180);
+    }
+}
+
 async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
     if (!tokenEl || !path || path.length <= 1) return;
-    var stepMs = stepDurationMs || 340;
+    /* REGRA DO USUÁRIO (2026-10): O ritmo padrão de movimentação é estritamente 800ms
+       por hexágono (salvo se _skipAllDiceAnim estiver ativo). NUNCA reduzir para manter
+       a clareza tática de acompanhamento para o jogador. Para avançar rápido, o jogador
+       usa o botão temporário no topo central 'Pular Movimento'. */
+    var stepMs = stepDurationMs || 800;
     tokenEl.style.zIndex = '60';
     tokenEl.classList.add('token--walking');
 
-    for (var p = 1; p < path.length; p++) {
-        var stepCoord = path[p];
-        var stepCenter = hexCenter(stepCoord.col, stepCoord.row);
-        var targetLeft = (stepCenter.cx - Math.round(HEX_W / 2)) + 'px';
-        var targetTop = (stepCenter.cy - Math.round(HEX_H / 2)) + 'px';
-
-        // Câmera acompanha o combatente durante a movimentação passo a passo (Ordem do Usuário 2026-10)
-        if (typeof window.bfCameraFocusCoord === 'function') {
-            try {
-                window.bfCameraFocusCoord(stepCoord.col, stepCoord.row, null, Math.round(stepMs * 0.95));
-            } catch (_) {}
-        }
-
-        // Som de passo / caminhada
-        if (typeof sfxStep === 'function') {
-            try { sfxStep(); } catch (_) {}
-        }
-
-        // Highlight sutil do hexágono pisado
-        var stepTile = document.querySelector('.hex-grid-svg polygon[data-col="' + stepCoord.col + '"][data-row="' + stepCoord.row + '"]');
-        if (stepTile) {
-            stepTile.classList.add('hex-tile--stepping');
-            (function (el) {
-                setTimeout(function () { el.classList.remove('hex-tile--stepping'); }, Math.round(stepMs * 0.9));
-            })(stepTile);
-        }
-
-        // FASE 1: Translação contínua de left/top com passada natural e leve elevação
-        var stepCadenceDeg = (p % 2 === 1) ? 2.5 : -2.5;
-        tokenEl.style.transition = 'left ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), top ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), transform ' + Math.round(stepMs * 0.5) + 'ms cubic-bezier(0.2, 0.8, 0.3, 1), filter ' + Math.round(stepMs * 0.5) + 'ms ease-out';
-        tokenEl.style.left = targetLeft;
-        tokenEl.style.top = targetTop;
-        tokenEl.style.transform = 'translateY(-7px) rotate(' + stepCadenceDeg + 'deg) scale(1.08)';
-        tokenEl.style.filter = 'drop-shadow(0 10px 8px rgba(0, 0, 0, 0.65))';
-
-        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.52)); });
-
-        // FASE 2: Aterrissagem do passo no centro do hexágono.
-        // CRÍTICO: mantemos left e top no transition para NUNCA cancelar ou congelar o movimento contínuo!
-        tokenEl.style.transition = 'left ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), top ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), transform ' + Math.round(stepMs * 0.44) + 'ms cubic-bezier(0.25, 1, 0.5, 1), filter ' + Math.round(stepMs * 0.44) + 'ms ease-in';
-        tokenEl.style.transform = 'translateY(0px) rotate(0deg) scale(1)';
-        tokenEl.style.filter = 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.75))';
-
-        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.48)); });
+    var skipRequested = false;
+    var shouldShowButton = (typeof _skipAllDiceAnim === 'undefined' || !_skipAllDiceAnim) && path.length > 1;
+    if (shouldShowButton) {
+        showCombatSkipMovementButton(function () {
+            skipRequested = true;
+        });
     }
 
-    tokenEl.classList.remove('token--walking');
-    tokenEl.style.zIndex = '';
-    tokenEl.style.transition = '';
-    tokenEl.style.transform = '';
-    tokenEl.style.filter = '';
+    try {
+        for (var p = 1; p < path.length; p++) {
+            if (skipRequested) {
+                var finalStep = path[path.length - 1];
+                var finalCenter = hexCenter(finalStep.col, finalStep.row);
+                tokenEl.style.transition = 'none';
+                tokenEl.style.left = (finalCenter.cx - Math.round(HEX_W / 2)) + 'px';
+                tokenEl.style.top = (finalCenter.cy - Math.round(HEX_H / 2)) + 'px';
+                tokenEl.style.transform = 'translateY(0px) rotate(0deg) scale(1)';
+                tokenEl.style.filter = '';
+                if (typeof window.bfCameraFocusCoord === 'function') {
+                    try { window.bfCameraFocusCoord(finalStep.col, finalStep.row, null, 150); } catch (_) {}
+                }
+                break;
+            }
+
+            var stepCoord = path[p];
+            var stepCenter = hexCenter(stepCoord.col, stepCoord.row);
+            var targetLeft = (stepCenter.cx - Math.round(HEX_W / 2)) + 'px';
+            var targetTop = (stepCenter.cy - Math.round(HEX_H / 2)) + 'px';
+
+            // Câmera acompanha o combatente durante a movimentação passo a passo (Ordem do Usuário 2026-10)
+            if (typeof window.bfCameraFocusCoord === 'function') {
+                try {
+                    window.bfCameraFocusCoord(stepCoord.col, stepCoord.row, null, Math.round(stepMs * 0.95));
+                } catch (_) {}
+            }
+
+            // Som de passo / caminhada
+            if (typeof sfxStep === 'function') {
+                try { sfxStep(); } catch (_) {}
+            }
+
+            // Highlight sutil do hexágono pisado
+            var stepTile = document.querySelector('.hex-grid-svg polygon[data-col="' + stepCoord.col + '"][data-row="' + stepCoord.row + '"]');
+            if (stepTile) {
+                stepTile.classList.add('hex-tile--stepping');
+                (function (el) {
+                    setTimeout(function () { el.classList.remove('hex-tile--stepping'); }, Math.round(stepMs * 0.9));
+                })(stepTile);
+            }
+
+            // FASE 1: Translação contínua de left/top com passada natural e leve elevação
+            var stepCadenceDeg = (p % 2 === 1) ? 2.5 : -2.5;
+            tokenEl.style.transition = 'left ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), top ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), transform ' + Math.round(stepMs * 0.5) + 'ms cubic-bezier(0.2, 0.8, 0.3, 1), filter ' + Math.round(stepMs * 0.5) + 'ms ease-out';
+            tokenEl.style.left = targetLeft;
+            tokenEl.style.top = targetTop;
+            tokenEl.style.transform = 'translateY(-7px) rotate(' + stepCadenceDeg + 'deg) scale(1.08)';
+            tokenEl.style.filter = 'drop-shadow(0 10px 8px rgba(0, 0, 0, 0.65))';
+
+            var phase1Ms = Math.round(stepMs * 0.52);
+            await new Promise(function (resolve) {
+                var interval = setInterval(function () {
+                    if (skipRequested) { clearInterval(interval); resolve(); }
+                }, 35);
+                setTimeout(function () { clearInterval(interval); resolve(); }, phase1Ms);
+            });
+
+            if (skipRequested) {
+                var finalStep2 = path[path.length - 1];
+                var finalCenter2 = hexCenter(finalStep2.col, finalStep2.row);
+                tokenEl.style.transition = 'none';
+                tokenEl.style.left = (finalCenter2.cx - Math.round(HEX_W / 2)) + 'px';
+                tokenEl.style.top = (finalCenter2.cy - Math.round(HEX_H / 2)) + 'px';
+                tokenEl.style.transform = 'translateY(0px) rotate(0deg) scale(1)';
+                tokenEl.style.filter = '';
+                if (typeof window.bfCameraFocusCoord === 'function') {
+                    try { window.bfCameraFocusCoord(finalStep2.col, finalStep2.row, null, 150); } catch (_) {}
+                }
+                break;
+            }
+
+            // FASE 2: Aterrissagem do passo no centro do hexágono.
+            tokenEl.style.transition = 'left ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), top ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), transform ' + Math.round(stepMs * 0.44) + 'ms cubic-bezier(0.25, 1, 0.5, 1), filter ' + Math.round(stepMs * 0.44) + 'ms ease-in';
+            tokenEl.style.transform = 'translateY(0px) rotate(0deg) scale(1)';
+            tokenEl.style.filter = 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.75))';
+
+            var phase2Ms = Math.round(stepMs * 0.48);
+            await new Promise(function (resolve) {
+                var interval = setInterval(function () {
+                    if (skipRequested) { clearInterval(interval); resolve(); }
+                }, 35);
+                setTimeout(function () { clearInterval(interval); resolve(); }, phase2Ms);
+            });
+        }
+    } finally {
+        if (shouldShowButton) {
+            hideCombatSkipMovementButton();
+        }
+        tokenEl.classList.remove('token--walking');
+        tokenEl.style.zIndex = '';
+        tokenEl.style.transition = '';
+        tokenEl.style.transform = '';
+        tokenEl.style.filter = '';
+    }
 }
 
 /**
@@ -20263,70 +20412,85 @@ async function handlePlayerMoveTo(tCol, tRow) {
     var tokenEl = (typeof getUnitTokenEl === 'function')
         ? getUnitTokenEl(currentState, currentState.p_idx)
         : document.querySelector('[data-unit-id="player"]');
-    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 220 : 340;
+    /* REGRA DO USUÁRIO (2026-10): Ritmo padrão canônico de 800ms por hexágono */
+    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
 
     var actualReachedSteps = 0;
     var actualSpentCost = 0;
+    var playerSkipRequested = false;
+    var shouldShowPlayerSkipBtn = (typeof _skipAllDiceAnim === 'undefined' || !_skipAllDiceAnim) && validPath.length > 2;
+    if (shouldShowPlayerSkipBtn) {
+        showCombatSkipMovementButton(function () {
+            playerSkipRequested = true;
+        });
+    }
 
-    for (var sIdx = 0; sIdx < validPath.length - 1; sIdx++) {
-        var curStep = validPath[sIdx];
-        var nextStep = validPath[sIdx + 1];
-        var stepCost = (difficultMap[nextStep.col + ',' + nextStep.row]) ? 2 : 1;
+    try {
+        for (var sIdx = 0; sIdx < validPath.length - 1; sIdx++) {
+            var curStep = validPath[sIdx];
+            var nextStep = validPath[sIdx + 1];
+            var stepCost = (difficultMap[nextStep.col + ',' + nextStep.row]) ? 2 : 1;
 
-        // D&D 5e PHB p. 195: OA ocorre antes de sair do alcance do hostil
-        var oas = (typeof simCheckOpportunityAttacks === 'function')
-            ? simCheckOpportunityAttacks(currentState.p_idx, curStep.col, curStep.row, nextStep.col, nextStep.row)
-            : [];
+            // D&D 5e PHB p. 195: OA ocorre antes de sair do alcance do hostil
+            var oas = (typeof simCheckOpportunityAttacks === 'function')
+                ? simCheckOpportunityAttacks(currentState.p_idx, curStep.col, curStep.row, nextStep.col, nextStep.row)
+                : [];
 
-        if (oas.length > 0) {
-            p.pos = { col: curStep.col, row: curStep.row };
-            render(currentState);
-
-            var stoppedBySentinel = false;
-            for (var oi = 0; oi < oas.length; oi++) {
-                var provoker = oas[oi].unit;
-                var provokerIdx = oas[oi].index;
-                if (!provoker || !provoker.alive || provoker.isDead || (provoker.hp | 0) <= 0) continue;
-                if (provoker.reactionSpent || provoker.reaction_spent) continue;
-
-                provoker.reactionSpent = true;
-                provoker.reaction_spent = true;
-
-                currentState.log.push('⚡ ' + provoker.n + ' desfere um Ataque de Oportunidade contra ' + p.n + ' (PHB p. 195)!');
+            if (oas.length > 0) {
+                p.pos = { col: curStep.col, row: curStep.row };
                 render(currentState);
 
-                await playTurn(provokerIdx, currentState.p_idx, { oa: true });
+                var stoppedBySentinel = false;
+                for (var oi = 0; oi < oas.length; oi++) {
+                    var provoker = oas[oi].unit;
+                    var provokerIdx = oas[oi].index;
+                    if (!provoker || !provoker.alive || provoker.isDead || (provoker.hp | 0) <= 0) continue;
+                    if (provoker.reactionSpent || provoker.reaction_spent) continue;
 
-                if (p.hp <= 0 || !p.alive || p.isDead) {
+                    provoker.reactionSpent = true;
+                    provoker.reaction_spent = true;
+
+                    currentState.log.push('⚡ ' + provoker.n + ' desfere um Ataque de Oportunidade contra ' + p.n + ' (PHB p. 195)!');
                     render(currentState);
-                    return;
+
+                    await playTurn(provokerIdx, currentState.p_idx, { oa: true });
+
+                    if (p.hp <= 0 || !p.alive || p.isDead) {
+                        render(currentState);
+                        return;
+                    }
+
+                    var hasSentinel = (provoker.feats || []).indexOf('sentinel') >= 0;
+                    if (hasSentinel && currentState.last && currentState.last.hit) {
+                        stoppedBySentinel = true;
+                        p.movement_left = 0;
+                        currentState.log.push('🛡️ ' + provoker.n + ' — Sentinela: acerta e reduz o deslocamento de ' + p.n + ' a 0 (PHB p. 169)!');
+                        render(currentState);
+                        break;
+                    }
                 }
 
-                var hasSentinel = (provoker.feats || []).indexOf('sentinel') >= 0;
-                if (hasSentinel && currentState.last && currentState.last.hit) {
-                    stoppedBySentinel = true;
-                    p.movement_left = 0;
-                    currentState.log.push('🛡️ ' + provoker.n + ' — Sentinela: acerta e reduz o deslocamento de ' + p.n + ' a 0 (PHB p. 169)!');
-                    render(currentState);
+                if (stoppedBySentinel) {
                     break;
                 }
             }
 
-            if (stoppedBySentinel) {
-                break;
+            actualSpentCost += stepCost;
+            p.movement_left = Math.max(0, p.movement_left - stepCost);
+            p.pos = { col: nextStep.col, row: nextStep.row };
+            actualReachedSteps++;
+
+            var liveTokenEl = (typeof getUnitTokenEl === 'function')
+                ? getUnitTokenEl(currentState, currentState.p_idx)
+                : (tokenEl || document.querySelector('[data-unit-id="player"]'));
+            if (liveTokenEl && typeof animateUnitHexMovement === 'function') {
+                var currentStepDuration = playerSkipRequested ? 20 : stepDurationMs;
+                await animateUnitHexMovement(liveTokenEl, [curStep, nextStep], currentStepDuration);
             }
         }
-
-        actualSpentCost += stepCost;
-        p.movement_left = Math.max(0, p.movement_left - stepCost);
-        p.pos = { col: nextStep.col, row: nextStep.row };
-        actualReachedSteps++;
-
-        var liveTokenEl = (typeof getUnitTokenEl === 'function')
-            ? getUnitTokenEl(currentState, currentState.p_idx)
-            : (tokenEl || document.querySelector('[data-unit-id="player"]'));
-        if (liveTokenEl && typeof animateUnitHexMovement === 'function') {
-            await animateUnitHexMovement(liveTokenEl, [curStep, nextStep], stepDurationMs);
+    } finally {
+        if (shouldShowPlayerSkipBtn) {
+            hideCombatSkipMovementButton();
         }
     }
 
@@ -33704,7 +33868,8 @@ async function playTurn(aIdx, tIdx, opts) {
                             ? getUnitTokenEl(s, aIdx)
                             : document.querySelector('[data-unit-id="' + ((typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (aIdx === s.p_idx ? 'player' : 'enemy_' + aIdx)) + '"]');
                         if (actorEl) {
-                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 220 : 340;
+                            /* REGRA DO USUÁRIO (2026-10): Ritmo canônico de 800ms para permitir acompanhamento */
+                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
                             await animateUnitHexMovement(actorEl, stepRes.path, hopDurationMs);
                         }
                     }
@@ -36950,7 +37115,8 @@ async function __combatAnimateOneEvent(ev) {
         if (tokenEl && ev.fromCol != null && ev.fromRow != null && ev.toCol != null && ev.toRow != null) {
             var path = hexLine(ev.fromCol, ev.fromRow, ev.toCol, ev.toRow);
             if (path && path.length > 1) {
-                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 220 : 340;
+                /* REGRA DO USUÁRIO (2026-10): Ritmo canônico de 800ms para permitir acompanhamento */
+                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
                 await animateUnitHexMovement(tokenEl, path, stepDurationMs);
             }
         }
