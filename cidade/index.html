@@ -24808,61 +24808,1434 @@ function _renderQuestDiary(bodyEl){
 // agora é "MATAR X inimigos específicos" OU "COLETAR Y itens específicos",
 // rotativo por dia (seed via Date YYYYMMDD). Masmorras virão NO FUTURO como
 // desafios semanais/raids — não agora.
+var DAILY_CHALLENGE_IMAGE_MAP = {
+  "Lobos": "combat/enemies/lobo.webp",
+  "Ratos Gigantes": "combat/enemies/lobo.webp",
+  "Bandidos": "combat/enemies/bandido.webp",
+  "Kobolds": "combat/enemies/kobold.webp",
+  "Flagelos de Galhos": "combat/enemies/lobo.webp",
+  "Javalis": "combat/enemies/javali.webp",
+  "Estirges": "combat/enemies/estirge.webp",
+  "Aranhas Gigantes": "combat/enemies/lobo.webp",
+  "Goblins Arqueiros": "combat/enemies/lobo.webp",
+  "Esqueletos": "combat/enemies/esqueleto.webp",
+  "Zumbis": "combat/enemies/zumbi.webp",
+  "Cultistas": "combat/enemies/cultista.webp",
+  "Fungos Violeta": "combat/enemies/lobo.webp",
+  "Ursos Negros": "combat/enemies/lobo.webp",
+  "Orcs Guerreiros": "combat/enemies/lobo.webp",
+  "Gnolls": "combat/enemies/gnoll.webp",
+  "Hobgoblins": "combat/enemies/hobgoblin.webp",
+  "Carniçais": "combat/enemies/ghoul.webp",
+  "Vultos": "combat/enemies/vulto.webp",
+  "Limos Cinzentos": "combat/enemies/lobo.webp",
+  "Ogros": "combat/enemies/ogro.webp",
+  "Ursos-Coruja": "combat/enemies/lobo.webp",
+  "Patrulheiros Anões": "combat/enemies/lobo.webp",
+  "Cultistas das Areias": "combat/enemies/lobo.webp",
+  "Horrores do Pântano": "combat/enemies/lobo.webp",
+  "Peles de Lobo": "city/daily_challenge.webp",
+  "Presas de Lobo": "city/daily_challenge.webp",
+  "Sedas de Aranha": "city/daily_challenge.webp",
+  "Glândulas de Veneno": "city/daily_challenge.webp",
+  "Ervas Medicinais": "items/ervas-medicinais.webp",
+  "Cogumelos Selvagens": "items/cogumelos-selvagens.webp",
+  "Raízes Silvestres": "city/daily_challenge.webp",
+  "Frutos Silvestres": "items/frutos-silvestres.webp",
+  "Caudas de Rato": "city/daily_challenge.webp",
+  "Orelhas de Goblin": "city/daily_challenge.webp",
+  "Peles de Urso": "city/daily_challenge.webp",
+  "Garras de Urso": "city/daily_challenge.webp",
+  "Couros de Javali": "city/daily_challenge.webp",
+  "Presas de Javali": "city/daily_challenge.webp",
+  "Dentes de Gnoll": "city/daily_challenge.webp",
+  "Escamas de Kobold": "city/daily_challenge.webp",
+  "Crânios Rachados": "city/daily_challenge.webp",
+  "Ossos Antigos": "items/osso.webp",
+  "Esporos Violetas": "city/daily_challenge.webp",
+  "Resíduos Ácidos": "city/daily_challenge.webp",
+  "Penas de Urso-Coruja": "city/daily_challenge.webp",
+  "Bicos de Urso-Coruja": "city/daily_challenge.webp",
+  "Garras Grandes": "city/daily_challenge.webp",
+  "Insígnias Militares": "city/daily_challenge.webp",
+  "Páginas de Ritual": "city/daily_challenge.webp",
+  "Carnes de Carniçal": "city/daily_challenge.webp"
+};
+
 var DAILY_CHALLENGE_POOL = [
-  // Pool HUNT (caça inimigos específicos) — alinhado com bestiário existente
-  { kind: 'hunt',   target: 'Lobos Cinzentos',     count: 3, biome: 'Floresta dos Sussurros',
-    icon: 'ic-lobo',   reward_gold: 60, reward_xp: 120,
-    desc: 'Fazendeiros do norte mal dormem. Lobos cinzentos descem da floresta toda noite.' },
-  { kind: 'hunt',   target: 'Goblins',              count: 5, biome: 'Ninho de Goblins',
-    icon: 'ic-goblin', reward_gold: 75, reward_xp: 140,
-    desc: 'Goblins armaram ninho ao norte. A Guarda pede sua intervenção.' },
-  { kind: 'hunt',   target: 'Esqueletos',           count: 4, biome: 'Cripta Antiga',
-    icon: 'ic-esqueleto', reward_gold: 90, reward_xp: 160,
-    desc: 'Mortos-vivos despertaram na cripta velha. Devolva-os ao silêncio.' },
-  { kind: 'hunt',   target: 'Bandidos',             count: 4, biome: 'Estrada do Comércio',
-    icon: 'ic-bandido', reward_gold: 100, reward_xp: 180,
-    desc: 'Bandidos assaltam mercadores na estrada. Capitã Helga oferece recompensa.' },
-  { kind: 'hunt',   target: 'Aranhas Gigantes',     count: 3, biome: 'Floresta dos Sussurros',
-    icon: 'ic-aranha', reward_gold: 80, reward_xp: 150,
-    desc: 'Teias gigantes bloqueiam a trilha do mercador. Limpe o caminho.' },
-  // Pool GATHER (coleta itens específicos)
-  { kind: 'gather', target: 'Raízes-da-Noite',     count: 5, biome: 'Floresta dos Sussurros',
-    icon: 'ic-druida', reward_gold: 50, reward_xp: 100,
-    desc: 'Mestra Sylvi precisa de raízes para um novo lote de poções.' },
-  { kind: 'gather', target: 'Pelo de Lobo',         count: 4, biome: 'Floresta dos Sussurros',
-    icon: 'ic-lobo',  reward_gold: 55, reward_xp: 110,
-    desc: 'Garrick, o curtidor, quer peles para vestes de inverno.' },
-  { kind: 'gather', target: 'Cogumelos Brilhantes', count: 6, biome: 'Cavernas Úmidas',
-    icon: 'ic-druida', reward_gold: 65, reward_xp: 120,
-    desc: 'Alquimista Velithra paga bem por cogumelos das cavernas.' },
-  { kind: 'gather', target: 'Gemas Brutas',         count: 2, biome: 'Vila Mineira',
-    icon: 'ic-ach-colecionador', reward_gold: 120, reward_xp: 180,
-    desc: 'Mestre Joalheiro precisa de gemas brutas pra cortar. Pagamento generoso.' },
-  { kind: 'gather', target: 'Ervas Curativas',     count: 8, biome: 'Campos Verdes',
-    icon: 'ic-druida', reward_gold: 70, reward_xp: 130,
-    desc: 'Templo de Pelor distribui poções aos enfermos. Ajude na coleta.' }
+  {
+    "id": "kill_wolves",
+    "kind": "hunt",
+    "target": "Lobos",
+    "count": 4,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Edital da Guarda: Alcateia das Bordas da Mata",
+    "contractor": "Guarda Municipal de Valdoria",
+    "desc": "Abata 4 Lobos nas estradas e matas ao redor de Valdoria.",
+    "briefing": "Matilhas de lobos descem das colinas ao entardecer e atacam carroças de cereais. A guarda oferece recompensa oficial aos aventureiros que dispersarem a alcateia.",
+    "flavor": "As matilhas perderam o medo das tochas. Mostre a eles a firmeza do aço.",
+    "linear_steps": [
+      "Aceitar o edital no posto do Capitão Kaelen na Praça Central",
+      "Rastrear e abater 4 Lobos nas estradas ou florestas durante a exploração",
+      "Receber as Valdoritas e o prestígio creditados imediatamente pelo tesouro municipal"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_giant_rats",
+    "kind": "hunt",
+    "target": "Ratos Gigantes",
+    "count": 6,
+    "biome": "cavern",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Saneamento Cívico: Infestação nos Subterrâneos",
+    "contractor": "Sindicato dos Moleiros",
+    "desc": "Extermine 6 Ratos Gigantes dos esgotos, adegas e ruínas cavernosas.",
+    "briefing": "Roedores monstruosos estão roendo as vigas dos armazéns de grãos e atacando trabalhadores da cidade baixa. O sindicato paga por cada criatura expurgada.",
+    "flavor": "A praga se espalha se não for contida na raiz. Limpe os subterrâneos.",
+    "linear_steps": [
+      "Consultar a requisição cívica com o Capitão Kaelen na Praça Central",
+      "Eliminar 6 Ratos Gigantes em cavernas, adegas ou masmorras",
+      "Concluir o saneamento com recompensa automática do conselho"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_bandits",
+    "kind": "hunt",
+    "target": "Bandidos",
+    "count": 5,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Segurança Comercial: Emboscada na Trilha Mercante",
+    "contractor": "Companhia Mercante dos Vales",
+    "desc": "Derrote 5 Bandidos que aterrorizam as estradas de acesso.",
+    "briefing": "Salteadores montaram pontos de vigília ilegais nas curvas das estradas e cobram pedágios forçados de caravanas. Os mercadores financiam a resposta da guarda.",
+    "flavor": "Eles acham que a lei termina onde o asfalto cede lugar à poeira. Prove o contrário.",
+    "linear_steps": [
+      "Assinar o termo de caçada no posto de editais da Praça Central",
+      "Enfrentar e abater 5 Bandidos nas rotas e estradas de Valdoria",
+      "Confirmar a pacificação da rota e retirar o pagamento em Valdoritas"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_kobolds",
+    "kind": "hunt",
+    "target": "Kobolds",
+    "count": 6,
+    "biome": "cavern",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Ordem nas Minas: Batedores dos Morros Pedregosos",
+    "contractor": "Mestre das Minas de Valdoria",
+    "desc": "Neutralize 6 Kobolds nas fendas rochosas e entradas de minas.",
+    "briefing": "Pequenos répteis armados com fundas e estacas tomaram as galerias de extração secundárias, sabotando carrinhos de minério e afugentando os mineiros.",
+    "flavor": "Onde um kobold se esconde, uma dúzia sussurra nas sombras. Mantenha os olhos abertos.",
+    "linear_steps": [
+      "Receber o despacho oficial na mesa do Capitão Kaelen",
+      "Abater 6 Kobolds nas cavernas e encostas pedregosas",
+      "Receber a bonificação minerária creditada no término"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_twig_blights",
+    "kind": "hunt",
+    "target": "Flagelos de Galhos",
+    "count": 5,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Restauração da Mata: Flagelo dos Galhos Retorcidos",
+    "contractor": "Círculo dos Druidas dos Bosques",
+    "desc": "Destrua 5 Flagelos de Galhos que corrompem as clareiras.",
+    "briefing": "Uma mácula vegetal fez raízes e galhos secos ganharem vida predatória. Eles estrangulam mudas sagradas e cravam espinhos venenosos em quem cruza as trilhas.",
+    "flavor": "Galhos que sangram seiva negra e avançam com ódio mudo. Devolva-os às cinzas.",
+    "linear_steps": [
+      "Atender ao chamado dos druidas via edital na Praça Central",
+      "Quebrar ou queimar 5 Flagelos de Galhos em combate pela floresta",
+      "Purificar a rota silvestre e recolher a oferenda do templo"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_boars",
+    "kind": "hunt",
+    "target": "Javalis",
+    "count": 4,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Proteção Rural: Javalis das Terras Aráveis",
+    "contractor": "Cooperativa dos Fazendeiros do Sul",
+    "desc": "Derrube 4 Javalis que destroem plantações e cercas.",
+    "briefing": "Espécimes selvagens desceram enfurecidos para os campos cultivados, arrasando hortas e ferindo trabalhadores com investidas brutais.",
+    "flavor": "Couro grosso e temperamento explosivo. Eles não desviam da rota, avance firme.",
+    "linear_steps": [
+      "Aceitar o pedido dos colonos com o oficial na Praça Central",
+      "Abater 4 Javalis enfurecidos nas planícies e bordas de matas",
+      "Resgatar a recompensa em mantimentos e moedas do conselho"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_stirges",
+    "kind": "hunt",
+    "target": "Estirges",
+    "count": 6,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Praga Noturna: Enxame dos Sugadores Alados",
+    "contractor": "Posto Avançado dos Guardas",
+    "desc": "Elimine 6 Estirges que infestam pontes antigas e copas.",
+    "briefing": "Parasitas alados do tamanho de corvos nidificaram sob os arcos de pedra. Eles atacam em bando na calada da noite drenando viajantes desprevenidos.",
+    "flavor": "O zumbido agudo das asas antes do bote rasga o silêncio da noite.",
+    "linear_steps": [
+      "Retirar a ordem de contenção no largo da Praça Central",
+      "Eliminar 6 Estirges em confrontos pelas estradas e bosques",
+      "Garantir a segurança noturna das pontes de Valdoria"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_giant_spiders",
+    "kind": "hunt",
+    "target": "Aranhas Gigantes",
+    "count": 3,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Desobstrução Florestal: Fiandeiras da Penumbra",
+    "contractor": "Guilda dos Lenhadores",
+    "desc": "Extermine 3 Aranhas Gigantes nas matas fechadas.",
+    "briefing": "Teias densas e pegajosas fecharam a garganta do vale dos carvalhos. Caçadores relatam presas paralisadas pendendo das ramagens mais altas.",
+    "flavor": "Quem pisa em suas teias não tem tempo para arrependimentos. Corte o fio.",
+    "linear_steps": [
+      "Aceitar a missão no posto de editais do Capitão Kaelen",
+      "Derrotar 3 Aranhas Gigantes nas florestas escuras",
+      "Liberar o corte de madeira e recolher a compensação em ouro"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_goblin_archers",
+    "kind": "hunt",
+    "target": "Goblins Arqueiros",
+    "count": 4,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Vigilância das Trilhas: Atiradores de Tocaias",
+    "contractor": "Patrulha de Escoltas",
+    "desc": "Abata 4 Goblins Arqueiros posicionados em emboscadas.",
+    "briefing": "Atiradores goblins utilizam flechas de cana envenenadas a partir das copas das árvores para alvejar cavalos e guardas de escolta.",
+    "flavor": "Flechas curtas com pontas embebidas em veneno. Faça-os provar do próprio remédio.",
+    "linear_steps": [
+      "Registrar a caçada no posto oficial da Praça Central",
+      "Encontrar e abater 4 Goblins Arqueiros durante viagens",
+      "Receber o soldo da guarda municipal automaticamente"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_skeletons",
+    "kind": "hunt",
+    "target": "Esqueletos",
+    "count": 5,
+    "biome": "crypt",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Purificação Sepulcral: Marcha dos Ossos Antigos",
+    "contractor": "Irmandade dos Sepulcros",
+    "desc": "Destrua 5 Esqueletos que despertaram nas necrópoles.",
+    "briefing": "Restos mortais de antigos soldados voltaram a empunhar armas enferrujadas nos cemitérios do vale. Os zeladores do descanso eterno pedem auxílio urgente.",
+    "flavor": "O bater de ossos secos ecoa na bruma noturna. Devolva-os à paz da terra.",
+    "linear_steps": [
+      "Aceitar o chamado sacro no posto do Capitão Kaelen",
+      "Despedaçar 5 Esqueletos em criptas, ruínas ou cemitérios",
+      "Restaurar a santidade dos sepulcros e receber a gratificação"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_zombies",
+    "kind": "hunt",
+    "target": "Zumbis",
+    "count": 4,
+    "biome": "crypt",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Vigília Sagrada: Expurgo dos Corpos Errantes",
+    "contractor": "Templo de Pelor",
+    "desc": "Elimine 4 Zumbis que perambulam pelas ruínas e valas.",
+    "briefing": "Corpos reanimados por feitiçaria profana arrastam-se das covas rasas em direção às aldeias periféricas. A ordem dos sacerdotes convoca aventureiros resolutos.",
+    "flavor": "A carne apodrece mas a maldição os move. Quebre os laços necróticos.",
+    "linear_steps": [
+      "Assumir o compromisso no posto de editais da Praça Central",
+      "Abater 4 Zumbis em combate sagrado nas necrópoles",
+      "Receber a bênção e as Valdoritas destinadas aos defensores"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_cultists",
+    "kind": "hunt",
+    "target": "Cultistas",
+    "count": 4,
+    "biome": "fortress",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Ordem Cívica: Célula dos Sussurros Proibidos",
+    "contractor": "Inquisição Cívica de Valdoria",
+    "desc": "Disperse 4 Cultistas envolvidos em rituais clandestinos.",
+    "briefing": "Fanáticos encapuzados realizam cerimônias heréticas em ruínas esquecidas, tentando invocar entidades das profundezas. A cidade não tolerará essa heresia.",
+    "flavor": "Cânticos profanos sussurrados ao luar. Silencie os fanáticos.",
+    "linear_steps": [
+      "Retirar o mandado cívico na Praça Central com o Capitão Kaelen",
+      "Enfrentar e derrotar 4 Cultistas nas ruínas ou ermos",
+      "Concluir o inquérito e receber o prêmio oficial da coroa"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_violet_fungus",
+    "kind": "hunt",
+    "target": "Fungos Violeta",
+    "count": 3,
+    "biome": "cavern",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Saneamento Alquímico: Broto Violeta das Grutas",
+    "contractor": "Ordem dos Boticários",
+    "desc": "Erradique 3 Fungos Violeta nas cavernas subterrâneas.",
+    "briefing": "Organismos fúngicos predadores brotaram nas fontes termais de onde a cidade retira água pura. Seus filamentos necróticos ameaçam contaminar o lençol freático.",
+    "flavor": "Tentáculos púrpuras que gotejam decomposição. Não hesite no golpe.",
+    "linear_steps": [
+      "Aceitar o encargo de saneamento na Praça Central",
+      "Destruir 3 Fungos Violeta nas cavernas e túneis úmidos",
+      "Assegurar a pureza das águas e retirar a compensação dos boticários"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_black_bears",
+    "kind": "hunt",
+    "target": "Ursos Negros",
+    "count": 3,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Contenção Predatória: Ursos das Gargantas Escuras",
+    "contractor": "Caravana de Comércio do Norte",
+    "desc": "Confronte 3 Ursos Negros que ameaçam os desfiladeiros.",
+    "briefing": "Grandes feras territoriais expulsas dos picos desceram para as passagens de carruagens, derrubando animais de carga com ferocidade avassaladora.",
+    "flavor": "Músculos densos e garras como foices. Uma caçada reservada aos destemidos.",
+    "linear_steps": [
+      "Aceitar o edital da guilda dos carroceiros na Praça Central",
+      "Rastrear e vencer 3 Ursos Negros nas matas e passagens",
+      "Desobstruir o comércio do norte e recolher o pagamento integral"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_orc_warriors",
+    "kind": "hunt",
+    "target": "Orcs Guerreiros",
+    "count": 4,
+    "biome": "fortress",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Defesa da Fronteira: Vanguarda das Colinas Cinzentas",
+    "contractor": "Conselho de Guerra de Valdoria",
+    "desc": "Enfrente 4 Orcs Guerreiros nos acampamentos das colinas.",
+    "briefing": "Guerreiros orcs armados de machados de guerra estão testando a resistência dos postos avançados da guarda. A cidade exige uma resposta contundente.",
+    "flavor": "Tambores de batalha ecoam no horizonte. Mostre a força dos defensores de Valdoria.",
+    "linear_steps": [
+      "Alistar-se na requisição militar com o Capitão Kaelen",
+      "Derrotar 4 Orcs Guerreiros em confrontos pelas colinas",
+      "Reportar a vitória e receber a recompensa de campanha do conselho"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "kill_gnolls",
+    "kind": "hunt",
+    "target": "Gnolls",
+    "count": 4,
+    "biome": "fortress",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Alerta Fronteiriço: Bando Hiena dos Desfiladeiros",
+    "contractor": "Posto Fronteiriço de Valdoria",
+    "desc": "Elimine 4 Gnolls que rondam as gargantas de pedra.",
+    "briefing": "Matilhas vorazes de gnolls armados de lanças e arcos atacam viajantes solitários, deixando apenas destruição. O comando militar autorizou caçada livre.",
+    "flavor": "Risos macabros cortando a neblina. Eles lutam sem honra, não hesite no aço.",
+    "linear_steps": [
+      "Apanhar o cartaz de recompensa na Praça Central",
+      "Abater 4 Gnolls em combate nas passagens rochosas",
+      "Receber o bônus de pacificação das estradas de montanha"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "kill_hobgoblins",
+    "kind": "hunt",
+    "target": "Hobgoblins",
+    "count": 3,
+    "biome": "fortress",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Operação Tática: Comitiva Marcial dos Montes",
+    "contractor": "Guarnição das Muralhas",
+    "desc": "Supere 3 Hobgoblins organizados em patrulhas marciais.",
+    "briefing": "Batedores disciplinados com escudos pesados e táticas de falange tentam isolar uma das rotas estratégicas de abastecimento. Exige-se perícia marcial.",
+    "flavor": "Disciplina férrea e passos sincronizados. Quebre a formação deles.",
+    "linear_steps": [
+      "Assumir a ordem de combate no posto do Capitão Kaelen",
+      "Derrotar 3 Hobgoblins em combate tático pelas fortalezas ou colinas",
+      "Garantir a integridade da rota e recolher o soldo de veterano"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "kill_ghouls",
+    "kind": "hunt",
+    "target": "Carniçais",
+    "count": 3,
+    "biome": "crypt",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Defesa das Necrópoles: Fome Insaciável dos Túmulos",
+    "contractor": "Clérigos da Vigília",
+    "desc": "Destrua 3 Carniçais que profanam as sepulturas.",
+    "briefing": "Criaturas necrófagas de garras paralizantes desenterram caixões e ameaçam contaminar o solo sagrado. Os clérigos buscam aventureiros corajosos.",
+    "flavor": "Garras que congelam o sangue e olhar faminto. O fogo sagrado prevalecerá.",
+    "linear_steps": [
+      "Atender ao apelo da vigília no largo da Praça Central",
+      "Aniquilar 3 Carniçais nas catacumbas e cemitérios do vale",
+      "Proteger a memória dos falecidos e receber o tributo eclesiástico"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "kill_shadows",
+    "kind": "hunt",
+    "target": "Vultos",
+    "count": 3,
+    "biome": "crypt",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Investigação Espectral: Sombras das Ruínas Esquecidas",
+    "contractor": "Academia dos Estudos Arcanos",
+    "desc": "Disperse 3 Vultos que drenam a vitalidade dos vivos.",
+    "briefing": "Aparições incorpóreas deslizam pelas paredes dos velhos mausoléus, roubando a força muscular daqueles que se aventuram além do entardecer.",
+    "flavor": "Silhuetas escuras mais densas que a noite. Mantenha a guarda iluminada.",
+    "linear_steps": [
+      "Consultar as notas de perigo no posto do Capitão Kaelen",
+      "Dissipar 3 Vultos em ruínas assombradas e túmulos antigos",
+      "Entregar o relatório à academia e recolher a bolsa de pesquisa"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "kill_gray_oozes",
+    "kind": "hunt",
+    "target": "Limos Cinzentos",
+    "count": 3,
+    "biome": "cavern",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Proteção aos Artífices: Devoradores de Metal e Pedra",
+    "contractor": "Sindicato dos Metalúrgicos",
+    "desc": "Dissolva 3 Limos Cinzentos nas galerias profundas.",
+    "briefing": "Massas informes corrosivas rastejam pelos trilhos das minas, derretendo ferramentas e ameaçando a vida dos garimpeiros. Uma ameaça ácida silenciosa.",
+    "flavor": "Parecem poças d’água inofensivas até corroerem sua lâmina. Cuidado onde pisa.",
+    "linear_steps": [
+      "Aceitar o contrato minerário na Praça Central",
+      "Destruir 3 Limos Cinzentos nas cavernas e passagens subterrâneas",
+      "Salvar os equipamentos de extração e receber o pagamento dos mestres"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "kill_ogres",
+    "kind": "hunt",
+    "target": "Ogros",
+    "count": 2,
+    "biome": "fortress",
+    "icon": "ic-stat-attack",
+    "reward_gold": 135,
+    "reward_xp": 250,
+    "title": "Caçada de Alto Risco: Colossos Selvagens das Fendas",
+    "contractor": "Alto Comando de Valdoria",
+    "desc": "Derrube 2 Ogros que aterrorizam os vales altos.",
+    "briefing": "Gigantes truculentos armados com troncos de árvore desceram das encostas, bloqueando a estrada das serras e esmagando carruagens inteiras com facilidade.",
+    "flavor": "Passos pesados que fazem a terra tremer. A força bruta cai diante da inteligência tática.",
+    "linear_steps": [
+      "Aceitar o desafio de alto calibre com o Capitão Kaelen na Praça Central",
+      "Enfrentar e abater 2 Ogros nas fortalezas ou montanhas",
+      "Confirmar a queda dos gigantes e retirar a grande recompensa em ouro"
+    ],
+    "min_level": 4
+  },
+  {
+    "id": "kill_owlbears",
+    "kind": "hunt",
+    "target": "Ursos-Coruja",
+    "count": 2,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 135,
+    "reward_xp": 250,
+    "title": "Grande Caçada: Terror Emplumado da Floresta",
+    "contractor": "Associação dos Caçadores Veteranos",
+    "desc": "Abata 2 Ursos-Coruja nos recantos selvagens mais profundos.",
+    "briefing": "Feras ancestrais misturando a força esmagadora de um urso e a visão letal de uma coruja gigante atacaram postos de batedores. A caçada mais almejada do mês.",
+    "flavor": "O piado estridente seguido de um rugido primal avisa que o predador ápice chegou.",
+    "linear_steps": [
+      "Registrar a lendária caçada no mural do Capitão Kaelen",
+      "Rastrear e vencer 2 Ursos-Coruja em florestas antigas",
+      "Consagrar a bravura do grupo e receber os louros e tesouros da cidade"
+    ],
+    "min_level": 4
+  },
+  {
+    "id": "kill_dwarf_patrols",
+    "kind": "hunt",
+    "target": "Patrulheiros Anões",
+    "count": 3,
+    "biome": "fortress",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Contenção das Minas: Desertores das Galerias Altas",
+    "contractor": "Tribunal dos Artífices",
+    "desc": "Vença 3 Patrulheiros Anões que desafiam os tratados.",
+    "briefing": "Uma guarnição rebelde rompeu acordos e bloqueou a passagem da serra norte com armaduras pesadas e martelos de guerra. É necessário restabelecer a ordem.",
+    "flavor": "Couraças de aço e teimosia de granito. Conquiste o respeito no choque dos escudos.",
+    "linear_steps": [
+      "Retirar o despacho diplomático no posto da Praça Central",
+      "Derrotar 3 Patrulheiros Anões renegados nas montanhas",
+      "Reabrir a via férrea e retirar a compensação dos artífices"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "kill_sand_cultists",
+    "kind": "hunt",
+    "target": "Cultistas das Areias",
+    "count": 3,
+    "biome": "fortress",
+    "icon": "ic-stat-attack",
+    "reward_gold": 135,
+    "reward_xp": 250,
+    "title": "Expedição do Sul: Fanáticos das Areias Escaldantes",
+    "contractor": "Embaixada das Terras do Sul",
+    "desc": "Neutralize 3 Cultistas das Areias que conjuram tempestades.",
+    "briefing": "Conjuradores do deserto ergueram altares proibidos nos limites secos do reino, conjurando ventanias cortantes para pilhar mercadores de temperos.",
+    "flavor": "Areia em brasa e encantamentos de fogo. Apague o fervor desses fanáticos.",
+    "linear_steps": [
+      "Aceitar o contrato consular com o Capitão Kaelen",
+      "Confrontar e derrotar 3 Cultistas das Areias nas terras áridas",
+      "Garantir a rota das especiarias e receber o pagamento em ouro fino"
+    ],
+    "min_level": 4
+  },
+  {
+    "id": "kill_swamp_horrors",
+    "kind": "hunt",
+    "target": "Horrores do Pântano",
+    "count": 2,
+    "biome": "temple",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Expurgo das Brumas: Monstruosidades dos Lodaçais",
+    "contractor": "Boticários das Águas Turvas",
+    "desc": "Destrua 2 Horrores do Pântano nas terras alagadas.",
+    "briefing": "Massas retorcidas de cipós carnívoros e carcaças afundadas erguem-se dos mangues, impedindo a passagem das barcaças que trazem lótus medicinal.",
+    "flavor": "Raízes venenosas que se movem com astúcia. Mostre a força de suas chamas e lâminas.",
+    "linear_steps": [
+      "Aceitar o edital lacrado no posto de Kaelen na Praça Central",
+      "Abater 2 Horrores do Pântano nos lamaçais e templos submersos",
+      "Liberar o fluxo dos canais e receber a gratificação dos boticários"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "kill_forest_spiders_deep",
+    "kind": "hunt",
+    "target": "Aranhas Gigantes",
+    "count": 4,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Rastreio Silvestre: Ninhada das Teias Negras",
+    "contractor": "Guias de Trilha de Valdoria",
+    "desc": "Extermine 4 Aranhas Gigantes nas copas fechadas.",
+    "briefing": "Uma nova colônia de aranhas estendeu redes de captura entre os pinheiros velhos. Peregrinos e caçadores estão encurralados sem conseguir retorno.",
+    "flavor": "Peçonha que escorre como orvalho amargo. Corte o nó das fiandeiras.",
+    "linear_steps": [
+      "Aceitar o chamado dos guias na mesa de campanha da Praça Central",
+      "Destruir 4 Aranhas Gigantes nas florestas densas",
+      "Garantir a passagem segura dos peregrinos e receber a recompensa"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_highway_bandits",
+    "kind": "hunt",
+    "target": "Bandidos",
+    "count": 6,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Segurança Fiscal: Salteadores do Trecho Pedregoso",
+    "contractor": "Coletoria Fiscal da Cidade",
+    "desc": "Derrote 6 Bandidos que ameaçam as carroças do tesouro.",
+    "briefing": "Quadrilhas organizadas interceptam carregamentos de suprimentos com barricadas de troncos e arqueiros escondidos nos barrancos.",
+    "flavor": "Quem vive de pilhagem deve responder pela espada. Imponha a ordem na estrada.",
+    "linear_steps": [
+      "Firmar o contrato da coletoria na Praça Central",
+      "Abater 6 Bandidos em embates pelas estradas principais",
+      "Concluir o trabalho e receber a quota garantida pelo tesouro"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_crypt_undead_march",
+    "kind": "hunt",
+    "target": "Zumbis",
+    "count": 5,
+    "biome": "crypt",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Vigília Fúnebre: Contenção da Vala Comum",
+    "contractor": "Irmãos da Mortalha",
+    "desc": "Derrube 5 Zumbis que romperam as valas das necrópoles.",
+    "briefing": "Chuva torrencial lavou a terra dos túmulos mais velhos e corpos sem descanso foram reanimados por antigas emanações sombrias da colina.",
+    "flavor": "Passos arrastados na lama e olhos sem luz. Conceda-lhes a paz final.",
+    "linear_steps": [
+      "Retirar o encargo solene com o oficial na Praça Central",
+      "Eliminar 5 Zumbis nas catacumbas e sepulcros do cemitério",
+      "Encerrar o risco de contágio e retirar as Valdoritas destinadas aos guardiões"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_cavern_pests",
+    "kind": "hunt",
+    "target": "Ratos Gigantes",
+    "count": 7,
+    "biome": "cavern",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Higiene Pública: Vassoura dos Túneis Inundados",
+    "contractor": "Conservação dos Aquedutos",
+    "desc": "Limpe 7 Ratos Gigantes das condutas de água das grutas.",
+    "briefing": "Os canais de pedra que abastecem as fontes públicas estão sob constante assédio de roedores carniceiros de tamanho descomunal.",
+    "flavor": "Trabalho indispensável para que as famílias da cidade bebam água límpida.",
+    "linear_steps": [
+      "Retirar o encargo sanitário na mesa do Capitão Kaelen",
+      "Abater 7 Ratos Gigantes nas cavernas e túneis úmidos",
+      "Validar a potabilidade das fontes e retirar a gratificação municipal"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_night_pack",
+    "kind": "hunt",
+    "target": "Lobos",
+    "count": 5,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Sentinela Noturna: Predadores do Crepúsculo",
+    "contractor": "Guarda Florestal de Valdoria",
+    "desc": "Enfrente 5 Lobos que rondam os portões externos à noite.",
+    "briefing": "Viajantes que chegam após o toque de recolher são encurralados por predadores velozes que aprenderam a espreitar na orla das florestas.",
+    "flavor": "Uivos sincronizados anunciando o cerco. Não dê as costas à matilha.",
+    "linear_steps": [
+      "Registrar a guarda no posto de editais da Praça Central",
+      "Abater 5 Lobos durante viagens crepusculares e noturnas",
+      "Receber o reconhecimento dos guardas dos portões em moedas"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_orc_raiders",
+    "kind": "hunt",
+    "target": "Orcs Guerreiros",
+    "count": 3,
+    "biome": "fortress",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Contenção das Terras Altas: Batedores Orcs da Cordilheira",
+    "contractor": "Patrulha da Alta Montanha",
+    "desc": "Derrube 3 Orcs Guerreiros que vigiam os fortes de pedra.",
+    "briefing": "Bandos armados de invasores orcs construíram paliçadas improvisadas e desafiam a autoridade dos pelotões de reconhecimento da coroa.",
+    "flavor": "Gritos guturais de desafio ecoam nas gargantas de pedra. Responda com aço.",
+    "linear_steps": [
+      "Assumir a missão marcial com o Capitão Kaelen",
+      "Abater 3 Orcs Guerreiros nas fortalezas ou montanhas",
+      "Reafirmar a soberania das estradas e receber o tributo do conselho"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "kill_goblin_skirmishers",
+    "kind": "hunt",
+    "target": "Goblins Arqueiros",
+    "count": 5,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Varredura das Clareiras: Emboscada dos Arqueiros Verdes",
+    "contractor": "Guilda dos Arqueiros de Valdoria",
+    "desc": "Derrote 5 Goblins Arqueiros entrincheirados nos ramos.",
+    "briefing": "Goblins caçadores estão espalhando armadilhas de laço e disparando contra batedores florestais a partir de plataformas camufladas.",
+    "flavor": "Eles contam com a covardia da distância. Encurte o espaço e vença.",
+    "linear_steps": [
+      "Aceitar o encargo de caça na Praça Central",
+      "Eliminar 5 Goblins Arqueiros nas matas e trilhas",
+      "Receber a premiação da guilda dos atiradores"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_bone_sentinels",
+    "kind": "hunt",
+    "target": "Esqueletos",
+    "count": 6,
+    "biome": "crypt",
+    "icon": "ic-stat-attack",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Restauração do Repouso: Sentinelas de Ossos Ancestrais",
+    "contractor": "Vigília do Silêncio",
+    "desc": "Destrua 6 Esqueletos armados que guardam criptas profanadas.",
+    "briefing": "Guerreiros de épocas imemoriais ergueram-se com escudos fendidos para atacar qualquer mortal que se aproxime dos velhos sepulcros.",
+    "flavor": "Guerreiros sem coração que não conhecem o cansaço. Quebre a sua marcha.",
+    "linear_steps": [
+      "Aceitar o voto fúnebre no posto do Capitão Kaelen",
+      "Despedaçar 6 Esqueletos nas criptas e ruínas antigas",
+      "Consagrar a libertação das almas e retirar o estipêndio"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "kill_wild_boar_herd",
+    "kind": "hunt",
+    "target": "Javalis",
+    "count": 5,
+    "biome": "wilds",
+    "icon": "ic-stat-attack",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Sossego no Campo: Manada Desgovernada dos Bosques",
+    "contractor": "Administrador das Pastagens",
+    "desc": "Abata 5 Javalis que ameaçam o rebanho municipal.",
+    "briefing": "Uma manada densa de javalis foi espantada de seu covil e avançou contra pastos onde animais de criação pastavam tranquilamente.",
+    "flavor": "Feras obstinadas que derrubam paliçadas de madeira no peito. Trave a investida.",
+    "linear_steps": [
+      "Atender ao chamado rural na mesa do Capitão Kaelen",
+      "Derrubar 5 Javalis em combates pelos campos e bosques",
+      "Garantir a segurança dos rebanhos e retirar a recompensa devida"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "kill_gnoll_trackers",
+    "kind": "hunt",
+    "target": "Gnolls",
+    "count": 3,
+    "biome": "fortress",
+    "icon": "ic-stat-attack",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Segurança nas Gargantas: Rastreadores da Matilha Gnoll",
+    "contractor": "Batedores do Forte",
+    "desc": "Elimine 3 Gnolls que farejam sobreviventes de caravanas.",
+    "briefing": "Cães carniceiros inteligentes seguem marcas de sangue nas estradas para cercar mercadores desarmados. Uma intervenção direta é imperativa.",
+    "flavor": "Focinhos erguidos contra o vento buscando presa fácil. Mostre-lhes presas de aço.",
+    "linear_steps": [
+      "Aceitar o despacho de emergência na Praça Central",
+      "Neutralizar 3 Gnolls nas montanhas e passagens fortificadas",
+      "Salvar as rotas de comércio e receber o prêmio do comando"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "find_wolf_pelts",
+    "kind": "gather",
+    "target": "Peles de Lobo",
+    "count": 3,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Requisição Têxtil: Peles de Lobo para os Curtumes",
+    "contractor": "Guilda dos Curtidores de Valdoria",
+    "desc": "Colete 3 Peles de Lobo para reforço de agasalhos da guarda.",
+    "briefing": "Com a aproximação dos ventos frios da serra, os seleiros e curtidores precisam de fardos de pele densa para forrar mantos e botas das patrulhas.",
+    "flavor": "Peles limpas e sem rasgos excessivos garantem bom ouro na cidade.",
+    "linear_steps": [
+      "Consultar a lista de insumos com o Capitão Kaelen na Praça Central",
+      "Obter 3 Peles de Lobo através de caça e esfolamento em suas viagens",
+      "Comprovar a posse no inventário para recebimento imediato dos créditos"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_wolf_fangs",
+    "kind": "gather",
+    "target": "Presas de Lobo",
+    "count": 4,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Artesanato Marcial: Presas de Predador para Amuletos",
+    "contractor": "Tenda dos Ourives e Xamãs",
+    "desc": "Traga 4 Presas de Lobo arrancadas de predadores abatidos.",
+    "briefing": "Ourives do mercado confeccionam pingentes de bravura para jovens recrutas e solicitam presas intactas de predadores silvestres.",
+    "flavor": "Marfim canino afiado como punhal. O símbolo da coragem nas estradas.",
+    "linear_steps": [
+      "Assumir a encomenda de troféus na Praça Central",
+      "Reunir 4 Presas de Lobo derrotando alvos e pilhando carcaças",
+      "Entregar a encomenda automaticamente ao término do desafio"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_spider_silk",
+    "kind": "gather",
+    "target": "Sedas de Aranha",
+    "count": 3,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Tecelagem Nobre: Fios de Seda para Vestes Arcanas",
+    "contractor": "Tecelagem Fina de Valdoria",
+    "desc": "Recolha 3 Sedas de Aranha em teias preservadas na mata.",
+    "briefing": "Conjuradores da academia encomendaram mantos reforçados que exigem a flexibilidade e resistência sobrenatural dos fios de aranhas gigantes.",
+    "flavor": "Mais leve que linho e mais forte que o bronze. Ingrediente precioso.",
+    "linear_steps": [
+      "Aceitar o contrato artesanal com o Capitão Kaelen",
+      "Recolher 3 Sedas de Aranha enfrentando aracnídeos na floresta",
+      "Validar os materiais e receber as Valdoritas e prestígio"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_poison_glands",
+    "kind": "gather",
+    "target": "Glândulas de Veneno",
+    "count": 2,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Farmacologia Rápida: Glândulas Peçonhentas para Antídotos",
+    "contractor": "Hospital de Caridade de Pelor",
+    "desc": "Obtenha 2 Glândulas de Veneno intactas de criaturas peçonhentas.",
+    "briefing": "O boticário municipal precisa sintetizar soros contra veneno de aracnídeos e escorpiões para tratar soldados feridos em patrulhas.",
+    "flavor": "Do próprio veneno se extrai o remédio. Cuidado redobrado ao extrair a bolsa.",
+    "linear_steps": [
+      "Registrar a coleta médica no posto da Praça Central",
+      "Coletar 2 Glândulas de Veneno através de combates e exploração",
+      "Fornecer o insumo vital e retirar a remuneração com bênção cívica"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_medicinal_herbs",
+    "kind": "gather",
+    "target": "Ervas Medicinais",
+    "count": 5,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Suprimento do Lazareto: Ervas Curativas para os Enfermos",
+    "contractor": "Ordem das Irmãs da Piedade",
+    "desc": "Forrageie 5 Ervas Medicinais nos campos e clareiras.",
+    "briefing": "As reservas de cataplasma do santuário esgotaram-se após a chegada de colonos enfermos. Ervas frescas colhidas sob o orvalho são urgentes.",
+    "flavor": "Aroma balsâmico que alivia dores e estanca sangramentos. A colheita que salva vidas.",
+    "linear_steps": [
+      "Atender ao apelo do santuário via edital na Praça Central",
+      "Forragear ou encontrar 5 Ervas Medicinais durante suas viagens",
+      "Receber a gratidão do templo e as Valdoritas do tesouro"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_wild_mushrooms",
+    "kind": "gather",
+    "target": "Cogumelos Selvagens",
+    "count": 4,
+    "biome": "cavern",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Ingredientes das Profundezas: Cogumelos das Grutas",
+    "contractor": "Alquimista Velithra",
+    "desc": "Encontre 4 Cogumelos Selvagens em cavernas e locais úmidos.",
+    "briefing": "Fungos com propriedades de absorção mineral são o componente-chave na fermentação de poções de visão noturna e elixires de resistência física.",
+    "flavor": "Bases escuras colhidas da umidade da rocha. Um ingrediente de grande valor.",
+    "linear_steps": [
+      "Assumir a requisição alquímica na mesa do Capitão Kaelen",
+      "Coletar 4 Cogumelos Selvagens explorando grutas e subterrâneos",
+      "Finalizar a entrega de suprimentos e recolher a bolsa de moedas"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_wild_roots",
+    "kind": "gather",
+    "target": "Raízes Silvestres",
+    "count": 5,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Logística Militar: Raízes Silvestres para Ração de Marcha",
+    "contractor": "Intendência das Caravanas",
+    "desc": "Desenterre 5 Raízes Silvestres nas margens das trilhas.",
+    "briefing": "Tubérculos densos e resistentes são desidratados para compor os fardos de ração dos batedores que passam semanas longe de acampamentos fortificados.",
+    "flavor": "Alimento rústico e fibroso que sustenta uma patrulha inteira na marcha.",
+    "linear_steps": [
+      "Aceitar o edital de suprimentos na Praça Central",
+      "Forragear 5 Raízes Silvestres ao longo das matas e planícies",
+      "Receber a compensação em Valdoritas creditada pelo intendente"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_wild_berries",
+    "kind": "gather",
+    "target": "Frutos Silvestres",
+    "count": 5,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Vitalidade Campal: Frutos Silvestres para Extratos",
+    "contractor": "Boticário Municipal de Valdoria",
+    "desc": "Colha 5 Frutos Silvestres nos arbustos ao longo dos caminhos.",
+    "briefing": "Bagas frescas ricas em nutrientes são prensadas para fazer xaropes tonificantes destinados a trabalhadores e sentinelas das muralhas.",
+    "flavor": "Frutas maduras colhidas sob o sol. O vigor da natureza engarrafado.",
+    "linear_steps": [
+      "Consultar a necessidade da botica com o Capitão Kaelen",
+      "Reunir 5 Frutos Silvestres em arbustos durante suas jornadas",
+      "Completar a cota e receber o estipêndio em ouro e experiência"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_rat_tails",
+    "kind": "gather",
+    "target": "Caudas de Rato",
+    "count": 6,
+    "biome": "cavern",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Controle de Pragas: Caudas de Rato como Prova Sanitária",
+    "contractor": "Inspetoria Sanitária da Cidade",
+    "desc": "Apresente 6 Caudas de Rato como atestado de dedetização.",
+    "briefing": "O magistrado estabeleceu pagamento fixo por apêndice de roedor apresentado, garantindo que as galerias inferiores continuem sob constante expurgo.",
+    "flavor": "Troféu desagradável, mas o dinheiro do tesouro paga o sabão e a ceia.",
+    "linear_steps": [
+      "Retirar o comprovante de fiscalização na Praça Central",
+      "Eliminar roedores monstruosos e coletar 6 Caudas de Rato",
+      "Atestar a limpeza urbana e sacar o valor estipulado"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_goblin_ears",
+    "kind": "gather",
+    "target": "Orelhas de Goblin",
+    "count": 4,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Comprovação Marcial: Orelhas de Goblin para a Guarda",
+    "contractor": "Capitão Kaelen",
+    "desc": "Traga 4 Orelhas de Goblin como comprovação de vitória.",
+    "briefing": "O conselho não paga por histórias de caçadores; apenas troféus físicos liberam as verbas de segurança destinadas à contenção das tribos verdes.",
+    "flavor": "A prova inegável de que a emboscada foi desmantelada com autoridade.",
+    "linear_steps": [
+      "Apresentar-se ao Capitão Kaelen na mesa de editais da Praça Central",
+      "Derrotar saqueadores e recolher 4 Orelhas de Goblin",
+      "Receber o soldo integral sem burocracia"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_bear_pelts",
+    "kind": "gather",
+    "target": "Peles de Urso",
+    "count": 2,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Fardamento Pesado: Peles de Urso para os Baluartes",
+    "contractor": "Intendente de Armas e Fardamento",
+    "desc": "Entregue 2 Peles de Urso de pelagem espessa e resistente.",
+    "briefing": "As guaritas de pedra no alto das muralhas enfrentam noites glaciais. Capas confeccionadas com couro e pelo de urso mantêm os vigias alertas.",
+    "flavor": "Pelagem espessa e isolamento térmico impecável. Uma presa de respeito.",
+    "linear_steps": [
+      "Assumir a requisição de mantos na Praça Central",
+      "Caçar e obter 2 Peles de Urso em confrontos nas matas",
+      "Receber o prêmio especial pago pela guarnição das muralhas"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_bear_claws",
+    "kind": "gather",
+    "target": "Garras de Urso",
+    "count": 3,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Forja de Honra: Garras de Predador para Pomos de Espada",
+    "contractor": "Forja dos Troféus de Garrick",
+    "desc": "Reúna 3 Garras de Urso bem preservadas para os armeiros.",
+    "briefing": "Ferreiros nobres entalham garras maciças nos cabos de lâminas sob encomenda para patrulheiros de Valdoria. O pagamento é generoso por peças intactas.",
+    "flavor": "Curvas, rígidas e afiadas como aço. O símbolo do vigor selvagem.",
+    "linear_steps": [
+      "Receber as especificações do mestre ferreiro na Praça Central",
+      "Coletar 3 Garras de Urso vencendo predadores nas florestas",
+      "Finalizar a encomenda e receber as moedas da forja"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_boar_leather",
+    "kind": "gather",
+    "target": "Couros de Javali",
+    "count": 3,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Arreios de Batalha: Couros Resistentes de Javali",
+    "contractor": "Oficina dos Seleiros de Valdoria",
+    "desc": "Providencie 3 Couros de Javali grossos para montarias.",
+    "briefing": "Cavalos de guerra exigem selas e cilhas que resistam a choques e umidade sem rasgar. O couro de javali adulto é o padrão exigido pela cavalaria.",
+    "flavor": "Espesso, fibroso e resistente ao tempo. O alicerce da boa sela.",
+    "linear_steps": [
+      "Aceitar o encargo dos seleiros na Praça Central",
+      "Obter 3 Couros de Javali através de caçadas nos ermos",
+      "Receber a remuneração estipulada pela oficina militar"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_boar_tusks",
+    "kind": "gather",
+    "target": "Presas de Javali",
+    "count": 3,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Defesa Blindada: Presas de Javali para Broquéis",
+    "contractor": "Ferraria Central de Valdoria",
+    "desc": "Traga 3 Presas de Javali para ornamentação e espigões de escudo.",
+    "briefing": "Artesãos soldam presas curvas nos umbos centrais de escudos infantaria para devolver pancadas mortais durante colisões de linhas de frente.",
+    "flavor": "Marfim denso que fura chapas e resiste a marteladas de guerra.",
+    "linear_steps": [
+      "Registrar o fornecimento de marfim com o Capitão Kaelen",
+      "Reunir 3 Presas de Javali abatendo animais de grande porte",
+      "Concluir o pedido e embolsar o ouro dos armeiros"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_gnoll_teeth",
+    "kind": "gather",
+    "target": "Dentes de Gnoll",
+    "count": 4,
+    "biome": "fortress",
+    "icon": "ic-mochila",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Caçador de Recompensas: Caninos de Saqueadores Gnolls",
+    "contractor": "Guarda da Fronteira",
+    "desc": "Apresente 4 Dentes de Gnoll arrancados de invasores.",
+    "briefing": "Oficiais da patrulha alta mantêm livro aberto de recompensas para cada bando gnoll dizimado nas passagens das colinas pedregosas.",
+    "flavor": "Caninos afiados que rasgavam carne e agora atestam a segurança do vale.",
+    "linear_steps": [
+      "Aceitar o contrato fronteiriço na Praça Central",
+      "Derrubar bandos de gnolls e coletar 4 Dentes de Gnoll",
+      "Receber as Valdoritas pagas pela pacificação da fronteira"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "find_kobold_scales",
+    "kind": "gather",
+    "target": "Escamas de Kobold",
+    "count": 5,
+    "biome": "cavern",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Composto Ignífugo: Escamas de Kobold para Alquimia",
+    "contractor": "Alquimistas da Forja",
+    "desc": "Junte 5 Escamas de Kobold recolhidas em covis rochosos.",
+    "briefing": "Moídas com resina vegetal, escamas de répteis subterrâneos criam uma pasta protetora que impede couros e tecidos de pegarem fogo em combate.",
+    "flavor": "Pequenas escamas ásperas com segredos resistentes ao calor.",
+    "linear_steps": [
+      "Firmar o pedido dos alquimistas na Praça Central",
+      "Recolher 5 Escamas de Kobold enfrentando criaturas nas cavernas",
+      "Finalizar a entrega de materiais raros com pagamento garantido"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_cracked_skulls",
+    "kind": "gather",
+    "target": "Crânios Rachados",
+    "count": 3,
+    "biome": "crypt",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Estudo Anatômico: Crânios de Tumbas Antigas",
+    "contractor": "Cátedra de Medicina e Cura",
+    "desc": "Recupere 3 Crânios Rachados de ossadas expostas.",
+    "briefing": "Eruditos analisam deformações ósseas causadas por antigas pragas para preparar defesas médicas contra febres que possam reaparecer no vale.",
+    "flavor": "Restos mortais que ainda guardam as respostas para salvar as gerações futuras.",
+    "linear_steps": [
+      "Retirar o encargo científico com o Capitão Kaelen",
+      "Encontrar 3 Crânios Rachados nas necrópoles e criptas",
+      "Receber o estipêndio de pesquisa da cátedra acadêmica"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_ancient_bones",
+    "kind": "gather",
+    "target": "Ossos Antigos",
+    "count": 6,
+    "biome": "crypt",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Fertilizante Rúnico: Cinzas Ósseas dos Mausoléus",
+    "contractor": "Jardins Sagrados do Templo",
+    "desc": "Junte 6 Ossos espalhados para consagração e ritos.",
+    "briefing": "Ossadas profanadas que jazem fora das covas são purificadas em chamas abençoadas pelo clero para adubar os pomares do templo com respeito sagrado.",
+    "flavor": "A matéria que retorna à terra sob a luz acolhedora do templo.",
+    "linear_steps": [
+      "Receber o encargo dos jardineiros na Praça Central",
+      "Recolher 6 Ossos em catacumbas ou ermos assombrados",
+      "Completar o ciclo litúrgico com recompensa em ouro e fé"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_violet_spores",
+    "kind": "gather",
+    "target": "Esporos Violetas",
+    "count": 2,
+    "biome": "cavern",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Tinta Luminescente: Esporos Violetas das Profundezas",
+    "contractor": "Escribas do Conservatório",
+    "desc": "Colete 2 Esporos Violetas colhidos de fungos cavernosos.",
+    "briefing": "Calígrafos reais necessitam de pigmentos bioluminescentes para registrar mapas de galerias subterrâneas que possam ser lidos sem acender tochas.",
+    "flavor": "Pó arroxeado brilhante que reluz na escuridão como constelações.",
+    "linear_steps": [
+      "Aceitar o encargo de iluminação na Praça Central",
+      "Obter 2 Esporos Violetas derrotando fungos em grutas úmidas",
+      "Receber o generoso pagamento dos escribas de Valdoria"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_acidic_residue",
+    "kind": "gather",
+    "target": "Resíduos Ácidos",
+    "count": 2,
+    "biome": "cavern",
+    "icon": "ic-mochila",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Metalurgia Especial: Resíduos Ácidos para Dissolução",
+    "contractor": "Fundição dos Ferreiros",
+    "desc": "Obtenha 2 Frascos de Resíduo Ácido de criaturas viscosas.",
+    "briefing": "Limos subterrâneos secretam substâncias capazes de purificar escórias minerais no cadinho, separando prata e ouro de rochas brutas com rapidez.",
+    "flavor": "Líquido efervescente que queima o ferro se mal manuseado. Use frascos esmaltados.",
+    "linear_steps": [
+      "Aceitar a encomenda cáustica no posto do Capitão Kaelen",
+      "Coletar 2 Resíduos Ácidos enfrentando limos nas cavernas",
+      "Garantir a remuneração técnica da fundição municipal"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "find_owlbear_feathers",
+    "kind": "gather",
+    "target": "Penas de Urso-Coruja",
+    "count": 2,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 135,
+    "reward_xp": 250,
+    "title": "Balística de Precisão: Penas Raras para Flechas Reais",
+    "contractor": "Mestre dos Arqueiros Reais",
+    "desc": "Traga 2 Penas de Urso-Coruja intactas da floresta.",
+    "briefing": "A plumagem primária de uma fera lendária confere estabilidade incomparável a virotes e flechas pesadas projetadas para furar couraças orcs.",
+    "flavor": "Macias ao toque, inabaláveis ao cortar rajadas de vento.",
+    "linear_steps": [
+      "Assumir a requisição balística na Praça Central",
+      "Conseguir 2 Penas de Urso-Coruja superando grandes predadores",
+      "Receber o prêmio de mestre atirador concedido pela guarda"
+    ],
+    "min_level": 4
+  },
+  {
+    "id": "find_owlbear_beaks",
+    "kind": "gather",
+    "target": "Bicos de Urso-Coruja",
+    "count": 1,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 135,
+    "reward_xp": 250,
+    "title": "Ferramentaria Nobre: Bico de Predador para Lapidação",
+    "contractor": "Corporação dos Lapidários",
+    "desc": "Obtenha 1 Bico de Urso-Coruja íntegro como bigorna de apoio.",
+    "briefing": "A estrutura óssea do bico de um urso-coruja maduro é tão compacta que lapidários utilizam-na como suporte para polir gemas preciosas sem arranhões.",
+    "flavor": "Um bico que quebrava ossos e agora serve para forjar obras de arte.",
+    "linear_steps": [
+      "Pegar a requisição de alto valor na mesa de Kaelen",
+      "Abater um urso-coruja e extrair 1 Bico de Urso-Coruja",
+      "Receber a expressiva soma em Valdoritas e reputação"
+    ],
+    "min_level": 4
+  },
+  {
+    "id": "find_large_claws",
+    "kind": "gather",
+    "target": "Garras Grandes",
+    "count": 3,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Equipamento de Escalada: Garras Grandes de Predadores",
+    "contractor": "Tenda dos Artífices Nômades",
+    "desc": "Entregue 3 Garras Grandes afiadas de monstros abatidos.",
+    "briefing": "Escaladores de montanha moldam garras de grandes feras em pontas de ganchos de resgate e ancoragens nas falésias gélidas.",
+    "flavor": "Força esculpida pela seleção natural dos ermos. Aço biológico.",
+    "linear_steps": [
+      "Consultar a lista dos artífices na Praça Central",
+      "Conquistar 3 Garras Grandes derrotando feras pelas florestas",
+      "Receber o pagamento imediato e agradecer a parceria"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_military_insignias",
+    "kind": "gather",
+    "target": "Insígnias Militares",
+    "count": 2,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Honra e Memória: Recuperação de Insígnias Militares",
+    "contractor": "Memorial dos Guardas de Valdoria",
+    "desc": "Recupere 2 Insígnias Militares de batedores caídos.",
+    "briefing": "Patrulheiros emboscados em tempos passados deixaram medalhas de identificação que precisam retornar às famílias para sepultamento com honrarias.",
+    "flavor": "Bronze oxidado pela chuva que ainda brilha com o dever cumprido.",
+    "linear_steps": [
+      "Aceitar o dever solene no posto do Capitão Kaelen",
+      "Recuperar 2 Insígnias Militares em despojos e ruínas",
+      "Entregar os símbolos ao memorial e receber a recompensa cívica"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_ritual_pages",
+    "kind": "gather",
+    "target": "Páginas de Ritual",
+    "count": 2,
+    "biome": "fortress",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Censura Arcana: Apreensão de Páginas de Ritual",
+    "contractor": "Arquivistas Sagrados do Altar",
+    "desc": "Apreenda 2 Páginas de Ritual arrancadas de grimórios hereges.",
+    "briefing": "Células de fanáticos disseminam pergaminhos contendo maldições arcanas. O sacerdócio exige que sejam confiscadas e queimadas em fogueira benta.",
+    "flavor": "Linhas vermelhas traçadas em ódio. Mantenha os pergaminhos fechados.",
+    "linear_steps": [
+      "Retirar o mandado de apreensão na Praça Central",
+      "Apreender 2 Páginas de Ritual enfrentando cultistas",
+      "Garantir a incineração das heresias e sacar a recompensa"
+    ],
+    "min_level": 2
+  },
+  {
+    "id": "find_ghoul_flesh",
+    "kind": "gather",
+    "target": "Carnes de Carniçal",
+    "count": 2,
+    "biome": "crypt",
+    "icon": "ic-mochila",
+    "reward_gold": 120,
+    "reward_xp": 225,
+    "title": "Pesquisa Toxicológica: Amostras de Tecido de Carniçal",
+    "contractor": "Pesquisadores do Lazareto",
+    "desc": "Recolha 2 Amostras de Carne de Carniçal para estudo.",
+    "briefing": "Médicos analisam como a infecção necrótica resiste ao apodrecimento natural para desenvolver antídotos contra a rigidez paralisante das garras.",
+    "flavor": "Fria, cinzenta e pestilenta. Use pinças de prata para embalar.",
+    "linear_steps": [
+      "Aceitar o encargo de risco toxicológico na Praça Central",
+      "Coletar 2 Carnes de Carniçal derrotando mortos-vivos no cemitério",
+      "Viabilizar a pesquisa médica e receber a expressiva bonificação"
+    ],
+    "min_level": 3
+  },
+  {
+    "id": "find_apothecary_herbs_large",
+    "kind": "gather",
+    "target": "Ervas Medicinais",
+    "count": 6,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Campanha de Abastecimento: Grande Colheita de Ervas",
+    "contractor": "Conselho de Saúde Pública",
+    "desc": "Entregue 6 Ervas Medicinais viçosas colhidas nos vales.",
+    "briefing": "Renovação dos estoques preventivos dos postos de atendimento das quatro portas da muralha. Quanto mais cedo a entrega, mais vidas protegidas.",
+    "flavor": "O verde vivo dos vales de Valdoria em favor de toda a população.",
+    "linear_steps": [
+      "Aceitar a campanha comunitária na mesa do Capitão Kaelen",
+      "Coletar 6 Ervas Medicinais durante suas viagens pelos ermos",
+      "Garantir o suprimento cívico e retirar o pagamento em Valdoritas"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_cave_mushrooms_batch",
+    "kind": "gather",
+    "target": "Cogumelos Selvagens",
+    "count": 5,
+    "biome": "cavern",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Safra das Grutas: Cogumelos Escuros para a Destilaria",
+    "contractor": "Guilda dos Destiladores",
+    "desc": "Encontre 5 Cogumelos Selvagens nas fendas subterrâneas.",
+    "briefing": "A famosa cerveja escura da estalagem requer fermento silvestre colhido diretamente em rochas de basalto úmido para adquirir seu sabor característico.",
+    "flavor": "O aroma de terra fresca que se transformará na caneca mais requisitada.",
+    "linear_steps": [
+      "Firmar a parceria comercial na Praça Central",
+      "Apanhar 5 Cogumelos Selvagens em cavernas e subterrâneos",
+      "Concluir o lote e comemorar com moedas sonantes no bolso"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_hunter_wolf_pelts_fine",
+    "kind": "gather",
+    "target": "Peles de Lobo",
+    "count": 4,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 90,
+    "reward_xp": 175,
+    "title": "Guarda de Honra: Fardo Escolhido de Peles de Lobo",
+    "contractor": "Feitor da Guarda do Castelo",
+    "desc": "Obtenha 4 Peles de Lobo de espécimes maduros das serras.",
+    "briefing": "O pelotão de elite das portas altas da cidadela está renovando suas mantas de gala e requisita peles de porte imponente.",
+    "flavor": "Peles que impõem respeito e aquecem as sentinelas de maior honra.",
+    "linear_steps": [
+      "Assumir a requisição nobre com o Capitão Kaelen",
+      "Caçar e reunir 4 Peles de Lobo durante suas aventuras",
+      "Entregar o fardo e recolher a generosa quantia em ouro"
+    ],
+    "min_level": 1
+  },
+  {
+    "id": "find_silk_spools",
+    "kind": "gather",
+    "target": "Sedas de Aranha",
+    "count": 4,
+    "biome": "wilds",
+    "icon": "ic-mochila",
+    "reward_gold": 105,
+    "reward_xp": 200,
+    "title": "Artilharia Élfica: Fios de Seda para Cordas de Arco",
+    "contractor": "Mestres de Arco e Flecha",
+    "desc": "Recolha 4 Sedas de Aranha para trançagem de cordas tenazes.",
+    "briefing": "Cordas de arco de caça confeccionadas com seda de aranha oferecem elasticidade inigualável e disparo silencioso mesmo sob chuva torrencial.",
+    "flavor": "O silêncio do disparo que não vibra nem deforma com a umidade.",
+    "linear_steps": [
+      "Retirar o despacho de armaria na Praça Central",
+      "Coletar 4 Sedas de Aranha enfrentando predadores de oito patas",
+      "Abastecer os atiradores de Valdoria e receber a remuneração"
+    ],
+    "min_level": 2
+  }
 ];
 
-// #DC (sessao #70): PNG relativo ao desafio (inimigo p/ hunt, item p/ gather) no
-// topo do popup do Desafio do Dia. Substitui o SVG heraldico <use href="#ic-*">
-// "tosco" que era usado antes (regra PRIORIDADE 0: NUNCA SVG, sempre PNG).
-// Mapeado por TARGET (nao por icon: 'ic-lobo' colide entre "Lobos Cinzentos" e
-// "Pelo de Lobo"). Ao adicionar entry em DAILY_CHALLENGE_POOL, mapear o PNG aqui.
-// Todos os PNGs ja existem em shared/img/{combat/enemies,items}/ (verificado).
 function _dcDailyPng(ch){
-  var MAP = {
-    'Lobos Cinzentos':      'combat/enemies/lobo.webp',
-    'Goblins':              'combat/enemies/goblin.webp',
-    'Esqueletos':           'combat/enemies/esqueleto.webp',
-    'Bandidos':             'combat/enemies/bandido.webp',
-    'Aranhas Gigantes':     'combat/enemies/aranha-gigante.webp',
-    'Raízes-da-Noite': 'items/raizes-silvestres.webp',
-    'Pelo de Lobo':         'items/pele-de-lobo.webp',
-    'Cogumelos Brilhantes': 'items/cogumelos-selvagens.webp',
-    'Gemas Brutas':         'items/gema-lapidada.webp',
-    'Ervas Curativas':      'items/erva-curativa.webp'
-  };
-  return '../shared/img/' + ((ch && MAP[ch.target]) || 'city/daily_challenge.webp');
+  if (!ch) return '../shared/img/city/daily_challenge.webp';
+  if (ch.target && DAILY_CHALLENGE_IMAGE_MAP[ch.target]) {
+    return '../shared/img/' + DAILY_CHALLENGE_IMAGE_MAP[ch.target];
+  }
+  return '../shared/img/city/daily_challenge.webp';
 }
 
 function _dailyChallengeForToday(){
@@ -24885,7 +26258,10 @@ function _dailyChallengeForToday(){
         // (_buildDailyChallengeMockData) leem ch.desc/ch.biome/ch.reward_gold/ch.reward_xp.
         // O mapeamento REMOTE OMITIA esses 4 campos → tela do desafio mostrava "undefined"
         // na descrição, no local e em "+undefined / +undefined XP". Mapeados do servidor:
-        desc: _srvCh.flavor || _srvCh.title || '',
+        desc: _srvCh.description || _srvCh.flavor || _srvCh.title || '',
+        contractor: _srvCh.contractor || 'Guarda Municipal de Valdoria',
+        briefing: _srvCh.briefing || '',
+        linear_steps: _srvCh.linear_steps || [],
         biome: _srvCh.biome_label || _srvCh.theme || '',
         reward_gold: parseInt(_srvCh.reward_gold, 10) || 0,
         reward_xp: parseInt(_srvCh.reward_xp, 10) || 0,
@@ -36058,6 +37434,8 @@ function _buildSquareMockData(player){
     sectionLabel: 'Atividades da Praça',  // P6: seção ornamentada (PADRAO_LOCAIS A)
     services: [
       { icon: _sqIco('dialogo'),  label: 'Investigar (NPCs)',  cb: 'square_investigate_open' },
+      { icon: _sqIco('recompensa'), label: 'Oficial de Recompensas', cb: 'square_bounty_officer_open',
+        badge: ((player && player.metadata && player.metadata.daily_challenge_completed) || window._dailyChallengeDone) ? '✓ Concluído' : 'Edital Ativo' },
       { icon: _sqIco('tochas'),   label: 'Explorar Área',      cb: 'square_explore_open' },
       // canonical: data/plaza_objects_data.py — 3 objetos interativos (fonte/quadro/estátua)
       { icon: _sqIco('fonte'),    label: 'Objetos da Praça',   cb: 'square_objects_open' },
@@ -36070,6 +37448,105 @@ function _buildSquareMockData(player){
       { icon: _sqIco('coroa'),    label: 'Mural dos Aventureiros', cb: 'square_mural_open' }
     ]
   };
+}
+
+function _squareShowBountyOfficerDialogue(p){
+  p = p || window.CITY_MOCK_PLAYER || null;
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+    _openCityDialogue('square', 'bounty_officer', p);
+    return;
+  }
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    var dc = (typeof _dailyChallengeForToday === 'function') ? _dailyChallengeForToday() : null;
+    var doneToday = !!(window._dailyChallengeDone || (p && p.metadata && p.metadata.daily_challenge_completed));
+    var title = (dc && (dc.title || dc.desc)) || 'Edital do Dia';
+    var count = (dc && dc.count) || 1;
+    var target = (dc && dc.target) || 'alvos';
+    var gold = (dc && dc.reward_gold) || 90;
+    var xp = (dc && dc.reward_xp) || 175;
+
+    var script = [
+      {
+        type: 'narration',
+        text: 'Ao lado do estandarte de armas de Valdoria e de uma mesa de campanha de carvalho, o Capitão Kaelen examina pergaminhos selados com cera vermelha. O veterano assente com aprumo militar ao notar sua aproximação.'
+      }
+    ];
+    var choices = [];
+    if (doneToday) {
+      script.push({
+        type: 'speech',
+        speaker: 'Capitão Kaelen',
+        text: 'Excelente trabalho com o edital de hoje, aventureiro! Nossas rotas estão mais seguras graças aos seus esforços. Novos despachos serão afixados aqui amanhã ao amanhecer.'
+      });
+      choices.push({ id: 'leave', label: 'Despedir-se' });
+    } else {
+      script.push({
+        type: 'speech',
+        speaker: 'Capitão Kaelen',
+        text: 'Saudações, combatente. O Conselho emite editais diários para conter as ameaças às muralhas e suprir nossos artesãos. Hoje temos o edital: «' + title + '» (' + count + '× ' + target + '). O tesouro garante ' + gold + ' Valdoritas e ' + xp + ' XP a quem concluir o serviço.'
+      });
+      choices.push({ id: 'open_challenge', label: '[📜 Ver Edital do Dia] Consultar detalhes e aceitar a caçada' });
+      choices.push({ id: 'how_it_works', label: '[💬 "Como funcionam esses editais?"] Entender a rotina de caçadas' });
+      choices.push({ id: 'leave', label: 'Despedir-se' });
+    }
+
+    window.vEncounter.render({
+      npc: {
+        name: 'Capitão Kaelen',
+        desc: 'Oficial de Recompensas de Valdoria · Intendente de Editais e Caçadas Cívicas',
+        portrait: '/shared/img/npcs/guarda-praca.webp'
+      },
+      script: script,
+      choices: choices
+    }, {
+      player: p,
+      closeable: true,
+      onChoice: function(ch){
+        if (ch && ch.id === 'open_challenge') {
+          try { window.vEncounter.close(); } catch(_){}
+          _showDailyChallengeEpicPopup(p);
+        } else if (ch && ch.id === 'how_it_works') {
+          window.vEncounter.render({
+            npc: {
+              name: 'Capitão Kaelen',
+              desc: 'Oficial de Recompensas de Valdoria · Intendente de Editais e Caçadas Cívicas',
+              portrait: '/shared/img/npcs/guarda-praca.webp'
+            },
+            script: [
+              {
+                type: 'narration',
+                text: 'O Capitão Kaelen gesticula na direção do mapa de patrulha aberto sobre a mesa de carvalho.'
+              },
+              {
+                type: 'speech',
+                speaker: 'Capitão Kaelen',
+                text: 'Todos os dias, à meia-noite, o Conselho publica uma requisição urgente — caçar feras e salteadores ou recolher materiais raros nos ermos. Ao aceitar, o progresso é acompanhado em suas viagens e combates. Assim que cumprir a meta, a recompensa é enviada imediatamente pelo tesouro municipal.'
+              }
+            ],
+            choices: [
+              { id: 'open_challenge', label: '[📜 Ver Edital de Hoje] Abrir o quadro do edital' },
+              { id: 'leave', label: '"Entendido, Capitão."' }
+            ]
+          }, {
+            player: p,
+            closeable: true,
+            onChoice: function(ch2){
+              if (ch2 && ch2.id === 'open_challenge') {
+                try { window.vEncounter.close(); } catch(_){}
+                _showDailyChallengeEpicPopup(p);
+              } else {
+                try { window.vEncounter.close(); } catch(_){}
+              }
+            }
+          });
+        } else {
+          try { window.vEncounter.close(); } catch(_){}
+        }
+      }
+    });
+    return;
+  }
+  _showDailyChallengeEpicPopup(p);
 }
 
 // === ARTISTAS DE RUA — diálogo épico (PADRAO_ALDRIC + vEncounter + 3D dice) ====
@@ -49444,7 +50921,7 @@ function _showDailyChallengeEpicPopup(p){
         + '</style>'
 
         // === BANNER topo: "◆ DESAFIO DO DIA · CAÇA ◆" === (#94: fontes maiores; #95: fluido clamp + linhas flexíveis)
-        + '<div style="display:flex;align-items:center;justify-content:center;gap: var(--v-space-sm, 5px);margin: var(--v-space-xs, 2px) 0 var(--v-space-lg, 12px);'
+        + '<div style="display:flex;align-items:center;justify-content:center;gap: var(--v-space-sm, 5px);margin: var(--v-space-xs, 2px) 0 6px;'
         + 'font-family:var(--v-font-display,Cinzel,serif);font-size:calc(clamp(11px,3.1vw,13px) * var(--v-font-scale, 1));'
         + 'color:var(--v-gold,#c4953a);letter-spacing:clamp(1px,0.6vw,2.4px);text-transform:uppercase;">'
         + '<span style="flex:1 1 12px;max-width:34px;height:1px;background:linear-gradient(90deg,transparent,rgba(196,149,58,0.6));"></span>'
@@ -49454,11 +50931,25 @@ function _showDailyChallengeEpicPopup(p){
         + '<span style="flex:1 1 12px;max-width:34px;height:1px;background:linear-gradient(90deg,rgba(196,149,58,0.6),transparent);"></span>'
         + '</div>'
 
-        // === FLAVOR LORE ===
-        + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);'
+        // === TÍTULO DO EDITAL & SOLICITANTE ===
+        + (ch.title ? ('<div style="text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-weight:700;'
+        + 'font-size:calc(clamp(14px,4.2vw,17px) * var(--v-font-scale, 1));color:#f4ebd9;margin-bottom:4px;line-height:1.3;">'
+        + ch.title + '</div>') : '')
+        + '<div style="display:flex;align-items:center;justify-content:center;gap:6px;'
+        + 'font-size:calc(clamp(11px,3.2vw,12px) * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);margin-bottom:10px;">'
+        + '<span>📜</span><b style="color:var(--v-gold,#c4953a);">Solicitante:</b> '
+        + '<span>' + (ch.contractor || 'Guarda Municipal de Valdoria') + '</span>'
+        + '</div>'
+
+        // === BRIEFING NARRATIVO (Contexto AAA) ===
+        + (ch.briefing ? ('<div style="text-align:justify;font-style:italic;color:var(--v-text-dim,#a09484);'
+        + 'background:rgba(26,20,16,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:var(--v-radius-sm, 6px);'
+        + 'padding: 8px 10px;font-size:calc(clamp(12px,3.4vw,13.5px) * var(--v-font-scale, 1));margin: 0 0 10px;line-height:1.55;">'
+        + '«' + ch.briefing + '»'
+        + '</div>') : ('<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);'
         + 'font-size:calc(clamp(13px,3.7vw,15px) * var(--v-font-scale, 1));margin: 0 var(--v-space-md, 8px) var(--v-space-lg, 12px);line-height:1.6;">'
         + '"' + ch.desc + '"'
-        + '</div>'
+        + '</div>'))
 
         // === ALVO BOX (target + biome highlighted) === (#95: fluido + badge de contagem + wrap-safe)
         + '<div style="margin: var(--v-space-md, 8px) 0 0;padding: var(--v-space-lg, 12px);'
@@ -49489,6 +50980,23 @@ function _showDailyChallengeEpicPopup(p){
         + '    ⏰ <span>Reseta à meia-noite</span>'
         + '  </div>'
         + '</div>'
+
+        // === ETAPAS LINEARES (Progresso AAA) ===
+        + (ch.linear_steps && ch.linear_steps.length ? (
+          '<div style="margin: 8px 0 0;padding: 8px 10px;'
+          + 'background:rgba(30,22,15,0.45);border:1px dashed rgba(196,149,58,0.3);border-radius:var(--v-radius-sm, 6px);">'
+          + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10.5px * var(--v-font-scale, 1));'
+          + 'color:var(--v-gold,#c4953a);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:flex;align-items:center;gap:5px;">'
+          + '<span>📋</span> <b>Etapas do Edital</b></div>'
+          + ch.linear_steps.map(function(st, idx){
+            return '<div style="font-size:calc(clamp(11px,3.1vw,12px) * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);'
+              + 'display:flex;align-items:flex-start;gap:6px;margin-bottom:3px;line-height:1.4;">'
+              + '<span style="color:var(--v-gold,#c4953a);font-weight:700;flex:0 0 auto;">' + (idx + 1) + '.</span>'
+              + '<span>' + st + '</span>'
+              + '</div>';
+          }).join('')
+          + '</div>'
+        ) : '')
 
         // === RECOMPENSAS BOX === (#95: fluido + wrap-safe)
         + '<div style="margin: var(--v-space-md-lg, 10px) 0 0;padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px);'
@@ -60581,6 +62089,16 @@ var _CITY_APPROACH_SCENES = {
     narration: 'O aroma de pergaminho vegetal e pigmentos minerais preenche a sala dedicada aos mistérios rúnicos...'
   },
 
+  // ── PRAÇA CENTRAL (Oficial de Recompensas e Cidadãos) ───────────────────
+  'square:bounty_officer': {
+    npc: { name: 'Capitão Kaelen', desc: 'Oficial de Recompensas · Praça Central', portrait: '/shared/img/npcs/guarda-praca.webp' },
+    narration: 'Junto à mesa de campanha da guarda e ao estandarte de Valdoria, o Capitão Kaelen analisa despachos de caçada e editais cívicos com postura vigilante...'
+  },
+  'square:*': {
+    npc: { name: 'Guarda da Praça', desc: 'Vigilante · Praça Central', portrait: '/shared/img/npcs/guarda-praca.webp' },
+    narration: 'O burburinho de mercadores, transeuntes e o murmúrio da fonte de pedra marcam o pulsar cotidiano da Praça Central...'
+  },
+
   // ── FESTIVAL ───────────────────────────────────────────────────────────
   'festival:olmiro': {
     npc: { name: 'Olmiro', desc: 'Mestre de Cerimônias · Praça do Festival', portrait: '/shared/img/npcs/olmiro-festeiro.webp' },
@@ -60926,6 +62444,13 @@ function _resolveCityChoice(venue, node, choiceId, p, npc, ctx){
 }
 
 function _handleCityDialogueResult(venue, data, p, npc, ctx){
+  if (data.action === 'open_daily_challenge') {
+    try { window.vEncounter.close(); } catch(_){}
+    if (typeof _showDailyChallengeEpicPopup === 'function') {
+      _showDailyChallengeEpicPopup(p);
+    }
+    return;
+  }
   // fechar
   if (data.close) { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); return; }
   // transição (porão server-driven já existente)
