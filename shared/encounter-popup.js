@@ -1539,10 +1539,8 @@
        via _heralIco/sprite, nunca payload). */
     if (!npcPortrait) {
       npcPortrait = _resolveGenericEncounterPortrait(npcName, npcDesc);
-      if (npcPortrait) {
-        _safePortraitURL = String(npcPortrait).replace(/"/g, '&quot;');
-      }
     }
+    var _safePortraitURL = npcPortrait ? String(npcPortrait).replace(/"/g, '&quot;') : '';
     var _hasPortraitImg = !!npcPortrait;
     var _hasPortraitHTML = !!npcPortraitHTML;
     var _portraitInner = '';
