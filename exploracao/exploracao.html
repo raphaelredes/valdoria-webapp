@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-07T21:28:03Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T08:46:16Z - do not edit directly, edit source -->
 
 
 
@@ -36910,6 +36910,10 @@ function _vinvExpAutoEquipSmart() {
 
   function canWearArmor(it) {
     var tags = it.tags || [];
+    if (tags.indexOf('clothing') !== -1) return true; // Roupas normais não exigem proficiência
+    var isArmor = tags.indexOf('armor') !== -1 || tags.indexOf('heavy_armor') !== -1 || tags.indexOf('medium_armor') !== -1 || tags.indexOf('light_armor') !== -1;
+    if (!isArmor) return true; // Não é armadura
+    if (cls === 'monge') return false; // Monge nunca usa armadura (Unarmored Defense)
     if (cls === 'druida' && tags.indexOf('metal') !== -1) return false;
     if (tags.indexOf('heavy_armor') !== -1) {
       if (!profHeavy) return false;
@@ -36923,7 +36927,7 @@ function _vinvExpAutoEquipSmart() {
     }
     if (tags.indexOf('medium_armor') !== -1) return profMedium;
     if (tags.indexOf('light_armor') !== -1) return profLight;
-    return true; // Roupas normais
+    return profLight;
   }
 
   function canUseWeapon(it) {
@@ -37029,13 +37033,13 @@ function _vinvExpAutoEquipSmart() {
     var best = null;
     var bestScore = -999;
     candidates.forEach(function (c) {
+      if (!canWearArmor(c)) return;
       var score = 0;
       if (targetSlot === 'main_hand') {
         if (!canUseWeapon(c)) return;
         score = weaponScore(c);
       } else if (targetSlot === 'chest') {
         if (cls === 'monge') return; // Monge nunca usa armadura (Unarmored Defense)
-        if (!canWearArmor(c)) return;
         var armAc = armorScore(c);
         if (cls === 'barbaro') {
           var unarmoredAc = 10 + dexMod + conMod;

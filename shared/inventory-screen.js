@@ -1355,7 +1355,9 @@
     else if (p.stats && typeof p.stats.ca === 'string' && parseInt(p.stats.ca, 10) > 0) currentRealAc = parseInt(p.stats.ca, 10);
     else if (typeof p.ac === 'number') currentRealAc = p.ac;
 
-    var deltaAc = newSim.ac - currentSim.ac;
+    var deltaAc = (slotKey === 'chest' || slotKey === 'off_hand')
+      ? (newSim.ac - currentSim.ac)
+      : ((item.ac_bonus || 0) - ((currentItem && currentItem.ac_bonus) || 0));
     var finalCurrentAc = currentRealAc != null ? currentRealAc : currentSim.ac;
     var finalProjectedAc = finalCurrentAc + deltaAc;
 
@@ -1404,8 +1406,13 @@
           type: 'warn'
         });
       }
-    } else if (cls === 'mago' || cls === 'wizard' || cls === 'feiticeiro' || cls === 'sorcerer') {
-      if (isArmor && !hasLight) {
+    } else {
+      var lacksProf = false;
+      if (isHeavyArmor && !hasHeavy) lacksProf = true;
+      else if (isMediumArmor && !hasMedium) lacksProf = true;
+      else if ((isLightArmor || isArmor) && !hasLight) lacksProf = true;
+
+      if (lacksProf) {
         warnings.push({
           title: 'Bloqueio Total de Magias',
           text: 'Sem proficiência em armaduras: Você NÃO poderá conjurar nenhuma magia enquanto vesti-la (PHB p.144)!',
@@ -1421,7 +1428,8 @@
           type: 'danger'
         });
       }
-    } else if (cls === 'druida' || cls === 'druid') {
+    }
+    if (cls === 'druida' || cls === 'druid') {
       if (isMetal && (isArmor || isShield)) {
         warnings.push({
           title: 'Tabu Sagrado de Druida',
@@ -1481,7 +1489,8 @@
     }[rarity];
 
     var slotKey = ctx.slotKey || (it.equipped ? it.slot : (it.slot || null));
-    var dndInfo = (slotKey === 'chest' || slotKey === 'off_hand' || it.slot === 'chest' || it.slot === 'off_hand')
+    var isArmOrWeap = (slotKey === 'chest' || slotKey === 'off_hand' || it.slot === 'chest' || it.slot === 'off_hand' || it.slot === 'head' || it.slot === 'shoulders' || it.slot === 'hands' || it.slot === 'feet' || it.slot === 'legs' || it.slot === 'main_hand' || (it.tags && (it.tags.indexOf('armor') !== -1 || it.tags.indexOf('weapon') !== -1 || it.tags.indexOf('shield') !== -1)));
+    var dndInfo = isArmOrWeap
       ? _evaluateItemDnd(it, slotKey || it.slot, cfg, it.equipped ? it : null)
       : null;
 
@@ -1727,7 +1736,8 @@
     var cfg = _state.config;
     var iconId = _resolveItemIcon(newItem);
 
-    var dndEval = (slotKey === 'chest' || slotKey === 'off_hand' || newItem.slot === 'chest' || newItem.slot === 'off_hand')
+    var isArmOrWeap = (slotKey === 'chest' || slotKey === 'off_hand' || newItem.slot === 'chest' || newItem.slot === 'off_hand' || newItem.slot === 'head' || newItem.slot === 'shoulders' || newItem.slot === 'hands' || newItem.slot === 'feet' || newItem.slot === 'legs' || newItem.slot === 'main_hand' || (newItem.tags && (newItem.tags.indexOf('armor') !== -1 || newItem.tags.indexOf('weapon') !== -1 || newItem.tags.indexOf('shield') !== -1)));
+    var dndEval = isArmOrWeap
       ? _evaluateItemDnd(newItem, slotKey || newItem.slot, cfg, currentItem)
       : null;
 
@@ -1916,7 +1926,8 @@
     alternatives.forEach(function (alt, i) {
       var iconId = _resolveItemIcon(alt);
       var altRarity = alt.rarity || 'common';
-      var dndEval = (slotKey === 'chest' || slotKey === 'off_hand' || alt.slot === 'chest' || alt.slot === 'off_hand')
+      var isArmOrWeap = (slotKey === 'chest' || slotKey === 'off_hand' || alt.slot === 'chest' || alt.slot === 'off_hand' || alt.slot === 'head' || alt.slot === 'shoulders' || alt.slot === 'hands' || alt.slot === 'feet' || alt.slot === 'legs' || alt.slot === 'main_hand' || (alt.tags && (alt.tags.indexOf('armor') !== -1 || alt.tags.indexOf('weapon') !== -1 || alt.tags.indexOf('shield') !== -1)));
+      var dndEval = isArmOrWeap
         ? _evaluateItemDnd(alt, slotKey || alt.slot, cfg, currentItem)
         : null;
 

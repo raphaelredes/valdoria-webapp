@@ -46937,13 +46937,22 @@ function _aeArmorCat(tags) {
   return null; // armadura sem categoria → trata como leve (roupas reforçadas)
 }
 function _aeCanWearArmor(cls, tags, name, stats, race, subrace) {
-  var cat = _aeArmorCat(tags) || 'light';
+  tags = tags || [];
+  if (tags.indexOf('clothing') !== -1) return true; // Roupas/tecidos não exigem proficiência de armadura
+  var isArmor = tags.indexOf('armor') !== -1
+    || tags.indexOf('heavy_armor') !== -1
+    || tags.indexOf('medium_armor') !== -1
+    || tags.indexOf('light_armor') !== -1
+    || _aeArmorCat(tags) !== null;
+  if (!isArmor) return true; // Acessórios, aneis, colares não são armadura
+  if (cls === 'monge') return false; // PHB p.78 Defesa sem Armadura + Artes Marciais
   if (cls === 'druida' && tags.indexOf('metal') !== -1) return false; // PHB p.65
   var r = String(race || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   var sub = String(subrace || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   var isDwarf = r.indexOf('ana') !== -1 || r.indexOf('dwarf') !== -1;
   var isMountainDwarf = isDwarf && (sub.indexOf('montanha') !== -1 || sub.indexOf('mountain') !== -1 || r.indexOf('montanha') !== -1);
 
+  var cat = _aeArmorCat(tags) || 'light';
   if (cat === 'heavy') {
     if (!_AE_HEAVY[cls]) return false;
     var n = (name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -47036,6 +47045,16 @@ function _vinvAutoEquipSmart() {
     pool.push({ name: e.n, slot: slot, it: it, tags: it.t || [] });
   });
 
+  // Garante que os itens atualmente equipados também estejam no pool para re-avaliação justa
+  Object.keys(eq || {}).forEach(function (slot) {
+    var name = eq[slot];
+    if (name && !pool.some(function (c) { return c.name === name; })) {
+      var it = getItemData(name) || {};
+      var s = _vinvSlotMap(it.s || it.slot) || slot;
+      pool.push({ name: name, slot: s, it: it, tags: it.t || [] });
+    }
+  });
+
   // melhor candidato por slot (D&D-aware)
   function bestFor(slotKey, excludeName) {
     var best = null, bestScore = 0;
@@ -47047,13 +47066,17 @@ function _vinvAutoEquipSmart() {
           && !(slotKey.indexOf('ring') === 0 && c.slot === 'ring')
           && !(slotKey === 'necklace' && c.slot === 'amulet')) return;
       if (excludeName && c.name === excludeName) return;
+
+      // D&D 5e PHB p.144: checagem universal de proficiência com armaduras em QUALQUER slot
+      // Se não tem proficiência (ex.: Mago tentando vestir elmo ou ombreiras de armadura), NUNCA auto-equipar!
+      if (!_aeCanWearArmor(cls, c.tags, c.name, stats, p.race || p.race_name, p.subrace || p.sub_race)) return;
+
       var score;
       if (slotKey === 'main_hand') {
         if (!_aeCanUseWeapon(cls, c.name, c.tags, p.race || p.race_name, p.subrace || p.sub_race)) return;
         score = _aeWeaponScore(c.it, stats, cls);
       } else if (slotKey === 'chest') {
         if (cls === 'monge') return;                       // Defesa sem Armadura
-        if (!_aeCanWearArmor(cls, c.tags, c.name, stats, p.race || p.race_name, p.subrace || p.sub_race)) return; // proficiência PHB + Força mínima
         if (cls === 'barbaro') {
           var unarmored = 10 + _aeMod(stats.dex) + _aeMod(stats.con);
           var armScore = (c.it.ac || 0) + (c.tags.indexOf('medium_armor') !== -1 ? Math.min(2, _aeMod(stats.dex)) : _aeMod(stats.dex));
@@ -48324,6 +48347,14 @@ function _showSlotModal(slot){
 // Funciona pra player ou ally (target ativo).
 function _doAutoEquip(){
   var eq = _getCurrentEquipped();
+  var isPlayer = (!window._invActiveTarget || window._invActiveTarget === 'player');
+  var p = isPlayer ? (window.CITY_MOCK_PLAYER || {}) : null;
+  var allies = (!isPlayer && typeof _getActiveAllies === 'function') ? _getActiveAllies() : [];
+  var ally = !isPlayer ? allies.find(function(a){ return a.id === window._invActiveTarget; }) : null;
+  var cls = _aeClsKey(isPlayer ? (p.cls || p.class_name || '') : (ally ? ally.cls : ''));
+  var stats = isPlayer ? (p.stats || {}) : ((ally && ally.stats) || {});
+  var race = isPlayer ? (p.race || p.race_name || '') : ((ally && ally.race) || '');
+  var subrace = isPlayer ? (p.subrace || p.sub_race || '') : '';
   var equipped = 0;
   CANON_SLOT_ORDER.forEach(function(slot){
     var current = eq[slot];
@@ -48341,6 +48372,9 @@ function _doAutoEquip(){
       }
       if (alreadyEquipped) return;
       var ci = getItemData(inv.n);
+      var cTags = (ci && (ci.t || ci.tags)) || [];
+      if (!_aeCanWearArmor(cls, cTags, inv.n, stats, race, subrace)) return;
+      if (slot === 'main_hand' && !_aeCanUseWeapon(cls, inv.n, cTags, race, subrace)) return;
       var score = _calcItemScore(ci, slot);
       if (score > bestScore){ bestScore = score; bestName = inv.n; }
     });
