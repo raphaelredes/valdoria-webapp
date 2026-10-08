@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T12:29:07Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T12:46:27Z - do not edit directly, edit source -->
 
 
 
@@ -40763,7 +40763,12 @@ async function confirmEdgeTransition(_skipJourney) {
     var _tgtName = (_tgt && _tgt.name) ? _tgt.name : (ed.label || 'novo mapa');
     JourneyRunner.start({
       biome: _tgtBiome, displayName: _tgtName, totalSteps: 1, confirm: false,
-      player: function () { return (window.S && S.player) || {}; },
+      player: function () {
+        var p = (window.S && S.player) ? Object.assign({}, S.player) : {};
+        if (window.S && window.S.allies) p.allies = window.S.allies;
+        if (window.S && window.S.party) p.party = window.S.party;
+        return p;
+      },
       audioBiome: true,
       refreshHud: (typeof updateHud === 'function') ? updateHud : null,
       onArrive: function (biome, dn, meta) {
@@ -41860,7 +41865,12 @@ function startReturnToCity() {
     JourneyRunner.start({
       biome: biome,
       displayName: 'Valdoria',
-      player: function () { return (window.S && S.player) || {}; },
+      player: function () {
+        var p = (window.S && S.player) ? Object.assign({}, S.player) : {};
+        if (window.S && window.S.allies) p.allies = window.S.allies;
+        if (window.S && window.S.party) p.party = window.S.party;
+        return p;
+      },
       confirm: true,
       audioBiome: true,
       direction: 'return',
@@ -43751,7 +43761,12 @@ function _cartTravelTo(mapId){
   if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
     JourneyRunner.start({
       biome: m.biome, displayName: m.name, totalSteps: _travelSteps,
-      player: function () { return (window.S && S.player) || {}; },
+      player: function () {
+        var p = (window.S && S.player) ? Object.assign({}, S.player) : {};
+        if (window.S && window.S.allies) p.allies = window.S.allies;
+        if (window.S && window.S.party) p.party = window.S.party;
+        return p;
+      },
       confirm: false,  // o clique em "Viajar pra X" no popup JÁ é a confirmação (Jogador Mínimo Trabalho)
       audioBiome: true,
       refreshHud: (typeof updateHud === 'function') ? updateHud : null,
@@ -44923,7 +44938,12 @@ function openLocationPopup(mapId) {
         biome: m.biome,
         displayName: m.name,
         totalSteps: _travelSteps,
-        player: function () { return (window.S && S.player) || {}; },
+        player: function () {
+          var p = (window.S && S.player) ? Object.assign({}, S.player) : {};
+          if (window.S && window.S.allies) p.allies = window.S.allies;
+          if (window.S && window.S.party) p.party = window.S.party;
+          return p;
+        },
         confirm: true,
         audioBiome: true,
         refreshHud: (typeof updateHud === 'function') ? updateHud : null,

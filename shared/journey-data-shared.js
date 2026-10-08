@@ -1219,6 +1219,83 @@ var DEPARTURES = {
         return '';
     }
 
+    /* -------- dinâmica de grupo vs solo (singular / plural) -------- */
+    function _isParty(player) {
+        if (player) {
+            if (Array.isArray(player.allies) && player.allies.length > 0) return true;
+            if (Array.isArray(player.party) && player.party.length > 1) return true;
+            if (typeof player.party_count === 'number' && player.party_count > 1) return true;
+            if (typeof player.allies_count === 'number' && player.allies_count > 0) return true;
+        }
+        if (typeof window !== 'undefined' && window.S) {
+            if (Array.isArray(window.S.allies) && window.S.allies.length > 0) return true;
+            if (Array.isArray(window.S.party) && window.S.party.length > 1) return true;
+        }
+        return false;
+    }
+
+    function _adaptPartyNarrative(text, isGroup) {
+        if (!text || typeof text !== 'string') return text;
+        if (isGroup) return text;
+        var t = text;
+        // Frases contextuais específicas
+        t = t.replace(/Vocês seguem, e a paisagem branca os engole devagar/g, 'Você segue, e a paisagem branca o engole devagar');
+        t = t.replace(/Vocês baixam a cabeça e avançam em fila/g, 'Você baixa a cabeça e avança com firmeza');
+        t = t.replace(/virem o primeiro morro/g, 'ver o primeiro morro');
+        t = t.replace(/vocês percebem juntos, sem palavras/g, 'você percebe em silêncio');
+        t = t.replace(/Vocês ajustam as mochilas, conferem armas, e seguem/g, 'Você ajusta a mochila, confere as armas, e segue');
+        t = t.replace(/Vocês ajustam as mochilas/g, 'Você ajusta a mochila');
+        t = t.replace(/Vocês ajustam armas e seguem/g, 'Você ajusta a arma e segue');
+        t = t.replace(/Armas firmes, vocês cruzam a fronteira/g, 'Arma firme, você cruza a fronteira');
+        t = t.replace(/chegada de vocês/g, 'sua chegada');
+        t = t.replace(/Tochas acesas\. Olhares trocados/g, 'Tocha acesa. Olhar atento');
+        t = t.replace(/Vocês acendem mais uma tocha/g, 'Você ergue a tocha');
+        t = t.replace(/\bVocês são\b/g, 'Você é');
+        t = t.replace(/\bvocês são\b/g, 'você é');
+        t = t.replace(/\bvisíveis\b/g, 'visível');
+        t = t.replace(/cruza vocês em direção/g, 'cruza seu caminho em direção');
+        t = t.replace(/Vocês embrulham rostos/g, 'Você protege o rosto');
+        t = t.replace(/Vocês molham panos e os amarram sobre o rosto/g, 'Você molha um pano e o amarra sobre o rosto');
+        t = t.replace(/Vocês conversam dez minutos/g, 'Você conversa dez minutos');
+
+        // Verbos e pronomes diretos
+        t = t.replace(/\bVocês seguem\b/g, 'Você segue');
+        t = t.replace(/\bvocês seguem\b/g, 'você segue');
+        t = t.replace(/\bVocês mantêm\b/g, 'Você mantém');
+        t = t.replace(/\bvocês mantêm\b/g, 'você mantém');
+        t = t.replace(/\bVocês cruzam\b/g, 'Você cruza');
+        t = t.replace(/\bvocês cruzam\b/g, 'você cruza');
+        t = t.replace(/\bVocês entram\b/g, 'Você entra');
+        t = t.replace(/\bvocês entram\b/g, 'você entra');
+        t = t.replace(/\bVocês passam\b/g, 'Você passa');
+        t = t.replace(/\bvocês passam\b/g, 'você passa');
+        t = t.replace(/\bVocês avançam\b/g, 'Você avança');
+        t = t.replace(/\bvocês avançam\b/g, 'você avança');
+        t = t.replace(/\bVocês atravessam\b/g, 'Você atravessa');
+        t = t.replace(/\bvocês atravessam\b/g, 'você atravessa');
+        t = t.replace(/\bVocês apertam\b/g, 'Você aperta');
+        t = t.replace(/\bvocês apertam\b/g, 'você aperta');
+        t = t.replace(/\bVocês hesitam\b/g, 'Você hesita');
+        t = t.replace(/\bvocês hesitam\b/g, 'você hesita');
+        t = t.replace(/\bVocês descem\b/g, 'Você desce');
+        t = t.replace(/\bvocês descem\b/g, 'você desce');
+        t = t.replace(/\bVocês percebem\b/g, 'Você percebe');
+        t = t.replace(/\bvocês percebem\b/g, 'você percebe');
+        t = t.replace(/\bvocês perceberem\b/g, 'você perceber');
+        t = t.replace(/\bvocês esperem\b/g, 'você esperar');
+        t = t.replace(/\bvocês sobem\b/g, 'você sobe');
+        t = t.replace(/\bvocês chegaram\b/g, 'você chegou');
+        t = t.replace(/\bvocês ouvirão\b/g, 'você ouvirá');
+
+        // Sintagmas preposicionais
+        t = t.replace(/\batrás de vocês\b/g, 'atrás de você');
+        t = t.replace(/\bjunto com vocês\b/g, 'junto com você');
+        t = t.replace(/\bantes de vocês\b/g, 'antes de você');
+        t = t.replace(/\bcontra vocês\b/g, 'contra você');
+
+        return t;
+    }
+
     // B3.5 #90: partida 'Rumo a...' com anti-repeat (sessão + 24h char-namespaced)
     // — antes pickDeparture sorteava puro, igual à queixa "eventos de Rumo a…
     // repetiam". Mesmo mecanismo do pickFreshHazard/pickFreshSafe, por índice.
@@ -1238,7 +1315,13 @@ var DEPARTURES = {
         var pick = idxs[Math.floor(Math.random() * idxs.length)];
         sessionUsed.push(pick);
         _markDepartureUsed(player, biome, pick);
-        var baseLines = (pool[pick] || []).slice();
+        var isGrp = _isParty(player);
+        var baseLines = (pool[pick] || []).map(function (line) {
+            return {
+                type: line.type || 'narration',
+                text: _adaptPartyNarrative(line.text, isGrp)
+            };
+        });
         if (player) {
             var flavor = _getDepartureFlavor(_traits(player), biome);
             if (flavor) baseLines.push({ type: 'narration', text: flavor });
@@ -1251,7 +1334,14 @@ var DEPARTURES = {
         if (player) return pickFreshDeparture(biome, player, sessionUsed);
         var pool = DEPARTURES[biome] || DEPARTURES.forest || [];
         if (!pool.length) return [];
-        return pool[Math.floor(Math.random() * pool.length)];
+        var isGrp = _isParty(player);
+        var chosen = pool[Math.floor(Math.random() * pool.length)] || [];
+        return chosen.map(function (line) {
+            return {
+                type: line.type || 'narration',
+                text: _adaptPartyNarrative(line.text, isGrp)
+            };
+        });
     }
 
     /* -------- regra (DndRules — odds IGUAIS cidade<->exploracao) -------- */
@@ -1802,7 +1892,12 @@ var DEPARTURES = {
         canTakeChoice: canTakeChoice,
         getConfirmationContent: getConfirmationContent,
         pickNarrative: pickNarrative,
-        detectWeather: detectWeather
+        detectWeather: detectWeather,
+        isParty: _isParty,
+        adaptPartyNarrative: _adaptPartyNarrative
     };
-})(typeof window !== 'undefined' ? window : this);
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = global.JourneyData;
+    }
+})(typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : this));
 

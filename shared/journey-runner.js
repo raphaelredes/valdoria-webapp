@@ -168,9 +168,15 @@
         ValdoriaAudio.playBiome(j.biome);
       }
     } catch (e) { _log('biome music failed: ' + e.message); }
-    var dep = (JD().pickDeparture) ? JD().pickDeparture(j.biome, _player(), []) : null;
-    var script = (dep || []).map(function (l) { return { type: l.type || 'narration', text: l.text }; });
-    if (!script.length) script = [{ type: 'narration', text: 'Você parte rumo a ' + j.displayName + '.' }];
+    var p = _player();
+    var isGrp = (JD().isParty) ? JD().isParty(p) : false;
+    var dep = (JD().pickDeparture) ? JD().pickDeparture(j.biome, p, []) : null;
+    var script = (dep || []).map(function (l) {
+      var txt = l.text;
+      if (JD().adaptPartyNarrative) txt = JD().adaptPartyNarrative(txt, isGrp);
+      return { type: l.type || 'narration', text: txt };
+    });
+    if (!script.length) script = [{ type: 'narration', text: (isGrp ? 'Vocês partem' : 'Você parte') + ' rumo a ' + j.displayName + '.' }];
     if (j.prep && j.prep.label) {
       script.push({ type: 'narration', text: 'Sob a postura de <b>' + j.prep.label + '</b>, a marcha se inicia com foco redobrado.' });
     }
@@ -207,18 +213,19 @@
     var hz = JD().pickFreshHazard ? JD().pickFreshHazard(j.biome, _player(), j.usedHaz) : null;
     if (!hz) { _safe(); return; }
     // pickFreshHazard já empurra hz.title em j.usedHaz (anti-repeat sessão+24h).
-    j._haz = hz;
-    if (JD().detectWeather && hz) {
-      var wHz = JD().detectWeather(hz);
-      if (wHz) { j.weather = wHz; _log('journey weather updated on hazard -> ' + wHz); }
-    }
+    var p = _player();
+    var isGrp = (JD().isParty) ? JD().isParty(p) : false;
     var script = (hz.script || []).map(function (line) {
       if (line.type === 'speech') return { type: 'speech', speaker: (hz.npc && hz.npc.name) || line.speaker || '', text: line.text };
-      return { type: 'narration', text: line.text };
+      var txt = line.text;
+      if (JD().adaptPartyNarrative) txt = JD().adaptPartyNarrative(txt, isGrp);
+      return { type: 'narration', text: txt };
     });
-    if (!script.length && hz.narr) script = [{ type: 'narration', text: hz.narr }];
+    if (!script.length && hz.narr) {
+      var nTxt = (JD().adaptPartyNarrative) ? JD().adaptPartyNarrative(hz.narr, isGrp) : hz.narr;
+      script = [{ type: 'narration', text: nTxt }];
+    }
     if (hz.speech && hz.npc) script.push({ type: 'speech', speaker: hz.npc.name, text: hz.speech });
-    var p = _player();
     var available = (hz.choices || []).filter(function (ch) {
       return (JD().canTakeChoice) ? JD().canTakeChoice(p, ch) : true;
     });
@@ -241,8 +248,10 @@
 
   function _safe() {
     var j = _j; if (!j) return;
-    // pickFreshSafe já empurra o texto em j.usedSafe (anti-repeat sessão+24h).
-    var txt = JD().pickFreshSafe ? JD().pickFreshSafe(j.biome, _player(), j.usedSafe) : null;
+    var p = _player();
+    var isGrp = (JD().isParty) ? JD().isParty(p) : false;
+    var txt = JD().pickFreshSafe ? JD().pickFreshSafe(j.biome, p, j.usedSafe) : null;
+    if (txt && JD().adaptPartyNarrative) txt = JD().adaptPartyNarrative(txt, isGrp);
     if (JD().detectWeather && txt) {
       var wSafe = JD().detectWeather(txt);
       if (wSafe) { j.weather = wSafe; _log('journey weather updated on safe -> ' + wSafe); }
