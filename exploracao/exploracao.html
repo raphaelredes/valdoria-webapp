@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T18:55:54Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T20:09:04Z - do not edit directly, edit source -->
 
 
 
@@ -34931,7 +34931,7 @@ const BIOME_WANDERING_ENCOUNTERS = {
 };
 
 function maybeRollWanderingMonster() {
-  if (S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent')) return false;
+  if (S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent' || S.mapId === 'orc_tribe')) return false;
   if (S.steps < 3) return false;  // grace period no início do mapa
   if (S.ph !== 'idle') return false;  // não interrompe evento/combate
   // v12.7 (2026-05-06): user reportou "não está havendo encontros com combate".
@@ -37789,7 +37789,7 @@ function maybeRollEvent() {
   // Phase 3 dungeons AAA (2026-04-26): masmorras tem so encontros FIXOS via
   // dungeonEncounters. Eventos procedurais (mendigo, minstrel, mercador, etc)
   // sao do overworld — nao fazem sentido dentro de acampamento orc hostil.
-  if (S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent')) return false;
+  if (S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent' || S.mapId === 'orc_tribe')) return false;
   // 2026-04-27: spacing rule (3..7 hexes) — substitui EVENT_CHANCE.
   if (typeof S._stepsToNextEvent !== 'number') {
     _resetEventSpacing();
