@@ -12427,41 +12427,51 @@ var CITY_LOCATIONS = {
 var CITY_DISCOVERY_QUESTS = {
   q_disc_desafio: { id:'q_disc_desafio', name:'Boletim do Conselho', targetCb:'daily_challenge', stages:[
     { id:'s1', speaker:'Capitã Ysoria',
+      narration:'Você se aproxima do quadro de avisos de ferro batido da guilda. Capitã Ysoria cruza os braços com um olhar afiado e atento.',
       text:'Aventureiro com história. Vimos teu nome no quadro da Guilda — três missões resolvidas no mês. O Conselho está abrindo Desafios Diários para os que provam serviço.',
       choices:[{ label:'O que são?', next:'s2' }] },
     { id:'s2', speaker:'Capitã Ysoria',
+      narration:'Ysoria desenrola um pergaminho grosso selado com a cera carmesim do Conselho dos Lordes.',
       text:'Dungeons rotativas — uma diferente por dia. Valdoritas extras, reputação dobrada e um item raro garantido pra quem completar. Mas só uma chance por dia. Topa?',
       choices:[{ label:'Topo.', next:'unlock' }] }
   ]},
   q_disc_praca: { id:'q_disc_praca', name:'A Voz da Fonte', targetCb:'square', stages:[
     { id:'s1', speaker:'Velho mendigo',
+      narration:'O burburinho da praça é cortado pelo murmúrio suave da água límpida na grande fonte de pedra entalhada. Um homem de mantos surrados gesticula em direção ao centro.',
       text:'Ei, forasteiro. Tu já visitou a fonte da praça? Lyana ainda canta lá nas tardes. Diz que viajou com a guarda real, mas voltou pra cantar pros pombos.',
       choices:[{ label:'Vou conhecê-la.', next:'s2' }] },
     { id:'s2', speaker:'Lyana, bardo',
+      narration:'Sentada à beira de mármore desgastado da fonte, uma jovem de sorriso sereno afina as cordas de seu alaúde sob a luz da tarde.',
       text:'Bem-vindo à praça, viajante. Aqui não tem coroas, só conversa boa e a fonte que ouve. Volte sempre que precisar de notícia — eu sei de quase tudo que se conta na cidade.',
       choices:[{ label:'Vou voltar.', next:'unlock' }] }
   ]},
   q_disc_codex: { id:'q_disc_codex', name:'Ruínas de Maerthal', targetCb:'action_codex', stages:[
     { id:'s1', speaker:'Você (lendo um pergaminho)',
+      narration:'Entre os escombros e cinzas do combate recente, a brisa fria revela um pergaminho envelhecido com selos desgastados e runas cintilantes.',
       text:'Caiu de um inimigo que você derrotou. Letras antigas, traduzidas: "Maerthal — onde os pactos foram quebrados, onde os arquivos do reino dormem."',
       choices:[{ label:'Procurar quem traduz isso.', next:'s2' }] },
     { id:'s2', speaker:'Sereniel, escrivã',
+      narration:'No recinto silencioso dos arquivos, o aroma de pergaminho curado e tinta de carvalho envolve o ambiente enquanto a escrivã ergue os olhos curiosos.',
       text:'Maerthal. Sim, já ouvi. O Compêndio guarda fragmentos do arquivo de lá — bestiário, locais explorados, segredos coletados. Sua jornada é digna de leitura. Posso te dar acesso.',
       choices:[{ label:'Aceito.', next:'unlock' }] }
   ]},
   q_disc_festival: { id:'q_disc_festival', name:'O Calendário Sagrado', targetCb:'festival', stages:[
     { id:'s1', speaker:'Sumo Sacerdote',
+      narration:'O incenso perfumado sobe em espirais suaves diante do altar dourado. O Sumo Sacerdote ergue seu báculo cerimonial com solene reverência.',
       text:'Os ventos mudaram, aventureiro. A lua de Florescência se aproxima — quando Valdoria abre suas portas para o Festival da Colheita. Quem prova-se em batalha é convidado.',
       choices:[{ label:'O que acontece no festival?', next:'s2' }] },
     { id:'s2', speaker:'Sumo Sacerdote',
+      narration:'O sacerdote abre um sorriso sereno, apontando para o zodíaco pintado na abóbada do templo.',
       text:'Jogos, mercado especial, blessing dos deuses, e a oportunidade rara de ganhar Selos do Festival — moeda única. Voltarei a te chamar quando as luas se alinharem.',
       choices:[{ label:'Aguardarei o sinal.', next:'unlock' }] }
   ]},
   q_disc_rel: { id:'q_disc_rel', name:'Os Laços que Sustentam', targetCb:'rel_main', stages:[
     { id:'s1', speaker:'Padre Brevon',
+      narration:'O repicar calmo dos sinos do templo ressoa pelas pedras do adro. Padre Brevon aproxima-se com passos tranquilos e olhar acolhedor.',
       text:'Aventureiro… percebo que ainda caminhas sozinho. Os deuses honram quem firma laços — não há feito maior que voltar pra casa com os companheiros que partiram contigo. Os teus vínculos precisam ser cultivados.',
       choices:[{ label:'Como cultivo esses laços?', next:'s2' }] },
     { id:'s2', speaker:'Padre Brevon',
+      narration:'Brevon indica com a mão a colunata que se abre para um pátio reservado atrás do santuário.',
       text:'O Pavilhão dos Vínculos, atrás do templo, é onde a cidade registra os pactos de alma — quem te acompanhou, a quem deves favor, quem prometeu retornar. Anota lá, e ofereça lembranças aos que importam. Os deuses leem essas páginas.',
       choices:[{ label:'Vou ao Pavilhão.', next:'unlock' }] }
   ]},
@@ -12598,6 +12608,8 @@ function _markLocationSeen(cb){
 // Mapa speaker → ícone heráldico (sem emojis genéricos de pessoa)
 function _discoverySpeakerIcon(speaker) {
   var s = String(speaker || '').toLowerCase();
+  if (s.indexOf('pergaminho') >= 0 || s.indexOf('lendo') >= 0
+      || s.indexOf('carta') >= 0 || s.indexOf('manuscrito') >= 0) return 'ic-escriba';
   if (s.indexOf('joalheir') >= 0 || s.indexOf('mercador') >= 0
       || s.indexOf('comercian') >= 0 || s.indexOf('banqueir') >= 0) return 'ic-banqueiro';
   if (s.indexOf('ferreir') >= 0 || s.indexOf('mestre de armas') >= 0
@@ -12610,7 +12622,7 @@ function _discoverySpeakerIcon(speaker) {
       || s.indexOf('curandeir') >= 0) return 'ic-clerigo';
   if (s.indexOf('bardo') >= 0 || s.indexOf('mendigo') >= 0 || s.indexOf('trovador') >= 0
       || s.indexOf('lyana') >= 0) return 'ic-bardo';
-  if (s.indexOf('você') >= 0 || s.indexOf('você') >= 0 || s.indexOf('lendo') >= 0) return 'ic-cartografia';
+  if (s.indexOf('você') >= 0 || s.indexOf('voce') >= 0) return 'ic-praca';
   return 'ic-praca';  // default
 }
 
@@ -12683,7 +12695,9 @@ var _NAMED_NPC_PORTRAITS = {
   'mestre thorne': 'npcs/thorne-armeiro.webp',
   'ferreiro thorne': 'npcs/thorne-armeiro.webp',
   'padre brevon': 'npcs/padre-aldric.webp',
-  'brevon': 'npcs/padre-aldric.webp'
+  'brevon': 'npcs/padre-aldric.webp',
+  'sereniel escriva': 'npcs/sereniel-escriva.webp',
+  'sereniel': 'npcs/sereniel-escriva.webp'
 };
 function _npcPortraitByName(name) {
   if (!name) return null;
@@ -12798,6 +12812,31 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('filosof') >= 0 || s.indexOf('filósof') >= 0 || s.indexOf('estudios') >= 0 || s.indexOf('arauto') >= 0) return _pz + 'librarian.webp';
   if (s.indexOf('especiari') >= 0 || s.indexOf('mercador') >= 0 || s.indexOf('vendedor') >= 0 || s.indexOf('comerciante') >= 0 || s.indexOf('mascate') >= 0) return _np + 'mercador-errante.webp';
   if (s.indexOf('pombos') >= 0 || s.indexOf('pomba') >= 0) return _np + 'animal1.webp';
+  // Ordem do Usuário 2026-10: SISTEMA DE IMAGEM GENÉRICA MISTERIOSA & IDENTIDADE DO JOGO
+  // 1. Pergaminhos / Manuscritos / Cartas / Leitura
+  if (s.indexOf('pergaminho') >= 0 || s.indexOf('lendo') >= 0 || s.indexOf('carta') >= 0 ||
+      s.indexOf('edital') >= 0 || s.indexOf('manuscrito') >= 0 || s.indexOf('decreto') >= 0 ||
+      s.indexOf('missiva') >= 0 || s.indexOf('mensagem') >= 0 || s.indexOf('registro') >= 0) {
+    return '/shared/img/items/pergaminho-antigo.webp';
+  }
+  // 2. Compêndio / Tomos / Livros / Códex / Arquivos
+  if (s.indexOf('compêndio') >= 0 || s.indexOf('compendio') >= 0 || s.indexOf('livro') >= 0 ||
+      s.indexOf('tomo') >= 0 || s.indexOf('códex') >= 0 || s.indexOf('codex') >= 0 ||
+      s.indexOf('crônica') >= 0 || s.indexOf('cronica') >= 0 || s.indexOf('arquivo') >= 0) {
+    return '/shared/img/levelup/subclasses/lore.webp';
+  }
+  // 3. Mistério / Sussurros / Enigmas / Ruínas / Presenças Ocultas
+  if (s.indexOf('misteri') >= 0 || s.indexOf('mistéri') >= 0 || s.indexOf('sussurr') >= 0 ||
+      s.indexOf('voz oculta') >= 0 || s.indexOf('sombra') >= 0 || s.indexOf('vulto') >= 0 ||
+      s.indexOf('enigma') >= 0 || s.indexOf('ocult') >= 0 || s.indexOf('desconhecid') >= 0 ||
+      s.indexOf('ruina') >= 0 || s.indexOf('ruína') >= 0) {
+    return '/shared/img/npcs/sussurrador-misterioso.webp';
+  }
+  // 4. Andarilho / Você / Reflexão do aventureiro
+  if (s.indexOf('você') >= 0 || s.indexOf('voce') >= 0) {
+    return _pz + 'square_wanderer.webp';
+  }
+
   // Fallback role-based (PNGs genéricos quando NPC não tem portrait dedicado)
   if (s.indexOf('grom') >= 0)        return '/shared/img/npcs/grom-o-caolho-v2.webp';  /* Grom, o Caolho — taverneiro ANÃO (retrato dedicado, ANTES do fallback generico de taverneiro). */
   if (s.indexOf('taverneir') >= 0)   return '/shared/img/npcs/taverneiro.webp';
@@ -12809,7 +12848,8 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('escriba') >= 0 || s.indexOf('escrivã') >= 0) return '/shared/img/npcs/escriba.webp';
   // Sumo Sacerdote / sacerdot — usa padre-aldric como fallback genérico de clero
   if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('sacerdot') >= 0) return '/shared/img/npcs/padre-aldric.webp';
-  return null;
+  // Fallback universal da identidade do jogo (Medalhão Dourado de Diálogo de Valdoria)
+  return '/shared/img/ui/dialogo.webp';
 }
 
 // Sanitiza HTML mantendo apenas <i>/<em>/<b>/<strong> (mesma whitelist do
@@ -12945,14 +12985,12 @@ function _renderDiscoveryStage(){
         };
       }
     }
-    // Self-narration ("Você (lendo)") → narration; senão speech
-    /* sessão #88: 2º operando era duplicata exata de 'você' — intenção era a
-       variante SEM acento (dataset defensivo). */
-    if (spk.toLowerCase().indexOf('você') >= 0 || spk.toLowerCase().indexOf('voce') >= 0) {
-      script.push({ type: 'narration', text: stg.text });
-    } else {
-      script.push({ type: 'speech', speaker: spkKey, text: stg.text });
+    // D&D 5e: Narração sensorial do Mestre obrigatória (Regra #14)
+    if (stg.narration) {
+      script.push({ type: 'narration', text: stg.narration });
     }
+    // Linha de diálogo ou leitura do personagem (Regra #15: integridade de speaker)
+    script.push({ type: 'speech', speaker: spkKey, text: stg.text });
   });
 
   // Choices finais: pega a label da última stage (geralmente "Aceito"/"Topo"/"Vou X")
@@ -67590,6 +67628,8 @@ function _renderEncounterViaVEncounter(enc, originalAction, player, npc) {
     dnpc.portrait = npc.portraitImg;             // <img> + lightbox (PNG real)
   } else if (typeof _npcPortraitByName === 'function' && _npcPortraitByName(npc.name)) {
     dnpc.portrait = _npcPortraitByName(npc.name); // 2026-06-13: retrato dedicado por nome (fonte única)
+  } else if (typeof _discoverySpeakerPortrait === 'function' && _discoverySpeakerPortrait(npc.name)) {
+    dnpc.portrait = _discoverySpeakerPortrait(npc.name);
   } else if (npc.portrait && typeof _heralIco === 'function') {
     dnpc.portraitHTML = _heralIco(npc.portrait); // SVG heraldico (sem lightbox)
   }

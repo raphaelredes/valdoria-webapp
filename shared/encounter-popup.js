@@ -57,12 +57,47 @@
   var OVERLAY_ID = 'encounter-overlay';
   var _currentRenderState = null;
 
-  /* PADRAO_LOCAIS #2 (2026-06-03): fallback de retrato. Atributo onerror estático
-     (sem conteúdo dinâmico) anexado ao <img> do portrait — se o WebP falhar
-     (404/rede), some o <img> quebrado e marca o .enc-portrait com a classe
-     enc-portrait-fallback, revelando um brasão heráldico via CSS (gradiente
-     dourado + glifo). NUNCA mostra o ícone de imagem quebrada do browser. */
-  var _ENC_IMG_ONERR = "onerror=\"this.style.display='none';this.parentNode.classList.add('enc-portrait-fallback');\"";
+  /* PADRAO_LOCAIS #2 & Ordem do Usuário 2026-10: fallback de retrato.
+     Se a imagem falhar (404/rede), substitui imediatamente pelo Medalhão Dourado
+     de Diálogo de Valdoria (/shared/img/ui/dialogo.webp), preservando a imersão. */
+  var _ENC_IMG_ONERR = "onerror=\"this.onerror=null;this.src='/shared/img/ui/dialogo.webp';\"";
+
+  /* Ordem do Usuário 2026-10: SISTEMA DE IMAGEM GENÉRICA MISTERIOSA & IDENTIDADE DO JOGO.
+     Quando um diálogo ou narrativa não possui imagem oficial/original dedicada (ou se refere
+     a leitura de pergaminho, tomo, mistério, monólogo interior ou crônica geral), este resolver
+     atribui automaticamente uma ilustração oficial de alta resolução de Valdoria. */
+  function _resolveGenericEncounterPortrait(name, desc) {
+    var s = String((name || '') + ' ' + (desc || '')).toLowerCase();
+    // 1. Pergaminho / Manuscrito / Carta / Edital / Decreto / Leitura / Mapa Antigo
+    if (s.indexOf('pergaminho') >= 0 || s.indexOf('lendo') >= 0 || s.indexOf('carta') >= 0 ||
+        s.indexOf('edital') >= 0 || s.indexOf('manuscrito') >= 0 || s.indexOf('decreto') >= 0 ||
+        s.indexOf('missiva') >= 0 || s.indexOf('mensagem') >= 0 || s.indexOf('registro') >= 0 ||
+        s.indexOf('aviso') >= 0 || s.indexOf('anota') >= 0) {
+      return '/shared/img/items/pergaminho-antigo.webp';
+    }
+    // 2. Livro / Tomo / Compêndio / Códex / Arquivos / Crônicas / Sabedoria Arcana
+    if (s.indexOf('compêndio') >= 0 || s.indexOf('compendio') >= 0 || s.indexOf('livro') >= 0 ||
+        s.indexOf('tomo') >= 0 || s.indexOf('códex') >= 0 || s.indexOf('codex') >= 0 ||
+        s.indexOf('crônica') >= 0 || s.indexOf('cronica') >= 0 || s.indexOf('arquivo') >= 0 ||
+        s.indexOf('biblioteca') >= 0) {
+      return '/shared/img/levelup/subclasses/lore.webp';
+    }
+    // 3. Mistério / Sussurro / Voz Oculta / Sombra / Vulto / Enigma / Ruínas / Presença Oculta
+    if (s.indexOf('misteri') >= 0 || s.indexOf('mistéri') >= 0 || s.indexOf('sussurr') >= 0 ||
+        s.indexOf('voz oculta') >= 0 || s.indexOf('sombra') >= 0 || s.indexOf('vulto') >= 0 ||
+        s.indexOf('enigma') >= 0 || s.indexOf('ocult') >= 0 || s.indexOf('desconhecid') >= 0 ||
+        s.indexOf('estranh') >= 0 || s.indexOf('ruina') >= 0 || s.indexOf('ruína') >= 0) {
+      return '/shared/img/npcs/sussurrador-misterioso.webp';
+    }
+    // 4. Você / Aventureiro / Monólogo Interior / Reflexão / Pensamento
+    if (s.indexOf('você') >= 0 || s.indexOf('voce') >= 0 || s.indexOf('pensamento') >= 0 ||
+        s.indexOf('reflex') >= 0 || s.indexOf('mente') >= 0 || s.indexOf('monólogo') >= 0 ||
+        s.indexOf('monologo') >= 0) {
+      return '/shared/img/npcs/plaza/square_wanderer.webp';
+    }
+    // 5. Fallback Canônico Universal de Identidade do Jogo (Medalhão Dourado de Diálogo de Valdoria)
+    return '/shared/img/ui/dialogo.webp';
+  }
 
   /* A3.7 (#90): NORMALIZADOR canônico do shape de NPC de diálogo (vNpc).
      3 shapes coexistem nos dados: (1) string-key resolvida contra
@@ -74,9 +109,9 @@
      renderizava. Datasets NÃO foram renomeados de propósito (111 literais +
      18 consumidores legados leem os campos antigos). Regras:
        - portraitImg (URL real) VENCE → vira portrait (lightbox funciona);
-       - portrait com cara de ícone ('ic-*') vira portraitHTML via _heralIco
-         quando disponível e NUNCA chega num <img src>; fora da cidade (sem
-         _heralIco) degrada pra sem-retrato (comportamento atual);
+       - portrait com cara de ícone ('ic-*') resolve para retrato temático
+         de identidade do jogo e só degrada para HTML se não houver;
+       - se não houver retrato, atribui o retrato de mistério/identidade canônico;
        - objeto já canônico passa intacto (idempotente). */
   var _NPC_ICON_RE = /^ic-[\w-]+$/;
   function _vNpcResolve(raw, opts) {
@@ -100,10 +135,15 @@
     if (out.portraitImg) {
       out.portrait = out.portraitImg;
     } else if (out.portrait && _NPC_ICON_RE.test(String(out.portrait))) {
-      if (!out.portraitHTML && typeof window._heralIco === 'function') {
+      var thematicPortrait = _resolveGenericEncounterPortrait(out.name, out.desc);
+      if (thematicPortrait) {
+        out.portrait = thematicPortrait;
+      } else if (!out.portraitHTML && typeof window._heralIco === 'function') {
         try { out.portraitHTML = window._heralIco(out.portrait); } catch (_eIco) {}
+        out.portrait = '';
       }
-      out.portrait = '';
+    } else if (!out.portrait) {
+      out.portrait = _resolveGenericEncounterPortrait(out.name, out.desc);
     }
     return out;
   }
@@ -1497,17 +1537,22 @@
        inline) — fecha o sink de header que aceitava HTML cru; URL do portrait
        tem aspas escapadas. portraitHTML continua confiado (gerado pelo caller
        via _heralIco/sprite, nunca payload). */
-    var _safePortraitURL = String(npcPortrait).replace(/"/g, '&quot;');
+    if (!npcPortrait) {
+      npcPortrait = _resolveGenericEncounterPortrait(npcName, npcDesc);
+      if (npcPortrait) {
+        _safePortraitURL = String(npcPortrait).replace(/"/g, '&quot;');
+      }
+    }
     var _hasPortraitImg = !!npcPortrait;
     var _hasPortraitHTML = !!npcPortraitHTML;
     var _portraitInner = '';
     var _portraitCls = 'enc-portrait';
     var _portraitTitle = '';
-    if (_hasPortraitHTML) {
-      _portraitInner = npcPortraitHTML;
-    } else if (_hasPortraitImg) {
+    if (_hasPortraitImg) {
       _portraitInner = '<img src="' + _safePortraitURL + '" alt="" ' + _ENC_IMG_ONERR + '>';
       _portraitTitle = ' title="Clique pra ampliar"';
+    } else if (_hasPortraitHTML) {
+      _portraitInner = npcPortraitHTML;
     } else {
       /* Ordem do Usuário 2026-10: NUNCA exibir círculo vazio ou sem imagem.
          Ativa fallback automático com gradiente e brasão heráldico estilizado. */
@@ -1636,7 +1681,40 @@
       // aparece durante narração (deveria só aparecer quando NPC fala).
       // Fix: oculta header se página atual NÃO tem speech (só narration).
       var hasSpeech = page.some(function(line){ return line.type === 'speech'; });
-      header.style.display = hasSpeech ? '' : 'none';
+      header.style.display = (hasSpeech || pages.length > 1) ? '' : 'none';
+
+      // Rule #15: Integridade de Speaker — sincroniza cabeçalho e retrato com o interlocutor da página ativa
+      var firstSpeech = page.find(function(line){ return line.type === 'speech'; });
+      if (firstSpeech && firstSpeech.speaker) {
+        var pageSpkKey = firstSpeech.speaker;
+        var reg = (opts && opts.npcRegistry) || window.RECURRING_NPCS || null;
+        var spkHit = reg ? reg[pageSpkKey] : null;
+        var displayName = (spkHit && spkHit.name) || pageSpkKey;
+        var displayDesc = (spkHit && spkHit.desc) || npcDesc;
+        var displayPortrait = (spkHit && (spkHit.portraitImg || spkHit.portrait))
+          || (typeof window._npcPortraitByName === 'function' ? window._npcPortraitByName(displayName) : null)
+          || (typeof _resolveGenericEncounterPortrait === 'function' ? _resolveGenericEncounterPortrait(displayName, displayDesc) : null);
+
+        var nameEl = header.querySelector('.enc-name');
+        if (nameEl && displayName) {
+          nameEl.textContent = displayName;
+        }
+        var descEl = header.querySelector('.enc-desc');
+        if (descEl && displayDesc) {
+          descEl.textContent = displayDesc;
+        }
+        var portImg = header.querySelector('.enc-portrait img');
+        if (portImg && displayPortrait) {
+          portImg.src = displayPortrait;
+        } else if (displayPortrait) {
+          var portEl = header.querySelector('.enc-portrait');
+          if (portEl) {
+            portEl.innerHTML = '<img src="' + String(displayPortrait).replace(/"/g, '&quot;') + '" alt="" ' + _ENC_IMG_ONERR + '>';
+            portEl.className = 'enc-portrait';
+            portEl.title = 'Clique pra ampliar';
+          }
+        }
+      }
 
       var strophes = [];
       page.forEach(function(line) {

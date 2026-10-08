@@ -268,12 +268,14 @@ body.perf-lite #encounter-overlay.active .enc-card {
    foto real. Override de object-fit pra contain + remove object-position crop. */
 .enc-portrait img.v-asset-class,
 .enc-portrait svg {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   object-fit: contain;
   object-position: center;
   padding: var(--v-space-sm, 4px);
   box-sizing: border-box;
+  display: block;
+  margin: auto;
 }
 /* PADRAO_LOCAIS #2 (2026-06-03): fallback de retrato quando o WebP falha (404/rede).
    O onerror em encounter-popup.js esconde o <img> quebrado e adiciona esta classe,
