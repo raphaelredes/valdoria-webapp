@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T08:46:16Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T09:30:02Z - do not edit directly, edit source -->
 
 
 
@@ -36954,7 +36954,7 @@ function _vinvExpAutoEquipSmart() {
     var avgDie = 3.5;
     var m = String(it.dmg_die || '').match(/^(\d+)d(\d+)/);
     if (m) avgDie = (parseInt(m[1], 10) * (parseInt(m[2], 10) + 1)) / 2;
-    var score = avgDie + mod + (it.bonus || 0) + (it.value || 0) / 1000;
+    var score = avgDie + mod + (it.bonus || 0);
 
     // D&D 5e: Conjuradores (Mago, Feiticeiro, Bruxo, Druida, Clérigo, Bardo)
     var isArcane = (cls === 'mago' || cls === 'feiticeiro' || cls === 'bruxo' || cls === 'bardo');
@@ -37055,7 +37055,7 @@ function _vinvExpAutoEquipSmart() {
         score = offHandScore(c);
         if (score < 0) return;
       } else {
-        score = (c.ac_bonus || 0) * 4 + (c.bonus || 0) * 2 + (c.heal || 0) + (c.value || 0) / 1000;
+        score = (c.ac_bonus || 0) * 4 + (c.bonus || 0) * 2 + (c.heal || 0);
         if (score <= 0 && !c.ac_bonus && !c.bonus) score = 0.5;
       }
       if (score > bestScore) {

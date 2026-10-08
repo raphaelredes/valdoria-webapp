@@ -47000,7 +47000,7 @@ function _aeWeaponScore(it, stats, cls) {
   var dexBased = tags.indexOf('ranged') !== -1
     || (tags.indexOf('finesse') !== -1 && (stats.dex || 10) > (stats.str || 10));
   var mod = dexBased ? _aeMod(stats.dex) : _aeMod(stats.str);
-  var score = _aeAvgDie(it.dd) + mod + (it.b || 0) + (it.v || 0) / 1000;
+  var score = _aeAvgDie(it.dd) + mod + (it.b || 0);
 
   // D&D 5e: Conjuradores (Mago, Feiticeiro, Bruxo, Druida, Clérigo, Bardo)
   // Armas de foco e cajados canalizam a trama mágica e superam armas mundanas simples
@@ -47026,16 +47026,35 @@ function _aeWeaponScore(it, stats, cls) {
   return score;
 }
 function _aeGenericScore(it) {
-  return (it.ac || 0) * 4 + (it.sb || 0) * 4 + (it.sdc || 0) * 4 + (it.mb || 0) * 2 + (it.hlb || 0) * 2 + (it.b || 0) * 2 + (it.v || 0) / 1000;
+  var tags = it.t || it.tags || [];
+  var s = (it.ac || 0) * 4 + (it.sb || 0) * 4 + (it.sdc || 0) * 4 + (it.mb || 0) * 2 + (it.hlb || 0) * 2 + (it.b || 0) * 2;
+  if (s <= 0 && (tags.indexOf('clothing') !== -1 || tags.indexOf('fabric') !== -1 || tags.indexOf('accessory') !== -1)) {
+    return 0.1; // Roupas/tecidos sem bônus numérico ainda são preferíveis a slot vazio
+  }
+  return s;
 }
-function _vinvAutoEquipSmart() {
+function _aeSlotLabel(slot) {
+  return ({
+    head: 'Cabeça', chest: 'Peito', feet: 'Botas',
+    main_hand: 'Mão Dir.', off_hand: 'Mão Esq.',
+    ring: 'Anel', ring1: 'Anel I', ring2: 'Anel II', ring_1: 'Anel I', ring_2: 'Anel II',
+    amulet: 'Amuleto', necklace: 'Amuleto', cloak: 'Capa', map: 'Mapa',
+    shoulders: 'Ombros', belt: 'Cinto', hands: 'Mãos', legs: 'Pernas',
+  })[slot] || slot;
+}
+function _vinvAutoEquipSmart(onFinished) {
   var p = window.CITY_MOCK_PLAYER || {};
   var cls = _aeClsKey(p.cls || p.class_name || '');
   var stats = p.stats || {};
   if (typeof MOCK_PLAYER_EQUIPPED === 'undefined') window.MOCK_PLAYER_EQUIPPED = {};
   var eq = MOCK_PLAYER_EQUIPPED;
 
-  // candidatos: inventário com qty>0 (inclui os já equipados — re-avaliados)
+  // Snapshot inicial para restauração caso o jogador cancele
+  var initialEquipped = {};
+  Object.keys(eq || {}).forEach(function (k) { initialEquipped[k] = eq[k]; });
+  var initialAc = (typeof p.ac === 'number') ? p.ac : (parseInt(p.ac, 10) || 0);
+
+  // Candidatos: inventário com qty>0 (inclui os já equipados — re-avaliados)
   var pool = [];
   (window.MOCK_PLAYER_INVENTORY || []).forEach(function (e) {
     if (!e || !e.n || (e.q || 0) <= 0) return;
@@ -47055,20 +47074,18 @@ function _vinvAutoEquipSmart() {
     }
   });
 
-  // melhor candidato por slot (D&D-aware)
-  function bestFor(slotKey, excludeName) {
-    var best = null, bestScore = 0;
+  // Retorna os melhores candidatos por pontuação mecânica para o slot
+  function candidatesFor(slotKey, excludeName) {
+    var valid = [];
+    var maxScore = -999;
     pool.forEach(function (c) {
-      // 2026-06-12 (review): slotKey agora é canônico (ring_1/ring_2/necklace).
-      // O pool tem c.slot = _vinvSlotMap(it.s): anéis viram 'ring' genérico e
-      // amuletos viram 'amulet' — casa a família aqui.
       if (c.slot !== slotKey
           && !(slotKey.indexOf('ring') === 0 && c.slot === 'ring')
-          && !(slotKey === 'necklace' && c.slot === 'amulet')) return;
+          && !(slotKey === 'necklace' && c.slot === 'amulet')
+          && !(slotKey === 'feet' && c.slot === 'boots')) return;
       if (excludeName && c.name === excludeName) return;
 
       // D&D 5e PHB p.144: checagem universal de proficiência com armaduras em QUALQUER slot
-      // Se não tem proficiência (ex.: Mago tentando vestir elmo ou ombreiras de armadura), NUNCA auto-equipar!
       if (!_aeCanWearArmor(cls, c.tags, c.name, stats, p.race || p.race_name, p.subrace || p.sub_race)) return;
 
       var score;
@@ -47114,42 +47131,140 @@ function _vinvAutoEquipSmart() {
         score = _aeGenericScore(c.it);
         if (score <= 0) return;                             // sem benefício → não equipa
       }
-      if (score > bestScore) { bestScore = score; best = c; }
+      valid.push({ candidate: c, score: score });
+      if (score > maxScore) maxScore = score;
     });
-    return best;
+
+    if (valid.length === 0 || maxScore <= 0) return { bestScore: 0, uniqueCandidates: [] };
+
+    // Filtra todos os candidatos que alcançam a melhor pontuação
+    var topCandidates = valid.filter(function (entry) {
+      return Math.abs(entry.score - maxScore) < 0.001;
+    }).map(function (entry) { return entry.candidate; });
+
+    // Deduplica por nome para ignorar cópias 100% idênticas (Regra do Usuário: "desde que não sejam literalmente 100% idênticos")
+    var uniqueCandidates = [];
+    var seen = {};
+    topCandidates.forEach(function (c) {
+      var k = (c.name || '').trim().toLowerCase();
+      if (!seen[k]) {
+        seen[k] = true;
+        uniqueCandidates.push(c);
+      }
+    });
+
+    return { bestScore: maxScore, uniqueCandidates: uniqueCandidates };
   }
 
-  // 2026-06-12 (review): keys CANÔNICAS do MOCK_PLAYER_EQUIPPED (ring_1/ring_2/
-  // necklace) — iguais às que _equipItem/_resolveEquipSlot gravam. Antes o
-  // auto-equip escrevia ring1/ring2/amulet (keys da UI) → coexistiam com as
-  // canônicas do equip manual (dupla representação, sync inconsistente).
   var SLOTS = ['main_hand', 'chest', 'off_hand', 'head', 'necklace', 'cloak', 'feet', 'ring_1', 'ring_2'];
   var changes = [];
-  var ring1Pick = null;
-  SLOTS.forEach(function (slotKey) {
-    var pick = bestFor(slotKey, slotKey === 'ring_2' && ring1Pick ? ring1Pick.name : null);
-    if (slotKey === 'ring_1') ring1Pick = pick;
-    if (!pick) return;
+
+  function applyPick(slotKey, pickName) {
+    if (!pickName) return;
     var current = eq[slotKey];
-    if (current === pick.name) return;                      // já é o melhor
-    // troca: ajusta CA (delta do que sai + do que entra), sem toast por item
+    if (current === pickName) return;                      // já é o melhor
     if (current) _vinvApplyAcDelta(current, -1);
-    eq[slotKey] = pick.name;
-    _vinvApplyAcDelta(pick.name, +1);
-    changes.push(pick.name);
+    eq[slotKey] = pickName;
+    _vinvApplyAcDelta(pickName, +1);
+    changes.push(pickName);
+  }
+
+  function finishEquip(cancelled) {
+    if (cancelled) {
+      Object.keys(eq || {}).forEach(function (k) { delete eq[k]; });
+      Object.assign(eq, initialEquipped);
+      p.ac = initialAc;
+      if (typeof vToast === 'function') vToast('Auto-equip cancelado.');
+      if (window.vInventory && vInventory.isOpen && vInventory.isOpen()) {
+        vInventory.refresh(_vinvBuildConfig().player);
+      }
+      if (typeof onFinished === 'function') onFinished(0);
+      return 0;
+    }
+
+    if (typeof refreshHud === 'function') refreshHud();
+    if (typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
+    if (typeof vToast === 'function') {
+      vToast(changes.length
+        ? 'Auto-equipado: ' + changes.length + ' troca(s) — ' + changes.join(', ')
+        : '✓ Você já está com o melhor conjunto para sua classe.');
+    }
+    if (window.vInventory && vInventory.isOpen && vInventory.isOpen()) {
+      vInventory.refresh(_vinvBuildConfig().player);
+    }
+    if (typeof onFinished === 'function') onFinished(changes.length);
+    return changes.length;
+  }
+
+  // Pré-analisa quantos slots terão empate para numerar passos (ex: "Passo 1 de 2")
+  var tieSlots = [];
+  var tempRing1 = null;
+  SLOTS.forEach(function (sKey) {
+    var evalRes = candidatesFor(sKey, sKey === 'ring_2' && tempRing1 ? tempRing1 : null);
+    if (evalRes && evalRes.uniqueCandidates.length > 1) {
+      tieSlots.push(sKey);
+    } else if (evalRes && evalRes.uniqueCandidates.length === 1 && sKey === 'ring_1') {
+      tempRing1 = evalRes.uniqueCandidates[0].name;
+    }
   });
 
-  if (typeof refreshHud === 'function') refreshHud();
-  if (typeof _syncEquippedToLocalStorage === 'function') _syncEquippedToLocalStorage();
-  if (typeof vToast === 'function') {
-    vToast(changes.length
-      ? 'Auto-equipado: ' + changes.length + ' troca(s) — ' + changes.join(', ')
-      : '✓ Você já está com o melhor conjunto para sua classe.');
+  var totalTieSteps = tieSlots.length;
+  var currentTieStep = 0;
+  var ring1PickName = null;
+
+  function processSlotAt(idx) {
+    if (idx >= SLOTS.length) {
+      return finishEquip(false);
+    }
+    var slotKey = SLOTS[idx];
+    var excludeName = (slotKey === 'ring_2' && ring1PickName) ? ring1PickName : null;
+    var evalRes = candidatesFor(slotKey, excludeName);
+
+    if (!evalRes || evalRes.uniqueCandidates.length === 0) {
+      return processSlotAt(idx + 1);
+    }
+
+    if (evalRes.uniqueCandidates.length === 1) {
+      var pick = evalRes.uniqueCandidates[0];
+      if (slotKey === 'ring_1') ring1PickName = pick.name;
+      applyPick(slotKey, pick.name);
+      return processSlotAt(idx + 1);
+    }
+
+    // Empate entre 2 ou mais equipamentos equivalentes não-idênticos
+    currentTieStep++;
+    var stepText = totalTieSteps > 1 ? ('Passo ' + currentTieStep + ' de ' + totalTieSteps) : '';
+
+    if (window.vInventory && typeof window.vInventory.showEquipChoiceModal === 'function') {
+      window.vInventory.showEquipChoiceModal({
+        slotKey: slotKey,
+        slotLabel: _aeSlotLabel(slotKey),
+        stepText: stepText,
+        currentName: eq[slotKey] || '',
+        items: evalRes.uniqueCandidates.map(function (c) {
+          return (c.it && c.it.name) ? c.it : (getItemData(c.name) || { name: c.name });
+        }),
+        onChoose: function (chosenItem) {
+          var chosenName = (chosenItem && chosenItem.name) ? chosenItem.name : String(chosenItem || '');
+          if (slotKey === 'ring_1') ring1PickName = chosenName;
+          applyPick(slotKey, chosenName);
+          processSlotAt(idx + 1);
+        },
+        onCancel: function () {
+          finishEquip(true);
+        }
+      });
+      return changes.length;
+    } else {
+      // Fallback para ambientes sem interface (ex.: testes unitários headless)
+      var fbPick = evalRes.uniqueCandidates[0];
+      if (slotKey === 'ring_1') ring1PickName = fbPick.name;
+      applyPick(slotKey, fbPick.name);
+      return processSlotAt(idx + 1);
+    }
   }
-  if (window.vInventory && vInventory.isOpen && vInventory.isOpen()) {
-    vInventory.refresh(_vinvBuildConfig().player);
-  }
-  return changes.length;
+
+  return processSlotAt(0);
 }
 
 /* 2026-06-12 (user): CA reflete equip/unequip na hora. Ajusta p.ac pelo bônus

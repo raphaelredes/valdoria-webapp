@@ -380,6 +380,16 @@
       };
       detailEl.addEventListener('click', _onStandaloneBackdropClick);
     },
+
+    /**
+     * Exibe o modal popup para escolher entre equipamentos equivalentes em resultados de melhorias.
+     * @param {object} opts
+     */
+    showEquipChoiceModal: function (opts) {
+      opts = opts || {};
+      if (!_state.overlay) _state.overlay = _buildOverlay();
+      _showEquipChoiceModal(opts);
+    },
   };
 
   // ============================================================
@@ -1817,6 +1827,117 @@
     card.querySelector('[data-action="confirm-ok"]').addEventListener('click', function () {
       _closeConfirm();
       if (typeof onConfirm === 'function') onConfirm();
+    });
+  }
+
+  function _showEquipChoiceModal(opts) {
+    opts = opts || {};
+    var ov = _state.overlay && _state.overlay.querySelector('[data-region="confirm"]');
+    var card = _state.overlay && _state.overlay.querySelector('[data-region="confirm-card"]');
+    if (!ov || !card) {
+      if (typeof opts.onChoose === 'function' && opts.items && opts.items.length) {
+        opts.onChoose(opts.items[0]);
+      }
+      return;
+    }
+
+    var slotLabel = opts.slotLabel || _slotLabel(opts.slotKey);
+    var stepBadge = opts.stepText ? '<span class="vinv-choice-step">' + _esc(opts.stepText) + '</span>' : '';
+    var items = opts.items || [];
+    var currentName = opts.currentName || '';
+
+    var optionsHtml = '';
+    items.forEach(function (rawItem, idx) {
+      var it = typeof rawItem === 'string' ? { name: rawItem } : Object.assign({}, rawItem);
+      var name = it.name || it.n || '';
+      if (!it.name) it.name = name;
+
+      if (window.ITEMS_DB_GEN && window.ITEMS_DB_GEN[name]) {
+        var gen = window.ITEMS_DB_GEN[name];
+        if (!it.desc && gen.desc) it.desc = gen.desc;
+        if (!it.rarity && (gen.r || it.rare)) it.rarity = gen.r || it.rare;
+        if (!it.tags && gen.t) it.tags = gen.t;
+        if (it.ac_bonus == null && gen.ac != null) it.ac_bonus = gen.ac;
+        if (!it.dmg_die && gen.dd) it.dmg_die = gen.dd;
+        if (!it.dmg_type && gen.dt) it.dmg_type = gen.dt;
+        if (it.bonus == null && gen.b != null) it.bonus = gen.b;
+        if (it.heal == null && gen.hb != null) it.heal = gen.hb;
+      }
+      var rarity = it.rarity || 'common';
+      var rNorm = { comum: 'common', incomum: 'uncommon', raro: 'rare', epico: 'epic', lendario: 'legendary', missao: 'quest' };
+      if (rNorm[rarity]) rarity = rNorm[rarity];
+
+      var iconId = _resolveItemIcon(it);
+      var isCurrent = (currentName && name === currentName);
+      var badgeCurrent = isCurrent ? '<span class="vinv-choice-badge current">Equipado</span>' : '';
+
+      var metaStr = _buildMeta(it);
+      var descStr = it.desc ? ('<div class="vinv-choice-desc">' + _esc(it.desc.slice(0, 85)) + (it.desc.length > 85 ? '…' : '') + '</div>') : '';
+
+      optionsHtml += '<div class="vinv-choice-option r-' + rarity + (isCurrent ? ' is-current' : '') + '" data-choice-idx="' + idx + '" role="button" tabindex="0">'
+        +   '<div class="vinv-choice-icon">' + _iconSrc(iconId, name) + '</div>'
+        +   '<div class="vinv-choice-info">'
+        +     '<div class="vinv-choice-name-row">'
+        +       '<span class="vinv-choice-name r-' + rarity + '">' + _esc(name) + '</span>'
+        +       badgeCurrent
+        +     '</div>'
+        +     (metaStr ? ('<div class="vinv-choice-meta">' + metaStr + '</div>') : '')
+        +     descStr
+        +   '</div>'
+        +   '<button type="button" class="vinv-btn primary vinv-choice-pick-btn" data-pick-idx="' + idx + '">Escolher</button>'
+        + '</div>';
+    });
+
+    card.className = 'vinv-confirm-card vinv-choice-card';
+    card.innerHTML = ''
+      + '<div class="vinv-choice-header">'
+      +   '<div class="vinv-confirm-title">Equipamentos Equivalentes</div>'
+      +   stepBadge
+      + '</div>'
+      + '<div class="vinv-choice-subtitle">Existem opções com resultados equivalentes para <strong>' + _esc(slotLabel) + '</strong>. Selecione qual deseja equipar:</div>'
+      + '<div class="vinv-choice-list">'
+      +   optionsHtml
+      + '</div>'
+      + '<div class="vinv-confirm-actions">'
+      +   '<button type="button" class="vinv-btn" data-action="choice-cancel">Cancelar</button>'
+      + '</div>';
+
+    ov.classList.add('active');
+
+    function _closeChoice() {
+      ov.removeEventListener('click', _onChoiceBackdrop);
+      ov.classList.remove('active');
+      card.className = 'vinv-confirm-card';
+    }
+
+    function _onChoiceBackdrop(e) {
+      if (e.target === ov) {
+        _closeChoice();
+        if (typeof opts.onCancel === 'function') opts.onCancel();
+      }
+    }
+    ov.addEventListener('click', _onChoiceBackdrop);
+
+    var cancelBtn = card.querySelector('[data-action="choice-cancel"]');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', function () {
+        _closeChoice();
+        if (typeof opts.onCancel === 'function') opts.onCancel();
+      });
+    }
+
+    var optionEls = card.querySelectorAll('.vinv-choice-option');
+    optionEls.forEach(function (optEl) {
+      var idx = parseInt(optEl.getAttribute('data-choice-idx'), 10);
+      var selectItem = function (ev) {
+        if (ev) ev.stopPropagation();
+        var chosen = items[idx];
+        _closeChoice();
+        if (typeof opts.onChoose === 'function') opts.onChoose(chosen);
+      };
+      optEl.addEventListener('click', selectItem);
+      var btn = optEl.querySelector('.vinv-choice-pick-btn');
+      if (btn) btn.addEventListener('click', selectItem);
     });
   }
 

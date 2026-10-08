@@ -1588,6 +1588,149 @@
   box-sizing: border-box;
 }
 
+/* === Modal de Escolha de Equipamentos Equivalentes (Auto-Equip) === */
+.vinv-confirm-card.vinv-choice-card {
+  max-width: clamp(300px, 92vw, 420px);
+  padding: 14px 12px;
+  gap: 10px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.vinv-choice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.vinv-choice-step {
+  font-family: var(--vinv-font-ui, Cinzel, serif);
+  font-size: calc(10px * var(--v-font-scale, 1));
+  color: var(--vinv-gold, #c4953a);
+  background: rgba(196, 149, 58, 0.15);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vinv-choice-subtitle {
+  font-size: calc(11px * var(--v-font-scale, 1));
+  color: var(--vinv-text-dim, #c8b99d);
+  line-height: 1.35;
+  width: 100%;
+}
+
+.vinv-choice-subtitle strong {
+  color: var(--vinv-gold, #c4953a);
+}
+
+.vinv-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-height: 52vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding-right: 2px;
+}
+
+.vinv-choice-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(18, 12, 8, 0.65);
+  border: 1px solid rgba(196, 149, 58, 0.28);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.vinv-choice-option:hover {
+  background: rgba(196, 149, 58, 0.14);
+  border-color: var(--vinv-gold, #c4953a);
+  transform: translateY(-1px);
+}
+
+.vinv-choice-option.is-current {
+  border-left: 3px solid var(--vinv-gold, #c4953a);
+}
+
+.vinv-choice-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vinv-choice-icon img,
+.vinv-choice-icon svg,
+.vinv-choice-icon .vitem-placeholder {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.vinv-choice-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vinv-choice-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.vinv-choice-name {
+  font-family: var(--vinv-font-display, Cinzel, serif);
+  font-size: calc(11.5px * var(--v-font-scale, 1));
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vinv-choice-badge.current {
+  font-size: 9px;
+  color: #2ed573;
+  background: rgba(46, 213, 115, 0.15);
+  border: 1px solid rgba(46, 213, 115, 0.35);
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.vinv-choice-meta {
+  font-size: calc(10px * var(--v-font-scale, 1));
+  color: var(--vinv-text-dim, #c8b99d);
+}
+
+.vinv-choice-desc {
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+  color: var(--vinv-text-muted, #9e8f78);
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.vinv-choice-pick-btn {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+}
+
 .vinv-detail-card {
   background: linear-gradient(180deg, #3a2c20 0%, #2a2018 100%);
   border: 2px solid var(--vinv-gold);
