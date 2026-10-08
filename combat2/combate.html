@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T21:45:42Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T22:32:59Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10256,9 +10256,9 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .hex-tile {
-  fill: rgba(45, 36, 26, 0.72);
-  stroke: rgba(180, 140, 70, 0.28);
-  stroke-width: 1.2;
+  fill: rgba(36, 28, 20, 0.40);
+  stroke: rgba(180, 140, 70, 0.20);
+  stroke-width: 1px;
   transition: fill 0.18s ease, stroke 0.18s ease, opacity 0.25s ease;
 }
 
@@ -10266,7 +10266,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .battlefield-hex-arena .hex-tile {
   transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.25s ease;
   stroke-linejoin: round;
-  stroke-width: 1.2px;
+  stroke-width: 1px;
 }
 .battlefield-hex-arena .hex-terrain-detail {
   pointer-events: none;
@@ -10279,21 +10279,21 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.25s ease;
 }
 .battlefield-hex-arena .hex-tile.hex-tile--vision-edge {
-  stroke: rgba(212, 175, 55, 0.48) !important;
-  stroke-width: 1.5 !important;
-  stroke-dasharray: 6 3;
+  stroke: rgba(212, 175, 55, 0.40) !important;
+  stroke-width: 1.3px !important;
+  stroke-dasharray: 5 3;
 }
 .battlefield-hex-arena .hex-tile.hex-tile--dim {
   opacity: 0.72;
   filter: brightness(0.62) saturate(0.65) contrast(0.9);
-  stroke: rgba(140, 115, 75, 0.45) !important;
+  stroke: rgba(140, 115, 75, 0.40) !important;
   stroke-dasharray: 4 2;
   transition: opacity 0.25s ease, filter 0.25s ease;
 }
 .battlefield-hex-arena .hex-tile.hex-tile--fogged {
   opacity: 0.92 !important;
   fill: #0c0a08 !important;
-  stroke: rgba(48, 38, 28, 0.38) !important;
+  stroke: rgba(48, 38, 28, 0.35) !important;
   stroke-dasharray: 2 4;
   pointer-events: none;
   transition: opacity 0.35s ease, fill 0.35s ease;
@@ -10301,17 +10301,17 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .battlefield-hex-arena .hex-tile.hex-tile--fogged.hex-tile--reachable {
   pointer-events: auto !important;
   cursor: pointer !important;
-  stroke: rgba(140, 100, 40, 0.4) !important;
+  stroke: rgba(140, 100, 40, 0.35) !important;
   stroke-dasharray: 3 3;
 }
 .battlefield-hex-arena .hex-tile.hex-tile--fogged.hex-tile--reachable:hover {
   fill: #14110d !important;
-  stroke: rgba(196, 149, 58, 0.65) !important;
+  stroke: rgba(196, 149, 58, 0.60) !important;
 }
 
 .battlefield-hex-arena .hex-tile:hover {
-  fill: rgba(196, 149, 58, 0.28) !important;
-  stroke: rgba(255, 215, 0, 0.85) !important;
+  fill: rgba(196, 149, 58, 0.16) !important;
+  stroke: rgba(255, 215, 0, 0.75) !important;
 }
 
 .battlefield-hex-arena .hex-tile--enemy-zone {
@@ -10323,83 +10323,286 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   stroke-dasharray: none;
 }
 
-/* Hexágonos de alcance tático D&D 5e — deslocamento com preenchimento translúcido suave (sem ofuscar visão) */
+/* Hexágonos de alcance tático D&D 5e — translúcido e sutil, terreno 100% visível por baixo sem opacidade pesada */
 .battlefield-hex-arena .hex-tile--reachable {
-  fill: rgba(196, 149, 58, 0.12) !important;
-  stroke: rgba(212, 175, 55, 0.72) !important;
-  stroke-width: 1.6 !important;
-  stroke-dasharray: 5 3;
+  fill: rgba(212, 175, 55, 0.04) !important;
+  stroke: rgba(212, 175, 55, 0.48) !important;
+  stroke-width: 1.1px !important;
+  stroke-dasharray: 4 3;
   cursor: pointer !important;
-  filter: drop-shadow(0 0 5px rgba(196, 149, 58, 0.35));
+  filter: none !important;
 }
 
 .battlefield-hex-arena .hex-tile--reachable:hover {
-  fill: rgba(220, 175, 75, 0.42) !important;
+  fill: rgba(220, 175, 75, 0.16) !important;
   stroke: #ffd700 !important;
+  stroke-width: 1.5px !important;
   stroke-dasharray: none;
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.75));
+  filter: drop-shadow(0 0 7px rgba(255, 215, 0, 0.50));
 }
 
 .battlefield-hex-arena .hex-tile--in-reach {
-  fill: rgba(180, 70, 40, 0.25) !important;
-  stroke: rgba(220, 95, 65, 0.75) !important;
-  stroke-width: 1.8 !important;
+  fill: rgba(220, 95, 65, 0.08) !important;
+  stroke: rgba(220, 95, 65, 0.55) !important;
+  stroke-width: 1.3px !important;
 }
 
 .battlefield-hex-arena .hex-tile--occupied-player {
-  stroke: #ffd700 !important;
-  stroke-width: 2.5 !important;
-  fill: rgba(255, 215, 0, 0.16) !important;
-  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.45));
+  stroke: rgba(255, 215, 0, 0.82) !important;
+  stroke-width: 1.9px !important;
+  fill: rgba(255, 215, 0, 0.07) !important;
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.35));
 }
 
 .battlefield-hex-arena .hex-tile--occupied-ally {
-  stroke: #5dade2 !important;
-  stroke-width: 2.5 !important;
-  fill: rgba(93, 173, 226, 0.16) !important;
-  filter: drop-shadow(0 0 6px rgba(93, 173, 226, 0.45));
+  stroke: rgba(93, 173, 226, 0.82) !important;
+  stroke-width: 1.9px !important;
+  fill: rgba(93, 173, 226, 0.07) !important;
+  filter: drop-shadow(0 0 5px rgba(93, 173, 226, 0.35));
 }
 
 .battlefield-hex-arena .hex-tile--occupied-enemy {
-  stroke: #e74c3c !important;
-  stroke-width: 2.5 !important;
-  fill: rgba(231, 76, 60, 0.16) !important;
-  filter: drop-shadow(0 0 6px rgba(231, 76, 60, 0.45));
+  stroke: rgba(231, 76, 60, 0.82) !important;
+  stroke-width: 1.9px !important;
+  fill: rgba(231, 76, 60, 0.07) !important;
+  filter: drop-shadow(0 0 5px rgba(231, 76, 60, 0.35));
 }
 
 .battlefield-hex-arena .hex-tile--occupied-boss {
-  stroke: #f39c12 !important;
-  stroke-width: 3 !important;
-  fill: rgba(243, 156, 18, 0.22) !important;
-  filter: drop-shadow(0 0 8px rgba(243, 156, 18, 0.55));
+  stroke: rgba(243, 156, 18, 0.88) !important;
+  stroke-width: 2.2px !important;
+  fill: rgba(243, 156, 18, 0.10) !important;
+  filter: drop-shadow(0 0 7px rgba(243, 156, 18, 0.45));
 }
 
 .battlefield-hex-arena .hex-tile--in-reach.hex-tile--occupied-enemy {
   stroke: #ff5722 !important;
-  stroke-width: 3 !important;
-  fill: rgba(255, 87, 34, 0.26) !important;
-  filter: drop-shadow(0 0 8px rgba(255, 87, 34, 0.6));
+  stroke-width: 2.2px !important;
+  fill: rgba(255, 87, 34, 0.12) !important;
+  filter: drop-shadow(0 0 6px rgba(255, 87, 34, 0.42));
 }
 
 .battlefield-hex-arena .hex-tile--in-reach.hex-tile--occupied-boss {
   stroke: #ff9800 !important;
-  stroke-width: 3.5 !important;
-  fill: rgba(255, 152, 0, 0.3) !important;
-  filter: drop-shadow(0 0 10px rgba(255, 152, 0, 0.7));
+  stroke-width: 2.5px !important;
+  fill: rgba(255, 152, 0, 0.15) !important;
+  filter: drop-shadow(0 0 8px rgba(255, 152, 0, 0.50));
 }
 
 .battlefield-hex-arena .hex-tile--in-reach.hex-tile--occupied-ally {
   stroke: #00e5ff !important;
-  stroke-width: 3 !important;
-  fill: rgba(0, 229, 255, 0.25) !important;
-  filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.6));
+  stroke-width: 2.2px !important;
+  fill: rgba(0, 229, 255, 0.12) !important;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.42));
 }
 
 .battlefield-hex-arena .hex-tile--stepping {
   stroke: #f1c40f !important;
-  stroke-width: 2.8 !important;
-  fill: rgba(241, 196, 15, 0.22) !important;
-  filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.7));
+  stroke-width: 2.2px !important;
+  fill: rgba(241, 196, 15, 0.14) !important;
+  filter: drop-shadow(0 0 7px rgba(241, 196, 15, 0.50));
+}
+
+/* Indicador de turno do jogador com botão no topo para encerrar turno sem rolagem */
+.current-turn.player-turn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 4px 12px !important;
+  box-sizing: border-box !important;
+  gap: 8px !important;
+}
+.current-turn.player-turn .ct-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.top-end-turn-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(180deg, rgba(48, 36, 20, 0.95), rgba(28, 20, 10, 0.98));
+  border: 1px solid rgba(212, 175, 55, 0.75);
+  border-radius: 6px;
+  color: #f7e7be;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 9px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+  transition: all 0.16s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+.top-end-turn-btn:hover {
+  background: linear-gradient(180deg, rgba(68, 50, 24, 0.98), rgba(42, 30, 14, 0.98));
+  border-color: #ffd700;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.55);
+  transform: translateY(-1px);
+}
+.top-end-turn-btn:active {
+  transform: translateY(0);
+}
+.top-end-turn-btn .tet-icon {
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* Layout switcher e visualização em grade de botões de habilidades */
+.lp-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.lp-header-left {
+  display: flex;
+  flex-direction: column;
+}
+.lp-header-left .lp-title {
+  margin-bottom: 2px;
+}
+.lp-layout-toggle {
+  display: inline-flex;
+  background: rgba(18, 14, 10, 0.9);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+.lp-layout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #ebd6a7;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.lp-layout-btn.active {
+  background: linear-gradient(180deg, #c4953a, #8f6723);
+  color: #120e0a;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+.lp-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 4px 2px;
+  overflow-y: auto;
+  max-height: calc(100vh - 280px);
+}
+.lp-quick-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.lp-quick-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 6px;
+  background: linear-gradient(180deg, rgba(38, 30, 22, 0.95), rgba(22, 17, 12, 0.98));
+  border: 1px solid rgba(196, 149, 58, 0.5);
+  border-radius: 8px;
+  color: #f7e7be;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  min-height: 82px;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+.lp-quick-btn:hover:not(.disabled) {
+  border-color: #ffd700;
+  background: linear-gradient(180deg, rgba(58, 44, 28, 0.98), rgba(32, 24, 16, 0.98));
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.45);
+  transform: translateY(-1px);
+}
+.lp-quick-btn.disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  filter: grayscale(0.65);
+  border-color: rgba(120, 100, 80, 0.3);
+}
+.lp-qb-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 4px;
+}
+.lp-qb-ico {
+  font-size: 18px;
+  line-height: 1;
+}
+.lp-qb-badge {
+  font-size: 8px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.lp-qb-name {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  flex: 1 1 auto;
+}
+.lp-qb-cost {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9.5px;
+  color: #f59e0b;
+  font-weight: 700;
+}
+.lp-qb-cost.cant {
+  color: #ef4444;
+}
+.lp-qb-block-chip {
+  font-size: 7.5px;
+  color: #fca5a5;
+  background: rgba(185, 28, 28, 0.35);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 3px;
+  padding: 1px 4px;
+  margin-top: 3px;
+  max-width: 95%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lp-quick-help-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(20, 16, 12, 0.9);
+  border: 1px solid rgba(196, 149, 58, 0.6);
+  color: #ebd6a7;
+  font-size: 10px;
+  line-height: 16px;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.lp-quick-help-btn:hover {
+  border-color: #ffd700;
+  color: #ffd700;
 }
 
 .battlefield-hex-arena .hex-coord {
@@ -16295,7 +16498,14 @@ function newCombatFromSetup(cfg) {
     }
 
     var order = [p].concat(allies).concat(enemies);
-    assignInitialPositions(order, typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14, typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12);
+    assignInitialPositions(
+        order,
+        typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14,
+        typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12,
+        cfg.biome || 'forest',
+        cfg.weather || 'clear',
+        cfg.formation || (cfg.playerSurprised ? 'ambush' : 'line')
+    );
     /* IDs estáveis por posição de origem (player→aliados→inimigos). O snapshot
        de checkpoint referencia unidades por id; sem ids o restore de HP era
        no-op silencioso (bug user 2026-06-10: lobo morto revivia ao reabrir o
@@ -19741,9 +19951,10 @@ function calculateHexMovementCost(fromC, fromR, toC, toR, difficultMap) {
     return cost;
 }
 
-function assignInitialPositions(order, cols, rows, biome, weather) {
+function assignInitialPositions(order, cols, rows, biome, weather, formation) {
     cols = cols || HEX_COLS_DEFAULT;
     rows = rows || HEX_ROWS_DEFAULT;
+    formation = formation || 'line';
     var allies = [];
     var enemies = [];
     var playerUnit = null;
@@ -19759,6 +19970,12 @@ function assignInitialPositions(order, cols, rows, biome, weather) {
         }
     });
     if (!playerUnit && allies.length > 0) playerUnit = allies[0];
+
+    // Se qualquer aliado estiver surpreso e a formação for padrão, promove a emboscada
+    var hasSurprisedAlly = allies.some(function (c) { return c && (c.surprised || c.surprisedFromIntro); });
+    if (hasSurprisedAlly && formation === 'line') {
+        formation = 'ambush';
+    }
 
     // Raio de visão do personagem para ancorar o limiar de visibilidade da linha inimiga
     var vr = 6;
@@ -19794,30 +20011,60 @@ function assignInitialPositions(order, cols, rows, biome, weather) {
         { col: centerCol, row: playerRow + 2 }
     ];
 
-    // Slots inimigos: dinamicamente posicionados no limite de visão do personagem ao Norte
-    var enemyCandidates = [];
-    for (var er = 0; er < rows; er++) {
-        for (var ec = 0; ec < cols; ec++) {
-            if (er < playerRow) {
-                var d = hexDistance(centerCol, playerRow, ec, er);
-                if (d <= targetDist) {
-                    enemyCandidates.push({ d: d, colDiff: Math.abs(ec - centerCol), col: ec, row: er });
+    // Slots para inimigos conforme a formação tática
+    var enemySlots = [];
+    if (formation === 'ambush' || formation === 'encircling') {
+        // Cerco / Emboscada D&D 5e: inimigos cercam a comitiva em múltiplos quadrantes
+        enemySlots = [
+            { col: Math.max(1, centerCol - 3), row: Math.max(1, playerRow - 3) },
+            { col: Math.min(cols - 2, centerCol + 3), row: Math.max(1, playerRow - 3) },
+            { col: Math.max(0, centerCol - 4), row: Math.max(1, playerRow - 1) },
+            { col: Math.min(cols - 1, centerCol + 4), row: Math.max(1, playerRow - 1) },
+            { col: centerCol, row: Math.max(0, playerRow - 4) },
+            { col: Math.max(1, centerCol - 3), row: Math.min(rows - 1, playerRow + 2) },
+            { col: Math.min(cols - 2, centerCol + 3), row: Math.min(rows - 1, playerRow + 2) },
+            { col: centerCol, row: Math.min(rows - 1, playerRow + 3) },
+            { col: Math.max(0, centerCol - 5), row: Math.max(0, playerRow - 2) },
+            { col: Math.min(cols - 1, centerCol + 5), row: Math.max(0, playerRow - 2) }
+        ];
+    } else if (formation === 'scattered' || formation === 'dispersed') {
+        // Dispersão tática: inimigos espalhados em profundidades e colunas intercaladas
+        enemySlots = [
+            { col: Math.max(1, centerCol - 4), row: Math.max(1, playerRow - targetDist) },
+            { col: Math.min(cols - 2, centerCol + 4), row: Math.max(1, playerRow - targetDist + 1) },
+            { col: centerCol, row: Math.max(0, playerRow - targetDist - 1) },
+            { col: Math.max(2, centerCol - 2), row: Math.max(2, playerRow - targetDist + 2) },
+            { col: Math.min(cols - 3, centerCol + 2), row: Math.max(2, playerRow - targetDist + 2) },
+            { col: Math.max(0, centerCol - 5), row: Math.max(1, playerRow - targetDist - 1) },
+            { col: Math.min(cols - 1, centerCol + 5), row: Math.max(1, playerRow - targetDist - 1) },
+            { col: centerCol, row: Math.max(1, playerRow - targetDist + 1) }
+        ];
+    } else {
+        // Formação em linha padrão (frontal ao Norte)
+        var enemyCandidates = [];
+        for (var er = 0; er < rows; er++) {
+            for (var ec = 0; ec < cols; ec++) {
+                if (er < playerRow) {
+                    var d = hexDistance(centerCol, playerRow, ec, er);
+                    if (d <= targetDist) {
+                        enemyCandidates.push({ d: d, colDiff: Math.abs(ec - centerCol), col: ec, row: er });
+                    }
                 }
             }
         }
-    }
-    // Ordena: 1º d === targetDist (exatamente no limiar da visão!), 2º d === targetDist - 1, 3º mais próximo do centro
-    enemyCandidates.sort(function (a, b) {
-        var pA = (a.d === targetDist) ? -1 : ((a.d === targetDist - 1) ? 0 : 1);
-        var pB = (b.d === targetDist) ? -1 : ((b.d === targetDist - 1) ? 0 : 1);
-        if (pA !== pB) return pA - pB;
-        if (a.colDiff !== b.colDiff) return a.colDiff - b.colDiff;
-        return b.d - a.d;
-    });
+        // Ordena: 1º d === targetDist (exatamente no limiar da visão!), 2º d === targetDist - 1, 3º mais próximo do centro
+        enemyCandidates.sort(function (a, b) {
+            var pA = (a.d === targetDist) ? -1 : ((a.d === targetDist - 1) ? 0 : 1);
+            var pB = (b.d === targetDist) ? -1 : ((b.d === targetDist - 1) ? 0 : 1);
+            if (pA !== pB) return pA - pB;
+            if (a.colDiff !== b.colDiff) return a.colDiff - b.colDiff;
+            return b.d - a.d;
+        });
 
-    var enemySlots = enemyCandidates.map(function (cand) {
-        return { col: cand.col, row: cand.row };
-    });
+        enemySlots = enemyCandidates.map(function (cand) {
+            return { col: cand.col, row: cand.row };
+        });
+    }
 
     if (enemySlots.length === 0) {
         var fbRows = [playerRow - targetDist, playerRow - targetDist + 1, 2, 3];
@@ -24201,6 +24448,96 @@ function mountBattlefieldPanZoom() {
         }
     };
 
+    /* Aproximação de combate pós-iniciativa: enquadra de perto todos os combatentes ativos (aliados e inimigos). */
+    var getEngagementParams = function () {
+        var vpW = vp.clientWidth;
+        var vpH = vp.clientHeight;
+        if (!vpW || !vpH || vpW < 100 || vpH < 100) {
+            var appEl = document.getElementById('app');
+            if (appEl && appEl.clientWidth >= 100 && appEl.clientHeight >= 100) {
+                vpW = appEl.clientWidth;
+                vpH = Math.max(200, Math.round(appEl.clientHeight * 0.55));
+            } else {
+                vpW = Math.max(320, window.innerWidth || 390);
+                vpH = Math.max(220, Math.round((window.innerHeight || 600) * 0.45));
+            }
+        }
+
+        var dockEl = document.querySelector('.sim-action-dock');
+        var dockH = (dockEl && dockEl.offsetHeight) ? Math.min(80, dockEl.offsetHeight) : 0;
+        var usableVpH = Math.max(160, vpH - dockH);
+        var usableCenterY = usableVpH / 2;
+
+        var aliveUnits = [];
+        if (currentState && currentState.order && Array.isArray(currentState.order)) {
+            for (var i = 0; i < currentState.order.length; i++) {
+                var u = currentState.order[i];
+                if (u && (u.alive !== false) && !u.isDead &&
+                    (typeof u.hp !== 'number' || u.hp > 0 || u.dying || u.deathSaves) &&
+                    u.pos && u.pos.col != null && u.pos.row != null) {
+                    aliveUnits.push(u);
+                }
+            }
+        }
+
+        if (aliveUnits.length > 0) {
+            var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (var ui = 0; ui < aliveUnits.length; ui++) {
+                var un = aliveUnits[ui];
+                var cCenter = hexCenter(un.pos.col, un.pos.row);
+                var sx = padPanX + cCenter.cx;
+                var sy = padPanY + cCenter.cy;
+                if (sx < minX) minX = sx;
+                if (sx > maxX) maxX = sx;
+                if (sy < minY) minY = sy;
+                if (sy > maxY) maxY = sy;
+            }
+
+            var marginX = 72;
+            var marginY = 72;
+            var boxMinX = minX - marginX;
+            var boxMaxX = maxX + marginX;
+            var boxMinY = minY - marginY;
+            var boxMaxY = maxY + marginY;
+
+            var boxW = Math.max(180, boxMaxX - boxMinX);
+            var boxH = Math.max(180, boxMaxY - boxMinY);
+            var centerX = (boxMinX + boxMaxX) / 2;
+            var centerY = (boxMinY + boxMaxY) / 2;
+
+            var padScreenX = 36;
+            var padScreenY = 36;
+            var availW = Math.max(140, vpW - padScreenX);
+            var availH = Math.max(140, usableVpH - padScreenY);
+
+            var fitX = availW / boxW;
+            var fitY = availH / boxH;
+            var zUnits = Math.min(fitX, fitY);
+
+            var z = Math.max(0.60, Math.min(1.15, zUnits));
+
+            var panX = (vpW / 2) - (centerX * z);
+            var panY = usableCenterY - (centerY * z);
+            var clamped = clampPan(panX, panY, z);
+            return { z: z, x: clamped.x, y: clamped.y };
+        }
+
+        return getOverviewParams();
+    };
+
+    var fitEngagement = async function (animate, durationMs) {
+        var p = getEngagementParams();
+        if (animate) {
+            await smoothAnimateCamera(p.z, p.x, p.y, durationMs || 800);
+            if (window.__bfPanState) window.__bfPanState.userAdjusted = true;
+        } else {
+            currentZoom = p.z;
+            currentPanX = p.x;
+            currentPanY = p.y;
+            applyTransform(false, true);
+        }
+    };
+
     var focusPlayer = async function (animate) {
         var pActor = null;
         if (currentState && currentState.order && Array.isArray(currentState.order)) {
@@ -24348,6 +24685,11 @@ function mountBattlefieldPanZoom() {
     window.bfCameraFocusOverview = async function (durationMs) {
         await fitOverview(true, durationMs || 750);
     };
+
+    window.bfCameraFocusEngagement = async function (durationMs) {
+        await fitEngagement(true, durationMs || 800);
+    };
+    window.__focusCombatEngagement = fitEngagement;
 
     window.bfCameraFocusCoord = async function (col, row, targetZoom, durationMs) {
         if (col == null || row == null || typeof hexCenter !== 'function') return;
@@ -24824,7 +25166,11 @@ function render(s) {
     var isPlayerTurn = s.active_idx === s.p_idx;
     if (activeNow) {
         if (isPlayerTurn) {
-            html += '<div class="current-turn player-turn"><span class="ct-chevron">▸</span><span class="ct-text">SEU TURNO</span><span class="ct-chevron">◂</span></div>';
+            html += '<div class="current-turn player-turn">' +
+                '<div class="ct-info"><span class="ct-chevron">▸</span><span class="ct-text">SEU TURNO</span><span class="ct-chevron">◂</span></div>' +
+                '<button type="button" class="top-end-turn-btn" data-act="end-turn" title="Encerrar seu turno ativo sem precisar rolar a tela">' +
+                '<span class="tet-icon">⏳</span><span class="tet-label">Encerrar Turno</span></button>' +
+                '</div>';
         } else {
             /* 2026-06-08 (user): resolve a IMAGEM da classe (ex.: Guerreiro do Thorne)
                em vez de imprimir o id cru 'IC_GUERREIRO' como texto. */
@@ -27681,6 +28027,59 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
     return { html: html, totalPages: totalPages, page: page, filteredCount: filteredCount };
 }
 
+/* Constrói grade de botões rápidos para habilidades (layout tátil/compacto). */
+function _buildSkillButtonsGridHtml(skills, filter, resIco, resValue) {
+    var sCur = (typeof currentState !== 'undefined') ? currentState : null;
+    var pCur = (sCur && sCur.order && sCur.p_idx != null) ? sCur.order[sCur.p_idx] : null;
+    var filtered = [];
+    skills.forEach(function (sk, i) {
+        var cat = _skillCategoryOf(sk);
+        if (filter !== 'all' && cat !== filter) return;
+        if (sk.minLevel && pCur && (pCur.lvl | 0) < (sk.minLevel | 0)) return;
+        var skCanUse = pCur ? _simIsSkillUsable(sCur, pCur, sk) : true;
+        filtered.push({ sk: sk, origIdx: i, cat: cat, canUse: skCanUse });
+    });
+    filtered.sort(function (a, b) {
+        if (a.canUse !== b.canUse) return a.canUse ? -1 : 1;
+        return a.origIdx - b.origIdx;
+    });
+    var filteredCount = filtered.length;
+    var html = '<div class="lp-buttons-grid">';
+    for (var j = 0; j < filtered.length; j++) {
+        var entry = filtered[j];
+        var sk = entry.sk;
+        var i = entry.origIdx;
+        var cat = entry.cat;
+        var canUse = pCur ? _simIsSkillUsable(sCur, pCur, sk) : (resValue >= sk.cost);
+        var blockReason = (!canUse && pCur) ? _simSkillDisabledReason(sCur, pCur, sk) : null;
+        var theme = _skillThemeOf(sk);
+        var resKind = _skillResourceKind(sk);
+        var resGlyph = _resourceGlyphFor(resKind);
+        var resBadgeHtml = '<span class="lp-qb-badge res-' + resKind + '" title="' +
+            (resKind === 'bonus' ? 'Ação Bônus (▲)' : resKind === 'reaction' ? 'Reação ()' : 'Ação (◆)') +
+            '">' + resGlyph + '</span>';
+        var costTxt = (sk.cost | 0) > 0 ? (resIco + ' ' + sk.cost) : '0';
+
+        html += '<div class="lp-quick-item" data-cat="' + cat + '">';
+        html += '<button type="button" class="lp-quick-btn lp-item--' + theme + (canUse ? '' : ' disabled') + '" data-skill="' + i + '"' + (canUse ? '' : ' disabled') + (blockReason ? ' title="' + escHtml(blockReason) + '"' : '') + '>';
+        html += '<div class="lp-qb-top">';
+        html += '<span class="lp-qb-ico">' + _skillIconHTML(sk) + '</span>';
+        html += resBadgeHtml;
+        html += '</div>';
+        html += '<div class="lp-qb-name">' + escHtml(sk.n) + '</div>';
+        html += '<div class="lp-qb-cost' + (canUse ? '' : ' cant') + '">' + costTxt + '</div>';
+        if (blockReason) {
+            html += '<div class="lp-qb-block-chip" title="' + escHtml(blockReason) + '">' + escHtml(blockReason) + '</div>';
+        }
+        html += '</button>';
+        html += '<button type="button" class="lp-quick-help-btn" data-skill-help="' + i + '" title="Detalhes D&D 5e" aria-label="Detalhes técnicos">?</button>';
+        html += '</div>';
+    }
+    html += '</div>';
+    if (!filteredCount) html = '<div class="lp-empty">Nenhuma habilidade nesta categoria.</div>';
+    return { html: html, filteredCount: filteredCount };
+}
+
 /* Helper: wire clicks da lista (help button + skill button). */
 function _bindSkillListListeners(listEl, skills, ov, reopenFn) {
     listEl.querySelectorAll('[data-skill-help]').forEach(function (hb) {
@@ -27751,11 +28150,29 @@ function openSkillsPanel() {
         return Math.max(3, Math.min(9, Math.floor(listH / rowH)));
     })();
 
+    var layoutMode = 'detailed';
+    try {
+        var _savedMode = localStorage.getItem('c2_skill_layout_mode');
+        if (_savedMode === 'buttons' || _savedMode === 'detailed') layoutMode = _savedMode;
+    } catch (_eMode) {}
+
     function renderListBody() {
         var listEl = card.querySelector('.lp-list');
         var pagerEl = card.querySelector('.lp-pager');
         if (!listEl) return;
         var currentFilter = available[activeIdx].k;
+
+        if (layoutMode === 'buttons') {
+            var bResult = _buildSkillButtonsGridHtml(p.skills, currentFilter, p.res.ico, p.res.value);
+            setHTML(listEl, bResult.html);
+            _bindSkillListListeners(listEl, p.skills, ov, openSkillsPanel);
+            if (pagerEl) {
+                pagerEl.style.display = 'none';
+                setHTML(pagerEl, '');
+            }
+            return;
+        }
+
         var result = _buildSkillListHtml(p.skills, currentFilter, p.res.ico, p.res.value, currentPage, PAGE_SIZE);
         currentPage = result.page;
         setHTML(listEl, result.html);
@@ -27823,6 +28240,10 @@ function openSkillsPanel() {
 
     var html = '<div class="lp-title">Habilidades</div>';
     html += '<div class="lp-sub">' + p.res.ico + ' ' + p.res.value + '/' + p.res.max + ' ' + p.res.name + '</div>';
+    html += '<div class="lp-layout-toggle" role="radiogroup" aria-label="Modo de visualização" style="align-self:center; margin: 4px auto 6px auto;">';
+    html += '<button type="button" class="lp-layout-btn' + (layoutMode === 'detailed' ? ' active' : '') + '" data-layout="detailed" title="Lista detalhada">☰ Lista</button>';
+    html += '<button type="button" class="lp-layout-btn' + (layoutMode === 'buttons' ? ' active' : '') + '" data-layout="buttons" title="Grade de botões rápidos">☷ Botões</button>';
+    html += '</div>';
     html += '<div class="lp-filter-dd" role="group" aria-label="Filtro de habilidades">';
     html += '<button type="button" class="lp-filter-dd-trigger" aria-haspopup="listbox" aria-expanded="false">';
     html += '<span class="lp-filter-dd-label"></span>';
@@ -27849,6 +28270,23 @@ function openSkillsPanel() {
         _actionTaken = false;
         render(currentState);
     });
+
+    // Alternador de layout ativo
+    card.querySelectorAll('.lp-layout-btn').forEach(function (lBtn) {
+        lBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var targetMode = lBtn.getAttribute('data-layout');
+            if (targetMode && targetMode !== layoutMode) {
+                layoutMode = targetMode;
+                try { localStorage.setItem('c2_skill_layout_mode', layoutMode); } catch (_eSave) {}
+                card.querySelectorAll('.lp-layout-btn').forEach(function (b) {
+                    b.classList.toggle('active', b.getAttribute('data-layout') === layoutMode);
+                });
+                renderListBody();
+            }
+        });
+    });
+
     // Trigger do dropdown: toggle open
     var ddWrap = card.querySelector('.lp-filter-dd');
     var ddTrigger = card.querySelector('.lp-filter-dd-trigger');
@@ -33556,6 +33994,14 @@ function beginCombatAfterInitOrder() {
        input. Se for NPC, roda runNpcSegmentUntilPlayerTurn até chegar no player. */
     currentState.active_idx = 0;
     render(currentState);
+    /* Aproximação suave da câmera logo após iniciativa focando os combatentes ativos (aliados e inimigos) */
+    try {
+        if (typeof window.bfCameraFocusEngagement === 'function') {
+            window.bfCameraFocusEngagement(850);
+        } else if (typeof window.__focusCombatEngagement === 'function') {
+            window.__focusCombatEngagement(true, 850);
+        }
+    } catch (_eCam) {}
     if (currentState.active_idx !== currentState.p_idx) {
         /* 2026-06-07 / 2026-10 FIX (turno travado): loop de NPCs no início de combate com
            watchdog circuit breaker e bloco finally incondicional pra garantir que o jogador
