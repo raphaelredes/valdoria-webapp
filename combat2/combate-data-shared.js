@@ -253,6 +253,7 @@ var CHAR_CLASSES = [
         { n: 'Bola de Fogo', ico: '', cost: 4, kind: 'attack', minLevel: 5, desc: 'Esfera flamejante 8d6 fogo AOE (PHB p.241). Escala +1d6 por slot acima do 3º. TR DES metade.',
             damageSpec: { n: 8, d: 6, scaleByCasterLevel: { breakpoints: [[7, 1], [9, 2], [11, 3], [13, 4], [15, 5], [17, 6]] } }, dmgType: 'fire', save: { ability: 'dex' },
             fireball: { n: 8, d: 6, flat: 0 }, multiTarget: true,
+            aoeRadius: 4, aoeShape: 'sphere',
             helpDnd5e: 'Bola de Fogo / Fireball (PHB p.241 — Mago/Feiticeiro nv 3): 1 action; esfera de 6m raio. Cada criatura na área faz TR DES; **8d6 fogo** em falha, metade em sucesso.\nUpcast: +1d6 por nível acima do 3º.\nV1.7 Sprint-17 (2026-04-21): era 3d6 stub (divergência PHB) — corrigido pra 8d6 RAW.' },
         { n: 'Mísseis Mágicos', ico: '', cost: 2, kind: 'attack', desc: 'Três dardos arcanos que acertam sem falhar. Cada um causa 1d4+1 de dano de força.',
             dmgType: 'force', autoHit: true,
@@ -426,6 +427,7 @@ var CHAR_CLASSES = [
         { n: 'Onda de Trovão', ico: '', cost: 2, kind: 'attack', dmgType: 'thunder',
             desc: 'Cubo (PHB p.282): 2d8 trovão AOE, escala +1d8 por slot acima do 1º. TR CON metade + empurrão.',
             damageSpec: { n: 2, d: 8, scaleByCasterLevel: { breakpoints: [[3, 1], [5, 2], [7, 3], [9, 4], [11, 5], [13, 6], [15, 7], [17, 8]] } }, save: { ability: 'con' }, multiTarget: true,
+            aoeRadius: 3, aoeShape: 'cube',
             helpDnd5e: 'Onda de Trovão / Thunderwave (PHB p.282 — Mago/Druida/Bardo/Feiticeiro nv 1): 1 action; cubo 4,5m origem você. Criaturas e objetos soltos fazem TR CON; em falha, 2d8 trovão + empurra 3m, em sucesso metade + sem empurrão.\nUpcast: +1d8 por nível acima do 1º.\nArena: reusa multiTarget + save + damageSpec. Empurrão não modelado (sem grid).' },
         /* V1.7 Sprint-14 (2026-04-21 closeout review) — Flecha de Ácido (Melf's Acid Arrow PHB p.258):
            Mago nv 2. Ranged spell atk 4d4 acid + 2d4 no próximo turno. Reusa damageSpec + ranged. */
@@ -442,6 +444,7 @@ var CHAR_CLASSES = [
         { n: 'Cone de Frio', ico: '', cost: 4, kind: 'attack', minLevel: 9, dmgType: 'cold',
             desc: 'Cone (PHB p.236): 8d8 frio AOE, escala +1d8 por slot acima do 5º. TR CON metade.',
             damageSpec: { n: 8, d: 8, scaleByCasterLevel: { breakpoints: [[11, 1], [13, 2], [15, 3], [17, 4]] } }, save: { ability: 'con' }, multiTarget: true,
+            aoeRadius: 12, aoeShape: 'cone',
             helpDnd5e: 'Cone de Frio / Cone of Cold (PHB p.236 — Mago/Feiticeiro nv 5): 1 action; cone 18m. Criaturas na área fazem TR CON; 8d8 cold em falha, metade em sucesso. Criaturas mortas por este spell viram estátuas de gelo.\nUpcast: +1d8 por nível acima do 5º.\nArena: reusa multiTarget + save + damageSpec (mesmo pipeline AOE).' },
         /* V1.7 Sprint-13 (2026-04-21 closeout review) — Mãos Flamejantes (Burning Hands PHB p.220):
            Mago nv 1. Cone 15ft AOE 3d6 fogo; TR DES metade. Reusa multiTarget+save pattern. */
@@ -450,6 +453,7 @@ var CHAR_CLASSES = [
         { n: 'Mãos Flamejantes', ico: '', cost: 2, kind: 'attack', dmgType: 'fire',
             desc: 'Cone (PHB p.220): 3d6 fogo AOE, escala +1d6 por slot acima do 1º. TR DES metade.',
             damageSpec: { n: 3, d: 6, scaleByCasterLevel: { breakpoints: [[3, 1], [5, 2], [7, 3], [9, 4], [11, 5], [13, 6], [15, 7], [17, 8]] } }, save: { ability: 'dex' }, multiTarget: true,
+            aoeRadius: 3, aoeShape: 'cone',
             helpDnd5e: 'Mãos Flamejantes / Burning Hands (PHB p.220 — Mago/Feiticeiro nv 1): 1 action; cone de fogo 4,5m (15ft). Cada criatura na área faz TR DES; 3d6 fogo em falha, metade em sucesso. Objetos inflamáveis pegam fogo.\nUpcast: +1d6 por nível acima do 1º.\nArena: reusa padrão multiTarget + save + damageSpec (mesmo pipeline da Bola de Fogo, menor dmg).' },
         /* V1.7 Sprint-13 (2026-04-21 closeout review) — Raio Relampejante (Lightning Bolt PHB p.257):
            Mago nv 3. Linha 30m AOE 8d6 lightning; TR DES metade. Reusa multiTarget+save. */
@@ -458,6 +462,7 @@ var CHAR_CLASSES = [
         { n: 'Raio Relampejante', ico: '', cost: 3, kind: 'attack', minLevel: 5, dmgType: 'lightning',
             desc: 'Linha (PHB p.257): 8d6 elétrico AOE, escala +1d6 por slot acima do 3º. TR DES metade.',
             damageSpec: { n: 8, d: 6, scaleByCasterLevel: { breakpoints: [[7, 1], [9, 2], [11, 3], [13, 4], [15, 5], [17, 6]] } }, save: { ability: 'dex' }, multiTarget: true,
+            aoeRadius: 20, aoeShape: 'line',
             helpDnd5e: 'Raio Relampejante / Lightning Bolt (PHB p.257 — Mago/Feiticeiro nv 3): 1 action; linha 30m × 1,5m. Cada criatura na linha faz TR DES; 8d6 elétrico em falha, metade em sucesso. Objetos inflamáveis pegam fogo.\nUpcast: +1d6 por nível acima do 3º.\nArena: reusa multiTarget + save + damageSpec (mesmo fluxo da Bola de Fogo).' },
         /* V1.7 Sprint-13 (2026-04-21 closeout review) — Choque Elétrico (Shocking Grasp PHB p.276):
            Mago cantrip. Melee spell atk 1d8 lightning. Alvo não pode usar reação até próximo turno.
@@ -656,6 +661,7 @@ var CHAR_CLASSES = [
         { n: 'Espíritos Guardiões', ico: '', cost: 3, kind: 'attack', minLevel: 5, dmgType: 'radiant',
             desc: 'Aura (PHB p.250): 3d8 radiante AOE (escala +1d8/slot acima 3º); TR SAB metade (concentração).',
             damageSpec: { n: 3, d: 8, scaleByCasterLevel: { breakpoints: [[7, 1], [9, 2], [11, 3], [13, 4], [15, 5], [17, 6]] } }, save: { ability: 'wis' }, multiTarget: true,
+            aoeRadius: 3, aoeShape: 'sphere',
             helpDnd5e: 'Espíritos Guardiões / Spirit Guardians (PHB p.250 — Clérigo nv 3): 1 action; concentração 10 min. Espíritos em aura 4,5m ao redor do caster. Criaturas hostis que entrarem OU começarem turno na aura fazem TR SAB; 3d8 radiante (ou necrótico para clérigos de mal) em falha, metade em sucesso.\nUpcast: +1d8 por nível acima do 3º.\nArena stub: cast aplica dano 1x AOE (sem tracking ongoing) + stub documentation da aura; concentração flag para quebrar ao sofrer dano.' },
         /* V1.7 Sprint-12 (2026-04-21 closeout review) — Infligir Ferimentos (Inflict Wounds PHB p.254):
            Clérigo nv 1. 1 action melee spell atk; em acerto 3d10 necrotic. Cast não requer concentração. */
@@ -727,6 +733,7 @@ var CHAR_CLASSES = [
         /* Fase 4C: Canalizar Divindade — Expulsar Mortos-Vivos (Turn Undead PHB p.58).
            No FIM da lista de propósito (não desloca slots das skills anteriores). */
         { n: 'Expulsar Mortos-Vivos', ico: '†', cost: 0, kind: 'attack', dmgType: 'radiant', minLevel: 2, multiTarget: true, requiresTargetTag: ['undead'], combatOnceId: 'channel_divinity', save: { ability: 'wis' },
+            aoeRadius: 6, aoeShape: 'sphere',
             damageSpec: { n: 0, d: 0 },
             desc: 'Canalizar Divindade (PHB p.58): mortos-vivos fazem TR de SAB ou são Expulsos (fogem e perdem o turno). 1×/combate.',
             helpDnd5e: 'Expulsar Mortos-Vivos / Turn Undead (PHB p.58-59 — Canalizar Divindade, Clérigo nv 2): cada morto-vivo que vê/ouve o Clérigo faz um TR de Sabedoria (CD de magia). Em falha, é "expulso" por 1 min ou até sofrer dano — gasta os turnos fugindo e não pode agir.\nArena (sem grelha): TR SAB vs CD; em falha, Expulso (skipTurn 3 rodadas, termina ao sofrer dano). Só afeta mortos-vivos (auto-alveja todos os undead vivos). 1×/combate; sem mortos-vivos, não gasta o uso.',
@@ -1303,6 +1310,7 @@ var CHAR_CLASSES = [
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.228) — Call Lightning upcast +1d10/slot acima 3º. */
         { n: 'Invocar Raio', ico: '', cost: 3, kind: 'attack', minLevel: 5, desc: 'Nuvem de tempestade (PHB p.228): 3d10 elétrico AOE (escala +1d10/slot acima 3º); TR DES metade.',
             damageSpec: { n: 3, d: 10, scaleByCasterLevel: { breakpoints: [[7, 1], [9, 2], [11, 3], [13, 4], [15, 5], [17, 6]] } }, dmgType: 'lightning', save: { ability: 'dex' }, multiTarget: true,
+            aoeRadius: 1, aoeShape: 'cylinder',
             helpDnd5e: 'Invocar Raio / Call Lightning (PHB p.228 — nível 3): invoca nuvem de tempestade; escolhe ponto e um raio desce causando 3d10 elétrico em criaturas em 1,5m (TR DES metade). Nas rodadas seguintes, pode gastar ação pra outro raio.\nUpcast: +1d10 por nível acima do 3º.\nV1.7 Sprint-17 (2026-04-21): era single-target (divergência) — agora multiTarget AOE PHB-correto.' },
         /* V1.7 Sprint-16 (2026-04-21 closeout review) — Chicote Espinhoso (Thorn Whip PHB p.282):
            Druida cantrip. Ranged spell atk 1d6 piercing + puxa alvo 3m. Reusa damageSpec+ranged+scale. */
@@ -1346,6 +1354,7 @@ var CHAR_CLASSES = [
         { n: 'Plaga de Insetos', ico: '', cost: 4, kind: 'attack', minLevel: 9, dmgType: 'piercing',
             desc: 'AOE (PHB p.253): 4d10 piercing (escala +1d10/slot acima 5º); TR CON metade (concentração).',
             damageSpec: { n: 4, d: 10, scaleByCasterLevel: { breakpoints: [[11, 1], [13, 2], [15, 3], [17, 4]] } }, save: { ability: 'con' }, multiTarget: true,
+            aoeRadius: 4, aoeShape: 'sphere',
             helpDnd5e: 'Plaga de Insetos / Insect Plague (PHB p.253 — Druida/Clérigo/Feiticeiro nv 5): 1 action; concentração 10 min. Enxame gafanhotos esfera 6m. Criaturas entrando/iniciando turno fazem TR CON; 4d10 piercing em falha, metade em sucesso. Heavily obscured (ocultamento pesado).\nUpcast: +1d10 por nível acima do 5º.\nArena: multiTarget + save + damageSpec + concentration.' },
         /* V1.7 Sprint-14 (2026-04-21 closeout review) — Feixe Lunar (Moonbeam PHB p.259):
            Druida nv 2. Cilindro 1.5m 2d10 radiant TR CON metade. Concentração 1 min.
@@ -1354,6 +1363,7 @@ var CHAR_CLASSES = [
         { n: 'Feixe Lunar', ico: '', cost: 2, kind: 'attack', minLevel: 3, dmgType: 'radiant',
             desc: 'Cilindro (PHB p.259): 2d10 radiante AOE (escala +1d10/slot acima 2º); TR CON metade (concentração).',
             damageSpec: { n: 2, d: 10, scaleByCasterLevel: { breakpoints: [[5, 1], [7, 2], [9, 3], [11, 4], [13, 5], [15, 6], [17, 7]] } }, save: { ability: 'con' }, multiTarget: true,
+            aoeRadius: 1, aoeShape: 'cylinder',
             helpDnd5e: 'Feixe Lunar / Moonbeam (PHB p.259 — Druida nv 2): 1 action; concentração 1 min. Feixe prateado cilindro 1,5m raio × 12m alto. Criaturas que entrarem OU começarem turno no feixe fazem TR CON; 2d10 radiante em falha, metade em sucesso. Formas de lobisomem com desvantagem.\nUpcast: +1d10 por nível acima do 2º.\nArena stub: cast aplica dano AOE 1x + concentration flag (ongoing não modelado — similar Spirit Guardians).' },
         /* V1.7 Sprint-7 (2026-04-21 closeout) — Contágio (Contagion PHB p.234) Druida nv 5.
            TR CON 3x — 3 falhas infligem doença. Arena stub: 1 falha → Exausto nv 1 (desvantagem em checks). */

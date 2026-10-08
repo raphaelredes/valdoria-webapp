@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T15:16:46Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T16:30:46Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -30299,36 +30299,81 @@ function applyMagicMissileDartImpact(dart, s, _staleTargetEl) {
     var t = s.order[dart.tIdx];
     if (!t) return;
     var isFireball = dart.variant === 'fireball';
-    var oldHp = t.hp;
-    var newHp = Math.max(0, oldHp - dart.dmg);
-    // Tipo de dano por variante: fireball → fire, MM → force
     var dmgTypeVariant = isFireball ? 'fire' : 'force';
-    applyHpAfterDamage(s, t, oldHp, newHp, { dmgType: dmgTypeVariant });
-    /* V1.7 Sprint-17 Ronda 31 (2026-04-21 QA log breakdown) — per-dart impact uniformizado. */
-    s.log.push((isFireball ? '  → Bola de Fogo (dardo): ' : '  → Dardo de força: ') + dart.dmg + ' em ' + t.n + '.');
-    // PHB p.241: cada criatura na área da Bola de Fogo faz um Teste de Resistência
-    // (CD de magia do conjurador); dano CHEIO em falha, METADE em sucesso. Espelha
-    // o motor _apply_save_damage_shared_roll (mesma rolagem de dano compartilhada).
-    // Antes: probabilidade fixa de 70% + dano aleatorio (mecanica inventada, nao-D&D).
-    // Corrigido 2026-07-01 (o alvo mirado e o centro da explosao: dano cheio).
+    var finalTargetDmg = dart.dmg;
+
+    if (isFireball) {
+        var _svAb = dart.saveAbility || 'dex';
+        var _svDc = dart.saveDc || 12;
+        var sv = dart.targetSave;
+        if (!sv) {
+            var _svMode = (typeof _simSaveAdvState === 'function') ? _simSaveAdvState(t, _svAb) : 'normal';
+            var _svRoll = (typeof _simRollD20WithAdv === 'function') ? _simRollD20WithAdv(_svMode, false).r : (Math.floor(Math.random() * 20) + 1);
+            var _svMod = (typeof simSaveMod === 'function') ? simSaveMod(t, _svAb) : 0;
+            var _svTotal = _svRoll + _svMod;
+            var _svOk = _svTotal >= _svDc;
+            finalTargetDmg = _svOk ? Math.max(1, Math.floor(dart.dmg / 2)) : dart.dmg;
+            sv = { roll: _svRoll, mod: _svMod, total: _svTotal, dc: _svDc, success: _svOk, finalDmg: finalTargetDmg };
+        } else {
+            finalTargetDmg = sv.finalDmg;
+        }
+        var oldHp = t.hp;
+        var newHp = Math.max(0, oldHp - finalTargetDmg);
+        applyHpAfterDamage(s, t, oldHp, newHp, { dmgType: 'fire' });
+        s.log.push('  → Bola de Fogo em ' + t.n + ' — TR ' + _svAb.toUpperCase() + ' ' + sv.roll + '+' + sv.mod +
+            '=' + sv.total + ' vs CD ' + sv.dc + (sv.success ? ' (sucesso, metade): ' : ' (falha): ') +
+            finalTargetDmg + ' de fogo.');
+    } else {
+        var oldHp = t.hp;
+        var newHp = Math.max(0, oldHp - dart.dmg);
+        applyHpAfterDamage(s, t, oldHp, newHp, { dmgType: dmgTypeVariant });
+        s.log.push('  → Dardo de força: ' + dart.dmg + ' em ' + t.n + '.');
+    }
+
     var splashVictims = [];
     if (isFireball) {
         var _svAb = dart.saveAbility || 'dex';
         var _svDc = dart.saveDc || 12;
-        for (var si = 0; si < s.order.length; si++) {
-            if (si === dart.tIdx) continue;
+        var aoeRadius = dart.aoeRadius || 4; // 4 hexes = 20ft raio (D&D 5e PHB p. 241)
+
+        // Determina quem está estritamente dentro da área de efeito:
+        var hasGrid = t.pos && typeof t.pos.col === 'number';
+        var victimsIndices = [];
+
+        if (hasGrid && typeof hexDistance === 'function') {
+            for (var si = 0; si < s.order.length; si++) {
+                if (si === dart.tIdx) continue;
+                var u = s.order[si];
+                if (!u || u.t !== 'e' || !u.alive || !u.pos || typeof u.pos.col !== 'number') continue;
+                var dist = hexDistance(t.pos.col, t.pos.row, u.pos.col, u.pos.row);
+                if (dist <= aoeRadius) {
+                    victimsIndices.push(si);
+                }
+            }
+        } else {
+            // Teatro da mente (sem grid): no máximo 1 a 2 inimigos adicionais agrupados (DMG p. 249)
+            var otherLiving = [];
+            for (var si = 0; si < s.order.length; si++) {
+                if (si === dart.tIdx) continue;
+                var u = s.order[si];
+                if (u && u.t === 'e' && u.alive) otherLiving.push(si);
+            }
+            victimsIndices = otherLiving.slice(0, 2);
+        }
+
+        for (var vi = 0; vi < victimsIndices.length; vi++) {
+            var si = victimsIndices[vi];
             var u = s.order[si];
-            if (!u || u.t !== 'e' || !u.alive) continue;
             var _svMode = (typeof _simSaveAdvState === 'function') ? _simSaveAdvState(u, _svAb) : 'normal';
-            var _svRoll = _simRollD20WithAdv(_svMode, false).r;
-            var _svMod = simSaveMod(u, _svAb);
+            var _svRoll = (typeof _simRollD20WithAdv === 'function') ? _simRollD20WithAdv(_svMode, false).r : (Math.floor(Math.random() * 20) + 1);
+            var _svMod = (typeof simSaveMod === 'function') ? simSaveMod(u, _svAb) : 0;
             var _svTotal = _svRoll + _svMod;
             var _svOk = _svTotal >= _svDc;
             var splashDmg = _svOk ? Math.max(1, Math.floor(dart.dmg / 2)) : dart.dmg;
             var oldHpS = u.hp;
             var newHpS = Math.max(0, oldHpS - splashDmg);
             applyHpAfterDamage(s, u, oldHpS, newHpS, { dmgType: 'fire' });
-            s.log.push('  → ' + u.n + ' — TR ' + _svAb.toUpperCase() + ' ' + _svRoll + '+' + _svMod +
+            s.log.push('  → Área: ' + u.n + ' — TR ' + _svAb.toUpperCase() + ' ' + _svRoll + '+' + _svMod +
                 '=' + _svTotal + ' vs CD ' + _svDc + (_svOk ? ' (sucesso, metade): ' : ' (falha): ') +
                 splashDmg + ' de fogo.');
             splashVictims.push({ idx: si, dmg: splashDmg });
@@ -31427,26 +31472,52 @@ async function playFireballSpellTurn(aIdx, tIdx, skill) {
     var target = s.order[tIdx];
     if (!actor || !target || !skill) return;
     simLogPushTurnHeader(s, actor);
-    await sleep(150);
+    await sleep(250);
     if (skill.cost && actor.res) {
         actor.res.value = Math.max(0, actor.res.value - skill.cost);
         render(s);
     }
-    var fb = skill.fireball || { n: 3, d: 6, flat: 0 };
-    var dN = Math.max(1, fb.n | 0 || 3);
-    var dD = Math.max(2, fb.d | 0 || 6);
-    var dFlat = fb.flat | 0;
+    // D&D 5e PHB p.241 RAW: 8d6 base + escala de upcast por nível do conjurador
+    var spec = skill.damageSpec || skill.fireball || { n: 8, d: 6, flat: 0 };
+    var dN = Math.max(1, spec.n | 0 || 8);
+    var dD = Math.max(2, spec.d | 0 || 6);
+    var dFlat = spec.flat | 0;
+    var lvl = Math.max(1, actor.lvl | 0 || 1);
+    var bps = (spec.scaleByCasterLevel && spec.scaleByCasterLevel.breakpoints) || [];
+    var upcastBonus = 0;
+    for (var bi = 0; bi < bps.length; bi++) {
+        if (lvl >= bps[bi][0]) upcastBonus = bps[bi][1];
+    }
+    dN += upcastBonus;
     var rolls = [];
     for (var i = 0; i < dN; i++) rolls.push(rollN(dD));
     var total = rolls.reduce(function (a, b) { return a + b; }, 0) + dFlat;
     var _fbSaveAb = (skill.save && skill.save.ability) || 'dex';
-    var dart = { tIdx: tIdx, rolls: rolls, dmg: total, d: dD, flat: dFlat, variant: 'fireball',
-        saveAbility: _fbSaveAb, saveDc: simSpellSaveDc(actor) };
+    var _fbSaveDc = (typeof simSpellSaveDc === 'function') ? simSpellSaveDc(actor) : (8 + (actor.dmgMod || 3) + 3);
+    var aoeRadius = skill.aoeRadius || 4;
+
+    // Resolução do TR de Destreza para o alvo principal (PHB p.241 — o alvo no centro também rola TR)
+    var _tSvMode = (typeof _simSaveAdvState === 'function') ? _simSaveAdvState(target, _fbSaveAb) : 'normal';
+    var _tSvRoll = (typeof _simRollD20WithAdv === 'function') ? _simRollD20WithAdv(_tSvMode, false).r : (Math.floor(Math.random() * 20) + 1);
+    var _tSvMod = (typeof simSaveMod === 'function') ? simSaveMod(target, _fbSaveAb) : 0;
+    var _tSvTotal = _tSvRoll + _tSvMod;
+    var _tSvOk = _tSvTotal >= _fbSaveDc;
+    var targetFinalDmg = _tSvOk ? Math.max(1, Math.floor(total / 2)) : total;
+
+    var dart = {
+        tIdx: tIdx, rolls: rolls, dmg: total, d: dD, flat: dFlat, variant: 'fireball',
+        diceLabel: dN + 'd' + dD + ' fogo',
+        saveAbility: _fbSaveAb, saveDc: _fbSaveDc, aoeRadius: aoeRadius,
+        targetSave: {
+            roll: _tSvRoll, mod: _tSvMod, total: _tSvTotal, dc: _fbSaveDc,
+            success: _tSvOk, finalDmg: targetFinalDmg
+        }
+    };
     await showFireballSpellOverlay(actor, target, dart, s);
     // Espera o efeito de queimadura persistente rolar no card do alvo
     // e nos respingados antes de prosseguir pra próxima ação (pulado se "Pular dados").
     if (!_skipAllDiceAnim) await sleep(1900);
-    s.last = { a: actor.n, t: target.n, hit: true, dmg: total, crit: false, tIdx: tIdx };
+    s.last = { a: actor.n, t: target.n, hit: true, dmg: targetFinalDmg, crit: false, tIdx: tIdx };
     render(s);
 }
 
@@ -31476,7 +31547,8 @@ function showFireballSpellOverlay(actor, target, dart, s) {
         vsLabel.textContent = 'VS';
         var targetHost = document.createElement('div');
         targetHost.style.cssText = 'flex:1;max-width:45%;';
-        appendDiceCombatArenaSide(targetHost, target, '3d6 fogo');
+        var diceBadgeText = dart.diceLabel || (dart.rolls.length + 'd' + dart.d + ' fogo');
+        appendDiceCombatArenaSide(targetHost, target, diceBadgeText);
         vsWrap.appendChild(actorHost);
         vsWrap.appendChild(vsLabel);
         vsWrap.appendChild(targetHost);
@@ -31496,7 +31568,7 @@ function showFireballSpellOverlay(actor, target, dart, s) {
         ov.appendChild(resultEl);
         var dartLabel = document.createElement('div');
         dartLabel.className = 'mm-dart-label';
-        dartLabel.textContent = 'Rolando 3d6 de fogo...';
+        dartLabel.textContent = 'Rolando ' + diceBadgeText + '...';
         ov.appendChild(dartLabel);
         var continueBtn = document.createElement('button');
         continueBtn.className = 'dice-continue-btn';
@@ -31518,7 +31590,7 @@ function showFireballSpellOverlay(actor, target, dart, s) {
             if (typeof sfxDiceRoll === 'function') {
                 try { sfxDiceRoll(); } catch (_eFB) {}
             }
-            dice = new Dice3D(container, { size: 200, dieType: 'd' + dart.d, duration: 700 });
+            dice = new Dice3D(container, { size: 200, dieType: 'd' + dart.d, duration: 750 });
             var configs = dart.rolls.map(function (v) { return { value: v }; });
             dice.rollMultiple(configs, function () {
                 dartLabel.textContent = dart.rolls.join(' + ') + (dart.flat ? ' + ' + dart.flat : '');
@@ -31529,12 +31601,15 @@ function showFireballSpellOverlay(actor, target, dart, s) {
                         while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
                         var titleEl = document.createElement('div');
                         titleEl.className = 'drl-rollup mm-summary-title mm-summary-title--fire';
-                        titleEl.textContent = 'Bola de Fogo — ' + dart.dmg + ' de fogo';
+                        titleEl.textContent = 'Bola de Fogo — ' + dart.dmg + ' rolado (' + diceBadgeText + ')';
                         resultEl.appendChild(titleEl);
+                        var sv = dart.targetSave;
                         var row = document.createElement('div');
                         row.className = 'drl-rollup mm-summary-row';
-                        row.textContent = '▸ ' + (target.n || '?') + ' (' + dart.rolls.join(' + ') +
-                            (dart.flat ? ' + ' + dart.flat : '') + ') = ' + dart.dmg + ' PV';
+                        var svText = (sv && sv.success)
+                            ? ' ▸ TR DES ' + sv.total + ' vs CD ' + sv.dc + ' (Sucesso: metade do dano) → ' + sv.finalDmg + ' PV'
+                            : ' ▸ TR DES ' + (sv ? sv.total : '?') + ' vs CD ' + (sv ? sv.dc : '?') + ' (Falha: dano cheio) → ' + (sv ? sv.finalDmg : dart.dmg) + ' PV';
+                        row.textContent = (target.n || '?') + svText;
                         resultEl.appendChild(row);
                         setTimeout(function () { continueBtn.style.display = ''; }, 400);
                     });
@@ -36998,7 +37073,7 @@ async function animHexTokenAttack(fromEl, targetEl, isRanged) {
     if (!fromEl) return;
     if (isRanged || !targetEl) {
         fromEl.classList.add('token-casting');
-        await new Promise(function (r) { setTimeout(r, 260); });
+        await new Promise(function (r) { setTimeout(r, 520); });
         fromEl.classList.remove('token-casting');
         return;
     }
@@ -37013,12 +37088,12 @@ async function animHexTokenAttack(fromEl, targetEl, isRanged) {
         var ly = (dy / dist) * lungeDist;
 
         fromEl.style.zIndex = '55';
-        fromEl.style.transition = 'transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.2)';
+        fromEl.style.transition = 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2)';
         fromEl.style.transform = 'translate(' + lx.toFixed(1) + 'px, ' + ly.toFixed(1) + 'px) scale(1.12)';
-        await new Promise(function (r) { setTimeout(r, 160); });
-        fromEl.style.transition = 'transform 0.22s ease-in';
+        await new Promise(function (r) { setTimeout(r, 220); });
+        fromEl.style.transition = 'transform 0.28s ease-in';
         fromEl.style.transform = 'translate(0, 0) scale(1)';
-        await new Promise(function (r) { setTimeout(r, 140); });
+        await new Promise(function (r) { setTimeout(r, 200); });
         fromEl.style.transition = '';
         fromEl.style.transform = '';
         fromEl.style.zIndex = '';
@@ -37042,8 +37117,8 @@ async function animLaunchMagicMissiles(fromEl, targetEl, darts, tU) {
     var tx = tRect.left + tRect.width / 2;
     var ty = tRect.top + tRect.height / 2;
 
-    var STAGGER_MS = 140;
-    var FLIGHT_MS = 460;
+    var STAGGER_MS = 200;
+    var FLIGHT_MS = 750;
 
     // Dispara projéteis de força e partículas no Canvas simultaneamente
     if (window._combatVfx) {
