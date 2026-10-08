@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T09:30:02Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T12:29:07Z - do not edit directly, edit source -->
 
 
 
@@ -26050,473 +26050,228 @@ function drawDecorSprite(ctx, cx, cy, type, seed) {
     ctx.stroke();
   }
   else if (type === 'bonepile') {
-    // ── PILHA GRANDE DE OSSOS (em volta do trono de Brakthar) ──
-    // Phase 5 polish v2 (2026-04-26): user feedback "muito mal feito, crie pilhas
-    // grande com muitos ossos". Redesign completo: ~30 elementos em 6 camadas
-    // (base ampla, ossos longos espalhados, costelas, ossos pequenos, cranios em
-    // cima). Tier-gated agressivo pra performance em smartphone fraco.
-    //
-    // CAMADAS (chao -> topo):
-    //  L0: sombra base + halo escuro (pile MASSIVE no chao)
-    //  L1: 6-7 ossos longos espalhados horizontalmente (chao)
-    //  L2: 2 ossos pelvicos / escapulas (planos amplos)
-    //  L3: 5 femures cruzados em angulos diversos (mid-pile)
-    //  L4: 2-3 caixas toracicas em angulos diferentes
-    //  L5: 8 ossos pequenos espalhados (fragmentos)
-    //  L6: 2-3 cranios orc EM CIMA (mais prominentes, olhos podem brilhar)
+    // ── OSSÁRIO / PILHA DE OSSOS (escala proporcional ao personagem) ──
+    // Redesign v3 (2026-10): Substituição do antigo espalhamento exagerado (84 ossos gigantes)
+    // por uma pilha compacta, atmosférica e perfeitamente dimensionada à silhueta do personagem
+    // (bs = HEX_W/55 * 0.48 * 1.35, ocupando ~25-30% do centro do hexágono com ~10-12 elementos).
     var tier = (typeof _tileDetail !== 'undefined') ? _tileDetail : 2;
-    // Pilha maior — cada bonepile ocupa quase todo o hex visualmente.
-    var pileScale = bigS * 1.25;
-    // Seed-driven: rotacao base do conjunto + offset central pequeno
-    var setRot = (rng() - 0.5) * 0.6;
-    var ofsX = (rng() - 0.5) * 0.20 * pileScale;
-    var ofsY = (rng() - 0.5) * 0.15 * pileScale;
+    var bs = Math.max(0.4, HEX_W / 55 * 0.48) * 1.35;
+
+    // Variação determinística suave por seed
+    var setRot = (rng() - 0.5) * 0.35;
+    var ofsX = (rng() - 0.5) * 1.6 * bs;
+    var ofsY = (rng() - 0.5) * 1.2 * bs;
     var bx = cx + ofsX, by = cy + ofsY;
-    // Cores — osso ivory envelhecido + sombras + crack
-    var bonesColor = '#e8dcc0';
-    var bonesMid = '#c8b898';
-    var bonesShadow = '#9a8868';
-    var bonesCrack = 'rgba(50,32,20,0.85)';
 
-    // ── L0: Sombra base AMPLA + halo escuro ──
-    ctx.fillStyle = 'rgba(0,0,0,0.65)';
-    ctx.beginPath();
-    ctx.ellipse(bx, by + 0.55 * pileScale, 1.85 * pileScale, 0.55 * pileScale, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Halo de sujeira/cinza ao redor (menor opacity, vibe macabra)
-    if (tier >= 1) {
-      ctx.fillStyle = 'rgba(40,30,22,0.35)';
-      ctx.beginPath();
-      ctx.ellipse(bx, by + 0.45 * pileScale, 1.65 * pileScale, 0.48 * pileScale, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    // Cores de osso envelhecido, sombras e terra
+    var bonesColor     = '#faf3e6'; // Highlight alvejado
+    var bonesMid       = '#c8b898'; // Meio-tom marfim envelhecido
+    var bonesShadow    = '#7c6a50'; // Sombra profunda do osso
+    var bonesDark      = '#18110b'; // Cavidades / órbitas
+    var soilDark       = '#241a12'; // Terra revolvida
+    var soilMid        = '#38281a'; // Terra / cinza
 
+    // ── L0: Sombra de contato e montículo de terra revolvida ──
     ctx.save();
     ctx.translate(bx, by);
     ctx.rotate(setRot);
 
-    // ── HELPER inline: desenha 1 femur (knobs em ambos lados) ──
-    function _drawFemur(rotation, length, yOffset, thickFactor) {
-      ctx.save();
-      ctx.translate(0, yOffset);
-      ctx.rotate(rotation);
-      var L = length * pileScale;
-      var thick = (thickFactor || 0.15) * pileScale;
-      // Sombra interna (offset Y pra leve depth)
-      ctx.fillStyle = bonesShadow;
-      ctx.fillRect(-L / 2, -thick / 2 + 0.05 * pileScale, L, thick * 0.95);
-      // Corpo principal
-      ctx.fillStyle = bonesMid;
-      ctx.fillRect(-L / 2, -thick / 2, L, thick * 0.9);
-      // Highlight por cima
-      ctx.fillStyle = bonesColor;
-      ctx.fillRect(-L / 2, -thick / 2, L, thick * 0.4);
-      // Knobs (cabecas articulares)
-      var knobR = 0.18 * pileScale;
-      // Esquerdo
-      ctx.fillStyle = bonesShadow;
-      ctx.beginPath();
-      ctx.arc(-L / 2 + 0.05 * pileScale, 0.04 * pileScale, knobR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = bonesMid;
-      ctx.beginPath();
-      ctx.arc(-L / 2, 0, knobR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = bonesColor;
-      ctx.beginPath();
-      ctx.arc(-L / 2 - 0.04 * pileScale, -0.05 * pileScale, knobR * 0.55, 0, Math.PI * 2);
-      ctx.fill();
-      // Direito
-      ctx.fillStyle = bonesShadow;
-      ctx.beginPath();
-      ctx.arc(L / 2 + 0.05 * pileScale, 0.04 * pileScale, knobR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = bonesMid;
-      ctx.beginPath();
-      ctx.arc(L / 2, 0, knobR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = bonesColor;
-      ctx.beginPath();
-      ctx.arc(L / 2 + 0.04 * pileScale, -0.05 * pileScale, knobR * 0.55, 0, Math.PI * 2);
-      ctx.fill();
-      // Crack longitudinal (tier full)
-      if (tier >= 2) {
-        ctx.strokeStyle = bonesCrack;
-        ctx.lineWidth = 0.022 * pileScale;
-        ctx.beginPath();
-        ctx.moveTo(-L / 3, -thick / 4);
-        ctx.bezierCurveTo(-L / 6, thick / 6, L / 8, -thick / 8, L / 4, thick / 6);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
+    // Sombra suave no terreno
+    ctx.fillStyle = 'rgba(0,0,0,0.40)';
+    ctx.beginPath();
+    ctx.ellipse(0, 1.4 * bs, 11.5 * bs, 4.8 * bs, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // ── HELPER inline: ribcage compacta ──
-    function _drawRibcage(tx, ty, rotation, scale) {
-      ctx.save();
-      ctx.translate(tx, ty);
-      ctx.rotate(rotation);
-      ctx.scale(scale, scale);
-      // Esterno vertical (sombra + corpo)
-      ctx.fillStyle = bonesShadow;
-      ctx.fillRect(-0.05 * pileScale, -0.55 * pileScale, 0.10 * pileScale, 1.1 * pileScale);
-      ctx.fillStyle = bonesMid;
-      ctx.fillRect(-0.04 * pileScale, -0.55 * pileScale, 0.07 * pileScale, 1.0 * pileScale);
-      ctx.fillStyle = bonesColor;
-      ctx.fillRect(-0.04 * pileScale, -0.55 * pileScale, 0.04 * pileScale, 1.0 * pileScale);
-      // 5 costelas (arcos pra dois lados)
-      var nRibs = (tier >= 1) ? 5 : 3;
-      for (var rib = 0; rib < nRibs; rib++) {
-        var ribY = -0.45 * pileScale + rib * 0.22 * pileScale;
-        // Lado esquerdo (sombra)
-        ctx.strokeStyle = bonesShadow;
-        ctx.lineWidth = 0.085 * pileScale;
-        ctx.beginPath();
-        ctx.moveTo(0, ribY);
-        ctx.quadraticCurveTo(-0.55 * pileScale, ribY + 0.10 * pileScale, -0.68 * pileScale, ribY + 0.32 * pileScale);
-        ctx.stroke();
-        // Lado direito (sombra)
-        ctx.beginPath();
-        ctx.moveTo(0, ribY);
-        ctx.quadraticCurveTo(0.55 * pileScale, ribY + 0.10 * pileScale, 0.68 * pileScale, ribY + 0.32 * pileScale);
-        ctx.stroke();
-        // Highlight (osso claro por cima)
-        ctx.strokeStyle = bonesColor;
-        ctx.lineWidth = 0.055 * pileScale;
-        ctx.beginPath();
-        ctx.moveTo(0, ribY - 0.015 * pileScale);
-        ctx.quadraticCurveTo(-0.55 * pileScale, ribY + 0.085 * pileScale, -0.68 * pileScale, ribY + 0.30 * pileScale);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0, ribY - 0.015 * pileScale);
-        ctx.quadraticCurveTo(0.55 * pileScale, ribY + 0.085 * pileScale, 0.68 * pileScale, ribY + 0.30 * pileScale);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
+    // Monte de terra escura / cinzas
+    ctx.fillStyle = soilDark;
+    ctx.beginPath();
+    ctx.ellipse(0, 0.7 * bs, 9.8 * bs, 4.0 * bs, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = soilMid;
+    ctx.beginPath();
+    ctx.ellipse(-0.5 * bs, 0.3 * bs, 7.5 * bs, 3.0 * bs, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // ── HELPER inline: cranio orc detalhado ──
-    function _drawSkull(tx, ty, rotation, scale, glowEyes) {
+    // ── HELPER: desenha um osso longo proporcional com côndilos articulares ──
+    function _drawSmallBone(ax, ay, rot, len, thick) {
       ctx.save();
-      ctx.translate(tx, ty);
-      ctx.rotate(rotation);
-      ctx.scale(scale, scale);
-      var sR = pileScale;
-      // Sombra
-      ctx.fillStyle = 'rgba(0,0,0,0.45)';
-      ctx.beginPath();
-      ctx.ellipse(0.05 * sR, 0.07 * sR, 0.55 * sR, 0.46 * sR, 0, 0, Math.PI * 2);
-      ctx.fill();
-      // Cranio (3 layers de profundidade)
+      ctx.translate(ax, ay);
+      ctx.rotate(rot);
+      var halfL = len / 2;
+      var rK = thick * 0.75;
+      // Sombra projetada
+      ctx.fillStyle = 'rgba(15,10,6,0.35)';
+      ctx.fillRect(-halfL, 0.3 * bs, len, thick);
+      // Sombra / base do osso
       ctx.fillStyle = bonesShadow;
+      ctx.fillRect(-halfL, -thick / 2, len, thick);
       ctx.beginPath();
-      ctx.ellipse(0.02 * sR, 0.03 * sR, 0.55 * sR, 0.46 * sR, 0, 0, Math.PI * 2);
+      ctx.arc(-halfL, -thick * 0.42, rK, 0, Math.PI * 2);
+      ctx.arc(-halfL,  thick * 0.42, rK, 0, Math.PI * 2);
+      ctx.arc( halfL, -thick * 0.42, rK, 0, Math.PI * 2);
+      ctx.arc( halfL,  thick * 0.42, rK, 0, Math.PI * 2);
       ctx.fill();
+      // Meio tom (marfim envelhecido)
       ctx.fillStyle = bonesMid;
+      ctx.fillRect(-halfL + 0.3 * bs, -thick / 2, len - 0.6 * bs, thick * 0.85);
       ctx.beginPath();
-      ctx.ellipse(0, 0, 0.54 * sR, 0.45 * sR, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = bonesColor;
-      ctx.beginPath();
-      ctx.ellipse(-0.02 * sR, -0.03 * sR, 0.50 * sR, 0.42 * sR, 0, 0, Math.PI * 2);
+      ctx.arc(-halfL + 0.2 * bs, -thick * 0.38, rK * 0.85, 0, Math.PI * 2);
+      ctx.arc(-halfL + 0.2 * bs,  thick * 0.38, rK * 0.85, 0, Math.PI * 2);
+      ctx.arc( halfL - 0.2 * bs, -thick * 0.38, rK * 0.85, 0, Math.PI * 2);
+      ctx.arc( halfL - 0.2 * bs,  thick * 0.38, rK * 0.85, 0, Math.PI * 2);
       ctx.fill();
       // Highlight superior
-      if (tier >= 1) {
-        ctx.fillStyle = 'rgba(255,250,235,0.4)';
-        ctx.beginPath();
-        ctx.ellipse(-0.12 * sR, -0.20 * sR, 0.28 * sR, 0.14 * sR, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      // Mandibula inferior
-      ctx.fillStyle = bonesShadow;
-      ctx.beginPath();
-      ctx.ellipse(0, 0.34 * sR, 0.44 * sR, 0.20 * sR, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = bonesMid;
-      ctx.beginPath();
-      ctx.ellipse(-0.02 * sR, 0.32 * sR, 0.42 * sR, 0.18 * sR, 0, 0, Math.PI * 2);
-      ctx.fill();
-      // 2 presas orc (acima da mandibula, apontam pra cima)
       ctx.fillStyle = bonesColor;
+      ctx.fillRect(-halfL + 0.8 * bs, -thick / 2, len - 1.6 * bs, thick * 0.35);
       ctx.beginPath();
-      ctx.moveTo(-0.20 * sR, 0.22 * sR);
-      ctx.lineTo(-0.24 * sR, 0.04 * sR);
-      ctx.lineTo(-0.14 * sR, 0.24 * sR);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(0.20 * sR, 0.22 * sR);
-      ctx.lineTo(0.24 * sR, 0.04 * sR);
-      ctx.lineTo(0.14 * sR, 0.24 * sR);
-      ctx.closePath();
-      ctx.fill();
-      // Olhos vazios
-      ctx.fillStyle = '#1a0e08';
-      ctx.beginPath();
-      ctx.ellipse(-0.19 * sR, -0.05 * sR, 0.14 * sR, 0.18 * sR, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(0.19 * sR, -0.05 * sR, 0.14 * sR, 0.18 * sR, 0, 0, Math.PI * 2);
-      ctx.fill();
-      // Glow vermelho APENAS no cranio principal (top) + tier full
-      if (glowEyes && tier >= 2) {
-        var glowPulse = 0.5 + Math.sin(_frameNow * 0.003) * 0.2;
-        ctx.fillStyle = 'rgba(190,40,30,' + glowPulse + ')';
-        ctx.beginPath();
-        ctx.arc(-0.19 * sR, -0.05 * sR, 0.07 * sR, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(0.19 * sR, -0.05 * sR, 0.07 * sR, 0, Math.PI * 2);
-        ctx.fill();
-        // Glow blur ao redor (efeito halo)
-        var grdEye = ctx.createRadialGradient(-0.19 * sR, -0.05 * sR, 0, -0.19 * sR, -0.05 * sR, 0.18 * sR);
-        grdEye.addColorStop(0, 'rgba(220,50,30,' + (glowPulse * 0.5) + ')');
-        grdEye.addColorStop(1, 'rgba(220,50,30,0)');
-        ctx.fillStyle = grdEye;
-        ctx.beginPath();
-        ctx.arc(-0.19 * sR, -0.05 * sR, 0.18 * sR, 0, Math.PI * 2);
-        ctx.fill();
-        var grdEye2 = ctx.createRadialGradient(0.19 * sR, -0.05 * sR, 0, 0.19 * sR, -0.05 * sR, 0.18 * sR);
-        grdEye2.addColorStop(0, 'rgba(220,50,30,' + (glowPulse * 0.5) + ')');
-        grdEye2.addColorStop(1, 'rgba(220,50,30,0)');
-        ctx.fillStyle = grdEye2;
-        ctx.beginPath();
-        ctx.arc(0.19 * sR, -0.05 * sR, 0.18 * sR, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      // Cavidade nasal
-      ctx.fillStyle = '#1a0e08';
-      ctx.beginPath();
-      ctx.moveTo(0, 0.06 * sR);
-      ctx.lineTo(-0.07 * sR, 0.20 * sR);
-      ctx.lineTo(0.07 * sR, 0.20 * sR);
-      ctx.closePath();
-      ctx.fill();
-      // Cracks (tier full)
-      if (tier >= 2) {
-        ctx.strokeStyle = bonesCrack;
-        ctx.lineWidth = 0.024 * sR;
-        ctx.beginPath();
-        ctx.moveTo(-0.05 * sR, -0.40 * sR);
-        ctx.lineTo(-0.10 * sR, -0.22 * sR);
-        ctx.lineTo(-0.02 * sR, -0.10 * sR);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0.15 * sR, -0.32 * sR);
-        ctx.lineTo(0.22 * sR, -0.18 * sR);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    // ── ESPALHAMENTO TOTAL DO HEX (2026-04-26 v3) ──
-    // User feedback: "ossos muito juntos, espalhe por todo hexagono, adicione
-    // mais ossos, e ambiente de boss". Total ~60 elementos, distribuidos por
-    // toda area do hex (nao mais concentrados no centro).
-    //
-    // Spread bounds (raio elipsoidal — hex flat-top tem width > height):
-    var spreadX = HEX_W * 0.36;  // raio horizontal
-    var spreadY = HEX_W * 0.30;  // raio vertical (ligeiramente menor)
-    // Helper: posicao aleatoria dentro da elipse hex (rejection sampling rapido)
-    function _randHexPos() {
-      // Usa rng() do seed do landmark (deterministico — mesmo hex sempre igual)
-      var attempts = 0;
-      while (attempts++ < 8) {
-        var rx = (rng() * 2 - 1) * spreadX;
-        var ry = (rng() * 2 - 1) * spreadY;
-        // Dentro da elipse?
-        if ((rx * rx) / (spreadX * spreadX) + (ry * ry) / (spreadY * spreadY) <= 0.92) {
-          return { x: rx, y: ry };
-        }
-      }
-      return { x: 0, y: 0 };
-    }
-
-    // ── L1: ~14-18 OSSOS LONGOS espalhados por TODO o hex ──
-    var nLongBones = (tier >= 2) ? 18 : (tier >= 1) ? 14 : 9;
-    for (var lbI = 0; lbI < nLongBones; lbI++) {
-      var pos = _randHexPos();
-      var rotL = (rng() - 0.5) * Math.PI;            // -90 a +90 graus
-      var lenL = 0.95 + rng() * 0.95;                // 0.95 a 1.9 pileScale
-      var thickL = 0.11 + rng() * 0.05;              // 0.11 a 0.16
-      ctx.save();
-      ctx.translate(pos.x, pos.y);
-      _drawFemur(rotL, lenL, 0, thickL);
-      ctx.restore();
-    }
-
-    // ── L2: ~4-6 PELVIS/ESCAPULA espalhados ──
-    var nPelvis = (tier >= 2) ? 6 : (tier >= 1) ? 4 : 2;
-    for (var pI = 0; pI < nPelvis; pI++) {
-      var pPos = _randHexPos();
-      var pRot = (rng() - 0.5) * Math.PI;
-      var pSize = 0.32 + rng() * 0.20;               // 0.32 a 0.52
-      var pIsPelvis = rng() > 0.5;
-      ctx.save();
-      ctx.translate(pPos.x, pPos.y);
-      ctx.rotate(pRot);
-      // Sombra
-      ctx.fillStyle = bonesShadow;
-      ctx.beginPath();
-      ctx.ellipse(0.03 * pileScale, 0.03 * pileScale, pSize * pileScale, pSize * 0.6 * pileScale, 0, 0, Math.PI * 2);
-      ctx.fill();
-      // Corpo
-      ctx.fillStyle = bonesMid;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, pSize * pileScale, pSize * 0.6 * pileScale, 0, 0, Math.PI * 2);
-      ctx.fill();
-      // Highlight
-      ctx.fillStyle = bonesColor;
-      ctx.beginPath();
-      ctx.ellipse(-0.04 * pileScale, -0.04 * pileScale, pSize * 0.7 * pileScale, pSize * 0.4 * pileScale, 0, 0, Math.PI * 2);
-      ctx.fill();
-      // Buracos pelvicos (apenas pelvis)
-      if (pIsPelvis) {
-        ctx.fillStyle = '#3a2a18';
-        ctx.beginPath();
-        ctx.ellipse(-pSize * 0.4 * pileScale, 0, pSize * 0.18 * pileScale, pSize * 0.28 * pileScale, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(pSize * 0.4 * pileScale, 0, pSize * 0.18 * pileScale, pSize * 0.28 * pileScale, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-
-    // ── L3: ~3-4 RIBCAGES espalhadas por todo hex ──
-    var nRibs = (tier >= 2) ? 4 : (tier >= 1) ? 3 : 1;
-    for (var rcI = 0; rcI < nRibs; rcI++) {
-      var rcPos = _randHexPos();
-      var rcRot = (rng() - 0.5) * Math.PI;
-      var rcScale = 0.55 + rng() * 0.45;             // 0.55 a 1.0
-      _drawRibcage(rcPos.x, rcPos.y, rcRot, rcScale);
-    }
-
-    // ── L4: ~25-32 OSSOS PEQUENOS (fragmentos) espalhados densamente ──
-    var nSmall = (tier >= 2) ? 32 : (tier >= 1) ? 22 : 12;
-    for (var fragI = 0; fragI < nSmall; fragI++) {
-      var fPos = _randHexPos();
-      var fRot = (rng() - 0.5) * Math.PI;
-      var fLen = 0.22 + rng() * 0.30;                // 0.22 a 0.52 pileScale
-      var fThick = 0.07 + rng() * 0.04;
-      ctx.save();
-      ctx.translate(fPos.x, fPos.y);
-      ctx.rotate(fRot);
-      var sL = fLen * pileScale;
-      var sT = fThick * pileScale;
-      // Sombra
-      ctx.fillStyle = bonesShadow;
-      ctx.fillRect(-sL / 2, -sT / 2 + 0.025 * pileScale, sL, sT);
-      // Corpo
-      ctx.fillStyle = bonesMid;
-      ctx.fillRect(-sL / 2, -sT / 2, sL, sT * 0.9);
-      // Highlight
-      ctx.fillStyle = bonesColor;
-      ctx.fillRect(-sL / 2, -sT / 2, sL, sT * 0.35);
-      // Knobs
-      ctx.fillStyle = bonesMid;
-      ctx.beginPath();
-      ctx.arc(-sL / 2, 0, sT * 0.65, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(sL / 2, 0, sT * 0.65, 0, Math.PI * 2);
+      ctx.arc(-halfL + 0.2 * bs, -thick * 0.4, rK * 0.45, 0, Math.PI * 2);
+      ctx.arc( halfL - 0.2 * bs, -thick * 0.4, rK * 0.45, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
 
-    // ── L5: ~8-12 RIBS SOLTAS (arcos curvos individuais — fragmentos toracicos) ──
-    var nLooseRibs = (tier >= 2) ? 12 : (tier >= 1) ? 8 : 4;
-    for (var lrI = 0; lrI < nLooseRibs; lrI++) {
-      var lrPos = _randHexPos();
-      var lrRot = (rng() - 0.5) * Math.PI;
-      var lrSize = 0.25 + rng() * 0.30;
-      ctx.save();
-      ctx.translate(lrPos.x, lrPos.y);
-      ctx.rotate(lrRot);
-      // Sombra
-      ctx.strokeStyle = bonesShadow;
-      ctx.lineWidth = 0.085 * pileScale;
-      ctx.beginPath();
-      ctx.moveTo(-lrSize * pileScale, 0.04 * pileScale);
-      ctx.quadraticCurveTo(0, -lrSize * 0.6 * pileScale + 0.04 * pileScale, lrSize * pileScale, 0.04 * pileScale);
-      ctx.stroke();
-      // Corpo
-      ctx.strokeStyle = bonesMid;
-      ctx.lineWidth = 0.07 * pileScale;
-      ctx.beginPath();
-      ctx.moveTo(-lrSize * pileScale, 0);
-      ctx.quadraticCurveTo(0, -lrSize * 0.6 * pileScale, lrSize * pileScale, 0);
-      ctx.stroke();
-      // Highlight
-      ctx.strokeStyle = bonesColor;
-      ctx.lineWidth = 0.04 * pileScale;
-      ctx.beginPath();
-      ctx.moveTo(-lrSize * pileScale, -0.015 * pileScale);
-      ctx.quadraticCurveTo(0, -lrSize * 0.6 * pileScale - 0.02 * pileScale, lrSize * pileScale, -0.015 * pileScale);
-      ctx.stroke();
-      ctx.restore();
-    }
+    var rotV = (rng() - 0.5) * 0.25;
 
-    // ── L6: ~5-7 VERTEBRAS (discos pequenos com furo central) ──
+    // ── L1: Ossos longos da fundação (3 cruzados formando o monte) ──
     if (tier >= 1) {
-      var nVert = (tier >= 2) ? 7 : 5;
-      for (var vI = 0; vI < nVert; vI++) {
-        var vPos = _randHexPos();
-        var vSize = 0.10 + rng() * 0.05;
-        ctx.save();
-        ctx.translate(vPos.x, vPos.y);
-        // Sombra
-        ctx.fillStyle = bonesShadow;
-        ctx.beginPath();
-        ctx.arc(0.025 * pileScale, 0.025 * pileScale, vSize * pileScale, 0, Math.PI * 2);
-        ctx.fill();
-        // Corpo
-        ctx.fillStyle = bonesMid;
-        ctx.beginPath();
-        ctx.arc(0, 0, vSize * pileScale, 0, Math.PI * 2);
-        ctx.fill();
-        // Highlight
-        ctx.fillStyle = bonesColor;
-        ctx.beginPath();
-        ctx.arc(-0.02 * pileScale, -0.02 * pileScale, vSize * 0.7 * pileScale, 0, Math.PI * 2);
-        ctx.fill();
-        // Furo central (canal medular)
-        ctx.fillStyle = '#3a2a18';
-        ctx.beginPath();
-        ctx.arc(0, 0, vSize * 0.35 * pileScale, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
+      _drawSmallBone(-2.0 * bs, -0.9 * bs, -1.02 + rotV, 7.8 * bs, 1.2 * bs);
+    }
+    _drawSmallBone(-0.3 * bs,  0.2 * bs, -0.46 + rotV, 11.5 * bs, 1.45 * bs);
+    _drawSmallBone( 0.4 * bs,  0.4 * bs,  0.40 + rotV, 11.0 * bs, 1.35 * bs);
+    _drawSmallBone( 0.0,       1.5 * bs,  0.05 + rotV,  9.5 * bs, 1.25 * bs);
+
+    // ── L2: Arcos de costelas curvadas ──
+    ctx.strokeStyle = bonesShadow;
+    ctx.lineWidth = 1.0 * bs;
+    ctx.beginPath();
+    ctx.arc(-2.8 * bs, 0.4 * bs, 3.4 * bs, Math.PI * 0.85, Math.PI * 1.65);
+    ctx.stroke();
+    ctx.strokeStyle = bonesMid;
+    ctx.lineWidth = 0.65 * bs;
+    ctx.beginPath();
+    ctx.arc(-2.8 * bs, 0.4 * bs, 3.4 * bs, Math.PI * 0.88, Math.PI * 1.62);
+    ctx.stroke();
+
+    ctx.strokeStyle = bonesShadow;
+    ctx.lineWidth = 1.0 * bs;
+    ctx.beginPath();
+    ctx.arc(2.6 * bs, 0.2 * bs, 3.0 * bs, -Math.PI * 0.65, 0.15);
+    ctx.stroke();
+    ctx.strokeStyle = bonesMid;
+    ctx.lineWidth = 0.65 * bs;
+    ctx.beginPath();
+    ctx.arc(2.6 * bs, 0.2 * bs, 3.0 * bs, -Math.PI * 0.62, 0.12);
+    ctx.stroke();
+
+    // ── L3: Fragmentos / vértebras pequenas assentadas na terra ──
+    ctx.fillStyle = bonesMid;
+    ctx.beginPath();
+    ctx.arc(-5.2 * bs, 1.6 * bs, 1.0 * bs, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = bonesDark;
+    ctx.beginPath();
+    ctx.arc(-5.2 * bs, 1.6 * bs, 0.38 * bs, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = bonesMid;
+    ctx.beginPath();
+    ctx.arc(4.6 * bs, 1.9 * bs, 0.95 * bs, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = bonesDark;
+    ctx.beginPath();
+    ctx.arc(4.6 * bs, 1.9 * bs, 0.35 * bs, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ── L4: Segundo crânio menor (semi-enterrado no flanco) ──
+    if (rng() > 0.32) {
+      var s2X = 4.2 * bs;
+      var s2Y = 0.3 * bs;
+      ctx.save();
+      ctx.translate(s2X, s2Y);
+      ctx.rotate(0.40 + (rng() - 0.5) * 0.2);
+      ctx.fillStyle = bonesShadow;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 1.8 * bs, 1.4 * bs, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = bonesMid;
+      ctx.beginPath();
+      ctx.ellipse(-0.1 * bs, -0.1 * bs, 1.6 * bs, 1.2 * bs, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = bonesColor;
+      ctx.beginPath();
+      ctx.ellipse(-0.2 * bs, -0.4 * bs, 1.0 * bs, 0.6 * bs, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = bonesDark;
+      ctx.beginPath();
+      ctx.arc(-0.4 * bs, 0.1 * bs, 0.36 * bs, 0, Math.PI * 2);
+      ctx.arc( 0.4 * bs, 0.1 * bs, 0.36 * bs, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
-    // ── L7: 4-5 CRANIOS ORC espalhados pelo hex (boss area dread) ──
-    // Posicoes manuais distribuidas pra garantir cobertura visual ampla.
-    var skullPositions = [
-      // Principal (top center, maior, olhos brilhantes)
-      { x: 0,                  y: -spreadY * 0.55, rot: (rng() - 0.5) * 0.3, scale: 1.05, glow: true },
-      // Secundario esquerdo
-      { x: -spreadX * 0.55,    y: -spreadY * 0.20, rot: -0.45, scale: 0.65, glow: false },
-      // Secundario direito
-      { x:  spreadX * 0.50,    y: -spreadY * 0.10, rot:  0.55, scale: 0.70, glow: false }
-    ];
-    if (tier >= 1) {
-      skullPositions.push(
-        // Lateral baixo esquerdo
-        { x: -spreadX * 0.35,  y:  spreadY * 0.45, rot:  0.30, scale: 0.55, glow: false }
-      );
-    }
-    if (tier >= 2) {
-      skullPositions.push(
-        // Lateral baixo direito (5o cranio — apenas tier full)
-        { x:  spreadX * 0.40,  y:  spreadY * 0.40, rot: -0.25, scale: 0.60, glow: false }
-      );
-    }
-    for (var skI = 0; skI < skullPositions.length; skI++) {
-      var sk = skullPositions[skI];
-      _drawSkull(sk.x, sk.y, sk.rot, sk.scale, sk.glow);
-    }
+    // ── L5: Crânio central no ápice da pilha ──
+    var skX = 0.1 * bs;
+    var skY = -1.7 * bs;
+    var skRot = (rng() - 0.5) * 0.30;
+    ctx.save();
+    ctx.translate(skX, skY);
+    ctx.rotate(skRot);
 
-    ctx.restore();  // close bx/by translate+rotate
+    // Sombra do crânio sobre os ossos
+    ctx.fillStyle = 'rgba(0,0,0,0.42)';
+    ctx.beginPath();
+    ctx.ellipse(0.4 * bs, 0.6 * bs, 3.1 * bs, 2.5 * bs, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sombra base do crânio + maxila
+    ctx.fillStyle = bonesShadow;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 2.9 * bs, 2.4 * bs, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(0, 1.4 * bs, 1.8 * bs, 1.0 * bs, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Corpo marfim
+    ctx.fillStyle = bonesMid;
+    ctx.beginPath();
+    ctx.ellipse(-0.1 * bs, -0.1 * bs, 2.6 * bs, 2.1 * bs, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-0.05 * bs, 1.3 * bs, 1.5 * bs, 0.9 * bs, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Highlight superior da calota craniana
+    ctx.fillStyle = bonesColor;
+    ctx.beginPath();
+    ctx.ellipse(-0.3 * bs, -0.7 * bs, 1.8 * bs, 1.0 * bs, -0.18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Órbitas oculares fundas
+    ctx.fillStyle = bonesDark;
+    ctx.beginPath();
+    ctx.ellipse(-0.9 * bs, 0.2 * bs, 0.65 * bs, 0.75 * bs, -0.15, 0, Math.PI * 2);
+    ctx.ellipse( 0.8 * bs, 0.2 * bs, 0.65 * bs, 0.75 * bs,  0.15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cavidade nasal
+    ctx.beginPath();
+    ctx.moveTo(-0.3 * bs, 0.95 * bs);
+    ctx.lineTo( 0.3 * bs, 0.95 * bs);
+    ctx.lineTo( 0.0,      0.55 * bs);
+    ctx.closePath();
+    ctx.fill();
+
+    // Dentes / fenda maxilar
+    ctx.fillStyle = bonesDark;
+    ctx.fillRect(-0.85 * bs, 1.65 * bs, 1.7 * bs, 0.35 * bs);
+    ctx.fillStyle = bonesColor;
+    ctx.fillRect(-0.6 * bs, 1.55 * bs, 0.35 * bs, 0.35 * bs);
+    ctx.fillRect(-0.1 * bs, 1.55 * bs, 0.35 * bs, 0.35 * bs);
+    ctx.fillRect( 0.4 * bs, 1.55 * bs, 0.35 * bs, 0.35 * bs);
+
+    ctx.restore(); // Fecha crânio
+    ctx.restore(); // Fecha bx/by translate+rotate
   }
   // ── SENTINEL_ORC: orc dormindo apoiado em lanca ──
   // Phase 5b polish v4 (2026-04-26): NPC visivel em L22 ate o encontro disparar.
@@ -30855,16 +30610,9 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     // Tier-gated 2/5/8 ops. Cristais menores + sparkle apenas em EPIC.
     _drawCrystalAAA(ctx, cx, cy, col, row);
   } else if (tile === 'b') {
-    // V1.7.1 USER RULE (2026-05-01): "ossos são gigantes, deixe proporcional
-    // ao tamanho da silhueta do personagem". Player sprite usa HEX_W/55*0.48
-    // ≈ 0.44 escala. Bones reduzidas de 2.4x → 0.85x pra ficar visualmente
-    // proporcional. drawDecorSprite('bonepile') tem 6 camadas detalhadas
-    // (~30 elementos: ossos, fêmures, costelas, crânios). Em escala player.
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(0.85, 0.85);
-    drawDecorSprite(ctx, 0, 0, 'bonepile', col * 7 + row * 13 + 31);
-    ctx.restore();
+    // Hexágono de ossos: renderizado diretamente pelo novo desenho do ossário
+    // perfeitamente calibrado à escala da silhueta do personagem.
+    drawDecorSprite(ctx, cx, cy, 'bonepile', col * 7 + row * 13 + 31);
   } else if (tile === 'l') {
     // 2026-04-27 USER RULE: AAA mobile-minimalist redesign Batch 2.
     // Tier-gated 2/4/7 ops. Tilt sutil + musgo + crack apenas em EPIC.
