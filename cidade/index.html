@@ -2643,6 +2643,309 @@ LOG SINK (Fase 7):
       box-shadow: 0 6px 16px rgba(196,149,58,0.6);
     }
 
+    /* ============================================================
+       === LIGA DOS AVENTUREIROS — AAA RPG SYSTEM
+       ============================================================ */
+    .vLg-nav-tabs {
+      display: flex;
+      gap: 5px;
+      margin: 8px 8px 12px;
+      border-bottom: 1px solid rgba(196,149,58,0.3);
+      padding-bottom: 6px;
+      overflow-x: auto;
+    }
+    .vLg-tab-btn {
+      padding: 6px 12px;
+      background: rgba(42,36,32,0.6);
+      border: 1px solid rgba(196,149,58,0.3);
+      border-radius: 6px;
+      color: var(--v-text-dim, #a09484);
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .vLg-tab-btn:hover {
+      background: rgba(196,149,58,0.15);
+      color: #fff;
+    }
+    .vLg-tab-btn.active {
+      background: linear-gradient(180deg, rgba(196,149,58,0.35), rgba(74,56,40,0.5));
+      border-color: var(--v-gold, #c4953a);
+      color: var(--v-gold, #ffd700);
+      box-shadow: 0 0 10px rgba(196,149,58,0.35);
+    }
+    .vLg-countdown-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 8px 10px;
+      padding: 8px 14px;
+      background: linear-gradient(90deg, rgba(196,149,58,0.15) 0%, rgba(20,16,12,0.8) 100%);
+      border: 1px solid rgba(196,149,58,0.4);
+      border-left: 3px solid var(--v-gold, #ffd700);
+      border-radius: 6px;
+    }
+    .vLg-first-blood-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 8px 10px;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, rgba(196,40,30,0.18) 0%, rgba(42,30,20,0.6) 100%);
+      border: 1px solid rgba(255,100,50,0.4);
+      border-left: 3px solid #ff6040;
+      border-radius: 6px;
+    }
+    .vLg-standings-table {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 0 8px 10px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .vLg-standing-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      background: rgba(42,36,32,0.45);
+      border: 1px solid rgba(74,56,40,0.4);
+      font-size: 11.5px;
+      transition: all 0.15s;
+    }
+    .vLg-standing-row:hover {
+      background: rgba(196,149,58,0.1);
+      border-color: rgba(196,149,58,0.4);
+    }
+    .vLg-standing-row.is-player {
+      background: linear-gradient(90deg, rgba(196,149,58,0.3) 0%, rgba(42,36,32,0.8) 100%);
+      border: 1.5px solid var(--v-gold, #ffd700);
+      box-shadow: 0 0 12px rgba(196,149,58,0.4);
+    }
+    .vLg-standing-row.zone-promote {
+      border-left: 3px solid #7cdb7c;
+    }
+    .vLg-standing-row.zone-maintain {
+      border-left: 3px solid #c4953a;
+    }
+    .vLg-standing-row.zone-demote {
+      border-left: 3px solid #e85040;
+    }
+    .vLg-standing-rank {
+      min-width: 28px;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      text-align: center;
+      font-size: 12px;
+    }
+    .vLg-standing-name {
+      flex: 1;
+      min-width: 0;
+      font-weight: 600;
+      color: #e8dcc8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .vLg-standing-xp {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    /* ============================================================
+       === CONQUISTAS — AAA CODEX SYSTEM
+       ============================================================ */
+    .vAch-nav-tabs {
+      display: flex;
+      gap: 5px;
+      margin: 8px 8px 10px;
+      border-bottom: 1px solid rgba(196,149,58,0.3);
+      padding-bottom: 6px;
+      overflow-x: auto;
+    }
+    .vAch-tab-btn {
+      padding: 5px 10px;
+      background: rgba(42,36,32,0.6);
+      border: 1px solid rgba(196,149,58,0.3);
+      border-radius: 6px;
+      color: var(--v-text-dim, #a09484);
+      font-family: 'Cinzel', serif;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .vAch-tab-btn:hover {
+      background: rgba(196,149,58,0.15);
+      color: #fff;
+    }
+    .vAch-tab-btn.active {
+      background: linear-gradient(180deg, rgba(196,149,58,0.35), rgba(74,56,40,0.5));
+      border-color: var(--v-gold, #c4953a);
+      color: var(--v-gold, #ffd700);
+      box-shadow: 0 0 8px rgba(196,149,58,0.35);
+    }
+    .vAch-focus-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: linear-gradient(135deg, #e85040, #ff8a4a);
+      color: #fff;
+      font-size: 8px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      animation: vAchPulse 1.8s ease-in-out infinite;
+      box-shadow: 0 0 6px rgba(232,80,64,0.6);
+    }
+    @keyframes vAchPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    /* ============================================================
+       === BESTIÁRIO DE CAÇA & ABATES — AAA HUNTER'S CODEX
+       ============================================================ */
+    .vBst-nav-tabs {
+      display: flex;
+      gap: 5px;
+      margin: 8px 8px 10px;
+      border-bottom: 1px solid rgba(196,40,30,0.35);
+      padding-bottom: 6px;
+      overflow-x: auto;
+    }
+    .vBst-tab-btn {
+      padding: 5px 10px;
+      background: rgba(42,20,16,0.6);
+      border: 1px solid rgba(196,40,30,0.35);
+      border-radius: 6px;
+      color: var(--v-text-dim, #a09484);
+      font-family: 'Cinzel', serif;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .vBst-tab-btn:hover {
+      background: rgba(196,40,30,0.2);
+      color: #fff;
+    }
+    .vBst-tab-btn.active {
+      background: linear-gradient(180deg, rgba(196,40,30,0.35), rgba(74,20,16,0.6));
+      border-color: #ff6040;
+      color: #ffb090;
+      box-shadow: 0 0 8px rgba(255,96,64,0.35);
+    }
+    .vBst-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, rgba(42,24,18,0.7) 0%, rgba(30,16,14,0.6) 100%);
+      border: 1px solid rgba(74,36,28,0.6);
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: all 0.18s;
+      position: relative;
+    }
+    .vBst-card:hover {
+      transform: translateX(3px);
+      border-color: #ff6040;
+      background: linear-gradient(90deg, rgba(74,30,22,0.8) 0%, rgba(42,20,16,0.7) 100%);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+    }
+    .vBst-portrait-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid var(--v-gold, #c4953a);
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+      background: #100806;
+      box-shadow: 0 0 8px rgba(0,0,0,0.7);
+    }
+    .vBst-portrait-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .vBst-mastery-tag {
+      font-size: 8.5px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+    .vBst-mastery-1 { background: rgba(120,100,80,0.3); border: 1px solid #7a6850; color: #a09484; }
+    .vBst-mastery-2 { background: rgba(196,149,58,0.2); border: 1px solid #c4953a; color: #ffd700; }
+    .vBst-mastery-3 { background: linear-gradient(90deg, #c4953a, #ffd700); color: #1a1006; font-weight: 800; box-shadow: 0 0 6px rgba(255,215,0,0.5); }
+
+    /* Modal do Dossiê da Criatura */
+    #creature-dossier-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 9400;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      background: rgba(8, 6, 5, 0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      animation: cdo-fade 0.2s ease-out;
+    }
+    #creature-dossier-overlay.active { display: flex; }
+    @keyframes cdo-fade {
+      0% { opacity: 0; transform: scale(0.97); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .cdo-modal {
+      width: 100%;
+      max-width: 530px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, rgba(32, 20, 16, 0.98) 0%, rgba(16, 10, 8, 0.99) 100%);
+      border: 1.5px solid #ff6040;
+      border-radius: 12px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.9), inset 0 0 16px rgba(255,96,64,0.15);
+      overflow: hidden;
+    }
+    .cdo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: linear-gradient(90deg, rgba(196,40,30,0.3), rgba(42,20,16,0.2));
+      border-bottom: 1px solid rgba(255,96,64,0.3);
+    }
+    .cdo-body {
+      padding: 16px 18px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     /* Screen styles: .rel-hub */
     .rel-hub {
       display: flex;
@@ -9160,6 +9463,8 @@ body.perf-lite .vc-action-btn { transition: none; }
     </div>
     <!-- Relations Dossier Overlay (AAA RPG Vínculos e Alianças) -->
     <div id="relations-dossier-overlay"></div>
+    <!-- Creature Dossier Overlay (AAA RPG Bestiário de Caça / Abates) -->
+    <div id="creature-dossier-overlay"></div>
     <!-- Bottom Panel (footer estilo bot DEV — substituiu #footer-collapsible) -->
     <!-- Toggle (·) pra recolher menu — FORA do panel, acima dele (2026-05-04) -->
     <!-- 2026-05-18 preflight fix (check_webapp_immersive_mode_complete): aliases
@@ -17916,16 +18221,64 @@ function _showLeagueRankInfo(){
   });
 }
 
+var _LEAGUE_ROSTER_DEFAULTS = [
+  { name: 'Kaelen dos Montes', cls: 'Guerreiro', level: 12, xp: 1940 },
+  { name: 'Mirela Lâmina-Dourada', cls: 'Paladina', level: 11, xp: 1780 },
+  { name: 'Eldrin Sábio', cls: 'Mago', level: 10, xp: 1620 },
+  { name: 'Bran Forja-Rápida', cls: 'Bárbaro', level: 10, xp: 1450 },
+  { name: 'Sylas Sombra-Leve', cls: 'Ladino', level: 9, xp: 1310 },
+  { name: 'Aria Vento-Fresco', cls: 'Druida', level: 9, xp: 1190 },
+  { name: 'Tarek Quebra-Escudo', cls: 'Guerreiro', level: 8, xp: 1080 },
+  { name: 'Lyanna Cantora', cls: 'Barda', level: 8, xp: 970 },
+  { name: 'Garrick Guarda-Forte', cls: 'Clérigo', level: 8, xp: 880 },
+  { name: 'Vaelin Flecha-Certeira', cls: 'Patrulheiro', level: 7, xp: 810 },
+  { name: 'Doran Braço-de-Ferro', cls: 'Guerreiro', level: 7, xp: 720 },
+  { name: 'Morwen Capuz-Sombrio', cls: 'Bruxa', level: 7, xp: 650 },
+  { name: 'Finnian Andarilho', cls: 'Monge', level: 6, xp: 590 },
+  { name: 'Theron Chamas-Vivas', cls: 'Feiticeiro', level: 6, xp: 520 },
+  { name: 'Kira Passo-Silencioso', cls: 'Ladina', level: 6, xp: 470 },
+  { name: 'Boran Machado-Largo', cls: 'Bárbaro', level: 5, xp: 420 },
+  { name: 'Selene Luz-da-Alvorada', cls: 'Clériga', level: 5, xp: 370 },
+  { name: 'Orin Escudo-de-Carvalho', cls: 'Paladino', level: 5, xp: 330 },
+  { name: 'Tessa dos Pomares', cls: 'Druida', level: 4, xp: 290 },
+  { name: 'Bram dos Mares', cls: 'Guerreiro', level: 4, xp: 260 },
+  { name: 'Nyssa Mãos-Leves', cls: 'Monge', level: 4, xp: 220 },
+  { name: 'Cedric Manto-Cinza', cls: 'Mago', level: 4, xp: 190 },
+  { name: 'Rowan Caçador-de-Lobos', cls: 'Patrulheiro', level: 3, xp: 160 },
+  { name: 'Aldis Couro-Batido', cls: 'Ladino', level: 3, xp: 130 },
+  { name: 'Althea da Fonte', cls: 'Clériga', level: 3, xp: 110 },
+  { name: 'Varek da Colina', cls: 'Guerreiro', level: 2, xp: 90 },
+  { name: 'Jared do Vale', cls: 'Bardo', level: 2, xp: 70 },
+  { name: 'Eira dos Bosques', cls: 'Patrulheira', level: 2, xp: 50 },
+  { name: 'Torin da Pedreira', cls: 'Guerreiro', level: 1, xp: 30 }
+];
+
+var _leagueCurrentSubTab = 'standings';
+
+function _calcLeagueCountdown(){
+  var now = new Date();
+  var daysToMon = (8 - now.getDay()) % 7;
+  if (daysToMon === 0) daysToMon = 7;
+  var nextMon = new Date(now);
+  nextMon.setDate(now.getDate() + daysToMon);
+  nextMon.setHours(0,0,0,0);
+  var diffMs = nextMon - now;
+  var diffH = Math.max(0, Math.floor(diffMs / 3600000));
+  var d = Math.floor(diffH / 24);
+  var h = diffH % 24;
+  return d + 'd ' + h + 'h';
+}
+
 function _showLeaguePopup(p){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = 'Liga dos Aventureiros';
-  // Sessão #63 (2026-05-30): XP de liga REAL do player (era mock 1240) — bate
-  // com o card do hub (buildMockHubScreen). Personagem novo nv1 = 0.
+
   var currentXp = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.league_xp != null)
-    ? window.CITY_MOCK_PLAYER.league_xp : 0;
+    ? window.CITY_MOCK_PLAYER.league_xp : (p && p.league_xp != null ? p.league_xp : 0);
+
   var currentTier = LEAGUE_TIERS[0];
   for (var i = LEAGUE_TIERS.length - 1; i >= 0; i--) {
     if (currentXp >= LEAGUE_TIERS[i].minXp) { currentTier = LEAGUE_TIERS[i]; break; }
@@ -17936,260 +18289,230 @@ function _showLeaguePopup(p){
   pctInTier = Math.max(0, Math.min(100, pctInTier));
   var atMax = (nextTier === currentTier);
   var tColor = currentTier.color;
-  var rankMock = (typeof _deriveLeagueRank === 'function') ? _deriveLeagueRank(window.CITY_MOCK_PLAYER) : Math.max(11, 60000 - currentXp); // CY4: rank coerente (level+league_xp reais), não mais "1234-xp"
-  var currentBenefits = LEAGUE_BENEFITS[currentTier.id] || [];
+
+  var todayIso = (typeof _todayIso === 'function') ? _todayIso() : (new Date().toISOString().slice(0,10));
+  var meta = (p && p.metadata) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.metadata) || {};
+  var firstBloodDone = (meta.league_first_blood_date === todayIso);
+  var cdStr = _calcLeagueCountdown();
+
+  // Construir standings de 30 aventureiros
+  var playerName = (p && p.name) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.name) || 'Seu Aventureiro';
+  var playerClass = (p && p.hero_class) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.hero_class) || 'Aventureiro';
+  var playerLvl = (p && p.level) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.level) || 1;
+
+  var divisionList = _LEAGUE_ROSTER_DEFAULTS.slice();
+  divisionList.push({
+    name: playerName,
+    cls: playerClass,
+    level: playerLvl,
+    xp: currentXp,
+    isPlayer: true
+  });
+  divisionList.sort(function(a, b){ return b.xp - a.xp; });
+
+  var playerRankInDiv = 1;
+  for (var di = 0; di < divisionList.length; di++) {
+    divisionList[di].rank = di + 1;
+    if (divisionList[di].isPlayer) playerRankInDiv = di + 1;
+  }
+
+  function _renderTabContent(){
+    var cHtml = '';
+    if (_leagueCurrentSubTab === 'standings') {
+      cHtml += '<div style="margin: 0 8px 8px; font-size: calc(10.5px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); display: flex; justify-content: space-between; align-items: center;">'
+        + '<span>Divisão Semanal · <b>30 Aventureiros</b></span>'
+        + '<span style="color: #ffd700; font-weight: 700;">Top 10 Sobem de Liga</span>'
+        + '</div>';
+
+      cHtml += '<div class="vLg-standings-table">';
+      divisionList.forEach(function(row){
+        var zoneClass = row.rank <= 10 ? 'zone-promote' : (row.rank > 25 ? 'zone-demote' : 'zone-maintain');
+        var isPl = !!row.isPlayer;
+        var rankBadgeColor = row.rank === 1 ? '#ffd700' : (row.rank === 2 ? '#c0c0c0' : (row.rank === 3 ? '#cd7f32' : 'var(--v-text-dim, #a09484)'));
+        var rewardTag = '';
+        if (row.rank === 1) rewardTag = '<span style="font-size:9px; background:rgba(255,215,0,0.2); border:1px solid #ffd700; color:#ffd700; padding:1px 5px; border-radius:4px; margin-left:4px;">150 Valdoritas</span>';
+        else if (row.rank === 2) rewardTag = '<span style="font-size:9px; background:rgba(192,192,192,0.2); border:1px solid #c0c0c0; color:#e0e0e0; padding:1px 5px; border-radius:4px; margin-left:4px;">100 Valdoritas</span>';
+        else if (row.rank === 3) rewardTag = '<span style="font-size:9px; background:rgba(205,127,50,0.2); border:1px solid #cd7f32; color:#d88c42; padding:1px 5px; border-radius:4px; margin-left:4px;">75 Valdoritas</span>';
+        else if (row.rank <= 10) rewardTag = '<span style="font-size:8.5px; color:#7cdb7c; margin-left:4px;">▲ Promover</span>';
+        else if (row.rank > 25) rewardTag = '<span style="font-size:8.5px; color:#e85040; margin-left:4px;">▼ Risco</span>';
+
+        cHtml += '<div class="vLg-standing-row ' + zoneClass + (isPl ? ' is-player' : '') + '">'
+          + '<span class="vLg-standing-rank" style="color:' + rankBadgeColor + ';">' + row.rank + 'º</span>'
+          + '<div class="vLg-standing-name">'
+          +   (isPl ? '<b style="color:var(--v-gold, #ffd700);">VOCÊ</b> (' + row.name + ')' : row.name)
+          +   ' <span style="font-size:9.5px; color:var(--v-text-dim,#a09484); font-weight:normal;">Nv.' + row.level + ' ' + row.cls + '</span>'
+          +   rewardTag
+          + '</div>'
+          + '<span class="vLg-standing-xp">' + row.xp.toLocaleString('pt-BR') + ' XP</span>'
+          + '</div>';
+      });
+      cHtml += '</div>';
+
+      cHtml += '<div style="margin: 4px 8px 10px; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(196,149,58,0.2); border-radius: 6px; font-size: 10px; color: var(--v-text-dim, #a09484); line-height: 1.4;">'
+        + '<b style="color: #7cdb7c;">▲ Top 10:</b> Ascendem para a próxima Liga no reset. '
+        + '<b style="color: #e85040;">▼ Últimos 5:</b> Descendem de divisão se houver tier inferior.'
+        + '</div>';
+    } else if (_leagueCurrentSubTab === 'contracts') {
+      var kCount = (p && typeof p.kills === 'number') ? p.kills : (window.CITY_MOCK_PLAYER ? (window.CITY_MOCK_PLAYER.kills || 0) : 0);
+      var strk = (p && typeof p.streak === 'number') ? p.streak : (window.CITY_MOCK_PLAYER ? (window.CITY_MOCK_PLAYER.streak || 0) : 0);
+
+      var contracts = [
+        { title: 'Primeiro Sangue Diário', desc: 'Vença sua primeira batalha do dia', xp: 150, cur: firstBloodDone ? 1 : 0, max: 1, done: firstBloodDone },
+        { title: 'Purga das Estradas', desc: 'Abata feras ou salteadores no condado', xp: 300, cur: Math.min(5, kCount), max: 5, done: kCount >= 5 },
+        { title: 'Trilhas do Condado', desc: 'Complete 1 expedição ou descubra novo hex', xp: 250, cur: 1, max: 1, done: true },
+        { title: 'Glória na Arena', desc: 'Mantenha sequência de 3 vitórias consecutivas', xp: 400, cur: Math.min(3, strk), max: 3, done: strk >= 3 }
+      ];
+
+      cHtml += '<div style="display:flex; flex-direction:column; gap:6px; margin: 0 8px 10px;">';
+      contracts.forEach(function(ct){
+        var pctC = Math.round(ct.cur / ct.max * 100);
+        cHtml += '<div style="padding: 10px 12px; background: rgba(42,36,32,0.6); border: 1px solid ' + (ct.done ? '#7cdb7c66' : 'rgba(196,149,58,0.3)') + '; border-left: 3px solid ' + (ct.done ? '#7cdb7c' : 'var(--v-gold, #c4953a)') + '; border-radius: 6px;">'
+          + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 3px;">'
+          +   '<b style="font-family:Cinzel,serif; font-size:12px; color:' + (ct.done ? '#a8e8a8' : '#e8dcc8') + ';">' + ct.title + '</b>'
+          +   '<span style="font-family:Cinzel,serif; font-weight:700; font-size:11px; color:var(--v-gold, #ffd700);">+' + ct.xp + ' XP Liga</span>'
+          + '</div>'
+          + '<div style="font-size:10px; color:var(--v-text-dim,#a09484); margin-bottom: 6px;">' + ct.desc + '</div>'
+          + '<div style="height: 5px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow:hidden;">'
+          +   '<div style="height:100%; width:' + pctC + '%; background:' + (ct.done ? '#7cdb7c' : 'linear-gradient(90deg, #c4953a, #ffd700)') + ';"></div>'
+          + '</div>'
+          + '<div style="display:flex; justify-content:space-between; font-size:9.5px; color:var(--v-text-dim,#a09484); margin-top:3px;">'
+          +   '<span>' + ct.cur + ' / ' + ct.max + '</span>'
+          +   '<span style="color:' + (ct.done ? '#7cdb7c' : 'var(--v-gold,#c4953a)') + ';">' + (ct.done ? '✓ Concluído' : pctC + '%') + '</span>'
+          + '</div>'
+          + '</div>';
+      });
+      cHtml += '</div>';
+    } else {
+      // Jornada & Privilégios
+      if (!atMax) {
+        var xpToNext = nextTier.minXp - currentXp;
+        cHtml += '<div style="margin: 0 8px 8px; padding: 8px 10px; background:rgba(196,149,58,0.06); border:1px solid var(--v-border,#4a3828); border-radius: 6px;">'
+          + '<div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:6px;">'
+          +   '<span>Ascensão para <b style="color:' + nextTier.color + ';">' + nextTier.name + '</b></span>'
+          +   '<span style="color:var(--v-gold,#c4953a); font-weight:700;">' + Math.round(pctInTier) + '%</span>'
+          + '</div>'
+          + '<div style="height:8px; background:rgba(0,0,0,0.45); border-radius:4px; overflow:hidden; border:1px solid var(--v-border,#4a3828);">'
+          +   '<div style="height:100%; width:' + pctInTier + '%; background:linear-gradient(90deg,' + tColor + ',' + nextTier.color + ');"></div>'
+          + '</div>'
+          + '<div style="font-size:10px; color:var(--v-text-dim,#a09484); margin-top:4px; text-align:center; font-style:italic;">'
+          +   'Faltam <b style="color:var(--v-gold,#c4953a);">' + xpToNext.toLocaleString('pt-BR') + ' XP</b> para o próximo escalão'
+          + '</div>'
+          + '</div>';
+      }
+
+      // Trilha das medalhas
+      cHtml += '<div style="margin: 0 8px 10px;">'
+        + '<div style="position:relative; display:grid; grid-template-columns:repeat(5,1fr); gap:0; padding: 8px 4px 6px; background:linear-gradient(180deg,rgba(196,149,58,0.06) 0%,rgba(42,36,32,0.4) 100%); border:1px solid rgba(196,149,58,0.18); border-radius:8px;">';
+
+      cHtml += '<div style="position:absolute; top:24px; left:12%; right:12%; height:2px; pointer-events:none; background:linear-gradient(90deg,';
+      LEAGUE_TIERS.forEach(function(t, idx){
+        var unlocked = currentXp >= t.minXp;
+        cHtml += (unlocked ? t.color : 'rgba(80,68,56,0.5)') + (idx < LEAGUE_TIERS.length - 1 ? ',' : '');
+      });
+      cHtml += ');"></div>';
+
+      LEAGUE_TIERS.forEach(function(t, idx){
+        var unlocked = currentXp >= t.minXp;
+        var current = (idx === currentTierIdx);
+        var medalSize = current ? '36px' : '28px';
+        cHtml += '<div style="position:relative; display:flex; flex-direction:column; align-items:center; z-index:2;">'
+          + '<div class="vLg-path-medal' + (current ? ' is-current' : '') + '" style="position:relative; width:' + medalSize + '; height:' + medalSize + '; border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:' + (unlocked ? '1' : '0.4') + ';">'
+          + '<img src="/shared/img/medals/' + t.id + '.webp" alt="' + t.name + '" style="width:100%; height:100%; object-fit:contain;' + (unlocked ? '' : ' filter:grayscale(0.7) brightness(0.7);') + (current ? ' filter:drop-shadow(0 0 6px ' + t.color + ');' : '') + '">'
+          + '</div>'
+          + '<div style="font-family:Cinzel,serif; font-size:9px; margin-top:4px; color:' + (current ? t.color : (unlocked ? '#d4c8b0' : '#888')) + '; font-weight:' + (current ? '700' : '500') + ';">' + t.name + '</div>'
+          + '</div>';
+      });
+      cHtml += '</div></div>';
+
+      // Privilégios
+      var currentBenefits = LEAGUE_BENEFITS[currentTier.id] || [];
+      if (currentBenefits.length) {
+        cHtml += '<div style="margin: 0 8px 10px; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(196,149,58,0.25); border-radius: 6px;">'
+          + '<div style="font-family:Cinzel,serif; font-size:10px; color:' + tColor + '; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; text-align:center;">Privilégios de ' + currentTier.name + '</div>'
+          + '<div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center;">';
+        currentBenefits.forEach(function(b){
+          cHtml += '<div style="padding: 3px 8px; background:' + tColor + '15; border:1px solid ' + tColor + '55; border-radius:12px; font-size:10.5px; color:#e0d8c8;">✦ ' + b + '</div>';
+        });
+        cHtml += '</div></div>';
+      }
+
+      // Posição na ordem
+      cHtml += '<div class="vLg-rank-card" style="margin: 0 8px 10px; padding: 8px 12px; background:rgba(196,149,58,0.06); border:1px solid rgba(196,149,58,0.25); border-radius:6px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="if(typeof _showLeagueRankInfo===\'function\')_showLeagueRankInfo();">'
+        + '<span style="color:var(--v-text-dim,#a09484); font-size:11px;">Posição na Ordem Global ⓘ</span>'
+        + '<span style="font-family:Cinzel,serif; color:var(--v-gold,#ffd700); font-weight:700; font-size:12px;">#' + playerRankInDiv + ' na Divisão</span>'
+        + '</div>';
+    }
+    return cHtml;
+  }
 
   var html = '<div class="lg-hub" style="position:relative; padding:0; overflow:hidden;">';
 
-  // === STYLES — keyframes para todas as animações épicas ===
-  html += '<style>'
-    + '@keyframes vLgMedalPulse{0%,100%{filter:drop-shadow(0 0 10px ' + tColor + 'aa) drop-shadow(0 0 22px ' + tColor + '66);}50%{filter:drop-shadow(0 0 18px ' + tColor + 'ee) drop-shadow(0 0 36px ' + tColor + '99);}}'
-    /* 2026-05-22 FIX: keyframes incluem translate(-50%,-50%) pra não sobrescrever
-       centering. Antes: float aplicava translateY(0) puro → medalha pulava pro topo-left.
-       Agora: composição correta, medalha permanece centralizada + flutua sutilmente. */
-    + '@keyframes vLgMedalFloat{0%,100%{transform:translate(-50%,calc(-50% + 0px));}50%{transform:translate(-50%,calc(-50% - 4px));}}'
-    + '@keyframes vLgRayRotate{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}'
-    + '@keyframes vLgAuraPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.55;}50%{transform:translate(-50%,-50%) scale(1.15);opacity:0.85;}}'
-    + '@keyframes vLgAuraPulse2{0%,100%{transform:translate(-50%,-50%) scale(1.1);opacity:0.30;}50%{transform:translate(-50%,-50%) scale(1.35);opacity:0.55;}}'
-    + '@keyframes vLgParticle{0%{transform:translate(-50%,-50%) translateY(0) translateX(0);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{transform:translate(-50%,-50%) translateY(-60px) translateX(var(--lg-px,0px));opacity:0;}}'
-    + '@keyframes vLgRibbonSway{0%,100%{transform:rotate(-1.5deg);}50%{transform:rotate(1.5deg);}}'
-    + '@keyframes vLgRuneShine{0%,100%{opacity:0.55;text-shadow:0 0 4px ' + tColor + '88;}50%{opacity:1;text-shadow:0 0 12px ' + tColor + 'cc;}}'
-    + '.vLg-medal-anim{animation:vLgMedalPulse 3.4s ease-in-out infinite, vLgMedalFloat 5s ease-in-out infinite;}'
-    + '.vLg-rays{animation:vLgRayRotate 30s linear infinite;}'
-    + '.vLg-aura{animation:vLgAuraPulse 3.4s ease-in-out infinite;}'
-    + '.vLg-aura2{animation:vLgAuraPulse2 3.4s ease-in-out infinite;}'
-    + '.vLg-ribbon{animation:vLgRibbonSway 4s ease-in-out infinite; transform-origin: top center;}'
-    + '.vLg-particle{animation:vLgParticle 5s ease-in-out infinite;}'
-    + '.vLg-rune{animation:vLgRuneShine 2.8s ease-in-out infinite; display:inline-block;}'
-    + '.vLg-path-medal{transition:transform 0.25s ease;cursor:pointer;}'
-    + '.vLg-path-medal:hover{transform:scale(1.12);}'
-    + '.vLg-path-medal.is-current{animation:vLgMedalPulse 3.4s ease-in-out infinite;}'
-    + 'body.perf-lite .vLg-medal-anim,body.perf-lite .vLg-rays,body.perf-lite .vLg-aura,body.perf-lite .vLg-aura2,body.perf-lite .vLg-particle,body.perf-lite .vLg-rune,body.perf-lite .vLg-path-medal.is-current{animation:none;}'
-    + '@media (prefers-reduced-motion:reduce){.vLg-medal-anim,.vLg-rays,.vLg-aura,.vLg-aura2,.vLg-particle,.vLg-ribbon,.vLg-rune,.vLg-path-medal.is-current{animation:none;}}'
-    + '</style>';
-
-  // === HEADER ÉPICO CERIMONIAL ===
-  html += '<div style="position:relative; padding: 18px var(--v-space-lg, 12px) 18px; overflow:hidden;'
-    + 'background:radial-gradient(ellipse at 50% 35%,' + tColor + '40 0%,' + tColor + '15 35%,rgba(42,36,32,0.95) 75%);'
-    + 'border:1px solid ' + tColor + '; border-radius:var(--v-radius,10px); margin: var(--v-space-md, 8px) var(--v-space-md, 8px) 6px;">'
-
-    // Banner topo "ORDEM DOS AVENTUREIROS" com decorações laterais
-    + '<div style="position:relative; z-index:3; display:flex; align-items:center; justify-content:center; gap: var(--v-space-md, 8px);'
-    + 'font-family:var(--v-font-display,Cinzel,serif); font-size:calc(9px * var(--v-font-scale, 1));'
-    + 'color:' + tColor + '; letter-spacing:3px; text-transform:uppercase; margin-bottom:6px;">'
-    + '<span style="flex:0 0 30px; height:1px; background:linear-gradient(90deg,transparent,' + tColor + '88);"></span>'
-    + '<span class="vLg-rune">◆</span>'
-    + '<span style="opacity:0.95;">Ordem dos Aventureiros</span>'
-    + '<span class="vLg-rune">◆</span>'
-    + '<span style="flex:0 0 30px; height:1px; background:linear-gradient(90deg,' + tColor + '88,transparent);"></span>'
+  // Header cerimonial
+  html += '<div style="position:relative; padding: 16px 12px 14px; overflow:hidden; background:radial-gradient(ellipse at 50% 35%,' + tColor + '40 0%,' + tColor + '15 35%,rgba(42,36,32,0.95) 75%); border:1px solid ' + tColor + '; border-radius:var(--v-radius,10px); margin: 8px 8px 6px;">'
+    + '<div style="display:flex; align-items:center; justify-content:center; gap: 8px; font-family:Cinzel,serif; font-size:9px; color:' + tColor + '; letter-spacing:3px; text-transform:uppercase; margin-bottom:6px;">'
+    +   '<span>◆ Ordem dos Aventureiros ◆</span>'
     + '</div>'
-
-    // Container da medalha + auras + rays + partículas (140px area)
-    + '<div style="position:relative; width:140px; height:140px; margin: 0 auto var(--v-space-md-lg, 10px);">'
-
-    /* 2026-05-22 SIMPLIFICAÇÃO (user feedback): removidos overlays que conflitavam
-       com a medalha PNG (que já tem ribbon, ornamentos, design rich).
-       - REMOVIDO: light rays SVG 200×200 (overflow do container 140)
-       - REMOVIDO: laurel wreath SVG (leaves invadiam centro da medalha)
-       - REMOVIDO: CSS ribbon (PNG já tem ribbon próprio)
-       - REDUZIDO: 6→3 partículas (menos visual noise)
-       - MANTIDO: 2 auras pulsantes (efeito glow sutil que destaca a medalha)
-       - FIX: medal float keyframe não sobrescreve mais centering transform */
-
-    // 2 auras pulsantes (outer/inner) — apenas glow sutil
-    + '<div class="vLg-aura2" style="position:absolute; top:50%; left:50%; width:140px; height:140px; border-radius:50%;'
-    + 'background:radial-gradient(circle,' + tColor + '33 0%,transparent 70%); pointer-events:none;'
-    + 'transform:translate(-50%,-50%);"></div>'
-    + '<div class="vLg-aura" style="position:absolute; top:50%; left:50%; width:110px; height:110px; border-radius:50%;'
-    + 'background:radial-gradient(circle,' + tColor + '55 0%,transparent 65%); pointer-events:none;'
-    + 'transform:translate(-50%,-50%);"></div>'
-
-    // Medalha PNG principal (100px) — centro-centro
-    + '<img class="vLg-medal-anim vLg-medal-img" '
-    +    'src="/shared/img/medals/' + currentTier.id + '.webp" '
-    +    'alt="Medalha ' + currentTier.name + '" '
-    +    'data-medal-name="' + currentTier.name + '" '
-    +    'data-medal-desc="Tier ' + currentTier.name + ' — ' + currentXp.toLocaleString('pt-BR') + ' XP de Liga" '
-    +    'style="position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%,-50%); object-fit:contain; z-index:2; cursor:zoom-in;" '
-    +    'onerror="this.style.display=\'none\';if(this.nextSibling){this.nextSibling.style.display=\'\'}" '
-    +    'onclick="if(window.showLightbox)window.showLightbox(this.src,this.dataset.medalName,this.dataset.medalDesc);">'
-    + '<svg viewBox="0 0 120 120" style="position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%,-50%); color:' + tColor + '; z-index:2; display:none;"><use href="#' + currentTier.icon + '"/></svg>'
-
-    // 3 partículas flutuantes (reduzido de 6) — efeito sparkle discreto
-    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:4px; height:4px; border-radius:50%; background:' + tColor + '; --lg-px:18px; animation-delay:0s; box-shadow:0 0 6px ' + tColor + ';"></div>'
-    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:3px; height:3px; border-radius:50%; background:' + tColor + '; --lg-px:-22px; animation-delay:1.5s; box-shadow:0 0 5px ' + tColor + ';"></div>'
-    + '<div class="vLg-particle" style="position:absolute; top:50%; left:50%; width:4px; height:4px; border-radius:50%; background:' + tColor + '; --lg-px:24px; animation-delay:3.0s; box-shadow:0 0 6px ' + tColor + ';"></div>'
-
-    + '</div>'  // /medalha-container
-
-    // Nome do tier (28px Cinzel grande com text-shadow épico)
-    + '<div style="text-align:center; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(28px * var(--v-font-scale, 1));'
-    + 'color:' + tColor + '; font-weight:700; letter-spacing:5px; text-transform:uppercase;'
-    + 'text-shadow:0 0 14px ' + tColor + 'aa,0 0 28px ' + tColor + '55,0 3px 6px rgba(0,0,0,0.6); margin-bottom:6px; position:relative; z-index:3;">'
-    + currentTier.name
+    + '<div style="position:relative; width:100px; height:100px; margin: 0 auto 8px;">'
+    +   '<img class="vLg-medal-anim" src="/shared/img/medals/' + currentTier.id + '.webp" alt="' + currentTier.name + '" style="position:absolute; top:50%; left:50%; width:90px; height:90px; transform:translate(-50%,-50%); object-fit:contain; z-index:2; cursor:zoom-in;" onclick="if(window.showLightbox)window.showLightbox(this.src,\'Medalha ' + currentTier.name + '\',\'Tier ' + currentTier.name + '\');">'
     + '</div>'
-
-    // XP em ornate bordered card
-    + '<div style="position:relative; z-index:3; display:inline-flex; align-items:center; gap: var(--v-space-md, 8px);'
-    + 'padding:6px 14px; background:rgba(0,0,0,0.55); border:1px solid ' + tColor + '88; border-radius:18px;'
-    + 'box-shadow:0 0 12px ' + tColor + '44, inset 0 0 6px rgba(0,0,0,0.4);'
-    + 'margin:0 auto; display:flex; max-width:fit-content;">'
-    +   '<span class="vLg-rune" style="color:' + tColor + '; font-size:calc(10px * var(--v-font-scale, 1));">◆</span>'
-    +   '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(18px * var(--v-font-scale, 1)); color:' + tColor + ';'
-    +   'font-weight:700; text-shadow:0 0 8px ' + tColor + '88;">' + currentXp.toLocaleString('pt-BR') + '</span>'
-    +   '<span style="font-size:calc(9px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:2px;">XP de Liga</span>'
-    +   '<span class="vLg-rune" style="color:' + tColor + '; font-size:calc(10px * var(--v-font-scale, 1));">◆</span>'
+    + '<div style="text-align:center; font-family:Cinzel,serif; font-size:24px; color:' + tColor + '; font-weight:700; letter-spacing:4px; text-transform:uppercase; margin-bottom:4px;">'
+    +   currentTier.name
     + '</div>'
-
-    + '</div>';  // /header
-
-  // === INSCRIPTION CARD — "Por feitos lendários, glória e ouro..." ===
-  // 2026-05-22: termo ajustado para "lendários" per CLAUDE.md MANDATORY RULE.
-  html += '<div style="margin: 0 var(--v-space-md, 8px) var(--v-space-md, 8px); padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);'
-    + 'background:linear-gradient(180deg,rgba(196,149,58,0.08) 0%,rgba(42,36,32,0.4) 100%);'
-    + 'border:1px solid rgba(196,149,58,0.20); border-radius: var(--v-radius-sm, 6px); text-align:center;'
-    + 'position:relative;">'
-    + '<div style="font-family:var(--v-font,MedievalSharp,serif); font-size:calc(13px * var(--v-font-scale, 1)); color:var(--v-text,#d4c8b0); font-style:italic; line-height:1.5;">'
-    + '"Por feitos lendários, glória e ouro, ergue-se o nome do aventureiro entre as estrelas."'
-    + '</div>'
-    + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin-top: var(--v-space-sm, 4px); letter-spacing:1px;">'
-    + '— Provérbio antigo dos aventureiros'
+    + '<div style="display:flex; justify-content:center; align-items:center; gap:6px;">'
+    +   '<span style="font-family:Cinzel,serif; font-size:16px; color:' + tColor + '; font-weight:700;">' + currentXp.toLocaleString('pt-BR') + '</span>'
+    +   '<span style="font-size:9px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:1px;">XP de Liga</span>'
     + '</div>'
     + '</div>';
 
-  // === PROGRESS BAR pra próximo tier (decorado com runes) ===
-  if (!atMax) {
-    var xpToNext = nextTier.minXp - currentXp;
-    html += '<div style="margin: 0 var(--v-space-md, 8px) var(--v-space-md, 8px); padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);'
-      + 'background:rgba(196,149,58,0.06); border:1px solid var(--v-border,#4a3828);'
-      + 'border-radius: var(--v-radius-sm, 6px);">'
-      // Header com from/to medalhas
-      + '<div style="display:flex; justify-content:space-between; align-items:center; font-size:calc(11px * var(--v-font-scale, 1)); margin-bottom:6px;">'
-      +   '<span style="display:inline-flex; align-items:center; gap: var(--v-space-sm, 4px);">'
-      +     '<svg viewBox="0 0 120 120" style="width:14px; height:14px; color:' + tColor + ';"><use href="#' + currentTier.icon + '"/></svg>'
-      +     '<span>Progresso para <b style="color:' + nextTier.color + ';">' + nextTier.name + '</b></span>'
-      +   '</span>'
-      +   '<span style="color:var(--v-gold,#c4953a); font-weight:700;">' + Math.round(pctInTier) + '%</span>'
-      + '</div>'
-      // Bar com runes nas extremidades
-      + '<div style="position:relative; display:flex; align-items:center; gap:6px;">'
-      +   '<span class="vLg-rune" style="color:' + tColor + '; font-size:calc(11px * var(--v-font-scale, 1));">◆</span>'
-      +   '<div style="flex:1; height:10px; background:rgba(0,0,0,0.45); border-radius:5px; overflow:hidden;'
-      +   'border:1px solid var(--v-border,#4a3828); box-shadow:inset 0 1px 3px rgba(0,0,0,0.5);">'
-      +     '<div style="height:100%; width:' + pctInTier + '%; background:linear-gradient(90deg,' + tColor + ',' + nextTier.color + ');'
-      +     'transition:width 0.5s ease; box-shadow:0 0 8px ' + nextTier.color + ',inset 0 1px 0 rgba(255,255,255,0.2);"></div>'
-      +   '</div>'
-      +   '<span class="vLg-rune" style="color:' + nextTier.color + '; font-size:calc(11px * var(--v-font-scale, 1));">◆</span>'
-      + '</div>'
-      + '<div style="font-size:calc(11px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin-top:6px; text-align:center; font-style:italic;">'
-      + 'Faltam <b style="color:var(--v-gold,#c4953a); font-style:normal;">' + xpToNext.toLocaleString('pt-BR') + ' XP</b> para ascender'
-      + '</div>'
-      + '</div>';
-  } else {
-    // Já no tier máximo (Mithral)
-    html += '<div style="margin: 0 var(--v-space-md, 8px) var(--v-space-md, 8px); padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);'
-      + 'background:linear-gradient(90deg,rgba(185,212,242,0.10),rgba(196,149,58,0.10));'
-      + 'border:1px solid ' + tColor + '88; border-radius: var(--v-radius-sm, 6px); text-align:center;'
-      + 'font-family:var(--v-font-display,Cinzel,serif); font-size:calc(11px * var(--v-font-scale, 1)); color:' + tColor + '; letter-spacing:2px;">'
-      + '<span class="vLg-rune">◆</span> Lenda viva — Pináculo da Ordem <span class="vLg-rune">◆</span>'
-      + '</div>';
-  }
-
-  // === TIER PATH HORIZONTAL — 5 medalhas conectadas (jornada visual) ===
-  html += '<div style="margin: 0 var(--v-space-md, 8px) var(--v-space-md, 8px);">'
-    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
-    + 'text-transform:uppercase; letter-spacing:2px; margin-bottom: var(--v-space-md, 8px); text-align:center;">'
-    + '<span class="vLg-rune">◆</span> Caminho da Ordem <span class="vLg-rune">◆</span>'
+  // Banner da Temporada (Countdown + First Blood)
+  html += '<div class="vLg-countdown-card">'
+    + '<div style="display:flex; align-items:center; gap:6px;">'
+    +   '<span style="font-size:14px;">⏳</span>'
+    +   '<div>'
+    +     '<div style="font-size:9.5px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:1px;">Fechamento da Rodada</div>'
+    +     '<div style="font-family:Cinzel,serif; font-weight:700; font-size:12px; color:#ffd700;">Segunda-feira 00:00 · ' + cdStr + ' restantes</div>'
+    +   '</div>'
     + '</div>'
-    + '<div style="position:relative; display:grid; grid-template-columns:repeat(5,1fr); gap:0; padding: var(--v-space-md, 8px) var(--v-space-sm, 4px) 6px;'
-    + 'background:linear-gradient(180deg,rgba(196,149,58,0.06) 0%,rgba(42,36,32,0.4) 100%);'
-    + 'border:1px solid rgba(196,149,58,0.18); border-radius:8px;">';
-
-  // Linha conectora (atrás dos dots)
-  html += '<div style="position:absolute; top:24px; left:12%; right:12%; height:2px; pointer-events:none;'
-    + 'background:linear-gradient(90deg,';
-  LEAGUE_TIERS.forEach(function(t, idx){
-    var unlocked = currentXp >= t.minXp;
-    var colorAt = unlocked ? t.color : 'rgba(80,68,56,0.5)';
-    html += colorAt + (idx < LEAGUE_TIERS.length - 1 ? ',' : '');
-  });
-  html += ');"></div>';
-
-  LEAGUE_TIERS.forEach(function(t, idx){
-    var unlocked = currentXp >= t.minXp;
-    var current = (idx === currentTierIdx);
-    var medalSize = current ? '36px' : '28px';
-    var opacity = unlocked ? '1' : '0.4';
-    html += '<div style="position:relative; display:flex; flex-direction:column; align-items:center; z-index:2;">'
-      + '<div class="vLg-path-medal' + (current ? ' is-current' : '') + '" '
-      + 'style="position:relative; width:' + medalSize + '; height:' + medalSize + ';'
-      + 'background:' + (unlocked ? 'radial-gradient(circle,' + t.color + '22,transparent 70%)' : 'transparent') + ';'
-      + 'border-radius:50%; display:flex; align-items:center; justify-content:center;'
-      + 'opacity:' + opacity + ';">'
-      // 2026-05-22: PNG medal canonical com click-to-zoom (PADRAO_LIGHTBOX)
-      + '<img class="vLg-path-medal-img" '
-      +    'src="/shared/img/medals/' + t.id + '.webp" '
-      +    'alt="' + t.name + '" '
-      +    'data-medal-name="' + t.name + '" '
-      +    'data-medal-desc="Tier ' + t.name + ' — ' + t.minXp.toLocaleString('pt-BR') + ' a ' + t.maxXp.toLocaleString('pt-BR') + ' XP" '
-      +    'style="width:100%; height:100%; object-fit:contain;'
-      + (unlocked ? '' : ' filter:grayscale(0.7) brightness(0.7);')
-      + (current ? ' filter:drop-shadow(0 0 6px ' + t.color + ');' : '')
-      +    ' cursor:zoom-in;" '
-      +    'onerror="this.style.display=\'none\';if(this.nextSibling){this.nextSibling.style.display=\'\'}" '
-      +    'onclick="event.stopPropagation();if(window.showLightbox)window.showLightbox(this.src,this.dataset.medalName,this.dataset.medalDesc);">'
-      + '<svg viewBox="0 0 120 120" style="width:100%; height:100%; color:' + t.color + '; display:none;'
-      + (current ? 'filter:drop-shadow(0 0 6px ' + t.color + ');' : '') + '"><use href="#' + t.icon + '"/></svg>'
-      + '</div>'
-      // Label nome
-      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(9px * var(--v-font-scale, 1)); margin-top: var(--v-space-sm, 4px); line-height:1;'
-      + 'color:' + (current ? t.color : (unlocked ? 'var(--v-text,#d4c8b0)' : 'var(--v-text-dim,#a09484)')) + ';'
-      + 'font-weight:' + (current ? '700' : '500') + '; letter-spacing:0.5px; text-transform:uppercase;'
-      + (current ? 'text-shadow:0 0 6px ' + t.color + '88;' : '') + '">'
-      + t.name + '</div>'
-      // XP range mini
-      + '<div style="font-size:calc(8px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin-top:1px; opacity:' + (unlocked ? '0.9' : '0.5') + ';">'
-      + (t.minXp >= 1000 ? (t.minXp/1000) + 'k' : t.minXp) + '+</div>'
-      + '</div>';
-  });
-  html += '</div></div>';
-
-  // === BENEFITS — chips do tier atual ===
-  if (currentBenefits.length) {
-    html += '<div style="margin: 0 var(--v-space-md, 8px) var(--v-space-md, 8px);">'
-      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(10px * var(--v-font-scale, 1)); color:' + tColor + ';'
-      + 'text-transform:uppercase; letter-spacing:2px; margin-bottom:6px; text-align:center;">'
-      + '<span class="vLg-rune">◆</span> Privilégios — ' + currentTier.name + ' <span class="vLg-rune">◆</span>'
-      + '</div>'
-      + '<div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center;">';
-    currentBenefits.forEach(function(b){
-      html += '<div style="padding: var(--v-space-sm, 4px) var(--v-space-md-lg, 10px); background:' + tColor + '12; border:1px solid ' + tColor + '55;'
-        + 'border-radius:12px; font-size:calc(11px * var(--v-font-scale, 1)); color:var(--v-text,#d4c8b0); display:inline-flex; align-items:center; gap: var(--v-space-sm, 4px);">'
-        + '<span style="color:' + tColor + ';">✦</span> ' + b
-        + '</div>';
-    });
-    html += '</div></div>';
-  }
-
-  // === POSIÇÃO NA ORDEM — clicável com tooltip explicativo ===
-  // 2026-05-22 user feedback: "não entendi o que que é a posição na ordem.
-  // Faço com que, ao clicar, informe o que significa".
-  html += '<div class="vLg-rank-card" style="margin: 0 var(--v-space-md, 8px) var(--v-space-md-lg, 10px); padding: 6px var(--v-space-md-lg, 10px);'
-    + 'background:rgba(196,149,58,0.04); border:1px solid rgba(196,149,58,0.15); border-radius: var(--v-radius-sm, 6px);'
-    + 'display:flex; justify-content:space-between; align-items:center; font-size:calc(11px * var(--v-font-scale, 1));'
-    + 'cursor:pointer; transition:background 0.18s ease,border-color 0.18s ease;"'
-    + ' onmouseover="this.style.background=\'rgba(196,149,58,0.10)\';this.style.borderColor=\'rgba(196,149,58,0.35)\';"'
-    + ' onmouseout="this.style.background=\'rgba(196,149,58,0.04)\';this.style.borderColor=\'rgba(196,149,58,0.15)\';"'
-    + ' onclick="if(typeof _showLeagueRankInfo===\'function\')_showLeagueRankInfo();">'
-    + '<span style="color:var(--v-text-dim,#a09484); display:inline-flex; align-items:center; gap:6px;">'
-    + '<img src="/shared/img/achievements/ach-aventureiro.webp" alt="" style="width:14px; height:14px; object-fit:contain; vertical-align:middle;">'
-    + 'Posição na Ordem <span style="opacity:0.5;font-size:calc(13px * var(--v-font-scale, 1));">ⓘ</span>'
-    + '</span>'
-    + '<span style="font-family:var(--v-font-display,Cinzel,serif); color:var(--v-gold,#c4953a); font-weight:700;">'
-    + rankMock.toLocaleString('pt-BR') + 'º</span>'
+    + '<div style="font-family:Cinzel,serif; font-size:11px; color:#7cdb7c; font-weight:700; border:1px solid #7cdb7c66; padding:2px 8px; border-radius:10px;">Divisão Ativa</div>'
     + '</div>';
+
+  // Card do Primeiro Sangue Diário
+  html += '<div class="vLg-first-blood-card">'
+    + '<div style="font-size:22px;">🗡️</div>'
+    + '<div style="flex:1;">'
+    +   '<div style="font-family:Cinzel,serif; font-weight:700; font-size:11.5px; color:#ff8a4a;">Primeiro Sangue Diário (+150 XP Liga)</div>'
+    +   '<div style="font-size:10px; color:var(--v-text-dim,#a09484);">'
+    +     (firstBloodDone ? '✓ Bônus já resgatado hoje. Retorne na próxima alvorada!' : 'Vença seu primeiro combate do dia para conquistar o bônus!')
+    +   '</div>'
+    + '</div>'
+    + '<div>'
+    +   (firstBloodDone ? '<span style="font-size:10px; color:#7cdb7c; font-weight:700; background:rgba(124,219,124,0.15); border:1px solid #7cdb7c; padding:2px 7px; border-radius:8px;">✓ COLETADO</span>'
+                        : '<span style="font-size:10px; color:#ff8a4a; font-weight:700; background:rgba(255,100,50,0.15); border:1px solid #ff8a4a; padding:2px 7px; border-radius:8px;">EM DISPUTA</span>')
+    + '</div>'
+    + '</div>';
+
+  // Navegação por Abas
+  html += '<div class="vLg-nav-tabs">'
+    + '<button class="vLg-tab-btn' + (_leagueCurrentSubTab === 'standings' ? ' active' : '') + '" onclick="window._switchLeagueTab(\'standings\')">🏆 Standings da Divisão</button>'
+    + '<button class="vLg-tab-btn' + (_leagueCurrentSubTab === 'contracts' ? ' active' : '') + '" onclick="window._switchLeagueTab(\'contracts\')">⚔️ Contratos Semanais</button>'
+    + '<button class="vLg-tab-btn' + (_leagueCurrentSubTab === 'perks' ? ' active' : '') + '" onclick="window._switchLeagueTab(\'perks\')">📜 Jornada & Privilégios</button>'
+    + '</div>';
+
+  // Container de Conteúdo Dinâmico
+  html += '<div id="vLg-tab-content-area">' + _renderTabContent() + '</div>';
 
   html += '</div>';
+
+  window._switchLeagueTab = function(tabKey){
+    _leagueCurrentSubTab = tabKey;
+    var el = document.getElementById('vLg-tab-content-area');
+    if (el) el.innerHTML = _renderTabContent();
+    var btns = bodyEl.querySelectorAll('.vLg-tab-btn');
+    btns.forEach(function(btn){
+      btn.classList.toggle('active', btn.getAttribute('onclick').indexOf(tabKey) > -1);
+    });
+  };
+
   bodyEl.innerHTML = html;
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'league') _popupStack.push('league');
@@ -18372,6 +18695,42 @@ function _achChainState(chain){
 // até o anterior ser concluído (regra: não mostrar a próxima conquista).
 // Click na medalha → popup de detalhe com sequência completa.
 // ============================================================================
+var _achActiveCategoryFilter = 'all';
+
+var _ACH_CATEGORIES_MAP = {
+  algoz: 'combate',
+  cacador: 'combate',
+  indomavel: 'combate',
+  sobrevivente: 'combate',
+  andarilho: 'exploracao',
+  cartografo: 'exploracao',
+  aventureiro: 'exploracao',
+  mestre: 'maestria',
+  cofreiro: 'maestria',
+  colecionador: 'maestria',
+  forjador: 'maestria',
+  erudito: 'maestria',
+  devoto: 'maestria',
+  diplomata: 'maestria'
+};
+
+var _ACH_TITLES_REWARD = {
+  algoz: 'O Carrasco de Valdoria',
+  cacador: 'O Predador Lendário',
+  indomavel: 'O Indomável',
+  cofreiro: 'O Magnata do Reino',
+  mestre: 'Arquiteto das Lendas',
+  aventureiro: 'O Veterano Errante',
+  andarilho: 'O Andarilho dos Ermos',
+  cartografo: 'Mestre Cartógrafo',
+  colecionador: 'O Curador Supremo',
+  forjador: 'Lenda da Bigorna',
+  erudito: 'O Arcanista Iluminado',
+  devoto: 'A Voz dos Deuses',
+  diplomata: 'O Grande Embaixador',
+  sobrevivente: 'O Eterno Imortal'
+};
+
 function _showAchievementsPopup(p){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
@@ -18379,131 +18738,168 @@ function _showAchievementsPopup(p){
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = 'Conquistas';
 
+  // Tenta sincronizar em background se remoto
+  if (typeof _refreshAchProgress === 'function') {
+    _refreshAchProgress().catch(function(){});
+  }
+
   // Computa totais
-  var totalTiers = 0, doneTiers = 0, masteredChains = 0;
+  var totalTiers = 0, doneTiers = 0, masteredChains = 0, totalEarnedXp = 0;
   ACHIEVEMENT_CHAINS.forEach(function(c){
     var st = _achChainState(c);
     totalTiers += c.tiers.length;
     doneTiers += st.done;
     if (st.mastered) masteredChains++;
+    c.tiers.forEach(function(t){
+      if (st.progress >= t.goal) totalEarnedXp += (t.xp || 0);
+    });
   });
   var pct = Math.round(doneTiers / totalTiers * 100);
 
-  var html = '<div class="ach-medals-hub" style="padding: var(--v-space-md, 8px); display: flex; flex-direction: column; height: 100%;">';
+  function _filterChains(){
+    return ACHIEVEMENT_CHAINS.filter(function(c){
+      var st = _achChainState(c);
+      if (_achActiveCategoryFilter === 'all') return true;
+      if (_achActiveCategoryFilter === 'mastered') return st.mastered;
+      if (_achActiveCategoryFilter === 'focus') {
+        if (st.mastered) return false;
+        var t = st.active;
+        var pPct = t ? (st.progress / t.goal) : 0;
+        return pPct >= 0.5;
+      }
+      return _ACH_CATEGORIES_MAP[c.id] === _achActiveCategoryFilter;
+    });
+  }
 
-  // X-6.5.51AY (2026-05-11): header épico com brasão central + crown.
-  // Antes era barra compacta — agora "manuscrito iluminado" com mestre count
-  // em destaque pra valorizar o progresso do player.
-  html += '<style>'
-    + '@keyframes vCrownGlow{0%,100%{filter:drop-shadow(0 0 6px rgba(255,215,0,0.45));}50%{filter:drop-shadow(0 0 14px rgba(255,235,140,0.75));}}'
-    + '.vAch-crown{animation:vCrownGlow 3.2s ease-in-out infinite;}'
-    + '</style>';
-  // === HEADER ÉPICO: brasão iluminado + stats ===
-  html += '<div style="position:relative; padding: 14px var(--v-space-lg, 12px) var(--v-space-md-lg, 10px); '
-    + 'background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.20) 0%, rgba(196,149,58,0.10) 35%, rgba(42,36,32,0.95) 75%); '
-    + 'border: 1px solid var(--v-gold, #c4953a); '
-    + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-sm, 6px); overflow:hidden;">'
-    + '<div style="position:absolute;top:6px;left:8px;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(9px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.75;">◆ MANUSCRITO DAS GLÓRIAS ◆</div>'
-    + '<div style="display:flex; align-items:center; gap: var(--v-space-lg, 12px);">'
-    // Brasão central
-    + '<div style="position:relative; min-width: 60px; height: 60px; display:grid; place-items:center;">'
-    +   '<img class="vAch-crown" src="/shared/img/achievements/trofeu.webp" alt="" style="width: 60px; height: 60px; object-fit:contain;">'
-    +   (masteredChains > 0 ? '<div style="position:absolute; top:-4px; right:-6px; background:linear-gradient(180deg,#ffd700,#c87a4a); color:#3a2a08; font-family:var(--v-font-display,Cinzel,serif); font-size:calc(11px * var(--v-font-scale, 1)); font-weight:700; padding: var(--v-space-xs, 2px) 6px; border-radius: var(--v-radius, 10px); border:1px solid rgba(0,0,0,0.5); box-shadow:0 2px 4px rgba(0,0,0,0.6);">★' + masteredChains + '</div>' : '')
-    + '</div>'
-    // Stats column
-    + '<div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:5px;">'
-    +   '<div style="display:flex; align-items:baseline; gap: var(--v-space-sm, 4px);">'
-    +     '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(26px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); font-weight:700; line-height:1; text-shadow:0 0 10px rgba(255,215,0,0.4);">' + doneTiers + '</span>'
-    +     '<span style="font-size:calc(13px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); font-weight:400;">/ ' + totalTiers + '</span>'
-    +     '<span style="margin-left:auto; font-size:calc(11px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); font-family:var(--v-font-display,Cinzel,serif); letter-spacing:1.5px;">' + pct + '%</span>'
+  function _renderGrid(){
+    var visible = _filterChains();
+    if (visible.length === 0 && _achActiveCategoryFilter === 'focus') {
+      // Se nenhuma atingiu 50%, pega as 3 mais avançadas
+      var sorted = ACHIEVEMENT_CHAINS.filter(function(c){ return !_achChainState(c).mastered; }).sort(function(a, b){
+        var stA = _achChainState(a), stB = _achChainState(b);
+        var rA = stA.active ? (stA.progress / stA.active.goal) : 0;
+        var rB = stB.active ? (stB.progress / stB.active.goal) : 0;
+        return rB - rA;
+      });
+      visible = sorted.slice(0, 3);
+    }
+
+    if (visible.length === 0) {
+      return '<div style="grid-column: 1/-1; text-align:center; padding: 24px 10px; color: var(--v-text-dim,#a09484); font-style:italic; font-size:11px;">Nenhuma façanha nesta categoria no momento.</div>';
+    }
+
+    var gHtml = '';
+    visible.forEach(function(c){
+      var st = _achChainState(c);
+      var stateCls = st.mastered ? 'medal-mastered' : (st.done > 0 ? 'medal-progressing' : 'medal-starter');
+      var ribbonText = st.mastered ? '★' : st.active.label;
+      var iconColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#5a5048');
+      var iconGlow = st.mastered ? 'filter: drop-shadow(0 0 4px rgba(255,180,60,0.5));' : '';
+
+      var isNear = false;
+      if (!st.mastered && st.active) {
+        var nearPct = st.progress / st.active.goal;
+        if (nearPct >= 0.7) isNear = true;
+      }
+
+      gHtml += '<div class="ach-medal ' + stateCls + '" data-chain="' + c.id + '" '
+        + 'style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px 5px; cursor: pointer; position: relative; border-radius: 6px; background: rgba(42,36,32,0.4); border: 1px solid rgba(74,56,40,0.4); transition: transform 0.15s ease, border-color 0.15s ease;" '
+        + 'onmouseover="this.style.borderColor=\'var(--v-gold,#c4953a)\';this.style.transform=\'scale(1.02)\';" onmouseout="this.style.borderColor=\'rgba(74,56,40,0.4)\';this.style.transform=\'\';">'
+        + (isNear ? '<span class="vAch-focus-badge">QUASE LÁ!</span>' : '')
+        + '<div class="med-circle" style="position: relative; width: 48px; height: 48px; display: grid; place-items: center;">'
+        +   '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 38px; height: 38px; color: ' + iconColor + '; ' + iconGlow + ' pointer-events: none;">'
+        +     '<use href="#' + c.icon + '"/>'
+        +   '</svg>'
+        + '</div>'
+        + '<div class="med-ribbon" style="position: relative; margin-top: -6px; '
+        +   'background: ' + (st.mastered ? 'linear-gradient(180deg, #ffd700, #c87a4a)' : (st.done > 0 ? 'linear-gradient(180deg, #c63d3d, #8a2828)' : '#5a5048')) + '; '
+        +   'color: #fff; font-family: var(--v-font-display, Cinzel, serif); font-weight: 700; font-size: 8.5px; padding: 1px 6px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.6); box-shadow: 0 1px 2px rgba(0,0,0,0.5); min-width: 14px; text-align: center;">'
+        +   ribbonText
+        + '</div>'
+        + '<div class="med-name" style="margin-top: 3px; font-family: var(--v-font-display, Cinzel, serif); font-size: 10px; font-weight: 600; line-height: 1.1; text-align: center; color: ' + (st.done > 0 ? 'var(--v-text-bright, #e8dcc8)' : 'var(--v-text-dim, #a09484)') + '; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">'
+        +   c.name
+        + '</div>'
+        + '<div style="font-size: 8.5px; color: var(--v-text-dim, #a09484); margin-top: 1px;">'
+        +   (st.mastered ? '★ Dominado' : st.progress + ' / ' + st.active.goal)
+        + '</div>'
+        + '</div>';
+    });
+    return gHtml;
+  }
+
+  var html = '<div class="ach-medals-hub" style="padding: 6px 8px; display: flex; flex-direction: column; height: 100%;">';
+
+  // Header épico
+  html += '<div style="position:relative; padding: 12px 14px 10px; background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.20) 0%, rgba(196,149,58,0.10) 35%, rgba(42,36,32,0.95) 75%); border: 1px solid var(--v-gold, #c4953a); border-radius: var(--v-radius, 10px); margin-bottom: 6px; overflow:hidden;">'
+    + '<div style="position:absolute;top:6px;left:8px;font-family:var(--v-font-display,Cinzel,serif);font-size:8.5px;color:var(--v-gold,#c4953a);letter-spacing:2px;opacity:0.75;">◆ MANUSCRITO DAS GLÓRIAS ◆</div>'
+    + '<div style="display:flex; align-items:center; gap: 12px; margin-top: 4px;">'
+    +   '<div style="position:relative; min-width: 52px; height: 52px; display:grid; place-items:center;">'
+    +     '<img class="vAch-crown" src="/shared/img/achievements/trofeu.webp" alt="" style="width: 50px; height: 50px; object-fit:contain;">'
+    +     (masteredChains > 0 ? '<div style="position:absolute; top:-3px; right:-4px; background:linear-gradient(180deg,#ffd700,#c87a4a); color:#3a2a08; font-family:var(--v-font-display,Cinzel,serif); font-size:10px; font-weight:700; padding:1px 5px; border-radius:8px; border:1px solid rgba(0,0,0,0.5);">★' + masteredChains + '</div>' : '')
     +   '</div>'
-    +   '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:1.5px;">conquistas registradas</div>'
-    // Barra ornamentada
-    +   '<div style="height: 8px; background: rgba(0,0,0,0.55); border-radius: var(--v-radius-xs, 4px); overflow: hidden; border: 1px solid rgba(255,215,0,0.25); position:relative;">'
-    +     '<div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, #8a5a20, #c4953a 50%, #ffd700); box-shadow: 0 0 8px rgba(255,215,0,0.6);"></div>'
+    +   '<div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:4px;">'
+    +     '<div style="display:flex; align-items:baseline; gap: 4px;">'
+    +       '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:22px; color:var(--v-gold,#c4953a); font-weight:700; line-height:1;">' + doneTiers + '</span>'
+    +       '<span style="font-size:11px; color:var(--v-text-dim,#a09484);">/ ' + totalTiers + ' metas</span>'
+    +       '<span style="margin-left:auto; font-size:11px; color:var(--v-gold,#c4953a); font-family:var(--v-font-display,Cinzel,serif); font-weight:700;">' + pct + '%</span>'
+    +     '</div>'
+    +     '<div style="height: 6px; background: rgba(0,0,0,0.55); border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,215,0,0.25);">'
+    +       '<div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, #8a5a20, #c4953a 50%, #ffd700);"></div>'
+    +     '</div>'
+    +     '<div style="font-size:9.5px; color:var(--v-text-dim,#a09484); display:flex; justify-content:space-between;">'
+    +       '<span>' + (masteredChains > 0 ? '<b style="color:#ffd700;">' + masteredChains + ' cadeias dominadas</b>' : 'Cada feito gravado em ouro') + '</span>'
+    +       '<span style="color:var(--v-gold,#ffd700);">+' + totalEarnedXp.toLocaleString('pt-BR') + ' XP total</span>'
+    +     '</div>'
     +   '</div>'
-    +   (masteredChains > 0
-        ? '<div style="font-size: calc(10px * var(--v-font-scale, 1)); color: #ffd700; font-style: italic; margin-top: var(--v-space-xs, 2px);">' + masteredChains + ' cadeia' + (masteredChains === 1 ? '' : 's') + ' dominada' + (masteredChains === 1 ? '' : 's') + ' </div>'
-        : '<div style="font-size: calc(10px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); font-style: italic; margin-top: var(--v-space-xs, 2px);">"Cada feito gravado em ouro eterno."</div>')
-    + '</div>'
     + '</div>'
     + '</div>';
 
-  // === GRID 3 COLUNAS DE MEDALHAS ===
-  html += '<div class="amh-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; align-content: start; overflow-y: auto;">';
-  ACHIEVEMENT_CHAINS.forEach(function(c){
-    var st = _achChainState(c);
-    var stateCls = st.mastered ? 'medal-mastered' : (st.done > 0 ? 'medal-progressing' : 'medal-starter');
-    var ribbonText = st.mastered ? '★' : st.active.label;
+  // Abas de Categoria
+  html += '<div class="vAch-nav-tabs">'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'all' ? ' active' : '') + '" onclick="window._switchAchFilter(\'all\')">🏆 Todas (14)</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'focus' ? ' active' : '') + '" onclick="window._switchAchFilter(\'foco\')">🎯 Quase Lá!</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'combate' ? ' active' : '') + '" onclick="window._switchAchFilter(\'combate\')">⚔️ Combate</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'exploracao' ? ' active' : '') + '" onclick="window._switchAchFilter(\'exploracao\')">🗺️ Exploração</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'maestria' ? ' active' : '') + '" onclick="window._switchAchFilter(\'maestria\')">💎 Maestria</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'mastered' ? ' active' : '') + '" onclick="window._switchAchFilter(\'mastered\')">★ Mestre</button>'
+    + '</div>';
 
-    // Sessao #68 (2026-05-30): user pediu remover a medalha dourada de fundo das
-    // imagens de Conquistas — fica so o icone heraldico. O icone ADOTA a cor antes
-    // usada no disco (gold/orange-gold/dim) pra ficar visivel no fundo escuro do
-    // card (antes era marrom escuro #1f1304 contando com o disco dourado atras).
-    var iconColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#5a5048');
-    var iconGlow = st.mastered ? 'filter: drop-shadow(0 0 4px rgba(255,180,60,0.5));' : '';
+  // Grid
+  html += '<div id="vAch-grid-container" class="amh-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; align-content: start; overflow-y: auto; padding-right: 2px;">'
+    + _renderGrid()
+    + '</div>';
 
-    html += '<div class="ach-medal ' + stateCls + '" data-chain="' + c.id + '" '
-      + 'style="display: flex; flex-direction: column; align-items: center; gap: var(--v-space-xs, 2px); padding: var(--v-space-sm, 4px) var(--v-space-xs, 2px); cursor: pointer; position: relative; border-radius: var(--v-radius-sm, 6px); transition: transform 0.15s ease;">'
-      // Sessao #68: sem medal-bg — so o icone heraldico (maior, ocupa o espaco do disco)
-      + '<div class="med-circle" style="position: relative; width: 54px; height: 54px; display: grid; place-items: center;">'
-      + '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 40px; height: 40px; color: ' + iconColor + '; ' + iconGlow + ' pointer-events: none;">'
-      + '<use href="#' + c.icon + '"/>'
-      + '</svg>'
-      + '</div>'
-      // Faixa (ribbon) com tier
-      + '<div class="med-ribbon" style="position: relative; margin-top: -8px; '
-      + 'background: ' + (st.mastered ? 'linear-gradient(180deg, #ffd700, #c87a4a)' : (st.done > 0 ? 'linear-gradient(180deg, #c63d3d, #8a2828)' : '#5a5048')) + '; '
-      + 'color: #fff; '
-      + 'font-family: var(--v-font-display, Cinzel, serif); '
-      + 'font-weight: 700; font-size: calc(9px * var(--v-font-scale, 1)); '
-      + 'padding: 1px 7px; '
-      + 'border-radius: 2px; '
-      + 'border: 1px solid rgba(0,0,0,0.6); '
-      + 'box-shadow: 0 1px 2px rgba(0,0,0,0.5); '
-      + 'text-shadow: 0 1px 1px rgba(0,0,0,0.5); '
-      + 'min-width: 16px; text-align: center; letter-spacing: 0.5px;">'
-      + ribbonText
-      + '</div>'
-      // Nome curto (até 2 linhas)
-      + '<div class="med-name" style="margin-top: 3px; '
-      + 'font-family: var(--v-font-display, Cinzel, serif); '
-      + 'font-size: calc(10px * var(--v-font-scale, 1)); font-weight: 600; line-height: 1.1; text-align: center; '
-      + 'color: ' + (st.done > 0 ? 'var(--v-text-bright, #e8dcc8)' : 'var(--v-text-dim, #a09484)') + '; '
-      + 'max-width: 100%; '
-      + 'display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">'
-      + c.name
-      + '</div>'
-      + '</div>';
-  });
   html += '</div>';
-  html += '</div>';
+
+  window._switchAchFilter = function(fKey){
+    _achActiveCategoryFilter = fKey;
+    var gEl = document.getElementById('vAch-grid-container');
+    if (gEl) gEl.innerHTML = _renderGrid();
+    var btns = bodyEl.querySelectorAll('.vAch-tab-btn');
+    btns.forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('onclick').indexOf(fKey) > -1);
+    });
+    // Wire clicks novament
+    _wireAchMedalClicks();
+  };
+
+  function _wireAchMedalClicks(){
+    bodyEl.querySelectorAll('.ach-medal').forEach(function(el){
+      el.onclick = function(){
+        _showAchievementDetailPopup(el.getAttribute('data-chain'), p);
+      };
+    });
+  }
 
   bodyEl.innerHTML = html;
-
-  // Wire click → detalhe
-  bodyEl.querySelectorAll('.ach-medal').forEach(function(el){
-    el.addEventListener('click', function(){
-      _showAchievementDetailPopup(el.getAttribute('data-chain'), p);
-    });
-    // Hover/active visual
-    el.addEventListener('mousedown', function(){ el.style.transform = 'scale(0.96)'; });
-    el.addEventListener('mouseup',   function(){ el.style.transform = ''; });
-    el.addEventListener('mouseleave',function(){ el.style.transform = ''; });
-  });
+  _wireAchMedalClicks();
 
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'achievements') _popupStack.push('achievements');
-  // Registra restoreFn pra navigateBack do detalhe re-renderizar a grid
   window._popupRestoreFns = window._popupRestoreFns || {};
   window._popupRestoreFns.achievements = function(){ _showAchievementsPopup(p); };
 }
 
-// ============================================================================
-// DETALHE da cadeia — abre ao clicar numa medalha.
-// Mostra: medalha grande no topo, descrição, barra de progresso do tier ativo,
-// e a SEQUÊNCIA completa de tiers (concluídos ✓ + ativo em progresso + futuros bloqueados).
-// ============================================================================
 function _showAchievementDetailPopup(chainId, p){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
@@ -18516,89 +18912,75 @@ function _showAchievementDetailPopup(chainId, p){
   if (titleEl) titleEl.textContent = chain.name;
   var st = _achChainState(chain);
 
-  var html = '<div class="ach-detail" style="padding: var(--v-space-md, 8px); display: flex; flex-direction: column; gap: var(--v-space-sm, 6px); height: 100%;">';
-
-  // === MEDALHA GRANDE PRINCIPAL ===
-  // Sessao #68 (2026-05-30): sem medal-bg (par com a grid) — o icone heraldico
-  // adota a cor gold/orange-gold/dim pra ficar visivel sem o disco dourado atras.
-  var heroIconColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#5a5048');
-  var heroGlowFilter = st.mastered ? 'filter: drop-shadow(0 0 5px rgba(255,180,60,0.55));' : '';
-
-  // Compute reward totals (USER REQUEST 2026-05-22: clareza do que está em jogo)
   var totalChainXp = chain.tiers.reduce(function(s, t){ return s + (t.xp || 0); }, 0);
   var earnedXp = chain.tiers.reduce(function(s, t){ return s + (st.progress >= t.goal ? (t.xp || 0) : 0); }, 0);
   var earnedCount = chain.tiers.filter(function(t){ return st.progress >= t.goal; }).length;
 
-  html += '<div style="display: flex; flex-direction: column; align-items: center; padding: var(--v-space-md, 12px) var(--v-space-md, 10px); '
-    + 'background: linear-gradient(180deg, rgba(196,149,58,0.18) 0%, rgba(42,36,32,0.95) 100%); '
-    + 'border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); '
-    + 'border-radius: var(--v-radius, 10px); position: relative;">'
-    // Sessao #68: sem medal-bg — so o icone heraldico grande (ocupa o espaco do disco)
-    + '<div style="position: relative; width: 84px; height: 84px; '
-    + 'display: grid; place-items: center; ' + heroGlowFilter + '">'
-    + '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 64px; height: 64px; color: ' + heroIconColor + '; pointer-events: none;">'
-    + '<use href="#' + chain.icon + '"/>'
-    + '</svg>'
+  var crestIconColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#5a5048');
+  var crestGlowFilter = st.mastered ? 'filter: drop-shadow(0 0 5px rgba(255,180,60,0.55));' : '';
+  var masterTitle = _ACH_TITLES_REWARD[chainId] || 'Mestre da Façanha';
+
+  var html = '<div class="ach-detail" style="padding: 8px; display: flex; flex-direction: column; gap: 6px; height: 100%;">';
+
+  // Medalha Principal
+  html += '<div style="display: flex; flex-direction: column; align-items: center; padding: 10px; background: linear-gradient(180deg, rgba(196,149,58,0.18) 0%, rgba(42,36,32,0.95) 100%); border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); border-radius: var(--v-radius, 10px); position: relative;">'
+    + '<div style="position: relative; width: 68px; height: 68px; display: grid; place-items: center; ' + crestGlowFilter + '">'
+    +   '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 54px; height: 54px; color: ' + crestIconColor + '; pointer-events: none;">'
+    +     '<use href="#' + chain.icon + '"/>'
+    +   '</svg>'
     + '</div>'
-    // Faixa do tier — SEPARADA da medalha (FIX 2026-05-22: era margin-top: -10px causando overlap)
-    + '<div style="margin-top: var(--v-space-md, 10px); '
-    + 'background: ' + (st.mastered ? 'linear-gradient(180deg, #ffd700, #c87a4a)' : (st.done > 0 ? 'linear-gradient(180deg, #c63d3d, #8a2828)' : '#5a5048')) + '; '
-    + 'color: #fff; '
-    + 'font-family: var(--v-font-display, Cinzel, serif); '
-    + 'font-weight: 700; font-size: calc(12px * var(--v-font-scale, 1)); '
-    + 'padding: 3px 14px; '
-    + 'border-radius: 3px; '
-    + 'border: 1px solid rgba(0,0,0,0.6); '
-    + 'box-shadow: 0 1px 3px rgba(0,0,0,0.5); '
-    + 'text-shadow: 0 1px 1px rgba(0,0,0,0.5); '
-    + 'letter-spacing: 1px;">'
-    + (st.mastered ? '★ MESTRE ★' : st.active.label + ' — ' + st.active.name)
+    + '<div style="margin-top: 6px; background: ' + (st.mastered ? 'linear-gradient(180deg, #ffd700, #c87a4a)' : (st.done > 0 ? 'linear-gradient(180deg, #c63d3d, #8a2828)' : '#5a5048')) + '; color: #fff; font-family: var(--v-font-display, Cinzel, serif); font-weight: 700; font-size: 11px; padding: 2px 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.6); letter-spacing: 1px;">'
+    +   (st.mastered ? '★ MESTRE ★' : st.active.label + ' — ' + st.active.name)
     + '</div>'
-    // Flavor (descrição do que conta para a cadeia)
-    + '<div style="margin-top: var(--v-space-sm, 8px); '
-    + 'font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484); '
-    + 'text-align: center; line-height: 1.4; max-width: 280px; font-style: italic;">'
-    + chain.flavor
+    + '<div style="margin-top: 6px; font-size: 11px; color: var(--v-text-dim, #a09484); text-align: center; line-height: 1.4; max-width: 280px; font-style: italic;">'
+    +   chain.flavor
     + '</div>'
     + '</div>';
 
-  // === RECOMPENSAS DESBLOQUEÁVEIS (USER REQUEST 2026-05-22: clareza do ganho) ===
-  html += '<div style="padding: var(--v-space-sm, 6px) var(--v-space-md, 10px); '
-    + 'background: rgba(196,149,58,0.05); '
-    + 'border: 1px solid var(--v-border, #4a3828); '
-    + 'border-radius: var(--v-radius-sm, 6px);">'
-    + '<div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: var(--v-space-sm, 4px);">'
-    + '<span style="font-size: calc(10px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px;">Recompensas</span>'
-    + '<span style="font-size: calc(11px * var(--v-font-scale, 1)); color: var(--v-text-bright, #e8dcc8); font-weight: 700;">'
-    + earnedCount + ' / ' + chain.tiers.length + '</span>'
+  // Título Honorífico
+  html += '<div style="padding: 6px 10px; background: rgba(196,149,58,0.06); border: 1px solid var(--v-gold-30, rgba(196,149,58,0.3)); border-radius: 6px; display: flex; align-items: center; justify-content: space-between;">'
+    + '<div style="display:flex; align-items:center; gap:6px;">'
+    +   '<span style="font-size:13px;">🎖️</span>'
+    +   '<div>'
+    +     '<div style="font-size:8.5px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:1px;">Título por Domínio Máximo</div>'
+    +     '<div style="font-family:Cinzel,serif; font-size:11.5px; color:' + (st.mastered ? '#ffd700' : 'var(--v-text-bright,#e8dcc8)') + '; font-weight:700;">' + masterTitle + '</div>'
+    +   '</div>'
     + '</div>'
-    + '<div style="font-size: calc(11px * var(--v-font-scale, 1)); color: var(--v-text, #d4c8b0); line-height: 1.4;">'
-    + 'Conquistado: <b style="color: var(--v-gold, #c4953a);">+' + earnedXp + ' XP</b>'
-    + (earnedXp < totalChainXp ? ' · A ganhar: <b style="color: var(--v-text-dim, #a09484);">+' + (totalChainXp - earnedXp) + ' XP</b>' : ' · <b style="color: #7cdb7c;">cadeia completa</b>')
+    + '<div>'
+    +   (st.mastered ? '<span style="font-size:9.5px; color:#7cdb7c; font-weight:700;">✓ CONQUISTADO</span>' : '<span style="font-size:9.5px; color:var(--v-text-dim,#a09484);">Tier V</span>')
     + '</div>'
     + '</div>';
 
-  // === BARRA DE PROGRESSO DO TIER ATIVO ===
+  // Recompensas
+  html += '<div style="padding: 6px 10px; background: rgba(196,149,58,0.05); border: 1px solid var(--v-border, #4a3828); border-radius: 6px;">'
+    + '<div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">'
+    +   '<span style="font-size: 10px; color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px;">Recompensas</span>'
+    +   '<span style="font-size: 11px; color: var(--v-text-bright, #e8dcc8); font-weight: 700;">' + earnedCount + ' / ' + chain.tiers.length + ' metas</span>'
+    + '</div>'
+    + '<div style="font-size: 10.5px; color: var(--v-text, #d4c8b0); line-height: 1.4;">'
+    +   'Acumulado: <b style="color: var(--v-gold, #c4953a);">+' + earnedXp + ' XP</b>'
+    +   (earnedXp < totalChainXp ? ' · A conquistar: <b style="color: var(--v-text-dim, #a09484);">+' + (totalChainXp - earnedXp) + ' XP</b>' : ' · <b style="color: #7cdb7c;">Façanha Completa!</b>')
+    + '</div>'
+    + '</div>';
+
+  // Barra de Progresso do Tier Ativo
   if (!st.mastered) {
     var t = st.active;
     var tierPct = Math.min(100, Math.round(st.progress / t.goal * 100));
-    html += '<div style="padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
-      + 'background: rgba(196,149,58,0.06); '
-      + 'border: 1px solid var(--v-border, #4a3828); '
-      + 'border-radius: var(--v-radius-sm, 6px);">'
-      + '<div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: var(--v-space-sm, 4px);">'
-      + '<span style="font-size: calc(10px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px;">Próxima conquista</span>'
-      + '<span style="font-size: calc(11px * var(--v-font-scale, 1)); color: var(--v-text-bright, #e8dcc8); font-weight: 700;">' + st.progress + ' / ' + t.goal + '</span>'
+    html += '<div style="padding: 6px 10px; background: rgba(196,149,58,0.06); border: 1px solid var(--v-border, #4a3828); border-radius: 6px;">'
+      + '<div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">'
+      +   '<span style="font-size: 10px; color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px;">Meta do Tier ' + t.label + '</span>'
+      +   '<span style="font-size: 11px; color: var(--v-text-bright, #e8dcc8); font-weight: 700;">' + st.progress + ' / ' + t.goal + '</span>'
       + '</div>'
-      + '<div style="height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden; border: 1px solid rgba(0,0,0,0.4);">'
-      + '<div style="height: 100%; width: ' + tierPct + '%; background: linear-gradient(90deg, var(--v-gold-dim, #9a7530), var(--v-gold, #c4953a), #ffd700); box-shadow: 0 0 6px rgba(255,215,0,0.5);"></div>'
+      + '<div style="height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden;">'
+      +   '<div style="height: 100%; width: ' + tierPct + '%; background: linear-gradient(90deg, #9a7530, #c4953a, #ffd700);"></div>'
       + '</div>'
       + '</div>';
   }
 
-  // === SEQUÊNCIA DE TIERS ===
-  html += '<div style="font-size: calc(10px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px; padding: 0 var(--v-space-md, 8px);">◆ Sequência</div>';
-  html += '<div style="display: flex; flex-direction: column; gap: 3px; flex: 1; overflow-y: auto;">';
+  // Sequência de Tiers
+  html += '<div style="font-size: 10px; color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px; padding: 0 4px;">◆ Trilha de Evolução</div>';
+  html += '<div style="display: flex; flex-direction: column; gap: 3px; flex: 1; overflow-y: auto; padding-right: 2px;">';
 
   chain.tiers.forEach(function(t, i){
     var tierDone = st.progress >= t.goal;
@@ -18607,58 +18989,29 @@ function _showAchievementDetailPopup(chainId, p){
 
     var bg, border, color, iconBg, iconColor, marker;
     if (tierDone) {
-      bg = 'rgba(196,149,58,0.10)';
-      border = 'var(--v-gold, #c4953a)';
-      color = 'var(--v-text-bright, #e8dcc8)';
-      iconBg = 'linear-gradient(135deg, #ffd700, #c4953a)';
-      iconColor = '#3a2a08';
-      marker = '✓';
+      bg = 'rgba(196,149,58,0.10)'; border = 'var(--v-gold, #c4953a)'; color = 'var(--v-text-bright, #e8dcc8)';
+      iconBg = 'linear-gradient(135deg, #ffd700, #c4953a)'; iconColor = '#3a2a08'; marker = '✓';
     } else if (tierActive) {
-      bg = 'rgba(255,100,50,0.08)';
-      border = '#ff8a4a';
-      color = 'var(--v-text-bright, #e8dcc8)';
-      iconBg = 'linear-gradient(135deg, #ff8a4a, #c63d3d)';
-      iconColor = '#fff';
-      marker = '◆';
+      bg = 'rgba(255,100,50,0.08)'; border = '#ff8a4a'; color = 'var(--v-text-bright, #e8dcc8)';
+      iconBg = 'linear-gradient(135deg, #ff8a4a, #c63d3d)'; iconColor = '#fff'; marker = '◆';
     } else {
-      bg = 'rgba(196,149,58,0.02)';
-      border = 'var(--v-border, #4a3828)';
-      color = 'var(--v-text-dim, #a09484)';
-      iconBg = '#3a3530';
-      iconColor = '#5a5048';
-      marker = '·';
+      bg = 'rgba(196,149,58,0.02)'; border = 'var(--v-border, #4a3828)'; color = 'var(--v-text-dim, #a09484)';
+      iconBg = '#3a3530'; iconColor = '#5a5048'; marker = '·';
     }
 
-    html += '<div style="display: flex; align-items: center; gap: var(--v-space-sm, 6px); padding: var(--v-space-sm, 6px) var(--v-space-md, 8px); '
-      + 'background: ' + bg + '; '
-      + 'border: 1px solid ' + border + '; '
-      + 'border-radius: var(--v-radius-sm, 6px); '
-      + (tierFuture ? 'opacity: 0.6;' : '') + '">'
-      // Roman + status
-      + '<div style="display:flex; flex-direction: column; align-items: center; min-width: 26px;">'
-      + '<div style="width: 22px; height: 22px; border-radius: 50%; background: ' + iconBg + '; '
-      + 'color: ' + iconColor + '; font-family: var(--v-font-display, Cinzel, serif); font-size: calc(10px * var(--v-font-scale, 1)); font-weight: 700; '
-      + 'display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0,0,0,0.5); '
-      + 'box-shadow: inset 0 1px 1px rgba(255,255,255,0.3);">'
-      + t.label
+    html += '<div style="display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: ' + bg + '; border: 1px solid ' + border + '; border-radius: 6px; ' + (tierFuture ? 'opacity: 0.6;' : '') + '">'
+      + '<div style="width: 20px; height: 20px; border-radius: 50%; background: ' + iconBg + '; color: ' + iconColor + '; font-family: Cinzel, serif; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;">'
+      +   t.label
       + '</div>'
-      + '</div>'
-      // Nome + meta
       + '<div style="flex: 1; min-width: 0;">'
-      + '<div style="font-size: calc(12px * var(--v-font-scale, 1)); font-weight: 600; color: ' + color + '; line-height: 1.2;">'
-      + (tierFuture ? '???' : t.name)
+      +   '<div style="font-size: 11.5px; font-weight: 600; color: ' + color + '; line-height: 1.2;">' + (tierFuture ? '???' : t.name) + '</div>'
+      +   '<div style="font-size: 9.5px; color: var(--v-text-dim, #a09484); line-height: 1.2;">' + (tierFuture ? 'Bloqueado' : (tierDone ? 'Concluído · ' + t.goal : 'Meta · ' + t.goal)) + '</div>'
       + '</div>'
-      + '<div style="font-size: calc(10px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); line-height: 1.2;">'
-      + (tierFuture ? 'Bloqueado' : (tierDone ? 'Concluído · ' + t.goal : 'Meta · ' + t.goal))
+      + '<div style="font-size: 10px; color: ' + (tierDone ? 'var(--v-gold, #c4953a)' : 'var(--v-text-dim, #a09484)') + '; font-weight: 600; min-width: 50px; text-align: right;">'
+      +   '+' + t.xp + ' XP'
       + '</div>'
-      + '</div>'
-      // XP reward
-      + '<div style="font-size: calc(10px * var(--v-font-scale, 1)); color: ' + (tierDone ? 'var(--v-gold, #c4953a)' : 'var(--v-text-dim, #a09484)') + '; font-weight: 600; min-width: 50px; text-align: right;">'
-      + '+' + t.xp + ' XP'
-      + '</div>'
-      // Marker
-      + '<div style="font-size: calc(14px * var(--v-font-scale, 1)); color: ' + (tierDone ? '#7cdb7c' : (tierActive ? '#ff8a4a' : '#5a5048')) + '; min-width: 16px; text-align: center;">'
-      + marker
+      + '<div style="font-size: 12px; color: ' + (tierDone ? '#7cdb7c' : (tierActive ? '#ff8a4a' : '#5a5048')) + '; min-width: 14px; text-align: center;">'
+      +   marker
       + '</div>'
       + '</div>';
   });
@@ -18671,65 +19024,598 @@ function _showAchievementDetailPopup(chainId, p){
   if (typeof _popupStack !== 'undefined') _popupStack.push('ach_detail_' + chainId);
 }
 
-// canonical: bestiary stats — kills por tipo de inimigo
-// Sessão #23 (2026-05-22): PNGs canonical do combat (preferidos), SVG icon como fallback
-var KILLS_BY_TYPE = [
-  { type: 'Lobo Cinzento',  icon: 'ic-lobo',      png: '/shared/img/combat/enemies/lobo.webp',           kills: 8, cr: '1/4' },
-  { type: 'Goblin',          icon: 'ic-goblin',    png: '/shared/img/combat/enemies/goblin.webp',         kills: 6, cr: '1/4' },
-  { type: 'Esqueleto',       icon: 'ic-esqueleto', png: '/shared/img/combat/enemies/esqueleto.webp',      kills: 4, cr: '1/4' },
-  { type: 'Aranha Gigante',  icon: 'ic-aranha',    png: '/shared/img/combat/enemies/aranha-gigante.webp', kills: 3, cr: '1' },
-  { type: 'Orc Guerreiro',   icon: 'ic-orc',       png: '/shared/img/combat/enemies/orc-guerreiro.webp',  kills: 2, cr: '1' }
+// canonical: bestiary stats — catálogo completo de 22 criaturas canônicas D&D 5e de Valdoria
+// AAA Monster Hunter / Witcher / Diablo IV Codex de Caça
+var CANONICAL_BESTIARY_CATALOG = [
+  {
+    id: 'lobo',
+    type: 'Lobo Cinzento',
+    aliases: ['Lobo Cinzento', 'Lobo', 'lobo'],
+    category: 'beast',
+    categoryLabel: 'Fera',
+    cr: '1/4',
+    icon: 'ic-lobo',
+    png: '/shared/img/combat/enemies/lobo.webp',
+    habitat: 'Florestas e Bosques de Valdoria',
+    defaultKills: 8,
+    desc: 'Predador veloz e implacável que caça em alcateias organizadas nos ermos silvestres de Valdoria.',
+    tactics: 'Tática de Matilha: Ganha vantagem nas jogadas de ataque contra uma criatura se pelo menos um aliado estiver adjacente ao alvo.',
+    weaknesses: 'Vulnerável a ataques em área e fogo; a alcateia se desestabiliza quando o alfa é abatido.',
+    drops: 'Pele Íntegra de Lobo (15V), Presa de Predador, Carne de Caça Fresca'
+  },
+  {
+    id: 'goblin',
+    type: 'Goblin Saqueador',
+    aliases: ['Goblin', 'Goblin Saqueador', 'goblin'],
+    category: 'humanoid',
+    categoryLabel: 'Humanoide',
+    cr: '1/4',
+    icon: 'ic-goblin',
+    png: '/shared/img/combat/enemies/goblin.webp',
+    habitat: 'Cavernas Úmidas e Acampamentos de Emboscada',
+    defaultKills: 6,
+    desc: 'Criaturas ardilosas e covardes que atacam em vantagem numérica e usam emboscadas sujas nos desfiladeiros.',
+    tactics: 'Fuga Ágil: Consegue desengajar ou se esconder como uma ação bônus em cada turno de combate.',
+    weaknesses: 'Moral frágil; foge ou implora por misericórdia quando gravemente ferido ou isolado de seu bando.',
+    drops: 'Adaga Lascada, Moedas Furtadas (5V), Amuleto de Osso Rústico'
+  },
+  {
+    id: 'esqueleto',
+    type: 'Esqueleto Guerreiro',
+    aliases: ['Esqueleto', 'Esqueleto Guerreiro', 'esqueleto'],
+    category: 'undead',
+    categoryLabel: 'Morto-Vivo',
+    cr: '1/4',
+    icon: 'ic-esqueleto',
+    png: '/shared/img/combat/enemies/esqueleto.webp',
+    habitat: 'Criptas, Catacumbas e Túmulos Esquecidos',
+    defaultKills: 4,
+    desc: 'Ossadas animadas por necromancia antiga, obedecendo cegamente a ordens de vigília eterna nos sepulcros.',
+    tactics: 'Ataques disciplinados com espadas curtas enferrujadas ou disparos coordenados de arco curto.',
+    weaknesses: 'Vulnerabilidade a Dano Contundente (martelos e maças estraçalham sua estrutura óssea). Imunidade a Veneno.',
+    drops: 'Fragmentos de Osso Mágico, Flechas Antigas, Crânio Polido (10V)'
+  },
+  {
+    id: 'aranha-gigante',
+    type: 'Aranha Gigante',
+    aliases: ['Aranha Gigante', 'Aranha', 'aranha-gigante'],
+    category: 'beast',
+    categoryLabel: 'Fera',
+    cr: '1',
+    icon: 'ic-aranha',
+    png: '/shared/img/combat/enemies/aranha-gigante.webp',
+    habitat: 'Florestas Sombrias e Galerias Subterrâneas',
+    defaultKills: 3,
+    desc: 'Predador aracnídeo monstruoso capaz de tecer teias densas e injetar peçonha paralisante com suas quelíceras.',
+    tactics: 'Lançar Teia para restringir a mobilidade dos aventureiros e realizar botes surpresa do teto rochoso.',
+    weaknesses: 'Vulnerável a Dano de Fogo (queima suas teias instantaneamente). Perde vantagem em terreno aberto iluminado.',
+    drops: 'Glândula de Veneno Puro (30V), Fios de Seda Refinada, Quelíceras Afiadas'
+  },
+  {
+    id: 'orc-guerreiro',
+    type: 'Orc Guerreiro',
+    aliases: ['Orc Guerreiro', 'Orc', 'orc-guerreiro', 'orc'],
+    category: 'humanoid',
+    categoryLabel: 'Humanoide',
+    cr: '1',
+    icon: 'ic-orc',
+    png: '/shared/img/combat/enemies/orc-guerreiro.webp',
+    habitat: 'Montanhas Áridas e Fortes Fortificados',
+    defaultKills: 2,
+    desc: 'Combatente brutal cuja ferocidade em batalha busca a glória da vitória pelo corte implacável do machado.',
+    tactics: 'Agressivo: Como ação bônus, avança todo seu deslocamento em direção a um inimigo que consiga enxergar.',
+    weaknesses: 'Suscetível a magias de controle de grupo e quebra de postura ofensiva prolongada.',
+    drops: 'Machado de Guerra Orc, Insígnia de Batalha (25V), Couro Pesado Curtido'
+  },
+  {
+    id: 'javali',
+    type: 'Javali Selvagem',
+    aliases: ['Javali Selvagem', 'Javali', 'javali'],
+    category: 'beast',
+    categoryLabel: 'Fera',
+    cr: '1/4',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/javali.webp',
+    habitat: 'Matas Fechadas e Vales Verdes',
+    defaultKills: 2,
+    desc: 'Besta corpulenta armada com presas pontiagudas e uma fúria obstinada quando encurralada.',
+    tactics: 'Investida: Se mover em linha reta antes de atacar, causa dano extra e derruba a presa no solo.',
+    weaknesses: 'Mobilidade em curvas limitada; ataques à distância e armadilhas de laço anulam seu ímpeto.',
+    drops: 'Presas de Javali Raras, Carne Salgada de Caça, Couro Resistente'
+  },
+  {
+    id: 'zumbi',
+    type: 'Zumbi Pestilento',
+    aliases: ['Zumbi', 'Zumbi Pestilento', 'zumbi'],
+    category: 'undead',
+    categoryLabel: 'Morto-Vivo',
+    cr: '1/4',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/zumbi.webp',
+    habitat: 'Cemitérios Profanados e Pântanos Fétidos',
+    defaultKills: 2,
+    desc: 'Cadáver ambulante reanimado por corrupção necromântica, marchando com fome incessante de carne viva.',
+    tactics: 'Fortitude de Morto-Vivo: Ao sofrer dano letal, faz salvaguarda de CON para permanecer de pé com 1 PV.',
+    weaknesses: 'Vulnerável a Dano Radiante e Golpes Críticos (que desmembram o corpo imediatamente). Movimento lento.',
+    drops: 'Trapos Fétidos, Dente Podre, Resíduo Necrótico Alquímico (12V)'
+  },
+  {
+    id: 'carnical',
+    type: 'Carniçal Devorador',
+    aliases: ['Carniçal', 'Carnical', 'Carniçal Devorador', 'carnical'],
+    category: 'undead',
+    categoryLabel: 'Morto-Vivo',
+    cr: '1',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/carnical.webp',
+    habitat: 'Criptas Esquecidas e Fossas Mortuárias',
+    defaultKills: 1,
+    desc: 'Necrófago feroz cujas garras transmitem um entorpecimento frio e paralisante aos mortais.',
+    tactics: 'Garras Paralisantes: O golpe com garras exige salvaguarda de CON para evitar paralisia de 1 minuto.',
+    weaknesses: 'Dano de Fogo e Radiante; elfos possuem imunidade natural à sua paralisia necrótica.',
+    drops: 'Garra Putrefata (20V), Pó de Sepultura, Amuleto Antigo de Cripta'
+  },
+  {
+    id: 'hobgoblin',
+    type: 'Hobgoblin Legionário',
+    aliases: ['Hobgoblin', 'Hobgoblin Legionário', 'hobgoblin'],
+    category: 'humanoid',
+    categoryLabel: 'Humanoide',
+    cr: '1/2',
+    icon: 'ic-goblin',
+    png: '/shared/img/combat/enemies/hobgoblin.webp',
+    habitat: 'Fortalezas Militares e Posições Estratégicas',
+    defaultKills: 2,
+    desc: 'Guerreiro severo e disciplinado que aplica rigor marcial e combate em formação com escudo e espada.',
+    tactics: 'Vantagem Marcial: Causa 2d6 de dano extra a cada turno se o alvo estiver adjacente a outro aliado.',
+    weaknesses: 'Isolamento tático; dispersar suas linhas de apoio enfraquece consideravelmente seu dano.',
+    drops: 'Armadura de Malha Hobgoblin, Brasão de Legião (18V), Espada Longa Forjada'
+  },
+  {
+    id: 'vulto',
+    type: 'Vulto Sombrio',
+    aliases: ['Vulto', 'Vulto Sombrio', 'vulto'],
+    category: 'undead',
+    categoryLabel: 'Morto-Vivo',
+    cr: '2',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/vulto.webp',
+    habitat: 'Salões Abandonados e Câmaras Amaldiçoadas',
+    defaultKills: 1,
+    desc: 'Silhueta incorpórea que se esgueira pela escuridão drenando a vitalidade física dos viventes.',
+    tactics: 'Movimento Incorpóreo e Dreno de Força: Atravessa paredes de pedra e reduz o atributo de Força do alvo no acerto.',
+    weaknesses: 'Vulnerável a Dano Radiante; sofre desvantagem severa sob a luz direta do sol.',
+    drops: 'Essência Etérea Noturna (45V), Pano das Sombras, Fragmento de Alma'
+  },
+  {
+    id: 'ogro',
+    type: 'Ogro Selvagem',
+    aliases: ['Ogro', 'Ogro Selvagem', 'ogro'],
+    category: 'monstrosity',
+    categoryLabel: 'Gigante',
+    cr: '2',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/ogro.webp',
+    habitat: 'Desfiladeiros Rochosos e Cavernas Úmidas',
+    defaultKills: 1,
+    desc: 'Gigante bronco e imponente cuja força bruta descomunal parte escudos e estraçalha armaduras de aço.',
+    tactics: 'Clava Pesada Devastadora: Golpes de longo alcance com alto índice de dano contundente bruto.',
+    weaknesses: 'Baixa agilidade mental; extremamente vulnerável a magias de ilusão, intelecto e sabedoria.',
+    drops: 'Grande Clava de Tronco, Pele de Besta Gigante (40V), Colar de Crânios Primitivo'
+  },
+  {
+    id: 'urso-coruja',
+    type: 'Urso-Coruja',
+    aliases: ['Urso-Coruja', 'Urso Coruja', 'urso-coruja'],
+    category: 'monstrosity',
+    categoryLabel: 'Monstrosidade',
+    cr: '3',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/urso-coruja.webp',
+    habitat: 'Florestas Primordiais e Gargantas Rochosas',
+    defaultKills: 1,
+    desc: 'Criatura colossal combinando a ferocidade de um urso com os sentidos afiados e bico cortante de uma coruja.',
+    tactics: 'Ataque Múltiplo: Desfere golpes combinados de garras dilacerantes e bico serrilhado no mesmo turno.',
+    weaknesses: 'Pode ser desorientado por barulhos ensurdecedores e armadilhas táticas de fosso.',
+    drops: 'Penas Raras de Predador (50V), Bico de Urso-Coruja Íntegro, Garras Curvadas'
+  },
+  {
+    id: 'troll-das-cavernas',
+    type: 'Troll das Cavernas',
+    aliases: ['Troll', 'Troll das Cavernas', 'troll', 'troll-das-cavernas'],
+    category: 'monstrosity',
+    categoryLabel: 'Gigante',
+    cr: '5',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/troll-das-cavernas.webp',
+    habitat: 'Profundezas Rochosas e Pântanos Fétidos',
+    defaultKills: 0,
+    desc: 'Guerreiro descomunal dotado de uma assombrosa capacidade de regenerar tecidos feridos em segundos.',
+    tactics: 'Regeneração Monstruosa: Recupera 10 pontos de vida no começo de cada turno enquanto respirar.',
+    weaknesses: 'Vulnerabilidade absoluta a FOGO e ÁCIDO: Qualquer dano ígneo ou ácido cessa sua regeneração por uma rodada inteira!',
+    drops: 'Glândula de Regeneração Rara (80V), Sangue Concentrado de Troll, Couro Espesso'
+  },
+  {
+    id: 'limo-cinzento',
+    type: 'Limo Cinzento',
+    aliases: ['Limo Cinzento', 'Limo', 'limo-cinzento'],
+    category: 'monstrosity',
+    categoryLabel: 'Gosma',
+    cr: '1/2',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/limo-cinzento.webp',
+    habitat: 'Esgotos Subterrâneos e Masmorras Antigas',
+    defaultKills: 1,
+    desc: 'Massa amorfa e ácida que se camufla como pedra molhada para dissolver presas desavisadas.',
+    tactics: 'Corrosão de Metal: O contato de armas ou armaduras não mágicas com sua gosma corrói permanentemente o equipamento.',
+    weaknesses: 'Frio e Fogo; possui imunidade completa a danos cortantes e perfurantes.',
+    drops: 'Resíduo Ácido Puro (25V), Seiva Mineral Alcalina'
+  },
+  {
+    id: 'espectro',
+    type: 'Espectro Condenado',
+    aliases: ['Espectro', 'Espectro Condenado', 'espectro'],
+    category: 'undead',
+    categoryLabel: 'Morto-Vivo',
+    cr: '1',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/espectro.webp',
+    habitat: 'Ruínas Assombradas e Criptas Seladas',
+    defaultKills: 0,
+    desc: 'Alma atormentada pela dor e desespero que busca sugar a chama vital dos vivos nos recantos escuros.',
+    tactics: 'Dreno de Vida: Ataque corpo a corpo que reduz a vida máxima da vítima caso a salvaguarda de CON falhe.',
+    weaknesses: 'Dano Radiante; sensibilidade extrema à luz natural do sol.',
+    drops: 'Pó Espectral Brilhante (35V), Vela Mortuária Eterna'
+  },
+  {
+    id: 'basilisco',
+    type: 'Basilisco Petrificador',
+    aliases: ['Basilisco', 'Basilisco Petrificador', 'basilisco'],
+    category: 'monstrosity',
+    categoryLabel: 'Monstrosidade',
+    cr: '3',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/basilisco.webp',
+    habitat: 'Cavernas Subterrâneas e Minas Antigas',
+    defaultKills: 0,
+    desc: 'Réptil rastejante de oito patas cujo olhar fixo transforma aventureiros em estátuas de pedra maciça.',
+    tactics: 'Olhar Petrificante: Qualquer combatente que inicie seu turno olhando para a criatura deve salvar CON ou começar a petrificar.',
+    weaknesses: 'Espelhos polidos (seu próprio reflexo pode petrificá-lo) e combate às cegas/com os olhos vendados.',
+    drops: 'Olho de Basilisco Intacto (90V), Óleo Petrificante Concentrado, Couro Escamoso Pesado'
+  },
+  {
+    id: 'gargula',
+    type: 'Gárgula Alada',
+    aliases: ['Gárgula', 'Gargula', 'Gárgula Alada', 'gargula'],
+    category: 'monstrosity',
+    categoryLabel: 'Elemental',
+    cr: '2',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/gargula.webp',
+    habitat: 'Telhados de Catedrais e Ruínas Sagradas',
+    defaultKills: 0,
+    desc: 'Predador esculpido em rocha viva que descansa imóvel como estátua gótica até o momento do ataque aéreo.',
+    tactics: 'Falsa Aparência: Indistinguível de uma escultura de pedra comum enquanto permanecer imóvel.',
+    weaknesses: 'Armas encantadas e Dano de Trovão que causam fissuras estruturais em seu corpo mineral.',
+    drops: 'Coração de Granito Mágico (45V), Garra Pétrea Polida'
+  },
+  {
+    id: 'mumia',
+    type: 'Múmia Guardiã',
+    aliases: ['Múmia', 'Mumia', 'Múmia Guardiã', 'mumia'],
+    category: 'undead',
+    categoryLabel: 'Morto-Vivo',
+    cr: '3',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/mumia.webp',
+    habitat: 'Tumbas Reais e Câmaras Mortuárias Seladas',
+    defaultKills: 0,
+    desc: 'Guardião funerário embalsamado que carrega a temida Maldição da Podridão nas cinzas de suas faixas.',
+    tactics: 'Olhar Pavoroso e Podridão de Múmia: Vítimas amaldiçoadas perdem a capacidade de curar pontos de vida.',
+    weaknesses: 'Vulnerabilidade Severa a FOGO (as bandagens e óleos de embalsamamento entram em combustão imediata).',
+    drops: 'Bandagens Preservadas Raras (60V), Amuleto do Faraó, Bálsamo Funerário Sagrado'
+  },
+  {
+    id: 'minotauro',
+    type: 'Minotauro Labiríntico',
+    aliases: ['Minotauro', 'Minotauro Labiríntico', 'minotauro'],
+    category: 'monstrosity',
+    categoryLabel: 'Monstrosidade',
+    cr: '3',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/minotauro.webp',
+    habitat: 'Labirintos de Masmorras e Galerias Antigas',
+    defaultKills: 0,
+    desc: 'Guerreiro taurino imune à desorientação, capaz de farejar aventureiros em labirintos escuros como breu.',
+    tactics: 'Investida com Chifres e Lembrança Labiríntica: Recorda perfeitamente qualquer rota e desfere chifradas arrasadoras.',
+    weaknesses: 'Iscas sonoras e armadilhas mecânicas com disparos concentrados à distância.',
+    drops: 'Chifre Maciço de Minotauro (75V), Machado Pesado de Labirinto, Couro Bovino Raro'
+  },
+  {
+    id: 'quimera',
+    type: 'Quimera Alada',
+    aliases: ['Quimera', 'Quimera Alada', 'quimera'],
+    category: 'monstrosity',
+    categoryLabel: 'Monstrosidade',
+    cr: '6',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/quimera.webp',
+    habitat: 'Picos Rochosos e Penhascos Proibidos',
+    defaultKills: 0,
+    desc: 'Monstro colossal com cabeças de leão, bode e dragão, capaz de planar nos céus e expelir chamas abrasadoras.',
+    tactics: 'Sopro Flamejante de Dragão e Tríplice Ataque simultâneo por terra e ar no mesmo turno de combate.',
+    weaknesses: 'Ataques focados que inutilizem suas asas; vulnerável a frio glacial intenso.',
+    drops: 'Coração de Fogo Dracônico (150V), Presa Quimérica, Escama Carmesim Imaculada'
+  },
+  {
+    id: 'viverna',
+    type: 'Viverna dos Penhascos',
+    aliases: ['Viverna', 'Viverna dos Penhascos', 'viverna'],
+    category: 'monstrosity',
+    categoryLabel: 'Dragão',
+    cr: '6',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/viverna.webp',
+    habitat: 'Montanhas Nevadas e Penhascos dos Ventos',
+    defaultKills: 0,
+    desc: 'Parente draconiano feroz armado com um ferrão caudal repleto de peçonha devastadora.',
+    tactics: 'Mergulho Aéreo e Ferrão Venenoso: Desfere 7d6 de dano de veneno caso a vítima falhe na salvaguarda de CON.',
+    weaknesses: 'Magias paralisantes e disparos contundentes enquanto voa provocam quedas letais.',
+    drops: 'Glândula de Veneno de Viverna (180V), Escamas Aladas Duras, Ferrão Intacto'
+  },
+  {
+    id: 'yeti',
+    type: 'Yeti das Neves',
+    aliases: ['Yeti', 'Yeti das Neves', 'yeti'],
+    category: 'monstrosity',
+    categoryLabel: 'Monstrosidade',
+    cr: '3',
+    icon: 'ic-inimigo',
+    png: '/shared/img/combat/enemies/yeti.webp',
+    habitat: 'Picos Glaciais e Cavernas Congeladas',
+    defaultKills: 0,
+    desc: 'Abominação peluda das neves cujo olhar gélido paralisa a coragem dos aventureiros pelo pavor do frio.',
+    tactics: 'Olhar Congelante: Paralisa alvos pelo frio agudo; possui camuflagem perfeita em nevascas.',
+    weaknesses: 'Vulnerabilidade Severa a FOGO (derrete sua pelagem protetora e dissipa seu olhar glacial).',
+    drops: 'Pelagem Branca de Yeti (70V), Garra Glacial Eterna, Essência de Gelo Primordial'
+  }
 ];
 
+// Helper: calcula maestria do caçador
+function _getHunterMastery(kills){
+  kills = kills || 0;
+  if (kills >= 15) {
+    return { level: 3, label: 'Apex', roman: 'III', cls: 'vBst-mastery-3', nextGoal: null, title: 'Predador Apex' };
+  } else if (kills >= 5) {
+    return { level: 2, label: 'Caçador', roman: 'II', cls: 'vBst-mastery-2', nextGoal: 15, title: 'Caçador Veterano' };
+  } else if (kills >= 1) {
+    return { level: 1, label: 'Aprendiz', roman: 'I', cls: 'vBst-mastery-1', nextGoal: 5, title: 'Aprendiz de Rastro' };
+  }
+  return { level: 0, label: 'Desconhecido', roman: '—', cls: '', nextGoal: 1, title: 'Não Avistado' };
+}
+
+// CR cor escalada (verde→amarelo→laranja→vermelho→roxo)
+function _crColor(cr){
+  var c = parseFloat((cr || '0').toString().replace(/[^\d/.]/g,'')) || 0;
+  if (cr && cr.indexOf('/') > -1) c = 1 / (parseFloat(cr.split('/')[1]) || 1);
+  if (c >= 8) return '#a050e0';
+  if (c >= 4) return '#e85040';
+  if (c >= 2) return '#ffa040';
+  if (c >= 1) return '#ffd040';
+  return '#7cdb7c';
+}
+
+function _crLabel(cr){
+  var c = parseFloat((cr || '0').toString().replace(/[^\d/.]/g,'')) || 0;
+  if (cr && cr.indexOf('/') > -1) c = 1 / (parseFloat(cr.split('/')[1]) || 1);
+  if (c >= 16) return 'Épico';
+  if (c >= 8)  return 'Lendário';
+  if (c >= 4)  return 'Elite';
+  if (c >= 2)  return 'Veterano';
+  if (c >= 1)  return 'Novato';
+  return 'Iniciante';
+}
+
+// Modal AAA de Dossiê da Criatura
+function _showCreatureDossier(specimen, p){
+  var ov = document.getElementById('creature-dossier-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'creature-dossier-overlay';
+    document.body.appendChild(ov);
+  }
+  var kills = specimen.kills || 0;
+  var mastery = _getHunterMastery(kills);
+  var crCol = _crColor(specimen.cr);
+  var crLbl = _crLabel(specimen.cr);
+  var _isFileKl = (location.protocol === 'file:');
+
+  // Progresso para o próximo tier de maestria
+  var prevGoal = mastery.level === 3 ? 15 : (mastery.level === 2 ? 5 : (mastery.level === 1 ? 1 : 0));
+  var nextGoal = mastery.nextGoal;
+  var gaugePct = 100;
+  if (nextGoal) {
+    var range = nextGoal - prevGoal;
+    var cur = Math.max(0, kills - prevGoal);
+    gaugePct = Math.min(100, Math.round((cur / range) * 100));
+  }
+
+  // Tiers de desbloqueio
+  var tier1Unlocked = kills >= 1 || _isFileKl;
+  var tier2Unlocked = kills >= 5 || _isFileKl;
+  var tier3Unlocked = kills >= 15 || _isFileKl;
+
+  var html = '<div class="cdo-modal">'
+    + '<div class="cdo-header">'
+    +   '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 14px; color: #ff8a4a; font-weight: 700; display:flex; align-items:center; gap:8px;">'
+    +     '<span>📖 DOSSIÊ DE CAÇADA · D&D 5e</span>'
+    +   '</div>'
+    +   '<button id="cdo-close-x" type="button" style="background:none; border:none; color:var(--v-text-dim,#a09484); font-size:20px; cursor:pointer; padding:2px 8px; line-height:1;" aria-label="Fechar">✕</button>'
+    + '</div>'
+    + '<div class="cdo-body">'
+    /* Perfil do Espécime */
+    +   '<div style="display:flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); padding: 12px; border-radius: 8px; border: 1px solid rgba(196,40,30,0.35);">'
+    +     '<div style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid ' + crCol + '; overflow: hidden; flex-shrink: 0; box-shadow: 0 0 16px ' + crCol + '55; background: #120a08;">'
+    +       '<img src="' + specimen.png + '" alt="" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display=\'none\';" />'
+    +     '</div>'
+    +     '<div style="flex: 1; min-width: 0;">'
+    +       '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 17px; font-weight: 700; color: #fff; line-height: 1.2;">' + specimen.type + '</div>'
+    +       '<div style="font-size: 11px; color: #f0c8b0; margin-top: 2px;">' + specimen.categoryLabel + ' · ' + specimen.habitat + '</div>'
+    +       '<div style="display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: wrap;">'
+    +         '<span style="font-size: 9.5px; background: rgba(40,16,12,0.8); color: ' + crCol + '; padding: 2px 7px; border-radius: 4px; border: 1px solid ' + crCol + '; font-weight: 700;">CR ' + specimen.cr + ' · ' + crLbl + '</span>'
+    +         (mastery.level > 0 ? ('<span class="vBst-mastery-tag ' + mastery.cls + '">Maestria ' + mastery.roman + ' · ' + mastery.title + '</span>') : '<span style="font-size: 9px; color: #7a6850; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; border: 1px solid #4a3828;">Não Catalogado</span>')
+    +       '</div>'
+    +     '</div>'
+    +     '<div style="text-align: right; min-width: 54px;">'
+    +       '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 24px; font-weight: 700; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.4); line-height: 1;">' + kills + '</div>'
+    +       '<div style="font-size: 8.5px; color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px;">abates</div>'
+    +     '</div>'
+    +   '</div>'
+    /* Barra de Maestria */
+    +   '<div style="background: rgba(196,40,30,0.06); border: 1px solid rgba(74,36,28,0.7); border-radius: 6px; padding: 8px 12px;">'
+    +     '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">'
+    +       '<span style="font-size: 10px; color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px; font-weight:600;">Evolução de Maestria do Caçador</span>'
+    +       '<span style="font-size: 10.5px; color: #fff; font-weight: 700;">' + (nextGoal ? (kills + ' / ' + nextGoal + ' abates') : 'Nível Máximo Atingido') + '</span>'
+    +     '</div>'
+    +     '<div style="height: 6px; background: rgba(0,0,0,0.6); border-radius: 3px; overflow: hidden;">'
+    +       '<div style="height: 100%; width: ' + gaugePct + '%; background: linear-gradient(90deg, #c43020, #ff8a4a, #ffd700); box-shadow: 0 0 8px rgba(255,138,74,0.6);"></div>'
+    +     '</div>'
+    +   '</div>'
+    /* Seção 1: Descrição e Comportamento */
+    +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid ' + (tier1Unlocked ? 'rgba(196,149,58,0.4)' : 'rgba(74,40,30,0.4)') + '; border-radius: 8px; padding: 10px 12px;">'
+    +     '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 11px; color: ' + (tier1Unlocked ? '#ffd700' : 'var(--v-text-dim,#a09484)') + '; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display:flex; justify-content:space-between;">'
+    +       '<span>📜 Descrição & Ecologia</span>'
+    +       '<span style="font-size: 9.5px; color: ' + (tier1Unlocked ? '#7cdb7c' : '#a09484') + ';">' + (tier1Unlocked ? '✓ Desbloqueado' : '🔒 Requer 1 abate') + '</span>'
+    +     '</div>'
+    +     (tier1Unlocked
+            ? '<div style="font-size: 11.5px; color: var(--v-text, #d4c8b0); line-height: 1.45;">' + specimen.desc + '</div>'
+            : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Abata pelo menos 1 espécime para registrar o rastro ecológico no códex.</div>')
+    +   '</div>'
+    /* Seção 2: Táticas e Fraquezas D&D 5e */
+    +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid ' + (tier2Unlocked ? 'rgba(255,138,74,0.5)' : 'rgba(74,40,30,0.4)') + '; border-radius: 8px; padding: 10px 12px;">'
+    +     '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 11px; color: ' + (tier2Unlocked ? '#ff8a4a' : 'var(--v-text-dim,#a09484)') + '; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display:flex; justify-content:space-between;">'
+    +       '<span>⚔️ Táticas & Fraquezas (D&D 5e)</span>'
+    +       '<span style="font-size: 9.5px; color: ' + (tier2Unlocked ? '#7cdb7c' : '#a09484') + ';">' + (tier2Unlocked ? '✓ Desbloqueado' : '🔒 Requer 5 abates') + '</span>'
+    +     '</div>'
+    +     (tier2Unlocked
+            ? '<div style="font-size: 11.5px; color: var(--v-text, #d4c8b0); line-height: 1.45;">'
+              + '<p style="margin: 0 0 6px 0;"><b style="color:#ffb090;">Comportamento:</b> ' + specimen.tactics + '</p>'
+              + '<p style="margin: 0;"><b style="color:#7cdb7c;">Vulnerabilidade:</b> ' + specimen.weaknesses + '</p>'
+              + '</div>'
+            : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Atinja a Maestria II (5 abates) para desvendar as fraquezas secretas e padrões de ataque do monstro.</div>')
+    +   '</div>'
+    /* Seção 3: Despojos Raros */
+    +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid ' + (tier3Unlocked ? 'rgba(255,215,0,0.5)' : 'rgba(74,40,30,0.4)') + '; border-radius: 8px; padding: 10px 12px;">'
+    +     '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 11px; color: ' + (tier3Unlocked ? '#ffd700' : 'var(--v-text-dim,#a09484)') + '; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display:flex; justify-content:space-between;">'
+    +       '<span>💎 Despojos Raros & Esfolamento</span>'
+    +       '<span style="font-size: 9.5px; color: ' + (tier3Unlocked ? '#7cdb7c' : '#a09484') + ';">' + (tier3Unlocked ? '✓ Desbloqueado' : '🔒 Requer 15 abates') + '</span>'
+    +     '</div>'
+    +     (tier3Unlocked
+            ? '<div style="font-size: 11.5px; color: #ffd700; line-height: 1.45; font-weight: 600;">' + specimen.drops + '</div>'
+            : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Atinja a Maestria III (15 abates) para extrair os componentes alquímicos e troféus mais raros desta presa.</div>')
+    +   '</div>'
+    + '</div>'
+    + '<div style="padding: 10px 18px; background: rgba(18,10,8,0.95); border-top: 1px solid rgba(196,40,30,0.3); display:flex; justify-content: flex-end;">'
+    +   '<button id="cdo-btn-close" type="button" style="padding: 7px 18px; background: linear-gradient(180deg, #4a2016, #2a100a); border: 1px solid #ff6040; border-radius: 6px; color: #ffb090; font-family: Cinzel, serif; font-size: 11px; font-weight: 700; cursor: pointer;">Fechar Dossiê</button>'
+    + '</div>'
+    + '</div>';
+
+  ov.innerHTML = html;
+  ov.classList.add('active');
+  if (typeof _popupStack !== 'undefined') _popupStack.push('creature_dossier_' + specimen.id);
+
+  var _close = function(){
+    ov.classList.remove('active');
+    if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] === 'creature_dossier_' + specimen.id) {
+      _popupStack.pop();
+    }
+  };
+  var closeX = document.getElementById('cdo-close-x');
+  if (closeX) closeX.onclick = _close;
+  var btnClose = document.getElementById('cdo-btn-close');
+  if (btnClose) btnClose.onclick = _close;
+  ov.onclick = function(e){
+    if (e.target === ov) _close();
+  };
+}
+
+// Tela principal de Abates & Bestiário AAA
 function _showKillsPopup(p){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
-  if (titleEl) titleEl.textContent = 'Abates';
-  // Auditoria server-driven 2026-06-25 (#9): breakdown REAL de p.kills_by_type (servidor);
-  // KILLS_BY_TYPE vira só lookup de ícone/png/cr por espécie. REMOTE sem dados → vazio
-  // (NÃO fabrica o mock); total sempre do p.kills real em REMOTE. LOCAL (file://) = mock dev.
+  if (titleEl) titleEl.textContent = 'Abates & Bestiário';
+
   var _isFileKl = (location.protocol === 'file:');
   var _kbtSrv = (p && p.kills_by_type && typeof p.kills_by_type === 'object') ? p.kills_by_type : null;
   var _hasSrvKl = !!(_kbtSrv && Object.keys(_kbtSrv).length > 0);
-  var _klLookup = {};
-  KILLS_BY_TYPE.forEach(function(k){ _klLookup[k.type] = k; });
-  var KBT = _hasSrvKl
-    ? Object.keys(_kbtSrv).map(function(name){
-        var ref = _klLookup[name] || {};
-        return { type: name, kills: (_kbtSrv[name] || 0),
-                 icon: ref.icon || 'ic-inimigo', png: ref.png || '', cr: ref.cr || '?' };
-      }).sort(function(a, b){ return b.kills - a.kills; })
-    : (_isFileKl ? KILLS_BY_TYPE.slice() : []);
-  var total = (!_isFileKl && p && typeof p.kills === 'number')
-    ? p.kills
-    : KBT.reduce(function(a, b){ return a + b.kills; }, 0);
-  var top = KBT.slice().sort(function(a,b){return b.kills-a.kills;})[0] || {type:'—',kills:0};
-  // CR cor escalada (verde→amarelo→vermelho→roxo)
-  function _crColor(cr){
-    var c = parseFloat((cr || '0').toString().replace(/[^\d/.]/g,'')) || 0;
-    if (cr && cr.indexOf('/') > -1) c = 1 / (parseFloat(cr.split('/')[1]) || 1);
-    if (c >= 8) return '#a050e0';
-    if (c >= 4) return '#e85040';
-    if (c >= 2) return '#ffa040';
-    if (c >= 1) return '#ffd040';
-    return '#7cdb7c';
+
+  // Mapeia todas as espécies do catálogo canônico com os abates reais do jogador
+  var catalog = CANONICAL_BESTIARY_CATALOG.map(function(item){
+    var clone = Object.assign({}, item);
+    var kills = 0;
+    if (_hasSrvKl) {
+      kills = _kbtSrv[item.type] || _kbtSrv[item.id] || 0;
+      if (!kills && item.aliases) {
+        for (var a = 0; a < item.aliases.length; a++) {
+          if (_kbtSrv[item.aliases[a]]) {
+            kills = _kbtSrv[item.aliases[a]];
+            break;
+          }
+        }
+      }
+    } else if (_isFileKl) {
+      kills = item.defaultKills || 0;
+    }
+    clone.kills = kills;
+    return clone;
+  });
+
+  // Se o servidor tiver espécies que não estão no catálogo canônico, inclui dinamicamente
+  if (_hasSrvKl) {
+    Object.keys(_kbtSrv).forEach(function(kName){
+      var already = catalog.some(function(c){
+        return c.type.toLowerCase() === kName.toLowerCase() || (c.aliases && c.aliases.some(function(al){ return al.toLowerCase() === kName.toLowerCase(); }));
+      });
+      if (!already) {
+        catalog.push({
+          id: kName.toLowerCase().replace(/\s+/g, '-'),
+          type: kName,
+          category: 'monstrosity',
+          categoryLabel: 'Inimigo',
+          cr: '1',
+          icon: 'ic-inimigo',
+          png: '/shared/img/combat/enemies/lobo.webp',
+          habitat: 'Ermos de Valdoria',
+          kills: _kbtSrv[kName] || 0,
+          desc: 'Espécime registrado em combates recentes nos territórios além dos portões.',
+          tactics: 'Padrão combativo agressivo.',
+          weaknesses: 'Ataques coordenados e armas mágicas.',
+          drops: 'Despojos de Batalha (10V)'
+        });
+      }
+    });
   }
-  // Compute ranking (top 3 ganham medalha)
-  var ranking = KBT.slice().sort(function(a,b){return b.kills-a.kills;});
-  var rankMap = {};
-  ranking.forEach(function(r, i){ rankMap[r.type] = i + 1; });
-  // X-6.5.51BB (2026-05-11): elevou tela Abates pra AAA "Diablo IV Trophy Hall":
-  //   - Contador animado 0→total com easeOutCubic (1.6s)
-  //   - 4 correntes pendentes (CSS) sustentando o pedestal
-  //   - 6 brasas flutuando ao redor do pedestal (vKlEmber)
-  //   - 4 gotas de sangue caindo do topo do card (vKlBloodDrip)
-  //   - Stagger entry 80ms por card (vKlCardSlideIn cascading)
-  //   - Medalhas (gold/silver/bronze) nos top 3 bestiário
-  //   - Anel crimson rotativo orbitando pedestal (vKlOrbitRing)
-  //   - Eye glow no skull SVG fallback (vKlSkullEye pulsante)
-  //   - Decorative skulls nos cantos do header
+
+  // Ordena por abates decrescente
+  catalog.sort(function(a, b){ return b.kills - a.kills; });
+
+  // Cálculos de Totais e Estatísticas
+  var totalKills = (!_isFileKl && p && typeof p.kills === 'number')
+    ? p.kills
+    : catalog.reduce(function(acc, cur){ return acc + cur.kills; }, 0);
+
+  var catalogedCount = catalog.filter(function(c){ return c.kills > 0; }).length;
+  var topHunted = catalog[0] || { type: '—', kills: 0 };
+
+  // Contrato do Dia (Alvo Prioritário de Caça - Determinístico por Dia)
+  var _today = new Date();
+  var _daySeed = (_today.getFullYear() * 372 + (_today.getMonth() + 1) * 31 + _today.getDate());
+  var dailyBounty = CANONICAL_BESTIARY_CATALOG[_daySeed % CANONICAL_BESTIARY_CATALOG.length];
+  var bountyKillsToday = catalog.find(function(c){ return c.id === dailyBounty.id; });
+  var bountyCurrentKills = bountyKillsToday ? bountyKillsToday.kills : 0;
+
   var html = '<style>'
     + '@keyframes vBladeShimmer{0%,100%{filter:drop-shadow(0 0 6px rgba(255,80,40,0.4));}50%{filter:drop-shadow(0 0 14px rgba(255,140,80,0.7));}}'
     + '@keyframes vKlPedestalGlow{0%,100%{box-shadow:0 0 18px rgba(196,40,30,0.45),inset 0 0 22px rgba(255,80,40,0.18);}50%{box-shadow:0 0 32px rgba(255,80,40,0.78),inset 0 0 34px rgba(255,120,60,0.36);}}'
@@ -18740,22 +19626,17 @@ function _showKillsPopup(p){
     + '@keyframes vKlSkullEye{0%,100%{filter:drop-shadow(0 0 4px rgba(255,40,20,0.4)) drop-shadow(0 0 10px rgba(255,80,40,0.3));}50%{filter:drop-shadow(0 0 10px rgba(255,90,50,0.85)) drop-shadow(0 0 22px rgba(255,40,20,0.6));}}'
     + '@keyframes vKlCounterPulse{0%{transform:scale(1.18);text-shadow:0 0 22px rgba(255,80,40,0.95),0 2px 4px rgba(0,0,0,0.6);}100%{transform:scale(1);text-shadow:0 0 14px rgba(255,80,40,0.55),0 2px 4px rgba(0,0,0,0.6);}}'
     + '@keyframes vKlHeaderInk{0%{opacity:0;transform:translateY(-8px);}100%{opacity:1;transform:translateY(0);}}'
-    + '@keyframes vKlMedalShine{0%,100%{filter:drop-shadow(0 0 4px var(--medalCol,#ffd700));}50%{filter:drop-shadow(0 0 12px var(--medalCol,#ffd700)) drop-shadow(0 0 22px var(--medalCol,#ffd700));}}'
     + '@keyframes vKlChainSway{0%,100%{transform:translateX(-50%) rotate(-1.2deg);}50%{transform:translateX(-50%) rotate(1.2deg);}}'
-    /* Header epico — animation entry */
     + '.vKl-header{animation:vKlHeaderInk 0.55s ease-out;}'
-    /* Pedestal principal hangs from chains; orbiting ring; embers behind */
     + '.vKl-pedestal-wrap{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;margin: var(--v-space-xs, 2px) 0 var(--v-space-sm, 4px);}'
     + '.vKl-chains{position:relative;width:64px;height:14px;display:flex;justify-content:space-between;transform-origin:top center;animation:vKlChainSway 3.4s ease-in-out infinite;}'
     + '.vKl-chain-link{width:2px;height:14px;background:linear-gradient(180deg,rgba(74,56,40,0.4),rgba(196,149,58,0.8));border-radius:1px;box-shadow:0 0 3px rgba(196,149,58,0.4);}'
-    + '.vKl-cenario-pedestal{position:relative;width:clamp(96px,24vw,118px);height:clamp(96px,24vw,118px);margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle at 50% 32%,rgba(255,80,40,0.22) 0%,rgba(80,18,12,0.65) 60%,rgba(20,10,8,0.92) 100%);border:1px solid rgba(196,40,30,0.65);animation:vKlPedestalGlow 3s ease-in-out infinite;display:grid;place-items:center;}'
+    + '.vKl-cenario-pedestal{position:relative;width:clamp(88px,22vw,110px);height:clamp(88px,22vw,110px);margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle at 50% 32%,rgba(255,80,40,0.22) 0%,rgba(80,18,12,0.65) 60%,rgba(20,10,8,0.92) 100%);border:1px solid rgba(196,40,30,0.65);animation:vKlPedestalGlow 3s ease-in-out infinite;display:grid;place-items:center;}'
     + '.vKl-cenario-pedestal::before{content:"";position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(196,40,30,0.22);pointer-events:none;}'
-    /* Orbital ring (rotating runes orbit) */
     + '.vKl-orbit-ring{position:absolute;top:50%;left:50%;width:130%;height:130%;border-radius:50%;border:1px dashed rgba(196,40,30,0.45);transform:translate(-50%,-50%);pointer-events:none;animation:vKlOrbitRing 16s linear infinite;}'
     + '.vKl-orbit-ring::before,.vKl-orbit-ring::after{content:"◆";position:absolute;font-size:calc(9px * var(--v-font-scale, 1));color:#e85040;text-shadow:0 0 6px rgba(255,80,40,0.7);}'
     + '.vKl-orbit-ring::before{top:-7px;left:50%;transform:translateX(-50%);}'
     + '.vKl-orbit-ring::after{bottom:-7px;left:50%;transform:translateX(-50%);}'
-    /* Embers floating around pedestal */
     + '.vKl-ember{position:absolute;bottom:10%;width:4px;height:4px;border-radius:50%;background:radial-gradient(circle,#ffe080,#ff6020 60%,transparent);pointer-events:none;animation:vKlEmberFloat 3.2s ease-out infinite;}'
     + '.vKl-ember.e1{left:18%;--x0:0px;--x1:-16px;animation-delay:0s;}'
     + '.vKl-ember.e2{left:34%;--x0:0px;--x1:8px;animation-delay:0.5s;}'
@@ -18763,177 +19644,191 @@ function _showKillsPopup(p){
     + '.vKl-ember.e4{left:66%;--x0:0px;--x1:14px;animation-delay:1.7s;}'
     + '.vKl-ember.e5{left:82%;--x0:0px;--x1:-12px;animation-delay:2.3s;}'
     + '.vKl-ember.e6{left:42%;--x0:0px;--x1:4px;animation-delay:2.7s;}'
-    /* Blood drips at top of header */
     + '.vKl-blood-drip{position:absolute;top:0;width:2px;height:14px;background:linear-gradient(180deg,#c43020,#7a1810 80%,transparent);border-radius:0 0 2px 2px;pointer-events:none;animation:vKlBloodDrip 3.4s ease-in infinite;box-shadow:0 0 4px rgba(196,40,30,0.6);}'
     + '.vKl-blood-drip.d1{left:18%;animation-delay:0s;}'
     + '.vKl-blood-drip.d2{left:42%;animation-delay:1.0s;height:16px;}'
     + '.vKl-blood-drip.d3{left:68%;animation-delay:1.9s;}'
     + '.vKl-blood-drip.d4{left:84%;animation-delay:2.5s;height:12px;}'
-    /* Decorative skull glyphs in header corners */
     + '.vKl-corner-skull{position:absolute;font-size:calc(18px * var(--v-font-scale, 1));color:rgba(196,40,30,0.32);text-shadow:0 0 6px rgba(196,40,30,0.4);pointer-events:none;font-family:serif;line-height:1;}'
     + '.vKl-corner-skull.tl{top:8px;left:18px;}'
     + '.vKl-corner-skull.tr{top:8px;right:18px;}'
-    /* Counter pulse no remount (chamado quando contador termina) */
     + '.vKl-counter-pulse{animation:vKlCounterPulse 0.45s ease-out;}'
-    /* SVG fallback skull com eye glow */
     + '.vKl-cenario-fallback{width:64%;height:64%;color:#c43020;animation:vKlSkullEye 1.8s ease-in-out infinite;}'
     + '.vKl-cenario-png{position:absolute;inset:0;background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:50%;}'
-    + '.vKl-cenario-png[data-src]{background-image:var(--v-trophy-img,none);}'
-    + '.vKl-cenario-pedestal[data-has-png="1"] .vKl-cenario-fallback{display:none;}'
-    /* Bestiary cards com stagger entry + medal badges */
-    + '.vKl-beast-card{position:relative;animation:vKlCardSlideIn 0.5s ease-out backwards;overflow:hidden;}'
-    + '.vKl-beast-card:hover{transform:translateX(2px);transition:transform 0.15s ease-out;}'
-    /* X-6.5.51BK (2026-05-11): user request — medalhas I/II/III removidas
-       dos cards. Ficavam sobre partes dos monstros tampando texto. Top
-       agora destaca via border-left dourado + "LÍDER" badge inline +
-       glow extra no numero. */
     + '</style>';
-  html += '<div class="kl-hub" style="padding: var(--v-space-md, 8px);">';
-  // === HEADER ÉPICO: ornamentos + correntes + pedestal + brasas + sangue ===
-  html += '<div class="vKl-header" style="position:relative; text-align: center; padding: 18px var(--v-space-lg, 12px) var(--v-space-xl, 16px); '
+
+  html += '<div class="kl-hub" style="padding: var(--v-space-md, 8px); display: flex; flex-direction: column; gap: 8px;">';
+
+  // === HEADER ÉPICO DIABLO IV TROPHY HALL ===
+  html += '<div class="vKl-header" style="position:relative; text-align: center; padding: 14px var(--v-space-lg, 12px) 14px; '
     + 'background: radial-gradient(ellipse at 50% 0%, rgba(196,40,30,0.35) 0%, rgba(100,20,15,0.20) 35%, rgba(30,18,14,0.96) 75%); '
-    + 'border: 1px solid #c43020; '
-    + 'border-radius: var(--v-radius, 10px); margin-bottom: var(--v-space-md, 8px); overflow:hidden;">'
-    /* Decorative corner skulls */
-    + '<span class="vKl-corner-skull tl"></span>'
-    + '<span class="vKl-corner-skull tr"></span>'
-    /* Blood drips from top edge */
-    + '<span class="vKl-blood-drip d1"></span>'
-    + '<span class="vKl-blood-drip d2"></span>'
-    + '<span class="vKl-blood-drip d3"></span>'
-    + '<span class="vKl-blood-drip d4"></span>'
-    /* Banner ◆ HALL DE CAÇADA ◆ centered with ornaments */
-    + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:#e85040;letter-spacing:3px;opacity:0.85;margin-bottom: var(--v-space-sm, 4px);">◆ HALL DE CAÇADA ◆</div>'
-    /* Pedestal wrap: chains + pedestal + orbit ring + embers */
+    + 'border: 1px solid #c43020; border-radius: var(--v-radius, 10px); overflow:hidden;">'
+    + '<span class="vKl-corner-skull tl"></span><span class="vKl-corner-skull tr"></span>'
+    + '<span class="vKl-blood-drip d1"></span><span class="vKl-blood-drip d2"></span><span class="vKl-blood-drip d3"></span><span class="vKl-blood-drip d4"></span>'
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:#e85040;letter-spacing:3px;opacity:0.85;margin-bottom: 2px;">◆ CÓDEX DE CAÇADA DE VALDORIA ◆</div>'
     + '<div class="vKl-pedestal-wrap">'
     +   '<div class="vKl-chains"><span class="vKl-chain-link"></span><span class="vKl-chain-link"></span><span class="vKl-chain-link"></span></div>'
     +   '<div style="position:relative;display:inline-block;">'
     +     '<div class="vKl-orbit-ring"></div>'
     +     '<div class="vKl-cenario-pedestal" id="vKl-cenario-pedestal">'
-    /* 2026-05-27: data-src removido. PNG hall-cacada-trophy.png nunca existiu (slot "for future" commit 1959ac32). SVG fallback ic-ach-algoz cobre. */
     +       '<div class="vKl-cenario-png"></div>'
     +       '<svg class="vKl-cenario-fallback" viewBox="0 0 120 120"><use href="#ic-ach-algoz"/></svg>'
     +     '</div>'
-    /* Embers floating up around the pedestal */
-    +     '<span class="vKl-ember e1"></span>'
-    +     '<span class="vKl-ember e2"></span>'
-    +     '<span class="vKl-ember e3"></span>'
-    +     '<span class="vKl-ember e4"></span>'
-    +     '<span class="vKl-ember e5"></span>'
-    +     '<span class="vKl-ember e6"></span>'
+    +     '<span class="vKl-ember e1"></span><span class="vKl-ember e2"></span><span class="vKl-ember e3"></span><span class="vKl-ember e4"></span><span class="vKl-ember e5"></span><span class="vKl-ember e6"></span>'
     +   '</div>'
     + '</div>'
-    /* Counter (animated 0→total via JS) */
-    + '<div id="vKl-counter" style="font-family: var(--v-font-display, Cinzel, serif); font-size: calc(clamp(38px,9.5vw,52px) * var(--v-font-scale, 1)); '
-    + 'color: #ff6040; font-weight: 700; line-height: 1; text-shadow: 0 0 14px rgba(255,80,40,0.55), 0 2px 4px rgba(0,0,0,0.6); margin-top:6px;">0</div>'
-    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: calc(clamp(11px,2.8vw,13px) * var(--v-font-scale, 1)); color: #f0c8b0; text-transform: uppercase; letter-spacing: 3px; margin-top: var(--v-space-sm, 4px);">'
+    + '<div id="vKl-counter" style="font-family: var(--v-font-display, Cinzel, serif); font-size: calc(clamp(34px,8.5vw,46px) * var(--v-font-scale, 1)); '
+    + 'color: #ff6040; font-weight: 700; line-height: 1; text-shadow: 0 0 14px rgba(255,80,40,0.55), 0 2px 4px rgba(0,0,0,0.6); margin-top:2px;">0</div>'
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: calc(11px * var(--v-font-scale, 1)); color: #f0c8b0; text-transform: uppercase; letter-spacing: 2.5px; margin-top: 2px;">'
     + 'Inimigos Abatidos'
     + '</div>'
-    + (top && top.kills > 0
-      ? '<div style="font-size: calc(clamp(10px,2.6vw,12px) * var(--v-font-scale, 1)); color: var(--v-text-dim,#a09484); font-style: italic; margin-top: var(--v-space-md, 8px); line-height:1.4;">'
-        + '<span style="color:var(--v-gold, #c4953a);"></span> Espécie mais caçada: <b style="color:#e85040">' + top.type + '</b> <span style="color:var(--v-text-dim,#a09484);">·</span> <b style="color:#ffd700">' + top.kills + '</b>'
-      + '</div>'
-      : '')
+    /* Estatísticas do Caçador */
+    + '<div style="display:flex; justify-content:center; gap:10px; margin-top: 10px; flex-wrap:wrap;">'
+    +   '<div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(196,149,58,0.4); border-radius: 6px; padding: 4px 10px; font-size: 10px; color: #e8dcc8;">'
+    +     '<span style="color:var(--v-gold,#c4953a);">Catalogadas:</span> <b>' + catalogedCount + '</b> / ' + catalog.length
+    +   '</div>'
+    +   '<div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,96,64,0.4); border-radius: 6px; padding: 4px 10px; font-size: 10px; color: #e8dcc8;">'
+    +     '<span style="color:#ff8a4a;">Espécie Predileta:</span> <b>' + topHunted.type + '</b> (' + topHunted.kills + ')'
+    +   '</div>'
+    + '</div>'
     + '</div>';
-  /* X-6.5.51BC (2026-05-11): script de PNG + contador EXECUTAM via setTimeout
-     pos-innerHTML. innerHTML NAO executa <script> tags (silently dropped),
-     bug causou contador parado em "0". Agora as funcoes ficam definidas no
-     escopo da funcao _showKillsPopup e rodam apos bodyEl.innerHTML setar. */
-  // === BESTIÁRIO: cards com stagger + medalha rank ===
-  html += '<div style="background:linear-gradient(180deg,rgba(74,30,20,0.30) 0%, rgba(42,18,12,0.18) 100%); border:1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); padding: 14px var(--v-space-md, 8px) var(--v-space-md, 8px); position:relative;">'
-    + '<div style="position:absolute;top:0;left:14px;transform:translateY(-50%);background:#1a1410;padding: 0 var(--v-space-md, 8px);font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a); letter-spacing:2px;">◈ Bestiário de Caça ◈</div>';
-  /* X-6.5.51BK (2026-05-11): user request - REMOVER medalhas I/II/III dos
-     cards. Numeros romanos sobre partes dos monstros + tampando textos.
-     Solucao: highlight no rank #1 via border-left dourado mais grosso +
-     glow extra no numero de abates. Sem badge sobreposta. */
-  // CR descriptor PT-BR (sessão #23 — clareza pro player sobre "Perigo X/Y")
-  function _crLabel(cr){
-    var c = parseFloat((cr || '0').toString().replace(/[^\d/.]/g,'')) || 0;
-    if (cr && cr.indexOf('/') > -1) c = 1 / (parseFloat(cr.split('/')[1]) || 1);
-    if (c >= 16) return 'Épico';
-    if (c >= 8)  return 'Lendário';
-    if (c >= 4)  return 'Elite';
-    if (c >= 2)  return 'Veterano';
-    if (c >= 1)  return 'Novato';
-    return 'Iniciante';
-  }
-  KBT.forEach(function(k, idx){
-    var pct = total ? Math.round(k.kills / total * 100) : 0;
-    var crCol = _crColor(k.cr);
-    var crLbl = _crLabel(k.cr);
-    var iconCol = HERALDIC_COLORS[k.icon] || '#8a7a6a';
-    var rank = rankMap[k.type] || 99;
-    var isTop = rank === 1;
-    var borderLeftCol = isTop ? '#ffd700' : crCol;
-    var borderLeftW = isTop ? '4px' : '3px';
-    var killNumCol = isTop ? '#ffd700' : 'var(--v-gold, #c4953a)';
-    var killNumGlow = isTop ? '0 0 12px rgba(255,215,0,0.55)' : '0 0 8px rgba(255,215,0,0.3)';
-    // Sessão #23: prefere PNG canonical do combat (k.png), SVG fallback
-    var enemyArt = k.png
-      ? '<img src="' + k.png + '" alt="" loading="lazy" style="width: 32px; height: 32px; flex-shrink: 0; object-fit: cover; border-radius: 50%; border: 1px solid ' + iconCol + '55; filter: drop-shadow(0 0 4px ' + iconCol + '55);" onerror="this.style.display=\'none\';this.nextElementSibling&&(this.nextElementSibling.style.display=\'\');">'
-        + '<svg viewBox="0 0 120 120" style="display:none;width: 28px; height: 28px; flex-shrink: 0; color: ' + iconCol + '; filter: drop-shadow(0 0 4px ' + iconCol + '55);"><use href="#' + k.icon + '"/></svg>'
-      : '<svg viewBox="0 0 120 120" style="width: 28px; height: 28px; flex-shrink: 0; color: ' + iconCol + '; filter: drop-shadow(0 0 4px ' + iconCol + '55);"><use href="#' + k.icon + '"/></svg>';
-    html += '<div class="vKl-beast-card" style="padding: 9px var(--v-space-md-lg, 10px) var(--v-space-md, 8px); '
-      + 'background: linear-gradient(90deg, rgba(196,40,30,0.08) 0%, rgba(196,149,58,0.05) 100%); '
-      + 'border: 1px solid ' + (isTop ? 'rgba(255,215,0,0.45)' : 'rgba(74,56,40,0.7)') + '; '
-      + 'border-left: ' + borderLeftW + ' solid ' + borderLeftCol + '; '
-      + 'border-radius: var(--v-radius-sm, 6px); margin-bottom: var(--v-space-sm, 4px); '
-      + 'animation-delay:' + (0.08 * idx + 0.15) + 's;">'
-      + '<div style="display:flex; align-items: center; gap: var(--v-space-md-lg, 10px); margin-bottom: 6px;">'
-      +   enemyArt
-      +   '<div style="flex:1; min-width:0;">'
-      +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-text-bright, #e8dcc8); font-weight:600;">' + k.type + (isTop ? ' <span style="color:#ffd700;font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:1px;">· LÍDER</span>' : '') + '</div>'
-      +     '<div style="font-size: calc(9px * var(--v-font-scale, 1)); color: ' + crCol + '; letter-spacing:1px; margin-top:1px;" title="Classificação de Desafio (D&D 5e) — quanto maior o CR, mais perigoso é o inimigo">◆ Perigo <b style="font-weight:600;">' + crLbl + '</b> · CR ' + k.cr + '</div>'
-      +   '</div>'
-      +   '<div style="text-align:right;">'
-      +     '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size: calc(22px * var(--v-font-scale, 1)); font-weight: 700; color: ' + killNumCol + '; text-shadow:' + killNumGlow + ';">' + k.kills + '</span>'
-      +     '<div style="font-size: calc(8px * var(--v-font-scale, 1)); color: var(--v-text-dim,#a09484); letter-spacing:1px; margin-top:-2px;">abates</div>'
-      +   '</div>'
-      + '</div>'
-      + '<div style="height: 6px; background: rgba(0,0,0,0.55); border-radius: 3px; overflow: hidden; border: 1px solid rgba(0,0,0,0.3); position:relative;">'
-      +   '<div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, ' + crCol + ', ' + crCol + 'cc); box-shadow: 0 0 8px ' + crCol + '99, inset 0 1px 1px rgba(255,255,255,0.3);"></div>'
-      + '</div>'
-      + '</div>';
-  });
-  html += '</div>';
+
+  // === CARD DE ALVO DIÁRIO / CONTRATO DE CAÇADA (MONSTER HUNTER STYLE) ===
+  html += '<div style="background: linear-gradient(90deg, rgba(80,24,16,0.85) 0%, rgba(42,16,12,0.85) 100%); border: 1.5px solid #ff6040; border-radius: 8px; padding: 10px 14px; display:flex; align-items:center; gap:12px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">'
+    + '<div style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid #ffd700; overflow:hidden; flex-shrink:0; background:#180c08; box-shadow: 0 0 10px rgba(255,215,0,0.4);">'
+    +   '<img src="' + dailyBounty.png + '" alt="" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display=\'none\';" />'
+    + '</div>'
+    + '<div style="flex:1; min-width:0;">'
+    +   '<div style="font-family:Cinzel,serif; font-size:10px; color:#ffd700; text-transform:uppercase; letter-spacing:1px; font-weight:700;">🎯 Contrato de Caça do Dia</div>'
+    +   '<div style="font-family:Cinzel,serif; font-size:13.5px; color:#fff; font-weight:700;">' + dailyBounty.type + '</div>'
+    +   '<div style="font-size:10px; color:#ffb090; margin-top:1px;">Recompensa: <b style="color:#ffd700;">+75 XP da Liga</b> e <b style="color:#ffd700;">+20 Valdoritas</b></div>'
+    + '</div>'
+    + '<button id="vBst-bounty-btn" type="button" style="padding: 6px 12px; background: linear-gradient(180deg, #ff8a4a, #c43020); border: 1px solid #ffd700; border-radius: 6px; color:#fff; font-family:Cinzel,serif; font-size:10px; font-weight:700; cursor:pointer; white-space:nowrap; box-shadow:0 0 8px rgba(255,138,74,0.5);">'
+    +   'Inspecionar 🔎'
+    + '</button>'
+    + '</div>';
+
+  // === ABAS DE CATEGORIA DE MONSTROS ===
+  html += '<div class="vBst-nav-tabs">'
+    + '<button class="vBst-tab-btn active" data-vbst-cat="all">⚔️ Todos (' + catalog.length + ')</button>'
+    + '<button class="vBst-tab-btn" data-vbst-cat="beast">🐺 Feras</button>'
+    + '<button class="vBst-tab-btn" data-vbst-cat="humanoid">🧌 Humanoides</button>'
+    + '<button class="vBst-tab-btn" data-vbst-cat="undead">💀 Mortos-Vivos</button>'
+    + '<button class="vBst-tab-btn" data-vbst-cat="monstrosity">🐉 Monstrosidades</button>'
+    + '<button class="vBst-tab-btn" data-vbst-cat="top">🏆 Mais Caçados</button>'
+    + '</div>';
+
+  // === CONTAINER DOS CARDS DE BESTIÁRIO ===
+  html += '<div id="vBst-cards-list" style="display:flex; flex-direction:column; gap:6px;"></div>';
+
   html += '</div>';
   bodyEl.innerHTML = html;
   ov.classList.add('active');
   if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'kills') _popupStack.push('kills');
-  // X-6.5.51BC (2026-05-11): scripts post-innerHTML — innerHTML <script>
-  // sao stripped silenciosamente pelo navegador, entao rodamos aqui APOS
-  // o DOM ser populado. Captura `total` no closure.
+
+  // Função interna para renderizar os cards com base na categoria
+  function _renderBestiaryCards(categoryFilter){
+    var listEl = document.getElementById('vBst-cards-list');
+    if (!listEl) return;
+
+    var filtered = catalog.slice();
+    if (categoryFilter === 'beast') {
+      filtered = filtered.filter(function(c){ return c.category === 'beast'; });
+    } else if (categoryFilter === 'humanoid') {
+      filtered = filtered.filter(function(c){ return c.category === 'humanoid'; });
+    } else if (categoryFilter === 'undead') {
+      filtered = filtered.filter(function(c){ return c.category === 'undead'; });
+    } else if (categoryFilter === 'monstrosity') {
+      filtered = filtered.filter(function(c){ return c.category === 'monstrosity' || c.category === 'giant' || c.category === 'dragon' || c.category === 'elemental' || c.category === 'ooze'; });
+    } else if (categoryFilter === 'top') {
+      filtered = filtered.filter(function(c){ return c.kills > 0; }).sort(function(a, b){ return b.kills - a.kills; });
+    }
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center; padding:24px 10px; color:var(--v-text-dim,#a09484); font-size:12px; font-style:italic;">Nenhum espécime encontrado nesta categoria de caçada.</div>';
+      return;
+    }
+
+    var cardsHtml = '';
+    filtered.forEach(function(k, idx){
+      var kills = k.kills || 0;
+      var mastery = _getHunterMastery(kills);
+      var crCol = _crColor(k.cr);
+      var crLbl = _crLabel(k.cr);
+      var isTop = (idx === 0 && kills > 0);
+      var borderLeftCol = isTop ? '#ffd700' : crCol;
+      var pct = totalKills ? Math.round(kills / totalKills * 100) : 0;
+
+      cardsHtml += '<div class="vBst-card" data-vbst-id="' + k.id + '" style="border-left: 3.5px solid ' + borderLeftCol + '; ' + (kills === 0 ? 'opacity: 0.65; filter: grayscale(0.35);' : '') + '">'
+        + '<div class="vBst-portrait-wrap" style="border-color: ' + crCol + ';">'
+        +   '<img class="vBst-portrait-img" src="' + k.png + '" alt="' + k.type + '" loading="lazy" onerror="this.style.display=\'none\';" />'
+        + '</div>'
+        + '<div style="flex:1; min-width:0;">'
+        +   '<div style="display:flex; justify-content:space-between; align-items:center;">'
+        +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(12.5px * var(--v-font-scale, 1)); color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'
+        +       k.type + (isTop ? ' <span style="color:#ffd700; font-size:10px; font-weight:800;">· LÍDER</span>' : '')
+        +     '</div>'
+        +     (mastery.level > 0 ? ('<span class="vBst-mastery-tag ' + mastery.cls + '">' + mastery.label + ' ' + mastery.roman + '</span>') : '<span style="font-size:8.5px; color:#7a6850;">Não Visto</span>')
+        +   '</div>'
+        +   '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">'
+        +     '<span style="font-size:9.5px; color:' + crCol + '; font-weight:600;">◆ CR ' + k.cr + ' · ' + crLbl + ' <span style="color:var(--v-text-dim,#a09484);">(' + k.categoryLabel + ')</span></span>'
+        +     '<span style="font-size:10px; color:#ffd700; font-weight:700;">' + kills + ' <span style="font-size:8.5px; color:var(--v-text-dim,#a09484); font-weight:400;">abates</span></span>'
+        +   '</div>'
+        +   '<div style="height:4px; background:rgba(0,0,0,0.6); border-radius:2px; overflow:hidden; margin-top:4px;">'
+        +     '<div style="height:100%; width:' + (kills === 0 ? 0 : Math.max(5, pct)) + '%; background:linear-gradient(90deg, ' + crCol + ', ' + crCol + 'cc);"></div>'
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+    });
+
+    listEl.innerHTML = cardsHtml;
+
+    // Registra clique nos cards para abrir o Dossiê
+    var cardNodes = listEl.querySelectorAll('.vBst-card');
+    cardNodes.forEach(function(card){
+      card.onclick = function(){
+        var sId = card.getAttribute('data-vbst-id');
+        var found = catalog.find(function(c){ return c.id === sId; });
+        if (found) _showCreatureDossier(found, p);
+      };
+    });
+  }
+
+  // Render inicial
+  _renderBestiaryCards('all');
+
+  // Registra eventos das abas
+  var tabButtons = bodyEl.querySelectorAll('.vBst-tab-btn');
+  tabButtons.forEach(function(btn){
+    btn.onclick = function(){
+      tabButtons.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var cat = btn.getAttribute('data-vbst-cat');
+      _renderBestiaryCards(cat);
+    };
+  });
+
+  // Botão Inspecionar Alvo Diário
+  var bountyBtn = document.getElementById('vBst-bounty-btn');
+  if (bountyBtn) {
+    bountyBtn.onclick = function(){
+      _showCreatureDossier(dailyBounty, p);
+    };
+  }
+
+  // Animação do Contador de Abates 0 -> total
   setTimeout(function(){
-    // 1) Heuristica de PNG: tenta carregar trophy.png, fallback SVG fica
-    try {
-      var ped = document.getElementById('vKl-cenario-pedestal');
-      if (ped) {
-        var slot = ped.querySelector('.vKl-cenario-png');
-        if (slot) {
-          var src = slot.getAttribute('data-src');
-          if (src) {
-            var img = new Image();
-            img.onload = function(){
-              slot.style.backgroundImage = 'url("' + src + '")';
-              ped.setAttribute('data-has-png', '1');
-            };
-            img.src = src;
-          }
-        }
-      }
-    } catch(_e1){}
-    // 2) Contador animado 0 -> total com easeOutCubic + pulse final
     try {
       var el = document.getElementById('vKl-counter');
       if (el) {
-        var target = total;
-        var dur = 1600;
+        var target = totalKills;
+        var dur = 1400;
         var start = performance.now();
         function _vKlTick(t){
-          var p = Math.min(1, (t - start) / dur);
-          var eased = 1 - Math.pow(1 - p, 3);
+          var pr = Math.min(1, (t - start) / dur);
+          var eased = 1 - Math.pow(1 - pr, 3);
           el.textContent = Math.round(eased * target);
-          if (p < 1) {
+          if (pr < 1) {
             requestAnimationFrame(_vKlTick);
           } else {
             el.classList.add('vKl-counter-pulse');
@@ -18943,7 +19838,7 @@ function _showKillsPopup(p){
         requestAnimationFrame(_vKlTick);
       }
     } catch(_e3){}
-  }, 30);  // pequeno delay pra garantir layout settled
+  }, 40);
 }
 
 // canonical: streak history
