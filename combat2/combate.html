@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T23:29:39Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T23:53:14Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10494,151 +10494,178 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   font-weight: 700;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
+.lp-hotbar-preview {
+  width: 100%;
+  padding: 5px 8px;
+  margin-bottom: 6px;
+  background: rgba(18, 14, 10, 0.9);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  border-radius: 6px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ebd6a7;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.5px;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+  min-height: 28px;
+  line-height: 16px;
+}
+.list-panel-card--skills {
+  width: calc(100% - 16px);
+  max-width: 450px;
+  height: calc(100% - 24px);
+  max-height: calc(100% - 24px);
+  padding: 14px 10px 12px 10px;
+  gap: 6px;
+}
 .lp-buttons-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-  padding: 4px 2px;
-  overflow-y: auto;
-  max-height: calc(100vh - 270px);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 4px 2px 10px 2px;
   width: 100%;
   box-sizing: border-box;
+  justify-items: center;
 }
-@media (max-width: 360px) {
+@media (min-width: 400px) {
   .lp-buttons-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
   }
 }
 .lp-quick-item {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 4px;
   width: 100%;
-  box-sizing: border-box;
-}
-.lp-quick-btn {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  background: linear-gradient(180deg, rgba(38, 30, 22, 0.95), rgba(22, 17, 12, 0.98));
-  border: 1px solid rgba(196, 149, 58, 0.5);
-  border-radius: 6px;
-  color: #f7e7be;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  height: 38px;
-  min-height: 38px;
-  max-height: 38px;
-  flex: 1 1 auto;
-  min-width: 0;
-  box-sizing: border-box;
-  text-align: left;
-}
-.lp-quick-btn:hover:not(.disabled) {
-  border-color: #ffd700;
-  background: linear-gradient(180deg, rgba(58, 44, 28, 0.98), rgba(32, 24, 16, 0.98));
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
-  transform: translateY(-1px);
-}
-.lp-quick-btn.disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  filter: grayscale(0.65);
-  border-color: rgba(120, 100, 80, 0.3);
-}
-.lp-qb-ico {
-  width: 22px;
-  height: 22px;
-  min-width: 22px;
-  max-width: 22px;
-  max-height: 22px;
-  flex-shrink: 0;
+  max-width: 68px;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  box-sizing: border-box;
+}
+.lp-quick-btn {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: radial-gradient(circle at 50% 30%, rgba(42, 34, 24, 0.98), rgba(15, 11, 8, 0.98));
+  border: 1.5px solid rgba(196, 149, 58, 0.6);
+  border-radius: 8px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8), 0 2px 5px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.lp-quick-btn:hover:not(.disabled) {
+  border-color: #ffd700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.55), inset 0 0 6px rgba(255, 215, 0, 0.2);
+  transform: translateY(-2px) scale(1.04);
+}
+.lp-quick-btn:active:not(.disabled) {
+  transform: translateY(0) scale(0.97);
+}
+.lp-quick-btn.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(0.85);
+  border-color: rgba(90, 75, 60, 0.35);
+}
+.lp-qb-ico {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
   line-height: 1;
 }
 .lp-qb-ico img.skill-ico-img,
 .lp-quick-btn img.skill-ico-img {
-  width: 22px !important;
-  height: 22px !important;
-  max-width: 22px !important;
-  max-height: 22px !important;
+  width: 78% !important;
+  height: 78% !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
   object-fit: contain !important;
   display: block;
-  border-radius: 3px;
-  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.6));
+  border-radius: 4px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.85));
 }
-.lp-qb-center {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-}
-.lp-qb-name {
-  font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10px;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.lp-qb-badge {
+.lp-qb-action-badge {
+  position: absolute;
+  top: 2px;
+  left: 2px;
   font-size: 8px;
-  padding: 1px 3px;
-  border-radius: 3px;
-  font-weight: 700;
-  flex-shrink: 0;
   line-height: 1;
+  padding: 2px 3px;
+  border-radius: 3px;
+  font-weight: 800;
+  z-index: 2;
+  background: rgba(8, 6, 4, 0.85);
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none;
 }
-.lp-qb-cost {
+.lp-qb-action-badge.res-action { color: #e8c45a; }
+.lp-qb-action-badge.res-bonus  { color: #f97316; }
+.lp-qb-action-badge.res-reaction { color: #38bdf8; }
+.lp-qb-cost-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 9.5px;
+  font-size: 9px;
+  font-weight: 800;
   color: #f59e0b;
-  font-weight: 700;
-  flex-shrink: 0;
-  white-space: nowrap;
-  margin-left: auto;
-  padding-left: 2px;
+  background: rgba(8, 6, 4, 0.85);
+  border: 0.5px solid rgba(196, 149, 58, 0.4);
+  border-radius: 3px;
+  padding: 1px 3px;
+  line-height: 1;
+  z-index: 2;
+  pointer-events: none;
 }
-.lp-qb-cost.cant {
+.lp-qb-cost-badge.cant {
   color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.5);
 }
 .lp-quick-help-btn {
-  width: 22px;
-  height: 38px;
-  min-width: 22px;
-  max-width: 22px;
-  flex-shrink: 0;
-  border-radius: 4px;
-  background: rgba(26, 20, 15, 0.85);
-  border: 1px solid rgba(196, 149, 58, 0.4);
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  max-width: 15px;
+  border-radius: 50%;
+  background: rgba(15, 12, 8, 0.85);
+  border: 0.5px solid rgba(196, 149, 58, 0.5);
   color: #c4953a;
-  font-size: 10px;
+  font-size: 8.5px;
   font-weight: 700;
-  line-height: 36px;
+  line-height: 14px;
   padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 3;
+  opacity: 0.65;
   transition: all 0.15s ease;
   box-sizing: border-box;
 }
 .lp-quick-help-btn:hover {
-  background: rgba(45, 35, 25, 0.95);
+  opacity: 1;
   border-color: #ffd700;
   color: #ffd700;
+  transform: scale(1.15);
 }
 
 .battlefield-hex-arena .hex-coord {
@@ -28063,7 +28090,7 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
     return { html: html, totalPages: totalPages, page: page, filteredCount: filteredCount };
 }
 
-/* Constrói grade de botões rápidos para habilidades (layout tátil/compacto). */
+/* Constrói grade de atalhos de habilidades (hotbar estilo Baldur's Gate 3 / RPG). */
 function _buildSkillButtonsGridHtml(skills, filter, resIco, resValue) {
     var sCur = (typeof currentState !== 'undefined') ? currentState : null;
     var pCur = (sCur && sCur.order && sCur.p_idx != null) ? sCur.order[sCur.p_idx] : null;
@@ -28080,7 +28107,8 @@ function _buildSkillButtonsGridHtml(skills, filter, resIco, resValue) {
         return a.origIdx - b.origIdx;
     });
     var filteredCount = filtered.length;
-    var html = '<div class="lp-buttons-grid">';
+    var html = '<div class="lp-hotbar-preview" id="lp-hotbar-preview">✦ Selecione um atalho para lançar</div>';
+    html += '<div class="lp-buttons-grid">';
     for (var j = 0; j < filtered.length; j++) {
         var entry = filtered[j];
         var sk = entry.sk;
@@ -28091,21 +28119,20 @@ function _buildSkillButtonsGridHtml(skills, filter, resIco, resValue) {
         var theme = _skillThemeOf(sk);
         var resKind = _skillResourceKind(sk);
         var resGlyph = _resourceGlyphFor(resKind);
-        var resBadgeHtml = '<span class="lp-qb-badge res-' + resKind + '" title="' +
-            (resKind === 'bonus' ? 'Ação Bônus (▲)' : resKind === 'reaction' ? 'Reação ()' : 'Ação (◆)') +
-            '">' + resGlyph + '</span>';
-        var costTxt = (sk.cost | 0) > 0 ? (resIco + ' ' + sk.cost) : '0';
+        var actLabel = (resKind === 'bonus' ? 'Ação Bônus' : resKind === 'reaction' ? 'Reação' : 'Ação');
+        var resBadgeHtml = '<span class="lp-qb-action-badge res-' + resKind + '" title="' + actLabel + '">' + resGlyph + '</span>';
+        var costTxt = (sk.cost | 0) > 0 ? (sk.cost + ' ' + resIco) : '0';
+        var costBadgeHtml = '<span class="lp-qb-cost-badge' + (canUse ? '' : ' cant') + '">' + costTxt + '</span>';
+        var fullTitle = (sk.n || 'Habilidade') + ' (' + costTxt + ' · ' + actLabel + ')' + (blockReason ? ' — ' + blockReason : '');
+        var previewText = (sk.n || '') + '  ·  ' + costTxt + '  ·  ' + actLabel + (blockReason ? ' (' + blockReason + ')' : '');
 
-        html += '<div class="lp-quick-item" data-cat="' + cat + '">';
-        html += '<button type="button" class="lp-quick-btn lp-item--' + theme + (canUse ? '' : ' disabled') + '" data-skill="' + i + '"' + (canUse ? '' : ' disabled') + (blockReason ? ' title="' + escHtml(blockReason) + '"' : '') + '>';
-        html += '<div class="lp-qb-ico">' + _skillIconHTML(sk) + '</div>';
-        html += '<div class="lp-qb-center">';
-        html += '<span class="lp-qb-name" title="' + escHtml(sk.n) + '">' + escHtml(sk.n) + '</span>';
+        html += '<div class="lp-quick-item" data-cat="' + cat + '" data-skill-preview="' + escHtml(previewText) + '">';
+        html += '<button type="button" class="lp-quick-btn lp-item--' + theme + (canUse ? '' : ' disabled') + '" data-skill="' + i + '"' + (canUse ? '' : ' disabled') + ' title="' + escHtml(fullTitle) + '">';
         html += resBadgeHtml;
-        html += '</div>';
-        html += '<div class="lp-qb-cost' + (canUse ? '' : ' cant') + '">' + costTxt + '</div>';
+        html += '<div class="lp-qb-ico">' + _skillIconHTML(sk) + '</div>';
+        html += costBadgeHtml;
         html += '</button>';
-        html += '<button type="button" class="lp-quick-help-btn" data-skill-help="' + i + '" title="Detalhes D&D 5e" aria-label="Detalhes técnicos">?</button>';
+        html += '<button type="button" class="lp-quick-help-btn" data-skill-help="' + i + '" title="Detalhes: ' + escHtml(sk.n) + '" aria-label="Detalhes técnicos">?</button>';
         html += '</div>';
     }
     html += '</div>';
@@ -28113,7 +28140,7 @@ function _buildSkillButtonsGridHtml(skills, filter, resIco, resValue) {
     return { html: html, filteredCount: filteredCount };
 }
 
-/* Helper: wire clicks da lista (help button + skill button). */
+/* Helper: wire clicks da lista (help button + skill button + hover preview de atalhos). */
 function _bindSkillListListeners(listEl, skills, ov, reopenFn) {
     listEl.querySelectorAll('[data-skill-help]').forEach(function (hb) {
         hb.addEventListener('click', function (e) {
@@ -28131,6 +28158,24 @@ function _bindSkillListListeners(listEl, skills, ov, reopenFn) {
             useSkill(skills[i], { onCancel: reopenFn });
         });
     });
+    // Hotbar preview listener no modo atalhos (BG3)
+    var previewEl = listEl.querySelector('#lp-hotbar-preview') || (listEl.parentElement && listEl.parentElement.querySelector('#lp-hotbar-preview'));
+    if (previewEl) {
+        var defaultPreview = '✦ Selecione uma habilidade para lançar';
+        listEl.querySelectorAll('.lp-quick-item[data-skill-preview]').forEach(function (item) {
+            var txt = item.getAttribute('data-skill-preview');
+            var updatePreview = function () {
+                if (txt) previewEl.textContent = txt;
+            };
+            var resetPreview = function () {
+                previewEl.textContent = defaultPreview;
+            };
+            item.addEventListener('mouseenter', updatePreview);
+            item.addEventListener('pointerenter', updatePreview);
+            item.addEventListener('pointerdown', updatePreview);
+            item.addEventListener('mouseleave', resetPreview);
+        });
+    }
 }
 
 function openSkillsPanel() {
@@ -28139,7 +28184,7 @@ function openSkillsPanel() {
     var ov = document.createElement('div');
     ov.className = 'list-panel-overlay';
     var card = document.createElement('div');
-    card.className = 'list-panel-card';
+    card.className = 'list-panel-card list-panel-card--skills';
 
     // Conta por categoria + monta lista disponível (só com count > 0, +Todas)
     var counts = {};
@@ -28183,11 +28228,14 @@ function openSkillsPanel() {
         return Math.max(3, Math.min(9, Math.floor(listH / rowH)));
     })();
 
-    var layoutMode = 'detailed';
+    var layoutMode = 'buttons'; // Padrão: hotbar de atalhos RPG estilo Baldur's Gate 3
     try {
         var _savedMode = localStorage.getItem('c2_skill_layout_mode');
         if (_savedMode === 'buttons' || _savedMode === 'detailed') layoutMode = _savedMode;
-    } catch (_eMode) {}
+        else layoutMode = 'buttons';
+    } catch (_eMode) {
+        layoutMode = 'buttons';
+    }
 
     function renderListBody() {
         var listEl = card.querySelector('.lp-list');
@@ -28273,9 +28321,9 @@ function openSkillsPanel() {
 
     var html = '<div class="lp-title">Habilidades</div>';
     html += '<div class="lp-sub">' + p.res.ico + ' ' + p.res.value + '/' + p.res.max + ' ' + p.res.name + '</div>';
-    html += '<div class="lp-layout-toggle" role="radiogroup" aria-label="Modo de visualização" style="align-self:center; margin: 4px auto 6px auto;">';
+    html += '<div class="lp-layout-toggle" role="radiogroup" aria-label="Modo de visualização" style="align-self:center; margin: 2px auto 6px auto;">';
+    html += '<button type="button" class="lp-layout-btn' + (layoutMode === 'buttons' ? ' active' : '') + '" data-layout="buttons" title="Atalhos estilo Baldur\'s Gate 3">☷ Atalhos</button>';
     html += '<button type="button" class="lp-layout-btn' + (layoutMode === 'detailed' ? ' active' : '') + '" data-layout="detailed" title="Lista detalhada">☰ Lista</button>';
-    html += '<button type="button" class="lp-layout-btn' + (layoutMode === 'buttons' ? ' active' : '') + '" data-layout="buttons" title="Grade de botões rápidos">☷ Botões</button>';
     html += '</div>';
     html += '<div class="lp-filter-dd" role="group" aria-label="Filtro de habilidades">';
     html += '<button type="button" class="lp-filter-dd-trigger" aria-haspopup="listbox" aria-expanded="false">';
