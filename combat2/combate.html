@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T14:58:14Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T15:16:46Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6115,7 +6115,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
        Fix: card SEM overflow (frame fica fixo); .lp-help-body recebe
        overflow agora, scroll APENAS no conteúdo. */
     overflow: hidden;
-    padding: 22px 22px 18px;
+    padding: 16px 18px 14px;
     box-sizing: border-box;
     min-height: 0;
     display: flex;
@@ -6134,12 +6134,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
         inset 0 -8px 14px rgba(0,0,0,0.4);
     display: flex;
     flex-direction: column;
-    gap: var(--v-space-md-lg, 10px);
-    /* 2026-06-14 PERF (Referência Tática travava ao abrir, até no S20 FE):
-       promove o card a uma layer de GPU própria — a stack de 6 box-shadows é
-       rasterizada UMA vez e a animação de scale vira um transform composto na
-       GPU (sem repaint da sombra por frame). O card sai do DOM ao fechar, então
-       o will-change não vaza memória. */
+    gap: 8px;
     will-change: transform, opacity;
     animation: lpHelpEntry .5s cubic-bezier(.34,1.56,.64,1) both;
 }
@@ -6159,9 +6154,6 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     z-index: 1;
 }
 @keyframes lpHelpEntry {
-    /* 2026-06-14 PERF: removido filter:blur (era o pior custo de GPU em WebView
-       Android — re-borrava a textura inteira do card a cada frame). scale+rotate+
-       opacity são compostos na GPU; a sensação de profundidade continua pelo scale. */
     0%   { transform: scale(0.72) rotate(-3deg); opacity: 0; }
     100% { transform: scale(1) rotate(0); opacity: 1; }
 }
@@ -6173,13 +6165,13 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     align-items: center;
     justify-content: center;
     gap: var(--v-space-md-lg, 10px);
-    font-size: calc(12px * var(--v-font-scale, 1));
-    letter-spacing: 0.22em;
+    font-size: calc(10.5px * var(--v-font-scale, 1));
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--v-gold, #c4953a);
     font-family: var(--v-font-display, 'Cinzel'), serif;
     font-weight: 700;
-    margin: 0 0 var(--v-space-xs, 2px);
+    margin: 0 0 2px;
 }
 .lp-help-tag::before,
 .lp-help-tag::after {
@@ -6188,16 +6180,16 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(196,149,58,0.75), transparent);
 }
-/* TÍTULO: Cinzel maior, embossed, pulse sutil + gem divider ✧ ◆ ✧ */
+/* TÍTULO: Cinzel refinado com proporções harmônicas */
 .lp-help-title {
     position: relative;
     z-index: 3;
     font-family: var(--v-font-display, 'Cinzel'), serif;
     font-weight: 700;
-    font-size: calc(22px * var(--v-font-scale, 1));
+    font-size: calc(18px * var(--v-font-scale, 1));
     color: #ffd680;
     text-align: center;
-    letter-spacing: 2.5px;
+    letter-spacing: 2px;
     line-height: 1.2;
     text-transform: uppercase;
     text-shadow:
@@ -6214,11 +6206,11 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     content: '✧  ◆  ✧';
     display: block;
     font-family: serif;
-    font-size: calc(11px * var(--v-font-scale, 1));
+    font-size: calc(10px * var(--v-font-scale, 1));
     font-weight: 400;
     color: rgba(196,149,58,0.85);
-    letter-spacing: 6px;
-    margin-top: var(--v-space-md, 8px);
+    letter-spacing: 4px;
+    margin-top: 4px;
     text-shadow: 0 0 8px rgba(196,149,58,0.6);
     animation: lpHelpGemPulse 2.4s ease-in-out infinite alternate;
 }
@@ -6226,13 +6218,6 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     0%   { opacity: 0.65; text-shadow: 0 0 4px rgba(196,149,58,0.4); }
     100% { opacity: 1;    text-shadow: 0 0 10px rgba(255,220,140,0.75); }
 }
-/* 2026-06-14 PERF tiers — cumpre a promessa de tiering (comentário ~3150) no
-   popup de leitura "Referência Tática". Em perf-lite/medium: entrada instantânea
-   (sem scale/sombra animada) + pulses infinitos de filter/text-shadow DESLIGADOS
-   (repaint contínuo, sem ganho funcional numa tela de leitura). Escopo só
-   .lp-help-* — NÃO toca outros consumidores de lpHelpGemPulse (6583/9299).
-   Em flagship (full) o visual completo é mantido; o lag de ABERTURA já foi
-   resolvido pra TODOS os tiers removendo o filter:blur + will-change no card. */
 body.perf-lite .lp-help-card, body.perf-medium .lp-help-card,
 body.perf-lite .lp-help-lim-card, body.perf-medium .lp-help-lim-card {
     animation: none;
@@ -6245,63 +6230,66 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
 @media (prefers-reduced-motion: reduce) {
     .lp-help-title, .lp-help-title::after { animation: none; }
 }
-/* RESUMO: descrição curta da skill (movida da skill row pro help card em
-   X-6.5.51AT, 2026-05-08). Estilo: itálico centralizado, sutilmente
-   destacado por borda dourada e fundo translúcido — ledes a leitura
-   antes do texto técnico D&D 5e detalhado abaixo. */
+/* RESUMO: descrição curta da skill em tamanho calibrado */
 .lp-help-desc {
     position: relative;
     z-index: 3;
-    font-family: var(--v-font, 'Marcellus'), serif;
-    font-size: calc(14px * var(--v-font-scale, 1));
-    line-height: 1.5;
-    color: var(--v-text, #d4c8b0);
+    font-family: var(--v-font, 'Marcellus', 'Cinzel'), serif;
+    font-size: calc(12px * var(--v-font-scale, 1));
+    line-height: 1.45;
+    color: #e6dac3;
     text-align: center;
-    font-style: italic;
-    padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+    padding: 6px 10px;
     margin: 0;
-    background: rgba(196,149,58,0.06);
+    background: rgba(196,149,58,0.08);
     border-radius: var(--v-radius-sm, 6px);
-    border: 1px solid rgba(196,149,58,0.18);
+    border: 1px solid rgba(196,149,58,0.22);
     flex-shrink: 0;
 }
-/* CORPO: tipografia de manuscrito, drop cap na primeira letra */
+/* CORPO: tipografia legível, letras menores e acolhedoras para leitura de regras D&D 5e */
 .lp-help-body {
     position: relative;
     z-index: 3;
-    font-family: var(--v-font, 'MedievalSharp'), serif;
-    font-size: calc(16px * var(--v-font-scale, 1));
-    line-height: 1.7;
-    color: #d4c8b0;
+    font-family: var(--v-font, 'Marcellus', 'Crimson Pro', serif);
+    font-size: calc(12.5px * var(--v-font-scale, 1));
+    line-height: 1.55;
+    color: #ded3be;
     text-align: left;
-    padding-top: var(--v-space-xs, 2px);
-    /* 2026-04-27: scroll movido do card pro body — frame com gleam fica fixo */
+    padding-top: 4px;
+    padding-bottom: 24px;
     overflow-y: auto;
     overflow-x: hidden;
     flex: 1 1 auto;
     min-height: 0;
-    /* Padding extra nos lados pra scroll bar não cobrir conteúdo */
     padding-right: var(--v-space-md, 8px);
-    margin-right: -6px;
+    margin-right: -4px;
 }
 .lp-help-body .lp-help-p:first-child::first-letter {
     font-family: var(--v-font-display, 'Cinzel'), serif;
     font-weight: 700;
-    font-size: calc(40px * var(--v-font-scale, 1));
-    line-height: 0.9;
+    font-size: calc(15px * var(--v-font-scale, 1));
     color: #ffd680;
-    float: left;
-    padding: var(--v-space-sm, 4px) var(--v-space-md-lg, 10px) 0 0;
-    text-shadow:
-        0 1px 0 rgba(0,0,0,0.7),
-        0 0 12px rgba(196,149,58,0.6);
+    text-shadow: 0 0 6px rgba(196,149,58,0.5);
 }
-.lp-help-p { margin: 0 0 var(--v-space-md-lg, 10px); }
+.lp-help-p { margin: 0 0 6px; }
+.lp-help-p.lp-help-bullet {
+    margin: 0 0 5px;
+    padding-left: 10px;
+    text-indent: -10px;
+    color: #e8dfcf;
+}
 .lp-help-p:last-child { margin-bottom: 0; }
 .lp-help-p strong {
     color: #ffd680;
     font-weight: 700;
     text-shadow: 0 0 4px rgba(196,149,58,0.4);
+}
+.lp-help-body .v-scroll-hint-arrow {
+    bottom: 4px;
+    width: 24px;
+    height: 24px;
+    opacity: 0.8;
+    pointer-events: none;
 }
 /* Linha de botões: [Entendido] [?] lado a lado */
 .lp-help-btn-row {
@@ -27191,21 +27179,20 @@ function openSkillHelpMini(overlayEl, skill) {
     if (skill.desc && String(skill.desc).trim()) {
         descNode = document.createElement('div');
         descNode.className = 'lp-help-desc';
-        descNode.textContent = skill.desc;
+        var cleanDesc = String(skill.desc).trim()
+            .replace(/^Self-buff\s*\([^)]*\):\s*/i, '')
+            .replace(/^Self\s*\([^)]*\):\s*/i, '')
+            .replace(/\bTR\s+([A-Z]{3})\b/g, 'TR de $1');
+        descNode.textContent = cleanDesc;
     }
     var body = document.createElement('div');
     body.className = 'lp-help-body';
     var raw = skill.helpDnd5e;
     if (!raw || !String(raw).trim()) {
-        /* Fallback: se NÃO há texto técnico D&D, body fica só com o pointer
-           pro PHB (resumo já está acima em descNode, não duplicar). */
-        raw = 'Consulte o PHB/SRD 5.1 para a magia ou talento homólogo.';
+        raw = 'Consulte o Livro do Jogador (PHB 5e) para a descrição canônica desta habilidade ou magia.';
     }
-    /* 2026-06-07: (1) PULA linhas de changelog/versão do dev (V1.x, Sprint, Ronda,
-       datas, X-codes, "alinhamento PHB", "flag X adicionada", "era kind:") — não
-       interessam ao jogador; (2) renderiza **negrito** de verdade (antes o textContent
-       mostrava o ** literal), via DOM seguro (sem innerHTML). */
-    var _DEV_NOTE_RE = /^\s*(V\d|Sprint|Ronda|\(?20\d\d-\d\d|X-\d|QA\b|alinhamento PHB|flag\s+\S+\s+(adicionad|removid)|era\s+`?kind)/i;
+    /* Filtra linhas de notas internas de desenvolvimento / stubs e formata regras canônicas de D&D 5e */
+    var _DEV_NOTE_RE = /^\s*(V\d|Sprint|Ronda|\(?20\d\d-\d\d|X-\d|QA\b|alinhamento PHB|flag\s+\S+\s+(adicionad|removid)|era\s+`?kind|Arena\s+stub|Arena:|stub:|Upcast:.*stub)/i;
     function _appendBoldLine(parent, text) {
         var parts = String(text).split('**');
         for (var _i = 0; _i < parts.length; _i++) {
@@ -27220,11 +27207,37 @@ function openSkillHelpMini(overlayEl, skill) {
         }
     }
     String(raw).split('\n').forEach(function (line) {
-        if (!line.trim()) return;
-        if (_DEV_NOTE_RE.test(line)) return;  // não mostra notas de dev/versão ao jogador
+        var trimmed = line.trim();
+        if (!trimmed) return;
+        if (_DEV_NOTE_RE.test(trimmed)) return;
+
+        // Limpeza de jargões técnicos residuais de programação
+        trimmed = trimmed
+            .replace(/\(caster stub\)/gi, '')
+            .replace(/\(stub[^\)]*\)/gi, '')
+            .replace(/\(skipTurn — não modelado\)/gi, '')
+            .replace(/\(não modelado\)/gi, '')
+            .replace(/Arena stub:.*$/gi, '')
+            .replace(/Arena:.*$/gi, '')
+            .replace(/\b1 action\b/gi, '1 Ação')
+            .replace(/\b1 bonus action\b/gi, '1 Ação Bônus')
+            .replace(/\bbonus action\b/gi, 'Ação Bônus')
+            .replace(/\bBA\b/g, 'Ação Bônus')
+            .replace(/\bTR DES\b/g, 'TR de Destreza')
+            .replace(/\bTR SAB\b/g, 'TR de Sabedoria')
+            .replace(/\bTR CON\b/g, 'TR de Constituição')
+            .replace(/\bTR INT\b/g, 'TR de Inteligência')
+            .replace(/\bTR FOR\b/g, 'TR de Força')
+            .replace(/\bTR CAR\b/g, 'TR de Carisma')
+            .replace(/\bTRs DES\b/g, 'TRs de Destreza')
+            .replace(/\(só Attack, Dash, Disengage, Hide, ou Use an Object\)/gi, '(apenas Atacar, Disparar, Desengajar, Esconder-se ou Usar Objeto)')
+            .trim();
+        if (!trimmed) return;
+
         var pr = document.createElement('p');
-        pr.className = 'lp-help-p';
-        _appendBoldLine(pr, line);
+        var isBullet = /^[•\-\*]/.test(trimmed);
+        pr.className = isBullet ? 'lp-help-p lp-help-bullet' : 'lp-help-p';
+        _appendBoldLine(pr, trimmed);
         body.appendChild(pr);
     });
     // Linha de botões: [Entendido] [?] — o "?" abre sub-popup com notas

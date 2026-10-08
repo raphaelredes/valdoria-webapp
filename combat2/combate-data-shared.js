@@ -338,45 +338,54 @@ var CHAR_CLASSES = [
                PHB p.271 "Poisoned until end of target's next turn" = ~1 rodada, não 3.
                Corrigido: turns 3 → 1. */
             afterAttackEnemyDebuff: { id: 'ray_sickness_poisoned', turns: 1, n: 'Envenenado', ico: '', atkDisadvantage: true, dndCondition: 'Envenenado (PHB App.A — Raio Doentio, until end of next turn)' } },
-        /* V1.7 Sprint-16 (2026-04-21 closeout review) — Pressa (Haste PHB p.251):
-           Mago/Feiticeiro nv 3. Self-buff: +2 CA + vantagem TR DES + velocidade dobrada + 1 atk extra. Concentração. */
+        /* Pressa (Haste PHB p.251): Mago/Feiticeiro nv 3 */
         { n: 'Pressa', ico: '', cost: 3, kind: 'buff', minLevel: 5,
-            desc: 'Self-buff (PHB p.251): +2 CA + vantagem DES + vantagem atk 3 rodadas (concentração).',
-            helpDnd5e: 'Pressa / Haste (PHB p.251 — Mago/Feiticeiro nv 3): 1 action; concentração 1 min. Alvo (criatura tocada, caster stub) ganha velocidade dobrada, +2 CA, vantagem em TRs DES e 1 ataque adicional a cada turno (só Attack, Dash, Disengage, Hide, ou Use an Object). Quando acaba, alvo fica letárgico 1 turno (skipTurn — não modelado).\nArena stub: buffSim atkAdvantage + acBonus:2 + concentration. Ataque extra não modelado (simplificação — vantagem aproxima poder).',
-            /* V1.7 Sprint-17 Ronda 12 (2026-04-21 QA PHB p.251) — Haste agora com
-               extra attack REAL (PHB RAW) em vez de atkAdvantage stub.
-               Antes: atkAdvantage:true (stub — representava poder extra como vantagem).
-               Agora: removido atkAdvantage, sim detecta buff 'haste' em confirmAndAttack
-               e adiciona +1 ataque por turno (PHB: "one additional action... Attack"). */
+            desc: 'Acelera o alvo (D&D 5e PHB p. 251): velocidade dobrada, +2 CA, vantagem em testes de Destreza e 1 ataque adicional por turno sob concentração (3 rodadas).',
+            helpDnd5e: 'Pressa (Haste — D&D 5e PHB p. 251):\n' +
+                       'Magia de 3º nível (Mago / Feiticeiro). Tempo de conjuração: 1 Ação. Duração: Concentração até 1 minuto.\n' +
+                       '• Deslocamento: A velocidade do alvo é dobrada.\n' +
+                       '• Defesa Ágil: Concede +2 de bônus na Classe de Armadura (CA) e vantagem em Testes de Resistência de Destreza.\n' +
+                       '• Ação Adicional: A cada turno, concede uma ação extra para desferir 1 ataque adicional, Disparar, Desengajar ou Esconder-se.\n' +
+                       '• Letargia Posterior: Ao término da concentração, uma onda passageira de cansaço afeta o alvo.',
             buffSim: { id: 'haste', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Pressa', condRule: 'PHB p.251 — +2 CA + 1 ataque extra/turno + concentração.', acBonus: 2, concentration: true } },
-        /* V1.7 Sprint-16 (2026-04-21 closeout review) — Lentidão (Slow PHB p.277):
-           Mago/Feiticeiro nv 3. AOE cubo 12m — TR SAB; falha: speed/2, -2 CA, atk disadv, 1 ação ou BA por turno. */
+        /* Lentidão (Slow PHB p.277): Mago/Feiticeiro nv 3 */
         { n: 'Lentidão', ico: '', cost: 3, kind: 'attack', minLevel: 5, dmgType: 'psychic',
-            desc: 'AOE (PHB p.277): cubo 12m — TR SAB ou LENTO 3 rodadas.',
+            desc: 'Distorção temporal em área (D&D 5e PHB p. 277): cubo de 12m onde alvos sofrem velocidade pela metade, -2 CA, desvantagem em ataques e restrição de ações.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'wis' }, multiTarget: true,
-            helpDnd5e: 'Lentidão / Slow (PHB p.277 — Mago/Feiticeiro nv 3): 1 action; concentração 1 min. Cubo 12m, até 6 criaturas. TR SAB; em falha: velocidade/2, -2 CA, -2 TR DES, atk com DESVANTAGEM, 1 ação OU BA (não ambos) por turno. TR SAB fim de cada turno.\nArena stub: 0 dano + debuff speed0 + atkDisadvantage + skipBonus 3 rodadas + repeatSave SAB + concentration.',
+            helpDnd5e: 'Lentidão (Slow — D&D 5e PHB p. 277):\n' +
+                       'Magia de 3º nível (Mago / Feiticeiro). Tempo de conjuração: 1 Ação. Duração: Concentração até 1 minuto.\n' +
+                       '• Área de Efeito: Cubo de 12 metros, afetando até 6 criaturas que falharem em Teste de Resistência de Sabedoria.\n' +
+                       '• Penalidades Táticas: A velocidade é reduzida pela metade, sofre -2 na CA e -2 em Testes de Resistência de Destreza.\n' +
+                       '• Ações Limitadas: Ataques sofrem desvantagem e alvos só podem executar 1 Ação ou 1 Ação Bônus por turno, nunca ambas.\n' +
+                       '• Teste Recorrente: No final de cada turno, o alvo pode repetir o teste para encerrar o efeito.',
             afterAttackEnemyDebuff: { id: 'slow_spell', turns: 3, n: 'Lento', ico: '', atkDisadvantage: true, skipBonus: true, speed0: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Lento (PHB — Slow)' } },
-        /* V1.7 Sprint-16 (2026-04-21 closeout review) — Invisibilidade Maior (Greater Invisibility PHB p.250):
-           Mago/Bardo/Feiticeiro nv 4. Self-buff (ou target) — como Invisibility mas NÃO quebra ao atacar/castar. */
+        /* Invisibilidade Maior (Greater Invisibility PHB p.250): Mago/Bardo/Feiticeiro nv 4 */
         { n: 'Invisibilidade Maior', ico: '', cost: 4, kind: 'buff', minLevel: 7,
-            desc: 'Self (PHB p.250): INVISÍVEL + atk adv + atacantes disadv 3 rodadas (não quebra).',
-            helpDnd5e: 'Invisibilidade Maior / Greater Invisibility (PHB p.250 — Mago/Bardo/Feiticeiro nv 4): 1 action; concentração 1 min. Alvo fica invisível (como Invisibility PHB p.255), mas o efeito NÃO termina ao atacar ou castar magia. Versão superior da Invisibility nv 2.\nArena: buffSim atkAdvantage + attackerDisadvantage + concentration. SEM endOnAttack (diferencial vs Invisibility nv 2).',
+            desc: 'Camuflagem arcana total (D&D 5e PHB p. 250): o alvo fica invisível por 3 rodadas sob concentração, mantendo o efeito mesmo após atacar ou conjurar.',
+            helpDnd5e: 'Invisibilidade Maior (Greater Invisibility — D&D 5e PHB p. 250):\n' +
+                       'Magia de 4º nível (Mago / Feiticeiro / Bardo). Tempo de conjuração: 1 Ação. Duração: Concentração até 1 minuto.\n' +
+                       '• Vantagem Tática: O alvo torna-se completamente invisível. Seus ataques recebem vantagem e ataques contra ele sofrem desvantagem.\n' +
+                       '• Invisibilidade Persistente: Ao contrário da versão básica, o efeito NÃO se dissipa quando o alvo ataca ou conjura magias.',
             buffSim: { id: 'greater_invisibility', vfx: 'arcane', decOn: 'round', turns: 3, kind: 'buff', condName: 'Invisível (Maior)', condRule: 'PHB p.250 — atk adv + atacantes disadv. NÃO quebra ao atacar.', atkAdvantage: true, attackerDisadvantage: true, concentration: true, dndCondition: 'Invisível (PHB App.A — Greater Invisibility)' } },
-        /* V1.7 Sprint-16 (2026-04-21 closeout review) — Palavra do Poder: Atordoar (Power Word Stun PHB p.266):
-           Mago/Bardo/Feiticeiro/Bruxo nv 8. Alvo com ≤150 HP fica ATORDOADO sem save. Stub: aplica skipTurn 3 rodadas. */
-        /* V1.7 Sprint-17 (2026-04-21 QA PHB p.266) — Power Word Stun com HP threshold:
-           Só funciona em alvos com ≤150 HP. Antes stubbava sem check de threshold. */
+        /* Palavra do Poder: Atordoar (Power Word Stun PHB p.266) */
         { n: 'Palavra Poder: Atordoar', ico: '', cost: 7, kind: 'attack', minLevel: 15, dmgType: 'psychic',
-            desc: 'Alvo ≤150 HP (PHB p.266): fica ATORDOADO 3 rodadas (sem TR).',
+            desc: 'Comando imperativo avassalador (D&D 5e PHB p. 266): se o alvo possuir 150 PV ou menos, é atordoado imediatamente sem direito a teste inicial.',
             damageSpec: { n: 0, d: 0 }, hpThreshold: 150,
-            helpDnd5e: 'Palavra do Poder: Atordoar / Power Word Stun (PHB p.266 — Mago/Bardo/Feiticeiro/Bruxo nv 8): 1 action; alvo com **≤150 HP atual** fica ATORDOADO. Alvo faz TR CON fim de cada turno; sucesso termina. Alvos com >150 HP: **SEM EFEITO**.\nV1.7 Sprint-17 (2026-04-21): flag hpThreshold:150 adicionada + handler em playTurn valida antes de aplicar debuff (PHB-fiel).\nArena: aplica debuff Atordoado 3 rodadas se target.hp ≤ 150, senão nada.',
+            helpDnd5e: 'Palavra de Poder: Atordoar (Power Word Stun — D&D 5e PHB p. 266):\n' +
+                       'Magia de 8º nível (Mago / Feiticeiro / Bruxo / Bardo). Tempo de conjuração: 1 Ação. Alcance: 18 metros.\n' +
+                       '• Limiar de Vitalidade: Se o alvo tiver 150 Pontos de Vida ou menos, fica Atordoado na hora, sem teste de resistência.\n' +
+                       '• Condição Atordoado: Incapacitado de agir ou reagir, ataques contra ele têm vantagem e falha automaticamente em testes de Força e Destreza.\n' +
+                       '• Recuperação: No final de cada um de seus turnos, o alvo pode realizar um Teste de Resistência de Constituição para se recuperar.',
             afterAttackEnemyDebuff: { id: 'power_word_stun', turns: 3, n: 'Atordoado (Palavra)', ico: '', skipTurn: true, targetedAdvantage: true, autoFailStrDex: true, repeatSave: { ability: 'con' }, dndCondition: 'Atordoado (PHB — Power Word Stun)' } },
-        /* V1.7 Sprint-15 (2026-04-21 closeout review) — Graxa (Grease PHB p.249):
-           Mago nv 1. AOE quadrado 3m; criaturas em pé fazem TR DES ou Prone; também difícil. */
+        /* Graxa (Grease PHB p.249) */
         { n: 'Graxa', ico: '', cost: 2, kind: 'attack', dmgType: 'acid',
-            desc: 'AOE (PHB p.249): TR DES ou prostrado + terreno difícil 1 min.',
+            desc: 'Solo escorregadio (D&D 5e PHB p. 249): cobre uma área de 3m; criaturas em pé devem passar em TR de Destreza ou caem prostradas.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'dex' }, multiTarget: true,
-            helpDnd5e: 'Graxa / Grease (PHB p.249 — Mago/Artificer nv 1): 1 action; AOE 3m². Criaturas em pé na área fazem TR DES; em falha caem PROSTRADAS. Terreno difícil 1 min.\nArena: 0 dano + debuff Prone (atkDisadvantage) 2 rodadas em falha no TR DES. Terreno difícil não modelado (sem grid).',
+            helpDnd5e: 'Graxa (Grease — D&D 5e PHB p. 249):\n' +
+                       'Magia de 1º nível (Mago). Tempo de conjuração: 1 Ação. Duração: 1 minuto.\n' +
+                       '• Área de Efeito: Cobre uma superfície de 3 metros com substância viscosa e escorregadia.\n' +
+                       '• Derrubada: Criaturas na área ao ser conjurada ou que entrem nela devem ser bem-sucedidas em um Teste de Resistência de Destreza ou cairão Prostradas.\n' +
+                       '• Vantagem Tática: Criaturas prostradas sofrem desvantagem em seus ataques e concedem vantagem a atacantes corpo-a-corpo adjacentes.',
             afterAttackEnemyDebuff: { id: 'grease_prone', turns: 2, n: 'Prostrado (Graxa)', ico: '', atkDisadvantage: true, prone: true, dndCondition: 'Prostrado (PHB App.A — Grease)' } },
         /* V1.7 Sprint-15 (2026-04-21 closeout review) — Hipnose (Hypnotic Pattern PHB p.252):
            Mago/Bardo/Feiticeiro/Bruxo nv 3. AOE cubo 9m; TR SAB ou Incapacitated. */
