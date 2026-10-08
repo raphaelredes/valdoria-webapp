@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-07T13:17:29Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T14:01:57Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2158,6 +2158,14 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .battlefield-hex-arena .cell.hex-token.player-turn-active::after {
   display: none !important;
   content: none !important;
+}
+
+/* Animação fluida de caminhada do combatente no grid hexagonal (Ordem do Usuário 2026-10) */
+.cell.hex-token.token--walking,
+.battlefield-hex-arena .cell.hex-token.token--walking {
+  z-index: 65 !important;
+  pointer-events: none !important;
+  will-change: left, top, transform, filter;
 }
 
 /* Barras de recurso (MP / Energia / Vigor / Furia) */
@@ -15294,6 +15302,21 @@ function unitUidForOrderIndex(s, idx) {
     return null;
 }
 
+/** Busca elemento do token na arena por order index com múltiplos fallbacks robustos. */
+function getUnitTokenEl(s, idx) {
+    if (!s || !s.order || idx < 0 || idx >= s.order.length) return null;
+    var u = s.order[idx];
+    var uid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, idx) : null;
+    var el = uid ? document.querySelector('[data-unit-id="' + uid + '"]') : null;
+    if (!el && u && u.id) {
+        el = document.querySelector('[data-unit-id="' + u.id + '"]');
+    }
+    if (!el) {
+        el = document.querySelector('[data-unit-id="' + (idx === s.p_idx ? 'player' : 'enemy_' + idx) + '"]');
+    }
+    return el;
+}
+
 function tryConsumeCombatSetup() {
     try {
         var raw = sessionStorage.getItem(SIM_COMBAT_SETUP_KEY);
@@ -19181,7 +19204,7 @@ function buildTurnQueue(s) {
     }
     var parts = ['<div class="turn-queue" id="turn-queue">'];
     if (s.ph === 'active' && s.rn > 0) {
-        parts.push('<span class="tl-round">Turno ' + s.rn + '</span>');
+        parts.push('<span class="tl-round">Rodada ' + s.rn + '</span>');
     }
     for (var i = 0; i < list.length; i++) {
         var entry = list[i];
@@ -19934,8 +19957,9 @@ function ensureProceduralBattlefield(s) {
 
 async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
     if (!tokenEl || !path || path.length <= 1) return;
-    var stepMs = stepDurationMs || 800;
+    var stepMs = stepDurationMs || 340;
     tokenEl.style.zIndex = '60';
+    tokenEl.classList.add('token--walking');
 
     for (var p = 1; p < path.length; p++) {
         var stepCoord = path[p];
@@ -19950,42 +19974,40 @@ async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
             } catch (_) {}
         }
 
-        // Som de passo / pulo
+        // Som de passo / caminhada
         if (typeof sfxStep === 'function') {
             try { sfxStep(); } catch (_) {}
         }
-
-        // FASE 1: Arco de elevação do pulo (hop up)
-        tokenEl.style.transition = 'left ' + Math.round(stepMs * 0.95) + 'ms cubic-bezier(0.22, 0.61, 0.36, 1), top ' + Math.round(stepMs * 0.95) + 'ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ' + Math.round(stepMs * 0.5) + 'ms cubic-bezier(0.18, 0.89, 0.32, 1.28), filter ' + Math.round(stepMs * 0.5) + 'ms ease-out';
-        tokenEl.style.transform = 'translateY(-14px) scale(1.18)';
-        tokenEl.style.filter = 'drop-shadow(0 14px 10px rgba(0, 0, 0, 0.75))';
-        tokenEl.style.left = targetLeft;
-        tokenEl.style.top = targetTop;
 
         // Highlight sutil do hexágono pisado
         var stepTile = document.querySelector('.hex-grid-svg polygon[data-col="' + stepCoord.col + '"][data-row="' + stepCoord.row + '"]');
         if (stepTile) {
             stepTile.classList.add('hex-tile--stepping');
             (function (el) {
-                setTimeout(function () { el.classList.remove('hex-tile--stepping'); }, Math.round(stepMs * 0.85));
+                setTimeout(function () { el.classList.remove('hex-tile--stepping'); }, Math.round(stepMs * 0.9));
             })(stepTile);
         }
 
-        // Aguarda atingir o ápice do pulo
+        // FASE 1: Translação contínua de left/top com passada natural e leve elevação
+        var stepCadenceDeg = (p % 2 === 1) ? 2.5 : -2.5;
+        tokenEl.style.transition = 'left ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), top ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), transform ' + Math.round(stepMs * 0.5) + 'ms cubic-bezier(0.2, 0.8, 0.3, 1), filter ' + Math.round(stepMs * 0.5) + 'ms ease-out';
+        tokenEl.style.left = targetLeft;
+        tokenEl.style.top = targetTop;
+        tokenEl.style.transform = 'translateY(-7px) rotate(' + stepCadenceDeg + 'deg) scale(1.08)';
+        tokenEl.style.filter = 'drop-shadow(0 10px 8px rgba(0, 0, 0, 0.65))';
+
         await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.52)); });
 
-        // FASE 2: Queda e aterrissagem no centro do hexágono (hop land)
-        tokenEl.style.transition = 'transform ' + Math.round(stepMs * 0.36) + 'ms cubic-bezier(0.25, 1, 0.5, 1), filter ' + Math.round(stepMs * 0.36) + 'ms ease-in';
-        tokenEl.style.transform = 'translateY(0px) scale(0.96)';
-        tokenEl.style.filter = 'drop-shadow(0 2px 5px rgba(0, 0, 0, 0.85))';
+        // FASE 2: Aterrissagem do passo no centro do hexágono.
+        // CRÍTICO: mantemos left e top no transition para NUNCA cancelar ou congelar o movimento contínuo!
+        tokenEl.style.transition = 'left ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), top ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), transform ' + Math.round(stepMs * 0.44) + 'ms cubic-bezier(0.25, 1, 0.5, 1), filter ' + Math.round(stepMs * 0.44) + 'ms ease-in';
+        tokenEl.style.transform = 'translateY(0px) rotate(0deg) scale(1)';
+        tokenEl.style.filter = 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.75))';
 
-        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.34)); });
-
-        // FASE 3: Descompressão / repouso normal
-        tokenEl.style.transform = 'translateY(0px) scale(1)';
-        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.14)); });
+        await new Promise(function (r) { setTimeout(r, Math.round(stepMs * 0.48)); });
     }
 
+    tokenEl.classList.remove('token--walking');
     tokenEl.style.zIndex = '';
     tokenEl.style.transition = '';
     tokenEl.style.transform = '';
@@ -20238,8 +20260,10 @@ async function handlePlayerMoveTo(tCol, tRow) {
 
     if (validPath.length <= 1) return;
 
-    var tokenEl = document.querySelector('[data-unit-id="player"]');
-    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
+    var tokenEl = (typeof getUnitTokenEl === 'function')
+        ? getUnitTokenEl(currentState, currentState.p_idx)
+        : document.querySelector('[data-unit-id="player"]');
+    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 220 : 340;
 
     var actualReachedSteps = 0;
     var actualSpentCost = 0;
@@ -20298,8 +20322,11 @@ async function handlePlayerMoveTo(tCol, tRow) {
         p.pos = { col: nextStep.col, row: nextStep.row };
         actualReachedSteps++;
 
-        if (tokenEl && typeof animateUnitHexMovement === 'function') {
-            await animateUnitHexMovement(tokenEl, [curStep, nextStep], stepDurationMs);
+        var liveTokenEl = (typeof getUnitTokenEl === 'function')
+            ? getUnitTokenEl(currentState, currentState.p_idx)
+            : (tokenEl || document.querySelector('[data-unit-id="player"]'));
+        if (liveTokenEl && typeof animateUnitHexMovement === 'function') {
+            await animateUnitHexMovement(liveTokenEl, [curStep, nextStep], stepDurationMs);
         }
     }
 
@@ -29681,7 +29708,7 @@ function showMagicMissileVolleyOverlay(actor, darts, groupList, s, perDart) {
         if (s.rn) {
             var rb = document.createElement('div');
             rb.className = 'dice-round-badge';
-            rb.textContent = 'Turno ' + s.rn;
+            rb.textContent = 'Rodada ' + s.rn;
             ov.appendChild(rb);
         }
         // Carrossel VS: actor | alvo atual com setas
@@ -30423,7 +30450,7 @@ function showAllySpellOverlay(actor, target, dart, s, skill, themeKey) {
         if (s.rn) {
             var rb = document.createElement('div');
             rb.className = 'dice-round-badge';
-            rb.textContent = 'Turno ' + s.rn;
+            rb.textContent = 'Rodada ' + s.rn;
             ov.appendChild(rb);
         }
         var vsWrap = document.createElement('div');
@@ -30750,7 +30777,7 @@ function _sbShowSummonOverlay(actor, beast, s) {
         if (s.rn) {
             var rb = document.createElement('div');
             rb.className = 'dice-round-badge';
-            rb.textContent = 'Turno ' + s.rn;
+            rb.textContent = 'Rodada ' + s.rn;
             ov.appendChild(rb);
         }
         var vsWrap = document.createElement('div');
@@ -30990,7 +31017,7 @@ function showRayOfFrostOverlay(actor, target, dart, s) {
         if (s.rn) {
             var rb = document.createElement('div');
             rb.className = 'dice-round-badge';
-            rb.textContent = 'Turno ' + s.rn;
+            rb.textContent = 'Rodada ' + s.rn;
             ov.appendChild(rb);
         }
         // VS simplificado (caster | alvo)
@@ -31258,7 +31285,7 @@ function showFireballSpellOverlay(actor, target, dart, s) {
         if (s.rn) {
             var rb = document.createElement('div');
             rb.className = 'dice-round-badge';
-            rb.textContent = 'Turno ' + s.rn;
+            rb.textContent = 'Rodada ' + s.rn;
             ov.appendChild(rb);
         }
         // VS simplificado: ator | alvo único (sem carrossel de setas)
@@ -31990,11 +32017,11 @@ function showDice(value, cb, actor, context, opts) {
     } else {
         ov.className = 'dice-overlay';
     }
-    /* Badge de turno acima do dado (substitui o banner antigo) */
+    /* Badge de rodada acima do dado (substitui o banner antigo) */
     if (currentState && currentState.ph === 'active' && currentState.rn) {
         var rb = document.createElement('div');
         rb.className = 'dice-round-badge';
-        rb.textContent = 'Turno ' + currentState.rn;
+        rb.textContent = 'Rodada ' + currentState.rn;
         ov.appendChild(rb);
     }
     /* V1.7 (2026-04-21, QA feedback "jogador não lê log durante combate") —
@@ -32505,7 +32532,7 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
         if (currentState && currentState.rn) {
             var rb = document.createElement('div');
             rb.className = 'dice-round-badge';
-            rb.textContent = 'Turno ' + currentState.rn;
+            rb.textContent = 'Rodada ' + currentState.rn;
             ov.appendChild(rb);
         }
         appendDiceCombatHeader(ov, actor, target, null);
@@ -32725,7 +32752,7 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
         if (currentState && currentState.rn) {
             var rb = document.createElement('div');
             rb.className = 'dice-round-badge';
-            rb.textContent = 'Turno ' + currentState.rn;
+            rb.textContent = 'Rodada ' + currentState.rn;
             ov.appendChild(rb);
         }
         var selfOnly = actor === target;
@@ -33170,10 +33197,10 @@ function beginCombatAfterInitOrder() {
            nunca fique preso sem o botão Agir liberado. */
         (async function () {
             try {
-                var watchdogFn = (typeof _runNpcSegmentWithWatchdog === 'function')
-                    ? _runNpcSegmentWithWatchdog
-                    : runNpcSegmentUntilPlayerTurn;
-                if (await watchdogFn(currentState, 15000)) {
+                var _segTimeout = (typeof _calcNpcSegmentTimeout === 'function')
+                    ? _calcNpcSegmentTimeout(currentState)
+                    : 60000;
+                if (await watchdogFn(currentState, _segTimeout)) {
                     _simSkipNonPlayerDice = false;
                     render(currentState);
                     return;
@@ -33673,10 +33700,11 @@ async function playTurn(aIdx, tIdx, opts) {
                 var stepRes = findHexPathStep(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row, mLeft, occMap, (s.battlefield ? s.battlefield.cols : 8), (s.battlefield ? s.battlefield.rows : 10), reach, dtMap);
                 if (stepRes.steps > 0) {
                     if (stepRes.path && stepRes.path.length > 1) {
-                        var actorUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (aIdx === s.p_idx ? 'player' : 'enemy_' + aIdx);
-                        var actorEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
+                        var actorEl = (typeof getUnitTokenEl === 'function')
+                            ? getUnitTokenEl(s, aIdx)
+                            : document.querySelector('[data-unit-id="' + ((typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (aIdx === s.p_idx ? 'player' : 'enemy_' + aIdx)) + '"]');
                         if (actorEl) {
-                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
+                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 220 : 340;
                             await animateUnitHexMovement(actorEl, stepRes.path, hopDurationMs);
                         }
                     }
@@ -33688,11 +33716,7 @@ async function playTurn(aIdx, tIdx, opts) {
                     }
                     s.log.push(actor.n + ' avança ' + formatHexDistanceMeters(stepRes.steps) + ' em direção a ' + target.n + '.');
                     render(s);
-                    // Zoom out suave até mostrar toda a tela no final da movimentação da IA (Ordem do Usuário 2026-10)
-                    if (typeof window.bfCameraFocusOverview === 'function') {
-                        try { await window.bfCameraFocusOverview(750); } catch (_) {}
-                    }
-                    await sleep(_skipAllDiceAnim ? 60 : 300);
+                    await sleep(_skipAllDiceAnim ? 60 : 250);
                 }
             }
             dist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
@@ -35456,18 +35480,20 @@ async function runNpcSegmentUntilPlayerTurn() {
             render(s);
 
             /* Apresentação Cinematográfica do Turno da IA (Ordem do Usuário 2026-10):
-               1. Mostra o cenário todo primeiro (Overview).
-               2. Aguarda pelo menos 2 segundos para o jogador ver o posicionamento geral.
-               3. Dá um zoom devagar focando no combatente ativo.
-               4. Só depois inicia a movimentação e ataques. */
+               1. Mostra o cenário todo primeiro (Overview) no início da sequência de NPCs (_npcIter === 1).
+               2. Aguarda um breve momento para o jogador ver o posicionamento geral.
+               3. Foca no combatente ativo da vez de forma suave e dinâmica.
+               4. Em NPCs subsequentes (_npcIter > 1), transiciona direto para o combatente ativo sem congelar no overview. */
             try {
-                if (typeof window.bfCameraFocusOverview === 'function') {
-                    await window.bfCameraFocusOverview((typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 450);
+                if (_npcIter === 1) {
+                    if (typeof window.bfCameraFocusOverview === 'function') {
+                        await window.bfCameraFocusOverview((typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 450);
+                    }
+                    await sleep((typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 1200);
                 }
-                await sleep((typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 2000);
                 if (typeof window.bfCameraFocusUnit === 'function') {
-                    await window.bfCameraFocusUnit(c, 0.95, (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 800);
-                    await sleep((typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 250);
+                    await window.bfCameraFocusUnit(c, 0.95, (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 500);
+                    await sleep((typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 200);
                 }
             } catch (_eCamCinematic) {}
 
@@ -35877,11 +35903,18 @@ async function runNpcSegmentUntilPlayerTurn() {
 
 /* COMBAT-WATCHDOG (2026-10): Circuito de segurança watchdog para segmentos de NPC.
    Garante que nenhum turno de NPC, animação pendente ou promise perdida prenda o
-   combate por mais de 15 segundos. Se o segmento não concluir no tempo limite,
-   o watchdog dispara, registra telemetria, recupera o estado seguro, força o turno
-   para o jogador e garante que a UI reapareça destravada. */
+   combate indefinidamente. O teto de tempo é proporcional ao número de combatentes
+   (mínimo 60s, +20s por combatente), garantindo tempo hábil para animações e caminhadas,
+   evitando falsos-positivos que cortavam rodadas no meio (Ordem do Usuário 2026-10).
+   Se o segmento não concluir no tempo limite, o watchdog dispara, registra telemetria,
+   recupera o estado seguro, força o turno para o jogador e garante que a UI reapareça destravada. */
+function _calcNpcSegmentTimeout(s) {
+    var count = (s && s.order && s.order.length > 0) ? s.order.length : 4;
+    return Math.max(60000, count * 20000);
+}
+
 async function _runNpcSegmentWithWatchdog(s, timeoutMs) {
-    timeoutMs = timeoutMs || 15000;
+    timeoutMs = timeoutMs || _calcNpcSegmentTimeout(s);
     var _timer = null;
     var _watchdogPromise = new Promise(function (_, reject) {
         _timer = setTimeout(function () {
@@ -35934,7 +35967,7 @@ async function runNpcsUntilPlayer(opts) {
             simAdvanceToRound(s);
         }
         s.active_idx = nextIdx;
-        if (await _runNpcSegmentWithWatchdog(s, 15000)) {
+        if (await _runNpcSegmentWithWatchdog(s, _calcNpcSegmentTimeout(s))) {
             _simSkipNonPlayerDice = false;
             await sleep(1800);
             render(s);
@@ -35949,7 +35982,7 @@ async function runNpcsUntilPlayer(opts) {
                 simAdvanceToRound(s);
             }
             s.active_idx = nextIdx2;
-            if (await _runNpcSegmentWithWatchdog(s, 15000)) {
+            if (await _runNpcSegmentWithWatchdog(s, _calcNpcSegmentTimeout(s))) {
                 _simSkipNonPlayerDice = false;
                 await sleep(1800);
                 render(s);
@@ -35977,7 +36010,7 @@ async function runNpcsUntilPlayer(opts) {
                     simAdvanceToRound(s);
                 }
                 s.active_idx = nextIdx3;
-                if (await _runNpcSegmentWithWatchdog(s, 15000)) { _simSkipNonPlayerDice = false; await sleep(1800); render(s); return; }
+                if (await _runNpcSegmentWithWatchdog(s, _calcNpcSegmentTimeout(s))) { _simSkipNonPlayerDice = false; await sleep(1800); render(s); return; }
             }
             if (s.order[s.p_idx] && (s.order[s.p_idx].hp <= 0 || s.order[s.p_idx].isDead)) { render(s); return; }
         } catch (_ePet) { /* nunca hard-locka o turno do jogador */ }
@@ -36911,11 +36944,13 @@ async function __combatAnimateOneEvent(ev) {
             : (actorIdx === (currentState.p_idx || 0) ? 'player' : 'enemy_' + actorIdx);
         var actorUnit = (currentState && currentState.order) ? currentState.order[actorIdx] : null;
 
-        var tokenEl = document.querySelector('[data-unit-id="' + actorUid + '"]');
+        var tokenEl = (typeof getUnitTokenEl === 'function')
+            ? getUnitTokenEl(currentState, actorIdx)
+            : document.querySelector('[data-unit-id="' + actorUid + '"]');
         if (tokenEl && ev.fromCol != null && ev.fromRow != null && ev.toCol != null && ev.toRow != null) {
             var path = hexLine(ev.fromCol, ev.fromRow, ev.toCol, ev.toRow);
             if (path && path.length > 1) {
-                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
+                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 220 : 340;
                 await animateUnitHexMovement(tokenEl, path, stepDurationMs);
             }
         }
@@ -36925,10 +36960,6 @@ async function __combatAnimateOneEvent(ev) {
             ensureProceduralBattlefield(currentState);
         }
         render(currentState);
-        // Zoom out suave até mostrar toda a tela no final da movimentação remota/IA (Ordem do Usuário 2026-10)
-        if (typeof window.bfCameraFocusOverview === 'function') {
-            try { await window.bfCameraFocusOverview(750); } catch (_) {}
-        }
         return;
     }
     if (kind === 'stand_up') {
