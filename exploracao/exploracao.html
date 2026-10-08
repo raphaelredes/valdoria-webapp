@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T12:46:27Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T13:13:30Z - do not edit directly, edit source -->
 
 
 
@@ -11441,41 +11441,65 @@ window.__onIntroTap = function() {
        Threshold aumentado pra ~120 palavras combinadas; tela pequena cai pra
        60. Resultado: scripts de 4-5 linhas agora ficam em 1-2 páginas (era 3).
        Densidade narrativa profissional, menos cliques de paginação. */
-    var smallScreen = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 600);
-    var MAX_PAGE_WORDS = smallScreen ? 60 : 120;
-    var MAX_LINES_PER_PAGE = smallScreen ? 2 : 3;
+    var smallScreen = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 640);
+    var MAX_PAGE_WORDS = smallScreen ? 45 : 55;
+    var MAX_PAGE_CHARS = smallScreen ? 280 : 340;
+    var MAX_LINES_PER_PAGE = smallScreen ? 3 : 4;
     var countWords = function (s) { return (s || '').split(/\s+/).filter(Boolean).length; };
-    var canGroup = function (curr, next) {
-      var sameSpeaker = curr.type === 'speech' && next.type === 'speech'
-                        && (curr.speaker || '') === (next.speaker || '');
-      return (
-        (curr.type === 'speech'    && next.type === 'narration') ||
-        (curr.type === 'narration' && next.type === 'speech') ||
-        (curr.type === 'narration' && next.type === 'narration') ||
-        sameSpeaker
-      );
-    };
     var pages = [];
-    var i = 0;
-    while (i < script.length) {
-      var page = [script[i]];
-      var totalWords = countWords(script[i].text);
-      var lines = 1;
-      while (
-        lines < MAX_LINES_PER_PAGE &&
-        i + 1 < script.length &&
-        canGroup(page[page.length - 1], script[i + 1])
-      ) {
-        var nextWords = countWords(script[i + 1].text);
-        if (totalWords + nextWords > MAX_PAGE_WORDS) break;
-        page.push(script[i + 1]);
-        totalWords += nextWords;
-        lines++;
-        i++;
+    var current = [];
+    var currentWords = 0;
+    var currentChars = 0;
+    var currentLines = 0;
+    function flushCurrent() {
+      if (current.length > 0) {
+        pages.push(current);
+        current = [];
+        currentWords = 0;
+        currentChars = 0;
+        currentLines = 0;
       }
-      pages.push(page);
-      i++;
     }
+    (script || []).forEach(function(stroph) {
+      if (!stroph) return;
+      var text = String(stroph.text || '').trim();
+      if (!text) return;
+      var sentences = (typeof _splitIntoSentences === 'function') ? _splitIntoSentences(text) : [text];
+      var wCount = countWords(text);
+      var cCount = text.length;
+      if (sentences.length <= 1 || (wCount <= MAX_PAGE_WORDS && cCount <= MAX_PAGE_CHARS)) {
+        var wouldExceed = (current.length >= 2) || (currentLines + sentences.length > MAX_LINES_PER_PAGE) ||
+                          (currentWords + wCount > MAX_PAGE_WORDS) || (currentChars + cCount > MAX_PAGE_CHARS);
+        if (current.length > 0 && wouldExceed) flushCurrent();
+        current.push(stroph);
+        currentWords += wCount; currentChars += cCount; currentLines += sentences.length;
+      } else {
+        flushCurrent();
+        var chunkSentences = [];
+        var chunkWords = 0;
+        var chunkChars = 0;
+        sentences.forEach(function(sent) {
+          var w = countWords(sent);
+          var c = sent.length;
+          if (chunkSentences.length > 0 && (chunkWords + w > MAX_PAGE_WORDS || chunkChars + c > MAX_PAGE_CHARS || chunkSentences.length >= MAX_LINES_PER_PAGE)) {
+            pages.push([Object.assign({}, stroph, { text: chunkSentences.join(' ') })]);
+            chunkSentences = []; chunkWords = 0; chunkChars = 0;
+          }
+          chunkSentences.push(sent);
+          chunkWords += w; chunkChars += c;
+        });
+        if (chunkSentences.length > 0) {
+          var finalStroph = Object.assign({}, stroph, { text: chunkSentences.join(' ') });
+          if (chunkWords >= Math.round(MAX_PAGE_WORDS * 0.65)) {
+            pages.push([finalStroph]);
+          } else {
+            current = [finalStroph];
+            currentWords = chunkWords; currentChars = chunkChars; currentLines = chunkSentences.length;
+          }
+        }
+      }
+    });
+    flushCurrent();
     return pages;
   }
 

@@ -319,86 +319,141 @@
 
   var _activeEncounterInstance = null;
 
+  function _countWords(str) {
+    return (str || '').trim().split(/\s+/).filter(Boolean).length;
+  }
+
   /* Agrupa estrofes em páginas (canonical PADRAO_ALDRIC):
-     - Até 2 estrofes por página
-     - Até 10 sentences por página
-     - Quebra quando atingir qualquer limite */
-  function _groupScriptIntoPages(script) {
-    var MAX_STROPHES_PER_PAGE = 2;
-    var MAX_LINES_PER_PAGE = 10;
+     - Orçamento adaptativo por página (evita scrolling vertical em telas mobile/Telegram)
+     - Até 2 estrofes por página (se forem curtas)
+     - Limite de ~45-55 palavras ou ~280-340 caracteres por página
+     - Particiona parágrafos longos em limites de sentenças limpos */
+  function _groupScriptIntoPages(script, opts) {
+    opts = opts || {};
+    var smallScreen = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 640);
+    var MAX_PAGE_WORDS = opts.maxWords || (smallScreen ? 45 : 55);
+    var MAX_PAGE_CHARS = opts.maxChars || (smallScreen ? 280 : 340);
+    var MAX_STROPHES_PER_PAGE = opts.maxStrophes || 2;
+    var MAX_LINES_PER_PAGE = opts.maxLines || 4;
+
     var pages = [];
     var current = [];
-    var currentLineCount = 0;
-    script.forEach(function(stroph) {
-      var lineCount = _splitIntoSentences(stroph.text || '').length;
-      var wouldExceed = (current.length >= MAX_STROPHES_PER_PAGE) ||
-                        (currentLineCount + lineCount > MAX_LINES_PER_PAGE);
-      if (current.length > 0 && wouldExceed) {
+    var currentWords = 0;
+    var currentChars = 0;
+    var currentLines = 0;
+
+    function flushCurrent() {
+      if (current.length > 0) {
         pages.push(current);
         current = [];
-        currentLineCount = 0;
+        currentWords = 0;
+        currentChars = 0;
+        currentLines = 0;
       }
-      current.push(stroph);
-      currentLineCount += lineCount;
+    }
+
+    (script || []).forEach(function(stroph) {
+      if (!stroph) return;
+
+      // Blocos estruturados especiais (recompensas, ficha, notificações técnicas)
+      if (stroph.type === 'reward' || stroph.type === 'character_sheet' || stroph.type === 'technical') {
+        flushCurrent();
+        pages.push([stroph]);
+        return;
+      }
+
+      // Sub-linha de check_hint (anúncio de teste de perícia) — fica junto da estrofe
+      if (stroph._checkHint) {
+        if (current.length > 0) {
+          current.push(stroph);
+        } else if (pages.length > 0) {
+          pages[pages.length - 1].push(stroph);
+        } else {
+          current.push(stroph);
+        }
+        return;
+      }
+
+      var text = String(stroph.text || '').trim();
+      if (!text) return;
+
+      var sentences = _splitIntoSentences(text);
+      var wordCount = _countWords(text);
+      var charCount = text.length;
+
+      // Se a estrofe cabe confortavelmente inteira no orçamento de uma página
+      if (sentences.length <= 1 || (wordCount <= MAX_PAGE_WORDS && charCount <= MAX_PAGE_CHARS)) {
+        var wouldExceed = (current.length >= MAX_STROPHES_PER_PAGE) ||
+                          (currentLines + sentences.length > MAX_LINES_PER_PAGE) ||
+                          (currentWords + wordCount > MAX_PAGE_WORDS) ||
+                          (currentChars + charCount > MAX_PAGE_CHARS);
+        if (current.length > 0 && wouldExceed) {
+          flushCurrent();
+        }
+        current.push(stroph);
+        currentWords += wordCount;
+        currentChars += charCount;
+        currentLines += sentences.length;
+      } else {
+        // Estrofe longa com múltiplas sentenças: particiona em fatias legíveis
+        flushCurrent();
+
+        var chunkSentences = [];
+        var chunkWords = 0;
+        var chunkChars = 0;
+
+        sentences.forEach(function(sent) {
+          var w = _countWords(sent);
+          var c = sent.length;
+
+          var wouldExceedChunk = (chunkSentences.length > 0) && (
+            (chunkWords + w > MAX_PAGE_WORDS) ||
+            (chunkChars + c > MAX_PAGE_CHARS) ||
+            (chunkSentences.length >= MAX_LINES_PER_PAGE)
+          );
+
+          if (wouldExceedChunk) {
+            var chunkStroph = Object.assign({}, stroph, { text: chunkSentences.join(' ') });
+            pages.push([chunkStroph]);
+            chunkSentences = [];
+            chunkWords = 0;
+            chunkChars = 0;
+          }
+
+          chunkSentences.push(sent);
+          chunkWords += w;
+          chunkChars += c;
+        });
+
+        if (chunkSentences.length > 0) {
+          var finalStroph = Object.assign({}, stroph, { text: chunkSentences.join(' ') });
+          if (chunkWords >= Math.round(MAX_PAGE_WORDS * 0.65)) {
+            pages.push([finalStroph]);
+          } else {
+            current = [finalStroph];
+            currentWords = chunkWords;
+            currentChars = chunkChars;
+            currentLines = chunkSentences.length;
+          }
+        }
+      }
     });
-    if (current.length > 0) pages.push(current);
+
+    flushCurrent();
     return pages;
   }
 
-  /* A1.5 (auditoria #90): modo 'compact' — algoritmo v3 do StubEventLayer da
-     exploração PROMOVIDO a fonte única (era o mais avançado dos 3: agrupamento
-     speaker-aware, balanceado por PALAVRAS e responsivo ao viewport; páginas
-     menores pro card compacto stub 80vh). smallScreen é avaliado a cada
-     chamada de propósito (viewport pode mudar entre eventos). */
+  /* Modo 'compact' — utiliza limites ligeiramente mais enxutos mantendo a mesma robustez */
   function _groupScriptCompact(script) {
-    var smallScreen = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 600);
-    var MAX_PAGE_WORDS = smallScreen ? 60 : 120;
-    var MAX_LINES = smallScreen ? 2 : 3;
-    var countWords = function (s) { return (s || '').split(/\s+/).filter(Boolean).length; };
-    var canGroup = function (curr, next) {
-      var sameSpeaker = curr.type === 'speech' && next.type === 'speech'
-                        && (curr.speaker || '') === (next.speaker || '');
-      return (
-        (curr.type === 'speech'    && next.type === 'narration') ||
-        (curr.type === 'narration' && next.type === 'speech') ||
-        (curr.type === 'narration' && next.type === 'narration') ||
-        sameSpeaker
-      );
-    };
-    var pages = [];
-    var i = 0;
-    while (i < script.length) {
-      var page = [script[i]];
-      var totalWords = countWords(script[i].text);
-      var lines = 1;
-      while (
-        lines < MAX_LINES &&
-        i + 1 < script.length &&
-        canGroup(page[page.length - 1], script[i + 1])
-      ) {
-        var nextWords = countWords(script[i + 1].text);
-        if (totalWords + nextWords > MAX_PAGE_WORDS) break;
-        page.push(script[i + 1]);
-        totalWords += nextWords;
-        lines++;
-        i++;
-      }
-      pages.push(page);
-      i++;
-    }
-    return pages;
+    return _groupScriptIntoPages(script || [], { maxWords: 45, maxChars: 260, maxLines: 3, maxStrophes: 2 });
   }
 
   /* A1.5: API pública de paginação de script[] de diálogo (fonte única).
-     opts.mode: 'aldric' (default — PADRAO_ALDRIC, 2 estrofes/10 sentences,
-     usado pelo próprio vEncounter.render — pacing da cidade NÃO muda) |
-     'compact' (StubEventLayer da exploração — 2-3 linhas, 60/120 palavras,
-     speaker-aware + responsivo). Input/output: array de line objects
-     {type,speaker?,text} → array de páginas (array de arrays). */
+     opts.mode: 'aldric' (default — PADRAO_ALDRIC) | 'compact' (modo compacto). */
   function groupScriptIntoPages(script, opts) {
     var mode = (opts && opts.mode) || 'aldric';
     if (mode === 'compact') return _groupScriptCompact(script || []);
-    return _groupScriptIntoPages(script || []);
+    return _groupScriptIntoPages(script || [], opts);
   }
 
   /* Typewriter RPG clássico — char-by-char com pausa em <i>/</i>.
@@ -1674,6 +1729,8 @@
       body.innerHTML = '';
       body.classList.remove('revealed');
       body.style.minHeight = '';
+      body.style.maxHeight = '';
+      body.scrollTop = 0;
       var page = pages[idx];
       // Sessão #23 v8 (2026-05-22): user reportou cabeçalho com nome NPC
       // aparece durante narração (deveria só aparecer quando NPC fala).
