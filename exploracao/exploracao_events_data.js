@@ -1300,6 +1300,10 @@ window.__EXPLORACAO_EVENTS = {
     "id": "plains_farmer_distress_01",
     "biome": "plains",
     "type": "social",
+    "exclude_maps": [
+      "orc_tribe",
+      "orc_chief_tent"
+    ],
     "title": "O Celeiro Devorado",
     "text": "Um camponês magro vem correndo, abano na mão. \"Senhor(a)! Ratos gigantes no celeiro! Comem tudo!\"",
     "flavor": "Sua única boia. Sem grão, a família não passa do inverno.",
@@ -1360,7 +1364,7 @@ window.__EXPLORACAO_EVENTS = {
           "text": "Vocês correm pro celeiro. Os ratos te atacam!",
           "combat": {
             "enemy_id": "rat_swarm",
-            "enemy_count": 1
+            "enemy_count": 3
           },
           "script": [
             {
@@ -1938,6 +1942,10 @@ window.__EXPLORACAO_EVENTS = {
     "id": "plains_ratswarm_barn_01",
     "biome": "plains",
     "type": "combat_optional",
+    "exclude_maps": [
+      "orc_tribe",
+      "orc_chief_tent"
+    ],
     "title": "O Celeiro Abandonado",
     "text": "Um celeiro solitário apodrece na planície, mas dentro dele há provisões preservadas e talvez algo mais de valor — e um guincho coletivo que faz o couro arrepiar. Um mar de ratos do tamanho de gatos cobre o assoalho, olhos vermelhos voltados para a porta onde você surgiu.",
     "flavor": "Os celeiros abandonados da planície viram reinos de ratos famintos. O que sobrou de valioso lá dentro divide espaço com dentes e doença.",
@@ -1958,7 +1966,7 @@ window.__EXPLORACAO_EVENTS = {
           "text": "Você entra de arma em punho, aço e botas abrindo caminho pela maré de pelos e dentes. Os ratos guincham e mordem, mas você alcança o que veio buscar e sai com o saque, ainda que marcado pelas mordidas.",
           "combat": {
             "enemy_id": "rat_swarm",
-            "enemy_count": 1
+            "enemy_count": 4
           },
           "script": [
             {
@@ -1996,7 +2004,7 @@ window.__EXPLORACAO_EVENTS = {
           "text": "O vento vira e sopra a fumaça de volta na sua cara, e os ratos, em vez de fugir, entram em pânico e atacam tudo que se move — inclusive você. A retirada apressada vira uma briga que você não escolheu.",
           "combat": {
             "enemy_id": "rat_swarm",
-            "enemy_count": 1
+            "enemy_count": 4
           },
           "script": [
             {

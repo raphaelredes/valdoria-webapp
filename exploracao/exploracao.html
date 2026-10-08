@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T18:08:47Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T18:55:54Z - do not edit directly, edit source -->
 
 
 
@@ -4359,6 +4359,9 @@ body.perf-lite .hud-cond-chip .dot, body.reduced-motion .hud-cond-chip .dot { an
   text-align: center;
   margin: 0 0 var(--v-space-lg, 12px) 0;
   text-shadow: 0 0 14px rgba(196,149,58,0.4), 0 1px 3px rgba(0,0,0,0.7);
+}
+#event-modal .event-title {
+  display: none !important;
 }
 .event-divider {
   display: flex;
@@ -34928,6 +34931,7 @@ const BIOME_WANDERING_ENCOUNTERS = {
 };
 
 function maybeRollWanderingMonster() {
+  if (S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent')) return false;
   if (S.steps < 3) return false;  // grace period no início do mapa
   if (S.ph !== 'idle') return false;  // não interrompe evento/combate
   // v12.7 (2026-05-06): user reportou "não está havendo encontros com combate".
@@ -37785,7 +37789,7 @@ function maybeRollEvent() {
   // Phase 3 dungeons AAA (2026-04-26): masmorras tem so encontros FIXOS via
   // dungeonEncounters. Eventos procedurais (mendigo, minstrel, mercador, etc)
   // sao do overworld — nao fazem sentido dentro de acampamento orc hostil.
-  if (S.mapDef && S.mapDef.dungeon) return false;
+  if (S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent')) return false;
   // 2026-04-27: spacing rule (3..7 hexes) — substitui EVENT_CHANCE.
   if (typeof S._stepsToNextEvent !== 'number') {
     _resetEventSpacing();
@@ -37802,6 +37806,13 @@ function maybeRollEvent() {
   const ids = Object.keys(EVENTS_POOL).filter(function(id) {
     const ev = EVENTS_POOL[id];
     if (ev.biome !== S.biome) return false;
+    if (ev.exclude_maps) {
+      if (Array.isArray(ev.exclude_maps)) {
+        if (ev.exclude_maps.includes(S.mapId)) return false;
+      } else {
+        if (ev.exclude_maps === S.mapId) return false;
+      }
+    }
     if (ev.requires_map) {
       if (Array.isArray(ev.requires_map)) {
         if (!ev.requires_map.includes(S.mapId)) return false;
@@ -38881,7 +38892,11 @@ function openEventModal() {
   ev._pickedFlavor = ev._pickedFlavor !== undefined ? ev._pickedFlavor : (ev.flavor_variants ? pickVariant(ev, 'flavor') : (ev.flavor || null));
   ev._pickedTitle = ev._pickedTitle || pickFamiliarityVariant(ev, 'title');
 
-  document.getElementById('event-title').textContent = ev._pickedTitle;
+  var _titleEl = document.getElementById('event-title');
+  if (_titleEl) {
+    _titleEl.textContent = ev._pickedTitle;
+    _titleEl.style.display = 'none';
+  }
   // PADRAO_ALDRIC (2026-06-21): banner do NPC (retrato+nome) se o evento tiver ev.npc.
   _renderEventNpcBanner(ev);
   // Narrativa: se o evento tem script[] ESTRUTURADO (narration/speech), renderiza no
@@ -39762,8 +39777,21 @@ function _explEventHeaderNpc(ev) {
     else npc.portrait = _explNormImgPath(npc.portrait);
     return npc;
   }
+  // Rótulo atmosférico não-spoiler quando não há NPC nomeado
+  var cat = (typeof inferCategory === 'function' && ev) ? inferCategory(ev) : (ev && ev.type);
+  var nonSpoilerNames = {
+    hazard: 'Ameaça no Caminho',
+    combat_forced: 'Perigo Iminente',
+    combat_optional: 'Presença Suspeita',
+    social: 'Encontro no Ermo',
+    discovery: 'Descoberta',
+    quest_hook: 'Rastro Misterioso',
+    lore: 'Ecos do Passado',
+    rest: 'Refúgio Provisório'
+  };
+  var defaultName = (nonSpoilerNames[ev && ev.type] || nonSpoilerNames[cat] || 'Acontecimento');
   return {
-    name: (ev && ev.title) ? ev.title : 'Perigo',
+    name: defaultName,
     portrait: portrait
   };
 }
