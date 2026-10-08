@@ -2280,6 +2280,686 @@ LOG SINK (Fase 7):
     }
     .cpp-btn-cancel:hover { border-color: #c4953a; color: #c4953a; }
 
+    /* ============================================================
+       === VÍNCULOS & ALIANÇAS — AAA RPG SYSTEM (Persona/Hades/BG3)
+       ============================================================ */
+    #relations-dossier-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 9400;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      background: rgba(10, 8, 6, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      animation: rdo-fade 0.2s ease-out;
+    }
+    #relations-dossier-overlay.active { display: flex; }
+    @keyframes rdo-fade {
+      0% { opacity: 0; transform: scale(0.97); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .rdo-modal {
+      width: 100%;
+      max-width: 530px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, rgba(34, 27, 20, 0.98) 0%, rgba(18, 14, 11, 0.99) 100%);
+      border: 1.5px solid var(--v-gold, #c4953a);
+      border-radius: 12px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.85), inset 0 0 16px rgba(196,149,58,0.15);
+      overflow: hidden;
+    }
+    .rdo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: linear-gradient(90deg, rgba(196,149,58,0.18), rgba(196,149,58,0.05));
+      border-bottom: 1px solid rgba(196,149,58,0.3);
+    }
+    .rdo-header-title {
+      font-family: 'Cinzel', serif;
+      font-size: var(--v-font-md, 14px);
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .rdo-close-btn {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(196,149,58,0.4);
+      color: #d4c8b0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.15s;
+    }
+    .rdo-close-btn:hover {
+      background: rgba(196,149,58,0.3);
+      color: #fff;
+      border-color: #c4953a;
+    }
+    .rdo-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 16px 18px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+    .rdo-profile {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .rdo-portrait-wrap {
+      position: relative;
+      width: 82px;
+      height: 82px;
+      flex-shrink: 0;
+    }
+    .rdo-portrait {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--v-gold, #c4953a);
+      box-shadow: 0 0 16px rgba(196,149,58,0.4), 0 4px 12px rgba(0,0,0,0.6);
+    }
+    .rdo-venue-badge {
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(16,12,8,0.92);
+      border: 1px solid var(--v-gold, #c4953a);
+      color: #f0e6d2;
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+    .rdo-meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .rdo-name {
+      font-family: 'Cinzel', serif;
+      font-size: var(--v-font-lg, 17px);
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 2px;
+      letter-spacing: 0.04em;
+    }
+    .rdo-role {
+      font-size: var(--v-font-sm, 12px);
+      color: var(--v-text-dim, #a09484);
+      margin-bottom: 5px;
+    }
+    .rdo-tier-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+      flex-wrap: wrap;
+    }
+    .rdo-stars {
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+    .rdo-tier-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(196,149,58,0.4);
+      background: rgba(196,149,58,0.12);
+    }
+    .rdo-rep-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .rdo-rep-pos {
+      color: #8fbf6a;
+      background: rgba(143,191,106,0.12);
+      border: 1px solid rgba(143,191,106,0.4);
+    }
+    .rdo-rep-neg {
+      color: #d08a6a;
+      background: rgba(208,138,106,0.12);
+      border: 1px solid rgba(208,138,106,0.4);
+    }
+    .rdo-gauge-container {
+      margin-top: 4px;
+    }
+    .rdo-gauge-bar {
+      height: 7px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(196,149,58,0.3);
+    }
+    .rdo-gauge-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 8px rgba(255,215,0,0.5);
+    }
+    .rdo-gauge-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--v-text-dim, #a09484);
+      margin-top: 3px;
+    }
+    .rdo-quote-box {
+      background: rgba(196,149,58,0.06);
+      border-left: 3px solid var(--v-gold, #c4953a);
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      font-style: italic;
+      font-size: var(--v-font-sm, 12px);
+      color: #eedcb2;
+      line-height: 1.45;
+    }
+    .rdo-sec-title {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .rdo-lore-box {
+      font-size: var(--v-font-sm, 12px);
+      color: var(--v-text, #d4c8b0);
+      line-height: 1.5;
+      background: rgba(0,0,0,0.25);
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(196,149,58,0.15);
+    }
+    .rdo-perk-card {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: linear-gradient(90deg, rgba(196,149,58,0.12), rgba(0,0,0,0.3));
+      border: 1px solid rgba(196,149,58,0.4);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .rdo-perk-ico {
+      font-size: 18px;
+      line-height: 1;
+    }
+    .rdo-perk-name {
+      font-family: 'Cinzel', serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #ffd700;
+      margin-bottom: 2px;
+    }
+    .rdo-perk-desc {
+      font-size: 11.5px;
+      color: #d4c8b0;
+      line-height: 1.4;
+    }
+    .rdo-dnd-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+    }
+    .rdo-dnd-cell {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(196,149,58,0.2);
+      border-radius: 6px;
+      padding: 6px 4px;
+      text-align: center;
+    }
+    .rdo-dnd-lbl {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--v-text-dim, #a09484);
+    }
+    .rdo-dnd-val {
+      font-size: 11px;
+      font-weight: 700;
+      color: #f0e6d2;
+      margin-top: 2px;
+    }
+    .rdo-roadmap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .rdo-milestone {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-size: 11.5px;
+    }
+    .rdo-milestone.unlocked {
+      background: rgba(196,149,58,0.1);
+      border-color: rgba(196,149,58,0.35);
+    }
+    .rdo-ms-num {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      width: 22px;
+      text-align: center;
+      color: var(--v-gold, #c4953a);
+    }
+    .rdo-ms-info {
+      flex: 1;
+    }
+    .rdo-ms-title {
+      font-weight: 600;
+      color: #e8dcc8;
+    }
+    .rdo-ms-desc {
+      font-size: 10.5px;
+      color: var(--v-text-dim, #a09484);
+    }
+    .rdo-ms-status {
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .rdo-milestone.unlocked .rdo-ms-status {
+      color: #8fbf6a;
+    }
+    .rdo-milestone.locked .rdo-ms-status {
+      color: #7a6850;
+    }
+    .rdo-footer {
+      display: flex;
+      gap: 8px;
+      padding: 12px 18px;
+      background: rgba(18,14,11,0.95);
+      border-top: 1px solid rgba(196,149,58,0.25);
+    }
+    .rdo-btn {
+      flex: 1;
+      padding: 10px 10px;
+      border-radius: 6px;
+      font-family: 'Cinzel', serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .rdo-btn-back {
+      background: rgba(74,56,40,0.5);
+      border: 1px solid #4a3828;
+      color: #a09484;
+    }
+    .rdo-btn-back:hover {
+      border-color: #c4953a;
+      color: #c4953a;
+    }
+    .rdo-btn-visit {
+      background: rgba(196,149,58,0.2);
+      border: 1px solid var(--v-gold, #c4953a);
+      color: #f0e6d2;
+    }
+    .rdo-btn-visit:hover {
+      background: rgba(196,149,58,0.35);
+      color: #fff;
+    }
+    .rdo-btn-talk {
+      background: linear-gradient(180deg, #c4953a 0%, #8b6420 100%);
+      border: 1px solid #ffd700;
+      color: #1a1510;
+      box-shadow: 0 4px 12px rgba(196,149,58,0.4);
+    }
+    .rdo-btn-talk:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(196,149,58,0.6);
+    }
+
+    /* Screen styles: .rel-hub */
+    .rel-hub {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 10px 6px 20px;
+      color: var(--v-text, #d4c8b0);
+      box-sizing: border-box;
+    }
+    .rel-header-banner {
+      background: linear-gradient(180deg, rgba(38,30,22,0.9), rgba(22,17,13,0.9));
+      border: 1px solid rgba(196,149,58,0.35);
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+    .rel-header-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .rel-header-title {
+      font-family: 'Cinzel', serif;
+      font-size: var(--v-font-lg, 16px);
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+    .rel-header-flavor {
+      font-size: var(--v-font-xs, 11.5px);
+      color: var(--v-text-dim, #a09484);
+      font-style: italic;
+      margin: 0 0 10px 0;
+    }
+    .rel-stats-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .rel-stat-pill {
+      flex: 1 1 90px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(196,149,58,0.25);
+      border-radius: 6px;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    .rel-stat-lbl {
+      font-size: 9.5px;
+      color: var(--v-text-dim, #a09484);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .rel-stat-val {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffd700;
+      margin-top: 1px;
+    }
+    .rel-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .rel-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .rel-tabs::-webkit-scrollbar { display: none; }
+    .rel-tab-btn {
+      padding: 5px 11px;
+      border-radius: 20px;
+      background: rgba(30,24,18,0.85);
+      border: 1px solid rgba(196,149,58,0.25);
+      color: var(--v-text-dim, #a09484);
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .rel-tab-btn.active {
+      background: rgba(196,149,58,0.25);
+      border-color: var(--v-gold, #c4953a);
+      color: #ffd700;
+      box-shadow: 0 0 10px rgba(196,149,58,0.25);
+    }
+    .rel-search-box {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(196,149,58,0.3);
+      border-radius: 6px;
+      color: #f0e6d2;
+      font-size: 12px;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .rel-search-box:focus {
+      border-color: var(--v-gold, #c4953a);
+      box-shadow: 0 0 8px rgba(196,149,58,0.3);
+    }
+    .rel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .rel-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: linear-gradient(160deg, rgba(34,26,20,0.95) 0%, rgba(18,14,11,0.98) 100%);
+      border: 1px solid rgba(196,149,58,0.35);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      box-sizing: border-box;
+    }
+    .rel-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--v-gold, #c4953a);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.7), 0 0 14px rgba(196,149,58,0.3);
+    }
+    .rel-card-top {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .rel-card-portrait-wrap {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+    }
+    .rel-card-portrait {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--v-gold, #c4953a);
+      box-shadow: 0 0 10px rgba(196,149,58,0.35);
+    }
+    .rel-card-venue-tag {
+      position: absolute;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14,10,7,0.92);
+      border: 1px solid rgba(196,149,58,0.5);
+      color: #eedcb2;
+      font-size: 8.5px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .rel-card-meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .rel-card-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .rel-card-name {
+      font-family: 'Cinzel', serif;
+      font-size: var(--v-font-md, 14.5px);
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .rel-card-role {
+      font-size: 11.5px;
+      color: var(--v-text-dim, #a09484);
+      margin: 1px 0 3px;
+    }
+    .rel-card-tier-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+    }
+    .rel-card-gauge {
+      height: 5px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid rgba(196,149,58,0.25);
+      margin-top: 4px;
+    }
+    .rel-card-gauge-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .rel-card-perk-ribbon {
+      background: rgba(196,149,58,0.08);
+      border: 1px solid rgba(196,149,58,0.25);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .rel-card-perk-title {
+      color: #ffd700;
+      font-weight: 700;
+      margin-bottom: 1px;
+    }
+    .rel-card-perk-desc {
+      color: #d4c8b0;
+      font-size: 10.5px;
+    }
+    .rel-card-quote {
+      font-style: italic;
+      font-size: 11px;
+      color: #a09484;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .rel-card-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: auto;
+    }
+    .rel-btn-card-dossier {
+      flex: 1;
+      padding: 7px 8px;
+      background: rgba(196,149,58,0.15);
+      border: 1px solid rgba(196,149,58,0.4);
+      color: #f0e6d2;
+      border-radius: 5px;
+      font-family: 'Cinzel', serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .rel-btn-card-dossier:hover {
+      background: rgba(196,149,58,0.3);
+      color: #fff;
+      border-color: #ffd700;
+    }
+    .rel-btn-card-talk {
+      flex: 1;
+      padding: 7px 8px;
+      background: linear-gradient(180deg, #c4953a 0%, #8b6420 100%);
+      border: 1px solid #c4953a;
+      color: #1a1510;
+      border-radius: 5px;
+      font-family: 'Cinzel', serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .rel-btn-card-talk:hover {
+      filter: brightness(1.15);
+    }
+    .rel-guide-strip {
+      margin-top: 14px;
+      background: linear-gradient(180deg, rgba(28,22,17,0.9), rgba(16,12,9,0.95));
+      border: 1px solid rgba(196,149,58,0.25);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .rel-guide-title {
+      font-family: 'Cinzel', serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      margin-bottom: 3px;
+    }
+    .rel-guide-desc {
+      font-size: 11px;
+      color: var(--v-text-dim, #a09484);
+      margin-bottom: 10px;
+    }
+    .rel-guide-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .rel-guide-btn {
+      padding: 6px 10px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(196,149,58,0.3);
+      border-radius: 6px;
+      color: #d4c8b0;
+      font-family: 'Cinzel', serif;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .rel-guide-btn:hover {
+      background: rgba(196,149,58,0.2);
+      border-color: var(--v-gold, #c4953a);
+      color: #fff;
+    }
+
     /* ===== Hall popup — Convocação do Aventureiro (Trocar Personagem) =====
        2026-06-07 (design judge-panel): popup épico de troca de personagem.
        Arte WebP da classe num medalhão circular (anel rúnico girando + brasão
@@ -8478,6 +9158,8 @@ body.perf-lite .vc-action-btn { transition: none; }
       </div>
       <div class="ndo-body" id="ndo-body"></div>
     </div>
+    <!-- Relations Dossier Overlay (AAA RPG Vínculos e Alianças) -->
+    <div id="relations-dossier-overlay"></div>
     <!-- Bottom Panel (footer estilo bot DEV — substituiu #footer-collapsible) -->
     <!-- Toggle (·) pra recolher menu — FORA do panel, acima dele (2026-05-04) -->
     <!-- 2026-05-18 preflight fix (check_webapp_immersive_mode_complete): aliases
@@ -19125,10 +19807,9 @@ var AREA_REGISTRY = {
     subkeys: [],
     status: 'ok'
   },
-  // === Vínculos (Fase 9.8 — 2026-05-02) ===
-  // Sem renderer dedicado canonical — usa renderSquareHub-like (services list)
+  // === Vínculos (Fase 9.8 — 2026-05-02 / Upgrade AAA RPG) ===
   'relations': {
-    renderer: 'renderSquareHub',  // reusa renderer compatível
+    renderer: 'renderRelationsScreen',
     mockBuilder: '_buildRelationsMockData',
     subkeys: [],
     status: 'ok'
@@ -22977,20 +23658,19 @@ var RELATIONS_NPCS = [
   { id: 'rel_thorne',  icon: '<img src="/shared/img/npcs/thorne-armeiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/npcs/thorne-armeiro.webp' },
   { id: 'rel_mirena',  icon: '<img src="/shared/img/merchants/mirena.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/merchants/mirena.webp' },
   { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Valeriax',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.webp' },
+  { id: 'rel_braun',   icon: '<img src="/shared/img/npcs/braun-quartelmestre.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Braun',       role: 'Quartel-mestre',   ref_id: 'guild_braun',     portraitImg: '/shared/img/npcs/braun-quartelmestre.webp' },
   { id: 'rel_eirik',   icon: '<img src="/shared/img/npcs/eirik-escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Eirik',           role: 'Escriba Rúnico',   ref_id: 'rune_eirik',      portraitImg: '/shared/img/npcs/eirik-escriba.webp' },
-  // Mercadores TIER 2.0 com reputação REAL no servidor (cartographer/jeweler/tentmaker em
-  // NPC_INFO) — antes AUSENTES do RELATIONS_NPCS → nunca apareciam em Vínculos mesmo com renome.
   { id: 'rel_corvus',   icon: '<img src="/shared/img/merchants/corvus-veltharion.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Corvus',   role: 'Cartógrafo', ref_id: 'market_corvus',   portraitImg: '/shared/img/merchants/corvus-veltharion.webp' },
   { id: 'rel_velithra', icon: '<img src="/shared/img/merchants/velithra.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',        name: 'Velithra', role: 'Joalheira',  ref_id: 'market_velithra', portraitImg: '/shared/img/merchants/velithra.webp' },
-  { id: 'rel_bjorn',    icon: '<img src="/shared/img/merchants/bjorn-anao.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Bjorn',    role: 'Tendeiro',   ref_id: 'market_bjorn',    portraitImg: '/shared/img/merchants/bjorn-anao.webp' }
+  { id: 'rel_bjorn',    icon: '<img src="/shared/img/merchants/bjorn-anao.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Bjorn',    role: 'Tendeiro',   ref_id: 'market_bjorn',    portraitImg: '/shared/img/merchants/bjorn-anao.webp' },
+  { id: 'rel_garrick',  icon: '<img src="/shared/img/npcs/mestre-garrick.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Mestre Garrick',role: 'Mestre Artífice', ref_id: 'workshop_garrick',portraitImg: '/shared/img/npcs/mestre-garrick.webp' },
+  { id: 'rel_olmiro',   icon: '<img src="/shared/img/npcs/olmiro-festeiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Olmiro',        role: 'Mestre Cerimônias',ref_id: 'festival_olmiro',portraitImg: '/shared/img/npcs/olmiro-festeiro.webp' },
+  { id: 'rel_vorhan',   icon: '<img src="/shared/img/npcs/mestre-vorhan.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Mestre Vorhan', role: 'Mestre da Arena',  ref_id: 'arena_vorhan',    portraitImg: '/shared/img/npcs/mestre-vorhan.webp' },
+  { id: 'rel_kaelen',   icon: '<img src="/shared/img/npcs/guarda-praca.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Capitão Kaelen',role: 'Oficial Recompensas', ref_id: 'square_kaelen',portraitImg: '/shared/img/npcs/guarda-praca.webp' }
 ];
 
-// (removido #92: _relationTier — tier 0-5 por contagem de diálogo — virou dead code quando
-//  Vínculos passou a tierar pela afinidade EFETIVA do servidor via _relAffTier; sem callers.)
-
 // #92b (2026-06-23): retratos dos NPCs do mundo-2 que aparecem na lista server-driven de
-// Vínculos (relations.list) mas NÃO estão no RELATIONS_NPCS. key (NPC_INFO) → slug WebP
-// (gerado por scripts/_gen_world2_relations_npcs.py). Sem entrada → ícone heráldico fallback.
+// Vínculos (relations.list) mas NÃO estão no RELATIONS_NPCS. key (NPC_INFO) → slug WebP.
 var NPC_PORTRAIT_BY_KEY = {
   npc_citizen_tessa: 'tessa-fruteira', npc_traveler_bram: 'bram-marinheiro',
   npc_citizen_lyra: 'lyra-costureira', npc_citizen_wenn: 'wenn-carpinteiro',
@@ -23005,66 +23685,257 @@ function _world2Portrait(key){
   return slug ? '/shared/img/npcs/' + slug + '.webp' : null;
 }
 
-// item F (2026-06-18): mapeia o id do RELATIONS_NPC → a key do NPC na afinidade
-// REAL do servidor (city_relationships_data.py NPC_INFO). Banqueiro e Escriba não
-// têm afinidade no servidor (não constam no sistema de relacionamento) → sem key.
+// Mapeamento enriquecido de lore, bênçãos e dados D&D 5e dos NPCs da cidade.
+var CITY_NPC_DETAILS = {
+  npc_temple_elara: {
+    name: 'Irmã Elara', role: 'Sacerdotisa', venue: 'temple', venue_label: 'Templo dos Quatro', category: 'sacred',
+    perk: 'Bênção Fraternal — Preces e auxílio em bálsamos curativos com menor custo',
+    lore: 'Sacerdotisa devota do Templo dos Quatro, conhecida por acolher feridos e andarilhos com voz mansa e mãos curativas.',
+    quote: 'A luz dos deuses acolhe até os passos mais fatigados da estrada.',
+    portrait: '/shared/img/npcs/irma-elara.webp'
+  },
+  npc_tavern_grom: {
+    name: 'Grom, o Caolho', role: 'Taverneiro', venue: 'tavern', venue_label: 'Taverna do Javali', category: 'social',
+    perk: 'Boatos da Caneca — Rumores frescos de missões e refeições revigorantes',
+    lore: 'Veterano de barba grisalha e olhar aguçado que comanda o balcão da taverna mais movimentada do condado.',
+    quote: 'Aqui entra quem tem sede e fica quem sabe escutar. Você conquistou meu respeito, amigo.',
+    portrait: '/shared/img/npcs/grom-o-caolho-v2.webp'
+  },
+  npc_inn_martha: {
+    name: 'Martha', role: 'Estalajadeira', venue: 'inn', venue_label: 'Estalagem da Pena-Dourada', category: 'social',
+    perk: 'Lareira da Colina — Repouso revigorante e acolhimento dedicado',
+    lore: 'A matriarca da estalagem, cuja hospitalidade já salvou incontáveis comitivas nas noites de neblina e tempestade.',
+    quote: 'Uma lareira quente e um colchão de palha limpa fazem qualquer estrada valer a pena.',
+    portrait: '/shared/img/npcs/estalajadeira.webp'
+  },
+  npc_gate_aldric: {
+    name: 'Guarda Aldric', role: 'Capitão dos Portões', venue: 'gates', venue_label: 'Portões da Cidade', category: 'civic',
+    perk: 'Alerta da Sentinela — Avisos de patrulha e passagem desimpedida',
+    lore: 'Guarda veterano da vigília municipal, de olhar vigilante e postura inabalável na defesa das muralhas de Valdoria.',
+    quote: 'Nossas muralhas protegem os justos. Saber que você vigia a estrada tranquiliza meu turno.',
+    portrait: '/shared/img/npcs/guarda-aldric.webp'
+  },
+  npc_guild_tavira: {
+    name: 'Tavira Valeriax', role: 'Mestra da Guilda', venue: 'guild', venue_label: 'Guilda dos Mercenários', category: 'civic',
+    perk: 'Contratos de Honra — Prioridade em expedições e taxas sindicais reduzidas',
+    lore: 'Líder respeitada dos aventureiros que jurou nunca mais deixar um companheiro sem apoio ou justiça nas estradas.',
+    quote: 'A guilda não é feita de pedras ou brasões; é feita da palavra de quem empunha o aço.',
+    portrait: '/shared/img/npcs/mestra-tavira.webp'
+  },
+  npc_guild_braun: {
+    name: 'Braun', role: 'Quartel-mestre', venue: 'guild', venue_label: 'Guilda dos Mercenários', category: 'civic',
+    perk: 'Logística Militar — Equipamentos de campo e rações de marcha inspecionadas',
+    lore: 'Intendente severo e calculista responsável pelo arsenal e pelas provisões de campanha da guilda.',
+    quote: 'Sem provisões uma tropa tomba antes da primeira flecha. Respeite a intendência.',
+    portrait: '/shared/img/npcs/braun-quartelmestre.webp'
+  },
+  blacksmith: {
+    name: 'Thorne', role: 'Ferreiro', venue: 'market', venue_label: 'Mercado Central', category: 'craft',
+    perk: 'Afiação de Batalha — Desconto no forjamento e reparo de armas e armaduras',
+    lore: 'Ferreiro forte e compenetrado que forja lâminas e cotas de malha confiáveis para quem desafia o perigo.',
+    quote: 'Arma boa canta no choque; armadura boa aguenta o tranco. Meu aço não vai te desapontar.',
+    portrait: '/shared/img/npcs/thorne-armeiro.webp'
+  },
+  alchemist: {
+    name: 'Mirena', role: 'Alquimista', venue: 'market', venue_label: 'Mercado Central', category: 'craft',
+    perk: 'Reserva Botânica — Acesso a ervas raras e desconto em elixires de cura',
+    lore: 'Herbalista astuta cercada de retortas de vidro e raízes suspensas para secagem no coração do mercado.',
+    quote: 'A natureza dá o veneno e o remédio na mesma folha; basta saber destilar com paciência.',
+    portrait: '/shared/img/merchants/mirena.webp'
+  },
+  cartographer: {
+    name: 'Corvus', role: 'Cartógrafo', venue: 'market', venue_label: 'Mercado Central', category: 'craft',
+    perk: 'Trilhas Ocultas — Desconto em cartas geográficas e anotações de atalhos',
+    lore: 'Erudito de monóculo cuja vida inteira foi dedicada a mapear cada colina, ruína e encruzilhada de Valdoria.',
+    quote: 'Quem viaja sem mapa caminha em círculos; quem viaja com sabedoria chega antes da noite.',
+    portrait: '/shared/img/merchants/corvus-veltharion.webp'
+  },
+  jeweler: {
+    name: 'Velithra', role: 'Joalheira', venue: 'market', venue_label: 'Mercado Central', category: 'craft',
+    perk: 'Lapidação Mágica — Avaliação de gemas brutas e joias com infusão mineral',
+    lore: 'Joalheira de olhar cirúrgico que enxerga o coração lapidado até na rocha mais opaca das minas.',
+    quote: 'A pedra bruta suporta a pressão até reluzir. Sua evolução me lembra um bom diamante.',
+    portrait: '/shared/img/merchants/velithra.webp'
+  },
+  tentmaker: {
+    name: 'Bjorn', role: 'Tendeiro', venue: 'market', venue_label: 'Mercado Central', category: 'craft',
+    perk: 'Equipamento de Marcha — Mochilas resistentes e tendas contra intempéries',
+    lore: 'Anão curtidor que entende o valor inestimável de uma lona impermeável quando a tempestade desaba.',
+    quote: 'O vento uiva lá fora, mas debaixo de uma boa lona ninguém perde o sono nem o fogo.',
+    portrait: '/shared/img/merchants/bjorn-anao.webp'
+  },
+  npc_workshop_garrick: {
+    name: 'Mestre Garrick', role: 'Mestre Artífice', venue: 'workshop', venue_label: 'Oficina de Artesanato', category: 'craft',
+    perk: 'Segredo da Bigorna — Têmpera avançada e receitas exclusivas de forja',
+    lore: 'Artesão meticuloso cujas engrenagens e forjas produzem as ferramentas mais refinadas do reino.',
+    quote: 'Uma peça bem ajustada dura gerações. A pressa é inimiga da perfeição mecânica.',
+    portrait: '/shared/img/npcs/mestre-garrick.webp'
+  },
+  npc_bank_aldwin: {
+    name: 'Aldwin de Tholram', role: 'Banqueiro', venue: 'bank', venue_label: 'Casa de Tholram', category: 'civic',
+    perk: 'Linha de Crédito — Cofres seguros, empréstimos amigáveis e rendimentos maiores',
+    lore: 'Patrício de gestos comedidos que gerencia os depósitos e a circulação de moedas de ouro em Valdoria.',
+    quote: 'Ouro parado adoece; ouro sob custódia prospera. Seus depósitos estão seguros comigo.',
+    portrait: '/shared/img/npcs/banqueiro.webp'
+  },
+  npc_rune_eirik: {
+    name: 'Eirik', role: 'Escriba Rúnico', venue: 'rune', venue_label: 'Santuário das Runas', category: 'sacred',
+    perk: 'Tinta Arcana — Desconto na inscrição de pergaminhos e identificação de glifos',
+    lore: 'Sábio de olhar penetrante que domina os segredos da escrita mística e das runas antigas.',
+    quote: 'Cada traço rúnico prende uma fagulha do éter. Cuidado com o que você pronuncia ao ler.',
+    portrait: '/shared/img/npcs/eirik-escriba.webp'
+  },
+  npc_festival_olmiro: {
+    name: 'Olmiro', role: 'Mestre de Cerimônias', venue: 'festival', venue_label: 'Praça do Festival', category: 'social',
+    perk: 'Espírito Festivo — Vales de diversão e chances extras em jogos festivos',
+    lore: 'Festeiro carismático de roupas espalhafatosas que contagia a praça com jogos e gargalhadas.',
+    quote: 'A vida nas estradas é dura demais para passar sem dançar e erguer um brinde à lua!',
+    portrait: '/shared/img/npcs/olmiro-festeiro.webp'
+  },
+  npc_arena_vorhan: {
+    name: 'Mestre Vorhan', role: 'Mestre da Arena', venue: 'arena', venue_label: 'Fosso de Combate', category: 'civic',
+    perk: 'Técnica de Fosso — Bônus de postura tática e acesso prioritário a torneios',
+    lore: 'Gladiador coroado repleto de cicatrizes de batalha que ensina o valor da esquiva e da guarda alta.',
+    quote: 'A areia da arena não aceita desculpas. Quem sangra junto comigo merece meu respeito.',
+    portrait: '/shared/img/npcs/mestre-vorhan.webp'
+  },
+  npc_square_bounty_officer: {
+    name: 'Capitão Kaelen', role: 'Oficial de Recompensas', venue: 'square', venue_label: 'Praça Central', category: 'civic',
+    perk: 'Despacho do Capitão — Recompensas adicionais em caçadas e desafios cívicos',
+    lore: 'Oficial pragmático da vigília encarregado dos editais e caçadas aos perigos que cercam Valdoria.',
+    quote: 'A ordem de Valdoria depende de homens e mulheres corajosos. Traga resultados e terá ouro.',
+    portrait: '/shared/img/npcs/guarda-praca.webp'
+  },
+  npc_citizen_tessa: {
+    name: 'Tessa', role: 'Fruteira', venue: 'market', venue_label: 'Mercado Central', category: 'citizen',
+    perk: 'Frutas da Estação — Provisões frescas que aliviam cansaço da marcha',
+    lore: 'Comerciante sorridente da feira livre com as maçãs e bagas mais frescas dos pomares do leste.',
+    quote: 'Coma uma maçã doce antes de pegar a estrada, viajante! Faz bem pro espírito.',
+    portrait: '/shared/img/npcs/tessa-fruteira.webp'
+  },
+  npc_citizen_lyra: {
+    name: 'Lyra', role: 'Costureira', venue: 'market', venue_label: 'Mercado Central', category: 'citizen',
+    perk: 'Ponto Firme — Remendos rápidos e bolsos secretos em mantos de viagem',
+    lore: 'Costureira detalhista capaz de remendar capas rasgadas por garras de feras sem deixar marca.',
+    quote: 'Um bom ponto de linha sustenta a capa contra o vento mais cortante do inverno.',
+    portrait: '/shared/img/npcs/lyra-costureira.webp'
+  },
+  npc_citizen_berta: {
+    name: 'Berta', role: 'Cozinheira da Estalagem', venue: 'inn', venue_label: 'Estalagem da Colina', category: 'social',
+    perk: 'Caldo de Caldeirão — Refeições quentes que restauram vigor e ânimo',
+    lore: 'Cozinheira calorosa e de riso fácil que governa os caldeirões de ensopado da estalagem com maestria.',
+    quote: 'Barriga vazia não empunha espada direito! Sente-se e tome uma tigela bem servida.',
+    portrait: '/shared/img/npcs/berta-cozinheira.webp'
+  },
+  npc_citizen_greta: {
+    name: 'Greta', role: 'Padeira', venue: 'market', venue_label: 'Mercado Central', category: 'citizen',
+    perk: 'Pão de Centeio — Pães densos e nutritivos de longa durabilidade',
+    lore: 'Padeira enérgica cujas fornadas ao amanhecer perfumam quarteirões inteiros com aroma de fermento e trigo.',
+    quote: 'Pão fresco saindo do forno de lenha! Nada acalma a alma como uma fatia crocante.',
+    portrait: '/shared/img/npcs/greta-padeira.webp'
+  },
+  npc_traveler_bram: {
+    name: 'Bram', role: 'Marinheiro Viajante', venue: 'tavern', venue_label: 'Taverna do Javali', category: 'social',
+    perk: 'Navegação Costeira — Relatos de rotas marítimas e marés favoráveis',
+    lore: 'Lobo do mar de pele curtida pelo sal e olhos azuis que já cruzou arquipélagos proibidos e costas esquecidas.',
+    quote: 'O mar cobra seu preço, mas quem conhece o vento nunca se perde no horizonte.',
+    portrait: '/shared/img/npcs/bram-marinheiro.webp'
+  },
+  npc_traveler_olen: {
+    name: 'Olen', role: 'Trovador Andarilho', venue: 'tavern', venue_label: 'Taverna do Javali', category: 'social',
+    perk: 'Balada da Estrada — Inspiração lírica que eleva a moral do grupo',
+    lore: 'Bardo itinerante com alaúde de jacarandá que troca canções e lendas por uma caneca de hidromel.',
+    quote: 'Toda grande jornada merece uma balada à altura. Deixe-me cantar sobre seus passos.',
+    portrait: '/shared/img/npcs/olen-trovador.webp'
+  },
+  npc_beggar_kira: {
+    name: 'Kira', role: 'Olhos das Vielas', venue: 'square', venue_label: 'Praça Central', category: 'social',
+    perk: 'Sussurro das Sombras — Avisos discretos sobre patrulhas e vigaristas nas vielas',
+    lore: 'Jovem atenta que conhece cada telhado, duto e beco escuro da cidade baixa.',
+    quote: 'Quem ninguém nota enxerga tudo. Uma moeda de cobre e eu te conto o que vi ontem à noite.',
+    portrait: '/shared/img/npcs/kira-mendiga.webp'
+  },
+  npc_druid_sylthara: {
+    name: 'Sylthara', role: 'Guardiã do Bosque', venue: 'gates', venue_label: 'Portões da Cidade', category: 'sacred',
+    perk: 'Comunhão da Terra — Sabedoria sobre ervas silvestres e rastros na mata',
+    lore: 'Druida silenciosa vestida em folhagens secas que vigia os limites entre a civilização e a mata densa.',
+    quote: 'A terra sente cada passo pesado. Trate as raízes com respeito e a floresta te guiará.',
+    portrait: '/shared/img/npcs/sylthara-druida.webp'
+  }
+};
+
 var REL_SERVER_KEY = {
   rel_martha: 'npc_inn_martha', rel_grom: 'npc_tavern_grom', rel_aldric: 'npc_gate_aldric',
   rel_elara: 'npc_temple_elara', rel_thorne: 'blacksmith', rel_mirena: 'alchemist',
-  rel_tavira: 'npc_guild_tavira',
-  rel_corvus: 'cartographer', rel_velithra: 'jeweler', rel_bjorn: 'tentmaker'
+  rel_tavira: 'npc_guild_tavira', rel_braun: 'npc_guild_braun',
+  rel_corvus: 'cartographer', rel_velithra: 'jeweler', rel_bjorn: 'tentmaker',
+  rel_aldwin: 'npc_bank_aldwin', rel_eirik: 'npc_rune_eirik',
+  rel_garrick: 'npc_workshop_garrick', rel_olmiro: 'npc_festival_olmiro',
+  rel_vorhan: 'npc_arena_vorhan', rel_kaelen: 'npc_square_bounty_officer'
 };
-// item F: tier por afinidade 0-100 (espelha AFFINITY_TIERS do servidor). Um NPC que
-// aparece aqui JÁ foi conhecido (afinidade registrada) → mínimo "Conhecido", nunca
-// "Estranho" (estranhos são FILTRADOS — sem spoiler de quem nunca se encontrou).
+
 function _relAffTier(aff){
-  aff = aff || 0;
-  if (aff >= 80) return { label: 'Amigo Próximo', stars: '★★★★★' };
-  if (aff >= 60) return { label: 'Familiar',      stars: '★★★★☆' };
-  if (aff >= 40) return { label: 'Confiante',     stars: '★★★☆☆' };
-  if (aff >= 20) return { label: 'Cordial',       stars: '★★☆☆☆' };
-  return                { label: 'Conhecido',     stars: '★☆☆☆☆' };
+  aff = (typeof aff === 'number') ? aff : 0;
+  if (aff >= 80) return { tier: 5, label: 'Aliado de Alma', stars: '★★★★★', color: '#ffd700', nextReq: null, nextLabel: 'No Auge' };
+  if (aff >= 60) return { tier: 4, label: 'Familiar',      stars: '★★★★☆', color: '#f3b23e', nextReq: 80,   nextLabel: 'Aliado de Alma' };
+  if (aff >= 40) return { tier: 3, label: 'Confiante',     stars: '★★★☆☆', color: '#7cdb7c', nextReq: 60,   nextLabel: 'Familiar' };
+  if (aff >= 20) return { tier: 2, label: 'Cordial',       stars: '★★☆☆☆', color: '#c4953a', nextReq: 40,   nextLabel: 'Confiante' };
+  return                { tier: 1, label: 'Conhecido',     stars: '★☆☆☆☆', color: '#a09484', nextReq: 20,   nextLabel: 'Cordial' };
+}
+
+function _relPortraitUrl(p){
+  if (!p) return '';
+  if (p.indexOf('http') === 0 || p.indexOf('/') === 0 || p.indexOf('../') === 0) return p;
+  if (p.indexOf('shared/img/') === 0) return '/' + p;
+  return '/shared/img/' + p;
 }
 
 function _buildRelationsMockData(player){
-  // item F (2026-06-18, SUPREME RULE #0): mostra SÓ NPCs com quem o personagem JÁ
-  // interagiu — afinidade/reputação REAIS (server-authoritative, hidratadas de
-  // player.narrative em metadata.npc_affinity/npc_reputation), OU diálogo já usado.
-  // ANTES listava TODOS os 9 fixos como "★☆☆☆☆ Estranho" — vazava NPCs nunca conhecidos.
   player = player || {};
-  // SERVER-DRIVEN (#92, 2026-06-23): em REMOTE a lista vem do SERVIDOR (CITY_SERVER_RELATIONS,
-  // montada de Player.narrative em relations.list) → QUALQUER NPC com reputação/afinidade real
-  // aparece, sem depender da lista hardcoded RELATIONS_NPCS. Retrato se o NPC está mapeado;
-  // senão ícone heráldico neutro (ic-dialogo). LOCAL (file://) cai na lógica client abaixo.
+  // SERVER-DRIVEN: lista autoritativa montada no backend a partir de Player.narrative
   if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()
       && Array.isArray(window.CITY_SERVER_RELATIONS)) {
     var _byKey = {};
     RELATIONS_NPCS.forEach(function(rn){ var k = REL_SERVER_KEY[rn.id]; if (k) _byKey[k] = rn; });
-    var _fallbackIco = (typeof _heralIco === 'function') ? _heralIco('ic-dialogo', null, '38px') : '';
     var srvServices = window.CITY_SERVER_RELATIONS.map(function(rel){
       var rn = _byKey[rel.key];
-      var w2 = rn ? null : _world2Portrait(rel.key);  // retrato do mundo-2 (#92b), se houver
-      var portraitImg = rn ? rn.portraitImg : w2;
-      var icon = rn ? rn.icon
-               : (w2 ? '<img src="' + w2 + '" alt="" style="width:38px;height:38px;object-fit:contain;">' : _fallbackIco);
+      var ext = CITY_NPC_DETAILS[rel.key] || {};
+      var w2 = rn ? null : _world2Portrait(rel.key);
+      var portraitImg = rel.portrait ? _relPortraitUrl(rel.portrait) : (rn ? rn.portraitImg : (w2 || ext.portrait));
       var eff = (typeof rel.eff_affinity === 'number') ? rel.eff_affinity : 50;
       var tier = _relAffTier(eff);
       var badge = tier.stars + ' ' + tier.label;
       if (typeof rel.reputation === 'number' && rel.reputation !== 0) badge += ' · Renome ' + (rel.reputation > 0 ? '+' : '') + rel.reputation;
       return {
-        icon: icon,
-        label: rel.name + ' (' + rel.role + ')',
+        key: rel.key,
+        id: rn ? rn.id : ('srv_' + rel.key),
+        name: rel.name || ext.name || 'Habitante',
+        role: rel.role || ext.role || 'Cidadão',
+        venue: rel.venue || ext.venue || '',
+        venue_label: rel.venue_label || ext.venue_label || 'Valdoria',
+        category: rel.category || ext.category || 'citizen',
+        perk: rel.perk || ext.perk || 'Aliança de Valdoria',
+        lore: rel.lore || ext.lore || '',
+        quote: rel.quote || ext.quote || '',
         cb: rn ? ('rel_view_' + rn.id) : ('rel_view_srv_' + rel.key),
-        badge: badge, _aff: eff,
+        badge: badge,
+        _aff: eff,
+        eff_affinity: eff,
+        reputation: rel.reputation,
+        encounters: rel.encounters || 0,
+        tier: tier,
         portraitImg: portraitImg
       };
     });
     return {
-      type: 'hub',
+      type: 'relations',
       flavor: '<i>Os laços que você cultivou em Valdoria. Diálogos e gestos genuínos constroem confiança.</i>',
-      services: srvServices
+      services: srvServices,
+      relations: srvServices
     };
   }
+
+  // LOCAL / MOCK FALLBACK
   var md = player.metadata || {};
   var aff = md.npc_affinity || {};
   var rep = md.npc_reputation || {};
@@ -23074,37 +23945,46 @@ function _buildRelationsMockData(player){
     return (sk && (sk in aff || sk in rep)) || ((dlg[r.ref_id] || []).length > 0);
   }).map(function(r){
     var sk = REL_SERVER_KEY[r.id];
+    var ext = (sk && CITY_NPC_DETAILS[sk]) ? CITY_NPC_DETAILS[sk] : {};
     var realAff = (sk && typeof aff[sk] === 'number');
     var repVal = (sk && typeof rep[sk] === 'number') ? rep[sk] : null;
-    // Estrelas por afinidade EFETIVA (0-100): afinidade REAL quando hidratada; senão
-    // derivada da REPUTAÇÃO (eixo real -100..+100) como delta do Neutro 50 → clamp(50 + rep/2);
-    // por último, sinal de diálogo aproximado. Assim a MAGNITUDE da reputação MOVE o tier
-    // (proporcional à escala real: rep ±20 cruza uma banda de 20), em vez de ancorar em Neutro fixo.
     var a = realAff ? aff[sk]
           : (repVal !== null) ? Math.max(0, Math.min(100, 50 + repVal / 2))
           : ((dlg[r.ref_id] || []).length * 12);
+    a = Math.max(0, Math.min(100, Math.round(a)));
     var tier = _relAffTier(a);
-    // Surface o Renome concreto (eixo distinto da afinidade) p/ a magnitude ser visível
-    // mesmo dentro de uma banda de estrelas (ex.: +5 e -1 caem em "Confiante", mas o nº difere).
     var badge = tier.stars + ' ' + tier.label;
     if (repVal !== null && repVal !== 0) badge += ' · Renome ' + (repVal > 0 ? '+' : '') + repVal;
     return {
-      icon: r.icon,
-      label: r.name + ' (' + r.role + ')',
+      key: sk || r.ref_id,
+      id: r.id,
+      name: ext.name || r.name,
+      role: ext.role || r.role,
+      venue: ext.venue || '',
+      venue_label: ext.venue_label || 'Valdoria',
+      category: ext.category || 'citizen',
+      perk: ext.perk || 'Aliança de Valdoria',
+      lore: ext.lore || '',
+      quote: ext.quote || '',
       cb: 'rel_view_' + r.id,
       badge: badge,
-      _aff: a
+      _aff: a,
+      eff_affinity: a,
+      reputation: repVal,
+      encounters: (dlg[r.ref_id] || []).length,
+      tier: tier,
+      portraitImg: ext.portrait ? _relPortraitUrl(ext.portrait) : r.portraitImg
     };
   }).sort(function(x, y){ return (y._aff || 0) - (x._aff || 0); });
+
   return {
-    type: 'hub',
+    type: 'relations',
     flavor: '<i>Os laços que você cultivou em Valdoria. Diálogos e gestos genuínos constroem confiança.</i>',
-    services: services
+    services: services,
+    relations: services
   };
 }
 
-// item F: empty-state ÉPICO (PADRAO_ALDRIC) — personagem ainda sem vínculos.
-// Substitui o genérico "Nada disponível no momento." do renderSquareHub.
 function _relationsRenderEmpty(container){
   if (!container) return;
   while (container.firstChild) container.removeChild(container.firstChild);
@@ -23117,6 +23997,452 @@ function _relationsRenderEmpty(container){
     +     'fa&ccedil;a perguntas genu&iacute;nas, e seus v&iacute;nculos surgir&atilde;o nestas p&aacute;ginas.'
     +   '</p>'
     + '</div>';
+}
+
+// === DOSSIÊ DE ALIANÇA AAA (Persona / Hades / BG3) ===
+function _relationsShowDossier(npc, player){
+  if (!npc) return;
+  player = player || window.CITY_MOCK_PLAYER || {};
+  var ov = document.getElementById('relations-dossier-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'relations-dossier-overlay';
+    document.body.appendChild(ov);
+  }
+
+  var eff = (typeof npc._aff === 'number') ? npc._aff : ((typeof npc.eff_affinity === 'number') ? npc.eff_affinity : 50);
+  var tier = npc.tier || _relAffTier(eff);
+  var rep = npc.reputation;
+  var repBadge = '';
+  if (typeof rep === 'number' && rep !== 0) {
+    var cls = rep > 0 ? 'rdo-rep-pos' : 'rdo-rep-neg';
+    repBadge = '<span class="rdo-rep-badge ' + cls + '">Renome ' + (rep > 0 ? '+' : '') + rep + '</span>';
+  }
+
+  var nextTxt = tier.nextReq ? ('+' + (tier.nextReq - eff) + ' pts para ' + tier.nextLabel) : 'Vínculo no Auge (Máximo)';
+  var portraitSrc = _relPortraitUrl(npc.portrait || npc.portraitImg || '');
+
+  // Benefício e Perk
+  var perkText = npc.perk || 'Auxílio e acolhimento nas ruas de Valdoria.';
+  var perkParts = perkText.split('—');
+  var perkTitle = perkParts[0] ? perkParts[0].trim() : 'Bênção de Amizade';
+  var perkDesc = perkParts[1] ? perkParts[1].trim() : perkText;
+
+  // D&D 5e Social Attitude (DMG p. 244)
+  var dndAttitude = eff >= 80 ? 'Aliado de Alma' :
+                    eff >= 60 ? 'Leal' :
+                    eff >= 40 ? 'Amigável' :
+                    eff >= 20 ? 'Receptivo' : 'Indiferente';
+  var dndDC = eff >= 80 ? 'CD 5' :
+              eff >= 60 ? 'CD 8' :
+              eff >= 40 ? 'CD 10' :
+              eff >= 20 ? 'CD 12' : 'CD 15';
+  var dndDiscount = eff >= 80 ? '15%' :
+                    eff >= 60 ? '10%' :
+                    eff >= 40 ? '5%' :
+                    eff >= 20 ? 'Favores' : 'Padrão';
+  var dialoguesCount = npc.encounters || ((window._npcDialoguesUsed || {})[npc.key || npc.ref_id] || []).length || 0;
+
+  // Marcos de Afinidade I a V
+  var milestones = [
+    { num: 'I',   tierVal: 1, req: '0-19',   name: 'Conhecido',     desc: 'Primeiro contato e reconhecimento nas ruas de Valdoria.' },
+    { num: 'II',  tierVal: 2, req: '20-39',  name: 'Cordial',       desc: 'Saudações acolhedoras e atendimento prioritário em serviços.' },
+    { num: 'III', tierVal: 3, req: '40-59',  name: 'Confiante',     desc: 'Desconto de 5% no comércio e abertura de confidências pessoais.' },
+    { num: 'IV',  tierVal: 4, req: '60-79',  name: 'Familiar',      desc: 'Desconto de 10% e acesso a favores exclusivos de aliança.' },
+    { num: 'V',   tierVal: 5, req: '80-100', name: 'Aliado de Alma', desc: 'Desconto máximo de 15%, bênçãos permanentes e lealdade inabalável.' }
+  ];
+
+  var roadmapHtml = milestones.map(function(ms){
+    var isUnlocked = eff >= (ms.tierVal === 1 ? 0 : ms.tierVal === 2 ? 20 : ms.tierVal === 3 ? 40 : ms.tierVal === 4 ? 60 : 80);
+    var uCls = isUnlocked ? 'unlocked' : 'locked';
+    var stText = isUnlocked ? '✓ Desbloqueado' : '🔒 Bloqueado';
+    return '<div class="rdo-milestone ' + uCls + '">'
+      + '<span class="rdo-ms-num">' + ms.num + '</span>'
+      + '<div class="rdo-ms-info">'
+      +   '<div class="rdo-ms-title">' + ms.name + ' <span style="font-size:10px;color:var(--v-text-dim,#a09484);">(' + ms.req + ')</span></div>'
+      +   '<div class="rdo-ms-desc">' + ms.desc + '</div>'
+      + '</div>'
+      + '<span class="rdo-ms-status">' + stText + '</span>'
+      + '</div>';
+  }).join('');
+
+  var venueLabel = npc.venue_label || 'Valdoria';
+  var venueEmoji = npc.venue === 'temple' ? '🏛️' :
+                   npc.venue === 'tavern' ? '🍺' :
+                   npc.venue === 'inn' ? '🛏️' :
+                   npc.venue === 'gates' ? '🛡️' :
+                   npc.venue === 'guild' ? '⚔️' :
+                   npc.venue === 'market' ? '🛒' :
+                   npc.venue === 'workshop' ? '⚒️' :
+                   npc.venue === 'bank' ? '💰' :
+                   npc.venue === 'rune' ? '📜' :
+                   npc.venue === 'festival' ? '🎭' :
+                   npc.venue === 'arena' ? '🏟️' : '📍';
+
+  var dlgVenue = (npc.key && _REL_DIALOGUE_VENUE && _REL_DIALOGUE_VENUE[npc.key]) ? _REL_DIALOGUE_VENUE[npc.key] : null;
+
+  var html = ''
+    + '<div class="rdo-modal">'
+    +   '<div class="rdo-header">'
+    +     '<div class="rdo-header-title">⚜️ Dossiê de Aliança</div>'
+    +     '<button class="rdo-close-btn" id="rdo-close-x" type="button" aria-label="Fechar">✕</button>'
+    +   '</div>'
+    +   '<div class="rdo-body">'
+    +     '<div class="rdo-profile">'
+    +       '<div class="rdo-portrait-wrap">'
+    +         '<img class="rdo-portrait" src="' + portraitSrc + '" alt="' + npc.name + '" onerror="this.style.display=\'none\'" />'
+    +         '<span class="rdo-venue-badge">' + venueEmoji + ' ' + venueLabel + '</span>'
+    +       '</div>'
+    +       '<div class="rdo-meta">'
+    +         '<h4 class="rdo-name">' + npc.name + '</h4>'
+    +         '<div class="rdo-role">' + npc.role + ' · ' + venueLabel + '</div>'
+    +         '<div class="rdo-tier-row">'
+    +           '<span class="rdo-stars" style="color:' + tier.color + ';">' + tier.stars + '</span>'
+    +           '<span class="rdo-tier-badge" style="color:' + tier.color + ';">' + tier.label + '</span>'
+    +           repBadge
+    +         '</div>'
+    +         '<div class="rdo-gauge-container">'
+    +           '<div class="rdo-gauge-bar">'
+    +             '<div class="rdo-gauge-fill" style="width:' + eff + '%;background:linear-gradient(90deg,#8a5a18,' + tier.color + ');"></div>'
+    +           '</div>'
+    +           '<div class="rdo-gauge-labels">'
+    +             '<span>Afinidade ' + eff + ' / 100</span>'
+    +             '<span>' + nextTxt + '</span>'
+    +           '</div>'
+    +         '</div>'
+    +       '</div>'
+    +     '</div>'
+    +     (npc.quote ? ('<div class="rdo-quote-box">“' + npc.quote + '”</div>') : '')
+    +     (npc.lore ? ('<div><div class="rdo-sec-title">📖 Histórico & Personalidade</div><div class="rdo-lore-box">' + npc.lore + '</div></div>') : '')
+    +     '<div>'
+    +       '<div class="rdo-sec-title">✨ Bênção / Benefício Concedido</div>'
+    +       '<div class="rdo-perk-card">'
+    +         '<div class="rdo-perk-ico">✨</div>'
+    +         '<div>'
+    +           '<div class="rdo-perk-name">' + perkTitle + '</div>'
+    +           '<div class="rdo-perk-desc">' + perkDesc + '</div>'
+    +         '</div>'
+    +       '</div>'
+    +     '</div>'
+    +     '<div>'
+    +       '<div class="rdo-sec-title">⚖️ Dinâmica Social D&D 5e (DMG p. 244)</div>'
+    +       '<div class="rdo-dnd-grid">'
+    +         '<div class="rdo-dnd-cell"><div class="rdo-dnd-lbl">Atitude</div><div class="rdo-dnd-val" style="color:' + tier.color + ';">' + dndAttitude + '</div></div>'
+    +         '<div class="rdo-dnd-cell"><div class="rdo-dnd-lbl">CD Social</div><div class="rdo-dnd-val">' + dndDC + '</div></div>'
+    +         '<div class="rdo-dnd-cell"><div class="rdo-dnd-lbl">Desconto</div><div class="rdo-dnd-val" style="color:#ffd700;">' + dndDiscount + '</div></div>'
+    +         '<div class="rdo-dnd-cell"><div class="rdo-dnd-lbl">Diálogos</div><div class="rdo-dnd-val">' + dialoguesCount + '</div></div>'
+    +       '</div>'
+    +     '</div>'
+    +     '<div>'
+    +       '<div class="rdo-sec-title">🏆 Marcos de Afinidade</div>'
+    +       '<div class="rdo-roadmap">' + roadmapHtml + '</div>'
+    +     '</div>'
+    +   '</div>'
+    +   '<div class="rdo-footer">'
+    +     '<button class="rdo-btn rdo-btn-back" id="rdo-btn-back" type="button">Voltar</button>'
+    +     (npc.venue ? ('<button class="rdo-btn rdo-btn-visit" id="rdo-btn-visit" type="button">📍 Visitar Local</button>') : '')
+    +     (dlgVenue ? ('<button class="rdo-btn rdo-btn-talk" id="rdo-btn-talk" type="button">💬 Conversar Agora</button>') : '')
+    +   '</div>'
+    + '</div>';
+
+  ov.innerHTML = html;
+  ov.classList.add('active');
+
+  var _close = function(){ ov.classList.remove('active'); };
+  var closeX = document.getElementById('rdo-close-x');
+  if (closeX) closeX.onclick = _close;
+  var btnBack = document.getElementById('rdo-btn-back');
+  if (btnBack) btnBack.onclick = _close;
+
+  var btnVisit = document.getElementById('rdo-btn-visit');
+  if (btnVisit && npc.venue) {
+    btnVisit.onclick = function(){
+      _close();
+      if (typeof openCityPopup === 'function') openCityPopup(npc.venue);
+    };
+  }
+
+  var btnTalk = document.getElementById('rdo-btn-talk');
+  if (btnTalk && dlgVenue) {
+    btnTalk.onclick = function(){
+      _close();
+      if (typeof closeCityPopup === 'function') closeCityPopup(true);
+      if (typeof window._openCityDialogue === 'function') {
+        window._openCityDialogue(dlgVenue[0], dlgVenue[1], player);
+      }
+    };
+  }
+}
+
+// === TELA CANÔNICA DE VÍNCULOS AAA (Persona/Hades/BG3) ===
+function renderRelationsScreen(container, relData, player){
+  if (!container) return;
+  player = player || window.CITY_MOCK_PLAYER || {};
+  relData = relData || _buildRelationsMockData(player);
+  var list = (relData.relations || relData.services || []).slice();
+
+  while (container.firstChild) container.removeChild(container.firstChild);
+
+  // EMPTY STATE ÉPICO
+  if (!list || list.length === 0) {
+    var emptyHtml = ''
+      + '<div class="rel-hub">'
+      +   '<div class="rel-header-banner">'
+      +     '<div class="rel-header-title-row">'
+      +       '<h3 class="rel-header-title">Vínculos & Alianças</h3>'
+      +       '<span style="font-size:11px;color:var(--v-gold,#c4953a);font-weight:700;">0 Vínculos Ativos</span>'
+      +     '</div>'
+      +     '<p class="rel-header-flavor">Laços de confiança forjados pelas ruas e tavernas de Valdoria.</p>'
+      +   '</div>'
+      +   '<div class="subscreen" style="text-align:center;padding:28px 16px;background:rgba(20,16,12,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:10px;">'
+      +     '<div style="font-size:42px;color:var(--v-gold,#c4953a);opacity:0.85;margin-bottom:8px;line-height:1;">🏛️</div>'
+      +     '<div style="font-family:\'Cinzel\',serif;font-size:var(--v-font-lg,16px);font-weight:700;color:var(--v-gold,#c4953a);letter-spacing:1px;margin-bottom:10px;">O Pavilhão Aguarda Seus Laços</div>'
+      +     '<p style="font-size:var(--v-font-sm,12.5px);color:var(--v-text-dim,#a09484);line-height:1.6;max-width:320px;margin:0 auto 16px;">'
+      +       'Nenhum nome foi inscrito ainda. Os laços com os habitantes de Valdoria nascem da conversa, '
+      +       'da convivência e da ajuda mútua. Procure os cidadãos e mestres da cidade para iniciar suas primeiras alianças '
+      +       'e destravar bênçãos exclusivas.'
+      +     '</p>'
+      +     '<div style="font-family:\'Cinzel\',serif;font-size:12px;color:var(--v-gold,#c4953a);font-weight:700;margin-bottom:10px;">Onde Forjar Seus Primeiros Laços:</div>'
+      +     '<div class="rel-guide-buttons" style="justify-content:center;">'
+      +       '<button class="rel-guide-btn" type="button" data-venue="tavern">🍺 Taverna do Javali</button>'
+      +       '<button class="rel-guide-btn" type="button" data-venue="market">🛒 Mercado Central</button>'
+      +       '<button class="rel-guide-btn" type="button" data-venue="temple">🏛️ Templo dos Quatro</button>'
+      +       '<button class="rel-guide-btn" type="button" data-venue="gates">🛡️ Portões da Cidade</button>'
+      +       '<button class="rel-guide-btn" type="button" data-venue="guild">⚔️ Guilda dos Mercenários</button>'
+      +       '<button class="rel-guide-btn" type="button" data-venue="workshop">⚒️ Oficina de Artesanato</button>'
+      +       '<button class="rel-guide-btn" type="button" data-venue="inn">🛏️ Estalagem da Pena-Dourada</button>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+    container.innerHTML = emptyHtml;
+
+    container.querySelectorAll('.rel-guide-btn').forEach(function(btn){
+      btn.onclick = function(){
+        var venue = btn.getAttribute('data-venue');
+        if (venue && typeof openCityPopup === 'function') openCityPopup(venue);
+      };
+    });
+    return;
+  }
+
+  // TELA RICA COM CARDS AAA
+  var totalBonds = list.length;
+  var confidantsCount = list.filter(function(x){ return (x.tier && x.tier.tier >= 3) || (x._aff >= 40); }).length;
+  var repSum = list.reduce(function(acc, x){ return acc + (typeof x.reputation === 'number' ? x.reputation : 0); }, 0);
+
+  var craftCount = list.filter(function(x){ return x.category === 'craft'; }).length;
+  var civicCount = list.filter(function(x){ return x.category === 'civic' || x.category === 'sacred'; }).length;
+  var socialCount = list.filter(function(x){ return x.category === 'social' || x.category === 'citizen'; }).length;
+
+  var cardsHtml = list.map(function(item, idx){
+    var eff = (typeof item._aff === 'number') ? item._aff : ((typeof item.eff_affinity === 'number') ? item.eff_affinity : 50);
+    var tier = item.tier || _relAffTier(eff);
+    var rep = item.reputation;
+    var repBadge = '';
+    if (typeof rep === 'number' && rep !== 0) {
+      repBadge = '<span style="font-size:10px;font-weight:700;color:' + (rep > 0 ? '#8fbf6a' : '#d08a6a') + ';">Renome ' + (rep > 0 ? '+' : '') + rep + '</span>';
+    }
+
+    var nextInfo = tier.nextReq ? ('+' + (tier.nextReq - eff) + ' para ' + tier.nextLabel) : 'No Auge';
+    var portraitSrc = _relPortraitUrl(item.portrait || item.portraitImg || '');
+
+    var perkText = item.perk || 'Aliança cívica de Valdoria.';
+    var perkParts = perkText.split('—');
+    var perkTitle = perkParts[0] ? perkParts[0].trim() : 'Benefício de Aliança';
+    var perkDesc = perkParts[1] ? perkParts[1].trim() : perkText;
+
+    var venueLabel = item.venue_label || 'Valdoria';
+    var venueEmoji = item.venue === 'temple' ? '🏛️' :
+                     item.venue === 'tavern' ? '🍺' :
+                     item.venue === 'inn' ? '🛏️' :
+                     item.venue === 'gates' ? '🛡️' :
+                     item.venue === 'guild' ? '⚔️' :
+                     item.venue === 'market' ? '🛒' :
+                     item.venue === 'workshop' ? '⚒️' :
+                     item.venue === 'bank' ? '💰' :
+                     item.venue === 'rune' ? '📜' :
+                     item.venue === 'festival' ? '🎭' :
+                     item.venue === 'arena' ? '🏟️' : '📍';
+
+    var dlgVenue = (item.key && _REL_DIALOGUE_VENUE && _REL_DIALOGUE_VENUE[item.key]) ? _REL_DIALOGUE_VENUE[item.key] : null;
+
+    return ''
+      + '<div class="rel-card" data-idx="' + idx + '" data-cat="' + (item.category || 'citizen') + '" data-tier="' + tier.tier + '" data-search="' + (item.name + ' ' + item.role + ' ' + perkText).toLowerCase() + '">'
+      +   '<div class="rel-card-top">'
+      +     '<div class="rel-card-portrait-wrap">'
+      +       '<img class="rel-card-portrait" src="' + portraitSrc + '" alt="' + item.name + '" onerror="this.style.display=\'none\'" />'
+      +       '<span class="rel-card-venue-tag">' + venueEmoji + ' ' + venueLabel + '</span>'
+      +     '</div>'
+      +     '<div class="rel-card-meta">'
+      +       '<div class="rel-card-name-row">'
+      +         '<h4 class="rel-card-name">' + item.name + '</h4>'
+      +         repBadge
+      +       '</div>'
+      +       '<div class="rel-card-role">' + item.role + '</div>'
+      +       '<div class="rel-card-tier-line">'
+      +         '<span style="color:' + tier.color + ';letter-spacing:1px;">' + tier.stars + '</span>'
+      +         '<span style="color:' + tier.color + ';font-weight:700;">' + tier.label + '</span>'
+      +       '</div>'
+      +       '<div class="rel-card-gauge">'
+      +         '<div class="rel-card-gauge-fill" style="width:' + eff + '%;background:linear-gradient(90deg,#8a5a18,' + tier.color + ');"></div>'
+      +       '</div>'
+      +       '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--v-text-dim,#a09484);margin-top:2px;">'
+      +         '<span>' + eff + ' / 100</span>'
+      +         '<span>' + nextInfo + '</span>'
+      +       '</div>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="rel-card-perk-ribbon">'
+      +     '<div class="rel-card-perk-title">✨ ' + perkTitle + '</div>'
+      +     '<div class="rel-card-perk-desc">' + perkDesc + '</div>'
+      +   '</div>'
+      +   (item.quote ? ('<div class="rel-card-quote">“' + item.quote + '”</div>') : '')
+      +   '<div class="rel-card-actions">'
+      +     '<button class="rel-btn-card-dossier" type="button" data-action="dossier">🔍 Dossiê</button>'
+      +     (dlgVenue ? ('<button class="rel-btn-card-talk" type="button" data-action="talk">💬 Conversar</button>') : '')
+      +   '</div>'
+      + '</div>';
+  }).join('');
+
+  var fullHtml = ''
+    + '<div class="rel-hub">'
+    +   '<div class="rel-header-banner">'
+    +     '<div class="rel-header-title-row">'
+    +       '<h3 class="rel-header-title">Vínculos & Alianças</h3>'
+    +       '<span style="font-size:11px;color:var(--v-gold,#c4953a);font-weight:700;">' + totalBonds + ' Ativos</span>'
+    +     '</div>'
+    +     '<p class="rel-header-flavor">Laços de confiança forjados pelas ruas e tavernas de Valdoria.</p>'
+    +     '<div class="rel-stats-bar">'
+    +       '<div class="rel-stat-pill">'
+    +         '<div class="rel-stat-lbl">Total Alianças</div>'
+    +         '<div class="rel-stat-val">' + totalBonds + '</div>'
+    +       '</div>'
+    +       '<div class="rel-stat-pill">'
+    +         '<div class="rel-stat-lbl">Confidentes (T3+)</div>'
+    +         '<div class="rel-stat-val">' + confidantsCount + '</div>'
+    +       '</div>'
+    +       '<div class="rel-stat-pill">'
+    +         '<div class="rel-stat-lbl">Renome Cívico</div>'
+    +         '<div class="rel-stat-val" style="color:' + (repSum >= 0 ? '#8fbf6a' : '#d08a6a') + ';">' + (repSum > 0 ? '+' : '') + repSum + '</div>'
+    +       '</div>'
+    +     '</div>'
+    +   '</div>'
+    +   '<div class="rel-controls">'
+    +     '<div class="rel-tabs">'
+    +       '<button class="rel-tab-btn active" type="button" data-filter="all">Todos (' + totalBonds + ')</button>'
+    +       '<button class="rel-tab-btn" type="button" data-filter="confidants">Confidentes (' + confidantsCount + ')</button>'
+    +       '<button class="rel-tab-btn" type="button" data-filter="craft">Ofícios & Lojas (' + craftCount + ')</button>'
+    +       '<button class="rel-tab-btn" type="button" data-filter="civic">Cívicos & Fé (' + civicCount + ')</button>'
+    +       '<button class="rel-tab-btn" type="button" data-filter="social">Social & Taverna (' + socialCount + ')</button>'
+    +     '</div>'
+    +     '<input class="rel-search-box" id="rel-search-input" type="text" placeholder="🔍 Buscar por nome, ofício ou bênção..." />'
+    +   '</div>'
+    +   '<div class="rel-grid" id="rel-cards-grid">' + cardsHtml + '</div>'
+    +   '<div id="rel-no-results" style="display:none;text-align:center;padding:24px 10px;color:var(--v-text-dim,#a09484);font-style:italic;font-size:12px;">Nenhum vínculo encontrado para este filtro.</div>'
+    +   '<div class="rel-guide-strip">'
+    +     '<div class="rel-guide-title">🌟 Expandir Círculo de Alianças em Valdoria</div>'
+    +     '<div class="rel-guide-desc">Visite outras áreas da cidade para conversar, prestar auxílio e destravar bênçãos exclusivas:</div>'
+    +     '<div class="rel-guide-buttons">'
+    +       '<button class="rel-guide-btn" type="button" data-venue="tavern">🍺 Taverna</button>'
+    +       '<button class="rel-guide-btn" type="button" data-venue="market">🛒 Mercado</button>'
+    +       '<button class="rel-guide-btn" type="button" data-venue="temple">🏛️ Templo</button>'
+    +       '<button class="rel-guide-btn" type="button" data-venue="gates">🛡️ Portões</button>'
+    +       '<button class="rel-guide-btn" type="button" data-venue="guild">⚔️ Guilda</button>'
+    +       '<button class="rel-guide-btn" type="button" data-venue="workshop">⚒️ Oficina</button>'
+    +       '<button class="rel-guide-btn" type="button" data-venue="inn">🛏️ Estalagem</button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
+
+  container.innerHTML = fullHtml;
+
+  // Interações com cards e botões
+  var cards = container.querySelectorAll('.rel-card');
+  cards.forEach(function(card){
+    var idx = parseInt(card.getAttribute('data-idx'), 10);
+    var item = list[idx];
+    if (!item) return;
+
+    card.onclick = function(e){
+      // Se clicou em botão interno, deixa o botão cuidar
+      if (e.target && (e.target.tagName === 'BUTTON' || e.target.closest('button'))) return;
+      _relationsShowDossier(item, player);
+    };
+
+    var btnDossier = card.querySelector('[data-action="dossier"]');
+    if (btnDossier) {
+      btnDossier.onclick = function(e){
+        e.stopPropagation();
+        _relationsShowDossier(item, player);
+      };
+    }
+
+    var btnTalk = card.querySelector('[data-action="talk"]');
+    if (btnTalk) {
+      var dlgVenue = (item.key && _REL_DIALOGUE_VENUE && _REL_DIALOGUE_VENUE[item.key]) ? _REL_DIALOGUE_VENUE[item.key] : null;
+      btnTalk.onclick = function(e){
+        e.stopPropagation();
+        if (dlgVenue && typeof window._openCityDialogue === 'function') {
+          if (typeof closeCityPopup === 'function') closeCityPopup(true);
+          window._openCityDialogue(dlgVenue[0], dlgVenue[1], player);
+        }
+      };
+    }
+  });
+
+  // Filtros por abas e busca
+  var currentFilter = 'all';
+  var searchInput = container.querySelector('#rel-search-input');
+  var noResultsEl = container.querySelector('#rel-no-results');
+
+  var applyFilter = function(){
+    var q = (searchInput && searchInput.value || '').trim().toLowerCase();
+    var visibleCount = 0;
+
+    cards.forEach(function(card){
+      var cat = card.getAttribute('data-cat') || '';
+      var tierVal = parseInt(card.getAttribute('data-tier') || '1', 10);
+      var searchStr = card.getAttribute('data-search') || '';
+
+      var matchTab = false;
+      if (currentFilter === 'all') matchTab = true;
+      else if (currentFilter === 'confidants') matchTab = (tierVal >= 3);
+      else if (currentFilter === 'craft') matchTab = (cat === 'craft');
+      else if (currentFilter === 'civic') matchTab = (cat === 'civic' || cat === 'sacred');
+      else if (currentFilter === 'social') matchTab = (cat === 'social' || cat === 'citizen');
+
+      var matchQuery = (!q || searchStr.indexOf(q) >= 0);
+
+      if (matchTab && matchQuery) {
+        card.style.display = 'flex';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    if (noResultsEl) noResultsEl.style.display = visibleCount === 0 ? 'block' : 'none';
+  };
+
+  var tabBtns = container.querySelectorAll('.rel-tab-btn');
+  tabBtns.forEach(function(tb){
+    tb.onclick = function(){
+      tabBtns.forEach(function(b){ b.classList.remove('active'); });
+      tb.classList.add('active');
+      currentFilter = tb.getAttribute('data-filter') || 'all';
+      applyFilter();
+    };
+  });
+
+  if (searchInput) searchInput.oninput = applyFilter;
+
+  // Botões de navegação rápida do guia
+  container.querySelectorAll('.rel-guide-btn').forEach(function(btn){
+    btn.onclick = function(){
+      var venue = btn.getAttribute('data-venue');
+      if (venue && typeof openCityPopup === 'function') openCityPopup(venue);
+    };
+  });
 }
 
 // ============================================================================
@@ -51735,100 +53061,94 @@ var _REL_DIALOGUE_VENUE = {
   npc_inn_martha: ['inn', 'martha'],
   npc_tavern_grom: ['tavern', 'grom'],
   npc_gate_aldric: ['gates', 'aldric'],
+  npc_temple_elara: ['temple', 'elara'],
   npc_guild_tavira: ['guild', 'tavira'],
   npc_guild_braun: ['guild', 'braun'],
   npc_arena_vorhan: ['arena', 'vorhan'],
   npc_workshop_garrick: ['workshop', 'garrick'],
   npc_festival_olmiro: ['festival', 'olmiro'],
-  npc_bank_aldwin: ['bank', 'aldwin']
+  npc_bank_aldwin: ['bank', 'aldwin'],
+  npc_rune_eirik: ['rune', 'eirik'],
+  npc_square_bounty_officer: ['square', 'bounty_officer'],
+  blacksmith: ['market', 'thorne'],
+  alchemist: ['market', 'mirena'],
+  cartographer: ['market', 'corvus']
 };
 function _relationsShow(p, relId){
+  p = p || window.CITY_MOCK_PLAYER || {};
   var r = RELATIONS_NPCS.find(function(x){ return x.id === relId; });
-  // SERVER-DRIVEN (#92): NPC sem entrada em RELATIONS_NPCS (mundo-2, sem retrato) vem da lista
-  // do servidor (CITY_SERVER_RELATIONS) via cb 'rel_view_srv_<key>'. Sintetiza um `r` (ícone
-  // heráldico neutro, sem retrato) pra o resto da função renderizar do mesmo jeito.
   var srvRel = null;
-  if (!r && relId && relId.indexOf('srv_') === 0 && Array.isArray(window.CITY_SERVER_RELATIONS)) {
-    var _srvKey = relId.substring(4);
-    srvRel = window.CITY_SERVER_RELATIONS.find(function(x){ return x.key === _srvKey; });
-    if (srvRel) {
-      r = { id: relId, name: srvRel.name, role: srvRel.role, ref_id: srvRel.key,
-            icon: (typeof _heralIco === 'function') ? _heralIco('ic-dialogo', null, '96px') : '',
-            portraitImg: _world2Portrait(srvRel.key) };  // #92b: retrato real se houver, senão heráldico
-    }
+  var srvKey = null;
+
+  if (r) {
+    srvKey = REL_SERVER_KEY[r.id] || r.ref_id;
+  } else if (relId && relId.indexOf('srv_') === 0) {
+    srvKey = relId.substring(4);
+  } else if (relId && relId.indexOf('rel_view_srv_') === 0) {
+    srvKey = relId.substring(13);
+  } else if (relId && relId.indexOf('rel_view_') === 0) {
+    var subId = relId.substring(9);
+    r = RELATIONS_NPCS.find(function(x){ return x.id === subId; });
+    srvKey = r ? (REL_SERVER_KEY[r.id] || r.ref_id) : subId;
+  } else {
+    srvKey = relId;
   }
-  if (!r) return;
-  // SUPREME RULE #0 (2026-06-23): afinidade/tier vêm do SERVIDOR (Player.narrative, hidratado
-  // em metadata.npc_affinity/npc_reputation, ou da lista server-driven) — MESMA lógica do
-  // _buildRelationsMockData. ANTES o detalhe derivava o tier da CONTAGEM DE DIÁLOGO local,
-  // contradizendo a lista (um NPC com afinidade alta via quest aparecia "Estranho").
+
+  if (Array.isArray(window.CITY_SERVER_RELATIONS) && srvKey) {
+    srvRel = window.CITY_SERVER_RELATIONS.find(function(x){ return x.key === srvKey; });
+  }
+
+  var ext = (srvKey && typeof CITY_NPC_DETAILS !== 'undefined' && CITY_NPC_DETAILS[srvKey]) ? CITY_NPC_DETAILS[srvKey] : {};
+
+  var name = (srvRel && srvRel.name) || (r && r.name) || ext.name || srvKey || 'Habitante';
+  var role = (srvRel && srvRel.role) || (r && r.role) || ext.role || 'Cidadão';
+  var venue = (srvRel && srvRel.venue) || ext.venue || '';
+  var venue_label = (srvRel && srvRel.venue_label) || ext.venue_label || 'Valdoria';
+  var category = (srvRel && srvRel.category) || ext.category || 'citizen';
+  var perk = (srvRel && srvRel.perk) || ext.perk || 'Aliança de Valdoria';
+  var lore = (srvRel && srvRel.lore) || ext.lore || '';
+  var quote = (srvRel && srvRel.quote) || ext.quote || '';
+  var portrait = (srvRel && srvRel.portrait) || ext.portrait || (r && r.portraitImg) || _world2Portrait(srvKey) || '';
+
   var md = (p && p.metadata) || {};
   var aff = md.npc_affinity || {};
   var rep = md.npc_reputation || {};
-  var sk = REL_SERVER_KEY[relId] || (srvRel ? srvRel.key : null);
-  // P5c: venue do motor de diálogo (se o NPC for conversável) — só em REMOTE.
-  var _dlgVenue = (sk && _REL_DIALOGUE_VENUE[sk]
-      && typeof window._openCityDialogue === 'function'
-      && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())
-    ? _REL_DIALOGUE_VENUE[sk] : null;
-  var realAff = (sk && typeof aff[sk] === 'number');
-  var repVal = (sk && typeof rep[sk] === 'number') ? rep[sk]
+  var realAff = (srvKey && typeof aff[srvKey] === 'number');
+  var repVal = (srvKey && typeof rep[srvKey] === 'number') ? rep[srvKey]
              : (srvRel && typeof srvRel.reputation === 'number') ? srvRel.reputation : null;
-  var interactions = ((window._npcDialoguesUsed || {})[r.ref_id] || []).length;
-  // afinidade EFETIVA 0-100: real > server eff_affinity > reputação (delta do Neutro) > proxy de diálogo
-  var effAff = realAff ? aff[sk]
+  var interactions = ((window._npcDialoguesUsed || {})[(r ? r.ref_id : srvKey)] || []).length;
+
+  var effAff = realAff ? aff[srvKey]
              : (srvRel && typeof srvRel.eff_affinity === 'number') ? srvRel.eff_affinity
              : (repVal !== null) ? (50 + repVal / 2)
              : (interactions * 12);
-  effAff = Math.max(0, Math.min(100, effAff));
-  var tier = _relAffTier(effAff);  // {label, stars} — MESMO tier da lista (0-100, 5 bandas)
-  // Conta diálogos DESCOBERTOS (info secundária; NÃO dirige mais o tier)
-  var allNpcs = (typeof TAVERN_NPCS !== 'undefined' ? TAVERN_NPCS : [])
-    .concat(typeof MARKET_MERCHANTS !== 'undefined' ? MARKET_MERCHANTS : [])
-    .concat(typeof GUILD_NPCS !== 'undefined' ? GUILD_NPCS : [])
-    .concat(typeof RUNE_NPCS !== 'undefined' ? RUNE_NPCS : [])
-    .concat(typeof ARENA_NPCS !== 'undefined' ? ARENA_NPCS : [])
-    .concat(typeof GATES_NPCS !== 'undefined' ? GATES_NPCS : []);
-  var npcRef = allNpcs.find(function(n){ return n.id === r.ref_id; });
-  var totalDialogs = npcRef && npcRef.talkOptions ? npcRef.talkOptions.length : 0;
-  var iconHtml = r.icon;
-  if (r.portraitImg) {
-    iconHtml = '<img src="' + r.portraitImg + '" alt="' + r.name + '" ' +
-               'style="width:96px;height:96px;border-radius:50%;object-fit:cover;' +
-               'border:2px solid var(--v-gold,#c4953a);' +
-               'box-shadow:0 0 14px rgba(196,149,58,0.45),0 4px 14px rgba(0,0,0,0.5);" ' +
-               'loading="lazy" ' +
-               'onerror="this.style.display=\'none\'"/>';
+  effAff = Math.max(0, Math.min(100, Math.round(effAff)));
+  var tier = _relAffTier(effAff);
+
+  var unified = {
+    key: srvKey,
+    id: (r && r.id) || ('rel_' + srvKey),
+    name: name,
+    role: role,
+    venue: venue,
+    venue_label: venue_label,
+    category: category,
+    perk: perk,
+    lore: lore,
+    quote: quote,
+    portrait: _relPortraitUrl(portrait),
+    portraitImg: _relPortraitUrl(portrait),
+    _aff: effAff,
+    eff_affinity: effAff,
+    reputation: repVal,
+    tier: tier,
+    encounters: (srvRel && srvRel.encounters) || interactions
+  };
+
+  if (typeof _relationsShowDossier === 'function') {
+    _relationsShowDossier(unified, p);
+    return;
   }
-  var tierColor = effAff >= 80 ? '#ffd700' :
-                  effAff >= 60 ? '#c4953a' :
-                  effAff >= 40 ? '#a09484' : '#7a6850';
-  var affBar = '<div style="margin: var(--v-space-md, 8px) 0 var(--v-space-lg, 12px);background:rgba(0,0,0,0.4);height:6px;border-radius:3px;overflow:hidden;border:1px solid rgba(196,149,58,0.3);">' +
-               '<div style="width:' + effAff + '%;height:100%;background:linear-gradient(90deg,#8a5a18,' + tierColor + ');' +
-               'box-shadow:0 0 6px ' + tierColor + ';transition:width 0.3s ease;"></div></div>';
-  var repLine = (repVal !== null && repVal !== 0)
-    ? '<div style="color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md, 8px);">Renome: <b style="color:' + (repVal > 0 ? '#8fbf6a' : '#d08a6a') + ';">' + (repVal > 0 ? '+' : '') + repVal + '</b></div>'
-    : '';
-  _showInfoPopup({
-    icon: iconHtml, npc: r.name, title: 'Vínculo: ' + r.name,
-    desc: '<b style="color:' + tierColor + ';font-size:calc(14px * var(--v-font-scale, 1));letter-spacing:0.5px;">' + r.name + '</b> <span style="color:var(--v-text-dim, #a09484);">— ' + r.role + '</span><br>' +
-          '<div style="margin-top: var(--v-space-md, 8px);display:flex;justify-content:space-between;font-size:calc(12px * var(--v-font-scale, 1));">' +
-          '<span style="color:' + tierColor + ';font-weight:600;">' + tier.stars + ' ' + tier.label + '</span>' +
-          '<span style="color:var(--v-text-dim, #a09484);">Afinidade ' + Math.round(effAff) + '/100</span></div>' + affBar +
-          repLine +
-          '<div style="color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));margin-bottom: var(--v-space-md-lg, 10px);">Diálogos: <b style="color:var(--v-text, #d4c8b0);">' + interactions + '</b>' + (totalDialogs > 0 ? ' / ' + totalDialogs + ' descobertos' : '') + '</div>' +
-          (effAff < 20
-            ? '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(0,0,0,0.25);border-left:2px solid rgba(196,149,58,0.4);border-radius: var(--v-radius-xs, 4px);font-style:italic;color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));">Seu v&iacute;nculo com ' + r.name + ' ainda &eacute; incipiente. Converse, ajude e cumpra miss&otilde;es pra fortalec&ecirc;-lo.</div>'
-            : effAff >= 80
-              ? '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(196,149,58,0.12);border-left:2px solid ' + tierColor + ';border-radius: var(--v-radius-xs, 4px);font-style:italic;color:#f4d896;font-size:calc(12px * var(--v-font-scale, 1));">&#11088; V&iacute;nculo no auge. ' + r.name + ' confia plenamente em voc&ecirc;.</div>'
-              : '<div style="padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(0,0,0,0.25);border-left:2px solid ' + tierColor + ';border-radius: var(--v-radius-xs, 4px);font-style:italic;color:var(--v-text-dim, #a09484);font-size:calc(12px * var(--v-font-scale, 1));">Continue cultivando este v&iacute;nculo &mdash; gestos genu&iacute;nos e miss&otilde;es aprofundam a confian&ccedil;a de ' + r.name + '.</div>'),
-    // popup informativo (read-only) — esconde Confirmar redundante
-    singleButton: !_dlgVenue,
-    cancelLabel: 'Voltar',
-    // P5c: NPC de venue do motor → CTA "Conversar" abre o diálogo server-driven
-    confirmLabel: 'Conversar',
-    onConfirm: _dlgVenue ? function(){ window._openCityDialogue(_dlgVenue[0], _dlgVenue[1]); } : function(){}
-  });
 }
 
 // ============================================================================
@@ -54270,15 +55590,20 @@ function _renderCityPopup(key){
       return;
     }
   }
-  if (key === 'relations' && typeof renderSquareHub === 'function') {
-    if (titleEl) titleEl.textContent = 'Vínculos com NPCs';
-    // item F (2026-06-18): só NPCs já interagidos; vazio → empty-state ÉPICO.
-    // #92 (2026-06-23): em REMOTE re-busca a lista do SERVIDOR antes de renderizar (fresca
-    // após ganhar renome na sessão); LOCAL renderiza direto. Depois pinta (server > fallback).
+  if (key === 'relations') {
+    if (titleEl) titleEl.textContent = 'Vínculos & Alianças';
+    // AAA RPG Relationships System (Persona/Hades/BG3)
+    // Em REMOTE re-busca a lista do SERVIDOR antes de renderizar (fresca após ganhar renome);
+    // Renderiza a interface dedicada de cards e alianças.
     var _renderRel = function(){
       var relData = _buildRelationsMockData(window.CITY_MOCK_PLAYER);
-      if (!relData.services || relData.services.length === 0) _relationsRenderEmpty(bodyEl);
-      else renderSquareHub(bodyEl, relData);
+      if (typeof renderRelationsScreen === 'function') {
+        renderRelationsScreen(bodyEl, relData, window.CITY_MOCK_PLAYER);
+      } else if (!relData.services || relData.services.length === 0) {
+        _relationsRenderEmpty(bodyEl);
+      } else if (typeof renderSquareHub === 'function') {
+        renderSquareHub(bodyEl, relData);
+      }
     };
     if (typeof _refreshRelations === 'function' && window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
       _refreshRelations().then(_renderRel).catch(_renderRel);
