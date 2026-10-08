@@ -14951,6 +14951,7 @@ function _getFichaMember(idx){
       idx: 0, isPlayer: true,
       name: p.name || 'Aventureiro',
       cls: p.cls || 'mago', race: p.race || 'elfo',
+      subrace: p.subrace || '', subclass: p.subclass || '',
       level: p.level || 1,
       hp: p.hp || 28, hpMax: p.hpMax || 28,
       mp: p.mp || 12, mpMax: p.mpMax || 12,
@@ -14966,7 +14967,7 @@ function _getFichaMember(idx){
   }
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m) return null;
-  return Object.assign({ idx: idx, isPlayer: false, stats: _genFichaStats(m) }, m);
+  return Object.assign({ idx: idx, isPlayer: false, stats: _genFichaStats(m), subrace: m.subrace || '', subclass: m.subclass || '' }, m);
 }
 
 // FC2 (2026-06-07): explicações D&D 5e dos atributos e stats de combate da ficha.
@@ -14996,6 +14997,1128 @@ function _showFichaStatHelp(key){
     singleButton: true, cancelLabel: 'Entendi'
   });
 }
+
+// ============================================================================
+// D&D 5E INFORMAÇÕES TÉCNICAS: SALVAGUARDAS, RAÇAS, SUB-RAÇAS, CLASSES E SUB-CLASSES
+// ============================================================================
+
+function _raceCanonical(r){
+  var k = (r || '').toLowerCase().trim();
+  if (k === 'anao' || k === 'anão' || k === 'dwarf') return 'dwarf';
+  if (k === 'elfo' || k === 'elf') return 'elf';
+  if (k === 'humano' || k === 'human') return 'human';
+  if (k === 'halfling') return 'halfling';
+  if (k === 'gnomo' || k === 'gnome') return 'gnome';
+  if (k === 'meio-elfo' || k === 'meio_elfo' || k === 'halfelf' || k === 'half-elf') return 'halfelf';
+  if (k === 'meio-orc' || k === 'meio_orc' || k === 'halforc' || k === 'half-orc') return 'halforc';
+  if (k === 'tiefling') return 'tiefling';
+  if (k === 'draconato' || k === 'dragonborn') return 'dragonborn';
+  return k || 'human';
+}
+
+function _subraceLabelPT(sub, rKey){
+  if (!sub) return '';
+  var k = String(sub).toLowerCase().replace(/-/g, '_').trim();
+  var MAP = {
+    hill: 'Colina', anao_da_colina: 'Colina',
+    mountain: 'Montanha', anao_da_montanha: 'Montanha',
+    high: 'Alto Elfo', high_elf: 'Alto Elfo',
+    wood: 'Elfo da Floresta', wood_elf: 'Elfo da Floresta',
+    drow: 'Drow (Elfo Negro)', dark_elf: 'Drow',
+    lightfoot: 'Pés-Leves',
+    stout: 'Robusto',
+    rock: 'Das Rochas', rock_gnome: 'Das Rochas',
+    forest: 'Da Floresta', forest_gnome: 'Da Floresta',
+    standard: 'Padrão',
+    variant: 'Variante',
+    asmodeus: 'Linhagem de Asmodeus',
+    baalzebul: 'Linhagem de Baalzebul',
+    dispater: 'Linhagem de Dispater',
+    mephistopheles: 'Linhagem de Mephistopheles',
+    red: 'Vermelho (Fogo)', blue: 'Azul (Relâmpago)', white: 'Branco (Gelo)',
+    black: 'Negro (Ácido)', green: 'Verde (Veneno)', gold: 'Dourado (Fogo)',
+    silver: 'Prateado (Gelo)', bronze: 'Bronze (Relâmpago)', copper: 'Cobre (Ácido)',
+    brass: 'Latão (Fogo)'
+  };
+  return MAP[k] || (typeof _titleCase === 'function' ? _titleCase(sub) : sub);
+}
+
+function _subclassLabelPT(sub, cKey){
+  if (!sub) return '';
+  var k = String(sub).toLowerCase().replace(/-/g, '_').trim();
+  var MAP = {
+    evocation: 'Evocação', evoker: 'Evocação',
+    abjuration: 'Proteção Arcana', abjurer: 'Proteção Arcana',
+    necromancy: 'Necromancia', necromancer: 'Necromancia',
+    divination: 'Adivinhação', diviner: 'Adivinhação',
+    illusion: 'Ilusão', illusionist: 'Ilusão',
+    enchantment: 'Encantamento', enchanter: 'Encantamento',
+    transmutation: 'Transmutação', transmuter: 'Transmutação',
+    conjuration: 'Conjuração', conjurer: 'Conjuração',
+    champion: 'Campeão',
+    battle_master: 'Mestre de Batalha', battlemaster: 'Mestre de Batalha',
+    eldritch_knight: 'Cavaleiro Arcano',
+    thief: 'Ladrão',
+    assassin: 'Assassino',
+    arcane_trickster: 'Trapaceiro Arcano',
+    life: 'Domínio da Vida',
+    light: 'Domínio da Luz',
+    war: 'Domínio da Guerra',
+    knowledge: 'Domínio do Conhecimento',
+    nature: 'Domínio da Natureza',
+    tempest: 'Domínio da Tempestade',
+    trickery: 'Domínio da Trapaça',
+    devotion: 'Juramento de Devoção',
+    vengeance: 'Juramento de Vingança',
+    ancients: 'Juramento dos Anciões',
+    hunter: 'Caçador',
+    beast_master: 'Mestre das Feras',
+    gloom_stalker: 'Perseguidor Sombrio',
+    berserker: 'Caminho do Furioso',
+    totem: 'Guerreiro Totêmico',
+    zealot: 'Fanático',
+    lore: 'Colégio do Conhecimento',
+    valor: 'Colégio da Bravura',
+    swords: 'Colégio das Espadas',
+    moon: 'Círculo da Lua',
+    land: 'Círculo da Terra',
+    shepherd: 'Círculo do Pastor',
+    open_hand: 'Caminho da Mão Aberta', openhand: 'Caminho da Mão Aberta',
+    shadow: 'Caminho da Sombra',
+    four_elements: 'Quatro Elementos',
+    draconic: 'Linhagem Dracônica',
+    wild_magic: 'Magia Selvagem',
+    storm: 'Feitiçaria da Tempestade',
+    fiend: 'O Corruptor (Ínfero)',
+    archfey: 'A Arquifada',
+    great_old_one: 'O Grande Antigo'
+  };
+  return MAP[k] || (typeof _titleCase === 'function' ? _titleCase(sub) : sub);
+}
+
+var _DND_RACE_HELP = {
+  human: {
+    name: 'Humano (Human)',
+    desc: 'A raça mais adaptável e determinada dos Reinos. Mortais com ambição inabalável e engenhosidade diante de qualquer desafio.',
+    bonuses: '+1 em todos os 6 Atributos (Padrão) ou +1 em 2 Atributos + 1 Talento + 1 Perícia (Variante)',
+    speed: '9 metros (30 pés) · Tamanho Médio',
+    langs: 'Comum + 1 idioma adicional à sua escolha',
+    advantages: [
+      'Versatilidade Máxima: Beneficia qualquer classe e permite builds equilibradas sem lacunas.',
+      'Sem penalidades raciais ou restrições de armas.'
+    ],
+    disadvantages: [
+      'Ausência de Visão no Escuro natural: Depende de tochas, lâmpadas ou magias de luz em masmorras.',
+      'Não possui resistências inatas a danos elementais.'
+    ],
+    subraces: 'Humano Padrão (bônus universal) e Humano Variante (talento extra).'
+  },
+  dwarf: {
+    name: 'Anão (Dwarf)',
+    desc: 'Forjados na rocha das montanhas profundas. Famosos pela resistência sobre-humana, coragem estoica e mestria em armas e armaduras.',
+    bonuses: '+2 Constituição',
+    speed: '7,5 metros (25 pés) — deslocamento NUNCA é reduzido por armaduras pesadas · Tamanho Médio',
+    langs: 'Comum, Anão',
+    advantages: [
+      'Resiliência Anã: Vantagem em salvaguardas contra Veneno e Resistência a dano de veneno (dano cortado pela metade).',
+      'Visão no Escuro: Enxerga 18 metros na penumbra e escuridão.',
+      'Treinamento Anão em Armas: Proficiência com machados de batalha, machadinhas, martelos leves e martelos de guerra.',
+      'Conhecimento da Pedra: Dobra a proficiência em testes de História ligados a trabalhos em cantaria.'
+    ],
+    disadvantages: [
+      'Deslocamento base ligeiramente menor (7,5m) que aventureiros de 9m.'
+    ],
+    subraces: 'Anão da Colina (+1 SAB, +1 PV máximo por nível) e Anão da Montanha (+2 FOR, armaduras médias).'
+  },
+  elf: {
+    name: 'Elfo (Elf)',
+    desc: 'Povo ancestral de graça sobrenatural e sentidos aguçados, conectados à Agrestia das Fadas e à magia primordial.',
+    bonuses: '+2 Destreza',
+    speed: '9 metros (30 pés) · Tamanho Médio',
+    langs: 'Comum, Élfico',
+    advantages: [
+      'Ancestralidade Feérica: Vantagem em salvaguardas contra ser Enfeitiçado (Charm) e Imunidade absoluta a magias de sono!',
+      'Sentidos Aguçados: Proficiência gratuita na perícia Percepção (a mais exigida no jogo).',
+      'Visão no Escuro: Enxerga 18 metros na escuridão.',
+      'Transe: Não dorme. Medita profundamente por 4 horas obtendo descanso pleno.'
+    ],
+    disadvantages: [
+      'Menor resistência natural a dano bruto físico se não investir em Constituição.'
+    ],
+    subraces: 'Alto Elfo (+1 INT, truque arcano), Elfo da Floresta (+1 SAB, vel 10,5m, camuflagem) e Drow (+1 CAR, visão 36m, magias inatas).'
+  },
+  halfling: {
+    name: 'Halfling',
+    desc: 'Pequenos andarilhos de pés ligeiros e grande espírito. Sua sorte lendária e agilidade surpreendente desafiam perigos mortais.',
+    bonuses: '+2 Destreza',
+    speed: '7,5 metros (25 pés) · Tamanho Pequeno',
+    langs: 'Comum, Halfling',
+    advantages: [
+      'Sortudo: Ao rolar 1 natural no d20 (ataque, teste ou salvaguarda), você re-rola o dado obrigatoriamente!',
+      'Bravura: Vantagem em salvaguardas contra a condição Amedrontado (Medo).',
+      'Agilidade Pequenina: Pode se mover através do espaço de criaturas Maiores que você.'
+    ],
+    disadvantages: [
+      'Tamanho Pequeno: Ataques com armas da propriedade Pesada (Heavy, como espada larga ou machado grande) sofrem Desvantagem.',
+      'Deslocamento base de 7,5 metros.'
+    ],
+    subraces: 'Pés-Leves (+1 CAR, Furtividade Natural atrás de companheiros) e Robusto (+1 CON, vantagem e resistência a veneno).'
+  },
+  gnome: {
+    name: 'Gnomo (Gnome)',
+    desc: 'Mentes brilhantes, inventores obstinados e exploradores natos. Carregam energia vibrante e uma barreira mental inata contra feitiços.',
+    bonuses: '+2 Inteligência',
+    speed: '7,5 metros (25 pés) · Tamanho Pequeno',
+    langs: 'Comum, Gnômico',
+    advantages: [
+      'Astúcia Gnômica: Vantagem em TODAS as salvaguardas de Inteligência, Sabedoria e Carisma contra magias!',
+      'Visão no Escuro: Enxerga 18 metros na escuridão.'
+    ],
+    disadvantages: [
+      'Tamanho Pequeno: Desvantagem ao manejar armas da propriedade Pesada.',
+      'Deslocamento base de 7,5 metros.'
+    ],
+    subraces: 'Gnomo das Rochas (+1 CON, Ferramentas de Funileiro, engenhocas) e Gnomo da Floresta (+1 DES, truque Ilusão Menor, comunicação com pequenos animais).'
+  },
+  halfelf: {
+    name: 'Meio-Elfo (Half-Elf)',
+    desc: 'Caminhantes entre dois mundos, unindo a diplomacia e ambição humanas com a sensibilidade e graça mágica élfica.',
+    bonuses: '+2 Carisma e +1 em outros 2 atributos à sua escolha',
+    speed: '9 metros (30 pés) · Tamanho Médio',
+    langs: 'Comum, Élfico + 1 idioma adicional',
+    advantages: [
+      'Versatilidade em Perícias: Ganha proficiência em 2 perícias extras à sua escolha.',
+      'Ancestralidade Feérica: Vantagem contra ser Enfeitiçado e imunidade a sono mágico.',
+      'Visão no Escuro: Enxerga 18 metros na escuridão.',
+      'Distribuição flexível de atributos ideal para classes carismáticas (Bardo, Bruxo, Feiticeiro, Paladino).'
+    ],
+    disadvantages: [
+      'Não possui magias de dano inatas nem resistências a elementos específicos.'
+    ],
+    subraces: 'Linhagem Única com alta adaptabilidade.'
+  },
+  halforc: {
+    name: 'Meio-Orc (Half-Orc)',
+    desc: 'Combatentes ferozes de força avassaladora e determinação inquebrável, suportando golpes que abateriam mortais comuns.',
+    bonuses: '+2 Força, +1 Constituição',
+    speed: '9 metros (30 pés) · Tamanho Médio',
+    langs: 'Comum, Orc',
+    advantages: [
+      'Resistência Implacável: Ao ser reduzido a 0 PV sem morrer, você fica com 1 PV (1× por descanso longo).',
+      'Ataques Selvagens: Ao acertar um acerto crítico corpo-a-corpo, rola 1 dado de dano adicional da arma!',
+      'Ameaçador: Proficiência gratuita na perícia Intimidação.',
+      'Visão no Escuro: Enxerga 18 metros na escuridão.'
+    ],
+    disadvantages: [
+      'Sem bônus mentais para conjuração mágica, vocação primariamente voltada a combate físico.'
+    ],
+    subraces: 'Linhagem Única.'
+  },
+  tiefling: {
+    name: 'Tiefling',
+    desc: 'Portadores de herança infernal que reflete em seus chifres nobres, cauda e olhar marcante. Mestres em fogo e sombras.',
+    bonuses: '+2 Carisma, +1 Inteligência (Linhagem de Asmodeus)',
+    speed: '9 metros (30 pés) · Tamanho Médio',
+    langs: 'Comum, Infernal',
+    advantages: [
+      'Resistência Infernal: Resistência a dano de Fogo (sofre apenas metade do dano de um dos tipos mais comuns do jogo).',
+      'Legado Infernal: Magias inatas — Truque Taumaturgia (nv 1), Repreensão Infernal 3d10 (nv 3) e Escuridão (nv 5).',
+      'Visão no Escuro: Enxerga 18 metros na escuridão.'
+    ],
+    disadvantages: [
+      'Bônus focados em Carisma/Inteligência, sem atributos físicos nativos na linhagem clássica.'
+    ],
+    subraces: 'Linhagens Infernais: Asmodeus (fogo/escuridão), Baalzebul (veneno), Dispater (furtividade) e Mephistopheles (chamas arcanas).'
+  },
+  dragonborn: {
+    name: 'Draconato (Dragonborn)',
+    desc: 'Herdeiros dos dragões ancestrais com escamas grossas, porte régio e o poder elemental destruidor correndo nas veias.',
+    bonuses: '+2 Força, +1 Carisma',
+    speed: '9 metros (30 pés) · Tamanho Médio',
+    langs: 'Comum, Dracônico',
+    advantages: [
+      'Sopro Dracônico: Ataque em área (cone de 4,5m ou linha de 9m) causando 2d6 dano elemental (escala: 3d6 no nv 6, 4d6 no nv 11 e 5d6 no nv 16).',
+      'Resistência Dracônica: Resistência passiva permanente ao tipo de dano do seu sopro (reduz o dano sofrido pela metade).'
+    ],
+    disadvantages: [
+      'Ausência de Visão no Escuro natural.',
+      'Sopro limitado a 1 uso por descanso (1× por combate na arena).'
+    ],
+    subraces: '10 Ancestralidades Dracônicas cromáticas e metálicas.'
+  }
+};
+
+var _DND_SUBRACE_HELP = {
+  hill: {
+    name: 'Anão da Colina (Hill Dwarf)',
+    race: 'Anão',
+    bonuses: '+1 Sabedoria (total +2 CON, +1 SAB)',
+    advantages: [
+      'Tenacidade Anã: Seu valor máximo de Pontos de Vida aumenta em +1 por nível (retroativo)!',
+      'Excelente afinidade para Clérigos e Druidas duráveis com alta vida e Percepção aguçada.'
+    ],
+    disadvantages: 'Não concede proficiências adicionais de armadura além das da classe.'
+  },
+  mountain: {
+    name: 'Anão da Montanha (Mountain Dwarf)',
+    race: 'Anão',
+    bonuses: '+2 Força (total +2 CON, +2 FOR — a maior soma de atributos físicos do jogo)',
+    advantages: [
+      'Treinamento Anão com Armaduras: Proficiência em armaduras leves e médias independente da classe!',
+      'Permite que conjuradores usem armaduras médias sem precisar de talentos adicionais.'
+    ],
+    disadvantages: 'Não concede o PV extra da Tenacidade da Colina.'
+  },
+  high: {
+    name: 'Alto Elfo (High Elf)',
+    race: 'Elfo',
+    bonuses: '+1 Inteligência (total +2 DES, +1 INT)',
+    advantages: [
+      'Truque Adicional: Aprende 1 truque da lista de Mago (usa Inteligência como atributo de conjuração).',
+      'Idioma Extra: Aprende a falar, ler e escrever 1 idioma adicional.',
+      'Treinamento com Armas Élficas: Espada longa, espada curta, arco curto e arco longo.'
+    ],
+    disadvantages: 'Sem o bônus de velocidade adicional do Elfo da Floresta.'
+  },
+  wood: {
+    name: 'Elfo da Floresta (Wood Elf)',
+    race: 'Elfo',
+    bonuses: '+1 Sabedoria (total +2 DES, +1 SAB)',
+    advantages: [
+      'Pés Ligeiros: Deslocamento base aumentado para 10,5 metros (35 pés)!',
+      'Máscara da Natureza: Pode tentar se esconder mesmo quando apenas levemente obscurecido por folhagens ou chuva.',
+      'Treinamento com Armas Élficas: Espadas e arcos.'
+    ],
+    disadvantages: 'Não concede o truque arcano do Alto Elfo.'
+  },
+  drow: {
+    name: 'Elfo Negro / Drow (Dark Elf)',
+    race: 'Elfo',
+    bonuses: '+1 Carisma (total +2 DES, +1 CAR)',
+    advantages: [
+      'Visão no Escuro Superior: Alcance estendido para impressionantes 36 metros!',
+      'Magia Drow: Aprende o truque Luzes Dançantes, e ganha magias inatas Fogo Feérico (nv 3) e Escuridão (nv 5).'
+    ],
+    disadvantages: [
+      'Sensibilidade à Luz Solar: Desvantagem em ataques e testes de Percepção sob a luz solar direta.'
+    ]
+  },
+  lightfoot: {
+    name: 'Halfling Pés-Leves (Lightfoot)',
+    race: 'Halfling',
+    bonuses: '+1 Carisma (total +2 DES, +1 CAR)',
+    advantages: [
+      'Furtividade Natural: Pode tentar se esconder atrás de qualquer criatura que seja ao menos um tamanho maior que você (incluindo seus companheiros de grupo!).'
+    ],
+    disadvantages: 'Menos resistente a toxinas que o Halfling Robusto.'
+  },
+  stout: {
+    name: 'Halfling Robusto (Stout)',
+    race: 'Halfling',
+    bonuses: '+1 Constituição (total +2 DES, +1 CON)',
+    advantages: [
+      'Resiliência dos Robustos: Vantagem em salvaguardas contra veneno e resistência a dano de veneno (reduz pela metade).'
+    ],
+    disadvantages: 'Não possui a furtividade entre companheiros do Pés-Leves.'
+  },
+  rock: {
+    name: 'Gnomo das Rochas (Rock Gnome)',
+    race: 'Gnomo',
+    bonuses: '+1 Constituição (total +2 INT, +1 CON)',
+    advantages: [
+      'Conhecimento de Artífice: Dobra o bônus de proficiência em História ao avaliar itens mágicos ou mecanismos.',
+      'Engenhoqueiro: Proficiência com Ferramentas de Funileiro; pode criar pequenos dispositivos mecânicos (acendedor, brinquedo mecânico, caixa de música).'
+    ],
+    disadvantages: 'Sem o truque Ilusão Menor do Gnomo da Floresta.'
+  },
+  forest: {
+    name: 'Gnomo da Floresta (Forest Gnome)',
+    race: 'Gnomo',
+    bonuses: '+1 Destreza (total +2 INT, +1 DES)',
+    advantages: [
+      'Ilusionista Nato: Conhece o truque Ilusão Menor gratuitamente (usa INT).',
+      'Falar com Feras Pequenas: Pode comunicar ideias simples a animais pequenos da floresta.'
+    ],
+    disadvantages: 'Sem o bônus de Constituição do Gnomo das Rochas.'
+  },
+  standard: {
+    name: 'Humano Padrão (Standard Human)',
+    race: 'Humano',
+    bonuses: '+1 em Força, Destreza, Constituição, Inteligência, Sabedoria e Carisma (+6 pontos totais)',
+    advantages: ['Equilíbrio universal — eleva modificadores em múltiplos atributos simultaneamente.'],
+    disadvantages: ['Não concede talento no 1º nível nem perícias adicionais.']
+  },
+  variant: {
+    name: 'Humano Variante (Variant Human)',
+    race: 'Humano',
+    bonuses: '+1 em 2 atributos à escolha, 1 perícia adicional e 1 Talento no nível 1 (PHB p.31)',
+    advantages: ['Uma das opções mais fortes de customização do D&D 5e devido ao Talento precoce.'],
+    disadvantages: ['Não recebe +1 nos outros 4 atributos.']
+  },
+  asmodeus: {
+    name: 'Linhagem de Asmodeus',
+    race: 'Tiefling',
+    bonuses: '+2 Carisma, +1 Inteligência',
+    advantages: ['Magias clássicas: Taumaturgia, Repreensão Infernal (3d10 fogo) e Escuridão.'],
+    disadvantages: 'Foco temático exclusivamente em fogo.'
+  },
+  baalzebul: {
+    name: 'Linhagem de Baalzebul',
+    race: 'Tiefling',
+    bonuses: '+2 Carisma, +1 Inteligência',
+    advantages: ['Magias inatas de corrupção: Raio Doentio (2d8 veneno + envenenado) e Coroa da Loucura.'],
+    disadvantages: 'Inimigos imunes a veneno anulam o Raio Doentio.'
+  },
+  dispater: {
+    name: 'Linhagem de Dispater',
+    race: 'Tiefling',
+    bonuses: '+2 Carisma, +1 Destreza',
+    advantages: ['Magias inatas de espionagem e subterfúgio: Disfarçar-se e Invisibilidade.'],
+    disadvantages: 'Menor poder destrutivo direto de fogo.'
+  },
+  mephistopheles: {
+    name: 'Linhagem de Mephistopheles',
+    race: 'Tiefling',
+    bonuses: '+2 Carisma, +1 Inteligência',
+    advantages: ['Poder arcano das chamas: Mãos Flamejantes (cone 3d6 fogo) e Lâmina Flamejante.'],
+    disadvantages: 'Magias focadas em curto alcance.'
+  }
+};
+
+var _DND_CLASS_HELP = {
+  mago: {
+    name: 'Mago (Wizard)',
+    role: 'DPS Arcano, Controle de Grupo e Especialista em Rituais',
+    hit_die: '1d6 por nível',
+    resource: 'Mana / Espaços de Magia',
+    saves: 'Inteligência (INT) e Sabedoria (SAB)',
+    armor: 'Nenhuma armadura natural',
+    weapons: 'Adagas, dardos, fundas, bordões e bestas leves',
+    main_attr: 'Inteligência (INT) — rege a CD das magias e bônus de ataque arcano',
+    advantages: [
+      'Maior acervo de magias do jogo: Controle de grupo, dano explosivo e utilidade cósmica.',
+      'Recuperação Arcana: Recupera espaços de magia após um Descanso Curto (1× por dia).',
+      'Conjuração Ritual: Conjura magias com a tag ritual sem gastar slots.',
+      'Especialização em 8 Tradições Arcanas (Escolas de Magia) a partir do nível 2.'
+    ],
+    disadvantages: [
+      'Menor Vida do jogo (1d6), extremamente frágil em combate corpo-a-corpo.',
+      'Sem proficiência com armaduras; depende de Escudo Arcano e posicionamento tático.'
+    ],
+    subclasses: 'Evocação, Proteção Arcana (Abjuração), Adivinhação, Necromancia, Ilusão, Encantamento, Transmutação, Conjuração.'
+  },
+  guerreiro: {
+    name: 'Guerreiro (Fighter)',
+    role: 'Tanque da Linha de Frente, DPS Físico e Especialista em Armas',
+    hit_die: '1d10 por nível',
+    resource: 'Vigor / Habilidades Marciais',
+    saves: 'Força (FOR) e Constituição (CON)',
+    armor: 'Todas as armaduras (Leve, Média, Pesada) e Escudos',
+    weapons: 'Todas as armas Simples e Marciais',
+    main_attr: 'Força (FOR) ou Destreza (DES)',
+    advantages: [
+      'Recobrar Fôlego: Cura bônus rápida (1d10 + nível) por descanso curto.',
+      'Surto de Ação: Realiza uma ação adicional completa no mesmo turno!',
+      'Múltiplos Ataques por rodada conforme progride em nível.',
+      'A mais alta flexibilidade de armaduras e estilos de combate marciais.'
+    ],
+    disadvantages: [
+      'Sem magias inatas na classe base (exceto no arquétipo Cavaleiro Arcano).',
+      'Vulnerável a magias que exigem salvaguardas mentais (SAB, CAR, INT).'
+    ],
+    subclasses: 'Campeão, Mestre de Batalha, Cavaleiro Arcano.'
+  },
+  ladino: {
+    name: 'Ladino (Rogue)',
+    role: 'DPS Furtivo de Emboscada, Infiltração e Especialista em Perícias',
+    hit_die: '1d8 por nível',
+    resource: 'Energia / Ação Astuta',
+    saves: 'Destreza (DES) e Inteligência (INT)',
+    armor: 'Armaduras Leves',
+    weapons: 'Armas Simples, Bestas de Mão, Espadas Longas, Rapieiras e Espadas Curtas',
+    main_attr: 'Destreza (DES)',
+    advantages: [
+      'Ataque Furtivo: Dano extra massivo (+1d6 a +10d6) com vantagem ou aliado adjacente.',
+      'Ação Astuta: Correr, Desengajar ou Esconder-se como Ação Bônus todo turno.',
+      'Especialização: Dobra a proficiência em perícias chave e ferramentas de ladrão.',
+      'Evasão & Esquiva Sobrenatural: Reduz danos de ataques e explosões pela metade ou zero.'
+    ],
+    disadvantages: [
+      'Dependente de vantagem ou aliados adjacentes para ativar o Ataque Furtivo.',
+      'Não pode usar armaduras médias ou pesadas sem perder furtividade.'
+    ],
+    subclasses: 'Ladrão, Assassino, Trapaceiro Arcano.'
+  },
+  clerigo: {
+    name: 'Clérigo (Cleric)',
+    role: 'Curador Primário, Suporte Divino e Combatente Médio',
+    hit_die: '1d8 por nível',
+    resource: 'Mana / Magia Divina e Canalizar Divindade',
+    saves: 'Sabedoria (SAB) e Carisma (CAR)',
+    armor: 'Armaduras Leves e Médias, Escudos (e Pesadas em certos Domínios)',
+    weapons: 'Armas Simples (e Marciais no Domínio da Guerra)',
+    main_attr: 'Sabedoria (SAB)',
+    advantages: [
+      'Curador mais eficiente do jogo (Curar Ferimentos, Palavra Curativa, Restauração).',
+      'Canalizar Divindade: Expulsar Mortos-vivos e bênçãos sagradas únicas.',
+      'Equilíbrio exemplar entre defesa sólida com escudo e magias divinas de impacto.'
+    ],
+    disadvantages: [
+      'Alcance ofensivo direto menor que conjuradores arcanos.',
+      'Mobilidade moderada em armaduras de metal.'
+    ],
+    subclasses: 'Domínio da Vida, Luz, Guerra, Conhecimento, Natureza, Tempestade, Trapaça.'
+  },
+  paladino: {
+    name: 'Paladino (Paladin)',
+    role: 'Tanque Sagrado, DPS de Golpe Radiante e Suporte de Auras',
+    hit_die: '1d10 por nível',
+    resource: 'Mana / Imposição de Mãos e Golpes Divinos',
+    saves: 'Sabedoria (SAB) e Carisma (CAR)',
+    armor: 'Todas as armaduras e Escudos',
+    weapons: 'Todas as armas Simples e Marciais',
+    main_attr: 'Força (FOR) e Carisma (CAR)',
+    advantages: [
+      'Destruição Divina (Divine Smite): Converte slots de magia em dano radiante avassalador!',
+      'Imposição de Mãos: Pool de cura dedicado sem consumir espaços de magia.',
+      'Auras Sagradas: Concede bônus maciço em salvaguardas para si e aliados próximos.'
+    ],
+    disadvantages: [
+      'Gasto acelerado de slots de magia se abusar de destruições divinas.',
+      'Alcance de combate primariamente corpo-a-corpo.'
+    ],
+    subclasses: 'Juramento de Devoção, Vingança, Anciões.'
+  },
+  barbaro: {
+    name: 'Bárbaro (Barbarian)',
+    role: 'Tanque Primal, DPS Brutal e Absorvedor de Dano',
+    hit_die: '1d12 por nível (a maior Vida do D&D 5e)',
+    resource: 'Fúria Primal',
+    saves: 'Força (FOR) e Constituição (CON)',
+    armor: 'Armaduras Leves e Médias, Escudos (ou Defesa sem Armadura)',
+    weapons: 'Todas as armas Simples e Marciais',
+    main_attr: 'Força (FOR) e Constituição (CON)',
+    advantages: [
+      'Fúria: Resistência a dano cortante, perfurante e contundente + bônus de dano!',
+      'Ataque Descuidado: Vantagem voluntária em rolagens de ataque corpo-a-corpo.',
+      'Defesa sem Armadura: CA = 10 + mod DES + mod CON.'
+    ],
+    disadvantages: [
+      'Incapaz de conjurar ou manter concentração em magias enquanto em Fúria.',
+      'Vulnerável a ataques mentais de encantamento e medo se não for Furioso imune.'
+    ],
+    subclasses: 'Caminho do Furioso, Guerreiro Totêmico, Fanático.'
+  },
+  bardo: {
+    name: 'Bardo (Bard)',
+    role: 'Suporte Versátil, Mestre de Perícias e Conjurador',
+    hit_die: '1d8 por nível',
+    resource: 'Inspiração Bárdica e Mana',
+    saves: 'Destreza (DES) e Carisma (CAR)',
+    armor: 'Armaduras Leves',
+    weapons: 'Armas Simples, Bestas de Mão, Rapieiras, Espadas Curtas e Espadas Longas',
+    main_attr: 'Carisma (CAR)',
+    advantages: [
+      'Inspiração Bárdica: Adiciona dados de bônus em testes, ataques e salvaguardas dos aliados.',
+      'Pau pra Toda Obra: Adiciona metade da proficiência em QUALQUER teste sem proficiência.',
+      'Segredos Mágicos: Pode aprender magias de QUALQUER outra classe do jogo!'
+    ],
+    disadvantages: [
+      'Dano físico base modesto sem especialização no Colégio das Espadas ou Bravura.',
+      'Depende da cooperação e posicionamento tático dos companheiros.'
+    ],
+    subclasses: 'Colégio do Conhecimento, Bravura, Espadas.'
+  },
+  druida: {
+    name: 'Druida (Druid)',
+    role: 'Forma Selvagem, Controle Territorial e Conjurador da Natureza',
+    hit_die: '1d8 por nível',
+    resource: 'Mana e Usos de Forma Selvagem',
+    saves: 'Inteligência (INT) e Sabedoria (SAB)',
+    armor: 'Armaduras Leves e Médias não-metálicas, Escudos de madeira',
+    weapons: 'Clavas, adagas, dardos, lanças, maças, bordões, cimitarras, foices, fundas',
+    main_attr: 'Sabedoria (SAB)',
+    advantages: [
+      'Forma Selvagem: Transforma-se em animais ganhando barra de PV temporária independente!',
+      'Magias extraordinárias de terreno e invocação (Emaranhar, Invocar Animais).',
+      'Versatilidade extrema para atuar como tanque fera, curador ou controlador.'
+    ],
+    disadvantages: [
+      'Tabu Druídico: Recusa-se a vestir armaduras ou escudos feitos de metal.',
+      'Exige gerenciamento rigoroso de Concentração em suas magias.'
+    ],
+    subclasses: 'Círculo da Lua (Combate Feral), Círculo da Terra, Círculo do Pastor.'
+  },
+  monge: {
+    name: 'Monge (Monk)',
+    role: 'DPS Ágil de Alta Mobilidade e Desestabilizador',
+    hit_die: '1d8 por nível',
+    resource: 'Pontos de Ki',
+    saves: 'Força (FOR) e Destreza (DES)',
+    armor: 'Nenhuma armadura (Defesa sem Armadura = 10 + DES + SAB)',
+    weapons: 'Armas Simples e Espadas Curtas',
+    main_attr: 'Destreza (DES) e Sabedoria (SAB)',
+    advantages: [
+      'Artes Marciais: Ataques desarmados com bônus de dano e golpes extras como ação bônus.',
+      'Pontos de Ki: Rajada de Golpes, Defesa Paciente e Golpe Atordoante (Stunning Strike)!',
+      'Mobilidade incomparável e capacidade de correr pelas paredes e líquidos.'
+    ],
+    disadvantages: [
+      'Extremamente dependente de atributos múltiplos (DES, SAB e CON simultaneamente).',
+      'Recursos de Ki podem se esgotar rapidamente em batalhas longas sem descanso.'
+    ],
+    subclasses: 'Caminho da Mão Aberta, Caminho da Sombra, Quatro Elementos.'
+  },
+  feiticeiro: {
+    name: 'Feiticeiro (Sorcerer)',
+    role: 'DPS Arcano de Explosão e Manipulador de Magia (Metamagia)',
+    hit_die: '1d6 por nível',
+    resource: 'Pontos de Feitiçaria e Mana',
+    saves: 'Constituição (CON) e Carisma (CAR)',
+    armor: 'Nenhuma armadura natural',
+    weapons: 'Adagas, dardos, fundas, bordões e bestas leves',
+    main_attr: 'Carisma (CAR)',
+    advantages: [
+      'Metamagia: Pode alterar magias em tempo real (Magia Duplicada, Acelerada, Potencializada)!',
+      'Proficiência nativa em Salvaguardas de CON (mantém Concentração com facilidade).',
+      'Poder de fogo concentrado de altíssimo impacto em poucos turnos.'
+    ],
+    disadvantages: [
+      'Repertório de magias conhecidas menor que o do Mago.',
+      'Dado de vida 1d6 e sem armaduras naturais.'
+    ],
+    subclasses: 'Linhagem Dracônica, Magia Selvagem, Tempestade.'
+  },
+  bruxo: {
+    name: 'Bruxo (Warlock)',
+    role: 'DPS Arcano Constante de Longo Alcance e Magia de Pacto',
+    hit_die: '1d8 por nível',
+    resource: 'Magia de Pacto (Recuperação TOTAL em Descanso Curto)',
+    saves: 'Sabedoria (SAB) e Carisma (CAR)',
+    armor: 'Armaduras Leves',
+    weapons: 'Armas Simples',
+    main_attr: 'Carisma (CAR)',
+    advantages: [
+      'Rajada Mística (Eldritch Blast): O melhor truque de dano do D&D 5e (1d10 força escalável).',
+      'Magia de Pacto: Seus slots sempre conjuram no NÍVEL MÁXIMO e recuperam em descansos curtos!',
+      'Invocações Místicas: Habilidades passivas sobrenaturais customizáveis.'
+    ],
+    disadvantages: [
+      'Poucos espaços de magia por combate (geralmente apenas 2 slots ativos).',
+      'Requer estratégia para maximizar truques e descanso entre encontros.'
+    ],
+    subclasses: 'O Corruptor (Ínfero), A Arquifada, O Grande Antigo.'
+  },
+  patrulheiro: {
+    name: 'Patrulheiro (Ranger)',
+    role: 'DPS à Distância, Rastreador dos Ermos e Combatente Híbrido',
+    hit_die: '1d10 por nível',
+    resource: 'Mana / Magias Naturais',
+    saves: 'Força (FOR) e Destreza (DES)',
+    armor: 'Armaduras Leves e Médias, Escudos',
+    weapons: 'Armas Simples e Marciais',
+    main_attr: 'Destreza (DES) e Sabedoria (SAB)',
+    advantages: [
+      'Inimigo Favorito e Explorador Natural: Bônus de rastreamento, iniciativa e navegação.',
+      'Marca do Caçador: Dano contínuo extra (+1d6) em cada ataque.',
+      'Excelente poder de fogo à distância com arcos e armaduras flexíveis.'
+    ],
+    disadvantages: [
+      'Gasto de ação bônus disputado entre magias de marca e habilidades.',
+      'Exige boa distribuição entre DES, CON e SAB.'
+    ],
+    subclasses: 'Caçador (Hunter), Mestre das Feras, Perseguidor Sombrio.'
+  }
+};
+
+var _DND_SUBCLASS_HELP = {
+  evocation: {
+    name: 'Escola de Evocação (Evocation)',
+    class: 'Mago',
+    desc: 'Mestres no domínio de forças elementais destrutivas como fogo, gelo e relâmpago.',
+    features: [
+      { lvl: 'Nv 3', name: 'Esculpir Magias', desc: 'Protege aliados na área das suas magias de explosão: passam automaticamente na salvaguarda e não sofrem dano!' },
+      { lvl: 'Nv 7', name: 'Cantrip Potente', desc: 'Adiciona seu modificador de Inteligência ao dano dos seus truques arcanos.' },
+      { lvl: 'Nv 11', name: 'Evocação Potente', desc: 'Soma o modificador de Inteligência a todas as magias de dano de evocação.' },
+      { lvl: 'Nv 15', name: 'Sobrecarga Arcana', desc: 'Força uma magia de 1º a 5º nível a causar o dano MÁXIMO possível dos dados (1× por descanso longo).' }
+    ],
+    advantages: 'Maior poder destrutivo em área de todo o D&D sem qualquer risco de ferir seus companheiros de grupo.',
+    disadvantages: 'Foco exclusivo em destruição direta, sem os escudos defensivos da Abjuração ou previsão da Adivinhação.'
+  },
+  abjuration: {
+    name: 'Proteção Arcana / Abjuração (Abjuration)',
+    class: 'Mago',
+    desc: 'Especialistas em erguer barreiras intransponíveis, repelir maldições e anular magias inimigas.',
+    features: [
+      { lvl: 'Nv 3', name: 'Proteção Arcana (Arcane Ward)', desc: 'Cria uma barreira mágica com PVs próprios que absorve dano direcionado a você antes de tocar sua vida.' },
+      { lvl: 'Nv 7', name: 'Proteção Projetada', desc: 'Pode estender sua barreira para absorver dano que atingiria um aliado próximo.' },
+      { lvl: 'Nv 11', name: 'Abjuração Aprimorada', desc: 'Contramágica e Dissipar Magia somam seu bônus de proficiência no teste de anulação.' },
+      { lvl: 'Nv 15', name: 'Resistência a Magias', desc: 'Vantagem permanente em salvaguardas contra todas as magias e resistência ao dano mágico.' }
+    ],
+    advantages: 'O mago mais resistente e protegido de todo o sistema, excelente contra chefes conjuradores.',
+    disadvantages: 'Menor dano de explosão em comparação à Evocação.'
+  },
+  divination: {
+    name: 'Escola de Adivinhação (Divination)',
+    class: 'Mago',
+    desc: 'Vislumbram as teias do tempo e manipulam a probabilidade e o destino.',
+    features: [
+      { lvl: 'Nv 3', name: 'Presságio (Portent)', desc: 'Rola 2d20 ao descansar; durante o dia, substitua qualquer rolagem (sua, de aliado ou de inimigo) por um desses dados!' },
+      { lvl: 'Nv 7', name: 'Adivinhação Experta', desc: 'Conjurar magias de adivinhação devolve espaços de magia gastos.' },
+      { lvl: 'Nv 11', name: 'Terceiro Olho', desc: 'Enxerga no escuro, no plano etéreo e detecta invisibilidade.' },
+      { lvl: 'Nv 15', name: 'Presságio Maior', desc: 'Rola 3d20 em vez de 2 no início de cada descanso.' }
+    ],
+    advantages: 'Poder decisivo para garantir que o chefe inimigo tire 1 na salvaguarda contra sua magia mais forte.',
+    disadvantages: 'Exige uso analítico cirúrgico dos dados rolados.'
+  },
+  necromancy: {
+    name: 'Escola de Necromancia (Necromancy)',
+    class: 'Mago',
+    desc: 'Manipuladores da energia negativa e dos laços entre carne, alma e morte.',
+    features: [
+      { lvl: 'Nv 3', name: 'Colheita Sombria', desc: 'Abater inimigos com magias regenera seus Pontos de Vida (o dobro ou triplo do nível da magia).' },
+      { lvl: 'Nv 7', name: 'Servos Imortais', desc: 'Mortos-vivos criados ganham PVs adicionais e somam seu bônus de proficiência no dano.' },
+      { lvl: 'Nv 11', name: 'Inured to Undeath', desc: 'Resistência a dano necrótico e seu teto de PV máximo nunca pode ser reduzido.' },
+      { lvl: 'Nv 15', name: 'Comandar Mortos-Vivos', desc: 'Pode tentar escravizar mortos-vivos inimigos inteligentes.' }
+    ],
+    advantages: 'Sustentação contínua de vida em combate e exército subordinado de esqueletos e zumbis.',
+    disadvantages: 'Forte estigma social e repulsa em cidades e templos sagrados.'
+  },
+  champion: {
+    name: 'Campeão (Champion)',
+    class: 'Guerreiro',
+    desc: 'Perfeição atlética bruta. O clássico guerreiro inabalável focado em golpes devastadores.',
+    features: [
+      { lvl: 'Nv 3', name: 'Crítico Aprimorado', desc: 'Seus ataques com armas acertam acertos críticos com 19 ou 20 no d20 (dobra a chance de dano crítico)!' },
+      { lvl: 'Nv 7', name: 'Atleta Notável', desc: 'Adiciona metade da proficiência em qualquer teste físico de FOR/DES/CON e aumenta salto.' },
+      { lvl: 'Nv 11', name: 'Segundo Estilo de Luta', desc: 'Adota um estilo de combate adicional (ex.: Defesa + Duelismo).' },
+      { lvl: 'Nv 15', name: 'Crítico Superior', desc: 'Seus acertos críticos passam a ativar com 18, 19 ou 20 no d20!' }
+    ],
+    advantages: 'Máxima taxa de acertos críticos do jogo; extremamente simples e devastador com armas de dano alto.',
+    disadvantages: 'Pouca versatilidade tática fora do combate físico direto.'
+  },
+  battle_master: {
+    name: 'Mestre de Batalha (Battle Master)',
+    class: 'Guerreiro',
+    desc: 'Estrategista do campo de batalha que utiliza manobras táticas e superioridade marcial.',
+    features: [
+      { lvl: 'Nv 3', name: 'Manobras & Dados de Superioridade', desc: 'Ganha dados d8 de superioridade para desarmar, derrubar, empurrar ou dar ataque extra a aliados!' },
+      { lvl: 'Nv 7', name: 'Conheça seu Inimigo', desc: 'Analisa o adversário para descobrir atributos, CA e vida relativa.' },
+      { lvl: 'Nv 11', name: 'Dados Aprimorados', desc: 'Seus dados de superioridade aumentam para d10.' }
+    ],
+    advantages: 'Controle extraordinário de campo e suporte dinâmico a toda a comitiva de aventureiros.',
+    disadvantages: 'Exige gerenciar o pool de dados de superioridade a cada combate.'
+  },
+  thief: {
+    name: 'Ladrão (Thief)',
+    class: 'Ladino',
+    desc: 'Mestre da agilidade, acrobacia e gatunagem nos becos e tumbas ancestrais.',
+    features: [
+      { lvl: 'Nv 3', name: 'Mãos Rápidas', desc: 'Pode usar ferramentas de ladrão, desarmar armadilhas e usar itens como Ação Bônus!' },
+      { lvl: 'Nv 3', name: 'Andarilho dos Telhados', desc: 'Escalar não consome movimento extra e salto aumentado.' },
+      { lvl: 'Nv 9', name: 'Furtividade Suprema', desc: 'Vantagem em testes de Furtividade se mover até metade do deslocamento.' }
+    ],
+    advantages: 'Velocidade incomparável de interação com o cenário e itens durante combate.',
+    disadvantages: 'Menos dano bruto de primeira rodada que o Assassino.'
+  },
+  assassin: {
+    name: 'Assassino (Assassin)',
+    class: 'Ladino',
+    desc: 'Especialista em eliminação fulminante, venenos mortais e disfarces perfeitos.',
+    features: [
+      { lvl: 'Nv 3', name: 'Emboscada (Assassinate)', desc: 'Vantagem contra quem não agiu no combate, e acertos em alvos Surpresos são AUTOMATICAMENTE CRÍTICOS!' },
+      { lvl: 'Nv 9', name: 'Especialista em Infiltração', desc: 'Cria identidades falsas impecáveis com histórico documentado.' }
+    ],
+    advantages: 'Capacidade inigualável de abater sentinelas e chefes no primeiro turno de combate com dano crítico dobrado.',
+    disadvantages: 'Perde parte da vantagem após a rodada inicial de surpresa.'
+  },
+  life: {
+    name: 'Domínio da Vida (Life Domain)',
+    class: 'Clérigo',
+    desc: 'Canalizadores da energia positiva universal, mestres absolutos em restaurar os feridos.',
+    features: [
+      { lvl: 'Nv 1', name: 'Discípulo da Vida', desc: 'Suas magias de cura restauram PV adicional igual a 2 + o nível da magia!' },
+      { lvl: 'Nv 2', name: 'Preservar a Vida', desc: 'Canalizar Divindade para curar até 5× o nível de clérigo distribuído entre aliados feridos.' },
+      { lvl: 'Nv 6', name: 'Curador Abençoado', desc: 'Curar aliados também restaura seus próprios PVs.' }
+    ],
+    advantages: 'A mais alta taxa de cura por slot de todo o sistema D&D 5e; proficiência com armaduras pesadas.',
+    disadvantages: 'Foco quase total em cura e sustentação, com menos magias de dano elemental.'
+  },
+  hunter: {
+    name: 'Caçador (Hunter)',
+    class: 'Patrulheiro',
+    desc: 'Guardião letal especializado em caçar feras colossais e hordas de monstros.',
+    features: [
+      { lvl: 'Nv 3', name: 'Abatedor Colossal (Colossus Slayer)', desc: 'Causa +1d8 de dano adicional na arma uma vez por rodada contra alvos já feridos!' },
+      { lvl: 'Nv 7', name: 'Táticas Defensivas', desc: 'Defesa contra múltiplos ataques de um mesmo monstro.' },
+      { lvl: 'Nv 11', name: 'Ataque em Turbilhão', desc: 'Realiza ataques simultâneos contra todos os inimigos ao redor.' }
+    ],
+    advantages: 'Dano consistente e elevado em toda rodada com custo zero de recursos.',
+    disadvantages: 'Não possui companheiro animal permanente como o Mestre das Feras.'
+  },
+  berserker: {
+    name: 'Caminho do Furioso (Berserker)',
+    class: 'Bárbaro',
+    desc: 'Guerreiros primais que canalizam fúria cega, ignorando a própria dor para dilacerar inimigos.',
+    features: [
+      { lvl: 'Nv 3', name: 'Frenesi (Frenzy)', desc: 'Pode realizar um ataque corpo-a-corpo adicional como Ação Bônus em cada turno de Fúria!' },
+      { lvl: 'Nv 6', name: 'Fúria Imperturbável', desc: 'Imune a ser Enfeitiçado ou Amedrontado enquanto em Fúria.' }
+    ],
+    advantages: 'Volume avassalador de ataques com armas de duas mãos.',
+    disadvantages: 'Usar Frenesi impõe 1 nível de Exaustão ao término da Fúria.'
+  },
+  lore: {
+    name: 'Colégio do Conhecimento (College of Lore)',
+    class: 'Bardo',
+    desc: 'Eruditos errantes que acumulam segredos mágicos de todas as tradições conhecidas.',
+    features: [
+      { lvl: 'Nv 3', name: 'Palavras Cortantes', desc: 'Usa a Inspiração Bárdica como reação para subtrair do ataque ou dano de um inimigo!' },
+      { lvl: 'Nv 3', name: 'Proficiências Bônus', desc: 'Ganha proficiência em 3 perícias adicionais à escolha.' },
+      { lvl: 'Nv 6', name: 'Segredos Mágicos Adicionais', desc: 'Aprende 2 magias de QUALQUER outra classe do jogo (inclusive magias de Mago ou Paladino)!' }
+    ],
+    advantages: 'O aventureiro mais flexível e preparado de todo o jogo, capaz de conjurar qualquer magia dos Reinos.',
+    disadvantages: 'Menos focado em combate físico com armas.'
+  }
+};
+
+// Aliases para subclasses de mago e cleric
+_DND_SUBCLASS_HELP['evoker'] = _DND_SUBCLASS_HELP['evocation'];
+_DND_SUBCLASS_HELP['abjurer'] = _DND_SUBCLASS_HELP['abjuration'];
+_DND_SUBCLASS_HELP['necromancer'] = _DND_SUBCLASS_HELP['necromancy'];
+_DND_SUBCLASS_HELP['diviner'] = _DND_SUBCLASS_HELP['divination'];
+
+function _showFichaSavesHelp(saveKey, memberIdx){
+  var m = _getFichaMember(memberIdx !== undefined ? memberIdx : window._fichaMemberIdx);
+  if (!m) m = _getFichaMember(0);
+  var stats = (m && m.stats) || { str:10, dex:10, con:10, int:10, wis:10, cha:10 };
+  var cKey = _cgpClsKey(m && m.cls);
+  var rKey = _raceCanonical(m && m.race);
+  var prof = (m && m.prof != null) ? m.prof : (Math.floor(((m && m.level) || 1) / 4) + 2);
+  function _mod(s){ return Math.floor(((s || 10) - 10) / 2); }
+  function _modStr(v){ return (v >= 0 ? '+' : '') + v; }
+
+  var SAVING_PROF_MAP = {
+    mago: ['int', 'wis'],
+    guerreiro: ['str', 'con'],
+    ladino: ['dex', 'int'],
+    clerigo: ['wis', 'cha'],
+    paladino: ['wis', 'cha'],
+    barbaro: ['str', 'con'],
+    bardo: ['dex', 'cha'],
+    druida: ['int', 'wis'],
+    monge: ['str', 'dex'],
+    feiticeiro: ['con', 'cha'],
+    bruxo: ['wis', 'cha'],
+    patrulheiro: ['str', 'dex']
+  };
+  var profSaves = SAVING_PROF_MAP[cKey] || ['str', 'con'];
+
+  var STAT_NAMES = {
+    str: 'Força', dex: 'Destreza', con: 'Constituição',
+    int: 'Inteligência', wis: 'Sabedoria', cha: 'Carisma'
+  };
+
+  var SAVE_PURPOSES = {
+    str: {
+      use: 'Resistir a ser empurrado, derrubado, agarrado, constrito por tentáculos ou esmagado sob soterramentos.',
+      examples: 'Efeitos como <i>Onda Trovejante</i>, teias adesivas, manobras de desarmar e golpes de gigantes.'
+    },
+    dex: {
+      use: 'Esquivar-se rapidamente com reflexos apurados de explosões e perigos de efeito em área.',
+      examples: 'Magias como <i>Bola de Fogo</i> e <i>Relâmpago</i>, sopros de dragão, armadilhas de lâminas e desmoronamentos.'
+    },
+    con: {
+      use: 'Resistir a venenos, toxinas, doenças, calor/frio extremo, necrose física e manter a <b>Concentração</b> em magias.',
+      examples: 'Picadas venenosas, magias de frio/morte como <i>Raio Doentio</i>, e teste de Concentração ao sofrer qualquer dano (CD 10 ou metade do dano sofrido).'
+    },
+    int: {
+      use: 'Desmascarar ilusões, decifrar anomalias mentais e resistir a ataques psíquicos que drenam o intelecto.',
+      examples: 'Ataques psíquicos de devoradores de mentes, magias como <i>Labirinto</i>, <i>Rajada Mental</i> e armadilhas cognitivas.'
+    },
+    wis: {
+      use: 'Resistir a controle mental, feitiços de charme, amedrontamento, hipnose, paralisia mágica e possessão.',
+      examples: 'Magias frequentes como <i>Enfeitiçar Pessoa</i>, <i>Medo</i>, <i>Imobilizar Pessoa</i>, <i>Sugestão</i> e olhares petrificantes.'
+    },
+    cha: {
+      use: 'Preservar sua identidade contra banimentos interplanares, possessões espirituais e distorções da sua alma.',
+      examples: 'Magias como <i>Banimento</i>, possessão de fantasmas, <i>Calamidade</i> e efeitos que expulsam o aventureiro para outro plano cósmico.'
+    }
+  };
+
+  var racialAdvantage = '';
+  if (rKey === 'gnome') {
+    racialAdvantage = '<div style="margin-top:8px; padding:6px 9px; background:rgba(196,149,58,0.15); border:1px solid rgba(196,149,58,0.4); border-radius:5px; font-size:11px; color:#ffd700;">'
+      + '⚡ <b>Astúcia Gnômica (Traço Racial):</b> Você tem <b>Vantagem</b> (rola 2d20 e escolhe o maior) em <b>TODAS as Salvaguardas de INT, SAB e CAR contra magias</b>!</div>';
+  } else if (rKey === 'elf' || rKey === 'halfelf') {
+    racialAdvantage = '<div style="margin-top:8px; padding:6px 9px; background:rgba(196,149,58,0.15); border:1px solid rgba(196,149,58,0.4); border-radius:5px; font-size:11px; color:#ffd700;">'
+      + '🍃 <b>Ancestralidade Feérica (Traço Racial):</b> Você tem <b>Vantagem</b> em salvaguardas contra ser Enfeitiçado e <b>Imunidade total</b> a magias de sono!</div>';
+  } else if (rKey === 'dwarf') {
+    racialAdvantage = '<div style="margin-top:8px; padding:6px 9px; background:rgba(196,149,58,0.15); border:1px solid rgba(196,149,58,0.4); border-radius:5px; font-size:11px; color:#ffd700;">'
+      + '🛡️ <b>Resiliência Anã (Traço Racial):</b> Você tem <b>Vantagem</b> em salvaguardas contra Veneno e Resistência a dano de veneno!</div>';
+  } else if (rKey === 'halfling') {
+    racialAdvantage = '<div style="margin-top:8px; padding:6px 9px; background:rgba(196,149,58,0.15); border:1px solid rgba(196,149,58,0.4); border-radius:5px; font-size:11px; color:#ffd700;">'
+      + '🍀 <b>Bravura & Sorte (Traço Racial):</b> Vantagem em salvaguardas contra <b>Medo</b>! Além disso, com <b>Sortudo</b>, se rolar 1 natural no d20 de qualquer salvaguarda, re-rola obrigatoriamente!</div>';
+  }
+
+  var title, descHtml;
+
+  if (saveKey && STAT_NAMES[saveKey]) {
+    var sName = STAT_NAMES[saveKey];
+    var isProf = profSaves.indexOf(saveKey) >= 0;
+    var baseVal = stats[saveKey] || 10;
+    var baseM = _mod(baseVal);
+    var total = isProf ? (baseM + prof) : baseM;
+    var info = SAVE_PURPOSES[saveKey];
+
+    title = 'Salvaguarda de ' + sName;
+    descHtml = '<div style="text-align:left; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.55; color:var(--v-text,#d4c8b0);">'
+      + '<div style="background:rgba(20,16,12,0.8); border:1px solid rgba(196,149,58,0.3); border-radius:6px; padding:8px 10px; margin-bottom:10px;">'
+      + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">'
+      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:14px; font-weight:700; color:#ffd700;">Bônus Total: ' + _modStr(total) + '</span>'
+      + '<span style="font-size:10px; color:' + (isProf ? '#ffd700' : '#a09484') + '; font-weight:bold;">' + (isProf ? '● Proficiente' : '○ Sem Proficiência') + '</span>'
+      + '</div>'
+      + '<div style="font-size:11px; color:#a09484;">'
+      + 'Cálculo: Modificador de ' + sName + ' (' + _modStr(baseM) + ') '
+      + (isProf ? ('+ Bônus de Proficiência (' + _modStr(prof) + ')') : '(sem proficiência de classe)')
+      + ' = <b style="color:#ffd700;">' + _modStr(total) + '</b>'
+      + '</div>'
+      + '</div>'
+
+      + '<div style="margin-bottom:8px;">'
+      + '<b style="color:#ffd700;">O que é e para que serve:</b><br>'
+      + info.use
+      + '</div>'
+
+      + '<div style="margin-bottom:8px; font-size:11px; color:#b8aa94;">'
+      + '<b style="color:#c4953a;">Exemplos Práticos no Jogo:</b><br>'
+      + info.examples
+      + '</div>'
+
+      + '<div style="background:rgba(30,24,18,0.6); border-left:3px solid var(--v-gold,#c4953a); padding:6px 8px; margin-top:8px; font-size:11px;">'
+      + '<b>Como funciona o teste:</b> Quando você é alvo de uma ameaça, rola <code>1d20 + ' + _modStr(total) + '</code>. Se o resultado for igual ou maior que a Classe de Dificuldade (CD) do conjurador ou da armadilha, você resiste com sucesso!'
+      + '</div>'
+      + racialAdvantage
+      + '</div>';
+  } else {
+    title = 'Salvaguardas D&D 5e';
+    var profLabels = profSaves.map(function(k){ return STAT_NAMES[k]; }).join(' e ');
+    descHtml = '<div style="text-align:left; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.55; color:var(--v-text,#d4c8b0);">'
+      + '<p style="margin:0 0 8px;">As <b>Salvaguardas (Testes de Resistência)</b> são a sua defesa ativa contra perigos que não miram sua Classe de Armadura (CA) — como feitiços, venenos, explosões e armadilhas.</p>'
+
+      + '<div style="background:rgba(20,16,12,0.8); border:1px solid rgba(196,149,58,0.3); border-radius:6px; padding:7px 9px; margin-bottom:8px; font-size:11px;">'
+      + '<b style="color:#ffd700;">Fórmula no d20:</b><br>'
+      + '<code>1d20 + Bônus da Salvaguarda ≥ CD (Dificuldade)</code><br>'
+      + '<span style="color:#a09484;">Passar no teste anula o efeito ou reduz o dano sofrido pela metade.</span>'
+      + '</div>'
+
+      + '<div style="margin-bottom:8px;">'
+      + '<b style="color:#ffd700;">O que significam os círculos:</b><br>'
+      + '• <span style="color:#ffd700;">● Dourado (Proficiente):</span> Concedido pela classe (<b>' + _classLabelPT(m.cls) + '</b> domina <b>' + profLabels + '</b>). Soma o <b>Bônus de Proficiência (+' + prof + ')</b> ao modificador do atributo.<br>'
+      + '• <span style="color:#a09484;">○ Vazio (Base):</span> Não-proficiente. Usa apenas o modificador bruto do atributo.'
+      + '</div>'
+
+      + '<div style="margin-bottom:8px;">'
+      + '<b style="color:#ffd700;">As 6 Salvaguardas:</b><br>'
+      + '• <b>FOR:</b> Resistir a ser empurrado, derrubado ou imobilizado.<br>'
+      + '• <b>DES:</b> Esquivar de Bolas de Fogo, sopros e armadilhas.<br>'
+      + '• <b>CON:</b> Resistir a venenos e manter <b>Concentração</b> ao levar dano.<br>'
+      + '• <b>INT:</b> Desmascarar ilusões e ataques mentais psíquicos.<br>'
+      + '• <b>SAB:</b> Resistir a encantos, medo, paralisia e controle mental.<br>'
+      + '• <b>CAR:</b> Resistir a banimentos interplanares e possessão de alma.'
+      + '</div>'
+      + racialAdvantage
+      + '</div>';
+  }
+
+  _showInfoPopup({
+    icon: '<svg viewBox="0 0 120 120" style="width:34px;height:34px;color:var(--v-gold,#c4953a);"><use href="#ic-stat-ac"/></svg>',
+    npc: 'Ficha do Aventureiro · Regras D&D 5e',
+    title: title,
+    desc: descHtml,
+    singleButton: true,
+    cancelLabel: 'Entendi'
+  });
+}
+
+function _showFichaRaceHelp(raceKey, memberIdx){
+  var r = _raceCanonical(raceKey);
+  var data = _DND_RACE_HELP[r] || _DND_RACE_HELP['human'];
+  var advHtml = (data.advantages || []).map(function(a){ return '• ' + a; }).join('<br>');
+  var disHtml = (data.disadvantages || []).map(function(d){ return '• ' + d; }).join('<br>');
+
+  var descHtml = '<div style="text-align:left; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.55; color:var(--v-text,#d4c8b0);">'
+    + '<p style="margin:0 0 8px; font-style:italic; color:#e0d4c0;">' + data.desc + '</p>'
+    + '<div style="background:rgba(20,16,12,0.8); border:1px solid rgba(196,149,58,0.3); border-radius:6px; padding:7px 9px; margin-bottom:8px; font-size:11px;">'
+    + '<b style="color:#ffd700;">Características Básicas:</b><br>'
+    + '• <b>Atributos:</b> ' + data.bonuses + '<br>'
+    + '• <b>Deslocamento & Porte:</b> ' + data.speed + '<br>'
+    + '• <b>Idiomas:</b> ' + data.langs + '<br>'
+    + (data.subraces ? ('• <b>Sub-raças:</b> ' + data.subraces) : '')
+    + '</div>'
+
+    + '<div style="margin-bottom:8px;">'
+    + '<b style="color:#7cdb7c;">Vantagens & Traços Raciais:</b><br>'
+    + advHtml
+    + '</div>'
+
+    + (disHtml ? ('<div style="margin-bottom:8px;">'
+      + '<b style="color:#e07c7c;">Desvantagens & Limitações:</b><br>'
+      + disHtml
+      + '</div>') : '')
+    + '</div>';
+
+  _showInfoPopup({
+    icon: '<span style="font-size:32px;">🌿</span>',
+    npc: 'Linhagem D&D 5e',
+    title: data.name,
+    desc: descHtml,
+    singleButton: true,
+    cancelLabel: 'Entendi'
+  });
+}
+
+function _showFichaSubraceHelp(subraceKey, raceKey, memberIdx){
+  var sub = String(subraceKey || '').toLowerCase().replace(/-/g, '_').trim();
+  var rKey = _raceCanonical(raceKey);
+  var data = _DND_SUBRACE_HELP[sub];
+
+  var descHtml = '<div style="text-align:left; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.55; color:var(--v-text,#d4c8b0);">';
+
+  if (data) {
+    var advHtml = Array.isArray(data.advantages) ? data.advantages.map(function(a){ return '• ' + a; }).join('<br>') : ('• ' + data.advantages);
+    descHtml += '<div style="background:rgba(20,16,12,0.8); border:1px solid rgba(196,149,58,0.3); border-radius:6px; padding:7px 9px; margin-bottom:8px; font-size:11px;">'
+      + '<b style="color:#ffd700;">Raça Progenitora:</b> ' + data.race + '<br>'
+      + '• <b>Bônus de Atributos:</b> ' + data.bonuses + '<br>'
+      + '</div>'
+      + '<div style="margin-bottom:8px;">'
+      + '<b style="color:#7cdb7c;">Vantagens Exclusivas da Sub-raça:</b><br>'
+      + advHtml
+      + '</div>'
+      + (data.disadvantages ? ('<div style="margin-bottom:8px;">'
+        + '<b style="color:#e07c7c;">Desvantagens / Limitações:</b><br>• '
+        + data.disadvantages
+        + '</div>') : '');
+  } else {
+    // Lista todas as sub-raças para esta raça
+    var list = [];
+    Object.keys(_DND_SUBRACE_HELP).forEach(function(sk){
+      var item = _DND_SUBRACE_HELP[sk];
+      if (item && item.race && _raceCanonical(item.race) === rKey) {
+        list.push('• <b>' + item.name + ':</b> ' + item.bonuses);
+      }
+    });
+    if (list.length) {
+      descHtml += '<p style="margin:0 0 8px;">Sub-raças disponíveis para <b>' + _raceLabelPT(rKey) + '</b>:</p>'
+        + '<div style="margin-bottom:8px; font-size:11px;">' + list.join('<br>') + '</div>'
+        + '<div style="font-size:11px; color:#a09484;">Cada sub-raça confere talentos e bônus de atributo únicos conforme as regras oficiais de D&D 5e.</div>';
+    } else {
+      descHtml += '<p>Esta raça possui linhagem única nos registros canônicos de D&D 5e.</p>';
+    }
+  }
+
+  descHtml += '</div>';
+
+  _showInfoPopup({
+    icon: '<span style="font-size:32px;">⚙️</span>',
+    npc: 'Sub-raça D&D 5e',
+    title: data ? data.name : ('Sub-raças de ' + _raceLabelPT(rKey)),
+    desc: descHtml,
+    singleButton: true,
+    cancelLabel: 'Entendi'
+  });
+}
+
+function _showFichaClassHelp(classKey, memberIdx){
+  var c = _cgpClsKey(classKey);
+  var data = _DND_CLASS_HELP[c] || _DND_CLASS_HELP['guerreiro'];
+  var advHtml = (data.advantages || []).map(function(a){ return '• ' + a; }).join('<br>');
+  var disHtml = (data.disadvantages || []).map(function(d){ return '• ' + d; }).join('<br>');
+
+  var descHtml = '<div style="text-align:left; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.55; color:var(--v-text,#d4c8b0);">'
+    + '<div style="background:rgba(20,16,12,0.8); border:1px solid rgba(196,149,58,0.3); border-radius:6px; padding:7px 9px; margin-bottom:8px; font-size:11px;">'
+    + '<b style="color:#ffd700;">Visão Tática D&D 5e:</b><br>'
+    + '• <b>Função:</b> ' + data.role + '<br>'
+    + '• <b>Dado de Vida:</b> ' + data.hit_die + '<br>'
+    + '• <b>Recurso de Combate:</b> ' + data.resource + '<br>'
+    + '• <b>Salvaguardas Proficientes:</b> <span style="color:#ffd700;">' + data.saves + '</span><br>'
+    + '• <b>Atributo Chave:</b> ' + data.main_attr + '<br>'
+    + '• <b>Armaduras:</b> ' + data.armor + '<br>'
+    + '• <b>Armas:</b> ' + data.weapons + '<br>'
+    + (data.subclasses ? ('• <b>Sub-classes (Tradições):</b> ' + data.subclasses) : '')
+    + '</div>'
+
+    + '<div style="margin-bottom:8px;">'
+    + '<b style="color:#7cdb7c;">Vantagens & Habilidades Marcantes:</b><br>'
+    + advHtml
+    + '</div>'
+
+    + '<div style="margin-bottom:8px;">'
+    + '<b style="color:#e07c7c;">Desvantagens & Fraquezas:</b><br>'
+    + disHtml
+    + '</div>'
+    + '</div>';
+
+  _showInfoPopup({
+    icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:var(--v-gold,#c4953a);"><use href="#' + _classToHeraldic(c) + '"/></svg>',
+    npc: 'Vocação D&D 5e',
+    title: data.name,
+    desc: descHtml,
+    singleButton: true,
+    cancelLabel: 'Entendi'
+  });
+}
+
+function _showFichaSubclassHelp(subclassKey, classKey, memberIdx){
+  var sub = String(subclassKey || '').toLowerCase().replace(/-/g, '_').trim();
+  var cKey = _cgpClsKey(classKey);
+  var data = _DND_SUBCLASS_HELP[sub];
+
+  var descHtml = '<div style="text-align:left; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.55; color:var(--v-text,#d4c8b0);">';
+
+  if (data) {
+    descHtml += '<p style="margin:0 0 8px; font-style:italic; color:#e0d4c0;">' + data.desc + '</p>'
+      + '<div style="background:rgba(20,16,12,0.8); border:1px solid rgba(196,149,58,0.3); border-radius:6px; padding:7px 9px; margin-bottom:8px; font-size:11px;">'
+      + '<b style="color:#ffd700;">Progressão por Nível (Marcos D&D 5e):</b><br>';
+    (data.features || []).forEach(function(f){
+      descHtml += '• <b style="color:#ffd700;">' + f.lvl + ' — ' + f.name + ':</b> ' + f.desc + '<br>';
+    });
+    descHtml += '</div>'
+      + '<div style="margin-bottom:8px;">'
+      + '<b style="color:#7cdb7c;">Vantagens Táticas:</b><br>• ' + data.advantages
+      + '</div>'
+      + '<div style="margin-bottom:8px;">'
+      + '<b style="color:#e07c7c;">Desvantagens / Trade-offs:</b><br>• ' + data.disadvantages
+      + '</div>';
+  } else {
+    // Lista todas as sub-classes para esta classe
+    var list = [];
+    Object.keys(_DND_SUBCLASS_HELP).forEach(function(sk){
+      var item = _DND_SUBCLASS_HELP[sk];
+      if (item && item.class && _cgpClsKey(item.class) === cKey) {
+        list.push('• <b style="color:#ffd700;">' + item.name + ':</b> ' + item.desc);
+      }
+    });
+    if (list.length) {
+      descHtml += '<p style="margin:0 0 8px;">Tradições e Sub-classes de <b>' + _classLabelPT(cKey) + '</b>:</p>'
+        + '<div style="margin-bottom:8px; font-size:11px;">' + list.join('<br>') + '</div>'
+        + '<div style="font-size:11px; color:#a09484;">A sub-classe concede identidade tática única, habilidades exclusivas e novos poderes por nível.</div>';
+    } else {
+      descHtml += '<p>Informações de sub-classe para ' + _classLabelPT(cKey) + ' em sincronização com o banco D&D 5e.</p>';
+    }
+  }
+
+  descHtml += '</div>';
+
+  _showInfoPopup({
+    icon: '<span style="font-size:32px;">🔮</span>',
+    npc: 'Especialização D&D 5e',
+    title: data ? data.name : ('Sub-classes de ' + _classLabelPT(cKey)),
+    desc: descHtml,
+    singleButton: true,
+    cancelLabel: 'Entendi'
+  });
+}
+
 
 function _showStatusPopup(memberIdx){
   var ov = document.getElementById('city-subscreen-popup');
@@ -15088,6 +16211,10 @@ function _showStatusPopup(memberIdx){
     : '<svg viewBox="0 0 120 120" style="width: 38px; height: 38px;"><use href="#' + heraldicId + '"/></svg>';
   var raceLabel = _raceLabelPT(m.race);
   var classLabel = _classLabelPT(m.cls);
+  var rKey = (typeof _raceCanonical === 'function') ? _raceCanonical(m.race) : (m.race || 'human');
+  var cKey = _cgpClsKey(m.cls);
+  var subraceLabel = (typeof _subraceLabelPT === 'function') ? _subraceLabelPT(m.subrace, rKey) : (m.subrace || '');
+  var subclassLabel = (typeof _subclassLabelPT === 'function') ? _subclassLabelPT(m.subclass, cKey) : (m.subclass || '');
 
   /* 2026-05-22 — EPIC FICHA v5 "Pergaminho Lendário" =========================
      User: "Melhore o visual da ficha do personagem. Quero que fique épico."
@@ -15116,6 +16243,10 @@ function _showStatusPopup(memberIdx){
     + '.fEp-clickable{cursor:pointer;transition:transform 0.18s ease, box-shadow 0.18s ease;}'
     + '.fEp-clickable:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(196,149,58,0.25);}'
     + '.fEp-clickable:active{transform:translateY(0);}'
+    + '.ficha-meta-badge{background:linear-gradient(180deg,rgba(48,38,28,0.9),rgba(24,18,14,0.95));border:1px solid rgba(196,149,58,0.38);border-radius:4px;color:var(--v-text,#d4c8b0);font-size:calc(9.5px * var(--v-font-scale,1));padding:2px 7px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;line-height:1.2;transition:all 0.18s ease;font-family:inherit;}'
+    + '.ficha-meta-badge:hover,.ficha-meta-badge:active{border-color:var(--v-gold,#c4953a);color:#ffd700;box-shadow:0 0 8px rgba(196,149,58,0.35);transform:translateY(-1px);}'
+    + '.ficha-link{color:var(--v-gold,#c4953a);text-decoration:underline dotted rgba(196,149,58,0.6);text-underline-offset:3px;cursor:pointer;transition:color 0.15s ease,text-shadow 0.15s ease;font-style:normal;display:inline-block;}'
+    + '.ficha-link:hover,.ficha-link:active{color:#ffd700;text-decoration-style:solid;text-shadow:0 0 6px rgba(255,215,0,0.5);}'
     + 'body.perf-lite .fEp-avatar-anim,body.perf-lite .fEp-rune,body.perf-lite .fEp-shield,body.perf-lite .fEp-ambient{animation:none;}'
     + '@media (prefers-reduced-motion:reduce){.fEp-avatar-anim,.fEp-hp-critical,.fEp-rune,.fEp-shield,.fEp-ambient{animation:none;}}'
     + '</style>';
@@ -15172,7 +16303,27 @@ function _showStatusPopup(memberIdx){
     + '</div>'
     // Subtitle
     + '<div class="ficha-subtitle" style="color:var(--v-text-dim,#a09484); font-size:calc(11px * var(--v-font-scale, 1)); font-style:italic; letter-spacing:0.3px;">'
-    + classLabel + ' ' + raceLabel + ' · <b style="color:var(--v-gold,#c4953a); font-style:normal;">Nível ' + m.level + '</b>'
+    + '<span class="ficha-link" onclick="_showFichaClassHelp(\'' + cKey + '\',' + memberIdx + ')" title="Toque para detalhes da classe D&D 5e">' + classLabel + '</span>'
+    + (subclassLabel ? (' (<span class="ficha-link" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + memberIdx + ')" title="Toque para detalhes da sub-classe D&D 5e">' + subclassLabel + '</span>)') : '')
+    + ' '
+    + '<span class="ficha-link" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + memberIdx + ')" title="Toque para detalhes da raça D&D 5e">' + raceLabel + '</span>'
+    + (subraceLabel ? (' (<span class="ficha-link" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + memberIdx + ')" title="Toque para detalhes da sub-raça D&D 5e">' + subraceLabel + '</span>)') : '')
+    + ' · <b style="color:var(--v-gold,#c4953a); font-style:normal;">Nível ' + m.level + '</b>'
+    + '</div>'
+    // Meta Badges row: 4 pills interativos (Classe, Sub-classe, Raça, Sub-raça)
+    + '<div class="ficha-tags-row" style="display:flex; justify-content:center; align-items:center; gap:4px; margin-top:4px; flex-wrap:wrap;">'
+    + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaClassHelp(\'' + cKey + '\',' + memberIdx + ')" title="Classe D&D 5e: ' + classLabel + ' — toque p/ vantagens e desvantagens">'
+    + '<span>🛡️</span> <b>' + classLabel + '</b>'
+    + '</button>'
+    + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + memberIdx + ')" title="Sub-classe D&D 5e: ' + (subclassLabel || 'Ver Tradições') + ' — toque p/ habilidades e vantagens">'
+    + '<span>🔮</span> <span>' + (subclassLabel || 'Sub-classe') + '</span>'
+    + '</button>'
+    + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + memberIdx + ')" title="Raça D&D 5e: ' + raceLabel + ' — toque p/ traços e vantagens raciais">'
+    + '<span>🌿</span> <b>' + raceLabel + '</b>'
+    + '</button>'
+    + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + memberIdx + ')" title="Sub-raça D&D 5e: ' + (subraceLabel || 'Ver Linhagens') + ' — toque p/ vantagens exclusivas">'
+    + '<span>⚙️</span> <span>' + (subraceLabel || 'Sub-raça') + '</span>'
+    + '</button>'
     + '</div>'
     + '</div>';
 
@@ -15347,9 +16498,10 @@ function _showStatusPopup(memberIdx){
   var profSaves = SAVING_PROF_MAP[cKey] || ['str', 'con'];
 
   html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) 3px;">';
-  html += '<div class="ficha-section-title" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
-    + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px;">'
+  html += '<div class="ficha-section-title fEp-clickable" onclick="_showFichaSavesHelp(\''\',' + memberIdx + ')" title="Toque para entender as Salvaguardas (D&D 5e)" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
+    + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px; cursor:pointer;">'
     + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Salvaguardas (D&D 5e)'
+    + '<span style="font-size:8px; color:var(--v-gold,#c4953a); opacity:0.85; border:1px solid rgba(196,149,58,0.35); border-radius:3px; padding:1px 5px; margin-left:3px; letter-spacing:0; text-transform:none;">ⓘ Entenda os números</span>'
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left: var(--v-space-sm, 4px);"></span>'
     + '</div>';
 
@@ -15363,7 +16515,7 @@ function _showStatusPopup(memberIdx){
     var dotColor = isProf ? '#ffd700' : 'rgba(160,148,132,0.4)';
     var valColor = isProf ? '#ffd700' : 'var(--v-text,#d4c8b0)';
 
-    html += '<div style="display:flex; align-items:center; justify-content:space-between; padding:3px 6px; background:rgba(30,24,18,0.7); border:1px solid ' + (isProf ? 'rgba(196,149,58,0.4)' : 'rgba(196,149,58,0.15)') + '; border-radius:4px; font-size:10px;">'
+    html += '<div class="fEp-clickable" onclick="_showFichaSavesHelp(\'' + s.key + '\',' + memberIdx + ')" title="Salvaguarda de ' + s.label + ' (' + (isProf ? 'Proficiente ●' : 'Base ○') + ') — toque para detalhes" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:3px 6px; background:rgba(30,24,18,0.7); border:1px solid ' + (isProf ? 'rgba(196,149,58,0.45)' : 'rgba(196,149,58,0.18)') + '; border-radius:4px; font-size:10px; transition:border-color 0.15s, transform 0.15s;">'
       + '<span style="color:' + dotColor + '; font-size:8px; margin-right:3px;">' + dot + '</span>'
       + '<span style="color:var(--v-text-dim,#a09484); font-size:9px; font-weight:700;">' + s.label + '</span>'
       + '<span style="color:' + valColor + '; font-weight:700; font-variant-numeric:tabular-nums;">' + saveStr + '</span>'
