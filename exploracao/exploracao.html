@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T13:13:30Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T15:51:33Z - do not edit directly, edit source -->
 
 
 
@@ -2122,6 +2122,42 @@ html body .camp-screen {
 .tb-biome { color: var(--v-gold, #c4953a); }
 .tb-weather { color: var(--v-text, #d4c8b0); opacity: 0.95; }
 .tb-phase { color: var(--v-text, #d4c8b0); opacity: 0.95; }
+
+/* Masmorra / Dungeon Top Bar — Formato diferenciado, imersivo e de alto destaque */
+#top-bar.top-bar--dungeon {
+  background: linear-gradient(180deg, rgba(34, 15, 12, 0.98) 0%, rgba(24, 11, 9, 0.94) 65%, rgba(16, 8, 6, 0) 100%);
+  border-bottom: 1px solid rgba(220, 70, 35, 0.5);
+  box-shadow: 0 4px 22px rgba(0, 0, 0, 0.88), 0 0 16px rgba(220, 60, 30, 0.35), inset 0 -1px 0 rgba(220, 60, 30, 0.25);
+}
+.tb-biome.tb-biome--dungeon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, rgba(165, 38, 22, 0.95), rgba(75, 18, 12, 0.98));
+  border: 1px solid rgba(255, 180, 75, 0.8);
+  border-radius: 4px;
+  padding: 2px 7px;
+  color: #ffe090;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  box-shadow: 0 0 10px rgba(220, 50, 25, 0.6), inset 0 1px 0 rgba(255, 220, 130, 0.5);
+  text-shadow: 0 0 6px rgba(255, 110, 45, 0.9), 0 1px 2px #000;
+  animation: tbDungeonPulse 2.8s ease-in-out infinite;
+}
+.tb-weather.tb-weather--dungeon {
+  color: #e8a882;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+.tb-phase.tb-phase--dungeon {
+  color: #ffb852;
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(255, 140, 40, 0.6), 0 1px 2px #000;
+}
+@keyframes tbDungeonPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(220, 50, 25, 0.45), inset 0 1px 0 rgba(255, 220, 130, 0.4); border-color: rgba(255, 180, 75, 0.7); }
+  50%      { box-shadow: 0 0 16px rgba(255, 75, 35, 0.8), inset 0 1px 0 rgba(255, 240, 160, 0.65); border-color: rgba(255, 215, 120, 0.98); }
+}
 
 /* X-6.5.51i: popup tip sobre condicao da exploracao (biome/weather/phase).
    Position absolute dentro do #frame, centralizado. Open/close via class .visible. */
@@ -16651,6 +16687,13 @@ const BIOME_COLORS = {
     '#': '#1a1612', 'c': '#3a4858',  // cristal fosforescente
     '*': '#5a5030'                     // clarabóia (solo iluminado pela luz do dia)
   },
+  dungeon: {
+    '.': '#2a2622', 'g': '#1a1816', 'p': '#342e28', 't': '#221e1a',
+    'T': '#181412', 'r': '#3e3730', 'R': '#4a4238', 'H': '#2e2018',
+    'F': '#3a1f18', 's': '#383028', 'w': '#18242a',
+    'E': '#c4953a', 'D': '#9a3088', 'C': '#c4953a',
+    '#': '#151311', 'o': '#3d2e24', 'i': '#3d1c16'
+  },
   volcanic: {
     '.': '#3a1f18', 'g': '#4a2820', 'p': '#5a3020', 'v': '#4a2820',
     'T': '#2a1815', 'r': '#4a2820', 'R': '#5a3828',
@@ -16692,6 +16735,9 @@ const NARRATIONS = {
     cave_grass: ['Suas botas ecoam no corredor de pedra.', 'Gotas d\u2019água caem ritmicamente.'],
     cave_path: ['O chão polido por séculos de passos guia o caminho.', 'Cristais reluzem levemente ao toque da tocha.'],
     cave_rock: ['Você atravessa uma galeria estreita.', 'Pedras grandes bloqueiam parte da passagem.'],
+    dungeon_grass: ['O piso de pedra fria ecoa sob cada passo.', 'Goteiras distantes quebram o silêncio macabro.', 'O cheiro áspero de ferro e tochas impregna a masmorra.'],
+    dungeon_path: ['A trilha de lajes de pedra avança entre muralhas escuras.', 'Cinzas de fogueiras e marcas de lâminas cobrem o chão de pedra.'],
+    dungeon_rock: ['Você contorna blocos maciços de rocha e estacas pontiagudas.', 'Paredes de pedra talhada bloqueiam qualquer passagem lateral.'],
     volcanic_grass: ['Cinzas secas crepitam sob os pés.', 'O calor sobe do solo em ondas.'],
     volcanic_path: ['A rocha vulcânica forma um trilho negro.', 'Fendas soltam vapor quente ao lado da trilha.'],
     volcanic_rock: ['Você caminha entre brasas ainda acesas.', 'Cada pedra pulsa com calor residual.'],
@@ -16707,6 +16753,7 @@ const NARRATIONS = {
     desert: ['Um escorpião cruza a trilha depressa.', 'Ondas de calor distorcem o horizonte.', 'Ossos branqueados pelo sol marcam o caminho.', 'O sol cai perpendicular — sem sombras.'],
     snow: ['Um flocos solitário desce dançando.', 'O silêncio da neve é absoluto.', 'Tracks recentes de alce cruzam a trilha.', 'A respiração congela no ar.'],
     cave: ['Uma gota d\u2019água cai ecoando.', 'Morcegos passam rápidos no alto da galeria.', 'Algo farfalha na escuridão além da tocha.', 'Veios luminosos pulsam no teto.'],
+    dungeon: ['Gritos guturais ecoam nas profundezas da fortaleza.', 'O crepitar de tochas e braseiros projeta sombras dançantes nas paredes de pedra.', 'O cheiro de sangue seco e couro curtido é espesso no ar.', 'Um estalar de correntes e ferro ressoa mais adiante.'],
     volcanic: ['Uma bolha de lava estoura à distância.', 'O calor seco queima a garganta.', 'Vapor sulfúrico sobe de uma fenda.', 'As cinzas caem como neve preta.'],
     graveyard: ['Um sussurro passa sem fonte visível.', 'As lápides mais antigas estão inclinadas.', 'Um vento súbito frio sopra sem origem clara.', 'A lua parece mais pálida por aqui.']
   }
@@ -20608,7 +20655,7 @@ const FIXED_MAPS = {
   // Layout: trilha sobe do sul (L26) -> patio central (K13) -> tenda interior (L4 trono).
   // Spec: docs/sistemas/dungeons-planning.md + src/game/dungeons/orc_chief_tent.py
   orc_chief_tent: {
-    id: 'orc_chief_tent', region: 'valdoria', biome: 'plains',
+    id: 'orc_chief_tent', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
     name: 'Tenda do Chefe Brakthar',
     cols: 22, rows: 26, seed: 99001, spawnCol: 11, spawnRow: 25,
     // Phase 5b polish v4 (2026-04-26): musica dungeon_dark (em vez de plains).
@@ -24206,6 +24253,7 @@ function renderFrame(ts) {
   if (F.day_night_tint)   _runStep('drawDayNightTint', () => drawDayNightTint(mainCtx));
   if (F.weather_overlay)  _runStep('drawWeatherOverlay', () => drawWeatherOverlay(mainCtx));
   if (_ambientOK && F.ambient_haze) _runStep('drawDistantHaze', () => _drawDistantHaze(mainCtx));
+  if (typeof _drawDungeonAtmosphere === 'function') _runStep('drawDungeonAtmosphere', () => _drawDungeonAtmosphere(mainCtx));
   if (F.debug_hud)        _runStep('drawDebugHud', () => drawDebugHud(mainCtx));
 
   // 2026-04-29 PERF DIAG: tempo total do frame + atualiza top-5 a cada 60 frames
@@ -24722,7 +24770,7 @@ function drawWaterShimmer(ctx) {
 // tiers (barato — batch num único stroke) pra o mapa ter vida até no lite.
 function drawWindGrass(ctx) {
   if (window.vReducedMotion) return;
-  if (!S || !S.grid || !S.player || !S.fogState) return;
+  if (!S || !S.grid || !S.player || !S.fogState || S.biome === 'dungeon' || (S.mapDef && S.mapDef.dungeon)) return;
   var tier = window._valdoriaPerformanceTier;
   var maxDist = (tier === 'lite') ? 3 : 5;
   var cap = (tier === 'lite') ? 16 : 44;
@@ -29647,25 +29695,209 @@ function _drawDuneAAA(ctx, cx, cy, col, row) {
 }
 
 // ════════════════════════════════════════════════════════════════════════
+// RENDERERS DEDICADOS DE MASMORRA / DUNGEON (Paredes de Rocha/Paliçada, Peles & Pátio)
+// ════════════════════════════════════════════════════════════════════════
+function _drawDungeonWallTile(ctx, cx, cy, col, row) {
+  var W = HEX_W;
+  var hashSeed = (col * 73 + row * 31) & 0xFFFF;
+  var hashRng = seededRng(hashSeed);
+
+  // 1. Base sólida de rocha escura intransponível (cobrindo o hex)
+  ctx.fillStyle = '#12100e';
+  ctx.beginPath();
+  ctx.arc(cx, cy, W * 0.46, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 2. Grandes blocos poligonais de pedra talhada / alvenaria
+  var blocks = [
+    { x: -0.22, y: -0.15, w: 0.44, h: 0.28, c: '#231d19', edge: '#383029' },
+    { x:  0.08, y: -0.05, w: 0.38, h: 0.32, c: '#1c1714', edge: '#302822' },
+    { x: -0.26, y:  0.10, w: 0.42, h: 0.26, c: '#28211c', edge: '#3d342c' },
+    { x:  0.02, y:  0.18, w: 0.32, h: 0.22, c: '#191512', edge: '#2b241e' }
+  ];
+  for (var bi = 0; bi < blocks.length; bi++) {
+    var b = blocks[bi];
+    var bx = cx + (b.x + (hashRng() - 0.5) * 0.05) * W;
+    var by = cy + (b.y + (hashRng() - 0.5) * 0.05) * W;
+    var bw = b.w * W;
+    var bh = b.h * W;
+    ctx.fillStyle = '#0a0807';
+    ctx.fillRect(bx - bw * 0.5, by - bh * 0.5 + 2, bw, bh);
+    ctx.fillStyle = b.c;
+    ctx.fillRect(bx - bw * 0.5, by - bh * 0.5, bw, bh);
+    ctx.fillStyle = b.edge;
+    ctx.fillRect(bx - bw * 0.5, by - bh * 0.5, bw, 2);
+    ctx.fillStyle = '#0c0a09';
+    ctx.fillRect(bx - bw * 0.2, by - bh * 0.2, bw * 0.4, 1.5);
+  }
+
+  // 3. Paliçada de toras e estacas pontiagudas de guerra orc
+  var stakes = [
+    { x: -0.24, y: 0.02, w: 0.12, h: 0.55, tilt: -0.08 },
+    { x: -0.08, y: -0.12, w: 0.14, h: 0.62, tilt: 0.04 },
+    { x:  0.10, y: -0.05, w: 0.13, h: 0.58, tilt: -0.05 },
+    { x:  0.25, y: 0.08, w: 0.12, h: 0.50, tilt: 0.07 }
+  ];
+  for (var si = 0; si < stakes.length; si++) {
+    var st = stakes[si];
+    var sx = cx + st.x * W;
+    var sy = cy + st.y * W;
+    var sw = st.w * W;
+    var sh = st.h * W;
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(st.tilt);
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(-sw * 0.5 + 2, -sh * 0.4 + 3, sw, sh * 0.8);
+    ctx.fillStyle = '#362214';
+    ctx.fillRect(-sw * 0.5, -sh * 0.4, sw, sh * 0.8);
+    ctx.fillStyle = '#4e3320';
+    ctx.fillRect(-sw * 0.5, -sh * 0.4, sw * 0.35, sh * 0.8);
+    ctx.fillStyle = '#22140a';
+    ctx.beginPath();
+    ctx.moveTo(-sw * 0.5, -sh * 0.4);
+    ctx.lineTo(0, -sh * 0.65);
+    ctx.lineTo(sw * 0.5, -sh * 0.4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#1c1815';
+    ctx.fillRect(-sw * 0.55, -sh * 0.1, sw * 1.1, 3);
+    ctx.fillStyle = '#5c483a';
+    ctx.fillRect(-sw * 0.55, -sh * 0.1, sw * 1.1, 1);
+    ctx.restore();
+  }
+
+  // 4. Detalhe Macabro ou Tocha de Parede por Hash
+  var feat = hashSeed % 5;
+  if (feat === 0) {
+    var kx = cx - 0.08 * W, ky = cy - 0.42 * W;
+    ctx.fillStyle = '#dcd2bf';
+    ctx.beginPath();
+    ctx.arc(kx, ky, W * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(kx - W * 0.05, ky + W * 0.03, W * 0.10, W * 0.05);
+    ctx.fillStyle = '#1a1410';
+    ctx.beginPath();
+    ctx.arc(kx - W * 0.03, ky, W * 0.022, 0, Math.PI * 2);
+    ctx.arc(kx + W * 0.03, ky, W * 0.022, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (feat === 1) {
+    var tx = cx + 0.12 * W, ty = cy - 0.28 * W;
+    ctx.fillStyle = '#181412';
+    ctx.fillRect(tx - 2, ty, 4, 14);
+    ctx.fillStyle = '#4a2810';
+    ctx.fillRect(tx - 3, ty - 4, 6, 6);
+    var flAmp = Math.sin(_animTime * 0.008 + hashSeed) * 2;
+    ctx.fillStyle = '#ff8c1a';
+    ctx.beginPath();
+    ctx.ellipse(tx, ty - 7 + flAmp * 0.5, 4, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffe066';
+    ctx.beginPath();
+    ctx.ellipse(tx, ty - 6 + flAmp * 0.5, 2, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function _drawDungeonInnerTentTile(ctx, cx, cy, col, row) {
+  var W = HEX_W;
+  var hashSeed = (col * 59 + row * 23) & 0xFFFF;
+  ctx.save();
+  ctx.translate(cx, cy);
+  var rugAngle = (hashSeed % 6) * 0.3;
+  ctx.rotate(rugAngle);
+  ctx.fillStyle = 'rgba(10, 6, 4, 0.6)';
+  ctx.beginPath();
+  ctx.ellipse(1, 2, W * 0.30, W * 0.22, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = (hashSeed % 2 === 0) ? '#4a1e16' : '#381612';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, W * 0.28, W * 0.20, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#220e0a';
+  for (var pi = 0; pi < 8; pi++) {
+    var ang = (pi / 8) * Math.PI * 2;
+    var rx = Math.cos(ang) * W * 0.27;
+    var ry = Math.sin(ang) * W * 0.19;
+    ctx.fillRect(rx - 1.5, ry - 1.5, 3, 3);
+  }
+  ctx.strokeStyle = 'rgba(210, 150, 70, 0.45)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-W * 0.14, 0);
+  ctx.lineTo(W * 0.14, 0);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function _drawDungeonPatioTile(ctx, cx, cy, col, row) {
+  var W = HEX_W;
+  var hashSeed = (col * 47 + row * 19) & 0xFFFF;
+  ctx.fillStyle = 'rgba(15, 12, 10, 0.55)';
+  ctx.beginPath();
+  ctx.ellipse(cx + (hashSeed % 7 - 3) * 2, cy + (hashSeed % 5 - 2) * 2, W * 0.26, W * 0.16, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#241a14';
+  ctx.fillRect(cx - 3, cy - 2, 4, 3);
+  ctx.fillRect(cx + 4, cy + 3, 3, 2);
+}
+
+function _drawDungeonAtmosphere(ctx) {
+  if (!S || !canvasW || !canvasH) return;
+  var isDungMap = !!(S && ((S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon)) || S.biome === 'dungeon'));
+  if (!isDungMap) return;
+
+  var tier = window._valdoriaPerformanceTier;
+  if (tier === 'lite') return;
+
+  var cx = canvasW * 0.5;
+  var cy = canvasH * 0.5;
+  var maxR = Math.max(canvasW, canvasH) * 0.72;
+  var minR = Math.min(canvasW, canvasH) * 0.26;
+  var vigGrad = ctx.createRadialGradient(cx, cy, minR, cx, cy, maxR);
+  vigGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  vigGrad.addColorStop(0.55, 'rgba(18, 9, 6, 0.38)');
+  vigGrad.addColorStop(1, 'rgba(8, 4, 3, 0.82)');
+
+  ctx.save();
+  ctx.fillStyle = vigGrad;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  if (tier !== 'lite' && !window.vReducedMotion) {
+    ctx.fillStyle = 'rgba(255, 130, 40, 0.65)';
+    for (var ci = 0; ci < 12; ci++) {
+      var seed = ci * 1337;
+      var cSpeed = 0.0003 + (ci % 4) * 0.0001;
+      var cOff = (_animTime * cSpeed + ci * 0.12) % 1;
+      var cpx = ((seed * 17) % canvasW + Math.sin(_animTime * 0.001 + ci) * 18) % canvasW;
+      var cpy = canvasH - (cOff * canvasH);
+      var cSize = 1.2 + (ci % 3) * 0.6;
+      ctx.beginPath();
+      ctx.arc(cpx, cpy, cSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════════════════════════════
 function drawTileDecoration(ctx, cx, cy, tile, col, row) {
   const rng = seededRng(col + row * 31);
-  // Phase 2 ajuste v6 (2026-04-26): COPAS DE ARVORES com altura. Em vez de grama
-  // (genérica), agora 4 copas de arvores reais por hex com:
-  //   - Trunk visivel (perception de altura)
-  //   - Sombra abaixo (3D feel)
-  //   - Canopy body (silhueta dark)
-  //   - Highlight no topo (luz solar)
-  //   - Shadow no fundo (volume 3D)
-  //   - Leaf texture lines (medium+)
-  // 4 tipos de copa: round, pointed (pine), irregular (oak), broad (spread).
-  // Z-sorted por Y pra back-to-front rendering correto.
-  // Pra cobrir o hex (sem gaps): 6 floor blobs darkest atras das arvores.
-  // 2026-04-27 USER RULE: "adicione aos hexagonos o que fizemos no mapa do
-  // Brakthar... inclusive faça a mata ser os hexagonos de lá". Mata 'g'
-  // agora usa o mesmo renderer épico do dungeon '#' (4 árvores z-sorted +
-  // floor blobs cobrindo hex). Condition cobre AMBOS '#' (dungeon) E 'g'
-  // (mata em qualquer mapa).
-  if ((tile === '#' && S.mapDef && S.mapDef.dungeon) || tile === 'g') {
+  const isDungMap = !!(S && ((S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon)) || S.biome === 'dungeon'));
+  if (tile === '#' && isDungMap) {
+    _drawDungeonWallTile(ctx, cx, cy, col, row);
+    return;
+  }
+  if (tile === 'i' && isDungMap) {
+    _drawDungeonInnerTentTile(ctx, cx, cy, col, row);
+    return;
+  }
+  if (tile === 'o' && isDungMap) {
+    _drawDungeonPatioTile(ctx, cx, cy, col, row);
+    return;
+  }
+  // Copas de árvores em florestas e matas (tile 'g' ou '#' fora de masmorras)
+  if (tile === 'g' || (tile === '#' && !isDungMap)) {
     var W = HEX_W;
     var H = HEX_H; // V1.7.4 rev3: necessário pra _drawForestBird (era ReferenceError silenciado pelo try/catch)
     var tierMata = window._valdoriaPerformanceTier;
@@ -33578,7 +33810,7 @@ function drawHeatShimmer(ctx) {
 var _birdFlock = null;
 function _maybeSpawnBirdFlock() {
   if (_birdFlock) return;
-  if (!S || S.biome !== 'plains' || S.dayPhase === 'night') return;
+  if (!S || S.biome !== 'plains' || S.dayPhase === 'night' || S.biome === 'dungeon' || (S.mapDef && S.mapDef.dungeon)) return;
   if (Math.random() > 0.002) return;  // ~0.2% por frame a 60fps = spawn médio cada ~8-10s de gameplay
   _birdFlock = {
     x: -80, y: canvasH * (0.12 + Math.random() * 0.25),
@@ -33617,6 +33849,7 @@ function drawBirdFlock(ctx) {
 // God rays sutis da direção do sol (só dia limpo, plains/desert)
 function drawSunRays(ctx) {
   if (!S) return;
+  if (S.biome === 'dungeon' || (S.mapDef && S.mapDef.dungeon)) return;
   if (S.biome !== 'plains' && S.biome !== 'desert') return;
   if (S.dayPhase !== 'day' || S.weather !== 's') return;
   const srcX = canvasW * 0.15;
@@ -45521,33 +45754,58 @@ function updateCurrentCoord() {
 }
 
 function updateTopBar() {
-  /* 2026-07-05 FIX (regressão sweep emoji round 7): os 3 itens do top-bar
-     (bioma / clima / fase-do-dia) eram ICON-ONLY (textContent = emoji). O sweep
-     zerou os emojis (biomeIco/wthrIco/phaseIco viraram '' e o fallback || '') →
-     os 3 renderizavam VAZIO e o jogador só via o "Perigo" (único com label de
-     texto). Agora renderizam o NOME PT-BR como TEXTO (emoji-ban ok), igual ao
-     Perigo. Mantém o title= (tooltip) e o popup contextual ao tocar. */
+  const topBarEl = document.getElementById('top-bar');
+  const isDungeon = !!(S && ((S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon)) || S.biome === 'dungeon'));
+
+  if (topBarEl) {
+    if (isDungeon) topBarEl.classList.add('top-bar--dungeon');
+    else topBarEl.classList.remove('top-bar--dungeon');
+  }
+
   const biomeName = { forest: 'Floresta', plains: 'Planície', desert: 'Deserto',
                        cave: 'Caverna', mountain: 'Montanha', swamp: 'Pântano',
-                       graveyard: 'Cemitério', snow: 'Neve', volcanic: 'Vulcânico' };
+                       graveyard: 'Cemitério', snow: 'Neve', volcanic: 'Vulcânico',
+                       dungeon: 'Masmorra' };
   const biomeEl = document.getElementById('top-biome');
   if (biomeEl) {
-    biomeEl.textContent = biomeName[S.biome] || S.biome || '';
-    biomeEl.title = biomeName[S.biome] || S.biome;
+    if (isDungeon) {
+      biomeEl.classList.add('tb-biome--dungeon');
+      biomeEl.textContent = '🏰 MASMORRA';
+      const dungName = (S.mapDef && S.mapDef.name) ? S.mapDef.name : 'Interior Fortificado';
+      biomeEl.title = 'Masmorra: ' + dungName + ' (Complexo Subterrâneo / Covil Hostil)';
+    } else {
+      biomeEl.classList.remove('tb-biome--dungeon');
+      biomeEl.textContent = biomeName[S.biome] || S.biome || '';
+      biomeEl.title = biomeName[S.biome] || S.biome;
+    }
   }
 
-  const wthrName = { s: 'Limpo', r: 'Chuva', f: 'Névoa', t: 'Tempestade' };
+  const wthrName = { s: 'Limpo', r: 'Chuva', f: 'Névoa', t: 'Tempestade', dungeon: 'Confinado', confinado: 'Confinado' };
   const wthrEl = document.getElementById('top-weather');
   if (wthrEl) {
-    wthrEl.textContent = wthrName[S.weather] || S.weather || '';
-    wthrEl.title = wthrName[S.weather] || S.weather;
+    if (isDungeon) {
+      wthrEl.classList.add('tb-weather--dungeon');
+      wthrEl.textContent = 'CONFINADO';
+      wthrEl.title = 'Ambiente Confinado — Ar denso, tochas e braseiros de guerra';
+    } else {
+      wthrEl.classList.remove('tb-weather--dungeon');
+      wthrEl.textContent = wthrName[S.weather] || S.weather || '';
+      wthrEl.title = wthrName[S.weather] || S.weather;
+    }
   }
 
-  const phaseName = { day: 'Dia', dusk: 'Entardecer', night: 'Noite', dawn: 'Aurora' };
+  const phaseName = { day: 'Dia', dusk: 'Entardecer', night: 'Noite', dawn: 'Aurora', torches: 'Penumbra' };
   const phaseEl = document.getElementById('top-phase');
   if (phaseEl) {
-    phaseEl.textContent = phaseName[S.dayPhase] || S.dayPhase || '';
-    phaseEl.title = phaseName[S.dayPhase] || S.dayPhase;
+    if (isDungeon) {
+      phaseEl.classList.add('tb-phase--dungeon');
+      phaseEl.textContent = 'TOCHAS';
+      phaseEl.title = 'Luz de Tochas / Penumbra — Sem sol; iluminação restrita ao fogo interior';
+    } else {
+      phaseEl.classList.remove('tb-phase--dungeon');
+      phaseEl.textContent = phaseName[S.dayPhase] || S.dayPhase || '';
+      phaseEl.title = phaseName[S.dayPhase] || S.dayPhase;
+    }
   }
 
   const pips = document.getElementById('top-danger').querySelectorAll('.danger-pip');
@@ -45565,6 +45823,7 @@ const TB_BIOME_INFO = {
   plains:    { ico: '', name: 'Planície',   desc: 'Campos abertos sob o céu, com trilhas suaves e fazendas dispersas.', effects: ['Visibilidade ampla — vê POIs distantes', 'Encontros aleatórios menos frequentes', 'Forragear oferece grãos e frutas (DC 10)', 'Sem cobertura — fugir de combate é mais difícil'] },
   desert:    { ico: '', name: 'Deserto',    desc: 'Dunas escaldantes de dia, gélidas de noite. Água é vida.', effects: ['Exaustão (CON DC 12) a cada poucos passos sob o sol', 'Forragear (Sobrevivência DC 16) é raríssimo', 'Tempestades de areia reduzem visibilidade ao mínimo', 'Encontros: bandidos e criaturas adaptadas'] },
   cave:      { ico: '', name: 'Caverna',    desc: 'Túneis úmidos onde a luz não alcança. Cuidado com o que espreita.', effects: ['Escuridão total — Tocha/Luz obrigatória', 'Encontros de criaturas das profundezas (CR maior)', 'Quedas e armadilhas frequentes (DEX saves)', 'Eco delata sua presença'] },
+  dungeon:   { ico: '🏰', name: 'Masmorra',   desc: 'Estrutura fortificada e confinada. Paredes de rocha, estacas e sentinelas em alerta.', effects: ['Sem céu aberto — intempéries externas não afetam o interior', 'Visibilidade restrita ao alcance de tochas e magias de luz (PHB p. 183)', 'Encontros hostis e sentinelas em posições defensivas', 'Descanso longo limitado a locais seguros (fogueira central)'] },
   mountain:  { ico: '', name: 'Montanha',  desc: 'Picos rochosos e penhascos. O ar fica rarefeito.', effects: ['Terreno difícil — movimento custa o dobro', 'Quedas perigosas (DEX DC 14)', 'Encontros: trolls, ogros, águias', 'Frio noturno (CON saves)'] },
   swamp:     { ico: '', name: 'Pântano',    desc: 'Atoleiros e mangues onde a névoa nunca dissipa. O chão te puxa.', effects: ['Movimento severamente lento', 'Doenças (CON DC 13) ao beber água parada', 'Visibilidade reduzida pela névoa', 'Encontros: aranhas gigantes, trolls, ghouls'] },
   graveyard: { ico: '', name: 'Cemitério',  desc: 'Lápides musgosas onde o véu entre mundos é fino.', effects: ['Encontros mortos-vivos frequentes', 'Saves de Sabedoria contra horror (DC 12)', 'Profanar tumbas tem consequências', 'Mais perigoso à noite'] },
@@ -45576,12 +45835,15 @@ const TB_WEATHER_INFO = {
   r: { ico: '', name: 'Chuva',      desc: 'Pingos persistentes encharcam o caminho.', effects: ['Visibilidade reduzida pra POIs distantes', 'Movimento -1 (terreno escorregadio)', 'Fogueira difícil de acender (Sobrevivência DC 13)', 'Rastros são mais fáceis de seguir'] },
   f: { ico: '', name: 'Névoa',      desc: 'Branco leitoso engole tudo a poucos metros.', effects: ['Visibilidade severamente reduzida (1-2 hexes)', 'Inimigos podem te surpreender (Percepção desvantagem)', 'Forragear mais difícil (sem ver longe)', 'Lugares secretos podem se revelar'] },
   t: { ico: '', name: 'Tempestade', desc: 'Trovões e raios. A natureza te avisa: pare.', effects: ['Movimento muito lento', 'Risco de raio (DEX DC 15) em áreas abertas', 'Visibilidade quase nula', 'Encontros aleatórios reduzidos (criaturas se escondem)'] },
+  dungeon:   { ico: '🔥', name: 'Confinado', desc: 'Ar denso e pesado, aquecido por tochas e fogueiras de guerra.', effects: ['Protegido contra chuvas ou ventos do exterior', 'Fumaça e sombras podem camuflar aproximações', 'Sons ecoam pelas galerias e corredores de pedra'] },
+  confinado: { ico: '🔥', name: 'Confinado', desc: 'Ar denso e pesado, aquecido por tochas e fogueiras de guerra.', effects: ['Protegido contra chuvas ou ventos do exterior', 'Fumaça e sombras podem camuflar aproximações', 'Sons ecoam pelas galerias e corredores de pedra'] },
 };
 const TB_PHASE_INFO = {
-  day:   { ico: '',  name: 'Dia',        desc: 'O sol no zênite ilumina tudo. Aventureiros estão em vantagem.', effects: ['Visibilidade total', 'Encontros mortos-vivos raros', 'NPCs amigáveis estão ativos (Persuasão DC normal)', 'Fácil descansar com segurança'] },
-  dusk:  { ico: '', name: 'Entardecer',  desc: 'O sol declina, lançando sombras longas. A transição.', effects: ['Visibilidade começa a cair', 'Encontros aumentam ligeiramente', 'Hora de buscar abrigo', 'Mortos-vivos começam a despertar'] },
-  night: { ico: '', name: 'Noite',       desc: 'A escuridão domina. Caçadores noturnos estão à solta.', effects: ['Visibilidade muito reduzida (sem Tocha/Luz)', 'Encontros mortos-vivos e predadores frequentes', 'Saves de Sabedoria contra medo (DC 12)', 'Descanso requer vigília'] },
-  dawn:  { ico: '', name: 'Aurora',      desc: 'O primeiro raio dourado. Esperança renova.', effects: ['Visibilidade volta gradualmente', 'Mortos-vivos recuam', 'Bônus pra cura matinal (+1d4 HP)', 'NPCs camponeses começam o dia'] },
+  day:     { ico: '',  name: 'Dia',        desc: 'O sol no zênite ilumina tudo. Aventureiros estão em vantagem.', effects: ['Visibilidade total', 'Encontros mortos-vivos raros', 'NPCs amigáveis estão ativos (Persuasão DC normal)', 'Fácil descansar com segurança'] },
+  dusk:    { ico: '', name: 'Entardecer',  desc: 'O sol declina, lançando sombras longas. A transição.', effects: ['Visibilidade começa a cair', 'Encontros aumentam ligeiramente', 'Hora de buscar abrigo', 'Mortos-vivos começam a despertar'] },
+  night:   { ico: '', name: 'Noite',       desc: 'A escuridão domina. Caçadores noturnos estão à solta.', effects: ['Visibilidade muito reduzida (sem Tocha/Luz)', 'Encontros mortos-vivos e predadores frequentes', 'Saves de Sabedoria contra medo (DC 12)', 'Descanso requer vigília'] },
+  dawn:    { ico: '', name: 'Aurora',      desc: 'O primeiro raio dourado. Esperança renova.', effects: ['Visibilidade volta gradualmente', 'Mortos-vivos recuam', 'Bônus pra cura matinal (+1d4 HP)', 'NPCs camponeses começam o dia'] },
+  torches: { ico: '🕯️', name: 'Luz de Tochas / Penumbra', desc: 'O interior não recebe luz solar direta. A iluminação é gerada por tochas e braseiros.', effects: ['Penumbra fora do raio direto das tochas (PHB p. 183)', 'Tochas ativas ampliam o raio de visão e afastam emboscadas', 'Fontes mágicas de luz clareiam a escuridão circundante'] },
 };
 const TB_DANGER_INFO = {
   ico: '◆', name: 'Nível de Perigo',
@@ -45598,10 +45860,17 @@ const TB_DANGER_INFO = {
 function _showTbConditionPopup(kind) {
   let info = null;
   let kindLabel = '';
-  if (kind === 'biome')   { info = TB_BIOME_INFO[S.biome] || TB_BIOME_INFO.forest; kindLabel = 'Bioma'; }
-  else if (kind === 'weather') { info = TB_WEATHER_INFO[S.weather] || TB_WEATHER_INFO.s; kindLabel = 'Clima'; }
-  else if (kind === 'phase')   { info = TB_PHASE_INFO[S.dayPhase] || TB_PHASE_INFO.day; kindLabel = 'Fase do Dia'; }
-  else if (kind === 'danger')  {
+  const isDungeon = !!(S && ((S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon)) || S.biome === 'dungeon'));
+  if (kind === 'biome') {
+    info = isDungeon ? TB_BIOME_INFO.dungeon : (TB_BIOME_INFO[S.biome] || TB_BIOME_INFO.forest);
+    kindLabel = 'Bioma';
+  } else if (kind === 'weather') {
+    info = isDungeon ? TB_WEATHER_INFO.confinado : (TB_WEATHER_INFO[S.weather] || TB_WEATHER_INFO.s);
+    kindLabel = 'Clima';
+  } else if (kind === 'phase') {
+    info = isDungeon ? TB_PHASE_INFO.torches : (TB_PHASE_INFO[S.dayPhase] || TB_PHASE_INFO.day);
+    kindLabel = isDungeon ? 'Iluminação' : 'Fase do Dia';
+  } else if (kind === 'danger') {
     info = TB_DANGER_INFO;
     kindLabel = 'Indicador';
     info.name = TB_DANGER_INFO.name + ' (' + (S.dangerLevel || 0) + '/5)';
