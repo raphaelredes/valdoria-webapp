@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T17:07:54Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T18:08:42Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -15943,7 +15943,7 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
     var enemy = {
         t: 'e', n: n, hp: hp, mhp: mhp, ac: ac, atk: atk, die: die,
         dmgMod: (spec.dmgMod_exact != null) ? parseInt(spec.dmgMod_exact, 10) : sc.dmgMod,
-        attr: sc.attr, dex: sc.dex, con: sc.con,
+        attr: sc.attr, dex: (spec.dex_exact != null) ? parseInt(spec.dex_exact, 10) : sc.dex, con: sc.con,
         wis: sc.wis != null ? sc.wis : 10, str: sc.str != null ? sc.str : 10, int: sc.int != null ? sc.int : 10, cha: sc.cha != null ? sc.cha : 10,
         ico: spec.ico_exact || sc.ico, alive: hp > 0,
         /* 2026-06-11 (user): status PRÉ-aplicado no inimigo via spec.se_exact
@@ -16315,44 +16315,44 @@ function newCombatFromSetup(cfg) {
             c.initPending = true;
             return;
         }
-        /* Sessão #86 (C): iniciativa FIXA (init_exact) tem prioridade sobre o
-           d20+DEX — garante que um aliado scriptado (Thorne no prólogo) aja
-           cedo/visivelmente. DEX 10 default dava d20 puro e ele agia por último,
-           sumindo na luta curta antes do turno dele. */
-        c.init = (c.init_exact != null)
-            ? parseInt(c.init_exact, 10)
-            : rollN(20) + Math.floor((c.dex - 10) / 2);
+        var dexMod = Math.floor(((c.dex != null ? c.dex : 10) - 10) / 2);
+        var initBonus = 0;
+        if (Array.isArray(c.feats) && c.feats.indexOf('alert') >= 0) initBonus += 5;
+        if (typeof getInitBonusFromStatuses === 'function') initBonus += getInitBonusFromStatuses(c);
+
+        var rawRoll;
+        if (c.init_exact != null) {
+            c.init = parseInt(c.init_exact, 10);
+            rawRoll = Math.max(1, Math.min(20, c.init - dexMod - initBonus));
+        } else if (typeof c.init_roll === 'number' && c.init_roll >= 1 && c.init_roll <= 20) {
+            rawRoll = c.init_roll;
+            c.init = rawRoll + dexMod + initBonus;
+        } else {
+            rawRoll = rollN(20);
+            c.init = rawRoll + dexMod + initBonus;
+        }
+        c.init_roll = rawRoll;
         c.initRevealed = false;
         c.initRolling = false;
     });
-    /* Phase 5b polish v3 (2026-04-26): SURPRISE + EFEITOS DE INTRO.
-       cfg.surprise (PHB p.189): boss perde 1 turno, player attack first.
-       cfg.preCombatEffects: array de efeitos especificos por opcao do encontro:
-         - 'fury_drained': boss comeca com res.value = 0 (Furia esgotada)
-         - 'burst_disabled': boss nao usa Investida Furiosa neste combate
-         - 'first_attack_adv': player ganha vantagem no 1° ataque
-         - 'boss_enraged': boss +2 dmgMod (combate fail-state)
-         - 'boss_ac_debuff': boss CA -2 (intimidacao quebra defesa) */
+    /* Phase 5b polish v3 / D&D 5e PHB p.189: SURPRESA.
+       Surpresa aplica a condição 'surprised' na Rodada 1 (perde o turno).
+       NÃO altera nem adultera o valor numérico de iniciativa (+30 removido).
+       Cada combatente mantém sua rolagem autêntica de 1d20. */
     if (cfg.surprise === true) {
         order.forEach(function (c) {
-            if (c.t === 'p' || c.t === 'a') {
-                c.init = (c.init | 0) + 30;
-            } else if (c.t === 'e') {
+            if (c.t === 'e') {
                 c.surprised = true;
                 c.surprisedFromIntro = true;
             }
         });
     }
-    // User sessão #69: emboscada AO player ("orcs saltam, sem tempo de reagir").
-    // Oposto de cfg.surprise: os INIMIGOS agem primeiro (+30 init) e o PLAYER +
-    // aliados perdem o round 1 (PHB p.189). Assim o log "foi pego de surpresa"
-    // nomeia o PLAYER, coerente com a narrativa de emboscada (antes dizia que o
-    // orc foi surpreendido, contradizendo o texto).
+    // User sessão #69 / D&D 5e PHB p.189: emboscada ao grupo.
+    // O jogador e aliados perdem o round 1 ('surprised' flag).
+    // Cada unidade mantém sua rolagem autêntica de d20 (sem +30 artificial).
     if (cfg.playerSurprised === true) {
         order.forEach(function (c) {
-            if (c.t === 'e') {
-                c.init = (c.init | 0) + 30;
-            } else if (c.t === 'p' || c.t === 'a') {
+            if (c.t === 'p' || c.t === 'a') {
                 c.surprised = true;
                 c.surprisedFromIntro = true;
             }
@@ -33470,8 +33470,9 @@ async function animInit(preSkip) {
            seta ja ancorada no proximo combatente (conforme solicitado). */
         await sleep(i === 0 ? 600 : 2000);
         if (_skipInit) { c.initRolling = false; break; }
-        var d20 = c.init - Math.floor((c.dex - 10) / 2);
-        if (d20 < 1) d20 = 1; if (d20 > 20) d20 = 20;
+        var d20 = (typeof c.init_roll === 'number' && c.init_roll >= 1 && c.init_roll <= 20)
+            ? c.init_roll
+            : Math.max(1, Math.min(20, c.init - Math.floor(((c.dex || 10) - 10) / 2)));
         await new Promise(function (r) { showDice(d20, r, c, 'Iniciativa', { initiativeSequence: true }); });
         /* Skip pode ter fechado o overlay durante a rolagem */
         c.initRolling = false;
@@ -33499,6 +33500,44 @@ async function animInit(preSkip) {
     showInitiativeOrderPopup();
 }
 
+/** Trata a condição Surpreso (D&D 5e PHB p.189) quando chega o turno do jogador.
+ * Na Rodada 1, uma unidade surpresa perde o turno (sem ações, reações ou deslocamento).
+ * A condição se encerra no fim deste turno. */
+async function checkAndHandlePlayerSurprise(s) {
+    if (!s || s.ph !== 'active') return false;
+    var p = (s.order && typeof s.p_idx === 'number') ? s.order[s.p_idx] : null;
+    if (p && p.hp > 0 && p.alive && p.surprised) {
+        p.surprised = false;
+        s.log.push(p.n + ' foi pego de surpresa — perde o primeiro turno (PHB p.189).');
+        try {
+            var cellRoot = document.querySelector('[data-unit-id="' + (p.id || 'p') + '"]');
+            if (cellRoot && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(cellRoot, 'SURPRESO!', 'attack');
+            }
+        } catch (_) {}
+        render(s);
+        await sleep(900);
+        var nxt = (s.active_idx + 1) % s.order.length;
+        if (nxt === 0) {
+            simAdvanceToRound(s);
+        }
+        s.active_idx = nxt;
+        render(s);
+        if (s.active_idx !== s.p_idx) {
+            var watchdogFn = (typeof _runNpcSegmentWithWatchdog === 'function')
+                ? _runNpcSegmentWithWatchdog
+                : runNpcSegmentUntilPlayerTurn;
+            var _segTimeout = (typeof _calcNpcSegmentTimeout === 'function')
+                ? _calcNpcSegmentTimeout(s)
+                : 60000;
+            await watchdogFn(s, _segTimeout);
+            render(s);
+        }
+        return true;
+    }
+    return false;
+}
+
 /** Fecha o popup de ordem e entra na fase active (mesmo fluxo do antigo CTA fixo). */
 function beginCombatAfterInitOrder() {
     if (!currentState || currentState.ph !== 'init_done') return;
@@ -33522,6 +33561,9 @@ function beginCombatAfterInitOrder() {
            watchdog circuit breaker e bloco finally incondicional pra garantir que o jogador
            nunca fique preso sem o botão Agir liberado. */
         (async function () {
+            var watchdogFn = (typeof _runNpcSegmentWithWatchdog === 'function')
+                ? _runNpcSegmentWithWatchdog
+                : runNpcSegmentUntilPlayerTurn;
             try {
                 var _segTimeout = (typeof _calcNpcSegmentTimeout === 'function')
                     ? _calcNpcSegmentTimeout(currentState)
@@ -33540,6 +33582,10 @@ function beginCombatAfterInitOrder() {
                 if (typeof _resetActionFlags === 'function') _resetActionFlags(currentState);
                 render(currentState);
             }
+        })();
+    } else {
+        (async function () {
+            await checkAndHandlePlayerSurprise(currentState);
         })();
     }
 }
@@ -36224,6 +36270,9 @@ async function runNpcSegmentUntilPlayerTurn() {
         try {
             await window.bfCameraFocusUnit(s.order[s.p_idx], 0.92, (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 10 : 400);
         } catch (_) {}
+    }
+    if (s.order && s.order[s.p_idx] && s.order[s.p_idx].surprised && typeof checkAndHandlePlayerSurprise === 'function') {
+        await checkAndHandlePlayerSurprise(s);
     }
     return false;
 }

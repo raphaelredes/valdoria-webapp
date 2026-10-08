@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T16:49:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T18:08:47Z - do not edit directly, edit source -->
 
 
 
@@ -15626,15 +15626,15 @@ window.__explFetchTO = function(url, opts, ms) {
     },
 
     // POST /api/exploracao/event_choice
-    eventChoice: async function(idx) {
+    eventChoice: async function(idx, extra) {
       var tok = _motorToken();
       if (!tok) {
         console.warn('[E-REM:API-EVENT_CHOICE] skip no_motor_token idx=' + idx);
         return { error: 'no_motor_token' };
       }
       console.info('[E-REM:API-EVENT_CHOICE] send idx=' + idx);
-      var res = await _post('/api/exploracao/event_choice',
-        { token: tok, choice_idx: idx });
+      var payload = Object.assign({ token: tok, choice_idx: idx }, extra || {});
+      var res = await _post('/api/exploracao/event_choice', payload);
       if (res && res.outcome) {
         var check = res.outcome.check;
         var delta = res.outcome.delta || {};
@@ -38866,6 +38866,14 @@ function openEventModal() {
   if (typeof _markActive === 'function') _markActive(60000);
   const modal = document.getElementById('event-modal');
   const ev = S.event;
+  if (!ev) return;
+  // D&D 5e: Teste Cego de Sentidos / Percepção Pré-Combate
+  if ((ev.combat || ev.type === 'combat_forced') && !ev._blindCheckDone && typeof rollBlindPerceptionCheck === 'function') {
+    rollBlindPerceptionCheck(ev, function () {
+      openEventModal();
+    });
+    return;
+  }
   LOG('EVENT', 'openEventModal id=' + ev.id + ' biome=' + S.biome + ' mapId=' + S.mapId + ' choices=' + (ev.choices || []).length);
   // [R3] Variantes sensíveis a familiaridade (NPC reconhece player em retornos).
   // Pick + cache — não re-rola no mesmo evento.
@@ -39064,6 +39072,7 @@ function _engageForcedCombat(ev) {
     triggerCombatScreen({
       enemyId: enemyId || 'goblin',
       surprise: !!c.surprise,
+      playerSurprised: !!c.playerSurprised,
       context: { source: 'forced', event_id: ev && ev.id, biome: S.biome },
       onLose: () => { if (typeof triggerDefeat === 'function') triggerDefeat('Morto em uma emboscada.'); }
     });
@@ -39082,7 +39091,11 @@ function _engageForcedCombat(ev) {
     && typeof window.ExploracaoAPI.hasToken === 'function'
     && window.ExploracaoAPI.hasToken());
   if (_isRemote && typeof window.ExploracaoAPI.eventChoice === 'function') {
-    Promise.resolve(window.ExploracaoAPI.eventChoice(0)).then(function (res) {
+    var _extraPayload = {
+      player_surprised: !!(c.playerSurprised),
+      surprise: !!(c.surprise)
+    };
+    Promise.resolve(window.ExploracaoAPI.eventChoice(0, _extraPayload)).then(function (res) {
       // Sessão #75 (SERVER-AUTHORITY): se o servidor stageou o combate REMOTE
       // (combat_redirect — flag VALDORIA_REMOTE_FORCED_COMBAT on), redireciona pro
       // combate REMOTE (token+api → /api/combat2/prepare + bridge + rewards validados
@@ -39875,6 +39888,14 @@ function _explEventBodyNode(ev) {
 // o jogador preso sem o evento.
 function _explShowEventVEnc(ev) {
   _explVEncResolving = false;
+  if (!ev) return;
+  // D&D 5e: Teste Cego de Sentidos / Percepção Pré-Combate
+  if ((ev.combat || ev.type === 'combat_forced') && !ev._blindCheckDone && typeof rollBlindPerceptionCheck === 'function') {
+    rollBlindPerceptionCheck(ev, function () {
+      _explShowEventVEnc(ev);
+    });
+    return;
+  }
   try {
     var node = _explEventBodyNode(ev);
     // Se TODAS as choices foram filtradas (nenhuma elegivel pro player atual), o
@@ -40382,6 +40403,160 @@ function _resolveSkillForCheck(p, skillSpec) {
     if (m > best.mod) best = { skill: sk, mod: m };
   }
   return best;
+}
+
+/** D&D 5e: Teste Cego de Sentidos / Percepção Pré-Combate (PHB p. 177, 189).
+ * O Mestre solicita uma rolagem de dados misteriosa sem contexto antes de
+ * revelar a narrativa ou os monstros. O resultado determina se o grupo é
+ * pego de surpresa (emboscada) ou se percebe o perigo a tempo (ou até ganha surpresa!). */
+function rollBlindPerceptionCheck(ev, onDone) {
+  if (!ev) { if (typeof onDone === 'function') onDone(); return; }
+  ev._blindCheckDone = true;
+
+  const overlay = document.getElementById('dice-overlay');
+  const wrap = document.getElementById('dice-canvas-wrap');
+  const formula = document.getElementById('dice-formula');
+  const result = document.getElementById('dice-result');
+  const skipBtn = document.getElementById('dice-skip-btn');
+
+  if (!overlay || !wrap || !formula || !result || !skipBtn) {
+    if (typeof onDone === 'function') onDone();
+    return;
+  }
+
+  var p = (window.S && window.S.player) || {};
+  var wis = (typeof p.wis === 'number') ? p.wis : ((p.stats && p.stats.wis) || 10);
+  var wisMod = Math.floor((wis - 10) / 2);
+  var profList = (p.proficiency || p.proficiencies || []);
+  var isProf = profList.some(function (pr) {
+    var s = String(pr).toLowerCase();
+    return s.indexOf('percep') !== -1 || s === 'wis';
+  });
+  var lvl = p.lvl || p.level || 1;
+  var profBonus = isProf ? (2 + Math.floor((lvl - 1) / 4)) : 0;
+  var totalMod = wisMod + profBonus;
+
+  var danger = (window.S && window.S.mapDef && window.S.mapDef.danger) ? window.S.mapDef.danger : 1;
+  var stealthDC = 12 + Math.floor(danger * 0.4);
+
+  var d20 = 1 + Math.floor(Math.random() * 20);
+  var total = d20 + totalMod;
+
+  clearChildren(wrap);
+  clearChildren(formula);
+  clearChildren(result);
+  result.className = '';
+  result.style.display = 'none';
+  skipBtn.style.display = 'none';
+
+  formula.innerHTML = '<div style="font-family:var(--v-font-display,\'Cinzel\'),serif; font-size:18px; color:var(--v-gold,#c4953a); letter-spacing:1px; margin-bottom:4px;">TESTE DE SENTIDOS</div>' +
+                      '<div style="font-size:13px; color:var(--v-text-muted,#a89f91); font-style:italic;">O Mestre de Mesa pede uma rolagem de dados...</div>';
+
+  overlay.classList.add('visible');
+
+  var advanced = false;
+  function advance() {
+    if (advanced) return;
+    advanced = true;
+    overlay.classList.remove('visible');
+    setTimeout(function () {
+      if (typeof onDone === 'function') onDone();
+    }, 300);
+  }
+
+  skipBtn.onclick = function (e) { if (e) e.stopPropagation(); advance(); };
+  skipBtn.addEventListener('click', function (e) { if (e) e.stopPropagation(); advance(); });
+  result.onclick = function () { advance(); };
+
+  var resultShown = false;
+  function showResult() {
+    if (resultShown) return;
+    resultShown = true;
+
+    clearChildren(formula);
+    var modSign = totalMod >= 0 ? '+' : '';
+    formula.innerHTML = '<div style="font-family:var(--v-font-display,\'Cinzel\'),serif; font-size:15px; color:var(--v-gold,#c4953a); margin-bottom:4px;">TESTE DE SENTIDOS &middot; D&D 5e</div>' +
+                        '<div style="font-size:14px; color:var(--v-text,#e0d8c3);">' +
+                        'd20 (<b>' + d20 + '</b>) ' + modSign + totalMod + ' (Percepção) = <b>' + total + '</b> vs CD ' + stealthDC +
+                        '</div>';
+
+    var isNat20 = (d20 === 20);
+    var isNat1 = (d20 === 1);
+    var isSuccess = !isNat1 && (isNat20 || total >= stealthDC);
+
+    if (isNat20) {
+      result.className = 'success';
+      result.innerHTML = '✦ 20 NATURAL! SUCESSO CRÍTICO ✦';
+    } else if (isNat1) {
+      result.className = 'failure';
+      result.innerHTML = '☠ 1 NATURAL! FALHA CRÍTICA ☠';
+    } else if (isSuccess) {
+      result.className = 'success';
+      result.innerHTML = 'PERCEPÇÃO AGUÇADA — ALERTA!';
+    } else {
+      result.className = 'failure';
+      result.innerHTML = 'EMBOSCADA — SURPREENDIDO!';
+    }
+    result.style.display = 'inline-block';
+
+    skipBtn.textContent = 'Ver o que aconteceu ▸';
+    skipBtn.style.setProperty('display', 'inline-block', 'important');
+    skipBtn.style.setProperty('visibility', 'visible', 'important');
+    skipBtn.style.setProperty('opacity', '1', 'important');
+
+    if (!ev.combat) ev.combat = {};
+    if (isNat20) {
+      ev.combat.surprise = true;
+      ev.combat.playerSurprised = false;
+    } else if (isSuccess) {
+      ev.combat.surprise = false;
+      ev.combat.playerSurprised = false;
+    } else {
+      ev.combat.surprise = false;
+      ev.combat.playerSurprised = true;
+    }
+
+    var narrText = '';
+    if (isNat20) {
+      narrText = '🎲 <b>Teste de Sentidos (✦ 20 Natural! Sucesso Crítico ✦)</b> — Seus instintos aguçados captam a aproximação furtiva muito antes do bote. Você avista as sombras rasteiras entre a vegetação antes que elas notem sua vigília! O grupo ganha a Vantagem da Surpresa!';
+    } else if (isSuccess) {
+      narrText = '🎲 <b>Teste de Sentidos (D20: ' + d20 + modSign + totalMod + ' = ' + total + ' vs CD ' + stealthDC + ' · SUCESSO)</b> — Seus ouvidos atentos captam o som sutil de folhas secas se quebrando e a respiração pesada na vegetação. Você saca sua arma a tempo e encara as feras nos olhos! Você não foi pego desprevenido.';
+    } else if (isNat1) {
+      narrText = '🎲 <b>Teste de Sentidos (☠ 1 Natural! Falha Crítica ☠)</b> — Uma distração momentânea no caminho deixa sua retaguarda completamente exposta. Os atacantes rompem a folhagem em investida brutal sem chance de reação! Emboscada total!';
+    } else {
+      narrText = '🎲 <b>Teste de Sentidos (D20: ' + d20 + modSign + totalMod + ' = ' + total + ' vs CD ' + stealthDC + ' · FALHA)</b> — O silêncio do ermo parecia total até que o estalar violento rompe a calma. De repente, formas ferozes saltam das sombras direto contra a sua retaguarda! Emboscada!';
+    }
+
+    if (Array.isArray(ev.script) && ev.script.length > 0) {
+      ev.script.unshift({ type: 'narration', text: narrText });
+    } else {
+      ev.script = [
+        { type: 'narration', text: narrText },
+        { type: 'narration', text: ev.text || ev.title || 'Inimigos surgem no caminho!' }
+      ];
+    }
+  }
+
+  var safetyTimer = setTimeout(function () {
+    showResult();
+  }, 3500);
+
+  if (window.Dice3D) {
+    try {
+      var dice = new window.Dice3D(wrap, { size: 200, dieType: 'd20', duration: 1500 });
+      dice.roll(d20, function () {
+        clearTimeout(safetyTimer);
+        showResult();
+      });
+      return;
+    } catch (e) {
+      console.warn('[DICE] Dice3D error in blind check:', e);
+    }
+  }
+  setTimeout(function () {
+    clearTimeout(safetyTimer);
+    showResult();
+  }, 1000);
 }
 
 function rollSkillCheck(choice, cb) {
