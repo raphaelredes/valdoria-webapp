@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T16:30:46Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T17:07:54Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -19741,57 +19741,131 @@ function calculateHexMovementCost(fromC, fromR, toC, toR, difficultMap) {
     return cost;
 }
 
-function assignInitialPositions(order, cols, rows) {
+function assignInitialPositions(order, cols, rows, biome, weather) {
     cols = cols || HEX_COLS_DEFAULT;
     rows = rows || HEX_ROWS_DEFAULT;
     var allies = [];
     var enemies = [];
+    var playerUnit = null;
     order.forEach(function (c) {
         if (!c) return;
-        if (c.t === 'p' || c.t === 'a') allies.push(c);
-        else if (c.t === 'e') enemies.push(c);
+        if (c.t === 'p') {
+            playerUnit = c;
+            allies.push(c);
+        } else if (c.t === 'a') {
+            allies.push(c);
+        } else if (c.t === 'e') {
+            enemies.push(c);
+        }
     });
+    if (!playerUnit && allies.length > 0) playerUnit = allies[0];
+
+    // Raio de visão do personagem para ancorar o limiar de visibilidade da linha inimiga
+    var vr = 6;
+    if (playerUnit && typeof calcUnitVisionRange === 'function') {
+        vr = calcUnitVisionRange(playerUnit, weather, biome);
+    }
+    var targetDist = Math.max(5, Math.min(vr || 6, 7));
+
+    var centerCol = Math.floor(cols / 2);
+    var playerRow = Math.min(rows - 3, targetDist + 3);
 
     var occupied = {};
     function key(c, r) { return c + ',' + r; }
 
-    function placeGroup(group, baseRows, centerCol) {
-        var colOffsets = [0, 1, -1, 2, -2, 3, -3, 4];
-        group.forEach(function (c) {
-            if (c.pos && c.pos.col != null && c.pos.row != null) {
-                occupied[key(c.pos.col, c.pos.row)] = true;
-                return;
-            }
-            var placed = false;
-            for (var ri = 0; ri < baseRows.length && !placed; ri++) {
-                var r = baseRows[ri];
-                for (var ci = 0; ci < colOffsets.length; ci++) {
-                    var candCol = centerCol + colOffsets[ci];
-                    if (candCol >= 0 && candCol < cols && !occupied[key(candCol, r)]) {
-                        c.pos = { col: candCol, row: r };
-                        occupied[key(candCol, r)] = true;
-                        placed = true;
-                        break;
-                    }
+    order.forEach(function (c) {
+        if (c && c.pos && c.pos.col != null && c.pos.row != null) {
+            occupied[key(c.pos.col, c.pos.row)] = true;
+        }
+    });
+
+    // Slots aliados: centrados no Sul ao redor do personagem
+    var allySlots = [
+        { col: centerCol, row: playerRow },
+        { col: centerCol - 1, row: playerRow },
+        { col: centerCol + 1, row: playerRow },
+        { col: centerCol, row: playerRow + 1 },
+        { col: centerCol - 1, row: playerRow + 1 },
+        { col: centerCol + 1, row: playerRow + 1 },
+        { col: centerCol - 2, row: playerRow },
+        { col: centerCol + 2, row: playerRow },
+        { col: centerCol - 2, row: playerRow + 1 },
+        { col: centerCol + 2, row: playerRow + 1 },
+        { col: centerCol, row: playerRow + 2 }
+    ];
+
+    // Slots inimigos: dinamicamente posicionados no limite de visão do personagem ao Norte
+    var enemyCandidates = [];
+    for (var er = 0; er < rows; er++) {
+        for (var ec = 0; ec < cols; ec++) {
+            if (er < playerRow) {
+                var d = hexDistance(centerCol, playerRow, ec, er);
+                if (d <= targetDist) {
+                    enemyCandidates.push({ d: d, colDiff: Math.abs(ec - centerCol), col: ec, row: er });
                 }
             }
-            if (!placed) {
-                for (var fr = 0; fr < rows && !placed; fr++) {
-                    for (var fc = 0; fc < cols; fc++) {
-                        if (!occupied[key(fc, fr)]) {
-                            c.pos = { col: fc, row: fr };
-                            occupied[key(fc, fr)] = true;
-                            placed = true;
-                            break;
-                        }
-                    }
+        }
+    }
+    // Ordena: 1º d === targetDist (exatamente no limiar da visão!), 2º d === targetDist - 1, 3º mais próximo do centro
+    enemyCandidates.sort(function (a, b) {
+        var pA = (a.d === targetDist) ? -1 : ((a.d === targetDist - 1) ? 0 : 1);
+        var pB = (b.d === targetDist) ? -1 : ((b.d === targetDist - 1) ? 0 : 1);
+        if (pA !== pB) return pA - pB;
+        if (a.colDiff !== b.colDiff) return a.colDiff - b.colDiff;
+        return b.d - a.d;
+    });
+
+    var enemySlots = enemyCandidates.map(function (cand) {
+        return { col: cand.col, row: cand.row };
+    });
+
+    if (enemySlots.length === 0) {
+        var fbRows = [playerRow - targetDist, playerRow - targetDist + 1, 2, 3];
+        for (var fbi = 0; fbi < fbRows.length; fbi++) {
+            var fbR = fbRows[fbi];
+            var fbCols = [centerCol, centerCol - 1, centerCol + 1, centerCol - 2, centerCol + 2];
+            for (var fci = 0; fci < fbCols.length; fci++) {
+                var fbC = fbCols[fci];
+                if (fbC >= 0 && fbC < cols && fbR >= 0 && fbR < rows) {
+                    enemySlots.push({ col: fbC, row: fbR });
                 }
             }
-        });
+        }
     }
 
-    placeGroup(allies, [rows - 2, rows - 1, rows - 3], Math.floor(cols / 2) - 1);
-    placeGroup(enemies, [1, 2, 0], Math.floor(cols / 2));
+    // Posiciona aliados
+    var aIdx = 0;
+    allies.forEach(function (c) {
+        if (c.pos && c.pos.col != null && c.pos.row != null) return;
+        while (aIdx < allySlots.length && occupied[key(allySlots[aIdx].col, allySlots[aIdx].row)]) {
+            aIdx++;
+        }
+        if (aIdx < allySlots.length) {
+            c.pos = { col: allySlots[aIdx].col, row: allySlots[aIdx].row };
+            occupied[key(c.pos.col, c.pos.row)] = true;
+            aIdx++;
+        } else {
+            c.pos = { col: centerCol, row: rows - 1 };
+            occupied[key(c.pos.col, c.pos.row)] = true;
+        }
+    });
+
+    // Posiciona inimigos
+    var eIdx = 0;
+    enemies.forEach(function (c) {
+        if (c.pos && c.pos.col != null && c.pos.row != null) return;
+        while (eIdx < enemySlots.length && occupied[key(enemySlots[eIdx].col, enemySlots[eIdx].row)]) {
+            eIdx++;
+        }
+        if (eIdx < enemySlots.length) {
+            c.pos = { col: enemySlots[eIdx].col, row: enemySlots[eIdx].row };
+            occupied[key(c.pos.col, c.pos.row)] = true;
+            eIdx++;
+        } else {
+            c.pos = { col: centerCol, row: 0 };
+            occupied[key(c.pos.col, c.pos.row)] = true;
+        }
+    });
 
     order.forEach(function (c) {
         if (!c) return;
@@ -19859,15 +19933,15 @@ function calcUnitVisionRange(u, weather, biome) {
     var curBiome = String(biome || 'forest').toLowerCase();
 
     var baseR = 6; // Dia / Limpo (alcance tático padrão D&D 5e: 9m / 6 hexes)
-    if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') baseR = 2;
-    else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') baseR = 3;
-    else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') baseR = 4;
-    else if (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('masmorra') >= 0 || curBiome.indexOf('dungeon') >= 0) baseR = 2;
+    if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') baseR = 3;
+    else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') baseR = 4;
+    else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') baseR = 5;
+    else if (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('masmorra') >= 0 || curBiome.indexOf('dungeon') >= 0 || curBiome.indexOf('caverna') >= 0) baseR = 5;
     else baseR = 6;
 
     // Bônus racial D&D 5e (Darkvision / Sentidos Aguçados)
     var raceStr = String(u.race || u.r || '').toLowerCase();
-    if (raceStr.indexOf('elf') >= 0 || raceStr.indexOf('an') >= 0 || raceStr.indexOf('dwarf') >= 0 || raceStr.indexOf('tiefling') >= 0 || raceStr.indexOf('gnom') >= 0) {
+    if (raceStr.indexOf('elf') >= 0 || raceStr.indexOf('drow') >= 0 || raceStr.indexOf('anao') >= 0 || raceStr.indexOf('anão') >= 0 || raceStr.indexOf('dwarf') >= 0 || raceStr.indexOf('tiefling') >= 0 || raceStr.indexOf('gnom') >= 0) {
         baseR += 1;
     }
     var uName = String(u.n || '').toLowerCase();
@@ -20921,7 +20995,7 @@ function buildBattlefield(s) {
     var bRows = s.battlefield.rows || HEX_ROWS_DEFAULT;
 
     // Ensure positions and movement speeds are assigned
-    assignInitialPositions(s.order, bCols, bRows);
+    assignInitialPositions(s.order, bCols, bRows, s.biome || s.bio, s.weather);
     ensureProceduralBattlefield(s);
     bCols = s.battlefield.cols;
     bRows = s.battlefield.rows;
@@ -21016,7 +21090,7 @@ function buildBattlefield(s) {
     var visionConditionLabel = 'LUZ PLENA';
     var isCave = (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('caverna') >= 0 || curBiome.indexOf('masmorra') >= 0 || curBiome.indexOf('dungeon') >= 0);
     var pRace = String(playerUnit && (playerUnit.race || playerUnit.r) || '').toLowerCase();
-    var hasDarkvision = (pRace.indexOf('elf') >= 0 || pRace.indexOf('an') >= 0 || pRace.indexOf('dwarf') >= 0 || pRace.indexOf('tiefling') >= 0 || pRace.indexOf('gnom') >= 0);
+    var hasDarkvision = (pRace.indexOf('elf') >= 0 || pRace.indexOf('drow') >= 0 || pRace.indexOf('anao') >= 0 || pRace.indexOf('anão') >= 0 || pRace.indexOf('dwarf') >= 0 || pRace.indexOf('tiefling') >= 0 || pRace.indexOf('gnom') >= 0);
 
     if (isPlayerBlinded) {
         visionConditionLabel = 'CEGO';
