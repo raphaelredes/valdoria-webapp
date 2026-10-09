@@ -1656,8 +1656,14 @@
         var _now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
         if (_now - _lastPortraitTap < 400) return;  // ignora o disparo duplicado
         _lastPortraitTap = _now;
-        if (typeof window.showLightbox === 'function') {
-          window.showLightbox(npcPortrait, npcName, npcDesc);
+        var curImg = portraitEl.querySelector('img');
+        var curSrc = (curImg && curImg.getAttribute('src')) || npcPortrait;
+        var nameEl = header.querySelector('.enc-name');
+        var descEl = header.querySelector('.enc-desc');
+        var curName = (nameEl && nameEl.textContent) || npcName;
+        var curDesc = (descEl && descEl.textContent) || npcDesc;
+        if (typeof window.showLightbox === 'function' && curSrc) {
+          window.showLightbox(curSrc, curName, curDesc);
         } else {
           console.warn('[ENC] showLightbox unavailable — lightbox.js missing?');
         }
@@ -1746,8 +1752,12 @@
         var spkHit = reg ? reg[pageSpkKey] : null;
         var displayName = (spkHit && spkHit.name) || pageSpkKey;
         var displayDesc = (spkHit && spkHit.desc) || npcDesc;
+        var isMainSpeaker = !spkHit && (displayName === npcName || !firstSpeech.speaker || firstSpeech.speaker === npcName || (dialogue.npc && (firstSpeech.speaker === dialogue.npc.id || firstSpeech.speaker === dialogue.npc.npc_id)));
         var displayPortrait = (spkHit && (spkHit.portraitImg || spkHit.portrait))
+          || (isMainSpeaker && npcPortrait ? npcPortrait : null)
           || (typeof window._npcPortraitByName === 'function' ? window._npcPortraitByName(displayName) : null)
+          || (typeof window._discoverySpeakerPortrait === 'function' ? window._discoverySpeakerPortrait(displayName) : null)
+          || (npcPortrait || null)
           || (typeof _resolveGenericEncounterPortrait === 'function' ? _resolveGenericEncounterPortrait(displayName, displayDesc) : null);
 
         var nameEl = header.querySelector('.enc-name');

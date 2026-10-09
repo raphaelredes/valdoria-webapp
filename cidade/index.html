@@ -12745,7 +12745,15 @@ var _NAMED_NPC_PORTRAITS = {
   'padre brevon': 'npcs/padre-aldric.webp',
   'brevon': 'npcs/padre-aldric.webp',
   'sereniel escriva': 'npcs/sereniel-escriva.webp',
-  'sereniel': 'npcs/sereniel-escriva.webp'
+  'sereniel': 'npcs/sereniel-escriva.webp',
+  'aldenmar': 'npcs/banqueiro.webp',
+  'tesoureiro aldenmar': 'npcs/banqueiro.webp',
+  'aldwin': 'npcs/banqueiro.webp',
+  'aldwin de tholram': 'npcs/banqueiro.webp',
+  'martha': 'npcs/estalajadeira.webp',
+  'martha estalajadeira': 'npcs/estalajadeira.webp',
+  'durgan': 'npcs/ferreiro.webp',
+  'mestre durgan': 'npcs/ferreiro.webp'
 };
 function _npcPortraitByName(name) {
   if (!name) return null;
@@ -12889,10 +12897,10 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('grom') >= 0)        return '/shared/img/npcs/grom-o-caolho-v2.webp';  /* Grom, o Caolho — taverneiro ANÃO (retrato dedicado, ANTES do fallback generico de taverneiro). */
   if (s.indexOf('taverneir') >= 0)   return '/shared/img/npcs/taverneiro.webp';
   if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/estalajadeira.webp';
-  if (s.indexOf('banqueir') >= 0) return '/shared/img/npcs/banqueiro.webp';
+  if (s.indexOf('banqueir') >= 0 || s.indexOf('aldenmar') >= 0 || s.indexOf('tesoureir') >= 0 || s.indexOf('aldwin') >= 0) return '/shared/img/npcs/banqueiro.webp';
   if (s.indexOf('alquimist') >= 0) return '/shared/img/npcs/alquimista.webp';
   if (s.indexOf('aldeao') >= 0 || s.indexOf('aldeã') >= 0) return '/shared/img/npcs/aldeao.webp';
-  if (s.indexOf('ferreir') >= 0) return '/shared/img/npcs/ferreiro.webp';
+  if (s.indexOf('ferreir') >= 0 || s.indexOf('durgan') >= 0) return '/shared/img/npcs/ferreiro.webp';
   if (s.indexOf('escriba') >= 0 || s.indexOf('escrivã') >= 0) return '/shared/img/npcs/escriba.webp';
   // Sumo Sacerdote / sacerdot — usa padre-aldric como fallback genérico de clero
   if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('sacerdot') >= 0) return '/shared/img/npcs/padre-aldric.webp';
@@ -42319,14 +42327,18 @@ function _tavernShowMuralBoard(p){
   }
 }
 
-// FASE 5d (#6) — leitura de um aviso flavor do mural (D7: usa n.text). Não vira quest.
+// FASE 5d (#6) — leitura de um aviso do mural. Registra pista de exploração diegética.
 function _muralShowNotice(n){
   if (!n) return;
+  // Registra a leitura do rumor/aviso no servidor para conceder pista de exploração
+  if (window.vCityServer && typeof window.vCityServer.cityAction === 'function') {
+    window.vCityServer.cityAction('notice.read', { notice_id: n.id }).catch(function(){});
+  }
   if (typeof _showInfoPopup !== 'function') { if (typeof vToast === 'function') vToast(n.text || '', 'info'); return; }
   _showInfoPopup({
     icon: _heralIco('ic-pergaminho'), npc: 'Grom, o Caolho', title: (n.title || 'Aviso'),
-    desc: '<i>"' + (n.text || '') + '"</i>',
-    singleButton: true, cancelLabel: 'Voltar', onCancel: function(){}
+    desc: '<i>"' + (n.text || '') + '"</i><br><br><span style="color:var(--v-gold,#ffd700);font-weight:600;">🗺️ Pista de Exploração Registrada!</span><br><small style="color:var(--v-text-dim,#a09484);">Você guardou esse relato no seu diário de viagem. Ele guiará suas buscas nos ermos de Valdoria.</small>',
+    singleButton: true, cancelLabel: 'Entendido', onCancel: function(){}
   });
 }
 
@@ -64564,12 +64576,16 @@ var _CITY_APPROACH_SCENES = {
 
   // ── CASA DE THOLRAM (BANCO) ────────────────────────────────────────────
   'bank:aldwin': {
-    npc: { name: 'Aldwin de Tholram', desc: 'Banqueiro · Casa de Tholram', portrait: '/shared/img/npcs/banqueiro.webp' },
-    narration: 'A serenidade austera e o eco de balanças de precisão marcam os cofres da Casa de Tholram. Aldwin ajusta seus óculos de leitura...'
+    npc: { name: 'Tesoureiro Aldenmar', desc: 'Tesoureiro · Banco da Cidade', portrait: '/shared/img/npcs/banqueiro.webp' },
+    narration: 'A serenidade austera e o eco de balanças de precisão marcam os cofres da Casa de Tholram. O Tesoureiro Aldenmar apoia o pesado livro-razão sobre o balcão...'
+  },
+  'bank:aldenmar': {
+    npc: { name: 'Tesoureiro Aldenmar', desc: 'Tesoureiro · Banco da Cidade', portrait: '/shared/img/npcs/banqueiro.webp' },
+    narration: 'A serenidade austera e o eco de balanças de precisão marcam os cofres da Casa de Tholram. O Tesoureiro Aldenmar apoia o pesado livro-razão sobre o balcão...'
   },
   'bank:*': {
-    npc: { name: 'Aldwin de Tholram', desc: 'Banqueiro · Casa de Tholram', portrait: '/shared/img/npcs/banqueiro.webp' },
-    narration: 'Cofres de ferro reforçado e guardas atentos compõem a segurança silenciosa da Casa de Tholram...'
+    npc: { name: 'Tesoureiro Aldenmar', desc: 'Tesoureiro · Banco da Cidade', portrait: '/shared/img/npcs/banqueiro.webp' },
+    narration: 'Cofres de ferro reforçado e guardas atentos compõem a segurança silenciosa do Banco de Valdoria...'
   },
 
   // ── ESCRIBA RÚNICO ─────────────────────────────────────────────────────
