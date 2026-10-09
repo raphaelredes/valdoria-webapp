@@ -17523,7 +17523,7 @@ function _showStatusPopup(memberIdx){
   var profSaves = SAVING_PROF_MAP[cKey] || ['str', 'con'];
 
   html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) 3px;">';
-  html += '<div class="ficha-section-title fEp-clickable" onclick="_showFichaSavesHelp(\''\',' + memberIdx + ')" title="Toque para entender as Salvaguardas (D&D 5e)" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
+  html += '<div class="ficha-section-title fEp-clickable" onclick="_showFichaSavesHelp(null,' + memberIdx + ')" title="Toque para entender as Salvaguardas (D&D 5e)" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
     + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px; cursor:pointer;">'
     + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Salvaguardas (D&D 5e)'
     + '<span style="font-size:8px; color:var(--v-gold,#c4953a); opacity:0.85; border:1px solid rgba(196,149,58,0.35); border-radius:3px; padding:1px 5px; margin-left:3px; letter-spacing:0; text-transform:none;">ⓘ Entenda os números</span>'
