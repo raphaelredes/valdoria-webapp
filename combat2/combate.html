@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-09T00:47:45Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-09T12:31:01Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -11553,7 +11553,7 @@ document.write('<script src="../shared/items-db-generated.js?v=' + _vti + '"><\/
 /* User sessão #69: propaga o tamanho de fonte escolhido no settings da cidade
    para o COMBATE. body[data-font-size] → --v-font-scale (valdoria-design.css).
    Sem isto o texto do combate ficava sempre no tamanho base mesmo com A+. */
-(function(){try{var sz=localStorage.getItem('valdoria_font_size')||'normal';if(sz==='xlarge')sz='large';if(['small','normal','large'].indexOf(sz)<0)sz='normal';if(document.body)document.body.setAttribute('data-font-size',sz);}catch(_e){}})();
+(function(){try{var sz=localStorage.getItem('valdoria_font_size')||'normal';if(sz==='xlarge')sz='large';if(['small','normal','large'].indexOf(sz)<0)sz='normal';if(document.documentElement)document.documentElement.setAttribute('data-font-size',sz);if(document.body)document.body.setAttribute('data-font-size',sz);}catch(_e){}})();
 </script>
 <!-- ════════════════════════════════════════════════════════════════════════
      INTRO TITLE + LOADING — pattern canonical (USER REQUEST 2026-05-05)
