@@ -12701,7 +12701,7 @@ var _NAMED_NPC_PORTRAITS = {
   'comerciante brael': 'npcs/comerciante-brael.webp',
   'mestra miriana': 'npcs/mestra-miriana.webp',
   'mestre corvus': 'merchants/corvus-veltharion.webp',
-  'ferreiro da praca': 'npcs/ferreiro.webp',
+  'ferreiro da praca': 'npcs/durgan.webp',
   'quinto o queijeiro': 'npcs/quinto-queijeiro.webp',
   'velha do oculto': 'npcs/velha-oculto.webp',
   'batedor de carteira': 'npcs/batedor-carteira.webp',
@@ -12742,18 +12742,22 @@ var _NAMED_NPC_PORTRAITS = {
   'thorne': 'npcs/thorne-armeiro.webp',
   'mestre thorne': 'npcs/thorne-armeiro.webp',
   'ferreiro thorne': 'npcs/thorne-armeiro.webp',
-  'padre brevon': 'npcs/padre-aldric.webp',
-  'brevon': 'npcs/padre-aldric.webp',
+  'padre brevon': 'npcs/padre-brevon.webp',
+  'brevon': 'npcs/padre-brevon.webp',
   'sereniel escriva': 'npcs/sereniel-escriva.webp',
   'sereniel': 'npcs/sereniel-escriva.webp',
-  'aldenmar': 'npcs/banqueiro.webp',
-  'tesoureiro aldenmar': 'npcs/banqueiro.webp',
-  'aldwin': 'npcs/banqueiro.webp',
-  'aldwin de tholram': 'npcs/banqueiro.webp',
-  'martha': 'npcs/estalajadeira.webp',
-  'martha estalajadeira': 'npcs/estalajadeira.webp',
-  'durgan': 'npcs/ferreiro.webp',
-  'mestre durgan': 'npcs/ferreiro.webp'
+  'aldenmar': 'npcs/aldenmar-banqueiro.webp',
+  'tesoureiro aldenmar': 'npcs/aldenmar-banqueiro.webp',
+  'aldwin': 'npcs/aldenmar-banqueiro.webp',
+  'aldwin de tholram': 'npcs/aldenmar-banqueiro.webp',
+  'martha': 'npcs/martha.webp',
+  'martha estalajadeira': 'npcs/martha.webp',
+  'durgan': 'npcs/durgan.webp',
+  'mestre durgan': 'npcs/mestre-durgan.webp',
+  'hadric': 'npcs/hadric-cacador.webp',
+  'hadric cacador': 'npcs/hadric-cacador.webp',
+  'malakor': 'npcs/malakor-livreiro.webp',
+  'malakor livreiro': 'npcs/malakor-livreiro.webp'
 };
 function _npcPortraitByName(name) {
   if (!name) return null;
@@ -12782,7 +12786,9 @@ function _discoverySpeakerPortrait(speaker) {
   // Personagens nominais (PNGs dedicados)
   // 2026-06-13: capitão dos portões (guarda) ANTES do clero — colisão de nome "Aldric".
   if (s.indexOf('aldric') >= 0 && (s.indexOf('guarda') >= 0 || s.indexOf('capit') >= 0 || s.indexOf('port') >= 0)) return '/shared/img/npcs/guarda-aldric.webp';
-  if (s.indexOf('brevon') >= 0) return '/shared/img/npcs/padre-aldric.webp';  /* Padre Brevon (ex-Padre Aldric, renomeado 2026-06-17 p/ 1o nome unico) */
+  if (s.indexOf('brevon') >= 0) return '/shared/img/npcs/padre-brevon.webp';  /* Padre Brevon (ex-Padre Aldric, renomeado 2026-06-17 p/ 1o nome unico) */
+  if (s.indexOf('hadric') >= 0) return '/shared/img/npcs/hadric-cacador.webp';
+  if (s.indexOf('malakor') >= 0) return '/shared/img/npcs/malakor-livreiro.webp';
   if (s.indexOf('tavira') >= 0)  return '/shared/img/npcs/mestra-tavira.webp';
   if (s.indexOf('lyana') >= 0)   return '/shared/img/npcs/lyana-herbalista.webp';
   if (s.indexOf('elara') >= 0)   return '/shared/img/npcs/irma-elara.webp';
@@ -12895,15 +12901,15 @@ function _discoverySpeakerPortrait(speaker) {
 
   // Fallback role-based (PNGs genéricos quando NPC não tem portrait dedicado)
   if (s.indexOf('grom') >= 0)        return '/shared/img/npcs/grom-o-caolho-v2.webp';  /* Grom, o Caolho — taverneiro ANÃO (retrato dedicado, ANTES do fallback generico de taverneiro). */
-  if (s.indexOf('taverneir') >= 0)   return '/shared/img/npcs/taverneiro.webp';
-  if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/estalajadeira.webp';
-  if (s.indexOf('banqueir') >= 0 || s.indexOf('aldenmar') >= 0 || s.indexOf('tesoureir') >= 0 || s.indexOf('aldwin') >= 0) return '/shared/img/npcs/banqueiro.webp';
-  if (s.indexOf('alquimist') >= 0) return '/shared/img/npcs/alquimista.webp';
+  if (s.indexOf('taverneir') >= 0)   return '/shared/img/npcs/barnabey-taverneiro.webp';
+  if (s.indexOf('martha') >= 0 || s.indexOf('estalajadeir') >= 0) return '/shared/img/npcs/martha.webp';
+  if (s.indexOf('banqueir') >= 0 || s.indexOf('aldenmar') >= 0 || s.indexOf('tesoureir') >= 0 || s.indexOf('aldwin') >= 0) return '/shared/img/npcs/aldenmar-banqueiro.webp';
+  if (s.indexOf('alquimist') >= 0) return '/shared/img/npcs/thendros-alquimista.webp';
   if (s.indexOf('aldeao') >= 0 || s.indexOf('aldeã') >= 0) return '/shared/img/npcs/aldeao.webp';
-  if (s.indexOf('ferreir') >= 0 || s.indexOf('durgan') >= 0) return '/shared/img/npcs/ferreiro.webp';
-  if (s.indexOf('escriba') >= 0 || s.indexOf('escrivã') >= 0) return '/shared/img/npcs/escriba.webp';
-  // Sumo Sacerdote / sacerdot — usa padre-aldric como fallback genérico de clero
-  if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('sacerdot') >= 0) return '/shared/img/npcs/padre-aldric.webp';
+  if (s.indexOf('ferreir') >= 0 || s.indexOf('durgan') >= 0) return '/shared/img/npcs/durgan.webp';
+  if (s.indexOf('escriba') >= 0 || s.indexOf('escrivã') >= 0) return '/shared/img/npcs/severus-escriba.webp';
+  // Sumo Sacerdote / sacerdot — usa padre-brevon como sacerdote clérigo do templo
+  if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('sacerdot') >= 0) return '/shared/img/npcs/padre-brevon.webp';
   // Fallback universal da identidade do jogo (Medalhão Dourado de Diálogo de Valdoria)
   return '/shared/img/ui/dialogo.webp';
 }
@@ -22125,7 +22131,7 @@ function _buildInnMockData(player){
     flavor: greeting,
     renome: { inn: rep },
     npc: {
-      icon: '<img src="/shared/img/npcs/estalajadeira.webp" alt="" style="width:48px;height:48px;object-fit:contain;">',
+      icon: '<img src="/shared/img/npcs/martha.webp" alt="" style="width:48px;height:48px;object-fit:contain;">',
       name: 'Martha',
       role: 'Estalajadeira',
       subtitle: '<i>"Que bom que voltou! O que precisa hoje?"</i>',
@@ -24821,10 +24827,10 @@ function _buildArenaMockData(player){
 // rel_thorne ganhou portraitImg dedicado (thorne-armeiro.webp existe em shared/img/npcs/).
 // Sessão #26 (2026-05-22) P1 #77: adicionado portraitImg (PNG quando disponível, fallback role-based)
 var RELATIONS_NPCS = [
-  { id: 'rel_martha',  icon: '<img src="/shared/img/npcs/estalajadeira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/estalajadeira.webp' },
+  { id: 'rel_martha',  icon: '<img src="/shared/img/npcs/martha.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Martha',          role: 'Estalajadeira',    ref_id: 'inn_martha',      portraitImg: '/shared/img/npcs/martha.webp' },
   { id: 'rel_grom',    icon: '<img src="/shared/img/npcs/grom-o-caolho-v2.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Grom, o Caolho',role: 'Taverneiro',       ref_id: 'tav_grom',        portraitImg: '/shared/img/npcs/grom-o-caolho-v2.webp' },
   { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/guarda-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Guarda Aldric',   role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/guarda-aldric.webp' },
-  { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/banqueiro.webp' },
+  { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/aldenmar-banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/aldenmar-banqueiro.webp' },
   { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
   { id: 'rel_thorne',  icon: '<img src="/shared/img/npcs/thorne-armeiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/npcs/thorne-armeiro.webp' },
   { id: 'rel_mirena',  icon: '<img src="/shared/img/merchants/mirena.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/merchants/mirena.webp' },
@@ -24877,7 +24883,7 @@ var CITY_NPC_DETAILS = {
     perk: 'Lareira da Colina — Repouso revigorante e acolhimento dedicado',
     lore: 'A matriarca da estalagem, cuja hospitalidade já salvou incontáveis comitivas nas noites de neblina e tempestade.',
     quote: 'Uma lareira quente e um colchão de palha limpa fazem qualquer estrada valer a pena.',
-    portrait: '/shared/img/npcs/estalajadeira.webp'
+    portrait: '/shared/img/npcs/martha.webp'
   },
   npc_gate_aldric: {
     name: 'Guarda Aldric', role: 'Capitão dos Portões', venue: 'gates', venue_label: 'Portões da Cidade', category: 'civic',
@@ -24947,7 +24953,7 @@ var CITY_NPC_DETAILS = {
     perk: 'Linha de Crédito — Cofres seguros, empréstimos amigáveis e rendimentos maiores',
     lore: 'Patrício de gestos comedidos que gerencia os depósitos e a circulação de moedas de ouro em Valdoria.',
     quote: 'Ouro parado adoece; ouro sob custódia prospera. Seus depósitos estão seguros comigo.',
-    portrait: '/shared/img/npcs/banqueiro.webp'
+    portrait: '/shared/img/npcs/aldenmar-banqueiro.webp'
   },
   npc_rune_eirik: {
     name: 'Eirik', role: 'Escriba Rúnico', venue: 'rune', venue_label: 'Santuário das Runas', category: 'sacred',
@@ -26137,8 +26143,8 @@ var SHADOW_NPCS = [{
 // adventurous→combat/patrulheiro, scholarly→npcs/escriba, mercantile→npcs/banqueiro, mysterious→combat/bruxo
 var TRAVELERS_KNOWN = [
   { id: 'wnp_thessan', icon: '<img src="/shared/img/combat/patrulheiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Thessan Caminhos-Longos', archetype: 'adventurous', schedule: 'wanderer', loc_now: 'gates',       activity: 'examina um mapa desgastado e murmura nomes de cidades distantes' },
-  { id: 'wnp_orana',   icon: '<img src="/shared/img/npcs/escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Orana Folha-de-Vidro',    archetype: 'scholarly',   schedule: 'scholar',  loc_now: 'temple',      activity: 'folheia um tomo coberto com runas que você não reconhece' },
-  { id: 'wnp_borek',   icon: '<img src="/shared/img/npcs/banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Borek Saco-Pesado',       archetype: 'mercantile',  schedule: 'merchant', loc_now: 'market',      activity: 'pesa moedas numa balança de bronze, olhar atento aos vendedores' },
+  { id: 'wnp_orana',   icon: '<img src="/shared/img/npcs/severus-escriba.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Orana Folha-de-Vidro',    archetype: 'scholarly',   schedule: 'scholar',  loc_now: 'temple',      activity: 'folheia um tomo coberto com runas que você não reconhece' },
+  { id: 'wnp_borek',   icon: '<img src="/shared/img/npcs/aldenmar-banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Borek Saco-Pesado',       archetype: 'mercantile',  schedule: 'merchant', loc_now: 'market',      activity: 'pesa moedas numa balança de bronze, olhar atento aos vendedores' },
   { id: 'wnp_silvia',  icon: '<img src="/shared/img/combat/bruxo.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',       name: 'Silvia Capuz-de-Lua',     archetype: 'mysterious',  schedule: 'rogue',    loc_now: 'town_square', activity: 'observa os transeuntes como quem procura alguém — ou foge de alguém' }
 ];
 
@@ -63902,10 +63908,10 @@ var RECURRING_NPCS = {
     portrait: 'ic-mago', portraitImg: '/shared/img/npcs/mestra-miriana.webp',
     desc: 'Erudita de vestes acadêmicas. Carrega livros antigos.'
   },
-  garrick: {
-    name: 'Garrick, o Caçador',
+  hadric: {
+    name: 'Hadric, o Caçador',
     portrait: 'ic-patrulheiro',
-    portraitImg: '/shared/img/npcs/mestre-garrick.webp',  // Sessao #37 v18 (2026-05-25)
+    portraitImg: '/shared/img/npcs/hadric-cacador.webp',
     desc: 'Patrulheiro humano, capa de pele, arco às costas.'
   },
   // 2026-05-12 NPCs das missões da Guilda (PADRAO_ALDRIC consistency)
@@ -63954,7 +63960,7 @@ var RECURRING_NPCS = {
   martha: {
     name: 'Martha',
     portrait: 'ic-estalajadeira',
-    portraitImg: '/shared/img/npcs/estalajadeira.webp',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
+    portraitImg: '/shared/img/npcs/martha.webp',  // Sessao #37 v18 (2026-05-25): PADRAO_ALDRIC lightbox
     desc: 'Estalajadeira da Pena-Dourada. Trata todo mundo como filho — desde que pague a conta. Reconhece um veterano de longe.'
   },
   // 2026-05-18 PADRAO_ALDRIC para os 5 mercadores fixos do Mercado.
@@ -64671,33 +64677,33 @@ var _CITY_APPROACH_SCENES = {
 
   // ── ESTALAGEM DA PENA-DOURADA ──────────────────────────────────────────
   'inn:martha': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha.webp' },
     narration: 'O calor acolhedor da lareira e o aroma reconfortante de ensopado te recebem na Estalagem da Pena-Dourada. Martha abre um sorriso acolhedor ao te ver chegar...'
   },
   'inn:rooms': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha.webp' },
     narration: 'Você se aproxima do balcão de mogno, observando o quadro de chaves de latão polido em busca de um leito seguro para o descanso...'
   },
   'inn:meals': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha.webp' },
     narration: 'O cheiro apetitoso de pão quente e caldo fervejante enche a sala. Martha limpa o balcão e aponta o cardápio do dia...'
   },
   'inn:relax': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha.webp' },
     narration: 'Você busca um momento de calmaria longe do peso das armas e da poeira da estrada, aproximando-se da área de descanso reservada...'
   },
   'inn:martha_concern': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha.webp' },
     narration: 'Martha limpa o balcão com movimentos lentos, os olhos perdidos na chama da vela. Percebendo seus passos, ela suspira com discrição...'
   },
   'inn:*': {
-    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/estalajadeira.webp' },
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem da Pena-Dourada', portrait: '/shared/img/npcs/martha.webp' },
     narration: 'O ambiente sereno da Pena-Dourada oferece um refúgio da agitação da cidade. Martha ergue o olhar acolhedor em sua direção...'
   },
 
   // ── TEMPLO DOS QUATRO ──────────────────────────────────────────────────
-  'temple:aldric': {
-    npc: { name: 'Padre Brevon', desc: 'Clérigo · Templo dos Quatro', portrait: '/shared/img/npcs/padre-aldric.webp' },
+  'temple:brevon': {
+    npc: { name: 'Padre Brevon', desc: 'Clérigo · Templo dos Quatro', portrait: '/shared/img/npcs/padre-brevon.webp' },
     narration: 'O eco suave de preces e a luz filtrada pelos vitrais sagrados preenchem a nave do templo. Você se aproxima do sacerdote...'
   },
   'temple:elara': {
@@ -64705,7 +64711,7 @@ var _CITY_APPROACH_SCENES = {
     narration: 'Entre frascos de bálsamo e ervas curativas, a Irmã Elara ergue os olhos serenos de suas orações ao notar sua presença...'
   },
   'temple:*': {
-    npc: { name: 'Padre Brevon', desc: 'Clérigo · Templo dos Quatro', portrait: '/shared/img/npcs/padre-aldric.webp' },
+    npc: { name: 'Padre Brevon', desc: 'Clérigo · Templo dos Quatro', portrait: '/shared/img/npcs/padre-brevon.webp' },
     narration: 'A serenidade solene do templo reverbera com o perfume de mirra e o calor tênue das lamparinas votivas...'
   },
 
@@ -64745,15 +64751,15 @@ var _CITY_APPROACH_SCENES = {
 
   // ── CASA DE THOLRAM (BANCO) ────────────────────────────────────────────
   'bank:aldwin': {
-    npc: { name: 'Tesoureiro Aldenmar', desc: 'Tesoureiro · Banco da Cidade', portrait: '/shared/img/npcs/banqueiro.webp' },
+    npc: { name: 'Tesoureiro Aldenmar', desc: 'Tesoureiro · Banco da Cidade', portrait: '/shared/img/npcs/aldenmar-banqueiro.webp' },
     narration: 'A serenidade austera e o eco de balanças de precisão marcam os cofres da Casa de Tholram. O Tesoureiro Aldenmar apoia o pesado livro-razão sobre o balcão...'
   },
   'bank:aldenmar': {
-    npc: { name: 'Tesoureiro Aldenmar', desc: 'Tesoureiro · Banco da Cidade', portrait: '/shared/img/npcs/banqueiro.webp' },
+    npc: { name: 'Tesoureiro Aldenmar', desc: 'Tesoureiro · Banco da Cidade', portrait: '/shared/img/npcs/aldenmar-banqueiro.webp' },
     narration: 'A serenidade austera e o eco de balanças de precisão marcam os cofres da Casa de Tholram. O Tesoureiro Aldenmar apoia o pesado livro-razão sobre o balcão...'
   },
   'bank:*': {
-    npc: { name: 'Tesoureiro Aldenmar', desc: 'Tesoureiro · Banco da Cidade', portrait: '/shared/img/npcs/banqueiro.webp' },
+    npc: { name: 'Tesoureiro Aldenmar', desc: 'Tesoureiro · Banco da Cidade', portrait: '/shared/img/npcs/aldenmar-banqueiro.webp' },
     narration: 'Cofres de ferro reforçado e guardas atentos compõem a segurança silenciosa do Banco de Valdoria...'
   },
 
@@ -65800,7 +65806,7 @@ function _buildMerchantTopicEnc(srcEnc, merchant, p, isCostFlow){
 // Mapa de defaults por NPC (name/desc/portrait/icon fallback)
 var _NPC_DEFAULTS = {
   aldric:      { name: 'Guarda Aldric',       desc: 'Veterano dos portões de Valdoria',  portrait: '/shared/img/npcs/guarda-aldric.webp',  icon: 'ic-paladino' },
-  martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/estalajadeira.webp',  icon: 'ic-estalajadeira' },
+  martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/martha.webp',  icon: 'ic-estalajadeira' },
   grom:        { name: 'Grom, o Caolho',    desc: 'Taverneiro anão do Javali Bêbado', portrait: '/shared/img/npcs/grom-o-caolho-v2.webp',    icon: 'ic-taverneiro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/irma-elara.webp',   icon: 'ic-clerigo' },
   thorne:      { name: 'Thorne',              desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/npcs/thorne-armeiro.webp',   icon: 'ic-guerreiro' },
@@ -66247,25 +66253,25 @@ var CHANCE_ENCOUNTERS = [
     }
   },
 
-  // ═══ ENCONTRO 7: Garrick, o Caçador (Portões/Cartografia) ═══════
+  // ═══ ENCONTRO 7: Hadric, o Caçador (Portões/Cartografia) ═══════
   {
-    id: 'garrick_gates_routes',
-    npc: 'garrick',
+    id: 'hadric_gates_routes',
+    npc: 'hadric',
     triggers: ['nav:gates', 'nav:portoes'],
     condition: function(p){
       var enc = p._encountered_npcs || {};
-      return !enc.garrick_routes && (p.level || 1) >= 4;
+      return !enc.hadric_routes && (p.level || 1) >= 4;
     },
     script: [
       { type: 'narration', text: 'Você se aproxima dos portões. Um patrulheiro de capa de pele encosta na muralha, observando o horizonte. Quando vê você, faz um aceno breve com a cabeça.' },
-      { type: 'speech', speaker: 'Garrick, o Caçador', text: '— Saindo a campo? Ou só conferindo o tempo?' },
+      { type: 'speech', speaker: 'Hadric, o Caçador', text: '— Saindo a campo? Ou só conferindo o tempo?' },
       { type: 'narration', text: 'Ele se afasta da muralha, ajustando o arco às costas. O olhar dele tem aquela calma só dos que andaram muito sob estrelas.' },
-      { type: 'speech', speaker: 'Garrick, o Caçador', text: '— Sou Garrick. Patrulho rotas pra Coroa há dezessete invernos. Conheço Valdoria como minha mão direita.' },
-      { type: 'speech', speaker: 'Garrick, o Caçador', text: '— Olha, vou te dar um conselho que ninguém vai te dar: Corvus, na Praça, vende mapas. Bons. Mas ele só sabe vender o que TEM. Tem regiões que ninguém mapeou ainda — locais escondidos que só descobrem quem realmente caminha por eles.' },
-      { type: 'speech', speaker: 'Garrick, o Caçador', text: '— Quando você passa perto de um lugar inexplorado, presta atenção nos sinais. Pegadas estranhas. Fumaça de longe. Um aroma que não é da floresta. É assim que aventureiros descobrem o que não tá nos pergaminhos.' }
+      { type: 'speech', speaker: 'Hadric, o Caçador', text: '— Sou Hadric. Patrulho rotas pra Coroa há dezessete invernos. Conheço Valdoria como minha mão direita.' },
+      { type: 'speech', speaker: 'Hadric, o Caçador', text: '— Olha, vou te dar um conselho que ninguém vai te dar: Corvus, na Praça, vende mapas. Bons. Mas ele só sabe vender o que TEM. Tem regiões que ninguém mapeou ainda — locais escondidos que só descobrem quem realmente caminha por eles.' },
+      { type: 'speech', speaker: 'Hadric, o Caçador', text: '— Quando você passa perto de um lugar inexplorado, presta atenção nos sinais. Pegadas estranhas. Fumaça de longe. Um aroma que não é da floresta. É assim que aventureiros descobrem o que não tá nos pergaminhos.' }
     ],
     choices: [
-      { id: 'thank', label: 'Vou ficar de olho. Obrigado, Garrick.', result: 'continue' },
+      { id: 'thank', label: 'Vou ficar de olho. Obrigado, Hadric.', result: 'continue' },
       { id: 'ask_more', label: 'Algum lugar específico que devo investigar?', result: 'continue' },
       // 2026-05-12 PADRAO_ALDRIC dice rolls — Garrick gates routes
       // SAB 13 — Sobrevivência: ler o tempo / rastros
