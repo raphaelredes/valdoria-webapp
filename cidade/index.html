@@ -13338,8 +13338,16 @@ function buildMockHubScreen(player){
         league_icon: _t.icon,
         league_xp: (player && player.league_xp != null) ? player.league_xp : 0,
         league_name: _t.name, league_color: _t.color, league_cb: 'league_main',
-        ach_unlocked: (player && player.ach_unlocked != null) ? player.ach_unlocked : 0,
-        ach_total: (player && player.ach_total != null) ? player.ach_total : 0,
+        ach_unlocked: (function(){
+          if (player && player.ach_unlocked != null && player.ach_unlocked > 0) return player.ach_unlocked;
+          if (typeof ACHIEVEMENT_CHAINS !== 'undefined' && typeof _achChainState === 'function') {
+            var _d = 0;
+            ACHIEVEMENT_CHAINS.forEach(function(c){ _d += _achChainState(c).done; });
+            return _d;
+          }
+          return 0;
+        })(),
+        ach_total: (player && player.ach_total != null && player.ach_total > 0) ? player.ach_total : 70,
         ach_cb: 'ach_main'
       };
     })(),
@@ -18152,11 +18160,11 @@ function _fmtDateEpicoPtBr(value){
 
 // canonical: league_data.py — 5 tiers (Bronze/Prata/Ouro/Platina/Mithral) + thresholds
 var LEAGUE_TIERS = [
-  { id: 'bronze',   icon: 'ic-liga-bronze',  name: 'Bronze',   minXp: 0,     maxXp: 2500,  color: '#cd7f32' },
-  { id: 'silver',   icon: 'ic-liga-prata',   name: 'Prata',    minXp: 2500,  maxXp: 5000,  color: '#c0c0c0' },
-  { id: 'gold',     icon: 'ic-liga-ouro',    name: 'Ouro',     minXp: 5000,  maxXp: 10000, color: '#ffd700' },
-  { id: 'platinum', icon: 'ic-liga-platina', name: 'Platina',  minXp: 10000, maxXp: 20000, color: '#e5e4e2' },
-  { id: 'mithral',  icon: 'ic-liga-mithral', name: 'Mithral',  minXp: 20000, maxXp: 50000, color: '#b9d4f2' }
+  { id: 'bronze',   tierKey: 'bronze',   icon: 'ic-liga-bronze',  name: 'Bronze',   minXp: 0,     maxXp: 2500,  color: '#cd7f32', medal: 'bronze.webp' },
+  { id: 'silver',   tierKey: 'prata',    icon: 'ic-liga-prata',   name: 'Prata',    minXp: 2500,  maxXp: 5000,  color: '#c0c0c0', medal: 'silver.webp' },
+  { id: 'gold',     tierKey: 'ouro',     icon: 'ic-liga-ouro',    name: 'Ouro',     minXp: 5000,  maxXp: 10000, color: '#ffd700', medal: 'gold.webp' },
+  { id: 'platinum', tierKey: 'platina',  icon: 'ic-liga-platina', name: 'Platina',  minXp: 10000, maxXp: 20000, color: '#7eb6c4', medal: 'platinum.webp' },
+  { id: 'mithral',  tierKey: 'lendaria', icon: 'ic-liga-mithral', name: 'Mithral',  minXp: 20000, maxXp: 50000, color: '#b9d4f2', medal: 'mithral.webp' }
 ];
 
 /* 2026-05-22 — LIGA ÉPICA v2 "Ordem dos Aventureiros" =======================
@@ -18411,9 +18419,18 @@ function _showLeaguePopup(p){
   var currentXp = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.league_xp != null)
     ? window.CITY_MOCK_PLAYER.league_xp : (p && p.league_xp != null ? p.league_xp : 0);
 
-  var currentTier = LEAGUE_TIERS[0];
-  for (var i = LEAGUE_TIERS.length - 1; i >= 0; i--) {
-    if (currentXp >= LEAGUE_TIERS[i].minXp) { currentTier = LEAGUE_TIERS[i]; break; }
+  var currentTierId = (p && p.league_tier) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.league_tier) || '';
+  var currentTier = null;
+  if (currentTierId) {
+    currentTier = LEAGUE_TIERS.find(function(t){
+      return t.id === currentTierId || t.tierKey === currentTierId || t.name.toLowerCase() === currentTierId.toLowerCase();
+    });
+  }
+  if (!currentTier) {
+    currentTier = LEAGUE_TIERS[0];
+    for (var i = LEAGUE_TIERS.length - 1; i >= 0; i--) {
+      if (currentXp >= LEAGUE_TIERS[i].minXp) { currentTier = LEAGUE_TIERS[i]; break; }
+    }
   }
   var currentTierIdx = LEAGUE_TIERS.indexOf(currentTier);
   var nextTier = LEAGUE_TIERS[Math.min(currentTierIdx + 1, LEAGUE_TIERS.length - 1)];
@@ -18863,15 +18880,45 @@ var _ACH_TITLES_REWARD = {
   sobrevivente: 'O Eterno Imortal'
 };
 
-function _showAchievementsPopup(p){
+function _showAchievementsPopup(p, isRefresh){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
   var bodyEl = document.getElementById('csp-body');
   if (!ov || !bodyEl) return;
   if (titleEl) titleEl.textContent = 'Conquistas';
 
-  // Tenta sincronizar em background se remoto
-  if (typeof _refreshAchProgress === 'function') {
+  p = p || window.CITY_MOCK_PLAYER || {};
+
+  // Pré-hidratação imediata a partir dos dados do personagem caso o servidor ainda não tenha respondido
+  if (typeof ACH_PROGRESS !== 'undefined' && !window._achProgressFetched) {
+    if (p.level && !ACH_PROGRESS.mestre) ACH_PROGRESS.mestre = p.level;
+    var _goldTotal = (p.gold || 0) + (p.bank_gold || 0);
+    if (_goldTotal > 0 && !ACH_PROGRESS.cofreiro) ACH_PROGRESS.cofreiro = _goldTotal;
+    if (p.kills && !ACH_PROGRESS.algoz) ACH_PROGRESS.algoz = p.kills;
+    if (p.kills && !ACH_PROGRESS.cacador) ACH_PROGRESS.cacador = p.kills;
+    if (p.win_streak && !ACH_PROGRESS.indomavel) ACH_PROGRESS.indomavel = p.win_streak;
+    if (Array.isArray(p.known_locations) && p.known_locations.length && !ACH_PROGRESS.andarilho) ACH_PROGRESS.andarilho = p.known_locations.length;
+    if (Array.isArray(p.inventory) && p.inventory.length && !ACH_PROGRESS.colecionador) ACH_PROGRESS.colecionador = (new Set(p.inventory)).size;
+    var _ast = (p.metadata && p.metadata.achievement_stats) || {};
+    if (_ast.combat_victories && !ACH_PROGRESS.algoz) ACH_PROGRESS.algoz = _ast.combat_victories;
+    if (_ast.quests_completed && !ACH_PROGRESS.aventureiro) ACH_PROGRESS.aventureiro = _ast.quests_completed;
+    if (_ast.social_success && !ACH_PROGRESS.diplomata) ACH_PROGRESS.diplomata = _ast.social_success;
+    if (_ast.items_crafted && !ACH_PROGRESS.forjador) ACH_PROGRESS.forjador = _ast.items_crafted;
+    if (_ast.creatures_hunted && !ACH_PROGRESS.cacador) ACH_PROGRESS.cacador = _ast.creatures_hunted;
+    if (_ast.close_calls && !ACH_PROGRESS.sobrevivente) ACH_PROGRESS.sobrevivente = _ast.close_calls;
+    var _tr = (p.metadata && p.metadata.trail_stats) || {};
+    if (_tr.total_hexes && !ACH_PROGRESS.cartografo) ACH_PROGRESS.cartografo = _tr.total_hexes;
+    var _cdx = (p.metadata && p.metadata.codex) || {};
+    var _rns = (p.metadata && p.metadata.inscribed_runes) || {};
+    var _cLen = Object.keys(_cdx).length + Object.keys(_rns).length;
+    if (_cLen > 0 && !ACH_PROGRESS.erudito) ACH_PROGRESS.erudito = _cLen;
+    var _dl = (p.metadata && p.metadata.daily_login) || {};
+    var _dStrk = _dl.max_streak || _dl.streak || 0;
+    if (_dStrk > 0 && !ACH_PROGRESS.devoto) ACH_PROGRESS.devoto = _dStrk;
+  }
+
+  // Tenta sincronizar em background se remoto (apenas na abertura, sem loop no refresh)
+  if (!isRefresh && typeof _refreshAchProgress === 'function') {
     _refreshAchProgress().catch(function(){});
   }
 
@@ -19027,7 +19074,7 @@ function _showAchievementsPopup(p){
   _wireAchMedalClicks();
 
   ov.classList.add('active');
-  if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'achievements') _popupStack.push('achievements');
+  if (!isRefresh && typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== 'achievements') _popupStack.push('achievements');
   window._popupRestoreFns = window._popupRestoreFns || {};
   window._popupRestoreFns.achievements = function(){ _showAchievementsPopup(p); };
 }
@@ -19159,6 +19206,54 @@ function _showAchievementDetailPopup(chainId, p){
 // canonical: bestiary stats — catálogo completo de 22 criaturas canônicas D&D 5e de Valdoria
 // AAA Monster Hunter / Witcher / Diablo IV Codex de Caça
 var CANONICAL_BESTIARY_CATALOG = [
+  {
+    id: 'ninho-ratos',
+    type: 'Ninho de Ratos do Esgoto',
+    aliases: ['Ninho de Ratos do Esgoto', 'Ratos do Esgoto', 'Rato do Esgoto', 'Rato Gigante', 'rato', 'ratos', 'ninho de ratos'],
+    category: 'beast',
+    categoryLabel: 'Fera',
+    cr: '1/4',
+    icon: 'ic-rato',
+    png: '/shared/img/combat/enemies/rato-gigante.webp',
+    habitat: 'Esgotos, Porões e Subsolos Urbanos',
+    defaultKills: 1,
+    desc: 'Enxames vorazes e pestilentos de roedores cinzentos que infestam galerias de drenagem e porões escuros da cidade.',
+    tactics: 'Ataques em massa e mordidas infectadas; espalham febres e doenças em combate fechado nos cantos estreitos.',
+    weaknesses: 'Dano de Fogo (dispersa o enxame imediatamente), fumaça densa e ataques em cone ou área.',
+    drops: 'Cauda de Rato (2V), Dente Roedor, Pelo Úmido'
+  },
+  {
+    id: 'bandido-arcano',
+    type: 'Bandido Mercenário Arcano',
+    aliases: ['Bandido Mercenário Arcano', 'Bandido Arcano', 'Mercenário Arcano', 'bandido arcano', 'mercenario arcano'],
+    category: 'humanoid',
+    categoryLabel: 'Humanoide',
+    cr: '1/2',
+    icon: 'ic-bandido',
+    png: '/shared/img/combat/enemies/bandido.webp',
+    habitat: 'Esconderijos Subterrâneos e Acampamentos Renegados',
+    defaultKills: 1,
+    desc: 'Foras-da-lei astutos que combinam esgrima suja com truques mágicos e feitiços arcanos menores roubados de pergaminhos.',
+    tactics: 'Canalizam rajadas de choque, dardos arcanos ou truques de ilusão para desestabilizar alvos antes de golpear com lâminas.',
+    weaknesses: 'Interrupção de concentração mágica, combate físico implacável e golpes pesados contundentes.',
+    drops: 'Pergaminho Chamuscado, Moedas de Prata (8V), Lâmina de Aço'
+  },
+  {
+    id: 'bandido-besta',
+    type: 'Bandido (Besta Leve)',
+    aliases: ['Bandido (Besta Leve)', 'Bandido Besta Leve', 'Bandido Arqueiro', 'bandido (besta leve)', 'bandido arqueiro'],
+    category: 'humanoid',
+    categoryLabel: 'Humanoide',
+    cr: '1/8',
+    icon: 'ic-bandido',
+    png: '/shared/img/combat/enemies/bandido-arqueiro.webp',
+    habitat: 'Estradas Ermas, Bosques e Ruínas',
+    defaultKills: 1,
+    desc: 'Salteadores oportunistas armados com bestas mecânicas que emboscam viajantes a partir de coberturas elevadas.',
+    tactics: 'Disparos à distância mantendo recuo contínuo e buscando proteção atrás de pedras, troncos e barricadas.',
+    weaknesses: 'Combate corpo a corpo imediato, investidas rápidas e cobertura com escudos pesados.',
+    drops: 'Virotes de Besta (4V), Moedas Furtadas (5V), Adaga Cega'
+  },
   {
     id: 'lobo',
     type: 'Lobo Cinzento',
@@ -19587,8 +19682,9 @@ function _showCreatureDossier(specimen, p){
     + '<div class="cdo-body">'
     /* Perfil do Espécime */
     +   '<div style="display:flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); padding: 12px; border-radius: 8px; border: 1px solid rgba(196,40,30,0.35);">'
-    +     '<div style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid ' + crCol + '; overflow: hidden; flex-shrink: 0; box-shadow: 0 0 16px ' + crCol + '55; background: #120a08;">'
+    +     '<div class="v-zoomable" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid ' + crCol + '; overflow: hidden; flex-shrink: 0; box-shadow: 0 0 16px ' + crCol + '55; background: #120a08; cursor: zoom-in; position:relative;" title="Clique para ampliar" onclick="if(window.showLightbox)window.showLightbox(\'' + specimen.png + '\', \'' + specimen.type.replace(/'/g, "\\'") + '\', \'' + (specimen.categoryLabel + ' · CR ' + specimen.cr).replace(/'/g, "\\'") + '\');">'
     +       '<img src="' + specimen.png + '" alt="" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display=\'none\';" />'
+    +       '<span style=\"position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);color:#ffd700;font-size:9px;padding:1px 3px;border-radius:3px;pointer-events:none;\">🔍</span>'
     +     '</div>'
     +     '<div style="flex: 1; min-width: 0;">'
     +       '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 17px; font-weight: 700; color: #fff; line-height: 1.2;">' + specimen.type + '</div>'
@@ -19704,6 +19800,53 @@ function _showKillsPopup(p){
     return clone;
   });
 
+  // Helper inteligente para resolver imagem e categoria de qualquer criatura:
+  function _resolveEnemyFallback(name) {
+    var s = (name || '').toLowerCase();
+    var img = '/shared/img/combat/enemies/lobo.webp';
+    var cat = 'monstrosity';
+    var catLbl = 'Monstrosidade';
+
+    if (s.indexOf('rato') >= 0 || s.indexOf('esgoto') >= 0 || s.indexOf('roedor') >= 0) {
+      img = '/shared/img/combat/enemies/rato-gigante.webp';
+      cat = 'beast'; catLbl = 'Fera';
+    } else if (s.indexOf('bandido') >= 0 || s.indexOf('mercen') >= 0 || s.indexOf('salteador') >= 0 || s.indexOf('ladra') >= 0 || s.indexOf('ladro') >= 0 || s.indexOf('renegado') >= 0) {
+      cat = 'humanoid'; catLbl = 'Humanoide';
+      if (s.indexOf('arqueiro') >= 0 || s.indexOf('besta') >= 0 || s.indexOf('tiro') >= 0) {
+        img = '/shared/img/combat/enemies/bandido-arqueiro.webp';
+      } else if (s.indexOf('capitao') >= 0 || s.indexOf('lider') >= 0 || s.indexOf('chefe') >= 0) {
+        img = '/shared/img/combat/enemies/capitao-bandido.webp';
+      } else {
+        img = '/shared/img/combat/enemies/bandido.webp';
+      }
+    } else if (s.indexOf('goblin') >= 0) {
+      img = '/shared/img/combat/enemies/goblin.webp';
+      cat = 'humanoid'; catLbl = 'Humanoide';
+    } else if (s.indexOf('esqueleto') >= 0 || s.indexOf('caveira') >= 0) {
+      img = '/shared/img/combat/enemies/esqueleto.webp';
+      cat = 'undead'; catLbl = 'Morto-Vivo';
+    } else if (s.indexOf('zumbi') >= 0 || s.indexOf('morto') >= 0) {
+      img = '/shared/img/combat/enemies/zumbi.webp';
+      cat = 'undead'; catLbl = 'Morto-Vivo';
+    } else if (s.indexOf('aranha') >= 0) {
+      img = '/shared/img/combat/enemies/aranha-gigante.webp';
+      cat = 'beast'; catLbl = 'Fera';
+    } else if (s.indexOf('orc') >= 0) {
+      img = '/shared/img/combat/enemies/orc-guerreiro.webp';
+      cat = 'humanoid'; catLbl = 'Humanoide';
+    } else if (s.indexOf('urso-coruja') >= 0) {
+      img = '/shared/img/combat/enemies/urso-coruja.webp';
+      cat = 'monstrosity'; catLbl = 'Monstrosidade';
+    } else if (s.indexOf('urso') >= 0) {
+      img = '/shared/img/combat/enemies/urso.webp';
+      cat = 'beast'; catLbl = 'Fera';
+    } else if (s.indexOf('lobo') >= 0 || s.indexOf('worg') >= 0) {
+      img = '/shared/img/combat/enemies/lobo.webp';
+      cat = 'beast'; catLbl = 'Fera';
+    }
+    return { img: img, category: cat, categoryLabel: catLbl };
+  }
+
   // Se o servidor tiver espécies que não estão no catálogo canônico, inclui dinamicamente
   if (_hasSrvKl) {
     Object.keys(_kbtSrv).forEach(function(kName){
@@ -19711,19 +19854,20 @@ function _showKillsPopup(p){
         return c.type.toLowerCase() === kName.toLowerCase() || (c.aliases && c.aliases.some(function(al){ return al.toLowerCase() === kName.toLowerCase(); }));
       });
       if (!already) {
+        var fb = _resolveEnemyFallback(kName);
         catalog.push({
           id: kName.toLowerCase().replace(/\s+/g, '-'),
           type: kName,
-          category: 'monstrosity',
-          categoryLabel: 'Inimigo',
+          category: fb.category,
+          categoryLabel: fb.categoryLabel,
           cr: '1',
-          icon: 'ic-inimigo',
-          png: '/shared/img/combat/enemies/lobo.webp',
-          habitat: 'Ermos de Valdoria',
+          icon: fb.category === 'beast' ? 'ic-lobo' : (fb.category === 'humanoid' ? 'ic-goblin' : 'ic-inimigo'),
+          png: fb.img,
+          habitat: (fb.category === 'humanoid' ? 'Estradas e Subterrâneos' : (fb.category === 'beast' ? 'Esgotos e Matas' : 'Ermos de Valdoria')),
           kills: _kbtSrv[kName] || 0,
           desc: 'Espécime registrado em combates recentes nos territórios além dos portões.',
-          tactics: 'Padrão combativo agressivo.',
-          weaknesses: 'Ataques coordenados e armas mágicas.',
+          tactics: 'Padrão combativo agressivo e coordenado.',
+          weaknesses: 'Ataques concentrados e armas mágicas.',
           drops: 'Despojos de Batalha (10V)'
         });
       }
@@ -19892,7 +20036,7 @@ function _showKillsPopup(p){
       var pct = totalKills ? Math.round(kills / totalKills * 100) : 0;
 
       cardsHtml += '<div class="vBst-card" data-vbst-id="' + k.id + '" style="border-left: 3.5px solid ' + borderLeftCol + '; ' + (kills === 0 ? 'opacity: 0.65; filter: grayscale(0.35);' : '') + '">'
-        + '<div class="vBst-portrait-wrap" style="border-color: ' + crCol + ';">'
+        + '<div class="vBst-portrait-wrap v-zoomable" style="border-color: ' + crCol + '; cursor: zoom-in;" title="Clique para ampliar" onclick="event.stopPropagation(); if(window.showLightbox)window.showLightbox(\'' + k.png + '\', \'' + k.type.replace(/'/g, "\\'") + '\', \'' + (k.categoryLabel + ' · CR ' + k.cr).replace(/'/g, "\\'") + '\');">'
         +   '<img class="vBst-portrait-img" src="' + k.png + '" alt="' + k.type + '" loading="lazy" onerror="this.style.display=\'none\';" />'
         + '</div>'
         + '<div style="flex:1; min-width:0;">'
@@ -26566,16 +26710,41 @@ function _refreshNpcState(){
 // sobrevivente) mantêm o valor mock — divergência de catálogo documentada (§12).
 function _refreshAchProgress(){
   if (!window.vCityServer || !window.vCityServer.isRemote()) return Promise.resolve();
-  // CY5 (2026-06-07): em REMOTE, ZERA tudo ANTES de aplicar o servidor. Antes, as
-  // 6 chains sem stat no backend (cacador/cartografo/forjador/erudito/diplomata/
-  // sobrevivente) mantinham os valores de SHOWCASE do mock (algoz 1500, cacador
-  // 23, cartografo 180, etc.) → um personagem RECÉM-CRIADO aparecia com ~8/70
-  // conquistas (11%) falsas. Agora unwired = 0 (honesto) até o backend trackear.
-  // O mock de showcase continua só em LOCAL (file://, retorna antes deste ponto).
-  if (typeof ACH_PROGRESS !== 'undefined'){ for (var z in ACH_PROGRESS){ ACH_PROGRESS[z] = 0; } }
   return window.vCityServer.ach.progress().then(function(r){
     if (r && r.ok && r.ach_progress && typeof ACH_PROGRESS !== 'undefined'){
+      window._achProgressFetched = true;
       for (var k in r.ach_progress){ ACH_PROGRESS[k] = r.ach_progress[k]; }  // aplica o real do servidor
+      // Recalcula contagem real de metas concluídas (0 a 70)
+      var doneTiers = 0;
+      if (typeof ACHIEVEMENT_CHAINS !== 'undefined' && typeof _achChainState === 'function') {
+        ACHIEVEMENT_CHAINS.forEach(function(c){
+          doneTiers += _achChainState(c).done;
+        });
+      }
+      if (window.CITY_MOCK_PLAYER) {
+        window.CITY_MOCK_PLAYER.ach_unlocked = doneTiers;
+        window.CITY_MOCK_PLAYER.ach_total = 70;
+      }
+      // Se o modal de conquistas estiver ativo na tela, atualiza suavemente em tempo real
+      var ov = document.getElementById('city-subscreen-popup');
+      var titleEl = document.getElementById('csp-title');
+      if (ov && ov.classList.contains('active') && titleEl && titleEl.textContent === 'Conquistas') {
+        if (typeof _showAchievementsPopup === 'function') {
+          _showAchievementsPopup(window.CITY_MOCK_PLAYER, true);
+        }
+      }
+      // Atualiza o card de conquistas no progress_strip da cidade se estiver visível no DOM
+      var achCards = document.querySelectorAll('.hub-prog-card');
+      achCards.forEach(function(card){
+        var lbl = card.querySelector('.hp-lbl');
+        if (lbl && lbl.textContent === 'Conquistas') {
+          var val = card.querySelector('.hp-val');
+          if (val) {
+            var col = (typeof HERALDIC_COLORS !== 'undefined' && HERALDIC_COLORS['ic-trofeu']) || '#e8d878';
+            val.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + col + ';"><use href="#ic-trofeu"/></svg>' + doneTiers + '/70';
+          }
+        }
+      });
     }
   }).catch(function(e){ console.warn('[CITY] ach progress failed', e); });
 }
