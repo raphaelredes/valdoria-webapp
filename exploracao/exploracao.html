@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T02:26:57Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T02:44:59Z - do not edit directly, edit source -->
 
 
 
@@ -23927,7 +23927,7 @@ function _shouldRenderAmbient() {
     return !_autoThrottleAmbient;
   }
 }
-function renderFrame(ts) {
+function renderFrame(ts, force) {
   _rafScheduled = false;
   _animTime = ts || performance.now();
   // 2026-04-29 PERF: pre-computa timestamp e gradiente cache flush uma vez por frame.
@@ -23945,9 +23945,9 @@ function renderFrame(ts) {
     _cloudBlobCache = {};
     _cloudBlobCacheFrame = 0;
   }
-  // X-6.5.51m: throttle por target FPS (skip frame se chegou cedo demais)
+  // X-6.5.51m: throttle por target FPS (skip frame se chegou cedo demais) — bypass quando force=true
   const minDelta = 1000 / _renderTargetFps;
-  if (_animTime - _renderLastTs < minDelta - 1) {
+  if (!force && _animTime - _renderLastTs < minDelta - 1) {
     requestAnimationFrame(renderFrame);
     _rafScheduled = true;
     return;
@@ -24061,15 +24061,15 @@ function renderFrame(ts) {
   // (30x menos). Ganho perf gigantesco em zoom alto.
   var _cullStartCol = 0, _cullEndCol = COLS;
   var _cullStartRow = 0, _cullEndRow = ROWS;
-  // V1.7.5 rev11 (2026-05-02): em editor mode NUNCA cullar — user vê o
-  // mapa completo (scene cache copia tudo, sem áreas pretas não-pintadas).
-  // PROD continua com cull pra perf de zoom alto.
-  if (_vpBounds && !window._editorMode) {
+  var _isSmallMap = (COLS <= 35 && ROWS <= 35);
+  // Em mapas pequenos/masmorras (ex: tenda orc 22x26) ou editor mode, NUNCA cullar:
+  // todos os hexes e paredes permanecem sempre desenhados, eliminando cortes ou frestas.
+  if (_vpBounds && !window._editorMode && !_isSmallMap) {
     var _hexW75 = HEX_W * 0.75;
-    _cullStartCol = Math.max(0, Math.floor((_vpBounds.x - MAP_OFFSET_X) / _hexW75) - 2);
-    _cullEndCol   = Math.min(COLS, Math.ceil((_vpBounds.x + _vpBounds.w - MAP_OFFSET_X) / _hexW75) + 2);
-    _cullStartRow = Math.max(0, Math.floor((_vpBounds.y - MAP_OFFSET_Y) / HEX_H) - 2);
-    _cullEndRow   = Math.min(ROWS, Math.ceil((_vpBounds.y + _vpBounds.h - MAP_OFFSET_Y) / HEX_H) + 2);
+    _cullStartCol = Math.max(0, Math.floor((_vpBounds.x - MAP_OFFSET_X) / _hexW75) - 3);
+    _cullEndCol   = Math.min(COLS, Math.ceil((_vpBounds.x + _vpBounds.w - MAP_OFFSET_X) / _hexW75) + 3);
+    _cullStartRow = Math.max(0, Math.floor((_vpBounds.y - MAP_OFFSET_Y) / HEX_H) - 3);
+    _cullEndRow   = Math.min(ROWS, Math.ceil((_vpBounds.y + _vpBounds.h - MAP_OFFSET_Y) / HEX_H) + 3);
   }
   // V5 REFACTOR 2026-04-29: cada layer agora é gated por window._FEATURES[key].
   // User pediu "ativando aos poucos para encontrar gargalos". Painel flutuante
@@ -46517,9 +46517,17 @@ function setZoom(z) {
     vp.scrollTop  = Math.max(0, Math.min(canvasH - vp.clientHeight, Math.round(newCenterY - vp.clientHeight / 2)));
   }
 
+  // Desperta loop de render e força desenho síncrono imediato
+  _markActive(2000);
+  _rafScheduled = false;
+  try {
+    renderFrame(performance.now(), true);
+  } catch (err) {
+    LOGE('ZOOM', 'immediate renderFrame failed:', err && err.message);
+  }
+
   showZoomIndicator();
   updateZoomButtonsState();
-  scheduleRender();
 }
 
 function _commitZoomNow() {
@@ -46570,25 +46578,25 @@ function centerOnPlayer(smooth) {
   }
 }
 
-// Mouse wheel zoom com throttle suave sem CSS transform
-var _wheelZoomTimer = null;
-var _wheelZoomTarget = null;
+// Mouse wheel zoom com frame pacing suave via requestAnimationFrame
+var _wheelAccumDelta = 0;
+var _wheelRaf = null;
 function bindWheelZoom() {
   const vp = document.getElementById('map-viewport');
   if (!vp) return;
   vp.addEventListener('wheel', (e) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.12 : 0.12;
-    var baseZ = _wheelZoomTarget !== null ? _wheelZoomTarget : _zoom;
-    _wheelZoomTarget = clamp(baseZ + delta, ZOOM_MIN, ZOOM_MAX);
-    if (_wheelZoomTimer) clearTimeout(_wheelZoomTimer);
-    _wheelZoomTimer = setTimeout(function() {
-      if (_wheelZoomTarget !== null) {
-        var tz = _wheelZoomTarget;
-        _wheelZoomTarget = null;
-        setZoom(tz);
-      }
-    }, 25);
+    _markActive(2000);
+    const step = (e.deltaY > 0 ? -1 : 1) * 0.12;
+    _wheelAccumDelta += step;
+    if (!_wheelRaf) {
+      _wheelRaf = requestAnimationFrame(() => {
+        _wheelRaf = null;
+        var toApply = _wheelAccumDelta;
+        _wheelAccumDelta = 0;
+        setZoom(_zoom + toApply);
+      });
+    }
   }, { passive: false });
 }
 
@@ -46755,11 +46763,13 @@ function bindPinchZoom() {
         dist: Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY),
         zoom: _zoom
       };
+      _markActive(2000);
     }
   }, { passive: true });
   vp.addEventListener('touchmove', (e) => {
     if (e.touches.length === 2 && _pinchStart) {
       e.preventDefault();
+      _markActive(2000);
       const newDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
       const ratio = newDist / _pinchStart.dist;
       _pendingPinchZoom = _pinchStart.zoom * ratio;
