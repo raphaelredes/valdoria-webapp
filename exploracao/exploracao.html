@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T00:48:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T01:05:37Z - do not edit directly, edit source -->
 
 
 
@@ -6697,11 +6697,12 @@ document.write('<script src="../shared/lightbox.js?v=' + _vti + '"><\/script>');
         if (l2) { l2.style.display = 'none'; l2.classList.add('hidden'); }
         try { console.info('[EXPLORE] boot loading hidden —', reason); } catch (_e) {}
       };
-      // Esconde só quando a exploração pintou: window.load (após boot/DCL) + 2 rAF.
+      window._hideExploreBoot = _hideExploreBoot;
+      // Esconde assim que o primeiro frame do mapa é pintado ou no load ou sanity timeout
       window.addEventListener('load', function () {
-        requestAnimationFrame(function () { requestAnimationFrame(function () { _hideExploreBoot('painted'); }); });
+        requestAnimationFrame(function () { _hideExploreBoot('window-load'); });
       });
-      setTimeout(function () { _hideExploreBoot('sanity-12s'); }, 12000);
+      setTimeout(function () { _hideExploreBoot('sanity-timeout'); }, 2000);
     }
     return;
   }
@@ -32970,6 +32971,78 @@ function drawPlayer(ctx) {
 //   - light:           glow branco-amarelado constante (luz mágica estável)
 //   - dancing_lights:  4 wisps orbitando + glow conjunto pulsante
 //   - daylight:        orbe grande dourado acima do player (luz solar divina)
+// Sprites de luz pré-renderizados (bake 1x offscreen, zero createRadialGradient por frame — 60fps mobile)
+var _lightSpriteCache = {};
+
+function _getBakedLightSprite(type) {
+  if (_lightSpriteCache[type]) return _lightSpriteCache[type];
+  var size = (type === 'wisp') ? 24 : (type === 'spark') ? 12 : 96;
+  var off = document.createElement('canvas');
+  off.width = size;
+  off.height = size;
+  var oCtx = off.getContext('2d');
+  var half = size * 0.5;
+
+  if (type === 'wisp') {
+    // Orbe de Luzes Dançantes: núcleo estelar com brilho compacto
+    var g = oCtx.createRadialGradient(half, half, 0, half, half, half);
+    g.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+    g.addColorStop(0.35, 'rgba(255, 240, 160, 0.85)');
+    g.addColorStop(0.70, 'rgba(180, 220, 255, 0.35)');
+    g.addColorStop(1, 'rgba(140, 180, 255, 0)');
+    oCtx.fillStyle = g;
+    oCtx.beginPath();
+    oCtx.arc(half, half, half, 0, Math.PI * 2);
+    oCtx.fill();
+  } else if (type === 'spark') {
+    // Pequena centelha mágica
+    var g = oCtx.createRadialGradient(half, half, 0, half, half, half);
+    g.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+    g.addColorStop(0.4, 'rgba(255, 240, 170, 0.60)');
+    g.addColorStop(1, 'rgba(255, 220, 100, 0)');
+    oCtx.fillStyle = g;
+    oCtx.beginPath();
+    oCtx.arc(half, half, half, 0, Math.PI * 2);
+    oCtx.fill();
+  } else if (type === 'torch_halo') {
+    // Halo quente de tocha
+    var g = oCtx.createRadialGradient(half, half, 0, half, half, half);
+    g.addColorStop(0, 'rgba(255, 180, 90, 0.32)');
+    g.addColorStop(0.45, 'rgba(255, 130, 45, 0.16)');
+    g.addColorStop(0.8, 'rgba(210, 85, 25, 0.05)');
+    g.addColorStop(1, 'rgba(180, 70, 20, 0)');
+    oCtx.fillStyle = g;
+    oCtx.beginPath();
+    oCtx.arc(half, half, half, 0, Math.PI * 2);
+    oCtx.fill();
+  } else if (type === 'light_halo') {
+    // Halo suave dourado/branco de Luz (truque)
+    var g = oCtx.createRadialGradient(half, half, 0, half, half, half);
+    g.addColorStop(0, 'rgba(255, 250, 225, 0.40)');
+    g.addColorStop(0.40, 'rgba(255, 235, 175, 0.20)');
+    g.addColorStop(0.80, 'rgba(245, 215, 120, 0.06)');
+    g.addColorStop(1, 'rgba(220, 180, 80, 0)');
+    oCtx.fillStyle = g;
+    oCtx.beginPath();
+    oCtx.arc(half, half, half, 0, Math.PI * 2);
+    oCtx.fill();
+  } else if (type === 'dancing_halo') {
+    // Halo suave celestial de Luzes Dançantes
+    var g = oCtx.createRadialGradient(half, half, 0, half, half, half);
+    g.addColorStop(0, 'rgba(255, 248, 225, 0.35)');
+    g.addColorStop(0.45, 'rgba(225, 235, 255, 0.18)');
+    g.addColorStop(0.85, 'rgba(185, 210, 255, 0.05)');
+    g.addColorStop(1, 'rgba(150, 175, 255, 0)');
+    oCtx.fillStyle = g;
+    oCtx.beginPath();
+    oCtx.arc(half, half, half, 0, Math.PI * 2);
+    oCtx.fill();
+  }
+
+  _lightSpriteCache[type] = off;
+  return off;
+}
+
 function drawPlayerLightAura(ctx) {
   if (!S || !S.player) return;
   if (!S.lightSource) return;
@@ -32997,151 +33070,56 @@ function drawPlayerLightAura(ctx) {
   ctx.globalCompositeOperation = 'lighter';  // luz somativa
 
   if (src === 'torch') {
-    // === TOCHA — glow dourado-laranja com flicker natural ===
-    var flick = 1 + Math.sin(_animTime * 0.012) * 0.08
-              + Math.sin(_animTime * 0.027) * 0.05;
-    var rT = HEX_W * 1.35 * flick;
-    var _tgKey = 'tch|' + Math.round(pCx/4) + '|' + Math.round(pCy/4) + '|' + Math.round(rT/4);
-    var torchGrad = _tileGradCache[_tgKey];
-    if (!torchGrad) {
-      torchGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, rT);
-      torchGrad.addColorStop(0, 'rgba(255, 180, 90, 0.35)');
-      torchGrad.addColorStop(0.4, 'rgba(255, 140, 50, 0.20)');
-      torchGrad.addColorStop(0.75, 'rgba(220, 100, 30, 0.08)');
-      torchGrad.addColorStop(1, 'rgba(180, 70, 20, 0)');
-      _tileGradCache[_tgKey] = torchGrad;
-    }
-    ctx.fillStyle = torchGrad;
-    ctx.beginPath();
-    ctx.arc(pCx, pCy, rT, 0, Math.PI * 2);
-    ctx.fill();
+    // === TOCHA — glow dourado-laranja contido com flicker natural ===
+    var flick = 1 + Math.sin(_animTime * 0.012) * 0.05;
+    var rT = HEX_W * 0.95 * flick;
+    var spT = _getBakedLightSprite('torch_halo');
+    ctx.drawImage(spT, pCx - rT, pCy - rT, rT * 2, rT * 2);
   } else if (src === 'light') {
-    // === LUZ (TRUQUE) — branco-dourado radiante arcano (ilumina mais que a tocha) ===
-    var pulse = 1 + Math.sin(_animTime * 0.003) * 0.05;
-    var rL = HEX_W * 2.2 * pulse;
-    var _lgKey = 'lt|' + Math.round(pCx/4) + '|' + Math.round(pCy/4) + '|' + Math.round(rL/4);
-    var lightGrad = _tileGradCache[_lgKey];
-    if (!lightGrad) {
-      lightGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, rL);
-      lightGrad.addColorStop(0, 'rgba(255, 252, 230, 0.46)');
-      lightGrad.addColorStop(0.3, 'rgba(255, 240, 190, 0.28)');
-      lightGrad.addColorStop(0.65, 'rgba(255, 225, 140, 0.12)');
-      lightGrad.addColorStop(1, 'rgba(240, 195, 90, 0)');
-      _tileGradCache[_lgKey] = lightGrad;
-    }
-    ctx.fillStyle = lightGrad;
-    ctx.beginPath();
-    ctx.arc(pCx, pCy, rL, 0, Math.PI * 2);
-    ctx.fill();
+    // === LUZ (TRUQUE) — branco-dourado radiante contido (proporcional ao aventureiro) ===
+    var pulse = 1 + Math.sin(_animTime * 0.003) * 0.04;
+    var rL = HEX_W * 1.05 * pulse;
+    var spL = _getBakedLightSprite('light_halo');
+    ctx.drawImage(spL, pCx - rL, pCy - rL, rL * 2, rL * 2);
 
-    // Destaque central reluzente no cajado / mãos do conjurador
-    var coreGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, HEX_W * 0.55);
-    coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
-    coreGrad.addColorStop(0.45, 'rgba(255, 250, 210, 0.45)');
-    coreGrad.addColorStop(1, 'rgba(255, 230, 150, 0)');
-    ctx.fillStyle = coreGrad;
-    ctx.beginPath();
-    ctx.arc(pCx, pCy, HEX_W * 0.55, 0, Math.PI * 2);
-    ctx.fill();
+    // Foco sutil no cajado/corpo (14px)
+    var spk = _getBakedLightSprite('spark');
+    ctx.drawImage(spk, pCx - 7, pCy - 7, 14, 14);
 
-    // Centelhas mágicas arcanas orbitando o conjurador
-    for (var sp = 0; sp < 4; sp++) {
-      var spAng = _animTime * 0.0018 + sp * (Math.PI * 0.5);
-      var spDist = HEX_W * (0.35 + 0.15 * Math.sin(_animTime * 0.0025 + sp * 1.7));
-      var spX = pCx + Math.cos(spAng) * spDist;
-      var spY = pCy + Math.sin(spAng) * (spDist * 0.6) - Math.abs(Math.sin(_animTime * 0.002 + sp)) * 10;
-      var spR = 3.5 + Math.sin(_animTime * 0.006 + sp) * 1.0;
-      var spGrad = ctx.createRadialGradient(spX, spY, 0, spX, spY, spR * 2.5);
-      spGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-      spGrad.addColorStop(0.4, 'rgba(255, 245, 180, 0.65)');
-      spGrad.addColorStop(1, 'rgba(255, 215, 100, 0)');
-      ctx.fillStyle = spGrad;
-      ctx.beginPath();
-      ctx.arc(spX, spY, spR * 2.5, 0, Math.PI * 2);
-      ctx.fill();
+    // 3 centelhas arcanas sutis próximas ao aventureiro
+    for (var s = 0; s < 3; s++) {
+      var ang = _animTime * 0.0015 + s * (Math.PI * 0.67);
+      var dist = Math.max(8, HEX_W * 0.28);
+      var sx = pCx + Math.cos(ang) * dist;
+      var sy = pCy + Math.sin(ang) * (dist * 0.6) - 4;
+      ctx.drawImage(spk, sx - 4, sy - 4, 8, 8);
     }
   } else if (src === 'dancing_lights') {
-    // === LUZES DANÇANTES — 4 orbes luminosos orbitando + iluminação ampla combinada ===
-    var rDL = HEX_W * 2.8 * (1 + Math.sin(_animTime * 0.002) * 0.05);
-    var dLightGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, rDL);
-    dLightGrad.addColorStop(0, 'rgba(255, 248, 220, 0.40)');
-    dLightGrad.addColorStop(0.35, 'rgba(230, 235, 255, 0.24)');
-    dLightGrad.addColorStop(0.7, 'rgba(195, 215, 255, 0.10)');
-    dLightGrad.addColorStop(1, 'rgba(150, 175, 255, 0)');
-    ctx.fillStyle = dLightGrad;
-    ctx.beginPath();
-    ctx.arc(pCx, pCy, rDL, 0, Math.PI * 2);
-    ctx.fill();
+    // === LUZES DANÇANTES — halo sutil contido + 4 orbes orbitando harmoniosamente ===
+    var rDL = HEX_W * 1.15;
+    var spHalo = _getBakedLightSprite('dancing_halo');
+    ctx.drawImage(spHalo, pCx - rDL, pCy - rDL, rDL * 2, rDL * 2);
 
-    // 4 Wisps dançantes e exuberantes
+    var wispSp = _getBakedLightSprite('wisp');
     var wispCount = 4;
-    var orbitR = HEX_W * 1.15;
+    // Órbita contida perto do aventureiro (cerca de 20-28px)
+    var orbitR = Math.max(16, HEX_W * 0.38);
     var t = _animTime * 0.0012;
 
     for (var w = 0; w < wispCount; w++) {
       var phase = (w / wispCount) * Math.PI * 2;
       var wx = pCx + Math.cos(t + phase) * orbitR;
-      var wy = pCy + Math.sin(t * 1.25 + phase) * (orbitR * 0.65)
-             + Math.sin(t * 2.5 + phase * 2.0) * 8;
+      var wy = pCy + Math.sin(t * 1.25 + phase) * (orbitR * 0.6)
+             + Math.sin(t * 2.5 + phase * 2.0) * 4;
 
-      // Halo individual de cada orbe
-      var rW = HEX_W * 0.95;
-      var wispGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, rW);
-      wispGrad.addColorStop(0, 'rgba(255, 250, 220, 0.38)');
-      wispGrad.addColorStop(0.4, 'rgba(220, 235, 255, 0.18)');
-      wispGrad.addColorStop(1, 'rgba(160, 180, 255, 0)');
-      ctx.fillStyle = wispGrad;
-      ctx.beginPath();
-      ctx.arc(wx, wy, rW, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Rastro cintilante sutil (trail)
-      var trailAng = t + phase - 0.2;
-      var tx = pCx + Math.cos(trailAng) * orbitR;
-      var ty = pCy + Math.sin(trailAng * 1.25) * (orbitR * 0.65);
-      var trailGrad = ctx.createRadialGradient(tx, ty, 0, tx, ty, 8);
-      trailGrad.addColorStop(0, 'rgba(255, 245, 200, 0.45)');
-      trailGrad.addColorStop(1, 'rgba(180, 210, 255, 0)');
-      ctx.fillStyle = trailGrad;
-      ctx.beginPath();
-      ctx.arc(tx, ty, 8, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Glow exterior estelar do orbe
-      var glowGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, 18);
-      glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-      glowGrad.addColorStop(0.35, 'rgba(255, 240, 160, 0.75)');
-      glowGrad.addColorStop(0.7, 'rgba(180, 220, 255, 0.35)');
-      glowGrad.addColorStop(1, 'rgba(140, 180, 255, 0)');
-      ctx.fillStyle = glowGrad;
-      ctx.beginPath();
-      ctx.arc(wx, wy, 18, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Núcleo sólido do orbe (wisp nítido e visível)
-      var coreSize = 6.0 + Math.sin(t * 5.0 + phase) * 1.5;
-      var coreGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, coreSize);
-      coreGrad.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
-      coreGrad.addColorStop(0.55, 'rgba(255, 248, 190, 0.95)');
-      coreGrad.addColorStop(1, 'rgba(255, 220, 120, 0.2)');
-      ctx.fillStyle = coreGrad;
-      ctx.beginPath();
-      ctx.arc(wx, wy, coreSize, 0, Math.PI * 2);
-      ctx.fill();
+      // Orbe pré-renderizado (16x16px na tela) acelerado por hardware pela GPU
+      ctx.drawImage(wispSp, Math.round(wx - 8), Math.round(wy - 8), 16, 16);
     }
   } else if (src === 'daylight') {
-    // === DAYLIGHT — orbe brilhante acima do player (luz solar divina) ===
-    var rD = HEX_W * 2.2;
-    var _dyCy = pCy - HEX_H * 0.3;
-    var dayGrad = ctx.createRadialGradient(pCx, _dyCy, 0, pCx, _dyCy, rD);
-    dayGrad.addColorStop(0, 'rgba(255, 245, 200, 0.50)');
-    dayGrad.addColorStop(0.3, 'rgba(255, 230, 160, 0.28)');
-    dayGrad.addColorStop(0.7, 'rgba(255, 210, 130, 0.12)');
-    dayGrad.addColorStop(1, 'rgba(255, 200, 100, 0)');
-    ctx.fillStyle = dayGrad;
-    ctx.beginPath();
-    ctx.arc(pCx, _dyCy, rD, 0, Math.PI * 2);
-    ctx.fill();
+    var rD = HEX_W * 1.4;
+    var _dyCy = pCy - HEX_H * 0.25;
+    var spD = _getBakedLightSprite('light_halo');
+    ctx.drawImage(spD, pCx - rD, _dyCy - rD, rD * 2, rD * 2);
   }
 
   ctx.restore();
@@ -33482,14 +33460,14 @@ const LIGHT_SOURCES = {
   },
   dancing_lights: {
     id: 'dancing_lights', label: 'Luzes Dançantes', icon: '',
-    desc: 'Truque de Mago. Quatro esferas luminosas flutuam ao redor — iluminam área ampla (+3 visão).',
-    vision_bonus: 3,
+    desc: 'Truque de Mago. Quatro esferas luminosas flutuam ao redor — iluminam melhor que uma tocha (+2 visão).',
+    vision_bonus: 2,
     available: function(p) { return p.cls_key === 'mago'; }
   },
   daylight: {
     id: 'daylight', label: 'Luz do Dia', icon: '',
-    desc: 'Magia Divina de 3º nível (Clérigo). Esfera de luz natural por 1 hora (+4 visão). Consome slot.',
-    vision_bonus: 4,
+    desc: 'Magia Divina de 3º nível (Clérigo). Esfera de luz natural por 1 hora (+3 visão). Consome slot.',
+    vision_bonus: 3,
     mp_cost: 3,
     available: function(p) { return p.cls_key === 'clerigo' && p.mp >= 3; }
   }
@@ -33544,13 +33522,13 @@ function getVisionRange() {
   const weather = S.weather || 's';
   // Phase 5a dungeons AAA (2026-04-26): masmorras forcam visao reduzida (torch
   // radius). Sem luz: 1 hex (mal ve adjacente). Com tocha: 2 hex. Com truque
-  // light: 3 hex. Com dancing_lights: 4 hex. Cria tensao de exploracao em interior fechado,
+  // light ou dancing_lights: 3 hex. Cria tensao de exploracao em interior fechado,
   // diferente do overworld onde dia+limpo da 4-5 hex.
   if (S.mapDef && S.mapDef.dungeon === true) {
     let dBase = 1;  // sem luz: quase nada (1 hex visivel = jogador + 6 vizinhos)
     const dSrc = S.lightSource;
     if (dSrc && LIGHT_SOURCES[dSrc]) {
-      dBase += LIGHT_SOURCES[dSrc].vision_bonus;  // torch=+1=>2, light=+2=>3, dancing_lights=+3=>4, daylight=+4=>5
+      dBase += LIGHT_SOURCES[dSrc].vision_bonus;  // torch=+1=>2, light/dancing_lights=+2=>3, daylight=+3=>4
     }
     return Math.max(1, dBase);
   }
@@ -48158,11 +48136,15 @@ function boot() {
     // preta ate o rAF voltar. Forca centralizacao + 1 frame SINCRONOS, sem o rAF.
     try { centerOnPlayer(false); } catch (_) {}
     try { renderFrame(performance.now()); } catch (_) {}
+    if (typeof window._hideExploreBoot === 'function') window._hideExploreBoot('initial-frame-sync');
 
     // Centraliza após render inicial — aguarda um tick pro viewport medir corretamente
     requestAnimationFrame(() => {
       centerOnPlayer(false);
-      requestAnimationFrame(() => centerOnPlayer(false));
+      requestAnimationFrame(() => {
+        centerOnPlayer(false);
+        if (typeof window._hideExploreBoot === 'function') window._hideExploreBoot('boot-painted');
+      });
     });
 
     // Quest delivery check — se algum quest aponta pra este mapa, abre após pequeno delay
