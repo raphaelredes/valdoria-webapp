@@ -751,7 +751,7 @@
     var box = document.createElement('div');
     box.className = 'enc-cs';
 
-    /* Retrato grande dourado (clicável → lightbox). Fallback escondido onerror. */
+    /* 1. Retrato grande dourado (clicável → lightbox). */
     var portraitURL = npc.portrait || '';
     var pWrap = document.createElement('div');
     pWrap.className = 'enc-cs-portrait-wrap';
@@ -781,28 +781,78 @@
     }
     box.appendChild(pWrap);
 
-    /* Nome + sub (classe · raça · Nível N). */
+    /* 2. Nome destacado. */
     var nameEl = document.createElement('div');
     nameEl.className = 'enc-cs-name';
     nameEl.textContent = npc.name || 'Aventureiro';
     box.appendChild(nameEl);
 
-    var subParts = [];
-    if (ch['class']) subParts.push(String(ch['class']));
-    if (ch.race) subParts.push(String(ch.race));
-    if (ch.level != null) subParts.push('Nível ' + (ch.level | 0));
-    if (subParts.length) {
-      var subEl = document.createElement('div');
-      subEl.className = 'enc-cs-sub';
-      subEl.textContent = subParts.join(' · ');
-      box.appendChild(subEl);
+    /* 3. Preço atual em destaque a mais (Ordem do Usuário 2026-10). */
+    var cost = (ch.cost != null) ? ch.cost : (npc.cost != null ? npc.cost : null);
+    if (cost != null && cost > 0) {
+      var priceBadge = document.createElement('div');
+      priceBadge.className = 'enc-cs-price-badge';
+      priceBadge.innerHTML = '<span class="vi vi-coin sm"></span> Soldo Atual: <b>' + cost + ' Valdoritas</b>';
+      box.appendChild(priceBadge);
     }
 
-    /* Linha de vitais (PV / CA / PM). */
+    /* 4. Subtítulo descritivo. */
+    var clsLabel = String(ch['class'] || '');
+    var subclsLabel = String(ch.subclass || '');
+    var raceLabel = String(ch.race || '');
+    var subraceLabel = String(ch.subrace || '');
+    var lvl = (ch.level != null) ? (ch.level | 0) : 1;
+
+    var subParts = [];
+    if (clsLabel) subParts.push(clsLabel + (subclsLabel ? ' (' + subclsLabel + ')' : ''));
+    if (raceLabel) subParts.push(raceLabel + (subraceLabel ? ' (' + subraceLabel + ')' : ''));
+    subParts.push('Nível ' + lvl);
+
+    var subEl = document.createElement('div');
+    subEl.className = 'enc-cs-sub';
+    subEl.textContent = subParts.join(' · ');
+    box.appendChild(subEl);
+
+    /* 5. Linha de Meta-badges (Classe, Sub-classe, Raça, Sub-raça - padrão da ficha do personagem). */
+    var tagsRow = document.createElement('div');
+    tagsRow.className = 'enc-cs-tags-row';
+
+    if (clsLabel) {
+      var bCls = document.createElement('div');
+      bCls.className = 'enc-cs-meta-badge';
+      bCls.innerHTML = '<span>🛡️</span> <b>' + clsLabel + '</b>';
+      tagsRow.appendChild(bCls);
+    }
+    if (subclsLabel) {
+      var bSubcls = document.createElement('div');
+      bSubcls.className = 'enc-cs-meta-badge';
+      bSubcls.innerHTML = '<span>🔮</span> <span>' + subclsLabel + '</span>';
+      tagsRow.appendChild(bSubcls);
+    }
+    if (raceLabel) {
+      var bRace = document.createElement('div');
+      bRace.className = 'enc-cs-meta-badge';
+      bRace.innerHTML = '<span>🌿</span> <b>' + raceLabel + '</b>';
+      tagsRow.appendChild(bRace);
+    }
+    if (subraceLabel) {
+      var bSubrace = document.createElement('div');
+      bSubrace.className = 'enc-cs-meta-badge';
+      bSubrace.innerHTML = '<span>⚙️</span> <span>' + subraceLabel + '</span>';
+      tagsRow.appendChild(bSubrace);
+    }
+    box.appendChild(tagsRow);
+
+    /* 6. Linha de vitais e combate (PV / CA / Deslocamento / Bônus Ataque / Dado de Vida). */
     var vitals = [];
     if (ch.hp != null) vitals.push(['PV', String(ch.hp | 0)]);
     if (ch.ac != null) vitals.push(['CA', String(ch.ac | 0)]);
-    if (ch.mp != null && (ch.mp | 0) > 0) vitals.push(['PM', String(ch.mp | 0)]);
+    if (ch.speed) vitals.push(['Desl.', String(ch.speed).split(' ')[0]]);
+    if (ch.attack_bonus) vitals.push(['Ataque', String(ch.attack_bonus)]);
+    if (ch.spell_dc) vitals.push(['DC Mag.', String(ch.spell_dc)]);
+    if (ch.hit_die) vitals.push(['Dado Vida', String(ch.hit_die)]);
+    else if (ch.mp != null && (ch.mp | 0) > 0) vitals.push(['PM', String(ch.mp | 0)]);
+
     if (vitals.length) {
       var vRow = document.createElement('div');
       vRow.className = 'enc-cs-vitals';
@@ -822,7 +872,7 @@
       box.appendChild(vRow);
     }
 
-    /* Grid de 6 atributos (valor + modificador). */
+    /* 7. Grid de 6 atributos D&D 5e (valor + modificador). */
     var stats = ch.stats || {};
     var grid = document.createElement('div');
     grid.className = 'enc-cs-grid';
@@ -848,15 +898,54 @@
     });
     box.appendChild(grid);
 
-    /* Seção Temperamento. */
-    if (ch.personality) {
-      box.appendChild(_csSection('Temperamento', [String(ch.personality)], 'enc-cs-pers'));
+    /* 8. Habilidades e o que fazem (Ordem do Usuário 2026-10). */
+    var abilities = Array.isArray(ch.abilities) ? ch.abilities : [];
+    if (abilities.length > 0) {
+      var abSec = document.createElement('div');
+      abSec.className = 'enc-cs-section';
+      var abTitle = document.createElement('div');
+      abTitle.className = 'enc-cs-section-title';
+      abTitle.textContent = '◆ Habilidades & O que Fazem (D&D 5e)';
+      abSec.appendChild(abTitle);
+
+      var abList = document.createElement('div');
+      abList.className = 'enc-cs-abilities-list';
+      abilities.forEach(function (ab) {
+        var card = document.createElement('div');
+        card.className = 'enc-cs-ability-card';
+
+        var head = document.createElement('div');
+        head.className = 'enc-cs-ability-header';
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'enc-cs-ability-name';
+        nameSpan.textContent = ab.name || 'Habilidade';
+        var typeSpan = document.createElement('span');
+        typeSpan.className = 'enc-cs-ability-type';
+        typeSpan.textContent = ab.type || 'Especial';
+        head.appendChild(nameSpan);
+        head.appendChild(typeSpan);
+
+        var descDiv = document.createElement('div');
+        descDiv.className = 'enc-cs-ability-desc';
+        descDiv.textContent = ab.desc || '';
+
+        card.appendChild(head);
+        card.appendChild(descDiv);
+        abList.appendChild(card);
+      });
+      abSec.appendChild(abList);
+      box.appendChild(abSec);
+    } else {
+      /* Fallback clássico caso abilities não venha populado */
+      var spells = (ch.spells || []).filter(Boolean).map(String);
+      if (spells.length) {
+        box.appendChild(_csSection('Habilidades & Magias', spells, 'enc-cs-skills'));
+      }
     }
 
-    /* Seção Perícias / Habilidades. */
-    var spells = (ch.spells || []).filter(Boolean).map(String);
-    if (spells.length) {
-      box.appendChild(_csSection('Habilidades', spells, 'enc-cs-skills'));
+    /* 9. Seção Temperamento. */
+    if (ch.personality) {
+      box.appendChild(_csSection('Temperamento', [String(ch.personality)], 'enc-cs-pers'));
     }
 
     return box;

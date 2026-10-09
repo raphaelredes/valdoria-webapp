@@ -55,29 +55,13 @@
     ];
 
     function _populate(label) {
-        if (typeof global.ValdoriaLoadingHTML !== 'function') return false;
+        // Ordem do Usuário (2026-10): A tela de carregamento com orbe mágico (ValdoriaLoadingHTML)
+        // é EXCLUSIVA do primeiro boot do jogo. Não deve reaparecer em transições internas (vitória, retorno à cidade).
         var ld = document.getElementById('loading');
-        if (!ld) return false;
-        var tmp = document.createElement('div');
-        var flavor = _flavorTips[Math.floor(Math.random() * _flavorTips.length)];
-        tmp.innerHTML = global.ValdoriaLoadingHTML({
-            overlayId: 'loading',
-            title: 'LENDAS DE VALDORIA',
-            defaultTip: flavor,
-            hasStage: true,
-            hasRetry: false,
-            icon: 'magic-circle',
-            particleSet: 'standard',
-            tier: global._valdoriaPerformanceTier || 'full'
-        });
-        var ov = tmp.firstElementChild;
-        if (!ov) return false;
-        ov.style.background = '#1a1510';
-        ov.style.display = '';
-        if (ld.parentNode) ld.parentNode.replaceChild(ov, ld);
-        var st = document.getElementById('loading-stage');
-        if (st && label) st.textContent = label;
-        _hidden = false;
+        if (ld) {
+            ld.style.display = 'none';
+        }
+        _hidden = true;
         return true;
     }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-09T12:31:01Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-09T17:01:07Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -26164,14 +26164,9 @@ function __combatShowErrorOverlay(title, detailsHtml) {
                 /* 2026-05-13: nointro=1 pra destino bootar direto no magic-circle */
                 qp.set('nointro', '1');
                 var url = '/cidade/' + (qp.toString() ? '?' + qp.toString() : '');
-                if (window._vTransitionLoader) window._vTransitionLoader.show('Retornando à cidade…');
                 window.__valdoria_transitioning = true;
-                /* 2026-05-13 BUGBOT FIX (PR #90): delay 30ms pra browser pintar
-                   o loader antes de unload — sem isso, location.replace dispara
-                   sync e loader nunca aparece. Mesmo padrao da cidade.html. */
                 setTimeout(function(){ location.replace(url); }, 30);
             } catch (eF) {
-                if (window._vTransitionLoader) window._vTransitionLoader.show('Retornando à cidade…');
                 setTimeout(function(){ location.href = '/cidade/?nointro=1'; }, 30);
             }
         });
@@ -26191,18 +26186,6 @@ function __combatShowErrorOverlay(title, detailsHtml) {
    já computou tudo; server só persiste. */
 async function __combatCompleteCanonical(result, origin) {
     console.info('[C-REM:PIVOT-COMPLETE] enter result=' + result + ' origin=' + origin);
-    /* 2026-05-13 USER REQUEST: mostra magic-circle ANTES de fetch+redirect.
-       Cobre o gap combate->origin (cidade/exploracao) com loader "real". */
-    if (window._vTransitionLoader) {
-        /* BUG FIX 2026-06-16 (user: "tela de derrota dizia voltar a exploracao"):
-           derrota tem prioridade sobre origin — sempre rumo ao Templo, nunca
-           "Retornando à exploração". O destino real e decidido pelo servidor
-           (Server-Is-Authority); este label so reflete a intencao. */
-        var _exitLabel = (result === 'defeat')
-            ? 'Ressuscitando no Templo…'
-            : (origin === 'exploracao' ? 'Retornando à exploração…' : 'Retornando à cidade…');
-        window._vTransitionLoader.show(_exitLabel);
-    }
     var s = currentState || {};
     var p = (s.order && s.p_idx != null) ? s.order[s.p_idx] : null;
     var rewards = (s.rewards && typeof s.rewards === 'object') ? {

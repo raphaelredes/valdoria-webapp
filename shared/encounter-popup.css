@@ -716,6 +716,102 @@ body.perf-lite #encounter-overlay.active .enc-card {
   border: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
 }
 .enc-cs-pers { color: var(--v-text-dim, #a09484); }
+
+/* Badge de Preço / Soldo Atual em Destaque */
+.enc-cs-price-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 16px;
+  margin: 4px 0 2px;
+  background: linear-gradient(135deg, rgba(196, 149, 58, 0.22) 0%, rgba(38, 29, 20, 0.95) 100%);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: var(--v-radius-pill, 20px);
+  color: #ffd700;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(13px * var(--v-font-scale, 1));
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 12px rgba(196, 149, 58, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Meta-badges da ficha (Classe, Sub-classe, Raça, Sub-raça) */
+.enc-cs-tags-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 380px;
+  margin: 3px 0 6px;
+}
+.enc-cs-meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  background: rgba(30, 24, 18, 0.85);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: var(--v-radius-pill, 20px);
+  font-size: calc(11px * var(--v-font-scale, 1));
+  color: var(--v-text, #d4c8b0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.enc-cs-meta-badge b {
+  color: var(--v-gold, #c4953a);
+}
+
+/* Cards de Habilidades com descrição ("O que fazem") */
+.enc-cs-abilities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 4px;
+}
+.enc-cs-ability-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: linear-gradient(170deg, rgba(42, 34, 24, 0.75) 0%, rgba(24, 18, 14, 0.95) 100%);
+  border: 1px solid rgba(196, 149, 58, 0.28);
+  border-radius: var(--v-radius-sm, 6px);
+  text-align: left;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.enc-cs-ability-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+.enc-cs-ability-name {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(12px * var(--v-font-scale, 1));
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 0.5px;
+}
+.enc-cs-ability-type {
+  font-size: calc(9.5px * var(--v-font-scale, 1));
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: rgba(196, 149, 58, 0.18);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  color: var(--v-gold, #c4953a);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.enc-cs-ability-desc {
+  font-size: calc(11px * var(--v-font-scale, 1));
+  line-height: 1.45;
+  color: var(--v-text, #d4c8b0);
+}
 @media (max-width: 360px) {
   .enc-cs-grid { grid-template-columns: repeat(2, 1fr); }
 }
