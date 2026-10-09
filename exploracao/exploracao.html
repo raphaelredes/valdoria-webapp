@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T01:05:37Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T01:36:43Z - do not edit directly, edit source -->
 
 
 
@@ -15155,6 +15155,9 @@ function parseRewardString(s) {
     } catch (e) { /* fall through to URL token */ }
     return qs.get('token') || '';
   })();
+  window._getExploreSessionToken = function () {
+    return window.__EXPLORE_MOTOR_TOKEN || (typeof _motorToken === 'function' ? _motorToken() : '') || window.__EXPLORE_TOKEN || '';
+  };
   window.__EXPLORE_USER_ID  = parseInt(qs.get('uid'), 10) || 0;
   window.__EXPLORE_MAP_ID   = qs.get('map_id') || '';
   // #8 fundacional: ids legados (snaps em voo durante o deploy) -> canônico.
@@ -23676,9 +23679,18 @@ function resizeCanvases() {
   // com DPR=2 backing 3850px (ok); com DPR=3 5775px (ok). Desktop com
   // monitor 4K+zoom extremo cai pra 1 automaticamente.
   const _rawDpr = window.devicePixelRatio || 1;
+  const _isMobile = (typeof window !== 'undefined') && (
+    ('ontouchstart' in window) ||
+    (navigator.maxTouchPoints > 0) ||
+    (window.innerWidth <= 850)
+  );
+  // Em telas touch/mobile, se o canvas total for grande (>1.2M pixels lógicos),
+  // cap DPR em 1.0; se compacto, até 1.25. Evita backing buffers de 10M+ pixels que travam GPUs mobile (ex.: Samsung S20)
+  const _maxPixelsMobile = 1200000;
+  const _mobileDprCap = _isMobile ? ((totalW * totalH > _maxPixelsMobile) ? 1.0 : 1.25) : 2.0;
   const _maxSafeDim = 8000;
   const _safeDpr = _maxSafeDim / Math.max(totalW, totalH, 1);
-  const dpr = Math.max(1, Math.min(_rawDpr, 2, _safeDpr));
+  const dpr = Math.max(1, Math.min(_rawDpr, _mobileDprCap, _safeDpr));
   mainCanvas.style.width = totalW + 'px';
   mainCanvas.style.height = totalH + 'px';
   mainCanvas.width = Math.round(totalW * dpr);
@@ -23779,10 +23791,13 @@ function scheduleRender() {
   // CPU em idle clear/fog: 100% → ~10% (V4 original target).
   // Storm/rain mantêm rAF full-rate — sem regressão do V8 incident.
   if (_isIdle()) {
-    // 2026-06-15 (user "mapa vivo"): device capaz mantém ~33fps no idle p/ a vida do
-    // mapa (pássaros/água/folhas) seguir animando; lite/reduced-motion cai a 6.6fps.
-    var _idleMs = ((window._valdoriaPerformanceTier !== 'lite') && !window.vReducedMotion)
-                  ? LIVING_TICK_MS : IDLE_TICK_MS;
+    // 2026-10-08 PERF MOBILE: em masmorras (interior coberto/sem fauna de ar livre) ou mobile touch,
+    // o idle dorme a 150ms (~6.6fps). A CPU/GPU esfriam e poupam bateria. Ao tocar/mover,
+    // _markActive reativa full-rate (60fps) imediatamente.
+    var _isDungIdle = !!(S && ((S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon)) || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent'));
+    var _isMobIdle = (typeof window !== 'undefined') && (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 850));
+    var _idleMs = (_isDungIdle || _isMobIdle || (window._valdoriaPerformanceTier === 'lite') || window.vReducedMotion)
+                  ? IDLE_TICK_MS : LIVING_TICK_MS;
     setTimeout(function() { renderFrame(performance.now()); }, _idleMs);
   } else {
     requestAnimationFrame(renderFrame);
@@ -29736,12 +29751,16 @@ function _drawDungeonWallTile(ctx, cx, cy, col, row) {
     ctx.fillRect(bx - bw * 0.2, by - bh * 0.2, bw * 0.4, 1.5);
   }
 
-  // 3. Paliçada de toras e estacas pontiagudas de guerra orc
-  var stakes = [
-    { x: -0.24, y: 0.02, w: 0.12, h: 0.55, tilt: -0.08 },
-    { x: -0.08, y: -0.12, w: 0.14, h: 0.62, tilt: 0.04 },
-    { x:  0.10, y: -0.05, w: 0.13, h: 0.58, tilt: -0.05 },
-    { x:  0.25, y: 0.08, w: 0.12, h: 0.50, tilt: 0.07 }
+  // 3. Paliçada de toras e estacas pontiagudas de guerra orc (direto em coords para zero lag)
+  var _isMobWall = (typeof window !== 'undefined') && (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 850));
+  var stakes = _isMobWall ? [
+    { x: -0.16, y: -0.05, w: 0.16, h: 0.60, skew: -1.5 },
+    { x:  0.16, y:  0.02, w: 0.15, h: 0.54, skew:  1.2 }
+  ] : [
+    { x: -0.24, y: 0.02, w: 0.12, h: 0.55, skew: -2.0 },
+    { x: -0.08, y: -0.12, w: 0.14, h: 0.62, skew:  1.0 },
+    { x:  0.10, y: -0.05, w: 0.13, h: 0.58, skew: -1.2 },
+    { x:  0.25, y: 0.08, w: 0.12, h: 0.50, skew:  1.8 }
   ];
   for (var si = 0; si < stakes.length; si++) {
     var st = stakes[si];
@@ -29749,27 +29768,29 @@ function _drawDungeonWallTile(ctx, cx, cy, col, row) {
     var sy = cy + st.y * W;
     var sw = st.w * W;
     var sh = st.h * W;
-    ctx.save();
-    ctx.translate(sx, sy);
-    ctx.rotate(st.tilt);
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    ctx.fillRect(-sw * 0.5 + 2, -sh * 0.4 + 3, sw, sh * 0.8);
+    var topX = sx + st.skew;
+    var topY = sy - sh * 0.4;
+    // Sombra da tora
+    ctx.fillStyle = 'rgba(0,0,0,0.50)';
+    ctx.fillRect(sx - sw * 0.5 + 2, topY + 2, sw, sh * 0.8);
+    // Tronco da tora
     ctx.fillStyle = '#362214';
-    ctx.fillRect(-sw * 0.5, -sh * 0.4, sw, sh * 0.8);
+    ctx.fillRect(sx - sw * 0.5, topY, sw, sh * 0.8);
     ctx.fillStyle = '#4e3320';
-    ctx.fillRect(-sw * 0.5, -sh * 0.4, sw * 0.35, sh * 0.8);
+    ctx.fillRect(sx - sw * 0.5, topY, sw * 0.35, sh * 0.8);
+    // Ponta afiada
     ctx.fillStyle = '#22140a';
     ctx.beginPath();
-    ctx.moveTo(-sw * 0.5, -sh * 0.4);
-    ctx.lineTo(0, -sh * 0.65);
-    ctx.lineTo(sw * 0.5, -sh * 0.4);
+    ctx.moveTo(sx - sw * 0.5, topY);
+    ctx.lineTo(topX, topY - sh * 0.25);
+    ctx.lineTo(sx + sw * 0.5, topY);
     ctx.closePath();
     ctx.fill();
+    // Amarração
     ctx.fillStyle = '#1c1815';
-    ctx.fillRect(-sw * 0.55, -sh * 0.1, sw * 1.1, 3);
+    ctx.fillRect(sx - sw * 0.55, sy - 2, sw * 1.1, 3);
     ctx.fillStyle = '#5c483a';
-    ctx.fillRect(-sw * 0.55, -sh * 0.1, sw * 1.1, 1);
-    ctx.restore();
+    ctx.fillRect(sx - sw * 0.55, sy - 2, sw * 1.1, 1);
   }
 
   // 4. Detalhe Macabro ou Tocha de Parede por Hash
@@ -30093,10 +30114,19 @@ function _drawDungeonAtmosphere(ctx) {
   var tier = window._valdoriaPerformanceTier;
   if (tier === 'lite') return;
 
-  var cx = canvasW * 0.5;
-  var cy = canvasH * 0.5;
-  var maxR = Math.max(canvasW, canvasH) * 0.72;
-  var minR = Math.min(canvasW, canvasH) * 0.26;
+  // 2026-10-08 PERF VIEWPORT: desenha vinheta e brasas SOMENTE na viewport visivel
+  // (evita fillRect e gradiente de 11M pixels em canvas full que congelam mobile)
+  var vp = _vpBoundsCurrent;
+  var vx = vp ? vp.x : 0;
+  var vy = vp ? vp.y : 0;
+  var vw = vp ? vp.w : canvasW;
+  var vh = vp ? vp.h : canvasH;
+  if (vw <= 0 || vh <= 0) return;
+
+  var cx = vx + vw * 0.5;
+  var cy = vy + vh * 0.5;
+  var maxR = Math.max(vw, vh) * 0.72;
+  var minR = Math.min(vw, vh) * 0.26;
   var vigGrad = ctx.createRadialGradient(cx, cy, minR, cx, cy, maxR);
   vigGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
   vigGrad.addColorStop(0.55, 'rgba(18, 9, 6, 0.38)');
@@ -30104,16 +30134,17 @@ function _drawDungeonAtmosphere(ctx) {
 
   ctx.save();
   ctx.fillStyle = vigGrad;
-  ctx.fillRect(0, 0, canvasW, canvasH);
+  ctx.fillRect(vx, vy, vw, vh);
 
-  if (tier !== 'lite' && !window.vReducedMotion) {
+  var isMob = (typeof window !== 'undefined') && (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 850));
+  if (tier !== 'lite' && !window.vReducedMotion && !isMob) {
     ctx.fillStyle = 'rgba(255, 130, 40, 0.65)';
-    for (var ci = 0; ci < 12; ci++) {
+    for (var ci = 0; ci < 8; ci++) {
       var seed = ci * 1337;
       var cSpeed = 0.0003 + (ci % 4) * 0.0001;
       var cOff = (_animTime * cSpeed + ci * 0.12) % 1;
-      var cpx = ((seed * 17) % canvasW + Math.sin(_animTime * 0.001 + ci) * 18) % canvasW;
-      var cpy = canvasH - (cOff * canvasH);
+      var cpx = vx + (((seed * 17) % vw + Math.sin(_animTime * 0.001 + ci) * 18) % vw);
+      var cpy = vy + vh - (cOff * vh);
       var cSize = 1.2 + (ci % 3) * 0.6;
       ctx.beginPath();
       ctx.arc(cpx, cpy, cSize, 0, Math.PI * 2);
@@ -39245,13 +39276,14 @@ function resolveChoice(idx) {
     LOG('API', 'remote_dungeon_choice idx=' + idx + ' enc=' + (S.event._encId || '?'));
     var _apiD = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
     var _mapD = S.event._mapId, _encD = S.event._encId, _hexD = S.event._hexId || '';
+    var _tokD = (typeof window._getExploreSessionToken === 'function' ? window._getExploreSessionToken() : '') || window.__EXPLORE_MOTOR_TOKEN || window.__EXPLORE_TOKEN;
     var _bodyD = JSON.stringify({
-      token: window.__EXPLORE_TOKEN, map_id: _mapD, encounter_id: _encD,
+      token: _tokD, map_id: _mapD, encounter_id: _encD,
       choice_idx: idx, hex_id: _hexD
     });
     window.__explFetchTO(_apiD + '/api/exploracao/dungeon_event_choice', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + window.__EXPLORE_TOKEN, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'Bearer ' + (window.__EXPLORE_TOKEN || _tokD), 'Content-Type': 'application/json' },
       body: _bodyD
     }, 12000).then(function (resp) { return resp.json(); }).then(function (res) {
       if (!res || res.error) { _remoteEventChoiceError(res && res.error); return; }
@@ -39371,13 +39403,16 @@ function _remoteRenderDiceAndResolve(ch, oc, onDone) {
       else { _remoteShowOutcome(ch, oc); }
     }, 350);
   }
-  // SAFETY 1: handlers redundantes (paridade com LOCAL rollSkillCheck V2.7).
-  // User reportou trava em REMOTE — onclick às vezes não dispara em mobile
-  // touch. addEventListener('click') + addEventListener('pointerdown') cobrem
-  // os casos onde onclick falha (Telegram WebApp Android usa pointer events).
-  skipBtn.onclick = function(ev) { ev.stopPropagation(); advance('onclick'); };
-  skipBtn.addEventListener('click', function(ev) { ev.stopPropagation(); advance('addEventListener'); });
-  skipBtn.addEventListener('pointerdown', function(ev) { ev.stopPropagation(); advance('pointerdown'); });
+  var _lastAdvTime = 0;
+  function _tryAdvance(src) {
+    var now = performance.now();
+    if (now - _lastAdvTime < 180) return;
+    _lastAdvTime = now;
+    advance(src);
+  }
+  skipBtn.onclick = function(ev) { _tryAdvance('onclick'); };
+  skipBtn.addEventListener('click', function(ev) { _tryAdvance('click'); });
+  skipBtn.addEventListener('pointerup', function(ev) { _tryAdvance('pointerup'); });
   // SAFETY 2: pointer-events forçado pra evitar overlay/CSS bloqueando click
   skipBtn.style.setProperty('pointer-events', 'auto', 'important');
   skipBtn.style.setProperty('cursor', 'pointer', 'important');
@@ -40031,7 +40066,7 @@ function _explDungeonVEncResolve(ev, ch) {
     return;
   }
   var _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
-  var _tok = window.__EXPLORE_TOKEN;
+  var _tok = (typeof window._getExploreSessionToken === 'function' ? window._getExploreSessionToken() : '') || window.__EXPLORE_MOTOR_TOKEN || window.__EXPLORE_TOKEN;
   if (!_tok || !_api || typeof window.__explFetchTO !== 'function') {
     LOGW('EVENT', 'vencounter_dungeon_no_token');
     return;
@@ -40045,7 +40080,7 @@ function _explDungeonVEncResolve(ev, ch) {
   LOG('API', 'vencounter_dungeon_choice idx=' + idx + ' enc=' + (ev._encId || '?'));
   window.__explFetchTO(_api + '/api/exploracao/dungeon_event_choice', {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + _tok, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + (window.__EXPLORE_TOKEN || _tok), 'Content-Type': 'application/json' },
     body: _body
   }, 12000).then(function (resp) { return resp.json(); }).then(function (res) {
     if (!res || res.error) { _explEventVEncError(ev, res && res.error); return; }
