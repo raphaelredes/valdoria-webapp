@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-08T23:53:14Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-09T00:09:03Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6464,7 +6464,7 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
     top: 0;
     /* Mesmo gradient do .list-panel-card — emenda visual perfeita */
     background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2a2420));
-    z-index: 3;
+    z-index: 10;
 }
 .lp-filter-dd-trigger {
     width: 100%;
@@ -6536,7 +6536,7 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
         0 0 24px rgba(196,149,58,0.25),
         inset 0 1px 0 rgba(255,220,140,0.1);
     display: none;
-    z-index: 20;
+    z-index: 50;
     max-height: 280px;
     overflow-y: auto;
 }
@@ -9326,7 +9326,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 /* Popup de confirmação dos Mísseis Mágicos. */
 /* Base do popup: cores PADRÃO do jogo (paleta Valdoria — dourado/pergaminho).
    Para MM (roxo arcano) existe variante explícita `--force`. */
-.mm-confirm-overlay { position: fixed; inset: 0; background: radial-gradient(ellipse at center, rgba(30,22,14,0.72), rgba(0,0,0,0.88)); display: flex; align-items: center; justify-content: center; z-index: 9500; animation: mmConfOvIn 0.22s ease-out; }
+.mm-confirm-overlay { position: fixed; inset: 0; background: radial-gradient(ellipse at center, rgba(30,22,14,0.72), rgba(0,0,0,0.88)); display: flex; align-items: center; justify-content: center; z-index: 10010; animation: mmConfOvIn 0.22s ease-out; }
 @keyframes mmConfOvIn { from { opacity: 0; } to { opacity: 1; } }
 .mm-confirm-card { width: min(92vw, 320px); padding: var(--v-space-xl, 16px) 18px 14px; background: linear-gradient(180deg, var(--v-bg-raised, #3a2e1e), var(--v-bg, #2a2014)); border: 1px solid rgba(196,149,58,0.6); border-radius: 16px; box-shadow: 0 0 30px rgba(196,149,58,0.35), 0 10px 24px rgba(0,0,0,0.75); color: var(--v-text, #d4c8b0); font-family: var(--v-font, 'MedievalSharp'), serif; animation: mmConfCardIn 0.3s ease-out; }
 @keyframes mmConfCardIn { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -9337,12 +9337,12 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .mm-confirm-title {
     font-family: var(--v-font-display, 'Cinzel'), serif;
     font-weight: 700;
-    font-size: calc(15px * var(--v-font-scale, 1));
+    font-size: calc(13px * var(--v-font-scale, 1));
     letter-spacing: 2px;
     color: #ffd680;
     text-transform: uppercase;
     text-align: center;
-    margin-bottom: var(--v-space-md, 8px);
+    margin-bottom: var(--v-space-xs, 2px);
     /* Default DOURADO (cores do jogo) — gradient Valdoria clássico */
     background: linear-gradient(90deg, #fff4d0 0%, #ffd680 50%, #c4953a 100%);
     -webkit-background-clip: text;
@@ -9350,6 +9350,27 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 10px rgba(196,149,58,0.45);
     filter: drop-shadow(0 0 6px rgba(196,149,58,0.4));
+}
+.mm-confirm-skill-name {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 700;
+    font-size: calc(17px * var(--v-font-scale, 1));
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: center;
+    color: #ffd700;
+    margin: 2px 0 6px 0;
+    text-shadow: 0 0 14px rgba(255, 215, 0, 0.65), 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+.mm-confirm-meta {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: calc(11px * var(--v-font-scale, 1));
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #f59e0b;
+    text-align: center;
+    margin-bottom: var(--v-space-md, 8px);
+    text-transform: uppercase;
 }
 .mm-confirm-title.mm-confirm-title--fire {
     color: #ffb060;
@@ -28132,7 +28153,6 @@ function _buildSkillButtonsGridHtml(skills, filter, resIco, resValue) {
         html += '<div class="lp-qb-ico">' + _skillIconHTML(sk) + '</div>';
         html += costBadgeHtml;
         html += '</button>';
-        html += '<button type="button" class="lp-quick-help-btn" data-skill-help="' + i + '" title="Detalhes: ' + escHtml(sk.n) + '" aria-label="Detalhes técnicos">?</button>';
         html += '</div>';
     }
     html += '</div>';
@@ -28151,11 +28171,20 @@ function _bindSkillListListeners(listEl, skills, ov, reopenFn) {
         });
     });
     listEl.querySelectorAll('[data-skill]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', async function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             if (btn.hasAttribute('disabled')) return;
             var i = parseInt(btn.getAttribute('data-skill'), 10);
+            if (isNaN(i) || !skills[i]) return;
+            var sk = skills[i];
+
+            // Modal de confirmação com destaque na habilidade
+            var okUse = await showSkillUseConfirmPopup(sk);
+            if (!okUse) return; // Se cancelou, mantém a janela de habilidades aberta intacta!
+
             ov.remove();
-            useSkill(skills[i], { onCancel: reopenFn });
+            useSkill(sk, { onCancel: reopenFn, confirmed: true });
         });
     });
     // Hotbar preview listener no modo atalhos (BG3)
@@ -28228,14 +28257,11 @@ function openSkillsPanel() {
         return Math.max(3, Math.min(9, Math.floor(listH / rowH)));
     })();
 
-    var layoutMode = 'buttons'; // Padrão: hotbar de atalhos RPG estilo Baldur's Gate 3
+    var layoutMode = 'detailed'; // Padrão: lista detalhada (escolha manual do jogador se quiser atalhos)
     try {
         var _savedMode = localStorage.getItem('c2_skill_layout_mode');
         if (_savedMode === 'buttons' || _savedMode === 'detailed') layoutMode = _savedMode;
-        else layoutMode = 'buttons';
-    } catch (_eMode) {
-        layoutMode = 'buttons';
-    }
+    } catch (_eMode) {}
 
     function renderListBody() {
         var listEl = card.querySelector('.lp-list');
@@ -28322,8 +28348,8 @@ function openSkillsPanel() {
     var html = '<div class="lp-title">Habilidades</div>';
     html += '<div class="lp-sub">' + p.res.ico + ' ' + p.res.value + '/' + p.res.max + ' ' + p.res.name + '</div>';
     html += '<div class="lp-layout-toggle" role="radiogroup" aria-label="Modo de visualização" style="align-self:center; margin: 2px auto 6px auto;">';
-    html += '<button type="button" class="lp-layout-btn' + (layoutMode === 'buttons' ? ' active' : '') + '" data-layout="buttons" title="Atalhos estilo Baldur\'s Gate 3">☷ Atalhos</button>';
     html += '<button type="button" class="lp-layout-btn' + (layoutMode === 'detailed' ? ' active' : '') + '" data-layout="detailed" title="Lista detalhada">☰ Lista</button>';
+    html += '<button type="button" class="lp-layout-btn' + (layoutMode === 'buttons' ? ' active' : '') + '" data-layout="buttons" title="Atalhos estilo RPG">☷ Atalhos</button>';
     html += '</div>';
     html += '<div class="lp-filter-dd" role="group" aria-label="Filtro de habilidades">';
     html += '<button type="button" class="lp-filter-dd-trigger" aria-haspopup="listbox" aria-expanded="false">';
@@ -28425,16 +28451,22 @@ function showSkillUseConfirmPopup(skill) {
         })();
         var title = document.createElement('div');
         title.className = 'mm-confirm-title' + (themeCls ? ' mm-confirm-title--' + themeCls : '');
-        title.textContent = 'Usar ' + (skill.n || 'habilidade') + '?';
+        title.textContent = 'Confirmar Habilidade';
+        var nameEl = document.createElement('div');
+        nameEl.className = 'mm-confirm-skill-name';
+        nameEl.textContent = skill.n || 'Habilidade';
+        var meta = document.createElement('div');
+        meta.className = 'mm-confirm-meta';
+        var resKind = (typeof _skillResourceKind === 'function') ? _skillResourceKind(skill) : 'action';
+        var actLabel = (resKind === 'bonus' ? 'Ação Bônus' : resKind === 'reaction' ? 'Reação' : 'Ação');
+        var pCur = (currentState && currentState.order && currentState.p_idx != null) ? currentState.order[currentState.p_idx] : null;
+        var resIco = (pCur && pCur.res) ? pCur.res.ico : '✦';
+        var costTxt = (skill.cost | 0) > 0 ? (skill.cost + ' ' + resIco) : 'Sem custo';
+        var kindTxt = skill.kind === 'attack' ? 'Ataque' : skill.kind === 'heal' ? 'Cura' : 'Buff';
+        meta.textContent = actLabel + '  ·  ' + kindTxt + '  ·  ' + costTxt;
         var sub = document.createElement('div');
         sub.className = 'mm-confirm-sub';
         sub.textContent = skill.desc || '';
-        var meta = document.createElement('div');
-        meta.className = 'mm-confirm-sub';
-        meta.style.opacity = '.85';
-        var costTxt = (skill.cost | 0) > 0 ? ('Custo: ' + skill.cost + ' ' + (skill.costLabel || 'rec.')) : 'Sem custo';
-        var kindTxt = skill.kind === 'attack' ? 'Ataque' : skill.kind === 'heal' ? 'Cura' : 'Buff';
-        meta.textContent = kindTxt + ' · ' + costTxt;
         var btns = document.createElement('div');
         btns.className = 'mm-confirm-btns';
         var btnCancel = document.createElement('button');
@@ -28444,16 +28476,18 @@ function showSkillUseConfirmPopup(skill) {
         var btnOk = document.createElement('button');
         btnOk.className = 'mm-confirm-btn-ok';
         btnOk.type = 'button';
-        btnOk.textContent = 'Usar';
+        btnOk.textContent = 'Confirmar';
         function done(v) { if (ov.parentNode) ov.parentNode.removeChild(ov); resolve(v); }
         btnCancel.addEventListener('click', function () { done(false); });
         btnOk.addEventListener('click', function () { done(true); });
+        ov.addEventListener('click', function (e) { if (e.target === ov) done(false); });
         btns.appendChild(btnCancel);
         btns.appendChild(btnOk);
         card.appendChild(icoWrap);
         card.appendChild(title);
-        if (skill.desc) card.appendChild(sub);
+        card.appendChild(nameEl);
         card.appendChild(meta);
+        if (skill.desc) card.appendChild(sub);
         card.appendChild(btns);
         ov.appendChild(card);
         mountInGameFrame(ov);
@@ -28857,6 +28891,13 @@ async function useSkill(skill, opts) {
             console.warn('[C-REM:SKILL] aborted slot_not_found name=' + (skill && skill.n));
             return;
         }
+        if (!opts.confirmed) {
+            var okUseRem = await showSkillUseConfirmPopup(skill);
+            if (!okUseRem) {
+                if (typeof opts.onCancel === 'function') { try { opts.onCancel(); } catch (e) {} }
+                return;
+            }
+        }
         /* Precisa target? (attack ou heal com targetAlly ou buff targetAlly) */
         var needsTarget = skill.kind === 'attack' || skill.kind === 'heal' || skill.targetAlly;
         if (needsTarget && skill.healTargets === 'self') { needsTarget = false; }
@@ -28894,7 +28935,7 @@ async function useSkill(skill, opts) {
     if (typeof _simIsSkillUsable === 'function' && !_simIsSkillUsable(currentState, p, skill)) {
         return;
     }
-    var okUse = await showSkillUseConfirmPopup(skill);
+    var okUse = (opts && opts.confirmed) ? true : await showSkillUseConfirmPopup(skill);
     if (!okUse) {
         // Se o chamador pediu pra reabrir algo ao cancelar (ex.: lista de
         // habilidades), chama o callback pra restaurar o contexto.
