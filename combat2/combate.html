@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-09T00:09:03Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-09T00:47:45Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10622,40 +10622,71 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 .lp-qb-action-badge {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  font-size: 8px;
+  top: 3px;
+  left: 3px;
+  font-size: 13px;
   line-height: 1;
-  padding: 2px 3px;
-  border-radius: 3px;
-  font-weight: 800;
+  padding: 2.5px 5px;
+  border-radius: 5px;
+  font-weight: 900;
   z-index: 2;
-  background: rgba(8, 6, 4, 0.85);
-  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 8, 5, 0.95);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
   pointer-events: none;
 }
-.lp-qb-action-badge.res-action { color: #e8c45a; }
-.lp-qb-action-badge.res-bonus  { color: #f97316; }
-.lp-qb-action-badge.res-reaction { color: #38bdf8; }
+.lp-qb-action-badge.res-action {
+  color: #fef08a;
+  border-color: #eab308;
+  text-shadow: 0 0 8px rgba(250, 204, 21, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(234, 179, 8, 0.45);
+}
+.lp-qb-action-badge.res-bonus {
+  color: #fed7aa;
+  border-color: #f97316;
+  text-shadow: 0 0 8px rgba(251, 146, 60, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(249, 115, 22, 0.5);
+}
+.lp-qb-action-badge.res-reaction {
+  color: #bae6fd;
+  border-color: #0ea5e9;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(14, 165, 233, 0.5);
+}
 .lp-qb-cost-badge {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
+  bottom: 3px;
+  right: 3px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 9px;
-  font-weight: 800;
-  color: #f59e0b;
-  background: rgba(8, 6, 4, 0.85);
-  border: 0.5px solid rgba(196, 149, 58, 0.4);
-  border-radius: 3px;
-  padding: 1px 3px;
+  font-size: 14px;
+  font-weight: 900;
+  color: #fde047;
+  background: rgba(10, 8, 5, 0.95);
+  border: 1.5px solid rgba(245, 158, 11, 0.75);
+  border-radius: 5px;
+  padding: 1.5px 5px;
   line-height: 1;
   z-index: 2;
   pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(245, 158, 11, 0.35);
 }
 .lp-qb-cost-badge.cant {
-  color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(239, 68, 68, 0.45);
+}
+.lp-qb-cost-val {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.lp-qb-cost-ico {
+  font-size: 11.5px;
+  opacity: 0.95;
+  margin-left: 1px;
 }
 .lp-quick-help-btn {
   position: absolute;
@@ -28142,8 +28173,12 @@ function _buildSkillButtonsGridHtml(skills, filter, resIco, resValue) {
         var resGlyph = _resourceGlyphFor(resKind);
         var actLabel = (resKind === 'bonus' ? 'Ação Bônus' : resKind === 'reaction' ? 'Reação' : 'Ação');
         var resBadgeHtml = '<span class="lp-qb-action-badge res-' + resKind + '" title="' + actLabel + '">' + resGlyph + '</span>';
-        var costTxt = (sk.cost | 0) > 0 ? (sk.cost + ' ' + resIco) : '0';
-        var costBadgeHtml = '<span class="lp-qb-cost-badge' + (canUse ? '' : ' cant') + '">' + costTxt + '</span>';
+        var costVal = (sk.cost | 0) > 0 ? (sk.cost | 0) : '0';
+        var costTxt = (sk.cost | 0) > 0 ? (costVal + ' ' + resIco) : '0';
+        var costBadgeInner = (sk.cost | 0) > 0
+            ? '<span class="lp-qb-cost-val">' + costVal + '</span><span class="lp-qb-cost-ico">' + resIco + '</span>'
+            : '<span class="lp-qb-cost-val">0</span>';
+        var costBadgeHtml = '<span class="lp-qb-cost-badge' + (canUse ? '' : ' cant') + '">' + costBadgeInner + '</span>';
         var fullTitle = (sk.n || 'Habilidade') + ' (' + costTxt + ' · ' + actLabel + ')' + (blockReason ? ' — ' + blockReason : '');
         var previewText = (sk.n || '') + '  ·  ' + costTxt + '  ·  ' + actLabel + (blockReason ? ' (' + blockReason + ')' : '');
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-08T20:09:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T00:48:00Z - do not edit directly, edit source -->
 
 
 
@@ -20010,8 +20010,9 @@ var sessionEventHistory = [];
     // NUNCA foi religado → render pulava todo o bloco de fog (renderFrame não
     // alcançava drawFogComposite) → mapa inteiro visível, sem névoa. Default ON.
     fog_of_war: true,
-    player_aura: false,
-    // Sessão #69 (user: "efeitos quando o tempo muda no mapa não aplicam ao
+    player_aura: true,
+    // Sessão #69 / Sessão #85: player_aura religado — restaura efeitos visuais de luz,
+    // tocha e truques mágicos (Luz, Luzes Dançantes) no mapa de exploração.
     // andar"): estes flags ficaram OFF desde um A/B FPS-test antigo (MESMA causa
     // do fog_of_war na sessão #67) e nunca foram religados → o tint de dia/noite e
     // o overlay de clima nunca desenhavam, mesmo com S.dayPhase/S.weather mudando
@@ -32972,12 +32973,10 @@ function drawPlayer(ctx) {
 function drawPlayerLightAura(ctx) {
   if (!S || !S.player) return;
   if (!S.lightSource) return;
-  // Tier guard — lite skip pra performance mobile
-  if (window._valdoriaPerformanceTier === 'lite') return;
   var src = S.lightSource;
   if (!LIGHT_SOURCES[src]) return;
 
-  // Posição do player (mesmo cálculo de drawPlayer pra consistência)
+  // Posição do aventureiro (mesmo cálculo de drawPlayer pra consistência)
   var pCx, pCy;
   try {
     if (playerAnim) {
@@ -33001,13 +33000,13 @@ function drawPlayerLightAura(ctx) {
     // === TOCHA — glow dourado-laranja com flicker natural ===
     var flick = 1 + Math.sin(_animTime * 0.012) * 0.08
               + Math.sin(_animTime * 0.027) * 0.05;
-    var rT = HEX_W * 1.3 * flick;
+    var rT = HEX_W * 1.35 * flick;
     var _tgKey = 'tch|' + Math.round(pCx/4) + '|' + Math.round(pCy/4) + '|' + Math.round(rT/4);
     var torchGrad = _tileGradCache[_tgKey];
     if (!torchGrad) {
       torchGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, rT);
-      torchGrad.addColorStop(0, 'rgba(255, 180, 90, 0.30)');
-      torchGrad.addColorStop(0.4, 'rgba(255, 140, 50, 0.18)');
+      torchGrad.addColorStop(0, 'rgba(255, 180, 90, 0.35)');
+      torchGrad.addColorStop(0.4, 'rgba(255, 140, 50, 0.20)');
       torchGrad.addColorStop(0.75, 'rgba(220, 100, 30, 0.08)');
       torchGrad.addColorStop(1, 'rgba(180, 70, 20, 0)');
       _tileGradCache[_tgKey] = torchGrad;
@@ -33017,102 +33016,128 @@ function drawPlayerLightAura(ctx) {
     ctx.arc(pCx, pCy, rT, 0, Math.PI * 2);
     ctx.fill();
   } else if (src === 'light') {
-    // === LUZ (TRUQUE) — branco-amarelado estável ===
-    // User pediu: "tocha mas mais amarelado, ou mesmo branco". Luz mágica
-    // estável (sem flicker), forma orbe difuso ao redor do player.
-    var pulse = 1 + Math.sin(_animTime * 0.003) * 0.04;  // pulse muito sutil
-    var rL = HEX_W * 1.5 * pulse;
+    // === LUZ (TRUQUE) — branco-dourado radiante arcano (ilumina mais que a tocha) ===
+    var pulse = 1 + Math.sin(_animTime * 0.003) * 0.05;
+    var rL = HEX_W * 2.2 * pulse;
     var _lgKey = 'lt|' + Math.round(pCx/4) + '|' + Math.round(pCy/4) + '|' + Math.round(rL/4);
     var lightGrad = _tileGradCache[_lgKey];
     if (!lightGrad) {
       lightGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, rL);
-      lightGrad.addColorStop(0, 'rgba(255, 250, 220, 0.34)');
-      lightGrad.addColorStop(0.35, 'rgba(255, 245, 200, 0.20)');
-      lightGrad.addColorStop(0.7, 'rgba(255, 235, 160, 0.08)');
-      lightGrad.addColorStop(1, 'rgba(255, 225, 140, 0)');
+      lightGrad.addColorStop(0, 'rgba(255, 252, 230, 0.46)');
+      lightGrad.addColorStop(0.3, 'rgba(255, 240, 190, 0.28)');
+      lightGrad.addColorStop(0.65, 'rgba(255, 225, 140, 0.12)');
+      lightGrad.addColorStop(1, 'rgba(240, 195, 90, 0)');
       _tileGradCache[_lgKey] = lightGrad;
     }
     ctx.fillStyle = lightGrad;
     ctx.beginPath();
     ctx.arc(pCx, pCy, rL, 0, Math.PI * 2);
     ctx.fill();
-    // Detalhe extra (medium+): pequeno highlight central mais branco
-    if (window._valdoriaPerformanceTier !== 'medium') {
-      var _lcKey = 'lc|' + Math.round(pCx/4) + '|' + Math.round(pCy/4);
-      var coreGrad = _tileGradCache[_lcKey];
-      if (!coreGrad) {
-        coreGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, HEX_W * 0.4);
-        coreGrad.addColorStop(0, 'rgba(255, 255, 245, 0.30)');
-        coreGrad.addColorStop(1, 'rgba(255, 255, 245, 0)');
-        _tileGradCache[_lcKey] = coreGrad;
-      }
-      ctx.fillStyle = coreGrad;
+
+    // Destaque central reluzente no cajado / mãos do conjurador
+    var coreGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, HEX_W * 0.55);
+    coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+    coreGrad.addColorStop(0.45, 'rgba(255, 250, 210, 0.45)');
+    coreGrad.addColorStop(1, 'rgba(255, 230, 150, 0)');
+    ctx.fillStyle = coreGrad;
+    ctx.beginPath();
+    ctx.arc(pCx, pCy, HEX_W * 0.55, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Centelhas mágicas arcanas orbitando o conjurador
+    for (var sp = 0; sp < 4; sp++) {
+      var spAng = _animTime * 0.0018 + sp * (Math.PI * 0.5);
+      var spDist = HEX_W * (0.35 + 0.15 * Math.sin(_animTime * 0.0025 + sp * 1.7));
+      var spX = pCx + Math.cos(spAng) * spDist;
+      var spY = pCy + Math.sin(spAng) * (spDist * 0.6) - Math.abs(Math.sin(_animTime * 0.002 + sp)) * 10;
+      var spR = 3.5 + Math.sin(_animTime * 0.006 + sp) * 1.0;
+      var spGrad = ctx.createRadialGradient(spX, spY, 0, spX, spY, spR * 2.5);
+      spGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      spGrad.addColorStop(0.4, 'rgba(255, 245, 180, 0.65)');
+      spGrad.addColorStop(1, 'rgba(255, 215, 100, 0)');
+      ctx.fillStyle = spGrad;
       ctx.beginPath();
-      ctx.arc(pCx, pCy, HEX_W * 0.4, 0, Math.PI * 2);
+      ctx.arc(spX, spY, spR * 2.5, 0, Math.PI * 2);
       ctx.fill();
     }
   } else if (src === 'dancing_lights') {
-    // === LUZES DANÇANTES — 4 wisps orbitando + iluminação dinâmica ===
-    // User pediu: "whispers quase invisíveis circulando o personagem e
-    // iluminando o mapa, pode fazer a iluminação se movimentar os limites
-    // de acordo com a movimentação dos whispers".
-    var wispCount = (window._valdoriaPerformanceTier === 'medium') ? 3 : 4;
-    var orbitR = HEX_W * 0.95;
-    var t = _animTime * 0.0010;     // ciclo orbital ~6s/volta
-    // Renderiza UNION de halos de cada wisp — luz cumulativa segue movimento
+    // === LUZES DANÇANTES — 4 orbes luminosos orbitando + iluminação ampla combinada ===
+    var rDL = HEX_W * 2.8 * (1 + Math.sin(_animTime * 0.002) * 0.05);
+    var dLightGrad = ctx.createRadialGradient(pCx, pCy, 0, pCx, pCy, rDL);
+    dLightGrad.addColorStop(0, 'rgba(255, 248, 220, 0.40)');
+    dLightGrad.addColorStop(0.35, 'rgba(230, 235, 255, 0.24)');
+    dLightGrad.addColorStop(0.7, 'rgba(195, 215, 255, 0.10)');
+    dLightGrad.addColorStop(1, 'rgba(150, 175, 255, 0)');
+    ctx.fillStyle = dLightGrad;
+    ctx.beginPath();
+    ctx.arc(pCx, pCy, rDL, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4 Wisps dançantes e exuberantes
+    var wispCount = 4;
+    var orbitR = HEX_W * 1.15;
+    var t = _animTime * 0.0012;
+
     for (var w = 0; w < wispCount; w++) {
       var phase = (w / wispCount) * Math.PI * 2;
-      // Movimento elíptico não-circular pra parecer "dançante" não-uniforme
       var wx = pCx + Math.cos(t + phase) * orbitR;
-      var wy = pCy + Math.sin(t * 1.3 + phase) * orbitR * 0.7
-             + Math.sin(t * 2.1 + phase * 1.5) * 8;
-      // Halo grande de cada wisp — alpha baixo (quase invisível) mas
-      // contribui pra iluminação cumulativa
-      var rW = HEX_W * 0.85;
-      // Cache por bucket 4px — wisp orbita ~1-2px/frame, hit rate ~3-4 frames
-      var _wgKey = 'wg|' + w + '|' + Math.round(wx/4) + '|' + Math.round(wy/4);
-      var wispGrad = _tileGradCache[_wgKey];
-      if (!wispGrad) {
-        wispGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, rW);
-        wispGrad.addColorStop(0, 'rgba(220, 230, 255, 0.22)');
-        wispGrad.addColorStop(0.4, 'rgba(180, 200, 255, 0.10)');
-        wispGrad.addColorStop(1, 'rgba(140, 160, 240, 0)');
-        _tileGradCache[_wgKey] = wispGrad;
-      }
+      var wy = pCy + Math.sin(t * 1.25 + phase) * (orbitR * 0.65)
+             + Math.sin(t * 2.5 + phase * 2.0) * 8;
+
+      // Halo individual de cada orbe
+      var rW = HEX_W * 0.95;
+      var wispGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, rW);
+      wispGrad.addColorStop(0, 'rgba(255, 250, 220, 0.38)');
+      wispGrad.addColorStop(0.4, 'rgba(220, 235, 255, 0.18)');
+      wispGrad.addColorStop(1, 'rgba(160, 180, 255, 0)');
       ctx.fillStyle = wispGrad;
       ctx.beginPath();
       ctx.arc(wx, wy, rW, 0, Math.PI * 2);
       ctx.fill();
-      // Core "whisper" — pequeno ponto brilhante (o wisp em si)
-      var coreSize = 2 + Math.sin(t * 5 + phase) * 0.6;  // pulsa sutilmente
-      var _wcKey = 'wc|' + w + '|' + Math.round(wx/4) + '|' + Math.round(wy/4);
-      var coreGrad = _tileGradCache[_wcKey];
-      if (!coreGrad) {
-        coreGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, coreSize * 4);
-        coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
-        coreGrad.addColorStop(0.4, 'rgba(220, 230, 255, 0.40)');
-        coreGrad.addColorStop(1, 'rgba(180, 200, 255, 0)');
-        _tileGradCache[_wcKey] = coreGrad;
-      }
+
+      // Rastro cintilante sutil (trail)
+      var trailAng = t + phase - 0.2;
+      var tx = pCx + Math.cos(trailAng) * orbitR;
+      var ty = pCy + Math.sin(trailAng * 1.25) * (orbitR * 0.65);
+      var trailGrad = ctx.createRadialGradient(tx, ty, 0, tx, ty, 8);
+      trailGrad.addColorStop(0, 'rgba(255, 245, 200, 0.45)');
+      trailGrad.addColorStop(1, 'rgba(180, 210, 255, 0)');
+      ctx.fillStyle = trailGrad;
+      ctx.beginPath();
+      ctx.arc(tx, ty, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Glow exterior estelar do orbe
+      var glowGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, 18);
+      glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      glowGrad.addColorStop(0.35, 'rgba(255, 240, 160, 0.75)');
+      glowGrad.addColorStop(0.7, 'rgba(180, 220, 255, 0.35)');
+      glowGrad.addColorStop(1, 'rgba(140, 180, 255, 0)');
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(wx, wy, 18, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Núcleo sólido do orbe (wisp nítido e visível)
+      var coreSize = 6.0 + Math.sin(t * 5.0 + phase) * 1.5;
+      var coreGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, coreSize);
+      coreGrad.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+      coreGrad.addColorStop(0.55, 'rgba(255, 248, 190, 0.95)');
+      coreGrad.addColorStop(1, 'rgba(255, 220, 120, 0.2)');
       ctx.fillStyle = coreGrad;
       ctx.beginPath();
-      ctx.arc(wx, wy, coreSize * 4, 0, Math.PI * 2);
+      ctx.arc(wx, wy, coreSize, 0, Math.PI * 2);
       ctx.fill();
     }
   } else if (src === 'daylight') {
     // === DAYLIGHT — orbe brilhante acima do player (luz solar divina) ===
-    var rD = HEX_W * 2.0;
+    var rD = HEX_W * 2.2;
     var _dyCy = pCy - HEX_H * 0.3;
-    var _dyKey = 'dl|' + Math.round(pCx/4) + '|' + Math.round(_dyCy/4);
-    var dayGrad = _tileGradCache[_dyKey];
-    if (!dayGrad) {
-      dayGrad = ctx.createRadialGradient(pCx, _dyCy, 0, pCx, _dyCy, rD);
-      dayGrad.addColorStop(0, 'rgba(255, 245, 200, 0.45)');
-      dayGrad.addColorStop(0.3, 'rgba(255, 230, 160, 0.25)');
-      dayGrad.addColorStop(0.7, 'rgba(255, 210, 130, 0.10)');
-      dayGrad.addColorStop(1, 'rgba(255, 200, 100, 0)');
-      _tileGradCache[_dyKey] = dayGrad;
-    }
+    var dayGrad = ctx.createRadialGradient(pCx, _dyCy, 0, pCx, _dyCy, rD);
+    dayGrad.addColorStop(0, 'rgba(255, 245, 200, 0.50)');
+    dayGrad.addColorStop(0.3, 'rgba(255, 230, 160, 0.28)');
+    dayGrad.addColorStop(0.7, 'rgba(255, 210, 130, 0.12)');
+    dayGrad.addColorStop(1, 'rgba(255, 200, 100, 0)');
     ctx.fillStyle = dayGrad;
     ctx.beginPath();
     ctx.arc(pCx, _dyCy, rD, 0, Math.PI * 2);
@@ -33445,26 +33470,26 @@ function drawWeatherOverlay(ctx) {
 const LIGHT_SOURCES = {
   torch: {
     id: 'torch', label: 'Tocha', icon: '',
-    desc: 'Tocha física — qualquer classe pode carregar.',
+    desc: 'Tocha física — qualquer classe pode carregar (+1 visão).',
     vision_bonus: 1,
     available: function(p) { return true; }
   },
   light: {
     id: 'light', label: 'Luz (Truque)', icon: '✦',
-    desc: 'Truque arcano/divino. Cria luz equivalente a uma tocha — sem consumir recursos.',
-    vision_bonus: 1,
+    desc: 'Truque arcano/divino. Cria luz mágica radiante — ilumina melhor que uma tocha (+2 visão), sem consumir recursos.',
+    vision_bonus: 2,
     available: function(p) { return p.cls_key === 'mago' || p.cls_key === 'clerigo'; }
   },
   dancing_lights: {
     id: 'dancing_lights', label: 'Luzes Dançantes', icon: '',
-    desc: 'Truque de Mago. Quatro esferas luminosas flutuam ao redor — iluminam área ampla.',
-    vision_bonus: 2,
+    desc: 'Truque de Mago. Quatro esferas luminosas flutuam ao redor — iluminam área ampla (+3 visão).',
+    vision_bonus: 3,
     available: function(p) { return p.cls_key === 'mago'; }
   },
   daylight: {
     id: 'daylight', label: 'Luz do Dia', icon: '',
-    desc: 'Magia Divina de 3º nível (Clérigo). Esfera de luz natural por 1 hora. Consome slot.',
-    vision_bonus: 3,
+    desc: 'Magia Divina de 3º nível (Clérigo). Esfera de luz natural por 1 hora (+4 visão). Consome slot.',
+    vision_bonus: 4,
     mp_cost: 3,
     available: function(p) { return p.cls_key === 'clerigo' && p.mp >= 3; }
   }
@@ -33479,7 +33504,7 @@ function availableLightSources(p) {
 // - night: base vision = 1
 // - cave (qualquer fase): vision 0 sem luz (escuridão absoluta)
 // - volcanic: fog_base_mul no mapa ajusta intensidade
-// - Luz adiciona vision_bonus conforme fonte ativa (1-3 hexes)
+// - Luz adiciona vision_bonus conforme fonte ativa (1-4 hexes)
 // 2026-04-27 USER RULE: "no hex de mata, faça o personagem parecer estar
 // entrando na mata mesmo, fazendo o jogador enxergar somente dentro da mata
 // e o restante inteiro do mapa fica em fog enquanto estiver nessa mata".
@@ -33510,8 +33535,8 @@ function getVisionRange() {
     // padrão denso da floresta é 1.
     var _src = S.lightSource;
     if (_src === 'torch') return 2;            // tocha: leve bônus
-    if (_src === 'light' || _src === 'dancing_lights') return 2;  // magia
-    if (_src === 'daylight') return 2;         // luz divina
+    if (_src === 'light') return 2;            // truque de luz
+    if (_src === 'dancing_lights' || _src === 'daylight') return 3;  // magia ampla
     return 1;  // sem luz: só o anel adjacente (1 hex)
   }
   const phase = S.dayPhase || 'day';
@@ -33519,13 +33544,13 @@ function getVisionRange() {
   const weather = S.weather || 's';
   // Phase 5a dungeons AAA (2026-04-26): masmorras forcam visao reduzida (torch
   // radius). Sem luz: 1 hex (mal ve adjacente). Com tocha: 2 hex. Com truque
-  // light/dancing_lights: 3 hex. Cria tensao de exploracao em interior fechado,
+  // light: 3 hex. Com dancing_lights: 4 hex. Cria tensao de exploracao em interior fechado,
   // diferente do overworld onde dia+limpo da 4-5 hex.
   if (S.mapDef && S.mapDef.dungeon === true) {
     let dBase = 1;  // sem luz: quase nada (1 hex visivel = jogador + 6 vizinhos)
     const dSrc = S.lightSource;
     if (dSrc && LIGHT_SOURCES[dSrc]) {
-      dBase += LIGHT_SOURCES[dSrc].vision_bonus;  // torch=+1=>2, dancing_lights=+2=>3, daylight=+3=>4
+      dBase += LIGHT_SOURCES[dSrc].vision_bonus;  // torch=+1=>2, light=+2=>3, dancing_lights=+3=>4, daylight=+4=>5
     }
     return Math.max(1, dBase);
   }
@@ -33550,7 +33575,12 @@ function getVisionRange() {
   const src = S.lightSource;
   if (src && LIGHT_SOURCES[src]) {
     const adverse = biome === 'cave' || phase === 'night' || weather === 'r' || weather === 't' || weather === 'f';
-    if (adverse) base += LIGHT_SOURCES[src].vision_bonus;
+    if (adverse) {
+      base += LIGHT_SOURCES[src].vision_bonus;
+    } else {
+      // De dia limpo, truques mágicos de luz refinam a percepção de terreno (+1 hex)
+      if (LIGHT_SOURCES[src].vision_bonus >= 2) base = Math.min(6, base + 1);
+    }
   }
   // M11 (Fase 1 ritmo, PHB p.182): o ritmo modula a percepção do OVERWORLD —
   // Cauteloso +1 hex (nota tudo antes), Rápido −1 (avança mais cego). Não afeta
