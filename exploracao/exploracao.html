@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T01:36:43Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T02:01:02Z - do not edit directly, edit source -->
 
 
 
@@ -23684,13 +23684,12 @@ function resizeCanvases() {
     (navigator.maxTouchPoints > 0) ||
     (window.innerWidth <= 850)
   );
-  // Em telas touch/mobile, se o canvas total for grande (>1.2M pixels lógicos),
-  // cap DPR em 1.0; se compacto, até 1.25. Evita backing buffers de 10M+ pixels que travam GPUs mobile (ex.: Samsung S20)
-  const _maxPixelsMobile = 1200000;
-  const _mobileDprCap = _isMobile ? ((totalW * totalH > _maxPixelsMobile) ? 1.0 : 1.25) : 2.0;
+  // Em telas touch/mobile, fixa DPR em 1.0 estável (evita que o DPR salte entre 1.0 e 1.25 durante zoom e elimina gargalo de memória GPU)
+  const _mobileDprCap = _isMobile ? 1.0 : 2.0;
   const _maxSafeDim = 8000;
   const _safeDpr = _maxSafeDim / Math.max(totalW, totalH, 1);
   const dpr = Math.max(1, Math.min(_rawDpr, _mobileDprCap, _safeDpr));
+  window._currentExploreDpr = dpr;
   mainCanvas.style.width = totalW + 'px';
   mainCanvas.style.height = totalH + 'px';
   mainCanvas.width = Math.round(totalW * dpr);
@@ -24087,7 +24086,7 @@ function renderFrame(ts) {
   if (F.hexes_base) {
     if (F.scene_cache) {
       _runStep('drawScene-cached', () => {
-        var MAX_CACHE_DIM = 2000;
+        var MAX_CACHE_DIM = 4096;
         var cacheScale = Math.min(1, MAX_CACHE_DIM / Math.max(canvasW, canvasH));
         var cacheW = Math.ceil(canvasW * cacheScale);
         var cacheH = Math.ceil(canvasH * cacheScale);
@@ -24118,6 +24117,8 @@ function renderFrame(ts) {
                      + '|d' + (F.hex_decorations ? 1 : 0)
                      + _animTick;
         var needRebuild = (_sceneCacheKey !== sceneKey);
+        // Durante zoom CSS interativo, preserva o cache existente (GPU faz o scaling instantâneo a 60 FPS sem thrashing)
+        if (_isCssZooming && _sceneCacheCanvas) needRebuild = false;
         if (needRebuild) {
           if (!_sceneCacheCanvas || _sceneCacheCanvas.width !== cacheW || _sceneCacheCanvas.height !== cacheH) {
             _sceneCacheCanvas = document.createElement('canvas');
@@ -27372,9 +27373,10 @@ function drawTile(ctx, col, row, phase) {
   } // closes phase !== 'deco' branch
   // ─── PASS 2: DECORATION ──────────────────────────────────────────────
   if (phase === 'base') return; // skip decoration
-  // V3.1 LOD: decorações apenas em zoom medio+ (HEX_W >= 40). Low-zoom
-  // mostra só tile base pra render ser ~2x mais rápido.
-  if (HEX_W >= 40) {
+  // LOD: decorações em masmorra (#, i, o) NUNCA são suprimidas (são paredes, tendas e salas estruturais).
+  // Para outros tiles, desenha sempre que HEX_W >= 22 (evita pop-in/pop-out visual ao aproximar ou afastar o zoom).
+  var isDungTile = (tile === '#' || tile === 'i' || tile === 'o');
+  if (isDungTile || HEX_W >= 22) {
     // V1.6.3 USER RULE (2026-05-01): "deixar limitado ao hex mesmo, então mude
     // o desenho da mata de forma que não invada os hex adjacentes, que fique
     // delimitado ao espaço do próprio hex".
@@ -30114,23 +30116,28 @@ function _drawDungeonAtmosphere(ctx) {
   var tier = window._valdoriaPerformanceTier;
   if (tier === 'lite') return;
 
-  // 2026-10-08 PERF VIEWPORT: desenha vinheta e brasas SOMENTE na viewport visivel
-  // (evita fillRect e gradiente de 11M pixels em canvas full que congelam mobile)
+  // Desenha vinheta e brasas abrangendo a viewport com margem segura (evita bordas cortadas ao dar zoom)
+  var _ratioD = (typeof _zoomCssRatio === 'number' && _zoomCssRatio > 0) ? _zoomCssRatio : 1;
+  var _isZoomingD = Math.abs(_ratioD - 1) > 0.001;
   var vp = _vpBoundsCurrent;
-  var vx = vp ? vp.x : 0;
-  var vy = vp ? vp.y : 0;
-  var vw = vp ? vp.w : canvasW;
-  var vh = vp ? vp.h : canvasH;
+  var vx = 0, vy = 0, vw = canvasW, vh = canvasH;
+  if (vp && !_isZoomingD && vp.w < canvasW && vp.h < canvasH) {
+    var pad = 180;
+    vx = Math.max(0, vp.x - pad);
+    vy = Math.max(0, vp.y - pad);
+    vw = Math.min(canvasW - vx, vp.w + pad * 2);
+    vh = Math.min(canvasH - vy, vp.h + pad * 2);
+  }
   if (vw <= 0 || vh <= 0) return;
 
   var cx = vx + vw * 0.5;
   var cy = vy + vh * 0.5;
-  var maxR = Math.max(vw, vh) * 0.72;
-  var minR = Math.min(vw, vh) * 0.26;
+  var maxR = Math.hypot(vw, vh) * 0.55;
+  var minR = Math.min(vw, vh) * 0.22;
   var vigGrad = ctx.createRadialGradient(cx, cy, minR, cx, cy, maxR);
   vigGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
   vigGrad.addColorStop(0.55, 'rgba(18, 9, 6, 0.38)');
-  vigGrad.addColorStop(1, 'rgba(8, 4, 3, 0.82)');
+  vigGrad.addColorStop(1, 'rgba(8, 4, 3, 0.72)');
 
   ctx.save();
   ctx.fillStyle = vigGrad;
@@ -33848,11 +33855,8 @@ function drawFogComposite() {
   if (fogCanvas.width !== mainCanvas.width || fogCanvas.height !== mainCanvas.height) {
     fogCanvas.width = mainCanvas.width;
     fogCanvas.height = mainCanvas.height;
-    // 2026-05-06 v2: DPR adaptativo (ver resizeCanvases). Deriva o DPR
-    // efetivo a partir das dims atuais — mainCanvas.width/canvasW.
-    const _rawDpr = window.devicePixelRatio || 1;
-    const _safeDpr = 8000 / Math.max(canvasW || mainCanvas.width, canvasH || mainCanvas.height, 1);
-    const dpr = Math.max(1, Math.min(_rawDpr, 2, _safeDpr));
+    // Deriva o DPR efetivo a partir das dimensões exatas de mainCanvas (evita descompasso em mobile)
+    const dpr = (mainCanvas && canvasW) ? (mainCanvas.width / canvasW) : (window._currentExploreDpr || 1);
     fogCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     _fogMaskDirty = true;  // V8.1: resize força rebuild do composite
     if (shouldLogF) LOG('FOG', 'fogCanvas dims resynced to ' + fogCanvas.width + 'x' + fogCanvas.height);
@@ -33937,11 +33941,8 @@ function drawHardFogOnUnexplored(ctx) {
       _hardFogLastZoom !== HEX_W) {
     _hardFogCanvas.width = mainCanvas.width;
     _hardFogCanvas.height = mainCanvas.height;
-    // 2026-05-06 v2: DPR adaptativo (ver resizeCanvases) — usa real DPR
-    // até cap 2 com fallback automático se backing exceder 8000px (GPU).
-    const _rawDpr = window.devicePixelRatio || 1;
-    const _safeDpr = 8000 / Math.max(canvasW || mainCanvas.width, canvasH || mainCanvas.height, 1);
-    const dpr = Math.max(1, Math.min(_rawDpr, 2, _safeDpr));
+    // Deriva o DPR efetivo a partir das dimensões exatas de mainCanvas (evita descompasso em mobile)
+    const dpr = (mainCanvas && canvasW) ? (mainCanvas.width / canvasW) : (window._currentExploreDpr || 1);
     _hardFogCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     _hardFogLastZoom = HEX_W;
     _hardFogDirty = true;
@@ -35168,11 +35169,15 @@ function setupTapToMove() {
   // hexToScreen em qualquer dpr.
   function toCanvas(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
-    return { x: clientX - rect.left, y: clientY - rect.top };
+    const ratio = (typeof _zoomCssRatio === 'number' && _zoomCssRatio > 0) ? _zoomCssRatio : 1;
+    return {
+      x: (clientX - rect.left) / ratio,
+      y: (clientY - rect.top) / ratio
+    };
   }
-  // Qual célula (herói ou um dos 6 vizinhos) foi tocada — a mais próxima dentro do
+  // Qual célula (aventureiro ou um dos 6 vizinhos) foi tocada — a mais próxima dentro do
   // raio de acerto; null se caiu longe (área vazia). Adjacente-only → basta testar
-  // herói + vizinhos.
+  // aventureiro + vizinhos.
   function tappedCell(cx, cy) {
     const p = S.player;
     const cells = [{ col: p.col, row: p.row, hero: true }];
@@ -46498,8 +46503,8 @@ function _applyCssZoom(ratio) {
     var mapEl = document.getElementById('map');
     var svgEl = document.getElementById('tile-overlay-layer');
     var t = (ratio === 1) ? '' : 'scale(' + ratio + ')';
-    // V8.4: transform-origin no PLAYER (não 0,0) → zoom pivota nele, mapa não
-    // desliza pra direita-baixo durante gesto. Player permanece visualmente fixo.
+    // Transform-origin no aventureiro (não 0,0) → zoom pivota nele, mapa não
+    // desliza durante o gesto. O personagem permanece visualmente fixo.
     var origin = '0 0';
     _zoomCssOriginX = 0;
     _zoomCssOriginY = 0;
@@ -46514,7 +46519,13 @@ function _applyCssZoom(ratio) {
       } catch (_) {}
     }
     if (mapEl) { mapEl.style.transformOrigin = origin; mapEl.style.transform = t; }
-    if (svgEl) { svgEl.style.transformOrigin = origin; svgEl.style.transform = t; }
+    if (svgEl) {
+      var vp = document.getElementById('map-viewport');
+      var sx = (vp && vp.scrollLeft) || 0;
+      var sy = (vp && vp.scrollTop) || 0;
+      svgEl.style.transformOrigin = origin;
+      svgEl.style.transform = 'translate(' + (-sx) + 'px, ' + (-sy) + 'px)' + (t ? ' ' + t : '');
+    }
   } catch (e) {
     // V8.6 defensive: nunca derruba pipeline de zoom por erro de DOM/transform
     try { LOGE('ZOOM', 'applyCssZoom failed:', e && e.message); } catch (_) {}
@@ -46524,7 +46535,13 @@ function _applyCssZoom(ratio) {
     _zoomCssOriginY = 0;
     try {
       var m = document.getElementById('map'); if (m) m.style.transform = '';
-      var s = document.getElementById('tile-overlay-layer'); if (s) s.style.transform = '';
+      var s = document.getElementById('tile-overlay-layer');
+      if (s) {
+        var vp2 = document.getElementById('map-viewport');
+        var sx2 = (vp2 && vp2.scrollLeft) || 0;
+        var sy2 = (vp2 && vp2.scrollTop) || 0;
+        s.style.transform = 'translate(' + (-sx2) + 'px, ' + (-sy2) + 'px)';
+      }
     } catch (_) {}
   }
 }
@@ -46581,9 +46598,16 @@ function _commitZoomNow() {
       updateZoomButtonsState();
       return;
     }
+    // Invalidação completa de caches para nova resolução sem resquícios visuais
+    _sceneCacheCanvas = null;
+    _sceneCacheKey = '';
+    _hexBaseCache = {};
+    _hexBaseCacheKey = '';
+    _hardFogDirty = true;
+    _fogMaskDirty = true;
     // V1.7.5 rev5 (2026-05-02): em editor mode capturar offsets/scroll ANTES
     // do resize pra preservar centro visual. centerOnPlayer recentra no spawn
-    // (player) — comportamento certo no game, ERRADO no editor.
+    // (aventureiro) — comportamento certo no game, ERRADO no editor.
     var _edOldOffsetX, _edOldOffsetY, _edOldCenterX, _edOldCenterY, _edOldZ;
     if (window._editorMode) {
       var _edVp = document.getElementById('map-viewport');
@@ -46597,9 +46621,8 @@ function _commitZoomNow() {
     }
     resizeCanvases();
     if (typeof _repositionAllTileObjects === 'function') _repositionAllTileObjects();
-    scheduleRender();
     if (window._editorMode && _edOldZ) {
-      // Preserva centro visual em editor mode (não recentraliza no player)
+      // Preserva centro visual em editor mode (não recentraliza no aventureiro)
       var _edVp2 = document.getElementById('map-viewport');
       if (_edVp2) {
         var _edHexLocalX = (_edOldCenterX - _edOldOffsetX) / _edOldZ;
@@ -46610,8 +46633,10 @@ function _commitZoomNow() {
         _edVp2.scrollTop  = Math.max(0, _edNewCenterY - _edVp2.clientHeight / 2);
       }
     } else {
-      centerOnPlayer(false); // game mode normal — recentra no player
+      centerOnPlayer(false); // game mode normal — recentra no aventureiro
     }
+    _syncTileOverlayScroll();
+    scheduleRender();
     updateZoomButtonsState();
   } catch (e) {
     try { LOGE('ZOOM', 'commitZoom failed:', e && e.message, e && e.stack); } catch (_) {}
@@ -46621,7 +46646,13 @@ function _commitZoomNow() {
       _zoomCssOriginX = 0;
       _zoomCssOriginY = 0;
       var m = document.getElementById('map'); if (m) m.style.transform = '';
-      var s = document.getElementById('tile-overlay-layer'); if (s) s.style.transform = '';
+      var s = document.getElementById('tile-overlay-layer');
+      if (s) {
+        var vpE = document.getElementById('map-viewport');
+        var sxE = (vpE && vpE.scrollLeft) || 0;
+        var syE = (vpE && vpE.scrollTop) || 0;
+        s.style.transform = 'translate(' + (-sxE) + 'px, ' + (-syE) + 'px)';
+      }
     } catch (_) {}
     _zoomPendingValue = null;
   }
@@ -46657,23 +46688,22 @@ function showZoomIndicator() {
 }
 
 function centerOnPlayer(smooth) {
-  // V1.7.5 rev5 (2026-05-02): em editor mode NUNCA recentra no player.
-  // 5 reports de "zoom volta ao spawn" — causa raiz: havia 8+ call sites
-  // (zoom commit, moves, boot, pin button, camera follow). Bloquear na
-  // origem é a única fix robusta. Editor preserva centro visual via
-  // outras paths (editor:fitAll, _commitZoomNow custom logic).
+  // Em editor mode nunca recentra no aventureiro
   if (window._editorMode) return;
   const vp = document.getElementById('map-viewport');
   if (!vp) return;
   const c = hexToScreen(S.player.col, S.player.row);
   const heightPx = effectiveTileHeightPx(S.player.col, S.player.row);
-  const targetX = c.x - vp.clientWidth / 2;
-  const targetY = (c.y - heightPx) - vp.clientHeight / 2;
-  vp.scrollTo({
-    left: Math.max(0, Math.min(canvasW - vp.clientWidth, targetX)),
-    top: Math.max(0, Math.min(canvasH - vp.clientHeight, targetY)),
-    behavior: smooth ? 'smooth' : 'auto'
-  });
+  const targetX = Math.round(c.x - vp.clientWidth / 2);
+  const targetY = Math.round((c.y - heightPx) - vp.clientHeight / 2);
+  const clampX = Math.max(0, Math.min(canvasW - vp.clientWidth, targetX));
+  const clampY = Math.max(0, Math.min(canvasH - vp.clientHeight, targetY));
+  if (smooth) {
+    vp.scrollTo({ left: clampX, top: clampY, behavior: 'smooth' });
+  } else {
+    vp.scrollLeft = clampX;
+    vp.scrollTop = clampY;
+  }
 }
 
 // Mouse wheel zoom
@@ -46710,18 +46740,17 @@ function bindZoomControls() {
   updateZoomButtonsState();  // X-6.5.51k: estado inicial
 }
 
-// Sub-projeto #4 (2026-04-27): SVG overlay (#tile-overlay-layer) é child do
-// frame, não do map-viewport. Quando user pan/scroll o canvas, os tile-objects
-// ficavam "presos na tela" sem acompanhar os hexes. Esta função aplica
-// translate inverso ao scroll do viewport, fazendo o overlay seguir o canvas.
+// Sub-projeto #4 (2026-04-27): SVG overlay (#tile-overlay-layer)
+// Mantém overlay perfeitamente ancorado aos hexes durante pan e zoom
 function _syncTileOverlayScroll() {
   var vp = document.getElementById('map-viewport');
   var overlay = document.getElementById('tile-overlay-layer');
   if (!vp || !overlay) return;
   var sx = vp.scrollLeft || 0;
   var sy = vp.scrollTop || 0;
-  // translate negativo = empurra conteúdo do SVG p/ esquerda/cima conforme scroll
-  overlay.style.transform = 'translate(' + (-sx) + 'px, ' + (-sy) + 'px)';
+  var ratio = (typeof _zoomCssRatio === 'number' && _zoomCssRatio > 0) ? _zoomCssRatio : 1;
+  var t = (Math.abs(ratio - 1) > 0.001) ? ' scale(' + ratio + ')' : '';
+  overlay.style.transform = 'translate(' + (-sx) + 'px, ' + (-sy) + 'px)' + t;
 }
 
 // Sub-projeto #4 v5: render inicial dos tile-objects via SVG overlay (sprites
@@ -46765,7 +46794,11 @@ function _repositionAllTileObjects() {
 function bindTileOverlayScrollSync() {
   var vp = document.getElementById('map-viewport');
   if (!vp) return;
-  vp.addEventListener('scroll', _syncTileOverlayScroll, { passive: true });
+  vp.addEventListener('scroll', function() {
+    _syncTileOverlayScroll();
+    if (typeof _markActive === 'function') _markActive(300);
+    scheduleRender();
+  }, { passive: true });
   // Sync inicial
   _syncTileOverlayScroll();
 }
