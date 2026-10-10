@@ -7211,6 +7211,290 @@ body.perf-lite .vc-action-btn { transition: none; }
     }
     body.perf-lite .hall-orb-aaa .title-orb-wrap { transform: scale(0.55) !important; }
 
+    /* ==========================================================================
+     * GUIA DA TELA ATUAL — MODAL DIDÁTICO & TOUR EM TEMPO REAL
+     * ========================================================================== */
+    #city-guide-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(8, 6, 4, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 14px;
+    }
+    #city-guide-overlay.active {
+      display: flex;
+      animation: csgFadeIn 0.25s ease-out;
+    }
+    @keyframes csgFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .csg-card {
+      width: 100%;
+      max-width: 440px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, rgba(38,30,22,0.98), rgba(22,18,14,0.99));
+      border: 1.5px solid #c4953a;
+      border-radius: 14px;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.85), inset 0 1px 0 rgba(196,149,58,0.25), 0 0 30px rgba(196,149,58,0.15);
+      position: relative;
+      overflow: hidden;
+      animation: csgCardPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes csgCardPop {
+      from { opacity: 0; transform: scale(0.94) translateY(12px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .csg-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid rgba(196,149,58,0.3);
+      background: linear-gradient(180deg, rgba(196,149,58,0.12), transparent);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .csg-crest {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 2px 8px rgba(196,149,58,0.4));
+    }
+    .csg-crest svg, .csg-crest img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+    .csg-title-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+    .csg-title {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      font-size: calc(15px * var(--v-font-scale, 1));
+      font-weight: 700;
+      color: #c4953a;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(196,149,58,0.4);
+      line-height: 1.2;
+    }
+    .csg-subtitle {
+      font-size: calc(11px * var(--v-font-scale, 1));
+      color: #a09484;
+      margin-top: 3px;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .csg-close-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(196,149,58,0.35);
+      background: rgba(0,0,0,0.3);
+      color: #c4953a;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .csg-close-icon:hover {
+      background: rgba(196,149,58,0.25);
+      color: #fff;
+      border-color: #c4953a;
+    }
+    .csg-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .csg-body::-webkit-scrollbar {
+      width: 5px;
+    }
+    .csg-body::-webkit-scrollbar-thumb {
+      background: rgba(196,149,58,0.35);
+      border-radius: 4px;
+    }
+    .csg-intro {
+      font-family: 'MedievalSharp', serif;
+      font-size: calc(13px * var(--v-font-scale, 1));
+      line-height: 1.55;
+      color: #d4c8b0;
+      padding: 4px 2px;
+    }
+    .csg-item {
+      background: rgba(18, 14, 10, 0.7);
+      border: 1px solid rgba(196, 149, 58, 0.22);
+      border-left: 3px solid #c4953a;
+      border-radius: 8px;
+      padding: 10px 12px;
+      transition: border-color 0.2s ease;
+    }
+    .csg-item:hover {
+      border-color: rgba(196, 149, 58, 0.45);
+    }
+    .csg-item-title {
+      font-family: 'Cinzel', serif;
+      font-size: calc(12.5px * var(--v-font-scale, 1));
+      font-weight: 700;
+      color: #e2bd70;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .csg-item-title span.csg-diamond {
+      color: #c4953a;
+      font-size: 10px;
+      margin-right: 4px;
+    }
+    .csg-item-desc {
+      font-family: 'MedievalSharp', serif;
+      font-size: calc(12px * var(--v-font-scale, 1));
+      line-height: 1.55;
+      color: #c8bca4;
+    }
+    .csg-badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-family: sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .csg-badge.gold {
+      background: rgba(196, 149, 58, 0.2);
+      border: 1px solid rgba(196, 149, 58, 0.5);
+      color: #e4b75a;
+    }
+    .csg-badge.green {
+      background: rgba(60, 140, 60, 0.2);
+      border: 1px solid rgba(60, 140, 60, 0.5);
+      color: #72d672;
+    }
+    .csg-badge.blue {
+      background: rgba(60, 100, 180, 0.2);
+      border: 1px solid rgba(60, 100, 180, 0.5);
+      color: #72a6f2;
+    }
+    .csg-tip {
+      background: linear-gradient(180deg, rgba(196,149,58,0.14), rgba(35,26,18,0.45));
+      border: 1px solid rgba(196,149,58,0.5);
+      border-radius: 8px;
+      padding: 11px 13px;
+      margin-top: 4px;
+    }
+    .csg-tip-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Cinzel', serif;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      font-weight: 700;
+      color: #c4953a;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .csg-tip-header::before {
+      content: "✨";
+      font-size: 12px;
+    }
+    .csg-tip-text {
+      font-family: 'MedievalSharp', serif;
+      font-style: italic;
+      font-size: calc(12px * var(--v-font-scale, 1));
+      line-height: 1.55;
+      color: #e8dcc4;
+    }
+    .csg-actions {
+      display: flex;
+      gap: 10px;
+      padding: 12px 18px 16px;
+      border-top: 1px solid rgba(196,149,58,0.22);
+      background: rgba(15,12,8,0.7);
+      flex-shrink: 0;
+    }
+    .csg-btn {
+      flex: 1;
+      padding: 11px 12px;
+      border-radius: 8px;
+      font-family: 'Cinzel', serif;
+      font-size: calc(12px * var(--v-font-scale, 1));
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    .csg-btn-tour {
+      background: linear-gradient(180deg, #d4a54a, #9a7530);
+      color: #1a1410;
+      border: 1px solid #e4b75a;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(196,149,58,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+      text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+      animation: csgTourPulse 2.4s ease-in-out infinite;
+    }
+    .csg-btn-tour:hover {
+      background: linear-gradient(180deg, #e4b75a, #a78540);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(196,149,58,0.65), inset 0 1px 0 rgba(255,255,255,0.35);
+    }
+    .csg-btn-tour:active {
+      transform: translateY(0);
+    }
+    .csg-btn-close {
+      background: linear-gradient(180deg, rgba(74,56,40,0.65), rgba(58,46,34,0.9));
+      color: #d4c8b0;
+      border: 1px solid rgba(196,149,58,0.45);
+    }
+    .csg-btn-close:hover {
+      background: linear-gradient(180deg, rgba(196,149,58,0.25), rgba(90,68,48,0.4));
+      color: #f4e5b8;
+      border-color: #c4953a;
+      transform: translateY(-1px);
+    }
+    .csg-btn-close:active {
+      transform: translateY(0);
+    }
+    @keyframes csgTourPulse {
+      0%, 100% {
+        box-shadow: 0 4px 14px rgba(196,149,58,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+      }
+      50% {
+        box-shadow: 0 4px 22px rgba(196,149,58,0.75), 0 0 12px rgba(196,149,58,0.45), inset 0 1px 0 rgba(255,255,255,0.4);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -9726,6 +10010,29 @@ body.perf-lite .vc-action-btn { transition: none; }
         <div class="cpp-actions">
           <button class="cpp-btn cpp-btn-cancel" id="cpp-cancel-btn">Cancelar</button>
           <button class="cpp-btn cpp-btn-confirm" id="cpp-confirm-btn">Confirmar</button>
+        </div>
+      </div>
+    </div>
+    <!-- City Screen Guide Overlay (Guia da Tela Atual com Apresentação Didática e Tour em Tempo Real) -->
+    <div id="city-guide-overlay" class="city-guide-overlay" onclick="_onGuideOverlayBackdrop(event)">
+      <div class="csg-card" onclick="event.stopPropagation()">
+        <div class="csg-header">
+          <div class="csg-crest" id="csg-crest"></div>
+          <div class="csg-title-wrap">
+            <h3 class="csg-title" id="csg-title">GUIA DA TELA</h3>
+            <div class="csg-subtitle" id="csg-subtitle">Valdoria • Informações e Mecânicas</div>
+          </div>
+          <button class="csg-close-icon" id="csg-close-icon" onclick="_closeScreenGuideModal()" title="Fechar">✕</button>
+        </div>
+        <div class="csg-body" id="csg-body">
+          <!-- Conteúdo formatado via JS -->
+        </div>
+        <div class="csg-actions" id="csg-actions">
+          <button class="csg-btn csg-btn-tour" id="csg-tour-btn">
+            <span class="csg-btn-ico">🎯</span>
+            <span class="csg-btn-text">Mostrar na Tela (Tempo Real)</span>
+          </button>
+          <button class="csg-btn csg-btn-close" id="csg-close-btn" onclick="_closeScreenGuideModal()">✓ Entendido</button>
         </div>
       </div>
     </div>
@@ -15031,7 +15338,7 @@ function _showFirstTimeTutorial(stepIdx){
   var prevBtn = document.getElementById('ft-prev');
   var nextBtn = document.getElementById('ft-next');
   prevBtn.disabled = (stepIdx === 0);
-  nextBtn.textContent = (stepIdx === STEPS.length - 1) ? '✓ Entendido' : 'Próximo →';
+  nextBtn.textContent = (stepIdx === STEPS.length - 1) ? '✓ Concluir' : 'Próximo →';
   /* Spotlight */
   var spotlight = document.getElementById('first-tut-spotlight');
   var mask = document.getElementById('first-tut-mask');
@@ -15157,7 +15464,31 @@ function _showFirstTimeTutorial(stepIdx){
           spotlight.classList.remove('visible');
         }
         card.classList.remove('center');
-        try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e){}
+        try {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Re-medicao precisa pos-scroll (especialmente em sub-telas com overflow interno)
+          setTimeout(function(){
+            var curTarget = document.querySelector(step.selector);
+            if (!curTarget) return;
+            var r2 = curTarget.getBoundingClientRect();
+            if (r2.width > 0 && r2.height > 0) {
+              spotlight.style.left = (r2.left - pad) + 'px';
+              spotlight.style.top = (r2.top - pad) + 'px';
+              spotlight.style.width = (r2.width + pad * 2) + 'px';
+              spotlight.style.height = (r2.height + pad * 2) + 'px';
+              var L2 = r2.left - pad, T2 = r2.top - pad;
+              var R2 = L2 + r2.width + pad * 2, B2 = T2 + r2.height + pad * 2;
+              var clip2 = 'polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%, ' +
+                         L2 + 'px ' + T2 + 'px, ' +
+                         R2 + 'px ' + T2 + 'px, ' +
+                         R2 + 'px ' + B2 + 'px, ' +
+                         L2 + 'px ' + B2 + 'px, ' +
+                         L2 + 'px ' + T2 + 'px)';
+              mask.style.clipPath = clip2;
+              mask.style.webkitClipPath = clip2;
+            }
+          }, 280);
+        } catch(e){}
       }
     } /* end _measureAndPosition */
     setTimeout(_measureAndPosition, (targetTab || step.expandFooter) ? 320 : 0);
@@ -29223,34 +29554,753 @@ function _bankAldwinTip(player){
   return '';
 }
 
+// ============================================================================
+// === GUIA DA TELA ATUAL & TOURS VISUAIS EM TEMPO REAL (PADRÃO DIDÁTICO) ======
+// ============================================================================
+
+var SCREEN_GUIDE_META = {
+  'hub': {
+    title: 'Cidade de Valdoria',
+    subtitle: 'Distritos Urbanos • Seu Refúgio Seguro',
+    iconId: 'ic-portoes'
+  },
+  'city_main': {
+    title: 'Cidade de Valdoria',
+    subtitle: 'Distritos Urbanos • Seu Refúgio Seguro',
+    iconId: 'ic-portoes'
+  },
+  'tavern': {
+    title: 'Taverna do Javali Bêbado',
+    subtitle: 'Bairro do Mercado • Convívio & Boatos',
+    iconId: 'ic-taverna'
+  },
+  'inn': {
+    title: 'Estalagem Pena-Dourada',
+    subtitle: 'Aposentos & Descanso Longo',
+    iconId: 'ic-sono'
+  },
+  'inn_rest': {
+    title: 'Estalagem Pena-Dourada',
+    subtitle: 'Aposentos & Descanso Longo',
+    iconId: 'ic-sono'
+  },
+  'market': {
+    title: 'Mercado de Valdoria',
+    subtitle: 'Distrito Comercial • Compra & Venda',
+    iconId: 'ic-mochila'
+  },
+  'temple': {
+    title: 'Templo dos Quatro',
+    subtitle: 'Santuário Sagrado • Cura & Bênçãos',
+    iconId: 'ic-clerigo'
+  },
+  'bank': {
+    title: 'Banco de Valdoria',
+    subtitle: 'Cofres Fortificados • Proteção de Moedas',
+    iconId: 'ic-mochila'
+  },
+  'guild': {
+    title: 'Guilda dos Aventureiros',
+    subtitle: 'Quartel Oficial • Recrutas & Caçadas',
+    iconId: 'ic-guerreiro'
+  },
+  'square': {
+    title: 'Praça Central',
+    subtitle: 'Coração Social • Habitantes & Cartógrafo',
+    iconId: 'ic-portoes'
+  },
+  'town_square': {
+    title: 'Praça Central',
+    subtitle: 'Coração Social • Habitantes & Cartógrafo',
+    iconId: 'ic-portoes'
+  },
+  'arena': {
+    title: 'Arena de Valdoria',
+    subtitle: 'Coliseu dos Gladiadores • Duelos & Apostas',
+    iconId: 'ic-arena'
+  },
+  'runes': {
+    title: 'Escriba Rúnico',
+    subtitle: 'Forja Mística • Encantamentos Rúnicos',
+    iconId: 'ic-runas'
+  },
+  'rune_scribe': {
+    title: 'Escriba Rúnico',
+    subtitle: 'Forja Mística • Encantamentos Rúnicos',
+    iconId: 'ic-runas'
+  },
+  'workshop': {
+    title: 'Oficina de Artesanato',
+    subtitle: 'Bancadas & Fabricação de Peças',
+    iconId: 'ic-mochila'
+  },
+  'gates': {
+    title: 'Portões da Cidade',
+    subtitle: 'Sentinelas da Muralha & Expedições',
+    iconId: 'ic-portoes'
+  },
+  'travel': {
+    title: 'Viagem & Cartografia',
+    subtitle: 'Estradas de Valdoria • Acampamento',
+    iconId: 'ic-cartografia'
+  },
+  'cartografia': {
+    title: 'Viagem & Cartografia',
+    subtitle: 'Estradas de Valdoria • Acampamento',
+    iconId: 'ic-cartografia'
+  },
+  'trade_board': {
+    title: 'Quadro de Trocas',
+    subtitle: 'Comércio entre Andarilhos & Ofertas',
+    iconId: 'ic-mochila'
+  },
+  'heroes_wall': {
+    title: 'Mural dos Aventureiros',
+    subtitle: 'Hall da Fama • Rankings & Façanhas',
+    iconId: 'ic-guerreiro'
+  },
+  'social': {
+    title: 'Comitiva & Alianças',
+    subtitle: 'Comunicação & Andarilhos Conectados',
+    iconId: 'ic-grupo'
+  }
+};
+
+var SCREEN_TOUR_STEPS = {
+  // === CIDADE DE VALDORIA (HUB PRINCIPAL) ===
+  'hub': [
+    {
+      selector: null,
+      title: 'Tour da Cidade de Valdoria',
+      description: 'Bem-vindo ao seu refúgio seguro! Vou te guiar em tempo real pela tela para desenhar e explicar o funcionamento de cada setor e botão da cidade.'
+    },
+    {
+      selector: '.hub-cta',
+      title: 'Partir para Aventura',
+      description: 'O coração da ação. Clique aqui para abrir o <b>Mapa de Valdoria</b> e viajar para florestas, montanhas e masmorras, conquistando XP e espólios.'
+    },
+    {
+      selector: '.hub-loc[data-cb="action_quests"], .hub-loc[data-cb="quests"]',
+      title: 'Missões & Contratos',
+      description: 'Lista de tarefas disponíveis: missões <b>diárias</b> que renovam a cada amanhecer, contratos de <b>história</b> épicos e tarefas secundárias.'
+    },
+    {
+      selector: '.hub-loc[data-cb="taverna"], .hub-loc[data-cb="tavern"]',
+      title: 'Taverna do Javali Bêbado',
+      description: 'O ponto de encontro dos aventureiros. Ouça boatos sobre fraquezas de monstros, aposte nos dados, contrate mercenários ou converse com o bardo.'
+    },
+    {
+      selector: '.city-sector-tabs',
+      title: 'Os 4 Setores Urbanos',
+      description: 'Valdoria está dividida em 4 distritos: <b>Convívio</b> (taverna e missões), <b>Comércio</b> (mercado e banco), <b>Combate</b> (guilda e arena) e <b>Espírito</b> (templo e praça).'
+    },
+    {
+      selector: '.hub-loc[data-cb="estalagem"], .hub-loc[data-cb="inn"]',
+      title: 'Estalagem Pena-Dourada',
+      description: 'Repouso seguro para <b>Descanso Longo</b>. Recupera todos os seus Pontos de Vida, Magia e remove penalidades de exaustão.',
+      levelReq: 2
+    },
+    {
+      selector: '.hub-loc[data-cb="market"], .hub-loc[data-cb="mercado"]',
+      title: 'Mercado de Valdoria',
+      description: 'Compre e venda armas, armaduras pesadas, poções de cura, pergaminhos mágicos e mapas de novas regiões.'
+    },
+    {
+      selector: '.hub-loc[data-cb="temple"], .hub-loc[data-cb="templo"]',
+      title: 'Templo dos Quatro',
+      description: 'Cura sagrada imediata, purificação de venenos, alívio de maldições e bênçãos divinas concedidas pelos clérigos.'
+    },
+    {
+      selector: '.hub-loc[data-cb="bank"], .hub-loc[data-cb="banco"]',
+      title: 'Banco de Valdoria',
+      description: 'Guarde Valdoritas e itens preciosos em cofres blindados. Moedas no banco sobrevivem a derrotas em combate e assaltos na estrada.',
+      levelReq: 4
+    },
+    {
+      selector: '.hub-loc[data-cb="guild"], .hub-loc[data-cb="guilda"]',
+      title: 'Guilda dos Aventureiros',
+      description: 'Recrute novos aliados de diferentes classes para sua comitiva e consulte Braun, o Marcado, sobre táticas de guerra.',
+      levelReq: 3
+    },
+    {
+      selector: '.hub-loc[data-cb="praca"], .hub-loc[data-cb="square"]',
+      title: 'Praça Central',
+      description: 'Vida social ao ar livre: interaja com cidadãos que mudam conforme o horário do dia e adquira mapas com o Cartógrafo Corvus.',
+      levelReq: 2
+    },
+    {
+      selector: '#bottom-panel, .footer-row.footer-quick',
+      expandFooter: true,
+      title: 'Barra de Atalhos Rápidos',
+      description: 'Acesso imediato à sua <b>Mochila</b>, <b>Ficha</b> de atributos, <b>Hall</b> de aventureiros e menu de <b>Ajuda</b>.'
+    },
+    {
+      selector: '#city-group-panel',
+      title: 'Cards do Grupo no Topo',
+      description: 'Monitore em tempo real os Pontos de Vida (HP), Pontos de Magia (MP), nível e moedas de cada membro do seu grupo.'
+    },
+    {
+      selector: null,
+      title: 'Tour da Cidade Concluído!',
+      description: 'Você conhece todos os distritos de Valdoria! Sempre que tiver dúvidas em qualquer tela, basta tocar no ícone de <b>Ajuda</b> no rodapé.'
+    }
+  ],
+
+  // === TAVERNA DO JAVALI BÊBADO ===
+  'tavern': [
+    {
+      selector: null,
+      title: 'Tour da Taverna',
+      description: 'Bem-vindo ao Javali Bêbado! Vamos destacar em tempo real cada atividade e serviço disponível neste estabelecimento.'
+    },
+    {
+      selector: '.cenario',
+      title: 'O Salão da Taverna',
+      description: 'O ambiente principal de convívio dos aventureiros. Aqui histórias são compartilhadas e parcerias são formadas sob a luz das velas.'
+    },
+    {
+      selector: '.row-npc',
+      title: 'Grom, o Caolho',
+      description: 'O taverneiro anão. Clique nele para ouvir falas rotativas, receber conselhos sobre o clima da cidade e iniciar conversas sobre a região.'
+    },
+    {
+      selector: '.rep-bar',
+      title: 'Reputação na Taverna',
+      description: 'Indica como os frequentadores e Grom te enxergam (Neutro, Cordial, Amigável). Renome alto destrava diálogos exclusivos e respeito.'
+    },
+    {
+      selector: '.svc[data-svc*="drinks"], .svc:first-child',
+      title: 'Bebidas & Consumíveis',
+      description: 'Canecos de cerveja e hidromel que restauram pequenas quantidades de vida e mana para aliviar o cansaço do dia.'
+    },
+    {
+      selector: '.svc[data-svc*="gather"], .svc[data-svc*="rumor"]',
+      title: 'Investigar Boatos',
+      description: 'Pague algumas moedas para colher rumores. Boatos confirmados concedem <b>+2 de Dano</b> contra tipos específicos de monstros até seu próximo descanso longo!'
+    },
+    {
+      selector: '.svc[data-svc*="games"], .svc[data-svc*="dados"]',
+      title: 'Mesa de Dados & Apostas',
+      description: 'Aposte 10 ou 50 Valdoritas contra os clientes locais num teste de d20. Vença para dobrar sua aposta!'
+    },
+    {
+      selector: '.svc[data-svc*="bard"]',
+      title: 'O Bardo Errante',
+      description: 'Peça uma balada para ganhar um dado de <b>Inspiração (+1d6)</b> para apoiar seus próximos testes de perícia ou combate.'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Retornar à Cidade',
+      description: 'Use a seta no topo esquerdo para sair da taverna e voltar à vista geral dos distritos de Valdoria.'
+    }
+  ],
+
+  // === MERCADO DE VALDORIA ===
+  'market': [
+    {
+      selector: null,
+      title: 'Tour do Mercado',
+      description: 'O coração do comércio em Valdoria! Veja em tempo real como funcionam os postos de compra, venda e troca de equipamentos.'
+    },
+    {
+      selector: '.cenario, .market-hub',
+      title: 'As Tendas do Mercado',
+      description: 'Mercadores de várias partes do continente se reúnem aqui para negociar aço, pergaminhos raros, poções e relíquias.'
+    },
+    {
+      selector: '.row-npc, .market-npc-selector, .svc:first-child',
+      title: 'Mestres de Ofício',
+      description: 'Thorne (ferreiro de armaduras e armas), Mirena (alquimista de poções) e Corvus (mapas). Cada mercador é especialista em uma categoria.'
+    },
+    {
+      selector: '.services, .market-tabs',
+      title: 'Comprar e Vender',
+      description: 'Compre equipamentos essenciais para sobreviver nas masmorras e venda itens inúteis da sua mochila para encher seus bolsos de Valdoritas.'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Sair do Mercado',
+      description: 'Toque em Voltar para carregar suas novas compras de volta aos outros distritos de Valdoria.'
+    }
+  ],
+
+  // === ESTALAGEM PENA-DOURADA ===
+  'inn': [
+    {
+      selector: null,
+      title: 'Tour da Estalagem',
+      description: 'O refúgio para recuperação total! Vamos te mostrar como funcionam os aposentos e os benefícios do Descanso Longo.'
+    },
+    {
+      selector: '.cenario, .inn-cenario',
+      title: 'Acomodações Seguras',
+      description: 'Lareira acesa e camas limpas. Dormir na estalagem recupera completamente Pontos de Vida, Magia e remove níveis de Exaustão.'
+    },
+    {
+      selector: '.row-npc',
+      title: 'A Estalajadeira',
+      description: 'Converse com ela para pedir quartos, refeições quentes e ouvir os últimos relatos de viajantes que cruzaram as estradas.'
+    },
+    {
+      selector: '.services, .inn-rest-grid',
+      title: 'Quartos Disponíveis',
+      description: 'Escolha entre o <b>Estábulo</b> (econômico), o <b>Quarto Comum</b> (recuperação completa de PV/PM) ou a <b>Suíte Real</b> (que também concede Inspiração e vantagem!).'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Retornar aos Portões',
+      description: 'Após descansar e recuperar suas forças, use o botão Voltar para retornar à cidade pronto para novos desafios.'
+    }
+  ],
+
+  // === TEMPLO DOS QUATRO ===
+  'temple': [
+    {
+      selector: null,
+      title: 'Tour do Templo',
+      description: 'Santuário de luz e fé. Conheça as bênçãos sagradas e serviços de cura divina em tempo real.'
+    },
+    {
+      selector: '.cenario',
+      title: 'O Altar Sagrado',
+      description: 'Dedicado aos Quatro Guardiões. Aqui as preces concedem curas milagrosas sem a necessidade de gastar dias inteiros dormindo.'
+    },
+    {
+      selector: '.row-npc',
+      title: 'O Sacerdote',
+      description: 'Converse com o clérigo responsável pelo altar para entender o poder divino e solicitar ritos sagrados.'
+    },
+    {
+      selector: '.svc[data-svc*="cure"], .svc[data-svc*="heal"], .svc:first-child',
+      title: 'Curar Ferimentos (30 Valdoritas)',
+      description: 'Restaura PV imediatamente usando magia sagrada de 2d8+2. Muito mais eficiente e rápido do que consumir poções de cura em estoque.'
+    },
+    {
+      selector: '.svc[data-svc*="poison"], .svc[data-svc*="venom"]',
+      title: 'Purificar Veneno (40 Valdoritas)',
+      description: 'Remove toxinas debilitantes e doenças mágicas contraídas em embates com criaturas peçonhentas.'
+    },
+    {
+      selector: '.svc[data-svc*="bless"], .svc[data-svc*="clarity"]',
+      title: 'Bênção da Clareza (25 Valdoritas)',
+      description: 'Restaura +5 Pontos de Magia (MP) diretamente, permitindo que conjuradores voltem prontos ao combate.'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Sair do Santuário',
+      description: 'Retorne abençoado aos distritos para continuar suas expedições.'
+    }
+  ],
+
+  // === BANCO DE VALDORIA ===
+  'bank': [
+    {
+      selector: null,
+      title: 'Tour do Banco',
+      description: 'Proteção patrimonial absoluta! Veja como guardar seu ouro e seus itens nos cofres fortificados.'
+    },
+    {
+      selector: '.cenario',
+      title: 'Os Cofres Fortificados',
+      description: 'Segurança guardada por soldados. Tudo que estiver guardado aqui não é perdido mesmo em caso de derrota fatal em combate.'
+    },
+    {
+      selector: '.row-npc',
+      title: 'Aldwin, o Banqueiro',
+      description: 'Contador meticuloso de Valdoria. Administra o cofre, saques, depósitos e escrituras de propriedades da nobreza.'
+    },
+    {
+      selector: '.svc[data-svc*="deposit"], .svc:first-child',
+      title: 'Guardar Valdoritas (Depósito)',
+      description: 'Depositar suas moedas é <b>gratuito</b> e livre de qualquer taxa! É a melhor forma de proteger suas economias antes de viajar.'
+    },
+    {
+      selector: '.svc[data-svc*="withdraw"]',
+      title: 'Retirar Valdoritas (Saque)',
+      description: 'Saques possuem uma taxa administrativa de <b>2%</b>. Saque apenas o valor que planeja gastar imediatamente no mercado.'
+    },
+    {
+      selector: '.svc[data-svc*="item"], .svc[data-svc*="vault"]',
+      title: 'Cofre de Pertences',
+      description: 'Guarde armas pesadas, joias e ingredientes raros sem ocupar espaço nem peso nos slots da sua mochila de viagem.'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Sair do Banco',
+      description: 'Retorne à cidade sabendo que seus bens estão sob custódia segura.'
+    }
+  ],
+
+  // === GUILDA DOS AVENTUREIROS ===
+  'guild': [
+    {
+      selector: null,
+      title: 'Tour da Guilda',
+      description: 'O quartel dos caçadores! Conheça como contratar aliados, aceitar caçadas e elevar sua reputação marcial.'
+    },
+    {
+      selector: '.cenario',
+      title: 'O Salão de Armas',
+      description: 'Onde contratos de caça são negociados com a coroa e a guarda. O ponto de partida de grandes comitivas.'
+    },
+    {
+      selector: '.row-npc',
+      title: 'Braun, o Marcado',
+      description: 'Veterano dos Cinco de Valdoria e combatente experiente. Converse com Braun para colher valiosas dicas táticas de combate.'
+    },
+    {
+      selector: '.svc[data-svc*="quest"], .svc:first-child',
+      title: 'Mural de Caçadas',
+      description: 'Contratos oficiais para eliminar feras e bandidos. Cumpra os requisitos para resgatar ricas recompensas em ouro e renome.'
+    },
+    {
+      selector: '.svc[data-svc*="recruit"], .svc[data-svc*="hire"]',
+      title: 'Recrutar Aventureiros',
+      description: 'Contrate clérigos, guerreiros, ladinos e magos. Eles acompanham sua comitiva e usam suas habilidades automaticamente nas batalhas.'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Retornar aos Distritos',
+      description: 'Use o botão Voltar para equipar sua nova equipe no mercado e partir para a caçada.'
+    }
+  ],
+
+  // === PRAÇA CENTRAL ===
+  'square': [
+    {
+      selector: null,
+      title: 'Tour da Praça Central',
+      description: 'O pulsar da vida urbana! Conheça os habitantes, eventos rotativos e a tenda do cartógrafo.'
+    },
+    {
+      selector: '.cenario',
+      title: 'O Pátio Central',
+      description: 'Área aberta com chafariz onde cidadãos e mercadores de passagem conversam durante o dia.'
+    },
+    {
+      selector: '.row-npc',
+      title: 'Encontros & Moradores',
+      description: 'Os personagens presentes na praça mudam conforme o horário. Cada um tem diálogos progressivos e novidades sobre o mundo.'
+    },
+    {
+      selector: '.svc[data-svc*="cartog"], .svc:first-child',
+      title: 'Corvus, o Cartógrafo',
+      description: 'Compre mapas regionais de planícies, florestas, pântanos e montanhas para liberar novas rotas de viagem no mapa-múndi.'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Retornar à Cidade',
+      description: 'Toque em Voltar para circular pelos outros setores de Valdoria.'
+    }
+  ],
+
+  // === ARENA DE VALDORIA ===
+  'arena': [
+    {
+      selector: null,
+      title: 'Tour da Arena de Valdoria',
+      description: 'O coliseu dos gladiadores! Teste sua perícia tática em combates individuais valendo ouro e glória.'
+    },
+    {
+      selector: '.cenario',
+      title: 'O Fosso dos Campeões',
+      description: 'Onde o público vibra com combates de alta técnica. As batalhas ocorrem com regras estritas de duelo.'
+    },
+    {
+      selector: '.row-npc',
+      title: 'Mestre Vorhan',
+      description: 'Comandante da arena. Regula os desafios, valida as inscrições e gerencia os prêmios das lutas.'
+    },
+    {
+      selector: '.services, .svc:first-child',
+      title: 'Tiers de Duelo',
+      description: 'Enfrente adversários de dificuldade Bronze, Prata ou Ouro. Quanto maior o risco, maior a bolsa de Valdoritas conquistada!'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Retornar aos Portões',
+      description: 'Volte aos distritos da cidade para tratar seus ferimentos ou ostentar suas medalhas.'
+    }
+  ],
+
+  // === ESCRIBA RÚNICO ===
+  'runes': [
+    {
+      selector: null,
+      title: 'Tour do Escriba Rúnico',
+      description: 'A magia dos símbolos antigos! Aprenda a gravar runas ancestrais em seus equipamentos.'
+    },
+    {
+      selector: '#csp-title, .cenario',
+      title: 'A Mesa de Inscrição',
+      description: 'Local protegido por sigilos arcanos onde pedras rúnicas são fundidas ao aço e ao couro de armas e armaduras.'
+    },
+    {
+      selector: '.services, .rune-slots, .svc:first-child',
+      title: 'Gravação Rúnica',
+      description: 'Combine fragmentos rúnicos para forjar runas completas e aplique-as nos slots dos seus itens para ganhar bônus permanentes.'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Retornar à Cidade',
+      description: 'Volte ao mercado ou à taverna com seu equipamento aprimorado por runas.'
+    }
+  ],
+
+  // === OFICINA DE ARTESANATO ===
+  'workshop': [
+    {
+      selector: null,
+      title: 'Tour da Oficina',
+      description: 'O antro do trabalho manual e da forja de materiais raros.'
+    },
+    {
+      selector: '#csp-title, .cenario',
+      title: 'A Grande Bigorna',
+      description: 'Forjas e bancadas para transformar minérios e peles brutas em equipamentos de alta durabilidade.'
+    },
+    {
+      selector: '.services, .svc:first-child',
+      title: 'Artesanato & Melhorias',
+      description: 'Repare armaduras danificadas e crie itens personalizados usando os recursos que coletar em suas viagens.'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Retornar à Cidade',
+      description: 'Volte aos distritos principais com seus itens forjados.'
+    }
+  ],
+
+  // === PORTÕES DA CIDADE ===
+  'gates': [
+    {
+      selector: null,
+      title: 'Tour dos Portões',
+      description: 'O limite entre a segurança amuralhada e os perigos selvagens de Valdoria.'
+    },
+    {
+      selector: '#csp-title, .cenario',
+      title: 'A Muralha & Sentinelas',
+      description: 'Guardas vigiam os caminhos de entrada e saída, alertando sobre bandidos e patrulhas nas proximidades.'
+    },
+    {
+      selector: '.services, .svc:first-child',
+      title: 'Partidas & Notícias da Estrada',
+      description: 'Consulte os sentinelas antes de iniciar viagens longas para saber das condições climáticas e perigos no caminho.'
+    },
+    {
+      selector: '#csp-back-btn',
+      title: 'Voltar ao Interior',
+      description: 'Retorne ao abrigo dos muros de Valdoria.'
+    }
+  ]
+};
+
+// Parser robusto para diagramação do conteúdo do guia
+function _formatScreenGuideContent(rawText){
+  if (!rawText) return { intro: '', items: [], tip: '' };
+  var clean = String(rawText).replace(/\\n/g, '\n').trim();
+  var paragraphs = clean.split(/\n\s*\n/);
+  var intro = '';
+  var items = [];
+  var tip = '';
+
+  for (var i = 0; i < paragraphs.length; i++) {
+    var p = paragraphs[i].trim();
+    if (!p) continue;
+
+    // Header geral descartado (já vai pro header visual)
+    if (i === 0 && /^<b>.*?GUIA.*?<\/b>/i.test(p)) continue;
+
+    // Bloco de Dica
+    if (/^<i>\s*Dica\s*<\/i>\s*:/i.test(p) || /^Dica:/i.test(p)) {
+      tip = p.replace(/^<i>\s*Dica\s*<\/i>\s*:\s*/i, '').replace(/^Dica:\s*/i, '').trim();
+      continue;
+    }
+
+    // Linha de intro curta
+    if (items.length === 0 && !p.startsWith('<b>') && p.endsWith(':')) {
+      intro = p;
+      continue;
+    }
+
+    // Tópicos com <b>Título</b>
+    var boldMatch = p.match(/^<b>([^<]+)<\/b>(?::|\s*)([\s\S]*)$/);
+    if (boldMatch) {
+      var titlePart = boldMatch[1].trim();
+      var descPart = boldMatch[2].trim();
+      var badgeMatch = titlePart.match(/\(([^)]+)\)/);
+      var badge = '';
+      if (badgeMatch) {
+        badge = badgeMatch[1];
+        titlePart = titlePart.replace(/\([^)]+\)/, '').trim();
+      }
+      var lines = descPart.split('\n').map(function(l) {
+        return l.trim().replace(/^[•\-\*]\s*/, '');
+      }).filter(Boolean);
+
+      items.push({
+        title: titlePart,
+        badge: badge,
+        lines: lines
+      });
+    } else {
+      if (items.length > 0) {
+        items[items.length - 1].lines.push(p);
+      } else {
+        intro = (intro ? intro + '<br>' : '') + p;
+      }
+    }
+  }
+
+  return { intro: intro, items: items, tip: tip };
+}
+
+function _buildScreenGuideHtml(screenKey, parsed){
+  var html = '';
+  if (parsed.intro) {
+    html += '<div class="csg-intro">' + parsed.intro + '</div>';
+  }
+
+  for (var i = 0; i < parsed.items.length; i++) {
+    var it = parsed.items[i];
+    var badgeHtml = '';
+    if (it.badge) {
+      var badgeClass = 'gold';
+      if (/hp|vida|curar/i.test(it.badge)) badgeClass = 'green';
+      else if (/mp|mana|claridade/i.test(it.badge)) badgeClass = 'blue';
+      badgeHtml = '<span class="csg-badge ' + badgeClass + '">' + it.badge + '</span>';
+    }
+
+    var linesHtml = it.lines.map(function(line) {
+      var formatted = line
+        .replace(/(\d+d\d+(?:\+\d+)?)/g, '<b style="color:#72d672">$1</b>')
+        .replace(/(\+\d+\s*(?:HP|MP|Dano|XP))/gi, '<b style="color:#ffd700">$1</b>')
+        .replace(/(Valdoritas)/gi, '<b style="color:#ffd700">$1</b>');
+      return '<div style="margin-bottom:3px;display:flex;align-items:flex-start;gap:6px;"><span style="color:#c4953a;font-size:10px;line-height:1.6;">▸</span><span>' + formatted + '</span></div>';
+    }).join('');
+
+    html += '<div class="csg-item">'
+      + '<div class="csg-item-title">'
+      +   '<div><span class="csg-diamond">◆</span>' + it.title + '</div>'
+      +   badgeHtml
+      + '</div>'
+      + '<div class="csg-item-desc">' + linesHtml + '</div>'
+      + '</div>';
+  }
+
+  if (parsed.tip) {
+    html += '<div class="csg-tip">'
+      + '<div class="csg-tip-header">Dica do Mestre</div>'
+      + '<div class="csg-tip-text">' + parsed.tip + '</div>'
+      + '</div>';
+  }
+
+  return html;
+}
+
+function _openScreenGuideModal(screenKey, helpKey, rawText){
+  var ov = document.getElementById('city-guide-overlay');
+  if (!ov) return;
+
+  var meta = SCREEN_GUIDE_META[screenKey] || SCREEN_GUIDE_META[helpKey] || SCREEN_GUIDE_META['hub'];
+  var crestEl = document.getElementById('csg-crest');
+  var titleEl = document.getElementById('csg-title');
+  var subEl = document.getElementById('csg-subtitle');
+  var bodyEl = document.getElementById('csg-body');
+  var tourBtn = document.getElementById('csg-tour-btn');
+
+  if (crestEl) crestEl.innerHTML = _heralIco(meta.iconId || 'ic-mochila');
+  if (titleEl) titleEl.textContent = 'GUIA: ' + (meta.title || 'CIDADE').toUpperCase();
+  if (subEl) subEl.textContent = meta.subtitle || 'Valdoria • Informações e Mecânicas';
+
+  var parsed = _formatScreenGuideContent(rawText);
+  if (bodyEl) bodyEl.innerHTML = _buildScreenGuideHtml(screenKey, parsed);
+
+  // Configura botão de Tour em Tempo Real
+  var tourTargetKey = SCREEN_TOUR_STEPS[screenKey] ? screenKey : (SCREEN_TOUR_STEPS[helpKey] ? helpKey : (screenKey === 'hub' ? 'hub' : null));
+  if (tourBtn) {
+    if (tourTargetKey && SCREEN_TOUR_STEPS[tourTargetKey]) {
+      tourBtn.style.display = 'flex';
+      tourBtn.onclick = function(){
+        _closeScreenGuideModal();
+        _startInteractiveScreenTour(tourTargetKey);
+      };
+    } else {
+      tourBtn.style.display = 'none';
+    }
+  }
+
+  ov.classList.add('active');
+}
+
+function _closeScreenGuideModal(){
+  var ov = document.getElementById('city-guide-overlay');
+  if (ov) ov.classList.remove('active');
+}
+
+function _onGuideOverlayBackdrop(ev){
+  if (ev && ev.target && ev.target.id === 'city-guide-overlay') {
+    _closeScreenGuideModal();
+  }
+}
+
+// Inicia tour interativo em tempo real para qualquer tela
+function _startInteractiveScreenTour(screenKey){
+  _closeScreenGuideModal();
+  var purOv = document.getElementById('confirm-purchase-overlay');
+  if (purOv) purOv.classList.remove('active');
+
+  var key = screenKey || 'hub';
+  if (key === 'city_main') key = 'hub';
+  if (key === 'town_square') key = 'square';
+  if (key === 'rune_scribe') key = 'runes';
+  if (key === 'inn_rest') key = 'inn';
+
+  var steps = SCREEN_TOUR_STEPS[key] || SCREEN_TOUR_STEPS['hub'];
+  if (!steps || !steps.length) steps = TUTORIAL_STEPS;
+
+  var _pLevel = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.level) || 1;
+  window._activeTutorialSteps = steps.filter(function(s){
+    return !s.levelReq || s.levelReq <= _pLevel;
+  });
+
+  // Se for o hub, garante fechamento de subscreen para ver a cidade
+  if (key === 'hub') {
+    var subPop = document.getElementById('city-subscreen-popup');
+    if (subPop && subPop.classList.contains('active')) {
+      subPop.classList.remove('active');
+      if (typeof _popupStack !== 'undefined') _popupStack.length = 0;
+    }
+  }
+
+  // Remove overlay anterior para recriar bolinhas de navegação para a contagem exata da tela
+  var oldTut = document.getElementById('first-tut-overlay');
+  if (oldTut) oldTut.remove();
+
+  _showFirstTimeTutorial(0);
+}
+
 // canonical: help_texts.py — ajuda contextual baseada na tela atual.
-// Mapping: tela atual (top do _popupStack) → key em HELP_TEXTS_CITY/SYSTEMS
 function _showHelpForCurrentScreen(){
   var topScreen = (typeof _popupStack !== 'undefined' && _popupStack.length)
     ? _popupStack[_popupStack.length - 1]
     : 'hub';
-  // Mapeia keys do simulador → keys do canonical HELP_TEXTS
+
   var SCREEN_TO_HELP = {
     hub: 'city_main', temple: 'temple', tavern: 'tavern', inn: 'inn',
     inn_rest: 'inn', bank: 'bank', guild: 'guild', square: 'town_square',
-    market: 'market', trade_board: 'trade_board', heroes_wall: 'heroes_wall',
-    runes: 'rune_scribe', cartografia: 'travel'
+    market: 'market', arena: 'arena', workshop: 'workshop', runes: 'rune_scribe',
+    gates: 'gates', cartografia: 'travel', trade_board: 'trade_board',
+    heroes_wall: 'heroes_wall', social: 'social'
   };
+
   var helpKey = SCREEN_TO_HELP[topScreen] || 'city_main';
-  // Busca em HELP_TEXTS_CITY ou HELP_TEXTS_SYSTEMS
   var text = (HELP_TEXTS_CITY && HELP_TEXTS_CITY[helpKey]) ||
-             (HELP_TEXTS_SYSTEMS && HELP_TEXTS_SYSTEMS[helpKey]);
-  if (!text){
-    text = HELP_TEXTS_CITY['city_main'] || '';
-  }
-  // FIX 2026-05-03: HELP_TEXTS_CITY usa \\n (escape duplo) → vira string literal "\n"
-  // (backslash+n) após JS parse, não newline real. Converte ambos os formatos.
-  var html = text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-  _showInfoPopup({
-    icon: _heralIco('ic-mochila'), npc: 'Ajuda', title: 'Guia da tela atual',
-    desc: html,
-    onConfirm: function(){}
-  });
+             (HELP_TEXTS_SYSTEMS && HELP_TEXTS_SYSTEMS[helpKey]) ||
+             (HELP_TEXTS_CITY && HELP_TEXTS_CITY['city_main']) || '';
+
+  _openScreenGuideModal(topScreen, helpKey, text);
 }
 
 // Estado mock — saldos + propriedades + seguro
@@ -45784,7 +46834,13 @@ var HELP_TEXTS_CITY = {
 
     'market': '\\n<b>MERCADO - GUIA RÁPIDO</b>\\n\\nOnde o comércio acontece:\\n\\n<b>Comprar Equipamentos</b>\\n• <b>Ferreiro</b>: Armas e Armaduras pesadas\\n• <b>Alquimista</b>: Poções e Ingredientes\\n• <b>Místico</b>: Itens mágicos e pergaminhos\\n• <b>Viajantes</b>: Itens raros e exóticos (Rotação periódica)\\n\\n<b>Vender Itens</b>\\n• Mercadores só compram o que lhes interessa\\n• O Ferreiro compra metais, o Alquimista compra ervas, etc.\\n• Preço de venda é geralmente 50% do valor base (ou menos)\\n\\n<b>Negociação e Fofoca</b>\\n• Pergunte aos mercadores sobre seus colegas ausentes\\n• Use perícias de Carisma para tentar descontos (arriscado!)\\n\\n<i>Dica</i>: Itens equipados não aparecem na lista de venda para evitar acidentes.\\n',
 
-    'city_main': '\\n<b>CIDADE DE Valdoria - GUIA</b>\\n\\nSeu refúgio seguro. Onde ir?\\n\\n<b>Aventura</b>: Explorar biomas, encontros narrativos e combates\\n<b>Estalagem</b>: Recuperar Vida/Mana (Descanso Longo)\\n<b>Mercado</b>: Comprar/Vender Equipamentos e Mapas\\n<b>Taverna</b>: Rumores, Jogos, Bebidas e Mercenários\\n<b>Guilda</b>: Missões, Recompensas e Recrutar Aventureiros\\n<b>Banco</b>: Guardar Valdoritas e Itens\\n<b>Praça</b>: NPCs, Cartógrafo e Social\\n<b>Templo</b>: Cura, Purificação e Bênçãos\\n<b>Portões</b>: Guardas e Arredores da Cidade\\n\\n<i>Dica</i>: Compre um <b>Mapa de Valdória</b> para viajar entre regiões. Converse com todos — cada NPC pode ter informações valiosas!\\n',
+    'city_main': '\\n<b>CIDADE DE Valdoria - GUIA</b>\\n\\nSeu refúgio seguro. Onde ir?\\n\\n<b>Aventura</b>: Explorar biomas, encontros narrativos e combates\\n<b>Estalagem</b>: Recuperar Vida/Mana (Descanso Longo)\\n<b>Mercado</b>: Comprar/Vender Equipamentos e Mapas\\n<b>Taverna</b>: Rumores, Jogos, Bebidas e Mercenários\\n<b>Guilda</b>: Missões, Recompensas e Recrutar Aventureiros\\n<b>Banco</b>: Guardar Valdoritas e Itens\\n<b>Praça</b>: NPCs, Cartógrafo e Social\\n<b>Templo</b>: Cura, Purificação e Bênçãos\\n<b>Arena</b>: Desafios, Duelos e Apostas\\n<b>Escriba Rúnico</b>: Encantamentos e Gravação\\n<b>Portões</b>: Guardas e Arredores da Cidade\\n\\n<i>Dica</i>: Compre um <b>Mapa de Valdória</b> para viajar entre regiões. Converse com todos — cada morador ou andarilho pode ter informações valiosas!\\n',
+
+    'arena': '\\n<b>ARENA DE VALDORIA - GUIA RÁPIDO</b>\\n\\nO coliseu dos gladiadores e campeões:\\n\\n<b>Desafios de Duelo</b>\\n• Enfrente oponentes de níveis crescentes em combates táticos individuais\\n• Teste suas melhores estratégias e perícias de combate\\n\\n<b>Apostas em Valdoritas</b>\\n• Aposte suas moedas antes de soar o gongo\\n• Vitórias rendem bolsas fartas de ouro e elevam seu renome marcial\\n\\n<b>Mestre Vorhan</b>\\n• O veterano que comanda a arena\\n• Consulte-o sobre adversários lendários e regras de combate\\n\\n<i>Dica</i>: Descanse na estalagem e traga poções antes de pisar na areia do coliseu!\\n',
+
+    'workshop': '\\n<b>OFICINA DE ARTESANATO - GUIA RÁPIDO</b>\\n\\nBancadas de trabalho e forja manual:\\n\\n<b>Reparos & Manutenção</b>\\n• Conserte armaduras trincadas e afie lâminas gastas em combate\\n• Utilize barras de ferro, aço e couros obtidos em viagens\\n\\n<b>Forja sob Encomenda</b>\\n• Fabrique equipamentos sob medida com os artesãos locais\\n\\n<i>Dica</i>: Guarde minérios raros encontrados em cavernas para forjar peças com maior durabilidade!\\n',
+
+    'gates': '\\n<b>PORTÕES DA CIDADE - GUIA RÁPIDO</b>\\n\\nA fronteira entre as muralhas protetoras e o ermo:\\n\\n<b>Sentinelas de Guarda</b>\\n• Os guardas vigiam as estradas principais e avisam sobre perigos imediatos\\n\\n<b>Partida para Viagens</b>\\n• Ponto de saída para desbravar bosques, montanhas e pântanos\\n• Tenha sempre provisões, tochas e poções antes de cruzar o rastrilho\\n\\n<i>Dica</i>: Ouça as palavras dos sentinelas para saber de emboscadas e monstros nas rotas próximas!\\n'
 };
 
 var HELP_TEXTS_SYSTEMS = {
@@ -60506,7 +61562,7 @@ var ACTION_HANDLERS = {
   'rune_thunder':           function(p){ vToast('T3 Trovão — 2d8 dano extra em crítico. Arma.'); },
   'rune_absorb':            function(p){ vToast('T3 Absorção — 5% HP temporário ao receber dano. Peito.'); },
   'rune_devastation':       function(p){ vToast('T3 Devastação — +1 dano em todos ataques. Arma.'); },
-  'runes_help':             function(p){ vToast('Tutorial: Coleta 3 fragmentos do mesmo tier (Floresta T1, Caverna T2, Vulcânico T3) → Forja Runa.'); },
+  'runes_help':             function(p){ _showHelpForCurrentScreen(); },
 
   // Festival
   'festival_events':        function(p){ vToast('Eventos hoje: Desfile (16h), Espetáculo de fogos (22h). Não-perder!'); },
