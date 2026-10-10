@@ -61473,10 +61473,17 @@ function _getGameWeather(dayOfYear){
   // Seed determinística
   var seed = dayOfYear + TIME_EPOCH_GAME_YEAR;
   function rng(){ var x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
-  var baseTemp = dayOfYear < 80 ? 5 : (dayOfYear < 170 ? 20 : (dayOfYear < 260 ? 25 : 10));
-  var temp = baseTemp + Math.floor(rng() * 11) - 5;
+  var isWinter = dayOfYear >= 300 || dayOfYear < 45;
+  var baseTemp = isWinter ? 5 : (dayOfYear < 150 ? 18 : (dayOfYear < 240 ? 25 : 12));
+  var temp = baseTemp + Math.floor(rng() * 9) - 4;
   if (rng() < 0.001) return { icon: '', desc: 'Eclipse', temp: temp - 10 };
   var roll = rng();
+  if (isWinter) {
+    if (roll < 0.25) return { icon: '', desc: 'Céu Frio e Límpido', temp: temp + 1 };
+    if (roll < 0.55) return { icon: '', desc: 'Névoa e Geada', temp: temp - 1 };
+    if (roll < 0.80) return { icon: '', desc: 'Chuva Congelante', temp: temp - 2 };
+    return { icon: '', desc: 'Tempestade de Inverno', temp: temp - 4 };
+  }
   if (roll < 0.4)  return { icon: '', desc: 'Ensolarado', temp: temp + 2 };
   if (roll < 0.7)  return { icon: '', desc: 'Nublado',    temp: temp };
   if (roll < 0.9)  return { icon: '', desc: 'Chuvoso',    temp: temp - 3 };
@@ -61501,16 +61508,22 @@ var TOPBAR_PERIOD_PNG = {
   night: 'period-night',
 };
 var TOPBAR_WEATHER_PNG = {
-  'ensolarado':  'weather-sunny',
-  'limpo':       'weather-sunny',
-  'nublado':     'weather-cloudy',
-  'chuva':       'weather-rain',
-  'chuvoso':     'weather-rain',
-  'tempestade':  'weather-storm',
-  'neve':        'weather-snow',
-  'nevoa':       'weather-fog',
-  'névoa':       'weather-fog',
-  'bruma':       'weather-fog',
+  'ensolarado':            'weather-sunny',
+  'limpo':                 'weather-sunny',
+  'céu frio e límpido':    'weather-sunny',
+  'ceu frio e limpido':    'weather-sunny',
+  'nublado':               'weather-cloudy',
+  'chuva':                 'weather-rain',
+  'chuvoso':               'weather-rain',
+  'chuva congelante':      'weather-rain',
+  'tempestade':            'weather-storm',
+  'tempestade de inverno': 'weather-storm',
+  'neve':                  'weather-snow',
+  'nevoa':                 'weather-fog',
+  'névoa':                 'weather-fog',
+  'névoa e geada':         'weather-fog',
+  'nevoa e geada':         'weather-fog',
+  'bruma':                 'weather-fog',
 };
 function _ctbIconHTML(slug, fallbackEmoji){
   if (!slug) return fallbackEmoji || '';

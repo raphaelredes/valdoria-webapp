@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-10T11:07:52Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-10T11:19:02Z - do not edit directly, edit source -->
 
 
 
@@ -21931,6 +21931,7 @@ function _normalizeWeatherCode(w) {
   if (s === 'r' || s === 'rain' || s === 'chuva' || s === 'chuvoso') return 'r';
   if (s === 't' || s === 'storm' || s === 'tempestade' || s === 'tormenta') return 't';
   if (s === 'f' || s === 'fog' || s === 'nevoa' || s === 'névoa' || s === 'neblina' || s === 'bruma') return 'f';
+  if (s === 'snow' || s === 'neve' || s === 'nevasca') return 'snow';
   if (s === 's' || s === 'clear' || s === 'sunny' || s === 'sol' || s === 'limpo') return 's';
   return s.length === 1 ? s : 's';
 }
@@ -26947,11 +26948,19 @@ function drawDayNightTint(ctx) {
   const phase = S ? (S.dayPhase || 'day') : 'day';
   const shouldLogD = _frameCount % 120 === 1;  // 1x/2seg
   if (shouldLogD) LOG('DAYPHASE', 'drawDayNightTint phase=' + phase);
-  if (phase === 'day') { if (shouldLogD) LOG('DAYPHASE', 'skipped (day = no tint)'); return; }
   let r, g, b, a;
+  if (phase === 'day') {
+    if (S && S.isGlacimir) {
+      // Sol de inverno de Glacimir: luz cristalina e ar gélido sutil
+      r = 195; g = 215; b = 245; a = 0.06;
+    } else {
+      if (shouldLogD) LOG('DAYPHASE', 'skipped (day = no tint)');
+      return;
+    }
+  }
   // 2026-07-06 (user "ambientes vivos"): golden-hour um pouco mais presente — o
   // amanhecer/entardecer ganham mais âmbar (midday continua neutro, noite fria).
-  if (phase === 'dusk') { r = 206; g = 98; b = 42; a = 0.18; }
+  else if (phase === 'dusk') { r = 206; g = 98; b = 42; a = 0.18; }
   else if (phase === 'dawn') { r = 255; g = 178; b = 102; a = 0.11; }
   else { r = 20; g = 30; b = 60; a = 0.28; }  // night
   // Flicker noturno leve
@@ -33448,6 +33457,23 @@ function drawWeatherOverlay(ctx) {
     } else {
       ctx.fillRect(0, 0, canvasW, canvasH);
     }
+  } else if (S.weather === 'snow') {
+    // 2026-10-10: Nevasca / Flocos de neve com tint gélido
+    ctx.fillStyle = 'rgba(215, 228, 245, 0.22)';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+    const rng = seededRng(Math.floor(_animTime / 40));
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.beginPath();
+    const flakes = 60;
+    const speed = 0.28;
+    for (let i = 0; i < flakes; i++) {
+      const x = (rng() * canvasW + Math.sin(_animTime * 0.004 + i) * 18) % canvasW;
+      const y = (rng() * canvasH + _animTime * speed) % canvasH;
+      const r = 1.0 + (rng() * 1.5);
+      ctx.moveTo(x + r, y);
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+    }
+    ctx.fill();
   }
   } catch (e) {
     LOGE('WEATHER', 'drawWeatherOverlay failed:', e.message, e.stack);
@@ -34711,7 +34737,7 @@ function onMoveEnd(col, row) {
       case 'rain': return 'r';
       case 'fog': return 'f';
       case 'storm': return 't';
-      case 'snow': return 'f';
+      case 'snow': return 'snow';
       default: return null;
     }
   }
@@ -34728,14 +34754,15 @@ function onMoveEnd(col, row) {
     if (narrate) {
       var biomeNarr = {
         desert: { s: 'O sol volta a brilhar forte sobre as dunas.', t: 'Uma tempestade de areia se aproxima ao horizonte!', r: 'Uma chuva rara cai sobre o deserto — uma bênção breve.', f: 'Uma névoa morna envolve as dunas.' },
-        snow: { s: 'O céu de inverno se abre — raios frios cortam o ar.', f: 'Uma nevasca gelada se forma ao redor.', t: 'Tempestade polar — o vento uiva com força assustadora!', r: 'A chuva cai congelada sobre a neve.' },
+        snow: { s: 'O céu de inverno se abre — raios frios cortam o ar.', f: 'Uma nevasca gelada se forma ao redor.', t: 'Tempestade polar — o vento uiva com força assustadora!', r: 'A chuva cai congelada sobre a neve.', snow: 'A nevasca aperta, cobrindo o solo de gelo.' },
         volcanic: { s: 'O calor sobe em ondas trêmulas — o ar é seco.', t: 'Trovões secos ecoam entre as rochas vulcânicas.', f: 'Vapor sulfúrico se levanta da cratera.', r: 'Chuva ácida cai sobre a cratera — evaporando ao tocar a rocha.' }
       };
       var defaultNarr = {
         s: 'As nuvens se dissipam. O céu clareia.',
         r: 'Gotas começam a cair. A chuva se intensifica.',
         f: 'Uma névoa densa se forma ao redor.',
-        t: 'Trovões ecoam ao longe. Uma tempestade se aproxima!'
+        t: 'Trovões ecoam ao longe. Uma tempestade se aproxima!',
+        snow: 'Flocos de neve começam a cair e o vento gela os ossos.'
       };
       var bi = biomeNarr[S.biome];
       var txt = (bi && bi[code]) || defaultNarr[code];
@@ -34750,7 +34777,11 @@ function onMoveEnd(col, row) {
   var _weatherClientRoll = !(window.__EXPLORE_MODE === 'remote'
     && window.ExploracaoAPI && window.ExploracaoAPI.hasToken());
   if (_weatherClientRoll && S.steps % 12 === 0 && Math.random() < 0.45) {
-    const pool = (S.mapDef && S.mapDef.weather_pool) || ['s', 'r', 'f', 't'];
+    let pool = (S.mapDef && S.mapDef.weather_pool) ? S.mapDef.weather_pool.slice() : ['s', 'r', 'f', 't'];
+    // Ajuste Sazonal de Glacimir (inverno): clima favorece geada/névoa, tempestade fria e neve
+    if (S && S.isGlacimir) {
+      pool = ['f', 'f', 't', 'snow', 'r', 's'];
+    }
     const next = pickRandom(pool);
     LOG('WEATHER', 'step=' + S.steps + ' pool=' + JSON.stringify(pool) + ' picked=' + next + ' current=' + S.weather);
     _applyWeatherCode(next, true);
@@ -46288,6 +46319,7 @@ const TB_WEATHER_INFO = {
   r: { ico: '', name: 'Chuva',      desc: 'Pingos persistentes encharcam o caminho.', effects: ['Visibilidade reduzida pra POIs distantes', 'Movimento -1 (terreno escorregadio)', 'Fogueira difícil de acender (Sobrevivência DC 13)', 'Rastros são mais fáceis de seguir'] },
   f: { ico: '', name: 'Névoa',      desc: 'Branco leitoso engole tudo a poucos metros.', effects: ['Visibilidade severamente reduzida (1-2 hexes)', 'Inimigos podem te surpreender (Percepção desvantagem)', 'Forragear mais difícil (sem ver longe)', 'Lugares secretos podem se revelar'] },
   t: { ico: '', name: 'Tempestade', desc: 'Trovões e raios. A natureza te avisa: pare.', effects: ['Movimento muito lento', 'Risco de raio (DEX DC 15) em áreas abertas', 'Visibilidade quase nula', 'Encontros aleatórios reduzidos (criaturas se escondem)'] },
+  snow:      { ico: '❄️', name: 'Neve / Nevasca', desc: 'Frio congelante e rajadas brancas cortam o horizonte.', effects: ['Visibilidade reduzida a 1 hex (PHB p. 183)', 'Terreno escorregadio e passos lentos', 'Risco de exaustão por frio sem abrigo ou agasalho (CD 10)', 'Rastreamento na neve fresca facilitado'] },
   dungeon:   { ico: '🔥', name: 'Confinado', desc: 'Ar denso e pesado, aquecido por tochas e fogueiras de guerra.', effects: ['Protegido contra chuvas ou ventos do exterior', 'Fumaça e sombras podem camuflar aproximações', 'Sons ecoam pelas galerias e corredores de pedra'] },
   confinado: { ico: '🔥', name: 'Confinado', desc: 'Ar denso e pesado, aquecido por tochas e fogueiras de guerra.', effects: ['Protegido contra chuvas ou ventos do exterior', 'Fumaça e sombras podem camuflar aproximações', 'Sons ecoam pelas galerias e corredores de pedra'] },
 };
