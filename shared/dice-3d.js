@@ -25,29 +25,29 @@ var Dice3D = (function () {
      * 10 tons de resina/acrílico (matiz); o corpo final é escurecido em createBodyMaterial.
      * Campos: roughness base, clearcoat, clearcoatRough, opacity, envMapI.
      */
-    /** Números sempre brancos; traços escuros para contraste em faces escuras (corpo do dado). */
-    var DICE_LABEL_LIGHT = { fill: '#ffffff', stroke: '#0c0a08', stroke2: 'rgba(18,14,12,0.72)' };
+    /** Números sempre claros (marfim/dourado) com contorno escuro e aura dourada para contraste nobre. */
+    var DICE_LABEL_LIGHT = { fill: '#fff8e0', stroke: '#0c0a08', stroke2: 'rgba(212,175,55,0.75)' };
 
     var DICE_STYLE_VARIATIONS = [
-        { key: 'mel_fosco', color: 0x8a6028, edge: 0xb89048, roughness: 0.74, clearcoat: 0.12, clearcoatRough: 0.82, opacity: 1, envMapI: 0.2, emissive: 0x2a1c08, emiInt: 0.06,
+        { key: 'mel_fosco', color: 0xc49030, edge: 0xf5d060, roughness: 0.35, clearcoat: 0.48, clearcoatRough: 0.2, opacity: 1, envMapI: 0.4, emissive: 0x322008, emiInt: 0.08,
             label: DICE_LABEL_LIGHT },
-        { key: 'ambra_opaca', color: 0x784018, edge: 0xa87838, roughness: 0.68, clearcoat: 0.18, clearcoatRough: 0.72, opacity: 0.97, envMapI: 0.22, emissive: 0x381808, emiInt: 0.06,
+        { key: 'ambra_opaca', color: 0xba5218, edge: 0xf0a840, roughness: 0.32, clearcoat: 0.52, clearcoatRough: 0.18, opacity: 0.98, envMapI: 0.42, emissive: 0x3e1608, emiInt: 0.09,
             label: DICE_LABEL_LIGHT },
-        { key: 'vinho_resina', color: 0x581820, edge: 0x986030, roughness: 0.78, clearcoat: 0.08, clearcoatRough: 0.88, opacity: 1, envMapI: 0.18, emissive: 0x180608, emiInt: 0.07,
+        { key: 'vinho_resina', color: 0x8e1e2c, edge: 0xe09848, roughness: 0.36, clearcoat: 0.48, clearcoatRough: 0.22, opacity: 1, envMapI: 0.38, emissive: 0x240810, emiInt: 0.08,
             label: DICE_LABEL_LIGHT },
-        { key: 'musgo_acrilico', color: 0x304020, edge: 0x786828, roughness: 0.71, clearcoat: 0.14, clearcoatRough: 0.8, opacity: 1, envMapI: 0.2, emissive: 0x101808, emiInt: 0.06,
+        { key: 'musgo_acrilico', color: 0x2e663a, edge: 0x98b848, roughness: 0.34, clearcoat: 0.46, clearcoatRough: 0.2, opacity: 1, envMapI: 0.4, emissive: 0x0a1e0c, emiInt: 0.08,
             label: DICE_LABEL_LIGHT },
-        { key: 'pergaminho_asp', color: 0x5a5040, edge: 0x887848, roughness: 0.82, clearcoat: 0.06, clearcoatRough: 0.9, opacity: 0.96, envMapI: 0.16, emissive: 0x201810, emiInt: 0.05,
+        { key: 'pergaminho_asp', color: 0x907c62, edge: 0xd4b878, roughness: 0.42, clearcoat: 0.38, clearcoatRough: 0.24, opacity: 0.98, envMapI: 0.34, emissive: 0x221c12, emiInt: 0.06,
             label: DICE_LABEL_LIGHT },
-        { key: 'azul_noite', color: 0x203058, edge: 0x887038, roughness: 0.69, clearcoat: 0.16, clearcoatRough: 0.76, opacity: 1, envMapI: 0.24, emissive: 0x0c1018, emiInt: 0.06,
+        { key: 'azul_noite', color: 0x1e3e78, edge: 0xd8b458, roughness: 0.32, clearcoat: 0.52, clearcoatRough: 0.18, opacity: 1, envMapI: 0.45, emissive: 0x081630, emiInt: 0.08,
             label: DICE_LABEL_LIGHT },
-        { key: 'cobre_fosco', color: 0x704018, edge: 0xa08040, roughness: 0.76, clearcoat: 0.1, clearcoatRough: 0.85, opacity: 1, envMapI: 0.2, emissive: 0x281008, emiInt: 0.06,
+        { key: 'cobre_fosco', color: 0xa85c28, edge: 0xdeb868, roughness: 0.38, clearcoat: 0.44, clearcoatRough: 0.22, opacity: 1, envMapI: 0.38, emissive: 0x2e1408, emiInt: 0.08,
             label: DICE_LABEL_LIGHT },
-        { key: 'pedra_quente', color: 0x403428, edge: 0x907040, roughness: 0.85, clearcoat: 0.05, clearcoatRough: 0.92, opacity: 0.94, envMapI: 0.14, emissive: 0x181008, emiInt: 0.05,
+        { key: 'pedra_quente', color: 0x5e4832, edge: 0xc4953a, roughness: 0.4, clearcoat: 0.4, clearcoatRough: 0.24, opacity: 0.96, envMapI: 0.35, emissive: 0x1c1208, emiInt: 0.07,
             label: DICE_LABEL_LIGHT },
-        { key: 'verde_mata', color: 0x184030, edge: 0x688050, roughness: 0.72, clearcoat: 0.14, clearcoatRough: 0.78, opacity: 1, envMapI: 0.22, emissive: 0x061410, emiInt: 0.06,
+        { key: 'verde_mata', color: 0x225c42, edge: 0x92c872, roughness: 0.35, clearcoat: 0.46, clearcoatRough: 0.2, opacity: 1, envMapI: 0.4, emissive: 0x081a12, emiInt: 0.08,
             label: DICE_LABEL_LIGHT },
-        { key: 'carvao_opaco', color: 0x242018, edge: 0x786038, roughness: 0.8, clearcoat: 0.09, clearcoatRough: 0.86, opacity: 0.98, envMapI: 0.16, emissive: 0x0c0a08, emiInt: 0.06,
+        { key: 'carvao_opaco', color: 0x222028, edge: 0xebba42, roughness: 0.28, clearcoat: 0.65, clearcoatRough: 0.12, opacity: 0.98, envMapI: 0.45, emissive: 0x121018, emiInt: 0.08,
             label: DICE_LABEL_LIGHT },
     ];
 
@@ -69,17 +69,17 @@ var Dice3D = (function () {
     }
 
     /**
-     * Textura de face: numero centrado, sem shadowBlur (legivel em “vidro”).
-     * Números em branco + contorno escuro (faces do corpo já escuras em createBodyMaterial).
+     * Textura de face: fundo 100% transparente para que o material nobre e as arestas 3D do dado apareçam.
+     * Números em marfim/dourado com contorno escuro e aura dourada nobre.
      */
     function makeLabelTexture(num, size, varIdx) {
         size = size || _labelRes;
         var vi = (varIdx | 0) % DICE_STYLE_VARIATIONS.length;
         var st = DICE_STYLE_VARIATIONS[vi];
         var lb = st.label || {};
-        var fill = lb.fill || '#ffffff';
+        var fill = lb.fill || '#fff8e0';
         var strokeOuter = lb.stroke || '#0c0a08';
-        var strokeMid = lb.stroke2 || 'rgba(18,14,12,0.72)';
+        var strokeMid = lb.stroke2 || 'rgba(212,175,55,0.75)';
         var _tk = num + '_' + size + '_v' + vi;
         if (_texCache[_tk]) return _texCache[_tk];
 
@@ -90,20 +90,9 @@ var Dice3D = (function () {
         ctx.clearRect(0, 0, size, size);
         var cx = size / 2;
         var cy = size / 2;
-        /* Grão fino na face (acrílico/resina fosca), sem brilho de “adesivo liso”. */
-        var g0 = ctx.createRadialGradient(cx * 0.3, cy * 0.25, 0, cx, cy, size * 0.72);
-        g0.addColorStop(0, 'rgba(22,18,14,0.18)');
-        g0.addColorStop(0.45, 'rgba(10,8,6,0.1)');
-        g0.addColorStop(1, 'rgba(18,14,12,0.2)');
-        ctx.fillStyle = g0;
-        ctx.fillRect(0, 0, size, size);
-        for (var gi = 0; gi < Math.round(size * size * 0.00055); gi++) {
-            ctx.fillStyle = 'rgba(0,0,0,' + (0.04 + Math.random() * 0.06) + ')';
-            ctx.fillRect((Math.random() * size) | 0, (Math.random() * size) | 0, 1, 1);
-        }
 
         var text = String(num);
-        var fontSize = text.length > 1 ? Math.round(size * 0.56) : Math.round(size * 0.68);
+        var fontSize = text.length > 2 ? Math.round(size * 0.48) : (text.length > 1 ? Math.round(size * 0.58) : Math.round(size * 0.70));
         ctx.font = 'bold ' + fontSize + 'px "Cinzel", Georgia, serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -112,26 +101,28 @@ var Dice3D = (function () {
         ctx.shadowOffsetY = 0;
         ctx.shadowColor = 'transparent';
 
-        var strokeW = Math.max(2, Math.round(size * 0.05));
+        var strokeW = Math.max(3, Math.round(size * 0.065));
         ctx.lineJoin = 'round';
         ctx.miterLimit = 2;
         ctx.lineWidth = strokeW;
         ctx.strokeStyle = strokeOuter;
         ctx.strokeText(text, cx, cy);
-        ctx.lineWidth = Math.max(1, strokeW - 2);
-        ctx.strokeStyle = strokeMid;
-        ctx.strokeText(text, cx, cy);
+
+        ctx.shadowColor = strokeMid;
+        ctx.shadowBlur = Math.round(size * 0.08);
+
         ctx.fillStyle = fill;
         ctx.fillText(text, cx, cy);
 
         if (num === 6 || num === 9) {
+            ctx.shadowBlur = 0;
             var w = ctx.measureText(text).width;
-            ctx.fillStyle = strokeOuter.indexOf('#') === 0 ? strokeOuter : 'rgba(26,21,16,0.92)';
-            ctx.fillRect(cx - w / 2, cy + fontSize * 0.34, w, Math.max(2, fontSize * 0.08));
+            ctx.fillStyle = '#c4953a';
+            ctx.fillRect(cx - w / 2, cy + fontSize * 0.36, w, Math.max(2, fontSize * 0.08));
         }
 
         var tex = new THREE.CanvasTexture(c);
-        tex.colorSpace = THREE.SRGBColorSpace;
+        if (THREE.SRGBColorSpace !== undefined) tex.colorSpace = THREE.SRGBColorSpace;
         tex.userData = { cached: true };
 
         if (_texCacheOrder.length >= _TEX_CACHE_MAX) {
@@ -155,13 +146,9 @@ var Dice3D = (function () {
         return DICE_STYLE_VARIATIONS[(varIdx | 0) % DICE_STYLE_VARIATIONS.length];
     }
 
-    /** Corpo do dado: escurece a face base (dados sempre visualmente escuros). */
+    /** Corpo do dado: mantém a cor nobre e saturada do preset de resina/gema. */
     function dieBodyColorHex(hex) {
-        var mul = 0.56;
-        var r = Math.max(8, Math.min(255, (((hex >> 16) & 255) * mul) | 0));
-        var g = Math.max(8, Math.min(255, (((hex >> 8) & 255) * mul) | 0));
-        var b = Math.max(8, Math.min(255, ((hex & 255) * mul) | 0));
-        return (r << 16) | (g << 8) | b;
+        return hex;
     }
 
     /** Ruído procedural (cinzento) para bumpMap — relevo microscópico tipo resina/acrílico fosco. */
@@ -198,37 +185,35 @@ var Dice3D = (function () {
         return tex;
     }
 
-    /** Superfície áspera (bump forte) + sheen mate no Physical. */
+    /** Superfície polida com micro-relevo sutil e sheen elegante no Physical. */
     function attachDieBodyMicroRelief(mat) {
         if (!mat) return;
         mat.bumpMap = getDieMicroBumpTexture();
-        mat.bumpScale = _isLite ? 0.032 : (_isMedium ? 0.055 : 0.082);
+        mat.bumpScale = _isLite ? 0.012 : (_isMedium ? 0.02 : 0.026);
         if (mat.isMeshPhysicalMaterial) {
-            mat.sheen = 0.07;
-            mat.sheenRoughness = 0.94;
-            mat.sheenColor = new THREE.Color(0xd4c8b0);
+            mat.sheen = 0.06;
+            mat.sheenRoughness = 0.8;
+            mat.sheenColor = new THREE.Color(0xf0e4d0);
         }
     }
 
     function createBodyMaterial(varIdx) {
         var st = _styleAt(varIdx);
         var op = st.opacity != null ? st.opacity : 1;
-        var rough = st.roughness != null ? st.roughness : 0.75;
-        var cc = st.clearcoat != null ? st.clearcoat : 0.1;
-        var ccr = st.clearcoatRough != null ? st.clearcoatRough : 0.82;
-        var envI = st.envMapI != null ? st.envMapI : 0.24;
-        envI *= 0.88;
+        var rough = st.roughness != null ? st.roughness : 0.34;
+        var cc = st.clearcoat != null ? st.clearcoat : 0.48;
+        var ccr = st.clearcoatRough != null ? st.clearcoatRough : 0.18;
+        var envI = st.envMapI != null ? st.envMapI : 0.4;
         var bodyHex = dieBodyColorHex(st.color);
         if (_isLite) {
             var m0 = new THREE.MeshStandardMaterial({
                 color: bodyHex,
-                metalness: 0.02,
-                roughness: Math.min(0.96, rough + 0.12),
+                metalness: 0.1,
+                roughness: Math.min(0.8, rough + 0.1),
                 transparent: op < 0.999,
                 opacity: op,
                 emissive: st.emissive,
-                emissiveIntensity: Math.min(0.14, (st.emiInt || 0.06) * 1.2),
-                envMapIntensity: envI * 0.85,
+                emissiveIntensity: 0.12,
                 flatShading: false,
                 side: THREE.FrontSide,
             });
@@ -236,28 +221,22 @@ var Dice3D = (function () {
             attachDieBodyMicroRelief(m0);
             return m0;
         }
-        if (_isMedium) {
-            rough = Math.min(0.96, rough + 0.06);
-            envI *= 0.9;
-            cc *= 0.8;
-        }
-        rough = Math.min(0.98, rough + (_isMedium ? 0.04 : 0.08));
         var m1 = new THREE.MeshPhysicalMaterial({
             color: bodyHex,
-            metalness: 0,
+            metalness: 0.06,
             roughness: rough,
             transmission: 0,
-            thickness: 0.2,
-            ior: 1.48,
+            thickness: 0.3,
+            ior: 1.52,
             transparent: op < 0.999,
             opacity: op,
             side: THREE.FrontSide,
-            envMapIntensity: envI * (_isMedium ? 0.95 : 0.85),
-            clearcoat: cc * (_isMedium ? 0.88 : 0.72),
-            clearcoatRoughness: Math.min(0.98, ccr + 0.08),
-            specularIntensity: _isMedium ? 0.22 : 0.16,
+            envMapIntensity: envI,
+            clearcoat: cc,
+            clearcoatRoughness: ccr,
+            specularIntensity: 0.58,
             emissive: st.emissive,
-            emissiveIntensity: st.emiInt != null ? st.emiInt : 0.06,
+            emissiveIntensity: st.emiInt != null ? st.emiInt : 0.08,
             flatShading: false,
         });
         if (m1.roughness != null) m1.userData._d3dRoughBase = m1.roughness;
@@ -293,18 +272,17 @@ var Dice3D = (function () {
         }
     }
 
-    /** Arestas desenhadas: só em perf “lite” (poucas linhas, quase invisíveis). Full/medium = volume só com luz + bump. */
+    /** Arestas desenhadas douradas: ativas em todos os tiers para destacar a tridimensionalidade dos poliedros. */
     function addEdgeWire(mesh, geo, threshold, edgeHex) {
-        if (!_isLite) return;
-        var th = Math.max(threshold || 15, 44);
+        var th = threshold || 15;
         var edges = new THREE.EdgesGeometry(geo, th);
-        var bodyHex = mesh.material && mesh.material.color ? mesh.material.color.getHex() : 0x5a4a38;
-        var lineCol = new THREE.Color(edgeHex != null ? edgeHex : EDGE_COLOR);
-        lineCol.lerp(new THREE.Color(bodyHex), 0.68);
+        var lineCol = edgeHex != null ? edgeHex : EDGE_COLOR;
+        var op = _isLite ? 0.38 : 0.58;
         mesh.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
-            color: lineCol.getHex(),
+            color: lineCol,
             transparent: true,
-            opacity: 0.078,
+            opacity: op,
+            depthTest: true,
         })));
     }
 
@@ -759,8 +737,8 @@ var Dice3D = (function () {
         this._renderer.setPixelRatio(_isLite ? 1 : Math.min(window.devicePixelRatio, 2));
         this._renderer.shadowMap.enabled = false;
         this._renderer.toneMapping = _isLite ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
-        /* Exposição moderada — dados foscos sem “queimar” highlights (discourse threejs PBR). */
-        this._renderer.toneMappingExposure = _isLite ? 1 : 0.88;
+        /* Exposição equilibrada para realçar gemas, reflexos e arestas de ouro. */
+        this._renderer.toneMappingExposure = _isLite ? 1 : 1.05;
         container.appendChild(this._renderer.domElement);
         try {
             this._renderer.domElement.style.background = 'transparent';
@@ -884,10 +862,24 @@ var Dice3D = (function () {
             this._resultGlow.intensity = pulse;
             var target = this._fusionMesh || this._dieMesh;
             if (target) {
-                var amp = this._epicResult ? 0.034 : 0.008;
+                var amp = this._epicResult ? 0.034 : 0.01;
                 var sp = this._epicResult ? 3.1 : 2.0;
                 var s = 1.0 + amp * Math.sin(this._resultTime * sp);
                 target.scale.setScalar(s);
+                // Perspectiva 3D: o dado de resultado respira com rotação nobre revelando volume, facetas e arestas de ouro
+                if (this._fusionMesh && this._fusionBaseQuat) {
+                    var tiltX = 0.22 + Math.sin(this._resultTime * 1.4) * 0.05;
+                    var tiltY = 0.26 + Math.cos(this._resultTime * 1.1) * 0.06;
+                    var tiltEuler = new THREE.Euler(tiltX, tiltY, 0, 'YXZ');
+                    var tiltQ = new THREE.Quaternion().setFromEuler(tiltEuler);
+                    this._fusionMesh.quaternion.copy(this._fusionBaseQuat.clone().multiply(tiltQ));
+                } else if (this._dieMesh && this._finalQuat) {
+                    var glintX = Math.sin(this._resultTime * 1.4) * 0.035;
+                    var glintY = Math.cos(this._resultTime * 1.1) * 0.035;
+                    var glintEuler = new THREE.Euler(glintX, glintY, 0, 'YXZ');
+                    var glintQ = new THREE.Quaternion().setFromEuler(glintEuler);
+                    this._dieMesh.quaternion.copy(this._finalQuat.clone().multiply(glintQ));
+                }
             }
             var efx = this._epicDieFxGroup;
             if (efx && (this._epicResult === 'crit' || this._epicResult === 'fail')) {
@@ -1353,6 +1345,7 @@ var Dice3D = (function () {
         this._fusionDuration = 500;
         this._fusionCallback = onDone;
         this._fusionTotal = totalValue;
+        this._fusionBaseQuat = null;
         this._resultGlow.intensity = 0;
         haptic('medium');
     };
@@ -1390,7 +1383,10 @@ var Dice3D = (function () {
                 if (normals[fi].z > normals[faceIdx].z) faceIdx = fi;
             }
             var alignQ = new THREE.Quaternion().setFromUnitVectors(normals[faceIdx].clone(), new THREE.Vector3(0, 0, 1));
-            this._fusionMesh.quaternion.copy(alignQ);
+            this._fusionBaseQuat = alignQ.clone();
+            var initTilt = new THREE.Euler(0.24, 0.28, 0, 'YXZ');
+            var initQ = new THREE.Quaternion().setFromEuler(initTilt);
+            this._fusionMesh.quaternion.copy(alignQ.clone().multiply(initQ));
             this._scene.add(this._fusionMesh);
             this._camera.position.z = 4.5;
             this._keyLight.intensity = 1.65;
@@ -1462,6 +1458,7 @@ var Dice3D = (function () {
         this._multiMeshes = [];
         this._dieMesh = null;
         this._fusionMesh = null;
+        this._fusionBaseQuat = null;
         try {
             // Sessão #38 (2026-05-26) Fase 3.1: WEBGL_lose_context.loseContext()
             // ANTES de renderer.dispose() pra forçar GC do WebGL context.
