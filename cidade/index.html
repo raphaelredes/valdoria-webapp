@@ -26902,11 +26902,22 @@ function _srvQuestDetail(serverId){
   // não chamamos mais navigateTo aqui (evita o subscreen simples antigo). Degrada pro
   // subscreen legado SÓ se vMissao não existir.
   if (window.vMissao && typeof window.vMissao.show === 'function') {
+    var onComp = function(){ _srvCompleteQuest(serverId); };
+    // Ordem do Usuário 2026-10: NUNCA usar rotas cruas ou entregas silenciosas pelo diário.
+    // Missões com NPC de entrega abrem obrigatoriamente encontro presencial com narrativa e testes de dados.
+    if (serverId === 'quest_lyana_scroll' || serverId === 'lyana') {
+      onComp = function(){
+        if (window.vMissao && typeof window.vMissao.hide === 'function') window.vMissao.hide();
+        if (typeof closeCityPopup === 'function') closeCityPopup(true);
+        if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter();
+        else _srvCompleteQuest(serverId);
+      };
+    }
     window.vMissao.show(sq, {
       mode: 'detail',
       npc: sq.npc || '',
       ready: ready,
-      onComplete: function(){ _srvCompleteQuest(serverId); },
+      onComplete: onComp,
       onAbandon: function(){ _srvAbandonQuest(serverId); }
     });
     return;
@@ -41480,6 +41491,23 @@ function _squareShowInvestigatePopup(p){
   // SEM ícones cinza (fallback = retrato aldeao.webp). O diálogo segue PADRAO_ALDRIC
   // (_showSharedNpcDialogue / vEncounter). Variação de 3 a 7 pessoas (_squareGetDailyNpcPool).
   var visible = _squareGetDailyNpcPool(p);
+  // Se a missão da Lyana estiver ativa, garante a presença da herbalista na praça com badge de missão
+  var hasLyanaQuest = false;
+  try {
+    var _qa = (typeof QUESTS_ACTIVE !== 'undefined' ? QUESTS_ACTIVE : []);
+    hasLyanaQuest = _qa.some(function(q){
+      return q.serverId === 'quest_lyana_scroll' || q.id === 'qa_lyana' || q.id === 'lyana';
+    });
+  } catch(_e){}
+  if (hasLyanaQuest) {
+    visible = visible.filter(function(n){ return (n.name || '').indexOf('Lyana') < 0; });
+    visible.unshift({
+      name: 'Lyana, a Herbalista',
+      role: '📜 Entregar Carta da Missão',
+      portraitImg: '/shared/img/npcs/lyana-herbalista.webp',
+      _isLyanaQuest: true
+    });
+  }
   var _portraitFor = function(npc){
     var ph = npc.portraitImg || (typeof _plazaPhotoFor === 'function' ? _plazaPhotoFor(npc) : '');
     // BUG 2026-06-28 (user: "Nila tiefling aparecia como velho humano"): resolver
@@ -41509,6 +41537,10 @@ function _squareShowInvestigatePopup(p){
     items: items,
     onPick: function(item){
       if (item && item._npc){
+        if (item._npc._isLyanaQuest || (hasLyanaQuest && (item._npc.name || '').indexOf('Lyana') >= 0)) {
+          _startLyanaEncounter(p);
+          return;
+        }
         _showSharedNpcDialogue({
           npc: item._npc,
           player: p,
@@ -58724,6 +58756,261 @@ var SUBSCREEN_DATA = {
 //     _gainXp(p, amt)   — XP + level up automático
 //     refreshHud()      — re-renderiza cliente após mutation
 // ============================================================================
+// ============================================================================
+// === MISSÕES CANÔNICAS D&D 5E — ENTREGA NARRATIVA COM ROLAGEM DE DADOS ======
+// ============================================================================
+// Ordem do Usuário 2026-10: NUNCA usar rotas cruas ou entregas silenciosas.
+// A entrega de missões possui imersão de RPG de mesa D&D 5e, presença física
+// no mundo (dia vs noite), rolagens de dados 3D antes da narrativa (Percepção,
+// Intuição, Natureza) e depois da narrativa (Investigação, Persuasão),
+// reatividade por classe e moralidade na escolha das recompensas.
+
+function _completeLyanaQuestServer(gold, xp, msg){
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+    window.vCityServer.quest.complete('quest_lyana_scroll').then(function(r){
+      if (r && r.ok) {
+        if (r.quests) _applyServerQuests(r.quests);
+        try {
+          var p = window.CITY_MOCK_PLAYER;
+          if (p){
+            if (gold) p.gold = (p.gold || 0) + gold;
+            if (xp) p.xp = (p.xp || 0) + xp;
+          }
+          if (typeof refreshHud === 'function') refreshHud();
+        } catch(_){}
+        if (typeof vToast === 'function') vToast(msg || 'Missão concluída com êxito! +' + gold + ' Valdoritas +' + xp + ' XP', 'ok');
+        if (typeof _refreshServerBoard === 'function') {
+          _refreshServerBoard().then(function(){
+            if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+          });
+        }
+      } else {
+        if (typeof vToast === 'function') vToast((r && r.error) || 'Missão entregue com sucesso.', 'ok');
+      }
+    }).catch(function(e){
+      console.error('[CITY] complete lyana server err', e);
+      _deliverQuest('lyana', gold, xp, msg);
+    });
+  } else {
+    _deliverQuest('lyana', gold, xp, msg);
+  }
+}
+
+function _startLyanaEncounter(p, forceDay){
+  p = p || window.CITY_MOCK_PLAYER || null;
+  if (typeof window.vEncounter !== 'object' || !window.vEncounter.render) {
+    _completeLyanaQuestServer(20, 40, 'Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
+    return;
+  }
+  var t = (typeof _getCurrentGameTime === 'function') ? _getCurrentGameTime() : { hour: 12 };
+  var period = (typeof _getGamePeriod === 'function') ? _getGamePeriod(t.hour) : 'day';
+
+  // 1. CONDICIONAL DE HORÁRIO / PRESENÇA — NOITE (Praça vazia, banca coberta)
+  if (period === 'night' && !forceDay) {
+    var NIGHT_DIALOGUE = {
+      npc: {
+        name: 'Guarda da Vigília da Praça',
+        desc: 'Patrulha Noturna · Armadura de Ferro e Lanterna de Latão',
+        portrait: '/shared/img/npcs/guarda-praca.webp'
+      },
+      script: [
+        {
+          type: 'narration',
+          text: 'O vento frio da noite sopra entre as estátuas antigas da Praça Central. O calçamento de pedra está deserto e úmido, refletindo o brilho pálido das tochas e das estrelas na água da fonte adormecida. A banca de ervas está completamente vazia, protegida por pesadas lonas de cânhamo amarradas por cordas grossas.'
+        },
+        {
+          type: 'speech',
+          speaker: 'Guarda da Praça',
+          text: '<i>(aproxima a lanterna estalando, iluminando seus passos)</i> Parado aí, andarilho. Procurando a herbalista a esta hora morta da noite? Lyana recolheu suas raízes e fechou a tenda quando o sino do templo tocou ao crepúsculo. Dizem que ela descansa na Estalagem da Pena-Dourada quando não passa a madrugada vigiando a cura de doentes. Volte ao amanhecer ou tente a sorte por lá.'
+        }
+      ],
+      choices: [
+        { id: 'wait_dawn', label: '🌅 Aguardar pelo amanhecer na Praça' },
+        { id: 'leave_night', label: '↩ Voltar e retornar durante o dia' }
+      ]
+    };
+    window.vEncounter.render(NIGHT_DIALOGUE, {
+      player: p,
+      onChoice: function(ch){
+        if (ch && ch.id === 'wait_dawn') {
+          try { window.vEncounter.close(); } catch(_){}
+          if (typeof vToast === 'function') vToast('Você aguarda as horas passarem até os primeiros raios de sol tocarem as muralhas...');
+          setTimeout(function(){ _startLyanaEncounter(p, true); }, 400);
+        }
+      }
+    });
+    return;
+  }
+
+  // 2. FASE DIURNA — ABORDAGEM COM ROLAGENS DE DADOS (PRÉ-NARRATIVA)
+  var charClass = (p && (p.hero_class || p.class || '')) || '';
+  var isDruidOrRanger = /druid|patrulh|ranger/i.test(charClass);
+
+  var LYANA_MAIN_SCRIPT = [
+    {
+      type: 'narration',
+      text: 'A Praça respira ao redor da grande fonte entalhada de Valdoria. Lyana está agachada perto da água fresca, separando raízes num pano azul claro. Cabelos castanhos soltos pelas costas, vestido de linho verde-musgo e mãos manchadas de seiva. Ao te ver aproximar, ela ergue o rosto — olhos verdes inquietos, sobrancelhas franzidas pela expectativa de três luas.'
+    },
+    {
+      type: 'speech',
+      speaker: 'Lyana',
+      text: '<i>(levanta-se devagar, esfregando as mãos no avental)</i> Tu... tu vens da estrada dos Portões? <b>Trazes notícias?</b> O que era para ser um recado de uma semana virou um silêncio angustiante de três luas. Por favor — se sabes de algo, fala!'
+    },
+    {
+      type: 'narration',
+      text: 'Tu estendes o pergaminho selado. Os dedos dela tremem ao reconhecer a tinta e o sinete — a caligrafia firme do pai, Eirik, o Runeiro. Ela rompe o lacre de cera vermelha com reverência e ansiedade. Os olhos correm pelas linhas, os lábios mexem em silêncio, e um misto de alívio e pavor atravessa seu rosto jovem.'
+    },
+    {
+      type: 'speech',
+      speaker: 'Lyana',
+      text: '<i>(dobra o pergaminho e aperta-o contra o peito)</i> Ele está vivo. <b>Meu pai está vivo!</b> Mas ele escreveu sobre as runas de novo... aquelas que sangram quando há lua nova. Pediu o cristal de selamento... <i>(pausa, respirando fundo)</i> Tu não imaginas o peso que tiraste de minhas costas hoje, aventureiro. Aceita o que tenho — é uma paga honesta pelo teu caminho.'
+    }
+  ];
+
+  var LYANA_CHOICES = [
+    { id: 'lyana-confirm-deliver', label: '◆ "Aceito a paga. Que teu pai retorne em paz."' },
+    { id: 'lyana-confirm-deliver-modest', label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."' },
+    {
+      id: 'curious',
+      label: '🎲 "O cristal... runas que sangram? Deixe-me examinar." · Investigação CD 13',
+      check: { skill: 'investigation', dc: 13 },
+      resultNarration: 'Cruzas as datas da carta com o que sabes sobre o alinhamento das luas. O padrão salta aos olhos: toda menção às runas coincide com o auge da lua nova — e o pedido do cristal veio três dias antes da próxima conjunção! O cristal não é um amuleto comum, mas uma fechadura arcanotécnica para estancar fendas.',
+      resultText: '<i>(Lyana empalidece de espanto, depois assente devagar)</i> "Tu enxergas o que ele enxerga... Papai dizia que as runas só sangram quando algo do outro lado empurra. O cristal fecha essa passagem. Guarda este Bálsamo Restaurador contigo... e se um dia vires uma runa úmida, não a toques."',
+      resultNarrationFail: 'As linhas da carta se recusam a formar padrão. Datas, símbolos cifrados em runeiro anão, o cristal — peças demais para decifrar às pressas na praça.',
+      resultTextFail: '<i>(Lyana dobra a carta, protetora)</i> "Perdoa. Já disse mais do que devia — papai sempre pediu segredo sobre as runas. Quando ele voltar das montanhas, perguntaremos a ele."'
+    },
+    {
+      id: 'comfort',
+      label: '🎲 "Teu pai é forte e resiliente. Não percas a esperança." · Persuasão CD 12',
+      check: { skill: 'persuasion', dc: 12 },
+      resultNarration: 'Suas palavras firmes e compassivas dissipam a sombra de desespero que nublava o olhar da jovem herbalista. A postura dela se apruma, e ela respira sem o peso do pânico.',
+      resultText: '<i>(Lyana sorri pela primeira vez, os olhos marejados)</i> "Obrigada... Eu precisava ouvir isso. Que a bênção da terra acompanhe cada passo de tua jornada."',
+      resultNarrationFail: 'Lyana assente de forma mecânica, ainda dominada pela incerteza da estrada do norte.',
+      resultTextFail: '<i>(Lyana suspira)</i> "Espero que os deuses te ouçam, andarilho."'
+    }
+  ];
+
+  var LYANA_SUB = {
+    'approach-perception': {
+      npc: {
+        name: 'Lyana, a Herbalista',
+        desc: 'Filha de Eirik · Banca de Ervas e Ungüentos na Praça',
+        portrait: '/shared/img/npcs/lyana-herbalista.webp'
+      },
+      script: LYANA_MAIN_SCRIPT,
+      choices: LYANA_CHOICES
+    },
+    'approach-insight': {
+      npc: {
+        name: 'Lyana, a Herbalista',
+        desc: 'Filha de Eirik · Banca de Ervas e Ungüentos na Praça',
+        portrait: '/shared/img/npcs/lyana-herbalista.webp'
+      },
+      script: LYANA_MAIN_SCRIPT,
+      choices: LYANA_CHOICES
+    },
+    'approach-nature': {
+      npc: {
+        name: 'Lyana, a Herbalista',
+        desc: 'Filha de Eirik · Banca de Ervas e Ungüentos na Praça',
+        portrait: '/shared/img/npcs/lyana-herbalista.webp'
+      },
+      script: LYANA_MAIN_SCRIPT,
+      choices: LYANA_CHOICES
+    },
+    'approach-direct': {
+      npc: {
+        name: 'Lyana, a Herbalista',
+        desc: 'Filha de Eirik · Banca de Ervas e Ungüentos na Praça',
+        portrait: '/shared/img/npcs/lyana-herbalista.webp'
+      },
+      script: LYANA_MAIN_SCRIPT,
+      choices: LYANA_CHOICES
+    },
+    'lyana-confirm-deliver': {
+      npc: {
+        name: 'Lyana, a Herbalista',
+        desc: 'Filha de Eirik · vinte e dois anos · banca de ervas na Praça',
+        portrait: '/shared/img/npcs/lyana-herbalista.webp'
+      },
+      script: [
+        { type: 'narration', text: 'Lyana abre a bolsinha de couro pendurada no cinto. Conta vinte moedas de prata — economia honesta de quem vive de raízes e unguentos. Coloca-as na tua mão e fecha teus dedos por cima com gratidão sincera.' },
+        { type: 'speech', speaker: 'Lyana', text: '<i>(sorri com alívio no peito)</i> Se voltares à Praça e precisares de poções ou emplastros, vem aqui primeiro. Minha banca está sempre aberta para ti.' }
+      ],
+      choices: [ { id: 'done', label: '◆ Despedir-se', cb: 'close' } ],
+      onClose: function(){
+        _completeLyanaQuestServer(20, 40, 'Lyana abraça a carta. +20 Valdoritas +40 XP. Missão concluída!');
+      }
+    },
+    'lyana-confirm-deliver-modest': {
+      npc: {
+        name: 'Lyana, a Herbalista',
+        desc: 'Filha de Eirik · vinte e dois anos · banca de ervas na Praça',
+        portrait: '/shared/img/npcs/lyana-herbalista.webp'
+      },
+      script: [
+        { type: 'narration', text: 'Lyana hesita, comovida pelo gesto de nobreza. Dois feirantes idosos que acompanhavam a cena trocam olhares de respeito. Um deles aproxima-se e coloca uma bolsa na sua mão: <i>"Poucos em Valdoria recusam prata por compaixão a uma filha aflita. A cidade honra sua virtude, aventureiro."</i>' },
+        { type: 'speech', speaker: 'Lyana', text: '<i>(curva-se em profunda reverência)</i> Que os ventos do Pai e o espírito das matas te guardem em cada passo. <b>Jamais esquecerei tua generosidade.</b>' }
+      ],
+      choices: [ { id: 'done', label: '◆ Despedir-se', cb: 'close' } ],
+      onClose: function(){
+        _completeLyanaQuestServer(30, 60, 'Lyana grava teu rosto com eterna gratidão. +30 Valdoritas +60 XP (+15 afinidade). Missão concluída!');
+      }
+    }
+  };
+
+  var APPROACH_DIALOGUE = {
+    npc: {
+      name: 'Lyana, a Herbalista',
+      desc: 'Filha de Eirik · Banca de Ervas e Ungüentos na Praça',
+      portrait: '/shared/img/npcs/lyana-herbalista.webp'
+    },
+    script: [
+      {
+        type: 'narration',
+        text: 'O sol ilumina a grande fonte de pedra da Praça Central. Entre as barracas de toldos listrados e o aroma de especiarias frescas, você avista a jovem herbalista descrita nos Portões. Antes de dar o primeiro passo, você estuda a cena.'
+      }
+    ],
+    choices: [
+      {
+        id: 'approach-perception',
+        label: '🎲 Observar postura e arredores · Percepção CD 11',
+        check: { skill: 'perception', dc: 11 },
+        resultNarration: 'Você apura o olhar entre a multidão. Lyana está agachada perto da fonte, amarrando raízes com dedos trêmulos. Seus olhos verdes erguem-se a cada minuto na direção dos Portões, demonstrando a angústia de quem aguarda notícias vitais há três luas. No peito dela brilha um camafeu com uma runa idêntica à do pergaminho selado.',
+        resultText: '<i>(Lyana percebe sua aproximação cautelosa e ergue-se com o coração aos saltos)</i> "Você... você caminha com o porte de quem vem da estrada dos Portões! Diga-me... você traz notícias de meu pai?!"',
+        resultNarrationFail: 'O vozerio dos mercadores e a fumaça de um braseiro distraem sua atenção. Você precisa contornar a fonte antes de localizá-la sentada num banco de madeira separando folhas.',
+        resultTextFail: '<i>(Lyana limpa a terra das mãos no avental de linho verde)</i> "Pois não, viajante? Precisa de unguentos para a estrada?"'
+      },
+      {
+        id: 'approach-insight',
+        label: '🎲 Avaliar os sentimentos da jovem · Intuição CD 12',
+        check: { skill: 'insight', dc: 12 },
+        resultNarration: 'Você lê a tensão nos ombros e na respiração dela. O medo dela não tem origem em dívidas ou perigos urbanos: é o pavor sufocante de uma filha que teme receber notícias fúnebres sobre a expedição do pai.',
+        resultText: '<i>(Lyana aperta um maço de alfazema contra o peito)</i> "Tens o olhar compreensivo de quem reconhece o fardo da aflição... Por favor, diga se soubeste de algo na estrada."',
+        resultNarrationFail: 'Ela aparenta ser apenas uma comerciante compenetrada em seu ofício botânico.',
+        resultTextFail: '<i>(Lyana ajeita seus potes de cerâmica)</i> "Bom dia, aventureiro. O que procura hoje?"'
+      },
+      (isDruidOrRanger ? {
+        id: 'approach-nature',
+        label: '🌿 [Natureza/Sobrevivência] Identificar as ervas raras da banca · CD 10',
+        check: { skill: 'nature', dc: 10 },
+        resultNarration: 'Você reconhece o aroma acre de Raiz-de-Mandrágora selvagem e Folhas de Meimendro — ingredientes ancestrais que só um conhecedor dos ermos colhe sob luas propícias para selar febres e venenos profanos.',
+        resultText: '<i>(Lyana sorri com genuína surpresa)</i> "Reconhece estas folhas? Sinto a bênção da floresta em seus passos. Poucos na cidade entendem a voz das raízes."',
+        resultNarrationFail: 'Você observa apenas um monte de raízes e folhas verdes frescas estendidas sobre o pano.',
+        resultTextFail: '<i>(Lyana saúda gentilmente)</i> "Bem-vindo à banca de ervas."'
+      } : null),
+      {
+        id: 'approach-direct',
+        label: 'Aproximar-se diretamente da banca'
+      }
+    ].filter(Boolean)
+  };
+
+  window._SVC_CONFIG = window._SVC_CONFIG_INN || { faction: 'lyana', factionLabel: 'Lyana, Herbalista' };
+  window.vEncounter.render(APPROACH_DIALOGUE, { dialogues: LYANA_SUB, player: p });
+}
+window._startLyanaEncounter = _startLyanaEncounter;
+
 var ACTION_HANDLERS = {
   // 2026-05-22 B1 PoC: trigger pra testar Aldric JSON dialogue end-to-end.
   // Uso: doAction('test_aldric_dialog') via console ou button dev.
@@ -59805,66 +60092,7 @@ var ACTION_HANDLERS = {
     });
   },
   'quest_lyana_locate': function(p){ _questGotoMap('lyana', 'Falar com Lyana'); },
-  /* 2026-05-20: upgrade PADRAO_ALDRIC — antes era _deliverQuest direto (toast
-     simples). Agora abre encounter completo: Lyana recebe carta com typewriter,
-     emoções por estrofe, e só completa quest após clicar "Entregar". PNG canonical
-     lyana-herbalista.webp gerada via scripts/_gen_inn_lyana_pngs.py. */
-  'quest_lyana_deliver': function(p){
-    if (typeof window.vEncounter !== 'object' || !window.vEncounter.render) {
-      _deliverQuest('lyana', 20, 40, 'Lyana recebe a carta. +20 Valdoritas +40 XP. Missão completa!');
-      return;
-    }
-    var LYANA_DIALOGUE = {
-      npc: {
-        name: 'Lyana, a Herbalista',
-        desc: 'Filha de Eirik · vinte e dois anos · banca de ervas na Praça',
-        portrait: '/shared/img/npcs/lyana-herbalista.webp'
-      },
-      script: [
-        { type: 'narration', text: 'A Praça respira no fim da tarde — comerciantes recolhem bancas, sinos do templo soam graves. Lyana está agachada perto da fonte, separando raízes de mandrágora num pano azul claro. Cabelos castanhos soltos pelas costas, vestido de linho verde-musgo, mãos manchadas de seiva. Ao te ver aproximar, ela ergue o rosto — olhos verdes inquietos, sobrancelhas franzidas pela expectativa de três luas.' },
-        { type: 'speech', speaker: 'Lyana', text: '<i>(levanta-se devagar, esfrega as mãos no avental)</i> Tu... tu vens da estrada? <b>Trazes notícias?</b> O que era pra ser um recado de uma semana virou silêncio de três luas. Por favor — qualquer coisa, fala.' },
-        { type: 'narration', text: 'Tu entregas o pergaminho selado. Os dedos dela tremem ao reconhecer a tinta — a caligrafia firme do pai, Eirik, o Runeiro. Ela rompe o selo de cera com cuidado, como se temesse o som. Olhos correm pelas linhas, lábios mexem em silêncio, e algo entre alívio e angústia atravessa o rosto.' },
-        { type: 'speech', speaker: 'Lyana', text: '<i>(dobra o pergaminho e aperta contra o peito)</i> Ele está vivo. <b>Vivo.</b> Mas escreveu sobre as runas de novo — aquelas que sangram na lua nova. Pediu o cristal... <i>(pausa, respira fundo)</i> Tu não imaginas o peso que tiraste das minhas costas hoje, aventureiro. Aceita o que tenho — não é muito, mas é de coração.' }
-      ],
-      choices: [
-        // Sessão #55 (2026-05-28) — FIX Bug P0 Quest delivery loop Lyana:
-        //   _dispatchSvcChoice (svc-interactions.js:451) e _handleChoiceInternal
-        //   (encounter-popup.js:841) buscam ch.id (NÃO cb) em opts.dialogues.
-        //   Antes: id='accept'/cb='lyana-confirm-deliver' → lookup falhava em
-        //   opts.dialogues['accept'] → fall-through pra vCity.act → close sem
-        //   aplicar reward. Fix: id passa a ser igual à key de LYANA_SUB.
-        { id: 'lyana-confirm-deliver',        label: '"Aceito. Que teu pai retorne em paz."' },
-        { id: 'lyana-confirm-deliver-modest', label: '↩ "Não preciso de paga. Cuida-te, Lyana."' },
-        { id: 'curious', label: '"O cristal... runas que sangram? Conta mais." · Investigação DC 13', check: { skill: 'investigation', dc: 13 },
-          resultNarration: 'Cruzas as datas da carta com o que sabes das luas. O padrão salta: toda menção às runas coincide com a lua nova — e o pedido do cristal veio três dias antes da próxima.',
-          resultText: '<i>(Lyana empalidece, depois assente devagar)</i> "Tu vês o que ele vê, então. Papai dizia que as runas só sangram quando algo do outro lado empurra. O cristal não é enfeite — é fechadura. Guarda isso contigo... e se um dia vires uma runa úmida, não a toques."',
-          resultNarrationFail: 'As linhas da carta se recusam a formar padrão. Datas, runas, o cristal — peças demais, encaixes de menos.',
-          resultTextFail: '<i>(Lyana dobra a carta, protetora)</i> "Perdoa. Já disse mais do que devia — papai sempre pediu segredo sobre as runas. Quando ele voltar, pergunta a ele. É história dele, não minha."' }
-      ]
-    };
-    var LYANA_SUB = {
-      'lyana-confirm-deliver': {
-        npc: LYANA_DIALOGUE.npc,
-        script: [
-          { type: 'narration', text: 'Lyana abre a bolsinha de couro pendurada no cinto. Conta vinte moedas de prata — economia honesta de quem vive de raízes e ungüentos. Coloca-as na tua mão e fecha teus dedos por cima.' },
-          { type: 'speech', speaker: 'Lyana', text: '<i>(sorri pela primeira vez em três luas)</i> Se voltares à Praça e precisar de uma poção, vem aqui primeiro. A casa é tua agora.' }
-        ],
-        choices: [ { id: 'done', label: '◆ Despedir-se', cb: 'close' } ],
-        onClose: function(){ _deliverQuest('lyana', 20, 40, 'Lyana abraça a carta. +20 Valdoritas +40 XP. Missão completa!'); }
-      },
-      'lyana-confirm-deliver-modest': {
-        npc: LYANA_DIALOGUE.npc,
-        script: [
-          { type: 'narration', text: 'Lyana hesita, depois assente com um aceno breve. Não insiste — entende que alguns gestos não se compram com prata.' },
-          { type: 'speech', speaker: 'Lyana', text: '<i>(curva-se ligeiramente)</i> Que os ventos do Pai te guardem na próxima estrada. <b>Não esquecerei.</b>' }
-        ],
-        choices: [ { id: 'done', label: '◆ Despedir-se', cb: 'close' } ],
-        onClose: function(){ _deliverQuest('lyana', 30, 50, 'Lyana grava teu rosto. +30 Valdoritas +50 XP (+10 afinidade). Missão completa!'); }
-      }
-    };
-    window._SVC_CONFIG = window._SVC_CONFIG_INN || { faction: 'lyana', factionLabel: 'Lyana, Herbalista' };
-    window.vEncounter.render(LYANA_DIALOGUE, { dialogues: LYANA_SUB });
-  },
+  'quest_lyana_deliver': function(p){ _startLyanaEncounter(p); },
   'quest_lyana_read': function(p){
     _showInfoPopup({
       icon: _heralIco('ic-pergaminho'),
@@ -61110,18 +61338,24 @@ function renderCityTopBar(){
   var weatherSlug = TOPBAR_WEATHER_PNG[weatherKey];
   var periodIcon = _ctbIconHTML(periodSlug, pemoji);
   var weatherIcon = _ctbIconHTML(weatherSlug, w.icon);
-  // Sessão #62 revisão 2: REMOVIDO ao lado de VALDORIA — user confirmou
-  // "é um ícone sem sentido". Só o nome dourado VALDORIA permanece.
+  // Ordem do Usuário 2026-10: Valdoritas visíveis exclusivamente na ficha/card do personagem,
+  // liberando espaço nobre no cabeçalho para organização cristalina de dia, período, horário e clima.
   el.innerHTML = ''
-    + '<div class="ctb-icons">'
-    + '  <span class="ctb-item"><span style="color:var(--v-gold,#c4953a);">VALDORIA</span></span>'
+    + '<div class="ctb-icons" style="gap:10px;">'
+    + '  <span class="ctb-item ctb-city" style="color:var(--v-gold,#c4953a);letter-spacing:2px;font-size:calc(13px * var(--v-font-scale, 1));font-weight:700;">'
+    + '    <span style="opacity:0.8;font-size:0.85em;margin-right:2px;">◆</span>VALDORIA'
+    + '  </span>'
     + '</div>'
-    + '<div class="ctb-icons ctb-gold" title="Suas Valdoritas">' + _goldBadgeHTML() + '</div>'
-    + '<div class="ctb-icons" title="' + hh + ':' + mm + ' · ' + plabel + ' · ' + t.day + ' de ' + monthName + ' · Ano ' + t.year + ' · ' + w.desc + ' (' + w.temp + '°C)">'
-    + '  <span class="ctb-item ctb-time">' + periodIcon + ' ' + hh + ':' + mm + '</span>'
-    // Sessao #37 v13: monthShort + ano abreviado pra caber em "Maior"
-    + '  <span class="ctb-item ctb-date" style="font-size: var(--v-font-xs, 11px); color: var(--v-text-dim, #a09484);">' + t.day + ' ' + monthShort + ' · ' + t.year + '</span>'
-    + '  <span class="ctb-item ctb-weather">' + weatherIcon + ' ' + w.temp + '°</span>'
+    + '<div class="ctb-icons" style="gap:14px;flex-wrap:nowrap;" title="' + hh + ':' + mm + ' · ' + plabel + ' · ' + t.day + ' de ' + monthName + ' · Ano ' + t.year + ' · ' + w.desc + ' (' + w.temp + '°C)">'
+    + '  <span class="ctb-item ctb-date" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);font-weight:600;letter-spacing:0.8px;">'
+    + '    ' + t.day + ' ' + monthShort + ' · Ano ' + t.year
+    + '  </span>'
+    + '  <span class="ctb-item ctb-time" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold-light,#e8c45a);font-weight:600;gap:4px;">'
+    + '    ' + periodIcon + ' ' + plabel + ' ' + hh + ':' + mm
+    + '  </span>'
+    + '  <span class="ctb-item ctb-weather" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);font-weight:500;gap:4px;">'
+    + '    ' + weatherIcon + ' ' + w.desc + ' · ' + w.temp + '°C'
+    + '  </span>'
     + '</div>';
 }
 
