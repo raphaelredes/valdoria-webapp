@@ -70576,8 +70576,226 @@ function _renderEncounterPopup(enc, originalAction, player) {
   _renderPage(0);
 }
 
-/* Registro de Diálogos e Crônicas do Aventureiro (Canonical)
-   Acessível via Configurações > Extras > Registro de Diálogos. */
+/* ============================================================================
+   Registro de Diálogos e Crônicas do Aventureiro (Canonical AAA)
+   Acessível via Configurações > Extras > Registro de Diálogos.
+   Organizado por Setores, Interlocutores (NPCs), Busca Textual e Leitor Fullscreen.
+   ============================================================================ */
+
+function _openDialogueReaderPopup(entry, allNpcDialogues, currentIndex){
+  var reader = document.getElementById('dlg-full-reader');
+  if (reader) reader.remove();
+
+  reader = document.createElement('div');
+  reader.id = 'dlg-full-reader';
+  reader.className = 'dlg-full-reader-overlay';
+
+  var npcObj = entry.npc || {};
+  var npcName = (typeof npcObj === 'string' ? npcObj : npcObj.name) || 'Interlocutor';
+  var npcDesc = (typeof npcObj === 'object' && npcObj.desc) ? npcObj.desc : (entry.location || '');
+  var portraitUrl = (typeof npcObj === 'object' && (npcObj.portraitImg || npcObj.portrait)) || '';
+  var isImg = portraitUrl && (portraitUrl.indexOf('/') >= 0 || portraitUrl.indexOf('.') >= 0);
+
+  var sId = (window.vDialogueHistory && typeof window.vDialogueHistory.resolveSector === 'function')
+    ? window.vDialogueHistory.resolveSector(entry) : 'other';
+  var secList = (window.vDialogueHistory && window.vDialogueHistory.SECTORS) || [];
+  var secMeta = secList.find(function(s){ return s.id === sId; }) || { label: 'Encontro', icon: 'ic-dialogo' };
+
+  var dDate = entry.ts ? new Date(entry.ts) : new Date();
+  var dateStr = dDate.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' às ' +
+                dDate.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+
+  var html = '<style>'
+    + '.dlg-full-reader-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#241c15 0%,#130e0a 100%);display:flex;flex-direction:column;box-sizing:border-box;overflow:hidden;animation:dlgFadeIn 0.2s ease-out;}'
+    + '@keyframes dlgFadeIn{from{opacity:0;transform:scale(0.99);}to{opacity:1;transform:scale(1);}}'
+    + '.dfr-header{flex-shrink:0;display:flex;align-items:center;gap: var(--v-space-md, 10px);padding: 12px 16px;background:linear-gradient(180deg,rgba(35,27,20,0.95),rgba(20,15,11,0.9));border-bottom:1.5px solid var(--v-gold,#c4953a);box-shadow:0 4px 16px rgba(0,0,0,0.6);}'
+    + '.dfr-portrait{width:46px;height:46px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid var(--v-gold,#c4953a);display:flex;align-items:center;justify-content:center;background:rgba(20,16,12,0.9);box-shadow:0 0 10px rgba(196,149,58,0.35);cursor:pointer;}'
+    + '.dfr-portrait img{width:100%;height:100%;object-fit:cover;}'
+    + '.dfr-portrait svg{width:28px;height:28px;color:var(--v-gold,#c4953a);}'
+    + '.dfr-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}'
+    + '.dfr-name{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(15px * var(--v-font-scale, 1));color:#fff4d0;font-weight:700;letter-spacing:1px;text-shadow:0 0 8px rgba(196,149,58,0.4);}'
+    + '.dfr-sub-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);}'
+    + '.dfr-sector-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;background:rgba(196,149,58,0.15);border:1px solid rgba(196,149,58,0.4);border-radius:4px;color:var(--v-gold,#c4953a);font-weight:700;text-transform:uppercase;font-size:calc(9.5px * var(--v-font-scale, 1));}'
+    + '.dfr-close-btn{flex-shrink:0;background:rgba(74,56,40,0.5);border:1px solid var(--v-gold-40,rgba(196,149,58,0.4));color:#ffd27a;width:36px;height:36px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;}'
+    + '.dfr-close-btn:hover{background:rgba(196,149,58,0.25);border-color:var(--v-gold,#c4953a);color:#fff;transform:scale(1.05);}'
+    // Corpo
+    + '.dfr-body{flex:1;overflow-y:auto;padding: 16px;display:flex;flex-direction:column;gap: 14px;max-width:760px;margin:0 auto;width:100%;box-sizing:border-box;}'
+    + '.dfr-date-tag{text-align:center;font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;margin-bottom:4px;}'
+    + '.dfr-script-block{display:flex;flex-direction:column;gap:8px;}'
+    + '.dfr-line{font-size:calc(13px * var(--v-font-scale, 1));line-height:1.6;color:#e6dac0;}'
+    + '.dfr-line.speech{padding: 8px 12px;background:rgba(196,149,58,0.08);border-left:3px solid var(--v-gold,#c4953a);border-radius:0 8px 8px 0;box-shadow:0 2px 6px rgba(0,0,0,0.2);}'
+    + '.dfr-line.narration{font-style:italic;color:#a89b88;padding-left:10px;border-left:2px solid rgba(196,149,58,0.25);}'
+    + '.dfr-speaker{display:block;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);font-weight:700;letter-spacing:1px;margin-bottom:2px;}'
+    // Decisão
+    + '.dfr-decision-card{padding: 10px 14px;background:linear-gradient(180deg,rgba(196,149,58,0.18) 0%,rgba(196,149,58,0.08) 100%);border:1.5px solid var(--v-gold,#c4953a);border-radius:8px;box-shadow:0 3px 12px rgba(0,0,0,0.3);display:flex;flex-direction:column;gap:3px;}'
+    + '.dfr-decision-tag{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}'
+    + '.dfr-decision-label{font-size:calc(13.5px * var(--v-font-scale, 1));color:#fff4d0;font-weight:700;}'
+    + '.dfr-decision-desc{font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;line-height:1.4;}'
+    // Teste D&D 5e
+    + '.dfr-check-card{padding: 10px 14px;border-radius:8px;border:1.5px solid;display:flex;flex-direction:column;gap:4px;font-size:calc(12px * var(--v-font-scale, 1));}'
+    + '.dfr-check-card.check-win{background:rgba(122,208,107,0.12);border-color:#7ad06b;}'
+    + '.dfr-check-card.check-loss{background:rgba(208,72,72,0.12);border-color:#d04848;}'
+    + '.dfr-check-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--v-font-display,Cinzel,serif);font-weight:700;font-size:calc(12px * var(--v-font-scale, 1));}'
+    + '.dfr-check-badge{padding:2px 8px;border-radius:4px;font-size:calc(10.5px * var(--v-font-scale, 1));text-transform:uppercase;font-weight:700;letter-spacing:1px;}'
+    + '.dfr-check-formula{font-size:calc(11.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);}'
+    // Desfecho
+    + '.dfr-outcome-box{padding: 10px 14px;background:rgba(20,16,12,0.7);border-left:3px solid #b8862d;border-radius:0 8px 8px 0;display:flex;flex-direction:column;gap:6px;}'
+    + '.dfr-outcome-title{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:#c4953a;letter-spacing:1px;text-transform:uppercase;font-weight:700;}'
+    // Recompensas
+    + '.dfr-rewards-box{display:flex;gap:8px;flex-wrap:wrap;padding: 8px 12px;background:rgba(196,149,58,0.08);border:1px solid rgba(196,149,58,0.3);border-radius:6px;align-items:center;}'
+    + '.dfr-reward-item{display:inline-flex;align-items:center;gap:4px;font-size:calc(11px * var(--v-font-scale, 1));color:#ffd27a;font-weight:700;}'
+    // Footer
+    + '.dfr-footer{flex-shrink:0;padding: 10px 16px;background:rgba(20,16,12,0.92);border-top:1px solid rgba(196,149,58,0.3);display:flex;justify-content:space-between;align-items:center;gap: var(--v-space-md, 8px);}'
+    + '.dfr-nav-btn{padding: 6px 14px;background:rgba(74,56,40,0.55);border:1px solid rgba(196,149,58,0.45);border-radius:6px;color:#d4c8b0;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));cursor:pointer;transition:all 0.15s;}'
+    + '.dfr-nav-btn:hover:not(:disabled){background:rgba(196,149,58,0.2);border-color:var(--v-gold,#c4953a);color:#fff;}'
+    + '.dfr-nav-btn:disabled{opacity:0.35;cursor:default;}'
+    + '.dfr-back-btn{padding: 8px 18px;background:linear-gradient(180deg,#c4953a,#8a6420);border:1px solid #ffd700;border-radius:6px;color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(12px * var(--v-font-scale, 1));font-weight:700;cursor:pointer;letter-spacing:0.8px;}'
+    + '</style>'
+    + '<div class="dfr-header">'
+    +   '<div class="dfr-portrait" ' + (isImg ? 'title="Ampliar imagem"' : '') + '>'
+    +     (isImg ? '<img src="' + portraitUrl + '" alt="" loading="lazy"/>' : '<svg viewBox="0 0 120 120"><use href="#' + (portraitUrl || 'ic-dialogo') + '"/></svg>')
+    +   '</div>'
+    +   '<div class="dfr-meta">'
+    +     '<div class="dfr-name">' + npcName + '</div>'
+    +     '<div class="dfr-sub-row">'
+    +       '<span class="dfr-sector-badge">' + (secMeta.label || 'Setor') + '</span>'
+    +       (npcDesc ? '<span>· ' + npcDesc + '</span>' : '')
+    +     '</div>'
+    +   '</div>'
+    +   '<button id="dfr-btn-close" class="dfr-close-btn" type="button" aria-label="Fechar">✕</button>'
+    + '</div>'
+    + '<div class="dfr-body">'
+    +   '<div class="dfr-date-tag">✦ Encontro ocorrido em ' + dateStr + '</div>'
+    // Falas iniciais
+    +   '<div class="dfr-script-block">';
+
+  (entry.script || []).forEach(function(line){
+    if (!line || !line.text) return;
+    if (line.type === 'speech') {
+      var spk = line.speaker || npcName;
+      html += '<div class="dfr-line speech"><span class="dfr-speaker">' + spk + '</span>' + line.text + '</div>';
+    } else {
+      html += '<div class="dfr-line narration">' + line.text + '</div>';
+    }
+  });
+  html += '</div>';
+
+  // Decisão tomada pelo jogador
+  if (entry.chosen) {
+    html += '<div class="dfr-decision-card">'
+      + '<span class="dfr-decision-tag">⚔ Tua Decisão:</span>'
+      + '<span class="dfr-decision-label">' + (entry.chosen.label || entry.chosen.id || 'Avançar') + '</span>'
+      + (entry.chosen.desc ? '<span class="dfr-decision-desc">' + entry.chosen.desc + '</span>' : '')
+      + '</div>';
+  }
+
+  // Teste de perícia / dados D&D 5e
+  if (entry.check && (entry.check.d20 != null || entry.check.total != null)) {
+    var ck = entry.check;
+    var isWin = !!ck.success;
+    var bCls = ck.critSuccess ? 'badge-crit' : (isWin ? 'badge-win' : 'badge-loss');
+    var bLabel = ck.critSuccess ? '⚜ Acerto Crítico!' : (ck.critFail ? '✗ Falha Crítica' : (isWin ? '✓ Sucesso' : '✗ Falha'));
+    var skillLabel = (window.DndRules && typeof window.DndRules.skillLabelPT === 'function')
+      ? window.DndRules.skillLabelPT(ck.skill || ck.stat)
+      : (ck.skill || ck.stat || 'Atributo');
+    var modStr = (ck.mod >= 0 ? '+' : '') + (ck.mod || 0);
+
+    html += '<div class="dfr-check-card ' + (isWin ? 'check-win' : 'check-loss') + '">'
+      + '<div class="dfr-check-head">'
+      +   '<span>🎲 Teste de ' + skillLabel + (ck.dc ? ' (CD ' + ck.dc + ')' : '') + '</span>'
+      +   '<span class="dfr-check-badge ' + bCls + '">' + bLabel + '</span>'
+      + '</div>'
+      + '<div class="dfr-check-formula">'
+      +   'Rolagem d20: <b>' + (ck.d20 != null ? ck.d20 : '-') + '</b> ' + modStr + ' = <b>' + (ck.total != null ? ck.total : '-') + '</b>' + (ck.dc ? ' vs CD ' + ck.dc : '')
+      + '</div>'
+      + '</div>';
+  }
+
+  // Desfecho narrativo
+  if (entry.outcome && (Array.isArray(entry.outcome) ? entry.outcome.length > 0 : String(entry.outcome).trim().length > 0)) {
+    html += '<div class="dfr-outcome-box">'
+      + '<div class="dfr-outcome-title">✦ Desfecho & Resposta:</div>';
+    if (Array.isArray(entry.outcome)) {
+      entry.outcome.forEach(function(oLine){
+        if (!oLine || !oLine.text) return;
+        if (oLine.type === 'speech') {
+          html += '<div class="dfr-line speech"><span class="dfr-speaker">' + (oLine.speaker || npcName) + '</span>' + oLine.text + '</div>';
+        } else {
+          html += '<div class="dfr-line narration">' + oLine.text + '</div>';
+        }
+      });
+    } else {
+      html += '<div class="dfr-line narration">' + String(entry.outcome) + '</div>';
+    }
+    html += '</div>';
+  }
+
+  // Recompensas
+  if (Array.isArray(entry.rewards) && entry.rewards.length > 0) {
+    html += '<div class="dfr-rewards-box">'
+      + '<span style="font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);font-weight:700;text-transform:uppercase;">Recompensas:</span>';
+    entry.rewards.forEach(function(rw){
+      var ico = rw.type === 'xp' ? '⭐' : (rw.type === 'gold' ? '🪙' : '✦');
+      var sign = (rw.amount > 0) ? '+' : '';
+      html += '<span class="dfr-reward-item">' + ico + ' ' + sign + rw.amount + ' ' + (rw.label || '') + '</span>';
+    });
+    html += '</div>';
+  }
+
+  html += '</div>' // dfr-body
+    // Footer
+    + '<div class="dfr-footer">';
+
+  var hasMulti = Array.isArray(allNpcDialogues) && allNpcDialogues.length > 1;
+  if (hasMulti) {
+    html += '<button id="dfr-prev-btn" class="dfr-nav-btn" ' + (currentIndex > 0 ? '' : 'disabled') + '>← Mais Antigo</button>'
+         +  '<button id="dfr-back-bottom" class="dfr-back-btn">↩ Voltar</button>'
+         +  '<button id="dfr-next-btn" class="dfr-nav-btn" ' + (currentIndex < allNpcDialogues.length - 1 ? '' : 'disabled') + '>Mais Recente →</button>';
+  } else {
+    html += '<div style="flex:1;"></div>'
+         +  '<button id="dfr-back-bottom" class="dfr-back-btn">↩ Voltar ao Registro</button>'
+         +  '<div style="flex:1;"></div>';
+  }
+  html += '</div>';
+
+  reader.innerHTML = html;
+  document.body.appendChild(reader);
+
+  function _closeReader(){
+    if (reader && reader.parentNode) reader.parentNode.removeChild(reader);
+  }
+
+  var closeBtn = reader.querySelector('#dfr-btn-close');
+  if (closeBtn) closeBtn.addEventListener('click', _closeReader);
+  var bottomBackBtn = reader.querySelector('#dfr-back-bottom');
+  if (bottomBackBtn) bottomBackBtn.addEventListener('click', _closeReader);
+
+  var portraitEl = reader.querySelector('.dfr-portrait');
+  if (portraitEl && isImg) {
+    portraitEl.addEventListener('click', function(){
+      if (typeof window.showLightbox === 'function') {
+        window.showLightbox(portraitUrl, npcName, npcDesc);
+      }
+    });
+  }
+
+  // Navegação entre múltiplos diálogos do mesmo NPC
+  if (hasMulti) {
+    var prevBtn = reader.querySelector('#dfr-prev-btn');
+    if (prevBtn && currentIndex > 0) {
+      prevBtn.addEventListener('click', function(){
+        _openDialogueReaderPopup(allNpcDialogues[currentIndex - 1], allNpcDialogues, currentIndex - 1);
+      });
+    }
+    var nextBtn = reader.querySelector('#dfr-next-btn');
+    if (nextBtn && currentIndex < allNpcDialogues.length - 1) {
+      nextBtn.addEventListener('click', function(){
+        _openDialogueReaderPopup(allNpcDialogues[currentIndex + 1], allNpcDialogues, currentIndex + 1);
+      });
+    }
+  }
+}
+
 function _showDialogHistoryPopup(){
   var p = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || null;
   var hist = [];
@@ -70599,9 +70817,31 @@ function _showDialogHistoryPopup(){
     _popupStack.push('dialog_history');
   }
 
-  // Estado de filtros e busca em memória de sessão
-  if (!window._dlgFilters) {
-    window._dlgFilters = { period: 'all', limit: 10, search: '' };
+  // Estado de filtros, busca e setor ativo
+  if (!window._dlgState) {
+    window._dlgState = { sector: 'all', search: '', period: 'all' };
+  }
+
+  var SECTORS = (window.vDialogueHistory && window.vDialogueHistory.SECTORS) || [
+    { id: 'all', label: 'Todos os Setores', icon: 'ic-pergaminho' },
+    { id: 'gates', label: 'Portões da Cidade', icon: 'ic-portao' },
+    { id: 'square', label: 'Praça Central', icon: 'ic-praca' },
+    { id: 'tavern', label: 'Taverna do Javali', icon: 'ic-taverna' },
+    { id: 'inn', label: 'Estalagem da Colina', icon: 'ic-estalagem' },
+    { id: 'market', label: 'Mercado de Eldoria', icon: 'ic-mercado' },
+    { id: 'bank', label: 'Banco de Tholram', icon: 'ic-banco' },
+    { id: 'temple', label: 'Templo dos Deuses', icon: 'ic-templo' },
+    { id: 'workshop', label: 'Oficina & Forja', icon: 'ic-oficina' },
+    { id: 'arena', label: 'Arena de Duelos', icon: 'ic-arena' },
+    { id: 'journey', label: 'Viagens & Estradas', icon: 'ic-bussola' },
+    { id: 'other', label: 'Outros Encontros', icon: 'ic-dialogo' }
+  ];
+
+  function _resolveSectorId(entry){
+    if (window.vDialogueHistory && typeof window.vDialogueHistory.resolveSector === 'function') {
+      return window.vDialogueHistory.resolveSector(entry);
+    }
+    return 'other';
   }
 
   function _fmtTs(ts){
@@ -70611,254 +70851,257 @@ function _showDialogHistoryPopup(){
     if (elapsed < 60000) return 'agora';
     if (elapsed < 3600000) return Math.floor(elapsed/60000) + ' min atrás';
     if (elapsed < 86400000) return Math.floor(elapsed/3600000) + ' h atrás';
-    return d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'}) + ' ' +
-           d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    return d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'});
   }
 
-  function _applyFilters(all){
-    var f = window._dlgFilters;
-    var now = Date.now();
-    var q = (f.search || '').trim().toLowerCase();
-
-    var filtered = all.filter(function(d){
-      // Filtro de período
-      if (f.period === 'today' && (now - (d.ts || 0)) >= 86400000) return false;
-      if (f.period === 'week' && (now - (d.ts || 0)) >= 7 * 86400000) return false;
-
-      // Filtro de busca por texto/NPC
-      if (q) {
-        var npcName = (d.npc && (d.npc.name || d.npc)) ? String(d.npc.name || d.npc).toLowerCase() : '';
-        var loc = d.location ? String(d.location).toLowerCase() : '';
-        var chosenText = (d.chosen && d.chosen.label) ? String(d.chosen.label).toLowerCase() : '';
-        var scriptText = (d.script || []).map(function(s){ return (s.text || '').toLowerCase(); }).join(' ');
-        var outcomeText = (d.outcome || []).map(function(o){ return (o.text || '').toLowerCase(); }).join(' ');
-        var matches = npcName.indexOf(q) >= 0 || loc.indexOf(q) >= 0 || chosenText.indexOf(q) >= 0 ||
-                      scriptText.indexOf(q) >= 0 || outcomeText.indexOf(q) >= 0;
-        if (!matches) return false;
-      }
-      return true;
-    });
-
-    if (f.limit === 'all' || f.limit >= 999) return filtered;
-    return filtered.slice(0, typeof f.limit === 'number' ? f.limit : 10);
+  // Realça o texto pesquisado
+  function _highlightMatch(text, query){
+    if (!text || !query) return text || '';
+    var esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return String(text).replace(new RegExp('(' + esc + ')', 'gi'), '<mark class="dlg-search-match">$1</mark>');
   }
 
   function _render(){
-    var filtered = _applyFilters(hist);
+    var state = window._dlgState;
+    var now = Date.now();
+    var q = (state.search || '').trim().toLowerCase();
+
+    // 1. Contagem total de diálogos por setor
+    var sectorCounts = {};
+    SECTORS.forEach(function(s){ sectorCounts[s.id] = 0; });
+    hist.forEach(function(entry){
+      var sec = _resolveSectorId(entry);
+      sectorCounts[sec] = (sectorCounts[sec] || 0) + 1;
+      sectorCounts['all'] = (sectorCounts['all'] || 0) + 1;
+    });
+
+    // 2. Filtragem
+    var filtered = hist.filter(function(entry){
+      // Filtro de setor
+      if (state.sector !== 'all') {
+        var eSec = _resolveSectorId(entry);
+        if (eSec !== state.sector) return false;
+      }
+      // Filtro de período
+      if (state.period === 'today' && (now - (entry.ts || 0)) >= 86400000) return false;
+      if (state.period === 'week' && (now - (entry.ts || 0)) >= 7 * 86400000) return false;
+
+      // Filtro de busca textual digitando
+      if (q) {
+        var npcName = (entry.npc && (entry.npc.name || entry.npc)) ? String(entry.npc.name || entry.npc).toLowerCase() : '';
+        var loc = entry.location ? String(entry.location).toLowerCase() : '';
+        var chosenText = (entry.chosen && entry.chosen.label) ? String(entry.chosen.label).toLowerCase() : '';
+        var chosenDesc = (entry.chosen && entry.chosen.desc) ? String(entry.chosen.desc).toLowerCase() : '';
+        var scriptText = (entry.script || []).map(function(s){ return (s.text || '').toLowerCase(); }).join(' ');
+        var outcomeText = (entry.outcome || []).map(function(o){ return (o.text || '').toLowerCase(); }).join(' ');
+        var rewardsText = (entry.rewards || []).map(function(r){ return (r.label || '').toLowerCase(); }).join(' ');
+        var matches = npcName.indexOf(q) >= 0 || loc.indexOf(q) >= 0 || chosenText.indexOf(q) >= 0 ||
+                      chosenDesc.indexOf(q) >= 0 || scriptText.indexOf(q) >= 0 || outcomeText.indexOf(q) >= 0 ||
+                      rewardsText.indexOf(q) >= 0;
+        if (!matches) return false;
+      }
+
+      return true;
+    });
+
+    // 3. Agrupamento por Interlocutor (NPC)
+    var npcGroups = {};
+    filtered.forEach(function(entry){
+      var npc = entry.npc || {};
+      var npcName = (typeof npc === 'string' ? npc : npc.name) || 'Interlocutor Desconhecido';
+      if (!npcGroups[npcName]) {
+        npcGroups[npcName] = {
+          name: npcName,
+          desc: npc.desc || entry.location || '',
+          portrait: npc.portrait || 'ic-dialogo',
+          portraitImg: npc.portraitImg || null,
+          dialogues: []
+        };
+      }
+      npcGroups[npcName].dialogues.push(entry);
+    });
+
+    // Ordena os NPCs por diálogo mais recente
+    var sortedNpcKeys = Object.keys(npcGroups).sort(function(a, b){
+      var tsA = (npcGroups[a].dialogues[0] && npcGroups[a].dialogues[0].ts) || 0;
+      var tsB = (npcGroups[b].dialogues[0] && npcGroups[b].dialogues[0].ts) || 0;
+      return tsB - tsA;
+    });
+
     var html = '<style>'
-      + '.dlg-hist-wrap{padding: var(--v-space-md, 8px);display:flex;flex-direction:column;gap: var(--v-space-md, 10px);}'
-      + '.dlg-hist-controls{display:flex;flex-direction:column;gap:6px;padding: var(--v-space-md, 8px) var(--v-space-md-lg, 10px);background:rgba(42,36,32,0.65);border:1px solid var(--v-border,#4a3828);border-radius:8px;}'
-      + '.dlg-search-input{width:100%;box-sizing:border-box;padding: 6px var(--v-space-md, 8px);background:rgba(20,16,12,0.85);border:1px solid var(--v-gold-40,rgba(196,149,58,0.4));border-radius: var(--v-radius-xs, 4px);color:#fff4d0;font-family:inherit;font-size:calc(12px * var(--v-font-scale, 1));outline:none;}'
-      + '.dlg-search-input:focus{border-color:var(--v-gold,#c4953a);box-shadow:0 0 8px rgba(196,149,58,0.3);}'
-      + '.dlg-filter-row{display:flex;align-items:center;gap:6px;font-size:calc(10px * var(--v-font-scale, 1));}'
-      + '.dlg-filter-label{color:var(--v-gold,#c4953a);text-transform:uppercase;letter-spacing:1px;min-width:60px;font-weight:700;}'
-      + '.dlg-filter-btns{display:flex;gap: var(--v-space-sm, 4px);flex:1;}'
-      + '.dlg-filter-btn{flex:1;padding: var(--v-space-sm, 4px) 6px;background:rgba(196,149,58,0.06);border:1px solid var(--v-border,#4a3828);border-radius: var(--v-radius-xs, 4px);color:var(--v-text-dim,#a09484);font-size:calc(10px * var(--v-font-scale, 1));font-family:var(--v-font,MedievalSharp,serif);cursor:pointer;transition:all 0.15s;}'
-      + '.dlg-filter-btn:hover{background:rgba(196,149,58,0.12);color:var(--v-text,#d4c8b0);}'
-      + '.dlg-filter-btn.active{background:linear-gradient(180deg,#c4953a,#8a6420);color:#1a1410;border-color:#ffd700;font-weight:700;}'
-      + '.dlg-hist-count-line{display:flex;justify-content:space-between;align-items:center;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;margin:2px 0;}'
-      + '.dlg-hist-clear-btn{background:none;border:none;color:#d04848;font-size:calc(10px * var(--v-font-scale, 1));cursor:pointer;opacity:0.8;transition:opacity 0.2s;text-decoration:underline;}'
-      + '.dlg-hist-clear-btn:hover{opacity:1;}'
-      // Entry Card
-      + '.dlg-hist-entry{padding: var(--v-space-lg, 12px);background:linear-gradient(180deg,rgba(48,38,28,0.7) 0%,rgba(32,24,18,0.85) 100%);border:1px solid rgba(196,149,58,0.35);border-radius:8px;box-shadow:0 3px 12px rgba(0,0,0,0.35);display:flex;flex-direction:column;gap: var(--v-space-md, 8px);}'
-      + '.dlg-hist-header{display:flex;align-items:center;gap: var(--v-space-md, 8px);padding-bottom:6px;border-bottom:1px solid rgba(196,149,58,0.2);}'
-      + '.dlg-hist-portrait{width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1.5px solid var(--v-gold,#c4953a);display:flex;align-items:center;justify-content:center;background:rgba(20,16,12,0.8);box-shadow:0 0 6px rgba(196,149,58,0.25);}'
-      + '.dlg-hist-portrait img{width:100%;height:100%;object-fit:cover;}'
-      + '.dlg-hist-portrait svg{width:20px;height:20px;color:var(--v-gold,#c4953a);}'
-      + '.dlg-hist-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}'
-      + '.dlg-hist-name{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(13px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);font-weight:700;letter-spacing:0.8px;}'
-      + '.dlg-hist-sub{font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;line-height:1.2;}'
-      + '.dlg-hist-ts{font-size:calc(9.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);margin-left:auto;white-space:nowrap;opacity:0.85;}'
-      // Script
-      + '.dlg-hist-body{display:flex;flex-direction:column;gap:5px;}'
-      + '.dlg-hist-line{font-size:calc(11.5px * var(--v-font-scale, 1));line-height:1.45;color:#d4c8b0;}'
-      + '.dlg-hist-line.speech{padding: 5px var(--v-space-md, 8px);border-left:2.5px solid var(--v-gold,#c4953a);background:rgba(196,149,58,0.06);border-radius:0 5px 5px 0;}'
-      + '.dlg-hist-line.narration{font-style:italic;color:#9b8e7c;padding-left:6px;border-left:1.5px solid rgba(196,149,58,0.2);}'
-      + '.dlg-hist-speaker{display:block;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(9.5px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);font-weight:700;letter-spacing:1px;margin-bottom:1px;}'
-      // Decision Box
-      + '.dlg-hist-decision{display:flex;flex-direction:column;gap:2px;padding: 6px var(--v-space-md, 8px);background:rgba(196,149,58,0.12);border:1px solid var(--v-gold-40,rgba(196,149,58,0.4));border-radius:6px;margin-top:2px;}'
-      + '.dlg-hist-decision-tag{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(9px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);text-transform:uppercase;letter-spacing:1px;font-weight:700;}'
-      + '.dlg-hist-decision-label{font-size:calc(12px * var(--v-font-scale, 1));color:#fff4d0;font-weight:700;}'
-      + '.dlg-hist-decision-desc{font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;line-height:1.3;}'
-      // Check Box (D&D 5e Dice)
-      + '.dlg-hist-check-box{display:flex;flex-direction:column;gap:3px;padding: 6px var(--v-space-md, 8px);border-radius:6px;border:1px solid;font-size:calc(11px * var(--v-font-scale, 1));}'
-      + '.dlg-hist-check-box.check-win{background:rgba(122,208,107,0.09);border-color:rgba(122,208,107,0.45);}'
-      + '.dlg-hist-check-box.check-loss{background:rgba(208,72,72,0.09);border-color:rgba(208,72,72,0.45);}'
-      + '.dlg-hist-check-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--v-font-display,Cinzel,serif);font-weight:700;letter-spacing:0.8px;}'
-      + '.dlg-hist-check-badge{padding:1px 6px;border-radius:4px;font-size:calc(9.5px * var(--v-font-scale, 1));text-transform:uppercase;font-weight:700;}'
-      + '.badge-win{background:#7ad06b33;color:#7ad06b;border:1px solid #7ad06b66;}'
-      + '.badge-loss{background:#d0484833;color:#d04848;border:1px solid #d0484866;}'
-      + '.badge-crit{background:#ffd27a33;color:#ffd27a;border:1px solid #ffd27a88;box-shadow:0 0 6px rgba(255,210,90,0.3);}'
-      + '.dlg-hist-check-formula{font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);}'
-      // Outcome
-      + '.dlg-hist-outcome-section{margin-top:2px;padding: 6px var(--v-space-md, 8px);background:rgba(20,16,12,0.5);border-left:2.5px solid #8a6420;border-radius:0 6px 6px 0;display:flex;flex-direction:column;gap:4px;}'
-      + '.dlg-hist-outcome-title{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(9px * var(--v-font-scale, 1));color:#c4953a;letter-spacing:1px;text-transform:uppercase;font-weight:700;}'
-      // Rewards
-      + '.dlg-hist-rewards-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}'
-      + '.dlg-hist-reward-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.35);border-radius:4px;font-size:calc(10px * var(--v-font-scale, 1));color:#ffd27a;font-weight:700;}'
-      // Empty State
-      + '.dlg-hist-empty-state{text-align:center;padding:28px 16px;background:rgba(42,36,32,0.4);border:1px dashed var(--v-border,#4a3828);border-radius:8px;}'
+      + '.dlg-hub-wrap{padding: var(--v-space-md, 8px);display:flex;flex-direction:column;gap: 10px;}'
+      // Search Bar Proeminente
+      + '.dlg-search-box{position:relative;display:flex;align-items:center;background:rgba(20,16,12,0.9);border:1.5px solid var(--v-gold-40,rgba(196,149,58,0.45));border-radius:8px;padding: 2px 8px;box-shadow:0 3px 10px rgba(0,0,0,0.4);transition:border-color 0.2s,box-shadow 0.2s;}'
+      + '.dlg-search-box:focus-within{border-color:var(--v-gold,#c4953a);box-shadow:0 0 12px rgba(196,149,58,0.4);}'
+      + '.dlg-search-icon{font-size:14px;color:var(--v-gold,#c4953a);margin-right:6px;flex-shrink:0;}'
+      + '.dlg-search-field{flex:1;background:transparent;border:none;outline:none;color:#fff4d0;font-family:inherit;font-size:calc(13px * var(--v-font-scale, 1));padding: 8px 4px;}'
+      + '.dlg-search-clear{background:none;border:none;color:var(--v-text-dim,#a09484);font-size:14px;cursor:pointer;padding: 4px;transition:color 0.15s;}'
+      + '.dlg-search-clear:hover{color:#fff;}'
+      + '.dlg-search-match{background:rgba(255,210,90,0.35);color:#fff8db;padding:0 2px;border-radius:2px;font-weight:700;}'
+      // Sectors Horizontal Bar
+      + '.dlg-sectors-bar{display:flex;gap: 6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}'
+      + '.dlg-sectors-bar::-webkit-scrollbar{display:none;}'
+      + '.dlg-sector-pill{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding: 6px 10px;background:rgba(42,32,24,0.7);border:1px solid rgba(196,149,58,0.3);border-radius:20px;color:var(--v-text,#d4c8b0);font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10.5px * var(--v-font-scale, 1));cursor:pointer;transition:all 0.18s;white-space:nowrap;}'
+      + '.dlg-sector-pill:hover{background:rgba(196,149,58,0.18);border-color:var(--v-gold,#c4953a);color:#fff;}'
+      + '.dlg-sector-pill.active{background:linear-gradient(180deg,#c4953a,#8a6420);border-color:#ffd700;color:#1a1410;font-weight:700;box-shadow:0 2px 8px rgba(196,149,58,0.4);}'
+      + '.dlg-sector-badge{padding: 0 5px;background:rgba(0,0,0,0.25);border-radius:10px;font-size:calc(9.5px * var(--v-font-scale, 1));font-weight:700;}'
+      + '.dlg-sector-pill.active .dlg-sector-badge{background:rgba(26,20,16,0.35);color:#fff;}'
+      // Sub-bar
+      + '.dlg-sub-bar{display:flex;justify-content:space-between;align-items:center;font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);padding: 0 2px;}'
+      + '.dlg-period-toggle{display:inline-flex;gap:3px;background:rgba(20,16,12,0.6);border:1px solid var(--v-border,#4a3828);border-radius:4px;padding:2px;}'
+      + '.dlg-period-btn{background:none;border:none;color:var(--v-text-dim,#a09484);font-family:inherit;font-size:calc(10px * var(--v-font-scale, 1));padding: 2px 6px;border-radius:3px;cursor:pointer;transition:all 0.15s;}'
+      + '.dlg-period-btn.active{background:var(--v-gold,#c4953a);color:#1a1410;font-weight:700;}'
+      // NPC Group Card
+      + '.dlg-npc-group{background:linear-gradient(180deg,rgba(46,36,26,0.75) 0%,rgba(28,20,14,0.88) 100%);border:1px solid rgba(196,149,58,0.35);border-radius:10px;box-shadow:0 3px 14px rgba(0,0,0,0.4);overflow:hidden;margin-bottom:10px;}'
+      + '.dlg-npc-head{display:flex;align-items:center;gap: 10px;padding: 10px 12px;background:rgba(20,16,12,0.55);border-bottom:1px solid rgba(196,149,58,0.2);}'
+      + '.dlg-npc-avatar{width:38px;height:38px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1.5px solid var(--v-gold,#c4953a);display:flex;align-items:center;justify-content:center;background:rgba(20,16,12,0.9);box-shadow:0 0 6px rgba(196,149,58,0.3);cursor:pointer;}'
+      + '.dlg-npc-avatar img{width:100%;height:100%;object-fit:cover;}'
+      + '.dlg-npc-avatar svg{width:22px;height:22px;color:var(--v-gold,#c4953a);}'
+      + '.dlg-npc-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}'
+      + '.dlg-npc-title{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(13.5px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);font-weight:700;letter-spacing:0.8px;}'
+      + '.dlg-npc-desc{font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;line-height:1.2;}'
+      + '.dlg-npc-count-badge{font-size:calc(10px * var(--v-font-scale, 1));color:#ffd27a;background:rgba(196,149,58,0.15);border:1px solid rgba(196,149,58,0.35);border-radius:12px;padding:2px 8px;white-space:nowrap;font-weight:700;}'
+      // Lista de Diálogos do NPC
+      + '.dlg-npc-list{display:flex;flex-direction:column;padding: 6px 10px 10px;gap: 8px;}'
+      + '.dlg-chat-card{padding: 8px 10px;background:rgba(20,16,12,0.5);border:1px solid rgba(196,149,58,0.2);border-radius:6px;display:flex;flex-direction:column;gap: 5px;cursor:pointer;transition:border-color 0.15s,background 0.15s,transform 0.1s;}'
+      + '.dlg-chat-card:hover{border-color:var(--v-gold,#c4953a);background:rgba(196,149,58,0.08);transform:translateY(-1px);}'
+      + '.dlg-chat-top{display:flex;justify-content:space-between;align-items:center;font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);}'
+      + '.dlg-chat-snippet{font-size:calc(11.5px * var(--v-font-scale, 1));color:#d4c8b0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}'
+      + '.dlg-chat-footer{display:flex;justify-content:space-between;align-items:center;margin-top:2px;gap:6px;flex-wrap:wrap;}'
+      + '.dlg-chat-badge-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}'
+      + '.dlg-badge-mini{padding:1px 5px;border-radius:3px;font-size:calc(9.5px * var(--v-font-scale, 1));font-weight:700;}'
+      + '.dlg-open-btn{padding: 4px 10px;background:linear-gradient(180deg,#c4953a,#8a6420);border:1px solid #ffd700;border-radius:4px;color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));font-weight:700;cursor:pointer;margin-left:auto;white-space:nowrap;}'
+      // Empty
+      + '.dlg-empty-state{text-align:center;padding:32px 16px;background:rgba(42,36,32,0.4);border:1px dashed var(--v-border,#4a3828);border-radius:8px;}'
       + '</style>'
-      + '<div class="dlg-hist-wrap">'
-      // Controls
-      + '<div class="dlg-hist-controls">'
-      +   '<input type="text" id="dlg-search-input" class="dlg-search-input" placeholder="🔍 Buscar por interlocutor ou palavra..." value="' + (window._dlgFilters.search || '') + '">'
-      +   '<div class="dlg-filter-row"><span class="dlg-filter-label">Período</span><div class="dlg-filter-btns">'
-      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.period === 'today' ? 'active' : '') + '" data-period="today">Hoje</button>'
-      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.period === 'week' ? 'active' : '') + '" data-period="week">7 dias</button>'
-      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.period === 'all' ? 'active' : '') + '" data-period="all">Todos</button>'
-      +   '</div></div>'
-      +   '<div class="dlg-filter-row"><span class="dlg-filter-label">Quantos</span><div class="dlg-filter-btns">'
-      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.limit === 10 ? 'active' : '') + '" data-limit="10">10</button>'
-      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.limit === 30 ? 'active' : '') + '" data-limit="30">30</button>'
-      +     '<button class="dlg-filter-btn ' + (window._dlgFilters.limit === 'all' ? 'active' : '') + '" data-limit="all">Todos</button>'
-      +   '</div></div>'
+      + '<div class="dlg-hub-wrap">'
+      // 1. Barra de Busca
+      + '<div class="dlg-search-box">'
+      +   '<span class="dlg-search-icon">🔍</span>'
+      +   '<input type="text" id="dlg-search-input" class="dlg-search-field" placeholder="Pesquisar pistas, falas, nomes ou locais..." value="' + (state.search || '') + '">'
+      +   (state.search ? '<button id="dlg-clear-search" class="dlg-search-clear" type="button" title="Limpar busca">✕</button>' : '')
       + '</div>'
-      + '<div class="dlg-hist-count-line">'
-      +   '<span>Mostrando ' + filtered.length + ' de ' + hist.length + ' diálogo' + (hist.length === 1 ? '' : 's') + ' do aventureiro.</span>'
-      +   (hist.length > 0 ? '<button id="dlg-clear-history" class="dlg-hist-clear-btn" type="button">Limpar registro</button>' : '')
+      // 2. Barra de Setores
+      + '<div class="dlg-sectors-bar">';
+
+    SECTORS.forEach(function(sec){
+      var count = sectorCounts[sec.id] || 0;
+      var isActive = state.sector === sec.id;
+      // Mostra o setor se tiver diálogos, ou se for 'all', ou se for o selecionado
+      if (count > 0 || sec.id === 'all' || isActive) {
+        html += '<button class="dlg-sector-pill ' + (isActive ? 'active' : '') + '" data-sector="' + sec.id + '">'
+          + '<span>' + sec.label + '</span>'
+          + '<span class="dlg-sector-badge">' + count + '</span>'
+          + '</button>';
+      }
+    });
+
+    html += '</div>'
+      // 3. Sub-bar com contagem e período
+      + '<div class="dlg-sub-bar">'
+      +   '<span>' + filtered.length + ' diálogo' + (filtered.length === 1 ? '' : 's') + ' em ' + sortedNpcKeys.length + ' interlocutor' + (sortedNpcKeys.length === 1 ? '' : 'es') + '</span>'
+      +   '<div class="dlg-period-toggle">'
+      +     '<button class="dlg-period-btn ' + (state.period === 'today' ? 'active' : '') + '" data-period="today">Hoje</button>'
+      +     '<button class="dlg-period-btn ' + (state.period === 'week' ? 'active' : '') + '" data-period="week">7d</button>'
+      +     '<button class="dlg-period-btn ' + (state.period === 'all' ? 'active' : '') + '" data-period="all">Todos</button>'
+      +   '</div>'
       + '</div>';
 
+    // 4. Render dos Grupos por NPC
     if (hist.length === 0) {
-      html += '<div class="dlg-hist-empty-state">'
+      html += '<div class="dlg-empty-state">'
         + '<div style="font-size:36px;margin-bottom:8px;opacity:0.8;">📜</div>'
         + '<div style="font-family:var(--v-font-display,Cinzel,serif);color:var(--v-gold,#c4953a);font-size:calc(14px * var(--v-font-scale, 1));font-weight:700;margin-bottom:6px;">Nenhum diálogo registrado ainda</div>'
         + '<div style="font-size:calc(11.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);line-height:1.5;max-width:320px;margin:0 auto;">'
         +   'Suas conversas, decisões e rolagens com os habitantes de Valdoria ficarão gravadas aqui para consulta.'
         + '</div>'
         + '</div>';
-    } else if (filtered.length === 0) {
-      html += '<div class="dlg-hist-empty-state">'
+    } else if (sortedNpcKeys.length === 0) {
+      html += '<div class="dlg-empty-state">'
         + '<div style="font-size:28px;margin-bottom:6px;opacity:0.7;">🔍</div>'
         + '<div style="font-family:var(--v-font-display,Cinzel,serif);color:var(--v-gold,#c4953a);font-size:calc(13px * var(--v-font-scale, 1));font-weight:700;">Nenhum diálogo encontrado</div>'
-        + '<div style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);margin-top:4px;">Tente alterar os termos da busca ou os filtros de período.</div>'
+        + '<div style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);margin-top:4px;">Tente alterar os termos da busca ou selecionar outro setor.</div>'
         + '</div>';
     } else {
-      filtered.forEach(function(d){
-        var npcObj = d.npc || {};
-        var npcName = (typeof npcObj === 'string' ? npcObj : npcObj.name) || 'Interlocutor';
-        var npcDesc = (typeof npcObj === 'object' && npcObj.desc) ? npcObj.desc : (d.location || '');
-        var portraitUrl = (typeof npcObj === 'object' && (npcObj.portraitImg || npcObj.portrait)) || '';
-        var isImg = portraitUrl && (portraitUrl.indexOf('/') >= 0 || portraitUrl.indexOf('.') >= 0);
+      sortedNpcKeys.forEach(function(npcName){
+        var grp = npcGroups[npcName];
+        var isImg = grp.portraitImg || (grp.portrait && (grp.portrait.indexOf('/') >= 0 || grp.portrait.indexOf('.') >= 0));
+        var portSrc = grp.portraitImg || grp.portrait;
 
-        html += '<div class="dlg-hist-entry">';
-        // Header
-        html += '<div class="dlg-hist-header">';
-        html += '<div class="dlg-hist-portrait" ' + (isImg ? 'style="cursor:pointer;" title="Ampliar retrato"' : '') + ' data-portrait="' + (isImg ? portraitUrl : '') + '">';
-        if (isImg) {
-          html += '<img src="' + portraitUrl + '" alt="" loading="lazy" onerror="this.style.display=\'none\';"/>';
-        } else {
-          html += '<svg viewBox="0 0 120 120"><use href="#' + (portraitUrl || 'ic-dialogo') + '"/></svg>';
-        }
-        html += '</div>';
-        html += '<div class="dlg-hist-meta">';
-        html += '<span class="dlg-hist-name">' + npcName + '</span>';
-        if (npcDesc) html += '<span class="dlg-hist-sub">' + npcDesc + '</span>';
-        html += '</div>';
-        html += '<span class="dlg-hist-ts">' + _fmtTs(d.ts) + '</span>';
-        html += '</div>';
+        html += '<div class="dlg-npc-group">'
+          + '<div class="dlg-npc-head">'
+          +   '<div class="dlg-npc-avatar" data-portrait="' + (isImg ? portSrc : '') + '" title="Ver retrato">'
+          +     (isImg ? '<img src="' + portSrc + '" alt="" loading="lazy"/>' : '<svg viewBox="0 0 120 120"><use href="#' + (grp.portrait || 'ic-dialogo') + '"/></svg>')
+          +   '</div>'
+          +   '<div class="dlg-npc-info">'
+          +     '<div class="dlg-npc-title">' + _highlightMatch(grp.name, q) + '</div>'
+          +     (grp.desc ? '<div class="dlg-npc-desc">' + grp.desc + '</div>' : '')
+          +   '</div>'
+          +   '<span class="dlg-npc-count-badge">' + grp.dialogues.length + ' diálogo' + (grp.dialogues.length === 1 ? '' : 's') + '</span>'
+          + '</div>'
+          + '<div class="dlg-npc-list">';
 
-        // Script inicial
-        html += '<div class="dlg-hist-body">';
-        (d.script || []).forEach(function(line){
-          if (!line || !line.text) return;
-          if (line.type === 'speech') {
-            var spkr = line.speaker || npcName;
-            html += '<div class="dlg-hist-line speech"><span class="dlg-hist-speaker">' + spkr + '</span>' + line.text + '</div>';
-          } else {
-            html += '<div class="dlg-hist-line narration">' + line.text + '</div>';
-          }
-        });
-        html += '</div>';
-
-        // Escolha tomada pelo jogador
-        if (d.chosen) {
-          html += '<div class="dlg-hist-decision">';
-          html += '<span class="dlg-hist-decision-tag">⚔ Tua Decisão:</span>';
-          html += '<span class="dlg-hist-decision-label">' + (d.chosen.label || d.chosen.id || 'Avançar') + '</span>';
-          if (d.chosen.desc) html += '<span class="dlg-hist-decision-desc">' + d.chosen.desc + '</span>';
-          html += '</div>';
-        }
-
-        // Teste de dados D&D 5e
-        if (d.check && (d.check.d20 != null || d.check.total != null)) {
-          var isWin = !!d.check.success;
-          var badgeCls = d.check.critSuccess ? 'badge-crit' : (isWin ? 'badge-win' : 'badge-loss');
-          var badgeLabel = d.check.critSuccess ? '⚜ Acerto Crítico!' : (d.check.critFail ? '✗ Falha Crítica' : (isWin ? '✓ Sucesso' : '✗ Falha'));
-          var testSkill = (window.DndRules && typeof window.DndRules.skillLabelPT === 'function')
-            ? window.DndRules.skillLabelPT(d.check.skill || d.check.stat)
-            : (d.check.skill || d.check.stat || 'Atributo');
-          var modStr = (d.check.mod >= 0 ? '+' : '') + (d.check.mod || 0);
-
-          html += '<div class="dlg-hist-check-box ' + (isWin ? 'check-win' : 'check-loss') + '">';
-          html += '<div class="dlg-hist-head"><div class="dlg-hist-check-head">';
-          html += '<span>🎲 Teste de ' + testSkill + (d.check.dc ? ' (CD ' + d.check.dc + ')' : '') + '</span>';
-          html += '<span class="dlg-hist-check-badge ' + badgeCls + '">' + badgeLabel + '</span>';
-          html += '</div></div>';
-          html += '<div class="dlg-hist-check-formula">';
-          html += 'd20: <b>' + (d.check.d20 != null ? d.check.d20 : '-') + '</b> ' + modStr + ' = <b>' + (d.check.total != null ? d.check.total : '-') + '</b>' + (d.check.dc ? ' vs CD ' + d.check.dc : '');
-          html += '</div>';
-          html += '</div>';
-        }
-
-        // Desfecho narrativo pós-escolha
-        if (d.outcome && (Array.isArray(d.outcome) ? d.outcome.length > 0 : String(d.outcome).trim().length > 0)) {
-          html += '<div class="dlg-hist-outcome-section">';
-          html += '<div class="dlg-hist-outcome-title">✦ Resposta & Desfecho:</div>';
-          if (Array.isArray(d.outcome)) {
-            d.outcome.forEach(function(oLine){
-              if (!oLine || !oLine.text) return;
-              if (oLine.type === 'speech') {
-                html += '<div class="dlg-hist-line speech"><span class="dlg-hist-speaker">' + (oLine.speaker || npcName) + '</span>' + oLine.text + '</div>';
-              } else {
-                html += '<div class="dlg-hist-line narration">' + oLine.text + '</div>';
-              }
-            });
-          } else {
-            html += '<div class="dlg-hist-line narration">' + String(d.outcome) + '</div>';
-          }
-          html += '</div>';
-        }
-
-        // Recompensas / Consequências
-        if (Array.isArray(d.rewards) && d.rewards.length > 0) {
-          html += '<div class="dlg-hist-rewards-row">';
-          d.rewards.forEach(function(rw){
-            var icon = rw.type === 'xp' ? '⭐' : (rw.type === 'gold' ? '🪙' : '✦');
-            var sign = (rw.amount > 0) ? '+' : '';
-            html += '<span class="dlg-hist-reward-badge">' + icon + ' ' + sign + rw.amount + ' ' + (rw.label || '') + '</span>';
+        grp.dialogues.forEach(function(d, dIdx){
+          // Trecho da primeira fala ou narração
+          var firstText = '';
+          (d.script || []).some(function(l){
+            if (l && l.text) { firstText = (l.speaker ? '<b>' + l.speaker + ':</b> ' : '') + l.text; return true; }
+            return false;
           });
-          html += '</div>';
-        }
 
-        html += '</div>'; // dlg-hist-entry
+          html += '<div class="dlg-chat-card" data-dialogue-id="' + d.id + '" data-npc-name="' + npcName + '" data-idx="' + dIdx + '">'
+            + '<div class="dlg-chat-top">'
+            +   '<span>✦ Encontro</span>'
+            +   '<span>' + _fmtTs(d.ts) + '</span>'
+            + '</div>'
+            + '<div class="dlg-chat-snippet">' + _highlightMatch(firstText, q) + '</div>'
+            + '<div class="dlg-chat-footer">'
+            +   '<div class="dlg-chat-badge-row">';
+
+          if (d.chosen) {
+            html += '<span class="dlg-badge-mini" style="background:rgba(196,149,58,0.2);color:#ffd27a;border:1px solid rgba(196,149,58,0.4);">'
+                 +  '⚔ ' + _highlightMatch(d.chosen.label || 'Decisão', q) + '</span>';
+          }
+          if (d.check) {
+            var isW = !!d.check.success;
+            html += '<span class="dlg-badge-mini ' + (isW ? 'badge-win' : 'badge-loss') + '">'
+                 +  '🎲 ' + (isW ? 'Sucesso' : 'Falha') + '</span>';
+          }
+          if (Array.isArray(d.rewards) && d.rewards.length > 0) {
+            html += '<span class="dlg-badge-mini" style="background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid rgba(255,215,0,0.4);">'
+                 +  '🪙 Recompensas</span>';
+          }
+
+          html += '</div>'
+            +   '<button class="dlg-open-btn" type="button">📜 Abrir Diálogo</button>'
+            + '</div>'
+            + '</div>';
+        });
+
+        html += '</div></div>'; // dlg-npc-list, dlg-npc-group
       });
     }
 
-    html += '</div>'; // dlg-hist-wrap
+    // Botão Limpar no rodapé
+    if (hist.length > 0) {
+      html += '<div style="text-align:center;padding: 10px 0 var(--v-space-lg, 12px);">'
+        + '<button id="dlg-clear-history-all" style="background:none;border:none;color:#d04848;font-size:calc(10.5px * var(--v-font-scale, 1));cursor:pointer;opacity:0.8;text-decoration:underline;">'
+        + '🗑️ Limpar todo o registro de diálogos'
+        + '</button>'
+        + '</div>';
+    }
+
+    html += '</div>'; // dlg-hub-wrap
     bodyEl.innerHTML = html;
 
-    // Lightbox ao clicar no retrato
-    bodyEl.querySelectorAll('.dlg-hist-portrait[data-portrait]').forEach(function(el){
-      var src = el.getAttribute('data-portrait');
-      if (src) {
-        el.addEventListener('click', function(){
-          if (typeof window.showLightbox === 'function') {
-            var nameEl = el.parentElement.querySelector('.dlg-hist-name');
-            var descEl = el.parentElement.querySelector('.dlg-hist-sub');
-            window.showLightbox(src, (nameEl && nameEl.textContent) || '', (descEl && descEl.textContent) || '');
-          }
-        });
-      }
-    });
+    // --- Wire Event Listeners ---
 
-    // Wire campo de busca
-    var searchInput = bodyEl.querySelector('#dlg-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', function(){
-        window._dlgFilters.search = searchInput.value;
+    // 1. Busca digitando em tempo real
+    var searchInp = bodyEl.querySelector('#dlg-search-input');
+    if (searchInp) {
+      searchInp.addEventListener('input', function(){
+        window._dlgState.search = searchInp.value;
         _render();
-        // Preserva o foco e a posição do cursor no input
         var newInp = bodyEl.querySelector('#dlg-search-input');
         if (newInp) {
           newInp.focus();
@@ -70866,26 +71109,64 @@ function _showDialogHistoryPopup(){
         }
       });
     }
+    var clearSearchBtn = bodyEl.querySelector('#dlg-clear-search');
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener('click', function(){
+        window._dlgState.search = '';
+        _render();
+      });
+    }
 
-    // Wire botões de filtro
-    bodyEl.querySelectorAll('.dlg-filter-btn[data-period]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        window._dlgFilters.period = btn.getAttribute('data-period');
+    // 2. Setores
+    bodyEl.querySelectorAll('.dlg-sector-pill').forEach(function(pill){
+      pill.addEventListener('click', function(){
+        window._dlgState.sector = pill.getAttribute('data-sector');
         _render();
       });
     });
-    bodyEl.querySelectorAll('.dlg-filter-btn[data-limit]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var lim = btn.getAttribute('data-limit');
-        window._dlgFilters.limit = lim === 'all' ? 'all' : parseInt(lim, 10);
+
+    // 3. Período
+    bodyEl.querySelectorAll('.dlg-period-btn').forEach(function(pBtn){
+      pBtn.addEventListener('click', function(){
+        window._dlgState.period = pBtn.getAttribute('data-period');
         _render();
       });
     });
 
-    // Wire botão de limpar histórico (com confirmação obrigatória — Regra #24)
-    var clearBtn = bodyEl.querySelector('#dlg-clear-history');
-    if (clearBtn) {
-      clearBtn.addEventListener('click', function(){
+    // 4. Abertura do Leitor em Tela Cheia ao clicar no Card ou no botão
+    bodyEl.querySelectorAll('.dlg-chat-card').forEach(function(card){
+      card.addEventListener('click', function(){
+        var dId = card.getAttribute('data-dialogue-id');
+        var npcN = card.getAttribute('data-npc-name');
+        var targetEntry = hist.find(function(h){ return h.id === dId; });
+        if (targetEntry) {
+          var npcGroupDialogues = (npcGroups[npcN] && npcGroups[npcN].dialogues) || [targetEntry];
+          var idx = npcGroupDialogues.findIndex(function(h){ return h.id === dId; });
+          _openDialogueReaderPopup(targetEntry, npcGroupDialogues, idx >= 0 ? idx : 0);
+        }
+      });
+    });
+
+    // 5. Lightbox no avatar do NPC
+    bodyEl.querySelectorAll('.dlg-npc-avatar[data-portrait]').forEach(function(av){
+      var src = av.getAttribute('data-portrait');
+      if (src) {
+        av.addEventListener('click', function(e){
+          e.stopPropagation();
+          if (typeof window.showLightbox === 'function') {
+            var head = av.parentElement;
+            var t = head.querySelector('.dlg-npc-title');
+            var d = head.querySelector('.dlg-npc-desc');
+            window.showLightbox(src, (t && t.textContent) || '', (d && d.textContent) || '');
+          }
+        });
+      }
+    });
+
+    // 6. Limpar histórico com confirmação (Regra #24)
+    var clearAllBtn = bodyEl.querySelector('#dlg-clear-history-all');
+    if (clearAllBtn) {
+      clearAllBtn.addEventListener('click', function(){
         if (confirm('Deseja realmente limpar todo o registro de diálogos deste aventureiro? Esta ação não pode ser desfeita.')) {
           if (typeof window !== 'undefined' && window.vDialogueHistory && typeof window.vDialogueHistory.clearHistory === 'function') {
             window.vDialogueHistory.clearHistory(p);

@@ -360,6 +360,102 @@
   }
 
   /**
+   * Setores canônicos de Valdoria para organização do registro.
+   */
+  var SECTORS = [
+    { id: 'all', label: 'Todos os Setores', icon: 'ic-pergaminho' },
+    { id: 'gates', label: 'Portões da Cidade', icon: 'ic-portao' },
+    { id: 'square', label: 'Praça Central', icon: 'ic-praca' },
+    { id: 'tavern', label: 'Taverna do Javali', icon: 'ic-taverna' },
+    { id: 'inn', label: 'Estalagem da Colina', icon: 'ic-estalagem' },
+    { id: 'market', label: 'Mercado de Eldoria', icon: 'ic-mercado' },
+    { id: 'bank', label: 'Banco de Tholram', icon: 'ic-banco' },
+    { id: 'temple', label: 'Templo dos Deuses', icon: 'ic-templo' },
+    { id: 'workshop', label: 'Oficina & Forja', icon: 'ic-oficina' },
+    { id: 'arena', label: 'Arena de Duelos', icon: 'ic-arena' },
+    { id: 'journey', label: 'Viagens & Estradas', icon: 'ic-bussola' },
+    { id: 'other', label: 'Outros Encontros', icon: 'ic-dialogo' }
+  ];
+
+  /**
+   * Identifica o setor canônico correspondente a uma entrada de diálogo.
+   */
+  function resolveSector(entry) {
+    if (!entry) return 'other';
+    var loc = String(entry.location || '').toLowerCase();
+    var npc = entry.npc || {};
+    var npcName = String(npc.name || '').toLowerCase();
+    var npcId = String(npc.id || '').toLowerCase();
+    var npcDesc = String(npc.desc || '').toLowerCase();
+    var all = loc + ' ' + npcName + ' ' + npcId + ' ' + npcDesc;
+
+    if (all.indexOf('gate') >= 0 || all.indexOf('portão') >= 0 || all.indexOf('portao') >= 0 || all.indexOf('aldric') >= 0 || all.indexOf('guarda') >= 0) {
+      return 'gates';
+    }
+    if (all.indexOf('tavern') >= 0 || all.indexOf('taverna') >= 0 || all.indexOf('grom') >= 0 || all.indexOf('lyra') >= 0 || all.indexOf('javali') >= 0 || all.indexOf('bardo') >= 0) {
+      return 'tavern';
+    }
+    if (all.indexOf('inn') >= 0 || all.indexOf('estalagem') >= 0 || all.indexOf('martha') >= 0 || all.indexOf('quarto') >= 0 || all.indexOf('hospede') >= 0) {
+      return 'inn';
+    }
+    if (all.indexOf('market') >= 0 || all.indexOf('mercado') >= 0 || all.indexOf('thorne') >= 0 || all.indexOf('mirena') >= 0 || all.indexOf('velithra') >= 0 || all.indexOf('corvus') >= 0 || all.indexOf('bjorn') >= 0 || all.indexOf('barraca') >= 0) {
+      return 'market';
+    }
+    if (all.indexOf('bank') >= 0 || all.indexOf('banco') >= 0 || all.indexOf('aldwin') >= 0 || all.indexOf('tholram') >= 0 || all.indexOf('cofre') >= 0) {
+      return 'bank';
+    }
+    if (all.indexOf('temple') >= 0 || all.indexOf('templo') >= 0 || all.indexOf('elara') >= 0 || all.indexOf('deuses') >= 0 || all.indexOf('clérigo') >= 0 || all.indexOf('clerigo') >= 0) {
+      return 'temple';
+    }
+    if (all.indexOf('workshop') >= 0 || all.indexOf('oficina') >= 0 || all.indexOf('ferreiro') >= 0 || all.indexOf('forja') >= 0 || all.indexOf('bigorna') >= 0 || all.indexOf('alchemist') >= 0) {
+      return 'workshop';
+    }
+    if (all.indexOf('arena') >= 0 || all.indexOf('pit_fight') >= 0 || all.indexOf('duelo') >= 0 || all.indexOf('combate') >= 0) {
+      return 'arena';
+    }
+    if (all.indexOf('journey') >= 0 || all.indexOf('viagem') >= 0 || all.indexOf('estrada') >= 0 || all.indexOf('floresta') >= 0 || all.indexOf('trilha') >= 0 || all.indexOf('explor') >= 0) {
+      return 'journey';
+    }
+    if (all.indexOf('square') >= 0 || all.indexOf('praça') >= 0 || all.indexOf('praca') >= 0 || all.indexOf('chafariz') >= 0 || all.indexOf('mendigo') >= 0 || all.indexOf('taviel') >= 0) {
+      return 'square';
+    }
+
+    return 'other';
+  }
+
+  /**
+   * Agrupa as entradas por setor e, dentro de cada setor, por interlocutor (NPC).
+   */
+  function groupBySectorAndNpc(entries) {
+    if (!Array.isArray(entries)) return {};
+    var grouped = {};
+
+    entries.forEach(function (entry) {
+      var sId = resolveSector(entry);
+      if (!grouped[sId]) {
+        grouped[sId] = {
+          sector: sId,
+          npcs: {}
+        };
+      }
+      var npc = entry.npc || {};
+      var npcName = npc.name || 'Interlocutor Desconhecido';
+      if (!grouped[sId].npcs[npcName]) {
+        grouped[sId].npcs[npcName] = {
+          name: npcName,
+          desc: npc.desc || '',
+          portrait: npc.portrait || 'ic-dialogo',
+          portraitImg: npc.portraitImg || null,
+          dialogues: []
+        };
+      }
+      grouped[sId].npcs[npcName].dialogues.push(entry);
+    });
+
+    return grouped;
+  }
+
+  /**
    * Limpa todo o histórico de diálogos do personagem ativo.
    */
   function clearHistory(player) {
@@ -371,8 +467,11 @@
 
   // Exportação canônica universal
   var api = {
+    SECTORS: SECTORS,
     getCharacterKey: getCharacterKey,
     getHistory: getHistory,
+    resolveSector: resolveSector,
+    groupBySectorAndNpc: groupBySectorAndNpc,
     recordStart: recordStart,
     recordChoice: recordChoice,
     recordCheck: recordCheck,
