@@ -224,15 +224,30 @@ window.ValdoriaLoadingController = function(config) {
         }
     }
 
+    var _lastSpeedPct = -1;
     function _updateRingSpeed(pct) {
         if (!overlay) return;
+        if (Math.abs(pct - _lastSpeedPct) < 1.0 && pct < 100) return;
+        _lastSpeedPct = pct;
         var factor = 1 + (pct / 100) * 1.5;
         var outer = overlay.querySelector('.mc-outer');
         var mid = overlay.querySelector('.mc-mid');
         var inner = overlay.querySelector('.mc-inner');
-        if (outer) outer.style.animationDuration = Math.max(8, 30 / factor) + 's';
-        if (mid) mid.style.animationDuration = Math.max(6, 24 / factor) + 's';
-        if (inner) inner.style.animationDuration = Math.max(4, 16 / factor) + 's';
+        var durOuter = Math.max(8, (60 / factor).toFixed(1)) + 's';
+        var durMid = Math.max(6, (35 / factor).toFixed(1)) + 's';
+        var durInner = Math.max(5, (45 / factor).toFixed(1)) + 's';
+        if (outer) {
+            outer.style.setProperty('animation-duration', durOuter, 'important');
+            outer.style.setProperty('animation-play-state', 'running', 'important');
+        }
+        if (mid) {
+            mid.style.setProperty('animation-duration', durMid, 'important');
+            mid.style.setProperty('animation-play-state', 'running', 'important');
+        }
+        if (inner) {
+            inner.style.setProperty('animation-duration', durInner, 'important');
+            inner.style.setProperty('animation-play-state', 'running', 'important');
+        }
     }
 
     function _updateGemPhase(pct) {

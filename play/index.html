@@ -10,6 +10,20 @@
 <title>Lendas de Valdoria — Carregando…</title>
 <style>html,body{margin:0;padding:0;background:#1a1510;color:#d4c8b0;height:100%;overflow:hidden}</style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+// Motion parity: impede que preferências do SO Windows com animações desativadas congelem a tela de carregamento
+if (typeof window.matchMedia === 'function') {
+  var _origMM = window.matchMedia.bind(window);
+  window.matchMedia = function(q) {
+    var mql = _origMM(q);
+    if (typeof q === 'string' && q.indexOf('prefers-reduced-motion') >= 0) {
+      try { Object.defineProperty(mql, 'matches', { get: function(){ return false; }, configurable: true }); } catch(_){}
+    }
+    return mql;
+  };
+}
+try { Object.defineProperty(window, 'vReducedMotion', { get: function(){ return false; }, configurable: true }); } catch(_){}
+</script>
 <!-- 2026-05-11 (user request): "/play/ tambem deve redirecionar para tela de
      autenticacao caso nao esteja autenticado". Auth gate roda ANTES da
      logica de /play/ pra redirect instantaneo sem 700ms delay. Telegram
@@ -27,6 +41,7 @@
 // loading-template.js para magic-circle overlay durante auth+state)
 // Tiered Cache: stable bundle hash for Bucket B asset query strings
 var v = (window.VBUNDLE_HASH || Date.now());
+document.write('<script src="/shared/sim-full-motion.js?v=' + v + '"><\/script>');
 document.write('<link rel="stylesheet" href="/valdoria-design.css?v=' + v + '">');
 document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + v + '">');
 document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + v + '">');
@@ -374,6 +389,18 @@ document.write('<script src="/shared/maintenance-overlay.js?v=' + v + '"><\/scri
       // CSS animations injetadas inline (não dependem de loading.css)
       var st = document.createElement('style');
       st.textContent = ''
+        + '@keyframes spinCW{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}'
+        + '@keyframes spinCCW{0%{transform:rotate(0deg);}100%{transform:rotate(-360deg);}}'
+        + '@keyframes energyFlow{to{stroke-dashoffset:-640;}}'
+        + '@keyframes mcOrbBreatheEnh{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-4px) scale(1.04);}}'
+        + '@keyframes mcOrbNebulaRot{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}'
+        + '.mc-ring{transform-origin:50% 50% !important;-webkit-transform-origin:50% 50% !important;animation-play-state:running !important;}'
+        + '.mc-outer{animation:spinCW var(--ring-outer,60s) linear infinite !important;transform-origin:50% 50% !important;-webkit-transform-origin:50% 50% !important;animation-play-state:running !important;}'
+        + '.mc-mid{animation:spinCCW var(--ring-mid,35s) linear infinite !important;transform-origin:50% 50% !important;-webkit-transform-origin:50% 50% !important;animation-play-state:running !important;}'
+        + '.mc-inner{animation:spinCW var(--ring-inner,45s) linear infinite !important;transform-origin:50% 50% !important;-webkit-transform-origin:50% 50% !important;animation-play-state:running !important;}'
+        + '.mc-energy-arc{animation:energyFlow 8s linear infinite !important;animation-play-state:running !important;}'
+        + '.mc-orb{animation:mcOrbBreatheEnh 5s ease-in-out infinite !important;animation-play-state:running !important;}'
+        + '.mc-orb-nebula{animation:mcOrbNebulaRot 30s linear infinite !important;}'
         + '@keyframes epicBurst{0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) translate(var(--bx),var(--by)) scale(0.2);}}'
         + '@keyframes epicPctGlow{0%,100%{text-shadow:0 0 8px rgba(196,149,58,0.6),0 0 18px rgba(255,200,90,0.35);}50%{text-shadow:0 0 14px rgba(255,215,140,0.85),0 0 28px rgba(255,180,90,0.55);}}'
         + '@keyframes epicBarShimmer{0%{background-position:-200px 0;}100%{background-position:200px 0;}}'
