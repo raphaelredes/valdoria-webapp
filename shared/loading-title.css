@@ -647,23 +647,19 @@
   100% { opacity: 1; }
 }
 
-/* ── Performance: Lite — no nebula animations, static orb ── */
-.title-screen.title-lite .title-particles,
-.title-screen.title-lite .title-runes { display: none; }
-.title-screen.title-lite .title-text,
-.title-screen.title-lite .title-text-sub { animation: none; opacity: 1; }
-.title-screen.title-lite .title-divider-gem { animation: none; opacity: 0.7; }
-.title-screen.title-lite .title-orb-ambient,
+/* ── Performance: Lite — animação suave e otimizada (sem sobrecarga de blur) ── */
+.title-screen.title-lite .title-particles .tp:nth-child(n+5) { display: none; }
+.title-screen.title-lite .title-runes .title-rune:nth-child(n+3) { display: none; }
 .title-screen.title-lite .title-orb-rays,
 .title-screen.title-lite .title-orb-sss,
 .title-screen.title-lite .title-orb-floor { display: none; }
-.title-screen.title-lite .title-orb-nebula,
-.title-screen.title-lite .title-orb-core,
-.title-screen.title-lite .title-orb-core-fl { animation: none; }
 .title-screen.title-lite .title-orb-wisp,
 .title-screen.title-lite .title-orb-spark { display: none; }
-.title-screen.title-lite .title-orb { animation: none; }
-.title-screen.title-lite .title-orb-wrap { animation: none; opacity: 1; }
+.title-screen.title-lite .title-orb-ambient { animation-duration: 6s; opacity: 0.6; }
+.title-screen.title-lite .title-orb { animation: titleOrbFloat 6s ease-in-out infinite; }
+.title-screen.title-lite .title-orb-wrap { opacity: 1; }
+.title-screen.title-lite .title-orb-nebula { animation: titleNebulaRotate 30s linear infinite; }
+.title-screen.title-lite .title-orb-core { animation: titleOrbCorePulse 4s ease-in-out infinite; }
 .title-screen.title-lite.exit { animation: titleExitLite 0.4s ease-in forwards; }
 .title-screen.title-lite.exit .title-brand,
 .title-screen.title-lite.exit .title-cta,

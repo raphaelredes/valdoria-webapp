@@ -99,14 +99,7 @@
                     + '&env=' + encodeURIComponent(sess.env || _env)
                     + (sess.char_id ? '&char=' + encodeURIComponent(sess.char_id) : '')
                     + '&_cb=' + Date.now();
-                // Se já estamos em /cidade/, /exploracao/, etc, NAO redirect (deixa página carregar)
-                if (path === '/play/' || path === '/play') {
-                    try { console.info('[AUTH-GATE] valdoria_session detectada — redirect /play/ -> /cidade/ com URL params'); } catch(_){}
-                    try { window.__valdoria_transitioning = true; } catch(_){}
-                    location.replace(url);
-                    return;
-                }
-                // Em outras game pages, deixa página carregar (já é destino válido)
+                // Em /play/ ou outras game pages, deixa carregar normalmente
                 try { console.info('[AUTH-GATE] valdoria_session detectada — permite carregar', path); } catch(_){}
                 return;
             }

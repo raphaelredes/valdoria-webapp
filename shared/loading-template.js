@@ -109,7 +109,7 @@ window.ValdoriaLoadingHTML = function(opts) {
           + '<defs><path id="runeOuter" d="M150,150 m-125,0 a125,125 0 1,1 250,0 a125,125 0 1,1 -250,0"/></defs>'
           + '<circle cx="150" cy="150" r="125" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="1"/>'
           + '<circle cx="150" cy="150" r="127" fill="none" stroke="rgba(196,149,58,0.04)" stroke-width="0.5" stroke-dasharray="4 8"/>'
-          + '<text class="mc-rune-text" fill="rgba(196,149,58,0.5)"><textPath href="#runeOuter" startOffset="0%">' + runes + '</textPath></text>'
+          + '<text class="mc-rune-text" fill="rgba(196,149,58,0.5)"><textPath href="#runeOuter" xlink:href="#runeOuter" startOffset="0%">' + runes + '</textPath></text>'
           + '</svg>'
           // Mid energy ring
           + '<svg class="mc-ring mc-mid" viewBox="0 0 300 300">'
@@ -126,7 +126,7 @@ window.ValdoriaLoadingHTML = function(opts) {
           + '<svg class="mc-ring mc-inner" viewBox="0 0 300 300">'
           + '<defs><path id="runeInner" d="M150,150 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0"/></defs>'
           + '<circle cx="150" cy="150" r="75" fill="none" stroke="rgba(196,149,58,0.06)" stroke-width="0.5"/>'
-          + '<text class="mc-inner-text" fill="rgba(196,149,58,0.35)"><textPath href="#runeInner" startOffset="0%">\u25C6 VALDORIA \u25C6 LENDAS \u25C6 VALDORIA \u25C6 LENDAS </textPath></text>'
+          + '<text class="mc-inner-text" fill="rgba(196,149,58,0.35)"><textPath href="#runeInner" xlink:href="#runeInner" startOffset="0%">\u25C6 VALDORIA \u25C6 LENDAS \u25C6 VALDORIA \u25C6 LENDAS </textPath></text>'
           + '</svg>'
           // Gem — 3D animated orb (Orb of Valdoria)
           + '<div class="mc-gem" id="mc-gem"><div class="mc-gem-flare"></div>'

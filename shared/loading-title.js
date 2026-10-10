@@ -247,12 +247,17 @@
       /* Selo de versão — async, nunca bloqueia o boot (R1, version-display-plan) */
       _fetchVersionLabel(_el.querySelector('.title-version'));
 
-      /* Tap handler — entire screen is clickable */
-      _el.addEventListener('click', _onTap);
-      _el.addEventListener('touchend', function(e) {
-        e.preventDefault();
+      /* Tap handler — entire screen is clickable (omnidirectional: click, pointerup, touchend) */
+      var _lastTap = 0;
+      function _safeTap(e) {
+        var now = Date.now();
+        if (now - _lastTap < 200) return;
+        _lastTap = now;
         _onTap();
-      }, { passive: false });
+      }
+      _el.addEventListener('click', _safeTap);
+      _el.addEventListener('pointerup', _safeTap);
+      _el.addEventListener('touchend', _safeTap, { passive: true });
     }
 
     /* ── Tap handler ── */
