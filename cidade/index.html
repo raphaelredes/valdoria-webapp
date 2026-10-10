@@ -62863,7 +62863,27 @@ function _buildExploracaoSnap(mapId) {
         })
       : [],
     allies: allies,
-    map_id: mapId || ''
+    map_id: mapId || '',
+    // Sincronização Sazonal D&D 5e: Glacimir, ciclo solar e clima
+    time: (function(){
+      try {
+        var ct = (typeof _getCurrentGameTime === 'function') ? _getCurrentGameTime() : null;
+        if (!ct) return null;
+        var cp = (typeof _getGamePeriod === 'function') ? _getGamePeriod(ct.hour) : 'day';
+        var cw = (typeof _getGameWeather === 'function') ? _getGameWeather(ct.dayOfYear) : null;
+        return {
+          year: ct.year,
+          month: ct.month,
+          month_name: (typeof TIME_MONTHS !== 'undefined' && TIME_MONTHS[ct.month]) || 'Glacimir',
+          day: ct.day,
+          hour: ct.hour,
+          minute: ct.minute,
+          period: cp,
+          weather: (cw && cw.desc) || 'Ensolarado',
+          temp: (cw && cw.temp) || 15
+        };
+      } catch (_e) { return null; }
+    })()
   };
 }
 
@@ -62909,6 +62929,24 @@ function _travelToBiome(mapIdOrBiome, displayName){
   var qParams = new URLSearchParams();
   qParams.set('map_id', mapId);  // 2026-05-11: antes era 'biome' (ignorado por exploracao)
   qParams.set('back', 'cidade');
+  // Sincronização Sazonal e Temporal (Glacimir / Horário / Clima vivo de Valdoria):
+  try {
+    var curTime = (typeof _getCurrentGameTime === 'function') ? _getCurrentGameTime() : null;
+    if (curTime) {
+      var curPeriod = (typeof _getGamePeriod === 'function') ? _getGamePeriod(curTime.hour) : 'day';
+      var curWeather = (typeof _getGameWeather === 'function') ? _getGameWeather(curTime.dayOfYear) : null;
+      var wCode = 's';
+      if (curWeather && curWeather.desc) {
+        var wd = curWeather.desc.toLowerCase();
+        if (wd.indexOf('chuva') >= 0 || wd.indexOf('chuvoso') >= 0) wCode = 'r';
+        else if (wd.indexOf('tempestade') >= 0) wCode = 't';
+        else if (wd.indexOf('neblina') >= 0 || wd.indexOf('névoa') >= 0 || wd.indexOf('nublado') >= 0 || wd.indexOf('neve') >= 0) wCode = 'f';
+      }
+      qParams.set('ld_phase', curPeriod);
+      qParams.set('ld_weather', wCode);
+      qParams.set('ld_month', curTime.month);
+    }
+  } catch (_eTime) {}
   try {
     var cur = new URLSearchParams(location.search || '');
     var carry = ['token', 'uid', 'user_id', 'api', 'api_base', 'char', 'char_id', 'env'];

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-09T14:56:25Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-10T11:07:52Z - do not edit directly, edit source -->
 
 
 
@@ -16138,6 +16138,18 @@ window.__applyExploreSnap = function(S, snap) {
   }
   // Gera sessionId único pra esta sessão (usado em event_history entries)
   S._sessionId = Date.now();
+  // Sincronização Sazonal e Temporal D&D 5e (Glacimir / Tempo do Reino)
+  if (snap.time) {
+    S.gameTime = snap.time;
+    if (snap.time.period) S.dayPhase = snap.time.period;
+    if (snap.time.weather && typeof _serverWeatherToClientCode === 'function') {
+      var _sc = _serverWeatherToClientCode(snap.time.weather);
+      if (_sc) S.weather = _sc;
+    }
+    if (snap.time.month === 10 || snap.time.month === 11 || (snap.time.month_name && String(snap.time.month_name).indexOf('Glacimir') >= 0)) {
+      S.isGlacimir = true;
+    }
+  }
   console.info('[E-REM:BOOT] snap applied cls=' + p.cls_key + ' lvl=' + p.level
     + ' xp=' + p.xp + ' hp=' + p.hp + '/' + p.mhp
     + ' mp=' + p.mp + '/' + p.mmp + ' gold=' + S.gold
@@ -21909,7 +21921,7 @@ const FIXED_MAPS = {
 })();
 
 // Setup choices (coletados pelo overlay antes do boot)
-var setupChoices = { region: 'valdoria', map: 'city_gates', weather: 's', phase: 'day', soundOn: true,
+var setupChoices = { region: 'valdoria', map: 'city_gates', weather: 's', phase: 'day', month: 10, isGlacimir: true, soundOn: true,
   // V2.6: PHB personality. Default neutro amig\u00e1vel.
   background: 'folk_hero', alignment: 'NG' };
 
@@ -22031,6 +22043,8 @@ function initState() {
     gold: 0,  // V2.5: Valdoritas do jogador, visível no HUD
     weather: setupChoices.weather || 's',
     dayPhase: setupChoices.phase || 'day',
+    month: (typeof setupChoices.month === 'number') ? setupChoices.month : 10,
+    isGlacimir: (setupChoices.month === 10 || setupChoices.month === 11 || typeof setupChoices.month !== 'number'),
     dangerLevel: 2,
     player: (function () {
       // X-6.5.51 (2026-04-26): nivel via URL param ld_lvl (default 3).
@@ -40396,9 +40410,12 @@ function _envModifiers(skill, weather, dayPhase) {
       // padrão — sem mod
     }
   }
-  // Sobrevivência: chuva apaga rastros
+  // Sobrevivência: chuva apaga rastros; inverno de Glacimir dificulta forrageamento (DMG p. 111)
   if (skill === 'survival') {
     if (weather === 'r' || weather === 't') dcMod += 2;
+    if ((setupChoices && (setupChoices.month === 10 || setupChoices.month === 11)) || (typeof S !== 'undefined' && S && S.isGlacimir)) {
+      dcMod += 2;
+    }
   }
   // Atletismo / força: tempestade dificulta (ventos, terreno)
   if (skill === 'athletics' || skill === 'str') {
@@ -46338,6 +46355,25 @@ function _showTbConditionPopup(kind) {
     b.appendChild(ul);
     sec.appendChild(t); sec.appendChild(b); body.appendChild(sec);
   }
+  if (kind === 'weather' && S && S.isGlacimir && !isDungeon) {
+    const secGlacier = document.createElement('div');
+    secGlacier.className = 'tb-cp-section';
+    const tG = document.createElement('div'); tG.className = 'tb-cp-section-title'; tG.textContent = 'Estação: Inverno de Glacimir';
+    const bG = document.createElement('div'); bG.className = 'tb-cp-section-body';
+    const ulG = document.createElement('ul');
+    [
+      'Mês de geadas severas e noites prematuras (DMG p. 110)',
+      'Forragear alimentos tem CD +2 pela escassez e congelamento da vegetação',
+      'Rastreamento em terreno aberto facilitado por pegadas na geada (Vantagem)',
+      'Águas congelantes exigem Salvaguarda de Constituição (CD 10) contra frio e exaustão'
+    ].forEach(eff => {
+      const li = document.createElement('li');
+      li.textContent = eff;
+      ulG.appendChild(li);
+    });
+    bG.appendChild(ulG);
+    secGlacier.appendChild(tG); secGlacier.appendChild(bG); body.appendChild(secGlacier);
+  }
   document.getElementById('tb-condition-popup').classList.add('visible');
 }
 
@@ -48951,6 +48987,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (qs.get('ld_phase')) setupChoices.phase = qs.get('ld_phase');
       if (qs.get('ld_bg')) setupChoices.background = qs.get('ld_bg');
       if (qs.get('ld_align')) setupChoices.alignment = qs.get('ld_align');
+      if (qs.get('ld_month')) {
+        var _mVal = parseInt(qs.get('ld_month'), 10);
+        if (!isNaN(_mVal)) {
+          setupChoices.month = _mVal;
+          setupChoices.isGlacimir = (_mVal === 10 || _mVal === 11);
+        }
+      }
       // ld_cls é usado no initState (escolha de classe)
       if (qs.get('ld_cls')) window.__LD_CLS = qs.get('ld_cls');
       // === Cidade → Exploração: ?biome= URL param (Fase 6 — 2026-04-30) ===
