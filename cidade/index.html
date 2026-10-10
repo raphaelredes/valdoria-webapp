@@ -1737,9 +1737,15 @@ LOG SINK (Fase 7):
     .vmsn-body {
       padding: var(--v-space-lg, 12px) var(--v-space-lg, 12px) var(--v-space-md, 8px);
       overflow-y: auto;
+      overscroll-behavior: contain;
       flex: 1 1 auto;
+      min-height: 0;
       text-align: center;
+      scrollbar-width: thin;
+      scrollbar-color: var(--v-gold, #c4953a) rgba(0,0,0,0.3);
     }
+    .vmsn-body::-webkit-scrollbar { width: 4px; }
+    .vmsn-body::-webkit-scrollbar-thumb { background: var(--v-gold, #c4953a); border-radius: 4px; }
     .vmsn-title {
       font-family: var(--v-font-display, 'Cinzel', serif);
       font-weight: 700;
@@ -1843,6 +1849,10 @@ LOG SINK (Fase 7):
       gap: var(--v-space-sm, 4px);
       padding: var(--v-space-md, 8px) var(--v-space-lg, 12px) var(--v-space-lg, 12px);
       flex: 0 0 auto;
+      flex-shrink: 0;
+      margin-top: auto;
+      width: 100%;
+      box-sizing: border-box;
     }
     .vmsn-btn {
       flex: 1 1 auto;
@@ -1895,9 +1905,9 @@ LOG SINK (Fase 7):
       width: auto;
       min-width: 260px;
       max-width: 360px;
-      max-height: 88vh;  /* X-6.5.51AU: don't overflow viewport */
+      max-height: 90vh;
       margin: 0 var(--v-space-xl, 16px);
-      padding: 22px 20px 18px;  /* tightened for short content */
+      padding: 0;
       background: linear-gradient(180deg, rgba(40,32,24,0.98), rgba(22,18,14,0.98));
       border: 1.5px solid #c4953a;
       border-radius: 12px;
@@ -1905,12 +1915,32 @@ LOG SINK (Fase 7):
       text-align: center;
       display: flex;
       flex-direction: column;
-      overflow-y: auto;  /* X-6.5.51AU: scroll only if content exceeds 88vh */
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .srp-body {
+      padding: 22px 20px 10px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      flex: 1 1 auto;
+      min-height: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--v-gold, #c4953a) rgba(0,0,0,0.3);
+    }
+    .srp-body::-webkit-scrollbar { width: 4px; }
+    .srp-body::-webkit-scrollbar-thumb { background: var(--v-gold, #c4953a); border-radius: 4px; }
+    .srp-footer {
+      padding: 0 20px 18px;
+      flex-shrink: 0;
+      margin-top: auto;
+      width: 100%;
+      box-sizing: border-box;
     }
     /* X-6.5.51AU (2026-05-08): adaptive sizing — short events get compact card,
        long events fit viewport with internal scroll. User reportou: "ajuste o
        popup ao tamanho da narrativa". */
-    .srp-card.compact { padding: 18px 18px 14px; min-width: 240px; }
+    .srp-card.compact .srp-body { padding: 18px 18px 8px; }
+    .srp-card.compact .srp-footer { padding: 0 18px 14px; }
     .srp-card.compact .srp-icon { font-size: calc(36px * var(--v-font-scale, 1)); margin-bottom: 6px; }
     .srp-card.compact .srp-narrative { padding: var(--v-space-md, 8px) var(--v-space-lg, 12px); }
     .srp-icon {
@@ -2120,12 +2150,9 @@ LOG SINK (Fase 7):
       cursor: pointer;
       box-shadow: 0 4px 14px rgba(196,149,58,0.4), inset 0 1px 0 rgba(255,230,180,0.3);
       text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      /* J (2026-06-18): CTA sempre visível — fica grudado no fundo do card mesmo
-         quando o conteúdo rola (antes o botão era empurrado pra fora e "cortado"). */
-      position: sticky;
-      bottom: 0;
-      margin-top: var(--v-space-sm, 4px);
-      flex-shrink: 0;
+      display: block;
+      margin: 0;
+      box-sizing: border-box;
     }
     .srp-continue-btn:hover {
       transform: translateY(-1px);
@@ -2210,24 +2237,23 @@ LOG SINK (Fase 7):
     .cpp-card {
       width: 100%;
       max-width: 360px;
-      /* Sessão #64 (2026-05-30): max-height + scroll interno — sem isso o popup
-         (ex: Desafio do Dia) ESTOURAVA a tela em letra grande (conteúdo escala
-         com --v-font-scale mas o card não tinha limite/scroll). Regra "Popup
-         DEVE Ocupar Máximo de Espaço". */
-      max-height: 92vh;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      padding: 22px 20px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 18px 20px 16px;
       background: linear-gradient(180deg, rgba(40,32,24,0.98), rgba(22,18,14,0.98));
       border: 1.5px solid #c4953a;
       border-radius: 12px;
       box-shadow: 0 12px 40px rgba(0,0,0,0.7), inset 0 0 12px rgba(196,149,58,0.15);
       text-align: center;
+      box-sizing: border-box;
     }
     .cpp-icon {
       font-size: calc(42px * var(--v-font-scale, 1));
       margin-bottom: var(--v-space-md-lg, 10px);
       filter: drop-shadow(0 0 12px rgba(196,149,58,0.4));
+      flex-shrink: 0;
     }
     .cpp-title {
       font-family: 'Cinzel', serif;
@@ -2237,12 +2263,33 @@ LOG SINK (Fase 7):
       margin: 0 0 var(--v-space-sm, 4px);
       text-transform: uppercase;
       text-shadow: 0 0 10px rgba(196,149,58,0.3);
+      flex-shrink: 0;
     }
     .cpp-npc {
       color: #d4c8b0;
       font-style: italic;
       font-size: var(--v-font-sm, 12px);
       margin-bottom: var(--v-space-lg, 12px);
+      flex-shrink: 0;
+    }
+    .cpp-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+    }
+    .cpp-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .cpp-body::-webkit-scrollbar-thumb {
+      background: rgba(196, 149, 58, 0.4);
+      border-radius: 2px;
     }
     .cpp-desc {
       color: #d4c8b0;
@@ -2293,6 +2340,9 @@ LOG SINK (Fase 7):
     .cpp-actions {
       display: flex;
       gap: var(--v-space-md, 8px);
+      flex-shrink: 0;
+      width: 100%;
+      margin-top: auto;
     }
     .cpp-btn {
       flex: 1;
@@ -2988,10 +3038,32 @@ LOG SINK (Fase 7):
     .cdo-body {
       padding: 16px 18px;
       overflow-y: auto;
-      flex: 1;
+      overscroll-behavior: contain;
+      flex: 1 1 auto;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 96, 64, 0.4) transparent;
+    }
+    .cdo-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .cdo-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 96, 64, 0.4);
+      border-radius: 2px;
+    }
+    .cdo-footer {
+      padding: 10px 18px;
+      background: rgba(18,10,8,0.95);
+      border-top: 1px solid rgba(196,40,30,0.3);
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+      margin-top: auto;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     /* Screen styles: .rel-hub */
@@ -3620,11 +3692,16 @@ LOG SINK (Fase 7):
     .alm-card {
       width: 100%;
       max-width: 360px;
-      padding: 22px 20px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 20px 18px 16px;
       background: linear-gradient(180deg, rgba(40,32,24,0.98), rgba(22,18,14,0.98));
       border: 1.5px solid #c4953a;
       border-radius: var(--v-radius, 10px);
       box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+      box-sizing: border-box;
     }
     .alm-title {
       font-family: 'Cinzel', serif;
@@ -3730,10 +3807,29 @@ LOG SINK (Fase 7):
       font-family: 'Cinzel', serif;
     }
     .alm-ally-max-btn:hover { background: rgba(196,149,58,0.25); }
+    #alm-allies-list {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 2px;
+      margin-bottom: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+    }
+    #alm-allies-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    #alm-allies-list::-webkit-scrollbar-thumb {
+      background: rgba(196, 149, 58, 0.4);
+      border-radius: 2px;
+    }
     .alm-actions {
       display: flex;
       gap: var(--v-space-md, 8px);
-      margin-top: var(--v-space-lg, 12px);
+      margin-top: auto;
+      flex-shrink: 0;
+      width: 100%;
     }
     .alm-confirm {
       flex: 1;
@@ -4019,18 +4115,18 @@ LOG SINK (Fase 7):
       width: 100%;
       max-width: 380px;
       max-height: 88vh;
-      overflow-y: auto;
       background: linear-gradient(180deg, rgba(34, 27, 20, 0.98) 0%, rgba(18, 14, 10, 0.98) 100%);
       border: 1.5px solid var(--v-gold, #c4953a);
       border-radius: var(--v-radius, 10px);
-      padding: 18px 16px;
+      padding: 16px 16px 14px;
       text-align: center;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), inset 0 0 16px rgba(196, 149, 58, 0.12);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       animation: cwoCardScale 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       box-sizing: border-box;
+      overflow: hidden;
     }
     @keyframes cwoCardScale {
       from { opacity: 0; transform: scale(0.94) translateY(8px); }
@@ -4041,6 +4137,7 @@ LOG SINK (Fase 7):
       align-items: center;
       gap: 12px;
       text-align: left;
+      flex-shrink: 0;
     }
     .cwo-icon-box {
       width: 44px;
@@ -4083,7 +4180,27 @@ LOG SINK (Fase 7):
       opacity: 0.5;
       font-size: 11px;
       letter-spacing: 4px;
-      margin: -4px 0 -2px;
+      margin: -2px 0 0;
+      flex-shrink: 0;
+    }
+    .cwo-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+    }
+    .cwo-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .cwo-body::-webkit-scrollbar-thumb {
+      background: rgba(196, 149, 58, 0.4);
+      border-radius: 2px;
     }
     .cwo-grid {
       display: grid;
@@ -4174,6 +4291,17 @@ LOG SINK (Fase 7):
       color: var(--v-text-dim, #a09484);
       line-height: 1.45;
     }
+    .cwo-footer {
+      flex-shrink: 0;
+      width: 100%;
+      margin-top: auto;
+      padding-top: 6px;
+      border-top: 1px solid rgba(196, 149, 58, 0.22);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      box-sizing: border-box;
+    }
     .cwo-btn-close {
       background: linear-gradient(180deg, #c4953a 0%, #8b6420 100%);
       border: 1px solid #ffd700;
@@ -4183,13 +4311,14 @@ LOG SINK (Fase 7):
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 1px;
-      padding: 9px 16px;
+      padding: 10px 16px;
       cursor: pointer;
       text-transform: uppercase;
       text-shadow: 0 1px 2px rgba(0,0,0,0.3);
       box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
       transition: filter 0.15s ease, transform 0.15s ease;
-      margin-top: 2px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .cwo-btn-close:hover {
       filter: brightness(1.12);
@@ -5203,6 +5332,7 @@ LOG SINK (Fase 7):
     .cem-card {
       width: 100%;
       max-width: 320px;
+      max-height: 90vh;
       background: linear-gradient(180deg, rgba(40, 32, 24, 0.98), rgba(22, 18, 14, 0.98));
       border: 1.5px solid #c4953a;
       border-radius: var(--v-radius, 10px);
@@ -5212,6 +5342,8 @@ LOG SINK (Fase 7):
       gap: var(--v-space-md-lg, 10px);
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(196, 149, 58, 0.1);
       animation: cem-in 0.18s ease-out;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     @keyframes cem-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .cem-card h2 {
@@ -5222,6 +5354,7 @@ LOG SINK (Fase 7):
       margin: 0;
       text-align: center;
       text-shadow: 0 0 12px rgba(196, 149, 58, 0.2);
+      flex-shrink: 0;
     }
     .cem-card .question {
       color: #a09484;
@@ -5229,8 +5362,22 @@ LOG SINK (Fase 7):
       font-size: var(--v-font-sm, 12px);
       text-align: center;
       line-height: 1.5;
+      flex-shrink: 0;
+      margin: 0;
     }
-    .cem-options { display: flex; flex-direction: column; gap: var(--v-space-md, 8px); }
+    .cem-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--v-space-md, 8px);
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--v-gold, #c4953a) rgba(0,0,0,0.3);
+    }
+    .cem-options::-webkit-scrollbar { width: 4px; }
+    .cem-options::-webkit-scrollbar-thumb { background: var(--v-gold, #c4953a); border-radius: 4px; }
     .cem-option {
       display: flex;
       align-items: center;
@@ -5264,7 +5411,10 @@ LOG SINK (Fase 7):
       font-size: var(--v-font-sm, 12px);
       border-radius: var(--v-radius-xs, 4px);
       cursor: pointer;
-      margin-top: var(--v-space-sm, 4px);
+      margin-top: auto;
+      flex-shrink: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
     .cem-cancel:hover { border-color: #c4953a; color: #c4953a; }
 
@@ -5454,14 +5604,39 @@ LOG SINK (Fase 7):
 #cart-loc-popup.active { display: flex; }
 .clp-card {
   width: 100%;
-  max-width: 340px;
+  max-width: 360px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: linear-gradient(180deg, rgba(40,32,24,0.98), rgba(22,18,14,0.98));
   border: 1.5px solid #c4953a;
   border-radius: var(--v-radius, 10px);
-  padding: var(--v-space-2xl, 24px);
+  padding: 20px 20px 16px;
   text-align: center;
   box-shadow: 0 12px 40px rgba(0,0,0,0.7), inset 0 0 12px rgba(196,149,58,0.1);
   animation: clp-in 0.18s ease-out;
+  box-sizing: border-box;
+}
+.clp-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+}
+.clp-body::-webkit-scrollbar {
+  width: 4px;
+}
+.clp-body::-webkit-scrollbar-thumb {
+  background: rgba(196, 149, 58, 0.4);
+  border-radius: 2px;
 }
 @keyframes clp-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
 .clp-icon {
@@ -5539,6 +5714,10 @@ LOG SINK (Fase 7):
   display: flex;
   flex-direction: column;
   gap: var(--v-space-md-lg, 10px);
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: auto;
+  box-sizing: border-box;
 }
 .clp-btn {
   width: 100%;
@@ -6298,12 +6477,37 @@ body.perf-lite .vc-action-btn { transition: none; }
       background: var(--v-bg-card, #2e2520);
       border: 2px solid var(--v-border, #4a3828);
       border-radius: 12px;
-      padding: 20px;
+      padding: 18px 20px 16px;
       max-width: 360px;
       width: 100%;
-      max-height: 80vh;
-      overflow-y: auto;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+      box-sizing: border-box;
+    }
+    .inv-detail-header {
+      flex-shrink: 0;
+      text-align: center;
+      width: 100%;
+    }
+    .inv-detail-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 2px;
+      margin-bottom: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(196, 149, 58, 0.4) transparent;
+    }
+    .inv-detail-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .inv-detail-body::-webkit-scrollbar-thumb {
+      background: rgba(196, 149, 58, 0.4);
+      border-radius: 2px;
     }
     .inv-detail-emoji { font-size: calc(48px * var(--v-font-scale, 1)); text-align: center; margin-bottom: var(--v-space-md, 8px); }
     .inv-detail-name {
@@ -6344,8 +6548,15 @@ body.perf-lite .vc-action-btn { transition: none; }
       letter-spacing: 0.04em;
     }
     .inv-detail-actions {
-      display: flex; gap: 6px;
-      margin-top: 14px;
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid rgba(196,149,58,0.2);
+      width: 100%;
+      box-sizing: border-box;
+      z-index: 10;
     }
     .inv-detail-btn {
       flex: 1;
@@ -9983,24 +10194,28 @@ body.perf-lite .vc-action-btn { transition: none; }
     <!-- Service Result Overlay (Fase 9.3 — feedback visual + dice 3D) -->
     <div id="service-result-overlay">
       <div class="srp-card">
-        <div class="srp-icon" id="srp-icon"></div>
-        <div class="srp-npc" id="srp-npc">NPC</div>
-        <div class="srp-divider">─ ◆ ─</div>
-        <div class="srp-narrative" id="srp-narrative"></div>
-        <!-- Dice 3D canvas (Fase 9.3 — Dice3D quando disponível, fallback CSS pill) -->
-        <div class="srp-dice-3d" id="srp-dice-3d" style="display:none"></div>
-        <div class="srp-dice" id="srp-dice" style="display:none">
-          <span></span>
-          <span id="srp-dice-formula"></span>
-          <span>=</span>
-          <span id="srp-dice-total"></span>
+        <div class="srp-body" id="srp-body">
+          <div class="srp-icon" id="srp-icon"></div>
+          <div class="srp-npc" id="srp-npc">NPC</div>
+          <div class="srp-divider">─ ◆ ─</div>
+          <div class="srp-narrative" id="srp-narrative"></div>
+          <!-- Dice 3D canvas (Fase 9.3 — Dice3D quando disponível, fallback CSS pill) -->
+          <div class="srp-dice-3d" id="srp-dice-3d" style="display:none"></div>
+          <div class="srp-dice" id="srp-dice" style="display:none">
+            <span></span>
+            <span id="srp-dice-formula"></span>
+            <span>=</span>
+            <span id="srp-dice-total"></span>
+          </div>
+          <div class="srp-delta-row" id="srp-delta-row"></div>
+          <div class="srp-rewards" id="srp-rewards" style="display:none">
+            <div class="srp-rr-title">✦ RECOMPENSAS ✦</div>
+            <div class="srp-rr-list" id="srp-rr-list"></div>
+          </div>
         </div>
-        <div class="srp-delta-row" id="srp-delta-row"></div>
-        <div class="srp-rewards" id="srp-rewards" style="display:none">
-          <div class="srp-rr-title">✦ RECOMPENSAS ✦</div>
-          <div class="srp-rr-list" id="srp-rr-list"></div>
+        <div class="srp-footer">
+          <button class="srp-continue-btn" id="srp-continue-btn">Continuar ✓</button>
         </div>
-        <button class="srp-continue-btn" id="srp-continue-btn">Continuar ✓</button>
       </div>
     </div>
     <!-- PADRAO_MISSAO — popup ÉPICO e REUTILIZÁVEL pra TODAS as telas de missão.
@@ -10035,16 +10250,18 @@ body.perf-lite .vc-action-btn { transition: none; }
         <div class="cpp-icon" id="cpp-icon"></div>
         <h3 class="cpp-title" id="cpp-title">Confirmar Compra</h3>
         <p class="cpp-npc" id="cpp-npc"></p>
-        <div class="cpp-desc" id="cpp-desc"></div>
-        <div class="cpp-cost-row" id="cpp-cost-row">
-          <span class="cpp-cost-label" id="cpp-cost-label">Custo:</span>
-          <span class="cpp-cost-value" id="cpp-cost">0 Valdoritas</span>
+        <div class="cpp-body" id="cpp-body">
+          <div class="cpp-desc" id="cpp-desc"></div>
+          <div class="cpp-cost-row" id="cpp-cost-row">
+            <span class="cpp-cost-label" id="cpp-cost-label">Custo:</span>
+            <span class="cpp-cost-value" id="cpp-cost">0 Valdoritas</span>
+          </div>
+          <div class="cpp-cost-row">
+            <span class="cpp-cost-label">Suas Valdoritas:</span>
+            <span class="cpp-cost-value" id="cpp-gold">0 Valdoritas</span>
+          </div>
+          <div class="cpp-warning" id="cpp-warning" style="display:none"></div>
         </div>
-        <div class="cpp-cost-row">
-          <span class="cpp-cost-label">Suas Valdoritas:</span>
-          <span class="cpp-cost-value" id="cpp-gold">0 Valdoritas</span>
-        </div>
-        <div class="cpp-warning" id="cpp-warning" style="display:none"></div>
         <div class="cpp-actions">
           <button class="cpp-btn cpp-btn-cancel" id="cpp-cancel-btn">Cancelar</button>
           <button class="cpp-btn cpp-btn-confirm" id="cpp-confirm-btn">Confirmar</button>
@@ -20352,7 +20569,7 @@ function _showCreatureDossier(specimen, p){
             : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Atinja a Maestria III (15 abates) para extrair os componentes alquímicos e troféus mais raros desta presa.</div>')
     +   '</div>'
     + '</div>'
-    + '<div style="padding: 10px 18px; background: rgba(18,10,8,0.95); border-top: 1px solid rgba(196,40,30,0.3); display:flex; justify-content: flex-end;">'
+    + '<div class="cdo-footer">'
     +   '<button id="cdo-btn-close" type="button" style="padding: 7px 18px; background: linear-gradient(180deg, #4a2016, #2a100a); border: 1px solid #ff6040; border-radius: 6px; color: #ffb090; font-family: Cinzel, serif; font-size: 11px; font-weight: 700; cursor: pointer;">Fechar Dossiê</button>'
     + '</div>'
     + '</div>';
@@ -49570,14 +49787,18 @@ function _showJunkSellerModal(){
       + '</div>';
   }).join('');
   card.innerHTML = ''
+    + '<div class="inv-detail-header">'
     + '<div class="inv-detail-emoji"></div>'
     + '<div class="inv-detail-name" style="color:var(--v-gold,#c4953a)">Vender Lixo</div>'
     + '<div class="inv-detail-rarity">' + info.count + ' itens · 60% do valor</div>'
     + '<div class="inv-detail-divider"></div>'
+    + '</div>'
+    + '<div class="inv-detail-body">'
     + '<div class="junk-list">' + listHtml + '</div>'
     + '<div class="inv-detail-divider"></div>'
     + '<div class="inv-detail-stats" style="text-align:center;font-weight:700">'
     +   'Total: <b style="color:var(--v-gold,#c4953a)">+' + info.gold + ' <span class="vi vi-coin sm"></span></b>'
+    + '</div>'
     + '</div>'
     + '<div class="inv-detail-actions">'
     +   '<button class="inv-detail-btn" id="junk-sell-btn"><span class="vi vi-coin sm"></span> Vender Tudo</button>'
@@ -49743,13 +49964,17 @@ function _showGemFusionModal(){
       + '</div>';
   }).join('');
   card.innerHTML = ''
+    + '<div class="inv-detail-header">'
     + '<div class="inv-detail-emoji"></div>'
     + '<div class="inv-detail-name" style="color:var(--v-gold,#c4953a)">Fusão de Gemas</div>'
     + '<div class="inv-detail-rarity">3 iguais → 1 do tier superior</div>'
     + '<div class="inv-detail-divider"></div>'
+    + '</div>'
+    + '<div class="inv-detail-body">'
     + '<div class="fusion-list">' + listHtml + '</div>'
     + '<div class="inv-detail-divider"></div>'
     + '<div class="inv-detail-stats" style="font-style:italic;font-size:var(--v-font-xs,10px);text-align:center">Toque numa fusão para fundir.</div>'
+    + '</div>'
     + '<div class="inv-detail-actions">'
     +   '<button class="inv-detail-btn" id="fusion-cancel-btn">Fechar</button>'
     + '</div>';
@@ -49908,12 +50133,15 @@ function _showSetDetailsModal(){
   var card = document.getElementById('inv-detail-card');
   if (!ov || !card) return;
   if (sets.length === 0){
-    card.innerHTML = '<div class="inv-empty">Nenhum set em progresso.</div>'
+    card.innerHTML = '<div class="inv-detail-body"><div class="inv-empty">Nenhum set em progresso.</div></div>'
       + '<div class="inv-detail-actions"><button class="inv-detail-btn" id="set-modal-close">Fechar</button></div>';
   } else {
-    var html = '<div class="inv-detail-name" style="color:var(--v-gold,#c4953a);text-align:center">Conjuntos</div>'
+    var html = '<div class="inv-detail-header">'
+      + '<div class="inv-detail-name" style="color:var(--v-gold,#c4953a);text-align:center">Conjuntos</div>'
       + '<div class="inv-detail-rarity">' + sets.length + ' em progresso</div>'
-      + '<div class="inv-detail-divider"></div>';
+      + '<div class="inv-detail-divider"></div>'
+      + '</div>'
+      + '<div class="inv-detail-body">';
     sets.forEach(function(s){
       html += '<div class="set-progress">'
         + '<div class="set-title">' + s.set.icon + ' ' + s.set.name + ' (' + s.ownedCount + '/' + s.total + ')</div>'
@@ -49935,7 +50163,8 @@ function _showSetDetailsModal(){
       });
       html += '</div>';
     });
-    html += '<div class="inv-detail-actions"><button class="inv-detail-btn" id="set-modal-close">Fechar</button></div>';
+    html += '</div>'
+      + '<div class="inv-detail-actions"><button class="inv-detail-btn" id="set-modal-close">Fechar</button></div>';
     card.innerHTML = html;
   }
   ov.classList.add('active');
@@ -50105,10 +50334,13 @@ function _showSlotModal(slot){
   var label = CANON_SLOT_NAMES[slot] || slot;
   var emoji = CANON_SLOT_EMOJI[slot] || '';
   var html = ''
+    + '<div class="inv-detail-header">'
     + '<div class="inv-detail-emoji">' + emoji + '</div>'
     + '<div class="inv-detail-name" style="color:var(--v-gold,#c4953a)">' + label + '</div>'
     + '<div class="inv-detail-rarity">SLOT DE EQUIPAMENTO</div>'
-    + '<div class="inv-detail-divider"></div>';
+    + '<div class="inv-detail-divider"></div>'
+    + '</div>'
+    + '<div class="inv-detail-body">';
   // Atual
   if (current){
     var ci = getItemData(current);
@@ -50142,6 +50374,7 @@ function _showSlotModal(slot){
     });
     html += '</div>';
   }
+  html += '</div>';
   html += '<div class="inv-detail-actions"><button class="inv-detail-btn" id="slot-modal-close">Fechar</button></div>';
   card.innerHTML = html;
   ov.classList.add('active');
@@ -50292,13 +50525,17 @@ function _showItemDetail(name){
   actionsHtml += '<button class="inv-detail-btn" id="inv-detail-close">Fechar</button>';
   actionsHtml += '</div>';
   card.innerHTML = ''
+    + '<div class="inv-detail-header">'
     + '<div class="inv-detail-emoji">' + (it.e || _heralIco("ic-mochila")) + '</div>'
     + '<div class="inv-detail-name" style="color:' + rarityCol + '">' + name + (locked ? ' · travado' : '') + '</div>'
     + '<div class="inv-detail-rarity" style="color:' + rarityCol + '">' + getRarityLabel(rarity) + (equipped ? ' · EQUIPADO' : '') + '</div>'
     + '<div class="inv-detail-divider"></div>'
+    + '</div>'
+    + '<div class="inv-detail-body">'
     + '<div class="inv-detail-stats">' + statLines.join('<br>') + '</div>'
     + (it.desc ? '<div class="inv-detail-divider"></div><div class="inv-detail-stats" style="font-style:italic">' + it.desc + '</div>' : '')
     + (tagHtml ? '<div class="inv-detail-tags">' + tagHtml + '</div>' : '')
+    + '</div>'
     + actionsHtml;
   ov.classList.add('active');
   // Wire actions
@@ -50789,16 +51026,20 @@ function _showShopItemDetail(name, npcId){
   }
 
   card.innerHTML = ''
+    + '<div class="inv-detail-header">'
     // X-6.5.51CJ (2026-05-18): vlb-zoomable-svg → tocar/clicar abre lightbox em tela cheia
     + '<div class="inv-detail-emoji vlb-zoomable-svg" data-lb-caption="' + name.replace(/"/g, '&quot;') + '" title="Toque para ampliar">' + detailIcon + '</div>'
     + '<div class="inv-detail-name" style="color:' + rarityCol + '">' + name + '</div>'
     + '<div class="inv-detail-rarity" style="color:' + rarityCol + '">' + getRarityLabel(rarity) + '</div>'
     + preBadges
     + '<div class="inv-detail-divider"></div>'
+    + '</div>'
+    + '<div class="inv-detail-body">'
     + '<div class="inv-detail-stats">' + statLines.join('<br>') + '</div>'
     + (it.desc ? '<div class="inv-detail-divider"></div><div class="inv-detail-stats" style="font-style:italic">' + it.desc + '</div>' : '')
     + (tagHtml ? '<div class="inv-detail-tags">' + tagHtml + '</div>' : '')
     + negNote
+    + '</div>'
     + actionsHtml;
   ov.classList.add('active');
   // 2026-06-14 FIX (zoom de equipamento, como nos retratos de NPC/combate):
@@ -62923,38 +63164,42 @@ function _showCityWeatherPopup(){
     + '  </div>'
     + '</div>'
     + '<div class="cwo-divider">─ ◆ ─</div>'
-    + '<div class="cwo-grid">'
-    + '  <div class="cwo-metric-card">'
-    + '    <span class="cwo-metric-label">CLIMA ATUAL</span>'
-    + '    <span class="cwo-metric-val" style="color:var(--v-gold-light,#e8c45a);">' + weatherIcon + ' ' + w.desc + ' · ' + w.temp + '°C</span>'
-    + '    <span class="cwo-metric-sub">' + feel + '</span>'
+    + '<div class="cwo-body">'
+    + '  <div class="cwo-grid">'
+    + '    <div class="cwo-metric-card">'
+    + '      <span class="cwo-metric-label">CLIMA ATUAL</span>'
+    + '      <span class="cwo-metric-val" style="color:var(--v-gold-light,#e8c45a);">' + weatherIcon + ' ' + w.desc + ' · ' + w.temp + '°C</span>'
+    + '      <span class="cwo-metric-sub">' + feel + '</span>'
+    + '    </div>'
+    + '    <div class="cwo-metric-card">'
+    + '      <span class="cwo-metric-label">HORÁRIO &amp; CICLO</span>'
+    + '      <span class="cwo-metric-val">' + periodIcon + ' ' + hh + ':' + mm + '</span>'
+    + '      <span class="cwo-metric-sub">' + plabel + '</span>'
+    + '    </div>'
+    + '    <div class="cwo-metric-card">'
+    + '      <span class="cwo-metric-label">DATA NO REINO</span>'
+    + '      <span class="cwo-metric-val">' + t.day + ' de ' + monthName + '</span>'
+    + '      <span class="cwo-metric-sub">Ano ' + t.year + ' da Fundação</span>'
+    + '    </div>'
+    + '    <div class="cwo-metric-card">'
+    + '      <span class="cwo-metric-label">VISIBILIDADE</span>'
+    + '      <span class="cwo-metric-val" style="font-size:11px;">' + mechanics.vis + '</span>'
+    + '      <span class="cwo-metric-sub">' + mechanics.cond + '</span>'
+    + '    </div>'
     + '  </div>'
-    + '  <div class="cwo-metric-card">'
-    + '    <span class="cwo-metric-label">HORÁRIO &amp; CICLO</span>'
-    + '    <span class="cwo-metric-val">' + periodIcon + ' ' + hh + ':' + mm + '</span>'
-    + '    <span class="cwo-metric-sub">' + plabel + '</span>'
+    + '  <div class="cwo-narrative-box">'
+    + '    <div class="cwo-box-badge">✦ DESCRIÇÃO DO CENÁRIO ✦</div>'
+    + '    <p class="cwo-narrative-text">“' + narrative + '”</p>'
+    + '    <div class="cwo-month-lore"><b>Mês de ' + monthName + ':</b> <i>' + monthLore + '</i></div>'
     + '  </div>'
-    + '  <div class="cwo-metric-card">'
-    + '    <span class="cwo-metric-label">DATA NO REINO</span>'
-    + '    <span class="cwo-metric-val">' + t.day + ' de ' + monthName + '</span>'
-    + '    <span class="cwo-metric-sub">Ano ' + t.year + ' da Fundação</span>'
-    + '  </div>'
-    + '  <div class="cwo-metric-card">'
-    + '    <span class="cwo-metric-label">VISIBILIDADE</span>'
-    + '    <span class="cwo-metric-val" style="font-size:11px;">' + mechanics.vis + '</span>'
-    + '    <span class="cwo-metric-sub">' + mechanics.cond + '</span>'
+    + '  <div class="cwo-effects-box">'
+    + '    <div class="cwo-effects-title">⚔️ CONDIÇÕES DE VIAGEM &amp; EXPLORAÇÃO</div>'
+    + '    <div class="cwo-effects-text">' + mechanics.effect + '</div>'
     + '  </div>'
     + '</div>'
-    + '<div class="cwo-narrative-box">'
-    + '  <div class="cwo-box-badge">✦ DESCRIÇÃO DO CENÁRIO ✦</div>'
-    + '  <p class="cwo-narrative-text">“' + narrative + '”</p>'
-    + '  <div class="cwo-month-lore"><b>Mês de ' + monthName + ':</b> <i>' + monthLore + '</i></div>'
-    + '</div>'
-    + '<div class="cwo-effects-box">'
-    + '  <div class="cwo-effects-title">⚔️ CONDIÇÕES DE VIAGEM &amp; EXPLORAÇÃO</div>'
-    + '  <div class="cwo-effects-text">' + mechanics.effect + '</div>'
-    + '</div>'
-    + '<button class="cwo-btn-close" onclick="window._closeCityWeatherPopup()">Entendido ✕</button>';
+    + '<div class="cwo-footer">'
+    + '  <button class="cwo-btn-close" onclick="window._closeCityWeatherPopup()">Entendido ✕</button>'
+    + '</div>';
 
   ov.classList.add('active');
 }
@@ -65074,7 +65319,8 @@ function _openCartLocationPopup(biome){
     var orderInProgress = (p.cartographer_orders || []).some(function(o){
       return o.map === biome.mapKey;
     });
-    var bodyHtml = '<div class="clp-icon" style="opacity:0.4;font-size:calc(48px * var(--v-font-scale, 1))"></div>'
+    var bodyHtml = '<div class="clp-body">'
+      + '<div class="clp-icon" style="opacity:0.4;font-size:calc(48px * var(--v-font-scale, 1))"></div>'
       + '<h2 style="color:var(--v-text-dim, #a09484)">Local Desconhecido</h2>'
       + '<p style="font-style:italic;color:var(--v-text-dim, #a09484)">Sussurros nas tavernas mencionam algo nessa direção, '
       + 'mas você não tem informação cartográfica suficiente para traçar uma rota.</p>'
@@ -65103,6 +65349,7 @@ function _openCartLocationPopup(biome){
                 + 'Aventureiros relatam ter encontrado por acaso.';
     }
     bodyHtml += '</span></div>'
+      + '</div>'
       + '<div class="clp-buttons">'
       + (biome.mapKey && !hasMapItem && !orderInProgress
           ? '<button class="clp-btn clp-btn-travel" data-clp="goto-cartographer">Ir ao Cartógrafo</button>'
@@ -65139,11 +65386,13 @@ function _openCartLocationPopup(biome){
   var canExploreOrigin = isCurrent && biome.isOrigin;
   // 2026-05-05 v10: removido badge "Tier N" — só level range no rec.
   card.innerHTML = ''
+    + '<div class="clp-body">'
     + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
     + (isCurrent ? '<div class="clp-current-here">VOCÊ ESTÁ AQUI</div>' : '')
     + '<h2>' + biome.name + '</h2>'
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
     + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key)) + '</div>' : '')
+    + '</div>'
     + '<div class="clp-buttons">'
     + (canExploreOrigin
         ? '<button class="clp-btn clp-btn-travel" data-clp="travel">Explorar Planícies dos Portões</button>'
