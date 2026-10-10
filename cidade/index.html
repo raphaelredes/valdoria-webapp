@@ -884,6 +884,8 @@ LOG SINK (Fase 7):
     .hub-loc[data-cb="rune_scribe"] .hl-nm { color: #5a8ad4; }
     .hub-loc[data-cb="guild"]       .hl-nm,
     .hub-loc[data-cb="guilda"]      .hl-nm { color: #8a96a8; }
+    .hub-loc[data-cb="passagens"]   .hl-nm,
+    .hub-loc[data-cb="passages"]    .hl-nm,
     .hub-loc[data-cb="gates"]       .hl-nm,
     .hub-loc[data-cb="portoes"]     .hl-nm { color: #9a8a78; }
     .hub-loc[data-cb="arena"]       .hl-nm,
@@ -13079,6 +13081,7 @@ window.addEventListener('online', function() {
       'square': 'square', 'praca': 'square',
       'bank': 'bank', 'banco': 'bank',
       'gates': 'gates', 'portoes': 'gates',
+      'passagens': 'passagens', 'passages': 'passagens',
       'action_quests': 'quests', 'quests': 'quests', 'quest_open_1': 'quests', 'quest_open_2': 'quests',
       'quest_open_': 'quests',
 
@@ -13222,7 +13225,7 @@ window.addEventListener('online', function() {
 var CITY_SECTORS = {
   convivio:  { id:'convivio',  label:'Convívio',  icoImg:'cerveja' },
   comercio:  { id:'comercio',  label:'Comércio',  icoImg:'mercado' },
-  combate:   { id:'combate',   label:'Combate',   icoImg:'acao-atacar' },
+  combate:   { id:'combate',   label:'Combate & Acessos', icoImg:'acao-atacar' },
   espirito:  { id:'espirito',  label:'Espírito',  icoImg:'templo' }
 };
 var CITY_SECTOR_ORDER = ['convivio','comercio','combate','espirito'];
@@ -13231,7 +13234,7 @@ var CITY_SECTOR_ORDER = ['convivio','comercio','combate','espirito'];
 /* 2026-05-21 USER REQUEST: redução lv 1 minimalista (4 essenciais).
    Lv 1: tavern, market, action_quests, temple — core gameplay loop
    Lv 2: inn, rel_main — desbloqueados após primeira missão completa
-   Lv 3: guild, gates — desbloqueados quando jogador tem XP/equip básico
+   Lv 3: guild, gates/passagens — desbloqueados quando jogador tem XP/equip básico
    Mini-tutorial single-step disparado quando novo local aparece. */
 var CITY_LOCATIONS = {
   // === CONVÍVIO === (essenciais + tier 2)
@@ -13246,15 +13249,15 @@ var CITY_LOCATIONS = {
   bank:          { sector:'comercio', levelReq:4, discoveryQuestId:null, npcReveal:true, label:'Banco',      cb:'bank' },
   open_workshop: { sector:'comercio', levelReq:6, discoveryQuestId:null, npcReveal:true, label:'Oficina',    cb:'open_workshop' },
   rune_scribe:   { sector:'comercio', levelReq:8, discoveryQuestId:null, npcReveal:true, label:'Runas',      cb:'rune_scribe' },
-  // === COMBATE === (lv 3 unlocked)
-  guild:           { sector:'combate', levelReq:2, discoveryQuestId:null, npcReveal:true, label:'Guilda',    cb:'guild' },
-  gates:           { sector:'combate', levelReq:3, discoveryQuestId:null, npcReveal:true, label:'Portões',   cb:'gates' },
-  arena:           { sector:'combate', levelReq:3, discoveryQuestId:null, npcReveal:true, label:'Arena',     cb:'arena' },
-  daily_challenge: { sector:'combate', levelReq:5, discoveryQuestId:'q_disc_desafio',  label:'Desafio',   cb:'daily_challenge' },
-  // questGated: aparece SÓ com missão de esgoto ativa (bounty 'Praga de Ratos'
-  // OU 'Sons do Esgoto'). Server-driven: a entrada espelha QUESTS_ACTIVE (estado
-  // do servidor) e a cena/combate é 100% resolvida em /api/sewer/* (sewer_api_routes).
-  passagem:        { sector:'combate', levelReq:1, questGated:['bounty_rat_tails','quest_rce_sewer_echo'], discoveryQuestId:null, label:'Esgoto', cb:'sewer' },
+  // === COMBATE & ACESSOS === (4 locais canônicos: Guilda, Passagens, Arena, Desafio)
+  guild:           { sector:'combate', levelReq:2, discoveryQuestId:null, npcReveal:true, label:'Guilda',     cb:'guild' },
+  passagens:       { sector:'combate', levelReq:3, discoveryQuestId:null, npcReveal:true, label:'Passagens',  cb:'passagens' },
+  arena:           { sector:'combate', levelReq:3, discoveryQuestId:null, npcReveal:true, label:'Arena',      cb:'arena' },
+  daily_challenge: { sector:'combate', levelReq:5, discoveryQuestId:'q_disc_desafio',  label:'Desafio',    cb:'daily_challenge' },
+  // Sub-acessos integrados no hub Passagens (sector:null não renderiza na grade principal)
+  gates:           { sector:null,      levelReq:3, discoveryQuestId:null, npcReveal:true, label:'Portões',    cb:'gates' },
+  // questGated: guard de preflight; acessível de dentro de Passagens (server-driven /api/sewer/*)
+  passagem:        { sector:null,      levelReq:1, questGated:['bounty_rat_tails','quest_rce_sewer_echo'], discoveryQuestId:null, label:'Esgoto', cb:'sewer' },
   // questGated: aparecem SÓ com a quest de combate ATIVA. Combate encenado 100%
   // server-driven via /api/quest_combat/* (quest_combat_api_routes, motor genérico)
   // → on_victory completa a quest. cb mapeado a _enterQuestCombat('<qid>').
@@ -15649,8 +15652,9 @@ function _showFirstTimeTutorial(stepIdx){
       'bank': 'comercio', 'banco': 'comercio',
       'open_workshop': 'comercio', 'oficina': 'comercio', 'workshop': 'comercio',
       'rune_scribe': 'comercio', 'runas': 'comercio', 'rune': 'comercio',
-      // Combate
+      // Combate & Acessos
       'guild': 'combate', 'guilda': 'combate',
+      'passagens': 'combate', 'passages': 'combate',
       'gates': 'combate', 'portoes': 'combate',
       'arena': 'combate',
       'daily_challenge': 'combate', 'desafio': 'combate',
@@ -21834,6 +21838,12 @@ var AREA_REGISTRY = {
     status: 'ok'
   },
   // === Fase 9.9 — Áreas restantes da tela cidade (Portões/Compêndio/Missões/Desafio)
+  'passagens': {
+    renderer: 'renderSquareHub',
+    mockBuilder: '_buildPassagensMockData',
+    subkeys: [],
+    status: 'ok'
+  },
   'gates': {
     renderer: 'renderGatesHub',
     mockBuilder: '_buildGatesMockData',
@@ -27259,6 +27269,219 @@ function _buildGatesMockData(player){
     ],
     wandering_npcs: []
   };
+}
+
+// === PASSAGENS & ARREDORES (Hub de locais diversos: Portões, Esgoto, Beco, Viajantes) ===
+function _buildPassagensMockData(player){
+  player = player || window.CITY_MOCK_PLAYER;
+  var isRogue = false;
+  if (player) {
+    var cls = String(player.hero_class || player.cls || '').toLowerCase();
+    if (cls === 'ladino' || cls === 'rogue' || cls === 'ladina') isRogue = true;
+    if (Array.isArray(player.allies)) {
+      player.allies.forEach(function(al){
+        var aCls = String(al.hero_class || al.cls || al.class || '').toLowerCase();
+        if (aCls === 'ladino' || aCls === 'rogue' || aCls === 'ladina') isRogue = true;
+      });
+    }
+  }
+
+  var hasSewerQuest = false;
+  if (typeof _hasActiveGatedQuest === 'function') {
+    hasSewerQuest = _hasActiveGatedQuest(['bounty_rat_tails', 'quest_rce_sewer_echo']);
+  }
+
+  var storedUnlocked = false;
+  try {
+    storedUnlocked = localStorage.getItem('valdoria_blackmarket_unlocked_' + (window._charId || 'default')) === '1';
+  } catch(_){}
+  var isUnlocked = window._blackMarketUnlocked || storedUnlocked;
+
+  var services = [
+    {
+      icon: _heralIco('ic-portoes'),
+      label: 'Portões da Cidade',
+      badge: 'Muralhas & Ermos',
+      desc: 'Sentinelas, Guarda Aldric e saída para viagens selvagens.',
+      cb: 'passagens_open_gates'
+    },
+    {
+      icon: _heralIco('ic-portoes'),
+      label: 'Esgotos Subterrâneos',
+      badge: hasSewerQuest ? '⚠️ Missão Ativa' : 'Grades Trancadas',
+      desc: hasSewerQuest ? 'Descida aberta para caça e combate nas galerias.' : 'Acesso trancado pelo Conselho. Requer missão.',
+      cb: 'passagens_open_sewer'
+    },
+    {
+      icon: _heralIco('ic-bruxo'),
+      label: 'Beco Sombrio',
+      badge: isUnlocked ? 'Mercado Aberto' : (isRogue ? '🕵️ Gíria da Guilda' : 'Acesso Restrito'),
+      desc: isRogue ? 'Marcas secretas da guilda indicam o comércio clandestino do Vulto.' : 'Passagem obscura entre os muros vigiada por figuras silenciosas.',
+      cb: 'passagens_open_blackmarket'
+    },
+    {
+      icon: _heralIco('ic-cartografia'),
+      label: 'Pátio dos Viajantes',
+      badge: 'Caravanas & Diário',
+      desc: 'Relatos de forasteiros, mercadores itinerantes e diário de estrada.',
+      cb: 'passagens_open_travelers'
+    }
+  ];
+
+  return {
+    type: 'hub',
+    bannerImg: '/shared/img/city/portoes-banner.webp',
+    bannerTitle: 'PASSAGENS & ARREDORES',
+    flavor: 'Rotas periféricas, arcos de pedra e galerias que conectam os distritos aos ermos de Valdoria. Sentinelas vigiam a estrada principal, enquanto sombras e canais escorrem sob a muralha.',
+    rep_label: '4 acessos principais integrados neste setor',
+    services: services
+  };
+}
+
+function _openBlackMarketEncounter(p){
+  p = p || window.CITY_MOCK_PLAYER;
+  var storedUnlocked = false;
+  try {
+    storedUnlocked = localStorage.getItem('valdoria_blackmarket_unlocked_' + (window._charId || 'default')) === '1';
+  } catch(_){}
+  if (window._blackMarketUnlocked || storedUnlocked) {
+    navigateTo('shadow_alley');
+    return;
+  }
+
+  var isRogue = false;
+  if (p) {
+    var cls = String(p.hero_class || p.cls || '').toLowerCase();
+    if (cls === 'ladino' || cls === 'rogue' || cls === 'ladina') isRogue = true;
+    if (Array.isArray(p.allies)) {
+      p.allies.forEach(function(al){
+        var aCls = String(al.hero_class || al.cls || al.class || '').toLowerCase();
+        if (aCls === 'ladino' || aCls === 'rogue' || aCls === 'ladina') isRogue = true;
+      });
+    }
+  }
+
+  if (window.vEncounter && window.vEncounter.render) {
+    var choices = [];
+    if (isRogue) {
+      choices.push({ id: 'rogue_pass', label: '🕵️ [Ladino] Fazer o sinal secreto e sussurrar a gíria da guilda' });
+    }
+    choices.push({ id: 'test_history', label: '📜 [História DC 14] Tentar lembrar rumores sobre o Corvo Branco' });
+    choices.push({ id: 'inquire', label: 'Senha? Que senha?' });
+    choices.push({ id: 'leave', label: '↩ Dar meia-volta' });
+
+    window.vEncounter.render({
+      npc: {
+        id: 'npc_blackmarket_shadow',
+        name: 'Figura Encapuzada',
+        desc: 'Vulto silencioso guardando o arco entre os muros',
+        portrait: '/shared/img/combat/bruxo.webp',
+        icon: 'ic-bruxo'
+      },
+      script: [
+        { type: 'narration', text: 'Você se aproxima de um arco estreito e mal iluminado nos fundos da muralha. Das sombras entre dois tonéis de carvalho, uma figura encapuzada surge como se fizesse parte da própria escuridão, a mão repousando na bainha de uma adaga afiada.' },
+        { type: 'speech', text: 'Parado aí. A senha?' }
+      ],
+      choices: choices
+    }, {
+      player: p,
+      onChoice: function(ch){
+        if (!ch || ch.id === 'leave') {
+          try { window.vEncounter.close(); } catch(_){}
+          return;
+        }
+        if (ch.id === 'rogue_pass') {
+          window.vEncounter.render({
+            npc: {
+              id: 'npc_blackmarket_shadow',
+              name: 'Figura Encapuzada',
+              portrait: '/shared/img/combat/bruxo.webp',
+              icon: 'ic-bruxo'
+            },
+            script: [
+              { type: 'narration', text: 'Você faz o sinal secreto da guilda com os dedos e sussurra a gíria das sombras. O homem encapuzado relaxa a postura e guarda a adaga com um aceno sutil.' },
+              { type: 'speech', text: 'Pode passar, sombra. O Vulto não gosta de conversa na entrada. Seja rápido.' }
+            ],
+            choices: [
+              { id: 'enter', label: 'Entrar no Beco Sombrio ▸' }
+            ]
+          }, {
+            player: p,
+            onChoice: function(){
+              try { window.vEncounter.close(); } catch(_){}
+              window._blackMarketUnlocked = true;
+              try { localStorage.setItem('valdoria_blackmarket_unlocked_' + (window._charId || 'default'), '1'); } catch(_){}
+              navigateTo('shadow_alley');
+            }
+          });
+          return;
+        }
+        if (ch.id === 'test_history') {
+          var intMod = 0;
+          if (p && p.stats) intMod = Math.floor(((p.stats.int || 10) - 10) / 2);
+          var roll = Math.floor(Math.random() * 20) + 1;
+          var total = roll + intMod;
+          var success = total >= 14;
+
+          var resultText = success
+            ? 'Você vasculha as memórias das conversas na taverna e recorda-se do grafite riscado no beco: "Corvo Branco". Ao ouvir a frase, a figura encapuzada assente e abre a passagem.'
+            : 'Você arrisca uma palavra vaga sobre corvos e ouro velho. A figura encapuzada cospe de lado e dá um passo à frente com o aço brilhando na penumbra.';
+          var speechText = success
+            ? 'Corvo Branco... Certo. Entre logo e não faça perguntas idiotas.'
+            : 'Errou feio. Dê o fora antes que eu chame os cães ou fure sua garganta.';
+
+          window.vEncounter.render({
+            npc: {
+              id: 'npc_blackmarket_shadow',
+              name: 'Figura Encapuzada',
+              portrait: '/shared/img/combat/bruxo.webp',
+              icon: 'ic-bruxo'
+            },
+            script: [
+              { type: 'narration', text: '[Teste de História (DC 14): ' + roll + ' + ' + intMod + ' = ' + total + ' — ' + (success ? 'SUCESSO' : 'FALHA') + ']\n\n' + resultText },
+              { type: 'speech', text: speechText }
+            ],
+            choices: success
+              ? [{ id: 'enter', label: 'Entrar no Beco Sombrio ▸' }]
+              : [{ id: 'leave', label: '↩ Recuar' }]
+          }, {
+            player: p,
+            onChoice: function(subCh){
+              try { window.vEncounter.close(); } catch(_){}
+              if (success && subCh && subCh.id === 'enter') {
+                window._blackMarketUnlocked = true;
+                try { localStorage.setItem('valdoria_blackmarket_unlocked_' + (window._charId || 'default'), '1'); } catch(_){}
+                navigateTo('shadow_alley');
+              }
+            }
+          });
+          return;
+        }
+        if (ch.id === 'inquire') {
+          window.vEncounter.render({
+            npc: {
+              id: 'npc_blackmarket_shadow',
+              name: 'Figura Encapuzada',
+              portrait: '/shared/img/combat/bruxo.webp',
+              icon: 'ic-bruxo'
+            },
+            script: [
+              { type: 'speech', text: 'Turista... Achou o caminho errado. Dê o fora daqui antes que se meta em apuros que suas moedas não pagam.' }
+            ],
+            choices: [
+              { id: 'leave', label: '↩ Afastar-se' }
+            ]
+          }, {
+            player: p,
+            onChoice: function(){ try { window.vEncounter.close(); } catch(_){} }
+          });
+          return;
+        }
+      }
+    });
+  } else {
+    navigateTo('shadow_alley');
+  }
 }
 
 // Items pra preparar viagem (brasões heráldicos canonical)
@@ -58756,6 +58979,11 @@ function _renderCityPopup(key){
     renderSquareHub(bodyEl, _buildHeroesWallMockData(window.CITY_MOCK_PLAYER));
     return;
   }
+  if (key === 'passagens' && typeof renderSquareHub === 'function') {
+    if (titleEl) titleEl.textContent = 'Passagens & Arredores';
+    renderSquareHub(bodyEl, _buildPassagensMockData(window.CITY_MOCK_PLAYER));
+    return;
+  }
   // === Casos especiais legados (Fase 8.1) ===
   var d = SUBSCREEN_DATA[key];
   if (!d) return;
@@ -66488,6 +66716,56 @@ function _handleSewerResult(p, data){
 // ACTION_HANDLERS (cidade.html standalone define o único doAction, REMOTE+LOCAL).
 if (typeof ACTION_HANDLERS !== 'undefined') {
   ACTION_HANDLERS['sewer'] = function(pl){ _enterSewer(pl || window.CITY_MOCK_PLAYER); };
+  ACTION_HANDLERS['passagens'] = function(pl){
+    if (typeof navigateTo === 'function') navigateTo('passagens');
+  };
+  ACTION_HANDLERS['passagens_open_gates'] = function(pl){
+    if (typeof navigateTo === 'function') navigateTo('gates');
+  };
+  ACTION_HANDLERS['passagens_open_sewer'] = function(pl){
+    pl = pl || window.CITY_MOCK_PLAYER;
+    var hasSewerQuest = false;
+    if (pl) {
+      var qActive = Array.isArray(pl.quests_active) ? pl.quests_active : [];
+      hasSewerQuest = qActive.some(function(q){
+        var qId = typeof q === 'string' ? q : (q && q.id);
+        return qId === 'bounty_rat_tails' || qId === 'quest_rce_sewer_echo';
+      });
+    }
+    if (hasSewerQuest) {
+      _enterSewer(pl);
+    } else {
+      if (window.vEncounter && window.vEncounter.render) {
+        window.vEncounter.render({
+          npc: {
+            id: 'npc_sewer_gate',
+            name: 'Grade do Esgoto',
+            desc: 'Acesso trancado sob a muralha sul',
+            portrait: '/shared/img/combat/esgoto.webp',
+            icon: 'ic-portoes'
+          },
+          script: [
+            { type: 'narration', text: 'Você encontra o poço de descida para as galerias pluviais. Pesadas grades de ferro forjado e correntes com o selo do Conselho Municipal bloqueiam o alçapão.' },
+            { type: 'narration', text: 'Uma placa de bronze avisa: "Acesso restrito a caçadores credenciados pela Guilda com mandado de extermínio de pragas."' }
+          ],
+          choices: [
+            { id: 'leave', label: '↩ Afastar-se das grades' }
+          ]
+        }, {
+          player: pl,
+          onChoice: function(){ try { window.vEncounter.close(); } catch(_){} }
+        });
+      } else {
+        if (typeof vToast === 'function') vToast('Grades trancadas — requer missão de esgoto ativa.', 'warn');
+      }
+    }
+  };
+  ACTION_HANDLERS['passagens_open_blackmarket'] = function(pl){
+    _openBlackMarketEncounter(pl || window.CITY_MOCK_PLAYER);
+  };
+  ACTION_HANDLERS['passagens_open_travelers'] = function(pl){
+    if (typeof navigateTo === 'function') navigateTo('travelers');
+  };
 }
 
 // ============================================================================
@@ -73428,6 +73706,8 @@ var _LOC_MAP = (function(){
         'templo':           { ico: S('ic-templo'),   nm: 'Templo' },
         'gates':            { ico: S('ic-portoes'),  nm: 'Portões' },
         'portoes':          { ico: S('ic-portoes'),  nm: 'Portões' },
+        'passagens':        { ico: S('ic-portoes'),  nm: 'Passagens' },
+        'passages':         { ico: S('ic-portoes'),  nm: 'Passagens' },
         'sewer':            { ico: S('ic-portoes'),  nm: 'Esgoto' },
         'square':           { ico: S('ic-praca'),    nm: 'Praça' },
         'praca':            { ico: S('ic-praca'),    nm: 'Praça' },
