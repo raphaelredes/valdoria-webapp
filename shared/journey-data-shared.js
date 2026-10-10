@@ -82,7 +82,20 @@ var HAZARDS = {
             dwarf: 'Com a compleição atarracada de anão, você planta as solas no chão e arrebenta a corda no primeiro arranque.',
             halforc: 'Um rugido curto e a fibra da corda se rompe sob a força bruta dos seus braços.'
           },
-          fNarr: 'A corda lacera sua pele antes de ceder — sangue desce pela bota.', dmg: 4 } ] },
+          fNarr: 'A corda lacera sua pele antes de ceder — sangue desce pela bota.', dmg: 4 },
+        { i: '🤝', t: 'Companheiro trava a alavanca', stat: 'str', dc: 10,
+          requires_ally: true,
+          desc: 'Seu companheiro corre e firma o galho curvado com ambas as mãos.',
+          sNarr: 'Seu companheiro de grupo trava a madeira curvada antes do chicoteio; você desata o laço com calma e agradece o trabalho em equipe.',
+          sNarr_by_ally: 'Seu companheiro de grupo trava a madeira curvada antes do chicoteio; você desata o laço com calma e agradece o trabalho em equipe.',
+          fNarr: 'Seu aliado escorrega nas folhas úmidas e o galho bate de raspão no seu ombro antes de soltar.', dmg: 2,
+          fNarr_by_ally: 'Seu aliado escorrega nas folhas úmidas e o galho bate de raspão no seu ombro antes de soltar.' },
+        { i: '🌿', t: 'Instinto silvestre aguçado', stat: 'wis', dc: 10,
+          requires_subrace: ['wood', 'forest_gnome'],
+          desc: 'Percepção natural detecta o gatilho disfarçado pela folhagem.',
+          sNarr: 'Seus sentidos de habitante das matas percebem o arranjo falso das folhas secas antes de descarregar todo o peso; você desvia com um passo leve.',
+          fNarr: 'A folhagem falsa engana seus passos e a corda tensiona no tornozelo.', dmg: 2 }
+      ] },
 
     { title: 'Galho Despencando',
       script: [
@@ -98,7 +111,25 @@ var HAZARDS = {
           desc: 'Tentar redirecionar o galho com força bruta enquanto cai.',
           sNarr: 'Você crava os ombros no galho e o desvia — ele cai paralelo à trilha. Suor escorre, mas você está inteiro.',
           fNarr: 'O galho é mais pesado do que parece — torce seu pulso e te empurra contra um tronco lateral.', dmg: 2,
-          condition: { id: 'bruised', icon: '💥', label: 'Contusão Muscular (−1)', desc: 'Penalidade em testes físicos de Força e testes atléticos no mapa.' } } ] },
+          condition: { id: 'bruised', icon: '💥', label: 'Contusão Muscular (−1)', desc: 'Penalidade em testes físicos de Força e testes atléticos no mapa.' } },
+        { i: '🛡', t: 'Guarda marcial com escudo', stat: 'str', dc: 10,
+          requires_class: ['guerreiro', 'paladino', 'clerigo'],
+          desc: 'Fincar a postura defensiva e aparar o impacto no rebordo de aço.',
+          sNarr: 'Você crava as botas e ergue o escudo em ângulo oblíquo; a madeira podre se estilhaça em pedaços inofensivos contra o metal reforçado.',
+          fNarr: 'O impacto quebra as fibras do escudo e choca com força o seu ombro.', dmg: 2 },
+        { i: '🤝', t: 'Puxão salvador de aliado', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Seu companheiro percebe o estalo e puxa você pelo cinturão a tempo.',
+          sNarr: 'Seu parceiro de viagem reage com velocidade espantosa, arrancando você da linha de queda um segundo antes do estrondo no solo.',
+          sNarr_by_ally: 'Seu parceiro de viagem reage com velocidade espantosa, arrancando você da linha de queda um segundo antes do estrondo no solo.',
+          fNarr: 'O puxão desequilibra vocês dois; caem juntos na terra enquanto galhos menores riscam suas capas.', dmg: 1,
+          fNarr_by_ally: 'O puxão desequilibra vocês dois; caem juntos na terra enquanto galhos menores riscam suas capas.' },
+        { i: '✨', t: 'Pulso arcano de repulsão', stat: 'int', dc: 11,
+          requires_class: ['mago', 'feiticeiro', 'bruxo'],
+          desc: 'Erguer um anteparo místico cinético para defletir o tronco.',
+          sNarr: 'Com uma palavra de comando, uma barreira translúcida de energia desvia o galho para longe do caminho.',
+          fNarr: 'A concentração falha no susto e lascas de casca cortam seu braço.', dmg: 2 }
+      ] },
 
     { title: 'Os Sussurros',
       script: [
@@ -119,7 +150,25 @@ var HAZARDS = {
             chaotic: 'Você ri das vozes em alta voz. O choque do som humano dispersa o feitiço.'
           },
           fNarr: 'Por um instante você reconhece a voz da sua mãe. Você para. Quando volta a si, sangue escorre do nariz e há horas que você não anda.', dmg: 3,
-          condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' } } ] },
+          condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' } },
+        { i: '🙏', t: 'Prece de proteção sagrada', stat: 'wis', dc: 11,
+          requires_class: ['clerigo', 'paladino'],
+          desc: 'Invocar bênção radiante que purifica o ar de espíritos zombeteiros.',
+          sNarr: 'Uma aura morna de serenidade afasta as ilusões auditivas; a floresta curva-se em silêncio respeitoso.',
+          fNarr: 'Os ecos perturbam sua mente por um instante antes de se dissiparem.', dmg: 2 },
+        { i: '🤝', t: 'Manter conversa firme com aliados', stat: 'cha', dc: 10,
+          requires_ally: true,
+          desc: 'Conversar com seu companheiro em voz alta para quebrar o encanto ilusório.',
+          sNarr: 'O som familiar e confiante de seus companheiros rompe o transe; as vozes sombrias perdem todo o poder sobre vocês.',
+          sNarr_by_ally: 'O som familiar e confiante de seus companheiros rompe o transe; as vozes sombrias perdem todo o poder sobre vocês.',
+          fNarr: 'As vozes fazem vocês hesitarem na trilha antes de retomarem o ritmo.', dmg: 1,
+          fNarr_by_ally: 'As vozes fazem vocês hesitarem na trilha antes de retomarem o ritmo.' },
+        { i: '🧝', t: 'Cântico ancestral em élfico', stat: 'int', dc: 10,
+          requires_race: ['elf', 'halfelf'],
+          desc: 'Responder aos espíritos silvestres com versos poéticos na língua antiga.',
+          sNarr: 'Ao ouvir as frases harmônicas dos elfos, os ecos da mata se acalmam em um murmúrio dócil de folhas dançantes.',
+          fNarr: 'A lembrança dos versos hesita e um arrepio gélido percorre sua espinha.', dmg: 2 }
+      ] },
 
     { title: 'Atoleiro Profundo',
       script: [
@@ -135,7 +184,63 @@ var HAZARDS = {
             druida: 'A floresta te diz onde pisar. As raízes da carvalho-mãe se firmam ligeiramente onde sua bota toca, oferecendo apoio.'
           },
           fNarr: 'Você afunda até as canelas. Vinte minutos de pânico depois, sai sujo, exausto, com algo se mexendo dentro da bota.', dmg: 2,
-          condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' } } ] }
+          condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' } },
+        { i: '💪', t: 'Salto atlético sobre as pedras', stat: 'str', dc: 12,
+          desc: 'Impulso vigoroso para alcançar a margem de pedras secas.',
+          sNarr: 'Com força atlética explosiva, você projeta o corpo além da lama viscosa e aterrissa com firmeza sobre terra seca.',
+          fNarr: 'O solo escorrega sob a sola da bota e você atola até a canela, perdendo o fôlego.', dmg: 2 },
+        { i: '🧗', t: 'Passos leves e acrobáticos', stat: 'dex', dc: 11,
+          requires_class: ['ladino', 'monge', 'bardo'],
+          desc: 'Distribuir o peso com agilidade sobre galhos e saliências superficiais.',
+          sNarr: 'Tocando apenas as pontas dos pés com agilidade dançante, você transpõe o atoleiro antes que o lodo possa puxá-lo.',
+          fNarr: 'Uma raiz fina quebra sob a pisada rápida e a lama espirra em suas vestes.', dmg: 1 },
+        { i: '🤝', t: 'Apoio com corda de aliado', stat: 'str', dc: 10,
+          requires_ally: true,
+          desc: 'Seu companheiro finca uma estaca ou segura uma corda firme da outra margem.',
+          sNarr: 'Trabalhando em equipe com uma corda de escalada, vocês cruzam a depressão lodosa sem risco de afundar.',
+          sNarr_by_ally: 'Trabalhando em equipe com uma corda de escalada, vocês cruzam a depressão lodosa sem risco de afundar.',
+          fNarr: 'A corda estica bruscamente e puxa seu companheiro para a borda da poça lamacenta.', dmg: 1,
+          fNarr_by_ally: 'A corda estica bruscamente e puxa seu companheiro para a borda da poça lamacenta.' },
+        { i: '👣', t: 'Passo leve de pequenino', stat: 'dex', dc: 10,
+          requires_race: ['halfling', 'gnome'],
+          desc: 'Aproveitar o peso reduzido e o equilíbrio natural para não afundar.',
+          sNarr: 'Sua estatura diminuta e leveza de passos mal deixam marcas na lama; você passa correndo como se o lodo fosse chão batido.',
+          fNarr: 'Uma poça funda engole sua bota menor, exigindo puxão enérgico.', dmg: 1 }
+      ] },
+
+    { title: 'Círculo de Pedras Rúnicas',
+      script: [
+        { type: 'narration', text: 'Monólitos ancestrais cobertos de líquen formam uma clareira circular entre as faias antigas.' },
+        { type: 'narration', text: 'O ar dentro do círculo vibra com ressonância mágica suave, e runas gastas pelo tempo brilham tênues sob o dossel.' }
+      ],
+      choices: [
+        { i: '🌿', t: 'Comunhão com os espíritos da mata', stat: 'wis', dc: 11,
+          desc: 'Respirar fundo e harmonizar-se com a energia pacífica do local.',
+          sNarr: 'Uma onda de calma revigorante percorre seus membros; a floresta parece reconhecer sua intenção pacífica.',
+          sNarr_by_class: {
+            druida: 'Você toca o monólito central e ouve os ecos de druidas de eras passadas, renovando sua comunhão natural.',
+            patrulheiro: 'Você reconhece o santuário como marco seguro dos guardiões da fronteira; o descanso é pleno.'
+          },
+          fNarr: 'A energia mágica oscila e causa um leve formigamento de desorientação.', dmg: 1 },
+        { i: '📜', t: 'Decifrar inscrições arcanas', stat: 'int', dc: 12,
+          desc: 'Examinar os glifos talhados na rocha com olhar acadêmico.',
+          sNarr: 'Você decifra fragmentos de um poema élfico de proteção; a compreensão do encantamento amplia seus horizontes.',
+          sNarr_by_class: {
+            mago: 'A geometria das runas é impecável. Você anota os princípios de contenção em seu grimório com fascínio.',
+            bardo: 'Você reconhece a melodia gravada em notas rúnicas e assobia um compasso alegre em homenagem.'
+          },
+          fNarr: 'As runas são complexas demais e o esforço mental deixa uma leve enxaqueca.', dmg: 1 },
+        { i: '🤝', t: 'Descanso protegido com companheiros', stat: null,
+          requires_ally: true,
+          desc: 'Aproveitar a santidade do círculo para conferir mantimentos e equipamentos em grupo.',
+          sNarr: 'Abrigados no interior das pedras protetoras, você e seus companheiros recuperam o fôlego com total segurança.',
+          sNarr_by_ally: 'Abrigados no interior das pedras protetoras, você e seus companheiros recuperam o fôlego com total segurança.',
+          fNarr: '' },
+        { i: '🚶', t: 'Passar com respeito e seguir', stat: null,
+          desc: 'Fazer uma reverência discreta e continuar a jornada sem tocar nas pedras.',
+          sNarr: 'Você cruza a clareira em silêncio reverente; as pedras permanecem imóveis enquanto você retoma a trilha.',
+          fNarr: '' }
+      ] }
   ],
 
   plains: [
@@ -152,7 +257,25 @@ var HAZARDS = {
         { i: '🗺', t: 'Buscar abrigo natural', stat: 'wis', dc: 12,
           desc: 'Procurar uma elevação ou pedra que sirva de quebra-vento.',
           sNarr: 'Você reconhece a forma de uma rocha mãe a vinte metros e se abriga atrás dela. O vento passa por cima sem te tocar.',
-          fNarr: 'Não há abrigo. Você se agacha e espera, cuspindo areia.', dmg: 1 } ] },
+          fNarr: 'Não há abrigo. Você se agacha e espera, cuspindo areia.', dmg: 1 },
+        { i: '🤝', t: 'Formação cerrada com aliados', stat: 'con', dc: 10,
+          requires_ally: true,
+          desc: 'Avançar ombro a ombro com mantos entrelaçados para dividir a força da ventania.',
+          sNarr: 'Unidos em formação cerrada, vocês protegem a respiração uns dos outros e mantêm o rumo sem desviar um único passo.',
+          sNarr_by_ally: 'Unidos em formação cerrada, vocês protegem a respiração uns dos outros e mantêm o rumo sem desviar um único passo.',
+          fNarr: 'Uma rajada lateral desequilibra a fila e areia fina invade as mochilas.', dmg: 1,
+          fNarr_by_ally: 'Uma rajada lateral desequilibra a fila e areia fina invade as mochilas.' },
+        { i: '🗿', t: 'Vigor maciço inabalável', stat: 'con', dc: 9,
+          requires_race: ['dwarf', 'halforc', 'dragonborn'],
+          desc: 'Fincar os pés no solo e cortar a tempestade como um bloco de rocha.',
+          sNarr: 'Sua compleição física formidável simplesmente ignora o açoite das rajadas; você marcha imperturbável pelo vendaval.',
+          fNarr: 'A poeira espirra forte contra seus olhos, forçando uma pausa curta.', dmg: 1 },
+        { i: '✨', t: 'Desvio arcano da poeira', stat: 'int', dc: 11,
+          requires_class: ['mago', 'druida', 'feiticeiro'],
+          desc: 'Canalizar um vórtice de ar contrário para abrir passagem limpa.',
+          sNarr: 'Com um gesto circular, você molda uma corrente de ar que lança a poeira para cima, mantendo o grupo em uma bolha de ar limpo.',
+          fNarr: 'A força da rajada sobrepuja a concentração mágica e joga terra em suas vestes.', dmg: 2 }
+      ] },
 
     { title: 'Bandidos da Estrada',
       npc: { name: 'Líder dos Bandidos', desc: 'Veterano de guerra desempregado', portrait: '../shared/img/npcs/trail/lider-dos-bandidos.webp' },
@@ -186,7 +309,20 @@ var HAZARDS = {
         { i: '🏃', t: 'Romper e fugir', stat: 'dex', dc: 12,
           desc: 'Surpreender com velocidade — ganhar a brecha entre os dois flanqueadores.',
           sNarr: 'Você dispara entre eles antes que percebam. Vinte metros depois, no trigal alto, eles desistem.',
-          fNarr: 'Uma flecha o atinge nas costas antes de você sumir. O ferimento não é fatal mas sangra muito.', dmg: 4 } ] },
+          fNarr: 'Uma flecha o atinge nas costas antes de você sumir. O ferimento não é fatal mas sangra muito.', dmg: 4 },
+        { i: '⚔️', t: 'Intimidação militar em comitiva', stat: 'str', dc: 11,
+          requires_ally: true,
+          desc: 'Você e seus companheiros desembainham as armas ao mesmo tempo em formação marcial perfeita.',
+          sNarr: 'O som sincronizado do aço sendo desembainhado pelo seu grupo gela a espinha dos assaltantes; vendo que a luta custará caro, eles abaixam as lâminas e recuam.',
+          sNarr_by_ally: 'O som sincronizado do aço sendo desembainhado pelo seu grupo gela a espinha dos assaltantes; vendo que a luta custará caro, eles abaixam as lâminas e recuam.',
+          fNarr: 'Os veteranos aceitam a provocação e cerram fileiras para avançar!', dmg: 3,
+          fNarr_by_ally: 'Os veteranos aceitam a provocação e cerram fileiras para avançar!' },
+        { i: '🎖', t: 'Código de honra militar', stat: 'cha', dc: 10,
+          requires_background: ['soldier', 'noble', 'folk_hero'],
+          desc: 'Evocar os antigos regimentos da coroa ou o dever para com o povo.',
+          sNarr: 'Você recita a antiga saudação dos regimentos de fronteira; o líder arregala os olhos, bate continência com a mão enluvada e dá passagem com respeito sincero.',
+          fNarr: 'O líder balança a cabeça amargurado: "Honra não enche a barriga dos nossos filhos, viajante."', dmg: 2 }
+      ] },
 
     { title: 'Cavalo Selvagem',
       script: [
@@ -201,7 +337,60 @@ var HAZARDS = {
         { i: '🏃', t: 'Continuar rápido', stat: 'dex', dc: 11,
           desc: 'Confiar que o predador já passou e ganhar distância.',
           sNarr: 'Você corre. Quando para, está duas léguas adiante e o som dos cascos sumiu.',
-          fNarr: 'Você cansa antes do esperado. As pernas pesam pelo resto da jornada.', dmg: 2 } ] }
+          fNarr: 'Você cansa antes do esperado. As pernas pesam pelo resto da jornada.', dmg: 2 },
+        { i: '🐎', t: 'Acalmar o animal com empatia', stat: 'wis', dc: 10,
+          requires_class: ['druida', 'patrulheiro', 'bardo'],
+          desc: 'Emitir um som cadenciado e estender a mão para conter o pânico da fera.',
+          sNarr: 'O animal desacelera em círculos, bufa aliviado ao sentir sua serenidade e sinaliza a colina antes de galopar em segurança para o vale.',
+          fNarr: 'O cavalo relincha em susto e quase atinge sua bagagem ao desviar bruscamente.', dmg: 1 },
+        { i: '🤝', t: 'Cobertura em flanco com aliados', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'Seu companheiro vigia os arbustos altos enquanto você analisa o rastro sem ser surpreendido.',
+          sNarr: 'Graças à vigília atenta de seus companheiros, você confirma com segurança total que o predador já se afastou léguas ao norte.',
+          sNarr_by_ally: 'Graças à vigília atenta de seus companheiros, você confirma com segurança total que o predador já se afastou léguas ao norte.',
+          fNarr: 'O vento no capim alto gera um falso alarme, assustando o grupo por instantes.', dmg: 0,
+          fNarr_by_ally: 'O vento no capim alto gera um falso alarme, assustando o grupo por instantes.' },
+        { i: '🏹', t: 'Instinto de caçador de fronteira', stat: 'wis', dc: 10,
+          requires_background: ['outlander', 'hermit'],
+          desc: 'Reconhecer imediatamente os hábitos do predador pelo odor e tipo de pisada.',
+          sNarr: 'Você sente o cheiro característico no vento e sabe a idade e direção da fera; orienta a marcha contornando a rota sem qualquer perigo.',
+          fNarr: 'O vento sopra em redemoinho e dilui os odores da estepe.', dmg: 1 }
+      ] },
+
+    { title: 'Monólito dos Antigos Reis',
+      script: [
+        { type: 'narration', text: 'Uma coluna colossal de pedra calcária se ergue solitária no meio da vastidão da planície.' },
+        { type: 'narration', text: 'Entalhes de cavaleiros de armadura pesada e espadas erguidas decoram a base, guardando a memória dos antigos monarcas de Valdoria.' }
+      ],
+      choices: [
+        { i: '📜', t: 'Estudar os anais históricos', stat: 'int', dc: 11,
+          desc: 'Decifrar os nomes dos generais e batalhas gravados na pedra.',
+          sNarr: 'Você reconhece a genealogia da dinastia fundadora; as lições táticas gravadas ali inspiram confiança marcial para o resto da viagem.',
+          sNarr_by_class: {
+            mago: 'A clareza dos glifos históricos enriquece seus estudos arcanos sobre as defesas do reino.',
+            bardo: 'Você memoriza a balada dos antigos reis e ganha novas estrofes para suas canções de estrada.'
+          },
+          fNarr: 'A erosão apagou as palavras essenciais, restando apenas poeira calcária.', dmg: 0 },
+        { i: '🙏', t: 'Homenagem aos guerreiros caídos', stat: 'wis', dc: 10,
+          desc: 'Fazer uma saudação respeitosa em honra aos antigos defensores da planície.',
+          sNarr: 'Uma brisa suave e reconfortante sopra pelos campos, como se o espírito dos guerreiros abençoasse a comitiva de aventureiros.',
+          sNarr_by_class: {
+            paladino: 'Seu juramento ressoa com os ideais gravados na rocha; uma bênção radiante acalma seu coração.',
+            clerigo: 'Você entoa uma bênção de repouso eterno para as almas dos bravos caídos.'
+          },
+          fNarr: 'A pedra permanece fria e silenciosa sob o céu aberto.', dmg: 0 },
+        { i: '🤝', t: 'Companheiro ajuda a inspecionar o topo', stat: 'str', dc: 10,
+          requires_ally: true,
+          desc: 'Apoiar os ombros de seu aliado para alcançar os relevos mais altos do monumento.',
+          sNarr: 'Trabalhando juntos, vocês alcançam um nicho elevado onde encontram um antigo marco de pedra com água de chuva limpa e fresca.',
+          sNarr_by_ally: 'Trabalhando juntos, vocês alcançam um nicho elevado onde encontram um antigo marco de pedra com água de chuva limpa e fresca.',
+          fNarr: 'A pedra calcária esfarela na quina e você desce deslizando com poeira nos braços.', dmg: 1,
+          fNarr_by_ally: 'A pedra calcária esfarela na quina e você desce deslizando com poeira nos braços.' },
+        { i: '🚶', t: 'Contemplar de longe e seguir', stat: null,
+          desc: 'Seguir a viagem mantendo o monumento como ponto de referência no horizonte.',
+          sNarr: 'A silhueta imponente da coluna guia seus passos em linha reta pela vastidão dos trigais.',
+          fNarr: '' }
+      ] }
   ],
 
   swamp: [
@@ -233,7 +422,20 @@ var HAZARDS = {
         { i: '💪', t: 'Forçar saída', stat: 'str', dc: 13,
           desc: 'Não há tempo: arrancar-se da lama com força bruta.',
           sNarr: 'Com esforço brutal você se liberta. Músculos queimam, mas você está inteiro.',
-          fNarr: 'Você afunda mais antes de escapar. Lama nos pulmões — tosse molhada por horas.', dmg: 4 } ] },
+          fNarr: 'Você afunda mais antes de escapar. Lama nos pulmões — tosse molhada por horas.', dmg: 4 },
+        { i: '🤝', t: 'Tracionamento sincronizado com aliado', stat: 'str', dc: 10,
+          requires_ally: true,
+          desc: 'Seu companheiro finca as botas em raiz firme e estende a haste da lança.',
+          sNarr: 'Seu aliado estende a haste com firmeza e puxa seu peso em um movimento fluido, livrando suas pernas da sucção sem esforço.',
+          sNarr_by_ally: 'Seu aliado estende a haste com firmeza e puxa seu peso em um movimento fluido, livrando suas pernas da sucção sem esforço.',
+          fNarr: 'A lama puxa com força inesperada e seu companheiro quase escorrega junto.', dmg: 2,
+          fNarr_by_ally: 'A lama puxa com força inesperada e seu companheiro quase escorrega junto.' },
+        { i: '✨', t: 'Passo leve ou levitação mística', stat: 'int', dc: 11,
+          requires_class: ['mago', 'bruxo', 'feiticeiro', 'monge'],
+          desc: 'Canalizar energia mística para anular a densidade sob a sola dos pés.',
+          sNarr: 'Seus pés mal tocam a lama lodosa; uma película de energia mágica desliza seu corpo para terra firme.',
+          fNarr: 'A concentração quebra com a frieza do lodo e a lama engole suas botas.', dmg: 2 }
+      ] },
 
     { title: 'Gás do Pântano',
       script: [
@@ -248,7 +450,25 @@ var HAZARDS = {
         { i: '🗺', t: 'Rodear pela margem', stat: 'wis', dc: 11,
           desc: 'Subir pela margem mais alta do pântano e contornar.',
           sNarr: 'Você sobe pela margem e contorna a nuvem. Custa tempo, mas não custa pulmão.',
-          fNarr: 'A margem é traiçoeira. Você escorrega e cai na água. Não foi a nuvem, mas foi feio.', dmg: 2 } ] },
+          fNarr: 'A margem é traiçoeira. Você escorrega e cai na água. Não foi a nuvem, mas foi feio.', dmg: 2 },
+        { i: '🌿', t: 'Filtro de ervas purificadoras', stat: 'wis', dc: 10,
+          requires_class: ['druida', 'clerigo', 'patrulheiro'],
+          desc: 'Umedecer um tecido com folhas balsâmicas para respirar através do filtro.',
+          sNarr: 'As ervas medicinais neutralizam o aroma doce e letal; vocês cruzam a cortina de miasma com os pulmões protegidos.',
+          fNarr: 'O miasma satura o tecido rápido demais e a garganta começa a arder.', dmg: 2 },
+        { i: '🍺', t: 'Resistência anã a toxinas', stat: 'con', dc: 9,
+          requires_race: 'dwarf',
+          desc: 'Fisiologia resistente de anão habituado a vapores de minas e gases pesados.',
+          sNarr: 'Seu sangue resistente pigarreia e ignora a névoa tóxica; você caminha com passos firmes sem vacilar a vista.',
+          fNarr: 'A fumaça acre faz seus olhos lacrimejarem na saída.', dmg: 1 },
+        { i: '🤝', t: 'Orientação mútua pelas correntes de ar', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'Avançar em linha com o companheiro monitorando as lufadas de vento limpo.',
+          sNarr: 'Comunicando-se em sussurros rápidos, vocês seguem as brechas de ar fresco e contornam a bolsa de gás sem respirar a névoa.',
+          sNarr_by_ally: 'Comunicando-se em sussurros rápidos, vocês seguem as brechas de ar fresco e contornam a bolsa de gás sem respirar a névoa.',
+          fNarr: 'Uma rajada repentina joga uma golfada de vapor nos rostos do grupo.', dmg: 2,
+          fNarr_by_ally: 'Uma rajada repentina joga uma golfada de vapor nos rostos do grupo.' }
+      ] },
 
     { title: 'Caçador Solitário',
       npc: { name: 'Caçador do Pântano', desc: 'Eremita que protege o ecossistema', portrait: '../shared/img/npcs/trail/cacador-do-pantano.webp' },
@@ -261,11 +481,57 @@ var HAZARDS = {
         { i: '🤝', t: 'Concordar', stat: null,
           desc: 'Aceitar os termos do pântano.',
           sNarr: 'Você concorda em voz alta. A flecha some da árvore ao seu lado — recolhida sem você ver. "Boa jornada, viajante. O pântano se lembra."',
-          fNarr: '' },  // sem fail (concordar = always success)
+          fNarr: '' },
         { i: '🗣', t: 'Negociar isenção', stat: 'cha', dc: 14,
           desc: 'Explicar que está só de passagem, não vai caçar nada.',
           sNarr: 'Você explica seu propósito com clareza. Ele aceita — silêncio do mato como assinatura. "Cruze rápido então. E olhe pra trás antes de entrar nas raízes grandes."',
-          fNarr: 'Ele não acredita. Outra flecha — esta passa raspando o ombro. Você corre.', dmg: 3 } ] }
+          fNarr: 'Ele não acredita. Outra flecha — esta passa raspando o ombro. Você corre.', dmg: 3 },
+        { i: '🏹', t: 'Sinal de respeito entre batedores', stat: 'wis', dc: 10,
+          requires_class: ['patrulheiro', 'druida', 'ladino'],
+          desc: 'Responder com o sinal gestual mudo dos rastreadores de fronteira.',
+          sNarr: 'Ao ver seu gesto profissional, o caçador abaixa o arco e acena: "Um companheiro de trilha. As raízes ao norte estão secas hoje."',
+          fNarr: 'O eremita desconfia do sinal e exige passos rápidos.', dmg: 0 },
+        { i: '👥', t: 'Apresentar a comitiva pacífica', stat: 'cha', dc: 11,
+          requires_ally: true,
+          desc: 'Garantir a postura serena e inofensiva de todo o grupo de viajantes.',
+          sNarr: 'A compostura equilibrada de seus companheiros tranquiliza o caçador, que recolhe sua flecha e indica a trilha segura.',
+          sNarr_by_ally: 'A compostura equilibrada de seus companheiros tranquiliza o caçador, que recolhe sua flecha e indica a trilha segura.',
+          fNarr: 'O caçador mantém a flecha mirada até vocês sumirem na névoa.', dmg: 0,
+          fNarr_by_ally: 'O caçador mantém a flecha mirada até vocês sumirem na névoa.' }
+      ] },
+
+    { title: 'Fogo-Fátuo da Charneca',
+      script: [
+        { type: 'narration', text: 'Pequenas esferas de luz azulada dançam sobre as poças escuras, cintilando em ritmo hipnótico.' },
+        { type: 'narration', text: 'Uma canção inaudível parece sussurrar em sua mente, convidando você a desviar da trilha em direção à água funda.' }
+      ],
+      choices: [
+        { i: '🧠', t: 'Resistir ao encanto hipnótico', stat: 'wis', dc: 12,
+          desc: 'Firmar os olhos nas próprias botas e ignorar as luzes ilusórias.',
+          sNarr: 'Você fecha a mente para a atração ilusória; as chamas frias percebem sua resistência e se dissipam no charco.',
+          sNarr_by_class: {
+            monge: 'Sua mente vazia e disciplinada é imune a truques luminosos; você caminha com serenidade absoluta.',
+            mago: 'Você reconhece a tecitura de encantamento menor e desfaz o feitiço com um simples gesto de dispersão.'
+          },
+          fNarr: 'Por instantes você dá dois passos em direção ao charco, molhando as canelas antes de despertar.', dmg: 2 },
+        { i: '🙏', t: 'Purificação com luz sagrada', stat: 'wis', dc: 10,
+          requires_class: ['clerigo', 'paladino'],
+          desc: 'Erguer um símbolo sagrado e emitir um brilho radiante que afasta as aparições.',
+          sNarr: 'A luz divina ofusca os fogos-fátuos, que se dissolvem soltando um assobio sibilante de derrota.',
+          fNarr: 'A luz sagrada vacila na névoa densa antes de clarear o caminho.', dmg: 1 },
+        { i: '🤝', t: 'Companheiro alerta o perigo', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Seu aliado percebe o transe e puxa seu ombro de volta para a trilha seca.',
+          sNarr: 'A mão firme de seu companheiro rompe o fascínio instantaneamente: "Não olhe para a água funda, amigo!" Vocês passam em segurança.',
+          sNarr_by_ally: 'A mão firme de seu companheiro rompe o fascínio instantaneamente: "Não olhe para a água funda, amigo!" Vocês passam em segurança.',
+          fNarr: 'Vocês dois hesitam por alguns segundos antes de se recomporem.', dmg: 1,
+          fNarr_by_ally: 'Vocês dois hesitam por alguns segundos antes de se recomporem.' },
+        { i: '🧝', t: 'Firmeza élfica contra encantos', stat: 'wis', dc: 9,
+          requires_race: 'elf',
+          desc: 'Imunidade inata dos elfos a efeitos mágicos de fascínio.',
+          sNarr: 'Seu sangue de elfo acha a dança luminosa risível; você cruza a charneca sorrindo da tentativa vã dos espíritos.',
+          fNarr: 'A luminescência irrita sua visão periférica por alguns momentos.', dmg: 1 }
+      ] }
   ],
 
   mountain: [
@@ -296,7 +562,20 @@ var HAZARDS = {
           sNarr_by_class: {
             barbaro: 'Você crava as mãos na pedra e aguenta o impacto gelado com músculos retesados, rugindo contra a neve.'
           },
-          fNarr: 'Pedras vêm com a neve. Quebra de costela. Você sobrevive mas dói cada respiração.', dmg: 4 } ] },
+          fNarr: 'Pedras vêm com a neve. Quebra de costela. Você sobrevive mas dói cada respiração.', dmg: 4 },
+        { i: '🤝', t: 'Fixar âncora de corda com o grupo', stat: 'str', dc: 11,
+          requires_ally: true,
+          desc: 'Você e seu aliado cravam apoios na rocha e ancoram o grupo com corda de escalada.',
+          sNarr: 'Cravando os apoios de aço na rocha nua, vocês suportam a torrente de neve presos com segurança enquanto o turbilhão despenca no desfiladeiro.',
+          sNarr_by_ally: 'Cravando os apoios de aço na rocha nua, vocês suportam a torrente de neve presos com segurança enquanto o turbilhão despenca no desfiladeiro.',
+          fNarr: 'Um dos apoios cede na neve fofa e puxa o ombro de seu companheiro.', dmg: 3,
+          fNarr_by_ally: 'Um dos apoios cede na neve fofa e puxa o ombro de seu companheiro.' },
+        { i: '✨', t: 'Cúpula mística de deflexão', stat: 'int', dc: 11,
+          requires_class: ['mago', 'feiticeiro', 'bruxo'],
+          desc: 'Criar um escudo arcano em cunha para dividir o fluxo de neve para as laterais.',
+          sNarr: 'Um arco cintilante de força divide a massa de gelo como a proa de um navio quebrando ondas congeladas.',
+          fNarr: 'A pressão violenta racha a barreira mística e estilhaços de gelo batem em suas costas.', dmg: 3 }
+      ] },
 
     { title: 'Fenda Profunda',
       script: [
@@ -304,10 +583,28 @@ var HAZARDS = {
         { type: 'narration', text: 'Cair seria queda livre por mais tempo do que se quer pensar.' }
       ],
       choices: [
-        { i: '🧗', t: 'Saltar', stat: 'str', dc: 12,
+        { i: '🧗', t: 'Saltar com ímpeto', stat: 'str', dc: 12,
           desc: 'Recuo, corrida, salto de fé.',
           sNarr: 'Salto perfeito. Pés firmes do outro lado. Você se permite olhar pra trás, suspirar, seguir.',
-          fNarr: 'Você escorrega na borda do salto e bate o ombro ao subir. Por um instante, achou que seria fim de tudo.', dmg: 3 } ] },
+          fNarr: 'Você escorrega na borda do salto e bate o ombro ao subir. Por um instante, achou que seria fim de tudo.', dmg: 3 },
+        { i: '🤸', t: 'Salto acrobático preciso', stat: 'dex', dc: 11,
+          requires_class: ['monge', 'ladino', 'bardo'],
+          desc: 'Impulso suave e aterrissagem equilibrada tocando a quina de pedra sem ruído.',
+          sNarr: 'Com agilidade acrobática graciosa, você pousa do outro lado da fenda com a leveza de um felino.',
+          fNarr: 'A borda de pedra esfarela sob seus dedos e você rala os joelhos ao se puxar.', dmg: 2 },
+        { i: '🤝', t: 'Ponte de corda estendida com aliados', stat: 'str', dc: 10,
+          requires_ally: true,
+          desc: 'Um aventureiro cruza com a ponta da corda e firma a ancoragem para o restante passar.',
+          sNarr: 'Trabalhando em equipe com técnica militar de montanha, todos cruzam o abismo sustentados pela corda esticada.',
+          sNarr_by_ally: 'Trabalhando em equipe com técnica militar de montanha, todos cruzam o abismo sustentados pela corda esticada.',
+          fNarr: 'A corda estica perigosamente contra a pedra afiada antes de todos passarem.', dmg: 1,
+          fNarr_by_ally: 'A corda estica perigosamente contra a pedra afiada antes de todos passarem.' },
+        { i: '⛏', t: 'Localizar ponte de pedra natural', stat: 'wis', dc: 10,
+          requires_race: 'dwarf',
+          desc: 'Olhos acostumados a desfiladeiros encontram uma viga de granito firme logo abaixo.',
+          sNarr: 'Seus sentidos de anão revelam uma borda oculta de pedra maciça dois passos abaixo; você atravessa com firmeza inabalável.',
+          fNarr: 'A descida até a viga oculta desgasta suas botas e canelas.', dmg: 1 }
+      ] },
 
     { title: 'Vento Cortante',
       script: [
@@ -318,7 +615,52 @@ var HAZARDS = {
         { i: '🛡', t: 'Encolher e perseverar', stat: 'con', dc: 11,
           desc: 'Capa fechada, cabeça baixa, andar lento.',
           sNarr: 'Você se encolhe contra o vento. Cada passo dói mas você não para. O frio fica, mas o pior passa.',
-          fNarr: 'Os dedos ficam dormentes. Você sente algo que pode ser perda permanente.', dmg: 3 } ] }
+          fNarr: 'Os dedos ficam dormentes. Você sente algo que pode ser perda permanente.', dmg: 3 },
+        { i: '🔥', t: 'Tocha ou fagulha de reaquecimento', stat: 'wis', dc: 11,
+          desc: 'Encontrar uma concavidade na pedra e abrigar uma chama breve para manter o calor.',
+          sNarr: 'Você abriga a chama sob a pedra e reaquece mãos e solas das botas antes que o torpor se instale.',
+          fNarr: 'O vento uivante sopra forte demais e apaga as fagulhas repetidas vezes.', dmg: 2 },
+        { i: '🤝', t: 'Partilhar mantos e revezar vanguarda', stat: 'con', dc: 10,
+          requires_ally: true,
+          desc: 'Revezar quem vai à frente abrindo caminho no vento frio com os mantos do grupo.',
+          sNarr: 'Revezando a vanguarda e agrupando os mantos pesados, vocês mantêm o calor vital e cruzam a crista com vigor renovado.',
+          sNarr_by_ally: 'Revezando a vanguarda e agrupando os mantos pesados, vocês mantêm o calor vital e cruzam a crista com vigor renovado.',
+          fNarr: 'O vento gélido castiga o rosto dos companheiros antes de alcançarem a descida.', dmg: 1,
+          fNarr_by_ally: 'O vento gélido castiga o rosto dos companheiros antes de alcançarem a descida.' },
+        { i: '🏔', t: 'Resistência nativa às alturas', stat: 'con', dc: 9,
+          requires_subrace: ['mountain', 'goliath', 'wood'],
+          desc: 'Sangue acostumado ao ar rarefeito e aos cumes nevados.',
+          sNarr: 'Seu organismo conhece a fúria das altas encostas; seus pulmões adaptam-se ao ar frio e sua pele tolera o vento sem tremer.',
+          fNarr: 'A ventania resseca suas narinas e lábios.', dmg: 1 }
+      ] },
+
+    { title: 'A Ponte de Cordas Pênsil',
+      script: [
+        { type: 'narration', text: 'Uma ponte suspensa de cordas e tábuas antigas balança sobre um abismo vertiginoso de névoa e pedras pontiagudas.' },
+        { type: 'narration', text: 'O vento da ravina faz a estrutura gemer a cada rajada, e várias tábuas apodrecidas revelam o vazio abaixo.' }
+      ],
+      choices: [
+        { i: '🚶', t: 'Travessia lenta e ponderada', stat: 'dex', dc: 12,
+          desc: 'Testar cada tábua antes de apoiar o peso, segurando firme nos cabos laterais.',
+          sNarr: 'Passo a passo disciplinado, você contorna duas ripas podres e chega à outra margem com o coração acelerado mas são e salvo.',
+          fNarr: 'Uma tábua se quebra ao meio sob seu pé; você se segura no cabo lateral por puro reflexo enquanto lascas caem no abismo.', dmg: 2 },
+        { i: '⚓', t: 'Reforço de nós e ancoragem firme', stat: 'str', dc: 11,
+          requires_class: ['guerreiro', 'paladino', 'patrulheiro'],
+          desc: 'Apertar as amarras principais nos troncos de suporte antes de cruzar.',
+          sNarr: 'Com força e conhecimento de ancoragens, você tensiona os cabos frouxos; a ponte fica mais estável e a travessia torna-se segura.',
+          fNarr: 'Uma das cordas secundárias rompe com estalo alto e açoita seu braço.', dmg: 2 },
+        { i: '🤝', t: 'Travessia coordenada em fila com aliados', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Avançar espaçados mantendo a corda de segurança entre os aventureiros.',
+          sNarr: 'Com disciplina e equilíbrio mútuo, o grupo avança compassadamente, compensando o balanço do vento até o outro lado.',
+          sNarr_by_ally: 'Com disciplina e equilíbrio mútuo, o grupo avança compassadamente, compensando o balanço do vento até o outro lado.',
+          fNarr: 'O vento balança a ponte bruscamente e assusta a comitiva por instantes.', dmg: 1,
+          fNarr_by_ally: 'O vento balança a ponte bruscamente e assusta a comitiva por instantes.' },
+        { i: '🪨', t: 'Contorno pela garganta de pedras', stat: 'con', dc: 11,
+          desc: 'Evitar a ponte suspensa e descer pela encosta íngreme de seixos.',
+          sNarr: 'Você escolhe o chão sólido e contorna a ravina pelas pedras; demora mais tempo, mas poupa os nervos.',
+          fNarr: 'Pedras soltas escorregam na descida e arranham suas botas.', dmg: 1 }
+      ] }
   ],
 
   desert: [
@@ -334,7 +676,24 @@ var HAZARDS = {
           sNarr_by_class: {
             patrulheiro: 'Você reconhece os ventos antes da maioria. Encontra abrigo perfeito atrás de uma rocha — emerge limpo.'
           },
-          fNarr: 'A areia rasga sua pele através do tecido. Pequenos cortes em todo lugar.', dmg: 4 } ] },
+          fNarr: 'A areia rasga sua pele através do tecido. Pequenos cortes em todo lugar.', dmg: 4 },
+        { i: '🏜', t: 'Escavar trincheira na duna', stat: 'str', dc: 11,
+          desc: 'Cavar depressão rápida na encosta protegida do vento para se abrigar.',
+          sNarr: 'Em minutos de esforço vigoroso, você escava uma vala sob a lona de viagem; a areia passa rugindo por cima sem atingir você.',
+          fNarr: 'A areia fofa desaba duas vezes sobre seus braços antes de conseguir firmar o abrigo.', dmg: 2 },
+        { i: '🤝', t: 'Tenda de emergência com companheiro', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Armar uma cobertura dupla com estacas firmes ao lado de seu parceiro.',
+          sNarr: 'Em perfeita sincronia de acampamento, vocês cravam as estacas e protegem as mochilas e os olhos sob a lona firme.',
+          sNarr_by_ally: 'Em perfeita sincronia de acampamento, vocês cravam as estacas e protegem as mochilas e os olhos sob a lona firme.',
+          fNarr: 'Uma das estacas solta no vento e o pólen de areia invade a tenda improvisada.', dmg: 1,
+          fNarr_by_ally: 'Uma das estacas solta no vento e o pólen de areia invade a tenda improvisada.' },
+        { i: '✨', t: 'Domo arcano de retenção', stat: 'int', dc: 11,
+          requires_class: ['mago', 'druida', 'feiticeiro', 'clerigo'],
+          desc: 'Modelar uma barreira esférica mágica que deflete os grãos incandescentes.',
+          sNarr: 'Um arco tênue de energia translúcida desvia o vendaval de poeira para os lados, mantendo o ar respirável e fresco.',
+          fNarr: 'A força da ventania quebra a barreira mágica antes do fim da tempestade.', dmg: 2 }
+      ] },
 
     { title: 'Espelhismo Mortal',
       script: [
@@ -345,7 +704,24 @@ var HAZARDS = {
         { i: '🧠', t: 'Verificar antes de seguir', stat: 'wis', dc: 12,
           desc: 'Observar os reflexos, o vento, sinais de que é miragem.',
           sNarr: 'A imagem treme demais nas bordas. Não há sinais reais — sem pegadas, sem aves. Miragem. Você guarda água e segue.',
-          fNarr: 'Você corre pro oásis e descobre que era miragem só ao chegar. Hora de sol perdida, cantil quase vazio.', dmg: 3 } ] }
+          fNarr: 'Você corre pro oásis e descobre que era miragem só ao chegar. Hora de sol perdida, cantil quase vazio.', dmg: 3 },
+        { i: '🧭', t: 'Navegação solar e bússola', stat: 'int', dc: 11,
+          desc: 'Manter a linha de marcha pelas sombras projetadas no solo, ignorando o brilho ao longe.',
+          sNarr: 'Conferindo as sombras do sol com precisão matemática, você confirma que o brilho fica fora da rota e mantém o passo firme.',
+          fNarr: 'A reverberação do calor faz suas medições hesitarem por uma milha.', dmg: 1 },
+        { i: '🤝', t: 'Conferência mútua com companheiros', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'Pedir que o parceiro analise a visão do oásis por outro ângulo.',
+          sNarr: 'Seu parceiro de viagem observa a ausência de qualquer ave no céu daquele ponto: "É ilusão de calor, amigo. Mantenha o rumo."',
+          sNarr_by_ally: 'Seu parceiro de viagem observa a ausência de qualquer ave no céu daquele ponto: "É ilusão de calor, amigo. Mantenha o rumo."',
+          fNarr: 'Vocês debatem debaixo do sol inclemente antes de concordarem com a rota original.', dmg: 1,
+          fNarr_by_ally: 'Vocês debatem debaixo do sol inclemente antes de concordarem com a rota original.' },
+        { i: '👁', t: 'Percepção mística aguçada', stat: 'wis', dc: 10,
+          requires_class: ['mago', 'bruxo', 'clerigo', 'monge'],
+          desc: 'Fechar os olhos físicos e sentir as correntes térmicas do solo desértico.',
+          sNarr: 'Seus sentidos sobrenaturais dissipam a imagem enganosa; sob as palmeiras imaginárias não há nada além de areia escaldante.',
+          fNarr: 'O calor causa uma leve pontada de enxaqueca ao tentar concentrar o olhar.', dmg: 1 }
+      ] }
   ],
 
   snow: [
@@ -381,7 +757,15 @@ var HAZARDS = {
         { i: '🏃', t: 'Recuar devagar', stat: 'wis', dc: 12,
           desc: 'Não correr. Recuar passo a passo, sem virar de costas.',
           sNarr: 'Você recua sem provocar, olhando ele direto sem ameaça. O lobo perde interesse — não vale o esforço hoje.',
-          fNarr: 'Você escorrega no gelo. Ele avança no instante da queda — mordida superficial.', dmg: 3 } ] },
+          fNarr: 'Você escorrega no gelo. Ele avança no instante da queda — mordida superficial.', dmg: 3 },
+        { i: '🤝', t: 'Guarda dupla com parceiro', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'Você e seu companheiro assumem postura de combate cobrindo os flancos.',
+          sNarr: 'Vendo dois combatentes sincronizados prontos para a retaliação, o lobo veterano calcula que o risco é alto demais e desaparece entre os pinheiros.',
+          sNarr_by_ally: 'Vendo dois combatentes sincronizados prontos para a retaliação, o lobo veterano calcula que o risco é alto demais e desaparece entre os pinheiros.',
+          fNarr: 'A fera rosna e ameaça o flanco antes de bater em retirada.', dmg: 1,
+          fNarr_by_ally: 'A fera rosna e ameaça o flanco antes de bater em retirada.' }
+      ] },
 
     { title: 'Tempestade Branca',
       script: [
@@ -392,7 +776,24 @@ var HAZARDS = {
         { i: '🗺', t: 'Buscar marcadores', stat: 'wis', dc: 12,
           desc: 'Pedras grandes, troncos, qualquer linha visual pra orientar-se.',
           sNarr: 'Você identifica uma linha de pedras à esquerda. Segue por elas, passo a passo. Quando a tempestade abre, está exatamente onde devia estar.',
-          fNarr: 'Você roda em círculos por horas. Quando se orienta, está exausto e a uma quilômetro do caminho.', dmg: 4 } ] }
+          fNarr: 'Você roda em círculos por horas. Quando se orienta, está exausto e a uma quilômetro do caminho.', dmg: 4 },
+        { i: '❄️', t: 'Passos firmes e resistência', stat: 'con', dc: 11,
+          desc: 'Manter a cadência de marcha sem parar, aquecendo os pulmões pelo tecido da gola.',
+          sNarr: 'Com disciplina e vigor físico, você corta a camada fofa sem hesitar até avistar a borda da depressão.',
+          fNarr: 'O vento gelado entorpece as pontas dos dedos e desacelera seu avanço.', dmg: 3 },
+        { i: '🤝', t: 'Corda guia entre companheiros', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Ligar os aventureiros com uma corda de escalada para impedir qualquer dispersão no nevoeiro branco.',
+          sNarr: 'Atados com segurança, vocês marcham juntos em ritmo constante; ninguém se perde e o grupo supera a nevasca unido.',
+          sNarr_by_ally: 'Atados com segurança, vocês marcham juntos em ritmo constante; ninguém se perde e o grupo supera a nevasca unido.',
+          fNarr: 'A neve puxa a ponta da corda e vocês precisam parar para reatar as amarras no frio.', dmg: 1,
+          fNarr_by_ally: 'A neve puxa a ponta da corda e vocês precisam parar para reatar as amarras no frio.' },
+        { i: '🔥', t: 'Farol místico de calor', stat: 'int', dc: 10,
+          requires_class: ['mago', 'feiticeiro', 'druida', 'clerigo'],
+          desc: 'Manter uma pequena esfera mágica de fogo brando que derrete os flocos e ilumina a trilha.',
+          sNarr: 'A centelha mágica irradia conforto térmico suficiente para guiar a respiração e manter a rota desimpedida.',
+          fNarr: 'O turbilhão de vento apaga a chama mística com um assobio cortante.', dmg: 2 }
+      ] }
   ],
 
   cave: [
@@ -416,7 +817,25 @@ var HAZARDS = {
           requires_race: 'dwarf',
           desc: 'Conhecimento de pedra: identificar o ponto cego da queda.',
           sNarr: 'Seus olhos acostumados à pedra profunda calculam o ângulo exato do impacto. Você recua um passo e a rocha se espatifa sem te tocar.',
-          fNarr: 'A rocha trinca em ângulo irregular e lascas cortam seu braço.', dmg: 2 } ] },
+          fNarr: 'A rocha trinca em ângulo irregular e lascas cortam seu braço.', dmg: 2 },
+        { i: '🛡', t: 'Aparar estilhaços com escudo', stat: 'str', dc: 11,
+          requires_class: ['guerreiro', 'paladino', 'barbaro'],
+          desc: 'Fincar a postura marcial e desviar as pontas de pedra com a chapa de metal.',
+          sNarr: 'Você ergue o escudo firme; o bloco principal espatifa-se ao lado enquanto os fragmentos afiados ricocheteiam no aço.',
+          fNarr: 'O impacto de uma lasca pesada amassa a borda do escudo e choca seu pulso.', dmg: 2 },
+        { i: '🤝', t: 'Puxão salvador de parceiro', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Seu parceiro de grupo puxa seu braço para trás no exato instante do desabamento.',
+          sNarr: 'Com reflexos admiráveis, seu aliado arranca você da zona de impacto; a lança de pedra estilhaça onde seus pés estavam.',
+          sNarr_by_ally: 'Com reflexos admiráveis, seu aliado arranca você da zona de impacto; a lança de pedra estilhaça onde seus pés estavam.',
+          fNarr: 'O puxão rápido faz vocês dois caírem sobre o cascalho pontiagudo.', dmg: 1,
+          fNarr_by_ally: 'O puxão rápido faz vocês dois caírem sobre o cascalho pontiagudo.' },
+        { i: '👁', t: 'Visão no escuro apurada', stat: 'wis', dc: 10,
+          requires_race: ['elf', 'dwarf', 'gnome', 'tiefling', 'halforc'],
+          desc: 'Perceber a rachadura na abóbada escura antes mesmo da pedra se soltar.',
+          sNarr: 'Sua visão aguçada nas trevas nota a queda da poeira segundos antes do estalo; você simplesmente dá dois passos calmos para o lado.',
+          fNarr: 'A poeira caindo da fissura queima levemente os olhos.', dmg: 1 }
+      ] },
 
     { title: 'Eco Estranho',
       script: [
@@ -432,7 +851,25 @@ var HAZARDS = {
           },
           fNarr: 'Você não localiza. Quando segue, sente algo seguindo a passos atrás. Não vira pra ver.', dmg: 3 },
         { i: '⚔️', t: 'Investir contra o perseguidor', isCombat: true, enemyId: 'troglodyte',
-          desc: 'Girar com a arma em punho e atacar a criatura das sombras.' } ] }
+          desc: 'Girar com a arma em punho e atacar a criatura das sombras.' },
+        { i: '🤫', t: 'Silêncio absoluto e camuflagem', stat: 'dex', dc: 11,
+          requires_class: ['ladino', 'monge', 'patrulheiro'],
+          desc: 'Paralisar cada músculo e esperar a criatura entregar sua posição pelo ruído.',
+          sNarr: 'Você some na penumbra sem emitir respiração; desorientado pela ausência de passos, o perseguidor rasteja para outra galeria.',
+          fNarr: 'Uma gota pinga no seu elmo de aço e revela sua posição com um eco agudo.', dmg: 1 },
+        { i: '🤝', t: 'Pinça de emboscada com aliado', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'Sinalizar silenciosamente para seu parceiro cobrir a retaguarda.',
+          sNarr: 'Vocês viram em guarda sincronizada cobrindo as duas bocas do túnel; percebendo a desvantagem, a besta recua e foge.',
+          sNarr_by_ally: 'Vocês viram em guarda sincronizada cobrindo as duas bocas do túnel; percebendo a desvantagem, a besta recua e foge.',
+          fNarr: 'O perseguidor quase contorna sua posição antes de se evadir pelas fendas.', dmg: 1,
+          fNarr_by_ally: 'O perseguidor quase contorna sua posição antes de se evadir pelas fendas.' },
+        { i: '✨', t: 'Clarão mágico de revelação', stat: 'int', dc: 10,
+          requires_class: ['clerigo', 'mago', 'feiticeiro', 'bardo'],
+          desc: 'Projetar um estalo luminoso que preenche toda a galeria subterrânea.',
+          sNarr: 'Uma onda súbita de luz radiante ilumina cada recanto; a criatura das sombras guincha ofuscada e foge túnel adentro.',
+          fNarr: 'A luz rebate nas estalactites brancas e ofusca sua visão por instantes.', dmg: 1 }
+      ] }
   ],
 
   graveyard: [
@@ -471,7 +908,15 @@ var HAZARDS = {
           sNarr: 'Você corre. Vinte segundos depois, está do outro lado, ofegante mas inteiro.',
           fNarr: 'Um toque gelado nas costas drena sua energia. Você chega exausto.', dmg: 4 },
         { i: '⚔️', t: 'Banir os espectros pela lâmina', isCombat: true, enemyId: 'skeleton',
-          desc: 'Desembainhar sua arma e purificar as aparições em combate.' } ] },
+          desc: 'Desembainhar sua arma e purificar as aparições em combate.' },
+        { i: '🤝', t: 'Círculo de bravura com aliados', stat: 'cha', dc: 10,
+          requires_ally: true,
+          desc: 'Unir as costas e entoar palavras de lealdade e coragem compartilhada.',
+          sNarr: 'O calor da bravura mútua do grupo repele as aparições gélidas; os espectros recuam respeitosos perante a vida inabalável de vocês.',
+          sNarr_by_ally: 'O calor da bravura mútua do grupo repele as aparições gélidas; os espectros recuam respeitosos perante a vida inabalável de vocês.',
+          fNarr: 'O arrepio espectral drena o calor dos companheiros antes de deixarem as lápides.', dmg: 2,
+          fNarr_by_ally: 'O arrepio espectral drena o calor dos companheiros antes de deixarem as lápides.' }
+      ] },
 
     { title: 'Lápide Trincada',
       script: [
@@ -486,7 +931,24 @@ var HAZARDS = {
         { i: '🗣', t: 'Falar uma oração', stat: 'wis', dc: 12,
           desc: 'Bênção sussurrada — pacificar o que está dentro.',
           sNarr: 'Você sussurra a oração que sua avó ensinou. A trinca para de avançar. Você sente paz como uma mão pousada no ombro.',
-          fNarr: 'Sua oração é fraca ou errada. A trinca abre mais um centímetro. Você apressa o passo.', dmg: 2 } ] }
+          fNarr: 'Sua oração é fraca ou errada. A trinca abre mais um centímetro. Você apressa o passo.', dmg: 2 },
+        { i: '🔨', t: 'Conter a trinca com laje pesada', stat: 'str', dc: 11,
+          desc: 'Apoiar um bloco de mármore caído sobre a fenda para sufocar o que quer que tente emergir.',
+          sNarr: 'Com força concentrada, você posiciona a laje firme sobre a fissura; a vibração cessa e o túmulo volta ao repouso eterno.',
+          fNarr: 'A pedra desliza e prende seus dedos antes de assentar no mármore.', dmg: 1 },
+        { i: '🤝', t: 'Vigília atenta com aliados', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'O grupo passa em formação de guarda com armas prontas sem quebrar o ritmo dos passos.',
+          sNarr: 'Com disciplina e olhos atentos em cada nicho fúnebre, a comitiva contorna o mausoléu e segue viagem em segurança.',
+          sNarr_by_ally: 'Com disciplina e olhos atentos em cada nicho fúnebre, a comitiva contorna o mausoléu e segue viagem em segurança.',
+          fNarr: 'Um estalo seco atrás da lápide assusta a comitiva por um segundo.', dmg: 0,
+          fNarr_by_ally: 'Um estalo seco atrás da lápide assusta a comitiva por um segundo.' },
+        { i: '📜', t: 'Reforço de runas de confinamento', stat: 'int', dc: 11,
+          requires_class: ['mago', 'bruxo', 'bardo'],
+          desc: 'Traçar caracteres arcanos de aprisionamento para selar a fenda.',
+          sNarr: 'As linhas de giz místico brilham em azul safira e fecham a energia espectral no interior da pedra.',
+          fNarr: 'O encantamento absorve mais energia mágica do que o previsto, deixando você cansado.', dmg: 2 }
+      ] }
   ],
 
   volcanic: [
@@ -510,7 +972,24 @@ var HAZARDS = {
           requires_race: ['tiefling', 'dragonborn'],
           desc: 'Aproveitar resistência inata ao calor para cruzar sem recuar.',
           sNarr: 'Seu sangue resistente ao fogo ignora o bafo abrasador da lava. Você atravessa as cinzas incandescentes com passos firmes.',
-          fNarr: 'O vapor superaquecido atinge seus olhos por um instante, forçando um desvio repentino.', dmg: 2 } ] },
+          fNarr: 'O vapor superaquecido atinge seus olhos por um instante, forçando um desvio repentino.', dmg: 2 },
+        { i: '🪨', t: 'Avanço pela crista de basalto fria', stat: 'wis', dc: 11,
+          desc: 'Identificar as rochas mais escuras e antigas que suportam o peso sem fundir.',
+          sNarr: 'Seus passos encontram a crista sólida de pedra antiga; você transpõe a brecha térmica sem pisar na crosta derretida.',
+          fNarr: 'A sola da bota chia no calor intenso e fumaça sobe no ar.', dmg: 2 },
+        { i: '🤝', t: 'Salto amparado por companheiro', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Seu parceiro estende a mão da outra borda firme para segurar seu impulso.',
+          sNarr: 'Com sincronia perfeita, seu aliado segura seu braço no final do salto e firma você em solo seguro.',
+          sNarr_by_ally: 'Com sincronia perfeita, seu aliado segura seu braço no final do salto e firma você em solo seguro.',
+          fNarr: 'O calor ascendente faz a pegada escorregar e vocês caem juntos no cascalho quente.', dmg: 2,
+          fNarr_by_ally: 'O calor ascendente faz a pegada escorregar e vocês caem juntos no cascalho quente.' },
+        { i: '💪', t: 'Potência muscular atlética', stat: 'str', dc: 11,
+          requires_class: ['guerreiro', 'barbaro', 'monge'],
+          desc: 'Impulso vigoroso e arranque formidável sobre o fluxo de magma.',
+          sNarr: 'Com força física superior, você transpõe o vão de fogo como uma flecha humana e aterrissa com solidez inabalável.',
+          fNarr: 'A aterrissagem sobre pedra quente queima a barra de suas perneiras.', dmg: 2 }
+      ] },
 
     { title: 'Cinzas Quentes',
       script: [
@@ -521,7 +1000,24 @@ var HAZARDS = {
         { i: '🛡', t: 'Cobertura completa', stat: 'con', dc: 12,
           desc: 'Manto encharcado de cantil, cabeça encolhida.',
           sNarr: 'Você molha o manto e se cobre. Cinzas queimam o tecido externo, mas você passa sem queimar pele.',
-          fNarr: 'Algumas brasas pegam no cabelo. Você apaga rapidamente, mas o susto fica.', dmg: 3 } ] }
+          fNarr: 'Algumas brasas pegam no cabelo. Você apaga rapidamente, mas o susto fica.', dmg: 3 },
+        { i: '🏃', t: 'Corrida entre marquises de pedra', stat: 'dex', dc: 11,
+          desc: 'Disparar velozmente abrigando-se de saliência em saliência.',
+          sNarr: 'Em saltos velozes, você cruza a chuva de detritos pulando de teto em teto de rocha basáltica.',
+          fNarr: 'Cinzas abrasivas atingem sua nuca antes do próximo abrigo.', dmg: 2 },
+        { i: '🤝', t: 'Toldo blindado com o grupo', stat: 'con', dc: 10,
+          requires_ally: true,
+          desc: 'Erguer mantos de couro reforçados em conjunto para proteger a comitiva.',
+          sNarr: 'Avançando em marcha compacta protegidos pelo couro esticado, o grupo supera a tempestade de cinzas sem uma única queimadura.',
+          sNarr_by_ally: 'Avançando em marcha compacta protegidos pelo couro esticado, o grupo supera a tempestade de cinzas sem uma única queimadura.',
+          fNarr: 'O couro fumaça e o cheiro acre de queimado invade a respiração.', dmg: 1,
+          fNarr_by_ally: 'O couro fumaça e o cheiro acre de queimado invade a respiração.' },
+        { i: '🔥', t: 'Imunidade inata a brasas', stat: 'con', dc: 9,
+          requires_race: ['tiefling', 'dragonborn'],
+          desc: 'Fisiologia resistente ao fogo que suporta fagulhas incandescentes.',
+          sNarr: 'Sua compleição ancestral ignora as fagulhas quentes; você marcha pela chuva negra com serenidade régia.',
+          fNarr: 'A fuligem irrita seus olhos por alguns passos.', dmg: 1 }
+      ] }
   ]
 };
 
@@ -546,7 +1042,20 @@ var HAZARDS_EXTRA = {
           sNarr: 'Você sobe rápido, agarra galho firme. Os lobos passam embaixo, sem olhar pra cima.',
           fNarr: 'A casca cede sob seus dedos. Você cai e bate as costas contra raízes.', dmg: 5 },
         { i: '⚔️', t: 'Enfrentar a matilha de lobos', isCombat: true, enemyId: 'dire_wolf',
-          desc: 'Desembainhar sua arma e interceptar os lobos em combate aberto.' } ] },
+          desc: 'Desembainhar sua arma e interceptar os lobos em combate aberto.' },
+        { i: '🤝', t: 'Emboscada coordenada com aliados', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'Posicionar seu companheiro na cobertura alta e cruzar as flechas caso a matilha desvie.',
+          sNarr: 'Com cobertura mútua perfeita, vocês permanecem imóveis até a matilha passar concentrada no rastro; nenhum lobo nota a comitiva.',
+          sNarr_by_ally: 'Com cobertura mútua perfeita, vocês permanecem imóveis até a matilha passar concentrada no rastro; nenhum lobo nota a comitiva.',
+          fNarr: 'Um galho quebra sob a bota de seu parceiro e um dos lobos rosna desconfiado antes de seguir a caça.', dmg: 1,
+          fNarr_by_ally: 'Um galho quebra sob a bota de seu parceiro e um dos lobos rosna desconfiado antes de seguir a caça.' },
+        { i: '🍃', t: 'Desviar o rastro com ervas aromáticas', stat: 'wis', dc: 11,
+          requires_class: ['druida', 'patrulheiro'],
+          desc: 'Esmagar folhas de menta silvestre para mascarar seu odor corporal.',
+          sNarr: 'O aroma penetrante das ervas apaga seu rastro no ar úmido; a matilha passa rente aos arbustos sem notar a presença de mortais.',
+          fNarr: 'O vento sopra as folhas secas e o aroma não se espalha a tempo.', dmg: 2 }
+      ] },
 
     { title: 'O Andarilho Cego',
       npc: { name: 'Velho Andarilho', desc: 'Eremita cego que conhece a floresta de cor', portrait: '../shared/img/npcs/velho-andarilho.webp' },
@@ -570,7 +1079,20 @@ var HAZARDS_EXTRA = {
         { i: '➡️', t: 'Ignorar e seguir', stat: 'wis', dc: 12,
           desc: 'Confiar na sua própria orientação, deixar o velho.',
           sNarr: 'Você sente que está no rumo certo. Cumprimenta o velho e segue. Sua intuição estava certa — chega bem.',
-          fNarr: 'A trilha que você escolhe leva ao ninho de aranhas que ele teria avisado. Picadas múltiplas.', dmg: 4 } ] },
+          fNarr: 'A trilha que você escolhe leva ao ninho de aranhas que ele teria avisado. Picadas múltiplas.', dmg: 4 },
+        { i: '📜', t: 'Trocar bênção de eremita ou peregrino', stat: 'wis', dc: 10,
+          requires_background: ['acolyte', 'hermit', 'sage'],
+          desc: 'Compartilhar uma prece ou ditado antigo de peregrinação.',
+          sNarr: 'Ao ouvir seu provérbio de estrada, o ancião abre um sorriso iluminado: "Bendito seja o andarilho que honra as velhas palavras." Ele indica a vereda secreta das faias douradas.',
+          fNarr: 'O ancião ouve em silêncio e apenas balança o bastão de madeira.', dmg: 0 },
+        { i: '👥', t: 'Apresentar a comitiva com cordialidade', stat: 'cha', dc: 10,
+          requires_ally: true,
+          desc: 'Apresentar seus companheiros e oferecer um gole de água do cantil.',
+          sNarr: 'A cortesia do grupo alegra o coração solitário do andarilho: "Raras vezes vejo um bando viajar com tanta harmonia. Vão pela margem do córrego raso."',
+          sNarr_by_ally: 'A cortesia do grupo alegra o coração solitário do andarilho: "Raras vezes vejo um bando viajar com tanta harmonia. Vão pela margem do córrego raso."',
+          fNarr: 'O velho agradece a água mas retira-se apressado pelas sombras.', dmg: 0,
+          fNarr_by_ally: 'O velho agradece a água mas retira-se apressado pelas sombras.' }
+      ] },
 
     { title: 'Cogumelo Errado',
       script: [
@@ -589,7 +1111,25 @@ var HAZARDS_EXTRA = {
         { i: '🚶', t: 'Não comer', stat: null,
           desc: 'Manter prudência — não vale o risco.',
           sNarr: 'Você passa direto. Estômago reclama mas você sabe que essa é a decisão certa. Aguenta até o destino.',
-          fNarr: '' } ] },
+          fNarr: '' },
+        { i: '🌿', t: 'Coletar amostra para unguento', stat: 'int', dc: 11,
+          requires_class: ['druida', 'clerigo', 'patrulheiro'],
+          desc: 'Usar luvas para colher a toxina com segurança para estudo ou preparo de antídotos.',
+          sNarr: 'Com técnica impecável de boticário, você extrai o veneno vegetal sem encostar na pele; seu conhecimento botânico se aprofunda.',
+          fNarr: 'Um pólen volátil escapa da haste e irrita suas narinas por alguns minutos.', dmg: 1 },
+        { i: '🤝', t: 'Consultar experiência do parceiro', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'Pedir que seu aliado confirme as características da espécie antes de qualquer decisão.',
+          sNarr: 'Seu companheiro analisa o talo com olhar atento e avisa na hora: "É o chapéu-da-morte, amigo. Jogue fora!" Vocês descartam o perigo a tempo.',
+          sNarr_by_ally: 'Seu companheiro analisa o talo com olhar atento e avisa na hora: "É o chapéu-da-morte, amigo. Jogue fora!" Vocês descartam o perigo a tempo.',
+          fNarr: 'Seu parceiro fica na dúvida e vocês decidem não arriscar a ingestão.', dmg: 0,
+          fNarr_by_ally: 'Seu parceiro fica na dúvida e vocês decidem não arriscar a ingestão.' },
+        { i: '🍄', t: 'Olfato apurado para toxinas', stat: 'wis', dc: 10,
+          requires_race: ['dwarf', 'halfling'],
+          desc: 'Sentidos aguçados reconhecem o cheiro doce e amargo característico do veneno.',
+          sNarr: 'Seu paladar e olfato treinados detectam o rastro amargo característico das espécies mortais; você descarta o fungo sem hesitar.',
+          fNarr: 'O cheiro amargo enjoa seu estômago temporariamente.', dmg: 1 }
+      ] },
 
     { title: 'Encontro com Fada',
       npc: { name: 'Fada da Trilha', desc: 'Pequena criatura mágica de luz dourada', portrait: '../shared/img/npcs/trail/fada-da-trilha.webp' },
@@ -609,7 +1149,25 @@ var HAZARDS_EXTRA = {
         { i: '➡️', t: 'Recusar e seguir', stat: null,
           desc: 'Você não tem tempo pra missões de fada.',
           sNarr: 'A fada dá de ombros. "Justo. Outra hora então." Some em piscar de luz dourada.',
-          fNarr: '' } ] },
+          fNarr: '' },
+        { i: '🧝', t: 'Saudação férica em dialeto silvestre', stat: 'cha', dc: 10,
+          requires_race: ['elf', 'gnome'],
+          desc: 'Responder no tom melódico das criaturas da corte das fadas.',
+          sNarr: 'Ao ouvir seu dialeto férico fluente, os olhos da fada brilham de encanto. Ela assobia alegre e sopra pó de estrelas que renova o fôlego da comitiva.',
+          fNarr: 'A fada ri de sua pronúncia travessa e bate asas para o alto.', dmg: 0 },
+        { i: '🎶', t: 'Verso poético de encantamento', stat: 'cha', dc: 11,
+          requires_class: ['bardo', 'bruxo'],
+          desc: 'Propor uma rima engenhosa em troca do segredo do atalho.',
+          sNarr: 'Sua estrofe encanta a criaturinha, que gira no ar rindo: "Que viajante espirituoso!" O atalho mágico se abre reluzente diante de vocês.',
+          fNarr: 'A fada acha a rima previsível demais e voa embora zombando baixinho.', dmg: 0 },
+        { i: '🤝', t: 'Resgate cuidadoso em dupla', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Seu parceiro afasta a raiz curvada enquanto você retira a criatura ilesa.',
+          sNarr: 'Com o companheiro erguendo a casca com cuidado, o sapo salta livre e feliz; a fada aplaude e guia o grupo pela senda dourada.',
+          sNarr_by_ally: 'Com o companheiro erguendo a casca com cuidado, o sapo salta livre e feliz; a fada aplaude e guia o grupo pela senda dourada.',
+          fNarr: 'A raiz range e fecha a abertura antes de você tirar as mãos.', dmg: 0,
+          fNarr_by_ally: 'A raiz range e fecha a abertura antes de você tirar as mãos.' }
+      ] },
 
     { title: 'Trilha Bifurcada',
       script: [
@@ -624,7 +1182,29 @@ var HAZARDS_EXTRA = {
             patrulheiro: 'Você lê as pegadas como livro. Caçador, sozinho, há uma hora. Profissional. Se ele passou, é seguro.',
             ladrao: 'Pegadas falsas. Alguém passou em zigue-zague pra parecer mais. Provavelmente armadilha. Esquerda então.'
           },
-          fNarr: 'Você não consegue tirar conclusão clara. Decide na intuição — e erra. A trilha escolhida demora muito mais.', dmg: 0 } ] },
+          fNarr: 'Você não consegue tirar conclusão clara. Decide na intuição — e erra. A trilha escolhida demora muito mais.', dmg: 0 },
+        { i: '🧭', t: 'Consultar carta topográfica e relevo', stat: 'int', dc: 11,
+          desc: 'Analisar a drenagem de água e as curvas de nível do mapa da região.',
+          sNarr: 'Você identifica a inclinação natural do vale e percebe que a trilha da esquerda corta uma curva inteira de colina; a rota é rápida e perfeita.',
+          fNarr: 'A vegetação nova alterou os marcos antigos do mapa, custando tempo de conferência.', dmg: 0 },
+        { i: '🤝', t: 'Batedor aliado faz reconhecimento', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Seu companheiro corre cem metros à frente pela curva para conferir a passagem.',
+          sNarr: 'Seu aliado retorna com sinal de polegar erguido: "A passagem da esquerda está limpa e seca!" Vocês avançam sem dúvidas.',
+          sNarr_by_ally: 'Seu aliado retorna com sinal de polegar erguido: "A passagem da esquerda está limpa e seca!" Vocês avançam sem dúvidas.',
+          fNarr: 'Seu parceiro volta sem certezas após encontrar uma bifurcação secundária.', dmg: 0,
+          fNarr_by_ally: 'Seu parceiro volta sem certezas após encontrar uma bifurcação secundária.' },
+        { i: '👁', t: 'Instinto de ladino para armadilhas', stat: 'wis', dc: 10,
+          requires_class: ['ladino', 'ladrao', 'patrulheiro'],
+          desc: 'Varredura rápida por fios de tropeço, folhagens falsas ou gatilhos na trilha curta.',
+          sNarr: 'Você nota um galho quebrado artificialmente e desvia de uma vala rasa oculta, seguindo pela rota mais rápida com segurança.',
+          fNarr: 'O excesso de cautela retarda a marcha por quase uma hora.', dmg: 0 },
+        { i: '⛏', t: 'Instinto telúrico da pedra', stat: 'wis', dc: 10,
+          requires_race: 'dwarf',
+          desc: 'Sentir a firmeza do substrato rochoso sob as camadas de terra.',
+          sNarr: 'Seus pés sentem a laje de granito que sustenta o caminho da esquerda; o chão é firme como o pátio de uma cidadela anã.',
+          fNarr: 'A terra fofa esconde raízes soltas sob a bota.', dmg: 0 }
+      ] },
 
     { title: 'Ninho de Aranhas Pequenas',
       script: [
@@ -639,7 +1219,25 @@ var HAZARDS_EXTRA = {
         { i: '🛡', t: 'Forçar passagem', stat: 'con', dc: 13,
           desc: 'Avançar empurrando as teias, aceitando algumas mordidas.',
           sNarr: 'Você passa pisando duro. Algumas aranhas mordem mas são mordidas leves — sua armadura aguenta a maioria.',
-          fNarr: 'Várias mordidas em sequência. Inchaço, ardor, mas você passa. Vai descansar mal hoje.', dmg: 3 } ] },
+          fNarr: 'Várias mordidas em sequência. Inchaço, ardor, mas você passa. Vai descansar mal hoje.', dmg: 3 },
+        { i: '🤸', t: 'Rastejo acrobático por baixo das teias', stat: 'dex', dc: 11,
+          requires_class: ['ladino', 'monge', 'bardo'],
+          desc: 'Deslizar rente ao solo sob as linhas de teia sem tocar nos filamentos.',
+          sNarr: 'Com flexibilidade impecável, você rasteja sob a teia principal sem romper um único fio e emerge do outro lado ileso.',
+          fNarr: 'Sua mochila esbarra em um galho e teias caem em seus ombros.', dmg: 1 },
+        { i: '🤝', t: 'Desobstrução coordenada com varas longas', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Você e seu companheiro usam varas de carvalho para enrolar os fios antes da passagem.',
+          sNarr: 'Trabalhando em equipe, vocês enrolam as teias nas hastes de madeira como meadas de lã e abrem um corredor amplo e limpo.',
+          sNarr_by_ally: 'Trabalhando em equipe, vocês enrolam as teias nas hastes de madeira como meadas de lã e abrem um corredor amplo e limpo.',
+          fNarr: 'Uma das varas parte e aranhas caem nas mangas de seu companheiro.', dmg: 2,
+          fNarr_by_ally: 'Uma das varas parte e aranhas caem nas mangas de seu companheiro.' },
+        { i: '🌿', t: 'Repelente natural de menta silvestre', stat: 'wis', dc: 10,
+          requires_class: ['druida', 'patrulheiro'],
+          desc: 'Esmagar folhas de menta e cânfora cujo óleo repele aracnídeos.',
+          sNarr: 'O vapor herbal faz os aracnídeos recuarem apressados para o topo dos galhos; vocês cruzam sem levar uma picada.',
+          fNarr: 'As folhas secas soltam pouco óleo e algumas aranhas insistem em se aproximar.', dmg: 1 }
+      ] },
 
     { title: 'Túmulo Coberto de Musgo',
       script: [
@@ -654,7 +1252,24 @@ var HAZARDS_EXTRA = {
         { i: '🔍', t: 'Ler a inscrição completa', stat: 'int', dc: 14,
           desc: 'Decifrar o nome apagado pelos séculos.',
           sNarr: 'Você arranha o musgo cuidadosamente. <b>Mara, a Curandeira de Valdoria — 1247-1289</b>. Lendária. Você sente que a história dela merece ser contada quando voltar à cidade.',
-          fNarr: 'Você arranha demais e quebra um pedaço da pedra. Constrangido, deixa-a quebrada e segue.', dmg: 1 } ] }
+          fNarr: 'Você arranha demais e quebra um pedaço da pedra. Constrangido, deixa-a quebrada e segue.', dmg: 1 },
+        { i: '🕯', t: 'Bênção e consagração do repouso', stat: 'wis', dc: 10,
+          requires_class: ['paladino', 'clerigo'],
+          desc: 'Canalizar uma prece formal de descanso eterno sobre o túmulo esquecido.',
+          sNarr: 'Um calor suave irradia do mármore; uma sensação de conforto e proteção acompanha a comitiva pelo resto da tarde.',
+          fNarr: 'A pedra continua fria e úmida sob o musgo.', dmg: 0 },
+        { i: '🤝', t: 'Flores silvestres e tributo do grupo', stat: null,
+          requires_ally: true,
+          desc: 'Colher pequenas flores da margem e depositar com seus aliados em silêncio respeitoso.',
+          sNarr: 'O tributo conjunto traz paz e solenidade ao coração de todos os viajantes; a mata parece abrir passagem calma adiante.',
+          sNarr_by_ally: 'O tributo conjunto traz paz e solenidade ao coração de todos os viajantes; a mata parece abrir passagem calma adiante.',
+          fNarr: '' },
+        { i: '🎖', t: 'Reconhecer heráldica antiga', stat: 'int', dc: 11,
+          requires_background: ['noble', 'sage', 'soldier'],
+          desc: 'Identificar o brasão de armas da família fundadora esculpido na base.',
+          sNarr: 'Você reconhece a flor-de-lis dos primeiros pioneiros de Valdoria; a memória dos feitos dos mortais do passado revigora seu espírito.',
+          fNarr: 'A heráldica foi corrompida pelas raízes invasoras.', dmg: 0 }
+      ] }
   ],
 
   plains: [
@@ -672,7 +1287,24 @@ var HAZARDS_EXTRA = {
         { i: '🗣', t: 'Conversar sem dar nada', stat: 'cha', dc: 12,
           desc: 'Tentar extrair informação sem custo.',
           sNarr: 'Vocês conversam dez minutos. Ele percebe que você quer informação grátis mas decide te dar mesmo assim — "porque é jovem e tem coração no lugar". Aviso útil.',
-          fNarr: 'Ele cala-se assim que percebe sua intenção. Você sai sem nada além de constrangimento.', dmg: 0 } ] },
+          fNarr: 'Ele cala-se assim que percebe sua intenção. Você sai sem nada além de constrangimento.', dmg: 0 },
+        { i: '🍞', t: 'Partilhar provisões com aliados', stat: null,
+          requires_ally: true,
+          desc: 'Oferecer pão e queijo da ração compartilhada do grupo.',
+          sNarr: 'Comovido com a generosidade da comitiva, o velho divide seu mapa rústico desenhado em couro: "Tomem a trilha das oliveiras, amigos. Evita o atoleiro do rio."',
+          sNarr_by_ally: 'Comovido com a generosidade da comitiva, o velho divide seu mapa rústico desenhado em couro: "Tomem a trilha das oliveiras, amigos. Evita o atoleiro do rio."',
+          fNarr: '' },
+        { i: '🙏', t: 'Cura e alívio das feridas', stat: 'wis', dc: 10,
+          requires_class: ['clerigo', 'paladino', 'druida'],
+          desc: 'Impor as mãos sobre os tornozelos inchados do mendigo com magia de alívio.',
+          sNarr: 'A dor nas pernas do velho arrefece; em lágrimas de gratidão, ele avisa sobre bandidos entocados na próxima colina antes de abençoar sua marcha.',
+          fNarr: 'A bênção acalma o ancião, embora ele mal consiga articular palavras de volta.', dmg: 0 },
+        { i: '🌾', t: 'Solidariedade de protetor do povo', stat: 'cha', dc: 10,
+          requires_background: ['folk_hero', 'acolyte'],
+          desc: 'Tratar o homem com a dignidade devida aos cidadãos de Valdoria.',
+          sNarr: 'O ancião reconhece em você a alma de um defensor legítimo do povo simples: "O vale precisa de almas como a tua. Vá sob os bons ventos."',
+          fNarr: 'O velho aceita o cumprimento em silêncio melancólico.', dmg: 0 }
+      ] },
 
     { title: 'Ovo Caído',
       script: [
@@ -695,7 +1327,25 @@ var HAZARDS_EXTRA = {
             evil: 'Pragmático. Carma neutro — sobrevivência primeiro.',
             good: 'Você se sente um pouco culpado mas o estômago aperta.'
           },
-          fNarr: '' } ] },
+          fNarr: '' },
+        { i: '🤝', t: 'Companheiro faz base para escalada', stat: 'str', dc: 10,
+          requires_ally: true,
+          desc: 'Subir nos ombros de seu aliado para alcançar os galhos baixos com segurança.',
+          sNarr: 'Com o apoio sólido de seu companheiro, você deposita o ovo no ninho sem esforço perigoso; ambos descem ilesos sob o olhar das aves.',
+          sNarr_by_ally: 'Com o apoio sólido de seu companheiro, você deposita o ovo no ninho sem esforço perigoso; ambos descem ilesos sob o olhar das aves.',
+          fNarr: 'A base oscila na descida e vocês caem juntos no capim alto.', dmg: 1,
+          fNarr_by_ally: 'A base oscila na descida e vocês caem juntos no capim alto.' },
+        { i: '🪶', t: 'Escalada leve de elfo silvestre', stat: 'dex', dc: 10,
+          requires_subrace: 'wood',
+          desc: 'Subir pelos nós do tronco com a agilidade natural dos elfos da floresta.',
+          sNarr: 'Seus pés leves mal tocam a casca; você devolve o ovo ao ninho com a suavidade de uma brisa e desce com um salto perfeito.',
+          fNarr: 'Um ramo estala sob a bota e você arranha o pulso.', dmg: 1 },
+        { i: '✨', t: 'Mão mágica ou levitação suave', stat: 'int', dc: 10,
+          requires_class: ['mago', 'feiticeiro', 'bardo'],
+          desc: 'Guiar o ovo pelo ar envolvido em uma película mística de força.',
+          sNarr: 'Uma mão translúcida de energia ergue o ovo suavemente e o acomoda de volta no centro das palhas aquecidas.',
+          fNarr: 'A magia vacila com o vento da estepe e o ovo quase escorrega antes de assentar.', dmg: 0 }
+      ] },
 
     { title: 'Carcaça de Ovelha',
       script: [
@@ -710,7 +1360,24 @@ var HAZARDS_EXTRA = {
             patrulheiro: 'Urso pardo, macho, pesando uns 280kg. Já se afastou rumo norte. Você está seguro, mas evita parar nesta área.',
             ladrao: 'Não é caça natural. As marcas são forçadas — alguém matou a ovelha e dispôs as marcas pra parecer urso. Estranho. Você passa rápido.'
           },
-          fNarr: 'Você não consegue ler direito as marcas. Segue cauteloso e perde tempo olhando pra trás.', dmg: 1 } ] },
+          fNarr: 'Você não consegue ler direito as marcas. Segue cauteloso e perde tempo olhando pra trás.', dmg: 1 },
+        { i: '🏹', t: 'Leitura de rastro de caçador', stat: 'wis', dc: 10,
+          requires_class: ['patrulheiro', 'barbaro', 'druida'],
+          desc: 'Examinar o padrão de sangue e a direção do vento para deduzir a posição da fera.',
+          sNarr: 'Você percebe que a presa foi abatida por predador solitário já saciado; orienta o grupo pela rota oposta sem risco.',
+          fNarr: 'O vento espalha o odor da carcaça e confunde as pegadas.', dmg: 1 },
+        { i: '🤝', t: 'Vigília com flechas armadas do grupo', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'Companheiro cobre o trigal com arco armado enquanto você inspeciona o caminho.',
+          sNarr: 'Com armas apontadas e passos cautelosos, vocês contornam a clareira ensanguentada com guarda impecável.',
+          sNarr_by_ally: 'Com armas apontadas e passos cautelosos, vocês contornam a clareira ensanguentada com guarda impecável.',
+          fNarr: 'Um corvo grasna alto no capim e sobressalta os companheiros por instantes.', dmg: 0,
+          fNarr_by_ally: 'Um corvo grasna alto no capim e sobressalta os companheiros por instantes.' },
+        { i: '🏃', t: 'Desvio rápido contra o vento', stat: 'dex', dc: 11,
+          desc: 'Ganhar distância imediatamente sem tocar na cena.',
+          sNarr: 'Você acelera o passo contornando o trigal; em minutos o cheiro de sangue fica para trás no horizonte.',
+          fNarr: 'A corrida no terreno acidentado quase provoca uma torção no tornozelo.', dmg: 1 }
+      ] },
 
     { title: 'Mulher do Poço',
       npc: { name: 'Mulher do Poço', desc: 'Camponesa carregando dois baldes pesados', portrait: '../shared/img/npcs/trail/mulher-do-poco-v2.webp' },
@@ -726,7 +1393,24 @@ var HAZARDS_EXTRA = {
         { i: '💪', t: 'Ajudar com os baldes', stat: 'str', dc: 11,
           desc: 'Carregar até a casa dela — ato de bondade simples.',
           sNarr: 'Você ergue os baldes com facilidade. Ela aponta a casinha a uma centena de metros. Em troca, ela te dá pão fresco da manhã. <i>+5 HP recuperados quando comer.</i>',
-          fNarr: 'Você quase derruba um balde. Ela ri — "deixa pra eu mesma, viajante. Boa intenção contou." Você segue.', dmg: 0 } ] },
+          fNarr: 'Você quase derruba um balde. Ela ri — "deixa pra eu mesma, viajante. Boa intenção contou." Você segue.', dmg: 0 },
+        { i: '🤝', t: 'Grupo ajuda no transporte da água', stat: null,
+          requires_ally: true,
+          desc: 'Você e seus companheiros dividem os baldes e escoltam a mulher até a chácara.',
+          sNarr: 'Impressionada com a gentileza de toda a comitiva, a camponesa oferece água limpa aromatizada com hortelã e queijo fresco para a jornada.',
+          sNarr_by_ally: 'Impressionada com a gentileza de toda a comitiva, a camponesa oferece água limpa aromatizada com hortelã e queijo fresco para a jornada.',
+          fNarr: '' },
+        { i: '🎶', t: 'Cantar balada alegre de estrada', stat: 'cha', dc: 10,
+          requires_class: 'bardo',
+          desc: 'Animar a caminhada da trabalhadora com versos ritmados sobre Valdoria.',
+          sNarr: 'Seu canto ilumina o rosto cansado da mulher, que ri e canta junto; a alegria partilhada deixa seus passos leves pelo resto da tarde.',
+          fNarr: 'O ritmo quebra no meio da canção, mas ela agradece a intenção com um sorriso.', dmg: 0 },
+        { i: '✨', t: 'Purificação e bênção da fonte', stat: 'wis', dc: 10,
+          requires_class: ['clerigo', 'paladino', 'druida'],
+          desc: 'Traçar uma bênção de pureza sobre a água dos baldes.',
+          sNarr: 'A água adquire um brilho cristalino e doce; a mulher agradece a graça divina com uma reverência humilde.',
+          fNarr: 'A bênção é sussurrada e a camponesa segue seu caminho satisfeita.', dmg: 0 }
+      ] },
 
     { title: 'Tempestade Distante',
       script: [
@@ -741,7 +1425,54 @@ var HAZARDS_EXTRA = {
         { i: '🌳', t: 'Buscar abrigo natural', stat: 'wis', dc: 12,
           desc: 'Procurar uma árvore grande ou rocha protetora.',
           sNarr: 'Você encontra um carvalho enorme com galhos baixos densos. Espera vinte minutos da tempestade passar protegido. Sai apenas levemente úmido.',
-          fNarr: 'O abrigo escolhido é insuficiente. Chove forte sobre você. Você fica calado mas continua.', dmg: 1 } ] }
+          fNarr: 'O abrigo escolhido é insuficiente. Chove forte sobre você. Você fica calado mas continua.', dmg: 1 },
+        { i: '🤝', t: 'Montar toldo de marcha com aliados', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Unir as capas impermeáveis e armar um abrigo rápido estaiado no capim.',
+          sNarr: 'Trabalhando em equipe antes do primeiro raio, o grupo ergue uma tenda resistente onde todos aguardam a chuvarada protegidos e secos.',
+          sNarr_by_ally: 'Trabalhando em equipe antes do primeiro raio, o grupo ergue uma tenda resistente onde todos aguardam a chuvarada protegidos e secos.',
+          fNarr: 'Uma rajada de vento arranca a estaca e a chuva molha as mochilas dos companheiros.', dmg: 1,
+          fNarr_by_ally: 'Uma rajada de vento arranca a estaca e a chuva molha as mochilas dos companheiros.' },
+        { i: '🌦', t: 'Previsão do curso das nuvens', stat: 'wis', dc: 10,
+          requires_class: ['druida', 'patrulheiro'],
+          desc: 'Ler a trajetória do vento e ajustar a rota para a borda seca da tempestade.',
+          sNarr: 'Você reconhece que a massa de nuvens segue para o sul; uma leve correção de azimute mantém o grupo sob garoa branda e inofensiva.',
+          fNarr: 'A frente fria muda de repente e despeja água sobre sua capa.', dmg: 1 },
+        { i: '💪', t: 'Marcha forçada atlética', stat: 'con', dc: 11,
+          requires_class: ['barbaro', 'guerreiro'],
+          desc: 'Manter passo acelerado sustentado por vigor físico superior.',
+          sNarr: 'Com ritmo de marcha inabalável, você cobre o terreno em tempo recorde antes que o céu desabe.',
+          fNarr: 'O esforço acelerado drena suas energias e cansa as pernas.', dmg: 2 }
+      ] },
+
+    { title: 'Bivaque dos Guardas da Fronteira',
+      npc: { name: 'Sargento da Fronteira', desc: 'Veterano em vigília nas terras abertas', portrait: '../shared/img/npcs/trail/lider-dos-bandidos.webp' },
+      script: [
+        { type: 'narration', text: 'Uma paliçada de estacas e uma tenda com as cores de Valdoria marcam o posto avançado da patrulha real.' },
+        { type: 'speech', speaker: 'Sargento da Fronteira', text: '— Alto lá! <i>(o sentinela bate o cabo da alabarda no chão)</i> Identifiquem-se, viajantes. A fronteira leste está em estado de alerta.' }
+      ],
+      choices: [
+        { i: '🎖', t: 'Apresentar credenciais militares ou nobres', stat: 'cha', dc: 10,
+          requires_background: ['soldier', 'noble', 'folk_hero'],
+          desc: 'Declarar seu serviço militar, brasão de linhagem ou reputação entre os defensores.',
+          sNarr: 'O sargento perfila em continência: "Honra a quem serve o reino. Passem com a bênção dos postos de guarda."',
+          fNarr: 'O sentinela confere seus pertences com desconfiança burocrática antes de liberar a passagem.', dmg: 0 },
+        { i: '👥', t: 'Apresentar comitiva de aventureiros em ordem', stat: 'cha', dc: 11,
+          requires_ally: true,
+          desc: 'Explicar a missão pacífica do grupo e cooperar com a inspeção da patrulha.',
+          sNarr: 'A disciplina e cordialidade de seus companheiros tranquilizam os soldados, que oferecem água fresca de cantil e indicam a rota patrulhada.',
+          sNarr_by_ally: 'A disciplina e cordialidade de seus companheiros tranquilizam os soldados, que oferecem água fresca de cantil e indicam a rota patrulhada.',
+          fNarr: 'A inspeção da bagagem do grupo demora meia hora antes da liberação.', dmg: 0,
+          fNarr_by_ally: 'A inspeção da bagagem do grupo demora meia hora antes da liberação.' },
+        { i: '🗣', t: 'Diplomacia cortês e relato de estrada', stat: 'cha', dc: 12,
+          desc: 'Compartilhar notícias e rumores das trilhas em troca de salvo-conduto.',
+          sNarr: 'Os guardas apreciam as informações sobre o tráfego recente e carimbam sua passagem sem embaraços.',
+          fNarr: 'O sargento resmunga mas dá passagem após advertir sobre bandos armados adiante.', dmg: 0 },
+        { i: '🚶', t: 'Contornar o posto pela estepe aberta', stat: 'dex', dc: 11,
+          desc: 'Evitar o entrevero militar e seguir pela orla dos trigais.',
+          sNarr: 'Você contorna a paliçada fora da linha de visão das sentinelas e segue a jornada sem interrupções.',
+          fNarr: 'Um guarda grita aviso da torre, forçando você a apressar o passo na terra batida.', dmg: 0 }
+      ] }
   ],
 
   swamp: [
@@ -758,7 +1489,25 @@ var HAZARDS_EXTRA = {
             clerigo: 'Sua aura divina é reconhecida. O lampião baixa devagar, fica a três metros, e quando você prossegue, vai junto — protegendo. Espírito amigo.',
             druida: 'Você sussurra o nome antigo (que druidas aprendem novatos). Luz brilha quente. "Prossiga, conhecedor."'
           },
-          fNarr: 'Sua hesitação fala mais alto que o respeito. Luz se distancia — neutra. Você passa sem ajuda nem ameaça.', dmg: 0 } ] },
+          fNarr: 'Sua hesitação fala mais alto que o respeito. Luz se distancia — neutra. Você passa sem ajuda nem ameaça.', dmg: 0 },
+        { i: '✨', t: 'Comunhão mística ancestral', stat: 'wis', dc: 10,
+          requires_class: ['clerigo', 'mago', 'bruxo'],
+          desc: 'Canalizar energia arcana ou sagrada em harmonia com o espírito guardião.',
+          sNarr: 'O lampião flutua suavemente à frente de seus passos, iluminando pedras firmes sobre o lodo traiçoeiro.',
+          fNarr: 'O espírito pisca de forma intermitente e sobe para o dossel enevoado.', dmg: 0 },
+        { i: '🤝', t: 'Vigília com companheiros unidos', stat: 'wis', dc: 10,
+          requires_ally: true,
+          desc: 'O grupo mantém contato visual e marcha firme sem se desviar para a luz.',
+          sNarr: 'Unidos em formação calma, a comitiva cruza a clareira enevoada; a luz parece zelar pelos viajantes antes de sumir.',
+          sNarr_by_ally: 'Unidos em formação calma, a comitiva cruza a clareira enevoada; a luz parece zelar pelos viajantes antes de sumir.',
+          fNarr: 'A bruma se adensa por instantes antes de dispersar.', dmg: 0,
+          fNarr_by_ally: 'A bruma se adensa por instantes antes de dispersar.' },
+        { i: '🧝', t: 'Reconhecimento de elfo das matas', stat: 'wis', dc: 9,
+          requires_race: 'elf',
+          desc: 'Sensibilidade élfica para entidades pacíficas da natureza.',
+          sNarr: 'Seus olhos compreendem a natureza inofensiva do espírito; você passa com um aceno familiar e segue em paz.',
+          fNarr: 'A luz pulsa e segue seu rumo pelas copas.', dmg: 0 }
+      ] },
 
     { title: 'Cobra-Coral',
       script: [
@@ -773,7 +1522,25 @@ var HAZARDS_EXTRA = {
         { i: '⚔', t: 'Matar à distância', stat: 'dex', dc: 14,
           desc: 'Adaga arremessada — uma chance só.',
           sNarr: 'A adaga voa pura. Cobra morta antes do bote. Você recolhe o veneno (uso futuro?) e prossegue.',
-          fNarr: 'A adaga desvia. A cobra ataca defensiva. Você se afasta antes de mais bote mas leva mordida no braço.', dmg: 6 } ] },
+          fNarr: 'A adaga desvia. A cobra ataca defensiva. Você se afasta antes de mais bote mas leva mordida no braço.', dmg: 6 },
+        { i: '🤝', t: 'Imobilização com vara em pinça por aliado', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Seu parceiro prende a cabeça do réptil com um galho bifurcado enquanto vocês passam.',
+          sNarr: 'Com técnica serena de caçadores, seu aliado trava a serpente na lama e vocês transpõem a trilha em total segurança.',
+          sNarr_by_ally: 'Com técnica serena de caçadores, seu aliado trava a serpente na lama e vocês transpõem a trilha em total segurança.',
+          fNarr: 'A serpente escapa da pinça de madeira e silva agressiva antes de sumir nas folhas.', dmg: 2,
+          fNarr_by_ally: 'A serpente escapa da pinça de madeira e silva agressiva antes de sumir nas folhas.' },
+        { i: '🌿', t: 'Tranquilizar a serpente', stat: 'wis', dc: 10,
+          requires_class: ['druida', 'patrulheiro'],
+          desc: 'Compreender o comportamento do réptil e contornar sem acionar sua postura de ataque.',
+          sNarr: 'Você lê os movimentos da cauda e respeita o território da cobra; ela captura sua presa e ignora sua passagem.',
+          fNarr: 'A cobra nota sua aproximação e ergue a cabeça em aviso antes de você recuar.', dmg: 1 },
+        { i: '🤸', t: 'Salto esquivo acrobático', stat: 'dex', dc: 11,
+          requires_class: ['monge', 'ladino'],
+          desc: 'Transpor a raiz curvada em um salto silencioso e ligeiro.',
+          sNarr: 'Com agilidade felina, você salta sobre o galho sem produzir vibração no solo e segue viagem ileso.',
+          fNarr: 'A aterrissagem estala uma folha seca e você recua no susto.', dmg: 1 }
+      ] },
 
     { title: 'Pescador Solitário',
       npc: { name: 'Pescador do Pântano', desc: 'Homem velho com canas no ombro', portrait: '../shared/img/npcs/trail/pescador-do-pantano.webp' },
@@ -785,7 +1552,23 @@ var HAZARDS_EXTRA = {
         { i: '🤐', t: 'Esperar em silêncio', stat: 'wis', dc: 11,
           desc: 'Cinco minutos de absoluta paciência.',
           sNarr: 'Você fica quieto. A linha tensiona. Ele puxa devagar — uma carpa enorme, escamas prateadas como se carregassem luz própria. "Hoje os deuses fartaram." Te indica caminho seco através do pântano. <i>+5 XP por bondade observada.</i>',
-          fNarr: 'Você se mexe demais. A carpa foge. Ele balança a cabeça mas sem rancor. "Tudo bem. Sigue, jovem."', dmg: 0 } ] }
+          fNarr: 'Você se mexe demais. A carpa foge. Ele balança a cabeça mas sem rancor. "Tudo bem. Sigue, jovem."', dmg: 0 },
+        { i: '🤝', t: 'Oferecer isca ou anzol da mochila', stat: null,
+          requires_ally: true,
+          desc: 'Seu parceiro tira uma isca da bolsa de viagem e oferece gentilmente ao veterano.',
+          sNarr: 'O ancião aceita o anzol reforçado com um largo sorriso desdentado: "Que a comitiva de vocês tenha a bênção das águas calmas! Vão pelo banco de areia."',
+          sNarr_by_ally: 'O ancião aceita o anzol reforçado com um largo sorriso desdentado: "Que a comitiva de vocês tenha a bênção das águas calmas! Vão pelo banco de areia."',
+          fNarr: '' },
+        { i: '🎣', t: 'Histórias de águas e pescaria', stat: 'cha', dc: 10,
+          requires_background: ['sailor', 'folk_hero'],
+          desc: 'Trocar cumprimentos de quem conhece a paciência dos rios e mares.',
+          sNarr: 'O pescador reconhece o companheiro de águas: "Ah, quem já puxou rede sabe respeitar o peixe!" A conversa rende atalho precioso.',
+          fNarr: 'O velho faz sinal de silêncio com o dedo nos lábios.', dmg: 0 },
+        { i: '🚶', t: 'Acenar e seguir devagar', stat: null,
+          desc: 'Passar na ponta dos pés para não atrapalhar a pesca.',
+          sNarr: 'Você passa como uma sombra sem fazer ondulações na margem; o pescador acena a cabeça em silencioso agradecimento.',
+          fNarr: '' }
+      ] }
   ],
 
   mountain: [
@@ -805,7 +1588,25 @@ var HAZARDS_EXTRA = {
         { i: '➡️', t: 'Não interferir', stat: null,
           desc: 'Natureza segue seu curso.',
           sNarr: 'Você segue. Quando passa de novo no caminho de volta dias depois, ainda vê a águia em uma pedra próxima — viveu. Forte.',
-          fNarr: '' } ] }
+          fNarr: '' },
+        { i: '🤝', t: 'Socorro em equipe com aliados', stat: 'dex', dc: 10,
+          requires_ally: true,
+          desc: 'Seu parceiro imobiliza gentilmente o bico da ave com uma capa grossa enquanto você ajusta os ossos da asa.',
+          sNarr: 'Com trabalho conjunto perfeito, a asa é imobilizada com talas firmes; a nobre ave bufa com calma e pousa firme em um rochedo seguro.',
+          sNarr_by_ally: 'Com trabalho conjunto perfeito, a asa é imobilizada com talas firmes; a nobre ave bufa com calma e pousa firme em um rochedo seguro.',
+          fNarr: 'A ave se debate e bica a manga de seu companheiro antes de vocês soltarem.', dmg: 1,
+          fNarr_by_ally: 'A ave se debate e bica a manga de seu companheiro antes de vocês soltarem.' },
+        { i: '🙏', t: 'Prece de cura e restauração divina', stat: 'wis', dc: 10,
+          requires_class: ['clerigo', 'paladino'],
+          desc: 'Impor as mãos com energia sagrada sobre a fratura do animal.',
+          sNarr: 'Uma luz radiante reconstitui a fibra óssea da asa; a águia emite um grito triunfante e ganha os céus em voo majestoso.',
+          fNarr: 'A magia fecha o ferimento superficial mas a asa ainda requer repouso.', dmg: 0 },
+        { i: '🏹', t: 'Empatia de caçador da montanha', stat: 'wis', dc: 10,
+          requires_class: ['patrulheiro', 'barbaro'],
+          desc: 'Usar tiras de couro e carne de ração para tranquilizar a fera dos picos.',
+          sNarr: 'A ave aceita a carne com calma e permite o curativo rápido; seu olhar firme agradece o socorro dos mortais.',
+          fNarr: 'A ave rejeita a aproximação e agita as garras afiadas.', dmg: 1 }
+      ] }
   ],
 
   desert: [
@@ -824,7 +1625,20 @@ var HAZARDS_EXTRA = {
           sNarr: 'Você toma rota mais longa pelas dunas. Cansativo, mas chega seguro.',
           fNarr: 'Você se perde nas dunas. Acaba voltando ao caminho original — onde a caravana já passou.', dmg: 2 },
         { i: '⚔️', t: 'Enfrentar os bandidos do deserto', isCombat: true, enemyId: 'bandit_leader',
-          desc: 'Desembainhar as armas e combater o grupo armado.' } ] }
+          desc: 'Desembainhar as armas e combater o grupo armado.' },
+        { i: '🤝', t: 'Aproximação em delegação com aliados', stat: 'cha', dc: 10,
+          requires_ally: true,
+          desc: 'Avançar em postura diplomática com as armas embainhadas e saudações abertas.',
+          sNarr: 'Ao verem a compostura pacífica e equilibrada da sua comitiva, os mercadores acenam com lenços brancos e oferecem tâmaras e água fresca.',
+          sNarr_by_ally: 'Ao verem a compostura pacífica e equilibrada da sua comitiva, os mercadores acenam com lenços brancos e oferecem tâmaras e água fresca.',
+          fNarr: 'A caravana apressa o passo temendo um grupo armado e passa a distância.', dmg: 0,
+          fNarr_by_ally: 'A caravana apressa o passo temendo um grupo armado e passa a distância.' },
+        { i: '🪙', t: 'Diálogo comercial de guilda', stat: 'cha', dc: 10,
+          requires_background: ['guild_artisan', 'charlatan', 'noble'],
+          desc: 'Exibir selos comerciais ou trocar cumprimentos formais das rotas de comércio.',
+          sNarr: 'Eles reconhecem o jargão mercantil das guildas e acolhem você com honras; vocês negociam suprimentos com grande vantagem.',
+          fNarr: 'Os mascates estão receosos e recusam trocas demoradas no calor.', dmg: 0 }
+      ] }
   ]
 };
 
@@ -1374,13 +2188,41 @@ var DEPARTURES = {
         return DndRules.successPct(_journeyView(player), { stat: choice.stat, skill: choice.skill, dc: choice.dc });
     }
 
-    /* -------- narrativa por traco (by_subclass > by_subrace > by_class > by_race > by_alignment > by_background > default) -------- */
+    /* -------- narrativa por traco (by_subclass > by_subrace > by_class > by_race > by_alignment > by_background > by_ally > default) -------- */
     function _traits(player) {
         var p = player || {};
         var ck = (global.DndRules && DndRules.classKey) ? DndRules.classKey(p.cls || p.class || p.hero_class || p.char_class) : String(p.cls || p.class || p.hero_class || p.char_class || '').toLowerCase();
         var rk = (global.DndRules && DndRules.raceKey) ? DndRules.raceKey(p.race || p.raca) : String(p.race || p.raca || '').toLowerCase();
         var srk = (global.DndRules && DndRules.subraceKey) ? DndRules.subraceKey(p.subrace || p.sub_race) : String(p.subrace || p.sub_race || '').toLowerCase();
         var sck = (global.DndRules && DndRules.subclassKey) ? DndRules.subclassKey(p.subclass || p.sub_class) : String(p.subclass || p.sub_class || '').toLowerCase();
+
+        // Coleta aliados ativos no grupo
+        var rawAllies = [];
+        if (Array.isArray(p.allies)) rawAllies = p.allies;
+        else if (global.GROUP_MEMBERS && Array.isArray(global.GROUP_MEMBERS)) {
+            rawAllies = global.GROUP_MEMBERS.filter(function(m, idx) { return idx > 0 && m && !m.dead; });
+        }
+        var partyClasses = [ck];
+        var partyRaces = [rk];
+        var partySubclasses = sck ? [sck] : [];
+        var partySubraces = srk ? [srk] : [];
+        var allyClasses = [];
+        var allyRaces = [];
+        var allyNames = [];
+
+        rawAllies.forEach(function(a) {
+            if (!a) return;
+            var aCls = (global.DndRules && DndRules.classKey) ? DndRules.classKey(a.cls || a.class) : String(a.cls || a.class || '').toLowerCase();
+            var aRace = (global.DndRules && DndRules.raceKey) ? DndRules.raceKey(a.race || a.raca) : String(a.race || a.raca || '').toLowerCase();
+            var aSubcls = (global.DndRules && DndRules.subclassKey) ? DndRules.subclassKey(a.subclass || a.sub_class) : String(a.subclass || a.sub_class || '').toLowerCase();
+            var aSubrace = (global.DndRules && DndRules.subraceKey) ? DndRules.subraceKey(a.subrace || a.sub_race) : String(a.subrace || a.sub_race || '').toLowerCase();
+            if (aCls) { partyClasses.push(aCls); allyClasses.push(aCls); }
+            if (aRace) { partyRaces.push(aRace); allyRaces.push(aRace); }
+            if (aSubcls) partySubclasses.push(aSubcls);
+            if (aSubrace) partySubraces.push(aSubrace);
+            if (a.name) allyNames.push(a.name);
+        });
+
         return {
             cls: ck,
             race: rk,
@@ -1388,29 +2230,59 @@ var DEPARTURES = {
             subclass: sck,
             alignment: String(p.alignment || '').toLowerCase(),
             bg: String(p.bg || p.background || '').toLowerCase(),
-            name: p.name || 'Viajante'
+            name: p.name || 'Viajante',
+            allies: rawAllies,
+            hasAllies: rawAllies.length > 0,
+            allyNames: allyNames,
+            partyClasses: partyClasses,
+            partyRaces: partyRaces,
+            partySubclasses: partySubclasses,
+            partySubraces: partySubraces,
+            allyClasses: allyClasses,
+            allyRaces: allyRaces
         };
     }
 
     function canTakeChoice(player, choice) {
         if (!choice) return false;
         var t = _traits(player);
-        function _match(req, actual) {
+        function _match(req, listOrVal) {
             if (!req) return true;
-            if (!actual) return false;
-            if (Array.isArray ? Array.isArray(req) : (req instanceof Array)) {
-                var i;
-                for (i = 0; i < req.length; i++) {
-                    if (String(req[i]).toLowerCase() === actual) return true;
+            var reqList = (Array.isArray(req)) ? req : [req];
+            var valList = (Array.isArray(listOrVal)) ? listOrVal : [listOrVal];
+            for (var rIdx = 0; rIdx < reqList.length; rIdx++) {
+                var rItem = String(reqList[rIdx]).toLowerCase();
+                for (var vIdx = 0; vIdx < valList.length; vIdx++) {
+                    if (String(valList[vIdx]).toLowerCase() === rItem) return true;
                 }
-                return false;
             }
-            return String(req).toLowerCase() === actual;
+            return false;
         }
+
+        // Requer presença de aliados no grupo
+        if (choice.requires_ally === true && !t.hasAllies) return false;
+        if (choice.only_solo === true && t.hasAllies) return false;
+
+        // Requer classe específica de um aliado
+        if (choice.requires_ally_class && !_match(choice.requires_ally_class, t.allyClasses)) return false;
+
+        // Requer classe no grupo (jogador ou aliado)
+        if (choice.requires_party_class && !_match(choice.requires_party_class, t.partyClasses)) return false;
+
+        // Requer raça no grupo (jogador ou aliado)
+        if (choice.requires_party_race && !_match(choice.requires_party_race, t.partyRaces)) return false;
+
+        // Requer sub-raça no grupo (jogador ou aliado)
+        if (choice.requires_party_subrace && !_match(choice.requires_party_subrace, t.partySubraces)) return false;
+
+        // Requer sub-classe no grupo (jogador ou aliado)
+        if (choice.requires_party_subclass && !_match(choice.requires_party_subclass, t.partySubclasses)) return false;
+
+        // Requer classe do próprio aventureiro
         var reqCls = choice.requires_class || choice.only_class;
         if (reqCls) {
             var cActual = (t.cls === 'ladrao') ? 'ladino' : t.cls;
-            var reqList = (Array.isArray && Array.isArray(reqCls)) ? reqCls : [reqCls];
+            var reqList = (Array.isArray(reqCls)) ? reqCls : [reqCls];
             var matchedCls = false;
             for (var cIdx = 0; cIdx < reqList.length; cIdx++) {
                 var rc = String(reqList[cIdx]).toLowerCase();
@@ -1419,12 +2291,23 @@ var DEPARTURES = {
             }
             if (!matchedCls) return false;
         }
+
+        // Requer raça do próprio aventureiro
         var reqRace = choice.requires_race || choice.only_race;
         if (reqRace && !_match(reqRace, t.race)) return false;
+
+        // Requer sub-raça do próprio aventureiro
         var reqSubrace = choice.requires_subrace || choice.only_subrace;
         if (reqSubrace && !_match(reqSubrace, t.subrace)) return false;
+
+        // Requer sub-classe do próprio aventureiro
         var reqSubclass = choice.requires_subclass || choice.only_subclass;
         if (reqSubclass && !_match(reqSubclass, t.subclass)) return false;
+
+        // Requer antecedente
+        var reqBg = choice.requires_background || choice.requires_bg;
+        if (reqBg && !_match(reqBg, t.bg)) return false;
+
         return true;
     }
 
@@ -1442,6 +2325,7 @@ var DEPARTURES = {
         }
 
         if (success) {
+            if (choice.sNarr_by_ally && t.hasAllies) return choice.sNarr_by_ally;
             var snSc = _findIn(choice.sNarr_by_subclass, t.subclass);
             if (snSc) return snSc;
             var snSr = _findIn(choice.sNarr_by_subrace, t.subrace);
@@ -1457,6 +2341,7 @@ var DEPARTURES = {
             return choice.sNarr || '';
         }
 
+        if (choice.fNarr_by_ally && t.hasAllies) return choice.fNarr_by_ally;
         var fnSc = _findIn(choice.fNarr_by_subclass, t.subclass);
         if (fnSc) return fnSc;
         var fnSr = _findIn(choice.fNarr_by_subrace, t.subrace);
