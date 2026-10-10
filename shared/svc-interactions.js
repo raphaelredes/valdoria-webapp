@@ -165,6 +165,23 @@
         window._applyRenownDelta(faction, deltaR);
       }
 
+      // Registro canônico do teste no histórico do aventureiro
+      if (typeof window !== 'undefined' && window.vDialogueHistory && typeof window.vDialogueHistory.recordCheck === 'function') {
+        try {
+          window.vDialogueHistory.recordCheck({
+            stat: opts.ability,
+            skill: opts.ability,
+            dc: roll.dc,
+            mod: roll.mod,
+            d20: roll.d20,
+            total: roll.total,
+            success: roll.success,
+            critSuccess: roll.critSuccess,
+            critFail: roll.critFail
+          });
+        } catch (_eHist) {}
+      }
+
       /* Sessao #29 (2026-05-24): se opts.ch.ally_source existe, dispara
          POST /api/ally/apply-effect com o dice_result. Backend aplica
          renown REAL + effect + item + gold conforme registry. Toast de
@@ -255,6 +272,17 @@
             }
             var _npcObj = (opts.dialogue && opts.dialogue.npc) || null;
             var _npcName = (_npcObj && _npcObj.name) || '';
+
+            // Registro do desfecho narrativo e renome no histórico
+            if (typeof window !== 'undefined' && window.vDialogueHistory && typeof window.vDialogueHistory.recordOutcome === 'function') {
+              try {
+                var outcomeLines = [];
+                if (rNarration) outcomeLines.push({ type: 'narration', text: rNarration });
+                if (rText) outcomeLines.push({ type: 'speech', speaker: _npcName, text: rText });
+                window.vDialogueHistory.recordOutcome(outcomeLines, deltaR ? [{ type: 'renown', amount: deltaR, label: 'Renome' }] : null);
+              } catch (_eHist) {}
+            }
+
             _closeEncounterCanon();
             if (typeof window._showInfoPopup === 'function') {
               window._showInfoPopup({

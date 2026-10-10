@@ -1667,6 +1667,18 @@
         try { affinityBadge = window.npcAffinity.renderBadgeHTML(_p, npcId); } catch(_e){}
       }
     }
+
+    // Registro canônico de histórico do aventureiro
+    var _currentHistoryEntryId = null;
+    if (typeof window !== 'undefined' && window.vDialogueHistory && typeof window.vDialogueHistory.recordStart === 'function') {
+      try {
+        var _pHist = (opts && opts.player) || window.CITY_MOCK_PLAYER || null;
+        _currentHistoryEntryId = window.vDialogueHistory.recordStart(dialogue, {
+          player: _pHist,
+          location: (opts && opts.location) || (typeof window._currentScreen !== 'undefined' ? window._currentScreen : '')
+        });
+      } catch (_eHist) {}
+    }
     // PADRAO_ALDRIC (sessão #70): contador de Valdoritas SEMPRE visível, logo
     // ACIMA dos números de paginação. Lê opts.player.gold (ou CITY_MOCK_PLAYER).
     // A classe cgb-num deixa o contador da cidade (_refreshGoldBadges) atualizá-lo.
@@ -2320,6 +2332,14 @@
         try { window._postAllyEffect(ch.ally_source, null); } catch(_e) {}
       }
 
+      // Registro de histórico: grava a escolha tomada pelo jogador
+      if (typeof window !== 'undefined' && window.vDialogueHistory && typeof window.vDialogueHistory.recordChoice === 'function') {
+        try {
+          var _pChoice = (opts && opts.player) || window.CITY_MOCK_PLAYER || null;
+          window.vDialogueHistory.recordChoice(_currentHistoryEntryId, ch, null, null, _pChoice);
+        } catch (_eHist) {}
+      }
+
       // External onChoice callback (PADRAO_ALDRIC v2 contrato) - SOBERANO
       // Quando o caller fornece onChoice (ex.: _renderCityDialogue, _arrivalRenderNode, _openRecrutaDialogue, journey-runner),
       // este callback DEVE ser invocado com a choice selecionada, sem ser interceptado por fallbacks legados.
@@ -2379,6 +2399,7 @@
       dialogue: dialogue,
       opts: opts,
       card: card,
+      historyEntryId: _currentHistoryEntryId,
       getPages: function() { return pages; },
       setPages: function(p) { pages = p; },
       getCurrentPage: function() { return currentPage; },
@@ -2440,6 +2461,14 @@
       }
     });
     dialogue.script = combinedScript;
+
+    // Atualiza histórico com as falas recebidas dinamicamente
+    if (incomingScript.length > 0 && typeof window !== 'undefined' && window.vDialogueHistory && typeof window.vDialogueHistory.appendScript === 'function') {
+      try {
+        var _pAttach = (inst.opts && inst.opts.player) || window.CITY_MOCK_PLAYER || null;
+        window.vDialogueHistory.appendScript(incomingScript, inst.historyEntryId, _pAttach);
+      } catch (_eHist) {}
+    }
 
     var newPages = _groupScriptIntoPages(combinedScript);
     inst.setPages(newPages);
