@@ -109,8 +109,9 @@
       choices: choices,
       choicesTitle: (content && content.choicesTitle) || 'Preparação de Viagem',
       choicesSubtitle: (content && content.choicesSubtitle) || (j.displayName ? ('Rumo a ' + j.displayName) : ''),
+      choicesBtnLabel: 'Escolher Postura de Viagem',
       compact: true,
-      inline: choices.length <= 2,
+      inline: false,
       noProgress: true,
       onChoice: function (ch) {
         if (ch && ch.id === 'jrn_cancel') {

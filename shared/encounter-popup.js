@@ -1145,17 +1145,27 @@
       titleText = parts[0].trim();
       subtitleText = parts.slice(1).join(':').trim();
     } else if (ch.id === 'jrn_go') {
+      titleText = 'Partir em marcha padrão';
       subtitleText = 'Marcha Padrão · Ritmo Comum';
     } else if (ch.id === 'jrn_cancel') {
+      titleText = 'Permanecer na cidade';
       subtitleText = 'Permanecer na Cidade · Cancelar';
+    } else if (ch.isPrep) {
+      subtitleText = 'Postura Tática de Estrada';
     }
 
     var statBadge = '';
-    if (ch.stat) {
+    if (ch.stat && ch.isPrep) {
       var sName = _STAT_LABEL_PT[ch.stat] || ch.stat.toUpperCase();
-      statBadge = '<span class="enc-cd-badge">Vantagem em ' + sName + '</span>';
+      statBadge = '<span class="enc-cd-badge">✦ Vantagem em ' + sName + '</span>';
     } else if (ch.isPrep) {
       statBadge = '<span class="enc-cd-badge">Postura Tática</span>';
+    } else if (ch.stat && ch.advantage) {
+      var sName = _STAT_LABEL_PT[ch.stat] || ch.stat.toUpperCase();
+      statBadge = '<span class="enc-cd-badge">✦ Vantagem em ' + sName + '</span>';
+    } else if (ch.stat) {
+      var sName = _STAT_LABEL_PT[ch.stat] || ch.stat.toUpperCase();
+      statBadge = '<span class="enc-cd-badge">Teste de ' + sName + '</span>';
     }
     if (ch.dc && ch.skill) {
       statBadge += '<span class="enc-cd-badge">CD ' + ch.dc + ' · ' + _skillLabelPT(ch.skill) + (ch.chance != null ? ' (' + ch.chance + '%)' : '') + '</span>';
@@ -1170,23 +1180,55 @@
     if (ch.desc) {
       descHtml =
         '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">Efeito da Escolha</div>' +
+          '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
           '<div class="enc-cd-box">' + ch.desc + '</div>' +
+        '</div>';
+    } else {
+      descHtml =
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
+          '<div class="enc-cd-box">' + _coinify(titleText) + (subtitleText ? ' — ' + subtitleText : '') + '</div>' +
         '</div>';
     }
 
-    var flavorHtml = '';
+    var resultsHtml = '';
+    var resultParts = [];
     if (ch.prepText) {
-      flavorHtml =
+      resultParts.push('<div class="enc-cd-flavor">' + ch.prepText + '</div>');
+    }
+    if (ch.isPrep) {
+      resultParts.push('<div>✦ <b>Benefício na Estrada:</b> Concede <b>Vantagem</b> (rolagem de 2d20, escolhendo o maior valor) no primeiro teste do atributo correspondente durante a viagem, auxiliando a superar perigos e emboscadas.</div>');
+    } else if (ch.id === 'jrn_go') {
+      resultParts.push('<div>Avanço pelo trajeto em ritmo normal, sem bônus adicionais de postura e sem penalidades prévias.</div>');
+    } else if (ch.id === 'jrn_cancel') {
+      resultParts.push('<div>A viagem é suspensa em segurança, retornando à cidade sem passagem de tempo ou perda de recursos.</div>');
+    } else if (ch.dc) {
+      resultParts.push('<div>✦ <b>Sucesso:</b> Desafio superado com êxito' + (ch.chance != null ? ' (' + ch.chance + '% de chance)' : '') + '.</div>');
+      resultParts.push('<div>⚠️ <b>Falha:</b> Risco de complicações, perda de recursos ou dano' + (ch.dmg ? ' (~' + ch.dmg + ' PV)' : '') + '.</div>');
+    } else if (ch.isCombat) {
+      resultParts.push('<div style="color:#df7262;">⚔️ <b>Combate Iminente:</b> Enfrentará os adversários em batalha tática em grade hexagonal.</div>');
+    }
+    if (ch.possibleResults || ch.results) {
+      resultParts.push('<div>' + (ch.possibleResults || ch.results) + '</div>');
+    }
+    if (ch.cost) {
+      resultParts.push('<div>Custo de <b>' + ch.cost + ' ' + _VCOIN + '</b> debitado de suas posses para confirmar.</div>');
+    }
+
+    if (resultParts.length > 0) {
+      resultsHtml =
         '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">Concentração na Estrada</div>' +
-          '<div class="enc-cd-flavor">' + ch.prepText + '</div>' +
+          '<div class="enc-cd-section-title">Possíveis Resultados</div>' +
+          '<div class="enc-cd-box" style="display:flex; flex-direction:column; gap:6px;">' +
+            resultParts.join('') +
+          '</div>' +
         '</div>';
     }
 
     var confirmLabel = (ch.isPrep) ? 'Adotar esta Postura'
       : (ch.id === 'jrn_go') ? 'Partir em Marcha Padrão'
       : (ch.id === 'jrn_cancel') ? 'Permanecer na Cidade'
+      : (ch.isCombat) ? 'Entrar em Combate'
       : 'Confirmar Escolha';
 
     card.innerHTML =
@@ -1196,7 +1238,7 @@
       (statBadge ? '<div class="enc-cd-badge-row">' + statBadge + '</div>' : '') +
       '<div class="enc-cd-divider"></div>' +
       descHtml +
-      flavorHtml +
+      resultsHtml +
       '<div class="enc-cd-actions">' +
         '<button type="button" class="enc-cd-btn-confirm">✔ ' + confirmLabel + '</button>' +
         '<button type="button" class="enc-cd-btn-back">← Voltar às opções</button>' +
@@ -1432,9 +1474,7 @@
             '<span class="enc-cho-row-sub">' + (subText ? subText + statHint : '') + '</span>' +
             (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
           '</span>' +
-          ((ch.desc || ch.prepText)
-            ? '<span class="enc-cho-info-btn" role="button" tabindex="0" title="Ver detalhes desta opção" aria-label="Ver detalhes">ℹ</span>'
-            : '') +
+          '<span class="enc-cho-info-btn" role="button" tabindex="0" title="Ver detalhes desta opção" aria-label="Ver detalhes" style="display:none;" aria-hidden="true">ℹ</span>' +
           '<span class="enc-cho-row-chev">›</span>';
 
         var infoBtn = row.querySelector('.enc-cho-info-btn');
@@ -1443,13 +1483,6 @@
             e.stopPropagation();
             e.preventDefault();
             _openChoiceDetailDialog(ch, opts);
-          });
-          infoBtn.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation();
-              e.preventDefault();
-              _openChoiceDetailDialog(ch, opts);
-            }
           });
         }
       } else {
@@ -1470,9 +1503,12 @@
       // com ch.itemName. stopPropagation no thumb evita disparar a compra.
       var _thumb = _buildChoiceItemThumb(ch);
       if (_thumb) row.insertBefore(_thumb, row.firstChild);
-      row.addEventListener('click', function() {
-        closeChoices(true); // fecha imediatamente pra liberar top-layer e evitar bloqueios
-        if (typeof opts.onChoice === 'function') opts.onChoice(ch);
+      row.addEventListener('click', function(e) {
+        e.preventDefault();
+        // REGRA MANDATÓRIA (Ordem do Usuário 2026-10): O clique em qualquer postura ou ação
+        // DEVE abrir a janela explicativa de confirmação sempre, exibindo o que está sendo
+        // escolhido e os possíveis resultados, com botão explícito de confirmação e botão de voltar.
+        _openChoiceDetailDialog(ch, opts);
       });
       listEl.appendChild(row);
     });
@@ -2270,9 +2306,14 @@
         choices.forEach(function(ch, idx) {
           var btn = document.createElement('button');
           btn.className = 'enc-btn' + (idx === 0 ? ' enc-btn-primary' : '');
-          /* sessão #88: label vazio → 'Continuar' (nunca botão clicável vazio) */
-          btn.innerHTML = _coinify((ch.label && String(ch.label).trim()) || 'Continuar');  // labels são autorais (não input) — coin icon ok
-          btn.addEventListener('click', function() { _handleChoiceInternal(ch); });
+          btn.innerHTML = _coinify((ch.label && String(ch.label).trim()) || 'Continuar');
+          btn.addEventListener('click', function() {
+            if (ch.isPrep || ch.desc || ch.cost || ch.stat || ch.dc || ch.requireConfirm) {
+              _openChoiceDetailDialog(ch, { onChoice: _handleChoiceInternal });
+            } else {
+              _handleChoiceInternal(ch);
+            }
+          });
           btns.push(btn);
         });
       } else {
