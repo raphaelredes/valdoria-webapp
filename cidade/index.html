@@ -3971,6 +3971,234 @@ LOG SINK (Fase 7):
       filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.2));
     }
 
+    /* === Gatilho de Clima & Calendário (Sessão 2026-10) === */
+    .ctb-datetime-trigger {
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: var(--v-radius-xs, 4px);
+      border: 1px solid transparent;
+      background: rgba(196, 149, 58, 0.04);
+      transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.1s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ctb-datetime-trigger:hover {
+      background: rgba(196, 149, 58, 0.14);
+      border-color: rgba(196, 149, 58, 0.35);
+      box-shadow: 0 0 10px rgba(196, 149, 58, 0.22);
+    }
+    .ctb-datetime-trigger:active {
+      background: rgba(196, 149, 58, 0.24);
+      border-color: var(--v-gold, #c4953a);
+      transform: scale(0.98);
+    }
+
+    /* === Modal de Clima & Calendário (Sessão 2026-10) === */
+    #city-weather-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(12, 9, 6, 0.88);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+      animation: cwoFadeIn 0.2s ease-out;
+    }
+    #city-weather-overlay.active {
+      display: flex;
+    }
+    @keyframes cwoFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .cwo-card {
+      width: 100%;
+      max-width: 380px;
+      max-height: 88vh;
+      overflow-y: auto;
+      background: linear-gradient(180deg, rgba(34, 27, 20, 0.98) 0%, rgba(18, 14, 10, 0.98) 100%);
+      border: 1.5px solid var(--v-gold, #c4953a);
+      border-radius: var(--v-radius, 10px);
+      padding: 18px 16px;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), inset 0 0 16px rgba(196, 149, 58, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: cwoCardScale 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+    }
+    @keyframes cwoCardScale {
+      from { opacity: 0; transform: scale(0.94) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .cwo-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+    }
+    .cwo-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: rgba(196, 149, 58, 0.12);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 12px rgba(196, 149, 58, 0.2);
+    }
+    .cwo-icon-box img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+    .cwo-titles {
+      flex: 1;
+      min-width: 0;
+    }
+    .cwo-title {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      letter-spacing: 1.5px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+    .cwo-subtitle {
+      margin: 2px 0 0;
+      font-size: 11px;
+      color: var(--v-text-dim, #a09484);
+      letter-spacing: 0.5px;
+    }
+    .cwo-divider {
+      color: var(--v-gold, #c4953a);
+      opacity: 0.5;
+      font-size: 11px;
+      letter-spacing: 4px;
+      margin: -4px 0 -2px;
+    }
+    .cwo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      text-align: left;
+    }
+    .cwo-metric-card {
+      background: rgba(22, 17, 13, 0.7);
+      border: 1px solid rgba(196, 149, 58, 0.22);
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .cwo-metric-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+    .cwo-metric-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--v-text, #d4c8b0);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .cwo-metric-sub {
+      font-size: 10px;
+      color: var(--v-text-dim, #a09484);
+      line-height: 1.2;
+    }
+    .cwo-narrative-box {
+      background: rgba(16, 12, 9, 0.8);
+      border: 1px solid rgba(196, 149, 58, 0.2);
+      border-radius: 6px;
+      padding: 10px 12px;
+      text-align: left;
+    }
+    .cwo-box-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      text-align: center;
+      opacity: 0.85;
+    }
+    .cwo-narrative-text {
+      margin: 0;
+      font-size: 12px;
+      color: var(--v-text, #d4c8b0);
+      font-style: italic;
+      line-height: 1.55;
+    }
+    .cwo-month-lore {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(196, 149, 58, 0.2);
+      font-size: 11px;
+      color: var(--v-gold-light, #e8c45a);
+      line-height: 1.4;
+    }
+    .cwo-effects-box {
+      background: rgba(22, 17, 13, 0.6);
+      border: 1px solid rgba(196, 149, 58, 0.18);
+      border-radius: 6px;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .cwo-effects-title {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--v-gold, #c4953a);
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+    .cwo-effects-text {
+      font-size: 11px;
+      color: var(--v-text-dim, #a09484);
+      line-height: 1.45;
+    }
+    .cwo-btn-close {
+      background: linear-gradient(180deg, #c4953a 0%, #8b6420 100%);
+      border: 1px solid #ffd700;
+      border-radius: var(--v-radius-sm, 6px);
+      color: #1a1510;
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 9px 16px;
+      cursor: pointer;
+      text-transform: uppercase;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+      transition: filter 0.15s ease, transform 0.15s ease;
+      margin-top: 2px;
+    }
+    .cwo-btn-close:hover {
+      filter: brightness(1.12);
+      box-shadow: 0 6px 16px rgba(196, 149, 58, 0.45);
+    }
+    .cwo-btn-close:active {
+      transform: translateY(1px);
+    }
+
     /* === Group Panel (ate 4 membros — V8 card mini, 1 linha) === */
     /* 2026-05-11 v4 (user request): "diminua os 4 cards, para caber em uma
        única linha". Mudou de 2x2 grid 140x140 -> 1x4 grid responsive.
@@ -9500,6 +9728,10 @@ body.perf-lite .vc-action-btn { transition: none; }
           <button class="cpp-btn cpp-btn-confirm" id="cpp-confirm-btn">Confirmar</button>
         </div>
       </div>
+    </div>
+    <!-- City Weather & Calendar Overlay (Janela de Clima & Calendário) -->
+    <div id="city-weather-overlay" onclick="_onWeatherOverlayBackdrop(event)">
+      <div class="cwo-card" id="cwo-card" onclick="event.stopPropagation()"></div>
     </div>
     <!-- NPC Dialogue Popup (Fase 9.3 — drill-down NPC) -->
     <div id="npc-dialogue-overlay">
@@ -61319,6 +61551,213 @@ function _refreshGoldBadges(){
 }
 window._refreshGoldBadges = _refreshGoldBadges;
 
+// ============================================================================
+// === MODAL DE CLIMA & CALENDÁRIO (Sessão 2026-10) ===========================
+// ============================================================================
+var TIME_MONTH_LORE = [
+  'Fim do inverno severo com céu prateado sobre o vale.',
+  'Primeiros brotos nos bosques e estandartes erguidos.',
+  'Despertar da primavera, flores silvestres e rios degelados.',
+  'Mês das liras, canções e celebrações da terra florida.',
+  'Sol ascendente no auge da primavera valdoriana.',
+  'Solstício de verão com sol zenital límpido e radiante.',
+  'A grande colheita dourada nos campos cultivados.',
+  'Folhagem ruiva e brisas outonais que refrescam o vale.',
+  'Últimas brasas quentes do ano antes do recolhimento.',
+  'Corvos migratórios e escuridão gradual dos dias.',
+  'Geada profunda e ventos gélidos das cordilheiras do norte.',
+  'Noites longas de reflexão e encerramento do ciclo anual.'
+];
+
+function _getWeatherNarrative(wDesc, period, temp) {
+  var d = (wDesc || '').toLowerCase();
+  if (d.indexOf('ensolarado') >= 0 || d.indexOf('limpo') >= 0) {
+    if (period === 'night') {
+      return 'A abóbada celeste estende-se límpida e salpicada de estrelas brilhantes sobre o vale. Uma brisa noturna agradável sopra entre as estátuas e muralhas de Valdoria, enquanto o luar prateado ilumina as pedras do calçamento.';
+    } else if (period === 'dawn') {
+      return 'Os primeiros raios de sol despontam dourados pelas ameias leste, banhando a cidade em calor reconfortante. O orvalho da madrugada brilha sobre as fontes, e o aroma de pão fresco começa a escapar das padarias da Praça.';
+    } else if (period === 'dusk') {
+      return 'O sol declina tingindo o horizonte de tons carmesim e âmbar. O calçamento de pedra ainda retém o calor do dia, enquanto guardas acendem os primeiros lampiões a óleo ao longo das ruelas do burgo.';
+    } else {
+      return 'O sol dourado brilha soberano no firmamento de Valdoria. O calçamento aquece sob as botas dos viajantes, e o ar límpido e agradável enche a cidade de vitalidade, com mercadores e andarilhos circulando com ânimo renovado.';
+    }
+  } else if (d.indexOf('nublado') >= 0) {
+    if (period === 'night') {
+      return 'Nuvens espessas e cinzentas velam a lua e as estrelas, deixando a noite em Valdoria envolta em sombras densas. As tochas das patrulhas lançam reflexos alaranjados contra a calçada úmida.';
+    } else {
+      return 'Um manto sereno de nuvens prateadas filtra a luz solar, proporcionando uma temperatura amena e sombras suaves. É o clima ideal para marchas longas e trabalhos artesanais nas oficinas sem o desgaste do calor forte.';
+    }
+  } else if (d.indexOf('chuva') >= 0 || d.indexOf('chuvoso') >= 0) {
+    if (period === 'night') {
+      return 'Uma chuva fria e ritmada cai sobre os telhados de ardósia da cidade deserta. O som contínuo das biqueiras gotejando nas calçadas ressoa pelas esquinas, convidando aventureiros para o calor acolhedor da lareira da estalagem.';
+    } else {
+      return 'Gotas ritmadas de chuva lavam as pedras antigas de Valdoria. Mercadores apressam-se em proteger suas bancas com lonas de cânhamo enceradas, e o aroma reconfortante de terra molhada e pedra úmida perfuma as ruelas.';
+    }
+  } else if (d.indexOf('tempestade') >= 0) {
+    return 'Ventos impetuosos uivam entre os campanários e agitam os toldos da praça. Trovões ribombam além das muralhas e relâmpagos recortam o céu turbulento. A maioria dos cidadãos e andarilhos busca abrigo seguro nas tavernas fortificadas.';
+  } else if (d.indexOf('eclipse') >= 0) {
+    return 'Uma penumbra solene e misteriosa cobre Valdoria em pleno dia. Uma auréola mística circunda o astro celeste, e um calafrio sobrenatural percorre as pedras da cidade. Sacerdotes do Templo entoam cânticos protetores aos deuses antigos.';
+  } else {
+    return 'O ar de Valdoria segue sereno e constante, refletindo a harmonia milenar do vale protegido pelas grandes muralhas de pedra.';
+  }
+}
+
+function _getWeatherMechanics(wDesc) {
+  var d = (wDesc || '').toLowerCase();
+  if (d.indexOf('ensolarado') >= 0 || d.indexOf('limpo') >= 0) {
+    return {
+      vis: 'Visibilidade Plena',
+      cond: 'Tempo limpo e estável',
+      effect: 'Nenhuma penalidade de deslocamento ou visão. Testes de Percepção visual operam com alcance irrestrito. Condições ideais para marcha e exploração.'
+    };
+  } else if (d.indexOf('nublado') >= 0) {
+    return {
+      vis: 'Luz Difusa',
+      cond: 'Conforto térmico ameno',
+      effect: 'Protege contra estresse por calor ao ar livre. Condições equilibradas para patrulha e viagens com armaduras metálicas.'
+    };
+  } else if (d.indexOf('chuva') >= 0 || d.indexOf('chuvoso') >= 0) {
+    return {
+      vis: 'Piso Escorregadio',
+      cond: 'Ruído ambiental de chuva',
+      effect: 'Desvantagem em testes de Percepção baseados em audição além de 9 metros. Rastreamento facilitado em trilhas de terra e lama.'
+    };
+  } else if (d.indexOf('tempestade') >= 0) {
+    return {
+      vis: 'Visibilidade Parcial (18m)',
+      cond: 'Ventos fortes e lamaçal',
+      effect: 'Desvantagem em ataques à distância com armas de projéteis. Deslocamento em descampados fora dos muros é considerado terreno difícil.'
+    };
+  } else if (d.indexOf('eclipse') >= 0) {
+    return {
+      vis: 'Penumbra Mística',
+      cond: 'Conjunção cósmica rara',
+      effect: 'Testes de Arcanismo e Religião recebem bônus de foco (+2). Criaturas sensíveis à luz movem-se com destreza ampliada.'
+    };
+  } else {
+    return {
+      vis: 'Normal',
+      cond: 'Clima típico',
+      effect: 'Condições regulares de exploração e rotina no burgo.'
+    };
+  }
+}
+
+var _lastWeatherPopupTrigger = 0;
+function _onWeatherTriggerClick(ev){
+  if (ev) {
+    var now = Date.now();
+    if (now - _lastWeatherPopupTrigger < 180) return;
+    _lastWeatherPopupTrigger = now;
+  }
+  _showCityWeatherPopup();
+}
+window._onWeatherTriggerClick = _onWeatherTriggerClick;
+
+function _closeCityWeatherPopup(){
+  var ov = document.getElementById('city-weather-overlay');
+  if (ov) {
+    ov.classList.remove('active');
+  }
+}
+window._closeCityWeatherPopup = _closeCityWeatherPopup;
+
+function _onWeatherOverlayBackdrop(ev){
+  var ov = document.getElementById('city-weather-overlay');
+  if (ev && ev.target === ov) {
+    _closeCityWeatherPopup();
+  }
+}
+window._onWeatherOverlayBackdrop = _onWeatherOverlayBackdrop;
+
+function _showCityWeatherPopup(){
+  var ov = document.getElementById('city-weather-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'city-weather-overlay';
+    ov.onclick = function(e){ _onWeatherOverlayBackdrop(e); };
+    var app = document.getElementById('app') || document.body;
+    app.appendChild(ov);
+  }
+  var card = document.getElementById('cwo-card');
+  if (!card) {
+    card = document.createElement('div');
+    card.id = 'cwo-card';
+    card.className = 'cwo-card';
+    card.onclick = function(e){ e.stopPropagation(); };
+    ov.appendChild(card);
+  }
+
+  var t = _getCurrentGameTime();
+  var period = _getGamePeriod(t.hour);
+  var pemoji = TIME_PERIOD_EMOJI[period] || '☀️';
+  var plabel = TIME_PERIOD_LABEL[period] || 'Dia';
+  var w = _getGameWeather(t.dayOfYear);
+  var monthName = TIME_MONTHS[t.month] || 'Mês';
+  var hh = (t.hour < 10 ? '0' : '') + t.hour;
+  var mm = (t.minute < 10 ? '0' : '') + t.minute;
+  var periodSlug = TOPBAR_PERIOD_PNG[(period || '').toLowerCase()];
+  var weatherKey = (w.desc || '').toLowerCase().split(/\s+/)[0];
+  var weatherSlug = TOPBAR_WEATHER_PNG[weatherKey];
+  var periodIcon = _ctbIconHTML(periodSlug, pemoji);
+  var weatherIcon = _ctbIconHTML(weatherSlug, w.icon);
+  var monthLore = TIME_MONTH_LORE[t.month] || 'Ciclo sazonal de Valdoria.';
+
+  var feel = 'Temperatura amena';
+  if (w.temp < 8) feel = 'Frio rigoroso (brisa gélida)';
+  else if (w.temp < 16) feel = 'Fresco e arejado';
+  else if (w.temp <= 24) feel = 'Agradável e equilibrado';
+  else feel = 'Calor moderado sob sol aberto';
+
+  var narrative = _getWeatherNarrative(w.desc, period, w.temp);
+  var mechanics = _getWeatherMechanics(w.desc);
+
+  card.innerHTML = ''
+    + '<div class="cwo-header">'
+    + '  <div class="cwo-icon-box">' + weatherIcon + '</div>'
+    + '  <div class="cwo-titles">'
+    + '    <h3 class="cwo-title">CLIMA &amp; CALENDÁRIO</h3>'
+    + '    <p class="cwo-subtitle">Atmosfera e Tempo em Valdoria</p>'
+    + '  </div>'
+    + '</div>'
+    + '<div class="cwo-divider">─ ◆ ─</div>'
+    + '<div class="cwo-grid">'
+    + '  <div class="cwo-metric-card">'
+    + '    <span class="cwo-metric-label">CLIMA ATUAL</span>'
+    + '    <span class="cwo-metric-val" style="color:var(--v-gold-light,#e8c45a);">' + weatherIcon + ' ' + w.desc + ' · ' + w.temp + '°C</span>'
+    + '    <span class="cwo-metric-sub">' + feel + '</span>'
+    + '  </div>'
+    + '  <div class="cwo-metric-card">'
+    + '    <span class="cwo-metric-label">HORÁRIO &amp; CICLO</span>'
+    + '    <span class="cwo-metric-val">' + periodIcon + ' ' + hh + ':' + mm + '</span>'
+    + '    <span class="cwo-metric-sub">' + plabel + '</span>'
+    + '  </div>'
+    + '  <div class="cwo-metric-card">'
+    + '    <span class="cwo-metric-label">DATA NO REINO</span>'
+    + '    <span class="cwo-metric-val">' + t.day + ' de ' + monthName + '</span>'
+    + '    <span class="cwo-metric-sub">Ano ' + t.year + ' da Fundação</span>'
+    + '  </div>'
+    + '  <div class="cwo-metric-card">'
+    + '    <span class="cwo-metric-label">VISIBILIDADE</span>'
+    + '    <span class="cwo-metric-val" style="font-size:11px;">' + mechanics.vis + '</span>'
+    + '    <span class="cwo-metric-sub">' + mechanics.cond + '</span>'
+    + '  </div>'
+    + '</div>'
+    + '<div class="cwo-narrative-box">'
+    + '  <div class="cwo-box-badge">✦ DESCRIÇÃO DO CENÁRIO ✦</div>'
+    + '  <p class="cwo-narrative-text">“' + narrative + '”</p>'
+    + '  <div class="cwo-month-lore"><b>Mês de ' + monthName + ':</b> <i>' + monthLore + '</i></div>'
+    + '</div>'
+    + '<div class="cwo-effects-box">'
+    + '  <div class="cwo-effects-title">⚔️ CONDIÇÕES DE VIAGEM &amp; EXPLORAÇÃO</div>'
+    + '  <div class="cwo-effects-text">' + mechanics.effect + '</div>'
+    + '</div>'
+    + '<button class="cwo-btn-close" onclick="window._closeCityWeatherPopup()">Entendido ✕</button>';
+
+  ov.classList.add('active');
+}
+window._showCityWeatherPopup = _showCityWeatherPopup;
+
 function renderCityTopBar(){
   var el = document.getElementById('city-top-bar');
   if (!el) return;
@@ -61338,23 +61777,29 @@ function renderCityTopBar(){
   var weatherSlug = TOPBAR_WEATHER_PNG[weatherKey];
   var periodIcon = _ctbIconHTML(periodSlug, pemoji);
   var weatherIcon = _ctbIconHTML(weatherSlug, w.icon);
-  // Ordem do Usuário 2026-10: Valdoritas visíveis exclusivamente na ficha/card do personagem,
-  // liberando espaço nobre no cabeçalho para organização cristalina de dia, período, horário e clima.
+
+  // Ordem do Usuário 2026-10:
+  // Topbar limpa, ultra-compacta e sem corte de palavras.
+  // Toque/clique na data/hora ou no clima abre modal com detalhes do clima e calendário.
   el.innerHTML = ''
-    + '<div class="ctb-icons" style="gap:10px;">'
+    + '<div class="ctb-icons" style="gap:8px;">'
     + '  <span class="ctb-item ctb-city" style="color:var(--v-gold,#c4953a);letter-spacing:2px;font-size:calc(13px * var(--v-font-scale, 1));font-weight:700;">'
     + '    <span style="opacity:0.8;font-size:0.85em;margin-right:2px;">◆</span>VALDORIA'
     + '  </span>'
     + '</div>'
-    + '<div class="ctb-icons" style="gap:14px;flex-wrap:nowrap;" title="' + hh + ':' + mm + ' · ' + plabel + ' · ' + t.day + ' de ' + monthName + ' · Ano ' + t.year + ' · ' + w.desc + ' (' + w.temp + '°C)">'
-    + '  <span class="ctb-item ctb-date" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);font-weight:600;letter-spacing:0.8px;">'
+    + '<div class="ctb-icons ctb-datetime-trigger" onclick="window._onWeatherTriggerClick(event)" '
+    + '     style="gap:6px;flex-wrap:nowrap;align-items:center;" '
+    + '     title="Toque para ver detalhes do clima e calendário de Valdoria">'
+    + '  <span class="ctb-item ctb-date" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);font-weight:600;letter-spacing:0.5px;white-space:nowrap;">'
     + '    ' + t.day + ' ' + monthShort + ' · Ano ' + t.year
     + '  </span>'
-    + '  <span class="ctb-item ctb-time" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold-light,#e8c45a);font-weight:600;gap:4px;">'
-    + '    ' + periodIcon + ' ' + plabel + ' ' + hh + ':' + mm
+    + '  <span style="color:rgba(196,149,58,0.4);font-size:9px;line-height:1;user-select:none;">•</span>'
+    + '  <span class="ctb-item ctb-time" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold-light,#e8c45a);font-weight:600;gap:3px;white-space:nowrap;">'
+    + '    ' + periodIcon + ' ' + hh + ':' + mm
     + '  </span>'
-    + '  <span class="ctb-item ctb-weather" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);font-weight:500;gap:4px;">'
-    + '    ' + weatherIcon + ' ' + w.desc + ' · ' + w.temp + '°C'
+    + '  <span style="color:rgba(196,149,58,0.4);font-size:9px;line-height:1;user-select:none;">•</span>'
+    + '  <span class="ctb-item ctb-weather" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);font-weight:600;gap:3px;white-space:nowrap;">'
+    + '    ' + weatherIcon + ' ' + w.temp + '°C'
     + '  </span>'
     + '</div>';
 }
