@@ -723,6 +723,199 @@
   }
 
   /* ──────────────────────────────────────────────────────────────────────
+     Bloco IMPACTO NO PERSONAGEM estruturado (perda de vida e condições na viagem).
+     Espelha visualmente o card da cidade (.cgp-card v8-style) e anima a queda de PV.
+     Mostrado SOMENTE quando algo acontece com a vida ou stats do personagem.
+     DOM-safe (createElement/textContent), sem XSS, tokens canônicos do sistema. */
+  function _normalizeClassKey(cls) {
+    var k = (cls || '').toLowerCase()
+      .replace(/[áàâã]/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i')
+      .replace(/[óô]/g, 'o').replace(/ú/g, 'u')
+      .replace(/[\s].*/, '');
+    var ALIASES = {
+      sacerdote: 'clerigo',
+      sacerdotisa: 'clerigo',
+      cleric: 'clerigo',
+      clerica: 'clerigo',
+      cleriga: 'clerigo',
+      feiticeira: 'feiticeiro',
+      paladina: 'paladino',
+      druidesa: 'druida',
+      monja: 'monge',
+      bruxa: 'bruxo',
+      barbara: 'barbaro',
+      ladra: 'ladino',
+      ladrao: 'ladino',
+      barbaro: 'barbaro',
+      'meio-elfo': 'aliado'
+    };
+    return ALIASES[k] || k || 'guerreiro';
+  }
+
+  function _buildPlayerImpactCardEl(line) {
+    if (!line) return null;
+    var p = line.player || {};
+    var prevHp = (line.prevHp != null) ? line.prevHp : (p.hp || 0);
+    var newHp = (line.newHp != null) ? line.newHp : (p.hp || 0);
+    var hpMax = line.hpMax || p.hpMax || p.mhp || p.max_hp || 28;
+    if (hpMax <= 0) hpMax = 1;
+    var dmg = (line.dmg != null) ? line.dmg : Math.max(0, prevHp - newHp);
+    var cond = line.condition || null;
+
+    var prevPct = Math.max(0, Math.min(100, Math.round((prevHp / hpMax) * 100)));
+    var newPct = Math.max(0, Math.min(100, Math.round((newHp / hpMax) * 100)));
+
+    var hpRatio = newHp / hpMax;
+    var hpThr = hpRatio > 0.5 ? 'high' : (hpRatio > 0.25 ? 'mid' : 'low');
+
+    var card = document.createElement('div');
+    var rawCls = (p.cls || p.hero_class || p.cls_key || 'guerreiro').toString().toLowerCase();
+    var clsKey = _normalizeClassKey(rawCls);
+    card.className = 'enc-pic-card' + (dmg > 0 ? ' enc-pic-card--damaged' : '') + ' cls-' + clsKey;
+
+    // Topo: Avatar + Nome + Subtítulo + Nível
+    var top = document.createElement('div');
+    top.className = 'enc-pic-top';
+
+    var av = document.createElement('div');
+    av.className = 'enc-pic-avatar';
+    var heraldicId = 'ic-' + clsKey;
+    av.innerHTML = '<svg viewBox="0 0 120 120" style="width:24px;height:24px;fill:currentColor;" aria-hidden="true"><use href="#' + heraldicId + '"/></svg>';
+    top.appendChild(av);
+
+    var info = document.createElement('div');
+    info.className = 'enc-pic-info';
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'enc-pic-name';
+    nameEl.textContent = p.name || 'Aventureiro';
+    info.appendChild(nameEl);
+
+    var subEl = document.createElement('div');
+    subEl.className = 'enc-pic-sub';
+    var clsDisplay = p.cls || p.hero_class || 'Aventureiro';
+    var raceDisplay = p.race || 'Mortal';
+    subEl.textContent = clsDisplay + ' · ' + raceDisplay;
+    info.appendChild(subEl);
+
+    top.appendChild(info);
+
+    var lvlEl = document.createElement('div');
+    lvlEl.className = 'enc-pic-lvl';
+    lvlEl.textContent = 'Nv ' + (p.level || p.lvl || 1);
+    top.appendChild(lvlEl);
+
+    card.appendChild(top);
+
+    // Conteúdo: Barra de Vida com transição animada e badges
+    var content = document.createElement('div');
+    content.className = 'enc-pic-content';
+
+    var hpRow = document.createElement('div');
+    hpRow.className = 'enc-pic-hp-row';
+
+    var hpHead = document.createElement('div');
+    hpHead.className = 'enc-pic-hp-head';
+
+    var hpLbl = document.createElement('div');
+    hpLbl.className = 'enc-pic-hp-lbl';
+    hpLbl.textContent = 'Pontos de Vida';
+    hpHead.appendChild(hpLbl);
+
+    if (dmg > 0) {
+      var dmgBadge = document.createElement('span');
+      dmgBadge.className = 'enc-pic-dmg-badge';
+      dmgBadge.textContent = '−' + dmg + ' PV';
+      hpHead.appendChild(dmgBadge);
+    }
+
+    var hpVal = document.createElement('div');
+    hpVal.className = 'enc-pic-hp-val' + (hpThr === 'low' ? ' enc-pic-hp-val--low' : '');
+    hpVal.textContent = newHp + ' / ' + hpMax;
+    hpHead.appendChild(hpVal);
+
+    hpRow.appendChild(hpHead);
+
+    // Track de PV com ghost fill da perda e transição suave do fill
+    var track = document.createElement('div');
+    track.className = 'enc-pic-track';
+
+    if (prevPct > newPct) {
+      var ghostFill = document.createElement('div');
+      ghostFill.className = 'enc-pic-ghost-fill';
+      ghostFill.style.width = prevPct + '%';
+      track.appendChild(ghostFill);
+    }
+
+    var fill = document.createElement('div');
+    fill.className = 'enc-pic-fill enc-pic-fill--' + hpThr;
+    fill.style.width = prevPct + '%';
+    track.appendChild(fill);
+
+    // Dispara animação da vida abaixando após montagem no DOM
+    setTimeout(function () {
+      try { fill.style.width = newPct + '%'; } catch (_) {}
+    }, 60);
+
+    hpRow.appendChild(track);
+    content.appendChild(hpRow);
+
+    // Meta row (CA e Recurso se houver)
+    var metaRow = document.createElement('div');
+    metaRow.className = 'enc-pic-meta-row';
+
+    var acBadge = document.createElement('span');
+    acBadge.className = 'enc-pic-meta-badge';
+    acBadge.textContent = '🛡️ ' + (p.ac || 10) + ' CA';
+    metaRow.appendChild(acBadge);
+
+    var resName = (p.resName || p.resourceName || (window.DndRules && DndRules.classResourceName && DndRules.classResourceName(clsKey)) || 'MP');
+    var curRes = (p.mp != null) ? p.mp : (p.resource != null ? p.resource : null);
+    var maxRes = (p.mpMax != null) ? p.mpMax : (p.resourceMax != null ? p.resourceMax : (p.mmp != null ? p.mmp : null));
+    if (maxRes && maxRes > 0) {
+      var resBadge = document.createElement('span');
+      resBadge.className = 'enc-pic-meta-badge enc-pic-meta-badge--mp';
+      resBadge.textContent = '✨ ' + (curRes != null ? curRes : maxRes) + '/' + maxRes + ' ' + resName;
+      metaRow.appendChild(resBadge);
+    }
+
+    content.appendChild(metaRow);
+
+    // Caixa de Condição / Prejuízo se houver
+    if (cond) {
+      var condBox = document.createElement('div');
+      condBox.className = 'enc-pic-cond-box';
+
+      var condIcon = document.createElement('span');
+      condIcon.className = 'enc-pic-cond-icon';
+      condIcon.textContent = cond.icon || '⚠️';
+      condBox.appendChild(condIcon);
+
+      var condText = document.createElement('div');
+      condText.className = 'enc-pic-cond-text';
+
+      var condTitle = document.createElement('div');
+      condTitle.className = 'enc-pic-cond-title';
+      condTitle.textContent = cond.label || (typeof cond === 'string' ? cond : 'Condição Aplicada');
+      condText.appendChild(condTitle);
+
+      if (cond.desc) {
+        var condDesc = document.createElement('div');
+        condDesc.className = 'enc-pic-cond-desc';
+        condDesc.textContent = cond.desc;
+        condText.appendChild(condDesc);
+      }
+
+      condBox.appendChild(condText);
+      content.appendChild(condBox);
+    }
+
+    card.appendChild(content);
+    return card;
+  }
+
+
+  /* ──────────────────────────────────────────────────────────────────────
      Bloco FICHA DE PERSONAGEM estruturado (FASE 5 — "Ver ficha" do recruta da
      guilda, 2026-06-24). Espelha _buildRewardBlockEl: nó DOM construído via
      createElement + textContent (DOM-safe, ZERO innerHTML com dados → sem XSS).
@@ -1957,6 +2150,18 @@
             tdiv.className = 'enc-line enc-technical-line';
             tdiv.appendChild(tel);
             body.appendChild(tdiv);
+          }
+          return;
+        }
+        /* Bloco IMPACTO NO PERSONAGEM estruturado (perda de vida e condições na viagem).
+           Revelado com animação de queda de PV e caixa de condições quando aplicável. */
+        if (line.type === 'player_impact') {
+          var picEl = _buildPlayerImpactCardEl(line);
+          if (picEl) {
+            var picDiv = document.createElement('div');
+            picDiv.className = 'enc-line enc-player-impact-line';
+            picDiv.appendChild(picEl);
+            body.appendChild(picDiv);
           }
           return;
         }

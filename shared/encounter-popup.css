@@ -1924,6 +1924,240 @@ body.perf-lite .enc-cho-item-thumb--clickable:hover { transform: none; }
   border-color: var(--v-gold-55);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Ficha/Card Resumida de Impacto do Personagem na Viagem (Ordem do Usuário 2026-10):
+   Mostrada SOMENTE quando há perda de PV ou condição/debuff sofrido na jornada.
+   Espelha visualmente o card da cidade (.cgp-card v8-style) e anima a queda de PV.
+   ───────────────────────────────────────────────────────────────────────── */
+.enc-player-impact-line {
+  visibility: hidden;
+  margin: var(--v-space-sm, 6px) 0;
+}
+.enc-body.revealed .enc-player-impact-line {
+  visibility: visible;
+  animation: encPicIn 0.4s ease both;
+}
+@keyframes encPicIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.enc-pic-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 10px 12px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(196, 149, 58, 0.15), transparent 70%),
+    linear-gradient(180deg, rgba(46, 36, 26, 0.95) 0%, rgba(28, 22, 16, 0.98) 100%);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: var(--v-radius, 10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 244, 208, 0.1);
+  color: var(--v-text, #d4c8b0);
+  font-family: 'Georgia', serif;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.enc-pic-card--damaged {
+  border-color: rgba(223, 114, 98, 0.65);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7), 0 0 14px rgba(223, 114, 98, 0.25);
+}
+
+.enc-pic-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(196, 149, 58, 0.25);
+  padding-bottom: 7px;
+}
+.enc-pic-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--v-gold, #c4953a);
+  background: radial-gradient(circle at 50% 40%, rgba(196, 149, 58, 0.3), rgba(15, 12, 8, 0.8));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+.enc-pic-info {
+  flex: 1;
+  min-width: 0;
+}
+.enc-pic-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: calc(13px * var(--v-font-scale, 1));
+  color: #e8c872;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.enc-pic-sub {
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+  color: #a09484;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.enc-pic-lvl {
+  padding: 2px 7px;
+  border: 1px solid var(--v-gold-40);
+  border-radius: 6px;
+  font-family: 'Cinzel', serif;
+  font-size: calc(10px * var(--v-font-scale, 1));
+  font-weight: 700;
+  color: #ffd700;
+  background: rgba(15, 12, 8, 0.6);
+  flex-shrink: 0;
+}
+
+.enc-pic-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.enc-pic-hp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.enc-pic-hp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.enc-pic-hp-lbl {
+  font-family: 'Cinzel', serif;
+  font-size: calc(10px * var(--v-font-scale, 1));
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+.enc-pic-hp-val {
+  font-size: calc(11px * var(--v-font-scale, 1));
+  font-weight: 700;
+  color: #e2d9cd;
+}
+.enc-pic-hp-val--low { color: #e07c7c; }
+
+.enc-pic-dmg-badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(180, 40, 30, 0.85);
+  border: 1px solid #ff6050;
+  color: #fff0f0;
+  font-family: 'Cinzel', serif;
+  font-size: calc(10px * var(--v-font-scale, 1));
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 8px rgba(220, 60, 40, 0.6);
+  animation: encDmgDropPulse 0.5s cubic-bezier(0.18, 1.25, 0.35, 1) both;
+}
+@keyframes encDmgDropPulse {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.enc-pic-track {
+  position: relative;
+  width: 100%;
+  height: 9px;
+  background: rgba(15, 12, 8, 0.7);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.enc-pic-ghost-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(220, 60, 40, 0.45);
+  pointer-events: none;
+}
+.enc-pic-fill {
+  position: relative;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.7s cubic-bezier(0.2, 0.85, 0.25, 1.05);
+}
+.enc-pic-fill--high {
+  background: linear-gradient(90deg, #5a8a3e, #8ab04e);
+}
+.enc-pic-fill--mid {
+  background: linear-gradient(90deg, #b08038, #d0a040);
+}
+.enc-pic-fill--low {
+  background: linear-gradient(90deg, #8a2a20, #c04030);
+  animation: cgpHpLowBlink 1.2s ease-in-out infinite;
+}
+
+.enc-pic-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 1px;
+}
+.enc-pic-meta-badge {
+  font-size: calc(10px * var(--v-font-scale, 1));
+  font-family: 'Cinzel', serif;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(15, 12, 8, 0.5);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  color: #c4953a;
+}
+.enc-pic-meta-badge--mp {
+  color: #70c0f0;
+  border-color: rgba(112, 192, 240, 0.3);
+}
+
+.enc-pic-cond-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(45, 24, 18, 0.8);
+  border: 1px solid rgba(223, 114, 98, 0.45);
+  box-shadow: inset 0 0 10px rgba(180, 40, 30, 0.2);
+  margin-top: 2px;
+}
+.enc-pic-cond-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+.enc-pic-cond-text {
+  flex: 1;
+  min-width: 0;
+}
+.enc-pic-cond-title {
+  font-family: 'Cinzel', serif;
+  font-size: calc(10.5px * var(--v-font-scale, 1));
+  font-weight: 700;
+  color: #ff9080;
+  letter-spacing: 0.5px;
+}
+.enc-pic-cond-desc {
+  font-size: calc(10px * var(--v-font-scale, 1));
+  color: #c8b8a4;
+  line-height: 1.35;
+  margin-top: 1px;
+}
+
 /* prefers-reduced-motion + perf-lite — desliga animações épicas. */
 @media (prefers-reduced-motion: reduce) {
   .enc-btn-choose-icon { animation: none; }

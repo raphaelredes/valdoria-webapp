@@ -84,7 +84,7 @@
       },
       {
         player: _player(), showGold: false, fullHeight: true, progress: prog,
-        showHp: true,  /* #90 (user): barra de vida estilo combate abaixo do diálogo */
+        showHp: false, /* #91 (user): remove barra permanente; ficha resumida exibida somente quando houver impacto */
         inlineChoices: cfg.inline === true,
         compact: cfg.compact || false,
         onChoice: function (ch) { if (typeof cfg.onChoice === 'function') cfg.onChoice(ch); }
@@ -402,30 +402,75 @@
     }, 80);
   }
 
-  // Desfecho: narrativa (por classe/alinhamento via JourneyData) + dano + morte.
+  // Seleciona condição temática com base no perigo ou biome em falhas
+  function _pickBiomeHazardCondition(biome, hz, ch) {
+    if (ch && ch.condition) return ch.condition;
+    var text = (((hz && hz.title) || '') + ' ' + ((ch && (ch.fNarr || ch.desc)) || '')).toLowerCase();
+    if (text.indexOf('veneno') !== -1 || text.indexOf('peconha') !== -1 || text.indexOf('picada') !== -1 || text.indexOf('gas') !== -1 || text.indexOf('podre') !== -1 || text.indexOf('esporo') !== -1) {
+      return { id: 'poisoned', icon: '🧪', label: 'Envenenado', desc: 'Desvantagem em jogadas de ataque e testes de atributo no mapa hexagonal.' };
+    }
+    if (text.indexOf('torc') !== -1 || text.indexOf('tornozelo') !== -1 || text.indexOf('queda') !== -1 || text.indexOf('tropec') !== -1 || text.indexOf('escorreg') !== -1 || text.indexOf('lama') !== -1 || text.indexOf('atoleiro') !== -1 || text.indexOf('raiz') !== -1) {
+      return { id: 'sprained', icon: '🦶', label: 'Torção no Tornozelo (−3m)', desc: 'Deslocamento reduzido em 3m (-2 hexes) e desvantagem em testes de Destreza no mapa hexagonal.' };
+    }
+    if (text.indexOf('vento') !== -1 || text.indexOf('frio') !== -1 || text.indexOf('gelo') !== -1 || text.indexOf('sede') !== -1 || text.indexOf('cansac') !== -1 || text.indexOf('exaust') !== -1 || text.indexOf('afund') !== -1 || text.indexOf('tempestade') !== -1) {
+      return { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' };
+    }
+    if (text.indexOf('impacto') !== -1 || text.indexOf('pancada') !== -1 || text.indexOf('galho') !== -1 || text.indexOf('rocha') !== -1 || text.indexOf('pedra') !== -1) {
+      return { id: 'bruised', icon: '💥', label: 'Contusão Muscular (−1)', desc: 'Penalidade em testes físicos de Força e Constituição no mapa hexagonal.' };
+    }
+    // Chance de fadiga leve em viagens com biomas desafiadores
+    if (Math.random() < 0.45) {
+      return { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' };
+    }
+    return null;
+  }
+
+  // Aplica condição temporária ao aventureiro e persiste para a exploração
+  function _applyJourneyCondition(p, cond) {
+    if (!p || !cond) return;
+    p.conditions = p.conditions || {};
+    if (Array.isArray(p.conditions)) {
+      if (p.conditions.indexOf(cond.id) < 0) p.conditions.push(cond.id);
+    } else {
+      p.conditions[cond.id] = { id: cond.id, label: cond.label, desc: cond.desc };
+    }
+    try {
+      var saved = [];
+      try { saved = JSON.parse(sessionStorage.getItem('valdoria_journey_conditions') || '[]'); } catch (_) {}
+      if (!Array.isArray(saved)) saved = [];
+      if (saved.indexOf(cond.id) < 0) saved.push(cond.id);
+      sessionStorage.setItem('valdoria_journey_conditions', JSON.stringify(saved));
+    } catch (_) {}
+  }
+
+  // Desfecho: narrativa + cálculo de dano e condições + ficha resumida condicional.
   function _outcome(hz, ch, success, roll) {
     var j = _j; if (!j) return;
     var p = _player();
+    var prevHp = (p && p.hp != null) ? p.hp : 28;
+    var hpMax = (p && (p.hpMax || p.mhp || p.max_hp)) || 28;
     var narr = (JD().pickNarrative ? JD().pickNarrative(ch, p, success) : '')
       || (success ? 'Você supera o perigo e segue em frente.' : 'O perigo te alcança, mas você sobrevive — desta vez.');
     var dmgApplied = 0;
+    var conditionApplied = null;
     if (!success) {
       var dmg = (ch && ch.dmg != null) ? ch.dmg : 1;
       if (dmg > 0 && p) {
         p.hp = Math.max(0, (p.hp || 0) - dmg);
         dmgApplied = dmg;
+        try { sessionStorage.setItem('valdoria_journey_hp', String(p.hp)); } catch (_) {}
         if (typeof j.opts.refreshHud === 'function') { try { j.opts.refreshHud(); } catch (e) {} }
+      }
+      var pickedCond = _pickBiomeHazardCondition(j.biome, hz, ch);
+      if (pickedCond) {
+        conditionApplied = pickedCond;
+        _applyJourneyCondition(p, pickedCond);
       }
     }
     var body = narr;
     if (JD().detectWeather && narr) {
       var wNarr = JD().detectWeather(narr);
       if (wNarr) { j.weather = wNarr; _log('journey weather updated on outcome -> ' + wNarr); }
-    }
-    if (dmgApplied > 0) {
-      // O texto vai pro vEncounter, cujo _san só permite i/b/em/br/strong/u/s/code —
-      // <span style> era STRIPPADO + logava '[ENC] HTML bloqueado'. Usa <b> (permitida).
-      body += ' <b>(−' + dmgApplied + ' HP)</b>';
     }
     // Morte na jornada. AUTORIDADE do desfecho:
     //  • opts.onDefeat presente (exploração REMOTE) → o CALLER decide (triggerDefeat:
@@ -434,7 +479,18 @@
     //  • sem onDefeat (cidade = sandbox client-mock) → socorro local a 1/4 HP.
     if (p && p.hp <= 0) {
       _vRender({
-        script: [{ type: 'narration', text: body }],
+        script: [
+          { type: 'narration', text: body },
+          {
+            type: 'player_impact',
+            player: p,
+            prevHp: prevHp,
+            newHp: 0,
+            hpMax: hpMax,
+            dmg: dmgApplied,
+            condition: conditionApplied
+          }
+        ],
         choices: [{ id: 'jrn_dead', label: 'Você sucumbiu...' }],
         inline: true,
         onChoice: function () {
@@ -450,13 +506,30 @@
       });
       return;
     }
-    _renderContinue([{ type: 'narration', text: body }]);
+    var scriptLines = [{ type: 'narration', text: body }];
+    // REGRA DO USUÁRIO: ficha/card resumida exibida SOMENTE se algo acontecer com a vida ou stats
+    if (dmgApplied > 0 || conditionApplied != null) {
+      scriptLines.push({
+        type: 'player_impact',
+        player: p,
+        prevHp: prevHp,
+        newHp: p ? p.hp : 0,
+        hpMax: hpMax,
+        dmg: dmgApplied,
+        condition: conditionApplied
+      });
+    }
+    _renderContinue(scriptLines);
   }
 
   function _arrive() {
     var j = _j; if (!j) return;
     var cb = j.opts.onArrive, biome = j.biome, dn = j.displayName;
-    var meta = { weather: j.weather || null };
+    var p = _player();
+    var meta = {
+      weather: j.weather || null,
+      conditions: (p && p.conditions) || []
+    };
     _log('journey complete -> onArrive(' + biome + ', weather=' + meta.weather + ')');
     _close();
     if (typeof cb === 'function') { try { cb(biome, dn, meta); } catch (e) {} }

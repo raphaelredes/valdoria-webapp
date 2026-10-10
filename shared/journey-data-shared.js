@@ -61,7 +61,8 @@ var HAZARDS = {
           sNarr_by_race: {
             elf: 'Com graça élfica, você encontra o ponto de alívio do gatilho antes do galho subir.'
           },
-          fNarr: 'A corda corta sua perna ao apertar. Sangue quente escorre — o nó travou no movimento errado.', dmg: 3 },
+          fNarr: 'A corda corta sua perna ao apertar. Sangue quente escorre — o nó travou no movimento errado.', dmg: 3,
+          condition: { id: 'sprained', icon: '🦶', label: 'Torção no Tornozelo (−3m)', desc: 'Deslocamento reduzido em 3m (-2 hexes) e desvantagem em testes de Destreza no mapa.' } },
         { i: '🗡', t: 'Cortar cordão mestre', stat: 'dex', dc: 11,
           requires_class: ['ladino', 'ladrao', 'patrulheiro'],
           desc: 'Lâmina afiada desfaz o laço antes da tensão subir.',
@@ -96,7 +97,8 @@ var HAZARDS = {
         { i: '💪', t: 'Empurrar pra desviar', stat: 'str', dc: 12,
           desc: 'Tentar redirecionar o galho com força bruta enquanto cai.',
           sNarr: 'Você crava os ombros no galho e o desvia — ele cai paralelo à trilha. Suor escorre, mas você está inteiro.',
-          fNarr: 'O galho é mais pesado do que parece — torce seu pulso e te empurra contra um tronco lateral.', dmg: 2 } ] },
+          fNarr: 'O galho é mais pesado do que parece — torce seu pulso e te empurra contra um tronco lateral.', dmg: 2,
+          condition: { id: 'bruised', icon: '💥', label: 'Contusão Muscular (−1)', desc: 'Penalidade em testes físicos de Força e testes atléticos no mapa.' } } ] },
 
     { title: 'Os Sussurros',
       script: [
@@ -116,7 +118,8 @@ var HAZARDS = {
             lawful: 'Você ancora-se em código e dever. As vozes não têm âncora pra te puxar.',
             chaotic: 'Você ri das vozes em alta voz. O choque do som humano dispersa o feitiço.'
           },
-          fNarr: 'Por um instante você reconhece a voz da sua mãe. Você para. Quando volta a si, sangue escorre do nariz e há horas que você não anda.', dmg: 3 } ] },
+          fNarr: 'Por um instante você reconhece a voz da sua mãe. Você para. Quando volta a si, sangue escorre do nariz e há horas que você não anda.', dmg: 3,
+          condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' } } ] },
 
     { title: 'Atoleiro Profundo',
       script: [
@@ -131,7 +134,8 @@ var HAZARDS = {
             patrulheiro: 'Você lê o pântano como página aberta. Em segundos identifica a trilha de javali que cruza o atoleiro — pisa firme onde eles pisaram, sem afundar.',
             druida: 'A floresta te diz onde pisar. As raízes da carvalho-mãe se firmam ligeiramente onde sua bota toca, oferecendo apoio.'
           },
-          fNarr: 'Você afunda até as canelas. Vinte minutos de pânico depois, sai sujo, exausto, com algo se mexendo dentro da bota.', dmg: 2 } ] }
+          fNarr: 'Você afunda até as canelas. Vinte minutos de pânico depois, sai sujo, exausto, com algo se mexendo dentro da bota.', dmg: 2,
+          condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' } } ] }
   ],
 
   plains: [

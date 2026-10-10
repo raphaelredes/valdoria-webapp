@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-10T11:19:02Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-10T22:19:04Z - do not edit directly, edit source -->
 
 
 
@@ -3463,6 +3463,16 @@ body.perf-lite #hud-float-status .icon { animation: none; }
   color: #c09ae0;
   background: linear-gradient(180deg, rgba(52, 38, 74, 0.95), rgba(34, 24, 50, 0.92));
   text-shadow: 0 0 4px rgba(176, 130, 216, 0.4);
+}
+.hud-cond-chip--exhausted {
+  color: #e09a50;
+  background: linear-gradient(180deg, rgba(64, 42, 22, 0.95), rgba(42, 26, 14, 0.92));
+  text-shadow: 0 0 4px rgba(224, 154, 80, 0.4);
+}
+.hud-cond-chip--injured {
+  color: #df7262;
+  background: linear-gradient(180deg, rgba(64, 28, 24, 0.95), rgba(42, 18, 16, 0.92));
+  text-shadow: 0 0 4px rgba(223, 114, 98, 0.4);
 }
 @keyframes condDotPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 body.perf-lite .hud-cond-chip .dot, body.reduced-motion .hud-cond-chip .dot { animation: none; }
@@ -12750,9 +12760,20 @@ body.perf-lite .stub-popup-voice { animation: none; }
     if (choice.disadvantage === true) disadv = true;
     if (window.FlagsRegistry && window.FlagsRegistry.has('tile_bonus_advantage')) adv = true;
     if (player && player.conditions) {
-      if (player.conditions['frightened']) disadv = true;
-      if (player.conditions['restrained']) disadv = true;
-      if (player.conditions['poisoned']) disadv = true;
+      var _hasCond = function(k) {
+        if (Array.isArray(player.conditions)) return player.conditions.indexOf(k) >= 0;
+        return !!player.conditions[k];
+      };
+      if (_hasCond('frightened') || _hasCond('amedrontado')) disadv = true;
+      if (_hasCond('restrained')) disadv = true;
+      if (_hasCond('poisoned') || _hasCond('envenenado')) disadv = true;
+      if (_hasCond('exhaustion') || _hasCond('exausto') || _hasCond('fatigued') || _hasCond('fatigado')) disadv = true;
+      if (_hasCond('sprained') || _hasCond('torcao')) {
+        if (choice && (choice.stat === 'dex' || choice.stat === 'str')) disadv = true;
+      }
+      if (_hasCond('bruised') || _hasCond('contundido')) {
+        if (choice && (choice.stat === 'str' || choice.stat === 'con')) disadv = true;
+      }
     }
     /* C4.10 #90: Exaustão nv1+ — DESVANTAGEM em testes de habilidade (PHB
        p.291). O texto do jogo já prometia; _detectAdvantage ignorava. */
@@ -22106,7 +22127,8 @@ function initState() {
         background: setupChoices.background || 'folk_hero',
         alignment: setupChoices.alignment || 'NG',
         name: setupChoices.name || (S && S.player && S.player.name) || (window.__EXPLORE_MODE === 'remote' ? 'Aventureiro' : randomFantasyName()),
-        equipment: (window.__EXPLORE_SERVER_EQUIPPED && typeof window.__EXPLORE_SERVER_EQUIPPED === 'object') ? Object.assign({}, window.__EXPLORE_SERVER_EQUIPPED) : (typeof _vinvExpGetEquippedDict === 'function' ? _vinvExpGetEquippedDict() : {})
+        equipment: (window.__EXPLORE_SERVER_EQUIPPED && typeof window.__EXPLORE_SERVER_EQUIPPED === 'object') ? Object.assign({}, window.__EXPLORE_SERVER_EQUIPPED) : (typeof _vinvExpGetEquippedDict === 'function' ? _vinvExpGetEquippedDict() : {}),
+        conditions: []
       };
     })(),
     grid: map.grid,
@@ -22139,6 +22161,27 @@ function initState() {
     allies: [],                     // V2.0 ally system — [{id, name, cls, role, recruited_at}]
     _pendingDelivery: null
   };
+  // Aplica condições e impacto de PV originados da viagem prévia (cidade ↔ exploração)
+  try {
+    var _jConds = sessionStorage.getItem('valdoria_journey_conditions');
+    if (_jConds) {
+      sessionStorage.removeItem('valdoria_journey_conditions');
+      var parsedConds = JSON.parse(_jConds);
+      if (Array.isArray(parsedConds)) {
+        S.player.conditions = (S.player.conditions || []).concat(parsedConds);
+      }
+    }
+  } catch (_) {}
+  try {
+    var _jHp = sessionStorage.getItem('valdoria_journey_hp');
+    if (_jHp) {
+      sessionStorage.removeItem('valdoria_journey_hp');
+      var parsedHp = parseInt(_jHp, 10);
+      if (!isNaN(parsedHp) && parsedHp > 0) {
+        S.player.hp = Math.min(S.player.mhp, parsedHp);
+      }
+    }
+  } catch (_) {}
 }
 
 // ============================================================================
@@ -45998,10 +46041,16 @@ if (typeof window._audioWatchdogInterval === 'undefined') {
 var _COND_LABELS_PT = {
   'poisoned': 'Envenenado', 'envenenado': 'Envenenado',
   'frightened': 'Amedrontado', 'amedrontado': 'Amedrontado',
+  'exhaustion': 'Exausto', 'exausto': 'Exausto',
+  'sprained': 'Torção', 'torcao': 'Torção',
+  'fatigued': 'Fatigado', 'fatigado': 'Fatigado',
+  'bruised': 'Contundido', 'contundido': 'Contundido',
 };
 function _condChipClass(cid) {
   if (cid === 'envenenado' || cid === 'poisoned') return 'hud-cond-chip--poisoned';
   if (cid === 'amedrontado' || cid === 'frightened') return 'hud-cond-chip--frightened';
+  if (cid === 'exhaustion' || cid === 'exausto' || cid === 'fatigued' || cid === 'fatigado') return 'hud-cond-chip--exhausted';
+  if (cid === 'sprained' || cid === 'torcao' || cid === 'bruised' || cid === 'contundido') return 'hud-cond-chip--injured';
   return '';
 }
 // conditions vem como ARRAY (state do servidor) ou DICT (OutcomeApplier LOCAL).
