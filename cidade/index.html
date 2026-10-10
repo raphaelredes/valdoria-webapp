@@ -70582,44 +70582,156 @@ function _renderEncounterPopup(enc, originalAction, player) {
    Organizado por Setores, Interlocutores (NPCs), Busca Textual e Leitor Fullscreen.
    ============================================================================ */
 
-function _openDialogueReaderPopup(entry, allNpcDialogues, currentIndex){
-  var reader = document.getElementById('dlg-full-reader');
-  if (reader) reader.remove();
-
-  reader = document.createElement('div');
-  reader.id = 'dlg-full-reader';
-  reader.className = 'dlg-full-reader-overlay';
-
-  var npcObj = entry.npc || {};
-  var npcName = (typeof npcObj === 'string' ? npcObj : npcObj.name) || 'Interlocutor';
-  var npcDesc = (typeof npcObj === 'object' && npcObj.desc) ? npcObj.desc : (entry.location || '');
-  var portraitUrl = (typeof npcObj === 'object' && (npcObj.portraitImg || npcObj.portrait)) || '';
-  var isImg = portraitUrl && (portraitUrl.indexOf('/') >= 0 || portraitUrl.indexOf('.') >= 0);
-
-  var sId = (window.vDialogueHistory && typeof window.vDialogueHistory.resolveSector === 'function')
-    ? window.vDialogueHistory.resolveSector(entry) : 'other';
-  var secList = (window.vDialogueHistory && window.vDialogueHistory.SECTORS) || [];
-  var secMeta = secList.find(function(s){ return s.id === sId; }) || { label: 'Encontro', icon: 'ic-dialogo' };
-
-  var dDate = entry.ts ? new Date(entry.ts) : new Date();
+function _buildDialogueBodyHTML(entryItem, defaultNpcName){
+  var npcItem = entryItem.npc || {};
+  var spkNpc = (typeof npcItem === 'string' ? npcItem : npcItem.name) || defaultNpcName || 'Interlocutor';
+  var dDate = entryItem.ts ? new Date(entryItem.ts) : new Date();
   var dateStr = dDate.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' às ' +
                 dDate.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
 
+  var bHtml = '<div class="dfr-date-tag">✦ Encontro ocorrido em ' + dateStr + '</div>'
+            + '<div class="dfr-script-block">';
+
+  (entryItem.script || []).forEach(function(line){
+    if (!line || !line.text) return;
+    if (line.type === 'speech') {
+      var spk = line.speaker || spkNpc;
+      bHtml += '<div class="dfr-line speech"><span class="dfr-speaker">' + spk + '</span>' + line.text + '</div>';
+    } else {
+      bHtml += '<div class="dfr-line narration">' + line.text + '</div>';
+    }
+  });
+  bHtml += '</div>';
+
+  // Decisão tomada pelo jogador
+  if (entryItem.chosen) {
+    bHtml += '<div class="dfr-decision-card">'
+      + '<span class="dfr-decision-tag">⚔ Tua Decisão:</span>'
+      + '<span class="dfr-decision-label">' + (entryItem.chosen.label || entryItem.chosen.id || 'Avançar') + '</span>'
+      + (entryItem.chosen.desc ? '<span class="dfr-decision-desc">' + entryItem.chosen.desc + '</span>' : '')
+      + '</div>';
+  }
+
+  // Teste de perícia / dados D&D 5e
+  if (entryItem.check && (entryItem.check.d20 != null || entryItem.check.total != null)) {
+    var ck = entryItem.check;
+    var isWin = !!ck.success;
+    var bCls = ck.critSuccess ? 'badge-crit' : (isWin ? 'badge-win' : 'badge-loss');
+    var bLabel = ck.critSuccess ? '⚜ Acerto Crítico!' : (ck.critFail ? '✗ Falha Crítica' : (isWin ? '✓ Sucesso' : '✗ Falha'));
+    var skillLabel = (window.DndRules && typeof window.DndRules.skillLabelPT === 'function')
+      ? window.DndRules.skillLabelPT(ck.skill || ck.stat)
+      : (ck.skill || ck.stat || 'Atributo');
+    var modStr = (ck.mod >= 0 ? '+' : '') + (ck.mod || 0);
+
+    bHtml += '<div class="dfr-check-card ' + (isWin ? 'check-win' : 'check-loss') + '">'
+      + '<div class="dfr-check-head">'
+      +   '<span>🎲 Teste de ' + skillLabel + (ck.dc ? ' (CD ' + ck.dc + ')' : '') + '</span>'
+      +   '<span class="dfr-check-badge ' + bCls + '">' + bLabel + '</span>'
+      + '</div>'
+      + '<div class="dfr-check-formula">'
+      +   'Rolagem d20: <b>' + (ck.d20 != null ? ck.d20 : '-') + '</b> ' + modStr + ' = <b>' + (ck.total != null ? ck.total : '-') + '</b>' + (ck.dc ? ' vs CD ' + ck.dc : '')
+      + '</div>'
+      + '</div>';
+  }
+
+  // Desfecho narrativo
+  if (entryItem.outcome && (Array.isArray(entryItem.outcome) ? entryItem.outcome.length > 0 : String(entryItem.outcome).trim().length > 0)) {
+    bHtml += '<div class="dfr-outcome-box">'
+      + '<div class="dfr-outcome-title">✦ Desfecho & Resposta:</div>';
+    if (Array.isArray(entryItem.outcome)) {
+      entryItem.outcome.forEach(function(oLine){
+        if (!oLine || !oLine.text) return;
+        if (oLine.type === 'speech') {
+          bHtml += '<div class="dfr-line speech"><span class="dfr-speaker">' + (oLine.speaker || spkNpc) + '</span>' + oLine.text + '</div>';
+        } else {
+          bHtml += '<div class="dfr-line narration">' + oLine.text + '</div>';
+        }
+      });
+    } else {
+      bHtml += '<div class="dfr-line narration">' + String(entryItem.outcome) + '</div>';
+    }
+    bHtml += '</div>';
+  }
+
+  // Recompensas
+  if (Array.isArray(entryItem.rewards) && entryItem.rewards.length > 0) {
+    bHtml += '<div class="dfr-rewards-box">'
+      + '<span style="font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);font-weight:700;text-transform:uppercase;">Recompensas:</span>';
+    entryItem.rewards.forEach(function(rw){
+      var ico = rw.type === 'xp' ? '⭐' : (rw.type === 'gold' ? '🪙' : '✦');
+      var sign = (rw.amount > 0) ? '+' : '';
+      bHtml += '<span class="dfr-reward-item">' + ico + ' ' + sign + rw.amount + ' ' + (rw.label || '') + '</span>';
+    });
+    bHtml += '</div>';
+  }
+
+  return bHtml;
+}
+
+function _openDialogueReaderPopup(entry, allNpcDialogues, currentIndex){
+  // Ordena cronologicamente os encontros do mesmo interlocutor (0: mais antigo -> N-1: mais recente)
+  var sortedList = (Array.isArray(allNpcDialogues) && allNpcDialogues.length > 0)
+    ? allNpcDialogues.slice().sort(function(a, b){ return (a.ts || 0) - (b.ts || 0); })
+    : [entry];
+  var activeIdx = sortedList.findIndex(function(x){ return x && x.id === entry.id; });
+  if (activeIdx < 0) activeIdx = (typeof currentIndex === 'number' && currentIndex >= 0 && currentIndex < sortedList.length) ? currentIndex : 0;
+
+  var existingReader = document.getElementById('dlg-full-reader');
+  if (existingReader && typeof existingReader._navigateTo === 'function') {
+    existingReader._navigateTo(activeIdx, 'auto');
+    return;
+  }
+  if (existingReader) existingReader.remove();
+
+  var reader = document.createElement('div');
+  reader.id = 'dlg-full-reader';
+  reader.className = 'dlg-full-reader-overlay';
+
+  var currentEntry = sortedList[activeIdx] || entry;
+  var npcObj = currentEntry.npc || {};
+  var npcName = (typeof npcObj === 'string' ? npcObj : npcObj.name) || 'Interlocutor';
+  var npcDesc = (typeof npcObj === 'object' && npcObj.desc) ? npcObj.desc : (currentEntry.location || '');
+  var portraitUrl = (typeof npcObj === 'object' && (npcObj.portraitImg || npcObj.portrait)) || '';
+  var isImg = portraitUrl && (portraitUrl.indexOf('/') >= 0 || portraitUrl.indexOf('.') >= 0);
+
+  function _getSectorMeta(eItem){
+    var sId = (window.vDialogueHistory && typeof window.vDialogueHistory.resolveSector === 'function')
+      ? window.vDialogueHistory.resolveSector(eItem) : 'other';
+    var secList = (window.vDialogueHistory && window.vDialogueHistory.SECTORS) || [];
+    return secList.find(function(s){ return s.id === sId; }) || { label: 'Encontro', icon: 'ic-dialogo' };
+  }
+
+  var secMeta = _getSectorMeta(currentEntry);
+
   var html = '<style>'
-    + '.dlg-full-reader-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#241c15 0%,#130e0a 100%);display:flex;flex-direction:column;box-sizing:border-box;overflow:hidden;animation:dlgFadeIn 0.2s ease-out;}'
+    + '.dlg-full-reader-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#241c15 0%,#130e0a 100%);display:flex;flex-direction:column;box-sizing:border-box;overflow:hidden;animation:dlgFadeIn 0.22s cubic-bezier(0.16,1,0.3,1);will-change:opacity,transform;}'
+    + '.dlg-full-reader-overlay.dlg-closing{animation:dlgFadeOut 0.18s cubic-bezier(0.4,0,1,1) forwards !important;pointer-events:none;}'
     + '@keyframes dlgFadeIn{from{opacity:0;transform:scale(0.99);}to{opacity:1;transform:scale(1);}}'
+    + '@keyframes dlgFadeOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(0.985);}}'
     + '.dfr-header{flex-shrink:0;display:flex;align-items:center;gap: var(--v-space-md, 10px);padding: 12px 16px;background:linear-gradient(180deg,rgba(35,27,20,0.95),rgba(20,15,11,0.9));border-bottom:1.5px solid var(--v-gold,#c4953a);box-shadow:0 4px 16px rgba(0,0,0,0.6);}'
     + '.dfr-portrait{width:46px;height:46px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid var(--v-gold,#c4953a);display:flex;align-items:center;justify-content:center;background:rgba(20,16,12,0.9);box-shadow:0 0 10px rgba(196,149,58,0.35);cursor:pointer;}'
     + '.dfr-portrait img{width:100%;height:100%;object-fit:cover;}'
     + '.dfr-portrait svg{width:28px;height:28px;color:var(--v-gold,#c4953a);}'
     + '.dfr-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}'
     + '.dfr-name{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(15px * var(--v-font-scale, 1));color:#fff4d0;font-weight:700;letter-spacing:1px;text-shadow:0 0 8px rgba(196,149,58,0.4);}'
-    + '.dfr-sub-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);}'
+    + '.dfr-sub-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);transition:opacity 0.16s ease;}'
     + '.dfr-sector-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;background:rgba(196,149,58,0.15);border:1px solid rgba(196,149,58,0.4);border-radius:4px;color:var(--v-gold,#c4953a);font-weight:700;text-transform:uppercase;font-size:calc(9.5px * var(--v-font-scale, 1));}'
     + '.dfr-close-btn{flex-shrink:0;background:rgba(74,56,40,0.5);border:1px solid var(--v-gold-40,rgba(196,149,58,0.4));color:#ffd27a;width:36px;height:36px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;}'
     + '.dfr-close-btn:hover{background:rgba(196,149,58,0.25);border-color:var(--v-gold,#c4953a);color:#fff;transform:scale(1.05);}'
-    // Corpo
-    + '.dfr-body{flex:1;overflow-y:auto;padding: 16px;display:flex;flex-direction:column;gap: 14px;max-width:760px;margin:0 auto;width:100%;box-sizing:border-box;}'
+    // Viewport e Container do Corpo com Transições
+    + '.dfr-body-viewport{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;}'
+    + '.dfr-body-content{padding: 16px;display:flex;flex-direction:column;gap: 14px;max-width:760px;margin:0 auto;width:100%;box-sizing:border-box;will-change:transform,opacity;}'
+    + '.dfr-body-content.dfr-initial-fade{animation:dfrFadeUp 0.22s cubic-bezier(0.16,1,0.3,1);}'
+    + '@keyframes dfrFadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}'
+    // Efeitos direcionais suaves entre diálogos
+    + '.dfr-slide-out-right{animation:dfrSlideOutRight 0.14s cubic-bezier(0.4,0,1,1) forwards !important;}'
+    + '.dfr-slide-out-left{animation:dfrSlideOutLeft 0.14s cubic-bezier(0.4,0,1,1) forwards !important;}'
+    + '.dfr-slide-in-left{animation:dfrSlideInLeft 0.22s cubic-bezier(0.16,1,0.3,1) forwards !important;}'
+    + '.dfr-slide-in-right{animation:dfrSlideInRight 0.22s cubic-bezier(0.16,1,0.3,1) forwards !important;}'
+    + '@keyframes dfrSlideOutRight{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(32px);}}'
+    + '@keyframes dfrSlideOutLeft{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(-32px);}}'
+    + '@keyframes dfrSlideInLeft{from{opacity:0;transform:translateX(-32px);}to{opacity:1;transform:translateX(0);}}'
+    + '@keyframes dfrSlideInRight{from{opacity:0;transform:translateX(32px);}to{opacity:1;transform:translateX(0);}}'
     + '.dfr-date-tag{text-align:center;font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);font-style:italic;margin-bottom:4px;}'
     + '.dfr-script-block{display:flex;flex-direction:column;gap:8px;}'
     + '.dfr-line{font-size:calc(13px * var(--v-font-scale, 1));line-height:1.6;color:#e6dac0;}'
@@ -70644,12 +70756,15 @@ function _openDialogueReaderPopup(entry, allNpcDialogues, currentIndex){
     // Recompensas
     + '.dfr-rewards-box{display:flex;gap:8px;flex-wrap:wrap;padding: 8px 12px;background:rgba(196,149,58,0.08);border:1px solid rgba(196,149,58,0.3);border-radius:6px;align-items:center;}'
     + '.dfr-reward-item{display:inline-flex;align-items:center;gap:4px;font-size:calc(11px * var(--v-font-scale, 1));color:#ffd27a;font-weight:700;}'
-    // Footer
-    + '.dfr-footer{flex-shrink:0;padding: 10px 16px;background:rgba(20,16,12,0.92);border-top:1px solid rgba(196,149,58,0.3);display:flex;justify-content:space-between;align-items:center;gap: var(--v-space-md, 8px);}'
-    + '.dfr-nav-btn{padding: 6px 14px;background:rgba(74,56,40,0.55);border:1px solid rgba(196,149,58,0.45);border-radius:6px;color:#d4c8b0;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));cursor:pointer;transition:all 0.15s;}'
-    + '.dfr-nav-btn:hover:not(:disabled){background:rgba(196,149,58,0.2);border-color:var(--v-gold,#c4953a);color:#fff;}'
-    + '.dfr-nav-btn:disabled{opacity:0.35;cursor:default;}'
-    + '.dfr-back-btn{padding: 8px 18px;background:linear-gradient(180deg,#c4953a,#8a6420);border:1px solid #ffd700;border-radius:6px;color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(12px * var(--v-font-scale, 1));font-weight:700;cursor:pointer;letter-spacing:0.8px;}'
+    // Footer Estável com Animações
+    + '.dfr-footer{flex-shrink:0;padding: 10px 16px;background:rgba(20,16,12,0.95);border-top:1.5px solid rgba(196,149,58,0.3);display:flex;justify-content:space-between;align-items:center;gap: var(--v-space-md, 8px);}'
+    + '.dfr-nav-btn{padding: 7px 14px;background:rgba(74,56,40,0.55);border:1px solid rgba(196,149,58,0.45);border-radius:6px;color:#d4c8b0;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:all 0.2s cubic-bezier(0.2,0.9,0.3,1);user-select:none;}'
+    + '.dfr-nav-btn:hover:not(:disabled){background:rgba(196,149,58,0.22);border-color:var(--v-gold,#c4953a);color:#fff;transform:translateY(-1px);}'
+    + '.dfr-nav-btn:disabled{opacity:0.28;cursor:default;pointer-events:none;}'
+    + '.dfr-nav-center{display:flex;align-items:center;gap: 8px;flex-direction:column;}'
+    + '.dfr-counter-badge{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.35);border-radius:12px;padding: 2px 10px;font-weight:700;letter-spacing:0.6px;transition:all 0.18s ease;white-space:nowrap;}'
+    + '.dfr-back-btn{padding: 7px 18px;background:linear-gradient(180deg,#c4953a,#8a6420);border:1px solid #ffd700;border-radius:6px;color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11.5px * var(--v-font-scale, 1));font-weight:700;cursor:pointer;letter-spacing:0.8px;transition:all 0.18s;}'
+    + '.dfr-back-btn:hover{box-shadow:0 0 10px rgba(196,149,58,0.45);transform:translateY(-1px);}'
     + '</style>'
     + '<div class="dfr-header">'
     +   '<div class="dfr-portrait" ' + (isImg ? 'title="Ampliar imagem"' : '') + '>'
@@ -70664,96 +70779,33 @@ function _openDialogueReaderPopup(entry, allNpcDialogues, currentIndex){
     +   '</div>'
     +   '<button id="dfr-btn-close" class="dfr-close-btn" type="button" aria-label="Fechar">✕</button>'
     + '</div>'
-    + '<div class="dfr-body">'
-    +   '<div class="dfr-date-tag">✦ Encontro ocorrido em ' + dateStr + '</div>'
-    // Falas iniciais
-    +   '<div class="dfr-script-block">';
-
-  (entry.script || []).forEach(function(line){
-    if (!line || !line.text) return;
-    if (line.type === 'speech') {
-      var spk = line.speaker || npcName;
-      html += '<div class="dfr-line speech"><span class="dfr-speaker">' + spk + '</span>' + line.text + '</div>';
-    } else {
-      html += '<div class="dfr-line narration">' + line.text + '</div>';
-    }
-  });
-  html += '</div>';
-
-  // Decisão tomada pelo jogador
-  if (entry.chosen) {
-    html += '<div class="dfr-decision-card">'
-      + '<span class="dfr-decision-tag">⚔ Tua Decisão:</span>'
-      + '<span class="dfr-decision-label">' + (entry.chosen.label || entry.chosen.id || 'Avançar') + '</span>'
-      + (entry.chosen.desc ? '<span class="dfr-decision-desc">' + entry.chosen.desc + '</span>' : '')
-      + '</div>';
-  }
-
-  // Teste de perícia / dados D&D 5e
-  if (entry.check && (entry.check.d20 != null || entry.check.total != null)) {
-    var ck = entry.check;
-    var isWin = !!ck.success;
-    var bCls = ck.critSuccess ? 'badge-crit' : (isWin ? 'badge-win' : 'badge-loss');
-    var bLabel = ck.critSuccess ? '⚜ Acerto Crítico!' : (ck.critFail ? '✗ Falha Crítica' : (isWin ? '✓ Sucesso' : '✗ Falha'));
-    var skillLabel = (window.DndRules && typeof window.DndRules.skillLabelPT === 'function')
-      ? window.DndRules.skillLabelPT(ck.skill || ck.stat)
-      : (ck.skill || ck.stat || 'Atributo');
-    var modStr = (ck.mod >= 0 ? '+' : '') + (ck.mod || 0);
-
-    html += '<div class="dfr-check-card ' + (isWin ? 'check-win' : 'check-loss') + '">'
-      + '<div class="dfr-check-head">'
-      +   '<span>🎲 Teste de ' + skillLabel + (ck.dc ? ' (CD ' + ck.dc + ')' : '') + '</span>'
-      +   '<span class="dfr-check-badge ' + bCls + '">' + bLabel + '</span>'
-      + '</div>'
-      + '<div class="dfr-check-formula">'
-      +   'Rolagem d20: <b>' + (ck.d20 != null ? ck.d20 : '-') + '</b> ' + modStr + ' = <b>' + (ck.total != null ? ck.total : '-') + '</b>' + (ck.dc ? ' vs CD ' + ck.dc : '')
-      + '</div>'
-      + '</div>';
-  }
-
-  // Desfecho narrativo
-  if (entry.outcome && (Array.isArray(entry.outcome) ? entry.outcome.length > 0 : String(entry.outcome).trim().length > 0)) {
-    html += '<div class="dfr-outcome-box">'
-      + '<div class="dfr-outcome-title">✦ Desfecho & Resposta:</div>';
-    if (Array.isArray(entry.outcome)) {
-      entry.outcome.forEach(function(oLine){
-        if (!oLine || !oLine.text) return;
-        if (oLine.type === 'speech') {
-          html += '<div class="dfr-line speech"><span class="dfr-speaker">' + (oLine.speaker || npcName) + '</span>' + oLine.text + '</div>';
-        } else {
-          html += '<div class="dfr-line narration">' + oLine.text + '</div>';
-        }
-      });
-    } else {
-      html += '<div class="dfr-line narration">' + String(entry.outcome) + '</div>';
-    }
-    html += '</div>';
-  }
-
-  // Recompensas
-  if (Array.isArray(entry.rewards) && entry.rewards.length > 0) {
-    html += '<div class="dfr-rewards-box">'
-      + '<span style="font-size:calc(10.5px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);font-weight:700;text-transform:uppercase;">Recompensas:</span>';
-    entry.rewards.forEach(function(rw){
-      var ico = rw.type === 'xp' ? '⭐' : (rw.type === 'gold' ? '🪙' : '✦');
-      var sign = (rw.amount > 0) ? '+' : '';
-      html += '<span class="dfr-reward-item">' + ico + ' ' + sign + rw.amount + ' ' + (rw.label || '') + '</span>';
-    });
-    html += '</div>';
-  }
-
-  html += '</div>' // dfr-body
-    // Footer
+    + '<div class="dfr-body-viewport">'
+    +   '<div class="dfr-body-content dfr-initial-fade">'
+    +     _buildDialogueBodyHTML(currentEntry, npcName)
+    +   '</div>'
+    + '</div>'
     + '<div class="dfr-footer">';
 
-  var hasMulti = Array.isArray(allNpcDialogues) && allNpcDialogues.length > 1;
+  var totalDialogues = sortedList.length;
+  var hasMulti = totalDialogues > 1;
+
   if (hasMulti) {
-    html += '<button id="dfr-prev-btn" class="dfr-nav-btn" ' + (currentIndex > 0 ? '' : 'disabled') + '>← Mais Antigo</button>'
-         +  '<button id="dfr-back-bottom" class="dfr-back-btn">↩ Voltar</button>'
-         +  '<button id="dfr-next-btn" class="dfr-nav-btn" ' + (currentIndex < allNpcDialogues.length - 1 ? '' : 'disabled') + '>Mais Recente →</button>';
+    html += '<button id="dfr-prev-btn" class="dfr-nav-btn" ' + (activeIdx > 0 ? '' : 'disabled') + ' title="Atalho: Seta Esquerda (←)">'
+         +    '<span>◀</span><span>Mais Antigo</span>'
+         +  '</button>'
+         +  '<div class="dfr-nav-center">'
+         +    '<div id="dfr-counter-badge" class="dfr-counter-badge">Diálogo ' + (activeIdx + 1) + ' de ' + totalDialogues + '</div>'
+         +    '<button id="dfr-back-bottom" class="dfr-back-btn">↩ Voltar</button>'
+         +  '</div>'
+         +  '<button id="dfr-next-btn" class="dfr-nav-btn" ' + (activeIdx < totalDialogues - 1 ? '' : 'disabled') + ' title="Atalho: Seta Direita (→)">'
+         +    '<span>Mais Recente</span><span>▶</span>'
+         +  '</button>';
   } else {
     html += '<div style="flex:1;"></div>'
-         +  '<button id="dfr-back-bottom" class="dfr-back-btn">↩ Voltar ao Registro</button>'
+         +  '<div class="dfr-nav-center">'
+         +    '<div class="dfr-counter-badge">Diálogo Único</div>'
+         +    '<button id="dfr-back-bottom" class="dfr-back-btn">↩ Voltar ao Registro</button>'
+         +  '</div>'
          +  '<div style="flex:1;"></div>';
   }
   html += '</div>';
@@ -70761,8 +70813,86 @@ function _openDialogueReaderPopup(entry, allNpcDialogues, currentIndex){
   reader.innerHTML = html;
   document.body.appendChild(reader);
 
+  var viewportEl = reader.querySelector('.dfr-body-viewport');
+  var contentEl = reader.querySelector('.dfr-body-content');
+  var prevBtn = reader.querySelector('#dfr-prev-btn');
+  var nextBtn = reader.querySelector('#dfr-next-btn');
+  var counterBadge = reader.querySelector('#dfr-counter-badge');
+  var subRowEl = reader.querySelector('.dfr-sub-row');
+
+  var isBusy = false;
+
+  function _updateControls(){
+    if (!hasMulti) return;
+    if (prevBtn) {
+      if (activeIdx > 0) prevBtn.removeAttribute('disabled');
+      else prevBtn.setAttribute('disabled', 'disabled');
+    }
+    if (nextBtn) {
+      if (activeIdx < totalDialogues - 1) nextBtn.removeAttribute('disabled');
+      else nextBtn.setAttribute('disabled', 'disabled');
+    }
+    if (counterBadge) {
+      var tag = '';
+      if (activeIdx === 0) tag = ' · Mais Antigo';
+      else if (activeIdx === totalDialogues - 1) tag = ' · Mais Recente';
+      counterBadge.textContent = 'Diálogo ' + (activeIdx + 1) + ' de ' + totalDialogues + tag;
+    }
+  }
+
+  function _updateHeaderMeta(eItem){
+    if (!subRowEl) return;
+    subRowEl.style.opacity = '0.35';
+    setTimeout(function(){
+      var sm = _getSectorMeta(eItem);
+      var nd = (typeof (eItem.npc) === 'object' && eItem.npc.desc) ? eItem.npc.desc : (eItem.location || '');
+      subRowEl.innerHTML = '<span class="dfr-sector-badge">' + (sm.label || 'Setor') + '</span>'
+                         + (nd ? '<span>· ' + nd + '</span>' : '');
+      subRowEl.style.opacity = '1';
+    }, 100);
+  }
+
+  // Transição suave direcional entre diálogos
+  function _navigateTo(targetIdx, direction){
+    if (isBusy || targetIdx === activeIdx || targetIdx < 0 || targetIdx >= totalDialogues) return;
+    isBusy = true;
+
+    var dir = direction || (targetIdx < activeIdx ? 'older' : 'newer');
+    activeIdx = targetIdx;
+    var nextEntry = sortedList[activeIdx];
+
+    _updateControls();
+    _updateHeaderMeta(nextEntry);
+
+    var outClass = dir === 'older' ? 'dfr-slide-out-right' : 'dfr-slide-out-left';
+    var inClass  = dir === 'older' ? 'dfr-slide-in-left' : 'dfr-slide-in-right';
+
+    if (contentEl) {
+      contentEl.className = 'dfr-body-content ' + outClass;
+
+      setTimeout(function(){
+        contentEl.innerHTML = _buildDialogueBodyHTML(nextEntry, npcName);
+        if (viewportEl) viewportEl.scrollTop = 0;
+        contentEl.className = 'dfr-body-content ' + inClass;
+
+        setTimeout(function(){
+          if (contentEl) contentEl.className = 'dfr-body-content';
+          isBusy = false;
+        }, 220);
+      }, 130);
+    } else {
+      isBusy = false;
+    }
+  }
+
+  reader._navigateTo = _navigateTo;
+
   function _closeReader(){
-    if (reader && reader.parentNode) reader.parentNode.removeChild(reader);
+    window.removeEventListener('keydown', _onKeyDown);
+    reader.classList.add('dlg-closing');
+    setTimeout(function(){
+      if (reader && reader.parentNode) reader.parentNode.removeChild(reader);
+    }, 180);
   }
 
   var closeBtn = reader.querySelector('#dfr-btn-close');
@@ -70779,21 +70909,59 @@ function _openDialogueReaderPopup(entry, allNpcDialogues, currentIndex){
     });
   }
 
-  // Navegação entre múltiplos diálogos do mesmo NPC
+  // Navegação pelos botões
   if (hasMulti) {
-    var prevBtn = reader.querySelector('#dfr-prev-btn');
-    if (prevBtn && currentIndex > 0) {
+    _updateControls();
+
+    if (prevBtn) {
       prevBtn.addEventListener('click', function(){
-        _openDialogueReaderPopup(allNpcDialogues[currentIndex - 1], allNpcDialogues, currentIndex - 1);
+        _navigateTo(activeIdx - 1, 'older');
       });
     }
-    var nextBtn = reader.querySelector('#dfr-next-btn');
-    if (nextBtn && currentIndex < allNpcDialogues.length - 1) {
+    if (nextBtn) {
       nextBtn.addEventListener('click', function(){
-        _openDialogueReaderPopup(allNpcDialogues[currentIndex + 1], allNpcDialogues, currentIndex + 1);
+        _navigateTo(activeIdx + 1, 'newer');
       });
+    }
+
+    // Suporte a gestos touch swipe (sem stopPropagation — Regra #20)
+    var touchStartX = 0;
+    var touchStartY = 0;
+    if (viewportEl) {
+      viewportEl.addEventListener('touchstart', function(e){
+        if (e.touches && e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      viewportEl.addEventListener('touchend', function(e){
+        if (e.changedTouches && e.changedTouches.length === 1) {
+          var deltaX = e.changedTouches[0].clientX - touchStartX;
+          var deltaY = e.changedTouches[0].clientY - touchStartY;
+          if (Math.abs(deltaX) > 48 && Math.abs(deltaY) < 55) {
+            if (deltaX > 0 && activeIdx > 0) {
+              _navigateTo(activeIdx - 1, 'older');
+            } else if (deltaX < 0 && activeIdx < totalDialogues - 1) {
+              _navigateTo(activeIdx + 1, 'newer');
+            }
+          }
+        }
+      }, { passive: true });
     }
   }
+
+  // Suporte a atalhos de teclado (setas ← / → e Esc)
+  function _onKeyDown(e){
+    if (e.key === 'ArrowLeft' && hasMulti && activeIdx > 0) {
+      _navigateTo(activeIdx - 1, 'older');
+    } else if (e.key === 'ArrowRight' && hasMulti && activeIdx < totalDialogues - 1) {
+      _navigateTo(activeIdx + 1, 'newer');
+    } else if (e.key === 'Escape') {
+      _closeReader();
+    }
+  }
+  window.addEventListener('keydown', _onKeyDown);
 }
 
 function _showDialogHistoryPopup(){
