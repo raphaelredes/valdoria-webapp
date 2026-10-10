@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-09T17:01:07Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-10T23:14:53Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1530,9 +1530,15 @@ html.sim-prod .sim-side-panel { display: none !important; }
   background: rgba(90, 58, 26, 0.45);
   outline: none;
 }
-/* CDN combat: fixed + inset:0 cobre o monitor inteiro; no simulador fica dentro do frame */
-/* Canvas VFX fica abaixo de qualquer overlay de dado (evita cobrir WebGL). */
-#vfxCanvas { z-index: 40; pointer-events: none; }
+/* REGRA SOBERANA (Ordem do Usuário 2026-10): Efeitos visuais e animações (vfxCanvas,
+   floating labels, partículas, projéteis) DEVEM SEMPRE ficar ACIMA de todos os outros layers,
+   incluindo miniaturas, tokens de combatentes (15..65), relevo e HUD de combate, permanecendo
+   apenas abaixo de popups/overlays de dados WebGL (101000). */
+#vfxCanvas,
+canvas#vfxCanvas {
+  z-index: 99990 !important;
+  pointer-events: none !important;
+}
 #vfxCanvas,
 .dice-overlay,
 .unit-detail-overlay,
@@ -7356,10 +7362,9 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
 /* PHB miss — label "Errou" flutuando pra cima com glow branco
    (mesma paleta do glow em torno dos cards). Usa cell como âncora. */
 .cell-miss-float-label {
-    position: absolute;
-    left: 50%; top: 22%;
+    position: fixed;
     transform: translate(-50%, 0);
-    z-index: 14;
+    z-index: 99999 !important;
     pointer-events: none;
     font-family: var(--v-font-display, 'Cinzel'), serif;
     font-weight: 800;
@@ -8932,16 +8937,14 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 /* Float labels (+N HP, etc.) acima do card */
 .cell-float-label {
-    position: absolute;
-    left: 50%;
-    top: 0;
+    position: fixed;
     transform: translate(-50%, -20%);
     font-family: var(--v-font-display, 'Cinzel'), serif;
     font-weight: 700;
     font-size: calc(22px * var(--v-font-scale, 1));
     letter-spacing: 1px;
     pointer-events: none;
-    z-index: 15;
+    z-index: 99999 !important;
     animation: cflRise 1.4s cubic-bezier(.22,.61,.36,1) forwards;
     text-shadow: 0 2px 4px rgba(0,0,0,0.9);
 }
@@ -11271,11 +11274,27 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   animation: hexAttackPulse 0.4s ease-out;
 }
 
-.floating-dmg {
+/* REGRA SOBERANA (Ordem do Usuário 2026-10): Efeitos visuais e animações
+   DEVEM SEMPRE ficar ACIMA de todos os outros layers (tokens, combatentes, relevo e HUD). */
+.floating-dmg,
+.cell-skill-impact-label,
+.cell-miss-float-label,
+.cell-float-label,
+.hit-particle,
+.mm-flying-missile {
   z-index: 99999 !important;
+  pointer-events: none !important;
 }
-.cell-skill-impact-label {
-  z-index: 99999 !important;
+#vfxCanvas,
+canvas#vfxCanvas,
+.boss-charge-footprint,
+.boss-charge-speedline,
+.boss-charge-shockwave,
+.boss-charge-dust,
+.rf-bolt,
+.rf-ice-shard {
+  z-index: 99990 !important;
+  pointer-events: none !important;
 }
 
 .token-hp-badge {
@@ -32558,17 +32577,20 @@ function _showEndTurnConfirm(s, onConfirm) {
     });
 }
 
-/** Injeta o texto "Errou" animado subindo no card do alvo. */
-function spawnMissFloatLabel(el) {
+/** Injeta o texto "Errou" (ou customText) animado subindo acima do card do alvo no document.body (position:fixed) */
+function spawnMissFloatLabel(el, customText) {
     if (!el) return;
+    var rect = el.getBoundingClientRect();
     var lbl = document.createElement('div');
     lbl.className = 'cell-miss-float-label';
-    lbl.textContent = 'Errou';
+    lbl.textContent = customText || 'Errou';
+    lbl.style.left = (rect.left + rect.width / 2) + 'px';
+    lbl.style.top = (rect.top - 8) + 'px';
     /* X-6.5.51AE (2026-05-07): força animation-duration inline com !important
        (ver _spawnFloatingDmgNumber pra contexto completo). */
     lbl.style.setProperty('animation-duration', '1.25s', 'important');
     lbl.style.setProperty('animation-iteration-count', '1', 'important');
-    el.appendChild(lbl);
+    document.body.appendChild(lbl);
     setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 1300);
 }
 
@@ -38283,12 +38305,15 @@ async function __combatAnimateOneEvent(ev) {
            cell-float-label.heal (verde, sobe do card). */
         if (elH && (ev.healGained | 0) > 0) {
             try {
+                var _hRect = elH.getBoundingClientRect();
                 var _hLbl = document.createElement('div');
                 _hLbl.className = 'cell-float-label heal';
                 _hLbl.textContent = '+' + (ev.healGained | 0) + ' PV';
+                _hLbl.style.left = (_hRect.left + _hRect.width / 2) + 'px';
+                _hLbl.style.top = (_hRect.top - 8) + 'px';
                 _hLbl.style.setProperty('animation-duration', '1.4s', 'important');
                 _hLbl.style.setProperty('animation-iteration-count', '1', 'important');
-                elH.appendChild(_hLbl);
+                document.body.appendChild(_hLbl);
                 setTimeout(function () { if (_hLbl.parentNode) _hLbl.parentNode.removeChild(_hLbl); }, 1450);
             } catch (eHL) {}
         }
@@ -38404,12 +38429,15 @@ async function __combatAnimateOneEvent(ev) {
                     try { window._combatVfx.healBurst(_elHi); } catch (_) {}
                 }
                 try {
+                    var _iRect = _elHi.getBoundingClientRect();
                     var _iLbl = document.createElement('div');
                     _iLbl.className = 'cell-float-label heal';
                     _iLbl.textContent = '+' + (ev.healGained | 0) + ' PV';
+                    _iLbl.style.left = (_iRect.left + _iRect.width / 2) + 'px';
+                    _iLbl.style.top = (_iRect.top - 8) + 'px';
                     _iLbl.style.setProperty('animation-duration', '1.4s', 'important');
                     _iLbl.style.setProperty('animation-iteration-count', '1', 'important');
-                    _elHi.appendChild(_iLbl);
+                    document.body.appendChild(_iLbl);
                     setTimeout(function () { if (_iLbl.parentNode) _iLbl.parentNode.removeChild(_iLbl); }, 1450);
                 } catch (eIL) {}
             }
