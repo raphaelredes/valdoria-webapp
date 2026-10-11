@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-10T23:34:04Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-11T00:04:43Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10114,6 +10114,66 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   box-sizing: border-box;
 }
 
+/* Weather Canvas & Clima Atmosférico no Campo de Batalha Hexagonal */
+.bf-weather-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none !important;
+  z-index: 9000;
+}
+.battlefield-hex-arena.weather-rain {
+  filter: drop-shadow(0 0 16px rgba(18, 30, 48, 0.45));
+}
+.battlefield-hex-arena.weather-storm {
+  filter: drop-shadow(0 0 24px rgba(8, 14, 28, 0.7));
+}
+.battlefield-hex-arena.weather-fog {
+  filter: drop-shadow(0 0 16px rgba(180, 190, 205, 0.35));
+}
+.battlefield-hex-arena.weather-snow {
+  filter: drop-shadow(0 0 16px rgba(160, 195, 230, 0.4));
+}
+.weather-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e0e5eb;
+  vertical-align: middle;
+}
+.weather-badge.w-clear {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.35);
+  color: #fde047;
+}
+.weather-badge.w-rain {
+  background: rgba(56, 189, 248, 0.14);
+  border-color: rgba(56, 189, 248, 0.38);
+  color: #7dd3fc;
+}
+.weather-badge.w-storm {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+}
+.weather-badge.w-fog {
+  background: rgba(148, 163, 184, 0.16);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #cbd5e1;
+}
+.weather-badge.w-snow {
+  background: rgba(186, 230, 253, 0.15);
+  border-color: rgba(186, 230, 253, 0.38);
+  color: #e0f2fe;
+}
+
 /* Névoa de Guerra (Fog of War) nos Tokens de Combate D&D 5e */
 .battlefield-hex-arena .cell.hex-token.token--shrouded-fog {
   opacity: 0 !important;
@@ -15592,7 +15652,7 @@ function newCombat() {
         if (c.summonKind) c.summonedBy = p_idx;
     });
     assignInitialPositions(order, typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14, typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12);
-    var _state = { ph: 'intro', order: order, p_idx: p_idx, active_idx: 0, rn: 0, _wrapsSeen: 0, log: [], last: null, bio: 'forest',
+    var _state = { ph: 'intro', order: order, p_idx: p_idx, active_idx: 0, rn: 0, _wrapsSeen: 0, log: [], last: null, bio: 'forest', biome: 'forest', weather: 'clear',
              battlefield: { cols: typeof HEX_COLS_DEFAULT !== 'undefined' ? HEX_COLS_DEFAULT : 14, rows: typeof HEX_ROWS_DEFAULT !== 'undefined' ? HEX_ROWS_DEFAULT : 12 },
              /* V1 Invocações Phase 1 — dict[caster_idx -> list[attached_summon]] */
              attachedSummons: {},
@@ -16760,7 +16820,11 @@ function newCombatFromSetup(cfg) {
     order.forEach(function (c) {
         if (c.summonKind) c.summonedBy = p_idx;
     });
-    var _state = { ph: 'intro', order: order, p_idx: p_idx, active_idx: 0, rn: 0, _wrapsSeen: 0, log: [], last: null, bio: 'forest', _fromSetup: true,
+    var _state = { ph: 'intro', order: order, p_idx: p_idx, active_idx: 0, rn: 0, _wrapsSeen: 0, log: [], last: null,
+             bio: cfg.biome || 'forest',
+             biome: cfg.biome || 'forest',
+             weather: cfg.weather || 'clear',
+             _fromSetup: true,
              /* #17 (sessao #70): narrativa do evento (ex: "Tres orcs saltam...")
                 vinda do setup.narrative -> exibida via typewriter na intro do combate. */
              narrative: cfg.narrative || '',
@@ -16800,6 +16864,7 @@ function newCombatFromSetup(cfg) {
         _simLog('[SIM:BOOT]', {
             mode: 'fromSetup',
             biome: cfg.biome || 'forest',
+            weather: cfg.weather || 'clear',
             difficulty: gdiff,
             p_idx: p_idx,
             order_len: order.length,
@@ -20316,6 +20381,7 @@ function calcUnitVisionRange(u, weather, biome) {
     var baseR = 6; // Dia / Limpo (alcance tático padrão D&D 5e: 9m / 6 hexes)
     if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') baseR = 3;
     else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') baseR = 4;
+    else if (curWeather === 'snow' || curWeather === 'neve') baseR = 4;
     else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') baseR = 5;
     else if (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('masmorra') >= 0 || curBiome.indexOf('dungeon') >= 0 || curBiome.indexOf('caverna') >= 0) baseR = 5;
     else baseR = 6;
@@ -21320,6 +21386,35 @@ function getBattlefieldBiomeKey(s) {
     return 'forest';
 }
 
+function getBattlefieldWeatherKey(s) {
+    var raw = String((s && s.weather) || 'clear').toLowerCase().trim();
+    if (raw === 'rain' || raw === 'r' || raw === 'chuva') return 'rain';
+    if (raw === 'storm' || raw === 't' || raw === 'tempestade') return 'storm';
+    if (raw === 'fog' || raw === 'f' || raw === 'nevoa' || raw === 'névoa') return 'fog';
+    if (raw === 'snow' || raw === 'neve') return 'snow';
+    return 'clear';
+}
+
+var BATTLEFIELD_BIOME_LABELS = {
+    forest: 'Floresta',
+    plains: 'Planície',
+    swamp: 'Pântano',
+    desert: 'Deserto',
+    mountain: 'Montanha',
+    cave: 'Caverna',
+    crypt: 'Cripta',
+    snow: 'Tundra Gélida',
+    volcanic: 'Vulcânico'
+};
+
+var BATTLEFIELD_WEATHER_LABELS = {
+    clear: { label: 'Limpo', icon: '☀️', cls: 'w-clear' },
+    rain: { label: 'Chuva', icon: '🌧️', cls: 'w-rain' },
+    storm: { label: 'Tempestade', icon: '⛈️', cls: 'w-storm' },
+    fog: { label: 'Névoa', icon: '🌫️', cls: 'w-fog' },
+    snow: { label: 'Neve', icon: '❄️', cls: 'w-snow' }
+};
+
 function getHexBiomeDetails(col, row, biome) {
     var h = ((col * 374761393) ^ (row * 668265263)) >>> 0;
     h = (h ^ (h >>> 13)) * 1274126177;
@@ -21479,6 +21574,8 @@ function buildBattlefield(s) {
         visionConditionLabel = 'NÉVOA DENSA';
     } else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') {
         visionConditionLabel = 'TEMPESTADE';
+    } else if (curWeather === 'snow' || curWeather === 'neve') {
+        visionConditionLabel = 'NEVASCA';
     } else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') {
         visionConditionLabel = 'CHUVA FORTE';
     } else if (isCave) {
@@ -21618,8 +21715,9 @@ function buildBattlefield(s) {
     html += '<div class="bf-pan-stage" data-bf-pan-stage style="width:' + stageW + 'px; height:' + stageH + 'px; position:relative; transform-origin: 0 0; transform: translate3d(' + _initPanX + 'px, ' + _initPanY + 'px, 0) scale(' + _initZoom + ');">';
 
     var curBiome = getBattlefieldBiomeKey(s);
+    var curWeather = String((s && s.weather) || 'clear').toLowerCase();
 
-    var bfExtra = ' biome-' + curBiome;
+    var bfExtra = ' biome-' + curBiome + ' weather-' + curWeather;
     if (_selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
         (_pendingSkill.blessSpell || _pendingSkill.shieldSpell)) {
         bfExtra += ' picker-buff-ally';
@@ -21810,6 +21908,8 @@ function buildBattlefield(s) {
             html += '</div>';
         }
     }
+
+    html += '<canvas class="bf-weather-canvas" width="' + arenaW + '" height="' + arenaH + '" style="position:absolute; left:0; top:0; width:' + arenaW + 'px; height:' + arenaH + 'px; pointer-events:none; z-index:9000;" data-bf-weather="' + escHtml(curWeather) + '"></canvas>';
 
     html += '</div>'; // .battlefield-hex-arena
     html += '</div>'; // .bf-pan-stage
@@ -25106,6 +25206,205 @@ function mountBattlefieldPanZoom() {
     };
 }
 
+var _bfWeatherTeardown = null;
+var _bfWeatherRafId = null;
+
+function mountBattlefieldWeather(s) {
+    if (_bfWeatherTeardown) {
+        try { _bfWeatherTeardown(); } catch (_eWt) {}
+        _bfWeatherTeardown = null;
+    }
+    if (_bfWeatherRafId) {
+        try { if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(_bfWeatherRafId); } catch (_eWraf) {}
+        _bfWeatherRafId = null;
+    }
+
+    var canvas = document.querySelector('.bf-weather-canvas');
+    if (!canvas || typeof canvas.getContext !== 'function') return;
+    if (typeof requestAnimationFrame !== 'function') return;
+
+    var ctx = null;
+    try { ctx = canvas.getContext('2d'); } catch (_eCtx) {}
+    if (!ctx) return;
+
+    var weatherRaw = canvas.getAttribute('data-bf-weather') || (s && s.weather) || 'clear';
+    var curWeather = getBattlefieldWeatherKey({ weather: weatherRaw });
+
+    var w = canvas.width || canvas.offsetWidth || 800;
+    var h = canvas.height || canvas.offsetHeight || 600;
+
+    if (curWeather === 'clear') {
+        // Céu limpo: limpa o canvas e encerra sem gastar ciclos de renderização
+        ctx.clearRect(0, 0, w, h);
+        return;
+    }
+
+    // Inicialização do pool de partículas persistente de alta performance (sem GC)
+    var particleCount = 0;
+    if (curWeather === 'storm') particleCount = 110;
+    else if (curWeather === 'rain') particleCount = 65;
+    else if (curWeather === 'snow') particleCount = 55;
+    else if (curWeather === 'fog') particleCount = 8; // bandas suaves de névoa
+
+    var particles = [];
+    for (var i = 0; i < particleCount; i++) {
+        particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            speed: (curWeather === 'storm') ? (18 + Math.random() * 8)
+                 : (curWeather === 'rain') ? (11 + Math.random() * 5)
+                 : (curWeather === 'snow') ? (1.2 + Math.random() * 1.5)
+                 : (0.15 + Math.random() * 0.25),
+            length: (curWeather === 'storm') ? (15 + Math.random() * 7)
+                  : (curWeather === 'rain') ? (9 + Math.random() * 5)
+                  : (1.2 + Math.random() * 1.8),
+            slant: (curWeather === 'storm') ? (3.5 + Math.random() * 1.5)
+                 : (curWeather === 'rain') ? (1.8 + Math.random() * 0.8)
+                 : 0,
+            swayPhase: Math.random() * Math.PI * 2,
+            swaySpeed: 0.002 + Math.random() * 0.003,
+            radius: (curWeather === 'snow') ? (1.0 + Math.random() * 1.6)
+                  : (curWeather === 'fog') ? (w * 0.28 + Math.random() * (w * 0.15))
+                  : 1.0,
+            alpha: (curWeather === 'fog') ? (0.04 + Math.random() * 0.04) : 1.0
+        });
+    }
+
+    var lastTimestamp = null;
+    var lightningTimer = (curWeather === 'storm') ? (3000 + Math.random() * 4000) : 0;
+    var lightningAlpha = 0;
+
+    function stepWeather(timestamp) {
+        if (!canvas.isConnected) {
+            _bfWeatherRafId = null;
+            return;
+        }
+
+        // Regra #21: Monotonicidade e clamp obrigatório
+        if (lastTimestamp === null) {
+            lastTimestamp = timestamp;
+        }
+        var rawDt = timestamp - lastTimestamp;
+        var dt = Math.max(10, Math.min(64, rawDt)); // clamp 10ms a 64ms
+        lastTimestamp = timestamp;
+
+        var dtFactor = dt / 16.666; // normalizado para 60fps
+
+        ctx.clearRect(0, 0, w, h);
+
+        if (curWeather === 'rain' || curWeather === 'storm') {
+            var isStorm = (curWeather === 'storm');
+
+            // Tint atmosférico uniforme
+            ctx.fillStyle = isStorm ? 'rgba(15, 22, 35, 0.24)' : 'rgba(30, 45, 65, 0.10)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Partículas de chuva em lote único (batching: 1 beginPath + N lineTo + 1 stroke)
+            ctx.strokeStyle = isStorm ? 'rgba(205, 220, 245, 0.58)' : 'rgba(185, 205, 230, 0.42)';
+            ctx.lineWidth = isStorm ? 1.3 : 1.0;
+            ctx.beginPath();
+            for (var rIdx = 0; rIdx < particles.length; rIdx++) {
+                var p = particles[rIdx];
+                p.y += p.speed * dtFactor;
+                p.x -= p.slant * dtFactor * 0.4;
+                if (p.y > h + 20) {
+                    p.y = -20;
+                    p.x = Math.random() * (w + 100);
+                }
+                if (p.x < -40) {
+                    p.x = w + 20;
+                }
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x - p.slant, p.y + p.length);
+            }
+            ctx.stroke();
+
+            // Respingos no chão para tempestade
+            if (isStorm) {
+                ctx.fillStyle = 'rgba(210, 225, 250, 0.32)';
+                ctx.beginPath();
+                for (var sIdx = 0; sIdx < 16; sIdx++) {
+                    var sp = particles[sIdx];
+                    if (sp && sp.y > h * 0.45) {
+                        ctx.moveTo(sp.x + 1.6, sp.y);
+                        ctx.arc(sp.x, sp.y, 1.4, 0, Math.PI * 2);
+                    }
+                }
+                ctx.fill();
+
+                // Clarão de relâmpago atmosférico
+                lightningTimer -= dt;
+                if (lightningTimer <= 0) {
+                    lightningAlpha = 0.38 + Math.random() * 0.22;
+                    lightningTimer = 4500 + Math.random() * 6000;
+                }
+                if (lightningAlpha > 0.01) {
+                    ctx.fillStyle = 'rgba(235, 242, 255, ' + lightningAlpha.toFixed(3) + ')';
+                    ctx.fillRect(0, 0, w, h);
+                    lightningAlpha *= Math.pow(0.82, dtFactor);
+                }
+            }
+        } else if (curWeather === 'snow') {
+            // Tint gélido
+            ctx.fillStyle = 'rgba(215, 228, 245, 0.14)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Flocos de neve batched (1 beginPath + N arc + 1 fill)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
+            ctx.beginPath();
+            for (var snIdx = 0; snIdx < particles.length; snIdx++) {
+                var sn = particles[snIdx];
+                sn.y += sn.speed * dtFactor;
+                sn.swayPhase += sn.swaySpeed * dt;
+                var swayX = Math.sin(sn.swayPhase) * 1.2;
+                sn.x += swayX * dtFactor;
+                if (sn.y > h + 10) {
+                    sn.y = -10;
+                    sn.x = Math.random() * w;
+                }
+                if (sn.x < -10) sn.x = w + 10;
+                else if (sn.x > w + 10) sn.x = -10;
+
+                ctx.moveTo(sn.x + sn.radius, sn.y);
+                ctx.arc(sn.x, sn.y, sn.radius, 0, Math.PI * 2);
+            }
+            ctx.fill();
+        } else if (curWeather === 'fog') {
+            // Névoa densa com tint uniforme e faixas suaves de bruma
+            ctx.fillStyle = 'rgba(220, 225, 235, 0.26)';
+            ctx.fillRect(0, 0, w, h);
+
+            for (var fgIdx = 0; fgIdx < particles.length; fgIdx++) {
+                var fg = particles[fgIdx];
+                fg.x += fg.speed * dtFactor * 1.5;
+                if (fg.x - fg.radius > w) {
+                    fg.x = -fg.radius;
+                    fg.y = Math.random() * h;
+                }
+                var grad = ctx.createRadialGradient(fg.x, fg.y, 0, fg.x, fg.y, fg.radius);
+                grad.addColorStop(0, 'rgba(230, 235, 245, ' + fg.alpha + ')');
+                grad.addColorStop(0.6, 'rgba(225, 230, 240, ' + (fg.alpha * 0.4) + ')');
+                grad.addColorStop(1, 'rgba(220, 225, 235, 0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.ellipse(fg.x, fg.y, fg.radius, fg.radius * 0.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        _bfWeatherRafId = requestAnimationFrame(stepWeather);
+    }
+
+    _bfWeatherRafId = requestAnimationFrame(stepWeather);
+
+    _bfWeatherTeardown = function () {
+        if (_bfWeatherRafId) {
+            try { if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(_bfWeatherRafId); } catch (_eT) {}
+            _bfWeatherRafId = null;
+        }
+    };
+}
+
 /* 2026-05-21 ANTI-CHEAT: debounced checkpoint dispatch. render() roda múltiplas
    vezes por segundo durante animações — debounce para 1 POST a cada 2s.
    _lastCheckpointAt prev. dup-suppression durante a mesma frame. */
@@ -25266,9 +25565,13 @@ function render(s) {
         } else {
             html += buildTurnQueue(s);
         }
+        var _hdrBiomeKeyIntro = getBattlefieldBiomeKey(s);
+        var _hdrWeatherKeyIntro = getBattlefieldWeatherKey(s);
+        var _hdrBiomeLabelIntro = BATTLEFIELD_BIOME_LABELS[_hdrBiomeKeyIntro] || 'Floresta';
+        var _hdrWInfoIntro = BATTLEFIELD_WEATHER_LABELS[_hdrWeatherKeyIntro] || BATTLEFIELD_WEATHER_LABELS.clear;
         html += '<div class="arena-header compact-header"><div class="arena-subtitle">' +
                 (ph === 'intro' ? 'Posicionamento' : ph === 'init' ? 'Rolando Iniciativa...' : 'Ordem de Combate') +
-                '</div></div>';
+                ' · ' + escHtml(_hdrBiomeLabelIntro) + ' <span class="weather-badge ' + _hdrWInfoIntro.cls + '" title="Clima ativo: ' + escHtml(_hdrWInfoIntro.label) + '">' + _hdrWInfoIntro.icon + ' ' + escHtml(_hdrWInfoIntro.label) + '</span></div></div>';
         html += buildBattlefield(s);
         if (ph === 'intro') {
             /* [MELHORIA 2026-04-21] CTAs movidos pra popup modal showIntroChoicePopup()
@@ -25280,6 +25583,8 @@ function render(s) {
         /* ph === 'init_done': escurecimento + ordem + CTA no popup showInitiativeOrderPopup() */
         setHTML(app, html);
         bindActions();
+        mountBattlefieldPanZoom();
+        mountBattlefieldWeather(s);
         /* [MELHORIA 2026-04-21] ph='intro' mostra popup modal com as 2 opções
            (Começar Rolagens / Pular Todas). Melhor UX em smartphone —
            substituiu overlay inline no bottom. */
@@ -25321,7 +25626,11 @@ function render(s) {
                 '</div>';
         }
     }
-    html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Rodada ' + s.rn + '</span> Floresta <span class="weather-badge w-clear">Limpo</span></div></div>';
+    var _hdrBiomeKey = getBattlefieldBiomeKey(s);
+    var _hdrWeatherKey = getBattlefieldWeatherKey(s);
+    var _hdrBiomeLabel = BATTLEFIELD_BIOME_LABELS[_hdrBiomeKey] || 'Floresta';
+    var _hdrWInfo = BATTLEFIELD_WEATHER_LABELS[_hdrWeatherKey] || BATTLEFIELD_WEATHER_LABELS.clear;
+    html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Rodada ' + s.rn + '</span> ' + escHtml(_hdrBiomeLabel) + ' <span class="weather-badge ' + _hdrWInfo.cls + '" title="Clima ativo: ' + escHtml(_hdrWInfo.label) + '">' + _hdrWInfo.icon + ' ' + escHtml(_hdrWInfo.label) + '</span></div></div>';
     /* V1 Invocações Phase 4 (2026-04-19, c) — HUD de recursos D&D 5e no topo:
          · Player turn: 3 pílulas completas (◆ Ação / ▲ Bônus / Reação) — ref completa
          · NPC turn: pílula compacta Reação SOMENTE — PHB p.190 reação pode ser
@@ -25713,6 +26022,7 @@ function bindActions() {
         })(lootRows[lri]);
     }
     mountBattlefieldPanZoom();
+    mountBattlefieldWeather(currentState);
 }
 
 function _showVictoryItemDetailPopup(itemObj) {
@@ -26914,6 +27224,17 @@ function onBtnClick(ev) {
                         rqs.set('map_id', resume.mapId);
                         if (resume.playerCol != null) { rqs.set('ld_spawn_col', resume.playerCol); rqs.set('col', resume.playerCol); }
                         if (resume.playerRow != null) { rqs.set('ld_spawn_row', resume.playerRow); rqs.set('row', resume.playerRow); }
+                    }
+                    if (resume.weather) {
+                        rqs.set('weather', resume.weather);
+                        rqs.set('ld_weather', resume.weather);
+                        try { sessionStorage.setItem('valdoria_journey_weather', resume.weather); } catch (_) {}
+                    }
+                    if (resume.biome) {
+                        rqs.set('biome', resume.biome);
+                    }
+                    if (resume.dayPhase) {
+                        rqs.set('ld_phase', resume.dayPhase);
                     }
                     /* Preserva godmode + lvl ao voltar pra exploracao — proximo combate
                        puxado a partir desse boot herda os mesmos overrides. */

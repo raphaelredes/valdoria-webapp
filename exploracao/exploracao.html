@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-10T22:39:26Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T00:04:53Z - do not edit directly, edit source -->
 
 
 
@@ -15600,6 +15600,13 @@ window.__explFetchTO = function(url, opts, ms) {
             if (res.state.abilities) {
               window.S.player.abilities = Object.assign(window.S.player.abilities || {}, res.state.abilities);
             }
+            if (res.state.weather && typeof _serverWeatherToClientCode === 'function') {
+              var _wcInit = _serverWeatherToClientCode(res.state.weather);
+              if (_wcInit) {
+                if (typeof _applyWeatherCode === 'function') _applyWeatherCode(_wcInit, false);
+                else window.S.weather = _wcInit;
+              }
+            }
           }
         }
         // #map-toast (2026-06-23): o servidor avisa quando ESTA chegada revelou um local NOVO →
@@ -16170,6 +16177,10 @@ window.__applyExploreSnap = function(S, snap) {
     if (snap.time.month === 10 || snap.time.month === 11 || (snap.time.month_name && String(snap.time.month_name).indexOf('Glacimir') >= 0)) {
       S.isGlacimir = true;
     }
+  }
+  if (snap.weather && typeof _serverWeatherToClientCode === 'function') {
+    var _scSnap = _serverWeatherToClientCode(snap.weather);
+    if (_scSnap) S.weather = _scSnap;
   }
   console.info('[E-REM:BOOT] snap applied cls=' + p.cls_key + ' lvl=' + p.level
     + ' xp=' + p.xp + ' hp=' + p.hp + '/' + p.mhp
@@ -38505,12 +38516,13 @@ function triggerCombatScreen(cfg) {
   // X-6.5.51 (2026-04-26): godmode flag persistente no boot pra cada combate
   // disparado a partir desse exploracao herdar o "one-shot kill" ate o reload.
   const godmode = window.__LD_GODMODE === true;
+  var simWeatherName = (S.weather === 'r') ? 'rain' : ((S.weather === 't') ? 'storm' : ((S.weather === 'f') ? 'fog' : ((S.weather === 'snow') ? 'snow' : 'clear')));
   // Monta URL com params pro combate.html pegar contexto
   const params = new URLSearchParams({
     from:      'exploracao',
     biome:     S.biome || 'plains',
     daypha:    S.dayPhase || 'day',
-    weather:   S.weather || 's',
+    weather:   simWeatherName,
     enemy:     cfg.enemyId || 'goblin',
     enemyName: enemyData.name,
     enemyCr:   enemyData.cr || '1/4',
@@ -38543,6 +38555,9 @@ function triggerCombatScreen(cfg) {
     var _augQs = new URLSearchParams(location.search);
     localStorage.setItem('valdoria_explore_resume', JSON.stringify({
       ts: Date.now(), mapId: S.mapId, playerCol: p.col, playerRow: p.row,
+      weather: S.weather || 's',
+      dayPhase: S.dayPhase || 'day',
+      biome: S.biome || 'plains',
       auth: {
         token: window.__EXPLORE_TOKEN || _augQs.get('token') || '',
         api: window.__EXPLORE_API_BASE || _augQs.get('api') || '',
@@ -38626,6 +38641,8 @@ function triggerCombatScreen(cfg) {
     sessionStorage.setItem('valdoria_sim_combat_setup_v1', JSON.stringify({
       v: 1,
       fillMode: 'per_slot',
+      biome: S.biome || 'plains',
+      weather: simWeatherName,
       // Sessão #75: passa a PARTY REAL (S.allies do snap: Sia/Joel/Quade) pro combate
       // de exploração. Antes era allyCount:0 hardcoded → a party não aparecia (só um
       // familiar default "Sprite"). Cap em SIM_PARTY_MAX_ALLIES (3) — combate.html re-clampa.
@@ -38739,7 +38756,9 @@ function triggerCombatScreen(cfg) {
           enemy: cfg.enemyId || 'goblin',
           count: (cfg.enemyCount || cfg.count || undefined),
           surprise: !!cfg.surprise,
-          narrative: cfg.narrative || ''
+          narrative: cfg.narrative || '',
+          weather: simWeatherName,
+          biome: S.biome || 'forest'
         })
       }).then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) {
