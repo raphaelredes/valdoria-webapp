@@ -2082,14 +2082,14 @@
       // Sessão #23 v8 (2026-05-22): user reportou cabeçalho com nome NPC
       // aparece durante narração (deveria só aparecer quando NPC fala).
       // Fix: oculta header se página atual NÃO tem speech (só narration).
-      var hasSpeech = page.some(function(line){ return line.type === 'speech'; });
+      var hasSpeech = page.some(function(line){ return line.type === 'speech' || line.type === 'player_speech'; });
       header.style.display = (hasSpeech || pages.length > 1) ? '' : 'none';
 
       // Rule #15: Integridade de Speaker — sincroniza cabeçalho e retrato com o interlocutor da página ativa
-      var firstSpeech = page.find(function(line){ return line.type === 'speech'; });
+      var firstSpeech = page.find(function(line){ return line.type === 'speech'; }) || page.find(function(line){ return line.type === 'player_speech'; });
       if (firstSpeech && firstSpeech.speaker) {
         var pageSpkKey = firstSpeech.speaker;
-        var isPlayerSpeaker = !!firstSpeech.is_player || pageSpkKey === '{player_name}' || pageSpkKey === '{player}';
+        var isPlayerSpeaker = !!firstSpeech.is_player || firstSpeech.type === 'player_speech' || pageSpkKey === '{player_name}' || pageSpkKey === '{player}';
         var pData = (opts && opts.player) || window.CURRENT_PLAYER || null;
         var playerName = (pData && pData.name) || 'Você';
         if (isPlayerSpeaker) {
@@ -2200,12 +2200,12 @@
         /* sessão #88: tipo 'dm' (voz de Mestre, doc §4.0.1) ganha visual próprio
            (sépia + label MESTRE via .enc-dm); qualquer type desconhecido cai em
            narration (antes caía em speech — invertido vs. legacy/Stub). */
-        var isLinePlayer = !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}';
-        var _lineCls = (line.type === 'speech') ? ('enc-speech' + (isLinePlayer ? ' enc-speech--player' : ''))
+        var isLinePlayer = line.type === 'player_speech' || !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}';
+        var _lineCls = (line.type === 'speech' || line.type === 'player_speech') ? ('enc-speech' + (isLinePlayer ? ' enc-speech--player' : ''))
           : (line.type === 'dm') ? 'enc-narration enc-dm'
           : 'enc-narration' + (line._checkHint ? ' enc-check-hint' : '');
         div.className = 'enc-line ' + _lineCls;
-        if (line.type === 'speech' && line.speaker) {
+        if ((line.type === 'speech' || line.type === 'player_speech') && line.speaker) {
           /* GUARD anti-vazamento (sessão #88 — bug reportado pelo user: key de
              backend exibida como nome do NPC). speaker DEVE ser display name;
              o CSS exibe data-speaker VERBATIM (content:attr). Key snake_case
@@ -2330,11 +2330,11 @@
       /* Ordem do Usuário 2026-10: Diálogos/narrativas que estão repetindo não precisam
          mostrar animação de escrita de texto (design visual) pois o jogador já leu. */
       var textLines = page.filter(function(l) {
-        return l && (l.type === 'speech' || l.type === 'narration' || l.type === 'dm') && l.text;
+        return l && (l.type === 'speech' || l.type === 'player_speech' || l.type === 'narration' || l.type === 'dm') && l.text;
       });
-      var hasSpeech = textLines.some(function(l) { return l.type === 'speech'; });
+      var hasSpeech = textLines.some(function(l) { return l.type === 'speech' || l.type === 'player_speech'; });
       var isPageRepeated = textLines.length > 0 && (
-        (hasSpeech && textLines.some(function(l) { return l.type === 'speech' && _isTextSeen(l.text); })) ||
+        (hasSpeech && textLines.some(function(l) { return (l.type === 'speech' || l.type === 'player_speech') && _isTextSeen(l.text); })) ||
         textLines.every(function(l) { return _isTextSeen(l.text); })
       );
 
