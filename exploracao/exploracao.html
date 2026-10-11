@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T00:04:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T00:16:48Z - do not edit directly, edit source -->
 
 
 
@@ -3083,6 +3083,212 @@ body.footer-collapsed #footer-restore { display: block; }
   color: var(--v-gold,#c4953a); font-weight: 700; box-shadow: inset 0 0 8px rgba(196,149,58,0.12); }
 #pace-bar .pace-seg:active { transform: scale(0.96); }
 @media (prefers-reduced-motion: reduce) { #pace-bar .pace-seg { transition: none; } }
+#pace-bar .pace-info-btn {
+  flex: 0 0 24px; width: 24px; height: 24px; min-height: 24px; border-radius: 50%;
+  border: 1px solid rgba(196,149,58,0.3); background: rgba(196,149,58,0.06);
+  color: var(--v-gold, #c4953a); font-family: var(--v-font-display, Cinzel, serif);
+  font-size: 11px; font-weight: bold; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; padding: 0; align-self: center; margin-left: 2px;
+  transition: all 0.15s ease;
+}
+#pace-bar .pace-info-btn:hover, #pace-bar .pace-info-btn:active {
+  background: rgba(196,149,58,0.22); border-color: var(--v-gold, #c4953a); transform: scale(1.06);
+}
+
+/* Modal de Formas de Viajar (Ordem do Usuário 2026-10) */
+#explore-pace-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 9200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 8, 6, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 14px;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+#explore-pace-modal .epm-card {
+  width: 100%;
+  max-width: 410px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #2a221c, #1f1813);
+  border: 1px solid var(--v-gold, #c4953a);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75), inset 0 0 24px rgba(196, 149, 58, 0.08);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+#explore-pace-modal .epm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(196, 149, 58, 0.2);
+  background: rgba(196, 149, 58, 0.04);
+  flex-shrink: 0;
+}
+#explore-pace-modal .epm-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#explore-pace-modal .epm-title {
+  margin: 0;
+  font-family: var(--v-font-display, Cinzel, serif);
+  font-size: calc(15px * var(--v-font-scale, 1));
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+#explore-pace-modal .epm-sub {
+  font-family: var(--v-font, serif);
+  font-size: calc(11px * var(--v-font-scale, 1));
+  color: var(--v-text-dim, #a09484);
+}
+#explore-pace-modal .epm-close {
+  background: none;
+  border: none;
+  color: var(--v-text-dim, #a09484);
+  font-size: calc(18px * var(--v-font-scale, 1));
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 6px;
+  transition: color 0.15s ease;
+}
+#explore-pace-modal .epm-close:hover {
+  color: var(--v-gold, #c4953a);
+}
+#explore-pace-modal .epm-body {
+  padding: 12px 14px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-family: var(--v-font, serif);
+  color: var(--v-text, #d4c8b0);
+}
+#explore-pace-modal .epm-intro {
+  font-size: calc(12px * var(--v-font-scale, 1));
+  line-height: 1.4;
+  color: var(--v-text-dim, #a89e8e);
+  margin-bottom: 1px;
+}
+#explore-pace-modal .epm-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#explore-pace-modal .epm-option {
+  background: rgba(196, 149, 58, 0.04);
+  border: 1px solid rgba(196, 149, 58, 0.18);
+  border-radius: 8px;
+  padding: 9px 11px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+#explore-pace-modal .epm-option.selected {
+  background: rgba(196, 149, 58, 0.12);
+  border-color: var(--v-gold, #c4953a);
+  box-shadow: inset 0 0 12px rgba(196, 149, 58, 0.1);
+}
+#explore-pace-modal .epm-opt-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+#explore-pace-modal .epm-opt-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+#explore-pace-modal .epm-opt-name {
+  font-family: var(--v-font-display, Cinzel, serif);
+  font-weight: 700;
+  font-size: calc(13px * var(--v-font-scale, 1));
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 0.5px;
+}
+#explore-pace-modal .epm-opt-tag {
+  margin-left: auto;
+  font-size: calc(10px * var(--v-font-scale, 1));
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+#explore-pace-modal .tag-cautious {
+  background: rgba(82, 196, 150, 0.15);
+  color: #7ee7be;
+  border: 1px solid rgba(82, 196, 150, 0.35);
+}
+#explore-pace-modal .tag-normal {
+  background: rgba(196, 149, 58, 0.15);
+  color: #f0cf85;
+  border: 1px solid rgba(196, 149, 58, 0.35);
+}
+#explore-pace-modal .tag-fast {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+#explore-pace-modal .epm-opt-tradeoff {
+  font-size: calc(12px * var(--v-font-scale, 1));
+  color: #eee4d2;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 5px;
+}
+#explore-pace-modal .epm-opt-bullets {
+  margin: 0;
+  padding-left: 16px;
+  font-size: calc(11.5px * var(--v-font-scale, 1));
+  line-height: 1.4;
+  color: var(--v-text-dim, #b0a595);
+}
+#explore-pace-modal .epm-opt-bullets li {
+  margin-bottom: 2px;
+}
+#explore-pace-modal .epm-opt-bullets li strong {
+  color: #dcd2be;
+}
+#explore-pace-modal .epm-opt-bullets li em {
+  color: #e59866;
+  font-style: normal;
+}
+#explore-pace-modal .epm-footer {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(196, 149, 58, 0.2);
+  background: rgba(196, 149, 58, 0.04);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+#explore-pace-modal .epm-btn-confirm {
+  background: linear-gradient(180deg, #c4953a, #9c7324);
+  border: 1px solid #e0ba62;
+  border-radius: 6px;
+  color: #120e0a;
+  font-family: var(--v-font-display, Cinzel, serif);
+  font-size: calc(12.5px * var(--v-font-scale, 1));
+  font-weight: 700;
+  padding: 8px 18px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+#explore-pace-modal .epm-btn-confirm:hover {
+  filter: brightness(1.1);
+}
+#explore-pace-modal .epm-btn-confirm:active {
+  transform: scale(0.97);
+}
 /* M13 (Fase 2): Forragear — pílula acima do pace-bar, SÓ no ritmo Cauteloso. */
 #btn-forage { position: absolute; left: 50%; transform: translateX(-50%); bottom: 132px; z-index: 16;
   display: none; min-height: 30px; padding: 6px 18px; border-radius: var(--v-radius-pill,20px);
@@ -8790,6 +8996,7 @@ window.__onIntroTap = function() {
     <button type="button" class="party-pace-btn pace-seg" data-pace="cautious" title="Cauteloso — vê mais longe, evita surpresas; 1 hex, menos encontros">Cauteloso</button>
     <button type="button" class="party-pace-btn pace-seg" data-pace="normal" title="Normal — ritmo equilibrado; 2 hexes">Normal</button>
     <button type="button" class="party-pace-btn pace-seg" data-pace="fast" title="Rápido — cobre 3 hexes, mas vê menos e atrai mais encontros">Rápido</button>
+    <button type="button" class="pace-info-btn" id="btn-pace-info" title="Formas de Viajar — Informações e Diretrizes D&D 5e" aria-label="Informações sobre formas de viajar">?</button>
   </div>
 
   <!-- M13 (Fase 2): Forragear — recompensa do Cauteloso (só visível nesse ritmo, via
@@ -9154,6 +9361,66 @@ window.__onIntroTap = function() {
       </div>
       <div class="party-footer">
         <button type="button" class="party-close" id="party-close-btn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Formas de Viajar (Ordem do Usuário 2026-10) -->
+  <div id="explore-pace-modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
+    <div class="epm-card">
+      <div class="epm-head">
+        <div class="epm-head-text">
+          <h2 class="epm-title">Formas de Viajar</h2>
+          <span class="epm-sub">Diretrizes de Marcha e Ritmo (D&D 5e)</span>
+        </div>
+        <button type="button" class="epm-close" id="epm-btn-close" aria-label="Fechar janela">✕</button>
+      </div>
+      <div class="epm-body">
+        <div class="epm-intro">O ritmo de marcha do grupo determina a velocidade pelo mapa, a visão periférica e a segurança contra encontros:</div>
+        <div class="epm-options">
+          <div class="epm-option" data-pace="cautious" role="button" tabindex="0">
+            <div class="epm-opt-badge-row">
+              <span class="epm-opt-icon">🛡</span>
+              <span class="epm-opt-name">Cauteloso</span>
+              <span class="epm-opt-tag tag-cautious">Foco Defensivo</span>
+            </div>
+            <div class="epm-opt-tradeoff">Enxerga mais longe e evita surpresas; menos encontros, porém marcha mais lenta.</div>
+            <ul class="epm-opt-bullets">
+              <li><strong>Visão e Percepção:</strong> +1 raio de visão no mapa e bônus na percepção passiva.</li>
+              <li><strong>Segurança:</strong> Minimiza o risco de emboscadas e desbloqueia a ação <em>Forragear</em>.</li>
+              <li><strong>Deslocamento:</strong> Avança 1 hexágono por ação de marcha.</li>
+            </ul>
+          </div>
+          <div class="epm-option" data-pace="normal" role="button" tabindex="0">
+            <div class="epm-opt-badge-row">
+              <span class="epm-opt-icon">⚖</span>
+              <span class="epm-opt-name">Normal</span>
+              <span class="epm-opt-tag tag-normal">Equilibrado</span>
+            </div>
+            <div class="epm-opt-tradeoff">Ritmo equilibrado entre velocidade de travessia e atenção aos arredores.</div>
+            <ul class="epm-opt-bullets">
+              <li><strong>Visão e Percepção:</strong> Alcance de visão e sentidos padrão dos membros do grupo.</li>
+              <li><strong>Segurança:</strong> Taxa equilibrada de encontros e desafios de bioma.</li>
+              <li><strong>Deslocamento:</strong> Avança 2 hexágonos por ação de marcha.</li>
+            </ul>
+          </div>
+          <div class="epm-option" data-pace="fast" role="button" tabindex="0">
+            <div class="epm-opt-badge-row">
+              <span class="epm-opt-icon">⚡</span>
+              <span class="epm-opt-name">Rápido</span>
+              <span class="epm-opt-tag tag-fast">Aceleração</span>
+            </div>
+            <div class="epm-opt-tradeoff">Cobre mais terreno rapidamente, mas vê menos e atrai mais perigos e emboscadas.</div>
+            <ul class="epm-opt-bullets">
+              <li><strong>Visão e Percepção:</strong> -1 raio de visão no mapa e penalidade na percepção passiva.</li>
+              <li><strong>Segurança:</strong> Maior chance de tropeçar em armadilhas e sofrer emboscadas.</li>
+              <li><strong>Deslocamento:</strong> Avança até 3 hexágonos por ação de marcha.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="epm-footer">
+        <button type="button" class="epm-btn-confirm" id="epm-btn-confirm">✔ Entendido</button>
       </div>
     </div>
   </div>
@@ -47020,6 +47287,113 @@ function _bindForage() {
   b.addEventListener('click', function (e) { e.preventDefault(); _doForage(); });
 }
 document.addEventListener('DOMContentLoaded', _bindForage);
+// =========================================================================
+// M11 / Ordem do Usuário (2026-10): Guia e Modal de Formas de Viajar
+// - Toasts de ritmo REMOVIDOS DEFINITIVAMENTE.
+// - Modal popup explicativo exibido SOMENTE UMA VEZ (persistido no localStorage).
+// - Botão de info '?' no pace-bar permite consulta manual a qualquer momento.
+// =========================================================================
+var _TRAVEL_PACE_SEEN_KEY = 'valdoria_travel_pace_guide_seen';
+var _epmSelectedPace = 'normal';
+var _epmIsManual = false;
+
+function _hasSeenTravelPaceGuide() {
+  try {
+    return localStorage.getItem(_TRAVEL_PACE_SEEN_KEY) === '1';
+  } catch (_) {
+    return false;
+  }
+}
+
+function _markTravelPaceGuideSeen() {
+  try {
+    localStorage.setItem(_TRAVEL_PACE_SEEN_KEY, '1');
+  } catch (_) {}
+}
+
+function showTravelPaceGuidePopup(targetPace, isManualOpen) {
+  var modal = document.getElementById('explore-pace-modal');
+  if (!modal) return;
+
+  var currentPace = (window.S && (window.S.travelPace || window.S.pace)) || 'normal';
+  _epmSelectedPace = targetPace || currentPace;
+  _epmIsManual = !!isManualOpen;
+
+  function _syncOptionHighlight() {
+    var opts = modal.querySelectorAll('.epm-option');
+    for (var i = 0; i < opts.length; i++) {
+      if (opts[i].getAttribute('data-pace') === _epmSelectedPace) {
+        opts[i].classList.add('selected');
+      } else {
+        opts[i].classList.remove('selected');
+      }
+    }
+  }
+
+  _syncOptionHighlight();
+
+  if (!modal._bound) {
+    modal._bound = true;
+
+    modal.addEventListener('click', function (e) {
+      var opt = (e.target && e.target.closest) ? e.target.closest('.epm-option') : null;
+      if (opt) {
+        var p = opt.getAttribute('data-pace');
+        if (p) {
+          _epmSelectedPace = p;
+          _syncOptionHighlight();
+        }
+        return;
+      }
+
+      var closeBtn = (e.target && e.target.closest) ? e.target.closest('#epm-btn-close') : null;
+      if (closeBtn) {
+        e.preventDefault();
+        _markTravelPaceGuideSeen();
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        if (!_epmIsManual) {
+          _setTravelPace(_epmSelectedPace, true);
+        }
+        return;
+      }
+
+      var confirmBtn = (e.target && e.target.closest) ? e.target.closest('#epm-btn-confirm') : null;
+      if (confirmBtn) {
+        e.preventDefault();
+        _markTravelPaceGuideSeen();
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        _setTravelPace(_epmSelectedPace, true);
+        return;
+      }
+
+      if (e.target === modal) {
+        _markTravelPaceGuideSeen();
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        if (!_epmIsManual) {
+          _setTravelPace(_epmSelectedPace, true);
+        }
+      }
+    });
+
+    window.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        _markTravelPaceGuideSeen();
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        if (!_epmIsManual) {
+          _setTravelPace(_epmSelectedPace, true);
+        }
+      }
+    });
+  }
+
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+}
+
 // M11: liga os cliques do #pace-bar (Ritmo em primeiro plano) a _setTravelPace.
 // Idempotente; reusa .party-pace-btn (o mesmo _updatePaceUI marca o ativo).
 function _bindPaceBar() {
@@ -47027,6 +47401,13 @@ function _bindPaceBar() {
   if (!bar || bar._bound) return;
   bar._bound = true;
   bar.addEventListener('click', function (e) {
+    var infoBtn = (e.target && e.target.closest) ? e.target.closest('#btn-pace-info') : null;
+    if (infoBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      showTravelPaceGuidePopup(window.S ? (window.S.travelPace || 'normal') : 'normal', true);
+      return;
+    }
     var b = (e.target && e.target.closest) ? e.target.closest('.party-pace-btn') : null;
     var pc = b && b.getAttribute('data-pace');
     if (pc) _setTravelPace(pc);
@@ -47034,9 +47415,18 @@ function _bindPaceBar() {
   _updatePaceUI();
 }
 document.addEventListener('DOMContentLoaded', _bindPaceBar);
-function _setTravelPace(pace) {
+
+function _setTravelPace(pace, skipPopup) {
   if (!_PACE_LABELS[pace]) return;
   if (!window.S) return;
+
+  // Ordem do Usuário 2026-10: Exibir avisos de formas de viajar SOMENTE UMA VEZ
+  // em janela popup. Caso o jogador ainda não tenha visto, abre o popup.
+  if (!skipPopup && !_hasSeenTravelPaceGuide()) {
+    showTravelPaceGuidePopup(pace, false);
+    return;
+  }
+
   if (window.S.travelPace === pace) return;
   window.S.travelPace = pace;  // aplicado no próximo /move (servidor valida + persiste)
   window.S.pace = pace;        // espelho p/ mecânicas (duração/percepção/surpresa)
@@ -47051,18 +47441,9 @@ function _setTravelPace(pace) {
     if (S.player) revealFogAt(S.player.col, S.player.row, getVisionRange());
     scheduleRender();
   } catch (_) {}
-  try {
-    var _tradeoff = {
-      cautious: 'Cauteloso — enxerga mais longe e evita surpresas; menos encontros, porém mais lento',
-      normal:   'Normal — ritmo equilibrado',
-      fast:     'Rápido — cobre mais terreno, mas vê menos e atrai mais encontros'
-    };
-    var msg = _tradeoff[pace] || ('Ritmo: ' + _PACE_LABELS[pace]);
-    if (typeof vToast === 'function') {
-      vToast(msg, pace === 'fast' ? 'warn' : 'info',
-             (typeof calcReadTime === 'function' ? calcReadTime(msg, 'toast') : 3000));
-    }
-  } catch (_) { /* toast opcional */ }
+
+  // 2026-10 (Ordem do Usuário): NOTIFICAÇÃO (vToast) REMOVIDA DEFINITIVAMENTE.
+  // Avisos de formas de viajar são explicados exclusivamente no popup de regras.
 }
 
 function renderExploreFooter() {
