@@ -330,6 +330,219 @@
 
   var _activeEncounterInstance = null;
 
+  /* ============================================================================
+   * PERSISTÊNCIA DE DIÁLOGOS, NARRATIVAS E ESCOLHAS (Ordem do Usuário 2026-10)
+   * Garante que se o jogador fechar o jogo no meio de um diálogo, narrativa ou
+   * seleção de escolhas, ao recarregar ou retornar, o diálogo seja restaurado
+   * exatamente onde estava (mesmo personagem/NPC, página e escolhas).
+   * ============================================================================ */
+  var _ENCOUNTER_STORAGE_PREFIX = 'valdoria_active_encounter_';
+  var _ENCOUNTER_MAX_AGE_MS = 48 * 60 * 60 * 1000; // 48 horas de validade
+  var _choiceHandlers = {};
+
+  function registerChoiceHandler(handlerType, fn) {
+    if (typeof handlerType === 'string' && typeof fn === 'function') {
+      _choiceHandlers[handlerType] = fn;
+    }
+  }
+
+  function _resolveStorageCharId(opts) {
+    var p = (opts && opts.player) || (typeof window !== 'undefined' ? (window.CURRENT_PLAYER || window.CITY_MOCK_PLAYER) : null);
+    if (opts && opts.charId) return String(opts.charId);
+    if (p && (p.char_id || p.id)) return String(p.char_id || p.id);
+    if (typeof window !== 'undefined' && typeof window._charId === 'string' && window._charId) return window._charId;
+    if (typeof window !== 'undefined' && window.location && window.location.search) {
+      try {
+        var sp = new URLSearchParams(window.location.search);
+        var qp = sp.get('char') || sp.get('char_id');
+        if (qp) return qp;
+      } catch (_) {}
+    }
+    return 'default';
+  }
+
+  function _getEncounterStorageKey(charId) {
+    return _ENCOUNTER_STORAGE_PREFIX + (charId || 'default');
+  }
+
+  function _saveActiveState(dialogue, opts, currentPage) {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    if (opts && opts.transient) return;
+    if (!dialogue || !dialogue.script) return;
+
+    try {
+      var charId = _resolveStorageCharId(opts);
+      var key = _getEncounterStorageKey(charId);
+
+      var serialized = {
+        charId: charId,
+        currentPage: typeof currentPage === 'number' ? currentPage : 0,
+        dialogue: {
+          npc: dialogue.npc ? {
+            id: dialogue.npc.id || dialogue.npc.key || '',
+            name: dialogue.npc.name || '',
+            desc: dialogue.npc.desc || '',
+            portrait: dialogue.npc.portrait || '',
+            portraitHTML: dialogue.npc.portraitHTML || ''
+          } : null,
+          script: Array.isArray(dialogue.script) ? dialogue.script.map(function(s) {
+            return {
+              type: s.type,
+              text: s.text,
+              speaker: s.speaker,
+              is_player: s.is_player,
+              check_hint: s.check_hint,
+              xp: s.xp,
+              gold: s.gold,
+              items: s.items,
+              effect: s.effect
+            };
+          }) : [],
+          choices: Array.isArray(dialogue.choices) ? dialogue.choices.map(function(c) {
+            return {
+              id: c.id,
+              label: c.label,
+              desc: c.desc,
+              cb: c.cb,
+              icon: c.icon,
+              dc: c.dc,
+              skill: c.skill,
+              stat: c.stat,
+              cost: c.cost,
+              renownDelta: c.renownDelta,
+              screen: c.screen,
+              node: c.node,
+              isPrep: c.isPrep,
+              requireConfirm: c.requireConfirm,
+              _oneShot: c._oneShot,
+              _forced: c._forced,
+              _idx: c._idx
+            };
+          }) : [],
+          title: dialogue.title || null,
+          choicesTitle: dialogue.choicesTitle || null,
+          choicesSubtitle: dialogue.choicesSubtitle || null,
+          choicesBtnLabel: dialogue.choicesBtnLabel || null,
+          compact: !!dialogue.compact
+        },
+        opts: {
+          venue: opts && opts.venue ? opts.venue : null,
+          node: opts && opts.node ? opts.node : null,
+          encId: opts && opts.encId ? opts.encId : null,
+          action: opts && opts.action ? opts.action : null,
+          handlerType: opts && opts.handlerType ? opts.handlerType : null,
+          location: opts && opts.location ? opts.location : null,
+          closeable: opts ? !!opts.closeable : false,
+          inlineChoices: opts ? !!opts.inlineChoices : false,
+          fullHeight: opts ? !!opts.fullHeight : false,
+          showGold: opts ? (opts.showGold !== false) : true,
+          showHp: opts ? !!opts.showHp : false,
+          compact: opts ? !!opts.compact : false,
+          customState: opts && opts.customState ? opts.customState : null
+        },
+        timestamp: Date.now()
+      };
+
+      var json = JSON.stringify(serialized);
+      localStorage.setItem(key, json);
+      if (window.sessionStorage) {
+        sessionStorage.setItem(key, json);
+      }
+      window.__valdoria_active_encounter = serialized;
+    } catch (e) {
+      console.warn('[ENC] Erro ao salvar persistência do diálogo:', e);
+    }
+  }
+
+  function _clearActiveState(charId) {
+    if (typeof window === 'undefined') return;
+    try {
+      var cid = charId || _resolveStorageCharId();
+      var key = _getEncounterStorageKey(cid);
+      if (window.localStorage) localStorage.removeItem(key);
+      if (window.sessionStorage) sessionStorage.removeItem(key);
+      window.__valdoria_active_encounter = null;
+    } catch (e) {
+      console.warn('[ENC] Erro ao limpar persistência do diálogo:', e);
+    }
+  }
+
+  function getPersistedState(charId) {
+    if (typeof window === 'undefined' || !window.localStorage) return null;
+    try {
+      var cid = charId || _resolveStorageCharId();
+      var key = _getEncounterStorageKey(cid);
+      var raw = localStorage.getItem(key);
+      if (!raw && window.sessionStorage) {
+        raw = sessionStorage.getItem(key);
+      }
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (!parsed || !parsed.dialogue || !parsed.timestamp) return null;
+      if (Date.now() - parsed.timestamp > _ENCOUNTER_MAX_AGE_MS) {
+        _clearActiveState(cid);
+        return null;
+      }
+      return parsed;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function hasPersistedState(charId) {
+    return !!getPersistedState(charId);
+  }
+
+  function restorePersistedState(extraOpts) {
+    extraOpts = extraOpts || {};
+    var charId = _resolveStorageCharId(extraOpts);
+    var saved = getPersistedState(charId);
+    if (!saved || !saved.dialogue) return false;
+
+    var dialogue = saved.dialogue;
+    var mergedOpts = Object.assign({}, saved.opts || {}, extraOpts);
+    mergedOpts.startPage = typeof saved.currentPage === 'number' ? saved.currentPage : 0;
+    mergedOpts._restoring = true;
+
+    var handlerType = mergedOpts.handlerType;
+    var customHandler = handlerType ? _choiceHandlers[handlerType] : null;
+
+    mergedOpts.onChoice = function(ch, dlg) {
+      if (typeof extraOpts.onChoice === 'function') {
+        extraOpts.onChoice(ch, dlg);
+        return;
+      }
+      if (typeof customHandler === 'function') {
+        customHandler(ch, dlg, mergedOpts);
+        return;
+      }
+      if (mergedOpts.venue && mergedOpts.node && window.vCityServer && typeof window.vCityServer.cityAction === 'function') {
+        window.vCityServer.cityAction('dialogue.choice', { venue: mergedOpts.venue, node: mergedOpts.node, choice_id: ch && ch.id })
+          .then(function(res) {
+            if (res && res.result_script) {
+              render({ npc: (res.npc || dlg.npc), script: res.result_script, choices: (res.choices || []) }, mergedOpts);
+            } else {
+              close();
+            }
+          })
+          .catch(function() { close(); });
+        return;
+      }
+      if (ch && ch.cb === 'close') {
+        close();
+        return;
+      }
+      close();
+    };
+
+    if (typeof window !== 'undefined' && window.vEncounter && typeof window.vEncounter.render === 'function') {
+      window.vEncounter.render(dialogue, mergedOpts);
+    } else {
+      render(dialogue, mergedOpts);
+    }
+    return true;
+  }
+
   function _countWords(str) {
     return (str || '').trim().split(/\s+/).filter(Boolean).length;
   }
@@ -2106,6 +2319,8 @@
     _showOverlay(ov);
 
     function renderPage(idx) {
+      currentPage = idx;
+      _saveActiveState(dialogue, opts, currentPage);
       if (_currentRenderState && _currentRenderState.activeTypewriters) {
         _currentRenderState.activeTypewriters.forEach(function(tw){ tw.skip(); });
       }
@@ -2719,7 +2934,12 @@
       renderActions: renderActions
     };
 
-    renderPage(0);
+    var _startPg = (opts && typeof opts.startPage === 'number' && opts.startPage > 0)
+      ? Math.min(opts.startPage, pages.length - 1)
+      : 0;
+    currentPage = _startPg;
+    _saveActiveState(dialogue, opts, currentPage);
+    renderPage(_startPg);
   }
 
   /* Conexão transparente com dados remotos (Ordem do Usuário 2026-10):
@@ -2814,10 +3034,12 @@
         }
       }
     }
+    _saveActiveState(dialogue, inst.opts, curPage);
     return true;
   }
 
   function close() {
+    _clearActiveState(_resolveStorageCharId(_activeEncounterInstance ? _activeEncounterInstance.opts : null));
     closeChoices(true);
     var ov = document.getElementById(OVERLAY_ID);
     // task #69: idempotent state cleanup (also covers edge case where .close()
@@ -2856,7 +3078,14 @@
     sanitize: _sanitizeDialogueHTML,
     /* A1.5 (auditoria #90): paginação canônica de script[]. mode 'aldric'
        (default, PADRAO_ALDRIC) | 'compact' (StubEventLayer exploração). */
-    groupScriptIntoPages: groupScriptIntoPages
+    groupScriptIntoPages: groupScriptIntoPages,
+    /* Persistência de diálogos, narrativas e escolhas (Ordem do Usuário 2026-10) */
+    registerChoiceHandler: registerChoiceHandler,
+    hasPersistedState: hasPersistedState,
+    getPersistedState: getPersistedState,
+    clearPersistedState: _clearActiveState,
+    savePersistedState: _saveActiveState,
+    restorePersistedState: restorePersistedState
   };
 
   /* Compat: alias usado por cidade openCityPopup (task #47 dismiss flow). */

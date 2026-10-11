@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T04:53:22Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T05:27:14Z - do not edit directly, edit source -->
 
 
 
@@ -40536,6 +40536,8 @@ function _explShowEventVEnc(ev) {
     }
     window.vEncounter.render(node, {
       player: S.player, closeable: false,
+      handlerType: 'expl_event',
+      customState: { ev: ev },
       onChoice: function (ch) {
         // #12 Fase 4-deleção: combat_forced — a choice única "Enfrentar!" (_forced)
         // dispara o combate via _engageForcedCombat (reusa o trigger do openEventModal:
@@ -40703,6 +40705,8 @@ function _explShowOutcomeVEnc(ev, oc) {
   try {
     window.vEncounter.render(node, {
       player: S.player, closeable: false,
+      handlerType: 'expl_event_outcome',
+      customState: { ev: ev, oc: oc },
       onChoice: function () { _explEventVEncFinish(oc); }
     });
   } catch (e) {
@@ -40849,6 +40853,8 @@ function _explShowTileVEnc(rt) {
   if (!node.choices || !node.choices.length) { throw new Error('tile_no_eligible_choices'); }
   window.vEncounter.render(node, {
     player: S.player, closeable: false,
+    handlerType: 'expl_tile',
+    customState: { rt: rt },
     onChoice: function (ch) { _explTileVEncResolve(rt, ch); }
   });
   LOG('TILE', 'vencounter_render hex=' + (rt.hexId || '?') + ' type=' + (rt.type || '?') + ' choices=' + node.choices.length);
@@ -40934,6 +40940,8 @@ function _explShowTileOutcomeVEnc(rt, choice, outcome, rollResult) {
   try {
     window.vEncounter.render(node, {
       player: S.player, closeable: false,
+      handlerType: 'expl_tile_outcome',
+      customState: { rt: rt, choice: choice, outcome: outcome, rollResult: rollResult, chain: chain },
       onChoice: function () { _explTileVEncFinish(rt, choice, outcome, rollResult, chain); }
     });
   } catch (e) {
@@ -40979,6 +40987,80 @@ function _explTileVEncFinish(rt, choice, outcome, rollResult, chain) {
     return;
   }
   try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_) {}
+}
+
+/* ============================================================================
+ * PERSISTÊNCIA DE DIÁLOGOS, NARRATIVAS E ESCOLHAS NA EXPLORAÇÃO (Ordem do Usuário 2026-10)
+ * ============================================================================ */
+function _setupExplorationDialoguePersistence() {
+  if (!window.vEncounter || typeof window.vEncounter.registerChoiceHandler !== 'function') return;
+
+  window.vEncounter.registerChoiceHandler('expl_event', function(ch, dlg, opts) {
+    var ev = (opts && opts.customState && opts.customState.ev) || null;
+    if (!ev) {
+      try { window.vEncounter.close(); } catch (_) {}
+      return;
+    }
+    if (ch && ch._forced) {
+      try { window.vEncounter.close(); } catch (_) {}
+      if (typeof _engageForcedCombat === 'function') _engageForcedCombat(ev);
+      return;
+    }
+    if (ev && ev.__dungeon) {
+      if (typeof _explDungeonVEncResolve === 'function') _explDungeonVEncResolve(ev, ch);
+    } else {
+      if (typeof _explEventVEncResolve === 'function') _explEventVEncResolve(ev, ch);
+    }
+  });
+
+  window.vEncounter.registerChoiceHandler('expl_event_outcome', function(ch, dlg, opts) {
+    var oc = (opts && opts.customState && opts.customState.oc) || null;
+    if (typeof _explEventVEncFinish === 'function') {
+      _explEventVEncFinish(oc);
+    } else {
+      try { window.vEncounter.close(); } catch (_) {}
+    }
+  });
+
+  window.vEncounter.registerChoiceHandler('expl_tile', function(ch, dlg, opts) {
+    var rt = (opts && opts.customState && opts.customState.rt) || null;
+    if (rt && typeof _explTileVEncResolve === 'function') {
+      _explTileVEncResolve(rt, ch);
+    } else {
+      try { window.vEncounter.close(); } catch (_) {}
+    }
+  });
+
+  window.vEncounter.registerChoiceHandler('expl_tile_outcome', function(ch, dlg, opts) {
+    var cs = (opts && opts.customState) || {};
+    var rt = cs.rt || null;
+    var choice = cs.choice || null;
+    var outcome = cs.outcome || null;
+    var rollResult = cs.rollResult || null;
+    var chain = cs.chain || null;
+    if (typeof _explTileVEncFinish === 'function') {
+      _explTileVEncFinish(rt, choice, outcome, rollResult, chain);
+    } else {
+      try { window.vEncounter.close(); } catch (_) {}
+    }
+  });
+}
+
+function _tryRestoreActiveExplorationDialogue() {
+  if (!window.vEncounter || typeof window.vEncounter.hasPersistedState !== 'function') return false;
+  var p = (window.S && window.S.player) ? window.S.player : null;
+  var charKey = (p && (p.char_id || p.id)) || (typeof _expCharIdSafe === 'function' ? _expCharIdSafe() : 'default');
+  if (!window.vEncounter.hasPersistedState(charKey)) return false;
+
+  var saved = window.vEncounter.getPersistedState(charKey);
+  if (!saved || !saved.dialogue) return false;
+
+  console.info('[EXPLORACAO] Diálogo/narrativa ativa encontrada na persistência. Restaurando...');
+  return window.vEncounter.restorePersistedState({ player: p });
+}
+
+if (typeof _setupExplorationDialoguePersistence === 'function') {
+  _setupExplorationDialoguePersistence();
 }
 
 // Dice overlay estilo check-overlay do combate (formula + result pill + skip btn)
@@ -50036,6 +50118,19 @@ document.addEventListener('DOMContentLoaded', () => {
         LOG('BOOT', 'scroll-hint observer instalado');
       }
     } catch (_eSH) { console.warn('[EXPLORACAO] scroll-hint setup falhou:', _eSH); }
+
+    try {
+      if (typeof _setupExplorationDialoguePersistence === 'function') {
+        _setupExplorationDialoguePersistence();
+      }
+      setTimeout(function () {
+        if (typeof _tryRestoreActiveExplorationDialogue === 'function') {
+          _tryRestoreActiveExplorationDialogue();
+        }
+      }, 100);
+    } catch (_eDP) {
+      console.warn('[EXPLORACAO] Persistência de diálogo setup falhou:', _eDP);
+    }
   } catch (e) {
     LOGE('BOOT', 'DOMContentLoaded handler FAILED:', e.message, e.stack);
   }

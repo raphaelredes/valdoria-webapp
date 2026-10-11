@@ -66276,6 +66276,13 @@ document.addEventListener('DOMContentLoaded', function(){
       _ldTG.classList.add('hidden');  // task #86: previne FOUC safety re-show
     }
   }
+  // Ordem do Usuário 2026-10: Configura e tenta restaurar diálogos/narrativas ativas persistidas
+  if (typeof _setupCityDialoguePersistence === 'function') {
+    _setupCityDialoguePersistence();
+  }
+  if (typeof _tryRestoreActiveCityDialogue === 'function') {
+    setTimeout(function(){ _tryRestoreActiveCityDialogue(); }, 60);
+  }
   // === Música ambiente da cidade (canonical: ValdoriaAudio) ===
   // FIX 2026-05-04: força track da cidade ignorando resume de outras WebApps.
   // Ao entrar na cidade, sempre toca 'city' (ou track da tela atual).
@@ -67067,6 +67074,7 @@ function _arrivalRenderNode(node){
   window.vEncounter.render(
     { npc: node.npc, script: node.script, choices: node.choices },
     { player: window.CITY_MOCK_PLAYER, closeable: false,
+      handlerType: 'arrival', encId: (_arrivalState && _arrivalState.encId), action: (_arrivalState && _arrivalState.action),
       onChoice: function(ch){ _arrivalChoice(ch && ch.id); } }
   );
 }
@@ -67403,7 +67411,7 @@ function _openCityDialogue(venue, node, p){
       npc: approach.npc,
       script: [{ type: 'dm', text: approach.narration }],
       choices: []
-    }, { player: p, closeable: true, pendingRemote: true });
+    }, { player: p, closeable: true, pendingRemote: true, venue: venue, node: node, handlerType: 'city_dialogue' });
   }
 
   window.vCityServer.cityAction('dialogue.get', { venue: venue, node: node }).then(function(data){
@@ -67547,7 +67555,9 @@ function _renderCityDialogue(venue, data, p, ctx){
   }
   window.vEncounter.render(
     { npc: data.npc, script: data.script, choices: data.choices },
-    { player: p, closeable: true, onChoice: function(ch){
+    { player: p, closeable: true,
+      venue: venue, node: node, handlerType: 'city_dialogue', customState: { ctx: ctx },
+      onChoice: function(ch){
         // FASE 5d (#3): ramo do recruta ANTES dos ramos genéricos. D2: "Ver ficha"
         // é uma CHOICE com `node` ('<npc_id>:ficha'); voltar_ficha tem node '<npc_id>'.
         if (venue === 'recruta') {
@@ -67805,6 +67815,75 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
     return;
   }
   try { window.vEncounter.close(); } catch(_){}
+}
+
+/* ============================================================================
+ * PERSISTÊNCIA DE DIÁLOGOS, NARRATIVAS E ESCOLHAS NA CIDADE (Ordem do Usuário 2026-10)
+ * ============================================================================ */
+function _setupCityDialoguePersistence() {
+  if (!window.vEncounter || typeof window.vEncounter.registerChoiceHandler !== 'function') return;
+
+  window.vEncounter.registerChoiceHandler('city_dialogue', function(ch, dlg, opts) {
+    var venue = (opts && opts.venue) || '';
+    var node = (opts && opts.node) || '';
+    var p = (opts && opts.player) || (typeof _ensureCityState === 'function' ? _ensureCityState() : window.CITY_MOCK_PLAYER);
+    var ctx = (opts && opts.customState && opts.customState.ctx) || null;
+    var npc = (dlg && dlg.npc) || (opts && opts.customState && opts.customState.npc) || null;
+    var npcId = (ctx && ctx.npcId) || (npc && (npc.id || npc.npc_id)) || '';
+
+    if (venue === 'recruta') {
+      if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} return; }
+      var nextNode = (ch && ch.node) || node || npcId;
+      _resolveCityChoice('recruta', nextNode, ch && ch.id, p, npc, { npcId: npcId });
+      return;
+    }
+    if (ch && ch.screen && /^bank_(deposit|withdraw)_custom$/.test(ch.screen)) {
+      _bankCustomAmount(ch.screen, p, npc);
+    }
+    else if (ch && (ch.screen === 'tavern_board_menu' || ch.screen === 'tavern_bulletin_open')) {
+      try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
+      _tavernShowMuralBoard(p);
+    }
+    else if (ch && (ch.screen === 'tavern_gather_menu' || ch.screen === 'tavern_gather_open')) {
+      try { if (window.vEncounter && window.vEncounter.close) window.vEncounter.close(); } catch(_){}
+      _tavernShowGather(p);
+    }
+    else if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, npc); }
+    else if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
+    else if (node) { _resolveCityChoice(venue, node, ch && ch.id, p, npc); }
+    else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
+  });
+
+  window.vEncounter.registerChoiceHandler('arrival', function(ch, dlg, opts) {
+    if (opts && opts.encId) {
+      _arrivalState = { encId: opts.encId, action: opts.action };
+      window._encounterActive = true;
+    }
+    _arrivalChoice(ch && ch.id);
+  });
+}
+
+function _tryRestoreActiveCityDialogue() {
+  if (!window.vEncounter || typeof window.vEncounter.hasPersistedState !== 'function') return false;
+  var charKey = window._charId || 'default';
+  if (!window.vEncounter.hasPersistedState(charKey)) return false;
+
+  var saved = window.vEncounter.getPersistedState(charKey);
+  if (!saved || !saved.dialogue) return false;
+
+  console.info('[CIDADE] Diálogo/narrativa ativa encontrada na persistência. Restaurando...');
+  if (saved.opts && saved.opts.handlerType === 'arrival' && saved.opts.encId) {
+    _arrivalState = { encId: saved.opts.encId, action: saved.opts.action };
+    window._encounterActive = true;
+  }
+
+  var p = (typeof _ensureCityState === 'function' ? _ensureCityState() : window.CITY_MOCK_PLAYER);
+  return window.vEncounter.restorePersistedState({ player: p });
+}
+
+// Configura handlers imediatamente se vEncounter já estiver carregado
+if (typeof _setupCityDialoguePersistence === 'function') {
+  _setupCityDialoguePersistence();
 }
 
 function _applyHudFromDialogue(d){
