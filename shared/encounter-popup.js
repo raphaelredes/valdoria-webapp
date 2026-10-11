@@ -1550,6 +1550,12 @@
 
   function _openChoiceDetailDialog(ch, opts) {
     if (!ch) return;
+    // REGRA SOBERANA (Ordem do Usuário 2026-10): Quando existir apenas uma opção,
+    // a janela NUNCA deverá aparecer para solicitar confirmação da ação, pois o jogador não tem outra escolha.
+    if (opts && (opts.singleChoice || opts.totalChoices === 1 || (opts.choices && opts.choices.length === 1))) {
+      if (typeof opts.onChoice === 'function') opts.onChoice(ch);
+      return;
+    }
     var ov = _ensureChoiceDetailOverlay();
     var card = ov.querySelector('.enc-cd-card');
     if (!card) return;
@@ -1958,10 +1964,14 @@
       if (_thumb) row.insertBefore(_thumb, row.firstChild);
       row.addEventListener('click', function(e) {
         e.preventDefault();
-        // REGRA MANDATÓRIA (Ordem do Usuário 2026-10): O clique em qualquer postura ou ação
-        // DEVE abrir a janela explicativa de confirmação sempre, exibindo o que está sendo
-        // escolhido e os possíveis resultados, com botão explícito de confirmação e botão de voltar.
-        _openChoiceDetailDialog(ch, opts);
+        // REGRA MANDATÓRIA (Ordem do Usuário 2026-10): Quando existir apenas uma opção (choices.length === 1),
+        // a janela NUNCA deverá aparecer para solicitar confirmação da ação, pois o jogador não tem outra escolha.
+        if (choices && choices.length > 1) {
+          _openChoiceDetailDialog(ch, opts);
+        } else {
+          closeChoices();
+          if (typeof opts.onChoice === 'function') opts.onChoice(ch);
+        }
       });
       listEl.appendChild(row);
     });
@@ -2803,8 +2813,10 @@
           btn.className = 'enc-btn' + (idx === 0 ? ' enc-btn-primary' : '');
           btn.innerHTML = _coinify((ch.label && String(ch.label).trim()) || 'Continuar');
           btn.addEventListener('click', function() {
-            if (ch.isPrep || ch.desc || ch.cost || ch.stat || ch.dc || ch.requireConfirm) {
-              _openChoiceDetailDialog(ch, { onChoice: _handleChoiceInternal });
+            // REGRA MANDATÓRIA (Ordem do Usuário 2026-10): Quando existir apenas uma opção (choices.length === 1),
+            // a janela NUNCA deverá aparecer para solicitar confirmação da ação, pois o jogador não tem outra escolha.
+            if (choices.length > 1 && (ch.isPrep || ch.desc || ch.cost || ch.stat || ch.dc || ch.requireConfirm)) {
+              _openChoiceDetailDialog(ch, { onChoice: _handleChoiceInternal, totalChoices: choices.length });
             } else {
               _handleChoiceInternal(ch);
             }
