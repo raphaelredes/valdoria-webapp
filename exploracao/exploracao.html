@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T03:48:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T04:12:54Z - do not edit directly, edit source -->
 
 
 
@@ -11482,9 +11482,10 @@ window.__onIntroTap = function() {
           // (espelha o closeEventModal legacy ~36022). Fallback p/ schema raw.
           var _evCombat = null;
           try {
-            var _dc = outcome && outcome.dungeon_combat;
-            if (_dc && _dc.enemy) {
-              _evCombat = { enemyId: _dc.enemy, surprise: !!_dc.surprise,
+            var _dc = outcome && (outcome.dungeon_combat || outcome.combat);
+            if (_dc && (_dc.enemy || _dc.enemy_id || _dc.enemyId)) {
+              var _eId = _dc.enemy || _dc.enemy_id || _dc.enemyId;
+              _evCombat = { enemyId: _eId, surprise: !!_dc.surprise,
                 /* Sessão #72: playerSurprised (emboscada AO player, PHB p.189) +
                    enemy_count (narrativa de "N figuras" gera N inimigos). */
                 playerSurprised: !!_dc.playerSurprised,
@@ -40455,6 +40456,32 @@ function _explEventBodyNode(ev) {
         c.advantage = true;
       }
     }
+    // BG3 style tags and 1st-person speech resolution
+    var spkSpeech = '';
+    if (ch.speech_by_class && clsKey && ch.speech_by_class[clsKey]) spkSpeech = ch.speech_by_class[clsKey];
+    else if (ch.speech_by_race && p.race && ch.speech_by_race[p.race]) spkSpeech = ch.speech_by_race[p.race];
+    else if (ch.speech_by_background && bg && ch.speech_by_background[bg]) spkSpeech = ch.speech_by_background[bg];
+    else if (ch.speech) spkSpeech = ch.speech;
+
+    var spkTag = '';
+    if (ch.tag_by_class && clsKey && ch.tag_by_class[clsKey]) spkTag = ch.tag_by_class[clsKey];
+    else if (ch.tag_by_race && p.race && ch.tag_by_race[p.race]) spkTag = ch.tag_by_race[p.race];
+    else if (ch.tag_by_background && bg && ch.tag_by_background[bg]) spkTag = ch.tag_by_background[bg];
+    else if (ch.tag) spkTag = ch.tag;
+
+    if (!spkTag && !spkSpeech && typeof window.JourneyData !== 'undefined' && typeof window.JourneyData.pickChoiceVoice === 'function') {
+      try {
+        var voice = window.JourneyData.pickChoiceVoice(ch, p, ev);
+        if (voice) {
+          if (!spkTag && voice.tag) spkTag = voice.tag;
+          if (!spkSpeech && voice.speech) spkSpeech = voice.speech;
+        }
+      } catch (_) {}
+    }
+
+    if (spkTag) c.tag = spkTag;
+    if (spkSpeech) c.speech = spkSpeech;
+    if (ch.desc) c.desc = ch.desc;
     if (ch.badge) c.badge = ch.badge;
     displayed.push(c);
   });
@@ -41416,18 +41443,22 @@ function applyChoiceOutcome(choice, success, total, dc) {
   // Phase 3: dungeon_combat dispara combate apos closeEventModal.
   // Salva em S._pendingCombat — closeEventModal chama triggerCombatScreen.
   // Phase 4: lookup_name forca spawn de inimigo especifico (boss Brakthar).
-  if (outcome.dungeon_combat) {
+  if (outcome.dungeon_combat || outcome.combat) {
+    var _dcObj = outcome.dungeon_combat || outcome.combat;
+    var _eId = _dcObj.enemy || _dcObj.enemy_id || _dcObj.enemyId;
     S._pendingCombat = {
-      enemy: outcome.dungeon_combat.enemy,
-      surprise: !!outcome.dungeon_combat.surprise,
-      lookup_name: outcome.dungeon_combat.lookup_name || null,
+      enemy: _eId,
+      surprise: !!_dcObj.surprise,
+      playerSurprised: !!_dcObj.playerSurprised,
+      enemy_count: _dcObj.enemy_count || _dcObj.enemyCount || 1,
+      lookup_name: _dcObj.lookup_name || null,
       // Phase 5b polish v3 (2026-04-26): preCombatEffects propaga vantagens do
       // skill check pre-combate (boss_ac_debuff, fury_drained, burst_disabled,
       // first_attack_adv, boss_enraged) ate combate.html newCombatFromSetup.
-      preCombatEffects: Array.isArray(outcome.dungeon_combat.preCombatEffects)
-        ? outcome.dungeon_combat.preCombatEffects : [],
+      preCombatEffects: Array.isArray(_dcObj.preCombatEffects)
+        ? _dcObj.preCombatEffects : [],
       // #17 (sessao #70): narrativa do evento -> intro typewriter do combate
-      narrative: outcome.dungeon_combat.narrative || outcome.flavor || outcome.text || ''
+      narrative: _dcObj.narrative || outcome.flavor || outcome.text || ''
     };
     LOG('DUNGEON', 'pending combat queued enemy=' + S._pendingCombat.enemy
       + ' surprise=' + S._pendingCombat.surprise
@@ -42449,6 +42480,28 @@ function classCanTakeChoice(ch, clsKey, bg, align, allies) {
       var pSkills = (p.proficiency || p.skill_proficiencies || []).map(norm);
       if (!rSkList.every(function (sk) { return pSkills.includes(norm(sk)); })) return false;
     }
+  }
+
+  if (ch.requires_any && typeof ch.requires_any === 'object') {
+    var anyMatch = false;
+    var anyReq = ch.requires_any;
+    if (anyReq.classes || anyReq.class) {
+      var anyCls = (Array.isArray(anyReq.classes || anyReq.class) ? (anyReq.classes || anyReq.class) : [anyReq.classes || anyReq.class]).map(norm);
+      if (anyCls.includes(norm(clsKey))) anyMatch = true;
+    }
+    if (anyReq.races || anyReq.race) {
+      var anyR = (Array.isArray(anyReq.races || anyReq.race) ? (anyReq.races || anyReq.race) : [anyReq.races || anyReq.race]).map(norm);
+      if (anyR.includes(norm(p.race || p.raca || ''))) anyMatch = true;
+    }
+    if (anyReq.backgrounds || anyReq.background) {
+      var anyBg = (Array.isArray(anyReq.backgrounds || anyReq.background) ? (anyReq.backgrounds || anyReq.background) : [anyReq.backgrounds || anyReq.background]).map(norm);
+      if (anyBg.includes(norm(bg))) anyMatch = true;
+    }
+    if (anyReq.subclasses || anyReq.subclass) {
+      var anySc = (Array.isArray(anyReq.subclasses || anyReq.subclass) ? (anyReq.subclasses || anyReq.subclass) : [anyReq.subclasses || anyReq.subclass]).map(norm);
+      if (anySc.includes(norm(p.subclass || ''))) anyMatch = true;
+    }
+    if (!anyMatch) return false;
   }
 
   return true;
