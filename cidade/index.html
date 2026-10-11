@@ -1357,43 +1357,54 @@ LOG SINK (Fase 7):
       flex-shrink: 0;
       display: flex;
       align-items: center;
-      gap: var(--v-space-md-lg, 10px);
-      padding: var(--v-space-lg, 12px) 14px;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
       background: linear-gradient(180deg, rgba(28,22,16,0.95), rgba(28,22,16,0.78));
       border-bottom: 1px solid rgba(196,149,58,0.3);
+      min-height: 48px;
+      box-sizing: border-box;
     }
     .csp-back-btn {
       flex: 0 0 auto;
       background: rgba(74,56,40,0.6);
       border: 1px solid rgba(196,149,58,0.5);
       color: #c4953a;
-      padding: 6px var(--v-space-lg, 12px);
+      padding: 6px 10px;
       border-radius: var(--v-radius-sm, 6px);
       font-family: 'Cinzel', serif;
       font-size: var(--v-font-sm, 12px);
       cursor: pointer;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
     }
     .csp-back-btn:hover { border-color: #c4953a; background: rgba(196,149,58,0.15); }
     .csp-title {
-      flex: 1;
+      flex: 1 1 auto;
+      min-width: 0;
       font-family: 'Cinzel', serif;
       color: #c4953a;
-      font-size: var(--v-font-lg, 15px);
-      letter-spacing: 0.08em;
+      font-size: clamp(12px, 3.5vw, 15px);
+      letter-spacing: 0.04em;
       text-shadow: 0 0 8px rgba(196,149,58,0.3);
       text-align: center;
-      padding-right: 80px; /* compensa o botão Voltar pra título ficar centralizado */
+      padding: 0 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     /* Contador de Valdoritas (#70) — topo-direito de TODAS as telas/subtelas */
     .city-gold-badge { display: inline-flex; align-items: center; gap: var(--v-space-sm, 4px);
       font-family: 'Cinzel', serif; color: #ffd700; font-weight: 700;
       font-size: var(--v-font-sm, 12px); white-space: nowrap; }
-    .csp-gold { position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    .csp-gold {
+      flex: 0 0 auto;
+      position: static;
+      transform: none;
       display: inline-flex; align-items: center; gap: var(--v-space-sm, 4px); color: #ffd700;
       font-family: 'Cinzel', serif; font-weight: 700; font-size: var(--v-font-sm, 12px);
-      padding: var(--v-space-sm, 4px) 9px; border: 1px solid var(--v-gold-40, rgba(196,149,58,0.4));
-      border-radius: var(--v-radius-sm, 6px); background: rgba(15,12,8,0.55); white-space: nowrap; }
+      padding: var(--v-space-sm, 4px) 8px; border: 1px solid var(--v-gold-40, rgba(196,149,58,0.4));
+      border-radius: var(--v-radius-sm, 6px); background: rgba(15,12,8,0.7); white-space: nowrap; }
     .ctb-gold { justify-content: center; }
     .csp-body {
       flex: 1;
@@ -7120,6 +7131,520 @@ body.perf-lite .vc-action-btn { transition: none; }
       opacity: 0.8;
     }
     .inv-detail-btn:active { transform: scale(0.97); }
+
+    /* ====================================================================
+       MERCADO & LOJAS DE NPCS — PADRÃO RPG AAA (REFORMULAÇÃO 2026-10)
+       Design responsivo compacto, padrão Lista Rica / Grade, sem duplicações,
+       otimizado para Mobile, Telegram WebView2 e Desktop.
+       ==================================================================== */
+    .shop-header-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 12px;
+      margin: 4px 10px 6px 10px;
+      background: linear-gradient(90deg, rgba(32, 24, 16, 0.75) 0%, rgba(20, 16, 12, 0.85) 100%);
+      border: 1px solid rgba(196, 149, 58, 0.25);
+      border-radius: var(--v-radius-sm, 6px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+    .shop-quote-line {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      color: var(--v-text, #d4c8b0);
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .shop-quote-icon {
+      font-style: normal;
+      font-size: 12px;
+      flex-shrink: 0;
+      opacity: 0.85;
+    }
+    .shop-quote-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .shop-stock-pill {
+      flex-shrink: 0;
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: calc(10px * var(--v-font-scale, 1));
+      color: var(--v-gold, #c4953a);
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(196, 149, 58, 0.3);
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    /* Toolbar da Loja: Categorias em Chips + Ferramentas */
+    .shop-toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 8px;
+      padding: 0 10px;
+    }
+    .shop-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 2px 0 4px 0;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+    }
+    .shop-filter-bar::-webkit-scrollbar { display: none; }
+    .shop-filter-chip {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: rgba(22, 18, 14, 0.85);
+      border: 1px solid rgba(196, 149, 58, 0.3);
+      border-radius: 14px;
+      color: var(--v-text-dim, #a09484);
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: calc(11px * var(--v-font-scale, 1));
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .shop-filter-chip:hover {
+      border-color: var(--v-gold, #c4953a);
+      color: var(--v-text, #d4c8b0);
+    }
+    .shop-filter-chip.active {
+      background: linear-gradient(180deg, rgba(196, 149, 58, 0.28), rgba(74, 56, 40, 0.45));
+      border-color: var(--v-gold, #c4953a);
+      color: #ffd700;
+      font-weight: 700;
+      box-shadow: 0 0 6px rgba(196, 149, 58, 0.25);
+    }
+    .shop-chip-count {
+      font-size: 9px;
+      opacity: 0.8;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 1px 4px;
+      border-radius: 8px;
+    }
+
+    /* Linha de Ferramentas: Busca + Ordenação + Toggle Lista/Grade */
+    .shop-controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .shop-search-box {
+      flex: 1 1 auto;
+      min-width: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .shop-search-ico {
+      position: absolute;
+      left: 8px;
+      font-size: 11px;
+      opacity: 0.6;
+      pointer-events: none;
+      color: var(--v-text-dim, #a09484);
+    }
+    .shop-search-input {
+      width: 100%;
+      height: 30px;
+      box-sizing: border-box;
+      padding: 0 24px 0 26px;
+      background: rgba(14, 11, 8, 0.75);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: var(--v-radius-sm, 6px);
+      color: var(--v-text, #d4c8b0);
+      font-family: inherit;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .shop-search-input:focus {
+      border-color: var(--v-gold, #c4953a);
+      box-shadow: 0 0 6px rgba(196, 149, 58, 0.2);
+    }
+    .shop-search-clear {
+      position: absolute;
+      right: 6px;
+      background: transparent;
+      border: none;
+      color: var(--v-text-dim, #a09484);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 4px;
+      line-height: 1;
+    }
+    .shop-search-clear:hover { color: #fff; }
+
+    .shop-sort-toggle {
+      flex: 0 0 auto;
+      height: 30px;
+      padding: 0 8px;
+      background: rgba(30, 24, 18, 0.85);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: var(--v-radius-sm, 6px);
+      color: var(--v-gold, #c4953a);
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: calc(11px * var(--v-font-scale, 1));
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .shop-sort-toggle:hover {
+      background: rgba(196, 149, 58, 0.15);
+      border-color: var(--v-gold, #c4953a);
+    }
+
+    .shop-view-switch {
+      flex: 0 0 auto;
+      display: inline-flex;
+      background: rgba(14, 11, 8, 0.8);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: var(--v-radius-sm, 6px);
+      padding: 2px;
+      gap: 2px;
+    }
+    .shop-view-btn {
+      background: transparent;
+      border: none;
+      color: var(--v-text-dim, #a09484);
+      padding: 3px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      transition: all 0.15s ease;
+      font-family: var(--v-font-display, 'Cinzel', serif);
+    }
+    .shop-view-btn:hover { color: var(--v-text, #d4c8b0); }
+    .shop-view-btn.active {
+      background: linear-gradient(180deg, rgba(196, 149, 58, 0.35), rgba(74, 56, 40, 0.6));
+      color: #ffd700;
+      font-weight: 700;
+      box-shadow: 0 0 4px rgba(196, 149, 58, 0.3);
+    }
+
+    /* === MODO LISTA RICA (PADRÃO AAA) === */
+    .shop-list-view {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 10px 16px 10px;
+    }
+    .shop-list-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      min-height: 54px;
+      box-sizing: border-box;
+      background: linear-gradient(90deg, rgba(28, 22, 16, 0.9) 0%, rgba(18, 14, 10, 0.8) 100%);
+      border: 1px solid rgba(196, 149, 58, 0.22);
+      border-left: 3px solid var(--v-rarity-common, #b0b0b0);
+      border-radius: var(--v-radius-sm, 6px);
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .shop-list-row:hover {
+      background: linear-gradient(90deg, rgba(40, 32, 22, 0.95) 0%, rgba(28, 22, 16, 0.85) 100%);
+      border-color: rgba(196, 149, 58, 0.45);
+      transform: translateX(2px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    }
+    .shop-list-row:active {
+      transform: scale(0.99);
+    }
+    .shop-list-row.r-uncommon  { border-left-color: var(--v-rarity-uncommon, #4caf50); }
+    .shop-list-row.r-rare      { border-left-color: var(--v-rarity-rare, #2196f3); }
+    .shop-list-row.r-very_rare { border-left-color: var(--v-rarity-very-rare, #9c27b0); }
+    .shop-list-row.r-legendary { border-left-color: var(--v-rarity-legendary, #ff9800); }
+
+    .shop-list-row.shop-poor {
+      opacity: 0.65;
+    }
+    .shop-list-row.shop-poor:hover {
+      opacity: 0.88;
+    }
+
+    .shop-row-icon-slot {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, rgba(38, 30, 20, 0.9) 0%, rgba(12, 10, 8, 0.95) 100%);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 6px;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.7);
+    }
+    .shop-row-icon-slot svg, .shop-row-icon-slot img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+    }
+    .shop-row-stock-badge {
+      position: absolute;
+      bottom: -3px;
+      right: -3px;
+      font-size: 8px;
+      font-weight: 700;
+      color: var(--v-text-dim, #a09484);
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      padding: 0 4px;
+      border-radius: 6px;
+      line-height: 1.3;
+      letter-spacing: 0.02em;
+    }
+    .shop-row-stock-badge.last {
+      color: #ff6b6b;
+      border-color: rgba(255, 107, 107, 0.6);
+      animation: shop-stock-pulse 1.8s infinite;
+    }
+
+    .shop-row-info {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      justify-content: center;
+    }
+    .shop-row-title-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .shop-row-name {
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: calc(12.5px * var(--v-font-scale, 1));
+      font-weight: 600;
+      color: var(--v-text, #d4c8b0);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+    }
+    .shop-row-name.r-uncommon  { color: var(--v-rarity-uncommon, #4caf50); }
+    .shop-row-name.r-rare      { color: var(--v-rarity-rare, #2196f3); }
+    .shop-row-name.r-very_rare { color: var(--v-rarity-very-rare, #9c27b0); }
+    .shop-row-name.r-legendary { color: var(--v-rarity-legendary, #ff9800); }
+
+    .shop-row-meta-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: calc(10.5px * var(--v-font-scale, 1));
+      color: var(--v-text-dim, #a09484);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+    .shop-row-badge-pill {
+      display: inline-block;
+      font-size: 9px;
+      padding: 0 4px;
+      border-radius: 3px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      background: rgba(196, 149, 58, 0.15);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      color: var(--v-gold, #c4953a);
+    }
+    .shop-row-badge-pill.attune {
+      background: rgba(155, 89, 182, 0.2);
+      border-color: rgba(155, 89, 182, 0.5);
+      color: #d2a8f0;
+    }
+
+    .shop-row-price-box {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 1px;
+    }
+    .shop-row-price {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-weight: 700;
+      font-size: calc(12.5px * var(--v-font-scale, 1));
+      color: #ffd700;
+      white-space: nowrap;
+    }
+    .shop-row-price.too-expensive {
+      color: #ff6b6b;
+      opacity: 0.85;
+    }
+    .shop-row-discount-tag {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: #7cdb7c;
+      letter-spacing: 0.02em;
+    }
+    .shop-row-chevron {
+      color: rgba(196, 149, 58, 0.4);
+      font-size: 15px;
+      font-weight: 700;
+      margin-left: 4px;
+      line-height: 1;
+    }
+
+    /* === MODO GRADE OTIMIZADA (VITRINE) === */
+    .shop-grid-view {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      padding: 0 10px 16px 10px;
+    }
+    @media (max-width: 370px) {
+      .shop-grid-view {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .shop-grid-card {
+      background: linear-gradient(180deg, rgba(28, 22, 16, 0.85) 0%, rgba(16, 12, 8, 0.95) 100%);
+      border: 1px solid var(--v-border, #4a3828);
+      border-radius: var(--v-radius-sm, 6px);
+      padding: 6px 5px;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: transform 0.12s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      min-height: 120px;
+      box-sizing: border-box;
+    }
+    .shop-grid-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+      border-color: var(--v-gold, #c4953a);
+    }
+    .shop-grid-card:active {
+      transform: scale(0.98);
+    }
+    .shop-grid-card.r-common    { border-color: var(--v-rarity-common, #b0b0b0); }
+    .shop-grid-card.r-uncommon  { border-color: var(--v-rarity-uncommon, #4caf50); }
+    .shop-grid-card.r-rare      { border-color: var(--v-rarity-rare, #2196f3); }
+    .shop-grid-card.r-very_rare { border-color: var(--v-rarity-very-rare, #9c27b0); }
+    .shop-grid-card.r-legendary { border-color: var(--v-rarity-legendary, #ff9800); }
+
+    .shop-grid-price-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #ffd700;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      padding: 1px 4px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-family: var(--v-font-display, 'Cinzel', serif);
+    }
+    .shop-grid-price-badge.too-expensive {
+      color: #ff6b6b;
+      border-color: rgba(255, 107, 107, 0.5);
+    }
+    .shop-grid-stock-badge {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      font-size: 8.5px;
+      font-weight: 700;
+      color: var(--v-text-dim, #a09484);
+      background: rgba(0, 0, 0, 0.75);
+      padding: 1px 3px;
+      border-radius: 4px;
+    }
+    .shop-grid-stock-badge.last {
+      color: #ff6b6b;
+      animation: shop-stock-pulse 1.8s infinite;
+    }
+
+    .shop-grid-icon {
+      margin-top: 14px;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .shop-grid-icon svg, .shop-grid-icon img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    }
+    .shop-grid-name {
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: calc(11px * var(--v-font-scale, 1));
+      font-weight: 600;
+      color: var(--v-text, #d4c8b0);
+      text-align: center;
+      line-height: 1.2;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      min-height: 2.4em;
+    }
+    .shop-grid-name.r-uncommon  { color: var(--v-rarity-uncommon, #4caf50); }
+    .shop-grid-name.r-rare      { color: var(--v-rarity-rare, #2196f3); }
+    .shop-grid-name.r-very_rare { color: var(--v-rarity-very-rare, #9c27b0); }
+    .shop-grid-name.r-legendary { color: var(--v-rarity-legendary, #ff9800); }
+
+    .shop-grid-meta {
+      font-size: calc(9.5px * var(--v-font-scale, 1));
+      color: var(--v-text-dim, #a09484);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
 
     /* ====================================================================
        CITY SECTORS & DISCOVERY SYSTEM (USER REQUEST 2026-05-04)
@@ -51153,6 +51678,43 @@ function _resolveItemIcon(name, size){
 }
 window._resolveItemIcon = _resolveItemIcon;
 
+function _getShopItemMeta(it){
+  if (!it) return '';
+  var parts = [];
+  if (it.dd) parts.push('⚔ ' + it.dd);
+  if (it.ac) parts.push('🛡 +' + it.ac + ' CA');
+  if (it.b)  parts.push('+' + it.b + ' ATK');
+  if (it.hb) parts.push('❤️ +' + it.hb + ' PV');
+  if (it.mb) parts.push('✨ +' + it.mb + ' MP');
+  if (parts.length === 0){
+    var tags = it.t || [];
+    if (tags.indexOf('potion') !== -1 || tags.indexOf('consumable') !== -1){
+      if (it.desc && it.desc.length <= 40) parts.push(it.desc);
+      else parts.push('Consumível');
+    } else if (tags.indexOf('gem') !== -1){
+      parts.push('Gema Preciosa');
+    } else if (tags.indexOf('map') !== -1){
+      parts.push('Cartografia');
+    } else if (tags.indexOf('tool') !== -1 || tags.indexOf('camping') !== -1){
+      parts.push('Equipamento de Viagem');
+    } else if (tags.indexOf('jewelry') !== -1 || tags.indexOf('accessory') !== -1){
+      parts.push('Joia & Adorno');
+    }
+  }
+  return parts.join(' · ');
+}
+
+function _getShopItemCategory(it){
+  if (!it || !it.t || !it.t.length) return '';
+  var priority = ['martial_weapon', 'simple_weapon', 'heavy_armor', 'medium_armor', 'light_armor', 'shield', 'potion', 'gem', 'map', 'tool', 'camping', 'accessory', 'consumable', 'weapon', 'armor'];
+  for (var i = 0; i < priority.length; i++){
+    if (it.t.indexOf(priority[i]) !== -1){
+      return getTagLabel(priority[i]);
+    }
+  }
+  return getTagLabel(it.t[0]) || '';
+}
+
 function _showShopPopup(npcId){
   var shop = CANON_MARKET_SHOPS[npcId];
   if (!shop){ vToast('Loja não disponível.'); return; }
@@ -51164,10 +51726,18 @@ function _showShopPopup(npcId){
   // Root cause: textContent escapa HTML. shop.icon contem SVG via _heralIco().
   // Fix: mesmo padrao do _showInfoPopup (linha 17592) — innerHTML quando icon tem '<'.
   if (titleEl) {
-    var titleHtml = shop.icon + ' ' + shop.npc + ' — ' + shop.role;
-    if (shop.icon && shop.icon.indexOf('<') === 0) titleEl.innerHTML = titleHtml;
+    var titleHtml = (shop.icon ? shop.icon + ' ' : '') + shop.npc + ' · ' + shop.role;
+    if (titleHtml.indexOf('<') >= 0) titleEl.innerHTML = titleHtml;
     else titleEl.textContent = titleHtml;
   }
+  // Sincroniza saldo de Valdoritas no header (único ponto canônico de exibição)
+  try {
+    var cspGoldNum = document.querySelector('#csp-gold .cgb-num');
+    if (cspGoldNum) {
+      var p = window.CITY_MOCK_PLAYER;
+      cspGoldNum.textContent = (typeof _cityGoldNow === 'function') ? _cityGoldNow() : (p ? (p.gold || 0) : 0);
+    }
+  } catch(_e){}
   // Reset shop filter ao abrir uma loja diferente
   window._currentShopNpcId = npcId;
   _renderShopPopup();
@@ -51187,69 +51757,139 @@ function _renderShopPopup(){
   if (!bodyEl) return;
   var p = window.CITY_MOCK_PLAYER;
   var totalGold = p ? (p.gold || 0) : 0;
-  var sortLabels = { default:'Padrão', name:'A-Z', rarity:'Raridade', value:'Preço' };
+  var sortLabels = { default:'Padrão', name:'Nome', rarity:'Raridade', value:'Preço' };
   var filters = _shopGetFilters(npcId);
-  var html = ''
-    + '<div class="inv-meta-bar">'
-    +   '<span style="float:left">Bolsa: ' + totalGold + ' <span class="vi vi-coin sm"></span></span>'
-    +   shop.items.length + ' itens à venda'
-    + '</div>'
-    + '<p class="subscreen-flavor"><i>' + shop.greeting + '</i></p>'
-    + '<div class="inv-search-bar">'
-    +   '<input id="shop-search-input" class="inv-search-input" type="text" placeholder="Buscar item..." value="' + (window._shopSearch || '') + '">'
-    +   '<button class="inv-sort-btn" id="shop-sort-btn">' + sortLabels[window._shopSort] + '</button>'
-    + '</div>'
-    + '<div class="inv-filter-row">';
-  filters.forEach(function(f){
-    var active = (f.id === window._shopFilter) ? ' active' : '';
-    html += '<span class="inv-filter-pill' + active + '" data-filter="' + f.id + '">' + f.label + ' (' + f.count + ')</span>';
-  });
-  html += '</div>';
+  var viewMode = window._shopViewMode || (function(){
+    try { return localStorage.getItem('valdoria_shop_view_mode') || 'list'; } catch(_e){ return 'list'; }
+  })();
+  window._shopViewMode = viewMode;
+
+  // Atualiza saldo no header #csp-gold (único local de exibição, sem duplicações!)
+  try {
+    var cspGoldNum = document.querySelector('#csp-gold .cgb-num');
+    if (cspGoldNum) cspGoldNum.textContent = totalGold;
+  } catch(_e){}
+
   // Filtered items (canonical: stock-aware — items com stock 0 ficam invisíveis)
   var items = shop.items.filter(function(name){
     if (_shopGetStock(npcId, name) <= 0) return false;
     return _shopMatchesFilter(name, window._shopFilter) && _shopMatchesSearch(name, window._shopSearch);
   });
   items.sort(_shopSortCompare);
+
+  var greetingClean = (shop.greeting || '').replace(/^["'“]|["'”]$/g, '');
+
+  var html = ''
+    + '<div class="shop-header-card">'
+    +   '<div class="shop-quote-line" title="' + greetingClean.replace(/"/g, '&quot;') + '">'
+    +     '<span class="shop-quote-icon">💬</span>'
+    +     '<span class="shop-quote-text">“' + greetingClean + '”</span>'
+    +   '</div>'
+    +   '<div class="shop-stock-pill">' + items.length + ' de ' + shop.items.length + ' artigos</div>'
+    + '</div>'
+    + '<div class="shop-toolbar">'
+    +   '<div class="shop-filter-bar">';
+
+  filters.forEach(function(f){
+    var active = (f.id === window._shopFilter) ? ' active' : '';
+    html += '<button class="shop-filter-chip' + active + '" data-filter="' + f.id + '">'
+      + f.label + ' <span class="shop-chip-count">' + f.count + '</span>'
+      + '</button>';
+  });
+
+  html += '</div>'
+    + '<div class="shop-controls-bar">'
+    +   '<div class="shop-search-box">'
+    +     '<span class="shop-search-ico">🔍</span>'
+    +     '<input id="shop-search-input" class="shop-search-input" type="text" placeholder="Buscar produto ou efeito..." value="' + (window._shopSearch || '').replace(/"/g, '&quot;') + '">'
+    +     (window._shopSearch ? '<button id="shop-search-clear" class="shop-search-clear" title="Limpar busca">✕</button>' : '')
+    +   '</div>'
+    +   '<button class="shop-sort-toggle" id="shop-sort-btn" title="Alternar ordenação">'
+    +     '↕ ' + sortLabels[window._shopSort]
+    +   '</button>'
+    +   '<div class="shop-view-switch" title="Modo de exibição">'
+    +     '<button class="shop-view-btn' + (viewMode === 'list' ? ' active' : '') + '" data-mode="list" title="Exibição em Lista">☰</button>'
+    +     '<button class="shop-view-btn' + (viewMode === 'grid' ? ' active' : '') + '" data-mode="grid" title="Exibição em Grade">⊞</button>'
+    +   '</div>'
+    + '</div>'
+    + '</div>';
+
   if (items.length === 0){
-    html += '<div class="inv-empty">— Nenhum item ' + (window._shopSearch ? 'encontrado' : 'em estoque') + ' —</div>';
-  } else {
-    html += '<div class="inv-grid">';
+    html += '<div class="inv-empty" style="padding: 30px 10px; text-align: center; color: var(--v-text-dim, #a09484); font-style: italic;">— Nenhum artigo ' + (window._shopSearch ? 'encontrado para esta busca' : 'nesta categoria') + ' —</div>';
+  } else if (viewMode === 'list'){
+    html += '<div class="shop-list-view">';
     items.forEach(function(name){
       var it = getItemData(name);
       var rarity = it.r || 'common';
-      var basePrice = it.v || 0;
-      // X-6.5.51CC (2026-05-18): preço D&D 5e canonical (CHA + reputação).
-      // Mostra modificador no card pra player saber se ta pagando melhor/pior.
       var displayPrice = _marketCalculateBuyPrice(name, npcId, p);
       if (p && p.metadata && (p.metadata.market_haggle_discount || p.metadata.market_haggle_penalty)){
         displayPrice = _haggleAdjustPrice(displayPrice, p);
       }
       var canAfford = totalGold >= displayPrice;
       var stock = _shopGetStock(npcId, name);
-      var meta = (it.dd ? it.dd : '') + (it.ac ? '+' + it.ac + ' CA' : '') + (it.b ? '+' + it.b + ' ATK' : '');
-      var priceHtml = '<div class="shop-card-price' + (canAfford ? '' : ' too-expensive') + '">' + _fmtV(displayPrice) + ' <span class="vi vi-coin sm"></span></div>';
-      var stockHtml = stock <= 2 ? '<div class="shop-card-stock' + (stock === 1 ? ' last' : '') + '">' + stock + ' un.</div>' : '';
-      // 2026-05-18: USER REPORT — "vários itens com desenho errado" no shop.
-      // Fix v2: HeraldicItems.iconSvg(name) com auto-strip de artigos PT-BR.
-      // Diagnóstico: ic-it-* tem ~519 IDs slugificados sem artigos, mas item
-      // names tem "de"/"da"/"do" ("Espada de Treino", "Cota de Malha",
-      // "Machado de Batalha"). Slug direto falha em 83% dos itens. Solução:
-      // _resolveItemIcon tenta múltiplas variantes (direto, sem artigos,
-      // sem espaços) antes de cair pro fallback emoji/mochila.
-      var iconHtml = _resolveItemIcon(name, '40px');
+      var tacticalMeta = _getShopItemMeta(it);
+      var categoryLabel = _getShopItemCategory(it);
+      var iconHtml = _resolveItemIcon(name, '32px');
       if (!iconHtml) iconHtml = (it.e || _heralIco("ic-mochila"));
-      html += '<div class="inv-card r-' + rarity + (canAfford ? '' : ' shop-poor') + '" data-name="' + name.replace(/"/g, '&quot;') + '">'
-        +   priceHtml
-        +   stockHtml
-        +   '<div class="inv-card-emoji">' + iconHtml + '</div>'
-        +   '<div class="inv-card-name r-' + rarity + '">' + name + '</div>'
-        +   (meta ? '<div class="inv-card-meta">' + meta + '</div>' : '')
+      var nameEsc = name.replace(/"/g, '&quot;');
+      var stockBadge = stock <= 2 ? '<span class="shop-row-stock-badge' + (stock === 1 ? ' last' : '') + '">' + stock + ' un</span>' : '';
+      var attuneBadge = (typeof _attunementRequired === 'function' && _attunementRequired(name)) ? '<span class="shop-row-badge-pill attune">✦ Sint.</span>' : '';
+
+      html += '<div class="shop-list-row r-' + rarity + (canAfford ? '' : ' shop-poor') + '" data-name="' + nameEsc + '">'
+        +   '<div class="shop-row-icon-slot r-' + rarity + '">'
+        +     iconHtml
+        +     stockBadge
+        +   '</div>'
+        +   '<div class="shop-row-info">'
+        +     '<div class="shop-row-title-line">'
+        +       '<span class="shop-row-name r-' + rarity + '">' + name + '</span>'
+        +       attuneBadge
+        +     '</div>'
+        +     '<div class="shop-row-meta-line">'
+        +       (tacticalMeta ? '<span>' + tacticalMeta + '</span>' : '')
+        +       (tacticalMeta && categoryLabel ? '<span>·</span>' : '')
+        +       (categoryLabel ? '<span>' + categoryLabel + '</span>' : '')
+        +     '</div>'
+        +   '</div>'
+        +   '<div class="shop-row-price-box">'
+        +     '<div style="display:flex;align-items:center;">'
+        +       '<span class="shop-row-price' + (canAfford ? '' : ' too-expensive') + '">' + _fmtV(displayPrice) + ' <span class="vi vi-coin sm"></span></span>'
+        +       '<span class="shop-row-chevron">›</span>'
+        +     '</div>'
+        +   '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="shop-grid-view">';
+    items.forEach(function(name){
+      var it = getItemData(name);
+      var rarity = it.r || 'common';
+      var displayPrice = _marketCalculateBuyPrice(name, npcId, p);
+      if (p && p.metadata && (p.metadata.market_haggle_discount || p.metadata.market_haggle_penalty)){
+        displayPrice = _haggleAdjustPrice(displayPrice, p);
+      }
+      var canAfford = totalGold >= displayPrice;
+      var stock = _shopGetStock(npcId, name);
+      var tacticalMeta = _getShopItemMeta(it);
+      var iconHtml = _resolveItemIcon(name, '36px');
+      if (!iconHtml) iconHtml = (it.e || _heralIco("ic-mochila"));
+      var nameEsc = name.replace(/"/g, '&quot;');
+      var stockBadge = stock <= 2 ? '<div class="shop-grid-stock-badge' + (stock === 1 ? ' last' : '') + '">' + stock + ' un</div>' : '';
+
+      html += '<div class="shop-grid-card r-' + rarity + (canAfford ? '' : ' shop-poor') + '" data-name="' + nameEsc + '">'
+        +   '<div class="shop-grid-price-badge' + (canAfford ? '' : ' too-expensive') + '">' + _fmtV(displayPrice) + ' <span class="vi vi-coin sm"></span></div>'
+        +   stockBadge
+        +   '<div class="shop-grid-icon">' + iconHtml + '</div>'
+        +   '<div class="shop-grid-name r-' + rarity + '">' + name + '</div>'
+        +   (tacticalMeta ? '<div class="shop-grid-meta">' + tacticalMeta + '</div>' : '')
         + '</div>';
     });
     html += '</div>';
   }
+
   bodyEl.innerHTML = html;
+
   // Wire events
   var searchInput = document.getElementById('shop-search-input');
   if (searchInput){
@@ -51258,6 +51898,15 @@ function _renderShopPopup(){
       _renderShopPopup();
       var newInput = document.getElementById('shop-search-input');
       if (newInput){ newInput.focus(); newInput.selectionStart = newInput.selectionEnd = window._shopSearch.length; }
+    });
+  }
+  var searchClear = document.getElementById('shop-search-clear');
+  if (searchClear){
+    searchClear.addEventListener('click', function(){
+      window._shopSearch = '';
+      _renderShopPopup();
+      var newInput = document.getElementById('shop-search-input');
+      if (newInput) newInput.focus();
     });
   }
   var sortBtn = document.getElementById('shop-sort-btn');
@@ -51269,13 +51918,23 @@ function _renderShopPopup(){
       _renderShopPopup();
     });
   }
-  bodyEl.querySelectorAll('.inv-filter-pill').forEach(function(pill){
-    pill.addEventListener('click', function(){
-      window._shopFilter = pill.dataset.filter;
+  bodyEl.querySelectorAll('.shop-filter-chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      window._shopFilter = chip.dataset.filter;
       _renderShopPopup();
     });
   });
-  bodyEl.querySelectorAll('.inv-card').forEach(function(card){
+  bodyEl.querySelectorAll('.shop-view-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var mode = btn.dataset.mode;
+      if (mode && mode !== window._shopViewMode){
+        window._shopViewMode = mode;
+        try { localStorage.setItem('valdoria_shop_view_mode', mode); } catch(_e){}
+        _renderShopPopup();
+      }
+    });
+  });
+  bodyEl.querySelectorAll('.shop-list-row, .shop-grid-card').forEach(function(card){
     card.addEventListener('click', function(){
       _showShopItemDetail(card.dataset.name, npcId);
     });
@@ -51290,8 +51949,12 @@ function _showShopItemDetail(name, npcId){
   var p = window.CITY_MOCK_PLAYER;
   var rarity = it.r || 'common';
   var rarityCol = getRarityColor(rarity);
-  var canAfford = p && p.gold >= (it.v || 0);
   var shop = CANON_MARKET_SHOPS[npcId];
+  var displayPrice = _marketCalculateBuyPrice(name, npcId, p);
+  if (p && p.metadata && (p.metadata.market_haggle_discount || p.metadata.market_haggle_penalty)){
+    displayPrice = _haggleAdjustPrice(displayPrice, p);
+  }
+  var canAfford = p && p.gold >= displayPrice;
   // Build stats
   var statLines = [];
   if (it.s) statLines.push('<b>Slot:</b> ' + (CANON_SLOT_NAMES[it.s] || it.s));
@@ -51301,8 +51964,12 @@ function _showShopItemDetail(name, npcId){
   if (it.hb) statLines.push('<b>HP:</b> +' + it.hb);
   if (it.mb) statLines.push('<b>MP:</b> +' + it.mb);
   if (it.sk) statLines.push('<b>Slots de Gema:</b> ' + it.sk);
-  statLines.push('<b>Preço:</b> ' + (it.v || 0) + ' <span class="vi vi-coin sm"></span>');
-  if (p) statLines.push('<b>Sua bolsa:</b> ' + _fmtV(p.gold) + ' <span class="vi vi-coin sm"></span>');
+  var currentGold = p ? (p.gold || 0) : 0;
+  var goldDiff = currentGold - displayPrice;
+  var goldRemainderHtml = canAfford
+    ? ' <span style="font-size:11px;color:var(--v-text-dim,#a09484);font-weight:normal;">(restarão ' + _fmtV(goldDiff) + ' 🪙)</span>'
+    : ' <span style="font-size:11px;color:var(--v-danger,#c44);font-weight:normal;">(faltam ' + _fmtV(Math.abs(goldDiff)) + ' 🪙)</span>';
+  statLines.push('<b>Preço:</b> ' + _fmtV(displayPrice) + ' <span class="vi vi-coin sm"></span>' + goldRemainderHtml);
   // Build tags
   var tagHtml = (it.t || []).map(function(t){ return '<span class="inv-detail-tag">' + getTagLabel(t) + '</span>'; }).join('');
   // X-6.5.51CD (2026-05-18): D&D 5e skill checks AAA — Pechinchar/Intimidar/Avaliar
