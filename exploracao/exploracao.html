@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T01:49:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T03:48:53Z - do not edit directly, edit source -->
 
 
 
@@ -11104,6 +11104,9 @@ window.__onIntroTap = function() {
             n.skill = skillLabel;
           }
           if (c.cost) n.cost = c.cost;
+          if (c.speech || c.player_speech) n.speech = c.speech || c.player_speech;
+          if (c.tag) n.tag = c.tag;
+          if (c.badge) n.badge = c.badge;
           n._original = c;
           return n;
         });

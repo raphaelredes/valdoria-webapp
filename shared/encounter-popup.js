@@ -1380,17 +1380,29 @@
       statBadge += '<span class="enc-cd-badge">Renome ' + rd + '</span>';
     }
 
+    var speechHtml = '';
+    if (ch.speech) {
+      var sTxt = String(ch.speech).trim();
+      if (sTxt.indexOf('"') === 0 && sTxt.lastIndexOf('"') === sTxt.length - 1) sTxt = sTxt.slice(1, -1);
+      else if (sTxt.indexOf('“') === 0 && sTxt.lastIndexOf('”') === sTxt.length - 1) sTxt = sTxt.slice(1, -1);
+      speechHtml =
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title">Fala / Resposta do Personagem</div>' +
+          '<div class="enc-cd-box enc-cd-speech">“' + sTxt + '”</div>' +
+        '</div>';
+    }
+
     var descHtml = '';
     if (ch.desc) {
       descHtml =
         '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
+          '<div class="enc-cd-section-title">' + (ch.speech ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
           '<div class="enc-cd-box">' + ch.desc + '</div>' +
         '</div>';
     } else {
       descHtml =
         '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
+          '<div class="enc-cd-section-title">' + (ch.speech ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
           '<div class="enc-cd-box">' + _coinify(titleText) + (subtitleText ? ' — ' + subtitleText : '') + '</div>' +
         '</div>';
     }
@@ -1433,6 +1445,7 @@
       : (ch.id === 'jrn_go') ? 'Partir em Marcha Padrão'
       : (ch.id === 'jrn_cancel') ? 'Permanecer na Cidade'
       : (ch.isCombat) ? 'Entrar em Combate'
+      : (ch.speech) ? 'Dizer isto e Confirmar'
       : 'Confirmar Escolha';
 
     card.innerHTML =
@@ -1441,6 +1454,7 @@
       (subtitleText ? '<div class="enc-cd-subtitle">' + subtitleText + '</div>' : '') +
       (statBadge ? '<div class="enc-cd-badge-row">' + statBadge + '</div>' : '') +
       '<div class="enc-cd-divider"></div>' +
+      speechHtml +
       descHtml +
       resultsHtml +
       '<div class="enc-cd-actions">' +
@@ -1646,14 +1660,28 @@
          fallback 'Continuar' + warn pro error-reporter. */
       var _choLabel = (ch.label && String(ch.label).trim()) || 'Continuar';
       if (!ch.label) console.warn('[ENC] choice sem label', ch.id || ch.cb || '');
-      if (ch.badge) {
+
+      var tagText = ch.tag || (ch.badge && String(ch.badge).replace(/^\[|\]$/g, '')) || '';
+      var tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + tagText.toUpperCase() + ']</span>' : '';
+      var hasSpeech = !!(ch.speech && String(ch.speech).trim());
+      var speechClean = '';
+      if (hasSpeech) {
+        speechClean = String(ch.speech).trim();
+        if (speechClean.indexOf('"') === 0 && speechClean.lastIndexOf('"') === speechClean.length - 1) {
+          speechClean = speechClean.slice(1, -1);
+        } else if (speechClean.indexOf('“') === 0 && speechClean.lastIndexOf('”') === speechClean.length - 1) {
+          speechClean = speechClean.slice(1, -1);
+        }
+      }
+
+      if (!tagPill && ch.badge) {
         _choLabel = '<span class="enc-cho-badge-pill" style="display:inline-block;padding:1px 6px;margin-right:6px;font-size:10px;font-weight:700;border:1px solid rgba(196,149,58,0.5);border-radius:4px;color:#c4953a;background:rgba(196,149,58,0.12);text-transform:uppercase;letter-spacing:0.5px;">' + ch.badge + '</span>' + _choLabel;
       }
 
       if (isCompact) {
-        var titleText = _choLabel;
+        var titleText = hasSpeech ? (tagPill + '“' + _coinify(speechClean) + '”') : _choLabel;
         var subText = '';
-        if (_choLabel.indexOf(':') !== -1) {
+        if (_choLabel.indexOf(':') !== -1 && !hasSpeech) {
           var lp = _choLabel.split(':');
           titleText = lp[0].trim();
           subText = lp.slice(1).join(':').trim();
@@ -1665,6 +1693,8 @@
           subText = 'Suspender viagem em segurança';
         } else if (ch.desc) {
           subText = ch.desc;
+        } else if (hasSpeech && ch.label) {
+          subText = ch.label;
         }
 
         var statHint = '';
@@ -1690,13 +1720,19 @@
           });
         }
       } else {
+        var mainContent = '';
+        var subDesc = '';
+        if (hasSpeech) {
+          mainContent = tagPill + '<span class="enc-cho-speech">“' + _coinify(speechClean) + '”</span>';
+          subDesc = ch.desc || ch.label || '';
+        } else {
+          mainContent = (tagPill ? tagPill : '') + _coinify(_choLabel);
+          subDesc = ch.desc || '';
+        }
         row.innerHTML =
-          /* 2026-06-07 (user): PADRAO_ALDRIC — SEM símbolo (◆) à esquerda das escolhas;
-             o badge de DC/custo vira uma meta-line de LARGURA TOTAL embaixo do título
-             (antes era coluna à direita que espremia o título e ficava mal distribuída). */
           '<span class="enc-cho-row-body">' +
-            '<span class="enc-cho-row-label">' + _coinify(_choLabel) + '</span>' +
-            (ch.desc ? '<span class="enc-cho-row-desc">' + ch.desc + '</span>' : '') +
+            '<span class="enc-cho-row-label">' + mainContent + '</span>' +
+            (subDesc ? '<span class="enc-cho-row-desc">' + subDesc + '</span>' : '') +
             (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
           '</span>' +
           '<span class="enc-cho-row-chev">›</span>';
@@ -2200,7 +2236,7 @@
         /* sessão #88: tipo 'dm' (voz de Mestre, doc §4.0.1) ganha visual próprio
            (sépia + label MESTRE via .enc-dm); qualquer type desconhecido cai em
            narration (antes caía em speech — invertido vs. legacy/Stub). */
-        var isLinePlayer = line.type === 'player_speech' || !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}';
+        var isLinePlayer = line.type === 'player_speech' || !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}' || line.speaker === 'Você' || (pData && pData.name && line.speaker === pData.name);
         var _lineCls = (line.type === 'speech' || line.type === 'player_speech') ? ('enc-speech' + (isLinePlayer ? ' enc-speech--player' : ''))
           : (line.type === 'dm') ? 'enc-narration enc-dm'
           : 'enc-narration' + (line._checkHint ? ' enc-check-hint' : '');

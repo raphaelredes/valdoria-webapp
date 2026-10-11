@@ -1455,23 +1455,48 @@ var HAZARDS_EXTRA = {
         { i: '🎖', t: 'Apresentar credenciais militares ou nobres', stat: 'cha', dc: 10,
           requires_background: ['soldier', 'noble', 'folk_hero'],
           desc: 'Declarar seu serviço militar, brasão de linhagem ou reputação entre os defensores.',
+          tag_by_background: {
+            soldier: 'SOLDADO',
+            noble: 'NOBRE',
+            folk_hero: 'DEFENSOR DO POVO'
+          },
+          speech_by_background: {
+            soldier: '"Descanse, sargento. Já servi sob as cores do reino na fronteira e conheço o peso desta vigília. Olhe minhas credenciais de serviço."',
+            noble: '"Mantenha a guarda baixa, sargento. Trago as insígnias da minha Casa e salvo-conduto emitido pelas cortes de Valdoria."',
+            folk_hero: '"Guarde a alabarda, sargento. Venho em socorro das vilas da fronteira e minha reputação precede meus passos."'
+          },
+          tag: 'CREDENCIAL',
+          speech: '"Trago credenciais oficiais de Valdoria. Estamos em missão legítima e pedimos passagem regulamentar."',
           sNarr: 'O sargento perfila em continência: "Honra a quem serve o reino. Passem com a bênção dos postos de guarda."',
           fNarr: 'O sentinela confere seus pertences com desconfiança burocrática antes de liberar a passagem.', dmg: 0 },
         { i: '👥', t: 'Apresentar comitiva de aventureiros em ordem', stat: 'cha', dc: 11,
           requires_ally: true,
+          tag: 'LÍDER DO GRUPO',
+          speech: '"Tranquilize seus homens, sargento. Esta comitiva responde ao meu comando. Viemos em missão pacífica e cooperamos com a inspeção."',
           desc: 'Explicar a missão pacífica do grupo e cooperar com a inspeção da patrulha.',
           sNarr: 'A disciplina e cordialidade de seus companheiros tranquilizam os soldados, que oferecem água fresca de cantil e indicam a rota patrulhada.',
           sNarr_by_ally: 'A disciplina e cordialidade de seus companheiros tranquilizam os soldados, que oferecem água fresca de cantil e indicam a rota patrulhada.',
           fNarr: 'A inspeção da bagagem do grupo demora meia hora antes da liberação.', dmg: 0,
           fNarr_by_ally: 'A inspeção da bagagem do grupo demora meia hora antes da liberação.' },
         { i: '🗣', t: 'Diplomacia cortês e relato de estrada', stat: 'cha', dc: 12,
+          tag: 'PERSUASÃO',
+          speech: '"Trago notícias e rumores das trilhas do oeste, sargento. Bandos armados e movimentações suspeitas. Podemos trocar relatos por livre passagem."',
           desc: 'Compartilhar notícias e rumores das trilhas em troca de salvo-conduto.',
           sNarr: 'Os guardas apreciam as informações sobre o tráfego recente e carimbam sua passagem sem embaraços.',
           fNarr: 'O sargento resmunga mas dá passagem após advertir sobre bandos armados adiante.', dmg: 0 },
         { i: '🚶', t: 'Contornar o posto pela estepe aberta', stat: 'dex', dc: 11,
+          tag: 'FURTIVIDADE',
+          speech: '*Sinalizar para recuar devagar pela estepe, contornando a paliçada fora da linha de visão das sentinelas.*',
           desc: 'Evitar o entrevero militar e seguir pela orla dos trigais.',
           sNarr: 'Você contorna a paliçada fora da linha de visão das sentinelas e segue a jornada sem interrupções.',
-          fNarr: 'Um guarda grita aviso da torre, forçando você a apressar o passo na terra batida.', dmg: 0 }
+          fNarr: 'Um guarda grita aviso da torre, forçando você a apressar o passo na terra batida.', dmg: 0 },
+        { i: '⚔️', t: 'Intimidação marcial resoluta', stat: 'cha', dc: 12,
+          requires_class: ['barbaro', 'guerreiro', 'paladino'],
+          tag: 'INTIMIDAÇÃO',
+          speech: '"Abaixe essa alabarda antes que eu a tome de você, sargento. Não temos tempo para atrasos e você não vai querer testar meu aço."',
+          desc: 'Impor respeito militar com firmeza de quem não aceita ser atrasado.',
+          sNarr: 'O sargento engole em seco perante sua imponência marcial: "Muito bem... abram a cancela! Passem sem criar tumulto."',
+          fNarr: 'Os sentinelas cerram fileiras e apontam lanças com cautela, forçando você a moderar o tom antes de liberarem a passagem.', dmg: 0 }
       ] }
   ],
 
@@ -2357,6 +2382,152 @@ var DEPARTURES = {
         return choice.fNarr || '';
     }
 
+    /* -------- Baldur's Gate 3 Dialogue Choice Voice Engine (D&D 5e) -------- */
+    function pickChoiceVoice(choice, player, hazard) {
+        if (!choice) return { tag: 'AÇÃO', speech: '' };
+        var t = _traits(player);
+        var clsKey = t.cls;
+        var clsAlt = (clsKey === 'ladino') ? 'ladrao' : (clsKey === 'ladrao' ? 'ladino' : clsKey);
+
+        function _findIn(obj, key, alt) {
+            if (!obj) return null;
+            if (key && obj[key]) return obj[key];
+            if (alt && obj[alt]) return obj[alt];
+            return null;
+        }
+
+        // 1. Resolve Tag (BG3-style D&D 5e badge)
+        var resolvedTag = '';
+        if (choice.tag_by_background && t.bg && choice.tag_by_background[t.bg]) {
+            resolvedTag = choice.tag_by_background[t.bg];
+        } else if (choice.tag_by_subclass && t.subclass && choice.tag_by_subclass[t.subclass]) {
+            resolvedTag = choice.tag_by_subclass[t.subclass];
+        } else if (choice.tag_by_class) {
+            var tagCls = _findIn(choice.tag_by_class, clsKey, clsAlt);
+            if (tagCls) resolvedTag = tagCls;
+        } else if (choice.tag_by_race && t.race && choice.tag_by_race[t.race]) {
+            resolvedTag = choice.tag_by_race[t.race];
+        }
+
+        if (!resolvedTag && choice.tag) {
+            resolvedTag = choice.tag;
+        }
+
+        if (!resolvedTag) {
+            var reqBg = choice.requires_background || choice.requires_bg;
+            if (reqBg) {
+                var bgKey = (Array.isArray(reqBg)) ? (t.bg && reqBg.indexOf(t.bg) >= 0 ? t.bg : reqBg[0]) : reqBg;
+                var BG_MAP = {
+                    soldier: 'SOLDADO',
+                    noble: 'NOBRE',
+                    folk_hero: 'DEFENSOR DO POVO',
+                    acolyte: 'ACÓLITO',
+                    criminal: 'CRIMINOSO',
+                    sage: 'SÁBIO',
+                    outlander: 'ANDARILHO',
+                    guild_artisan: 'ARTESÃO',
+                    urchin: 'ÓRFÃO',
+                    hermit: 'EREMITA',
+                    charlatan: 'CHARLATÃO',
+                    sailor: 'MARINHEIRO',
+                    entertainer: 'ARTISTA'
+                };
+                resolvedTag = BG_MAP[bgKey] || String(bgKey).toUpperCase();
+            } else if (choice.requires_class) {
+                var cReq = (Array.isArray(choice.requires_class)) ? (t.cls && choice.requires_class.indexOf(t.cls) >= 0 ? t.cls : choice.requires_class[0]) : choice.requires_class;
+                var CLS_MAP = {
+                    guerreiro: 'GUERREIRO',
+                    barbaro: 'BÁRBARO',
+                    paladino: 'PALADINO',
+                    clerigo: 'CLÉRIGO',
+                    ladino: 'LADINO',
+                    ladrao: 'LADINO',
+                    mago: 'MAGO',
+                    bruxo: 'BRUXO',
+                    feiticeiro: 'FEITICEIRO',
+                    patrulheiro: 'PATRULHEIRO',
+                    bardo: 'BARDO',
+                    druida: 'DRUIDA',
+                    monge: 'MONGE'
+                };
+                resolvedTag = CLS_MAP[cReq] || String(cReq).toUpperCase();
+            } else if (choice.requires_race) {
+                var rReq = (Array.isArray(choice.requires_race)) ? (t.race && choice.requires_race.indexOf(t.race) >= 0 ? t.race : choice.requires_race[0]) : choice.requires_race;
+                var RACE_MAP = {
+                    human: 'HUMANO',
+                    elf: 'ELFO',
+                    dwarf: 'ANÃO',
+                    halforc: 'MEIO-ORC',
+                    halfling: 'HALFLING',
+                    gnome: 'GNOMO',
+                    tiefling: 'TIEFLING',
+                    dragonborn: 'DRACONATO'
+                };
+                resolvedTag = RACE_MAP[rReq] || String(rReq).toUpperCase();
+            } else if (choice.requires_ally && t.hasAllies) {
+                resolvedTag = 'LÍDER DO GRUPO';
+            } else if (choice.isCombat) {
+                resolvedTag = 'COMBATE';
+            } else if (choice.stat) {
+                var sKey = String(choice.stat).toLowerCase();
+                var cDesc = ((choice.t || '') + ' ' + (choice.desc || '')).toLowerCase();
+                if (sKey === 'cha') {
+                    if (cDesc.indexOf('ment') >= 0 || cDesc.indexOf('fing') >= 0 || cDesc.indexOf('disfar') >= 0) resolvedTag = 'ENGANAÇÃO';
+                    else if (cDesc.indexOf('amea') >= 0 || cDesc.indexOf('intimid') >= 0 || cDesc.indexOf('força') >= 0) resolvedTag = 'INTIMIDAÇÃO';
+                    else resolvedTag = 'PERSUASÃO';
+                } else if (sKey === 'dex') {
+                    if (cDesc.indexOf('furtiv') >= 0 || cDesc.indexOf('sombra') >= 0 || cDesc.indexOf('escond') >= 0 || cDesc.indexOf('contorn') >= 0) resolvedTag = 'FURTIVIDADE';
+                    else if (cDesc.indexOf('corda') >= 0 || cDesc.indexOf('gatilho') >= 0 || cDesc.indexOf('armadilha') >= 0 || cDesc.indexOf('destrav') >= 0 || cDesc.indexOf('desarm') >= 0) resolvedTag = 'LADINAGEM';
+                    else resolvedTag = 'ACROBACIA';
+                } else if (sKey === 'str') {
+                    resolvedTag = 'ATLETISMO';
+                } else if (sKey === 'wis') {
+                    if (cDesc.indexOf('olhar') >= 0 || cDesc.indexOf('notar') >= 0 || cDesc.indexOf('perceb') >= 0 || cDesc.indexOf('vigia') >= 0) resolvedTag = 'PERCEPÇÃO';
+                    else if (cDesc.indexOf('trilha') >= 0 || cDesc.indexOf('sobreviv') >= 0 || cDesc.indexOf('rastro') >= 0 || cDesc.indexOf('clima') >= 0) resolvedTag = 'SOBREVIVÊNCIA';
+                    else resolvedTag = 'INTUIÇÃO';
+                } else if (sKey === 'int') {
+                    if (cDesc.indexOf('magi') >= 0 || cDesc.indexOf('arcan') >= 0 || cDesc.indexOf('runa') >= 0) resolvedTag = 'ARCANISMO';
+                    else if (cDesc.indexOf('investig') >= 0 || cDesc.indexOf('examin') >= 0) resolvedTag = 'INVESTIGAÇÃO';
+                    else resolvedTag = 'HISTÓRIA';
+                } else if (sKey === 'con') {
+                    resolvedTag = 'CONSTITUIÇÃO';
+                }
+            }
+        }
+        if (!resolvedTag) resolvedTag = (choice.badge ? String(choice.badge).replace(/^\[|\]$/g, '') : 'AÇÃO');
+
+        // 2. Resolve Speech (1st-person dialogue in quotes or active 1st-person action)
+        var resolvedSpeech = '';
+        if (choice.speech_by_ally && t.hasAllies) resolvedSpeech = choice.speech_by_ally;
+        if (!resolvedSpeech && choice.speech_by_background && t.bg) resolvedSpeech = choice.speech_by_background[t.bg];
+        if (!resolvedSpeech && choice.speech_by_subclass && t.subclass) resolvedSpeech = choice.speech_by_subclass[t.subclass];
+        if (!resolvedSpeech && choice.speech_by_subrace && t.subrace) resolvedSpeech = choice.speech_by_subrace[t.subrace];
+        if (!resolvedSpeech && choice.speech_by_class) resolvedSpeech = _findIn(choice.speech_by_class, clsKey, clsAlt);
+        if (!resolvedSpeech && choice.speech_by_race && t.race) resolvedSpeech = choice.speech_by_race[t.race];
+        if (!resolvedSpeech && choice.speech) resolvedSpeech = choice.speech;
+
+        // If no explicit speech provided, synthesize contextual 1st person line:
+        if (!resolvedSpeech) {
+            var hasNPC = hazard && (hazard.npc || (hazard.script && hazard.script.some(function(s){ return s && s.type === 'speech'; })));
+            if (hasNPC) {
+                var actionText = choice.desc || choice.t || '';
+                if (actionText) {
+                    resolvedSpeech = '"' + actionText.replace(/\.$/, '') + '."';
+                } else {
+                    resolvedSpeech = '"Vamos resolver isto com calma."';
+                }
+            } else {
+                var act = choice.desc || choice.t || '';
+                resolvedSpeech = '*' + act.replace(/\.$/, '') + '.*';
+            }
+        }
+
+        return {
+            tag: resolvedTag.toUpperCase(),
+            speech: resolvedSpeech
+        };
+    }
+
     /* -------- Confirmação e Preparação Sensorial PADRAO_ALDRIC (D&D 5e) -------- */
     function _getRaceConfirmationNarration(t, biome) {
         if (!t) return '';
@@ -2781,6 +2952,7 @@ var DEPARTURES = {
         canTakeChoice: canTakeChoice,
         getConfirmationContent: getConfirmationContent,
         pickNarrative: pickNarrative,
+        pickChoiceVoice: pickChoiceVoice,
         detectWeather: detectWeather,
         isParty: _isParty,
         adaptPartyNarrative: _adaptPartyNarrative

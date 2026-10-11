@@ -72077,6 +72077,9 @@ function _renderEncounterChoices(enc, originalAction, player, actionsEl) {
         else if (c.check && c.check.dc) { n.dc = c.check.dc; n.skill = c.check.skill || ''; }
         if (c.cost) n.cost = c.cost;
         if (c.icon) n.icon = c.icon;
+        if (c.speech || c.player_speech) n.speech = c.speech || c.player_speech;
+        if (c.tag) n.tag = c.tag;
+        if (c.badge) n.badge = c.badge;
         // Effect badge: renown delta inferido de c.effect.renown (D&D 5e Renown)
         if (c.effect && typeof c.effect.renown === 'number') n.renownDelta = c.effect.renown;
         n._original = c; // preserva ref pro dispatch

@@ -231,7 +231,18 @@
       return (JD().canTakeChoice) ? JD().canTakeChoice(p, ch) : true;
     });
     var choices = available.map(function (ch, i) {
-      var out = { id: 'jrn_ch_' + i, label: ch.t, desc: ch.desc || '', _haz: ch };
+      var vInfo = (JD().pickChoiceVoice) ? JD().pickChoiceVoice(ch, p, hz) : null;
+      var speech = (vInfo && vInfo.speech) || ch.speech || '';
+      var tag = (vInfo && vInfo.tag) || ch.tag || ch.badge || '';
+      var out = {
+        id: 'jrn_ch_' + i,
+        label: ch.t,
+        desc: ch.desc || '',
+        speech: speech,
+        tag: tag,
+        badge: tag ? ('[' + tag + ']') : '',
+        _haz: ch
+      };
       if (ch.stat && ch.dc != null) {
         out.dc = ch.dc;
         out.skill = (global.DndRules && DndRules.statLabel) ? DndRules.statLabel(ch.stat) : ch.stat;
@@ -472,25 +483,35 @@
       var wNarr = JD().detectWeather(narr);
       if (wNarr) { j.weather = wNarr; _log('journey weather updated on outcome -> ' + wNarr); }
     }
+    var pSpeech = (ch && (ch.speech || (ch._haz && ch._haz.speech))) || '';
+    if (!pSpeech && JD().pickChoiceVoice) {
+      var vInfo = JD().pickChoiceVoice((ch && ch._haz) || ch, p, hz);
+      if (vInfo && vInfo.speech) pSpeech = vInfo.speech;
+    }
+    var pSpeaker = (p && (p.name || p.char_name)) || 'Você';
+
     // Morte na jornada. AUTORIDADE do desfecho:
     //  • opts.onDefeat presente (exploração REMOTE) → o CALLER decide (triggerDefeat:
     //    derrota REAL + post status=dead ao servidor). NUNCA reviver no cliente aqui —
     //    seria fabricar estado de jogo (viola "Servidor é a Autoridade" #0).
     //  • sem onDefeat (cidade = sandbox client-mock) → socorro local a 1/4 HP.
     if (p && p.hp <= 0) {
+      var deadScript = [];
+      if (pSpeech) {
+        deadScript.push({ type: 'speech', is_player: true, speaker: pSpeaker, text: pSpeech });
+      }
+      deadScript.push({ type: 'narration', text: body });
+      deadScript.push({
+        type: 'player_impact',
+        player: p,
+        prevHp: prevHp,
+        newHp: 0,
+        hpMax: hpMax,
+        dmg: dmgApplied,
+        condition: conditionApplied
+      });
       _vRender({
-        script: [
-          { type: 'narration', text: body },
-          {
-            type: 'player_impact',
-            player: p,
-            prevHp: prevHp,
-            newHp: 0,
-            hpMax: hpMax,
-            dmg: dmgApplied,
-            condition: conditionApplied
-          }
-        ],
+        script: deadScript,
         choices: [{ id: 'jrn_dead', label: 'Você sucumbiu...' }],
         inline: true,
         onChoice: function () {
@@ -506,7 +527,11 @@
       });
       return;
     }
-    var scriptLines = [{ type: 'narration', text: body }];
+    var scriptLines = [];
+    if (pSpeech) {
+      scriptLines.push({ type: 'speech', is_player: true, speaker: pSpeaker, text: pSpeech });
+    }
+    scriptLines.push({ type: 'narration', text: body });
     // REGRA DO USUÁRIO: ficha/card resumida exibida SOMENTE se algo acontecer com a vida ou stats
     if (dmgApplied > 0 || conditionApplied != null) {
       scriptLines.push({
