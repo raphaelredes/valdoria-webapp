@@ -82,18 +82,21 @@
          */
         iconSvg: function (name, size) {
             var slug = _resolveSlug(name);
-            if (!slug) return "";
             var sz = size || "32px";
-            // Se vItems ja carregou manifest e o slug NAO tem PNG, retorna vazio
-            // pra caller usar fallback emoji.
+            var placeholderSrc = BASE + 'shared/img/items/placeholder-item.svg';
+            if (!slug) {
+                return '<img src="' + placeholderSrc + '" alt="Em Forja" title="Item em produção" ' +
+                    'style="width:' + sz + ';height:' + sz + ';display:inline-block;vertical-align:middle;object-fit:contain" loading="lazy">';
+            }
             if (typeof window !== 'undefined' && window.vItems && window.vItems._state &&
                 window.vItems._state.loaded && !window.vItems.has(slug)) {
-                return "";
+                return '<img src="' + placeholderSrc + '" alt="Em Forja" title="' + name + ' (Em Forja)" ' +
+                    'style="width:' + sz + ';height:' + sz + ';display:inline-block;vertical-align:middle;object-fit:contain" loading="lazy">';
             }
             return '<img src="' + ITEMS_PATH + slug + '.webp" ' +
                 'style="width:' + sz + ';height:' + sz +
                 ';display:inline-block;vertical-align:middle;object-fit:contain" ' +
-                'onerror="this.style.display=\'none\'" loading="lazy">';
+                'onerror="this.src=\'' + placeholderSrc + '\'" loading="lazy">';
         },
         /* Helpers de debug. */
         resolve: _resolveSlug,

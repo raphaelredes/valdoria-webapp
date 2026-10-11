@@ -7528,13 +7528,15 @@ body.perf-lite .vc-action-btn { transition: none; }
     /* === MODO GRADE OTIMIZADA (VITRINE) === */
     .shop-grid-view {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 6px;
       padding: 0 10px 16px 10px;
+      width: 100%;
+      box-sizing: border-box;
     }
     @media (max-width: 370px) {
       .shop-grid-view {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
     .shop-grid-card {
@@ -7550,7 +7552,11 @@ body.perf-lite .vc-action-btn { transition: none; }
       gap: 3px;
       transition: transform 0.12s ease, box-shadow 0.15s ease, border-color 0.15s ease;
       min-height: 120px;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
       box-sizing: border-box;
+      overflow: hidden;
     }
     .shop-grid-card:hover {
       transform: translateY(-2px);
@@ -7624,6 +7630,11 @@ body.perf-lite .vc-action-btn { transition: none; }
       text-align: center;
       line-height: 1.2;
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+      word-break: break-word;
+      overflow-wrap: break-word;
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
@@ -7644,6 +7655,9 @@ body.perf-lite .vc-action-btn { transition: none; }
       overflow: hidden;
       text-overflow: ellipsis;
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     /* ====================================================================
@@ -14102,6 +14116,18 @@ var _NAMED_NPC_PORTRAITS = {
   'mestre durgan': 'npcs/mestre-durgan.webp',
   'hadric': 'npcs/hadric-cacador.webp',
   'hadric cacador': 'npcs/hadric-cacador.webp',
+  'hadric o cacador': 'npcs/hadric-cacador.webp',
+  'corvus': 'merchants/corvus-veltharion.webp',
+  'corvus veltharion': 'merchants/corvus-veltharion.webp',
+  'mirena': 'merchants/mirena.webp',
+  'mirena virelle': 'merchants/mirena.webp',
+  'velithra': 'merchants/velithra.webp',
+  'velithra aelmira': 'merchants/velithra.webp',
+  'garlen': 'merchants/garlen.webp',
+  'garlen castellor': 'merchants/garlen.webp',
+  'lyana': 'npcs/lyana-herbalista.webp',
+  'lyana herbalista': 'npcs/lyana-herbalista.webp',
+  'lyana a herbalista': 'npcs/lyana-herbalista.webp',
   'malakor': 'npcs/malakor-livreiro.webp',
   'malakor livreiro': 'npcs/malakor-livreiro.webp'
 };
@@ -24297,7 +24323,8 @@ var MARKET_MERCHANTS = [
       '<i>Thorne bate uma peça no balcão.</i> "Acabou de sair da forja. Quente ainda."'
     ],
     talkOptions: [
-      { id: 'browse', q: 'Mostra o catálogo', a: '"Espadas de 15 a 300 Valdoritas. Cota de malha 75. Mithral? Tenho um peitoral por 500 — mas só vende pra quem prova valor."' },
+      { id: 'browse', q: 'Mostra o catálogo', a: '"Espadas de 15 a 300 Valdoritas. Cota de malha 75. Mithral? Peitoral ou lâminas desse quilate eu não deixo na prateleira — só forjo sob encomenda se trouxer o lingote."' },
+      { id: 'custom_forge', q: 'Encomendar Forja Especial de Mithral' },
       { id: 'metal', q: 'Como conseguiu o mithral?', a: '"Caravana do norte. Caro. Mas a qualidade compensa. Quem usa mithral, sobrevive."' },
       { id: 'repair', q: 'Conserta equipamento? (10 Valdoritas)', a: '<i>Thorne examina.</i> "Pequenos amassados. Conserto sim."', cost: 10 },
       { id: 'history', q: 'Há quanto tempo é ferreiro?', a: '"Quarenta anos de bigorna. Aprendi com mestres ferreiros nas estradas do norte antes de vir pra Valdoria com Aris. Forjei pra milícias e caravanas."' }
@@ -41689,6 +41716,7 @@ var CANON_ITEMS_DB = {
   'Cota de Malha':      {e: _heralIco('ic-mochila'), v:75,  r:'common',  t:['armor','heavy_armor'],             s:'chest',     ac:6,  desc:'Cota de malha de ferro. CA base 16.'},
   // 2026-07-01: ac 6→4 (Peitoral PHB = CA 14 média; mithral remove a penalidade, não sobe CA) + b:1 removido (armadura não dá bônus de ataque)
   'Peitoral de Mithral':{e: _heralIco('ic-liga-mithral'), v:500, r:'rare',    t:['armor','medium_armor','magic'],    s:'chest',     ac:4, desc:'Peitoral leve e impenetrável de mithral forjado.'},
+  'Lingote de Mithral': {e: _heralIco('ic-liga-mithral'), v:250, r:'rare',    t:['crafting','material','metal'],             desc:'Barra reluzente de mithral puro, leve e resistente como aço estelar.'},
   'Elmo Enferrujado':   {e: _heralIco('ic-mochila'), v:25,  r:'common',  t:['armor','medium_armor'],             s:'head',      ac:2,  desc:'Elmo simples de ferro. +2 CA.'},
   'Elmo de Cavaleiro':  {e: _heralIco('ic-mochila'), v:150, r:'uncommon',t:['armor','medium_armor'],             s:'head',      ac:2,  desc:'Elmo de aço polido com viseira. +2 CA.'},
   'Grevas de Ferro':    {e: _heralIco('ic-mochila'), v:45,  r:'common',  t:['armor','medium_armor'],             s:'legs',      ac:2,  desc:'Proteções de pernas em ferro. +2 CA.'},
@@ -42130,8 +42158,8 @@ var CANON_MARKET_SHOPS = {
       'Cimitarra', 'Machado de Batalha', 'Martelo de Guerra',
       'Cajado de Salgueiro', 'Adaga Balanceada', 'Arco de Caça',
       'Arco Longo', 'Besta Leve', 'Tridente',
-      // Armas de elite
-      'Espada Élfica', 'Espada de Mithral', 'Montante', 'Machado Grande', 'Alabarda',
+      // Armas marciais pesadas
+      'Montante', 'Machado Grande', 'Alabarda',
       // Escudos
       'Escudo de Madeira', 'Escudo de Aço',
       // Armaduras leves
@@ -42140,8 +42168,8 @@ var CANON_MARKET_SHOPS = {
       'Gibão de Peles', 'Cota de Malha', 'Cota de Escamas', 'Brunea',
       // Armaduras pesadas
       'Brunea de Anéis',
-      // Armaduras elite
-      'Peitoral de Mithral', 'Meia-Placa', 'Cota de Talas',
+      // Armaduras pesadas de alto valor (mundanas)
+      'Meia-Placa', 'Cota de Talas',
       // Outros
       'Elmo Enferrujado', 'Elmo de Cavaleiro', 'Grevas de Ferro',
       'Botas Pesadas', 'Manoplas de Ferro',
@@ -51674,7 +51702,8 @@ function _resolveItemIcon(name, size){
       }
     }
   }
-  return '';
+  // 5) Placeholder oficial quando não há arte dedicada (Ordem do Usuário 2026-10)
+  return '<img src="/shared/img/items/placeholder-item.svg" alt="Em Forja" title="' + name + ' (Arte Oficial em Produção)" style="width:' + size + ';height:' + size + ';display:inline-block;vertical-align:middle;object-fit:contain" loading="lazy" />';
 }
 window._resolveItemIcon = _resolveItemIcon;
 
@@ -60399,6 +60428,16 @@ function _onInnRestClick(room, members){
       // onDone callback — re-mostra popup + atualiza HUD
       if (popup && popupWasActive) popup.classList.add('active');
       refreshHud();
+      // Avança prazo de forja sob encomenda em Thorne (se houver)
+      var fOrd = (typeof _getThorneForgeOrder === 'function') ? _getThorneForgeOrder(p) : null;
+      if (fOrd && fOrd.daysRemaining > 0) {
+        fOrd.daysRemaining--;
+        if (fOrd.daysRemaining <= 0) fOrd.completed = true;
+        _setThorneForgeOrder(p, fOrd);
+        if (typeof vToast === 'function') {
+          vToast('A forja de ' + fOrd.item + ' avançou na oficina de Thorne!', 'info');
+        }
+      }
       // canonical: mostra sonho + ally event + dream insight (skip se anim foi pulado)
       if (!(result && result.skipped)){
         _innShowDreamPopup(p, tier, alliesData);
@@ -69336,6 +69375,264 @@ function _marketShowColleagueGossip(p, merchant){
   if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(enc, 'market_npc_' + merchant.id, p);
 }
 
+// === SISTEMA DE FORJA SOB ENCOMENDA DE MITHRAL (THORNE) ===
+function _getThorneForgeOrder(p){
+  p = p || window.CITY_MOCK_PLAYER || {};
+  if (p.forge_order) return p.forge_order;
+  try {
+    var raw = localStorage.getItem('thorne_forge_order_' + (p.name || 'player'));
+    if (raw) {
+      p.forge_order = JSON.parse(raw);
+      return p.forge_order;
+    }
+  } catch(e){}
+  return null;
+}
+window._getThorneForgeOrder = _getThorneForgeOrder;
+
+function _setThorneForgeOrder(p, order){
+  p = p || window.CITY_MOCK_PLAYER || {};
+  p.forge_order = order;
+  try {
+    var key = 'thorne_forge_order_' + (p.name || 'player');
+    if (order) localStorage.setItem(key, JSON.stringify(order));
+    else localStorage.removeItem(key);
+  } catch(e){}
+}
+window._setThorneForgeOrder = _setThorneForgeOrder;
+
+function _countInventoryItem(itemName){
+  var list = (typeof MOCK_PLAYER_INVENTORY !== 'undefined') ? MOCK_PLAYER_INVENTORY : [];
+  var total = 0;
+  for (var i = 0; i < list.length; i++){
+    if (list[i].n === itemName || list[i].name === itemName){
+      total += (list[i].q || list[i].quantity || 1);
+    }
+  }
+  return total;
+}
+window._countInventoryItem = _countInventoryItem;
+
+function _consumeInventoryItem(itemName, qty){
+  qty = qty || 1;
+  var list = (typeof MOCK_PLAYER_INVENTORY !== 'undefined') ? MOCK_PLAYER_INVENTORY : [];
+  for (var i = 0; i < list.length; i++){
+    var it = list[i];
+    if (it.n === itemName || it.name === itemName){
+      var current = it.q || it.quantity || 1;
+      if (current <= qty){
+        qty -= current;
+        list.splice(i, 1);
+        i--;
+      } else {
+        it.q = current - qty;
+        qty = 0;
+      }
+      if (qty <= 0) break;
+    }
+  }
+  if (typeof _syncInventoryToLocalStorage === 'function') _syncInventoryToLocalStorage();
+}
+window._consumeInventoryItem = _consumeInventoryItem;
+
+function _addInventoryItem(itemName, qty){
+  qty = qty || 1;
+  var list = (typeof MOCK_PLAYER_INVENTORY !== 'undefined') ? MOCK_PLAYER_INVENTORY : [];
+  var found = false;
+  for (var i = 0; i < list.length; i++){
+    if (list[i].n === itemName || list[i].name === itemName){
+      list[i].q = (list[i].q || 1) + qty;
+      found = true;
+      break;
+    }
+  }
+  if (!found){
+    list.push({
+      n: itemName,
+      q: qty,
+      get id(){ return 'forge_' + itemName; },
+      get icon(){ return (typeof getItemData === 'function' ? getItemData(this.n).e : ''); },
+      get value(){ return (typeof getItemData === 'function' ? getItemData(this.n).v : 500); },
+      get name(){ return this.n; }
+    });
+  }
+  if (typeof _syncInventoryToLocalStorage === 'function') _syncInventoryToLocalStorage();
+}
+window._addInventoryItem = _addInventoryItem;
+
+function _thorneShowCustomForge(p, merchant, subTopic){
+  p = p || window.CITY_MOCK_PLAYER || {};
+  var bjornFix = (merchant.id === 'tentmaker') ? 'bjorn' : merchant.id;
+  var npcKey = 'mer_' + bjornFix;
+
+  // Subtópico: Informações sobre onde encontrar Mithral
+  if (subTopic === 'lore_mithral'){
+    var loreEnc = {
+      id: 'mer_thorne_lore_mithral',
+      npc: npcKey,
+      script: [
+        { type: 'narration', text: '<i>"Onde posso encontrar Lingotes de Mithral?"</i>' },
+        { type: 'speech', speaker: npcKey, text: '"Mithral não brota no quintal. Os anões extraíam veios profundos nas montanhas do norte antes das antigas guerras. Hoje em dia, você encontra lingotes guardados em câmaras secretas de ruínas antigas, tesouros de monstros ancestrais, ou raramente com caravanas nobres. Se encontrar um lingote, guarde com a vida e traga direto para a minha bigorna."' }
+      ],
+      choices: [
+        { id: 'back_forge', label: '← Voltar às encomendas', result: 'goto_dialog', _encounterRef: 'mer_thorne_custom_forge' }
+      ]
+    };
+    if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(loreEnc, 'market_npc_' + merchant.id, p);
+    return;
+  }
+
+  // Subtópico: Janela de confirmação detalhada para Espada de Mithral (Regra Soberana #24)
+  if (subTopic === 'confirm_sword'){
+    var ingots = _countInventoryItem('Lingote de Mithral');
+    var canAfford = (p.gold >= 500 && ingots >= 1);
+    var swordScript = [
+      { type: 'narration', text: '<b>Encomenda de Forja: Espada de Mithral</b>' },
+      { type: 'narration', text: '<b>O Que Está Sendo Escolhido:</b> Confecção sob medida de uma Espada de Mithral personalizada forjada a mão por Thorne.' },
+      { type: 'narration', text: '<b>Requisitos e Custos:</b> 1x Lingote de Mithral e 500 Valdoritas. Prazo: 3 dias de trabalho na bigorna.' },
+      { type: 'narration', text: '<b>Benefícios e Consequências:</b> Arma mágica rara D&D 5e (1d8 cortante versátil 1d10, Acuidade/Finesse — permite usar Destreza para ataques e dano, peso reduzido em 50%, ignora resistências a ataques mundanos). O lingote e o ouro são entregues a Thorne no ato da contratação.' }
+    ];
+    if (!canAfford){
+      var missing = [];
+      if (ingots < 1) missing.push((1 - ingots) + 'x Lingote de Mithral');
+      if (p.gold < 500) missing.push((500 - p.gold) + ' Valdoritas');
+      swordScript.push({ type: 'narration', text: '<span style="color:#e06666;">⚠ Requisitos insuficientes para a encomenda. Faltam: ' + missing.join(' e ') + '.</span>' });
+    }
+    var swordChoices = [];
+    if (canAfford){
+      swordChoices.push({
+        id: 'confirm',
+        label: '✔ Confirmar Encomenda da Espada',
+        result: 'thorne_confirm_order',
+        _forgeItem: 'Espada de Mithral',
+        _ingotCost: 1,
+        _goldCost: 500,
+        _days: 3
+      });
+    }
+    swordChoices.push({
+      id: 'back',
+      label: '← Voltar às opções',
+      result: 'goto_dialog',
+      _encounterRef: 'mer_thorne_custom_forge'
+    });
+    var swordEnc = {
+      id: 'mer_thorne_confirm_sword',
+      npc: npcKey,
+      script: swordScript,
+      choices: swordChoices
+    };
+    if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(swordEnc, 'market_npc_' + merchant.id, p);
+    return;
+  }
+
+  // Subtópico: Janela de confirmação detalhada para Peitoral de Mithral (Regra Soberana #24)
+  if (subTopic === 'confirm_breastplate'){
+    var ingotsP = _countInventoryItem('Lingote de Mithral');
+    var canAffordP = (p.gold >= 800 && ingotsP >= 2);
+    var plateScript = [
+      { type: 'narration', text: '<b>Encomenda de Forja: Peitoral de Mithral</b>' },
+      { type: 'narration', text: '<b>O Que Está Sendo Escolhido:</b> Forja de um Peitoral de Mithral de placas articuladas sob medida para o aventureiro.' },
+      { type: 'narration', text: '<b>Requisitos e Custos:</b> 2x Lingotes de Mithral e 800 Valdoritas. Prazo: 5 dias de trabalho na forja.' },
+      { type: 'narration', text: '<b>Benefícios e Consequências:</b> Armadura média mágica rara D&D 5e (CA 14 + mod Des máx +2). O mithral é maleável e silencioso: não impõe desvantagem em testes de Furtividade (Furtividade normal) e não possui exigência mínima de Força. Peso cortado pela metade. Os materiais e o ouro são entregues a Thorne no ato da contratação.' }
+    ];
+    if (!canAffordP){
+      var missingP = [];
+      if (ingotsP < 2) missingP.push((2 - ingotsP) + 'x Lingotes de Mithral');
+      if (p.gold < 800) missingP.push((800 - p.gold) + ' Valdoritas');
+      plateScript.push({ type: 'narration', text: '<span style="color:#e06666;">⚠ Requisitos insuficientes para a encomenda. Faltam: ' + missingP.join(' e ') + '.</span>' });
+    }
+    var plateChoices = [];
+    if (canAffordP){
+      plateChoices.push({
+        id: 'confirm',
+        label: '✔ Confirmar Encomenda do Peitoral',
+        result: 'thorne_confirm_order',
+        _forgeItem: 'Peitoral de Mithral',
+        _ingotCost: 2,
+        _goldCost: 800,
+        _days: 5
+      });
+    }
+    plateChoices.push({
+      id: 'back',
+      label: '← Voltar às opções',
+      result: 'goto_dialog',
+      _encounterRef: 'mer_thorne_custom_forge'
+    });
+    var plateEnc = {
+      id: 'mer_thorne_confirm_breastplate',
+      npc: npcKey,
+      script: plateScript,
+      choices: plateChoices
+    };
+    if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(plateEnc, 'market_npc_' + merchant.id, p);
+    return;
+  }
+
+  // Encomenda Ativa: Verificar status ou entrega
+  var order = _getThorneForgeOrder(p);
+  if (order){
+    if (order.completed || order.daysRemaining <= 0){
+      var claimScript = [
+        { type: 'narration', text: 'Thorne sopra as fagulhas incandescentes e retira a peça reluzente do tanque de têmpera em óleo estelar. O brilho prateado-azulado do mithral reflete a luz da oficina.' },
+        { type: 'speech', speaker: npcKey, text: '"Aqui está, aventureiro. ' + order.item + ' concluída com perfeição. O metal é leve como uma pluma e resistente como o âmago da montanha. Honre essa obra-prima."' },
+        { type: 'narration', text: 'Você recebeu a sua encomenda concluída: <b>' + order.item + '</b>!' }
+      ];
+      var claimEnc = {
+        id: 'mer_thorne_forge_claim',
+        npc: npcKey,
+        script: claimScript,
+        choices: [
+          { id: 'claim', label: '✔ Receber ' + order.item, result: 'thorne_claim_order' }
+        ]
+      };
+      if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(claimEnc, 'market_npc_' + merchant.id, p);
+      return;
+    } else {
+      var waitScript = [
+        { type: 'narration', text: 'Thorne ergue a máscara de proteção e enxuga o suor da testa. Na bigorna, a forma inacabada de ' + order.item + ' repousa sob as brasas.' },
+        { type: 'speech', speaker: npcKey, text: '"Sua encomenda de <b>' + order.item + '</b> está tomando forma. O mithral exige têmpera lenta e batidas precisas — qualquer pressa arruinaria a liga."' },
+        { type: 'narration', text: 'Prazo restante estimado: <b>' + order.daysRemaining + ' dia(s)</b> de trabalho na forja. Você pode aguardar na cidade ou explorar as redondezas.' }
+      ];
+      var waitChoices = [
+        { id: 'wait_day', label: '⏳ Descansar na cidade (Avançar 1 dia de forja)', result: 'thorne_forge_advance_day' },
+        { id: 'back', label: '← Voltar ao balcão', result: 'goto_dialog', _encounterRef: 'mer_thorne_greeting' }
+      ];
+      var waitEnc = {
+        id: 'mer_thorne_forge_status',
+        npc: npcKey,
+        script: waitScript,
+        choices: waitChoices
+      };
+      if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(waitEnc, 'market_npc_' + merchant.id, p);
+      return;
+    }
+  }
+
+  // Sem encomenda ativa: Menu de Encomendas
+  var mithralIngots = _countInventoryItem('Lingote de Mithral');
+  var script = [
+    { type: 'narration', text: 'Thorne apoia os braços musculosos sobre a bigorna e te encara com respeito profissional.' },
+    { type: 'speech', speaker: npcKey, text: '"Mithral não é ferro qualquer pra eu deixar pronto na vitrine acumulando pó. Peças dessa estirpe só ganham vida sob encomenda direta. Traga a matéria-prima e pague a mão de obra da forja, e eu bato a obra-prima pra ti."' },
+    { type: 'narration', text: 'Você possui atualmente: <b>' + mithralIngots + 'x Lingote de Mithral</b> na mochila.' }
+  ];
+  var choices = [
+    { id: 'order_sword', label: '◆ Encomendar Espada de Mithral (1x Lingote + 500 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_sword' },
+    { id: 'order_breastplate', label: '◆ Encomendar Peitoral de Mithral (2x Lingotes + 800 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_breastplate' },
+    { id: 'ask_ingots', label: '◆ "Onde posso encontrar Lingotes de Mithral?"', result: 'goto_dialog', _encounterRef: 'mer_thorne_lore_mithral' },
+    { id: 'back', label: '← Voltar ao balcão', result: 'goto_dialog', _encounterRef: 'mer_thorne_greeting' }
+  ];
+  var enc = {
+    id: 'mer_thorne_custom_forge',
+    npc: npcKey,
+    script: script,
+    choices: choices
+  };
+  if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(enc, 'market_npc_' + merchant.id, p);
+}
+window._thorneShowCustomForge = _thorneShowCustomForge;
+
 function _openMerchantDialogue(p, merchantId, topicKey){
   // Encontra o merchant em MARKET_MERCHANTS pra ler talkOptions/role/desc
   var merchant = (typeof MARKET_MERCHANTS !== 'undefined')
@@ -69356,6 +69653,12 @@ function _openMerchantDialogue(p, merchantId, topicKey){
   // resolvido em runtime (não vive no registry estático MARKET_MERCHANT_ENCOUNTERS).
   if (topicKey === 'colleagues'){
     _marketShowColleagueGossip(p, merchant);
+    return;
+  }
+
+  // Tópico dinâmico "custom_forge": forja sob encomenda de Mithral de Thorne
+  if (topicKey === 'custom_forge' || topicKey === 'confirm_sword' || topicKey === 'confirm_breastplate' || topicKey === 'lore_mithral'){
+    _thorneShowCustomForge(p, merchant, topicKey);
     return;
   }
 
@@ -69421,8 +69724,8 @@ function _merchantBuildTopicChoices(merchant){
   var choices = [];
   var bjornFix = (merchant.id === 'tentmaker') ? 'bjorn' : merchant.id;
   (merchant.talkOptions || []).forEach(function(opt){
-    // Skip se já usada (exceto browse, que pode ser repetida)
-    if (opt.id !== 'browse' && typeof _npcIsUsed === 'function' && _npcIsUsed(merchant.id, opt.id)){
+    // Skip se já usada (exceto browse e custom_forge, que podem ser repetidas)
+    if (opt.id !== 'browse' && opt.id !== 'custom_forge' && typeof _npcIsUsed === 'function' && _npcIsUsed(merchant.id, opt.id)){
       return;
     }
     var icon = (opt.id === 'browse') ? ''
@@ -73498,6 +73801,62 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     // 2026-05-18 PADRAO_ALDRIC para mercadores: fecha encounter e volta ao
     // hub do Mercado (renderiza a tela atual). Não dispara nova ação.
     if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
+  } else if (choice.result === 'thorne_confirm_order') {
+    var cost = choice._goldCost || 0;
+    var ingots = choice._ingotCost || 1;
+    var item = choice._forgeItem;
+    var days = choice._days || 3;
+    if (_countInventoryItem('Lingote de Mithral') < ingots || (typeof _pay === 'function' && !_pay(player, cost))) {
+      if (typeof vToast === 'function') vToast('Recursos insuficientes para a encomenda.', 'warn');
+      setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'custom_forge'); }, 80);
+      return;
+    }
+    _consumeInventoryItem('Lingote de Mithral', ingots);
+    _setThorneForgeOrder(player, {
+      charName: player.name || 'Aventureiro',
+      item: item,
+      cost: cost,
+      ingots: ingots,
+      daysTotal: days,
+      daysRemaining: days,
+      orderedAt: Date.now(),
+      completed: false
+    });
+    if (typeof refreshHud === 'function') refreshHud();
+    if (typeof vToast === 'function') vToast('Encomenda iniciada: ' + item + '! Prazo: ' + days + ' dias.', 'success');
+    var confirmScript = [
+      { type: 'narration', text: 'Thorne recebe os lingotes com pinças pesadas e os examina sob a luz da forja. Um sorriso discreto surge sob o bigode grisalho.' },
+      { type: 'speech', speaker: 'mer_thorne', text: '"Perfeito. Mithral puríssimo. O trabalho começa agora. Volte em <b>' + days + ' dias</b> e tua encomenda estará pronta para a glória."' }
+    ];
+    var confirmEnc = {
+      id: 'mer_thorne_ordered',
+      npc: 'mer_thorne',
+      script: confirmScript,
+      choices: [
+        { id: 'more', label: '◆ Outra pergunta', result: 'goto_dialog', _encounterRef: 'mer_thorne_greeting' },
+        { id: 'close', label: '← Voltar ao Mercado', result: 'merchant_close' }
+      ]
+    };
+    if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(confirmEnc, 'market_npc_thorne', player);
+  } else if (choice.result === 'thorne_claim_order') {
+    var order = _getThorneForgeOrder(player);
+    if (order) {
+      _addInventoryItem(order.item, 1);
+      var claimedItem = order.item;
+      _setThorneForgeOrder(player, null);
+      if (typeof refreshHud === 'function') refreshHud();
+      if (typeof vToast === 'function') vToast('Você obteve: ' + claimedItem + '!', 'success');
+    }
+    setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'greeting'); }, 80);
+  } else if (choice.result === 'thorne_forge_advance_day') {
+    var orderAdv = _getThorneForgeOrder(player);
+    if (orderAdv && orderAdv.daysRemaining > 0) {
+      orderAdv.daysRemaining--;
+      if (orderAdv.daysRemaining <= 0) orderAdv.completed = true;
+      _setThorneForgeOrder(player, orderAdv);
+      if (typeof vToast === 'function') vToast('Um dia se passou na forja de Thorne.', 'info');
+    }
+    setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'custom_forge'); }, 80);
   } else if (choice.result === 'merchant_pay') {
     // 2026-05-18 PADRAO_ALDRIC para mercadores: choice de serviço pago
     // (repair, enchant, etc). Cobra gold + aplica effect + mostra result popup.

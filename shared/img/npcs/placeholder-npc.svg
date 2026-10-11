@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <radialGradient id="npcBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2c2217"/>
+      <stop offset="70%" stop-color="#18130c"/>
+      <stop offset="100%" stop-color="#0a0805"/>
+    </radialGradient>
+    <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0b865"/>
+      <stop offset="50%" stop-color="#8a6932"/>
+      <stop offset="100%" stop-color="#4a3717"/>
+    </linearGradient>
+  </defs>
+  <!-- Circular Frame -->
+  <circle cx="60" cy="60" r="56" fill="url(#npcBg)" stroke="url(#goldRing)" stroke-width="2.5"/>
+  <circle cx="60" cy="60" r="50" fill="none" stroke="#5a4528" stroke-width="1" stroke-dasharray="3 3"/>
+  
+  <!-- Silhouette of cloaked adventurer / traveler figure -->
+  <g fill="#61503c" transform="translate(60, 62)">
+    <!-- Head / Hood -->
+    <path d="M-14 -18 C-14 -32, 14 -32, 14 -18 C14 -8, 6 -4, 0 -3 C-6 -4, -14 -8, -14 -18 Z" fill="#4a3b2b"/>
+    <ellipse cx="0" cy="-17" rx="7" ry="9" fill="#2b2014"/>
+    <!-- Cloaked Shoulders -->
+    <path d="M-34 32 C-34 10, -22 0, 0 0 C22 0, 34 10, 34 32 Z" fill="#443527"/>
+    <!-- Cloak Brooch / Clasp -->
+    <circle cx="0" cy="2" r="3.5" fill="#c4953a" stroke="#e0b865" stroke-width="1"/>
+  </g>
+
+  <!-- Banner "SEM RETRATO" -->
+  <rect x="20" y="88" width="80" height="18" rx="4" fill="#140f09" stroke="#7a5b28" stroke-width="1"/>
+  <text x="60" y="100.5" font-family="'Cinzel', serif, sans-serif" font-size="7.5" font-weight="bold" fill="#caa45a" text-anchor="middle" letter-spacing="0.5">SEM RETRATO</text>
+</svg>
