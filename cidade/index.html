@@ -25008,14 +25008,15 @@ function _buildMarketMockData(player){
   } else {
     h = new Date().getHours();  // fallback
   }
-  // Mercado fecha 22h-6h game time (TIME_PERIOD_BOUNDS: 5-8 dawn, 8-17 day, 17-20 dusk, resto night)
+  // Mercado fecha das 22:00 às 06:00 (vigília noturna)
   var closed = (h < 6 || h >= 22);
   if (closed) {
     return {
       type: 'closed',
-      message: 'Mercado fechado (22h-6h game time). Volte ao amanhecer.',
+      message: 'Mercado fechado durante a vigília noturna (22:00 às 06:00). As bancas estão cobertas e os mercadores recolhidos aos seus aposentos até o raiar do sol.',
       extras: [
-        { icon: _heralIco('ic-taverna'), label: 'Taverna está aberta', cb: 'open_tavern_redirect' }
+        { icon: '<img src="../shared/img/services/svc-dormir-comum.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Estalagem Pena-Dourada', badge: 'Passar a noite', cb: 'open_inn_redirect' },
+        { icon: '<img src="../shared/img/services/svc-bebidas.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Taverna do Javali Bêbado', badge: 'Aberta', cb: 'open_tavern_redirect' }
       ]
     };
   }
@@ -25078,6 +25079,7 @@ function _buildMarketMockData(player){
     merchants: presentMerchants,
     // 2026-05-27: SVG _heralIco substituído por PNG (regra "no SVG in city").
     extras: [
+      { icon: '<img src="../shared/img/services/svc-mapas.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Banca de Cartografia', desc: 'Mestre Corvus · Encomenda de Mapas', badge: 'Corvus', cb: 'open_cartographer' },
       { icon: '<img src="../shared/img/services/svc-vender.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Vender Itens', cb: 'market_sell_open' },
       { icon: '<img src="../shared/img/services/svc-decifrar.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Escriba Rúnico', cb: 'market_rune_redirect',
         badge: 'Eirik' }
@@ -61957,6 +61959,8 @@ var ACTION_HANDLERS = {
   'market_sell_open':     function(p){ _marketShowSell(p); },
   'market_rune_redirect': function(p){ navigateTo('runes'); },
   'open_tavern_redirect': function(p){ closeCityPopup(true); navigateTo('tavern'); },
+  'open_inn_redirect':    function(p){ closeCityPopup(true); navigateTo('inn'); },
+  'open_cartographer':    function(p){ if (typeof _openCartographerPopup === 'function') _openCartographerPopup(p || window.CITY_MOCK_PLAYER); },
 
   // --- GUILDA ---
   'guild_quests_open':    function(p){ _guildShowQuests(p); },
@@ -65102,13 +65106,6 @@ function renderCartographyCanvas(el){
     + '  <div class="cart-header">'
     + '    <h2>Mapa de Valdoria</h2>'
     + '    <p class="flavor">Toca um destino pra viajar. Roda do mouse ou pinça pra zoom.</p>'
-    + '    <button id="cart-corvus-chip" type="button" style="display:inline-flex;align-items:center;gap:8px;margin-top:6px;'
-    +        'padding:4px 12px 4px 4px;background:linear-gradient(180deg,rgba(74,56,40,0.55),rgba(42,30,18,0.75));'
-    +        'border:1px solid rgba(196,149,58,0.45);border-radius:20px;color:var(--v-text,#d4c8b0);cursor:pointer;'
-    +        'font-family:inherit;font-size:calc(11px * var(--v-font-scale, 1));">'
-    + '      <img src="../shared/img/merchants/corvus-veltharion.webp" alt="" style="width:26px;height:26px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);" onerror="this.style.display=\'none\'">'
-    + '      <span><b style="color:var(--v-gold,#c4953a)">Corvus</b> · Encomendas de mapas</span>'
-    + '    </button>'
     + '  </div>'
     + '  <div class="cart-canvas-frame">'
     + '    <div class="cart-zoom-info" id="cart-zoom-info">100%</div>'
@@ -65130,15 +65127,6 @@ function renderCartographyCanvas(el){
       try { closeCityPopup(true); } catch(_e){}
       navigateTo('hub');
     });
-  }
-
-  var corvusBtn = document.getElementById('cart-corvus-chip');
-  if (corvusBtn) {
-    corvusBtn.onclick = function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      if (typeof _openCorvusGreetingDialog === 'function') _openCorvusGreetingDialog();
-    };
   }
 
   _cartCanvas = document.getElementById('cart-canvas');
@@ -70637,8 +70625,9 @@ function _openCorvusGreetingDialog(player, opts) {
     triggers: [],
     script: script,
     choices: [
-      { id: 'show_maps', label: 'Mostrar os mapas', result: 'open_cartographer' },
-      { id: 'later',     label: 'Volto depois', result: 'continue' }
+      { id: 'show_maps',   label: 'Mostrar os mapas', result: 'open_cartographer' },
+      { id: 'lore_advice', label: 'Consultar rotas e segredos de Valdoria', result: 'corvus_lore_advice' },
+      { id: 'later',       label: 'Volto depois', result: 'continue' }
     ],
     onDone: function(p){
       p._encountered_npcs = p._encountered_npcs || {};
@@ -72294,6 +72283,25 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     } else if (typeof _openCartographerPopup === 'function') {
       _openCartographerPopup(player);
     }
+  } else if (choice.result === 'corvus_lore_advice') {
+    // Terceira opção: Corvus compartilha conselhos cartográficos, geografia de Valdoria e ritmo de viagem
+    var loreEnc = {
+      id: 'corvus_lore_advice',
+      npc: 'corvus_greeting',
+      triggers: [],
+      script: [
+        { type: 'narration', text: 'Mestre Corvus limpa as lentes de seus óculos com uma flanela de feltro gasta, aponta a ponta do compasso sobre uma grande carta náutica desdobrada e apoia os cotovelos sobre o balcão.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— Quer saber o que há além das muralhas de Valdoria? Escute com atenção, porque a maioria dos que partem sem conhecer o terreno nunca volta pra me trazer relatos.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— Ao sul, as planícies e clareiras parecem mansas à luz do meio-dia, mas ao entardecer as névoas ocultam antigas sepulturas e covis. Ao norte e leste, as escarpas rochosas de Brakenhall e as terras vulcânicas não perdoam aventureiros desatentos.' },
+        { type: 'narration', text: 'Ele bate a ponta dos dedos sobre as marcações de relevo, fitando você com seriedade de cartógrafo veterano.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— E aqui vai uma lição de quem sobreviveu a três expedições na Frota de Solhaven: o maior inimigo de quem viaja não são apenas as feras, é a teimosia de lutar contra o próprio corpo. Quem caminha ou luta durante o seu horário habitual de sono tem reflexos pesados como chumbo. Respeite sua rotina de descanso na estalagem ou no acampamento, ou as terras selvagens cobrarão o preço em sangue.' }
+      ],
+      choices: [
+        { id: 'show_maps_from_lore', label: 'Mostrar os mapas agora', result: 'open_cartographer' },
+        { id: 'thanks_corvus', label: 'Agradecer os conselhos', result: 'continue' }
+      ]
+    };
+    _renderEncounterPopup(loreEnc, 'open_cartografia', player);
   } else if (choice.result === 'continue_to_cart') {
     // Continua pra abrir cartografia
     if (typeof navigateTo === 'function') navigateTo('cartografia');
