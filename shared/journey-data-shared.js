@@ -390,6 +390,39 @@ var HAZARDS = {
           desc: 'Seguir a viagem mantendo o monumento como ponto de referência no horizonte.',
           sNarr: 'A silhueta imponente da coluna guia seus passos em linha reta pela vastidão dos trigais.',
           fNarr: '' }
+      ] },
+
+    { title: 'O Marco Esquecido do Pioneiro',
+      script: [
+        { type: 'narration', text: 'À margem da antiga trilha de terra batida, ergue-se um monólito de basalto negro parcialmente tombado, salpicado por líquens acinzentados.' },
+        { type: 'narration', text: 'Na face de pedra voltada para o norte, runas profundas e a flor-de-lis de Valdoria resistem ao tempo: <i>«Marco VII — Fundação do Primeiro Círculo — 1 Hora de Marcha aos Portões»</i>.' },
+        { type: 'narration', text: 'Na base da rocha, um pequeno nicho vedado com chumbo antigo parece ter cedido à erosão das chuvas.' }
+      ],
+      choices: [
+        { i: '🔍', t: 'Examinar o nicho e decifrar as runas', stat: 'int', dc: 10,
+          desc: 'Investigar os entalhes geométricos e a cavidade vedada na base da pedra.',
+          giveItem: 'Placa do Marco Primordial',
+          flag: 'found_marco_relic',
+          sNarr: 'Você raspa o musgo com cuidado. O texto narra como os primeiros batedores da fundação de Valdoria fincaram esses marcos a cada hora de marcha a pé para traçar os caminhos seguros das terras ermas. Dentro do nicho, você encontra a <b>Placa do Marco Primordial</b> de cobre oxidado! <i>(Missão: Leve a placa ao Mestre Cartógrafo Corvus na cidade para aprender os segredos das antigas rotas)</i>.',
+          sNarr_by_class: {
+            mago: 'Você reconhece a caligrafia geométrica dos primeiros escribas arcanos da corte fundadora.',
+            ladino: 'Com perícia sutil, você abre o lacre de chumbo sem danificar a relíquia antiga.'
+          },
+          fNarr: 'A erosão pelo vento desgastou a maioria dos numerais, mas a estrutura ainda confirma que você está no traçado original de marcha da fundação.', dmg: 0 },
+        { i: '🧭', t: 'Usar o alinhamento como guia de marcha', stat: 'wis', dc: 11,
+          desc: 'Calcular a direção exata que a face entalhada aponta em direção a Valdoria.',
+          isShortcut: true,
+          sNarr: 'A inclinação da pedra aponta exatamente o corredor de terreno firme desbravado pelos antigos batedores. Você ganha tempo e encurta a travessia!',
+          fNarr: 'A estepe ondulada confunde suas medições visuais no horizonte.', dmg: 1 },
+        { i: '🙏', t: 'Prece aos batedores pioneiros', stat: 'wis', dc: 10,
+          requires_background: ['outlander', 'soldier', 'folk_hero', 'hermit'],
+          desc: 'Deixar uma pequena oferenda de ervas em homenagem aos andarilhos que desbravaram as primeiras trilhas.',
+          sNarr: 'Uma sensação de foco e serenidade preenche seu peito. Os passos parecem mais leves sob a bênção dos antigos batedores da estrada.',
+          fNarr: 'O vento dispersa as folhas secas pela planície.', dmg: 0 },
+        { i: '➡️', t: 'Registrar mentalmente e seguir', stat: null,
+          desc: 'Anotar a posição da pedra como referência e retomar a caminhada.',
+          sNarr: 'Você memoriza a silhueta do marco e retoma o passo com ritmo constante.',
+          fNarr: '' }
       ] }
   ],
 

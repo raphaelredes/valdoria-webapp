@@ -71027,16 +71027,23 @@ function _openCorvusGreetingDialog(player, opts) {
     { type: 'speech', speaker: 'Mestre Corvus', text: '— Tenho sete mapas regionais à venda. Cada linha neste caderno representa semanas de caminhada, acampamentos sob chuva, e ao menos um encontro com algo que queria me comer. Vamos ao que interessa: precisa de algum?' }
   ];
 
+  var corvusChoices = [];
+  var hasRelic = !!(player && (player.found_marco_relic || (Array.isArray(player.inventory) && player.inventory.indexOf('Placa do Marco Primordial') >= 0)));
+  var completedQuest = !!(player && player.marco_quest_completed);
+  if (hasRelic && !completedQuest) {
+    corvusChoices.push({ id: 'deliver_relic', label: '📜 Entregar a Placa do Marco Primordial a Corvus', result: 'corvus_marco_quest_complete' });
+  }
+  corvusChoices.push({ id: 'show_maps',   label: 'Mostrar os mapas', result: 'open_cartographer' });
+  corvusChoices.push({ id: 'lore_advice', label: 'Consultar rotas e segredos de Valdoria', result: 'corvus_lore_advice' });
+  corvusChoices.push({ id: 'marco_inquiry', label: 'Perguntar sobre a medição oficial em Marcos', result: 'corvus_marco_lore_inquiry' });
+  corvusChoices.push({ id: 'later',       label: 'Volto depois', result: 'continue' });
+
   var enc = {
     id: 'corvus_greeting' + (fromAldric ? '_via_aldric' : ''),
     npc: 'corvus_greeting',
     triggers: [],
     script: script,
-    choices: [
-      { id: 'show_maps',   label: 'Mostrar os mapas', result: 'open_cartographer' },
-      { id: 'lore_advice', label: 'Consultar rotas e segredos de Valdoria', result: 'corvus_lore_advice' },
-      { id: 'later',       label: 'Volto depois', result: 'continue' }
-    ],
+    choices: corvusChoices,
     onDone: function(p){
       p._encountered_npcs = p._encountered_npcs || {};
       p._encountered_npcs.corvus_greeted = true;
@@ -72712,6 +72719,61 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
       ]
     };
     _renderEncounterPopup(loreEnc, 'open_cartografia', player);
+  } else if (choice.result === 'corvus_marco_quest_complete') {
+    // Entrega da relíquia e conclusão da missão dos Primeiros Marcos (Ordem do Usuário 2026-10)
+    if (player) {
+      player.marco_quest_completed = true;
+      player.corvus_route_knowledge = true;
+      player.gold = (player.gold || 0) + 15;
+      player.xp = (player.xp || 0) + 50;
+      if (Array.isArray(player.inventory)) {
+        var idx = player.inventory.indexOf('Placa do Marco Primordial');
+        if (idx >= 0) player.inventory.splice(idx, 1);
+      }
+    }
+    try {
+      localStorage.setItem('valdoria_marco_quest_completed', '1');
+      sessionStorage.setItem('valdoria_corvus_route_knowledge', '1');
+    } catch (_) {}
+
+    var questEnc = {
+      id: 'corvus_marco_quest_complete',
+      npc: 'corvus_greeting',
+      triggers: [],
+      script: [
+        { type: 'narration', text: 'Você retira a chapa de cobre oxidado da mochila e a apoia sobre a mesa de carvalho. O som metálico faz Corvus erguer os óculos imediatamente.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— Pelos deuses das rotas... <i>(as mãos do velho cartógrafo tremem de reverência)</i> Esta é uma chapa fundacional do Primeiro Círculo! Foram forjadas há mais de um século, quando os pioneiros e andarilhos de Valdoria desbravaram este vale a ferro e sangue.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— As velhas lendas falavam em léguas indefinidas ou passos que ninguém conseguia conferir. Nossos fundadores decretaram que a sobrevivência exigia certeza: cada <b>Marco</b> deveria ser exatamente a distância que uma patrulha armada cobre em uma hora de marcha resoluta sob terreno firme.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— Cada pedra-marco cravada nas terras ermas era uma promessa sagrada: você sabia com precisão quantas horas de esforço restavam até o próximo abrigo antes que a noite caísse.' },
+        { type: 'narration', text: 'Corvus abre um compêndio de veludo escuro e copia as ranhuras geométricas da placa, compartilhando segredos de navegação esquecidos. <b>Missão Concluída: O Mistério dos Primeiros Marcos!</b> (+50 XP, +15 Moedas de Ouro e Vantagem permanente em orientação nas terras ermas).' }
+      ],
+      choices: [
+        { id: 'show_maps_from_quest', label: 'Consultar os mapas de Corvus', result: 'open_cartographer' },
+        { id: 'thanks_corvus_quest', label: 'Agradecer e guardar os ensinamentos', result: 'continue' }
+      ]
+    };
+    _renderEncounterPopup(questEnc, 'open_cartografia', player);
+  } else if (choice.result === 'corvus_marco_lore_inquiry') {
+    // Consulta sobre a medição oficial em Marcos (Ordem do Usuário 2026-10)
+    if (player) player.corvus_route_knowledge = true;
+    try { sessionStorage.setItem('valdoria_corvus_route_knowledge', '1'); } catch(_) {}
+    var inquiryEnc = {
+      id: 'corvus_marco_lore_inquiry',
+      npc: 'corvus_greeting',
+      triggers: [],
+      script: [
+        { type: 'narration', text: 'Mestre Corvus larga a régua de latão e apoia as duas mãos no balcão, encarando você com o olhar satisfeito de quem ouve a pergunta certa.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— Os <b>Marcos</b>? Excelente pergunta, viajante. Poucos se dão ao trabalho de entender a terra que pisam antes de sangrar nela.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— Quando nossos ancestrais ergueram as muralhas de Valdoria, batedores destemidos marcharam em direção aos quatro pontos cardeais. A cada hora de caminhada constante e vigilante, cravavam um monólito de basalto negro nas estradas. Essa distância é o nosso Marco — cerca de três milhas no rigor da marcha.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— Hoje, muitos desses marcos foram derrubados por terremotos ou devorados pela vegetação. Por isso, quando você consulta seus mapas, a distância é uma <b>estimativa</b>. Quem é prudente descobre atalhos; quem se distrai, enfrenta desvios e marcha marcos a mais.' },
+        { type: 'narration', text: '<i>Dica de Corvus:</i> Se você encontrar um antigo monólito dos marcos abandonado pelas planícies, examine sua base — os primeiros batedores costumavam selar anotações de rota em nichos de chumbo.' }
+      ],
+      choices: [
+        { id: 'show_maps_from_inquiry', label: 'Mostrar os mapas agora', result: 'open_cartographer' },
+        { id: 'thanks_inquiry', label: 'Agradecer a explicação', result: 'continue' }
+      ]
+    };
+    _renderEncounterPopup(inquiryEnc, 'open_cartografia', player);
   } else if (choice.result === 'continue_to_cart') {
     // Continua pra abrir cartografia
     if (typeof navigateTo === 'function') navigateTo('cartografia');

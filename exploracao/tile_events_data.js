@@ -599,6 +599,25 @@ window.TILE_EVENTS_DB['runestone.dormant'] = {
       }
     },
     {
+      id: 'inspect_marco_stone',
+      label: 'Examinar entalhes de fronteira (História)',
+      skill: 'history', dc: 11,
+      outcome_ok: {
+        flavor: 'Você descobre runas da fundação de Valdoria: a pedra é um antigo Marco territorial fincado por batedores a cada hora de marcha. Num nicho da base, você resgata uma Placa do Marco Primordial!',
+        ops: [
+          { op: 'xp', delta: 25 },
+          { op: 'item', id: 'Placa do Marco Primordial' },
+          { op: 'flag', id: 'found_marco_relic', scope: 'pc' }
+        ],
+        fsm: 'player_proximity'
+      },
+      outcome_fail: {
+        flavor: 'O musgo grosso impede a leitura completa, mas você reconhece o entalhe da flor-de-lis de Valdoria.',
+        ops: [{ op: 'xp', delta: 5 }],
+        fsm: null
+      }
+    },
+    {
       id: 'leave_runestone',
       label: 'Seguir respeitosamente',
       flavor: 'Você baixa a cabeça e prossegue.',

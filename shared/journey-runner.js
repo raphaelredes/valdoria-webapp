@@ -59,8 +59,76 @@
     _j = { opts: opts, biome: biome, displayName: opts.displayName || 'destino',
            total: total, step: 0, distTotal: distTotal, distRemaining: distTotal,
            usedHaz: [], usedSafe: [], prevTrack: prevTrack, weather: null };
-    if (opts.confirm === false) _departure();
-    else _confirm();
+    if (opts.confirm === false) {
+      _showMarcoTutorial(function () { _departure(); });
+    } else {
+      _confirm();
+    }
+  }
+
+  // Verifica se o jogador já viu a introdução aos Marcos de Valdoria (Ordem do Usuário 2026-10)
+  function _hasSeenMarcoTutorial() {
+    try {
+      if (localStorage.getItem('valdoria_seen_marcos_lore') === '1') return true;
+    } catch (_) {}
+    var p = _player();
+    return !!(p && (p.seen_marcos_lore || p.corvus_route_knowledge));
+  }
+
+  function _markSeenMarcoTutorial() {
+    try { localStorage.setItem('valdoria_seen_marcos_lore', '1'); } catch (_) {}
+    var p = _player();
+    if (p) p.seen_marcos_lore = true;
+  }
+
+  // Janela explicativa instrutiva na 1ª vez que o jogador lida com a medida dos Marcos (Ordem do Usuário 2026-10)
+  function _showMarcoTutorial(proceedCb) {
+    if (_hasSeenMarcoTutorial()) {
+      if (typeof proceedCb === 'function') proceedCb();
+      return;
+    }
+
+    var scriptLines = [
+      {
+        type: 'narration',
+        text: 'Antes de cruzar os portões rumo às terras ermas, você consulta seus registros de navegação e as cartas terrestres do Conservatório de Valdoria. Nas velhas crônicas falava-se em "léguas" ou "passos", mas neste território a sobrevivência depende de uma medida própria: <b>os Marcos de Valdoria</b>.'
+      },
+      {
+        type: 'narration',
+        text: '<div style="background:rgba(20,14,10,0.88);border:1px solid #d4a359;border-radius:8px;padding:12px;margin:8px 0;line-height:1.55;">'
+            + '<h4 style="margin:0 0 8px 0;color:#ffc6a8;font-family:Cinzel,serif;letter-spacing:1px;font-size:14px;">🗺️ A Medida Oficial das Estradas: Os Marcos</h4>'
+            + '<p style="margin:0 0 8px 0;color:#e8d8c8;font-size:12.5px;">'
+            + 'Em <i>Lendas de Valdoria</i>, as distâncias entre a cidade e os ermos são medidas em <b>Marcos</b>. Cada Marco equivale à distância percorrida em aproximadamente <b>uma hora de marcha contínua e resoluta</b> em terreno plano (~3 milhas / ~4,8 km no D&D 5e), tendo como base as antigas pedras-marco de basalto cravadas nas estradas pelos pioneiros da cidade.'
+            + '</p>'
+            + '<h4 style="margin:8px 0 6px 0;color:#ffc6a8;font-family:Cinzel,serif;letter-spacing:1px;font-size:13px;">🧭 Por que a Distância é uma Estimativa?</h4>'
+            + '<ul style="margin:0;padding-left:18px;color:#d8c8b8;font-size:12px;line-height:1.5;">'
+            + '<li><b>Monólitos Esquecidos:</b> Com o passar dos anos, muitos marcos foram tombados, cobertos por musgo ou partidos por feras. Por isso, a rota informa uma <i>estimativa aproximada de marcos restantes</i> calculada pelo grupo.</li>'
+            + '<li><b>Desvios e Relevo:</b> Erros de orientação ou terrenos intransponíveis exigem contornos forçados, adicionando marcos à viagem (+3 marcos) e atraindo mais perigos.</li>'
+            + '<li><b>Atalhos e Perícia:</b> Conselhos de cartógrafos, batedores veteranos ou testes bem-sucedidos de Sobrevivência/Percepção permitem cortar caminho por trilhas ocultas (-3 marcos).</li>'
+            + '</ul>'
+            + '</div>'
+      },
+      {
+        type: 'narration',
+        text: 'Manter o ritmo da marcha e calcular os marcos restantes com cautela é o que separa um retorno em segurança de um destino trágico nas terras selvagens.'
+      }
+    ];
+
+    _vRender({
+      npc: {
+        name: 'Compêndio de Cartografia',
+        desc: 'Tratado Oficial de Medição e Rotas de Valdoria',
+        portrait: '../shared/img/npcs/corvus.webp'
+      },
+      script: scriptLines,
+      choices: [{ id: 'marco_lore_ack', label: 'Compreendido, planejar postura de marcha ▸' }],
+      inline: true,
+      noProgress: true,
+      onChoice: function () {
+        _markSeenMarcoTutorial();
+        if (typeof proceedCb === 'function') proceedCb();
+      }
+    });
   }
 
   // Render de uma "página" no encounter canônico (vEncounter, PADRAO_ALDRIC).
@@ -105,33 +173,35 @@
   // Confirmação antes de viajar (user sessão #90: "não tem popup de confirmação").
   function _confirm() {
     var j = _j; if (!j) return;
-    var p = _player();
-    var content = (JD().getConfirmationContent) ? JD().getConfirmationContent(p, j) : null;
-    var script = (content && content.script) || [
-      { type: 'narration', text: 'Preparar viagem para <b>' + j.displayName + '</b>? A jornada terá ' + j.total + ' etapas — perigos podem surgir no caminho.' }
-    ];
-    var choices = (content && content.choices) || [
-      { id: 'jrn_go', label: 'Confirmar viagem' },
-      { id: 'jrn_cancel', label: 'Cancelar' }
-    ];
-    _vRender({
-      script: script,
-      choices: choices,
-      choicesTitle: (content && content.choicesTitle) || 'Preparação de Viagem',
-      choicesSubtitle: (content && content.choicesSubtitle) || (j.displayName ? ('Rumo a ' + j.displayName) : ''),
-      choicesBtnLabel: 'Escolher Postura de Viagem',
-      compact: true,
-      inline: false,
-      noProgress: true,
-      onChoice: function (ch) {
-        if (ch && ch.id === 'jrn_cancel') {
-          _cancel();
-        } else if (ch && ch.isPrep) {
-          _prepStance(ch);
-        } else {
-          _departure();
+    _showMarcoTutorial(function () {
+      var p = _player();
+      var content = (JD().getConfirmationContent) ? JD().getConfirmationContent(p, j) : null;
+      var script = (content && content.script) || [
+        { type: 'narration', text: 'Preparar viagem para <b>' + j.displayName + '</b>? A jornada terá ' + j.total + ' etapas — perigos podem surgir no caminho.' }
+      ];
+      var choices = (content && content.choices) || [
+        { id: 'jrn_go', label: 'Confirmar viagem' },
+        { id: 'jrn_cancel', label: 'Cancelar' }
+      ];
+      _vRender({
+        script: script,
+        choices: choices,
+        choicesTitle: (content && content.choicesTitle) || 'Preparação de Viagem',
+        choicesSubtitle: (content && content.choicesSubtitle) || (j.displayName ? ('Rumo a ' + j.displayName) : ''),
+        choicesBtnLabel: 'Escolher Postura de Viagem',
+        compact: true,
+        inline: false,
+        noProgress: true,
+        onChoice: function (ch) {
+          if (ch && ch.id === 'jrn_cancel') {
+            _cancel();
+          } else if (ch && ch.isPrep) {
+            _prepStance(ch);
+          } else {
+            _departure();
+          }
         }
-      }
+      });
     });
   }
 
@@ -508,6 +578,27 @@
       j.distRemaining = (j.distRemaining || 0) + 3;
       j.total = (j.total || 3) + 1;
       body += '<br><br><b>⚠️ Desvio forçado!</b> O relevo traiçoeiro exigiu um contorno, adicionando ~3 marcos à estimativa da travessia.';
+    }
+    // Concessão de itens e flags de eventos de jornada (Ordem do Usuário 2026-10)
+    var targetCh = (ch && ch._haz) || ch;
+    if (success && targetCh && targetCh.giveItem) {
+      if (p) {
+        p.inventory = p.inventory || [];
+        if (p.inventory.indexOf(targetCh.giveItem) < 0) {
+          p.inventory.push(targetCh.giveItem);
+        }
+      }
+      try {
+        var inv = JSON.parse(localStorage.getItem('player_inventory') || '[]');
+        if (Array.isArray(inv) && inv.indexOf(targetCh.giveItem) < 0) {
+          inv.push(targetCh.giveItem);
+          localStorage.setItem('player_inventory', JSON.stringify(inv));
+        }
+      } catch (_) {}
+    }
+    if (success && targetCh && targetCh.flag) {
+      if (p) p[targetCh.flag] = true;
+      try { localStorage.setItem('valdoria_' + targetCh.flag, '1'); } catch (_) {}
     }
     if (JD().detectWeather && narr) {
       var wNarr = JD().detectWeather(narr);
