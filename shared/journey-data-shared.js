@@ -2590,7 +2590,7 @@ var DEPARTURES = {
         return '';
     }
 
-    function _getPreparationChoices(t, biome) {
+    function _getPreparationChoices(t, biome, player) {
         var preps = [];
         if (!t) return preps;
 
@@ -2789,6 +2789,30 @@ var DEPARTURES = {
             });
         }
 
+        // Postura Cartográfica e Conhecimento de Rotas (Ordem do Usuário 2026-10)
+        var hasCorvus = !!(player && (player.corvus_route_knowledge || player.cartographer_advice || (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('valdoria_corvus_route_knowledge'))));
+        var hasVeteran = !!(player && (player.veteran_path_tips || (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('valdoria_veteran_path_tips'))));
+        if (hasCorvus) {
+            preps.push({
+                id: 'prep_corvus_map',
+                label: 'Cartas e Anotações de Mestre Corvus: Atalhos e marcos de relevo',
+                desc: 'Anotações cartográficas detalhadas sobre o relevo, ravinas e atalhos de Valdoria (Vantagem no 1º teste com Inteligência ou Sabedoria e orientação aprimorada).',
+                isPrep: true,
+                stat: 'wis',
+                prepText: 'Você desdobra as cartas e notas de Mestre Corvus, conferindo marcações de relevo e marcos de pedras que indicam trilhas mais seguras.'
+            });
+        }
+        if (hasVeteran) {
+            preps.push({
+                id: 'prep_veteran_trail',
+                label: 'Conselhos de Batedores Veteranos: Trilhas batidas e desvios',
+                desc: 'Instruções práticas transmitidas por veteranos experientes sobre passagens firmes (Vantagem no 1º teste com Percepção ou Sobrevivência).',
+                isPrep: true,
+                stat: 'wis',
+                prepText: 'Os relatos práticos de velhos batedores ecoam em sua memória, revelando quais gargantas evitar e onde o solo sustenta o passo.'
+            });
+        }
+
         return preps;
     }
 
@@ -2796,6 +2820,7 @@ var DEPARTURES = {
         var t = _traits(player);
         var dest = (j && j.displayName) || 'destino desconhecido';
         var steps = (j && j.total) || 3;
+        var estDist = steps * 3;
         var biome = (j && j.biome) || 'plains';
         var isReturn = (dest === 'Valdoria' || (j && j.isReturn) || (j && j.opts && (j.opts.direction === 'return' || j.opts.isReturn)));
 
@@ -2803,8 +2828,8 @@ var DEPARTURES = {
             {
                 type: 'narration',
                 text: isReturn
-                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. A travessia de volta exigirá <b>' + steps + ' etapas</b> de marcha atenta através da região.')
-                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A travessia pelas terras ermas exigirá <b>' + steps + ' etapas</b> de marcha contínua.')
+                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. A travessia de volta estima uma distância aproximada de <b>~' + estDist + ' léguas</b> por trilhas que podem variar conforme o relevo e os imprevistos da rota.')
+                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A travessia pelas terras ermas estima uma distância aproximada de <b>~' + estDist + ' léguas</b> de marcha contínua por caminhos sujeitos a desvios e imprevistos.')
             }
         ];
 
@@ -2824,7 +2849,7 @@ var DEPARTURES = {
             }
         ];
 
-        var prepChoices = _getPreparationChoices(t, biome);
+        var prepChoices = _getPreparationChoices(t, biome, player);
         for (var i = 0; i < prepChoices.length; i++) {
             choices.push(prepChoices[i]);
         }

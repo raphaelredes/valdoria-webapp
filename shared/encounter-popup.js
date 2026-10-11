@@ -2075,31 +2075,40 @@
       card.classList.add('enc-full');
     }
 
-    /* 2026-06-07 EX5 (viagem "Rumo a <destino>"): mostra no TOPO quantas etapas
-       faltam até o local. opts.progress = { current, total } (1-based). Banner
-       épico full-width com barra de avanço. Safe-DOM (evita hook de innerHTML). */
-    if (opts.progress && opts.progress.total > 0) {
+    /* Viagem e Navegação (Ordem do Usuário 2026-10): Mostra distância estimada
+       aproximada em léguas (que pode variar com desvios e atalhos) em vez de contagem
+       rígida de etapas numéricas, ou banner de travessia urbana por Valdoria. Safe-DOM. */
+    if (opts.progress && (opts.progress.total > 0 || opts.progress.isCityWalk || opts.progress.distEstimated != null)) {
       var _pg = opts.progress;
-      var _cur = Math.max(1, Math.min(_pg.current || 1, _pg.total));
-      var _remain = Math.max(0, _pg.total - _cur);
       var pBan = document.createElement('div');
       pBan.className = 'enc-journey-progress';
       var pLine = document.createElement('div');
       pLine.className = 'enc-jp-line';
       var pLabel = document.createElement('span');
       pLabel.className = 'enc-jp-label';
-      pLabel.textContent = 'Etapa ' + _cur + ' de ' + _pg.total;
       var pRemain = document.createElement('span');
       pRemain.className = 'enc-jp-remain';
-      pRemain.textContent = _remain === 0 ? 'Você chegou!'
-        : (_remain === 1 ? 'Falta 1 etapa' : 'Faltam ' + _remain + ' etapas');
+
+      if (_pg.isCityWalk) {
+        pLabel.textContent = _pg.title || '◈ TRAVESSIA POR VALDORIA';
+        pRemain.textContent = _pg.destination ? ('Rumo a ' + _pg.destination) : 'Pelas ruas da cidade';
+      } else {
+        var _cur = Math.max(1, Math.min(_pg.current || 1, _pg.total || 1));
+        var _remain = Math.max(0, (_pg.total || 1) - _cur);
+        var _distRem = (_pg.distRemaining != null) ? _pg.distRemaining : (_remain * 3);
+        pLabel.textContent = 'Distância estimada: ~' + _distRem + ' léguas';
+        pRemain.textContent = (_remain === 0 || _distRem <= 0) ? 'Destino avistado!'
+          : ('Aproximadamente ~' + _distRem + ' léguas restantes (estimativa)');
+      }
+
       pLine.appendChild(pLabel);
       pLine.appendChild(pRemain);
       var pBar = document.createElement('div');
       pBar.className = 'enc-jp-bar';
       var pFill = document.createElement('div');
       pFill.className = 'enc-jp-fill';
-      pFill.style.width = Math.round((_cur / _pg.total) * 100) + '%';
+      var _pct = _pg.isCityWalk ? 100 : Math.round((Math.max(1, Math.min(_pg.current || 1, _pg.total || 1)) / (_pg.total || 1)) * 100);
+      pFill.style.width = Math.max(12, Math.min(100, _pct)) + '%';
       pBar.appendChild(pFill);
       pBan.appendChild(pLine);
       pBan.appendChild(pBar);

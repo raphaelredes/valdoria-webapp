@@ -52,11 +52,13 @@
     if (_j) { _log('journey already active — ignorando start'); return; }
     opts = opts || {};
     var biome = opts.biome || 'plains';
-    var total = opts.totalSteps || (3 + Math.floor(Math.random() * 3));  // 3-5 etapas
+    var total = opts.totalSteps || (3 + Math.floor(Math.random() * 3));  // 3-5 trechos
+    var distTotal = total * 3;
     var prevTrack = (global.ValdoriaAudio && typeof ValdoriaAudio.getCurrentTrack === 'function')
       ? ValdoriaAudio.getCurrentTrack() : null;
     _j = { opts: opts, biome: biome, displayName: opts.displayName || 'destino',
-           total: total, step: 0, usedHaz: [], usedSafe: [], prevTrack: prevTrack, weather: null };
+           total: total, step: 0, distTotal: distTotal, distRemaining: distTotal,
+           usedHaz: [], usedSafe: [], prevTrack: prevTrack, weather: null };
     if (opts.confirm === false) _departure();
     else _confirm();
   }
@@ -70,7 +72,15 @@
     }
     var prog = null;
     if (!cfg.noProgress && _j && _j.total > 0 && _j.step >= 1) {
-      prog = { current: _j.step, total: _j.total };
+      prog = {
+        current: _j.step,
+        total: _j.total,
+        distTotal: _j.distTotal || (_j.total * 3),
+        distRemaining: (_j.distRemaining != null) ? _j.distRemaining : Math.max(0, (_j.total - _j.step) * 3),
+        distEstimated: (_j.distRemaining != null) ? _j.distRemaining : Math.max(0, (_j.total - _j.step) * 3),
+        isDistance: true,
+        hideStages: true
+      };
     }
     global.vEncounter.render(
       {
@@ -195,7 +205,13 @@
   function _step() {
     var j = _j; if (!j) return;
     j.step++;
-    if (j.step > j.total) { _arrive(); return; }
+    if (j.distRemaining != null) {
+      j.distRemaining = Math.max(0, j.distTotal - (j.step * 3));
+    }
+    if (j.step > j.total || (j.distRemaining != null && j.distRemaining <= 0)) {
+      _arrive();
+      return;
+    }
     _renderStep();
   }
 
@@ -290,14 +306,15 @@
 
   // Tela "continuar/chegar" — UMA escolha inline. IDÊNTICA ida<->volta (PADRAO_VIAGEM:
   // mesma interface, mínimo trabalho). Sem "Acampar" no caminho (a exploração mantém o
-  // descanso pelo botão de acampar normal do mapa) — assim a etapa é 1 toque nas 2 direções.
+  // descanso pelo botão de acampar normal do mapa) — assim a travessia é 1 toque nas 2 direções.
   function _renderContinue(scriptLines, npc) {
     var j = _j; if (!j) return;
-    var remaining = j.total - j.step;
+    var distLeft = (j.distRemaining != null) ? j.distRemaining : Math.max(0, (j.total - j.step) * 3);
+    var isNear = (distLeft <= 0 || j.step >= j.total);
     _vRender({
       npc: npc || null,
       script: scriptLines,
-      choices: [{ id: 'jrn_cont', label: (remaining > 0 ? 'Continuar viagem' : 'Chegar ao destino') }],
+      choices: [{ id: 'jrn_cont', label: (isNear ? ('Chegar a ' + j.displayName) : ('Continuar marcha (~' + distLeft + ' léguas)')) }],
       inline: true,
       onChoice: function () { _step(); }
     });
@@ -479,6 +496,18 @@
       }
     }
     var body = narr;
+    // Ajuste dinâmico de distância aproximada (Ordem do Usuário 2026-10):
+    // Atalhos bem-sucedidos ou rota conhecida reduzem a distância restante;
+    // Desvios ou desorientação aumentam a distância e o número de encontros.
+    if (success && (ch && (ch.isShortcut || (ch._haz && ch._haz.isShortcut)))) {
+      j.distRemaining = Math.max(0, (j.distRemaining || 3) - 3);
+      j.step = Math.min(j.total, j.step + 1);
+      body += '<br><br><b>🗺️ Atalho de rota aproveitado!</b> A travessia foi encurtada em ~3 léguas.';
+    } else if (!success && (ch && (ch.isDetour || (ch._haz && ch._haz.isDetour) || (hz && hz.isOrientationHazard)))) {
+      j.distRemaining = (j.distRemaining || 0) + 3;
+      j.total = (j.total || 3) + 1;
+      body += '<br><br><b>⚠️ Desvio forçado!</b> O relevo traiçoeiro exigiu um contorno, adicionando ~3 léguas à estimativa da travessia.';
+    }
     if (JD().detectWeather && narr) {
       var wNarr = JD().detectWeather(narr);
       if (wNarr) { j.weather = wNarr; _log('journey weather updated on outcome -> ' + wNarr); }

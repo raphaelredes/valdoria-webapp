@@ -21670,7 +21670,7 @@ function _playAudioForScreen(screen){
   try { ValdoriaAudio.play(trackKey); } catch(e){ console.warn('[CITY-AUDIO]', e); }
 }
 
-function navigateTo(screen, params){
+function navigateTo(screen, params, skipWalk){
   if (screen === 'hub' || screen === 'cartografia') {
     window._isAtMarket = false;
     // Push da tela atual no navStack pra navigateBack funcionar
@@ -21683,6 +21683,13 @@ function navigateTo(screen, params){
     renderCurrentScreen(params);
     _playAudioForScreen(screen);
     _logCity('navigate -> ' + screen + ' (stack=' + _navStack.length + ')');
+    return;
+  }
+  // Travessia urbana (Ordem do Usuário 2026-10): caminhar pelo distrito com narrativa e chance de eventos
+  if (!skipWalk && typeof _startCityWalk === 'function' && typeof _CITY_WALK_DESTINATIONS !== 'undefined' && _CITY_WALK_DESTINATIONS[screen] && _currentScreen === 'hub' && _popupStack.length === 0) {
+    _startCityWalk(screen, function(){
+      navigateTo(screen, params, true);
+    });
     return;
   }
   // Sub-screen → popup
@@ -61958,8 +61965,20 @@ var ACTION_HANDLERS = {
   // --- MERCADO ---
   'market_sell_open':     function(p){ _marketShowSell(p); },
   'market_rune_redirect': function(p){ navigateTo('runes'); },
-  'open_tavern_redirect': function(p){ closeCityPopup(true); navigateTo('tavern'); },
-  'open_inn_redirect':    function(p){ closeCityPopup(true); navigateTo('inn'); },
+  'open_tavern_redirect': function(p){
+    if (typeof _startCityWalk === 'function') {
+      _startCityWalk('tavern', function(){ closeCityPopup(true); navigateTo('tavern', null, true); });
+    } else {
+      closeCityPopup(true); navigateTo('tavern');
+    }
+  },
+  'open_inn_redirect':    function(p){
+    if (typeof _startCityWalk === 'function') {
+      _startCityWalk('inn', function(){ closeCityPopup(true); navigateTo('inn', null, true); });
+    } else {
+      closeCityPopup(true); navigateTo('inn');
+    }
+  },
   'open_cartographer':    function(p){ if (typeof _openCartographerPopup === 'function') _openCartographerPopup(p || window.CITY_MOCK_PLAYER); },
 
   // --- GUILDA ---
@@ -67173,6 +67192,395 @@ function _tryArrivalEncounter(action){
 window._tryArrivalEncounter = _tryArrivalEncounter;
 
 // ============================================================================
+// === CIDADE — CAMINHAR ATÉ O LOCAL ESCOLHIDO COM NARRATIVA E EVENTOS ========
+// ============================================================================
+// Ordem do Usuário (2026-10): A opção de descanso na estalagem deve fazer o
+// personagem ir até a estalagem com narrativa do caminho e chance de eventos,
+// assim como toda direção que o personagem toma na cidade (sem contagem de etapas).
+var _CITY_WALK_DESTINATIONS = {
+  'inn': { name: 'Estalagem Pena-Dourada', district: 'Distrito das Tabernas e Hospedarias', icon: 'svc-dormir-comum.webp' },
+  'tavern': { name: 'Taverna do Javali Bêbado', district: 'Beco dos Tonéis', icon: 'svc-bebidas.webp' },
+  'market': { name: 'Mercado de Valdoria', district: 'Praça Central do Comércio', icon: 'svc-vender.webp' },
+  'temple': { name: 'Templo da Luz Radiante', district: 'Colina dos Altares', icon: 'svc-bencao.webp' },
+  'guild': { name: 'Guilda dos Aventureiros', district: 'Pátio das Lâminas', icon: 'svc-treino.webp' },
+  'arena': { name: 'Arena de Valdoria', district: 'Distrito da Fossa', icon: 'svc-arena.webp' },
+  'workshop': { name: 'Oficina dos Artífices', district: 'Rua das Forjas', icon: 'svc-reparar.webp' },
+  'runes': { name: 'Escriba Rúnico', district: 'Torre das Inscrições', icon: 'svc-decifrar.webp' },
+  'bank': { name: 'Banco de Valdoria', district: 'Ala dos Tesouros', icon: 'svc-banco.webp' },
+  'shadow_alley': { name: 'Beco das Sombras', district: 'Vielas Ocultas', icon: 'svc-investigar.webp' },
+  'gates': { name: 'Portões de Valdoria', district: 'Muralhas Externas', icon: 'svc-mapas.webp' }
+};
+
+function _getCityWalkAtmosphericText(destKey, isNight, isRain) {
+  if (destKey === 'inn') {
+    if (isNight) {
+      return 'Você recolhe seus pertences e caminha pelas ruas silenciosas de Valdoria sob o manto da vigília noturna. O vento sopra fresco entre os telhados de ardósia, enquanto tochas presas às vigas de carvalho estalam suavemente na brisa. Ao dobrar a esquina da praça, a fachada rústica da Estalagem Pena-Dourada se destaca na penumbra, com o calor acolhedor da lareira desenhando sombras douradas nas janelas de vidro chumbado.';
+    }
+    return 'Você caminha pelo calçamento de pedras arredondadas de Valdoria em direção à Estalagem Pena-Dourada. O aroma reconfortante de lenha queimando e ensopado fresco que escapa pelas chaminés guia seus passos até o pórtico de madeira nobre.';
+  }
+  if (destKey === 'tavern') {
+    if (isNight) {
+      return 'Você cruza as vielas iluminadas por archotes em direção ao Beco dos Tonéis. Mesmo durante a noite, os ecos de risadas e o tintilar compassado de canecas pesadas revelam a agitação viva na Taverna do Javali Bêbado.';
+    }
+    return 'Você abre passagem pelo movimento do calçamento, aproximando-se da Taverna do Javali Bêbado. O aroma característico de malte torrado e assados no espeto preenche o ar conforme você se aproxima do pórtico.';
+  }
+  if (destKey === 'temple') {
+    if (isNight) {
+      return 'Você sobe a suave encosta de pedras polidas em direção à Colina dos Altares. Sob a luz prateada das estrelas, as chamas das tochas votivas bailam suavemente, iluminando os relevos dos santos guardiões talhados no mármore sereno do Templo da Luz Radiante.';
+    }
+    return 'Você sobe os degraus de pedra clara em direção à Colina dos Altares. A suave fragrância de incenso sagrado de sândalo e o cântico suave dos sacerdotes criam uma aura de serenidade ao redor do Templo da Luz Radiante.';
+  }
+  if (destKey === 'market') {
+    if (isNight) {
+      return 'Você atravessa a praça do mercado sob a luz da vigília noturna. As bancas estão cobertas por lonas pesadas e os mercadores recolhidos, enquanto os lampiões municipais projetam sombras compridas sobre o pátio de pedra deserto.';
+    }
+    return 'Você se desloca em direção à Praça Central. O calçamento se alarga diante dos mastros e bancadas do Mercado de Valdoria, onde mercadores organizam seus fardos sob os toldos coloridos.';
+  }
+  if (destKey === 'guild') {
+    return isNight
+      ? 'Você caminha pelo Pátio das Lâminas sob a guarda silenciosa dos mastros da guilda. Tochas acesas em suportes de ferro forjado iluminam as portas duplas de carvalho reforçado com ferro fundido.'
+      : 'Você marcha pelo pátio de armas em direção ao grande salão da Guilda. O tinido metálico de lâminas em treino e os brasões desbotados nas paredes de cantaria respiram séculos de contratos e missões.';
+  }
+  if (destKey === 'arena') {
+    return isNight
+      ? 'Você desce os degraus de cantaria rumo ao fosso da Arena. Sob as tochas fumegantes, as grades de ferro protegem a entrada dos combatentes e o piso de areia na penumbra.'
+      : 'Você caminha em direção ao coliseu de pedras escuras. O eco de brados e o choque de escudos vindo da arena elevam a adrenalina a cada passo.';
+  }
+  if (destKey === 'workshop') {
+    return isNight
+      ? 'Você caminha pela Rua das Forjas, onde as brasas nos fornos ainda ardem com brilho avermelhado na penumbra, aquecendo as paredes de pedra maciça.'
+      : 'O calor intenso e a fumaça de carvão mineral sobem das chaminés da Rua das Forjas. As marteladas rítmicas nas bigornas guiam seus passos até a oficina dos ferreiros.';
+  }
+  if (destKey === 'runes') {
+    return isNight
+      ? 'Você segue pelas sombras de arcadas góticas até a Torre das Inscrições. Pequenas runas gravadas nas soleiras emitem uma luminescência azulada sutil no escuro.'
+      : 'Você avança pela viela quieta em direção ao refúgio do Escriba Rúnico. O cheiro de pergaminho antigo, cera de abelha e tintas arcanas perfuma o ar.';
+  }
+  if (destKey === 'bank') {
+    return isNight
+      ? 'Você se aproxima do Banco de Valdoria sob a vigilância cerrada das sentinelas armadas. As pesadas grades de bronze fecham as arcas durante a noite.'
+      : 'Você atravessa a ala administrativa até os pórticos imponentes do Banco de Valdoria, onde guardas com librés escarlates vigiam a entrada dos cofres.';
+  }
+  if (destKey === 'shadow_alley') {
+    return isNight
+      ? 'Você se embrenha pelo Beco das Sombras. A escuridão é densa e apenas lampejos distantes de tochas cortam a névoa fria entre as paredes mofadas.'
+      : 'Você se desvia para as vielas estreitas onde a luz do sol mal alcança o calçamento. Figuras discretas observam de janelas superiores.';
+  }
+  if (destKey === 'gates') {
+    return isNight
+      ? 'Você caminha até os Portões de Valdoria sob o olhar vigilante dos guardas nas ameias. A ponte levadiça e as pesadas vigas de ferro barram as feras da noite.'
+      : 'Você caminha pela grande avenida militar até as arcadas dos Portões Principais. A brisa aberta dos campos e o som de cornetas dos sentinelas dão as boas-vindas.';
+  }
+  return 'Você caminha pelas ruas de Valdoria, acompanhando o relevo do calçamento até o seu destino.';
+}
+
+var _CITY_WALK_EVENTS = [
+  {
+    id: 'walk_patrol',
+    title: 'Patrulha da Guarda Municipal',
+    script: [
+      { type: 'narration', text: 'Duas sentinelas da guarda de Valdoria com alabardas reforçadas e lanternas de óleo de baleia cruzam a esquina de cantaria. A luz dourada da lâmpada ilumina seus passos no calçamento.' },
+      { type: 'speech', speaker: 'Sentinela da Guarda', text: '— Alto lá, viajante. Para onde se direcionam seus passos dentro dos muros a essa hora?' }
+    ],
+    npc: { name: 'Sentinela da Guarda', desc: 'Vigília Municipal de Valdoria' },
+    choices: [
+      {
+        id: 'patrol_persuade',
+        label: 'Apresentar-se com cortesia',
+        desc: 'Explicar com respeito que está a caminho de seu destino legítimo (Persuasão CD 11).',
+        stat: 'cha', dc: 11,
+        sNarr: 'O sentinela assente com respeito e baixa a ponta da lança: "Muito bem, aventureiro. Mantenha-se nas vias iluminadas e que sua estadia seja pacífica."',
+        fNarr: 'O guarda franze o cenho e inspeciona suas credenciais com rigidez antes de autorizar a passagem: "Circule sem algazarras."'
+      },
+      {
+        id: 'patrol_intimidate',
+        label: 'Impor presença marcial',
+        desc: 'Sustentar o olhar e demonstrar disciplina de combatente experiente (Intimidação CD 12).',
+        stat: 'str', dc: 12,
+        sNarr: 'As sentinelas reconhecem a postura inabalável de quem já enfrentou feras piores nos ermos, recuando um passo e deixando a passagem livre.',
+        fNarr: 'O guarda firma a alabarda: "Sem provocações nos muros de Valdoria." Após um instante tenso, ele libera o caminho.'
+      },
+      {
+        id: 'patrol_stealth',
+        label: 'Desviar pelas sombras',
+        desc: 'Aproveitar a penumbra dos arcos para contornar sem ser abordado (Furtividade CD 11).',
+        stat: 'dex', dc: 11,
+        sNarr: 'Com passadas amortecidas, você desliza pela sombra do beiral sem que a lanterna da patrulha alcance suas vestes.',
+        fNarr: 'Uma bota estala numa tábua solta; a sentinela ergue a lanterna e te fita desconfiada por instantes antes de seguir a ronda.'
+      }
+    ]
+  },
+  {
+    id: 'walk_urchin',
+    title: 'Sombra nas Vielas',
+    script: [
+      { type: 'narration', text: 'Conforme você avança pelo estreito corredor entre dois sobrados de madeira, uma silhueta franzina envolta em farrapos passa raspando pela sua capa com rapidez felina.' }
+    ],
+    npc: { name: 'Jovem das Vielas', desc: 'Sobrevivente dos becos de Valdoria' },
+    choices: [
+      {
+        id: 'urchin_perceive',
+        label: 'Agarrar o pulso do trombadinha',
+        desc: 'Notar a tentativa de furto antes que a navalha corte suas amarras (Percepção CD 12).',
+        stat: 'wis', dc: 12,
+        sNarr: 'Seus reflexos interceptam o braço do jovem a tempo. Surpreso e assustado, o trombadinha pede desculpas gaguejando e escapa em disparada pelas sombras.',
+        fNarr: 'Você sente o puxão na fivela tarde demais. Por sorte, nada foi levado, mas o incidente te deixa em alerta máximo.'
+      },
+      {
+        id: 'urchin_dodge',
+        label: 'Giro defensivo com a capa',
+        desc: 'Desviar ágil e afastar a aproximação suspeita (Destreza CD 11).',
+        stat: 'dex', dc: 11,
+        sNarr: 'Com um movimento rápido da capa, você bloqueia a investida e encara o jovem, que recua temeroso e some no escuro.',
+        fNarr: 'Você tropeça de leve numa caixa de verduras, permitindo que a sombra desapareça na esquina.'
+      },
+      {
+        id: 'urchin_mercy',
+        label: 'Oferecer algumas moedas',
+        desc: 'Demonstrar compaixão diante da miséria das ruas (Carisma CD 10).',
+        stat: 'cha', dc: 10,
+        sNarr: 'Você estende algumas moedas com serenidade. O jovem recolhe o cobre com os olhos brilhando em gratidão e sussurra: "Obrigado, viajante... Cuidado com os desvios escuros à frente."',
+        fNarr: 'O jovem agarra o que pode e corre veloz sem olhar para trás.'
+      }
+    ]
+  },
+  {
+    id: 'walk_veteran',
+    title: 'Conselhos de um Batedor Veterano',
+    script: [
+      { type: 'narration', text: 'Sob a marquise de uma velha cantaria, um batedor veterano com cicatrizes de garras no queixo afia a lâmina de um machadinho contra uma pedra úmida.' },
+      { type: 'speech', speaker: 'Braun, o Batedor', text: '— Caminhando pela cidade, aventureiro? Se o seu destino for cruzar os portões rumo aos ermos mais tarde, escute: as trilhas de Valdoria enganam até os mais atentos. Quem não conhece os marcos de pedra acaba marchando em círculos.' }
+    ],
+    npc: { name: 'Braun, o Batedor', desc: 'Ex-aventureiro e veterano das terras ermas' },
+    choices: [
+      {
+        id: 'veteran_learn',
+        label: 'Anotar os conselhos de rota de Braun',
+        desc: 'Ouvir com atenção as instruções topográficas do veterano (Sobrevivência CD 11).',
+        stat: 'wis', dc: 11,
+        isVeteranTip: true,
+        sNarr: 'Braun compartilha referências precisas sobre desvios firmes e gargantas rochosas seguras. Você memorizou os Conselhos de Batedores Veteranos (+Vantagem em viagens)!',
+        fNarr: 'Braun fala em termos confusos de campanhas antigas, mas o relato traz pistas valiosas sobre a cautela necessária fora dos muros.'
+      },
+      {
+        id: 'veteran_greet',
+        label: 'Agradecer e prosseguir',
+        desc: 'Fazer um aceno cortês em respeito à experiência de Braun e seguir caminho.',
+        sNarr: 'Você agradece a saudação marcial e continua sua travessia pelas ruas de Valdoria.'
+      }
+    ]
+  },
+  {
+    id: 'walk_bard',
+    title: 'Melodia na Esquina',
+    script: [
+      { type: 'narration', text: 'Um bardo itinerante sentado num barril de carvalho dedilha acordes suaves em um alaúde, entoando uma antiga balada sobre os primeiros desbravadores de Valdoria.' },
+      { type: 'speech', speaker: 'Trovador Errante', text: '— "Sob o manto da noite ou a glória do sol, cada passo do andarilho tece a lenda de Valdoria..."' }
+    ],
+    npc: { name: 'Trovador Errante', desc: 'Músico de praça' },
+    choices: [
+      {
+        id: 'bard_listen',
+        label: 'Apreciar a canção',
+        desc: 'Permitir que a melodia inspire sua determinação e foco de aventureiro.',
+        sNarr: 'A música dissipa o peso do cansaço e renova o seu ânimo para as tarefas e provações que o aguardam.'
+      },
+      {
+        id: 'bard_pass',
+        label: 'Apressar o passo',
+        desc: 'Manter a marcha constante rumo ao seu destino.',
+        sNarr: 'Você mantém o passo firme pelas pedras, deixando os acordes do alaúde sumirem suavemente às suas costas.'
+      }
+    ]
+  },
+  {
+    id: 'walk_shrine',
+    title: 'Nicho Votivo dos Guardiões',
+    script: [
+      { type: 'narration', text: 'Em uma reentrância na parede de pedra, um pequeno oratório talhado dedicado aos Guardiões Antigos exibe uma lamparina de azeite acesa e ramos secos de alecrim.' }
+    ],
+    choices: [
+      {
+        id: 'shrine_pray',
+        label: 'Fazer uma prece silenciosa',
+        desc: 'Pedir proteção e discernimento aos espíritos protetores (Religião CD 10).',
+        stat: 'wis', dc: 10,
+        sNarr: 'Uma onda de tranquilidade serena preenche seu espírito, como um presságio benéfico para suas próximas decisões.',
+        fNarr: 'Você fita a chama com respeito e segue viagem com o coração firme.'
+      },
+      {
+        id: 'shrine_continue',
+        label: 'Prosseguir em silêncio',
+        desc: 'Seguir seu caminho pelas vielas sem interromper a marcha.',
+        sNarr: 'Você contempla o brilho dourado da lamparina e avança pelo calçamento.'
+      }
+    ]
+  }
+];
+
+function _resolveCityWalkCheck(ch, player, onResolved) {
+  var stat = ch.stat || 'wis';
+  var dc = ch.dc || 10;
+  var mod = 0;
+  if (player && player.attributes && player.attributes[stat] != null) {
+    mod = Math.floor((player.attributes[stat] - 10) / 2);
+  }
+  var d20 = Math.floor(Math.random() * 20) + 1;
+  var total = d20 + mod;
+  var success = (total >= dc);
+
+  var ov = document.getElementById('encounter-overlay');
+  if (ov && typeof Dice3D === 'function' && typeof THREE !== 'undefined') {
+    while (ov.firstChild) ov.removeChild(ov.firstChild);
+    var card = document.createElement('div');
+    card.className = 'enc-card enc-full';
+    card.style.cssText = 'display:flex;flex-direction:column;justify-content:center;text-align:center;padding:24px;';
+    var statName = (window.DndRules && DndRules.statLabel) ? DndRules.statLabel(stat) : stat.toUpperCase();
+    var h1 = document.createElement('div');
+    h1.style.cssText = 'font-size:11px;letter-spacing:2px;color:#c4953a;text-transform:uppercase;margin-bottom:6px;';
+    h1.textContent = 'Teste de ' + statName;
+    var h2 = document.createElement('div');
+    h2.style.cssText = 'font-size:13px;color:#f4d896;letter-spacing:1.5px;margin-bottom:16px;';
+    h2.textContent = 'Classe de Dificuldade ' + dc + ' · modificador ' + (mod >= 0 ? '+' : '') + mod;
+    var mount = document.createElement('div');
+    mount.style.cssText = 'width:160px;height:160px;margin:0 auto 14px;';
+    var resEl = document.createElement('div');
+    resEl.style.cssText = 'min-height:52px;font-size:15px;color:#f4d896;letter-spacing:1px;line-height:1.6;';
+    var actEl = document.createElement('div');
+    actEl.style.cssText = 'display:flex;gap:10px;justify-content:center;margin-top:16px;opacity:0;transition:opacity 0.4s;';
+    card.appendChild(h1); card.appendChild(h2); card.appendChild(mount); card.appendChild(resEl); card.appendChild(actEl);
+    ov.appendChild(card);
+    if (typeof ov.showModal === 'function' && !ov.open) { try { ov.showModal(); } catch(_){} }
+    ov.classList.add('active');
+
+    function _finishRoll() {
+      var txt = success ? (ch.sNarr || 'Você obtém sucesso com destreza e foco.') : (ch.fNarr || 'A tentativa não sai como planejado, mas você segue em frente.');
+      onResolved(success, txt);
+    }
+
+    function _showRes() {
+      while (resEl.firstChild) resEl.removeChild(resEl.firstChild);
+      var sub = document.createElement('div');
+      sub.style.cssText = 'font-size:11px;color:#a09484;letter-spacing:1.5px;margin-bottom:6px;';
+      sub.textContent = 'Rolagem d20 ' + (mod >= 0 ? '+' : '') + mod + ' = ' + total + ' vs CD ' + dc;
+      var status = document.createElement('div');
+      status.style.cssText = 'font-size:18px;color:' + (success ? '#7ad06b' : '#d85848') + ';font-weight:700;letter-spacing:2px;font-family:Cinzel,serif;';
+      status.textContent = success ? 'SUCESSO!' : 'FALHA!';
+      resEl.appendChild(sub); resEl.appendChild(status);
+      var btn = document.createElement('button');
+      btn.className = 'enc-btn enc-btn-primary';
+      btn.style.cssText = 'padding:8px 22px;';
+      btn.textContent = 'Continuar →';
+      btn.addEventListener('click', _finishRoll);
+      actEl.appendChild(btn);
+      actEl.style.opacity = '1';
+    }
+
+    try {
+      var dice = new Dice3D(mount, { size: 156, dieType: 'd20', duration: 1500 });
+      dice.roll(d20, _showRes);
+      return;
+    } catch(e) {}
+  }
+
+  var txt = success ? (ch.sNarr || 'Você obtém sucesso com destreza e foco.') : (ch.fNarr || 'A tentativa não sai como planejado, mas você segue em frente.');
+  onResolved(success, txt);
+}
+
+function _showCityWalkArrival(dest, narrativeText, proceedFn) {
+  var p = (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {});
+  if (window.vEncounter && typeof vEncounter.render === 'function') {
+    vEncounter.render({
+      script: [
+        { type: 'narration', text: narrativeText },
+        { type: 'narration', text: 'Você conclui a caminhada pelo distrito e avista a entrada de <b>' + dest.name + '</b> diante de você.' }
+      ],
+      choices: [
+        { id: 'walk_enter', label: 'Entrar em ' + dest.name, desc: 'Adentrar o estabelecimento e acessar suas dependências.' }
+      ],
+      choicesTitle: 'Chegada ao Destino',
+      choicesSubtitle: dest.name
+    }, {
+      player: p,
+      progress: { isCityWalk: true, title: '◈ TRAVESSIA POR VALDORIA', destination: dest.name },
+      inlineChoices: true,
+      onChoice: function() {
+        if (typeof vEncounter.close === 'function') vEncounter.close();
+        if (typeof proceedFn === 'function') proceedFn();
+      }
+    });
+  } else {
+    if (typeof proceedFn === 'function') proceedFn();
+  }
+}
+
+function _startCityWalk(targetKey, proceedFn, opts) {
+  opts = opts || {};
+  var p = (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {});
+  var dest = _CITY_WALK_DESTINATIONS[targetKey] || { name: targetKey, district: 'Distrito de Valdoria' };
+
+  var hr = (new Date()).getHours();
+  var isNight = (hr < 6 || hr >= 22);
+  var isRain = false;
+  try {
+    if (typeof _getCurrentGameTime === 'function' && typeof _getGameWeather === 'function') {
+      var t0 = _getCurrentGameTime();
+      var w = _getGameWeather(t0.dayOfYear);
+      if (w && (w.desc === 'Chuvoso' || w.desc === 'Tempestade')) isRain = true;
+    }
+  } catch(e) {}
+
+  var walkNarr = _getCityWalkAtmosphericText(targetKey, isNight, isRain);
+
+  var rollEvent = (Math.random() < 0.40);
+  var chosenEvent = rollEvent ? _CITY_WALK_EVENTS[Math.floor(Math.random() * _CITY_WALK_EVENTS.length)] : null;
+
+  if (chosenEvent && window.vEncounter && typeof vEncounter.render === 'function') {
+    var encScript = [{ type: 'narration', text: walkNarr }].concat(chosenEvent.script);
+    var encChoices = (chosenEvent.choices || []).map(function(ch, idx){
+      return {
+        id: ch.id || ('walk_ch_' + idx),
+        label: ch.label,
+        desc: ch.desc || '',
+        dc: ch.dc,
+        skill: ch.stat ? ((window.DndRules && DndRules.statLabel) ? DndRules.statLabel(ch.stat) : ch.stat.toUpperCase()) : null,
+        _ev: ch
+      };
+    });
+
+    vEncounter.render({
+      npc: chosenEvent.npc || null,
+      script: encScript,
+      choices: encChoices,
+      choicesTitle: chosenEvent.title || 'Encontro nas Ruas de Valdoria',
+      choicesSubtitle: 'A caminho de ' + dest.name
+    }, {
+      player: p,
+      progress: { isCityWalk: true, title: '◈ TRAVESSIA POR VALDORIA', destination: dest.name },
+      onChoice: function(selected) {
+        var ch = selected._ev || selected;
+        if (ch.isVeteranTip) {
+          p.veteran_path_tips = true;
+          try { sessionStorage.setItem('valdoria_veteran_path_tips', '1'); } catch(_) {}
+        }
+        if (ch.stat && ch.dc) {
+          _resolveCityWalkCheck(ch, p, function(success, resultText){
+            _showCityWalkArrival(dest, resultText, proceedFn);
+          });
+        } else {
+          var resTxt = ch.sNarr || 'Você prossegue com cautela e firmeza pelo calçamento de Valdoria.';
+          _showCityWalkArrival(dest, resTxt, proceedFn);
+        }
+      }
+    });
+    return;
+  }
+
+  _showCityWalkArrival(dest, walkNarr, proceedFn);
+}
+window._startCityWalk = _startCityWalk;
+
+// ============================================================================
 // === PADRAO_SERVIDOR — Diálogos server-driven genéricos (sessão #71) ========
 // ============================================================================
 // Regra Padrão (Ordem do Usuário 2026-10): PROIBIDO exibir telas de carregamento
@@ -72285,6 +72693,8 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     }
   } else if (choice.result === 'corvus_lore_advice') {
     // Terceira opção: Corvus compartilha conselhos cartográficos, geografia de Valdoria e ritmo de viagem
+    if (player) player.corvus_route_knowledge = true;
+    try { sessionStorage.setItem('valdoria_corvus_route_knowledge', '1'); } catch(_) {}
     var loreEnc = {
       id: 'corvus_lore_advice',
       npc: 'corvus_greeting',
@@ -72293,7 +72703,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
         { type: 'narration', text: 'Mestre Corvus limpa as lentes de seus óculos com uma flanela de feltro gasta, aponta a ponta do compasso sobre uma grande carta náutica desdobrada e apoia os cotovelos sobre o balcão.' },
         { type: 'speech', speaker: 'Mestre Corvus', text: '— Quer saber o que há além das muralhas de Valdoria? Escute com atenção, porque a maioria dos que partem sem conhecer o terreno nunca volta pra me trazer relatos.' },
         { type: 'speech', speaker: 'Mestre Corvus', text: '— Ao sul, as planícies e clareiras parecem mansas à luz do meio-dia, mas ao entardecer as névoas ocultam antigas sepulturas e covis. Ao norte e leste, as escarpas rochosas de Brakenhall e as terras vulcânicas não perdoam aventureiros desatentos.' },
-        { type: 'narration', text: 'Ele bate a ponta dos dedos sobre as marcações de relevo, fitando você com seriedade de cartógrafo veterano.' },
+        { type: 'narration', text: 'Ele traça anotações detalhadas de marcos de pedras e ravinas no verso de uma folha e te entrega com cuidado. Você obteve <b>Conhecimento Cartográfico de Corvus</b> (+Vantagem em viagens e chance de cortar caminho nas terras ermas).' },
         { type: 'speech', speaker: 'Mestre Corvus', text: '— E aqui vai uma lição de quem sobreviveu a três expedições na Frota de Solhaven: o maior inimigo de quem viaja não são apenas as feras, é a teimosia de lutar contra o próprio corpo. Quem caminha ou luta durante o seu horário habitual de sono tem reflexos pesados como chumbo. Respeite sua rotina de descanso na estalagem ou no acampamento, ou as terras selvagens cobrarão o preço em sangue.' }
       ],
       choices: [
