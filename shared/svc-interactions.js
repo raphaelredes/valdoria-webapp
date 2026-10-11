@@ -209,21 +209,44 @@
             window.vToast((deltaR>=0?'+':'')+deltaR+' Renome · '+facLabel, deltaR>=0?'gold':'warn');
           }
           var success = roll.success;
+          var rNarration = '', rText = '';
+          if (opts.ch && success && (opts.ch.resultNarration || opts.ch.resultText)) {
+            rNarration = opts.ch.resultNarration || '';
+            rText = opts.ch.resultText || '';
+          } else if (opts.ch && !success && (opts.ch.resultNarrationFail || opts.ch.resultTextFail)) {
+            rNarration = opts.ch.resultNarrationFail || '';
+            rText = opts.ch.resultTextFail || '';
+          } else {
+            var _reactions = (window._SVC_CONFIG && window._SVC_CONFIG.reactions) || {};
+            var _rkey = deltaR >= 3 ? 'very_positive' : deltaR > 0 ? 'positive'
+              : deltaR <= -2 ? 'very_negative' : deltaR < 0 ? 'negative' : 'neutral';
+            rText = _reactions[_rkey] || (success
+              ? 'O olhar diante de ti se ilumina — a sorte sorriu desta vez.'
+              : 'Um aceno breve encerra o assunto. Não foi desta vez.');
+          }
+          var _npcObj = (opts.dialogue && opts.dialogue.npc) || null;
+          var _npcName = (_npcObj && _npcObj.name) || '';
+
+          // Registro do desfecho narrativo e renome no histórico
+          if (typeof window !== 'undefined' && window.vDialogueHistory && typeof window.vDialogueHistory.recordOutcome === 'function') {
+            try {
+              var outcomeLines = [];
+              if (rNarration) outcomeLines.push({ type: 'narration', text: rNarration });
+              if (rText) outcomeLines.push({ type: 'speech', speaker: _npcName, text: rText });
+              window.vDialogueHistory.recordOutcome(outcomeLines, deltaR ? [{ type: 'renown', amount: deltaR, label: 'Renome' }] : null);
+            } catch (_eHist) {}
+          }
+
           // Próximo nó: success → opts.ch.success / fail → opts.ch.failure
-          // Senão: continueDialogue (legacy). Senão: close.
+          // Senão: continueDialogue / ou id direto na tabela de diálogos
           var nextNodeId = null;
           if (opts.ch) {
             if (success && opts.ch.success) nextNodeId = opts.ch.success;
             else if (!success && opts.ch.failure) nextNodeId = opts.ch.failure;
             else if (opts.ch.continueDialogue) nextNodeId = opts.ch.continueDialogue;
+            else if (opts.dialogues && opts.dialogues[opts.ch.id]) nextNodeId = opts.ch.id;
           }
-          /* Sessao #29 v3 (2026-05-24): Continuar do dice NAO fechava o <dialog>
-             nativo — classList.remove('active') so removia a classe legacy. O
-             native <dialog>.open ficava true + ::backdrop visivel + top-layer
-             bloqueando qualquer popup subsequente (_showInfoPopup invisivel
-             porque o backdrop do encounter cobria tudo). Fix: usar
-             vEncounter.close() canonical em todos os paths. Mesma raiz do bug
-             do choice-click anterior. */
+
           function _closeEncounterCanon() {
             try {
               if (window.vEncounter && typeof window.vEncounter.close === 'function') {
@@ -238,70 +261,51 @@
           }
 
           if (nextNodeId && opts.dialogues && opts.dialogues[nextNodeId]) {
-            // Render próximo nó PADRAO_ALDRIC
+            // Se há próximo nó, anexa a narração do teste ao topo do nó para não perder a resposta
+            var targetNode = Object.assign({}, opts.dialogues[nextNodeId]);
+            var prependedScript = [];
+            if (rNarration) prependedScript.push({ type: 'narration', text: rNarration });
+            if (rText) prependedScript.push({ type: 'speech', speaker: _npcName || (targetNode.npc && targetNode.npc.name) || 'NPC', text: rText });
+            if (prependedScript.length > 0) {
+              targetNode.script = prependedScript.concat(targetNode.script || []);
+            }
             if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-              window.vEncounter.render(opts.dialogues[nextNodeId], { dialogues: opts.dialogues });
+              window.vEncounter.render(targetNode, { dialogues: opts.dialogues, player: opts.player });
             } else if (typeof window._renderEncounterPopup === 'function') {
-              window._renderEncounterPopup(opts.dialogues[nextNodeId]);
+              window._renderEncounterPopup(targetNode);
             } else {
               _closeEncounterCanon();
             }
           } else {
-            /* A3.5 (#90): NUNCA fechar MUDO. Antes, choice de dado sem
-               resultNarration/resultText fazia rolagem → Continuar → o
-               encounter sumia sem mostrar nada (bug sessão #76 do banco,
-               generalizado — 12 choices mudas em produção). E na FALHA, o
-               fallback usava a narração de SUCESSO (desonesto). Agora:
-               campos do resultado certo quando existem; senão, default
-               HONESTO na voz do NPC reusando _SVC_CONFIG.reactions (mesmo
-               pool do opinion-*), mapeado pelo delta de Renome. */
-            var rNarration = '', rText = '';
-            if (opts.ch && success && (opts.ch.resultNarration || opts.ch.resultText)) {
-              rNarration = opts.ch.resultNarration || '';
-              rText = opts.ch.resultText || '';
-            } else if (opts.ch && !success && (opts.ch.resultNarrationFail || opts.ch.resultTextFail)) {
-              rNarration = opts.ch.resultNarrationFail || '';
-              rText = opts.ch.resultTextFail || '';
-            } else {
-              var _reactions = (window._SVC_CONFIG && window._SVC_CONFIG.reactions) || {};
-              var _rkey = deltaR >= 3 ? 'very_positive' : deltaR > 0 ? 'positive'
-                : deltaR <= -2 ? 'very_negative' : deltaR < 0 ? 'negative' : 'neutral';
-              rText = _reactions[_rkey] || (success
-                ? 'O olhar diante de ti se ilumina — a sorte sorriu desta vez.'
-                : 'Um aceno breve encerra o assunto. Não foi desta vez.');
-            }
-            var _npcObj = (opts.dialogue && opts.dialogue.npc) || null;
-            var _npcName = (_npcObj && _npcObj.name) || '';
-
-            // Registro do desfecho narrativo e renome no histórico
-            if (typeof window !== 'undefined' && window.vDialogueHistory && typeof window.vDialogueHistory.recordOutcome === 'function') {
-              try {
-                var outcomeLines = [];
-                if (rNarration) outcomeLines.push({ type: 'narration', text: rNarration });
-                if (rText) outcomeLines.push({ type: 'speech', speaker: _npcName, text: rText });
-                window.vDialogueHistory.recordOutcome(outcomeLines, deltaR ? [{ type: 'renown', amount: deltaR, label: 'Renome' }] : null);
-              } catch (_eHist) {}
-            }
-
-            _closeEncounterCanon();
-            if (typeof window._showInfoPopup === 'function') {
+            // Regra Soberana #16 e #24: encerramento honesto direto no vEncounter com [↩ Continuar]
+            if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+              var outcomeScript = [];
+              if (rNarration) outcomeScript.push({ type: 'narration', text: rNarration });
+              if (rText) outcomeScript.push({ type: 'speech', speaker: _npcName, text: rText });
+              if (!outcomeScript.length) {
+                outcomeScript.push({ type: 'narration', text: success ? 'Sucesso no teste.' : 'Falha no teste.' });
+              }
+              window.vEncounter.render({
+                npc: _npcObj || { name: _npcName },
+                script: outcomeScript,
+                choices: [{ id: 'close', label: '↩ Continuar', cb: 'close' }]
+              }, { player: opts.player });
+            } else if (typeof window._showInfoPopup === 'function') {
+              _closeEncounterCanon();
               window._showInfoPopup({
                 icon: '',
                 npc: _npcName,
                 title: success ? 'Sucesso' : 'Falha',
                 desc: (rNarration ? '<i style="color:var(--v-text-dim,#a09484);">' + rNarration + '</i><br><br>' : '') + rText,
-                onConfirm: function(){}
-              });
-            } else if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-              // Fallback fora da cidade (_showInfoPopup é cidade-only)
-              window.vEncounter.render({
-                npc: _npcObj || { name: _npcName },
-                script: (rNarration ? [{ type: 'narration', text: rNarration }] : [])
-                  .concat([{ type: 'narration', text: rText }]),
-                choices: [{ id: 'close', label: '↩ Voltar', cb: 'close' }]
+                singleButton: true,
+                cancelLabel: 'Continuar',
+                onCancel: function(){}
               });
             } else if (typeof window.vToast === 'function') {
+              _closeEncounterCanon();
               vToast(rText, success ? 'ok' : 'warn');
+            } else {
+              _closeEncounterCanon();
             }
           }
         });
