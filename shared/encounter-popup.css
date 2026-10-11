@@ -2228,3 +2228,152 @@ body.perf-lite .enc-cho-row {
   animation-duration: 180ms;
   animation-delay: 0ms !important;
 }
+
+/* ============================================================================
+ * CONTRATO DE AVENTURA / MISSÃO PROCLAMADA (PADRAO_ALDRIC ÉPICO - D&D 5e)
+ * Apresentação solene dark medieval (D&D 5e / Grim Hollow / BG3):
+ * Moldura de pergaminho obsidiana, selo heráldico, título dourado,
+ * objetivo claro e chips destacados de experiência, valdoritas e itens.
+ * ============================================================================ */
+.enc-quest-card {
+  margin: 8px 0;
+  padding: 16px 14px;
+  background: linear-gradient(180deg, rgba(28, 22, 16, 0.96) 0%, rgba(16, 13, 10, 0.98) 100%);
+  border: 1px solid rgba(196, 149, 58, 0.5);
+  border-radius: var(--v-radius-md, 8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), inset 0 0 16px rgba(196, 149, 58, 0.12);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.enc-quest-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #e8c872, transparent);
+}
+.enc-quest-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #c4953a;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.enc-quest-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #f5e2ba;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  margin-bottom: 8px;
+}
+.enc-quest-divider {
+  width: 60%;
+  height: 1px;
+  margin: 0 auto 12px;
+  background: linear-gradient(90deg, transparent, rgba(196, 149, 58, 0.4), transparent);
+}
+.enc-quest-section {
+  margin-bottom: 10px;
+  text-align: left;
+}
+.enc-quest-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8c7b66;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.enc-quest-obj {
+  font-family: 'Georgia', serif;
+  font-size: 13px;
+  color: #d6ccbe;
+  line-height: 1.4;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border-left: 2px solid #c4953a;
+  border-radius: 2px;
+}
+.enc-quest-rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.enc-quest-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.4px;
+  font-weight: 600;
+}
+.enc-quest-pill-xp {
+  background: rgba(120, 80, 200, 0.18);
+  border: 1px solid rgba(160, 120, 240, 0.4);
+  color: #d8c2ff;
+}
+.enc-quest-pill-gold {
+  background: rgba(196, 149, 58, 0.18);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  color: #f3d790;
+}
+.enc-quest-pill-item {
+  background: rgba(60, 120, 90, 0.18);
+  border: 1px solid rgba(80, 160, 120, 0.4);
+  color: #a4e0c0;
+}
+.enc-quest-pill-default {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #d6ccbe;
+}
+.enc-quest-motto {
+  font-family: 'Georgia', serif;
+  font-size: 10px;
+  font-style: italic;
+  color: #7d7161;
+  margin-top: 12px;
+  border-top: 1px dashed rgba(196, 149, 58, 0.15);
+  padding-top: 8px;
+}
+
+/* Botões Inline de Decisão de Missão */
+.enc-btn-quest-accept {
+  background: linear-gradient(180deg, #c4953a 0%, #8f6a24 100%) !important;
+  color: #1a1510 !important;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase !important;
+  border: 1px solid #e8c872 !important;
+  box-shadow: 0 2px 8px rgba(196, 149, 58, 0.35) !important;
+  text-align: center !important;
+}
+.enc-btn-quest-accept:hover {
+  background: linear-gradient(180deg, #dfbf78 0%, #a87e2a 100%) !important;
+  color: #0d0a06 !important;
+  transform: translateY(-1px) !important;
+}
+.enc-btn-quest-decline {
+  background: rgba(28, 22, 18, 0.85) !important;
+  color: #a89f91 !important;
+  font-family: 'Cinzel', serif !important;
+  font-size: 12px !important;
+  letter-spacing: 0.6px !important;
+  border: 1px solid rgba(196, 149, 58, 0.25) !important;
+  text-align: center !important;
+}
+.enc-btn-quest-decline:hover {
+  background: rgba(45, 36, 30, 0.95) !important;
+  color: #d4c8b0 !important;
+  border-color: rgba(196, 149, 58, 0.45) !important;
+}
+

@@ -57,6 +57,26 @@
   var OVERLAY_ID = 'encounter-overlay';
   var _currentRenderState = null;
 
+  /* ============================================================================
+   * BANIMENTO PERMANENTE DE EMOJIS EM NARRATIVAS E UI (Ordem do Usuário 2026-10)
+   * Ambientação dark medieval rígida D&D 5e. Remove pictográficos coloridos,
+   * emotes de rosto, criaturas, fantasmas e objetos coloridos de narrações, falas,
+   * escolhas, títulos e modais, preservando glifos tipográficos monocromáticos
+   * universais (✓ ✗ → ← ◆ ◇ · • … ▸ ▾ ■ □ ● ○).
+   * ============================================================================ */
+  var _BANNED_EMOJI_RE = /[\uD83C-\uDBFF\uDC00-\uDFFF\u2600-\u26FF\u2700-\u27BF\u2B50-\u2B55\uFE0F]/g;
+  function _stripEmojis(str) {
+    if (!str) return '';
+    return String(str).replace(_BANNED_EMOJI_RE, function(m) {
+      if (m === '✓' || m === '✔' || m === '✕' || m === '✖' || m === '✗' ||
+          m === '◆' || m === '◇' || m === '·' || m === '•' || m === '…' ||
+          m === '▸' || m === '▾' || m === '■' || m === '□' || m === '●' || m === '○') {
+        return m;
+      }
+      return '';
+    }).replace(/\s{2,}/g, ' ');
+  }
+
   /* PADRAO_LOCAIS #2 & Ordem do Usuário 2026-10: fallback de retrato.
      Se a imagem falhar (404/rede), substitui imediatamente pelo Medalhão Dourado
      de Diálogo de Valdoria (/shared/img/ui/dialogo.webp), preservando a imersão. */
@@ -579,9 +599,10 @@
     (script || []).forEach(function(stroph) {
       if (!stroph) return;
 
-      // Blocos estruturados especiais (recompensas, ficha, notificações técnicas)
-      if (stroph.type === 'reward' || stroph.type === 'character_sheet' || stroph.type === 'technical') {
+      // Blocos estruturados especiais (recompensas, ficha, notificações técnicas, contratos de missão)
+      if (stroph.type === 'reward' || stroph.type === 'character_sheet' || stroph.type === 'technical' || stroph.type === 'quest_contract' || (stroph.text && _parseQuestDetails(stroph.text))) {
         flushCurrent();
+        if (!stroph.type || stroph.type === 'narration') stroph.type = 'quest_contract';
         pages.push([stroph]);
         return;
       }
@@ -799,8 +820,9 @@
        Fecha num ponto único os 3 sinks de line.text (pre-measure innerHTML,
        _instantReveal span.innerHTML e _typewriter createElement/setAttribute):
        um `<img onerror=...>` vindo de payload nunca chega ao DOM como tag.
-       NÃO escapa `&` — entidades (&mdash;) são legítimas nos textos. */
-    var raw = String(html == null ? '' : html);
+       NÃO escapa `&` — entidades (&mdash;) são legítimas nos textos.
+       BANIMENTO DE EMOJIS: limpa qualquer emote ou pictográfico colorido. */
+    var raw = (typeof _stripEmojis === 'function' ? _stripEmojis(html) : String(html == null ? '' : html));
     var escaped = raw.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     var permitted = escaped.replace(/&lt;(\/?)(i|em|b|strong|br|u|s|code)&gt;/gi, '<$1$2>');
     /* ANTI-VAZAMENTO PERMANENTE (bug prólogo 2026-06-11 — user: "nunca mais
@@ -944,6 +966,140 @@
     });
     box.appendChild(list);
     return box;
+  }
+
+  /* ============================================================================
+   * BLOCO ÉPICO DE CONTRATO DE AVENTURA / MISSÃO PROCLAMADA (PADRAO_ALDRIC)
+   * Apresentação solene dark medieval (D&D 5e / Grim Hollow / BG3):
+   * Moldura de pergaminho obsidiana, selo heráldico, título dourado,
+   * objetivo claro e chips destacados de experiência, valdoritas e itens.
+   * ============================================================================ */
+  function _parseQuestDetails(text) {
+    if (!text || typeof text !== 'string') return null;
+    var clean = text.replace(/<[^>]*>/g, ' ');
+    if (clean.indexOf('Nova Miss') === -1 && clean.indexOf('Contrato de Aventura') === -1) {
+      return null;
+    }
+    var lines = text.split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
+    var title = '';
+    var objective = '';
+    var rewardsText = '';
+
+    lines.forEach(function(l) {
+      var plain = l.replace(/<[^>]*>/g, '').trim();
+      if (/Nova Miss[ãa]o:?/i.test(plain)) {
+        title = plain.replace(/^.*?Nova Miss[ãa]o:?\s*/i, '').trim();
+      } else if (/Contrato de Aventura:?/i.test(plain)) {
+        title = plain.replace(/^.*?Contrato de Aventura:?\s*/i, '').trim();
+      } else if (/Recompensa:?/i.test(plain)) {
+        rewardsText = plain.replace(/^.*?Recompensa:?\s*/i, '').trim();
+      } else if (/Objetivo:?/i.test(plain)) {
+        objective = plain.replace(/^.*?Objetivo:?\s*/i, '').trim();
+      } else if (!objective && plain) {
+        objective = plain;
+      }
+    });
+
+    if (!title && !objective) return null;
+
+    var rewards = [];
+    if (rewardsText) {
+      var parts = rewardsText.split(/[·•|]/).map(function(s){ return s.trim(); }).filter(Boolean);
+      parts.forEach(function(p) {
+        var kind = 'item';
+        if (/xp/i.test(p)) kind = 'xp';
+        else if (/valdorita/i.test(p) || /ouro/i.test(p)) kind = 'gold';
+        rewards.push({ kind: kind, text: _stripEmojis(p) });
+      });
+    }
+
+    return {
+      title: _stripEmojis(title || 'Nova Missão'),
+      objective: _stripEmojis(objective),
+      rewards: rewards
+    };
+  }
+
+  function _buildQuestCardEl(qData) {
+    if (!qData) return null;
+    var card = document.createElement('div');
+    card.className = 'enc-quest-card';
+
+    var badge = document.createElement('div');
+    badge.className = 'enc-quest-badge';
+    badge.textContent = '❖ CONTRATO DE AVENTURA ❖';
+    card.appendChild(badge);
+
+    var title = document.createElement('div');
+    title.className = 'enc-quest-title';
+    title.textContent = _stripEmojis(qData.title || 'Demanda de Valdoria');
+    card.appendChild(title);
+
+    var divLine = document.createElement('div');
+    divLine.className = 'enc-quest-divider';
+    card.appendChild(divLine);
+
+    if (qData.objective) {
+      var objSec = document.createElement('div');
+      objSec.className = 'enc-quest-section';
+      var objLbl = document.createElement('div');
+      objLbl.className = 'enc-quest-label';
+      objLbl.textContent = 'OBJETIVO';
+      var objTxt = document.createElement('div');
+      objTxt.className = 'enc-quest-obj';
+      objTxt.textContent = _stripEmojis(qData.objective);
+      objSec.appendChild(objLbl);
+      objSec.appendChild(objTxt);
+      card.appendChild(objSec);
+    }
+
+    if (qData.rewards && qData.rewards.length) {
+      var rewSec = document.createElement('div');
+      rewSec.className = 'enc-quest-section';
+      var rewLbl = document.createElement('div');
+      rewLbl.className = 'enc-quest-label';
+      rewLbl.textContent = 'GLÓRIA & ESPÓLIOS';
+      var rewList = document.createElement('div');
+      rewList.className = 'enc-quest-rewards';
+      qData.rewards.forEach(function(r) {
+        var pill = document.createElement('span');
+        pill.className = 'enc-quest-pill enc-quest-pill-' + (r.kind || 'default');
+        pill.textContent = _stripEmojis(r.text);
+        rewList.appendChild(pill);
+      });
+      rewSec.appendChild(rewLbl);
+      rewSec.appendChild(rewList);
+      card.appendChild(rewSec);
+    }
+
+    var motto = document.createElement('div');
+    motto.className = 'enc-quest-motto';
+    motto.textContent = 'A desolação de Valdoria desafia a bravura dos mortais.';
+    card.appendChild(motto);
+
+    return card;
+  }
+
+  /* Verifica se a tela/diálogo atual é uma decisão de aceitar ou recusar missão. */
+  function _isQuestDecisionScreen(dialogue, choices) {
+    if (!choices || !choices.length) return false;
+    var hasAccept = false;
+    var hasDecline = false;
+    choices.forEach(function(c) {
+      var cid = String(c.id || c.next || '').toLowerCase();
+      var cl = String(c.label || '').toLowerCase();
+      if (cid === 'accept' || cl.indexOf('aceitar') >= 0) hasAccept = true;
+      if (cid === 'decline' || cl.indexOf('recusar') >= 0) hasDecline = true;
+    });
+    if (hasAccept && (hasDecline || choices.length <= 2)) return true;
+    if (dialogue && (dialogue.isQuest || dialogue.quest_id)) return true;
+    if (dialogue && dialogue.script) {
+      var scriptStr = JSON.stringify(dialogue.script).toLowerCase();
+      if (scriptStr.indexOf('nova miss') >= 0 || scriptStr.indexOf('contrato de aventura') >= 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /* ──────────────────────────────────────────────────────────────────────
@@ -1552,11 +1708,18 @@
     if (!ch) return false;
     var total = (opts && (opts.totalChoices != null ? opts.totalChoices : (opts.choices ? opts.choices.length : null)));
     if (total === 1) return false;
-    var cid = String(ch.id || '').toLowerCase();
+    var cid = String(ch.id || ch.next || '').toLowerCase();
     var ccb = String(ch.cb || '').toLowerCase();
     var clabel = String(ch.label || '').toLowerCase();
     if (cid === 'close' || cid === 'leave' || cid === 'back' || cid === 'done' || ccb === 'close') return false;
     if (clabel.indexOf('continuar') >= 0 || clabel.indexOf('voltar') >= 0 || clabel.indexOf('despedir') >= 0) return false;
+
+    // Regra Soberana (Ordem do Usuário 2026-10): Decisão de Aceitar ou Recusar Missão exige confirmação prévia obrigatória
+    var isQuestChoice = !!(opts && opts.isQuestScreen) ||
+      cid === 'accept' || cid === 'decline' ||
+      clabel.indexOf('aceitar') >= 0 || clabel.indexOf('recusar') >= 0;
+    if (isQuestChoice) return true;
+
     return !!(
       ch.isPrep ||
       ch.isCombat ||
@@ -1581,10 +1744,31 @@
     var card = ov.querySelector('.enc-cd-card');
     if (!card) return;
 
+    var cid = String(ch.id || ch.next || '').toLowerCase();
+    var clabel = String(ch.label || '').toLowerCase();
+    var isQuestChoice = !!(opts && opts.isQuestScreen) ||
+      cid === 'accept' || cid === 'decline' ||
+      clabel.indexOf('aceitar') >= 0 || clabel.indexOf('recusar') >= 0;
+    var isAcceptQuest = isQuestChoice && (cid === 'accept' || clabel.indexOf('aceitar') >= 0);
+    var isDeclineQuest = isQuestChoice && (cid === 'decline' || clabel.indexOf('recusar') >= 0);
+
     var rawLabel = (ch.label && String(ch.label).trim()) || 'Opção';
     var titleText = rawLabel;
     var subtitleText = '';
-    if (rawLabel.indexOf(':') !== -1) {
+    var dlg = (opts && opts.dialogue) || _currentRenderState || null;
+    var questTitle = '';
+    if (dlg) {
+      if (dlg.title && dlg.title !== 'Escolher ação' && dlg.title !== 'ENCONTRO') questTitle = dlg.title;
+      else if (dlg.npc && dlg.npc.name) questTitle = dlg.npc.name;
+    }
+
+    if (isAcceptQuest) {
+      titleText = questTitle ? ('Aceitar Missão: ' + questTitle) : 'Aceitar Contrato de Aventura';
+      subtitleText = 'Contrato de Aventura · Compromisso de Honra';
+    } else if (isDeclineQuest) {
+      titleText = questTitle ? ('Recusar Missão: ' + questTitle) : 'Recusar Chamado';
+      subtitleText = 'Retirada Cautelosa';
+    } else if (rawLabel.indexOf(':') !== -1) {
       var parts = rawLabel.split(':');
       titleText = parts[0].trim();
       subtitleText = parts.slice(1).join(':').trim();
@@ -1628,47 +1812,68 @@
       speechHtml =
         '<div class="enc-cd-section">' +
           '<div class="enc-cd-section-title">Fala / Resposta do Personagem</div>' +
-          '<div class="enc-cd-box enc-cd-speech">“' + sTxt + '”</div>' +
+          '<div class="enc-cd-box enc-cd-speech">“' + _stripEmojis(sTxt) + '”</div>' +
         '</div>';
     }
 
     var descHtml = '';
-    if (ch.desc) {
+    if (isAcceptQuest) {
+      descHtml =
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
+          '<div class="enc-cd-box">Você assume formalmente o encargo de cumprir este objetivo. Sua palavra como aventureiro é selada perante a desolação e os perigos de Valdoria.</div>' +
+        '</div>';
+    } else if (isDeclineQuest) {
+      descHtml =
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
+          '<div class="enc-cd-box">Você decide declinar a incumbência neste momento, priorizando sua sobrevivência e recusando o peso deste fardo.</div>' +
+        '</div>';
+    } else if (ch.desc) {
       descHtml =
         '<div class="enc-cd-section">' +
           '<div class="enc-cd-section-title">' + (ch.speech ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
-          '<div class="enc-cd-box">' + ch.desc + '</div>' +
+          '<div class="enc-cd-box">' + _stripEmojis(ch.desc) + '</div>' +
         '</div>';
     } else {
       descHtml =
         '<div class="enc-cd-section">' +
           '<div class="enc-cd-section-title">' + (ch.speech ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
-          '<div class="enc-cd-box">' + _coinify(titleText) + (subtitleText ? ' — ' + subtitleText : '') + '</div>' +
+          '<div class="enc-cd-box">' + _stripEmojis(_coinify(titleText)) + (subtitleText ? ' — ' + subtitleText : '') + '</div>' +
         '</div>';
     }
 
     var resultsHtml = '';
     var resultParts = [];
-    if (ch.prepText) {
-      resultParts.push('<div class="enc-cd-flavor">' + ch.prepText + '</div>');
-    }
-    if (ch.isPrep) {
-      resultParts.push('<div>✦ <b>Benefício na Estrada:</b> Concede <b>Vantagem</b> (rolagem de 2d20, escolhendo o maior valor) no primeiro teste do atributo correspondente durante a viagem, auxiliando a superar perigos e emboscadas.</div>');
-    } else if (ch.id === 'jrn_go') {
-      resultParts.push('<div>Avanço pelo trajeto em ritmo normal, sem bônus adicionais de postura e sem penalidades prévias.</div>');
-    } else if (ch.id === 'jrn_cancel') {
-      resultParts.push('<div>A viagem é suspensa em segurança, retornando à cidade sem passagem de tempo ou perda de recursos.</div>');
-    } else if (ch.dc) {
-      resultParts.push('<div>✦ <b>Sucesso:</b> Desafio superado com êxito' + (ch.chance != null ? ' (' + ch.chance + '% de chance)' : '') + '.</div>');
-      resultParts.push('<div>⚠️ <b>Falha:</b> Risco de complicações, perda de recursos ou dano' + (ch.dmg ? ' (~' + ch.dmg + ' PV)' : '') + '.</div>');
-    } else if (ch.isCombat) {
-      resultParts.push('<div style="color:#df7262;">⚔️ <b>Combate Iminente:</b> Enfrentará os adversários em batalha tática em grade hexagonal.</div>');
-    }
-    if (ch.possibleResults || ch.results) {
-      resultParts.push('<div>' + (ch.possibleResults || ch.results) + '</div>');
-    }
-    if (ch.cost) {
-      resultParts.push('<div>Custo de <b>' + ch.cost + ' ' + _VCOIN + '</b> debitado de suas posses para confirmar.</div>');
+    if (isAcceptQuest) {
+      resultParts.push('<div>✦ O contrato será formalmente inscrito em seu <b>Diário de Aventuras</b>.</div>');
+      resultParts.push('<div>✦ As recompensas prometidas (XP, Valdoritas e espólios garantidos) serão concedidas ao concluir o objetivo.</div>');
+      resultParts.push('<div>◆ Desafios e perigos mortais aguardam no local designado. Prepare suas provisões e armas.</div>');
+    } else if (isDeclineQuest) {
+      resultParts.push('<div>✦ A missão não será iniciada agora.</div>');
+      resultParts.push('<div>✦ Você continuará livre para seguir viagem ou retornar aos seus afazeres na cidade em segurança.</div>');
+    } else {
+      if (ch.prepText) {
+        resultParts.push('<div class="enc-cd-flavor">' + ch.prepText + '</div>');
+      }
+      if (ch.isPrep) {
+        resultParts.push('<div>✦ <b>Benefício na Estrada:</b> Concede <b>Vantagem</b> (rolagem de 2d20, escolhendo o maior valor) no primeiro teste do atributo correspondente durante a viagem, auxiliando a superar perigos e emboscadas.</div>');
+      } else if (ch.id === 'jrn_go') {
+        resultParts.push('<div>Avanço pelo trajeto em ritmo normal, sem bônus adicionais de postura e sem penalidades prévias.</div>');
+      } else if (ch.id === 'jrn_cancel') {
+        resultParts.push('<div>A viagem é suspensa em segurança, retornando à cidade sem passagem de tempo ou perda de recursos.</div>');
+      } else if (ch.dc) {
+        resultParts.push('<div>✦ <b>Sucesso:</b> Desafio superado com êxito' + (ch.chance != null ? ' (' + ch.chance + '% de chance)' : '') + '.</div>');
+        resultParts.push('<div>◆ <b>Falha:</b> Risco de complicações, perda de recursos ou dano' + (ch.dmg ? ' (~' + ch.dmg + ' PV)' : '') + '.</div>');
+      } else if (ch.isCombat) {
+        resultParts.push('<div style="color:#df7262;">⚔ <b>Combate Iminente:</b> Enfrentará os adversários em batalha tática em grade hexagonal.</div>');
+      }
+      if (ch.possibleResults || ch.results) {
+        resultParts.push('<div>' + (ch.possibleResults || ch.results) + '</div>');
+      }
+      if (ch.cost) {
+        resultParts.push('<div>Custo de <b>' + ch.cost + ' ' + _VCOIN + '</b> debitado de suas posses para confirmar.</div>');
+      }
     }
 
     if (resultParts.length > 0) {
@@ -1681,7 +1886,9 @@
         '</div>';
     }
 
-    var confirmLabel = (ch.isPrep) ? 'Adotar esta Postura'
+    var confirmLabel = (isAcceptQuest) ? 'Aceitar Missão'
+      : (isDeclineQuest) ? 'Confirmar Recusa'
+      : (ch.isPrep) ? 'Adotar esta Postura'
       : (ch.id === 'jrn_go') ? 'Partir em Marcha Padrão'
       : (ch.id === 'jrn_cancel') ? 'Permanecer na Cidade'
       : (ch.isCombat) ? 'Entrar em Combate'
@@ -1690,8 +1897,8 @@
 
     card.innerHTML =
       '<button class="enc-cd-close" type="button" aria-label="Fechar">✕</button>' +
-      '<div class="enc-cd-title">' + _coinify(titleText) + '</div>' +
-      (subtitleText ? '<div class="enc-cd-subtitle">' + subtitleText + '</div>' : '') +
+      '<div class="enc-cd-title">' + _stripEmojis(_coinify(titleText)) + '</div>' +
+      (subtitleText ? '<div class="enc-cd-subtitle">' + _stripEmojis(subtitleText) + '</div>' : '') +
       (statBadge ? '<div class="enc-cd-badge-row">' + statBadge + '</div>' : '') +
       '<div class="enc-cd-divider"></div>' +
       speechHtml +
@@ -1844,8 +2051,8 @@
     var oldGuide = card ? card.querySelector('.enc-cho-guide-btn') : null;
     if (oldGuide && oldGuide.parentNode) oldGuide.parentNode.removeChild(oldGuide);
 
-    var title = opts.title || 'Escolher ação';
-    var ctxName = opts.npcName || '';
+    var title = _stripEmojis(opts.title || 'Escolher ação');
+    var ctxName = _stripEmojis(opts.npcName || '');
 
     var isCompact = opts.compact === true ||
                     (typeof title === 'string' && title.toLowerCase().indexOf('prepara') !== -1 && title.toLowerCase().indexOf('viagem') !== -1) ||
@@ -1898,15 +2105,15 @@
       // label e desc podem ter HTML inline simples (<span>, <i>)
       /* sessão #88: choice sem label NUNCA vira botão vazio (só chevron) —
          fallback 'Continuar' + warn pro error-reporter. */
-      var _choLabel = (ch.label && String(ch.label).trim()) || 'Continuar';
+      var _choLabel = _stripEmojis((ch.label && String(ch.label).trim()) || 'Continuar');
       if (!ch.label) console.warn('[ENC] choice sem label', ch.id || ch.cb || '');
 
       var tagText = ch.tag || (ch.badge && String(ch.badge).replace(/^\[|\]$/g, '')) || '';
-      var tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + tagText.toUpperCase() + ']</span>' : '';
+      var tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
       var hasSpeech = !!(ch.speech && String(ch.speech).trim());
       var speechClean = '';
       if (hasSpeech) {
-        speechClean = String(ch.speech).trim();
+        speechClean = _stripEmojis(String(ch.speech).trim());
         if (speechClean.indexOf('"') === 0 && speechClean.lastIndexOf('"') === speechClean.length - 1) {
           speechClean = speechClean.slice(1, -1);
         } else if (speechClean.indexOf('“') === 0 && speechClean.lastIndexOf('”') === speechClean.length - 1) {
@@ -1915,7 +2122,7 @@
       }
 
       if (!tagPill && ch.badge) {
-        _choLabel = '<span class="enc-cho-badge-pill" style="display:inline-block;padding:1px 6px;margin-right:6px;font-size:10px;font-weight:700;border:1px solid rgba(196,149,58,0.5);border-radius:4px;color:#c4953a;background:rgba(196,149,58,0.12);text-transform:uppercase;letter-spacing:0.5px;">' + ch.badge + '</span>' + _choLabel;
+        _choLabel = '<span class="enc-cho-badge-pill" style="display:inline-block;padding:1px 6px;margin-right:6px;font-size:10px;font-weight:700;border:1px solid rgba(196,149,58,0.5);border-radius:4px;color:#c4953a;background:rgba(196,149,58,0.12);text-transform:uppercase;letter-spacing:0.5px;">' + _stripEmojis(ch.badge) + '</span>' + _choLabel;
       }
 
       if (isCompact) {
@@ -1932,9 +2139,9 @@
           titleText = 'Permanecer na cidade';
           subText = 'Suspender viagem em segurança';
         } else if (ch.desc) {
-          subText = ch.desc;
+          subText = _stripEmojis(ch.desc);
         } else if (hasSpeech && ch.label) {
-          subText = ch.label;
+          subText = _stripEmojis(ch.label);
         }
 
         var statHint = '';
@@ -1956,7 +2163,7 @@
           infoBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             e.preventDefault();
-            _openChoiceDetailDialog(ch, opts);
+            _openChoiceDetailDialog(ch, Object.assign({}, opts, { totalChoices: choices.length }));
           });
         }
       } else {
@@ -1964,10 +2171,10 @@
         var subDesc = '';
         if (hasSpeech) {
           mainContent = tagPill + '<span class="enc-cho-speech">“' + _coinify(speechClean) + '”</span>';
-          subDesc = ch.desc || ch.label || '';
+          subDesc = _stripEmojis(ch.desc || ch.label || '');
         } else {
           mainContent = (tagPill ? tagPill : '') + _coinify(_choLabel);
-          subDesc = ch.desc || '';
+          subDesc = _stripEmojis(ch.desc || '');
         }
         row.innerHTML =
           '<span class="enc-cho-row-body">' +
@@ -1987,8 +2194,9 @@
         e.preventDefault();
         // REGRA MANDATÓRIA (Ordem do Usuário 2026-10): Quando existir apenas uma opção (choices.length === 1),
         // ou a escolha for puramente narrativa/conversacional, a janela NUNCA deverá aparecer para solicitar confirmação.
-        if (_isChoiceConfirmable(ch, opts)) {
-          _openChoiceDetailDialog(ch, opts);
+        var confirmOpts = Object.assign({}, opts, { totalChoices: choices.length });
+        if (_isChoiceConfirmable(ch, confirmOpts)) {
+          _openChoiceDetailDialog(ch, confirmOpts);
         } else {
           closeChoices();
           if (typeof opts.onChoice === 'function') opts.onChoice(ch);
@@ -2477,6 +2685,19 @@
           }
           return;
         }
+        /* CONTRATO DE AVENTURA / MISSÃO PROCLAMADA estruturado (PADRAO_ALDRIC ÉPICO).
+           Renderizado via DOM-safe createElement/textContent, revelado junto da página. */
+        if (line.type === 'quest_contract' || (line.text && _parseQuestDetails(line.text))) {
+          var qData = line.quest || _parseQuestDetails(line.text);
+          var qel = _buildQuestCardEl(qData);
+          if (qel) {
+            var qdiv = document.createElement('div');
+            qdiv.className = 'enc-line enc-quest-line';
+            qdiv.appendChild(qel);
+            body.appendChild(qdiv);
+          }
+          return;
+        }
         /* 2026-06-08 (user): NAO cria box pra estrofe sem texto. Aparecia uma
            caixa com fundo/borda VAZIA no dialogo (ex.: resultado dos Primeiros
            Socorros). So renderiza estrofe que de fato tem conteudo. */
@@ -2826,18 +3047,36 @@
         console.warn('[ENC] dialogue sem choices — fallback Fechar');
         choices = [{ id: '_enc_auto_close', label: 'Fechar', cb: 'close' }];
       }
-      var useInline = opts.inlineChoices === true || choices.length === 1;
+      var isQuestScreen = _isQuestDecisionScreen(dialogue, choices);
+      var useInline = opts.inlineChoices === true || choices.length === 1 || isQuestScreen;
       var btns = [];
       if (useInline) {
         choices.forEach(function(ch, idx) {
           var btn = document.createElement('button');
           btn.className = 'enc-btn' + (idx === 0 ? ' enc-btn-primary' : '');
-          btn.innerHTML = _coinify((ch.label && String(ch.label).trim()) || 'Continuar');
+          if (isQuestScreen) {
+            var cid = String(ch.id || ch.next || '').toLowerCase();
+            var clabel = String(ch.label || '').toLowerCase();
+            var isAccept = (cid === 'accept' || clabel.indexOf('aceitar') >= 0);
+            if (isAccept) {
+              btn.className = 'enc-btn enc-btn-primary enc-btn-quest-accept';
+              btn.innerHTML = '⚔ ' + _stripEmojis((ch.label && String(ch.label).trim()) || 'Aceitar Missão');
+            } else {
+              btn.className = 'enc-btn enc-btn-secondary enc-btn-quest-decline';
+              btn.innerHTML = '✕ ' + _stripEmojis((ch.label && String(ch.label).trim()) || 'Recusar');
+            }
+          } else {
+            btn.innerHTML = _stripEmojis(_coinify((ch.label && String(ch.label).trim()) || 'Continuar'));
+          }
           btn.addEventListener('click', function() {
-            // REGRA MANDATÓRIA (Ordem do Usuário 2026-10): Quando existir apenas uma opção (choices.length === 1),
-            // ou a escolha for narrativa/conversacional, a janela NUNCA deverá aparecer para solicitar confirmação.
-            if (_isChoiceConfirmable(ch, { totalChoices: choices.length })) {
-              _openChoiceDetailDialog(ch, { onChoice: _handleChoiceInternal, totalChoices: choices.length });
+            var confirmOpts = {
+              totalChoices: choices.length,
+              dialogue: dialogue,
+              isQuestScreen: isQuestScreen,
+              onChoice: _handleChoiceInternal
+            };
+            if (_isChoiceConfirmable(ch, confirmOpts)) {
+              _openChoiceDetailDialog(ch, confirmOpts);
             } else {
               _handleChoiceInternal(ch);
             }
@@ -2850,13 +3089,15 @@
         btn.className = 'enc-btn enc-btn-primary enc-btn-choose';
         var _chooseBtnText = (dialogue && dialogue.choicesBtnLabel) || 'Escolher ação';
         btn.innerHTML = '<span class="enc-btn-choose-icon">⚔</span>' +
-                        '<span class="enc-btn-choose-label">' + _chooseBtnText + '</span>' +
+                        '<span class="enc-btn-choose-label">' + _stripEmojis(_chooseBtnText) + '</span>' +
                         '<span class="enc-btn-choose-count">' + choices.length + '</span>';
         btn.addEventListener('click', function() {
           openChoices(choices, {
-            title: (dialogue && (dialogue.choicesTitle || dialogue.title)) || 'Escolher ação',
-            npcName: (dialogue && dialogue.choicesSubtitle) || (dialogue && dialogue.npc && dialogue.npc.name) || '',
+            title: _stripEmojis((dialogue && (dialogue.choicesTitle || dialogue.title)) || 'Escolher ação'),
+            npcName: _stripEmojis((dialogue && dialogue.choicesSubtitle) || (dialogue && dialogue.npc && dialogue.npc.name) || ''),
             compact: (dialogue && dialogue.compact) || opts.compact || false,
+            dialogue: dialogue,
+            isQuestScreen: isQuestScreen,
             onChoice: _handleChoiceInternal
           });
         });
