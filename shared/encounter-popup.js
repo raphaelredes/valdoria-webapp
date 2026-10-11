@@ -166,6 +166,17 @@
       .replace(/(\d+)\s*V\b(?![a-zA-Z])/g, '$1 ' + _VCOIN);
   }
 
+  /* Suporte a flexão gramatical por gênero {masc|fem} ou {masc|fem|neut} */
+  function _resolveGenderTokens(text, gender) {
+    if (!text || typeof text !== 'string') return text || '';
+    var g = String(gender || '').trim().toLowerCase();
+    var isFem = (g === 'f' || g === 'female' || g === 'fem' || g === 'mulher' || g === 'feminino');
+    return text.replace(/\{([^{}|]+)\|([^{}|]+)(?:\|([^{}|]+))?\}/g, function(match, m, f, n) {
+      if (isFem) return f;
+      return m;
+    });
+  }
+
   /* task #69 (2026-05-20) — MIGRATION HTML <dialog> element.
      Pesquisa em 4 fontes (MDN, caniuse 95.48%, LogRocket, dev.to) confirma
      <dialog> + showModal() é solução definitiva pra z-index conflicts.
@@ -2078,17 +2089,26 @@
       var firstSpeech = page.find(function(line){ return line.type === 'speech'; });
       if (firstSpeech && firstSpeech.speaker) {
         var pageSpkKey = firstSpeech.speaker;
+        var isPlayerSpeaker = !!firstSpeech.is_player || pageSpkKey === '{player_name}' || pageSpkKey === '{player}';
+        var pData = (opts && opts.player) || window.CURRENT_PLAYER || null;
+        var playerName = (pData && pData.name) || 'Você';
+        if (isPlayerSpeaker) {
+          pageSpkKey = playerName;
+        }
         var reg = (opts && opts.npcRegistry) || window.RECURRING_NPCS || null;
-        var spkHit = reg ? reg[pageSpkKey] : null;
-        var displayName = (spkHit && spkHit.name) || pageSpkKey;
-        var displayDesc = (spkHit && spkHit.desc) || npcDesc;
-        var isMainSpeaker = !spkHit && (displayName === npcName || !firstSpeech.speaker || firstSpeech.speaker === npcName || (dialogue.npc && (firstSpeech.speaker === dialogue.npc.id || firstSpeech.speaker === dialogue.npc.npc_id)));
-        var displayPortrait = (spkHit && (spkHit.portraitImg || spkHit.portrait))
-          || (isMainSpeaker && npcPortrait ? npcPortrait : null)
-          || (typeof window._npcPortraitByName === 'function' ? window._npcPortraitByName(displayName) : null)
-          || (typeof window._discoverySpeakerPortrait === 'function' ? window._discoverySpeakerPortrait(displayName) : null)
-          || (npcPortrait || null)
-          || (typeof _resolveGenericEncounterPortrait === 'function' ? _resolveGenericEncounterPortrait(displayName, displayDesc) : null);
+        var spkHit = (!isPlayerSpeaker && reg) ? reg[pageSpkKey] : null;
+        var displayName = isPlayerSpeaker ? playerName : ((spkHit && spkHit.name) || pageSpkKey);
+        var playerDesc = (pData && (pData.subclass || pData.char_class || pData.class_name || pData.cls_key || 'Aventureiro')) || 'Aventureiro';
+        var displayDesc = isPlayerSpeaker ? playerDesc : ((spkHit && spkHit.desc) || npcDesc);
+        var isMainSpeaker = !isPlayerSpeaker && !spkHit && (displayName === npcName || !firstSpeech.speaker || firstSpeech.speaker === npcName || (dialogue.npc && (firstSpeech.speaker === dialogue.npc.id || firstSpeech.speaker === dialogue.npc.npc_id)));
+        var displayPortrait = isPlayerSpeaker
+          ? ((pData && (pData.portrait || pData.avatar)) || null)
+          : ((spkHit && (spkHit.portraitImg || spkHit.portrait))
+            || (isMainSpeaker && npcPortrait ? npcPortrait : null)
+            || (typeof window._npcPortraitByName === 'function' ? window._npcPortraitByName(displayName) : null)
+            || (typeof window._discoverySpeakerPortrait === 'function' ? window._discoverySpeakerPortrait(displayName) : null)
+            || (npcPortrait || null)
+            || (typeof _resolveGenericEncounterPortrait === 'function' ? _resolveGenericEncounterPortrait(displayName, displayDesc) : null));
 
         var nameEl = header.querySelector('.enc-name');
         if (nameEl && displayName) {
@@ -2168,13 +2188,20 @@
         /* 2026-06-08 (user): NAO cria box pra estrofe sem texto. Aparecia uma
            caixa com fundo/borda VAZIA no dialogo (ex.: resultado dos Primeiros
            Socorros). So renderiza estrofe que de fato tem conteudo. */
-        var _sentences = _splitIntoSentences(_sanitizeDialogueHTML(line.text));
+        var lineText = line.text;
+        var pData = (opts && opts.player) || window.CURRENT_PLAYER || null;
+        if (lineText && typeof _resolveGenderTokens === 'function') {
+          var _pG = (pData && pData.gender) || '';
+          lineText = _resolveGenderTokens(lineText, _pG);
+        }
+        var _sentences = _splitIntoSentences(_sanitizeDialogueHTML(lineText));
         if (!_sentences.length) return;
         var div = document.createElement('div');
         /* sessão #88: tipo 'dm' (voz de Mestre, doc §4.0.1) ganha visual próprio
            (sépia + label MESTRE via .enc-dm); qualquer type desconhecido cai em
            narration (antes caía em speech — invertido vs. legacy/Stub). */
-        var _lineCls = (line.type === 'speech') ? 'enc-speech'
+        var isLinePlayer = !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}';
+        var _lineCls = (line.type === 'speech') ? ('enc-speech' + (isLinePlayer ? ' enc-speech--player' : ''))
           : (line.type === 'dm') ? 'enc-narration enc-dm'
           : 'enc-narration' + (line._checkHint ? ' enc-check-hint' : '');
         div.className = 'enc-line ' + _lineCls;
@@ -2187,7 +2214,9 @@
              Display names legítimos ('Martha', 'Grom Barba-Cinza', 'Aldwin de
              Tholram') têm maiúscula/acento/espaço e passam intactos. */
           var _spk = String(line.speaker);
-          if (/^[a-z0-9_]+$/.test(_spk) ||
+          if (isLinePlayer || _spk === '{player_name}' || _spk === '{player}') {
+            _spk = (pData && pData.name) || 'Você';
+          } else if (/^[a-z0-9_]+$/.test(_spk) ||
               (dialogue.npc && (_spk === dialogue.npc.id || _spk === dialogue.npc.key))) {
             console.warn('[ENC] speaker key não resolvida (usando npc.name): ' + _spk);
             _spk = (dialogue.npc && dialogue.npc.name) || '';

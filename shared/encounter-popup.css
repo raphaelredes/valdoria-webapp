@@ -870,6 +870,16 @@ body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
      estourar horizontal — belt-and-suspenders do guard JS */
   overflow-wrap: anywhere;
 }
+.enc-speech.enc-speech--player {
+  color: #d8ecf8;
+  background: rgba(18, 48, 77, 0.42);
+  border-left: 3px solid #4fa3d1;
+  box-shadow: 0 2px 8px rgba(10, 25, 45, 0.4);
+}
+.enc-speech.enc-speech--player::before {
+  color: #6ec6ff;
+  text-shadow: 0 0 6px rgba(110, 198, 255, 0.5);
+}
 .enc-speech i, .enc-speech em {
   color: #9b8e7c;
   font-style: italic;

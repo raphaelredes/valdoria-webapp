@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T00:16:48Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T01:09:42Z - do not edit directly, edit source -->
 
 
 
@@ -4671,6 +4671,15 @@ body.perf-lite .hud-cond-chip .dot, body.reduced-motion .hud-cond-chip .dot { an
   letter-spacing: 1.2px;
   margin-bottom: 5px;
   text-shadow: 0 0 6px var(--v-gold-40, rgba(196, 149, 58, 0.4));
+}
+/* Fala autoral do próprio personagem — destaque elegante em safira-dourada */
+.event-text-speech--player {
+  border-left-color: #4fa3d1;
+  background: rgba(28, 44, 64, 0.38);
+}
+.event-text-speech--player[data-speaker]::before {
+  color: #6ec6ff;
+  text-shadow: 0 0 6px rgba(110, 198, 255, 0.45);
 }
 /* Banner do NPC (retrato + nome) no topo do card de evento — paridade com vEncounter. */
 .event-npc {
@@ -39154,6 +39163,153 @@ function _renderEventTextAsAldric(elId, fullText, opts) {
   });
 }
 
+// D&D 5e: Motor de Resolução de Falas do Personagem (Character Voice Engine JS)
+function _resolveGenderTokens(text, gender) {
+  if (!text || typeof text !== 'string' || text.indexOf('{') === -1) return text;
+  var g = String(gender || 'male').toLowerCase().trim();
+  var isFem = (g === 'female' || g === 'feminino' || g === 'mulher' || g === 'f');
+  var isNb = (g === 'non_binary' || g === 'non-binary' || g === 'nao-binario' || g === 'agender' || g === 'fluid' || g === 'nb');
+  return text.replace(/\{([^{}|]+)\|([^{}|]+)(?:\|([^{}|]+))?\}/g, function(_, masc, fem, neut) {
+    if (isFem) return fem;
+    if (isNb) return neut || masc;
+    return masc;
+  });
+}
+
+function _resolveOutcomeScriptForPlayer(script, outcome, player) {
+  if (!Array.isArray(script) || !script.length) return script;
+  player = player || (window.S && window.S.player) || {};
+  var pName = player.name || 'Você';
+  var pGender = player.gender || 'male';
+  var pCls = (player.cls || player.hero_class || player.char_class || '').toLowerCase().trim();
+  var pBg = (player.background || '').toLowerCase().trim();
+  var pRace = (player.race || '').toLowerCase().trim();
+  var pSubrace = (player.subrace || '').toLowerCase().trim();
+  var pSubclass = (player.subclass || '').toLowerCase().trim();
+  var pAlign = (player.alignment || '').toUpperCase().trim();
+  var pTrait = (player.personality_trait || '').toLowerCase().trim();
+  var pIdeal = (player.ideal || '').toLowerCase().trim();
+  var pBond = (player.bond || '').toLowerCase().trim();
+  var pFlaw = (player.flaw || '').toLowerCase().trim();
+
+  function pickSpeech(spec) {
+    if (!spec) return '';
+    if (typeof spec === 'string') return spec;
+    if (typeof spec !== 'object') return String(spec);
+
+    // 1. Traço de Personalidade
+    if (spec.by_personality_trait && pTrait) {
+      for (var k in spec.by_personality_trait) {
+        if (k && pTrait.indexOf(k.toLowerCase()) !== -1) return spec.by_personality_trait[k];
+      }
+    }
+    // 2. Ideal
+    if (spec.by_ideal && pIdeal) {
+      for (var ki in spec.by_ideal) {
+        if (ki && pIdeal.indexOf(ki.toLowerCase()) !== -1) return spec.by_ideal[ki];
+      }
+    }
+    // 3. Vínculo
+    if (spec.by_bond && pBond) {
+      for (var kb in spec.by_bond) {
+        if (kb && pBond.indexOf(kb.toLowerCase()) !== -1) return spec.by_bond[kb];
+      }
+    }
+    // 4. Defeito
+    if (spec.by_flaw && pFlaw) {
+      for (var kf in spec.by_flaw) {
+        if (kf && pFlaw.indexOf(kf.toLowerCase()) !== -1) return spec.by_flaw[kf];
+      }
+    }
+    // 5. Antecedente (Background)
+    if (spec.by_background && pBg) {
+      for (var kbg in spec.by_background) {
+        var nBg = kbg.toLowerCase().replace(/[\s_]+/g, '_');
+        var curBg = pBg.replace(/[\s_]+/g, '_');
+        if (nBg === curBg || (nBg === 'soldier' && curBg === 'soldado') ||
+            (nBg === 'outlander' && (curBg === 'forasteiro' || curBg === 'nomade')) ||
+            (nBg === 'criminal' && curBg === 'criminoso') ||
+            (nBg === 'noble' && curBg === 'nobre') ||
+            (nBg === 'sage' && curBg === 'sabio') ||
+            (nBg === 'acolyte' && curBg === 'acolito') ||
+            (nBg === 'folk_hero' && (curBg === 'defensor_do_povo' || curBg === 'campeao_do_povo')) ||
+            (nBg === 'guild_artisan' && curBg === 'artesao_de_guilda')) {
+          return spec.by_background[kbg];
+        }
+      }
+    }
+    // 6. Subclasse
+    if (spec.by_subclass && pSubclass) {
+      for (var ksc in spec.by_subclass) {
+        if (ksc.toLowerCase() === pSubclass) return spec.by_subclass[ksc];
+      }
+    }
+    // 7. Classe
+    if (spec.by_class && pCls) {
+      for (var kc in spec.by_class) {
+        var nCls = kc.toLowerCase();
+        if (nCls === pCls || (nCls === 'guerreiro' && pCls === 'warrior') ||
+            (nCls === 'barbaro' && pCls === 'barbarian') ||
+            (nCls === 'ladino' && pCls === 'rogue') ||
+            (nCls === 'mago' && pCls === 'mage') ||
+            (nCls === 'clerigo' && pCls === 'cleric')) {
+          return spec.by_class[kc];
+        }
+      }
+    }
+    // 8. Sub-raça
+    if (spec.by_subrace && pSubrace) {
+      for (var ksr in spec.by_subrace) {
+        if (ksr.toLowerCase() === pSubrace) return spec.by_subrace[ksr];
+      }
+    }
+    // 9. Raça
+    if (spec.by_race && pRace) {
+      for (var kr in spec.by_race) {
+        var nRace = kr.toLowerCase();
+        if (nRace === pRace || (nRace === 'half_orc' && (pRace === 'meio-orc' || pRace === 'meio_orc')) ||
+            (nRace === 'dwarf' && pRace === 'anao') ||
+            (nRace === 'elf' && pRace === 'elfo') ||
+            (nRace === 'human' && pRace === 'humano')) {
+          return spec.by_race[kr];
+        }
+      }
+    }
+    // 10. Alinhamento
+    if (spec.by_alignment && pAlign) {
+      for (var ka in spec.by_alignment) {
+        var kaLow = ka.toLowerCase();
+        if (ka.toUpperCase() === pAlign) return spec.by_alignment[ka];
+        if (typeof alignmentMatches === 'function' && alignmentMatches(pAlign, kaLow)) return spec.by_alignment[ka];
+      }
+    }
+    return spec.text || '';
+  }
+
+  return script.map(function(line) {
+    if (!line) return line;
+    var copy = Object.assign({}, line);
+    var spk = String(copy.speaker || '').trim();
+    var isPlayer = (copy.type === 'speech' && (spk === '{player_name}' || spk === 'player' || spk === 'Você' || copy.is_player || copy.player_speech));
+
+    if (isPlayer) {
+      var speechSpec = copy.player_speech || (outcome && outcome.player_speech) || copy.text || '';
+      var chosen = pickSpeech(speechSpec);
+      chosen = _resolveGenderTokens(chosen, pGender);
+      chosen = chosen.replace(/\{player_name\}/g, pName);
+      copy.text = chosen;
+      copy.speaker = (pName && pName !== 'Você') ? pName : 'Você';
+      copy.is_player = true;
+    } else {
+      var txt = String(copy.text || '');
+      txt = _resolveGenderTokens(txt, pGender);
+      txt = txt.replace(/\{player_name\}/g, pName && pName !== 'Você' ? pName : 'viajante');
+      copy.text = txt;
+    }
+    return copy;
+  });
+}
+
 // PADRAO_ALDRIC (2026-06-21): renderiza um script[] ESTRUTURADO (narration/speech) no
 // modal de evento — narração em itálico cinza, fala em card dourado COM o nome do NPC
 // (igual ao vEncounter.render de cidade/prólogo). Usado por openEventModal quando
@@ -39170,15 +39326,22 @@ function _renderEventScriptAsAldric(elOrId, script, opts) {
   var acc = baseDelay;
   var _san = (window.vEncounter && typeof window.vEncounter.sanitize === 'function')
     ? window.vEncounter.sanitize : null;
+  var pName = (window.S && window.S.player && window.S.player.name) || 'Você';
+  var pGender = (window.S && window.S.player && window.S.player.gender) || 'male';
+
   script.forEach(function(line) {
     if (!line) return;
     var clean = String(line.text || '').trim();
     if (!clean) return;
+    clean = _resolveGenderTokens(clean, pGender);
+    clean = clean.replace(/\{player_name\}/g, (pName !== 'Você') ? pName : 'viajante');
+
     var span = document.createElement('span');
     var isSpeech = (line.type === 'speech');
     if (isSpeech) {
-      span.className = 'event-text-speech';
+      span.className = 'event-text-speech' + (line.is_player ? ' event-text-speech--player' : '');
       var spk = String(line.speaker || '').trim();
+      if (spk === '{player_name}' || spk === 'player') spk = (pName !== 'Você') ? pName : 'Você';
       // guard anti-vazamento: nunca renderiza key snake_case pura como speaker (#88)
       if (spk && !/^[a-z0-9_]+$/.test(spk)) span.setAttribute('data-speaker', spk);
     } else {
@@ -39838,7 +40001,11 @@ function _remoteShowOutcome(ch, oc) {
       var narr = document.createElement('p');
       narr.style.margin = '6px 0 0 0';
       if (Array.isArray(oc.script) && oc.script.length) {
-        _renderEventScriptAsAldric(narr, oc.script);
+        var resolvedScript = (typeof _resolveOutcomeScriptForPlayer === 'function')
+          ? _resolveOutcomeScriptForPlayer(oc.script, oc, S.player)
+          : oc.script;
+        S.event.resolved.script = resolvedScript;
+        _renderEventScriptAsAldric(narr, resolvedScript);
       } else {
         narr.textContent = outcomeText;
       }
@@ -41319,7 +41486,11 @@ function applyChoiceOutcome(choice, success, total, dc) {
   // PADRAO_ALDRIC (2026-06-21): se o outcome tem script[] estruturado (narração/fala da
   // resolução), renderiza no padrão canônico; senão usa o texto plano (fallback legacy).
   if (Array.isArray(outcome.script) && outcome.script.length) {
-    _renderEventScriptAsAldric(narr, outcome.script);
+    var resolvedScript = (typeof _resolveOutcomeScriptForPlayer === 'function')
+      ? _resolveOutcomeScriptForPlayer(outcome.script, outcome, S.player)
+      : outcome.script;
+    S.event.resolved.script = resolvedScript;
+    _renderEventScriptAsAldric(narr, resolvedScript);
   } else {
     narr.textContent = outcomeText;
   }
