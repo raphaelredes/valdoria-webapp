@@ -103,8 +103,8 @@
             + '<h4 style="margin:8px 0 6px 0;color:#ffc6a8;font-family:Cinzel,serif;letter-spacing:1px;font-size:13px;">🧭 Por que a Distância é uma Estimativa?</h4>'
             + '<ul style="margin:0;padding-left:18px;color:#d8c8b8;font-size:12px;line-height:1.5;">'
             + '<li><b>Monólitos Esquecidos:</b> Com o passar dos anos, muitos marcos foram tombados, cobertos por musgo ou partidos por feras. Por isso, a rota informa uma <i>estimativa aproximada de marcos restantes</i> calculada pelo grupo.</li>'
-            + '<li><b>Desvios e Relevo:</b> Erros de orientação ou terrenos intransponíveis exigem contornos forçados, adicionando marcos à viagem (+3 marcos) e atraindo mais perigos.</li>'
-            + '<li><b>Atalhos e Perícia:</b> Conselhos de cartógrafos, batedores veteranos ou testes bem-sucedidos de Sobrevivência/Percepção permitem cortar caminho por trilhas ocultas (-3 marcos).</li>'
+            + '<li><b>Desvios e Relevo:</b> Erros de orientação ou terrenos intransponíveis exigem contornos forçados, adicionando marcos à viagem <b>determinados por rolagem de dados (1d4 a 1d6 marcos adicionais)</b> e atraindo mais perigos.</li>'
+            + '<li><b>Atalhos e Perícia:</b> Conselhos de cartógrafos, batedores veteranos ou testes bem-sucedidos de Sobrevivência/Percepção permitem cortar caminho por trilhas ocultas, <b>encurtando a distância calculada nos dados (1d4 a 1d6 marcos a menos)</b>.</li>'
             + '</ul>'
             + '</div>'
       },
@@ -567,17 +567,48 @@
       }
     }
     var body = narr;
-    // Ajuste dinâmico de distância aproximada (Ordem do Usuário 2026-10):
-    // Atalhos bem-sucedidos ou rota conhecida reduzem a distância restante;
-    // Desvios ou desorientação aumentam a distância e o número de encontros.
+    // Ajuste dinâmico de distância em Marcos com Rolagem de Dados D&D 5e (Ordem do Usuário 2026-10):
+    // Desvios e atalhos NUNCA usam valores fixos (+3 ou -3); decorrem de cálculo tirado nos dados!
     if (success && (ch && (ch.isShortcut || (ch._haz && ch._haz.isShortcut)))) {
-      j.distRemaining = Math.max(0, (j.distRemaining || 3) - 3);
+      var isHighMargin = (roll && (roll.d20 === 20 || (roll.total != null && ch && ch.dc && roll.total >= ch.dc + 5)));
+      var dieSides = isHighMargin ? 6 : 4;
+      var dieRoll = Math.floor(Math.random() * dieSides) + 1;
+      var corvusBonus = (p && p.corvus_route_knowledge) ? 1 : 0;
+      var rawShortcut = dieRoll + corvusBonus;
+      var currentDist = j.distRemaining || 3;
+      var marcosEncurtados = Math.max(1, Math.min((currentDist > 1 ? currentDist - 1 : 1), rawShortcut));
+      j.distRemaining = Math.max(0, currentDist - marcosEncurtados);
       j.step = Math.min(j.total, j.step + 1);
-      body += '<br><br><b>🗺️ Atalho de rota aproveitado!</b> A travessia foi encurtada em ~3 marcos.';
+
+      var corvusTag = corvusBonus ? ' <span style="font-size:10px;color:#7cdb7c;">(+1 Conhecimento de Corvus)</span>' : '';
+      var critTag = isHighMargin ? ' <span style="font-size:10px;color:#ffd700;font-weight:700;">★ SUCESSO NOTÁVEL</span>' : '';
+      body += '<br><br><div style="background:rgba(20,28,18,0.85);border:1px solid #7cdb7c;border-radius:6px;padding:8px 10px;margin-top:8px;">'
+            +   '<div style="font-family:Cinzel,serif;color:#7cdb7c;font-weight:700;font-size:12px;display:flex;align-items:center;gap:6px;">'
+            +     '<span>🎲</span><span>Rolagem de Atalho: d' + dieSides + ' [' + dieRoll + ']' + corvusTag + critTag + ' ➔ ' + marcosEncurtados + (marcosEncurtados === 1 ? ' Marco' : ' Marcos') + '</span>'
+            +   '</div>'
+            +   '<div style="font-size:11.5px;color:#d4e8d0;margin-top:3px;">'
+            +     '<b>🗺️ Atalho de rota aproveitado!</b> O grupo descobre uma picada secreta e encurta a travessia em <b>~' + marcosEncurtados + (marcosEncurtados === 1 ? ' marco' : ' marcos') + '</b>.'
+            +   '</div>'
+            + '</div>';
     } else if (!success && (ch && (ch.isDetour || (ch._haz && ch._haz.isDetour) || (hz && hz.isOrientationHazard)))) {
-      j.distRemaining = (j.distRemaining || 0) + 3;
+      var isSevereFailure = (roll && (roll.d20 === 1 || (roll.total != null && ch && ch.dc && roll.total <= ch.dc - 5)));
+      var dieSides = isSevereFailure ? 6 : 4;
+      var dieRoll = Math.floor(Math.random() * dieSides) + 1;
+      var cautiousMitigation = (j.pace === 'cautious' || (j.opts && j.opts.stance === 'cautious')) ? 1 : 0;
+      var detourMarcos = Math.max(1, dieRoll - cautiousMitigation);
+      j.distRemaining = (j.distRemaining || 0) + detourMarcos;
       j.total = (j.total || 3) + 1;
-      body += '<br><br><b>⚠️ Desvio forçado!</b> O relevo traiçoeiro exigiu um contorno, adicionando ~3 marcos à estimativa da travessia.';
+
+      var mitTag = cautiousMitigation ? ' <span style="font-size:10px;color:#7cdb7c;">(−1 Marcha Cautelosa)</span>' : '';
+      var fumbleTag = isSevereFailure ? ' <span style="font-size:10px;color:#ff6b6b;font-weight:700;">⚠ FALHA SEVERA</span>' : '';
+      body += '<br><br><div style="background:rgba(32,16,14,0.85);border:1px solid #e06050;border-radius:6px;padding:8px 10px;margin-top:8px;">'
+            +   '<div style="font-family:Cinzel,serif;color:#ff8070;font-weight:700;font-size:12px;display:flex;align-items:center;gap:6px;">'
+            +     '<span>🎲</span><span>Rolagem de Desvio: d' + dieSides + ' [' + dieRoll + ']' + mitTag + fumbleTag + ' ➔ +' + detourMarcos + (detourMarcos === 1 ? ' Marco' : ' Marcos') + '</span>'
+            +   '</div>'
+            +   '<div style="font-size:11.5px;color:#f0d0cc;margin-top:3px;">'
+            +     '<b>⚠️ Desvio forçado!</b> O relevo traiçoeiro e a rota obstruída exigiram um contorno, adicionando <b>+' + detourMarcos + (detourMarcos === 1 ? ' marco' : ' marcos') + '</b> à estimativa da travessia.'
+            +   '</div>'
+            + '</div>';
     }
     // Concessão de itens e flags de eventos de jornada (Ordem do Usuário 2026-10)
     var targetCh = (ch && ch._haz) || ch;
