@@ -1548,12 +1548,33 @@
     ov.classList.remove('active');
   }
 
+  function _isChoiceConfirmable(ch, opts) {
+    if (!ch) return false;
+    var total = (opts && (opts.totalChoices != null ? opts.totalChoices : (opts.choices ? opts.choices.length : null)));
+    if (total === 1) return false;
+    var cid = String(ch.id || '').toLowerCase();
+    var ccb = String(ch.cb || '').toLowerCase();
+    var clabel = String(ch.label || '').toLowerCase();
+    if (cid === 'close' || cid === 'leave' || cid === 'back' || cid === 'done' || ccb === 'close') return false;
+    if (clabel.indexOf('continuar') >= 0 || clabel.indexOf('voltar') >= 0 || clabel.indexOf('despedir') >= 0) return false;
+    return !!(
+      ch.isPrep ||
+      ch.isCombat ||
+      (ch.cost && ch.cost > 0) ||
+      ch.requireConfirm ||
+      cid === 'jrn_go' ||
+      cid === 'jrn_cancel' ||
+      (ch.stat && ch.dc) ||
+      (ch.check && ch.check.dc)
+    );
+  }
+
   function _openChoiceDetailDialog(ch, opts) {
     if (!ch) return;
     // REGRA SOBERANA (Ordem do Usuário 2026-10): Quando existir apenas uma opção,
-    // a janela NUNCA deverá aparecer para solicitar confirmação da ação, pois o jogador não tem outra escolha.
-    if (opts && (opts.singleChoice || opts.totalChoices === 1 || (opts.choices && opts.choices.length === 1))) {
-      if (typeof opts.onChoice === 'function') opts.onChoice(ch);
+    // ou opção puramente narrativa/conversacional, a janela NUNCA deverá aparecer.
+    if (!_isChoiceConfirmable(ch, opts)) {
+      if (opts && typeof opts.onChoice === 'function') opts.onChoice(ch);
       return;
     }
     var ov = _ensureChoiceDetailOverlay();
@@ -1965,8 +1986,8 @@
       row.addEventListener('click', function(e) {
         e.preventDefault();
         // REGRA MANDATÓRIA (Ordem do Usuário 2026-10): Quando existir apenas uma opção (choices.length === 1),
-        // a janela NUNCA deverá aparecer para solicitar confirmação da ação, pois o jogador não tem outra escolha.
-        if (choices && choices.length > 1) {
+        // ou a escolha for puramente narrativa/conversacional, a janela NUNCA deverá aparecer para solicitar confirmação.
+        if (_isChoiceConfirmable(ch, opts)) {
           _openChoiceDetailDialog(ch, opts);
         } else {
           closeChoices();
@@ -2814,8 +2835,8 @@
           btn.innerHTML = _coinify((ch.label && String(ch.label).trim()) || 'Continuar');
           btn.addEventListener('click', function() {
             // REGRA MANDATÓRIA (Ordem do Usuário 2026-10): Quando existir apenas uma opção (choices.length === 1),
-            // a janela NUNCA deverá aparecer para solicitar confirmação da ação, pois o jogador não tem outra escolha.
-            if (choices.length > 1 && (ch.isPrep || ch.desc || ch.cost || ch.stat || ch.dc || ch.requireConfirm)) {
+            // ou a escolha for narrativa/conversacional, a janela NUNCA deverá aparecer para solicitar confirmação.
+            if (_isChoiceConfirmable(ch, { totalChoices: choices.length })) {
               _openChoiceDetailDialog(ch, { onChoice: _handleChoiceInternal, totalChoices: choices.length });
             } else {
               _handleChoiceInternal(ch);

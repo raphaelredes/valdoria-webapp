@@ -11183,7 +11183,7 @@ body.perf-lite .vc-action-btn { transition: none; }
           window.vEncounter.render({
             npc: { name: 'Sacerdote do Templo', desc: 'Despertar no Templo de Valdoria',
                    id: 'temple_awakening',
-                   portraitImg: '/shared/img/npcs/sumo-sacerdote.webp' },
+                   portraitImg: '/shared/img/npcs/varek-sumo-sacerdote.webp?v=20261011' },
             script: res.script,
             choices: [{ id: 'rise', label: 'Erguer-se do Altar' }]
           }, {
@@ -14200,7 +14200,7 @@ function _discoverySpeakerPortrait(speaker) {
   // #2: NPC nomeado com retrato SEMPRE tem WebP dedicado. ANTES dos fallbacks
   // role-based pra ter prioridade sobre 'escrivã'/'sacerdot'.
   if (s.indexOf('sereniel') >= 0) return '/shared/img/npcs/sereniel-escriva.webp';
-  if (s.indexOf('sumo sacerdote') >= 0) return '/shared/img/npcs/sumo-sacerdote.webp';
+  if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('varek') >= 0) return '/shared/img/npcs/varek-sumo-sacerdote.webp?v=20261011';
   // Plaza NPCs (Sessao #37 v18 — PADRAO_ALDRIC lightbox parity para discovery quests)
   if (s.indexOf('mendigo') >= 0) return '/shared/img/npcs/plaza/mendigo_praca.webp';
   if (s.indexOf('crian') >= 0)   return '/shared/img/npcs/plaza/crianca_pomar.webp';
@@ -59166,19 +59166,24 @@ function _showInfoPopup(opts){
   // Botão Confirmar simples (sem custo)
   // Sessão #26 (2026-05-22): suporte a opts.singleButton — popups informativos
   // (Vínculos, etc.) escondem Confirmar e mostram só Voltar (regra UX P0 #75).
-  var confirmBtn = document.getElementById('cpp-confirm-btn');
-  var cancelBtn = document.getElementById('cpp-cancel-btn');
-  if (opts.singleButton) {
+  // Ordem do Usuário 2026-10: Telas/popups de resultado (falha, sucesso, aviso, sem confirmação)
+  // NUNCA devem ter botões duplos [VOLTAR] e [CONFIRMAR]; devem ter botão único de avanço [ Continuar ▸ ].
+  var isSingle = !!(opts.singleButton ||
+                    /falha|sucesso|bloqueado|limite|aviso|resultado|informação|info|dica/i.test(opts.title || '') ||
+                    (!opts.onConfirm && opts.onCancel) ||
+                    (!opts.confirmLabel && (opts.onCancel || opts.onConfirm)));
+  if (isSingle) {
     confirmBtn.style.display = 'none';
     // Botão Voltar fica largura total + cor confirm pra ser o CTA principal
-    cancelBtn.textContent = opts.cancelLabel || 'Fechar';
+    cancelBtn.textContent = opts.cancelLabel || opts.confirmLabel || 'Continuar ▸';
     cancelBtn.style.flex = '1 1 100%';
     cancelBtn.onclick = function(){
       ov.classList.remove('active');
       costRows.forEach(function(r){ r.style.display = ''; });
       confirmBtn.style.display = '';
       cancelBtn.style.flex = '';
-      if (typeof opts.onCancel === 'function') opts.onCancel();
+      if (typeof opts.onConfirm === 'function') opts.onConfirm();
+      else if (typeof opts.onCancel === 'function') opts.onCancel();
     };
   } else {
     confirmBtn.style.display = '';
@@ -69673,8 +69678,8 @@ function _thorneShowCustomForge(p, merchant, subTopic){
     { type: 'narration', text: 'Você possui atualmente: <b>' + mithralIngots + 'x Lingote de Mithral</b> na mochila.' }
   ];
   var choices = [
-    { id: 'order_sword', label: '◆ Encomendar Espada de Mithral (1x Lingote + 500 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_sword' },
-    { id: 'order_breastplate', label: '◆ Encomendar Peitoral de Mithral (2x Lingotes + 800 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_breastplate' },
+    { id: 'order_sword', label: '◆ Encomendar Espada de Mithral (75% Sucesso / 25% Falha · 1x Lingote + 500 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_sword' },
+    { id: 'order_breastplate', label: '◆ Encomendar Peitoral de Mithral (70% Sucesso / 30% Falha · 2x Lingotes + 800 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_breastplate' },
     { id: 'ask_ingots', label: '◆ "Onde posso encontrar Lingotes de Mithral?"', result: 'goto_dialog', _encounterRef: 'mer_thorne_lore_mithral' },
     { id: 'back', label: '← Voltar ao balcão', result: 'goto_dialog', _encounterRef: 'mer_thorne_greeting' }
   ];

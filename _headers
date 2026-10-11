@@ -81,9 +81,6 @@
 /shared/img/merchants/*
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
-/shared/img/npcs/*
-  Cache-Control: public, max-age=31536000, immutable
-  X-Content-Type-Options: nosniff
 /shared/img/oficina/*
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
