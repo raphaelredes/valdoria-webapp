@@ -336,7 +336,7 @@ var HAZARDS = {
           fNarr: 'Você não consegue ler as marcas direito. Segue cauteloso, com mão na arma o resto da etapa.', dmg: 1 },
         { i: '🏃', t: 'Continuar rápido', stat: 'dex', dc: 11,
           desc: 'Confiar que o predador já passou e ganhar distância.',
-          sNarr: 'Você corre. Quando para, está duas léguas adiante e o som dos cascos sumiu.',
+          sNarr: 'Você corre. Quando para, está cerca de dois marcos adiante e o som dos cascos sumiu.',
           fNarr: 'Você cansa antes do esperado. As pernas pesam pelo resto da jornada.', dmg: 2 },
         { i: '🐎', t: 'Acalmar o animal com empatia', stat: 'wis', dc: 10,
           requires_class: ['druida', 'patrulheiro', 'bardo'],
@@ -346,8 +346,8 @@ var HAZARDS = {
         { i: '🤝', t: 'Cobertura em flanco com aliados', stat: 'wis', dc: 10,
           requires_ally: true,
           desc: 'Seu companheiro vigia os arbustos altos enquanto você analisa o rastro sem ser surpreendido.',
-          sNarr: 'Graças à vigília atenta de seus companheiros, você confirma com segurança total que o predador já se afastou léguas ao norte.',
-          sNarr_by_ally: 'Graças à vigília atenta de seus companheiros, você confirma com segurança total que o predador já se afastou léguas ao norte.',
+          sNarr: 'Graças à vigília atenta de seus companheiros, você confirma com segurança total que o predador já se afastou vários marcos ao norte.',
+          sNarr_by_ally: 'Graças à vigília atenta de seus companheiros, você confirma com segurança total que o predador já se afastou vários marcos ao norte.',
           fNarr: 'O vento no capim alto gera um falso alarme, assustando o grupo por instantes.', dmg: 0,
           fNarr_by_ally: 'O vento no capim alto gera um falso alarme, assustando o grupo por instantes.' },
         { i: '🏹', t: 'Instinto de caçador de fronteira', stat: 'wis', dc: 10,
@@ -1067,14 +1067,14 @@ var HAZARDS_EXTRA = {
       choices: [
         { i: '🤝', t: 'Aceitar gentileza', stat: 'cha', dc: 11,
           desc: 'Conversar honestamente, ouvir as histórias dele em troca da rota segura.',
-          sNarr: 'Você senta com ele dez minutos. Ele conta como ficou cego — uma rixa antiga com uma bruxa local. No fim, descreve um atalho que economiza meia légua e evita um ninho de aranhas.',
+          sNarr: 'Você senta com ele dez minutos. Ele conta como ficou cego — uma rixa antiga com uma bruxa local. No fim, descreve um atalho que economiza quase um marco e evita um ninho de aranhas.',
           sNarr_by_alignment: {
             good: 'Você se conecta genuinamente. O velho sorri pela primeira vez em meses. "Tu tens coração limpo. Que a floresta te abrace."'
           },
           fNarr: 'Você é educado mas distante. Ele te indica o atalho mas avisa: "O caminho é teu, mas a floresta sente quem vem com pressa demais."', dmg: 0 },
         { i: '🪙', t: 'Pagar uma moeda', stat: null,
           desc: 'Transação direta, sem meias palavras.',
-          sNarr: 'Ele aceita a moeda com leve aceno. "Direita na primeira bifurcação após o carvalho rachado. Boa jornada." A trilha indicada corta meia légua de mata fechada.',
+          sNarr: 'Ele aceita a moeda com leve aceno. "Direita na primeira bifurcação após o carvalho rachado. Boa jornada." A trilha indicada corta quase um marco de mata fechada.',
           fNarr: '' },
         { i: '➡️', t: 'Ignorar e seguir', stat: 'wis', dc: 12,
           desc: 'Confiar na sua própria orientação, deixar o velho.',
@@ -1800,7 +1800,7 @@ var DEPARTURES = {
     [
       { type: 'narration', text: 'Vocês cruzam a ponte de pedra que marca a fronteira da cidade. O rio corre baixo embaixo — promessa de água potável até o destino.' },
       { type: 'narration', text: 'O céu é amplo demais aqui. Sem florestas que oprimam, sem montanhas que orientem — só a estrada, o sol e o canto distante das cotovias.' },
-      { type: 'narration', text: 'Liberdade tem um preço: vocês são <b>visíveis</b> a léguas de distância. Quem precisa se esconder, escolhe outras rotas.' }
+      { type: 'narration', text: 'Liberdade tem um preço: vocês são <b>visíveis</b> a muitos marcos de distância. Quem precisa se esconder, escolhe outras rotas.' }
     ],
     [
       { type: 'narration', text: 'A última carroça de mercadores cruza vocês em direção à cidade. O carroceiro inclina o chapéu, mas o olhar é <i>de aviso</i>: "Cuidado com o leste."' },
@@ -2542,7 +2542,7 @@ var DEPARTURES = {
         if (t.subrace === 'forest') return 'Sua empatia de gnomo da floresta o faz notar os cantos dos pequenos pássaros prevendo as condições do tempo.';
 
         if (t.race === 'dwarf') return 'Com a solidez do povo anão, você crava o pé no chão da saída e verifica o peso da bagagem com satisfação prática.';
-        if (t.race === 'elf') return 'Com a graça e acuidade élficas, sua vista perscruta léguas de distância em busca de qualquer alteração no relevo.';
+        if (t.race === 'elf') return 'Com a graça e acuidade élficas, sua vista perscruta muitos marcos de distância em busca de qualquer alteração no relevo.';
         if (t.race === 'halfling') return 'Seu otimismo e passos ligeiros de halfling encontram conforto mesmo nas estradas mais rústicas.';
         if (t.race === 'dragonborn') return 'Seu porte régio de draconato impõe respeito à estrada; o calor elemental em seu peito arde perante o desafio.';
         if (t.race === 'halforc') return 'A tenacidade de meio-orc vibra em seus músculos. Cicatrizes antigas lembram que as terras selvagens são seu verdadeiro lar.';
@@ -2828,8 +2828,8 @@ var DEPARTURES = {
             {
                 type: 'narration',
                 text: isReturn
-                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. A travessia de volta estima uma distância aproximada de <b>~' + estDist + ' léguas</b> por trilhas que podem variar conforme o relevo e os imprevistos da rota.')
-                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A travessia pelas terras ermas estima uma distância aproximada de <b>~' + estDist + ' léguas</b> de marcha contínua por caminhos sujeitos a desvios e imprevistos.')
+                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. A travessia de volta estima uma distância aproximada de <b>~' + estDist + ' marcos</b> por trilhas que podem variar conforme o relevo e os imprevistos da rota.')
+                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A travessia pelas terras ermas estima uma distância aproximada de <b>~' + estDist + ' marcos</b> de marcha contínua por caminhos sujeitos a desvios e imprevistos.')
             }
         ];
 

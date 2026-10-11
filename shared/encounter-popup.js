@@ -2076,7 +2076,7 @@
     }
 
     /* Viagem e Navegação (Ordem do Usuário 2026-10): Mostra distância estimada
-       aproximada em léguas (que pode variar com desvios e atalhos) em vez de contagem
+       aproximada em marcos (que pode variar com desvios e atalhos) em vez de contagem
        rígida de etapas numéricas, ou banner de travessia urbana por Valdoria. Safe-DOM. */
     if (opts.progress && (opts.progress.total > 0 || opts.progress.isCityWalk || opts.progress.distEstimated != null)) {
       var _pg = opts.progress;
@@ -2096,9 +2096,10 @@
         var _cur = Math.max(1, Math.min(_pg.current || 1, _pg.total || 1));
         var _remain = Math.max(0, (_pg.total || 1) - _cur);
         var _distRem = (_pg.distRemaining != null) ? _pg.distRemaining : (_remain * 3);
-        pLabel.textContent = 'Distância estimada: ~' + _distRem + ' léguas';
+        var _distUnit = (_distRem === 1) ? ' marco' : ' marcos';
+        pLabel.textContent = 'Distância estimada: ~' + _distRem + _distUnit;
         pRemain.textContent = (_remain === 0 || _distRem <= 0) ? 'Destino avistado!'
-          : ('Aproximadamente ~' + _distRem + ' léguas restantes (estimativa)');
+          : ('Aproximadamente ~' + _distRem + (_distRem === 1 ? ' marco restante' : ' marcos restantes') + ' (estimativa)');
       }
 
       pLine.appendChild(pLabel);

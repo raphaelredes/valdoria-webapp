@@ -311,10 +311,11 @@
     var j = _j; if (!j) return;
     var distLeft = (j.distRemaining != null) ? j.distRemaining : Math.max(0, (j.total - j.step) * 3);
     var isNear = (distLeft <= 0 || j.step >= j.total);
+    var distUnit = (distLeft === 1) ? ' marco' : ' marcos';
     _vRender({
       npc: npc || null,
       script: scriptLines,
-      choices: [{ id: 'jrn_cont', label: (isNear ? ('Chegar a ' + j.displayName) : ('Continuar marcha (~' + distLeft + ' léguas)')) }],
+      choices: [{ id: 'jrn_cont', label: (isNear ? ('Chegar a ' + j.displayName) : ('Continuar marcha (~' + distLeft + distUnit + ')')) }],
       inline: true,
       onChoice: function () { _step(); }
     });
@@ -502,11 +503,11 @@
     if (success && (ch && (ch.isShortcut || (ch._haz && ch._haz.isShortcut)))) {
       j.distRemaining = Math.max(0, (j.distRemaining || 3) - 3);
       j.step = Math.min(j.total, j.step + 1);
-      body += '<br><br><b>🗺️ Atalho de rota aproveitado!</b> A travessia foi encurtada em ~3 léguas.';
+      body += '<br><br><b>🗺️ Atalho de rota aproveitado!</b> A travessia foi encurtada em ~3 marcos.';
     } else if (!success && (ch && (ch.isDetour || (ch._haz && ch._haz.isDetour) || (hz && hz.isOrientationHazard)))) {
       j.distRemaining = (j.distRemaining || 0) + 3;
       j.total = (j.total || 3) + 1;
-      body += '<br><br><b>⚠️ Desvio forçado!</b> O relevo traiçoeiro exigiu um contorno, adicionando ~3 léguas à estimativa da travessia.';
+      body += '<br><br><b>⚠️ Desvio forçado!</b> O relevo traiçoeiro exigiu um contorno, adicionando ~3 marcos à estimativa da travessia.';
     }
     if (JD().detectWeather && narr) {
       var wNarr = JD().detectWeather(narr);
