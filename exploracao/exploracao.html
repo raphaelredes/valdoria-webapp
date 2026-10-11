@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T01:09:42Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-11T01:28:04Z - do not edit directly, edit source -->
 
 
 
@@ -39286,7 +39286,7 @@ function _resolveOutcomeScriptForPlayer(script, outcome, player) {
     return spec.text || '';
   }
 
-  return script.map(function(line) {
+  var resList = script.map(function(line) {
     if (!line) return line;
     var copy = Object.assign({}, line);
     var spk = String(copy.speaker || '').trim();
@@ -39308,6 +39308,38 @@ function _resolveOutcomeScriptForPlayer(script, outcome, player) {
     }
     return copy;
   });
+
+  var hasPlayer = resList.some(function(l) { return l && l.is_player; });
+  if (!hasPlayer && resList.length && outcome) {
+    var fallbackText = pickSpeech(outcome.player_speech);
+    if (!fallbackText) {
+      fallbackText = 'Com determinação e atenção redobrada, o caminho segue adiante.';
+    }
+    fallbackText = _resolveGenderTokens(fallbackText, pGender);
+    fallbackText = fallbackText.replace(/\{player_name\}/g, pName);
+    var pLine = {
+      type: 'speech',
+      speaker: (pName && pName !== 'Você') ? pName : 'Você',
+      text: fallbackText,
+      is_player: true
+    };
+    var npcIdx = -1;
+    for (var ni = 0; ni < resList.length; ni++) {
+      if (resList[ni] && resList[ni].type === 'speech' && !resList[ni].is_player) {
+        npcIdx = ni;
+        break;
+      }
+    }
+    if (npcIdx !== -1) {
+      resList.splice(npcIdx, 0, pLine);
+    } else if (resList.length > 1) {
+      resList.splice(1, 0, pLine);
+    } else {
+      resList.push(pLine);
+    }
+  }
+
+  return resList;
 }
 
 // PADRAO_ALDRIC (2026-06-21): renderiza um script[] ESTRUTURADO (narration/speech) no
