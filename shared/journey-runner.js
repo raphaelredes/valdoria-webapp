@@ -95,18 +95,19 @@
       },
       {
         type: 'narration',
-        text: '<div style="background:rgba(20,14,10,0.88);border:1px solid #d4a359;border-radius:8px;padding:12px;margin:8px 0;line-height:1.55;">'
-            + '<h4 style="margin:0 0 8px 0;color:#ffc6a8;font-family:Cinzel,serif;letter-spacing:1px;font-size:14px;">🗺️ A Medida Oficial das Estradas: Os Marcos</h4>'
-            + '<p style="margin:0 0 8px 0;color:#e8d8c8;font-size:12.5px;">'
-            + 'Em <i>Lendas de Valdoria</i>, as distâncias entre a cidade e os ermos são medidas em <b>Marcos</b>. Cada Marco equivale à distância percorrida em aproximadamente <b>uma hora de marcha contínua e resoluta</b> em terreno plano (~3 milhas / ~4,8 km no D&D 5e), tendo como base as antigas pedras-marco de basalto cravadas nas estradas pelos pioneiros da cidade.'
-            + '</p>'
-            + '<h4 style="margin:8px 0 6px 0;color:#ffc6a8;font-family:Cinzel,serif;letter-spacing:1px;font-size:13px;">🧭 Por que a Distância é uma Estimativa?</h4>'
-            + '<ul style="margin:0;padding-left:18px;color:#d8c8b8;font-size:12px;line-height:1.5;">'
-            + '<li><b>Monólitos Esquecidos:</b> Com o passar dos anos, muitos marcos foram tombados, cobertos por musgo ou partidos por feras. Por isso, a rota informa uma <i>estimativa aproximada de marcos restantes</i> calculada pelo grupo.</li>'
-            + '<li><b>Desvios e Relevo:</b> Erros de orientação ou terrenos intransponíveis exigem contornos forçados, adicionando marcos à viagem <b>determinados por rolagem de dados (1d4 a 1d6 marcos adicionais)</b> e atraindo mais perigos.</li>'
-            + '<li><b>Atalhos e Perícia:</b> Conselhos de cartógrafos, batedores veteranos ou testes bem-sucedidos de Sobrevivência/Percepção permitem cortar caminho por trilhas ocultas, <b>encurtando a distância calculada nos dados (1d4 a 1d6 marcos a menos)</b>.</li>'
-            + '</ul>'
-            + '</div>'
+        text: '<b>A Medida Oficial das Estradas: Os Marcos</b><br><br>Em <i>Lendas de Valdoria</i>, as distâncias entre a cidade e os ermos são medidas em <b>Marcos</b>. Cada Marco equivale à distância percorrida em aproximadamente <b>uma hora de marcha contínua e resoluta</b> em terreno plano (~3 milhas / ~4,8 km no D&D 5e), tendo como base as antigas pedras-marco de basalto cravadas nas estradas pelos pioneiros.'
+      },
+      {
+        type: 'narration',
+        text: '<b>Por que a Distância é uma Estimativa?</b><br><br><b>• Monólitos Esquecidos:</b> Com o passar dos anos, muitos marcos foram tombados, cobertos por musgo ou partidos por feras. Por isso, a rota informa uma <i>estimativa aproximada de marcos restantes</i> calculada pelo grupo.'
+      },
+      {
+        type: 'narration',
+        text: '<b>• Desvios e Relevo:</b> Erros de orientação ou terrenos intransponíveis exigem contornos forçados, adicionando marcos à viagem <b>determinados por rolagem de dados (1d4 a 1d6 marcos adicionais)</b> e atraindo mais perigos.'
+      },
+      {
+        type: 'narration',
+        text: '<b>• Atalhos e Perícia:</b> Conselhos de cartógrafos, batedores veteranos ou testes bem-sucedidos de Sobrevivência e Percepção permitem cortar caminho por trilhas ocultas, <b>encurtando a distância calculada nos dados (1d4 a 1d6 marcos a menos)</b>.'
       },
       {
         type: 'narration',
@@ -580,16 +581,10 @@
       j.distRemaining = Math.max(0, currentDist - marcosEncurtados);
       j.step = Math.min(j.total, j.step + 1);
 
-      var corvusTag = corvusBonus ? ' <span style="font-size:10px;color:#7cdb7c;">(+1 Conhecimento de Corvus)</span>' : '';
-      var critTag = isHighMargin ? ' <span style="font-size:10px;color:#ffd700;font-weight:700;">★ SUCESSO NOTÁVEL</span>' : '';
-      body += '<br><br><div style="background:rgba(20,28,18,0.85);border:1px solid #7cdb7c;border-radius:6px;padding:8px 10px;margin-top:8px;">'
-            +   '<div style="font-family:Cinzel,serif;color:#7cdb7c;font-weight:700;font-size:12px;display:flex;align-items:center;gap:6px;">'
-            +     '<span>🎲</span><span>Rolagem de Atalho: d' + dieSides + ' [' + dieRoll + ']' + corvusTag + critTag + ' ➔ ' + marcosEncurtados + (marcosEncurtados === 1 ? ' Marco' : ' Marcos') + '</span>'
-            +   '</div>'
-            +   '<div style="font-size:11.5px;color:#d4e8d0;margin-top:3px;">'
-            +     '<b>🗺️ Atalho de rota aproveitado!</b> O grupo descobre uma picada secreta e encurta o caminho em <b>~' + marcosEncurtados + (marcosEncurtados === 1 ? ' marco' : ' marcos') + '</b>.'
-            +   '</div>'
-            + '</div>';
+      var corvusTag = corvusBonus ? ' <i>(+1 Conhecimento de Corvus)</i>' : '';
+      var critTag = isHighMargin ? ' <b>★ SUCESSO NOTÁVEL</b>' : '';
+      body += '<br><br><b>🎲 Rolagem de Atalho:</b> d' + dieSides + ' [' + dieRoll + ']' + corvusTag + critTag + ' ➔ ' + marcosEncurtados + (marcosEncurtados === 1 ? ' Marco' : ' Marcos') + '<br>'
+            + '<b>🗺️ Atalho de rota aproveitado!</b> O grupo descobre uma picada secreta e encurta o caminho em <b>~' + marcosEncurtados + (marcosEncurtados === 1 ? ' marco' : ' marcos') + '</b>.';
     } else if (!success && (ch && (ch.isDetour || (ch._haz && ch._haz.isDetour) || (hz && hz.isOrientationHazard)))) {
       var isSevereFailure = (roll && (roll.d20 === 1 || (roll.total != null && ch && ch.dc && roll.total <= ch.dc - 5)));
       var dieSides = isSevereFailure ? 6 : 4;
@@ -599,16 +594,10 @@
       j.distRemaining = (j.distRemaining || 0) + detourMarcos;
       j.total = (j.total || 3) + 1;
 
-      var mitTag = cautiousMitigation ? ' <span style="font-size:10px;color:#7cdb7c;">(−1 Marcha Cautelosa)</span>' : '';
-      var fumbleTag = isSevereFailure ? ' <span style="font-size:10px;color:#ff6b6b;font-weight:700;">⚠ FALHA SEVERA</span>' : '';
-      body += '<br><br><div style="background:rgba(32,16,14,0.85);border:1px solid #e06050;border-radius:6px;padding:8px 10px;margin-top:8px;">'
-            +   '<div style="font-family:Cinzel,serif;color:#ff8070;font-weight:700;font-size:12px;display:flex;align-items:center;gap:6px;">'
-            +     '<span>🎲</span><span>Rolagem de Desvio: d' + dieSides + ' [' + dieRoll + ']' + mitTag + fumbleTag + ' ➔ +' + detourMarcos + (detourMarcos === 1 ? ' Marco' : ' Marcos') + '</span>'
-            +   '</div>'
-            +   '<div style="font-size:11.5px;color:#f0d0cc;margin-top:3px;">'
-            +     '<b>⚠️ Desvio forçado!</b> O relevo difícil e a rota obstruída exigiram um contorno, adicionando <b>+' + detourMarcos + (detourMarcos === 1 ? ' marco' : ' marcos') + '</b> ao caminho.'
-            +   '</div>'
-            + '</div>';
+      var mitTag = cautiousMitigation ? ' <i>(−1 Marcha Cautelosa)</i>' : '';
+      var fumbleTag = isSevereFailure ? ' <b>⚠ FALHA SEVERA</b>' : '';
+      body += '<br><br><b>🎲 Rolagem de Desvio:</b> d' + dieSides + ' [' + dieRoll + ']' + mitTag + fumbleTag + ' ➔ +' + detourMarcos + (detourMarcos === 1 ? ' Marco' : ' Marcos') + '<br>'
+            + '<b>⚠️ Desvio forçado!</b> O relevo difícil e a rota obstruída exigiram um contorno, adicionando <b>+' + detourMarcos + (detourMarcos === 1 ? ' marco' : ' marcos') + '</b> ao caminho.';
     }
     // Concessão de itens e flags de eventos de jornada (Ordem do Usuário 2026-10)
     var targetCh = (ch && ch._haz) || ch;
@@ -679,11 +668,50 @@
       });
       return;
     }
+    // Recompensas de XP / Ouro / Itens estruturadas (Ordem do Usuário 2026-10):
+    var targetCh = (ch && ch._haz) || ch;
+    var rewardXp = 0;
+    var rewardReason = '';
+    if (success) {
+      if (targetCh && targetCh.xp) {
+        rewardXp = targetCh.xp;
+        rewardReason = targetCh.xpReason || '';
+      }
+      var xpMatch = body.match(/(\+?\d+)\s*XP(?:\s+(?:por|de|—|-)\s+([^.<]+))?/i);
+      if (xpMatch) {
+        if (!rewardXp) rewardXp = parseInt(xpMatch[1].replace('+', ''), 10);
+        if (!rewardReason && xpMatch[2]) rewardReason = xpMatch[2].trim();
+        body = body.replace(/<i>\s*\+?\d+\s*XP[^<]*<\/i>/gi, '')
+                   .replace(/\+?\d+\s*XP(?:\s+(?:por|de|—|-)\s+[^.<]+)?\.?/gi, '')
+                   .replace(/\s{2,}/g, ' ').trim();
+      }
+      if (rewardXp > 0 && p) {
+        p.xp = (p.xp || 0) + rewardXp;
+        try {
+          var savedXp = parseInt(localStorage.getItem('player_xp') || '0', 10);
+          localStorage.setItem('player_xp', String(savedXp + rewardXp));
+        } catch (_) {}
+        if (typeof j.opts.toast === 'function') {
+          j.opts.toast('+' + rewardXp + ' XP — ' + (rewardReason || 'Experiência adquirida'), 'info');
+        }
+        if (typeof j.opts.refreshHud === 'function') {
+          try { j.opts.refreshHud(); } catch (e) {}
+        }
+      }
+    }
+
     var scriptLines = [];
     if (pSpeech) {
       scriptLines.push({ type: 'speech', is_player: true, speaker: pSpeaker, text: pSpeech });
     }
     scriptLines.push({ type: 'narration', text: body });
+    if (rewardXp > 0) {
+      scriptLines.push({
+        type: 'reward',
+        xp: rewardXp,
+        effect: rewardReason || 'Superação na jornada'
+      });
+    }
     // REGRA DO USUÁRIO: ficha/card resumida exibida SOMENTE se algo acontecer com a vida ou stats
     if (dmgApplied > 0 || conditionApplied != null) {
       scriptLines.push({
@@ -696,7 +724,7 @@
         condition: conditionApplied
       });
     }
-    _renderContinue(scriptLines);
+    _renderContinue(scriptLines, (hz && hz.npc) || null);
   }
 
   function _arrive() {

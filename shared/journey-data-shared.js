@@ -1608,21 +1608,27 @@ var HAZARDS_EXTRA = {
       ],
       choices: [
         { i: '🤐', t: 'Esperar em silêncio', stat: 'wis', dc: 11,
-          desc: 'Cinco minutos de absoluta paciência.',
-          sNarr: 'Você fica quieto. A linha tensiona. Ele puxa devagar — uma carpa enorme, escamas prateadas como se carregassem luz própria. "Hoje os deuses fartaram." Te indica caminho seco através do pântano. <i>+5 XP por bondade observada.</i>',
-          fNarr: 'Você se mexe demais. A carpa foge. Ele balança a cabeça mas sem rancor. "Tudo bem. Sigue, jovem."', dmg: 0 },
+          speech: '"Ficarei imóvel e em silêncio absoluto. Não vou atrapalhar sua pescaria."',
+          desc: 'Cinco minutos de paciência aguardando a carpa fisgar a isca.',
+          xp: 5,
+          xpReason: 'Bondade e paciência observadas',
+          sNarr: 'Você fica quieto. A linha tensiona. Ele puxa devagar — uma carpa enorme, escamas prateadas como se carregassem luz própria. "Hoje os deuses fartaram." O velho aponta um caminho seco e seguro através do pântano.',
+          fNarr: 'Você se mexe demais. A carpa foge. Ele balança a cabeça, mas sem rancor: "Tudo bem. Segue em paz, jovem."', dmg: 0 },
         { i: '🤝', t: 'Oferecer isca ou anzol da mochila', stat: null,
           requires_ally: true,
-          desc: 'Seu parceiro tira uma isca da bolsa de viagem e oferece gentilmente ao veterano.',
+          speech: '"Trago anzóis reforçados na bagagem. Pegue um de presente para sua pescaria."',
+          desc: 'Seu parceiro tira uma isca e anzol da bolsa de viagem e oferece gentilmente ao veterano.',
           sNarr: 'O ancião aceita o anzol reforçado com um largo sorriso desdentado: "Que a comitiva de vocês tenha a bênção das águas calmas! Vão pelo banco de areia."',
           sNarr_by_ally: 'O ancião aceita o anzol reforçado com um largo sorriso desdentado: "Que a comitiva de vocês tenha a bênção das águas calmas! Vão pelo banco de areia."',
           fNarr: '' },
         { i: '🎣', t: 'Histórias de águas e pescaria', stat: 'cha', dc: 10,
           requires_background: ['sailor', 'folk_hero'],
+          speech: '"Águas calmas escondem os peixes mais manhosos. Conheço a paciência que os rios exigem."',
           desc: 'Trocar cumprimentos de quem conhece a paciência dos rios e mares.',
-          sNarr: 'O pescador reconhece o companheiro de águas: "Ah, quem já puxou rede sabe respeitar o peixe!" A conversa rende atalho precioso.',
-          fNarr: 'O velho faz sinal de silêncio com o dedo nos lábios.', dmg: 0 },
+          sNarr: 'O pescador reconhece o companheiro de águas: "Ah, quem já puxou rede sabe respeitar o peixe!" A conversa rende um atalho precioso.',
+          fNarr: 'O velho faz sinal de silêncio com o dedo nos lábios, concentrado na linha.', dmg: 0 },
         { i: '🚶', t: 'Acenar e seguir devagar', stat: null,
+          speech: '"Boa pescaria, companheiro. Passaremos contornando a margem para não perturbar a água."',
           desc: 'Passar na ponta dos pés para não atrapalhar a pesca.',
           sNarr: 'Você passa como uma sombra sem fazer ondulações na margem; o pescador acena a cabeça em silencioso agradecimento.',
           fNarr: '' }
@@ -2539,20 +2545,10 @@ var DEPARTURES = {
         if (!resolvedSpeech && choice.speech_by_race && t.race) resolvedSpeech = choice.speech_by_race[t.race];
         if (!resolvedSpeech && choice.speech) resolvedSpeech = choice.speech;
 
-        // If no explicit speech provided, synthesize contextual 1st person line:
+        // If no explicit speech provided, do not fabricate quotes around action description:
+        // Actions (e.g. stealth, athletics, passing quietly) are physical intents, not spoken dialogue.
         if (!resolvedSpeech) {
-            var hasNPC = hazard && (hazard.npc || (hazard.script && hazard.script.some(function(s){ return s && s.type === 'speech'; })));
-            if (hasNPC) {
-                var actionText = choice.desc || choice.t || '';
-                if (actionText) {
-                    resolvedSpeech = '"' + actionText.replace(/\.$/, '') + '."';
-                } else {
-                    resolvedSpeech = '"Vamos resolver isto com calma."';
-                }
-            } else {
-                var act = choice.desc || choice.t || '';
-                resolvedSpeech = '*' + act.replace(/\.$/, '') + '.*';
-            }
+            resolvedSpeech = '';
         }
 
         return {

@@ -833,8 +833,13 @@
        TAG escapada restante, de modo que CSS/HTML cravado num campo de texto
        NUNCA chega ao jogador como lixo de marcação. Só remove o que tem forma de
        tag (`<nome ...>`); `<` literal que não é tag (ex.: "a < b") é preservado.
+       Substitui quebras de bloco (h1-h6, p, div, li, ul, ol, br) por espaço antes do
+       strip para impedir colagem acidental de palavras (ex.: "Marcos</h4><p>Em" -> "Marcos Em").
        Apresentação rica (recompensa/XP) DEVE usar script item {type:'reward'}. */
-    var stripped = permitted.replace(/&lt;\/?[a-zA-Z][^&]*?&gt;/g, '');
+    var spaced = permitted
+      .replace(/&lt;\/(?:h[1-6]|p|div|li|section|article)&gt;/gi, ' ')
+      .replace(/&lt;(?:h[1-6]|p|div|li|ul|ol|section|article)[^&]*?&gt;/gi, ' ');
+    var stripped = spaced.replace(/&lt;\/?[a-zA-Z][^&]*?&gt;/g, '').replace(/\s{2,}/g, ' ');
     if (stripped !== permitted) {
       try {
         console.error('[ENC] HTML bloqueado em texto de diálogo (use {type:"reward"} '
@@ -2221,6 +2226,15 @@
         if (hasSpeech) {
           mainContent = tagPill + '<span class="enc-cho-speech">“' + _coinify(speechClean) + '”</span>';
           subDesc = _stripEmojis(ch.desc || ch.label || '');
+          // Anti-repetição (Ordem do Usuário 2026-10): se a descrição for idêntica à fala,
+          // usa o label da ação se diferente, ou omite a duplicação em vez de repetir o mesmo texto
+          var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s]/g, '').toLowerCase();
+          var _normSub = String(subDesc || '').replace(/[“”.!?,;:\s]/g, '').toLowerCase();
+          if (_normSpeech && _normSpeech === _normSub) {
+            var _altLabel = _stripEmojis(ch.label || '');
+            var _normLabel = _altLabel.replace(/[“”.!?,;:\s]/g, '').toLowerCase();
+            subDesc = (_normLabel && _normLabel !== _normSpeech) ? _altLabel : '';
+          }
         } else {
           mainContent = (tagPill ? tagPill : '') + _coinify(_choLabel);
           subDesc = _stripEmojis(ch.desc || '');
@@ -2678,6 +2692,23 @@
             portEl.title = 'Clique pra ampliar';
           }
         }
+      } else if (dialogue.npc && (dialogue.npc.name || dialogue.npc.desc)) {
+        var nameElDef = header.querySelector('.enc-name');
+        if (nameElDef) nameElDef.textContent = dialogue.npc.name || '';
+        var descElDef = header.querySelector('.enc-desc');
+        if (descElDef) descElDef.textContent = dialogue.npc.desc || '';
+        var portImgDef = header.querySelector('.enc-portrait img');
+        if (portImgDef && dialogue.npc.portrait) {
+          portImgDef.src = dialogue.npc.portrait;
+        } else if (dialogue.npc.portrait) {
+          var portElDef = header.querySelector('.enc-portrait');
+          if (portElDef) {
+            portElDef.innerHTML = '<img src="' + String(dialogue.npc.portrait).replace(/"/g, '&quot;') + '" alt="" ' + _ENC_IMG_ONERR + '>';
+            portElDef.className = 'enc-portrait';
+          }
+        }
+      } else if (!hasSpeech) {
+        header.style.display = 'none';
       }
 
       var strophes = [];

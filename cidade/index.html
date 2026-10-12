@@ -66157,7 +66157,8 @@ function _travelToBiome(mapIdOrBiome, displayName){
       return;
     }
     // Fallback (sem journey): direto pra anim
-    playTravelAnimation(mapId, displayName, function(){
+    var _fbBiome = (typeof _cityTravelInfo === 'function' ? _cityTravelInfo(mapId).biome : mapId);
+    playTravelAnimation(_fbBiome, displayName, function(){
       _logCity('travel anim done -> redirect (no journey)');
       if (window._vTransitionLoader) window._vTransitionLoader.show('Chegando ao destino…');
       window.__valdoria_transitioning = true;
@@ -66216,7 +66217,7 @@ function startCityJourney(mapId, displayName, finalUrl) {
   // sair dos portões da cidade já te coloca no mapa dos portões).
   if (info.steps <= 0) {
     if (typeof _logCity === 'function') _logCity('city travel adjacent (' + mapId + ') -> sem etapas, direto');
-    _cityJourneyArrive(mapId, displayName, finalUrl);
+    _cityJourneyArrive(info.biome, displayName, finalUrl);
     return;
   }
   if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
@@ -66242,7 +66243,7 @@ function startCityJourney(mapId, displayName, finalUrl) {
           total: (jinfo && jinfo.total) || info.steps
         });
       },
-      onArrive: function (biome, dn, meta) { _cityJourneyArrive(mapId, displayName, finalUrl, meta); },
+      onArrive: function (biome, dn, meta) { _cityJourneyArrive(info.biome, displayName, finalUrl, meta); },
       onCancel: function () {
         if (typeof _logCity === 'function') _logCity('city journey cancelled');
         try {
@@ -66259,7 +66260,7 @@ function startCityJourney(mapId, displayName, finalUrl) {
     return;
   }
   // Fallback defensivo (runner ausente): vai direto pro destino.
-  _cityJourneyArrive(mapId, displayName, finalUrl);
+  _cityJourneyArrive(info.biome, displayName, finalUrl);
 }
 
 function _cityLaunchJourneyCombat(rs) {
@@ -66334,6 +66335,11 @@ function _cityLaunchJourneyCombatFallback(rs) {
 // Chegada: cobre o gap silhueta->exploração com o magic-circle loader ANTES do
 // location.href (destino também mostra loader via ?nointro=1). Args vêm do runner.
 function _cityJourneyArrive(biome, displayName, url, meta) {
+  var realBiome = biome;
+  if (typeof _cityTravelInfo === 'function') {
+    var cInfo = _cityTravelInfo(biome);
+    if (cInfo && cInfo.biome) realBiome = cInfo.biome;
+  }
   var targetUrl = url;
   var w = (meta && meta.weather) || null;
   if (w) {
@@ -66354,7 +66360,7 @@ function _cityJourneyArrive(biome, displayName, url, meta) {
     window.__valdoria_transitioning = true;
     setTimeout(function () { window.location.href = targetUrl; }, 30);
   }
-  if (typeof playTravelAnimation === 'function') playTravelAnimation(biome, displayName, _doRedirect);
+  if (typeof playTravelAnimation === 'function') playTravelAnimation(realBiome, displayName, _doRedirect);
   else _doRedirect();
 }
 
