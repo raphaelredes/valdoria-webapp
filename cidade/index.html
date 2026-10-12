@@ -69257,6 +69257,68 @@ function _innRenderRoomKeyBoardRemote(venue, data, p){
   });
 }
 
+function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
+  var chk = ch.check || {};
+  var skl = chk.skill || ch.skill || 'Perícia';
+  var dc = chk.dc || ch.dc || 10;
+  var sklLabel = chk.skill_label || ('Teste de ' + skl);
+  var hasInsp = Boolean(data && data.tactical_resources && data.tactical_resources.has_inspiration);
+
+  var script = [
+    { type: 'narration', text: '<b>🎲 ' + sklLabel + ' — Dificuldade CD ' + dc + '</b>' },
+    { type: 'narration', text: '<b>O Que Está Sendo Escolhido:</b> ' + (ch.label || 'Realizar esta ação de diálogo.') },
+    { type: 'narration', text: '<b>Possíveis Consequências:</b> Sucesso garante a conquista do objetivo e benefícios táticos da cena. Em caso de falha, complicações, desconfiança ou desvantagens na conversa podem ocorrer.' }
+  ];
+
+  if (hasInsp) {
+    script.push({
+      type: 'narration',
+      text: '✨ <b>Recurso Tático — Inspiração de Mesa Disponível:</b> Você possui inspiração ativa e pode consumi-la para rolar com <b>Vantagem D&D 5e</b> (dois dados d20, escolhendo o maior).'
+    });
+  }
+
+  var choices = [];
+  if (hasInsp) {
+    choices.push({
+      id: 'roll_insp',
+      label: '✔ [✨ Com Inspiração] Rolar com Vantagem (2d20)',
+      _tactical_options: { use_inspiration: true }
+    });
+    choices.push({
+      id: 'roll_normal',
+      label: '✔ [Sem Inspiração] Rolar Normal (1d20)',
+      _tactical_options: { use_inspiration: false }
+    });
+  } else {
+    choices.push({
+      id: 'roll_normal',
+      label: '✔ Rolar o Teste de ' + sklLabel + ' (1d20)',
+      _tactical_options: { use_inspiration: false }
+    });
+  }
+
+  choices.push({
+    id: 'back',
+    label: '← Voltar às opções',
+    _is_back: true
+  });
+
+  window.vEncounter.render(
+    { npc: data.npc, script: script, choices: choices },
+    { player: p, closeable: true,
+      venue: venue, node: node, handlerType: 'city_dialogue', customState: { ctx: ctx },
+      onChoice: function(selected){
+        if (selected && selected._is_back) {
+          _renderCityDialogue(venue, data, p, ctx);
+          return;
+        }
+        var tact = (selected && selected._tactical_options) || null;
+        _resolveCityChoice(venue, node, ch.id, p, data.npc, ctx, tact);
+      }
+    }
+  );
+}
+
 function _renderCityDialogue(venue, data, p, ctx){
   if (!(window.vEncounter && window.vEncounter.render)) return;
   var node = data.node || '';
@@ -69296,7 +69358,10 @@ function _renderCityDialogue(venue, data, p, ctx){
         }
         else if (ch && ch.screen) { _openCityScreen(venue, ch.screen, p, data.npc); }
         else if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
-        else if (node) { _resolveCityChoice(venue, node, ch && ch.id, p, data.npc); }
+        else if (ch && (ch.check || ch.dc) && typeof _showSkillCheckTacticalModal === 'function') {
+          _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx);
+        }
+        else if (node) { _resolveCityChoice(venue, node, ch && ch.id, p, data.npc, ctx); }
         else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
     } }
   );
@@ -69390,12 +69455,14 @@ function _bankCustomAmount(cb, p, npc){
   });
 }
 
-function _resolveCityChoice(venue, node, choiceId, p, npc, ctx){
+function _resolveCityChoice(venue, node, choiceId, p, npc, ctx, tacticalOptions){
   if (!choiceId) return;
   // Regra Padrão (Ordem do Usuário 2026-10): PROIBIDO exibir tela de loading
   // de boot (vProcessing) ao resolver escolhas em diálogo. O diálogo segue aberto e imersivo.
   // D1: o `node` JÁ carrega o npc_id (raiz '<id>' / sub '<id>:ficha'). NÃO postar npc_id separado.
-  window.vCityServer.cityAction('dialogue.choice', { venue: venue, node: node, choice_id: choiceId }).then(function(data){
+  var payload = { venue: venue, node: node, choice_id: choiceId };
+  if (tacticalOptions) payload.tactical_options = tacticalOptions;
+  window.vCityServer.cityAction('dialogue.choice', payload).then(function(data){
     if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível agir.', 'warn'); return; }
     _handleCityDialogueResult(venue, data, p, npc, ctx);
   }).catch(function(e){
