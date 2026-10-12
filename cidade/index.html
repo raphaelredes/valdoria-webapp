@@ -69262,7 +69262,12 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   var skl = chk.skill || ch.skill || 'Perícia';
   var dc = chk.dc || ch.dc || 10;
   var sklLabel = chk.skill_label || ('Teste de ' + skl);
-  var hasInsp = Boolean(data && data.tactical_resources && data.tactical_resources.has_inspiration);
+  var tactRes = chk.tactical_resources || (data && data.tactical_resources) || {};
+  var hasInsp = Boolean(tactRes.has_inspiration);
+  var hasGuidance = Boolean(tactRes.has_guidance);
+  var hasFriends = Boolean(tactRes.has_friends);
+  var hasThaum = Boolean(tactRes.has_thaumaturgy);
+  var assistOptions = tactRes.assist_options || [];
 
   var script = [
     { type: 'narration', text: '<b>🎲 ' + sklLabel + ' — Dificuldade CD ' + dc + '</b>' },
@@ -69273,27 +69278,88 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   if (hasInsp) {
     script.push({
       type: 'narration',
-      text: '✨ <b>Recurso Tático — Inspiração de Mesa Disponível:</b> Você possui inspiração ativa e pode consumi-la para rolar com <b>Vantagem D&D 5e</b> (dois dados d20, escolhendo o maior).'
+      text: '✨ <b>Inspiração de Mesa Disponível:</b> Você possui inspiração ativa e pode consumi-la para rolar com <b>Vantagem D&D 5e</b> (dois dados d20, escolhendo o maior).'
+    });
+  }
+  if (hasGuidance) {
+    script.push({
+      type: 'narration',
+      text: '🙏 <b>Magia Social — Orientação (+1d4):</b> ' + (tactRes.guidance_source ? (tactRes.guidance_source + ' pode abençoar a ação com +1d4 de bônus divinatório.') : 'Você pode conjurar o truque para adicionar +1d4 ao total.')
+    });
+  }
+  if (hasFriends) {
+    script.push({
+      type: 'narration',
+      text: '🎭 <b>Truque Arcano — Amizade (Vantagem):</b> Concede Vantagem imediata em testes de Carisma. <i>⚠️ Risco BG3: O alvo perceberá que foi manipulado magicamente após o término do diálogo, gerando descontentamento.</i>'
+    });
+  }
+  if (assistOptions.length > 0) {
+    script.push({
+      type: 'narration',
+      text: '👥 <b>Auxílio da Comitiva:</b> Você pode realizar a ação pessoalmente ou pedir a um companheiro especialista da comitiva para assumir o teste.'
     });
   }
 
   var choices = [];
+
+  // 1. Opções para o próprio aventureiro
+  if (hasInsp && hasGuidance) {
+    choices.push({
+      id: 'roll_self_insp_guidance',
+      label: '✔ [Você] Rolar com Inspiração (2d20 Vantagem) + Orientação (+1d4)',
+      _tactical_options: { use_inspiration: true, use_guidance: true }
+    });
+  }
   if (hasInsp) {
     choices.push({
-      id: 'roll_insp',
-      label: '✔ [✨ Com Inspiração] Rolar com Vantagem (2d20)',
-      _tactical_options: { use_inspiration: true }
+      id: 'roll_self_insp',
+      label: '✔ [Você] Rolar com Inspiração de Mesa (2d20 Vantagem)',
+      _tactical_options: { use_inspiration: true, use_guidance: false }
     });
+  }
+  if (hasGuidance) {
     choices.push({
-      id: 'roll_normal',
-      label: '✔ [Sem Inspiração] Rolar Normal (1d20)',
-      _tactical_options: { use_inspiration: false }
+      id: 'roll_self_guidance',
+      label: '✔ [Você] Rolar Pessoalmente com Orientação (+1d4)',
+      _tactical_options: { use_inspiration: false, use_guidance: true }
     });
-  } else {
+  }
+  if (hasFriends) {
     choices.push({
-      id: 'roll_normal',
-      label: '✔ Rolar o Teste de ' + sklLabel + ' (1d20)',
-      _tactical_options: { use_inspiration: false }
+      id: 'roll_self_friends',
+      label: '✔ [Você · 🎭 Truque Amizade] Rolar com Vantagem (Alvo nota o encanto depois)',
+      _tactical_options: { use_friends: true, use_guidance: hasGuidance }
+    });
+  }
+  if (hasThaum) {
+    choices.push({
+      id: 'roll_self_thaum',
+      label: '✔ [Você · ⚡ Taumaturgia] Rolar com Vantagem em Intimidação',
+      _tactical_options: { use_thaumaturgy: true, use_guidance: hasGuidance }
+    });
+  }
+  choices.push({
+    id: 'roll_self_normal',
+    label: '✔ [Você] Rolar Teste Normal de ' + sklLabel + ' (1d20)',
+    _tactical_options: { use_inspiration: false, use_guidance: false }
+  });
+
+  // 2. Opções de Delegar para Companheiros Especialistas (Pilar B)
+  for (var i = 0; i < assistOptions.length; i++) {
+    var cOpt = assistOptions[i];
+    var cPrefix = cOpt.is_better ? '⭐ [Especialista: ' : '👥 [Companheiro: ';
+    var cLabel = cPrefix + cOpt.name + ' (' + (cOpt.raw_class || cOpt.class) + ')] Delegar Teste (Bônus +' + cOpt.bonus + ')';
+    if (hasGuidance) {
+      cLabel += ' + Orientação (+1d4)';
+    }
+    choices.push({
+      id: 'roll_comp_' + cOpt.companion_id,
+      label: '✔ ' + cLabel,
+      _tactical_options: {
+        roller: cOpt.companion_id,
+        use_guidance: hasGuidance,
+        use_inspiration: false
+      }
     });
   }
 
