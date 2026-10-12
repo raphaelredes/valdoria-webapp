@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-12T00:43:13Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-12T03:19:28Z - do not edit directly, edit source -->
 
 
 
@@ -44213,7 +44213,7 @@ function _doOfflineShortRest(p) {
 }
 
 // H2: aplica o resultado AUTORITATIVO do servidor (cliente só renderiza).
-function _applyServerShortRest(p, healed, serverState) {
+function _applyServerShortRest(p, healed, serverState, banter) {
   var preHp = p.hp;
   if (serverState && typeof serverState.hp === 'number') p.hp = serverState.hp;
   else p.hp = Math.min(p.mhp, p.hp + (healed.hp || 0));
@@ -44228,10 +44228,22 @@ function _applyServerShortRest(p, healed, serverState) {
   var rollTxt = (rawRoll !== null ? '1d' + die + '=' + rawRoll : '1d' + die)
     + '+CON(' + (conMod >= 0 ? '+' : '') + conMod + ')';
   var status = document.getElementById('camp-footer-status');
+  var allyNote = '';
+  if (healed && healed.companion_rolls && healed.companion_rolls.length > 0) {
+    var cNames = healed.companion_rolls.map(function(cr){ return cr.name + ' (+' + cr.heal + ' PV)'; }).join(', ');
+    allyNote = ' · Comitiva: ' + cNames;
+  }
   var msg = 'Descanso Curto: ' + rollTxt + ' = +' + actual + ' HP' + fullHpNote
-    + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?');
+    + '. Agora ' + p.hp + '/' + p.mhp + '. HD ' + p.hd + '/' + (p.mhd || '?') + allyNote;
   if (status) status.textContent = msg;
   if (typeof vToast === 'function') vToast(msg, actual > 0 ? 'success' : 'info');
+  if (banter && banter.speech) {
+    setTimeout(function() {
+      if (typeof vToast === 'function') {
+        vToast('💬 ' + banter.speaker + ': "' + banter.speech + '"', 'info');
+      }
+    }, 700);
+  }
   try { window.serverLog && window.serverLog('exploracao', 'info', 'camp_short_done_server',
     { die: die, rolled: healed.rolled, heal_actual: actual, hp: p.hp, hd: p.hd }); } catch (_) {}
   _persistLocalStats();
@@ -44407,7 +44419,7 @@ function doShortRest() {
       var _actual = Math.max(0, _projHp - _preHp);
       var _full = (_actual === 0 && _projHp >= p.mhp);
       _animateHealDie(_die, _raw, _con, _actual, _full, function () {
-        _applyServerShortRest(p, res.healed, res.state);
+        _applyServerShortRest(p, res.healed, res.state, res.campfire_banter);
       });
     }).catch(function(err){
       console.warn('[CAMP] rest_short server err, using resilient offline rest:', err);
@@ -44501,6 +44513,18 @@ function doLongRest() {
               if (typeof res.state.hit_dice === 'number') p.hd = res.state.hit_dice;
               if (typeof res.state.exhaustion === 'number') p.exh = res.state.exhaustion;
               _persistLocalStats();
+            }
+            if (res.healed && res.healed.allies_restored && res.healed.allies_restored.length > 0) {
+              var aNames = res.healed.allies_restored.map(function(ar){ return ar.name; }).join(', ');
+              var cst = document.getElementById('camp-footer-status');
+              if (cst) cst.textContent = (cst.textContent || '') + ' · Comitiva recuperada: ' + aNames;
+            }
+            if (res.campfire_banter && res.campfire_banter.speech) {
+              setTimeout(function() {
+                if (typeof vToast === 'function') {
+                  vToast('💬 ' + res.campfire_banter.speaker + ': "' + res.campfire_banter.speech + '"', 'info');
+                }
+              }, 700);
             }
           } else if (res && res.reason === 'no_camp_gear') {
             // 2026-06-21: servidor RECUSOU (sem Barraca/Kit) → REVERTE o heal otimista e
