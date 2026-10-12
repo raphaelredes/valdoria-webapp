@@ -22200,6 +22200,71 @@ var _navStack = [];
 var _currentScreen = 'hub';
 var _popupStack = [];  // sub-screens drill-down (tavern → tavern_drinks → ...)
 
+// === Rastreamento do Local Atual do Aventureiro na Cidade ===
+// Ordem do Usuário 2026-10: Se o aventureiro já se encontra em um local (ex.: na Guilda),
+// fechou o popup para ver o mapa/hub e clicou para entrar na Guilda novamente, NUNCA
+// reexibir a janela "A caminho:" pois ele já está fisicamente nas dependências do local.
+// A travessia urbana só ocorre ao se deslocar para um estabelecimento diferente.
+var _cityCurrentVenue = null;
+var _CITY_PRIMARY_VENUES = {
+  'inn': 1, 'tavern': 1, 'market': 1, 'temple': 1, 'guild': 1,
+  'arena': 1, 'workshop': 1, 'runes': 1, 'bank': 1, 'shadow_alley': 1, 'gates': 1
+};
+
+function _resolveCityVenueKey(key) {
+  if (!key || typeof key !== 'string') return null;
+  key = key.toLowerCase();
+  if (key.indexOf('nav:') === 0) key = key.slice(4);
+  if (_CITY_PRIMARY_VENUES[key]) return key;
+  if (typeof _CITY_WALK_DESTINATIONS !== 'undefined' && _CITY_WALK_DESTINATIONS && _CITY_WALK_DESTINATIONS[key]) return key;
+  if (key === 'taverna' || key.indexOf('tavern_') === 0 || key.indexOf('taverna_') === 0) return 'tavern';
+  if (key === 'estalagem' || key === 'open_inn' || key.indexOf('inn_') === 0) return 'inn';
+  if (key === 'mercado' || key === 'open_market' || key.indexOf('market_') === 0 || key.indexOf('shop_') === 0) return 'market';
+  if (key === 'templo' || key === 'open_temple' || key.indexOf('temple_') === 0) return 'temple';
+  if (key === 'guilda' || key.indexOf('guild_') === 0 || key.indexOf('guilda_') === 0) return 'guild';
+  if (key === 'arena_main' || key.indexOf('arena_') === 0) return 'arena';
+  if (key === 'open_workshop' || key.indexOf('workshop_') === 0) return 'workshop';
+  if (key === 'rune_scribe' || key.indexOf('rune_') === 0 || key.indexOf('runes_') === 0) return 'runes';
+  if (key === 'banco' || key.indexOf('bank_') === 0) return 'bank';
+  if (key === 'action_shadow_alley' || key.indexOf('shadow_alley_') === 0) return 'shadow_alley';
+  if (key === 'portoes' || key === 'action_city_gates' || key.indexOf('gates_') === 0) return 'gates';
+  if (typeof CITY_CB_TO_SCREEN !== 'undefined' && CITY_CB_TO_SCREEN && CITY_CB_TO_SCREEN[key]) {
+    var mapped = CITY_CB_TO_SCREEN[key];
+    if (_CITY_PRIMARY_VENUES[mapped]) return mapped;
+  }
+  return null;
+}
+
+function _getCityCurrentVenue() {
+  if (_cityCurrentVenue) return _cityCurrentVenue;
+  if (window._cityCurrentVenue) return window._cityCurrentVenue;
+  try {
+    var stored = sessionStorage.getItem('valdoria_city_current_venue');
+    if (stored) {
+      _cityCurrentVenue = stored;
+      window._cityCurrentVenue = stored;
+      return stored;
+    }
+  } catch(_) {}
+  return null;
+}
+
+function _setCityCurrentVenue(venueKey) {
+  var resolved = _resolveCityVenueKey(venueKey);
+  _cityCurrentVenue = resolved || null;
+  window._cityCurrentVenue = _cityCurrentVenue;
+  try {
+    if (_cityCurrentVenue) {
+      sessionStorage.setItem('valdoria_city_current_venue', _cityCurrentVenue);
+    } else {
+      sessionStorage.removeItem('valdoria_city_current_venue');
+    }
+  } catch(_) {}
+}
+window._resolveCityVenueKey = _resolveCityVenueKey;
+window._getCityCurrentVenue = _getCityCurrentVenue;
+window._setCityCurrentVenue = _setCityCurrentVenue;
+
 // navigateTo unificado:
 //  - 'hub' / 'cartografia' → muda #content, fecha popup
 //  - qualquer outro key → abre/empilha popup (igual bot DEV abre vPopup ao clicar local)
@@ -22261,7 +22326,11 @@ function navigateTo(screen, params, skipWalk){
     return;
   }
   // Travessia urbana (Ordem do Usuário 2026-10): caminhar pelo distrito com narrativa e chance de eventos
-  if (!skipWalk && typeof _startCityWalk === 'function' && typeof _CITY_WALK_DESTINATIONS !== 'undefined' && _CITY_WALK_DESTINATIONS[screen] && _currentScreen === 'hub' && _popupStack.length === 0) {
+  // Se o aventureiro já se encontra no local (ex.: já estava na guilda e reabriu), pula a travessia
+  var targetVenue = _resolveCityVenueKey(screen);
+  var currentVenue = _getCityCurrentVenue();
+  var isAlreadyAtVenue = !!(targetVenue && currentVenue && targetVenue === currentVenue);
+  if (!skipWalk && !isAlreadyAtVenue && typeof _startCityWalk === 'function' && typeof _CITY_WALK_DESTINATIONS !== 'undefined' && _CITY_WALK_DESTINATIONS[screen] && _currentScreen === 'hub' && _popupStack.length === 0) {
     _startCityWalk(screen, function(){
       navigateTo(screen, params, true);
     });
@@ -59720,6 +59789,7 @@ function openCityPopup(key, params){
     if (key === 'market' || (typeof key === 'string' && (key.indexOf('shop_') === 0 || key.indexOf('market_') === 0))) {
       window._isAtMarket = true;
     }
+    if (typeof _setCityCurrentVenue === 'function') _setCityCurrentVenue(key);
     _logCity('popup open -> ' + key + ' DEDUP (already on top)');
     _renderCityPopup(key);
     var popup0 = document.getElementById('city-subscreen-popup');
@@ -59729,6 +59799,7 @@ function openCityPopup(key, params){
   if (key === 'market' || (typeof key === 'string' && (key.indexOf('shop_') === 0 || key.indexOf('market_') === 0))) {
     window._isAtMarket = true;
   }
+  if (typeof _setCityCurrentVenue === 'function') _setCityCurrentVenue(key);
   _popupStack.push(key);
   _renderCityPopup(key);
   var popup = document.getElementById('city-subscreen-popup');
@@ -68865,10 +68936,12 @@ function _showCityWalkArrival(dest, narrativeText, proceedFn) {
       inlineChoices: true,
       onChoice: function() {
         if (typeof vEncounter.close === 'function') vEncounter.close();
+        if (typeof _setCityCurrentVenue === 'function') _setCityCurrentVenue(dest.key || dest.placeName);
         if (typeof proceedFn === 'function') proceedFn();
       }
     });
   } else {
+    if (typeof _setCityCurrentVenue === 'function') _setCityCurrentVenue(dest.key || dest.placeName);
     if (typeof proceedFn === 'function') proceedFn();
   }
 }
