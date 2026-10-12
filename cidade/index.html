@@ -54684,9 +54684,15 @@ function _guildShowRecruits(p){
         // #95 FASE 3: card épico (retrato à esquerda + nome + "Nível N · Classe · Raça")
         var raceStr = it.race ? (' · ' + it.race) : '';
         var port = it.port ? ('../shared/img/adventurers/' + it.port + '.webp') : '';
+        var badgeHtml = it.cost + ' ' + coin;
+        if (it.base_cost && it.cost < it.base_cost) {
+          badgeHtml = '<span style="text-decoration:line-through;opacity:0.55;font-size:0.85em;margin-right:4px;">' + it.base_cost + '</span><span style="color:var(--v-success,#6fae6f);font-weight:700;">' + it.cost + '</span> ' + coin;
+        } else if (it.base_cost && it.cost > it.base_cost) {
+          badgeHtml = '<span style="color:var(--v-danger,#c0584a);font-weight:700;">' + it.cost + '</span> ' + coin;
+        }
         return { portrait: port, icon: (it.ico || _heralIco('ic-grupo')), label: it.n,
           desc: 'Nível ' + (it.l || 1) + ' · ' + _clsCap(it.c) + raceStr + (it.rehire ? ' · (recontratar)' : ''),
-          badge: it.cost + ' ' + coin, _it: it };
+          badge: badgeHtml, _it: it };
       });
       _squareShowListPopup({
         stackKey: 'guild_recruits', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Recrutar Aliados',
@@ -69586,11 +69592,20 @@ function _renderCityDialogue(venue, data, p, ctx){
     { npc: data.npc, script: data.script, choices: data.choices },
     { player: p, closeable: true,
       venue: venue, node: node, handlerType: 'city_dialogue', customState: { ctx: ctx },
+      onClose: function() {
+        if (venue === 'recruta' && typeof _guildShowRecruits === 'function') {
+          _guildShowRecruits(p);
+        }
+      },
       onChoice: function(ch){
         // FASE 5d (#3): ramo do recruta ANTES dos ramos genéricos. D2: "Ver ficha"
         // é uma CHOICE com `node` ('<npc_id>:ficha'); voltar_ficha tem node '<npc_id>'.
         if (venue === 'recruta') {
-          if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} return; }
+          if (ch && ch.cb === 'close') {
+            try { window.vEncounter.close(); } catch(_){}
+            if (typeof _guildShowRecruits === 'function') _guildShowRecruits(p);
+            return;
+          }
           var nextNode = (ch && ch.node) || (data.node) || npcId;  // D1: node carrega npc_id
           if (ch && (ch.check || ch.dc) && typeof _showSkillCheckTacticalModal === 'function') {
             _showSkillCheckTacticalModal('recruta', nextNode, ch, p, data, { npcId: npcId });
@@ -69738,7 +69753,12 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
     return;
   }
   // fechar
-  if (data.close) { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); return; }
+  if (data.close) {
+    try { window.vEncounter.close(); } catch(_){}
+    if (typeof refreshHud === 'function') refreshHud();
+    if (venue === 'recruta' && typeof _guildShowRecruits === 'function') _guildShowRecruits(p);
+    return;
+  }
   // transição (porão server-driven já existente)
   if (data.transition && data.transition.kind === 'cellar') {
     try { window.vEncounter.close(); } catch(_){}
@@ -69816,6 +69836,7 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
               try { window.vEncounter.close(); } catch(_){}
               if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
               if (typeof refreshHud === 'function') refreshHud();
+              if (typeof _guildShowRecruits === 'function') _guildShowRecruits(p);
           } }
         );
         return;
@@ -69872,7 +69893,11 @@ function _setupCityDialoguePersistence() {
     var npcId = (ctx && ctx.npcId) || (npc && (npc.id || npc.npc_id)) || '';
 
     if (venue === 'recruta') {
-      if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} return; }
+      if (ch && ch.cb === 'close') {
+        try { window.vEncounter.close(); } catch(_){}
+        if (typeof _guildShowRecruits === 'function') _guildShowRecruits(p);
+        return;
+      }
       var nextNode = (ch && ch.node) || node || npcId;
       _resolveCityChoice('recruta', nextNode, ch && ch.id, p, npc, { npcId: npcId });
       return;

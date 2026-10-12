@@ -3439,7 +3439,8 @@
   }
 
   function close() {
-    _clearActiveState(_resolveStorageCharId(_activeEncounterInstance ? _activeEncounterInstance.opts : null));
+    var prevOpts = _activeEncounterInstance ? _activeEncounterInstance.opts : null;
+    _clearActiveState(_resolveStorageCharId(prevOpts));
     closeChoices(true);
     var ov = document.getElementById(OVERLAY_ID);
     // task #69: idempotent state cleanup (also covers edge case where .close()
@@ -3451,6 +3452,9 @@
     _closeOverlay(ov);
     _currentRenderState = null;
     _activeEncounterInstance = null;
+    if (prevOpts && typeof prevOpts.onClose === 'function') {
+      try { prevOpts.onClose(); } catch(e){ console.error('[vEncounter] onClose error', e); }
+    }
   }
 
   function isOpen() {
