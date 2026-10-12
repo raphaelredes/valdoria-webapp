@@ -28561,9 +28561,19 @@ function _srvCompleteQuest(serverId){
       var rw = r.rewards || {};
       // aplica gold/xp ao HUD local (display); servidor já persistiu
       try { var p = window.CITY_MOCK_PLAYER; if (p){ if (rw.gold) p.gold = (p.gold||0) + rw.gold; if (rw.xp) p.xp = (p.xp||0) + rw.xp; } if (typeof refreshHud==='function') refreshHud(); } catch(_){}
-      if (typeof vToast==='function') vToast('✓ Missão completa! +' + (rw.gold||0) + ' Valdoritas +' + (rw.xp||0) + ' XP');
-      if (typeof closeCityPopup==='function') closeCityPopup(true);
-      _refreshServerBoard().then(function(){ if (typeof renderCurrentScreen==='function') renderCurrentScreen(); });
+      var _dest = (typeof _getQuestDeliveryDestination === 'function') ? _getQuestDeliveryDestination(serverId) : null;
+      if (typeof closeCityPopup === 'function') closeCityPopup(true);
+      if (typeof _showQuestCompletionEncounter === 'function') {
+        _showQuestCompletionEncounter(serverId, rw.gold || 0, rw.xp || 0, _dest, function(){
+          if (typeof vToast === 'function') vToast('✓ Missão completa! +' + (rw.gold||0) + ' Valdoritas +' + (rw.xp||0) + ' XP');
+          if (typeof navigateTo === 'function' && _dest && _dest.destKey) navigateTo(_dest.destKey, null, true);
+          _refreshServerBoard().then(function(){ if (typeof renderCurrentScreen === 'function') renderCurrentScreen(); });
+        });
+      } else {
+        if (typeof vToast === 'function') vToast('✓ Missão completa! +' + (rw.gold||0) + ' Valdoritas +' + (rw.xp||0) + ' XP');
+        if (typeof navigateTo === 'function' && _dest && _dest.destKey) navigateTo(_dest.destKey, null, true);
+        _refreshServerBoard().then(function(){ if (typeof renderCurrentScreen === 'function') renderCurrentScreen(); });
+      }
     } else if (typeof vToast==='function') {
       vToast((r && r.error) || 'Não foi possível entregar a missão');
     }
@@ -28671,6 +28681,212 @@ function _getQuestDeliveryDestination(serverId, sq) {
   if (/arena|combate|gladiador/i.test(desc)) return { destKey: 'arena', npcName: 'Mestre da Arena', placeName: 'Arena de Valdoria' };
   if (/beco|sombras|velithra/i.test(desc)) return { destKey: 'shadow_alley', npcName: 'Contato das Sombras', placeName: 'Beco das Sombras' };
   return { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' };
+}
+
+// Diálogos diegéticos de conclusão de missões (D&D 5e / Ordem do Usuário 2026-10):
+// Narrativa sensorial do Mestre + fala do NPC contratante + escolha em 1ª pessoa.
+var _QUEST_COMPLETION_SCENES = {
+  'wolves': {
+    npc: { name: 'Mestra Tavira', desc: 'Mestra da Guilda dos Aventureiros · Pátio das Lâminas', portrait: '/shared/img/npcs/mestra-tavira.webp' },
+    script: [
+      { type: 'narration', text: 'Você sobe os degraus de cantaria e adentra a Guilda dos Aventureiros. Mestra Tavira ergue o olhar dos mapas táticos, sentindo o cheiro de mato e trilha em seus passos.' },
+      { type: 'speech', speaker: 'Mestra Tavira', text: '— Os fazendeiros do norte enviaram uma mensagem confirmando: a alcateia de lobos recuou após você abater os espécimes. Excelente caçada, aventureiro. Aqui está a recompensa prometida pela Guilda.' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Tavira',
+      speech: '— "Missão cumprida, Mestra Tavira. A estrada ao norte está mais segura."',
+      tag: 'RECOMPENSA',
+      desc: 'Entregar os troféus dos lobos e receber o pagamento e o prestígio da guilda.'
+    }
+  },
+  'goblins': {
+    npc: { name: 'Capitã Helga', desc: 'Instrutora e Capitã da Guilda · Pátio de Armas', portrait: '/shared/img/npcs/capita-helga.webp' },
+    script: [
+      { type: 'narration', text: 'Você encontra a Capitã Helga no salão de armas da Guilda, supervisionando a manutenção dos escudos. Ao notar sua aproximação, ela assente com respeito marcial.' },
+      { type: 'speech', speaker: 'Capitã Helga', text: '— Notícias do norte chegaram antes de você. Os goblins debandaram do acampamento após você eliminar o grupo batedor. Trabalho limpo e preciso. Tome sua paga merecida.' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Helga',
+      speech: '— "Os batedores goblins foram eliminados, Capitã. Foi uma honra."',
+      tag: 'RECOMPENSA',
+      desc: 'Entregar as provas do confronto e receber a recompensa de Valdoritas e experiência.'
+    }
+  },
+  'herbs': {
+    npc: { name: 'Mestra Sylvi', desc: 'Herbalista e Alquimista · Mercado de Valdoria', portrait: '/shared/img/npcs/mestra-sylvi.webp' },
+    script: [
+      { type: 'narration', text: 'Você se aproxima da banca de alquimia no Mercado de Valdoria. Frascos de vidro colorido tilintam suavemente quando Mestra Sylvi nota o fardo aromático de folhas frescas em suas mãos.' },
+      { type: 'speech', speaker: 'Mestra Sylvi', text: '— Pelas raízes sagradas! Raiz-da-noite perfeitamente colhida sob o luar! Minhas infusões curativas terão uma pureza inigualável graças à sua diligência. Aqui está cada moeda prometida, com minha sincera gratidão.' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Sylvi',
+      speech: '— "Aqui estão as cinco raízes-da-noite, Sylvi. Que sirvam a um bom propósito."',
+      tag: 'RECOMPENSA',
+      desc: 'Entregar as raízes frescas para a confecção de elixires medicinais.'
+    }
+  },
+  'patrol': {
+    npc: { name: 'Vigia Tomás', desc: 'Sentinela das Ameias · Portões de Valdoria', portrait: '/shared/img/npcs/joran-sentinela.webp' },
+    script: [
+      { type: 'narration', text: 'Você encontra o Vigia Tomás nas ameias dos Portões de Valdoria, apoiado em sua lança enquanto fita a bruma que se dissipa na planície.' },
+      { type: 'speech', speaker: 'Vigia Tomás', text: '— Sobrevivemos à vigília sob o nevoeiro do pântano. Seus olhos atentos e sua firmeza impediram que perigos se esgueirassem até a rota comercial. Aqui está sua parte merecida do soldo.' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Tomás',
+      speech: '— "A patrulha na fronteira foi cumprida com vigilância e disciplina, Tomás."',
+      tag: 'RECOMPENSA',
+      desc: 'Concluir a ronda da patrulha e receber o pagamento das sentinelas.'
+    }
+  },
+  'rat_den': {
+    npc: { name: 'Padeiro Erlan', desc: 'Mestre Padeiro · Mercado Central de Valdoria', portrait: '/shared/img/npcs/aldeao.webp' },
+    script: [
+      { type: 'narration', text: 'Você chega à padaria no Mercado Central. O calor acolhedor do forno de pedra e o cheiro de pão crocante guiam seus passos até Erlan, que bate a farinha das mãos sorrindo aliviado.' },
+      { type: 'speech', speaker: 'Padeiro Erlan', text: '— Pelos deuses, a paz voltou ao porão! O forno já está a todo vapor e a farinha ficou intocada. Você me livrou de um prejuízo terrível, andarilho! Tome seu pagamento com toda a minha gratidão.' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Erlan',
+      speech: '— "O porão foi desinfestado e o perigo neutralizado, Erlan. Bom proveito do forno."',
+      tag: 'RECOMPENSA',
+      desc: 'Receber a recompensa do padeiro pelo extermínio dos ratos gigantes.'
+    }
+  },
+  'escort': {
+    npc: { name: 'Comerciante Brael', desc: 'Mercador de Caravanas · Portões de Valdoria', portrait: '/shared/img/npcs/comerciante-brael.webp' },
+    script: [
+      { type: 'narration', text: 'Você encontra o Comerciante Brael supervisionando o descarregamento das carroças junto às muralhas dos Portões de Valdoria. Ele vem ao seu encontro com expressão de imenso alívio.' },
+      { type: 'speech', speaker: 'Comerciante Brael', text: '— Cada baú e cada fardo chegou sem um único arranhão! As trilhas estavam repletas de olhares suspeitos, mas sua prontidão de guarda nos trouxe em segurança até aqui. Receba sua justa parte!' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Brael',
+      speech: '— "A caravana completou a jornada sem baixas, Brael. Bons negócios em Valdoria."',
+      tag: 'RECOMPENSA',
+      desc: 'Finalizar o contrato de escolta e embolsar o ouro dos mercadores.'
+    }
+  },
+  'ruin': {
+    npc: { name: 'Estudiosa Maeve', desc: 'Arqueóloga e Erudita · Colina dos Altares', portrait: '/shared/img/npcs/estudiosa-maeve.webp' },
+    script: [
+      { type: 'narration', text: 'Você sobe até as arcadas iluminadas da Colina dos Altares, onde a Estudiosa Maeve examina velhos pergaminhos. Ao ver os artefatos antigos em suas mãos, seus olhos brilham de entusiasmo.' },
+      { type: 'speech', speaker: 'Estudiosa Maeve', text: '— Simplesmente extraordinário! As inscrições nestas relíquias preservam memórias que julgávamos perdidas no tempo! Seu empenho arqueológico e marcial foi inestimável. Receba sua recompensa com todo o meu apreço.' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Maeve',
+      speech: '— "As relíquias foram resgatadas com segurança das ruínas élficas, Maeve."',
+      tag: 'RECOMPENSA',
+      desc: 'Entregar os achados arqueológicos e receber a gratificação dos estudiosos.'
+    }
+  },
+  'bandit_lord': {
+    npc: { name: 'Capitã Helga', desc: 'Instrutora e Capitã da Guilda · Pátio de Armas', portrait: '/shared/img/npcs/capita-helga.webp' },
+    script: [
+      { type: 'narration', text: 'Você adentra a Guilda dos Aventureiros. Capitã Helga baixa uma caneca de ferro e bate o punho calejado na mesa ao constatar a confirmação da derrota de Vargrim.' },
+      { type: 'speech', speaker: 'Capitã Helga', text: '— Vargrim, o Cicatriz, finalmente encontrou seu fim! Aquele facínora aterrorizou as rotas comerciais por luas inteiras. A ordem e o sossego retornam às estradas graças à sua coragem. Receba a recompensa máxima do contrato.' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Helga',
+      speech: '— "O líder bandido foi derrotado, Capitã. A justiça prevaleceu nas trilhas."',
+      tag: 'RECOMPENSA',
+      desc: 'Confirmar a eliminação do líder bandido e recolher o alto prêmio da recompensa.'
+    }
+  },
+  'dragonet': {
+    npc: { name: 'Conselheiro Aldric', desc: 'Conselheiro Municipal · Portões de Valdoria', portrait: '/shared/img/npcs/guarda-aldric.webp' },
+    script: [
+      { type: 'narration', text: 'Você encontra o Conselheiro Aldric ladeado por guardas junto aos Portões de Valdoria. Ao avistar o troféu escamoso do dragonete, ele solta um longo suspiro de alívio.' },
+      { type: 'speech', speaker: 'Conselheiro Aldric', text: '— A desgraça foi contida antes que a criatura ganhasse envergadura para queimar vilarejos inteiros. O conselho municipal reconhece seu grande feito com a mais alta consideração. Aqui está o tesouro prometido.' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Aldric',
+      speech: '— "O dragonete foi abatido na cratera, Conselheiro. As fazendas estão a salvo."',
+      tag: 'RECOMPENSA',
+      desc: 'Apresentar as provas do abate da fera alada e receber o tesouro da cidade.'
+    }
+  },
+  'defend': {
+    npc: { name: 'Capitã Helga', desc: 'Instrutora e Capitã da Guilda · Pátio de Armas', portrait: '/shared/img/npcs/capita-helga.webp' },
+    script: [
+      { type: 'narration', text: 'O salão da Guilda está em júbilo contido. Capitã Helga avança a passos decididos e presta uma continência marcial vigorosa diante de você.' },
+      { type: 'speech', speaker: 'Capitã Helga', text: '— Os relatórios dos batedores confirmam: as hordas orcs recuaram após a resistência ferrenha nos Campos Verdes! Você protegeu vidas inocentes com firmeza de aço. Valdoria tem uma dívida de honra com você!' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Helga',
+      speech: '— "A linha nos Campos Verdes resistiu ao impacto, Capitã. Valdoria segue protegida."',
+      tag: 'RECOMPENSA',
+      desc: 'Reportar a vitória na defesa dos campos e receber o prestigioso soldo marcial.'
+    }
+  },
+  'cellar': {
+    npc: { name: 'Martha', desc: 'Estalajadeira · Estalagem Pena-Dourada', portrait: '/shared/img/npcs/martha.webp' },
+    script: [
+      { type: 'narration', text: 'Você desce até a entrada da adega na Estalagem Pena-Dourada. Martha guarda os panos de linho e ergue a lamparina com os olhos marejados de alívio.' },
+      { type: 'speech', speaker: 'Martha', text: '— O silêncio voltou ao porão! Não ouço mais nenhum ruído assustador sob os assoalhos. Posso buscar meus barris de vinho em paz. Muito obrigada, tome aqui seu ouro merecido e a eterna gratidão da casa.' }
+    ],
+    choice: {
+      label: 'Receber recompensa de Martha',
+      speech: '— "Sua adega está desobstruída e segura, Martha. Descanse com tranquilidade."',
+      tag: 'RECOMPENSA',
+      desc: 'Avisar a estalajadeira da limpeza da adega e receber o pagamento e o quarto limpo.'
+    }
+  }
+};
+_QUEST_COMPLETION_SCENES['quest_martha_cellar'] = _QUEST_COMPLETION_SCENES['cellar'];
+_QUEST_COMPLETION_SCENES['quest_wolves'] = _QUEST_COMPLETION_SCENES['wolves'];
+_QUEST_COMPLETION_SCENES['quest_goblins'] = _QUEST_COMPLETION_SCENES['goblins'];
+_QUEST_COMPLETION_SCENES['quest_herbs'] = _QUEST_COMPLETION_SCENES['herbs'];
+_QUEST_COMPLETION_SCENES['quest_patrol'] = _QUEST_COMPLETION_SCENES['patrol'];
+_QUEST_COMPLETION_SCENES['quest_rat_den'] = _QUEST_COMPLETION_SCENES['rat_den'];
+_QUEST_COMPLETION_SCENES['quest_escort'] = _QUEST_COMPLETION_SCENES['escort'];
+_QUEST_COMPLETION_SCENES['quest_ruin'] = _QUEST_COMPLETION_SCENES['ruin'];
+_QUEST_COMPLETION_SCENES['quest_bandit_lord'] = _QUEST_COMPLETION_SCENES['bandit_lord'];
+_QUEST_COMPLETION_SCENES['quest_dragonet'] = _QUEST_COMPLETION_SCENES['dragonet'];
+_QUEST_COMPLETION_SCENES['quest_defend'] = _QUEST_COMPLETION_SCENES['defend'];
+
+function _showQuestCompletionEncounter(questId, gold, xp, destInfo, onDone) {
+  var p = (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {});
+  var comp = _QUEST_COMPLETION_SCENES[questId] || (_QUEST_COMPLETION_SCENES[questId.replace(/^quest_/, '')]);
+  if (!comp && destInfo) {
+    comp = {
+      npc: { name: destInfo.npcName || 'Contratante', desc: destInfo.placeName || 'Valdoria' },
+      script: [
+        { type: 'narration', text: 'Você encontra ' + (destInfo.npcName || 'o contratante') + ' em ' + (destInfo.placeName || 'seu posto') + ' e relata a conclusão bem-sucedida do objetivo.' },
+        { type: 'speech', speaker: destInfo.npcName || 'Contratante', text: '— Excelente trabalho, aventureiro! Sua perícia honrou este contrato. Aqui está sua recompensa merecida.' }
+      ],
+      choice: {
+        label: 'Receber recompensa',
+        speech: '— "Missão cumprida. Foi uma honra servir."',
+        tag: 'RECOMPENSA',
+        desc: 'Receber a recompensa de ouro e prestígio.'
+      }
+    };
+  }
+  if (comp && window.vEncounter && typeof vEncounter.render === 'function') {
+    vEncounter.render({
+      npc: comp.npc,
+      script: comp.script,
+      choices: [
+        {
+          id: 'turn_in_done',
+          label: comp.choice.label,
+          speech: comp.choice.speech,
+          tag: comp.choice.tag || 'RECOMPENSA',
+          desc: comp.choice.desc || 'Receber a recompensa da missão.'
+        }
+      ],
+      choicesTitle: 'Entrega de Missão',
+      choicesSubtitle: (destInfo && (destInfo.placeName || destInfo.destKey)) || 'Valdoria'
+    }, {
+      player: p,
+      progress: { isCityWalk: false, title: '◈ ENTREGA DE MISSÃO', destination: (destInfo && (destInfo.placeName || destInfo.destKey)) || 'Valdoria' },
+      inlineChoices: true,
+      onChoice: function() {
+        if (typeof vEncounter.close === 'function') vEncounter.close();
+        if (typeof onDone === 'function') onDone();
+      }
+    });
+  } else {
+    if (typeof onDone === 'function') onDone();
+  }
 }
 
 // Detalhe de quest do SERVIDOR: injeta uma sub-tela dinâmica em SUBSCREEN_DATA
@@ -61396,7 +61612,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Sussurros', 'quest_wolves_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes do objetivo', '3 lobos cinzentos', 'quest_wolves_details'],
-      [_heralIco('ic-missões'), 'Reportar a Tavira', 'completar missão', 'quest_wolves_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Tavira (Guilda)', 'completar missão', 'quest_wolves_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Tavira', 'quest_wolves_abandon']
     ]
   },
@@ -61407,7 +61623,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_lyana_locate'],
       [_heralIco('ic-pergaminho'), 'Reler a carta', 'pergaminho selado', 'quest_lyana_read'],
-      [_heralIco('ic-missões'), 'Entregar carta a Lyana', 'completar missão', 'quest_lyana_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Lyana (Praça)', 'completar missão', 'quest_lyana_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Lyana', 'quest_lyana_abandon']
     ]
   },
@@ -61422,7 +61638,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Ninho de Goblins', 'quest_goblins_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 3 goblins', 'quest_goblins_details'],
-      [_heralIco('ic-missões'), 'Entregar provas a Helga', 'completar missão', 'quest_goblins_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Helga (Guilda)', 'completar missão', 'quest_goblins_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Helga', 'quest_goblins_abandon']
     ]
   },
@@ -61433,7 +61649,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Floresta dos Sussurros', 'quest_herbs_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '5 raízes-da-noite', 'quest_herbs_details'],
-      [_heralIco('ic-missões'), 'Entregar ervas a Sylvi', 'completar missão', 'quest_herbs_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Sylvi (Mercado)', 'completar missão', 'quest_herbs_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Sylvi', 'quest_herbs_abandon']
     ]
   },
@@ -61445,7 +61661,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Pântano Nebuloso', 'quest_patrol_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à patrulha', 'quest_patrol_details'],
-      [_heralIco('ic-missões'), 'Reportar a Tomás', 'completar missão', 'quest_patrol_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Tomás (Portões)', 'completar missão', 'quest_patrol_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Tomás', 'quest_patrol_abandon']
     ]
   },
@@ -61457,7 +61673,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_rat_den_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar 4 ratos-gigantes', 'quest_rat_den_details'],
-      [_heralIco('ic-missões'), 'Reportar a Erlan', 'completar missão', 'quest_rat_den_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Erlan (Mercado)', 'completar missão', 'quest_rat_den_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Erlan', 'quest_rat_den_abandon']
     ]
   },
@@ -61468,7 +61684,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Valkrest (Acampamento)', 'quest_escort_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'sobreviver à jornada', 'quest_escort_details'],
-      [_heralIco('ic-missões'), 'Reportar a Brael', 'completar missão', 'quest_escort_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Brael (Portões)', 'completar missão', 'quest_escort_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Brael', 'quest_escort_abandon']
     ]
   },
@@ -61479,7 +61695,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Ruínas Élficas', 'quest_ruin_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', '3 relíquias ou pergaminhos', 'quest_ruin_details'],
-      [_heralIco('ic-missões'), 'Entregar achados a Maeve', 'completar missão', 'quest_ruin_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Maeve (Colina)', 'completar missão', 'quest_ruin_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Maeve', 'quest_ruin_abandon']
     ]
   },
@@ -61490,7 +61706,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Forte dos Bandidos', 'quest_bandit_lord_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar Vargrim', 'quest_bandit_lord_details'],
-      [_heralIco('ic-missões'), 'Reportar a Helga', 'completar missão', 'quest_bandit_lord_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Helga (Guilda)', 'completar missão', 'quest_bandit_lord_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Helga', 'quest_bandit_lord_abandon']
     ]
   },
@@ -61501,7 +61717,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Cratera Vulcânica', 'quest_dragonet_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'matar dragonete', 'quest_dragonet_details'],
-      [_heralIco('ic-missões'), 'Reportar a Aldric', 'completar missão', 'quest_dragonet_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Aldric (Portões)', 'completar missão', 'quest_dragonet_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Aldric', 'quest_dragonet_abandon']
     ]
   },
@@ -61512,7 +61728,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Campos Verdes', 'quest_defend_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'defender a região', 'quest_defend_details'],
-      [_heralIco('ic-missões'), 'Reportar a Helga', 'completar missão', 'quest_defend_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Helga (Guilda)', 'completar missão', 'quest_defend_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Helga', 'quest_defend_abandon']
     ]
   },
@@ -61524,7 +61740,7 @@ var SUBSCREEN_DATA = {
     buttons: [
       [_heralIco('ic-cartografia'), 'Ver no mapa', 'Portões de Valdoria', 'quest_cellar_locate'],
       [_heralIco('ic-pergaminho'), 'Detalhes objetivos', 'limpar a adega', 'quest_cellar_details'],
-      [_heralIco('ic-missões'), 'Reportar a Martha', 'completar missão', 'quest_cellar_deliver'],
+      [_heralIco('ic-missões'), '🚶 A caminho de Martha (Estalagem)', 'completar missão', 'quest_cellar_deliver'],
       [_heralIco('ic-missões'), 'Abandonar missão', '-afinidade com Martha', 'quest_cellar_abandon']
     ]
   },
@@ -61640,9 +61856,9 @@ function _startLyanaEncounter(p, forceDay){
         {
           id: 'go_inn',
           tag: 'INVESTIGAR',
-          speech: '— "Agradeço a orientação, guarda. Vou até a Estalagem da Pena-Dourada tentar a sorte por lá."',
-          label: '🍺 Ir à Estalagem da Pena-Dourada',
-          desc: 'Seguir o conselho da patrulha e fazer o caminho até a estalagem para procurar Lyana.'
+          speech: '— "Agradeço a orientação, guarda. Vou até a Estalagem da Pena-Dourada procurar abrigo e descansar até o amanhecer."',
+          label: '🏨 Procurar abrigo na Estalagem da Pena-Dourada',
+          desc: 'Seguir o conselho da patrulha e caminhar até a estalagem para alugar um quarto e repousar.'
         },
         {
           id: 'leave_night',
@@ -61663,12 +61879,16 @@ function _startLyanaEncounter(p, forceDay){
           setTimeout(function(){ _startLyanaEncounter(p, true); }, 400);
         } else if (ch.id === 'go_inn') {
           try { window.vEncounter.close(); } catch(_){}
+          if (typeof closeCityPopup === 'function') closeCityPopup(true);
           if (typeof _startCityWalk === 'function') {
             _startCityWalk('inn', function(){
-              if (typeof navigateTo === 'function') navigateTo('inn');
+              if (typeof closeCityPopup === 'function') closeCityPopup(true);
+              if (typeof navigateTo === 'function') navigateTo('inn', null, true);
+              if (typeof vToast === 'function') vToast('Você chegou à Estalagem da Pena-Dourada. Aqui você pode alugar um quarto para descansar até o amanhecer.');
             });
           } else {
-            if (typeof navigateTo === 'function') navigateTo('inn');
+            if (typeof closeCityPopup === 'function') closeCityPopup(true);
+            if (typeof navigateTo === 'function') navigateTo('inn', null, true);
           }
         } else if (ch.id === 'leave_night') {
           try { window.vEncounter.close(); } catch(_){}
@@ -63035,7 +63255,16 @@ var ACTION_HANDLERS = {
     });
   },
   'quest_lyana_locate': function(p){ _questGotoMap('lyana', 'Falar com Lyana'); },
-  'quest_lyana_deliver': function(p){ _startLyanaEncounter(p); },
+  'quest_lyana_deliver': function(p){
+    if (typeof _startCityWalk === 'function') {
+      if (typeof closeCityPopup === 'function') closeCityPopup(true);
+      _startCityWalk('market', function(){
+        _startLyanaEncounter(p);
+      }, { questId: 'lyana', npcName: 'Lyana' });
+    } else {
+      _startLyanaEncounter(p);
+    }
+  },
   'quest_lyana_read': function(p){
     _showInfoPopup({
       icon: _heralIco('ic-pergaminho'),
@@ -63623,7 +63852,7 @@ function _isQuestReady(questId){
   return { ready: false, raw: prog };
 }
 
-function _deliverQuest(questId, gold, xp, msg){
+function _deliverQuest(questId, gold, xp, msg, skipWalk){
   var p = window.CITY_MOCK_PLAYER;
   if (!p) return;
   p.completed_quests = p.completed_quests || [];
@@ -63637,7 +63866,7 @@ function _deliverQuest(questId, gold, xp, msg){
   var status = _isQuestReady(questId);
   if (!status.ready) {
     var detail = status.notFound
-      ? '<i>Aceita esta missão antes de tentar reportá-la.</i>'
+      ? '<i>Aceite esta missão antes de tentar reportá-la.</i>'
       : (status.current != null && status.goal != null
           ? 'Progresso atual: <b style="color:#e8a042;">' + status.current + ' / ' + status.goal + '</b>.<br><br>'
             + '<i>Volte quando tiver completado o objetivo.</i>'
@@ -63654,6 +63883,31 @@ function _deliverQuest(questId, gold, xp, msg){
     }
     return;
   }
+
+  // Se não foi chamado com skipWalk=true, caminha fisicamente até o local de entrega
+  if (!skipWalk && typeof _startCityWalk === 'function') {
+    if (typeof closeCityPopup === 'function') closeCityPopup(true);
+    var destInfo = (typeof _getQuestDeliveryDestination === 'function')
+      ? _getQuestDeliveryDestination(questId)
+      : { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' };
+
+    _startCityWalk(destInfo.destKey, function(){
+      if (typeof _showQuestCompletionEncounter === 'function') {
+        _showQuestCompletionEncounter(questId, gold, xp, destInfo, function(){
+          _deliverQuest(questId, gold, xp, msg, true);
+          if (typeof navigateTo === 'function') navigateTo(destInfo.destKey, null, true);
+        });
+      } else {
+        _deliverQuest(questId, gold, xp, msg, true);
+        if (typeof navigateTo === 'function') navigateTo(destInfo.destKey, null, true);
+      }
+    }, {
+      questId: questId,
+      npcName: destInfo.npcName
+    });
+    return;
+  }
+
   p.gold = (p.gold || 0) + (gold || 0);
   if (typeof _gainXp === 'function' && xp) _gainXp(p, xp);
   p.completed_quests.push(questId);
@@ -68521,18 +68775,29 @@ function _resolveCityWalkCheck(ch, player, onResolved) {
 function _showCityWalkArrival(dest, narrativeText, proceedFn) {
   var p = (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {});
   if (window.vEncounter && typeof vEncounter.render === 'function') {
+    var arrivalTarget = dest.placeName || dest.name;
+    var arrivalNarr = dest.npcName
+      ? 'Você conclui a caminhada pelo distrito e avista <b>' + dest.npcName + '</b> em <b>' + arrivalTarget + '</b> diante de você.'
+      : 'Você conclui a caminhada pelo distrito e avista a entrada de <b>' + arrivalTarget + '</b> diante de você.';
+    var choiceLabel = dest.npcName
+      ? 'Aproximar-se de ' + dest.npcName
+      : 'Entrar em ' + arrivalTarget;
+    var choiceSpeech = dest.npcName
+      ? '— "Cheguei ao local. Hora de falar com ' + dest.npcName + '."'
+      : '— "Cheguei ao meu destino. É hora de prosseguir."';
+
     vEncounter.render({
       script: [
         { type: 'narration', text: narrativeText },
-        { type: 'narration', text: 'Você conclui a caminhada pelo distrito e avista a entrada de <b>' + dest.name + '</b> diante de você.' }
+        { type: 'narration', text: arrivalNarr }
       ],
       choices: [
         {
           id: 'walk_enter',
-          label: 'Entrar em ' + dest.name,
-          speech: '— "Cheguei ao meu destino. É hora de prosseguir."',
+          label: choiceLabel,
+          speech: choiceSpeech,
           tag: 'CHEGADA',
-          desc: 'Adentrar as dependências de ' + dest.name + '.'
+          desc: dest.npcName ? ('Aproximar-se de ' + dest.npcName + ' em ' + arrivalTarget + '.') : ('Adentrar as dependências de ' + arrivalTarget + '.')
         }
       ],
       choicesTitle: 'Chegada ao Destino',
@@ -68554,10 +68819,23 @@ function _showCityWalkArrival(dest, narrativeText, proceedFn) {
 function _startCityWalk(targetKey, proceedFn, opts) {
   opts = opts || {};
   var p = (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {});
-  var dest = _CITY_WALK_DESTINATIONS[targetKey] || { name: targetKey, district: 'Distrito de Valdoria' };
+  var baseDest = _CITY_WALK_DESTINATIONS[targetKey] || { name: targetKey, district: 'Distrito de Valdoria' };
+  var dest = {
+    key: targetKey,
+    name: opts.destName || (opts.npcName ? (opts.npcName + ' (' + baseDest.name + ')') : baseDest.name),
+    placeName: baseDest.name,
+    district: opts.district || baseDest.district || 'Distrito de Valdoria',
+    npcName: opts.npcName || null
+  };
 
   var hr = (new Date()).getHours();
-  var isNight = (hr < 6 || hr >= 22);
+  try {
+    if (typeof _getCurrentGameTime === 'function') {
+      var _gt = _getCurrentGameTime();
+      if (_gt && _gt.hour != null) hr = _gt.hour;
+    }
+  } catch(_) {}
+  var isNight = (typeof _getGamePeriod === 'function') ? (_getGamePeriod(hr) === 'night') : (hr < 6 || hr >= 22);
   var isRain = false;
   try {
     if (typeof _getCurrentGameTime === 'function' && typeof _getGameWeather === 'function') {
