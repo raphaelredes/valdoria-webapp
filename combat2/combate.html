@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-11T00:04:43Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-12T10:01:30Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -11580,6 +11580,40 @@ canvas#vfxCanvas,
   0% { opacity: 0; transform: translate(-50%, -30%) scale(0.85); }
   100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
+
+/* 2026-10-12 D&D 5e Épico: Screen Shakes e Vinheta de Acerto Crítico em #app */
+#app.shake-light {
+  animation: appShakeLight 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+#app.shake-heavy {
+  animation: appShakeHeavy 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+@keyframes appShakeLight {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 1px, 0); }
+  30%, 50%, 70% { transform: translate3d(-2px, -1px, 0); }
+  40%, 60% { transform: translate3d(2px, 0, 0); }
+}
+@keyframes appShakeHeavy {
+  10%, 90% { transform: translate3d(-3px, -1px, 0) scale(1.002); }
+  20%, 80% { transform: translate3d(4px, 2px, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, -2px, 0) scale(0.998); }
+  40%, 60% { transform: translate3d(5px, 1px, 0); }
+}
+#app.crit-vignette-flash::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 99999;
+  box-shadow: inset 0 0 100px 30px rgba(255, 60, 20, 0.55), inset 0 0 40px rgba(255, 215, 0, 0.35);
+  animation: critVignettePulse 0.45s ease-out forwards;
+}
+@keyframes critVignettePulse {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
 </style>
 <script>
 /* Garante classe no <html> (copias antigas) e reaplica skin no fim da cascata após todos os CSS do CDN. */
@@ -16276,7 +16310,12 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         /* 2026-04-27: Wet status (D&D 5e DMG p.110). Importado da exploração via
            wetTurns_exact no SIM payload. Quando > 0: vulnerabilidade a frio +
            resistência a fogo. Decrementa 1 por round em rollInitiative/start. */
-        wetTurns: (spec.wetTurns_exact != null) ? Math.max(0, parseInt(spec.wetTurns_exact, 10) || 0) : 0
+        wetTurns: (spec.wetTurns_exact != null) ? Math.max(0, parseInt(spec.wetTurns_exact, 10) || 0) : 0,
+        /* 2026-10-12: D&D 5e Resistências, Vulnerabilidades e Imunidades */
+        resistances: Array.isArray(spec.resistances_exact) ? spec.resistances_exact.slice() : [],
+        vulnerabilities: Array.isArray(spec.vulnerabilities_exact) ? spec.vulnerabilities_exact.slice() : [],
+        immunities: Array.isArray(spec.immunities_exact) ? spec.immunities_exact.slice() : [],
+        conditionImmunities: Array.isArray(spec.conditionImmunities_exact) ? spec.conditionImmunities_exact.slice() : []
     };
 }
 
@@ -16361,7 +16400,14 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
            rola TR CON; falha → 'petrified' no player (repeatSave = recuperação + teto).
            Espelha combat2_resolve.enemy_condition_on_hit_debuff (motor = spec canônico). */
         conditionOnHit: (spec.conditionOnHit_exact || b.conditionOnHit || null),
-        it: { ic: '', lb: 'ataca' }
+        it: { ic: '', lb: 'ataca' },
+        /* 2026-10-12: D&D 5e Resistências, Vulnerabilidades, Imunidades e Resistência Lendária */
+        resistances: Array.isArray(spec.resistances_exact) ? spec.resistances_exact.slice() : (b.resistances || []),
+        vulnerabilities: Array.isArray(spec.vulnerabilities_exact) ? spec.vulnerabilities_exact.slice() : (b.vulnerabilities || []),
+        immunities: Array.isArray(spec.immunities_exact) ? spec.immunities_exact.slice() : (b.immunities || []),
+        conditionImmunities: Array.isArray(spec.conditionImmunities_exact) ? spec.conditionImmunities_exact.slice() : (b.conditionImmunities || []),
+        legendaryResistances: (spec.legendaryResistances_exact != null) ? (spec.legendaryResistances_exact | 0) : ((b.legendaryResistances | 0) || 0),
+        legendaryResistancesUsed: 0
     };
     /* V1.7 Stage-CASTERS (2026-04-21) — propaga skills + res + caster flags.
        NPCs com isCaster:true têm arsenal mágico e AI decide entre weapon/spell
@@ -18955,6 +19001,41 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             var _rrEl = _rrUid ? document.querySelector('[data-unit-id="' + _rrUid + '"]') : null;
             if (_rrEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_rrEl, 'RESISTENTE', 'attack');
         } catch (_eRR) {}
+    }
+
+    // 2026-10-12 D&D 5e: Imunidades, Vulnerabilidades e Resistências de Criatura (PHB p. 197 & MM p. 11)
+    if (damageApplied > 0 && target && dmgMeta.dmgType) {
+        var _canonDt = String(dmgMeta.dmgType).toLowerCase().trim();
+        if (target.immunities && target.immunities.some(function (im) { return String(im).toLowerCase().trim() === _canonDt; })) {
+            damageApplied = 0;
+            newHp = oldHp;
+            if (s && s.log) s.log.push(target.n + ' é IMUNE a ' + _canonDt + ' (D&D 5e): 0 dano sofrido.');
+            try {
+                var _imUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
+                var _imEl = _imUid ? document.querySelector('[data-unit-id="' + _imUid + '"]') : null;
+                if (_imEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_imEl, 'IMUNE', 'buff');
+            } catch (_eIm) {}
+        } else if (damageApplied > 0 && target.vulnerabilities && target.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _canonDt; })) {
+            var _origVul = damageApplied;
+            damageApplied = damageApplied * 2;
+            newHp = oldHp - damageApplied;
+            if (s && s.log) s.log.push(target.n + ' tem VULNERABILIDADE a ' + _canonDt + ' (D&D 5e): ' + _origVul + ' → ' + damageApplied + ' dano.');
+            try {
+                var _vulUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
+                var _vulEl = _vulUid ? document.querySelector('[data-unit-id="' + _vulUid + '"]') : null;
+                if (_vulEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_vulEl, 'VULNERÁVEL', 'crit');
+            } catch (_eVul) {}
+        } else if (damageApplied > 0 && target.resistances && target.resistances.some(function (res) { return String(res).toLowerCase().trim() === _canonDt; })) {
+            var _origRes = damageApplied;
+            damageApplied = Math.max(1, Math.floor(damageApplied / 2));
+            newHp = oldHp - damageApplied;
+            if (s && s.log) s.log.push(target.n + ' tem RESISTÊNCIA a ' + _canonDt + ' (D&D 5e): ' + _origRes + ' → ' + damageApplied + ' dano.');
+            try {
+                var _resUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
+                var _resEl = _resUid ? document.querySelector('[data-unit-id="' + _resUid + '"]') : null;
+                if (_resEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_resEl, 'RESISTENTE', 'attack');
+            } catch (_eRes) {}
+        }
     }
     // Redução por Reflexos Evasivos (halfDmg) — só se não for cura/skip
     if (damageApplied > 0 && !dmgMeta.noReduction) {
@@ -30244,11 +30325,13 @@ function showTargetConfirm(tgtIdx) {
         critMax = baseRolls * 2 * die + mod;
     }
 
-    /* Reducoes de dano (D&D 5e): resistencia (metade do dano) ou
-       imunidade (zero). Por enquanto stub — futuramente vira de
-       u.resistances/u.immunities. */
+    /* Reduções e peculiaridades de dano D&D 5e: resistências,
+       imunidades e vulnerabilidades. */
     var reductions = u.resistances || []; // ['fogo','frio'...]
     var immunities = u.immunities || [];
+    var vulnerabilities = u.vulnerabilities || [];
+    var legRes = (u.legendaryResistances | 0) || 0;
+    var legResUsed = (u.legendaryResistancesUsed | 0) || 0;
 
     var html = '';
     html += '<div class="tcc-title">' + (skill ? 'Usar ' + escHtml(skill.n) : 'Atacar este alvo?') + '</div>';
@@ -30310,13 +30393,20 @@ function showTargetConfirm(tgtIdx) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
         html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
     }
+    if (vulnerabilities.length) {
+        html += '<div class="tcc-dmg-row vulnerability" style="color:#ff6b6b;"><span class="tcc-dmg-lbl">⚠ Vulnerável</span><span class="tcc-dmg-val">' + vulnerabilities.join(', ') + ' (2× dano)</span></div>';
+    }
     if (reductions.length) {
         html += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">Resistente</span><span class="tcc-dmg-val">' + reductions.join(', ') + ' (½ dano)</span></div>';
     }
     if (immunities.length) {
         html += '<div class="tcc-dmg-row immunity"><span class="tcc-dmg-lbl">✦ Imune</span><span class="tcc-dmg-val">' + immunities.join(', ') + ' (0 dano)</span></div>';
     }
-    if (!reductions.length && !immunities.length) {
+    if (legRes > 0) {
+        var _legLeft = Math.max(0, legRes - legResUsed);
+        html += '<div class="tcc-dmg-row legendary" style="color:#d4af37;"><span class="tcc-dmg-lbl">★ Res. Lendária</span><span class="tcc-dmg-val">' + _legLeft + '/' + legRes + ' restantes</span></div>';
+    }
+    if (!reductions.length && !immunities.length && !vulnerabilities.length) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Reduções</span><span class="tcc-dmg-val tcc-none">— nenhuma —</span></div>';
     }
 
@@ -38514,6 +38604,15 @@ async function __combatAnimateOneEvent(ev) {
         if (typeof _shakeAppSim === 'function') {
             _shakeAppSim(ev.crit ? 'heavy' : 'light');
         }
+        if (ev.crit) {
+            var _appCrit = document.getElementById('app');
+            if (_appCrit) {
+                _appCrit.classList.remove('crit-vignette-flash');
+                void _appCrit.offsetWidth;
+                _appCrit.classList.add('crit-vignette-flash');
+                setTimeout(function () { if (_appCrit) _appCrit.classList.remove('crit-vignette-flash'); }, 480);
+            }
+        }
 
         // Projéteis e Slashes no Canvas
         if (window._combatVfx && elT) {
@@ -38531,6 +38630,12 @@ async function __combatAnimateOneEvent(ev) {
                 }
                 if (ev.crit && window._combatVfx.critBurst) {
                     window._combatVfx.critBurst(elT, dmgType);
+                }
+                if ((ev.divineSmite || dmgType === 'radiant') && typeof window._combatVfx.radiantBurst === 'function') {
+                    window._combatVfx.radiantBurst(elT);
+                }
+                if (ev.sneakAttack && typeof window._combatVfx.shadowStrike === 'function') {
+                    window._combatVfx.shadowStrike(elT);
                 }
             } catch (_eVfx) {}
         }
@@ -38556,6 +38661,14 @@ async function __combatAnimateOneEvent(ev) {
             if (typeof spawnSkillImpactLabel === 'function') {
                 spawnSkillImpactLabel(elT, 'GOLPE FATAL!', 'crit');
             }
+            if (window._combatVfx && typeof window._combatVfx.kill === 'function') {
+                try { window._combatVfx.kill(elT, dmgType); } catch (_eKill) {}
+            }
+        }
+
+        // Micro freeze-frame (Hit-Stop D&D 5e épico) em acertos críticos ou golpes letais
+        if (ev.crit || isFatalBlow) {
+            await new Promise(function (r) { setTimeout(r, 60); });
         }
         await new Promise(function (r) { setTimeout(r, isFatalBlow ? 900 : 650); });
 
@@ -38881,7 +38994,7 @@ async function __combatAnimateOneEvent(ev) {
         return;
     }
     if (kind === 'concentration_save' || kind === 'concentration_lost') {
-        /* Flash caster + pausa curta. */
+        /* Flash caster + pausa curta + VFX temático. */
         var ccUid = 'player';
         if (ev.tIdx != null && currentState && currentState.order) {
             var ccU = currentState.order[ev.tIdx];
@@ -38893,6 +39006,15 @@ async function __combatAnimateOneEvent(ev) {
         setTimeout(function () {
             if (ccEl) ccEl.classList.remove('dodged', 'buff-flash');
         }, 420);
+        if (window._combatVfx && ccEl) {
+            try {
+                if (kind === 'concentration_lost' && typeof window._combatVfx.concentrationLost === 'function') {
+                    window._combatVfx.concentrationLost(ccEl);
+                } else if (kind === 'concentration_save' && typeof window._combatVfx.concentrationSave === 'function') {
+                    window._combatVfx.concentrationSave(ccEl);
+                }
+            } catch (_eConcVfx) {}
+        }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 360); });
         return;
