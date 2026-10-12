@@ -984,21 +984,28 @@
     var title = '';
     var objective = '';
     var rewardsText = '';
+    var introText = '';
+    var foundQuest = false;
 
-    lines.forEach(function(l) {
+    for (var i = 0; i < lines.length; i++) {
+      var l = lines[i];
       var plain = l.replace(/<[^>]*>/g, '').trim();
       if (/Nova Miss[ãa]o:?/i.test(plain)) {
+        foundQuest = true;
         title = plain.replace(/^.*?Nova Miss[ãa]o:?\s*/i, '').trim();
       } else if (/Contrato de Aventura:?/i.test(plain)) {
+        foundQuest = true;
         title = plain.replace(/^.*?Contrato de Aventura:?\s*/i, '').trim();
       } else if (/Recompensa:?/i.test(plain)) {
         rewardsText = plain.replace(/^.*?Recompensa:?\s*/i, '').trim();
       } else if (/Objetivo:?/i.test(plain)) {
         objective = plain.replace(/^.*?Objetivo:?\s*/i, '').trim();
-      } else if (!objective && plain) {
+      } else if (foundQuest && !rewardsText && !objective) {
         objective = plain;
+      } else if (!foundQuest) {
+        introText = (introText ? introText + ' ' : '') + plain;
       }
-    });
+    }
 
     if (!title && !objective) return null;
 
@@ -1015,8 +1022,9 @@
 
     return {
       title: _stripEmojis(title || 'Nova Missão'),
-      objective: _stripEmojis(objective),
-      rewards: rewards
+      objective: _stripEmojis(objective || title),
+      rewards: rewards,
+      introText: _stripEmojis(introText)
     };
   }
 
@@ -1086,16 +1094,33 @@
     var hasAccept = false;
     var hasDecline = false;
     choices.forEach(function(c) {
-      var cid = String(c.id || c.next || '').toLowerCase();
-      var cl = String(c.label || '').toLowerCase();
-      if (cid === 'accept' || cl.indexOf('aceitar') >= 0) hasAccept = true;
-      if (cid === 'decline' || cl.indexOf('recusar') >= 0) hasDecline = true;
+      var cid = String(c.id || c.next || c.cb || c.action || '').toLowerCase();
+      var cl = String(c.label || c.text || '').toLowerCase();
+      var cres = String(c.result || '').toLowerCase();
+      if (
+        cid === 'accept' || cid.indexOf('accept') >= 0 || cid === 'unlock' ||
+        cl.indexOf('aceitar') >= 0 || cl.indexOf('aceito') >= 0 ||
+        cres === 'accept_quest' || cres === 'discovery_unlock' || !!c._questId || !!c.quest_id
+      ) {
+        hasAccept = true;
+      }
+      if (
+        cid === 'decline' || cid.indexOf('decline') >= 0 || cid === 'defer' ||
+        cl.indexOf('recusar') >= 0 || cl.indexOf('desistir') >= 0 ||
+        cl.indexOf('cancelar') >= 0 || cl.indexOf('outra hora') >= 0 ||
+        cl.indexOf('mudar de ideia') >= 0 || cl.indexOf('não posso') >= 0 ||
+        cl.indexOf('talvez depois') >= 0 || cl.indexOf('adiar') >= 0 ||
+        cl.indexOf('resistir') >= 0 || cl.indexOf('devolver') >= 0 ||
+        cl.indexOf('soltar') >= 0 || cres === 'discovery_defer'
+      ) {
+        hasDecline = true;
+      }
     });
     if (hasAccept && (hasDecline || choices.length <= 2)) return true;
-    if (dialogue && (dialogue.isQuest || dialogue.quest_id)) return true;
+    if (dialogue && (dialogue.isQuest || dialogue.quest_id || dialogue.is_quest)) return true;
     if (dialogue && dialogue.script) {
       var scriptStr = JSON.stringify(dialogue.script).toLowerCase();
-      if (scriptStr.indexOf('nova miss') >= 0 || scriptStr.indexOf('contrato de aventura') >= 0) {
+      if (scriptStr.indexOf('nova miss') >= 0 || scriptStr.indexOf('contrato de aventura') >= 0 || scriptStr.indexOf('quest_contract') >= 0) {
         return true;
       }
     }
@@ -1714,10 +1739,11 @@
     if (cid === 'close' || cid === 'leave' || cid === 'back' || cid === 'done' || ccb === 'close') return false;
     if (clabel.indexOf('continuar') >= 0 || clabel.indexOf('voltar') >= 0 || clabel.indexOf('despedir') >= 0) return false;
 
-    // Regra Soberana (Ordem do Usuário 2026-10): Decisão de Aceitar ou Recusar Missão exige confirmação prévia obrigatória
+    // Regra Soberana #48 (Ordem do Usuário 2026-10): Decisão de Aceitar ou Recusar Missão exige confirmação prévia obrigatória
+    var cres = String(ch.result || '').toLowerCase();
     var isQuestChoice = !!(opts && opts.isQuestScreen) ||
-      cid === 'accept' || cid === 'decline' ||
-      clabel.indexOf('aceitar') >= 0 || clabel.indexOf('recusar') >= 0;
+      (cid === 'accept' || cid.indexOf('accept') >= 0 || clabel.indexOf('aceitar') >= 0 || clabel.indexOf('aceito') >= 0 || cres === 'accept_quest' || cres === 'discovery_unlock' || !!ch._questId || !!ch.quest_id) ||
+      (cid === 'decline' || cid.indexOf('decline') >= 0 || clabel.indexOf('recusar') >= 0 || clabel.indexOf('desistir') >= 0 || clabel.indexOf('cancelar') >= 0 || clabel.indexOf('outra hora') >= 0 || clabel.indexOf('adiar') >= 0 || cres === 'discovery_defer');
     if (isQuestChoice) return true;
 
     return !!(
@@ -1744,13 +1770,14 @@
     var card = ov.querySelector('.enc-cd-card');
     if (!card) return;
 
-    var cid = String(ch.id || ch.next || '').toLowerCase();
+    var cid = String(ch.id || ch.next || ch.cb || '').toLowerCase();
     var clabel = String(ch.label || '').toLowerCase();
+    var cres = String(ch.result || '').toLowerCase();
     var isQuestChoice = !!(opts && opts.isQuestScreen) ||
-      cid === 'accept' || cid === 'decline' ||
-      clabel.indexOf('aceitar') >= 0 || clabel.indexOf('recusar') >= 0;
-    var isAcceptQuest = isQuestChoice && (cid === 'accept' || clabel.indexOf('aceitar') >= 0);
-    var isDeclineQuest = isQuestChoice && (cid === 'decline' || clabel.indexOf('recusar') >= 0);
+      (cid === 'accept' || cid.indexOf('accept') >= 0 || clabel.indexOf('aceitar') >= 0 || clabel.indexOf('aceito') >= 0 || cres === 'accept_quest' || cres === 'discovery_unlock' || !!ch._questId || !!ch.quest_id) ||
+      (cid === 'decline' || cid.indexOf('decline') >= 0 || clabel.indexOf('recusar') >= 0 || clabel.indexOf('desistir') >= 0 || clabel.indexOf('cancelar') >= 0 || clabel.indexOf('outra hora') >= 0 || clabel.indexOf('adiar') >= 0 || cres === 'discovery_defer');
+    var isAcceptQuest = isQuestChoice && (cid === 'accept' || cid.indexOf('accept') >= 0 || clabel.indexOf('aceitar') >= 0 || clabel.indexOf('aceito') >= 0 || cres === 'accept_quest' || cres === 'discovery_unlock' || !!ch._questId || !!ch.quest_id);
+    var isDeclineQuest = isQuestChoice && !isAcceptQuest && (cid === 'decline' || cid.indexOf('decline') >= 0 || clabel.indexOf('recusar') >= 0 || clabel.indexOf('desistir') >= 0 || clabel.indexOf('cancelar') >= 0 || clabel.indexOf('outra hora') >= 0 || clabel.indexOf('adiar') >= 0 || cres === 'discovery_defer');
 
     var rawLabel = (ch.label && String(ch.label).trim()) || 'Opção';
     var titleText = rawLabel;
@@ -1760,6 +1787,21 @@
     if (dlg) {
       if (dlg.title && dlg.title !== 'Escolher ação' && dlg.title !== 'ENCONTRO') questTitle = dlg.title;
       else if (dlg.npc && dlg.npc.name) questTitle = dlg.npc.name;
+      if (dlg.script && Array.isArray(dlg.script)) {
+        for (var si = 0; si < dlg.script.length; si++) {
+          var st = dlg.script[si];
+          if (st.type === 'quest_contract' && st.quest && st.quest.title) {
+            questTitle = st.quest.title; break;
+          }
+          if (st.text) {
+            var pq = _parseQuestDetails(st.text);
+            if (pq && pq.title) { questTitle = pq.title; break; }
+          }
+        }
+      }
+    }
+    if (!questTitle && ch._questId && typeof GUILD_QUEST_DETAILS !== 'undefined' && GUILD_QUEST_DETAILS[ch._questId]) {
+      questTitle = GUILD_QUEST_DETAILS[ch._questId].title;
     }
 
     if (isAcceptQuest) {
@@ -2689,12 +2731,20 @@
            Renderizado via DOM-safe createElement/textContent, revelado junto da página. */
         if (line.type === 'quest_contract' || (line.text && _parseQuestDetails(line.text))) {
           var qData = line.quest || _parseQuestDetails(line.text);
-          var qel = _buildQuestCardEl(qData);
-          if (qel) {
-            var qdiv = document.createElement('div');
-            qdiv.className = 'enc-line enc-quest-line';
-            qdiv.appendChild(qel);
-            body.appendChild(qdiv);
+          if (qData) {
+            if (qData.introText) {
+              var introDiv = document.createElement('div');
+              introDiv.className = 'enc-line enc-line--narration';
+              introDiv.innerHTML = _sanitizeDialogueHTML(_stripEmojis(qData.introText));
+              body.appendChild(introDiv);
+            }
+            var qel = _buildQuestCardEl(qData);
+            if (qel) {
+              var qdiv = document.createElement('div');
+              qdiv.className = 'enc-line enc-quest-line';
+              qdiv.appendChild(qel);
+              body.appendChild(qdiv);
+            }
           }
           return;
         }
@@ -3055,9 +3105,10 @@
           var btn = document.createElement('button');
           btn.className = 'enc-btn' + (idx === 0 ? ' enc-btn-primary' : '');
           if (isQuestScreen) {
-            var cid = String(ch.id || ch.next || '').toLowerCase();
+            var cid = String(ch.id || ch.next || ch.cb || '').toLowerCase();
             var clabel = String(ch.label || '').toLowerCase();
-            var isAccept = (cid === 'accept' || clabel.indexOf('aceitar') >= 0);
+            var cres = String(ch.result || '').toLowerCase();
+            var isAccept = (cid === 'accept' || cid.indexOf('accept') >= 0 || cid === 'unlock' || clabel.indexOf('aceitar') >= 0 || clabel.indexOf('aceito') >= 0 || cres === 'accept_quest' || cres === 'discovery_unlock' || !!ch._questId || !!ch.quest_id);
             if (isAccept) {
               btn.className = 'enc-btn enc-btn-primary enc-btn-quest-accept';
               btn.innerHTML = '⚔ ' + _stripEmojis((ch.label && String(ch.label).trim()) || 'Aceitar Missão');

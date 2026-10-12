@@ -14427,10 +14427,18 @@ function _renderDiscoveryStage(){
     script.push({ type: 'speech', speaker: spkKey, text: stg.text });
   });
 
-  // Choices finais: pega a label da última stage (geralmente "Aceito"/"Topo"/"Vou X")
-  // + opção "Adiar" pra fechar sem unlock (player pode voltar depois)
-  var lastStage = stages[stages.length - 1];
-  var unlockLabel = (lastStage.choices && lastStage.choices[0] && lastStage.choices[0].label) || 'Aceitar';
+  // Bloco de Contrato de Aventura estruturado (Regra Soberana #48 / PADRAO_ALDRIC)
+  var rewList = [];
+  if (quest.xp) rewList.push({ kind: 'xp', text: quest.xp + ' XP' });
+  if (quest.reward) rewList.push({ kind: 'gold', text: quest.reward + ' Valdoritas' });
+  script.push({
+    type: 'quest_contract',
+    quest: {
+      title: quest.title || quest.name || 'Descoberta de Valdoria',
+      objective: quest.desc || quest.description || 'Investigar o local e desvendar o mistério.',
+      rewards: rewList
+    }
+  });
 
   var enc = {
     id: 'discovery_' + quest.id,
@@ -14438,8 +14446,8 @@ function _renderDiscoveryStage(){
     triggers: [],
     script: script,
     choices: [
-      { id: 'unlock', label: unlockLabel,    result: 'discovery_unlock', _questId: quest.id },
-      { id: 'defer',  label: 'Adiar — outro momento', result: 'discovery_defer',  _questId: quest.id }
+      { id: 'unlock', label: 'Aceitar a Missão', result: 'discovery_unlock', _questId: quest.id },
+      { id: 'defer',  label: 'Recusar',           result: 'discovery_defer',  _questId: quest.id }
     ],
     onDone: function(){}
   };
@@ -58292,11 +58300,11 @@ function _bankLoanPayRemote(p, amt){
     }
 
     if (mode === 'accept') {
-      actions.appendChild(_mkBtn('Confirmar', 'vmsn-btn-primary', function(){
+      actions.appendChild(_mkBtn('⚔ Aceitar a Missão', 'vmsn-btn-primary vmsn-btn-quest-accept', function(){
         _close(ov);
         if (typeof opts.onConfirm === 'function') opts.onConfirm();
       }));
-      actions.appendChild(_mkBtn('Voltar', '', _doBack));
+      actions.appendChild(_mkBtn('✕ Recusar', 'vmsn-btn-secondary vmsn-btn-quest-decline', _doBack));
     } else if (mode === 'detail') {
       if (opts.ready && typeof opts.onComplete === 'function') {
         actions.appendChild(_mkBtn('Entregar missão', 'vmsn-btn-primary', function(){
@@ -62870,19 +62878,18 @@ var ACTION_HANDLERS = {
   'quest_wolves_abandon': function(p){
     _abandonQuest('wolves', 'Caçar Lobos Cinzentos', '-5 afinidade com Tavira (caçadora)');
   },
-  // X-6.5.51AV (2026-05-11): handlers de accept delegam pro _acceptQuest helper.
-  // Antes só mostravam toast — agora MOVEM de GUILD_QUESTS_AVAILABLE para
-  // QUESTS_ACTIVE, com check de nível, duplicata e completed/abandoned.
-  'accept_q_goblins':       function(p){ _acceptQuest('goblins'); },
-  'accept_q_herbs':         function(p){ _acceptQuest('herbs'); },
-  // 2026-05-12 BALANCING: 2 quests nv 2 novos
-  'accept_q_patrol':        function(p){ _acceptQuest('patrol'); },
-  'accept_q_rat_den':       function(p){ _acceptQuest('rat_den'); },
-  'accept_q_escort':        function(p){ _acceptQuest('escort'); },
-  'accept_q_ruin':          function(p){ _acceptQuest('ruin'); },
-  'accept_q_bandit_lord':   function(p){ _acceptQuest('bandit_lord'); },
-  'accept_q_dragonet':      function(p){ _acceptQuest('dragonet'); },
-  'accept_q_defend':        function(p){ _acceptQuest('defend'); },
+  // Regra Soberana #48 / Ordem do Usuário 2026-10: Handlers do quadro de missões
+  // abrem o Contrato de Aventura estruturado via vEncounter, exibindo botões inline
+  // diretos de aceitar/recusar e janela de confirmação prévia com trade-offs.
+  'accept_q_goblins':       function(p){ _openGuildQuestOfferEncounter('goblins'); },
+  'accept_q_herbs':         function(p){ _openGuildQuestOfferEncounter('herbs'); },
+  'accept_q_patrol':        function(p){ _openGuildQuestOfferEncounter('patrol'); },
+  'accept_q_rat_den':       function(p){ _openGuildQuestOfferEncounter('rat_den'); },
+  'accept_q_escort':        function(p){ _openGuildQuestOfferEncounter('escort'); },
+  'accept_q_ruin':          function(p){ _openGuildQuestOfferEncounter('ruin'); },
+  'accept_q_bandit_lord':   function(p){ _openGuildQuestOfferEncounter('bandit_lord'); },
+  'accept_q_dragonet':      function(p){ _openGuildQuestOfferEncounter('dragonet'); },
+  'accept_q_defend':        function(p){ _openGuildQuestOfferEncounter('defend'); },
 
   // X-6.5.51AV (2026-05-11): handlers DELIVER / ABANDON / LOCATE / DETAILS
   // pra cada uma das 7 quests de guild. Padrão delegando ao _deliverQuest e
@@ -63534,6 +63541,73 @@ function _abandonQuest(questId, displayName, consequencia){
     });
   } else {
     _doIt();
+  }
+}
+
+// X-6.5.51AV (2026-05-11): aceita uma quest do guild board.
+// Regra Soberana #48 / Ordem do Usuário 2026-10: Apresentação Épica de Contrato de Aventura do Mural da Guilda
+function _openGuildQuestOfferEncounter(qid){
+  var p = window.CITY_MOCK_PLAYER;
+  var d = (typeof GUILD_QUEST_DETAILS !== 'undefined' && GUILD_QUEST_DETAILS[qid]) || null;
+  if (!d) {
+    if (typeof vToast === 'function') vToast(_uiIcoImg('alerta','ui-ico-img') + ' Missão indisponível: ' + qid, 'warn');
+    return;
+  }
+  // Nível mínimo
+  if (((p && p.level) || 1) < (d.lvlReq || 1)) {
+    if (typeof vToast === 'function') vToast(_uiIcoImg('alerta','ui-ico-img') + ' Requer nível ' + d.lvlReq + ' (você é nível ' + ((p && p.level) || 1) + ').', 'warn');
+    return;
+  }
+  // Duplicata em ACTIVE
+  if (typeof QUESTS_ACTIVE !== 'undefined') {
+    var alreadyActive = QUESTS_ACTIVE.some(function(q){ return q && q.id === 'qa_' + qid; });
+    if (alreadyActive) {
+      if (typeof vToast === 'function') vToast(_uiIcoImg('alerta','ui-ico-img') + ' Essa missão já está nas ativas.', 'warn');
+      return;
+    }
+  }
+  // Já resolvida
+  if (typeof _isQuestCompletedOrAbandoned === 'function' && _isQuestCompletedOrAbandoned(qid)) {
+    if (typeof vToast === 'function') vToast(_uiIcoImg('alerta','ui-ico-img') + ' Essa missão já foi resolvida (concluída ou abandonada).', 'warn');
+    return;
+  }
+
+  // Apresentação estruturada com vEncounter
+  if (typeof window.vEncounter !== 'undefined' && typeof window.vEncounter.open === 'function') {
+    window.vEncounter.open({
+      id: 'guild_quest_offer_' + qid,
+      title: d.title,
+      subtitle: 'Contrato de Aventura · Mural da Guilda',
+      speaker: d.npc || 'Mural de Avisos',
+      npc: { name: d.npc || 'Mural de Avisos', icon: d.icon || 'ic-mochila' },
+      script: [
+        { type: 'narration', text: d.flavor || d.desc },
+        {
+          type: 'quest_contract',
+          quest: {
+            title: d.title,
+            objective: d.desc + (d.location ? ' (Local: ' + d.location + ')' : ''),
+            rewards: [
+              { kind: 'xp', text: d.xp + ' XP' },
+              { kind: 'gold', text: d.reward + ' Valdoritas' }
+            ]
+          }
+        }
+      ],
+      choices: [
+        { id: 'accept', label: 'Aceitar a Missão', result: 'accept_quest', _questId: qid },
+        { id: 'decline', label: 'Recusar', result: 'close' }
+      ]
+    }, {
+      inlineChoices: true,
+      onChoice: function(ch){
+        if (ch.id === 'accept' || ch.result === 'accept_quest') {
+          _acceptQuest(qid);
+        }
+      }
+    });
+  } else {
+    _acceptQuest(qid);
   }
 }
 
@@ -67323,11 +67397,22 @@ var MARTHA_ENCOUNTERS = {
       { type: 'narration', text: 'Martha hesita por um instante. Os olhos vão para a escada que desce pro porão.' },
       { type: 'speech', speaker: 'Martha', text: '"Velharias. Barris vazios. Coisas que o meu falecido marido guardou e nunca mais alguém olhou."' },
       { type: 'narration', text: 'Ela limpa as mãos no avental.' },
-      { type: 'speech', speaker: 'Martha', text: '"Mas ultimamente... <i>ouço ruídos.</i> Tem algo lá embaixo que não devia estar. Se quiser investigar, pega a chave atrás do balcão. Te pago bem se limpar."' }
+      { type: 'speech', speaker: 'Martha', text: '"Mas ultimamente... <i>ouço ruídos.</i> Tem algo lá embaixo que não devia estar. Se quiser investigar, pega a chave atrás do balcão. Te pago bem se limpar."' },
+      {
+        type: 'quest_contract',
+        quest: {
+          title: 'Investigar a Adega',
+          objective: 'Descer à adega da Estalagem e eliminar os ratos gigantes nos barris.',
+          rewards: [
+            { kind: 'xp', text: '50 XP' },
+            { kind: 'gold', text: '30 Valdoritas' }
+          ]
+        }
+      }
     ],
     choices: [
-      { id: 'accept_cellar',  label: '◆ Aceito investigar a adega', result: 'accept_quest', _questId: 'cellar' },
-      { id: 'decline_cellar', label: 'Talvez outra hora.',           result: 'goto_dialog', _encounterRef: 'martha_decline' }
+      { id: 'accept_cellar',  label: 'Aceitar a Missão', result: 'accept_quest', _questId: 'cellar' },
+      { id: 'decline_cellar', label: 'Recusar',           result: 'goto_dialog', _encounterRef: 'martha_decline' }
     ]
   },
   local: {
