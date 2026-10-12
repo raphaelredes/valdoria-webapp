@@ -221,7 +221,7 @@
         { type: 'narration', text: descText },
         { type: 'narration', text: '<i>Postura ativada:</i> <b>' + prepChoice.label + '</b> — concederá <b>Vantagem</b> contra perigos durante o trajeto.' }
       ],
-      choices: [{ id: 'jrn_go_prep', label: 'Iniciar viagem (A caminho)', speech: '— "Estamos prontos. É hora de pegar a estrada."', tag: 'PARTIR' }],
+      choices: [{ id: 'jrn_go_prep', label: 'Iniciar viagem (A caminho)', speech: '"Estamos prontos. É hora de pegar a estrada."', tag: 'PARTIR' }],
       inline: true,
       noProgress: true,
       onChoice: function () { _departure(); }

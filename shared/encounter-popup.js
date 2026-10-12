@@ -77,6 +77,32 @@
     }).replace(/\s{2,}/g, ' ');
   }
 
+  /* Ordem do Usuário 2026-10: Sanitização canônica de falas/quotes de escolhas.
+     Remove pontuação redundante (travessão '—', dashes, aspas duplicadas ou aninhadas)
+     que causava o erro de aparecer '“— "' antes ou '."”' depois da fala nos cards de escolha. */
+  function _cleanSpeechText(raw) {
+    if (!raw) return '';
+    var s = _stripEmojis(String(raw).trim());
+    var prev = '';
+    while (s && s !== prev) {
+      prev = s;
+      // Remove travessões ou traços iniciais (comum em roteiros de diálogo)
+      s = s.replace(/^[—–-]+\s*/, '');
+      // Remove aspas externas pareadas ("...", “...”, '...', «...»)
+      if ((s.charAt(0) === '"' && s.charAt(s.length - 1) === '"') ||
+          (s.charAt(0) === '“' && s.charAt(s.length - 1) === '”') ||
+          (s.charAt(0) === '«' && s.charAt(s.length - 1) === '»') ||
+          (s.charAt(0) === '\'' && s.charAt(s.length - 1) === '\'')) {
+        s = s.slice(1, -1).trim();
+      }
+      // Remove aspas ou traços órfãos no início ou no fim
+      s = s.replace(/^[“"«'\s]+/, '').replace(/[”"»'\s]+$/, '');
+      s = s.replace(/^[—–-]+\s*/, '').replace(/[—–-]+\s*$/, '');
+      s = s.trim();
+    }
+    return s;
+  }
+
   /* PADRAO_LOCAIS #2 & Ordem do Usuário 2026-10: fallback de retrato.
      Se a imagem falhar (404/rede), substitui imediatamente pelo Medalhão Dourado
      de Diálogo de Valdoria (/shared/img/ui/dialogo.webp), preservando a imersão. */
@@ -1853,14 +1879,14 @@
 
     var speechHtml = '';
     if (ch.speech) {
-      var sTxt = String(ch.speech).trim();
-      if (sTxt.indexOf('"') === 0 && sTxt.lastIndexOf('"') === sTxt.length - 1) sTxt = sTxt.slice(1, -1);
-      else if (sTxt.indexOf('“') === 0 && sTxt.lastIndexOf('”') === sTxt.length - 1) sTxt = sTxt.slice(1, -1);
-      speechHtml =
-        '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">Fala / Resposta do Personagem</div>' +
-          '<div class="enc-cd-box enc-cd-speech">“' + _stripEmojis(sTxt) + '”</div>' +
-        '</div>';
+      var sTxt = _cleanSpeechText(ch.speech);
+      if (sTxt) {
+        speechHtml =
+          '<div class="enc-cd-section">' +
+            '<div class="enc-cd-section-title">Fala / Resposta do Personagem</div>' +
+            '<div class="enc-cd-box enc-cd-speech">“' + _coinify(sTxt) + '”</div>' +
+          '</div>';
+      }
     }
 
     var descHtml = '';
@@ -2163,16 +2189,11 @@
         var _trimmed = String(ch.label).trim();
         if (_trimmed.indexOf('— "') === 0 || _trimmed.indexOf('— “') === 0 || _trimmed.indexOf('“') === 0 || (_trimmed.indexOf('"') === 0 && _trimmed.length > 2)) {
           hasSpeech = true;
-          speechClean = _trimmed.replace(/^[—–-]\s*/, '');
+          speechClean = _cleanSpeechText(_trimmed);
         }
       }
       if (hasSpeech && !speechClean) {
-        speechClean = _stripEmojis(String(ch.speech).trim());
-        if (speechClean.indexOf('"') === 0 && speechClean.lastIndexOf('"') === speechClean.length - 1) {
-          speechClean = speechClean.slice(1, -1);
-        } else if (speechClean.indexOf('“') === 0 && speechClean.lastIndexOf('”') === speechClean.length - 1) {
-          speechClean = speechClean.slice(1, -1);
-        }
+        speechClean = _cleanSpeechText(ch.speech);
       }
 
       if (!tagPill && ch.badge) {
