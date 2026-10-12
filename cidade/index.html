@@ -58830,7 +58830,17 @@ function _showServiceResultPopup(opts){
                   _fsTail = ' <span style="opacity:0.75">vs ' + _fsFormula.slice(_vsIdx + 4) + '</span>';
                 }
                 if (_vsIdx > -1) _fsFormula = _fsFormula.slice(0, _vsIdx);
-                _fsLbl.innerHTML = _fsFormula + ' = <b style="color:var(--v-gold, #c4953a)">' + opts.dice.total + '</b>' + _fsTail;
+                var _degreeHtml = '';
+                if (opts.dice && opts.dice.degree_label) {
+                  var _degColor = 'var(--v-gold, #c4953a)';
+                  if (opts.dice.degree === 'critical_success') _degColor = '#ffd700';
+                  else if (opts.dice.degree === 'exceptional_success') _degColor = '#7bc67b';
+                  else if (opts.dice.degree === 'marginal_failure') _degColor = '#e0a845';
+                  else if (opts.dice.degree === 'catastrophic_failure' || opts.dice.degree === 'critical_failure') _degColor = '#e05353';
+                  else if (opts.dice.degree === 'failure') _degColor = '#d97d7d';
+                  _degreeHtml = '<div style="margin-top:6px;font-size:calc(clamp(13px,3.8vw,15px)*var(--v-font-scale,1));font-weight:bold;letter-spacing:1px;color:' + _degColor + ';">' + opts.dice.degree_label + '</div>';
+                }
+                _fsLbl.innerHTML = _fsFormula + ' = <b style="color:var(--v-gold, #c4953a)">' + opts.dice.total + '</b>' + _fsTail + _degreeHtml;
               }
               setTimeout(_fsFinish, 1500);
             });
@@ -68398,12 +68408,14 @@ function _arrivalChoice(choiceId){
             icon: (node.npc && node.npc.portrait)
               ? ('<img src="' + node.npc.portrait + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">')
               : undefined,
-            dice: { sides: 20, value: d.d20, total: d.total, formula: 'd20 ' + d.d20 + ' ' + _mod, dc: d.dc, label: 'Teste de ' + _skl },
+            dice: { sides: 20, value: d.d20, total: d.total, formula: 'd20 ' + d.d20 + ' ' + _mod, dc: d.dc, label: 'Teste de ' + _skl,
+                    degree: d.degree, degree_label: d.degree_label },
             narrative: '<b>' + _skl + '</b> — '
                 + (d.success
                     ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
                     : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
-                + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>',
+                + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>'
+                + (d.degree_label ? (' &bull; <b style="color:' + (d.degree === 'critical_success' ? '#ffd700' : d.degree === 'exceptional_success' ? '#7bc67b' : d.degree === 'marginal_failure' ? '#e0a845' : (d.degree === 'catastrophic_failure' || d.degree === 'critical_failure') ? '#e05353' : d.degree === 'failure' ? '#d97d7d' : 'var(--v-gold,#c4953a)') + '">' + d.degree_label + '</b>') : ''),
             onContinue: function(){ _arrivalRenderNode(node); }
           });
           return;
@@ -69650,12 +69662,14 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
         ? ('<img src="' + data.npc.portrait + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">')
         : undefined,
       dice: { sides: (d.sides || 20), value: d.roll, total: d.total, formula: 'd20 ' + d.roll + ' ' + _mod,
-              dc: d.dc, label: 'Teste de ' + _skl },  // D3: value=roll · dc/label → cena fullscreen do dado
+              dc: d.dc, label: 'Teste de ' + _skl,
+              degree: d.degree, degree_label: d.degree_label },  // D3: value=roll · dc/label → cena fullscreen do dado
       narrative: '<b>' + _skl + '</b> — '
           + (d.success
               ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
               : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
-          + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>',
+          + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>'
+          + (d.degree_label ? (' &bull; <b style="color:' + (d.degree === 'critical_success' ? '#ffd700' : d.degree === 'exceptional_success' ? '#7bc67b' : d.degree === 'marginal_failure' ? '#e0a845' : (d.degree === 'catastrophic_failure' || d.degree === 'critical_failure') ? '#e05353' : d.degree === 'failure' ? '#d97d7d' : 'var(--v-gold,#c4953a)') + '">' + d.degree_label + '</b>') : ''),
       onContinue: function(){
         // D4: SEMPRE re-fetch da raiz (custo novo + barganha consumida). NÃO renderiza node embutido.
         var nid = (ctx && ctx.npcId) || (data.npc && data.npc.id);

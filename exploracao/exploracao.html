@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-12T03:19:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-12T03:48:19Z - do not edit directly, edit source -->
 
 
 
@@ -13124,9 +13124,25 @@ body.perf-lite .stub-popup-voice { animation: none; }
       var bold = document.createElement('b');
       bold.textContent = String(total);
       formula.appendChild(bold);
-      formula.appendChild(document.createTextNode(' vs CD ' + dc));
+      var margin = total - dc;
+      var degText = success ? 'SUCESSO' : 'FALHA';
+      if (d20 === 20) {
+        degText = '🌟 SUCESSO CRÍTICO';
+      } else if (d20 === 1) {
+        degText = '💀 FALHA CRÍTICA';
+      } else if (margin >= 5) {
+        degText = '✨ SUCESSO EXCEPCIONAL (+' + margin + ')';
+      } else if (success) {
+        degText = 'SUCESSO';
+      } else if (margin >= -2) {
+        degText = '⚠️ FALHA MARGINAL (' + margin + ')';
+      } else if (margin <= -5) {
+        degText = '💥 FALHA CATASTRÓFICA (' + margin + ')';
+      } else {
+        degText = 'FALHA';
+      }
       result.className = success ? 'success' : 'failure';
-      result.textContent = success ? 'SUCESSO' : 'FALHA';
+      result.textContent = degText;
       result.style.display = 'inline-block';
       // Continuar button — prominente: gradiente gold + fonte maior + padding maior
       // Setamos com !important pra evitar regressão por CSS herdado.
@@ -41341,10 +41357,25 @@ function rollSkillCheck(choice, cb) {
     const b = document.createElement('b');
     b.textContent = String(total);
     formula.appendChild(b);
-    formula.appendChild(document.createTextNode(' vs CD ' + choice.dc));
-
+    const margin = total - choice.dc;
+    let degText = success ? 'SUCESSO' : 'FALHA';
+    if (d20 === 20) {
+      degText = '🌟 SUCESSO CRÍTICO';
+    } else if (d20 === 1) {
+      degText = '💀 FALHA CRÍTICA';
+    } else if (margin >= 5) {
+      degText = '✨ SUCESSO EXCEPCIONAL (+' + margin + ')';
+    } else if (success) {
+      degText = 'SUCESSO';
+    } else if (margin >= -2) {
+      degText = '⚠️ FALHA MARGINAL (' + margin + ')';
+    } else if (margin <= -5) {
+      degText = '💥 FALHA CATASTRÓFICA (' + margin + ')';
+    } else {
+      degText = 'FALHA';
+    }
     result.className = success ? 'success' : 'failure';
-    result.textContent = success ? 'SUCESSO' : 'FALHA';
+    result.textContent = degText;
     result.style.display = 'inline-block';
 
     // V2.6: botao CONTINUAR sempre aparece ao fim da animacao, JAMAIS fecha sozinho.
