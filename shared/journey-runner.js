@@ -220,7 +220,7 @@
         { type: 'narration', text: descText },
         { type: 'narration', text: '<i>Postura ativada:</i> <b>' + prepChoice.label + '</b> — concederá <b>Vantagem</b> contra perigos durante o trajeto.' }
       ],
-      choices: [{ id: 'jrn_go_prep', label: 'Iniciar travessia' }],
+      choices: [{ id: 'jrn_go_prep', label: 'Iniciar viagem (A caminho)', speech: '— "Estamos prontos. É hora de pegar a estrada."', tag: 'PARTIR' }],
       inline: true,
       noProgress: true,
       onChoice: function () { _departure(); }
@@ -587,7 +587,7 @@
             +     '<span>🎲</span><span>Rolagem de Atalho: d' + dieSides + ' [' + dieRoll + ']' + corvusTag + critTag + ' ➔ ' + marcosEncurtados + (marcosEncurtados === 1 ? ' Marco' : ' Marcos') + '</span>'
             +   '</div>'
             +   '<div style="font-size:11.5px;color:#d4e8d0;margin-top:3px;">'
-            +     '<b>🗺️ Atalho de rota aproveitado!</b> O grupo descobre uma picada secreta e encurta a travessia em <b>~' + marcosEncurtados + (marcosEncurtados === 1 ? ' marco' : ' marcos') + '</b>.'
+            +     '<b>🗺️ Atalho de rota aproveitado!</b> O grupo descobre uma picada secreta e encurta o caminho em <b>~' + marcosEncurtados + (marcosEncurtados === 1 ? ' marco' : ' marcos') + '</b>.'
             +   '</div>'
             + '</div>';
     } else if (!success && (ch && (ch.isDetour || (ch._haz && ch._haz.isDetour) || (hz && hz.isOrientationHazard)))) {
@@ -606,7 +606,7 @@
             +     '<span>🎲</span><span>Rolagem de Desvio: d' + dieSides + ' [' + dieRoll + ']' + mitTag + fumbleTag + ' ➔ +' + detourMarcos + (detourMarcos === 1 ? ' Marco' : ' Marcos') + '</span>'
             +   '</div>'
             +   '<div style="font-size:11.5px;color:#f0d0cc;margin-top:3px;">'
-            +     '<b>⚠️ Desvio forçado!</b> O relevo traiçoeiro e a rota obstruída exigiram um contorno, adicionando <b>+' + detourMarcos + (detourMarcos === 1 ? ' marco' : ' marcos') + '</b> à estimativa da travessia.'
+            +     '<b>⚠️ Desvio forçado!</b> O relevo difícil e a rota obstruída exigiram um contorno, adicionando <b>+' + detourMarcos + (detourMarcos === 1 ? ' marco' : ' marcos') + '</b> ao caminho.'
             +   '</div>'
             + '</div>';
     }

@@ -2154,7 +2154,14 @@
       var tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
       var hasSpeech = !!(ch.speech && String(ch.speech).trim());
       var speechClean = '';
-      if (hasSpeech) {
+      if (!hasSpeech && ch.label) {
+        var _trimmed = String(ch.label).trim();
+        if (_trimmed.indexOf('— "') === 0 || _trimmed.indexOf('— “') === 0 || _trimmed.indexOf('“') === 0 || (_trimmed.indexOf('"') === 0 && _trimmed.length > 2)) {
+          hasSpeech = true;
+          speechClean = _trimmed.replace(/^[—–-]\s*/, '');
+        }
+      }
+      if (hasSpeech && !speechClean) {
         speechClean = _stripEmojis(String(ch.speech).trim());
         if (speechClean.indexOf('"') === 0 && speechClean.lastIndexOf('"') === speechClean.length - 1) {
           speechClean = speechClean.slice(1, -1);
@@ -2371,7 +2378,7 @@
       pRemain.className = 'enc-jp-remain';
 
       if (_pg.isCityWalk) {
-        pLabel.textContent = _pg.title || '◈ TRAVESSIA POR VALDORIA';
+        pLabel.textContent = _pg.title || '◈ A CAMINHO POR VALDORIA';
         pRemain.textContent = _pg.destination ? ('Rumo a ' + _pg.destination) : 'Pelas ruas da cidade';
       } else {
         var _cur = Math.max(1, Math.min(_pg.current || 1, _pg.total || 1));

@@ -13661,9 +13661,25 @@ window.addEventListener('online', function() {
         return; // Encontro disparou — popup vai chamar doAction(action) ao continuar
       }
       // FASE 1 server-driven: board accept + complete/abandon + detalhe (vCityServer.quest.*)
-      if (action.indexOf('srvaccept_') === 0) { _srvAcceptQuest(action.slice(10)); return; }
-      if (action.indexOf('srvcomplete_') === 0) { _srvCompleteQuest(action.slice(12)); return; }
-      if (action.indexOf('srvabandon_') === 0) { _srvAbandonQuest(action.slice(11)); return; }
+      if (action.indexOf('srvcomplete_') === 0) {
+        var _scId = action.slice(12);
+        var _scSq = (typeof QUESTS_ACTIVE !== 'undefined') ? QUESTS_ACTIVE.filter(function(q){return q.serverId===_scId;})[0] : null;
+        var _scDest = (typeof _getQuestDeliveryDestination === 'function') ? _getQuestDeliveryDestination(_scId, _scSq) : { destKey: 'market' };
+        if (typeof _startCityWalk === 'function') {
+          _startCityWalk(_scDest.destKey, function(){
+            if (typeof _scDest.encounterFn === 'function') _scDest.encounterFn();
+            else if (_scId === 'quest_lyana_scroll' || _scId === 'lyana') {
+              if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter();
+              else _srvCompleteQuest(_scId);
+            } else {
+              _srvCompleteQuest(_scId);
+            }
+          }, { questId: _scId, questTitle: _scSq ? _scSq.title : '', npcName: _scDest.npcName });
+        } else {
+          _srvCompleteQuest(_scId);
+        }
+        return;
+      }
       if (action.indexOf('quest_open_srv_') === 0) { _srvQuestDetail(action.slice(15)); return; }  // quest do servidor → detalhe dinâmico
       if (action.indexOf('quest_done_srv_') === 0) { _srvQuestDoneDetail(action.slice(15)); return; }  // missão FEITA → info read-only
       // 1.6 ARENA → combat2 REAL (server-authoritative, 2026-06-18). Em REMOTE as
@@ -28601,34 +28617,104 @@ function _srvAbandonQuestConfirmed(serverId){
     if (typeof vToast==='function') vToast('Erro ao abandonar missão');
   });
 }
+// Destinos diegéticos de entrega de missões (Ordem do Usuário 2026-10):
+// O aventureiro faz o caminho físico até o local/NPC específico ("A caminho de...")
+// para entregar a missão presencialmente, mantendo imersão total de D&D 5e.
+var _QUEST_DELIVERY_DESTINATIONS = {
+  'quest_lyana_scroll': { destKey: 'market', npcName: 'Lyana', placeName: 'Praça Central', encounterFn: function(){ if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter(); } },
+  'lyana':              { destKey: 'market', npcName: 'Lyana', placeName: 'Praça Central', encounterFn: function(){ if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter(); } },
+  'quest_martha_cellar':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', encounterFn: function(){ if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) ACTION_HANDLERS['quest_cellar_deliver'](); else _srvCompleteQuest('quest_martha_cellar'); } },
+  'cellar':             { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', encounterFn: function(){ if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) ACTION_HANDLERS['quest_cellar_deliver'](); else _srvCompleteQuest('cellar'); } },
+  'quest_martha_journal':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada' },
+  'quest_martha_shadow':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada' },
+  'quest_martha_relic': { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada' },
+  'quest_thorne_forge': { destKey: 'market', npcName: 'Thorne', placeName: 'Mercado de Valdoria' },
+  'quest_thorne_son':   { destKey: 'market', npcName: 'Thorne', placeName: 'Mercado de Valdoria' },
+  'quest_aldric_smugglers': { destKey: 'gates', npcName: 'Guarda Aldric', placeName: 'Portões de Valdoria' },
+  'dragonet':           { destKey: 'gates', npcName: 'Guarda Aldric', placeName: 'Portões de Valdoria' },
+  'escort':             { destKey: 'gates', npcName: 'Brael', placeName: 'Portões de Valdoria' },
+  'patrol':             { destKey: 'gates', npcName: 'Tomás', placeName: 'Portões de Valdoria' },
+  'quest_tavira_recruit':{ destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' },
+  'quest_tavira_traitor':{ destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' },
+  'wolves':             { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' },
+  'quest_open_wolves':  { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' },
+  'goblins':            { destKey: 'guild', npcName: 'Capitã Helga', placeName: 'Guilda dos Aventureiros' },
+  'bandit_lord':        { destKey: 'guild', npcName: 'Capitã Helga', placeName: 'Guilda dos Aventureiros' },
+  'defend':             { destKey: 'guild', npcName: 'Capitã Helga', placeName: 'Guilda dos Aventureiros' },
+  'quest_grom_brawl':   { destKey: 'tavern', npcName: 'Grom', placeName: 'Taverna do Javali Bêbado' },
+  'quest_grom_past':    { destKey: 'tavern', npcName: 'Grom', placeName: 'Taverna do Javali Bêbado' },
+  'herbs':              { destKey: 'market', npcName: 'Sylvi', placeName: 'Mercado de Valdoria' },
+  'quest_open_herbs':   { destKey: 'market', npcName: 'Sylvi', placeName: 'Mercado de Valdoria' },
+  'rat_den':            { destKey: 'market', npcName: 'Erlan', placeName: 'Mercado de Valdoria' },
+  'ruin':               { destKey: 'temple', npcName: 'Maeve', placeName: 'Colina dos Altares' },
+  'cleric_blessing':    { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante' },
+  'quest_class_cleric': { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante' },
+  'quest_class_fighter':{ destKey: 'arena', npcName: 'Brakos', placeName: 'Arena de Valdoria' },
+  'arena_fighter':      { destKey: 'arena', npcName: 'Brakos', placeName: 'Arena de Valdoria' },
+  'quest_mirena_experiment': { destKey: 'market', npcName: 'Mirena', placeName: 'Mercado de Valdoria' },
+  'quest_mirena_rival': { destKey: 'market', npcName: 'Mirena', placeName: 'Mercado de Valdoria' },
+  'velithra_necklace':  { destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras' },
+  'quest_velithra_heist':{ destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras' },
+  'quest_velithra_patron':{ destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras' }
+};
+
+function _getQuestDeliveryDestination(serverId, sq) {
+  var id = serverId || (sq && sq.serverId) || (sq && sq.id) || '';
+  if (_QUEST_DELIVERY_DESTINATIONS[id]) return _QUEST_DELIVERY_DESTINATIONS[id];
+  var desc = ((sq && sq.desc) || '') + ' ' + ((sq && sq.title) || '');
+  if (/estalagem|martha|porão|adega/i.test(desc)) return { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada' };
+  if (/lyana|praça|fonte/i.test(desc)) return { destKey: 'market', npcName: 'Lyana', placeName: 'Praça Central' };
+  if (/mercado|thorne|ferreiro|mirena/i.test(desc)) return { destKey: 'market', npcName: 'Comerciante', placeName: 'Mercado de Valdoria' };
+  if (/portões|aldric|brael|fronteira/i.test(desc)) return { destKey: 'gates', npcName: 'Guarda dos Portões', placeName: 'Portões de Valdoria' };
+  if (/taverna|grom/i.test(desc)) return { destKey: 'tavern', npcName: 'Grom', placeName: 'Taverna do Javali Bêbado' };
+  if (/templo|elara|altar|bênção/i.test(desc)) return { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante' };
+  if (/arena|combate|gladiador/i.test(desc)) return { destKey: 'arena', npcName: 'Mestre da Arena', placeName: 'Arena de Valdoria' };
+  if (/beco|sombras|velithra/i.test(desc)) return { destKey: 'shadow_alley', npcName: 'Contato das Sombras', placeName: 'Beco das Sombras' };
+  return { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' };
+}
+
 // Detalhe de quest do SERVIDOR: injeta uma sub-tela dinâmica em SUBSCREEN_DATA
 // (reusa o render de openCityPopup) com Entregar (se pronta) + Abandonar.
 function _srvQuestDetail(serverId){
   var sq = (typeof QUESTS_ACTIVE!=='undefined') ? QUESTS_ACTIVE.filter(function(q){return q.serverId===serverId;})[0] : null;
   if (!sq){ if (typeof vToast==='function') vToast('Missão não encontrada'); return; }
   var ready = (sq.progress||'').indexOf('✓') >= 0;
-  // PADRAO_MISSAO — popup ÉPICO via vMissao.show (modo 'detail'). Server-authoritative:
-  // reusa os MESMOS callbacks de servidor (_srvCompleteQuest/_srvAbandonQuest), que já
-  // tratam closeCityPopup + refresh do board. vMissao tem overlay PRÓPRIO sobreposto
-  // (fecha/volta sozinho), então NÃO depende do nav-stack do SUBSCREEN_DATA — por isso
-  // não chamamos mais navigateTo aqui (evita o subscreen simples antigo). Degrada pro
-  // subscreen legado SÓ se vMissao não existir.
-  if (window.vMissao && typeof window.vMissao.show === 'function') {
-    var onComp = function(){ _srvCompleteQuest(serverId); };
-    // Ordem do Usuário 2026-10: NUNCA usar rotas cruas ou entregas silenciosas pelo diário.
-    // Missões com NPC de entrega abrem obrigatoriamente encontro presencial com narrativa e testes de dados.
-    if (serverId === 'quest_lyana_scroll' || serverId === 'lyana') {
-      onComp = function(){
-        if (window.vMissao && typeof window.vMissao.hide === 'function') window.vMissao.hide();
-        if (typeof closeCityPopup === 'function') closeCityPopup(true);
+  var destInfo = _getQuestDeliveryDestination(serverId, sq);
+  var deliverLabel = '🚶 A caminho de ' + (destInfo.npcName || destInfo.placeName || 'entregar');
+
+  var onComp = function(){
+    if (window.vMissao && typeof window.vMissao.hide === 'function') window.vMissao.hide();
+    if (typeof closeCityPopup === 'function') closeCityPopup(true);
+
+    var arrivalCb = function(){
+      if (typeof destInfo.encounterFn === 'function') {
+        destInfo.encounterFn();
+      } else if (serverId === 'quest_lyana_scroll' || serverId === 'lyana') {
         if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter();
         else _srvCompleteQuest(serverId);
-      };
+      } else {
+        _srvCompleteQuest(serverId);
+      }
+    };
+
+    if (typeof _startCityWalk === 'function') {
+      _startCityWalk(destInfo.destKey, arrivalCb, {
+        questId: serverId,
+        questTitle: sq.title || '',
+        npcName: destInfo.npcName
+      });
+    } else {
+      arrivalCb();
     }
+  };
+
+  // PADRAO_MISSAO — popup ÉPICO via vMissao.show (modo 'detail'). Server-authoritative:
+  if (window.vMissao && typeof window.vMissao.show === 'function') {
     window.vMissao.show(sq, {
       mode: 'detail',
-      npc: sq.npc || '',
+      npc: sq.npc || destInfo.npcName || '',
       ready: ready,
+      deliverLabel: deliverLabel,
       onComplete: onComp,
       onAbandon: function(){ _srvAbandonQuest(serverId); }
     });
@@ -28638,7 +28724,7 @@ function _srvQuestDetail(serverId){
   var icoMis = (typeof _heralIco==='function') ? _heralIco('ic-missões') : '';
   var coin = '<span class="vi vi-coin sm"></span>';
   var btns = [];
-  if (ready) btns.push([icoMis, 'Entregar missão', 'completar', 'srvcomplete_' + serverId]);
+  if (ready) btns.push([icoMis, deliverLabel, 'completar', 'srvcomplete_' + serverId]);
   btns.push([icoMis, 'Abandonar missão', 'desistir', 'srvabandon_' + serverId]);
   if (typeof SUBSCREEN_DATA !== 'undefined') {
     SUBSCREEN_DATA['quest_open_srv_' + serverId] = {
@@ -58307,7 +58393,8 @@ function _bankLoanPayRemote(p, amt){
       actions.appendChild(_mkBtn('✕ Recusar', 'vmsn-btn-secondary vmsn-btn-quest-decline', _doBack));
     } else if (mode === 'detail') {
       if (opts.ready && typeof opts.onComplete === 'function') {
-        actions.appendChild(_mkBtn('Entregar missão', 'vmsn-btn-primary', function(){
+        var deliverBtnText = opts.deliverLabel || '🚶 A caminho da entrega';
+        actions.appendChild(_mkBtn(deliverBtnText, 'vmsn-btn-primary', function(){
           _close(ov);
           opts.onComplete();
         }));
@@ -61543,17 +61630,50 @@ function _startLyanaEncounter(p, forceDay){
         }
       ],
       choices: [
-        { id: 'wait_dawn', label: '🌅 Aguardar pelo amanhecer na Praça' },
-        { id: 'leave_night', label: '↩ Voltar e retornar durante o dia' }
+        {
+          id: 'wait_dawn',
+          tag: 'PACIÊNCIA',
+          speech: '— "A mensagem que trago é urgente. Vou me abrigar sob as marquises e esperar até o amanhecer."',
+          label: '🌅 Aguardar pelo amanhecer na Praça',
+          desc: 'Aguardar as horas passarem na praça até o raiar do dia para falar com Lyana assim que a banca abrir.'
+        },
+        {
+          id: 'go_inn',
+          tag: 'INVESTIGAR',
+          speech: '— "Agradeço a orientação, guarda. Vou até a Estalagem da Pena-Dourada tentar a sorte por lá."',
+          label: '🍺 Ir à Estalagem da Pena-Dourada',
+          desc: 'Seguir o conselho da patrulha e fazer o caminho até a estalagem para procurar Lyana.'
+        },
+        {
+          id: 'leave_night',
+          tag: 'DESPEDIDA',
+          speech: '— "Compreendido, sentinela. Não causarei incômodo na sua vigília. Retornarei quando a praça acordar."',
+          label: '↩ Voltar e retornar durante o dia',
+          desc: 'Agradecer o sentinela e afastar-se, retornando durante o horário comercial diurno.'
+        }
       ]
     };
     window.vEncounter.render(NIGHT_DIALOGUE, {
       player: p,
       onChoice: function(ch){
-        if (ch && ch.id === 'wait_dawn') {
+        if (!ch) return;
+        if (ch.id === 'wait_dawn') {
           try { window.vEncounter.close(); } catch(_){}
-          if (typeof vToast === 'function') vToast('Você aguarda as horas passarem até os primeiros raios de sol tocarem as muralhas...');
+          if (typeof vToast === 'function') vToast('Você aguarda as horas passarem sob as estrelas até os primeiros raios de sol tocarem as muralhas...');
           setTimeout(function(){ _startLyanaEncounter(p, true); }, 400);
+        } else if (ch.id === 'go_inn') {
+          try { window.vEncounter.close(); } catch(_){}
+          if (typeof _startCityWalk === 'function') {
+            _startCityWalk('inn', function(){
+              if (typeof navigateTo === 'function') navigateTo('inn');
+            });
+          } else {
+            if (typeof navigateTo === 'function') navigateTo('inn');
+          }
+        } else if (ch.id === 'leave_night') {
+          try { window.vEncounter.close(); } catch(_){}
+          if (typeof vToast === 'function') vToast('Você se despede do sentinela e decide retornar durante o dia.');
+          if (typeof refreshHud === 'function') refreshHud();
         }
       }
     });
@@ -61592,11 +61712,26 @@ function _startLyanaEncounter(p, forceDay){
   ];
 
   var LYANA_DELIVERY_CHOICES = [
-    { id: 'lyana-confirm-deliver', label: '◆ "Aceito a paga. Que teu pai retorne em paz."' },
-    { id: 'lyana-confirm-deliver-modest', label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."' },
+    {
+      id: 'lyana-confirm-deliver',
+      tag: 'HONESTIDADE',
+      speech: '— "Aceito a justa paga, Lyana. Que teu pai retorne em paz de suas andanças."',
+      label: '◆ "Aceito a paga. Que teu pai retorne em paz."',
+      desc: 'Receber as vinte moedas de prata ganhas honestamente pela entrega.'
+    },
+    {
+      id: 'lyana-confirm-deliver-modest',
+      tag: 'COMPAIXÃO',
+      speech: '— "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai e tuas pesquisas."',
+      label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."',
+      desc: 'Recusar o pagamento em respeito à aflição familiar e à nobreza da causa.'
+    },
     {
       id: 'curious',
+      tag: 'INVESTIGAÇÃO',
+      speech: '— "O cristal... runas que sangram? Deixe-me examinar o pergaminho, talvez eu compreenda algo."',
       label: '🎲 "O cristal... runas que sangram? Deixe-me examinar o pergaminho." · Investigação CD 13',
+      desc: 'Examinar o padrão cifrado e os detalhes arcanos da mensagem (Investigação CD 13).',
       check: { skill: 'investigation', dc: 13 },
       continueDialogue: 'approach-curious',
       resultNarration: 'Cruzas as datas da carta com o que sabes sobre o alinhamento das luas. O padrão salta aos olhos: toda menção às runas coincide com o auge da lua nova — e o pedido do cristal veio três dias antes da próxima conjunção! O cristal não é um amuleto comum, mas uma fechadura arcanotécnica para estancar fendas.',
@@ -61606,7 +61741,10 @@ function _startLyanaEncounter(p, forceDay){
     },
     {
       id: 'comfort',
+      tag: 'PERSUASÃO',
+      speech: '— "Teu pai é forte e resiliente, Lyana. Não percas a esperança, ele voltará."',
       label: '🎲 "Teu pai é forte e resiliente. Não percas a esperança." · Persuasão CD 12',
+      desc: 'Confortar a jovem com palavras firmes e inspiradoras (Persuasão CD 12).',
       check: { skill: 'persuasion', dc: 12 },
       continueDialogue: 'approach-comfort',
       resultNarration: 'Suas palavras firmes e compassivas dissipam a sombra de desespero que nublava o olhar da jovem herbalista. A postura dela se apruma, e ela respira sem o peso do pânico.',
@@ -61649,8 +61787,20 @@ function _startLyanaEncounter(p, forceDay){
         { type: 'speech', speaker: 'Lyana', text: '"Pelo teu caminho e por tua ajuda leal, por favor, escolhe como receber tua recompensa."' }
       ],
       choices: [
-        { id: 'lyana-confirm-deliver', label: '◆ "Aceito a paga. Que teu pai retorne em paz."' },
-        { id: 'lyana-confirm-deliver-modest', label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."' }
+        {
+          id: 'lyana-confirm-deliver',
+          tag: 'HONESTIDADE',
+          speech: '— "Aceito a justa paga, Lyana. Que teu pai retorne em paz de suas andanças."',
+          label: '◆ "Aceito a paga. Que teu pai retorne em paz."',
+          desc: 'Receber a recompensa da missão.'
+        },
+        {
+          id: 'lyana-confirm-deliver-modest',
+          tag: 'COMPAIXÃO',
+          speech: '— "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."',
+          label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."',
+          desc: 'Recusar as moedas por gentileza.'
+        }
       ]
     },
     'approach-comfort': {
@@ -61660,8 +61810,20 @@ function _startLyanaEncounter(p, forceDay){
         { type: 'speech', speaker: 'Lyana', text: '"Jamais esquecerei o que fizeste por nós hoje, aventureiro. Como queres receber tua justa paga?"' }
       ],
       choices: [
-        { id: 'lyana-confirm-deliver', label: '◆ "Aceito a paga. Que teu pai retorne em paz."' },
-        { id: 'lyana-confirm-deliver-modest', label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."' }
+        {
+          id: 'lyana-confirm-deliver',
+          tag: 'HONESTIDADE',
+          speech: '— "Aceito a justa paga, Lyana. Que teu pai retorne em paz de suas andanças."',
+          label: '◆ "Aceito a paga. Que teu pai retorne em paz."',
+          desc: 'Receber a recompensa da missão.'
+        },
+        {
+          id: 'lyana-confirm-deliver-modest',
+          tag: 'COMPAIXÃO',
+          speech: '— "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."',
+          label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."',
+          desc: 'Recusar as moedas por gentileza.'
+        }
       ]
     },
     'lyana-confirm-deliver': {
@@ -61674,7 +61836,16 @@ function _startLyanaEncounter(p, forceDay){
         { type: 'narration', text: 'Lyana abre a bolsinha de couro pendurada no cinto. Conta vinte moedas de prata — economia honesta de quem vive de raízes e unguentos. Coloca-as na tua mão e fecha teus dedos por cima com gratidão sincera.' },
         { type: 'speech', speaker: 'Lyana', text: '<i>(sorri com alívio no peito)</i> Se voltares à Praça e precisares de poções ou emplastros, vem aqui primeiro. Minha banca está sempre aberta para ti.' }
       ],
-      choices: [ { id: 'done', label: '◆ Despedir-se', cb: 'close' } ],
+      choices: [
+        {
+          id: 'done',
+          tag: 'DESPEDIDA',
+          speech: '— "Agradeço, Lyana. Cuidarei para que teus conselhos me acompanhem na estrada. Até breve."',
+          label: '◆ Despedir-se',
+          desc: 'Concluir a conversa e retornar à praça.',
+          cb: 'close'
+        }
+      ],
       onClose: function(){
         _completeLyanaQuestServer(20, 40, 'Lyana abraça a carta. +20 Valdoritas +40 XP. Missão concluída!');
       }
@@ -61689,7 +61860,16 @@ function _startLyanaEncounter(p, forceDay){
         { type: 'narration', text: 'Lyana hesita, comovida pelo gesto de nobreza. Dois feirantes idosos que acompanhavam a cena trocam olhares de respeito. Um deles aproxima-se e coloca uma bolsa na sua mão: <i>"Poucos em Valdoria recusam prata por compaixão a uma filha aflita. A cidade honra sua virtude, aventureiro."</i>' },
         { type: 'speech', speaker: 'Lyana', text: '<i>(curva-se em profunda reverência)</i> Que os ventos do Pai e o espírito das matas te guardem em cada passo. <b>Jamais esquecerei tua generosidade.</b>' }
       ],
-      choices: [ { id: 'done', label: '◆ Despedir-se', cb: 'close' } ],
+      choices: [
+        {
+          id: 'done',
+          tag: 'DESPEDIDA',
+          speech: '— "Agradeço, Lyana. Cuidarei para que teus conselhos me acompanhem na estrada. Até breve."',
+          label: '◆ Despedir-se',
+          desc: 'Concluir a conversa e retornar à praça.',
+          cb: 'close'
+        }
+      ],
       onClose: function(){
         _completeLyanaQuestServer(30, 60, 'Lyana grava teu rosto com eterna gratidão. +30 Valdoritas +60 XP (+15 afinidade). Missão concluída!');
       }
@@ -61707,7 +61887,10 @@ function _startLyanaEncounter(p, forceDay){
     choices: [
       {
         id: 'approach-perception',
+        tag: 'PERCEPÇÃO',
+        speech: '— "Aproximo-me com discrição, observando como ela organiza as raízes e se há alguém vigiando a banca."',
         label: '🎲 Observar postura e arredores · Percepção CD 11',
+        desc: 'Estudar atentamente a postura da jovem e os arredores da fonte (Percepção CD 11).',
         check: { skill: 'perception', dc: 11 },
         continueDialogue: 'approach-talk',
         resultNarration: 'Você apura o olhar entre a multidão. Lyana está agachada perto da fonte, amarrando raízes com dedos trêmulos. Seus olhos verdes erguem-se a cada minuto na direção dos Portões, demonstrando a angústia de quem aguarda notícias vitais há três luas. No peito dela brilha um camafeu com uma runa idêntica à do pergaminho selado.',
@@ -61717,7 +61900,10 @@ function _startLyanaEncounter(p, forceDay){
       },
       {
         id: 'approach-insight',
+        tag: 'INTUIÇÃO',
+        speech: '— "Observo o peso da respiração e a aflição no olhar dela antes de pronunciar qualquer palavra."',
         label: '🎲 Avaliar os sentimentos da jovem · Intuição CD 12',
+        desc: 'Ler as emoções e a angústia da filha que aguarda notícias da estrada (Intuição CD 12).',
         check: { skill: 'insight', dc: 12 },
         continueDialogue: 'approach-talk',
         resultNarration: 'Você lê a tensão nos ombros e na respiração dela. O medo dela não tem origem em dívidas ou perigos urbanos: é o pavor sufocante de uma filha que teme receber notícias fúnebres sobre a expedição do pai.',
@@ -61727,7 +61913,10 @@ function _startLyanaEncounter(p, forceDay){
       },
       (isDruidOrRanger ? {
         id: 'approach-nature',
+        tag: 'NATUREZA',
+        speech: '— "Reconheço o aroma dessas folhas de meimendro e raízes raras. Você tem bom olho botânico, herbalista."',
         label: '🌿 [Natureza/Sobrevivência] Identificar as ervas raras da banca · CD 10',
+        desc: 'Demonstrar conhecimento sobre ervas raras e plantas silvestres (Natureza CD 10).',
         check: { skill: 'nature', dc: 10 },
         continueDialogue: 'approach-talk',
         resultNarration: 'Você reconhece o aroma acre de Raiz-de-Mandrágora selvagem e Folhas de Meimendro — ingredientes ancestrais que só um conhecedor dos ermos colhe sob luas propícias para selar febres e venenos profanos.',
@@ -61737,7 +61926,10 @@ function _startLyanaEncounter(p, forceDay){
       } : null),
       {
         id: 'approach-direct',
-        label: 'Aproximar-se diretamente da banca',
+        tag: 'DIPLOMACIA',
+        speech: '— "Com licença, Lyana? Trago uma mensagem lacrada que foi confiada a mim nos Portões."',
+        label: '◆ Aproximar-se diretamente da banca',
+        desc: 'Avançar com passos seguros até a tenda e apresentar-se à herbalista.',
         continueDialogue: 'approach-talk'
       }
     ].filter(Boolean)
@@ -68101,6 +68293,8 @@ var _CITY_WALK_EVENTS = [
     choices: [
       {
         id: 'patrol_persuade',
+        tag: 'PERSUASÃO',
+        speech: '— "Saudações, sentinelas. Estou a caminho de meus afazeres pacíficos pela cidade."',
         label: 'Apresentar-se com cortesia',
         desc: 'Explicar com respeito que está a caminho de seu destino legítimo (Persuasão CD 11).',
         stat: 'cha', dc: 11,
@@ -68109,6 +68303,8 @@ var _CITY_WALK_EVENTS = [
       },
       {
         id: 'patrol_intimidate',
+        tag: 'INTIMIDAÇÃO',
+        speech: '— "Apenas cuidem de seus postos. Não há nada aqui que exija a sua interferência."',
         label: 'Impor presença marcial',
         desc: 'Sustentar o olhar e demonstrar disciplina de combatente experiente (Intimidação CD 12).',
         stat: 'str', dc: 12,
@@ -68117,6 +68313,8 @@ var _CITY_WALK_EVENTS = [
       },
       {
         id: 'patrol_stealth',
+        tag: 'FURTIVIDADE',
+        speech: '— "Melhor não chamar atenção desnecessária. Deslizarei pelas sombras."',
         label: 'Desviar pelas sombras',
         desc: 'Aproveitar a penumbra dos arcos para contornar sem ser abordado (Furtividade CD 11).',
         stat: 'dex', dc: 11,
@@ -68135,6 +68333,8 @@ var _CITY_WALK_EVENTS = [
     choices: [
       {
         id: 'urchin_perceive',
+        tag: 'PERCEPÇÃO',
+        speech: '— "Mãos onde eu possa vê-las! Conheço esse truque de longe."',
         label: 'Agarrar o pulso do trombadinha',
         desc: 'Notar a tentativa de furto antes que a navalha corte suas amarras (Percepção CD 12).',
         stat: 'wis', dc: 12,
@@ -68143,6 +68343,8 @@ var _CITY_WALK_EVENTS = [
       },
       {
         id: 'urchin_dodge',
+        tag: 'DESTREZA',
+        speech: '— "Passo em falso, garoto! Não vai me pegar tão fácil."',
         label: 'Giro defensivo com a capa',
         desc: 'Desviar ágil e afastar a aproximação suspeita (Destreza CD 11).',
         stat: 'dex', dc: 11,
@@ -68151,6 +68353,8 @@ var _CITY_WALK_EVENTS = [
       },
       {
         id: 'urchin_mercy',
+        tag: 'COMPAIXÃO',
+        speech: '— "Guarde as navalhas, jovem. Tome estas moedas e compre algo para comer."',
         label: 'Oferecer algumas moedas',
         desc: 'Demonstrar compaixão diante da miséria das ruas (Carisma CD 10).',
         stat: 'cha', dc: 10,
@@ -68170,6 +68374,8 @@ var _CITY_WALK_EVENTS = [
     choices: [
       {
         id: 'veteran_learn',
+        tag: 'SOBREVIVÊNCIA',
+        speech: '— "Agradeço o aviso, veterano. Diga-me mais sobre os marcos e desvios seguros."',
         label: 'Anotar os conselhos de rota de Braun',
         desc: 'Ouvir com atenção as instruções topográficas do veterano (Sobrevivência CD 11).',
         stat: 'wis', dc: 11,
@@ -68179,9 +68385,11 @@ var _CITY_WALK_EVENTS = [
       },
       {
         id: 'veteran_greet',
+        tag: 'CORTESIA',
+        speech: '— "Agradeço pelas palavras, Braun. Que os ventos soprem a seu favor."',
         label: 'Agradecer e prosseguir',
         desc: 'Fazer um aceno cortês em respeito à experiência de Braun e seguir caminho.',
-        sNarr: 'Você agradece a saudação marcial e continua sua travessia pelas ruas de Valdoria.'
+        sNarr: 'Você agradece a saudação marcial e continua a caminho pelas ruas de Valdoria.'
       }
     ]
   },
@@ -68196,12 +68404,16 @@ var _CITY_WALK_EVENTS = [
     choices: [
       {
         id: 'bard_listen',
+        tag: 'INSPIRAÇÃO',
+        speech: '— "Bela canção, trovador. Uma boa melodia alivia o peso de qualquer jornada."',
         label: 'Apreciar a canção',
         desc: 'Permitir que a melodia inspire sua determinação e foco de aventureiro.',
         sNarr: 'A música dissipa o peso do cansaço e renova o seu ânimo para as tarefas e provações que o aguardam.'
       },
       {
         id: 'bard_pass',
+        tag: 'MARCHA',
+        speech: '— "Preciso manter o ritmo. O tempo urge e o dever me chama."',
         label: 'Apressar o passo',
         desc: 'Manter a marcha constante rumo ao seu destino.',
         sNarr: 'Você mantém o passo firme pelas pedras, deixando os acordes do alaúde sumirem suavemente às suas costas.'
@@ -68217,6 +68429,8 @@ var _CITY_WALK_EVENTS = [
     choices: [
       {
         id: 'shrine_pray',
+        tag: 'DEVOÇÃO',
+        speech: '— "Que os Guardiões Antigos iluminem meus passos e guardem minhas decisões."',
         label: 'Fazer uma prece silenciosa',
         desc: 'Pedir proteção e discernimento aos espíritos protetores (Religião CD 10).',
         stat: 'wis', dc: 10,
@@ -68225,6 +68439,8 @@ var _CITY_WALK_EVENTS = [
       },
       {
         id: 'shrine_continue',
+        tag: 'PROSSEGUIR',
+        speech: '— "Que a chama siga acesa. Tenho de seguir adiante."',
         label: 'Prosseguir em silêncio',
         desc: 'Seguir seu caminho pelas vielas sem interromper a marcha.',
         sNarr: 'Você contempla o brilho dourado da lamparina e avança pelo calçamento.'
@@ -68311,13 +68527,19 @@ function _showCityWalkArrival(dest, narrativeText, proceedFn) {
         { type: 'narration', text: 'Você conclui a caminhada pelo distrito e avista a entrada de <b>' + dest.name + '</b> diante de você.' }
       ],
       choices: [
-        { id: 'walk_enter', label: 'Entrar em ' + dest.name }
+        {
+          id: 'walk_enter',
+          label: 'Entrar em ' + dest.name,
+          speech: '— "Cheguei ao meu destino. É hora de prosseguir."',
+          tag: 'CHEGADA',
+          desc: 'Adentrar as dependências de ' + dest.name + '.'
+        }
       ],
       choicesTitle: 'Chegada ao Destino',
       choicesSubtitle: dest.name
     }, {
       player: p,
-      progress: { isCityWalk: true, title: '◈ TRAVESSIA POR VALDORIA', destination: dest.name },
+      progress: { isCityWalk: true, title: '◈ A CAMINHO: ' + dest.name.toUpperCase(), destination: dest.name },
       inlineChoices: true,
       onChoice: function() {
         if (typeof vEncounter.close === 'function') vEncounter.close();
@@ -68357,6 +68579,8 @@ function _startCityWalk(targetKey, proceedFn, opts) {
         id: ch.id || ('walk_ch_' + idx),
         label: ch.label,
         desc: ch.desc || '',
+        tag: ch.tag || null,
+        speech: ch.speech || null,
         dc: ch.dc,
         skill: ch.stat ? ((window.DndRules && DndRules.statLabel) ? DndRules.statLabel(ch.stat) : ch.stat.toUpperCase()) : null,
         _ev: ch
@@ -68371,7 +68595,7 @@ function _startCityWalk(targetKey, proceedFn, opts) {
       choicesSubtitle: 'A caminho de ' + dest.name
     }, {
       player: p,
-      progress: { isCityWalk: true, title: '◈ TRAVESSIA POR VALDORIA', destination: dest.name },
+      progress: { isCityWalk: true, title: '◈ A CAMINHO: ' + dest.name.toUpperCase(), destination: dest.name },
       onChoice: function(selected) {
         var ch = selected._ev || selected;
         if (ch.isVeteranTip) {

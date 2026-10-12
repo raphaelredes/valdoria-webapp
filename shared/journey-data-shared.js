@@ -412,7 +412,7 @@ var HAZARDS = {
         { i: '🧭', t: 'Usar o alinhamento como guia de marcha', stat: 'wis', dc: 11,
           desc: 'Calcular a direção exata que a face entalhada aponta em direção a Valdoria.',
           isShortcut: true,
-          sNarr: 'A inclinação da pedra aponta exatamente o corredor de terreno firme desbravado pelos antigos batedores. Você ganha tempo e encurta a travessia!',
+          sNarr: 'A inclinação da pedra aponta exatamente o corredor de terreno firme desbravado pelos antigos batedores. Você ganha tempo e encurta o caminho!',
           fNarr: 'A estepe ondulada confunde suas medições visuais no horizonte.', dmg: 1 },
         { i: '🙏', t: 'Prece aos batedores pioneiros', stat: 'wis', dc: 10,
           requires_background: ['outlander', 'soldier', 'folk_hero', 'hermit'],
@@ -673,16 +673,16 @@ var HAZARDS = {
         { type: 'narration', text: 'O vento da ravina faz a estrutura gemer a cada rajada, e várias tábuas apodrecidas revelam o vazio abaixo.' }
       ],
       choices: [
-        { i: '🚶', t: 'Travessia lenta e ponderada', stat: 'dex', dc: 12,
+        { i: '🚶', t: 'Passagem lenta e cuidadosa', stat: 'dex', dc: 12,
           desc: 'Testar cada tábua antes de apoiar o peso, segurando firme nos cabos laterais.',
           sNarr: 'Passo a passo disciplinado, você contorna duas ripas podres e chega à outra margem com o coração acelerado mas são e salvo.',
           fNarr: 'Uma tábua se quebra ao meio sob seu pé; você se segura no cabo lateral por puro reflexo enquanto lascas caem no abismo.', dmg: 2 },
         { i: '⚓', t: 'Reforço de nós e ancoragem firme', stat: 'str', dc: 11,
           requires_class: ['guerreiro', 'paladino', 'patrulheiro'],
           desc: 'Apertar as amarras principais nos troncos de suporte antes de cruzar.',
-          sNarr: 'Com força e conhecimento de ancoragens, você tensiona os cabos frouxos; a ponte fica mais estável e a travessia torna-se segura.',
+          sNarr: 'Com força e conhecimento de ancoragens, você tensiona os cabos frouxos; a ponte fica mais estável e o caminho torna-se seguro.',
           fNarr: 'Uma das cordas secundárias rompe com estalo alto e açoita seu braço.', dmg: 2 },
-        { i: '🤝', t: 'Travessia coordenada em fila com aliados', stat: 'dex', dc: 10,
+        { i: '🤝', t: 'Avanço coordenado em fila com aliados', stat: 'dex', dc: 10,
           requires_ally: true,
           desc: 'Avançar espaçados mantendo a corda de segurança entre os aventureiros.',
           sNarr: 'Com disciplina e equilíbrio mútuo, o grupo avança compassadamente, compensando o balanço do vento até o outro lado.',
@@ -2076,11 +2076,11 @@ var DEPARTURES = {
         if (t.cls === 'patrulheiro') return 'Seu olhar de patrulheiro examina o horizonte aberto, identificando rotas naturais e possíveis trilhas de caça.';
         if (t.cls === 'ladino' || t.cls === 'ladrao') return 'Seu instinto de ladino mantém um olho na rota e outro nos pontos de fuga ao longo da estrada.';
         if (t.cls === 'guerreiro') return 'O peso familiar da armadura e a empunhadura da arma transmitem a costumeira confiança marcial para a marcha.';
-        if (t.cls === 'mago') return 'Você mantém a mente afiada e o grimório protegido da poeira, calculando mentalmente as variáveis da travessia.';
+        if (t.cls === 'mago') return 'Você mantém a mente afiada e o grimório protegido da poeira, calculando mentalmente as variáveis da viagem.';
         if (t.cls === 'clerigo') return 'Com a mão no símbolo divino, você faz uma oração silenciosa de passagem aos espíritos do caminho.';
         if (t.cls === 'paladino') return 'Sua postura ereta e determinação moral inspiram coragem diante da vastidão incerta das terras selvagens.';
         if (t.cls === 'barbaro') return 'O ar livre dos ermos infla seus pulmões; longe das muralhas de pedra, você se sente verdadeiramente vivo.';
-        if (t.cls === 'druida') return 'Você toca a relva na beira da estrada e agradece a acolhida da terra no início da travessia.';
+        if (t.cls === 'druida') return 'Você toca a relva na beira da estrada e agradece a acolhida da terra no início da viagem.';
         if (t.cls === 'bardo') return 'Você marca um compasso rítmico com os pés, transformando a fadiga da marcha em melodia estimulante.';
         if (t.cls === 'monge') return 'Seu passo é sereno e ritmado, sincronizando respiração e movimento num estado contínuo de vigília meditativa.';
         if (t.cls === 'bruxo') return 'Uma presença invisível parece acompanhar sua sombra na estrada, sussurrando cautela em segredo.';
@@ -2598,11 +2598,11 @@ var DEPARTURES = {
         if (t.subclass === 'abjurer') return 'Fios invisíveis de proteção abjurativa envolvem sua pele; você traça runas de defesa para repelir perigos súbitos.';
         if (t.subclass === 'necromancer') return 'Você percebe os resquícios de vida e morte ao longo da rota com a impassibilidade de quem domina os véus do além.';
         if (t.subclass === 'life') return 'Você toca o relicário sagrado, emanando uma centelha de vitalidade curativa para sustentar o corpo contra a fadiga.';
-        if (t.subclass === 'war') return 'Você ora pelo favor da divindade das batalhas, empunhando a fé como um escudo inquebrantável na travessia.';
+        if (t.subclass === 'war') return 'Você ora pelo favor da divindade das batalhas, empunhando a fé como um escudo inquebrantável na viagem.';
         if (t.subclass === 'vengeance') return 'O peso do seu juramento de vingança guia seu passo inflexível; nada entre os portões e o destino deterá sua marcha.';
         if (t.subclass === 'devotion') return 'Sua lâmina brilha com honra e retidão; você parte como um bastião de luz contra os perigos dos ermos.';
         if (t.subclass === 'berserker') return 'O sangue ferve na expectativa da violência; seus músculos tremem com fúria contida a cada passada decidida.';
-        if (t.subclass === 'lore') return 'Você recorda baladas antigas sobre as ruínas e perigos desta região, buscando pistas históricas úteis para a travessia.';
+        if (t.subclass === 'lore') return 'Você recorda baladas antigas sobre as ruínas e perigos desta região, buscando pistas históricas úteis para a viagem.';
         if (t.subclass === 'moon') return 'Você sente o chamado da fera interior e o influxo dos ciclos selvagens protegendo sua forma mortal.';
         if (t.subclass === 'shadow') return 'Você respira com calma monástica, alinhando seus passos com a escuridão do terreno para passar despercebido.';
         if (t.subclass === 'fiend') return 'Um calor sulfuroso reconforta seus sentidos; seu patrono infernal cobra bravura e desdém pelo perigo.';
@@ -2677,7 +2677,7 @@ var DEPARTURES = {
             preps.push({
                 id: 'prep_sacred',
                 label: 'Postura Litúrgica: Bênção de proteção aos caminhantes',
-                desc: 'Invoca o favor divino para resguardar a travessia contra infortúnios (Vantagem no 1º teste com Sabedoria).',
+                desc: 'Invoca o favor divino para resguardar a viagem contra infortúnios (Vantagem no 1º teste com Sabedoria).',
                 isPrep: true,
                 stat: 'wis',
                 prepText: 'Você unge seu cajado ou escudo com uma prece sagrada, invocando o manto protetor da sua divindade sobre a rota.'
@@ -2703,8 +2703,8 @@ var DEPARTURES = {
         } else if (t.cls === 'bardo') {
             preps.push({
                 id: 'prep_tempo',
-                label: 'Postura de Cadência: Ritmo estimulante de travessia',
-                desc: 'Marca um compasso marcial animado para manter o ânimo e a mente afiados (Vantagem no 1º teste com Carisma).',
+                label: 'Postura de Marcha: Ritmo constante a caminho',
+                desc: 'Marca um compasso animado para manter o ânimo e a mente afiados (Vantagem no 1º teste com Carisma).',
                 isPrep: true,
                 stat: 'cha',
                 prepText: 'Você marca mentalmente um compasso marcial vigoroso, mantendo o ânimo elevado e a mente ágil diante de imprevistos.'
@@ -2861,8 +2861,8 @@ var DEPARTURES = {
             {
                 type: 'narration',
                 text: isReturn
-                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. A travessia de volta estima uma distância aproximada de <b>~' + estDist + ' marcos</b> por trilhas que podem variar conforme o relevo e os imprevistos da rota.')
-                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A travessia pelas terras ermas estima uma distância aproximada de <b>~' + estDist + ' marcos</b> de marcha contínua por caminhos sujeitos a desvios e imprevistos.')
+                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. O caminho de volta estima uma distância aproximada de <b>~' + estDist + ' marcos</b> por trilhas que podem variar conforme o relevo e os imprevistos da rota.')
+                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A viagem pelas terras ermas estima uma distância aproximada de <b>~' + estDist + ' marcos</b> de marcha contínua por caminhos sujeitos a desvios e imprevistos.')
             }
         ];
 
