@@ -68861,7 +68861,7 @@ function _showCityWalkArrival(dest, narrativeText, proceedFn) {
       choicesSubtitle: dest.name
     }, {
       player: p,
-      progress: { isCityWalk: true, title: '◈ A CAMINHO: ' + dest.name.toUpperCase(), destination: dest.name },
+      progress: { isCityWalk: true, title: '◈ A CAMINHO: ' + dest.name.toUpperCase(), destination: dest.name, district: dest.district },
       inlineChoices: true,
       onChoice: function() {
         if (typeof vEncounter.close === 'function') vEncounter.close();
@@ -68930,7 +68930,7 @@ function _startCityWalk(targetKey, proceedFn, opts) {
       choicesSubtitle: 'A caminho de ' + dest.name
     }, {
       player: p,
-      progress: { isCityWalk: true, title: '◈ A CAMINHO: ' + dest.name.toUpperCase(), destination: dest.name },
+      progress: { isCityWalk: true, title: '◈ A CAMINHO: ' + dest.name.toUpperCase(), destination: dest.name, district: dest.district },
       onChoice: function(selected) {
         var ch = selected._ev || selected;
         if (ch.isVeteranTip) {

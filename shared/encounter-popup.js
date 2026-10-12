@@ -2393,7 +2393,13 @@
 
       if (_pg.isCityWalk) {
         pLabel.textContent = _pg.title || '◈ A CAMINHO POR VALDORIA';
-        pRemain.textContent = _pg.destination ? ('Rumo a ' + _pg.destination) : 'Pelas ruas da cidade';
+        var _destNorm = (_pg.destination || '').trim().toLowerCase();
+        var _distNorm = (_pg.district || '').trim().toLowerCase();
+        if (_pg.district && _distNorm !== _destNorm && !_distNorm.startsWith('a caminho')) {
+          pRemain.textContent = _pg.district;
+        } else {
+          pRemain.textContent = 'Pelas ruas de Valdoria';
+        }
       } else {
         var _cur = Math.max(1, Math.min(_pg.current || 1, _pg.total || 1));
         var _remain = Math.max(0, (_pg.total || 1) - _cur);
