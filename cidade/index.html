@@ -69265,8 +69265,11 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   var tactRes = chk.tactical_resources || (data && data.tactical_resources) || {};
   var hasInsp = Boolean(tactRes.has_inspiration);
   var hasGuidance = Boolean(tactRes.has_guidance);
+  var hasBardic = Boolean(tactRes.has_bardic_inspiration);
+  var canBribe = Boolean(tactRes.can_bribe);
   var hasFriends = Boolean(tactRes.has_friends);
   var hasThaum = Boolean(tactRes.has_thaumaturgy);
+  var npcAttitude = tactRes.npc_attitude || 'indifferent';
   var assistOptions = tactRes.assist_options || [];
 
   var script = [
@@ -69287,6 +69290,29 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       text: '🙏 <b>Magia Social — Orientação (+1d4):</b> ' + (tactRes.guidance_source ? (tactRes.guidance_source + ' pode abençoar a ação com +1d4 de bônus divinatório.') : 'Você pode conjurar o truque para adicionar +1d4 ao total.')
     });
   }
+  if (hasBardic) {
+    script.push({
+      type: 'narration',
+      text: '🎵 <b>Inspiração Bárdica (+1d6):</b> ' + (tactRes.bardic_source ? (tactRes.bardic_source + ' concede +1d6 aditivo em testes de habilidade.') : 'Você pode somar +1d6 de dado de bardo ao total.')
+    });
+  }
+  if (canBribe) {
+    script.push({
+      type: 'narration',
+      text: '💰 <b>Oferecer Suborno (10 Valdoritas):</b> Você pode deslizar 10 Valdoritas discretamente para obter <b>Vantagem D&D 5e</b> (DMG p. 244).'
+    });
+  }
+  if (npcAttitude === 'friendly') {
+    script.push({
+      type: 'narration',
+      text: '🤝 <b>Atitude Amigável (DMG p. 244):</b> O interlocutor nutre apreço ou boa disposição (+2 de bônus em testes de interação social).'
+    });
+  } else if (npcAttitude === 'hostile') {
+    script.push({
+      type: 'narration',
+      text: '😠 <b>Atitude Hostil (DMG p. 244):</b> O interlocutor desconfia profundamente de suas intenções (-5 de penalidade em testes de interação social).'
+    });
+  }
   if (hasFriends) {
     script.push({
       type: 'narration',
@@ -69303,6 +69329,13 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   var choices = [];
 
   // 1. Opções para o próprio aventureiro
+  if (hasInsp && hasGuidance && hasBardic) {
+    choices.push({
+      id: 'roll_self_all_buffs',
+      label: '✔ [Você] Rolar com Inspiração (2d20 Vantagem) + Orientação (+1d4) + Bardo (+1d6)',
+      _tactical_options: { use_inspiration: true, use_guidance: true, use_bardic_inspiration: true }
+    });
+  }
   if (hasInsp && hasGuidance) {
     choices.push({
       id: 'roll_self_insp_guidance',
@@ -69317,11 +69350,32 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       _tactical_options: { use_inspiration: true, use_guidance: false }
     });
   }
+  if (hasBardic && hasGuidance) {
+    choices.push({
+      id: 'roll_self_bard_guidance',
+      label: '✔ [Você] Rolar com Orientação (+1d4) + Inspiração Bárdica (+1d6)',
+      _tactical_options: { use_guidance: true, use_bardic_inspiration: true }
+    });
+  }
+  if (hasBardic) {
+    choices.push({
+      id: 'roll_self_bard',
+      label: '✔ [Você · 🎵 Inspiração Bárdica] Rolar com +1d6 de Dado de Bardo',
+      _tactical_options: { use_bardic_inspiration: true, use_guidance: false }
+    });
+  }
   if (hasGuidance) {
     choices.push({
       id: 'roll_self_guidance',
       label: '✔ [Você] Rolar Pessoalmente com Orientação (+1d4)',
       _tactical_options: { use_inspiration: false, use_guidance: true }
+    });
+  }
+  if (canBribe) {
+    choices.push({
+      id: 'roll_self_bribe',
+      label: '✔ [Você · 💰 Suborno (10 Valdoritas)] Rolar com Vantagem',
+      _tactical_options: { use_bribe: true, use_guidance: hasGuidance, use_bardic_inspiration: hasBardic }
     });
   }
   if (hasFriends) {
@@ -69352,12 +69406,16 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     if (hasGuidance) {
       cLabel += ' + Orientação (+1d4)';
     }
+    if (hasBardic) {
+      cLabel += ' + Bardo (+1d6)';
+    }
     choices.push({
       id: 'roll_comp_' + cOpt.companion_id,
       label: '✔ ' + cLabel,
       _tactical_options: {
         roller: cOpt.companion_id,
         use_guidance: hasGuidance,
+        use_bardic_inspiration: hasBardic,
         use_inspiration: false
       }
     });
@@ -69404,6 +69462,10 @@ function _renderCityDialogue(venue, data, p, ctx){
         if (venue === 'recruta') {
           if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} return; }
           var nextNode = (ch && ch.node) || (data.node) || npcId;  // D1: node carrega npc_id
+          if (ch && (ch.check || ch.dc) && typeof _showSkillCheckTacticalModal === 'function') {
+            _showSkillCheckTacticalModal('recruta', nextNode, ch, p, data, { npcId: npcId });
+            return;
+          }
           _resolveCityChoice('recruta', nextNode, ch && ch.id, p, data.npc, { npcId: npcId });
           return;
         }
