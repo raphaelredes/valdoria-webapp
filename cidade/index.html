@@ -61920,6 +61920,45 @@ function _startLyanaEncounter(p, forceDay){
     portrait: '/shared/img/npcs/lyana-herbalista.webp'
   };
 
+  var isEirikRescued = Boolean((p && p.metadata && p.metadata.eirik_rescued_void_defeated) || (p && p.narrative && p.narrative.flags && p.narrative.flags.eirik_rescued_void_defeated));
+  if (isEirikRescued) {
+    var RESCUE_ACK_DIALOGUE = {
+      npc: LYANA_NPC_HEADER,
+      script: [
+        {
+          type: 'narration',
+          text: 'O aroma de alfazema e folhas de meimendro flutua suavemente sob a tenda de toldo azul. Ao avistar seus passos, os olhos de Lyana brilham com alegria indisfarçável. Ela deixa os maços de ervas sobre a esteira e vem até você com um sorriso radiante.'
+        },
+        {
+          type: 'speech',
+          speaker: 'Lyana',
+          text: '"Aventureiro! Meu pai retornou são e salvo das montanhas! Ele esteve aqui na Praça antes de abrir a Câmara Rúnica. Contou-me tudo sobre o frio do despenhadeiro, as runas que sangravam e como você enfrentou a terrível Sombra do Vazio para mantê-lo vivo! Nossa família tem uma dívida eterna contigo."'
+        }
+      ],
+      choices: [
+        {
+          id: 'lyana_rescue_thanks',
+          tag: 'DIPLOMACIA',
+          speech: '— "Fico feliz em ver tua família reunida e em paz, Lyana. Teu pai é um homem sábio e honrado."',
+          label: '◆ "Fico feliz em vê-lo a salvo. Teu pai é um homem de grande valor."',
+          desc: 'Celebrar a segurança de Eirik e a união familiar.',
+          cb: 'close'
+        },
+        {
+          id: 'lyana_buy_herbs',
+          tag: 'COMÉRCIO',
+          speech: '— "Agradeço tuas palavras. Agora que a paz reina, que ungüentos e poções tens disponíveis hoje?"',
+          label: '🌿 "Mostre-me os unguentos e ervas medicinais da tua banca."',
+          desc: 'Acessar o comércio de ervas e elixires medicinais com a gratidão da herbalista.',
+          cb: 'close'
+        }
+      ]
+    };
+    window._SVC_CONFIG = window._SVC_CONFIG_INN || { faction: 'lyana', factionLabel: 'Lyana, Herbalista' };
+    window.vEncounter.render(RESCUE_ACK_DIALOGUE, { player: p });
+    return;
+  }
+
   var LYANA_TALK_SCRIPT = [
     {
       type: 'narration',
