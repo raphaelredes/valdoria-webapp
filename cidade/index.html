@@ -17742,26 +17742,54 @@ function _getFichaMember(idx){
 // (PHB). Texto-fonte client-side (espelha src/game/character/creation_help.py +
 // help_texts; idealmente server-driven — follow-up junto com MN2).
 var _FICHA_STAT_HELP = {
-  str: { t: 'Força (FOR)', d: 'Poder físico bruto. Modifica ataques e dano corpo-a-corpo, testes de Atletismo e o quanto você carrega. Conjuração de nenhuma classe.' },
-  dex: { t: 'Destreza (DES)', d: 'Agilidade e reflexos. Modifica a Classe de Armadura (sem armadura pesada), a Iniciativa, ataques à distância e com armas acuradas, além de Acrobacia e Furtividade.' },
-  con: { t: 'Constituição (CON)', d: 'Vigor e saúde. Determina seus Pontos de Vida (somada por nível) e a resistência a fadiga, veneno e exaustão.' },
-  int: { t: 'Inteligência (INT)', d: 'Raciocínio e memória. Atributo de conjuração do Mago. Rege Arcanismo, Investigação, História e Natureza.' },
-  wis: { t: 'Sabedoria (SAB)', d: 'Percepção e intuição. Atributo de conjuração de Clérigo, Druida e Patrulheiro. Rege Percepção, Intuição, Medicina e Sobrevivência.' },
-  cha: { t: 'Carisma (CAR)', d: 'Força de personalidade. Atributo de conjuração de Bardo, Feiticeiro, Bruxo e Paladino. Rege Persuasão, Enganação, Intimidação e Atuação.' },
-  ac:  { t: 'Classe de Armadura (CA)', d: 'O quão difícil é te acertar. Um ataque precisa rolar d20 + bônus IGUAL ou MAIOR que sua CA pra atingir. Base 10 + modificador de DES + armadura/escudo equipados.' },
-  atk: { t: 'Bônus de Ataque', d: 'Somado à rolagem de d20 dos seus ataques: bônus de Proficiência + modificador do atributo da arma (FOR no corpo-a-corpo, DES em armas acuradas/à distância).' },
-  spelldc: { t: 'CD de Magia (Spell Save DC)', d: 'A dificuldade para um inimigo resistir às suas magias: 8 + bônus de Proficiência + modificador do seu atributo de conjuração (INT, SAB ou CAR, conforme a classe). PHB p.205.' },
-  prof: { t: 'Bônus de Proficiência', d: 'Somado a ataques, CD de magia e testes em que você é proficiente. Escala com o nível: +2 (níveis 1–4), +3 (5–8), até +6 no nível 17+. PHB Tabela 1-2.' }
+  str: { t: 'Força (FOR)', d: 'Poder físico bruto e potência muscular. Atributo primordial de Bárbaros e Guerreiros. Modifica ataques e dano corpo-a-corpo, testes de Atletismo e capacidade de carga.' },
+  dex: { t: 'Destreza (DES)', d: 'Agilidade, reflexos e equilíbrio. Modifica a Classe de Armadura (CA), a Iniciativa, ataques à distância e com armas acuradas, além de testes de Acrobacia e Furtividade.' },
+  con: { t: 'Constituição (CON)', d: 'Vigor, saúde e vitalidade. Determina Pontos de Vida (PV) adicionais por nível e testes de Concentração em magias ao sofrer dano em combate.' },
+  int: { t: 'Inteligência (INT)', d: 'Acuidade mental, memória e raciocínio lógico. Atributo de conjuração do Mago. Rege Arcanismo, Investigação, História, Natureza e Religião.' },
+  wis: { t: 'Sabedoria (SAB)', d: 'Percepção, intuição e sintonia com o ambiente. Atributo de conjuração de Clérigo e Druida. Rege Percepção, Intuição, Medicina e Sobrevivência.' },
+  cha: { t: 'Carisma (CAR)', d: 'Força de personalidade e magnetismo pessoal. Atributo de conjuração de Bardo, Feiticeiro, Bruxo e Paladino. Rege Persuasão, Enganação, Intimidação e Atuação.' },
+  ac:  { t: 'Classe de Armadura (CA)', d: 'O valor de defesa que determina o quão difícil é atingir o alvo com um ataque. Para acertar, o atacante precisa rolar 1d20 + bônus de ataque IGUAL ou MAIOR que esta CA.<br><br><b>Cálculo Canônico D&D 5e:</b> Base 10 + modificador de Destreza + armadura e escudo equipados ou armadura inata.' },
+  atk: { t: 'Bônus de Ataque', d: 'Valor somado à rolagem de 1d20 para determinar se o ataque atinge a Classe de Armadura (CA) do adversário.<br><br><b>Cálculo Canônico D&D 5e:</b> Bônus de Proficiência + modificador do atributo correspondente (Força para armas corpo-a-corpo padrão; Destreza para armas de ataque à distância ou armas com propriedade Acuidade).' },
+  spelldc: { t: 'Dificuldade de Magia (CD / Spell Save DC)', d: 'A Classe de Dificuldade (CD) que os inimigos devem igualar ou superar em seus testes de salvaguarda para resistir às magias do conjurador.<br><br><b>Cálculo Canônico D&D 5e (PHB p. 205):</b> 8 + Bônus de Proficiência + modificador do atributo de conjuração (INT para Mago; SAB para Clérigo/Druida; CAR para Bardo/Feiticeiro/Bruxo/Paladino).' },
+  prof: { t: 'Bônus de Proficiência', d: 'Bônus de competência universal somado a jogadas de ataque com armas treinadas, salvaguardas proficientes, CD de magias e testes de perícias proficientes.<br><br><b>Escala Canônica D&D 5e por Nível:</b><br>• Níveis 1 a 4: <b>+2</b><br>• Níveis 5 a 8: <b>+3</b><br>• Níveis 9 a 12: <b>+4</b><br>• Níveis 13 a 16: <b>+5</b><br>• Níveis 17 a 20: <b>+6</b>' }
 };
-function _showFichaStatHelp(key){
+_FICHA_STAT_HELP['dc'] = _FICHA_STAT_HELP['spelldc'];
+function _showFichaStatHelp(key, memberIdx){
   var h = _FICHA_STAT_HELP[key];
   if (!h || typeof _showInfoPopup !== 'function') return;
+  var currentVal = '';
+  var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
+  try {
+    var m = (typeof _getFichaMember === 'function') ? _getFichaMember(curIdx) : null;
+    if (m) {
+      var entityName = m.name || 'Este indivíduo';
+      if (key === 'ac') currentVal = entityName + ' possui <b>Classe de Armadura ' + (m.ac != null ? m.ac : 10) + '</b>.';
+      else if (key === 'atk') currentVal = entityName + ' possui <b>Bônus de Ataque ' + ((m.atk >= 0 ? '+' : '') + m.atk) + '</b>.';
+      else if (key === 'spelldc' || key === 'dc') currentVal = entityName + ' possui <b>CD de Magia ' + (m.dc != null ? m.dc : 10) + '</b>.';
+      else if (key === 'prof') currentVal = entityName + ' possui <b>Bônus de Proficiência +' + (m.prof != null ? m.prof : 2) + '</b>.';
+      else if (m.stats && m.stats[key] !== undefined) {
+        var v = m.stats[key];
+        var md = Math.floor((v - 10) / 2);
+        currentVal = entityName + ' possui <b>' + key.toUpperCase() + ' ' + v + '</b> (Modificador: <b>' + (md >= 0 ? '+' : '') + md + '</b>).';
+      }
+    }
+  } catch(e){}
+  var iconId = 'ic-stat-' + (key === 'atk' ? 'attack' : ((key === 'spelldc' || key === 'dc') ? 'spelldc' : key));
   _showInfoPopup({
-    icon: '<svg viewBox="0 0 120 120" style="width:34px;height:34px;color:var(--v-gold,#c4953a);"><use href="#ic-stat-' + (key === 'spelldc' ? 'spelldc' : key) + '"/></svg>',
-    npc: 'Ficha do Aventureiro',
+    icon: '<svg viewBox="0 0 120 120" style="width:34px;height:34px;color:var(--v-gold,#c4953a);"><use href="#' + iconId + '"/></svg>',
+    npc: 'Compêndio D&D 5e',
     title: h.t,
-    desc: '<div style="text-align:left;color:var(--v-text,#d4c8b0);font-size:calc(13px * var(--v-font-scale,1));line-height:1.6;">' + h.d + '</div>',
-    singleButton: true, cancelLabel: 'Entendi'
+    desc: '<div style="text-align:left;color:var(--v-text,#d4c8b0);font-size:calc(12.5px * var(--v-font-scale,1));line-height:1.55;">'
+      + '<p style="margin:0 0 8px 0;">' + h.d + '</p>'
+      + (currentVal ? '<p style="margin:8px 0 0 0;padding:6px 10px;background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.3);border-radius:4px;color:#ffd700;font-size:calc(11.5px * var(--v-font-scale,1));">📊 ' + currentVal + '</p>' : '')
+      + '</div>',
+    singleButton: true,
+    cancelLabel: '← Voltar à Ficha',
+    onCancel: function(){
+      if (typeof _showStatusPopup === 'function') {
+        _showStatusPopup(curIdx);
+      }
+    }
   });
 }
 
@@ -18697,13 +18725,19 @@ function _showFichaSavesHelp(saveKey, memberIdx){
       + '</div>';
   }
 
+  var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: '<svg viewBox="0 0 120 120" style="width:calc(34px * var(--v-font-scale, 1));height:calc(34px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);"><use href="#ic-stat-ac"/></svg>',
     npc: 'Ficha do Aventureiro · Regras D&D 5e',
     title: title,
     desc: descHtml,
     singleButton: true,
-    cancelLabel: 'Entendi'
+    cancelLabel: '← Voltar à Ficha',
+    onCancel: function(){
+      if (typeof _showStatusPopup === 'function') {
+        _showStatusPopup(curIdx);
+      }
+    }
   });
 }
 
@@ -18734,13 +18768,19 @@ function _showFichaRaceHelp(raceKey, memberIdx){
       + '</div>') : '')
     + '</div>';
 
+  var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: '<span style="font-size:calc(32px * var(--v-font-scale, 1));">🌿</span>',
     npc: 'Linhagem D&D 5e',
     title: data.name,
     desc: descHtml,
     singleButton: true,
-    cancelLabel: 'Entendi'
+    cancelLabel: '← Voltar à Ficha',
+    onCancel: function(){
+      if (typeof _showStatusPopup === 'function') {
+        _showStatusPopup(curIdx);
+      }
+    }
   });
 }
 
@@ -18785,13 +18825,19 @@ function _showFichaSubraceHelp(subraceKey, raceKey, memberIdx){
 
   descHtml += '</div>';
 
+  var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: '<span style="font-size:calc(32px * var(--v-font-scale, 1));">⚙️</span>',
     npc: 'Sub-raça D&D 5e',
     title: data ? data.name : ('Sub-raças de ' + _raceLabelPT(rKey)),
     desc: descHtml,
     singleButton: true,
-    cancelLabel: 'Entendi'
+    cancelLabel: '← Voltar à Ficha',
+    onCancel: function(){
+      if (typeof _showStatusPopup === 'function') {
+        _showStatusPopup(curIdx);
+      }
+    }
   });
 }
 
@@ -18860,13 +18906,19 @@ function _showFichaClassHelp(classKey, memberIdx){
     ? vAssets.classIconHTML(hId, 'calc(36px * var(--v-font-scale, 1))')
     : '<svg viewBox="0 0 120 120" style="width:calc(36px * var(--v-font-scale, 1));height:calc(36px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);"><use href="#' + hId + '"/></svg>';
 
+  var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: iconHtml,
     npc: 'Vocação D&D 5e',
     title: data.name,
     desc: descHtml,
     singleButton: true,
-    cancelLabel: 'Entendi'
+    cancelLabel: '← Voltar à Ficha',
+    onCancel: function(){
+      if (typeof _showStatusPopup === 'function') {
+        _showStatusPopup(curIdx);
+      }
+    }
   });
 }
 
@@ -18911,13 +18963,19 @@ function _showFichaSubclassHelp(subclassKey, classKey, memberIdx){
 
   descHtml += '</div>';
 
+  var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: '<span style="font-size:calc(32px * var(--v-font-scale, 1));">🔮</span>',
     npc: 'Especialização D&D 5e',
     title: data ? data.name : ('Sub-classes de ' + _classLabelPT(cKey)),
     desc: descHtml,
     singleButton: true,
-    cancelLabel: 'Entendi'
+    cancelLabel: '← Voltar à Ficha',
+    onCancel: function(){
+      if (typeof _showStatusPopup === 'function') {
+        _showStatusPopup(curIdx);
+      }
+    }
   });
 }
 
@@ -19010,6 +19068,7 @@ function _showStatusPopup(memberIdx){
       titleEl.textContent = 'Ficha do Companheiro';
     }
   }
+  var _memArg = (typeof memberIdx === 'string' ? ("'" + memberIdx + "'") : memberIdx);
   var stats = m.stats;
   function _mod(s){ var v = Math.floor((s - 10) / 2); return v; }
   function _modStr(s){ var v = _mod(s); return (v >= 0 ? '+' : '') + v; }
@@ -19119,9 +19178,109 @@ function _showStatusPopup(memberIdx){
     + '.ficha-meta-badge:hover,.ficha-meta-badge:active{border-color:var(--v-gold,#c4953a);color:#ffd700;box-shadow:0 0 8px rgba(196,149,58,0.35);transform:translateY(-1px);}'
     + '.ficha-link{color:var(--v-gold,#c4953a);text-decoration:underline dotted rgba(196,149,58,0.6);text-underline-offset:3px;cursor:pointer;transition:color 0.15s ease,text-shadow 0.15s ease;font-style:normal;display:inline-block;}'
     + '.ficha-link:hover,.ficha-link:active{color:#ffd700;text-decoration-style:solid;text-shadow:0 0 6px rgba(255,215,0,0.5);}'
+    + '.ficha-nav-bar{position:sticky;top:-4px;z-index:20;background:rgba(26,21,16,0.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--v-gold-30,rgba(196,149,58,0.3));padding:6px 10px 6px;box-shadow:0 4px 12px rgba(0,0,0,0.6);}'
+    + '.ficha-cat-tabs{display:flex;justify-content:center;gap:6px;margin-bottom:6px;}'
+    + '.ficha-cat-btn{padding:3px 10px;border-radius:12px;font-size:calc(9.5px * var(--v-font-scale,1));font-family:var(--v-font-display,Cinzel,serif);font-weight:600;cursor:pointer;transition:all 0.18s ease;line-height:1.3;}'
+    + '.ficha-cat-btn:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(196,149,58,0.3);}'
+    + '.ficha-entities-carousel{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:thin;scrollbar-color:rgba(196,149,58,0.4) transparent;-webkit-overflow-scrolling:touch;}'
+    + '.ficha-entities-carousel::-webkit-scrollbar{height:4px;}'
+    + '.ficha-entities-carousel::-webkit-scrollbar-thumb{background:rgba(196,149,58,0.4);border-radius:2px;}'
+    + '.ficha-switch-btn{flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:14px;font-family:inherit;font-size:calc(9.5px * var(--v-font-scale,1));cursor:pointer;transition:all 0.15s ease;}'
+    + '.ficha-switch-btn:hover{transform:translateY(-1px);}'
+    + '.ficha-combat-card{position:relative;cursor:pointer;background:linear-gradient(165deg,rgba(80,62,40,0.35) 0%,rgba(36,28,20,0.85) 100%);border:1px solid rgba(196,149,58,0.32);border-radius:var(--v-radius-sm,6px);padding:6px 8px;line-height:1.15;display:flex;align-items:center;gap:8px;box-shadow:inset 0 1px 0 rgba(196,149,58,0.18),inset 0 -1px 2px rgba(0,0,0,0.3),0 2px 4px rgba(0,0,0,0.35);transition:transform 0.18s ease,box-shadow 0.18s ease,border-color 0.18s ease;}'
+    + '.ficha-combat-card:hover{transform:translateY(-1px);border-color:var(--v-gold,#c4953a);box-shadow:inset 0 1px 0 rgba(196,149,58,0.3),0 4px 10px rgba(196,149,58,0.25);}'
+    + '.ficha-combat-card:active{transform:translateY(0);}'
     + 'body.perf-lite .fEp-avatar-anim,body.perf-lite .fEp-rune,body.perf-lite .fEp-shield,body.perf-lite .fEp-ambient{animation:none;}'
     + '@media (prefers-reduced-motion:reduce){.fEp-avatar-anim,.fEp-hp-critical,.fEp-rune,.fEp-shield,.fEp-ambient{animation:none;}}'
     + '</style>';
+
+  // === SWITCHER POR CATEGORIA NO TOPO (STICKY HEADER) ===
+  var curCat = window._fichaCategory || 'party';
+  if (typeof memberIdx === 'string') {
+    if (memberIdx.indexOf('bst_') === 0 || memberIdx.indexOf('enemy_') === 0) curCat = 'enemies';
+    else if (memberIdx.indexOf('rc_') === 0 || memberIdx.indexOf('npc_') === 0) curCat = 'recruits';
+  } else {
+    curCat = 'party';
+  }
+  window._fichaCategory = curCat;
+
+  var navHtml = '<div class="ficha-nav-bar">'
+    + '<div class="ficha-cat-tabs">'
+    + '<button type="button" class="ficha-cat-btn" data-cat="party" style="border:1px solid ' + (curCat === 'party' ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.3)') + '; background:' + (curCat === 'party' ? 'rgba(196,149,58,0.22)' : 'rgba(0,0,0,0.3)') + '; color:' + (curCat === 'party' ? '#ffd700' : 'var(--v-text-dim,#a09484)') + ';">🛡️ Grupo</button>'
+    + '<button type="button" class="ficha-cat-btn" data-cat="recruits" style="border:1px solid ' + (curCat === 'recruits' ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.3)') + '; background:' + (curCat === 'recruits' ? 'rgba(196,149,58,0.22)' : 'rgba(0,0,0,0.3)') + '; color:' + (curCat === 'recruits' ? '#ffd700' : 'var(--v-text-dim,#a09484)') + ';">👥 Recrutas & NPCs</button>'
+    + '<button type="button" class="ficha-cat-btn" data-cat="enemies" style="border:1px solid ' + (curCat === 'enemies' ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.3)') + '; background:' + (curCat === 'enemies' ? 'rgba(196,149,58,0.22)' : 'rgba(0,0,0,0.3)') + '; color:' + (curCat === 'enemies' ? '#ffd700' : 'var(--v-text-dim,#a09484)') + ';">👹 Inimigos & Criaturas</button>'
+    + '</div>'
+    + '<div class="ficha-entities-carousel">';
+
+  if (curCat === 'party') {
+    var members = (window.GROUP_MEMBERS || []).filter(function(mm, i){ return mm && !mm.dead; });
+    members.forEach(function(mm){
+      var idx = mm.idx !== undefined ? mm.idx : (window.GROUP_MEMBERS || []).indexOf(mm);
+      if (idx < 0) idx = 0;
+      var active = idx === memberIdx;
+      var hid = _classToHeraldic(mm.cls);
+      var avSvg = '<div style="width:18px; height:18px; border-radius:50%; flex-shrink:0;'
+        + 'background:var(--v-bg-card,#2e2520);'
+        + 'display:flex; align-items:center; justify-content:center;'
+        + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.5)') + ';'
+        + 'box-shadow:' + (active ? '0 0 6px rgba(196,149,58,0.6)' : 'none') + ';">'
+        + '<svg viewBox="0 0 120 120" style="width:11px; height:11px; color:var(--v-gold,#c4953a);"><use href="#' + hid + '"/></svg>'
+        + '</div>';
+      navHtml += '<button type="button" class="ficha-switch-btn fEp-clickable" data-idx="' + idx + '" '
+        + 'style="background:' + (active ? 'rgba(196,149,58,0.25)' : 'rgba(196,149,58,0.05)') + ';'
+        + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'var(--v-border,#4a3828)') + ';'
+        + 'color:' + (active ? '#ffd700' : 'var(--v-text,#d4c8b0)') + ';'
+        + (active ? 'box-shadow:0 0 8px rgba(196,149,58,0.4);' : '') + '">'
+        + avSvg + '<span>' + _titleCase(mm.name) + '</span>'
+        + '</button>';
+    });
+  } else if (curCat === 'recruits') {
+    var recruitList = [
+      { id: 'rc_korin', name: 'Korin', role: 'Guerreiro Anão' },
+      { id: 'rc_lyra', name: 'Lyra', role: 'Patrulheira Elfa' },
+      { id: 'rc_mira', name: 'Mira', role: 'Clériga Humana' },
+      { id: 'rc_vex', name: 'Vex', role: 'Ladino Meio-Elfo' },
+      { id: 'npc_balin', name: 'Balin', role: 'Ferreiro' },
+      { id: 'npc_tavira', name: 'Tavira', role: 'Líder da Guilda' },
+      { id: 'npc_lyra', name: 'Lyra Batedora', role: 'Guia' },
+      { id: 'npc_corvus', name: 'Corvus', role: 'Alquimista' }
+    ];
+    recruitList.forEach(function(item){
+      var active = item.id === memberIdx;
+      navHtml += '<button type="button" class="ficha-switch-btn fEp-clickable" data-idx="' + item.id + '" '
+        + 'style="background:' + (active ? 'rgba(196,149,58,0.25)' : 'rgba(196,149,58,0.05)') + ';'
+        + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.25)') + ';'
+        + 'color:' + (active ? '#ffd700' : 'var(--v-text,#d4c8b0)') + ';'
+        + (active ? 'box-shadow:0 0 8px rgba(196,149,58,0.4);' : '') + '">'
+        + '<span>👤</span><span>' + item.name + '</span>'
+        + '<span style="font-size:calc(8px * var(--v-font-scale,1)); color:var(--v-text-dim,#a09484);">(' + item.role + ')</span>'
+        + '</button>';
+    });
+  } else if (curCat === 'enemies') {
+    var enemyList = [
+      { id: 'bst_goblin', name: 'Goblin', icon: '🗡️' },
+      { id: 'bst_orc', name: 'Orc', icon: '🪓' },
+      { id: 'bst_esqueleto', name: 'Esqueleto', icon: '💀' },
+      { id: 'bst_zumbi', name: 'Zumbi', icon: '🧟' },
+      { id: 'bst_lobo', name: 'Lobo', icon: '🐺' },
+      { id: 'bst_bandido', name: 'Bandido', icon: '🏹' },
+      { id: 'bst_kobold', name: 'Kobold', icon: '🦎' },
+      { id: 'bst_aranha', name: 'Aranha', icon: '🕷️' },
+      { id: 'bst_javali', name: 'Javali', icon: '🐗' },
+      { id: 'bst_rato', name: 'Rato Gigante', icon: '🐀' }
+    ];
+    enemyList.forEach(function(item){
+      var active = item.id === memberIdx;
+      navHtml += '<button type="button" class="ficha-switch-btn fEp-clickable" data-idx="' + item.id + '" '
+        + 'style="background:' + (active ? 'rgba(230,80,60,0.25)' : 'rgba(196,149,58,0.05)') + ';'
+        + 'border:1px solid ' + (active ? '#ff6040' : 'rgba(196,149,58,0.25)') + ';'
+        + 'color:' + (active ? '#ffb090' : 'var(--v-text,#d4c8b0)') + ';'
+        + (active ? 'box-shadow:0 0 8px rgba(255,96,64,0.4);' : '') + '">'
+        + '<span>' + item.icon + '</span><span>' + item.name + '</span>'
+        + '</button>';
+    });
+  }
+  navHtml += '</div></div>';
 
   // Avatar pro portrait (50px dentro do ring 64px) — v6 compactado pra Telegram desktop
   var heroAvatarSvg;
@@ -19134,7 +19293,7 @@ function _showStatusPopup(memberIdx){
   }
   var hpCritical = hpPct < 25;
 
-  var html = fEpStyles + '<div class="ficha-epica" style="position:relative; padding: 0; overflow: hidden;">';
+  var html = fEpStyles + '<div class="ficha-epica" style="position:relative; padding: 0;">' + navHtml;
 
   // Textura ambient (parchment subtle)
   html += '<div class="fEp-ambient" style="position:absolute; inset:0; pointer-events:none; z-index:0;'
@@ -19341,7 +19500,7 @@ function _showStatusPopup(memberIdx){
       + 'style="width:36px;height:36px;flex-shrink:0;object-fit:contain;border-radius: var(--v-radius-sm, 6px);'
       + 'filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));" '
       + 'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=&quot;0 0 120 120&quot; style=&quot;width:32px;height:32px;color:' + iconCol + ';flex-shrink:0;&quot;><use href=&quot;#' + s.icon + '&quot;/></svg>\'">';
-    html += '<div class="ficha-stat-stone" onclick="_showFichaStatHelp(\'' + s.key + '\')" title="O que é? (mecânica D&D)" style="position:relative; cursor:pointer;'
+    html += '<div class="ficha-stat-stone" onclick="_showFichaStatHelp(\'' + s.key + '\',' + _memArg + ')" title="O que é? (mecânica D&D)" style="position:relative; cursor:pointer;'
       + 'background:linear-gradient(165deg,rgba(80,62,40,0.45) 0%,rgba(42,34,24,0.85) 100%);'
       + 'border:1px solid var(--v-border,#4a3828); border-radius: var(--v-radius-sm, 6px);'
       + 'padding:5px 7px; line-height:1.1;'
@@ -19385,7 +19544,7 @@ function _showStatusPopup(memberIdx){
   var profSaves = SAVING_PROF_MAP[cKey] || ['str', 'con'];
 
   html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) 3px;">';
-  html += '<div class="ficha-section-title fEp-clickable" onclick="_showFichaSavesHelp(null,' + memberIdx + ')" title="Toque para entender as Salvaguardas (D&D 5e)" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
+  html += '<div class="ficha-section-title fEp-clickable" onclick="_showFichaSavesHelp(null,' + _memArg + ')" title="Toque para entender as Salvaguardas (D&D 5e)" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
     + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px; cursor:pointer;">'
     + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Salvaguardas (D&D 5e)'
     + '<span style="font-size:calc(8px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); opacity:0.85; border:1px solid rgba(196,149,58,0.35); border-radius:3px; padding:1px 5px; margin-left:3px; letter-spacing:0; text-transform:none;">ⓘ Entenda os números</span>'
@@ -19402,7 +19561,7 @@ function _showStatusPopup(memberIdx){
     var dotColor = isProf ? '#ffd700' : 'rgba(160,148,132,0.4)';
     var valColor = isProf ? '#ffd700' : 'var(--v-text,#d4c8b0)';
 
-    html += '<div class="fEp-clickable" onclick="_showFichaSavesHelp(\'' + s.key + '\',' + memberIdx + ')" title="Salvaguarda de ' + s.label + ' (' + (isProf ? 'Proficiente ●' : 'Base ○') + ') — toque para detalhes" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:3px 6px; background:rgba(30,24,18,0.7); border:1px solid ' + (isProf ? 'rgba(196,149,58,0.45)' : 'rgba(196,149,58,0.18)') + '; border-radius:4px; font-size:calc(10px * var(--v-font-scale, 1)); transition:border-color 0.15s, transform 0.15s;">'
+    html += '<div class="fEp-clickable" onclick="_showFichaSavesHelp(\'' + s.key + '\',' + _memArg + ')" title="Salvaguarda de ' + s.label + ' (' + (isProf ? 'Proficiente ●' : 'Base ○') + ') — toque para detalhes" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:3px 6px; background:rgba(30,24,18,0.7); border:1px solid ' + (isProf ? 'rgba(196,149,58,0.45)' : 'rgba(196,149,58,0.18)') + '; border-radius:4px; font-size:calc(10px * var(--v-font-scale, 1)); transition:border-color 0.15s, transform 0.15s;">'
       + '<span style="color:' + dotColor + '; font-size:calc(8px * var(--v-font-scale, 1)); margin-right:3px;">' + dot + '</span>'
       + '<span style="color:var(--v-text-dim,#a09484); font-size:calc(9px * var(--v-font-scale, 1)); font-weight:700;">' + s.label + '</span>'
       + '<span style="color:' + valColor + '; font-weight:700; font-size:calc(10px * var(--v-font-scale, 1)); font-variant-numeric:tabular-nums;">' + saveStr + '</span>'
@@ -19410,43 +19569,39 @@ function _showStatusPopup(memberIdx){
   });
   html += '</div></div>';
 
-  // === COMBATE — shield badges v6 compactos ===
+  // === COMBATE — cards D&D 5e completos com nomes por extenso e subtítulos explicativos ===
   html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) var(--v-space-sm, 4px);">';
   html += '<div class="ficha-section-title" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
     + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px;">'
     + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Combate'
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left: var(--v-space-sm, 4px);"></span>'
     + '</div>';
-  // Backlog item 11 (sessao #85): combat stats agora usam WebP OpenAI (igual
-  // STATS_DATA dos atributos). 4 WebP em shared/img/ui/: stat-ac, stat-attack,
-  // stat-spelldc-2, stat-prof-2. Fallback SVG mantido por seguranca (onerror).
-  // 2026-06-12 (user): stat-spelldc/stat-prof tinham FUNDO BRANCO -> rembg +
-  // renomeados pra -2 (Tier A immutable: conteudo novo = filename novo).
   var COMBAT_DATA = [
-    { icon: 'ic-stat-ac',      label: 'CA',      value: ac,       key: 'ac',      png: 'stat-ac.webp' },
-    { icon: 'ic-stat-attack',  label: 'Atq.',    value: (attackBonus >= 0 ? '+' : '') + attackBonus, key: 'atk', png: 'stat-attack.webp' },
-    { icon: 'ic-stat-spelldc', label: 'DC Mag.', value: spellDc,  key: 'spelldc', png: 'stat-spelldc-2.webp' },
-    { icon: 'ic-stat-prof',    label: 'Prof.',   value: '+' + prof, key: 'prof',  png: 'stat-prof-2.webp' }
+    { key: 'ac',      label: 'Classe de Armadura (CA)',   sub: 'Defesa Passiva',       value: ac,                                          icon: 'ic-stat-ac',      png: 'stat-ac.webp' },
+    { key: 'atk',     label: 'Bônus de Ataque',           sub: 'Jogada de Acerto',     value: (attackBonus >= 0 ? '+' : '') + attackBonus, icon: 'ic-stat-attack',  png: 'stat-attack.webp' },
+    { key: 'spelldc', label: 'Dificuldade de Magia (CD)', sub: 'Resistência do Alvo', value: spellDc,                                   icon: 'ic-stat-spelldc', png: 'stat-spelldc-2.webp' },
+    { key: 'prof',    label: 'Bônus de Proficiência',     sub: 'Escala por Nível',     value: '+' + prof,                                  icon: 'ic-stat-prof',    png: 'stat-prof-2.webp' }
   ];
   var _combatUiBase = '/shared/img/ui/';
   var _combatV = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
-  html += '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap: var(--v-space-sm, 4px);">';
+  html += '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap: 6px;">';
   COMBAT_DATA.forEach(function(c){
     var iconCol = HERALDIC_COLORS[c.icon] || '#8a7a6a';
     var pngImg = '<img src="' + _combatUiBase + c.png + '?v=' + _combatV + '" alt="' + c.label + '" '
-      + 'style="width:18px;height:18px;flex-shrink:0;object-fit:contain;border-radius:3px;'
-      + 'filter:drop-shadow(0 1px 1px rgba(0,0,0,0.5));" '
-      + 'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=&quot;0 0 120 120&quot; style=&quot;width:13px;height:13px;color:' + iconCol + ';&quot;><use href=&quot;#' + c.icon + '&quot;/></svg>\'">';
-    html += '<div class="ficha-combat-badge fEp-shield" onclick="_showFichaStatHelp(\'' + c.key + '\')" title="O que é? (mecânica D&D)" style="position:relative; cursor:pointer;'
-      + 'display:flex; align-items:center; justify-content:space-between; gap:5px;'
-      + 'background:linear-gradient(180deg,rgba(196,149,58,0.10) 0%,rgba(42,36,32,0.6) 100%);'
-      + 'border:1px solid rgba(196,149,58,0.30); border-radius: var(--v-radius-xs, 4px) var(--v-radius-xs, 4px) 7px 7px;'
-      + 'padding: var(--v-space-sm, 4px) var(--v-space-md, 8px);">'
-      + '<span style="display:inline-flex; align-items:center; gap: var(--v-space-sm, 4px); font-size:calc(11px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484);">'
+      + 'style="width:20px;height:20px;flex-shrink:0;object-fit:contain;border-radius:3px;'
+      + 'filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));" '
+      + 'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=&quot;0 0 120 120&quot; style=&quot;width:16px;height:16px;color:' + iconCol + ';flex-shrink:0;&quot;><use href=&quot;#' + c.icon + '&quot;/></svg>\'">';
+    html += '<div class="ficha-combat-card fEp-clickable" onclick="_showFichaStatHelp(\'' + c.key + '\',' + _memArg + ')" title="' + c.label + ' — Toque para entender a mecânica D&D 5e">'
       + pngImg
-      + c.label + '</span>'
-      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(13px * var(--v-font-scale, 1)); font-weight:700;'
-      + 'color:var(--v-gold,#c4953a); text-shadow:0 0 6px rgba(196,149,58,0.35);">' + c.value + '</span>'
+      + '<div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:1px;">'
+      + '<div style="display:flex; align-items:center; gap:3px;">'
+      + '<span style="font-size:calc(9.5px * var(--v-font-scale, 1)); font-weight:700; color:var(--v-text,#d4c8b0); letter-spacing:0.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + c.label + '</span>'
+      + '<span style="font-size:calc(8.5px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); opacity:0.85;" title="Informação">ⓘ</span>'
+      + '</div>'
+      + '<div style="font-size:calc(8px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + c.sub + '</div>'
+      + '</div>'
+      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(15px * var(--v-font-scale, 1)); font-weight:700;'
+      + 'color:var(--v-gold,#c4953a); text-shadow:0 0 6px rgba(196,149,58,0.35); flex-shrink:0;">' + c.value + '</span>'
       + '</div>';
   });
   html += '</div></div>';
@@ -19515,107 +19670,23 @@ function _showStatusPopup(memberIdx){
     html += '</div></div>';
   }
 
-  // === SWITCHER POR CATEGORIA (GRUPO, RECRUTAS/NPCS, INIMIGOS) ===
-  var curCat = window._fichaCategory || 'party';
-  if (typeof memberIdx === 'string') {
-    if (memberIdx.indexOf('bst_') === 0 || memberIdx.indexOf('enemy_') === 0) curCat = 'enemies';
-    else if (memberIdx.indexOf('rc_') === 0 || memberIdx.indexOf('npc_') === 0) curCat = 'recruits';
-  } else {
-    curCat = 'party';
-  }
-  window._fichaCategory = curCat;
-
-  html += '<div class="ficha-switcher" style="position:relative; z-index:1; padding: 6px var(--v-space-md-lg, 10px) 7px;'
-    + 'border-top:1px solid var(--v-gold-12,rgba(196,149,58,0.18));'
-    + 'background:linear-gradient(180deg,rgba(196,149,58,0.06) 0%,rgba(196,149,58,0.02) 100%);">'
-    + '<div style="display:flex; justify-content:center; gap:6px; margin-bottom:6px;">'
-    + '<button type="button" class="ficha-cat-btn" data-cat="party" style="padding:2px 8px; border-radius:10px; font-size:calc(9.5px * var(--v-font-scale, 1)); font-family:var(--v-font-display,Cinzel,serif); cursor:pointer; border:1px solid ' + (curCat === 'party' ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.3)') + '; background:' + (curCat === 'party' ? 'rgba(196,149,58,0.22)' : 'rgba(0,0,0,0.3)') + '; color:' + (curCat === 'party' ? '#ffd700' : 'var(--v-text-dim,#a09484)') + ';">🛡️ Grupo</button>'
-    + '<button type="button" class="ficha-cat-btn" data-cat="recruits" style="padding:2px 8px; border-radius:10px; font-size:calc(9.5px * var(--v-font-scale, 1)); font-family:var(--v-font-display,Cinzel,serif); cursor:pointer; border:1px solid ' + (curCat === 'recruits' ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.3)') + '; background:' + (curCat === 'recruits' ? 'rgba(196,149,58,0.22)' : 'rgba(0,0,0,0.3)') + '; color:' + (curCat === 'recruits' ? '#ffd700' : 'var(--v-text-dim,#a09484)') + ';">👥 Recrutas & NPCs</button>'
-    + '<button type="button" class="ficha-cat-btn" data-cat="enemies" style="padding:2px 8px; border-radius:10px; font-size:calc(9.5px * var(--v-font-scale, 1)); font-family:var(--v-font-display,Cinzel,serif); cursor:pointer; border:1px solid ' + (curCat === 'enemies' ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.3)') + '; background:' + (curCat === 'enemies' ? 'rgba(196,149,58,0.22)' : 'rgba(0,0,0,0.3)') + '; color:' + (curCat === 'enemies' ? '#ffd700' : 'var(--v-text-dim,#a09484)') + ';">👹 Inimigos & Criaturas</button>'
+  // === ORNAMENTO D&D 5E NO RODAPÉ ===
+  html += '<div class="ficha-footer-ornament" style="position:relative; z-index:1; padding: 12px 10px 14px; text-align: center;'
+    + 'border-top: 1px solid var(--v-gold-12, rgba(196,149,58,0.18));'
+    + 'background: linear-gradient(180deg, rgba(196,149,58,0.04) 0%, rgba(0,0,0,0.2) 100%);">'
+    + '<div style="display:flex; align-items:center; justify-content:center; gap:8px; width:70%; margin:0 auto 4px;">'
+    + '<span style="flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,58,0.4),transparent);"></span>'
+    + '<span style="color:var(--v-gold,#c4953a); font-size:calc(8px * var(--v-font-scale, 1)); text-shadow:0 0 5px rgba(196,149,58,0.6);">◆</span>'
+    + '<span style="flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,58,0.4),transparent);"></span>'
     + '</div>'
-    + '<div style="display:flex; gap: var(--v-space-sm, 4px); justify-content:center; flex-wrap:wrap; max-height:90px; overflow-y:auto;">';
-
-  if (curCat === 'party') {
-    var members = (window.GROUP_MEMBERS || []).filter(function(mm, i){ return mm && !mm.dead; });
-    members.forEach(function(mm){
-      var idx = mm.idx !== undefined ? mm.idx : (window.GROUP_MEMBERS || []).indexOf(mm);
-      if (idx < 0) idx = 0;
-      var active = idx === memberIdx;
-      var hid = _classToHeraldic(mm.cls);
-      var avSvg = '<div style="width:18px; height:18px; border-radius:50%; flex-shrink:0;'
-        + 'background:var(--v-bg-card,#2e2520);'
-        + 'display:flex; align-items:center; justify-content:center;'
-        + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.5)') + ';'
-        + 'box-shadow:' + (active ? '0 0 6px rgba(196,149,58,0.6)' : 'none') + ';">'
-        + '<svg viewBox="0 0 120 120" style="width:11px; height:11px; color:var(--v-gold,#c4953a);"><use href="#' + hid + '"/></svg>'
-        + '</div>';
-      html += '<button class="ficha-switch-btn fEp-clickable" data-idx="' + idx + '" '
-        + 'style="display:flex; align-items:center; gap:5px; padding: 3px var(--v-space-md, 8px) 3px var(--v-space-sm, 4px);'
-        + 'background:' + (active ? 'rgba(196,149,58,0.18)' : 'rgba(196,149,58,0.04)') + ';'
-        + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'var(--v-border,#4a3828)') + ';'
-        + 'border-radius:12px;'
-        + 'color:' + (active ? 'var(--v-gold,#c4953a)' : 'var(--v-text,#d4c8b0)') + ';'
-        + 'font-family:inherit; font-size:calc(10px * var(--v-font-scale, 1)); cursor:pointer;'
-        + (active ? 'box-shadow:0 0 8px rgba(196,149,58,0.35);' : '') + '">'
-        + avSvg + '<span>' + _titleCase(mm.name) + '</span>'
-        + '</button>';
-    });
-  } else if (curCat === 'recruits') {
-    var recruitList = [
-      { id: 'rc_korin', name: 'Korin', role: 'Guerreiro Anão' },
-      { id: 'rc_lyra', name: 'Lyra', role: 'Patrulheira Elfa' },
-      { id: 'rc_mira', name: 'Mira', role: 'Clériga Humana' },
-      { id: 'rc_vex', name: 'Vex', role: 'Ladino Meio-Elfo' },
-      { id: 'npc_balin', name: 'Balin', role: 'Ferreiro' },
-      { id: 'npc_tavira', name: 'Tavira', role: 'Líder da Guilda' },
-      { id: 'npc_lyra', name: 'Lyra Batedora', role: 'Guia' },
-      { id: 'npc_corvus', name: 'Corvus', role: 'Alquimista' }
-    ];
-    recruitList.forEach(function(item){
-      var active = item.id === memberIdx;
-      html += '<button class="ficha-switch-btn fEp-clickable" data-idx="' + item.id + '" '
-        + 'style="display:flex; align-items:center; gap:5px; padding: 3px 8px;'
-        + 'background:' + (active ? 'rgba(196,149,58,0.22)' : 'rgba(196,149,58,0.05)') + ';'
-        + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.25)') + ';'
-        + 'border-radius:12px; color:' + (active ? '#ffd700' : 'var(--v-text,#d4c8b0)') + ';'
-        + 'font-family:inherit; font-size:calc(9.5px * var(--v-font-scale, 1)); cursor:pointer;'
-        + (active ? 'box-shadow:0 0 8px rgba(196,149,58,0.4);' : '') + '">'
-        + '<span>👤</span><span>' + item.name + '</span>'
-        + '<span style="font-size:calc(8px * var(--v-font-scale,1)); color:var(--v-text-dim,#a09484);">(' + item.role + ')</span>'
-        + '</button>';
-    });
-  } else if (curCat === 'enemies') {
-    var enemyList = [
-      { id: 'bst_goblin', name: 'Goblin', icon: '🗡️' },
-      { id: 'bst_orc', name: 'Orc', icon: '🪓' },
-      { id: 'bst_esqueleto', name: 'Esqueleto', icon: '💀' },
-      { id: 'bst_zumbi', name: 'Zumbi', icon: '🧟' },
-      { id: 'bst_lobo', name: 'Lobo', icon: '🐺' },
-      { id: 'bst_bandido', name: 'Bandido', icon: '🏹' },
-      { id: 'bst_kobold', name: 'Kobold', icon: '🦎' },
-      { id: 'bst_aranha', name: 'Aranha', icon: '🕷️' },
-      { id: 'bst_javali', name: 'Javali', icon: '🐗' },
-      { id: 'bst_rato', name: 'Rato Gigante', icon: '🐀' }
-    ];
-    enemyList.forEach(function(item){
-      var active = item.id === memberIdx;
-      html += '<button class="ficha-switch-btn fEp-clickable" data-idx="' + item.id + '" '
-        + 'style="display:flex; align-items:center; gap:5px; padding: 3px 8px;'
-        + 'background:' + (active ? 'rgba(230,80,60,0.25)' : 'rgba(196,149,58,0.05)') + ';'
-        + 'border:1px solid ' + (active ? '#ff6040' : 'rgba(196,149,58,0.25)') + ';'
-        + 'border-radius:12px; color:' + (active ? '#ffb090' : 'var(--v-text,#d4c8b0)') + ';'
-        + 'font-family:inherit; font-size:calc(9.5px * var(--v-font-scale, 1)); cursor:pointer;'
-        + (active ? 'box-shadow:0 0 8px rgba(255,96,64,0.4);' : '') + '">'
-        + '<span>' + item.icon + '</span><span>' + item.name + '</span>'
-        + '</button>';
-    });
-  }
-
-  html += '</div></div>';
+    + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(9.5px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase; opacity:0.85; text-shadow:0 0 6px rgba(196,149,58,0.3);">'
+    + '◆ Lendas de Valdoria • Compêndio & Ficha D&D 5e ◆'
+    + '</div>'
+    + '</div>';
   html += '</div>';
   bodyEl.innerHTML = html;
 
-  // Wire category buttons and entity switcher buttons
+  // Wire category buttons and entity switcher buttons (no sticky header do topo)
   bodyEl.querySelectorAll('.ficha-cat-btn').forEach(function(cBtn){
     cBtn.addEventListener('click', function(){
       var cat = cBtn.getAttribute('data-cat');
@@ -19633,6 +19704,12 @@ function _showStatusPopup(memberIdx){
       _showStatusPopup(idx);
     });
   });
+
+  // Auto-scroll do botão ativo no carousel horizontal
+  var activeSwitchBtn = bodyEl.querySelector('.ficha-switch-btn[style*="#ffd700"], .ficha-switch-btn[style*="#ffb090"]');
+  if (activeSwitchBtn && typeof activeSwitchBtn.scrollIntoView === 'function') {
+    try { activeSwitchBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(e){}
+  }
 
   // 2026-05-22 v6: history cards removed — wire-up obsoleto.
 
@@ -60120,6 +60197,9 @@ function _showConfirmPurchase(opts){
 function _showInfoPopup(opts){
   var ov = document.getElementById('confirm-purchase-overlay');
   if (!ov) return;
+  var confirmBtn = document.getElementById('cpp-confirm-btn');
+  var cancelBtn = document.getElementById('cpp-cancel-btn');
+  if (!confirmBtn || !cancelBtn) return;
   // USER FIX 2026-05-05: innerHTML pra suportar SVG icons (_heralIco)
   // textContent fazia SVG markup virar texto literal na tela.
   document.getElementById('cpp-icon').innerHTML = opts.icon || '◆';
@@ -60174,6 +60254,15 @@ function _showInfoPopup(opts){
       if (typeof opts.onCancel === 'function') opts.onCancel();
     };
   }
+  ov.onclick = function(e){
+    if (e.target === ov) {
+      ov.classList.remove('active');
+      costRows.forEach(function(r){ r.style.display = ''; });
+      confirmBtn.style.display = '';
+      cancelBtn.style.flex = '';
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    }
+  };
   ov.classList.add('active');
 }
 
