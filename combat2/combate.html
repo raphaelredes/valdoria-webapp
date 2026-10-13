@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-12T13:20:23Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-13T17:13:24Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -34308,19 +34308,23 @@ function openUnitDetail(uid) {
     html += '<div class="udc-id">';
     html += '<div class="udc-name">' + escHtml(u.n) + '</div>';
     if (u.t === 'p' || u.t === 'a') {
-        var raceLbl = u.race ? escHtml(u.race) + ' · ' : '';
-        html += '<div class="udc-sub">' + raceLbl + escHtml(u.clsLabel || u.cls) + ' · Nível ' + (u.lvl || 1) + '</div>';
+        var raceLbl = u.race ? escHtml(u.race) + (u.subrace ? ' (' + escHtml(u.subrace) + ')' : '') + ' · ' : '';
+        var clsLbl = escHtml(u.clsLabel || u.cls || 'Aventureiro') + (u.subclass ? ' (' + escHtml(u.subclass) + ')' : '');
+        html += '<div class="udc-sub">' + raceLbl + clsLbl + ' · Nível ' + (u.lvl || 1) + '</div>';
     } else {
-        var diffLbl = u.simDiff ? ' · ' + ({ easy: 'Fácil', normal: 'Normal', hard: 'Difícil' }[u.simDiff] || u.simDiff) : '';
-        html += '<div class="udc-sub">' + escHtml(u.species || 'Criatura') + ' · Nível sugerido ' + (u.sugLvl || 1) + diffLbl + '</div>';
+        var spLbl = escHtml(u.species || u.race || 'Criatura') + (u.subrace ? ' [' + escHtml(u.subrace) + ']' : '');
+        var roleLbl = (u.cls ? ' · ' + escHtml(u.cls) + (u.subclass ? ' (' + escHtml(u.subclass) + ')' : '') : '');
+        var crStr = (u.cr != null ? ' · ND ' + u.cr : (u.sugLvl ? ' · Nível ' + u.sugLvl : ''));
+        var xpStr = u.xp ? ' (' + u.xp + ' XP)' : '';
+        html += '<div class="udc-sub">' + spLbl + roleLbl + crStr + xpStr + '</div>';
     }
     html += '</div></div>';
 
-    /* Status / Stats */
-    html += '<div class="udc-section"><div class="udc-section-title">Status</div>';
+    /* Recursos & Status Vital */
+    html += '<div class="udc-section"><div class="udc-section-title">Recursos Vitais & Posição</div>';
     html += '<div class="udc-stats">';
     var hpPct = Math.round((u.hp / u.mhp) * 100);
-    var hpCls = vBarHpClass(hpPct);  /* FASE 4 single-source 60/25 */
+    var hpCls = vBarHpClass(hpPct);
     html += '<div class="udc-stat"><span class="udc-stat-lbl">PV</span><span class="udc-stat-val ' + hpCls + '">' + u.hp + ' / ' + u.mhp + '</span></div>';
     if (u.res && u.res.max) {
         html += '<div class="udc-stat"><span class="udc-stat-lbl">' + escHtml(u.res.name) + '</span><span class="udc-stat-val res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + ' / ' + u.res.max + '</span></div>';
@@ -34329,8 +34333,10 @@ function openUnitDetail(uid) {
     html += '<div class="udc-stat"><span class="udc-stat-lbl">CA</span><span class="udc-stat-val">' + u.ac + (acB ? ' +' + acB : '') + '</span></div>';
     var atkB = getAtkFlatFromStatuses(u);
     html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataque</span><span class="udc-stat-val">+' + u.atk + (atkB ? ' +' + atkB + ' temp' : '') + '</span></div>';
-    html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano</span><span class="udc-stat-val">1d' + u.die + '</span></div>';
-    html += '<div class="udc-stat"><span class="udc-stat-lbl">DEX</span><span class="udc-stat-val">' + u.dex + ' (' + (u.dex >= 10 ? '+' : '') + Math.floor((u.dex - 10) / 2) + ')</span></div>';
+    html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano</span><span class="udc-stat-val">' + (u.die ? ('1d' + u.die) : 'Arma') + '</span></div>';
+    if (u.speed != null) {
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Deslocamento</span><span class="udc-stat-val">' + formatHexDistanceMeters(u.speed) + ' (' + u.speed + 'h)</span></div>';
+    }
     if (u.init !== undefined && u.initRevealed) {
         html += '<div class="udc-stat"><span class="udc-stat-lbl">Iniciativa</span><span class="udc-stat-val">' + u.init + '</span></div>';
     }
@@ -34347,10 +34353,68 @@ function openUnitDetail(uid) {
             }
         }
     }
-    if (u.speed != null) {
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Deslocamento</span><span class="udc-stat-val">' + formatHexDistanceMeters(u.speed) + ' (' + u.speed + 'h)</span></div>';
+    html += '</div></div>';
+
+    /* Atributos D&D 5e (6-way com ícones e modificadores) */
+    var _attrBase = '../shared/img/levelup/attrs/';
+    var statsData = [
+        { k: 'str', lb: 'FOR', v: (u.str != null ? u.str : (u.strength != null ? u.strength : 10)), png: 'forca.webp' },
+        { k: 'dex', lb: 'DES', v: (u.dex != null ? u.dex : (u.dexterity != null ? u.dexterity : 10)), png: 'destreza.webp' },
+        { k: 'con', lb: 'CON', v: (u.con != null ? u.con : (u.constitution != null ? u.constitution : 10)), png: 'constituicao.webp' },
+        { k: 'int', lb: 'INT', v: (u.int != null ? u.int : (u.intelligence != null ? u.intelligence : 10)), png: 'inteligencia.webp' },
+        { k: 'wis', lb: 'SAB', v: (u.wis != null ? u.wis : (u.wisdom != null ? u.wisdom : 10)), png: 'sabedoria.webp' },
+        { k: 'cha', lb: 'CAR', v: (u.cha != null ? u.cha : (u.charisma != null ? u.charisma : 10)), png: 'carisma.webp' }
+    ];
+    html += '<div class="udc-section"><div class="udc-section-title">Atributos D&D 5e</div>';
+    html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">';
+    for (var si = 0; si < statsData.length; si++) {
+        var sObj = statsData[si];
+        var sMod = Math.floor((sObj.v - 10) / 2);
+        var sModStr = (sMod >= 0 ? '+' : '') + sMod;
+        var sModCol = sMod > 0 ? '#7cdb7c' : (sMod < 0 ? '#e07c7c' : '#a09484');
+        html += '<div style="display:flex; align-items:center; gap:5px; background:rgba(15,12,8,.55); border:1px solid var(--v-border,#4a3828); border-radius:6px; padding:4px 6px;">'
+            + '<img src="' + _attrBase + sObj.png + '" alt="" style="width:22px; height:22px; object-fit:contain; flex-shrink:0;" onerror="this.style.display=\'none\';" />'
+            + '<div style="flex:1; min-width:0; line-height:1.1;">'
+            + '<div style="font-size:9px; color:var(--v-text-dim,#a09484);">' + sObj.lb + '</div>'
+            + '<div style="font-family:Cinzel,serif; font-size:13px; font-weight:700; color:#ffd700;">' + sObj.v + ' <span style="font-size:9.5px; color:' + sModCol + '; font-weight:600;">' + sModStr + '</span></div>'
+            + '</div>'
+            + '</div>';
     }
     html += '</div></div>';
+
+    /* Salvaguardas D&D 5e */
+    var profSaves = u.saving_throw_proficiencies || [];
+    var profBonus = (u.prof != null) ? u.prof : (u.cr != null ? (u.cr < 5 ? 2 : (u.cr < 9 ? 3 : 4)) : (Math.floor(((u.lvl || 1) - 1) / 4) + 2));
+    html += '<div class="udc-section"><div class="udc-section-title">Salvaguardas D&D 5e</div>';
+    html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">';
+    for (var si2 = 0; si2 < statsData.length; si2++) {
+        var sObj2 = statsData[si2];
+        var isSaveProf = (profSaves.indexOf(sObj2.k) >= 0 || profSaves.indexOf(sObj2.lb.toLowerCase()) >= 0);
+        var baseSaveMod = Math.floor((sObj2.v - 10) / 2);
+        var totalSave = isSaveProf ? (baseSaveMod + profBonus) : baseSaveMod;
+        var saveStr = (totalSave >= 0 ? '+' : '') + totalSave;
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,16,12,0.6); border:1px solid ' + (isSaveProf ? 'rgba(196,149,58,0.5)' : 'rgba(74,56,40,0.4)') + '; border-radius:4px; padding:2px 6px; font-size:10px;">'
+            + '<span style="color:' + (isSaveProf ? '#ffd700' : 'rgba(160,148,132,0.5)') + '; font-size:8px; margin-right:3px;">' + (isSaveProf ? '●' : '○') + '</span>'
+            + '<span style="color:var(--v-text-dim,#a09484); font-weight:700;">' + sObj2.lb + '</span>'
+            + '<span style="color:' + (isSaveProf ? '#ffd700' : '#d4c8b0') + '; font-weight:700;">' + saveStr + '</span>'
+            + '</div>';
+    }
+    html += '</div></div>';
+
+    /* Defesas, Resistências e Imunidades */
+    var hasRes = (u.resistances && u.resistances.length);
+    var hasVuln = (u.vulnerabilities && u.vulnerabilities.length);
+    var hasImm = (u.immunities && u.immunities.length);
+    var hasCondImm = (u.condition_immunities && u.condition_immunities.length);
+    if (hasRes || hasVuln || hasImm || hasCondImm) {
+        html += '<div class="udc-section"><div class="udc-section-title">Propriedades & Defesas</div>';
+        html += '<div style="display:flex; flex-direction:column; gap:3px; font-size:10px; line-height:1.3;">';
+        if (hasVuln) html += '<div style="color:#ff8a4a;"><b>Vulnerável:</b> ' + escHtml(u.vulnerabilities.join(', ')) + '</div>';
+        if (hasRes) html += '<div style="color:#ffd700;"><b>Resistências:</b> ' + escHtml(u.resistances.join(', ')) + '</div>';
+        if (hasImm) html += '<div style="color:#7cdb7c;"><b>Imunidades a Dano:</b> ' + escHtml(u.immunities.join(', ')) + '</div>';
+        if (hasCondImm) html += '<div style="color:#9adfe8;"><b>Imunidades a Condições:</b> ' + escHtml(u.condition_immunities.join(', ')) + '</div>';
+        html += '</div></div>';
+    }
 
     /* Habilidades — X-6.5.51AB (2026-04-26): paginacao quando lista excede
        UDC_SKILLS_PER_PAGE. User feedback: "exista paginação para não existir

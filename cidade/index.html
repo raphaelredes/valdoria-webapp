@@ -17541,9 +17541,6 @@ function _inferAllySubrace(raceKey) {
 function _getFichaMember(idx){
   if (idx === 0 || idx === undefined) {
     var p = window.CITY_MOCK_PLAYER || {};
-    // USER REPORT 2026-05-14 #2 — Ficha agora usa valores REAIS do server (DB)
-    // quando disponíveis (ac/atk/dc/prof/hd via picked.armor_class etc).
-    // Fallback ao mock só pra LOCAL mode (sem REMOTE state).
     return {
       idx: 0, isPlayer: true,
       name: p.name || 'Aventureiro',
@@ -17562,6 +17559,138 @@ function _getFichaMember(idx){
       stats: p.stats || _genFichaStats({cls: p.cls})
     };
   }
+
+  // Se for ID de Recruta, NPC Notável ou Inimigo do Bestiário
+  if (typeof idx === 'string') {
+    // 1. Recrutas da Guilda
+    var rMatch = (typeof GUILD_RECRUITS !== 'undefined' ? GUILD_RECRUITS : []).find(function(r){ return r.id === idx; });
+    if (rMatch) {
+      var cKey = _cgpClsKey(rMatch.cls);
+      var rKey = (rMatch.race || 'humano').toLowerCase();
+      var lvl = rMatch.level || 2;
+      var stats = _genFichaStats({cls: rMatch.cls, race: rMatch.race});
+      var _mod = function(s){ return Math.floor(((s || 10) - 10) / 2); };
+      var prof = Math.floor((lvl - 1) / 4) + 2;
+      var calcAc = 10 + _mod(stats.dex);
+      if (cKey === 'guerreiro' || cKey === 'paladino') calcAc = 16 + 2;
+      else if (cKey === 'clerigo' || cKey === 'sacerdotisa') calcAc = 15 + 2;
+      else if (cKey === 'ladino' || cKey === 'patrulheiro') calcAc = 12 + Math.min(2, _mod(stats.dex));
+      var mainStat = (cKey === 'ladino' || cKey === 'patrulheiro') ? stats.dex : stats.str;
+      var calcAtk = prof + _mod(mainStat);
+      var spellStat = (cKey === 'mago') ? stats.int : ((cKey === 'clerigo' || cKey === 'sacerdotisa' || cKey === 'druida' || cKey === 'patrulheiro') ? stats.wis : stats.cha);
+      var calcDc = 8 + prof + _mod(spellStat);
+      var hitDieKind = (cKey === 'barbaro') ? 'd12' : ((['guerreiro', 'paladino', 'patrulheiro'].indexOf(cKey) >= 0) ? 'd10' : ((['mago', 'feiticeiro'].indexOf(cKey) >= 0) ? 'd6' : 'd8'));
+      var hpVal = 10 + (lvl - 1) * 6 + _mod(stats.con) * lvl;
+      return {
+        idx: idx,
+        isPlayer: false,
+        isRecruit: true,
+        name: rMatch.name,
+        cls: rMatch.cls,
+        race: rMatch.race,
+        subrace: _inferAllySubrace(rKey),
+        subclass: _inferAllySubclass(cKey),
+        level: lvl,
+        stats: stats,
+        hp: hpVal, hpMax: hpVal,
+        mp: (cKey === 'clerigo' || cKey === 'mago') ? 14 : 0, mpMax: (cKey === 'clerigo' || cKey === 'mago') ? 14 : 0,
+        ac: calcAc,
+        atk: calcAtk,
+        dc: calcDc,
+        prof: prof,
+        hd: lvl, hdMax: lvl,
+        hitDieKind: hitDieKind,
+        desc: rMatch.desc + ' ' + (rMatch.blurb || '')
+      };
+    }
+    // 2. NPCs Notáveis da Cidade
+    var CITY_NOTABLE_NPCS = {
+      'npc_balin': { name: 'Balin Martelo-de-Prata', cls: 'Guerreiro', race: 'Anão', subrace: 'Anão da Montanha', subclass: 'Mestre Forjador', level: 6, str: 18, dex: 12, con: 17, int: 13, wis: 14, cha: 12, hp: 58, ac: 18, desc: 'Ferreiro-chefe de Valdoria e veterano dos combates nas minas.' },
+      'npc_tavira': { name: 'Mestra Tavira', cls: 'Paladina', race: 'Humana', subrace: 'Humana Variante', subclass: 'Juramento de Devoção', level: 7, str: 16, dex: 10, con: 15, int: 11, wis: 13, cha: 16, hp: 65, ac: 19, desc: 'Líder da Guilda dos Aventureiros e comandante de contratos de caçada.' },
+      'npc_lyra': { name: 'Lyra Sussurro-do-Bosque', cls: 'Patrulheira', race: 'Elfa', subrace: 'Elfa da Floresta', subclass: 'Caçadora dos Ermos', level: 5, str: 11, dex: 18, con: 14, int: 12, wis: 16, cha: 13, hp: 44, ac: 16, desc: 'Batedora veterana das charnecas e guia experiente das caravanas.' },
+      'npc_corvus': { name: 'Corvus das Sombras', cls: 'Bruxo', race: 'Tiefling', subrace: 'Tiefling Infernal', subclass: 'Pacto das Profundezas', level: 6, str: 9, dex: 14, con: 14, int: 13, wis: 11, cha: 18, hp: 45, ac: 14, desc: 'Comerciante enigmático de itens raros e conhecedor de artes ocultas.' }
+    };
+    if (CITY_NOTABLE_NPCS[idx]) {
+      var nData = CITY_NOTABLE_NPCS[idx];
+      var cKey = _cgpClsKey(nData.cls);
+      var prof = Math.floor((nData.level - 1) / 4) + 2;
+      return {
+        idx: idx,
+        isPlayer: false,
+        isNpc: true,
+        name: nData.name,
+        cls: nData.cls,
+        race: nData.race,
+        subrace: nData.subrace,
+        subclass: nData.subclass,
+        level: nData.level,
+        stats: { str: nData.str, dex: nData.dex, con: nData.con, int: nData.int, wis: nData.wis, cha: nData.cha },
+        hp: nData.hp, hpMax: nData.hp,
+        mp: 16, mpMax: 16,
+        ac: nData.ac,
+        atk: prof + Math.floor(((cKey === 'patrulheiro' ? nData.dex : nData.str) - 10) / 2),
+        dc: 8 + prof + Math.floor(((cKey === 'bruxo' ? nData.cha : nData.wis) - 10) / 2),
+        prof: prof,
+        hd: nData.level, hdMax: nData.level,
+        hitDieKind: 'd8',
+        desc: nData.desc
+      };
+    }
+    // 3. Inimigos do Bestiário
+    var bstSlug = idx.replace(/^bst_|^enemy_/, '');
+    var specimen = (typeof CANONICAL_BESTIARY_CATALOG !== 'undefined' ? CANONICAL_BESTIARY_CATALOG : []).find(function(b){
+      return b.id === bstSlug || b.id.indexOf(bstSlug) >= 0;
+    });
+    if (!specimen) {
+      specimen = (typeof CANONICAL_BESTIARY_CATALOG !== 'undefined' ? CANONICAL_BESTIARY_CATALOG : []).find(function(b){
+        return b.id.indexOf(bstSlug) >= 0 || b.type.toLowerCase().indexOf(bstSlug) >= 0;
+      });
+    }
+    if (specimen) {
+      var dndXp = _dndXpByCr(specimen.cr);
+      var enemyStatsMap = {
+        'goblin': { str: 8, dex: 15, con: 11, int: 10, wis: 8, cha: 8, hp: 7, ac: 15, sp: 'Goblinóide', r: 'Goblin', sr: 'Goblin das Cavernas', c: 'Combatente Furtivo', sc: 'Espreitador' },
+        'orc': { str: 16, dex: 12, con: 16, int: 7, wis: 11, cha: 10, hp: 15, ac: 13, sp: 'Humanoide Selvagem', r: 'Orc', sr: 'Orc da Montanha', c: 'Guerreiro', sc: 'Berserker de Machado' },
+        'esqueleto': { str: 10, dex: 14, con: 15, int: 6, wis: 8, cha: 5, hp: 13, ac: 13, sp: 'Morto-Vivo', r: 'Esqueleto', sr: 'Ossada Fria', c: 'Combatente', sc: 'Infantaria da Cripta' },
+        'zumbi': { str: 13, dex: 6, con: 16, int: 3, wis: 6, cha: 5, hp: 22, ac: 8, sp: 'Morto-Vivo', r: 'Zumbi', sr: 'Cadavérico', c: 'Bruto', sc: 'Fortitude Zumbi' },
+        'lobo': { str: 12, dex: 15, con: 12, int: 3, wis: 12, cha: 6, hp: 11, ac: 13, sp: 'Fera Predadora', r: 'Lobo', sr: 'Lobo Cinzento', c: 'Caçador', sc: 'Táticas de Matilha' },
+        'bandido': { str: 12, dex: 14, con: 12, int: 10, wis: 10, cha: 10, hp: 13, ac: 12, sp: 'Humanoide', r: 'Humano', sr: 'Salteador da Estrada', c: 'Ladino / Mercenário', sc: 'Rufião' },
+        'aranha': { str: 14, dex: 16, con: 12, int: 2, wis: 11, cha: 4, hp: 26, ac: 14, sp: 'Fera Monstruosa', r: 'Aranha Gigante', sr: 'Aracnídeo das Teias', c: 'Predador', sc: 'Veneno Paralisante' },
+        'rato': { str: 7, dex: 15, con: 11, int: 2, wis: 10, cha: 4, hp: 7, ac: 12, sp: 'Fera', r: 'Rato Gigante', sr: 'Roedor dos Esgotos', c: 'Predador Urbano', sc: 'Táticas de Bando' },
+        'javali': { str: 13, dex: 11, con: 12, int: 2, wis: 9, cha: 5, hp: 11, ac: 11, sp: 'Fera', r: 'Javali', sr: 'Javali das Matas', c: 'Bruto', sc: 'Investida com Presas' },
+        'kobold': { str: 7, dex: 15, con: 9, int: 8, wis: 7, cha: 8, hp: 5, ac: 12, sp: 'Reptiliano', r: 'Kobold', sr: 'Kobold de Túnel', c: 'Ladino', sc: 'Táticas de Bando' }
+      };
+      var matchedKey = Object.keys(enemyStatsMap).find(function(k){ return bstSlug.indexOf(k) >= 0 || specimen.type.toLowerCase().indexOf(k) >= 0; }) || 'goblin';
+      var eStats = enemyStatsMap[matchedKey];
+      return {
+        idx: idx,
+        isPlayer: false,
+        isEnemy: true,
+        name: specimen.type,
+        cls: eStats.c,
+        race: eStats.r,
+        subrace: eStats.sr,
+        subclass: eStats.sc,
+        species: eStats.sp,
+        level: Math.max(1, Math.round(parseFloat(specimen.cr) || 1)),
+        cr: specimen.cr,
+        dndXp: dndXp,
+        stats: { str: eStats.str, dex: eStats.dex, con: eStats.con, int: eStats.int, wis: eStats.wis, cha: eStats.cha },
+        hp: eStats.hp, hpMax: eStats.hp,
+        ac: eStats.ac,
+        atk: 4,
+        dc: 12,
+        prof: 2,
+        hd: Math.max(1, Math.round(parseFloat(specimen.cr) || 1)), hdMax: Math.max(1, Math.round(parseFloat(specimen.cr) || 1)),
+        hitDieKind: 'd8',
+        png: specimen.png,
+        desc: specimen.desc + ' ' + specimen.tactics,
+        weaknesses: specimen.weaknesses,
+        drops: specimen.drops
+      };
+    }
+  }
+
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m) return null;
   var cKey = _cgpClsKey(m.cls);
@@ -18792,6 +18921,64 @@ function _showFichaSubclassHelp(subclassKey, classKey, memberIdx){
   });
 }
 
+// D&D 5E SPECIES VARIATIONS TAXONOMY (CLIENT-SIDE MIRROR OF enemy_variations.py)
+function _getSpeciesVariationsClient(speciesKey){
+  var sk = String(speciesKey || '').toLowerCase();
+  var VARS = {
+    goblin: [
+      { title: 'Goblin Espreitador', icon: '🗡️', enemy_class: 'Ladino', subclass: 'Assassino Furtivo', hp: 6, ac: 14, str: 8, dex: 15, con: 10, int: 10, wis: 8, cha: 8, cr: '1/4', traits: ['Ataque Furtivo (+1d6)', 'Fuga Ágil'] },
+      { title: 'Goblin Guerreiro', icon: '⚔️', enemy_class: 'Guerreiro', subclass: 'Vanguarda da Caverna', hp: 8, ac: 15, str: 11, dex: 14, con: 12, int: 9, wis: 9, cha: 8, cr: '1/4', traits: ['Cimitarra e Broquel', 'Fuga Ágil'] },
+      { title: 'Goblin Arqueiro', icon: '🏹', enemy_class: 'Patrulheiro', subclass: 'Atirador de Emboscada', hp: 7, ac: 14, str: 8, dex: 15, con: 11, int: 10, wis: 12, cha: 8, cr: '1/4', traits: ['Disparo em Movimento', 'Mira Furtiva'] },
+      { title: 'Goblin Xamã', icon: '☄️', enemy_class: 'Feiticeiro', subclass: 'Chamas Primitivas', hp: 10, ac: 12, str: 7, dex: 13, con: 11, int: 13, wis: 12, cha: 11, cr: '1/2', traits: ['Centelha de Chamas', 'Bola de Fogo Menor'] },
+      { title: 'Goblin Chefe', icon: '👑', enemy_class: 'Guerreiro', subclass: 'Líder Tirano', hp: 19, ac: 17, str: 13, dex: 14, con: 14, int: 11, wis: 10, cha: 12, cr: '1', traits: ['Liderança (+1d4 bônus)', 'Ataque Múltiplo (2x)'] }
+    ],
+    orc: [
+      { title: 'Orc Guerreiro', icon: '🪓', enemy_class: 'Guerreiro', subclass: 'Combatente de Machado', hp: 15, ac: 13, str: 16, dex: 12, con: 16, int: 7, wis: 11, cha: 10, cr: '1/2', traits: ['Agressivo (Movimento bônus)', 'Machado Grande'] },
+      { title: 'Orc Furioso', icon: '🩸', enemy_class: 'Bárbaro', subclass: 'Frenesi Sanguinário', hp: 18, ac: 12, str: 17, dex: 13, con: 16, int: 6, wis: 10, cha: 9, cr: '1/2', traits: ['Fúria Primal (+2 dano)', 'Ataque Descuidado'] },
+      { title: 'Orc Atirador de Lanças', icon: '🎯', enemy_class: 'Patrulheiro', subclass: 'Arremessador de Pique', hp: 14, ac: 13, str: 15, dex: 14, con: 14, int: 8, wis: 12, cha: 8, cr: '1/2', traits: ['Arremesso Brutal', 'Pique Pesado'] },
+      { title: 'Orc Xamã de Guerra', icon: '⚡', enemy_class: 'Clérigo', subclass: 'Domínio da Tempestade Orc', hp: 17, ac: 14, str: 14, dex: 11, con: 14, int: 9, wis: 15, cha: 11, cr: '1', traits: ['Raio Divino de Gruumsh', 'Bênção de Fúria'] },
+      { title: 'Orc Chefe de Guerra', icon: '👹', enemy_class: 'Guerreiro', subclass: 'Lorde da Horda', hp: 32, ac: 16, str: 18, dex: 12, con: 17, int: 10, wis: 12, cha: 14, cr: '2', traits: ['Rugido de Batalha', 'Ataque Múltiplo (2x)'] }
+    ],
+    esqueleto: [
+      { title: 'Esqueleto Combatente', icon: '💀', enemy_class: 'Guerreiro', subclass: 'Infantaria da Cripta', hp: 13, ac: 13, str: 10, dex: 14, con: 15, int: 6, wis: 8, cha: 5, cr: '1/4', traits: ['Vulnerável a Contundente', 'Imunidade a Veneno'] },
+      { title: 'Esqueleto Arqueiro', icon: '🏹', enemy_class: 'Patrulheiro', subclass: 'Atirador de Ossadas', hp: 11, ac: 13, str: 9, dex: 15, con: 14, int: 6, wis: 10, cha: 5, cr: '1/4', traits: ['Arco Curto Sombrio', 'Visão no Escuro'] },
+      { title: 'Esqueleto Couraçado', icon: '🛡️', enemy_class: 'Guerreiro', subclass: 'Guardião de Túmulo', hp: 20, ac: 16, str: 13, dex: 12, con: 16, int: 6, wis: 8, cha: 5, cr: '1/2', traits: ['Escudo Antigo', 'Muralha de Ossos'] },
+      { title: 'Mago Esquelético', icon: '🔮', enemy_class: 'Mago', subclass: 'Necromante Esquelético', hp: 15, ac: 11, str: 8, dex: 13, con: 12, int: 14, wis: 11, cha: 7, cr: '1', traits: ['Raio de Gelo', 'Toque Macabro'] }
+    ],
+    zumbi: [
+      { title: 'Zumbi Errante', icon: '🧟', enemy_class: 'Bruto', subclass: 'Putrefação Lenta', hp: 22, ac: 8, str: 13, dex: 6, con: 16, int: 3, wis: 6, cha: 5, cr: '1/4', traits: ['Fortitude Zumbi (CD 5+dano)', 'Imunidade a Veneno'] },
+      { title: 'Zumbi Pestilento', icon: '☣️', enemy_class: 'Bruto', subclass: 'Vetor de Praga', hp: 26, ac: 8, str: 14, dex: 6, con: 17, int: 3, wis: 6, cha: 5, cr: '1/2', traits: ['Aura Miasmática', 'Golpe Infectado'] },
+      { title: 'Zumbi Encouraçado', icon: '⛓️', enemy_class: 'Guerreiro', subclass: 'Cadáver de Infantaria', hp: 28, ac: 13, str: 15, dex: 6, con: 16, int: 3, wis: 6, cha: 5, cr: '1/2', traits: ['Cota de Malha Enferrujada', 'Fortitude Zumbi'] },
+      { title: 'Colosso Cadavérico', icon: '🪨', enemy_class: 'Bruto Colossal', subclass: 'Amálgama Carniçal', hp: 45, ac: 10, str: 18, dex: 6, con: 18, int: 3, wis: 6, cha: 5, cr: '2', traits: ['Esmagamento Fétido', 'Resistência Implacável'] }
+    ],
+    lobo: [
+      { title: 'Lobo Predador', icon: '🐺', enemy_class: 'Caçador', subclass: 'Táticas de Matilha', hp: 11, ac: 13, str: 12, dex: 15, con: 12, int: 3, wis: 12, cha: 6, cr: '1/4', traits: ['Táticas de Matilha', 'Derrubar no Acerto'] },
+      { title: 'Lobo Alfa', icon: '🌕', enemy_class: 'Líder Feral', subclass: 'Uivo de Comando', hp: 18, ac: 14, str: 14, dex: 15, con: 14, int: 4, wis: 13, cha: 8, cr: '1/2', traits: ['Uivo Desestabilizador', 'Mordida Dilacerante'] },
+      { title: 'Lobo das Neves', icon: '❄️', enemy_class: 'Fera Mística', subclass: 'Sopro Gélido', hp: 22, ac: 13, str: 13, dex: 15, con: 14, int: 4, wis: 12, cha: 6, cr: '1', traits: ['Resistência a Frio', 'Sopro do Inverno'] },
+      { title: 'Lobo Terrível', icon: '🐾', enemy_class: 'Fera Ancestral', subclass: 'Predador Primordial', hp: 37, ac: 14, str: 17, dex: 15, con: 15, int: 3, wis: 12, cha: 7, cr: '1', traits: ['Porte Grande', 'Forte Impacto de Queda'] }
+    ],
+    bandido: [
+      { title: 'Bandido Salteador', icon: '🗡️', enemy_class: 'Ladino', subclass: 'Rufião de Estrada', hp: 11, ac: 12, str: 11, dex: 14, con: 12, int: 10, wis: 10, cha: 10, cr: '1/8', traits: ['Cimitarra e Pistola/Besta', 'Táticas de Emboscada'] },
+      { title: 'Bandido Arqueiro', icon: '🏹', enemy_class: 'Patrulheiro', subclass: 'Atirador de Trincheira', hp: 13, ac: 13, str: 10, dex: 15, con: 12, int: 10, wis: 12, cha: 9, cr: '1/4', traits: ['Disparo da Penumbra', 'Flecha Pesada'] },
+      { title: 'Bandido Bruto', icon: '🔨', enemy_class: 'Bárbaro', subclass: 'Capanga Encapuzado', hp: 22, ac: 13, str: 15, dex: 12, con: 14, int: 8, wis: 9, cha: 9, cr: '1/2', traits: ['Porrete Pesado', 'Ataque Ameaçador'] },
+      { title: 'Capitão dos Bandidos', icon: '⚔️', enemy_class: 'Guerreiro', subclass: 'Mestre Duelista', hp: 38, ac: 15, str: 15, dex: 16, con: 14, int: 12, wis: 11, cha: 14, cr: '2', traits: ['Ataque Múltiplo (3x)', 'Aparar (+2 CA Reação)'] }
+    ],
+    kobold: [
+      { title: 'Kobold Espreitador', icon: '🦎', enemy_class: 'Ladino', subclass: 'Rastejador de Galeria', hp: 5, ac: 12, str: 7, dex: 15, con: 9, int: 8, wis: 7, cha: 8, cr: '1/8', traits: ['Táticas de Bando', 'Sensibilidade à Luz Solar'] },
+      { title: 'Kobold Inventor', icon: '💣', enemy_class: 'Artífice', subclass: 'Tramas de Armadilha', hp: 9, ac: 12, str: 7, dex: 15, con: 10, int: 13, wis: 9, cha: 8, cr: '1/4', traits: ['Bolsa de Truques', 'Vespa Fétida', 'Vaso de Escorpiões'] },
+      { title: 'Kobold Escamoso Alado', icon: '🪽', enemy_class: 'Combatente Aéreo', subclass: 'Urd Cavernoso', hp: 7, ac: 13, str: 7, dex: 16, con: 9, int: 8, wis: 7, cha: 8, cr: '1/4', traits: ['Voo Cavernoso', 'Queda de Pedras'] },
+      { title: 'Kobold Feiticeiro Dracônico', icon: '🔥', enemy_class: 'Feiticeiro', subclass: 'Centelha dos Dragões', hp: 14, ac: 13, str: 7, dex: 14, con: 11, int: 10, wis: 9, cha: 14, cr: '1', traits: ['Magia Dracônica', 'Mãos Flamejantes'] }
+    ]
+  };
+  var matchedKey = Object.keys(VARS).find(function(k){ return sk.indexOf(k) >= 0; });
+  if (matchedKey) return VARS[matchedKey];
+  return [
+    { title: (speciesKey || 'Criatura') + ' Batedor', icon: '🗡️', enemy_class: 'Ladino', subclass: 'Espreitador', hp: 12, ac: 13, str: 10, dex: 14, con: 12, int: 10, wis: 10, cha: 8, cr: '1/4', traits: ['Passo Leve', 'Sentidos Aguçados'] },
+    { title: (speciesKey || 'Criatura') + ' Guerreiro', icon: '⚔️', enemy_class: 'Guerreiro', subclass: 'Combatente', hp: 18, ac: 14, str: 14, dex: 12, con: 14, int: 8, wis: 10, cha: 8, cr: '1/2', traits: ['Ataque Físico Forte'] },
+    { title: (speciesKey || 'Criatura') + ' Ancião / Alfa', icon: '👑', enemy_class: 'Líder', subclass: 'Predador Veterano', hp: 30, ac: 15, str: 16, dex: 13, con: 15, int: 10, wis: 12, cha: 11, cr: '1', traits: ['Presença Ameaçadora', 'Ataque Múltiplo'] }
+  ];
+}
+
 
 function _showStatusPopup(memberIdx){
   var ov = document.getElementById('city-subscreen-popup');
@@ -18809,8 +18996,20 @@ function _showStatusPopup(memberIdx){
   var m = _getFichaMember(memberIdx);
   if (!m) { vToast(_uiIcoImg('falha','ui-ico-img') + ' Membro não encontrado.'); return; }
 
-  // Sessão #56 (2026-05-28) — Demand D: header "Ficha" → "Ficha do Aventureiro"
-  if (titleEl) titleEl.textContent = 'Ficha do Aventureiro';
+  // Atualiza título conforme a entidade (aventureiro, companheiro, recruta, npc ou inimigo)
+  if (titleEl) {
+    if (m.isEnemy) {
+      titleEl.textContent = 'Ficha do Inimigo / Criatura';
+    } else if (m.isNpc) {
+      titleEl.textContent = 'Ficha do Habitante da Cidade';
+    } else if (m.isRecruit) {
+      titleEl.textContent = 'Ficha do Recruta da Guilda';
+    } else if (m.isPlayer) {
+      titleEl.textContent = 'Ficha do Personagem';
+    } else {
+      titleEl.textContent = 'Ficha do Companheiro';
+    }
+  }
   var stats = m.stats;
   function _mod(s){ var v = Math.floor((s - 10) / 2); return v; }
   function _modStr(s){ var v = _mod(s); return (v >= 0 ? '+' : '') + v; }
@@ -18924,10 +19123,15 @@ function _showStatusPopup(memberIdx){
     + '@media (prefers-reduced-motion:reduce){.fEp-avatar-anim,.fEp-hp-critical,.fEp-rune,.fEp-shield,.fEp-ambient{animation:none;}}'
     + '</style>';
 
-  // Avatar pro hero portrait (50px dentro do ring 64px) — v6 compactado pra Telegram desktop
-  var heroAvatarSvg = (window.vAssets && typeof vAssets.classIconHTML === 'function')
-    ? vAssets.classIconHTML(heraldicId, '50px')
-    : '<svg viewBox="0 0 120 120" style="width: 50px; height: 50px;"><use href="#' + heraldicId + '"/></svg>';
+  // Avatar pro portrait (50px dentro do ring 64px) — v6 compactado pra Telegram desktop
+  var heroAvatarSvg;
+  if (m.png) {
+    heroAvatarSvg = '<img src="' + m.png + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display=\'none\';">';
+  } else if (window.vAssets && typeof vAssets.classIconHTML === 'function') {
+    heroAvatarSvg = vAssets.classIconHTML(heraldicId, '50px');
+  } else {
+    heroAvatarSvg = '<svg viewBox="0 0 120 120" style="width: 50px; height: 50px;"><use href="#' + heraldicId + '"/></svg>';
+  }
   var hpCritical = hpPct < 25;
 
   var html = fEpStyles + '<div class="ficha-epica" style="position:relative; padding: 0; overflow: hidden;">';
@@ -18937,23 +19141,16 @@ function _showStatusPopup(memberIdx){
     + 'background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.08) 0%,transparent 55%),'
     + 'radial-gradient(ellipse at 50% 100%,rgba(196,149,58,0.04) 0%,transparent 70%);"></div>';
 
-  // Sessão #56 (2026-05-28) — Demand D: banner "◆ Ficha do Aventureiro ◆"
-  // REMOVIDO. O title bar do popup (#csp-title) já diz "Ficha do Aventureiro"
-  // — duplicar acima do portrait era ruído visual (user feedback).
-
-  // Hero portrait compactado: avatar 64px container (50px inside) + nome 17px
+  // Portrait compactado: avatar 64px container (50px inside) + nome 17px
+  var zoomDesc = m.isEnemy ? ('CR ' + (m.cr || '1/4') + ' · ' + (m.species || 'Criatura')) : ('Nível ' + (m.level || 1));
   html += '<div class="ficha-portrait" style="position:relative; z-index:1; padding: 9px var(--v-space-md-lg, 10px) 7px;'
     + 'background:radial-gradient(ellipse at 50% 0%,rgba(196,149,58,0.16) 0%,rgba(42,36,32,0.95) 60%);'
     + 'border-bottom:1px solid var(--v-gold-30,rgba(196,149,58,0.3)); text-align:center;">'
     // Halo radial
     + '<div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:180px; height:90px;'
     + 'background:radial-gradient(ellipse at center top,rgba(196,149,58,0.22) 0%,transparent 60%); pointer-events:none;"></div>'
-    // FC1 (2026-06-07): moldura SUAVIZADA — removidos o ring externo duplo, os 4
-    // ornamentos ◆ e o pulso animado (roubavam o foco da imagem). Sobra uma borda
-    // gold fina + glow estático sutil. A imagem é CLICÁVEL (v-zoomable) → abre o
-    // lightbox ampliado, igual aos retratos de NPC (delegação em lightbox.js).
     + '<div style="position:relative; width:64px; height:64px; margin:0 auto 6px; z-index:2;">'
-    + '<div class="ficha-avatar v-zoomable" data-zoom-name="' + _titleCase(m.name) + '" data-zoom-desc="Nível ' + (m.level || 1) + '" '
+    + '<div class="ficha-avatar v-zoomable" data-zoom-name="' + _titleCase(m.name) + '" data-zoom-desc="' + zoomDesc + '" '
     + 'title="Toque para ampliar" style="position:absolute; inset:0;'
     + 'background:linear-gradient(180deg, var(--v-bg-card,#2e2520), var(--v-bg,#2a2420));'
     + 'border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center;'
@@ -18973,32 +19170,49 @@ function _showStatusPopup(memberIdx){
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,58,0.5),transparent);"></span>'
     + '<span style="color:var(--v-gold,#c4953a); font-size:calc(8px * var(--v-font-scale, 1)); text-shadow:0 0 5px rgba(196,149,58,0.6);">◆</span>'
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,58,0.5),transparent);"></span>'
-    + '</div>'
-    // Subtitle
-    + '<div class="ficha-subtitle" style="color:var(--v-text-dim,#a09484); font-size:calc(11px * var(--v-font-scale, 1)); font-style:italic; letter-spacing:0.3px;">'
-    + '<span class="ficha-link" onclick="_showFichaClassHelp(\'' + cKey + '\',' + memberIdx + ')" title="Toque para detalhes da classe D&D 5e">' + classLabel + '</span>'
-    + (subclassLabel ? (' (<span class="ficha-link" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + memberIdx + ')" title="Toque para detalhes da sub-classe D&D 5e">' + subclassLabel + '</span>)') : '')
-    + ' '
-    + '<span class="ficha-link" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + memberIdx + ')" title="Toque para detalhes da raça D&D 5e">' + raceLabel + '</span>'
-    + (subraceLabel ? (' (<span class="ficha-link" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + memberIdx + ')" title="Toque para detalhes da sub-raça D&D 5e">' + subraceLabel + '</span>)') : '')
-    + ' · <b style="color:var(--v-gold,#c4953a); font-style:normal;">Nível ' + m.level + '</b>'
-    + '</div>'
-    // Meta Badges row: 4 pills interativos (Classe, Sub-classe, Raça, Sub-raça)
-    + '<div class="ficha-tags-row" style="display:flex; justify-content:center; align-items:center; gap:4px; margin-top:4px; flex-wrap:wrap;">'
-    + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaClassHelp(\'' + cKey + '\',' + memberIdx + ')" title="Classe D&D 5e: ' + classLabel + ' — toque p/ vantagens e desvantagens">'
-    + '<span>🛡️</span> <b>' + classLabel + '</b>'
-    + '</button>'
-    + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + memberIdx + ')" title="Sub-classe D&D 5e: ' + (subclassLabel || 'Ver Tradições') + ' — toque p/ habilidades e vantagens">'
-    + '<span>🔮</span> <span>' + (subclassLabel || 'Sub-classe') + '</span>'
-    + '</button>'
-    + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + memberIdx + ')" title="Raça D&D 5e: ' + raceLabel + ' — toque p/ traços e vantagens raciais">'
-    + '<span>🌿</span> <b>' + raceLabel + '</b>'
-    + '</button>'
-    + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + memberIdx + ')" title="Sub-raça D&D 5e: ' + (subraceLabel || 'Ver Linhagens') + ' — toque p/ vantagens exclusivas">'
-    + '<span>⚙️</span> <span>' + (subraceLabel || 'Sub-raça') + '</span>'
-    + '</button>'
-    + '</div>'
     + '</div>';
+
+  if (m.isEnemy) {
+    html += '<div class="ficha-subtitle" style="color:var(--v-text-dim,#a09484); font-size:calc(11px * var(--v-font-scale, 1)); font-style:italic; letter-spacing:0.3px;">'
+      + '<span style="color:#ffb090; font-weight:700;">' + (m.species || 'Criatura') + '</span> · '
+      + '<span>' + (m.race || m.name) + '</span>'
+      + (m.subrace ? ' (' + m.subrace + ')' : '')
+      + ' · <b style="color:var(--v-gold,#c4953a); font-style:normal;">CR ' + (m.cr || '1/4') + ' (' + (m.dndXp || 50) + ' XP)</b>'
+      + '</div>'
+      + '<div class="ficha-tags-row" style="display:flex; justify-content:center; align-items:center; gap:4px; margin-top:4px; flex-wrap:wrap;">'
+      + '<button type="button" class="ficha-meta-badge" style="cursor:default;"><span>🏷️</span> <b>' + (m.species || 'Espécie') + '</b></button>'
+      + '<button type="button" class="ficha-meta-badge" style="cursor:default;"><span>🧬</span> <b>' + (m.race || 'Raça') + '</b></button>'
+      + (m.subrace ? '<button type="button" class="ficha-meta-badge" style="cursor:default;"><span>⚙️</span> <span>' + m.subrace + '</span></button>' : '')
+      + '<button type="button" class="ficha-meta-badge" style="cursor:default;"><span>⚔️</span> <b>' + (m.cls || 'Classe') + '</b></button>'
+      + (m.subclass ? '<button type="button" class="ficha-meta-badge" style="cursor:default;"><span>🔮</span> <span>' + m.subclass + '</span></button>' : '')
+      + '</div>';
+  } else {
+    // Subtitle e badges interativos de aventureiro / aliado
+    var memParam = (typeof memberIdx === 'number' ? memberIdx : 0);
+    html += '<div class="ficha-subtitle" style="color:var(--v-text-dim,#a09484); font-size:calc(11px * var(--v-font-scale, 1)); font-style:italic; letter-spacing:0.3px;">'
+      + '<span class="ficha-link" onclick="_showFichaClassHelp(\'' + cKey + '\',' + memParam + ')" title="Toque para detalhes da classe D&D 5e">' + classLabel + '</span>'
+      + (subclassLabel ? (' (<span class="ficha-link" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + memParam + ')" title="Toque para detalhes da sub-classe D&D 5e">' + subclassLabel + '</span>)') : '')
+      + ' '
+      + '<span class="ficha-link" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + memParam + ')" title="Toque para detalhes da raça D&D 5e">' + raceLabel + '</span>'
+      + (subraceLabel ? (' (<span class="ficha-link" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + memParam + ')" title="Toque para detalhes da sub-raça D&D 5e">' + subraceLabel + '</span>)') : '')
+      + ' · <b style="color:var(--v-gold,#c4953a); font-style:normal;">Nível ' + m.level + '</b>'
+      + '</div>'
+      + '<div class="ficha-tags-row" style="display:flex; justify-content:center; align-items:center; gap:4px; margin-top:4px; flex-wrap:wrap;">'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaClassHelp(\'' + cKey + '\',' + memParam + ')" title="Classe D&D 5e: ' + classLabel + ' — toque p/ vantagens e desvantagens">'
+      + '<span>🛡️</span> <b>' + classLabel + '</b>'
+      + '</button>'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + memParam + ')" title="Sub-classe D&D 5e: ' + (subclassLabel || 'Ver Tradições') + ' — toque p/ habilidades e vantagens">'
+      + '<span>🔮</span> <span>' + (subclassLabel || 'Sub-classe') + '</span>'
+      + '</button>'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + memParam + ')" title="Raça D&D 5e: ' + raceLabel + ' — toque p/ traços e vantagens raciais">'
+      + '<span>🌿</span> <b>' + raceLabel + '</b>'
+      + '</button>'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + memParam + ')" title="Sub-raça D&D 5e: ' + (subraceLabel || 'Ver Linhagens') + ' — toque p/ vantagens exclusivas">'
+      + '<span>⚙️</span> <span>' + (subraceLabel || 'Sub-raça') + '</span>'
+      + '</button>'
+      + '</div>';
+  }
+  html += '</div>';
 
   // Banner de Progressão Pendente (se houver ASI ou Skills para alocar)
   if (m.pendingAsi > 0 || m.pendingSkills > 0) {
@@ -19265,28 +19479,69 @@ function _showStatusPopup(memberIdx){
   // "Remove a parte nova que foi adicionada referente a histórico do aventureiro."
   // Liga/Conquistas/Abates/Sequência continuam acessíveis pelo hub (progress_strip).
 
-  // === SWITCHER — cards compactos com avatar + active glow ===
-  var members = (window.GROUP_MEMBERS || []).filter(function(mm, i){ return mm && !mm.dead; });
-  if (members.length > 1) {
-    html += '<div class="ficha-switcher" style="position:relative; z-index:1; padding: 5px var(--v-space-md-lg, 10px) 6px;'
-      + 'border-top:1px solid var(--v-gold-12,rgba(196,149,58,0.18));'
-      + 'background:linear-gradient(180deg,rgba(196,149,58,0.05) 0%,rgba(196,149,58,0.02) 100%);">'
-      + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(9px * var(--v-font-scale, 1));'
-      + 'color:var(--v-gold,#c4953a); text-align:center; margin-bottom: var(--v-space-sm, 4px);'
-      + 'text-transform:uppercase; letter-spacing:1.5px;">'
-      + '<span class="fEp-rune" style="font-size:calc(7px * var(--v-font-scale, 1)); margin-right:5px;">◆</span>'
-      + 'Trocar Membro'
-      + '<span class="fEp-rune" style="font-size:calc(7px * var(--v-font-scale, 1)); margin-left:5px;">◆</span>'
+  // === VARIAÇÕES DA ESPÉCIE D&D 5E (se inimigo) ===
+  if (m.isEnemy) {
+    var specKey = (m.race || m.name || '').toLowerCase();
+    var variations = _getSpeciesVariationsClient(specKey);
+    html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) var(--v-space-sm, 6px);">'
+      + '<div class="ficha-section-title" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
+      + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px;">'
+      + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Variações Conhecidas desta Espécie (D&D 5e)'
+      + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left: var(--v-space-sm, 4px);"></span>'
       + '</div>'
-      + '<div style="display:flex; gap: var(--v-space-sm, 4px); justify-content:center; flex-wrap:wrap;">';
+      + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin-bottom:5px; line-height:1.4;">'
+      + 'Espécimes individuais nos ermos possuem <b>variação natural de vida (±10-15%) e atributos secundários</b>. Arquétipos catalogados:'
+      + '</div>'
+      + '<div style="display:flex; flex-direction:column; gap:4px;">';
+    variations.forEach(function(v){
+      html += '<div style="background:rgba(28,20,16,0.75); border:1px solid rgba(196,149,58,0.25); border-radius:5px; padding:5px 8px; font-size:calc(10.5px * var(--v-font-scale, 1)); line-height:1.4;">'
+        + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">'
+        + '<span style="color:#ffd700; font-weight:700;">' + v.icon + ' ' + v.title + '</span>'
+        + '<span style="font-size:calc(9.5px * var(--v-font-scale, 1)); color:#ff8a4a; font-weight:700;">CR ' + v.cr + ' · ' + v.enemy_class + ' (' + v.subclass + ')</span>'
+        + '</div>'
+        + '<div style="display:flex; gap:8px; font-size:calc(9.5px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin-bottom:2px; flex-wrap:wrap;">'
+        + '<span>PV: <b style="color:#e07c7c;">' + v.hp + '</b></span>'
+        + '<span>CA: <b style="color:#7cdb7c;">' + v.ac + '</b></span>'
+        + '<span>FOR <b style="color:#d4c8b0;">' + v.str + '</b></span>'
+        + '<span>DES <b style="color:#d4c8b0;">' + v.dex + '</b></span>'
+        + '<span>CON <b style="color:#d4c8b0;">' + v.con + '</b></span>'
+        + '<span>INT <b style="color:#d4c8b0;">' + v.int + '</b></span>'
+        + '<span>SAB <b style="color:#d4c8b0;">' + v.wis + '</b></span>'
+        + '<span>CAR <b style="color:#d4c8b0;">' + v.cha + '</b></span>'
+        + '</div>'
+        + (v.traits && v.traits.length ? ('<div style="font-size:calc(9px * var(--v-font-scale, 1)); color:#c4b49c; font-style:italic;">Habilidades: ' + v.traits.join(' · ') + '</div>') : '')
+        + '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  // === SWITCHER POR CATEGORIA (GRUPO, RECRUTAS/NPCS, INIMIGOS) ===
+  var curCat = window._fichaCategory || 'party';
+  if (typeof memberIdx === 'string') {
+    if (memberIdx.indexOf('bst_') === 0 || memberIdx.indexOf('enemy_') === 0) curCat = 'enemies';
+    else if (memberIdx.indexOf('rc_') === 0 || memberIdx.indexOf('npc_') === 0) curCat = 'recruits';
+  } else {
+    curCat = 'party';
+  }
+  window._fichaCategory = curCat;
+
+  html += '<div class="ficha-switcher" style="position:relative; z-index:1; padding: 6px var(--v-space-md-lg, 10px) 7px;'
+    + 'border-top:1px solid var(--v-gold-12,rgba(196,149,58,0.18));'
+    + 'background:linear-gradient(180deg,rgba(196,149,58,0.06) 0%,rgba(196,149,58,0.02) 100%);">'
+    + '<div style="display:flex; justify-content:center; gap:6px; margin-bottom:6px;">'
+    + '<button type="button" class="ficha-cat-btn" data-cat="party" style="padding:2px 8px; border-radius:10px; font-size:calc(9.5px * var(--v-font-scale, 1)); font-family:var(--v-font-display,Cinzel,serif); cursor:pointer; border:1px solid ' + (curCat === 'party' ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.3)') + '; background:' + (curCat === 'party' ? 'rgba(196,149,58,0.22)' : 'rgba(0,0,0,0.3)') + '; color:' + (curCat === 'party' ? '#ffd700' : 'var(--v-text-dim,#a09484)') + ';">🛡️ Grupo</button>'
+    + '<button type="button" class="ficha-cat-btn" data-cat="recruits" style="padding:2px 8px; border-radius:10px; font-size:calc(9.5px * var(--v-font-scale, 1)); font-family:var(--v-font-display,Cinzel,serif); cursor:pointer; border:1px solid ' + (curCat === 'recruits' ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.3)') + '; background:' + (curCat === 'recruits' ? 'rgba(196,149,58,0.22)' : 'rgba(0,0,0,0.3)') + '; color:' + (curCat === 'recruits' ? '#ffd700' : 'var(--v-text-dim,#a09484)') + ';">👥 Recrutas & NPCs</button>'
+    + '<button type="button" class="ficha-cat-btn" data-cat="enemies" style="padding:2px 8px; border-radius:10px; font-size:calc(9.5px * var(--v-font-scale, 1)); font-family:var(--v-font-display,Cinzel,serif); cursor:pointer; border:1px solid ' + (curCat === 'enemies' ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.3)') + '; background:' + (curCat === 'enemies' ? 'rgba(196,149,58,0.22)' : 'rgba(0,0,0,0.3)') + '; color:' + (curCat === 'enemies' ? '#ffd700' : 'var(--v-text-dim,#a09484)') + ';">👹 Inimigos & Criaturas</button>'
+    + '</div>'
+    + '<div style="display:flex; gap: var(--v-space-sm, 4px); justify-content:center; flex-wrap:wrap; max-height:90px; overflow-y:auto;">';
+
+  if (curCat === 'party') {
+    var members = (window.GROUP_MEMBERS || []).filter(function(mm, i){ return mm && !mm.dead; });
     members.forEach(function(mm){
       var idx = mm.idx !== undefined ? mm.idx : (window.GROUP_MEMBERS || []).indexOf(mm);
       if (idx < 0) idx = 0;
       var active = idx === memberIdx;
       var hid = _classToHeraldic(mm.cls);
-      // Mini-avatar 18px compacto
-      // 2026-05-24 sessão #29: removido radial-gradient amarelo tosco.
-      // Mini-avatar usa fundo sólido dark + ring gold + SVG dourado.
       var avSvg = '<div style="width:18px; height:18px; border-radius:50%; flex-shrink:0;'
         + 'background:var(--v-bg-card,#2e2520);'
         + 'display:flex; align-items:center; justify-content:center;'
@@ -19305,16 +19560,76 @@ function _showStatusPopup(memberIdx){
         + avSvg + '<span>' + _titleCase(mm.name) + '</span>'
         + '</button>';
     });
-    html += '</div></div>';
+  } else if (curCat === 'recruits') {
+    var recruitList = [
+      { id: 'rc_korin', name: 'Korin', role: 'Guerreiro Anão' },
+      { id: 'rc_lyra', name: 'Lyra', role: 'Patrulheira Elfa' },
+      { id: 'rc_mira', name: 'Mira', role: 'Clériga Humana' },
+      { id: 'rc_vex', name: 'Vex', role: 'Ladino Meio-Elfo' },
+      { id: 'npc_balin', name: 'Balin', role: 'Ferreiro' },
+      { id: 'npc_tavira', name: 'Tavira', role: 'Líder da Guilda' },
+      { id: 'npc_lyra', name: 'Lyra Batedora', role: 'Guia' },
+      { id: 'npc_corvus', name: 'Corvus', role: 'Alquimista' }
+    ];
+    recruitList.forEach(function(item){
+      var active = item.id === memberIdx;
+      html += '<button class="ficha-switch-btn fEp-clickable" data-idx="' + item.id + '" '
+        + 'style="display:flex; align-items:center; gap:5px; padding: 3px 8px;'
+        + 'background:' + (active ? 'rgba(196,149,58,0.22)' : 'rgba(196,149,58,0.05)') + ';'
+        + 'border:1px solid ' + (active ? 'var(--v-gold,#c4953a)' : 'rgba(196,149,58,0.25)') + ';'
+        + 'border-radius:12px; color:' + (active ? '#ffd700' : 'var(--v-text,#d4c8b0)') + ';'
+        + 'font-family:inherit; font-size:calc(9.5px * var(--v-font-scale, 1)); cursor:pointer;'
+        + (active ? 'box-shadow:0 0 8px rgba(196,149,58,0.4);' : '') + '">'
+        + '<span>👤</span><span>' + item.name + '</span>'
+        + '<span style="font-size:calc(8px * var(--v-font-scale,1)); color:var(--v-text-dim,#a09484);">(' + item.role + ')</span>'
+        + '</button>';
+    });
+  } else if (curCat === 'enemies') {
+    var enemyList = [
+      { id: 'bst_goblin', name: 'Goblin', icon: '🗡️' },
+      { id: 'bst_orc', name: 'Orc', icon: '🪓' },
+      { id: 'bst_esqueleto', name: 'Esqueleto', icon: '💀' },
+      { id: 'bst_zumbi', name: 'Zumbi', icon: '🧟' },
+      { id: 'bst_lobo', name: 'Lobo', icon: '🐺' },
+      { id: 'bst_bandido', name: 'Bandido', icon: '🏹' },
+      { id: 'bst_kobold', name: 'Kobold', icon: '🦎' },
+      { id: 'bst_aranha', name: 'Aranha', icon: '🕷️' },
+      { id: 'bst_javali', name: 'Javali', icon: '🐗' },
+      { id: 'bst_rato', name: 'Rato Gigante', icon: '🐀' }
+    ];
+    enemyList.forEach(function(item){
+      var active = item.id === memberIdx;
+      html += '<button class="ficha-switch-btn fEp-clickable" data-idx="' + item.id + '" '
+        + 'style="display:flex; align-items:center; gap:5px; padding: 3px 8px;'
+        + 'background:' + (active ? 'rgba(230,80,60,0.25)' : 'rgba(196,149,58,0.05)') + ';'
+        + 'border:1px solid ' + (active ? '#ff6040' : 'rgba(196,149,58,0.25)') + ';'
+        + 'border-radius:12px; color:' + (active ? '#ffb090' : 'var(--v-text,#d4c8b0)') + ';'
+        + 'font-family:inherit; font-size:calc(9.5px * var(--v-font-scale, 1)); cursor:pointer;'
+        + (active ? 'box-shadow:0 0 8px rgba(255,96,64,0.4);' : '') + '">'
+        + '<span>' + item.icon + '</span><span>' + item.name + '</span>'
+        + '</button>';
+    });
   }
 
+  html += '</div></div>';
   html += '</div>';
   bodyEl.innerHTML = html;
 
-  // Wire switcher
+  // Wire category buttons and entity switcher buttons
+  bodyEl.querySelectorAll('.ficha-cat-btn').forEach(function(cBtn){
+    cBtn.addEventListener('click', function(){
+      var cat = cBtn.getAttribute('data-cat');
+      window._fichaCategory = cat;
+      if (cat === 'party') _showStatusPopup(0);
+      else if (cat === 'recruits') _showStatusPopup('rc_korin');
+      else if (cat === 'enemies') _showStatusPopup('bst_goblin');
+    });
+  });
+
   bodyEl.querySelectorAll('.ficha-switch-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
-      var idx = parseInt(btn.getAttribute('data-idx'), 10);
+      var rawIdx = btn.getAttribute('data-idx');
+      var idx = /^\d+$/.test(rawIdx) ? parseInt(rawIdx, 10) : rawIdx;
       _showStatusPopup(idx);
     });
   });
@@ -21353,8 +21668,40 @@ function _showCreatureDossier(specimen, p){
             ? '<div style="font-size: 11.5px; color: #ffd700; line-height: 1.45; font-weight: 600;">' + specimen.drops + '</div>'
             : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Atinja o Grau Apex III (15 abates) para extrair os componentes alquímicos e troféus mais raros desta presa.</div>')
     +   '</div>'
+    /* Seção 4: Atributos & Linhagens D&D 5e */
+    +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid rgba(196,149,58,0.4); border-radius: 8px; padding: 10px 12px;">'
+    +     '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 11px; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display:flex; justify-content:space-between; align-items:center;">'
+    +       '<span>⚔️ Atributos & Linhagens D&D 5e</span>'
+    +       '<button id="cdo-btn-open-ficha" type="button" style="padding: 2px 8px; background: rgba(196,149,58,0.2); border: 1px solid #ffd700; border-radius: 4px; color: #ffd700; font-family: Cinzel, serif; font-size: 9.5px; font-weight: 700; cursor: pointer;">📜 Ver Ficha Completa ▸</button>'
+    +     '</div>'
+    +     '<div style="font-size: 10.5px; color: var(--v-text-dim, #a09484); margin-bottom: 6px;">'
+    +       'Cada exemplar desta espécie possui <b>variação individual de atributos e vida (±10-15%)</b>. Arquétipos catalogados:'
+    +     '</div>'
+    +     (function(){
+            var vList = _getSpeciesVariationsClient(specimen.id || specimen.type);
+            var vHtml = '<div style="display:flex; flex-direction:column; gap:4px;">';
+            vList.slice(0, 3).forEach(function(v){
+              vHtml += '<div style="background:rgba(20,14,10,0.6); border:1px solid rgba(196,149,58,0.2); border-radius:4px; padding:4px 7px; font-size:10px;">'
+                + '<div style="display:flex; justify-content:space-between; align-items:center;">'
+                + '<span style="color:#ffd700; font-weight:700;">' + v.icon + ' ' + v.title + '</span>'
+                + '<span style="color:#ff8a4a;">CR ' + v.cr + ' · ' + v.enemy_class + '</span>'
+                + '</div>'
+                + '<div style="display:flex; gap:6px; color:var(--v-text-dim,#a09484); font-size:9px; margin-top:2px;">'
+                + '<span>PV: <b style="color:#e07c7c;">' + v.hp + '</b></span>'
+                + '<span>CA: <b style="color:#7cdb7c;">' + v.ac + '</b></span>'
+                + '<span>FOR <b style="color:#d4c8b0;">' + v.str + '</b></span>'
+                + '<span>DES <b style="color:#d4c8b0;">' + v.dex + '</b></span>'
+                + '<span>CON <b style="color:#d4c8b0;">' + v.con + '</b></span>'
+                + '</div>'
+                + '</div>';
+            });
+            vHtml += '</div>';
+            return vHtml;
+          })()
+    +   '</div>'
     + '</div>'
-    + '<div class="cdo-footer">'
+    + '<div class="cdo-footer" style="display:flex; justify-content:flex-end; gap:8px;">'
+    +   '<button id="cdo-btn-full-ficha" type="button" style="padding: 7px 14px; background: linear-gradient(180deg, rgba(196,149,58,0.3), rgba(60,45,25,0.8)); border: 1px solid #ffd700; border-radius: 6px; color: #ffd700; font-family: Cinzel, serif; font-size: 11px; font-weight: 700; cursor: pointer;">📜 Abrir Ficha D&D 5e</button>'
     +   '<button id="cdo-btn-close" type="button" style="padding: 7px 18px; background: linear-gradient(180deg, #4a2016, #2a100a); border: 1px solid #ff6040; border-radius: 6px; color: #ffb090; font-family: Cinzel, serif; font-size: 11px; font-weight: 700; cursor: pointer;">Fechar Dossiê</button>'
     + '</div>'
     + '</div>';
@@ -21373,6 +21720,16 @@ function _showCreatureDossier(specimen, p){
   if (closeX) closeX.onclick = _close;
   var btnClose = document.getElementById('cdo-btn-close');
   if (btnClose) btnClose.onclick = _close;
+  var openFichaBtn = document.getElementById('cdo-btn-open-ficha');
+  if (openFichaBtn) openFichaBtn.onclick = function(){
+    _close();
+    _showStatusPopup('bst_' + specimen.id);
+  };
+  var fullFichaBtn = document.getElementById('cdo-btn-full-ficha');
+  if (fullFichaBtn) fullFichaBtn.onclick = function(){
+    _close();
+    _showStatusPopup('bst_' + specimen.id);
+  };
   ov.onclick = function(e){
     if (e.target === ov) _close();
   };
