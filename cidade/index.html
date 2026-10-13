@@ -2757,57 +2757,66 @@ LOG SINK (Fase 7):
     /* ============================================================
        === LIGA DOS AVENTUREIROS — AAA RPG SYSTEM
        ============================================================ */
+    /* ============================================================
+       === LIGA DOS AVENTUREIROS — AAA RPG SYSTEM D&D 5e
+       ============================================================ */
     .vLg-nav-tabs {
       display: flex;
-      gap: 5px;
-      margin: 8px 8px 12px;
+      gap: 6px;
+      margin: 8px 8px 10px;
       border-bottom: 1px solid rgba(196,149,58,0.3);
       padding-bottom: 6px;
-      overflow-x: auto;
     }
     .vLg-tab-btn {
-      padding: 6px 12px;
-      background: rgba(42,36,32,0.6);
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 7px 4px;
+      background: rgba(42,36,32,0.65);
       border: 1px solid rgba(196,149,58,0.3);
       border-radius: 6px;
       color: var(--v-text-dim, #a09484);
       font-family: 'Cinzel', serif;
       font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.03em;
       cursor: pointer;
       white-space: nowrap;
-      transition: all 0.15s;
+      text-align: center;
+      transition: all 0.15s ease;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .vLg-tab-btn:hover {
-      background: rgba(196,149,58,0.15);
+      background: rgba(196,149,58,0.18);
       color: #fff;
+      border-color: rgba(196,149,58,0.5);
     }
     .vLg-tab-btn.active {
-      background: linear-gradient(180deg, rgba(196,149,58,0.35), rgba(74,56,40,0.5));
+      background: linear-gradient(180deg, rgba(196,149,58,0.35), rgba(74,56,40,0.6));
       border-color: var(--v-gold, #c4953a);
       color: var(--v-gold, #ffd700);
       box-shadow: 0 0 10px rgba(196,149,58,0.35);
+      font-weight: 700;
     }
     .vLg-countdown-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin: 0 8px 10px;
-      padding: 8px 14px;
-      background: linear-gradient(90deg, rgba(196,149,58,0.15) 0%, rgba(20,16,12,0.8) 100%);
-      border: 1px solid rgba(196,149,58,0.4);
+      margin: 0 8px 8px;
+      padding: 8px 12px;
+      background: linear-gradient(90deg, rgba(196,149,58,0.15) 0%, rgba(20,16,12,0.85) 100%);
+      border: 1px solid rgba(196,149,58,0.35);
       border-left: 3px solid var(--v-gold, #ffd700);
       border-radius: 6px;
     }
     .vLg-first-blood-card {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin: 0 8px 10px;
-      padding: 10px 14px;
-      background: linear-gradient(135deg, rgba(196,40,30,0.18) 0%, rgba(42,30,20,0.6) 100%);
-      border: 1px solid rgba(255,100,50,0.4);
+      gap: 10px;
+      margin: 0 8px 8px;
+      padding: 8px 12px;
+      background: linear-gradient(135deg, rgba(196,40,30,0.16) 0%, rgba(42,30,20,0.65) 100%);
+      border: 1px solid rgba(255,100,50,0.35);
       border-left: 3px solid #ff6040;
       border-radius: 6px;
     }
@@ -2878,13 +2887,16 @@ LOG SINK (Fase 7):
        ============================================================ */
     .vAch-nav-tabs {
       display: flex;
-      gap: 5px;
-      margin: 8px 8px 10px;
+      gap: 6px;
+      margin: 6px 8px 10px;
       border-bottom: 1px solid rgba(196,149,58,0.3);
       padding-bottom: 6px;
       overflow-x: auto;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
     }
     .vAch-tab-btn {
+      flex-shrink: 0;
       padding: 5px 10px;
       background: rgba(42,36,32,0.6);
       border: 1px solid rgba(196,149,58,0.3);
@@ -2899,7 +2911,7 @@ LOG SINK (Fase 7):
       transition: all 0.15s;
     }
     .vAch-tab-btn:hover {
-      background: rgba(196,149,58,0.15);
+      background: rgba(196,149,58,0.18);
       color: #fff;
     }
     .vAch-tab-btn.active {
@@ -2907,24 +2919,40 @@ LOG SINK (Fase 7):
       border-color: var(--v-gold, #c4953a);
       color: var(--v-gold, #ffd700);
       box-shadow: 0 0 8px rgba(196,149,58,0.35);
+      font-weight: 700;
     }
     .vAch-focus-badge {
       position: absolute;
-      top: -4px;
-      right: -4px;
+      top: 3px;
+      right: 3px;
+      z-index: 3;
       background: linear-gradient(135deg, #e85040, #ff8a4a);
       color: #fff;
-      font-size: 8px;
+      font-size: 7.5px;
       font-weight: 700;
-      padding: 1px 5px;
-      border-radius: 8px;
+      padding: 1px 4px;
+      border-radius: 4px;
       letter-spacing: 0.5px;
       animation: vAchPulse 1.8s ease-in-out infinite;
-      box-shadow: 0 0 6px rgba(232,80,64,0.6);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      pointer-events: none;
+    }
+    .vAch-mini-bar {
+      width: 82%;
+      height: 3px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 3px;
+    }
+    .vAch-mini-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #c4953a, #ffd700);
     }
     @keyframes vAchPulse {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+      50% { transform: scale(1.08); }
     }
 
     /* ============================================================
@@ -2932,13 +2960,16 @@ LOG SINK (Fase 7):
        ============================================================ */
     .vBst-nav-tabs {
       display: flex;
-      gap: 5px;
-      margin: 8px 8px 10px;
+      gap: 6px;
+      margin: 6px 8px 8px;
       border-bottom: 1px solid rgba(196,40,30,0.35);
       padding-bottom: 6px;
       overflow-x: auto;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
     }
     .vBst-tab-btn {
+      flex-shrink: 0;
       padding: 5px 10px;
       background: rgba(42,20,16,0.6);
       border: 1px solid rgba(196,40,30,0.35);
@@ -2952,14 +2983,15 @@ LOG SINK (Fase 7):
       transition: all 0.15s;
     }
     .vBst-tab-btn:hover {
-      background: rgba(196,40,30,0.2);
+      background: rgba(196,40,30,0.22);
       color: #fff;
     }
     .vBst-tab-btn.active {
-      background: linear-gradient(180deg, rgba(196,40,30,0.35), rgba(74,20,16,0.6));
+      background: linear-gradient(180deg, rgba(196,40,30,0.38), rgba(74,20,16,0.65));
       border-color: #ff6040;
       color: #ffb090;
       box-shadow: 0 0 8px rgba(255,96,64,0.35);
+      font-weight: 700;
     }
     .vBst-card {
       display: flex;
@@ -2979,6 +3011,14 @@ LOG SINK (Fase 7):
       border-color: #ff6040;
       background: linear-gradient(90deg, rgba(74,30,22,0.8) 0%, rgba(42,20,16,0.7) 100%);
       box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+    }
+    .vBst-card.is-undiscovered {
+      opacity: 0.72;
+      background: linear-gradient(90deg, rgba(28,18,16,0.6) 0%, rgba(20,12,10,0.6) 100%);
+      border-style: dashed;
+    }
+    .vBst-card.is-undiscovered .vBst-portrait-img {
+      filter: grayscale(1) brightness(0.45);
     }
     .vBst-portrait-wrap {
       width: 44px;
@@ -3005,6 +3045,7 @@ LOG SINK (Fase 7):
       text-transform: uppercase;
       display: inline-block;
     }
+    .vBst-mastery-0 { background: rgba(80,68,56,0.3); border: 1px solid #5a4838; color: #8a7868; }
     .vBst-mastery-1 { background: rgba(120,100,80,0.3); border: 1px solid #7a6850; color: #a09484; }
     .vBst-mastery-2 { background: rgba(196,149,58,0.2); border: 1px solid #c4953a; color: #ffd700; }
     .vBst-mastery-3 { background: linear-gradient(90deg, #c4953a, #ffd700); color: #1a1006; font-weight: 800; box-shadow: 0 0 6px rgba(255,215,0,0.5); }
@@ -19914,6 +19955,14 @@ function _calcLeagueCountdown(){
   return d + 'd ' + h + 'h';
 }
 
+var TIER_DND_INFO = {
+  bronze:   { sub: 'Iniciado da Ordem · Tier 1 (Níveis 1–4)', next: 'Prata', max: 2500, min: 0 },
+  silver:   { sub: 'Aventureiro Consagrado · Tier 2 (Níveis 5–10)', next: 'Ouro', max: 5000, min: 2500 },
+  gold:     { sub: 'Veterano das Campanhas · Tier 2–3 (Níveis 10–14)', next: 'Platina', max: 10000, min: 5000 },
+  platinum: { sub: 'Mestre da Ordem · Tier 3 (Níveis 15–18)', next: 'Mithral', max: 20000, min: 10000 },
+  mithral:  { sub: 'Lenda Viva de Valdoria · Tier 4 (Níveis 19–20)', next: null, max: 50000, min: 20000 }
+};
+
 function _showLeaguePopup(p){
   var ov = document.getElementById('city-subscreen-popup');
   var titleEl = document.getElementById('csp-title');
@@ -19939,10 +19988,14 @@ function _showLeaguePopup(p){
   }
   var currentTierIdx = LEAGUE_TIERS.indexOf(currentTier);
   var nextTier = LEAGUE_TIERS[Math.min(currentTierIdx + 1, LEAGUE_TIERS.length - 1)];
-  var pctInTier = (currentXp - currentTier.minXp) / (currentTier.maxXp - currentTier.minXp) * 100;
-  pctInTier = Math.max(0, Math.min(100, pctInTier));
   var atMax = (nextTier === currentTier);
   var tColor = currentTier.color;
+  var dndInfo = TIER_DND_INFO[currentTier.id] || { sub: 'Membro da Ordem', next: 'Próximo Escalão', max: currentTier.maxXp, min: currentTier.minXp };
+
+  var xpInTier = Math.max(0, currentXp - currentTier.minXp);
+  var tierSpan = Math.max(1, currentTier.maxXp - currentTier.minXp);
+  var pctInTier = atMax ? 100 : Math.max(0, Math.min(100, Math.round(xpInTier / tierSpan * 100)));
+  var xpToNext = Math.max(0, currentTier.maxXp - currentXp);
 
   var todayIso = (typeof _todayIso === 'function') ? _todayIso() : (new Date().toISOString().slice(0,10));
   var meta = (p && p.metadata) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.metadata) || {};
@@ -20003,7 +20056,7 @@ function _showLeaguePopup(p){
       cHtml += '</div>';
 
       cHtml += '<div style="margin: 4px 8px 10px; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(196,149,58,0.2); border-radius: 6px; font-size: 10px; color: var(--v-text-dim, #a09484); line-height: 1.4;">'
-        + '<b style="color: #7cdb7c;">▲ Top 10:</b> Ascendem para a próxima Liga no reset. '
+        + '<b style="color: #7cdb7c;">▲ Top 10:</b> Ascendem para o escalão superior no fechamento semanal. '
         + '<b style="color: #e85040;">▼ Últimos 5:</b> Descendem de divisão se houver tier inferior.'
         + '</div>';
     } else if (_leagueCurrentSubTab === 'contracts') {
@@ -20011,27 +20064,33 @@ function _showLeaguePopup(p){
       var strk = (p && typeof p.streak === 'number') ? p.streak : (window.CITY_MOCK_PLAYER ? (window.CITY_MOCK_PLAYER.streak || 0) : 0);
 
       var contracts = [
-        { title: 'Primeiro Sangue Diário', desc: 'Vença sua primeira batalha do dia', xp: 150, cur: firstBloodDone ? 1 : 0, max: 1, done: firstBloodDone },
-        { title: 'Purga das Estradas', desc: 'Abata feras ou salteadores no condado', xp: 300, cur: Math.min(5, kCount), max: 5, done: kCount >= 5 },
-        { title: 'Trilhas do Condado', desc: 'Complete 1 expedição ou descubra novo hex', xp: 250, cur: 1, max: 1, done: true },
-        { title: 'Glória na Arena', desc: 'Mantenha sequência de 3 vitórias consecutivas', xp: 400, cur: Math.min(3, strk), max: 3, done: strk >= 3 }
+        { title: 'Purga das Estradas', desc: 'Abata feras ou salteadores no condado', xp: 300, gold: 25, cur: Math.min(5, kCount), max: 5, done: kCount >= 5 },
+        { title: 'Trilhas do Condado', desc: 'Complete 1 expedição ou descubra novo hexágono', xp: 250, gold: 20, cur: 1, max: 1, done: true },
+        { title: 'Glória na Arena', desc: 'Mantenha sequência de 3 vitórias na Arena de Vorhan', xp: 400, gold: 40, cur: Math.min(3, strk), max: 3, done: strk >= 3 },
+        { title: 'Contrato da Guilda', desc: 'Cumpra missões mercenárias no Mural ou na Taverna', xp: 350, gold: 30, cur: 1, max: 2, done: false },
+        { title: 'Patrulha de Fronteira', desc: 'Vença embates contra bandidos e saqueadores', xp: 280, gold: 20, cur: Math.min(3, kCount), max: 3, done: kCount >= 3 }
       ];
+
+      cHtml += '<div style="margin: 0 8px 6px; font-size: 10.5px; color: var(--v-text-dim, #a09484); display: flex; justify-content: space-between;">'
+        + '<span>Quadro de Contratos Semanais</span>'
+        + '<span style="color: var(--v-gold, #c4953a);">Atualização: Toda Segunda</span>'
+        + '</div>';
 
       cHtml += '<div style="display:flex; flex-direction:column; gap:6px; margin: 0 8px 10px;">';
       contracts.forEach(function(ct){
         var pctC = Math.round(ct.cur / ct.max * 100);
-        cHtml += '<div style="padding: 10px 12px; background: rgba(42,36,32,0.6); border: 1px solid ' + (ct.done ? '#7cdb7c66' : 'rgba(196,149,58,0.3)') + '; border-left: 3px solid ' + (ct.done ? '#7cdb7c' : 'var(--v-gold, #c4953a)') + '; border-radius: 6px;">'
+        cHtml += '<div style="padding: 10px 12px; background: rgba(42,36,32,0.6); border: 1px solid ' + (ct.done ? '#7cdb7c66' : 'rgba(196,149,58,0.3)') + '; border-left: 3.5px solid ' + (ct.done ? '#7cdb7c' : 'var(--v-gold, #c4953a)') + '; border-radius: 6px;">'
           + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 3px;">'
           +   '<b style="font-family:Cinzel,serif; font-size:12px; color:' + (ct.done ? '#a8e8a8' : '#e8dcc8') + ';">' + ct.title + '</b>'
-          +   '<span style="font-family:Cinzel,serif; font-weight:700; font-size:11px; color:var(--v-gold, #ffd700);">+' + ct.xp + ' XP Liga</span>'
+          +   '<span style="font-family:Cinzel,serif; font-weight:700; font-size:11px; color:var(--v-gold, #ffd700);">+' + ct.xp + ' XP <span style="font-size:9.5px; color:#ffb090;">· +' + ct.gold + 'V</span></span>'
           + '</div>'
           + '<div style="font-size:10px; color:var(--v-text-dim,#a09484); margin-bottom: 6px;">' + ct.desc + '</div>'
           + '<div style="height: 5px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow:hidden;">'
           +   '<div style="height:100%; width:' + pctC + '%; background:' + (ct.done ? '#7cdb7c' : 'linear-gradient(90deg, #c4953a, #ffd700)') + ';"></div>'
           + '</div>'
           + '<div style="display:flex; justify-content:space-between; font-size:9.5px; color:var(--v-text-dim,#a09484); margin-top:3px;">'
-          +   '<span>' + ct.cur + ' / ' + ct.max + '</span>'
-          +   '<span style="color:' + (ct.done ? '#7cdb7c' : 'var(--v-gold,#c4953a)') + ';">' + (ct.done ? '✓ Concluído' : pctC + '%') + '</span>'
+          +   '<span>Progresso: ' + ct.cur + ' / ' + ct.max + '</span>'
+          +   '<span style="color:' + (ct.done ? '#7cdb7c' : 'var(--v-gold,#c4953a)') + '; font-weight:600;">' + (ct.done ? '✓ Cumprido' : pctC + '%') + '</span>'
           + '</div>'
           + '</div>';
       });
@@ -20039,11 +20098,10 @@ function _showLeaguePopup(p){
     } else {
       // Jornada & Privilégios
       if (!atMax) {
-        var xpToNext = nextTier.minXp - currentXp;
-        cHtml += '<div style="margin: 0 8px 8px; padding: 8px 10px; background:rgba(196,149,58,0.06); border:1px solid var(--v-border,#4a3828); border-radius: 6px;">'
+        cHtml += '<div style="margin: 0 8px 8px; padding: 10px 12px; background:rgba(196,149,58,0.06); border:1px solid var(--v-border,#4a3828); border-radius: 6px;">'
           + '<div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:6px;">'
           +   '<span>Ascensão para <b style="color:' + nextTier.color + ';">' + nextTier.name + '</b></span>'
-          +   '<span style="color:var(--v-gold,#c4953a); font-weight:700;">' + Math.round(pctInTier) + '%</span>'
+          +   '<span style="color:var(--v-gold,#c4953a); font-weight:700;">' + pctInTier + '%</span>'
           + '</div>'
           + '<div style="height:8px; background:rgba(0,0,0,0.45); border-radius:4px; overflow:hidden; border:1px solid var(--v-border,#4a3828);">'
           +   '<div style="height:100%; width:' + pctInTier + '%; background:linear-gradient(90deg,' + tColor + ',' + nextTier.color + ');"></div>'
@@ -20101,55 +20159,73 @@ function _showLeaguePopup(p){
 
   var html = '<div class="lg-hub" style="position:relative; padding:0; overflow:hidden;">';
 
-  // Header cerimonial
-  html += '<div style="position:relative; padding: 16px 12px 14px; overflow:hidden; background:radial-gradient(ellipse at 50% 35%,' + tColor + '40 0%,' + tColor + '15 35%,rgba(42,36,32,0.95) 75%); border:1px solid ' + tColor + '; border-radius:var(--v-radius,10px); margin: 8px 8px 6px;">'
-    + '<div style="display:flex; align-items:center; justify-content:center; gap: 8px; font-family:Cinzel,serif; font-size:9px; color:' + tColor + '; letter-spacing:3px; text-transform:uppercase; margin-bottom:6px;">'
-    +   '<span>◆ Ordem dos Aventureiros ◆</span>'
+  // Header cerimonial D&D 5e
+  html += '<div style="position:relative; padding: 14px 12px 12px; overflow:hidden; background:radial-gradient(ellipse at 50% 30%,' + tColor + '38 0%,' + tColor + '12 40%,rgba(32,24,20,0.95) 75%); border:1px solid ' + tColor + '; border-radius:var(--v-radius,10px); margin: 6px 8px 8px;">'
+    + '<div style="display:flex; align-items:center; justify-content:center; gap: 8px; font-family:Cinzel,serif; font-size:9.5px; color:' + tColor + '; letter-spacing:2.5px; text-transform:uppercase; margin-bottom:4px;">'
+    +   '<span>◆ ORDEM DOS AVENTUREIROS · D&D 5e ◆</span>'
     + '</div>'
-    + '<div style="position:relative; width:100px; height:100px; margin: 0 auto 8px;">'
-    +   '<img class="vLg-medal-anim" src="/shared/img/medals/' + currentTier.id + '.webp" alt="' + currentTier.name + '" style="position:absolute; top:50%; left:50%; width:90px; height:90px; transform:translate(-50%,-50%); object-fit:contain; z-index:2; cursor:zoom-in;" onclick="if(window.showLightbox)window.showLightbox(this.src,\'Medalha ' + currentTier.name + '\',\'Tier ' + currentTier.name + '\');">'
+    + '<div style="position:relative; width:92px; height:92px; margin: 0 auto 4px;">'
+    +   '<img class="vLg-medal-anim" src="/shared/img/medals/' + currentTier.id + '.webp" alt="' + currentTier.name + '" style="position:absolute; top:50%; left:50%; width:84px; height:84px; transform:translate(-50%,-50%); object-fit:contain; z-index:2; cursor:zoom-in;" onclick="if(window.showLightbox)window.showLightbox(this.src,\'Medalha ' + currentTier.name + '\',\'Tier ' + currentTier.name + '\');">'
     + '</div>'
-    + '<div style="text-align:center; font-family:Cinzel,serif; font-size:24px; color:' + tColor + '; font-weight:700; letter-spacing:4px; text-transform:uppercase; margin-bottom:4px;">'
+    + '<div style="text-align:center; font-family:Cinzel,serif; font-size:22px; color:' + tColor + '; font-weight:700; letter-spacing:3px; text-transform:uppercase; line-height:1.1; margin-bottom:2px;">'
     +   currentTier.name
     + '</div>'
-    + '<div style="display:flex; justify-content:center; align-items:center; gap:6px;">'
-    +   '<span style="font-family:Cinzel,serif; font-size:16px; color:' + tColor + '; font-weight:700;">' + currentXp.toLocaleString('pt-BR') + '</span>'
-    +   '<span style="font-size:9px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:1px;">XP de Liga</span>'
+    + '<div style="text-align:center; font-size:10px; color:#f0c8b0; letter-spacing:0.5px; margin-bottom:6px;">'
+    +   dndInfo.sub
     + '</div>'
-    + '</div>';
-
-  // Banner da Temporada (Countdown + First Blood)
-  html += '<div class="vLg-countdown-card">'
-    + '<div style="display:flex; align-items:center; gap:6px;">'
-    +   '<span style="font-size:14px;">⏳</span>'
-    +   '<div>'
-    +     '<div style="font-size:9.5px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:1px;">Fechamento da Rodada</div>'
-    +     '<div style="font-family:Cinzel,serif; font-weight:700; font-size:12px; color:#ffd700;">Segunda-feira 00:00 · ' + cdStr + ' restantes</div>'
+    /* Barra de progresso integrada no card de escalão */
+    + '<div style="max-width: 280px; margin: 0 auto; background: rgba(0,0,0,0.35); padding: 6px 10px; border-radius: 6px; border: 1px solid ' + tColor + '33;">'
+    +   '<div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#d4c8b0; margin-bottom:3px;">'
+    +     '<span>Progresso da Liga</span>'
+    +     '<b style="color:' + tColor + '; font-family:Cinzel,serif;">' + currentXp.toLocaleString('pt-BR') + ' <span style="font-size:8.5px; color:#a09484; font-weight:normal;">XP</span></b>'
+    +   '</div>'
+    +   '<div style="height:5px; background:rgba(0,0,0,0.6); border-radius:3px; overflow:hidden;">'
+    +     '<div style="height:100%; width:' + pctInTier + '%; background:linear-gradient(90deg, ' + tColor + ', #ffd700);"></div>'
+    +   '</div>'
+    +   '<div style="font-size:8.5px; color:var(--v-text-dim,#a09484); margin-top:3px; text-align:center;">'
+    +     (atMax ? '✦ Escalão Máximo da Ordem' : ('Faltam <b style="color:#ffd700;">' + xpToNext.toLocaleString('pt-BR') + ' XP</b> para ' + nextTier.name))
     +   '</div>'
     + '</div>'
-    + '<div style="font-family:Cinzel,serif; font-size:11px; color:#7cdb7c; font-weight:700; border:1px solid #7cdb7c66; padding:2px 8px; border-radius:10px;">Divisão Ativa</div>'
     + '</div>';
 
-  // Card do Primeiro Sangue Diário
+  // Banner da Temporada (Countdown + Posição Unificados)
+  var zoneLabel = playerRankInDiv <= 10 ? '▲ Top 10 (Ascensão)' : (playerRankInDiv > 25 ? '▼ Risco de Queda' : '■ Manutenção');
+  var zoneColor = playerRankInDiv <= 10 ? '#7cdb7c' : (playerRankInDiv > 25 ? '#e85040' : '#c4953a');
+
+  html += '<div class="vLg-countdown-card">'
+    + '<div style="display:flex; align-items:center; gap:8px;">'
+    +   '<span style="font-size:16px;">⏳</span>'
+    +   '<div>'
+    +     '<div style="font-size:9px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:0.5px;">Fechamento da Rodada</div>'
+    +     '<div style="font-family:Cinzel,serif; font-weight:700; font-size:11.5px; color:#ffd700;">Segunda-feira 00:00 · ' + cdStr + ' restantes</div>'
+    +   '</div>'
+    + '</div>'
+    + '<div style="text-align:right;">'
+    +   '<div style="font-size:9px; color:var(--v-text-dim,#a09484); text-transform:uppercase;">Posição na Divisão</div>'
+    +   '<div style="font-family:Cinzel,serif; font-size:11px; font-weight:700; color:' + zoneColor + ';">#' + playerRankInDiv + ' de 30 · ' + zoneLabel + '</div>'
+    + '</div>'
+    + '</div>';
+
+  // Card do Primeiro Sangue Diário (ÚNICO, sem repetição na aba de contratos)
   html += '<div class="vLg-first-blood-card">'
-    + '<div style="font-size:22px;">🗡️</div>'
-    + '<div style="flex:1;">'
-    +   '<div style="font-family:Cinzel,serif; font-weight:700; font-size:11.5px; color:#ff8a4a;">Primeiro Sangue Diário (+150 XP Liga)</div>'
-    +   '<div style="font-size:10px; color:var(--v-text-dim,#a09484);">'
-    +     (firstBloodDone ? '✓ Bônus já resgatado hoje. Retorne na próxima alvorada!' : 'Vença seu primeiro combate do dia para conquistar o bônus!')
+    + '<div style="font-size:20px;">🗡️</div>'
+    + '<div style="flex:1; min-width:0;">'
+    +   '<div style="font-family:Cinzel,serif; font-weight:700; font-size:11.5px; color:#ff8a4a;">Bônus Diário: Primeiro Sangue (+150 XP Liga)</div>'
+    +   '<div style="font-size:9.5px; color:var(--v-text-dim,#a09484);">'
+    +     (firstBloodDone ? '✓ Bônus resgatado hoje! Uma nova presa aguarda na próxima alvorada.' : 'Vença seu primeiro combate do dia nos ermos ou arena para conquistar o bônus!')
     +   '</div>'
     + '</div>'
     + '<div>'
-    +   (firstBloodDone ? '<span style="font-size:10px; color:#7cdb7c; font-weight:700; background:rgba(124,219,124,0.15); border:1px solid #7cdb7c; padding:2px 7px; border-radius:8px;">✓ COLETADO</span>'
-                        : '<span style="font-size:10px; color:#ff8a4a; font-weight:700; background:rgba(255,100,50,0.15); border:1px solid #ff8a4a; padding:2px 7px; border-radius:8px;">EM DISPUTA</span>')
+    +   (firstBloodDone ? '<span style="font-size:9.5px; color:#7cdb7c; font-weight:700; background:rgba(124,219,124,0.15); border:1px solid #7cdb7c; padding:2px 7px; border-radius:6px; white-space:nowrap;">✓ COLETADO</span>'
+                        : '<span style="font-size:9.5px; color:#ff8a4a; font-weight:700; background:rgba(255,100,50,0.15); border:1px solid #ff8a4a; padding:2px 7px; border-radius:6px; white-space:nowrap;">EM DISPUTA</span>')
     + '</div>'
     + '</div>';
 
-  // Navegação por Abas
+  // Navegação por Abas Responsivas e Balanceadas
   html += '<div class="vLg-nav-tabs">'
-    + '<button class="vLg-tab-btn' + (_leagueCurrentSubTab === 'standings' ? ' active' : '') + '" onclick="window._switchLeagueTab(\'standings\')">🏆 Standings da Divisão</button>'
-    + '<button class="vLg-tab-btn' + (_leagueCurrentSubTab === 'contracts' ? ' active' : '') + '" onclick="window._switchLeagueTab(\'contracts\')">⚔️ Contratos Semanais</button>'
-    + '<button class="vLg-tab-btn' + (_leagueCurrentSubTab === 'perks' ? ' active' : '') + '" onclick="window._switchLeagueTab(\'perks\')">📜 Jornada & Privilégios</button>'
+    + '<button class="vLg-tab-btn' + (_leagueCurrentSubTab === 'standings' ? ' active' : '') + '" onclick="window._switchLeagueTab(\'standings\')">🏆 Classificação</button>'
+    + '<button class="vLg-tab-btn' + (_leagueCurrentSubTab === 'contracts' ? ' active' : '') + '" onclick="window._switchLeagueTab(\'contracts\')">⚔️ Contratos</button>'
+    + '<button class="vLg-tab-btn' + (_leagueCurrentSubTab === 'perks' ? ' active' : '') + '" onclick="window._switchLeagueTab(\'perks\')">📜 Privilégios</button>'
     + '</div>';
 
   // Container de Conteúdo Dinâmico
@@ -20478,19 +20554,23 @@ function _showAchievementsPopup(p, isRefresh){
       var stateCls = st.mastered ? 'medal-mastered' : (st.done > 0 ? 'medal-progressing' : 'medal-starter');
       var ribbonText = st.mastered ? '★' : st.active.label;
       var iconColor = st.mastered ? '#c89028' : (st.done > 0 ? '#a07424' : '#5a5048');
-      var iconGlow = st.mastered ? 'filter: drop-shadow(0 0 4px rgba(255,180,60,0.5));' : '';
+      var iconGlow = st.mastered ? 'filter: drop-shadow(0 0 5px rgba(255,180,60,0.6));' : '';
 
       var isNear = false;
+      var pctGoal = 0;
       if (!st.mastered && st.active) {
         var nearPct = st.progress / st.active.goal;
+        pctGoal = Math.min(100, Math.round(nearPct * 100));
         if (nearPct >= 0.7) isNear = true;
+      } else if (st.mastered) {
+        pctGoal = 100;
       }
 
       gHtml += '<div class="ach-medal ' + stateCls + '" data-chain="' + c.id + '" '
-        + 'style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px 5px; cursor: pointer; position: relative; border-radius: 6px; background: rgba(42,36,32,0.4); border: 1px solid rgba(74,56,40,0.4); transition: transform 0.15s ease, border-color 0.15s ease;" '
-        + 'onmouseover="this.style.borderColor=\'var(--v-gold,#c4953a)\';this.style.transform=\'scale(1.02)\';" onmouseout="this.style.borderColor=\'rgba(74,56,40,0.4)\';this.style.transform=\'\';">'
+        + 'style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 4px 6px; cursor: pointer; position: relative; border-radius: 6px; background: rgba(42,36,32,0.45); border: 1px solid ' + (isNear ? 'rgba(255,138,74,0.6)' : 'rgba(74,56,40,0.45)') + '; transition: transform 0.15s ease, border-color 0.15s ease;" '
+        + 'onmouseover="this.style.borderColor=\'var(--v-gold,#c4953a)\';this.style.transform=\'scale(1.02)\';" onmouseout="this.style.borderColor=\'' + (isNear ? 'rgba(255,138,74,0.6)' : 'rgba(74,56,40,0.45)') + '\';this.style.transform=\'\';">'
         + (isNear ? '<span class="vAch-focus-badge">QUASE LÁ!</span>' : '')
-        + '<div class="med-circle" style="position: relative; width: 48px; height: 48px; display: grid; place-items: center;">'
+        + '<div class="med-circle" style="position: relative; width: 46px; height: 46px; display: grid; place-items: center;">'
         +   '<svg viewBox="0 0 120 120" style="grid-area: 1/1; width: 38px; height: 38px; color: ' + iconColor + '; ' + iconGlow + ' pointer-events: none;">'
         +     '<use href="#' + c.icon + '"/>'
         +   '</svg>'
@@ -20503,8 +20583,12 @@ function _showAchievementsPopup(p, isRefresh){
         + '<div class="med-name" style="margin-top: 3px; font-family: var(--v-font-display, Cinzel, serif); font-size: 10px; font-weight: 600; line-height: 1.1; text-align: center; color: ' + (st.done > 0 ? 'var(--v-text-bright, #e8dcc8)' : 'var(--v-text-dim, #a09484)') + '; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">'
         +   c.name
         + '</div>'
-        + '<div style="font-size: 8.5px; color: var(--v-text-dim, #a09484); margin-top: 1px;">'
-        +   (st.mastered ? '★ Dominado' : st.progress + ' / ' + st.active.goal)
+        + '<div style="font-size: 8.5px; color: var(--v-text-dim, #a09484); margin-top: 1px; font-family: Cinzel, serif;">'
+        +   (st.mastered ? '★ Dominado' : st.progress.toLocaleString('pt-BR') + ' / ' + st.active.goal.toLocaleString('pt-BR'))
+        + '</div>'
+        /* Mini-Barra de Progresso */
+        + '<div class="vAch-mini-bar">'
+        +   '<div class="vAch-mini-bar-fill" style="width:' + pctGoal + '%;' + (st.mastered ? 'background:linear-gradient(90deg, #ffd700, #ff8a4a);' : '') + '"></div>'
         + '</div>'
         + '</div>';
     });
@@ -20538,14 +20622,14 @@ function _showAchievementsPopup(p, isRefresh){
     + '</div>'
     + '</div>';
 
-  // Abas de Categoria
+  // Abas de Categoria com Scroll Fluido e Contadores
   html += '<div class="vAch-nav-tabs">'
     + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'all' ? ' active' : '') + '" onclick="window._switchAchFilter(\'all\')">🏆 Todas (14)</button>'
-    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'focus' ? ' active' : '') + '" onclick="window._switchAchFilter(\'foco\')">🎯 Quase Lá!</button>'
-    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'combate' ? ' active' : '') + '" onclick="window._switchAchFilter(\'combate\')">⚔️ Combate</button>'
-    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'exploracao' ? ' active' : '') + '" onclick="window._switchAchFilter(\'exploracao\')">🗺️ Exploração</button>'
-    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'maestria' ? ' active' : '') + '" onclick="window._switchAchFilter(\'maestria\')">💎 Maestria</button>'
-    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'mastered' ? ' active' : '') + '" onclick="window._switchAchFilter(\'mastered\')">★ Mestre</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'focus' ? ' active' : '') + '" onclick="window._switchAchFilter(\'focus\')">🎯 Quase Lá</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'combate' ? ' active' : '') + '" onclick="window._switchAchFilter(\'combate\')">⚔️ Combate (4)</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'exploracao' ? ' active' : '') + '" onclick="window._switchAchFilter(\'exploracao\')">🗺️ Exploração (4)</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'maestria' ? ' active' : '') + '" onclick="window._switchAchFilter(\'maestria\')">💎 Maestria (6)</button>'
+    + '<button class="vAch-tab-btn' + (_achActiveCategoryFilter === 'mastered' ? ' active' : '') + '" onclick="window._switchAchFilter(\'mastered\')">★ Dominadas (' + masteredChains + ')</button>'
     + '</div>';
 
   // Grid
@@ -21113,6 +21197,27 @@ var CANONICAL_BESTIARY_CATALOG = [
   }
 ];
 
+// Helper: XP oficial de combate D&D 5e por Nível de Desafio (CR)
+function _dndXpByCr(cr){
+  var s = String(cr || '0').trim();
+  if (s === '0') return 10;
+  if (s === '1/8') return 25;
+  if (s === '1/4') return 50;
+  if (s === '1/2') return 100;
+  if (s === '1') return 200;
+  if (s === '2') return 450;
+  if (s === '3') return 700;
+  if (s === '4') return 1100;
+  if (s === '5') return 1800;
+  if (s === '6') return 2300;
+  if (s === '7') return 2900;
+  if (s === '8') return 3900;
+  if (s === '9') return 5000;
+  if (s === '10') return 5900;
+  var n = parseFloat(s);
+  return n > 0 ? Math.round(n * 450) : 50;
+}
+
 // Helper: calcula maestria do caçador
 function _getHunterMastery(kills){
   kills = kills || 0;
@@ -21123,7 +21228,7 @@ function _getHunterMastery(kills){
   } else if (kills >= 1) {
     return { level: 1, label: 'Aprendiz', roman: 'I', cls: 'vBst-mastery-1', nextGoal: 5, title: 'Aprendiz de Rastro' };
   }
-  return { level: 0, label: 'Desconhecido', roman: '—', cls: '', nextGoal: 1, title: 'Não Avistado' };
+  return { level: 0, label: 'Não Avistado', roman: '—', cls: 'vBst-mastery-0', nextGoal: 1, title: 'Não Avistado' };
 }
 
 // CR cor escalada (verde→amarelo→laranja→vermelho→roxo)
@@ -21160,6 +21265,7 @@ function _showCreatureDossier(specimen, p){
   var mastery = _getHunterMastery(kills);
   var crCol = _crColor(specimen.cr);
   var crLbl = _crLabel(specimen.cr);
+  var dndXp = _dndXpByCr(specimen.cr);
   var _isFileKl = (location.protocol === 'file:');
 
   // Progresso para o próximo tier de maestria
@@ -21179,24 +21285,24 @@ function _showCreatureDossier(specimen, p){
 
   var html = '<div class="cdo-modal">'
     + '<div class="cdo-header">'
-    +   '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 14px; color: #ff8a4a; font-weight: 700; display:flex; align-items:center; gap:8px;">'
-    +     '<span>📖 DOSSIÊ DE CAÇADA · D&D 5e</span>'
+    +   '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 13.5px; color: #ff8a4a; font-weight: 700; display:flex; align-items:center; gap:8px;">'
+    +     '<span>📖 DOSSIÊ DE CAÇADA · REGRAS D&D 5e</span>'
     +   '</div>'
     +   '<button id="cdo-close-x" type="button" style="background:none; border:none; color:var(--v-text-dim,#a09484); font-size:20px; cursor:pointer; padding:2px 8px; line-height:1;" aria-label="Fechar">✕</button>'
     + '</div>'
     + '<div class="cdo-body">'
-    /* Perfil do Espécime */
-    +   '<div style="display:flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); padding: 12px; border-radius: 8px; border: 1px solid rgba(196,40,30,0.35);">'
+    /* Perfil do Espécime D&D 5e */
+    +   '<div style="display:flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(196,40,30,0.35);">'
     +     '<div class="v-zoomable" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid ' + crCol + '; overflow: hidden; flex-shrink: 0; box-shadow: 0 0 16px ' + crCol + '55; background: #120a08; cursor: zoom-in; position:relative;" title="Clique para ampliar" onclick="if(window.showLightbox)window.showLightbox(\'' + specimen.png + '\', \'' + specimen.type.replace(/'/g, "\\'") + '\', \'' + (specimen.categoryLabel + ' · CR ' + specimen.cr).replace(/'/g, "\\'") + '\');">'
-    +       '<img src="' + specimen.png + '" alt="" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display=\'none\';" />'
+    +       '<img src="' + specimen.png + '" alt="" style="width: 100%; height: 100%; object-fit: cover;' + (kills === 0 ? ' filter: grayscale(1) brightness(0.5);' : '') + '" onerror="this.style.display=\'none\';" />'
     +       '<span style=\"position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);color:#ffd700;font-size:9px;padding:1px 3px;border-radius:3px;pointer-events:none;\">🔍</span>'
     +     '</div>'
     +     '<div style="flex: 1; min-width: 0;">'
-    +       '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 17px; font-weight: 700; color: #fff; line-height: 1.2;">' + specimen.type + '</div>'
-    +       '<div style="font-size: 11px; color: #f0c8b0; margin-top: 2px;">' + specimen.categoryLabel + ' · ' + specimen.habitat + '</div>'
-    +       '<div style="display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: wrap;">'
-    +         '<span style="font-size: 9.5px; background: rgba(40,16,12,0.8); color: ' + crCol + '; padding: 2px 7px; border-radius: 4px; border: 1px solid ' + crCol + '; font-weight: 700;">CR ' + specimen.cr + ' · ' + crLbl + '</span>'
-    +         (mastery.level > 0 ? ('<span class="vBst-mastery-tag ' + mastery.cls + '">Maestria ' + mastery.roman + ' · ' + mastery.title + '</span>') : '<span style="font-size: 9px; color: #7a6850; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; border: 1px solid #4a3828;">Não Catalogado</span>')
+    +       '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 16.5px; font-weight: 700; color: #fff; line-height: 1.2;">' + specimen.type + '</div>'
+    +       '<div style="font-size: 10.5px; color: #f0c8b0; margin-top: 2px;">' + specimen.categoryLabel + ' · ' + specimen.habitat + '</div>'
+    +       '<div style="display: flex; gap: 5px; margin-top: 6px; align-items: center; flex-wrap: wrap;">'
+    +         '<span style="font-size: 9.5px; background: rgba(40,16,12,0.85); color: ' + crCol + '; padding: 2px 7px; border-radius: 4px; border: 1px solid ' + crCol + '; font-weight: 700;">CR ' + specimen.cr + ' · ' + dndXp + ' XP</span>'
+    +         (mastery.level > 0 ? ('<span class="vBst-mastery-tag ' + mastery.cls + '">Maestria ' + mastery.roman + ' · ' + mastery.title + '</span>') : '<span class="vBst-mastery-tag vBst-mastery-0">Não Catalogado</span>')
     +       '</div>'
     +     '</div>'
     +     '<div style="text-align: right; min-width: 54px;">'
@@ -21208,7 +21314,7 @@ function _showCreatureDossier(specimen, p){
     +   '<div style="background: rgba(196,40,30,0.06); border: 1px solid rgba(74,36,28,0.7); border-radius: 6px; padding: 8px 12px;">'
     +     '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">'
     +       '<span style="font-size: 10px; color: var(--v-gold, #c4953a); text-transform: uppercase; letter-spacing: 1px; font-weight:600;">Evolução de Maestria do Caçador</span>'
-    +       '<span style="font-size: 10.5px; color: #fff; font-weight: 700;">' + (nextGoal ? (kills + ' / ' + nextGoal + ' abates') : 'Nível Máximo Atingido') + '</span>'
+    +       '<span style="font-size: 10.5px; color: #fff; font-weight: 700;">' + (nextGoal ? (kills + ' / ' + nextGoal + ' abates para Grau ' + (mastery.level + 1)) : 'Grau Apex III Máximo Atingido') + '</span>'
     +     '</div>'
     +     '<div style="height: 6px; background: rgba(0,0,0,0.6); border-radius: 3px; overflow: hidden;">'
     +       '<div style="height: 100%; width: ' + gaugePct + '%; background: linear-gradient(90deg, #c43020, #ff8a4a, #ffd700); box-shadow: 0 0 8px rgba(255,138,74,0.6);"></div>'
@@ -21217,12 +21323,12 @@ function _showCreatureDossier(specimen, p){
     /* Seção 1: Descrição e Comportamento */
     +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid ' + (tier1Unlocked ? 'rgba(196,149,58,0.4)' : 'rgba(74,40,30,0.4)') + '; border-radius: 8px; padding: 10px 12px;">'
     +     '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 11px; color: ' + (tier1Unlocked ? '#ffd700' : 'var(--v-text-dim,#a09484)') + '; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display:flex; justify-content:space-between;">'
-    +       '<span>📜 Descrição & Ecologia</span>'
+    +       '<span>📜 Descrição & Ecologia (D&D 5e)</span>'
     +       '<span style="font-size: 9.5px; color: ' + (tier1Unlocked ? '#7cdb7c' : '#a09484') + ';">' + (tier1Unlocked ? '✓ Desbloqueado' : '🔒 Requer 1 abate') + '</span>'
     +     '</div>'
     +     (tier1Unlocked
             ? '<div style="font-size: 11.5px; color: var(--v-text, #d4c8b0); line-height: 1.45;">' + specimen.desc + '</div>'
-            : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Abata pelo menos 1 espécime para registrar o rastro ecológico no códex.</div>')
+            : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Abata pelo menos 1 espécime nos ermos para registrar o rastro ecológico no códex.</div>')
     +   '</div>'
     /* Seção 2: Táticas e Fraquezas D&D 5e */
     +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid ' + (tier2Unlocked ? 'rgba(255,138,74,0.5)' : 'rgba(74,40,30,0.4)') + '; border-radius: 8px; padding: 10px 12px;">'
@@ -21232,10 +21338,10 @@ function _showCreatureDossier(specimen, p){
     +     '</div>'
     +     (tier2Unlocked
             ? '<div style="font-size: 11.5px; color: var(--v-text, #d4c8b0); line-height: 1.45;">'
-              + '<p style="margin: 0 0 6px 0;"><b style="color:#ffb090;">Comportamento:</b> ' + specimen.tactics + '</p>'
-              + '<p style="margin: 0;"><b style="color:#7cdb7c;">Vulnerabilidade:</b> ' + specimen.weaknesses + '</p>'
+              + '<p style="margin: 0 0 6px 0;"><b style="color:#ffb090;">Traços & Comportamento:</b> ' + specimen.tactics + '</p>'
+              + '<p style="margin: 0;"><b style="color:#7cdb7c;">Vulnerabilidade & Fraquezas:</b> ' + specimen.weaknesses + '</p>'
               + '</div>'
-            : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Atinja a Maestria II (5 abates) para desvendar as fraquezas secretas e padrões de ataque do monstro.</div>')
+            : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Atinja a Maestria II (5 abates) para desvendar as fraquezas secretas, vulnerabilidades de dano e traços de ataque do monstro.</div>')
     +   '</div>'
     /* Seção 3: Despojos Raros */
     +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid ' + (tier3Unlocked ? 'rgba(255,215,0,0.5)' : 'rgba(74,40,30,0.4)') + '; border-radius: 8px; padding: 10px 12px;">'
@@ -21245,7 +21351,7 @@ function _showCreatureDossier(specimen, p){
     +     '</div>'
     +     (tier3Unlocked
             ? '<div style="font-size: 11.5px; color: #ffd700; line-height: 1.45; font-weight: 600;">' + specimen.drops + '</div>'
-            : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Atinja a Maestria III (15 abates) para extrair os componentes alquímicos e troféus mais raros desta presa.</div>')
+            : '<div style="font-size: 11px; color: #7a6850; font-style: italic;">Atinja o Grau Apex III (15 abates) para extrair os componentes alquímicos e troféus mais raros desta presa.</div>')
     +   '</div>'
     + '</div>'
     + '<div class="cdo-footer">'
@@ -21389,6 +21495,13 @@ function _showKillsPopup(p){
 
   var catalogedCount = catalog.filter(function(c){ return c.kills > 0; }).length;
   var topHunted = catalog[0] || { type: '—', kills: 0 };
+  var totalDndXp = catalog.reduce(function(acc, cur){ return acc + (cur.kills * _dndXpByCr(cur.cr)); }, 0);
+
+  // Contagens por categoria
+  var beastsCount = catalog.filter(function(c){ return c.category === 'beast'; }).length;
+  var humanoidsCount = catalog.filter(function(c){ return c.category === 'humanoid'; }).length;
+  var undeadCount = catalog.filter(function(c){ return c.category === 'undead'; }).length;
+  var monstrositiesCount = catalog.filter(function(c){ return c.category === 'monstrosity' || c.category === 'giant' || c.category === 'dragon' || c.category === 'elemental' || c.category === 'ooze'; }).length;
 
   // Contrato do Dia (Alvo Prioritário de Caça - Determinístico por Dia)
   var _today = new Date();
@@ -21396,6 +21509,8 @@ function _showKillsPopup(p){
   var dailyBounty = CANONICAL_BESTIARY_CATALOG[_daySeed % CANONICAL_BESTIARY_CATALOG.length];
   var bountyKillsToday = catalog.find(function(c){ return c.id === dailyBounty.id; });
   var bountyCurrentKills = bountyKillsToday ? bountyKillsToday.kills : 0;
+  var bountyDone = bountyCurrentKills > 0;
+  var bountyDndXp = _dndXpByCr(dailyBounty.cr);
 
   var html = '<style>'
     + '@keyframes vBladeShimmer{0%,100%{filter:drop-shadow(0 0 6px rgba(255,80,40,0.4));}50%{filter:drop-shadow(0 0 14px rgba(255,140,80,0.7));}}'
@@ -21463,39 +21578,48 @@ function _showKillsPopup(p){
     + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size: calc(11px * var(--v-font-scale, 1)); color: #f0c8b0; text-transform: uppercase; letter-spacing: 2.5px; margin-top: 2px;">'
     + 'Inimigos Abatidos'
     + '</div>'
-    /* Estatísticas do Caçador */
-    + '<div style="display:flex; justify-content:center; gap:10px; margin-top: 10px; flex-wrap:wrap;">'
-    +   '<div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(196,149,58,0.4); border-radius: 6px; padding: 4px 10px; font-size: 10px; color: #e8dcc8;">'
+    /* Estatísticas do Caçador D&D 5e */
+    + '<div style="display:flex; justify-content:center; gap:8px; margin-top: 10px; flex-wrap:wrap;">'
+    +   '<div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(196,149,58,0.4); border-radius: 6px; padding: 4px 9px; font-size: 10px; color: #e8dcc8;">'
     +     '<span style="color:var(--v-gold,#c4953a);">Catalogadas:</span> <b>' + catalogedCount + '</b> / ' + catalog.length
     +   '</div>'
-    +   '<div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,96,64,0.4); border-radius: 6px; padding: 4px 10px; font-size: 10px; color: #e8dcc8;">'
+    +   '<div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,96,64,0.4); border-radius: 6px; padding: 4px 9px; font-size: 10px; color: #e8dcc8;">'
     +     '<span style="color:#ff8a4a;">Espécie Predileta:</span> <b>' + topHunted.type + '</b> (' + topHunted.kills + ')'
+    +   '</div>'
+    +   '<div style="background: rgba(0,0,0,0.45); border: 1px solid rgba(124,219,124,0.4); border-radius: 6px; padding: 4px 9px; font-size: 10px; color: #e8dcc8;">'
+    +     '<span style="color:#7cdb7c;">XP de Combate:</span> <b>+' + totalDndXp.toLocaleString('pt-BR') + ' XP</b>'
     +   '</div>'
     + '</div>'
     + '</div>';
 
-  // === CARD DE ALVO DIÁRIO / CONTRATO DE CAÇADA (MONSTER HUNTER STYLE) ===
-  html += '<div style="background: linear-gradient(90deg, rgba(80,24,16,0.85) 0%, rgba(42,16,12,0.85) 100%); border: 1.5px solid #ff6040; border-radius: 8px; padding: 10px 14px; display:flex; align-items:center; gap:12px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">'
-    + '<div style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid #ffd700; overflow:hidden; flex-shrink:0; background:#180c08; box-shadow: 0 0 10px rgba(255,215,0,0.4);">'
+  // === CARD DE ALVO DIÁRIO / CONTRATO DE CAÇADA (MONSTER HUNTER STYLE D&D 5e) ===
+  html += '<div style="background: linear-gradient(90deg, rgba(80,24,16,0.88) 0%, rgba(42,16,12,0.88) 100%); border: 1.5px solid #ff6040; border-radius: 8px; padding: 10px 12px; display:flex; align-items:center; gap:12px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);">'
+    + '<div style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #ffd700; overflow:hidden; flex-shrink:0; background:#180c08; box-shadow: 0 0 10px rgba(255,215,0,0.4);">'
     +   '<img src="' + dailyBounty.png + '" alt="" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display=\'none\';" />'
     + '</div>'
     + '<div style="flex:1; min-width:0;">'
-    +   '<div style="font-family:Cinzel,serif; font-size:10px; color:#ffd700; text-transform:uppercase; letter-spacing:1px; font-weight:700;">🎯 Contrato de Caça do Dia</div>'
-    +   '<div style="font-family:Cinzel,serif; font-size:13.5px; color:#fff; font-weight:700;">' + dailyBounty.type + '</div>'
-    +   '<div style="font-size:10px; color:#ffb090; margin-top:1px;">Recompensa: <b style="color:#ffd700;">+75 XP da Liga</b> e <b style="color:#ffd700;">+20 Valdoritas</b></div>'
+    +   '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">'
+    +     '<span style="font-family:Cinzel,serif; font-size:9.5px; color:#ffd700; text-transform:uppercase; letter-spacing:1px; font-weight:700;">🎯 Contrato de Caça do Dia</span>'
+    +     (bountyDone ? '<span style="font-size:9px; color:#7cdb7c; font-weight:700; background:rgba(124,219,124,0.18); border:1px solid #7cdb7c; padding:1px 6px; border-radius:4px;">✓ CUMPRIDO (' + bountyCurrentKills + ')</span>'
+                      : '<span style="font-size:9px; color:#ff8a4a; font-weight:700; background:rgba(255,100,50,0.18); border:1px solid #ff8a4a; padding:1px 6px; border-radius:4px;">EM ABERTO (0 / 1)</span>')
+    +   '</div>'
+    +   '<div style="font-family:Cinzel,serif; font-size:13.5px; color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'
+    +     dailyBounty.type + ' <span style="font-size:10px; color:#ffb090; font-weight:normal;">· CR ' + dailyBounty.cr + ' (' + bountyDndXp + ' XP)</span>'
+    +   '</div>'
+    +   '<div style="font-size:9.5px; color:#ffb090; margin-top:2px;">Recompensa: <b style="color:#ffd700;">+75 XP da Liga</b> · <b style="color:#ffd700;">+20 Valdoritas</b></div>'
     + '</div>'
     + '<button id="vBst-bounty-btn" type="button" style="padding: 6px 12px; background: linear-gradient(180deg, #ff8a4a, #c43020); border: 1px solid #ffd700; border-radius: 6px; color:#fff; font-family:Cinzel,serif; font-size:10px; font-weight:700; cursor:pointer; white-space:nowrap; box-shadow:0 0 8px rgba(255,138,74,0.5);">'
     +   'Inspecionar 🔎'
     + '</button>'
     + '</div>';
 
-  // === ABAS DE CATEGORIA DE MONSTROS ===
+  // === ABAS DE CATEGORIA DE MONSTROS COM CONTAGEM ===
   html += '<div class="vBst-nav-tabs">'
     + '<button class="vBst-tab-btn active" data-vbst-cat="all">⚔️ Todos (' + catalog.length + ')</button>'
-    + '<button class="vBst-tab-btn" data-vbst-cat="beast">🐺 Feras</button>'
-    + '<button class="vBst-tab-btn" data-vbst-cat="humanoid">🧌 Humanoides</button>'
-    + '<button class="vBst-tab-btn" data-vbst-cat="undead">💀 Mortos-Vivos</button>'
-    + '<button class="vBst-tab-btn" data-vbst-cat="monstrosity">🐉 Monstrosidades</button>'
+    + '<button class="vBst-tab-btn" data-vbst-cat="beast">🐺 Feras (' + beastsCount + ')</button>'
+    + '<button class="vBst-tab-btn" data-vbst-cat="humanoid">🧌 Humanoides (' + humanoidsCount + ')</button>'
+    + '<button class="vBst-tab-btn" data-vbst-cat="undead">💀 Mortos-Vivos (' + undeadCount + ')</button>'
+    + '<button class="vBst-tab-btn" data-vbst-cat="monstrosity">🐉 Monstrosidades (' + monstrositiesCount + ')</button>'
     + '<button class="vBst-tab-btn" data-vbst-cat="top">🏆 Mais Caçados</button>'
     + '</div>';
 
@@ -21536,11 +21660,23 @@ function _showKillsPopup(p){
       var mastery = _getHunterMastery(kills);
       var crCol = _crColor(k.cr);
       var crLbl = _crLabel(k.cr);
+      var dndXp = _dndXpByCr(k.cr);
       var isTop = (idx === 0 && kills > 0);
       var borderLeftCol = isTop ? '#ffd700' : crCol;
-      var pct = totalKills ? Math.round(kills / totalKills * 100) : 0;
 
-      cardsHtml += '<div class="vBst-card" data-vbst-id="' + k.id + '" style="border-left: 3.5px solid ' + borderLeftCol + '; ' + (kills === 0 ? 'opacity: 0.65; filter: grayscale(0.35);' : '') + '">'
+      // Progresso para o próximo nível de maestria
+      var prevGoal = mastery.level === 3 ? 15 : (mastery.level === 2 ? 5 : (mastery.level === 1 ? 1 : 0));
+      var nextGoal = mastery.nextGoal;
+      var masteryPct = 100;
+      if (nextGoal) {
+        var range = nextGoal - prevGoal;
+        var curK = Math.max(0, kills - prevGoal);
+        masteryPct = Math.min(100, Math.round((curK / range) * 100));
+      }
+
+      var undiscoveredCls = kills === 0 ? ' is-undiscovered' : '';
+
+      cardsHtml += '<div class="vBst-card' + undiscoveredCls + '" data-vbst-id="' + k.id + '" style="border-left: 3.5px solid ' + borderLeftCol + ';">'
         + '<div class="vBst-portrait-wrap v-zoomable" style="border-color: ' + crCol + '; cursor: zoom-in;" title="Clique para ampliar" onclick="event.stopPropagation(); if(window.showLightbox)window.showLightbox(\'' + k.png + '\', \'' + k.type.replace(/'/g, "\\'") + '\', \'' + (k.categoryLabel + ' · CR ' + k.cr).replace(/'/g, "\\'") + '\');">'
         +   '<img class="vBst-portrait-img" src="' + k.png + '" alt="' + k.type + '" loading="lazy" onerror="this.style.display=\'none\';" />'
         + '</div>'
@@ -21549,14 +21685,15 @@ function _showKillsPopup(p){
         +     '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(12.5px * var(--v-font-scale, 1)); color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'
         +       k.type + (isTop ? ' <span style="color:#ffd700; font-size:10px; font-weight:800;">· LÍDER</span>' : '')
         +     '</div>'
-        +     (mastery.level > 0 ? ('<span class="vBst-mastery-tag ' + mastery.cls + '">' + mastery.label + ' ' + mastery.roman + '</span>') : '<span style="font-size:8.5px; color:#7a6850;">Não Visto</span>')
+        +     (mastery.level > 0 ? ('<span class="vBst-mastery-tag ' + mastery.cls + '">' + mastery.label + ' ' + mastery.roman + '</span>') : '<span class="vBst-mastery-tag vBst-mastery-0">Não Avistado</span>')
         +   '</div>'
         +   '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">'
-        +     '<span style="font-size:9.5px; color:' + crCol + '; font-weight:600;">◆ CR ' + k.cr + ' · ' + crLbl + ' <span style="color:var(--v-text-dim,#a09484);">(' + k.categoryLabel + ')</span></span>'
-        +     '<span style="font-size:10px; color:#ffd700; font-weight:700;">' + kills + ' <span style="font-size:8.5px; color:var(--v-text-dim,#a09484); font-weight:400;">abates</span></span>'
+        +     '<span style="font-size:9.5px; color:' + crCol + '; font-weight:600;">◆ CR ' + k.cr + ' · ' + crLbl + ' (' + dndXp + ' XP) <span style="color:var(--v-text-dim,#a09484);">[' + k.categoryLabel + ']</span></span>'
+        +     (kills > 0 ? ('<span style="font-size:10px; color:#ffd700; font-weight:700;">' + kills + ' <span style="font-size:8.5px; color:var(--v-text-dim,#a09484); font-weight:400;">abates</span></span>')
+                         : '<span style="font-size:8.5px; color:#8a7868; font-style:italic;">0 abates</span>')
         +   '</div>'
         +   '<div style="height:4px; background:rgba(0,0,0,0.6); border-radius:2px; overflow:hidden; margin-top:4px;">'
-        +     '<div style="height:100%; width:' + (kills === 0 ? 0 : Math.max(5, pct)) + '%; background:linear-gradient(90deg, ' + crCol + ', ' + crCol + 'cc);"></div>'
+        +     '<div style="height:100%; width:' + (kills === 0 ? 0 : Math.max(5, masteryPct)) + '%; background:linear-gradient(90deg, ' + crCol + ', #ffd700);"></div>'
         +   '</div>'
         + '</div>'
         + '</div>';
@@ -65412,7 +65549,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
 var ALLY_LORE_REPLIES = {
   'clerigo:pray':   { narration: '{name} ergue o símbolo sagrado e murmura uma litania baixa, a mão livre pousada sobre teu ombro.', speech: 'Que os Quatro firmem teu braço e suavizem tua queda. <i>(traça um sinal no ar)</i> Vai em paz — a luz caminha contigo.' },
   'clerigo:ask':    { narration: '{name} acaricia o símbolo desgastado, o olhar perdido em alguma manhã antiga.', speech: 'Eu não escolhi a fé — ela me encontrou num campo de mortos, quando rezei por um e dois se levantaram. Desde então sirvo. É tudo o que sei fazer direito.' },
-  'guerreiro:tactics': { narration: '{name} risca o chão com a ponta da bota, desenhando duas linhas e um círculo.', speech: 'Eu seguro a frente, tu rodeias pela direita. Quem cair, cai gritando — pra avisar o outro. Sem heroísmo. Heroísmo enche cova.' },
+  'guerreiro:tactics': { narration: '{name} risca o chão com a ponta da bota, desenhando duas linhas e um círculo.', speech: 'Eu seguro a frente, tu rodeias pela direita. Quem cair, cai gritando — pra avisar o outro. Sem audácia tola. Audácia tola enche cova.' },
   'guerreiro:story':   { narration: '{name} guarda a pedra de amolar e fica em silêncio por um instante longo demais.', speech: 'Ponte de Karreth. Éramos quarenta ao amanhecer, seis ao pôr do sol. Não conto pra impressionar — conto pra tu lembrares que voltar já é vitória.' },
   'mago:spell':     { narration: '{name} abre o grimório numa página marcada com fita vermelha e a vira pra ti.', speech: 'Hoje preparei chama e escudo. Uma pra abrir caminho, outra pra fechar feridas que não deveriam existir. Magia é economia — gasta-se o que se tem.' },
   'mago:theory':    { narration: '{name} ergue dois dedos e uma teia tênue de luz se desenha entre eles.', speech: 'A Trama é o tecido por baixo do mundo. Nós não criamos magia — apenas puxamos os fios certos e torcemos que não desfie tudo. Geralmente funciona.' },
@@ -65507,19 +65644,338 @@ function _allyTplKey(cls){
   return ALIASES[k] || k;
 }
 
+// === Tópicos Temáticos de Conversa com Companheiros D&D 5e / BG3 ===
+var ALLY_TOPIC_CONFIG = {
+  camp_campfire:      { id: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸',         title: 'Ao Redor da Fogueira',  dc: 13, skill: 'persuasion',  skillLabel: 'Persuasão' },
+  backstory_secret:   { id: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸',        title: 'Segredos do Passado',   dc: 14, skill: 'insight',     skillLabel: 'Intuição' },
+  morals_faith:       { id: 'morals_faith',       label: '⚖️ Princípios e crenças ▸',         title: 'Filosofia e Crenças',   dc: 13, skill: 'religion',    skillLabel: 'Religião' },
+  combat_bonds:       { id: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸',   title: 'Laços de Batalha',      dc: 13, skill: 'athletics',   skillLabel: 'Atletismo' },
+  personal_favor:     { id: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸',      title: 'Favor Pessoal',         dc: 14, skill: 'investigation', skillLabel: 'Investigação' },
+  romance_courtship:  { id: 'romance_courtship',  label: '💖 Confidências a dois [Afeto] ▸',  title: 'Confidências e Afeto',  dc: 12, skill: 'persuasion',  skillLabel: 'Persuasão' },
+  sparring_challenge: { id: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸',     title: 'Desafio de Treino',     dc: 13, skill: 'acrobatics',  skillLabel: 'Acrobacia' },
+};
+
+function _buildClientAllyTopicNode(cls, topicKey, displayName) {
+  var cfg = ALLY_TOPIC_CONFIG[topicKey] || ALLY_TOPIC_CONFIG.camp_campfire;
+  var dc = cfg.dc || 13;
+  var skill = cfg.skill || 'persuasion';
+  var skillLabel = cfg.skillLabel || 'Persuasão';
+
+  var intros = {
+    camp_campfire: [
+      { type: 'narration', text: 'A fogueira crepita com pequenas centelhas douradas subindo para o céu estrelado. ' + displayName + ' senta-se próximo às brasas, o calor suavizando o cansaço da marcha.' },
+      { type: 'speech', speaker: displayName, text: 'A noite está fria, mas as brasas ajudam. Poucas coisas valem tanto quanto uma conversa honesta depois de um dia de marcha puxada. O que tens em mente?' }
+    ],
+    backstory_secret: [
+      { type: 'narration', text: displayName + ' fica em silêncio por um instante, o olhar distante como quem revisita lembranças antigas que o tempo não conseguiu apagar.' },
+      { type: 'speech', speaker: displayName, text: 'Nem tudo começou na guilda de aventureiros. Deixei para trás dívidas e rostos que prefiro não lembrar toda noite... mas quem não deixou?' }
+    ],
+    morals_faith: [
+      { type: 'narration', text: displayName + ' gesticula com moderação, a postura demonstrando a reflexão séria de quem já viu escolhas difíceis pesarem na balança da vida.' },
+      { type: 'speech', speaker: displayName, text: 'O mundo não é simples. Às vezes é preciso firmeza para que os outros durmam em paz nas muralhas da cidade. Qual é o teu limite moral?' }
+    ],
+    combat_bonds: [
+      { type: 'narration', text: displayName + ' examina o equipamento de viagem com olhar metódico, assentindo com respeito ao notar tua presença vigilante.' },
+      { type: 'speech', speaker: displayName, text: 'Nosso ritmo de combate está afinado. Saber que estás cobrindo minhas costas quando o confronto aperta faz toda a diferença. Estamos prontos para o que vier.' }
+    ],
+    personal_favor: [
+      { type: 'narration', text: displayName + ' respira fundo, hesitando um segundo antes de quebrar a reserva habitual com um tom sincero e confidencial.' },
+      { type: 'speech', speaker: displayName, text: 'Há um assunto pendente do qual não consigo me desvencilhar sozinho(a). Se estiveres disposto(a) a me apoiar quando a hora chegar, eu nunca esquecerei.' }
+    ],
+    romance_courtship: [
+      { type: 'narration', text: 'A brisa noturna agita os galhos ao redor do acampamento. ' + displayName + ' ergue os olhos devagar, um brilho cálido e desarmado transparecendo na penumbra.' },
+      { type: 'speech', speaker: displayName, text: 'O acampamento finalmente dorme... e pela primeira vez hoje sinto que podemos respirar em paz. Gosto de ter-te por perto. O que te trouxe até mim agora?' }
+    ],
+    sparring_challenge: [
+      { type: 'narration', text: displayName + ' assume uma base equilibrada e leve, os olhos brilhando com a centelha sadia da competição entre companheiros.' },
+      { type: 'speech', speaker: displayName, text: 'Um treino leve antes de deitar afasta a rigidez muscular e mantém os reflexos vivos. Guarda alta — mostra-me o que aprendeste hoje!' }
+    ]
+  };
+
+  var script = intros[topicKey] || intros.camp_campfire;
+
+  var choices = [
+    {
+      id: 'emp_' + topicKey,
+      label: '"Compreendo teu fardo. Podes sempre contar com meu apoio."',
+      renownDelta: 2,
+      cb: 'close',
+      _replyScript: [
+        { type: 'narration', text: displayName + ' relaxa os ombros, um suspiro contido aliviando a tensão guardada.' },
+        { type: 'speech', speaker: displayName, text: 'Ouvir isso faz a jornada parecer menos pesada. Obrigado(a) por não julgar antes de escutar.' }
+      ]
+    },
+    {
+      id: 'prag_' + topicKey,
+      label: '"Foco na nossa missão e nos recursos. A sobrevivência do grupo vem primeiro."',
+      renownDelta: 1,
+      cb: 'close',
+      _replyScript: [
+        { type: 'narration', text: displayName + ' assente com firmeza prática, reconhecendo o bom senso da prudência.' },
+        { type: 'speech', speaker: displayName, text: 'Pensamento sóbrio. Quem perde o foco na sobrevivência não dura duas semanas fora dos muros.' }
+      ]
+    },
+    {
+      id: 'check_' + topicKey,
+      label: '"Permita-me compartilhar uma perspectiva diferente." [CD ' + dc + ' ' + skillLabel + ']',
+      check: { skill: skill, dc: dc },
+      resultNarration: 'Tua colocação atinge o ponto exato da questão. ' + displayName + ' arregala os olhos levemente, demonstrando genuína admiração por tua clareza mental.',
+      resultText: 'A conversa aprofundou vosso laço. <b>+2 de Aprovação</b> e respeito conquistado.',
+      resultNarrationFail: 'Tua colocação soa apressada. ' + displayName + ' cruza os braços e mantém a reserva, preferindo mudar de assunto.',
+      resultTextFail: 'O assunto foi encerrado sem atrito maior, mas a guarda permaneceu fechada.'
+    },
+    {
+      id: 'prov_' + topicKey,
+      label: '"Duvido que consigas manter essa convicção quando a prova real chegar."',
+      renownDelta: 0,
+      cb: 'close',
+      _replyScript: [
+        { type: 'narration', text: displayName + ' esboça um sorriso desafiador, a determinação faiscando no olhar firme.' },
+        { type: 'speech', speaker: displayName, text: 'Estás me desafiando? Vamos ver quem mantém a postura quando a poeira assentar.' }
+      ]
+    }
+  ];
+
+  return { script: script, choices: choices };
+}
+
+function _showAllyTopicDialogue(idx, topicKey) {
+  var m = (window.GROUP_MEMBERS || [])[idx];
+  if (!m || m.dead || m.isPlayer) return;
+  var cls = _allyTplKey(m.cls);
+  var displayName = (m.name || '').split(/\s+/)[0];
+  var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
+  var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
+    ? vAssets.classIconHTML(heraldicId, '100%')
+    : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
+
+  var topicNode = _buildClientAllyTopicNode(cls, topicKey, displayName);
+  var cfg = ALLY_TOPIC_CONFIG[topicKey] || ALLY_TOPIC_CONFIG.camp_campfire;
+
+  var fullChoices = topicNode.choices.map(function(c) {
+    return {
+      id: c.id,
+      label: c.label,
+      cb: c.cb || 'close',
+      _replyScript: c._replyScript,
+      renownDelta: c.renownDelta || 0,
+      check: c.check,
+      resultNarration: c.resultNarration,
+      resultText: c.resultText,
+      resultNarrationFail: c.resultNarrationFail,
+      resultTextFail: c.resultTextFail,
+      ally_source: {
+        cls: cls,
+        choice_id: c.id,
+        name: displayName,
+        topic: topicKey,
+        renown_hint: c.renownDelta || 0
+      }
+    };
+  });
+
+  fullChoices.push({
+    id: 'back_to_ally_hub',
+    label: '↩ Voltar aos outros assuntos',
+    cb: function() { _showAllyDialogue(idx); }
+  });
+
+  var dlg = {
+    npc: {
+      id: 'ally_' + (m.name || ('idx' + idx)) + '_' + topicKey,
+      name: displayName,
+      desc: _classLabelPT(m.cls) + ' · ' + cfg.title + ' · Nv ' + m.level,
+      portraitHTML: portraitHTML
+    },
+    script: topicNode.script,
+    choices: fullChoices
+  };
+
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render(dlg, { closeable: true });
+  }
+}
+function _hasSeenCompanionRelationshipTutorial() {
+  try {
+    var charKey = 'valdoria_companion_relationship_tutorial_seen_' + (window._charId || 'default');
+    return localStorage.getItem(charKey) === '1';
+  } catch (_) {
+    return false;
+  }
+}
+
+function _markSeenCompanionRelationshipTutorial() {
+  try {
+    var charKey = 'valdoria_companion_relationship_tutorial_seen_' + (window._charId || 'default');
+    localStorage.setItem(charKey, '1');
+    if (typeof fetch === 'function') {
+      fetch('/api/ally/tutorial-seen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.id) || 1 })
+      }).catch(function() {});
+    }
+  } catch (_) {}
+}
+
+function _showCompanionRelationshipTutorial(optAllyName, onDone) {
+  var allyName = optAllyName || 'vosso novo companheiro';
+  var dlg = {
+    npc: {
+      id: 'dm_tutorial_relationships',
+      name: 'O Mestre de Jogo',
+      desc: 'Regras de Interação Social D&D 5e & Baldur\'s Gate 3',
+      portraitHTML: '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;">📜</div>'
+    },
+    script: [
+      {
+        type: 'narration',
+        text: 'A fogueira crepita lançando centelhas ao céu noturno. Ao vosso lado, ' + allyName + ' ajeita o equipamento de viagem. A jornada pelas terras de Valdoria não precisa mais ser percorrida em solidão.'
+      },
+      {
+        type: 'speech',
+        speaker: 'Mestre',
+        text: '<b>Bem-vindo ao Sistema de Relacionamentos com Companheiros!</b><br><br>' +
+              'A partir de agora, cada postura, conversa e decisão vossa influencia a <b>Aprovação</b> do aliado (escala de <b>-100 a +100</b>, inspirada em Baldur\'s Gate 3):<br>' +
+              '• 💢 <b>Hostil (-100 a -50):</b> Desconfiança extrema e recusa a confidências.<br>' +
+              '• ❄️ <b>Frio (-49 a -25):</b> Distância prudente e diálogo profissional restrito.<br>' +
+              '• 😐 <b>Neutro (-24 a +24):</b> Parceria de armas funcional e cooperação padrão.<br>' +
+              '• 😊 <b>Amigável (+25 a +49):</b> Companheirismo leal, conversas abertas e partilha.<br>' +
+              '• 💛 <b>Leal (+50 a +74):</b> Devoção de sangue, proteção incondicional e missões pessoais.<br>' +
+              '• 💖 <b>Devoto (+75 a +100):</b> Ligação inquebrável, entrega total e bênçãos eternas.'
+      },
+      {
+        type: 'narration',
+        text: 'Nem todos os laços são forjados sob o mesmo molde. Conforme conviveis na estrada, vossa dinâmica evolui para uma conexão singular com bônus mecânicos em combate.'
+      },
+      {
+        type: 'speech',
+        speaker: 'Mestre',
+        text: 'Vós podeis desenvolver 4 tipos de relacionamentos:<br><br>' +
+              '• 🛡️ <b>Camaradagem:</b> Laço fraterno de armas. Concede <b>+1 na Classe de Armadura (CA)</b> ao grupo em formação.<br>' +
+              '• ⚔️ <b>Rivalidade Sadia:</b> Competição de maestria. Concede <b>+2 de Dano</b> no primeiro ataque bem-sucedido de cada turno.<br>' +
+              '• 📜 <b>Mentoria:</b> Troca de sabedoria e conselhos táticos. Concede <b>+1 em Salvaguardas Mentais</b>.<br>' +
+              '• 💖 <b>Romance & Devoção:</b> Conexão íntima que avança por 4 estágios (Flerte, Vínculo, Compromisso), trazendo imunidade a medo e inspiração quando o parceiro é ameaçado.'
+      },
+      {
+        type: 'narration',
+        text: 'Nas pausas de descanso e noites de vigília, o silêncio abre espaço para confidências profundas. Vossa oratória e sagacidade ditarão o sucesso das palavras.'
+      },
+      {
+        type: 'speech',
+        speaker: 'Mestre',
+        text: '• 💬 <b>Tópicos de Conversa & Testes D&D 5e:</b> Escolha entre 7 temas (Fogueira, Segredos do Passado, Princípios, Laços de Batalha, Favores, Confidências e Treino). Testes de perícia (Persuasão, Intuição, Intimidação) usam seus atributos para conquistar saltos imediatos de aprovação.<br><br>' +
+              '• 📜 <b>Missões de Companheiro (Companion Quests):</b> Em afinidade alta, o aliado confiará sua missão pessoal a vós, concedendo bênçãos permanentes e relíquias.<br><br>' +
+              '• 🎁 <b>Presentes da Mochila:</b> Itens afins ao gosto do aliado fortalecem o afeto e rendem lembranças raras de retribuição!'
+      }
+    ],
+    choices: [
+      {
+        id: 'finish_relationship_tutorial',
+        label: '✔ Compreendi! Iniciar Convivência com Companheiros ▸',
+        cb: function() {
+          _markSeenCompanionRelationshipTutorial();
+          if (typeof onDone === 'function') onDone();
+        }
+      }
+    ]
+  };
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render(dlg, { closeable: true });
+  }
+}
+window._showCompanionRelationshipTutorial = _showCompanionRelationshipTutorial;
+
+function _showAllyGiftDialogue(idx) {
+  var m = (window.GROUP_MEMBERS || [])[idx];
+  if (!m || m.dead || m.isPlayer) return;
+  var cls = _allyTplKey(m.cls);
+  var displayName = (m.name || '').split(/\s+/)[0];
+  var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
+  var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
+    ? vAssets.classIconHTML(heraldicId, '100%')
+    : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
+
+  var p = window.CITY_MOCK_PLAYER;
+  var inv = (p && p.inventory) ? p.inventory : [];
+  var uniqueItems = Array.from(new Set(inv)).slice(0, 5);
+
+  var giftChoices = uniqueItems.map(function(itemName) {
+    return {
+      id: 'gift_' + itemName,
+      label: '🎁 Entregar ' + itemName + ' (' + inv.filter(function(x){ return x === itemName; }).length + ' na mochila)',
+      cb: 'close',
+      _replyScript: [
+        {
+          type: 'narration',
+          text: displayName + ' recebe ' + itemName + ' com um brilho de surpresa nos olhos e um sorriso sincero de gratidão.'
+        },
+        {
+          type: 'speech',
+          speaker: displayName,
+          text: 'Um gesto muito generoso da tua parte! Guardarei este presente com carinho como prova de nossa camaradagem na estrada.'
+        }
+      ]
+    };
+  });
+
+  if (giftChoices.length === 0) {
+    giftChoices.push({
+      id: 'no_gifts',
+      label: 'Nenhum item disponível na mochila para presentear',
+      cb: 'close'
+    });
+  }
+
+  giftChoices.push({
+    id: 'back_from_gifts',
+    label: '↩ Voltar aos outros assuntos',
+    cb: function() { _showAllyDialogue(idx); }
+  });
+
+  var dlg = {
+    npc: {
+      id: 'ally_gift_' + idx,
+      name: displayName,
+      desc: _classLabelPT(m.cls) + ' · Oferecer Presente · Nv ' + m.level,
+      portraitHTML: portraitHTML
+    },
+    script: [
+      {
+        type: 'narration',
+        text: 'Você abre sua mochila de viagem diante de ' + displayName + '. Um pequeno gesto de generosidade pode estreitar laços e aprofundar a cumplicidade de vossa comitiva.'
+      },
+      {
+        type: 'speech',
+        speaker: displayName,
+        text: 'O que tens aí? Não precisavas te incomodar comigo... mas confesso que aprecio a consideração.'
+      }
+    ],
+    choices: giftChoices
+  };
+
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render(dlg, { closeable: true });
+  }
+}
+window._showAllyGiftDialogue = _showAllyGiftDialogue;
+
 // _showAllyDialogue(memberIdx) — Sessão #28 v2 (2026-05-24): fullscreen
-// PADRAO_ALDRIC (vEncounter.render) com closeable:true. User pode fechar a
-// qualquer momento via X (ou ESC) sem se comprometer a uma choice — quando
-// quiser conversar mais, clica de novo no card.
 function _showAllyDialogue(idx){
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
   var cls = _allyTplKey(m.cls);
   var tpl = ALLY_DIALOGUE_TEMPLATES[cls] || ALLY_DIALOGUE_TEMPLATES.guerreiro;
   var displayName = (m.name || '').split(/\s+/)[0];
-  // B2.1 #90: intro ROTATIVA — pool = [script original, ...ALLY_INTRO_EXTRA[cls]]
-  // sorteado via _pickNonRepeating (não repete a mesma abertura 2 visitas
-  // seguidas; dois aliados da mesma classe não falam igual toda vez).
+
+  // Disparo automático do tutorial no primeiro encontro com aliado
+  if (!_hasSeenCompanionRelationshipTutorial()) {
+    _showCompanionRelationshipTutorial(displayName, function() {
+      _showAllyDialogue(idx);
+    });
+    return;
+  }
+
   var _introPool = [tpl.script || []].concat(ALLY_INTRO_EXTRA[cls] || []);
   var _introScript = tpl.script || [];
   if (typeof _pickNonRepeating === 'function' && _introPool.length > 1) {
@@ -65534,20 +65990,105 @@ function _showAllyDialogue(idx){
     return copy;
   });
   var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
-  /* Sessão #28 v3 (2026-05-24): portraitHTML em vez de portrait (URL).
-     Render a PNG da classe (/shared/img/combat/clerigo.webp etc.) via
-     vAssets.classIconHTML, com fallback SVG sprite quando vAssets falha
-     ou PNG inexistente. User: "use a imagem da classe deles ao invés de
-     uma foto de personagem". */
   var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
     ? vAssets.classIconHTML(heraldicId, '100%')
     : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
-  /* Helper: aplica {name} → displayName em strings (label, narrações, etc.). */
   function _personalize(s) {
     return typeof s === 'string' ? s.replace(/\{name\}/g, displayName) : s;
   }
-  // sessão #76: id estável por aliado p/ marcar perguntas já usadas (1x só).
   var _allyNpcId = 'ally_' + (m.name || ('idx' + idx));
+
+  // Choices canônicas originais de lore e perícia
+  var classChoices = (tpl.choices || []).filter(function(c){
+    var oneShot = (c.id !== 'leave' && !c.check);
+    return !oneShot || typeof _npcIsUsed !== 'function' || !_npcIsUsed(_allyNpcId, c.id);
+  }).map(function(c){
+    var _reply = (c.id !== 'leave' && !c.check)
+      ? ALLY_LORE_REPLIES[cls + ':' + c.id] : null;
+    var _replyScript = _reply ? [
+      { type: 'narration', text: _personalize(_reply.narration) },
+      { type: 'speech', speaker: displayName, text: _personalize(_reply.speech) }
+    ] : null;
+    return {
+      id: c.id,
+      label: _personalize(c.label),
+      cb: c.cb || 'close',
+      _oneShot: (c.id !== 'leave' && !c.check),
+      _replyScript: _replyScript,
+      renownDelta: c.renown,
+      resultNarration: _personalize(c.resultNarration),
+      resultText: _personalize(c.resultText),
+      resultNarrationFail: _personalize(c.resultNarrationFail),
+      resultTextFail: _personalize(c.resultTextFail),
+      ally_source: {
+        cls: cls,
+        choice_id: c.id,
+        name: displayName,
+        renown_hint: c.renown || 0,
+        label_hint: (c.label || '').replace(/^[^A-Za-zÀ-ú"]+\s*/, '').substring(0, 50),
+      },
+    };
+  });
+
+  var leaveChoice = classChoices.filter(function(c){ return c.id === 'leave'; })[0];
+  var otherClassChoices = classChoices.filter(function(c){ return c.id !== 'leave'; });
+
+  // Tópicos profundos de relacionamento D&D 5e / BG3
+  var topicChoices = [
+    {
+      id: 'nav_tutorial',
+      label: '📖 Como Funciona o Vínculo com Aliados ▸',
+      cb: function() { _showCompanionRelationshipTutorial(displayName, function() { _showAllyDialogue(idx); }); }
+    },
+    {
+      id: 'nav_gift',
+      label: '🎁 Oferecer um presente da mochila ▸',
+      cb: function() { _showAllyGiftDialogue(idx); }
+    },
+    {
+      id: 'nav_campfire',
+      label: '🔥 Conversar ao redor da fogueira ▸',
+      cb: function() { _showAllyTopicDialogue(idx, 'camp_campfire'); }
+    },
+    {
+      id: 'nav_backstory',
+      label: '🗝️ Falar sobre lembranças e o passado ▸',
+      cb: function() { _showAllyTopicDialogue(idx, 'backstory_secret'); }
+    },
+    {
+      id: 'nav_morals',
+      label: '⚖️ Refletir sobre princípios e crenças ▸',
+      cb: function() { _showAllyTopicDialogue(idx, 'morals_faith'); }
+    },
+    {
+      id: 'nav_combat',
+      label: '🛡️ Alinhar táticas e laços de batalha ▸',
+      cb: function() { _showAllyTopicDialogue(idx, 'combat_bonds'); }
+    },
+    {
+      id: 'nav_favor',
+      label: '📜 Assunto pessoal e missão pendente ▸',
+      cb: function() { _showAllyTopicDialogue(idx, 'personal_favor'); }
+    },
+    {
+      id: 'nav_romance',
+      label: '💖 Momento a dois e confidências [Afeto] ▸',
+      cb: function() { _showAllyTopicDialogue(idx, 'romance_courtship'); }
+    },
+    {
+      id: 'nav_sparring',
+      label: '⚔️ Desafio de perícia e treino rápido ▸',
+      cb: function() { _showAllyTopicDialogue(idx, 'sparring_challenge'); }
+    }
+  ];
+
+  var combinedChoices = otherClassChoices.concat(topicChoices);
+  if (leaveChoice) {
+    combinedChoices.push(leaveChoice);
+  } else {
+    combinedChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close', renownDelta: 0 });
+  }
+
   var dlg = {
     npc: {
       id: _allyNpcId,
@@ -65556,57 +66097,7 @@ function _showAllyDialogue(idx){
       portraitHTML: portraitHTML
     },
     script: personalizedScript,
-    /* Sessão #28 v3 (2026-05-24): choices podem ter:
-       - check: {skill|stat, dc} (dice check, A3.2 #90) → _diceCheckSvc lê resultNarration
-         + resultText (success) ou resultNarrationFail + resultTextFail (failure)
-       - cb: 'close' (default, leave/lore choices) — só fecha o encounter
-       - renown: N pra renownDelta cosmético no badge */
-    // sessão #76: só perguntas AINDA NÃO usadas — uma pergunta concluída (mesmo em
-    // FALHA de skill check) NUNCA mais reaparece. _npcMarkUsed roda em
-    // _handleChoiceInternal (encounter-popup.js) ao escolher.
-    /* B2.2 #90: só perguntas de LORE são one-shot (somem após perguntar uma
-       vez — narrativamente correto). A choice de skill-check e o "Sair" são
-       RENOVÁVEIS (sem `check`/id 'leave') → ficam SEMPRE disponíveis, então o
-       aliado NUNCA vira mudo ('Fechar'-only) após esgotar as perguntas de lore.
-       Bug original: encounter-popup.js marcava QUALQUER choice (incl leave)
-       como usada → após ~4 cliques o aliado renderizava só a intro + Fechar. */
-    choices: (tpl.choices || []).filter(function(c){
-      var oneShot = (c.id !== 'leave' && !c.check);
-      // skill/leave: sempre passam. lore: só se ainda não foi perguntada.
-      return !oneShot || typeof _npcIsUsed !== 'function' || !_npcIsUsed(_allyNpcId, c.id);
-    }).map(function(c){
-      // B2.3 #90: pergunta de lore ganha resposta in-character (renderizada
-      // antes de fechar). Só lore (sem check, não 'leave') tem reply.
-      var _reply = (c.id !== 'leave' && !c.check)
-        ? ALLY_LORE_REPLIES[cls + ':' + c.id] : null;
-      var _replyScript = _reply ? [
-        { type: 'narration', text: _personalize(_reply.narration) },
-        { type: 'speech', speaker: displayName, text: _personalize(_reply.speech) }
-      ] : null;
-      return {
-        id: c.id,
-        label: _personalize(c.label),
-        cb: c.cb || 'close',
-        _oneShot: (c.id !== 'leave' && !c.check),
-        _replyScript: _replyScript,
-        renownDelta: c.renown,
-        resultNarration: _personalize(c.resultNarration),
-        resultText: _personalize(c.resultText),
-        resultNarrationFail: _personalize(c.resultNarrationFail),
-        resultTextFail: _personalize(c.resultTextFail),
-        /* Sessao #29: ally_source permite que encounter-popup + _diceCheckSvc
-           chamem POST /api/ally/apply-effect com os params certos.
-           renown_hint + label_hint sao usados pelo fallback toast quando
-           backend offline (ex: bot DEV nao reiniciado ainda). */
-        ally_source: {
-          cls: cls,
-          choice_id: c.id,
-          name: displayName,
-          renown_hint: c.renown || 0,
-          label_hint: (c.label || '').replace(/^[^A-Za-zÀ-ú"]+\s*/, '').substring(0, 50),
-        },
-      };
-    })
+    choices: combinedChoices
   };
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     window.vEncounter.render(dlg, { closeable: true });
