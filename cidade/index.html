@@ -19347,26 +19347,25 @@ function _showStatusPopup(memberIdx){
       + '</div>';
   } else {
     // Subtitle e badges interativos de aventureiro / aliado
-    var memParam = (typeof memberIdx === 'number' ? memberIdx : 0);
     html += '<div class="ficha-subtitle" style="color:var(--v-text-dim,#a09484); font-size:calc(11px * var(--v-font-scale, 1)); font-style:italic; letter-spacing:0.3px;">'
-      + '<span class="ficha-link" onclick="_showFichaClassHelp(\'' + cKey + '\',' + memParam + ')" title="Toque para detalhes da classe D&D 5e">' + classLabel + '</span>'
-      + (subclassLabel ? (' (<span class="ficha-link" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + memParam + ')" title="Toque para detalhes da sub-classe D&D 5e">' + subclassLabel + '</span>)') : '')
+      + '<span class="ficha-link" onclick="_showFichaClassHelp(\'' + cKey + '\',' + _memArg + ')" title="Toque para detalhes da classe D&D 5e">' + classLabel + '</span>'
+      + (subclassLabel ? (' (<span class="ficha-link" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + _memArg + ')" title="Toque para detalhes da sub-classe D&D 5e">' + subclassLabel + '</span>)') : '')
       + ' '
-      + '<span class="ficha-link" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + memParam + ')" title="Toque para detalhes da raça D&D 5e">' + raceLabel + '</span>'
-      + (subraceLabel ? (' (<span class="ficha-link" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + memParam + ')" title="Toque para detalhes da sub-raça D&D 5e">' + subraceLabel + '</span>)') : '')
+      + '<span class="ficha-link" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + _memArg + ')" title="Toque para detalhes da raça D&D 5e">' + raceLabel + '</span>'
+      + (subraceLabel ? (' (<span class="ficha-link" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + _memArg + ')" title="Toque para detalhes da sub-raça D&D 5e">' + subraceLabel + '</span>)') : '')
       + ' · <b style="color:var(--v-gold,#c4953a); font-style:normal;">Nível ' + m.level + '</b>'
       + '</div>'
       + '<div class="ficha-tags-row" style="display:flex; justify-content:center; align-items:center; gap:4px; margin-top:4px; flex-wrap:wrap;">'
-      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaClassHelp(\'' + cKey + '\',' + memParam + ')" title="Classe D&D 5e: ' + classLabel + ' — toque p/ vantagens e desvantagens">'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaClassHelp(\'' + cKey + '\',' + _memArg + ')" title="Classe D&D 5e: ' + classLabel + ' — toque p/ vantagens e desvantagens">'
       + '<span>🛡️</span> <b>' + classLabel + '</b>'
       + '</button>'
-      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + memParam + ')" title="Sub-classe D&D 5e: ' + (subclassLabel || 'Ver Tradições') + ' — toque p/ habilidades e vantagens">'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + _memArg + ')" title="Sub-classe D&D 5e: ' + (subclassLabel || 'Ver Tradições') + ' — toque p/ habilidades e vantagens">'
       + '<span>🔮</span> <span>' + (subclassLabel || 'Sub-classe') + '</span>'
       + '</button>'
-      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + memParam + ')" title="Raça D&D 5e: ' + raceLabel + ' — toque p/ traços e vantagens raciais">'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + _memArg + ')" title="Raça D&D 5e: ' + raceLabel + ' — toque p/ traços e vantagens raciais">'
       + '<span>🌿</span> <b>' + raceLabel + '</b>'
       + '</button>'
-      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + memParam + ')" title="Sub-raça D&D 5e: ' + (subraceLabel || 'Ver Linhagens') + ' — toque p/ vantagens exclusivas">'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + _memArg + ')" title="Sub-raça D&D 5e: ' + (subraceLabel || 'Ver Linhagens') + ' — toque p/ vantagens exclusivas">'
       + '<span>⚙️</span> <span>' + (subraceLabel || 'Sub-raça') + '</span>'
       + '</button>'
       + '</div>';
