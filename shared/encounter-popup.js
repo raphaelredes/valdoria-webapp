@@ -1616,6 +1616,7 @@
       sub: 'Poder Muscular · Potência Marcial',
       desc: 'Mede o poder muscular, a capacidade atlética de carregar cargas pesadas, erguer obstáculos e desferir golpes esmagadores com armas corpo a corpo pesadas (espadas, machados, martelos).',
       travel: 'Usada para saltar despenhadeiros, arrombar portas trancadas, escalar encostas íngremes e nadar contra torrentes na estrada.',
+      skillsText: '• Perícia Governada: Atletismo (escalada, saltos, natação e arrombamentos).\n• Manobras Marciais: Empurrar Alvo (derrubar caído ou empurrar 1,5m) e Agarrar criatura.',
       rules: 'Determina o modificador somado às jogadas de ataque e dano com armas corpo a corpo e testes de Atletismo. Fórmula oficial: (Valor - 10) / 2 arredondado para baixo.'
     },
     'des': {
@@ -1623,6 +1624,7 @@
       sub: 'Agilidade · Reflexos · Precisão',
       desc: 'Mede a agilidade corporal, equilíbrio, velocidade de reação, reflexos defensivos e precisão com armas à distância (arcos, bestas) e armas leves (adagas, rapieiras).',
       travel: 'Essencial para caminhar sem fazer barulho (Furtividade), desarmar armadilhas e reagir rapidamente a emboscadas na estrada.',
+      skillsText: '• Perícias Governadas: Acrobacia (equilíbrio e manobras), Furtividade (esconder-se e mover-se em silêncio) e Prestidigitação (bater carteiras e manipular fechaduras).\n• Iniciativa: Bônus de rapidez somado no início de todo combate.',
       rules: 'Soma-se à Iniciativa no início do combate, à Classe de Armadura (CA) com armaduras leves ou médias, e aos testes de Acrobacia, Furtividade e Prestidigitação. Fórmula oficial: (Valor - 10) / 2.'
     },
     'con': {
@@ -1630,6 +1632,7 @@
       sub: 'Vigor Físico · Vitalidade · Imunidade',
       desc: 'Representa a saúde do organismo, vigor físico, resistência à fadiga, fôlego e tolerância contra venenos, doenças e climas inclementes.',
       travel: 'Determina quanto o personagem aguenta de marchas forçadas sob frio extremo ou calor escaldante sem sofrer exaustão.',
+      skillsText: '• Salvaguardas Vitais: Resistir a venenos, toxinas, paralisias e exaustão por intempéries da estrada.\n• Concentração em Magias: Salvaguarda para não perder feitiços ao sofrer dano (CD 10 ou metade do dano sofrido).',
       rules: 'Cada ponto de modificador de Constituição é somado aos Pontos de Vida (PV) máximos a cada nível e aos testes para manter a Concentração em magias ativas.'
     },
     'int': {
@@ -1637,6 +1640,7 @@
       sub: 'Agudeza Mental · Conhecimento · Memória',
       desc: 'Mede a capacidade de raciocínio dedutivo, memória acadêmica, análise lógica e domínio de teorias mágicas arcanas.',
       travel: 'Usada para decifrar runas ancestrais, identificar monstros desconhecidos, examinar pistas em ruínas e resolver enigmas mecânicos.',
+      skillsText: '• Perícias Governadas: Arcanismo (magias e planos), História (guerras e lendas antigas), Investigação (procurar pistas e armadilhas ocultas), Natureza (plantas, clima e biomas) e Religião (deuses e ritos sagrados).',
       rules: 'Atributo conjurador primordial de Magos. Governa os testes de Arcanismo, História, Investigação, Natureza e Religião.'
     },
     'sab': {
@@ -1644,6 +1648,7 @@
       sub: 'Percepção Sensorial · Intuição · Força de Vontade',
       desc: 'Representa a sintonia com o ambiente ao redor, sentidos aguçados, intuição prática sobre intenções alheias e conexão espiritual com a natureza ou divindades.',
       travel: 'Fundamental para notar inimigos à espreita antes de ser emboscado, rastrear pegadas na mata e cuidar de ferimentos com primeiros socorros.',
+      skillsText: '• Perícias Governadas: Adestrar Animais (acalmar feras), Intuição (discernir mentiras e intenções), Medicina (estabilizar moribundos), Percepção (notar emboscadas) e Sobrevivência (rastrear e achar água/comida).',
       rules: 'Atributo conjurador de Clérigos, Druidas e Patrulheiros. Governa os testes de Percepção, Intuição, Sobrevivência, Medicina e Adestrar Animais.'
     },
     'car': {
@@ -1651,6 +1656,7 @@
       sub: 'Magnetismo Pessoal · Presença · Liderança',
       desc: 'Mede a força de personalidade, confiança, eloquência persuasiva, capacidade de liderar e impor respeito ou simpatia nos outros.',
       travel: 'Permite negociar soldos menores com recrutas, convencer guardas a liberar passagens, extrair boatos valiosos em tavernas e intimidar salteadores.',
+      skillsText: '• Perícias Governadas: Atuação (cantar e disfarçar-se), Blefe / Enganação (falsidades convincentes), Intimidação (impor medo moral) e Persuasão (acordos cordiais e diplomacia).',
       rules: 'Atributo conjurador de Paladinos, Bardos, Bruxos e Feiticeiros. Governa os testes de Persuasão, Intimidação, Atuação e Blefe (Enganação).'
     }
   };
@@ -1673,6 +1679,20 @@
       desc: 'Indica o quão difícil é para um inimigo acertar um ataque certeiro contra este aventureiro, combinando a espessura da armadura, o escudo e a agilidade para esquivar.',
       travel: 'Companheiros com CA elevada (17+) funcionam como verdadeiras muralhas defensivas na linha de frente, absorvendo o impacto dos inimigos.',
       rules: 'Para acertar, o atacante rola 1d20 e soma seu Bônus de Ataque. O resultado precisa ser igual ou maior que a CA do alvo. Se for menor, o golpe ricocheteia na armadura ou é esquivado.'
+    },
+    'Prof.': {
+      name: 'Bônus de Proficiência (Prof.)',
+      sub: 'Competência Marcial e Acadêmica',
+      desc: 'O bônus numérico canônico de D&D 5e somado a todas as jogadas e testes em que o aventureiro possui treinamento especializado (armas, perícias, ferramentas e magias).',
+      travel: 'Aumenta as chances de sucesso em sobrevivência, percepção de perigos e diálogos treinados.',
+      rules: 'Escala oficial por nível: +2 (níveis 1–4), +3 (níveis 5–8), +4 (níveis 9–12), +5 (níveis 13–16) e +6 (níveis 17–20). Soma-se ao Bônus de Ataque, CD de Magias e testes de perícias treinadas.'
+    },
+    'Armadura': {
+      name: 'Equipamento de Proteção',
+      sub: 'Categoria de Armadura e Escudo',
+      desc: 'A vestimenta defensiva e escudo envergados pelo aventureiro para desviar lâminas, projéteis e presas mortais.',
+      travel: 'Armaduras pesadas exigem preparo físico e força muscular para não desacelerar a marcha da comitiva.',
+      rules: 'Armaduras Leves somam o modificador integral de Destreza à CA. Armaduras Médias somam Destreza até o limite de +2. Armaduras Pesadas conferem CA fixa sem Destreza. Escudos conferem +2 de CA adicional.'
     },
     'Desl.': {
       name: 'Deslocamento (Desl.)',
@@ -1867,6 +1887,400 @@
   _RACE_DND_INFOS['meio_elfo'] = _RACE_DND_INFOS['meio-elfo'];
   _RACE_DND_INFOS['meio_orc'] = _RACE_DND_INFOS['meio-orc'];
 
+  function _normalizeDndKey(str) {
+    return String(str || '').toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+  }
+
+  var _SUBCLASS_DND_INFOS = {
+    'campeao': {
+      title: 'Campeão · Arquétipo Marcial',
+      subtitle: 'Aprimoramento Físico Supremo · Críticos Letais',
+      desc: 'Foca no desenvolvimento absoluto da força bruta e precisão atlética. Não depende de magias ou truques complexos; confia no aço e na maestria marcial pura.',
+      combat: 'Excelente na linha de frente para infligir danos massivos com armas pesadas e resistir a investidas.',
+      rules: 'Crítico Aprimorado (PHB p. 72): Seus ataques com armas acertam criticamente com uma rolagem de 19 ou 20 no d20 (dobrando as chances de acerto crítico de 5% para 10%).'
+    },
+    'mestre_de_batalha': {
+      title: 'Mestre de Batalha · Arquétipo Marcial',
+      subtitle: 'Estratégia e Controle · Manobras Marciais',
+      desc: 'Enxerga o combate como uma partida de xadrez tático. Utiliza técnicas marciais refinadas transmitidas por gerações de generais e veteranos de guerra.',
+      combat: 'Controla a posição dos inimigos no tabuleiro, derruba adversários, desarma e concede ataques adicionais a aliados.',
+      rules: 'Dados de Superioridade e Manobras de Combate (PHB p. 73): Gasta dados especiais (d8) para somar ao dano e aplicar efeitos secundários (derrubar caído, empurrar 4,5m ou fintar).'
+    },
+    'escola_de_evocacao': {
+      title: 'Escola de Evocação · Tradição Arcana',
+      subtitle: 'Poder Destrutivo Elemental · Esculpir Magias',
+      desc: 'Mestre das energias destrutivas da natureza: fogo ardente, relâmpagos cortantes, frio congelante e energia trovejante.',
+      combat: 'Destruição em área avassaladora de grupos inteiros de monstros sem risco para os companheiros de comitiva.',
+      rules: 'Esculpir Magias (PHB p. 117): Ao conjurar magias de evocação com área de efeito (como Bola de Fogo), escolhe aventureiros aliados para passarem automaticamente na salvaguarda e não sofrerem dano algum.'
+    },
+    'escola_de_abjuracao': {
+      title: 'Escola de Abjuração · Tradição Arcana',
+      subtitle: 'Muralha Protetora Arcana · Dissipação de Feitiços',
+      desc: 'Especialista em magias defensivas, escudos invisíveis, barreiras de repulsão e neutralização de feitiços hostis.',
+      combat: 'Protege o grupo contra emboscadas mágicas e absorve impactos letais com barreiras de força pura.',
+      rules: 'Projetor Arcano (PHB p. 115): Cria uma barreira mística protetora com Pontos de Vida próprios que absorve dano antes que atinja a vida real do mago ou de um aliado próximo.'
+    },
+    'assassino': {
+      title: 'Assassino · Arquétipo de Ladino',
+      subtitle: 'Letalidade Sorrateira · Emboscadas Mortais',
+      desc: 'Mestre da dissimulação, infiltração nas sombras, venenos rápidos e ataques fulminantes contra alvos desprevenidos.',
+      combat: 'Elimina alvos prioritários de elite antes que possam agir na rodada de combate.',
+      rules: 'Emboscada (PHB p. 97): Vantagem em jogadas de ataque contra qualquer criatura que ainda não tenha agido no combate. Qualquer acerto contra uma criatura surpresa é automaticamente um Acerto Crítico.'
+    },
+    'ladrao': {
+      title: 'Ladrão · Arquétipo de Ladino',
+      subtitle: 'Agilidade Suprema · Mãos Rápidas',
+      desc: 'Especialista em velocidade de dedos, escalada ágil, desarmar armadilhas e utilização engenhosa de itens mágicos em batalha.',
+      combat: 'Flanqueia inimigos, interage com mecanismos do terreno e usa poções ou bombas como ação bônus.',
+      rules: 'Mãos Rápidas & Andarilho de Telhados (PHB p. 97): Permite usar a Ação Astuta para desativar armadilhas, destrancar portas ou usar objetos como Ação Bônus.'
+    },
+    'dominio_da_vida': {
+      title: 'Domínio da Vida · Domínio Divino',
+      subtitle: 'Canalização Curativa Suprema · Preservação Vital',
+      desc: 'Dedicado à preservação da vida e à canalização da luz celestial pura, restaurando corpos feridos e expurgando enfermidades.',
+      combat: 'Garante que os aventureiros da comitiva permaneçam de pé mesmo após os golpes mais devastadores de monstros.',
+      rules: 'Discípulo da Vida (PHB p. 60): Sempre que conjura uma magia de cura de 1º círculo ou superior, a criatura recupera PV adicionais iguais a 2 + o círculo da magia.'
+    },
+    'dominio_da_guerra': {
+      title: 'Domínio da Guerra · Domínio Divino',
+      subtitle: 'Fervor Sagrado · Aço e Bênção Bélica',
+      desc: 'Canaliza o poder dos deuses das batalhas e da justiça armada. Empunha maças e martelos consagrados na vanguarda do combate.',
+      combat: 'Combina armaduras pesadas e golpes extras com bênçãos que potencializam ataques do grupo.',
+      rules: 'Sacerdote da Guerra & Golpe Guiado (PHB p. 63): Permite desferir um ataque marcial extra como Ação Bônus e concede +10 na jogada de ataque via Canalizar Divindade.'
+    },
+    'juramento_de_devocao': {
+      title: 'Juramento de Devoção · Juramento Sagrado',
+      subtitle: 'Cavaleiro da Luz · Justiça Inabalável',
+      desc: 'Personifica o ideal de coragem, honra, compaixão e dever moral estrito. Sua espada brilha com justiça radiante contra as trevas.',
+      combat: 'Muralha protetora contra mortos-vivos e corruptores, infundindo armas com poder divino.',
+      rules: 'Arma Sagrada & Aura de Devoção (PHB p. 86): Adiciona modificador de Carisma a todas as jogadas de ataque com sua arma e emite aura que impede que aliados próximos sejam enfeitiçados.'
+    },
+    'juramento_dos_ancioes': {
+      title: 'Juramento dos Anciões · Juramento Sagrado',
+      subtitle: 'Guardião da Luz Primordial · Defensor da Natureza',
+      desc: 'Preserva a alegria, beleza e a luz nascente do mundo contra a escuridão e desolação. Conecta a fé sagrada às forças ancestrais da floresta.',
+      combat: 'Resistência mística suprema que neutraliza a potência de magias inimigas.',
+      rules: 'Aura Protetora Antimagia (PHB p. 87): O paladino e companheiros próximos ganham resistência contra TODO o dano provocado por magias hostis.'
+    },
+    'cacador': {
+      title: 'Caçador · Arquétipo de Patrulheiro',
+      subtitle: 'Predador dos Ermos · Matador de Monstros',
+      desc: 'Especialista em caçar as criaturas mais perigosas que assolam Valdoria: gigantes, hordas de goblins e feras selvagens.',
+      combat: 'Adapta suas flechas e lâminas para explorar as vulnerabilidades específicas de presas colossais.',
+      rules: 'Presa do Caçador (PHB p. 93): Habilidades como Abatedor Colossal causam +1d8 de dano extra uma vez por rodada em inimigos feridos.'
+    },
+    'mestre_das_feras': {
+      title: 'Mestre das Feras · Arquétipo de Patrulheiro',
+      subtitle: 'Vínculo Espiritual Animal · Combate em Matilha',
+      desc: 'Forja uma ligação empática com uma besta leal da natureza (lobo, pantera, urso ou falcão), combatendo em coordenação harmônica.',
+      combat: 'A fera atua como combatente adicional no tabuleiro, flanqueando e derrubando inimigos para o grupo.',
+      rules: 'Companheiro Animal (PHB p. 93): O animal soma o bônus de proficiência do patrulheiro na CA, ataques e jogadas de dano.'
+    },
+    'caminho_do_berserker': {
+      title: 'Caminho do Berserker · Caminho Primitivo',
+      subtitle: 'Frenesi Sanguinário · Fúria Implacável',
+      desc: 'Abandona toda contenção racional para se entregar a um turbilhão de violência desmedida no calor da batalha.',
+      combat: 'Ofensiva avassaladora de ataques múltiplos por turno capaz de triturar chefes e monstros reforçados.',
+      rules: 'Frenesi (PHB p. 49): Durante a Fúria, pode realizar um ataque corpo a corpo adicional como Ação Bônus em cada um de seus turnos.'
+    },
+    'guerreiro_totemico': {
+      title: 'Guerreiro Totêmico · Caminho Primitivo',
+      subtitle: 'Espíritos Ancestrais Ferais · Vigor Sobrenatural',
+      desc: 'Guiado espiritualmente por protetores da fauna (Urso, Águia ou Lobo), absorvendo a força totêmica de guardiões místicos.',
+      combat: 'O maior tanque do jogo; virtualmente invulnerável a golpes normais enquanto estiver enfurecido.',
+      rules: 'Espírito Totêmico do Urso (PHB p. 50): Em Fúria, ganha resistência a TODOS os tipos de dano do jogo, com a única exceção de dano psíquico.'
+    },
+    'colegio_do_saber': {
+      title: 'Colégio do Saber · Colégio Bárdico',
+      subtitle: 'Segredos Místicos Ocultos · Sabedoria Universal',
+      desc: 'Erudito andarilho que coleta baladas esquecidas, segredos arcanos de outros conjuradores e técnicas de debate perspicazes.',
+      combat: 'Interrompe o sucesso dos inimigos e amplia o repertório de feitiços de qualquer escola de magia.',
+      rules: 'Palavras Cortantes (PHB p. 54): Usa dados de Inspiração Bárdica como Reação para subtrair da jogada de ataque ou dano de um oponente.'
+    },
+    'colegio_da_bravura': {
+      title: 'Colégio da Bravura · Colégio Bárdico',
+      subtitle: 'Canções Épicas Marciais · Arauto da Vitória',
+      desc: 'Mantém vivas as lendas de grandes façanhas através de tambores de guerra e estandartes, lutando lado a lado com guerreiros na linha de frente.',
+      combat: 'Inspira ataques marciais e concede bônus na defesa e no dano dos companheiros de comitiva.',
+      rules: 'Inspiração de Combate & Proficiência Marcial (PHB p. 55): Permite que aliados usem o dado de inspiração para somar à jogada de dano da arma ou à CA contra um ataque iminente.'
+    },
+    'circulo_da_lua': {
+      title: 'Círculo da Lua · Círculo Druídico',
+      subtitle: 'Metamorfose de Combate · Feras Titânicas',
+      desc: 'Guardião dos aspectos mais selvagens da natureza, transformando-se rapidamente em feras mortais (lobos atrozes, ursos-pardos e elementais).',
+      combat: 'Linha de frente monstruosa: atua como tanque com PV independente da besta e ataques brutais de garras e presas.',
+      rules: 'Forma Selvagem de Combate (PHB p. 69): Pode transmutar-se como Ação Bônus em vez de Ação Padrão e assumir formas de feras com Nível de Desafio muito superior.'
+    },
+    'circulo_da_terra': {
+      title: 'Círculo da Terra · Círculo Druídico',
+      subtitle: 'Misticismo Terreno · Magias Primordiais',
+      desc: 'Sacerdote da terra, pântanos, montanhas e florestas, preservando ritos ancestrais e controlando o ambiente natural.',
+      combat: 'Controle de multidões, manipulação de terreno (raízes que prendem) e recuperação mística contínua de espaços de magia.',
+      rules: 'Recuperação Natural (PHB p. 68): Durante um descanso curto, recupera espaços de magia gastos, ampliando sua longevidade em viagens longas.'
+    },
+    'caminho_da_palma_aberta': {
+      title: 'Caminho da Palma Aberta · Tradição Monástica',
+      subtitle: 'Maestria do Ki Desarmado · Controle Corporal',
+      desc: 'O ápice da arte marcial desarmada. Manipula a energia vital (Ki) para desestabilizar o equilíbrio físico e neurológico dos oponentes.',
+      combat: 'Derruba inimigos com facilidade, projeta alvos no chão e cancela reações de sentinelas.',
+      rules: 'Técnica da Palma Aberta (PHB p. 79): Ao acertar Rajada de Golpes, pode forçar o inimigo a cair no chão (salvaguarda de Destreza), ser empurrado a até 4,5m (Força) ou perder a reação.'
+    },
+    'caminho_das_sombras': {
+      title: 'Caminho das Sombras · Tradição Monástica',
+      subtitle: 'Passos Fantasmagóricos · Espionagem Noturna',
+      desc: 'Pratica artes de camuflagem, emboscadas e ilusão, utilizando as trevas e sombras como armas e portais de locomoção.',
+      combat: 'Cega conjuradores adversários com zonas de Escuridão e Silêncio e flanqueia por trás instantaneamente.',
+      rules: 'Artes das Sombras & Passo das Sombras (PHB p. 80): Permite teletransportar-se de uma sombra para outra a até 18 metros como Ação Bônus, ganhando vantagem no próximo ataque.'
+    },
+    'linhagem_draconica': {
+      title: 'Linhagem Dracônica · Origem de Feitiçaria',
+      subtitle: 'Magia no Sangue · Escamas Dracônicas',
+      desc: 'Herdeiro do poder congênito de dragões ancestrais. A magia irrompe em sua pele na forma de escamas protetoras e chamas elementais.',
+      combat: 'Conjurador resistente com alta CA natural e danos ampliados em feitiços do elemento correspondente.',
+      rules: 'Resiliência Dracônica (PHB p. 102): CA natural calculada como 13 + Destreza e ganha +1 Ponto de Vida máximo por nível de personagem.'
+    },
+    'magia_selvagem': {
+      title: 'Magia Selvagem · Origem de Feitiçaria',
+      subtitle: 'Caos Primordial · Ondas do Imprevisível',
+      desc: 'Canaliza a essência volátil do multiverso, onde cada feitiço pode desencadear fenômenos caóticos extraordinários.',
+      combat: 'Manipula as probabilidades do destino para converter falhas em sucessos espetaculares.',
+      rules: 'Marés do Caos & Surto de Magia Selvagem (PHB p. 103): Ganha Vantagem em uma jogada de ataque, teste ou salvaguarda à escolha, acionando surtos aleatórios na tabela de caos arcano.'
+    },
+    'o_corruptor': {
+      title: 'O Corruptor · Patrono Sobrenatural',
+      subtitle: 'Pacto Infernal · Vitalidade Sombria e Chamas',
+      desc: 'Selou um pacto misterioso com um lorde dos planos inferiores (diabos ou demônios), trocando serviços arcanos por poderes devastadores de destruição.',
+      combat: 'Absorve o vigor de cada criatura abatida para continuar lutando com vigor renovado.',
+      rules: 'Bênção do Senhor Negro (PHB p. 109): Ao reduzir uma criatura hostil a 0 PV, ganha Pontos de Vida temporários iguais ao modificador de Carisma + nível de bruxo.'
+    },
+    'o_arquifada': {
+      title: 'O Arquifada · Patrono Sobrenatural',
+      subtitle: 'Pacto Feérico · Encantos e Fuga Nebulosa',
+      desc: 'Vinculado a um nobre das cortes feéricas (Lorde do Verão ou Dama do Inverno), dominando magias de ilusão, encanto e sedução sobrenatural.',
+      combat: 'Confunde grupos de inimigos, torna-se invisível ao sofrer dano e desestabiliza a linha de batalha adversária.',
+      rules: 'Presença Feérica & Fuga Nebulosa (PHB p. 108): Pode fazer com que criaturas num cubo de 3m fiquem enfeitiçadas ou amedrontadas; ao sofrer dano, fica invisível e se teletransporta.'
+    }
+  };
+
+  var _SUBRACE_DND_INFOS = {
+    'humano_variante': {
+      title: 'Humano Variante · Sub-raça',
+      subtitle: 'Especialização Precoce · Ambição e Talento',
+      desc: 'Representa humanos com determinação extraordinária e vocação específica desde a juventude.',
+      traits: '• +1 em dois atributos distintos.\n• Proficiência em uma perícia adicional.\n• Um Talento de D&D 5e à escolha.',
+      rules: 'PHB p. 31. Uma das escolhas mais versáteis do RPG para customização marcial ou mágica.'
+    },
+    'humano_padrao': {
+      title: 'Humano Padrão · Sub-raça',
+      subtitle: 'Equilíbrio Universal · Versatilidade Global',
+      desc: 'Humanos que desenvolveram competências sólidas e equilíbrio físico e mental em todas as áreas.',
+      traits: '• +1 em TODOS os seis atributos (Força, Destreza, Constituição, Inteligência, Sabedoria e Carisma).',
+      rules: 'PHB p. 31. Eleva a pontuação geral do personagem e fortalece salvaguardas diversas.'
+    },
+    'alto_elfo': {
+      title: 'Alto Elfo · Sub-raça',
+      subtitle: 'Mente Arcana Nobre · Elegância Ancestral',
+      desc: 'Herdeiros de antigas tradições mágicas dos bosques superiores, com intelecto afiado e domínio dos mistérios da tecelagem arcana.',
+      traits: '• +1 em Inteligência.\n• Truque de Mago inato à escolha (baseado em Inteligência).\n• Treinamento com espadas longas, espadas curtas, arcos curtos e arcos longos.\n• Idioma adicional.',
+      rules: 'PHB p. 23. Perfeitos para magos, combatentes arcanos e conjuradores eruditos.'
+    },
+    'elfo_da_floresta': {
+      title: 'Elfo da Floresta · Sub-raça',
+      subtitle: 'Velocidade Silvestre · Furtividade na Natureza',
+      desc: 'Habitantes dos ermos profundos com sentidos aguçados e uma conexão instintiva com o terreno florestal.',
+      traits: '• +1 em Sabedoria.\n• Deslocamento ampliado para 10,5 metros (7 hexágonos por rodada).\n• Máscara da Natureza: Pode tentar se esconder mesmo sob leve folhagem, chuva forte ou névoa.',
+      rules: 'PHB p. 24. Excelente para patrulheiros, druidas, monges e ladinos batedores.'
+    },
+    'anao_da_colina': {
+      title: 'Anão da Colina · Sub-raça',
+      subtitle: 'Tenacidade Rochosa · Sabedoria e Vigor',
+      desc: 'Anões com sentidos intuitivos profundos, grande firmeza moral e uma resistência corporal espantosa.',
+      traits: '• +1 em Sabedoria.\n• Tenacidade Anã: Seus Pontos de Vida máximos aumentam em +1 a cada nível de personagem.',
+      rules: 'PHB p. 20. Concede uma reserva de vida extra cumulativa, excelente para clérigos e combatentes resistentes.'
+    },
+    'anao_da_montanha': {
+      title: 'Anão da Montanha · Sub-raça',
+      subtitle: 'Força Titânica · Forja e Aço Pesado',
+      desc: 'Combatentes rudes acostumados com as altitudes gélidas e cavernas profundas, donos de força muscular descomunal.',
+      traits: '• +2 em Força.\n• Treinamento com Armaduras: Proficiência inata com armaduras leves e médias.',
+      rules: 'PHB p. 20. Bônus expressivo de Força que permite criar combatentes pesados e conjuradores blindados.'
+    },
+    'pes_leves': {
+      title: 'Halfling Pés-Leves · Sub-raça',
+      subtitle: 'Furtividade Ágil · Carisma Cativante',
+      desc: 'Pequenos, velozes e discretos, mestres em passar despercebidos e se misturar em meio a multidões ou adversários maiores.',
+      traits: '• +1 em Carisma.\n• Furtividade Natural: Pode tentar se esconder mesmo quando ocultado apenas por uma criatura que seja de tamanho Médio ou maior.',
+      rules: 'PHB p. 28. O bônus facilita ataques furtivos e manobras evasivas em combate.'
+    },
+    'robusto': {
+      title: 'Halfling Robusto · Sub-raça',
+      subtitle: 'Vigor Inabalável · Resistência a Venenos',
+      desc: 'Dizem carregar traços de sangue anão antigo. São mais atarracados e notavelmente resistentes a toxinas.',
+      traits: '• +1 em Constituição.\n• Resiliência dos Robustos: Vantagem em salvaguardas contra veneno e resistência a dano venenoso.',
+      rules: 'PHB p. 28. Excelente sobrevivência contra serpentes, aranhas gigantes e armadilhas envenenadas.'
+    },
+    'alto_meio_elfo': {
+      title: 'Alto Meio-Elfo · Sub-raça',
+      subtitle: 'Sangue Nobre Arcano · Graça Mágica',
+      desc: 'Carrega com destaque a vertente nobre dos altos elfos, mantendo um truque arcano na ponta dos dedos.',
+      traits: '• Um truque arcano de Mago à escolha.\n• Carisma e atributos versáteis da herança meio-élfica.',
+      rules: 'SCAG p. 116. Combina flexibilidade social com utilidade mística imediata.'
+    },
+    'meio_elfo_da_floresta': {
+      title: 'Meio-Elfo da Floresta · Sub-raça',
+      subtitle: 'Passos Ligeiros dos Ermos · Agilidade Primitiva',
+      desc: 'Herda a agilidade dos elfos silvestres, movendo-se com passos rápidos pela mata.',
+      traits: '• Deslocamento aumentado para 10,5 metros (7 hexes) ou Máscara da Natureza.',
+      rules: 'SCAG p. 116. Maior mobilidade tática em campo aberto e combate em turnos.'
+    },
+    'draconato_cromatico': {
+      title: 'Draconato Cromático · Sub-raça',
+      subtitle: 'Fúria Destrutiva · Sopro em Linha Concentrada',
+      desc: 'Descendente de dragões vermelhos, azuis, verdes, pretos ou brancos, canalizando ferocidade elementar violenta.',
+      traits: '• Sopro em Linha (9 metros de comprimento por 1,5m de largura) causando dano elemental maciço.\n• Resistência inata ao tipo de dano do sopro.',
+      rules: 'PHB p. 34. Perfeito para abrir caminho entre fileiras cerradas de adversários.'
+    },
+    'draconato_metalico': {
+      title: 'Draconato Metálico · Sub-raça',
+      subtitle: 'Nobreza Ancestral · Sopro Cônico em Área',
+      desc: 'Descendente de dragões dourados, prateados, de bronze, latão ou cobre, conhecidos por sua nobreza e senso de dever.',
+      traits: '• Sopro em Cone (4,5 metros de abertura) cobrindo múltiplos alvos na linha de frente.\n• Resistência elemental correspondente.',
+      rules: 'PHB p. 34. Excelente cobertura de área em confrontos táticos.'
+    },
+    'gnomo_das_rochas': {
+      title: 'Gnomo das Rochas · Sub-raça',
+      subtitle: 'Engenho de Artífice · Conhecimento dos Mecanismos',
+      desc: 'Curiosos incansáveis com afinidade natural por engrenagens, maquinários arcanos e ferramentas de precisão.',
+      traits: '• +1 em Constituição.\n• Conhecimento de Artífice: Dobra a proficiência em testes de História relacionados a itens mágicos ou mecânicos.\n• Criação de pequenos dispositivos de corda com ferramentas de funileiro.',
+      rules: 'PHB p. 37. Perfeito para desvendar relíquias e armadilhas antigas em masmorras.'
+    },
+    'gnomo_da_floresta': {
+      title: 'Gnomo da Floresta · Sub-raça',
+      subtitle: 'Ilusão Natural · Amigo dos Animais',
+      desc: 'Povo alegre e recluso das matas que utiliza ilusões sutis para proteger seus lares e dialoga com a fauna silvestre.',
+      traits: '• +1 em Destreza.\n• Ilusionista Nato: Conhece o truque Ilusão Menor.\n• Falar com Feras Pequenas: Comunica conceitos simples com esquilos, texugos e aves.',
+      rules: 'PHB p. 37. Excelente para batedores, ladinos e conjuradores discretos.'
+    },
+    'meio_orc_da_fronteira': {
+      title: 'Meio-Orc da Fronteira · Sub-raça',
+      subtitle: 'Vigilância Rústica · Instinto Rastreador',
+      desc: 'Habitante das terras ermas e fronteiras perigosas, treinado na arte de rastrear salteadores e sobreviver a intempéries.',
+      traits: '• Sentidos aguçados e proficiência natural em Sobrevivência ou Intimidação.\n• Resistência implacável ampliada diante de perigos ambientais.',
+      rules: 'Excelente para patrulheiros, guerreiros e combatentes dos ermos.'
+    },
+    'meio_orc_cicatrizado': {
+      title: 'Meio-Orc Cicatrizado · Sub-raça',
+      subtitle: 'Veterano das Guerras · Fúria Incansável',
+      desc: 'Combatente coberto de marcas e cicatrizes de batalhas passadas, cujo corpo aprendeu a ignorar a dor e a focar no golpe fatal.',
+      traits: '• Potencializa os Ataques Selvagens em acertos críticos.\n• Presença intimidatória que abala o moral dos inimigos.',
+      rules: 'Combatente temível na vanguarda marcial com grande impacto psicológico.'
+    },
+    'tiefling_infernal': {
+      title: 'Tiefling Infernal · Sub-raça',
+      subtitle: 'Linhagem do Fogo · Chamas de Asmodeus',
+      desc: 'Carrega o sangue das fornalhas de Baator, com domínio inato sobre chamas vingativas e taumaturgia.',
+      traits: '• Truque Taumaturgia inato.\n• Conjura Repreensão Infernal ao sofrer golpes em combate, queimando atacantes com fogo sagrado sombrio.',
+      rules: 'PHB p. 43. Reação imediata defensiva contra atacantes corpo a corpo.'
+    },
+    'tiefling_abissal': {
+      title: 'Tiefling Abissal · Sub-raça',
+      subtitle: 'Caos do Abismo · Vigor Sobrenatural',
+      desc: 'Herdeiro da entropia e ferocidade do Abismo, com pele resistente e magias que oscilam conforme as fases do dia.',
+      traits: '• Pontos de Vida ampliados (+1 PV a cada dois níveis).\n• Magias inatas de caos e telecinese elemental.',
+      rules: 'UA / MToF. Maior vitalidade física e resiliência contra ataques contundentes.'
+    }
+  };
+
+  var _ARMOR_DND_INFOS = {
+    'cota_de_malha_escudo': {
+      title: 'Cota de Malha & Escudo',
+      subtitle: 'Armadura Pesada & Proteção de Aço',
+      desc: 'Composta por anéis de aço entrelaçados sobre acolchoamento reforçado e acompanhada por um sólido escudo heráldico.',
+      combat: 'CA base de 16 a 18. Absorve flechas e desvia lâminas pesadas na linha de frente.',
+      rules: 'Armadura Pesada (PHB p. 145): Concede CA fixa elevada sem somar Destreza. Exige Força 13 para deslocamento pleno. Escudo concede +2 de CA adicional.'
+    },
+    'placas_escudo_sagrado': {
+      title: 'Placas & Escudo Sagrado',
+      subtitle: 'Armadura Pesada Consagrada',
+      desc: 'O ápice da metalurgia defensiva: placas articuladas de metal que cobrem o corpo inteiro, com escudo gravado de símbolos sagrados.',
+      combat: 'CA base de 18 a 20. A defesa física mais intransponível do campo de batalha.',
+      rules: 'Armadura de Placas (PHB p. 145): CA base 18. Escudo adiciona +2 (totalizando CA 20). Não se soma modificador de Destreza.'
+    },
+    'cota_de_escamas_escudo': {
+      title: 'Cota de Escamas & Escudo',
+      subtitle: 'Armadura Média Articulada',
+      desc: 'Feita de tiras de couro reforçadas com placas metálicas sobrepostas lembrando escamas de peixe.',
+      combat: 'Excelente equilíbrio entre defesa sólida e mobilidade para conjuração divina.',
+      rules: 'Armadura Média (PHB p. 144): CA base 14 + modificador de Destreza (limitado a um máximo de +2). Escudo confere +2 de CA adicional.'
+    },
+    'armadura_de_couro_batido': {
+      title: 'Couro Batido',
+      subtitle: 'Armadura Leve Reforçada',
+      desc: 'Couro resistente temperado em óleo quente e cravado com rebites de aço pontuais.',
+      combat: 'Permite movimentos ágeis, saltos e arco e flecha sem qualquer ruído ou impedimento.',
+      rules: 'Armadura Leve (PHB p. 144): CA base 12 + modificador integral de Destreza sem teto limite.'
+    },
+    'couro_leve_adagas': {
+      title: 'Couro Leve & Adagas',
+      subtitle: 'Armadura Leve de Discrição',
+      desc: 'Colete de couro flexível que protege os órgãos vitais mantendo silêncio absoluto na marcha.',
+      combat: 'Ideal para emboscadas, furtividade noturna e manobras acrobáticas.',
+      rules: 'Armadura Leve (PHB p. 144): CA base 11 + modificador total de Destreza.'
+    },
+    'couro_leve_de_trovador': {
+      title: 'Couro Leve de Trovador',
+      subtitle: 'Armadura Leve Artística',
+      desc: 'Traje elegante de couro flexível adornado com fivelas, que não limita gestos musicais ou conjurações.',
+      combat: 'Mobilidade total para inspirar companheiros e esquivar de projéteis.',
+      rules: 'Armadura Leve (PHB p. 144): CA base 11 + modificador total de Destreza.'
+    },
+    'defesa_sem_armadura': {
+      title: 'Defesa sem Armadura',
+      subtitle: 'Proteção Inata Corporal',
+      desc: 'O aventureiro não veste armaduras metálicas pesadas; confia na couraça de seus músculos (Bárbaro) ou na intuição espiritual (Monge).',
+      combat: 'Total liberdade corporal para investir, esquivar e desferir golpes relâmpago.',
+      rules: 'Regra Especial (PHB p. 48 / 78): Bárbaros somam 10 + Destreza + Constituição. Monges somam 10 + Destreza + Sabedoria.'
+    },
+    'manto_marcial': {
+      title: 'Manto Marcial',
+      subtitle: 'Vestimenta de Treino Monástico',
+      desc: 'Túnica ascética tradicional que permite amplitude máxima de chutes, saltos e técnicas desarmadas.',
+      combat: 'Defesa baseada inteiramente na velocidade de reação e sentidos aguçados.',
+      rules: 'Defesa sem Armadura (PHB p. 78): CA calculada somando 10 + modificador de Destreza + modificador de Sabedoria.'
+    },
+    'armadura_de_madeira_escudo': {
+      title: 'Armadura de Madeira & Escudo',
+      subtitle: 'Proteção Natural Druídica',
+      desc: 'Placas de casca de ferro tratada e couro curtido com escudo de carvalho maciço.',
+      combat: 'Respeita o tabu druídico contra o uso de armaduras de metal forjado.',
+      rules: 'Armadura Média Alternativa (PHB p. 65): CA base 14 + Destreza (máx +2) e +2 pelo escudo.'
+    },
+    'manto_arcano_escudo': {
+      title: 'Manto Arcano & Escudo',
+      subtitle: 'Vestimenta de Seda Mística',
+      desc: 'Manto bordado com fios de proteção arcana e símbolos de dissipação.',
+      combat: 'Não impõe desvantagens em conjuração e combina perfeitamente com a magia Escudo Arcano (+5 CA).',
+      rules: 'Sem Armadura (PHB p. 144): CA 10 + Destreza. Potencializado por magias como Armadura Arcana (CA 13 + Des).'
+    },
+    'escamas_draconicas': {
+      title: 'Escamas Dracônicas',
+      subtitle: 'Proteção Natural Mística',
+      desc: 'A pele é reforçada por escamas cintilantes originadas do sangue ancestral de dragões.',
+      combat: 'Proteção rígida permanente sem o peso de metais.',
+      rules: 'Resiliência Dracônica (PHB p. 102): CA base 13 + modificador de Destreza de forma passiva.'
+    },
+    'couro_de_pacto': {
+      title: 'Couro de Pacto',
+      subtitle: 'Armadura Leve de Bruxo',
+      desc: 'Couro enegrecido temperado com cinzas de planos sobrenaturais.',
+      combat: 'Proteção discreta que mantém as mãos livres para disparar rajadas místicas.',
+      rules: 'Armadura Leve (PHB p. 144): CA base 11 + modificador total de Destreza.'
+    }
+  };
+
   function _openSheetInfoDialog(info) {
     if (!info) return;
     var ov = _ensureChoiceDetailOverlay();
@@ -1952,19 +2366,23 @@
       travel: 'Influencia testes de perícia e desafios encontrados durante as viagens.',
       rules: 'A pontuação define o modificador somado a jogadas de d20. Fórmula: (Valor - 10) / 2.'
     };
+    var sections = [
+      { title: 'O Que Significa na Prática?', text: info.desc },
+      { title: 'Influência no Grupo & Viagem', text: info.travel }
+    ];
+    if (info.skillsText) {
+      sections.push({ title: 'Perícias & Testes Governados (d20)', text: info.skillsText });
+    }
+    sections.push({
+      title: 'Regras & Mecânica D&D 5e',
+      text: info.rules + '\n\n• Valor Deste Personagem: ' + val + '\n• Modificador Atual: ' + _csFmtMod(mod) + ' (somado a jogadas e testes deste atributo)'
+    });
     _openSheetInfoDialog({
       title: info.name + ': ' + val + ' [' + _csFmtMod(mod) + ']',
       subtitle: info.sub,
       tag: '✦ ATRIBUTO D&D 5E',
       extraBadge: 'Modificador ' + _csFmtMod(mod),
-      sections: [
-        { title: 'O Que Significa na Prática?', text: info.desc },
-        { title: 'Influência no Grupo & Viagem?', text: info.travel },
-        {
-          title: 'Regras & Mecânica D&D 5e',
-          text: info.rules + '\n\n• Valor Deste Personagem: ' + val + '\n• Modificador Atual: ' + _csFmtMod(mod) + ' (somado a jogadas e testes deste atributo)'
-        }
-      ]
+      sections: sections
     });
   }
 
@@ -2011,23 +2429,23 @@
   }
 
   function _showSubclassDetail(subclsName, clsName) {
-    _openSheetInfoDialog({
-      title: subclsName + ' · Sub-classe',
+    var raw = String(subclsName || '').trim();
+    var key = _normalizeDndKey(raw);
+    var data = _SUBCLASS_DND_INFOS[key] || {
+      title: raw + ' · Sub-classe',
       subtitle: 'Especialização de ' + (clsName || 'Classe'),
+      desc: 'Representa a especialização temática e doutrinária escolhida pelo aventureiro dentro de sua classe, concedendo poderes exclusivos e técnicas avançadas.',
+      combat: 'Diferencia o estilo de combate do personagem, aprimorando dano, cura, suporte ou defesas místicas conforme o caminho trilhado.',
+      rules: 'Em D&D 5e, sub-classes desbloqueiam arquétipos e habilidades de prestígio que enriquecem o repertório de combate da comitiva.'
+    };
+    _openSheetInfoDialog({
+      title: data.title,
+      subtitle: data.subtitle,
       tag: '✦ SUB-CLASSE D&D 5E',
       sections: [
-        {
-          title: 'O Que Significa na Prática?',
-          text: 'Representa a especialização temática e doutrinária escolhida pelo aventureiro dentro de sua classe, concedendo poderes exclusivos e técnicas avançadas.'
-        },
-        {
-          title: 'Impacto Tático',
-          text: 'Diferencia o estilo de combate do personagem, aprimorando dano, cura, suporte ou defesas místicas conforme o caminho trilhado.'
-        },
-        {
-          title: 'Regras D&D 5e (Livro do Jogador)',
-          text: 'Em D&D 5e, sub-classes desbloqueiam arquétipos e habilidades de prestígio que enriquecem o repertório de combate da comitiva.'
-        }
+        { title: 'O Que Significa na Prática?', text: data.desc },
+        { title: 'Papel no Grupo & Combate', text: data.combat },
+        { title: 'Regras D&D 5e (Livro do Jogador)', text: data.rules }
       ]
     });
   }
@@ -2055,23 +2473,45 @@
   }
 
   function _showSubraceDetail(subraceName, raceName) {
-    _openSheetInfoDialog({
-      title: subraceName + ' · Sub-raça',
+    var raw = String(subraceName || '').trim();
+    var key = _normalizeDndKey(raw);
+    var data = _SUBRACE_DND_INFOS[key] || {
+      title: raw + ' · Sub-raça',
       subtitle: 'Ramificação de ' + (raceName || 'Raça'),
+      desc: 'Representa um ramo regional ou linhagem específica da raça, com adaptações anatômicas e culturais próprias.',
+      traits: 'Confere bônus adicionais de atributos, perícias ou resistências únicas (como a tenacidade dos Anões da Colina ou a magia dos Altos Elfos).',
+      rules: 'Sub-raças complementam os traços da raça base com talentos específicos de ancestralidade.'
+    };
+    _openSheetInfoDialog({
+      title: data.title,
+      subtitle: data.subtitle,
       tag: '✦ SUB-RAÇA D&D 5E',
       sections: [
-        {
-          title: 'O Que Significa na Prática?',
-          text: 'Representa um ramo regional ou linhagem específica da raça, com adaptações anatômicas e culturais próprias.'
-        },
-        {
-          title: 'Diferenciais de Sobrevivência',
-          text: 'Confere bônus adicionais de atributos, perícias ou resistências únicas (como a tenacidade dos Anões da Colina ou a magia dos Altos Elfos).'
-        },
-        {
-          title: 'Regras D&D 5e (Livro do Jogador)',
-          text: 'Sub-raças complementam os traços da raça base com talentos específicos de ancestralidade.'
-        }
+        { title: 'O Que Significa na Prática?', text: data.desc },
+        { title: 'Traços Marcantes de Sub-raça', text: data.traits },
+        { title: 'Regras D&D 5e (Livro do Jogador)', text: data.rules }
+      ]
+    });
+  }
+
+  function _showArmorDetail(armorName) {
+    var raw = String(armorName || '').trim();
+    var key = _normalizeDndKey(raw);
+    var data = _ARMOR_DND_INFOS[key] || {
+      title: raw,
+      subtitle: 'Equipamento de Proteção e Defesa',
+      desc: 'Vestimenta de proteção que desvia ataques e absorve impactos de armas e garras na linha de frente.',
+      combat: 'Garante que o aventureiro aguente o choque de combate em masmorras e emboscadas na estrada.',
+      rules: 'Armaduras definem a Classe de Armadura (CA) base. Armaduras Leves somam toda a Destreza; Médias somam até +2; Pesadas conferem proteção rígida fixa; Escudos concedem +2 de CA.'
+    };
+    _openSheetInfoDialog({
+      title: data.title + ' · Armadura',
+      subtitle: data.subtitle,
+      tag: '✦ ARMADURA D&D 5E',
+      sections: [
+        { title: 'O Que Significa na Prática?', text: data.desc },
+        { title: 'Impacto no Grupo & Combate', text: data.combat },
+        { title: 'Regras D&D 5e (Livro do Jogador)', text: data.rules }
       ]
     });
   }
@@ -2254,12 +2694,26 @@
       });
       tagsRow.appendChild(bSubrace);
     }
+    if (ch.armor_type) {
+      var bArmor = document.createElement('div');
+      bArmor.className = 'enc-cs-meta-badge enc-cs-interactive';
+      bArmor.setAttribute('role', 'button');
+      bArmor.setAttribute('tabindex', '0');
+      bArmor.setAttribute('title', 'Tocar para ver detalhes de ' + ch.armor_type);
+      bArmor.innerHTML = '<span>⚔️</span> <span>' + _stripEmojis(ch.armor_type) + '</span>';
+      bArmor.addEventListener('click', function(e) {
+        e.stopPropagation();
+        _showArmorDetail(ch.armor_type);
+      });
+      tagsRow.appendChild(bArmor);
+    }
     box.appendChild(tagsRow);
 
-    /* 6. Linha de vitais interativos (PV / CA / Deslocamento / Bônus Ataque / Dado de Vida / PM). */
+    /* 6. Linha de vitais interativos (PV / CA / Proficiência / Deslocamento / Bônus Ataque / Dado de Vida / PM). */
     var vitals = [];
     if (ch.hp != null) vitals.push(['PV', String(ch.hp | 0)]);
     if (ch.ac != null) vitals.push(['CA', String(ch.ac | 0)]);
+    if (ch.prof != null) vitals.push(['Prof.', String(ch.prof).indexOf('+') === 0 ? String(ch.prof) : ('+' + (ch.prof | 0))]);
     if (ch.speed) vitals.push(['Desl.', String(ch.speed).split(' ')[0]]);
     if (ch.attack_bonus) vitals.push(['Ataque', String(ch.attack_bonus)]);
     if (ch.spell_dc) vitals.push(['DC Mag.', String(ch.spell_dc)]);
@@ -2554,6 +3008,19 @@
     cha: 'Carisma'
   };
 
+  /* Escala Canônica D&D 5e de Classe de Dificuldade (PHB p. 174 / DMG p. 238).
+     Explicação didática para pessoas que não entendem D&D ou RPG. */
+  function _getDcBenchmarkInfo(dc) {
+    var n = Number(dc);
+    if (isNaN(n) || n <= 0) return null;
+    if (n <= 5) return { tier: 'Muito Fácil', desc: 'Tarefa simples; qualquer aventureiro com atenção básica obtém sucesso.' };
+    if (n <= 10) return { tier: 'Fácil', desc: 'Exige esforço comum; superada com tranquilidade por aventureiros treinados.' };
+    if (n <= 15) return { tier: 'Moderado', desc: 'Exige competência real, preparo ou atributos adequados para o êxito.' };
+    if (n <= 20) return { tier: 'Difícil', desc: 'Desafio árduo; exige treino especializado, bônus expressivos ou sorte no d20.' };
+    if (n <= 25) return { tier: 'Muito Difícil', desc: 'Grande façanha de sobrevivência que apenas especialistas experientes alcançam.' };
+    return { tier: 'Quase Impossível', desc: 'Proeza lendária nos limites absolutos da capacidade mortal.' };
+  }
+
   /* Choice detail modal (janela menor explicativa) */
   function _ensureChoiceDetailOverlay() {
     var ov = document.getElementById('enc-choice-detail-overlay');
@@ -2763,7 +3230,12 @@
         resultParts.push('<div>Avanço pelo trajeto em ritmo normal, sem bônus adicionais de postura e sem penalidades prévias.</div>');
       } else if (ch.id === 'jrn_cancel') {
         resultParts.push('<div>A viagem é suspensa em segurança, retornando à cidade sem passagem de tempo ou perda de recursos.</div>');
-      } else if (ch.dc) {
+      } else if (ch.dc || (ch.check && ch.check.dc)) {
+        var dcVal = ch.dc || (ch.check && ch.check.dc);
+        var bench = _getDcBenchmarkInfo(dcVal);
+        if (bench) {
+          resultParts.push('<div>✦ <b>Dificuldade D&D 5e (CD ' + dcVal + '): ' + bench.tier + '</b> — ' + bench.desc + '</div>');
+        }
         resultParts.push('<div>✦ <b>Sucesso:</b> Desafio superado com êxito' + (ch.chance != null ? ' (' + ch.chance + '% de chance)' : '') + '.</div>');
         resultParts.push('<div>◆ <b>Falha:</b> Risco de complicações, perda de recursos ou dano' + (ch.dmg ? ' (~' + ch.dmg + ' PV)' : '') + '.</div>');
       } else if (ch.isCombat) {
