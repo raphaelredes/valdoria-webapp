@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-13T17:13:24Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-14T01:37:55Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -22301,6 +22301,15 @@ function _actBtnIco(slug) {
     if (slug === 'acao-desengajar') {
         return '<svg class="action-btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#7ee7ff;"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 4 4v2"/></svg>';
     }
+    if (slug === 'acao-empurrar') {
+        return '<svg class="action-btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#f59e0b;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    }
+    if (slug === 'acao-ajudar') {
+        return '<svg class="action-btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#34d399;"><path d="M18 15l-6-6-6 6"/><circle cx="12" cy="12" r="9"/></svg>';
+    }
+    if (slug === 'acao-esconder') {
+        return '<svg class="action-btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#a78bfa;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+    }
     var loc = (typeof location !== 'undefined') ? location.href : '';
     var base = (loc.indexOf('file://') === 0) ? '../shared/img/ui/' : '/shared/img/ui/';
     return '<img class="action-btn-ico" src="' + base + slug + '.webp" alt="" loading="lazy" '
@@ -23103,7 +23112,7 @@ function buildCell(cell, activeId) {
 }
 
 /* ========= Render ========= */
-var currentState = null, _selectingTarget = false, _pendingSkill = null, _pendingHealItem = null, _skipInit = false, _simSkipNonPlayerDice = false, _activeDiceClose = null, _mmTargets = null;
+var currentState = null, _selectingTarget = false, _pendingSkill = null, _pendingSpecialAction = null, _pendingHealItem = null, _skipInit = false, _simSkipNonPlayerDice = false, _activeDiceClose = null, _mmTargets = null;
 /* Frente 8 (#83): preferência PERSISTENTE do jogador "pular animação de dados".
    Marcada = nenhuma animação de dado roda (player + inimigos + iniciativa) — o
    resultado é aplicado instantâneo (com som de impacto). Preferência de UI (não
@@ -24282,7 +24291,7 @@ function _updateActionSheetState(s) {
        (pointer-events:none) quando p.actionSpent. É só preferência de UI: sempre ativo. */
     var ALWAYS_ACTIVE = { 'pass': true, 'toggle-skip-dice': true, 'log': true };
     /* Buttons que requerem ação principal (PHB) */
-    var ACTION_GATED = { 'attack': true, 'dodge': true, 'flee': true, 'bag': true, 'use-item': true, 'dash': true, 'disengage': true };
+    var ACTION_GATED = { 'attack': true, 'dodge': true, 'flee': true, 'bag': true, 'use-item': true, 'dash': true, 'disengage': true, 'shove': true, 'help': true };
     for (var bi = 0; bi < mainBtns.length; bi++) {
         var btnEl = mainBtns[bi];
         var actName = btnEl.getAttribute('data-act') || '';
@@ -24307,12 +24316,23 @@ function _updateActionSheetState(s) {
                 btnEl.removeAttribute('aria-disabled');
                 btnEl.removeAttribute('title');
             }
+        } else if (actName === 'hide') {
+            var isRogueCunning = (p.cls || '').toLowerCase() === 'ladino' || (p.skills || []).some(function(s){ return s && s.n === 'Ação Ardilosa'; });
+            var hideSpent = isRogueCunning ? (!!p.bonusActionSpent && !!p.actionSpent) : !!p.actionSpent;
+            btnEl.classList.toggle('spent', hideSpent);
+            if (hideSpent) {
+                btnEl.setAttribute('aria-disabled', 'true');
+                btnEl.setAttribute('title', isRogueCunning ? 'Ação e Ação Bônus esgotadas neste turno' : 'Ação principal já gasta neste turno');
+            } else {
+                btnEl.removeAttribute('aria-disabled');
+                btnEl.removeAttribute('title');
+            }
         } else if (ALWAYS_ACTIVE[actName]) {
             /* Passar/Pular dados/Log: nunca desabilitar (meta UI) */
             btnEl.classList.remove('spent');
             btnEl.removeAttribute('aria-disabled');
         } else if (ACTION_GATED[actName]) {
-            /* Atacar/Esquivar/Fugir/Mochila: requerem ação principal */
+            /* Atacar/Esquivar/Fugir/Mochila/Empurrar/Ajudar: requerem ação principal */
             var _gateSpent = !!p.actionSpent;
             /* PHB p.93 Beast Master nv5+: o ataque de arma concedido pelo comando da
                fera fica disponível mesmo com a ação gasta (só o botão Atacar). */
@@ -25748,10 +25768,13 @@ function render(s) {
             hudIconHtml = '<span class="tsh-ico">' + _combatActionIconSVG(14) + '</span> ';
         }
 
-        var hintSub = 'Toque em um alvo dentro do alcance para confirmar o ataque';
-        var themeClass = '';
-
-        if (_pendingSkill && _pendingSkill.targetAlly && (_pendingSkill.blessSpell || _pendingSkill.shieldSpell)) {
+        if (_pendingSpecialAction === 'shove') {
+            hudTitle = 'Empurrar / Derrubar';
+            hintSub = 'Toque em um inimigo para empurrar 1,5m ou derrubar no chão (PHB p. 195)';
+        } else if (_pendingSpecialAction === 'help') {
+            hudTitle = 'Ajudar Aliado';
+            hintSub = 'Toque em um inimigo para criar distração e conceder Vantagem a um aliado (PHB p. 192)';
+        } else if (_pendingSkill && _pendingSkill.targetAlly && (_pendingSkill.blessSpell || _pendingSkill.shieldSpell)) {
             hintSub = 'Toque no aliado (ou em você) para aplicar ' + escHtml(_pendingSkill.n);
             themeClass = ' tsh--buff';
         } else if ((_pendingSkill && _pendingSkill.kind === 'heal') || _pendingHealItem) {
@@ -25896,6 +25919,13 @@ function render(s) {
                 }
                 html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + '<span class="action-btn-label">Disparada</span>' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + '<span class="action-btn-label">Desengajar</span>' + actionGlyph + '</button>';
+                var isRogueCunningHide = pCur && ((pCur.cls || '').toLowerCase() === 'ladino' || (pCur.skills || []).some(function(s){ return s && s.n === 'Ação Ardilosa'; }));
+                var hideGlyph = isRogueCunningHide
+                    ? '<span class="action-btn-res-icon res-bonus" aria-hidden="true">▲</span>'
+                    : actionGlyph;
+                html += '<button type="button" class="action-btn secondary" data-act="shove">' + _actBtnIco('acao-empurrar') + '<span class="action-btn-label">Empurrar</span>' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="help">' + _actBtnIco('acao-ajudar') + '<span class="action-btn-label">Ajudar</span>' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="hide">' + _actBtnIco('acao-esconder') + '<span class="action-btn-label">Esconder</span>' + hideGlyph + '</button>';
                 /* 2026-06-23: CD + chance aprox. direto no botão Fugir */
                 var _fleeDc = (typeof simFleeEscapeDc === 'function' && currentState) ? simFleeEscapeDc(currentState) : 0;
                 var _fleePI = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
@@ -25992,6 +26022,48 @@ function bindActions() {
                 }
                 if (_selectingTarget && uid && uid.indexOf('enemy_') === 0) {
                     var idx = parseInt(uid.slice(6), 10);
+                    if (_pendingSpecialAction === 'shove') {
+                        _selectingTarget = false;
+                        var _shoveTgt = idx;
+                        _pendingSpecialAction = null;
+                        render(currentState);
+                        showShoveChoiceModal(_shoveTgt).then(function(mode) {
+                            if (!mode) {
+                                _actionTaken = false;
+                                render(currentState);
+                                return;
+                            }
+                            _actionTaken = true;
+                            render(currentState);
+                            if (window.__COMBAT_MODE === 'remote' || window.__COMBAT_REMOTE_ACTIVE) {
+                                void __combatRemoteAction({ type: 'shove', target: _shoveTgt, shove_mode: mode });
+                            } else {
+                                void passPlayerMetaAction('shove', { target: _shoveTgt, shove_mode: mode });
+                            }
+                        });
+                        return;
+                    }
+                    if (_pendingSpecialAction === 'help') {
+                        _selectingTarget = false;
+                        var _helpTgt = idx;
+                        _pendingSpecialAction = null;
+                        render(currentState);
+                        showHelpChoiceModal(_helpTgt).then(function(ok) {
+                            if (!ok) {
+                                _actionTaken = false;
+                                render(currentState);
+                                return;
+                            }
+                            _actionTaken = true;
+                            render(currentState);
+                            if (window.__COMBAT_MODE === 'remote' || window.__COMBAT_REMOTE_ACTIVE) {
+                                void __combatRemoteAction({ type: 'help', target: _helpTgt });
+                            } else {
+                                void passPlayerMetaAction('help', { target: _helpTgt });
+                            }
+                        });
+                        return;
+                    }
                     /* V1 Invocações Phase 2 — Comandar Arma Espiritual (BA): aplica direto. */
                     if (_pendingAttachedSummon) {
                         var aIdx = _pendingAttachedSummon.attachedIdx;
@@ -27063,6 +27135,21 @@ function onBtnClick(ev) {
                     showToast('Desengajar consome uma Ação principal (PHB p. 192). Ação já utilizada neste turno.');
                 }
                 return;
+            } else if (spentAct === 'shove') {
+                if (typeof showToast === 'function') {
+                    showToast('Empurrar consome uma Ação principal (PHB p. 195). Ação já utilizada neste turno.');
+                }
+                return;
+            } else if (spentAct === 'help') {
+                if (typeof showToast === 'function') {
+                    showToast('Ajudar consome uma Ação principal (PHB p. 192). Ação já utilizada neste turno.');
+                }
+                return;
+            } else if (spentAct === 'hide') {
+                if (typeof showToast === 'function') {
+                    showToast('Esconder-se requer uma Ação disponível (PHB p. 177, 192). Ações esgotadas neste turno.');
+                }
+                return;
             } else if (spentAct === 'attack' || spentAct === 'dodge' || spentAct === 'bag' || spentAct === 'flee') {
                 if (typeof showToast === 'function') {
                     showToast('Ação indisponível: sua Ação principal já foi gasta neste turno (PHB p. 189).');
@@ -27094,19 +27181,123 @@ function onBtnClick(ev) {
         } else if (act === 'dash') {
             _actionSheetOpen = false;
             render(currentState);
-            void __combatRemoteAction({ type: 'dash' });
+            confirmSimDiceSkip(
+                'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n• Custo: Gasta sua Ação principal.',
+                'Disparada (PHB p. 192)',
+                '✔ Disparar',
+                '← Voltar às opções'
+            ).then(function(ok) {
+                if (ok) {
+                    _actionTaken = true;
+                    render(currentState);
+                    void __combatRemoteAction({ type: 'dash' });
+                } else {
+                    render(currentState);
+                }
+            });
             return;
         } else if (act === 'dodge') {
             _actionSheetOpen = false;
-            _actionTaken = true;
             render(currentState);
-            void __combatRemoteAction({ type: 'dodge' });
+            confirmSimDiceSkip(
+                'O Que Está Sendo Escolhido:\nVocê se concentra inteiramente na sua defesa até o início do seu próximo turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Ataques contra você têm Desvantagem se você vir o atacante.\n• Vantagem em Testes de Resistência de Destreza.\n• Custo: Gasta sua Ação principal.',
+                'Esquivar (PHB p. 192)',
+                '✔ Esquivar',
+                '← Voltar às opções'
+            ).then(function(ok) {
+                if (ok) {
+                    _actionTaken = true;
+                    render(currentState);
+                    void __combatRemoteAction({ type: 'dodge' });
+                } else {
+                    render(currentState);
+                }
+            });
             return;
         } else if (act === 'disengage') {
             _actionSheetOpen = false;
-            _actionTaken = true;
             render(currentState);
-            void __combatRemoteAction({ type: 'disengage' });
+            confirmSimDiceSkip(
+                'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n• Custo: Gasta sua Ação principal.',
+                'Desengajar (PHB p. 192)',
+                '✔ Desengajar',
+                '← Voltar às opções'
+            ).then(function(ok) {
+                if (ok) {
+                    _actionTaken = true;
+                    render(currentState);
+                    void __combatRemoteAction({ type: 'disengage' });
+                } else {
+                    render(currentState);
+                }
+            });
+            return;
+        } else if (act === 'shove') {
+            _actionSheetOpen = false;
+            var aliveIdxsShoveR = [];
+            if (currentState && currentState.order) {
+                for (var axSR = 0; axSR < currentState.order.length; axSR++) {
+                    var ocSR = currentState.order[axSR];
+                    if (ocSR && ocSR.t === 'e' && ocSR.alive && !ocSR.isDead) aliveIdxsShoveR.push(axSR);
+                }
+            }
+            if (aliveIdxsShoveR.length === 0) return;
+            if (aliveIdxsShoveR.length === 1) {
+                render(currentState);
+                showShoveChoiceModal(aliveIdxsShoveR[0]).then(function(mode) {
+                    if (mode) {
+                        _actionTaken = true;
+                        render(currentState);
+                        void __combatRemoteAction({ type: 'shove', target: aliveIdxsShoveR[0], shove_mode: mode });
+                    } else {
+                        render(currentState);
+                    }
+                });
+                return;
+            }
+            _selectingTarget = true;
+            _pendingSpecialAction = 'shove';
+            render(currentState);
+            return;
+        } else if (act === 'help') {
+            _actionSheetOpen = false;
+            var aliveIdxsHelpR = [];
+            if (currentState && currentState.order) {
+                for (var axHR = 0; axHR < currentState.order.length; axHR++) {
+                    var ocHR = currentState.order[axHR];
+                    if (ocHR && ocHR.t === 'e' && ocHR.alive && !ocHR.isDead) aliveIdxsHelpR.push(axHR);
+                }
+            }
+            if (aliveIdxsHelpR.length === 0) return;
+            if (aliveIdxsHelpR.length === 1) {
+                render(currentState);
+                showHelpChoiceModal(aliveIdxsHelpR[0]).then(function(ok) {
+                    if (ok) {
+                        _actionTaken = true;
+                        render(currentState);
+                        void __combatRemoteAction({ type: 'help', target: aliveIdxsHelpR[0] });
+                    } else {
+                        render(currentState);
+                    }
+                });
+                return;
+            }
+            _selectingTarget = true;
+            _pendingSpecialAction = 'help';
+            render(currentState);
+            return;
+        } else if (act === 'hide') {
+            _actionSheetOpen = false;
+            render(currentState);
+            showHideConfirmModal().then(function(ok) {
+                if (ok) {
+                    _actionTaken = true;
+                    render(currentState);
+                    void __combatRemoteAction({ type: 'hide' });
+                } else {
+                    render(currentState);
+                }
+            });
             return;
         } else if (act === 'flee') {
             _actionSheetOpen = false;
@@ -27469,6 +27660,7 @@ function onBtnClick(ev) {
     if (act === 'cancel-target') {
         _selectingTarget = false;
         _pendingSkill = null;
+        _pendingSpecialAction = null;
         _pendingHealItem = null;
         _mmTargets = null;
         _pendingAttachedSummon = null;  /* V1 Invocações Phase 2: cancela Comandar Arma */
@@ -27526,16 +27718,130 @@ function onBtnClick(ev) {
         render(currentState);
         return;
     }
-    if (act === 'dodge') {
+    if (act === 'dash') {
         _actionSheetOpen = false;
-        _actionTaken = true;
         render(currentState);
         confirmSimDiceSkip(
-            'Esquivar: ataques contra você ficam com desvantagem e suas salvaguardas de Destreza ganham vantagem até seu próximo turno. Gasta sua ação.',
-            'Esquivar'
+            'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n• Custo: Gasta sua Ação principal.',
+            'Disparada (PHB p. 192)',
+            '✔ Disparar',
+            '← Voltar às opções'
+        ).then(function(ok) {
+            if (ok) {
+                _actionTaken = true;
+                render(currentState);
+                void passPlayerMetaAction('dash');
+            } else {
+                render(currentState);
+            }
+        });
+        return;
+    }
+    if (act === 'disengage') {
+        _actionSheetOpen = false;
+        render(currentState);
+        confirmSimDiceSkip(
+            'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n• Custo: Gasta sua Ação principal.',
+            'Desengajar (PHB p. 192)',
+            '✔ Desengajar',
+            '← Voltar às opções'
+        ).then(function(ok) {
+            if (ok) {
+                _actionTaken = true;
+                render(currentState);
+                void passPlayerMetaAction('disengage');
+            } else {
+                render(currentState);
+            }
+        });
+        return;
+    }
+    if (act === 'dodge') {
+        _actionSheetOpen = false;
+        render(currentState);
+        confirmSimDiceSkip(
+            'O Que Está Sendo Escolhido:\nVocê se concentra inteiramente na sua defesa até o início do seu próximo turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Ataques contra você têm Desvantagem se você vir o atacante.\n• Vantagem em Testes de Resistência de Destreza.\n• Custo: Gasta sua Ação principal.',
+            'Esquivar (PHB p. 192)',
+            '✔ Esquivar',
+            '← Voltar às opções'
         ).then(function (ok) {
-            if (ok) { void passPlayerMetaAction('dodge'); }
-            else { _actionTaken = false; render(currentState); }
+            if (ok) {
+                _actionTaken = true;
+                render(currentState);
+                void passPlayerMetaAction('dodge');
+            } else {
+                render(currentState);
+            }
+        });
+        return;
+    }
+    if (act === 'shove') {
+        _actionSheetOpen = false;
+        var aliveIdxsShoveL = [];
+        if (currentState && currentState.order) {
+            for (var axSL = 0; axSL < currentState.order.length; axSL++) {
+                var ocSL = currentState.order[axSL];
+                if (ocSL && ocSL.t === 'e' && ocSL.alive && !ocSL.isDead) aliveIdxsShoveL.push(axSL);
+            }
+        }
+        if (aliveIdxsShoveL.length === 0) return;
+        if (aliveIdxsShoveL.length === 1) {
+            render(currentState);
+            showShoveChoiceModal(aliveIdxsShoveL[0]).then(function(mode) {
+                if (mode) {
+                    _actionTaken = true;
+                    render(currentState);
+                    void passPlayerMetaAction('shove', { target: aliveIdxsShoveL[0], shove_mode: mode });
+                } else {
+                    render(currentState);
+                }
+            });
+            return;
+        }
+        _selectingTarget = true;
+        _pendingSpecialAction = 'shove';
+        render(currentState);
+        return;
+    }
+    if (act === 'help') {
+        _actionSheetOpen = false;
+        var aliveIdxsHelpL = [];
+        if (currentState && currentState.order) {
+            for (var axHL = 0; axHL < currentState.order.length; axHL++) {
+                var ocHL = currentState.order[axHL];
+                if (ocHL && ocHL.t === 'e' && ocHL.alive && !ocHL.isDead) aliveIdxsHelpL.push(axHL);
+            }
+        }
+        if (aliveIdxsHelpL.length === 0) return;
+        if (aliveIdxsHelpL.length === 1) {
+            render(currentState);
+            showHelpChoiceModal(aliveIdxsHelpL[0]).then(function(ok) {
+                if (ok) {
+                    _actionTaken = true;
+                    render(currentState);
+                    void passPlayerMetaAction('help', { target: aliveIdxsHelpL[0] });
+                } else {
+                    render(currentState);
+                }
+            });
+            return;
+        }
+        _selectingTarget = true;
+        _pendingSpecialAction = 'help';
+        render(currentState);
+        return;
+    }
+    if (act === 'hide') {
+        _actionSheetOpen = false;
+        render(currentState);
+        showHideConfirmModal().then(function(ok) {
+            if (ok) {
+                _actionTaken = true;
+                render(currentState);
+                void passPlayerMetaAction('hide');
+            } else {
+                render(currentState);
+            }
         });
         return;
     }
@@ -27800,16 +28106,24 @@ async function passDownedPlayerSlot() {
     await runNpcsUntilPlayer();
 }
 
-async function passPlayerMetaAction(kind) {
+async function passPlayerMetaAction(kind, opts) {
     var s = currentState;
     if (!s || s.ph !== 'active') return;
     var p = s.order[s.p_idx];
     if (!p) return;
-    /* V1 Invocações Phase 4 (2026-04-19) — Passar/Esquivar/Desengajar consomem AÇÃO. */
-    p.actionSpent = true;
+    opts = opts || {};
     simLogPushTurnHeader(s, p);
-    if (kind === 'pass') s.log.push(p.n + ' passa o turno.');
-    else if (kind === 'dodge') {
+
+    if (kind === 'pass') {
+        p.actionSpent = true;
+        s.log.push(p.n + ' passa o turno.');
+        render(s);
+        await runNpcsUntilPlayer();
+        return;
+    }
+
+    if (kind === 'dodge') {
+        p.actionSpent = true;
         pushBuffSim(p, {
             id: 'acao_esquivar',
             vfx: 'dodge',
@@ -27817,18 +28131,70 @@ async function passPlayerMetaAction(kind) {
             turns: 1,
             kind: 'buff',
             condName: 'Esquivar (ação)',
-            condRule: 'PHB — Até o início do seu próximo turno: ataques contra você têm desvantagem se você vir o atacante; TR de DES com vantagem. Estado na ficha; rolagens seguem o fluxo atual do combate.'
+            condRule: 'PHB p. 192 — Até o início do seu próximo turno: ataques contra você têm desvantagem se você vir o atacante; TR de DES com vantagem.'
         }, '', 'Esquivar');
         s.log.push(p.n + ' usa Esquivar (desvantagem em ataques se ver o atacante; vantagem em TR de Destreza até o próximo turno).');
         render(s);
         await playBuffVfxOnCell('player', 'dodge', { durationMs: 2400 });
+    } else if (kind === 'dash') {
+        p.actionSpent = true;
+        var dashSpeed = p.speed || 6;
+        p.movement_left = (p.movement_left || 0) + dashSpeed;
+        s.log.push(p.n + ' usa Disparada (deslocamento adicional +' + formatHexDistanceMeters(dashSpeed) + ').');
+        render(s);
+    } else if (kind === 'disengage') {
+        p.actionSpent = true;
+        pushBuffSim(p, {
+            id: 'acao_desengajar',
+            turns: 1,
+            kind: 'buff',
+            condName: 'Desengajar (ação)',
+            condRule: 'PHB p. 192 — Seu deslocamento não provoca ataques de oportunidade até o fim do turno.'
+        }, '', 'Desengajar');
+        s.log.push(p.n + ' usa Desengajar (não provoca Ataques de Oportunidade até o final do turno).');
+        render(s);
+    } else if (kind === 'shove') {
+        p.actionSpent = true;
+        var sTgt = (opts.target != null && s.order[opts.target]) ? s.order[opts.target] : null;
+        var sMode = opts.shove_mode || 'prone';
+        if (sTgt) {
+            if (sMode === 'prone') {
+                if (!sTgt.se) sTgt.se = [];
+                sTgt.se.push({ id: 'prone', n: 'Caído', dndCondition: 'Ataques corpo a corpo têm Vantagem; ataques à distância têm Desvantagem. Gasta metade do movimento para levantar.' });
+                s.log.push(p.n + ' empurra ' + sTgt.n + ' e o derruba no chão (Caído)!');
+            } else {
+                s.log.push(p.n + ' empurra ' + sTgt.n + ' 1,5m para trás!');
+            }
+        }
+        render(s);
+    } else if (kind === 'help') {
+        p.actionSpent = true;
+        var hTgt = (opts.target != null && s.order[opts.target]) ? s.order[opts.target] : null;
+        if (hTgt) {
+            if (!hTgt.se) hTgt.se = [];
+            hTgt.se.push({ id: 'help_distracted', n: 'Distraído', targetedAdvantageByAlly: true, singleAttack: true, turns: 2 });
+            s.log.push(p.n + ' ajuda seu aliado criando uma distração contra ' + hTgt.n + ' (próximo ataque de aliado com Vantagem)!');
+        }
+        render(s);
+    } else if (kind === 'hide') {
+        var isRogueHide = (p.cls || '').toLowerCase() === 'ladino' || (p.skills || []).some(function(sk){ return sk && sk.n === 'Ação Ardilosa'; });
+        if (isRogueHide && !p.bonusActionSpent) {
+            p.bonusActionSpent = true;
+        } else {
+            p.actionSpent = true;
+        }
+        pushBuffSim(p, {
+            id: 'hidden',
+            turns: 2,
+            kind: 'buff',
+            condName: 'Oculto (Furtividade)',
+            condRule: 'PHB p. 177 — Ataques têm Vantagem; atacantes têm Desvantagem contra você. Encerra ao atacar.'
+        }, '', 'Oculto');
+        s.log.push(p.n + ' se esconde com sucesso nas sombras (Oculto)!');
+        render(s);
     }
-    if (kind === 'pass') render(s);
-    /* V1 Invocações Phase 4 (2026-04-19, b):
-       · 'pass' = explicit "passar turno" → SEMPRE auto-advance
-       · 'dodge' = ação principal mas pode ter BA disponível → respeita _maybeAdvanceOrStay */
-    if (kind === 'pass') await runNpcsUntilPlayer();
-    else await _maybeAdvanceOrStay();
+
+    await _maybeAdvanceOrStay();
 }
 
 function openCombatLog() {
@@ -30480,6 +30846,238 @@ function showTargetConfirm(tgtIdx) {
         }
         ov.remove();
         confirmAndAttack(tgtIdx);
+    });
+}
+
+/** Modal de confirmação para Empurrar / Derrubar (PHB p. 195) em total conformidade com a Regra Soberana #24 */
+function showShoveChoiceModal(targetIdx) {
+    return new Promise(function(resolve) {
+        var s = currentState;
+        var p = s && s.order && s.order[s.p_idx];
+        var u = s && s.order && s.order[targetIdx];
+        if (!u) { resolve(null); return; }
+
+        var dup = document.querySelector('.sim-skip-confirm-overlay');
+        if (dup) dup.remove();
+        var ov = document.createElement('div');
+        ov.className = 'sim-skip-confirm-overlay';
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        var card = document.createElement('div');
+        card.className = 'sim-skip-confirm-card';
+        card.style.maxWidth = '380px';
+
+        var titleEl = document.createElement('div');
+        titleEl.className = 'sim-skip-confirm-title';
+        titleEl.textContent = 'Empurrar / Derrubar (PHB p. 195)';
+
+        var subEl = document.createElement('div');
+        subEl.style.cssText = 'font-size:11px;color:var(--v-gold,#c4953a);text-align:center;margin-bottom:8px;font-weight:600;';
+        subEl.textContent = 'Manobra Tática Corpo a Corpo · Alvo: ' + (u.n || 'Inimigo');
+
+        var msgEl = document.createElement('div');
+        msgEl.className = 'sim-skip-confirm-msg';
+        msgEl.style.textAlign = 'left';
+        msgEl.style.fontSize = '12px';
+        msgEl.style.lineHeight = '1.45';
+        msgEl.innerHTML =
+            '<div style="margin-bottom:6px;"><strong>O Que Está Sendo Escolhido:</strong><br>' +
+            'Você usa uma ação de ataque para desestabilizar ou arremessar o oponente com sua força física.</div>' +
+            '<div style="margin-bottom:6px;"><strong>Consequências & Benefícios:</strong><br>' +
+            '• <em>Teste Resistido:</em> Seu Força (Atletismo) vs maior entre Força (Atletismo) e Destreza (Acrobacia) do alvo.<br>' +
+            '• <strong>Derrubar (Caído):</strong> Alvo fica Caído. Ataques corpo a corpo contra ele têm <strong>Vantagem</strong>; ataques à distância sofrem Desvantagem.<br>' +
+            '• <strong>Empurrar (1,5m):</strong> Move o alvo 1 hexágono para trás, afastando-o da área ou projetando contra perigos de terreno.<br>' +
+            '• <em>Custo:</em> Gasta sua Ação principal (e desloca-se até o alvo se necessário).</div>' +
+            '<div style="text-align:center;font-weight:600;color:var(--v-gold-bright,#e8c45a);margin-top:6px;">Escolha a manobra desejada:</div>';
+
+        var row = document.createElement('div');
+        row.className = 'sim-skip-confirm-actions';
+        row.style.flexDirection = 'column';
+        row.style.gap = '6px';
+
+        var btnProne = document.createElement('button');
+        btnProne.type = 'button';
+        btnProne.className = 'sim-skip-confirm-btn sim-skip-confirm-ok';
+        btnProne.innerHTML = '✔ Derrubar no Chão (Caído)';
+
+        var btnPush = document.createElement('button');
+        btnPush.type = 'button';
+        btnPush.className = 'sim-skip-confirm-btn sim-skip-confirm-ok';
+        btnPush.innerHTML = '✔ Empurrar 1,5m para Trás';
+
+        var btnBack = document.createElement('button');
+        btnBack.type = 'button';
+        btnBack.className = 'sim-skip-confirm-btn sim-skip-confirm-cancel';
+        btnBack.textContent = '← Voltar às opções';
+
+        function done(choice) {
+            try { ov.remove(); } catch(e){}
+            resolve(choice);
+        }
+
+        btnProne.addEventListener('click', function() { done('prone'); });
+        btnPush.addEventListener('click', function() { done('push'); });
+        btnBack.addEventListener('click', function() { done(null); });
+        ov.addEventListener('click', function(e) { if (e.target === ov) done(null); });
+
+        row.appendChild(btnProne);
+        row.appendChild(btnPush);
+        row.appendChild(btnBack);
+
+        card.appendChild(titleEl);
+        card.appendChild(subEl);
+        card.appendChild(msgEl);
+        card.appendChild(row);
+        ov.appendChild(card);
+        mountInGameFrame(ov);
+    });
+}
+
+/** Modal de confirmação para Ajudar (PHB p. 192) em total conformidade com a Regra Soberana #24 */
+function showHelpChoiceModal(targetIdx) {
+    return new Promise(function(resolve) {
+        var s = currentState;
+        var u = s && s.order && s.order[targetIdx];
+        if (!u) { resolve(false); return; }
+
+        var dup = document.querySelector('.sim-skip-confirm-overlay');
+        if (dup) dup.remove();
+        var ov = document.createElement('div');
+        ov.className = 'sim-skip-confirm-overlay';
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        var card = document.createElement('div');
+        card.className = 'sim-skip-confirm-card';
+        card.style.maxWidth = '380px';
+
+        var titleEl = document.createElement('div');
+        titleEl.className = 'sim-skip-confirm-title';
+        titleEl.textContent = 'Ajudar Aliado (PHB p. 192)';
+
+        var subEl = document.createElement('div');
+        subEl.style.cssText = 'font-size:11px;color:var(--v-gold,#c4953a);text-align:center;margin-bottom:8px;font-weight:600;';
+        subEl.textContent = 'Distrair Inimigo em Combate · Alvo: ' + (u.n || 'Inimigo');
+
+        var msgEl = document.createElement('div');
+        msgEl.className = 'sim-skip-confirm-msg';
+        msgEl.style.textAlign = 'left';
+        msgEl.style.fontSize = '12px';
+        msgEl.style.lineHeight = '1.45';
+        msgEl.innerHTML =
+            '<div style="margin-bottom:6px;"><strong>O Que Está Sendo Escolhido:</strong><br>' +
+            'Você finta, cerca e cria uma distração direta contra este inimigo para abrir uma brecha de ataque.</div>' +
+            '<div style="margin-bottom:6px;"><strong>Consequências & Benefícios:</strong><br>' +
+            '• O próximo ataque realizado por um aliado contra este alvo antes do seu próximo turno terá <strong>VANTAGEM</strong>.<br>' +
+            '• A distração encerra assim que o aliado desferir o primeiro ataque.<br>' +
+            '• <em>Custo:</em> Gasta sua Ação principal (e desloca-se até o alvo se necessário).</div>';
+
+        var row = document.createElement('div');
+        row.className = 'sim-skip-confirm-actions';
+
+        var btnBack = document.createElement('button');
+        btnBack.type = 'button';
+        btnBack.className = 'sim-skip-confirm-btn sim-skip-confirm-cancel';
+        btnBack.textContent = '← Voltar às opções';
+
+        var btnConfirm = document.createElement('button');
+        btnConfirm.type = 'button';
+        btnConfirm.className = 'sim-skip-confirm-btn sim-skip-confirm-ok';
+        btnConfirm.textContent = '✔ Ajudar Aliado';
+
+        function done(ok) {
+            try { ov.remove(); } catch(e){}
+            resolve(!!ok);
+        }
+
+        btnConfirm.addEventListener('click', function() { done(true); });
+        btnBack.addEventListener('click', function() { done(false); });
+        ov.addEventListener('click', function(e) { if (e.target === ov) done(false); });
+
+        row.appendChild(btnBack);
+        row.appendChild(btnConfirm);
+
+        card.appendChild(titleEl);
+        card.appendChild(subEl);
+        card.appendChild(msgEl);
+        card.appendChild(row);
+        ov.appendChild(card);
+        mountInGameFrame(ov);
+    });
+}
+
+/** Modal de confirmação para Esconder-se (PHB p. 177, 192) em total conformidade com a Regra Soberana #24 */
+function showHideConfirmModal() {
+    return new Promise(function(resolve) {
+        var s = currentState;
+        var p = s && s.order && s.order[s.p_idx];
+        var isRogue = p && ((p.cls || '').toLowerCase() === 'ladino' || (p.skills || []).some(function(sk){ return sk && sk.n === 'Ação Ardilosa'; }));
+
+        var dup = document.querySelector('.sim-skip-confirm-overlay');
+        if (dup) dup.remove();
+        var ov = document.createElement('div');
+        ov.className = 'sim-skip-confirm-overlay';
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        var card = document.createElement('div');
+        card.className = 'sim-skip-confirm-card';
+        card.style.maxWidth = '380px';
+
+        var titleEl = document.createElement('div');
+        titleEl.className = 'sim-skip-confirm-title';
+        titleEl.textContent = 'Esconder-se (PHB p. 177, 192)';
+
+        var subEl = document.createElement('div');
+        subEl.style.cssText = 'font-size:11px;color:var(--v-gold,#c4953a);text-align:center;margin-bottom:8px;font-weight:600;';
+        subEl.textContent = 'Furtividade e Cobertura no Combate';
+
+        var costText = isRogue
+            ? 'Gasta sua Ação Bônus (via Ação Ardilosa de Ladino) ou Ação Principal se Bônus já gasta.'
+            : 'Gasta sua Ação principal.';
+
+        var msgEl = document.createElement('div');
+        msgEl.className = 'sim-skip-confirm-msg';
+        msgEl.style.textAlign = 'left';
+        msgEl.style.fontSize = '12px';
+        msgEl.style.lineHeight = '1.45';
+        msgEl.innerHTML =
+            '<div style="margin-bottom:6px;"><strong>O Que Está Sendo Escolhido:</strong><br>' +
+            'Você tenta se esgueirar pelas sombras ou cobertura do cenário para ocultar sua posição.</div>' +
+            '<div style="margin-bottom:6px;"><strong>Consequências & Benefícios:</strong><br>' +
+            '• Realiza teste de <strong>Destreza (Furtividade)</strong> vs maior Percepção Passiva dos inimigos vivos.<br>' +
+            '• <em>Sucesso:</em> Concede condição <strong>Oculto</strong> (Vantagem no próximo ataque, Desvantagem em ataques sofridos). Encerra ao atacar.<br>' +
+            '• <em>Custo:</em> ' + costText + '</div>';
+
+        var row = document.createElement('div');
+        row.className = 'sim-skip-confirm-actions';
+
+        var btnBack = document.createElement('button');
+        btnBack.type = 'button';
+        btnBack.className = 'sim-skip-confirm-btn sim-skip-confirm-cancel';
+        btnBack.textContent = '← Voltar às opções';
+
+        var btnConfirm = document.createElement('button');
+        btnConfirm.type = 'button';
+        btnConfirm.className = 'sim-skip-confirm-btn sim-skip-confirm-ok';
+        btnConfirm.textContent = '✔ Esconder-se';
+
+        function done(ok) {
+            try { ov.remove(); } catch(e){}
+            resolve(!!ok);
+        }
+
+        btnConfirm.addEventListener('click', function() { done(true); });
+        btnBack.addEventListener('click', function() { done(false); });
+        ov.addEventListener('click', function(e) { if (e.target === ov) done(false); });
+
+        row.appendChild(btnBack);
+        row.appendChild(btnConfirm);
+
+        card.appendChild(titleEl);
+        card.appendChild(subEl);
+        card.appendChild(msgEl);
+        card.appendChild(row);
+        ov.appendChild(card);
+        mountInGameFrame(ov);
     });
 }
 
@@ -33229,7 +33827,7 @@ function playSkillCastVFX(uid, skillName) {
 function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
 /** Confirmação in-game (Promise → true/false). Usado para pular dados e para ações do jogador. */
-function confirmSimDiceSkip(message, title) {
+function confirmSimDiceSkip(message, title, okLabel, cancelLabel) {
     return new Promise(function (resolve) {
         var dup = document.querySelector('.sim-skip-confirm-overlay');
         if (dup) dup.remove();
@@ -33239,6 +33837,7 @@ function confirmSimDiceSkip(message, title) {
         ov.setAttribute('aria-modal', 'true');
         var card = document.createElement('div');
         card.className = 'sim-skip-confirm-card';
+        card.style.maxWidth = '380px';
         var titleEl = document.createElement('div');
         titleEl.className = 'sim-skip-confirm-title';
         titleEl.textContent = title || 'Confirmar ação';
@@ -33250,11 +33849,11 @@ function confirmSimDiceSkip(message, title) {
         var btnNo = document.createElement('button');
         btnNo.type = 'button';
         btnNo.className = 'sim-skip-confirm-btn sim-skip-confirm-cancel';
-        btnNo.textContent = 'Cancelar';
+        btnNo.textContent = cancelLabel || '← Voltar às opções';
         var btnYes = document.createElement('button');
         btnYes.type = 'button';
         btnYes.className = 'sim-skip-confirm-btn sim-skip-confirm-ok';
-        btnYes.textContent = 'Confirmar';
+        btnYes.textContent = okLabel || '✔ Confirmar';
         function done(ok) {
             try { document.removeEventListener('keydown', onKey); } catch (e0) {}
             try { ov.remove(); } catch (e1) {}
