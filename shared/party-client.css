@@ -1158,4 +1158,67 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
 }
 
+/* ── Tensão e Alerta da Masmorra (Blizzard Mythic+ / Bungie) ── */
+.v-party-threat-badge {
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 10.5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.v-party-threat-badge.threat-silent {
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid #4caf50;
+    color: #a5d6a7;
+}
+
+.v-party-threat-badge.threat-suspicious {
+    background: rgba(255, 193, 7, 0.2);
+    border: 1px solid #ffc107;
+    color: #ffe082;
+}
+
+.v-party-threat-badge.threat-alerted {
+    background: rgba(255, 152, 0, 0.25);
+    border: 1px solid #ff9800;
+    color: #ffcc80;
+}
+
+.v-party-threat-badge.threat-alarm {
+    background: rgba(244, 67, 54, 0.3);
+    border: 1px solid #f44336;
+    color: #ff8a80;
+    animation: vPartyAlarmPulse 1.2s infinite alternate;
+}
+
+@keyframes vPartyAlarmPulse {
+    from { box-shadow: 0 0 4px rgba(244, 67, 54, 0.4); }
+    to { box-shadow: 0 0 12px rgba(244, 67, 54, 0.9); }
+}
+
+/* ── Cumplicidade e Entrosamento da Comitiva (BioWare SWTOR / Larian BG3) ── */
+.v-party-synergy-box {
+    background: rgba(30, 22, 14, 0.8);
+    border: 1px solid rgba(196, 149, 58, 0.35);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-top: 8px;
+}
+
+.v-party-synergy-tier-badge {
+    background: rgba(255, 215, 0, 0.18);
+    border: 1px solid rgba(255, 215, 0, 0.45);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #ffe082;
+}
+
+
 

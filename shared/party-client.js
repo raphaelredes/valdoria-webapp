@@ -169,6 +169,10 @@
         html += '  <div class="v-party-hud-title">';
         html += '    <span>🛡️ Comitiva</span>';
         html += '    <span class="v-party-code-badge" id="v-party-copy-code" title="Toque para copiar código da sala">#' + sid + '</span>';
+        if (_partyState.dungeon_threat) {
+            var dt = _partyState.dungeon_threat;
+            html += '    <span class="v-party-threat-badge threat-' + (dt.stage_id || 'silent') + '" title="' + (dt.stage_desc || '') + '">' + (dt.stage_icon || '🟢') + ' ' + (dt.stage_name || 'Silencioso') + ' (' + (dt.alert_level || 0) + '%)</span>';
+        }
         html += '  </div>';
         html += '  <div class="v-party-hud-controls">';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-stash">🎒 Baú</button>';
@@ -1358,6 +1362,23 @@
             }
             html += '  </div>';
 
+            // Cumplicidade e Entrosamento da Comitiva (BioWare SWTOR / Larian BG3)
+            var syn = _partyState.synergy;
+            if (syn) {
+                html += '  <div class="v-party-synergy-box">';
+                html += '    <div style="display:flex; justify-content:space-between; align-items:center;">';
+                html += '      <span style="font-size:11.5px; font-weight:700; color:#f0e6d2;">🤝 Cumplicidade & Entrosamento</span>';
+                html += '      <span class="v-party-synergy-tier-badge">' + (syn.tier_icon || '🤝') + ' ' + (syn.tier_name || 'Companheiros') + '</span>';
+                html += '    </div>';
+                html += '    <div style="font-size:10.5px; color:#c7b59d; margin-top:4px;">';
+                html += '      <strong>Vínculo:</strong> ' + (syn.points || 0) + ' pts ' + (syn.next_threshold ? '(Próximo tier em ' + syn.next_threshold + ' pts)' : '(Tier Máximo)');
+                html += '    </div>';
+                html += '    <div style="font-size:10px; color:#ffd54f; margin-top:2px;">';
+                html += '      <strong>Efeito Ativo:</strong> ' + (syn.benefit || 'Laços de camaradagem fortalecidos.');
+                html += '    </div>';
+                html += '  </div>';
+            }
+
             html += '  <div style="display:flex; gap:8px; margin-top:10px;">';
             html += '    <button type="button" class="v-party-loot-btn ' + (isReady ? 'v-party-loot-btn-pass' : 'v-party-loot-btn-need') + '" id="v-lobby-ready-btn" style="flex:1; padding:10px;">';
             html += '      <span>' + (isReady ? '⏳ Desmarcar Prontidão' : '✔ Estou Pronto') + '</span>';
@@ -2538,6 +2559,46 @@
         return false;
     }
 
+    async function _triggerDistraction(skillTotal) {
+        if (!_partyState || !_partyState.session_id) return false;
+        try {
+            var res = await _request('/api/party/threat/distract', {
+                session_id: _partyState.session_id,
+                user_id: _cfg.uid,
+                skill_check_total: typeof skillTotal === 'number' ? skillTotal : undefined,
+            });
+            if (res && res.ok) {
+                if (_partyState && res.dungeon_threat) {
+                    _partyState.dungeon_threat = res.dungeon_threat;
+                    _renderHud();
+                }
+                var msg = res.message || (res.success ? 'Distração bem-sucedida! Alerta reduzido.' : 'A distração falhou! Alerta aumentou.');
+                if (global.vToast) global.vToast(msg, res.success ? 'ok' : 'warn');
+                return res;
+            }
+        } catch (err) {
+            if (global.vToast) global.vToast('Falha na manobra de distração: ' + err.message, 'err');
+        }
+        return false;
+    }
+
+    async function _rollDialogueSpeaker(votes, customSeed) {
+        if (!_partyState || !_partyState.session_id) return null;
+        try {
+            var res = await _request('/api/party/dialogue/speaker-roll', {
+                session_id: _partyState.session_id,
+                votes: votes || {},
+                custom_seed: customSeed,
+            });
+            if (res && res.ok && res.result) {
+                return res.result;
+            }
+        } catch (err) {
+            if (global.vToast) global.vToast('Erro na eleição do orador: ' + err.message, 'err');
+        }
+        return null;
+    }
+
     // Exportação do Singleton Global
     global.vPartyClient = {
         init: init,
@@ -2559,6 +2620,8 @@
         showReactionPrompt: _showReactionPrompt,
         renderPingWave: _renderPingWave,
         setFormation: _setMarchingFormation,
+        distractThreat: _triggerDistraction,
+        rollDialogueSpeaker: _rollDialogueSpeaker,
     };
 
 })(typeof window !== 'undefined' ? window : this);
