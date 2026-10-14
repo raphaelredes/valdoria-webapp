@@ -177,6 +177,7 @@
         html += '  <div class="v-party-hud-controls">';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-stash">🎒 Baú</button>';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-camp">🏕️ Acampamento</button>';
+        html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-lore">📖 Diário</button>';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-pings">🎯 Pings</button>';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-lobby">👥 Sala</button>';
         html += '  </div>';
@@ -295,6 +296,13 @@
             };
         }
 
+        var loreBtn = document.getElementById('v-party-btn-lore');
+        if (loreBtn) {
+            loreBtn.onclick = function () {
+                _openLoreJournalModal();
+            };
+        }
+
         var featBtn = document.getElementById('v-party-btn-feat');
         if (featBtn) {
             featBtn.onclick = function () {
@@ -396,6 +404,17 @@
                     }
                 }
             }
+        }
+        if (delta.lore_discovery) {
+            if (!_partyState.lore_journal) _partyState.lore_journal = { total_entries: 0, entries: {} };
+            var disc = delta.lore_discovery;
+            _partyState.lore_journal.entries[disc.entry_id] = disc;
+            _partyState.lore_journal.total_entries = Object.keys(_partyState.lore_journal.entries).length;
+            if (global.vToast) global.vToast('📖 Novo conhecimento registrado: ' + (disc.title || 'Fraqueza identificada!'), 'ok');
+        }
+        if (delta.combat_revivify) {
+            var cr = delta.combat_revivify;
+            if (global.vToast) global.vToast('✨ ' + cr.actorName + ' canalizou Reviver sobre ' + cr.targetName + '!', 'ok');
         }
     }
 
@@ -1058,6 +1077,76 @@
                 }
             };
         }
+    }
+
+    // ── Modal de Diário de Bordo & Bestiário da Comitiva (CRDTs / BioWare) ─────
+
+    function _openLoreJournalModal() {
+        _closeModal();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-lore-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card';
+
+        var journal = (_partyState && _partyState.lore_journal) ? _partyState.lore_journal : { total_entries: 0, entries: {} };
+        var entries = Object.values(journal.entries || {});
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">📖 Diário de Bordo & Bestiário Coletivo</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-lore-close">✖</button>';
+        html += '</div>';
+        html += '<div class="v-party-modal-body">';
+        html += '  <p style="color:#d5c7b3; font-size:12px; margin-top:0;">';
+        html += '    Conhecimentos anatômicos e fraquezas de criaturas catalogados pelos aventureiros da comitiva (sincronização determinística CRDT).';
+        html += '  </p>';
+
+        if (entries.length === 0) {
+            html += '  <div style="text-align:center; padding:18px 12px; background:rgba(20,16,12,0.6); border:1px dashed rgba(196,149,58,0.3); border-radius:6px; color:#a09078; font-size:11.5px; margin-bottom:10px;">';
+            html += '    <div style="font-size:22px; margin-bottom:6px;">📜</div>';
+            html += '    O diário da comitiva ainda não possui registros ancestrais.<br>Examine criaturas ou ruínas com testes de perícia (Arcanismo, Religião, Natureza) para desvendar fraquezas!';
+            html += '  </div>';
+        } else {
+            html += '  <div style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; padding-right:4px;">';
+            for (var i = 0; i < entries.length; i++) {
+                var e = entries[i];
+                var wClass = e.weakness_type ? ('weakness-' + e.weakness_type.toLowerCase()) : '';
+                html += '<div class="v-party-lore-card">';
+                html += '  <div class="v-party-lore-header">';
+                html += '    <span class="v-party-lore-title">' + (e.title || 'Fraqueza de Criatura') + '</span>';
+                if (e.weakness_type) {
+                    html += '    <span class="v-party-weakness-tag ' + wClass + '">Fraqueza: ' + e.weakness_type + ' (+' + (e.damage_bonus || 2) + ')</span>';
+                }
+                html += '  </div>';
+                if (e.tactical_note) {
+                    html += '  <div class="v-party-lore-tactical"><strong>Efeito Tático:</strong> ' + e.tactical_note + '</div>';
+                }
+                if (e.lore_description) {
+                    html += '  <div class="v-party-lore-desc">' + e.lore_description + '</div>';
+                }
+                html += '  <div class="v-party-lore-footer">';
+                html += '    <span>Descrito por: ' + (e.discovered_by_name || 'Aventureiro') + '</span>';
+                html += '    <span>' + (e.category || 'bestiário').toUpperCase() + '</span>';
+                html += '  </div>';
+                html += '</div>';
+            }
+            html += '  </div>';
+        }
+
+        html += '  <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-lore-back" style="width:100%; padding:8px; margin-top:8px;">← Voltar</button>';
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        var closeBtn = document.getElementById('v-lore-close');
+        if (closeBtn) closeBtn.onclick = _closeModal;
+        var backBtn = document.getElementById('v-lore-back');
+        if (backBtn) backBtn.onclick = _closeModal;
     }
 
     // ── Painel de Acampamento & Descanso da Comitiva (PHB p. 186 & Regra #24) ───
@@ -2599,6 +2688,47 @@
         return null;
     }
 
+    async function _identifyMonsterLore(species, checkTotal, skillKey) {
+        if (!_partyState || !_partyState.session_id) return null;
+        try {
+            var res = await _request('/api/party/lore/identify', {
+                session_id: _partyState.session_id,
+                user_id: _cfg.uid,
+                species_or_name: species,
+                check_total: checkTotal,
+                skill_key: skillKey || 'arcana',
+            });
+            if (res && res.ok) {
+                if (res.lore_journal) _partyState.lore_journal = res.lore_journal;
+                if (global.vToast) global.vToast(res.message, res.success ? 'ok' : 'warn');
+                return res;
+            }
+        } catch (err) {
+            if (global.vToast) global.vToast('Falha na identificação: ' + err.message, 'err');
+        }
+        return null;
+    }
+
+    async function _revivifyAlly(targetIdx) {
+        if (!_partyState || !_partyState.session_id) return false;
+        try {
+            var res = await _request('/api/party/combat/revivify', {
+                session_id: _partyState.session_id,
+                user_id: _cfg.uid,
+                target_idx: targetIdx,
+            });
+            if (res && res.ok) {
+                if (res.state) _partyState.combat = res.state;
+                if (global.vToast) global.vToast('✨ Prece de Reviver canalizada com sucesso!', 'ok');
+                _renderHud();
+                return res;
+            }
+        } catch (err) {
+            if (global.vToast) global.vToast('Erro ao reviver companheiro: ' + err.message, 'err');
+        }
+        return false;
+    }
+
     // Exportação do Singleton Global
     global.vPartyClient = {
         init: init,
@@ -2612,6 +2742,7 @@
         openSharedStash: _openSharedStashModal,
         openCampRest: _openCampRestModal,
         showCampRestVote: _showCampRestVoteModal,
+        openLoreJournal: _openLoreJournalModal,
         openTrade: _openTradeModal,
         showDeathSaveModal: _showDeathSaveModal,
         showSkillChallengeModal: _showSkillChallengeModal,
@@ -2622,6 +2753,8 @@
         setFormation: _setMarchingFormation,
         distractThreat: _triggerDistraction,
         rollDialogueSpeaker: _rollDialogueSpeaker,
+        identifyLore: _identifyMonsterLore,
+        revivifyAlly: _revivifyAlly,
     };
 
 })(typeof window !== 'undefined' ? window : this);
