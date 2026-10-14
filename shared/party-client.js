@@ -1319,6 +1319,45 @@
             }
             html += '  </div>';
 
+            // Formação Tática de Marcha (Baldur's Gate / Pillars of Eternity)
+            var currentFormation = _partyState.marching_formation || 'line';
+            var isLeader = (_partyState.leader_uid === _cfg.uid || _partyState.is_leader);
+
+            var FORMATIONS_DICT = {
+                line: { name: 'Linha Padrão', icon: '🛡️', benefit: 'Retaguarda ganha +2 CA de cobertura contra ataques à distância (PHB p. 196).' },
+                wedge: { name: 'Cunha de Assalto', icon: '⚔️', benefit: 'Toda a comitiva recebe +1 de bônus no ataque na 1ª rodada de combate.' },
+                protect: { name: 'Proteção ao Núcleo', icon: '🧙', benefit: 'Conjuradores no centro ganham Vantagem em salvaguardas de Concentração.' },
+                scattered: { name: 'Marcha Dispersa', icon: '🌫️', benefit: 'Espaçamento aberto: Vantagem em DES contra magias ou armadilhas de área.' }
+            };
+
+            html += '  <div class="v-party-formation-box">';
+            html += '    <div class="v-party-formation-title">';
+            html += '      <span>🧭 Formação Tática de Marcha</span>';
+            html += '      <span class="v-party-formation-badge">' + (FORMATIONS_DICT[currentFormation] ? FORMATIONS_DICT[currentFormation].name : currentFormation) + '</span>';
+            html += '    </div>';
+
+            if (isLeader) {
+                html += '    <div class="v-party-formation-grid">';
+                var fKeys = ['line', 'wedge', 'protect', 'scattered'];
+                for (var fI = 0; fI < fKeys.length; fI++) {
+                    var fKey = fKeys[fI];
+                    var fData = FORMATIONS_DICT[fKey];
+                    var isAct = (fKey === currentFormation);
+                    html += '      <button type="button" class="v-party-formation-btn ' + (isAct ? 'active' : '') + '" data-formation-key="' + fKey + '">';
+                    html += '        <strong>' + fData.icon + ' ' + fData.name + '</strong>';
+                    html += '        <span class="v-party-formation-benefit">' + fData.benefit + '</span>';
+                    html += '      </button>';
+                }
+                html += '    </div>';
+            } else {
+                var curData = FORMATIONS_DICT[currentFormation] || FORMATIONS_DICT.line;
+                html += '    <div style="font-size:11px; color:#c7b59d; margin-top:2px;">';
+                html += '      <strong>' + curData.icon + ' ' + curData.name + ':</strong> ' + curData.benefit;
+                html += '      <div style="font-size:9.5px; color:#888; margin-top:2px;">(Definido pelo líder da comitiva)</div>';
+                html += '    </div>';
+            }
+            html += '  </div>';
+
             html += '  <div style="display:flex; gap:8px; margin-top:10px;">';
             html += '    <button type="button" class="v-party-loot-btn ' + (isReady ? 'v-party-loot-btn-pass' : 'v-party-loot-btn-need') + '" id="v-lobby-ready-btn" style="flex:1; padding:10px;">';
             html += '      <span>' + (isReady ? '⏳ Desmarcar Prontidão' : '✔ Estou Pronto') + '</span>';
@@ -1427,6 +1466,30 @@
                         if (global.vToast) global.vToast('Erro ao sair da comitiva: ' + e.message, 'err');
                     }
                 };
+            }
+
+            if (isLeader) {
+                var formBtns = card.querySelectorAll('.v-party-formation-btn');
+                for (var fbI = 0; fbI < formBtns.length; fbI++) {
+                    formBtns[fbI].onclick = async function (ev) {
+                        var targetF = ev.currentTarget.getAttribute('data-formation-key');
+                        if (!targetF || targetF === currentFormation) return;
+                        try {
+                            var fRes = await _request('/api/party/formation/set', {
+                                session_id: _partyState.session_id,
+                                user_id: _cfg.uid,
+                                formation: targetF,
+                            });
+                            if (fRes && fRes.ok) {
+                                _partyState.marching_formation = targetF;
+                                if (global.vToast) global.vToast('Formação tática alterada para ' + (FORMATIONS_DICT[targetF] ? FORMATIONS_DICT[targetF].name : targetF) + '!', 'ok');
+                                _openLobbyModal();
+                            }
+                        } catch (err) {
+                            if (global.vToast) global.vToast('Erro ao alterar formação: ' + err.message, 'warn');
+                        }
+                    };
+                }
             }
         }
     }
@@ -2438,6 +2501,41 @@
                 _joinParty(autoParty).catch(function () {});
             }
         } catch (_) {}
+
+        // Protocolo de Reconexão Rápida / Resiliência de Rede (VisibilityChange & Online)
+        if (typeof document !== 'undefined' && !document._vPartyReconnectRegistered) {
+            document._vPartyReconnectRegistered = true;
+            var handleAppWakeup = function () {
+                if (document.visibilityState === 'visible' && _partyState && _partyState.session_id && _cfg.uid) {
+                    _request('/api/party/reconnect', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        client_turn_version: _partyState.turn_version || 0,
+                    }).then(function (recRes) {
+                        if (recRes && recRes.ok && recRes.snapshot) {
+                            _partyState = recRes.snapshot;
+                            _renderHud();
+                        }
+                    }).catch(function () {});
+                }
+            };
+            document.addEventListener('visibilitychange', handleAppWakeup);
+            window.addEventListener('online', handleAppWakeup);
+        }
+    }
+
+    async function _setMarchingFormation(formation) {
+        if (!_partyState || !_partyState.session_id) return false;
+        var res = await _request('/api/party/formation/set', {
+            session_id: _partyState.session_id,
+            user_id: _cfg.uid,
+            formation: formation,
+        });
+        if (res && res.ok) {
+            _partyState.marching_formation = formation;
+            return true;
+        }
+        return false;
     }
 
     // Exportação do Singleton Global
@@ -2460,6 +2558,7 @@
         showLootModal: _showLootModal,
         showReactionPrompt: _showReactionPrompt,
         renderPingWave: _renderPingWave,
+        setFormation: _setMarchingFormation,
     };
 
 })(typeof window !== 'undefined' ? window : this);

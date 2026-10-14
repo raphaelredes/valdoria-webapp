@@ -1069,3 +1069,93 @@
     }
 }
 
+/* ── Formações de Marcha Tática (Baldur's Gate / Pillars of Eternity) ── */
+.v-party-formation-box {
+    background: rgba(25, 18, 12, 0.75);
+    border: 1px solid rgba(196, 149, 58, 0.35);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-top: 8px;
+}
+
+.v-party-formation-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--v-gold, #c4953a);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.v-party-formation-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.v-party-formation-btn {
+    background: rgba(35, 27, 20, 0.9);
+    border: 1px solid rgba(196, 149, 58, 0.25);
+    border-radius: 5px;
+    color: #e0d0b8;
+    padding: 6px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: all 0.2s ease;
+}
+
+.v-party-formation-btn:hover {
+    border-color: var(--v-gold, #c4953a);
+    background: rgba(55, 42, 30, 0.95);
+    color: #fff;
+}
+
+.v-party-formation-btn.active {
+    border-color: #ffd700;
+    background: linear-gradient(180deg, rgba(70, 52, 28, 0.95) 0%, rgba(45, 32, 18, 0.98) 100%);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.35);
+    color: #ffe082;
+}
+
+.v-party-formation-benefit {
+    font-size: 9.5px;
+    color: #a89880;
+    line-height: 1.2;
+}
+
+.v-party-formation-badge {
+    display: inline-block;
+    background: rgba(196, 149, 58, 0.2);
+    border: 1px solid rgba(196, 149, 58, 0.4);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    color: #f5dfa8;
+}
+
+/* ── Reconexão Rápida / Resiliência de Rede ── */
+.v-party-reconnect-indicator {
+    position: fixed;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(20, 15, 10, 0.92);
+    border: 1px solid #ffd700;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 99999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+
