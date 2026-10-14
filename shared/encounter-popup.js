@@ -3172,16 +3172,31 @@
       statBadge += '<span class="enc-cd-badge">Renome ' + rd + '</span>';
     }
 
-    var speechHtml = '';
+    var sTxt = '';
     if (ch.speech) {
-      var sTxt = _cleanSpeechText(ch.speech);
-      if (sTxt) {
-        speechHtml =
-          '<div class="enc-cd-section">' +
-            '<div class="enc-cd-section-title">Fala / Resposta do Personagem</div>' +
-            '<div class="enc-cd-box enc-cd-speech">“' + _coinify(sTxt) + '”</div>' +
-          '</div>';
+      sTxt = _cleanSpeechText(ch.speech);
+    } else if (ch.label) {
+      var _lblTrim = String(ch.label).trim();
+      if (_lblTrim.indexOf('— "') === 0 || _lblTrim.indexOf('— “') === 0 || _lblTrim.indexOf('“') === 0 || (_lblTrim.indexOf('"') === 0 && _lblTrim.length > 2)) {
+        sTxt = _cleanSpeechText(_lblTrim);
+      } else {
+        var _tm = _lblTrim.match(/^\[(.*?)\]\s*(.*)$/);
+        if (_tm) {
+          var _pot = _tm[2].trim();
+          if (_pot.indexOf('“') === 0 || (_pot.indexOf('"') === 0 && _pot.length > 2)) {
+            sTxt = _cleanSpeechText(_pot);
+          }
+        }
       }
+    }
+
+    var speechHtml = '';
+    if (sTxt) {
+      speechHtml =
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title">Fala / Resposta do Personagem</div>' +
+          '<div class="enc-cd-box enc-cd-speech">“' + _coinify(sTxt) + '”</div>' +
+        '</div>';
     }
 
     var descHtml = '';
@@ -3200,13 +3215,13 @@
     } else if (ch.desc) {
       descHtml =
         '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">' + (ch.speech ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
+          '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
           '<div class="enc-cd-box">' + _stripEmojis(ch.desc) + '</div>' +
         '</div>';
     } else {
       descHtml =
         '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">' + (ch.speech ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
+          '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
           '<div class="enc-cd-box">' + _stripEmojis(_coinify(titleText)) + (subtitleText ? ' — ' + subtitleText : '') + '</div>' +
         '</div>';
     }
@@ -3265,7 +3280,7 @@
       : (ch.id === 'jrn_go') ? 'Partir em Marcha Padrão'
       : (ch.id === 'jrn_cancel') ? 'Permanecer na Cidade'
       : (ch.isCombat) ? 'Entrar em Combate'
-      : (ch.speech) ? 'Dizer isto e Confirmar'
+      : (ch.speech || sTxt) ? 'Dizer isto e Confirmar'
       : (ch.confirmLabel) ? ch.confirmLabel
       : (ch.dc || ch._tactical_options) ? 'Confirmar e Rolar'
       : 'Confirmar Escolha';
@@ -3495,6 +3510,19 @@
         if (_trimmed.indexOf('— "') === 0 || _trimmed.indexOf('— “') === 0 || _trimmed.indexOf('“') === 0 || (_trimmed.indexOf('"') === 0 && _trimmed.length > 2)) {
           hasSpeech = true;
           speechClean = _cleanSpeechText(_trimmed);
+        } else {
+          var _tagMatch = _trimmed.match(/^\[(.*?)\]\s*(.*)$/);
+          if (_tagMatch) {
+            var _potSpeech = _tagMatch[2].trim();
+            if (_potSpeech.indexOf('“') === 0 || (_potSpeech.indexOf('"') === 0 && _potSpeech.length > 2)) {
+              hasSpeech = true;
+              speechClean = _cleanSpeechText(_potSpeech);
+              if (!tagText) {
+                tagText = _tagMatch[1].trim();
+                tagPill = '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>';
+              }
+            }
+          }
         }
       }
       if (hasSpeech && !speechClean) {
@@ -3524,7 +3552,15 @@
         } else if (ch.desc) {
           subText = _stripEmojis(ch.desc);
         } else if (hasSpeech && ch.label) {
-          subText = _stripEmojis(ch.label);
+          var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s]/g, '').toLowerCase();
+          var _altLabel = _stripEmojis(ch.label || '');
+          if (dcBadge) {
+            _altLabel = _altLabel.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
+          }
+          var _normLabel = _altLabel.replace(/[“”.!?,;:\s]/g, '').toLowerCase();
+          if (_normLabel && _normLabel !== _normSpeech) {
+            subText = _altLabel;
+          }
         }
 
         var statHint = '';
