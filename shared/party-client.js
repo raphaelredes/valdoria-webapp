@@ -347,9 +347,10 @@
         }
         if (delta.camp_rest_resolved) {
             _partyState.camp_rest_proposal = null;
-            if (global.vToast) {
-                var isOk = delta.camp_rest_resolved.accepted;
-                global.vToast(isOk ? '🏕️ Descanso concluído com sucesso!' : '🏕️ ' + (delta.camp_rest_resolved.reason || 'Descanso cancelado.'), isOk ? 'ok' : 'err');
+            if (delta.camp_rest_resolved.accepted && delta.camp_rest_resolved.outcome) {
+                _showCampSummaryModal(delta.camp_rest_resolved.outcome);
+            } else if (global.vToast) {
+                global.vToast('🏕️ ' + (delta.camp_rest_resolved.reason || 'Descanso cancelado.'), 'err');
             }
         }
         if (delta.trade_requested) {
@@ -1161,23 +1162,25 @@
         var card = document.createElement('div');
         card.className = 'v-party-modal-card v-party-camp-card';
 
+        var selectedProposeRole = 'sentinel';
+
         var html = '';
         html += '<div class="v-party-modal-header">';
-        html += '  <div class="v-party-modal-title">🏕️ Acampamento & Descanso da Comitiva</div>';
+        html += '  <div class="v-party-modal-title">🏕️ Acampamento & Gestão de Vigília (PHB p. 186)</div>';
         html += '  <button type="button" class="v-party-icon-btn" id="v-camp-close">✖</button>';
         html += '</div>';
         html += '<div class="v-party-modal-body">';
         html += '  <p style="font-size:12px; color:#c7b59d; margin-top:0;">';
-        html += '    Conforme as regras do Livro do Jogador (D&D 5e PHB p. 186), descansar em grupo restaura a vitalidade física e mental dos aventureiros.';
+        html += '    Conforme o Livro do Jogador (D&D 5e PHB p. 186), acampar restaura a vitalidade física e mental da comitiva através de descanso consensual e escala tática de tarefas noturnas.';
         html += '  </p>';
 
         // O Que Está Sendo Escolhido (Regra #24)
         html += '  <div class="v-party-camp-explainer">';
         html += '    <div class="v-party-camp-block">';
         html += '      <div class="v-party-camp-block-title">⏳ Opção 1: Descanso Curto (1 Hora)</div>';
-        html += '      <div class="v-party-camp-block-desc"><strong>O Que Está Sendo Escolhido:</strong> Um período de pausa ligeira e provisões rápidas. Cada aventureiro pode gastar Dados de Vida (1dHD + CON) para regenerar PV. Classes como Bruxo e Monge restauram suas magias e Ki inteiramente.</div>';
-        html += '      <div class="v-party-camp-block-benefit">✔ <strong>Benefícios:</strong> Recuperação ágil de PV sem avançar o relógio do dia; restaura recursos táticos de classe.</div>';
-        html += '      <div class="v-party-camp-block-risk">⚠️ <strong>Limitação:</strong> Consome os Dados de Vida disponíveis do personagem até o próximo Descanso Longo.</div>';
+        html += '      <div class="v-party-camp-block-desc"><strong>O Que Está Sendo Escolhido:</strong> Uma pausa tática ligeira de 1 hora. Permite gastar Dados de Vida individuais (1dHD + CON) para estancar ferimentos e recuperar habilidades breves de classe (Bruxo, Monge, Guerreiro).</div>';
+        html += '      <div class="v-party-camp-block-benefit">✔ <strong>Benefícios:</strong> Recuperação rápida de PV sem avançar o relógio do dia.</div>';
+        html += '      <div class="v-party-camp-block-risk">⚠️ <strong>Limitação:</strong> Consome os Dados de Vida finitos do aventureiro.</div>';
         html += '      <button type="button" class="v-party-loot-btn v-party-loot-btn-greed" id="v-camp-propose-short" style="margin-top:8px; padding:8px; width:100%;">';
         html += '        ✔ Propor Descanso Curto (1h)';
         html += '      </button>';
@@ -1185,10 +1188,23 @@
 
         html += '    <div class="v-party-camp-block" style="margin-top:10px;">';
         html += '      <div class="v-party-camp-block-title">🌙 Opção 2: Descanso Longo (8 Horas)</div>';
-        html += '      <div class="v-party-camp-block-desc"><strong>O Que Está Sendo Escolhido:</strong> Um repouso solene e prolongado (mínimo 6h de sono e 2h de vigília leve). Restaura TODOS os Pontos de Vida (PV) e Pontos de Mana (MP) ao máximo, remove 1 nível de exaustão e define escala de sentinelas noturnas.</div>';
-        html += '      <div class="v-party-camp-block-benefit">✔ <strong>Benefícios:</strong> Vitalidade 100% restaurada para todos os companheiros vivos; recuperação de metade dos Dados de Vida totais.</div>';
-        html += '      <div class="v-party-camp-block-risk">⚠️ <strong>Atenção:</strong> Exige consenso da comitiva; pode ser interrompido por encontros hostis se a vigília falhar.</div>';
-        html += '      <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-camp-propose-long" style="margin-top:8px; padding:8px; width:100%;">';
+        html += '      <div class="v-party-camp-block-desc"><strong>O Que Está Sendo Escolhido:</strong> Repouso solene e prolongado de 8 horas. Restaura 100% de PV e MP, recupera metade dos Dados de Vida totais, reduz 1 nível de exaustão e define a escala de vigília e tarefas de fogueira.</div>';
+        html += '      <div class="v-party-camp-block-benefit">✔ <strong>Benefícios:</strong> Vitalidade plena, bônus de refeição (+5 PV temp) e redução do alerta da masmorra (-15 pontos) se o camuflador tiver sucesso.</div>';
+        html += '      <div class="v-party-camp-block-risk">⚠️ <strong>Atenção:</strong> Risco de emboscada se as sentinelas cochilarem durante a noite (PHB p. 189).</div>';
+
+        // Seletor de Papel do Proponente
+        html += '      <div style="margin-top:8px;">';
+        html += '        <div style="font-size:11px; font-weight:700; color:#c4953a; text-transform:uppercase; margin-bottom:4px;">Sua Função no Acampamento:</div>';
+        html += '        <div class="v-party-camp-roles-grid" id="v-camp-propose-roles">';
+        html += '          <div class="v-party-camp-role-card is-selected" data-role="sentinel"><span class="r-icon">👁️</span><strong>Sentinela</strong><small>Vigília noturna</small></div>';
+        html += '          <div class="v-party-camp-role-card" data-role="cook"><span class="r-icon">🍲</span><strong>Cozinheiro</strong><small>+5 PV temp</small></div>';
+        html += '          <div class="v-party-camp-role-card" data-role="camo"><span class="r-icon">🌿</span><strong>Camuflador</strong><small>-15 Alerta</small></div>';
+        html += '          <div class="v-party-camp-role-card" data-role="medic"><span class="r-icon">🩹</span><strong>Curandeiro</strong><small>Bálsamos extras</small></div>';
+        html += '          <div class="v-party-camp-role-card" data-role="scholar"><span class="r-icon">📜</span><strong>Cronista</strong><small>+15 Cumplicidade</small></div>';
+        html += '        </div>';
+        html += '      </div>';
+
+        html += '      <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-camp-propose-long" style="margin-top:10px; padding:8px; width:100%;">';
         html += '        ✔ Propor Descanso Longo (8h)';
         html += '      </button>';
         html += '    </div>';
@@ -1199,7 +1215,6 @@
         html += '      ← Voltar à Exploração';
         html += '    </button>';
         html += '  </div>';
-
         html += '</div>';
 
         card.innerHTML = html;
@@ -1210,6 +1225,16 @@
         if (closeBtn) closeBtn.onclick = _closeModal;
         var backBtn = document.getElementById('v-camp-back');
         if (backBtn) backBtn.onclick = _closeModal;
+
+        var roleCards = card.querySelectorAll('#v-camp-propose-roles .v-party-camp-role-card');
+        for (var rc = 0; rc < roleCards.length; rc++) {
+            roleCards[rc].onclick = function (ev) {
+                var el = ev.currentTarget;
+                for (var j = 0; j < roleCards.length; j++) roleCards[j].classList.remove('is-selected');
+                el.classList.add('is-selected');
+                selectedProposeRole = el.getAttribute('data-role');
+            };
+        }
 
         var btnShort = document.getElementById('v-camp-propose-short');
         if (btnShort) {
@@ -1238,8 +1263,9 @@
                         session_id: _partyState.session_id,
                         user_id: _cfg.uid,
                         rest_type: 'long',
+                        role_id: selectedProposeRole,
                     });
-                    if (global.vToast) global.vToast('Proposta de Descanso Longo enviada à comitiva!', 'ok');
+                    if (global.vToast) global.vToast('Proposta de Descanso Longo enviada com sua função escolhida!', 'ok');
                 } catch (e) {
                     if (global.vToast) global.vToast('Erro ao propor descanso: ' + e.message, 'err');
                 }
@@ -1247,7 +1273,7 @@
         }
     }
 
-    // ── Modal de Votação de Descanso da Comitiva (Consenso D&D 5e) ───────────────
+    // ── Modal de Votação de Descanso da Comitiva (Consenso D&D 5e & Vigília) ─────
 
     function _showCampRestVoteModal(proposal) {
         if (!proposal) return;
@@ -1262,6 +1288,7 @@
 
         var isLong = (proposal.rest_type === 'long');
         var proposer = proposal.proposer_name || 'Um companheiro';
+        var selectedVoteRole = 'sentinel';
 
         var html = '';
         html += '<div class="v-party-modal-header">';
@@ -1271,7 +1298,17 @@
         html += '  <p><strong>' + proposer + '</strong> propôs um <strong>' + (isLong ? 'Descanso Longo de 8 Horas' : 'Descanso Curto de 1 Hora') + '</strong> para a comitiva.</p>';
         html += '  <div class="v-party-camp-explainer">';
         if (isLong) {
-            html += '    <p style="font-size:12px; color:#e0d0b8;">✔ <strong>Efeito:</strong> Recuperação de 100% dos PV e Mana para todos, remoção de exaustão e escala de sentinelas (PHB p. 186).</p>';
+            html += '    <p style="font-size:12px; color:#e0d0b8;">✔ <strong>Efeito:</strong> Recuperação de 100% dos PV e Mana para todos, remoção de exaustão e resolução de tarefas de vigília (PHB p. 186).</p>';
+            html += '    <div style="margin-top:8px;">';
+            html += '      <div style="font-size:11px; font-weight:700; color:#c4953a; text-transform:uppercase; margin-bottom:4px;">Escolha sua Tarefa na Noite:</div>';
+            html += '      <div class="v-party-camp-roles-grid" id="v-camp-vote-roles">';
+            html += '        <div class="v-party-camp-role-card is-selected" data-role="sentinel"><span class="r-icon">👁️</span><strong>Sentinela</strong><small>Vigília noturna</small></div>';
+            html += '        <div class="v-party-camp-role-card" data-role="cook"><span class="r-icon">🍲</span><strong>Cozinheiro</strong><small>+5 PV temp</small></div>';
+            html += '        <div class="v-party-camp-role-card" data-role="camo"><span class="r-icon">🌿</span><strong>Camuflador</strong><small>-15 Alerta</small></div>';
+            html += '        <div class="v-party-camp-role-card" data-role="medic"><span class="r-icon">🩹</span><strong>Curandeiro</strong><small>Bálsamos</small></div>';
+            html += '        <div class="v-party-camp-role-card" data-role="scholar"><span class="r-icon">📜</span><strong>Cronista</strong><small>+15 Cumplicidade</small></div>';
+            html += '      </div>';
+            html += '    </div>';
         } else {
             html += '    <p style="font-size:12px; color:#e0d0b8;">✔ <strong>Efeito:</strong> Recuperação de PV gastando Dados de Vida (1dHD + CON) e recuperação rápida de recursos.</p>';
             html += '    <div style="margin:8px 0; font-size:12px;">';
@@ -1300,6 +1337,16 @@
         overlay.appendChild(card);
         document.body.appendChild(overlay);
 
+        var vRoleCards = card.querySelectorAll('#v-camp-vote-roles .v-party-camp-role-card');
+        for (var vr = 0; vr < vRoleCards.length; vr++) {
+            vRoleCards[vr].onclick = function (ev) {
+                var el = ev.currentTarget;
+                for (var j = 0; j < vRoleCards.length; j++) vRoleCards[j].classList.remove('is-selected');
+                el.classList.add('is-selected');
+                selectedVoteRole = el.getAttribute('data-role');
+            };
+        }
+
         var btnAccept = document.getElementById('v-camp-vote-accept');
         if (btnAccept) {
             btnAccept.onclick = async function () {
@@ -1313,8 +1360,9 @@
                         proposal_id: proposal.proposal_id,
                         choice: 'accept',
                         hit_dice: dVal,
+                        role_id: selectedVoteRole,
                     });
-                    if (global.vToast) global.vToast('Voto de descanso registrado!', 'ok');
+                    if (global.vToast) global.vToast('Voto de descanso e tarefa registrados!', 'ok');
                 } catch (e) {
                     if (global.vToast) global.vToast('Falha no voto de descanso: ' + e.message, 'err');
                 }
@@ -1338,6 +1386,80 @@
                 }
             };
         }
+    }
+
+    // ── Modal de Resumo de Acampamento & Relato de Fogueira (Owlcat / BioWare) ──
+
+    function _showCampSummaryModal(outcome) {
+        if (!outcome) return;
+        _closeModal();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-camp-summary-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card v-party-camp-card';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">🏕️ Relato da Fogueira & Desfecho do Descanso</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-camp-sum-close">✖</button>';
+        html += '</div>';
+        html += '<div class="v-party-modal-body">';
+
+        if (outcome.campfire_scene) {
+            html += '<div class="v-party-camp-scene-box">' + outcome.campfire_scene + '</div>';
+        }
+
+        if (outcome.ambush_triggered) {
+            var ambushAlert = outcome.ambush_surprised
+                ? '⚠️ EMBOSCADA NOTURNA! A comitiva foi surpreendida durante o sono!'
+                : '🛡️ ALERTA DE EMBOSCADA! As sentinelas ouviram passos nas sombras e acordaram o bando a tempo!';
+            html += '<div class="v-party-camp-ambush-alert ' + (outcome.ambush_surprised ? 'is-surprised' : 'is-alert') + '">' + ambushAlert + '</div>';
+        } else {
+            html += '<div class="v-party-camp-peaceful-badge">🌙 Noite pacífica sob a proteção das sentinelas. Vitalidade plena recuperada!</div>';
+        }
+
+        var results = outcome.role_results || [];
+        if (results.length > 0) {
+            html += '<div style="margin-top:10px; font-size:11px; font-weight:700; color:#c4953a; text-transform:uppercase;">Tarefas de Acampamento:</div>';
+            html += '<div class="v-party-camp-results-list">';
+            for (var i = 0; i < results.length; i++) {
+                var r = results[i];
+                var statusIcon = r.success ? '✨' : '⚠️';
+                html += '<div class="v-party-camp-result-row ' + (r.success ? 'is-success' : 'is-failure') + '">';
+                html += '  <div class="result-role">' + r.role_icon + ' ' + r.role_name + '</div>';
+                html += '  <div class="result-actor">' + r.member_name + ' (' + r.stat_used + ' ' + r.total + ' vs CD ' + r.dc + ')</div>';
+                html += '  <div class="result-summary">' + statusIcon + ' ' + r.summary + '</div>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+
+        html += '<div class="v-party-camp-rewards-strip">';
+        if (outcome.temp_hp_granted > 0) {
+            html += '<span class="camp-reward-tag">🍲 +' + outcome.temp_hp_granted + ' PV Temporários</span>';
+        }
+        if (outcome.threat_delta < 0) {
+            html += '<span class="camp-reward-tag">🌿 ' + outcome.threat_delta + ' Alerta da Masmorra</span>';
+        }
+        if (outcome.synergy_points_granted > 0) {
+            html += '<span class="camp-reward-tag">📜 +' + outcome.synergy_points_granted + ' Cumplicidade</span>';
+        }
+        html += '</div>';
+
+        html += '  <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-camp-sum-back" style="width:100%; padding:10px; margin-top:12px;">← Levantar Acampamento e Avançar</button>';
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        var closeBtn = document.getElementById('v-camp-sum-close');
+        if (closeBtn) closeBtn.onclick = _closeModal;
+        var backBtn = document.getElementById('v-camp-sum-back');
+        if (backBtn) backBtn.onclick = _closeModal;
     }
 
     // ── Painel de Lobby / Sala da Comitiva ───────────────────────────────────────
@@ -2742,6 +2864,7 @@
         openSharedStash: _openSharedStashModal,
         openCampRest: _openCampRestModal,
         showCampRestVote: _showCampRestVoteModal,
+        showCampSummary: _showCampSummaryModal,
         openLoreJournal: _openLoreJournalModal,
         openTrade: _openTradeModal,
         showDeathSaveModal: _showDeathSaveModal,
