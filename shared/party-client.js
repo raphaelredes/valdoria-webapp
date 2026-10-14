@@ -339,6 +339,44 @@
                 global.vToast(isOk ? '🏕️ Descanso concluído com sucesso!' : '🏕️ ' + (delta.camp_rest_resolved.reason || 'Descanso cancelado.'), isOk ? 'ok' : 'err');
             }
         }
+        if (delta.trade_requested) {
+            _partyState.active_trade = delta.trade_requested;
+            if (delta.trade_requested.p2_uid === _cfg.uid) {
+                _showTradeInviteModal(delta.trade_requested);
+            }
+        }
+        if (delta.trade_started || delta.trade_staged || delta.trade_locked || delta.trade_confirmed) {
+            var tradeData = delta.trade_started || delta.trade_staged || delta.trade_locked || delta.trade_confirmed;
+            _partyState.active_trade = tradeData;
+            _refreshTradeModal(tradeData);
+        }
+        if (delta.trade_completed) {
+            _partyState.active_trade = null;
+            _closeTradeModal();
+            if (global.vToast) {
+                global.vToast('⚖️ Troca concluída com sucesso entre ' + delta.trade_completed.p1_name + ' e ' + delta.trade_completed.p2_name + '!', 'ok');
+            }
+        }
+        if (delta.trade_cancelled) {
+            _partyState.active_trade = null;
+            _closeTradeModal();
+            if (global.vToast) {
+                global.vToast('⚖️ ' + (delta.trade_cancelled.reason || 'Negociação cancelada.'), 'warning');
+            }
+        }
+        if (delta.death_save_broadcast) {
+            var dsb = delta.death_save_broadcast;
+            if (dsb.crit_success) {
+                if (global.vToast) global.vToast('✨ MILAGRE EM CAMPO! ' + dsb.actorName + ' rolou Natural 20, recuperou 1 PV e se levantou!', 'ok');
+            } else if (dsb.is_dead) {
+                if (global.vToast) global.vToast('💀 Tragédia! ' + dsb.actorName + ' sucumbiu às salvaguardas contra a morte...', 'err');
+            } else if (dsb.is_stable) {
+                if (global.vToast) global.vToast('🛡️ ' + dsb.actorName + ' foi estabilizado a 0 PV e respira com alívio.', 'ok');
+            } else {
+                var sLabel = dsb.success ? 'Sucesso' : 'Falha';
+                if (global.vToast) global.vToast('🎲 Salvaguarda (' + dsb.actorName + '): d20=' + dsb.d20 + ' [' + sLabel + ' ' + dsb.total_successes + '/3 S, ' + dsb.total_failures + '/3 F]', dsb.success ? 'ok' : 'warning');
+            }
+        }
         if (delta.hp_change) {
             var mems = _partyState.members || [];
             for (var uid in delta.hp_change) {
@@ -410,6 +448,22 @@
             var myV = state.camp_rest_proposal.votes && state.camp_rest_proposal.votes[_cfg.uid];
             if (!myV) {
                 _showCampRestVoteModal(state.camp_rest_proposal);
+            }
+        }
+
+        // 4. Negociação bilateral ativa
+        if (state.active_trade) {
+            if (state.active_trade.status === 'pending_accept' && state.active_trade.p2_uid === _cfg.uid && !document.getElementById('v-party-trade-invite-modal')) {
+                _showTradeInviteModal(state.active_trade);
+            } else if ((state.active_trade.status === 'staged' || state.active_trade.status === 'locked') && document.getElementById('v-party-trade-modal')) {
+                _refreshTradeModal(state.active_trade);
+            }
+        }
+
+        // 5. Modo Espectador e Salvaguardas Contra a Morte no combate
+        if (state.combat && state.combat.is_spectator && state.combat.spectator_meta) {
+            if (state.combat.spectator_meta.dying && !document.getElementById('v-party-death-save-modal')) {
+                _showDeathSaveModal(state.combat);
             }
         }
     }
@@ -1233,7 +1287,12 @@
                 html += '        <div style="font-size:10px; color:#a09078;">Nv.' + mem.level + ' ' + mem.character_class + '</div>';
                 html += '      </div>';
                 html += '    </div>';
-                html += '    <span style="font-size:11px; color:' + (mem.ready ? '#4caf50' : '#ffa000') + ';">' + (mem.ready ? '✓ Pronto' : '⏳ Aguardando') + '</span>';
+                html += '    <div style="display:flex; align-items:center; gap:6px;">';
+                if (mem.uid !== _cfg.uid) {
+                    html += '      <button type="button" class="v-party-trade-init-btn" data-trade-uid="' + mem.uid + '" title="Trocar Itens e Moedas">⚖️ Negociar</button>';
+                }
+                html += '      <span style="font-size:11px; color:' + (mem.ready ? '#4caf50' : '#ffa000') + ';">' + (mem.ready ? '✓ Pronto' : '⏳ Aguardando') + '</span>';
+                html += '    </div>';
                 html += '  </div>';
             }
             html += '  </div>';
@@ -1294,6 +1353,27 @@
                     if (navigator.clipboard && navigator.clipboard.writeText) {
                         navigator.clipboard.writeText(text);
                         if (global.vToast) global.vToast('Convite copiado para área de transferência!', 'ok');
+                    }
+                };
+            }
+            var tradeBtns = card.querySelectorAll('.v-party-trade-init-btn');
+            for (var tIdx = 0; tIdx < tradeBtns.length; tIdx++) {
+                tradeBtns[tIdx].onclick = async function (ev) {
+                    var targetUid = parseInt(ev.currentTarget.getAttribute('data-trade-uid'), 10);
+                    _closeModal();
+                    try {
+                        var res = await _request('/api/party/trade/request', {
+                            session_id: _partyState.session_id,
+                            user_id: _cfg.uid,
+                            target_uid: targetUid,
+                        });
+                        if (res && res.ok && res.trade) {
+                            _partyState.active_trade = res.trade;
+                            _openTradeModal(res.trade);
+                            if (global.vToast) global.vToast('Convite de negociação enviado!', 'info');
+                        }
+                    } catch (err) {
+                        if (global.vToast) global.vToast('Falha ao negociar: ' + err.message, 'err');
                     }
                 };
             }
@@ -1408,6 +1488,562 @@
         } catch (_) {}
     }
 
+    // ── Negociação Bilateral Segura em Duas Etapas (Two-Phase Commit Protocol) ─
+
+    function _closeTradeModal() {
+        var el = document.getElementById('v-party-trade-modal');
+        if (el) el.remove();
+        var invEl = document.getElementById('v-party-trade-invite-modal');
+        if (invEl) invEl.remove();
+    }
+
+    function _showTradeInviteModal(trade) {
+        _closeTradeModal();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-trade-invite-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">⚖️ Proposta de Negociação Direta</div>';
+        html += '</div>';
+        html += '<div class="v-party-modal-body">';
+        html += '  <p style="color:#f0e6d2; font-size:13px;">O companheiro <strong>' + (trade.p1_name || 'Aventureiro') + '</strong> convidou você para negociar itens e moedas de ouro diretamente.</p>';
+        html += '  <p style="font-size:11px; color:#c7b59d;">As ofertas são bloqueadas em duas fases protegidas antes da confirmação mútua, prevenindo perdas ou trocas desonestas.</p>';
+        html += '  <div style="display:flex; gap:8px; margin-top:12px;">';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-trade-inv-accept" style="flex:1; padding:10px;">✔ Aceitar Negociação</button>';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-trade-inv-decline" style="flex:1; padding:10px;">✖ Recusar</button>';
+        html += '  </div>';
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        var btnAcc = document.getElementById('v-trade-inv-accept');
+        if (btnAcc) {
+            btnAcc.onclick = async function () {
+                _closeTradeModal();
+                try {
+                    var res = await _request('/api/party/trade/respond', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        trade_id: trade.trade_id,
+                        accept: true,
+                    });
+                    if (res && res.ok && res.trade) {
+                        _partyState.active_trade = res.trade;
+                        _openTradeModal(res.trade);
+                    }
+                } catch (err) {
+                    if (global.vToast) global.vToast('Erro ao aceitar negociação: ' + err.message, 'err');
+                }
+            };
+        }
+
+        var btnDec = document.getElementById('v-trade-inv-decline');
+        if (btnDec) {
+            btnDec.onclick = async function () {
+                _closeTradeModal();
+                try {
+                    await _request('/api/party/trade/respond', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        trade_id: trade.trade_id,
+                        accept: false,
+                    });
+                } catch (_) {}
+            };
+        }
+    }
+
+    function _openTradeModal(trade) {
+        _closeModal();
+        _closeTradeModal();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-trade-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card v-party-trade-card';
+        card.id = 'v-party-trade-card-inner';
+
+        card.innerHTML = _buildTradeModalHtml(trade);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        _bindTradeModalEvents(card, trade);
+    }
+
+    function _refreshTradeModal(trade) {
+        var card = document.getElementById('v-party-trade-card-inner');
+        if (!card) return;
+        card.innerHTML = _buildTradeModalHtml(trade);
+        _bindTradeModalEvents(card, trade);
+    }
+
+    function _buildTradeModalHtml(trade) {
+        var isP1 = (_cfg.uid === trade.p1_uid);
+        var myItems = isP1 ? (trade.p1_items || []) : (trade.p2_items || []);
+        var myGold = isP1 ? (trade.p1_gold || 0) : (trade.p2_gold || 0);
+        var myLocked = isP1 ? trade.p1_locked : trade.p2_locked;
+        var myConfirmed = isP1 ? trade.p1_confirmed : trade.p2_confirmed;
+
+        var partnerName = isP1 ? trade.p2_name : trade.p1_name;
+        var partnerItems = isP1 ? (trade.p2_items || []) : (trade.p1_items || []);
+        var partnerGold = isP1 ? (trade.p2_gold || 0) : (trade.p1_gold || 0);
+        var partnerLocked = isP1 ? trade.p2_locked : trade.p1_locked;
+
+        var bothLocked = (myLocked && partnerLocked);
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">⚖️ Negociação Segura (Two-Phase Commit)</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-trade-cancel-x">✖</button>';
+        html += '</div>';
+
+        html += '<div class="v-party-modal-body">';
+        html += '  <div class="v-party-trade-grid">';
+
+        // Coluna da Esquerda: Sua Oferta
+        html += '    <div class="v-party-trade-col">';
+        html += '      <div class="v-party-trade-col-header">';
+        html += '        <span>Sua Oferta</span>';
+        html += '        <span style="font-size:10px; color:#beb09b;">(' + _cfg.name + ')</span>';
+        html += '      </div>';
+        html += '      <div class="v-party-trade-lock-badge ' + (myLocked ? 'locked' : 'unlocked') + '">';
+        html += '        ' + (myLocked ? '🔒 OFERTA TRAVADA' : '🔓 AJUSTANDO OFERTA');
+        html += '      </div>';
+        html += '      <div style="font-size:10px; color:#a09078; font-weight:700;">Itens Ofertados:</div>';
+        html += '      <div class="v-party-trade-items" id="v-trade-my-items">';
+        if (myItems.length === 0) {
+            html += '      <div style="font-size:11px; color:#777; text-align:center; padding:10px;">Nenhum item ofertado</div>';
+        } else {
+            for (var i = 0; i < myItems.length; i++) {
+                var itm = myItems[i];
+                html += '    <div class="v-party-trade-item-pill">';
+                html += '      <span>' + (itm.name || itm.item_id) + ' x' + (itm.quantity || 1) + '</span>';
+                if (!myLocked) {
+                    html += '  <button type="button" class="v-party-icon-btn v-trade-remove-item" data-idx="' + i + '" style="font-size:10px; padding:1px 4px;">✕</button>';
+                }
+                html += '    </div>';
+            }
+        }
+        html += '      </div>';
+
+        html += '      <div class="v-party-trade-gold-box">';
+        html += '        <span>💰 Moedas de Ouro:</span>';
+        if (!myLocked) {
+            html += '    <input type="number" id="v-trade-gold-inp" min="0" value="' + myGold + '" style="width:60px; background:#18120d; border:1px solid #ffd700; color:#ffd700; text-align:right; border-radius:4px; padding:2px;" />';
+        } else {
+            html += '    <strong style="color:#ffd700;">' + myGold + ' PO</strong>';
+        }
+        html += '      </div>';
+
+        if (!myLocked) {
+            html += '    <div style="display:flex; gap:6px;">';
+            html += '      <button type="button" class="v-party-loot-btn" id="v-trade-add-item-btn" style="flex:1; padding:6px; font-size:11px;">+ Item da Mochila</button>';
+            html += '      <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-trade-lock-btn" style="flex:1; padding:6px; font-size:11px;">🔒 Travar Oferta</button>';
+            html += '    </div>';
+        } else {
+            html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-trade-unlock-btn" style="padding:6px; font-size:11px;">🔓 Destravar e Modificar</button>';
+        }
+        html += '    </div>';
+
+        // Coluna da Direita: Oferta do Parceiro
+        html += '    <div class="v-party-trade-col">';
+        html += '      <div class="v-party-trade-col-header">';
+        html += '        <span>Oferta do Companheiro</span>';
+        html += '        <span style="font-size:10px; color:#beb09b;">(' + partnerName + ')</span>';
+        html += '      </div>';
+        html += '      <div class="v-party-trade-lock-badge ' + (partnerLocked ? 'locked' : 'unlocked') + '">';
+        html += '        ' + (partnerLocked ? '🔒 OFERTA TRAVADA' : '⏳ AJUSTANDO OFERTA');
+        html += '      </div>';
+        html += '      <div style="font-size:10px; color:#a09078; font-weight:700;">Itens Ofertados:</div>';
+        html += '      <div class="v-party-trade-items">';
+        if (partnerItems.length === 0) {
+            html += '      <div style="font-size:11px; color:#777; text-align:center; padding:10px;">Nenhum item ofertado</div>';
+        } else {
+            for (var j = 0; j < partnerItems.length; j++) {
+                var pItm = partnerItems[j];
+                html += '    <div class="v-party-trade-item-pill">';
+                html += '      <span>' + (pItm.name || pItm.item_id) + ' x' + (pItm.quantity || 1) + '</span>';
+                html += '    </div>';
+            }
+        }
+        html += '      </div>';
+
+        html += '      <div class="v-party-trade-gold-box">';
+        html += '        <span>💰 Moedas de Ouro:</span>';
+        html += '        <strong style="color:#ffd700;">' + partnerGold + ' PO</strong>';
+        html += '      </div>';
+
+        html += '      <div style="font-size:10px; color:#888; text-align:center; margin-top:auto; padding:4px;">';
+        html += '        ' + (partnerLocked ? '✔ Parceiro pronto para confirmar' : 'Aguardando o parceiro travar');
+        html += '      </div>';
+        html += '    </div>';
+
+        html += '  </div>';
+
+        // Barra Inferior de Ação Mútua
+        html += '  <div style="display:flex; gap:8px; margin-top:8px;">';
+        if (bothLocked) {
+            html += '  <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-trade-confirm-btn" style="flex:2; padding:12px; font-size:13px;" ' + (myConfirmed ? 'disabled' : '') + '>';
+            html += '    ' + (myConfirmed ? '⏳ Aguardando confirmação de ' + partnerName : '✔ Confirmar Troca Bilateral');
+            html += '  </button>';
+        } else {
+            html += '  <div style="flex:2; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:6px; font-size:11px; color:#a09078; display:flex; align-items:center; justify-content:center; text-align:center; padding:8px;">';
+            html += '    Ambos os aventureiros devem travar suas ofertas antes de confirmar a troca.';
+            html += '  </div>';
+        }
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-trade-cancel-btn" style="flex:1; padding:10px;">';
+        html += '      ✖ Cancelar';
+        html += '    </button>';
+        html += '  </div>';
+
+        html += '</div>';
+        return html;
+    }
+
+    function _bindTradeModalEvents(card, trade) {
+        var tid = trade.trade_id;
+        var isP1 = (_cfg.uid === trade.p1_uid);
+        var myItems = isP1 ? (trade.p1_items || []) : (trade.p2_items || []);
+
+        var btnCancel = card.querySelector('#v-trade-cancel-btn');
+        var btnCancelX = card.querySelector('#v-trade-cancel-x');
+        var cancelHandler = async function () {
+            _closeTradeModal();
+            try {
+                await _request('/api/party/trade/cancel', {
+                    session_id: _partyState.session_id,
+                    user_id: _cfg.uid,
+                    trade_id: tid,
+                });
+            } catch (_) {}
+        };
+        if (btnCancel) btnCancel.onclick = cancelHandler;
+        if (btnCancelX) btnCancelX.onclick = cancelHandler;
+
+        var btnLock = card.querySelector('#v-trade-lock-btn');
+        if (btnLock) {
+            btnLock.onclick = async function () {
+                var gInp = card.querySelector('#v-trade-gold-inp');
+                var gVal = gInp ? parseInt(gInp.value, 10) || 0 : 0;
+                try {
+                    await _request('/api/party/trade/stage', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        trade_id: tid,
+                        items: myItems,
+                        gold: gVal,
+                    });
+                    var res = await _request('/api/party/trade/lock', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        trade_id: tid,
+                        locked: true,
+                    });
+                    if (res && res.trade) {
+                        _partyState.active_trade = res.trade;
+                        _refreshTradeModal(res.trade);
+                    }
+                } catch (err) {
+                    if (global.vToast) global.vToast('Erro ao travar oferta: ' + err.message, 'err');
+                }
+            };
+        }
+
+        var btnUnlock = card.querySelector('#v-trade-unlock-btn');
+        if (btnUnlock) {
+            btnUnlock.onclick = async function () {
+                try {
+                    var res = await _request('/api/party/trade/lock', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        trade_id: tid,
+                        locked: false,
+                    });
+                    if (res && res.trade) {
+                        _partyState.active_trade = res.trade;
+                        _refreshTradeModal(res.trade);
+                    }
+                } catch (err) {
+                    if (global.vToast) global.vToast('Erro ao destravar: ' + err.message, 'err');
+                }
+            };
+        }
+
+        var btnConfirm = card.querySelector('#v-trade-confirm-btn');
+        if (btnConfirm) {
+            btnConfirm.onclick = function () {
+                _showTradeConfirmDecision(trade);
+            };
+        }
+
+        var btnAddItem = card.querySelector('#v-trade-add-item-btn');
+        if (btnAddItem) {
+            btnAddItem.onclick = function () {
+                _promptTradeItemSelector(trade);
+            };
+        }
+
+        var rmBtns = card.querySelectorAll('.v-trade-remove-item');
+        for (var r = 0; r < rmBtns.length; r++) {
+            rmBtns[r].onclick = async function (ev) {
+                var idx = parseInt(ev.currentTarget.getAttribute('data-idx'), 10);
+                myItems.splice(idx, 1);
+                var gInp = card.querySelector('#v-trade-gold-inp');
+                var gVal = gInp ? parseInt(gInp.value, 10) || 0 : 0;
+                try {
+                    var res = await _request('/api/party/trade/stage', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        trade_id: tid,
+                        items: myItems,
+                        gold: gVal,
+                    });
+                    if (res && res.trade) {
+                        _partyState.active_trade = res.trade;
+                        _refreshTradeModal(res.trade);
+                    }
+                } catch (err) {
+                    if (global.vToast) global.vToast('Erro ao remover item: ' + err.message, 'err');
+                }
+            };
+        }
+    }
+
+    function _showTradeConfirmDecision(trade) {
+        var isP1 = (_cfg.uid === trade.p1_uid);
+        var partnerName = isP1 ? trade.p2_name : trade.p1_name;
+        var myItems = isP1 ? (trade.p1_items || []) : (trade.p2_items || []);
+        var myGold = isP1 ? (trade.p1_gold || 0) : (trade.p2_gold || 0);
+        var partnerItems = isP1 ? (trade.p2_items || []) : (trade.p1_items || []);
+        var partnerGold = isP1 ? (trade.p2_gold || 0) : (trade.p1_gold || 0);
+
+        var modal = document.createElement('div');
+        modal.className = 'v-party-modal-overlay';
+        modal.id = 'v-trade-confirm-dialog';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">✔ Confirmar Negociação Bilateral</div>';
+        html += '</div>';
+        html += '<div class="v-party-modal-body">';
+        html += '  <div class="v-party-camp-block">';
+        html += '    <div class="v-party-camp-block-title">O Que Está Sendo Escolhido:</div>';
+        html += '    <div class="v-party-camp-block-desc">Você está prestes a concluir a troca atômica definitiva com <strong>' + partnerName + '</strong>.</div>';
+        html += '    <div style="font-size:11px; color:#e0d0b8; margin:6px 0;">';
+        html += '      <div>📤 <strong>Você Entrega:</strong> ' + myItems.length + ' item(ns) e ' + myGold + ' PO.</div>';
+        html += '      <div>📥 <strong>Você Recebe:</strong> ' + partnerItems.length + ' item(ns) e ' + partnerGold + ' PO.</div>';
+        html += '    </div>';
+        html += '    <div class="v-party-camp-block-benefit">✔ Transação segura garantida pelo servidor autoritativo (Two-Phase Commit).</div>';
+        html += '  </div>';
+
+        html += '  <div style="display:flex; gap:8px; margin-top:12px;">';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-trade-decision-confirm" style="flex:1; padding:10px;">✔ Concluir Troca</button>';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-trade-decision-back" style="flex:1; padding:10px;">← Voltar às Opções</button>';
+        html += '  </div>';
+        html += '</div>';
+
+        card.innerHTML = html;
+        modal.appendChild(card);
+        document.body.appendChild(modal);
+
+        card.querySelector('#v-trade-decision-back').onclick = function () {
+            modal.remove();
+        };
+
+        card.querySelector('#v-trade-decision-confirm').onclick = async function () {
+            modal.remove();
+            try {
+                var res = await _request('/api/party/trade/confirm', {
+                    session_id: _partyState.session_id,
+                    user_id: _cfg.uid,
+                    trade_id: trade.trade_id,
+                });
+                if (res && res.trade) {
+                    _partyState.active_trade = res.trade;
+                    _refreshTradeModal(res.trade);
+                }
+            } catch (err) {
+                if (global.vToast) global.vToast('Erro ao confirmar: ' + err.message, 'err');
+            }
+        };
+    }
+
+    function _promptTradeItemSelector(trade) {
+        var myMember = null;
+        var members = (_partyState && _partyState.members) || [];
+        for (var i = 0; i < members.length; i++) {
+            if (members[i].uid === _cfg.uid) { myMember = members[i]; break; }
+        }
+        var inv = (myMember && myMember.inventory) || [];
+        if (inv.length === 0) {
+            if (global.vToast) global.vToast('Sua mochila na comitiva está vazia.', 'info');
+            return;
+        }
+
+        var modal = document.createElement('div');
+        modal.className = 'v-party-modal-overlay';
+        modal.id = 'v-trade-item-picker';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card';
+
+        var html = '<div class="v-party-modal-header"><div class="v-party-modal-title">🎒 Selecionar Item para Troca</div><button type="button" class="v-party-icon-btn" id="v-picker-close">✖</button></div>';
+        html += '<div class="v-party-modal-body"><div style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;">';
+        for (var j = 0; j < inv.length; j++) {
+            var itm = inv[j];
+            html += '<button type="button" class="v-party-loot-btn v-trade-pick-btn" data-id="' + itm.item_id + '" data-name="' + (itm.name || itm.item_id) + '" style="padding:8px 10px; text-align:left; align-items:flex-start;">';
+            html += '  <div style="font-weight:700;">' + (itm.name || itm.item_id) + '</div>';
+            html += '  <div style="font-size:10px; color:#c7b59d;">Quantidade disponível: ' + (itm.quantity || 1) + '</div>';
+            html += '</button>';
+        }
+        html += '</div></div>';
+
+        card.innerHTML = html;
+        modal.appendChild(card);
+        document.body.appendChild(modal);
+
+        card.querySelector('#v-picker-close').onclick = function () { modal.remove(); };
+
+        var pickBtns = card.querySelectorAll('.v-trade-pick-btn');
+        for (var p = 0; p < pickBtns.length; p++) {
+            pickBtns[p].onclick = async function (ev) {
+                var itmId = ev.currentTarget.getAttribute('data-id');
+                var itmName = ev.currentTarget.getAttribute('data-name');
+                modal.remove();
+
+                var isP1 = (_cfg.uid === trade.p1_uid);
+                var myItems = isP1 ? (trade.p1_items || []) : (trade.p2_items || []);
+                myItems.push({ item_id: itmId, name: itmName, quantity: 1 });
+
+                var gInp = document.querySelector('#v-trade-gold-inp');
+                var gVal = gInp ? parseInt(gInp.value, 10) || 0 : 0;
+                try {
+                    var res = await _request('/api/party/trade/stage', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        trade_id: trade.trade_id,
+                        items: myItems,
+                        gold: gVal,
+                    });
+                    if (res && res.trade) {
+                        _partyState.active_trade = res.trade;
+                        _refreshTradeModal(res.trade);
+                    }
+                } catch (err) {
+                    if (global.vToast) global.vToast('Erro ao ofertar item: ' + err.message, 'err');
+                }
+            };
+        }
+    }
+
+    // ── Salvaguardas Contra a Morte e Modo Espectador (D&D 5e PHB p.197) ────────
+
+    function _showDeathSaveModal(combatData) {
+        var existing = document.getElementById('v-party-death-save-modal');
+        if (existing) existing.remove();
+
+        var meta = combatData.spectator_meta || {};
+        var ds = meta.death_saves || { s: 0, f: 0 };
+        var canRoll = meta.can_roll_death_save;
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-death-save-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card v-party-death-save-card';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">🔻 Salvaguarda Contra a Morte (PHB p. 197)</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-ds-close">✖</button>';
+        html += '</div>';
+
+        html += '<div class="v-party-modal-body">';
+        html += '  <p style="color:#f0dcd0; font-size:12px; margin:0 0 8px 0;">Seu aventureiro está inconsciente a 0 PV. Três sucessos estabilizam sua respiração; três falhas resultam em morte permanente.</p>';
+
+        html += '  <div class="v-ds-track">';
+        html += '    <span style="font-size:12px; font-weight:700; color:#81c784;">Sucessos (' + ds.s + '/3):</span>';
+        html += '    <div class="v-ds-pips-row">';
+        for (var s = 1; s <= 3; s++) {
+            html += '  <div class="v-ds-pip v-ds-pip-s ' + (s <= ds.s ? 'active' : '') + '"></div>';
+        }
+        html += '    </div>';
+        html += '  </div>';
+
+        html += '  <div class="v-ds-track">';
+        html += '    <span style="font-size:12px; font-weight:700; color:#e57373;">Falhas (' + ds.f + '/3):</span>';
+        html += '    <div class="v-ds-pips-row">';
+        for (var f = 1; f <= 3; f++) {
+            html += '  <div class="v-ds-pip v-ds-pip-f ' + (f <= ds.f ? 'active' : '') + '"></div>';
+        }
+        html += '    </div>';
+        html += '  </div>';
+
+        if (canRoll) {
+            html += '  <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-ds-roll-btn" style="width:100%; padding:12px; margin-top:10px; font-size:13px;">';
+            html += '    🎲 Rolar Salvaguarda Contra a Morte (1d20)';
+            html += '  </button>';
+        } else {
+            html += '  <div style="font-size:11px; color:#beb09b; text-align:center; padding:8px; background:rgba(0,0,0,0.3); border-radius:4px; margin-top:8px;">';
+            html += '    Aguardando a sua vez na ordem de iniciativa para rolar o d20.';
+            html += '  </div>';
+        }
+
+        html += '  <div style="display:flex; gap:8px; margin-top:10px;">';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-greed" id="v-ds-ping-help" style="flex:1; padding:8px; font-size:11px;">🆘 Sinalizar Socorro</button>';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-ds-spectate-btn" style="flex:1; padding:8px; font-size:11px;">👁️ Ver Campo</button>';
+        html += '  </div>';
+
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        card.querySelector('#v-ds-close').onclick = function () { overlay.remove(); };
+        card.querySelector('#v-ds-spectate-btn').onclick = function () { overlay.remove(); };
+
+        var btnHelp = card.querySelector('#v-ds-ping-help');
+        if (btnHelp) {
+            btnHelp.onclick = function () {
+                _sendPing('assist', 0, 0, 'Companheiro caído a 0 PV precisa de cura!');
+                if (global.vToast) global.vToast('Alerta de socorro transmitido para a comitiva!', 'ok');
+            };
+        }
+
+        var btnRoll = card.querySelector('#v-ds-roll-btn');
+        if (btnRoll) {
+            btnRoll.onclick = async function () {
+                btnRoll.disabled = true;
+                try {
+                    await _request('/api/party/combat/death-save', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                    });
+                    overlay.remove();
+                    await _pollState();
+                } catch (err) {
+                    btnRoll.disabled = false;
+                    if (global.vToast) global.vToast('Erro ao rolar salvaguarda: ' + err.message, 'err');
+                }
+            };
+        }
+    }
+
     function init(cfg) {
         if (cfg) {
             for (var k in cfg) {
@@ -1437,6 +2073,8 @@
         openSharedStash: _openSharedStashModal,
         openCampRest: _openCampRestModal,
         showCampRestVote: _showCampRestVoteModal,
+        openTrade: _openTradeModal,
+        showDeathSaveModal: _showDeathSaveModal,
         showLootModal: _showLootModal,
         showReactionPrompt: _showReactionPrompt,
         renderPingWave: _renderPingWave,
