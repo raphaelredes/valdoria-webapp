@@ -3173,19 +3173,28 @@
     }
 
     var sTxt = '';
+    var detectedSub = '';
     if (ch.speech) {
       sTxt = _cleanSpeechText(ch.speech);
     } else if (ch.label) {
       var _lblTrim = String(ch.label).trim();
-      if (_lblTrim.indexOf('— "') === 0 || _lblTrim.indexOf('— “') === 0 || _lblTrim.indexOf('“') === 0 || (_lblTrim.indexOf('"') === 0 && _lblTrim.length > 2)) {
-        sTxt = _cleanSpeechText(_lblTrim);
+      var _dashM = _lblTrim.match(/^([^—–]+?)\s*[—–]\s*([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
+      if (_dashM) {
+        sTxt = _cleanSpeechText(_dashM[2]);
+        detectedSub = _dashM[1].trim();
       } else {
         var _tm = _lblTrim.match(/^\[(.*?)\]\s*(.*)$/);
         if (_tm) {
           var _pot = _tm[2].trim();
-          if (_pot.indexOf('“') === 0 || (_pot.indexOf('"') === 0 && _pot.length > 2)) {
+          var _qParen = _pot.match(/^([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
+          if (_qParen) {
+            sTxt = _cleanSpeechText(_qParen[1]);
+            if (_qParen[2]) detectedSub = _qParen[2].trim();
+          } else if (_pot.indexOf('“') === 0 || (_pot.indexOf('"') === 0 && _pot.length > 2)) {
             sTxt = _cleanSpeechText(_pot);
           }
+        } else if (_lblTrim.indexOf('— "') === 0 || _lblTrim.indexOf('— “') === 0 || _lblTrim.indexOf('“') === 0 || (_lblTrim.indexOf('"') === 0 && _lblTrim.length > 2)) {
+          sTxt = _cleanSpeechText(_lblTrim);
         }
       }
     }
@@ -3219,10 +3228,11 @@
           '<div class="enc-cd-box">' + _stripEmojis(ch.desc) + '</div>' +
         '</div>';
     } else {
+      var intentText = detectedSub || subtitleText || '';
       descHtml =
         '<div class="enc-cd-section">' +
           '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
-          '<div class="enc-cd-box">' + _stripEmojis(_coinify(titleText)) + (subtitleText ? ' — ' + subtitleText : '') + '</div>' +
+          '<div class="enc-cd-box">' + _stripEmojis(_coinify(intentText || titleText)) + '</div>' +
         '</div>';
     }
 
@@ -3507,14 +3517,31 @@
       var speechClean = '';
       if (!hasSpeech && ch.label) {
         var _trimmed = String(ch.label).trim();
-        if (_trimmed.indexOf('— "') === 0 || _trimmed.indexOf('— “') === 0 || _trimmed.indexOf('“') === 0 || (_trimmed.indexOf('"') === 0 && _trimmed.length > 2)) {
+        var _dashM = _trimmed.match(/^([^—–]+?)\s*[—–]\s*([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
+        if (_dashM) {
           hasSpeech = true;
-          speechClean = _cleanSpeechText(_trimmed);
+          speechClean = _cleanSpeechText(_dashM[2]);
+          subText = _dashM[1].trim();
+          if (_dashM[3] && !tagText) {
+            tagText = _dashM[3].trim();
+            tagPill = '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>';
+          }
         } else {
           var _tagMatch = _trimmed.match(/^\[(.*?)\]\s*(.*)$/);
           if (_tagMatch) {
             var _potSpeech = _tagMatch[2].trim();
-            if (_potSpeech.indexOf('“') === 0 || (_potSpeech.indexOf('"') === 0 && _potSpeech.length > 2)) {
+            var _qParen = _potSpeech.match(/^([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
+            if (_qParen) {
+              hasSpeech = true;
+              speechClean = _cleanSpeechText(_qParen[1]);
+              if (!tagText) {
+                tagText = _tagMatch[1].trim();
+                tagPill = '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>';
+              }
+              if (_qParen[2] && !subText) {
+                subText = _qParen[2].trim();
+              }
+            } else if (_potSpeech.indexOf('“') === 0 || (_potSpeech.indexOf('"') === 0 && _potSpeech.length > 2)) {
               hasSpeech = true;
               speechClean = _cleanSpeechText(_potSpeech);
               if (!tagText) {
@@ -3522,6 +3549,9 @@
                 tagPill = '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>';
               }
             }
+          } else if (_trimmed.indexOf('— "') === 0 || _trimmed.indexOf('— “') === 0 || _trimmed.indexOf('“') === 0 || (_trimmed.indexOf('"') === 0 && _trimmed.length > 2)) {
+            hasSpeech = true;
+            speechClean = _cleanSpeechText(_trimmed);
           }
         }
       }
