@@ -30,6 +30,7 @@
     var _activeLootTimer = null;
     var _activeReactionTimer = null;
     var _activeGhostingPromptMemberId = null;
+    var _lastSeenCombatSummaryId = null;
 
     // Elementos DOM cacheados
     var _hudEl = null;
@@ -377,6 +378,11 @@
                 if (global.vToast) global.vToast('🎲 Salvaguarda (' + dsb.actorName + '): d20=' + dsb.d20 + ' [' + sLabel + ' ' + dsb.total_successes + '/3 S, ' + dsb.total_failures + '/3 F]', dsb.success ? 'ok' : 'warning');
             }
         }
+        if (delta.challenge_started || delta.challenge_update) {
+            var chData = delta.challenge_started || delta.challenge_update;
+            _partyState.active_challenge = chData;
+            _showSkillChallengeModal(chData);
+        }
         if (delta.hp_change) {
             var mems = _partyState.members || [];
             for (var uid in delta.hp_change) {
@@ -464,6 +470,22 @@
         if (state.combat && state.combat.is_spectator && state.combat.spectator_meta) {
             if (state.combat.spectator_meta.dying && !document.getElementById('v-party-death-save-modal')) {
                 _showDeathSaveModal(state.combat);
+            }
+        }
+
+        // 6. Desafios de Perícias Coletivas (Skill Challenges D&D 4e/5e)
+        if (state.active_challenge) {
+            if (state.active_challenge.status === 'active' && !document.getElementById('v-party-challenge-modal')) {
+                _showSkillChallengeModal(state.active_challenge);
+            } else if (document.getElementById('v-party-challenge-modal')) {
+                _refreshSkillChallengeModal(state.active_challenge);
+            }
+        }
+
+        // 7. Resumo Tático Pós-Combate & MVP Honors (Blizzard / Valve / Riot)
+        if (state.last_combat_summary && !_lastSeenCombatSummaryId) {
+            if (!document.getElementById('v-party-summary-modal') && state.status !== 'combat' && state.status !== 'combat2') {
+                _showTacticalSummaryModal(state.last_combat_summary);
             }
         }
     }
@@ -2044,6 +2066,364 @@
         }
     }
 
+    // ── Desafios de Perícias Coletivas (D&D 4e/5e Skill Challenges) ─────────────
+
+    function _showSkillChallengeModal(challenge) {
+        var existing = document.getElementById('v-party-challenge-modal');
+        if (existing) {
+            _refreshSkillChallengeModal(challenge);
+            return;
+        }
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-challenge-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card v-party-challenge-card';
+
+        card.innerHTML = _buildSkillChallengeHtml(challenge);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        _bindSkillChallengeEvents(card, challenge);
+    }
+
+    function _refreshSkillChallengeModal(challenge) {
+        var overlay = document.getElementById('v-party-challenge-modal');
+        if (!overlay) return;
+        var card = overlay.querySelector('.v-party-challenge-card');
+        if (!card) return;
+        card.innerHTML = _buildSkillChallengeHtml(challenge);
+        _bindSkillChallengeEvents(card, challenge);
+    }
+
+    function _buildSkillChallengeHtml(challenge) {
+        var sReq = challenge.required_successes || 4;
+        var fMax = challenge.max_failures || 3;
+        var sCur = challenge.current_successes || 0;
+        var fCur = challenge.current_failures || 0;
+        var timeLeft = challenge.time_left_sec != null ? challenge.time_left_sec : (challenge.time_limit_sec || 60);
+        var isDone = challenge.status !== 'active';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">🧭 ' + (challenge.title || 'Desafio de Perícias Coletivas') + '</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-ch-close-x">✖</button>';
+        html += '</div>';
+
+        html += '<div class="v-party-modal-body">';
+        if (challenge.description) {
+            html += '  <p style="color:#f0dcd0; font-size:12px; line-height:1.4; margin:0 0 8px 0;">' + challenge.description + '</p>';
+        }
+
+        // Relógio de Progresso da Comitiva (Progress Clocks)
+        html += '  <div class="v-challenge-clock-banner">';
+        html += '    <div class="v-challenge-track">';
+        html += '      <span style="font-size:11px; font-weight:700; color:#81c784;">Sucessos:</span>';
+        for (var s = 1; s <= sReq; s++) {
+            html += '    <div class="v-ch-pip-s ' + (s <= sCur ? 'active' : '') + '"></div>';
+        }
+        html += '    </div>';
+
+        html += '    <div class="v-challenge-track">';
+        html += '      <span style="font-size:11px; font-weight:700; color:#e57373;">Falhas:</span>';
+        for (var f = 1; f <= fMax; f++) {
+            html += '    <div class="v-ch-pip-f ' + (f <= fCur ? 'active' : '') + '"></div>';
+        }
+        html += '    </div>';
+
+        html += '    <div style="font-size:11px; font-weight:700; color:#ffe082;">⏱️ ' + timeLeft + 's</div>';
+        html += '  </div>';
+
+        // Desfechos do Desafio
+        if (challenge.status === 'victory') {
+            html += '  <div style="background:rgba(46,125,50,0.25); border:1px solid #4caf50; border-radius:6px; padding:10px; text-align:center; margin:8px 0;">';
+            html += '    <div style="font-size:13px; font-weight:700; color:#81c784;">🏆 Vitória da Comitiva!</div>';
+            html += '    <div style="font-size:11px; color:#c8e6c9; margin-top:2px;">O obstáculo coletivo foi superado com maestria pela comitiva.</div>';
+            html += '  </div>';
+        } else if (challenge.status === 'partial_victory') {
+            html += '  <div style="background:rgba(239,108,0,0.25); border:1px solid #ff9800; border-radius:6px; padding:10px; text-align:center; margin:8px 0;">';
+            html += '    <div style="font-size:13px; font-weight:700; color:#ffb74d;">⚠️ Vitória Parcial (Sucesso com Custo)</div>';
+            html += '    <div style="font-size:11px; color:#ffe0b2; margin-top:2px;">A comitiva conseguiu escapar a tempo, sofrendo apenas desgaste leve de recursos.</div>';
+            html += '  </div>';
+        } else if (challenge.status === 'defeat') {
+            html += '  <div style="background:rgba(198,40,40,0.25); border:1px solid #f44336; border-radius:6px; padding:10px; text-align:center; margin:8px 0;">';
+            html += '    <div style="font-size:13px; font-weight:700; color:#e57373;">💀 Fracasso Crítico da Comitiva</div>';
+            html += '    <div style="font-size:11px; color:#ffcdd2; margin-top:2px;">O perigo ambiental cobrou seu preço, ativando armadilhas ou emboscada na câmara!</div>';
+            html += '  </div>';
+        }
+
+        // Grade de Perícias Aplicáveis
+        if (!isDone) {
+            html += '  <div style="font-size:11px; font-weight:700; color:var(--v-gold,#c4953a); margin-top:6px; text-transform:uppercase;">Escolha sua Perícia:</div>';
+            html += '  <div class="v-challenge-skills-grid">';
+            var skills = challenge.skills || [];
+            for (var i = 0; i < skills.length; i++) {
+                var sk = skills[i];
+                html += '    <button type="button" class="v-challenge-skill-btn" data-key="' + sk.skill_key + '">';
+                html += '      <div style="display:flex; flex-direction:column; gap:2px;">';
+                html += '        <div style="font-weight:700; font-size:12px; color:#ffe082;">🎲 ' + sk.skill_name + ' <span style="font-size:10px; color:#a1887f;">(CD ' + sk.dc + ' | ' + sk.attr.toUpperCase() + ')</span></div>';
+                html += '        <div style="font-size:11px; color:#ded1be;">' + sk.description + '</div>';
+                html += '      </div>';
+                html += '      <div style="font-size:16px;">▸</div>';
+                html += '    </button>';
+            }
+            html += '  </div>';
+
+            html += '  <div style="display:flex; gap:8px; margin-top:8px;">';
+            html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-greed" id="v-ch-assist-btn" style="flex:1; padding:8px; font-size:11px;">🤝 Ajudar Companheiro (Conceder Vantagem)</button>';
+            html += '  </div>';
+        }
+
+        // Histórico de Ações da Comitiva
+        var contribs = challenge.contributions || [];
+        if (contribs.length > 0) {
+            html += '  <div style="font-size:10px; font-weight:700; color:#a1887f; margin:8px 0 4px 0; text-transform:uppercase;">Últimas Ações da Comitiva:</div>';
+            html += '  <div class="v-challenge-log-box">';
+            for (var c = contribs.length - 1; c >= 0; c--) {
+                var ev = contribs[c];
+                if (ev.type === 'skill_check') {
+                    var sCol = ev.success ? '#81c784' : '#e57373';
+                    var sTxt = ev.success ? '✔ Sucesso' : '✖ Falha';
+                    var advNote = ev.has_advantage ? ' (Vantagem)' : '';
+                    html += '<div><strong>' + ev.member_name + '</strong> usou ' + ev.skill_name + advNote + ': d20=' + ev.roll + ' (Total ' + ev.total + ' vs CD ' + ev.dc + ') → <span style="color:' + sCol + '; font-weight:700;">' + sTxt + '</span></div>';
+                } else if (ev.type === 'assist') {
+                    html += '<div style="color:#ffd54f;">🤝 <strong>' + ev.member_name + '</strong> concedeu auxílio tático a ' + ev.target_name + '.</div>';
+                } else if (ev.message) {
+                    html += '<div style="color:#beb09b;">' + ev.message + '</div>';
+                }
+            }
+            html += '  </div>';
+        }
+
+        if (isDone) {
+            html += '  <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-ch-done-btn" style="width:100%; padding:10px; margin-top:10px; font-size:12px;">← Continuar Exploração</button>';
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    function _bindSkillChallengeEvents(card, challenge) {
+        var overlay = document.getElementById('v-party-challenge-modal');
+
+        var btnCloseX = card.querySelector('#v-ch-close-x');
+        if (btnCloseX) {
+            btnCloseX.onclick = function () { if (overlay) overlay.remove(); };
+        }
+
+        var btnDone = card.querySelector('#v-ch-done-btn');
+        if (btnDone) {
+            btnDone.onclick = function () { if (overlay) overlay.remove(); };
+        }
+
+        var skillBtns = card.querySelectorAll('.v-challenge-skill-btn');
+        for (var i = 0; i < skillBtns.length; i++) {
+            skillBtns[i].onclick = async function (ev) {
+                var skKey = ev.currentTarget.getAttribute('data-key');
+                ev.currentTarget.disabled = true;
+                try {
+                    var res = await _request('/api/party/challenge/contribute', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        skill_key: skKey,
+                    });
+                    if (res && res.challenge_state) {
+                        _partyState.active_challenge = res.challenge_state;
+                        _refreshSkillChallengeModal(res.challenge_state);
+                    }
+                    await _pollState();
+                } catch (err) {
+                    ev.currentTarget.disabled = false;
+                    if (global.vToast) global.vToast(err.message, 'warn');
+                }
+            };
+        }
+
+        var btnAssist = card.querySelector('#v-ch-assist-btn');
+        if (btnAssist) {
+            btnAssist.onclick = function () {
+                _promptChallengeAssistTarget(challenge);
+            };
+        }
+    }
+
+    function _promptChallengeAssistTarget(challenge) {
+        var existing = document.getElementById('v-ch-assist-dialog');
+        if (existing) existing.remove();
+
+        var members = (_partyState && _partyState.members) ? _partyState.members : [];
+        var eligible = [];
+        for (var i = 0; i < members.length; i++) {
+            if (members[i].uid !== _cfg.uid) eligible.push(members[i]);
+        }
+
+        if (eligible.length === 0) {
+            if (global.vToast) global.vToast('Não há outros companheiros na comitiva para auxiliar.', 'warn');
+            return;
+        }
+
+        var modal = document.createElement('div');
+        modal.className = 'v-party-modal-overlay';
+        modal.id = 'v-ch-assist-dialog';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card';
+        card.style.maxWidth = '360px';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">🤝 Ação de Ajuda (PHB p. 192)</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-ast-close">✖</button>';
+        html += '</div>';
+        html += '<div class="v-party-modal-body">';
+        html += '  <p style="color:#ded1be; font-size:11px;">Selecione qual companheiro da comitiva receberá Vantagem no próximo teste do desafio:</p>';
+        html += '  <div style="display:flex; flex-direction:column; gap:6px; margin:8px 0;">';
+        for (var j = 0; j < eligible.length; j++) {
+            var m = eligible[j];
+            html += '    <button type="button" class="v-party-loot-btn v-ast-target-btn" data-uid="' + m.uid + '" data-name="' + (m.name || 'Companheiro') + '" style="padding:8px 10px; text-align:left;">';
+            html += '      <span>' + (m.icon || '⚔️') + ' ' + (m.name || 'Companheiro') + ' (' + (m.character_class || 'Aventureiro') + ')</span>';
+            html += '    </button>';
+        }
+        html += '  </div>';
+        html += '</div>';
+
+        card.innerHTML = html;
+        modal.appendChild(card);
+        document.body.appendChild(modal);
+
+        card.querySelector('#v-ast-close').onclick = function () { modal.remove(); };
+
+        var tBtns = card.querySelectorAll('.v-ast-target-btn');
+        for (var k = 0; k < tBtns.length; k++) {
+            tBtns[k].onclick = async function (ev) {
+                var targetUid = parseInt(ev.currentTarget.getAttribute('data-uid'), 10);
+                var targetName = ev.currentTarget.getAttribute('data-name');
+                modal.remove();
+                try {
+                    var res = await _request('/api/party/challenge/assist', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        target_uid: targetUid,
+                        assist_type: 'advantage',
+                        note: _cfg.name + ' orienta e apoia ' + targetName + '.',
+                    });
+                    if (res && res.challenge_state) {
+                        _partyState.active_challenge = res.challenge_state;
+                        _refreshSkillChallengeModal(res.challenge_state);
+                    }
+                    if (global.vToast) global.vToast('Auxílio concedido a ' + targetName + ' (Vantagem no próximo teste)!', 'ok');
+                    await _pollState();
+                } catch (err) {
+                    if (global.vToast) global.vToast('Erro ao auxiliar companheiro: ' + err.message, 'err');
+                }
+            };
+        }
+    }
+
+    // ── Resumo Tático Pós-Combate & MVP Honors (Blizzard / Valve / Riot) ─────────
+
+    function _showTacticalSummaryModal(summary) {
+        if (!summary) return;
+        var existing = document.getElementById('v-party-summary-modal');
+        if (existing) existing.remove();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-summary-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card v-party-summary-card';
+
+        var phaseLabel = summary.phase === 'victory' ? '🏆 VITÓRIA ESMAGADORA' : '💀 DERROTA DRAMÁTICA';
+        var phaseColor = summary.phase === 'victory' ? '#81c784' : '#e57373';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">⚔️ Resumo Tático da Batalha</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-sum-close-x">✖</button>';
+        html += '</div>';
+
+        html += '<div class="v-party-modal-body">';
+        html += '  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(196,149,58,0.25); padding-bottom:6px; margin-bottom:8px;">';
+        html += '    <div style="font-size:12px; color:#ded1be;"><strong>Cenário:</strong> ' + (summary.biome || 'Masmorra') + ' | <strong>Duração:</strong> ' + (summary.rounds || 1) + ' Rodadas</div>';
+        html += '    <div style="font-size:11px; font-weight:700; color:' + phaseColor + ';">' + phaseLabel + '</div>';
+        html += '  </div>';
+
+        // Grid com os membros da comitiva e honrarias MVP
+        html += '  <div class="v-summary-grid">';
+        var members = summary.members || [];
+        for (var i = 0; i < members.length; i++) {
+            var m = members[i];
+            html += '    <div class="v-summary-member-card">';
+            html += '      <div style="display:flex; justify-content:space-between; align-items:center;">';
+            html += '        <div style="font-size:13px; font-weight:700; color:#ffe082;">' + (m.icon || '⚔️') + ' ' + (m.name || 'Aventureiro') + '</div>';
+            html += '        <div style="font-size:10px; color:#a1887f;">' + (m.character_class || 'Classe') + '</div>';
+            html += '      </div>';
+
+            if (m.honors && m.honors.length > 0) {
+                html += '    <div>';
+                for (var h = 0; h < m.honors.length; h++) {
+                    html += '    <span class="v-summary-honor-badge">' + m.honors[h] + '</span> ';
+                }
+                html += '    </div>';
+            }
+
+            html += '      <div style="display:flex; flex-direction:column; gap:2px; margin-top:4px;">';
+            html += '        <div class="v-summary-stat-row"><span>💥 Dano Infligido:</span><strong>' + (m.damage_dealt || 0) + '</strong></div>';
+            html += '        <div class="v-summary-stat-row"><span>🛡️ Dano Sofrido:</span><strong>' + (m.damage_taken || 0) + '</strong></div>';
+            html += '        <div class="v-summary-stat-row"><span>💚 Cura Concedida:</span><strong>' + (m.healing_done || 0) + '</strong></div>';
+            html += '        <div class="v-summary-stat-row"><span>💀 Inimigos Abatidos:</span><strong>' + (m.kills || 0) + '</strong></div>';
+            html += '      </div>';
+            html += '    </div>';
+        }
+        html += '  </div>';
+
+        // Totais e Espólios
+        html += '  <div class="v-summary-rewards-box">';
+        html += '    <strong>Totais da Comitiva:</strong> 💥 ' + (summary.total_party_damage || 0) + ' Dano Total | 🛡️ ' + (summary.total_party_taken || 0) + ' Sofrido | 💚 ' + (summary.total_party_healing || 0) + ' Curado';
+        html += '  </div>';
+
+        // Botões de Ação
+        html += '  <div style="display:flex; gap:8px; margin-top:10px;">';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-sum-copy-telegram" style="flex:2; padding:10px; font-size:12px;">📋 Copiar Relatório para o Telegram</button>';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-sum-done-btn" style="flex:1; padding:10px; font-size:12px;">← Continuar Viagem</button>';
+        html += '  </div>';
+
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        function closeSummary() {
+            _lastSeenCombatSummaryId = summary.compiled_at || Date.now();
+            overlay.remove();
+        }
+
+        card.querySelector('#v-sum-close-x').onclick = closeSummary;
+        card.querySelector('#v-sum-done-btn').onclick = closeSummary;
+
+        var btnCopy = card.querySelector('#v-sum-copy-telegram');
+        if (btnCopy) {
+            btnCopy.onclick = function () {
+                var text = summary.telegram_formatted_text || '';
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function () {
+                        btnCopy.textContent = '✔ Relatório Copiado!';
+                        btnCopy.style.background = '#4caf50';
+                        if (global.vToast) global.vToast('Relatório tático copiado para a área de transferência!', 'ok');
+                    }).catch(function () {
+                        if (global.vToast) global.vToast('Erro ao copiar relatório.', 'warn');
+                    });
+                } else {
+                    if (global.vToast) global.vToast('Área de transferência indisponível no navegador.', 'warn');
+                }
+            };
+        }
+    }
+
     function init(cfg) {
         if (cfg) {
             for (var k in cfg) {
@@ -2075,6 +2455,8 @@
         showCampRestVote: _showCampRestVoteModal,
         openTrade: _openTradeModal,
         showDeathSaveModal: _showDeathSaveModal,
+        showSkillChallengeModal: _showSkillChallengeModal,
+        showTacticalSummaryModal: _showTacticalSummaryModal,
         showLootModal: _showLootModal,
         showReactionPrompt: _showReactionPrompt,
         renderPingWave: _renderPingWave,
