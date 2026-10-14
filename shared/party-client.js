@@ -162,15 +162,40 @@
         var sid = _partyState.session_id;
 
         var html = '';
+        var inspiration = typeof _partyState.party_inspiration === 'number' ? _partyState.party_inspiration : 0;
+
         html += '<div class="v-party-hud-bar">';
         html += '  <div class="v-party-hud-title">';
         html += '    <span>🛡️ Comitiva</span>';
         html += '    <span class="v-party-code-badge" id="v-party-copy-code" title="Toque para copiar código da sala">#' + sid + '</span>';
         html += '  </div>';
         html += '  <div class="v-party-hud-controls">';
+        html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-stash">🎒 Baú</button>';
+        html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-camp">🏕️ Acampamento</button>';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-pings">🎯 Pings</button>';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-lobby">👥 Sala</button>';
         html += '  </div>';
+        html += '</div>';
+
+        // Alerta de Corda / Turn Timer Combat2 (Hearthstone Rope)
+        if (_partyState.combat && _partyState.combat.rope_active) {
+            html += '<div class="v-party-rope-badge">';
+            html += '  <span>⏳ Turno esgotando: ' + (_partyState.combat.turn_time_left || 0) + 's (Auto-Esquiva iminente)</span>';
+            html += '</div>';
+        }
+
+        // Barra de Inspiração da Comitiva D&D 5e (0 a 100)
+        html += '<div class="v-party-inspiration-wrap">';
+        html += '  <div class="v-party-inspiration-header">';
+        html += '    <span>✨ Inspiração da Comitiva</span>';
+        html += '    <span>' + inspiration + '/100</span>';
+        html += '  </div>';
+        html += '  <div class="v-party-inspiration-track">';
+        html += '    <div class="v-party-inspiration-fill" style="width:' + inspiration + '%;"></div>';
+        html += '  </div>';
+        if (inspiration >= 100) {
+            html += '  <button type="button" class="v-party-feat-btn" id="v-party-btn-feat">⚡ Conclamar Proeza de Comitiva</button>';
+        }
         html += '</div>';
 
         html += '<div class="v-party-members-grid">';
@@ -251,6 +276,27 @@
             };
         }
 
+        var stashBtn = document.getElementById('v-party-btn-stash');
+        if (stashBtn) {
+            stashBtn.onclick = function () {
+                _openSharedStashModal();
+            };
+        }
+
+        var campBtn = document.getElementById('v-party-btn-camp');
+        if (campBtn) {
+            campBtn.onclick = function () {
+                _openCampRestModal();
+            };
+        }
+
+        var featBtn = document.getElementById('v-party-btn-feat');
+        if (featBtn) {
+            featBtn.onclick = function () {
+                _openPartyFeatModal();
+            };
+        }
+
         var lobbyBtn = document.getElementById('v-party-btn-lobby');
         if (lobbyBtn) {
             lobbyBtn.onclick = function () {
@@ -259,16 +305,69 @@
         }
     }
 
-    // ── Polling & Sincronização ──────────────────────────────────────────────────
+    // ── Polling & Sincronização Delta (Valve Source Protocol / Glenn Fiedler) ────
+
+    function _applyStateDelta(delta, newVersion) {
+        if (!_partyState) return;
+        _partyState.turn_version = newVersion;
+        if (typeof delta.party_inspiration === 'number') {
+            _partyState.party_inspiration = delta.party_inspiration;
+        }
+        if (delta.shared_stash) {
+            _partyState.shared_stash = delta.shared_stash;
+        }
+        if (delta.dialogue_helpers) {
+            _partyState.dialogue_helpers = delta.dialogue_helpers;
+        }
+        if (delta.new_ping) {
+            _renderPingWave(delta.new_ping);
+        }
+        if (delta.leader_migrated) {
+            if (_partyState) _partyState.leader_uid = delta.leader_migrated.new_leader_uid;
+            if (global.vToast) global.vToast('👑 Liderança transferida para ' + delta.leader_migrated.new_leader_name + ' (ausência do líder anterior)', 'info');
+        }
+        if (delta.auto_dodge) {
+            if (global.vToast) global.vToast('⏳ Turno esgotou: ' + delta.auto_dodge.actor_name + ' assumiu Esquiva automática!', 'warning');
+        }
+        if (delta.camp_rest_proposal) {
+            _partyState.camp_rest_proposal = delta.camp_rest_proposal;
+        }
+        if (delta.camp_rest_resolved) {
+            _partyState.camp_rest_proposal = null;
+            if (global.vToast) {
+                var isOk = delta.camp_rest_resolved.accepted;
+                global.vToast(isOk ? '🏕️ Descanso concluído com sucesso!' : '🏕️ ' + (delta.camp_rest_resolved.reason || 'Descanso cancelado.'), isOk ? 'ok' : 'err');
+            }
+        }
+        if (delta.hp_change) {
+            var mems = _partyState.members || [];
+            for (var uid in delta.hp_change) {
+                for (var i = 0; i < mems.length; i++) {
+                    if (mems[i].uid === parseInt(uid, 10)) {
+                        mems[i].hp = delta.hp_change[uid];
+                    }
+                }
+            }
+        }
+    }
 
     async function _pollState() {
         if (!_partyState || !_partyState.session_id) return;
         try {
-            var data = await _request('/api/party/state?session_id=' + _partyState.session_id + '&uid=' + _cfg.uid, null, 'GET');
-            if (data && data.ok && data.state) {
-                _partyState = data.state;
+            var curVer = _partyState.turn_version || 0;
+            var url = '/api/party/state?session_id=' + _partyState.session_id + '&uid=' + _cfg.uid;
+            if (curVer > 0) {
+                url += '&ack_version=' + curVer;
+            }
+            var data = await _request(url, null, 'GET');
+            if (data && data.ok) {
+                if (data.is_delta && data.delta) {
+                    _applyStateDelta(data.delta, data.turn_version);
+                } else if (data.state) {
+                    _partyState = data.state;
+                }
                 _renderHud();
-                _checkStateTriggers(data.state);
+                _checkStateTriggers(_partyState);
             }
         } catch (e) {
             // Falha silenciosa de polling
@@ -303,6 +402,14 @@
             if (m.uid !== _cfg.uid && m.needs_ghosting_decision && _activeGhostingPromptMemberId !== m.uid) {
                 _showGhostingModal(m);
                 break;
+            }
+        }
+
+        // 3. Proposta de Acampamento e Descanso Consensual (Short / Long Rest)
+        if (state.camp_rest_proposal && !document.getElementById('v-party-camp-vote-modal')) {
+            var myV = state.camp_rest_proposal.votes && state.camp_rest_proposal.votes[_cfg.uid];
+            if (!myV) {
+                _showCampRestVoteModal(state.camp_rest_proposal);
             }
         }
     }
@@ -613,7 +720,8 @@
             { type: 'focus', icon: '🎯', label: 'Foco no Alvo' },
             { type: 'danger', icon: '⚠️', label: 'Alerta de Perigo' },
             { type: 'march', icon: '🚶', label: 'Ponto de Marcha' },
-            { type: 'explore', icon: '❓', label: 'Investigar Ponto' },
+            { type: 'assist', icon: '🆘', label: 'Socorro / Auxílio' },
+            { type: 'loot', icon: '💎', label: 'Espólio Valioso' },
         ];
 
         var html = '<div style="font-size:11px; font-weight:700; color:var(--v-gold,#c4953a); margin-bottom:4px; text-transform:uppercase;">Pings Táticos</div>';
@@ -659,14 +767,22 @@
                 _renderPingWave(res.ping);
             }
         } catch (e) {
-            if (global.vToast) global.vToast('Erro ao enviar ping: ' + e.message, 'err');
+            var msg = (e && e.message && e.message.indexOf('429') !== -1)
+                ? 'Você está sinalizando rápido demais. Aguarde alguns instantes.'
+                : ('Erro ao enviar ping: ' + e.message);
+            if (global.vToast) global.vToast(msg, 'warn');
         }
     }
 
     function _renderPingWave(ping) {
         var el = document.createElement('div');
         el.className = 'v-party-map-ping ping-' + (ping.ping_type || 'focus');
-        el.innerHTML = (ping.ping_type === 'focus' ? '🎯' : (ping.ping_type === 'danger' ? '⚠️' : (ping.ping_type === 'march' ? '🚶' : '❓')));
+        var ico = '🎯';
+        if (ping.ping_type === 'danger') ico = '⚠️';
+        else if (ping.ping_type === 'march') ico = '🚶';
+        else if (ping.ping_type === 'assist') ico = '🆘';
+        else if (ping.ping_type === 'loot') ico = '💎';
+        el.innerHTML = ico;
 
         // Centraliza na tela ou busca elemento do hexágono se disponível
         var targetHex = document.querySelector('[data-q="' + ping.hex_q + '"][data-r="' + ping.hex_r + '"]');
@@ -697,6 +813,362 @@
 
         document.body.appendChild(el);
         setTimeout(function () { el.remove(); }, 3500);
+    }
+
+    // ── Modal de Proezas de Comitiva (Regra Soberana #24) ────────────────────────
+
+    function _openPartyFeatModal() {
+        _closeModal();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-feat-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card';
+
+        var feats = [
+            {
+                id: 'alento_coletivo',
+                title: 'Alento Coletivo',
+                subtitle: 'Proeza de Comitiva • Cura Coordenada D&D 5e',
+                icon: '💚',
+                explanation: 'A comitiva canaliza a inspiração mútua para reerguer as forças de todos os companheiros vivos.',
+                consequences: 'Cura instantânea de 2d6 + 3 PV para cada aventureiro vivo do grupo e estabiliza companheiros caídos. Consome 100 pontos de Inspiração.',
+            },
+            {
+                id: 'investida_coordenada',
+                title: 'Investida Coordenada',
+                subtitle: 'Proeza de Comitiva • Mobilidade Tática Coletiva',
+                icon: '⚡',
+                explanation: 'O grupo sincroniza sua marcha em formação de assalto unificada.',
+                consequences: 'Concede +3 metros (2 hexágonos) de deslocamento adicional para todos os membros na rodada e ignora terreno difícil. Consome 100 pontos de Inspiração.',
+            },
+            {
+                id: 'vontade_inabalavel',
+                title: 'Vontade Inabalável',
+                subtitle: 'Proeza de Comitiva • Blindagem Moral e Espiritual',
+                icon: '🛡️',
+                explanation: 'A comitiva cerra fileiras e une suas vontades em determinação de ferro.',
+                consequences: 'Concede Vantagem em todas as jogadas de proteção e salvaguarda por 1 rodada inteira. Consome 100 pontos de Inspiração.',
+            },
+        ];
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">✨ Conclamar Proeza de Comitiva</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-feat-close">✖</button>';
+        html += '</div>';
+        html += '<div class="v-party-modal-body">';
+        html += '  <p style="color:#d5c7b3; font-size:12px;">A sinergia e cooperação da equipe atingiram o ápice (100/100). Selecione a Proeza a ser conclamada:</p>';
+
+        for (var i = 0; i < feats.length; i++) {
+            var f = feats[i];
+            html += '<div class="v-party-feat-card" style="background:rgba(30,22,16,0.85); border:1px solid rgba(196,149,58,0.3); border-radius:6px; padding:10px; margin-bottom:8px;">';
+            html += '  <div style="font-size:13px; font-weight:700; color:#f3dfa2;">' + f.icon + ' ' + f.title + '</div>';
+            html += '  <div style="font-size:10px; color:#a09078; text-transform:uppercase;">' + f.subtitle + '</div>';
+            html += '  <div style="margin-top:6px; font-size:11px; color:#e0d2c0;"><strong>O Que Está Sendo Escolhido:</strong> ' + f.explanation + '</div>';
+            html += '  <div style="margin-top:4px; font-size:11px; color:#c4953a;"><strong>Benefícios & Consequências:</strong> ' + f.consequences + '</div>';
+            html += '  <div style="display:flex; gap:8px; margin-top:8px;">';
+            html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-need v-btn-trigger-feat" data-feat-id="' + f.id + '" style="flex:1; padding:8px;">✔ Conclamar ' + f.title + '</button>';
+            html += '  </div>';
+            html += '</div>';
+        }
+
+        html += '  <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-feat-back" style="width:100%; padding:8px; margin-top:4px;">← Voltar ao Jogo</button>';
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        var closeBtn = document.getElementById('v-feat-close');
+        if (closeBtn) closeBtn.onclick = _closeModal;
+        var backBtn = document.getElementById('v-feat-back');
+        if (backBtn) backBtn.onclick = _closeModal;
+
+        var triggerBtns = card.querySelectorAll('.v-btn-trigger-feat');
+        for (var k = 0; k < triggerBtns.length; k++) {
+            triggerBtns[k].onclick = async function (ev) {
+                var fId = ev.currentTarget.getAttribute('data-feat-id');
+                _closeModal();
+                try {
+                    var res = await _request('/api/party/feat/trigger', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        feat_id: fId,
+                    });
+                    if (global.vToast) global.vToast('Proeza conclamada com sucesso!', 'ok');
+                    await _pollState();
+                } catch (err) {
+                    if (global.vToast) global.vToast('Falha ao conclamar proeza: ' + err.message, 'err');
+                }
+            };
+        }
+    }
+
+    // ── Modal de Mochila Compartilhada da Comitiva (Shared Stash) ───────────────
+
+    function _openSharedStashModal() {
+        _closeModal();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-stash-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card';
+
+        var stash = (_partyState && _partyState.shared_stash) ? _partyState.shared_stash : [];
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">🎒 Baú Compartilhado da Comitiva</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-stash-close">✖</button>';
+        html += '</div>';
+        html += '<div class="v-party-modal-body">';
+        html += '  <p style="color:#d5c7b3; font-size:12px;">Recursos comuns (poções, tochas, pergaminhos) partilhados livremente entre os aventureiros da comitiva.</p>';
+
+        if (stash.length === 0) {
+            html += '  <div style="text-align:center; padding:16px; color:#888; font-size:12px;">O baú compartilhado está vazio no momento.</div>';
+        } else {
+            html += '  <div style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;">';
+            for (var i = 0; i < stash.length; i++) {
+                var it = stash[i];
+                html += '<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(30,22,16,0.8); border:1px solid rgba(196,149,58,0.25); border-radius:5px; padding:6px 10px;">';
+                html += '  <div>';
+                html += '    <div style="font-size:12px; font-weight:700; color:#f3dfa2;">' + it.name + ' <span style="color:#aaa;">(x' + it.quantity + ')</span></div>';
+                html += '    <div style="font-size:10px; color:#888;">' + it.item_type + '</div>';
+                html += '  </div>';
+                html += '  <button type="button" class="v-party-loot-btn v-party-loot-btn-need v-btn-take-stash" data-item-id="' + it.item_id + '" style="padding:4px 10px; font-size:11px;">Pegar 1</button>';
+                html += '</div>';
+            }
+            html += '  </div>';
+        }
+
+        html += '  <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-stash-back" style="width:100%; padding:8px; margin-top:8px;">← Voltar</button>';
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        var closeBtn = document.getElementById('v-stash-close');
+        if (closeBtn) closeBtn.onclick = _closeModal;
+        var backBtn = document.getElementById('v-stash-back');
+        if (backBtn) backBtn.onclick = _closeModal;
+
+        var takeBtns = card.querySelectorAll('.v-btn-take-stash');
+        for (var k = 0; k < takeBtns.length; k++) {
+            takeBtns[k].onclick = async function (ev) {
+                var itId = ev.currentTarget.getAttribute('data-item-id');
+                try {
+                    await _request('/api/party/stash/transfer', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        item_id: itId,
+                        quantity: 1,
+                        action_mode: 'stash_to_player',
+                    });
+                    if (global.vToast) global.vToast('Item retirado para sua mochila!', 'ok');
+                    await _pollState();
+                    _openSharedStashModal();
+                } catch (e) {
+                    if (global.vToast) global.vToast('Erro ao pegar item: ' + e.message, 'err');
+                }
+            };
+        }
+    }
+
+    // ── Painel de Acampamento & Descanso da Comitiva (PHB p. 186 & Regra #24) ───
+
+    function _openCampRestModal() {
+        _closeModal();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-camp-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card v-party-camp-card';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">🏕️ Acampamento & Descanso da Comitiva</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-camp-close">✖</button>';
+        html += '</div>';
+        html += '<div class="v-party-modal-body">';
+        html += '  <p style="font-size:12px; color:#c7b59d; margin-top:0;">';
+        html += '    Conforme as regras do Livro do Jogador (D&D 5e PHB p. 186), descansar em grupo restaura a vitalidade física e mental dos aventureiros.';
+        html += '  </p>';
+
+        // O Que Está Sendo Escolhido (Regra #24)
+        html += '  <div class="v-party-camp-explainer">';
+        html += '    <div class="v-party-camp-block">';
+        html += '      <div class="v-party-camp-block-title">⏳ Opção 1: Descanso Curto (1 Hora)</div>';
+        html += '      <div class="v-party-camp-block-desc"><strong>O Que Está Sendo Escolhido:</strong> Um período de pausa ligeira e provisões rápidas. Cada aventureiro pode gastar Dados de Vida (1dHD + CON) para regenerar PV. Classes como Bruxo e Monge restauram suas magias e Ki inteiramente.</div>';
+        html += '      <div class="v-party-camp-block-benefit">✔ <strong>Benefícios:</strong> Recuperação ágil de PV sem avançar o relógio do dia; restaura recursos táticos de classe.</div>';
+        html += '      <div class="v-party-camp-block-risk">⚠️ <strong>Limitação:</strong> Consome os Dados de Vida disponíveis do personagem até o próximo Descanso Longo.</div>';
+        html += '      <button type="button" class="v-party-loot-btn v-party-loot-btn-greed" id="v-camp-propose-short" style="margin-top:8px; padding:8px; width:100%;">';
+        html += '        ✔ Propor Descanso Curto (1h)';
+        html += '      </button>';
+        html += '    </div>';
+
+        html += '    <div class="v-party-camp-block" style="margin-top:10px;">';
+        html += '      <div class="v-party-camp-block-title">🌙 Opção 2: Descanso Longo (8 Horas)</div>';
+        html += '      <div class="v-party-camp-block-desc"><strong>O Que Está Sendo Escolhido:</strong> Um repouso solene e prolongado (mínimo 6h de sono e 2h de vigília leve). Restaura TODOS os Pontos de Vida (PV) e Pontos de Mana (MP) ao máximo, remove 1 nível de exaustão e define escala de sentinelas noturnas.</div>';
+        html += '      <div class="v-party-camp-block-benefit">✔ <strong>Benefícios:</strong> Vitalidade 100% restaurada para todos os companheiros vivos; recuperação de metade dos Dados de Vida totais.</div>';
+        html += '      <div class="v-party-camp-block-risk">⚠️ <strong>Atenção:</strong> Exige consenso da comitiva; pode ser interrompido por encontros hostis se a vigília falhar.</div>';
+        html += '      <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-camp-propose-long" style="margin-top:8px; padding:8px; width:100%;">';
+        html += '        ✔ Propor Descanso Longo (8h)';
+        html += '      </button>';
+        html += '    </div>';
+        html += '  </div>';
+
+        html += '  <div style="margin-top:12px; display:flex; justify-content:flex-end;">';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-camp-back" style="padding:8px 16px;">';
+        html += '      ← Voltar à Exploração';
+        html += '    </button>';
+        html += '  </div>';
+
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        var closeBtn = document.getElementById('v-camp-close');
+        if (closeBtn) closeBtn.onclick = _closeModal;
+        var backBtn = document.getElementById('v-camp-back');
+        if (backBtn) backBtn.onclick = _closeModal;
+
+        var btnShort = document.getElementById('v-camp-propose-short');
+        if (btnShort) {
+            btnShort.onclick = async function () {
+                _closeModal();
+                try {
+                    await _request('/api/party/camp/propose', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        rest_type: 'short',
+                        hit_dice: 1,
+                    });
+                    if (global.vToast) global.vToast('Proposta de Descanso Curto enviada à comitiva!', 'ok');
+                } catch (e) {
+                    if (global.vToast) global.vToast('Erro ao propor descanso: ' + e.message, 'err');
+                }
+            };
+        }
+
+        var btnLong = document.getElementById('v-camp-propose-long');
+        if (btnLong) {
+            btnLong.onclick = async function () {
+                _closeModal();
+                try {
+                    await _request('/api/party/camp/propose', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        rest_type: 'long',
+                    });
+                    if (global.vToast) global.vToast('Proposta de Descanso Longo enviada à comitiva!', 'ok');
+                } catch (e) {
+                    if (global.vToast) global.vToast('Erro ao propor descanso: ' + e.message, 'err');
+                }
+            };
+        }
+    }
+
+    // ── Modal de Votação de Descanso da Comitiva (Consenso D&D 5e) ───────────────
+
+    function _showCampRestVoteModal(proposal) {
+        if (!proposal) return;
+        _closeModal();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-camp-vote-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card';
+
+        var isLong = (proposal.rest_type === 'long');
+        var proposer = proposal.proposer_name || 'Um companheiro';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">🏕️ Proposta de ' + (isLong ? 'Descanso Longo (8h)' : 'Descanso Curto (1h)') + '</div>';
+        html += '</div>';
+        html += '<div class="v-party-modal-body">';
+        html += '  <p><strong>' + proposer + '</strong> propôs um <strong>' + (isLong ? 'Descanso Longo de 8 Horas' : 'Descanso Curto de 1 Hora') + '</strong> para a comitiva.</p>';
+        html += '  <div class="v-party-camp-explainer">';
+        if (isLong) {
+            html += '    <p style="font-size:12px; color:#e0d0b8;">✔ <strong>Efeito:</strong> Recuperação de 100% dos PV e Mana para todos, remoção de exaustão e escala de sentinelas (PHB p. 186).</p>';
+        } else {
+            html += '    <p style="font-size:12px; color:#e0d0b8;">✔ <strong>Efeito:</strong> Recuperação de PV gastando Dados de Vida (1dHD + CON) e recuperação rápida de recursos.</p>';
+            html += '    <div style="margin:8px 0; font-size:12px;">';
+            html += '      <label>Dados de Vida a gastar: </label>';
+            html += '      <select id="v-camp-dice-select" style="background:#1b1510; color:#e0d0b8; border:1px solid #c4953a; border-radius:4px; padding:2px 6px;">';
+            var maxDice = Math.max(1, _cfg.level || 1);
+            for (var d = 1; d <= maxDice; d++) {
+                html += '        <option value="' + d + '">' + d + ' Dado(s) de Vida</option>';
+            }
+            html += '      </select>';
+            html += '    </div>';
+        }
+        html += '  </div>';
+
+        html += '  <div style="display:flex; gap:8px; margin-top:12px;">';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-camp-vote-accept" style="flex:1; padding:10px;">';
+        html += '      ✔ Aceitar Descanso';
+        html += '    </button>';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-camp-vote-decline" style="flex:1; padding:10px;">';
+        html += '      ✖ Recusar / Continuar';
+        html += '    </button>';
+        html += '  </div>';
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        var btnAccept = document.getElementById('v-camp-vote-accept');
+        if (btnAccept) {
+            btnAccept.onclick = async function () {
+                var diceInp = document.getElementById('v-camp-dice-select');
+                var dVal = diceInp ? parseInt(diceInp.value, 10) : 1;
+                _closeModal();
+                try {
+                    await _request('/api/party/camp/vote', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        proposal_id: proposal.proposal_id,
+                        choice: 'accept',
+                        hit_dice: dVal,
+                    });
+                    if (global.vToast) global.vToast('Voto de descanso registrado!', 'ok');
+                } catch (e) {
+                    if (global.vToast) global.vToast('Falha no voto de descanso: ' + e.message, 'err');
+                }
+            };
+        }
+
+        var btnDecline = document.getElementById('v-camp-vote-decline');
+        if (btnDecline) {
+            btnDecline.onclick = async function () {
+                _closeModal();
+                try {
+                    await _request('/api/party/camp/vote', {
+                        session_id: _partyState.session_id,
+                        user_id: _cfg.uid,
+                        proposal_id: proposal.proposal_id,
+                        choice: 'decline',
+                    });
+                    if (global.vToast) global.vToast('Você recusou a proposta de descanso.', 'warn');
+                } catch (e) {
+                    if (global.vToast) global.vToast('Falha ao recusar: ' + e.message, 'err');
+                }
+            };
+        }
     }
 
     // ── Painel de Lobby / Sala da Comitiva ───────────────────────────────────────
@@ -961,6 +1433,10 @@
         getState: function () { return _partyState; },
         openLobby: _openLobbyModal,
         openPings: _openPingPicker,
+        openPartyFeatModal: _openPartyFeatModal,
+        openSharedStash: _openSharedStashModal,
+        openCampRest: _openCampRestModal,
+        showCampRestVote: _showCampRestVoteModal,
         showLootModal: _showLootModal,
         showReactionPrompt: _showReactionPrompt,
         renderPingWave: _renderPingWave,
