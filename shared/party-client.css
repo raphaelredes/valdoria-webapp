@@ -1453,6 +1453,157 @@
     color: #ffd700;
 }
 
+/* ── Matriz Inteligente de Reações (D&D 5e Smart Reaction Matrix) ── */
+.v-party-reaction-matrix-card {
+    max-width: 520px;
+    width: 95%;
+}
+
+.v-party-matrix-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 8px 0;
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+.v-party-matrix-row {
+    background: rgba(24, 18, 14, 0.9);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.v-party-matrix-row.is-enabled {
+    border-color: #ffd700;
+    background: rgba(35, 26, 18, 0.95);
+}
+
+.v-party-matrix-row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.v-party-matrix-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #f0e6d2;
+}
+
+.v-party-matrix-cost {
+    font-size: 10px;
+    color: #ffb74d;
+    background: rgba(255, 183, 77, 0.15);
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 183, 77, 0.3);
+}
+
+.v-party-matrix-desc {
+    font-size: 11px;
+    color: #beb09b;
+    line-height: 1.35;
+}
+
+.v-party-matrix-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.v-party-matrix-select {
+    flex: 1;
+    background: #140f0b;
+    color: #e5dac9;
+    border: 1px solid rgba(196, 149, 58, 0.4);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    outline: none;
+}
+
+.v-party-matrix-toggle {
+    cursor: pointer;
+    background: #2a2016;
+    color: #aaa;
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.v-party-matrix-toggle.is-active {
+    background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%);
+    color: #fff;
+    border-color: #81c784;
+}
+
+/* ── Alerta de Fogo Amigo & Intenções Compartilhadas (Shared Intent Preview) ── */
+.v-party-friendly-fire-alert {
+    background: linear-gradient(90deg, rgba(211, 47, 47, 0.95) 0%, rgba(183, 28, 28, 0.95) 100%);
+    border: 1px solid #ff5252;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: friendlyFirePulse 1.2s infinite alternate;
+    box-shadow: 0 0 10px rgba(255, 82, 82, 0.6);
+}
+
+@keyframes friendlyFirePulse {
+    from { box-shadow: 0 0 6px rgba(255, 82, 82, 0.4); }
+    to { box-shadow: 0 0 16px rgba(255, 82, 82, 0.9); }
+}
+
+.v-party-intents-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(18, 14, 10, 0.9);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: 6px;
+    font-size: 10.5px;
+}
+
+.v-party-intent-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #e5dac9;
+}
+
+.v-party-ready-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(33, 150, 243, 0.2);
+    border: 1px solid rgba(33, 150, 243, 0.5);
+    color: #64b5f6;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 9.5px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
 
 
 

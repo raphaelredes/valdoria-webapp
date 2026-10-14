@@ -175,6 +175,7 @@
         }
         html += '  </div>';
         html += '  <div class="v-party-hud-controls">';
+        html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-reactions" title="Configurar Matriz de Reações Automáticas">⚡ Reações</button>';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-stash">🎒 Baú</button>';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-camp">🏕️ Acampamento</button>';
         html += '    <button type="button" class="v-party-icon-btn" id="v-party-btn-lore">📖 Diário</button>';
@@ -188,6 +189,42 @@
             html += '<div class="v-party-rope-badge">';
             html += '  <span>⏳ Turno esgotando: ' + (_partyState.combat.turn_time_left || 0) + 's (Auto-Esquiva iminente)</span>';
             html += '</div>';
+        }
+
+        // Alerta de Fogo Amigo & Intenções Compartilhadas (Shared Intent Ghosts & Friendly Fire)
+        if (_partyState.combat && _partyState.combat.active_intents) {
+            var cIntents = _partyState.combat.active_intents;
+            var cKeys = Object.keys(cIntents);
+            if (cKeys.length > 0) {
+                var hasFfAlert = false;
+                var ffNames = [];
+                for (var fIdx = 0; fIdx < cKeys.length; fIdx++) {
+                    var itmObj = cIntents[cKeys[fIdx]];
+                    if (itmObj && itmObj.friendly_fire_warning) {
+                        hasFfAlert = true;
+                        ffNames.push(itmObj.actor_name || ('Aventureiro #' + cKeys[fIdx]));
+                    }
+                }
+                if (hasFfAlert) {
+                    html += '<div class="v-party-friendly-fire-alert">';
+                    html += '  <span>⚠️ ALERTA DE FOGO AMIGO: Área de dispersão sob risco disparada por ' + ffNames.join(', ') + '!</span>';
+                    html += '</div>';
+                }
+                html += '<div class="v-party-intents-wrap">';
+                html += '  <div style="font-size:10px; font-weight:700; color:#ffd700; text-transform:uppercase;">👻 Intenções da Comitiva:</div>';
+                for (var ik = 0; ik < cKeys.length; ik++) {
+                    var intData = cIntents[cKeys[ik]];
+                    var aName = intData.actor_name || ('Membro #' + cKeys[ik]);
+                    var aDesc = intData.desc || intData.type || 'Ação em preparo';
+                    html += '  <div class="v-party-intent-row">';
+                    html += '    <span><strong>' + aName + ':</strong> ' + aDesc + '</span>';
+                    if (intData.target_idx != null) {
+                        html += '    <span style="font-size:9.5px; color:#ffb74d;">🎯 Alvo #' + intData.target_idx + '</span>';
+                    }
+                    html += '  </div>';
+                }
+                html += '</div>';
+            }
         }
 
         // Barra de Inspiração da Comitiva D&D 5e (0 a 100)
@@ -242,6 +279,11 @@
                 html += '<div class="v-party-badge-ai">🤖 IA Tática Ativa</div>';
             }
 
+            // Badges de Ação Preparada (PHB p. 193)
+            if (m.ready_action) {
+                html += '<div class="v-party-ready-badge">🎯 Ação Preparada</div>';
+            }
+
             // Barras de PV e MP
             html += '  <div class="v-party-bars">';
             html += '    <div class="v-party-bar-label">';
@@ -265,6 +307,13 @@
         hud.innerHTML = html;
 
         // Listeners de controles
+        var reactionsBtn = document.getElementById('v-party-btn-reactions');
+        if (reactionsBtn) {
+            reactionsBtn.onclick = function () {
+                _openReactionMatrixModal();
+            };
+        }
+
         var copyBtn = document.getElementById('v-party-copy-code');
         if (copyBtn) {
             copyBtn.onclick = function () {
@@ -2851,6 +2900,274 @@
         return false;
     }
 
+    // ── Matriz Inteligente de Reações (D&D 5e Smart Reaction Matrix) ────────────
+
+    var _REACTION_DEFS = [
+        {
+            id: 'shield',
+            name: 'Escudo Arcano (PHB p. 242)',
+            icon: '🛡️',
+            cost: '1 Slot Nv.1',
+            desc: 'Concede +5 na CA contra o ataque desencadeante e imunidade a Mísseis Mágicos.',
+            options: [
+                { value: 'on_hit_fatal', label: 'Automático: Se o ataque acertar e for letal' },
+                { value: 'always', label: 'Automático: Sempre que o ataque for acertar a CA base' },
+            ],
+            defaultOption: 'on_hit_fatal',
+        },
+        {
+            id: 'protect_ally',
+            name: 'Proteger Aliado / Interceptar (PHB p. 192)',
+            icon: '🤝',
+            cost: 'Reação',
+            desc: 'Impõe Desvantagem no ataque do inimigo contra um companheiro adjacente (1 hexágono).',
+            options: [
+                { value: 'on_ally_low_hp', label: 'Automático: Se o companheiro estiver com PV baixo (<30%)' },
+                { value: 'always', label: 'Automático: Sempre que um companheiro adjacente for alvejado' },
+            ],
+            defaultOption: 'on_ally_low_hp',
+        },
+        {
+            id: 'uncanny_dodge',
+            name: 'Esquiva Sobrenatural (PHB p. 96)',
+            icon: '⚡',
+            cost: 'Reação',
+            desc: 'Reduz o dano recebido pela metade contra um atacante visível.',
+            options: [
+                { value: 'on_high_damage', label: 'Automático: Apenas contra dano alto (>10 PV)' },
+                { value: 'always', label: 'Automático: Contra o primeiro ataque recebido na rodada' },
+            ],
+            defaultOption: 'on_high_damage',
+        },
+        {
+            id: 'opportunity_attack',
+            name: 'Ataque de Oportunidade (PHB p. 195)',
+            icon: '⚔️',
+            cost: 'Reação',
+            desc: 'Desfere um golpe corpo a corpo imediato quando um inimigo sai do seu alcance sem Desengajar.',
+            options: [
+                { value: 'always', label: 'Automático: Sempre golpear o inimigo que recuar' },
+            ],
+            defaultOption: 'always',
+        },
+    ];
+
+    function _openReactionMatrixModal() {
+        _closeModal();
+
+        var myMember = null;
+        var members = (_partyState && _partyState.members) || [];
+        for (var i = 0; i < members.length; i++) {
+            if (members[i].uid === _cfg.uid) { myMember = members[i]; break; }
+        }
+        var curMatrix = (myMember && myMember.reaction_matrix) ? JSON.parse(JSON.stringify(myMember.reaction_matrix)) : {};
+
+        var overlay = document.createElement('div');
+        overlay.className = 'v-party-modal-overlay';
+        overlay.id = 'v-party-reaction-matrix-modal';
+
+        var card = document.createElement('div');
+        card.className = 'v-party-modal-card v-party-reaction-matrix-card';
+
+        var html = '';
+        html += '<div class="v-party-modal-header">';
+        html += '  <div class="v-party-modal-title">⚡ Matriz Inteligente de Reações (D&D 5e)</div>';
+        html += '  <button type="button" class="v-party-icon-btn" id="v-rx-close">✖</button>';
+        html += '</div>';
+
+        html += '<div class="v-party-modal-body">';
+        html += '  <p style="color:#d5c7b3; font-size:12px; margin:0 0 6px 0;">Configure o disparo automático em <strong>0ms não-bloqueante</strong> para suas reações canônicas, preservando a fluidez tática da comitiva.</p>';
+
+        html += '  <div class="v-party-matrix-list">';
+        for (var rIdx = 0; rIdx < _REACTION_DEFS.length; rIdx++) {
+            var rDef = _REACTION_DEFS[rIdx];
+            var rule = curMatrix[rDef.id] || { enabled: false, condition: rDef.defaultOption };
+            var isEnabled = Boolean(rule.enabled);
+            var curCond = rule.condition || rDef.defaultOption;
+
+            html += '  <div class="v-party-matrix-row ' + (isEnabled ? 'is-enabled' : '') + '" data-reaction-id="' + rDef.id + '">';
+            html += '    <div class="v-party-matrix-row-head">';
+            html += '      <div class="v-party-matrix-title">';
+            html += '        <span>' + rDef.icon + '</span>';
+            html += '        <span>' + rDef.name + '</span>';
+            html += '      </div>';
+            html += '      <span class="v-party-matrix-cost">' + rDef.cost + '</span>';
+            html += '    </div>';
+            html += '    <div class="v-party-matrix-desc">' + rDef.desc + '</div>';
+            html += '    <div class="v-party-matrix-controls">';
+            html += '      <select class="v-party-matrix-select" data-select-id="' + rDef.id + '">';
+            for (var o = 0; o < rDef.options.length; o++) {
+                var opt = rDef.options[o];
+                var isSel = (opt.value === curCond) ? 'selected' : '';
+                html += '        <option value="' + opt.value + '" ' + isSel + '>' + opt.label + '</option>';
+            }
+            html += '      </select>';
+            html += '      <button type="button" class="v-party-matrix-toggle ' + (isEnabled ? 'is-active' : '') + '" data-toggle-id="' + rDef.id + '">';
+            html +=          isEnabled ? '✔ Ativado' : '✖ Inativo';
+            html += '      </button>';
+            html += '    </div>';
+            html += '  </div>';
+        }
+        html += '  </div>';
+
+        html += '  <div style="display:flex; gap:8px; margin-top:12px;">';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-need" id="v-rx-save" style="flex:1; padding:10px;">✔ Salvar Preferências</button>';
+        html += '    <button type="button" class="v-party-loot-btn v-party-loot-btn-pass" id="v-rx-cancel" style="padding:10px 14px;">← Voltar</button>';
+        html += '  </div>';
+        html += '</div>';
+
+        card.innerHTML = html;
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+
+        card.querySelector('#v-rx-close').onclick = _closeModal;
+        card.querySelector('#v-rx-cancel').onclick = _closeModal;
+
+        var toggleBtns = card.querySelectorAll('.v-party-matrix-toggle');
+        for (var t = 0; t < toggleBtns.length; t++) {
+            toggleBtns[t].onclick = function (ev) {
+                var btn = ev.currentTarget;
+                var rxId = btn.getAttribute('data-toggle-id');
+                var row = card.querySelector('.v-party-matrix-row[data-reaction-id="' + rxId + '"]');
+                var active = btn.classList.contains('is-active');
+                if (active) {
+                    btn.classList.remove('is-active');
+                    btn.textContent = '✖ Inativo';
+                    if (row) row.classList.remove('is-enabled');
+                } else {
+                    btn.classList.add('is-active');
+                    btn.textContent = '✔ Ativado';
+                    if (row) row.classList.add('is-enabled');
+                }
+            };
+        }
+
+        var saveBtn = card.querySelector('#v-rx-save');
+        if (saveBtn) {
+            saveBtn.onclick = async function () {
+                var newMatrix = {};
+                for (var k = 0; k < _REACTION_DEFS.length; k++) {
+                    var defId = _REACTION_DEFS[k].id;
+                    var tBtn = card.querySelector('.v-party-matrix-toggle[data-toggle-id="' + defId + '"]');
+                    var sEl = card.querySelector('.v-party-matrix-select[data-select-id="' + defId + '"]');
+                    var isAct = tBtn ? tBtn.classList.contains('is-active') : false;
+                    var condVal = sEl ? sEl.value : _REACTION_DEFS[k].defaultOption;
+                    newMatrix[defId] = {
+                        enabled: isAct,
+                        condition: condVal,
+                        spell: (defId === 'shield') ? 'shield' : undefined,
+                    };
+                }
+                _closeModal();
+                try {
+                    await _setReactionMatrix(newMatrix);
+                } catch (err) {
+                    if (global.vToast) global.vToast('Falha ao salvar preferências de reação: ' + err.message, 'err');
+                }
+            };
+        }
+    }
+
+    async function _setReactionMatrix(matrix) {
+        if (!_partyState || !_partyState.session_id) return false;
+        try {
+            var res = await _request('/api/party/combat/reaction-matrix', {
+                session_id: _partyState.session_id,
+                user_id: _cfg.uid,
+                reaction_matrix: matrix,
+            });
+            if (res && res.ok) {
+                var members = (_partyState && _partyState.members) || [];
+                for (var i = 0; i < members.length; i++) {
+                    if (members[i].uid === _cfg.uid) {
+                        members[i].reaction_matrix = res.reaction_matrix || matrix;
+                        break;
+                    }
+                }
+                if (global.vToast) global.vToast('⚡ Matriz de Reações sincronizada com sucesso!', 'ok');
+                return res;
+            }
+        } catch (err) {
+            if (global.vToast) global.vToast('Erro ao atualizar matriz de reações: ' + err.message, 'err');
+            throw err;
+        }
+        return false;
+    }
+
+    // ── Turnos Intercalados, Ação Preparada e Intenções Compartilhadas ───────────
+
+    async function _delayInBlock(actorIdx) {
+        if (!_partyState || !_partyState.session_id) return false;
+        try {
+            var res = await _request('/api/party/combat/action', {
+                session_id: _partyState.session_id,
+                user_id: _cfg.uid,
+                action: {
+                    type: 'delay_in_block',
+                    actor_idx: actorIdx,
+                },
+            });
+            if (res && res.ok) {
+                if (res.combat) _partyState.combat = res.combat;
+                if (global.vToast) global.vToast('⏳ Ação adiada no bloco compartilhado. Companheiros podem agir primeiro!', 'info');
+                _renderHud();
+                return res;
+            }
+        } catch (err) {
+            if (global.vToast) global.vToast('Erro ao adiar ação: ' + err.message, 'err');
+        }
+        return false;
+    }
+
+    async function _readyAction(actorIdx, trigger, rangeHexes, attackKind) {
+        if (!_partyState || !_partyState.session_id) return false;
+        try {
+            var res = await _request('/api/party/combat/action', {
+                session_id: _partyState.session_id,
+                user_id: _cfg.uid,
+                action: {
+                    type: 'ready_action',
+                    actor_idx: actorIdx,
+                    trigger: trigger || 'enemy_enters_range',
+                    range_hexes: rangeHexes || 5,
+                    attack_kind: attackKind || 'ranged',
+                },
+            });
+            if (res && res.ok) {
+                if (res.combat) _partyState.combat = res.combat;
+                if (global.vToast) global.vToast('🎯 Ação Preparada armada (PHB p. 193)! Aguardando gatilho do inimigo.', 'ok');
+                _renderHud();
+                return res;
+            }
+        } catch (err) {
+            if (global.vToast) global.vToast('Erro ao armar ação preparada: ' + err.message, 'err');
+        }
+        return false;
+    }
+
+    async function _previewIntent(actorIdx, intentData) {
+        if (!_partyState || !_partyState.session_id) return false;
+        try {
+            var res = await _request('/api/party/combat/action', {
+                session_id: _partyState.session_id,
+                user_id: _cfg.uid,
+                action: {
+                    type: 'intent_preview',
+                    actor_idx: actorIdx,
+                    intent: intentData || {},
+                },
+            });
+            if (res && res.ok) {
+                if (res.combat) _partyState.combat = res.combat;
+                _renderHud();
+                return res;
+            }
+        } catch (err) {
+            console.warn('[PartyClient] Falha ao enviar prévia de intenção:', err.message);
+        }
+        return false;
+    }
+
     // Exportação do Singleton Global
     global.vPartyClient = {
         init: init,
@@ -2878,6 +3195,11 @@
         rollDialogueSpeaker: _rollDialogueSpeaker,
         identifyLore: _identifyMonsterLore,
         revivifyAlly: _revivifyAlly,
+        openReactionMatrix: _openReactionMatrixModal,
+        setReactionMatrix: _setReactionMatrix,
+        delayInBlock: _delayInBlock,
+        readyAction: _readyAction,
+        previewIntent: _previewIntent,
     };
 
 })(typeof window !== 'undefined' ? window : this);
