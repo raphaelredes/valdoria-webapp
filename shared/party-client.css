@@ -1,0 +1,556 @@
+/**
+ * party-client.css — Estilos da Interface de Comitiva Multiplayer D&D 5e
+ * Lendas de Valdoria — Design System Canônico
+ * Regra Soberana Zero: Tolerância zero. Nomenclatura estrita de aventureiros, personagens e comitiva.
+ */
+
+/* ── HUD Flutuante da Comitiva ── */
+.v-party-hud {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    z-index: 850;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none; /* Sub-elementos habilitam ponteiro */
+    font-family: var(--v-font-body, 'Cinzel', serif);
+}
+
+.v-party-hud-bar {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(34, 28, 22, 0.95) 0%, rgba(20, 16, 12, 0.98) 100%);
+    border: 1px solid rgba(196, 149, 58, 0.45);
+    border-radius: 8px;
+    padding: 6px 10px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(196, 149, 58, 0.25);
+    backdrop-filter: blur(6px);
+}
+
+.v-party-hud-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--v-gold, #c4953a);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.v-party-code-badge {
+    background: rgba(196, 149, 58, 0.15);
+    border: 1px dashed rgba(196, 149, 58, 0.5);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-family: monospace;
+    color: #e6c88b;
+    cursor: pointer;
+    user-select: all;
+    transition: background 0.2s;
+}
+
+.v-party-code-badge:hover {
+    background: rgba(196, 149, 58, 0.3);
+}
+
+.v-party-hud-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.v-party-icon-btn {
+    pointer-events: auto;
+    background: rgba(45, 36, 28, 0.85);
+    border: 1px solid rgba(196, 149, 58, 0.35);
+    border-radius: 5px;
+    color: #e0d0b8;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.18s ease;
+}
+
+.v-party-icon-btn:hover {
+    border-color: var(--v-gold, #c4953a);
+    color: #fff;
+    background: rgba(70, 55, 40, 0.9);
+}
+
+/* ── Grade de Membros da Comitiva (1 a 4) ── */
+.v-party-members-grid {
+    pointer-events: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 6px;
+    max-width: 100%;
+}
+
+@media (max-width: 520px) {
+    .v-party-members-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.v-party-member-card {
+    background: rgba(26, 20, 16, 0.92);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: 6px;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.v-party-member-card.is-active-turn {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    animation: partyTurnPulse 2s infinite ease-in-out;
+}
+
+.v-party-member-card.is-offline {
+    opacity: 0.65;
+    filter: grayscale(40%);
+}
+
+@keyframes partyTurnPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
+    50% { box-shadow: 0 0 14px rgba(255, 215, 0, 0.6); }
+}
+
+.v-party-member-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.v-party-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #3a2e22;
+    border: 1px solid var(--v-gold, #c4953a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.v-party-avatar .v-party-leader-crown {
+    position: absolute;
+    top: -7px;
+    right: -4px;
+    font-size: 11px;
+    filter: drop-shadow(0 0 2px #000);
+}
+
+.v-party-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.v-party-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #f0e6d2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.v-party-subtext {
+    font-size: 10px;
+    color: #a89880;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ── Badges de Controle e Status ── */
+.v-party-badge-controller {
+    background: rgba(123, 32, 32, 0.85);
+    border: 1px solid rgba(220, 80, 80, 0.6);
+    color: #ffd6d6;
+    font-size: 9px;
+    border-radius: 3px;
+    padding: 1px 4px;
+    margin-top: 2px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.v-party-badge-ai {
+    background: rgba(60, 80, 110, 0.85);
+    border: 1px solid rgba(100, 140, 200, 0.6);
+    color: #d6e8ff;
+    font-size: 9px;
+    border-radius: 3px;
+    padding: 1px 4px;
+    margin-top: 2px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* ── Barras de Vitalidade Compactas ── */
+.v-party-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 2px;
+}
+
+.v-party-bar-wrap {
+    height: 7px;
+    background: #110e0c;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.7);
+}
+
+.v-party-bar-fill {
+    height: 100%;
+    transition: width 0.35s ease-out;
+}
+
+.v-party-bar-hp .v-party-bar-fill.hp-high {
+    background: linear-gradient(90deg, #2e7d32, #4caf50);
+}
+
+.v-party-bar-hp .v-party-bar-fill.hp-mid {
+    background: linear-gradient(90deg, #e65100, #ff9800);
+}
+
+.v-party-bar-hp .v-party-bar-fill.hp-low {
+    background: linear-gradient(90deg, #b71c1c, #f44336);
+    animation: partyHpBlink 1.2s infinite ease-in-out;
+}
+
+.v-party-bar-mp .v-party-bar-fill {
+    background: linear-gradient(90deg, #1565c0, #42a5f5);
+}
+
+@keyframes partyHpBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
+
+.v-party-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #beb09b;
+    line-height: 1;
+}
+
+/* ── Modal Flutuante de Saque Coletivo (Need before Greed) ── */
+.v-party-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    background: rgba(10, 8, 6, 0.85);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: partyFadeIn 0.2s ease-out;
+}
+
+.v-party-modal-card {
+    background: linear-gradient(180deg, #2a2016 0%, #1c150e 100%);
+    border: 2px solid var(--v-gold, #c4953a);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 20px rgba(196, 149, 58, 0.25);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.v-party-modal-header {
+    background: rgba(45, 34, 22, 0.85);
+    border-bottom: 1px solid rgba(196, 149, 58, 0.35);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.v-party-modal-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--v-gold, #c4953a);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.v-party-modal-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: #e5d8c4;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* ── Barra Regressiva de Tempo ── */
+.v-party-timer-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(196, 149, 58, 0.2);
+}
+
+.v-party-timer-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #ff8c00);
+    transform-origin: left;
+    transition: width 0.1s linear;
+}
+
+/* ── Item de Saque ── */
+.v-party-loot-item-preview {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: rgba(20, 16, 12, 0.7);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.v-party-loot-item-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    background: #33261a;
+    border: 1px solid var(--v-gold, #c4953a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+}
+
+.v-party-loot-item-info {
+    flex: 1;
+}
+
+.v-party-loot-item-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+}
+
+.v-party-loot-item-type {
+    font-size: 11px;
+    color: #b0a08b;
+    margin-top: 2px;
+}
+
+/* ── Ações de Saque Need/Greed/Pass ── */
+.v-party-loot-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.v-party-loot-btn {
+    padding: 10px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.18s ease;
+    border: 1px solid rgba(196, 149, 58, 0.4);
+    background: rgba(40, 30, 20, 0.85);
+    color: #f0e4cf;
+}
+
+.v-party-loot-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.v-party-loot-btn-need {
+    border-color: #ffd700;
+    background: linear-gradient(180deg, #44341c 0%, #2a1f10 100%);
+    color: #ffeb99;
+}
+
+.v-party-loot-btn-need:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(80%);
+}
+
+.v-party-loot-btn-greed {
+    border-color: #64b5f6;
+    background: linear-gradient(180deg, #1c2e44 0%, #101c2a 100%);
+    color: #bbdefb;
+}
+
+.v-party-loot-btn-pass {
+    border-color: #888;
+    background: linear-gradient(180deg, #2e2e2e 0%, #1e1e1e 100%);
+    color: #ccc;
+}
+
+.v-party-loot-tally {
+    font-size: 11px;
+    color: #bfa888;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 4px;
+}
+
+/* ── Modal de Prompt de Reação (6s Combat2) ── */
+.v-party-reaction-card {
+    border-color: #ff5722;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 87, 34, 0.35);
+}
+
+.v-party-reaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.v-party-reaction-opt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(40, 28, 20, 0.85);
+    border: 1px solid rgba(255, 140, 0, 0.4);
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    color: #fff;
+    text-align: left;
+}
+
+.v-party-reaction-opt:hover {
+    border-color: #ff9800;
+    background: rgba(65, 45, 30, 0.95);
+    transform: translateX(3px);
+}
+
+.v-party-reaction-cost {
+    font-size: 11px;
+    color: #ffb74d;
+    background: rgba(255, 152, 0, 0.15);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+/* ── Menu Radial / Flutuante de Pings Táticos ── */
+.v-party-ping-radial {
+    position: fixed;
+    z-index: 920;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(24, 18, 14, 0.95);
+    border: 1px solid var(--v-gold, #c4953a);
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(6px);
+    animation: partyFadeIn 0.18s ease-out;
+}
+
+.v-party-ping-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(45, 35, 25, 0.8);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: 5px;
+    color: #e5dac9;
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.v-party-ping-btn:hover {
+    background: rgba(75, 55, 35, 0.95);
+    border-color: var(--v-gold, #c4953a);
+    color: #fff;
+}
+
+/* ── Onda Visual de Ping no Tabuleiro/Mapa ── */
+.v-party-map-ping {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    margin-left: -22px;
+    margin-top: -22px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 450;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.v-party-map-ping::before,
+.v-party-map-ping::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    animation: partyPingRing 1.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.v-party-map-ping::after {
+    animation-delay: 0.6s;
+}
+
+.v-party-map-ping.ping-focus { color: #f44336; }
+.v-party-map-ping.ping-danger { color: #ff9800; }
+.v-party-map-ping.ping-march { color: #2196f3; }
+.v-party-map-ping.ping-explore { color: #ffd700; }
+
+@keyframes partyPingRing {
+    0% { transform: scale(0.4); opacity: 1; }
+    100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes partyFadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}

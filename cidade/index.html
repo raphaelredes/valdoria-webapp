@@ -11056,9 +11056,11 @@ body.perf-lite .vc-action-btn { transition: none; }
     // chama vEncounter.render(dialogue, { dialogues: SERVICE_DIALOGUES_X }).
     // Doc canonical: memory/feedback_centralize_in_canonical_webapps.md
     document.write('<link rel="stylesheet" href="/shared/encounter-popup.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
+    document.write('<link rel="stylesheet" href="/shared/party-client.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '">');
     document.write('<script src="/shared/coin-utils.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<script src="/shared/dialogue-history.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<script src="/shared/encounter-popup.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/party-client.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // PADRAO_VIAGEM (#90): orquestrador UNICO de viagem (ida cidade + volta exploracao).
     document.write('<script src="/shared/journey-runner.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // 2026-05-22: NPC dialogue engine foundation (skeleton — wiring NPC-a-NPC pendente).
@@ -12106,10 +12108,25 @@ body.perf-lite .vc-action-btn { transition: none; }
           console.warn('[CITY] SessionHeartbeat.init failed:', _heartbeatErr);
         }
       }
-      // Re-render se hub ja foi montado
       if (typeof refreshHud === 'function') refreshHud();
       if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
       if (typeof _checkAndShowLevelUpNotification === 'function') _checkAndShowLevelUpNotification();
+      if (window.vPartyClient && window.CITY_MOCK_PLAYER) {
+        var _cp = window.CITY_MOCK_PLAYER;
+        window.vPartyClient.init({
+          apiBase: _api.replace(/\/$/, ''),
+          uid: parseInt(_uid, 10) || _cp.id || _cp.uid || 1,
+          name: _cp.name || 'Aventureiro',
+          cls: _cp.hero_class || _cp.character_class || _cp.cls || 'Guerreiro',
+          icon: _cp.icon || '⚔️',
+          level: _cp.level || 1,
+          hp: _cp.hp || 20,
+          maxHp: _cp.hpMax || _cp.max_hp || 20,
+          mp: _cp.mp || 10,
+          maxMp: _cp.mpMax || _cp.max_mp || 10,
+          armorClass: _cp.ac || _cp.armor_class || 14
+        });
+      }
       // 2026-06-08: personagem real hidratado + hub re-renderizado → AGORA revela
       // (caso a cobertura tenha sido mantida por falta de state.hud no boot). O
       // jogador só vê o hub já com o personagem — sem flash de hub em branco.
@@ -12284,6 +12301,21 @@ body.perf-lite .vc-action-btn { transition: none; }
     // disparar no primeiro renderCityGroupPanel (DOMContentLoaded). Em REMOTE
     // mode a flag é setada apenas após /api/auth/characters aplicar `picked`.
     window._cityRealPlayerReady = true;
+    if (window.vPartyClient && window.CITY_MOCK_PLAYER) {
+      var _locP = window.CITY_MOCK_PLAYER;
+      window.vPartyClient.init({
+        uid: _locP.id || _locP.uid || 1,
+        name: _locP.name || 'Aventureiro',
+        cls: _locP.hero_class || _locP.character_class || _locP.cls || 'Guerreiro',
+        icon: _locP.icon || '⚔️',
+        level: _locP.level || 1,
+        hp: _locP.hp || 20,
+        maxHp: _locP.hpMax || _locP.max_hp || 20,
+        mp: _locP.mp || 10,
+        maxMp: _locP.mpMax || _locP.max_mp || 10,
+        armorClass: _locP.ac || _locP.armor_class || 14
+      });
+    }
   }
 
   // canonical: market_npcs_data.py REPUTATION_TIERS — reputação por mercador.
@@ -26507,6 +26539,10 @@ function _buildGuildMockData(player, recruitCount){
         desc: partyCount + ' de 3 aventureiros contigo',
         cb: 'guild_party_open',
         badge: partyCount + '/3' },
+      { icon: _heralIco('ic-grupo'), label: 'Reunir Comitiva (Multiplayer)',
+        desc: 'Jogue em cooperação com até 4 amigos online',
+        cb: 'guild_party_multiplayer_open',
+        badge: 'Co-op' },
       { icon: _heralIco('ic-guerreiro'), label: 'Treinar com Braun, o Marcado',
         desc: 'Mestre de armas veterano',
         cb: 'guild_npc_guild_braun' },
@@ -63926,6 +63962,13 @@ var ACTION_HANDLERS = {
   'guild_research_open':  function(p){ _guildShowResearch(p); },
   'guild_train_open':     function(p){ _guildShowTraining(p); },
   'guild_party_open':     function(p){ _guildShowParty(p); },
+  'guild_party_multiplayer_open': function(p){
+    if (window.vPartyClient) {
+      window.vPartyClient.openLobby();
+    } else if (typeof vToast === 'function') {
+      vToast('Sistema de comitiva indisponível no momento.', 'warn');
+    }
+  },
 
   // --- OFICINA ---
   'workshop_smith':       function(p){ _workshopShowRecipes(p, 'workshop_smith', 'Forja', ''); },
@@ -70913,7 +70956,7 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
       vToast(tmsg, ttype);
     }
     if (window.vEncounter && window.vEncounter.render) {
-      // FASE 5d (#3): hire selado do recruta ou despedida/reação → narra + choices dinâmicas ou volta.
+      // FASE 5d (#3): hire selado do recruta → narra + refresca grupo/HUD (label sem emoji).
       if (venue === 'recruta') {
         var _recChoices = (data.choices && data.choices.length) ? data.choices : [{ id: 'done', label: 'Voltar' }];
         window.vEncounter.render(

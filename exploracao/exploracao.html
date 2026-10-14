@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-12T04:08:37Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-14T18:53:02Z - do not edit directly, edit source -->
 
 
 
@@ -6686,6 +6686,9 @@ document.write('<script src="../shared/char-card.js?v=' + _vti + '"><\/script>')
    maior. Aplica a .enc-portrait (PADRAO_ALDRIC) + .npc-portrait via global
    event delegation. */
 document.write('<script src="../shared/lightbox.js?v=' + _vti + '"><\/script>');
+// Comitiva multiplayer D&D 5e: HUD do grupo, saques, reações táticas, pings no mapa e ghosting
+document.write('<link rel="stylesheet" href="../shared/party-client.css?v=' + _vti + '">');
+document.write('<script src="../shared/party-client.js?v=' + _vti + '"><\/script>');
 </script>
 </head>
 <body>
@@ -43582,6 +43585,21 @@ function renderPartyPopup() {
       renderPartyPopup();  // re-render pra atualizar o botão ativo
     });
   });
+
+  if (window.vPartyClient) {
+    var _mpSec = document.createElement('div');
+    _mpSec.className = 'party-multiplayer-sec';
+    _mpSec.style.marginTop = '12px';
+    _mpSec.style.textAlign = 'center';
+    var hasMpParty = window.vPartyClient.getState() && window.vPartyClient.getState().session_id;
+    var _btnLabel = hasMpParty ? '👥 Comitiva Multiplayer (Ativa)' : '👥 Reunir Comitiva Multiplayer';
+    _mpSec.innerHTML = '<button type="button" class="party-pace-btn" style="width:100%; padding:10px; border-color:#d4af37; background:linear-gradient(180deg, #3a2c17, #1f180e); color:#f3dfa2; font-weight:bold;">' + _btnLabel + '</button>';
+    _mpSec.querySelector('button').addEventListener('click', function() {
+      closePartyPopup();
+      window.vPartyClient.openLobby();
+    });
+    body.appendChild(_mpSec);
+  }
 }
 
 function _partyMemberCard(m) {
@@ -49005,6 +49023,27 @@ function boot() {
     updateQuestIndicator();
     updateAllyIndicator();
     scheduleRender();
+
+    if (window.vPartyClient && S && S.player) {
+      try {
+        var _p = S.player;
+        var _apiBase = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+        var _uid = window.__EXPLORE_USER_ID || _p.id || _p.uid || _p.char_id || 1;
+        window.vPartyClient.init({
+          apiBase: _apiBase,
+          uid: parseInt(_uid, 10) || 1,
+          name: _p.name || 'Aventureiro',
+          cls: _p.cls || _p.cls_key || 'Guerreiro',
+          icon: _p.ico || _p.icon || '⚔️',
+          level: _p.level || _p.lvl || 1,
+          hp: _p.hp || 20,
+          maxHp: _p.mhp || _p.hpMax || 20,
+          mp: _p.mp || 10,
+          maxMp: _p.mmp || _p.mpMax || 10,
+          armorClass: (typeof window.__EXPLORE_SERVER_AC === 'number') ? window.__EXPLORE_SERVER_AC : (_p.ac || 14)
+        });
+      } catch (_eParty) {}
+    }
 
     // X-7 (sessao #74): defense-in-depth contra tela preta no boot. O browser PAUSA
     // o rAF quando o WebApp abre em segundo plano (Telegram pre-carrega o WebApp).

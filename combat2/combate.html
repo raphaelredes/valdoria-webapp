@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-14T01:37:55Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-14T18:54:39Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -767,6 +767,7 @@ loadCSS('/valdoria-design.css');
 loadCSS('/shared/coin-icon.css');
 loadCSS('/shared/status-bars.css');
 loadCSS('/shared/toast.css');  /* PADRAO_NOTIFICACOES: toast.css acompanha toast.js (avisos de Forma Selvagem etc.) */
+loadCSS('/shared/party-client.css');
 loadCSS('/shared/animations.css');
 loadCSS('/combat/combat.css');
 loadCSS('/combat/combat-battlefield.css');
@@ -13207,6 +13208,8 @@ window.__onIntroTap = function() {
     document.write('<script src="' + BASE + '/shared/lightbox.js?v=' + v + '"><\/script>');
     // toast.js: PADRAO_NOTIFICACOES — vToast (avisos de Forma Selvagem etc.) (2026-06-08).
     document.write('<script src="' + BASE + '/shared/toast.js?v=' + v + '"><\/script>');
+    // party-client.js: Comitiva multiplayer D&D 5e (HUD, saques, reações, pings, ghosting).
+    document.write('<script src="' + BASE + '/shared/party-client.js?v=' + v + '"><\/script>');
     /* Clock skew guard (USER REQUEST 2026-05-04) — detecta NET::ERR_CERT_DATE_INVALID
        proativamente quando relógio do device está errado. */
     document.write('<script src="' + BASE + '/shared/clock-skew-guard.js?v=' + v + '"><\/script>');
