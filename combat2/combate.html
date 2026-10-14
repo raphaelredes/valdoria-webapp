@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-14T23:36:48Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-14T23:47:15Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2173,6 +2173,86 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   z-index: 65 !important;
   pointer-events: none !important;
   will-change: left, top, transform, filter;
+}
+
+/* ── Visualização Tática no Grid: Shared Intent Ghosts & Fogo Amigo (Pilar 3) ── */
+.hex-intent-trajectory {
+  stroke-dasharray: 6 4;
+  animation: intentTrajectoryDash 1.4s linear infinite;
+  pointer-events: none;
+}
+@keyframes intentTrajectoryDash {
+  to { stroke-dashoffset: -20; }
+}
+
+.hex-aoe-blast-zone {
+  animation: aoePulse 2s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes aoePulse {
+  0% { fill-opacity: 0.18; stroke-opacity: 0.6; }
+  100% { fill-opacity: 0.32; stroke-opacity: 0.95; }
+}
+
+.hex-aoe-friendly-fire {
+  animation: friendlyFireHexPulse 1s ease-in-out infinite alternate !important;
+  pointer-events: none;
+}
+@keyframes friendlyFireHexPulse {
+  0% { fill: rgba(220, 38, 38, 0.25); stroke: #ef4444; stroke-width: 2; }
+  100% { fill: rgba(220, 38, 38, 0.55); stroke: #ff1744; stroke-width: 3; }
+}
+
+.hex-friendly-fire-badge {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  font-weight: 700;
+  fill: #ffebee;
+  text-anchor: middle;
+  filter: drop-shadow(0 0 3px #d32f2f);
+  pointer-events: none;
+  animation: friendlyFireBadgeBlink 1s infinite alternate;
+}
+@keyframes friendlyFireBadgeBlink {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+.hex-intent-reticle {
+  animation: reticleSpin 6s linear infinite;
+  transform-origin: center;
+  pointer-events: none;
+}
+@keyframes reticleSpin {
+  100% { transform: rotate(360deg); }
+}
+
+.hex-intent-reticle-label {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  fill: #ff8a80;
+  text-anchor: middle;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
+
+.hex-intent-ghost-circle {
+  animation: ghostCirclePulse 1.8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes ghostCirclePulse {
+  0% { r: 16; opacity: 0.4; }
+  100% { r: 19; opacity: 0.85; }
+}
+
+.hex-intent-ghost-label {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  font-weight: 700;
+  fill: #ffd54f;
+  text-anchor: middle;
+  pointer-events: none;
 }
 
 /* Botão temporário flutuante no topo central para pular movimentação (Ordem do Usuário 2026-10) */
@@ -21548,6 +21628,136 @@ function getHexMicroDetailSvg(cx, cy, detailType, subSeed, isDim) {
     return '<g class="hex-terrain-detail" pointer-events="none" opacity="' + opacity + '">' + svg + '</g>';
 }
 
+/**
+ * Projeta visualmente trajetórias, áreas de efeito (AoE) e retículos de alvos
+ * dos companheiros da comitiva (Shared Intent Ghosts & Fogo Amigo — Pilar 3 D&D 5e).
+ */
+function buildSharedIntentsLayerSvg(s, bCols, bRows) {
+    if (!s) return '';
+    var intents = null;
+    if (s.active_intents) {
+        intents = s.active_intents;
+    } else if (typeof window !== 'undefined' && window.vPartyClient && typeof window.vPartyClient.getState === 'function') {
+        var pState = window.vPartyClient.getState();
+        if (pState && pState.combat && pState.combat.active_intents) {
+            intents = pState.combat.active_intents;
+        }
+    }
+
+    // Projeção local interativa se o jogador estiver mirando skill AoE no tabuleiro
+    var localAoe = null;
+    if (typeof _selectingTarget !== 'undefined' && _selectingTarget && typeof _pendingSkill !== 'undefined' && _pendingSkill && _pendingSkill.aoeRadius) {
+        var pUnit = s.order[s.p_idx];
+        if (pUnit && pUnit.pos) {
+            localAoe = {
+                actor_idx: s.p_idx,
+                actor_name: pUnit.n,
+                type: 'skill_aoe',
+                aoe_radius: _pendingSkill.aoeRadius || 2,
+                desc: _pendingSkill.n,
+            };
+        }
+    }
+
+    if (!intents && !localAoe) return '';
+
+    var intentList = [];
+    if (intents) {
+        if (Array.isArray(intents)) {
+            intentList = intentList.concat(intents);
+        } else if (typeof intents === 'object') {
+            for (var k in intents) {
+                if (intents.hasOwnProperty(k) && intents[k]) {
+                    intentList.push(intents[k]);
+                }
+            }
+        }
+    }
+    if (localAoe) {
+        intentList.push(localAoe);
+    }
+
+    if (intentList.length === 0) return '';
+
+    var friendlyPositions = {};
+    (s.order || []).forEach(function (u) {
+        if (u && (u.t === 'p' || u.t === 'a') && u.alive && !u.isDead && u.pos && u.pos.col != null && u.pos.row != null) {
+            friendlyPositions[u.pos.col + ',' + u.pos.row] = u;
+        }
+    });
+
+    var svg = '<g class="hex-shared-intents-layer" pointer-events="none">';
+
+    for (var i = 0; i < intentList.length; i++) {
+        var it = intentList[i];
+        if (!it) continue;
+
+        var actorUnit = (it.actor_idx != null && s.order && s.order[it.actor_idx]) ? s.order[it.actor_idx] : null;
+        var fromCenter = (actorUnit && actorUnit.pos) ? hexCenter(actorUnit.pos.col, actorUnit.pos.row) : null;
+
+        var targetCol = null;
+        var targetRow = null;
+        if (it.target_hex && it.target_hex.col != null && it.target_hex.row != null) {
+            targetCol = it.target_hex.col;
+            targetRow = it.target_hex.row;
+        } else if (it.target_idx != null && s.order && s.order[it.target_idx] && s.order[it.target_idx].pos) {
+            targetCol = s.order[it.target_idx].pos.col;
+            targetRow = s.order[it.target_idx].pos.row;
+        }
+
+        var targetCenter = (targetCol != null && targetRow != null) ? hexCenter(targetCol, targetRow) : null;
+
+        // 1. Trajetória tracejada (Trajectory line)
+        if (fromCenter && targetCenter && (fromCenter.cx !== targetCenter.cx || fromCenter.cy !== targetCenter.cy)) {
+            var midX = (fromCenter.cx + targetCenter.cx) / 2;
+            var midY = (fromCenter.cy + targetCenter.cy) / 2 - 12;
+            svg += '<path d="M ' + fromCenter.cx + ' ' + fromCenter.cy + ' Q ' + midX + ' ' + midY + ' ' + targetCenter.cx + ' ' + targetCenter.cy + '" stroke="rgba(255,183,77,0.75)" stroke-width="2.2" fill="none" class="hex-intent-trajectory" />';
+        }
+
+        // 2. Destino de Movimentação Fantasma (Movement Ghost)
+        if (it.type === 'move' && targetCenter) {
+            svg += '<circle cx="' + targetCenter.cx + '" cy="' + targetCenter.cy + '" r="18" fill="rgba(255,213,79,0.12)" stroke="#ffd54f" stroke-width="1.8" stroke-dasharray="4 2" class="hex-intent-ghost-circle" />';
+            svg += '<text x="' + targetCenter.cx + '" y="' + (targetCenter.cy + 3) + '" class="hex-intent-ghost-label">👻 ' + escHtml(it.actor_name || 'Aliado') + '</text>';
+        }
+
+        // 3. Projeção de Área de Efeito (AoE Blast Radius & Fogo Amigo)
+        if (it.aoe_radius && targetCol != null && targetRow != null) {
+            var aRad = it.aoe_radius;
+            for (var ac = 0; ac < bCols; ac++) {
+                for (var ar = 0; ar < bRows; ar++) {
+                    if (hexDistance(targetCol, targetRow, ac, ar) <= aRad) {
+                        var aCenter = hexCenter(ac, ar);
+                        var aPts = hexPolygonPoints(aCenter.cx, aCenter.cy);
+                        var hKey = ac + ',' + ar;
+                        var allyInHex = friendlyPositions[hKey];
+
+                        if (allyInHex && (!actorUnit || allyInHex !== actorUnit)) {
+                            // Alerta de Fogo Amigo!
+                            svg += '<polygon points="' + aPts + '" class="hex-aoe-friendly-fire" />';
+                            svg += '<text x="' + aCenter.cx + '" y="' + (aCenter.cy + 18) + '" class="hex-friendly-fire-badge">⚠️ FOGO AMIGO</text>';
+                        } else {
+                            // Zona de Dispersão padrão
+                            svg += '<polygon points="' + aPts + '" fill="rgba(255, 170, 0, 0.22)" stroke="#ffaa00" stroke-width="1.8" stroke-dasharray="6 3" class="hex-aoe-blast-zone" />';
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Retículo de Alvo Inimigo Marcado (Enemy Target Reticle)
+        if (it.target_idx != null && s.order && s.order[it.target_idx]) {
+            var tgtU = s.order[it.target_idx];
+            if (tgtU.t === 'e' && tgtU.pos && targetCenter) {
+                svg += '<circle cx="' + targetCenter.cx + '" cy="' + targetCenter.cy + '" r="25" fill="none" stroke="#ef5350" stroke-width="1.8" stroke-dasharray="5 3" class="hex-intent-reticle" />';
+                svg += '<text x="' + targetCenter.cx + '" y="' + (targetCenter.cy - 20) + '" class="hex-intent-reticle-label">🎯 ' + escHtml(it.actor_name || 'Membro') + '</text>';
+            }
+        }
+    }
+
+    svg += '</g>';
+    return svg;
+}
+
 function buildBattlefield(s) {
     if (!s) return '';
     s.battlefield = s.battlefield || { cols: HEX_COLS_DEFAULT, rows: HEX_ROWS_DEFAULT };
@@ -21958,6 +22168,10 @@ function buildBattlefield(s) {
             }
         }
     }
+
+    // Camada de Projeções de Intenções Compartilhadas / Intent Ghosts (Multiplayer D&D 5e / BG3 / Solasta)
+    html += buildSharedIntentsLayerSvg(s, bCols, bRows);
+
     html += '</svg>';
 
     // Tokens Layer (Miniaturas de Mesa)
