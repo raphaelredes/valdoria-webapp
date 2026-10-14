@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-14T20:27:04Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-14T23:36:48Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -25929,6 +25929,8 @@ function render(s) {
                 html += '<button type="button" class="action-btn secondary" data-act="shove">' + _actBtnIco('acao-empurrar') + '<span class="action-btn-label">Empurrar</span>' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="help">' + _actBtnIco('acao-ajudar') + '<span class="action-btn-label">Ajudar</span>' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="hide">' + _actBtnIco('acao-esconder') + '<span class="action-btn-label">Esconder</span>' + hideGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="ready" title="Preparar uma ação para disparar como Reação (PHB p. 193)">' + _actBtnIco('alerta') + '<span class="action-btn-label">Preparar</span>' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="delay" title="Adiar iniciativa dentro do bloco compartilhado">' + _actBtnIco('tempo') + '<span class="action-btn-label">Adiar Vez</span></button>';
                 /* 2026-06-23: CD + chance aprox. direto no botão Fugir */
                 var _fleeDc = (typeof simFleeEscapeDc === 'function' && currentState) ? simFleeEscapeDc(currentState) : 0;
                 var _fleePI = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
@@ -27302,6 +27304,42 @@ function onBtnClick(ev) {
                 }
             });
             return;
+        } else if (act === 'ready') {
+            _actionSheetOpen = false;
+            render(currentState);
+            confirmSimDiceSkip(
+                'O Que Está Sendo Escolhido:\nVocê prepara uma ação para disparar como Reação quando uma condição for atendida (D&D 5e PHB p. 193).\n\nConsequências & Benefícios:\n• Gasta sua Ação principal agora e reserva sua Reação.\n• Dispara automaticamente contra o primeiro inimigo que entrar no seu alcance tático.\n• Permite controlar o ritmo da batalha e interceptar avanços inimigos.',
+                'Ação Preparada (PHB p. 193)',
+                '✔ Armar Ação Preparada',
+                '← Voltar às opções'
+            ).then(function(ok) {
+                if (ok) {
+                    _actionTaken = true;
+                    render(currentState);
+                    void __combatRemoteAction({ type: 'ready_action', trigger: 'enemy_enters_range', range_hexes: 5, attack_kind: 'ranged' });
+                } else {
+                    render(currentState);
+                }
+            });
+            return;
+        } else if (act === 'delay') {
+            _actionSheetOpen = false;
+            render(currentState);
+            confirmSimDiceSkip(
+                'O Que Está Sendo Escolhido:\nVocê adia sua iniciativa dentro do bloco compartilhado de combate cooperativo (estilo Baldur\'s Gate 3).\n\nConsequências & Benefícios:\n• Não gasta sua Ação nem encerra seu turno.\n• Permite que companheiros de equipe atuem primeiro para coordenar combos táticos.\n• Mantém o bônus de Ímpeto Tático se o bloco agir com agilidade.',
+                'Adiar no Bloco (Iniciativa Compartilhada)',
+                '✔ Adiar Vez no Bloco',
+                '← Voltar às opções'
+            ).then(function(ok) {
+                if (ok) {
+                    _actionTaken = true;
+                    render(currentState);
+                    void __combatRemoteAction({ type: 'delay_in_block' });
+                } else {
+                    render(currentState);
+                }
+            });
+            return;
         } else if (act === 'flee') {
             _actionSheetOpen = false;
             _actionTaken = true;
@@ -27848,6 +27886,44 @@ function onBtnClick(ev) {
         });
         return;
     }
+    if (act === 'ready') {
+        _actionSheetOpen = false;
+        render(currentState);
+        confirmSimDiceSkip(
+            'O Que Está Sendo Escolhido:\nVocê prepara uma ação para disparar como Reação quando uma condição for atendida (D&D 5e PHB p. 193).\n\nConsequências & Benefícios:\n• Gasta sua Ação principal agora e reserva sua Reação.\n• Dispara automaticamente contra o primeiro inimigo que entrar no seu alcance tático.\n• Permite controlar o ritmo da batalha e interceptar avanços inimigos.',
+            'Ação Preparada (PHB p. 193)',
+            '✔ Armar Ação Preparada',
+            '← Voltar às opções'
+        ).then(function(ok) {
+            if (ok) {
+                _actionTaken = true;
+                render(currentState);
+                void passPlayerMetaAction('ready');
+            } else {
+                render(currentState);
+            }
+        });
+        return;
+    }
+    if (act === 'delay') {
+        _actionSheetOpen = false;
+        render(currentState);
+        confirmSimDiceSkip(
+            'O Que Está Sendo Escolhido:\nVocê adia sua iniciativa dentro do bloco compartilhado de combate cooperativo (estilo Baldur\'s Gate 3).\n\nConsequências & Benefícios:\n• Não gasta sua Ação nem encerra seu turno.\n• Permite que companheiros de equipe atuem primeiro para coordenar combos táticos.\n• Mantém o bônus de Ímpeto Tático se o bloco agir com agilidade.',
+            'Adiar no Bloco (Iniciativa Compartilhada)',
+            '✔ Adiar Vez no Bloco',
+            '← Voltar às opções'
+        ).then(function(ok) {
+            if (ok) {
+                _actionTaken = true;
+                render(currentState);
+                void passPlayerMetaAction('delay');
+            } else {
+                render(currentState);
+            }
+        });
+        return;
+    }
     if (act === 'flee') {
         _actionSheetOpen = false;
         _actionTaken = true;
@@ -28195,6 +28271,22 @@ async function passPlayerMetaAction(kind, opts) {
         }, '', 'Oculto');
         s.log.push(p.n + ' se esconde com sucesso nas sombras (Oculto)!');
         render(s);
+    } else if (kind === 'ready') {
+        p.actionSpent = true;
+        p.ready_action = { armed: true, trigger: 'enemy_enters_range', range_hexes: 5 };
+        pushBuffSim(p, {
+            id: 'ready_action',
+            turns: 1,
+            kind: 'buff',
+            condName: 'Ação Preparada (Reação)',
+            condRule: 'PHB p. 193 — Ação engatilhada reservando sua Reação; dispara contra o primeiro monstro que entrar no alcance.'
+        }, '', 'Preparado');
+        s.log.push(p.n + ' arma uma Ação Preparada (PHB p. 193), reservando sua Reação para interceptar inimigos!');
+        render(s);
+    } else if (kind === 'delay') {
+        s.log.push(p.n + ' adia sua ação no bloco compartilhado para combinar combos com seus companheiros.');
+        render(s);
+        return;
     }
 
     await _maybeAdvanceOrStay();
