@@ -1374,6 +1374,755 @@
     var n = (m == null) ? 0 : (m | 0);
     return (n >= 0 ? '+' : '') + n;
   }
+
+  /* Compêndio Educativo D&D 5e: Temperamentos, Atributos, Vitais e Classes (Ordem do Usuário 2026-10) */
+  var _TEMPERAMENT_INFOS = {
+    'estoico': {
+      title: 'Estoico · Temperamento',
+      subtitle: 'Resiliência Inabalável · Calma Sob Pressão',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Aventureiros estoicos são serenos, pragmáticos e não se deixam abalar por adversidades, dor ou provocações. Diante de perigos extremos, mantêm a cabeça fria e focam na solução mais lógica e eficaz para sobreviver.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Companheiro calmo e ponderado. Não cria intrigas nem entra em pânico durante vigílias noturnas ou tempestades.\n• Em Negociações: Não se impressiona com apelos emocionais ou ameaças vazias; responde apenas a argumentos racionais e termos justos.\n• Na Estrada: Mantém a marcha constante sem reclamar de cansaço ou intempéries.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Possui alta resiliência psicológica. Em testes de resistência contra medo (condição Amedrontado), intimidações ou efeitos de abalo moral, mantém postura inabalável na linha de frente da comitiva.'
+        }
+      ]
+    },
+    'rude': {
+      title: 'Ríspido · Temperamento',
+      subtitle: 'Direto ao Ponto · Sem Rodeios',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Prefere aço a palavras. É áspero, direto e odeia bajulações, rodeios ou perda de tempo. Diz o que pensa sem filtro, priorizando a ação prática.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Pode soar ranzinza em conversas cotidianas, mas é leal e protege a retaguarda com ferocidade.\n• Em Negociações: Detesta enrolação. Se tentar enrolá-lo em barganhas, perderá a paciência e aumentará o valor do contrato.\n• Na Estrada: Sempre pronto para o combate, reage agressivamente a qualquer sinal de emboscada.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Eficaz em afastar curiosos, batedores e espiões através de presença intimidadora natural.'
+        }
+      ]
+    },
+    'ganancioso': {
+      title: 'Ganancioso · Temperamento',
+      subtitle: 'Olho no Ouro · Foco no Lucro',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Calcula cada passo pelo retorno em Valdoritas e tesouros. Sua lealdade é guiada pelo peso da bolsa e pela perspectiva de enriquecer nas masmorras.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Passa o tempo polindo equipamentos, contando moedas e avaliando os espólios obtidos nas batalhas.\n• Em Negociações: Negociador tenaz. Pechinchar com ele exige astúcia, pois ele conhece o valor exato de cada serviço.\n• Na Estrada: Altamente motivado por recompensas gordas; enfrentará perigos maiores se houver promessa de grande pilhagem.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Percepção afiada para localizar baús trancados, compartimentos secretos e gemas preciosas entre os despojos.'
+        }
+      ]
+    },
+    'nobre': {
+      title: 'Nobre · Temperamento',
+      subtitle: 'Honra e Dignidade · Palavra Selada',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Regido por princípios de cavalaria, decência e integridade moral. Sua palavra é uma dívida sagrada e sua postura inspira respeito.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Promove ordem e harmonia na comitiva, evitando discórdias e zelando pelo bem-estar de todos.\n• Em Negociações: Concede descontos honrados se a missão envolver defender os inocentes ou lutar por uma causa justa.\n• Na Estrada: Recusa táticas covardes ou traições, posicionando-se sempre como escudo dos mais fracos.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Inspira confiança perante guardas, nobres e clérigos da cidade, facilitando interações diplomáticas e acordos formais.'
+        }
+      ]
+    },
+    'astuto': {
+      title: 'Astuto · Temperamento',
+      subtitle: 'Mente Estratégica · Cálculo Tático',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Perspicaz, observador e engenhoso. Lê as entrelinhas em qualquer situação e busca sempre a vantagem tática antes de dar o primeiro passo.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Analisa mapas, rotas alternativas e hábitos das criaturas da região para antecipar armadilhas.\n• Em Negociações: Respeita interlocutores inteligentes; aceita negociar o contrato se reconhecer uma proposta vantajosa para ambos.\n• Na Estrada: Sugere posições elevadas, caminhos discretos e emboscadas bem planejadas para poupar recursos.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Vantagem tática no posicionamento inicial de combate e facilidade em testes opostos de Intuição e Percepção contra blefes.'
+        }
+      ]
+    },
+    'avido': {
+      title: 'Ávido · Temperamento',
+      subtitle: 'Sede de Ação · Espírito Inquieto',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Movido pela urgência de viver novas façanhas e sentir a adrenalina do perigo. Ficar parado na cidade o sufoca; ele quer a estrada e o combate.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Inquieto durante descansos longos, sempre conferindo as armas e querendo retomar a marcha o quanto antes.\n• Em Negociações: Facilmente persuadido a aceitar contratos se a proposta prometer perigos reais e ação imediata.\n• Na Estrada: O primeiro a investir contra o perigo ao menor sinal de embate.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Bônus de prontidão para combate (Iniciativa) e rapidez ao reagir a chamados de socorro na estrada.'
+        }
+      ]
+    },
+    'fanfarrao': {
+      title: 'Fanfarrão · Temperamento',
+      subtitle: 'Glória Pessoal · Espírito Teatral',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Extrovertido, orgulhoso e fascinado pela própria lenda. Encara a vida como uma grande narrativa onde ele é a estrela principal.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Conta relatos exagerados de suas vitórias, elevando o moral do grupo com gargalhadas e causos épicos.\n• Em Negociações: Ofende-se se seu renome for desprezado, mas cede com facilidade se receber elogios legítimos à sua destreza.\n• Na Estrada: Adora chamar a atenção dos inimigos para si e dar golpes espalhafatosos.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Chamariz natural em batalhas, atraindo o foco dos adversários para aliviar a pressão sobre conjuradores e aliados frágeis.'
+        }
+      ]
+    },
+    'cauteloso': {
+      title: 'Cauteloso · Temperamento',
+      subtitle: 'Prudência Metódica · Prevenção de Riscos',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Metódico, vigilante e calculista com riscos. Jamais dá um passo no escuro sem antes testar o chão e planejar uma rota de fuga segura.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Verifica armadilhas perimetrais, raciona provisões com rigor e mantém sentinelas atentas.\n• Em Negociações: Exige garantias sobre os perigos da missão; se a estrada for perigosa demais, cobrará adicionais de segurança.\n• Na Estrada: Antecipa desmoronamentos, emboscadas de salteadores e plantas venenosas.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Previne que a comitiva seja pega de surpresa (Surprise Round) em viagens e acampamentos da estrada.'
+        }
+      ]
+    },
+    'mercenario': {
+      title: 'Mercenário · Temperamento',
+      subtitle: 'Profissional do Aço · Eficácia Contratual',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Veterano pragmático que encara o combate como ofício. Não luta por glória nem por causas nobres: cumpre o contrato à risca enquanto o soldo estiver pago.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Cuida disciplinadamente de suas armas e armaduras; não se envolve em dilemas morais do grupo.\n• Em Negociações: Negócio é negócio. Mantém um padrão profissional e respeita contrapropostas bem fundamentadas.\n• Na Estrada: Executa ordens difíceis sem pestanejar, mantendo a disciplina da linha de batalha.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Firmeza sob fogo cerrado, disciplina de formação marcial e confiabilidade mecânica em turnos táticos.'
+        }
+      ]
+    },
+    'idealista': {
+      title: 'Idealista · Temperamento',
+      subtitle: 'Devoção a Princípios · Esperança Ativa',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Acredita sinceramente na redenção de Valdoria e em um propósito maior que transcende o ouro e a ambição individual.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Compartilha comida com os famintos, acolhe refugiados e incentiva os companheiros a manterem a esperança.\n• Em Negociações: Disposto a reduzir significativamente suas exigências financeiras se a causa for honrada e altruísta.\n• Na Estrada: Jamais abandona um aliado para trás, arriscando a própria vida para salvar os companheiros.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Fortalece a coesão do grupo contra o desespero e a corrupção mágica das terras desoladas.'
+        }
+      ]
+    },
+    'taciturno': {
+      title: 'Taciturno · Temperamento',
+      subtitle: 'Silêncio Observador · Ação Certeira',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Homem de poucas palavras e olhar penetrante. Expressa-se por gestos secos e resolve problemas com ações práticas, nunca com discursos.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Prefere os cantos escuros e vigílias solitárias. Não fala sobre o próprio passado, mas cumpre suas tarefas com perfeição.\n• Em Negociações: Comunica-se por olhares e acenos; aceita ou recusa termos sem discutir.\n• Na Estrada: Movimenta-se sem fazer ruído, tornando-se invisível para a maioria dos sentinelas inimigos.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Bônus natural em infiltração furtiva e discrição na floresta ou ruínas.'
+        }
+      ]
+    },
+    'jovial': {
+      title: 'Jovial · Temperamento',
+      subtitle: 'Bom Humor Contagiante · Otimismo na Estrada',
+      tag: '✦ TEMPERAMENTO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Afável, empático e de riso fácil. Enxerga beleza e esperança até nas paisagens mais cinzentas e mantém o ânimo do grupo elevado.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• No Acampamento: Toca canções, compartilha histórias engraçadas e ajuda a descontrair a mente dos aventureiros feridos.\n• Em Negociações: Conquista a simpatia de mercadores e estalajadeiros, conseguindo informações e descontos sociais.\n• Na Estrada: Alivia o cansaço psicológico da comitiva, renovando as forças durante descansos curtos e longos.'
+        },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: 'Facilita o descanso do grupo, ajudando a recuperar o ânimo moral e a coesão social da comitiva.'
+        }
+      ]
+    }
+  };
+  _TEMPERAMENT_INFOS['ríspido'] = _TEMPERAMENT_INFOS['rispido'] = _TEMPERAMENT_INFOS['rude'];
+  _TEMPERAMENT_INFOS['ávido'] = _TEMPERAMENT_INFOS['avido'];
+  _TEMPERAMENT_INFOS['fanfarrão'] = _TEMPERAMENT_INFOS['fanfarrao'];
+
+  var _STAT_DND_INFOS = {
+    'for': {
+      name: 'Força (FOR)',
+      sub: 'Poder Muscular · Potência Marcial',
+      desc: 'Mede o poder muscular, a capacidade atlética de carregar cargas pesadas, erguer obstáculos e desferir golpes esmagadores com armas corpo a corpo pesadas (espadas, machados, martelos).',
+      travel: 'Usada para saltar despenhadeiros, arrombar portas trancadas, escalar encostas íngremes e nadar contra torrentes na estrada.',
+      rules: 'Determina o modificador somado às jogadas de ataque e dano com armas corpo a corpo e testes de Atletismo. Fórmula oficial: (Valor - 10) / 2 arredondado para baixo.'
+    },
+    'des': {
+      name: 'Destreza (DES)',
+      sub: 'Agilidade · Reflexos · Precisão',
+      desc: 'Mede a agilidade corporal, equilíbrio, velocidade de reação, reflexos defensivos e precisão com armas à distância (arcos, bestas) e armas leves (adagas, rapieiras).',
+      travel: 'Essencial para caminhar sem fazer barulho (Furtividade), desarmar armadilhas e reagir rapidamente a emboscadas na estrada.',
+      rules: 'Soma-se à Iniciativa no início do combate, à Classe de Armadura (CA) com armaduras leves ou médias, e aos testes de Acrobacia, Furtividade e Prestidigitação. Fórmula oficial: (Valor - 10) / 2.'
+    },
+    'con': {
+      name: 'Constituição (CON)',
+      sub: 'Vigor Físico · Vitalidade · Imunidade',
+      desc: 'Representa a saúde do organismo, vigor físico, resistência à fadiga, fôlego e tolerância contra venenos, doenças e climas inclementes.',
+      travel: 'Determina quanto o personagem aguenta de marchas forçadas sob frio extremo ou calor escaldante sem sofrer exaustão.',
+      rules: 'Cada ponto de modificador de Constituição é somado aos Pontos de Vida (PV) máximos a cada nível e aos testes para manter a Concentração em magias ativas.'
+    },
+    'int': {
+      name: 'Inteligência (INT)',
+      sub: 'Agudeza Mental · Conhecimento · Memória',
+      desc: 'Mede a capacidade de raciocínio dedutivo, memória acadêmica, análise lógica e domínio de teorias mágicas arcanas.',
+      travel: 'Usada para decifrar runas ancestrais, identificar monstros desconhecidos, examinar pistas em ruínas e resolver enigmas mecânicos.',
+      rules: 'Atributo conjurador primordial de Magos. Governa os testes de Arcanismo, História, Investigação, Natureza e Religião.'
+    },
+    'sab': {
+      name: 'Sabedoria (SAB)',
+      sub: 'Percepção Sensorial · Intuição · Força de Vontade',
+      desc: 'Representa a sintonia com o ambiente ao redor, sentidos aguçados, intuição prática sobre intenções alheias e conexão espiritual com a natureza ou divindades.',
+      travel: 'Fundamental para notar inimigos à espreita antes de ser emboscado, rastrear pegadas na mata e cuidar de ferimentos com primeiros socorros.',
+      rules: 'Atributo conjurador de Clérigos, Druidas e Patrulheiros. Governa os testes de Percepção, Intuição, Sobrevivência, Medicina e Adestrar Animais.'
+    },
+    'car': {
+      name: 'Carisma (CAR)',
+      sub: 'Magnetismo Pessoal · Presença · Liderança',
+      desc: 'Mede a força de personalidade, confiança, eloquência persuasiva, capacidade de liderar e impor respeito ou simpatia nos outros.',
+      travel: 'Permite negociar soldos menores com recrutas, convencer guardas a liberar passagens, extrair boatos valiosos em tavernas e intimidar salteadores.',
+      rules: 'Atributo conjurador de Paladinos, Bardos, Bruxos e Feiticeiros. Governa os testes de Persuasão, Intimidação, Atuação e Blefe (Enganação).'
+    }
+  };
+  _STAT_DND_INFOS['str'] = _STAT_DND_INFOS['for'];
+  _STAT_DND_INFOS['dex'] = _STAT_DND_INFOS['des'];
+  _STAT_DND_INFOS['wis'] = _STAT_DND_INFOS['sab'];
+  _STAT_DND_INFOS['cha'] = _STAT_DND_INFOS['car'];
+
+  var _VITAL_DND_INFOS = {
+    'PV': {
+      name: 'Pontos de Vida (PV)',
+      sub: 'Reserva de Sobrevivência e Vigor',
+      desc: 'Representa a combinação de resistência física, fôlego e vontade de viver antes de sucumbir em batalha. Não significa necessariamente cortes fatais, mas desgaste e desvio de golpes mortais.',
+      travel: 'Aventureiros com PV baixo precisam de curas imediatas ou repouso no acampamento para não correrem risco de morte iminente.',
+      rules: 'Quando o PV chega a 0, o aventureiro cai inconsciente e começa a fazer salvaguardas contra a morte (3 sucessos estabilizam, 3 falhas causam a morte definitiva). Recupera PV com poções, magias curativas ou descansos.'
+    },
+    'CA': {
+      name: 'Classe de Armadura (CA)',
+      sub: 'Dificuldade para Acertar Golpes',
+      desc: 'Indica o quão difícil é para um inimigo acertar um ataque certeiro contra este aventureiro, combinando a espessura da armadura, o escudo e a agilidade para esquivar.',
+      travel: 'Companheiros com CA elevada (17+) funcionam como verdadeiras muralhas defensivas na linha de frente, absorvendo o impacto dos inimigos.',
+      rules: 'Para acertar, o atacante rola 1d20 e soma seu Bônus de Ataque. O resultado precisa ser igual ou maior que a CA do alvo. Se for menor, o golpe ricocheteia na armadura ou é esquivado.'
+    },
+    'Desl.': {
+      name: 'Deslocamento (Desl.)',
+      sub: 'Mobilidade Tática no Tabuleiro',
+      desc: 'A distância máxima que este aventureiro consegue percorrer a pé em uma única rodada de combate (6 segundos) mantendo a capacidade de lutar.',
+      travel: 'Permite reposicionar-se no tabuleiro, flanquear adversários, buscar cobertura atrás de rochas ou socorrer aliados caídos.',
+      rules: 'Em D&D 5e, cada hexágono ou quadrado representa 1,5 metro de distância. Um deslocamento de 9 metros equivale a 6 hexágonos por turno.'
+    },
+    'Ataque': {
+      name: 'Bônus de Ataque',
+      sub: 'Precisão Ofensiva com a Arma Principal',
+      desc: 'O bônus fixo somado às rolagens de ataque com a arma principal do aventureiro, refletindo anos de treino marcial e destreza de combate.',
+      travel: 'Quanto maior o valor, mais consistente é o aventureiro em superar as armaduras de monstros de elite e chefes de masmorra.',
+      rules: 'Calculado pela soma do Bônus de Proficiência do nível com o Modificador do Atributo da arma (Força ou Destreza). Rolagem: d20 + Bônus vs CA do inimigo.'
+    },
+    'DC Mag.': {
+      name: 'Classe de Dificuldade Mágica (DC Mag.)',
+      sub: 'Poder e Resistência de Feitiços',
+      desc: 'A dificuldade imposta aos inimigos para resistirem aos feitiços e preces lançados por este conjurador.',
+      travel: 'Magias com CD alta tornam muito difícil que os adversários esquivem de bolas de fogo, resistam a paralisias ou anulem bênçãos.',
+      rules: 'Fórmula oficial: 8 + Bônus de Proficiência + Modificador do Atributo Conjurador (Inteligência, Sabedoria ou Carisma). O alvo deve rolar teste de resistência igual ou superior à CD para não sofrer o efeito pleno.'
+    },
+    'Dado Vida': {
+      name: 'Dado de Vida',
+      sub: 'Recuperação de Vigor em Descansos',
+      desc: 'A reserva interna de fôlego do personagem que determina quanto PV ele regenera naturalmente ao parar para descansar na estrada.',
+      travel: 'Usado durante Descansos Curtos (1 hora) na fogueira para fechar ferimentos sem gastar poções raras ou feitiços curativos.',
+      rules: 'O tipo de dado depende da classe: bárbaros usam d12, guerreiros e paladinos usam d10, clérigos e ladinos usam d8, magos usam d6. Ao descansar, rola o dado e soma o modificador de Constituição ao PV recuperado.'
+    },
+    'PM': {
+      name: 'Pontos de Mana / Magia (PM)',
+      sub: 'Reserva Arcana e Divina',
+      desc: 'A energia mágica disponível para lançar feitiços, bênçãos e técnicas especiais de canalização.',
+      travel: 'Conjuradores sem PM tornam-se vulneráveis e dependem de truques básicos até realizarem um descanso para recarregar seus dons.',
+      rules: 'Gasto a cada magia de nível conjurada. Recuperado integralmente após um Descanso Longo de 8 horas.'
+    }
+  };
+
+  var _CLASS_DND_INFOS = {
+    'paladino': {
+      name: 'Paladino',
+      sub: 'Guerreiro Sagrado · Defensor Juramentado',
+      desc: 'Guerreiro santo vinculado por um juramento sagrado. Combina maestria marcial pesada com cura pelas mãos e destruições divinas que punem o mal.',
+      role: 'Vanguarda defensiva e suporte. Cura aliados caídos e causa dano radiante devastador em monstros e mortos-vivos.',
+      rules: 'Usa armaduras pesadas e escudos (d10 de Dado de Vida). Conjurador baseado em Carisma com habilidades de Destruição Divina e Canalizar Divindade.'
+    },
+    'guerreiro': {
+      name: 'Guerreiro',
+      sub: 'Mestre das Armas e Táticas Marciais',
+      desc: 'Especialista supremo no combate armado e em armaduras. Versátil, resistente e disciplinado.',
+      role: 'Linha de frente inabalável. Capaz de realizar múltiplos ataques por turno e recuperar fôlego rapidamente.',
+      rules: 'Proficiência com todas as armas e armaduras (d10 de Dado de Vida). Recursos como Retomar o Fôlego e Surto de Ação.'
+    },
+    'mago': {
+      name: 'Mago',
+      sub: 'Erudito dos Mistérios Arcanos',
+      desc: 'Estudioso das leis arcanas que molda a realidade através de fórmulas místicas, grimórios e varinhas.',
+      role: 'Dano em área avassalador e controle de campo. Lança magias elementais, barreiras protetoras e encantamentos.',
+      rules: 'Conjurador baseado em Inteligência (d6 de Dado de Vida). Amplo repertório de feitiços e escolas de magia.'
+    },
+    'clerigo': {
+      name: 'Clérigo',
+      sub: 'Intercessor dos Deuses · Conjurador Divino',
+      desc: 'Canalizador do poder vivo de uma divindade ou dos Quatro de Valdoria. Combina poder de cura com bênçãos marciais.',
+      role: 'Suporte vital e protetor do grupo. Regenera vida, remove venenos, abençoa jogadas de ataque e repele mortos-vivos.',
+      rules: 'Conjurador baseado em Sabedoria (d8 de Dado de Vida). Armaduras médias/pesadas e Canalizar Divindade.'
+    },
+    'ladino': {
+      name: 'Ladino',
+      sub: 'Mestre da Furtividade e Precisão',
+      desc: 'Especialista em explorar pontos fracos, emboscadas e desarmar mecanismos mortais.',
+      role: 'Infiltração e dano concentrado com Ataque Furtivo. Desativa armadilhas e golpeia sem ser visto.',
+      rules: 'Usa Destreza e armaduras leves (d8 de Dado de Vida). Habilidade Evasão e Ação Astuta.'
+    },
+    'patrulheiro': {
+      name: 'Patrulheiro',
+      sub: 'Guia dos Ermos e Rastreador Implacável',
+      desc: 'Guerreiro dos bosques e fronteiras que conhece os hábitos das feras e os segredos da natureza.',
+      role: 'Combate à distância e sobrevivência. Guia a comitiva por caminhos seguros e marca presas táticas.',
+      rules: 'Combina maestria marcial com magias de Sabedoria (d10 de Dado de Vida).'
+    },
+    'barbaro': {
+      name: 'Bárbaro',
+      sub: 'Fúria Primitiva · Vigor Selvagem',
+      desc: 'Combatente impetuoso que canaliza sua fúria interior para resistir a golpes brutais e despedaçar inimigos.',
+      role: 'Tanque supremo da vanguarda. Absorve imensas quantidades de dano e desestabiliza as defesas inimigas.',
+      rules: 'Maior Dado de Vida do jogo (d12). A Fúria concede resistência a dano físico e bônus no ataque.'
+    },
+    'bardo': {
+      name: 'Bardo',
+      sub: 'Mestre da Música, Encanto e Inspiração',
+      desc: 'Artista errante cujas palavras e melodias tecem magia real, elevando o espírito dos companheiros e confundindo inimigos.',
+      role: 'Versatilidade total e inspiração. Concede bônus em testes dos aliados e enfraquece adversários.',
+      rules: 'Conjurador baseado em Carisma (d8 de Dado de Vida). Habilidade de Inspiração Bárdica.'
+    },
+    'druida': {
+      name: 'Druida',
+      sub: 'Guardião da Terra e das Formas Selvagens',
+      desc: 'Sacerdote da natureza que comanda as tempestades, cura os feridos e transmuta o próprio corpo em feras terríveis.',
+      role: 'Controle de terreno e suporte adaptável. Transforma-se em urso ou lobo na linha de frente.',
+      rules: 'Conjurador baseado em Sabedoria (d8 de Dado de Vida). Forma Selvagem.'
+    },
+    'monge': {
+      name: 'Monge',
+      sub: 'Mestre da Energia Ki e Artes Marciais',
+      desc: 'Guerreiro asceta que canaliza a energia vital (Ki) em golpes desarmados rápidos como raios e agilidade sobre-humana.',
+      role: 'Atacante veloz e atordoador. Desvia de projéteis e paralisa adversários com Golpes Atordoantes.',
+      rules: 'Combina Destreza e Sabedoria sem armadura (d8 de Dado de Vida). Pontos de Ki.'
+    },
+    'feiticeiro': {
+      name: 'Feiticeiro',
+      sub: 'Magia Inata · Poder no Sangue',
+      desc: 'Portador de poder arcano congênito derivado de linhagens dracônicas ou tempestades cósmicas.',
+      role: 'Explosões mágicas personalizadas via Metamagia.',
+      rules: 'Conjurador baseado em Carisma (d6 de Dado de Vida). Pontos de Feitiçaria e Metamagia.'
+    },
+    'bruxo': {
+      name: 'Bruxo',
+      sub: 'Pactuário de Entidades Sobrenaturais',
+      desc: 'Buscador de poder que selou um pacto misterioso com uma entidade ancestral (arquifadas, corruptores ou seres do além).',
+      role: 'Disparos místicos consistentes (Rajada Mística) e magias de impacto imediato.',
+      rules: 'Conjurador baseado em Carisma (d8 de Dado de Vida). Magia de Pacto recarrega em descanso curto.'
+    }
+  };
+
+  var _RACE_DND_INFOS = {
+    'anao': {
+      name: 'Anão',
+      sub: 'Resiliência da Rocha · Tradição das Montanhas',
+      desc: 'Guerreiros e artesãos robustos forjados na pedra. Conhecidos pela tenacidade inabalável e lealdade férrea.',
+      traits: '• Visão no Escuro (18 metros).\n• Resiliência Anã: Vantagem contra venenos e resistência a dano venenoso.\n• Constituição natural elevada.',
+      rules: 'Excelente para papéis de vanguarda e guerreiros de armadura pesada.'
+    },
+    'elfo': {
+      name: 'Elfo',
+      sub: 'Graça Ancestral · Sintonia Feérica',
+      desc: 'Povo longevo e elegante com sentidos sobrenaturalmente aguçados e ligação com as terras feéricas.',
+      traits: '• Visão no Escuro (18 metros).\n• Ancestral Feérico: Vantagem contra ser enfeitiçado e imunidade ao sono mágico.\n• Transe: Descanso de 4 horas em meditação profunda.',
+      rules: 'Destreza superior, ideal para arqueiros, conjuradores e patrulheiros.'
+    },
+    'humano': {
+      name: 'Humano',
+      sub: 'Versatilidade Notável · Ambição e Adaptação',
+      desc: 'A raça mais adaptável e pioneira de Valdoria, compensando a vida mais curta com determinação e versatilidade incomparáveis.',
+      traits: '• Determinação e adaptabilidade rápida a qualquer ambiente ou função marcial.\n• Aptidão para qualquer classe de combate ou magia.',
+      rules: 'Versatilidade excepcional em atributos e perícias.'
+    },
+    'halfling': {
+      name: 'Halfling',
+      sub: 'Sorte Inata · Coragem Descomunal',
+      desc: 'Pequenos em estatura, mas gigantes em coragem e alegria de viver. Difíceis de assustar e naturalmente afortunados.',
+      traits: '• Sortudo: Rola novamente se tirar 1 natural no d20.\n• Bravura: Vantagem contra ficar amedrontado.\n• Agilidade para esquiva entre adversários maiores.',
+      rules: 'Destreza elevada e proteção contra falhas críticas.'
+    },
+    'meio-elfo': {
+      name: 'Meio-Elfo',
+      sub: 'Herança Dupla · Diplomacia e Carisma',
+      desc: 'União da curiosidade humana com a graça feérica. Diplomatas natos e andarilhos versáteis.',
+      traits: '• Visão no Escuro e Ancestral Feérico.\n• Bônus expressivo em Carisma e versatilidade em perícias.',
+      rules: 'Perfeito para bardos, paladinos, feiticeiros e líderes de comitiva.'
+    },
+    'draconato': {
+      name: 'Draconato',
+      sub: 'Sangue de Dragões · Sopro Elemental',
+      desc: 'Guerreiros nobres com feições dracônicas que carregam o fogo, gelo ou eletricidade de seus ancestrais alados.',
+      traits: '• Arma de Sopro elemental em área.\n• Resistência natural ao tipo de dano do seu sopro.\n• Força e Carisma marcial.',
+      rules: 'Combatentes imponentes e paladinos formidáveis.'
+    },
+    'gnomo': {
+      name: 'Gnomo',
+      sub: 'Curiosidade Arcana · Engenho Inquieto',
+      desc: 'Entusiastas de engenhocas e mistérios mágicos com mentes velozes e espírito alegre.',
+      traits: '• Astúcia Gnômica: Vantagem em salvaguardas de INT, SAB e CAR contra magias.\n• Visão no Escuro.',
+      rules: 'Inteligência prodigiosa, excelentes magos e alquimistas.'
+    },
+    'meio-orc': {
+      name: 'Meio-Orc',
+      sub: 'Ferocidade Tenaz · Sobrevivência Brutal',
+      desc: 'Combatentes fortes e determinados que recusam a derrota, lutando até o último suspiro.',
+      traits: '• Resistência Implacável: Ao cair a 0 PV, fica com 1 PV uma vez por descanso.\n• Ataques Selvagens: Dano crítico ampliado.',
+      rules: 'Poder de destruição maciço para bárbaros e guerreiros.'
+    },
+    'tiefling': {
+      name: 'Tiefling',
+      sub: 'Ancestralidade Infernal · Fogo Sombrio',
+      desc: 'Herdeiros de um pacto antigo que carregam chifres, cauda e o fogo do plano inferior em seu sangue.',
+      traits: '• Resistência a dano de fogo.\n• Visão no Escuro.\n• Legado Infernal: Magias inatas de taumaturgia e repreensão infernal.',
+      rules: 'Carisma e Inteligência elevados, ótimos conjuradores.'
+    }
+  };
+  _RACE_DND_INFOS['anão'] = _RACE_DND_INFOS['anao'];
+  _RACE_DND_INFOS['meio_elfo'] = _RACE_DND_INFOS['meio-elfo'];
+  _RACE_DND_INFOS['meio_orc'] = _RACE_DND_INFOS['meio-orc'];
+
+  function _openSheetInfoDialog(info) {
+    if (!info) return;
+    var ov = _ensureChoiceDetailOverlay();
+    var card = ov.querySelector('.enc-cd-card');
+    if (!card) return;
+
+    var sectionsHtml = (info.sections || []).map(function(s) {
+      return '<div class="enc-cd-section">' +
+        '<div class="enc-cd-section-title">' + _stripEmojis(s.title) + '</div>' +
+        '<div class="enc-cd-box" style="white-space:pre-line;line-height:1.55;font-size:calc(12px * var(--v-font-scale, 1));">' +
+          _stripEmojis(s.text || s.html || '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    var badgeRowHtml = info.tag ? ('<div class="enc-cd-badge-row"><span class="enc-cd-badge" style="color:#ffd700;">' + _stripEmojis(info.tag) + '</span>' + (info.extraBadge ? ('<span class="enc-cd-badge">' + _stripEmojis(info.extraBadge) + '</span>') : '') + '</div>') : '';
+
+    card.innerHTML =
+      '<button type="button" class="enc-cd-close" aria-label="Fechar" id="enc-sheet-info-x">✕</button>' +
+      '<div class="enc-cd-title">' + _stripEmojis(info.title || 'Detalhes') + '</div>' +
+      (info.subtitle ? '<div class="enc-cd-subtitle">' + _stripEmojis(info.subtitle) + '</div>' : '') +
+      badgeRowHtml +
+      '<div class="enc-cd-divider"></div>' +
+      sectionsHtml +
+      '<div class="enc-cd-actions" style="margin-top:14px;">' +
+        '<button type="button" class="enc-cd-btn-confirm" id="enc-sheet-info-btn" style="width:100%;">' +
+          '← Entendido / Voltar à Ficha' +
+        '</button>' +
+      '</div>';
+
+    var closeFn = function(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      _closeChoiceDetailDialog();
+    };
+    var xBtn = card.querySelector('#enc-sheet-info-x');
+    if (xBtn) xBtn.addEventListener('click', closeFn);
+    var okBtn = card.querySelector('#enc-sheet-info-btn');
+    if (okBtn) okBtn.addEventListener('click', closeFn);
+
+    try {
+      if (!ov.open && typeof ov.showModal === 'function') ov.showModal();
+      else if (!ov.open) ov.setAttribute('open', '');
+    } catch (_e) {
+      ov.setAttribute('open', '');
+    }
+    ov.classList.add('active');
+  }
+
+  function _showTemperamentDetail(persName) {
+    var raw = String(persName || '').trim();
+    var key = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    var data = _TEMPERAMENT_INFOS[key] || _TEMPERAMENT_INFOS[raw.toLowerCase()] || null;
+    if (!data) {
+      data = {
+        title: raw + ' · Temperamento',
+        subtitle: 'Personalidade e Postura em Viagem',
+        tag: '✦ TEMPERAMENTO',
+        sections: [
+          {
+            title: 'O Que Significa na Prática?',
+            text: 'Define como este aventureiro encara os perigos de Valdoria, como reage sob pressão e de que maneira se relaciona com os demais membros da comitiva.'
+          },
+          {
+            title: 'Influência no Grupo & Viagem',
+            text: 'Impacta as conversas de acampamento, diálogos na estrada e a propensão a aceitar termos de contrato e barganhas.'
+          },
+          {
+            title: 'Regras & Mecânica D&D 5e',
+            text: 'Molda os traços de personalidade, ideais, vínculos e falhas que orientam as decisões de interpretação e reações morais do personagem.'
+          }
+        ]
+      };
+    }
+    _openSheetInfoDialog(data);
+  }
+
+  function _showStatDetail(statKey, statLabel, val, mod) {
+    var sk = String(statKey || '').toLowerCase();
+    var info = _STAT_DND_INFOS[sk] || {
+      name: statLabel + ' (' + sk.toUpperCase() + ')',
+      sub: 'Atributo de Personagem D&D 5e',
+      desc: 'Mede as capacidades físicas ou mentais do aventureiro segundo as regras de D&D 5e.',
+      travel: 'Influencia testes de perícia e desafios encontrados durante as viagens.',
+      rules: 'A pontuação define o modificador somado a jogadas de d20. Fórmula: (Valor - 10) / 2.'
+    };
+    _openSheetInfoDialog({
+      title: info.name + ': ' + val + ' [' + _csFmtMod(mod) + ']',
+      subtitle: info.sub,
+      tag: '✦ ATRIBUTO D&D 5E',
+      extraBadge: 'Modificador ' + _csFmtMod(mod),
+      sections: [
+        { title: 'O Que Significa na Prática?', text: info.desc },
+        { title: 'Influência no Grupo & Viagem?', text: info.travel },
+        {
+          title: 'Regras & Mecânica D&D 5e',
+          text: info.rules + '\n\n• Valor Deste Personagem: ' + val + '\n• Modificador Atual: ' + _csFmtMod(mod) + ' (somado a jogadas e testes deste atributo)'
+        }
+      ]
+    });
+  }
+
+  function _showVitalDetail(label, val, ch) {
+    var info = _VITAL_DND_INFOS[label] || {
+      name: label,
+      sub: 'Estatística de Combate e Sobrevivência',
+      desc: 'Métrica de combate fundamental para a resistência do aventureiro.',
+      travel: 'Afeta o desempenho em batalha e na marcha.',
+      rules: 'Calculado de acordo com as regras canônicas de D&D 5e.'
+    };
+    _openSheetInfoDialog({
+      title: info.name + ': ' + val,
+      subtitle: info.sub,
+      tag: '✦ VITAL DE COMBATE',
+      sections: [
+        { title: 'O Que Significa na Prática?', text: info.desc },
+        { title: 'Influência no Grupo & Viagem', text: info.travel },
+        { title: 'Regras D&D 5e (Livro do Jogador)', text: info.rules + '\n\n• Valor Registrado: ' + val }
+      ]
+    });
+  }
+
+  function _showClassDetail(clsName) {
+    var raw = String(clsName || '').trim();
+    var key = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    var data = _CLASS_DND_INFOS[key] || {
+      name: raw,
+      sub: 'Classe de Aventureiro D&D 5e',
+      desc: 'A vocação principal que define os talentos marciais ou mágicos do personagem.',
+      role: 'Determina a função em combate e o repertório de técnicas disponíveis.',
+      rules: 'Define Dados de Vida, proficiências em armas, armaduras e progressão de habilidades.'
+    };
+    _openSheetInfoDialog({
+      title: data.name + ' · Classe',
+      subtitle: data.sub,
+      tag: '✦ CLASSE D&D 5E',
+      sections: [
+        { title: 'O Que Significa na Prática?', text: data.desc },
+        { title: 'Papel no Grupo & Combate', text: data.role },
+        { title: 'Regras D&D 5e (Livro do Jogador)', text: data.rules }
+      ]
+    });
+  }
+
+  function _showSubclassDetail(subclsName, clsName) {
+    _openSheetInfoDialog({
+      title: subclsName + ' · Sub-classe',
+      subtitle: 'Especialização de ' + (clsName || 'Classe'),
+      tag: '✦ SUB-CLASSE D&D 5E',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Representa a especialização temática e doutrinária escolhida pelo aventureiro dentro de sua classe, concedendo poderes exclusivos e técnicas avançadas.'
+        },
+        {
+          title: 'Impacto Tático',
+          text: 'Diferencia o estilo de combate do personagem, aprimorando dano, cura, suporte ou defesas místicas conforme o caminho trilhado.'
+        },
+        {
+          title: 'Regras D&D 5e (Livro do Jogador)',
+          text: 'Em D&D 5e, sub-classes desbloqueiam arquétipos e habilidades de prestígio que enriquecem o repertório de combate da comitiva.'
+        }
+      ]
+    });
+  }
+
+  function _showRaceDetail(raceName) {
+    var raw = String(raceName || '').trim();
+    var key = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    var data = _RACE_DND_INFOS[key] || {
+      name: raw,
+      sub: 'Raça e Ancestralidade D&D 5e',
+      desc: 'A linhagem biológica e cultural que confere dons inatos, sentidos especiais e resistências naturais ao personagem.',
+      traits: 'Concede traços raciais específicos como Visão no Escuro, bônus de atributos ou resistências elementais.',
+      rules: 'Segundo as regras de D&D 5e, a raça fornece a base fisiológica e ancestral do aventureiro.'
+    };
+    _openSheetInfoDialog({
+      title: data.name + ' · Raça',
+      subtitle: data.sub,
+      tag: '✦ RAÇA & ANCESTRALIDADE',
+      sections: [
+        { title: 'O Que Significa na Prática?', text: data.desc },
+        { title: 'Traços Raciais Marcantes', text: data.traits },
+        { title: 'Regras D&D 5e (Livro do Jogador)', text: data.rules }
+      ]
+    });
+  }
+
+  function _showSubraceDetail(subraceName, raceName) {
+    _openSheetInfoDialog({
+      title: subraceName + ' · Sub-raça',
+      subtitle: 'Ramificação de ' + (raceName || 'Raça'),
+      tag: '✦ SUB-RAÇA D&D 5E',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Representa um ramo regional ou linhagem específica da raça, com adaptações anatômicas e culturais próprias.'
+        },
+        {
+          title: 'Diferenciais de Sobrevivência',
+          text: 'Confere bônus adicionais de atributos, perícias ou resistências únicas (como a tenacidade dos Anões da Colina ou a magia dos Altos Elfos).'
+        },
+        {
+          title: 'Regras D&D 5e (Livro do Jogador)',
+          text: 'Sub-raças complementam os traços da raça base com talentos específicos de ancestralidade.'
+        }
+      ]
+    });
+  }
+
+  function _showAbilityDetail(ab, clsName, subclsName) {
+    var aName = ab.name || 'Habilidade';
+    var aType = ab.type || 'Especial';
+    _openSheetInfoDialog({
+      title: aName,
+      subtitle: 'Habilidade de ' + aType + (clsName ? ' · ' + clsName : ''),
+      tag: '✦ HABILIDADE D&D 5E',
+      extraBadge: aType.toUpperCase(),
+      sections: [
+        {
+          title: 'O Que Faz em Batalha e na Estrada',
+          text: ab.desc || 'Habilidade marcial ou mágica especial de combate.'
+        },
+        {
+          title: 'Dicas Táticas & Uso Prático',
+          text: '• Em combates em turnos, esta técnica é ativada pelo aventureiro conforme a situação exigir (ação padrão, bônus ou reação).\n• Habilidades de suporte ou cura podem salvar aliados da inconsciência em momentos críticos.'
+        },
+        {
+          title: 'Regras D&D 5e (Livro do Jogador)',
+          text: 'Habilidade oficial integrada ao sistema de combate tático, respeitando alcance, consumo de recursos e regras do livro de regras canônico.'
+        }
+      ]
+    });
+  }
+
+  function _showPriceDetail(cost, ch) {
+    _openSheetInfoDialog({
+      title: 'Soldo de Contrato · ' + cost + ' Valdoritas',
+      subtitle: 'Custo de Ingresso na Comitiva de Aventura',
+      tag: '✦ SOLDO & CONTRATO',
+      sections: [
+        {
+          title: 'O Que Significa na Prática?',
+          text: 'Este é o valor em Valdoritas necessário para contratar este aventureiro e tê-lo ao seu lado nas estradas, masmorras e combates de Valdoria. O pagamento é realizado uma única vez no momento da assinatura do pacto.'
+        },
+        {
+          title: 'Influência no Grupo & Viagem',
+          text: '• Ao ingressar na sua comitiva (limite de até 3 aliados ativos), o aventureiro lutará ao seu lado em todas as batalhas em turnos.\n• Utilizará suas magias e técnicas para proteger o grupo e participará das decisões nos acampamentos da estrada.'
+        },
+        {
+          title: 'Regras D&D 5e & Economia',
+          text: 'O soldo base é calculado pelo nível marcial, classe e histórico do aventureiro. Você pode tentar reduzir o valor através de testes de Pechinchar (Carisma / Persuasão) ou Intimidar antes de fechar o contrato.'
+        }
+      ]
+    });
+  }
+
   function _buildCharacterSheetEl(line) {
     var npc = line.npc || {};
     var ch = line.character || {};
@@ -1416,12 +2165,19 @@
     nameEl.textContent = npc.name || 'Aventureiro';
     box.appendChild(nameEl);
 
-    /* 3. Preço atual em destaque a mais (Ordem do Usuário 2026-10). */
+    /* 3. Preço atual em destaque interativo (Ordem do Usuário 2026-10). */
     var cost = (ch.cost != null) ? ch.cost : (npc.cost != null ? npc.cost : null);
     if (cost != null && cost > 0) {
       var priceBadge = document.createElement('div');
-      priceBadge.className = 'enc-cs-price-badge';
+      priceBadge.className = 'enc-cs-price-badge enc-cs-interactive';
+      priceBadge.setAttribute('role', 'button');
+      priceBadge.setAttribute('tabindex', '0');
+      priceBadge.setAttribute('title', 'Tocar para ver detalhes sobre o soldo e contratação');
       priceBadge.innerHTML = '<span class="vi vi-coin sm"></span> Soldo Atual: <b>' + cost + ' Valdoritas</b>';
+      priceBadge.addEventListener('click', function(e) {
+        e.stopPropagation();
+        _showPriceDetail(cost, ch);
+      });
       box.appendChild(priceBadge);
     }
 
@@ -1442,37 +2198,65 @@
     subEl.textContent = subParts.join(' · ');
     box.appendChild(subEl);
 
-    /* 5. Linha de Meta-badges (Classe, Sub-classe, Raça, Sub-raça - padrão da ficha do personagem). */
+    /* 5. Linha de Meta-badges interativos (Classe, Sub-classe, Raça, Sub-raça). */
     var tagsRow = document.createElement('div');
     tagsRow.className = 'enc-cs-tags-row';
 
     if (clsLabel) {
       var bCls = document.createElement('div');
-      bCls.className = 'enc-cs-meta-badge';
+      bCls.className = 'enc-cs-meta-badge enc-cs-interactive';
+      bCls.setAttribute('role', 'button');
+      bCls.setAttribute('tabindex', '0');
+      bCls.setAttribute('title', 'Tocar para ver explicação da classe ' + clsLabel);
       bCls.innerHTML = '<span>🛡️</span> <b>' + clsLabel + '</b>';
+      bCls.addEventListener('click', function(e) {
+        e.stopPropagation();
+        _showClassDetail(clsLabel);
+      });
       tagsRow.appendChild(bCls);
     }
     if (subclsLabel) {
       var bSubcls = document.createElement('div');
-      bSubcls.className = 'enc-cs-meta-badge';
+      bSubcls.className = 'enc-cs-meta-badge enc-cs-interactive';
+      bSubcls.setAttribute('role', 'button');
+      bSubcls.setAttribute('tabindex', '0');
+      bSubcls.setAttribute('title', 'Tocar para ver explicação da sub-classe ' + subclsLabel);
       bSubcls.innerHTML = '<span>🔮</span> <span>' + subclsLabel + '</span>';
+      bSubcls.addEventListener('click', function(e) {
+        e.stopPropagation();
+        _showSubclassDetail(subclsLabel, clsLabel);
+      });
       tagsRow.appendChild(bSubcls);
     }
     if (raceLabel) {
       var bRace = document.createElement('div');
-      bRace.className = 'enc-cs-meta-badge';
+      bRace.className = 'enc-cs-meta-badge enc-cs-interactive';
+      bRace.setAttribute('role', 'button');
+      bRace.setAttribute('tabindex', '0');
+      bRace.setAttribute('title', 'Tocar para ver explicação da raça ' + raceLabel);
       bRace.innerHTML = '<span>🌿</span> <b>' + raceLabel + '</b>';
+      bRace.addEventListener('click', function(e) {
+        e.stopPropagation();
+        _showRaceDetail(raceLabel);
+      });
       tagsRow.appendChild(bRace);
     }
     if (subraceLabel) {
       var bSubrace = document.createElement('div');
-      bSubrace.className = 'enc-cs-meta-badge';
+      bSubrace.className = 'enc-cs-meta-badge enc-cs-interactive';
+      bSubrace.setAttribute('role', 'button');
+      bSubrace.setAttribute('tabindex', '0');
+      bSubrace.setAttribute('title', 'Tocar para ver explicação da sub-raça ' + subraceLabel);
       bSubrace.innerHTML = '<span>⚙️</span> <span>' + subraceLabel + '</span>';
+      bSubrace.addEventListener('click', function(e) {
+        e.stopPropagation();
+        _showSubraceDetail(subraceLabel, raceLabel);
+      });
       tagsRow.appendChild(bSubrace);
     }
     box.appendChild(tagsRow);
 
-    /* 6. Linha de vitais e combate (PV / CA / Deslocamento / Bônus Ataque / Dado de Vida). */
+    /* 6. Linha de vitais interativos (PV / CA / Deslocamento / Bônus Ataque / Dado de Vida / PM). */
     var vitals = [];
     if (ch.hp != null) vitals.push(['PV', String(ch.hp | 0)]);
     if (ch.ac != null) vitals.push(['CA', String(ch.ac | 0)]);
@@ -1487,7 +2271,14 @@
       vRow.className = 'enc-cs-vitals';
       vitals.forEach(function (v) {
         var pill = document.createElement('div');
-        pill.className = 'enc-cs-vital';
+        pill.className = 'enc-cs-vital enc-cs-interactive';
+        pill.setAttribute('role', 'button');
+        pill.setAttribute('tabindex', '0');
+        pill.setAttribute('title', 'Tocar para ver explicação de ' + v[0]);
+        pill.addEventListener('click', function(e) {
+          e.stopPropagation();
+          _showVitalDetail(v[0], v[1], ch);
+        });
         var vl = document.createElement('span');
         vl.className = 'enc-cs-vital-lbl';
         vl.textContent = v[0];
@@ -1501,7 +2292,7 @@
       box.appendChild(vRow);
     }
 
-    /* 7. Grid de 6 atributos D&D 5e (valor + modificador). */
+    /* 7. Grid de 6 atributos interativos D&D 5e (valor + modificador). */
     var stats = ch.stats || {};
     var grid = document.createElement('div');
     grid.className = 'enc-cs-grid';
@@ -1510,7 +2301,14 @@
       var v = (st.v != null) ? (st.v | 0) : 0;
       var m = (st.m != null) ? (st.m | 0) : 0;
       var cell = document.createElement('div');
-      cell.className = 'enc-cs-stat';
+      cell.className = 'enc-cs-stat enc-cs-interactive';
+      cell.setAttribute('role', 'button');
+      cell.setAttribute('tabindex', '0');
+      cell.setAttribute('title', 'Tocar para ver explicação de ' + s[1]);
+      cell.addEventListener('click', function(e) {
+        e.stopPropagation();
+        _showStatDetail(s[0], s[1], v, m);
+      });
       var lbl = document.createElement('div');
       lbl.className = 'enc-cs-stat-lbl';
       lbl.textContent = s[1];
@@ -1527,7 +2325,7 @@
     });
     box.appendChild(grid);
 
-    /* 8. Habilidades e o que fazem (Ordem do Usuário 2026-10). */
+    /* 8. Habilidades interativas e o que fazem (Ordem do Usuário 2026-10). */
     var abilities = Array.isArray(ch.abilities) ? ch.abilities : [];
     if (abilities.length > 0) {
       var abSec = document.createElement('div');
@@ -1541,7 +2339,14 @@
       abList.className = 'enc-cs-abilities-list';
       abilities.forEach(function (ab) {
         var card = document.createElement('div');
-        card.className = 'enc-cs-ability-card';
+        card.className = 'enc-cs-ability-card enc-cs-interactive';
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('title', 'Tocar para ver detalhes da habilidade ' + (ab.name || ''));
+        card.addEventListener('click', function(e) {
+          e.stopPropagation();
+          _showAbilityDetail(ab, clsLabel, subclsLabel);
+        });
 
         var head = document.createElement('div');
         head.className = 'enc-cs-ability-header';
@@ -1568,19 +2373,24 @@
       /* Fallback clássico caso abilities não venha populado */
       var spells = (ch.spells || []).filter(Boolean).map(String);
       if (spells.length) {
-        box.appendChild(_csSection('Habilidades & Magias', spells, 'enc-cs-skills'));
+        box.appendChild(_csSection('Habilidades & Magias', spells, 'enc-cs-skills', function(sp) {
+          _showAbilityDetail({ name: sp, type: 'Magia', desc: 'Magia ou truque de conjuração memorizado pelo aventureiro.' }, clsLabel, subclsLabel);
+        }));
       }
     }
 
-    /* 9. Seção Temperamento. */
+    /* 9. Seção Temperamento Interativa (Ordem do Usuário 2026-10). */
     if (ch.personality) {
-      box.appendChild(_csSection('Temperamento', [String(ch.personality)], 'enc-cs-pers'));
+      box.appendChild(_csSection('Temperamento', [String(ch.personality)], 'enc-cs-pers', function(pers) {
+        _showTemperamentDetail(pers);
+      }));
     }
 
     return box;
   }
+
   /* Seção rotulada da ficha (título dourado + chips/linha de itens, DOM-safe). */
-  function _csSection(title, items, chipCls) {
+  function _csSection(title, items, chipCls, onItemClick) {
     var sec = document.createElement('div');
     sec.className = 'enc-cs-section';
     var t = document.createElement('div');
@@ -1593,6 +2403,16 @@
       var chip = document.createElement('span');
       chip.className = 'enc-cs-chip ' + (chipCls || '');
       chip.textContent = it;
+      if (typeof onItemClick === 'function') {
+        chip.classList.add('enc-cs-interactive');
+        chip.setAttribute('role', 'button');
+        chip.setAttribute('tabindex', '0');
+        chip.setAttribute('title', 'Tocar para ver explicação detalhada de ' + it);
+        chip.addEventListener('click', function(e) {
+          e.stopPropagation();
+          onItemClick(it);
+        });
+      }
       list.appendChild(chip);
     });
     sec.appendChild(list);
@@ -2190,6 +3010,9 @@
          fallback 'Continuar' + warn pro error-reporter. */
       var _choLabel = _stripEmojis((ch.label && String(ch.label).trim()) || 'Continuar');
       if (!ch.label) console.warn('[ENC] choice sem label', ch.id || ch.cb || '');
+      if (dcBadge) {
+        _choLabel = _choLabel.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
+      }
 
       var tagText = ch.tag || (ch.badge && String(ch.badge).replace(/^\[|\]$/g, '')) || '';
       var tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
@@ -2204,6 +3027,9 @@
       }
       if (hasSpeech && !speechClean) {
         speechClean = _cleanSpeechText(ch.speech);
+      }
+      if (dcBadge && speechClean) {
+        speechClean = speechClean.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
       }
 
       if (!tagPill && ch.badge) {
@@ -2257,18 +3083,27 @@
         if (hasSpeech) {
           mainContent = tagPill + '<span class="enc-cho-speech">“' + _coinify(speechClean) + '”</span>';
           subDesc = _stripEmojis(ch.desc || ch.label || '');
+          if (dcBadge) {
+            subDesc = subDesc.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
+          }
           // Anti-repetição (Ordem do Usuário 2026-10): se a descrição for idêntica à fala,
           // usa o label da ação se diferente, ou omite a duplicação em vez de repetir o mesmo texto
           var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s]/g, '').toLowerCase();
           var _normSub = String(subDesc || '').replace(/[“”.!?,;:\s]/g, '').toLowerCase();
           if (_normSpeech && _normSpeech === _normSub) {
             var _altLabel = _stripEmojis(ch.label || '');
+            if (dcBadge) {
+              _altLabel = _altLabel.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
+            }
             var _normLabel = _altLabel.replace(/[“”.!?,;:\s]/g, '').toLowerCase();
             subDesc = (_normLabel && _normLabel !== _normSpeech) ? _altLabel : '';
           }
         } else {
           mainContent = (tagPill ? tagPill : '') + _coinify(_choLabel);
           subDesc = _stripEmojis(ch.desc || '');
+          if (dcBadge) {
+            subDesc = subDesc.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
+          }
         }
         row.innerHTML =
           '<span class="enc-cho-row-body">' +
