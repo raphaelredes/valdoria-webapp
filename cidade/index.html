@@ -70425,57 +70425,14 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   var assistOptions = tactRes.assist_options || [];
 
   var script = [
-    { type: 'narration', text: '<b>🎲 ' + sklLabel + ' — Dificuldade CD ' + dc + '</b>' },
-    { type: 'narration', text: '<b>O Que Está Sendo Escolhido:</b> ' + (ch.label || 'Realizar esta ação de diálogo.') },
-    { type: 'narration', text: '<b>Possíveis Consequências:</b> Sucesso garante a conquista do objetivo e benefícios táticos da cena. Em caso de falha, complicações, desconfiança ou desvantagens na conversa podem ocorrer.' }
+    { type: 'narration', text: 'Você avalia suas opções e recursos para o teste de ' + sklLabel + ' (CD ' + dc + ').' }
   ];
 
-  if (hasInsp) {
-    script.push({
-      type: 'narration',
-      text: '✨ <b>Inspiração de Mesa Disponível:</b> Você possui inspiração ativa e pode consumi-la para rolar com <b>Vantagem D&D 5e</b> (dois dados d20, escolhendo o maior).'
-    });
-  }
-  if (hasGuidance) {
-    script.push({
-      type: 'narration',
-      text: '🙏 <b>Magia Social — Orientação (+1d4):</b> ' + (tactRes.guidance_source ? (tactRes.guidance_source + ' pode abençoar a ação com +1d4 de bônus divinatório.') : 'Você pode conjurar o truque para adicionar +1d4 ao total.')
-    });
-  }
-  if (hasBardic) {
-    script.push({
-      type: 'narration',
-      text: '🎵 <b>Inspiração Bárdica (+1d6):</b> ' + (tactRes.bardic_source ? (tactRes.bardic_source + ' concede +1d6 aditivo em testes de habilidade.') : 'Você pode somar +1d6 de dado de bardo ao total.')
-    });
-  }
-  if (canBribe) {
-    script.push({
-      type: 'narration',
-      text: '💰 <b>Oferecer Suborno (10 Valdoritas):</b> Você pode deslizar 10 Valdoritas discretamente para obter <b>Vantagem D&D 5e</b> (DMG p. 244).'
-    });
-  }
+  var attitudeNote = '';
   if (npcAttitude === 'friendly') {
-    script.push({
-      type: 'narration',
-      text: '🤝 <b>Atitude Amigável (DMG p. 244):</b> O interlocutor nutre apreço ou boa disposição (+2 de bônus em testes de interação social).'
-    });
+    attitudeNote = '<br>🤝 Atitude Amigável: +2 de bônus social em testes de interação (DMG p. 244).';
   } else if (npcAttitude === 'hostile') {
-    script.push({
-      type: 'narration',
-      text: '😠 <b>Atitude Hostil (DMG p. 244):</b> O interlocutor desconfia profundamente de suas intenções (-5 de penalidade em testes de interação social).'
-    });
-  }
-  if (hasFriends) {
-    script.push({
-      type: 'narration',
-      text: '🎭 <b>Truque Arcano — Amizade (Vantagem):</b> Concede Vantagem imediata em testes de Carisma. <i>⚠️ Risco BG3: O alvo perceberá que foi manipulado magicamente após o término do diálogo, gerando descontentamento.</i>'
-    });
-  }
-  if (assistOptions.length > 0) {
-    script.push({
-      type: 'narration',
-      text: '👥 <b>Auxílio da Comitiva:</b> Você pode realizar a ação pessoalmente ou pedir a um companheiro especialista da comitiva para assumir o teste.'
-    });
+    attitudeNote = '<br>😠 Atitude Hostil: -5 de penalidade social em testes de interação (DMG p. 244).';
   }
 
   var choices = [];
@@ -70485,6 +70442,14 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_self_all_buffs',
       label: '✔ [Você] Rolar com Inspiração (2d20 Vantagem) + Orientação (+1d4) + Bardo (+1d6)',
+      title: 'Rolar com Todos os Bônus Disponíveis',
+      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      desc: 'Você combina todos os seus recursos ativos: Inspiração de Mesa (Vantagem 2d20), a bênção de Orientação (+1d4) e o ritmo de Inspiração Bárdica (+1d6).',
+      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>✦ Bônus aditivos: +1d4 (Orientação) e +1d6 (Inspiração Bárdica) somados ao resultado.<br>✦ Superar a CD ' + dc + ' garante o sucesso na interação.' + attitudeNote,
+      dc: dc,
+      skill: skl,
+      advantage: true,
+      requireConfirm: true,
       _tactical_options: { use_inspiration: true, use_guidance: true, use_bardic_inspiration: true }
     });
   }
@@ -70492,6 +70457,14 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_self_insp_guidance',
       label: '✔ [Você] Rolar com Inspiração (2d20 Vantagem) + Orientação (+1d4)',
+      title: 'Rolar com Inspiração e Orientação',
+      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      desc: 'Você utiliza sua Inspiração de Mesa para rolar com Vantagem combinada à bênção divinatória da Orientação (+1d4).',
+      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>✦ Bônus divinatório: +1d4 somado ao total.<br>✦ Superar a CD ' + dc + ' garante o sucesso na interação.' + attitudeNote,
+      dc: dc,
+      skill: skl,
+      advantage: true,
+      requireConfirm: true,
       _tactical_options: { use_inspiration: true, use_guidance: true }
     });
   }
@@ -70499,6 +70472,14 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_self_insp',
       label: '✔ [Você] Rolar com Inspiração de Mesa (2d20 Vantagem)',
+      title: 'Rolar com Inspiração de Mesa',
+      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      desc: 'Você consome sua Inspiração de Mesa ativa para rolar com Vantagem D&D 5e (dois dados d20, escolhendo o maior).',
+      possibleResults: '✦ Vantagem: Rola dois d20 e escolhe o maior resultado.<br>✦ Superar a CD ' + dc + ' garante o sucesso na interação.' + attitudeNote,
+      dc: dc,
+      skill: skl,
+      advantage: true,
+      requireConfirm: true,
       _tactical_options: { use_inspiration: true, use_guidance: false }
     });
   }
@@ -70506,6 +70487,13 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_self_bard_guidance',
       label: '✔ [Você] Rolar com Orientação (+1d4) + Inspiração Bárdica (+1d6)',
+      title: 'Rolar com Orientação e Bardo',
+      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      desc: 'Você soma o bônus divinatório da Orientação (+1d4) e o ritmo da Inspiração Bárdica (+1d6) ao seu teste.',
+      possibleResults: '✦ Bônus aditivos: +1d4 e +1d6 somados ao d20 contra CD ' + dc + '.' + attitudeNote,
+      dc: dc,
+      skill: skl,
+      requireConfirm: true,
       _tactical_options: { use_guidance: true, use_bardic_inspiration: true }
     });
   }
@@ -70513,6 +70501,13 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_self_bard',
       label: '✔ [Você · 🎵 Inspiração Bárdica] Rolar com +1d6 de Dado de Bardo',
+      title: 'Rolar com Inspiração Bárdica',
+      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      desc: 'Você canaliza a Inspiração Bárdica concedida por um bardo da comitiva para somar +1d6 ao seu teste de habilidade.',
+      possibleResults: '✦ Bônus aditivo: +1d6 somado ao d20 contra CD ' + dc + '.' + attitudeNote,
+      dc: dc,
+      skill: skl,
+      requireConfirm: true,
       _tactical_options: { use_bardic_inspiration: true, use_guidance: false }
     });
   }
@@ -70520,6 +70515,13 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_self_guidance',
       label: '✔ [Você] Rolar Pessoalmente com Orientação (+1d4)',
+      title: 'Rolar com Orientação Divina',
+      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      desc: 'Você conjura o truque divinatório Orientação para adicionar +1d4 ao total de sua rolagem.',
+      possibleResults: '✦ Bônus divinatório: +1d4 somado ao d20 contra CD ' + dc + '.' + attitudeNote,
+      dc: dc,
+      skill: skl,
+      requireConfirm: true,
       _tactical_options: { use_inspiration: false, use_guidance: true }
     });
   }
@@ -70527,6 +70529,15 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_self_bribe',
       label: '✔ [Você · 💰 Suborno (10 Valdoritas)] Rolar com Vantagem',
+      title: 'Oferecer Suborno (10 Valdoritas)',
+      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      desc: 'Você desliza 10 Valdoritas discretamente para obter Vantagem D&D 5e no teste de interação social (DMG p. 244).',
+      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>◆ Custo de 10 Valdoritas debitado de suas posses para confirmar.' + attitudeNote,
+      cost: 10,
+      dc: dc,
+      skill: skl,
+      advantage: true,
+      requireConfirm: true,
       _tactical_options: { use_bribe: true, use_guidance: hasGuidance, use_bardic_inspiration: hasBardic }
     });
   }
@@ -70534,6 +70545,14 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_self_friends',
       label: '✔ [Você · 🎭 Truque Amizade] Rolar com Vantagem (Alvo nota o encanto depois)',
+      title: 'Truque Arcano — Amizade',
+      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      desc: 'Você tece o truque arcano Amizade para encantar a mente do alvo, obtendo Vantagem imediata no teste de Carisma.',
+      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br><span style="color:#df7262;">⚠️ Risco BG3: O alvo perceberá que foi manipulado magicamente após o término do diálogo, gerando descontentamento e possível hostilidade.</span>' + attitudeNote,
+      dc: dc,
+      skill: skl,
+      advantage: true,
+      requireConfirm: true,
       _tactical_options: { use_friends: true, use_guidance: hasGuidance }
     });
   }
@@ -70541,12 +70560,27 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_self_thaum',
       label: '✔ [Você · ⚡ Taumaturgia] Rolar com Vantagem em Intimidação',
+      title: 'Taumaturgia Sobrenatural',
+      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      desc: 'Você manifesta maravilhas sobrenaturais menores (olhos brilhantes, voz trovejante) para obter Vantagem em Intimidação.',
+      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior resultado no teste de Intimidação.' + attitudeNote,
+      dc: dc,
+      skill: skl,
+      advantage: true,
+      requireConfirm: true,
       _tactical_options: { use_thaumaturgy: true, use_guidance: hasGuidance }
     });
   }
   choices.push({
     id: 'roll_self_normal',
     label: '✔ [Você] Rolar Teste Normal de ' + sklLabel + ' (1d20)',
+    title: 'Rolar Teste Normal',
+    subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+    desc: 'Você confia em suas próprias palavras e capacidade, realizando a rolagem padrão sem recursos adicionais.',
+    possibleResults: '✦ Rolagem padrão de 1d20 somando seu modificador de ' + sklLabel + ' contra CD ' + dc + '.<br>✦ Em caso de falha, complicações ou desvantagens na conversa podem ocorrer.' + attitudeNote,
+    dc: dc,
+    skill: skl,
+    requireConfirm: true,
     _tactical_options: { use_inspiration: false, use_guidance: false }
   });
 
@@ -70564,6 +70598,13 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     choices.push({
       id: 'roll_comp_' + cOpt.companion_id,
       label: '✔ ' + cLabel,
+      title: 'Delegar Teste para ' + cOpt.name,
+      subtitle: (cOpt.raw_class || cOpt.class) + ' · Bônus +' + cOpt.bonus + ' · CD ' + dc,
+      desc: 'Você pede a seu companheiro ' + cOpt.name + ' (' + (cOpt.raw_class || cOpt.class) + ') para assumir a frente do diálogo e realizar o teste com seu bônus de perícia (+' + cOpt.bonus + ').',
+      possibleResults: '✦ Teste realizado por ' + cOpt.name + ' com modificador +' + cOpt.bonus + ' contra CD ' + dc + '.' + (hasGuidance ? '<br>✦ Bônus de +1d4 da Orientação somado ao total.' : '') + (hasBardic ? '<br>✦ Bônus de +1d6 da Inspiração Bárdica somado ao total.' : '') + attitudeNote,
+      dc: dc,
+      skill: skl,
+      requireConfirm: true,
       _tactical_options: {
         roller: cOpt.companion_id,
         use_guidance: hasGuidance,
@@ -70579,11 +70620,39 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     _is_back: true
   });
 
-  window.vEncounter.render(
-    { npc: data.npc, script: script, choices: choices },
-    { player: p, closeable: true,
-      venue: venue, node: node, handlerType: 'city_dialogue', customState: { ctx: ctx },
-      onChoice: function(selected){
+  var encounterDialogue = {
+    npc: data.npc,
+    script: script,
+    choices: choices,
+    choicesTitle: '✦ ESCOLHER AÇÃO ✦',
+    choicesSubtitle: (data.npc && data.npc.name) || ''
+  };
+
+  var encounterOpts = {
+    player: p,
+    closeable: true,
+    venue: venue,
+    node: node,
+    handlerType: 'city_dialogue',
+    customState: { ctx: ctx },
+    onChoice: function(selected){
+      if (selected && selected._is_back) {
+        _renderCityDialogue(venue, data, p, ctx);
+        return;
+      }
+      var tact = (selected && selected._tactical_options) || null;
+      _resolveCityChoice(venue, node, ch.id, p, data.npc, ctx, tact);
+    }
+  };
+
+  window.vEncounter.render(encounterDialogue, encounterOpts);
+
+  if (window.vEncounter && typeof window.vEncounter.openChoices === 'function') {
+    window.vEncounter.openChoices(choices, {
+      title: '✦ ESCOLHER AÇÃO ✦',
+      npcName: (data.npc && data.npc.name) || '',
+      dialogue: encounterDialogue,
+      onChoice: function(selected) {
         if (selected && selected._is_back) {
           _renderCityDialogue(venue, data, p, ctx);
           return;
@@ -70591,8 +70660,8 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
         var tact = (selected && selected._tactical_options) || null;
         _resolveCityChoice(venue, node, ch.id, p, data.npc, ctx, tact);
       }
-    }
-  );
+    });
+  }
 }
 
 function _renderCityDialogue(venue, data, p, ctx){

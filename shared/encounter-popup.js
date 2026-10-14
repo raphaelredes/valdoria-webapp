@@ -1841,6 +1841,9 @@
     } else if (isDeclineQuest) {
       titleText = questTitle ? ('Recusar Missão: ' + questTitle) : 'Recusar Chamado';
       subtitleText = 'Retirada Cautelosa';
+    } else if (ch.title) {
+      titleText = ch.title;
+      subtitleText = ch.subtitle || '';
     } else if (rawLabel.indexOf(':') !== -1) {
       var parts = rawLabel.split(':');
       titleText = parts[0].trim();
@@ -1854,6 +1857,9 @@
     } else if (ch.isPrep) {
       subtitleText = 'Postura Tática de Estrada';
     }
+    if (ch.subtitle && !subtitleText) {
+      subtitleText = ch.subtitle;
+    }
 
     var statBadge = '';
     if (ch.stat && ch.isPrep) {
@@ -1864,6 +1870,8 @@
     } else if (ch.stat && ch.advantage) {
       var sName = _STAT_LABEL_PT[ch.stat] || ch.stat.toUpperCase();
       statBadge = '<span class="enc-cd-badge">✦ Vantagem em ' + sName + '</span>';
+    } else if (ch.advantage) {
+      statBadge = '<span class="enc-cd-badge" style="color:#ffd700;">✦ Vantagem</span>';
     } else if (ch.stat) {
       var sName = _STAT_LABEL_PT[ch.stat] || ch.stat.toUpperCase();
       statBadge = '<span class="enc-cd-badge">Teste de ' + sName + '</span>';
@@ -1966,6 +1974,8 @@
       : (ch.id === 'jrn_cancel') ? 'Permanecer na Cidade'
       : (ch.isCombat) ? 'Entrar em Combate'
       : (ch.speech) ? 'Dizer isto e Confirmar'
+      : (ch.confirmLabel) ? ch.confirmLabel
+      : (ch.dc || ch._tactical_options) ? 'Confirmar e Rolar'
       : 'Confirmar Escolha';
 
     card.innerHTML =
