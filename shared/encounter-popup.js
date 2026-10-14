@@ -567,6 +567,9 @@
           .then(function(res) {
             if (res && res.result_script) {
               render({ npc: (res.npc || dlg.npc), script: res.result_script, choices: (res.choices || []) }, mergedOpts);
+            } else if (res && res.script && (res.node || res.choices)) {
+              if (res.node) mergedOpts.node = res.node;
+              render({ npc: (res.npc || dlg.npc), script: res.script, choices: (res.choices || []) }, mergedOpts);
             } else {
               close();
             }

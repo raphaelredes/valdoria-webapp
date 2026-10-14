@@ -70913,11 +70913,16 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
       vToast(tmsg, ttype);
     }
     if (window.vEncounter && window.vEncounter.render) {
-      // FASE 5d (#3): hire selado do recruta → narra + refresca grupo/HUD (label sem emoji).
+      // FASE 5d (#3): hire selado do recruta ou despedida/reação → narra + choices dinâmicas ou volta.
       if (venue === 'recruta') {
+        var _recChoices = (data.choices && data.choices.length) ? data.choices : [{ id: 'done', label: 'Voltar' }];
         window.vEncounter.render(
-          { npc: data.npc || npc || { name: 'Aventureiro' }, script: data.result_script, choices: [{ id: 'done', label: 'Voltar' }] },
-          { player: p, onChoice: function(){
+          { npc: data.npc || npc || { name: 'Aventureiro' }, script: data.result_script, choices: _recChoices },
+          { player: p, onChoice: function(ch){
+              if (ch && ch.node) {
+                _resolveCityChoice('recruta', ch.node, ch.id, p, data.npc, { npcId: (ctx && ctx.npcId) || (data.npc && (data.npc.id || data.npc.npc_id)) });
+                return;
+              }
               try { window.vEncounter.close(); } catch(_){}
               if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
               if (typeof refreshHud === 'function') refreshHud();
