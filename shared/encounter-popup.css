@@ -1460,6 +1460,68 @@ body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
   margin-bottom: 2px;
 }
 
+/* Deliberação Cooperativa da Comitiva (Multiplayer D&D 5e / BG3) */
+.enc-cho-party-votes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+  align-items: center;
+}
+.enc-cho-voter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(35, 26, 17, 0.9);
+  border: 1px solid rgba(212, 168, 80, 0.55);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  font-family: 'Cinzel', serif;
+  font-size: calc(10px * var(--v-font-scale, 1));
+  color: #eeddbb;
+  letter-spacing: 0.3px;
+  animation: encVoterFadeIn 0.25s ease-out;
+}
+.enc-cho-voter-ico {
+  font-size: 11px;
+  line-height: 1;
+}
+.enc-cho-voter-name {
+  font-weight: 600;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.enc-delib-banner {
+  margin: 0 0 10px 0;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, rgba(45, 32, 18, 0.92), rgba(28, 20, 12, 0.96));
+  border: 1px solid rgba(212, 168, 80, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  font-family: 'Cinzel', serif;
+  text-align: center;
+}
+.enc-delib-banner-msg {
+  font-size: calc(11px * var(--v-font-scale, 1));
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 0.5px;
+}
+.enc-delib-micro-expr {
+  margin-top: 4px;
+  font-family: 'Marcellus', 'Georgia', serif;
+  font-size: calc(11px * var(--v-font-scale, 1));
+  font-style: italic;
+  color: #d8c8af;
+  line-height: 1.35;
+}
+@keyframes encVoterFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
 
 .enc-cho-row-side {
   flex-shrink: 0;

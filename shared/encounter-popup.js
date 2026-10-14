@@ -3493,6 +3493,24 @@
       var row = document.createElement('button');
       row.className = 'enc-cho-row' + (isCompact ? ' enc-cho-row--compact' : '');
       row.style.setProperty('--idx', idx);
+      var choiceKey = ch.id || ch.cb || ('choice_' + idx);
+      row.setAttribute('data-choice-id', choiceKey);
+
+      var partyVotesBadge = '';
+      var pVotes = ch.votes || ch.partyVotes || [];
+      if (Array.isArray(pVotes) && pVotes.length > 0) {
+        var voterPills = pVotes.map(function(v) {
+          var vName = _stripEmojis(v.name || 'Companheiro');
+          var vIco = v.icon || '👤';
+          var vArch = v.archetype ? ' (' + v.archetype + ')' : '';
+          return '<span class="enc-cho-voter-pill" title="' + vName + vArch + '">' +
+                   '<span class="enc-cho-voter-ico">' + vIco + '</span>' +
+                   '<span class="enc-cho-voter-name">' + vName + '</span>' +
+                 '</span>';
+        }).join('');
+        partyVotesBadge = '<div class="enc-cho-party-votes">' + voterPills + '</div>';
+      }
+
       var dcBadge = '';
       if (ch.dc && ch.skill) {
         /* sessão #88: "CD" (convenção PT-BR do projeto, não "DC") + tradução
@@ -3606,6 +3624,7 @@
             '<span class="enc-cho-row-label">' + _coinify(titleText) + '</span>' +
             '<span class="enc-cho-row-sub">' + (subText ? subText + statHint : '') + '</span>' +
             (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
+            (partyVotesBadge ? partyVotesBadge : '') +
           '</span>' +
           '<span class="enc-cho-info-btn" role="button" tabindex="0" title="Ver detalhes desta opção" aria-label="Ver detalhes" style="display:none;" aria-hidden="true">ℹ</span>' +
           '<span class="enc-cho-row-chev">›</span>';
@@ -3651,6 +3670,7 @@
             '<span class="enc-cho-row-label">' + mainContent + '</span>' +
             (subDesc ? '<span class="enc-cho-row-desc">' + subDesc + '</span>' : '') +
             (dcBadge ? '<span class="enc-cho-row-meta">' + dcBadge + '</span>' : '') +
+            (partyVotesBadge ? partyVotesBadge : '') +
           '</span>' +
           '<span class="enc-cho-row-chev">›</span>';
       }
@@ -4849,6 +4869,49 @@
     return _isOverlayOpen(ov);
   }
 
+  function updatePartyVotes(tallyMap) {
+    if (!tallyMap) return;
+    var overlay = document.getElementById(OVERLAY_ID);
+    if (!overlay) return;
+    var rows = overlay.querySelectorAll('.enc-cho-row');
+    rows.forEach(function(row) {
+      var cid = row.getAttribute('data-choice-id');
+      if (!cid) return;
+      var existing = row.querySelector('.enc-cho-party-votes');
+      if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+      var voters = tallyMap[cid];
+      if (Array.isArray(voters) && voters.length > 0) {
+        var container = document.createElement('div');
+        container.className = 'enc-cho-party-votes';
+        container.innerHTML = voters.map(function(v) {
+          var vName = _stripEmojis(v.name || 'Companheiro');
+          var vIco = v.icon || '👤';
+          var vArch = v.archetype ? ' (' + v.archetype + ')' : '';
+          return '<span class="enc-cho-voter-pill" title="' + vName + vArch + '">' +
+                   '<span class="enc-cho-voter-ico">' + vIco + '</span>' +
+                   '<span class="enc-cho-voter-name">' + vName + '</span>' +
+                 '</span>';
+        }).join('');
+        var body = row.querySelector('.enc-cho-row-body');
+        if (body) body.appendChild(container);
+      }
+    });
+  }
+
+  function showDeliberationBanner(msg, microExpr) {
+    var overlay = document.getElementById(OVERLAY_ID);
+    if (!overlay) return;
+    var existing = overlay.querySelector('.enc-delib-banner');
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+    var banner = document.createElement('div');
+    banner.className = 'enc-delib-banner';
+    banner.innerHTML =
+      '<div class="enc-delib-banner-msg">' + _stripEmojis(msg || 'Deliberação da Comitiva em andamento...') + '</div>' +
+      (microExpr ? '<div class="enc-delib-micro-expr">' + _stripEmojis(microExpr) + '</div>' : '');
+    var sub = overlay.querySelector('.enc-cho-sub') || overlay.querySelector('.enc-card');
+    if (sub) sub.insertBefore(banner, sub.firstChild);
+  }
+
   // === Public API ===========================================================
   window.vEncounter = {
     render: render,
@@ -4862,6 +4925,9 @@
     isChoicesOpen: isChoicesOpen,
     openChoiceDetail: _openChoiceDetailDialog,
     closeChoiceDetail: _closeChoiceDetailDialog,
+    /* Deliberação Narrativa Cooperativa D&D 5e / BG3 */
+    updatePartyVotes: updatePartyVotes,
+    showDeliberationBanner: showDeliberationBanner,
     /* A1.2 (auditoria #90): sanitizer de diálogo CANÔNICO. Whitelist
        i/em/b/strong/br/u/s/code (sem atributos), case-insensitive, NÃO escapa
        & (entidades &mdash; são legítimas). cidade/exploração delegam a ele. */
