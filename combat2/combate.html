@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-15T22:32:39Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-15T22:45:53Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -24220,6 +24220,63 @@ async function castSummonPack(s, p, sk) {
     await _maybeAdvanceOrStay();
 }
 
+/* V1.14 (2026-10-15) — Animar Mortos (PHB p.212 — Animate Dead).
+   Mago e Clérigo nv 5+. Ergue um Esqueleto Servo com arco curto.
+   SEM CONCENTRAÇÃO: coexiste com magias ativas de concentração. */
+async function castSummonUndead(s, p, sk) {
+    var us = sk.undeadSpec || {};
+    var dur = (sk.durTurns | 0) || 100;
+    var summonKind = us.id || 'animate_dead_skeleton';
+    if (p.res && p.res.value < (sk.cost | 0)) {
+        showMessage('Mana insuficiente.');
+        return;
+    }
+    if (sk.minLevel && (p.lvl | 0) < sk.minLevel) {
+        return;
+    }
+    p.res.value = Math.max(0, p.res.value - (sk.cost | 0));
+    p.actionSpent = true;
+    if (typeof simLogPushTurnHeader === 'function') simLogPushTurnHeader(s, p);
+    s.log.push(p.n + ' conjura ' + (sk.n || 'Animar Mortos') + ' (PHB p.212) — ergue um ' + (us.name || 'Esqueleto Servo') + ' com arco curto (sem concentração)!');
+    var pIdx = s.order.indexOf(p);
+    var insertPos = pIdx + 1;
+    var summon = {
+        t: 'a', n: us.name || 'Esqueleto Servo', ico: us.ico || '💀',
+        hp: us.hp || 13, mhp: us.mhp || us.hp || 13, ac: us.ac || 13,
+        atk: us.atk || 4, die: us.die || 6,
+        dmgMod: (us.damageSpec && us.damageSpec.flat) || 2,
+        dex: us.dex || 14, wis: us.wis || 8, con: us.con || 15,
+        str: us.str || 10, int: us.int || 6, cha: us.cha || 5,
+        attr: 'DEX',
+        multiAttack: us.multiAttack || 1,
+        damageSpec: us.damageSpec || { n: 1, d: 6, flat: 2 },
+        dmgType: us.dmgType || 'piercing',
+        ranged: true,
+        vulnerabilities: us.vulnerabilities || ['bludgeoning'],
+        immunities: us.immunities || ['poison'],
+        alive: true, dying: false, stable: false, isDead: false,
+        deathSaves: { s: 0, f: 0 }, se: [],
+        init: (p.init | 0) - 0.2,
+        initRevealed: true, initRolling: false,
+        species: us.name || 'Esqueleto Servo', sugLvl: 1,
+        it: { ic: us.ico || '💀', lb: summonKind },
+        summonedBy: pIdx,
+        summonKind: summonKind,
+        iconHeraldic: us.iconHeraldic || 'ic-skeleton',
+        focusTarget: null,
+        noDeathSaves: true,
+        durTurns: dur,
+        conjureCasterIdx: pIdx,
+        conjureCaster: p,
+        conjureSpellId: 'animate_dead'
+    };
+    s.order.splice(insertPos, 0, summon);
+    if (typeof _actionTaken !== 'undefined') _actionTaken = false;
+    _actionSheetOpen = false;
+    render(s);
+    await _maybeAdvanceOrStay();
+}
+
 /* PHB p.204 — dissipa TODAS as criaturas conjuradas por um `conjureSpellId` de um
    conjurador específico (match por referência ESTÁVEL `conjureCaster`, não índice).
    Chamado quando a concentração do conjurador quebra (dano/TR CON) ou ao conjurar
@@ -30542,6 +30599,11 @@ async function useSkill(skill, opts) {
        Spawna N cópias do wolfSpec em s.order, cada uma com summonKind/durTurns. */
     if (skill.kind === 'summon_pack') {
         castSummonPack(currentState, p, skill);
+        return;
+    }
+    /* V1.14 (2026-10-15) — Animar Mortos (PHB p.212 — Animate Dead). */
+    if (skill.kind === 'summon_undead') {
+        castSummonUndead(currentState, p, skill);
         return;
     }
     /* V1.7 Sprint-9+10 (2026-04-21 closeout) — PHB Action Surge / Reckless Attack:
@@ -40404,7 +40466,7 @@ async function __combatAnimateOneEvent(ev) {
         await new Promise(function (r) { setTimeout(r, 600); });
         return;
     }
-    if (kind === 'summon_cast' || kind === 'summon_pack_cast'
+    if (kind === 'summon_cast' || kind === 'summon_pack_cast' || kind === 'summon_undead_cast'
             || kind === 'summon_attack' || kind === 'summon_expire') {
         /* [C-REM:SUMMON] Summon events: flash caster + render (com o novo order
            do server contendo os summons spawnados). Fase 3 fará VFX dedicado. */

@@ -516,6 +516,28 @@ var CHAR_CLASSES = [
                     scaleByCasterLevel: { breakpoints: [[11, 2], [13, 4], [15, 6], [17, 8]] } },
                 dmgType: 'force',
                 concentration: true
+            } },
+        /* V1.14 (2026-10-15) — Animar Mortos (PHB p.212 — Animate Dead).
+           Mago/Clérigo nv 5+. Ergue um Esqueleto Servo (sem concentração). */
+        { n: 'Animar Mortos', ico: '💀', cost: 5, kind: 'summon_undead', minLevel: 5, concentration: false,
+            desc: 'Ergue um servo esqueleto com arco curto que luta como aliado da comitiva (sem concentração).',
+            helpDnd5e: 'Animar Mortos / Animate Dead (PHB p.212 — Mago e Clérigo nv 5): 1 Ação; alcance 3m; SEM CONCENTRAÇÃO (dura 24 horas). Infunde restos mortais com energia necrótica, erguendo um Esqueleto servo que obedece aos seus comandos.\nArena: invoca 1 Esqueleto Arqueiro (HP 13, CA 13, atk +4 à distância 1d6+2 perfurante). Por não requerer concentração, coexiste com magias de concentração ativas.',
+            undeadSpec: {
+                id: 'animate_dead_skeleton',
+                name: 'Esqueleto Servo',
+                ico: '💀',
+                iconHeraldic: 'ic-skeleton',
+                hp: 13, mhp: 13, ac: 13,
+                dex: 14, wis: 8, con: 15, str: 10, int: 6, cha: 5,
+                atk: 4,
+                damageSpec: { n: 1, d: 6, flat: 2 },
+                dmgType: 'piercing',
+                ranged: true,
+                die: 6,
+                multiAttack: 1,
+                vulnerabilities: ['bludgeoning'],
+                immunities: ['poison'],
+                conditionImmunities: ['poisoned', 'exhaustion']
             } }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '', dmgMod: 3, attr: 'DEX',
@@ -737,7 +759,29 @@ var CHAR_CLASSES = [
             damageSpec: { n: 0, d: 0 },
             desc: 'Canalizar Divindade (PHB p.58): mortos-vivos fazem TR de SAB ou são Expulsos (fogem e perdem o turno). 1×/combate.',
             helpDnd5e: 'Expulsar Mortos-Vivos / Turn Undead (PHB p.58-59 — Canalizar Divindade, Clérigo nv 2): cada morto-vivo que vê/ouve o Clérigo faz um TR de Sabedoria (CD de magia). Em falha, é "expulso" por 1 min ou até sofrer dano — gasta os turnos fugindo e não pode agir.\nArena (sem grelha): TR SAB vs CD; em falha, Expulso (skipTurn 3 rodadas, termina ao sofrer dano). Só afeta mortos-vivos (auto-alveja todos os undead vivos). 1×/combate; sem mortos-vivos, não gasta o uso.',
-            afterAttackEnemyDebuff: { id: 'turned', turns: 3, n: 'Expulso', ico: '»', skipTurn: true, wakeOnDamage: true, dndCondition: 'Expulso (Turn Undead — PHB p.58)' } }
+            afterAttackEnemyDebuff: { id: 'turned', turns: 3, n: 'Expulso', ico: '»', skipTurn: true, wakeOnDamage: true, dndCondition: 'Expulso (Turn Undead — PHB p.58)' } },
+        /* V1.14 (2026-10-15) — Animar Mortos (PHB p.212 — Animate Dead).
+           Mago/Clérigo nv 5+. Ergue um Esqueleto Servo (sem concentração). */
+        { n: 'Animar Mortos', ico: '💀', cost: 5, kind: 'summon_undead', minLevel: 5, concentration: false,
+            desc: 'Ergue um servo esqueleto com arco curto que luta como aliado da comitiva (sem concentração).',
+            helpDnd5e: 'Animar Mortos / Animate Dead (PHB p.212 — Mago e Clérigo nv 5): 1 Ação; alcance 3m; SEM CONCENTRAÇÃO (dura 24 horas). Infunde restos mortais com energia necrótica, erguendo um Esqueleto servo que obedece aos seus comandos.\nArena: invoca 1 Esqueleto Arqueiro (HP 13, CA 13, atk +4 à distância 1d6+2 perfurante). Por não requerer concentração, coexiste com magias de concentração ativas.',
+            undeadSpec: {
+                id: 'animate_dead_skeleton',
+                name: 'Esqueleto Servo',
+                ico: '💀',
+                iconHeraldic: 'ic-skeleton',
+                hp: 13, mhp: 13, ac: 13,
+                dex: 14, wis: 8, con: 15, str: 10, int: 6, cha: 5,
+                atk: 4,
+                damageSpec: { n: 1, d: 6, flat: 2 },
+                dmgType: 'piercing',
+                ranged: true,
+                die: 6,
+                multiAttack: 1,
+                vulnerabilities: ['bludgeoning'],
+                immunities: ['poison'],
+                conditionImmunities: ['poisoned', 'exhaustion']
+            } }
       ] },
     { cls: 'Paladino', hp: [26, 38], ac: [16, 18], atk: [5, 6], die: 8, dex: [8, 12], ico: '', dmgMod: 2, attr: 'STR',
       /* D&D 5e PHB p.84: Paladino é meio-conjurador — Smite Divino e magias
