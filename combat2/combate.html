@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-15T18:05:47Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-15T19:30:16Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -16485,7 +16485,7 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
     if (_exhSeed > 0) {
         _seSeed.push({ id: 'exhaustion', kind: 'debuff', ico: '',
             n: 'Exaustão (nível ' + _exhSeed + ')',
-            dndCondition: 'Exaustão ' + _exhSeed + ' (PHB p.291)',
+            dndCondition: 'Exaustão (nível ' + _exhSeed + ')',
             exhaustionLevel: _exhSeed, turnsLeft: null });
     }
     var _ibSeed = (!useRandom && spec.itemBuffs && typeof spec.itemBuffs === 'object') ? spec.itemBuffs : null;
@@ -17244,7 +17244,7 @@ function newCombatFromSetup(cfg) {
     /* 2026-04-27: anuncia Wet status no log inicial. Player veio de água na
        exploração — combate inicia com vulnerabilidade frio + resistência fogo. */
     if (p && p.wetTurns > 0) {
-        _state.log.push(p.n + ' está MOLHADO (' + p.wetTurns + ' turnos): vulnerabilidade a frio + resistência a fogo (DMG p.110).');
+        _state.log.push(p.n + ' está MOLHADO (' + p.wetTurns + ' turnos): vulnerabilidade a frio + resistência a fogo.');
     }
     return _state;
 }
@@ -17761,7 +17761,7 @@ async function simResolveEndTurnConditions(s, unitIdx) {
                 }
                 if (_afEnd) {
                     s.log.push(name + ' — TR ' + (ab === 'str' ? 'FOR' : 'DES') + ' vs ' +
-                        (st.n || st.id || 'efeito') + ' AUTO-FALHA (PHB App.A — ' +
+                        (st.n || st.id || 'efeito') + ' AUTO-FALHA (incapacitado — ' +
                         'Paralisado/Atordoado/Inconsciente/Petrificado) → efeito mantém.');
                     var _afTl = st.turnsLeft;
                     if (_afTl == null) { out.push(st); continue; }
@@ -17780,7 +17780,7 @@ async function simResolveEndTurnConditions(s, unitIdx) {
             if (_rsAdv.adv) {
                 var _rsD2 = _simLuckyD20(_simIsLucky(u));
                 if (_rsD2 > d20) d20 = _rsD2;
-                s.log.push(name + ' — ' + _rsAdv.label + ': vantagem no TR (PHB).');
+                s.log.push(name + ' — ' + _rsAdv.label + ': vantagem no teste de resistência.');
             }
             var smod = simSaveMod(u, ab);
             var total = d20 + smod;
@@ -18305,7 +18305,7 @@ function _simBreathWeaponSkill(ancestry, lvl) {
         save: { ability: saveAb },
         damageSpec: { n: n, d: 6, flat: 0 },
         combatOnceId: 'breath_weapon', isRacial: true,
-        desc: 'Sopro de ' + (PT[ancestry] || ancestry) + ' (' + n + 'd6, TR p/ metade). 1×/combate (PHB p.34).',
+        desc: 'Sopro de ' + (PT[ancestry] || ancestry) + ' (' + n + 'd6, TR p/ metade). 1× por combate.',
         helpDnd5e: 'Sopro Dracônico (PHB p.34 — traço racial do Draconato): exala energia em área; TR (CD 8+CON+prof), metade em sucesso. Escala 2d6/3d6/4d6/5d6 (nv 1/6/11/16). 1×/descanso — na arena, 1×/combate.'
     };
 }
@@ -18319,7 +18319,7 @@ function _simTieflingRebukeSkill() {
         dmgType: 'fire', reactionOnly: true,
         damageSpec: { n: 3, d: 10, flat: 0 },  /* REVIEW [0]: 2º nível = 3d10 (PHB p.43) */
         combatOnceId: 'hellish_rebuke_racial', isRacial: true,
-        desc: 'Reação: 3d10 fogo em quem te feriu (TR DES p/ metade). 1×/combate (PHB p.43).',
+        desc: 'Reação: 3d10 fogo em quem te feriu (TR DES p/ metade). 1× por combate.',
         helpDnd5e: 'Repreensão Infernal (PHB p.43 — Legado Infernal do Tiefling, nv 3): REAÇÃO ao receber dano; agressor faz TR de DES ou sofre 3d10 de fogo (metade em sucesso) — conjurada como magia de 2º NÍVEL.'
     };
 }
@@ -18342,7 +18342,7 @@ function _simSkillFaerieFire(dc) {
             dndCondition: 'Delineado (Fogo Feérico — atacado com vantagem)'
         },
         combatOnceId: 'drow_faerie_fire', isRacial: true,
-        desc: 'Delineia o alvo em luz (TR DES): atacantes têm vantagem contra ele. Concentração. 1×/combate (PHB p.24).',
+        desc: 'Delineia o alvo em luz (TR DES): atacantes têm vantagem contra ele. Concentração. 1× por combate.',
         helpDnd5e: 'Fogo Feérico / Faerie Fire (PHB p.239 — Magia Drow nv3): o alvo faz TR de DES ou fica DELINEADO por luz — todo ataque contra ele tem vantagem e ele não pode se beneficiar de invisibilidade. Concentração. 1×/dia — na arena, 1×/combate.'
     };
 }
@@ -18354,7 +18354,7 @@ function _simSkillDarkness() {
             dndCondition: 'Escuridão (atacantes não te enxergam — desvantagem)'
         },
         combatOnceId: 'darkness_racial', isRacial: true,
-        desc: 'Envolve-se em escuridão mágica: atacantes não te enxergam (desvantagem). Concentração. 1×/combate (PHB p.230).',
+        desc: 'Envolve-se em escuridão mágica: atacantes não te enxergam (desvantagem). Concentração. 1× por combate.',
         helpDnd5e: 'Escuridão / Darkness (PHB p.230 — Magia Drow nv5 / Legado de Asmodeus nv5): cria escuridão mágica que bloqueia até visão no escuro. Arena: atacantes ficam com DESVANTAGEM (não te enxergam). Concentração. 1×/dia — na arena, 1×/combate.'
     };
 }
@@ -18365,7 +18365,7 @@ function _simSkillBurningHands(dc) {
         save: { ability: 'dex', dc: dc },
         damageSpec: { n: 3, d: 6, flat: 0 },
         combatOnceId: 'mephistopheles_burning_hands', isRacial: true,
-        desc: 'Cone de fogo: 3d6 em área (TR DES p/ metade). 1×/combate (PHB p.220).',
+        desc: 'Cone de fogo: 3d6 em área (TR DES p/ metade). 1× por combate.',
         helpDnd5e: 'Mãos Flamejantes / Burning Hands (PHB p.220 — Legado de Mephistopheles nv3): cone de fogo, 3d6 a cada alvo; TR DES p/ metade. Conjurada como magia de 1º nível. 1×/dia — na arena, 1×/combate.'
     };
 }
@@ -18378,10 +18378,10 @@ function _simSkillRayOfSickness(dc) {
         afterAttackEnemyDebuff: {
             id: 'ray_sickness_poisoned', turns: 1, n: 'Envenenado', ico: '',
             atkDisadvantage: true,
-            dndCondition: 'Envenenado (PHB App.A — Raio Doentio)'
+            dndCondition: 'Envenenado'
         },
         combatOnceId: 'baalzebul_ray_sickness', isRacial: true,
-        desc: 'Raio venenoso: 2d8 + alvo Envenenado (TR CON). 1×/combate (PHB p.271).',
+        desc: 'Raio venenoso: 2d8 + alvo Envenenado (TR CON). 1× por combate.',
         helpDnd5e: 'Raio Doentio / Ray of Sickness (PHB p.271 — Legado de Baalzebul nv3): ataque de magia à distância; 2d8 veneno e o alvo faz TR de CON ou fica ENVENENADO (desvantagem em ataques). 1×/dia — na arena, 1×/combate.'
     };
 }
@@ -18391,10 +18391,10 @@ function _simSkillInvisibility() {
         buffSim: {
             id: 'invisibility', turns: 3, atkAdvantage: true,
             attackerDisadvantage: true, endOnAttack: true, concentration: true,
-            dndCondition: 'Invisível (PHB App.A — Invisibilidade)'
+            dndCondition: 'Invisível'
         },
         combatOnceId: 'dispater_invisibility', isRacial: true,
-        desc: 'Fica invisível: seus ataques com vantagem, atacantes com desvantagem (quebra ao atacar). 1×/combate (PHB p.255).',
+        desc: 'Fica invisível: seus ataques com vantagem, atacantes com desvantagem (quebra ao atacar). 1× por combate.',
         helpDnd5e: 'Invisibilidade / Invisibility (PHB p.255 — Legado de Dispater nv5): você fica invisível; seus ataques têm vantagem e atacantes têm desvantagem. Quebra ao atacar/conjurar. Concentração. 1×/dia — na arena, 1×/combate.'
     };
 }
@@ -19093,7 +19093,7 @@ function simDropConcentration(s, caster, logReason) {
                 var lkBefore = (lkT.se || []).length;
                 lkT.se = (lkT.se || []).filter(function (y) { return !y || y.id !== x.linkedConditionId; });
                 if ((lkT.se || []).length < lkBefore && s.log) {
-                    s.log.push((lkT.n || '?') + ' se liberta — a concentração de ' + (caster.n || '?') + ' foi encerrada (PHB p.203).');
+                    s.log.push((lkT.n || '?') + ' se liberta — a concentração de ' + (caster.n || '?') + ' foi encerrada.');
                 }
             }
             return false;
@@ -19102,7 +19102,7 @@ function simDropConcentration(s, caster, logReason) {
     });
     if (lost.length && s && s.log) {
         if (logReason) s.log.push(logReason);
-        else s.log.push((caster.n || '?') + ' encerra concentração — ' + lost.join(', ') + ' (PHB p.203).');
+        else s.log.push((caster.n || '?') + ' encerra concentração — ' + lost.join(', ') + '.');
     }
     return lost;
 }
@@ -19298,12 +19298,12 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             var _origCold = damageApplied;
             damageApplied = damageApplied * 2;
             newHp = oldHp - damageApplied;
-            if (s && s.log) s.log.push(target.n + ' está MOLHADO — vulnerabilidade a frio (DMG p.110): ' + _origCold + ' → ' + damageApplied + ' dano.');
+            if (s && s.log) s.log.push(target.n + ' está MOLHADO — vulnerabilidade a frio: ' + _origCold + ' → ' + damageApplied + ' dano.');
         } else if (_wdt === 'fire') {
             var _origFire = damageApplied;
             damageApplied = Math.floor(damageApplied / 2);
             newHp = oldHp - damageApplied;
-            if (s && s.log) s.log.push(target.n + ' está MOLHADO — resistência a fogo (DMG p.110): ' + _origFire + ' → ' + damageApplied + ' dano.');
+            if (s && s.log) s.log.push(target.n + ' está MOLHADO — resistência a fogo: ' + _origFire + ' → ' + damageApplied + ' dano.');
         }
     }
     // C1.6 #90: resistência racial tipada (Tiefling fogo, Anão/Stout veneno,
@@ -19327,7 +19327,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
         if (target.immunities && target.immunities.some(function (im) { return String(im).toLowerCase().trim() === _canonDt; })) {
             damageApplied = 0;
             newHp = oldHp;
-            if (s && s.log) s.log.push(target.n + ' é IMUNE a ' + _canonDt + ' (D&D 5e): 0 dano sofrido.');
+            if (s && s.log) s.log.push(target.n + ' é IMUNE a ' + _canonDt + ': 0 dano sofrido.');
             try {
                 var _imUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
                 var _imEl = _imUid ? document.querySelector('[data-unit-id="' + _imUid + '"]') : null;
@@ -19337,7 +19337,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             var _origVul = damageApplied;
             damageApplied = damageApplied * 2;
             newHp = oldHp - damageApplied;
-            if (s && s.log) s.log.push(target.n + ' tem VULNERABILIDADE a ' + _canonDt + ' (D&D 5e): ' + _origVul + ' → ' + damageApplied + ' dano.');
+            if (s && s.log) s.log.push(target.n + ' tem VULNERABILIDADE a ' + _canonDt + ': ' + _origVul + ' → ' + damageApplied + ' dano.');
             try {
                 var _vulUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
                 var _vulEl = _vulUid ? document.querySelector('[data-unit-id="' + _vulUid + '"]') : null;
@@ -19347,7 +19347,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             var _origRes = damageApplied;
             damageApplied = Math.max(1, Math.floor(damageApplied / 2));
             newHp = oldHp - damageApplied;
-            if (s && s.log) s.log.push(target.n + ' tem RESISTÊNCIA a ' + _canonDt + ' (D&D 5e): ' + _origRes + ' → ' + damageApplied + ' dano.');
+            if (s && s.log) s.log.push(target.n + ' tem RESISTÊNCIA a ' + _canonDt + ': ' + _origRes + ' → ' + damageApplied + ' dano.');
             try {
                 var _resUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
                 var _resEl = _resUid ? document.querySelector('[data-unit-id="' + _resUid + '"]') : null;
@@ -19368,12 +19368,12 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             var _origDmg = damageApplied;
             newHp = oldHp - reduced;
             damageApplied = reduced;
-            if (s && s.log) s.log.push(target.n + ' usa Reflexos Evasivos (PHB p.96): ' + _origDmg + ' → ' + reduced + ' dano (−' + diff + ' evasão).');
+            if (s && s.log) s.log.push(target.n + ' usa Reflexos Evasivos: ' + _origDmg + ' → ' + reduced + ' dano (−' + diff + ' evasão).');
         }
     }
-    /* V1.7 Sprint-8 (2026-04-21 closeout POLISH) — PHB p.276 Sleep:
+    /* V1.7 Sprint-8 (2026-04-21 closeout POLISH) — Sleep:
        "The effect also ends if the creature takes damage."
-       Remove buffs com `wakeOnDamage:true` ao sofrer dano. Emite log PHB. */
+       Remove buffs com `wakeOnDamage:true` ao sofrer dano. */
     if (damageApplied > 0 && target && target.se && target.se.length) {
         var _waking = target.se.filter(function (st) {
             return st && st.wakeOnDamage && (st.turnsLeft == null || st.turnsLeft > 0);
@@ -19382,7 +19382,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             target.se = target.se.filter(function (st) { return !st.wakeOnDamage; });
             _waking.forEach(function (st) {
                 var condN = st.n || st.condName || st.id || 'efeito';
-                if (s && s.log) s.log.push(target.n + ' desperta de ' + condN + ' ao sofrer dano (PHB p.276).');
+                if (s && s.log) s.log.push(target.n + ' desperta de ' + condN + ' ao sofrer dano.');
             });
         }
     }
@@ -19406,7 +19406,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
         newHp = oldHp - damageApplied;
         if (s && s.log) s.log.push(target.n + ' absorve ' + absorbed + ' via PV temporários (restam ' + target.tempHp + ').');
     }
-    /* FASE 8 / Forma Selvagem (PHB p.66): se a forma bestial cairia a 0, o Druida
+    /* FASE 8 / Forma Selvagem: se a forma bestial cairia a 0, o Druida
        REVERTE e o EXCESSO de dano carrega pro PV normal ("excess damage carries over").
        Se sobrar PV normal, sobrevive na forma original; senão segue pro fluxo de queda. */
     if (newHp <= 0 && target && target.wildShape && target._wsBackup
@@ -19430,7 +19430,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
         if ((target.hp | 0) > 0) { target.alive = true; clearDownedMeta(target); return; }
         newHp = 0;  // reverteu mas o excesso derrubou o PV normal a 0 → segue p/ queda
     }
-    /* C1.2 #90: Resistência Implacável (Meio-Orc, PHB p.41) — ao cair a 0 PV (não
+    /* C1.2 #90: Resistência Implacável (Meio-Orc) — ao cair a 0 PV (não
        por dano massivo), fica com 1 PV. 1×/combate (unit recriado a cada combate,
        relentlessUsed começa falso). Espelha o trait 'Implacável' do Lobo. */
     if (newHp <= 0 && target && target.t === 'p' && target.raceKey === 'halforc'
@@ -19442,7 +19442,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             target.isDead = false; target.stable = false;
             target.deathSaves = { s: 0, f: 0 };
             if (typeof clearDownedMeta === 'function') clearDownedMeta(target);
-            if (s && s.log) s.log.push(target.n + ' resiste com Resistência Implacável (PHB p.41) — fica com 1 PV!');
+            if (s && s.log) s.log.push(target.n + ' resiste com Resistência Implacável — mantém 1 PV!');
             try {
                 var _relEl = document.querySelector('[data-unit-id="player"]');
                 if (_relEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_relEl, 'IMPLACÁVEL!', 'boss');
@@ -19606,7 +19606,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             n: 'Prostrado (Inconsciente)',
             ico: '🔻',
             prone: true,
-            dndCondition: 'Prostrado (Inconsciente a 0 PV — PHB p.197)',
+            dndCondition: 'Prostrado (Inconsciente a 0 PV)',
             turnsLeft: null,
         });
         s.log.push(target.n + ' cai a 0 PV — inconsciente e prostrado (teste de morte no turno).');
@@ -19651,7 +19651,7 @@ function applyDeathSaveFromRoll(s, u, r) {
         u.hp = 1;
         u.alive = true;
         clearDownedMeta(u);
-        s.log.push(u.n + ' — NAT 20 no teste de morte (PHB p.197): 1 PV e volta a agir.');
+        s.log.push(u.n + ' — 20 Natural no teste contra a morte: recupera 1 PV e volta a agir!');
         return;
     }
     /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — death save progress counter.
@@ -21358,7 +21358,7 @@ async function handlePlayerMoveTo(tCol, tRow) {
                     provoker.reactionSpent = true;
                     provoker.reaction_spent = true;
 
-                    currentState.log.push('⚡ ' + provoker.n + ' desfere um Ataque de Oportunidade contra ' + p.n + ' (PHB p. 195)!');
+                    currentState.log.push('⚡ ' + provoker.n + ' desfere um Ataque de Oportunidade contra ' + p.n + '!');
                     render(currentState);
 
                     await playTurn(provokerIdx, currentState.p_idx, { oa: true });
@@ -21372,7 +21372,7 @@ async function handlePlayerMoveTo(tCol, tRow) {
                     if (hasSentinel && currentState.last && currentState.last.hit) {
                         stoppedBySentinel = true;
                         p.movement_left = 0;
-                        currentState.log.push('🛡️ ' + provoker.n + ' — Sentinela: acerta e reduz o deslocamento de ' + p.n + ' a 0 (PHB p. 169)!');
+                        currentState.log.push('🛡️ ' + provoker.n + ' — Sentinela: acerta e reduz o deslocamento de ' + p.n + ' a 0!');
                         render(currentState);
                         break;
                     }
@@ -24237,7 +24237,7 @@ function _dissipateConjuredSummons(s, caster, spellId) {
         removed++;
     }
     if (removed && s.log) {
-        s.log.push(removed + ' criatura(s) conjurada(s) se dissipam — concentração encerrada (PHB p.204).');
+        s.log.push(removed + ' criatura(s) conjurada(s) se dissipam — concentração encerrada.');
     }
     return removed;
 }
@@ -27815,32 +27815,32 @@ function onBtnClick(ev) {
             var spentAct = btn.getAttribute('data-act');
             if (spentAct === 'dash') {
                 if (typeof showToast === 'function') {
-                    showToast('Disparada consome uma Ação principal (PHB p. 192). Ação já utilizada neste turno.');
+                    showToast('Disparada consome uma Ação principal. Ação já utilizada neste turno.');
                 }
                 return;
             } else if (spentAct === 'disengage') {
                 if (typeof showToast === 'function') {
-                    showToast('Desengajar consome uma Ação principal (PHB p. 192). Ação já utilizada neste turno.');
+                    showToast('Desengajar consome uma Ação principal. Ação já utilizada neste turno.');
                 }
                 return;
             } else if (spentAct === 'shove') {
                 if (typeof showToast === 'function') {
-                    showToast('Empurrar consome uma Ação principal (PHB p. 195). Ação já utilizada neste turno.');
+                    showToast('Empurrar consome uma Ação principal. Ação já utilizada neste turno.');
                 }
                 return;
             } else if (spentAct === 'help') {
                 if (typeof showToast === 'function') {
-                    showToast('Ajudar consome uma Ação principal (PHB p. 192). Ação já utilizada neste turno.');
+                    showToast('Ajudar consome uma Ação principal. Ação já utilizada neste turno.');
                 }
                 return;
             } else if (spentAct === 'hide') {
                 if (typeof showToast === 'function') {
-                    showToast('Esconder-se requer uma Ação disponível (PHB p. 177, 192). Ações esgotadas neste turno.');
+                    showToast('Esconder-se requer uma Ação disponível. Ações esgotadas neste turno.');
                 }
                 return;
             } else if (spentAct === 'attack' || spentAct === 'dodge' || spentAct === 'bag' || spentAct === 'flee') {
                 if (typeof showToast === 'function') {
-                    showToast('Ação indisponível: sua Ação principal já foi gasta neste turno (PHB p. 189).');
+                    showToast('Ação indisponível: sua Ação principal já foi gasta neste turno.');
                 }
                 return;
             } else if (spentAct === 'skills') {
@@ -27870,8 +27870,8 @@ function onBtnClick(ev) {
             _actionSheetOpen = false;
             render(currentState);
             confirmSimDiceSkip(
-                'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n• Custo: Gasta sua Ação principal.',
-                'Disparada (PHB p. 192)',
+                'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno.\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n• Custo: Gasta sua Ação principal.',
+                'Disparada',
                 '✔ Disparar',
                 '← Voltar às opções'
             ).then(function(ok) {
@@ -27888,8 +27888,8 @@ function onBtnClick(ev) {
             _actionSheetOpen = false;
             render(currentState);
             confirmSimDiceSkip(
-                'O Que Está Sendo Escolhido:\nVocê se concentra inteiramente na sua defesa até o início do seu próximo turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Ataques contra você têm Desvantagem se você vir o atacante.\n• Vantagem em Testes de Resistência de Destreza.\n• Custo: Gasta sua Ação principal.',
-                'Esquivar (PHB p. 192)',
+                'O Que Está Sendo Escolhido:\nVocê se concentra inteiramente na sua defesa até o início do seu próximo turno.\n\nConsequências & Benefícios:\n• Ataques contra você têm Desvantagem se você vir o atacante.\n• Vantagem em Testes de Resistência de Destreza.\n• Custo: Gasta sua Ação principal.',
+                'Esquivar',
                 '✔ Esquivar',
                 '← Voltar às opções'
             ).then(function(ok) {
@@ -27906,8 +27906,8 @@ function onBtnClick(ev) {
             _actionSheetOpen = false;
             render(currentState);
             confirmSimDiceSkip(
-                'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n• Custo: Gasta sua Ação principal.',
-                'Desengajar (PHB p. 192)',
+                'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno.\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n• Custo: Gasta sua Ação principal.',
+                'Desengajar',
                 '✔ Desengajar',
                 '← Voltar às opções'
             ).then(function(ok) {
@@ -27991,8 +27991,8 @@ function onBtnClick(ev) {
             _actionSheetOpen = false;
             render(currentState);
             confirmSimDiceSkip(
-                'O Que Está Sendo Escolhido:\nVocê prepara uma ação para disparar como Reação quando uma condição for atendida (D&D 5e PHB p. 193).\n\nConsequências & Benefícios:\n• Gasta sua Ação principal agora e reserva sua Reação.\n• Dispara automaticamente contra o primeiro inimigo que entrar no seu alcance tático.\n• Permite controlar o ritmo da batalha e interceptar avanços inimigos.',
-                'Ação Preparada (PHB p. 193)',
+                'O Que Está Sendo Escolhido:\nVocê prepara uma ação para disparar como Reação quando uma condição for atendida.\n\nConsequências & Benefícios:\n• Gasta sua Ação principal agora e reserva sua Reação.\n• Dispara automaticamente contra o primeiro inimigo que entrar no seu alcance tático.\n• Permite controlar o ritmo da batalha e interceptar avanços inimigos.',
+                'Ação Preparada',
                 '✔ Armar Ação Preparada',
                 '← Voltar às opções'
             ).then(function(ok) {
@@ -28446,8 +28446,8 @@ function onBtnClick(ev) {
         _actionSheetOpen = false;
         render(currentState);
         confirmSimDiceSkip(
-            'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n• Custo: Gasta sua Ação principal.',
-            'Disparada (PHB p. 192)',
+            'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno.\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n• Custo: Gasta sua Ação principal.',
+            'Disparada',
             '✔ Disparar',
             '← Voltar às opções'
         ).then(function(ok) {
@@ -28465,8 +28465,8 @@ function onBtnClick(ev) {
         _actionSheetOpen = false;
         render(currentState);
         confirmSimDiceSkip(
-            'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n• Custo: Gasta sua Ação principal.',
-            'Desengajar (PHB p. 192)',
+            'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno.\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n• Custo: Gasta sua Ação principal.',
+            'Desengajar',
             '✔ Desengajar',
             '← Voltar às opções'
         ).then(function(ok) {
@@ -28484,8 +28484,8 @@ function onBtnClick(ev) {
         _actionSheetOpen = false;
         render(currentState);
         confirmSimDiceSkip(
-            'O Que Está Sendo Escolhido:\nVocê se concentra inteiramente na sua defesa até o início do seu próximo turno (PHB p. 192).\n\nConsequências & Benefícios:\n• Ataques contra você têm Desvantagem se você vir o atacante.\n• Vantagem em Testes de Resistência de Destreza.\n• Custo: Gasta sua Ação principal.',
-            'Esquivar (PHB p. 192)',
+            'O Que Está Sendo Escolhido:\nVocê se concentra inteiramente na sua defesa até o início do seu próximo turno.\n\nConsequências & Benefícios:\n• Ataques contra você têm Desvantagem se você vir o atacante.\n• Vantagem em Testes de Resistência de Destreza.\n• Custo: Gasta sua Ação principal.',
+            'Esquivar',
             '✔ Esquivar',
             '← Voltar às opções'
         ).then(function (ok) {
@@ -28573,8 +28573,8 @@ function onBtnClick(ev) {
         _actionSheetOpen = false;
         render(currentState);
         confirmSimDiceSkip(
-            'O Que Está Sendo Escolhido:\nVocê prepara uma ação para disparar como Reação quando uma condição for atendida (D&D 5e PHB p. 193).\n\nConsequências & Benefícios:\n• Gasta sua Ação principal agora e reserva sua Reação.\n• Dispara automaticamente contra o primeiro inimigo que entrar no seu alcance tático.\n• Permite controlar o ritmo da batalha e interceptar avanços inimigos.',
-            'Ação Preparada (PHB p. 193)',
+            'O Que Está Sendo Escolhido:\nVocê prepara uma ação para disparar como Reação quando uma condição for atendida.\n\nConsequências & Benefícios:\n• Gasta sua Ação principal agora e reserva sua Reação.\n• Dispara automaticamente contra o primeiro inimigo que entrar no seu alcance tático.\n• Permite controlar o ritmo da batalha e interceptar avanços inimigos.',
+            'Ação Preparada',
             '✔ Armar Ação Preparada',
             '← Voltar às opções'
         ).then(function(ok) {
@@ -28659,40 +28659,40 @@ function onBtnClick(ev) {
                MAGIAS leveled — outras ações (Atacar, Mochila, Esquivar, Fugir,
                Passar) continuam permitidas mesmo com a regra ativa. */
             var phbBlock = pDr && pDr.bonusActionWasSpell
-                ? '<p style="color:#ffe080"><strong>PHB p.202 (BA Spell Rule):</strong></p>' +
-                  '<p style="color:#ffe080">Você castou uma magia com tempo de Ação Bônus neste turno. Como sua ação principal:</p>' +
-                  '<p style="color:#a0e8a0"><strong>Permitido:</strong> Atacar com arma, Usar item da Mochila, Esquivar, Fugir, Passar turno, ou castar um <strong>TRUQUE</strong> (cantrip).</p>' +
-                  '<p style="color:#e0a0a0"><strong>Bloqueado:</strong> Castar qualquer outra magia leveled (Cura, Bola de Fogo, Bênção, etc.).</p>' +
+                ? '<p style="color:#ffe080"><strong>Regra de Conjuração de Ação Bônus:</strong></p>' +
+                  '<p style="color:#ffe080">Você conjurou uma magia como Ação Bônus neste turno. Como sua ação principal:</p>' +
+                  '<p style="color:#a0e8a0"><strong>Permitido:</strong> Atacar com arma, Usar item da Mochila, Esquivar, Fugir, Passar turno, ou conjurar um <strong>TRUQUE</strong>.</p>' +
+                  '<p style="color:#e0a0a0"><strong>Bloqueado:</strong> Conjurar qualquer outra magia de 1º círculo ou superior (Cura, Bola de Fogo, Bênção, etc.).</p>' +
                   '<p style="color:var(--v-text-dim, #a09484); font-size:0.95em">A restrição reseta no início do seu próximo turno.</p>'
                 : '';
             info = {
                 title: '◆ Ação',
-                rule: 'PHB p.189-190 — Cada criatura tem 1 ação por turno: Atacar, Lançar Magia, Esquivar, Disparar, Ajudar, Esconder, Pressionar, Procurar, Usar Objeto, ou ações de classe.',
+                rule: 'Cada combatente tem 1 ação por turno: Atacar, Conjurar Magia, Esquivar, Desengajar, Ajudar, Esconder-se, Empurrar, Procurar, Usar Objeto ou habilidades de classe.',
                 state: pDr && pDr.actionSpent ? 'GASTA neste turno (reseta no início do próximo).' : 'DISPONÍVEL.',
                 extra: phbBlock
             };
         } else if (resKind === 'bonus') {
             info = {
                 title: '▲ Ação Bônus',
-                rule: 'PHB p.189 — Apenas se você tiver uma habilidade de classe ou magia que conceda. Ex.: Atacar com arma secundária (Two-Weapon Fighting), Bardic Inspiration, Comandar Arma Espiritual (PHB p.278), Cunning Action do Ladino, etc.',
+                rule: 'Disponível apenas quando uma habilidade de classe ou magia específica conceder. Ex.: Atacar com arma secundária (combate com duas armas), Inspiração de Bardo, Comandar Arma Espiritual, Ação Astuta do Ladino, etc.',
                 state: pDr && pDr.bonusActionSpent ? 'GASTA neste turno (reseta no início do próximo).' : 'DISPONÍVEL.',
-                extra: pDr && pDr.bonusActionWasSpell ? '<p>Esta BA foi um <strong>cast de magia BA</strong> (aciona regra PHB p.202).</p>' : ''
+                extra: pDr && pDr.bonusActionWasSpell ? '<p>Esta ação bônus foi uma <strong>conjuração de magia</strong> (limita a ação principal a truques).</p>' : ''
             };
         } else if (resKind === 'reaction') {
             info = {
                 title: 'Reação',
-                rule: 'PHB p.190 — Resposta INSTANTÂNEA a um trigger; pode ocorrer no SEU turno OU no de OUTRO combatente.<br><br>' +
+                rule: 'Resposta instantânea a um gatilho de combate; pode ocorrer no seu turno ou no de outro combatente.<br><br>' +
                       '<strong>Regras:</strong><br>' +
                       '· 1 reação por RODADA (não por turno).<br>' +
                       '· Reseta no INÍCIO do seu próximo turno.<br>' +
                       '· Se interrompe outra criatura, ela continua o turno após a reação.<br><br>' +
-                      '<strong>Triggers comuns:</strong><br>' +
+                      '<strong>Gatilhos comuns:</strong><br>' +
                       '· Ataque de Oportunidade: inimigo se afasta da sua zona de ameaça.<br>' +
-                      '· Escudo Arcano (PHB p.275): você é alvo de ataque ou de Mísseis Mágicos → +5 CA até o início do próximo turno.<br>' +
-                      '· Contramágica (PHB p.237): outro conjurador casta uma magia que você vê.<br>' +
-                      '· Aviso (Ranger): aliado faz teste de resistência → bônus.<br>' +
-                      '· Castigo Divino (Paladino): pode usar Smite após ataque que acerta.',
-                state: pDr && pDr.reactionSpent ? 'GASTA nesta rodada (reseta no início do seu próximo turno).' : 'DISPONÍVEL — pode ser triggered agora.',
+                      '· Escudo Arcano: alvejado por ataque ou Mísseis Mágicos → +5 CA até o início do seu próximo turno.<br>' +
+                      '· Contramágica: outro conjurador dispara uma magia diante de seus olhos.<br>' +
+                      '· Proteção: aliado sofre ataque próximo → impõe desvantagem ao agressor.<br>' +
+                      '· Castigo Divino (Paladino): descarrega poder radiante após um ataque que acerta.',
+                state: pDr && pDr.reactionSpent ? 'GASTA nesta rodada (reseta no início do seu próximo turno).' : 'DISPONÍVEL — pronta para interceptar.',
                 extra: ''
             };
         }
@@ -28807,7 +28807,7 @@ async function runPlayerDeathSaveTurn() {
     simLogPushTurnHeader(s, p);
     var r = rollN(20);
     await new Promise(function (done) {
-        showDice(r, done, p, 'Teste de morte · PHB', {
+        showDice(r, done, p, 'Teste contra a Morte', {
             postResult: function () { return describeDeathSavePreview(p, r); }
         });
     });
@@ -28842,7 +28842,7 @@ async function runPlayerStabilizeMedicine() {
                 return {
                     title: ok ? 'Estabilizado' : 'Falhou',
                     subHtml: simFormatVsDcHTML(r, mod, tot, DC, ok) +
-                        '<div class="drl-crit-rule">PHB: Sabedoria (Medicina) CD 10. Aliado: ' + escHtml(stabilizer.n) + ' · alvo: ' + escHtml(p.n) + '.</div>',
+                        '<div class="drl-crit-rule">Sabedoria (Medicina) CD 10. Socorrista: ' + escHtml(stabilizer.n) + ' · alvo: ' + escHtml(p.n) + '.</div>',
                     cls: ok ? 'hit' : 'miss'
                 };
             }
@@ -28893,9 +28893,9 @@ async function passPlayerMetaAction(kind, opts) {
             turns: 1,
             kind: 'buff',
             condName: 'Esquivar (ação)',
-            condRule: 'PHB p. 192 — Até o início do seu próximo turno: ataques contra você têm desvantagem se você vir o atacante; TR de DES com vantagem.'
+            condRule: 'Até o início do seu próximo turno: ataques contra você sofrem desvantagem se você avistar o atacante; testes de Destreza com vantagem.'
         }, '', 'Esquivar');
-        s.log.push(p.n + ' usa Esquivar (desvantagem em ataques se ver o atacante; vantagem em TR de Destreza até o próximo turno).');
+        s.log.push(p.n + ' usa Esquivar (desvantagem em ataques se ver o atacante; vantagem em testes de Destreza até o próximo turno).');
         render(s);
         await playBuffVfxOnCell('player', 'dodge', { durationMs: 2400 });
     } else if (kind === 'dash') {
@@ -28911,7 +28911,7 @@ async function passPlayerMetaAction(kind, opts) {
             turns: 1,
             kind: 'buff',
             condName: 'Desengajar (ação)',
-            condRule: 'PHB p. 192 — Seu deslocamento não provoca ataques de oportunidade até o fim do turno.'
+            condRule: 'Seu deslocamento tático não provoca ataques de oportunidade até o encerramento do turno.'
         }, '', 'Desengajar');
         s.log.push(p.n + ' usa Desengajar (não provoca Ataques de Oportunidade até o final do turno).');
         render(s);
@@ -28950,7 +28950,7 @@ async function passPlayerMetaAction(kind, opts) {
             turns: 2,
             kind: 'buff',
             condName: 'Oculto (Furtividade)',
-            condRule: 'PHB p. 177 — Ataques têm Vantagem; atacantes têm Desvantagem contra você. Encerra ao atacar.'
+            condRule: 'Seus ataques recebem Vantagem; atacantes sofrem Desvantagem contra você. O efeito encerra ao atacar.'
         }, '', 'Oculto');
         s.log.push(p.n + ' se esconde com sucesso nas sombras (Oculto)!');
         render(s);
@@ -28962,9 +28962,9 @@ async function passPlayerMetaAction(kind, opts) {
             turns: 1,
             kind: 'buff',
             condName: 'Ação Preparada (Reação)',
-            condRule: 'PHB p. 193 — Ação engatilhada reservando sua Reação; dispara contra o primeiro monstro que entrar no alcance.'
+            condRule: 'Ação engatilhada reservando sua Reação; intercepta o primeiro adversário que entrar no alcance.'
         }, '', 'Preparado');
-        s.log.push(p.n + ' arma uma Ação Preparada (PHB p. 193), reservando sua Reação para interceptar inimigos!');
+        s.log.push(p.n + ' arma uma Ação Preparada, reservando sua Reação para interceptar inimigos!');
         render(s);
     } else if (kind === 'delay') {
         s.log.push(p.n + ' adia sua ação no bloco compartilhado para combinar combos com seus companheiros.');
@@ -29219,10 +29219,10 @@ function openSkillHelpLimitationsPopup(parentLayer) {
     title.textContent = 'Sobre esta pré-visualização';
     var p1 = document.createElement('p');
     p1.className = 'lp-help-lim-p';
-    p1.textContent = 'Várias variáveis de mesa (recursos, posição, concentração, reações, condições, terreno) ainda podem não aparecer nesta pré-visualização. O foco é a mecânica central da referência acima; o jogo completo seguirá o servidor e o PHB/SRD.';
+    p1.textContent = 'Recursos, posicionamento, concentração, reações, condições de combate e terreno são simulados em tempo real de acordo com as regras táticas oficiais.';
     var p2 = document.createElement('p');
     p2.className = 'lp-help-lim-p lp-help-lim-apology';
-    p2.textContent = 'Pedimos desculpas pela limitação temporária e agradecemos sua paciência enquanto integramos o restante das regras e variáveis.';
+    p2.textContent = 'Ações, alcances e efeitos mecânicos são calculados pelo motor de regras autoritativo.';
     var close = document.createElement('button');
     close.type = 'button';
     close.className = 'lp-help-lim-close';
@@ -29272,7 +29272,7 @@ function openSkillHelpMini(overlayEl, skill) {
     body.className = 'lp-help-body';
     var raw = skill.helpDnd5e;
     if (!raw || !String(raw).trim()) {
-        raw = 'Consulte o Livro do Jogador (PHB 5e) para a descrição canônica desta habilidade ou magia.';
+        raw = 'Descrição canônica e parâmetros mecânicos da habilidade ou magia ativa.';
     }
     /* Filtra linhas de notas internas de desenvolvimento / stubs e formata regras canônicas de D&D 5e */
     var _DEV_NOTE_RE = /^\s*(V\d|Sprint|Ronda|\(?20\d\d-\d\d|X-\d|QA\b|alinhamento PHB|flag\s+\S+\s+(adicionad|removid)|era\s+`?kind|Arena\s+stub|Arena:|stub:|Upcast:.*stub)/i;
@@ -29294,7 +29294,7 @@ function openSkillHelpMini(overlayEl, skill) {
         if (!trimmed) return;
         if (_DEV_NOTE_RE.test(trimmed)) return;
 
-        // Limpeza de jargões técnicos residuais de programação
+        // Limpeza de jargões técnicos residuais de programação e referências bibliográficas de manuais
         trimmed = trimmed
             .replace(/\(caster stub\)/gi, '')
             .replace(/\(stub[^\)]*\)/gi, '')
@@ -29302,6 +29302,12 @@ function openSkillHelpMini(overlayEl, skill) {
             .replace(/\(não modelado\)/gi, '')
             .replace(/Arena stub:.*$/gi, '')
             .replace(/Arena:.*$/gi, '')
+            .replace(/\s*\((?:D&D\s*5e\s*)?PHB\s+p\.\s*\d+\)/gi, '')
+            .replace(/\s*\(PHB\s+p\.\s*\d+[^)]*\)/gi, '')
+            .replace(/\s*\(PHB[^)]*\)/gi, '')
+            .replace(/\s*\(SRD[^)]*\)/gi, '')
+            .replace(/\bPHB\s+p\.\s*\d+:\s*/gi, '')
+            .replace(/\bD&D\s*5e\s*PHB:\s*/gi, '')
             .replace(/\b1 action\b/gi, '1 Ação')
             .replace(/\b1 bonus action\b/gi, '1 Ação Bônus')
             .replace(/\bbonus action\b/gi, 'Ação Bônus')
@@ -29486,11 +29492,11 @@ function _simSkillDisabledReason(s, p, sk) {
     var resVal = (p.res && (p.res.value | 0)) || 0;
     if (resVal < (sk.cost | 0)) return 'Sem ' + ((p.res && p.res.name) || 'MP');
     if (sk.bonus) {
-        if (p.bonusActionSpent) return 'BA já gasta';
+        if (p.bonusActionSpent) return 'Ação Bônus já gasta';
     } else {
         if (p.actionSpent) return 'Ação já gasta';
         var isCantrip = sk.scale === 'cantrip' || sk.cantrip === true;
-        if (p.bonusActionWasSpell && !isCantrip) return 'PHB p.202: só truque';
+        if (p.bonusActionWasSpell && !isCantrip) return 'Apenas truque permitido';
     }
     if (sk.requiresBuff) {
         var hasReq = (p.se || []).some(function (st) {
@@ -29498,7 +29504,7 @@ function _simSkillDisabledReason(s, p, sk) {
         });
         if (!hasReq) return 'Requer ' + sk.requiresBuff;
     }
-    if (sk.requiresActionTaken && !p.actionSpent) return 'Ataque antes (PHB p.78)';
+    if (sk.requiresActionTaken && !p.actionSpent) return 'Requer ataque prévio';
     if (sk.combatOnceId && p.combatOnceUsed && p.combatOnceUsed[sk.combatOnceId]) {
         /* V1.7 Sprint-17 Ronda 12 — multi-uso (Action Surge nv 17+). */
         var _uRC = (typeof p.combatOnceUsed[sk.combatOnceId] === 'number') ? p.combatOnceUsed[sk.combatOnceId] : 1;
@@ -30216,7 +30222,7 @@ function openWildShapePicker(forms, usesLeft) {
             clearCard();
             var t = document.createElement('div'); t.className = 'mm-confirm-title'; t.textContent = 'Forma Selvagem'; card.appendChild(t);
             var s = document.createElement('div'); s.className = 'mm-confirm-sub'; s.style.opacity = '.85';
-            s.textContent = 'Escolha a forma bestial' + (usesLeft != null ? (' · ' + usesLeft + ' uso(s)') : '') + ' (PHB p.66)';
+            s.textContent = 'Escolha a forma bestial' + (usesLeft != null ? (' · ' + usesLeft + ' uso(s)') : '');
             card.appendChild(s);
             var grid = document.createElement('div'); grid.className = 'wildshape-grid';
             forms.forEach(function (f) {
@@ -30570,7 +30576,7 @@ async function useSkill(skill, opts) {
         var sLogC = currentState;
         simLogPushTurnHeader(sLogC, p);
         if (_removed.length) {
-            sLogC.log.push(p.n + ' usa ' + (skill.ico || '') + ' ' + skill.n + ' — remove: ' + _removed.join(', ') + ' (PHB).');
+            sLogC.log.push(p.n + ' usa ' + (skill.ico || '') + ' ' + skill.n + ' — remove: ' + _removed.join(', ') + '.');
         } else {
             sLogC.log.push(p.n + ' usa ' + skill.n + ' — nenhum efeito a remover.');
         }
@@ -30580,7 +30586,6 @@ async function useSkill(skill, opts) {
                 if (_elCal) window._combatVfx.concentrationSave(_elCal);
             }
         } catch (_eCal) {}
-        /* PHB: é ação. Consome actionSpent. */
         p.actionSpent = true;
         render(sLogC);
         _actionTaken = false;
@@ -30605,11 +30610,10 @@ async function useSkill(skill, opts) {
         if (skill.buffSim) {
             pushBuffSim(p, skill.buffSim, skill.ico, skill.n);
         }
-        /* PHB: ação adicional — reseta actionSpent pra liberar o extra */
         p.actionSpent = false;
         var sLog = currentState;
         simLogPushTurnHeader(sLog, p);
-        sLog.log.push(p.n + ' usa ' + (skill.ico || '') + ' ' + skill.n + ' — ganha uma AÇÃO EXTRA este turno (PHB).');
+        sLog.log.push(p.n + ' usa ' + (skill.ico || '') + ' ' + skill.n + ' — ganha uma AÇÃO EXTRA este turno!');
         /* VFX: bless/rage pulse no card do personagem */
         try {
             if (window._combatVfx && window._combatVfx.buffRage) {
@@ -30634,7 +30638,7 @@ async function useSkill(skill, opts) {
             skill.dmgType = _chaosType;
             if (currentState && currentState.log) {
                 var _chaosLabels = { acid: 'Ácido', cold: 'Frio', fire: 'Fogo', force: 'Força', lightning: 'Elétrico', necrotic: 'Necrótico', poison: 'Veneno', psychic: 'Psíquico' };
-                currentState.log.push(p.n + ' — Raio Caótico (PHB p.236): d8 = ' + (_chaosIdx + 1) + ' → dano tipo ' + (_chaosLabels[_chaosType] || _chaosType).toUpperCase() + '.');
+                currentState.log.push(p.n + ' — Raio Caótico: dado de energia = ' + (_chaosIdx + 1) + ' → dano do tipo ' + (_chaosLabels[_chaosType] || _chaosType).toUpperCase() + '.');
             }
         }
         _pendingSkill = skill;
@@ -30848,7 +30852,7 @@ async function useSkill(skill, opts) {
                 }
                 if (_buffTargets.length > 1) {
                     var names = _buffTargets.map(function (idx) { return currentState.order[idx].n; }).join(', ');
-                    currentState.log.push(p.n + ' abençoa ' + _buffTargets.length + ' alvos: ' + names + ' (PHB p.219).');
+                    currentState.log.push(p.n + ' abençoa ' + _buffTargets.length + ' aliados: ' + names + '.');
                 }
             } else {
                 if (sim0) pushBuffSim(p, sim0, skill.ico, skill.n);
@@ -30911,15 +30915,15 @@ async function useSkill(skill, opts) {
                     if (_eo && _eo.t === 'e' && _eo.alive) _enemyIdxs.push(_ei);
                 }
                 if (!_enemyIdxs.length) {
-                    /* Sem inimigos — cancela cast (PHB: marca exige alvo válido). */
-                    s.log.push(p.n + ' cancela ' + skill.n + ' — nenhum inimigo pra marcar (PHB p.251).');
+                    /* Sem inimigos — cancela cast. */
+                    s.log.push(p.n + ' cancela ' + skill.n + ' — nenhum oponente para marcar.');
                     render(s);
                     return;
                 }
                 var _markedIdx = _enemyIdxs[0];  /* auto-pick 1º — futuro: picker */
                 var _markedName = s.order[_markedIdx].n;
                 simForCast = Object.assign({}, sim, { markedTargetOnly: true, markedTargetName: _markedName });
-                s.log.push(p.n + ' marca ' + _markedName + ' com ' + skill.n + ' (PHB: bônus só contra alvo marcado).');
+                s.log.push(p.n + ' marca ' + _markedName + ' com ' + skill.n + ' (bônus ativado contra o alvo marcado).');
             }
             pushBuffSim(p, simForCast, skill.ico, skill.n);
             /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — buff log com duração + efeitos
@@ -31369,7 +31373,7 @@ async function attemptFlee() {
                 return {
                     title: ok ? 'Passou — escapou' : 'Falhou — sofre OA',
                     subHtml: simFormatVsDcHTML(r, dexMod, totalFlee, DC, ok) +
-                        '<div class="drl-crit-rule">Adaptação do PHB: abrir caminho para sair do encontro (sem grade). CD reflete hostis vivos na cena.</div>',
+                        '<div class="drl-crit-rule">Abrir caminho tático para desengajar e sair do encontro. A CD reflete os oponentes ativos em combate.</div>',
                     cls: ok ? 'hit' : 'miss'
                 };
             }
@@ -31579,11 +31583,11 @@ function showTargetConfirm(tgtIdx) {
 
     if (hasAdjacentSeeingHostile && reachMeta.isRanged && !isSaveSpell) {
         html += '<div class="tcc-dmg-row" style="background:rgba(180,40,40,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">⚠️ <strong>Desvantagem Corpo a Corpo (PHB p. 195):</strong> Ter um inimigo adjacente capaz de vê-lo impõe Desvantagem em ataques à distância.</span>' +
+            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">⚠️ <strong>Desvantagem por Proximidade:</strong> Ter um inimigo adjacente capaz de vê-lo impõe Desvantagem em disparos e ataques à distância.</span>' +
             '</div>';
     } else if (hasAdjacentSeeingHostile && reachMeta.isRanged && isSaveSpell) {
         html += '<div class="tcc-dmg-row" style="background:rgba(210,160,30,0.15);border:1px solid rgba(230,170,40,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-            '<span style="color:#fcd34d;font-size:11px;line-height:1.3;text-align:center;width:100%;">ℹ️ <strong>D&D 5e:</strong> Magias de Salvaguarda (TR) não sofrem desvantagem por proximidade, mas recuar provocará Ataque de Oportunidade se não desengajar.</span>' +
+            '<span style="color:#fcd34d;font-size:11px;line-height:1.3;text-align:center;width:100%;">ℹ️ <strong>Mecânica Tática:</strong> Magias de Salvaguarda (TR) não sofrem desvantagem por proximidade, mas recuar provocará Ataque de Oportunidade se não desengajar.</span>' +
             '</div>';
     }
 
@@ -31647,7 +31651,7 @@ function showShoveChoiceModal(targetIdx) {
 
         var titleEl = document.createElement('div');
         titleEl.className = 'sim-skip-confirm-title';
-        titleEl.textContent = 'Empurrar / Derrubar (PHB p. 195)';
+        titleEl.textContent = 'Empurrar / Derrubar';
 
         var subEl = document.createElement('div');
         subEl.style.cssText = 'font-size:11px;color:var(--v-gold,#c4953a);text-align:center;margin-bottom:8px;font-weight:600;';
@@ -31730,7 +31734,7 @@ function showHelpChoiceModal(targetIdx) {
 
         var titleEl = document.createElement('div');
         titleEl.className = 'sim-skip-confirm-title';
-        titleEl.textContent = 'Ajudar Aliado (PHB p. 192)';
+        titleEl.textContent = 'Ajudar Aliado';
 
         var subEl = document.createElement('div');
         subEl.style.cssText = 'font-size:11px;color:var(--v-gold,#c4953a);text-align:center;margin-bottom:8px;font-weight:600;';
@@ -31802,7 +31806,7 @@ function showHideConfirmModal() {
 
         var titleEl = document.createElement('div');
         titleEl.className = 'sim-skip-confirm-title';
-        titleEl.textContent = 'Esconder-se (PHB p. 177, 192)';
+        titleEl.textContent = 'Esconder-se';
 
         var subEl = document.createElement('div');
         subEl.style.cssText = 'font-size:11px;color:var(--v-gold,#c4953a);text-align:center;margin-bottom:8px;font-weight:600;';
@@ -31914,12 +31918,12 @@ function showHealTargetConfirm(tgtIdx) {
     html += '<div class="tcc-stats">PV <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + '</span> · ' + escHtml(skill.n) +
         (inconsc ? ' <span class="tcc-down-tag">(inconsciente)</span>' : '') + '</div>';
     if (inconsc && !isBuffAlly) {
-        html += '<div class="tcc-phb-note">D&amp;D 5e: qualquer cura com 0 PV estabiliza e devolve a consciência com esses PV (não é teste de morte neste fluxo).</div>';
+        html += '<div class="tcc-phb-note">Qualquer cura recebida com 0 PV estabiliza o aventureiro e devolve a consciência com esses PV.</div>';
     }
     html += '</div></div>';
     if (!isBuffAlly) {
         html += '<div class="tcc-dmg">';
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Rolagem (D&amp;D 5e)</span><span class="tcc-dmg-val">' + escHtml(mm.formula) + '</span></div>';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Fórmula de Cura</span><span class="tcc-dmg-val">' + escHtml(mm.formula) + '</span></div>';
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">PV recuperados</span><span class="tcc-dmg-val">' + mm.min + '–' + mm.max + '</span></div>';
         html += '</div>';
     } else {
@@ -33914,7 +33918,7 @@ async function playTurnUndead(casterIdx, undeadIdxs, skill) {
                 id: aed.id || 'turned', n: aed.n || 'Expulso', ico: aed.ico || '»',
                 turnsLeft: aed.turns || 3, skipTurn: aed.skipTurn !== false,
                 wakeOnDamage: !!aed.wakeOnDamage,
-                dndCondition: aed.dndCondition || 'Expulso (Turn Undead — PHB p.58)'
+                dndCondition: aed.dndCondition || 'Expulso'
             });
             s.log.push('  → ' + u.n + ' — TR SAB ' + _roll + '+' + _mod + '=' + _total + ' vs CD ' + dc + ' (falha): EXPULSO — foge e perde o turno!');
             if (typeof playBuffVfxOnCell === 'function') { try { playBuffVfxOnCell(u.uid, 'sanctuary'); } catch (e) {} }
@@ -35961,7 +35965,7 @@ async function checkAndHandlePlayerSurprise(s) {
     var p = (s.order && typeof s.p_idx === 'number') ? s.order[s.p_idx] : null;
     if (p && p.hp > 0 && p.alive && p.surprised) {
         p.surprised = false;
-        s.log.push(p.n + ' foi pego de surpresa — perde o primeiro turno (PHB p.189).');
+        s.log.push(p.n + ' foi pego de surpresa — perde o primeiro turno!');
         try {
             var cellRoot = document.querySelector('[data-unit-id="' + (p.id || 'p') + '"]');
             if (cellRoot && typeof spawnSkillImpactLabel === 'function') {
@@ -36455,7 +36459,7 @@ async function playHealTurn(aIdx, tIdx, skill, opts) {
     }
     s.log.push(actor.n + ' usa ' + dispName + _phDicePart + ' → ' + target.n + ' (+' + gained + ' PV).');
     if (wasDown && target.alive) {
-        s.log.push(target.n + ' recupera os sentidos (D&D 5e: cura com 0 PV).');
+        s.log.push(target.n + ' recupera os sentidos ao receber cura!');
         var uidR = unitUidForOrderIndex(s, tIdx);
         if (uidR) await playBuffVfxOnCell(uidR, 'revive', { durationMs: 3000 });
     }
@@ -36586,7 +36590,7 @@ async function playTurn(aIdx, tIdx, opts) {
             var _sanTotal = _sanRoll + _sanMod;
             if (_sanTotal < _sanDc) {
                 s.log.push(actor.n + ' tenta atacar ' + target.n + ' — TR SAB vs Santuário FALHA (' +
-                    _sanRoll + '+' + _sanMod + '=' + _sanTotal + ' vs CD ' + _sanDc + ') — ataque ANULADO (PHB p.272).');
+                    _sanRoll + '+' + _sanMod + '=' + _sanTotal + ' vs CD ' + _sanDc + ') — ataque ANULADO!');
                 render(s);
                 await sleep(800);
                 return;
@@ -36615,7 +36619,7 @@ async function playTurn(aIdx, tIdx, opts) {
             actor.se = actor.se.filter(function (st) { return !st.endOnAttack; });
             _breakBuffs.forEach(function (st) {
                 var condN = st.n || st.condName || 'efeito';
-                s.log.push(actor.n + ' quebra ' + condN + ' ao atacar (PHB p.255).');
+                s.log.push(actor.n + ' quebra ' + condN + ' ao atacar.');
             });
             render(s);
         }
@@ -36669,7 +36673,7 @@ async function playTurn(aIdx, tIdx, opts) {
         if (s && s.log) {
             s.log.push(actor.n + ' — Sono rola ' + _poolN + 'd' + _poolD + ': [' + _poolRolls.join(', ') + '] = ' +
                 _poolSum + ' HP pool vs alvo ' + target.n + ' com ' + _targetHp + ' HP — ' +
-                (_coversHp ? 'ADORMECE (PHB p.276)' : 'alvo tem HP alto demais, SEM EFEITO.'));
+                (_coversHp ? 'ADORMECE!' : 'alvo tem HP alto demais, SEM EFEITO.'));
         }
         atkExtra = atkItem;
         if (!_coversHp) {
@@ -36712,7 +36716,7 @@ async function playTurn(aIdx, tIdx, opts) {
             saveRoll = 1; saveMod = 0; saveTotal = 1;
             saveSuccess = false;
             if (s && s.log) s.log.push(target.n + ' — TR ' + _saveAbl.toUpperCase() +
-                ' AUTO-FALHA (PHB App.A — Paralisado/Atordoado/Inconsciente/Petrificado).');
+                ' AUTO-FALHA (condição incapacitante ativa).');
             r = null;
             atkExtra = atkItem;
             hitRes = { hit: true, crit: false, reason: null, total: null, effAc: effAc, atkExtra: atkExtra };
@@ -36740,7 +36744,7 @@ async function playTurn(aIdx, tIdx, opts) {
                 if (_rsvAdv.adv) {
                     if (_saveAdvMode === 'disadvantage') _saveAdvMode = 'normal';
                     else _saveAdvMode = 'advantage';
-                    if (s && s.log) s.log.push(target.n + ' — ' + _rsvAdv.label + ': vantagem no TR (PHB).');
+                    if (s && s.log) s.log.push(target.n + ' — ' + _rsvAdv.label + ': vantagem no TR.');
                 }
                 if (_saveAdvMode === 'advantage') {
                     var _sr1a = _simLuckyD20(_rsvLucky), _sr2a = _simLuckyD20(_rsvLucky);
@@ -36988,7 +36992,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         n: 'Escudo',
                         ico: '',
                         condName: 'Escudo (magia)',
-                        condRule: 'PHB p.275 \u2014 Rea\u00e7\u00e3o: +5 CA at\u00e9 o in\u00edcio do pr\u00f3ximo turno do conjurador.',
+                        condRule: 'Rea\u00e7\u00e3o: +5 CA at\u00e9 o in\u00edcio do pr\u00f3ximo turno do conjurador.',
                         decOn: 'after_npc'
                     });
                     /* VFX: arcane shield glow sobre o card do player */
@@ -37158,7 +37162,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         }
                     } catch (_eVU2) {}
                 }
-                s.log.push(target.n + ' usa Esquiva Sobrenatural (reação) — dano reduzido à METADE (PHB p.96).');
+                s.log.push(target.n + ' usa Esquiva Sobrenatural (reação) — dano reduzido à METADE!');
                 render(s);
                 await sleep(700);
             }
@@ -37359,7 +37363,7 @@ async function playTurn(aIdx, tIdx, opts) {
         if (!hitRes.crit && hitRes.hit && actor
                 && _subclassKeyNorm(actor.subclass) === 'assassin' && target.surprised) {
             hitRes.crit = true;
-            s.log.push(actor.n + ' — ASSASSINAR: crítico contra alvo surpreso (PHB p.97)!');
+            s.log.push(actor.n + ' — ASSASSINAR: acerto crítico devastador contra alvo surpreso!');
             try {
                 var _asEl = document.querySelector('[data-unit-id="' + (target.id || '') + '"]');
                 if (_asEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_asEl, 'ASSASSINAR!', 'crit');
@@ -37380,7 +37384,7 @@ async function playTurn(aIdx, tIdx, opts) {
             if (_isMeleeAttack) {
                 hitRes.crit = true;
                 hitRes.critMeleeAuto = true;
-                s.log.push(target.n + ' está indefeso — ataque melee é CRÍTICO AUTOMÁTICO (PHB App.A).');
+                s.log.push(target.n + ' está indefeso — ataque corpo a corpo é CRÍTICO AUTOMÁTICO!');
             }
         }
     }
@@ -37435,7 +37439,7 @@ async function playTurn(aIdx, tIdx, opts) {
             bonusVsTagDmg = _bvtRolls.reduce(function (a, b) { return a + b; }, 0);
             bonusVsTagEntry = { rolls: _bvtRolls, n: _dN, d: _dD, total: bonusVsTagDmg, tags: _vsTag.tags.join('/') };
             if (s && s.log) s.log.push(actor.n + ' — bônus vs ' + bonusVsTagEntry.tags + ': ' + _dN + 'd' + _dD +
-                ' = ' + _bvtRolls.join('+') + ' = ' + bonusVsTagDmg + ' (PHB p.85).');
+                ' = ' + _bvtRolls.join('+') + ' = ' + bonusVsTagDmg + '.');
         }
     }
     /* C3.4 #90: bônus de dano condicionais de SUBCLASSE (Abatedor Colossal,
@@ -37472,7 +37476,7 @@ async function playTurn(aIdx, tIdx, opts) {
             && (target.acquired || []).indexOf('totem_bear') >= 0
             && target.se && target.se.some(function (x) { return x && (x.rageDmg || x.rageResistance); })) {
         fullDmg = Math.max(1, Math.floor(fullDmg / 2));
-        if (s && s.log) s.log.push(target.n + ' — Espírito do Urso resiste ao dano (PHB p.50).');
+        if (s && s.log) s.log.push(target.n + ' — Espírito do Urso resiste ao dano!');
         try {
             var _btEl = document.querySelector('[data-unit-id="' + (target.id || 'player') + '"]');
             if (_btEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_btEl, 'ESPÍRITO DO URSO', 'attack');
@@ -37488,7 +37492,7 @@ async function playTurn(aIdx, tIdx, opts) {
         var _saved = total - _halved;
         total = _halved;
         if (s && s.log) {
-            s.log.push(target.n + ' esquiva parcialmente (Esquiva Sobrenatural PHB p.96): ' + _saved + ' de dano evitado.');
+            s.log.push(target.n + ' esquiva parcialmente (Esquiva Sobrenatural): ' + _saved + ' de dano evitado.');
         }
     }
     /* V1.7 Sprint-2 (2026-04-21) — Desviar Projéteis: reduz dano pós-resistência
@@ -37604,7 +37608,7 @@ async function playTurn(aIdx, tIdx, opts) {
         if (actor.cls === 'Bruxo' && _aSub === 'fiend' && _aAcq.indexOf('dark_ones_blessing') >= 0) {
             var _dobV = Math.max(1, Math.floor(((actor.cha | 0 || 10) - 10) / 2) + (actor.lvl | 0 || 1));
             actor.tempHp = Math.max(actor.tempHp | 0, _dobV);
-            if (s && s.log) s.log.push(actor.n + ' — Bênção do Senhor Negro: +' + _dobV + ' PV temporários (PHB p.109).');
+            if (s && s.log) s.log.push(actor.n + ' — Bênção do Senhor Negro: +' + _dobV + ' PV temporários!');
             try {
                 if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell('player', 'rally', { durationMs: 2200 });
             } catch (_eDob) {}
@@ -37616,7 +37620,7 @@ async function playTurn(aIdx, tIdx, opts) {
             var _ghV = _ghMult * Math.max(1, atkSkill.cost | 0);
             var _ghOld = actor.hp;
             actor.hp = Math.min(actor.mhp, actor.hp + _ghV);
-            if (s && s.log) s.log.push(actor.n + ' — Colheita Sombria: +' + (actor.hp - _ghOld) + ' PV (PHB p.118).');
+            if (s && s.log) s.log.push(actor.n + ' — Colheita Sombria: +' + (actor.hp - _ghOld) + ' PV!');
             try {
                 if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell('player', 'bless', { durationMs: 2200 });
             } catch (_eGh) {}
@@ -37742,7 +37746,7 @@ async function playTurn(aIdx, tIdx, opts) {
            se target.hp ultrapassar (sem aplicar debuff). */
         if (atkSkill.hpThreshold && target && (target.hp | 0) > (atkSkill.hpThreshold | 0)) {
             s.log.push(target.n + ' — HP ' + (target.hp | 0) + ' > CD ' + atkSkill.hpThreshold + ': ' +
-                (atkSkill.n || 'magia') + ' SEM EFEITO (PHB p.266).');
+                (atkSkill.n || 'magia') + ' SEM EFEITO.');
             /* Skip afterAttackEnemyDebuff entirely — atkSkill.afterAttackEnemyDebuff
                fica null-equivalent pra este hit. */
             atkSkill = Object.assign({}, atkSkill, { afterAttackEnemyDebuff: null });
@@ -37758,7 +37762,7 @@ async function playTurn(aIdx, tIdx, opts) {
             if (!_matchTag) {
                 s.log.push(target.n + ' — tipo incompatível (requer ' +
                     atkSkill.requiresTargetTag.join('/') + '): ' +
-                    (atkSkill.n || 'magia') + ' SEM EFEITO (PHB RAW target type).');
+                    (atkSkill.n || 'magia') + ' SEM EFEITO (alvo inválido).');
                 atkSkill = Object.assign({}, atkSkill, { afterAttackEnemyDebuff: null });
             }
         }
@@ -37779,7 +37783,7 @@ async function playTurn(aIdx, tIdx, opts) {
             /* (B) Skill tem save principal E target passou → NÃO aplica debuff */
             if (atkSkill.save && saveSuccess === true) {
                 applyDebuff = false;
-                if (s && s.log) s.log.push(target.n + ' — TR bem-sucedido: ' + (aed.n || 'debuff') + ' NÃO aplica (PHB RAW).');
+                if (s && s.log) s.log.push(target.n + ' — TR bem-sucedido: ' + (aed.n || 'debuff') + ' NÃO aplica.');
                 var _tUidRes = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
                 var _tElRes = _tUidRes ? (document.querySelector('[data-unit-id="' + _tUidRes + '"]') || document.querySelector('[data-uid="' + _tUidRes + '"]')) : null;
                 if (_tElRes && typeof spawnSkillImpactLabel === 'function') {
@@ -37800,7 +37804,7 @@ async function playTurn(aIdx, tIdx, opts) {
                 if (_sonAdv.adv) {
                     var _sonD2 = _simLuckyD20(_simIsLucky(target));
                     if (_sonD2 > sonRoll) sonRoll = _sonD2;
-                    s.log.push(target.n + ' — ' + _sonAdv.label + ': vantagem no TR (PHB).');
+                    s.log.push(target.n + ' — ' + _sonAdv.label + ': vantagem no TR.');
                 }
                 var sonMod = (typeof simSaveMod === 'function') ? simSaveMod(target, ab) : 0;
                 var sonTotal = sonRoll + sonMod;
@@ -37820,7 +37824,7 @@ async function playTurn(aIdx, tIdx, opts) {
                     || /sono|sleep|adormec/i.test((aed.dndCondition || '') + ' ' + (aed.n || '')))
                     && (target.raceKey === 'elf' || target.raceKey === 'halfelf')) {
                 applyDebuff = false;
-                if (s && s.log) s.log.push(target.n + ' — Ancestralidade Feérica: imune a sono mágico (PHB p.23).');
+                if (s && s.log) s.log.push(target.n + ' — Ancestralidade Feérica: imune a sono mágico!');
                 try {
                     var _feyEl = document.querySelector('[data-unit-id="' + (target.id || 'player') + '"]');
                     if (_feyEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_feyEl, 'ANCESTRALIDADE FEÉRICA', 'attack');
@@ -37921,7 +37925,7 @@ async function playTurn(aIdx, tIdx, opts) {
                                 return !x || x.id !== _ocE.linkedConditionId;
                             });
                             if (s.log) s.log.push((_ocT.n || '?') + ' se liberta — ' + (actor.n || '?') +
-                                ' trocou de concentração (PHB p.203: só 1 por vez).');
+                                ' trocou de concentração (apenas uma por vez).');
                         }
                         actor.se.splice(_ocI, 1);
                     }
@@ -37973,13 +37977,13 @@ async function playTurn(aIdx, tIdx, opts) {
                     dndCondition: _nhd.dndCondition || ''
                 });
                 if (s && s.log) {
-                    s.log.push(target.n + ' — ' + (_smBuff.n || 'smite') + ' aplica: ' + (_nhd.n || 'condição') + ' (PHB p.219+).');
+                    s.log.push(target.n + ' — ' + (_smBuff.n || 'smite') + ' aplica: ' + (_nhd.n || 'condição') + '.');
                 }
             }
             /* PHB: rider CONSOME no primeiro hit. Remove smite do actor.se. */
             actor.se.splice(_smIdx, 1);
             if (s && s.log) {
-                s.log.push(actor.n + ' — ' + (_smBuff.n || 'smite') + ' consumida no acerto (PHB).');
+                s.log.push(actor.n + ' — ' + (_smBuff.n || 'smite') + ' consumida no acerto.');
             }
             break;  /* 1 rider por hit */
         }
@@ -38004,7 +38008,7 @@ async function playTurn(aIdx, tIdx, opts) {
            então mantém o mesmo SUCESSO/FALHA MAS destaca visualmente o nat 20/1. */
         var _svRollTxt;
         if (_svAutoFail) {
-            _svRollTxt = 'AUTO-FALHA ' + _sabPt + ' (PHB App.A)';
+            _svRollTxt = 'AUTO-FALHA ' + _sabPt + ' (incapacitado)';
         } else if (saveRoll === 20) {
             _svRollTxt = 'NAT 20! TR ' + _sabPt + ' ' + saveRoll + '+' + saveMod + '=' + saveTotal + ' vs CD ' + saveDc + ' SUCESSO (½)';
         } else if (saveRoll === 1) {
@@ -38021,7 +38025,7 @@ async function playTurn(aIdx, tIdx, opts) {
             var _mmFlat = (atkSkill.magicMissiles.perDart && atkSkill.magicMissiles.perDart.flat) || 1;
             var dartSummary = mmPack.darts.map(function (d) { return d.dmg; }).join(' + ');
             s.log.push(actor.n + ' — ' + (atkSkill.n || 'Mísseis Mágicos') + ': ' + mmPack.count +
-                ' dardos 1d' + _mmDie + '+' + _mmFlat + ' (' + dartSummary + ' = ' + total + ') em ' + target.n + ' (auto-hit PHB p.257).');
+                ' dardos 1d' + _mmDie + '+' + _mmFlat + ' (' + dartSummary + ' = ' + total + ') em ' + target.n + ' (acerto automático).');
         } else {
             /* AutoHit genérico (raro — spells que acertam sempre sem atk roll) */
             var _ahDicePart = '';
@@ -38253,7 +38257,7 @@ async function runNpcSegmentUntilPlayerTurn() {
             /* A1 (2026-04-19) — Familiar/Sprite PHB-fiel: NÃO ataca (PHB p.240).
                Tem turno na ordem mas usa pra Esquivar/Help (action narrativa).
                Aqui simplificamos: skip silencioso (sem log spam). */
-            s.log.push(c.n + ' permanece atento (PHB: familiar não ataca).');
+            s.log.push(c.n + ' permanece atento (familiar não ataca).');
             render(s);
             await sleep(450);
         } else if (c && c.isDead) {
@@ -38293,7 +38297,7 @@ async function runNpcSegmentUntilPlayerTurn() {
                não pode mover/agir/reagir no primeiro turno. Consome a flag e
                loga o "perde o turno por surpresa". */
             c.surprised = false;
-            s.log.push(c.n + ' foi pego de surpresa — perde o turno (PHB p.189).');
+            s.log.push(c.n + ' foi pego de surpresa — perde o turno!');
             try {
                 var cellRoot = document.querySelector('[data-unit-id="' + (c.id || ('e_' + s.active_idx)) + '"]');
                 if (cellRoot && typeof spawnSkillImpactLabel === 'function') {
@@ -38564,7 +38568,7 @@ async function runNpcSegmentUntilPlayerTurn() {
                                     var _csRollTxt = _csRoll === 20 ? 'NAT 20!' : _csRoll === 1 ? 'NAT 1!' :
                                         'd20 ' + _csRoll + '+prof ' + _csProf + '+mod ' + _csMod + '=' + _csTotal;
                                     s.log.push(pCS.n + ' — Contramágica (magia nv ' + _cspellLvl + '): ' + _csRollTxt +
-                                        ' vs CD ' + _csDc + ' ' + (_csSuccess ? 'SUCESSO' : 'FALHA') + ' (PHB p.228).');
+                                        ' vs CD ' + _csDc + ' ' + (_csSuccess ? 'SUCESSO' : 'FALHA') + '.');
                                 }
                                 if (_csSuccess) {
                                     s.log.push(pCS.n + ' conjura Contramágica (reação) — dissipa ' + npcSkillChoice.n + ' do ' + c.n + '!');
@@ -38682,7 +38686,7 @@ async function runNpcSegmentUntilPlayerTurn() {
                     if (tgt == null || tgt < 0) break;
                     if (atkCount > 1) {
                         var _tgtName = (s.order[tgt] && s.order[tgt].n) || 'alvo';
-                        s.log.push('⚔️ ' + c.n + ' desfere Ataque Múltiplo (' + (mi + 1) + '/' + atkCount + ') contra ' + _tgtName + ' (D&D 5e MM p.11).');
+                        s.log.push('⚔️ ' + c.n + ' desfere Ataque Múltiplo (' + (mi + 1) + '/' + atkCount + ') contra ' + _tgtName + '.');
                         try {
                             var _actorUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, s.active_idx) : null;
                             var _actorEl = _actorUid ? document.querySelector('[data-unit-id="' + _actorUid + '"]') : null;
@@ -38783,7 +38787,7 @@ async function runDeathSaveTurnForUnit(s, aIdx) {
     var r = rollN(20);
     if (!simShouldSkipDiceForActor(u)) {
         await new Promise(function (done) {
-            showDice(r, done, u, 'Teste de morte · PHB', {
+            showDice(r, done, u, 'Teste contra a Morte', {
                 postResult: function () { return describeDeathSavePreview(u, r); }
             });
         });
