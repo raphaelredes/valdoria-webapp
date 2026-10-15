@@ -1604,6 +1604,41 @@
     margin-top: 2px;
 }
 
+/* ── Bônus de Ímpeto Tático & Chess-Clock no HUD da Comitiva (Pilar 5) ── */
+.v-party-momentum-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: linear-gradient(90deg, rgba(74, 52, 14, 0.95) 0%, rgba(38, 26, 8, 0.95) 100%);
+    border: 1px solid #ffd54f;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff8e1;
+    box-shadow: 0 0 12px rgba(255, 213, 79, 0.4);
+    animation: momentumBannerPulse 1.6s infinite alternate;
+}
 
+@keyframes momentumBannerPulse {
+    from { box-shadow: 0 0 6px rgba(255, 213, 79, 0.3); border-color: rgba(255, 213, 79, 0.6); }
+    to { box-shadow: 0 0 16px rgba(255, 213, 79, 0.7); border-color: #ffd54f; }
+}
 
+.v-party-momentum-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #ffd54f;
+    letter-spacing: 0.5px;
+}
 
+.v-party-momentum-clock {
+    font-family: monospace, sans-serif;
+    font-size: 11.5px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 213, 79, 0.3);
+}

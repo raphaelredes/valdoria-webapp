@@ -191,6 +191,24 @@
             html += '</div>';
         }
 
+        // Bônus de Ímpeto Tático & Ritmo do Bloco (Pilar 5 — D&D 5e / BG3 Chess-Clock)
+        if (_partyState.combat) {
+            var cState = _partyState.combat;
+            var tStart = cState.turn_started_at || 0;
+            var tMax = cState.turn_timeout_seconds || 30.0;
+            var nowSec = Date.now() / 1000;
+            var tElapsed = tStart > 0 ? Math.max(0, nowSec - tStart) : 0;
+            var tRemaining = Math.max(0, Math.ceil(tMax - tElapsed));
+            var isMomentum = (tStart > 0 && tElapsed <= 15.0);
+
+            if (isMomentum) {
+                html += '<div class="v-party-momentum-banner" title="Ímpeto Tático: Conclua as ações do bloco cooperativo em menos de 15s para ganhar +5 de Inspiração de Comitiva!">';
+                html += '  <span class="v-party-momentum-tag">⚡ ÍMPETO TÁTICO ATIVO (<15s)</span>';
+                html += '  <span class="v-party-momentum-clock">⏱️ ' + tRemaining + 's (+5s por ação)</span>';
+                html += '</div>';
+            }
+        }
+
         // Alerta de Fogo Amigo & Intenções Compartilhadas (Shared Intent Ghosts & Friendly Fire)
         if (_partyState.combat && _partyState.combat.active_intents) {
             var cIntents = _partyState.combat.active_intents;
@@ -3200,6 +3218,11 @@
         delayInBlock: _delayInBlock,
         readyAction: _readyAction,
         previewIntent: _previewIntent,
+        triggerRhythmActionBonus: function () {
+            if (typeof global.triggerRhythmClockActionBonus === 'function') {
+                global.triggerRhythmClockActionBonus();
+            }
+        },
     };
 
 })(typeof window !== 'undefined' ? window : this);

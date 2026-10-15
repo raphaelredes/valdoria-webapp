@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-14T23:47:15Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-14T23:59:38Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2253,6 +2253,114 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   fill: #ffd54f;
   text-anchor: middle;
   pointer-events: none;
+}
+
+/* ── Ritmo Tático D&D 5e / Co-op Chess-Clock & Ímpeto Tático (Pilar 5) ── */
+.bf-rhythm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  background: rgba(20, 16, 12, 0.88);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 224, 144, 0.15);
+  backdrop-filter: blur(4px);
+  position: relative;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+.bf-rhythm-badge.momentum-active {
+  border-color: #ffd54f;
+  background: linear-gradient(135deg, rgba(46, 34, 14, 0.95), rgba(26, 18, 8, 0.92));
+  box-shadow: 0 0 16px rgba(255, 213, 79, 0.35), inset 0 1px 0 rgba(255, 238, 170, 0.3);
+  animation: momentumBadgePulse 1.8s ease-in-out infinite alternate;
+}
+@keyframes momentumBadgePulse {
+  0% { box-shadow: 0 0 10px rgba(255, 213, 79, 0.25); }
+  100% { box-shadow: 0 0 20px rgba(255, 213, 79, 0.55); }
+}
+.bf-rhythm-icon {
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bf-rhythm-content {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+.bf-rhythm-title {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--v-gold, #c4953a);
+}
+.bf-rhythm-badge.momentum-active .bf-rhythm-title {
+  color: #ffe082;
+  text-shadow: 0 0 8px rgba(255, 215, 64, 0.5);
+}
+.bf-rhythm-sub {
+  font-family: var(--v-font, 'MedievalSharp'), serif;
+  font-size: 8.5px;
+  color: var(--v-text-dim, #a09484);
+  letter-spacing: 0.3px;
+}
+.bf-rhythm-timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.bf-rhythm-timer-text {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff8e1;
+  letter-spacing: 0.5px;
+  min-width: 28px;
+  text-align: right;
+}
+.bf-rhythm-timer-bar {
+  width: 42px;
+  height: 5px;
+  background: rgba(40, 32, 24, 0.8);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.bf-rhythm-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #81c784);
+  border-radius: 2px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+.bf-rhythm-timer-fill.warn {
+  background: linear-gradient(90deg, #ff9800, #ffb74d);
+}
+.bf-rhythm-timer-fill.danger {
+  background: linear-gradient(90deg, #f44336, #e57373);
+}
+.bf-clock-bonus-float {
+  position: absolute;
+  top: -14px;
+  right: 12px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: #69f0ae;
+  text-shadow: 0 0 6px rgba(105, 240, 174, 0.7);
+  pointer-events: none;
+  animation: clockBonusFloat 1.2s ease-out forwards;
+}
+@keyframes clockBonusFloat {
+  0% { opacity: 0; transform: translateY(4px) scale(0.85); }
+  25% { opacity: 1; transform: translateY(-2px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-16px) scale(0.9); }
 }
 
 /* Botão temporário flutuante no topo central para pular movimentação (Ordem do Usuário 2026-10) */
@@ -21758,6 +21866,95 @@ function buildSharedIntentsLayerSvg(s, bCols, bRows) {
     return svg;
 }
 
+// ── Ritmo Tático D&D 5e / Chess-Clock & Ímpeto Tático (Pilar 5) ──
+function triggerRhythmClockActionBonus() {
+    if (typeof window === 'undefined') return;
+    window.__simClockExtension = Math.min(15, (window.__simClockExtension || 0) + 5);
+    window.__recentClockBonusTriggered = true;
+
+    // Atualiza feedback flutuante no DOM imediatamente se badge estiver visível
+    var badgeEl = document.querySelector('.bf-rhythm-badge');
+    if (badgeEl) {
+        var existingFloat = badgeEl.querySelector('.bf-clock-bonus-float');
+        if (existingFloat) existingFloat.remove();
+        var floatEl = document.createElement('div');
+        floatEl.className = 'bf-clock-bonus-float';
+        floatEl.textContent = '+5s';
+        badgeEl.appendChild(floatEl);
+        setTimeout(function () {
+            if (floatEl && floatEl.parentNode) floatEl.remove();
+            window.__recentClockBonusTriggered = false;
+        }, 1200);
+    } else {
+        setTimeout(function () {
+            window.__recentClockBonusTriggered = false;
+        }, 1200);
+    }
+}
+
+function buildPartyRhythmClockBadge(s) {
+    if (!s) return '';
+    var isPlayerActiveTurn = (s.ph === 'active' && s.active_idx === s.p_idx);
+    var isPartyCombat = !!(s.coop || s.is_party_combat || (typeof vPartyClient !== 'undefined' && vPartyClient.getState && vPartyClient.getState()));
+
+    // Tempo inicial do bloco
+    var startedAt = s.turn_started_at || (s.active_block && s.active_block.started_at) || 0;
+    var maxSeconds = parseFloat(s.turn_timeout_seconds || 30.0);
+
+    var nowSec = Date.now() / 1000;
+    if (!startedAt) {
+        if (typeof window !== 'undefined') {
+            if (!window.__simTurnStartTime || window.__simTurnRound !== (s.rn || 1) || window.__simTurnIdx !== s.active_idx) {
+                window.__simTurnStartTime = nowSec;
+                window.__simTurnRound = s.rn || 1;
+                window.__simTurnIdx = s.active_idx;
+                window.__simClockExtension = 0;
+            }
+            startedAt = window.__simTurnStartTime;
+            maxSeconds = Math.min(45, 30 + (window.__simClockExtension || 0));
+        } else {
+            startedAt = nowSec;
+        }
+    } else if (typeof window !== 'undefined' && window.__simClockExtension) {
+        maxSeconds = Math.min(45, maxSeconds + window.__simClockExtension);
+    }
+
+    var elapsed = Math.max(0, nowSec - startedAt);
+    var remaining = Math.max(0, Math.ceil(maxSeconds - elapsed));
+    var isMomentumEligible = (elapsed <= 15.0);
+
+    var pct = Math.max(0, Math.min(100, Math.round((remaining / maxSeconds) * 100)));
+    var fillCls = pct > 50 ? '' : (pct > 25 ? ' warn' : ' danger');
+
+    var badgeCls = 'bf-rhythm-badge' + (isMomentumEligible ? ' momentum-active' : '');
+    var icon = isMomentumEligible ? '⚡' : '⏱️';
+    var title = isMomentumEligible ? 'ÍMPETO TÁTICO' : 'RITMO DO TURNO';
+    var sub = isMomentumEligible ? '+5 INSPIRAÇÃO (<15s)' : '+5s POR AÇÃO';
+    var tooltip = isMomentumEligible
+        ? 'D&D 5e Ímpeto Tático: A comitiva está agindo em menos de 15 segundos! Conclua o bloco cooperativo para receber +5 de Inspiração de Comitiva.'
+        : 'Chess-Clock Cooperativo D&D 5e: Cada ação realizada adiciona +5 segundos ao relógio tático (máximo 45s).';
+
+    var bonusHtml = '';
+    if (typeof window !== 'undefined' && window.__recentClockBonusTriggered) {
+        bonusHtml = '<div class="bf-clock-bonus-float">+5s</div>';
+    }
+
+    return '<div class="' + badgeCls + '" title="' + tooltip + '">' +
+        bonusHtml +
+        '<div class="bf-rhythm-icon">' + icon + '</div>' +
+        '<div class="bf-rhythm-content">' +
+            '<span class="bf-rhythm-title">' + title + '</span>' +
+            '<span class="bf-rhythm-sub">' + sub + '</span>' +
+        '</div>' +
+        '<div class="bf-rhythm-timer-wrap">' +
+            '<div class="bf-rhythm-timer-bar">' +
+                '<div class="bf-rhythm-timer-fill' + fillCls + '" style="width:' + pct + '%;"></div>' +
+            '</div>' +
+            '<span class="bf-rhythm-timer-text">' + remaining + 's</span>' +
+        '</div>' +
+    '</div>';
+}
+
 function buildBattlefield(s) {
     if (!s) return '';
     s.battlefield = s.battlefield || { cols: HEX_COLS_DEFAULT, rows: HEX_ROWS_DEFAULT };
@@ -21897,6 +22094,7 @@ function buildBattlefield(s) {
     html += '<div class="bf-hud-badges">';
     html += '<div class="bf-scale-badge" title="Regras D&D 5e: 1 Hexágono = 1,5m (5 pés). Zoom tático de confronto!"><span class="bf-scale-icon">📐</span><span class="bf-scale-text">ESCALA D&D 5e: <strong>1 HEX = 1,5m (5 FT)</strong></span><span class="bf-scale-sub">ZOOM DE CONFRONTO</span></div>';
     html += '<div class="' + visionBadgeCls + '" title="' + visionTitle + '"><span class="bf-vision-icon">' + visionIcon + '</span><span class="bf-vision-text">' + visionText + '</span><span class="bf-vision-sub">' + visionConditionLabel + '</span></div>';
+    html += buildPartyRhythmClockBadge(s);
     html += '</div>';
 
     // AI Turn Floating Banner (Padrão Larian / Feedback Visual de Automação)
@@ -26503,6 +26701,12 @@ async function __combatRemoteAction(action) {
             console.warn('[C-REM:ACTION] server_error type=' + actionType + ' err=' + resp.error);
             return;
         }
+
+        // Extensão adaptativa de +5s no Chess-Clock por ação realizada (Pilar 5)
+        if (['move', 'attack', 'skill', 'shove', 'help', 'hide', 'ready_action', 'delay_in_block', 'dash', 'dodge', 'disengage'].indexOf(actionType) !== -1) {
+            triggerRhythmClockActionBonus();
+        }
+
         /* [C-REM:PHASE-DEFER] (2026-04-21 REMOTE-only, opção B aprovada pelo autor)
            Se response traz ph terminal (victory/defeat/fled) + events pra animar,
            o primeiro render mostra VITORIA/DERROTA antes da animação terminar.
@@ -36017,6 +36221,12 @@ async function playTurn(aIdx, tIdx, opts) {
     var actor = s.order[aIdx];
     var target = s.order[tIdx];
     if (!actor || !target) return;
+
+    // Extensão adaptativa de +5s no Chess-Clock por ação realizada (Pilar 5)
+    if (actor.t === 'p' || actor.t === 'a') {
+        triggerRhythmClockActionBonus();
+    }
+
     /* C3.4 #90: Abatedor Colossal é 1×/TURNO — reseta no início do turno do player. */
     if (actor.t === 'p') s._colossusUsedThisTurn = false;
     /* X-6.5.51AC: log início de turno pra debug. */
