@@ -44676,6 +44676,62 @@ function _aaaListSubScreen(opts){
   };
   var th = themes[opts.theme] || themes.tavern;
 
+  // PADRAO_LOCAIS (#70): Auto-resolução contextual de banner e subtítulo se não fornecidos
+  var bannerImg = opts.bannerImg;
+  var subtitle = opts.subtitle;
+  if (!bannerImg) {
+    var _key = (opts.stackKey || '').toLowerCase();
+    var _imgBase = (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:')
+      ? '../valdoria-webapp/shared/img/'
+      : '/shared/img/';
+    if (/^temple|shrine|chapel|prayer|altar|ritual/.test(_key)) {
+      bannerImg = _imgBase + 'templo/templo-banner.webp';
+      if (!subtitle) subtitle = 'Santuário de Valdoria · Bênçãos & Oração';
+    } else if (/^bank|vault|coin|deposit|withdraw|loan|insurance|invest/.test(_key)) {
+      bannerImg = _imgBase + 'banco/banco-banner.webp';
+      if (!subtitle) subtitle = 'Banco de Valdoria · Serviços Financeiros';
+    } else if (/^inn|martha|rest|sleep|bed|room/.test(_key)) {
+      bannerImg = _imgBase + 'estalagem/estalagem-banner.webp';
+      if (!subtitle) subtitle = 'Estalagem do Acolhimento · Repouso & Conforto';
+    } else if (/^market|shop|vendor|trade|buy|sell|goods/.test(_key)) {
+      bannerImg = _imgBase + 'mercado/mercado-banner.webp';
+      if (!subtitle) subtitle = 'Mercado Central · Trocas & Suprimentos';
+    } else if (/^guild|contracts|training|library/.test(_key)) {
+      bannerImg = _imgBase + 'guilda/guilda-banner.webp';
+      if (!subtitle) subtitle = 'Guilda dos Aventureiros · Salão Principal';
+    } else if (/^arena|fight|duel|tournament|spar/.test(_key)) {
+      bannerImg = _imgBase + 'arena/arena-banner.webp';
+      if (!subtitle) subtitle = 'Arena de Valdoria · Fosso de Combate';
+    } else if (/^workshop|craft|forge|blacksmith|smith/.test(_key)) {
+      bannerImg = _imgBase + 'oficina/oficina-banner.webp';
+      if (!subtitle) subtitle = 'Oficina dos Artífices · Forja & Reparos';
+    } else if (/^rune|scribe|enchant|magic|arcane|alchemist/.test(_key)) {
+      bannerImg = _imgBase + 'runas/runas-banner.webp';
+      if (!subtitle) subtitle = 'Torre Rúnica · Encantamentos & Manuscritos';
+    } else if (/^festival|games|fair|celebration/.test(_key)) {
+      bannerImg = _imgBase + 'festival/festival-banner.webp';
+      if (!subtitle) subtitle = 'Praça das Festas · Jogos & Celebração';
+    } else if (/^gates|caravan|exit|travel|patrol/.test(_key)) {
+      bannerImg = _imgBase + 'portoes/portoes-banner.webp';
+      if (!subtitle) subtitle = 'Portões de Valdoria · Estradas do Reino';
+    } else if (/^square|investigate|gossip|daily/.test(_key)) {
+      bannerImg = _imgBase + 'city/praca-banner.webp';
+      if (!subtitle) subtitle = 'Praça Central de Valdoria';
+    } else if (/^tavern|tav_|drinks|games|carousing|gather|pitfight/.test(_key)) {
+      bannerImg = _imgBase + 'taverna/javali-negro-banner.webp';
+      if (!subtitle) subtitle = 'Taverna do Javali Bêbado';
+    } else if (opts.theme === 'inn') {
+      bannerImg = _imgBase + 'estalagem/estalagem-banner.webp';
+      if (!subtitle) subtitle = 'Estalagem do Acolhimento · Repouso & Conforto';
+    } else if (opts.theme === 'arcane') {
+      bannerImg = _imgBase + 'runas/runas-banner.webp';
+      if (!subtitle) subtitle = 'Torre Rúnica · Artes Arcanas';
+    } else if (opts.theme === 'tavern') {
+      bannerImg = _imgBase + 'taverna/javali-negro-banner.webp';
+      if (!subtitle) subtitle = 'Taverna do Javali Bêbado';
+    }
+  }
+
   var html = ''
     + '<style>'
     + '.aaa-sub{display:flex;flex-direction:column;gap: var(--v-space-md-lg, 10px);padding: 6px var(--v-space-sm, 4px) var(--v-space-lg, 12px);}'
@@ -44747,11 +44803,11 @@ function _aaaListSubScreen(opts){
     // Cenário
     + '<div class="aaa-sub">'
     // PADRAO_LOCAIS (#70): banner-cenário WebP (nível taverna/estalagem) quando
-    // opts.bannerImg presente — imagem full-bleed + gradiente escuro p/ legibilidade.
-    +   '<div class="aaa-sub-cenario"' + (opts.bannerImg ? ' style="background-image:linear-gradient(180deg,rgba(10,8,5,0.25),rgba(10,8,5,0.82)),url(' + opts.bannerImg + ');background-size:cover;background-position:center 28%;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;"' : '') + '>'
+    // bannerImg presente — imagem full-bleed + gradiente escuro p/ legibilidade.
+    +   '<div class="aaa-sub-cenario"' + (bannerImg ? ' style="background-image:linear-gradient(180deg,rgba(10,8,5,0.25),rgba(10,8,5,0.82)),url(' + bannerImg + ');background-size:cover;background-position:center 28%;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;"' : '') + '>'
     +     (opts.icon ? '<div class="aaa-sub-icon">' + opts.icon + '</div>' : '')
     +     '<div class="aaa-sub-title">' + (opts.title || '') + '</div>'
-    +     (opts.subtitle ? '<div class="aaa-sub-orn">◆ ' + opts.subtitle + ' ◆</div>' : '')
+    +     (subtitle ? '<div class="aaa-sub-orn">◆ ' + subtitle + ' ◆</div>' : '')
     +   '</div>';
   // Flavor
   if (opts.flavor) {
@@ -45709,6 +45765,8 @@ function _tavernShowDrinks(p){
   _aaaListSubScreen({
     theme: 'tavern',
     stackKey: 'tavern_drinks',
+    bannerImg: '/shared/img/taverna/javali-negro-banner.webp',
+    subtitle: 'Taverna do Javali Bêbado · Balcão de Grom',
     icon: _heralIco('ic-cerveja'),
     title: 'Bebidas — Grom',
     flavor: '<i>Grom enxuga uma caneca.</i> "O que vai ser?"',
@@ -45865,6 +45923,8 @@ function _tavernShowGames(p){
   _aaaListSubScreen({
     theme: 'tavern',
     stackKey: 'tavern_games',
+    bannerImg: '/shared/img/taverna/dados.webp',
+    subtitle: 'Taverna do Javali Bêbado · Mesas de Apostas',
     icon: _heralIco('ic-cartas'), title: 'Mesa de Jogos',
     flavor: '<i>Algumas mesas no canto. Apostadores discutem em voz baixa.</i>',
     items: items,
@@ -46028,40 +46088,62 @@ function _tavernShowMuralBoard(p){
 
     var html = ''
       + '<style>'
-      + '.mural-wrap{padding: 6px var(--v-space-sm, 4px) var(--v-space-md, 8px);}'
-      + '.mural-board{position:relative;width:100%;height:74vh;min-height:460px;border-radius: var(--v-radius, 10px);overflow:hidden;'
+      + '.mural-wrap{padding: 6px var(--v-space-sm, 4px) var(--v-space-md, 8px);display:flex;flex-direction:column;gap:8px;}'
+      + '.mural-header-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;'
+      +   'background:linear-gradient(180deg,rgba(40,24,14,0.92),rgba(20,12,6,0.96));border:1px solid rgba(196,149,58,0.45);'
+      +   'border-radius:var(--v-radius,10px);box-shadow:0 4px 12px rgba(0,0,0,0.55);}'
+      + '.mural-header-info{display:flex;align-items:center;gap:12px;}'
+      + '.mural-header-icon{width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.6));}'
+      + '.mural-header-title{font-family:var(--v-font-display,Cinzel,serif);font-weight:700;font-size:calc(12.5px * var(--v-font-scale,1));color:#e8c45a;letter-spacing:0.5px;}'
+      + '.mural-header-sub{font-size:calc(10px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);}'
+      + '.mural-header-count{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10.5px * var(--v-font-scale,1));color:#c4953a;font-weight:700;letter-spacing:0.4px;}'
+      + '.mural-board{position:relative;width:100%;height:72vh;min-height:460px;border-radius: var(--v-radius, 10px);overflow:hidden;'
       +   'background:#1a0e06 url(' + BOARD_IMG + '?v=' + _bv + ') center/cover no-repeat;'
-      +   'border:1px solid rgba(196,149,58,0.35);box-shadow:0 6px 18px rgba(0,0,0,0.5),inset 0 0 26px rgba(0,0,0,0.45);}'
-      + '.mural-papers{position:absolute;top:18%;left:15%;right:15%;bottom:13%;}'  /* zona = só a cortiça (marrom clara), longe da moldura (user 2026-06-16) */
-      + '.mural-paper{position:absolute;width:44%;box-sizing:border-box;padding: 13px var(--v-space-md, 8px) 9px;cursor:pointer;'
-      +   'background:linear-gradient(158deg,#efe2c4 0%,#e6d4ad 55%,#d8c398 100%);color:#3a2a14;'
-      +   'border:1px solid rgba(120,90,40,0.55);border-radius: var(--v-radius-xs, 4px);'
-      +   'box-shadow:0 6px 12px rgba(0,0,0,0.45),inset 0 0 16px rgba(150,118,64,0.22);'
+      +   'border:1.5px solid rgba(196,149,58,0.45);box-shadow:0 8px 24px rgba(0,0,0,0.6),inset 0 0 30px rgba(0,0,0,0.5);}'
+      + '.mural-papers{position:absolute;top:18%;left:15%;right:15%;bottom:13%;}'  /* zona = cortiça clara longe da moldura */
+      + '.mural-paper{position:absolute;width:44%;box-sizing:border-box;padding: 12px var(--v-space-md, 8px) 8px;cursor:pointer;'
+      +   'background:linear-gradient(158deg,#f2e6cb 0%,#e8d7b3 55%,#dbca9d 100%);color:#3a2a14;'
+      +   'border:1px solid rgba(120,90,40,0.6);border-radius: var(--v-radius-xs, 4px);'
+      +   'box-shadow:0 6px 14px rgba(0,0,0,0.5),inset 0 0 16px rgba(150,118,64,0.25);'
       +   'transform-origin:top center;transition:transform 0.14s ease,box-shadow 0.18s,filter 0.18s;'
       +   'animation:muralPaperIn 0.42s ease-out both;}'
-      + '.mural-paper:hover{transform:scale(1.07) rotate(0deg)!important;z-index:6;'
-      +   'box-shadow:0 11px 22px rgba(0,0,0,0.55),0 0 16px rgba(255,200,90,0.45);filter:brightness(1.04);}'
+      + '.mural-paper:hover{transform:scale(1.08) rotate(0deg)!important;z-index:6;'
+      +   'box-shadow:0 12px 24px rgba(0,0,0,0.6),0 0 18px rgba(255,200,90,0.5);filter:brightness(1.05);}'
       + '.mural-paper:active{transform:scale(0.97)!important;}'
-      + '.mural-pin{position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:15px;height:15px;border-radius:50%;'
-      +   'background:radial-gradient(circle at 35% 30%,#ff8f6e,#c0392b 60%,#7a1f12);box-shadow:0 2px 4px rgba(0,0,0,0.55),inset 0 1px 2px rgba(255,255,255,0.4);}'
-      + '.mural-ptitle{font-family:var(--v-font-display,Cinzel,serif);font-weight:700;font-size:calc(12px * var(--v-font-scale,1));'
-      +   'line-height:1.18;text-align:center;color:#3a2410;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}'
-      + '.mural-pmeta{margin-top: var(--v-space-sm, 5px);padding-top: var(--v-space-xs, 3px);border-top:1px dashed rgba(120,90,40,0.45);'
+      + '.mural-pin{position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:50%;'
+      +   'background:radial-gradient(circle at 35% 30%,#e0a845,#967026 65%,#4a3410);box-shadow:0 2px 4px rgba(0,0,0,0.6),inset 0 1px 1px rgba(255,255,255,0.4);}'
+      + '.mural-pbadge{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(8px * var(--v-font-scale,1));font-weight:700;'
+      +   'letter-spacing:0.8px;text-transform:uppercase;padding:1px 5px;border-radius:3px;margin:2px auto 4px;display:inline-block;text-align:center;}'
+      + '.mural-pbadge.quest{background:rgba(180,40,20,0.18);border:1px solid rgba(180,40,20,0.55);color:#8a1f12;}'
+      + '.mural-pbadge.notice{background:rgba(196,149,58,0.22);border:1px solid rgba(196,149,58,0.55);color:#6e4a1a;}'
+      + '.mural-ptitle{font-family:var(--v-font-display,Cinzel,serif);font-weight:700;font-size:calc(11.5px * var(--v-font-scale,1));'
+      +   'line-height:1.2;text-align:center;color:#3a2410;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}'
+      + '.mural-pmeta{margin-top: var(--v-space-sm, 4px);padding-top: var(--v-space-xs, 3px);border-top:1px dashed rgba(120,90,40,0.45);'
       +   'font-size:calc(10px * var(--v-font-scale,1));text-align:center;color:#5a3c16;font-weight:600;letter-spacing:0.3px;'
       +   'display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;}'
-      + '.mural-plvl{font-size:calc(9px * var(--v-font-scale,1));color:#7a5a2a;font-style:italic;}'
-      + '.mural-pnote{margin-top: var(--v-space-sm, 5px);font-size:calc(9px * var(--v-font-scale,1));color:#5a3c16;font-style:italic;'
+      + '.mural-plvl{font-size:calc(9px * var(--v-font-scale,1));color:#7a5a2a;font-style:italic;margin-top:1px;}'
+      + '.mural-pnote{margin-top: var(--v-space-sm, 4px);font-size:calc(9px * var(--v-font-scale,1));color:#5a3c16;font-style:italic;'
       +   'line-height:1.3;text-align:center;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}'
       + '.mural-empty{position:absolute;top:42%;left:12%;right:12%;text-align:center;color:#efe2c4;'
       +   'font-family:var(--v-font,MedievalSharp,serif);font-size:calc(13px * var(--v-font-scale,1));font-style:italic;'
-      +   'text-shadow:0 2px 6px rgba(0,0,0,0.8);line-height:1.4;}'
-      + '.mural-grom{margin: var(--v-space-sm, 5px) 2px 0;text-align:center;font-family:var(--v-font,MedievalSharp,serif);'
+      +   'text-shadow:0 2px 6px rgba(0,0,0,0.85);line-height:1.4;}'
+      + '.mural-grom{padding:4px 6px;text-align:center;font-family:var(--v-font,MedievalSharp,serif);'
       +   'font-size:calc(11px * var(--v-font-scale,1));font-style:italic;color:var(--v-text-dim,#a09484);line-height:1.4;}'
       + '@keyframes muralPaperIn{from{opacity:0;transform:translateY(-6px) scale(0.96);}to{opacity:1;}}'
       + 'body.perf-lite .mural-paper{animation:none!important;}'
       + '@media (prefers-reduced-motion:reduce){.mural-paper{animation:none!important;}}'
       + '</style>'
       + '<div class="mural-wrap">'
+      +   '<div class="mural-header-bar">'
+      +     '<div class="mural-header-info">'
+      +       '<img class="mural-header-icon" src="/shared/img/services/svc-mural.webp" alt="">'
+      +       '<div style="text-align:left;">'
+      +         '<div class="mural-header-title">MURAL DE TAREFAS & RECOMPENSAS</div>'
+      +         '<div class="mural-header-sub">Taverna do Javali Bêbado · Contratos e Editais Vigentes</div>'
+      +       '</div>'
+      +     '</div>'
+      +     '<div class="mural-header-count">' + items.length + ' EDITAIS</div>'
+      +   '</div>'
       +   '<div class="mural-board">'
       +     '<div class="mural-papers">';
     if (items.length) {
@@ -46074,6 +46156,7 @@ function _tavernShowMuralBoard(p){
           html += '<button type="button" class="mural-paper" data-idx="' + i + '" data-kind="quest" '
             + 'style="top:' + s.t + '%;left:' + s.l + '%;transform:rotate(' + s.rot + 'deg);animation-delay:' + (i * 70) + 'ms;">'
             + '<span class="mural-pin"></span>'
+            + '<div class="mural-pbadge quest">CONTRATO</div>'
             + '<div class="mural-ptitle">' + (n.title || n.id) + '</div>'
             + '<div class="mural-pmeta">' + rw + ' ' + coin + ' · ' + xp + ' XP</div>'
             + '<div class="mural-plvl">' + lvl + '</div>'
@@ -46083,17 +46166,18 @@ function _tavernShowMuralBoard(p){
           html += '<button type="button" class="mural-paper" data-idx="' + i + '" data-kind="notice" '
             + 'style="top:' + s.t + '%;left:' + s.l + '%;transform:rotate(' + s.rot + 'deg);animation-delay:' + (i * 70) + 'ms;">'
             + '<span class="mural-pin"></span>'
+            + '<div class="mural-pbadge notice">AVISO LOCAL</div>'
             + '<div class="mural-ptitle">' + (n.title || 'Aviso') + '</div>'
             + '<div class="mural-pnote">' + (n.text || '') + '</div>'
             + '</button>';
         }
       });
     } else {
-      html += '<div class="mural-empty">O mural está vazio por ora.<br>Volte mais tarde — sempre pinga novidade.</div>';
+      html += '<div class="mural-empty">O mural está vazio por ora.<br>Volte mais tarde — sempre pingam novos contratos e avisos dos viajantes.</div>';
     }
     html += '</div></div>'
       + '<div class="mural-grom">' + (items.length
-          ? 'Grom aponta o mural coberto de editais e recados. <i>"Contrato selado teu diário registra. O resto é conversa de taverna."</i>'
+          ? 'Grom aponta o mural coberto de editais selados. <i>"Contrato selado teu diário registra ao aceitar. O resto é boato e conversa de estrada."</i>'
           : 'Grom dá de ombros. <i>"Mural vazio. Volta que sempre aparece coisa nova."</i>')
       + '</div></div>';
 
@@ -46152,89 +46236,14 @@ function _muralShowNotice(n){
   }
   if (typeof _showInfoPopup !== 'function') { if (typeof vToast === 'function') vToast(n.text || '', 'info'); return; }
   _showInfoPopup({
-    icon: _heralIco('ic-pergaminho'), npc: 'Grom, o Caolho', title: (n.title || 'Aviso'),
-    desc: '<i>"' + (n.text || '') + '"</i><br><br><span style="color:var(--v-gold,#ffd700);font-weight:600;">🗺️ Pista de Exploração Registrada!</span><br><small style="color:var(--v-text-dim,#a09484);">Você guardou esse relato no seu diário de viagem. Ele guiará suas buscas nos ermos de Valdoria.</small>',
+    icon: '/shared/img/quests/quest-scroll.webp', npc: 'Grom, o Caolho', title: (n.title || 'Aviso'),
+    desc: '<i>"' + (n.text || '') + '"</i><br><br><span style="color:var(--v-gold,#ffd700);font-weight:600;">[Pista de Exploração Registrada]</span><br><small style="color:var(--v-text-dim,#a09484);">Você guardou esse relato no seu diário de viagem. Ele guiará suas buscas nos ermos de Valdoria.</small>',
     singleButton: true, cancelLabel: 'Entendido', onCancel: function(){}
   });
 }
 
 function _tavernShowBulletin(p){
-  // 2026-06-14 (user: "peguei missões no mural com V verde, mas não apareceram em
-  // Missões"): o Mural era um board PROCEDURAL fake (CANON_NOTICE_BOARD) que só
-  // mostrava popup "Missão aceita / Diário atualizado" SEM persistir nada (sem
-  // quest.accept, sem quest id real). User escolheu "virar quadro real": agora o
-  // Mural mostra o MESMO board do servidor (SERVER_QUEST_BOARD, igual ao Quadro da
-  // Guilda) e aceitar PERSISTE via quest.accept → _applyServerQuests, aparecendo em
-  // Missões. Server-authority (SUPREME RULE #0). LOCAL (file://) usa o catálogo local.
-  var remote = !!(window.vCityServer && window.vCityServer.isRemote());
-  var coin = '<span class="vi vi-coin sm"></span>';
-
-  function _render(){
-    var board = remote ? (window.SERVER_QUEST_BOARD || [])
-                       : (typeof GUILD_QUESTS_AVAILABLE !== 'undefined' ? GUILD_QUESTS_AVAILABLE : []);
-    var items = board.map(function(q){
-      var rw = q.reward || 0, xp = q.xp || 0;
-      var diff = remote ? ('nv ' + (q.min_level || 1)) : (q.diff || '');
-      return { icon: q.icon || _heralIco('ic-missões'), label: q.title || q.id,
-               badge: rw + 'V + ' + xp + 'XP · ' + diff, _q: q };
-    });
-    _aaaListSubScreen({
-      theme: 'tavern',
-      stackKey: 'tavern_bulletin', icon: _heralIco('ic-missões'), title: 'Quadro de Avisos',
-      flavor: items.length
-        ? '<i>Grom aponta o mural coberto de editais selados. "Contratos de verdade, forasteiro. Aceita um — teu diário registra."</i>'
-        : '<i>Grom dá de ombros. "Mural vazio por ora. Volta mais tarde que sempre pinga contrato novo."</i>',
-      items: items,
-      onPick: function(item){
-        var q = item._q;
-        var rw = q.reward || 0, xp = q.xp || 0;
-        var ctx = q.desc ? ('<i>' + q.desc + '</i><br><br>') : '';
-        _showInfoPopup({
-          icon: q.icon || _heralIco('ic-missões'), npc: 'Grom, o Caolho',
-          title: 'Aceitar: ' + (q.title || q.id),
-          desc: ctx + '<b>Recompensa:</b> ' + rw + ' ' + coin + ' + ' + xp + ' XP'
-            + (remote && q.min_level ? '<br><b>Nível recomendado:</b> ' + q.min_level
-                                     : (q.diff ? '<br><b>Dificuldade:</b> ' + q.diff : '')),
-          onConfirm: function(){
-            if (!remote) {
-              // LOCAL mode (file://): fallback mock client-side (dev tool).
-              if (typeof _acceptQuest === 'function') _acceptQuest(q.id);
-              navigateBack();
-              return;
-            }
-            if (window.vProcessing && window.vProcessing.show) window.vProcessing.show({ text: 'Aceitando missão...' });
-            window.vCityServer.quest.accept(q.id).then(function(r){
-              if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
-              if (r && r.ok) {
-                if (typeof _applyServerQuests === 'function') _applyServerQuests(r.quests);  // hidrata QUESTS_ACTIVE → aparece em Missões
-                if (Array.isArray(window.SERVER_QUEST_BOARD)) {
-                  window.SERVER_QUEST_BOARD = window.SERVER_QUEST_BOARD.filter(function(b){ return b.id !== q.id; });
-                }
-                _showServiceResultPopup({
-                  icon: q.icon || _heralIco('ic-missões'), npc: 'Grom, o Caolho',
-                  narrative: '<b>' + (q.title || q.id) + '</b> registrada no seu diário.<br><i>"Boa sorte. Volta vivo."</i>',
-                  deltas: [], onContinue: function(){ navigateBack(); }
-                });
-              } else if (typeof vToast === 'function') {
-                vToast((r && r.error) || 'Não foi possível aceitar a missão');
-              }
-            }).catch(function(e){
-              if (window.vProcessing && window.vProcessing.hide) window.vProcessing.hide();
-              console.error('[CITY] tavern bulletin quest accept failed', e);
-              if (typeof vToast === 'function') vToast('Erro ao aceitar missão');
-            });
-          }
-        });
-      }
-    });
-  }
-
-  // Estado fresco do board (pode ter mudado desde o boot por accept/abandon).
-  if (remote && typeof _refreshServerBoard === 'function') {
-    _refreshServerBoard().then(_render).catch(_render);
-  } else {
-    _render();
-  }
+  _tavernShowMuralBoard(p);
 }
 
 function _tavernShowRoom(p){
@@ -49533,6 +49542,7 @@ function _tavernShowMercenaries(p){
         theme: 'tavern', stackKey: 'tav_mercenaries',
         icon: _heralIco('ic-stat-attack'), title: 'Contratar Mercenário',
         bannerImg: '/shared/img/taverna/mercenarios-banner.webp',
+        subtitle: 'Taverna do Javali Bêbado · Contratos de Mercenários',
         flavor: _dialogueFlavorText(data) || '<i>O Mestre dos Contratos folheia a lista. "Estes estão livres hoje. Pagamento à vista — o contrato vale por alguns combates."</i>',
         items: items,
         onPick: function(item){ _openCityScreen('tavern', item._cb, p); }
@@ -49558,7 +49568,10 @@ function _tavernShowMercenaries(p){
   });
   _aaaListSubScreen({
     theme: 'tavern',
-    stackKey: 'tav_mercenaries', icon: _heralIco('ic-stat-attack'), title: 'Contratar Mercenário',
+    stackKey: 'tav_mercenaries',
+    bannerImg: '/shared/img/taverna/mercenarios-banner.webp',
+    subtitle: 'Taverna do Javali Bêbado · Contratos de Mercenários',
+    icon: _heralIco('ic-stat-attack'), title: 'Contratar Mercenário',
     flavor: '<i>O Mestre dos Contratos folheia uma lista. "Estes estão livres hoje. Pagamento à vista, contrato vale por alguns combates."</i>',
     items: items,
     onPick: function(item){
@@ -49615,6 +49628,7 @@ function _tavernShowAdventurers(p){
         theme: 'tavern', stackKey: 'tav_adventurers',
         icon: _heralIco('ic-grupo'), title: 'Recrutar Explorador',
         bannerImg: '/shared/img/taverna/exploradores-banner.webp',
+        subtitle: 'Taverna do Javali Bêbado · Recrutamento de Exploradores',
         flavor: _dialogueFlavorText(data) || '<i>"Estes não são mercenários — são exploradores. Vão com você pelo propósito, não só pelo ouro. Mas ainda cobram."</i>',
         items: items,
         onPick: function(item){ _openCityScreen('tavern', item._cb, p); }
@@ -49641,7 +49655,10 @@ function _tavernShowAdventurers(p){
   });
   _aaaListSubScreen({
     theme: 'tavern',
-    stackKey: 'tav_adventurers', icon: _heralIco('ic-grupo'), title: 'Recrutar Aventureiro',
+    stackKey: 'tav_adventurers',
+    bannerImg: '/shared/img/taverna/exploradores-banner.webp',
+    subtitle: 'Taverna do Javali Bêbado · Recrutamento de Aventureiros',
+    icon: _heralIco('ic-grupo'), title: 'Recrutar Aventureiro',
     flavor: '<i>"Estes não são mercenários — são aventureiros. Vão com você porque acreditam no propósito, não só pelo ouro. Mas ainda cobram."</i>',
     items: items,
     onPick: function(item){
@@ -49687,7 +49704,10 @@ function _tavernShowCarousing(p){
   });
   _aaaListSubScreen({
     theme: 'tavern',
-    stackKey: 'tavern_carousing', icon: _heralIco('ic-cerveja'), title: 'Socializar (Carousing)',
+    stackKey: 'tavern_carousing',
+    bannerImg: '/shared/img/taverna/javali-negro-banner.webp',
+    subtitle: 'Taverna do Javali Bêbado · Farra & Contatos',
+    icon: _heralIco('ic-cerveja'), title: 'Socializar (Carousing)',
     flavor: '<i>— Socializar bebendo gera contatos. Custos altos = contatos importantes.</i>',
     items: items,
     onPick: function(item){
@@ -49770,7 +49790,10 @@ function _tavernShowGather(p){
   });
   _aaaListSubScreen({
     theme: 'tavern',
-    stackKey: 'tavern_gather', icon: _heralIco('ic-stat-wis'), title: 'Coletar Informações',
+    stackKey: 'tavern_gather',
+    bannerImg: '/shared/img/taverna/boatos.webp',
+    subtitle: 'Taverna do Javali Bêbado · Investigação de Boatos',
+    icon: _heralIco('ic-stat-wis'), title: 'Coletar Informações',
     flavor: '<i>' + intro + '</i><br><i>Cooldown: 5 turnos entre tentativas (canonical GATHER_COOLDOWN_TURNS).</i>',
     items: items,
     onPick: function(item){
@@ -49982,7 +50005,10 @@ function _tavernShowPitfight(p){
                   : 'Taxa de entrada: 25 Valdoritas + sua aposta.';
   _aaaListSubScreen({
     theme: 'tavern',
-    stackKey: 'tavern_pitfight', icon: _heralIco('ic-stat-attack'), title: 'Rinha — Aposte em ' + opp,
+    stackKey: 'tavern_pitfight',
+    bannerImg: '/shared/img/taverna/javali-negro-banner.webp',
+    subtitle: 'Taverna do Javali Bêbado · Rinha da Adega',
+    icon: _heralIco('ic-stat-attack'), title: 'Rinha — Aposte em ' + opp,
     flavor: '<i>' + introLine + '</i><br>' +
             '<i>3 testes (FOR · DES · CON) contra DC = 5 + 2d10 .</i><br>' +
             '<i>Cooldown: 3 turnos entre rinhas.</i>',
