@@ -523,6 +523,92 @@
         }
     }
 
+    // ── Streaming em Tempo Real (Server-Sent Events / SSE — D&D 5e Multiplayer) ──
+    var _eventSource = null;
+
+    function _startRealtimeStream() {
+        if (typeof EventSource === 'undefined') {
+            _startPolling();
+            return;
+        }
+        if (_eventSource) return;
+
+        var sid = _partyState && _partyState.session_id;
+        if (!sid) return;
+
+        var base = _getApiBase();
+        var url = base + '/api/party/stream?session_id=' + encodeURIComponent(sid) + '&user_id=' + encodeURIComponent(_cfg.uid);
+
+        try {
+            _eventSource = new EventSource(url);
+
+            _eventSource.addEventListener('initial_state', function (e) {
+                try {
+                    var data = JSON.parse(e.data);
+                    if (data && data.state) {
+                        _partyState = data.state;
+                        _renderHud();
+                        _checkStateTriggers(_partyState);
+                    }
+                } catch (err) {}
+            });
+
+            _eventSource.addEventListener('state_update', function (e) {
+                try {
+                    var data = JSON.parse(e.data);
+                    if (data.delta) {
+                        _applyStateDelta(data.delta, data.turn_version);
+                    } else if (data.state) {
+                        _partyState = data.state;
+                    }
+                    _renderHud();
+                    _checkStateTriggers(_partyState);
+                } catch (err) {}
+            });
+
+            _eventSource.addEventListener('ping', function (e) {
+                try {
+                    var pingData = JSON.parse(e.data);
+                    _renderPingWave(pingData);
+                } catch (err) {}
+            });
+
+            _eventSource.addEventListener('intent_update', function (e) {
+                try {
+                    var it = JSON.parse(e.data);
+                    if (_partyState && _partyState.combat) {
+                        _partyState.combat.active_intents = _partyState.combat.active_intents || {};
+                        _partyState.combat.active_intents[String(it.actorUid)] = it.intent;
+                        _renderHud();
+                    }
+                } catch (err) {}
+            });
+
+            _eventSource.onerror = function () {
+                // Em caso de instabilidade da conexão SSE, aciona o polling de contingência
+                _stopRealtimeStream();
+                _startPolling();
+            };
+
+            // Com o streaming SSE ativo, o polling opera apenas como heartbeat de segurança a cada 15s
+            _cfg.pollIntervalMs = 15000;
+            _startPolling();
+
+        } catch (err) {
+            _startPolling();
+        }
+    }
+
+    function _stopRealtimeStream() {
+        if (_eventSource) {
+            try {
+                _eventSource.close();
+            } catch (_) {}
+            _eventSource = null;
+        }
+        _cfg.pollIntervalMs = 2500;
+    }
+
     function _checkStateTriggers(state) {
         // 1. Verifica sorteio de saque coletivo ativo
         if (state.active_loot_roll && !_activeLootTimer) {
@@ -1827,7 +1913,7 @@
         if (res && res.ok && res.state) {
             _partyState = res.state;
             _renderHud();
-            _startPolling();
+            _startRealtimeStream();
             if (global.vToast) global.vToast('Comitiva criada com sucesso! Código: #' + res.session_id, 'ok');
             return res.state;
         }
@@ -1851,7 +1937,7 @@
         if (res && res.ok && res.state) {
             _partyState = res.state;
             _renderHud();
-            _startPolling();
+            _startRealtimeStream();
             if (global.vToast) global.vToast('Você entrou na comitiva #' + sessionId + '!', 'ok');
             return res.state;
         }
@@ -1861,6 +1947,7 @@
     async function _leaveParty() {
         if (!_partyState || !_partyState.session_id) return;
         var sid = _partyState.session_id;
+        _stopRealtimeStream();
         _stopPolling();
         _partyState = null;
         _renderHud();
@@ -2814,6 +2901,7 @@
                         if (recRes && recRes.ok && recRes.snapshot) {
                             _partyState = recRes.snapshot;
                             _renderHud();
+                            _startRealtimeStream();
                         }
                     }).catch(function () {});
                 }
