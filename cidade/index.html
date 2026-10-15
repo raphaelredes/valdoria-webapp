@@ -12051,25 +12051,22 @@ body.perf-lite .vc-action-btn { transition: none; }
           dead: false
         };
       }
-      // REMOTE mode: popula GROUP_MEMBERS com allies REAIS do backend (2026-05-10).
-      // Backend retorna _allies_data em city_hub.py:485, e o serializer
-      // (game_api_serializer.py:174) mapeia _allies_data → state.allies (sem underscore).
-      // Shape: [{n, c, r, ico, l, hp, mhp, mp, mmp, res, dead, type, ...}, ...]
-      // Index 0 = player_card (já populado acima); indexes 1+ = allies reais.
-      if (window.GROUP_MEMBERS){
-        // 2026-05-10 FIX v3: usa _savedState (era `state` mas estava fora de escopo
-        // neste .then — causava ReferenceError -> fallback -> mock visivel).
-        var state = _savedState;  // shim pra preservar logica abaixo
-        var _alliesBackend = (state && (state.allies || state._allies_data)) ? (state.allies || state._allies_data) : null;
-        var _realAllies = (_alliesBackend && _alliesBackend.length > 1) ? _alliesBackend.slice(1) : [];
-        if (typeof _syncPartyWithGroupMembers === 'function') {
-          _syncPartyWithGroupMembers(_realAllies);
-        }
+      // REMOTE mode: popula GROUP_MEMBERS com aliados REAIS do aventureiro (2026-05-10 / 2026-10-15).
+      // Backend /api/auth/characters retorna picked.allies (ally_block_data).
+      // Fallback: state.allies / state._allies_data de /api/game/state.
+      var state = _savedState;
+      var _alliesBackend = (picked && (picked.allies || picked.party)) ||
+                           (state && (state.allies || state._allies_data)) || null;
+      if (_alliesBackend && typeof _syncPartyWithGroupMembers === 'function') {
+        _syncPartyWithGroupMembers(_alliesBackend);
       }
       // Sessão #55 (2026-05-28): state real aplicado — libera fade-in do
       // #city-group-panel. refreshHud() abaixo dispara renderCityGroupPanel
       // que agora respeita _cityRealPlayerReady e revela o painel.
       window._cityRealPlayerReady = true;
+      if (typeof renderCityGroupPanel === 'function') {
+        renderCityGroupPanel();
+      }
       if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.guild && window.vCityServer.guild.start) {
         window.vCityServer.guild.start().then(function(gData){
           if (gData && gData.party && typeof _syncPartyWithGroupMembers === 'function') {
@@ -13689,6 +13686,12 @@ function syncCityPlayerFromServerState(st) {
     if (pl.level != null)  p.level = pl.level;
     if (pl.name)           p.name = pl.name;
     if (pl.exhaustion != null) p.exh = pl.exhaustion;
+  }
+  if (st.allies || st._allies_data || st.party) {
+    var _alliesSt = st.allies || st._allies_data || st.party;
+    if (typeof _syncPartyWithGroupMembers === 'function') {
+      _syncPartyWithGroupMembers(_alliesSt);
+    }
   }
   if (typeof refreshHud === 'function') refreshHud();
 }
@@ -65729,6 +65732,9 @@ function _resForClass(cls){
 // /api/web/party. Antes user via Liriel/Korin como mock, confundindo (parecia
 // outra conta). Em LOCAL (file://), mock fica pra dev/preview.
 var GROUP_MEMBERS = (function(){
+  if (window.GROUP_MEMBERS && Array.isArray(window.GROUP_MEMBERS) && window.GROUP_MEMBERS.slice(1).some(Boolean)) {
+    return window.GROUP_MEMBERS;
+  }
   try {
     var pp = new URLSearchParams(window.location.search);
     var isRemote = !!(pp.get('token') && pp.get('api') && pp.get('uid'));
@@ -69244,6 +69250,14 @@ document.addEventListener('DOMContentLoaded', function(){
   renderCityGroupPanel();
   renderCityExitBtn();
   renderCityHotbar();
+  // Sincroniza comitiva do servidor no boot (se remoto)
+  if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.guild && window.vCityServer.guild.start) {
+    window.vCityServer.guild.start().then(function(gData){
+      if (gData && gData.party && typeof _syncPartyWithGroupMembers === 'function') {
+        _syncPartyWithGroupMembers(gData.party);
+      }
+    }).catch(function(_gerr){ console.warn('[CITY] initial guild party sync failed', _gerr); });
+  }
   // Hook em refreshHud pra também atualizar group panel quando state muda
   var _origRefreshHud = refreshHud;
   refreshHud = function(){
