@@ -1924,6 +1924,8 @@ body.perf-lite .enc-cho-item-thumb--clickable:hover { transform: none; }
   letter-spacing: 1.2px;
   padding: 0 24px 2px;
   text-shadow: 0 0 10px rgba(196, 149, 58, 0.35);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .enc-cd-subtitle {
   text-align: center;
@@ -1932,6 +1934,8 @@ body.perf-lite .enc-cho-item-thumb--clickable:hover { transform: none; }
   font-style: italic;
   color: #a09484;
   margin-top: 2px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .enc-cd-badge-row {
@@ -1980,6 +1984,8 @@ body.perf-lite .enc-cho-item-thumb--clickable:hover { transform: none; }
   font-size: calc(11.5px * var(--v-font-scale, 1));
   color: #d8ceb8;
   line-height: 1.45;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .enc-cd-flavor {
   font-style: italic;
@@ -1990,6 +1996,8 @@ body.perf-lite .enc-cho-item-thumb--clickable:hover { transform: none; }
   border-left: 2px solid var(--v-gold-55);
   padding: 6px 10px;
   border-radius: 0 6px 6px 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .enc-cd-speech {
   font-family: 'Cinzel', 'Marcellus', serif;
@@ -2003,6 +2011,8 @@ body.perf-lite .enc-cho-item-thumb--clickable:hover { transform: none; }
   padding: 8px 12px;
   line-height: 1.45;
   margin-bottom: 2px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 

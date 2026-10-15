@@ -3103,6 +3103,53 @@
     var isDeclineQuest = isQuestChoice && !isAcceptQuest && (cid === 'decline' || cid.indexOf('decline') >= 0 || clabel.indexOf('recusar') >= 0 || clabel.indexOf('desistir') >= 0 || clabel.indexOf('cancelar') >= 0 || clabel.indexOf('outra hora') >= 0 || clabel.indexOf('adiar') >= 0 || cres === 'discovery_defer');
 
     var rawLabel = ((ch.label && String(ch.label).trim()) || 'Opção').replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
+    var sTxt = '';
+    var detectedSub = '';
+    if (ch.speech) {
+      sTxt = _cleanSpeechText(ch.speech);
+    } else if (ch.label) {
+      var _lblTrim = String(ch.label).trim();
+      var _dashM = _lblTrim.match(/^([^—–]+?)\s*[—–]\s*([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
+      if (_dashM) {
+        sTxt = _cleanSpeechText(_dashM[2]);
+        detectedSub = _dashM[1].trim();
+      } else {
+        var _colonM = _lblTrim.match(/^([^:]+?)\s*:\s*([“"][^”"]+[”"])$/);
+        if (_colonM) {
+          sTxt = _cleanSpeechText(_colonM[2]);
+          detectedSub = _colonM[1].trim();
+        } else {
+          var _tm = _lblTrim.match(/^\[(.*?)\]\s*(.*)$/);
+          if (_tm) {
+            var _pot = _tm[2].trim();
+            var _qParen = _pot.match(/^([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
+            if (_qParen) {
+              sTxt = _cleanSpeechText(_qParen[1]);
+              if (_qParen[2]) detectedSub = _qParen[2].trim();
+            } else if (_pot.indexOf('“') === 0 || (_pot.indexOf('"') === 0 && _pot.length > 2)) {
+              sTxt = _cleanSpeechText(_pot);
+            }
+          } else if (_lblTrim.indexOf('— "') === 0 || _lblTrim.indexOf('— “') === 0 || _lblTrim.indexOf('“') === 0 || (_lblTrim.indexOf('"') === 0 && _lblTrim.length > 2)) {
+            sTxt = _cleanSpeechText(_lblTrim);
+          }
+        }
+      }
+    }
+
+    var chDc = ch.dc || (ch.check && ch.check.dc);
+    var chSkill = ch.skill || (ch.check && (ch.check.skill || ch.check.stat));
+    if (!chDc) {
+      var cdExtMatch = String(ch.label || '').match(/\[\s*(?:CD\s*(\d+)\s+([A-Za-zÀ-ú\s]+)|([A-Za-zÀ-ú\s]+)\s+CD\s*(\d+))\s*\]/i);
+      if (cdExtMatch) {
+        chDc = cdExtMatch[1] || cdExtMatch[4];
+        chSkill = (cdExtMatch[2] || cdExtMatch[3] || '').trim();
+      }
+    }
+
+    var _normSpeech = String(sTxt || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+    var _normRaw = rawLabel.replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+    var isRawLabelPureSpeech = !!(_normSpeech && (_normRaw === _normSpeech || rawLabel.indexOf('“') === 0 || rawLabel.indexOf('"') === 0));
+
     var titleText = rawLabel;
     var subtitleText = '';
     var dlg = (opts && opts.dialogue) || _currentRenderState || null;
@@ -3136,6 +3183,60 @@
     } else if (ch.title) {
       titleText = ch.title;
       subtitleText = ch.subtitle || '';
+    } else if (isRawLabelPureSpeech) {
+      // Quando o rótulo é a própria fala entre aspas, gera um título de ação contextual
+      if (detectedSub) {
+        titleText = detectedSub;
+      } else if (chDc && chSkill) {
+        titleText = 'Teste de ' + _skillLabelPT(chSkill) + ' (CD ' + chDc + ')';
+      } else if (ch.tag) {
+        titleText = '[' + ch.tag.toUpperCase() + '] Resposta do Aventureiro';
+      } else if (ch.isCombat) {
+        titleText = 'Desafio de Combate';
+      } else if (cid === 'boon') {
+        titleText = 'Prece e Bênção Especial';
+      } else if (cid === 'spar') {
+        titleText = 'Treino e Desafio';
+      } else if (cid === 'scribe') {
+        titleText = 'Inscrição Arcana';
+      } else if (cid === 'lift') {
+        titleText = 'Ação Furtiva';
+      } else if (cid === 'forage') {
+        titleText = 'Coleta de Ervas';
+      } else if (cid === 'imbue') {
+        titleText = 'Consagração de Luz';
+      } else if (cid === 'gossip') {
+        titleText = 'Sondagem de Boatos';
+      } else if (cid === 'totem') {
+        titleText = 'Comunhão com Espíritos';
+      } else if (cid === 'focus') {
+        titleText = 'Foco e Meditação';
+      } else if (cid === 'arm') {
+        titleText = 'Desafio de Força';
+      } else if (cid === 'spark') {
+        titleText = 'Canalização Arcana';
+      } else if (cid === 'whisper') {
+        titleText = 'Sussurro Obscuro';
+      } else if (cid === 'pray') {
+        titleText = 'Prece e Devoção';
+      } else if (cid === 'tactics') {
+        titleText = 'Alinhamento Tático';
+      } else if (cid === 'story') {
+        titleText = 'História de Batalha';
+      } else if (cid === 'rumor') {
+        titleText = 'Sondagem de Rumores';
+      } else if (cid.indexOf('emp_') === 0) {
+        titleText = 'Apoio e Empatia';
+      } else if (cid.indexOf('prag_') === 0) {
+        titleText = 'Conselho Pragmático';
+      } else if (cid.indexOf('check_') === 0) {
+        titleText = 'Perspectiva e Perícia';
+      } else if (cid.indexOf('prov_') === 0) {
+        titleText = 'Desafio e Provocação';
+      } else {
+        titleText = 'Resposta do Personagem';
+      }
+      subtitleText = (chDc && chSkill) ? ('Desafio de perícia D&D 5e · ' + _skillLabelPT(chSkill)) : 'Interação de Diálogo';
     } else if (rawLabel.indexOf(':') !== -1) {
       var parts = rawLabel.split(':');
       titleText = parts[0].trim();
@@ -3168,48 +3269,12 @@
       var sName = _STAT_LABEL_PT[ch.stat] || ch.stat.toUpperCase();
       statBadge = '<span class="enc-cd-badge">Teste de ' + sName + '</span>';
     }
-    var chDc = ch.dc || (ch.check && ch.check.dc);
-    var chSkill = ch.skill || (ch.check && (ch.check.skill || ch.check.stat));
-    if (!chDc) {
-      var cdExtMatch = String(ch.label || '').match(/\[\s*(?:CD\s*(\d+)\s+([A-Za-zÀ-ú\s]+)|([A-Za-zÀ-ú\s]+)\s+CD\s*(\d+))\s*\]/i);
-      if (cdExtMatch) {
-        chDc = cdExtMatch[1] || cdExtMatch[4];
-        chSkill = (cdExtMatch[2] || cdExtMatch[3] || '').trim();
-      }
-    }
     if (chDc && chSkill) {
       statBadge += '<span class="enc-cd-badge">CD ' + chDc + ' · ' + _skillLabelPT(chSkill) + (ch.chance != null ? ' (' + ch.chance + '%)' : '') + '</span>';
     } else if (ch.cost) {
       statBadge += '<span class="enc-cd-badge" style="color:#ffd700;">' + ch.cost + ' ' + _VCOIN + '</span>';
     }
     // Ordem do Usuário 2026-10: Spoilers de consequências (Renome +X) em escolhas BANIDOS para preservar a imersão de RPG de mesa D&D 5e.
-
-    var sTxt = '';
-    var detectedSub = '';
-    if (ch.speech) {
-      sTxt = _cleanSpeechText(ch.speech);
-    } else if (ch.label) {
-      var _lblTrim = String(ch.label).trim();
-      var _dashM = _lblTrim.match(/^([^—–]+?)\s*[—–]\s*([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
-      if (_dashM) {
-        sTxt = _cleanSpeechText(_dashM[2]);
-        detectedSub = _dashM[1].trim();
-      } else {
-        var _tm = _lblTrim.match(/^\[(.*?)\]\s*(.*)$/);
-        if (_tm) {
-          var _pot = _tm[2].trim();
-          var _qParen = _pot.match(/^([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
-          if (_qParen) {
-            sTxt = _cleanSpeechText(_qParen[1]);
-            if (_qParen[2]) detectedSub = _qParen[2].trim();
-          } else if (_pot.indexOf('“') === 0 || (_pot.indexOf('"') === 0 && _pot.length > 2)) {
-            sTxt = _cleanSpeechText(_pot);
-          }
-        } else if (_lblTrim.indexOf('— "') === 0 || _lblTrim.indexOf('— “') === 0 || _lblTrim.indexOf('“') === 0 || (_lblTrim.indexOf('"') === 0 && _lblTrim.length > 2)) {
-          sTxt = _cleanSpeechText(_lblTrim);
-        }
-      }
-    }
 
     var speechHtml = '';
     if (sTxt) {
@@ -3234,18 +3299,33 @@
           '<div class="enc-cd-box">Você decide declinar a incumbência neste momento, priorizando sua sobrevivência e recusando o peso deste fardo.</div>' +
         '</div>';
     } else if (ch.desc) {
-      descHtml =
-        '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
-          '<div class="enc-cd-box">' + _stripEmojis(ch.desc) + '</div>' +
-        '</div>';
+      var _cDesc = _stripEmojis(ch.desc).trim();
+      var _normDesc = _cDesc.replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+      var _normTitle = String(titleText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+      if (_normDesc && _normDesc !== _normSpeech && _normDesc !== _normTitle) {
+        descHtml =
+          '<div class="enc-cd-section">' +
+            '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
+            '<div class="enc-cd-box">' + _cDesc + '</div>' +
+          '</div>';
+      }
     } else {
-      var intentText = detectedSub || subtitleText || '';
-      descHtml =
-        '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
-          '<div class="enc-cd-box">' + _stripEmojis(_coinify(intentText || titleText)) + '</div>' +
-        '</div>';
+      var intentText = (detectedSub || subtitleText || '').trim();
+      var _normIntent = intentText.replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+      var _normTitle = String(titleText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+      if (_normIntent && _normIntent !== _normSpeech && _normIntent !== _normTitle) {
+        descHtml =
+          '<div class="enc-cd-section">' +
+            '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
+            '<div class="enc-cd-box">' + _stripEmojis(_coinify(intentText)) + '</div>' +
+          '</div>';
+      } else if (!sTxt && titleText) {
+        descHtml =
+          '<div class="enc-cd-section">' +
+            '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
+            '<div class="enc-cd-box">' + _stripEmojis(_coinify(titleText)) + '</div>' +
+          '</div>';
+      }
     }
 
     var resultsHtml = '';
@@ -3566,7 +3646,13 @@
             tagPill = '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>';
           }
         } else {
-          var _tagMatch = _trimmed.match(/^\[(.*?)\]\s*(.*)$/);
+          var _colonM = _trimmed.match(/^([^:]+?)\s*:\s*([“"][^”"]+[”"])$/);
+          if (_colonM) {
+            hasSpeech = true;
+            speechClean = _cleanSpeechText(_colonM[2]);
+            subText = _colonM[1].trim();
+          } else {
+            var _tagMatch = _trimmed.match(/^\[(.*?)\]\s*(.*)$/);
           if (_tagMatch) {
             var _potSpeech = _tagMatch[2].trim();
             var _qParen = _potSpeech.match(/^([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
@@ -3594,7 +3680,8 @@
           }
         }
       }
-      if (hasSpeech && !speechClean) {
+    }
+    if (hasSpeech && !speechClean) {
         speechClean = _cleanSpeechText(ch.speech);
       }
       if (speechClean) {
