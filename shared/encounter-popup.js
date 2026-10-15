@@ -83,6 +83,8 @@
   function _cleanSpeechText(raw) {
     if (!raw) return '';
     var s = _stripEmojis(String(raw).trim());
+    // Remove marcações de CD/perícia que possam estar grudadas no final ou início da fala (evita quebra de aspas)
+    s = s.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
     var prev = '';
     while (s && s !== prev) {
       prev = s;
@@ -3100,7 +3102,7 @@
     var isAcceptQuest = isQuestChoice && (cid === 'accept' || cid.indexOf('accept') >= 0 || clabel.indexOf('aceitar') >= 0 || clabel.indexOf('aceito') >= 0 || cres === 'accept_quest' || cres === 'discovery_unlock' || !!ch._questId || !!ch.quest_id);
     var isDeclineQuest = isQuestChoice && !isAcceptQuest && (cid === 'decline' || cid.indexOf('decline') >= 0 || clabel.indexOf('recusar') >= 0 || clabel.indexOf('desistir') >= 0 || clabel.indexOf('cancelar') >= 0 || clabel.indexOf('outra hora') >= 0 || clabel.indexOf('adiar') >= 0 || cres === 'discovery_defer');
 
-    var rawLabel = (ch.label && String(ch.label).trim()) || 'Opção';
+    var rawLabel = ((ch.label && String(ch.label).trim()) || 'Opção').replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
     var titleText = rawLabel;
     var subtitleText = '';
     var dlg = (opts && opts.dialogue) || _currentRenderState || null;
@@ -3166,14 +3168,21 @@
       var sName = _STAT_LABEL_PT[ch.stat] || ch.stat.toUpperCase();
       statBadge = '<span class="enc-cd-badge">Teste de ' + sName + '</span>';
     }
-    if (ch.dc && ch.skill) {
-      statBadge += '<span class="enc-cd-badge">CD ' + ch.dc + ' · ' + _skillLabelPT(ch.skill) + (ch.chance != null ? ' (' + ch.chance + '%)' : '') + '</span>';
+    var chDc = ch.dc || (ch.check && ch.check.dc);
+    var chSkill = ch.skill || (ch.check && (ch.check.skill || ch.check.stat));
+    if (!chDc) {
+      var cdExtMatch = String(ch.label || '').match(/\[\s*(?:CD\s*(\d+)\s+([A-Za-zÀ-ú\s]+)|([A-Za-zÀ-ú\s]+)\s+CD\s*(\d+))\s*\]/i);
+      if (cdExtMatch) {
+        chDc = cdExtMatch[1] || cdExtMatch[4];
+        chSkill = (cdExtMatch[2] || cdExtMatch[3] || '').trim();
+      }
+    }
+    if (chDc && chSkill) {
+      statBadge += '<span class="enc-cd-badge">CD ' + chDc + ' · ' + _skillLabelPT(chSkill) + (ch.chance != null ? ' (' + ch.chance + '%)' : '') + '</span>';
     } else if (ch.cost) {
       statBadge += '<span class="enc-cd-badge" style="color:#ffd700;">' + ch.cost + ' ' + _VCOIN + '</span>';
-    } else if (ch.renownDelta) {
-      var rd = ch.renownDelta > 0 ? '+' + ch.renownDelta : String(ch.renownDelta);
-      statBadge += '<span class="enc-cd-badge">Renome ' + rd + '</span>';
     }
+    // Ordem do Usuário 2026-10: Spoilers de consequências (Renome +X) em escolhas BANIDOS para preservar a imersão de RPG de mesa D&D 5e.
 
     var sTxt = '';
     var detectedSub = '';
@@ -3512,25 +3521,34 @@
       }
 
       var dcBadge = '';
-      if (ch.dc && ch.skill) {
+      var chDc = ch.dc || (ch.check && ch.check.dc);
+      var chSkill = ch.skill || (ch.check && (ch.check.skill || ch.check.stat));
+      var rawLabelStr = String(ch.label || '');
+      if (!chDc) {
+        var cdExtMatch = rawLabelStr.match(/\[\s*(?:CD\s*(\d+)\s+([A-Za-zÀ-ú\s]+)|([A-Za-zÀ-ú\s]+)\s+CD\s*(\d+))\s*\]/i);
+        if (cdExtMatch) {
+          chDc = cdExtMatch[1] || cdExtMatch[4];
+          chSkill = (cdExtMatch[2] || cdExtMatch[3] || '').trim();
+        }
+      }
+
+      if (chDc && chSkill) {
         /* sessão #88: "CD" (convenção PT-BR do projeto, não "DC") + tradução
            de key EN ('charisma' → 'Carisma') preservando labels já em PT-BR. */
         var advTag = ch.advantage ? ' · <span class="enc-cho-adv" style="color:#ffd700;font-weight:700;">✦ Vantagem</span>' : '';
-        dcBadge = '<span class="enc-cho-dc">CD ' + ch.dc + ' · ' + _skillLabelPT(ch.skill) + (ch.chance != null ? ' · ' + ch.chance + '%' : '') + advTag + '</span>';
+        dcBadge = '<span class="enc-cho-dc">CD ' + chDc + ' · ' + _skillLabelPT(chSkill) + (ch.chance != null ? ' · ' + ch.chance + '%' : '') + advTag + '</span>';
       } else if (ch.cost) {
         dcBadge = '<span class="enc-cho-dc enc-cho-cost">' + ch.cost + ' ' + _VCOIN + '</span>';
-      } else if (ch.renownDelta) {
-        var rd = ch.renownDelta > 0 ? '+' + ch.renownDelta : String(ch.renownDelta);
-        dcBadge = '<span class="enc-cho-dc enc-cho-renown">Renome ' + rd + '</span>';
       }
+      // Ordem do Usuário 2026-10: Spoilers de consequências (Renome +X) em escolhas BANIDOS para preservar a imersão de RPG de mesa D&D 5e.
+
       // label e desc podem ter HTML inline simples (<span>, <i>)
       /* sessão #88: choice sem label NUNCA vira botão vazio (só chevron) —
          fallback 'Continuar' + warn pro error-reporter. */
       var _choLabel = _stripEmojis((ch.label && String(ch.label).trim()) || 'Continuar');
       if (!ch.label) console.warn('[ENC] choice sem label', ch.id || ch.cb || '');
-      if (dcBadge) {
-        _choLabel = _choLabel.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
-      }
+      // Sanitização robusta: remove marcações como [CD 14 Furtividade], [Persuasão CD 12], etc. em qualquer posição da string
+      _choLabel = _choLabel.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
 
       var tagText = ch.tag || (ch.badge && String(ch.badge).replace(/^\[|\]$/g, '')) || '';
       var tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
@@ -3579,8 +3597,8 @@
       if (hasSpeech && !speechClean) {
         speechClean = _cleanSpeechText(ch.speech);
       }
-      if (dcBadge && speechClean) {
-        speechClean = speechClean.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
+      if (speechClean) {
+        speechClean = speechClean.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
       }
 
       if (!tagPill && ch.badge) {
@@ -3601,16 +3619,12 @@
           titleText = 'Permanecer na cidade';
           subText = 'Suspender viagem em segurança';
         } else if (ch.desc) {
-          subText = _stripEmojis(ch.desc);
-        } else if (hasSpeech && ch.label) {
-          var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s]/g, '').toLowerCase();
-          var _altLabel = _stripEmojis(ch.label || '');
-          if (dcBadge) {
-            _altLabel = _altLabel.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
-          }
-          var _normLabel = _altLabel.replace(/[“”.!?,;:\s]/g, '').toLowerCase();
-          if (_normLabel && _normLabel !== _normSpeech) {
-            subText = _altLabel;
+          subText = _stripEmojis(ch.desc).replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
+          var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+          var _normSub = String(subText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+          var _normLabel = String(_choLabel || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+          if (_normSub && (_normSub === _normSpeech || _normSub === _normLabel)) {
+            subText = '';
           }
         }
 
@@ -3642,27 +3656,23 @@
         var subDesc = '';
         if (hasSpeech) {
           mainContent = tagPill + '<span class="enc-cho-speech">“' + _coinify(speechClean) + '”</span>';
-          subDesc = _stripEmojis(ch.desc || ch.label || '');
-          if (dcBadge) {
-            subDesc = subDesc.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
-          }
-          // Anti-repetição (Ordem do Usuário 2026-10): se a descrição for idêntica à fala,
-          // usa o label da ação se diferente, ou omite a duplicação em vez de repetir o mesmo texto
-          var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s]/g, '').toLowerCase();
-          var _normSub = String(subDesc || '').replace(/[“”.!?,;:\s]/g, '').toLowerCase();
-          if (_normSpeech && _normSpeech === _normSub) {
-            var _altLabel = _stripEmojis(ch.label || '');
-            if (dcBadge) {
-              _altLabel = _altLabel.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
+          subDesc = _stripEmojis(ch.desc || '');
+          if (subDesc) {
+            subDesc = subDesc.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
+            // Anti-repetição (Ordem do Usuário 2026-10): se a descrição for idêntica à fala ou label,
+            // omite a duplicação em vez de repetir o mesmo texto no topo e rodapé do card
+            var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+            var _normSub = String(subDesc || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+            var _normLabel = String(_choLabel || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+            if (_normSub && (_normSub === _normSpeech || _normSub === _normLabel)) {
+              subDesc = '';
             }
-            var _normLabel = _altLabel.replace(/[“”.!?,;:\s]/g, '').toLowerCase();
-            subDesc = (_normLabel && _normLabel !== _normSpeech) ? _altLabel : '';
           }
         } else {
           mainContent = (tagPill ? tagPill : '') + _coinify(_choLabel);
           subDesc = _stripEmojis(ch.desc || '');
-          if (dcBadge) {
-            subDesc = subDesc.replace(/^\[[^\]]*\bCD\s*\d+[^\]]*\]\s*/i, '');
+          if (subDesc) {
+            subDesc = subDesc.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
           }
         }
         row.innerHTML =

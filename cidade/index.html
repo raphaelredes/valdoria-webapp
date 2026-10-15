@@ -1411,6 +1411,10 @@ LOG SINK (Fase 7):
     .csp-body {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
       /* 2026-05-11 v4: padding minimo no body porque as secoes ja tem
          seu proprio padding lateral. Popup eh full overlay (inset 0,
          z-index 9000) — sem bottom-panel, sem padding extra necessario. */
@@ -12774,7 +12778,7 @@ function _isCTA(btn) {
       + '<div style="margin: 0 0 var(--v-space-md-lg, 10px);">'
       + '<div style="font-size:calc(11px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); letter-spacing:2px; text-transform:uppercase; margin-bottom: var(--v-space-md, 8px); padding: 0 var(--v-space-sm, 4px); text-align:center; font-family:var(--v-font-display,Cinzel,serif);">O Mundo te Espera</div>'
       + '<div style="display:flex; flex-direction:column; gap:5px;">'
-      + _fLsFeature(_uiIcoImg('acao-atacar','ui-ico-img'), 'Combate D&D 5e', 'Sistema completo de RPG de mesa')
+      + _fLsFeature(_uiIcoImg('acao-atacar','ui-ico-img'), 'Combate Tático por Turnos', 'Sistema completo de RPG de mesa')
       + _fLsFeature(_uiIcoImg('grupo','ui-ico-img'), 'Aliados Vivos', 'Companheiros que evoluem com você')
       + _fLsFeature(_uiIcoImg('cartografia','ui-ico-img'), 'Exploração Imersiva', 'Eventos, conquistas, missões épicas')
       + '</div>'
@@ -17819,10 +17823,10 @@ var _FICHA_STAT_HELP = {
   int: { t: 'Inteligência (INT)', d: 'Acuidade mental, memória e raciocínio lógico. Atributo de conjuração do Mago. Rege Arcanismo, Investigação, História, Natureza e Religião.' },
   wis: { t: 'Sabedoria (SAB)', d: 'Percepção, intuição e sintonia com o ambiente. Atributo de conjuração de Clérigo e Druida. Rege Percepção, Intuição, Medicina e Sobrevivência.' },
   cha: { t: 'Carisma (CAR)', d: 'Força de personalidade e magnetismo pessoal. Atributo de conjuração de Bardo, Feiticeiro, Bruxo e Paladino. Rege Persuasão, Enganação, Intimidação e Atuação.' },
-  ac:  { t: 'Classe de Armadura (CA)', d: 'O valor de defesa que determina o quão difícil é atingir o alvo com um ataque. Para acertar, o atacante precisa rolar 1d20 + bônus de ataque IGUAL ou MAIOR que esta CA.<br><br><b>Cálculo Canônico D&D 5e:</b> Base 10 + modificador de Destreza + armadura e escudo equipados ou armadura inata.' },
-  atk: { t: 'Bônus de Ataque', d: 'Valor somado à rolagem de 1d20 para determinar se o ataque atinge a Classe de Armadura (CA) do adversário.<br><br><b>Cálculo Canônico D&D 5e:</b> Bônus de Proficiência + modificador do atributo correspondente (Força para armas corpo-a-corpo padrão; Destreza para armas de ataque à distância ou armas com propriedade Acuidade).' },
-  spelldc: { t: 'Dificuldade de Magia (CD / Spell Save DC)', d: 'A Classe de Dificuldade (CD) que os inimigos devem igualar ou superar em seus testes de salvaguarda para resistir às magias do conjurador.<br><br><b>Cálculo Canônico D&D 5e (PHB p. 205):</b> 8 + Bônus de Proficiência + modificador do atributo de conjuração (INT para Mago; SAB para Clérigo/Druida; CAR para Bardo/Feiticeiro/Bruxo/Paladino).' },
-  prof: { t: 'Bônus de Proficiência', d: 'Bônus de competência universal somado a jogadas de ataque com armas treinadas, salvaguardas proficientes, CD de magias e testes de perícias proficientes.<br><br><b>Escala Canônica D&D 5e por Nível:</b><br>• Níveis 1 a 4: <b>+2</b><br>• Níveis 5 a 8: <b>+3</b><br>• Níveis 9 a 12: <b>+4</b><br>• Níveis 13 a 16: <b>+5</b><br>• Níveis 17 a 20: <b>+6</b>' }
+  ac:  { t: 'Classe de Armadura (CA)', d: 'O valor de defesa que determina o quão difícil é atingir o alvo com um ataque. Para acertar, o atacante precisa rolar 1d20 + bônus de ataque IGUAL ou MAIOR que esta CA.<br><br><b>Cálculo Regente:</b> Base 10 + modificador de Destreza + armadura e escudo equipados ou armadura inata.' },
+  atk: { t: 'Bônus de Ataque', d: 'Valor somado à rolagem de 1d20 para determinar se o ataque atinge a Classe de Armadura (CA) do adversário.<br><br><b>Cálculo Regente:</b> Bônus de Proficiência + modificador do atributo correspondente (Força para armas corpo-a-corpo padrão; Destreza para armas de ataque à distância ou armas com propriedade Acuidade).' },
+  spelldc: { t: 'Dificuldade de Magia (CD)', d: 'A Classe de Dificuldade (CD) que os inimigos devem igualar ou superar em seus testes de salvaguarda para resistir às magias do conjurador.<br><br><b>Cálculo Regente:</b> 8 + Bônus de Proficiência + modificador do atributo de conjuração (INT para Mago; SAB para Clérigo/Druida; CAR para Bardo/Feiticeiro/Bruxo/Paladino).' },
+  prof: { t: 'Bônus de Proficiência', d: 'Bônus de competência universal somado a jogadas de ataque com armas treinadas, salvaguardas proficientes, CD de magias e testes de perícias proficientes.<br><br><b>Escala por Nível:</b><br>• Níveis 1 a 4: <b>+2</b><br>• Níveis 5 a 8: <b>+3</b><br>• Níveis 9 a 12: <b>+4</b><br>• Níveis 13 a 16: <b>+5</b><br>• Níveis 17 a 20: <b>+6</b>' }
 };
 _FICHA_STAT_HELP['dc'] = _FICHA_STAT_HELP['spelldc'];
 function _showFichaStatHelp(key, memberIdx){
@@ -17848,7 +17852,7 @@ function _showFichaStatHelp(key, memberIdx){
   var iconId = 'ic-stat-' + (key === 'atk' ? 'attack' : ((key === 'spelldc' || key === 'dc') ? 'spelldc' : key));
   _showInfoPopup({
     icon: '<svg viewBox="0 0 120 120" style="width:34px;height:34px;color:var(--v-gold,#c4953a);"><use href="#' + iconId + '"/></svg>',
-    npc: 'Compêndio D&D 5e',
+    npc: 'Compêndio de Regras',
     title: h.t,
     desc: '<div style="text-align:left;color:var(--v-text,#d4c8b0);font-size:calc(12.5px * var(--v-font-scale,1));line-height:1.55;">'
       + '<p style="margin:0 0 8px 0;">' + h.d + '</p>'
@@ -18217,8 +18221,8 @@ var _DND_SUBRACE_HELP = {
   variant: {
     name: 'Humano Variante (Variant Human)',
     race: 'Humano',
-    bonuses: '+1 em 2 atributos à escolha, 1 perícia adicional e 1 Talento no nível 1 (PHB p.31)',
-    advantages: ['Uma das opções mais fortes de customização do D&D 5e devido ao Talento precoce.'],
+    bonuses: '+1 em 2 atributos à escolha, 1 perícia adicional e 1 Talento no nível 1',
+    advantages: ['Alta versatilidade tática e especialização precoce devido ao Talento adicional.'],
     disadvantages: ['Não recebe +1 nos outros 4 atributos.']
   },
   asmodeus: {
@@ -18358,7 +18362,7 @@ var _DND_CLASS_HELP = {
   barbaro: {
     name: 'Bárbaro (Barbarian)',
     role: 'Tanque Primal, DPS Brutal e Absorvedor de Dano',
-    hit_die: '1d12 por nível (a maior Vida do D&D 5e)',
+    hit_die: '1d12 por nível (a maior Vida entre as classes)',
     resource: 'Fúria Primal',
     saves: 'Força (FOR) e Constituição (CON)',
     armor: 'Armaduras Leves e Médias, Escudos (ou Defesa sem Armadura)',
@@ -18465,7 +18469,7 @@ var _DND_CLASS_HELP = {
     weapons: 'Armas Simples',
     main_attr: 'Carisma (CAR)',
     advantages: [
-      'Rajada Mística (Eldritch Blast): O melhor truque de dano do D&D 5e (1d10 força escalável).',
+      'Rajada Mística (Eldritch Blast): O mais poderoso truque de dano arcano (1d10 força escalável).',
       'Magia de Pacto: Seus slots sempre conjuram no NÍVEL MÁXIMO e recuperam em descansos curtos!',
       'Invocações Místicas: Habilidades passivas sobrenaturais customizáveis.'
     ],
@@ -18508,7 +18512,7 @@ var _DND_SUBCLASS_HELP = {
       { lvl: 'Nv 11', name: 'Evocação Potente', desc: 'Soma o modificador de Inteligência a todas as magias de dano de evocação.' },
       { lvl: 'Nv 15', name: 'Sobrecarga Arcana', desc: 'Força uma magia de 1º a 5º nível a causar o dano MÁXIMO possível dos dados (1× por descanso longo).' }
     ],
-    advantages: 'Maior poder destrutivo em área de todo o D&D sem qualquer risco de ferir seus companheiros de grupo.',
+    advantages: 'Maior poder destrutivo em área de todas as tradições sem qualquer risco de ferir seus companheiros de grupo.',
     disadvantages: 'Foco exclusivo em destruição direta, sem os escudos defensivos da Abjuração ou previsão da Adivinhação.'
   },
   abjuration: {
@@ -18607,7 +18611,7 @@ var _DND_SUBCLASS_HELP = {
       { lvl: 'Nv 2', name: 'Preservar a Vida', desc: 'Canalizar Divindade para curar até 5× o nível de clérigo distribuído entre aliados feridos.' },
       { lvl: 'Nv 6', name: 'Curador Abençoado', desc: 'Curar aliados também restaura seus próprios PVs.' }
     ],
-    advantages: 'A mais alta taxa de cura por slot de todo o sistema D&D 5e; proficiência com armaduras pesadas.',
+    advantages: 'A mais alta taxa de cura por espaço de magia entre todas as tradições; proficiência com armaduras pesadas.',
     disadvantages: 'Foco quase total em cura e sustentação, com menos magias de dano elemental.'
   },
   hunter: {
@@ -18766,7 +18770,7 @@ function _showFichaSavesHelp(saveKey, memberIdx){
       + racialAdvantage
       + '</div>';
   } else {
-    title = 'Salvaguardas D&D 5e';
+    title = 'Salvaguardas & Resistências';
     var profLabels = profSaves.map(function(k){ return STAT_NAMES[k]; }).join(' e ');
     descHtml = '<div style="text-align:left; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.55; color:var(--v-text,#d4c8b0);">'
       + '<p style="margin:0 0 8px; font-size:calc(11.5px * var(--v-font-scale, 1)); line-height:1.5;">As <b>Salvaguardas (Testes de Resistência)</b> são a sua defesa ativa contra perigos que não miram sua Classe de Armadura (CA) — como feitiços, venenos, explosões e armadilhas.</p>'
@@ -18799,7 +18803,7 @@ function _showFichaSavesHelp(saveKey, memberIdx){
   var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: '<svg viewBox="0 0 120 120" style="width:calc(34px * var(--v-font-scale, 1));height:calc(34px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);"><use href="#ic-stat-ac"/></svg>',
-    npc: 'Ficha do Aventureiro · Regras D&D 5e',
+    npc: 'Ficha do Aventureiro · Compêndio de Regras',
     title: title,
     desc: descHtml,
     singleButton: true,
@@ -18842,7 +18846,7 @@ function _showFichaRaceHelp(raceKey, memberIdx){
   var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: '<span style="font-size:calc(32px * var(--v-font-scale, 1));">🌿</span>',
-    npc: 'Linhagem D&D 5e',
+    npc: 'Linhagem Ancestral',
     title: data.name,
     desc: descHtml,
     singleButton: true,
@@ -18888,9 +18892,9 @@ function _showFichaSubraceHelp(subraceKey, raceKey, memberIdx){
     if (list.length) {
       descHtml += '<p style="margin:0 0 8px; font-size:calc(11.5px * var(--v-font-scale, 1));">Sub-raças disponíveis para <b>' + _raceLabelPT(rKey) + '</b>:</p>'
         + '<div style="margin-bottom:8px; font-size:calc(11px * var(--v-font-scale, 1)); line-height:1.5;">' + list.join('<br>') + '</div>'
-        + '<div style="font-size:calc(11px * var(--v-font-scale, 1)); color:#a09484; line-height:1.45;">Cada sub-raça confere talentos e bônus de atributo únicos conforme as regras oficiais de D&D 5e.</div>';
+        + '<div style="font-size:calc(11px * var(--v-font-scale, 1)); color:#a09484; line-height:1.45;">Cada sub-raça confere talentos e bônus de atributo únicos conforme as tradições canônicas de linhagem.</div>';
     } else {
-      descHtml += '<p style="font-size:calc(11.5px * var(--v-font-scale, 1));">Esta raça possui linhagem única nos registros canônicos de D&D 5e.</p>';
+      descHtml += '<p style="font-size:calc(11.5px * var(--v-font-scale, 1));">Esta raça possui linhagem única nos registros canônicos dos Reinos.</p>';
     }
   }
 
@@ -18899,7 +18903,7 @@ function _showFichaSubraceHelp(subraceKey, raceKey, memberIdx){
   var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: '<span style="font-size:calc(32px * var(--v-font-scale, 1));">⚙️</span>',
-    npc: 'Sub-raça D&D 5e',
+    npc: 'Sub-linhagem & Tradição',
     title: data ? data.name : ('Sub-raças de ' + _raceLabelPT(rKey)),
     desc: descHtml,
     singleButton: true,
@@ -18950,7 +18954,7 @@ function _showFichaClassHelp(classKey, memberIdx){
 
   var descHtml = '<div style="text-align:left; font-size:calc(12px * var(--v-font-scale, 1)); line-height:1.55; color:var(--v-text,#d4c8b0);">'
     + '<div style="background:rgba(20,16,12,0.8); border:1px solid rgba(196,149,58,0.3); border-radius:6px; padding:7px 9px; margin-bottom:8px; font-size:calc(11px * var(--v-font-scale, 1)); line-height:1.5;">'
-    + '<b style="color:#ffd700; font-size:calc(11.5px * var(--v-font-scale, 1));">Visão Tática D&D 5e:</b><br>'
+    + '<b style="color:#ffd700; font-size:calc(11.5px * var(--v-font-scale, 1));">Visão Tática da Classe:</b><br>'
     + '• <b>Função:</b> ' + data.role + '<br>'
     + '• <b>Dado de Vida:</b> ' + data.hit_die + '<br>'
     + '• <b>Recurso de Combate:</b> ' + data.resource + '<br>'
@@ -18980,7 +18984,7 @@ function _showFichaClassHelp(classKey, memberIdx){
   var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: iconHtml,
-    npc: 'Vocação D&D 5e',
+    npc: 'Vocação & Especialização',
     title: data.name,
     desc: descHtml,
     singleButton: true,
@@ -19003,7 +19007,7 @@ function _showFichaSubclassHelp(subclassKey, classKey, memberIdx){
   if (data) {
     descHtml += '<p style="margin:0 0 8px; font-style:italic; color:#e0d4c0; font-size:calc(11.5px * var(--v-font-scale, 1));">' + data.desc + '</p>'
       + '<div style="background:rgba(20,16,12,0.8); border:1px solid rgba(196,149,58,0.3); border-radius:6px; padding:7px 9px; margin-bottom:8px; font-size:calc(11px * var(--v-font-scale, 1)); line-height:1.5;">'
-      + '<b style="color:#ffd700; font-size:calc(11.5px * var(--v-font-scale, 1));">Progressão por Nível (Marcos D&D 5e):</b><br>';
+      + '<b style="color:#ffd700; font-size:calc(11.5px * var(--v-font-scale, 1));">Progressão por Nível (Marcos de Mestria):</b><br>';
     (data.features || []).forEach(function(f){
       descHtml += '• <b style="color:#ffd700;">' + f.lvl + ' — ' + f.name + ':</b> ' + f.desc + '<br>';
     });
@@ -19028,7 +19032,7 @@ function _showFichaSubclassHelp(subclassKey, classKey, memberIdx){
         + '<div style="margin-bottom:8px; font-size:calc(11px * var(--v-font-scale, 1)); line-height:1.5;">' + list.join('<br>') + '</div>'
         + '<div style="font-size:calc(11px * var(--v-font-scale, 1)); color:#a09484; line-height:1.45;">A sub-classe concede identidade tática única, habilidades exclusivas e novos poderes por nível.</div>';
     } else {
-      descHtml += '<p style="font-size:calc(11.5px * var(--v-font-scale, 1));">Informações de sub-classe para ' + _classLabelPT(cKey) + ' em sincronização com o banco D&D 5e.</p>';
+      descHtml += '<p style="font-size:calc(11.5px * var(--v-font-scale, 1));">Informações de sub-classe para ' + _classLabelPT(cKey) + ' em sincronização com o compêndio de regras.</p>';
     }
   }
 
@@ -19037,7 +19041,7 @@ function _showFichaSubclassHelp(subclassKey, classKey, memberIdx){
   var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
   _showInfoPopup({
     icon: '<span style="font-size:calc(32px * var(--v-font-scale, 1));">🔮</span>',
-    npc: 'Especialização D&D 5e',
+    npc: 'Especialização & Tradições',
     title: data ? data.name : ('Sub-classes de ' + _classLabelPT(cKey)),
     desc: descHtml,
     singleButton: true,
@@ -19258,9 +19262,11 @@ function _showStatusPopup(memberIdx){
     + '.ficha-entities-carousel::-webkit-scrollbar-thumb{background:rgba(196,149,58,0.4);border-radius:2px;}'
     + '.ficha-switch-btn{flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:14px;font-family:inherit;font-size:calc(9.5px * var(--v-font-scale,1));cursor:pointer;transition:all 0.15s ease;}'
     + '.ficha-switch-btn:hover{transform:translateY(-1px);}'
-    + '.ficha-combat-card{position:relative;cursor:pointer;background:linear-gradient(165deg,rgba(80,62,40,0.35) 0%,rgba(36,28,20,0.85) 100%);border:1px solid rgba(196,149,58,0.32);border-radius:var(--v-radius-sm,6px);padding:6px 8px;line-height:1.15;display:flex;align-items:center;gap:8px;box-shadow:inset 0 1px 0 rgba(196,149,58,0.18),inset 0 -1px 2px rgba(0,0,0,0.3),0 2px 4px rgba(0,0,0,0.35);transition:transform 0.18s ease,box-shadow 0.18s ease,border-color 0.18s ease;}'
+    + '.ficha-combat-card{position:relative;cursor:pointer;background:linear-gradient(165deg,rgba(80,62,40,0.35) 0%,rgba(36,28,20,0.85) 100%);border:1px solid rgba(196,149,58,0.32);border-radius:var(--v-radius-sm,6px);padding:5px 6px;line-height:1.15;display:flex;align-items:center;gap:6px;min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden;box-shadow:inset 0 1px 0 rgba(196,149,58,0.18),inset 0 -1px 2px rgba(0,0,0,0.3),0 2px 4px rgba(0,0,0,0.35);transition:transform 0.18s ease,box-shadow 0.18s ease,border-color 0.18s ease;}'
     + '.ficha-combat-card:hover{transform:translateY(-1px);border-color:var(--v-gold,#c4953a);box-shadow:inset 0 1px 0 rgba(196,149,58,0.3),0 4px 10px rgba(196,149,58,0.25);}'
     + '.ficha-combat-card:active{transform:translateY(0);}'
+    + '.ficha-combat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:100%;max-width:100%;box-sizing:border-box;}'
+    + '@media (max-width:340px){.ficha-combat-card{padding:4px;gap:4px;}}'
     + 'body.perf-lite .fEp-avatar-anim,body.perf-lite .fEp-rune,body.perf-lite .fEp-shield,body.perf-lite .fEp-ambient{animation:none;}'
     + '@media (prefers-reduced-motion:reduce){.fEp-avatar-anim,.fEp-hp-critical,.fEp-rune,.fEp-shield,.fEp-ambient{animation:none;}}'
     + '</style>';
@@ -19419,24 +19425,24 @@ function _showStatusPopup(memberIdx){
   } else {
     // Subtitle e badges interativos de aventureiro / aliado
     html += '<div class="ficha-subtitle" style="color:var(--v-text-dim,#a09484); font-size:calc(11px * var(--v-font-scale, 1)); font-style:italic; letter-spacing:0.3px;">'
-      + '<span class="ficha-link" onclick="_showFichaClassHelp(\'' + cKey + '\',' + _memArg + ')" title="Toque para detalhes da classe D&D 5e">' + classLabel + '</span>'
-      + (subclassLabel ? (' (<span class="ficha-link" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + _memArg + ')" title="Toque para detalhes da sub-classe D&D 5e">' + subclassLabel + '</span>)') : '')
+      + '<span class="ficha-link" onclick="_showFichaClassHelp(\'' + cKey + '\',' + _memArg + ')" title="Toque para detalhes da classe">' + classLabel + '</span>'
+      + (subclassLabel ? (' (<span class="ficha-link" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + _memArg + ')" title="Toque para detalhes da sub-classe">' + subclassLabel + '</span>)') : '')
       + ' '
-      + '<span class="ficha-link" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + _memArg + ')" title="Toque para detalhes da raça D&D 5e">' + raceLabel + '</span>'
-      + (subraceLabel ? (' (<span class="ficha-link" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + _memArg + ')" title="Toque para detalhes da sub-raça D&D 5e">' + subraceLabel + '</span>)') : '')
+      + '<span class="ficha-link" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + _memArg + ')" title="Toque para detalhes da linhagem">' + raceLabel + '</span>'
+      + (subraceLabel ? (' (<span class="ficha-link" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + _memArg + ')" title="Toque para detalhes da sub-linhagem">' + subraceLabel + '</span>)') : '')
       + ' · <b style="color:var(--v-gold,#c4953a); font-style:normal;">Nível ' + m.level + '</b>'
       + '</div>'
       + '<div class="ficha-tags-row" style="display:flex; justify-content:center; align-items:center; gap:4px; margin-top:4px; flex-wrap:wrap;">'
-      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaClassHelp(\'' + cKey + '\',' + _memArg + ')" title="Classe D&D 5e: ' + classLabel + ' — toque p/ vantagens e desvantagens">'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaClassHelp(\'' + cKey + '\',' + _memArg + ')" title="Classe: ' + classLabel + ' — toque p/ vantagens e desvantagens">'
       + '<span>🛡️</span> <b>' + classLabel + '</b>'
       + '</button>'
-      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + _memArg + ')" title="Sub-classe D&D 5e: ' + (subclassLabel || 'Ver Tradições') + ' — toque p/ habilidades e vantagens">'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubclassHelp(\'' + (m.subclass || '') + '\',\'' + cKey + '\',' + _memArg + ')" title="Sub-classe: ' + (subclassLabel || 'Ver Tradições') + ' — toque p/ habilidades e vantagens">'
       + '<span>🔮</span> <span>' + (subclassLabel || 'Sub-classe') + '</span>'
       + '</button>'
-      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + _memArg + ')" title="Raça D&D 5e: ' + raceLabel + ' — toque p/ traços e vantagens raciais">'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaRaceHelp(\'' + rKey + '\',' + _memArg + ')" title="Linhagem: ' + raceLabel + ' — toque p/ traços e vantagens">'
       + '<span>🌿</span> <b>' + raceLabel + '</b>'
       + '</button>'
-      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + _memArg + ')" title="Sub-raça D&D 5e: ' + (subraceLabel || 'Ver Linhagens') + ' — toque p/ vantagens exclusivas">'
+      + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + _memArg + ')" title="Sub-linhagem: ' + (subraceLabel || 'Ver Tradições') + ' — toque p/ vantagens exclusivas">'
       + '<span>⚙️</span> <span>' + (subraceLabel || 'Sub-raça') + '</span>'
       + '</button>'
       + '</div>';
@@ -19447,7 +19453,7 @@ function _showStatusPopup(memberIdx){
   if (m.pendingAsi > 0 || m.pendingSkills > 0) {
     html += '<div class="ficha-levelup-banner" style="margin: 6px 10px 4px; padding: 7px 10px; background: linear-gradient(135deg, rgba(196,149,58,0.25), rgba(35,28,20,0.92)); border: 1.5px solid var(--v-gold, #c4953a); border-radius: 6px; box-shadow: 0 0 10px rgba(196,149,58,0.35); text-align: center; animation: cgpLevelUpPulse 2s infinite;">'
       + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(11px * var(--v-font-scale, 1)); font-weight:800; color:#ffd700; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">'
-      + '▲ Progressão D&D 5e Disponível!'
+      + '▲ Evolução de Nível Disponível!'
       + '</div>'
       + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:#d4c8b0; margin-bottom:5px;">'
       + (m.pendingAsi > 0 ? ('<b>+' + m.pendingAsi + ' Pontos de Atributo (ASI)</b>') : '')
@@ -19527,10 +19533,10 @@ function _showStatusPopup(memberIdx){
   html += '</div>';
 
   // === ATRIBUTOS — pedras gravadas v6 compactas ===
-  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) 3px;">';
+  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) 3px; width:100%; max-width:100%; box-sizing:border-box;">';
   html += '<div class="ficha-section-title" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
     + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px;">'
-    + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Atributos D&D 5e'
+    + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Atributos Fundamentais'
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left: var(--v-space-sm, 4px);"></span>'
     + '</div>';
   // Sessão #56 (2026-05-28) — Demand E: ATTR PNGs OpenAI ao lado do número
@@ -19538,7 +19544,7 @@ function _showStatusPopup(memberIdx){
   // inteligencia,sabedoria,carisma}.png. Antes só SVG sprite ic-stat-*.
   // Layout 2-col em vez de 3-col pra acomodar PNG 32px + número grande
   // (especialmente em font-scale=1.5/2x).
-  html += '<div class="ficha-stats-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:5px;">';
+  html += '<div class="ficha-stats-grid" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; width:100%; max-width:100%; box-sizing:border-box;">';
   function _attrPngBase(){
     var loc = (typeof location !== 'undefined') ? location.href : '';
     if (loc.indexOf('file://') === 0) return '/shared/img/levelup/attrs/';
@@ -19570,7 +19576,7 @@ function _showStatusPopup(memberIdx){
       + 'style="width:36px;height:36px;flex-shrink:0;object-fit:contain;border-radius: var(--v-radius-sm, 6px);'
       + 'filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));" '
       + 'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=&quot;0 0 120 120&quot; style=&quot;width:32px;height:32px;color:' + iconCol + ';flex-shrink:0;&quot;><use href=&quot;#' + s.icon + '&quot;/></svg>\'">';
-    html += '<div class="ficha-stat-stone" onclick="_showFichaStatHelp(\'' + s.key + '\',' + _memArg + ')" title="O que é? (mecânica D&D)" style="position:relative; cursor:pointer;'
+    html += '<div class="ficha-stat-stone" onclick="_showFichaStatHelp(\'' + s.key + '\',' + _memArg + ')" title="O que é? (detalhes e mecânica)" style="position:relative; cursor:pointer;'
       + 'background:linear-gradient(165deg,rgba(80,62,40,0.45) 0%,rgba(42,34,24,0.85) 100%);'
       + 'border:1px solid var(--v-border,#4a3828); border-radius: var(--v-radius-sm, 6px);'
       + 'padding:5px 7px; line-height:1.1;'
@@ -19613,15 +19619,15 @@ function _showStatusPopup(memberIdx){
   var cKey = _cgpClsKey(m.cls);
   var profSaves = SAVING_PROF_MAP[cKey] || ['str', 'con'];
 
-  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) 3px;">';
-  html += '<div class="ficha-section-title fEp-clickable" onclick="_showFichaSavesHelp(null,' + _memArg + ')" title="Toque para entender as Salvaguardas (D&D 5e)" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
+  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) 3px; width:100%; max-width:100%; box-sizing:border-box;">';
+  html += '<div class="ficha-section-title fEp-clickable" onclick="_showFichaSavesHelp(null,' + _memArg + ')" title="Toque para entender as Salvaguardas" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
     + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px; cursor:pointer;">'
-    + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Salvaguardas (D&D 5e)'
+    + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Salvaguardas'
     + '<span style="font-size:calc(8px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); opacity:0.85; border:1px solid rgba(196,149,58,0.35); border-radius:3px; padding:1px 5px; margin-left:3px; letter-spacing:0; text-transform:none;">ⓘ Entenda os números</span>'
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left: var(--v-space-sm, 4px);"></span>'
     + '</div>';
 
-  html += '<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:4px;">';
+  html += '<div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; width:100%; max-width:100%; box-sizing:border-box;">';
   STATS_DATA.forEach(function(s){
     var isProf = profSaves.indexOf(s.key) >= 0;
     var baseMod = _mod(stats[s.key]);
@@ -19639,8 +19645,8 @@ function _showStatusPopup(memberIdx){
   });
   html += '</div></div>';
 
-  // === COMBATE — cards D&D 5e completos com nomes por extenso e subtítulos explicativos ===
-  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) var(--v-space-sm, 4px);">';
+  // === COMBATE — cards táticos completos com nomes por extenso e subtítulos explicativos ===
+  html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) var(--v-space-sm, 4px); width:100%; max-width:100%; box-sizing:border-box;">';
   html += '<div class="ficha-section-title" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
     + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px;">'
     + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Combate'
@@ -19654,24 +19660,24 @@ function _showStatusPopup(memberIdx){
   ];
   var _combatUiBase = '/shared/img/ui/';
   var _combatV = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
-  html += '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap: 6px;">';
+  html += '<div class="ficha-combat-grid">';
   COMBAT_DATA.forEach(function(c){
     var iconCol = HERALDIC_COLORS[c.icon] || '#8a7a6a';
     var pngImg = '<img src="' + _combatUiBase + c.png + '?v=' + _combatV + '" alt="' + c.label + '" '
-      + 'style="width:20px;height:20px;flex-shrink:0;object-fit:contain;border-radius:3px;'
+      + 'style="width:18px;height:18px;flex-shrink:0;object-fit:contain;border-radius:3px;'
       + 'filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));" '
       + 'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=&quot;0 0 120 120&quot; style=&quot;width:16px;height:16px;color:' + iconCol + ';flex-shrink:0;&quot;><use href=&quot;#' + c.icon + '&quot;/></svg>\'">';
-    html += '<div class="ficha-combat-card fEp-clickable" onclick="_showFichaStatHelp(\'' + c.key + '\',' + _memArg + ')" title="' + c.label + ' — Toque para entender a mecânica D&D 5e">'
+    html += '<div class="ficha-combat-card fEp-clickable" onclick="_showFichaStatHelp(\'' + c.key + '\',' + _memArg + ')" title="' + c.label + ' — Toque para entender a mecânica tática">'
       + pngImg
-      + '<div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:1px;">'
-      + '<div style="display:flex; align-items:center; gap:3px;">'
-      + '<span style="font-size:calc(9.5px * var(--v-font-scale, 1)); font-weight:700; color:var(--v-text,#d4c8b0); letter-spacing:0.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + c.label + '</span>'
-      + '<span style="font-size:calc(8.5px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); opacity:0.85;" title="Informação">ⓘ</span>'
+      + '<div style="flex:1; min-width:0; overflow:hidden; display:flex; flex-direction:column; gap:1px;">'
+      + '<div style="display:flex; align-items:center; gap:2px; min-width:0;">'
+      + '<span style="font-size:calc(9px * var(--v-font-scale, 1)); font-weight:700; color:var(--v-text,#d4c8b0); letter-spacing:0.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" title="' + c.label + '">' + c.label + '</span>'
+      + '<span style="font-size:calc(8px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); opacity:0.85; flex-shrink:0;" title="Informação">ⓘ</span>'
       + '</div>'
-      + '<div style="font-size:calc(8px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + c.sub + '</div>'
+      + '<div style="font-size:calc(7.5px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;">' + c.sub + '</div>'
       + '</div>'
-      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(15px * var(--v-font-scale, 1)); font-weight:700;'
-      + 'color:var(--v-gold,#c4953a); text-shadow:0 0 6px rgba(196,149,58,0.35); flex-shrink:0;">' + c.value + '</span>'
+      + '<span style="font-family:var(--v-font-display,Cinzel,serif); font-size:clamp(12px, 3.4vw, 15px); font-weight:700;'
+      + 'color:var(--v-gold,#c4953a); text-shadow:0 0 6px rgba(196,149,58,0.35); flex-shrink:0; text-align:right; margin-left:auto;">' + c.value + '</span>'
       + '</div>';
   });
   html += '</div></div>';
@@ -19711,7 +19717,7 @@ function _showStatusPopup(memberIdx){
     html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) var(--v-space-sm, 6px);">'
       + '<div class="ficha-section-title" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
       + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px;">'
-      + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Variações Conhecidas desta Espécie (D&D 5e)'
+      + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Variações Conhecidas desta Espécie'
       + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left: var(--v-space-sm, 4px);"></span>'
       + '</div>'
       + '<div style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484); margin-bottom:5px; line-height:1.4;">'
@@ -19750,7 +19756,7 @@ function _showStatusPopup(memberIdx){
     + '<span style="flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(196,149,58,0.4),transparent);"></span>'
     + '</div>'
     + '<div style="font-family:var(--v-font-display,Cinzel,serif); font-size:calc(9.5px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); letter-spacing:1.5px; text-transform:uppercase; opacity:0.85; text-shadow:0 0 6px rgba(196,149,58,0.3);">'
-    + '◆ Lendas de Valdoria • Compêndio & Ficha D&D 5e ◆'
+    + '◆ Lendas de Valdoria • Compêndio & Ficha de Personagem ◆'
     + '</div>'
     + '</div>';
   html += '</div>';
@@ -19829,12 +19835,12 @@ function _openLevelUpFlowFromFicha(memberIdx){
   function renderModalContent(){
     var html = '<div style="background:linear-gradient(180deg,#2e2520,#1a1510); border:1.5px solid var(--v-gold,#c4953a); border-radius:8px; width:100%; max-width:400px; padding:16px; box-shadow:0 8px 32px rgba(0,0,0,0.8); font-family:var(--v-font-display,Cinzel,serif); color:#d4c8b0;">';
     html += '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(196,149,58,0.3); padding-bottom:8px; margin-bottom:12px;">'
-      + '<h3 style="margin:0; font-size:calc(14px * var(--v-font-scale, 1)); color:#ffd700; letter-spacing:1px; text-transform:uppercase;">Evolução D&D 5e · Atributos</h3>'
+      + '<h3 style="margin:0; font-size:calc(14px * var(--v-font-scale, 1)); color:#ffd700; letter-spacing:1px; text-transform:uppercase;">Evolução de Atributos</h3>'
       + '<button type="button" id="v-asi-close" style="background:none; border:none; color:#a09484; font-size:calc(18px * var(--v-font-scale, 1)); cursor:pointer;">✕</button>'
       + '</div>';
 
     html += '<div style="font-size:calc(11px * var(--v-font-scale, 1)); color:#a09484; line-height:1.4; margin-bottom:10px; font-family:sans-serif;">'
-      + '<b>Regra D&D 5e:</b> Distribua seus pontos de Aumento no Valor de Atributo (máximo 20 por atributo). No D&D oficial atributos nunca são rolados ao subir de nível.'
+      + '<b>Aprimoramento:</b> Distribua seus pontos de Aumento no Valor de Atributo (máximo 20 por atributo). Atributos são aprimorados estrategicamente ao subir de nível.'
       + '</div>';
 
     html += '<div style="background:rgba(196,149,58,0.15); border:1px solid rgba(196,149,58,0.4); border-radius:6px; padding:6px 10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">'
@@ -19969,7 +19975,7 @@ function _openLevelUpCelebrationModal(notifData){
       hp_gain: 6,
       mp_gain: 5,
       is_asi: true,
-      highlights: ['Avanço de Nível D&D 5e']
+      highlights: ['Avanço de Nível']
     }];
   }
 
@@ -20624,7 +20630,7 @@ function _showLeaguePopup(p){
   // Header cerimonial D&D 5e
   html += '<div style="position:relative; padding: 14px 12px 12px; overflow:hidden; background:radial-gradient(ellipse at 50% 30%,' + tColor + '38 0%,' + tColor + '12 40%,rgba(32,24,20,0.95) 75%); border:1px solid ' + tColor + '; border-radius:var(--v-radius,10px); margin: 6px 8px 8px;">'
     + '<div style="display:flex; align-items:center; justify-content:center; gap: 8px; font-family:Cinzel,serif; font-size:9.5px; color:' + tColor + '; letter-spacing:2.5px; text-transform:uppercase; margin-bottom:4px;">'
-    +   '<span>◆ ORDEM DOS AVENTUREIROS · D&D 5e ◆</span>'
+    +   '<span>◆ ORDEM DOS AVENTUREIROS ◆</span>'
     + '</div>'
     + '<div style="position:relative; width:92px; height:92px; margin: 0 auto 4px;">'
     +   '<img class="vLg-medal-anim" src="/shared/img/medals/' + currentTier.id + '.webp" alt="' + currentTier.name + '" style="position:absolute; top:50%; left:50%; width:84px; height:84px; transform:translate(-50%,-50%); object-fit:contain; z-index:2; cursor:zoom-in;" onclick="if(window.showLightbox)window.showLightbox(this.src,\'Medalha ' + currentTier.name + '\',\'Tier ' + currentTier.name + '\');">'
@@ -21748,7 +21754,7 @@ function _showCreatureDossier(specimen, p){
   var html = '<div class="cdo-modal">'
     + '<div class="cdo-header">'
     +   '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 13.5px; color: #ff8a4a; font-weight: 700; display:flex; align-items:center; gap:8px;">'
-    +     '<span>📖 DOSSIÊ DE CAÇADA · REGRAS D&D 5e</span>'
+    +     '<span>📖 DOSSIÊ DE CAÇADA</span>'
     +   '</div>'
     +   '<button id="cdo-close-x" type="button" style="background:none; border:none; color:var(--v-text-dim,#a09484); font-size:20px; cursor:pointer; padding:2px 8px; line-height:1;" aria-label="Fechar">✕</button>'
     + '</div>'
@@ -21785,7 +21791,7 @@ function _showCreatureDossier(specimen, p){
     /* Seção 1: Descrição e Comportamento */
     +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid ' + (tier1Unlocked ? 'rgba(196,149,58,0.4)' : 'rgba(74,40,30,0.4)') + '; border-radius: 8px; padding: 10px 12px;">'
     +     '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 11px; color: ' + (tier1Unlocked ? '#ffd700' : 'var(--v-text-dim,#a09484)') + '; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display:flex; justify-content:space-between;">'
-    +       '<span>📜 Descrição & Ecologia (D&D 5e)</span>'
+    +       '<span>📜 Descrição & Ecologia Natural</span>'
     +       '<span style="font-size: 9.5px; color: ' + (tier1Unlocked ? '#7cdb7c' : '#a09484') + ';">' + (tier1Unlocked ? '✓ Desbloqueado' : '🔒 Requer 1 abate') + '</span>'
     +     '</div>'
     +     (tier1Unlocked
@@ -21795,7 +21801,7 @@ function _showCreatureDossier(specimen, p){
     /* Seção 2: Táticas e Fraquezas D&D 5e */
     +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid ' + (tier2Unlocked ? 'rgba(255,138,74,0.5)' : 'rgba(74,40,30,0.4)') + '; border-radius: 8px; padding: 10px 12px;">'
     +     '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 11px; color: ' + (tier2Unlocked ? '#ff8a4a' : 'var(--v-text-dim,#a09484)') + '; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display:flex; justify-content:space-between;">'
-    +       '<span>⚔️ Táticas & Fraquezas (D&D 5e)</span>'
+    +       '<span>⚔️ Táticas & Fraquezas em Batalha</span>'
     +       '<span style="font-size: 9.5px; color: ' + (tier2Unlocked ? '#7cdb7c' : '#a09484') + ';">' + (tier2Unlocked ? '✓ Desbloqueado' : '🔒 Requer 5 abates') + '</span>'
     +     '</div>'
     +     (tier2Unlocked
@@ -21818,7 +21824,7 @@ function _showCreatureDossier(specimen, p){
     /* Seção 4: Atributos & Linhagens D&D 5e */
     +   '<div style="background: rgba(30,18,14,0.7); border: 1px solid rgba(196,149,58,0.4); border-radius: 8px; padding: 10px 12px;">'
     +     '<div style="font-family: var(--v-font-display, Cinzel, serif); font-size: 11px; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display:flex; justify-content:space-between; align-items:center;">'
-    +       '<span>⚔️ Atributos & Linhagens D&D 5e</span>'
+    +       '<span>⚔️ Atributos & Linhagens Catalogadas</span>'
     +       '<button id="cdo-btn-open-ficha" type="button" style="padding: 2px 8px; background: rgba(196,149,58,0.2); border: 1px solid #ffd700; border-radius: 4px; color: #ffd700; font-family: Cinzel, serif; font-size: 9.5px; font-weight: 700; cursor: pointer;">📜 Ver Ficha Completa ▸</button>'
     +     '</div>'
     +     '<div style="font-size: 10.5px; color: var(--v-text-dim, #a09484); margin-bottom: 6px;">'
@@ -21848,7 +21854,7 @@ function _showCreatureDossier(specimen, p){
     +   '</div>'
     + '</div>'
     + '<div class="cdo-footer" style="display:flex; justify-content:flex-end; gap:8px;">'
-    +   '<button id="cdo-btn-full-ficha" type="button" style="padding: 7px 14px; background: linear-gradient(180deg, rgba(196,149,58,0.3), rgba(60,45,25,0.8)); border: 1px solid #ffd700; border-radius: 6px; color: #ffd700; font-family: Cinzel, serif; font-size: 11px; font-weight: 700; cursor: pointer;">📜 Abrir Ficha D&D 5e</button>'
+    +   '<button id="cdo-btn-full-ficha" type="button" style="padding: 7px 14px; background: linear-gradient(180deg, rgba(196,149,58,0.3), rgba(60,45,25,0.8)); border: 1px solid #ffd700; border-radius: 6px; color: #ffd700; font-family: Cinzel, serif; font-size: 11px; font-weight: 700; cursor: pointer;">📜 Abrir Ficha Completa</button>'
     +   '<button id="cdo-btn-close" type="button" style="padding: 7px 18px; background: linear-gradient(180deg, #4a2016, #2a100a); border: 1px solid #ff6040; border-radius: 6px; color: #ffb090; font-family: Cinzel, serif; font-size: 11px; font-weight: 700; cursor: pointer;">Fechar Dossiê</button>'
     + '</div>'
     + '</div>';
@@ -23498,7 +23504,7 @@ var TEMPLE_NPCS_DB = {
     npc: 'Acólito Theron',       npc_id: 'npc_temple_theron',
     title: 'Clareza',            icon: _heralIco('ic-stat-spelldc'),
     cost: 25,                    min_level: 1,
-    desc: 'Conc. 1 min. +1d4 em ataques e saves.'
+    desc: 'Concentração. +1d4 em ataques e salvaguardas.'
   },
   'remove_curse': {
     npc: 'Sacerdotisa Miriel',   npc_id: 'npc_temple_miriel',
@@ -23516,7 +23522,7 @@ var TEMPLE_NPCS_DB = {
     npc: 'Oráculo Orenthia',     npc_id: 'npc_temple_orenthia',
     title: 'Reviver',            icon: _heralIco('ic-esqueleto'),
     cost: 1000,                  min_level: 10,
-    desc: 'Ressuscita aliado caído com 1 HP. -4 em d20 por 4 long rests.'
+    desc: 'Ressuscita aliado caído com 1 HP. Penalidade nas jogadas por 4 descansos longos.'
   }
 };
 
@@ -24180,15 +24186,15 @@ var TAVERN_DRINKS = [
 // TAVERN_GAMES — 8 jogos com brasões canonical (substitui )
 // canonical: tavern_games.py L13-18 + sub-files (bones/challenges/tournament/drinking/xgte)
 var TAVERN_GAMES = [
-  { id: 'dice_10',    icon: _heralIco('ic-desafio'),     name: 'Dados — 10 <span class="vi vi-coin sm"></span>',            cost: 10,  payout: 20,  win_chance: 0.50, desc: 'd20 + CHA (Persuasion) vs d20 + (2 + nível/4)' },
-  { id: 'dice_50',    icon: _heralIco('ic-desafio'),     name: 'Dados — 50 <span class="vi vi-coin sm"></span>',            cost: 50,  payout: 100, win_chance: 0.50, desc: 'd20 + CHA (Persuasion) vs d20 + (2 + nível/4)' },
+  { id: 'dice_10',    icon: _heralIco('ic-desafio'),     name: 'Dados — 10 <span class="vi vi-coin sm"></span>',            cost: 10,  payout: 20,  win_chance: 0.50, desc: 'd20 + CAR (Persuasão) vs d20 + (2 + nível/4)' },
+  { id: 'dice_50',    icon: _heralIco('ic-desafio'),     name: 'Dados — 50 <span class="vi vi-coin sm"></span>',            cost: 50,  payout: 100, win_chance: 0.50, desc: 'd20 + CAR (Persuasão) vs d20 + (2 + nível/4)' },
   { id: 'dice_100',   icon: _heralIco('ic-desafio'),     name: 'Dados — 100 <span class="vi vi-coin sm"></span> (streak 3+)', cost: 100, payout: 200, win_chance: 0.50, desc: 'Tier desbloqueado com 3 vitórias seguidas' },
   { id: 'dice_200',   icon: _heralIco('ic-desafio'),     name: 'Dados — 200 <span class="vi vi-coin sm"></span> (streak 5+)', cost: 200, payout: 400, win_chance: 0.50, desc: 'Tier desbloqueado com 5 vitórias seguidas' },
   { id: 'bones',      icon: _heralIco('ic-boss'),        name: 'Ossos do Dragão (3d6)',          cost: 10, payout: 20,  win_chance: 0.45, desc: 'Hold/reroll. Bust se cair 1. Aposta 10 <span class="vi vi-coin sm"></span> — paga 2:1.' },
-  { id: 'challenge',  icon: _heralIco('ic-stat-attack'), name: 'Desafios (Atributos)',           cost: 10, payout: 20,  win_chance: 0.50, desc: '3 desafios FOR/DES/CON/INT vs DC. Aposta 10 <span class="vi vi-coin sm"></span> — paga 2:1.' },
+  { id: 'challenge',  icon: _heralIco('ic-stat-attack'), name: 'Desafios (Atributos)',           cost: 10, payout: 20,  win_chance: 0.50, desc: '3 desafios FOR/DES/CON/INT vs CD. Aposta 10 <span class="vi vi-coin sm"></span> — paga 2:1.' },
   { id: 'tournament', icon: _heralIco('ic-trofeu'),      name: 'Torneio Bronze (3 rounds)',      cost: 30, payout: 150, win_chance: 0.30, desc: 'Inscrição 30 <span class="vi vi-coin sm"></span> — prêmio 150 <span class="vi vi-coin sm"></span> se vencer 3 rounds seguidos.' },
-  { id: 'drinking',   icon: _heralIco('ic-cerveja'),     name: 'Concurso de Bebida',             cost: 15, payout: 30,  win_chance: 0.55, desc: 'CON save crescente por rodada. Aposta 15 <span class="vi vi-coin sm"></span> — paga 2:1.' },
-  { id: 'xgte',       icon: _heralIco('ic-cartas'),      name: 'Três Dragões (Cartas)', cost: 10, payout: 20,  win_chance: 0.45, desc: 'INT/CHA checks vs adversário. Aposta 10 <span class="vi vi-coin sm"></span> — paga 2:1.' }
+  { id: 'drinking',   icon: _heralIco('ic-cerveja'),     name: 'Concurso de Bebida',             cost: 15, payout: 30,  win_chance: 0.55, desc: 'Teste de resistência de CON crescente por rodada. Aposta 15 <span class="vi vi-coin sm"></span> — paga 2:1.' },
+  { id: 'xgte',       icon: _heralIco('ic-cartas'),      name: 'Três Dragões (Cartas)', cost: 10, payout: 20,  win_chance: 0.45, desc: 'Testes de INT/CAR contra adversário. Aposta 10 <span class="vi vi-coin sm"></span> — paga 2:1.' }
 ];
 
 // canonical: tavern_notice_board_data.py — 16 NOTICE_TEMPLATES (4 por tipo)
@@ -25712,7 +25718,7 @@ var MARKET_TRANSIENT_POOL = [
         "name": "Adaga de Arremesso",
         "value": 120,
         "icon": "",
-        "desc": "1d4+DEX à distância",
+        "desc": "1d4+DES à distância",
         "fullDesc": "Arma Simples. Dano: 1d4 perfurante. Arremesso (6/18m). Acuidade. Retorna magicamente após arremesso."
       }
     ],
@@ -26637,7 +26643,7 @@ var WORKSHOP_RECIPES = {
     { id: 'r_arrows',   icon: _heralIco('ic-stat-dex'),     name: 'Flechas (20)',     cost_mat: '1 madeira', cost_g: 5,  dc: 10 }
   ],
   workshop_jeweler: [
-    { id: 'r_ring_str', icon: _heralIco('ic-stat-str'),         name: 'Anel de Prata (+1 STR)', cost_mat: '1 prata + 1 turquesa', cost_g: 50,  dc: 14 },
+    { id: 'r_ring_str', icon: _heralIco('ic-stat-str'),         name: 'Anel de Prata (+1 FOR)', cost_mat: '1 prata + 1 turquesa', cost_g: 50,  dc: 14 },
     { id: 'r_amulet',   icon: _heralIco('ic-ach-colecionador'), name: 'Amuleto Estrelar',       cost_mat: '1 ouro + 1 ametista',  cost_g: 80,  dc: 15 },
     { id: 'r_pendant',  icon: _heralIco('ic-stat-spelldc'),     name: 'Pingente Arcano',        cost_mat: '1 ouro + 1 cristal',   cost_g: 100, dc: 16 }
   ],
@@ -27532,7 +27538,7 @@ function _relationsShowDossier(npc, player){
     +       '</div>'
     +     '</div>'
     +     '<div>'
-    +       '<div class="rdo-sec-title">⚖️ Dinâmica Social D&D 5e (DMG p. 244)</div>'
+    +       '<div class="rdo-sec-title">⚖️ Dinâmica Social</div>'
     +       '<div class="rdo-dnd-grid">'
     +         '<div class="rdo-dnd-cell"><div class="rdo-dnd-lbl">Atitude</div><div class="rdo-dnd-val" style="color:' + tier.color + ';">' + dndAttitude + '</div></div>'
     +         '<div class="rdo-dnd-cell"><div class="rdo-dnd-lbl">CD Social</div><div class="rdo-dnd-val">' + dndDC + '</div></div>'
@@ -28001,7 +28007,7 @@ function _shadowShowCrime(p){
       var ct = canonTypes[k];
       return {
         id: k, icon: ct.emoji, name: ct.name, desc: ct.desc,
-        checks: (ct.checks || []).map(function(c){ return { skill: c.label, stat: (c.attr || 'dexterity').toUpperCase().substr(0, 3) }; })
+        checks: (ct.checks || []).map(function(c){ return { skill: c.label, stat: _statAbbrPT(c.attr || 'dexterity') }; })
       };
     });
   } else {
@@ -28030,7 +28036,7 @@ function _shadowShowCrime(p){
       var tierItems = tiers.map(function(tier){
         return {
           icon: _heralIco('ic-stat-dex'), label: tier.label,
-          badge: 'DC ' + tier.dc + ' · ' + tier.reward_min + '-' + tier.reward_max + ' V',
+          badge: 'CD ' + tier.dc + ' · ' + tier.reward_min + '-' + tier.reward_max + ' V',
           _tier: tier
         };
       });
@@ -28044,7 +28050,7 @@ function _shadowShowCrime(p){
           _showInfoPopup({
             icon: t.icon, npc: 'O Vulto', title: t.name + ' — ' + tier.label,
             desc: '<b>Plano:</b> ' + t.desc + '<br>' +
-                  '<b>3 testes</b> contra DC ' + tier.dc + '<br><br>' +
+                  '<b>3 testes</b> contra CD ' + tier.dc + '<br><br>' +
                   '<b>Sucesso completo:</b> ' + tier.reward_min + '-' + tier.reward_max + ' <span class="vi vi-coin sm"></span><br>' +
                   '<b>Sucesso parcial:</b> metade da recompensa<br>' +
                   '<b>Falha:</b> multa de ' + tier.fine + ' <span class="vi vi-coin sm"></span> (preso pela guarda)',
@@ -28068,7 +28074,7 @@ function _shadowShowCrime(p){
                   var lastR = (res.rolls && res.rolls.length) ? res.rolls[res.rolls.length - 1].roll : 0;
                   _showServiceResultPopup({
                     icon: t.icon, npc: 'O Vulto', narrative: nar,
-                    dice: { formula: '3× 1d20 vs DC ' + tier.dc, sides: 20, value: lastR, total: lastR },
+                    dice: { formula: '3× 1d20 vs CD ' + tier.dc, sides: 20, value: lastR, total: lastR },
                     deltas: [{ type:'gold', label:'Bolsa', from: preGoldR, to: newGold, max: Math.max(preGoldR, newGold, 1), bar: false }],
                     onContinue: function(){ navigateBack(); }
                   });
@@ -28125,7 +28131,7 @@ function _shadowShowCrime(p){
               _showServiceResultPopup({
                 icon: t.icon, npc: 'O Vulto',
                 narrative: narrative,
-                dice: { formula: '3× 1d20 vs DC ' + tier.dc, sides: 20, value: lastRoll, total: lastRoll },
+                dice: { formula: '3× 1d20 vs CD ' + tier.dc, sides: 20, value: lastRoll, total: lastRoll },
                 deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }],
                 rewards: rewards,
                 onContinue: function(){ navigateBack(); }
@@ -28142,14 +28148,14 @@ function _shadowShowCrime(p){
 var SHADOW_EVENT_POOL = [
   { id: 'pickpocket', icon: _heralIco('ic-mochila'), name: 'Batedor de carteira',
     text: 'Uma mão rápida tenta alcançar sua bolsa enquanto você se espreme entre barris.',
-    check: 'DES DC 10', resolve: function(p){
+    check: 'DES CD 10', resolve: function(p){
       var roll = 1 + Math.floor(Math.random() * 20);
       var dc = 10;
-      if (roll >= dc) return { ok: true, msg: 'DES ' + roll + ' vs DC ' + dc + '. Você agarra o pulso do ladrão e o empurra. Nada foi levado.' };
+      if (roll >= dc) return { ok: true, msg: 'DES ' + roll + ' vs CD ' + dc + '. Você agarra o pulso do ladrão e o empurra. Nada foi levado.' };
       var loss = 5 + Math.floor(Math.random() * 16);
       var preGold = p.gold;
       p.gold = Math.max(0, p.gold - loss);
-      return { ok: false, gold_from: preGold, gold_to: p.gold, msg: 'DES ' + roll + ' vs DC ' + dc + '. Quando percebe, <b>' + loss + ' Valdoritas</b> já sumiram do bolso.' };
+      return { ok: false, gold_from: preGold, gold_to: p.gold, msg: 'DES ' + roll + ' vs CD ' + dc + '. Quando percebe, <b>' + loss + ' Valdoritas</b> já sumiram do bolso.' };
     }
   },
   /* X-6.5.51AV (2026-05-08) — Sussurros Arcanos AAA. User pediu: "garantir
@@ -28202,11 +28208,11 @@ var SHADOW_EVENT_POOL = [
   },
   { id: 'guard_patrol', icon: _heralIco('ic-stat-ac'), name: 'Patrulha da Guarda',
     text: 'Botas pesadas se aproximam do beco. Uma patrulha noturna está perto.',
-    check: 'Percepção Passiva DC 12', resolve: function(p){
+    check: 'Percepção Passiva CD 12', resolve: function(p){
       var pp = 10 + Math.floor(((p.stats && p.stats.wisdom) || 10 - 10) / 2);
       var dc = 12;
-      if (pp >= dc) return { ok: true, msg: 'Percepção ' + pp + ' vs DC ' + dc + '. Você ouve a tempo e mergulha nas sombras.' };
-      return { ok: false, msg: 'Percepção ' + pp + ' vs DC ' + dc + '. Tochas brilham no fim do beco — você se achata contra a parede, coração disparado.' };
+      if (pp >= dc) return { ok: true, msg: 'Percepção ' + pp + ' vs CD ' + dc + '. Você ouve a tempo e mergulha nas sombras.' };
+      return { ok: false, msg: 'Percepção ' + pp + ' vs CD ' + dc + '. Tochas brilham no fim do beco — você se achata contra a parede, coração disparado.' };
     }
   },
   { id: 'special_deal', icon: _heralIco('ic-bolsa'), name: 'Promoção do Vulto',
@@ -28744,7 +28750,7 @@ function _openBlackMarketEncounter(p){
     if (isRogue) {
       choices.push({ id: 'rogue_pass', label: '🕵️ [Ladino] Fazer o sinal secreto e sussurrar a gíria da guilda' });
     }
-    choices.push({ id: 'test_history', label: '📜 [História DC 14] Tentar lembrar rumores sobre o Corvo Branco' });
+    choices.push({ id: 'test_history', label: '📜 [História CD 14] Tentar lembrar rumores sobre o Corvo Branco' });
     choices.push({ id: 'inquire', label: 'Senha? Que senha?' });
     choices.push({ id: 'leave', label: '↩ Dar meia-volta' });
 
@@ -28816,7 +28822,7 @@ function _openBlackMarketEncounter(p){
               icon: 'ic-bruxo'
             },
             script: [
-              { type: 'narration', text: '[Teste de História (DC 14): ' + roll + ' + ' + intMod + ' = ' + total + ' — ' + (success ? 'SUCESSO' : 'FALHA') + ']\n\n' + resultText },
+              { type: 'narration', text: '[Teste de História (CD 14): ' + roll + ' + ' + intMod + ' = ' + total + ' — ' + (success ? 'SUCESSO' : 'FALHA') + ']\n\n' + resultText },
               { type: 'speech', text: speechText }
             ],
             choices: success
@@ -29810,7 +29816,7 @@ function _renderSocialTabOnline(container, isRemote) {
                 + 'Você está convidando <b>' + name + '</b> para ingressar no seu grupo de aventureiros (até 4 membros).<br><br>'
                 + '<b>Benefícios & Consequências Táticas:</b><br>'
                 + '• Exploração e partilha de experiência (XP) e espólios raros em masmorras.<br>'
-                + '• Cooperação mútua em combate por turnos D&D 5e (Combat2).<br>'
+                + '• Cooperação mútua em combate tático por turnos.<br>'
                 + '• Deliberação conjunta em acampamentos e descansos.<br>'
                 + '• Conexão de habilidades sinérgicas da comitiva.',
               confirmLabel: '✔ Enviar Convite de Grupo',
@@ -36411,7 +36417,7 @@ function _adaptCanonicalEvent(ev){
   var titleMatch = ev.title.match(/^(\S+)\s+(.*)$/);
   if (titleMatch){ out.icon = titleMatch[1]; out.title = titleMatch[2]; }
   ev.choices.forEach(function(c){
-    var nc = { id: c.id, label: c.label, stat: c.stat ? (CANON_STAT_TO_ABBR[c.stat] || c.stat.toUpperCase()) : null, dc: c.dc };
+    var nc = { id: c.id, label: c.label, stat: c.stat ? (CANON_STAT_TO_ABBR[c.stat] || _statAbbrPT(c.stat)) : null, dc: c.dc };
     function _adaptOutcome(o){
       if (!o) return null;
       var r = { text: o.text, xp: o.xp || 0 };
@@ -36567,10 +36573,10 @@ var CANON_CARTOGRAPHER = {
   "tier3_locked_explain": "<i>Corvus fecha o caderno. \"Esse mapa eu reservo pra quem já viu mundo. Volte depois de cruzar mais algumas terras — preciso saber que você tem cicatrizes pra aproveitar a região.\"</i>",
   "master_header": "\n<b>Mapa Mestre de Valdória</b>\n",
   "master_locked_regionals": "<i>Corvus balança a cabeça lentamente. \"O Mapa Mestre exige conhecimento de várias regiões. Volte com mais mapas no portfólio — cartógrafo de verdade conhece o terreno antes de juntar tudo num pergaminho só.\"</i>",
-  "master_available": "\"O Mapa Mestre pode ser seu — prove seus conhecimentos.\"\n<b>Mapa Mestre</b> — {price} Valdoritas — Teste de {stat} DC {dc}",
+  "master_available": "\"O Mapa Mestre pode ser seu — prove seus conhecimentos.\"\n<b>Mapa Mestre</b> — {price} Valdoritas — Teste de {stat} CD {dc}",
   "tier2_challenge_intro": {
-    "wisdom": "Corvus espalha pergaminhos sobre a mesa.\n\"Estas rotas cruzam terras onde a névoa engana os sentidos. Mostre-me que consegue ler os sinais da natureza.\"\n\n<b>Teste de Sabedoria (Sobrevivência) DC {dc}</b>",
-    "constitution": "Corvus puxa um mapa sobre o frio extremo.\n\"O Ermo Gelado mata mais viajantes que qualquer criatura. Segure esta pedra de gelo sem tremer.\"\n\n<b>Teste de Constituição (Resistência) DC {dc}</b>"
+    "wisdom": "Corvus espalha pergaminhos sobre a mesa.\n\"Estas rotas cruzam terras onde a névoa engana os sentidos. Mostre-me que consegue ler os sinais da natureza.\"\n\n<b>Teste de Sabedoria (Sobrevivência) CD {dc}</b>",
+    "constitution": "Corvus puxa um mapa sobre o frio extremo.\n\"O Ermo Gelado mata mais viajantes que qualquer criatura. Segure esta pedra de gelo sem tremer.\"\n\n<b>Teste de Constituição (Resistência) CD {dc}</b>"
   },
   "tier2_success": [
     "Corvus bate palmas.\n\"Excelente! Instintos de explorador nato.\"",
@@ -36582,7 +36588,7 @@ var CANON_CARTOGRAPHER = {
     "\"Muitos guerreiros falham neste teste. Treine mais e volte.\"",
     "O cartógrafo suspira.\n\"Tente novamente quando estiver preparado.\""
   ],
-  "master_challenge_intro": "Corvus desenrola um pergaminho enorme.\n\"Esta é minha obra-prima. Decifre estes marcos cartográficos arcanos. Se conseguir, o mapa é seu.\"\n\n<b>Teste de Inteligência (Cartografia) DC {dc}</b>",
+  "master_challenge_intro": "Corvus desenrola um pergaminho enorme.\n\"Esta é minha obra-prima. Decifre estes marcos cartográficos arcanos. Se conseguir, o mapa é seu.\"\n\n<b>Teste de Inteligência (Cartografia) CD {dc}</b>",
   "master_success": "Os olhos de Corvus se enchem de lágrimas de orgulho.\n\"Em cinquenta anos, posso contar nos dedos quantos decifraram esses marcos. Você é um deles.\"\n\nEle entrega o mapa com cuidado reverencial.\n\"Cuide bem dele. É mais do que um mapa — é meu legado.\"",
   "master_failure": "Corvus suspira.\n\"Não se desanime. Volte quando se sentir mais preparado.\"\n\n<i>Dica: Aumente sua Inteligência para melhorar suas chances.</i>",
   "buy_success_tier1": [
@@ -39596,10 +39602,10 @@ function _resolveInteractiveChoiceLOCAL(player, choice) {
     var roll = 1 + Math.floor(Math.random() * 20);
     var total = roll + mod;
     success = total >= choice.dc;
-    var abbr = STAT_TO_ABBR[choice.stat] || choice.stat.toUpperCase();
-    rolledLine = '' + abbr + ': ' + roll + (mod>=0?'+':'') + mod + ' = <b>' + total + '</b> vs DC ' + choice.dc + ' — ' + (success ? 'Sucesso' : 'Falha') + '<br><br>';
+    var abbr = STAT_TO_ABBR[choice.stat] || _statAbbrPT(choice.stat);
+    rolledLine = '' + abbr + ': ' + roll + (mod>=0?'+':'') + mod + ' = <b>' + total + '</b> vs CD ' + choice.dc + ' — ' + (success ? 'Sucesso' : 'Falha') + '<br><br>';
     diceData = {
-      formula: '1d20' + (mod>=0?'+':'') + mod + ' vs DC ' + choice.dc,
+      formula: '1d20' + (mod>=0?'+':'') + mod + ' vs CD ' + choice.dc,
       sides: 20, value: roll, total: total
     };
   }
@@ -39723,10 +39729,10 @@ function _resolveInteractiveChoiceREMOTE(player, choice) {
     var success = !!res.success;
     var rolledLine = '', diceData = null;
     if (hasCheck && typeof res.d20 === 'number') {
-      var abbr = STAT_TO_ABBR[choice.stat] || String(choice.stat).toUpperCase();
+      var abbr = STAT_TO_ABBR[choice.stat] || _statAbbrPT(choice.stat);
       var mod = res.modifier || 0;
-      rolledLine = '' + abbr + ': ' + res.d20 + (mod >= 0 ? '+' : '') + mod + ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — ' + (success ? 'Sucesso' : 'Falha') + '<br><br>';
-      diceData = { formula: '1d20' + (mod >= 0 ? '+' : '') + mod + ' vs DC ' + res.dc, sides: 20, value: res.d20, total: res.total };
+      rolledLine = '' + abbr + ': ' + res.d20 + (mod >= 0 ? '+' : '') + mod + ' = <b>' + res.total + '</b> vs CD ' + res.dc + ' — ' + (success ? 'Sucesso' : 'Falha') + '<br><br>';
+      diceData = { formula: '1d20' + (mod >= 0 ? '+' : '') + mod + ' vs CD ' + res.dc, sides: 20, value: res.d20, total: res.total };
     }
     var narrative = success ? (choice.result_text || '') : (choice.result_text_fail || choice.result_text || '');
     var deltas = [], rewards = [];
@@ -42927,7 +42933,7 @@ var CANON_RESEARCH = {
   "research_complications": [
     {
       "text": "O livro continha informações falsas plantadas por um inimigo.",
-      "effect": "Próxima pesquisa tem DC+2.",
+      "effect": "Próxima pesquisa tem CD+2.",
       "flag": "research_false_info"
     },
     {
@@ -43342,7 +43348,7 @@ var CANON_ITEMS_DB = {
   'Poção de Heroísmo':         {e: _heralIco('ic-mochila'), v:180,r:'uncommon', t:['consumable','potion','magic'], desc:'+10 HP temporário e Abençoar por 1h.'},
   'Poção de Resistência ao Fogo':{e: _heralIco('ic-mochila'),v:300,r:'uncommon',t:['consumable','potion','magic'], desc:'Resistência a fogo por 1h.'},
   'Poção de Resistência ao Frio':{e: _heralIco('ic-mochila'),v:300,r:'uncommon',t:['consumable','potion','magic'], desc:'Resistência a frio por 1h.'},
-  'Poção de Velocidade':       {e: _heralIco('ic-mochila'), v:400,r:'rare',     t:['consumable','potion','magic'], desc:'+2 CA, vantagem DEX, ação extra. 1 min.'},
+  'Poção de Velocidade':       {e: _heralIco('ic-mochila'), v:400,r:'rare',     t:['consumable','potion','magic'], desc:'+2 CA, vantagem DES, ação extra. 1 min.'},
   'Poção de Invisibilidade':   {e: _heralIco('ic-mochila'), v:500,r:'rare',     t:['consumable','potion','magic'], desc:'Invisível por 1h ou até atacar/conjurar.'},
   'Antídoto':                  {e: _heralIco('ic-mochila'), v:50, r:'common',   t:['consumable','potion'],         desc:'Remove condição envenenado.'},
   // === ITENS MÁGICOS COMUNS ===
@@ -43455,7 +43461,7 @@ var CANON_ITEM_SETS = {
     desc: 'Forjado com ossos e peles de lobos terríveis das Planícies Cinzentas.',
     pieces: ['Garras do Lobo Selvagem', 'Gibão do Lobo Selvagem', 'Botas do Lobo Selvagem'],
     thresholds: {
-      2: { label: '+2 DEX', bonuses: { stat_bonus: { dexterity: 2 } } },
+      2: { label: '+2 DES', bonuses: { stat_bonus: { dexterity: 2 } } },
       3: { label: '+1 Ataque · +1 Dano', bonuses: { attack_bonus: 1, damage_bonus: 1 } }
     }
   },
@@ -45614,7 +45620,7 @@ function _squareShowExploreEvent(p){
     var statVal = (p.stats && p.stats[STAT_KEY[ch.stat]]) || 10;
     var mod = Math.floor((statVal - 10) / 2);
     var chance = Math.max(5, Math.min(95, (21 - (ch.dc - mod)) * 5));
-    return ch.stat + ' DC ' + ch.dc + ' · ' + chance + '%';
+    return ch.stat + ' CD ' + ch.dc + ' · ' + chance + '%';
   }
   // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR rola o teste
   // e aplica gold/HP/XP/poção (RANGES roladas no servidor) via 'service.square_explore_event'.
@@ -45635,8 +45641,8 @@ function _squareShowExploreEvent(p){
       var diceData = null;
       if (res.has_check){
         rolledLine = '' + (ch.stat || res.stat) + ': ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
-          ' = <b>' + res.total + '</b> vs DC ' + res.dc + ' — ' + (res.success ? 'Sucesso!' : 'Falha.') + '<br><br>';
-        diceData = { formula: '1d20' + (res.modifier >= 0 ? '+' : '') + res.modifier + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total };
+          ' = <b>' + res.total + '</b> vs CD ' + res.dc + ' — ' + (res.success ? 'Sucesso!' : 'Falha.') + '<br><br>';
+        diceData = { formula: '1d20' + (res.modifier >= 0 ? '+' : '') + res.modifier + ' vs CD ' + res.dc, sides: 20, value: res.rolled, total: res.total };
       }
       var deltas = [];
       var rewards = [];
@@ -46112,7 +46118,7 @@ function _squareShowMuralPopup(p){
 }
 
 // STR/DEX/WIS/CHA (chaves internas do check) -> abreviacoes PT-BR so p/ DISPLAY (sweep praca 2026-06-19)
-function _statAbbrPT(s){ var M={STR:'FOR',DEX:'DES',CON:'CON',INT:'INT',WIS:'SAB',CHA:'CAR'}; return M[String(s||'').toUpperCase()]||s; }
+function _statAbbrPT(s){ var M={STR:'FOR',DEX:'DES',CON:'CON',INT:'INT',WIS:'SAB',CHA:'CAR',STRENGTH:'FOR',DEXTERITY:'DES',CONSTITUTION:'CON',INTELLIGENCE:'INT',WISDOM:'SAB',CHARISMA:'CAR'}; return M[String(s||'').toUpperCase()]||s; }
 
 // ============================================================================
 // === HELPERS ÁREAS (2026-05-02) ==================================
@@ -46212,8 +46218,8 @@ function _tavernShowDrinking(p){
   var entryFee    = 3;
   _showConfirmPurchase({
     icon: _heralIco('ic-cerveja'), npc: 'Mesa de Bebida', title: 'Concurso de Bebida',
-    desc: '<i>Toda rodada um CON save com DC subindo +' + dcIncrement + '. Aguente ' + maxRounds + ' rodadas pra vencer.</i><br><br>' +
-          '<b>DC inicial:</b> ' + baseDC + ' · <b>Rodadas:</b> ' + maxRounds + ' · <b>Bônus Anão:</b> +' + dwarfBonus + '<br>' +
+    desc: '<i>Toda rodada um teste de CON com CD subindo +' + dcIncrement + '. Aguente ' + maxRounds + ' rodadas pra vencer.</i><br><br>' +
+          '<b>CD inicial:</b> ' + baseDC + ' · <b>Rodadas:</b> ' + maxRounds + ' · <b>Bônus Anão:</b> +' + dwarfBonus + '<br>' +
           '<b>Entrada:</b> ' + entryFee + ' Valdoritas',
     cost: entryFee,
     onConfirm: function(){
@@ -46263,12 +46269,12 @@ function _tavernShowDrinking(p){
             ? (enduranceLine || '<b>VITÓRIA!</b> Aguentou ' + res.max_rounds + ' rodadas!') + '<br><br>' +
               (endText ? '<i>' + endText + '</i><br><br>' : '') +
               (isDwarf ? '<i>Bônus Anão (+' + res.dwarf_bonus + ') aplicado.</i><br>' : '') +
-              '<b>Último teste:</b> ' + lastRoll + (totalMod >= 0 ? '+' : '') + totalMod + ' = ' + (lastRoll + totalMod) + ' vs DC ' + lastDc
+              '<b>Último teste:</b> ' + lastRoll + (totalMod >= 0 ? '+' : '') + totalMod + ' = ' + (lastRoll + totalMod) + ' vs CD ' + lastDc
             : '<b>Bêbado!</b> Falhou na rodada ' + (res.failed_round || 0) + '/' + res.max_rounds + '.<br><br>' +
               (endText ? '<i>' + endText + '</i><br><br>' : '') +
               (isDwarf ? '<i>Bônus Anão (+' + res.dwarf_bonus + ') aplicado mas não foi suficiente.</i><br>' : '') +
-              '<b>Teste fatal:</b> ' + lastRoll + (totalMod >= 0 ? '+' : '') + totalMod + ' = ' + (lastRoll + totalMod) + ' vs DC ' + lastDc + '<br><br><i>A ressaca vai pesar amanhã.</i>'),
-          dice: { formula: '1d20' + (totalMod >= 0 ? '+' : '') + totalMod + ' vs DC ' + lastDc, sides: 20, value: lastRoll, total: lastRoll + totalMod },
+              '<b>Teste fatal:</b> ' + lastRoll + (totalMod >= 0 ? '+' : '') + totalMod + ' = ' + (lastRoll + totalMod) + ' vs CD ' + lastDc + '<br><br><i>A ressaca vai pesar amanhã.</i>'),
+          dice: { formula: '1d20' + (totalMod >= 0 ? '+' : '') + totalMod + ' vs CD ' + lastDc, sides: 20, value: lastRoll, total: lastRoll + totalMod },
           deltas: [
             { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
           ],
@@ -46806,7 +46812,7 @@ var WNPC_FRIENDSHIP_PERKS = {
   devout:      { key: 'wnpc_temple_heal',     label: 'Cura gratuita no templo 1x/dia', icon: _heralIco('ic-mochila'), value: 1    },
   cautious:    { key: 'wnpc_trap_bonus',      label: '+2 detecção de armadilhas',      icon: _heralIco('ic-taverna'), value: 2    },
   jovial:      { key: 'wnpc_tavern_luck',     label: '+5% jogos da taverna',           icon: _heralIco('ic-mochila'), value: 0.05 },
-  stoic:       { key: 'wnpc_ac_bonus',        label: '+1 AC temporário',                icon: _heralIco('ic-mochila'), value: 1    },
+  stoic:       { key: 'wnpc_ac_bonus',        label: '+1 CA temporário',                icon: _heralIco('ic-mochila'), value: 1    },
   mysterious:  { key: 'wnpc_rare_find',       label: '+15% itens raros',                icon: '', value: 0.15 }
 };
 
@@ -49503,7 +49509,7 @@ var WNPC_TRAIL_CLASS_BUFFS = {
 };
 
 var WNPC_TRAIL_BUFF_DESCRIPTIONS = {
-    'ac_bonus': "+{value} AC enquanto viajam juntos",
+    'ac_bonus': "+{value} CA enquanto viajam juntos",
     'temp_hp': "+{value} HP temporário enquanto viajam juntos",
     'loot_bonus': "Bônus de saque enquanto viajam juntos",
     'hp_regen': "+{value} HP por passo enquanto viajam juntos",
@@ -49542,7 +49548,7 @@ var HELP_TEXTS_CITY = {
 
     'guild': '\\n<b>GUILDA - GUIA RÁPIDO</b>\\n\\nO quartel-general dos aventureiros:\\n\\n<b>Quadro de Missões</b>\\n• Missões diárias com recompensas em Valdoritas e XP\\n• Novas missões disponíveis periodicamente\\n\\n<b>Tavira (Recompensas)</b>\\n• Entregue caçadas concluídas para receber recompensas\\n• Contratos de eliminação de criaturas específicas\\n\\n<b>Contratar Aventureiros</b>\\n• Recrute companheiros para seu grupo\\n• Cada aliado tem classe, nível e habilidades\\n• Eles lutam e usam magias automaticamente em combate\\n\\n<b>Gerenciar Grupo</b>\\n• Veja o status dos seus companheiros\\n• Dispense aliados para abrir espaço\\n\\n<b>Braun, o Marcado</b>\\n• Histórias de guerra e dicas sobre cada região\\n• Conheça Os Cinco de Valdoria — o lendário grupo de Braun\\n• Quanto mais você o visita, mais ele revela do passado\\n\\n<i>Dica</i>: Um Clérigo ou Paladino no grupo aumenta muito sua sobrevivência!\\n',
 
-    'town_square': '\\n<b>PRAÇA - GUIA RÁPIDO</b>\\n\\nO coração pulsante da cidade:\\n\\n<b>Investigar a Praça</b>\\n• Encontre NPCs e converse com eles\\n• NPCs mudam conforme o período (Manhã/Tarde)\\n• Alguns NPCs únicos têm histórias progressivas\\n\\n<b>Explorar a Área</b>\\n• Eventos investigativos com testes de perícia\\n• Pode encontrar itens, pistas ou situações inesperadas\\n\\n<b>Mestre Cartógrafo (Corvus)</b>\\n• Vende mapas que revelam locais no mapa-múndi\\n• <b>Mapas Comuns</b>: compra direta (Planícies, Floresta, Deserto)\\n• <b>Mapas Raros</b>: exigem teste de perícia (Pântano, Ermo Gelado)\\n• <b>Mapas de Expedição</b>: exigem ter visitado 3+ locais (Montanhas, Vulcânico)\\n• <b>Mapa Mestre</b>: exige 5+ mapas regionais + teste de INT DC 15\\n\\n<b>Social</b>\\n• Acesse o popup Social para chat e jogadores online\\n• Envie desafios, convites e saudações\\n\\n<i>Dica</i>: Mercadores do Mercado que estão de folga aparecem pela praça ou taverna!\\n',
+    'town_square': '\\n<b>PRAÇA - GUIA RÁPIDO</b>\\n\\nO coração pulsante da cidade:\\n\\n<b>Investigar a Praça</b>\\n• Encontre NPCs e converse com eles\\n• NPCs mudam conforme o período (Manhã/Tarde)\\n• Alguns NPCs únicos têm histórias progressivas\\n\\n<b>Explorar a Área</b>\\n• Eventos investigativos com testes de perícia\\n• Pode encontrar itens, pistas ou situações inesperadas\\n\\n<b>Mestre Cartógrafo (Corvus)</b>\\n• Vende mapas que revelam locais no mapa-múndi\\n• <b>Mapas Comuns</b>: compra direta (Planícies, Floresta, Deserto)\\n• <b>Mapas Raros</b>: exigem teste de perícia (Pântano, Ermo Gelado)\\n• <b>Mapas de Expedição</b>: exigem ter visitado 3+ locais (Montanhas, Vulcânico)\\n• <b>Mapa Mestre</b>: exige 5+ mapas regionais + teste de INT CD 15\\n\\n<b>Social</b>\\n• Acesse o popup Social para chat e jogadores online\\n• Envie desafios, convites e saudações\\n\\n<i>Dica</i>: Mercadores do Mercado que estão de folga aparecem pela praça ou taverna!\\n',
 
     'market': '\\n<b>MERCADO - GUIA RÁPIDO</b>\\n\\nOnde o comércio acontece:\\n\\n<b>Comprar Equipamentos</b>\\n• <b>Ferreiro</b>: Armas e Armaduras pesadas\\n• <b>Alquimista</b>: Poções e Ingredientes\\n• <b>Místico</b>: Itens mágicos e pergaminhos\\n• <b>Viajantes</b>: Itens raros e exóticos (Rotação periódica)\\n\\n<b>Vender Itens</b>\\n• Mercadores só compram o que lhes interessa\\n• O Ferreiro compra metais, o Alquimista compra ervas, etc.\\n• Preço de venda é geralmente 50% do valor base (ou menos)\\n\\n<b>Negociação e Fofoca</b>\\n• Pergunte aos mercadores sobre seus colegas ausentes\\n• Use perícias de Carisma para tentar descontos (arriscado!)\\n\\n<i>Dica</i>: Itens equipados não aparecem na lista de venda para evitar acidentes.\\n',
 
@@ -50076,7 +50082,7 @@ function _tavernShowCarousing(p){
   var contacts = (canon && canon.contacts && canon.contacts.length) ? canon.contacts : ['um contato útil'];
   var complications = (canon && canon.complications && canon.complications.length) ? canon.complications : [];
   var items = levels.map(function(l){
-    return { icon: l.emoji || '', label: l.label, badge: l.cost + ' V · DC ' + l.dc + ' CHA', _l: l };
+    return { icon: l.emoji || '', label: l.label, badge: l.cost + ' V · CD ' + l.dc + ' CAR', _l: l };
   });
   _aaaListSubScreen({
     theme: 'tavern',
@@ -50090,7 +50096,7 @@ function _tavernShowCarousing(p){
       var l = item._l;
       _showConfirmPurchase({
         icon: _heralIco('ic-cerveja'), npc: 'Anfitrião', title: l.label,
-        desc: '<i>' + l.desc + '</i><br><br>Custo: ' + l.cost + ' V · Teste DC ' + l.dc + ' CHA',
+        desc: '<i>' + l.desc + '</i><br><br>Custo: ' + l.cost + ' V · Teste CD ' + l.dc + ' CAR',
         cost: l.cost,
         onConfirm: function(){
           // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
@@ -50111,7 +50117,7 @@ function _tavernShowCarousing(p){
             if (typeof res.gold === 'number') p.gold = res.gold;
             var mod = (typeof res.modifier === 'number') ? res.modifier : 0;
             var narrative = '<b>Teste:</b> ' + res.rolled + (mod >= 0 ? '+' : '') + mod +
-              ' CHA = ' + res.total + ' vs DC ' + res.dc + ' — <b>' + (res.success ? 'SUCESSO' : 'falha') + '</b><br><br>' +
+              ' CAR = ' + res.total + ' vs CD ' + res.dc + ' — <b>' + (res.success ? 'SUCESSO' : 'falha') + '</b><br><br>' +
               (res.success
                 ? '<i>Conexões feitas! Você ganha como contato: <b>' + res.contact + '</b>.</i>'
                 : '<i>Bebeu demais. Acordou no banco da taverna sem contatos úteis.</i>');
@@ -50123,7 +50129,7 @@ function _tavernShowCarousing(p){
             _showServiceResultPopup({
               icon: res.success ? '' : '', npc: 'Anfitrião',
               narrative: narrative,
-              dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total },
+              dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' vs CD ' + res.dc, sides: 20, value: res.rolled, total: res.total },
               deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
               rewards: res.success ? [{ type:'item', amount: 1, label: 'Contato: ' + res.contact }] : null,
               onContinue: function(){ navigateBack(); }
@@ -50162,7 +50168,7 @@ function _tavernShowGather(p){
   var introPool = (canonExtra && canonExtra.gather_intro_lines) || [];
   var intro = introPool.length > 0 ? pickFrom(introPool) : 'Grom: "Cinco moedas e te conto o que sei."';
   var items = topics.map(function(t){
-    return { icon: t.icon, label: t.label, badge: t.cost + ' V · DC ' + t.dc, _t: t };
+    return { icon: t.icon, label: t.label, badge: t.cost + ' V · CD ' + t.dc, _t: t };
   });
   _aaaListSubScreen({
     theme: 'tavern',
@@ -50177,7 +50183,7 @@ function _tavernShowGather(p){
       _showConfirmPurchase({
         icon: t.icon, npc: 'Grom', title: 'Investigar: ' + t.label,
         player: p,
-        desc: '<b>' + t.label + '</b> · DC ' + t.dc + '<br>Custo: ' + t.cost + ' Valdoritas<br>' +
+        desc: '<b>' + t.label + '</b> · CD ' + t.dc + '<br>Custo: ' + t.cost + ' Valdoritas<br>' +
               '<b>Sucesso:</b> ' + t.bonus,
         cost: t.cost,
         onConfirm: function(){
@@ -50206,7 +50212,7 @@ function _tavernShowGather(p){
             _showServiceResultPopup({
               icon: res.success ? '' : '', npc: 'Grom, o Caolho',
               narrative: '<i>' + String(res.flavor || '').replace(/\n/g, '<br>') + '</i>',
-              dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total },
+              dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' vs CD ' + res.dc, sides: 20, value: res.rolled, total: res.total },
               deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
               rewards: res.success ? [{ type:'item', amount: 1, label: res.bonus_desc || t.bonus }] : null,
               onContinue: function(){ navigateBack(); }
@@ -50386,7 +50392,7 @@ function _tavernShowPitfight(p){
     subtitle: 'Taverna do Javali Bêbado · Rinha da Adega',
     icon: _heralIco('ic-stat-attack'), title: 'Rinha — Aposte em ' + opp,
     flavor: '<i>' + introLine + '</i><br>' +
-            '<i>3 testes (FOR · DES · CON) contra DC = 5 + 2d10 .</i><br>' +
+            '<i>3 testes (FOR · DES · CON) contra CD = 5 + 2d10 .</i><br>' +
             '<i>Cooldown: 3 turnos entre rinhas.</i>',
     items: items,
     onPick: function(item){
@@ -50396,7 +50402,7 @@ function _tavernShowPitfight(p){
         icon: _heralIco('ic-mochila'), npc: 'Mestre da Rinha', title: 'Apostar ' + b.label + ' em ' + opp,
         desc: '<i>Adversário: <b>' + opp + '</b></i><br><br>' +
               '<b>Taxa entrada:</b> 25 <span class="vi vi-coin sm"></span> · <b>Aposta:</b> ' + b.amount + ' <span class="vi vi-coin sm"></span> · <b>Total:</b> ' + totalCost + ' <span class="vi vi-coin sm"></span><br>' +
-              '<b>3 testes:</b> FOR · DES · CON vs DC = 5 + 2d10<br>' +
+              '<b>3 testes:</b> FOR · DES · CON vs CD = 5 + 2d10<br>' +
               '<i>Vitória: paga 2× aposta + ganha XP. Derrota: aposta perdida + dano.</i>',
         cost: totalCost,
         onConfirm: function(){
@@ -50423,11 +50429,11 @@ function _tavernShowPitfight(p){
             var checks = res.checks || [];
             var checkLog = checks.map(function(c){
               return (c.success ? '' : '') + ' ' + (c.stat || c.skill || '') + ': ' +
-                c.rolled + (c.mod >= 0 ? '+' : '') + c.mod + '=' + c.total + ' vs DC ' + c.dc;
+                c.rolled + (c.mod >= 0 ? '+' : '') + c.mod + '=' + c.total + ' vs CD ' + c.dc;
             }).join('<br>');
             var win = (res.successes || 0) >= 2;
             var resultText = res.outcome_text || (win ? 'VITÓRIA!' : 'DERROTA');
-            var narrative = '<b>DC ' + res.dc + '</b> (5 + 2d10)<br>' + checkLog + '<br><br>' +
+            var narrative = '<b>CD ' + res.dc + '</b> (5 + 2d10)<br>' + checkLog + '<br><br>' +
               '<b>' + resultText + '</b> (' + (res.successes || 0) + '/3 sucessos)';
             if (res.injury) narrative += '<br><i>Você saiu ferido da luta (-1 HP).</i>';
             if (res.reputation) narrative += '<br><i>A taverna inteira grita seu nome!</i>';
@@ -50439,7 +50445,7 @@ function _tavernShowPitfight(p){
             _showServiceResultPopup({
               icon: res.outcome_icon || (win ? '✓' : '✗'), npc: 'Mestre da Rinha',
               narrative: narrative,
-              dice: { formula: '3× 1d20 vs DC ' + res.dc, sides: 20, value: firstChk.rolled, total: firstChk.total },
+              dice: { formula: '3× 1d20 vs CD ' + res.dc, sides: 20, value: firstChk.rolled, total: firstChk.total },
               deltas: deltas,
               rewards: (win && res.payout > 0) ? [{ type:'gold', amount: res.payout, label: 'Prêmio da rinha' }] : null,
               onContinue: function(){ navigateBack(); }
@@ -53523,8 +53529,8 @@ function _showShopItemDetail(name, npcId){
   // Negociação D&D 5e — só disponível se não tentou ainda
   if (!alreadyNegotiated){
     actionsHtml += '<div style="display:flex;gap:6px;">';
-    actionsHtml += '<button class="inv-detail-btn" id="shop-haggle-btn" style="flex:1;font-size:calc(11px * var(--v-font-scale, 1));">Pechinchar <span style="opacity:0.7;">(Persuasão DC ' + _dndHaggleDC(name) + ')</span></button>';
-    actionsHtml += '<button class="inv-detail-btn" id="shop-intimidate-btn" style="flex:1;font-size:calc(11px * var(--v-font-scale, 1));background:linear-gradient(180deg,rgba(196,40,30,0.18),rgba(74,30,20,0.40));border-color:rgba(196,40,30,0.45);">Intimidar <span style="opacity:0.7;">(DC ' + (_dndHaggleDC(name) + 2) + ')</span></button>';
+    actionsHtml += '<button class="inv-detail-btn" id="shop-haggle-btn" style="flex:1;font-size:calc(11px * var(--v-font-scale, 1));">Pechinchar <span style="opacity:0.7;">(Persuasão CD ' + _dndHaggleDC(name) + ')</span></button>';
+    actionsHtml += '<button class="inv-detail-btn" id="shop-intimidate-btn" style="flex:1;font-size:calc(11px * var(--v-font-scale, 1));background:linear-gradient(180deg,rgba(196,40,30,0.18),rgba(74,30,20,0.40));border-color:rgba(196,40,30,0.45);">Intimidar <span style="opacity:0.7;">(CD ' + (_dndHaggleDC(name) + 2) + ')</span></button>';
     actionsHtml += '</div>';
   }
   actionsHtml += '<button class="inv-detail-btn" id="shop-detail-close" style="font-size:calc(11px * var(--v-font-scale, 1));opacity:0.75;">Fechar</button>';
@@ -53813,7 +53819,7 @@ function _shopConfirmBuy(name, npcId){
   }
   var diff = finalPrice - basePrice;
   var priceNote = '';
-  if (diff < 0) priceNote = '<br><i style="color:var(--v-rarity-uncommon,#4caf50)">↓ ' + diff + ' <span class="vi vi-coin sm"></span> total (CHA/Reputação' + (negData ? '/Skill' : '') + ')</i>';
+  if (diff < 0) priceNote = '<br><i style="color:var(--v-rarity-uncommon,#4caf50)">↓ ' + diff + ' <span class="vi vi-coin sm"></span> total (CAR/Reputação' + (negData ? '/Skill' : '') + ')</i>';
   else if (diff > 0) priceNote = '<br><i style="color:var(--v-danger,#c44)">↑ +' + diff + ' <span class="vi vi-coin sm"></span> total</i>';
   var breakdownHtml = _marketPriceBreakdown(name, npcId, p, 'buy') + negNoteHtml;
   // PADRAO_COMERCIO beat 3 (LOCAL): mesma cena vEncounter do REMOTE — narração
@@ -54730,7 +54736,7 @@ function _marketAttemptInsight(itemName, npcKey, player){
   var success = roll.total >= dc;
   var narrative;
   if (success){
-    narrative = '<i>Você observa atentamente. O mercador está sendo <b>honesto</b> — preço reflete CHA, reputação e categoria.</i>';
+    narrative = '<i>Você observa atentamente. O mercador está sendo <b>honesto</b> — preço reflete CAR, reputação e categoria.</i>';
   } else if (roll.total >= dc - 5){
     narrative = '<i>Você não consegue ler claramente. Pode estar ou não na média.</i>';
   } else {
@@ -54755,7 +54761,7 @@ function _marketPriceBreakdown(itemName, npcKey, player, action){
   if (chaMod !== 0){
     var chaPct = Math.round((chaMult - 1) * 100);
     var chaSign = chaPct >= 0 ? '+' : '';
-    lines.push('<b>CHA</b> (' + (chaMod >= 0 ? '+' : '') + chaMod + '): ' + chaSign + chaPct + '%');
+    lines.push('<b>CAR</b> (' + (chaMod >= 0 ? '+' : '') + chaMod + '): ' + chaSign + chaPct + '%');
   }
   if (rep !== 0 && repTier){
     var repPct = Math.round((repMult - 1) * 100);
@@ -54976,7 +54982,7 @@ function _marketShowSell(p){
     icon: (typeof _heralIco === 'function') ? _heralIco('ic-mercado') : '',
     flavor: '<div style="font-size:12px;line-height:1.5;color:var(--v-text,#d4c8b0);">'
           + '<div style="color:var(--v-gold,#c4953a);font-weight:700;margin-bottom:3px;letter-spacing:0.5px;">◆ REGRAS DE COMÉRCIO · VALDORIA</div>'
-          + '• <b>Equipamentos usados:</b> avaliados a 50% do valor da tabela D&D 5e.<br>'
+          + '• <b>Equipamentos usados:</b> avaliados a 50% do valor comercial padrão.<br>'
           + '• <b>Gemas e Joias:</b> preservam 100% do seu valor comercial.<br>'
           + '• <b>Especialistas da praça:</b> compram no ofício correto com bônus de ramo.'
           + '</div>',
@@ -55159,7 +55165,7 @@ function _marketSellMagicWithPersuasion(p, it, spec){
     desc: '<b>' + it.name + '</b><br>'
         + '<i>Valor estimado:</i> ' + (it.value || 0) + ' <span class="vi vi-coin sm"></span><br><br>'
         + '<i>Itens mágicos exigem negociação cuidadosa. O mercador pesa cada peça antes de fazer uma oferta.</i><br><br>'
-        + '<b>Teste de Persuasão:</b> d20 + CHA(' + (chaMod >= 0 ? '+' : '') + chaMod + ') + Proficiência(+' + prof + ') = ' + bonusStr + ' bônus<br>'
+        + '<b>Teste de Persuasão:</b> d20 + CAR(' + (chaMod >= 0 ? '+' : '') + chaMod + ') + Proficiência(+' + prof + ') = ' + bonusStr + ' bônus<br>'
         + '<br><i>"O resultado decide o quanto ele paga — de uma fração até o dobro do valor. Se ninguém quiser comprar hoje, volte outro dia."</i>',
     confirmLabel: 'Rolar Persuasão (d20)',
     cancelLabel: 'Voltar',
@@ -55995,9 +56001,9 @@ function _guildResearchRemote(p){
       icon: _heralIco('ic-ach-erudito'), title: 'Biblioteca da Guilda',
       subtitle: 'Sala de Pesquisa · Grande Biblioteca',
       bannerImg: '/shared/img/guilda/library-banner.webp',
-      flavor: '<i>O Veterano Braun ajusta os óculos sob a luz das velas, o dedo correndo por uma lombada gasta.</i> "' + (st.intro || 'Escolhe um tomo, aventureiro. O conhecimento tem preço — e seus riscos.') + '"<br><i>Cada tópico: 1d20 + INT vs DC ' + st.dc + ' · custo ' + st.cost + ' Valdoritas.</i>',
+      flavor: '<i>O Veterano Braun ajusta os óculos sob a luz das velas, o dedo correndo por uma lombada gasta.</i> "' + (st.intro || 'Escolhe um tomo, aventureiro. O conhecimento tem preço — e seus riscos.') + '"<br><i>Cada tópico: 1d20 + INT vs CD ' + st.dc + ' · custo ' + st.cost + ' Valdoritas.</i>',
       sectionLabel: 'Tomos disponíveis',
-      items: topics.map(function(t){ return { icon: _heralIco('ic-ach-erudito'), label: t.name, badge: st.cost + ' V · DC ' + st.dc, desc: t.desc, _k: t.key }; }),
+      items: topics.map(function(t){ return { icon: _heralIco('ic-ach-erudito'), label: t.name, badge: st.cost + ' V · CD ' + st.dc, desc: t.desc, _k: t.key }; }),
       onPick: function(item){ _guildResearchConfirmRemote(p, item._k, item, st); }
     });
   }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } console.error('[CITY] research state failed', _e); if (typeof vToast === 'function') vToast('Erro na biblioteca.', 'warn'); });
@@ -56006,7 +56012,7 @@ function _guildResearchRemote(p){
 function _guildResearchConfirmRemote(p, topicKey, topic, st){
   _showConfirmPurchase({
     icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun', title: topic.name,
-    desc: '<b>' + topic.name + '</b><br><i>' + (topic.desc || '') + '</i><br><br><b>Teste:</b> 1d20 + INT vs DC ' + st.dc + '<br><b>Custo:</b> ' + st.cost + ' Valdoritas',
+    desc: '<b>' + topic.name + '</b><br><i>' + (topic.desc || '') + '</i><br><br><b>Teste:</b> 1d20 + INT vs CD ' + st.dc + '<br><b>Custo:</b> ' + st.cost + ' Valdoritas',
     cost: st.cost,
     onConfirm: function(){
       var preGold = p.gold;
@@ -56028,7 +56034,7 @@ function _guildResearchConfirmRemote(p, topicKey, topic, st){
         _showServiceResultPopup({
           icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun',
           narrative: '<i>' + (res.result_text || '') + '</i>' + bonusLine + compLine,
-          dice: { formula: '1d20' + (res.bonus >= 0 ? '+' : '') + res.bonus + ' (' + res.skill_label + ') vs DC ' + res.dc, sides: 20, value: res.roll, total: res.total },
+          dice: { formula: '1d20' + (res.bonus >= 0 ? '+' : '') + res.bonus + ' (' + res.skill_label + ') vs CD ' + res.dc, sides: 20, value: res.roll, total: res.total },
           deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
           onContinue: function(){ navigateBack(); }
         });
@@ -56076,14 +56082,14 @@ function _guildShowResearch(p){
     });
   }
   var items = topics.map(function(t){
-    return { icon: _heralIco('ic-ach-erudito'), label: t.label, badge: t.cost + ' V · DC ' + t.dc + ' INT', _t: t };
+    return { icon: _heralIco('ic-ach-erudito'), label: t.label, badge: t.cost + ' V · CD ' + t.dc + ' INT', _t: t };
   });
   _squareShowListPopup({
     stackKey: 'guild_research', theme: 'arcane',
     icon: _heralIco('ic-ach-erudito'), title: 'Biblioteca da Guilda',
     subtitle: 'Sala de Pesquisa · Grande Biblioteca',
     bannerImg: '/shared/img/guilda/library-banner.webp',
-    flavor: '<i>O Veterano Braun ajusta os óculos sob a luz das velas.</i> "' + introLine + '"<br><i>Cada tópico: DC ' + canonDC + ' INT · buff +' + (canonTopics ? 2 : 1) + ' por 5 turnos.</i>',
+    flavor: '<i>O Veterano Braun ajusta os óculos sob a luz das velas.</i> "' + introLine + '"<br><i>Cada tópico: CD ' + canonDC + ' INT · buff +' + (canonTopics ? 2 : 1) + ' por 5 turnos.</i>',
     sectionLabel: 'Tomos disponíveis',
     items: items,
     onPick: function(item){
@@ -56094,7 +56100,7 @@ function _guildShowResearch(p){
       _showConfirmPurchase({
         icon: t.icon, npc: 'Veterano Braun', title: t.label,
         desc: '<b>' + t.label + '</b><br><i>' + (t.desc || '') + '</i><br><br>' +
-              '<b>Teste:</b> 1d20 + ' + skill.label + ' (' + skill.attr.toUpperCase().substr(0,3) + ') vs DC ' + t.dc + '<br>' +
+              '<b>Teste:</b> 1d20 + ' + skill.label + ' (' + skill.attr.toUpperCase().substr(0,3) + ') vs CD ' + t.dc + '<br>' +
               '<b>Custo:</b> ' + t.cost + ' Valdoritas',
         cost: t.cost,
         onConfirm: function(){
@@ -56136,7 +56142,7 @@ function _guildShowResearch(p){
           _showServiceResultPopup({
             icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', npc: 'Veterano Braun',
             narrative: '<i>' + resultText + '</i>' + compLine,
-            dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' (' + skill.label + ') vs DC ' + t.dc, sides: 20, value: rolled, total: total },
+            dice: { formula: '1d20' + (mod>=0?'+':'') + mod + ' (' + skill.label + ') vs CD ' + t.dc, sides: 20, value: rolled, total: total },
             deltas: [
               { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false },
               _lastXpDelta(p)
@@ -56485,7 +56491,7 @@ function _workshopShowRecipes(p, toolKey, toolName, toolIcon){
     return;
   }
   var items = recipes.map(function(r){
-    return { icon: r.icon, label: r.name, badge: r.cost_g + 'V · DC ' + r.dc, _r: r };
+    return { icon: r.icon, label: r.name, badge: r.cost_g + 'V · CD ' + r.dc, _r: r };
   });
   _squareShowListPopup({
     stackKey: 'workshop_recipes_' + toolKey,
@@ -56499,7 +56505,7 @@ function _workshopShowRecipes(p, toolKey, toolName, toolIcon){
         desc: '<b>' + r.name + '</b><br>' +
               'Materiais: ' + r.cost_mat + '<br>' +
               'Custo: ' + r.cost_g + ' Valdoritas<br>' +
-              'Teste: 1d20 + INT vs DC ' + r.dc,
+              'Teste: 1d20 + INT vs CD ' + r.dc,
         cost: r.cost_g,
         onConfirm: function(){
           var preGold = p.gold;
@@ -56510,7 +56516,7 @@ function _workshopShowRecipes(p, toolKey, toolName, toolIcon){
           _showServiceResultPopup({
             icon: success ? '' : '', npc: 'Artesão',
             narrative: '<b>Teste:</b> ' + rolled + ' + ' + modInt + ' INT = ' + (rolled + modInt) +
-              ' vs DC ' + r.dc + ' — <b>' + (success ? 'SUCESSO' : 'FALHA') + '</b><br><br>' +
+              ' vs CD ' + r.dc + ' — <b>' + (success ? 'SUCESSO' : 'FALHA') + '</b><br><br>' +
               (success
                 ? '<i>Item fabricado com qualidade.</i> <b>' + r.name + '</b> adicionado à bolsa.'
                 : '<i>Materiais perdidos no processo. Tente novamente.</i>'),
@@ -56631,7 +56637,7 @@ function _workshopShowRecipesRemote(p, stationKey, toolName, toolIcon){
     var items = recipes.map(function(r){
       var ready = r.has_materials && r.can_afford;
       return { icon: toolIcon, label: r.name + (ready ? '' : ' '),
-               badge: (r.cost_gp || 0) + 'V · DC ' + r.dc, _r: r };
+               badge: (r.cost_gp || 0) + 'V · CD ' + r.dc, _r: r };
     });
     _squareShowListPopup({
       stackKey: 'workshop_recipes_' + backendTool, icon: toolIcon, title: toolName + ' — Receitas',
@@ -56645,7 +56651,7 @@ function _workshopShowRecipesRemote(p, stationKey, toolName, toolIcon){
         if (!r.can_afford) warn += '<br><span style="color:#d98">Valdoritas insuficientes</span>';
         _showConfirmPurchase({
           icon: toolIcon, npc: 'Artesão', title: 'Fabricar ' + r.name,
-          desc: '<b>' + r.name + '</b><br>Materiais: ' + (ingStr || '—') + '<br>Custo: ' + (r.cost_gp || 0) + ' Valdoritas<br>Teste: 1d20 + atributo vs DC ' + r.dc + warn,
+          desc: '<b>' + r.name + '</b><br>Materiais: ' + (ingStr || '—') + '<br>Custo: ' + (r.cost_gp || 0) + ' Valdoritas<br>Teste: 1d20 + atributo vs CD ' + r.dc + warn,
           cost: r.cost_gp || 0,
           onConfirm: function(){ _workshopDoCraftRemote(p, r); }
         });
@@ -56675,7 +56681,7 @@ function _workshopDoCraftRemote(p, r){
     _showServiceResultPopup({
       icon: res.success ? (res.output_emoji || '') : '', npc: res.tool_name || 'Artesão',
       narrative: narrative,
-      dice: { formula: '1d20 ' + (res.ability_mod >= 0 ? '+' : '') + res.ability_mod + ' +' + res.prof_bonus + ' vs DC ' + res.dc, sides: 20, value: res.d20, total: res.total },
+      dice: { formula: '1d20 ' + (res.ability_mod >= 0 ? '+' : '') + res.ability_mod + ' +' + res.prof_bonus + ' vs CD ' + res.dc, sides: 20, value: res.d20, total: res.total },
       deltas: [{ type: 'gold', label: 'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }],
       onContinue: function(){ navigateBack(); }
     });
@@ -57175,7 +57181,7 @@ function _festivalEvent(p, ev){
   _showConfirmPurchase({
     icon: evIcon, npc: 'Festival', title: evName,
     desc: '<i>' + introText + '</i><br><br>' +
-          'Teste: 1d20 + ' + statLabel + ' vs DC ' + evDc + '<br>' +
+          'Teste: 1d20 + ' + statLabel + ' vs CD ' + evDc + '<br>' +
           'Custo: ' + evCost + ' Valdoritas',
     cost: evCost,
     onConfirm: function(){
@@ -57224,7 +57230,7 @@ function _festivalEvent(p, ev){
       _showServiceResultPopup({
         icon: success ? '' : '', npc: evName,
         narrative: '<i>' + resultLine + '</i>',
-        dice: { formula: '1d20' + (modAttr>=0?'+':'') + modAttr + ' vs DC ' + evDc, sides: 20, value: rolled, total: total },
+        dice: { formula: '1d20' + (modAttr>=0?'+':'') + modAttr + ' vs CD ' + evDc, sides: 20, value: rolled, total: total },
         deltas: [
           { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false },
           _lastXpDelta(p)
@@ -57266,7 +57272,7 @@ function _festivalEventRemote(p, eventId, evName, evIcon){
     _showServiceResultPopup({
       icon: res.success ? '' : '', npc: res.event_name || evName,
       narrative: '<i>' + (res.result_text || '') + '</i>',
-      dice: { formula: '1d20' + (res.modifier>=0?'+':'') + res.modifier + ' vs DC ' + res.dc, sides: 20, value: res.rolled, total: res.total },
+      dice: { formula: '1d20' + (res.modifier>=0?'+':'') + res.modifier + ' vs CD ' + res.dc, sides: 20, value: res.rolled, total: res.total },
       deltas: [
         { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false }
       ],
@@ -66372,7 +66378,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'pray',  label: '"Reza por nós antes do próximo combate."',  renown: 2 },
       { id: 'ask',   label: '"Conta-me sobre tua devoção."',              renown: 1 },
-      { id: 'boon',  label: '"Pede aos Quatro um favor especial." [CD 14 Persuasão]',
+      { id: 'boon',  label: '"Pede aos Quatro um favor especial."',
         check: { skill: 'persuasion', dc: 14 },
         resultNarration: '{name} fecha os olhos. Luz dourada envolve teus dedos por um instante — bênção rara dos Quatro.',
         resultText: 'Você se sente fortalecido(a). <b>+1 dado de inspiração</b> guardado até o próximo descanso.',
@@ -66390,7 +66396,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'tactics', label: '"Que tática usamos no próximo combate?"', renown: 2 },
       { id: 'story',   label: '"Conta uma batalha que te marcou."',       renown: 1 },
-      { id: 'spar',    label: '"Sparring rápido pra aquecer." [CD 13 Atletismo]',
+      { id: 'spar',    label: '"Sparring rápido pra aquecer."',
         check: { skill: 'athletics', dc: 13 },
         resultNarration: 'Vocês trocam golpes secos por dois minutos. {name} desarma-te no terceiro lance — sorri, devolve a arma.',
         resultText: 'Aprendeu um truque novo. <b>Vantagem na primeira jogada de ataque</b> do próximo combate.',
@@ -66408,7 +66414,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'spell',  label: '"Que magia preparaste pra hoje?"',           renown: 2 },
       { id: 'theory', label: '"Explica-me a Trama Arcana."',               renown: 1 },
-      { id: 'scribe', label: '"Escreve uma magia pra meu uso." [CD 15 Arcanismo]',
+      { id: 'scribe', label: '"Escreve uma magia pra meu uso."',
         check: { skill: 'arcana', dc: 15 },
         resultNarration: '{name} disseca uma página, anota fórmulas marginais e entrega-te o pergaminho ainda úmido de tinta.',
         resultText: 'Recebeu <b>Pergaminho de Mísseis Mágicos</b> (uso único, próximo descanso).',
@@ -66426,7 +66432,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'rumor', label: '"Ouviste algum rumor interessante?"',        renown: 2 },
       { id: 'past',  label: '"De onde vieste?"',                          renown: 0 },
-      { id: 'lift',  label: '"Pega-me algo na multidão. Discreto(a)." [CD 14 Furtividade]',
+      { id: 'lift',  label: '"Pega-me algo na multidão. Discreto(a)."',
         check: { skill: 'stealth', dc: 14 },
         resultNarration: '{name} desaparece num parágrafo. Volta antes do próximo suspiro — uma bolsa de couro caída no teu cinto.',
         resultText: 'Recebeu <b>+8 Valdoritas</b>. Ninguém percebeu.',
@@ -66444,7 +66450,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'track',  label: '"Pode rastrear esses lobos comigo?"',         renown: 2 },
       { id: 'nature', label: '"Fala-me da floresta do norte."',             renown: 1 },
-      { id: 'forage', label: '"Coleta ervas curativas pra mim." [CD 13 Sobrevivência]',
+      { id: 'forage', label: '"Coleta ervas curativas pra mim."',
         check: { skill: 'survival', dc: 13 },
         resultNarration: '{name} some por dez minutos entre as ruelas da feira. Volta com três folhas amassadas e raízes secas.',
         resultText: 'Recebeu <b>2× Erva Curativa</b> (cada uma cura 1d4+1 PV fora de combate).',
@@ -66462,7 +66468,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'bless', label: '"Renova-me a fé antes do combate."',          renown: 2 },
       { id: 'oath',  label: '"Conta-me como fizeste teu juramento."',      renown: 1 },
-      { id: 'imbue', label: '"Imbui minha arma de luz sagrada." [CD 14 Religião]',
+      { id: 'imbue', label: '"Imbui minha arma de luz sagrada."',
         check: { skill: 'religion', dc: 14 },
         resultNarration: '{name} coloca as mãos sobre tua arma. Uma luz dourada flui ao longo do gume — calma como sol de manhã.',
         resultText: 'Sua arma recebe <b>+1d8 dano radiante</b> no próximo ataque acertado.',
@@ -66480,7 +66486,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'inspire', label: '"Toca-me Inspiração antes da batalha."',    renown: 2 },
       { id: 'tale',    label: '"Conta a melhor história da estrada."',     renown: 1 },
-      { id: 'gossip',  label: '"Sonda boatos da taverna pra mim." [CD 12 Persuasão]',
+      { id: 'gossip',  label: '"Sonda boatos da taverna pra mim."',
         check: { skill: 'persuasion', dc: 12 },
         resultNarration: '{name} desaparece pela porta da taverna. Volta meia-hora depois com sorriso enviesado e um nome em código.',
         resultText: 'Aprendeu <b>localização secreta</b> de uma masmorra próxima. Marcada no mapa.',
@@ -66498,7 +66504,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'commune', label: '"Comunga com a natureza por nós."',         renown: 2 },
       { id: 'animal',  label: '"Que forma animal preferes assumir?"',      renown: 1 },
-      { id: 'totem',   label: '"Pede um espírito animal pra me guiar." [CD 13 Natureza]',
+      { id: 'totem',   label: '"Pede um espírito animal pra me guiar."',
         check: { skill: 'nature', dc: 13 },
         resultNarration: '{name} murmura uma canção antiga. Sentes algo invisível pousar no teu ombro — leve como pena, vigilante.',
         resultText: 'Recebeu <b>Espírito Sentinela</b> (avisa de emboscadas no próximo descanso longo).',
@@ -66516,7 +66522,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'train',  label: '"Treina comigo antes da aventura."',         renown: 2 },
       { id: 'wisdom', label: '"Compartilha um ensinamento."',              renown: 1 },
-      { id: 'focus',  label: '"Ajuda-me a focar minha mente." [CD 13 Sabedoria]',
+      { id: 'focus',  label: '"Ajuda-me a focar minha mente."',
         check: { stat: 'wis', dc: 13 },
         resultNarration: '{name} pousa dois dedos no centro de tua testa. Por um instante todo som do mundo desaparece — clareza total.',
         resultText: 'Recebeu <b>Vantagem em saves de Sabedoria</b> nas próximas 8 horas.',
@@ -66534,7 +66540,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'rage',  label: '"Solta a fúria contigo no próximo combate."', renown: 2 },
       { id: 'tribe', label: '"Fala-me da tua tribo."',                     renown: 1 },
-      { id: 'arm',   label: '"Queda de braço. Quem ganha paga a cerveja." [CD 15 Atletismo]',
+      { id: 'arm',   label: '"Queda de braço. Quem ganha paga a cerveja."',
         check: { skill: 'athletics', dc: 15 },
         resultNarration: 'Quase trinta segundos de pulso firme. Tu vences no fim — {name} ri alto e bate na mesa.',
         resultText: '{name} paga a cerveja. Recebeu <b>+5 Valdoritas</b> (taxa simbólica da vitória).',
@@ -66552,7 +66558,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'show',   label: '"Mostra-me um truque novo."',                 renown: 2 },
       { id: 'origin', label: '"De onde vem teu poder?"',                    renown: 0 },
-      { id: 'spark',  label: '"Empresta-me uma fagulha de poder." [CD 14 Carisma]',
+      { id: 'spark',  label: '"Empresta-me uma fagulha de poder."',
         check: { stat: 'cha', dc: 14 },
         resultNarration: '{name} toca teu peito com a ponta do dedo. Uma faísca azul mergulha sob tua pele — quente, viva.',
         resultText: 'Recebeu <b>+1d6 dano elemental</b> no próximo ataque acertado.',
@@ -66570,7 +66576,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     choices: [
       { id: 'pact',    label: '"Conta-me sobre teu Patrono."',              renown: 0 },
       { id: 'gift',    label: '"Pede um favor sombrio pra próxima luta."', renown: 2 },
-      { id: 'whisper', label: '"Escuta o que o Patrono diz sobre mim." [CD 14 Intimidação]',
+      { id: 'whisper', label: '"Escuta o que o Patrono diz sobre mim."',
         check: { skill: 'intimidation', dc: 14 },
         resultNarration: '{name} fecha os olhos. Quando os abre, a pupila brilha por um instante. "Ele te conhece. Sabe teu nome verdadeiro."',
         resultText: 'Recebeu <b>profecia obscura</b> — vantagem no próximo save contra magia.',
@@ -66758,7 +66764,7 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName) {
     },
     {
       id: 'check_' + topicKey,
-      label: '"Permita-me compartilhar uma perspectiva diferente." [CD ' + dc + ' ' + skillLabel + ']',
+      label: '"Permita-me compartilhar uma perspectiva diferente."',
       check: { skill: skill, dc: dc },
       resultNarration: 'Tua colocação atinge o ponto exato da questão. ' + displayName + ' arregala os olhos levemente, demonstrando genuína admiração por tua clareza mental.',
       resultText: 'A conversa aprofundou vosso laço. <b>+2 de Aprovação</b> e respeito conquistado.',
@@ -67042,12 +67048,17 @@ function _showAllyDialogue(idx){
       { type: 'narration', text: _personalize(_reply.narration) },
       { type: 'speech', speaker: displayName, text: _personalize(_reply.speech) }
     ] : null;
+    var _cleanLbl = _personalize(c.label || '').replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
     return {
       id: c.id,
-      label: _personalize(c.label),
+      label: _cleanLbl,
       cb: c.cb || 'close',
       _oneShot: (c.id !== 'leave' && !c.check),
       _replyScript: _replyScript,
+      check: c.check,
+      dc: c.dc || (c.check && c.check.dc),
+      skill: c.skill || (c.check && c.check.skill),
+      stat: c.stat || (c.check && c.check.stat),
       renownDelta: c.renown,
       resultNarration: _personalize(c.resultNarration),
       resultText: _personalize(c.resultText),
@@ -67058,7 +67069,7 @@ function _showAllyDialogue(idx){
         choice_id: c.id,
         name: displayName,
         renown_hint: c.renown || 0,
-        label_hint: (c.label || '').replace(/^[^A-Za-zÀ-ú"]+\s*/, '').substring(0, 50),
+        label_hint: (_cleanLbl || '').replace(/^[^A-Za-zÀ-ú"]+\s*/, '').substring(0, 50),
       },
     };
   });
@@ -71027,9 +71038,9 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
 
   var attitudeNote = '';
   if (npcAttitude === 'friendly') {
-    attitudeNote = '<br>🤝 Atitude Amigável: +2 de bônus social em testes de interação (DMG p. 244).';
+    attitudeNote = '<br>🤝 Atitude Amigável: +2 de bônus social em testes de interação.';
   } else if (npcAttitude === 'hostile') {
-    attitudeNote = '<br>😠 Atitude Hostil: -5 de penalidade social em testes de interação (DMG p. 244).';
+    attitudeNote = '<br>😠 Atitude Hostil: -5 de penalidade social em testes de interação.';
   }
 
   var choices = [];
@@ -71071,7 +71082,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       label: '✔ [Você] Rolar com Inspiração de Mesa (2d20 Vantagem)',
       title: 'Rolar com Inspiração de Mesa',
       subtitle: sklLabel + ' · Dificuldade CD ' + dc,
-      desc: 'Você consome sua Inspiração de Mesa ativa para rolar com Vantagem D&D 5e (dois dados d20, escolhendo o maior).',
+      desc: 'Você consome sua Inspiração de Mesa ativa para rolar com Vantagem (dois dados d20, escolhendo o maior).',
       possibleResults: '✦ Vantagem: Rola dois d20 e escolhe o maior resultado.<br>✦ Superar a CD ' + dc + ' garante o sucesso na interação.' + attitudeNote,
       dc: dc,
       skill: skl,
@@ -71128,7 +71139,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       label: '✔ [Você · 💰 Suborno (10 Valdoritas)] Rolar com Vantagem',
       title: 'Oferecer Suborno (10 Valdoritas)',
       subtitle: sklLabel + ' · Dificuldade CD ' + dc,
-      desc: 'Você desliza 10 Valdoritas discretamente para obter Vantagem D&D 5e no teste de interação social (DMG p. 244).',
+      desc: 'Você desliza 10 Valdoritas discretamente para obter Vantagem no teste de interação social.',
       possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>◆ Custo de 10 Valdoritas debitado de suas posses para confirmar.' + attitudeNote,
       cost: 10,
       dc: dc,
@@ -71145,7 +71156,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       title: 'Truque Arcano — Amizade',
       subtitle: sklLabel + ' · Dificuldade CD ' + dc,
       desc: 'Você tece o truque arcano Amizade para encantar a mente do alvo, obtendo Vantagem imediata no teste de Carisma.',
-      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br><span style="color:#df7262;">⚠️ Risco BG3: O alvo perceberá que foi manipulado magicamente após o término do diálogo, gerando descontentamento e possível hostilidade.</span>' + attitudeNote,
+      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br><span style="color:#df7262;">⚠️ Consequência: O alvo perceberá que foi manipulado magicamente após o término do diálogo, gerando descontentamento e possível hostilidade.</span>' + attitudeNote,
       dc: dc,
       skill: skl,
       advantage: true,
@@ -72208,7 +72219,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
       { type: 'narration', text: '<b>O Que Está Sendo Escolhido:</b> Forja de um Peitoral de Mithral de placas articuladas sob medida para o aventureiro.' },
       { type: 'narration', text: '<b>Requisitos e Custos:</b> 2x Lingotes de Mithral e 800 Valdoritas. Prazo: 5 dias de trabalho na forja.' },
       { type: 'narration', text: '<b>Chances de Resultado:</b><br>'
-        + '🟢 <b>Chance de Sucesso: 70%</b> — Thorne molda a couraça com perfeição ergonômica (D&D 5e: CA 14 + mod Des máx +2, sem desvantagem em testes de Furtividade, sem restrição de Força, peso cortado pela metade).<br>'
+        + '🟢 <b>Chance de Sucesso: 70%</b> — Thorne molda a couraça com perfeição ergonômica (Propriedades: CA 14 + mod Des máx +2, sem desvantagem em testes de Furtividade, sem restrição de Força, peso cortado pela metade).<br>'
         + '🔴 <b>Risco de Falha: 30%</b> — A conformação de placas articuladas no fogo místico exige alinhamento perfeito. Em caso de falha, Thorne consegue resgatar 1 Lingote de Mithral intacto do refugo e devolve a você, enquanto o outro lingote e o ouro são consumidos pelo trabalho.' }
     ];
     if (!canAffordP){
