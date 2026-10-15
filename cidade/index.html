@@ -12062,50 +12062,21 @@ body.perf-lite .vc-action-btn { transition: none; }
         var state = _savedState;  // shim pra preservar logica abaixo
         var _alliesBackend = (state && (state.allies || state._allies_data)) ? (state.allies || state._allies_data) : null;
         var _realAllies = (_alliesBackend && _alliesBackend.length > 1) ? _alliesBackend.slice(1) : [];
-        console.log('[CITY] real allies from backend:', _realAllies.length, '(source: ' + (state && state.allies ? 'state.allies' : state && state._allies_data ? 'state._allies_data' : 'none') + ')');
-        for (var k = 1; k < window.GROUP_MEMBERS.length; k++){
-          var _a = _realAllies[k - 1];
-          if (_a){
-            // Converte shape backend (n/c/r/l/hp/mhp/mp/mmp) -> shape mock (name/cls/race/level/...)
-            // Mochila F2 (2026-06-25): id = npc_id REAL do servidor (aliado de party);
-            // chave consistente p/ MOCK_ALLY_EQUIPPED + equip.set_ally. merc/familiar/adv
-            // não têm id (transientes) → cai no fallback name-derived em _getActiveAllies.
-            window.GROUP_MEMBERS[k] = {
-              id: _a.id || null,
-              name: _a.n || 'Aliado',
-              cls: String(_a.c || 'guerreiro').toLowerCase(),
-              race: String(_a.r || 'humano').toLowerCase(),
-              level: _a.l || 1,
-              hp: _a.hp || 0,
-              hpMax: _a.mhp || 1,
-              mp: _a.mp || 0,
-              mpMax: _a.mmp || 0,
-              exh: 0, exhMax: 6,
-              xp: _a.xp || 0,
-              xpNext: _a.xpn || 100,
-              gold: 0,
-              dead: !!_a.dead,
-              ico: _a.ico || null,
-              type: _a.type || 'party',
-              affinity: _a.aff || 0,
-              levelUps: _a.lu || 0,
-              se: _a.se || []
-            };
-            // Mochila F2: hidrata o equipamento REAL do aliado de party (party_status)
-            // → MOCK_ALLY_EQUIPPED[npc_id]. Antes era mock hardcoded nunca persistido.
-            if (_a.id) {
-              if (typeof window.MOCK_ALLY_EQUIPPED !== 'object' || !window.MOCK_ALLY_EQUIPPED) window.MOCK_ALLY_EQUIPPED = {};
-              window.MOCK_ALLY_EQUIPPED[_a.id] = _a.eq || {};
-            }
-          } else {
-            window.GROUP_MEMBERS[k] = null;
-          }
+        if (typeof _syncPartyWithGroupMembers === 'function') {
+          _syncPartyWithGroupMembers(_realAllies);
         }
       }
       // Sessão #55 (2026-05-28): state real aplicado — libera fade-in do
       // #city-group-panel. refreshHud() abaixo dispara renderCityGroupPanel
       // que agora respeita _cityRealPlayerReady e revela o painel.
       window._cityRealPlayerReady = true;
+      if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote() && window.vCityServer.guild && window.vCityServer.guild.start) {
+        window.vCityServer.guild.start().then(function(gData){
+          if (gData && gData.party && typeof _syncPartyWithGroupMembers === 'function') {
+            _syncPartyWithGroupMembers(gData.party);
+          }
+        }).catch(function(_gerr){ console.warn('[CITY] initial guild party sync failed', _gerr); });
+      }
       try { sessionStorage.removeItem('valdoria_relogin_attempt'); } catch (_clr) {}  // char carregou OK — libera futura auto-recuperação
       try { sessionStorage.removeItem('valdoria_city_reconnect'); } catch (_clr2) {}  // 2026-06-11: reseta contador de reconexao (load OK)
       // Sessão #60 (2026-05-28): Single-device session lock pra cidade.
@@ -44682,7 +44653,7 @@ function _aaaListSubScreen(opts){
   if (!bannerImg) {
     var _key = (opts.stackKey || '').toLowerCase();
     var _imgBase = (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:')
-      ? '../valdoria-webapp/shared/img/'
+      ? '/shared/img/'
       : '/shared/img/';
     if (/^temple|shrine|chapel|prayer|altar|ritual/.test(_key)) {
       bannerImg = _imgBase + 'templo/templo-banner.webp';
@@ -46081,7 +46052,7 @@ function _tavernShowMuralBoard(p){
     var titleEl = document.getElementById('csp-title');
     var bodyEl = document.getElementById('csp-body');
     if (!ov || !bodyEl) return;
-    if (titleEl) titleEl.textContent = 'Mural de Avisos';
+    if (titleEl) titleEl.textContent = 'Mural de Tarefas da Taverna';
 
     var items = (notices || []).slice(0, 6);  // 3-6 itens (cap do servidor)
     var slots = _slots(items.length);
@@ -55376,12 +55347,57 @@ function _guildHireFromFicha(d, p){
     }
     var preGold = p.gold;
     if (typeof res.cost === 'number') p.gold = Math.max(0, p.gold - res.cost);
-    if (window.GROUP_MEMBERS && window.GROUP_MEMBERS.length < 4){
+    if (window.GROUP_MEMBERS) {
+      while (window.GROUP_MEMBERS.length < 4) {
+        window.GROUP_MEMBERS.push(null);
+      }
       var allyClass = String(d.c || 'guerreiro').toLowerCase();
+      var allyRace = String(d.race || d.r || 'humano').toLowerCase();
       var hpByClass = { guerreiro:12, clerigo:10, ladino:9, mago:8, druida:10, patrulheiro:10, paladino:12, barbaro:14, monge:9, bardo:10, feiticeiro:8, bruxo:9 };
       var baseHp = hpByClass[allyClass] || 10;
-      var allyHp = baseHp + Math.floor(((d.l || 1) - 1) * (baseHp * 0.65));
-      window.GROUP_MEMBERS.push({ name: d.n, cls: allyClass, lvl: (d.l || 1), hp: allyHp, hpMax: allyHp, mp: 12, mpMax: 12, xp: 0, xpNext: 300, gold: 0, icon: d.ico });
+      var allyHp = d.hp != null ? d.hp : (baseHp + Math.floor(((d.l || 1) - 1) * (baseHp * 0.65)));
+      var allyMhp = d.mhp != null ? d.mhp : allyHp;
+      var newAllyObj = {
+        id: d.id || null,
+        name: d.n || d.name || 'Aliado',
+        cls: allyClass,
+        race: allyRace,
+        level: (d.l || 1),
+        hp: allyHp,
+        hpMax: allyMhp,
+        mp: d.mp != null ? d.mp : 12,
+        mpMax: d.mmp != null ? d.mmp : 12,
+        exh: 0, exhMax: 6,
+        xp: 0, xpNext: 300, gold: 0,
+        dead: false,
+        ico: d.ico || null,
+        type: 'party',
+        affinity: 0,
+        levelUps: 0,
+        se: []
+      };
+      var placed = false;
+      for (var sIdx = 1; sIdx < 4; sIdx++) {
+        if (!window.GROUP_MEMBERS[sIdx]) {
+          window.GROUP_MEMBERS[sIdx] = newAllyObj;
+          placed = true;
+          break;
+        }
+      }
+      if (!placed && window.GROUP_MEMBERS.length < 4) {
+        window.GROUP_MEMBERS.push(newAllyObj);
+      }
+      if (d.id) {
+        if (typeof window.MOCK_ALLY_EQUIPPED !== 'object' || !window.MOCK_ALLY_EQUIPPED) window.MOCK_ALLY_EQUIPPED = {};
+        window.MOCK_ALLY_EQUIPPED[d.id] = window.MOCK_ALLY_EQUIPPED[d.id] || {};
+      }
+    }
+    if (window.vCityServer && window.vCityServer.guild && window.vCityServer.guild.start) {
+      window.vCityServer.guild.start().then(function(gData){
+        if (gData && gData.party && typeof _syncPartyWithGroupMembers === 'function') {
+          _syncPartyWithGroupMembers(gData.party);
+        }
+      }).catch(function(){});
     }
     if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
     if (typeof refreshHud === 'function') refreshHud();
@@ -55759,9 +55775,21 @@ function _guildShowParty(p){
       window.vCityServer.guild.fire(m.id).then(function(res){
         if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
         if (!res || res.error) { if (typeof vToast === 'function') vToast((res && res.msg) || 'Não foi possível dispensar.', 'warn'); return; }
-        // Reflete no painel (servidor já persistiu; re-sync no próximo load via state.allies).
+        // Reflete no painel mantendo os 4 slots fixos.
         if (window.GROUP_MEMBERS) {
-          window.GROUP_MEMBERS = window.GROUP_MEMBERS.filter(function(gm, idx){ return idx === 0 || (gm && gm.name !== m.n); });
+          for (var gi = 1; gi < window.GROUP_MEMBERS.length; gi++) {
+            var _gm = window.GROUP_MEMBERS[gi];
+            if (_gm && (_gm.id === m.id || _gm.name === m.n)) {
+              window.GROUP_MEMBERS[gi] = null;
+            }
+          }
+        }
+        if (window.vCityServer && window.vCityServer.guild && window.vCityServer.guild.start) {
+          window.vCityServer.guild.start().then(function(gData){
+            if (gData && gData.party && typeof _syncPartyWithGroupMembers === 'function') {
+              _syncPartyWithGroupMembers(gData.party);
+            }
+          }).catch(function(){});
         }
         if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
         _showServiceResultPopup({
@@ -55775,6 +55803,9 @@ function _guildShowParty(p){
     window.vCityServer.guild.start().then(function(data){
       if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
       if (!data || data.error) { if (typeof vToast === 'function') vToast('Não foi possível abrir o grupo.', 'warn'); return; }
+      if (typeof _syncPartyWithGroupMembers === 'function') {
+        _syncPartyWithGroupMembers(data.party);
+      }
       var party = (data.party || []).filter(function(m){ return m && !m.dead; });
       var pmax = data.party_max || 3;
       if (!party.length) {
@@ -60629,6 +60660,10 @@ function closeCityPopup(silent){
       window._hallPrevAudioTrack = null;
     }
   } catch(e){}
+  // Garante que o painel de grupo de aventureiros reflita o estado atual ao fechar modais/telas
+  try {
+    if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
+  } catch(_ePanel) {}
   if (!silent) _logCity('popup closed');
 }
 // Renderiza popup pro key — dispatch para renderer canonical (AREA_REGISTRY) ou
@@ -60966,9 +61001,10 @@ function _renderInnMealsPopup(bodyEl, d){
   _aaaListSubScreen({
     theme: 'inn',
     stackKey: 'inn_meals',
+    bannerImg: '/shared/img/estalagem/estalagem-banner.webp',
+    subtitle: isEaten ? 'já alimentado' : 'Estalagem do Acolhimento · Cardápio de Martha',
     icon: '<svg viewBox="0 0 120 120" style="width:36px;height:36px;color:#d4a850;"><use href="#ic-mochila"/></svg>',
     title: 'CARDÁPIO · ESTALAGEM',
-    subtitle: isEaten ? 'já alimentado' : 'pratos do dia',
     flavor: flavor,
     items: items,
     onPick: function(item){
@@ -65322,6 +65358,55 @@ var GROUP_MEMBERS = (function(){
     null  // index 3 = vazio (recrutar na guilda)
   ];
 })();
+
+function _syncPartyWithGroupMembers(partyList) {
+  if (!window.GROUP_MEMBERS) {
+    window.GROUP_MEMBERS = [null, null, null, null];
+  }
+  while (window.GROUP_MEMBERS.length < 4) {
+    window.GROUP_MEMBERS.push(null);
+  }
+  var list = partyList || [];
+  if (list.length > 0 && (list[0].type === 'player' || list[0].isPlayer)) {
+    list = list.slice(1);
+  }
+  for (var k = 1; k < 4; k++) {
+    var _a = list[k - 1];
+    if (_a && !_a.dead) {
+      window.GROUP_MEMBERS[k] = {
+        id: _a.id || null,
+        name: _a.n || _a.name || 'Aliado',
+        cls: String(_a.c || _a.cls || 'guerreiro').toLowerCase(),
+        race: String(_a.race || _a.r || 'humano').toLowerCase(),
+        level: _a.l || _a.level || 1,
+        hp: _a.hp != null ? _a.hp : 20,
+        hpMax: _a.mhp != null ? _a.mhp : (_a.hpMax != null ? _a.hpMax : 20),
+        mp: _a.mp != null ? _a.mp : 10,
+        mpMax: _a.mmp != null ? _a.mmp : (_a.mpMax != null ? _a.mpMax : 10),
+        exh: 0, exhMax: 6,
+        xp: _a.xp || 0,
+        xpNext: _a.xpn || _a.xpNext || 100,
+        gold: 0,
+        dead: !!_a.dead,
+        ico: _a.ico || null,
+        type: _a.type || _a.mt || 'party',
+        affinity: _a.aff || _a.affinity || 0,
+        levelUps: _a.lu || _a.levelUps || 0,
+        se: _a.se || []
+      };
+      if (_a.id) {
+        if (typeof window.MOCK_ALLY_EQUIPPED !== 'object' || !window.MOCK_ALLY_EQUIPPED) window.MOCK_ALLY_EQUIPPED = {};
+        window.MOCK_ALLY_EQUIPPED[_a.id] = _a.eq || window.MOCK_ALLY_EQUIPPED[_a.id] || {};
+      }
+    } else {
+      window.GROUP_MEMBERS[k] = null;
+    }
+  }
+  if (typeof renderCityGroupPanel === 'function') {
+    renderCityGroupPanel();
+  }
+}
+window._syncPartyWithGroupMembers = _syncPartyWithGroupMembers;
 
 // --- HOTBAR FAVORITOS — 5 favs + "mais" ---
 // Atalhos rápidos. Ordem importa visualmente.
@@ -70926,6 +71011,9 @@ function _resolveCityChoice(venue, node, choiceId, p, npc, ctx, tacticalOptions)
 }
 
 function _handleCityDialogueResult(venue, data, p, npc, ctx){
+  if (data && data.allies && typeof _syncPartyWithGroupMembers === 'function') {
+    try { _syncPartyWithGroupMembers(data.allies); } catch(_){}
+  }
   if (data.action === 'open_daily_challenge') {
     try { window.vEncounter.close(); } catch(_){}
     if (typeof _showDailyChallengeEpicPopup === 'function') {
@@ -70960,6 +71048,16 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
   }
   // FASE 5d (#3): hire selado do recruta refresca o painel do grupo.
   if (venue === 'recruta' && data.transition && data.transition.kind === 'guild_party_refresh') {
+    if (data.allies && typeof _syncPartyWithGroupMembers === 'function') {
+      try { _syncPartyWithGroupMembers(data.allies); } catch(_){}
+    }
+    if (window.vCityServer && window.vCityServer.guild && window.vCityServer.guild.start) {
+      window.vCityServer.guild.start().then(function(gData){
+        if (gData && gData.party && typeof _syncPartyWithGroupMembers === 'function') {
+          _syncPartyWithGroupMembers(gData.party);
+        }
+      }).catch(function(){});
+    }
     try { if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel(); } catch(_){}
   }
   // FASE 5d (#3) — D3/D4: PADRAO_DADOS in-dialogue (barganha). Ramo `data.dice` ANTES
@@ -71020,6 +71118,13 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
                 return;
               }
               try { window.vEncounter.close(); } catch(_){}
+              if (window.vCityServer && window.vCityServer.guild && window.vCityServer.guild.start) {
+                window.vCityServer.guild.start().then(function(gData){
+                  if (gData && gData.party && typeof _syncPartyWithGroupMembers === 'function') {
+                    _syncPartyWithGroupMembers(gData.party);
+                  }
+                }).catch(function(){});
+              }
               if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
               if (typeof refreshHud === 'function') refreshHud();
               if (typeof _guildShowRecruits === 'function') _guildShowRecruits(p);
