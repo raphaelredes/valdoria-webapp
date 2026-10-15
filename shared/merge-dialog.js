@@ -71,50 +71,133 @@
         });
     }
 
-    function show(cfg) {
+    function _renderCharList(chars, emptyText) {
+        if (!chars || !chars.length) {
+            return '<div style="font-size:12px;color:var(--v-text-dim,#a09484);font-style:italic;padding:4px 0">' + (emptyText || 'Nenhum personagem registrado.') + '</div>';
+        }
+        var h = '<ul style="margin:4px 0 0;padding-left:18px;font-size:12.5px;color:var(--v-text,#d4c8b0);line-height:1.4">';
+        for (var i = 0; i < chars.length; i++) {
+            var c = chars[i];
+            var cName = (c && c.name) ? c.name : 'Aventureiro';
+            var cLvl = (c && c.level) ? ('Nv. ' + c.level) : '';
+            h += '<li><b>' + cName + '</b> ' + (cLvl ? ('(' + cLvl + ')') : '') + '</li>';
+        }
+        h += '</ul>';
+        return h;
+    }
+
+    function _showConfirm(cfg, opt, overlay) {
+        var card = overlay.querySelector('.merge-card-body');
+        if (!card) return;
+        card.innerHTML = '';
+
+        card.appendChild(_el('h3', 'margin:0 0 var(--v-space-sm,8px);color:var(--v-gold,#c4953a);'
+            + 'font-family:var(--v-font-display,serif)', 'Confirmar Resolução'));
+
+        var infoBox = _el('div', 'background:rgba(15,12,8,0.6);border:1px solid var(--v-border,#4a3828);'
+            + 'border-radius:6px;padding:10px 12px;margin:8px 0;font-size:13px;line-height:1.45');
+        infoBox.innerHTML = '<div style="color:#ffd700;font-weight:700;margin-bottom:4px">O Que Está Sendo Escolhido:</div>'
+            + '<div>' + (opt.label || '') + '</div>'
+            + '<div style="color:var(--v-text-dim,#a09484);font-size:12px;margin-top:6px">'
+            + '<b>Consequência:</b> ' + (opt.result || '') + '<br>'
+            + '🛡 <i>Um backup completo do estado de ambas as contas é gravado automaticamente antes da operação.</i>'
+            + '</div>';
+        card.appendChild(infoBox);
+
+        var btnConfirm = _el('button', 'display:block;width:100%;margin:12px 0 6px;'
+            + 'padding:12px;background:linear-gradient(180deg,#8b2616,#5e1a0e);border:1px solid #d45b45;'
+            + 'border-radius:6px;color:#fff;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px',
+            '✔ Confirmar e Prosseguir');
+        btnConfirm.addEventListener('click', function () {
+            _exec(cfg, opt.id, overlay);
+        });
+        card.appendChild(btnConfirm);
+
+        var btnBack = _el('button', 'display:block;width:100%;margin-top:6px;'
+            + 'padding:10px;background:transparent;border:1px solid var(--v-border,#4a3828);'
+            + 'border-radius:6px;color:var(--v-text-dim,#a09484);cursor:pointer;font-family:inherit;font-size:13px',
+            '← Voltar às opções');
+        btnBack.addEventListener('click', function () {
+            _renderOptions(cfg, overlay);
+        });
+        card.appendChild(btnBack);
+    }
+
+    function _renderOptions(cfg, overlay) {
         var merge = cfg.mergeData || {};
         var opts = merge.options || [];
         var a = merge.account_a || {}, b = merge.account_b || {};
+
+        var card = overlay.querySelector('.merge-card-body');
+        if (!card) return;
+        card.innerHTML = '';
+
+        card.appendChild(_el('h3', 'margin:0 0 var(--v-space-sm,8px);color:var(--v-gold,#c4953a);'
+            + 'font-family:var(--v-font-display,serif)', 'Vincular Contas Existentes'));
+
+        card.appendChild(_el('p', 'font-size:var(--v-font-body,13.5px);line-height:1.45;margin:0 0 10px',
+            'A credencial informada já está associada a outra conta em Valdoria. '
+            + 'Revise os personagens de cada conta e selecione como deseja resolver a unificação:'));
+
+        var summary = _el('div', 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px');
+
+        var boxA = _el('div', 'background:rgba(15,12,8,0.5);border:1px solid var(--v-border,#4a3828);'
+            + 'border-radius:6px;padding:8px 10px');
+        boxA.innerHTML = '<div style="color:var(--v-gold,#c4953a);font-weight:700;font-size:12px;margin-bottom:2px">Esta Conta (' + (a.char_count || 0) + ')</div>'
+            + _renderCharList(a.chars, 'Nenhum ativo');
+        summary.appendChild(boxA);
+
+        var boxB = _el('div', 'background:rgba(15,12,8,0.5);border:1px solid var(--v-border,#4a3828);'
+            + 'border-radius:6px;padding:8px 10px');
+        boxB.innerHTML = '<div style="color:#d4a040;font-weight:700;font-size:12px;margin-bottom:2px">Outra Conta (' + (b.char_count || 0) + ')</div>'
+            + _renderCharList(b.chars, 'Nenhum ativo');
+        summary.appendChild(boxB);
+
+        card.appendChild(summary);
+
+        opts.forEach(function (opt) {
+            var btn = _el('button', 'display:block;width:100%;margin:var(--v-space-sm,6px) 0;text-align:left;'
+                + 'white-space:normal;padding:var(--v-space-md,10px);background:var(--v-bg-raised,#332a22);'
+                + 'border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-sm,6px);'
+                + 'color:var(--v-text,#d4c8b0);cursor:pointer;font-family:inherit;transition:border-color .15s');
+            btn.onmouseenter = function () { btn.style.borderColor = '#c4953a'; };
+            btn.onmouseleave = function () { btn.style.borderColor = 'var(--v-border,#4a3828)'; };
+
+            var bold = document.createElement('b');
+            bold.style.cssText = 'color:#ffd700;display:block;margin-bottom:2px;font-size:13px';
+            bold.textContent = opt.label || '';
+            var span = document.createElement('span');
+            span.style.cssText = 'opacity:.85;font-size:11.5px;color:var(--v-text-dim,#a09484);display:block';
+            span.textContent = opt.result || '';
+            btn.appendChild(bold);
+            btn.appendChild(span);
+            btn.addEventListener('click', function () { _showConfirm(cfg, opt, overlay); });
+            card.appendChild(btn);
+        });
+
+        var cancel = _el('button', 'display:block;width:100%;margin-top:var(--v-space-sm,8px);'
+            + 'padding:var(--v-space-sm,8px);background:transparent;border:1px solid var(--v-border,#4a3828);'
+            + 'border-radius:var(--v-radius-sm,6px);color:var(--v-text-dim,#a09484);cursor:pointer;'
+            + 'font-family:inherit;font-size:13px', 'Cancelar e Fechar');
+        cancel.addEventListener('click', function () { _close(overlay); });
+        card.appendChild(cancel);
+    }
+
+    function show(cfg) {
         var overlay = _el('div', 'position:fixed;inset:0;z-index:var(--v-z-loading,1000);'
             + 'background:var(--v-overlay-bg,rgba(15,12,8,0.9));display:flex;align-items:center;'
             + 'justify-content:center;padding:var(--v-space-lg,16px)');
         var card = _el('div', 'background:var(--v-bg-card,#2e2520);border:1px solid var(--v-border,#4a3828);'
-            + 'border-radius:var(--v-radius,10px);max-width:400px;width:100%;max-height:92vh;'
+            + 'border-radius:var(--v-radius,10px);max-width:440px;width:100%;max-height:92vh;'
             + 'overflow-y:auto;padding:var(--v-space-xl,18px);color:var(--v-text,#d4c8b0);'
-            + 'font-family:var(--v-font,serif)');
-        card.appendChild(_el('h3', 'margin:0 0 var(--v-space-sm,8px);color:var(--v-gold,#c4953a);'
-            + 'font-family:var(--v-font-display,serif)', 'Vincular contas'));
-        card.appendChild(_el('p', 'font-size:var(--v-font-body,14px);line-height:1.5',
-            'Esta credencial já tem personagens em outra conta. Como você quer resolver?<br>'
-            + '<b>Esta conta:</b> ' + (a.char_count || 0) + ' · <b>A outra:</b> '
-            + (b.char_count || 0) + ' personagem(ns).'));
-        opts.forEach(function (opt) {
-            var btn = _el('button', 'display:block;width:100%;margin:var(--v-space-sm,8px) 0;text-align:left;'
-                + 'white-space:normal;padding:var(--v-space-md,10px);background:var(--v-bg-raised,#332a22);'
-                + 'border:1px solid var(--v-border,#4a3828);border-radius:var(--v-radius-sm,6px);'
-                + 'color:var(--v-text,#d4c8b0);cursor:pointer;font-family:inherit');
-            // textContent (NÃO innerHTML) — defesa contra XSS caso label/result um dia
-            // carregue dado controlado pelo jogador (ex: nome de personagem). Review F6.
-            var bold = document.createElement('b');
-            bold.textContent = opt.label || '';
-            var span = document.createElement('span');
-            span.style.cssText = 'opacity:.8;font-size:.85em';
-            span.textContent = opt.result || '';
-            btn.appendChild(bold);
-            btn.appendChild(document.createElement('br'));
-            btn.appendChild(span);
-            btn.addEventListener('click', function () { _exec(cfg, opt.id, overlay); });
-            card.appendChild(btn);
-        });
-        var cancel = _el('button', 'display:block;width:100%;margin-top:var(--v-space-xs,4px);'
-            + 'padding:var(--v-space-sm,8px);background:transparent;border:1px solid var(--v-border,#4a3828);'
-            + 'border-radius:var(--v-radius-sm,6px);color:var(--v-text-dim,#a09484);cursor:pointer;'
-            + 'font-family:inherit', 'Cancelar');
-        cancel.addEventListener('click', function () { _close(overlay); });
-        card.appendChild(cancel);
+            + 'font-family:var(--v-font,serif);box-shadow:0 12px 32px rgba(0,0,0,0.8)');
+        card.className = 'merge-card-body';
         overlay.appendChild(card);
+
         if (root.vOverlay && root.vOverlay.add) root.vOverlay.add(overlay);
         else document.body.appendChild(overlay);
+
+        _renderOptions(cfg, overlay);
     }
 
     root.vMergeDialog = { show: show };

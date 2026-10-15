@@ -128,7 +128,32 @@
       desc: 'Rios de lava e cinzas. O calor derrete metal. Lar de dragões?' },
     { key: 'valkrest',  name: 'Valkrest (Acampamento)',   x: 0.92, y: 0.4, biome: 'volcanic', tier: 5, ico: '', settlement: true, discoverable: true,
       mapKey: null,
-      desc: 'Acampamento fortificado de aventureiros veteranos. Tendas resistem ao calor.' }
+      desc: 'Acampamento fortificado de aventureiros veteranos. Tendas resistem ao calor.' },
+    // ─── 6 NOVOS BIOMAS (WORLD-1) ─────────────────
+    // COAST (Leste/Sudeste)
+    { key: 'salty_coast', name: 'Costa Salgada', x: 0.88, y: 0.88, biome: 'coast', tier: 4, ico: '',
+      mapKey: 'Mapa da Costa',
+      desc: 'Penhascos fustigados por ondas impiedosas, cavernas de maré e destroços de embarcações naufragadas. O sal impregna a brisa marinha.' },
+    // DARK MOUNTAIN (Noroeste profundo)
+    { key: 'black_peaks', name: 'Montanhas Negras', x: 0.05, y: 0.21, biome: 'dark_mountain', tier: 6, ico: '',
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Picos escarpados de rocha obsidiana e ardósia escura. O ar é pesado com enxofre antigo e as gargantas vertiginosas ecoam ventos uivantes.' },
+    // ELDRITCH SWAMP (Leste profundo)
+    { key: 'eldritch_mire', name: 'Pântano Eldritch', x: 0.88, y: 0.26, biome: 'eldritch_swamp', tier: 7, ico: '',
+      mapKey: 'Mapa do Pântano',
+      desc: 'Águas lodosas tingidas de fosforescência púrpura e árvores retorcidas cujas raízes sangram seiva espessa. Entidades ancestrais sussurram na névoa.' },
+    // BADLANDS (Sudeste árido)
+    { key: 'ashen_badlands', name: 'Terras Devastadas', x: 0.78, y: 0.74, biome: 'badlands', tier: 5, ico: '',
+      mapKey: 'Mapa das Planícies',
+      desc: 'Cânions profundos e platôs ressequidos de terra vermelha rachada. Nenhuma árvore sobrevive aqui, apenas carcaças de monstros e poeira sufocante.' },
+    // ANCIENT FOREST (Norte ancestral)
+    { key: 'elder_woods', name: 'Bosque Ancestral', x: 0.64, y: 0.06, biome: 'ancient_forest', tier: 5, ico: '',
+      mapKey: 'Mapa da Floresta',
+      desc: 'Árvores titânicas cujos troncos abraçam ruínas milenares anteriores à fundação de Valdória. A magia primordial vibra em cada folha prateada.' },
+    // FROZEN ABYSS (Norte extremo)
+    { key: 'glacial_rift', name: 'Abismo Glacial', x: 0.80, y: 0.05, biome: 'frozen_abyss', tier: 8, ico: '',
+      mapKey: 'Mapa do Ermo Gelado',
+      desc: 'Uma imensa fenda de gelo azul eterno onde o frio congela o sangue em instantes. Ecos de feras colossais presas nas profundezas ressoam pelas geleiras.' }
   ];
 
   // === CART_PATHS ===
@@ -159,7 +184,23 @@
     ['ancestral_graveyard', 'deep_swamp'],    // ancestral conecta a deep_swamp
     ['cave', 'underground_caverns'],          // Passagem → Cavernas Subterrâneas
     ['underground_caverns', 'crystal_depths'], // Cavernas → Profundezas de Cristal
-    ['crystal_depths', 'mountain']            // Profundezas → Picos (passagem alta)
+    ['crystal_depths', 'mountain'],           // Profundezas → Picos (passagem alta)
+    // ── Rotas dos 6 novos biomas (WORLD-1) ──
+    ['desert', 'salty_coast'],
+    ['volcanic', 'salty_coast'],
+    ['ashen_badlands', 'salty_coast'],
+    ['mountain', 'black_peaks'],
+    ['korthag', 'black_peaks'],
+    ['troll_cave', 'black_peaks'],
+    ['deep_swamp', 'eldritch_mire'],
+    ['valkrest', 'eldritch_mire'],
+    ['bandit_fortress', 'ashen_badlands'],
+    ['desert', 'ashen_badlands'],
+    ['volcanic', 'ashen_badlands'],
+    ['elven_ruins', 'elder_woods'],
+    ['snow', 'elder_woods'],
+    ['snow', 'glacial_rift'],
+    ['elder_woods', 'glacial_rift']
   ];
 
   // === _cartSeedRand ===
