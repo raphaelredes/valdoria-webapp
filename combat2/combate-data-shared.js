@@ -286,7 +286,7 @@ var CHAR_CLASSES = [
         { n: 'Relâmpago', ico: '', cost: 5, kind: 'attack', minLevel: 5, desc: 'Linha 30m (PHB p.257): 8d6 elétrico AOE (escala +1d6/slot acima 3º). TR DES metade.',
             damageSpec: { n: 8, d: 6, scaleByCasterLevel: { breakpoints: [[7, 1], [9, 2], [11, 3], [13, 4], [15, 5], [17, 6]] } }, dmgType: 'lightning', save: { ability: 'dex' }, multiTarget: true,
             helpDnd5e: 'Relâmpago / Lightning Bolt (PHB p.257 — Mago/Feiticeiro nv 3): 1 action; linha 30m × 1,5m. Cada criatura na linha faz TR DES; 8d6 elétrico em falha, metade em sucesso. Objetos inflamáveis pegam fogo.\nUpcast: +1d6 por nível acima do 3º.\nV1.7 Sprint-17 Ronda 27 (2026-04-21): adicionado upcast breakpoints + multiTarget (antes sem upcast + single target, divergências PHB RAW).' },
-        { n: 'Contramágica', ico: '', cost: 3, kind: 'buff', reactionOnly: true, shieldSpell: true,
+        { n: 'Contramágica', ico: '', cost: 3, kind: 'buff', reactionOnly: true, shieldSpell: true, minLevel: 5,
             desc: 'Reação: +3 CA e vantagem contra magias por 2 turnos. Dissipa parcialmente magia inimiga.',
             helpDnd5e: 'Contramágica (PHB p.237): reação para interromper outra magia em conjuração (nível 3 do espaço ou menor é dissipada automaticamente; acima exige teste).\nV1.7 (2026-04-21) — AGORA É REAÇÃO VERDADEIRA: aparece popup quando você for atingido por ataque/magia; gastar 3 Mana aplica +3 CA e vantagem em TR contra magia por 2 rodadas. Não pode mais ser castada em ação própria.',
             buffSim: { id: 'contramagica', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Contramágica', condRule: 'PHB p.237 — Reação: +3 CA e vantagem em TR contra magia por 2 rodadas.', acBonus: 3, magicSaveAdvantage: true } },
@@ -1427,7 +1427,11 @@ var CHAR_CLASSES = [
         { n: 'Metamagia: Acelerar', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 3,
             desc: 'Ação bônus (PHB p.101 Feiticeiro nv 3+): próxima magia de ação vira bônus — dispara rápido (vantagem + crítico estendido).',
             helpDnd5e: 'Feitiço Acelerado / Quickened Spell (PHB p.101 — Feiticeiro Metamagic): gasta 2 pontos de feitiçaria; a próxima magia que você lançar neste turno com tempo de 1 ação vira 1 ação bônus.\nArena stub: aplica vantagem + crítico estendido (19-20) no próximo ataque mágico (representa a velocidade do cast).\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.101): adicionada flag `minLevel: 3`.',
-            buffSim: { id: 'metamagia_acelerar', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Metamagia: Acelerar', condRule: 'PHB p.101 — próxima magia ação vira bônus. Stub: vantagem + d6 no próximo ataque.', atkAdvantage: true, dmgBonusDie: { n: 1, d: 6 } } }
+            buffSim: { id: 'metamagia_acelerar', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Metamagia: Acelerar', condRule: 'PHB p.101 — próxima magia ação vira bônus. Stub: vantagem + d6 no próximo ataque.', atkAdvantage: true, dmgBonusDie: { n: 1, d: 6 } } },
+        { n: 'Contramágica', ico: '', cost: 3, kind: 'buff', reactionOnly: true, shieldSpell: true, minLevel: 5,
+            desc: 'Reação: +3 CA e vantagem contra magias por 2 turnos. Dissipa parcialmente magia inimiga.',
+            helpDnd5e: 'Contramágica (PHB p.237): reação para interromper outra magia em conjuração (nível 3 do espaço ou menor é dissipada automaticamente; acima exige teste).\nV1.7 (2026-04-21) — AGORA É REAÇÃO VERDADEIRA: aparece popup quando você for atingido por ataque/magia; gastar 3 Mana aplica +3 CA e vantagem em TR contra magia por 2 rodadas. Não pode mais ser castada em ação própria.',
+            buffSim: { id: 'contramagica', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Contramágica', condRule: 'PHB p.237 — Reação: +3 CA e vantagem em TR contra magia por 2 rodadas.', acBonus: 3, magicSaveAdvantage: true } }
       ] },
     /* V1.7 Stage 7 (2026-04-21) — Bruxo (PHB p.105-115): CHA caster com pact patron.
        ADAPTAÇÕES vs PHB:
