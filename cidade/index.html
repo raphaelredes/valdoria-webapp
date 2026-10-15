@@ -660,6 +660,8 @@ LOG SINK (Fase 7):
        success (quando temos token+api+uid validados). */
     document.write('<script src="/shared/device-id.js?v=' + __vEarly + '"><\/script>');
     document.write('<script src="/shared/session-heartbeat.js?v=' + __vEarly + '"><\/script>');
+    /* REFACTOR-1 Phase 2: vAuthTokenStore (session/localStorage helper) */
+    document.write('<script src="/shared/auth-token-store.js?v=' + __vEarly + '"><\/script>');
     /* 2026-06-21 (user "botão nativo = fechar o jogo, mas confirmação DENTRO do jogo,
        não do Telegram"): exit-confirm.js intercepta o BackButton + o gesto de voltar e
        mostra o overlay in-game "Encerrar Aventura?" (respeita __valdoria_transitioning
@@ -11449,7 +11451,27 @@ body.perf-lite .vc-action-btn { transition: none; }
   // /api/auth/characters em vez de exibir mock "Aventureiro Mago Elfo Nv 5".
   // O endpoint foi enriquecido em src/game/core/web_auth.py:_get_characters
   // p/ retornar hp, max_hp, mp, max_mp, gold, xp, exhaustion alem de id/name/level/class_name/race.
-  var _token = params.get('token');
+  // REFACTOR-1 Phase 2: ler token do vAuthTokenStore (localStorage/sessionStorage) primeiro,
+  // com fallback para URLSearchParams ?token= para retrocompatibilidade.
+  var _token = (function() {
+    try {
+      if (window.vAuthTokenStore && typeof window.vAuthTokenStore.getToken === 'function') {
+        var _t = window.vAuthTokenStore.getToken();
+        if (_t) return _t;
+      }
+    } catch (_e) {}
+    return params.get('token');
+  })();
+  window._getCityToken = function() {
+    return _token || (function() {
+      try {
+        if (window.vAuthTokenStore && typeof window.vAuthTokenStore.getToken === 'function') {
+          return window.vAuthTokenStore.getToken() || '';
+        }
+      } catch (_e) {}
+      return (new URLSearchParams(window.location.search)).get('token') || '';
+    })();
+  };
   var _api   = params.get('api');
   var _uid   = params.get('uid');
   var _wantedChar = params.get('char');
@@ -16590,6 +16612,11 @@ function _showCharSwitchConfirm(picked){
             newParams.delete(k);
           });
           var newToken = data.token || token;
+          if (window.vAuthTokenStore && typeof window.vAuthTokenStore.setToken === 'function') {
+            try {
+              window.vAuthTokenStore.setToken(newToken, { char_id: picked.id, scope: 'game' });
+            } catch (_eStore) {}
+          }
           newParams.set('token', newToken);
           newParams.set('char', picked.id);
           newParams.set('_cb', String(Date.now()));  /* cache bust pra evitar cidade.html stale */
@@ -77427,13 +77454,28 @@ window._resetCartVisitFlag = function(){
 window.ValdoriaRemote = {
   isRemote: function() {
     var qs = new URLSearchParams(window.location.search || '');
-    return !!(qs.get('token') && qs.get('api') && qs.get('uid'));
+    var tok = (function() {
+      try {
+        if (window.vAuthTokenStore && typeof window.vAuthTokenStore.getToken === 'function') {
+          var _t = window.vAuthTokenStore.getToken();
+          if (_t) return _t;
+        }
+      } catch (_e) {}
+      return qs.get('token');
+    })();
+    return !!(tok && qs.get('api') && qs.get('uid'));
   },
   apiBase: function() {
     var qs = new URLSearchParams(window.location.search || '');
     return (qs.get('api') || '').replace(/\/+$/, '');
   },
   token: function() {
+    try {
+      if (window.vAuthTokenStore && typeof window.vAuthTokenStore.getToken === 'function') {
+        var _t = window.vAuthTokenStore.getToken();
+        if (_t) return _t;
+      }
+    } catch (_e) {}
     var qs = new URLSearchParams(window.location.search || '');
     return qs.get('token') || '';
   },
