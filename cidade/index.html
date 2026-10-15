@@ -66864,8 +66864,8 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
   var dlg = {
     npc: {
       id: 'dm_tutorial_relationships',
-      name: 'O Mestre de Jogo',
-      desc: 'Regras de Interação Social D&D 5e & Baldur\'s Gate 3',
+      name: 'Laços da Comitiva',
+      desc: 'Harmonia, Convivência e Lealdade na Estrada',
       portraitHTML: '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;">📜</div>'
     },
     script: [
@@ -66875,9 +66875,9 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
       },
       {
         type: 'speech',
-        speaker: 'Mestre',
-        text: '<b>Bem-vindo ao Sistema de Relacionamentos com Companheiros!</b><br><br>' +
-              'A partir de agora, cada postura, conversa e decisão vossa influencia a <b>Aprovação</b> do aliado (escala de <b>-100 a +100</b>, inspirada em Baldur\'s Gate 3):<br>' +
+        speaker: 'Crônica da Comitiva',
+        text: '<b>A Convivência e a Afinidade entre Companheiros</b><br><br>' +
+              'A partir de agora, cada postura, conversa e decisão vossa influencia a <b>Aprovação</b> do aliado (escala de <b>-100 a +100</b>):<br>' +
               '• 💢 <b>Hostil (-100 a -50):</b> Desconfiança extrema e recusa a confidências.<br>' +
               '• ❄️ <b>Frio (-49 a -25):</b> Distância prudente e diálogo profissional restrito.<br>' +
               '• 😐 <b>Neutro (-24 a +24):</b> Parceria de armas funcional e cooperação padrão.<br>' +
@@ -66891,7 +66891,7 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
       },
       {
         type: 'speech',
-        speaker: 'Mestre',
+        speaker: 'Crônica da Comitiva',
         text: 'Vós podeis desenvolver 4 tipos de relacionamentos:<br><br>' +
               '• 🛡️ <b>Camaradagem:</b> Laço fraterno de armas. Concede <b>+1 na Classe de Armadura (CA)</b> ao grupo em formação.<br>' +
               '• ⚔️ <b>Rivalidade Sadia:</b> Competição de maestria. Concede <b>+2 de Dano</b> no primeiro ataque bem-sucedido de cada turno.<br>' +
@@ -66904,16 +66904,16 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
       },
       {
         type: 'speech',
-        speaker: 'Mestre',
-        text: '• 💬 <b>Tópicos de Conversa & Testes D&D 5e:</b> Escolha entre 7 temas (Fogueira, Segredos do Passado, Princípios, Laços de Batalha, Favores, Confidências e Treino). Testes de perícia (Persuasão, Intuição, Intimidação) usam seus atributos para conquistar saltos imediatos de aprovação.<br><br>' +
-              '• 📜 <b>Missões de Companheiro (Companion Quests):</b> Em afinidade alta, o aliado confiará sua missão pessoal a vós, concedendo bênçãos permanentes e relíquias.<br><br>' +
+        speaker: 'Crônica da Comitiva',
+        text: '• 💬 <b>Tópicos de Conversa & Testes Sociais:</b> Escolha entre 7 temas (Fogueira, Segredos do Passado, Princípios, Laços de Batalha, Favores, Confidências e Treino). Testes de perícia (Persuasão, Intuição, Intimidação) usam seus atributos para conquistar saltos imediatos de aprovação.<br><br>' +
+              '• 📜 <b>Missões de Companheiro:</b> Em afinidade alta, o aliado confiará sua missão pessoal a vós, concedendo bênçãos permanentes e relíquias.<br><br>' +
               '• 🎁 <b>Presentes da Mochila:</b> Itens afins ao gosto do aliado fortalecem o afeto e rendem lembranças raras de retribuição!'
       }
     ],
     choices: [
       {
         id: 'finish_relationship_tutorial',
-        label: '✔ Compreendi! Iniciar Convivência com Companheiros ▸',
+        label: '✔ Compreendi a dinâmica do grupo ▸',
         cb: function() {
           _markSeenCompanionRelationshipTutorial();
           if (typeof onDone === 'function') onDone();
@@ -67009,14 +67009,6 @@ function _showAllyDialogue(idx){
   var tpl = ALLY_DIALOGUE_TEMPLATES[cls] || ALLY_DIALOGUE_TEMPLATES.guerreiro;
   var displayName = (m.name || '').split(/\s+/)[0];
 
-  // Disparo automático do tutorial no primeiro encontro com aliado
-  if (!_hasSeenCompanionRelationshipTutorial()) {
-    _showCompanionRelationshipTutorial(displayName, function() {
-      _showAllyDialogue(idx);
-    });
-    return;
-  }
-
   var _introPool = [tpl.script || []].concat(ALLY_INTRO_EXTRA[cls] || []);
   var _introScript = tpl.script || [];
   if (typeof _pickNonRepeating === 'function' && _introPool.length > 1) {
@@ -67078,7 +67070,7 @@ function _showAllyDialogue(idx){
   var topicChoices = [
     {
       id: 'nav_tutorial',
-      label: '📖 Como Funciona o Vínculo com Aliados ▸',
+      label: '📜 Compreender a dinâmica e a lealdade do grupo ▸',
       cb: function() { _showCompanionRelationshipTutorial(displayName, function() { _showAllyDialogue(idx); }); }
     },
     {
