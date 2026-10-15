@@ -3253,6 +3253,10 @@
     if (ch.subtitle && !subtitleText) {
       subtitleText = ch.subtitle;
     }
+    var _normSubTitle = String(subtitleText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+    if (_normSubTitle && _normSpeech && _normSubTitle === _normSpeech) {
+      subtitleText = (chDc && chSkill) ? ('Desafio de perícia D&D 5e · ' + _skillLabelPT(chSkill)) : '';
+    }
 
     var statBadge = '';
     if (ch.stat && ch.isPrep) {
@@ -3302,7 +3306,8 @@
       var _cDesc = _stripEmojis(ch.desc).trim();
       var _normDesc = _cDesc.replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
       var _normTitle = String(titleText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
-      if (_normDesc && _normDesc !== _normSpeech && _normDesc !== _normTitle) {
+      var _normSub = String(subtitleText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+      if (_normDesc && _normDesc !== _normSpeech && _normDesc !== _normTitle && _normDesc !== _normSub) {
         descHtml =
           '<div class="enc-cd-section">' +
             '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
@@ -3310,20 +3315,15 @@
           '</div>';
       }
     } else {
-      var intentText = (detectedSub || subtitleText || '').trim();
+      var intentText = (detectedSub || '').trim();
       var _normIntent = intentText.replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
       var _normTitle = String(titleText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
-      if (_normIntent && _normIntent !== _normSpeech && _normIntent !== _normTitle) {
+      var _normSub = String(subtitleText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+      if (_normIntent && _normIntent !== _normSpeech && _normIntent !== _normTitle && _normIntent !== _normSub) {
         descHtml =
           '<div class="enc-cd-section">' +
             '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
             '<div class="enc-cd-box">' + _stripEmojis(_coinify(intentText)) + '</div>' +
-          '</div>';
-      } else if (!sTxt && titleText) {
-        descHtml =
-          '<div class="enc-cd-section">' +
-            '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
-            '<div class="enc-cd-box">' + _stripEmojis(_coinify(titleText)) + '</div>' +
           '</div>';
       }
     }
@@ -3743,7 +3743,7 @@
         var subDesc = '';
         if (hasSpeech) {
           mainContent = tagPill + '<span class="enc-cho-speech">“' + _coinify(speechClean) + '”</span>';
-          subDesc = _stripEmojis(ch.desc || '');
+          subDesc = _stripEmojis(ch.desc || subText || '');
           if (subDesc) {
             subDesc = subDesc.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
             // Anti-repetição (Ordem do Usuário 2026-10): se a descrição for idêntica à fala ou label,
@@ -3760,6 +3760,11 @@
           subDesc = _stripEmojis(ch.desc || '');
           if (subDesc) {
             subDesc = subDesc.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
+            var _normSubNoSpeech = String(subDesc || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+            var _normLabelNoSpeech = String(_choLabel || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
+            if (_normSubNoSpeech && _normSubNoSpeech === _normLabelNoSpeech) {
+              subDesc = '';
+            }
           }
         }
         row.innerHTML =
