@@ -3413,6 +3413,8 @@
         closeChoices(true);
         if (opts && typeof opts.onChoice === 'function') {
           opts.onChoice(ch);
+        } else if (typeof ch.cb === 'function') {
+          try { ch.cb(ch); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
         }
       });
     }
@@ -4781,6 +4783,12 @@
       var activeOnChoice = (inst && inst.opts && inst.opts.onChoice) || (opts && opts.onChoice);
       if (typeof activeOnChoice === 'function') {
         activeOnChoice(ch, dialogue);
+        return;
+      }
+
+      // Se a própria choice possui callback funcional direto (ex.: navegação entre tópicos de companheiro, tutorial, presentes):
+      if (typeof ch.cb === 'function') {
+        try { ch.cb(ch, dialogue); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
         return;
       }
 

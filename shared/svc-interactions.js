@@ -538,6 +538,10 @@
    * @returns {boolean} true se interceptou; caller pode return.
    */
   window._dispatchSvcChoice = function(ch, dialogue, dialogues) {
+    if (ch && typeof ch.cb === 'function') {
+      try { ch.cb(ch, dialogue); } catch (_eCb) { console.warn('[SVC] ch.cb threw', _eCb); }
+      return true;
+    }
     var cb = ch.cb || '';
     var ov = document.getElementById('encounter-overlay');
     /* A3.2 (#90): shape CANÔNICO de skill check em choice — check:{skill|stat,
