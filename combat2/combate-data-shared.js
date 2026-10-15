@@ -1375,7 +1375,35 @@ var CHAR_CLASSES = [
             desc: 'Doença (PHB p.234): TR CON ou ENVENENADO 3 rodadas (atk/checks com desvantagem).',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'con' },
             helpDnd5e: 'Contágio / Contagion (PHB p.234 — Druida/Clérigo nv 5): toca alvo com doença. Atk magia melee; em hit alvo fica ENVENENADO. TR CON fim de cada turno: 3 sucessos = encerra, 3 falhas = doença inflige (7 tipos PHB).\nEnvenenado (PHB App.A): atk/ability checks com desvantagem.\nArena stub: 0 dano + debuff Envenenado 3 rodadas + repeatSave CON.\nV1.7 Sprint-17 Ronda 18 (2026-04-21): era Exausto (divergência PHB) — corrigido pra Poisoned RAW.',
-            afterAttackEnemyDebuff: { id: 'contagion_poisoned', turns: 3, n: 'Envenenado (Contágio)', ico: '', atkDisadvantage: true, abilityCheckDisadv: true, repeatSave: { ability: 'con' }, dndCondition: 'Envenenado (PHB App.A — Contágio)' } }
+            afterAttackEnemyDebuff: { id: 'contagion_poisoned', turns: 3, n: 'Envenenado (Contágio)', ico: '', atkDisadvantage: true, abilityCheckDisadv: true, repeatSave: { ability: 'con' }, dndCondition: 'Envenenado (PHB App.A — Contágio)' } },
+        { n: 'Conjurar Animais', ico: '', cost: 5, kind: 'summon_pack',
+            minLevel: 5,
+            desc: 'Conjura espíritos feéricos na forma de 4 lobos espirituais (TR 1/4, Pack Tactics, Concentração).',
+            helpDnd5e: 'Conjurar Animais (PHB p.225 — Conjure Animals): magia de 3º nível ' +
+                       'de Druida/Patrulheiro. Invoca espíritos feéricos em forma de bestas. ' +
+                       'Duração: até 1 hora, CONCENTRAÇÃO (na arena, os lobos ' +
+                       'se dissipam se você perder a concentração — TR CON ao sofrer dano, ou ao ' +
+                       'conjurar outra magia de concentração). ' +
+                       'Lobos têm Pack Tactics (Wolf MM p.341): vantagem em ataque se ≥1 aliado vivo.',
+            packSpec: {
+                count: 4,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_animals_wolf',
+                wolfSpec: {
+                    name: 'Lobo Espiritual',
+                    ico: '',
+                    iconHeraldic: 'ic-animal_companion',
+                    hp: 11, mhp: 11, ac: 13,
+                    dex: 15, wis: 12, con: 12, str: 12, int: 3, cha: 6,
+                    atk: 4,
+                    damageSpec: { n: 2, d: 4, flat: 2 },
+                    dmgType: 'piercing',
+                    die: 4,
+                    multiAttack: 1,
+                    packTactics: true
+                }
+            } }
       ] },
     /* V1.7 Stage 6 (2026-04-21) — Feiticeiro (PHB p.99-108): CHA caster inato.
        ADAPTAÇÕES vs PHB:
