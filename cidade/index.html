@@ -13622,6 +13622,44 @@ function _isCTA(btn) {
         var env = _env(); if (env) body.env = env;
         return _post('/api/guild/action', body);
       }
+    },
+    social: {
+      load: function(){
+        var a = _auth(); if (!a) return Promise.resolve(null);
+        var body = { user_id: a.uid, action: 'load' };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/game/social', body);
+      },
+      send: function(targetUid, type){
+        var a = _auth(); if (!a) return Promise.resolve(null);
+        var body = { user_id: a.uid, action: 'social_send', target_uid: targetUid, type: type };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/game/social', body);
+      },
+      accept: function(requestId){
+        var a = _auth(); if (!a) return Promise.resolve(null);
+        var body = { user_id: a.uid, action: 'social_accept', request_id: requestId };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/game/social', body);
+      },
+      decline: function(requestId){
+        var a = _auth(); if (!a) return Promise.resolve(null);
+        var body = { user_id: a.uid, action: 'social_decline', request_id: requestId };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/game/social', body);
+      },
+      chatPoll: function(msgCount){
+        var a = _auth(); if (!a) return Promise.resolve(null);
+        var body = { user_id: a.uid, action: 'chat_poll', msg_count: msgCount || 0 };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/game/social', body);
+      },
+      chatSend: function(text){
+        var a = _auth(); if (!a) return Promise.resolve(null);
+        var body = { user_id: a.uid, action: 'chat_send', text: text };
+        var env = _env(); if (env) body.env = env;
+        return _post('/api/game/social', body);
+      }
     }
   };
 })();
@@ -24198,7 +24236,8 @@ function _buildTavernMockData(player){
       { icon: _heralIco('ic-stat-wis'), label: 'Informações',       cb: 'tavern_gather_open' },
       { icon: _heralIco('ic-stat-attack'), label: 'Rinha',             cb: 'tavern_pitfight_open' },
       // Sessao #37 v17: Mural de Avisos→Mural
-      { icon: _heralIco('ic-missões'), label: 'Mural',            cb: 'tavern_bulletin_open' }
+      { icon: _heralIco('ic-missões'), label: 'Mural',            cb: 'tavern_bulletin_open' },
+      { icon: _heralIco('ic-grupo'), label: 'Comitiva (LFG)',    cb: 'tavern_lfg_open', badge: 'Online' }
     ]
   };
 }
@@ -29691,6 +29730,369 @@ function _normalizeQuests(){
   });
   return out;
 }
+
+// ============================================================================
+// === COMITIVA & MULTIPLAYER SOCIAL URBANO (LFG / Duelos / Chat / Trocas) ===
+// ============================================================================
+window._socialHubState = window._socialHubState || {
+  tab: 'online',
+  chatMessages: [
+    { sender: 'Mestre da Guilda', text: 'Os editais da semana estão fixados no mural. Procurem parceiros para as criptas.', time: '10:14', role: 'npc' },
+    { sender: 'Eirik Mão-de-Ferro', text: '*ergue a caneca de hidromel* Partindo para as colinas ao entardecer. Quem tiver lâmina afiada ou escudo, venha até o urso.', time: '10:22' },
+    { sender: 'Lyra', text: '*observa a multidão do canto da taverna* Cuidado com as vielas perto do mercado à noite...', time: '10:31' }
+  ],
+  inbox: []
+};
+
+function _renderSocialTabOnline(container, isRemote) {
+  var renderList = function(list) {
+    if (!list || list.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:24px 12px;color:var(--v-text-dim,#a09484);font-style:italic;">Nenhum outro aventureiro encontrado na cidade no momento.</div>';
+      return;
+    }
+    var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+    list.forEach(function(u){
+      var heraldic = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(u.cls || 'guerreiro') : 'ic-aldeao';
+      var clsLabel = (typeof _classLabelPT === 'function') ? _classLabelPT(u.cls || 'guerreiro') : (u.cls || 'Guerreiro');
+      var isLfg = (u.act && (u.act.indexOf('LFG') >= 0 || u.act.indexOf('Grupo') >= 0));
+      var badgeStyle = isLfg 
+        ? 'background:rgba(196,149,58,0.25);border:1px solid var(--v-gold,#c4953a);color:#ffd700;' 
+        : 'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--v-text-dim,#a09484);';
+      
+      html += '<div class="soc-card" style="background:rgba(24,18,14,0.85);border:1px solid rgba(196,149,58,0.25);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">'
+        + '  <div style="display:flex;align-items:center;justify-content:space-between;">'
+        + '    <div style="display:flex;align-items:center;gap:10px;">'
+        + '      <div style="width:36px;height:36px;flex-shrink:0;"><svg viewBox="0 0 120 120" style="width:100%;height:100%;"><use href="#' + heraldic + '"/></svg></div>'
+        + '      <div>'
+        + '        <div style="font-family:\'Cinzel\',serif;font-weight:700;font-size:13px;color:var(--v-gold,#c4953a);">' + _hubEsc(u.name) + '</div>'
+        + '        <div style="font-size:11px;color:var(--v-text-dim,#a09484);">' + _hubEsc(clsLabel) + ' · Nv ' + (u.lvl || u.level || 1) + '</div>'
+        + '      </div>'
+        + '    </div>'
+        + '    <span style="font-size:10px;padding:3px 8px;border-radius:12px;font-weight:600;' + badgeStyle + '">' + _hubEsc(u.act || 'Na Cidade') + '</span>'
+        + '  </div>'
+        + '  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;">'
+        + '    <button class="rel-guide-btn soc-act-btn" type="button" data-act="wave" data-uid="' + u.uid + '" data-name="' + _hubEsc(u.name) + '" style="flex:1;min-width:65px;font-size:11px;padding:4px 6px;">👋 Acenar</button>'
+        + '    <button class="rel-guide-btn soc-act-btn" type="button" data-act="party" data-uid="' + u.uid + '" data-name="' + _hubEsc(u.name) + '" data-cls="' + _hubEsc(clsLabel) + '" data-lvl="' + (u.lvl || u.level || 1) + '" style="flex:1.2;min-width:85px;font-size:11px;padding:4px 6px;color:#ffd700;border-color:rgba(196,149,58,0.5);">👥 Convidar</button>'
+        + '    <button class="rel-guide-btn soc-act-btn" type="button" data-act="duel" data-uid="' + u.uid + '" data-name="' + _hubEsc(u.name) + '" style="flex:1;min-width:65px;font-size:11px;padding:4px 6px;">⚔️ Duelo</button>'
+        + '    <button class="rel-guide-btn soc-act-btn" type="button" data-act="trade" data-uid="' + u.uid + '" data-name="' + _hubEsc(u.name) + '" style="flex:1;min-width:65px;font-size:11px;padding:4px 6px;">🤝 Troca</button>'
+        + '  </div>'
+        + '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('.soc-act-btn').forEach(function(btn){
+      btn.onclick = function(){
+        var act = btn.getAttribute('data-act');
+        var uid = parseInt(btn.getAttribute('data-uid'), 10);
+        var name = btn.getAttribute('data-name');
+        var cls = btn.getAttribute('data-cls') || 'Aventureiro';
+        var lvl = btn.getAttribute('data-lvl') || '1';
+
+        if (act === 'wave') {
+          if (isRemote && window.vCityServer && vCityServer.social) {
+            vCityServer.social.send(uid, 'wave').then(function(){
+              if (typeof vToast === 'function') vToast('Você acenou para ' + name + '!', 'info');
+            }).catch(function(){});
+          } else {
+            if (typeof vToast === 'function') vToast('Você acena amigavelmente para ' + name + '.', 'info');
+          }
+        } else if (act === 'party') {
+          if (typeof _showInfoPopup === 'function') {
+            _showInfoPopup({
+              icon: _heralIco('ic-grupo'),
+              title: 'Convidar para a Comitiva',
+              npc: name + ' — Nv ' + lvl + ' ' + cls,
+              desc: '<b>O Que Está Sendo Escolhido:</b><br>'
+                + 'Você está convidando <b>' + name + '</b> para ingressar no seu grupo de aventureiros (até 4 membros).<br><br>'
+                + '<b>Benefícios & Consequências Táticas:</b><br>'
+                + '• Exploração e partilha de experiência (XP) e espólios raros em masmorras.<br>'
+                + '• Cooperação mútua em combate por turnos D&D 5e (Combat2).<br>'
+                + '• Deliberação conjunta em acampamentos e descansos.<br>'
+                + '• Conexão de habilidades sinérgicas da comitiva.',
+              confirmLabel: '✔ Enviar Convite de Grupo',
+              cancelLabel: '← Voltar às opções',
+              onConfirm: function(){
+                if (isRemote && window.vCityServer && vCityServer.social) {
+                  vCityServer.social.send(uid, 'party_invite').then(function(){
+                    if (typeof vToast === 'function') vToast('Convite de grupo enviado para ' + name + '!', 'info');
+                  }).catch(function(){});
+                } else {
+                  if (typeof vToast === 'function') vToast('Convite de comitiva enviado para ' + name + '!', 'info');
+                }
+              }
+            });
+          }
+        } else if (act === 'duel') {
+          if (typeof _showInfoPopup === 'function') {
+            _showInfoPopup({
+              icon: _heralIco('ic-arena'),
+              title: 'Desafio de Duelo na Arena',
+              npc: name,
+              desc: '<b>O Que Está Sendo Escolhido:</b><br>'
+                + 'Você está desafiando <b>' + name + '</b> para um embate individual honroso na Arena de Duelos.<br><br>'
+                + '<b>Regras do Coliseu:</b><br>'
+                + '• Duelo supervisionado pelo Mestre Vorhan.<br>'
+                + '• Combate não-letal: ao término, os aventureiros recuperam seus recursos vitais.<br>'
+                + '• Reconhecimento marcial, renome e glória entre os combatentes de Valdoria.',
+              confirmLabel: '✔ Lançar Desafio',
+              cancelLabel: '← Voltar às opções',
+              onConfirm: function(){
+                if (isRemote && window.vCityServer && vCityServer.social) {
+                  vCityServer.social.send(uid, 'duel_challenge').then(function(){
+                    if (typeof vToast === 'function') vToast('Desafio de duelo enviado para ' + name + '!', 'info');
+                  }).catch(function(){});
+                } else {
+                  if (typeof vToast === 'function') vToast('Desafio de duelo enviado para ' + name + '!', 'info');
+                }
+              }
+            });
+          }
+        } else if (act === 'trade') {
+          if (typeof _showInfoPopup === 'function') {
+            _showInfoPopup({
+              icon: _heralIco('ic-mercado'),
+              title: 'Proposta de Troca Comercial',
+              npc: name,
+              desc: '<b>O Que Está Sendo Escolhido:</b><br>'
+                + 'Propor o início de uma negociação direta de itens e Valdoritas com <b>' + name + '</b>.<br><br>'
+                + '<b>Segurança Canônica (2PC):</b><br>'
+                + '• Protocolo bilateral de troca atômica.<br>'
+                + '• Proteção total contra golpes: qualquer alteração de oferta reinicia as travas de confirmação.<br>'
+                + '• Troca instantânea e validada pelo servidor.',
+              confirmLabel: '✔ Propor Troca',
+              cancelLabel: '← Voltar às opções',
+              onConfirm: function(){
+                if (isRemote && window.vCityServer && vCityServer.social) {
+                  vCityServer.social.send(uid, 'trade_invite').then(function(){
+                    if (typeof vToast === 'function') vToast('Proposta de troca enviada para ' + name + '!', 'info');
+                  }).catch(function(){});
+                } else {
+                  if (typeof vToast === 'function') vToast('Proposta de troca enviada para ' + name + '!', 'info');
+                }
+              }
+            });
+          }
+        }
+      };
+    });
+  };
+
+  var fallbackOnline = [
+    { uid: 101, name: 'Eirik Mão-de-Ferro', cls: 'guerreiro', lvl: 4, act: '🛡️ Procurando Grupo (Masmorras)', loc: 'tavern' },
+    { uid: 102, name: 'Lyra Sussurro-Noturno', cls: 'ladino', lvl: 4, act: 'Na Taverna do Javali', loc: 'tavern' },
+    { uid: 103, name: 'Irmão Vane', cls: 'clerigo', lvl: 3, act: 'Em Oração no Templo', loc: 'temple' },
+    { uid: 104, name: 'Tharion das Chamas', cls: 'mago', lvl: 5, act: 'Estudando no Escriba', loc: 'runes' },
+    { uid: 105, name: 'Selene Brisa-Suave', cls: 'patrulheiro', lvl: 3, act: '🌿 Procurando Grupo (Caçadas)', loc: 'square' },
+    { uid: 106, name: 'Alden o Redimido', cls: 'paladino', lvl: 4, act: '🛡️ Procurando Grupo (Comitiva)', loc: 'guild' }
+  ];
+
+  if (isRemote && window.vCityServer && vCityServer.social) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--v-text-dim,#a09484);">Consultando aventureiros em Valdoria...</div>';
+    vCityServer.social.load().then(function(res){
+      if (res && Array.isArray(res.online) && res.online.length > 0) {
+        renderList(res.online);
+      } else {
+        renderList(fallbackOnline);
+      }
+    }).catch(function(){
+      renderList(fallbackOnline);
+    });
+  } else {
+    renderList(fallbackOnline);
+  }
+}
+
+function _renderSocialTabInbox(container, isRemote) {
+  var renderInbox = function(items) {
+    if (!items || items.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:28px 12px;background:rgba(20,16,12,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:10px;">'
+        + '<div style="font-size:36px;margin-bottom:8px;">📭</div>'
+        + '<div style="font-family:\'Cinzel\',serif;font-size:14px;color:var(--v-gold,#c4953a);font-weight:700;margin-bottom:6px;">Nenhum Convite Pendente</div>'
+        + '<p style="font-size:12px;color:var(--v-text-dim,#a09484);max-width:320px;margin:0 auto;line-height:1.5;">Quando outros aventureiros enviarem convites para grupo, desafios de arena ou propostas de troca, eles aparecerão aqui para sua deliberação.</p>'
+        + '</div>';
+      return;
+    }
+    var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+    items.forEach(function(req){
+      var typeMap = {
+        'party_invite': { label: 'Convite para Comitiva', icon: '👥' },
+        'duel_challenge': { label: 'Desafio para Duelo', icon: '⚔️' },
+        'trade_invite': { label: 'Proposta de Troca', icon: '🤝' },
+        'wave': { label: 'Saudação Recebida', icon: '👋' }
+      };
+      var info = typeMap[req.type || req.request_type] || { label: 'Interação Social', icon: '✉️' };
+      html += '<div style="background:rgba(24,18,14,0.85);border:1px solid rgba(196,149,58,0.25);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+        + '  <div>'
+        + '    <div style="font-size:13px;font-weight:700;color:var(--v-gold,#c4953a);">' + info.icon + ' ' + _hubEsc(info.label) + '</div>'
+        + '    <div style="font-size:11px;color:var(--v-text-dim,#a09484);">De: <b>' + _hubEsc(req.sender_name || 'Aventureiro') + '</b></div>'
+        + '  </div>'
+        + '  <div style="display:flex;gap:6px;">'
+        + '    <button class="rel-guide-btn soc-inbox-btn" type="button" data-act="accept" data-rid="' + (req.id || req.request_id) + '" style="font-size:11px;padding:4px 8px;color:#88c878;border-color:rgba(136,200,120,0.5);">✔ Aceitar</button>'
+        + '    <button class="rel-guide-btn soc-inbox-btn" type="button" data-act="decline" data-rid="' + (req.id || req.request_id) + '" style="font-size:11px;padding:4px 8px;color:#e87050;border-color:rgba(232,112,80,0.5);">✕ Recusar</button>'
+        + '  </div>'
+        + '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('.soc-inbox-btn').forEach(function(btn){
+      btn.onclick = function(){
+        var act = btn.getAttribute('data-act');
+        var rid = btn.getAttribute('data-rid');
+        if (isRemote && window.vCityServer && vCityServer.social) {
+          var p = (act === 'accept') ? vCityServer.social.accept(rid) : vCityServer.social.decline(rid);
+          p.then(function(res){
+            if (typeof vToast === 'function') vToast((res && res.message) || (act === 'accept' ? 'Convite aceito!' : 'Convite recusado.'), 'info');
+            _renderSocialTabInbox(container, isRemote);
+          }).catch(function(){
+            _renderSocialTabInbox(container, isRemote);
+          });
+        } else {
+          if (typeof vToast === 'function') vToast(act === 'accept' ? 'Convite aceito com sucesso!' : 'Convite recusado.', 'info');
+          container.innerHTML = '<div style="text-align:center;padding:20px;color:#88c878;">Ação registrada.</div>';
+        }
+      };
+    });
+  };
+
+  if (isRemote && window.vCityServer && vCityServer.social) {
+    vCityServer.social.load().then(function(res){
+      var inb = (res && res.inbox) || [];
+      window._socialHubState.inbox = inb;
+      renderInbox(inb);
+    }).catch(function(){
+      renderInbox(window._socialHubState.inbox || []);
+    });
+  } else {
+    renderInbox(window._socialHubState.inbox || []);
+  }
+}
+
+function _renderSocialTabChat(container, isRemote) {
+  var state = window._socialHubState;
+  var html = ''
+    + '<div style="display:flex;flex-direction:column;gap:8px;height:320px;">'
+    + '  <div id="soc-chat-box" style="flex:1;background:rgba(12,8,6,0.85);border:1px solid rgba(196,149,58,0.25);border-radius:6px;padding:8px 10px;overflow-y:auto;font-size:12px;display:flex;flex-direction:column;gap:6px;"></div>'
+    + '  <div style="display:flex;gap:6px;">'
+    + '    <input id="soc-chat-input" type="text" maxlength="150" placeholder="Mensagem na praça pública (*ação* para interpretar)..." style="flex:1;background:rgba(0,0,0,0.6);border:1px solid rgba(196,149,58,0.3);border-radius:6px;color:#f0e6d2;padding:6px 10px;font-size:12px;outline:none;" />'
+    + '    <button id="soc-chat-send" class="rel-guide-btn" type="button" style="padding:6px 14px;color:#ffd700;font-weight:700;">Enviar</button>'
+    + '  </div>'
+    + '</div>';
+  container.innerHTML = html;
+
+  var chatBox = document.getElementById('soc-chat-box');
+  var chatInput = document.getElementById('soc-chat-input');
+  var sendBtn = document.getElementById('soc-chat-send');
+
+  var formatMsgText = function(text) {
+    var esc = _hubEsc(text || '');
+    return esc.replace(/\*([^*]+)\*/g, '<span style="color:#ffd700;font-style:italic;">$1</span>');
+  };
+
+  var updateChatDisplay = function(messages) {
+    if (!chatBox) return;
+    chatBox.innerHTML = '';
+    (messages || []).forEach(function(m){
+      var line = document.createElement('div');
+      line.style.cssText = 'line-height:1.4;';
+      var timeStr = m.time || '';
+      var senderHtml = '<strong style="color:var(--v-gold,#c4953a);">' + _hubEsc(m.sender || 'Aventureiro') + ':</strong> ';
+      var textHtml = formatMsgText(m.text || m.message || '');
+      line.innerHTML = (timeStr ? '<span style="font-size:10px;color:var(--v-text-dim,#807464);margin-right:4px;">[' + timeStr + ']</span>' : '') + senderHtml + textHtml;
+      chatBox.appendChild(line);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+  };
+
+  updateChatDisplay(state.chatMessages);
+
+  var doSend = function() {
+    var txt = (chatInput.value || '').trim();
+    if (!txt) return;
+    chatInput.value = '';
+    var myName = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.name) || 'Você';
+    var now = new Date();
+    var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    var newMsg = { sender: myName, text: txt, time: timeStr };
+
+    if (isRemote && window.vCityServer && vCityServer.social) {
+      vCityServer.social.chatSend(txt).then(function(){
+        state.chatMessages.push(newMsg);
+        updateChatDisplay(state.chatMessages);
+      }).catch(function(){
+        state.chatMessages.push(newMsg);
+        updateChatDisplay(state.chatMessages);
+      });
+    } else {
+      state.chatMessages.push(newMsg);
+      updateChatDisplay(state.chatMessages);
+    }
+  };
+
+  sendBtn.onclick = doSend;
+  chatInput.onkeydown = function(e){
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      doSend();
+    }
+  };
+}
+
+function _renderSocialHub(bodyEl) {
+  if (!bodyEl) return;
+  var state = window._socialHubState;
+  var isRemote = !!(window.vCityServer && vCityServer.isRemote && vCityServer.isRemote() && vCityServer.social);
+
+  while (bodyEl.firstChild) bodyEl.removeChild(bodyEl.firstChild);
+
+  var root = document.createElement('div');
+  root.className = 'rel-hub';
+  root.style.cssText = 'display:flex;flex-direction:column;gap:12px;color:var(--v-text,#d4c8b0);box-sizing:border-box;';
+
+  var banner = document.createElement('div');
+  banner.className = 'rel-header-banner';
+  banner.innerHTML = ''
+    + '<div class="rel-header-title-row">'
+    + '  <h3 class="rel-header-title">Comitiva & Jogadores</h3>'
+    + '  <span style="font-size:11px;color:#88c878;font-weight:700;">● Rede Ativa</span>'
+    + '</div>'
+    + '<p class="rel-header-flavor">Encontre companheiros de armas, desafie rivais para a Arena e reúna comitivas para as masmorras.</p>';
+  root.appendChild(banner);
+
+  var tabs = document.createElement('div');
+  tabs.className = 'rel-tabs';
+  tabs.innerHTML = ''
+    + '<button class="rel-tab-btn' + (state.tab === 'online' ? ' active' : '') + '" type="button" data-stab="online">👥 Aventureiros Online</button>'
+    + '<button class="rel-tab-btn' + (state.tab === 'inbox' ? ' active' : '') + '" type="button" data-stab="inbox">📩 Convites & Recados' + (state.inbox && state.inbox.length ? ' (' + state.inbox.length + ')' : '') + '</button>'
+    + '<button class="rel-tab-btn' + (state.tab === 'chat' ? ' active' : '') + '" type="button" data-stab="chat">💬 Praça & Chat</button>';
+  root.appendChild(tabs);
+
+  var container = document.createElement('div');
+  container.className = 'soc-tab-content';
+  root.appendChild(container);
+
+  bodyEl.appendChild(root);
+
+  tabs.querySelectorAll('.rel-tab-btn').forEach(function(btn){
+    btn.onclick = function(){
+      var tab = btn.getAttribute('data-stab');
+      if (tab) {
+        state.tab = tab;
+        _renderSocialHub(bodyEl);
+      }
+    };
+  });
+
+  if (state.tab === 'online') {
+    _renderSocialTabOnline(container, isRemote);
+  } else if (state.tab === 'inbox') {
+    _renderSocialTabInbox(container, isRemote);
+  } else if (state.tab === 'chat') {
+    _renderSocialTabChat(container, isRemote);
+  }
+}
+window._renderSocialHub = _renderSocialHub;
 
 function _renderQuestDiary(bodyEl){
   if (!bodyEl) return;
@@ -60931,6 +61333,11 @@ function _renderCityPopup(key){
     }, 50);
     return;
   }
+  if (key === 'social') {
+    if (titleEl) titleEl.textContent = 'Comitiva & Jogadores em Valdoria';
+    if (typeof _renderSocialHub === 'function') _renderSocialHub(bodyEl);
+    return;
+  }
   if (key === 'trade_board' && typeof renderSquareHub === 'function') {
     if (titleEl) titleEl.textContent = 'Quadro de Trocas';
     renderSquareHub(bodyEl, _buildTradeBoardMockData(window.CITY_MOCK_PLAYER));
@@ -64024,6 +64431,8 @@ var ACTION_HANDLERS = {
   'tavern_gather_menu':       function(p){ _tavernShowGather(p); },  // alias do diálogo do Grom ("Coletar informações")
   'tavern_pitfight_open':     function(p){ _tavernShowPitfight(p); },
   'tavern_bard_open':         function(p){ _tavernShowBard(p); },
+  'tavern_lfg_open':          function(p){ openCityPopup('social'); },
+  'open_social_hub':          function(p){ openCityPopup('social'); },
 
   // --- MERCADO ---
   'market_sell_open':     function(p){ _marketShowSell(p); },
@@ -67147,7 +67556,8 @@ SUBSCREEN_DATA['city_more'] = {
     [_heralIco('ic-missões'), 'Quadro de Trocas', 'P2P trade · nv 3+ canonical', 'nav:trade_board'],
     [_heralIco('ic-mochila'), 'Beco Sombrio', 'Mercado das sombras (Vulto)', 'nav:shadow_alley'],
     [_heralIco('ic-mochila'), 'Diário de Viajantes', 'NPCs ambulantes encontrados', 'nav:travelers'],
-    [_heralIco('ic-mochila'), 'Mural dos Aventureiros', 'Rankings + títulos + firsts', 'nav:heroes_wall']
+    [_heralIco('ic-mochila'), 'Mural dos Aventureiros', 'Rankings + títulos + firsts', 'nav:heroes_wall'],
+    [_heralIco('ic-grupo'), 'Comitiva & Jogadores', 'Chat, online, convites, duelos', 'nav:social']
   ]
 };
 
