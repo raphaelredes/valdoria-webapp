@@ -3411,10 +3411,12 @@
       confirmBtn.addEventListener('click', function() {
         _closeChoiceDetailDialog();
         closeChoices(true);
+        if (typeof ch.cb === 'function') {
+          try { ch.cb(ch); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
+          return;
+        }
         if (opts && typeof opts.onChoice === 'function') {
           opts.onChoice(ch);
-        } else if (typeof ch.cb === 'function') {
-          try { ch.cb(ch); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
         }
       });
     }
@@ -3792,7 +3794,11 @@
         if (_isChoiceConfirmable(ch, confirmOpts)) {
           _openChoiceDetailDialog(ch, confirmOpts);
         } else {
-          closeChoices();
+          closeChoices(true);
+          if (typeof ch.cb === 'function') {
+            try { ch.cb(ch, opts.dialogue); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
+            return;
+          }
           if (typeof opts.onChoice === 'function') opts.onChoice(ch);
         }
       });
@@ -3814,7 +3820,9 @@
     }, 50);
   }
 
+  var _closeChoicesTimer = null;
   function closeChoices(immediate) {
+    if (_closeChoicesTimer) { clearTimeout(_closeChoicesTimer); _closeChoicesTimer = null; }
     _closeChoiceDetailDialog();
     var sub = document.getElementById('enc-choices-overlay');
     if (!sub) return;
@@ -3831,7 +3839,8 @@
     }
     sub.classList.add('closing');
     sub.classList.remove('open');
-    setTimeout(function() {
+    _closeChoicesTimer = setTimeout(function() {
+      _closeChoicesTimer = null;
       // task #69: close <dialog> via .close() if available
       if (sub.tagName.toLowerCase() === 'dialog' && typeof sub.close === 'function') {
         try { if (sub.open) sub.close(); } catch(e){}
@@ -4776,6 +4785,12 @@
         } catch (_eHist) {}
       }
 
+      // Se a própria choice possui callback funcional direto (ex.: navegação entre tópicos de companheiro, tutorial, presentes):
+      if (typeof ch.cb === 'function') {
+        try { ch.cb(ch, dialogue); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
+        return;
+      }
+
       // External onChoice callback (PADRAO_ALDRIC v2 contrato) - SOBERANO
       // Quando o caller fornece onChoice (ex.: _renderCityDialogue, _arrivalRenderNode, _openRecrutaDialogue, journey-runner),
       // este callback DEVE ser invocado com a choice selecionada, sem ser interceptado por fallbacks legados.
@@ -4783,12 +4798,6 @@
       var activeOnChoice = (inst && inst.opts && inst.opts.onChoice) || (opts && opts.onChoice);
       if (typeof activeOnChoice === 'function') {
         activeOnChoice(ch, dialogue);
-        return;
-      }
-
-      // Se a própria choice possui callback funcional direto (ex.: navegação entre tópicos de companheiro, tutorial, presentes):
-      if (typeof ch.cb === 'function') {
-        try { ch.cb(ch, dialogue); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
         return;
       }
 

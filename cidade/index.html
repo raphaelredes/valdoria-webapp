@@ -66839,7 +66839,15 @@ function _showAllyTopicDialogue(idx, topicKey) {
   };
 
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-    window.vEncounter.render(dlg, { closeable: true });
+    window.vEncounter.render(dlg, {
+      closeable: true,
+      onChoice: function(ch) {
+        if (typeof ch.cb === 'function') {
+          try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPIC] cb failed', e); }
+          return;
+        }
+      }
+    });
   }
 }
 function _hasSeenCompanionRelationshipTutorial() {
@@ -66928,7 +66936,15 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
     ]
   };
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-    window.vEncounter.render(dlg, { closeable: true });
+    window.vEncounter.render(dlg, {
+      closeable: true,
+      onChoice: function(ch) {
+        if (typeof ch.cb === 'function') {
+          try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TUTORIAL] cb failed', e); }
+          return;
+        }
+      }
+    });
   }
 }
 window._showCompanionRelationshipTutorial = _showCompanionRelationshipTutorial;
@@ -67002,7 +67018,15 @@ function _showAllyGiftDialogue(idx) {
   };
 
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-    window.vEncounter.render(dlg, { closeable: true });
+    window.vEncounter.render(dlg, {
+      closeable: true,
+      onChoice: function(ch) {
+        if (typeof ch.cb === 'function') {
+          try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-GIFT] cb failed', e); }
+          return;
+        }
+      }
+    });
   }
 }
 window._showAllyGiftDialogue = _showAllyGiftDialogue;
@@ -67144,7 +67168,15 @@ function _showAllyDialogue(idx){
     choices: combinedChoices
   };
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-    window.vEncounter.render(dlg, { closeable: true });
+    window.vEncounter.render(dlg, {
+      closeable: true,
+      onChoice: function(ch) {
+        if (typeof ch.cb === 'function') {
+          try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY] cb failed', e); }
+          return;
+        }
+      }
+    });
   } else if (typeof vToast === 'function') {
     vToast('' + displayName + ': "' + (personalizedScript[1] || personalizedScript[0]).text + '"');
   }
