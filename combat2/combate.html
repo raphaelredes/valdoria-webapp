@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T01:08:22Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T02:09:21Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -11746,6 +11746,25 @@ canvas#vfxCanvas,
   display: inline-block;
 }
 
+.token-breach-chip {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #4a151b 0%, #2a0a0e 100%);
+  border: 1px solid #f0803c;
+  border-radius: 6px;
+  padding: 1px 5px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: #ffd79a;
+  z-index: 28;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .token-init-chip {
   position: absolute;
   top: -6px;
@@ -21325,6 +21344,10 @@ async function handlePlayerMoveTo(tCol, tRow) {
 
     var actualReachedSteps = 0;
     var actualSpentCost = 0;
+    var oaTriggeredInLocalMove = false;
+    var preMoveSnapshot = (!p.actionSpent && !p.bonusSpent && !_actionTaken)
+        ? { col: fromCol, row: fromRow, movement_left: p.movement_left || 0 }
+        : null;
     var playerSkipRequested = false;
     var shouldShowPlayerSkipBtn = (typeof _skipAllDiceAnim === 'undefined' || !_skipAllDiceAnim) && validPath.length > 2;
     if (shouldShowPlayerSkipBtn) {
@@ -21345,6 +21368,7 @@ async function handlePlayerMoveTo(tCol, tRow) {
                 : [];
 
             if (oas.length > 0) {
+                oaTriggeredInLocalMove = true;
                 p.pos = { col: curStep.col, row: curStep.row };
                 render(currentState);
 
@@ -21400,6 +21424,12 @@ async function handlePlayerMoveTo(tCol, tRow) {
         if (shouldShowPlayerSkipBtn) {
             hideCombatSkipMovementButton();
         }
+    }
+
+    if (actualReachedSteps > 0 && preMoveSnapshot && !oaTriggeredInLocalMove) {
+        if (!p._undo_move_checkpoint) p._undo_move_checkpoint = preMoveSnapshot;
+    } else if (oaTriggeredInLocalMove) {
+        delete p._undo_move_checkpoint;
     }
 
     ensureProceduralBattlefield(currentState);
@@ -21656,10 +21686,23 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
         acBadge = '';
     }
 
+    // Brecha Tática / Combo Token Badge & Intenção Espacial (Into the Breach / Sea of Stars / BG3)
+    var breachBadge = '';
+    var intentAttr = '';
+    if (fogState !== 'shrouded' && u.alive && !u.isDead) {
+        var hasBreach = (u.se || []).some(function (st) { return st && st.tacticalBreach; });
+        if (hasBreach) {
+            breachBadge = '<div class="token-breach-chip" title="Brecha Tática: Próximo ataque de aliado ou companheiro causa +1d6 de dano de sinergia!">🎯 Brecha</div>';
+        }
+        if (isEnemy && u.it && u.it.targetName) {
+            intentAttr = ' data-intent-target="' + escHtml(u.it.targetName) + '" title="' + escHtml((u.n || 'Inimigo') + ' — Intenção: ' + (u.it.lb || 'Atacar') + ' → ' + u.it.targetName + (u.it.dmg ? ' (' + u.it.dmg + ')' : '')) + '"';
+        }
+    }
+
     var tokenLeft = cx - Math.round(HEX_W / 2);
     var tokenTop = cy - Math.round(HEX_H / 2);
 
-    var html = '<div class="' + classes + '" data-unit-id="' + uid + '" data-clickable="1" ' +
+    var html = '<div class="' + classes + '" data-unit-id="' + uid + '" data-clickable="1"' + intentAttr + ' ' +
                'style="left:' + tokenLeft + 'px; top:' + tokenTop + 'px;">';
 
     html += '<div class="token-hex token-disc ' + ringCls + '">';
@@ -21673,10 +21716,11 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     html += '<span class="token-hp-text ' + hpCls + '">' + hpVal + '/' + u.mhp + '</span>';
     html += '</div>';
 
-    // Badges: AC, Init, Distance
+    // Badges: AC, Init, Distance, Brecha Tática
     if (acBadge) html += acBadge;
     if (initBadge) html += initBadge;
     if (distBadge) html += distBadge;
+    if (breachBadge) html += breachBadge;
 
     // Nameplate underneath
     html += '<div class="token-nameplate">' + nameLabel + '</div>';
@@ -22129,6 +22173,16 @@ function buildBattlefield(s) {
         });
     }
 
+    // Dynamic elemental surfaces map (Divinity: Original Sin 2 / BG3 systemic interactions)
+    var surfaceMap = {};
+    if (s.battlefield && s.battlefield.surfaces) {
+        s.battlefield.surfaces.forEach(function (sf) {
+            if (sf && sf.col != null && sf.row != null) {
+                surfaceMap[sf.col + ',' + sf.row] = sf;
+            }
+        });
+    }
+
     // Reachable hexes for active player movement
     var reachableMap = {};
     if (isPlayerActiveTurn && playerUnit && playerUnit.pos && (playerUnit.movement_left || 0) > 0) {
@@ -22454,6 +22508,13 @@ function buildBattlefield(s) {
                 html += '<text x="' + center.cx + '" y="' + (center.cy - 18) + '" class="hex-coord">' + coordLabel + '</text>';
             }
 
+            var surfTile = surfaceMap[hexKey];
+            if (surfTile && !isFogged) {
+                var sfSym = surfTile.symbol || '🔥';
+                var sfLbl = surfTile.label || surfTile.type || 'Superfície';
+                html += '<text x="' + center.cx + '" y="' + (center.cy - 6) + '" class="hex-hazard-badge hex-surface-badge">' + sfSym + ' ' + escHtml(sfLbl) + '</text>';
+            }
+
             // Se for obstáculo físico com cobertura (PHB p. 196)
             if (obsTile && !isFogged) {
                 var obsSym = obsTile.symbol || '🪨';
@@ -22518,16 +22579,22 @@ function buildBattlefield(s) {
     });
     html += '</div>'; // .hex-tokens-layer
 
-    // Battlefield HUD Header / Distance helper
+    // Battlefield HUD Header / Distance helper & Undo Move (Triangle Strategy / Tactics Ogre QoL)
     if (isPlayerActiveTurn && playerUnit) {
         var isPlayerProne = (playerUnit.se || []).some(function (st) { return st && (st.prone || st.id === 'prone'); });
         var standCostHexes = Math.floor((playerUnit.speed || 6) / 2);
         var standCostM = formatHexDistanceMeters(standCostHexes);
         var canStand = (playerUnit.movement_left || 0) >= standCostHexes;
+        var canUndoMove = !!(playerUnit._undo_move_checkpoint && !playerUnit.actionSpent && !playerUnit.bonusSpent && !_actionTaken);
 
-        if (isPlayerProne) {
+        if (isPlayerProne || canUndoMove) {
             html += '<div class="hex-turn-hud" aria-live="polite">';
-            html += '<button type="button" class="hth-stand-btn' + (canStand ? '' : ' disabled') + '" data-act="stand-up" title="Gasta metade do deslocamento (' + standCostM + ') para se levantar (PHB p. 190)">▲ Levantar-se (' + standCostM + ')</button>';
+            if (isPlayerProne) {
+                html += '<button type="button" class="hth-stand-btn' + (canStand ? '' : ' disabled') + '" data-act="stand-up" title="Gasta metade do deslocamento (' + standCostM + ') para se levantar (PHB p. 190)">▲ Levantar-se (' + standCostM + ')</button>';
+            }
+            if (canUndoMove) {
+                html += '<button type="button" class="hth-stand-btn hth-undo-move-btn" data-act="undo-move" title="Desfazer deslocamento tático e retornar à posição anterior do turno">↩ Desfazer Movimento</button>';
+            }
             html += '</div>';
         }
     }
@@ -28496,6 +28563,22 @@ function onBtnClick(ev) {
         pSu.movement_left = Math.max(0, (pSu.movement_left || 0) - standCost);
         pSu.se = (pSu.se || []).filter(function (st) { return !(st && (st.prone || st.id === 'prone')); });
         currentState.log.push(pSu.n + ' gasta ' + formatHexDistanceMeters(standCost) + ' de deslocamento e se levanta.');
+        render(currentState);
+        return;
+    }
+    if (act === 'undo-move') {
+        _actionSheetOpen = false;
+        if (window.__COMBAT_MODE === 'remote') {
+            void __combatRemoteAction({ type: 'undo_move' });
+            return;
+        }
+        var pUm = currentState.order[currentState.p_idx];
+        if (!pUm || !pUm._undo_move_checkpoint || pUm.actionSpent || pUm.bonusSpent || _actionTaken) return;
+        var cp = pUm._undo_move_checkpoint;
+        pUm.pos = { col: cp.col, row: cp.row };
+        pUm.movement_left = cp.movement_left;
+        delete pUm._undo_move_checkpoint;
+        currentState.log.push('↩ ' + pUm.n + ' desfaz o deslocamento tático e retorna à posição anterior.');
         render(currentState);
         return;
     }
