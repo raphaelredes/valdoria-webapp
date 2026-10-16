@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T02:47:45Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T03:04:20Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -11858,6 +11858,243 @@ canvas#vfxCanvas,
   fill: #ff7675;
 }
 
+/* Halos e Badges de Condições Canônicas D&D 5e (PHB p. 203, 290-292) */
+.token-concentration-halo {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1.2px dotted rgba(74, 185, 255, 0.85);
+  box-shadow: inset 0 0 8px rgba(74, 185, 255, 0.35), 0 0 14px rgba(0, 180, 255, 0.45);
+  animation: tokenConcRotate 10s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes tokenConcRotate {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.token-conc-chip {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #102636 0%, #08141d 100%);
+  border: 1px solid #4ab9ff;
+  border-radius: 5px;
+  padding: 1px 5px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: #cbe9ff;
+  z-index: 28;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(74, 185, 255, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: tokenConcPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes tokenConcPulse {
+  0%, 100% { border-color: #4ab9ff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 6px rgba(74, 185, 255, 0.3); }
+  50% { border-color: #8be0ff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 12px rgba(74, 185, 255, 0.7); }
+}
+
+.token--prone {
+  filter: brightness(0.85) contrast(0.95);
+}
+.token--prone .token-disc {
+  transform: rotate(-14deg) scale(0.94);
+  transition: transform 0.25s ease;
+}
+
+.token-prone-chip {
+  position: absolute;
+  bottom: -6px;
+  right: -8px;
+  background: linear-gradient(180deg, #382414 0%, #1c1109 100%);
+  border: 1px solid #d38b4a;
+  border-radius: 5px;
+  padding: 1px 4px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 7.5px;
+  font-weight: 700;
+  color: #ffdfba;
+  z-index: 29;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.token-cond-chip {
+  position: absolute;
+  bottom: -6px;
+  left: -8px;
+  background: #181512;
+  border: 1px solid #8e7855;
+  border-radius: 5px;
+  padding: 1px 4px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 7.5px;
+  font-weight: 700;
+  color: #ebd6a7;
+  z-index: 29;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.token-cond-chip--bless {
+  background: linear-gradient(180deg, #2b220d, #141005);
+  border-color: #ffd700;
+  color: #fff2a8;
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.45);
+}
+.token-cond-chip--blind {
+  background: linear-gradient(180deg, #281424, #120911);
+  border-color: #a855f7;
+  color: #e9d5ff;
+}
+.token-cond-chip--poison {
+  background: linear-gradient(180deg, #122814, #08140a);
+  border-color: #22c55e;
+  color: #bbf7d0;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
+}
+.token-cond-chip--stun {
+  background: linear-gradient(180deg, #302611, #181206);
+  border-color: #f59e0b;
+  color: #fef3c7;
+}
+
+/* Trilha Tática de Movimento e Alerta de AoO (D&D 5e PHB p. 190 / p. 195) */
+.hex-move-segment {
+  fill: none;
+  stroke: #d4af37;
+  stroke-width: 2.2;
+  stroke-dasharray: 5 3;
+  animation: moveLineDash 1s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.65));
+}
+.hex-move-segment--hazard {
+  stroke: #e74c3c !important;
+  stroke-dasharray: 4 3 !important;
+  filter: drop-shadow(0 0 5px rgba(231, 76, 60, 0.75)) !important;
+}
+@keyframes moveLineDash {
+  0% { stroke-dashoffset: 16; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.hex-move-node {
+  fill: #181410;
+  stroke: #d4af37;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+}
+.hex-move-node-label {
+  fill: #ffd54f;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  filter: drop-shadow(0 1px 2px #000);
+}
+
+.hex-move-hazard-ring {
+  fill: rgba(231, 76, 60, 0.15);
+  stroke: #e74c3c;
+  stroke-width: 1.6;
+  stroke-dasharray: 4 2;
+  animation: hazardRingPulse 1.2s ease-in-out infinite;
+}
+@keyframes hazardRingPulse {
+  0%, 100% { transform: scale(1); stroke-opacity: 0.9; }
+  50% { transform: scale(1.08); stroke-opacity: 0.5; }
+}
+
+.hex-hazard-badge-bg {
+  fill: rgba(28, 12, 12, 0.95);
+  stroke: #e74c3c;
+  stroke-width: 1.1;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
+}
+.hex-hazard-badge-text {
+  fill: #ff7675;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.hex-dest-badge-bg {
+  fill: rgba(18, 14, 10, 0.95);
+  stroke: #d4af37;
+  stroke-width: 1.2;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
+}
+.hex-dest-badge-bg--hazard {
+  stroke: #e74c3c;
+}
+.hex-dest-badge-text {
+  fill: #ffd54f;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.hex-dest-badge-text--hazard {
+  fill: #ff7675;
+}
+
+/* Área de Efeito (AoE) de Magias Canônicas no Tabuleiro (PHB p. 204-205) */
+.hex-aoe-circle {
+  pointer-events: none;
+  animation: aoePulse 2.4s ease-in-out infinite;
+}
+.hex-aoe-circle--fire {
+  opacity: 0.42;
+}
+.hex-aoe-circle--cone {
+  opacity: 0.38;
+}
+.hex-aoe-circle--radiant {
+  opacity: 0.38;
+}
+@keyframes aoePulse {
+  0%, 100% { opacity: 0.38; }
+  50% { opacity: 0.55; }
+}
+.hex-aoe-edge {
+  fill: none;
+  stroke: #d4af37;
+  stroke-width: 1.6;
+  stroke-dasharray: 6 3;
+  animation: aimLineDash 1.5s linear infinite;
+}
+.hex-aoe-badge-bg {
+  fill: rgba(20, 14, 10, 0.92);
+  stroke: #d4af37;
+  stroke-width: 1;
+}
+.hex-aoe-badge-text {
+  fill: #ffe082;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.token--aoe-targeted {
+  animation: aoeTargetPulse 1.2s ease-in-out infinite !important;
+}
+@keyframes aoeTargetPulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 107, 43, 0.7)); }
+  50% { filter: drop-shadow(0 0 14px rgba(255, 179, 71, 0.95)); }
+}
+
 .token-init-chip {
   position: absolute;
   top: -6px;
@@ -20325,6 +20562,208 @@ function hexDistanceMeters(c1, r1, c2, r2) {
 function clearTacticalAimVector() {
     var layer = document.getElementById('hexAimingVectorLayer');
     if (layer) layer.innerHTML = '';
+    clearTacticalAoePreview();
+}
+
+function clearTacticalAoePreview() {
+    var layer = document.getElementById('hexAoeVisualLayer');
+    if (layer) layer.innerHTML = '';
+    var highlighted = document.querySelectorAll('.token--aoe-targeted');
+    for (var i = 0; i < highlighted.length; i++) {
+        highlighted[i].classList.remove('token--aoe-targeted');
+    }
+}
+
+function drawTacticalAoePreview(centerCol, centerRow, skill) {
+    var layer = document.getElementById('hexAoeVisualLayer');
+    if (!layer || !currentState || !skill) return;
+    if (centerCol == null || centerRow == null) {
+        clearTacticalAoePreview();
+        return;
+    }
+
+    var radiusHex = 0;
+    var aoeType = 'arcane';
+    if (skill.fireball) {
+        radiusHex = 4; // 20 pés = 6m = 4 hexes (D&D 5e PHB p. 241)
+        aoeType = 'fire';
+    } else if (skill.coneOfCold || (skill.shape === 'cone')) {
+        radiusHex = 3;
+        aoeType = 'cone';
+    } else if (skill.spiritGuardians) {
+        radiusHex = 3; // 15 pés = 4,5m = 3 hexes (PHB p. 278)
+        aoeType = 'radiant';
+    } else if (skill.aoeRadius) {
+        radiusHex = Math.max(1, skill.aoeRadius | 0);
+    } else if (skill.radiusHexes) {
+        radiusHex = Math.max(1, skill.radiusHexes | 0);
+    } else if (skill.isAoe || skill.aoe) {
+        radiusHex = 3;
+    }
+
+    if (radiusHex <= 0) {
+        clearTacticalAoePreview();
+        return;
+    }
+
+    var pCenter = hexCenter(centerCol, centerRow);
+    var radiusPx = radiusHex * HEX_COL_STEP;
+
+    var svgParts = [];
+    var gradId = (aoeType === 'fire') ? 'aoeFireballGlow' : 'aoeArcaneGlow';
+    var circleCls = 'hex-aoe-circle hex-aoe-circle--' + aoeType;
+
+    // Círculo translúcido do raio de impacto
+    svgParts.push('<circle cx="' + pCenter.cx + '" cy="' + pCenter.cy + '" r="' + radiusPx + '" class="' + circleCls + '" fill="url(#' + gradId + ')" />');
+    svgParts.push('<circle cx="' + pCenter.cx + '" cy="' + pCenter.cy + '" r="' + radiusPx + '" class="hex-aoe-edge" />');
+
+    // Rótulo heráldico da área
+    var aoeMeters = formatHexDistanceMeters(radiusHex);
+    var aoeLabel = '◈ Área ' + aoeMeters + ' (' + radiusHex + 'h)';
+    if (skill.saveDc && skill.saveAbility) {
+        aoeLabel += ' | CD ' + skill.saveDc + ' ' + String(skill.saveAbility).toUpperCase();
+    }
+    var lblW = Math.max(86, aoeLabel.length * 6.2 + 18);
+    var lblH = 18;
+    var lblX = Math.round(pCenter.cx - lblW / 2);
+    var lblY = Math.round(pCenter.cy - radiusPx - 10);
+
+    svgParts.push('<g class="hex-aoe-badge">' +
+        '<rect x="' + lblX + '" y="' + lblY + '" width="' + lblW + '" height="' + lblH + '" rx="4" class="hex-aoe-badge-bg" />' +
+        '<text x="' + pCenter.cx + '" y="' + (lblY + 10) + '" class="hex-aoe-badge-text">' + escHtml(aoeLabel) + '</text>' +
+        '</g>');
+
+    layer.innerHTML = svgParts.join('');
+
+    // Destaque visual nos tokens situados dentro da área de efeito
+    if (currentState && currentState.order) {
+        for (var ti = 0; ti < currentState.order.length; ti++) {
+            var tu = currentState.order[ti];
+            if (!tu || !tu.alive || tu.isDead || !tu.pos) continue;
+            var td = hexDistance(centerCol, centerRow, tu.pos.col, tu.pos.row);
+            var tuid = unitUidForOrderIndex(currentState, ti);
+            var tEl = document.querySelector('.hex-token[data-unit-id="' + tuid + '"]');
+            if (tEl) {
+                if (td <= radiusHex) {
+                    tEl.classList.add('token--aoe-targeted');
+                } else {
+                    tEl.classList.remove('token--aoe-targeted');
+                }
+            }
+        }
+    }
+}
+
+function clearMovementTrailPreview() {
+    var layer = document.getElementById('hexMovementTrailLayer');
+    if (layer) layer.innerHTML = '';
+}
+
+function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
+    var layer = document.getElementById('hexMovementTrailLayer');
+    if (!layer || !currentState) return;
+    if (fromCol == null || fromRow == null || toCol == null || toRow == null) {
+        layer.innerHTML = '';
+        return;
+    }
+    if (fromCol === toCol && fromRow === toRow) {
+        layer.innerHTML = '';
+        return;
+    }
+    options = options || {};
+    var line = (typeof hexLine === 'function') ? hexLine(fromCol, fromRow, toCol, toRow) : [];
+    if (!line || line.length < 2) {
+        layer.innerHTML = '';
+        return;
+    }
+
+    var pUnit = currentState.order[currentState.p_idx];
+    var moveLeft = pUnit ? (pUnit.movement_left || 0) : 6;
+    var difficultMap = (currentState.battlefield && currentState.battlefield.difficult_terrain) || {};
+
+    var svgParts = [];
+    var totalCostHexes = 0;
+    var provokedAoOList = [];
+
+    // Computa cada passo da rota e verifica Ataques de Oportunidade canônicos (PHB p. 195)
+    for (var i = 0; i < line.length - 1; i++) {
+        var curStep = line[i];
+        var nextStep = line[i + 1];
+        var nextKey = nextStep.col + ',' + nextStep.row;
+        var stepCost = (difficultMap && difficultMap[nextKey]) ? 2 : 1;
+        totalCostHexes += stepCost;
+
+        var pFrom = hexCenter(curStep.col, curStep.row);
+        var pTo = hexCenter(nextStep.col, nextStep.row);
+
+        // Checa se sair de curStep para nextStep provoca AoO de algum hostil ativo
+        var aooProvoked = [];
+        if (typeof simCheckOpportunityAttacks === 'function') {
+            aooProvoked = simCheckOpportunityAttacks(currentState.p_idx, curStep.col, curStep.row, nextStep.col, nextStep.row);
+        }
+
+        var isStepHazard = aooProvoked && aooProvoked.length > 0;
+        if (isStepHazard) {
+            for (var ai = 0; ai < aooProvoked.length; ai++) {
+                provokedAoOList.push({
+                    unit: aooProvoked[ai],
+                    stepCol: curStep.col,
+                    stepRow: curStep.row,
+                    cx: pFrom.cx,
+                    cy: pFrom.cy
+                });
+            }
+        }
+
+        var segClass = 'hex-move-segment' + (isStepHazard ? ' hex-move-segment--hazard' : '');
+        var segMarker = isStepHazard ? 'url(#moveArrowRed)' : 'url(#moveArrowGold)';
+        var segD = 'M ' + pFrom.cx + ' ' + pFrom.cy + ' L ' + pTo.cx + ' ' + pTo.cy;
+
+        svgParts.push('<path d="' + segD + '" class="' + segClass + '" marker-end="' + segMarker + '" />');
+
+        // Nó intermediário com distância métrica a cada passo
+        if (i < line.length - 2) {
+            var stepDistM = formatHexDistanceMeters(totalCostHexes);
+            svgParts.push('<circle cx="' + pTo.cx + '" cy="' + pTo.cy + '" r="5" class="hex-move-node" />');
+            svgParts.push('<text x="' + pTo.cx + '" y="' + (pTo.cy - 7) + '" class="hex-move-node-label">' + stepDistM + '</text>');
+        }
+    }
+
+    // Marcadores pulsantes de alerta sobre cada hexágono de saída que provoca AoO
+    for (var hi = 0; hi < provokedAoOList.length; hi++) {
+        var hz = provokedAoOList[hi];
+        var hName = escHtml((hz.unit && hz.unit.n) || 'Inimigo');
+        svgParts.push('<circle cx="' + hz.cx + '" cy="' + hz.cy + '" r="16" class="hex-move-hazard-ring" />');
+        svgParts.push('<g class="hex-move-hazard-badge">' +
+            '<rect x="' + (hz.cx - 52) + '" y="' + (hz.cy - 30) + '" width="104" height="17" rx="4" class="hex-hazard-badge-bg" />' +
+            '<text x="' + hz.cx + '" y="' + (hz.cy - 19) + '" class="hex-hazard-badge-text">▲ AoO: ' + hName + '</text>' +
+            '</g>');
+    }
+
+    // Badge de Destino Final
+    var dest = line[line.length - 1];
+    var destCenter = hexCenter(dest.col, dest.row);
+    var remainingMeters = formatHexDistanceMeters(Math.max(0, moveLeft - totalCostHexes));
+    var totalM = formatHexDistanceMeters(totalCostHexes);
+    var destText = '⇥ ' + totalM + ' (' + totalCostHexes + 'h) · Restam ' + remainingMeters;
+    if (provokedAoOList.length > 0) {
+        destText = '▲ AoO (' + provokedAoOList.length + ') · ' + totalM + ' · Restam ' + remainingMeters;
+    }
+
+    var destBadgeW = Math.max(90, destText.length * 6.2 + 20);
+    var destBadgeH = 19;
+    var destX = Math.round(destCenter.cx - destBadgeW / 2);
+    var destY = Math.round(destCenter.cy - 24);
+
+    var destBgCls = 'hex-dest-badge-bg' + (provokedAoOList.length > 0 ? ' hex-dest-badge-bg--hazard' : '');
+    var destTextCls = 'hex-dest-badge-text' + (provokedAoOList.length > 0 ? ' hex-dest-badge-text--hazard' : '');
+
+    svgParts.push('<g class="hex-dest-badge-group">' +
+        '<rect x="' + destX + '" y="' + destY + '" width="' + destBadgeW + '" height="' + destBadgeH + '" rx="5" class="' + destBgCls + '" />' +
+        '<text x="' + destCenter.cx + '" y="' + (destY + 11) + '" class="' + destTextCls + '">' + escHtml(destText) + '</text>' +
+        '</g>');
+
+    layer.innerHTML = svgParts.join('');
 }
 
 function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
@@ -20332,10 +20771,12 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     if (!layer) return;
     if (fromCol == null || fromRow == null || toCol == null || toRow == null) {
         layer.innerHTML = '';
+        clearTacticalAoePreview();
         return;
     }
     if (fromCol === toCol && fromRow === toRow) {
         layer.innerHTML = '';
+        clearTacticalAoePreview();
         return;
     }
     options = options || {};
@@ -20381,6 +20822,14 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
         '</g>';
 
     layer.innerHTML = svgHtml;
+
+    // Se a ação ou magia selecionada tiver área de efeito (ex.: Bola de Fogo), projeta o círculo
+    var curSkill = options.skill || _pendingSkill;
+    if (curSkill && (curSkill.fireball || curSkill.aoeRadius || curSkill.isAoe || curSkill.aoe || curSkill.coneOfCold || curSkill.spiritGuardians)) {
+        drawTacticalAoePreview(toCol, toRow, curSkill);
+    } else {
+        clearTacticalAoePreview();
+    }
 }
 
 /**
@@ -21866,6 +22315,49 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
         }
     }
 
+    // Concentração D&D 5e (PHB p. 203)
+    var isConcentrating = !!(u.concentrationSpell || u.concentrating || (u.se || []).some(function (st) {
+        return st && (st.concentration || st.isConcentration);
+    }));
+    var concSpellName = u.concentrationSpell || 'Concentrando';
+    var concBadge = '';
+    if (fogState !== 'shrouded' && u.alive && !u.isDead && isConcentrating) {
+        classes += ' token--concentrating';
+        concBadge = '<div class="token-conc-chip" title="D&D 5e (PHB p. 203): Mantendo Concentração em ' + escHtml(concSpellName) + ' — Sofrer dano exige Teste de Resistência de Constituição (CD 10 ou metade do dano)">◈ ' + escHtml(concSpellName) + '</div>';
+    }
+
+    // Caído / Prone D&D 5e (PHB p. 190 / p. 292)
+    var isProne = !!(u.prone || (u.se || []).some(function (st) {
+        return st && (st.prone || st.id === 'prone' || String(st.n || '').toLowerCase() === 'caído');
+    }));
+    var proneBadge = '';
+    if (fogState !== 'shrouded' && u.alive && !u.isDead && isProne) {
+        classes += ' token--prone';
+        proneBadge = '<div class="token-prone-chip" title="D&D 5e (PHB p. 190 / p. 292): Caído no chão! Ataques corpo a corpo a 1,5m têm Vantagem; ataques à distância têm Desvantagem.">▾ Caído</div>';
+    }
+
+    // Condições Ativas Adicionais D&D 5e (PHB p. 290-292)
+    var condBadges = '';
+    if (fogState !== 'shrouded' && u.alive && !u.isDead && u.se && u.se.length) {
+        for (var ci = 0; ci < u.se.length; ci++) {
+            var stObj = u.se[ci];
+            if (!stObj || (stObj.turnsLeft != null && stObj.turnsLeft <= 0)) continue;
+            var stId = String(stObj.id || '').toLowerCase();
+            var stName = String(stObj.n || '').toLowerCase();
+            if (stId === 'help_distracted' || stObj.targetedAdvantageByAlly) continue;
+            if (stObj.prone || stId === 'prone') continue;
+            if (stId === 'bless' || stName.indexOf('bênção') >= 0 || stName.indexOf('bencao') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--bless" title="D&D 5e: Bênção (+1d4 em ataques e salvaguardas)">✦ Bênção</div>';
+            } else if (stId === 'blindness' || stObj.blind || stName.indexOf('cego') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--blind" title="D&D 5e (PHB p. 290): Cego">◉ Cego</div>';
+            } else if (stId.indexOf('poison') >= 0 || stName.indexOf('envenenad') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--poison" title="D&D 5e (PHB p. 292): Envenenado">▲ Envenenado</div>';
+            } else if (stObj.stunned || stId.indexOf('stun') >= 0 || stName.indexOf('atordo') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--stun" title="D&D 5e (PHB p. 290): Atordoado">◈ Atordoado</div>';
+            }
+        }
+    }
+
     var tokenLeft = cx - Math.round(HEX_W / 2);
     var tokenTop = cy - Math.round(HEX_H / 2);
 
@@ -21878,6 +22370,9 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
         html += '<div class="token-pulse-glow"></div>';
         html += '<div class="token-active-halo"></div>';
     }
+    if (isConcentrating) {
+        html += '<div class="token-concentration-halo"></div>';
+    }
     html += '</div>';
 
     // HP Bar
@@ -21886,12 +22381,15 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     html += '<span class="token-hp-text ' + hpCls + '">' + hpVal + '/' + u.mhp + '</span>';
     html += '</div>';
 
-    // Badges: AC, Init, Distance, Vantagem / Desvantagem D&D 5e
+    // Badges: AC, Init, Distance, Vantagem / Desvantagem, Concentração, Caído e Status D&D 5e
     if (acBadge) html += acBadge;
     if (initBadge) html += initBadge;
     if (distBadge) html += distBadge;
     if (advBadge) html += advBadge;
     if (disadvBadge) html += disadvBadge;
+    if (concBadge) html += concBadge;
+    if (proneBadge) html += proneBadge;
+    if (condBadges) html += condBadges;
 
     // Nameplate underneath
     html += '<div class="token-nameplate">' + nameLabel + '</div>';
@@ -22569,6 +23067,10 @@ function buildBattlefield(s) {
     html += '<linearGradient id="aimGradGold" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#d4af37" stop-opacity="0.95"/><stop offset="100%" stop-color="#ffd54f" stop-opacity="0.75"/></linearGradient>';
     html += '<marker id="aimArrowGold" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#d4af37"/></marker>';
     html += '<marker id="aimArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#c0392b"/></marker>';
+    html += '<marker id="moveArrowGold" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#d4af37"/></marker>';
+    html += '<marker id="moveArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#e74c3c"/></marker>';
+    html += '<radialGradient id="aoeFireballGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff5722" stop-opacity="0.55"/><stop offset="65%" stop-color="#ff9800" stop-opacity="0.22"/><stop offset="100%" stop-color="#ff5722" stop-opacity="0"/></radialGradient>';
+    html += '<radialGradient id="aoeArcaneGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00e5ff" stop-opacity="0.45"/><stop offset="65%" stop-color="#2979ff" stop-opacity="0.18"/><stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/></radialGradient>';
     html += '</defs>';
 
     // Territory tint zones (Enemies top rows 0..4, Allies bottom rows 5..9)
@@ -22715,7 +23217,9 @@ function buildBattlefield(s) {
     // Camada de Projeções de Intenções Compartilhadas / Intent Ghosts (Multiplayer D&D 5e / BG3 / Solasta)
     html += buildSharedIntentsLayerSvg(s, bCols, bRows);
 
-    // Camada Dinâmica de Vetor Balístico e Linha de Mira Tática (D&D 5e)
+    // Camada Dinâmica de Vetor Balístico, Trilha de Movimento e Área de Efeito (D&D 5e)
+    html += '<g id="hexAoeVisualLayer" class="hex-aoe-visual-layer" pointer-events="none"></g>';
+    html += '<g id="hexMovementTrailLayer" class="hex-movement-trail-layer" pointer-events="none"></g>';
     html += '<g id="hexAimingVectorLayer" class="hex-aiming-vector-layer" pointer-events="none"></g>';
 
     html += '</svg>';
@@ -26997,7 +27501,23 @@ function bindActions() {
                 tile.__pDownY = ev.clientY;
                 tile.__pDownTs = Date.now();
             });
+            tile.addEventListener('pointerenter', function (ev) {
+                if (ev.pointerType === 'touch') return;
+                if (!currentState || currentState.ph !== 'active') return;
+                if (currentState.active_idx !== currentState.p_idx) return;
+                var pUnit = currentState.order[currentState.p_idx];
+                if (!pUnit || !pUnit.pos) return;
+                var tCol = parseInt(tile.getAttribute('data-col'), 10);
+                var tRow = parseInt(tile.getAttribute('data-row'), 10);
+                if (!isNaN(tCol) && !isNaN(tRow)) {
+                    drawMovementPathPreview(pUnit.pos.col, pUnit.pos.row, tCol, tRow);
+                }
+            });
+            tile.addEventListener('pointerleave', function () {
+                clearMovementTrailPreview();
+            });
             var onTileTrigger = function (ev) {
+                clearMovementTrailPreview();
                 var now = Date.now();
                 if (now - _lastTileActionTime < 320) return;
                 if (window.__bfIsDragging) return;
@@ -27080,15 +27600,17 @@ function mountEnemyHoverStatHints() {
         return;
     }
 
-    var enemyEls = document.querySelectorAll('.cell.v8-card[data-unit-id^="enemy_"], .hex-token[data-unit-id^="enemy_"]');
-    for (var ei = 0; ei < enemyEls.length; ei++) {
+    var unitEls = document.querySelectorAll('.cell.v8-card[data-unit-id], .hex-token[data-unit-id]');
+    for (var ei = 0; ei < unitEls.length; ei++) {
         (function (el) {
             el.addEventListener('pointerenter', function (ev) {
                 if (ev.pointerType === 'touch') return;
                 var uid = el.getAttribute('data-unit-id');
                 if (!uid || !currentState || !currentState.order) return;
-                var uIdx = parseInt(uid.slice(6), 10);
-                var u = currentState.order[uIdx];
+                var u = null;
+                if (uid === 'player') u = currentState.order[currentState.p_idx];
+                else if (uid.indexOf('ally_') === 0) u = currentState.order[parseInt(uid.slice(5), 10)];
+                else if (uid.indexOf('enemy_') === 0) u = currentState.order[parseInt(uid.slice(6), 10)];
                 if (!u || !u.alive || el.classList.contains('token--shrouded-fog')) return;
 
                 removeEnemyHoverStatHint();
@@ -27097,10 +27619,10 @@ function mountEnemyHoverStatHints() {
                 hint.className = 'enemy-hover-stat-card';
                 hint.id = 'enemyHoverStatHint';
 
-                var hpPct = Math.round((u.hp / u.mhp) * 100);
+                var hpPct = (u.mhp > 0) ? Math.round((u.hp / u.mhp) * 100) : 0;
                 var hpCls = vBarHpClass(hpPct);
-                var crText = (u.cr != null ? 'ND ' + u.cr : (u.sugLvl ? 'Nível ' + u.sugLvl : ''));
-                var subText = escHtml(u.species || u.race || 'Criatura') + (u.subrace ? ' [' + escHtml(u.subrace) + ']' : '') + (u.cls ? ' · ' + escHtml(u.cls) : '');
+                var crText = (u.cr != null ? 'ND ' + u.cr : (u.sugLvl ? 'Nível ' + u.sugLvl : (u.lvl ? 'Nível ' + u.lvl : '')));
+                var subText = escHtml(u.species || u.race || (u.t === 'p' ? 'Personagem' : (u.t === 'a' ? 'Aliado' : 'Criatura'))) + (u.subrace ? ' [' + escHtml(u.subrace) + ']' : '') + (u.cls ? ' · ' + escHtml(u.cls) : '');
 
                 var hHtml = '<div class="ehs-header">'
                     + '<div class="ehs-name">' + escHtml(u.n) + '</div>'
@@ -27108,14 +27630,15 @@ function mountEnemyHoverStatHints() {
                     + '</div>';
                 hHtml += '<div class="ehs-sub">' + subText + '</div>';
 
-                var atkStr = (u.atk >= 0 ? '+' : '') + u.atk;
-                var dmgStr = u.die ? ('1d' + u.die) : 'Arma';
+                var atkStr = (u.atk != null ? (u.atk >= 0 ? '+' : '') + u.atk : '+4');
+                var dmgStr = u.die ? ('1d' + u.die) : (u.weapon || 'Arma');
+                var speedStr = formatHexDistanceMeters(u.speed || 6);
 
                 hHtml += '<div class="ehs-vitals">'
                     + '<div class="ehs-vital-item"><span class="ehs-vital-lbl">PV</span><span class="ehs-vital-val ' + hpCls + '">' + u.hp + '/' + u.mhp + '</span></div>'
                     + '<div class="ehs-vital-item"><span class="ehs-vital-lbl">CA</span><span class="ehs-vital-val">' + u.ac + '</span></div>'
                     + '<div class="ehs-vital-item"><span class="ehs-vital-lbl">Atk</span><span class="ehs-vital-val">' + atkStr + '</span></div>'
-                    + '<div class="ehs-vital-item"><span class="ehs-vital-lbl">Dano</span><span class="ehs-vital-val">' + dmgStr + '</span></div>'
+                    + '<div class="ehs-vital-item"><span class="ehs-vital-lbl">Desloc.</span><span class="ehs-vital-val">' + speedStr + '</span></div>'
                     + '</div>';
 
                 var statsArr = [
@@ -27137,20 +27660,38 @@ function mountEnemyHoverStatHints() {
 
                 var tagRows = '';
                 if (u.multiAttack && u.multiAttack > 1) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#7cdb7c;">⚔ <b>Multiataque:</b> ' + u.multiAttack + ' ataques/turno</div>';
+                    tagRows += '<div class="ehs-tag-row" style="color:#7cdb7c;">▸ <b>Multiataque:</b> ' + u.multiAttack + ' ataques/turno</div>';
                 }
                 if (u.packTactics) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#ffd700;">🐺 <b>Táticas de Matilha:</b> Vantagem c/ aliado</div>';
+                    tagRows += '<div class="ehs-tag-row" style="color:#ffd700;">◆ <b>Táticas de Matilha:</b> Vantagem com aliado</div>';
                 }
                 if (u.resistances && u.resistances.length) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#ffd700;">🛡 <b>Resistências:</b> ' + escHtml(u.resistances.join(', ')) + '</div>';
+                    tagRows += '<div class="ehs-tag-row" style="color:#ffd700;">⛨ <b>Resistências:</b> ' + escHtml(u.resistances.join(', ')) + '</div>';
                 }
                 if (u.immunities && u.immunities.length) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#7cdb7c;">✨ <b>Imunidades:</b> ' + escHtml(u.immunities.join(', ')) + '</div>';
+                    tagRows += '<div class="ehs-tag-row" style="color:#7cdb7c;">✦ <b>Imunidades:</b> ' + escHtml(u.immunities.join(', ')) + '</div>';
                 }
                 if (u.vulnerabilities && u.vulnerabilities.length) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#ff8a4a;">⚠ <b>Vulnerabilidades:</b> ' + escHtml(u.vulnerabilities.join(', ')) + '</div>';
+                    tagRows += '<div class="ehs-tag-row" style="color:#ff8a4a;">▲ <b>Vulnerabilidades:</b> ' + escHtml(u.vulnerabilities.join(', ')) + '</div>';
                 }
+
+                // Concentração e Condições ativas D&D 5e
+                if (u.concentrationSpell) {
+                    tagRows += '<div class="ehs-tag-row" style="color:#64b5f6;">◈ <b>Concentrando:</b> ' + escHtml(u.concentrationSpell) + '</div>';
+                }
+                if (u.prone) {
+                    tagRows += '<div class="ehs-tag-row" style="color:#ffb74d;">▾ <b>Condição:</b> Caído no chão</div>';
+                }
+                if (u.se && u.se.length) {
+                    for (var ui = 0; ui < u.se.length; ui++) {
+                        var st = u.se[ui];
+                        if (st && st.n && st.n !== 'Caído') {
+                            var durText = (st.turnsLeft != null && st.turnsLeft > 0) ? ' (' + st.turnsLeft + 't)' : '';
+                            tagRows += '<div class="ehs-tag-row" style="color:#d4af37;">◈ <b>Status:</b> ' + escHtml(st.n) + durText + '</div>';
+                        }
+                    }
+                }
+
                 if (tagRows) {
                     hHtml += '<div style="border-top:1px solid rgba(196,149,58,0.2); padding-top:4px;">' + tagRows + '</div>';
                 }
@@ -27172,7 +27713,7 @@ function mountEnemyHoverStatHints() {
             });
 
             el.addEventListener('pointerleave', removeEnemyHoverStatHint);
-        })(enemyEls[ei]);
+        })(unitEls[ei]);
     }
 }
 
