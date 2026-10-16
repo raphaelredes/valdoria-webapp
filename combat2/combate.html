@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T10:24:38Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T10:45:17Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -26994,6 +26994,74 @@ async function castSummonFey(s, p, sk) {
     await _maybeAdvanceOrStay();
 }
 
+/* V1.17 (2026-10-16) — Conjurar Celestial (PHB p.225 — Conjure Celestial).
+   Spawna 1 Couatl Celestial com Resistência à Magia (Concentração). */
+async function castSummonCelestial(s, p, sk) {
+    var cs = sk.celestialSpec || {};
+    var us = cs.unitSpec || {};
+    var count = (cs.count | 0) || 1;
+    var dur = (cs.durTurns | 0) || 10;
+    var summonKind = cs.summonKind || 'conjure_celestial_couatl';
+    if (p.res && p.res.value < (sk.cost | 0)) {
+        showMessage('Mana insuficiente.');
+        return;
+    }
+    if (sk.minLevel && (p.lvl | 0) < sk.minLevel) {
+        return;
+    }
+    if (typeof _dissipateConjuredSummons === 'function') {
+        _dissipateConjuredSummons(s, p, 'conjure_celestial');
+    }
+    p.res.value = Math.max(0, p.res.value - (sk.cost | 0));
+    p.actionSpent = true;
+    if (typeof simLogPushTurnHeader === 'function') simLogPushTurnHeader(s, p);
+    s.log.push(p.n + ' conjura ' + (sk.n || 'Conjurar Celestial') + ' (PHB p.225 — Concentração) — invoca ' + (us.name || 'Couatl Celestial') + '!');
+    var pIdx = s.order.indexOf(p);
+    for (var ci = 0; ci < count; ci++) {
+        var baseName = us.name || 'Couatl Celestial';
+        var celName = count > 1 ? (baseName + ' #' + (ci + 1)) : baseName;
+        var summon = {
+            t: 'a', n: celName, ico: us.ico || '🪶',
+            hp: us.hp || 97, mhp: us.mhp || us.hp || 97, ac: us.ac || 19,
+            atk: us.atk || 8, die: us.die || 6,
+            dmgMod: (us.damageSpec && us.damageSpec.flat) || 5,
+            dex: us.dex || 20, wis: us.wis || 20, con: us.con || 17,
+            str: us.str || 16, int: us.int || 18, cha: us.cha || 18,
+            attr: 'WIS',
+            speed: 8, movement_left: 8,
+            multiAttack: us.multiAttack || 1,
+            damageSpec: us.damageSpec || { n: 1, d: 6, flat: 5 },
+            dmgBonusDie: us.dmgBonusDie || { n: 2, d: 6 },
+            dmgType: us.dmgType || 'radiant',
+            ranged: false,
+            immunities: us.immunities || ['psychic'],
+            conditionImmunities: us.conditionImmunities || ['charmed', 'frightened', 'poisoned'],
+            alive: true, dying: false, stable: false, isDead: false,
+            deathSaves: { s: 0, f: 0 },
+            se: [{ id: 'magic_resistance', n: 'Resistência à Magia', magicSaveAdvantage: true, dndCondition: 'Resistência à Magia (Vantagem em TR contra magias)' }],
+            init: (p.init | 0) - 0.2 - (ci * 0.1),
+            initRevealed: true, initRolling: false,
+            species: baseName, sugLvl: 13,
+            it: { ic: us.ico || '🪶', lb: summonKind },
+            summonedBy: pIdx,
+            summonKind: summonKind,
+            iconHeraldic: us.iconHeraldic || 'ic-celestial',
+            focusTarget: null,
+            noDeathSaves: true,
+            durTurns: dur,
+            conjureCasterIdx: pIdx,
+            conjureCaster: p,
+            conjureSpellId: 'conjure_celestial',
+            concentrationSummon: true
+        };
+        s.order.splice(pIdx + 1 + ci, 0, summon);
+    }
+    if (typeof _actionTaken !== 'undefined') _actionTaken = false;
+    _actionSheetOpen = false;
+    render(s);
+    await _maybeAdvanceOrStay();
+}
+
 /* PHB p.204 — dissipa TODAS as criaturas conjuradas por um `conjureSpellId` de um
    conjurador específico (match por referência ESTÁVEL `conjureCaster`, não índice).
    Chamado quando a concentração do conjurador quebra (dano/TR CON) ou ao conjurar
@@ -33491,6 +33559,11 @@ async function useSkill(skill, opts) {
     /* V1.16 (2026-10-16) — Conjurar Seres da Floresta (PHB p.226 — Conjure Woodland Beings). */
     if (skill.kind === 'summon_fey') {
         castSummonFey(currentState, p, skill);
+        return;
+    }
+    /* V1.17 (2026-10-16) — Conjurar Celestial (PHB p.225 — Conjure Celestial). */
+    if (skill.kind === 'summon_celestial') {
+        castSummonCelestial(currentState, p, skill);
         return;
     }
     /* V1.7 Sprint-9+10 (2026-04-21 closeout) — PHB Action Surge / Reckless Attack:
@@ -43578,7 +43651,7 @@ async function __combatAnimateOneEvent(ev) {
         return;
     }
     if (kind === 'summon_cast' || kind === 'summon_pack_cast' || kind === 'summon_undead_cast'
-            || kind === 'summon_elemental_cast' || kind === 'summon_fey_cast'
+            || kind === 'summon_elemental_cast' || kind === 'summon_fey_cast' || kind === 'summon_celestial_cast'
             || kind === 'summon_attack' || kind === 'summon_expire') {
         /* [C-REM:SUMMON] Summon events: flash caster + render (com o novo order
            do server contendo os summons spawnados). Fase 3 fará VFX dedicado. */

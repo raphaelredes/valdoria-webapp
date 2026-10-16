@@ -808,6 +808,34 @@ var CHAR_CLASSES = [
                 vulnerabilities: ['bludgeoning'],
                 immunities: ['poison'],
                 conditionImmunities: ['poisoned', 'exhaustion']
+            } },
+        /* V1.17 (2026-10-16) — Conjurar Celestial (PHB p.225 — Conjure Celestial).
+           Clérigo nv 13+. Invoca 1 Couatl Celestial (Concentração). */
+        { n: 'Conjurar Celestial', ico: '🪶', cost: 7, kind: 'summon_celestial', minLevel: 13, concentration: true,
+            desc: 'Conjura 1 Couatl Celestial (Ser Celestial, TR 4, Resistência à Magia, Mordida Radiante e Concentração) como aliado leal da comitiva.',
+            helpDnd5e: 'Conjurar Celestial / Conjure Celestial (PHB p. 225 — Clérigo nv 13): magia de 7º círculo; alcance 27m; Concentração até 1 hora. Invoca uma criatura celestial dos Planos Superiores que obedece aos seus comandos e luta como aliada da comitiva.\nArena: invoca 1 Couatl Celestial (HP 97, CA 19, atk +8, 1d6+5 perfurante + 2d6 radiante, Resistência à Magia com vantagem em TR contra magias, Imune a dano psíquico, imune às condições Enfeitiçado, Amedrontado e Envenenado). Se o conjurador perder a concentração, a criatura celestial retorna aos Planos Superiores.',
+            celestialSpec: {
+                count: 1,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_celestial_couatl',
+                unitSpec: {
+                    name: 'Couatl Celestial',
+                    ico: '🪶',
+                    iconHeraldic: 'ic-celestial',
+                    hp: 97, mhp: 97, ac: 19,
+                    dex: 20, wis: 20, con: 17, str: 16, int: 18, cha: 18,
+                    atk: 8,
+                    damageSpec: { n: 1, d: 6, flat: 5 },
+                    dmgBonusDie: { n: 2, d: 6 },
+                    dmgType: 'radiant',
+                    ranged: false,
+                    die: 6,
+                    multiAttack: 1,
+                    speed: 8,
+                    immunities: ['psychic'],
+                    conditionImmunities: ['charmed', 'frightened', 'poisoned']
+                }
             } }
       ] },
     { cls: 'Paladino', hp: [26, 38], ac: [16, 18], atk: [5, 6], die: 8, dex: [8, 12], ico: '', dmgMod: 2, attr: 'STR',
