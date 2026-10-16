@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-16T09:52:14Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-16T10:07:30Z - do not edit directly, edit source -->
 
 
 
@@ -11182,7 +11182,12 @@ window.__onIntroTap = function() {
       var formula = document.getElementById('dice-formula');
       var result = document.getElementById('dice-result');
       var skipBtn = document.getElementById('dice-skip-btn');
-      if (!overlay || !check) { resolve(); return; }
+      if (!overlay || !check || !skipBtn) { resolve(); return; }
+      // Regra #20 & Isolamento: clona o botão para limpar ouvintes de rolagens anteriores
+      var cleanSkipBtn = skipBtn.cloneNode(true);
+      skipBtn.parentNode.replaceChild(cleanSkipBtn, skipBtn);
+      skipBtn = cleanSkipBtn;
+
       _remoteTileClr(wrap); _remoteTileClr(formula); _remoteTileClr(result);
       result.className = ''; result.style.display = 'none';
       skipBtn.style.display = 'none';
@@ -11190,18 +11195,29 @@ window.__onIntroTap = function() {
       var d20 = check.d20, total = check.total, dc = check.dc, success = check.success;
       var mod = (check.modifier || 0) + (check.proficiency_bonus || 0);
       var advanced = false;
-      function advance() {
+      var lastAdvTime = 0;
+      function advance(src) {
         if (advanced) return; advanced = true;
+        try { LOG('DICE', '_remoteTileDice advance source=' + (src || 'unknown')); } catch (_) {}
         overlay.classList.remove('visible');
         setTimeout(resolve, 350);
       }
-      skipBtn.onclick = function () { advance(); };
-      skipBtn.addEventListener('click', function () { advance(); });
-      skipBtn.addEventListener('pointerup', function () { advance(); });
+      function tryAdvance(e, src) {
+        var now = performance.now();
+        if (now - lastAdvTime < 180) return;
+        lastAdvTime = now;
+        advance(src || (e ? e.type : 'userAction'));
+      }
+      // Regra #20: suporte omnidirecional sem supressão de eventos
+      ['click', 'pointerup', 'touchend'].forEach(function (evt) {
+        skipBtn.addEventListener(evt, function (e) { tryAdvance(e, 'skipBtn-' + evt); }, { passive: true });
+        result.addEventListener(evt, function (e) { tryAdvance(e, 'result-' + evt); }, { passive: true });
+      });
+      skipBtn.onclick = function (e) { tryAdvance(e, 'skipBtn-onclick'); };
+      result.onclick = function (e) { tryAdvance(e, 'result-onclick'); };
       skipBtn.style.setProperty('pointer-events', 'auto', 'important');
       skipBtn.style.setProperty('cursor', 'pointer', 'important');
-      skipBtn.style.setProperty('z-index', '999', 'important');
-      result.onclick = function () { advance(); };
+      skipBtn.style.setProperty('z-index', '9999', 'important');
       result.style.cursor = 'pointer'; result.style.userSelect = 'none';
       var shown = false;
       function showResult() {
@@ -11214,10 +11230,15 @@ window.__onIntroTap = function() {
         result.className = success ? 'success' : 'failure';
         result.textContent = success ? 'SUCESSO' : 'FALHA';
         result.style.display = 'inline-block';
+        result.style.setProperty('pointer-events', 'auto', 'important');
+        result.style.setProperty('cursor', 'pointer', 'important');
         skipBtn.textContent = 'Continuar';
         skipBtn.style.setProperty('display', 'inline-block', 'important');
         skipBtn.style.setProperty('visibility', 'visible', 'important');
         skipBtn.style.setProperty('opacity', '1', 'important');
+        skipBtn.style.setProperty('pointer-events', 'auto', 'important');
+        skipBtn.style.setProperty('cursor', 'pointer', 'important');
+        skipBtn.style.setProperty('z-index', '9999', 'important');
       }
       var safetyTimer = setTimeout(showResult, 3000);
       function wrappedShow() { clearTimeout(safetyTimer); showResult(); }
@@ -39045,13 +39066,15 @@ function triggerCombatScreen(cfg) {
     // ia direto pro /combat2/?from=exploracao SEM token → '↩ Voltar à Exploração'
     // client-only → rewards NUNCA persistidos. O caminho client from=exploracao
     // fica só pra file:// (simulador). Fallback client-side só se o staging falhar.
-    var _tok = window.__EXPLORE_TOKEN, _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
-    if (_tok && _api) {
+    var _authTok = window.__EXPLORE_TOKEN || '';
+    var _motorTok = (typeof window._getExploreSessionToken === 'function' ? window._getExploreSessionToken() : '') || window.__EXPLORE_MOTOR_TOKEN || _authTok;
+    var _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+    if (_motorTok && _api) {
       fetch(_api + '/api/exploracao/stage_combat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (_authTok || _motorTok) },
         body: JSON.stringify({
-          token: _tok,
+          token: _motorTok,
           enemy: cfg.enemyId || 'goblin',
           count: (cfg.enemyCount || cfg.count || undefined),
           surprise: !!cfg.surprise,
@@ -39929,6 +39952,16 @@ function _remoteRenderDiceAndResolve(ch, oc, onDone) {
   var formula = document.getElementById('dice-formula');
   var result = document.getElementById('dice-result');
   var skipBtn = document.getElementById('dice-skip-btn');
+  if (!overlay || !wrap || !formula || !result || !skipBtn) {
+    if (typeof onDone === 'function') { onDone(); }
+    else { _remoteShowOutcome(ch, oc); }
+    return;
+  }
+  // Regra #20 & Isolamento: clona o botão para limpar ouvintes de rolagens anteriores
+  var cleanSkipBtn = skipBtn.cloneNode(true);
+  skipBtn.parentNode.replaceChild(cleanSkipBtn, skipBtn);
+  skipBtn = cleanSkipBtn;
+
   clearChildren(wrap); clearChildren(formula); clearChildren(result);
   result.className = '';
   result.style.display = 'none';
@@ -39937,6 +39970,7 @@ function _remoteRenderDiceAndResolve(ch, oc, onDone) {
   var d20 = oc.check.d20, total = oc.check.total, dc = oc.check.dc, success = oc.check.success;
   var mod = (oc.check.modifier || 0) + (oc.check.proficiency_bonus || 0);
   var advanced = false;
+  var lastAdvTime = 0;
   function advance(src) {
     try { LOG('DICE', '_remote advance source=' + (src || 'unknown') + ' advanced=' + advanced); } catch (_) {}
     if (advanced) return;
@@ -39947,22 +39981,22 @@ function _remoteRenderDiceAndResolve(ch, oc, onDone) {
       else { _remoteShowOutcome(ch, oc); }
     }, 350);
   }
-  var _lastAdvTime = 0;
-  function _tryAdvance(src) {
+  function tryAdvance(e, src) {
     var now = performance.now();
-    if (now - _lastAdvTime < 180) return;
-    _lastAdvTime = now;
-    advance(src);
+    if (now - lastAdvTime < 180) return;
+    lastAdvTime = now;
+    advance(src || (e ? e.type : 'userAction'));
   }
-  skipBtn.onclick = function(ev) { _tryAdvance('onclick'); };
-  skipBtn.addEventListener('click', function(ev) { _tryAdvance('click'); });
-  skipBtn.addEventListener('pointerup', function(ev) { _tryAdvance('pointerup'); });
-  // SAFETY 2: pointer-events forçado pra evitar overlay/CSS bloqueando click
+  // Regra #20: suporte omnidirecional sem supressão de eventos
+  ['click', 'pointerup', 'touchend'].forEach(function(evt) {
+    skipBtn.addEventListener(evt, function(e) { tryAdvance(e, 'skipBtn-' + evt); }, { passive: true });
+    result.addEventListener(evt, function(e) { tryAdvance(e, 'result-' + evt); }, { passive: true });
+  });
+  skipBtn.onclick = function(e) { tryAdvance(e, 'skipBtn-onclick'); };
+  result.onclick = function(e) { tryAdvance(e, 'result-onclick'); };
   skipBtn.style.setProperty('pointer-events', 'auto', 'important');
   skipBtn.style.setProperty('cursor', 'pointer', 'important');
-  skipBtn.style.setProperty('z-index', '999', 'important');
-  // Click no resultado também avança (UX intuitivo — área grande)
-  result.onclick = function() { advance('result-click'); };
+  skipBtn.style.setProperty('z-index', '9999', 'important');
   result.style.cursor = 'pointer';
   result.style.userSelect = 'none';
   var shown = false;
@@ -39977,10 +40011,15 @@ function _remoteRenderDiceAndResolve(ch, oc, onDone) {
     result.className = success ? 'success' : 'failure';
     result.textContent = success ? 'SUCESSO' : 'FALHA';
     result.style.display = 'inline-block';
+    result.style.setProperty('pointer-events', 'auto', 'important');
+    result.style.setProperty('cursor', 'pointer', 'important');
     skipBtn.textContent = 'Continuar';
     skipBtn.style.setProperty('display', 'inline-block', 'important');
     skipBtn.style.setProperty('visibility', 'visible', 'important');
     skipBtn.style.setProperty('opacity', '1', 'important');
+    skipBtn.style.setProperty('pointer-events', 'auto', 'important');
+    skipBtn.style.setProperty('cursor', 'pointer', 'important');
+    skipBtn.style.setProperty('z-index', '9999', 'important');
   }
   // SAFETY 3: timeout absoluto — se Dice3D.roll NUNCA chamar callback (race
   // condition, async error, audio context locked, etc.), em 3s mostra
@@ -40134,13 +40173,24 @@ function _remoteShowOutcome(ch, oc) {
           } catch (_) {}
         }
       };
-      // 3 handlers redundantes (paridade com dice safety — Telegram Android pointer)
-      continueEl.onclick = function() { advance('onclick'); };
-      continueEl.addEventListener('click', function() { advance('click'); });
-      continueEl.addEventListener('pointerdown', function() { advance('pointerdown'); });
+      // Regra #20: suporte omnidirecional com debounce sem pointerdown interceptador
+      var cleanContEl = continueEl.cloneNode(true);
+      continueEl.parentNode.replaceChild(cleanContEl, continueEl);
+      continueEl = cleanContEl;
+      var _lastAdv = 0;
+      function _tryAdv(src) {
+        var now = performance.now();
+        if (now - _lastAdv < 180) return;
+        _lastAdv = now;
+        advance(src);
+      }
+      ['click', 'pointerup', 'touchend'].forEach(function(evt) {
+        continueEl.addEventListener(evt, function() { _tryAdv(evt); }, { passive: true });
+      });
+      continueEl.onclick = function() { _tryAdv('onclick'); };
       continueEl.style.setProperty('pointer-events', 'auto', 'important');
       continueEl.style.setProperty('cursor', 'pointer', 'important');
-      continueEl.style.setProperty('z-index', '999', 'important');
+      continueEl.style.setProperty('z-index', '9999', 'important');
     }
   } catch (eBtn) {
     try { LOGE('EVENT', '_remoteShowOutcome continue-btn err=' + (eBtn && eBtn.message)); } catch (_) {}
@@ -40163,13 +40213,15 @@ function _remoteShowOutcome(ch, oc) {
         // 404 no hosted. Agora, em REMOTE, RE-ENCENA no servidor via
         // /api/exploracao/stage_combat (token → '✓ Continuar' → /complete persiste).
         // Sem combate tokenless: se o re-staging falhar, avisa e fica na exploração.
-        var _tok = window.__EXPLORE_TOKEN, _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
-        if (window.__EXPLORE_MODE === 'remote' && _tok && _api) {
+        var _authTok = window.__EXPLORE_TOKEN || '';
+        var _motorTok = (typeof window._getExploreSessionToken === 'function' ? window._getExploreSessionToken() : '') || window.__EXPLORE_MOTOR_TOKEN || _authTok;
+        var _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+        if (window.__EXPLORE_MODE === 'remote' && _motorTok && _api) {
           fetch(_api + '/api/exploracao/stage_combat', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (_authTok || _motorTok) },
             body: JSON.stringify({
-              token: _tok,
+              token: _motorTok,
               enemy: oc.combat_trigger.enemy_id,
               count: (oc.combat_trigger.enemy_count || undefined),
               surprise: !!oc.combat_trigger.surprise
@@ -40791,13 +40843,15 @@ function _explFinalizeCombatRedirect(oc) {
         window.location.href = oc._combat_redirect.redirect_url;
         return;
       }
-      var _tok = window.__EXPLORE_TOKEN, _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
-      if (window.__EXPLORE_MODE === 'remote' && _tok && _api) {
+      var _authTok = window.__EXPLORE_TOKEN || '';
+      var _motorTok = (typeof window._getExploreSessionToken === 'function' ? window._getExploreSessionToken() : '') || window.__EXPLORE_MOTOR_TOKEN || _authTok;
+      var _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
+      if (window.__EXPLORE_MODE === 'remote' && _motorTok && _api) {
         fetch(_api + '/api/exploracao/stage_combat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (_authTok || _motorTok) },
           body: JSON.stringify({
-            token: _tok, enemy: oc.combat_trigger.enemy_id,
+            token: _motorTok, enemy: oc.combat_trigger.enemy_id,
             count: (oc.combat_trigger.enemy_count || undefined),
             surprise: !!oc.combat_trigger.surprise
           })
