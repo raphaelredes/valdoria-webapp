@@ -1587,7 +1587,7 @@
         var apiFallback = '';
         var userId = '';
         var returnTo = ''; // webapp to return to after levelup (e.g., 'explore')
-        var sel = { asi: {}, feat: '', featStat: '', skills: [], subclass: '' };
+        var sel = { asi: {}, feat: '', featStat: '', skills: [], subclass: '', multiclass_choice: '' };
 
         // Haptic feedback helper
         function haptic(type = 'light') {
@@ -2202,8 +2202,121 @@
         </div>`;
             }
 
+            html += `
+            <div class="pending-item" style="cursor:pointer;border-color:var(--v-gold-30);margin-top:10px;" onclick="openMulticlassSubScreen()">
+                <div class="pending-icon">⚔️</div>
+                <div class="pending-text">
+                    <b>Aptidão Multiclasse (PHB p. 163)</b>
+                    <small id="mcSummaryHint">${sel.multiclass_choice ? 'Multiclasse selecionada: ' + ((CLASS_INFO[sel.multiclass_choice] || {}).name || sel.multiclass_choice) : 'Consulte requisitos e elegibilidade de novas classes'}</small>
+                </div>
+                <div class="pending-badge" id="mcSummaryBadge" style="${sel.multiclass_choice ? 'background:#4a9;color:#fff;' : 'background:var(--v-gold-20);color:var(--v-gold);border:1px solid var(--v-gold-50);'}">${sel.multiclass_choice ? ((CLASS_INFO[sel.multiclass_choice] || {}).name || sel.multiclass_choice) : 'Ver ▸'}</div>
+            </div>`;
+
             html += '</div><div class="hint">Prossiga para fazer suas escolhas</div>';
             el.innerHTML = html;
+        }
+
+        function openMulticlassSubScreen() {
+            var currCls = P.hero_class || 'WARRIOR';
+            var currInfo = CLASS_INFO[currCls] || { name: currCls };
+            var stats = P.stats || {};
+
+            var html = '<button class="lu-sub-back" onclick="closeSubScreen()">← Voltar ao Resumo</button>';
+            html += '<div class="section-title" style="margin-top:0;">Aptidão Multiclasse</div>';
+            html += '<div class="dm-bubble" style="font-size:12px;margin-bottom:12px;">' +
+                    'No D&D 5e (PHB p. 163), para avançar em uma nova classe, o aventureiro deve atingir os atributos mínimos ' +
+                    '<b>tanto da classe atual quanto da classe pretendida</b>.</div>';
+
+            html += '<div style="background:var(--v-bg-card,#2e2520);border:1px solid var(--v-border,#4a3828);border-radius:8px;padding:10px;margin-bottom:12px;">' +
+                    '<div style="font-size:11px;color:var(--v-text-dim,#a89f91);text-transform:uppercase;letter-spacing:1px;">Sua Classe Atual</div>' +
+                    '<div style="display:flex;align-items:center;gap:8px;margin-top:4px;">' +
+                    '<img src="../shared/img/combat/' + _heroSlug(currCls) + '.webp" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--v-gold-50);" onerror="this.style.display=\'none\'"/>' +
+                    '<b style="font-size:14px;color:var(--v-gold,#c4953a);">' + currInfo.name + '</b>' +
+                    '</div>' +
+                    '</div>';
+
+            html += '<div class="section-title" style="font-size:12px;margin:10px 0 6px 0;">Classes Disponíveis</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+
+            var classKeys = ['WARRIOR', 'MAGE', 'ROGUE', 'CLERIC', 'PALADIN', 'RANGER', 'BARBARIAN', 'BARD', 'DRUID', 'MONK', 'SORCERER', 'WARLOCK'];
+            for (var i = 0; i < classKeys.length; i++) {
+                var ck = classKeys[i];
+                var cinfo = CLASS_INFO[ck] || { name: ck };
+                var isCurrent = (String(currCls).toUpperCase() === ck);
+                var res = canMulticlass(stats, currCls, ck);
+                var isSelected = (sel.multiclass_choice === ck);
+
+                var borderStyle = isSelected ? 'border:2px solid var(--v-gold,#c4953a);background:rgba(196,149,58,0.12);box-shadow:0 0 10px rgba(196,149,58,0.3);' : 'border:1px solid var(--v-border,#4a3828);background:var(--v-bg-card,#2e2520);';
+
+                html += '<div style="border-radius:8px;padding:10px;transition:all 0.2s;' + borderStyle + '">';
+                html += '<div style="display:flex;align-items:center;gap:10px;">';
+                html += '<img src="../shared/img/combat/' + _heroSlug(ck) + '.webp" style="width:36px;height:36px;border-radius:6px;border:1px solid var(--v-gold-30);" onerror="this.style.display=\'none\'"/>';
+                html += '<div style="flex:1;">';
+                html += '<div style="display:flex;align-items:center;justify-content:space-between;">';
+                html += '<b style="font-size:14px;color:var(--v-text,#e8e1d5);">' + cinfo.name + '</b>';
+
+                if (isCurrent) {
+                    html += '<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--v-gold-20);color:var(--v-gold);border:1px solid var(--v-gold-40);">Classe Principal</span>';
+                } else if (res.eligible) {
+                    html += '<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(40,167,69,0.2);color:#4a9;border:1px solid #4a9;">✓ Elegível</span>';
+                } else {
+                    html += '<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.4);">✗ Bloqueado</span>';
+                }
+                html += '</div>';
+
+                var reqObj = (typeof MULTICLASS_REQS !== 'undefined') ? MULTICLASS_REQS[ck] : null;
+                var reqText = '';
+                if (reqObj) {
+                    var parts = [];
+                    for (var rk in reqObj) {
+                        if (rk.charAt(0) !== '_') {
+                            var curVal = stats[rk] || 10;
+                            var pass = curVal >= reqObj[rk];
+                            var color = pass ? '#4a9' : '#ef4444';
+                            parts.push((ATTR_ABBR[rk] || rk.toUpperCase()) + ' ' + reqObj[rk] + '+ (<span style="color:' + color + ';">atual ' + curVal + '</span>)');
+                        }
+                    }
+                    var joiner = (reqObj._combine === 'OR') ? ' ou ' : ' e ';
+                    reqText = 'Requer: ' + parts.join(joiner);
+                }
+                html += '<div style="font-size:11px;color:var(--v-text-dim,#a89f91);margin-top:3px;">' + reqText + '</div>';
+
+                if (!isCurrent) {
+                    if (res.eligible) {
+                        var btnLabel = isSelected ? '✓ Selecionada (Clique para remover)' : '+ Escolher para Multiclasse';
+                        var btnBg = isSelected ? 'background:var(--v-gold,#c4953a);color:#221a14;' : 'background:rgba(74,169,110,0.2);color:#4a9;border:1px solid #4a9;';
+                        html += '<button onclick="_toggleMulticlass(\'' + ck + '\')" style="margin-top:8px;width:100%;padding:6px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:none;' + btnBg + '">' + btnLabel + '</button>';
+                    } else {
+                        html += '<div style="font-size:10px;color:#ef4444;margin-top:4px;">' + (res.reason || 'Atributos insuficientes') + '</div>';
+                    }
+                }
+
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+            }
+            html += '</div>';
+            openSubScreen(html);
+        }
+
+        function _toggleMulticlass(clsKey) {
+            haptic('medium');
+            if (sel.multiclass_choice === clsKey) {
+                sel.multiclass_choice = '';
+            } else {
+                sel.multiclass_choice = clsKey;
+            }
+            var b = document.getElementById('mcSummaryBadge');
+            var h = document.getElementById('mcSummaryHint');
+            if (sel.multiclass_choice) {
+                var cname = (CLASS_INFO[sel.multiclass_choice] || {}).name || sel.multiclass_choice;
+                if (b) { b.textContent = cname; b.style.background = '#4a9'; b.style.color = '#fff'; }
+                if (h) { h.textContent = 'Multiclasse selecionada: ' + cname; }
+            } else {
+                if (b) { b.textContent = 'Ver ▸'; b.style.background = 'var(--v-gold-20)'; b.style.color = 'var(--v-gold)'; }
+                if (h) { h.textContent = 'Consulte requisitos e elegibilidade de novas classes'; }
+            }
+            openMulticlassSubScreen();
         }
 
         // ═══════════════════════════════════════════════
@@ -2769,6 +2882,15 @@
                 html += '</div>';
             }
 
+            if (sel.multiclass_choice) {
+                const mcInfo = CLASS_INFO[sel.multiclass_choice] || { name: sel.multiclass_choice };
+                html += `<div class="review-section">
+            <div class="review-section-title">⚔️ Multiclasse (D&D 5e PHB p. 163)</div>
+            <div class="review-row"><span class="review-label">Nova Classe:</span>
+            <span class="review-value"><span class="changed">${mcInfo.name}</span> <span class="new-badge">Multiclasse</span></span></div>
+        </div>`;
+            }
+
             html += '<div class="hint" style="margin-top: var(--v-space-lg, 12px)">Confirme suas escolhas para finalizar a subida de nível</div>';
             el.innerHTML = html;
         }
@@ -2802,6 +2924,7 @@
                 subclass: sel.subclass,
                 feat: sel.feat,
                 feat_stat: sel.featStat,
+                multiclass: sel.multiclass_choice || '',
             };
 
             // Show loading overlay
