@@ -622,7 +622,15 @@ var CHAR_CLASSES = [
                     conditionImmunities: ['charmed', 'exhaustion', 'poisoned'],
                     paralyzingClaws: { dc: 10, ability: 'con' }
                 }
-            } }
+            } },
+        /* V1.21 (2026-10-16) — Desintegrar (PHB p.233 — Disintegrate).
+           Mago nv 11+. 10d6+40 dano de força (TR Destreza anula). Reduzir a 0 PV desintegra em cinzas. */
+        { n: 'Desintegrar', ico: '⚡', cost: 6, kind: 'attack', minLevel: 11,
+            dmgType: 'force', ranged: true, reach: 12,
+            save: { ability: 'dex' }, saveNegates: true, disintegrateOnKill: true,
+            damageSpec: { n: 10, d: 6, flat: 40 },
+            desc: 'Feixe fino de energia esmeralda que causa 10d6+40 de dano de força (TR Destreza anula). Se reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas.',
+            helpDnd5e: 'Desintegrar / Disintegrate (PHB p. 233 — Mago, Feiticeiro e Bruxo nv 11): magia de 6º círculo; 1 Ação; alcance 18m (12 hexágonos). Dispara um raio verde fino na direção de um alvo. O alvo deve ser bem-sucedido num teste de resistência de Destreza ou sofrerá 10d6 + 40 de dano de força. Se for bem-sucedido no teste, não sofre dano algum (saveNegates). Se este dano reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas finas (sem salvaguardas de morte).' }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '', dmgMod: 3, attr: 'DEX',
       res: { type: 'energia', name: 'Energia', ico: '', max: 6 },
@@ -1776,7 +1784,15 @@ var CHAR_CLASSES = [
         { n: 'Contramágica', ico: '', cost: 3, kind: 'buff', reactionOnly: true, shieldSpell: true, minLevel: 5,
             desc: 'Reação: +3 CA e vantagem contra magias por 2 turnos. Dissipa parcialmente magia inimiga.',
             helpDnd5e: 'Contramágica (PHB p.237): reação para interromper outra magia em conjuração (nível 3 do espaço ou menor é dissipada automaticamente; acima exige teste).\nV1.7 (2026-04-21) — AGORA É REAÇÃO VERDADEIRA: aparece popup quando você for atingido por ataque/magia; gastar 3 Mana aplica +3 CA e vantagem em TR contra magia por 2 rodadas. Não pode mais ser castada em ação própria.',
-            buffSim: { id: 'contramagica', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Contramágica', condRule: 'PHB p.237 — Reação: +3 CA e vantagem em TR contra magia por 2 rodadas.', acBonus: 3, magicSaveAdvantage: true } }
+            buffSim: { id: 'contramagica', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Contramágica', condRule: 'PHB p.237 — Reação: +3 CA e vantagem em TR contra magia por 2 rodadas.', acBonus: 3, magicSaveAdvantage: true } },
+        /* V1.21 (2026-10-16) — Desintegrar (PHB p.233 — Disintegrate).
+           Feiticeiro nv 11+. 10d6+40 dano de força (TR Destreza anula). Reduzir a 0 PV desintegra em cinzas. */
+        { n: 'Desintegrar', ico: '⚡', cost: 6, kind: 'attack', minLevel: 11,
+            dmgType: 'force', ranged: true, reach: 12,
+            save: { ability: 'dex' }, saveNegates: true, disintegrateOnKill: true,
+            damageSpec: { n: 10, d: 6, flat: 40 },
+            desc: 'Feixe fino de energia esmeralda que causa 10d6+40 de dano de força (TR Destreza anula). Se reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas.',
+            helpDnd5e: 'Desintegrar / Disintegrate (PHB p. 233 — Mago, Feiticeiro e Bruxo nv 11): magia de 6º círculo; 1 Ação; alcance 18m (12 hexágonos). Dispara um raio verde fino na direção de um alvo. O alvo deve ser bem-sucedido num teste de resistência de Destreza ou sofrerá 10d6 + 40 de dano de força. Se for bem-sucedido no teste, não sofre dano algum (saveNegates). Se este dano reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas finas (sem salvaguardas de morte).' }
       ] },
     /* V1.7 Stage 7 (2026-04-21) — Bruxo (PHB p.105-115): CHA caster com pact patron.
        ADAPTAÇÕES vs PHB:
@@ -1910,7 +1926,15 @@ var CHAR_CLASSES = [
                     conditionImmunities: ['charmed', 'exhaustion', 'poisoned'],
                     paralyzingClaws: { dc: 10, ability: 'con' }
                 }
-            } }
+            } },
+        /* V1.21 (2026-10-16) — Desintegrar (PHB p.108 & 233 — Disintegrate / Arcanum Místico).
+           Bruxo nv 11+. 10d6+40 dano de força (TR Destreza anula). Reduzir a 0 PV desintegra em cinzas. */
+        { n: 'Desintegrar', ico: '⚡', cost: 1, kind: 'attack', minLevel: 11,
+            dmgType: 'force', ranged: true, reach: 12,
+            save: { ability: 'dex' }, saveNegates: true, disintegrateOnKill: true,
+            damageSpec: { n: 10, d: 6, flat: 40 },
+            desc: 'Arcanum Místico (PHB p.108): feixe fino de energia esmeralda que causa 10d6+40 de dano de força (TR Destreza anula). Se reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas.',
+            helpDnd5e: 'Desintegrar / Disintegrate (PHB p. 233, Arcanum Místico p. 108 — Bruxo nv 11): magia de 6º círculo via Arcanum Místico; 1 Ação; alcance 18m (12 hexágonos). Dispara um raio verde fino na direção de um alvo. O alvo deve ser bem-sucedido num teste de resistência de Destreza ou sofrerá 10d6 + 40 de dano de força. Se for bem-sucedido no teste, não sofre dano algum (saveNegates). Se este dano reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas finas (sem salvaguardas de morte).' }
       ],
       /* PHB p.107 Pacto da Corrente — o familiar é COMANDADO pelo Bruxo na arena
          ("forgo one of your own attacks to allow your familiar to make one attack"):

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T12:52:24Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T13:14:53Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -40917,7 +40917,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         return {
                             title: saveSuccess ? 'Passou na resistência' : 'Falhou na resistência',
                             subHtml: simFormatVsDcHTML(saveRoll, saveMod, saveTotal, saveDc, saveSuccess) +
-                                '<div class="drl-crit-rule">Bola de Fogo: metade do dano se passar na resistência.</div>',
+                                '<div class="drl-crit-rule">' + (atkSkill.saveNegates ? (escHtml(atkSkill.n || 'Magia') + ': nenhum dano se passar na resistência.') : (escHtml(atkSkill.n || 'Bola de Fogo') + ': metade do dano se passar na resistência.')) + '</div>',
                             cls: saveSuccess ? 'miss' : 'hit'
                         };
                     }
@@ -41586,7 +41586,7 @@ async function playTurn(aIdx, tIdx, opts) {
         } catch (_eBt) {}
     }
     var total = (atkSkill && atkSkill.save)
-        ? (saveSuccess ? Math.max(1, Math.floor(fullDmg / 2)) : fullDmg)
+        ? (saveSuccess ? (atkSkill.saveNegates ? 0 : Math.max(1, Math.floor(fullDmg / 2))) : fullDmg)
         : fullDmg;
     /* V1.7 Sprint-9 (2026-04-21 closeout) — Esquiva Sobrenatural: halve dano PHB p.96.
        Aplica ANTES de Desviar Projéteis (Esquiva é mais genérica, Desviar mais específica). */
@@ -41701,6 +41701,16 @@ async function playTurn(aIdx, tIdx, opts) {
         saveFailed: saveSuccess === false,
         deferFct: _rebukeWillOffer
     });
+
+    /* D&D 5e PHB p. 233: Desintegrar — se reduzir o alvo a 0 PV, desintegra em cinzas */
+    if (total > 0 && newHp <= 0 && atkSkill && atkSkill.disintegrateOnKill) {
+        target.isDead = true;
+        target.dying = false;
+        target.alive = false;
+        target.noDeathSaves = true;
+        target.disintegrated = true;
+        if (s && s.log) s.log.push('💥 ' + target.n + ' foi totalmente DESINTEGRADO em um monte de cinzas!');
+    }
 
     /* C3.4/C3.9 #90: hooks ON-KILL de subclasse — alvo reduzido a 0 PV por este
        ataque. Espelha o motor (_apply_attack on-kill). */
