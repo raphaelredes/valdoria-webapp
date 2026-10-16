@@ -2423,7 +2423,7 @@ var DEPARTURES = {
 
     /* -------- Baldur's Gate 3 Dialogue Choice Voice Engine (D&D 5e) -------- */
     function pickChoiceVoice(choice, player, hazard) {
-        if (!choice) return { tag: 'AÇÃO', speech: '' };
+        if (!choice) return { tag: '', speech: '' };
         var t = _traits(player);
         var clsKey = t.cls;
         var clsAlt = (clsKey === 'ladino') ? 'ladrao' : (clsKey === 'ladrao' ? 'ladino' : clsKey);
@@ -2507,33 +2507,34 @@ var DEPARTURES = {
                 resolvedTag = 'LÍDER DO GRUPO';
             } else if (choice.isCombat) {
                 resolvedTag = 'COMBATE';
-            } else if (choice.stat) {
-                var sKey = String(choice.stat).toLowerCase();
-                var cDesc = ((choice.t || '') + ' ' + (choice.desc || '')).toLowerCase();
-                if (sKey === 'cha') {
-                    if (cDesc.indexOf('ment') >= 0 || cDesc.indexOf('fing') >= 0 || cDesc.indexOf('disfar') >= 0) resolvedTag = 'ENGANAÇÃO';
-                    else if (cDesc.indexOf('amea') >= 0 || cDesc.indexOf('intimid') >= 0 || cDesc.indexOf('força') >= 0) resolvedTag = 'INTIMIDAÇÃO';
+            } else if (choice.stat || choice.skill) {
+                var sKey = String(choice.stat || choice.skill).toLowerCase();
+                var cDesc = ((choice.t || '') + ' ' + (choice.desc || '') + ' ' + (choice.label || '')).toLowerCase();
+                if (sKey === 'cha' || sKey === 'charisma' || sKey === 'persuasion' || sKey === 'deception' || sKey === 'intimidation') {
+                    if (cDesc.indexOf('ment') >= 0 || cDesc.indexOf('fing') >= 0 || cDesc.indexOf('disfar') >= 0 || sKey === 'deception') resolvedTag = 'ENGANAÇÃO';
+                    else if (cDesc.indexOf('amea') >= 0 || cDesc.indexOf('intimid') >= 0 || cDesc.indexOf('força') >= 0 || sKey === 'intimidation') resolvedTag = 'INTIMIDAÇÃO';
                     else resolvedTag = 'PERSUASÃO';
-                } else if (sKey === 'dex') {
-                    if (cDesc.indexOf('furtiv') >= 0 || cDesc.indexOf('sombra') >= 0 || cDesc.indexOf('escond') >= 0 || cDesc.indexOf('contorn') >= 0) resolvedTag = 'FURTIVIDADE';
-                    else if (cDesc.indexOf('corda') >= 0 || cDesc.indexOf('gatilho') >= 0 || cDesc.indexOf('armadilha') >= 0 || cDesc.indexOf('destrav') >= 0 || cDesc.indexOf('desarm') >= 0) resolvedTag = 'LADINAGEM';
+                } else if (sKey === 'dex' || sKey === 'dexterity' || sKey === 'stealth' || sKey === 'sleight_of_hand' || sKey === 'acrobatics') {
+                    if (cDesc.indexOf('furtiv') >= 0 || cDesc.indexOf('sombra') >= 0 || cDesc.indexOf('escond') >= 0 || cDesc.indexOf('contorn') >= 0 || sKey === 'stealth') resolvedTag = 'FURTIVIDADE';
+                    else if (cDesc.indexOf('corda') >= 0 || cDesc.indexOf('gatilho') >= 0 || cDesc.indexOf('armadilha') >= 0 || cDesc.indexOf('destrav') >= 0 || cDesc.indexOf('desarm') >= 0 || sKey === 'sleight_of_hand') resolvedTag = 'LADINAGEM';
                     else resolvedTag = 'ACROBACIA';
-                } else if (sKey === 'str') {
+                } else if (sKey === 'str' || sKey === 'strength' || sKey === 'athletics') {
                     resolvedTag = 'ATLETISMO';
-                } else if (sKey === 'wis') {
-                    if (cDesc.indexOf('olhar') >= 0 || cDesc.indexOf('notar') >= 0 || cDesc.indexOf('perceb') >= 0 || cDesc.indexOf('vigia') >= 0) resolvedTag = 'PERCEPÇÃO';
-                    else if (cDesc.indexOf('trilha') >= 0 || cDesc.indexOf('sobreviv') >= 0 || cDesc.indexOf('rastro') >= 0 || cDesc.indexOf('clima') >= 0) resolvedTag = 'SOBREVIVÊNCIA';
+                } else if (sKey === 'wis' || sKey === 'wisdom' || sKey === 'perception' || sKey === 'survival' || sKey === 'insight') {
+                    if (cDesc.indexOf('olhar') >= 0 || cDesc.indexOf('notar') >= 0 || cDesc.indexOf('perceb') >= 0 || cDesc.indexOf('vigia') >= 0 || cDesc.indexOf('estud') >= 0 || sKey === 'perception') resolvedTag = 'PERCEPÇÃO';
+                    else if (cDesc.indexOf('trilha') >= 0 || cDesc.indexOf('sobreviv') >= 0 || cDesc.indexOf('rastro') >= 0 || cDesc.indexOf('clima') >= 0 || sKey === 'survival') resolvedTag = 'SOBREVIVÊNCIA';
                     else resolvedTag = 'INTUIÇÃO';
-                } else if (sKey === 'int') {
-                    if (cDesc.indexOf('magi') >= 0 || cDesc.indexOf('arcan') >= 0 || cDesc.indexOf('runa') >= 0) resolvedTag = 'ARCANISMO';
-                    else if (cDesc.indexOf('investig') >= 0 || cDesc.indexOf('examin') >= 0) resolvedTag = 'INVESTIGAÇÃO';
+                } else if (sKey === 'int' || sKey === 'intelligence' || sKey === 'arcana' || sKey === 'investigation' || sKey === 'history') {
+                    if (cDesc.indexOf('magi') >= 0 || cDesc.indexOf('arcan') >= 0 || cDesc.indexOf('runa') >= 0 || sKey === 'arcana') resolvedTag = 'ARCANISMO';
+                    else if (cDesc.indexOf('investig') >= 0 || cDesc.indexOf('examin') >= 0 || sKey === 'investigation') resolvedTag = 'INVESTIGAÇÃO';
                     else resolvedTag = 'HISTÓRIA';
-                } else if (sKey === 'con') {
+                } else if (sKey === 'con' || sKey === 'constitution') {
                     resolvedTag = 'CONSTITUIÇÃO';
                 }
             }
         }
-        if (!resolvedTag) resolvedTag = (choice.badge ? String(choice.badge).replace(/^\[|\]$/g, '') : 'AÇÃO');
+        if (!resolvedTag) resolvedTag = (choice.badge ? String(choice.badge).replace(/^\[|\]$/g, '') : '');
+        if (resolvedTag && resolvedTag.toUpperCase() === 'AÇÃO') resolvedTag = '';
 
         // 2. Resolve Speech (1st-person dialogue in quotes or active 1st-person action)
         var resolvedSpeech = '';

@@ -660,9 +660,9 @@
       // Se a estrofe cabe confortavelmente inteira no orçamento de uma página
       if (sentences.length <= 1 || (wordCount <= MAX_PAGE_WORDS && charCount <= MAX_PAGE_CHARS)) {
         var wouldExceed = (current.length >= MAX_STROPHES_PER_PAGE) ||
-                          (currentLines + sentences.length > MAX_LINES_PER_PAGE) ||
                           (currentWords + wordCount > MAX_PAGE_WORDS) ||
-                          (currentChars + charCount > MAX_PAGE_CHARS);
+                          (currentChars + charCount > MAX_PAGE_CHARS) ||
+                          (currentLines + sentences.length > MAX_LINES_PER_PAGE && (currentWords + wordCount > Math.round(MAX_PAGE_WORDS * 0.75)));
         if (current.length > 0 && wouldExceed) {
           flushCurrent();
         }
@@ -3634,9 +3634,10 @@
       var _choLabel = _stripEmojis((ch.label && String(ch.label).trim()) || 'Continuar');
       if (!ch.label) console.warn('[ENC] choice sem label', ch.id || ch.cb || '');
       // Sanitização robusta: remove marcações como [CD 14 Furtividade], [Persuasão CD 12], etc. em qualquer posição da string
-      _choLabel = _choLabel.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
+      _choLabel = _choLabel.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').replace(/^\[\s*AÇÃO\s*\]\s*/i, '').trim();
 
       var tagText = ch.tag || (ch.badge && String(ch.badge).replace(/^\[|\]$/g, '')) || '';
+      if (tagText && tagText.toUpperCase() === 'AÇÃO') tagText = '';
       var tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
       var hasSpeech = !!(ch.speech && String(ch.speech).trim());
       var speechClean = '';
@@ -3649,7 +3650,8 @@
           subText = _dashM[1].trim();
           if (_dashM[3] && !tagText) {
             tagText = _dashM[3].trim();
-            tagPill = '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>';
+            if (tagText.toUpperCase() === 'AÇÃO') tagText = '';
+            tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
           }
         } else {
           var _colonM = _trimmed.match(/^([^:]+?)\s*:\s*([“"][^”"]+[”"])$/);
@@ -3667,7 +3669,8 @@
               speechClean = _cleanSpeechText(_qParen[1]);
               if (!tagText) {
                 tagText = _tagMatch[1].trim();
-                tagPill = '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>';
+                if (tagText.toUpperCase() === 'AÇÃO') tagText = '';
+                tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
               }
               if (_qParen[2] && !subText) {
                 subText = _qParen[2].trim();
@@ -3677,7 +3680,8 @@
               speechClean = _cleanSpeechText(_potSpeech);
               if (!tagText) {
                 tagText = _tagMatch[1].trim();
-                tagPill = '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>';
+                if (tagText.toUpperCase() === 'AÇÃO') tagText = '';
+                tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
               }
             }
           } else if (_trimmed.indexOf('— "') === 0 || _trimmed.indexOf('— “') === 0 || _trimmed.indexOf('“') === 0 || (_trimmed.indexOf('"') === 0 && _trimmed.length > 2)) {
@@ -4184,6 +4188,45 @@
     // task #69: use <dialog>.showModal() (top-layer, inert background, focus trap)
     _showOverlay(ov);
 
+    function _formatPlayerClassAndSubclass(pData) {
+      if (!pData) return 'Aventureiro';
+      var cls = String(pData.char_class || pData.class_name || pData.cls_key || pData.cls || '').toLowerCase();
+      var subcls = String(pData.subclass || '').toLowerCase();
+      var CLS_NAMES = {
+        guerreiro: 'Guerreiro', fighter: 'Guerreiro',
+        mago: 'Mago', wizard: 'Mago',
+        ladino: 'Ladino', rogue: 'Ladino', ladrao: 'Ladino',
+        clerigo: 'Clérigo', cleric: 'Clérigo',
+        paladino: 'Paladino', paladin: 'Paladino',
+        barbaro: 'Bárbaro', barbarian: 'Bárbaro',
+        bardo: 'Bardo', bard: 'Bardo',
+        druida: 'Druida', druid: 'Druida',
+        monge: 'Monge', monk: 'Monge',
+        patrulheiro: 'Patrulheiro', ranger: 'Patrulheiro',
+        feiticeiro: 'Feiticeiro', sorcerer: 'Feiticeiro',
+        bruxo: 'Bruxo', warlock: 'Bruxo'
+      };
+      var SUBCLS_NAMES = {
+        evocation: 'Evocação', abjuration: 'Abjuração', necromancy: 'Necromancia',
+        divination: 'Adivinhação', enchantment: 'Encantamento', illusion: 'Ilusão',
+        transmutation: 'Transmutação', conjuration: 'Conjuração',
+        champion: 'Campeão', battle_master: 'Mestre de Batalha', eldritch_knight: 'Cavaleiro Arcano',
+        assassin: 'Assassino', thief: 'Ladrão', arcane_trickster: 'Trapaceiro Arcano',
+        life: 'Vida', war: 'Guerra', light: 'Luz', tempest: 'Tempestade', trickery: 'Enganação', nature: 'Natureza', knowledge: 'Conhecimento',
+        devotion: 'Devoção', ancients: 'Anciões', vengeance: 'Vingança',
+        berserker: 'Berserker', totem: 'Totêmico', totem_warrior: 'Totêmico',
+        lore: 'Erudição', valor: 'Bravura',
+        moon: 'Lua', land: 'Terra',
+        open_hand: 'Palma Aberta', shadow: 'Sombras', four_elements: 'Quatro Elementos',
+        draconic: 'Linhagem Dracônica', wild_magic: 'Magia Selvagem',
+        fiend: 'O Corruptor', archfey: 'O Arquifada', great_old_one: 'O Grande Antigo'
+      };
+      var cName = CLS_NAMES[cls] || 'Aventureiro';
+      var sName = SUBCLS_NAMES[subcls] || (subcls ? subcls.charAt(0).toUpperCase() + subcls.slice(1) : '');
+      if (sName) return cName + ' · ' + sName;
+      return cName;
+    }
+
     function renderPage(idx) {
       currentPage = idx;
       _saveActiveState(dialogue, opts, currentPage);
@@ -4206,44 +4249,64 @@
       var firstSpeech = page.find(function(line){ return line.type === 'speech'; }) || page.find(function(line){ return line.type === 'player_speech'; });
       if (firstSpeech && firstSpeech.speaker) {
         var pageSpkKey = firstSpeech.speaker;
-        var isPlayerSpeaker = !!firstSpeech.is_player || firstSpeech.type === 'player_speech' || pageSpkKey === '{player_name}' || pageSpkKey === '{player}';
         var pData = (opts && opts.player) || window.CURRENT_PLAYER || null;
         var playerName = (pData && pData.name) || 'Você';
-        if (isPlayerSpeaker) {
-          pageSpkKey = playerName;
-        }
-        var reg = (opts && opts.npcRegistry) || window.RECURRING_NPCS || null;
-        var spkHit = (!isPlayerSpeaker && reg) ? reg[pageSpkKey] : null;
-        var displayName = isPlayerSpeaker ? playerName : ((spkHit && spkHit.name) || pageSpkKey);
-        var playerDesc = (pData && (pData.subclass || pData.char_class || pData.class_name || pData.cls_key || 'Aventureiro')) || 'Aventureiro';
-        var displayDesc = isPlayerSpeaker ? playerDesc : ((spkHit && spkHit.desc) || npcDesc);
-        var isMainSpeaker = !isPlayerSpeaker && !spkHit && (displayName === npcName || !firstSpeech.speaker || firstSpeech.speaker === npcName || (dialogue.npc && (firstSpeech.speaker === dialogue.npc.id || firstSpeech.speaker === dialogue.npc.npc_id)));
-        var displayPortrait = isPlayerSpeaker
-          ? ((pData && (pData.portrait || pData.avatar)) || null)
-          : ((spkHit && (spkHit.portraitImg || spkHit.portrait))
-            || (isMainSpeaker && npcPortrait ? npcPortrait : null)
-            || (typeof window._npcPortraitByName === 'function' ? window._npcPortraitByName(displayName) : null)
-            || (typeof window._discoverySpeakerPortrait === 'function' ? window._discoverySpeakerPortrait(displayName) : null)
-            || (npcPortrait || null)
-            || (typeof _resolveGenericEncounterPortrait === 'function' ? _resolveGenericEncounterPortrait(displayName, displayDesc) : null));
+        var isPlayerSpeaker = !!firstSpeech.is_player || firstSpeech.type === 'player_speech' || pageSpkKey === '{player_name}' || pageSpkKey === '{player}' || pageSpkKey === playerName || pageSpkKey === 'Você';
 
-        var nameEl = header.querySelector('.enc-name');
-        if (nameEl && displayName) {
-          nameEl.textContent = displayName;
-        }
-        var descEl = header.querySelector('.enc-desc');
-        if (descEl && displayDesc) {
-          descEl.textContent = displayDesc;
-        }
-        var portImg = header.querySelector('.enc-portrait img');
-        if (portImg && displayPortrait) {
-          portImg.src = displayPortrait;
-        } else if (displayPortrait) {
-          var portEl = header.querySelector('.enc-portrait');
-          if (portEl) {
-            portEl.innerHTML = '<img src="' + String(displayPortrait).replace(/"/g, '&quot;') + '" alt="" ' + _ENC_IMG_ONERR + '>';
-            portEl.className = 'enc-portrait';
-            portEl.title = 'Clique pra ampliar';
+        // Se a fala da página pertence ao próprio aventureiro e o encontro possui um interlocutor/NPC
+        // principal (ex: Garrik, o Condutor; Martha; Grom, o Caolho):
+        // O cabeçalho PERMANECE ancorado no NPC com quem o aventureiro está interagindo.
+        // O balão de fala dentro de .enc-body já exibe claramente o nome do aventureiro em destaque (.enc-speech--player).
+        // Forçar o cabeçalho a mudar pro aventureiro durante diálogo com NPC gerava o bug de exibir o rosto do NPC com o nome do jogador.
+        if (isPlayerSpeaker && dialogue.npc && dialogue.npc.name && dialogue.npc.name !== playerName && dialogue.npc.name !== 'Você') {
+          var nameElNpc = header.querySelector('.enc-name');
+          if (nameElNpc) nameElNpc.textContent = dialogue.npc.name || '';
+          var descElNpc = header.querySelector('.enc-desc');
+          if (descElNpc) descElNpc.textContent = dialogue.npc.desc || '';
+          var portImgNpc = header.querySelector('.enc-portrait img');
+          if (portImgNpc && dialogue.npc.portrait) {
+            portImgNpc.src = dialogue.npc.portrait;
+          } else if (dialogue.npc.portrait) {
+            var portElNpc = header.querySelector('.enc-portrait');
+            if (portElNpc) {
+              portElNpc.innerHTML = '<img src="' + String(dialogue.npc.portrait).replace(/"/g, '&quot;') + '" alt="" ' + _ENC_IMG_ONERR + '>';
+              portElNpc.className = 'enc-portrait';
+            }
+          }
+        } else {
+          var reg = (opts && opts.npcRegistry) || window.RECURRING_NPCS || null;
+          var spkHit = (!isPlayerSpeaker && reg) ? reg[pageSpkKey] : null;
+          var displayName = isPlayerSpeaker ? playerName : ((spkHit && spkHit.name) || pageSpkKey);
+          var playerDesc = _formatPlayerClassAndSubclass(pData);
+          var displayDesc = isPlayerSpeaker ? playerDesc : ((spkHit && spkHit.desc) || npcDesc);
+          var isMainSpeaker = !isPlayerSpeaker && !spkHit && (displayName === npcName || !firstSpeech.speaker || firstSpeech.speaker === npcName || (dialogue.npc && (firstSpeech.speaker === dialogue.npc.id || firstSpeech.speaker === dialogue.npc.npc_id)));
+          var displayPortrait = isPlayerSpeaker
+            ? ((pData && (pData.portrait || pData.avatar)) || null)
+            : ((spkHit && (spkHit.portraitImg || spkHit.portrait))
+              || (isMainSpeaker && npcPortrait ? npcPortrait : null)
+              || (typeof window._npcPortraitByName === 'function' ? window._npcPortraitByName(displayName) : null)
+              || (typeof window._discoverySpeakerPortrait === 'function' ? window._discoverySpeakerPortrait(displayName) : null)
+              || (npcPortrait || null)
+              || (typeof _resolveGenericEncounterPortrait === 'function' ? _resolveGenericEncounterPortrait(displayName, displayDesc) : null));
+
+          var nameEl = header.querySelector('.enc-name');
+          if (nameEl && displayName) {
+            nameEl.textContent = displayName;
+          }
+          var descEl = header.querySelector('.enc-desc');
+          if (descEl && displayDesc) {
+            descEl.textContent = displayDesc;
+          }
+          var portImg = header.querySelector('.enc-portrait img');
+          if (portImg && displayPortrait) {
+            portImg.src = displayPortrait;
+          } else if (displayPortrait) {
+            var portEl = header.querySelector('.enc-portrait');
+            if (portEl) {
+              portEl.innerHTML = '<img src="' + String(displayPortrait).replace(/"/g, '&quot;') + '" alt="" ' + _ENC_IMG_ONERR + '>';
+              portEl.className = 'enc-portrait';
+              portEl.title = 'Clique pra ampliar';
+            }
           }
         }
       } else if (dialogue.npc && (dialogue.npc.name || dialogue.npc.desc)) {
