@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T07:48:14Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T08:04:30Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -12463,6 +12463,158 @@ canvas#vfxCanvas,
   position: static;
 }
 
+/* Auras Visuais de Sentidos e Luz D&D 5e (PHB p. 183 / Solasta) */
+.token-darkvision-aura {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px dashed rgba(160, 205, 255, 0.55);
+  box-shadow: 0 0 10px rgba(110, 180, 255, 0.28), inset 0 0 8px rgba(110, 180, 255, 0.18);
+  pointer-events: none;
+  animation: darkvisionPulse 4s ease-in-out infinite;
+  z-index: 1;
+}
+@keyframes darkvisionPulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 14px rgba(130, 200, 255, 0.45); }
+}
+
+.token-light-aura {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 190, 70, 0.22) 20%, rgba(255, 140, 20, 0.08) 65%, transparent 100%);
+  border: 1px solid rgba(255, 180, 50, 0.4);
+  box-shadow: 0 0 16px rgba(255, 170, 40, 0.4), inset 0 0 10px rgba(255, 150, 20, 0.25);
+  pointer-events: none;
+  animation: torchFlicker 2.2s ease-in-out infinite alternate;
+  z-index: 1;
+}
+@keyframes torchFlicker {
+  0% { transform: scale(0.98); opacity: 0.85; filter: drop-shadow(0 0 6px rgba(255,160,30,0.5)); }
+  50% { transform: scale(1.02); opacity: 1; filter: drop-shadow(0 0 10px rgba(255,180,50,0.7)); }
+  100% { transform: scale(1.0); opacity: 0.9; filter: drop-shadow(0 0 7px rgba(255,150,20,0.55)); }
+}
+
+/* Anel Tático de Alvo Travado (Target Lock Pedestal - BG3 / Solasta) */
+.token-target-lock-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1.5px solid #ffcc00;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.65), inset 0 0 8px rgba(255, 204, 0, 0.4);
+  pointer-events: none;
+  animation: targetLockSpin 12s linear infinite;
+  z-index: 30;
+}
+.token-target-lock-ring::before,
+.token-target-lock-ring::after {
+  content: '';
+  position: absolute;
+  background: #ffe680;
+}
+.token-target-lock-ring::before {
+  top: -4px; bottom: -4px; left: 50%; width: 2px;
+  transform: translateX(-50%);
+}
+.token-target-lock-ring::after {
+  left: -4px; right: -4px; top: 50%; height: 2px;
+  transform: translateY(-50%);
+}
+@keyframes targetLockSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Feixes Arcanos de Concentração (D&D 5e PHB p. 203 / Solasta) */
+.hex-concentration-beam {
+  fill: none;
+  stroke: #4ab9ff;
+  stroke-width: 2.2;
+  stroke-dasharray: 6 3;
+  animation: concentrationBeamDash 1.2s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(74, 185, 255, 0.85));
+}
+@keyframes concentrationBeamDash {
+  0% { stroke-dashoffset: 18; }
+  100% { stroke-dashoffset: 0; }
+}
+.hex-conc-node-marker {
+  fill: #102636;
+  stroke: #4ab9ff;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 4px #4ab9ff);
+}
+.hex-conc-label {
+  fill: #cbe9ff;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  filter: drop-shadow(0 1px 2px #000);
+}
+
+/* Banner Dramático de Acerto Crítico D&D 5e (Natural 20 - BG3 / Solasta) */
+.dnd-crit-banner-overlay {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: critBannerFlow 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.dnd-crit-banner-box {
+  background: linear-gradient(180deg, rgba(30, 22, 10, 0.94) 0%, rgba(15, 11, 5, 0.96) 100%);
+  border: 1.5px solid #ffd700;
+  border-radius: 8px;
+  padding: 10px 24px;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.3);
+  text-align: center;
+  backdrop-filter: blur(4px);
+}
+.dnd-crit-banner-kicker {
+  font-family: var(--v-font-mono, monospace);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: #e5c158;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.dnd-crit-banner-title {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff6d6;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+.dnd-crit-banner-die {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 0 0 12px rgba(255, 220, 50, 0.95);
+  margin: 2px 0;
+}
+.dnd-crit-banner-desc {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 10px;
+  color: #dcd0b8;
+}
+@keyframes critBannerFlow {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.6) translateY(-10px); }
+  15% { opacity: 1; transform: translateX(-50%) scale(1.04) translateY(0); }
+  25% { transform: translateX(-50%) scale(1) translateY(0); }
+  80% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) scale(0.92) translateY(-12px); }
+}
+
 /* Trilha Tática de Movimento e Alerta de AoO (D&D 5e PHB p. 190 / p. 195) */
 .hex-move-segment {
   fill: none;
@@ -23052,6 +23204,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     var isEnemy = (utype === 'enemy');
     var isAlly = (utype === 'ally');
     var isActive = (uid === activeId);
+    var inTargetReach = false;
 
     var classes = 'cell occupied ' + utype + ' hex-token';
     var heraldicSlug = _heraldicClsSlugOf(u, utype);
@@ -23145,6 +23298,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
             if (isRelevantTarget) {
                 var inReach = (dist <= reachMeta.reachHex);
                 if (inReach) {
+                    inTargetReach = true;
                     classes += ' token--in-range';
                     var tgtCover = (typeof simComputeCover === 'function') ? simComputeCover(s, pUnit, u) : { cover: 'none', bonus: 0 };
                     var tgtAdv = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(pUnit, u, _pendingSkill) : 'normal';
@@ -23318,6 +23472,19 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     }
     if (isConcentrating) {
         html += '<div class="token-concentration-halo"></div>';
+    }
+    var uSpecies = String(u.species || u.race || '').toLowerCase();
+    var hasDarkvision = /(elfo|elf|anao|anão|dwarf|tiefling|gnomo|gnome|meio-orc|half-orc)/.test(uSpecies);
+    if (hasDarkvision && (isPlayer || isAlly)) {
+        html += '<div class="token-darkvision-aura" title="D&D 5e (PHB p. 183): Visão no Escuro (18m)"></div>';
+    }
+    var hasTorch = !!(u.hasTorch || (u.equipment && (u.equipment.off_hand === 'Tocha' || u.equipment.main_hand === 'Tocha')) ||
+        (u.se && u.se.some(function (st) { return st && (st.id === 'luz' || st.id === 'torch' || (st.n && st.n.indexOf('Luz') >= 0)); })));
+    if (hasTorch && (isPlayer || isAlly)) {
+        html += '<div class="token-light-aura" title="D&D 5e (PHB p. 183): Fonte de Luz (Tocha / Magia)"></div>';
+    }
+    if (inTargetReach) {
+        html += '<div class="token-target-lock-ring"></div>';
     }
     html += '</div>';
 
@@ -23992,6 +24159,129 @@ function setTargetThreatHighlight(targetIdx, active) {
 }
 
 /**
+ * Renderiza os Feixes Arcanos de Concentração (D&D 5e PHB p. 203 / Baldur's Gate 3 / Solasta).
+ * Liga o conjurador ativo que sustenta concentração ao(s) companheiro(s) ou alvos afetados
+ * (ex.: Bênção, Escudo da Fé, Heroísmo, Marca do Caçador, Perdição), tornando visível
+ * a linha mágica que sustenta o efeito no tabuleiro.
+ */
+function buildConcentrationTethersSvg(s, partyVisionMap) {
+    if (!s || !Array.isArray(s.order) || s.ph === 'intro' || s.ph === 'victory' || s.ph === 'defeat') return '';
+
+    var svg = '<g id="hexConcentrationTethersLayer" class="hex-concentration-tethers-layer" pointer-events="none">';
+    var hasAnyTether = false;
+
+    for (var cIdx = 0; cIdx < s.order.length; cIdx++) {
+        var caster = s.order[cIdx];
+        if (!caster || !caster.pos || (caster.alive === false) || caster.isDead) continue;
+        if (typeof caster.hp === 'number' && caster.hp <= 0) continue;
+
+        var isConc = !!(caster.isConcentrating || caster.concentrating || (caster.se && caster.se.some(function (st) {
+            return st && (st.concentration || st.concentrating || st.isConcentrating);
+        })));
+        if (!isConc) continue;
+
+        var casterCenter = hexCenter(caster.pos.col, caster.pos.row);
+
+        for (var tIdx = 0; tIdx < s.order.length; tIdx++) {
+            var target = s.order[tIdx];
+            if (!target || !target.pos || (target.alive === false) || target.isDead) continue;
+            if (target === caster) continue;
+
+            var isTargetLinked = false;
+            var spellLabel = 'Concentração';
+
+            if (target.se && Array.isArray(target.se)) {
+                for (var si = 0; si < target.se.length; si++) {
+                    var st = target.se[si];
+                    if (!st) continue;
+                    var sid = String(st.id || '').toLowerCase();
+                    var sName = String(st.n || st.condName || '').toLowerCase();
+                    if (st.sourceIdx === cIdx || st.casterIdx === cIdx ||
+                        (caster.concentratingOn && (sid.indexOf(caster.concentratingOn) >= 0 || sName.indexOf(caster.concentratingOn) >= 0)) ||
+                        (isConc && (sid === 'bless' || sid === 'shield_of_faith' || sid === 'heroism' || sid === 'hunters_mark' || sid === 'bane' || sid === 'bencao' || sid === 'escudo_fe' || sid === 'marca_cacador'))) {
+                        isTargetLinked = true;
+                        spellLabel = st.n || st.condName || 'Concentração';
+                        break;
+                    }
+                }
+            }
+
+            if (isTargetLinked) {
+                var targetCenter = hexCenter(target.pos.col, target.pos.row);
+                var dx = targetCenter.cx - casterCenter.cx;
+                var dy = targetCenter.cy - casterCenter.cy;
+                var distPx = Math.sqrt(dx * dx + dy * dy);
+                if (distPx < 2) continue;
+
+                var perpX = -dy / distPx;
+                var perpY = dx / distPx;
+                var curveOffset = Math.min(22, Math.max(8, distPx * 0.1));
+                var side = (cIdx % 2 === 0) ? -1 : 1;
+                var ctrlX = Math.round((casterCenter.cx + targetCenter.cx) / 2 + perpX * curveOffset * side);
+                var ctrlY = Math.round((casterCenter.cy + targetCenter.cy) / 2 + perpY * curveOffset * side);
+
+                var pathD = 'M ' + casterCenter.cx + ' ' + casterCenter.cy + ' Q ' + ctrlX + ' ' + ctrlY + ' ' + targetCenter.cx + ' ' + targetCenter.cy;
+
+                svg += '<path d="' + pathD + '" class="hex-concentration-beam" />';
+                svg += '<circle cx="' + ctrlX + '" cy="' + ctrlY + '" r="3" class="hex-conc-node-marker" />';
+
+                var badgeW = Math.max(46, spellLabel.length * 5.6 + 10);
+                var badgeH = 14;
+                var bx = Math.round(ctrlX - badgeW / 2);
+                var by = Math.round(ctrlY - 14);
+
+                svg += '<g class="hex-conc-badge">';
+                svg += '<rect x="' + bx + '" y="' + by + '" width="' + badgeW + '" height="' + badgeH + '" rx="4" ry="4" style="fill: rgba(16, 38, 54, 0.88); stroke: #4ab9ff; stroke-width: 1;" />';
+                svg += '<text x="' + ctrlX + '" y="' + (by + 7) + '" class="hex-conc-label">✦ ' + escHtml(spellLabel) + '</text>';
+                svg += '</g>';
+
+                hasAnyTether = true;
+            }
+        }
+    }
+
+    svg += '</g>';
+    return hasAnyTether ? svg : '';
+}
+
+/**
+ * D&D 5e (PHB p. 196) / Baldur's Gate 3 / Solasta:
+ * Exibe banner cinematográfico dramático de Acerto Crítico (Natural 20) no campo de batalha,
+ * celebrando o momento heráldico da mesa sem travar o ritmo do combate.
+ */
+function spawnCritDramaticBanner(actorUnit, targetUnit, ev) {
+    var app = document.getElementById('app') || document.body;
+    if (!app) return;
+
+    var existing = document.getElementById('dndCritDramaticBanner');
+    if (existing && existing.parentNode) {
+        existing.parentNode.removeChild(existing);
+    }
+
+    var aName = (actorUnit && actorUnit.n) ? actorUnit.n : (ev && ev.actorName ? ev.actorName : 'Combatente');
+    var tName = (targetUnit && targetUnit.n) ? targetUnit.n : (ev && ev.targetName ? ev.targetName : 'Alvo');
+
+    var banner = document.createElement('div');
+    banner.id = 'dndCritDramaticBanner';
+    banner.className = 'dnd-crit-banner-overlay';
+    banner.innerHTML =
+        '<div class="dnd-crit-banner-box">' +
+        '  <div class="dnd-crit-banner-kicker">D&D 5e • LIVRO DO JOGADOR p. 196</div>' +
+        '  <div class="dnd-crit-banner-title">✦ ACERTO CRÍTICO ✦</div>' +
+        '  <div class="dnd-crit-banner-die">NATURAL 20</div>' +
+        '  <div class="dnd-crit-banner-desc">' + escHtml(aName) + ' desfere um golpe demolidor contra ' + escHtml(tName) + '! Dados de dano dobrados.</div>' +
+        '</div>';
+
+    app.appendChild(banner);
+
+    setTimeout(function () {
+        if (banner && banner.parentNode) {
+            banner.parentNode.removeChild(banner);
+        }
+    }, 1850);
+}
+
+/**
  * Projeta visualmente trajetórias, áreas de efeito (AoE) e retículos de alvos
  * dos companheiros da comitiva (Shared Intent Ghosts & Fogo Amigo — Pilar 3 D&D 5e).
  */
@@ -24649,6 +24939,9 @@ function buildBattlefield(s) {
 
     // Camada de Vetores de Ameaça Tática dos Inimigos (Threat Lines — Into the Breach / BG3 / Solasta)
     html += buildEnemyThreatVectorsSvg(s, partyVisionMap);
+
+    // Camada de Feixes Arcanos de Concentração (D&D 5e PHB p. 203 / Solasta / BG3)
+    html += buildConcentrationTethersSvg(s, partyVisionMap);
 
     // Camada Dinâmica de Vetor Balístico, Trilha de Movimento e Área de Efeito (D&D 5e)
     html += '<g id="hexAoeVisualLayer" class="hex-aoe-visual-layer" pointer-events="none"></g>';
@@ -42621,6 +42914,9 @@ async function __combatAnimateOneEvent(ev) {
                 void _appCrit.offsetWidth;
                 _appCrit.classList.add('crit-vignette-flash');
                 setTimeout(function () { if (_appCrit) _appCrit.classList.remove('crit-vignette-flash'); }, 480);
+            }
+            if (typeof spawnCritDramaticBanner === 'function') {
+                spawnCritDramaticBanner(aUnit || aU, tUnit || tU, ev);
             }
         }
 
