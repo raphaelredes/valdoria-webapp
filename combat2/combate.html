@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T11:16:53Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T12:22:27Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1553,6 +1553,7 @@ canvas#vfxCanvas {
    max-width 480px max-height 100vh via #app CSS). */
 #app .combat-msg-overlay,
 #app .target-confirm-overlay,
+#app .target-action-menu-overlay,
 #app .sim-skip-confirm-overlay,
 #app .flee-info-overlay,
 #app .list-panel-overlay,
@@ -1579,6 +1580,7 @@ canvas#vfxCanvas {
    no viewport com cap canonical, posicionado top-center. */
 .combat-msg-overlay,
 .target-confirm-overlay,
+.target-action-menu-overlay,
 .sim-skip-confirm-overlay,
 .flee-info-overlay,
 .list-panel-overlay,
@@ -5142,6 +5144,325 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     font-size: 9.5px;
     line-height: 1.3;
     margin-top: 3px;
+}
+
+/* ==========================================================================
+   TARGET ACTION MENU (Leque de Ações do Alvo ao Clicar - Smartphone First)
+   Substitui mouse hover e oferece ergonomia tática direta para toque mobile
+   ========================================================================== */
+.target-action-menu-overlay {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 8, 5, 0.78);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 10040;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0;
+    box-sizing: border-box;
+    animation: udcFadeIn .18s ease;
+}
+
+@media (min-width: 601px) {
+    .target-action-menu-overlay {
+        justify-content: center;
+        padding: 16px;
+    }
+}
+
+.target-action-menu-sheet {
+    width: 100%;
+    max-width: 440px;
+    background: linear-gradient(180deg, #251d16 0%, #17120d 100%);
+    border: 1px solid var(--v-gold, #c4953a);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.88), 0 0 16px rgba(196, 149, 58, 0.25);
+    padding: 14px 16px 20px 16px;
+    box-sizing: border-box;
+    max-height: 85vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    color: #e6ded0;
+    animation: tamSheetSlideUp .22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 601px) {
+    .target-action-menu-sheet {
+        border-bottom: 1px solid var(--v-gold, #c4953a);
+        border-radius: 12px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(196, 149, 58, 0.3);
+    }
+}
+
+@keyframes tamSheetSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header */
+.tam-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(196, 149, 58, 0.3);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.tam-portrait {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid var(--v-gold, #c4953a);
+    overflow: hidden;
+    background: #110d0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.tam-portrait img,
+.tam-portrait svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.tam-info {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tam-title-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.tam-name {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #ffd700;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tam-cr {
+    font-size: 11px;
+    color: var(--v-text-dim, #a09484);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.tam-sub {
+    font-family: var(--v-font, 'MedievalSharp'), serif;
+    font-size: 11px;
+    color: var(--v-text-dim, #a09484);
+    margin-top: 1px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tam-vitals-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.tam-vital-chip {
+    font-size: 10.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(15, 12, 8, 0.6);
+    border: 1px solid rgba(74, 56, 40, 0.45);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tam-vital-lbl {
+    font-size: 9px;
+    color: var(--v-text-dim, #a09484);
+    text-transform: uppercase;
+}
+
+.tam-vital--dist.in-reach {
+    border-color: rgba(120, 200, 100, 0.4);
+    color: #85e085;
+}
+
+.tam-vital--dist.out-reach {
+    border-color: rgba(220, 120, 60, 0.4);
+    color: #ff9e66;
+}
+
+.tam-close-btn {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 32px;
+    height: 32px;
+    background: rgba(30, 24, 18, 0.8);
+    border: 1px solid rgba(196, 149, 58, 0.35);
+    border-radius: 50%;
+    color: var(--v-text-dim, #a09484);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all .15s ease;
+}
+
+.tam-close-btn:hover,
+.tam-close-btn:active {
+    background: rgba(60, 48, 36, 0.95);
+    color: #ffd700;
+    border-color: #ffd700;
+}
+
+/* Badges de Metadados / Condições */
+.tam-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 12px;
+}
+
+.tam-meta-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+}
+
+.tam-meta-badge.good {
+    background: rgba(40, 120, 40, 0.25);
+    border: 1px solid rgba(120, 200, 120, 0.45);
+    color: #85e085;
+}
+
+.tam-meta-badge.warn {
+    background: rgba(140, 100, 20, 0.25);
+    border: 1px solid rgba(220, 180, 60, 0.45);
+    color: #ffd700;
+}
+
+.tam-meta-badge.danger {
+    background: rgba(140, 30, 30, 0.25);
+    border: 1px solid rgba(240, 80, 80, 0.45);
+    color: #ff8585;
+}
+
+/* Lista de Ações do Leque */
+.tam-actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tam-act-btn {
+    width: 100%;
+    min-height: 48px;
+    background: linear-gradient(180deg, rgba(38, 30, 22, 0.9) 0%, rgba(22, 17, 13, 0.95) 100%);
+    border: 1px solid rgba(196, 149, 58, 0.35);
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    touch-action: manipulation;
+    text-align: left;
+    transition: all .15s ease;
+    box-sizing: border-box;
+}
+
+.tam-act-btn:hover:not(.is-disabled) {
+    border-color: var(--v-gold, #c4953a);
+    background: linear-gradient(180deg, rgba(48, 38, 28, 0.95) 0%, rgba(28, 22, 17, 1) 100%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5), 0 0 8px rgba(196, 149, 58, 0.2);
+}
+
+.tam-act-btn:active:not(.is-disabled) {
+    transform: scale(0.985);
+    border-color: #ffd700;
+}
+
+.tam-act-btn.is-disabled {
+    opacity: 0.55;
+    filter: grayscale(0.6);
+    cursor: not-allowed;
+    border-color: rgba(74, 56, 40, 0.3);
+}
+
+.tam-act-ico {
+    font-size: 20px;
+    width: 28px;
+    flex-shrink: 0;
+    text-align: center;
+    line-height: 1;
+}
+
+.tam-act-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tam-act-label {
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #f2e8d5;
+    letter-spacing: 0.4px;
+}
+
+.tam-act--attack .tam-act-label {
+    color: #ffd700;
+}
+
+.tam-act--skills .tam-act-label {
+    color: #c9a0ff;
+}
+
+.tam-act-desc {
+    font-family: var(--v-font, 'MedievalSharp'), serif;
+    font-size: 10.5px;
+    color: var(--v-text-dim, #a09484);
+    line-height: 1.25;
+    margin-top: 2px;
+}
+
+.tam-act-chev {
+    font-size: 14px;
+    color: var(--v-gold, #c4953a);
+    flex-shrink: 0;
 }
 
 /* Mensagens de combate (acerto/erro/dano/critico) */
@@ -29652,10 +29973,29 @@ function bindActions() {
                     showTargetConfirm(idx);
                     return;
                 }
+
+                // Quando nenhuma ação está selecionada (! _selectingTarget) no turno do jogador:
+                // abre o leque de opções de alvo ergonômico para mobile/smartphone
+                if (!_selectingTarget && currentState && currentState.ph === 'active' && currentState.active_idx === currentState.p_idx) {
+                    if (uid && uid.indexOf('enemy_') === 0) {
+                        var eIdx = parseInt(uid.slice(6), 10);
+                        if (!isNaN(eIdx) && currentState.order && currentState.order[eIdx] && currentState.order[eIdx].alive) {
+                            showTargetActionMenu(eIdx, uid);
+                            return;
+                        }
+                    } else if (uid === 'player' || (uid && uid.indexOf('ally_') === 0)) {
+                        var aIdx = (uid === 'player') ? currentState.p_idx : parseInt(uid.slice(5), 10);
+                        if (!isNaN(aIdx) && currentState.order && currentState.order[aIdx]) {
+                            showAllyActionMenu(aIdx, uid);
+                            return;
+                        }
+                    }
+                }
                 openUnitDetail(uid);
             };
             card.addEventListener('click', onCardTrigger);
-            card.addEventListener('pointerenter', function () {
+            card.addEventListener('pointerenter', function (ev) {
+                if (ev && ev.pointerType === 'touch') return;
                 var uid = card.getAttribute('data-unit-id');
                 if (uid && uid.indexOf('enemy_') === 0) {
                     var eIdx = parseInt(uid.slice(6), 10);
@@ -29790,20 +30130,598 @@ function bindActions() {
     mountEnemyHoverStatHints();
 }
 
-/* UI-2: Hover hint card compacto de estatísticas de inimigos (PHB-style) */
+/* UI-2: Limpeza defensiva de qualquer resquício de hover anterior */
 var _activeHoverHint = null;
 
 function removeEnemyHoverStatHint() {
     if (_activeHoverHint) {
-        _activeHoverHint.remove();
+        try { _activeHoverHint.remove(); } catch (_) {}
         _activeHoverHint = null;
     }
     var oldHint = document.getElementById('enemyHoverStatHint');
-    if (oldHint) oldHint.remove();
+    if (oldHint) {
+        try { oldHint.remove(); } catch (_) {}
+    }
+    var oldMenu = document.getElementById('targetActionMenuOverlay');
+    if (oldMenu) {
+        try { oldMenu.remove(); } catch (_) {}
+    }
 }
 
+/**
+ * Calcula o melhor hexágono para mover-se em direção ao alvo (adjacência de combate ou aproximação máxima).
+ */
+function findBestApproachHex(pUnit, targetUnit, s) {
+    if (!pUnit || !pUnit.pos || !targetUnit || !targetUnit.pos) return null;
+    var bCols = 8, bRows = 10;
+    if (s && s.battlefield) {
+        if (s.battlefield.cols) bCols = s.battlefield.cols;
+        if (s.battlefield.rows) bRows = s.battlefield.rows;
+    }
+    var moveLeft = pUnit.movement_left || 0;
+    if (moveLeft <= 0) return null;
+
+    var occupiedMap = {};
+    if (s && s.order) {
+        s.order.forEach(function (u) {
+            if (u && u.alive && !u.isDead && u.pos && u.pos.col != null && u.pos.row != null) {
+                occupiedMap[u.pos.col + ',' + u.pos.row] = true;
+            }
+        });
+    }
+    delete occupiedMap[pUnit.pos.col + ',' + pUnit.pos.row];
+
+    var difficultMap = {};
+    if (s && s.battlefield && s.battlefield.difficult_terrain) {
+        s.battlefield.difficult_terrain.forEach(function (dt) {
+            if (dt && dt.col != null && dt.row != null) difficultMap[dt.col + ',' + dt.row] = dt;
+        });
+    }
+
+    var obstacleMap = {};
+    if (s && s.battlefield && s.battlefield.obstacles) {
+        s.battlefield.obstacles.forEach(function (obs) {
+            if (obs && obs.col != null && obs.row != null) obstacleMap[obs.col + ',' + obs.row] = obs;
+        });
+    }
+
+    // 1. Tenta vizinho imediato desocupado (distância 1 hex) que o personagem alcance neste turno
+    var neighbors = (typeof hexNeighbors === 'function')
+        ? hexNeighbors(targetUnit.pos.col, targetUnit.pos.row)
+        : [];
+    var reachableNeighbors = [];
+    for (var i = 0; i < neighbors.length; i++) {
+        var n = neighbors[i];
+        if (n.col < 0 || n.col >= bCols || n.row < 0 || n.row >= bRows) continue;
+        var nk = n.col + ',' + n.row;
+        if (occupiedMap[nk] || obstacleMap[nk]) continue;
+        var cost = (typeof calculateHexMovementCost === 'function')
+            ? calculateHexMovementCost(pUnit.pos.col, pUnit.pos.row, n.col, n.row, difficultMap)
+            : hexDistance(pUnit.pos.col, pUnit.pos.row, n.col, n.row);
+        if (cost <= moveLeft) {
+            reachableNeighbors.push({ col: n.col, row: n.row, cost: cost });
+        }
+    }
+
+    if (reachableNeighbors.length > 0) {
+        reachableNeighbors.sort(function (a, b) { return a.cost - b.cost; });
+        return reachableNeighbors[0];
+    }
+
+    // 2. Se nenhum vizinho imediato for alcançável neste turno, move o máximo em direção ao alvo
+    var minTgtDist = hexDistance(pUnit.pos.col, pUnit.pos.row, targetUnit.pos.col, targetUnit.pos.row);
+    var bestCandidate = null;
+    for (var tc = 0; tc < bCols; tc++) {
+        for (var tr = 0; tr < bRows; tr++) {
+            if (tc === pUnit.pos.col && tr === pUnit.pos.row) continue;
+            var tk = tc + ',' + tr;
+            if (occupiedMap[tk] || obstacleMap[tk]) continue;
+            var tCost = (typeof calculateHexMovementCost === 'function')
+                ? calculateHexMovementCost(pUnit.pos.col, pUnit.pos.row, tc, tr, difficultMap)
+                : hexDistance(pUnit.pos.col, pUnit.pos.row, tc, tr);
+            if (tCost <= moveLeft) {
+                var dToTarget = hexDistance(tc, tr, targetUnit.pos.col, targetUnit.pos.row);
+                if (dToTarget < minTgtDist) {
+                    minTgtDist = dToTarget;
+                    bestCandidate = { col: tc, row: tr, cost: tCost };
+                }
+            }
+        }
+    }
+
+    return bestCandidate;
+}
+
+/**
+ * Leque de Opções Táticas do Alvo Inimigo (Target Action Menu - Mobile First)
+ * Acionado ao tocar/clicar em um inimigo quando não há ação pré-armada.
+ */
+function showTargetActionMenu(targetIdx, uid) {
+    removeEnemyHoverStatHint();
+    if (!currentState || currentState.ph !== 'active') {
+        openUnitDetail(uid);
+        return;
+    }
+    var s = currentState;
+    var p = s.order && s.order[s.p_idx];
+    var u = s.order && s.order[targetIdx];
+    if (!p || !u || !u.alive || u.isDead) {
+        openUnitDetail(uid);
+        return;
+    }
+
+    var ov = document.createElement('div');
+    ov.className = 'target-action-menu-overlay';
+    ov.id = 'targetActionMenuOverlay';
+
+    var sheet = document.createElement('div');
+    sheet.className = 'target-action-menu-sheet';
+
+    // Distância tática e alcance
+    var dist = 1;
+    if (p.pos && u.pos && u.pos.col != null) {
+        dist = hexDistance(p.pos.col, p.pos.row, u.pos.col, u.pos.row);
+    }
+    var distM = formatHexDistanceMeters(dist);
+    var isAdjacent = (dist <= 1);
+
+    var reachMeta = (typeof formatDndActionReach === 'function')
+        ? formatDndActionReach(p, null)
+        : { reachHex: 1, meters: '1,5m', label: '1,5m (5 pés)', isRanged: false };
+
+    var inAttackReach = (dist <= (reachMeta.reachHex || 1));
+    var isActionAvailable = !s.action_used;
+    var moveLeft = p.movement_left || 0;
+
+    // Cobertura e Vantagem/Desvantagem
+    var coverInfo = (typeof simComputeCover === 'function')
+        ? simComputeCover(s, p, u)
+        : { cover: 'none', bonus: 0 };
+    var isTotalCover = (coverInfo.cover === 'total');
+
+    var advState = (typeof simPeekAttackAdvState === 'function')
+        ? simPeekAttackAdvState(p, u, null)
+        : 'normal';
+
+    var isFlanked = (!reachMeta.isRanged && typeof simCheckFlanking === 'function' && s.order)
+        ? !!simCheckFlanking(p, u, s.order)
+        : false;
+
+    // Vitals
+    var hpPct = (u.mhp > 0) ? Math.max(0, Math.min(100, Math.round((u.hp / u.mhp) * 100))) : 0;
+    var hpCls = (typeof vBarHpClass === 'function') ? vBarHpClass(hpPct) : (hpPct > 50 ? 'hp-high' : 'hp-mid');
+    var displayAc = (typeof getEffectiveAc === 'function') ? getEffectiveAc(u) : (u.ac != null ? u.ac : 10);
+
+    var utype = 'enemy';
+    var iconId = _heraldicIconOf(u, utype);
+    var portraitHtml = _combatPortraitHTML(iconId, u, utype);
+
+    var html = '';
+    html += '<div class="tam-header">';
+    html +=   '<div class="tam-portrait">' + portraitHtml + '</div>';
+    html +=   '<div class="tam-info">';
+    html +=     '<div class="tam-title-row">';
+    html +=       '<div class="tam-name">' + escHtml(u.n) + '</div>';
+    var crText = (u.cr != null ? 'ND ' + u.cr : (u.sugLvl ? 'Nível ' + u.sugLvl : (u.lvl ? 'Nível ' + u.lvl : '')));
+    if (crText) html += '<div class="tam-cr">' + escHtml(crText) + '</div>';
+    html +=     '</div>';
+    var subText = escHtml(u.species || u.race || 'Criatura') + (u.subrace ? ' [' + escHtml(u.subrace) + ']' : '') + (u.cls ? ' · ' + escHtml(u.cls) : '');
+    html +=     '<div class="tam-sub">' + subText + '</div>';
+    html +=     '<div class="tam-vitals-row">';
+    html +=       '<span class="tam-vital-chip tam-vital--hp"><span class="tam-vital-lbl">PV</span> <b class="' + hpCls + '">' + u.hp + '/' + u.mhp + '</b></span>';
+    html +=       '<span class="tam-vital-chip tam-vital--ac"><span class="tam-vital-lbl">CA</span> <b>' + displayAc + '</b></span>';
+    html +=       '<span class="tam-vital-chip tam-vital--dist' + (inAttackReach ? ' in-reach' : ' out-reach') + '"><span class="tam-vital-lbl">Dist.</span> <b>' + distM + '</b></span>';
+    html +=     '</div>';
+    html +=   '</div>';
+    html +=   '<button class="tam-close-btn" aria-label="Fechar">✕</button>';
+    html += '</div>';
+
+    // Badges de Metadados / Condições
+    var metaBadges = [];
+    if (isTotalCover) metaBadges.push('<span class="tam-meta-badge danger">✕ Cobertura Total</span>');
+    else if (coverInfo.cover === 'half') metaBadges.push('<span class="tam-meta-badge warn">⛨ ½ Cobertura (+2 CA)</span>');
+    else if (coverInfo.cover === 'three_quarters') metaBadges.push('<span class="tam-meta-badge warn">⛨ ¾ Cobertura (+5 CA)</span>');
+
+    if (isFlanked) metaBadges.push('<span class="tam-meta-badge good">▲ Flanqueado (Vantagem)</span>');
+    else if (advState === 'advantage') metaBadges.push('<span class="tam-meta-badge good">▲ Vantagem</span>');
+    else if (advState === 'disadvantage') metaBadges.push('<span class="tam-meta-badge danger">▼ Desvantagem</span>');
+
+    if (u.prone) metaBadges.push('<span class="tam-meta-badge warn">▾ Caído no Chão</span>');
+
+    if (metaBadges.length > 0) {
+        html += '<div class="tam-meta-row">' + metaBadges.join(' ') + '</div>';
+    }
+
+    // Lista de Ações do Leque
+    html += '<div class="tam-actions-list">';
+
+    // 1. ATACAR
+    var atkDisabled = !isActionAvailable;
+    var atkReason = !isActionAvailable
+        ? 'Ação principal já gasta neste turno'
+        : (!inAttackReach ? 'Fora de alcance (' + distM + ' · máx ' + reachMeta.label + ')' : (isTotalCover ? 'Linha de visão bloqueada' : 'No alcance tático'));
+    var atkWeapon = p.weapon || 'Arma';
+    var atkMod = (p.atk != null ? (p.atk >= 0 ? '+' : '') + p.atk : '+4');
+    var atkDie = p.die ? ('1d' + p.die) : 'Dano';
+
+    html += '<button type="button" class="tam-act-btn tam-act--attack' + (atkDisabled ? ' is-disabled' : '') + '" data-tam-act="attack">';
+    html +=   '<div class="tam-act-ico">⚔</div>';
+    html +=   '<div class="tam-act-text">';
+    html +=     '<div class="tam-act-label">Atacar com ' + escHtml(atkWeapon) + '</div>';
+    html +=     '<div class="tam-act-desc">' + atkMod + ' para acertar · ' + atkDie + ' · ' + atkReason + '</div>';
+    html +=   '</div>';
+    html +=   '<div class="tam-act-chev">▸</div>';
+    html += '</button>';
+
+    // 2. HABILIDADES / MAGIAS
+    var hasSkills = (p.skills && p.skills.length > 0);
+    html += '<button type="button" class="tam-act-btn tam-act--skills' + (!hasSkills ? ' is-disabled' : '') + '" data-tam-act="skills">';
+    html +=   '<div class="tam-act-ico">✨</div>';
+    html +=   '<div class="tam-act-text">';
+    html +=     '<div class="tam-act-label">Habilidades & Magias</div>';
+    html +=     '<div class="tam-act-desc">Lançar magia ou poder de classe contra este alvo</div>';
+    html +=   '</div>';
+    html +=   '<div class="tam-act-chev">▸</div>';
+    html += '</button>';
+
+    // 3. EMPURRAR OU DERRUBAR (SHOVE - PHB p. 195)
+    var shoveDisabled = !isActionAvailable || !isAdjacent;
+    var shoveDesc = !isActionAvailable
+        ? 'Ação principal já gasta neste turno'
+        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Teste oposto de Atletismo para derrubar ou afastar 1,5m');
+    html += '<button type="button" class="tam-act-btn tam-act--shove' + (shoveDisabled ? ' is-disabled' : '') + '" data-tam-act="shove">';
+    html +=   '<div class="tam-act-ico">💨</div>';
+    html +=   '<div class="tam-act-text">';
+    html +=     '<div class="tam-act-label">Empurrar ou Derrubar (Manobra)</div>';
+    html +=     '<div class="tam-act-desc">' + shoveDesc + '</div>';
+    html +=   '</div>';
+    html +=   '<div class="tam-act-chev">▸</div>';
+    html += '</button>';
+
+    // 4. APROXIMAR-SE (SE NÃO ESTIVER ADJACENTE E TIVER MOVIMENTO)
+    if (!isAdjacent) {
+        var moveDisabled = (moveLeft <= 0);
+        var moveDesc = (moveLeft <= 0)
+            ? 'Deslocamento esgotado neste turno (0m)'
+            : ('Avançar até adjacência (' + formatHexDistanceMeters(moveLeft) + ' disponíveis)');
+        html += '<button type="button" class="tam-act-btn tam-act--move' + (moveDisabled ? ' is-disabled' : '') + '" data-tam-act="move">';
+        html +=   '<div class="tam-act-ico">🏃</div>';
+        html +=   '<div class="tam-act-text">';
+        html +=     '<div class="tam-act-label">Aproximar-se do Alvo</div>';
+        html +=     '<div class="tam-act-desc">' + moveDesc + '</div>';
+        html +=   '</div>';
+        html +=   '<div class="tam-act-chev">▸</div>';
+        html += '</button>';
+    }
+
+    // 5. INSPECIONAR FICHA COMPLETA
+    html += '<button type="button" class="tam-act-btn tam-act--inspect" data-tam-act="inspect">';
+    html +=   '<div class="tam-act-ico">👁</div>';
+    html +=   '<div class="tam-act-text">';
+    html +=     '<div class="tam-act-label">Inspecionar Ficha Completa</div>';
+    html +=     '<div class="tam-act-desc">Ver atributos, salvaguardas, resistências e traços</div>';
+    html +=   '</div>';
+    html +=   '<div class="tam-act-chev">▸</div>';
+    html += '</button>';
+
+    html += '</div>'; // .tam-actions-list
+
+    sheet.innerHTML = html;
+    ov.appendChild(sheet);
+    mountInGameFrame(ov);
+
+    // Event listeners
+    ov.addEventListener('click', function (e) {
+        if (e.target === ov) ov.remove();
+    });
+    var closeBtn = sheet.querySelector('.tam-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function () { ov.remove(); });
+    }
+
+    var atkBtn = sheet.querySelector('[data-tam-act="attack"]');
+    if (atkBtn) {
+        atkBtn.addEventListener('click', function () {
+            ov.remove();
+            if (!isActionAvailable) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Ação principal já gasta neste turno!', 'warn');
+                }
+                return;
+            }
+            _actionSheetOpen = false;
+            _actionTaken = true;
+            _pendingSkill = null;
+            _pendingHealItem = null;
+            if (typeof _pendingSkillSlot !== 'undefined') _pendingSkillSlot = null;
+            if (typeof _pendingPowerAttack !== 'undefined') _pendingPowerAttack = false;
+            _selectingTarget = true;
+            showTargetConfirm(targetIdx);
+        });
+    }
+
+    var skillsBtn = sheet.querySelector('[data-tam-act="skills"]');
+    if (skillsBtn) {
+        skillsBtn.addEventListener('click', function () {
+            ov.remove();
+            if (!hasSkills) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Nenhuma habilidade disponível no momento.', 'warn');
+                }
+                return;
+            }
+            window._preselectedTargetIdx = targetIdx;
+            _actionSheetOpen = false;
+            _actionTaken = true;
+            render(currentState);
+            openSkillsPanel();
+        });
+    }
+
+    var shoveBtn = sheet.querySelector('[data-tam-act="shove"]');
+    if (shoveBtn) {
+        shoveBtn.addEventListener('click', function () {
+            ov.remove();
+            if (!isActionAvailable) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Ação principal já gasta neste turno!', 'warn');
+                }
+                return;
+            }
+            if (!isAdjacent) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('▲ Alvo fora do alcance corpo a corpo (1,5m)! Aproxime-se primeiro.', 'warn');
+                }
+                return;
+            }
+            showShoveChoiceModal(targetIdx).then(function (mode) {
+                if (!mode) {
+                    _actionTaken = false;
+                    render(currentState);
+                    return;
+                }
+                _actionTaken = true;
+                render(currentState);
+                if (window.__COMBAT_MODE === 'remote' || window.__COMBAT_REMOTE_ACTIVE) {
+                    void __combatRemoteAction({ type: 'shove', target: targetIdx, shove_mode: mode });
+                } else {
+                    void passPlayerMetaAction('shove', { target: targetIdx, shove_mode: mode });
+                }
+            });
+        });
+    }
+
+    var moveBtn = sheet.querySelector('[data-tam-act="move"]');
+    if (moveBtn) {
+        moveBtn.addEventListener('click', function () {
+            ov.remove();
+            if (moveLeft <= 0) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Deslocamento esgotado neste turno!', 'warn');
+                }
+                return;
+            }
+            if (isAdjacent) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Você já está em alcance corpo a corpo (1,5m) do alvo!', 'info');
+                }
+                return;
+            }
+            var bestHex = findBestApproachHex(p, u, s);
+            if (!bestHex) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Não há caminho livre para se aproximar do alvo!', 'warn');
+                }
+                return;
+            }
+            showMoveConfirm(bestHex.col, bestHex.row);
+        });
+    }
+
+    var inspectBtn = sheet.querySelector('[data-tam-act="inspect"]');
+    if (inspectBtn) {
+        inspectBtn.addEventListener('click', function () {
+            ov.remove();
+            openUnitDetail(uid);
+        });
+    }
+}
+
+/**
+ * Leque de Opções Táticas para Aliados e Personagem do Jogador
+ */
+function showAllyActionMenu(targetIdx, uid) {
+    removeEnemyHoverStatHint();
+    if (!currentState || currentState.ph !== 'active') {
+        openUnitDetail(uid);
+        return;
+    }
+    var s = currentState;
+    var p = s.order && s.order[s.p_idx];
+    var u = s.order && s.order[targetIdx];
+    if (!p || !u) {
+        openUnitDetail(uid);
+        return;
+    }
+
+    var isSelf = (targetIdx === s.p_idx || uid === 'player');
+
+    var ov = document.createElement('div');
+    ov.className = 'target-action-menu-overlay';
+    ov.id = 'targetActionMenuOverlay';
+
+    var sheet = document.createElement('div');
+    sheet.className = 'target-action-menu-sheet';
+
+    var dist = 0;
+    if (!isSelf && p.pos && u.pos && u.pos.col != null) {
+        dist = hexDistance(p.pos.col, p.pos.row, u.pos.col, u.pos.row);
+    }
+    var distM = isSelf ? 'Você mesmo' : formatHexDistanceMeters(dist);
+    var isAdjacent = isSelf || (dist <= 1);
+    var isActionAvailable = !s.action_used;
+
+    var hpPct = (u.mhp > 0) ? Math.max(0, Math.min(100, Math.round((u.hp / u.mhp) * 100))) : 0;
+    var hpCls = (typeof vBarHpClass === 'function') ? vBarHpClass(hpPct) : (hpPct > 50 ? 'hp-high' : 'hp-mid');
+    var displayAc = (typeof getEffectiveAc === 'function') ? getEffectiveAc(u) : (u.ac != null ? u.ac : 10);
+
+    var utype = isSelf ? 'player' : 'ally';
+    var iconId = _heraldicIconOf(u, utype);
+    var portraitHtml = _combatPortraitHTML(iconId, u, utype);
+
+    var html = '';
+    html += '<div class="tam-header">';
+    html +=   '<div class="tam-portrait">' + portraitHtml + '</div>';
+    html +=   '<div class="tam-info">';
+    html +=     '<div class="tam-title-row">';
+    html +=       '<div class="tam-name">' + escHtml(u.n) + '</div>';
+    var lvlText = (u.lvl ? 'Nível ' + u.lvl : (u.sugLvl ? 'Nível ' + u.sugLvl : ''));
+    if (lvlText) html += '<div class="tam-cr">' + escHtml(lvlText) + '</div>';
+    html +=     '</div>';
+    var subText = isSelf ? 'Seu Personagem' : (escHtml(u.species || u.race || 'Companheiro') + (u.cls ? ' · ' + escHtml(u.cls) : ''));
+    html +=     '<div class="tam-sub">' + subText + '</div>';
+    html +=     '<div class="tam-vitals-row">';
+    html +=       '<span class="tam-vital-chip tam-vital--hp"><span class="tam-vital-lbl">PV</span> <b class="' + hpCls + '">' + u.hp + '/' + u.mhp + '</b></span>';
+    html +=       '<span class="tam-vital-chip tam-vital--ac"><span class="tam-vital-lbl">CA</span> <b>' + displayAc + '</b></span>';
+    html +=       '<span class="tam-vital-chip tam-vital--dist in-reach"><span class="tam-vital-lbl">Dist.</span> <b>' + distM + '</b></span>';
+    html +=     '</div>';
+    html +=   '</div>';
+    html +=   '<button class="tam-close-btn" aria-label="Fechar">✕</button>';
+    html += '</div>';
+
+    // Lista de Ações do Companheiro
+    html += '<div class="tam-actions-list">';
+
+    // 1. POÇÃO DE CURA / ITENS (se houver na bolsa)
+    var healBagIdx = -1;
+    if (p.bag && Array.isArray(p.bag)) {
+        for (var bi = 0; bi < p.bag.length; bi++) {
+            var bIt = p.bag[bi];
+            if (bIt && bIt.qty > 0 && (bIt.kind === 'potion' || bIt.heal || /poção|pocao|cura|healing/i.test(bIt.n || bIt.name || ''))) {
+                healBagIdx = bi;
+                break;
+            }
+        }
+    }
+    var canHeal = (healBagIdx >= 0) && (isSelf || isAdjacent);
+    var healDesc = (healBagIdx < 0)
+        ? 'Nenhuma poção de cura disponível na mochila'
+        : (!isSelf && !isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : (isSelf ? 'Beber poção de cura para recuperar PV' : 'Administrar poção de cura no companheiro'));
+
+    html += '<button type="button" class="tam-act-btn' + (!canHeal ? ' is-disabled' : '') + '" data-tam-act="potion">';
+    html +=   '<div class="tam-act-ico">🧪</div>';
+    html +=   '<div class="tam-act-text">';
+    html +=     '<div class="tam-act-label">' + (isSelf ? 'Beber Poção de Cura' : 'Aplicar Poção de Cura') + '</div>';
+    html +=     '<div class="tam-act-desc">' + healDesc + '</div>';
+    html +=   '</div>';
+    html +=   '<div class="tam-act-chev">▸</div>';
+    html += '</button>';
+
+    // 2. AJUDAR (HELP - PHB p. 192) - apenas se for outro companheiro
+    if (!isSelf) {
+        var helpDisabled = !isActionAvailable || !isAdjacent;
+        var helpDesc = !isActionAvailable
+            ? 'Ação principal já gasta neste turno'
+            : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Concede Vantagem no próximo ataque do companheiro');
+        html += '<button type="button" class="tam-act-btn' + (helpDisabled ? ' is-disabled' : '') + '" data-tam-act="help">';
+        html +=   '<div class="tam-act-ico">🤝</div>';
+        html +=   '<div class="tam-act-text">';
+        html +=     '<div class="tam-act-label">Ajudar Companheiro (Help)</div>';
+        html +=     '<div class="tam-act-desc">' + helpDesc + '</div>';
+        html +=   '</div>';
+        html +=   '<div class="tam-act-chev">▸</div>';
+        html += '</button>';
+    }
+
+    // 3. INSPECIONAR FICHA
+    html += '<button type="button" class="tam-act-btn" data-tam-act="inspect">';
+    html +=   '<div class="tam-act-ico">👁</div>';
+    html +=   '<div class="tam-act-text">';
+    html +=     '<div class="tam-act-label">' + (isSelf ? 'Inspecionar Minha Ficha' : 'Inspecionar Ficha do Companheiro') + '</div>';
+    html +=     '<div class="tam-act-desc">Ver atributos, equipamentos, magias e estatísticas</div>';
+    html +=   '</div>';
+    html +=   '<div class="tam-act-chev">▸</div>';
+    html += '</button>';
+
+    html += '</div>'; // .tam-actions-list
+
+    sheet.innerHTML = html;
+    ov.appendChild(sheet);
+    mountInGameFrame(ov);
+
+    // Event listeners
+    ov.addEventListener('click', function (e) {
+        if (e.target === ov) ov.remove();
+    });
+    var closeBtn = sheet.querySelector('.tam-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function () { ov.remove(); });
+    }
+
+    var potBtn = sheet.querySelector('[data-tam-act="potion"]');
+    if (potBtn) {
+        potBtn.addEventListener('click', function () {
+            ov.remove();
+            if (!canHeal) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast(healDesc, 'warn');
+                }
+                return;
+            }
+            _pendingHealItem = { bagIdx: healBagIdx };
+            _selectingTarget = true;
+            showHealTargetConfirm(targetIdx);
+        });
+    }
+
+    var helpBtn = sheet.querySelector('[data-tam-act="help"]');
+    if (helpBtn) {
+        helpBtn.addEventListener('click', function () {
+            ov.remove();
+            if (!isActionAvailable) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Ação principal já gasta neste turno!', 'warn');
+                }
+                return;
+            }
+            if (!isAdjacent) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('▲ Companheiro fora do alcance corpo a corpo (1,5m)!', 'warn');
+                }
+                return;
+            }
+            showHelpChoiceModal(targetIdx).then(function (ok) {
+                if (!ok) {
+                    _actionTaken = false;
+                    render(currentState);
+                    return;
+                }
+                _actionTaken = true;
+                render(currentState);
+                if (window.__COMBAT_MODE === 'remote' || window.__COMBAT_REMOTE_ACTIVE) {
+                    void __combatRemoteAction({ type: 'help', target: targetIdx });
+                } else {
+                    void passPlayerMetaAction('help', { target: targetIdx });
+                }
+            });
+        });
+    }
+
+    var inspectBtn = sheet.querySelector('[data-tam-act="inspect"]');
+    if (inspectBtn) {
+        inspectBtn.addEventListener('click', function () {
+            ov.remove();
+            openUnitDetail(uid);
+        });
+    }
+}
+
+/**
+ * Monta botões de inspeção pontual [ℹ] nos cards e garante remoção defensiva de hover.
+ * Nenhum mouse hover cria cards ou popups automáticos, prevenindo cards travados em touch.
+ */
 function mountEnemyHoverStatHints() {
-    // 1. Botões de inspeção rápida [ℹ] nos cards de inimigos
+    // 1. Botões de inspeção rápida [ℹ] nos cards de inimigos (clique explícito)
     var infoBtns = document.querySelectorAll('.unit-quick-info-btn');
     for (var bi = 0; bi < infoBtns.length; bi++) {
         (function (btn) {
@@ -29820,160 +30738,8 @@ function mountEnemyHoverStatHints() {
         })(infoBtns[bi]);
     }
 
-    // 2. Hover em dispositivos com ponteiro fino (mouse/desktop)
-    if (window.matchMedia && window.matchMedia('(hover: none)').matches) {
-        return;
-    }
-
-    var unitEls = document.querySelectorAll('.cell.v8-card[data-unit-id], .hex-token[data-unit-id]');
-    for (var ei = 0; ei < unitEls.length; ei++) {
-        (function (el) {
-            el.addEventListener('pointerenter', function (ev) {
-                if (ev.pointerType === 'touch') return;
-                var uid = el.getAttribute('data-unit-id');
-                if (!uid || !currentState || !currentState.order) return;
-                var u = null;
-                if (uid === 'player') u = currentState.order[currentState.p_idx];
-                else if (uid.indexOf('ally_') === 0) u = currentState.order[parseInt(uid.slice(5), 10)];
-                else if (uid.indexOf('enemy_') === 0) u = currentState.order[parseInt(uid.slice(6), 10)];
-                if (!u || !u.alive || el.classList.contains('token--shrouded-fog')) return;
-
-                removeEnemyHoverStatHint();
-
-                var hint = document.createElement('div');
-                hint.className = 'enemy-hover-stat-card';
-                hint.id = 'enemyHoverStatHint';
-
-                var hpPct = (u.mhp > 0) ? Math.round((u.hp / u.mhp) * 100) : 0;
-                var hpCls = vBarHpClass(hpPct);
-                var crText = (u.cr != null ? 'ND ' + u.cr : (u.sugLvl ? 'Nível ' + u.sugLvl : (u.lvl ? 'Nível ' + u.lvl : '')));
-                var subText = escHtml(u.species || u.race || (u.t === 'p' ? 'Personagem' : (u.t === 'a' ? 'Aliado' : 'Criatura'))) + (u.subrace ? ' [' + escHtml(u.subrace) + ']' : '') + (u.cls ? ' · ' + escHtml(u.cls) : '');
-
-                var hHtml = '<div class="ehs-header">'
-                    + '<div class="ehs-name">' + escHtml(u.n) + '</div>'
-                    + '<div class="ehs-cr">' + crText + '</div>'
-                    + '</div>';
-                hHtml += '<div class="ehs-sub">' + subText + '</div>';
-
-                var atkStr = (u.atk != null ? (u.atk >= 0 ? '+' : '') + u.atk : '+4');
-                var dmgStr = u.die ? ('1d' + u.die) : (u.weapon || 'Arma');
-                var speedStr = formatHexDistanceMeters(u.speed || 6);
-
-                hHtml += '<div class="ehs-vitals">'
-                    + '<div class="ehs-vital-item"><span class="ehs-vital-lbl">PV</span><span class="ehs-vital-val ' + hpCls + '">' + u.hp + '/' + u.mhp + '</span></div>'
-                    + '<div class="ehs-vital-item"><span class="ehs-vital-lbl">CA</span><span class="ehs-vital-val">' + u.ac + '</span></div>'
-                    + '<div class="ehs-vital-item"><span class="ehs-vital-lbl">Atk</span><span class="ehs-vital-val">' + atkStr + '</span></div>'
-                    + '<div class="ehs-vital-item"><span class="ehs-vital-lbl">Desloc.</span><span class="ehs-vital-val">' + speedStr + '</span></div>'
-                    + '</div>';
-
-                var statsArr = [
-                    { lb: 'FOR', v: (u.str != null ? u.str : 10) },
-                    { lb: 'DES', v: (u.dex != null ? u.dex : 10) },
-                    { lb: 'CON', v: (u.con != null ? u.con : 10) },
-                    { lb: 'INT', v: (u.int != null ? u.int : 10) },
-                    { lb: 'SAB', v: (u.wis != null ? u.wis : 10) },
-                    { lb: 'CAR', v: (u.cha != null ? u.cha : 10) }
-                ];
-                hHtml += '<div class="ehs-attrs">';
-                for (var si = 0; si < statsArr.length; si++) {
-                    var s = statsArr[si];
-                    var mod = Math.floor((s.v - 10) / 2);
-                    var modStr = (mod >= 0 ? '+' : '') + mod;
-                    hHtml += '<div class="ehs-attr-box"><div class="ehs-attr-lbl">' + s.lb + '</div><div class="ehs-attr-val">' + s.v + ' (' + modStr + ')</div></div>';
-                }
-                hHtml += '</div>';
-
-                var tagRows = '';
-                if (u.multiAttack && u.multiAttack > 1) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#7cdb7c;">▸ <b>Multiataque:</b> ' + u.multiAttack + ' ataques/turno</div>';
-                }
-                if (u.packTactics) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#ffd700;">◆ <b>Táticas de Matilha:</b> Vantagem com aliado</div>';
-                }
-                if (u.resistances && u.resistances.length) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#ffd700;">⛨ <b>Resistências:</b> ' + escHtml(u.resistances.join(', ')) + '</div>';
-                }
-                if (u.immunities && u.immunities.length) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#7cdb7c;">✦ <b>Imunidades:</b> ' + escHtml(u.immunities.join(', ')) + '</div>';
-                }
-                if (u.vulnerabilities && u.vulnerabilities.length) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#ff8a4a;">▲ <b>Vulnerabilidades:</b> ' + escHtml(u.vulnerabilities.join(', ')) + '</div>';
-                }
-
-                // Concentração e Condições ativas D&D 5e
-                if (u.concentrationSpell) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#64b5f6;">◈ <b>Concentrando:</b> ' + escHtml(u.concentrationSpell) + '</div>';
-                }
-                if (u.prone) {
-                    tagRows += '<div class="ehs-tag-row" style="color:#ffb74d;">▾ <b>Condição:</b> Caído no chão</div>';
-                }
-                if (u.se && u.se.length) {
-                    for (var ui = 0; ui < u.se.length; ui++) {
-                        var st = u.se[ui];
-                        if (st && st.n && st.n !== 'Caído') {
-                            var durText = (st.turnsLeft != null && st.turnsLeft > 0) ? ' (' + st.turnsLeft + 't)' : '';
-                            tagRows += '<div class="ehs-tag-row" style="color:#d4af37;">◈ <b>Status:</b> ' + escHtml(st.n) + durText + '</div>';
-                        }
-                    }
-                }
-
-                if (tagRows) {
-                    hHtml += '<div style="border-top:1px solid rgba(196,149,58,0.2); padding-top:4px;">' + tagRows + '</div>';
-                }
-
-                hint.innerHTML = hHtml;
-                document.body.appendChild(hint);
-                _activeHoverHint = hint;
-
-                var rect = el.getBoundingClientRect();
-                var hintRect = hint.getBoundingClientRect();
-                var left = rect.left + (rect.width - hintRect.width) / 2;
-                left = Math.max(10, Math.min(window.innerWidth - hintRect.width - 10, left));
-                var top = rect.top - hintRect.height - 8;
-                if (top < 10) {
-                    top = rect.bottom + 8;
-                }
-                hint.style.left = left + 'px';
-                hint.style.top = top + 'px';
-
-                if (_selectingTarget && currentState && u.t === 'e') {
-                    var pUnit = currentState.order[currentState.p_idx];
-                    if (pUnit && pUnit.pos && u.pos && u.pos.col != null) {
-                        var reachInfo = (typeof simGetAttackReach === 'function')
-                            ? simGetAttackReach(pUnit, _pendingSkill)
-                            : { reach: 1, isRanged: false };
-                        var coverInfo = (typeof simComputeCover === 'function')
-                            ? simComputeCover(currentState, pUnit, u)
-                            : { cover: 'none', bonus: 0 };
-                        var coverText = coverInfo.cover === 'half' ? '½ Cobertura (+2 CA)' : (coverInfo.cover === 'three_quarters' ? '¾ Cobertura (+5 CA)' : '');
-                        var advState = (typeof simPeekAttackAdvState === 'function')
-                            ? simPeekAttackAdvState(pUnit, u, _pendingSkill)
-                            : 'normal';
-                        var flankingInfo = (!reachInfo.isRanged && typeof simCheckFlanking === 'function')
-                            ? simCheckFlanking(pUnit, u, currentState.order)
-                            : null;
-                        drawTacticalAimVector(pUnit.pos.col, pUnit.pos.row, u.pos.col, u.pos.row, {
-                            reach: reachInfo.reach || 1,
-                            cover: coverInfo.cover !== 'none',
-                            coverText: coverText,
-                            coverType: coverInfo.cover,
-                            advState: advState,
-                            flankingInfo: flankingInfo,
-                            isShove: (_pendingSpecialAction === 'shove'),
-                            skill: _pendingSkill
-                        });
-                    }
-                }
-            });
-
-            el.addEventListener('pointerleave', function () {
-                removeEnemyHoverStatHint();
-                if (_selectingTarget) {
-                    clearTacticalAimVector();
-                }
-            });
-        })(unitEls[ei]);
-    }
+    // 2. Hover automático desativado por padrão do projeto para compatibilidade com touch/smartphones.
+    removeEnemyHoverStatHint();
 }
 
 function _showVictoryItemDetailPopup(itemObj) {
@@ -33106,12 +33872,14 @@ function openSkillsPanel() {
     // Ao fechar o painel sem usar skill → _actionTaken volta a false e Agir reaparece.
     ov.addEventListener('click', function (e) {
         if (e.target === ov) {
+            window._preselectedTargetIdx = null;
             ov.remove();
             _actionTaken = false;
             render(currentState);
         }
     });
     card.querySelector('[data-close]').addEventListener('click', function () {
+        window._preselectedTargetIdx = null;
         ov.remove();
         _actionTaken = false;
         render(currentState);
@@ -33646,6 +34414,15 @@ async function useSkill(skill, opts) {
             _pendingSkillSlot = slot;
             _selectingTarget = true;
             console.info('[C-REM:SKILL] picker_mode slot=' + slot + ' waiting_target');
+            if (window._preselectedTargetIdx != null) {
+                var _pTgt = window._preselectedTargetIdx;
+                window._preselectedTargetIdx = null;
+                if (currentState && currentState.order && currentState.order[_pTgt] && currentState.order[_pTgt].alive) {
+                    render(currentState);
+                    showTargetConfirm(_pTgt);
+                    return;
+                }
+            }
             render(currentState);
             return;
         }
@@ -33906,6 +34683,14 @@ async function useSkill(skill, opts) {
             _selectingTarget = true;
             render(currentState);
             return;
+        }
+        if (window._preselectedTargetIdx != null) {
+            var _pTgtLoc = window._preselectedTargetIdx;
+            window._preselectedTargetIdx = null;
+            if (currentState && currentState.order && currentState.order[_pTgtLoc] && currentState.order[_pTgtLoc].alive) {
+                showTargetConfirm(_pTgtLoc);
+                return;
+            }
         }
         if (aliveIdxs2.length === 1) { showTargetConfirm(aliveIdxs2[0]); return; }
         _selectingTarget = true;
