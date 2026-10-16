@@ -595,6 +595,33 @@ var CHAR_CLASSES = [
                     resistances: ['slashing', 'piercing', 'bludgeoning'],
                     conditionImmunities: ['charmed', 'frightened', 'paralyzed', 'petrified', 'poisoned', 'prone']
                 }
+            } },
+        /* V1.20 (2026-10-16) — Criar Mortos-Vivos (PHB p.229 — Create Undead).
+           Mago/Clérigo nv 11+. Ergue 2 Carniçais com garras paralisantes (sem concentração). */
+        { n: 'Criar Mortos-Vivos', ico: '🧟', cost: 6, kind: 'summon_greater_undead', minLevel: 11, concentration: false,
+            desc: 'Ergue 2 Carniçais (Ghouls mortos-vivos CR 1, Garras 2d4+2 e Salvaguarda de CON CD 10 contra Paralisia sem concentração) como aliados da comitiva.',
+            helpDnd5e: 'Criar Mortos-Vivos / Create Undead (PHB p. 229 — Mago, Clérigo e Bruxo nv 11): magia de 6º círculo; alcance 3m; Sem Concentração (24 horas). Ergue 2 carniçais vorazes que obedecem aos seus comandos e lutam como aliados da comitiva.\nCada Carniçal tem HP 22, CA 12, atk +4, 2d4+2 dano cortante. Criaturas atingidas (exceto elfos e mortos-vivos) devem passar em uma Salvaguarda de Constituição CD 10 ou sofrem a condição Paralisado. Imune a dano de veneno e às condições Enfeitiçado, Exaustão e Envenenado.',
+            greaterUndeadSpec: {
+                count: 2,
+                durTurns: 100,
+                concentration: false,
+                summonKind: 'create_undead_ghoul',
+                unitSpec: {
+                    name: 'Carniçal',
+                    ico: '🧟',
+                    iconHeraldic: 'ic-ghoul',
+                    hp: 22, mhp: 22, ac: 12,
+                    dex: 15, wis: 10, con: 10, str: 13, int: 7, cha: 6,
+                    atk: 4, die: 4,
+                    damageSpec: { n: 2, d: 4, flat: 2 },
+                    dmgType: 'slashing',
+                    ranged: false,
+                    multiAttack: 1,
+                    speed: 6,
+                    immunities: ['poison'],
+                    conditionImmunities: ['charmed', 'exhaustion', 'poisoned'],
+                    paralyzingClaws: { dc: 10, ability: 'con' }
+                }
             } }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '', dmgMod: 3, attr: 'DEX',
@@ -865,6 +892,33 @@ var CHAR_CLASSES = [
                     speed: 8,
                     immunities: ['psychic'],
                     conditionImmunities: ['charmed', 'frightened', 'poisoned']
+                }
+            } },
+        /* V1.20 (2026-10-16) — Criar Mortos-Vivos (PHB p.229 — Create Undead).
+           Mago/Clérigo nv 11+. Ergue 2 Carniçais com garras paralisantes (sem concentração). */
+        { n: 'Criar Mortos-Vivos', ico: '🧟', cost: 6, kind: 'summon_greater_undead', minLevel: 11, concentration: false,
+            desc: 'Ergue 2 Carniçais (Ghouls mortos-vivos CR 1, Garras 2d4+2 e Salvaguarda de CON CD 10 contra Paralisia sem concentração) como aliados da comitiva.',
+            helpDnd5e: 'Criar Mortos-Vivos / Create Undead (PHB p. 229 — Mago, Clérigo e Bruxo nv 11): magia de 6º círculo; alcance 3m; Sem Concentração (24 horas). Ergue 2 carniçais vorazes que obedecem aos seus comandos e lutam como aliados da comitiva.\nCada Carniçal tem HP 22, CA 12, atk +4, 2d4+2 dano cortante. Criaturas atingidas (exceto elfos e mortos-vivos) devem passar em uma Salvaguarda de Constituição CD 10 ou sofrem a condição Paralisado. Imune a dano de veneno e às condições Enfeitiçado, Exaustão e Envenenado.',
+            greaterUndeadSpec: {
+                count: 2,
+                durTurns: 100,
+                concentration: false,
+                summonKind: 'create_undead_ghoul',
+                unitSpec: {
+                    name: 'Carniçal',
+                    ico: '🧟',
+                    iconHeraldic: 'ic-ghoul',
+                    hp: 22, mhp: 22, ac: 12,
+                    dex: 15, wis: 10, con: 10, str: 13, int: 7, cha: 6,
+                    atk: 4, die: 4,
+                    damageSpec: { n: 2, d: 4, flat: 2 },
+                    dmgType: 'slashing',
+                    ranged: false,
+                    multiAttack: 1,
+                    speed: 6,
+                    immunities: ['poison'],
+                    conditionImmunities: ['charmed', 'exhaustion', 'poisoned'],
+                    paralyzingClaws: { dc: 10, ability: 'con' }
                 }
             } }
       ] },
@@ -1828,6 +1882,33 @@ var CHAR_CLASSES = [
                     multiAttack: 1,
                     speed: 8,
                     conditionImmunities: ['charmed']
+                }
+            } },
+        /* V1.20 (2026-10-16) — Criar Mortos-Vivos (PHB p.108 & 229 — Create Undead / Arcanum Místico).
+           Bruxo nv 11+. Ergue 2 Carniçais com garras paralisantes (sem concentração). */
+        { n: 'Criar Mortos-Vivos', ico: '🧟', cost: 1, kind: 'summon_greater_undead', minLevel: 11, concentration: false,
+            desc: 'Arcanum Místico (PHB p.108): ergue 2 Carniçais (Ghouls mortos-vivos CR 1, Garras 2d4+2 e Salvaguarda de CON CD 10 contra Paralisia sem concentração) como aliados da comitiva.',
+            helpDnd5e: 'Criar Mortos-Vivos / Create Undead (PHB p. 229, Arcanum Místico p. 108 — Bruxo nv 11): magia de 6º círculo via Arcanum Místico; alcance 3m; Sem Concentração (24 horas). Ergue 2 carniçais vorazes que obedecem aos seus comandos e lutam como aliados da comitiva.\nCada Carniçal tem HP 22, CA 12, atk +4, 2d4+2 dano cortante. Criaturas atingidas (exceto elfos e mortos-vivos) devem passar em uma Salvaguarda de Constituição CD 10 ou sofrem a condição Paralisado. Imune a dano de veneno e às condições Enfeitiçado, Exaustão e Envenenado.',
+            greaterUndeadSpec: {
+                count: 2,
+                durTurns: 100,
+                concentration: false,
+                summonKind: 'create_undead_ghoul',
+                unitSpec: {
+                    name: 'Carniçal',
+                    ico: '🧟',
+                    iconHeraldic: 'ic-ghoul',
+                    hp: 22, mhp: 22, ac: 12,
+                    dex: 15, wis: 10, con: 10, str: 13, int: 7, cha: 6,
+                    atk: 4, die: 4,
+                    damageSpec: { n: 2, d: 4, flat: 2 },
+                    dmgType: 'slashing',
+                    ranged: false,
+                    multiAttack: 1,
+                    speed: 6,
+                    immunities: ['poison'],
+                    conditionImmunities: ['charmed', 'exhaustion', 'poisoned'],
+                    paralyzingClaws: { dc: 10, ability: 'con' }
                 }
             } }
       ],
