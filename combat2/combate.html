@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T08:04:30Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T08:20:02Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -12526,6 +12526,69 @@ canvas#vfxCanvas,
   100% { transform: rotate(360deg); }
 }
 
+/* Auras de Condições e Buffs D&D 5e (PHB p. 48, 219, 275, 292 / BG3 / Solasta) */
+.token-rage-aura {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(239, 68, 68, 0.75);
+  box-shadow: 0 0 14px rgba(220, 38, 38, 0.65), inset 0 0 8px rgba(239, 68, 68, 0.45);
+  pointer-events: none;
+  animation: rageFlamePulse 1.6s ease-in-out infinite alternate;
+  z-index: 2;
+}
+@keyframes rageFlamePulse {
+  0% { transform: scale(0.96); opacity: 0.75; box-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
+  50% { transform: scale(1.04); opacity: 1; box-shadow: 0 0 18px rgba(239, 68, 68, 0.85); }
+  100% { transform: scale(0.98); opacity: 0.85; box-shadow: 0 0 12px rgba(220, 38, 38, 0.6); }
+}
+
+.token-bless-aura {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.2px solid rgba(250, 204, 21, 0.8);
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.5), inset 0 0 7px rgba(254, 240, 138, 0.35);
+  pointer-events: none;
+  animation: blessHaloPulse 2.8s ease-in-out infinite alternate;
+  z-index: 2;
+}
+@keyframes blessHaloPulse {
+  0% { transform: scale(0.97); opacity: 0.7; }
+  100% { transform: scale(1.03); opacity: 1; box-shadow: 0 0 18px rgba(250, 204, 21, 0.75); }
+}
+
+.token-poison-aura {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.2px dashed rgba(34, 197, 94, 0.75);
+  box-shadow: 0 0 12px rgba(22, 163, 74, 0.55), inset 0 0 8px rgba(34, 197, 94, 0.35);
+  pointer-events: none;
+  animation: poisonMistUndulate 3s ease-in-out infinite;
+  z-index: 2;
+}
+@keyframes poisonMistUndulate {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.65; }
+  50% { transform: scale(1.04) rotate(180deg); opacity: 0.95; box-shadow: 0 0 16px rgba(34, 197, 94, 0.75); }
+}
+
+.token-shield-aura {
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 1.8px solid #38bdf8;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, rgba(14, 165, 233, 0.04) 70%, transparent 100%);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.65), inset 0 0 10px rgba(56, 189, 248, 0.35);
+  pointer-events: none;
+  animation: shieldArcaneBarrier 2s ease-in-out infinite alternate;
+  z-index: 2;
+}
+@keyframes shieldArcaneBarrier {
+  0% { transform: scale(0.98); opacity: 0.75; }
+  100% { transform: scale(1.02); opacity: 1; box-shadow: 0 0 20px rgba(56, 189, 248, 0.85); }
+}
+
 /* Feixes Arcanos de Concentração (D&D 5e PHB p. 203 / Solasta) */
 .hex-concentration-beam {
   fill: none;
@@ -12613,6 +12676,73 @@ canvas#vfxCanvas,
   25% { transform: translateX(-50%) scale(1) translateY(0); }
   80% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
   100% { opacity: 0; transform: translateX(-50%) scale(0.92) translateY(-12px); }
+}
+
+/* Banner Dramático de Falha Crítica D&D 5e (Natural 1 - BG3 / Solasta) */
+.dnd-fumble-banner-overlay {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fumbleBannerFlow 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.dnd-fumble-banner-box {
+  background: linear-gradient(180deg, rgba(38, 12, 12, 0.95) 0%, rgba(20, 6, 6, 0.98) 100%);
+  border: 1.5px solid #ef4444;
+  border-radius: 8px;
+  padding: 10px 24px;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.55), inset 0 0 15px rgba(239, 68, 68, 0.25);
+  text-align: center;
+  backdrop-filter: blur(4px);
+}
+.dnd-fumble-banner-kicker {
+  font-family: var(--v-font-mono, monospace);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: #fca5a5;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.dnd-fumble-banner-title {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fee2e2;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.85);
+}
+.dnd-fumble-banner-die {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #ef4444;
+  text-shadow: 0 0 12px rgba(239, 68, 68, 0.95);
+  margin: 2px 0;
+}
+.dnd-fumble-banner-desc {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 10px;
+  color: #fecaca;
+}
+@keyframes fumbleBannerFlow {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.6) translateY(-10px); }
+  15% { opacity: 1; transform: translateX(-50%) scale(1.04) translateY(0); }
+  25% { transform: translateX(-50%) scale(1) translateY(0); }
+  80% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) scale(0.92) translateY(-12px); }
+}
+
+.floating-dmg .fct-mod--immune {
+  background: rgba(35, 30, 10, 0.92);
+  border: 1px solid #eab308;
+  color: #fef08a;
+  box-shadow: 0 0 6px rgba(234, 179, 8, 0.45);
 }
 
 /* Trilha Tática de Movimento e Alerta de AoO (D&D 5e PHB p. 190 / p. 195) */
@@ -20271,7 +20401,7 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
         opts = { crit: opts, dmgType: arguments[3] || '' };
     }
     opts = opts || {};
-    if (!target || dmg <= 0) return;
+    if (!target || (dmg <= 0 && !opts.immune)) return;
     var uid = null;
     if (currentState && currentState.order) {
         for (var i = 0; i < currentState.order.length; i++) {
@@ -20315,13 +20445,15 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
     if (opts.crit) {
         fctInner += '<span class="fct-crit-tag">✦ Crítico!</span>';
     }
-    fctInner += '<span class="fct-main-num">-' + dmg + '</span>';
+    fctInner += '<span class="fct-main-num">' + (opts.immune ? '0' : '-' + dmg) + '</span>';
     var dtKey = (opts.dmgType || '').toLowerCase();
     if (dtKey && DND_DAMAGE_TYPES[dtKey]) {
         var dtMeta = DND_DAMAGE_TYPES[dtKey];
         fctInner += '<span class="fct-type-tag">' + dtMeta.glyph + ' ' + dtMeta.label + '</span>';
     }
-    if (opts.resisted) {
+    if (opts.immune) {
+        fctInner += '<span class="fct-mod-tag fct-mod--immune">🚫 Imunidade (0 Dano)</span>';
+    } else if (opts.resisted) {
         fctInner += '<span class="fct-mod-tag fct-mod--resist">½ Resistência</span>';
     } else if (opts.vulnerable) {
         fctInner += '<span class="fct-mod-tag fct-mod--vuln">×2 Vulnerabilidade</span>';
@@ -20370,9 +20502,13 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
     }
 
     // 2026-10-12 D&D 5e: Imunidades, Vulnerabilidades e Resistências de Criatura (PHB p. 197 & MM p. 11)
+    var _isTargetImmune = false;
+    var _isTargetResistant = false;
+    var _isTargetVulnerable = false;
     if (damageApplied > 0 && target && dmgMeta.dmgType) {
         var _canonDt = String(dmgMeta.dmgType).toLowerCase().trim();
         if (target.immunities && target.immunities.some(function (im) { return String(im).toLowerCase().trim() === _canonDt; })) {
+            _isTargetImmune = true;
             damageApplied = 0;
             newHp = oldHp;
             if (s && s.log) s.log.push(target.n + ' é IMUNE a ' + _canonDt + ': 0 dano sofrido.');
@@ -20382,6 +20518,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
                 if (_imEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_imEl, 'IMUNE', 'buff');
             } catch (_eIm) {}
         } else if (damageApplied > 0 && target.vulnerabilities && target.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _canonDt; })) {
+            _isTargetVulnerable = true;
             var _origVul = damageApplied;
             damageApplied = damageApplied * 2;
             newHp = oldHp - damageApplied;
@@ -20392,6 +20529,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
                 if (_vulEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_vulEl, 'VULNERÁVEL', 'crit');
             } catch (_eVul) {}
         } else if (damageApplied > 0 && target.resistances && target.resistances.some(function (res) { return String(res).toLowerCase().trim() === _canonDt; })) {
+            _isTargetResistant = true;
             var _origRes = damageApplied;
             damageApplied = Math.max(1, Math.floor(damageApplied / 2));
             newHp = oldHp - damageApplied;
@@ -20438,10 +20576,13 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
     // 2026-06-07: dmgMeta.deferFct adia o FCT (a animação do dano sofrido) — usado
     // quando uma reação (ex.: Repreensão Infernal) vai abrir um popup ANTES: o
     // chamador dispara o FCT só depois que o jogador decide.
-    if (damageApplied > 0 && !dmgMeta.deferFct) {
+    if ((damageApplied > 0 || _isTargetImmune) && !dmgMeta.deferFct) {
         _spawnFloatingDmgNumber(target, damageApplied, {
             crit: !!dmgMeta.deathFailCrit,
             dmgType: dmgMeta.dmgType || '',
+            immune: _isTargetImmune,
+            resisted: _isTargetResistant,
+            vulnerable: _isTargetVulnerable,
             /* V1 Invocações Phase 4 — summon damage herda cor da classe do conjurador */
             summonCasterCls: dmgMeta.summonCasterCls || null
         });
@@ -23483,6 +23624,22 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     if (hasTorch && (isPlayer || isAlly)) {
         html += '<div class="token-light-aura" title="D&D 5e (PHB p. 183): Fonte de Luz (Tocha / Magia)"></div>';
     }
+    var isRaging = !!(u.isRaging || (u.se && u.se.some(function (st) { return st && (st.id === 'furia' || st.id === 'rage' || st.rageResistance); })));
+    if (isRaging) {
+        html += '<div class="token-rage-aura" title="D&D 5e (PHB p. 48): Fúria Bárbara Ativa (Resistência a dano físico e dano extra)"></div>';
+    }
+    var isBlessed = !!(u.se && u.se.some(function (st) { return st && (st.id === 'bless' || st.blessSpell || (st.n && (st.n.indexOf('Bênção') >= 0 || st.n.indexOf('Bencao') >= 0))); }));
+    if (isBlessed) {
+        html += '<div class="token-bless-aura" title="D&D 5e (PHB p. 219): Bênção (+1d4 em ataques e salvaguardas)"></div>';
+    }
+    var isPoisoned = !!(u.se && u.se.some(function (st) { return st && (st.id === 'poison' || st.poisoned || (st.n && st.n.indexOf('Envenenad') >= 0)); }));
+    if (isPoisoned) {
+        html += '<div class="token-poison-aura" title="D&D 5e (PHB p. 292): Condição Envenenado (Desvantagem em ataques e testes)"></div>';
+    }
+    var hasShieldSpell = !!(u.se && u.se.some(function (st) { return st && (st.id === 'shield' || st.id === 'escudo_arcano' || (st.n && st.n.indexOf('Escudo Arcano') >= 0)); }));
+    if (hasShieldSpell) {
+        html += '<div class="token-shield-aura" title="D&D 5e (PHB p. 275): Escudo Arcano (+5 CA)"></div>';
+    }
     if (inTargetReach) {
         html += '<div class="token-target-lock-ring"></div>';
     }
@@ -24270,6 +24427,43 @@ function spawnCritDramaticBanner(actorUnit, targetUnit, ev) {
         '  <div class="dnd-crit-banner-title">✦ ACERTO CRÍTICO ✦</div>' +
         '  <div class="dnd-crit-banner-die">NATURAL 20</div>' +
         '  <div class="dnd-crit-banner-desc">' + escHtml(aName) + ' desfere um golpe demolidor contra ' + escHtml(tName) + '! Dados de dano dobrados.</div>' +
+        '</div>';
+
+    app.appendChild(banner);
+
+    setTimeout(function () {
+        if (banner && banner.parentNode) {
+            banner.parentNode.removeChild(banner);
+        }
+    }, 1850);
+}
+
+/**
+ * D&D 5e (PHB p. 194) / Baldur's Gate 3 / Solasta:
+ * Exibe banner cinematográfico dramático de Falha Crítica (Natural 1) no campo de batalha,
+ * telegrafando o erro automático garantido pelas regras da 5e sem travar o ritmo da rodada.
+ */
+function spawnFumbleDramaticBanner(actorUnit, targetUnit, ev) {
+    var app = document.getElementById('app') || document.body;
+    if (!app) return;
+
+    var existing = document.getElementById('dndFumbleDramaticBanner');
+    if (existing && existing.parentNode) {
+        existing.parentNode.removeChild(existing);
+    }
+
+    var aName = (actorUnit && actorUnit.n) ? actorUnit.n : (ev && ev.actorName ? ev.actorName : 'Combatente');
+    var tName = (targetUnit && targetUnit.n) ? targetUnit.n : (ev && ev.targetName ? ev.targetName : 'Alvo');
+
+    var banner = document.createElement('div');
+    banner.id = 'dndFumbleDramaticBanner';
+    banner.className = 'dnd-fumble-banner-overlay';
+    banner.innerHTML =
+        '<div class="dnd-fumble-banner-box">' +
+        '  <div class="dnd-fumble-banner-kicker">D&D 5e • LIVRO DO JOGADOR p. 194</div>' +
+        '  <div class="dnd-fumble-banner-title">✕ FALHA CRÍTICA ✕</div>' +
+        '  <div class="dnd-fumble-banner-die">NATURAL 1</div>' +
+        '  <div class="dnd-fumble-banner-desc">' + escHtml(aName) + ' vacila o golpe contra ' + escHtml(tName) + '! Erro automático independentemente de modificadores.</div>' +
         '</div>';
 
     app.appendChild(banner);
@@ -42800,20 +42994,33 @@ async function __combatAnimateOneEvent(ev) {
                vertical em viewport baixo (Telegram WebApp desktop). */
             await new Promise(function (rD) {
                 try {
+                    var _advMode = ev.advMode || ev.adv || null;
+                    var _raw1 = ev.d20Raw1 != null ? ev.d20Raw1 : ev.advRaw1;
+                    var _raw2 = ev.d20Raw2 != null ? ev.d20Raw2 : ev.advRaw2;
                     showDice(ev.d20, rD, actorForDice, ev.skillName || null, {
                         combatTarget: targetForDice,
+                        advMode: _advMode,
+                        advRaw1: _raw1,
+                        advRaw2: _raw2,
                         postResult: function () {
+                            var _kicker = 'd20';
+                            if (_advMode === 'advantage') _kicker = 'd20 • VANTAGEM (2d20kh1)';
+                            else if (_advMode === 'disadvantage') _kicker = 'd20 • DESVANTAGEM (2d20kl1)';
+                            var _rows = [];
+                            if (_advMode && _raw1 != null && _raw2 != null) {
+                                _rows.push({ l: 'Dados', v: _raw1 + ' e ' + _raw2 + ' → ' + ev.d20 });
+                            } else {
+                                _rows.push({ l: 'Rolagem', v: String(ev.d20) });
+                            }
+                            _rows.push({ l: 'Ataque', v: '+' + (ev.atk || 0) });
+                            _rows.push({ l: 'Total', v: String(ev.total || ev.d20 + (ev.atk || 0)) });
+                            _rows.push({ l: 'CA alvo', v: String(ev.ac || '?') });
                             return {
                                 title: ev.hit ? (ev.crit ? 'CRÍTICO' : 'Acertou') : 'Errou',
                                 cls: ev.hit ? (ev.crit ? 'crit' : 'hit') : 'miss',
                                 subStructured: {
-                                    kicker: 'd20',
-                                    rows: [
-                                        { l: 'Rolagem', v: String(ev.d20) },
-                                        { l: 'Ataque', v: '+' + (ev.atk || 0) },
-                                        { l: 'Total', v: String(ev.total || ev.d20 + (ev.atk || 0)) },
-                                        { l: 'CA alvo', v: String(ev.ac || '?') }
-                                    ],
+                                    kicker: _kicker,
+                                    rows: _rows,
                                     note: ev.hit ? ('Dano: ' + (ev.dmgTotal | 0)) : 'Não alcançou a CA.'
                                 }
                             };
@@ -42835,6 +43042,9 @@ async function __combatAnimateOneEvent(ev) {
                 setTimeout(function () { if (elT) elT.classList.remove('dodged', 'miss-target-flash'); }, 600);
             }
             if (ev.d20 === 1) {
+                if (typeof spawnFumbleDramaticBanner === 'function') {
+                    try { spawnFumbleDramaticBanner(aU, tU, ev); } catch (eFB) {}
+                }
                 if (elA && typeof spawnSkillImpactLabel === 'function') {
                     try { spawnSkillImpactLabel(elA, '✕ NAT 1 FALHA CRÍTICA!', 'fumble'); } catch (eFum) {}
                 }
@@ -42975,9 +43185,25 @@ async function __combatAnimateOneEvent(ev) {
         }
         if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
             try {
+                var _isRemImm = false;
+                var _isRemVuln = false;
+                var _isRemRes = false;
+                var _cDt = String(dmgType || '').toLowerCase().trim();
+                if (_cDt && tU) {
+                    if (tU.immunities && tU.immunities.some(function (im) { return String(im).toLowerCase().trim() === _cDt; })) {
+                        _isRemImm = true;
+                    } else if (tU.vulnerabilities && tU.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _cDt; })) {
+                        _isRemVuln = true;
+                    } else if (tU.resistances && tU.resistances.some(function (res) { return String(res).toLowerCase().trim() === _cDt; })) {
+                        _isRemRes = true;
+                    }
+                }
                 _spawnFloatingDmgNumber(tU, ev.dmgTotal | 0, {
                     crit: !!ev.crit,
-                    dmgType: dmgType
+                    dmgType: dmgType,
+                    immune: _isRemImm,
+                    resisted: _isRemRes,
+                    vulnerable: _isRemVuln
                 });
             } catch (eFCT) { console.warn('[C-REM:VFX] _spawnFloatingDmgNumber failed', eFCT); }
         }
