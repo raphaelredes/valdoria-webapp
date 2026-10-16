@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-16T14:07:33Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-16T16:08:21Z - do not edit directly, edit source -->
 
 
 
@@ -21484,12 +21484,12 @@ const FIXED_MAPS = {
                   { label: 'Conversar com cuidado',
                     skill: 'cha', dc: 12,
                     desc: 'Carisma (Persuasao) CD 12 — abordar com tom calmo',
-                    outcome_ok: { text: '"Brakthar matou meu pai. Ele caira hoje, contigo ou sem ti." Ele explica: o xama esta atras da tenda, mas Brakthar esta sozinho no trono.', xp: 25, _flag: 'orc_youth_intel' },
+                    outcome_ok: { text: '"Brakthar matou meu pai. Ele caira hoje, com ou sem você." Ele explica: o xama esta atras da tenda, mas Brakthar esta sozinho no trono.', xp: 25, _flag: 'orc_youth_intel' },
                     outcome_fail: { text: 'Ele fica em silencio, lendo seu rosto. Nao confia ainda.', xp: 8 } },
                   { label: 'Curar a ferida e oferecer alianca',
                     skill: 'wis', dc: 13,
                     desc: 'Sabedoria (Medicina) CD 13 + persuasao implicita',
-                    outcome_ok: { text: 'Você estanca o sangue. Ele cospe no chao, depois fala devagar: "Ele caira hoje, contigo ou sem ti." Ele se levanta e oferece luta lado a lado. Vantagem no primeiro ataque vs Brakthar.', xp: 40, hp_gain: 5, _flag: 'orc_youth_ally' },
+                    outcome_ok: { text: 'Você estanca o sangue. Ele cospe no chao, depois fala devagar: "Ele caira hoje, com ou sem você." Ele se levanta e oferece luta lado a lado. Vantagem no primeiro ataque vs Brakthar.', xp: 40, hp_gain: 5, _flag: 'orc_youth_ally' },
                     outcome_fail: { text: 'Você cura a ferida, mas as palavras erram o tom. O orc foge mancando, sem alianca.', xp: 15 } }
                 ]
               }
@@ -21504,14 +21504,14 @@ const FIXED_MAPS = {
               _chainTo: {
                 id: 'memorial_after_chant',
                 title: 'O Cantico Atrai Atenção',
-                text: 'Sua voz, mesmo baixa, ressoou pelo ar tribal. O orc jovem encarou você: "Tu nao deveria saber isso." A reação dele decide muito.',
+                text: 'Sua voz, mesmo baixa, ressoou pelo ar tribal. O orc jovem encarou você: "Você não deveria saber isso." A reação dele decide muito.',
                 flavor: 'Memorial · estagio 2',
                 category: 'social',
                 choices: [
                   { label: 'Convencer que o cantico ajuda ambos',
                     skill: 'cha', dc: 14,
                     desc: 'Carisma (Persuasao) CD 14 — explicar objetivo comum',
-                    outcome_ok: { text: '"Eu vou usar contra Brakthar. Posso te ajudar?" Ele encara longo, depois assente. "Entao luta comigo. Ele matou meu pai." Aliado.', xp: 35, _flag: 'orc_youth_ally', hp_gain: 3 },
+                    outcome_ok: { text: '"Eu vou usar contra Brakthar. Posso ajudar você?" Ele encara longo, depois assente. "Entao lute comigo. Ele matou meu pai." Aliado.', xp: 35, _flag: 'orc_youth_ally', hp_gain: 3 },
                     outcome_fail: { text: 'Ele desvia o olhar desconfiado. "Estranho aprende cantico sagrado depressa demais. Algo nao bate." Permanece neutro.', xp: 8 } },
                   { label: 'Ignorar o orc e seguir',
                     desc: 'Sair do memorial mantendo so o cantico',
@@ -21643,7 +21643,7 @@ const FIXED_MAPS = {
       // ou eficacia das opcoes muda baseado no que voce acumulou nos encontros 1-7.
       { id: 'brakthar_throne', col: 11, row: 3, _hex: 'L4',
         title: 'Brakthar, Quebrador de Crânios',
-        text: 'Grossas cortinas de pele de mamute e couro cru bloqueiam o vento exterior. O interior da grande tenda e iluminado pelo brilho sufocante de braseiros de ferro em forma de cranio. O ar e pesado, denso com aroma de sangue coagulado, ervas amargas de xama e madeira queimada. No centro, sobre um trono macico esculpido em troncos petrificados e coroado por cranios com chifres, repousa Brakthar, Quebrador de Crânios. Seus musculos monumentais sao sulcados por cicatrizes de cem batalhas, e no peito largo, runas tribais reluzem em fogo escarlate vivo. O grande machado de duas maos descansa sobre seus joelhos. Ele te encara fixamente com olhos amarelados e predatórios, sem pressa alguma de se erguer. Um sorriso desdenhoso racha seus lábios grotescos: "Veio morrer aqui diante dos deuses da guerra... ou veio negociar com o dono deste vale?"',
+        text: 'Grossas cortinas de pele de mamute e couro cru bloqueiam o vento exterior. O interior da grande tenda e iluminado pelo brilho sufocante de braseiros de ferro em forma de cranio. O ar e pesado, denso com aroma de sangue coagulado, ervas amargas de xama e madeira queimada. No centro, sobre um trono macico esculpido em troncos petrificados e coroado por cranios com chifres, repousa Brakthar, Quebrador de Crânios. Seus musculos monumentais sao sulcados por cicatrizes de cem batalhas, e no peito largo, runas tribais reluzem em fogo escarlate vivo. O grande machado de duas maos descansa sobre seus joelhos. Ele encara você fixamente com olhos amarelados e predatórios, sem pressa alguma de se erguer. Um sorriso desdenhoso racha seus lábios grotescos: "Veio morrer aqui diante dos deuses da guerra... ou veio negociar com o dono deste vale?"',
         flavor: 'Trono do Chefe · 5 de 5 · BOSS FIGHT',
         category: 'danger',
         choices: [
@@ -21658,11 +21658,11 @@ const FIXED_MAPS = {
           { label: 'Intimidar com conhecimento das runas',
             skill: 'cha', dc: 14,
             desc: 'Carisma (Intimidação) CD 14. Sucesso: ele perde turno inicial + CA reduzida em 2.',
-            outcome_ok: { text: '"As runas no teu peito — eu sei como cancelá-las. O xamã não vai te salvar." Brakthar congela. A dúvida racha a fúria — sua guarda baixa. SURPRESA + CA -2.',
+            outcome_ok: { text: '"As runas no seu peito — eu sei como cancelá-las. O xamã não vai salvar você." Brakthar congela. A dúvida racha a fúria — sua guarda baixa. SURPRESA + CA -2.',
               xp: 30,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar',
                 surprise: true, preCombatEffects: ['boss_ac_debuff'] } },
-            outcome_fail: { text: 'Ele ri. "Tu falas demais para alguém que vai morrer." Combate sem bônus.',
+            outcome_fail: { text: 'Ele ri. "Você fala demais para alguém que vai morrer." Combate sem bônus.',
               xp: 5,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
           // ── 3. ENTOAR O CÂNTICO DO XAMÃ ──
@@ -21698,16 +21698,16 @@ const FIXED_MAPS = {
               xp: 30,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar',
                 surprise: true, preCombatEffects: ['first_attack_adv'] } },
-            outcome_fail: { text: 'Ele se levanta a tempo, machado em guarda. "Tu correu como um filhote." Combate sem bônus, você levou um arranhão.',
+            outcome_fail: { text: 'Ele se levanta a tempo, machado em guarda. "Você correu como um filhote." Combate sem bônus, você levou um arranhão.',
               xp: 5, hp_loss: 3,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
           // ── 6. NEGOCIAR SAÍDA (alta DC, peaceful exit ou boss enraged) ──
           { label: 'Negociar saída pacífica',
             skill: 'cha', dc: 16,
             desc: 'Carisma (Persuasão) CD 16 — muito difícil. Sucesso: evita combate. Falha: boss ENFURECIDO (+2 dano) ataca primeiro.',
-            outcome_ok: { text: '"Posso ir embora agora. Tu mantens teu trono, eu mantenho a vida. Ninguém vence aqui hoje." Brakthar encara longo. "...Tu tens coragem. Vai. Mas não volte." Você sai sem combate.',
+            outcome_ok: { text: '"Posso ir embora agora. Você mantém seu trono, eu mantenho a vida. Ninguém vence aqui hoje." Brakthar encara longo. "...Você tem coragem. Vá. Mas não volte." Você sai sem combate.',
               xp: 80, _flag: 'brakthar_spared' },
-            outcome_fail: { text: 'Brakthar ri até as runas tremerem. "Tu pensa que sou rei? Eu sou fúria. Não há negociação." Boss ENFURECIDO (+2 dano), você levou um soco antes do combate.',
+            outcome_fail: { text: 'Brakthar ri até as runas tremerem. "Você pensa que sou rei? Eu sou fúria. Não há negociação." Boss ENFURECIDO (+2 dano), você levou um soco antes do combate.',
               xp: 5, hp_loss: 5,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar',
                 surprise: false, preCombatEffects: ['boss_enraged'] } } },
@@ -21716,7 +21716,7 @@ const FIXED_MAPS = {
             only_race: 'meio_orc',
             skill: 'cha', dc: 12,
             desc: 'Carisma (Intimidacao) CD 12 — invocar o codigo sagrado do combate um-contra-um da estepe',
-            outcome_ok: { text: '"Eu trago o sangue dos antigos clas que tu traiste, Brakthar! Eu te desafio pelo trono perante os espiritos!" Brakthar aceita com respeito tribal — foco mortal no 1º golpe (Vantagem no 1º ataque + SURPRESA)!',
+            outcome_ok: { text: '"Eu trago o sangue dos antigos clas que você traiu, Brakthar! Desafio você pelo trono perante os espiritos!" Brakthar aceita com respeito tribal — foco mortal no 1º golpe (Vantagem no 1º ataque + SURPRESA)!',
               xp: 45,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: true, preCombatEffects: ['first_attack_adv'] } },
             outcome_fail: { text: 'Brakthar cospe na terra: "Mestico nao tem cla!" Ele ataca em furia cega.',
@@ -21726,7 +21726,7 @@ const FIXED_MAPS = {
             only_race: 'anao',
             skill: 'str', dc: 13,
             desc: 'Forca (Atletismo / Vinganca) CD 13 — erguer o martelo e vingar a traicao do Cla Picoluno',
-            outcome_ok: { text: '"Pelo ferro forjado e pelas cinzas do Cla Picoluno, tua traicao acaba hoje!" A indignacao ana abala a postura de Brakthar — guarda desfeita (CA -2 e Vantagem no 1º ataque)!',
+            outcome_ok: { text: '"Pelo ferro forjado e pelas cinzas do Cla Picoluno, sua traicao acaba hoje!" A indignacao ana abala a postura de Brakthar — guarda desfeita (CA -2 e Vantagem no 1º ataque)!',
               xp: 50,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: true, preCombatEffects: ['boss_ac_debuff', 'first_attack_adv'] } },
             outcome_fail: { text: 'Brakthar gargalha: "Mais anoes para o monturo!" Choque direto.',
@@ -21749,7 +21749,7 @@ const FIXED_MAPS = {
             outcome_ok: { text: 'Você proclama a sentenca de Brakthar sob a luz dos deuses. Uma aura dourada ofuscante irrompe na tenda, sufocando as runas de Gruumsh — a Investida Furiosa do chefe e paralisada (Investida cancelada + SURPRESA)!',
               xp: 45,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: true, preCombatEffects: ['burst_disabled'] } },
-            outcome_fail: { text: 'Brakthar escarra na luz: "Teus deuses nao mandam no meu machado!" Combate imediato.',
+            outcome_fail: { text: 'Brakthar escarra na luz: "Seus deuses nao mandam no meu machado!" Combate imediato.',
               xp: 8,
               dungeon_combat: { enemy: 'brakthar', lookup_name: 'Brakthar', surprise: false } } },
           { label: 'Identificar a cicatriz da junta no joelho esquerdo (Ladino)',
@@ -42849,7 +42849,7 @@ var LORE_FLAGS_DB = {
   // ── ORC JOVEM (4 outcomes) ──
   'orc_youth_ally':
     { title: 'Orc Jovem Aliado',
-      desc: '"Brakthar matou meu pai. Ele caira hoje." O orc jovem oferece lutar contigo. Vantagem no 1° ataque vs Brakthar.' },
+      desc: '"Brakthar matou meu pai. Ele caira hoje." O orc jovem oferece lutar ao seu lado. Vantagem no 1° ataque vs Brakthar.' },
   'orc_youth_intel':
     { title: 'Intel do Orc Jovem',
       desc: '"O xama esta atras da tenda, mas Brakthar esta sozinho no trono."' },
