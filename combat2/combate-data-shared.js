@@ -960,7 +960,16 @@ var CHAR_CLASSES = [
                     conditionImmunities: ['charmed', 'exhaustion', 'poisoned'],
                     paralyzingClaws: { dc: 10, ability: 'con' }
                 }
-            } }
+            } },
+        /* V1.23 (2026-10-16) — Tempestade de Fogo (PHB p.242 — Fire Storm).
+           Clérigo nv 13+. 7d10 dano de fogo em área (TR Destreza metade). */
+        { n: 'Tempestade de Fogo', ico: '🔥', cost: 7, kind: 'attack', minLevel: 13,
+            dmgType: 'fire', ranged: true, reach: 30,
+            save: { ability: 'dex' }, multiTarget: true,
+            aoeRadius: 6, aoeShape: 'storm',
+            damageSpec: { n: 7, d: 10, flat: 0 },
+            desc: 'Tormenta de labaredas que devasta a área causando 7d10 de dano de fogo (TR Destreza metade). Plantas e vegetação não sofrem dano se você escolher.',
+            helpDnd5e: 'Tempestade de Fogo / Fire Storm (PHB p. 242 — Clérigo, Druida e Feiticeiro nv 13): magia de 7º círculo; 1 Ação; alcance 45m (30 hexágonos). Uma tempestade de labaredas rutilantes desaba sobre o campo de batalha. Cada criatura na área deve realizar um teste de resistência de Destreza. Sofre 7d10 de dano de fogo em caso de falha, ou metade desse dano em caso de sucesso. O fogo não danifica as plantas na área se o conjurador assim desejar.' }
       ] },
     { cls: 'Paladino', hp: [26, 38], ac: [16, 18], atk: [5, 6], die: 8, dex: [8, 12], ico: '', dmgMod: 2, attr: 'STR',
       /* D&D 5e PHB p.84: Paladino é meio-conjurador — Smite Divino e magias
@@ -1760,7 +1769,16 @@ var CHAR_CLASSES = [
                     speed: 8,
                     conditionImmunities: ['charmed']
                 }
-            } }
+            } },
+        /* V1.23 (2026-10-16) — Tempestade de Fogo (PHB p.242 — Fire Storm).
+           Druida nv 13+. 7d10 dano de fogo em área (TR Destreza metade). */
+        { n: 'Tempestade de Fogo', ico: '🔥', cost: 7, kind: 'attack', minLevel: 13,
+            dmgType: 'fire', ranged: true, reach: 30,
+            save: { ability: 'dex' }, multiTarget: true,
+            aoeRadius: 6, aoeShape: 'storm',
+            damageSpec: { n: 7, d: 10, flat: 0 },
+            desc: 'Tormenta de labaredas que devasta a área causando 7d10 de dano de fogo (TR Destreza metade). Plantas e vegetação não sofrem dano se você escolher.',
+            helpDnd5e: 'Tempestade de Fogo / Fire Storm (PHB p. 242 — Clérigo, Druida e Feiticeiro nv 13): magia de 7º círculo; 1 Ação; alcance 45m (30 hexágonos). Uma tempestade de labaredas rutilantes desaba sobre o campo de batalha. Cada criatura na área deve realizar um teste de resistência de Destreza. Sofre 7d10 de dano de fogo em caso de falha, ou metade desse dano em caso de sucesso. O fogo não danifica as plantas na área se o conjurador assim desejar.' }
       ] },
     /* V1.7 Stage 6 (2026-04-21) — Feiticeiro (PHB p.99-108): CHA caster inato.
        ADAPTAÇÕES vs PHB:
@@ -1856,7 +1874,16 @@ var CHAR_CLASSES = [
                 immunities: ['poison'],
                 conditionImmunities: ['poisoned'],
                 undeadFortitude: true
-            } }
+            } },
+        /* V1.23 (2026-10-16) — Tempestade de Fogo (PHB p.242 — Fire Storm).
+           Feiticeiro nv 13+. 7d10 dano de fogo em área (TR Destreza metade). */
+        { n: 'Tempestade de Fogo', ico: '🔥', cost: 7, kind: 'attack', minLevel: 13,
+            dmgType: 'fire', ranged: true, reach: 30,
+            save: { ability: 'dex' }, multiTarget: true,
+            aoeRadius: 6, aoeShape: 'storm',
+            damageSpec: { n: 7, d: 10, flat: 0 },
+            desc: 'Tormenta de labaredas que devasta a área causando 7d10 de dano de fogo (TR Destreza metade). Plantas e vegetação não sofrem dano se você escolher.',
+            helpDnd5e: 'Tempestade de Fogo / Fire Storm (PHB p. 242 — Clérigo, Druida e Feiticeiro nv 13): magia de 7º círculo; 1 Ação; alcance 45m (30 hexágonos). Uma tempestade de labaredas rutilantes desaba sobre o campo de batalha. Cada criatura na área deve realizar um teste de resistência de Destreza. Sofre 7d10 de dano de fogo em caso de falha, ou metade desse dano em caso de sucesso. O fogo não danifica as plantas na área se o conjurador assim desejar.' }
       ] },
     /* V1.7 Stage 7 (2026-04-21) — Bruxo (PHB p.105-115): CHA caster com pact patron.
        ADAPTAÇÕES vs PHB:
