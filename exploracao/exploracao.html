@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-15T02:04:12Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-16T09:52:14Z - do not edit directly, edit source -->
 
 
 
@@ -11195,9 +11195,9 @@ window.__onIntroTap = function() {
         overlay.classList.remove('visible');
         setTimeout(resolve, 350);
       }
-      skipBtn.onclick = function (ev) { ev.stopPropagation(); advance(); };
-      skipBtn.addEventListener('click', function (ev) { ev.stopPropagation(); advance(); });
-      skipBtn.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); advance(); });
+      skipBtn.onclick = function () { advance(); };
+      skipBtn.addEventListener('click', function () { advance(); });
+      skipBtn.addEventListener('pointerup', function () { advance(); });
       skipBtn.style.setProperty('pointer-events', 'auto', 'important');
       skipBtn.style.setProperty('cursor', 'pointer', 'important');
       skipBtn.style.setProperty('z-index', '999', 'important');
@@ -13113,10 +13113,10 @@ body.perf-lite .stub-popup-voice { animation: none; }
       // segundo, faça aparecer imediatamente".
       setTimeout(callback, 0);
     }
-    // Múltiplos handlers redundantes (padrão do rollSkillCheck V2.7)
-    skipBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); advance('onclick'); };
-    skipBtn.addEventListener('click', function (ev) { if (ev) ev.stopPropagation(); advance('addEvent'); });
-    skipBtn.addEventListener('pointerdown', function (ev) { if (ev) ev.stopPropagation(); advance('pointerdown'); });
+    // Suporte omnidirecional (Regra #20)
+    skipBtn.onclick = function () { advance('onclick'); };
+    skipBtn.addEventListener('click', function () { advance('addEvent'); });
+    skipBtn.addEventListener('pointerup', function () { advance('pointerup'); });
 
     var resultShown = false;
     function showResult() {
@@ -41154,6 +41154,10 @@ function rollBlindPerceptionCheck(ev, onDone) {
     return;
   }
 
+  // Regra #20 & Isolamento de Estado: limpa ouvintes residuais de rolagens anteriores clonando o botão
+  var cleanSkipBtn = skipBtn.cloneNode(true);
+  skipBtn.parentNode.replaceChild(cleanSkipBtn, skipBtn);
+
   var p = (window.S && window.S.player) || {};
   var wis = (typeof p.wis === 'number') ? p.wis : ((p.stats && p.stats.wis) || 10);
   var wisMod = Math.floor((wis - 10) / 2);
@@ -41177,7 +41181,7 @@ function rollBlindPerceptionCheck(ev, onDone) {
   clearChildren(result);
   result.className = '';
   result.style.display = 'none';
-  skipBtn.style.display = 'none';
+  cleanSkipBtn.style.display = 'none';
 
   formula.innerHTML = '<div style="font-family:var(--v-font-display,\'Cinzel\'),serif; font-size:18px; color:var(--v-gold,#c4953a); letter-spacing:1px; margin-bottom:4px;">TESTE DE SENTIDOS</div>' +
                       '<div style="font-size:13px; color:var(--v-text-muted,#a89f91); font-style:italic;">O Mestre de Mesa pede uma rolagem de dados...</div>';
@@ -41185,18 +41189,50 @@ function rollBlindPerceptionCheck(ev, onDone) {
   overlay.classList.add('visible');
 
   var advanced = false;
-  function advance() {
+  var lastAdvTime = 0;
+  function advance(src) {
     if (advanced) return;
     advanced = true;
+    try { LOG('DICE', 'rollBlindPerceptionCheck advance called source=' + (src || 'unknown')); } catch (_) {}
     overlay.classList.remove('visible');
+    overlay.style.display = 'none';
+    cleanSkipBtn.style.display = 'none';
     setTimeout(function () {
-      if (typeof onDone === 'function') onDone();
-    }, 300);
+      if (typeof onDone === 'function') {
+        try {
+          onDone();
+        } catch (err) {
+          console.error('[DICE] onDone error in blind check:', err);
+          if (typeof openEventModal === 'function') {
+            try { openEventModal(); } catch (_) {}
+          }
+        }
+      }
+    }, 200);
   }
 
-  skipBtn.onclick = function (e) { if (e) e.stopPropagation(); advance(); };
-  skipBtn.addEventListener('click', function (e) { if (e) e.stopPropagation(); advance(); });
-  result.onclick = function () { advance(); };
+  function handleUserAdvance(e, src) {
+    if (!resultShown) return; // Só avança se o resultado já foi exibido (dado rolado)
+    var now = performance.now();
+    if (now - lastAdvTime < 180) return;
+    lastAdvTime = now;
+    advance(src || (e ? e.type : 'userAction'));
+  }
+
+  // Regra #20: suporte omnidirecional sem ev.stopPropagation() em pointerdown
+  ['click', 'pointerup', 'touchend'].forEach(function (evt) {
+    cleanSkipBtn.addEventListener(evt, function (e) { handleUserAdvance(e, 'skipBtn-' + evt); }, { passive: true });
+    result.addEventListener(evt, function (e) { handleUserAdvance(e, 'result-' + evt); }, { passive: true });
+  });
+  cleanSkipBtn.onclick = function (e) { handleUserAdvance(e, 'skipBtn-onclick'); };
+  result.onclick = function (e) { handleUserAdvance(e, 'result-onclick'); };
+
+  // Fallback seguro de toque/clique no overlay quando o resultado já está visível
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay || e.target === wrap) {
+      handleUserAdvance(e, 'overlay-bg');
+    }
+  });
 
   var resultShown = false;
   function showResult() {
@@ -41228,11 +41264,17 @@ function rollBlindPerceptionCheck(ev, onDone) {
       result.innerHTML = 'EMBOSCADA — SURPREENDIDO!';
     }
     result.style.display = 'inline-block';
+    result.style.setProperty('cursor', 'pointer', 'important');
+    result.style.setProperty('pointer-events', 'auto', 'important');
+    result.style.setProperty('user-select', 'none', 'important');
 
-    skipBtn.textContent = 'Ver o que aconteceu ▸';
-    skipBtn.style.setProperty('display', 'inline-block', 'important');
-    skipBtn.style.setProperty('visibility', 'visible', 'important');
-    skipBtn.style.setProperty('opacity', '1', 'important');
+    cleanSkipBtn.textContent = 'Ver o que aconteceu ▸';
+    cleanSkipBtn.style.setProperty('display', 'inline-block', 'important');
+    cleanSkipBtn.style.setProperty('visibility', 'visible', 'important');
+    cleanSkipBtn.style.setProperty('opacity', '1', 'important');
+    cleanSkipBtn.style.setProperty('pointer-events', 'auto', 'important');
+    cleanSkipBtn.style.setProperty('cursor', 'pointer', 'important');
+    cleanSkipBtn.style.setProperty('z-index', '9999', 'important');
 
     if (!ev.combat) ev.combat = {};
     if (isNat20) {
@@ -41336,11 +41378,10 @@ function rollSkillCheck(choice, cb) {
     overlay.classList.remove('visible');
     setTimeout(() => cb(success, total), 350);
   };
-  // V2.7: m\u00faltiplos handlers redundantes pra garantir que o bot\u00e3o funcione
-  // (user reportou bug persistente). onclick + addEventListener + pointer-events.
-  skipBtn.onclick = (ev) => { ev.stopPropagation(); advance('onclick'); };
-  skipBtn.addEventListener('click', (ev) => { ev.stopPropagation(); advance('addEventListener'); });
-  skipBtn.addEventListener('pointerdown', (ev) => { ev.stopPropagation(); advance('pointerdown'); });
+  // Suporte omnidirecional (Regra #20)
+  skipBtn.onclick = () => advance('onclick');
+  skipBtn.addEventListener('click', () => advance('addEventListener'));
+  skipBtn.addEventListener('pointerup', () => advance('pointerup'));
   skipBtn.style.setProperty('pointer-events', 'auto', 'important');
   skipBtn.style.setProperty('cursor', 'pointer', 'important');
   skipBtn.style.setProperty('z-index', '999', 'important');
@@ -44055,10 +44096,10 @@ function _animateHealDie(dieSize, rawRoll, conMod, actualHeal, fullHp, callback)
     skipBtn.style.cssText = '';  // reseta overrides pro próximo uso do overlay
     setTimeout(_done, 0);
   }
-  // Guard de double-fire + skip só válido após 500ms (Human Reading Time).
-  skipBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); advance(); };
-  skipBtn.addEventListener('click', function (ev) { if (ev) ev.stopPropagation(); advance(); });
-  skipBtn.addEventListener('pointerdown', function (ev) { if (ev) ev.stopPropagation(); advance(); });
+  // Suporte omnidirecional (Regra #20)
+  skipBtn.onclick = function () { advance(); };
+  skipBtn.addEventListener('click', function () { advance(); });
+  skipBtn.addEventListener('pointerup', function () { advance(); });
 
   var resultShown = false;
   function showResult() {
@@ -44140,9 +44181,10 @@ function _animatePotionHealDice(rolls, dieSize, bonus, actualHeal, formulaStr, i
     setTimeout(_done, 0);
   }
 
-  skipBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); advance(); };
-  skipBtn.addEventListener('click', function (ev) { if (ev) ev.stopPropagation(); advance(); });
-  skipBtn.addEventListener('pointerdown', function (ev) { if (ev) ev.stopPropagation(); advance(); });
+  // Suporte omnidirecional (Regra #20)
+  skipBtn.onclick = function () { advance(); };
+  skipBtn.addEventListener('click', function () { advance(); });
+  skipBtn.addEventListener('pointerup', function () { advance(); });
 
   var totalRoll = rolls.reduce(function (a, b) { return a + b; }, 0) + (bonus || 0);
 
