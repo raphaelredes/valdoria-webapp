@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T03:27:13Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T07:04:24Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -12080,6 +12080,65 @@ canvas#vfxCanvas,
   fill: #ff7675;
 }
 
+/* Vetores de Ameaça Tática e Intenção Espacial dos Inimigos (D&D 5e / Into the Breach / Triangle Strategy) */
+.hex-threat-path {
+  fill: none;
+  stroke: rgba(231, 76, 60, 0.42);
+  stroke-width: 1.8;
+  stroke-dasharray: 4 4;
+  animation: threatLineDash 1.6s linear infinite;
+  transition: stroke 0.25s ease, stroke-width 0.25s ease, filter 0.25s ease, opacity 0.25s ease;
+  pointer-events: none;
+  opacity: 0.38;
+}
+.hex-threat-path--boss {
+  stroke: rgba(255, 107, 107, 0.6);
+  stroke-width: 2.2;
+}
+.hex-threat-path--ranged {
+  stroke-dasharray: 5 3;
+}
+.hex-threat-path.threat-active {
+  opacity: 1 !important;
+  stroke: #ff4757 !important;
+  stroke-width: 2.8 !important;
+  stroke-dasharray: 6 3 !important;
+  filter: drop-shadow(0 0 8px rgba(255, 71, 87, 0.85)) !important;
+}
+@keyframes threatLineDash {
+  0% { stroke-dashoffset: 16; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.hex-threat-badge {
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+.hex-threat-badge.threat-active {
+  opacity: 1;
+}
+.hex-threat-badge-bg {
+  fill: rgba(24, 12, 12, 0.95);
+  stroke: #e74c3c;
+  stroke-width: 1.2;
+  rx: 4;
+  ry: 4;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
+}
+.hex-threat-badge-text {
+  fill: #ffb8b8;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.token--threatened .token-disc {
+  box-shadow: 0 0 12px rgba(231, 76, 60, 0.85), inset 0 0 6px rgba(231, 76, 60, 0.45) !important;
+  border-color: #e74c3c !important;
+}
+
 /* Halos e Badges de Condições Canônicas D&D 5e (PHB p. 203, 290-292) */
 .token-concentration-halo {
   position: absolute;
@@ -23079,6 +23138,228 @@ function getHexMicroDetailSvg(cx, cy, detailType, subSeed, isDim) {
 }
 
 /**
+ * D&D 5e / Into the Breach / Baldur's Gate 3:
+ * Computa a intenção espacial determinística de cada inimigo vivo no grid caso não tenha sido
+ * previamente calculada pelo motor Python (`e.it`).
+ */
+function simComputeEnemySpatialIntents(s) {
+    if (!s || !Array.isArray(s.order)) return [];
+    var partyCandidates = [];
+    s.order.forEach(function (u, idx) {
+        if (!u) return;
+        var isParty = (u.t === 'p' || u.t === 'a');
+        var isAlive = (u.alive !== false) && !u.isDead && (typeof u.hp !== 'number' || u.hp > 0) && !u.noTarget;
+        if (isParty && isAlive && u.pos && u.pos.col != null && u.pos.row != null) {
+            partyCandidates.push({ idx: idx, u: u });
+        }
+    });
+
+    var intentsOut = [];
+    s.order.forEach(function (e, eIdx) {
+        if (!e || e.t !== 'e') return;
+        var isAlive = (e.alive !== false) && !e.isDead && (typeof e.hp !== 'number' || e.hp > 0);
+        if (!isAlive || !e.pos || e.pos.col == null || e.pos.row == null) return;
+
+        // Se já tiver e.it válido com targetCol e targetRow (ou stun), preserva
+        if (e.it && (e.it.targetCol != null || e.it.tp === 'stun')) {
+            intentsOut.push({ enemyIdx: eIdx, it: e.it });
+            return;
+        }
+
+        // Verifica incapacitação / atordoamento D&D 5e
+        var seList = e.se || [];
+        var incapSt = null;
+        for (var si = 0; si < seList.length; si++) {
+            var st = seList[si];
+            if (st && (st.skipTurn || st.stunned || st.paralyzed || st.petrified || st.unconscious || st.id === 'surpreso' || st.id === 'surprised' || st.id === 'stunned')) {
+                incapSt = st;
+                break;
+            }
+        }
+        if (incapSt) {
+            var condLabel = String(incapSt.n || incapSt.dndCondition || 'Incapacitado').slice(0, 14);
+            var stunIntent = {
+                tp: 'stun',
+                ic: '◈',
+                lb: condLabel,
+                dmg: 0,
+                targetIdx: null,
+                targetName: null,
+                targetCol: null,
+                targetRow: null
+            };
+            e.it = stunIntent;
+            intentsOut.push({ enemyIdx: eIdx, it: stunIntent });
+            return;
+        }
+
+        if (partyCandidates.length === 0) return;
+
+        // Procura o membro da comitiva mais próximo no grid (desempate: aventureiro principal)
+        var bestCand = partyCandidates[0];
+        var bestDist = 999;
+        for (var ci = 0; ci < partyCandidates.length; ci++) {
+            var cand = partyCandidates[ci];
+            var d = hexDistance(e.pos.col, e.pos.row, cand.u.pos.col, cand.u.pos.row);
+            var charmedBlock = seList.some(function (st) {
+                return st && st.cantAtkCaster && cand.u.t === 'p';
+            });
+            if (charmedBlock && partyCandidates.length > 1) continue;
+            if (d < bestDist || (d === bestDist && cand.u.t === 'p' && bestCand.u.t !== 'p')) {
+                bestDist = d;
+                bestCand = cand;
+            }
+        }
+
+        var isRanged = !!(e.isRanged || (e.atkType === 'ranged') || (e.reach && e.reach > 2));
+        var reachHexes = e.reach || (isRanged ? 6 : 1);
+        var dieSize = Math.max(2, parseInt(e.die, 10) || 6);
+        var dmgMod = parseInt(e.dmgMod, 10) || 0;
+        var multi = Math.max(1, parseInt(e.multiAttack, 10) || 1);
+        var estDmg = Math.max(1, (Math.floor(dieSize / 2) + 1 + dmgMod) * multi);
+
+        var eSkills = e.skills || [];
+        var hasSpell = !!(e.isCaster || (eSkills.length > 0));
+        var tp = hasSpell ? 'skill' : (isRanged ? 'ranged' : 'atk');
+        var ic = hasSpell ? '✦' : (isRanged ? '⌖' : '▲');
+        var lb = (hasSpell && eSkills[0] && eSkills[0].n) ? String(eSkills[0].n).slice(0, 14) : (isRanged ? 'Disparo' : 'Atacar');
+
+        var intentObj = {
+            tp: tp,
+            ic: ic,
+            lb: lb,
+            dmg: estDmg,
+            targetIdx: bestCand.idx,
+            targetName: bestCand.u.n,
+            targetCol: bestCand.u.pos.col,
+            targetRow: bestCand.u.pos.row,
+            isRanged: isRanged,
+            reachHexes: reachHexes
+        };
+        e.it = intentObj;
+        intentsOut.push({ enemyIdx: eIdx, it: intentObj });
+    });
+
+    return intentsOut;
+}
+
+/**
+ * Renderiza a camada SVG de Vetores de Ameaça Tática dos Inimigos (Enemy Threat Vectors).
+ * Projeta curvas parabólicas translúcidas conectando inimigos vivos aos seus alvos previstos,
+ * com badges informativos de intenção e dano estimado (Into the Breach / Baldur's Gate 3).
+ */
+function buildEnemyThreatVectorsSvg(s, partyVisionMap) {
+    if (!s || !Array.isArray(s.order) || s.ph === 'intro' || s.ph === 'victory' || s.ph === 'defeat') return '';
+
+    simComputeEnemySpatialIntents(s);
+
+    var svg = '<g id="hexThreatVectorsLayer" class="hex-threat-vectors-layer">';
+
+    s.order.forEach(function (e, eIdx) {
+        if (!e || e.t !== 'e') return;
+        var isAlive = (e.alive !== false) && !e.isDead && (typeof e.hp !== 'number' || e.hp > 0);
+        if (!isAlive || !e.pos || e.pos.col == null || e.pos.row == null) return;
+
+        // Se o inimigo estiver sob névoa de guerra completa, oculta o vetor de ameaça (D&D 5e Fog of War)
+        var posKey = e.pos.col + ',' + e.pos.row;
+        var tokenVis = partyVisionMap ? partyVisionMap[posKey] : null;
+        var isShrouded = (!tokenVis || (!tokenVis.visible && !tokenVis.dim));
+        if (isShrouded) return;
+
+        var it = e.it;
+        if (!it || it.tp === 'stun' || it.targetCol == null || it.targetRow == null) return;
+
+        var fromCenter = hexCenter(e.pos.col, e.pos.row);
+        var toCenter = hexCenter(it.targetCol, it.targetRow);
+
+        var dx = toCenter.cx - fromCenter.cx;
+        var dy = toCenter.cy - fromCenter.cy;
+        var distPx = Math.sqrt(dx * dx + dy * dy);
+        if (distPx < 2) return;
+
+        // Ponto de controle da curva bezier para arco sutil e estético
+        var perpX = -dy / distPx;
+        var perpY = dx / distPx;
+        var curveOffset = Math.min(26, Math.max(10, distPx * 0.12));
+        var side = (eIdx % 2 === 0) ? 1 : -1;
+        var ctrlX = Math.round((fromCenter.cx + toCenter.cx) / 2 + perpX * curveOffset * side);
+        var ctrlY = Math.round((fromCenter.cy + toCenter.cy) / 2 + perpY * curveOffset * side);
+
+        var isBoss = !!(e.isBoss || e.tier === 'boss');
+        var isRanged = !!(it.isRanged || it.tp === 'ranged' || it.tp === 'skill');
+        var markerId = isBoss ? 'threatArrowBoss' : 'threatArrowRed';
+
+        var pathCls = 'hex-threat-path' + (isBoss ? ' hex-threat-path--boss' : '') + (isRanged ? ' hex-threat-path--ranged' : '');
+        var pathD = 'M ' + fromCenter.cx + ' ' + fromCenter.cy + ' Q ' + ctrlX + ' ' + ctrlY + ' ' + toCenter.cx + ' ' + toCenter.cy;
+
+        svg += '<path d="' + pathD + '" class="' + pathCls + '" marker-end="url(#' + markerId + ')" data-threat-enemy-idx="' + eIdx + '" data-threat-target-idx="' + it.targetIdx + '" />';
+
+        // Badge informativo de intenção no ponto de controle
+        var ic = (it.tp === 'skill') ? '✦' : (isRanged ? '⌖' : (it.tp === 'stun' ? '◈' : '▲'));
+        var labelText = ic + ' ' + (it.lb || 'Atacar') + ' · ~' + (it.dmg || 1) + ' dano';
+        var badgeW = Math.max(54, labelText.length * 6.2 + 14);
+        var badgeH = 17;
+        var bx = Math.round(ctrlX - badgeW / 2);
+        var by = Math.round(ctrlY - badgeH / 2);
+
+        svg += '<g class="hex-threat-badge" data-threat-enemy-idx="' + eIdx + '" data-threat-target-idx="' + it.targetIdx + '">';
+        svg += '<rect x="' + bx + '" y="' + by + '" width="' + badgeW + '" height="' + badgeH + '" class="hex-threat-badge-bg" />';
+        svg += '<text x="' + ctrlX + '" y="' + ctrlY + '" class="hex-threat-badge-text">' + escHtml(labelText) + '</text>';
+        svg += '</g>';
+    });
+
+    svg += '</g>';
+    return svg;
+}
+
+/**
+ * Destaca o vetor de ameaça de um inimigo específico e seu alvo da comitiva.
+ */
+function setEnemyThreatHighlight(enemyIdx, active) {
+    var paths = document.querySelectorAll('.hex-threat-path[data-threat-enemy-idx="' + enemyIdx + '"]');
+    for (var i = 0; i < paths.length; i++) {
+        if (active) paths[i].classList.add('threat-active');
+        else paths[i].classList.remove('threat-active');
+    }
+    var badges = document.querySelectorAll('.hex-threat-badge[data-threat-enemy-idx="' + enemyIdx + '"]');
+    for (var bi = 0; bi < badges.length; bi++) {
+        if (active) badges[bi].classList.add('threat-active');
+        else badges[bi].classList.remove('threat-active');
+    }
+    if (paths.length > 0) {
+        var tgtIdx = parseInt(paths[0].getAttribute('data-threat-target-idx'), 10);
+        if (!isNaN(tgtIdx)) {
+            var tgtToken = (typeof getUnitTokenEl === 'function') ? getUnitTokenEl(currentState, tgtIdx) : null;
+            if (tgtToken) {
+                if (active) tgtToken.classList.add('token--threatened');
+                else tgtToken.classList.remove('token--threatened');
+            }
+        }
+    }
+}
+
+/**
+ * Destaca todos os vetores de ameaça que miram em um membro específico da comitiva.
+ */
+function setTargetThreatHighlight(targetIdx, active) {
+    var paths = document.querySelectorAll('.hex-threat-path[data-threat-target-idx="' + targetIdx + '"]');
+    for (var i = 0; i < paths.length; i++) {
+        if (active) paths[i].classList.add('threat-active');
+        else paths[i].classList.remove('threat-active');
+    }
+    var badges = document.querySelectorAll('.hex-threat-badge[data-threat-target-idx="' + targetIdx + '"]');
+    for (var bi = 0; bi < badges.length; bi++) {
+        if (active) badges[bi].classList.add('threat-active');
+        else badges[bi].classList.remove('threat-active');
+    }
+    var tgtToken = (typeof getUnitTokenEl === 'function') ? getUnitTokenEl(currentState, targetIdx) : null;
+    if (tgtToken) {
+        if (active) tgtToken.classList.add('token--threatened');
+        else tgtToken.classList.remove('token--threatened');
+    }
+}
+
+/**
  * Projeta visualmente trajetórias, áreas de efeito (AoE) e retículos de alvos
  * dos companheiros da comitiva (Shared Intent Ghosts & Fogo Amigo — Pilar 3 D&D 5e).
  */
@@ -23573,6 +23854,8 @@ function buildBattlefield(s) {
     html += '<marker id="aimArrowAmber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#e67e22"/></marker>';
     html += '<marker id="moveArrowGold" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#d4af37"/></marker>';
     html += '<marker id="moveArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#e74c3c"/></marker>';
+    html += '<marker id="threatArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M 0 1.5 L 8.5 5 L 0 8.5 z" fill="#e74c3c"/></marker>';
+    html += '<marker id="threatArrowBoss" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#ff4757"/></marker>';
     html += '<radialGradient id="aoeFireballGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff5722" stop-opacity="0.55"/><stop offset="65%" stop-color="#ff9800" stop-opacity="0.22"/><stop offset="100%" stop-color="#ff5722" stop-opacity="0"/></radialGradient>';
     html += '<radialGradient id="aoeArcaneGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00e5ff" stop-opacity="0.45"/><stop offset="65%" stop-color="#2979ff" stop-opacity="0.18"/><stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/></radialGradient>';
     html += '</defs>';
@@ -23720,6 +24003,9 @@ function buildBattlefield(s) {
 
     // Camada de Projeções de Intenções Compartilhadas / Intent Ghosts (Multiplayer D&D 5e / BG3 / Solasta)
     html += buildSharedIntentsLayerSvg(s, bCols, bRows);
+
+    // Camada de Vetores de Ameaça Tática dos Inimigos (Threat Lines — Into the Breach / BG3 / Solasta)
+    html += buildEnemyThreatVectorsSvg(s, partyVisionMap);
 
     // Camada Dinâmica de Vetor Balístico, Trilha de Movimento e Área de Efeito (D&D 5e)
     html += '<g id="hexAoeVisualLayer" class="hex-aoe-visual-layer" pointer-events="none"></g>';
@@ -27963,10 +28249,18 @@ function bindActions() {
             };
             card.addEventListener('click', onCardTrigger);
             card.addEventListener('pointerenter', function () {
+                var uid = card.getAttribute('data-unit-id');
+                if (uid && uid.indexOf('enemy_') === 0) {
+                    var eIdx = parseInt(uid.slice(6), 10);
+                    if (!isNaN(eIdx) && typeof setEnemyThreatHighlight === 'function') setEnemyThreatHighlight(eIdx, true);
+                } else if (uid === 'player' || (uid && uid.indexOf('ally_') === 0)) {
+                    var myTgtIdx = (uid === 'player') ? (currentState ? currentState.p_idx : 0) : parseInt(uid.slice(5), 10);
+                    if (!isNaN(myTgtIdx) && typeof setTargetThreatHighlight === 'function') setTargetThreatHighlight(myTgtIdx, true);
+                }
+
                 if (!_selectingTarget || !currentState) return;
                 var pUnit = currentState.order[currentState.p_idx];
                 if (!pUnit || !pUnit.pos) return;
-                var uid = card.getAttribute('data-unit-id');
                 var tgtIdx = -1;
                 if (uid === 'player') tgtIdx = currentState.p_idx;
                 else if (uid && uid.indexOf('ally_') === 0) tgtIdx = parseInt(uid.slice(5), 10);
@@ -27995,6 +28289,15 @@ function bindActions() {
                 }
             });
             card.addEventListener('pointerleave', function () {
+                var uid = card.getAttribute('data-unit-id');
+                if (uid && uid.indexOf('enemy_') === 0) {
+                    var eIdx = parseInt(uid.slice(6), 10);
+                    if (!isNaN(eIdx) && typeof setEnemyThreatHighlight === 'function') setEnemyThreatHighlight(eIdx, false);
+                } else if (uid === 'player' || (uid && uid.indexOf('ally_') === 0)) {
+                    var myTgtIdx = (uid === 'player') ? (currentState ? currentState.p_idx : 0) : parseInt(uid.slice(5), 10);
+                    if (!isNaN(myTgtIdx) && typeof setTargetThreatHighlight === 'function') setTargetThreatHighlight(myTgtIdx, false);
+                }
+
                 if (_selectingTarget) {
                     clearTacticalAimVector();
                 }
@@ -37250,6 +37553,23 @@ function openUnitDetail(uid) {
         html += '<div class="udc-empty">— sem habilidades especiais —</div>';
     }
     html += '</div>';
+
+    /* Intenção Tática D&D 5e / Spatial Intent (Into the Breach / Baldur's Gate 3) */
+    if (u.t === 'e' && u.it) {
+        var it = u.it;
+        var itIcon = (it.tp === 'skill') ? '✦' : (it.isRanged ? '⌖' : (it.tp === 'stun' ? '◈' : '▲'));
+        html += '<div class="udc-section udc-section-intent"><div class="udc-section-title">Intenção Tática D&D 5e</div>';
+        html += '<div style="background:rgba(231,76,60,0.14); border:1px solid rgba(231,76,60,0.55); border-radius:6px; padding:6px 10px; font-size:11px; line-height:1.4;">';
+        if (it.tp === 'stun') {
+            html += '<div style="color:#e07c7c; font-weight:700;">◈ ' + escHtml(it.lb || 'Incapacitado') + '</div>';
+            html += '<div style="color:var(--v-text-dim,#a09484); font-size:10px;">Esta criatura está impedida de agir ou reagir neste turno.</div>';
+        } else {
+            var tgtText = it.targetName ? escHtml(it.targetName) : 'Alvo Próximo';
+            html += '<div style="color:#ffd54f; font-weight:700;">' + itIcon + ' ' + escHtml(it.lb || 'Atacar') + ' <span style="color:#ff6b6b; font-size:10.5px;">(~' + (it.dmg || 1) + ' dano projetado)</span></div>';
+            html += '<div style="color:var(--v-text-dim,#a09484); font-size:10.5px;">Alvo Previsto: <strong style="color:#fff;">' + tgtText + '</strong></div>';
+        }
+        html += '</div></div>';
+    }
 
     /* Condição (PV + efeitos D&D / simulador com duração em turnos ou rodadas) */
     html += '<div class="udc-section"><div class="udc-section-title">Condição</div>';
