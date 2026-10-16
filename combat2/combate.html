@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T07:23:15Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T07:41:32Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -12243,6 +12243,72 @@ canvas#vfxCanvas,
   dominant-baseline: central;
 }
 
+/* Projeção Tática de Empurrão D&D 5e (PHB p. 195 / BG3 / Into the Breach) */
+.hex-aim-path--shove {
+  stroke: #00e5ff;
+  stroke-dasharray: 6 3;
+  animation: aimDash 1.2s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.7));
+}
+.hex-shove-path {
+  fill: none;
+  stroke: #00e5ff;
+  stroke-width: 2.2;
+  stroke-dasharray: 4 3;
+  animation: shoveDash 0.9s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.75));
+  pointer-events: none;
+}
+.hex-shove-path--blocked {
+  stroke: #e74c3c;
+  stroke-dasharray: 3 3;
+  filter: drop-shadow(0 0 6px rgba(231, 76, 60, 0.8));
+}
+@keyframes shoveDash {
+  0% { stroke-dashoffset: 14; }
+  100% { stroke-dashoffset: 0; }
+}
+.hex-shove-dest-circle {
+  fill: rgba(0, 229, 255, 0.12);
+  stroke: #00e5ff;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2;
+  pointer-events: none;
+}
+.hex-shove-dest-circle--blocked {
+  fill: rgba(231, 76, 60, 0.15);
+  stroke: #e74c3c;
+  stroke-width: 1.5;
+  stroke-dasharray: 2 2;
+  pointer-events: none;
+}
+.hex-shove-badge {
+  pointer-events: none;
+}
+.hex-shove-badge-bg {
+  fill: rgba(14, 20, 28, 0.95);
+  stroke: #00e5ff;
+  stroke-width: 1.1;
+  rx: 4;
+  ry: 4;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.85));
+}
+.hex-shove-badge-bg--blocked {
+  fill: rgba(28, 12, 12, 0.95);
+  stroke: #e74c3c;
+}
+.hex-shove-badge-text {
+  fill: #80deea;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.hex-shove-badge-text--blocked {
+  fill: #ff8a80;
+}
+
 /* Halos e Badges de Condições Canônicas D&D 5e (PHB p. 203, 290-292) */
 .token-concentration-halo {
   position: absolute;
@@ -21379,11 +21445,12 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
         return;
     }
     options = options || {};
+    var isShove = !!(options.isShove || (_pendingSpecialAction === 'shove'));
     var pFrom = hexCenter(fromCol, fromRow);
     var pTo = hexCenter(toCol, toRow);
     var distHex = hexDistance(fromCol, fromRow, toCol, toRow);
     var distMeters = formatHexDistanceMeters(distHex);
-    var reachLimit = options.reach || 1;
+    var reachLimit = isShove ? 1 : (options.reach || 1);
     var isOutOfReach = distHex > reachLimit;
     var isTotalCover = (options.coverType === 'total');
     var hasCover = !!options.cover;
@@ -21391,7 +21458,12 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     var advState = options.advState || 'normal';
     var flankingInfo = options.flankingInfo || null;
     var isFlanked = !!(flankingInfo && flankingInfo.flanking);
-    var canFlank = !isOutOfReach && !isTotalCover && isFlanked;
+    var canFlank = !isShove && !isOutOfReach && !isTotalCover && isFlanked;
+
+    var shoveDest = null;
+    if (isShove && !isOutOfReach && !isTotalCover && typeof simComputeShoveDestination === 'function') {
+        shoveDest = simComputeShoveDestination(fromCol, fromRow, toCol, toRow, currentState);
+    }
 
     // Arco parabólico sutil para dar efeito de trajetória balística / linha de visão elegante
     var midX = (pFrom.cx + pTo.cx) / 2;
@@ -21403,7 +21475,21 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     var bgCls = 'hex-aim-badge-bg';
     var textCls = 'hex-aim-badge-text';
 
-    if (isOutOfReach) {
+    if (isShove) {
+        pathCls += ' hex-aim-path--shove';
+        markerId = 'shoveArrowCyan';
+        if (isOutOfReach) {
+            pathCls += ' hex-aim-path--out';
+            markerId = 'aimArrowRed';
+            bgCls += ' hex-aim-badge-bg--out';
+            textCls += ' hex-aim-badge-text--out';
+        } else if (isTotalCover) {
+            pathCls += ' hex-aim-path--blocked';
+            markerId = 'aimArrowRed';
+            bgCls += ' hex-aim-badge-bg--blocked';
+            textCls += ' hex-aim-badge-text--blocked';
+        }
+    } else if (isOutOfReach) {
         pathCls += ' hex-aim-path--out';
         markerId = 'aimArrowRed';
         bgCls += ' hex-aim-badge-bg--out';
@@ -21428,7 +21514,20 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     var pathD = 'M ' + pFrom.cx + ' ' + pFrom.cy + ' Q ' + midX + ' ' + midY + ' ' + pTo.cx + ' ' + pTo.cy;
 
     var badgeText = '▸ ' + distMeters + ' (' + distHex + ' ' + (distHex === 1 ? 'hex' : 'hexes') + ')';
-    if (isOutOfReach) {
+    if (isShove) {
+        if (isOutOfReach) {
+            badgeText = '✕ Empurrão Fora de Alcance (Requer Adjacência 1,5m)';
+        } else if (isTotalCover) {
+            badgeText = '✕ Bloqueado: Cobertura Total (PHB p. 196)';
+        } else if (shoveDest && shoveDest.isBlocked) {
+            badgeText = '▸ Empurrão (PHB p. 195) | ✕ Recuo Bloqueado por ' + (shoveDest.collisionReason || 'Obstáculo');
+        } else if (shoveDest && (shoveDest.surface || shoveDest.hazard)) {
+            var hzName = shoveDest.surface ? ('Superfície de ' + (shoveDest.surface.type || 'fogo')) : (shoveDest.hazard.name || 'Terreno Perigoso');
+            badgeText = '▸ Empurrão (PHB p. 195) | ▲ Alvo Cai em ' + hzName + '!';
+        } else {
+            badgeText = '▸ Empurrão (PHB p. 195) | ⇥ Recuo 1,5m Desobstruído';
+        }
+    } else if (isOutOfReach) {
         badgeText = '✕ Fora de Alcance (' + distMeters + ' > ' + formatHexDistanceMeters(reachLimit) + ')';
     } else if (isTotalCover) {
         badgeText = '✕ Bloqueado: Cobertura Total (PHB p. 196)';
@@ -21469,6 +21568,38 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
         svgHtml += '<g class="hex-flanking-badge">' +
             '<rect x="' + pbX + '" y="' + pbY + '" width="' + pbW + '" height="' + pbH + '" class="hex-flanking-badge-bg" />' +
             '<text x="' + pPartner.cx + '" y="' + (pbY + pbH / 2 + 1) + '" class="hex-flanking-badge-text">' + escHtml(partnerBadgeText) + '</text>' +
+            '</g>';
+    }
+
+    // Projeção tática de empurrão (destino, colisão e perigos ambientais)
+    if (shoveDest) {
+        var pDest = hexCenter(shoveDest.destCol, shoveDest.destRow);
+        var shovePathCls = 'hex-shove-path' + (shoveDest.isBlocked ? ' hex-shove-path--blocked' : '');
+        var shoveMarker = shoveDest.isBlocked ? 'url(#shoveArrowRed)' : 'url(#shoveArrowCyan)';
+        var shoveCircleCls = 'hex-shove-dest-circle' + (shoveDest.isBlocked ? ' hex-shove-dest-circle--blocked' : '');
+        var shoveBgCls = 'hex-shove-badge-bg' + (shoveDest.isBlocked ? ' hex-shove-badge-bg--blocked' : '');
+        var shoveTextCls = 'hex-shove-badge-text' + (shoveDest.isBlocked ? ' hex-shove-badge-text--blocked' : '');
+
+        var destBadgeLabel = '⇥ Recuo (1,5m)';
+        if (shoveDest.isBlocked) {
+            destBadgeLabel = '✕ Bloqueado (' + (shoveDest.collisionReason || 'Obstruído') + ')';
+        } else if (shoveDest.surface) {
+            var sKind = String(shoveDest.surface.type || shoveDest.surface.surface_type || 'Superfície').toUpperCase();
+            destBadgeLabel = '▲ Recuo: ' + sKind;
+        } else if (shoveDest.hazard) {
+            destBadgeLabel = '▲ Recuo: ' + (shoveDest.hazard.name || 'Perigo');
+        }
+
+        var dblW = Math.max(68, destBadgeLabel.length * 6.0 + 14);
+        var dblH = 16;
+        var dbX = Math.round(pDest.cx - dblW / 2);
+        var dbY = Math.round(pDest.cy - 12);
+
+        svgHtml += '<path d="M ' + pTo.cx + ' ' + pTo.cy + ' L ' + pDest.cx + ' ' + pDest.cy + '" class="' + shovePathCls + '" marker-end="' + shoveMarker + '" />';
+        svgHtml += '<circle cx="' + pDest.cx + '" cy="' + pDest.cy + '" r="22" class="' + shoveCircleCls + '" />';
+        svgHtml += '<g class="hex-shove-badge">' +
+            '<rect x="' + dbX + '" y="' + dbY + '" width="' + dblW + '" height="' + dblH + '" class="' + shoveBgCls + '" />' +
+            '<text x="' + pDest.cx + '" y="' + (dbY + dblH / 2 + 1) + '" class="' + shoveTextCls + '">' + escHtml(destBadgeLabel) + '</text>' +
             '</g>';
     }
 
@@ -23430,6 +23561,103 @@ function simCheckFlanking(actor, target, order) {
 }
 
 /**
+ * D&D 5e PHB p. 195 (Empurrão / Shove) / Baldur's Gate 3 / Into the Breach:
+ * Projeta o hexágono de destino ao empurrar um alvo para trás (5 pés / 1,5m / 1 hexágono).
+ * Identifica se a trajetória de recuo está desobstruída ou se colide com:
+ * 1. Borda do tabuleiro (limite da arena).
+ * 2. Obstáculos sólidos no battlefield (paredes, rochas, etc.).
+ * 3. Outra criatura viva no caminho.
+ * Mapeia também a presença de superfícies elementais (fogo, gelo, choque, veneno)
+ * ou terreno difícil perigoso no hexágono de destino para antecipação tática de perigo ambiental.
+ */
+function simComputeShoveDestination(actorCol, actorRow, targetCol, targetRow, state) {
+    if (actorCol == null || actorRow == null || targetCol == null || targetRow == null) return null;
+    state = state || (typeof currentState !== 'undefined' ? currentState : null);
+
+    var aCube = hexToCube(actorCol, actorRow);
+    var tCube = hexToCube(targetCol, targetRow);
+    var dx = tCube.x - aCube.x;
+    var dy = tCube.y - aCube.y;
+    var dz = tCube.z - aCube.z;
+
+    var destCube = { x: tCube.x + dx, y: tCube.y + dy, z: tCube.z + dz };
+    var destHex = cubeToHex(destCube.x, destCube.y, destCube.z);
+    var destCol = destHex.col;
+    var destRow = destHex.row;
+
+    var bf = (state && state.battlefield) ? state.battlefield : {};
+    var cols = bf.cols || 11;
+    var rows = bf.rows || 9;
+
+    var result = {
+        destCol: destCol,
+        destRow: destRow,
+        isBlocked: false,
+        collisionReason: null,
+        obstacle: null,
+        occupyingUnit: null,
+        surface: null,
+        hazard: null
+    };
+
+    // 1. Limites do tabuleiro
+    if (destCol < 0 || destCol >= cols || destRow < 0 || destRow >= rows) {
+        result.isBlocked = true;
+        result.collisionReason = 'Limite da Arena';
+        return result;
+    }
+
+    // 2. Obstáculos sólidos no battlefield
+    var obstacles = bf.obstacles || [];
+    for (var i = 0; i < obstacles.length; i++) {
+        var obs = obstacles[i];
+        if (obs && obs.col === destCol && obs.row === destRow) {
+            result.isBlocked = true;
+            result.obstacle = obs;
+            result.collisionReason = obs.name || 'Obstáculo Sólido';
+            return result;
+        }
+    }
+
+    // 3. Outra criatura viva ocupando o hexágono de destino
+    var order = (state && Array.isArray(state.order)) ? state.order : [];
+    for (var j = 0; j < order.length; j++) {
+        var u = order[j];
+        if (!u || !u.pos) continue;
+        var isAlive = (u.alive !== false) && !u.isDead && (typeof u.hp !== 'number' || u.hp > 0);
+        if (isAlive && u.pos.col === destCol && u.pos.row === destRow) {
+            result.isBlocked = true;
+            result.occupyingUnit = u;
+            var uName = u.n ? u.n.split(' ')[0] : 'Criatura';
+            result.collisionReason = uName;
+            return result;
+        }
+    }
+
+    // 4. Superfície elemental no destino
+    var surfaces = bf.surfaces || [];
+    for (var s = 0; s < surfaces.length; s++) {
+        var surf = surfaces[s];
+        if (surf && surf.col === destCol && surf.row === destRow) {
+            result.surface = surf;
+            break;
+        }
+    }
+
+    // 5. Terreno difícil perigoso no destino
+    var diff = bf.difficult_terrain || [];
+    for (var d = 0; d < diff.length; d++) {
+        var dt = diff[d];
+        if (dt && dt.col === destCol && dt.row === destRow) {
+            result.hazard = dt;
+            break;
+        }
+    }
+
+    return result;
+}
+
+/**
  * D&D 5e / Into the Breach / Baldur's Gate 3:
  * Computa a intenção espacial determinística de cada inimigo vivo no grid caso não tenha sido
  * previamente calculada pelo motor Python (`e.it`).
@@ -24148,6 +24376,8 @@ function buildBattlefield(s) {
     html += '<marker id="moveArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#e74c3c"/></marker>';
     html += '<marker id="threatArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M 0 1.5 L 8.5 5 L 0 8.5 z" fill="#e74c3c"/></marker>';
     html += '<marker id="threatArrowBoss" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#ff4757"/></marker>';
+    html += '<marker id="shoveArrowCyan" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#00e5ff"/></marker>';
+    html += '<marker id="shoveArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#e74c3c"/></marker>';
     html += '<radialGradient id="aoeFireballGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff5722" stop-opacity="0.55"/><stop offset="65%" stop-color="#ff9800" stop-opacity="0.22"/><stop offset="100%" stop-color="#ff5722" stop-opacity="0"/></radialGradient>';
     html += '<radialGradient id="aoeArcaneGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00e5ff" stop-opacity="0.45"/><stop offset="65%" stop-color="#2979ff" stop-opacity="0.18"/><stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/></radialGradient>';
     html += '<radialGradient id="surfGradFire" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff3d00" stop-opacity="0.45"/><stop offset="70%" stop-color="#ff9100" stop-opacity="0.25"/><stop offset="100%" stop-color="#ff3d00" stop-opacity="0.08"/></radialGradient>';
@@ -28589,6 +28819,7 @@ function bindActions() {
                             coverType: coverInfo.cover,
                             advState: advState,
                             flankingInfo: flankingInfo,
+                            isShove: (_pendingSpecialAction === 'shove'),
                             skill: _pendingSkill
                         });
                     }
@@ -28852,6 +29083,7 @@ function mountEnemyHoverStatHints() {
                             coverType: coverInfo.cover,
                             advState: advState,
                             flankingInfo: flankingInfo,
+                            isShove: (_pendingSpecialAction === 'shove'),
                             skill: _pendingSkill
                         });
                     }
@@ -30950,7 +31182,24 @@ async function passPlayerMetaAction(kind, opts) {
                 sTgt.se.push({ id: 'prone', n: 'Caído', dndCondition: 'Ataques corpo a corpo têm Vantagem; ataques à distância têm Desvantagem. Gasta metade do movimento para levantar.' });
                 s.log.push(p.n + ' empurra ' + sTgt.n + ' e o derruba no chão (Caído)!');
             } else {
-                s.log.push(p.n + ' empurra ' + sTgt.n + ' 1,5m para trás!');
+                var shDest = (p.pos && sTgt.pos && typeof simComputeShoveDestination === 'function')
+                    ? simComputeShoveDestination(p.pos.col, p.pos.row, sTgt.pos.col, sTgt.pos.row, s)
+                    : null;
+                if (shDest && !shDest.isBlocked) {
+                    sTgt.pos = { col: shDest.destCol, row: shDest.destRow };
+                    if (typeof ensureProceduralBattlefield === 'function') ensureProceduralBattlefield(s);
+                    var extraNote = '';
+                    if (shDest.surface) {
+                        extraNote = ' sobre superfície de ' + (shDest.surface.type || 'fogo');
+                    } else if (shDest.hazard) {
+                        extraNote = ' sobre ' + (shDest.hazard.name || 'terreno perigoso');
+                    }
+                    s.log.push(p.n + ' empurra ' + sTgt.n + ' 1,5m para trás' + extraNote + '!');
+                } else if (shDest && shDest.isBlocked) {
+                    s.log.push(p.n + ' tenta empurrar ' + sTgt.n + ', mas o recuo é bloqueado por ' + (shDest.collisionReason || 'obstáculo') + '!');
+                } else {
+                    s.log.push(p.n + ' empurra ' + sTgt.n + ' 1,5m para trás!');
+                }
             }
         }
         render(s);
@@ -33753,7 +34002,25 @@ function showShoveChoiceModal(targetIdx) {
         var btnPush = document.createElement('button');
         btnPush.type = 'button';
         btnPush.className = 'sim-skip-confirm-btn sim-skip-confirm-ok';
-        btnPush.innerHTML = '✔ Empurrar 1,5m para Trás';
+
+        var shDest = (p && p.pos && u && u.pos && typeof simComputeShoveDestination === 'function')
+            ? simComputeShoveDestination(p.pos.col, p.pos.row, u.pos.col, u.pos.row, s)
+            : null;
+
+        var pushSubtitleHtml = '';
+        if (shDest) {
+            if (shDest.isBlocked) {
+                pushSubtitleHtml = '<span style="display:block;font-size:10px;color:#e74c3c;font-weight:normal;margin-top:2px;">✕ Recuo bloqueado por ' + escHtml(shDest.collisionReason || 'obstáculo') + '</span>';
+            } else if (shDest.surface) {
+                var sType = String(shDest.surface.type || shDest.surface.surface_type || 'superfície').toUpperCase();
+                pushSubtitleHtml = '<span style="display:block;font-size:10px;color:#ffd54f;font-weight:normal;margin-top:2px;">▲ Alvo será projetado em Superfície (' + escHtml(sType) + ')!</span>';
+            } else if (shDest.hazard) {
+                pushSubtitleHtml = '<span style="display:block;font-size:10px;color:#ffd54f;font-weight:normal;margin-top:2px;">▲ Alvo será projetado em ' + escHtml(shDest.hazard.name || 'Terreno Perigoso') + '!</span>';
+            } else {
+                pushSubtitleHtml = '<span style="display:block;font-size:10px;color:#80deea;font-weight:normal;margin-top:2px;">⇥ Trajetória livre (recuo de 1 hexágono)</span>';
+            }
+        }
+        btnPush.innerHTML = '✔ Empurrar 1,5m para Trás' + pushSubtitleHtml;
 
         var btnBack = document.createElement('button');
         btnBack.type = 'button';
@@ -41959,6 +42226,91 @@ async function __combatAnimateOneEvent(ev) {
         }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 300); });
+        return;
+    }
+    if (kind === 'shove') {
+        var shActorIdx = ev.actorIdx != null ? ev.actorIdx : (currentState ? currentState.p_idx : 0);
+        var shTargetIdx = ev.targetIdx != null ? ev.targetIdx : (ev.tIdx != null ? ev.tIdx : 0);
+        var shActorUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, shActorIdx)
+            : (shActorIdx === (currentState.p_idx || 0) ? 'player' : 'enemy_' + shActorIdx);
+        var shTargetUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, shTargetIdx)
+            : (shTargetIdx === (currentState.p_idx || 0) ? 'player' : 'enemy_' + shTargetIdx);
+
+        var shActorUnit = (currentState && currentState.order) ? currentState.order[shActorIdx] : null;
+        var shTargetUnit = (currentState && currentState.order) ? currentState.order[shTargetIdx] : null;
+
+        var shElA = document.querySelector('[data-unit-id="' + shActorUid + '"]');
+        var shElT = document.querySelector('[data-unit-id="' + shTargetUid + '"]');
+
+        if (typeof animHexTokenAttack === 'function' && shElA && shElT) {
+            await animHexTokenAttack(shElA, shElT, false);
+        }
+
+        if (ev.success) {
+            if (ev.effect === 'push') {
+                if (ev.fromCol != null && ev.fromRow != null && ev.toCol != null && ev.toRow != null && shElT) {
+                    var pushPath = hexLine(ev.fromCol, ev.fromRow, ev.toCol, ev.toRow);
+                    if (pushPath && pushPath.length > 1) {
+                        var pushDuration = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 140 : 320;
+                        await animateUnitHexMovement(shElT, pushPath, pushDuration);
+                    }
+                    if (shTargetUnit) {
+                        shTargetUnit.pos = { col: ev.toCol, row: ev.toRow };
+                        if (typeof ensureProceduralBattlefield === 'function') ensureProceduralBattlefield(currentState);
+                    }
+                    if (typeof spawnMissFloatLabel === 'function') {
+                        spawnMissFloatLabel(shElT, 'Empurrado! 1,5m');
+                    }
+                    if (ev.hazardDamage != null && ev.hazardDamage > 0) {
+                        if (shTargetUnit) {
+                            shTargetUnit.hp = Math.max(0, (shTargetUnit.hp || 0) - ev.hazardDamage);
+                            shTargetUnit.alive = shTargetUnit.hp > 0;
+                            if (shTargetUnit.hp <= 0) shTargetUnit.isDead = true;
+                        }
+                        shElT.classList.add('dmg-flash');
+                        setTimeout(function () { shElT.classList.remove('dmg-flash'); }, 350);
+                        if (typeof _spawnFloatingDmgNumber === 'function') {
+                            _spawnFloatingDmgNumber(shElT, ev.hazardDamage, false, 'perfurante');
+                        }
+                    }
+                } else if (shElT) {
+                    shElT.classList.add('miss-target-flash');
+                    setTimeout(function () { shElT.classList.remove('miss-target-flash'); }, 350);
+                    if (typeof spawnMissFloatLabel === 'function') {
+                        spawnMissFloatLabel(shElT, 'Bloqueado!');
+                    }
+                }
+            } else {
+                // 'prone'
+                if (shTargetUnit) {
+                    shTargetUnit.se = shTargetUnit.se || [];
+                    if (!shTargetUnit.se.some(function (st) { return st && (st.prone || st.id === 'prone'); })) {
+                        shTargetUnit.se.push({ id: 'prone', n: 'Caído', prone: true, kind: 'debuff', ico: '' });
+                    }
+                }
+                if (shElT) {
+                    shElT.classList.add('token-prone');
+                    shElT.classList.add('miss-target-flash');
+                    setTimeout(function () { shElT.classList.remove('miss-target-flash'); }, 350);
+                    if (typeof spawnMissFloatLabel === 'function') {
+                        spawnMissFloatLabel(shElT, 'Derrubado!');
+                    }
+                }
+            }
+        } else {
+            // Resistiu
+            if (shElT) {
+                shElT.classList.add('miss-target-flash');
+                setTimeout(function () { shElT.classList.remove('miss-target-flash'); }, 350);
+                if (typeof spawnMissFloatLabel === 'function') {
+                    spawnMissFloatLabel(shElT, 'Resistiu!');
+                }
+            }
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 260); });
         return;
     }
     if (kind === 'attack' || kind === 'oa' || kind === 'skill') {
