@@ -662,7 +662,36 @@ var CHAR_CLASSES = [
                 immunities: ['poison'],
                 conditionImmunities: ['poisoned'],
                 undeadFortitude: true
-            } }
+            } },
+        /* V1.26 (2026-10-16) — Explosão Solar (PHB p.279 — Sunburst).
+           Mago nv 15+. 12d6 radiante em área esférica (TR Constituição metade e anula cegueira; mortos-vivos e limos têm desvantagem). */
+        { n: 'Explosão Solar', ico: '☀️', cost: 8, kind: 'attack', minLevel: 15,
+            dmgType: 'radiant', ranged: true, reach: 30,
+            save: { ability: 'con' }, multiTarget: true,
+            aoeRadius: 12, aoeShape: 'sphere',
+            damageSpec: { n: 12, d: 6, flat: 0 },
+            undeadDisadvantage: true,
+            afterAttackEnemyDebuff: {
+                id: 'sunburst_blind',
+                turns: 10,
+                n: 'Cego',
+                ico: '👁️',
+                atkDisadvantage: true,
+                targetedAdvantage: true,
+                blinded: true,
+                repeatSave: { ability: 'con' },
+                dndCondition: 'Cego (PHB p. 279 — Explosão Solar)'
+            },
+            desc: 'Luz solar ofuscante causando 12d6 radiante e Cegueira por 1 minuto (TR Constituição metade e não cega; mortos-vivos e limos têm desvantagem).',
+            helpDnd5e: 'Explosão Solar / Sunburst (PHB p. 279 — Clérigo, Druida, Feiticeiro e Mago nv 15): magia de 8º círculo; 1 Ação; alcance 45m (30 hexágonos); área esférica de 18m de raio (12 hexágonos). Luz solar brilhante preenche a área. Cada criatura realiza um TR de Constituição. Sofre 12d6 de dano radiante e fica CEGA por 1 minuto (10 rodadas) em falha, ou metade do dano sem cegueira em sucesso. Mortos-vivos e limos têm desvantagem no teste de resistência. Dissipa qualquer escuridão mágica.' },
+        /* V1.26 (2026-10-16) — Labirinto (PHB p.258 — Maze).
+           Mago nv 15+. Bane o alvo para um semiplano labiríntico sem salvaguarda inicial (concentração até 10 minutos). */
+        { n: 'Labirinto', ico: '🌀', cost: 8, kind: 'attack', minLevel: 15,
+            ranged: true, reach: 12,
+            concentration: true, mazeBanish: true,
+            damageSpec: { n: 0, d: 0 },
+            desc: 'Bane o alvo sem salvaguarda inicial para um semiplano labiríntico. O alvo pode tentar escapar no seu turno com teste de Inteligência CD 20 (concentração).',
+            helpDnd5e: 'Labirinto / Maze (PHB p. 258 — Mago nv 15): magia de 8º círculo; 1 Ação; alcance 18m (12 hexágonos); Concentração até 10 minutos (10 rodadas em combate). Você bane uma criatura à vista para um semiplano labiríntico. A criatura não tem direito a salvaguarda inicial. Enquanto banida, a criatura fica ausente do combate. No início de cada um dos seus turnos, o alvo pode tentar escapar resolvendo o labirinto com um teste de Inteligência CD 20. Minotauros passam automaticamente no teste de escape.' }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '', dmgMod: 3, attr: 'DEX',
       res: { type: 'energia', name: 'Energia', ico: '', max: 6 },
@@ -983,7 +1012,44 @@ var CHAR_CLASSES = [
             multiTarget: true, centerOnCaster: true, range_hexes: 6, aoeRadius: 6, aoeShape: 'sphere',
             save: { ability: 'cha' }, damageSpec: { n: 0, d: 0 }, divineWord: true,
             desc: 'Palavra divina de criação que atordoa, cega ou aniquila inimigos na área com base em seus PVs atuais (TR Carisma).',
-            helpDnd5e: 'Palavra Sagrada / Divine Word (PHB p. 234 — Clérigo nv 13): magia de 7º círculo; 1 Ação Bônus; alcance 9m (6 hexágonos). Cada criatura hostil na área que possa ouvir deve realizar uma Salvaguarda de Carisma. Em falha, sofre um efeito com base em seus PVs atuais: <= 50 PV surdo por 10 turnos; <= 40 PV cego e surdo por 10 turnos; <= 30 PV cego, surdo e atordoado por 1 rodada; <= 20 PV morre instantaneamente. Criaturas planares (celestiais, elementais, feéricas ou ínferas) são banidas de volta ao seu plano natal.' }
+            helpDnd5e: 'Palavra Sagrada / Divine Word (PHB p. 234 — Clérigo nv 13): magia de 7º círculo; 1 Ação Bônus; alcance 9m (6 hexágonos). Cada criatura hostil na área que possa ouvir deve realizar uma Salvaguarda de Carisma. Em falha, sofre um efeito com base em seus PVs atuais: <= 50 PV surdo por 10 turnos; <= 40 PV cego e surdo por 10 turnos; <= 30 PV cego, surdo e atordoado por 1 rodada; <= 20 PV morre instantaneamente. Criaturas planares (celestiais, elementais, feéricas ou ínferas) são banidas de volta ao seu plano natal.' },
+        /* V1.26 (2026-10-16) — Explosão Solar (PHB p.279 — Sunburst).
+           Clérigo nv 15+. 12d6 radiante em área esférica (TR Constituição metade e anula cegueira; mortos-vivos e limos têm desvantagem). */
+        { n: 'Explosão Solar', ico: '☀️', cost: 8, kind: 'attack', minLevel: 15,
+            dmgType: 'radiant', ranged: true, reach: 30,
+            save: { ability: 'con' }, multiTarget: true,
+            aoeRadius: 12, aoeShape: 'sphere',
+            damageSpec: { n: 12, d: 6, flat: 0 },
+            undeadDisadvantage: true,
+            afterAttackEnemyDebuff: {
+                id: 'sunburst_blind',
+                turns: 10,
+                n: 'Cego',
+                ico: '👁️',
+                atkDisadvantage: true,
+                targetedAdvantage: true,
+                blinded: true,
+                repeatSave: { ability: 'con' },
+                dndCondition: 'Cego (PHB p. 279 — Explosão Solar)'
+            },
+            desc: 'Luz solar ofuscante causando 12d6 radiante e Cegueira por 1 minuto (TR Constituição metade e não cega; mortos-vivos e limos têm desvantagem).',
+            helpDnd5e: 'Explosão Solar / Sunburst (PHB p. 279 — Clérigo, Druida, Feiticeiro e Mago nv 15): magia de 8º círculo; 1 Ação; alcance 45m (30 hexágonos); área esférica de 18m de raio (12 hexágonos). Luz solar brilhante preenche a área. Cada criatura realiza um TR de Constituição. Sofre 12d6 de dano radiante e fica CEGA por 1 minuto (10 rodadas) em falha, ou metade do dano sem cegueira em sucesso. Mortos-vivos e limos têm desvantagem no teste de resistência. Dissipa qualquer escuridão mágica.' },
+        /* V1.26 (2026-10-16) — Terremoto (PHB p.236 — Earthquake).
+           Clérigo nv 15+. Tremor colossal em área massiva que derruba criaturas Prostradas (TR Destreza). */
+        { n: 'Terremoto', ico: '🌋', cost: 8, kind: 'attack', minLevel: 15,
+            multiTarget: true, aoeRadius: 20, aoeShape: 'sphere',
+            save: { ability: 'dex' }, damageSpec: { n: 0, d: 0 },
+            afterAttackEnemyDebuff: {
+                id: 'earthquake_prone',
+                turns: 1,
+                n: 'Prostrado',
+                ico: '💫',
+                prone: true,
+                targetedAdvantageMelee: true,
+                dndCondition: 'Prostrado (PHB p. 236 — Terremoto)'
+            },
+            desc: 'Tremor sísmico massivo abala o campo de batalha. Criaturas no solo devem passar em TR de Destreza ou caem Prostradas.',
+            helpDnd5e: 'Terremoto / Earthquake (PHB p. 236 — Clérigo e Druida nv 15): magia de 8º círculo; 1 Ação; alcance 150m (área massiva). Um tremor sísmico colossal racha e convulsiona a terra. Cada criatura no solo na área deve realizar um Teste de Resistência de Destreza. Em falha, a criatura cai Prostrada no chão. Conjuradores que estejam mantendo concentração na área devem realizar TR de Constituição para não perder a magia.' }
       ] },
     { cls: 'Paladino', hp: [26, 38], ac: [16, 18], atk: [5, 6], die: 8, dex: [8, 12], ico: '', dmgMod: 2, attr: 'STR',
       /* D&D 5e PHB p.84: Paladino é meio-conjurador — Smite Divino e magias
@@ -1804,7 +1870,44 @@ var CHAR_CLASSES = [
             healSpec: { n: 4, d: 8, flat: 15 }, healSpell: true, range_hexes: 1,
             applyBuff: { id: 'regenerate_buff', n: 'Regeneração', ico: '🌿', turns: 10, regenPerTurn: 1, dndCondition: 'Regenerando (PHB p. 271)' },
             desc: 'Restaura 4d8 + 15 PV imediatamente e 1 PV no início de cada um de seus turnos por 10 rodadas. Restaura membros amputados.',
-            helpDnd5e: 'Regeneração / Regenerate (PHB p. 271 — Clérigo e Druida nv 13): magia de 7º círculo; 1 Ação; Toque (1 hex ou a si mesmo); duração 1 hora (10 rodadas em combate). Você toca uma criatura e estimula sua habilidade natural de cura. O alvo recupera 4d8 + 15 PV. Pela duração da magia, o alvo recupera 1 PV no início de cada um de seus turnos. Membros e tecidos amputados são totalmente restaurados e regenerados.' }
+            helpDnd5e: 'Regeneração / Regenerate (PHB p. 271 — Clérigo e Druida nv 13): magia de 7º círculo; 1 Ação; Toque (1 hex ou a si mesmo); duração 1 hora (10 rodadas em combate). Você toca uma criatura e estimula sua habilidade natural de cura. O alvo recupera 4d8 + 15 PV. Pela duração da magia, o alvo recupera 1 PV no início de cada um de seus turnos. Membros e tecidos amputados são totalmente restaurados e regenerados.' },
+        /* V1.26 (2026-10-16) — Explosão Solar (PHB p.279 — Sunburst).
+           Druida nv 15+. 12d6 radiante em área esférica (TR Constituição metade e anula cegueira; mortos-vivos e limos têm desvantagem). */
+        { n: 'Explosão Solar', ico: '☀️', cost: 8, kind: 'attack', minLevel: 15,
+            dmgType: 'radiant', ranged: true, reach: 30,
+            save: { ability: 'con' }, multiTarget: true,
+            aoeRadius: 12, aoeShape: 'sphere',
+            damageSpec: { n: 12, d: 6, flat: 0 },
+            undeadDisadvantage: true,
+            afterAttackEnemyDebuff: {
+                id: 'sunburst_blind',
+                turns: 10,
+                n: 'Cego',
+                ico: '👁️',
+                atkDisadvantage: true,
+                targetedAdvantage: true,
+                blinded: true,
+                repeatSave: { ability: 'con' },
+                dndCondition: 'Cego (PHB p. 279 — Explosão Solar)'
+            },
+            desc: 'Luz solar ofuscante causando 12d6 radiante e Cegueira por 1 minuto (TR Constituição metade e não cega; mortos-vivos e limos têm desvantagem).',
+            helpDnd5e: 'Explosão Solar / Sunburst (PHB p. 279 — Clérigo, Druida, Feiticeiro e Mago nv 15): magia de 8º círculo; 1 Ação; alcance 45m (30 hexágonos); área esférica de 18m de raio (12 hexágonos). Luz solar brilhante preenche a área. Cada criatura realiza um TR de Constituição. Sofre 12d6 de dano radiante e fica CEGA por 1 minuto (10 rodadas) em falha, ou metade do dano sem cegueira em sucesso. Mortos-vivos e limos têm desvantagem no teste de resistência. Dissipa qualquer escuridão mágica.' },
+        /* V1.26 (2026-10-16) — Terremoto (PHB p.236 — Earthquake).
+           Druida nv 15+. Tremor colossal em área massiva que derruba criaturas Prostradas (TR Destreza). */
+        { n: 'Terremoto', ico: '🌋', cost: 8, kind: 'attack', minLevel: 15,
+            multiTarget: true, aoeRadius: 20, aoeShape: 'sphere',
+            save: { ability: 'dex' }, damageSpec: { n: 0, d: 0 },
+            afterAttackEnemyDebuff: {
+                id: 'earthquake_prone',
+                turns: 1,
+                n: 'Prostrado',
+                ico: '💫',
+                prone: true,
+                targetedAdvantageMelee: true,
+                dndCondition: 'Prostrado (PHB p. 236 — Terremoto)'
+            },
+            desc: 'Tremor sísmico massivo abala o campo de batalha. Criaturas no solo devem passar em TR de Destreza ou caem Prostradas.',
+            helpDnd5e: 'Terremoto / Earthquake (PHB p. 236 — Clérigo e Druida nv 15): magia de 8º círculo; 1 Ação; alcance 150m (área massiva). Um tremor sísmico colossal racha e convulsiona a terra. Cada criatura no solo na área deve realizar um Teste de Resistência de Destreza. Em falha, a criatura cai Prostrada no chão. Conjuradores que estejam mantendo concentração na área devem realizar TR de Constituição para não perder a magia.' }
       ] },
     /* V1.7 Stage 6 (2026-04-21) — Feiticeiro (PHB p.99-108): CHA caster inato.
        ADAPTAÇÕES vs PHB:
@@ -1909,7 +2012,28 @@ var CHAR_CLASSES = [
             aoeRadius: 6, aoeShape: 'storm',
             damageSpec: { n: 7, d: 10, flat: 0 },
             desc: 'Tormenta de labaredas que devasta a área causando 7d10 de dano de fogo (TR Destreza metade). Plantas e vegetação não sofrem dano se você escolher.',
-            helpDnd5e: 'Tempestade de Fogo / Fire Storm (PHB p. 242 — Clérigo, Druida e Feiticeiro nv 13): magia de 7º círculo; 1 Ação; alcance 45m (30 hexágonos). Uma tempestade de labaredas rutilantes desaba sobre o campo de batalha. Cada criatura na área deve realizar um teste de resistência de Destreza. Sofre 7d10 de dano de fogo em caso de falha, ou metade desse dano em caso de sucesso. O fogo não danifica as plantas na área se o conjurador assim desejar.' }
+            helpDnd5e: 'Tempestade de Fogo / Fire Storm (PHB p. 242 — Clérigo, Druida e Feiticeiro nv 13): magia de 7º círculo; 1 Ação; alcance 45m (30 hexágonos). Uma tempestade de labaredas rutilantes desaba sobre o campo de batalha. Cada criatura na área deve realizar um teste de resistência de Destreza. Sofre 7d10 de dano de fogo em caso de falha, ou metade desse dano em caso de sucesso. O fogo não danifica as plantas na área se o conjurador assim desejar.' },
+        /* V1.26 (2026-10-16) — Explosão Solar (PHB p.279 — Sunburst).
+           Feiticeiro nv 15+. 12d6 radiante em área esférica (TR Constituição metade e anula cegueira; mortos-vivos e limos têm desvantagem). */
+        { n: 'Explosão Solar', ico: '☀️', cost: 8, kind: 'attack', minLevel: 15,
+            dmgType: 'radiant', ranged: true, reach: 30,
+            save: { ability: 'con' }, multiTarget: true,
+            aoeRadius: 12, aoeShape: 'sphere',
+            damageSpec: { n: 12, d: 6, flat: 0 },
+            undeadDisadvantage: true,
+            afterAttackEnemyDebuff: {
+                id: 'sunburst_blind',
+                turns: 10,
+                n: 'Cego',
+                ico: '👁️',
+                atkDisadvantage: true,
+                targetedAdvantage: true,
+                blinded: true,
+                repeatSave: { ability: 'con' },
+                dndCondition: 'Cego (PHB p. 279 — Explosão Solar)'
+            },
+            desc: 'Luz solar ofuscante causando 12d6 radiante e Cegueira por 1 minuto (TR Constituição metade e não cega; mortos-vivos e limos têm desvantagem).',
+            helpDnd5e: 'Explosão Solar / Sunburst (PHB p. 279 — Clérigo, Druida, Feiticeiro e Mago nv 15): magia de 8º círculo; 1 Ação; alcance 45m (30 hexágonos); área esférica de 18m de raio (12 hexágonos). Luz solar brilhante preenche a área. Cada criatura realiza um TR de Constituição. Sofre 12d6 de dano radiante e fica CEGA por 1 minuto (10 rodadas) em falha, ou metade do dano sem cegueira em sucesso. Mortos-vivos e limos têm desvantagem no teste de resistência. Dissipa qualquer escuridão mágica.' }
       ] },
     /* V1.7 Stage 7 (2026-04-21) — Bruxo (PHB p.105-115): CHA caster com pact patron.
        ADAPTAÇÕES vs PHB:
@@ -2083,7 +2207,15 @@ var CHAR_CLASSES = [
                 immunities: ['poison'],
                 conditionImmunities: ['poisoned'],
                 undeadFortitude: true
-            } }
+            } },
+        /* V1.26 (2026-10-16) — Labirinto (PHB p.108 & 258 — Maze / Arcanum Místico).
+           Bruxo nv 15+. Bane o alvo para um semiplano labiríntico sem salvaguarda inicial (concentração até 10 minutos). */
+        { n: 'Labirinto', ico: '🌀', cost: 1, kind: 'attack', minLevel: 15,
+            ranged: true, reach: 12,
+            concentration: true, mazeBanish: true,
+            damageSpec: { n: 0, d: 0 },
+            desc: 'Arcanum Místico (PHB p.108): bane o alvo sem salvaguarda inicial para um semiplano labiríntico. O alvo pode tentar escapar no seu turno com teste de Inteligência CD 20 (concentração).',
+            helpDnd5e: 'Labirinto / Maze (PHB p. 258, Arcanum Místico p. 108 — Bruxo nv 15): Arcanum Místico de 8º círculo; consome 1 Pacto; 1 Ação; alcance 18m (12 hexágonos); Concentração até 10 minutos (10 rodadas em combate). Você bane uma criatura à vista para um semiplano labiríntico. A criatura não tem direito a salvaguarda inicial. Enquanto banida, a criatura fica ausente do combate. No início de cada um dos seus turnos, o alvo pode tentar escapar resolvendo o labirinto com um teste de Inteligência CD 20. Minotauros passam automaticamente no teste de escape.' }
       ],
       /* PHB p.107 Pacto da Corrente — o familiar é COMANDADO pelo Bruxo na arena
          ("forgo one of your own attacks to allow your familiar to make one attack"):
