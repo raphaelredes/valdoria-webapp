@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T07:04:24Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T07:23:15Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -12139,6 +12139,110 @@ canvas#vfxCanvas,
   border-color: #e74c3c !important;
 }
 
+/* Superfícies Elementais Hexagonais (D&D 5e / Baldur's Gate 3 / Divinity: Original Sin 2) */
+.hex-surface-polygon {
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.hex-surface--fire {
+  fill: url(#surfGradFire);
+  stroke: rgba(255, 87, 34, 0.75);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 2;
+  filter: drop-shadow(0 0 6px rgba(255, 87, 34, 0.45));
+}
+.hex-surface--ice {
+  fill: url(#surfGradIce);
+  stroke: rgba(0, 229, 255, 0.7);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3;
+  filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.35));
+}
+.hex-surface--water {
+  fill: url(#surfGradWater);
+  stroke: rgba(41, 121, 255, 0.55);
+  stroke-width: 1.2;
+}
+.hex-surface--electrified {
+  fill: url(#surfGradLightning);
+  stroke: rgba(255, 235, 59, 0.85);
+  stroke-width: 1.6;
+  stroke-dasharray: 6 2;
+  animation: surfLightningPulse 1.2s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 7px rgba(255, 235, 59, 0.55));
+}
+.hex-surface--poison {
+  fill: url(#surfGradPoison);
+  stroke: rgba(46, 204, 113, 0.7);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+  filter: drop-shadow(0 0 5px rgba(46, 204, 113, 0.4));
+}
+@keyframes surfLightningPulse {
+  0% { stroke-opacity: 0.5; filter: drop-shadow(0 0 4px rgba(255, 235, 59, 0.4)); }
+  100% { stroke-opacity: 1; filter: drop-shadow(0 0 10px rgba(255, 235, 59, 0.85)); }
+}
+
+.hex-surface-badge {
+  pointer-events: none;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.hex-surface-badge-bg {
+  rx: 3;
+  ry: 3;
+  fill: rgba(18, 14, 10, 0.88);
+  stroke-width: 0.9;
+}
+.hex-surface-badge-bg--fire { stroke: #ff5722; }
+.hex-surface-badge-bg--ice { stroke: #00e5ff; }
+.hex-surface-badge-bg--water { stroke: #2979ff; }
+.hex-surface-badge-bg--electrified { stroke: #ffeb3b; }
+.hex-surface-badge-bg--poison { stroke: #2ecc71; }
+
+.hex-surface-badge-text--fire { fill: #ffab91; }
+.hex-surface-badge-text--ice { fill: #80deea; }
+.hex-surface-badge-text--water { fill: #90caf9; }
+.hex-surface-badge-text--electrified { fill: #fff59d; }
+.hex-surface-badge-text--poison { fill: #a5d6a7; }
+
+/* Flanqueamento D&D 5e (DMG p. 251 / Baldur's Gate 3 / Solasta) */
+.hex-flanking-vector {
+  fill: none;
+  stroke: #f1c40f;
+  stroke-width: 1.8;
+  stroke-dasharray: 4 3;
+  animation: flankingDash 1.2s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(241, 196, 15, 0.7));
+  pointer-events: none;
+}
+@keyframes flankingDash {
+  0% { stroke-dashoffset: 14; }
+  100% { stroke-dashoffset: 0; }
+}
+.hex-flanking-badge {
+  pointer-events: none;
+}
+.hex-flanking-badge-bg {
+  fill: rgba(22, 18, 8, 0.94);
+  stroke: #f1c40f;
+  stroke-width: 1.1;
+  rx: 4;
+  ry: 4;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.85));
+}
+.hex-flanking-badge-text {
+  fill: #fff176;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
 /* Halos e Badges de Condições Canônicas D&D 5e (PHB p. 203, 290-292) */
 .token-concentration-halo {
   position: absolute;
@@ -21248,6 +21352,13 @@ function simPeekAttackAdvState(actor, target, skill) {
         adv = true;
     }
 
+    // Flanqueamento D&D 5e (DMG p. 251): ataque corpo a corpo com aliado adjacente oposto
+    if (!isRanged && typeof simCheckFlanking === 'function' && currentState && currentState.order) {
+        if (simCheckFlanking(actor, target, currentState.order)) {
+            adv = true;
+        }
+    }
+
     if (adv && dis) return 'normal';
     if (adv) return 'advantage';
     if (dis) return 'disadvantage';
@@ -21278,6 +21389,9 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     var hasCover = !!options.cover;
     var coverText = options.coverText || '';
     var advState = options.advState || 'normal';
+    var flankingInfo = options.flankingInfo || null;
+    var isFlanked = !!(flankingInfo && flankingInfo.flanking);
+    var canFlank = !isOutOfReach && !isTotalCover && isFlanked;
 
     // Arco parabólico sutil para dar efeito de trajetória balística / linha de visão elegante
     var midX = (pFrom.cx + pTo.cx) / 2;
@@ -21299,7 +21413,7 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
         markerId = 'aimArrowRed';
         bgCls += ' hex-aim-badge-bg--blocked';
         textCls += ' hex-aim-badge-text--blocked';
-    } else if (advState === 'advantage') {
+    } else if (canFlank || advState === 'advantage') {
         pathCls += ' hex-aim-path--adv';
         markerId = 'aimArrowGreen';
         bgCls += ' hex-aim-badge-bg--adv';
@@ -21319,7 +21433,9 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     } else if (isTotalCover) {
         badgeText = '✕ Bloqueado: Cobertura Total (PHB p. 196)';
     } else {
-        if (advState === 'advantage') {
+        if (canFlank) {
+            badgeText += ' | ▲ Flanqueado (Vantagem D&D 5e)';
+        } else if (advState === 'advantage') {
             badgeText += ' | ▲ Vantagem';
         } else if (advState === 'disadvantage') {
             badgeText += ' | ▼ Desvantagem';
@@ -21335,8 +21451,28 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     var badgeX = Math.round(midX - badgeW / 2);
     var badgeY = Math.round(midY - badgeH / 2);
 
-    var svgHtml = '<path d="' + pathD + '" class="' + pathCls + '" marker-end="url(#' + markerId + ')" />' +
-        '<g class="hex-aim-badge-group">' +
+    var svgHtml = '<path d="' + pathD + '" class="' + pathCls + '" marker-end="url(#' + markerId + ')" />';
+
+    if (canFlank && flankingInfo.partner && flankingInfo.partner.pos) {
+        var pPartner = hexCenter(flankingInfo.partner.pos.col, flankingInfo.partner.pos.row);
+        var fMidX = (pTo.cx + pPartner.cx) / 2;
+        var fMidY = (pTo.cy + pPartner.cy) / 2 - 8;
+        svgHtml += '<path d="M ' + pPartner.cx + ' ' + pPartner.cy + ' Q ' + fMidX + ' ' + fMidY + ' ' + pTo.cx + ' ' + pTo.cy + '" class="hex-flanking-vector" marker-end="url(#aimArrowGold)" />' +
+            '<circle cx="' + pPartner.cx + '" cy="' + pPartner.cy + '" r="12" fill="none" stroke="#f1c40f" stroke-width="1.8" stroke-dasharray="3,3" opacity="0.85" />';
+
+        var partnerName = flankingInfo.partner.n ? flankingInfo.partner.n.split(' ')[0] : 'Aliado';
+        var partnerBadgeText = '▲ Pinça (' + partnerName + ')';
+        var pbW = Math.max(54, partnerBadgeText.length * 5.6 + 12);
+        var pbH = 14;
+        var pbX = Math.round(pPartner.cx - pbW / 2);
+        var pbY = Math.round(pPartner.cy - 16 - pbH);
+        svgHtml += '<g class="hex-flanking-badge">' +
+            '<rect x="' + pbX + '" y="' + pbY + '" width="' + pbW + '" height="' + pbH + '" class="hex-flanking-badge-bg" />' +
+            '<text x="' + pPartner.cx + '" y="' + (pbY + pbH / 2 + 1) + '" class="hex-flanking-badge-text">' + escHtml(partnerBadgeText) + '</text>' +
+            '</g>';
+    }
+
+    svgHtml += '<g class="hex-aim-badge-group">' +
         '<rect x="' + badgeX + '" y="' + badgeY + '" width="' + badgeW + '" height="' + badgeH + '" class="' + bgCls + '" />' +
         '<text x="' + midX + '" y="' + (midY + 1) + '" class="' + textCls + '">' + escHtml(badgeText) + '</text>' +
         '</g>';
@@ -22781,6 +22917,11 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                     classes += ' token--in-range';
                     var tgtCover = (typeof simComputeCover === 'function') ? simComputeCover(s, pUnit, u) : { cover: 'none', bonus: 0 };
                     var tgtAdv = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(pUnit, u, _pendingSkill) : 'normal';
+                    var isFlanked = false;
+                    var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(pUnit, _pendingSkill) : { reach: 1, isRanged: false };
+                    if (!reachInfo.isRanged && typeof simCheckFlanking === 'function' && s && s.order) {
+                        isFlanked = !!simCheckFlanking(pUnit, u, s.order);
+                    }
                     var metaChips = '';
                     if (tgtCover.cover === 'total') {
                         metaChips += ' · ✕ Bloqueado';
@@ -22789,7 +22930,9 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                     } else if (tgtCover.cover === 'three_quarters') {
                         metaChips += ' · ⛨ ¾ Cob';
                     }
-                    if (tgtAdv === 'advantage') {
+                    if (isFlanked) {
+                        metaChips += ' · ▲ Flanqueado';
+                    } else if (tgtAdv === 'advantage') {
                         metaChips += ' · ▲ Vant';
                     } else if (tgtAdv === 'disadvantage') {
                         metaChips += ' · ▼ Desv';
@@ -23135,6 +23278,155 @@ function getHexMicroDetailSvg(cx, cy, detailType, subSeed, isDim) {
     }
     if (!svg) return '';
     return '<g class="hex-terrain-detail" pointer-events="none" opacity="' + opacity + '">' + svg + '</g>';
+}
+
+/**
+ * D&D 5e / Baldur's Gate 3:
+ * Aplica ou combina uma superfície elemental no hexágono (col, row) com reações físicas:
+ * - 'fire' + 'ice' -> derrete em 'water' (Poça d'Água)
+ * - 'lightning' + ('water' ou 'ice') -> 'electrified_water' (Água Eletrificada)
+ */
+function simApplyHexSurface(state, col, row, surfaceType, turns, sourceName) {
+    if (!state) return null;
+    if (!state.battlefield) state.battlefield = {};
+    if (!Array.isArray(state.battlefield.surfaces)) state.battlefield.surfaces = [];
+    var surfaces = state.battlefield.surfaces;
+    var stNorm = String(surfaceType || 'fire').toLowerCase().trim();
+
+    var existingIdx = -1;
+    for (var i = 0; i < surfaces.length; i++) {
+        if (surfaces[i].col === col && surfaces[i].row === row) {
+            existingIdx = i;
+            break;
+        }
+    }
+
+    var reaction = null;
+    if (existingIdx >= 0) {
+        var prev = surfaces[existingIdx];
+        var prevT = prev.type || prev.surface_type;
+        if ((prevT === 'ice' && stNorm === 'fire') || (prevT === 'fire' && (stNorm === 'ice' || stNorm === 'cold'))) {
+            stNorm = 'water';
+            reaction = 'melt_to_water';
+        } else if ((prevT === 'water' || prevT === 'ice') && (stNorm === 'lightning' || stNorm === 'electric' || stNorm === 'electrified_water')) {
+            stNorm = 'electrified_water';
+            reaction = 'electrify_water';
+        }
+        surfaces.splice(existingIdx, 1);
+    }
+
+    var entry = {
+        col: parseInt(col, 10),
+        row: parseInt(row, 10),
+        type: stNorm,
+        surface_type: stNorm,
+        turnsLeft: Math.max(1, parseInt(turns, 10) || 2),
+        source: sourceName || '',
+        reaction: reaction
+    };
+    surfaces.push(entry);
+    return entry;
+}
+
+/**
+ * Renderiza a camada SVG de Superfícies Elementais Hexagonais (D&D 5e / Baldur's Gate 3).
+ * Desenha hexágonos cobertos por chamas, gelo, poças d'água, água eletrificada ou veneno,
+ * com badges heráldicos elegantes e regras canônicas de dano e salvaguardas.
+ */
+function buildHexSurfacesLayerSvg(s, partyVisionMap) {
+    if (!s || !s.battlefield || !Array.isArray(s.battlefield.surfaces) || s.battlefield.surfaces.length === 0) return '';
+    var surfaces = s.battlefield.surfaces;
+    var svg = '<g id="hexSurfacesLayer" class="hex-surfaces-layer" pointer-events="none">';
+
+    for (var i = 0; i < surfaces.length; i++) {
+        var surf = surfaces[i];
+        if (!surf || surf.col == null || surf.row == null) continue;
+
+        // Se sob névoa de guerra completa, não renderiza superfície não descoberta
+        var posKey = surf.col + ',' + surf.row;
+        var vis = partyVisionMap ? partyVisionMap[posKey] : null;
+        if (!vis || (!vis.visible && !vis.dim)) continue;
+
+        var center = hexCenter(surf.col, surf.row);
+        var pts = hexPolygonPoints(center.cx, center.cy);
+        var sType = String(surf.type || surf.surface_type || 'fire').toLowerCase();
+
+        var polyCls = 'hex-surface-polygon hex-surface--' + sType;
+        svg += '<polygon points="' + pts + '" class="' + polyCls + '" />';
+
+        // Badge de superfície no topo do hexágono (Glifos heráldicos monocromáticos Regra #46)
+        var meta = {
+            fire: { badge: '▲ Chamas (1d4)', bgCls: 'hex-surface-badge-bg--fire', txtCls: 'hex-surface-badge-text--fire' },
+            ice: { badge: '✦ Gelo (CD 10 DES)', bgCls: 'hex-surface-badge-bg--ice', txtCls: 'hex-surface-badge-text--ice' },
+            water: { badge: '◈ Água', bgCls: 'hex-surface-badge-bg--water', txtCls: 'hex-surface-badge-text--water' },
+            electrified_water: { badge: '✦ Choque (1d4)', bgCls: 'hex-surface-badge-bg--electrified', txtCls: 'hex-surface-badge-text--electrified' },
+            lightning: { badge: '✦ Choque (1d4)', bgCls: 'hex-surface-badge-bg--electrified', txtCls: 'hex-surface-badge-text--electrified' },
+            poison: { badge: '▲ Veneno (1d4)', bgCls: 'hex-surface-badge-bg--poison', txtCls: 'hex-surface-badge-text--poison' }
+        }[sType] || { badge: '▲ Superfície', bgCls: 'hex-surface-badge-bg--fire', txtCls: 'hex-surface-badge-text--fire' };
+
+        var labelText = meta.badge;
+        var badgeW = Math.max(48, labelText.length * 5.6 + 10);
+        var badgeH = 14;
+        var bx = Math.round(center.cx - badgeW / 2);
+        var by = Math.round(center.cy - 16);
+
+        svg += '<g class="hex-surface-badge">';
+        svg += '<rect x="' + bx + '" y="' + by + '" width="' + badgeW + '" height="' + badgeH + '" class="hex-surface-badge-bg ' + meta.bgCls + '" />';
+        svg += '<text x="' + center.cx + '" y="' + (by + 7) + '" class="' + meta.txtCls + '">' + escHtml(labelText) + '</text>';
+        svg += '</g>';
+    }
+
+    svg += '</g>';
+    return svg;
+}
+
+/**
+ * Atualiza o DOM da camada de superfícies elementais em tempo real sem causar reflow geral.
+ */
+function refreshHexSurfacesLayerLive() {
+    var layer = document.getElementById('hexSurfacesLayer');
+    if (!layer || !currentState) return;
+    var pvm = (typeof _simLastPartyVisionMap !== 'undefined') ? _simLastPartyVisionMap : null;
+    var fullSvg = buildHexSurfacesLayerSvg(currentState, pvm);
+    var m = fullSvg.match(/<g id="hexSurfacesLayer"[^>]*>([\s\S]*)<\/g>/);
+    layer.innerHTML = m ? m[1] : '';
+}
+
+/**
+ * D&D 5e DMG p. 251 (Regra de Flanqueamento em Grid Hexagonal):
+ * Verifica se um atacante e um aliado consciente da sua comitiva estão em lados
+ * opostos ou quase opostos do hexágono do alvo (distância entre aliados >= 2).
+ */
+function simCheckFlanking(actor, target, order) {
+    if (!actor || !target || !order || !Array.isArray(order)) return null;
+    if (!actor.pos || !target.pos) return null;
+    if (actor.t === target.t) return null;
+
+    // Flanqueamento requer combate corpo a corpo (1 hex de distância)
+    if (hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row) !== 1) return null;
+
+    for (var i = 0; i < order.length; i++) {
+        var ally = order[i];
+        if (!ally || ally === actor) continue;
+        if (ally.t !== actor.t) continue;
+        var isAlive = (ally.alive !== false) && !ally.isDead && (typeof ally.hp !== 'number' || ally.hp > 0);
+        if (!isAlive || !ally.pos) continue;
+
+        // O aliado deve estar também adjacente ao mesmo alvo
+        if (hexDistance(ally.pos.col, ally.pos.row, target.pos.col, target.pos.row) === 1) {
+            // Em hexágonos, posições opostas ou angulares de flanqueamento têm d(A, B) >= 2
+            var distBetweenAllies = hexDistance(actor.pos.col, actor.pos.row, ally.pos.col, ally.pos.row);
+            if (distBetweenAllies >= 2) {
+                return {
+                    flanking: true,
+                    actor: actor,
+                    partner: ally,
+                    target: target
+                };
+            }
+        }
+    }
+    return null;
 }
 
 /**
@@ -23858,6 +24150,11 @@ function buildBattlefield(s) {
     html += '<marker id="threatArrowBoss" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#ff4757"/></marker>';
     html += '<radialGradient id="aoeFireballGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff5722" stop-opacity="0.55"/><stop offset="65%" stop-color="#ff9800" stop-opacity="0.22"/><stop offset="100%" stop-color="#ff5722" stop-opacity="0"/></radialGradient>';
     html += '<radialGradient id="aoeArcaneGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00e5ff" stop-opacity="0.45"/><stop offset="65%" stop-color="#2979ff" stop-opacity="0.18"/><stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/></radialGradient>';
+    html += '<radialGradient id="surfGradFire" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff3d00" stop-opacity="0.45"/><stop offset="70%" stop-color="#ff9100" stop-opacity="0.25"/><stop offset="100%" stop-color="#ff3d00" stop-opacity="0.08"/></radialGradient>';
+    html += '<radialGradient id="surfGradIce" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00e5ff" stop-opacity="0.4"/><stop offset="70%" stop-color="#80deea" stop-opacity="0.2"/><stop offset="100%" stop-color="#00e5ff" stop-opacity="0.06"/></radialGradient>';
+    html += '<radialGradient id="surfGradWater" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2979ff" stop-opacity="0.32"/><stop offset="75%" stop-color="#0288d1" stop-opacity="0.18"/><stop offset="100%" stop-color="#2979ff" stop-opacity="0.05"/></radialGradient>';
+    html += '<radialGradient id="surfGradLightning" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffff00" stop-opacity="0.48"/><stop offset="65%" stop-color="#00e5ff" stop-opacity="0.28"/><stop offset="100%" stop-color="#ffd600" stop-opacity="0.08"/></radialGradient>';
+    html += '<radialGradient id="surfGradPoison" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00e676" stop-opacity="0.38"/><stop offset="70%" stop-color="#1b5e20" stop-opacity="0.22"/><stop offset="100%" stop-color="#00e676" stop-opacity="0.06"/></radialGradient>';
     html += '</defs>';
 
     // Territory tint zones (Enemies top rows 0..4, Allies bottom rows 5..9)
@@ -23899,6 +24196,7 @@ function buildBattlefield(s) {
             }
         }
     });
+    _simLastPartyVisionMap = partyVisionMap;
 
     for (var col = 0; col < bCols; col++) {
         for (var row = 0; row < bRows; row++) {
@@ -24000,6 +24298,9 @@ function buildBattlefield(s) {
             }
         }
     }
+
+    // Camada de Superfícies Elementais Hexagonais (BG3 / Divinity: Original Sin 2 / D&D 5e)
+    html += buildHexSurfacesLayerSvg(s, partyVisionMap);
 
     // Camada de Projeções de Intenções Compartilhadas / Intent Ghosts (Multiplayer D&D 5e / BG3 / Solasta)
     html += buildSharedIntentsLayerSvg(s, bCols, bRows);
@@ -28278,12 +28579,17 @@ function bindActions() {
                         var advState = (typeof simPeekAttackAdvState === 'function')
                             ? simPeekAttackAdvState(pUnit, tgtUnit, _pendingSkill)
                             : 'normal';
+                        var flankingInfo = (!reachInfo.isRanged && typeof simCheckFlanking === 'function')
+                            ? simCheckFlanking(pUnit, tgtUnit, currentState.order)
+                            : null;
                         drawTacticalAimVector(pUnit.pos.col, pUnit.pos.row, tgtUnit.pos.col, tgtUnit.pos.row, {
                             reach: reachInfo.reach || 1,
                             cover: coverInfo.cover !== 'none',
                             coverText: coverText,
                             coverType: coverInfo.cover,
-                            advState: advState
+                            advState: advState,
+                            flankingInfo: flankingInfo,
+                            skill: _pendingSkill
                         });
                     }
                 }
@@ -28522,9 +28828,42 @@ function mountEnemyHoverStatHints() {
                 }
                 hint.style.left = left + 'px';
                 hint.style.top = top + 'px';
+
+                if (_selectingTarget && currentState && u.t === 'e') {
+                    var pUnit = currentState.order[currentState.p_idx];
+                    if (pUnit && pUnit.pos && u.pos && u.pos.col != null) {
+                        var reachInfo = (typeof simGetAttackReach === 'function')
+                            ? simGetAttackReach(pUnit, _pendingSkill)
+                            : { reach: 1, isRanged: false };
+                        var coverInfo = (typeof simComputeCover === 'function')
+                            ? simComputeCover(currentState, pUnit, u)
+                            : { cover: 'none', bonus: 0 };
+                        var coverText = coverInfo.cover === 'half' ? '½ Cobertura (+2 CA)' : (coverInfo.cover === 'three_quarters' ? '¾ Cobertura (+5 CA)' : '');
+                        var advState = (typeof simPeekAttackAdvState === 'function')
+                            ? simPeekAttackAdvState(pUnit, u, _pendingSkill)
+                            : 'normal';
+                        var flankingInfo = (!reachInfo.isRanged && typeof simCheckFlanking === 'function')
+                            ? simCheckFlanking(pUnit, u, currentState.order)
+                            : null;
+                        drawTacticalAimVector(pUnit.pos.col, pUnit.pos.row, u.pos.col, u.pos.row, {
+                            reach: reachInfo.reach || 1,
+                            cover: coverInfo.cover !== 'none',
+                            coverText: coverText,
+                            coverType: coverInfo.cover,
+                            advState: advState,
+                            flankingInfo: flankingInfo,
+                            skill: _pendingSkill
+                        });
+                    }
+                }
             });
 
-            el.addEventListener('pointerleave', removeEnemyHoverStatHint);
+            el.addEventListener('pointerleave', function () {
+                removeEnemyHoverStatHint();
+                if (_selectingTarget) {
+                    clearTacticalAimVector();
+                }
+            });
         })(unitEls[ei]);
     }
 }
@@ -33193,8 +33532,15 @@ function showTargetConfirm(tgtIdx) {
 
     /* Bloco de previsao de dano */
     var advMode = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(p, u, skill) : 'normal';
+    var isFlanked = false;
+    var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(p, skill) : { reach: 1, isRanged: false };
+    if (!reachInfo.isRanged && typeof simCheckFlanking === 'function' && s && s.order) {
+        isFlanked = !!simCheckFlanking(p, u, s.order);
+    }
     var advBadge = '';
-    if (advMode === 'advantage') {
+    if (isFlanked) {
+        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Flanqueamento D&D 5e (DMG p. 251): Aliado em posição oposta">▲ FLANQUEADO (VANT)</span>';
+    } else if (advMode === 'advantage') {
         advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;">▲ VANTAGEM</span>';
     } else if (advMode === 'disadvantage') {
         advBadge = ' <span class="badge dis" style="background:#4a1515;color:#fecaca;border:1px solid #e74c3c;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;">▼ DESVANTAGEM</span>';
@@ -41819,8 +42165,28 @@ async function __combatAnimateOneEvent(ev) {
             try {
                 if (isFireball) {
                     window._combatVfx.fireballAoE(elT);
+                    if (tUnit && tUnit.pos && typeof simApplyHexSurface === 'function' && currentState) {
+                        simApplyHexSurface(currentState, tUnit.pos.col, tUnit.pos.row, 'fire', 3, 'Bola de Fogo');
+                        if (typeof hexNeighbors === 'function') {
+                            var adj = hexNeighbors(tUnit.pos.col, tUnit.pos.row);
+                            for (var ai = 0; ai < adj.length; ai++) {
+                                simApplyHexSurface(currentState, adj[ai].col, adj[ai].row, 'fire', 2, 'Bola de Fogo');
+                            }
+                        }
+                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                    }
                 } else if (isRayOfFrost && elA) {
                     window._combatVfx.rayOfFrost(elA, elT, { crit: !!ev.crit });
+                    if (tUnit && tUnit.pos && typeof simApplyHexSurface === 'function' && currentState) {
+                        simApplyHexSurface(currentState, tUnit.pos.col, tUnit.pos.row, 'ice', 2, 'Raio de Gelo');
+                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                    }
+                } else if (dmgType === 'lightning' && tUnit && tUnit.pos && typeof simApplyHexSurface === 'function' && currentState) {
+                    simApplyHexSurface(currentState, tUnit.pos.col, tUnit.pos.row, 'electrified_water', 2, 'Eletricidade');
+                    if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                } else if (dmgType === 'poison' && tUnit && tUnit.pos && typeof simApplyHexSurface === 'function' && currentState) {
+                    simApplyHexSurface(currentState, tUnit.pos.col, tUnit.pos.row, 'poison', 2, 'Veneno');
+                    if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
                 } else if (isRanged && elA) {
                     window._combatVfx.projectile(elA, elT, dmgType, { crit: !!ev.crit });
                 } else if (elA) {
