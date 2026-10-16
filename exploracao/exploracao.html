@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-16T10:07:30Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-16T11:55:25Z - do not edit directly, edit source -->
 
 
 
@@ -40532,12 +40532,14 @@ function _explEventBodyNode(ev) {
     if (ch.speech_by_class && clsKey && ch.speech_by_class[clsKey]) spkSpeech = ch.speech_by_class[clsKey];
     else if (ch.speech_by_race && p.race && ch.speech_by_race[p.race]) spkSpeech = ch.speech_by_race[p.race];
     else if (ch.speech_by_background && bg && ch.speech_by_background[bg]) spkSpeech = ch.speech_by_background[bg];
+    else if (ch.speech_by_alignment && align && ch.speech_by_alignment[align]) spkSpeech = ch.speech_by_alignment[align];
     else if (ch.speech) spkSpeech = ch.speech;
 
     var spkTag = '';
     if (ch.tag_by_class && clsKey && ch.tag_by_class[clsKey]) spkTag = ch.tag_by_class[clsKey];
     else if (ch.tag_by_race && p.race && ch.tag_by_race[p.race]) spkTag = ch.tag_by_race[p.race];
     else if (ch.tag_by_background && bg && ch.tag_by_background[bg]) spkTag = ch.tag_by_background[bg];
+    else if (ch.tag_by_alignment && align && ch.tag_by_alignment[align]) spkTag = ch.tag_by_alignment[align];
     else if (ch.tag) spkTag = ch.tag;
 
     if (!spkTag && !spkSpeech && typeof window.JourneyData !== 'undefined' && typeof window.JourneyData.pickChoiceVoice === 'function') {
@@ -40552,6 +40554,7 @@ function _explEventBodyNode(ev) {
 
     if (spkTag) c.tag = spkTag;
     if (spkSpeech) c.speech = spkSpeech;
+    if (ch.is_thought || ch.thought) c.is_thought = true;
     if (ch.desc) c.desc = ch.desc;
     if (ch.badge) c.badge = ch.badge;
     displayed.push(c);

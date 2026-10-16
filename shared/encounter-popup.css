@@ -1419,12 +1419,12 @@ body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
   gap: var(--v-space-xs, 2px);
 }
 .enc-cho-row-label {
-  font-family: 'Cinzel', 'Georgia', serif;
+  font-family: var(--v-font, 'Marcellus', 'Georgia', serif);
   font-size: var(--v-font-base);
-  font-weight: 700;
+  font-weight: 600;
   color: #d4c8b0;
-  letter-spacing: 0.6px;
-  line-height: 1.3;
+  letter-spacing: 0.35px;
+  line-height: 1.35;
 }
 .enc-cho-row:hover .enc-cho-row-label { color: #fff4d0; }
 .enc-cho-row-desc {
@@ -1450,14 +1450,18 @@ body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
   vertical-align: middle;
 }
 .enc-cho-speech {
-  font-family: 'Cinzel', 'Marcellus', serif;
-  font-size: calc(13px * var(--v-font-scale, 1));
+  font-family: var(--v-font, 'Marcellus', 'Georgia', serif);
+  font-size: calc(13.5px * var(--v-font-scale, 1));
   font-style: italic;
-  font-weight: 600;
+  font-weight: 400;
   color: #f7e8c6;
-  line-height: 1.35;
+  line-height: 1.4;
   display: block;
   margin-bottom: 2px;
+}
+.enc-cho-speech.enc-cho-thought {
+  color: #c9d8e8;
+  font-style: italic;
 }
 
 /* Deliberação Cooperativa da Comitiva (Multiplayer D&D 5e / BG3) */
@@ -2000,10 +2004,10 @@ body.perf-lite .enc-cho-item-thumb--clickable:hover { transform: none; }
   word-break: break-word;
 }
 .enc-cd-speech {
-  font-family: 'Cinzel', 'Marcellus', serif;
-  font-size: calc(13px * var(--v-font-scale, 1));
+  font-family: var(--v-font, 'Marcellus', 'Georgia', serif);
+  font-size: calc(13.5px * var(--v-font-scale, 1));
   font-style: italic;
-  font-weight: 600;
+  font-weight: 400;
   color: #f7e8c6;
   background: rgba(196, 149, 58, 0.12);
   border-left: 3px solid #c4953a;
@@ -2013,6 +2017,11 @@ body.perf-lite .enc-cho-item-thumb--clickable:hover { transform: none; }
   margin-bottom: 2px;
   overflow-wrap: break-word;
   word-break: break-word;
+}
+.enc-cd-speech.enc-cd-thought {
+  color: #c9d8e8;
+  background: rgba(43, 62, 85, 0.25);
+  border-left-color: #5b8db8;
 }
 
 

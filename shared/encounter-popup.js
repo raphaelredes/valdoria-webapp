@@ -3281,11 +3281,12 @@
     // Ordem do Usuário 2026-10: Spoilers de consequências (Renome +X) em escolhas BANIDOS para preservar a imersão de RPG de mesa D&D 5e.
 
     var speechHtml = '';
+    var isThought = (sTxt && ((sTxt.charAt(0) === '(' && sTxt.charAt(sTxt.length - 1) === ')') || (sTxt.charAt(0) === '*' && sTxt.charAt(sTxt.length - 1) === '*'))) || !!ch.is_thought || !!ch.thought;
     if (sTxt) {
       speechHtml =
         '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">Fala / Resposta do Personagem</div>' +
-          '<div class="enc-cd-box enc-cd-speech">“' + _coinify(sTxt) + '”</div>' +
+          '<div class="enc-cd-section-title">' + (isThought ? 'Pensamento do Personagem' : 'Fala / Resposta do Personagem') + '</div>' +
+          '<div class="enc-cd-box enc-cd-speech' + (isThought ? ' enc-cd-thought' : '') + '">' + (isThought ? _coinify(sTxt) : ('“' + _coinify(sTxt) + '”')) + '</div>' +
         '</div>';
     }
 
@@ -3382,6 +3383,7 @@
       : (ch.id === 'jrn_go') ? 'Partir em Marcha Padrão'
       : (ch.id === 'jrn_cancel') ? 'Permanecer na Cidade'
       : (ch.isCombat) ? 'Entrar em Combate'
+      : (isThought) ? 'Confirmar Decisão'
       : (ch.speech || sTxt) ? 'Dizer isto e Confirmar'
       : (ch.confirmLabel) ? ch.confirmLabel
       : (ch.dc || ch._tactical_options) ? 'Confirmar e Rolar'
@@ -3696,8 +3698,11 @@
         _choLabel = '<span class="enc-cho-badge-pill" style="display:inline-block;padding:1px 6px;margin-right:6px;font-size:10px;font-weight:700;border:1px solid rgba(196,149,58,0.5);border-radius:4px;color:#c4953a;background:rgba(196,149,58,0.12);text-transform:uppercase;letter-spacing:0.5px;">' + _stripEmojis(ch.badge) + '</span>' + _choLabel;
       }
 
+      var _isThought = (speechClean && ((speechClean.charAt(0) === '(' && speechClean.charAt(speechClean.length - 1) === ')') || (speechClean.charAt(0) === '*' && speechClean.charAt(speechClean.length - 1) === '*'))) || !!ch.is_thought || !!ch.thought;
+
       if (isCompact) {
-        var titleText = hasSpeech ? (tagPill + '“' + _coinify(speechClean) + '”') : _choLabel;
+        var speechFormattedCompact = _isThought ? _coinify(speechClean) : ('“' + _coinify(speechClean) + '”');
+        var titleText = hasSpeech ? (tagPill + speechFormattedCompact) : _choLabel;
         var subText = '';
         if (_choLabel.indexOf(':') !== -1 && !hasSpeech) {
           var lp = _choLabel.split(':');
@@ -3746,7 +3751,10 @@
         var mainContent = '';
         var subDesc = '';
         if (hasSpeech) {
-          mainContent = tagPill + '<span class="enc-cho-speech">“' + _coinify(speechClean) + '”</span>';
+          var speechFormatted = _isThought
+            ? ('<span class="enc-cho-speech enc-cho-thought">' + _coinify(speechClean) + '</span>')
+            : ('<span class="enc-cho-speech">“' + _coinify(speechClean) + '”</span>');
+          mainContent = tagPill + speechFormatted;
           subDesc = _stripEmojis(ch.desc || subText || '');
           if (subDesc) {
             subDesc = subDesc.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
