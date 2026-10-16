@@ -565,6 +565,36 @@ var CHAR_CLASSES = [
                     immunities: ['fire', 'poison'],
                     conditionImmunities: ['poisoned', 'exhaustion']
                 }
+            } },
+        /* V1.18 (2026-10-16) — Conjurar Elemental (PHB p.225 — Conjure Elemental).
+           Mago/Druida nv 9+. Invoca 1 Grande Elemental do Fogo (Concentração). */
+        { n: 'Conjurar Elemental', ico: '🌋', cost: 5, kind: 'summon_greater_elemental', minLevel: 9, concentration: true,
+            desc: 'Conjura 1 Grande Elemental do Fogo (Ser Elemental, TR 5, Dano Ígneo 2d6+3, Imunidade a Fogo/Veneno e Concentração) como aliado leal da comitiva.',
+            helpDnd5e: 'Conjurar Elemental / Conjure Elemental (PHB p. 225 — Mago e Druida nv 9): magia de 5º círculo; alcance 27m; Concentração até 1 hora. Invoca um elemental ancestral dos Planos Elementais que obedece aos seus comandos e luta como aliado da comitiva.\nArena: invoca 1 Grande Elemental do Fogo (HP 102, CA 13, atk +6, 2d6+3 de fogo + 1d10 combustão, imunidade a fogo e veneno, vulnerável a frio, resistência a dano cortante/perfurante/contundente de armas não-mágicas, imune às condições Enfeitiçado, Amedrontado, Paralisado, Petrificado, Envenenado e Prostrado). Se o conjurador perder a concentração, o elemental retorna ao seu plano natal.',
+            greaterElementalSpec: {
+                count: 1,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_elemental_greater_fire',
+                unitSpec: {
+                    name: 'Elemental do Fogo',
+                    ico: '🌋',
+                    iconHeraldic: 'ic-fire_elemental',
+                    hp: 102, mhp: 102, ac: 13,
+                    dex: 17, wis: 10, con: 16, str: 10, int: 6, cha: 7,
+                    atk: 6,
+                    damageSpec: { n: 2, d: 6, flat: 3 },
+                    dmgBonusDie: { n: 1, d: 10 },
+                    dmgType: 'fire',
+                    ranged: false,
+                    die: 6,
+                    multiAttack: 1,
+                    speed: 10,
+                    vulnerabilities: ['cold'],
+                    immunities: ['fire', 'poison'],
+                    resistances: ['slashing', 'piercing', 'bludgeoning'],
+                    conditionImmunities: ['charmed', 'frightened', 'paralyzed', 'petrified', 'poisoned', 'prone']
+                }
             } }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '', dmgMod: 3, attr: 'DEX',
@@ -1578,6 +1608,36 @@ var CHAR_CLASSES = [
                     die: 6,
                     multiAttack: 1,
                     conditionImmunities: ['charmed']
+                }
+            } },
+        /* V1.18 (2026-10-16) — Conjurar Elemental (PHB p.225 — Conjure Elemental).
+           Mago/Druida nv 9+. Invoca 1 Grande Elemental do Fogo (Concentração). */
+        { n: 'Conjurar Elemental', ico: '🌋', cost: 5, kind: 'summon_greater_elemental', minLevel: 9, concentration: true,
+            desc: 'Conjura 1 Grande Elemental do Fogo (Ser Elemental, TR 5, Dano Ígneo 2d6+3, Imunidade a Fogo/Veneno e Concentração) como aliado leal da comitiva.',
+            helpDnd5e: 'Conjurar Elemental / Conjure Elemental (PHB p. 225 — Mago e Druida nv 9): magia de 5º círculo; alcance 27m; Concentração até 1 hora. Invoca um elemental ancestral dos Planos Elementais que obedece aos seus comandos e luta como aliado da comitiva.\nArena: invoca 1 Grande Elemental do Fogo (HP 102, CA 13, atk +6, 2d6+3 de fogo + 1d10 combustão, imunidade a fogo e veneno, vulnerável a frio, resistência a dano cortante/perfurante/contundente de armas não-mágicas, imune às condições Enfeitiçado, Amedrontado, Paralisado, Petrificado, Envenenado e Prostrado). Se o conjurador perder a concentração, o elemental retorna ao seu plano natal.',
+            greaterElementalSpec: {
+                count: 1,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_elemental_greater_fire',
+                unitSpec: {
+                    name: 'Elemental do Fogo',
+                    ico: '🌋',
+                    iconHeraldic: 'ic-fire_elemental',
+                    hp: 102, mhp: 102, ac: 13,
+                    dex: 17, wis: 10, con: 16, str: 10, int: 6, cha: 7,
+                    atk: 6,
+                    damageSpec: { n: 2, d: 6, flat: 3 },
+                    dmgBonusDie: { n: 1, d: 10 },
+                    dmgType: 'fire',
+                    ranged: false,
+                    die: 6,
+                    multiAttack: 1,
+                    speed: 10,
+                    vulnerabilities: ['cold'],
+                    immunities: ['fire', 'poison'],
+                    resistances: ['slashing', 'piercing', 'bludgeoning'],
+                    conditionImmunities: ['charmed', 'frightened', 'paralyzed', 'petrified', 'poisoned', 'prone']
                 }
             } }
       ] },
