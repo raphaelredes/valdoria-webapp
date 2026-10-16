@@ -691,7 +691,27 @@ var CHAR_CLASSES = [
             concentration: true, mazeBanish: true,
             damageSpec: { n: 0, d: 0 },
             desc: 'Bane o alvo sem salvaguarda inicial para um semiplano labiríntico. O alvo pode tentar escapar no seu turno com teste de Inteligência CD 20 (concentração).',
-            helpDnd5e: 'Labirinto / Maze (PHB p. 258 — Mago nv 15): magia de 8º círculo; 1 Ação; alcance 18m (12 hexágonos); Concentração até 10 minutos (10 rodadas em combate). Você bane uma criatura à vista para um semiplano labiríntico. A criatura não tem direito a salvaguarda inicial. Enquanto banida, a criatura fica ausente do combate. No início de cada um dos seus turnos, o alvo pode tentar escapar resolvendo o labirinto com um teste de Inteligência CD 20. Minotauros passam automaticamente no teste de escape.' }
+            helpDnd5e: 'Labirinto / Maze (PHB p. 258 — Mago nv 15): magia de 8º círculo; 1 Ação; alcance 18m (12 hexágonos); Concentração até 10 minutos (10 rodadas em combate). Você bane uma criatura à vista para um semiplano labiríntico. A criatura não tem direito a salvaguarda inicial. Enquanto banida, a criatura fica ausente do combate. No início de cada um dos seus turnos, o alvo pode tentar escapar resolvendo o labirinto com um teste de Inteligência CD 20. Minotauros passam automaticamente no teste de escape.' },
+        /* V1.27 (2026-10-16) — Chuva de Meteoros (PHB p.220 — Meteor Swarm).
+           Mago nv 17+. 20d6 fogo + 20d6 concussão (total 40d6) em área colossal (TR Destreza metade; Evasão anula). */
+        { n: 'Chuva de Meteoros', ico: '☄️', cost: 9, kind: 'attack', minLevel: 17,
+            multiTarget: true, aoeRadius: 20, aoeShape: 'sphere', reach: 50,
+            save: { ability: 'dex' }, damageSpec: { n: 40, d: 6, flat: 0 },
+            meteorSwarm: true, dmgType: 'fire',
+            desc: '4 meteoros incandescentes explodem causando 20d6 de fogo + 20d6 de concussão (total 40d6) em área colossal (TR Destreza metade).',
+            helpDnd5e: 'Chuva de Meteoros / Meteor Swarm (PHB p. 220 — Mago e Feiticeiro nv 17): magia de 9º círculo; 1 Ação; alcance 1,5 km; área esférica massiva. Orbes flamejantes despencam do céu e explodem. Cada criatura na área realiza um TR de Destreza. Sofre 20d6 de dano de fogo e 20d6 de dano de concussão (total de 40d6) em falha, ou metade desse dano em sucesso. Evasão anula totalmente o dano em sucesso.' },
+        /* V1.27 (2026-10-16) — Parar o Tempo (PHB p.283 — Time Stop).
+           Mago nv 17+. Congela o fluxo temporal por 1d4+1 turnos livres consecutivos. */
+        { n: 'Parar o Tempo', ico: '⏳', cost: 9, kind: 'buff', minLevel: 17,
+            timeStop: true,
+            desc: 'Congela o fluxo do tempo por 1d4+1 turnos livres consecutivos, permitindo que você aja livremente sem que inimigos possam agir.',
+            helpDnd5e: 'Parar o Tempo / Time Stop (PHB p. 283 — Mago e Feiticeiro nv 17): magia de 9º círculo; 1 Ação. Você para brevemente o fluxo do tempo para todos exceto você. Ganha 1d4 + 1 ações livres consecutivas adicionais imediatas para se reposicionar, curar ou conjurar.' },
+        /* V1.27 (2026-10-16) — Palavra de Poder: Matar (PHB p.266 — Power Word Kill).
+           Mago nv 17+. Morte instantânea se o alvo possuir 100 PV ou menos (sem salvaguarda). */
+        { n: 'Palavra de Poder: Matar', ico: '☠️', cost: 9, kind: 'attack', minLevel: 17,
+            ranged: true, reach: 12, powerWordKill: true, damageSpec: { n: 0, d: 0 },
+            desc: 'Pronuncia uma palavra de poder. Se o alvo tiver 100 PV ou menos, morre instantaneamente sem teste de resistência.',
+            helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266 — Mago e Feiticeiro nv 17, Bruxo via Arcanum Místico): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '', dmgMod: 3, attr: 'DEX',
       res: { type: 'energia', name: 'Energia', ico: '', max: 6 },
@@ -1049,7 +1069,14 @@ var CHAR_CLASSES = [
                 dndCondition: 'Prostrado (PHB p. 236 — Terremoto)'
             },
             desc: 'Tremor sísmico massivo abala o campo de batalha. Criaturas no solo devem passar em TR de Destreza ou caem Prostradas.',
-            helpDnd5e: 'Terremoto / Earthquake (PHB p. 236 — Clérigo e Druida nv 15): magia de 8º círculo; 1 Ação; alcance 150m (área massiva). Um tremor sísmico colossal racha e convulsiona a terra. Cada criatura no solo na área deve realizar um Teste de Resistência de Destreza. Em falha, a criatura cai Prostrada no chão. Conjuradores que estejam mantendo concentração na área devem realizar TR de Constituição para não perder a magia.' }
+            helpDnd5e: 'Terremoto / Earthquake (PHB p. 236 — Clérigo e Druida nv 15): magia de 8º círculo; 1 Ação; alcance 150m (área massiva). Um tremor sísmico colossal racha e convulsiona a terra. Cada criatura no solo na área deve realizar um Teste de Resistência de Destreza. Em falha, a criatura cai Prostrada no chão. Conjuradores que estejam mantendo concentração na área devem realizar TR de Constituição para não perder a magia.' },
+        /* V1.27 (2026-10-16) — Cura Completa em Massa (PHB p.258 — Mass Heal).
+           Clérigo nv 17+. Restaura até 700 PV divididos entre aliados e remove todas as condições de cegueira e surdez. */
+        { n: 'Cura Completa em Massa', ico: '✨', cost: 9, kind: 'heal', minLevel: 17,
+            multiTarget: true, reach: 12, massHeal: true,
+            healSpec: { n: 0, d: 0, flat: 700 },
+            desc: 'Inundação colossal de cura divina: restaura até 700 PV divididos entre aliados e purifica todas as condições de cegueira e surdez.',
+            helpDnd5e: 'Cura Completa em Massa / Mass Heal (PHB p. 258 — Clérigo nv 17): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Uma torrente de energia curativa jorra de você para criaturas feridas. Você restaura até 700 PV divididos entre as criaturas escolhidas. A magia também encerra imediatamente qualquer efeito que cause cegueira ou surdez nas criaturas curadas.' }
       ] },
     { cls: 'Paladino', hp: [26, 38], ac: [16, 18], atk: [5, 6], die: 8, dex: [8, 12], ico: '', dmgMod: 2, attr: 'STR',
       /* D&D 5e PHB p.84: Paladino é meio-conjurador — Smite Divino e magias
@@ -1907,7 +1934,23 @@ var CHAR_CLASSES = [
                 dndCondition: 'Prostrado (PHB p. 236 — Terremoto)'
             },
             desc: 'Tremor sísmico massivo abala o campo de batalha. Criaturas no solo devem passar em TR de Destreza ou caem Prostradas.',
-            helpDnd5e: 'Terremoto / Earthquake (PHB p. 236 — Clérigo e Druida nv 15): magia de 8º círculo; 1 Ação; alcance 150m (área massiva). Um tremor sísmico colossal racha e convulsiona a terra. Cada criatura no solo na área deve realizar um Teste de Resistência de Destreza. Em falha, a criatura cai Prostrada no chão. Conjuradores que estejam mantendo concentração na área devem realizar TR de Constituição para não perder a magia.' }
+            helpDnd5e: 'Terremoto / Earthquake (PHB p. 236 — Clérigo e Druida nv 15): magia de 8º círculo; 1 Ação; alcance 150m (área massiva). Um tremor sísmico colossal racha e convulsiona a terra. Cada criatura no solo na área deve realizar um Teste de Resistência de Destreza. Em falha, a criatura cai Prostrada no chão. Conjuradores que estejam mantendo concentração na área devem realizar TR de Constituição para não perder a magia.' },
+        /* V1.27 (2026-10-16) — Tempestade da Vingança (PHB p.279 — Storm of Vengeance).
+           Druida nv 17+. Nuvem colossal causando 2d6 trovão e ensurdecendo em área por TR de Constituição (concentração até 10 rodadas). */
+        { n: 'Tempestade da Vingança', ico: '⛈️', cost: 9, kind: 'attack', minLevel: 17,
+            multiTarget: true, aoeRadius: 20, aoeShape: 'sphere', reach: 50,
+            save: { ability: 'con' }, damageSpec: { n: 2, d: 6, flat: 0 },
+            dmgType: 'thunder', concentration: true,
+            afterAttackEnemyDebuff: {
+                id: 'storm_deafened',
+                turns: 5,
+                n: 'Ensurdecido',
+                ico: '🔇',
+                deafened: true,
+                dndCondition: 'Ensurdecido (PHB p. 279 — Tempestade da Vingança)'
+            },
+            desc: 'Nuvem colossal de tempestade causa 2d6 de trovão e ensurdece por 5 rodadas em falha no TR de Constituição (concentração até 10 rodadas).',
+            helpDnd5e: 'Tempestade da Vingança / Storm of Vengeance (PHB p. 279 — Druida nv 17): magia de 9º círculo; 1 Ação; alcance visão (área colossal); Concentração até 1 minuto (10 rodadas). Uma nuvem de tempestade gigantesca surge e ribomba. Cada criatura na área realiza um TR de Constituição. Sofre 2d6 de dano de trovão e fica ensurdecida por 5 rodadas em falha, ou metade sem surdez em sucesso.' }
       ] },
     /* V1.7 Stage 6 (2026-04-21) — Feiticeiro (PHB p.99-108): CHA caster inato.
        ADAPTAÇÕES vs PHB:
@@ -2033,7 +2076,27 @@ var CHAR_CLASSES = [
                 dndCondition: 'Cego (PHB p. 279 — Explosão Solar)'
             },
             desc: 'Luz solar ofuscante causando 12d6 radiante e Cegueira por 1 minuto (TR Constituição metade e não cega; mortos-vivos e limos têm desvantagem).',
-            helpDnd5e: 'Explosão Solar / Sunburst (PHB p. 279 — Clérigo, Druida, Feiticeiro e Mago nv 15): magia de 8º círculo; 1 Ação; alcance 45m (30 hexágonos); área esférica de 18m de raio (12 hexágonos). Luz solar brilhante preenche a área. Cada criatura realiza um TR de Constituição. Sofre 12d6 de dano radiante e fica CEGA por 1 minuto (10 rodadas) em falha, ou metade do dano sem cegueira em sucesso. Mortos-vivos e limos têm desvantagem no teste de resistência. Dissipa qualquer escuridão mágica.' }
+            helpDnd5e: 'Explosão Solar / Sunburst (PHB p. 279 — Clérigo, Druida, Feiticeiro e Mago nv 15): magia de 8º círculo; 1 Ação; alcance 45m (30 hexágonos); área esférica de 18m de raio (12 hexágonos). Luz solar brilhante preenche a área. Cada criatura realiza um TR de Constituição. Sofre 12d6 de dano radiante e fica CEGA por 1 minuto (10 rodadas) em falha, ou metade do dano sem cegueira em sucesso. Mortos-vivos e limos têm desvantagem no teste de resistência. Dissipa qualquer escuridão mágica.' },
+        /* V1.27 (2026-10-16) — Chuva de Meteoros (PHB p.220 — Meteor Swarm).
+           Feiticeiro nv 17+. 20d6 fogo + 20d6 concussão (total 40d6) em área colossal (TR Destreza metade; Evasão anula). */
+        { n: 'Chuva de Meteoros', ico: '☄️', cost: 9, kind: 'attack', minLevel: 17,
+            multiTarget: true, aoeRadius: 20, aoeShape: 'sphere', reach: 50,
+            save: { ability: 'dex' }, damageSpec: { n: 40, d: 6, flat: 0 },
+            meteorSwarm: true, dmgType: 'fire',
+            desc: '4 meteoros incandescentes explodem causando 20d6 de fogo + 20d6 de concussão (total 40d6) em área colossal (TR Destreza metade).',
+            helpDnd5e: 'Chuva de Meteoros / Meteor Swarm (PHB p. 220 — Mago e Feiticeiro nv 17): magia de 9º círculo; 1 Ação; alcance 1,5 km; área esférica massiva. Orbes flamejantes despencam do céu e explodem. Cada criatura na área realiza um TR de Destreza. Sofre 20d6 de dano de fogo e 20d6 de dano de concussão (total de 40d6) em falha, ou metade desse dano em sucesso. Evasão anula totalmente o dano em sucesso.' },
+        /* V1.27 (2026-10-16) — Parar o Tempo (PHB p.283 — Time Stop).
+           Feiticeiro nv 17+. Congela o fluxo temporal por 1d4+1 turnos livres consecutivos. */
+        { n: 'Parar o Tempo', ico: '⏳', cost: 9, kind: 'buff', minLevel: 17,
+            timeStop: true,
+            desc: 'Congela o fluxo do tempo por 1d4+1 turnos livres consecutivos, permitindo que você aja livremente sem que inimigos possam agir.',
+            helpDnd5e: 'Parar o Tempo / Time Stop (PHB p. 283 — Mago e Feiticeiro nv 17): magia de 9º círculo; 1 Ação. Você para brevemente o fluxo do tempo para todos exceto você. Ganha 1d4 + 1 ações livres consecutivas adicionais imediatas para se reposicionar, curar ou conjurar.' },
+        /* V1.27 (2026-10-16) — Palavra de Poder: Matar (PHB p.266 — Power Word Kill).
+           Feiticeiro nv 17+. Morte instantânea se o alvo possuir 100 PV ou menos (sem salvaguarda). */
+        { n: 'Palavra de Poder: Matar', ico: '☠️', cost: 9, kind: 'attack', minLevel: 17,
+            ranged: true, reach: 12, powerWordKill: true, damageSpec: { n: 0, d: 0 },
+            desc: 'Pronuncia uma palavra de poder. Se o alvo tiver 100 PV ou menos, morre instantaneamente sem teste de resistência.',
+            helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266 — Mago e Feiticeiro nv 17, Bruxo via Arcanum Místico): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' }
       ] },
     /* V1.7 Stage 7 (2026-04-21) — Bruxo (PHB p.105-115): CHA caster com pact patron.
        ADAPTAÇÕES vs PHB:
@@ -2215,7 +2278,13 @@ var CHAR_CLASSES = [
             concentration: true, mazeBanish: true,
             damageSpec: { n: 0, d: 0 },
             desc: 'Arcanum Místico (PHB p.108): bane o alvo sem salvaguarda inicial para um semiplano labiríntico. O alvo pode tentar escapar no seu turno com teste de Inteligência CD 20 (concentração).',
-            helpDnd5e: 'Labirinto / Maze (PHB p. 258, Arcanum Místico p. 108 — Bruxo nv 15): Arcanum Místico de 8º círculo; consome 1 Pacto; 1 Ação; alcance 18m (12 hexágonos); Concentração até 10 minutos (10 rodadas em combate). Você bane uma criatura à vista para um semiplano labiríntico. A criatura não tem direito a salvaguarda inicial. Enquanto banida, a criatura fica ausente do combate. No início de cada um dos seus turnos, o alvo pode tentar escapar resolvendo o labirinto com um teste de Inteligência CD 20. Minotauros passam automaticamente no teste de escape.' }
+            helpDnd5e: 'Labirinto / Maze (PHB p. 258, Arcanum Místico p. 108 — Bruxo nv 15): Arcanum Místico de 8º círculo; consome 1 Pacto; 1 Ação; alcance 18m (12 hexágonos); Concentração até 10 minutos (10 rodadas em combate). Você bane uma criatura à vista para um semiplano labiríntico. A criatura não tem direito a salvaguarda inicial. Enquanto banida, a criatura fica ausente do combate. No início de cada um dos seus turnos, o alvo pode tentar escapar resolvendo o labirinto com um teste de Inteligência CD 20. Minotauros passam automaticamente no teste de escape.' },
+        /* V1.27 (2026-10-16) — Palavra de Poder: Matar (PHB p.108 & 266 — Power Word Kill / Arcanum Místico).
+           Bruxo nv 17+. Morte instantânea se o alvo possuir 100 PV ou menos (sem salvaguarda). */
+        { n: 'Palavra de Poder: Matar', ico: '☠️', cost: 1, kind: 'attack', minLevel: 17,
+            ranged: true, reach: 12, powerWordKill: true, damageSpec: { n: 0, d: 0 },
+            desc: 'Arcanum Místico (PHB p.108): pronuncia uma palavra de poder. Se o alvo tiver 100 PV ou menos, morre instantaneamente sem salvaguarda.',
+            helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266, Arcanum Místico p. 108 — Bruxo nv 17): Arcanum Místico de 9º círculo; consome 1 Pacto; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' }
       ],
       /* PHB p.107 Pacto da Corrente — o familiar é COMANDADO pelo Bruxo na arena
          ("forgo one of your own attacks to allow your familiar to make one attack"):
