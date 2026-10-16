@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T03:04:20Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T03:27:13Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -7748,6 +7748,14 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
         0 2px 3px rgba(0,0,0,0.95);
     font-size: calc(15px * var(--v-font-scale, 1));
 }
+.cell-skill-impact-label.cell-skill-impact-fumble {
+    color: #ff9999;
+    text-shadow:
+        0 0 8px rgba(220,50,50,1),
+        0 0 16px rgba(180,20,20,0.85),
+        0 2px 3px rgba(0,0,0,0.95);
+    font-size: calc(14px * var(--v-font-scale, 1));
+}
 .cell-skill-impact-label.cell-skill-impact-boss {
     color: #ff8060;
     text-shadow:
@@ -9253,6 +9261,184 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     color: #ec80b0;
     text-shadow: 0 2px 4px rgba(0,0,0,0.95), 0 0 12px rgba(208,64,128,0.9), 0 0 24px rgba(140,30,80,0.55);
 }
+
+/* Tipos de Dano D&D 5e e Modificadores no Floating Combat Text (PHB p. 196) */
+.floating-dmg .fct-crit-tag {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.95);
+    text-transform: uppercase;
+    margin-bottom: -4px;
+}
+.floating-dmg .fct-type-tag {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    color: #f5eedc;
+    opacity: 0.92;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-top: -3px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.floating-dmg .fct-mod-tag {
+    display: inline-block;
+    font-size: 8.5px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-top: 2px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    vertical-align: middle;
+}
+.floating-dmg .fct-mod--resist {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid #94a3b8;
+    color: #cbd5e1;
+    box-shadow: 0 0 6px rgba(148, 163, 184, 0.35);
+}
+.floating-dmg .fct-mod--vuln {
+    background: rgba(127, 29, 29, 0.9);
+    border: 1px solid #f87171;
+    color: #fecaca;
+    box-shadow: 0 0 6px rgba(248, 113, 113, 0.45);
+}
+
+/* Death Saving Throws D&D 5e HUD nos Tokens (PHB p. 197-198) */
+.token-death-saves {
+    position: absolute;
+    top: -36px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, rgba(20, 10, 10, 0.96) 0%, rgba(10, 5, 5, 0.98) 100%);
+    border: 1px solid #8e2a2a;
+    border-radius: 6px;
+    padding: 3px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 10px rgba(180, 40, 40, 0.45);
+    z-index: 30;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: deathSavesPulse 2s ease-in-out infinite;
+}
+
+@keyframes deathSavesPulse {
+    0%, 100% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 6px rgba(180, 40, 40, 0.35); }
+    50% { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.98), 0 0 14px rgba(220, 50, 50, 0.7); border-color: #c0392b; }
+}
+
+.ds-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 7.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.ds-row.ds-successes { color: #f7e7b4; }
+.ds-row.ds-failures { color: #ff9999; }
+.ds-lbl { font-size: 7px; opacity: 0.85; text-transform: uppercase; width: 44px; }
+.ds-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    opacity: 0.25;
+    transition: all 0.2s ease;
+}
+.ds-dot--s.filled {
+    opacity: 1;
+    color: #ffd700;
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.9);
+}
+.ds-dot--f.filled {
+    opacity: 1;
+    color: #e74c3c;
+    text-shadow: 0 0 6px rgba(231, 76, 60, 0.9);
+}
+
+.token-stable-chip {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #182822 0%, #0d1713 100%);
+    border: 1px solid #48bb78;
+    border-radius: 5px;
+    padding: 1px 6px;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 8px;
+    font-weight: 700;
+    color: #c6f6d5;
+    z-index: 28;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 6px rgba(72, 187, 120, 0.35);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Tracker de Iniciativa e Ordem de Turnos D&D 5e (Turn Tracker) */
+#turn-queue .tl-node {
+    position: relative;
+    border: 1.5px solid rgba(140, 115, 75, 0.45);
+    border-radius: 8px;
+    background: #14100c;
+    padding: 2px;
+}
+#turn-queue .tl-node.active {
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.65), inset 0 0 6px rgba(255, 215, 0, 0.3);
+    transform: scale(1.15) translateY(-2px);
+    z-index: 10;
+}
+#turn-queue .tl-node .tl-init-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: #18120c;
+    border: 1px solid #c4953a;
+    border-radius: 4px;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 7.5px;
+    font-weight: 700;
+    color: #ffd54f;
+    line-height: 1;
+    padding: 1px 3px;
+    z-index: 5;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.9);
+}
+#turn-queue .tl-node .tl-hp-track {
+    position: absolute;
+    bottom: 0;
+    left: 2px;
+    right: 2px;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 1px;
+    overflow: hidden;
+    z-index: 4;
+}
+#turn-queue .tl-node .tl-hp-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+#turn-queue .tl-node .tl-conc-icon {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    font-size: 8px;
+    color: #38bdf8;
+    filter: drop-shadow(0 0 4px #0284c7);
+    z-index: 5;
+}
+#turn-queue .tl-node.tl-dying .tl-ico {
+    filter: grayscale(80%) brightness(0.6);
+}
+
 /* Float labels (+N HP, etc.) acima do card */
 .cell-float-label {
     position: fixed;
@@ -11829,6 +12015,21 @@ canvas#vfxCanvas,
   stroke-dasharray: 4 4 !important;
   filter: drop-shadow(0 0 6px rgba(192, 57, 43, 0.65)) !important;
 }
+.hex-aim-path--adv {
+  stroke: #2ecc71 !important;
+  stroke-dasharray: 6 3 !important;
+  filter: drop-shadow(0 0 6px rgba(46, 204, 113, 0.75)) !important;
+}
+.hex-aim-path--disadv {
+  stroke: #e67e22 !important;
+  stroke-dasharray: 5 4 !important;
+  filter: drop-shadow(0 0 6px rgba(230, 126, 34, 0.75)) !important;
+}
+.hex-aim-path--blocked {
+  stroke: #d63031 !important;
+  stroke-dasharray: 3 3 !important;
+  filter: drop-shadow(0 0 6px rgba(214, 48, 49, 0.8)) !important;
+}
 @keyframes aimLineDash {
   0% { stroke-dashoffset: 18; }
   100% { stroke-dashoffset: 0; }
@@ -11845,6 +12046,18 @@ canvas#vfxCanvas,
 .hex-aim-badge-bg--out {
   stroke: #c0392b;
 }
+.hex-aim-badge-bg--adv {
+  stroke: #2ecc71;
+  fill: rgba(14, 28, 18, 0.96);
+}
+.hex-aim-badge-bg--disadv {
+  stroke: #e67e22;
+  fill: rgba(30, 20, 10, 0.96);
+}
+.hex-aim-badge-bg--blocked {
+  stroke: #d63031;
+  fill: rgba(35, 10, 10, 0.96);
+}
 .hex-aim-badge-text {
   fill: #ffd54f;
   font-family: var(--v-font-display, 'Cinzel'), serif;
@@ -11855,6 +12068,15 @@ canvas#vfxCanvas,
   pointer-events: none;
 }
 .hex-aim-badge-text--out {
+  fill: #ff7675;
+}
+.hex-aim-badge-text--adv {
+  fill: #a8ffb2;
+}
+.hex-aim-badge-text--disadv {
+  fill: #ffd180;
+}
+.hex-aim-badge-text--blocked {
   fill: #ff7675;
 }
 
@@ -19582,7 +19804,27 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
    MONTA EM document.body com position:fixed — FCT sobrevive ao render(s)
    que faz setHTML(#app, html) e destruiria children de #app. Coords viewport
    de getBoundingClientRect() funcionam perfeitamente em body (position:fixed). */
+/* D&D 5e (PHB p. 196): Mapeamento canônico dos 13 tipos de dano para o FCT */
+var DND_DAMAGE_TYPES = {
+    'slashing':    { label: 'Cortante',    glyph: '◆' },
+    'piercing':    { label: 'Perfurante',  glyph: '▸' },
+    'bludgeoning': { label: 'Contundente', glyph: '⛨' },
+    'fire':        { label: 'Fogo',        glyph: '▲' },
+    'cold':        { label: 'Frio',        glyph: '❄' },
+    'lightning':   { label: 'Relâmpago',   glyph: '⚡' },
+    'thunder':     { label: 'Trovão',      glyph: '◈' },
+    'acid':        { label: 'Ácido',       glyph: '▲' },
+    'poison':      { label: 'Veneno',      glyph: '▲' },
+    'radiant':     { label: 'Radiante',    glyph: '✦' },
+    'necrotic':    { label: 'Necrótico',   glyph: '☠' },
+    'psychic':     { label: 'Psíquico',    glyph: '◈' },
+    'force':       { label: 'Força',       glyph: '◈' }
+};
+
 function _spawnFloatingDmgNumber(target, dmg, opts) {
+    if (typeof opts === 'boolean') {
+        opts = { crit: opts, dmgType: arguments[3] || '' };
+    }
     opts = opts || {};
     if (!target || dmg <= 0) return;
     var uid = null;
@@ -19594,6 +19836,9 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
             }
         }
     }
+    if (!uid && typeof target.getAttribute === 'function') {
+        uid = target.getAttribute('data-unit-id');
+    }
     if (!uid) return;
     var el = document.querySelector('[data-unit-id="' + uid + '"]');
     if (!el) return;
@@ -19604,12 +19849,9 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
     var lbl = document.createElement('div');
     lbl.className = 'floating-dmg';
     if (opts.crit) lbl.classList.add('is-crit');
-    /* V1 Invocações Phase 4 (2026-04-19) — summon damage usa cor da classe do
-       conjurador em vez do dt-X do tipo de dano. Ex: Arma Espiritual de Clérigo
-       → cor dourada (cls-clerigo) em vez de violeta (dt-force). Reflete a
-       identidade do conjurador no FCT. */
+    /* V1 Invocações Phase 4 (2026-04-19) — summon damage usa cor da classe do conjurador */
     if (opts.summonCasterCls) {
-        lbl.classList.add(opts.summonCasterCls); /* já vem com prefixo "cls-X" */
+        lbl.classList.add(opts.summonCasterCls);
     } else {
         var dmgType = (opts.dmgType || '').toLowerCase();
         if (dmgType) lbl.classList.add('dt-' + dmgType);
@@ -19618,16 +19860,28 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
     else if (dmg >= 12) lbl.classList.add('tier-big');
     else if (dmg < 4) lbl.classList.add('tier-small');
     var jitterX = (Math.random() - 0.5) * 40;
-    lbl.style.position = 'fixed'; // sobrevive ao setHTML(#app) do render
+    lbl.style.position = 'fixed';
     lbl.style.left = (cx + jitterX) + 'px';
     lbl.style.top = cy + 'px';
-    /* X-6.5.51AE (2026-05-07): força animation-duration inline com !important
-       pra vencer `* { animation-duration: 0.01ms !important }` global de
-       valdoria-design.css quando prefers-reduced-motion:reduce ligado no SO.
-       Sem isso animação termina em 0.01ms e jogador não vê o número de dano. */
     lbl.style.setProperty('animation-duration', opts.crit ? '1.6s' : '1.4s', 'important');
     lbl.style.setProperty('animation-iteration-count', '1', 'important');
-    lbl.textContent = (opts.crit ? '✦ ' : '-') + dmg;
+
+    var fctInner = '';
+    if (opts.crit) {
+        fctInner += '<span class="fct-crit-tag">✦ Crítico!</span>';
+    }
+    fctInner += '<span class="fct-main-num">-' + dmg + '</span>';
+    var dtKey = (opts.dmgType || '').toLowerCase();
+    if (dtKey && DND_DAMAGE_TYPES[dtKey]) {
+        var dtMeta = DND_DAMAGE_TYPES[dtKey];
+        fctInner += '<span class="fct-type-tag">' + dtMeta.glyph + ' ' + dtMeta.label + '</span>';
+    }
+    if (opts.resisted) {
+        fctInner += '<span class="fct-mod-tag fct-mod--resist">½ Resistência</span>';
+    } else if (opts.vulnerable) {
+        fctInner += '<span class="fct-mod-tag fct-mod--vuln">×2 Vulnerabilidade</span>';
+    }
+    lbl.innerHTML = fctInner;
     document.body.appendChild(lbl);
     setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 1400);
 }
@@ -20426,16 +20680,23 @@ function buildTurnQueue(s) {
         else if ((entry.t === 'p' || entry.t === 'a') && entry.hp <= 0 && entry.stable) cls += ' tl-stable';
         /* ID estavel por nome — para FLIP animation comparar posicoes */
         var id = 'tq-' + entry.n.replace(/[^a-zA-Z0-9]/g, '_');
-        /* V1 Invocações Phase 3 — usa SVG heráldico (mesmo dos cards) quando há
-           mapping; fallback emoji para entries sem ícone designado. */
-        /* 2026-06-07: usa o MESMO retrato WebP (OpenAI) dos cards no tracker de
-           iniciativa (topo) — antes era SVG heráldico cru. _combatPortraitHTML
-           retorna <img> (com fallback SVG no onerror); se não houver retrato nem
-           ícone, cai no emoji. CSS .tl-ico img constrange ao tamanho do node. */
         var heraldicId = _heraldicIconOf(entry, entryUtype);
         var iconHtml = _combatPortraitHTML(heraldicId, entry, entryUtype);
         if (!iconHtml) iconHtml = escHtml(entry.ico);
-        parts.push('<div class="' + cls + '" id="' + id + '" title="' + escHtml(entry.n) + '"><div class="tl-ico">' + iconHtml + '</div></div>');
+
+        var initNum = (entry.init != null && entry.initRevealed !== false) ? entry.init : '?';
+        var hpVal = (entry.hp != null) ? entry.hp : 0;
+        var hpPct = (entry.mhp > 0) ? Math.max(0, Math.min(100, Math.round((hpVal / entry.mhp) * 100))) : 0;
+        var hpCls = (typeof vBarHpClass === 'function') ? vBarHpClass(hpPct) : (hpPct > 50 ? 'high' : 'low');
+
+        var nodeInner = '<div class="tl-ico">' + iconHtml + '</div>';
+        nodeInner += '<span class="tl-init-badge" title="Iniciativa: ' + initNum + '">' + initNum + '</span>';
+        nodeInner += '<div class="tl-hp-track"><div class="tl-hp-fill fill-' + hpCls + '" style="width:' + hpPct + '%;"></div></div>';
+        if (entry.concentrationSpell) {
+            nodeInner += '<span class="tl-conc-icon" title="Concentrando em ' + escHtml(entry.concentrationSpell) + '">◈</span>';
+        }
+
+        parts.push('<div class="' + cls + '" id="' + id + '" title="' + escHtml(entry.n) + ' (Init: ' + initNum + ' · PV: ' + hpVal + '/' + entry.mhp + ')">' + nodeInner + '</div>');
     }
     parts.push('</div>');
     return parts.join('');
@@ -20766,6 +21027,174 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
     layer.innerHTML = svgParts.join('');
 }
 
+/**
+ * Regra D&D 5e (PHB p. 196 - Cobertura / Cover):
+ * - Meia Cobertura (+2 CA / +2 TR Dex): criatura interveniente ou obstáculo baixo.
+ * - Três Quartos (+5 CA / +5 TR Dex): grande barreira ou fresta de flecha.
+ * - Cobertura Total: obstáculo opaco bloqueia inteiramente a linha de visão.
+ */
+function simComputeCover(state, attacker, target) {
+    if (!attacker || !target || !attacker.pos || !target.pos) {
+        return { cover: 'none', bonus: 0, blocksLoS: false };
+    }
+    var c1 = attacker.pos.col, r1 = attacker.pos.row;
+    var c2 = target.pos.col, r2 = target.pos.row;
+    if (c1 == null || r1 == null || c2 == null || r2 == null) {
+        return { cover: 'none', bonus: 0, blocksLoS: false };
+    }
+    if (typeof hexDistance === 'function' && hexDistance(c1, r1, c2, r2) <= 1) {
+        return { cover: 'none', bonus: 0, blocksLoS: false };
+    }
+    var line = (typeof hexLine === 'function') ? hexLine(c1, r1, c2, r2) : [];
+    if (!line || line.length <= 2) {
+        return { cover: 'none', bonus: 0, blocksLoS: false };
+    }
+    var intermediates = line.slice(1, -1);
+    var interMap = {};
+    for (var ii = 0; ii < intermediates.length; ii++) {
+        interMap[intermediates[ii].col + ',' + intermediates[ii].row] = true;
+    }
+
+    var bestCover = 'none';
+    var bestBonus = 0;
+
+    // 1. Obstáculos físicos no trajeto
+    var obstacles = (state && state.battlefield && state.battlefield.obstacles) || [];
+    for (var oi = 0; oi < obstacles.length; oi++) {
+        var obs = obstacles[oi];
+        if (!obs) continue;
+        var oKey = obs.col + ',' + obs.row;
+        if (interMap[oKey]) {
+            var cov = obs.cover || 'half';
+            if (cov === 'total') {
+                return { cover: 'total', bonus: 0, blocksLoS: true };
+            } else if (cov === 'three_quarters' && bestBonus < 5) {
+                bestCover = 'three_quarters';
+                bestBonus = 5;
+            } else if (cov === 'half' && bestBonus < 2) {
+                bestCover = 'half';
+                bestBonus = 2;
+            }
+        }
+    }
+
+    // 2. Criaturas intermediárias vivas (PHB p. 196: criaturas no caminho concedem Meia Cobertura)
+    if (bestBonus < 2 && state && state.order) {
+        for (var ci = 0; ci < state.order.length; ci++) {
+            var c = state.order[ci];
+            if (!c || c === attacker || c === target || !c.alive || c.isDead || (c.hp != null && c.hp <= 0)) continue;
+            if (c.pos && interMap[c.pos.col + ',' + c.pos.row]) {
+                bestCover = 'half';
+                bestBonus = 2;
+                break;
+            }
+        }
+    }
+
+    return { cover: bestCover, bonus: bestBonus, blocksLoS: false };
+}
+
+/**
+ * Avalia o estado de Vantagem / Desvantagem D&D 5e (PHB p. 173) de forma pura para HUD e UI.
+ */
+function simPeekAttackAdvState(actor, target, skill) {
+    if (!actor || !target) return 'normal';
+    var adv = false, dis = false;
+
+    // Ataque à distância com inimigo hostil adjacente consciente (PHB p. 195)
+    var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(actor, skill) : null;
+    var isRanged = reachInfo ? reachInfo.isRanged : (actor.is_ranged || actor.ranged);
+    if (isRanged && typeof simHasHostileAdjacent === 'function' && currentState && currentState.order) {
+        if (simHasHostileAdjacent(actor, currentState.order)) {
+            dis = true;
+        }
+    }
+
+    var simDist = null;
+    if (actor.pos && target.pos && typeof hexDistance === 'function') {
+        simDist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
+    }
+    var targetProne = !!(target.prone || (target.se && target.se.some(function (st) { return st && st.prone; })));
+
+    // Assassinar (PHB p. 97)
+    if (typeof _subclassKeyNorm === 'function' && _subclassKeyNorm(actor.subclass) === 'assassin' && currentState && (currentState.rn | 0) <= 1) {
+        adv = true;
+    }
+
+    // Buffs no atacante
+    if (actor.se && actor.se.length) {
+        for (var ai = 0; ai < actor.se.length; ai++) {
+            var st = actor.se[ai];
+            if (!st) continue;
+            if (st.atkAdvantage) {
+                if (st.markedTargetOnly && st.markedTargetName && target.n !== st.markedTargetName) {
+                    // diferente do marcado
+                } else {
+                    adv = true;
+                }
+            }
+            if (st.atkDisadvantage) dis = true;
+            if (st.attackAdvantage) adv = true;
+            if (st.prone && isRanged) dis = true;
+        }
+    }
+
+    // Debuffs / condições no alvo
+    if (target.se && target.se.length) {
+        for (var ti = 0; ti < target.se.length; ti++) {
+            var tst = target.se[ti];
+            if (!tst) continue;
+            if (tst.enemyAtkDisadvantage) dis = true;
+            if (tst.selfAtkVulnerable) adv = true;
+            if (tst.targetedAdvantage || tst.targetedAdvantageByAlly || tst.id === 'help_distracted') {
+                if (targetProne && simDist !== null) {
+                    if (simDist <= 1) adv = true;
+                    else dis = true;
+                } else {
+                    adv = true;
+                }
+            }
+            if (tst.attackerDisadvantage) dis = true;
+        }
+    }
+
+    // Alvo Caído (PHB p. 190 / 292)
+    if (targetProne) {
+        if (simDist !== null) {
+            if (simDist <= 1) adv = true;
+            else dis = true;
+        } else {
+            if (isRanged) dis = true;
+            else adv = true;
+        }
+    }
+
+    // Pack Tactics (PHB MM p. 341)
+    if (actor.packTactics && currentState && currentState.order) {
+        var alliesAlive = 0;
+        for (var pi = 0; pi < currentState.order.length; pi++) {
+            var a = currentState.order[pi];
+            if (a && a !== actor && a.alive && (a.t === 'p' || a.t === 'a')) alliesAlive++;
+        }
+        if (alliesAlive >= 1) adv = true;
+    }
+
+    // Exaustão nv 3+
+    if (typeof _simExhaustionLevel === 'function' && _simExhaustionLevel(actor) >= 3) {
+        dis = true;
+    }
+
+    // First attack advantage (leitura sem consumo)
+    if (actor.firstAttackAdvantage) {
+        adv = true;
+    }
+
+    if (adv && dis) return 'normal';
+    if (adv) return 'advantage';
+    if (dis) return 'disadvantage';
+    return 'normal';
+}
+
 function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     var layer = document.getElementById('hexAimingVectorLayer');
     if (!layer) return;
@@ -20786,24 +21215,59 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     var distMeters = formatHexDistanceMeters(distHex);
     var reachLimit = options.reach || 1;
     var isOutOfReach = distHex > reachLimit;
+    var isTotalCover = (options.coverType === 'total');
     var hasCover = !!options.cover;
     var coverText = options.coverText || '';
+    var advState = options.advState || 'normal';
 
     // Arco parabólico sutil para dar efeito de trajetória balística / linha de visão elegante
     var midX = (pFrom.cx + pTo.cx) / 2;
     var curvature = Math.min(22, Math.max(6, distHex * 3.5));
     var midY = (pFrom.cy + pTo.cy) / 2 - curvature;
 
-    var pathCls = 'hex-aim-path' + (isOutOfReach ? ' hex-aim-path--out' : '');
-    var markerId = isOutOfReach ? 'aimArrowRed' : 'aimArrowGold';
+    var pathCls = 'hex-aim-path';
+    var markerId = 'aimArrowGold';
+    var bgCls = 'hex-aim-badge-bg';
+    var textCls = 'hex-aim-badge-text';
+
+    if (isOutOfReach) {
+        pathCls += ' hex-aim-path--out';
+        markerId = 'aimArrowRed';
+        bgCls += ' hex-aim-badge-bg--out';
+        textCls += ' hex-aim-badge-text--out';
+    } else if (isTotalCover) {
+        pathCls += ' hex-aim-path--blocked';
+        markerId = 'aimArrowRed';
+        bgCls += ' hex-aim-badge-bg--blocked';
+        textCls += ' hex-aim-badge-text--blocked';
+    } else if (advState === 'advantage') {
+        pathCls += ' hex-aim-path--adv';
+        markerId = 'aimArrowGreen';
+        bgCls += ' hex-aim-badge-bg--adv';
+        textCls += ' hex-aim-badge-text--adv';
+    } else if (advState === 'disadvantage') {
+        pathCls += ' hex-aim-path--disadv';
+        markerId = 'aimArrowAmber';
+        bgCls += ' hex-aim-badge-bg--disadv';
+        textCls += ' hex-aim-badge-text--disadv';
+    }
 
     var pathD = 'M ' + pFrom.cx + ' ' + pFrom.cy + ' Q ' + midX + ' ' + midY + ' ' + pTo.cx + ' ' + pTo.cy;
 
     var badgeText = '▸ ' + distMeters + ' (' + distHex + ' ' + (distHex === 1 ? 'hex' : 'hexes') + ')';
     if (isOutOfReach) {
         badgeText = '✕ Fora de Alcance (' + distMeters + ' > ' + formatHexDistanceMeters(reachLimit) + ')';
-    } else if (hasCover && coverText) {
-        badgeText += ' | ' + coverText;
+    } else if (isTotalCover) {
+        badgeText = '✕ Bloqueado: Cobertura Total (PHB p. 196)';
+    } else {
+        if (advState === 'advantage') {
+            badgeText += ' | ▲ Vantagem';
+        } else if (advState === 'disadvantage') {
+            badgeText += ' | ▼ Desvantagem';
+        }
+        if (hasCover && coverText) {
+            badgeText += ' | ' + coverText;
+        }
     }
 
     var textLen = badgeText.length;
@@ -20811,9 +21275,6 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     var badgeH = 18;
     var badgeX = Math.round(midX - badgeW / 2);
     var badgeY = Math.round(midY - badgeH / 2);
-
-    var bgCls = 'hex-aim-badge-bg' + (isOutOfReach ? ' hex-aim-badge-bg--out' : '');
-    var textCls = 'hex-aim-badge-text' + (isOutOfReach ? ' hex-aim-badge-text--out' : '');
 
     var svgHtml = '<path d="' + pathD + '" class="' + pathCls + '" marker-end="url(#' + markerId + ')" />' +
         '<g class="hex-aim-badge-group">' +
@@ -22259,7 +22720,22 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                 var inReach = (dist <= reachMeta.reachHex);
                 if (inReach) {
                     classes += ' token--in-range';
-                    distBadge = '<span class="token-dist-chip token-dist-chip--in" title="No Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">' + _combatTargetIconSVG(10) + ' ' + distM + ' · No Alcance</span>';
+                    var tgtCover = (typeof simComputeCover === 'function') ? simComputeCover(s, pUnit, u) : { cover: 'none', bonus: 0 };
+                    var tgtAdv = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(pUnit, u, _pendingSkill) : 'normal';
+                    var metaChips = '';
+                    if (tgtCover.cover === 'total') {
+                        metaChips += ' · ✕ Bloqueado';
+                    } else if (tgtCover.cover === 'half') {
+                        metaChips += ' · ⛨ ½ Cob';
+                    } else if (tgtCover.cover === 'three_quarters') {
+                        metaChips += ' · ⛨ ¾ Cob';
+                    }
+                    if (tgtAdv === 'advantage') {
+                        metaChips += ' · ▲ Vant';
+                    } else if (tgtAdv === 'disadvantage') {
+                        metaChips += ' · ▼ Desv';
+                    }
+                    distBadge = '<span class="token-dist-chip token-dist-chip--in" title="No Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')' + metaChips + '">' + _combatTargetIconSVG(10) + ' ' + distM + metaChips + '</span>';
                 } else {
                     classes += ' token--out-of-range';
                     distBadge = '<span class="token-dist-chip token-dist-chip--out" title="Fora de Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">' + _combatWarningIconSVG(10) + ' ' + distM + ' · máx ' + reachMeta.meters + '</span>';
@@ -22358,6 +22834,31 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
         }
     }
 
+    // Salvaguardas contra a Morte / Estabilizado D&D 5e (PHB p. 197–198)
+    var deathSavesBadge = '';
+    if ((isPlayer || isAlly) && u.hp <= 0 && !u.isDead) {
+        if (u.stable) {
+            deathSavesBadge = '<div class="token-stable-chip" title="D&D 5e (PHB p. 197–198): Estabilizado a 0 PV (inconsciente, mas não precisa fazer salvaguardas contra a morte)">✦ Estável</div>';
+        } else if (u.dying) {
+            var ds = u.deathSaves || { s: 0, f: 0 };
+            var dsSucc = Math.max(0, Math.min(3, parseInt(ds.s, 10) || 0));
+            var dsFail = Math.max(0, Math.min(3, parseInt(ds.f, 10) || 0));
+            var dsHtml = '<div class="token-death-saves" title="Salvaguardas contra a Morte (PHB p. 197): 3 sucessos estabilizam, 3 falhas causam a morte permanente.">';
+            dsHtml += '<div class="ds-row ds-successes"><span class="ds-lbl">Sucessos</span>';
+            for (var si = 0; si < 3; si++) {
+                dsHtml += '<span class="ds-dot ds-dot--s' + (si < dsSucc ? ' filled' : '') + '">◆</span>';
+            }
+            dsHtml += '</div>';
+            dsHtml += '<div class="ds-row ds-failures"><span class="ds-lbl">Falhas</span>';
+            for (var fi = 0; fi < 3; fi++) {
+                dsHtml += '<span class="ds-dot ds-dot--f' + (fi < dsFail ? ' filled' : '') + '">✕</span>';
+            }
+            dsHtml += '</div>';
+            dsHtml += '</div>';
+            deathSavesBadge = dsHtml;
+        }
+    }
+
     var tokenLeft = cx - Math.round(HEX_W / 2);
     var tokenTop = cy - Math.round(HEX_H / 2);
 
@@ -22381,7 +22882,8 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     html += '<span class="token-hp-text ' + hpCls + '">' + hpVal + '/' + u.mhp + '</span>';
     html += '</div>';
 
-    // Badges: AC, Init, Distance, Vantagem / Desvantagem, Concentração, Caído e Status D&D 5e
+    // Badges: AC, Init, Distance, Vantagem / Desvantagem, Concentração, Caído, Status e Death Saves D&D 5e
+    if (deathSavesBadge) html += deathSavesBadge;
     if (acBadge) html += acBadge;
     if (initBadge) html += initBadge;
     if (distBadge) html += distBadge;
@@ -23067,6 +23569,8 @@ function buildBattlefield(s) {
     html += '<linearGradient id="aimGradGold" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#d4af37" stop-opacity="0.95"/><stop offset="100%" stop-color="#ffd54f" stop-opacity="0.75"/></linearGradient>';
     html += '<marker id="aimArrowGold" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#d4af37"/></marker>';
     html += '<marker id="aimArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#c0392b"/></marker>';
+    html += '<marker id="aimArrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#2ecc71"/></marker>';
+    html += '<marker id="aimArrowAmber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#e67e22"/></marker>';
     html += '<marker id="moveArrowGold" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#d4af37"/></marker>';
     html += '<marker id="moveArrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#e74c3c"/></marker>';
     html += '<radialGradient id="aoeFireballGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff5722" stop-opacity="0.55"/><stop offset="65%" stop-color="#ff9800" stop-opacity="0.22"/><stop offset="100%" stop-color="#ff5722" stop-opacity="0"/></radialGradient>';
@@ -27477,10 +27981,15 @@ function bindActions() {
                             ? simComputeCover(currentState, pUnit, tgtUnit)
                             : { cover: 'none', bonus: 0 };
                         var coverText = coverInfo.cover === 'half' ? '½ Cobertura (+2 CA)' : (coverInfo.cover === 'three_quarters' ? '¾ Cobertura (+5 CA)' : '');
+                        var advState = (typeof simPeekAttackAdvState === 'function')
+                            ? simPeekAttackAdvState(pUnit, tgtUnit, _pendingSkill)
+                            : 'normal';
                         drawTacticalAimVector(pUnit.pos.col, pUnit.pos.row, tgtUnit.pos.col, tgtUnit.pos.row, {
                             reach: reachInfo.reach || 1,
                             cover: coverInfo.cover !== 'none',
-                            coverText: coverText
+                            coverText: coverText,
+                            coverType: coverInfo.cover,
+                            advState: advState
                         });
                     }
                 }
@@ -32380,13 +32889,17 @@ function showTargetConfirm(tgtIdx) {
     html += '</div></div>';
 
     /* Bloco de previsao de dano */
-    var advMode = (typeof _simAttackAdvState === 'function') ? _simAttackAdvState(p, u, skill) : 'normal';
+    var advMode = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(p, u, skill) : 'normal';
     var advBadge = '';
     if (advMode === 'advantage') {
-        advBadge = ' <span class="badge adv" style="background:#2e7d32;color:#fff;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:bold;letter-spacing:0.5px;">VANTAGEM</span>';
+        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;">▲ VANTAGEM</span>';
     } else if (advMode === 'disadvantage') {
-        advBadge = ' <span class="badge dis" style="background:#c62828;color:#fff;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:bold;letter-spacing:0.5px;">DESVANTAGEM</span>';
+        advBadge = ' <span class="badge dis" style="background:#4a1515;color:#fecaca;border:1px solid #e74c3c;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;">▼ DESVANTAGEM</span>';
     }
+
+    var coverInfo = (typeof simComputeCover === 'function') ? simComputeCover(s, p, u) : { cover: 'none', bonus: 0, blocksLoS: false };
+    var isTotalCover = (coverInfo.cover === 'total' || coverInfo.blocksLoS);
+    var effectiveAc = u.ac + (coverInfo.bonus || 0);
 
     var distHex = (p.pos && u.pos && typeof hexDistance === 'function') ? hexDistance(p.pos.col, p.pos.row, u.pos.col, u.pos.row) : null;
     var distStr = distHex !== null ? (distHex * 1.5).toFixed(1).replace('.0', '') + 'm (' + distHex + ' hexes)' : '';
@@ -32396,8 +32909,8 @@ function showTargetConfirm(tgtIdx) {
         : { reachHex: 1, label: '1,5m (5 pés)', meters: '1,5m' };
     var inReach = distHex !== null ? (distHex <= reachMeta.reachHex) : true;
     var reachStatusBadge = inReach
-        ? ' <span style="color:var(--v-gold-bright,#e8c45a);font-weight:600;">· No Alcance (' + reachMeta.label + ') ✓</span>'
-        : ' <span style="color:#ff6b6b;font-weight:700;">· Fora de Alcance (máx: ' + reachMeta.label + ') ⚠️</span>';
+        ? ' <span style="color:var(--v-gold-bright,#e8c45a);font-weight:600;">· No Alcance (' + reachMeta.label + ') ✦</span>'
+        : ' <span style="color:#ff6b6b;font-weight:700;">· Fora de Alcance (máx: ' + reachMeta.label + ') ▲</span>';
 
     html += '<div class="tcc-dmg">';
     if (distStr) {
@@ -32407,21 +32920,26 @@ function showTargetConfirm(tgtIdx) {
     if (isSaveSpell) {
         var saveAb = (skill.save.ability || 'con').toUpperCase();
         var saveDc = (skill.save.dc | 0) || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(p) : 13);
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Salvaguarda</span><span class="tcc-dmg-val"><span class="tcc-n-key">TR ' + saveAb + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CD ' + saveDc + '</span></span></div>';
+        var dexCoverNote = (saveAb === 'DEX' && coverInfo.bonus > 0) ? ' (+ ' + coverInfo.bonus + ' Cobertura no TR)' : '';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Salvaguarda</span><span class="tcc-dmg-val"><span class="tcc-n-key">TR ' + saveAb + dexCoverNote + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CD ' + saveDc + '</span></span></div>';
         if (minDmg > 0 || maxDmg > 0) {
             html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (em falha)</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
         } else if (skill.afterAttackEnemyDebuff) {
             var debuffN = skill.afterAttackEnemyDebuff.n || 'Condição';
             var debuffTurns = skill.afterAttackEnemyDebuff.turns || 3;
-            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Efeito em falha</span><span class="tcc-dmg-val" style="color:#ffb74d;font-weight:600;">' + (skill.afterAttackEnemyDebuff.ico || '👁') + ' ' + escHtml(debuffN) + ' (' + debuffTurns + ' rodadas)</span></div>';
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Efeito em falha</span><span class="tcc-dmg-val" style="color:#ffb74d;font-weight:600;">◈ ' + escHtml(debuffN) + ' (' + debuffTurns + ' rodadas)</span></div>';
         }
     } else {
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CA ' + u.ac + '</span></span></div>';
+        var acDisplay = '<span class="tcc-n-ca">CA ' + effectiveAc + '</span>';
+        if (coverInfo.bonus > 0) {
+            acDisplay += ' <span style="font-size:10px;opacity:0.85;">(' + u.ac + ' + ' + coverInfo.bonus + ' ' + (coverInfo.cover === 'half' ? '½ Cobertura' : '¾ Cobertura') + ')</span>';
+        }
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> ' + acDisplay + '</span></div>';
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
         html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
     }
     if (vulnerabilities.length) {
-        html += '<div class="tcc-dmg-row vulnerability" style="color:#ff6b6b;"><span class="tcc-dmg-lbl">⚠ Vulnerável</span><span class="tcc-dmg-val">' + vulnerabilities.join(', ') + ' (2× dano)</span></div>';
+        html += '<div class="tcc-dmg-row vulnerability" style="color:#ff6b6b;"><span class="tcc-dmg-lbl">▲ Vulnerável</span><span class="tcc-dmg-val">' + vulnerabilities.join(', ') + ' (2× dano)</span></div>';
     }
     if (reductions.length) {
         html += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">Resistente</span><span class="tcc-dmg-val">' + reductions.join(', ') + ' (½ dano)</span></div>';
@@ -32431,7 +32949,7 @@ function showTargetConfirm(tgtIdx) {
     }
     if (legRes > 0) {
         var _legLeft = Math.max(0, legRes - legResUsed);
-        html += '<div class="tcc-dmg-row legendary" style="color:#d4af37;"><span class="tcc-dmg-lbl">★ Res. Lendária</span><span class="tcc-dmg-val">' + _legLeft + '/' + legRes + ' restantes</span></div>';
+        html += '<div class="tcc-dmg-row legendary" style="color:#d4af37;"><span class="tcc-dmg-lbl">◈ Res. Lendária</span><span class="tcc-dmg-val">' + _legLeft + '/' + legRes + ' restantes</span></div>';
     }
     if (!reductions.length && !immunities.length && !vulnerabilities.length) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Reduções</span><span class="tcc-dmg-val tcc-none">— nenhuma —</span></div>';
@@ -32460,19 +32978,33 @@ function showTargetConfirm(tgtIdx) {
         }
     }
 
+    if (coverInfo.cover !== 'none' && !isSaveSpell) {
+        if (isTotalCover) {
+            html += '<div class="tcc-dmg-row" style="background:rgba(180,40,30,0.22);border:1px solid rgba(255,100,100,0.45);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
+                '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">✕ <strong>Cobertura Total (PHB p. 196):</strong> Obstáculo opaco bloqueia inteiramente a linha de visão até o alvo.</span>' +
+                '</div>';
+        } else {
+            var covLbl = coverInfo.cover === 'half' ? 'Meia Cobertura (+2 CA / TR Dex)' : 'Três Quartos de Cobertura (+5 CA / TR Dex)';
+            var covDesc = coverInfo.cover === 'half' ? 'Criaturas ou obstáculos intermediários protegem o alvo (PHB p. 196).' : 'Grande barreira física ou fresta protege quase todo o corpo do alvo (PHB p. 196).';
+            html += '<div class="tcc-dmg-row" style="background:rgba(40,65,95,0.25);border:1px solid rgba(90,145,210,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
+                '<span style="color:#a5d8ff;font-size:11px;line-height:1.3;text-align:center;width:100%;">⛨ <strong>' + covLbl + ':</strong> ' + covDesc + '</span>' +
+                '</div>';
+        }
+    }
+
     if (hasAdjacentSeeingHostile && reachMeta.isRanged && !isSaveSpell) {
         html += '<div class="tcc-dmg-row" style="background:rgba(180,40,40,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">⚠️ <strong>Desvantagem por Proximidade:</strong> Ter um inimigo adjacente capaz de vê-lo impõe Desvantagem em disparos e ataques à distância.</span>' +
+            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">▲ <strong>Desvantagem por Proximidade (PHB p. 195):</strong> Ter um inimigo hostil adjacente e consciente impõe Desvantagem em disparos e ataques à distância.</span>' +
             '</div>';
     } else if (hasAdjacentSeeingHostile && reachMeta.isRanged && isSaveSpell) {
         html += '<div class="tcc-dmg-row" style="background:rgba(210,160,30,0.15);border:1px solid rgba(230,170,40,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-            '<span style="color:#fcd34d;font-size:11px;line-height:1.3;text-align:center;width:100%;">ℹ️ <strong>Mecânica Tática:</strong> Magias de Salvaguarda (TR) não sofrem desvantagem por proximidade, mas recuar provocará Ataque de Oportunidade se não desengajar.</span>' +
+            '<span style="color:#fcd34d;font-size:11px;line-height:1.3;text-align:center;width:100%;">◈ <strong>Mecânica Tática:</strong> Magias de Salvaguarda (TR) não sofrem desvantagem por proximidade, mas recuar provocará Ataque de Oportunidade se não desengajar.</span>' +
             '</div>';
     }
 
     if (!inReach) {
         html += '<div class="tcc-dmg-row" style="background:rgba(180,40,30,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">⚠️ Alvo além do alcance máximo de ' + reachMeta.label + '. Aproxime-se no tabuleiro antes de atacar.</span>' +
+            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">▲ Alvo além do alcance máximo de ' + reachMeta.label + '. Aproxime-se no tabuleiro antes de atacar.</span>' +
             '</div>';
     }
     html += '</div>';
@@ -32481,6 +33013,8 @@ function showTargetConfirm(tgtIdx) {
     html += '<button class="action-btn" data-tcc="cancel">✕ Cancelar</button>';
     if (!inReach) {
         html += '<button class="action-btn primary disabled" data-tcc="confirm" style="opacity:0.5;filter:grayscale(0.5);" title="Alvo fora de alcance">Fora de Alcance</button>';
+    } else if (isTotalCover) {
+        html += '<button class="action-btn primary disabled" data-tcc="confirm" style="opacity:0.5;filter:grayscale(0.5);" title="Bloqueado por Cobertura Total">Cobertura Total</button>';
     } else {
         html += '<button class="action-btn primary" data-tcc="confirm">Confirmar</button>';
     }
@@ -32501,7 +33035,13 @@ function showTargetConfirm(tgtIdx) {
     card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () {
         if (!inReach) {
             if (typeof showFloatingToast === 'function') {
-                showFloatingToast('⚠️ Alvo fora de alcance! Alcance máximo: ' + reachMeta.label, 'warn');
+                showFloatingToast('▲ Alvo fora de alcance! Alcance máximo: ' + reachMeta.label, 'warn');
+            }
+            return;
+        }
+        if (isTotalCover) {
+            if (typeof showFloatingToast === 'function') {
+                showFloatingToast('✕ Alvo sob Cobertura Total! Linha de visão bloqueada.', 'warn');
             }
             return;
         }
@@ -40871,8 +41411,17 @@ async function __combatAnimateOneEvent(ev) {
                 elT.classList.add('dodged', 'miss-target-flash');
                 setTimeout(function () { if (elT) elT.classList.remove('dodged', 'miss-target-flash'); }, 600);
             }
-            if (elT && typeof spawnMissFloatLabel === 'function') {
-                try { spawnMissFloatLabel(elT); } catch (eMS) {}
+            if (ev.d20 === 1) {
+                if (elA && typeof spawnSkillImpactLabel === 'function') {
+                    try { spawnSkillImpactLabel(elA, '✕ NAT 1 FALHA CRÍTICA!', 'fumble'); } catch (eFum) {}
+                }
+                if (elT && typeof spawnMissFloatLabel === 'function') {
+                    try { spawnMissFloatLabel(elT, 'Errou (Falha Crítica)'); } catch (eMS) {}
+                }
+            } else {
+                if (elT && typeof spawnMissFloatLabel === 'function') {
+                    try { spawnMissFloatLabel(elT, 'Errou'); } catch (eMS) {}
+                }
             }
             if (window._combatVfx && elT) {
                 try { window._combatVfx.missFlash(elT); } catch (eMF) {}
@@ -40973,7 +41522,9 @@ async function __combatAnimateOneEvent(ev) {
 
         // Labels de impacto DOM e Números de Dano Flutuante
         if (typeof spawnSkillImpactLabel === 'function' && elT) {
-            var _lblTxt = ev.crit ? 'CRÍTICO!' : (ev.skillName ? ev.skillName.toUpperCase() + '!' : 'ATAQUE!');
+            var _lblTxt = (ev.d20 === 20 || ev.crit)
+                ? '✦ NAT 20 CRÍTICO!'
+                : (ev.skillName ? ev.skillName.toUpperCase() + '!' : 'ATAQUE!');
             spawnSkillImpactLabel(elT, _lblTxt, ev.crit ? 'crit' : 'attack');
         }
         if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
