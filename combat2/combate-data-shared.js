@@ -969,7 +969,21 @@ var CHAR_CLASSES = [
             aoeRadius: 6, aoeShape: 'storm',
             damageSpec: { n: 7, d: 10, flat: 0 },
             desc: 'Tormenta de labaredas que devasta a área causando 7d10 de dano de fogo (TR Destreza metade). Plantas e vegetação não sofrem dano se você escolher.',
-            helpDnd5e: 'Tempestade de Fogo / Fire Storm (PHB p. 242 — Clérigo, Druida e Feiticeiro nv 13): magia de 7º círculo; 1 Ação; alcance 45m (30 hexágonos). Uma tempestade de labaredas rutilantes desaba sobre o campo de batalha. Cada criatura na área deve realizar um teste de resistência de Destreza. Sofre 7d10 de dano de fogo em caso de falha, ou metade desse dano em caso de sucesso. O fogo não danifica as plantas na área se o conjurador assim desejar.' }
+            helpDnd5e: 'Tempestade de Fogo / Fire Storm (PHB p. 242 — Clérigo, Druida e Feiticeiro nv 13): magia de 7º círculo; 1 Ação; alcance 45m (30 hexágonos). Uma tempestade de labaredas rutilantes desaba sobre o campo de batalha. Cada criatura na área deve realizar um teste de resistência de Destreza. Sofre 7d10 de dano de fogo em caso de falha, ou metade desse dano em caso de sucesso. O fogo não danifica as plantas na área se o conjurador assim desejar.' },
+        /* V1.25 (2026-10-16) — Regeneração (PHB p.271 — Regenerate).
+           Clérigo nv 13+. Restaura 4d8+15 PV imediatamente e 1 PV/turno por 10 rodadas. */
+        { n: 'Regeneração', ico: '🌿', cost: 7, kind: 'heal', minLevel: 13,
+            healSpec: { n: 4, d: 8, flat: 15 }, healSpell: true, range_hexes: 1,
+            applyBuff: { id: 'regenerate_buff', n: 'Regeneração', ico: '🌿', turns: 10, regenPerTurn: 1, dndCondition: 'Regenerando (PHB p. 271)' },
+            desc: 'Restaura 4d8 + 15 PV imediatamente e 1 PV no início de cada um de seus turnos por 10 rodadas. Restaura membros amputados.',
+            helpDnd5e: 'Regeneração / Regenerate (PHB p. 271 — Clérigo e Druida nv 13): magia de 7º círculo; 1 Ação; Toque (1 hex ou a si mesmo); duração 1 hora (10 rodadas em combate). Você toca uma criatura e estimula sua habilidade natural de cura. O alvo recupera 4d8 + 15 PV. Pela duração da magia, o alvo recupera 1 PV no início de cada um de seus turnos. Membros e tecidos amputados são totalmente restaurados e regenerados.' },
+        /* V1.25 (2026-10-16) — Palavra Sagrada (PHB p.234 — Divine Word).
+           Clérigo nv 13+. Ação Bônus. 9m em área ao redor do conjurador. TR Carisma contra efeitos de PVs. */
+        { n: 'Palavra Sagrada', ico: '⚡', cost: 7, kind: 'attack', bonus: true, minLevel: 13,
+            multiTarget: true, centerOnCaster: true, range_hexes: 6, aoeRadius: 6, aoeShape: 'sphere',
+            save: { ability: 'cha' }, damageSpec: { n: 0, d: 0 }, divineWord: true,
+            desc: 'Palavra divina de criação que atordoa, cega ou aniquila inimigos na área com base em seus PVs atuais (TR Carisma).',
+            helpDnd5e: 'Palavra Sagrada / Divine Word (PHB p. 234 — Clérigo nv 13): magia de 7º círculo; 1 Ação Bônus; alcance 9m (6 hexágonos). Cada criatura hostil na área que possa ouvir deve realizar uma Salvaguarda de Carisma. Em falha, sofre um efeito com base em seus PVs atuais: <= 50 PV surdo por 10 turnos; <= 40 PV cego e surdo por 10 turnos; <= 30 PV cego, surdo e atordoado por 1 rodada; <= 20 PV morre instantaneamente. Criaturas planares (celestiais, elementais, feéricas ou ínferas) são banidas de volta ao seu plano natal.' }
       ] },
     { cls: 'Paladino', hp: [26, 38], ac: [16, 18], atk: [5, 6], die: 8, dex: [8, 12], ico: '', dmgMod: 2, attr: 'STR',
       /* D&D 5e PHB p.84: Paladino é meio-conjurador — Smite Divino e magias
@@ -1783,7 +1797,14 @@ var CHAR_CLASSES = [
             aoeRadius: 6, aoeShape: 'storm',
             damageSpec: { n: 7, d: 10, flat: 0 },
             desc: 'Tormenta de labaredas que devasta a área causando 7d10 de dano de fogo (TR Destreza metade). Plantas e vegetação não sofrem dano se você escolher.',
-            helpDnd5e: 'Tempestade de Fogo / Fire Storm (PHB p. 242 — Clérigo, Druida e Feiticeiro nv 13): magia de 7º círculo; 1 Ação; alcance 45m (30 hexágonos). Uma tempestade de labaredas rutilantes desaba sobre o campo de batalha. Cada criatura na área deve realizar um teste de resistência de Destreza. Sofre 7d10 de dano de fogo em caso de falha, ou metade desse dano em caso de sucesso. O fogo não danifica as plantas na área se o conjurador assim desejar.' }
+            helpDnd5e: 'Tempestade de Fogo / Fire Storm (PHB p. 242 — Clérigo, Druida e Feiticeiro nv 13): magia de 7º círculo; 1 Ação; alcance 45m (30 hexágonos). Uma tempestade de labaredas rutilantes desaba sobre o campo de batalha. Cada criatura na área deve realizar um teste de resistência de Destreza. Sofre 7d10 de dano de fogo em caso de falha, ou metade desse dano em caso de sucesso. O fogo não danifica as plantas na área se o conjurador assim desejar.' },
+        /* V1.25 (2026-10-16) — Regeneração (PHB p.271 — Regenerate).
+           Druida nv 13+. Restaura 4d8+15 PV imediatamente e 1 PV/turno por 10 rodadas. */
+        { n: 'Regeneração', ico: '🌿', cost: 7, kind: 'heal', minLevel: 13,
+            healSpec: { n: 4, d: 8, flat: 15 }, healSpell: true, range_hexes: 1,
+            applyBuff: { id: 'regenerate_buff', n: 'Regeneração', ico: '🌿', turns: 10, regenPerTurn: 1, dndCondition: 'Regenerando (PHB p. 271)' },
+            desc: 'Restaura 4d8 + 15 PV imediatamente e 1 PV no início de cada um de seus turnos por 10 rodadas. Restaura membros amputados.',
+            helpDnd5e: 'Regeneração / Regenerate (PHB p. 271 — Clérigo e Druida nv 13): magia de 7º círculo; 1 Ação; Toque (1 hex ou a si mesmo); duração 1 hora (10 rodadas em combate). Você toca uma criatura e estimula sua habilidade natural de cura. O alvo recupera 4d8 + 15 PV. Pela duração da magia, o alvo recupera 1 PV no início de cada um de seus turnos. Membros e tecidos amputados são totalmente restaurados e regenerados.' }
       ] },
     /* V1.7 Stage 6 (2026-04-21) — Feiticeiro (PHB p.99-108): CHA caster inato.
        ADAPTAÇÕES vs PHB:
