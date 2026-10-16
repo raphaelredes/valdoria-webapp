@@ -4412,6 +4412,10 @@
           var _pG = (pData && pData.gender) || '';
           lineText = _resolveGenderTokens(lineText, _pG);
         }
+        if (lineText) {
+          var pName = (pData && pData.name) || 'Você';
+          lineText = String(lineText).replace(/\{player_name\}|\{player\}/g, pName);
+        }
         var _sentences = _splitIntoSentences(_sanitizeDialogueHTML(lineText));
         if (!_sentences.length) return;
         var div = document.createElement('div');
