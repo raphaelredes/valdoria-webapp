@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T08:20:02Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T10:24:38Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -26928,6 +26928,72 @@ async function castSummonUndead(s, p, sk) {
     await _maybeAdvanceOrStay();
 }
 
+/* V1.16 (2026-10-16) — Conjurar Seres da Floresta (PHB p.226 — Conjure Woodland Beings).
+   Spawna 2 Sátiros da Floresta com Resistência à Magia (Concentração). */
+async function castSummonFey(s, p, sk) {
+    var fs = sk.feySpec || {};
+    var us = fs.unitSpec || {};
+    var count = (fs.count | 0) || 2;
+    var dur = (fs.durTurns | 0) || 10;
+    var summonKind = fs.summonKind || 'conjure_woodland_beings_satyr';
+    if (p.res && p.res.value < (sk.cost | 0)) {
+        showMessage('Mana insuficiente.');
+        return;
+    }
+    if (sk.minLevel && (p.lvl | 0) < sk.minLevel) {
+        return;
+    }
+    if (typeof _dissipateConjuredSummons === 'function') {
+        _dissipateConjuredSummons(s, p, 'conjure_woodland_beings');
+    }
+    p.res.value = Math.max(0, p.res.value - (sk.cost | 0));
+    p.actionSpent = true;
+    if (typeof simLogPushTurnHeader === 'function') simLogPushTurnHeader(s, p);
+    s.log.push(p.n + ' conjura ' + (sk.n || 'Conjurar Seres da Floresta') + ' (PHB p.226 — Concentração) — invoca ' + count + ' ' + (us.name || 'Sátiro da Floresta') + '!');
+    var pIdx = s.order.indexOf(p);
+    for (var fi = 0; fi < count; fi++) {
+        var baseName = us.name || 'Sátiro da Floresta';
+        var feyName = count > 1 ? (baseName + ' #' + (fi + 1)) : baseName;
+        var summon = {
+            t: 'a', n: feyName, ico: us.ico || '🧚',
+            hp: us.hp || 31, mhp: us.mhp || us.hp || 31, ac: us.ac || 14,
+            atk: us.atk || 5, die: us.die || 6,
+            dmgMod: (us.damageSpec && us.damageSpec.flat) || 3,
+            dex: us.dex || 16, wis: us.wis || 10, con: us.con || 11,
+            str: us.str || 12, int: us.int || 12, cha: us.cha || 14,
+            attr: 'DEX',
+            speed: 8, movement_left: 8,
+            multiAttack: us.multiAttack || 1,
+            damageSpec: us.damageSpec || { n: 1, d: 6, flat: 3 },
+            dmgType: us.dmgType || 'piercing',
+            ranged: false,
+            conditionImmunities: us.conditionImmunities || ['charmed'],
+            alive: true, dying: false, stable: false, isDead: false,
+            deathSaves: { s: 0, f: 0 },
+            se: [{ id: 'magic_resistance', n: 'Resistência à Magia', magicSaveAdvantage: true, dndCondition: 'Resistência à Magia (Vantagem em TR contra magias)' }],
+            init: (p.init | 0) - 0.2 - (fi * 0.1),
+            initRevealed: true, initRolling: false,
+            species: baseName, sugLvl: 1,
+            it: { ic: us.ico || '🧚', lb: summonKind },
+            summonedBy: pIdx,
+            summonKind: summonKind,
+            iconHeraldic: us.iconHeraldic || 'ic-woodland_fey',
+            focusTarget: null,
+            noDeathSaves: true,
+            durTurns: dur,
+            conjureCasterIdx: pIdx,
+            conjureCaster: p,
+            conjureSpellId: 'conjure_woodland_beings',
+            concentrationSummon: true
+        };
+        s.order.splice(pIdx + 1 + fi, 0, summon);
+    }
+    if (typeof _actionTaken !== 'undefined') _actionTaken = false;
+    _actionSheetOpen = false;
+    render(s);
+    await _maybeAdvanceOrStay();
+}
+
 /* PHB p.204 — dissipa TODAS as criaturas conjuradas por um `conjureSpellId` de um
    conjurador específico (match por referência ESTÁVEL `conjureCaster`, não índice).
    Chamado quando a concentração do conjurador quebra (dano/TR CON) ou ao conjurar
@@ -33420,6 +33486,11 @@ async function useSkill(skill, opts) {
     /* V1.14 (2026-10-15) — Animar Mortos (PHB p.212 — Animate Dead). */
     if (skill.kind === 'summon_undead') {
         castSummonUndead(currentState, p, skill);
+        return;
+    }
+    /* V1.16 (2026-10-16) — Conjurar Seres da Floresta (PHB p.226 — Conjure Woodland Beings). */
+    if (skill.kind === 'summon_fey') {
+        castSummonFey(currentState, p, skill);
         return;
     }
     /* V1.7 Sprint-9+10 (2026-04-21 closeout) — PHB Action Surge / Reckless Attack:
@@ -43507,6 +43578,7 @@ async function __combatAnimateOneEvent(ev) {
         return;
     }
     if (kind === 'summon_cast' || kind === 'summon_pack_cast' || kind === 'summon_undead_cast'
+            || kind === 'summon_elemental_cast' || kind === 'summon_fey_cast'
             || kind === 'summon_attack' || kind === 'summon_expire') {
         /* [C-REM:SUMMON] Summon events: flash caster + render (com o novo order
            do server contendo os summons spawnados). Fase 3 fará VFX dedicado. */

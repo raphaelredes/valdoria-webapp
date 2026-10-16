@@ -1177,7 +1177,32 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Chuva de Espinhos / Hail of Thorns (PHB p.251 — Patrulheiro nv 1): **AÇÃO BÔNUS**; concentração até 1 min. No próximo ataque à distância com arma que você acertar, chuva de espinhos cai em 1,5m; criaturas nesse raio fazem TR DES; em falha 1d10 piercing, em sucesso metade.\nArena stub: buff BA concentration; próximo atk ranged ganha dmgBonusDie:1d10 (representa AOE aplicado ao alvo primário em arena sem área).',
             /* V1.7 Sprint-17 Ronda 15 (2026-04-21 QA PHB p.251) — Hail of Thorns
                upcast: +1d10 per slot above 1st. Cap PHB: max 6d10. */
-            buffSim: { id: 'hail_of_thorns', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Chuva de Espinhos (pronta)', condRule: 'PHB p.251 — próximo atk ranged +1d10 AOE (escala +1d10/slot).', dmgBonusDie: { n: 1, d: 10, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, consumeOnHit: true } }
+            buffSim: { id: 'hail_of_thorns', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Chuva de Espinhos (pronta)', condRule: 'PHB p.251 — próximo atk ranged +1d10 AOE (escala +1d10/slot).', dmgBonusDie: { n: 1, d: 10, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, consumeOnHit: true } },
+        /* V1.16 (2026-10-16) — Conjurar Seres da Floresta (PHB p.226 — Conjure Woodland Beings).
+           Patrulheiro nv 13+. Invoca 2 Sátiros da Floresta (Concentração). */
+        { n: 'Conjurar Seres da Floresta', ico: '🧚', cost: 6, kind: 'summon_fey', minLevel: 13, concentration: true,
+            desc: 'Conjura 2 Sátiros da Floresta (Criaturas Feéricas, TR 1/2, Resistência à Magia, Concentração) como aliados da comitiva.',
+            helpDnd5e: 'Conjurar Seres da Floresta / Conjure Woodland Beings (PHB p.226 — Patrulheiro nv 13): magia de 4º círculo; alcance 18m; Concentração até 1 hora. Invoca criaturas feéricas que obedecem aos seus comandos e agem como aliados da comitiva.\nArena: invoca 2 Sátiros da Floresta (HP 31, CA 14, atk +5, 1d6+3 perfurante, Resistência à Magia com vantagem em TR contra magias, imunes a Enfeitiçado). Se o conjurador perder a concentração, as criaturas feéricas se dissipam instantaneamente.',
+            feySpec: {
+                count: 2,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_woodland_beings_satyr',
+                unitSpec: {
+                    name: 'Sátiro da Floresta',
+                    ico: '🧚',
+                    iconHeraldic: 'ic-woodland_fey',
+                    hp: 31, mhp: 31, ac: 14,
+                    dex: 16, wis: 10, con: 11, str: 12, int: 12, cha: 14,
+                    atk: 5,
+                    damageSpec: { n: 1, d: 6, flat: 3 },
+                    dmgType: 'piercing',
+                    ranged: false,
+                    die: 6,
+                    multiAttack: 1,
+                    conditionImmunities: ['charmed']
+                }
+            } }
       ] },
     { cls: 'Bardo', hp: [20, 28], ac: [13, 15], atk: [4, 5], die: 6, dex: [14, 16], ico: '', dmgMod: 2, attr: 'CHA',
       res: { type: 'energia', name: 'Inspiração', ico: '', max: 8 },
@@ -1500,6 +1525,31 @@ var CHAR_CLASSES = [
                     vulnerabilities: ['cold'],
                     immunities: ['fire', 'poison'],
                     conditionImmunities: ['poisoned', 'exhaustion']
+                }
+            } },
+        /* V1.16 (2026-10-16) — Conjurar Seres da Floresta (PHB p.226 — Conjure Woodland Beings).
+           Druida nv 7+. Invoca 2 Sátiros da Floresta (Concentração). */
+        { n: 'Conjurar Seres da Floresta', ico: '🧚', cost: 6, kind: 'summon_fey', minLevel: 7, concentration: true,
+            desc: 'Conjura 2 Sátiros da Floresta (Criaturas Feéricas, TR 1/2, Resistência à Magia, Concentração) como aliados da comitiva.',
+            helpDnd5e: 'Conjurar Seres da Floresta / Conjure Woodland Beings (PHB p.226 — Druida nv 7): magia de 4º círculo; alcance 18m; Concentração até 1 hora. Invoca criaturas feéricas que obedecem aos seus comandos e agem como aliados da comitiva.\nArena: invoca 2 Sátiros da Floresta (HP 31, CA 14, atk +5, 1d6+3 perfurante, Resistência à Magia com vantagem em TR contra magias, imunes a Enfeitiçado). Se o conjurador perder a concentração, as criaturas feéricas se dissipam instantaneamente.',
+            feySpec: {
+                count: 2,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_woodland_beings_satyr',
+                unitSpec: {
+                    name: 'Sátiro da Floresta',
+                    ico: '🧚',
+                    iconHeraldic: 'ic-woodland_fey',
+                    hp: 31, mhp: 31, ac: 14,
+                    dex: 16, wis: 10, con: 11, str: 12, int: 12, cha: 14,
+                    atk: 5,
+                    damageSpec: { n: 1, d: 6, flat: 3 },
+                    dmgType: 'piercing',
+                    ranged: false,
+                    die: 6,
+                    multiAttack: 1,
+                    conditionImmunities: ['charmed']
                 }
             } }
       ] },
