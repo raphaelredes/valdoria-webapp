@@ -538,6 +538,33 @@ var CHAR_CLASSES = [
                 vulnerabilities: ['bludgeoning'],
                 immunities: ['poison'],
                 conditionImmunities: ['poisoned', 'exhaustion']
+            } },
+        /* V1.15 (2026-10-15) — Conjurar Elementais Menores (PHB p.226 — Conjure Minor Elementals).
+           Mago/Druida nv 7+. Invoca 2 Elementais de Magma (Concentração). */
+        { n: 'Conjurar Elementais', ico: '🔥', cost: 6, kind: 'summon_elemental', minLevel: 7, concentration: true,
+            desc: 'Conjura 2 Mephits de Magma (Elementais Menores, TR 1/2, Fogo, Concentração) como aliados da comitiva.',
+            helpDnd5e: 'Conjurar Elementais Menores / Conjure Minor Elementals (PHB p.226 — Mago e Druida nv 7): magia de 4º círculo; alcance 27m; Concentração até 1 hora. Invoca elementais dos Planos Elementais que obedecem aos seus comandos verbais.\nArena: invoca 2 Elementais de Magma (HP 22, CA 11, atk +4, 1d6+1 de fogo, imunes a fogo e veneno, vulneráveis a frio). Se o conjurador perder a concentração, os elementais retornam ao seu plano natal.',
+            elementalSpec: {
+                count: 2,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_minor_elementals_magma',
+                unitSpec: {
+                    name: 'Elemental de Magma',
+                    ico: '🔥',
+                    iconHeraldic: 'ic-fire_elemental',
+                    hp: 22, mhp: 22, ac: 11,
+                    dex: 12, wis: 10, con: 12, str: 8, int: 7, cha: 10,
+                    atk: 4,
+                    damageSpec: { n: 1, d: 6, flat: 1 },
+                    dmgType: 'fire',
+                    ranged: false,
+                    die: 6,
+                    multiAttack: 1,
+                    vulnerabilities: ['cold'],
+                    immunities: ['fire', 'poison'],
+                    conditionImmunities: ['poisoned', 'exhaustion']
+                }
             } }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '', dmgMod: 3, attr: 'DEX',
@@ -1446,6 +1473,33 @@ var CHAR_CLASSES = [
                     die: 4,
                     multiAttack: 1,
                     packTactics: true
+                }
+            } },
+        /* V1.15 (2026-10-15) — Conjurar Elementais Menores (PHB p.226 — Conjure Minor Elementals).
+           Mago/Druida nv 7+. Invoca 2 Elementais de Magma (Concentração). */
+        { n: 'Conjurar Elementais', ico: '🔥', cost: 6, kind: 'summon_elemental', minLevel: 7, concentration: true,
+            desc: 'Conjura 2 Mephits de Magma (Elementais Menores, TR 1/2, Fogo, Concentração) como aliados da comitiva.',
+            helpDnd5e: 'Conjurar Elementais Menores / Conjure Minor Elementals (PHB p.226 — Mago e Druida nv 7): magia de 4º círculo; alcance 27m; Concentração até 1 hora. Invoca elementais dos Planos Elementais que obedecem aos seus comandos verbais.\nArena: invoca 2 Elementais de Magma (HP 22, CA 11, atk +4, 1d6+1 de fogo, imunes a fogo e veneno, vulneráveis a frio). Se o conjurador perder a concentração, os elementais retornam ao seu plano natal.',
+            elementalSpec: {
+                count: 2,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_minor_elementals_magma',
+                unitSpec: {
+                    name: 'Elemental de Magma',
+                    ico: '🔥',
+                    iconHeraldic: 'ic-fire_elemental',
+                    hp: 22, mhp: 22, ac: 11,
+                    dex: 12, wis: 10, con: 12, str: 8, int: 7, cha: 10,
+                    atk: 4,
+                    damageSpec: { n: 1, d: 6, flat: 1 },
+                    dmgType: 'fire',
+                    ranged: false,
+                    die: 6,
+                    multiAttack: 1,
+                    vulnerabilities: ['cold'],
+                    immunities: ['fire', 'poison'],
+                    conditionImmunities: ['poisoned', 'exhaustion']
                 }
             } }
       ] },
