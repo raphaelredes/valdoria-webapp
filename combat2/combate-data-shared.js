@@ -1119,12 +1119,17 @@ var CHAR_CLASSES = [
            Paladino nv 3. BA + próximo atk em acerto → +3d8 radiante + alvo TR CON ou CEGO.
            Reusa Smite pattern (igual Trovejante/Marcante/Irado) + nextHitAppliesDebuff Cego. */
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.219) — Blinding Smite 3rd level, Paladino nv 9+. */
-        { n: 'Golpe Fulminante', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 9,
+        { n: 'Golpe Fulminante', ico: '✨', cost: 3, kind: 'buff', bonus: true, minLevel: 9,
             desc: 'Ação bônus (PHB p.219 — 3º nível, nv 9+): próximo atk +3d8 radiante + TR CON ou CEGO.',
             helpDnd5e: 'Golpe Fulminante / Blinding Smite (PHB p.219 — Paladino 3º nível): **AÇÃO BÔNUS**; concentração até 1 min. Próximo ataque com arma corpo-a-corpo que acertar causa +3d8 radiante; alvo faz TR CON ou fica CEGO até a magia terminar.\nArena stub: buff BA dmgBonusDie:{n:3,d:8} no próximo ataque + afterAttackEnemyDebuff Cego (atkDisadvantage+targetedAdvantage+repeatSave CON) 3 rodadas.',
             /* V1.7 Sprint-17 Ronda 11 (2026-04-21 QA PHB p.219) — Blinding Smite upcast
                +1d8 por slot acima do 3º. Paladino nv 9 (3rd) 3d8 base, nv 13 (4th) 4d8, nv 17 (5th) 5d8. */
-            buffSim: { id: 'golpe_fulminante', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Fulminante', condRule: 'PHB p.219 — próximo atk +3d8 radiante (escala +1d8/slot acima 3º) + TR CON ou Cego.', dmgBonusDie: { n: 3, d: 8, scaleByCasterLevel: { breakpoints: [[13, 1], [17, 2]] } }, concentration: true, nextHitAppliesDebuff: { id: 'blinding_smite_blind', turns: 3, n: 'Cego', ico: '‍', atkDisadvantage: true, targetedAdvantage: true, repeatSave: { ability: 'con' }, dndCondition: 'Cego (PHB App.A — Blinding Smite)' } } },
+            buffSim: { id: 'golpe_fulminante', vfx: 'bless', decOn: 'after_npc', turns: 10, kind: 'buff', condName: 'Golpe Fulminante', condRule: 'PHB p.219 — próximo atk +3d8 radiante (escala +1d8/slot acima 3º) + TR CON ou Cego.', dmgBonusDie: { n: 3, d: 8, scaleByCasterLevel: { breakpoints: [[13, 1], [17, 2]] } }, dmgBonusType: 'radiant', concentration: true, consumeOnHit: true, nextHitAppliesDebuff: { id: 'blinding_smite_blind', turns: 3, n: 'Cego', ico: '👁', atkDisadvantage: true, targetedAdvantage: true, repeatSave: { ability: 'con' }, dndCondition: 'Cego (PHB App.A — Blinding Smite)' } } },
+        /* V1.24 (D&D 5e PHB p.275) — Staggering Smite 4th level, Paladino nv 13+. */
+        { n: 'Golpe Estonteante', ico: '💫', cost: 4, kind: 'buff', bonus: true, minLevel: 13,
+            desc: 'Ação bônus (PHB p.275 — 4º nível, nv 13+): próximo atk +4d6 psíquico + TR SAB ou ESTONTEADO.',
+            helpDnd5e: 'Golpe Estonteante / Staggering Smite (PHB p.275 — Paladino 4º nível): **AÇÃO BÔNUS**; concentração até 1 min. Próximo ataque com arma que acertar causa +4d6 psíquico extra; alvo faz TR SAB ou fica ESTONTEADO (desvantagem em ataques e testes, sem reações) até o fim do seu próximo turno.\nArena: buff BA dmgBonusDie:{n:4,d:6} psíquico + nextHitAppliesDebuff Estonteado.',
+            buffSim: { id: 'golpe_estonteante', vfx: 'shadow', decOn: 'after_npc', turns: 10, kind: 'buff', condName: 'Golpe Estonteante', condRule: 'PHB p.275 — próximo atk +4d6 psíquico + TR SAB ou Estonteado.', dmgBonusDie: { n: 4, d: 6 }, dmgBonusType: 'psychic', concentration: true, consumeOnHit: true, nextHitAppliesDebuff: { id: 'staggering_smite_staggered', turns: 1, n: 'Estonteado', ico: '😵', atkDisadvantage: true, skipBonus: true, reactionDisabled: true, staggered: true, saveOnHit: { ability: 'wis' }, dndCondition: 'Estonteado (Destruição Estonteante — PHB p.275)' } } },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.289) — Wrathful Smite 1st level, Paladino nv 2+. */
         { n: 'Golpe Irado', ico: '', cost: 1, kind: 'buff', bonus: true, minLevel: 2,
             desc: 'Ação bônus (PHB p.289 — 1º nível, nv 2+): próximo ataque +1d6 psíquico, TR SAB ou amedrontado.',
