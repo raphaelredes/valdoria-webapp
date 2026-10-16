@@ -1639,6 +1639,33 @@ var CHAR_CLASSES = [
                     resistances: ['slashing', 'piercing', 'bludgeoning'],
                     conditionImmunities: ['charmed', 'frightened', 'paralyzed', 'petrified', 'poisoned', 'prone']
                 }
+            } },
+        /* V1.19 (2026-10-16) — Conjurar Seres Feéricos (PHB p.226 — Conjure Fey).
+           Druida/Bruxo nv 11+. Invoca 1 Nobre Eladrin (Concentração). */
+        { n: 'Conjurar Seres Feéricos', ico: '🧝', cost: 6, kind: 'summon_greater_fey', minLevel: 11, concentration: true,
+            desc: 'Conjura 1 Nobre Eladrin (Guardião Feérico ND 6, Resistência à Magia, Lâmina Solar 2d8+4+1d8 e Concentração) como aliado leal da comitiva.',
+            helpDnd5e: 'Conjurar Seres Feéricos / Conjure Fey (PHB p. 226 — Druida e Bruxo nv 11): magia de 6º círculo; alcance 27m; Concentração até 1 hora. Invoca um nobre espírito feérico dos ermos que obedece aos seus comandos e luta como aliado da comitiva.\nArena: invoca 1 Nobre Eladrin (HP 84, CA 17, atk +7, 2d8+4 perfurante + 1d8 radiante, Resistência à Magia com vantagem em TR contra magias, imune à condição Enfeitiçado). Se o conjurador perder a concentração, o espírito feérico retorna ao Faerie/Feywild.',
+            greaterFeySpec: {
+                count: 1,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_greater_fey_eladrin',
+                unitSpec: {
+                    name: 'Nobre Eladrin',
+                    ico: '🧝',
+                    iconHeraldic: 'ic-woodland_fey',
+                    hp: 84, mhp: 84, ac: 17,
+                    dex: 18, wis: 16, con: 14, str: 13, int: 14, cha: 18,
+                    atk: 7,
+                    damageSpec: { n: 2, d: 8, flat: 4 },
+                    dmgBonusDie: { n: 1, d: 8 },
+                    dmgType: 'radiant',
+                    ranged: false,
+                    die: 8,
+                    multiAttack: 1,
+                    speed: 8,
+                    conditionImmunities: ['charmed']
+                }
             } }
       ] },
     /* V1.7 Stage 6 (2026-04-21) — Feiticeiro (PHB p.99-108): CHA caster inato.
@@ -1775,7 +1802,34 @@ var CHAR_CLASSES = [
         { n: 'Lâmina Sombria', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 3,
             desc: 'Ação bônus (PHB p.275): invoca arma sombria — próximo atk +2d8 psíquico.',
             helpDnd5e: 'Golpe de Lâmina Sombria / Shadow Blade (PHB p.275 — Bruxo/Feiticeiro/Mago nv 2): **AÇÃO BÔNUS**; concentração até 1 min. Invoca espada de sombras (2d8 psíquico, finesse/light/thrown); vantagem em atk contra alvos em escuridão/penumbra. Upcast: +1d8 no nv 3, +2d8 no nv 5, +3d8 no nv 7.\nArena stub: buff BA concentration; próximo atk ganha dmgBonusDie:2d8 psychic. Em stub arena sem luz-tracking, não aplica vantagem automática.',
-            buffSim: { id: 'shadow_blade', vfx: 'shadow', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Lâmina Sombria', condRule: 'PHB p.275 — próximo atk +2d8 psíquico.', dmgBonusDie: { n: 2, d: 8 }, concentration: true } }
+            buffSim: { id: 'shadow_blade', vfx: 'shadow', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Lâmina Sombria', condRule: 'PHB p.275 — próximo atk +2d8 psíquico.', dmgBonusDie: { n: 2, d: 8 }, concentration: true } },
+        /* V1.19 (2026-10-16) — Conjurar Seres Feéricos (PHB p.108 & 226 — Conjure Fey / Arcanum Místico).
+           Bruxo nv 11+. Invoca 1 Nobre Eladrin (Concentração). */
+        { n: 'Conjurar Seres Feéricos', ico: '🧝', cost: 1, kind: 'summon_greater_fey', minLevel: 11, concentration: true,
+            desc: 'Arcanum Místico (PHB p.108): conjura 1 Nobre Eladrin (Guardião Feérico ND 6, Resistência à Magia e Concentração) como aliado leal.',
+            helpDnd5e: 'Conjurar Seres Feéricos / Conjure Fey (PHB p. 108 & 226 — Bruxo Arcanum Místico nv 11): Arcanum Místico de 6º círculo; consome 1 Pacto; Concentração até 1 hora. Invoca um nobre espírito feérico dos ermos que obedece aos seus comandos e luta como aliado da comitiva.\nArena: invoca 1 Nobre Eladrin (HP 84, CA 17, atk +7, 2d8+4 perfurante + 1d8 radiante, Resistência à Magia com vantagem em TR contra magias, imune à condição Enfeitiçado). Se o conjurador perder a concentração, o espírito feérico retorna ao Faerie/Feywild.',
+            greaterFeySpec: {
+                count: 1,
+                durTurns: 10,
+                concentration: true,
+                summonKind: 'conjure_greater_fey_eladrin',
+                unitSpec: {
+                    name: 'Nobre Eladrin',
+                    ico: '🧝',
+                    iconHeraldic: 'ic-woodland_fey',
+                    hp: 84, mhp: 84, ac: 17,
+                    dex: 18, wis: 16, con: 14, str: 13, int: 14, cha: 18,
+                    atk: 7,
+                    damageSpec: { n: 2, d: 8, flat: 4 },
+                    dmgBonusDie: { n: 1, d: 8 },
+                    dmgType: 'radiant',
+                    ranged: false,
+                    die: 8,
+                    multiAttack: 1,
+                    speed: 8,
+                    conditionImmunities: ['charmed']
+                }
+            } }
       ],
       /* PHB p.107 Pacto da Corrente — o familiar é COMANDADO pelo Bruxo na arena
          ("forgo one of your own attacks to allow your familiar to make one attack"):

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T11:03:24Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T11:16:53Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -27132,6 +27132,79 @@ async function castSummonGreaterElemental(s, p, sk) {
     await _maybeAdvanceOrStay();
 }
 
+async function castSummonGreaterFey(s, p, sk) {
+    var fs = sk.greaterFeySpec || {};
+    var us = fs.unitSpec || {};
+    var count = (fs.count | 0) || 1;
+    var dur = (fs.durTurns | 0) || 10;
+    var summonKind = fs.summonKind || 'conjure_greater_fey_eladrin';
+    if (p.res && p.res.value < (sk.cost | 0)) {
+        showMessage('Mana insuficiente.');
+        return;
+    }
+    if (sk.minLevel && (p.lvl | 0) < sk.minLevel) {
+        return;
+    }
+    if (typeof _dissipateConjuredSummons === 'function') {
+        _dissipateConjuredSummons(s, p, 'conjure_fey');
+    }
+    p.res.value = Math.max(0, p.res.value - (sk.cost | 0));
+    p.actionSpent = true;
+    if (typeof simLogPushTurnHeader === 'function') simLogPushTurnHeader(s, p);
+    s.log.push(p.n + ' conjura ' + (sk.n || 'Conjurar Seres Feéricos') + ' (PHB p.226 — Concentração) — invoca ' + (us.name || 'Nobre Eladrin') + '!');
+    var pIdx = s.order.indexOf(p);
+    for (var ci = 0; ci < count; ci++) {
+        var baseName = us.name || 'Nobre Eladrin';
+        var feyName = count > 1 ? (baseName + ' #' + (ci + 1)) : baseName;
+        var summon = {
+            t: 'a', n: feyName, ico: us.ico || '🧝',
+            hp: us.hp || 84, mhp: us.mhp || us.hp || 84, ac: us.ac || 17,
+            atk: us.atk || 7, die: us.die || 8,
+            dmgMod: (us.damageSpec && us.damageSpec.flat) || 4,
+            dex: us.dex || 18, wis: us.wis || 16, con: us.con || 14,
+            str: us.str || 13, int: us.int || 14, cha: us.cha || 18,
+            attr: 'DEX',
+            speed: 8, movement_left: 8,
+            multiAttack: us.multiAttack || 1,
+            damageSpec: us.damageSpec || { n: 2, d: 8, flat: 4 },
+            dmgBonusDie: us.dmgBonusDie || { n: 1, d: 8 },
+            dmgType: us.dmgType || 'radiant',
+            ranged: false,
+            conditionImmunities: us.conditionImmunities || ['charmed'],
+            alive: true, dying: false, stable: false, isDead: false,
+            deathSaves: { s: 0, f: 0 },
+            se: [
+                {
+                    id: 'magic_resistance',
+                    n: 'Resistência à Magia',
+                    ico: '🛡️',
+                    magicSaveAdvantage: true,
+                    dndCondition: 'Resistência à Magia (Vantagem em TR contra magias)'
+                }
+            ],
+            init: (p.init | 0) - 0.2 - (ci * 0.1),
+            initRevealed: true, initRolling: false,
+            species: baseName, sugLvl: 11,
+            it: { ic: us.ico || '🧝', lb: summonKind },
+            summonedBy: pIdx,
+            summonKind: summonKind,
+            iconHeraldic: us.iconHeraldic || 'ic-woodland_fey',
+            focusTarget: null,
+            noDeathSaves: true,
+            durTurns: dur,
+            conjureCasterIdx: pIdx,
+            conjureCaster: p,
+            conjureSpellId: 'conjure_fey',
+            concentrationSummon: true
+        };
+        s.order.splice(pIdx + 1 + ci, 0, summon);
+    }
+    if (typeof _actionTaken !== 'undefined') _actionTaken = false;
+    _actionSheetOpen = false;
+    render(s);
+    await _maybeAdvanceOrStay();
+}
+
 /* PHB p.204 — dissipa TODAS as criaturas conjuradas por um `conjureSpellId` de um
    conjurador específico (match por referência ESTÁVEL `conjureCaster`, não índice).
    Chamado quando a concentração do conjurador quebra (dano/TR CON) ou ao conjurar
@@ -33639,6 +33712,11 @@ async function useSkill(skill, opts) {
     /* V1.18 (2026-10-16) — Conjurar Elemental (PHB p.225 — Conjure Elemental). */
     if (skill.kind === 'summon_greater_elemental') {
         castSummonGreaterElemental(currentState, p, skill);
+        return;
+    }
+    /* V1.19 (2026-10-16) — Conjurar Seres Feéricos (PHB p.226 — Conjure Fey). */
+    if (skill.kind === 'summon_greater_fey') {
+        castSummonGreaterFey(currentState, p, skill);
         return;
     }
     /* V1.7 Sprint-9+10 (2026-04-21 closeout) — PHB Action Surge / Reckless Attack:
@@ -43726,7 +43804,7 @@ async function __combatAnimateOneEvent(ev) {
         return;
     }
     if (kind === 'summon_cast' || kind === 'summon_pack_cast' || kind === 'summon_undead_cast'
-            || kind === 'summon_elemental_cast' || kind === 'summon_fey_cast' || kind === 'summon_celestial_cast' || kind === 'summon_greater_elemental_cast'
+            || kind === 'summon_elemental_cast' || kind === 'summon_fey_cast' || kind === 'summon_celestial_cast' || kind === 'summon_greater_elemental_cast' || kind === 'summon_greater_fey_cast'
             || kind === 'summon_attack' || kind === 'summon_expire') {
         /* [C-REM:SUMMON] Summon events: flash caster + render (com o novo order
            do server contendo os summons spawnados). Fase 3 fará VFX dedicado. */
