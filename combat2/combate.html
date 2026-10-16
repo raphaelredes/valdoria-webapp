@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T07:41:32Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-16T07:48:14Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -12416,6 +12416,52 @@ canvas#vfxCanvas,
   border-color: #f59e0b;
   color: #fef3c7;
 }
+.token-cond-chip--paralyzed {
+  background: linear-gradient(180deg, #2b0c0c, #140505);
+  border-color: #ef4444;
+  color: #fecaca;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.45);
+}
+.token-cond-chip--frightened {
+  background: linear-gradient(180deg, #2c1608, #140a03);
+  border-color: #f97316;
+  color: #fed7aa;
+}
+.token-cond-chip--charmed {
+  background: linear-gradient(180deg, #2b0d20, #14050f);
+  border-color: #ec4899;
+  color: #fbcfe8;
+}
+.token-cond-chip--restrained {
+  background: linear-gradient(180deg, #182028, #0b1016);
+  border-color: #94a3b8;
+  color: #e2e8f0;
+}
+.token-cond-chip--invisible {
+  background: linear-gradient(180deg, #09242d, #031015);
+  border-color: #06b6d4;
+  color: #a5f3fc;
+  box-shadow: 0 0 6px rgba(6, 182, 212, 0.4);
+}
+.token-cond-chip--shield {
+  background: linear-gradient(180deg, #0d1e38, #050c18);
+  border-color: #3b82f6;
+  color: #bfdbfe;
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.45);
+}
+.token-cond-container {
+  position: absolute;
+  bottom: -6px;
+  left: -8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 29;
+  pointer-events: none;
+}
+.token-cond-container .token-cond-chip {
+  position: static;
+}
 
 /* Trilha Tática de Movimento e Alerta de AoO (D&D 5e PHB p. 190 / p. 195) */
 .hex-move-segment {
@@ -12498,6 +12544,24 @@ canvas#vfxCanvas,
 }
 .hex-dest-badge-text--hazard {
   fill: #ff7675;
+}
+
+/* Escudo de Cobertura no Destino de Movimento (D&D 5e PHB p. 196 / Solasta / BG3) */
+.hex-dest-cover-pill {
+  fill: rgba(10, 24, 38, 0.95);
+  stroke: #4fc3f7;
+  stroke-width: 1.1;
+  rx: 3;
+  ry: 3;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.85));
+}
+.hex-dest-cover-text {
+  fill: #81d4fa;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
 }
 
 /* Área de Efeito (AoE) de Magias Canônicas no Tabuleiro (PHB p. 204-205) */
@@ -21240,6 +21304,30 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
         destText = '▲ AoO (' + provokedAoOList.length + ') · ' + totalM + ' · Restam ' + remainingMeters;
     }
 
+    // D&D 5e (PHB p. 196 / Solasta / BG3): Avalia se o destino de movimento concede Cobertura contra inimigos à distância
+    var destCoverBonus = 0;
+    if (state && Array.isArray(state.order) && typeof simComputeCover === 'function') {
+        var phantomTarget = { pos: { col: dest.col, row: dest.row } };
+        for (var eci = 0; eci < state.order.length; eci++) {
+            var candEnemy = state.order[eci];
+            if (!candEnemy || candEnemy.t !== 'e') continue;
+            var isEnemyAlive = (candEnemy.alive !== false) && !candEnemy.isDead && (typeof candEnemy.hp !== 'number' || candEnemy.hp > 0);
+            if (!isEnemyAlive || !candEnemy.pos) continue;
+            if (hexDistance(candEnemy.pos.col, candEnemy.pos.row, dest.col, dest.row) > 1) {
+                var covEval = simComputeCover(state, candEnemy, phantomTarget);
+                if (covEval && covEval.bonus > destCoverBonus) {
+                    destCoverBonus = covEval.bonus;
+                }
+            }
+        }
+    }
+
+    if (destCoverBonus === 5) {
+        destText += ' · ⛨ ¾ Cob (+5 CA)';
+    } else if (destCoverBonus === 2) {
+        destText += ' · ⛨ ½ Cob (+2 CA)';
+    }
+
     var destBadgeW = Math.max(90, destText.length * 6.2 + 20);
     var destBadgeH = 19;
     var destX = Math.round(destCenter.cx - destBadgeW / 2);
@@ -21252,6 +21340,18 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
         '<rect x="' + destX + '" y="' + destY + '" width="' + destBadgeW + '" height="' + destBadgeH + '" rx="5" class="' + destBgCls + '" />' +
         '<text x="' + destCenter.cx + '" y="' + (destY + 11) + '" class="' + destTextCls + '">' + escHtml(destText) + '</text>' +
         '</g>');
+
+    if (destCoverBonus > 0) {
+        var covLabel = '⛨ +' + destCoverBonus + ' CA';
+        var covW = 46;
+        var covH = 13;
+        var covX = Math.round(destCenter.cx - covW / 2);
+        var covY = Math.round(destCenter.cy + 13);
+        svgParts.push('<g class="hex-dest-cover-group">' +
+            '<rect x="' + covX + '" y="' + covY + '" width="' + covW + '" height="' + covH + '" class="hex-dest-cover-pill" />' +
+            '<text x="' + destCenter.cx + '" y="' + (covY + 7) + '" class="hex-dest-cover-text">' + escHtml(covLabel) + '</text>' +
+            '</g>');
+    }
 
     layer.innerHTML = svgParts.join('');
 }
@@ -23163,6 +23263,18 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                 condBadges += '<div class="token-cond-chip token-cond-chip--poison" title="D&D 5e (PHB p. 292): Envenenado">▲ Envenenado</div>';
             } else if (stObj.stunned || stId.indexOf('stun') >= 0 || stName.indexOf('atordo') >= 0) {
                 condBadges += '<div class="token-cond-chip token-cond-chip--stun" title="D&D 5e (PHB p. 290): Atordoado">◈ Atordoado</div>';
+            } else if (stObj.paralyzed || stId.indexOf('paraly') >= 0 || stName.indexOf('paralis') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--paralyzed" title="D&D 5e (PHB p. 291): Paralisado (Incapacitado; ataques a 1,5m são acertos críticos)">◈ Paralisado</div>';
+            } else if (stId.indexOf('fright') >= 0 || stId.indexOf('fear') >= 0 || stName.indexOf('amedront') >= 0 || stName.indexOf('medo') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--frightened" title="D&D 5e (PHB p. 290): Amedrontado (Desvantagem em ataques e testes)">▲ Amedrontado</div>';
+            } else if (stId.indexOf('charm') >= 0 || stName.indexOf('enfeitiç') >= 0 || stName.indexOf('enfeitic') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--charmed" title="D&D 5e (PHB p. 291): Enfeitiçado">✦ Enfeitiçado</div>';
+            } else if (stObj.restrained || stId.indexOf('restrain') >= 0 || stName.indexOf('contido') >= 0 || stName.indexOf('impedido') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--restrained" title="D&D 5e (PHB p. 292): Contido (Deslocamento 0; ataques recebidos com Vantagem)">⛨ Contido</div>';
+            } else if (stId.indexOf('invis') >= 0 || stId === 'hidden' || stName.indexOf('invisív') >= 0 || stName.indexOf('invisiv') >= 0 || stName.indexOf('oculto') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--invisible" title="D&D 5e (PHB p. 291): Invisível / Oculto (Ataques com Vantagem; atacantes com Desvantagem)">✦ Invisível</div>';
+            } else if (stId === 'shield' || stId === 'escudo_arcano' || stName.indexOf('escudo arcano') >= 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--shield" title="D&D 5e: Escudo Arcano (+5 CA até próximo turno)">⛨ Escudo (+5 CA)</div>';
             }
         }
     }
@@ -23224,7 +23336,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     if (disadvBadge) html += disadvBadge;
     if (concBadge) html += concBadge;
     if (proneBadge) html += proneBadge;
-    if (condBadges) html += condBadges;
+    if (condBadges) html += '<div class="token-cond-container">' + condBadges + '</div>';
 
     // Nameplate underneath
     html += '<div class="token-nameplate">' + nameLabel + '</div>';
