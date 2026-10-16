@@ -630,7 +630,39 @@ var CHAR_CLASSES = [
             save: { ability: 'dex' }, saveNegates: true, disintegrateOnKill: true,
             damageSpec: { n: 10, d: 6, flat: 40 },
             desc: 'Feixe fino de energia esmeralda que causa 10d6+40 de dano de força (TR Destreza anula). Se reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas.',
-            helpDnd5e: 'Desintegrar / Disintegrate (PHB p. 233 — Mago, Feiticeiro e Bruxo nv 11): magia de 6º círculo; 1 Ação; alcance 18m (12 hexágonos). Dispara um raio verde fino na direção de um alvo. O alvo deve ser bem-sucedido num teste de resistência de Destreza ou sofrerá 10d6 + 40 de dano de força. Se for bem-sucedido no teste, não sofre dano algum (saveNegates). Se este dano reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas finas (sem salvaguardas de morte).' }
+            helpDnd5e: 'Desintegrar / Disintegrate (PHB p. 233 — Mago, Feiticeiro e Bruxo nv 11): magia de 6º círculo; 1 Ação; alcance 18m (12 hexágonos). Dispara um raio verde fino na direção de um alvo. O alvo deve ser bem-sucedido num teste de resistência de Destreza ou sofrerá 10d6 + 40 de dano de força. Se for bem-sucedido no teste, não sofre dano algum (saveNegates). Se este dano reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas finas (sem salvaguardas de morte).' },
+        /* V1.22 (2026-10-16) — Dedo da Morte (PHB p.236 — Finger of Death).
+           Mago nv 13+. 7d8+30 dano necrótico (TR Constituição metade). Se matar o alvo, ergue-o como Zumbi servo. */
+        { n: 'Dedo da Morte', ico: '🫵', cost: 7, kind: 'attack', minLevel: 13,
+            dmgType: 'necrotic', ranged: true, reach: 12,
+            save: { ability: 'con' }, zumbifyOnKill: true,
+            damageSpec: { n: 7, d: 8, flat: 30 },
+            desc: 'Raio de energia negativa causando 7d8+30 de dano necrótico (TR Constituição metade). Se matar o alvo, ergue-o como um Zumbi servo permanente.',
+            helpDnd5e: 'Dedo da Morte / Finger of Death (PHB p. 236 — Mago, Feiticeiro e Bruxo nv 13): magia de 7º círculo; 1 Ação; alcance 18m (12 hexágonos). Envia rajadas de energia negativa que causam dor atroz. O alvo realiza um teste de resistência de Constituição. Sofre 7d8 + 30 de dano necrótico em falha, ou metade em sucesso. Se o dano matar o alvo, ele ergue-se como um Zumbi servo leal na comitiva sob seu comando (sem concentração, imune a veneno e com Vigor Zumbi).',
+            zombieSpec: {
+                name: 'Zumbi Servo',
+                ico: '🧟',
+                iconHeraldic: 'ic-zombie',
+                hp: 22,
+                mhp: 22,
+                ac: 8,
+                dex: 6,
+                wis: 6,
+                con: 16,
+                str: 13,
+                int: 3,
+                cha: 5,
+                atk: 3,
+                die: 6,
+                damageSpec: { n: 1, d: 6, flat: 1 },
+                dmgType: 'bludgeoning',
+                ranged: false,
+                multiAttack: 1,
+                speed: 4,
+                immunities: ['poison'],
+                conditionImmunities: ['poisoned'],
+                undeadFortitude: true
+            } }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '', dmgMod: 3, attr: 'DEX',
       res: { type: 'energia', name: 'Energia', ico: '', max: 6 },
@@ -1792,7 +1824,39 @@ var CHAR_CLASSES = [
             save: { ability: 'dex' }, saveNegates: true, disintegrateOnKill: true,
             damageSpec: { n: 10, d: 6, flat: 40 },
             desc: 'Feixe fino de energia esmeralda que causa 10d6+40 de dano de força (TR Destreza anula). Se reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas.',
-            helpDnd5e: 'Desintegrar / Disintegrate (PHB p. 233 — Mago, Feiticeiro e Bruxo nv 11): magia de 6º círculo; 1 Ação; alcance 18m (12 hexágonos). Dispara um raio verde fino na direção de um alvo. O alvo deve ser bem-sucedido num teste de resistência de Destreza ou sofrerá 10d6 + 40 de dano de força. Se for bem-sucedido no teste, não sofre dano algum (saveNegates). Se este dano reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas finas (sem salvaguardas de morte).' }
+            helpDnd5e: 'Desintegrar / Disintegrate (PHB p. 233 — Mago, Feiticeiro e Bruxo nv 11): magia de 6º círculo; 1 Ação; alcance 18m (12 hexágonos). Dispara um raio verde fino na direção de um alvo. O alvo deve ser bem-sucedido num teste de resistência de Destreza ou sofrerá 10d6 + 40 de dano de força. Se for bem-sucedido no teste, não sofre dano algum (saveNegates). Se este dano reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas finas (sem salvaguardas de morte).' },
+        /* V1.22 (2026-10-16) — Dedo da Morte (PHB p.236 — Finger of Death).
+           Feiticeiro nv 13+. 7d8+30 dano necrótico (TR Constituição metade). Se matar o alvo, ergue-o como Zumbi servo. */
+        { n: 'Dedo da Morte', ico: '🫵', cost: 7, kind: 'attack', minLevel: 13,
+            dmgType: 'necrotic', ranged: true, reach: 12,
+            save: { ability: 'con' }, zumbifyOnKill: true,
+            damageSpec: { n: 7, d: 8, flat: 30 },
+            desc: 'Raio de energia negativa causando 7d8+30 de dano necrótico (TR Constituição metade). Se matar o alvo, ergue-o como um Zumbi servo permanente.',
+            helpDnd5e: 'Dedo da Morte / Finger of Death (PHB p. 236 — Mago, Feiticeiro e Bruxo nv 13): magia de 7º círculo; 1 Ação; alcance 18m (12 hexágonos). Envia rajadas de energia negativa que causam dor atroz. O alvo realiza um teste de resistência de Constituição. Sofre 7d8 + 30 de dano necrótico em falha, ou metade em sucesso. Se o dano matar o alvo, ele ergue-se como um Zumbi servo leal na comitiva sob seu comando (sem concentração, imune a veneno e com Vigor Zumbi).',
+            zombieSpec: {
+                name: 'Zumbi Servo',
+                ico: '🧟',
+                iconHeraldic: 'ic-zombie',
+                hp: 22,
+                mhp: 22,
+                ac: 8,
+                dex: 6,
+                wis: 6,
+                con: 16,
+                str: 13,
+                int: 3,
+                cha: 5,
+                atk: 3,
+                die: 6,
+                damageSpec: { n: 1, d: 6, flat: 1 },
+                dmgType: 'bludgeoning',
+                ranged: false,
+                multiAttack: 1,
+                speed: 4,
+                immunities: ['poison'],
+                conditionImmunities: ['poisoned'],
+                undeadFortitude: true
+            } }
       ] },
     /* V1.7 Stage 7 (2026-04-21) — Bruxo (PHB p.105-115): CHA caster com pact patron.
        ADAPTAÇÕES vs PHB:
@@ -1934,7 +1998,39 @@ var CHAR_CLASSES = [
             save: { ability: 'dex' }, saveNegates: true, disintegrateOnKill: true,
             damageSpec: { n: 10, d: 6, flat: 40 },
             desc: 'Arcanum Místico (PHB p.108): feixe fino de energia esmeralda que causa 10d6+40 de dano de força (TR Destreza anula). Se reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas.',
-            helpDnd5e: 'Desintegrar / Disintegrate (PHB p. 233, Arcanum Místico p. 108 — Bruxo nv 11): magia de 6º círculo via Arcanum Místico; 1 Ação; alcance 18m (12 hexágonos). Dispara um raio verde fino na direção de um alvo. O alvo deve ser bem-sucedido num teste de resistência de Destreza ou sofrerá 10d6 + 40 de dano de força. Se for bem-sucedido no teste, não sofre dano algum (saveNegates). Se este dano reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas finas (sem salvaguardas de morte).' }
+            helpDnd5e: 'Desintegrar / Disintegrate (PHB p. 233, Arcanum Místico p. 108 — Bruxo nv 11): magia de 6º círculo via Arcanum Místico; 1 Ação; alcance 18m (12 hexágonos). Dispara um raio verde fino na direção de um alvo. O alvo deve ser bem-sucedido num teste de resistência de Destreza ou sofrerá 10d6 + 40 de dano de força. Se for bem-sucedido no teste, não sofre dano algum (saveNegates). Se este dano reduzir o alvo a 0 PV, ele é totalmente desintegrado em cinzas finas (sem salvaguardas de morte).' },
+        /* V1.22 (2026-10-16) — Dedo da Morte (PHB p.108 & 236 — Finger of Death / Arcanum Místico).
+           Bruxo nv 13+. 7d8+30 dano necrótico (TR Constituição metade). Se matar o alvo, ergue-o como Zumbi servo. */
+        { n: 'Dedo da Morte', ico: '🫵', cost: 1, kind: 'attack', minLevel: 13,
+            dmgType: 'necrotic', ranged: true, reach: 12,
+            save: { ability: 'con' }, zumbifyOnKill: true,
+            damageSpec: { n: 7, d: 8, flat: 30 },
+            desc: 'Arcanum Místico (PHB p.108): raio de energia negativa causando 7d8+30 de dano necrótico (TR Constituição metade). Se matar o alvo, ergue-o como um Zumbi servo permanente.',
+            helpDnd5e: 'Dedo da Morte / Finger of Death (PHB p. 236, Arcanum Místico p. 108 — Bruxo nv 13): magia de 7º círculo via Arcanum Místico; 1 Ação; alcance 18m (12 hexágonos). Envia rajadas de energia negativa que causam dor atroz. O alvo realiza um teste de resistência de Constituição. Sofre 7d8 + 30 de dano necrótico em falha, ou metade em sucesso. Se o dano matar o alvo, ele ergue-se como um Zumbi servo leal na comitiva sob seu comando (sem concentração, imune a veneno e com Vigor Zumbi).',
+            zombieSpec: {
+                name: 'Zumbi Servo',
+                ico: '🧟',
+                iconHeraldic: 'ic-zombie',
+                hp: 22,
+                mhp: 22,
+                ac: 8,
+                dex: 6,
+                wis: 6,
+                con: 16,
+                str: 13,
+                int: 3,
+                cha: 5,
+                atk: 3,
+                die: 6,
+                damageSpec: { n: 1, d: 6, flat: 1 },
+                dmgType: 'bludgeoning',
+                ranged: false,
+                multiAttack: 1,
+                speed: 4,
+                immunities: ['poison'],
+                conditionImmunities: ['poisoned'],
+                undeadFortitude: true
+            } }
       ],
       /* PHB p.107 Pacto da Corrente — o familiar é COMANDADO pelo Bruxo na arena
          ("forgo one of your own attacks to allow your familiar to make one attack"):
