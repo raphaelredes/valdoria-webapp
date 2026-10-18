@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T19:25:37Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T19:46:43Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -33332,9 +33332,10 @@ function bindActions() {
                 if (typeof card.__pDownX === 'number' && typeof card.__pDownY === 'number') {
                     var cDx = Math.abs(ev.clientX - card.__pDownX);
                     var cDy = Math.abs(ev.clientY - card.__pDownY);
-                    if (cDx >= 4 || cDy >= 4) return;
+                    var maxCardDist = (card.__pDownType === 'touch') ? 14 : 6;
+                    if (cDx > maxCardDist || cDy > maxCardDist) return;
                 }
-                if (card.__pDownTs && (now - card.__pDownTs > 550)) return;
+                if (card.__pDownTs && (now - card.__pDownTs > 700)) return;
                 if (ev && ev.target && ev.target.closest && ev.target.closest('button')) return;
                 _lastCardActionTime = now;
                 if (ev && ev.cancelable && ev.type !== 'click') {
@@ -33595,9 +33596,10 @@ function bindActions() {
                 if (typeof tile.__pDownX === 'number' && typeof tile.__pDownY === 'number') {
                     var tDx = Math.abs(ev.clientX - tile.__pDownX);
                     var tDy = Math.abs(ev.clientY - tile.__pDownY);
-                    if (tDx >= 5 || tDy >= 5) return;
+                    var maxTileDist = (tile.__pDownType === 'touch') ? 14 : 7;
+                    if (tDx > maxTileDist || tDy > maxTileDist) return;
                 }
-                if (tile.__pDownTs && (now - tile.__pDownTs > 550)) return;
+                if (tile.__pDownTs && (now - tile.__pDownTs > 700)) return;
                 _lastTileActionTime = now;
                 if (ev && ev.cancelable && ev.type !== 'click') ev.preventDefault();
                 var tCol = parseInt(tile.getAttribute('data-col'), 10);
@@ -33892,7 +33894,7 @@ function showTargetActionMenu(targetIdx, uid) {
         : { reachHex: 1, meters: '1,5m', label: '1,5m (5 pés)', isRanged: false };
 
     var inAttackReach = (dist <= (reachMeta.reachHex || 1));
-    var isActionAvailable = !s.action_used;
+    var isActionAvailable = !p.actionSpent && !s.action_used && !s.actionUsed;
     var moveLeft = p.movement_left || 0;
 
     // Cobertura e Vantagem/Desvantagem
@@ -34239,7 +34241,7 @@ function showAllyActionMenu(targetIdx, uid) {
     }
     var distM = isSelf ? 'Você mesmo' : formatHexDistanceMeters(dist);
     var isAdjacent = isSelf || (dist <= 1);
-    var isActionAvailable = !s.action_used;
+    var isActionAvailable = !p.actionSpent && !s.action_used && !s.actionUsed;
 
     var hpPct = (u.mhp > 0) ? Math.max(0, Math.min(100, Math.round((u.hp / u.mhp) * 100))) : 0;
     var hpCls = (typeof vBarHpClass === 'function') ? vBarHpClass(hpPct) : (hpPct > 50 ? 'hp-high' : 'hp-mid');
@@ -35310,6 +35312,7 @@ function _animInitFailed(e, how) {
 
 function onBtnClick(ev) {
     var b = ev.currentTarget;
+    var btn = b;
     var act = b.dataset.act;
     /* [C-REM:BTN-ENTRY] (2026-04-21) log TODO click no onBtnClick pra diagnosticar
        path do Continue pós-vitória. Em TODAS as rotas (remote/local). */
@@ -39077,6 +39080,11 @@ async function useItem(idx) {
         render(currentState);
         return;
     }
+    if (window.__COMBAT_MODE === 'remote') {
+        render(currentState);
+        await __combatRemoteAction({ type: 'use_item', slot: idx, target: currentState.p_idx });
+        return;
+    }
     it.qty -= 1;
     var msg = it.n.toUpperCase();
     var sub = it.desc;
@@ -39632,9 +39640,15 @@ function showTargetConfirm(tgtIdx) {
     }
 
     if (!inReach) {
-        html += '<div class="tcc-dmg-row" style="background:rgba(180,40,30,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">▲ Alvo além do alcance máximo de ' + reachMeta.label + '. Aproxime-se no tabuleiro antes de atacar.</span>' +
-            '</div>';
+        if ((p.movement_left || 0) > 0) {
+            html += '<div class="tcc-dmg-row" style="background:rgba(40,120,200,0.18);border:1px solid rgba(80,180,255,0.4);border-radius:4px;padding:6px 8px;margin-top:4px;">' +
+                '<span style="color:#90cdf4;font-size:11.5px;line-height:1.35;text-align:center;width:100%;">🏃 <strong>Alvo além do alcance atual (' + reachMeta.label + '):</strong> Você possui <strong>' + formatHexDistanceMeters(p.movement_left) + '</strong> de deslocamento para avançar e atacar.</span>' +
+                '</div>';
+        } else {
+            html += '<div class="tcc-dmg-row" style="background:rgba(180,40,30,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
+                '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">▲ Alvo além do alcance máximo de ' + reachMeta.label + '. Deslocamento esgotado neste turno.</span>' +
+                '</div>';
+        }
     }
 
     if (drawerHtml) {
@@ -39646,7 +39660,11 @@ function showTargetConfirm(tgtIdx) {
     html += '<div class="tcc-actions">';
     html += '<button class="action-btn" data-tcc="cancel">✕ Cancelar</button>';
     if (!inReach) {
-        html += '<button class="action-btn primary disabled" data-tcc="confirm" style="opacity:0.5;filter:grayscale(0.5);" title="Alvo fora de alcance">Fora de Alcance</button>';
+        if ((p.movement_left || 0) > 0) {
+            html += '<button class="action-btn primary" data-tcc="approach" style="background:linear-gradient(135deg,#2b6cb0,#3182ce);border-color:#63b3ed;" title="Avançar pelo tabuleiro até o alcance e desferir o ataque">🏃 Avançar e Atacar</button>';
+        } else {
+            html += '<button class="action-btn primary disabled" data-tcc="confirm" style="opacity:0.5;filter:grayscale(0.5);" title="Alvo fora de alcance e sem deslocamento">Fora de Alcance</button>';
+        }
     } else if (isTotalCover) {
         html += '<button class="action-btn primary disabled" data-tcc="confirm" style="opacity:0.5;filter:grayscale(0.5);" title="Bloqueado por Cobertura Total">Cobertura Total</button>';
     } else {
@@ -39676,22 +39694,58 @@ function showTargetConfirm(tgtIdx) {
     }
     ov.addEventListener('click', function (e) { if (e.target === ov) _cancelTargetConfirm(); });
     card.querySelector('[data-tcc="cancel"]').addEventListener('click', function () { _cancelTargetConfirm(); });
-    card.querySelector('[data-tcc="confirm"]').addEventListener('click', function () {
-        if (!inReach) {
-            if (typeof showFloatingToast === 'function') {
-                showFloatingToast('▲ Alvo fora de alcance! Alcance máximo: ' + reachMeta.label, 'warn');
+    var approachBtn = card.querySelector('[data-tcc="approach"]');
+    if (approachBtn) {
+        approachBtn.addEventListener('click', async function () {
+            var bestHex = (typeof findBestApproachHex === 'function')
+                ? findBestApproachHex(p, u, currentState)
+                : null;
+            if (!bestHex) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Não há caminho livre para se aproximar do alvo!', 'warn');
+                }
+                return;
             }
-            return;
-        }
-        if (isTotalCover) {
-            if (typeof showFloatingToast === 'function') {
-                showFloatingToast('✕ Alvo sob Cobertura Total! Linha de visão bloqueada.', 'warn');
+            ov.remove();
+            if (window.__COMBAT_MODE === 'remote') {
+                try {
+                    await __combatRemoteAction({ type: 'move', col: bestHex.col, row: bestHex.row });
+                    confirmAndAttack(tgtIdx);
+                } catch (err) {
+                    console.error('[APPROACH-ATTACK] Falha ao aproximar:', err);
+                }
+            } else {
+                if (typeof handlePlayerMoveTo === 'function') {
+                    handlePlayerMoveTo(bestHex.col, bestHex.row).then(function () {
+                        if (currentState && currentState.ph === 'active' && p.alive && p.hp > 0) {
+                            confirmAndAttack(tgtIdx);
+                        }
+                    });
+                } else {
+                    confirmAndAttack(tgtIdx);
+                }
             }
-            return;
-        }
-        ov.remove();
-        confirmAndAttack(tgtIdx);
-    });
+        });
+    }
+    var confBtn = card.querySelector('[data-tcc="confirm"]');
+    if (confBtn) {
+        confBtn.addEventListener('click', function () {
+            if (!inReach) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('▲ Alvo fora de alcance! Alcance máximo: ' + reachMeta.label, 'warn');
+                }
+                return;
+            }
+            if (isTotalCover) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('✕ Alvo sob Cobertura Total! Linha de visão bloqueada.', 'warn');
+                }
+                return;
+            }
+            ov.remove();
+            confirmAndAttack(tgtIdx);
+        });
+    }
 }
 
 /** Modal de confirmação para Empurrar / Derrubar (PHB p. 195) em total conformidade com a Regra Soberana #24 */
