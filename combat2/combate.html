@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T16:59:19Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T17:32:58Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13085,6 +13085,108 @@ canvas#vfxCanvas,
   filter: drop-shadow(0 1px 2px #000);
 }
 
+/* PV Temporários (PHB p. 198), Forma Selvagem (PHB p. 66) e Auras Persistentes (PHB p. 85, 250) */
+.token-hp-badge--temphp {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 0 6px rgba(56, 189, 248, 0.45) !important;
+}
+.token-temphp-pill {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 8.5px;
+  font-weight: 800;
+  color: #7dd3fc;
+  background: rgba(14, 116, 144, 0.45);
+  border: 1px solid rgba(56, 189, 248, 0.65);
+  border-radius: 4px;
+  padding: 0 3px;
+  line-height: 1.15;
+  letter-spacing: 0.2px;
+}
+.token-cond-chip--wildshape {
+  background: linear-gradient(180deg, #0d2b18, #06150b);
+  border-color: #34d399;
+  color: #a7f3d0;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.45);
+}
+.token-cond-chip--paladin-aura {
+  background: linear-gradient(180deg, #2b2410, #141005);
+  border-color: #fbbf24;
+  color: #fde68a;
+  box-shadow: 0 0 5px rgba(251, 191, 36, 0.4);
+}
+.token-cond-chip--regen {
+  background: linear-gradient(180deg, #102a14, #071409);
+  border-color: #4ade80;
+  color: #bbf7d0;
+}
+.hex-active-aura-ring {
+  fill: rgba(250, 204, 21, 0.06);
+  stroke: rgba(250, 204, 21, 0.68);
+  stroke-width: 1.8;
+  stroke-dasharray: 7 4;
+  animation: activeAuraSpin 20s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.45));
+  pointer-events: none;
+}
+.hex-active-aura-ring--necrotic {
+  fill: rgba(168, 85, 247, 0.07);
+  stroke: rgba(192, 132, 252, 0.72);
+  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.5));
+}
+.hex-active-aura-ring--nature {
+  fill: rgba(52, 211, 153, 0.06);
+  stroke: rgba(52, 211, 153, 0.68);
+  filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.45));
+}
+@keyframes activeAuraSpin {
+  0% { stroke-dashoffset: 44; }
+  100% { stroke-dashoffset: 0; }
+}
+.hex-active-aura-label {
+  fill: #fef08a;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  filter: drop-shadow(0 1px 2px #000);
+  pointer-events: none;
+}
+.tcc-details-toggle {
+  width: 100%;
+  margin-top: 6px;
+  padding: 5px 8px;
+  background: rgba(24, 19, 14, 0.85);
+  border: 1px solid rgba(196, 149, 58, 0.42);
+  border-radius: 5px;
+  color: var(--v-gold-bright, #e8c45a);
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.tcc-details-toggle:hover, .tcc-details-toggle:active {
+  background: rgba(42, 33, 22, 0.95);
+  border-color: rgba(232, 196, 90, 0.75);
+}
+.tcc-details-drawer {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(196, 149, 58, 0.32);
+}
+.tcc-details-drawer.open {
+  display: flex;
+}
+
 /* Banner Dramático de Acerto Crítico D&D 5e (Natural 20 - BG3 / Solasta) */
 .dnd-crit-banner-overlay {
   position: absolute;
@@ -19476,6 +19578,17 @@ async function simResolveEndTurnConditions(s, unitIdx) {
             } else {
                 await sleep(80);
             }
+            try {
+                var _rsUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, unitIdx) : (u.id || null);
+                var _rsEl = _rsUid ? (document.querySelector('[data-unit-id="' + _rsUid + '"]') || document.querySelector('[data-uid="' + _rsUid + '"]')) : null;
+                if (_rsEl && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(
+                        _rsEl,
+                        ok ? ('🔓 LIVRE: ' + String(_condLbl).toUpperCase() + '!') : ('🔒 MANTEVE: ' + String(_condLbl).toUpperCase() + '!'),
+                        ok ? 'heal' : 'condition'
+                    );
+                }
+            } catch (_eRsLbl) {}
             if (ok) continue;
         }
         var tl = st.turnsLeft;
@@ -19486,6 +19599,13 @@ async function simResolveEndTurnConditions(s, unitIdx) {
         var tlint = tl | 0;
         if (tlint <= 1) {
             s.log.push(name + ': ' + (st.n || 'Efeito') + ' dissipou-se (fim da duração em turnos).');
+            try {
+                var _expUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, unitIdx) : (u.id || null);
+                var _expEl = _expUid ? (document.querySelector('[data-unit-id="' + _expUid + '"]') || document.querySelector('[data-uid="' + _expUid + '"]')) : null;
+                if (_expEl && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(_expEl, '✦ FIM: ' + String(st.n || 'EFEITO').toUpperCase(), 'attack');
+                }
+            } catch (_eExpLbl) {}
             continue;
         }
         st.turnsLeft = tlint - 1;
@@ -20683,13 +20803,74 @@ function simCalcSaveFailChanceDnd5e(s, caster, defender, skill) {
     var svInfo = simSaveModStatic(defender, saveAb);
     var coverInfo = (typeof simComputeCover === 'function' && s) ? simComputeCover(s, caster, defender) : { cover: 'none', bonus: 0 };
     var coverBonus = (saveAb === 'dex' && coverInfo.bonus > 0) ? (coverInfo.bonus | 0) : 0;
-    var totalSaveMod = svInfo.mod + coverBonus;
+
+    /* Aura de Proteção (Paladino L6+ consciente a até 2 hexes / 6 hexes nv18+) */
+    var paladinAuraBonus = 0;
+    if (s && Array.isArray(s.order)) {
+        for (var pi = 0; pi < s.order.length; pi++) {
+            var pu = s.order[pi];
+            if (!pu || !pu.alive || pu.isDead || (pu.hp | 0) <= 0) continue;
+            var sameTeam = (defender.t === 'e') ? (pu.t === 'e') : (pu.t === 'p' || pu.t === 'a');
+            if (!sameTeam) continue;
+            if (String(pu.cls || '').toLowerCase() === 'paladino' && (pu.lvl | 0) >= 6) {
+                var auraRad = (pu.lvl | 0) >= 18 ? 6 : 2;
+                var inAura = (pu === defender) || (pu.pos && defender.pos && typeof hexDistance === 'function' && hexDistance(pu.pos.col, pu.pos.row, defender.pos.col, defender.pos.row) <= auraRad);
+                if (inAura) {
+                    var pCha = (pu.cha != null) ? (pu.cha | 0) : 14;
+                    var pBonus = Math.max(1, Math.floor((pCha - 10) / 2));
+                    if (pBonus > paladinAuraBonus) paladinAuraBonus = pBonus;
+                }
+            }
+        }
+    }
+
+    var totalSaveMod = svInfo.mod + coverBonus + paladinAuraBonus;
+
+    /* PHB App. A: Paralisado / Atordoado / Inconsciente / Petrificado auto-falham TR FOR/DES */
+    var autoFail = false;
+    if ((saveAb === 'str' || saveAb === 'dex') && Array.isArray(defender.se)) {
+        autoFail = defender.se.some(function (st) {
+            return st && st.autoFailStrDex && (st.turnsLeft == null || st.turnsLeft > 0);
+        });
+    }
+    if (autoFail) {
+        return {
+            failPct: 100,
+            passPct: 0,
+            minRollToSave: 20,
+            saveAb: saveAb.toUpperCase(),
+            saveDc: saveDc,
+            targetSaveMod: totalSaveMod,
+            isTargetProf: svInfo.isProf,
+            coverBonus: coverBonus,
+            paladinAuraBonus: paladinAuraBonus,
+            saveAdvState: 'auto_fail',
+            breakdown: 'FALHA AUTOMÁTICA em TR ' + saveAb.toUpperCase() + ' (Alvo incapacitado/paralisado — PHB Apêndice A)'
+        };
+    }
+
+    var saveAdvState = (typeof _simSaveAdvState === 'function') ? _simSaveAdvState(defender, saveAb) : 'normal';
+    if (typeof _simRacialSaveAdv === 'function') {
+        var rAdv = _simRacialSaveAdv(defender, saveAb, (skill.n || '') + ' ' + (skill.dmgType || ''));
+        if (rAdv && rAdv.adv) {
+            saveAdvState = (saveAdvState === 'disadvantage') ? 'normal' : 'advantage';
+        }
+    }
 
     /* Alvo passa se d20 + totalSaveMod >= saveDc => d20 >= saveDc - totalSaveMod */
     var minPassD20 = Math.max(1, Math.min(21, saveDc - totalSaveMod));
     var passSides = Math.max(0, Math.min(20, 21 - minPassD20));
-    var failProb = 1 - (passSides / 20);
+    var pPassSingle = passSides / 20;
+    var pPass = pPassSingle;
+    if (saveAdvState === 'advantage') {
+        pPass = 1 - Math.pow(1 - pPassSingle, 2);
+    } else if (saveAdvState === 'disadvantage') {
+        pPass = Math.pow(pPassSingle, 2);
+    }
+    var failProb = 1 - pPass;
     var failPct = Math.round(Math.max(5, Math.min(95, failProb * 100)));
+    var advNote = saveAdvState === 'advantage' ? ' [Vantagem no TR]' : (saveAdvState === 'disadvantage' ? ' [Desvantagem no TR]' : '');
+    var auraNote = paladinAuraBonus > 0 ? (' (+' + paladinAuraBonus + ' Aura)') : '';
 
     return {
         failPct: failPct,
@@ -20700,7 +20881,9 @@ function simCalcSaveFailChanceDnd5e(s, caster, defender, skill) {
         targetSaveMod: totalSaveMod,
         isTargetProf: svInfo.isProf,
         coverBonus: coverBonus,
-        breakdown: 'Alvo rola 1d20 ' + (totalSaveMod >= 0 ? '+ ' + totalSaveMod : '- ' + Math.abs(totalSaveMod)) + (svInfo.isProf ? ' (Proficiente)' : '') + (coverBonus > 0 ? ' (+' + coverBonus + ' Cob.)' : '') + ' vs CD ' + saveDc
+        paladinAuraBonus: paladinAuraBonus,
+        saveAdvState: saveAdvState,
+        breakdown: 'Alvo rola 1d20 ' + (totalSaveMod >= 0 ? '+ ' + totalSaveMod : '- ' + Math.abs(totalSaveMod)) + (svInfo.isProf ? ' (Prof.)' : '') + (coverBonus > 0 ? ' (+' + coverBonus + ' Cob.)' : '') + auraNote + advNote + ' vs CD ' + saveDc
     };
 }
 
@@ -21398,13 +21581,20 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             summonCasterCls: dmgMeta.summonCasterCls || null
         });
     }
-    // Consumo de PV temporários (Grito de Guerra) antes do PV real
+    // Consumo de PV temporários (Grito de Guerra / Armadura de Agathys / Vitalidade Falsa) antes do PV real (PHB p. 198)
     if (damageApplied > 0 && target.tempHp > 0) {
         var absorbed = Math.min(target.tempHp, damageApplied);
         target.tempHp -= absorbed;
         damageApplied -= absorbed;
         newHp = oldHp - damageApplied;
         if (s && s.log) s.log.push(target.n + ' absorve ' + absorbed + ' via PV temporários (restam ' + target.tempHp + ').');
+        try {
+            var _thpUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
+            var _thpEl = _thpUid ? document.querySelector('[data-unit-id="' + _thpUid + '"]') : null;
+            if (_thpEl && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(_thpEl, '🛡 -' + absorbed + ' PV TEMP', 'buff');
+            }
+        } catch (_eThp) {}
     }
     /* FASE 8 / Forma Selvagem: se a forma bestial cairia a 0, o Druida
        REVERTE e o EXCESSO de dano carrega pro PV normal ("excess damage carries over").
@@ -21424,11 +21614,42 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             if (window._combatVfx && _wsRvEl && typeof window._combatVfx.wildShapeRevert === 'function') {
                 window._combatVfx.wildShapeRevert(_wsRvEl);
             }
+            if (_wsRvEl && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(_wsRvEl, '🐾 FORMA REVERTIDA!', 'save-fail');
+            }
         } catch (_eWsRv) {}
         if (s && s.log) s.log.push(_wsIco + ' A forma de ' + _wsName + ' se desfez!'
             + (_wsExc > 0 ? ' (' + _wsExc + ' dano excedente)' : ''));
         if ((target.hp | 0) > 0) { target.alive = true; clearDownedMeta(target); return; }
         newHp = 0;  // reverteu mas o excesso derrubou o PV normal a 0 → segue p/ queda
+    }
+    /* D&D 5e MM p. 316: Vigor Zumbi (Undead Fortitude) — se dano reduzir o zumbi a 0 PV,
+       faz TR CON CD (5 + dano sofrido), a menos que o dano seja radiante ou de um acerto crítico.
+       Em sucesso, cai para 1 PV em vez disso. */
+    if (newHp <= 0 && target && target.undeadFortitude && oldHp > 0
+            && !dmgMeta.deathFailCrit && String(dmgMeta.dmgType || '').toLowerCase() !== 'radiant') {
+        var _ufDc = 5 + Math.max(1, damageApplied);
+        var _ufMod = (typeof simAbilityModFromUnit === 'function') ? simAbilityModFromUnit(target, 'CON') : 3;
+        var _ufRoll = (typeof rD === 'function') ? rD(20) : (Math.floor(Math.random() * 20) + 1);
+        var _ufTotal = _ufRoll + _ufMod;
+        if (_ufTotal >= _ufDc) {
+            target.hp = 1;
+            target.alive = true;
+            if (typeof clearDownedMeta === 'function') clearDownedMeta(target);
+            if (s && s.log) {
+                s.log.push('🧟 ' + target.n + ' resiste com Vigor Zumbi (TR CON ' + _ufTotal + ' vs CD ' + _ufDc + ') — mantém 1 PV!');
+            }
+            try {
+                var _ufUid = target.id || (target.t === 'e' && s && s.order ? 'enemy_' + s.order.indexOf(target) : '');
+                var _ufEl = _ufUid ? document.querySelector('[data-unit-id="' + _ufUid + '"]') : null;
+                if (_ufEl && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(_ufEl, '🧟 VIGOR ZUMBI (1 PV)!', 'boss');
+                }
+            } catch (_eUf) {}
+            return;
+        } else if (s && s.log) {
+            s.log.push('🧟 ' + target.n + ' falha no Vigor Zumbi (TR CON ' + _ufTotal + ' vs CD ' + _ufDc + ').');
+        }
     }
     /* C1.2 #90: Resistência Implacável (Meio-Orc) — ao cair a 0 PV (não
        por dano massivo), fica com 1 PV. 1×/combate (unit recriado a cada combate,
@@ -25601,34 +25822,70 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                     inTargetReach = true;
                     classes += ' token--in-range';
                     var tgtCover = (typeof simComputeCover === 'function') ? simComputeCover(s, pUnit, u) : { cover: 'none', bonus: 0 };
-                    var tgtAdv = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(pUnit, u, _pendingSkill) : 'normal';
-                    var isFlanked = false;
-                    var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(pUnit, _pendingSkill) : { reach: 1, isRanged: false };
-                    if (!reachInfo.isRanged && typeof simCheckFlanking === 'function' && s && s.order) {
-                        isFlanked = !!simCheckFlanking(pUnit, u, s.order);
-                    }
-                    var elevMod = (typeof simCheckElevationTacticalModifier === 'function')
-                        ? simCheckElevationTacticalModifier(s, pUnit, u, !!reachInfo.isRanged)
-                        : { bonus: 0, state: 'flat' };
+                    var isSaveOnlySkill = !!(_pendingSkill && _pendingSkill.save && !_pendingSkill.attackRoll && _pendingSkill.kind !== 'attack');
+                    var isAutoHitSkill = !!(_pendingSkill && (_pendingSkill.autoHit || _pendingSkill.magicMissiles || _pendingSkill.powerWordKill || _pendingSkill.hpThreshold || _pendingSkill.sleepHpPool));
                     var metaChips = '';
-                    if (tgtCover.cover === 'total') {
-                        metaChips += ' · ✕ Bloqueado';
-                    } else if (tgtCover.cover === 'half') {
-                        metaChips += ' · ⛨ ½ Cob';
-                    } else if (tgtCover.cover === 'three_quarters') {
-                        metaChips += ' · ⛨ ¾ Cob';
-                    }
-                    if (elevMod.state === 'high_ground') {
-                        metaChips += ' · ⛰️ +2 Alt';
-                    } else if (elevMod.state === 'low_ground') {
-                        metaChips += ' · ▼ -2 Alt';
-                    }
-                    if (isFlanked) {
-                        metaChips += ' · ▲ Flanqueado';
-                    } else if (tgtAdv === 'advantage') {
-                        metaChips += ' · ▲ Vant';
-                    } else if (tgtAdv === 'disadvantage') {
-                        metaChips += ' · ▼ Desv';
+                    if (isEnemy) {
+                        if (_pendingSkill && (_pendingSkill.autoHit || _pendingSkill.magicMissiles)) {
+                            metaChips += ' · ✦ 100% Auto';
+                        } else if (_pendingSkill && _pendingSkill.powerWordKill) {
+                            metaChips += (u.hp <= 100) ? ' · ☠️ ≤100 PV' : ' · 🛡️ >100 PV';
+                        } else if (_pendingSkill && _pendingSkill.hpThreshold) {
+                            metaChips += (u.hp <= _pendingSkill.hpThreshold)
+                                ? (' · ⚡ ≤' + _pendingSkill.hpThreshold + ' PV')
+                                : (' · 🛡️ >' + _pendingSkill.hpThreshold + ' PV');
+                        } else if (_pendingSkill && _pendingSkill.sleepHpPool) {
+                            metaChips += ' · 💤 vs ' + u.hp + ' PV';
+                        } else if (isSaveOnlySkill && typeof simCalcSaveFailChanceDnd5e === 'function') {
+                            var _svChip = simCalcSaveFailChanceDnd5e(s, pUnit, u, _pendingSkill);
+                            if (_svChip) {
+                                metaChips += ' · TR ' + _svChip.saveAb + ' ' + _svChip.failPct + '%';
+                                if (_svChip.saveAdvState === 'auto_fail') metaChips += ' (Auto)';
+                                if (_svChip.saveAb === 'DEX' && (tgtCover.cover === 'half' || tgtCover.cover === 'three_quarters')) {
+                                    metaChips += (tgtCover.cover === 'half' ? ' · ⛨ ½ Cob' : ' · ⛨ ¾ Cob');
+                                }
+                            }
+                        } else if (!isAutoHitSkill) {
+                            var tgtAdv = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(pUnit, u, _pendingSkill) : 'normal';
+                            var isFlanked = false;
+                            var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(pUnit, _pendingSkill) : { reach: 1, isRanged: false };
+                            if (!reachInfo.isRanged && typeof simCheckFlanking === 'function' && s && s.order) {
+                                isFlanked = !!simCheckFlanking(pUnit, u, s.order);
+                            }
+                            var elevMod = (typeof simCheckElevationTacticalModifier === 'function')
+                                ? simCheckElevationTacticalModifier(s, pUnit, u, !!reachInfo.isRanged)
+                                : { bonus: 0, state: 'flat' };
+                            if (tgtCover.cover === 'total') {
+                                metaChips += ' · ✕ Bloqueado';
+                            } else if (tgtCover.cover === 'half') {
+                                metaChips += ' · ⛨ ½ Cob';
+                            } else if (tgtCover.cover === 'three_quarters') {
+                                metaChips += ' · ⛨ ¾ Cob';
+                            }
+                            if (elevMod.state === 'high_ground') {
+                                metaChips += ' · ⛰️ +2 Alt';
+                            } else if (elevMod.state === 'low_ground') {
+                                metaChips += ' · ▼ -2 Alt';
+                            }
+                            if (isFlanked) {
+                                metaChips += ' · ▲ Flanqueado';
+                            } else if (tgtAdv === 'advantage') {
+                                metaChips += ' · ▲ Vant';
+                            } else if (tgtAdv === 'disadvantage') {
+                                metaChips += ' · ▼ Desv';
+                            }
+                        }
+                        if (_pendingSkill && _pendingSkill.dmgType) {
+                            var _chipDt = String(_pendingSkill.dmgType).toLowerCase().trim();
+                            if (u.immunities && u.immunities.some(function (im) { return String(im).toLowerCase().trim() === _chipDt; })) {
+                                metaChips += ' · 🚫 IMUNE';
+                            } else if (u.vulnerabilities && u.vulnerabilities.some(function (vl) { return String(vl).toLowerCase().trim() === _chipDt; })) {
+                                metaChips += ' · ×2 VULN';
+                            } else if ((u.resistances && u.resistances.some(function (rs) { return String(rs).toLowerCase().trim() === _chipDt; })) ||
+                                       (typeof _simRacialResists === 'function' && _simRacialResists(u, _chipDt))) {
+                                metaChips += ' · ½ RES';
+                            }
+                        }
                     }
                     distBadge = '<span class="token-dist-chip token-dist-chip--in" title="No Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')' + metaChips + '">' + _combatTargetIconSVG(10) + ' ' + distM + metaChips + '</span>';
                 } else {
@@ -25687,10 +25944,21 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     }
 
     // Concentração D&D 5e (PHB p. 203)
-    var isConcentrating = !!(u.concentrationSpell || u.concentrating || (u.se || []).some(function (st) {
-        return st && (st.concentration || st.isConcentration);
-    }));
-    var concSpellName = u.concentrationSpell || 'Concentrando';
+    var concStEntry = null;
+    if (u.se && u.se.length) {
+        for (var _csi = 0; _csi < u.se.length; _csi++) {
+            var _cst = u.se[_csi];
+            if (_cst && (_cst.concentration || _cst.isConcentration) && (_cst.turnsLeft == null || _cst.turnsLeft > 0)) {
+                concStEntry = _cst;
+                break;
+            }
+        }
+    }
+    var isConcentrating = !!(u.concentrationSpell || u.concentrating || concStEntry);
+    var concSpellName = u.concentrationSpell
+        || (u.concentrating && (u.concentrating.spellName || u.concentrating.n))
+        || (concStEntry && (concStEntry.spellName || concStEntry.n))
+        || 'Concentrando';
     var concBadge = '';
     if (fogState !== 'shrouded' && u.alive && !u.isDead && isConcentrating) {
         classes += ' token--concentrating';
@@ -25707,8 +25975,33 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
         proneBadge = '<div class="token-prone-chip" title="D&D 5e (PHB p. 190 / p. 292): Caído no chão! Ataques corpo a corpo a 1,5m têm Vantagem; ataques à distância têm Desvantagem.">▾ Caído</div>';
     }
 
-    // Condições Ativas Adicionais D&D 5e (PHB p. 290-292)
+    // Condições Ativas Adicionais D&D 5e (PHB p. 290-292) + Forma Selvagem + Aura de Proteção
     var condBadges = '';
+    if (fogState !== 'shrouded' && u.alive && !u.isDead && typeof _wsIsTransformed === 'function' && _wsIsTransformed(u)) {
+        var _wsFormLbl = (u.wildShape && u.wildShape.form_name) || 'Forma Bestial';
+        condBadges += '<div class="token-cond-chip token-cond-chip--wildshape" title="D&D 5e (PHB p. 66): Forma Selvagem Ativa (' + escHtml(_wsFormLbl) + ')">🐾 ' + escHtml(_wsFormLbl) + '</div>';
+    }
+    if (fogState !== 'shrouded' && u.alive && !u.isDead && (isPlayer || isAlly) && s && s.order) {
+        var _palAuraBonus = 0;
+        for (var _pai = 0; _pai < s.order.length; _pai++) {
+            var _pau = s.order[_pai];
+            if (!_pau || !_pau.alive || _pau.hp <= 0 || (_pau.t !== 'p' && _pau.t !== 'a')) continue;
+            var _paCls = String(_pau.cls || _pau.classId || '').toLowerCase();
+            var _paLvl = _pau.level || _pau.lvl || 1;
+            if ((_paCls.indexOf('paladin') >= 0 || _paCls === 'paladino') && _paLvl >= 6) {
+                if (typeof simHasCondition === 'function' && (simHasCondition(_pau, 'incapacitated') || simHasCondition(_pau, 'stunned') || simHasCondition(_pau, 'paralyzed') || simHasCondition(_pau, 'unconscious'))) continue;
+                var _paRange = (_paLvl >= 18) ? 6 : 2;
+                var _paDist = (_pau === u) ? 0 : ((_pau.pos && u.pos && typeof hexDistance === 'function') ? hexDistance(_pau.pos.col, _pau.pos.row, u.pos.col, u.pos.row) : 99);
+                if (_paDist <= _paRange) {
+                    var _paCha = (typeof simAbilityModFromUnit === 'function') ? Math.max(1, simAbilityModFromUnit(_pau, 'CHA')) : 2;
+                    if (_paCha > _palAuraBonus) _palAuraBonus = _paCha;
+                }
+            }
+        }
+        if (_palAuraBonus > 0) {
+            condBadges += '<div class="token-cond-chip token-cond-chip--paladin-aura" title="D&D 5e (PHB p. 85): Aura de Proteção (+' + _palAuraBonus + ' em todos os Testes de Resistência)">⛨ Aura +' + _palAuraBonus + '</div>';
+        }
+    }
     if (fogState !== 'shrouded' && u.alive && !u.isDead && isEnemy && s && s.order) {
         var markLabel = null;
         for (var mi = 0; mi < s.order.length; mi++) {
@@ -25736,6 +26029,9 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
             var stName = String(stObj.n || '').toLowerCase();
             if (stId === 'help_distracted' || stObj.targetedAdvantageByAlly) continue;
             if (stObj.prone || stId === 'prone') continue;
+            if (stObj.regenPerTurn && stObj.regenPerTurn > 0) {
+                condBadges += '<div class="token-cond-chip token-cond-chip--regen" title="D&D 5e: Regeneração Ativa (+' + stObj.regenPerTurn + ' PV/turno)">🌿 +' + stObj.regenPerTurn + ' PV</div>';
+            }
             if (stId === 'bless' || stName.indexOf('bênção') >= 0 || stName.indexOf('bencao') >= 0) {
                 condBadges += '<div class="token-cond-chip token-cond-chip--bless" title="D&D 5e: Bênção (+1d4 em ataques e salvaguardas)">✦ Bênção</div>';
             } else if (stId === 'blindness' || stObj.blind || stName.indexOf('cego') >= 0) {
@@ -25846,10 +26142,14 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     }
     html += '</div>';
 
-    // HP Bar
-    html += '<div class="token-hp-badge">';
+    // HP Bar + Temporary HP Shield Pill (PHB p. 198)
+    var tempHpVal = (fogState !== 'shrouded' && u.tempHp && u.tempHp > 0) ? (u.tempHp | 0) : 0;
+    html += '<div class="token-hp-badge' + (tempHpVal > 0 ? ' token-hp-badge--temphp' : '') + '">';
     html += '<div class="token-hp-track"><div class="token-hp-fill ' + fillCls + '" style="width:' + hpPct + '%;"></div></div>';
     html += '<span class="token-hp-text ' + hpCls + '">' + hpVal + '/' + u.mhp + '</span>';
+    if (tempHpVal > 0) {
+        html += '<span class="token-temphp-pill" title="D&D 5e (PHB p. 198): +' + tempHpVal + ' PV Temporários (absorvem dano antes dos PV reais)">+' + tempHpVal + '🛡</span>';
+    }
     html += '</div>';
 
     // Badges: AC, Init, Elevation, Distance, Vantagem / Desvantagem, Concentração, Caído, Status e Death Saves D&D 5e
@@ -26534,8 +26834,8 @@ function buildConcentrationTethersSvg(s, partyVisionMap) {
         if (!caster || !caster.pos || (caster.alive === false) || caster.isDead) continue;
         if (typeof caster.hp === 'number' && caster.hp <= 0) continue;
 
-        var isConc = !!(caster.isConcentrating || caster.concentrating || (caster.se && caster.se.some(function (st) {
-            return st && (st.concentration || st.concentrating || st.isConcentrating);
+        var isConc = !!(caster.concentrationSpell || caster.isConcentrating || caster.concentrating || (caster.se && caster.se.some(function (st) {
+            return st && (st.concentration || st.concentrating || st.isConcentrating || st.isConcentration) && (st.turnsLeft == null || st.turnsLeft > 0);
         })));
         if (!isConc) continue;
 
@@ -26547,19 +26847,39 @@ function buildConcentrationTethersSvg(s, partyVisionMap) {
             if (target === caster) continue;
 
             var isTargetLinked = false;
-            var spellLabel = 'Concentração';
+            var spellLabel = caster.concentrationSpell || (caster.concentrating && (caster.concentrating.spellName || caster.concentrating.n)) || 'Concentração';
 
-            if (target.se && Array.isArray(target.se)) {
+            // 1. Verifica na própria lista de efeitos do conjurador (linkedTargetIdx / markedTargetName)
+            if (caster.se && Array.isArray(caster.se)) {
+                for (var csi = 0; csi < caster.se.length; csi++) {
+                    var cst = caster.se[csi];
+                    if (!cst || (cst.turnsLeft != null && cst.turnsLeft <= 0)) continue;
+                    if (cst.linkedTargetIdx === tIdx || (cst.markedTargetName && cst.markedTargetName === target.n)) {
+                        isTargetLinked = true;
+                        spellLabel = cst.spellName || cst.n || spellLabel;
+                        break;
+                    }
+                }
+            }
+
+            // 2. Verifica se o alvo é uma invocação sustentada por concentração deste conjurador
+            if (!isTargetLinked && (target.summonedBy === cIdx || target.conjurerIdx === cIdx) && (target.concentrationSummon || target.conjureSpellId)) {
+                isTargetLinked = true;
+                spellLabel = caster.concentrationSpell || target.conjureSpellName || 'Invocação';
+            }
+
+            // 3. Verifica efeitos ativos no próprio alvo originados pelo conjurador
+            if (!isTargetLinked && target.se && Array.isArray(target.se)) {
                 for (var si = 0; si < target.se.length; si++) {
                     var st = target.se[si];
-                    if (!st) continue;
+                    if (!st || (st.turnsLeft != null && st.turnsLeft <= 0)) continue;
                     var sid = String(st.id || '').toLowerCase();
                     var sName = String(st.n || st.condName || '').toLowerCase();
                     if (st.sourceIdx === cIdx || st.casterIdx === cIdx ||
                         (caster.concentratingOn && (sid.indexOf(caster.concentratingOn) >= 0 || sName.indexOf(caster.concentratingOn) >= 0)) ||
                         (isConc && (sid === 'bless' || sid === 'shield_of_faith' || sid === 'heroism' || sid === 'hunters_mark' || sid === 'bane' || sid === 'bencao' || sid === 'escudo_fe' || sid === 'marca_cacador'))) {
                         isTargetLinked = true;
-                        spellLabel = st.n || st.condName || 'Concentração';
+                        spellLabel = st.n || st.condName || spellLabel;
                         break;
                     }
                 }
@@ -26601,6 +26921,61 @@ function buildConcentrationTethersSvg(s, partyVisionMap) {
 
     svg += '</g>';
     return hasAnyTether ? svg : '';
+}
+window.buildHexConcentrationTethersSvg = buildConcentrationTethersSvg;
+
+/**
+ * Renderiza Anéis de Perímetro para Auras Persistentes Conjuradas (D&D 5e PHB p. 278 Espíritos Guardiões,
+ * Halo Sagrado, Campeão Ancião, Anjo Vingador) diretamente no piso tático ao redor do conjurador.
+ */
+function buildHexActiveAurasSvg(s, partyVisionMap) {
+    if (!s || !Array.isArray(s.order) || s.ph === 'intro' || s.ph === 'victory' || s.ph === 'defeat') return '';
+
+    var svg = '<g id="hexActiveAurasLayer" class="hex-active-auras-layer" pointer-events="none">';
+    var hasAura = false;
+
+    for (var i = 0; i < s.order.length; i++) {
+        var u = s.order[i];
+        if (!u || !u.pos || u.alive === false || u.isDead || (typeof u.hp === 'number' && u.hp <= 0)) continue;
+        if (!u.se || !u.se.length) continue;
+
+        for (var si = 0; si < u.se.length; si++) {
+            var st = u.se[si];
+            if (!st || (st.turnsLeft != null && st.turnsLeft <= 0)) continue;
+            var stId = String(st.id || '').toLowerCase();
+            var stName = String(st.n || '').toLowerCase();
+            var radiusHex = 0;
+            var auraStyleCls = '';
+            var auraTitle = '';
+
+            if (stId === 'espiritos_guardioes' || stId === 'spirit_guardians' || stName.indexOf('espíritos guardiões') >= 0 || stName.indexOf('espiritos guardioes') >= 0) {
+                radiusHex = 3; // 4,5m (15 ft)
+                auraStyleCls = (u.t === 'e') ? ' hex-active-aura-ring--necrotic' : '';
+                auraTitle = '✦ Espíritos Guardiões (4,5m)';
+            } else if (stId === 'halo_sagrado' || stId === 'holy_nimbus' || stName.indexOf('halo sagrado') >= 0) {
+                radiusHex = 6; // 9m (30 ft)
+                auraTitle = '☀️ Halo Sagrado (9m)';
+            } else if (stId === 'campeao_anciao' || stName.indexOf('campeão ancião') >= 0 || stName.indexOf('campeao anciao') >= 0) {
+                radiusHex = 2; // 3m (10 ft)
+                auraStyleCls = ' hex-active-aura-ring--nature';
+                auraTitle = '🌿 Campeão Ancião (3m)';
+            } else if (stId === 'anjo_vingador' || stName.indexOf('anjo vingador') >= 0) {
+                radiusHex = 6; // 9m (30 ft)
+                auraTitle = '🪽 Aura de Menace (9m)';
+            }
+
+            if (radiusHex > 0) {
+                var center = hexCenter(u.pos.col, u.pos.row);
+                var radiusPx = Math.round(radiusHex * HEX_COL_STEP);
+                svg += '<circle cx="' + center.cx + '" cy="' + center.cy + '" r="' + radiusPx + '" class="hex-active-aura-ring' + auraStyleCls + '" />';
+                svg += '<text x="' + center.cx + '" y="' + Math.max(12, center.cy - radiusPx + 11) + '" text-anchor="middle" class="hex-active-aura-label">' + escHtml(auraTitle) + '</text>';
+                hasAura = true;
+            }
+        }
+    }
+
+    svg += '</g>';
+    return hasAura ? svg : '';
 }
 
 /**
@@ -27534,6 +27909,9 @@ function buildBattlefield(s) {
 
     // Camada de Superfícies Elementais Hexagonais (BG3 / Divinity: Original Sin 2 / D&D 5e)
     html += buildHexSurfacesLayerSvg(s, partyVisionMap);
+
+    // Camada de Anéis de Perímetro de Auras Persistentes Conjuradas (Espíritos Guardiões / Halo Sagrado / Campeão Ancião)
+    html += buildHexActiveAurasSvg(s, partyVisionMap);
 
     // Camada de Projeções de Intenções Compartilhadas / Intent Ghosts (Multiplayer D&D 5e / BG3 / Solasta)
     html += buildSharedIntentsLayerSvg(s, bCols, bRows);
@@ -37978,8 +38356,30 @@ function showTargetConfirm(tgtIdx) {
     var isSaveSpell = !!(skill && skill.save);
     var isAutoHitSpell = !!(skill && (skill.autoHit || skill.magicMissiles));
 
-    /* Medidor Visual de Probabilidade D&D 5e (Padrão Baldur's Gate 3 / Solasta) */
-    if (isAutoHitSpell) {
+    /* Medidor Visual de Probabilidade & Limiares D&D 5e (Padrão Baldur's Gate 3 / Solasta) */
+    if (skill && skill.powerWordKill) {
+        var _pwkLethal = (u.hp <= 100);
+        html += '<div style="background:linear-gradient(90deg, rgba(' + (_pwkLethal ? '46,204,113,0.22' : '231,76,60,0.22') + '), rgba(20,16,12,0.75));border:1px solid ' + (_pwkLethal ? '#2ecc71' : '#e74c3c') + ';border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
+            + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + (_pwkLethal ? '#7cdb7c' : '#ff8585') + ';">'
+            + (_pwkLethal ? '☠️ MORTE INSTANTÂNEA (≤ 100 PV)' : '🛡️ ACIMA DO LIMIAR (> 100 PV)') + '</div>'
+            + '<div style="font-size:9.5px;color:#c9b896;">'
+            + (_pwkLethal ? 'Alvo com ' + u.hp + ' PV morre imediatamente sem Teste de Resistência (PHB p. 266).' : 'Alvo tem ' + u.hp + ' PV — a magia não surte efeito acima de 100 PV (PHB p. 266).')
+            + '</div></div>';
+    } else if (skill && skill.hpThreshold) {
+        var _thrOk = (u.hp <= skill.hpThreshold);
+        html += '<div style="background:linear-gradient(90deg, rgba(' + (_thrOk ? '46,204,113,0.22' : '231,76,60,0.22') + '), rgba(20,16,12,0.75));border:1px solid ' + (_thrOk ? '#2ecc71' : '#e74c3c') + ';border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
+            + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + (_thrOk ? '#7cdb7c' : '#ff8585') + ';">'
+            + (_thrOk ? '⚡ LIMIAR ATINGIDO (≤ ' + skill.hpThreshold + ' PV)' : '🛡️ ACIMA DO LIMIAR (> ' + skill.hpThreshold + ' PV)') + '</div>'
+            + '<div style="font-size:9.5px;color:#c9b896;">Alvo está com ' + u.hp + ' PV (limiar da magia: ' + skill.hpThreshold + ' PV).</div></div>';
+    } else if (skill && skill.sleepHpPool) {
+        html += '<div style="background:linear-gradient(90deg, rgba(129,140,248,0.22), rgba(20,16,12,0.75));border:1px solid rgba(129,140,248,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
+            + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#c7d2fe;">💤 PISCINA DE PV (' + skill.sleepHpPool.n + 'd' + skill.sleepHpPool.d + ' vs ' + u.hp + ' PV)</div>'
+            + '<div style="font-size:9.5px;color:#b8a9c9;">Sem Salvaguarda: adormece se o total rolado igualar ou superar os PV atuais (PHB p. 276).</div></div>';
+    } else if (skill && skill.mazeBanish) {
+        html += '<div style="background:linear-gradient(90deg, rgba(162,155,254,0.22), rgba(20,16,12,0.75));border:1px solid rgba(162,155,254,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
+            + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#d6bcfa;">🌀 BANIMENTO AUTOMÁTICO (SEM TR)</div>'
+            + '<div style="font-size:9.5px;color:#b8a9c9;">Alvo banido para semiplano labiríntico; exige teste de INT CD 20 para escapar (PHB p. 254).</div></div>';
+    } else if (isAutoHitSpell) {
         html += '<div style="background:linear-gradient(90deg, rgba(162,155,254,0.22), rgba(20,16,12,0.75));border:1px solid rgba(162,155,254,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">'
             + '<div><div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#d6bcfa;">✦ 100% ACERTO AUTOMÁTICO</div>'
             + '<div style="font-size:9.5px;color:#b8a9c9;">Infalível (PHB p. 257 — Mísseis Mágicos atingem automaticamente)</div></div>'
@@ -38015,6 +38415,35 @@ function showTargetConfirm(tgtIdx) {
             + '</div>';
     }
 
+    /* Alertas Contextuais Inteligentes D&D 5e (Exibidos imediatamente quando relevantes para a ação atual) */
+    var _canonRawDt = String(rawDmgType || '').toLowerCase().trim();
+    var _hasDirectDmg = (!isSaveSpell || minDmg > 0 || maxDmg > 0 || (skill && skill.damageSpec));
+    if (_canonRawDt && _hasDirectDmg) {
+        if (immunities.some(function (im) { return String(im).toLowerCase().trim() === _canonRawDt; })) {
+            html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 ALVO IMUNE A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará 0 de dano (PHB p. 197)</div>';
+        } else if (vulnerabilities.some(function (vl) { return String(vl).toLowerCase().trim() === _canonRawDt; })) {
+            html += '<div style="background:rgba(30,130,60,0.26);border:1px solid #4ade80;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#bbf7d0;font-weight:700;text-align:center;">🔥 ALVO VULNERÁVEL A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará 2× dano (PHB p. 197)</div>';
+        } else if (reductions.some(function (rs) { return String(rs).toLowerCase().trim() === _canonRawDt; }) || (typeof _simRacialResists === 'function' && _simRacialResists(u, _canonRawDt))) {
+            html += '<div style="background:rgba(180,120,20,0.22);border:1px solid #fbbf24;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#fde68a;font-weight:700;text-align:center;">🛡️ ALVO RESISTENTE A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará ½ dano (PHB p. 197)</div>';
+        }
+    }
+    var _condCheckObj = (skill && skill.save && skill.save.onFailApply) || (skill && skill.afterAttackEnemyDebuff) || null;
+    if (_condCheckObj && typeof simIsImmuneToCondition === 'function' && simIsImmuneToCondition(u, _condCheckObj)) {
+        html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 IMUNE À CONDIÇÃO (' + escHtml((_condCheckObj.n || 'Controle').toUpperCase()) + ') — Criatura imune ao efeito</div>';
+    }
+    if (skill && skill.requiresTargetTag) {
+        var _reqTag = String(skill.requiresTargetTag).toLowerCase();
+        var _uTags = [].concat(u.tags || [], u.creatureType ? [u.creatureType] : [], u.type ? [u.type] : []).map(function (t) { return String(t).toLowerCase(); });
+        if (_uTags.length > 0 && _uTags.indexOf(_reqTag) === -1) {
+            html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 TIPO DE CRIATURA INVÁLIDO: Exige alvo ' + escHtml(_reqTag.toUpperCase()) + ' (PHB)</div>';
+        }
+    }
+    if (skill && skill.concentration && (p.concentrationSpell || p.concentrating)) {
+        var _prevConc = p.concentrationSpell || (p.concentrating && (p.concentrating.spellName || p.concentrating.n)) || 'magia ativa';
+        html += '<div style="background:rgba(30,90,140,0.24);border:1px solid #38bdf8;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10px;color:#bae6fd;text-align:center;">◈ <strong>Concentração D&D 5e:</strong> Conjurar encerrará <em>' + escHtml(_prevConc) + '</em> (PHB p. 203).</div>';
+    }
+
+    /* Linhas Essenciais Compactas (Sempre Visíveis) */
     if (distStr) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância</span><span class="tcc-dmg-val">' + distStr + reachStatusBadge + '</span></div>';
     }
@@ -38025,9 +38454,10 @@ function showTargetConfirm(tgtIdx) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Salvaguarda</span><span class="tcc-dmg-val"><span class="tcc-n-key">TR ' + saveAb + dexCoverNote + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CD ' + saveDc + '</span></span></div>';
         if (minDmg > 0 || maxDmg > 0) {
             html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:10px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
-        } else if (skill.afterAttackEnemyDebuff) {
-            var debuffN = skill.afterAttackEnemyDebuff.n || 'Condição';
-            var debuffTurns = skill.afterAttackEnemyDebuff.turns || 3;
+        } else if (skill.afterAttackEnemyDebuff || (skill.save && skill.save.onFailApply)) {
+            var _effObj = skill.afterAttackEnemyDebuff || skill.save.onFailApply;
+            var debuffN = _effObj.n || 'Condição';
+            var debuffTurns = _effObj.turns || _effObj.turnsLeft || 3;
             html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Efeito em falha</span><span class="tcc-dmg-val" style="color:#ffb74d;font-weight:600;">◈ ' + escHtml(debuffN) + ' (' + debuffTurns + ' rodadas)</span></div>';
         }
     } else {
@@ -38038,11 +38468,16 @@ function showTargetConfirm(tgtIdx) {
         var effAtkVal = (p.atk | 0) + (elevMod.bonus | 0);
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + effAtkVal + '</span> <span class="tcc-vs">vs</span> ' + acDisplay + '</span></div>';
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:10px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
-        html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
+    }
+
+    /* Gaveta Colapsável de Divulgação Progressiva (Detalhes & Matemática D&D 5e sob demanda) */
+    var drawerHtml = '';
+    if (!isSaveSpell) {
+        drawerHtml += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
         if (!skill && typeof simClassExtraAttacks === 'function') {
             var _xAtks = simClassExtraAttacks(p.cls, p.lvl);
             if (_xAtks >= 1) {
-                html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque Extra</span><span class="tcc-dmg-val" style="color:#7cdb7c;font-weight:700;">⚔ ' + (1 + _xAtks) + '× golpes nesta Ação de Ataque (PHB)</span></div>';
+                drawerHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque Extra</span><span class="tcc-dmg-val" style="color:#7cdb7c;font-weight:700;">⚔ ' + (1 + _xAtks) + '× golpes nesta Ação de Ataque (PHB)</span></div>';
             }
         }
     }
@@ -38053,20 +38488,20 @@ function showTargetConfirm(tgtIdx) {
         }).join(', ');
     };
     if (vulnerabilities.length) {
-        html += '<div class="tcc-dmg-row vulnerability" style="color:#ff6b6b;"><span class="tcc-dmg-lbl">▲ Vulnerável</span><span class="tcc-dmg-val">' + escHtml(_fmtDmgListPt(vulnerabilities)) + ' (2× dano)</span></div>';
+        drawerHtml += '<div class="tcc-dmg-row vulnerability" style="color:#ff6b6b;"><span class="tcc-dmg-lbl">▲ Vulnerável</span><span class="tcc-dmg-val">' + escHtml(_fmtDmgListPt(vulnerabilities)) + ' (2× dano)</span></div>';
     }
     if (reductions.length) {
-        html += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">Resistente</span><span class="tcc-dmg-val">' + escHtml(_fmtDmgListPt(reductions)) + ' (½ dano)</span></div>';
+        drawerHtml += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">Resistente</span><span class="tcc-dmg-val">' + escHtml(_fmtDmgListPt(reductions)) + ' (½ dano)</span></div>';
     }
     if (immunities.length) {
-        html += '<div class="tcc-dmg-row immunity"><span class="tcc-dmg-lbl">✦ Imune</span><span class="tcc-dmg-val">' + escHtml(_fmtDmgListPt(immunities)) + ' (0 dano)</span></div>';
+        drawerHtml += '<div class="tcc-dmg-row immunity"><span class="tcc-dmg-lbl">✦ Imune</span><span class="tcc-dmg-val">' + escHtml(_fmtDmgListPt(immunities)) + ' (0 dano)</span></div>';
     }
     if (legRes > 0) {
         var _legLeft = Math.max(0, legRes - legResUsed);
-        html += '<div class="tcc-dmg-row legendary" style="color:#d4af37;"><span class="tcc-dmg-lbl">◈ Res. Lendária</span><span class="tcc-dmg-val">' + _legLeft + '/' + legRes + ' restantes</span></div>';
+        drawerHtml += '<div class="tcc-dmg-row legendary" style="color:#d4af37;"><span class="tcc-dmg-lbl">◈ Res. Lendária</span><span class="tcc-dmg-val">' + _legLeft + '/' + legRes + ' restantes</span></div>';
     }
     if (!reductions.length && !immunities.length && !vulnerabilities.length) {
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Reduções</span><span class="tcc-dmg-val tcc-none">— nenhuma —</span></div>';
+        drawerHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Reduções</span><span class="tcc-dmg-val tcc-none">— nenhuma —</span></div>';
     }
 
     var hasAdjacentSeeingHostile = false;
@@ -38101,7 +38536,7 @@ function showTargetConfirm(tgtIdx) {
         } else {
             var covLbl = coverInfo.cover === 'half' ? 'Meia Cobertura (+2 CA / TR Dex)' : 'Três Quartos de Cobertura (+5 CA / TR Dex)';
             var covDesc = coverInfo.cover === 'half' ? 'Criaturas ou obstáculos intermediários protegem o alvo (PHB p. 196).' : 'Grande barreira física ou fresta protege quase todo o corpo do alvo (PHB p. 196).';
-            html += '<div class="tcc-dmg-row" style="background:rgba(40,65,95,0.25);border:1px solid rgba(90,145,210,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
+            drawerHtml += '<div class="tcc-dmg-row" style="background:rgba(40,65,95,0.25);border:1px solid rgba(90,145,210,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
                 '<span style="color:#a5d8ff;font-size:11px;line-height:1.3;text-align:center;width:100%;">⛨ <strong>' + covLbl + blockerSuffix + ':</strong> ' + covDesc + '</span>' +
                 '</div>';
         }
@@ -38109,11 +38544,11 @@ function showTargetConfirm(tgtIdx) {
 
     if (hasAdjacentSeeingHostile && reachMeta.isRanged && !isSaveSpell) {
         html += '<div class="tcc-dmg-row" style="background:rgba(180,40,40,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">▲ <strong>Desvantagem por Proximidade (PHB p. 195):</strong> Ter um inimigo hostil adjacente e consciente impõe Desvantagem em disparos e ataques à distância.</span>' +
+            '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">▲ <strong>Desvantagem por Proximidade (PHB p. 195):</strong> Hostil adjacente impõe Desvantagem em ataques à distância.</span>' +
             '</div>';
     } else if (hasAdjacentSeeingHostile && reachMeta.isRanged && isSaveSpell) {
-        html += '<div class="tcc-dmg-row" style="background:rgba(210,160,30,0.15);border:1px solid rgba(230,170,40,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-            '<span style="color:#fcd34d;font-size:11px;line-height:1.3;text-align:center;width:100%;">◈ <strong>Mecânica Tática:</strong> Magias de Salvaguarda (TR) não sofrem desvantagem por proximidade, mas recuar provocará Ataque de Oportunidade se não desengajar.</span>' +
+        drawerHtml += '<div class="tcc-dmg-row" style="background:rgba(210,160,30,0.15);border:1px solid rgba(230,170,40,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
+            '<span style="color:#fcd34d;font-size:11px;line-height:1.3;text-align:center;width:100%;">◈ <strong>Mecânica Tática:</strong> Magias de Salvaguarda (TR) não sofrem desvantagem por proximidade.</span>' +
             '</div>';
     }
 
@@ -38121,6 +38556,11 @@ function showTargetConfirm(tgtIdx) {
         html += '<div class="tcc-dmg-row" style="background:rgba(180,40,30,0.18);border:1px solid rgba(255,100,100,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
             '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">▲ Alvo além do alcance máximo de ' + reachMeta.label + '. Aproxime-se no tabuleiro antes de atacar.</span>' +
             '</div>';
+    }
+
+    if (drawerHtml) {
+        html += '<button type="button" class="tcc-details-toggle" data-tcc-toggle="details"><span>▾ Detalhes &amp; Matemática D&amp;D 5e</span><span data-tcc-arrow>▸</span></button>';
+        html += '<div class="tcc-details-drawer" data-tcc-drawer="details">' + drawerHtml + '</div>';
     }
     html += '</div>';
 
@@ -38137,6 +38577,16 @@ function showTargetConfirm(tgtIdx) {
     setHTML(card, html);
     ov.appendChild(card);
     mountInGameFrame(ov);
+    var _toggleBtn = card.querySelector('[data-tcc-toggle="details"]');
+    var _drawerEl = card.querySelector('[data-tcc-drawer="details"]');
+    if (_toggleBtn && _drawerEl) {
+        _toggleBtn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var isOpen = _drawerEl.classList.toggle('is-open');
+            var arrowEl = _toggleBtn.querySelector('[data-tcc-arrow]');
+            if (arrowEl) arrowEl.textContent = isOpen ? '▾' : '▸';
+        });
+    }
     function _cancelTargetConfirm() {
         _pendingSkill = null;
         _pendingHealItem = null;
@@ -42337,7 +42787,12 @@ function openUnitDetail(uid) {
     html += '<div class="udc-stats">';
     var hpPct = Math.round((u.hp / u.mhp) * 100);
     var hpCls = vBarHpClass(hpPct);
-    html += '<div class="udc-stat"><span class="udc-stat-lbl">PV</span><span class="udc-stat-val ' + hpCls + '">' + u.hp + ' / ' + u.mhp + '</span></div>';
+    var tempHpSuffix = (u.tempHp && u.tempHp > 0) ? ' <span style="color:#7dd3fc;font-weight:800;" title="Pontos de Vida Temporários (PHB p. 198)">+' + (u.tempHp | 0) + '🛡</span>' : '';
+    html += '<div class="udc-stat"><span class="udc-stat-lbl">PV</span><span class="udc-stat-val ' + hpCls + '">' + u.hp + ' / ' + u.mhp + tempHpSuffix + '</span></div>';
+    if (typeof _wsIsTransformed === 'function' && _wsIsTransformed(u)) {
+        var _udcWsName = (u.wildShape && u.wildShape.form_name) || 'Besta';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Forma Selvagem</span><span class="udc-stat-val" style="color:#86efac;">🐾 ' + escHtml(_udcWsName) + '</span></div>';
+    }
     if (u.res && u.res.max) {
         html += '<div class="udc-stat"><span class="udc-stat-lbl">' + escHtml(u.res.name) + '</span><span class="udc-stat-val res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + ' / ' + u.res.max + '</span></div>';
     }
@@ -43275,6 +43730,13 @@ async function playTurn(aIdx, tIdx, opts) {
                 s.log.push(actor.n + ' tenta atacar ' + target.n + ' — TR SAB vs Santuário FALHA (' +
                     _sanRoll + '+' + _sanMod + '=' + _sanTotal + ' vs CD ' + _sanDc + ') — ataque ANULADO!');
                 render(s);
+                try {
+                    var _sanTgtUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : (target.id || null);
+                    var _sanTgtEl = _sanTgtUid ? document.querySelector('[data-unit-id="' + _sanTgtUid + '"]') : null;
+                    if (_sanTgtEl && typeof spawnSkillImpactLabel === 'function') {
+                        spawnSkillImpactLabel(_sanTgtEl, '✨ SANTUÁRIO BLOQUEOU!', 'save-pass');
+                    }
+                } catch (_eSanLbl) {}
                 await sleep(800);
                 return;
             } else {
@@ -44363,6 +44825,13 @@ async function playTurn(aIdx, tIdx, opts) {
         target.noDeathSaves = true;
         target.disintegrated = true;
         if (s && s.log) s.log.push('💥 ' + target.n + ' foi totalmente DESINTEGRADO em um monte de cinzas!');
+        try {
+            var _disUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
+            var _disEl = _disUid ? document.querySelector('[data-unit-id="' + _disUid + '"]') : null;
+            if (_disEl && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(_disEl, '💥 DESINTEGRADO EM CINZAS!', 'crit');
+            }
+        } catch (_eDis) {}
     }
 
     /* D&D 5e PHB p. 236: Dedo da Morte — se matar o alvo, ergue-o como Zumbi servo */
@@ -44413,6 +44882,11 @@ async function playTurn(aIdx, tIdx, opts) {
                 s.order.sort(function(a, b) { return (b.init || 0) - (a.init || 0); });
             }
             if (s && s.log) s.log.push('💀 ' + target.n + ' perece sob o Dedo da Morte e ergue-se como ' + zombieUnit.n + ' a serviço de ' + actor.n + '!');
+            var _zmbUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
+            var _zmbEl = _zmbUid ? document.querySelector('[data-unit-id="' + _zmbUid + '"]') : null;
+            if (_zmbEl && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(_zmbEl, '🧟 ERGUIDO COMO ZUMBI!', 'boss');
+            }
         } catch (_eZ) {}
     }
 
@@ -44427,6 +44901,10 @@ async function playTurn(aIdx, tIdx, opts) {
             actor.tempHp = Math.max(actor.tempHp | 0, _dobV);
             if (s && s.log) s.log.push(actor.n + ' — Bênção do Senhor Negro: +' + _dobV + ' PV temporários!');
             try {
+                var _dobEl = document.querySelector('[data-unit-id="player"]');
+                if (_dobEl && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(_dobEl, '🔥 +' + _dobV + ' PV TEMP!', 'buff');
+                }
                 if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell('player', 'rally', { durationMs: 2200 });
             } catch (_eDob) {}
         }
@@ -44439,6 +44917,10 @@ async function playTurn(aIdx, tIdx, opts) {
             actor.hp = Math.min(actor.mhp, actor.hp + _ghV);
             if (s && s.log) s.log.push(actor.n + ' — Colheita Sombria: +' + (actor.hp - _ghOld) + ' PV!');
             try {
+                var _ghEl = document.querySelector('[data-unit-id="player"]');
+                if (_ghEl && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(_ghEl, '💀 +' + (actor.hp - _ghOld) + ' PV COLHEITA!', 'buff');
+                }
                 if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell('player', 'bless', { durationMs: 2200 });
             } catch (_eGh) {}
         }
@@ -44569,6 +45051,13 @@ async function playTurn(aIdx, tIdx, opts) {
         if (atkSkill.hpThreshold && target && (target.hp | 0) > (atkSkill.hpThreshold | 0)) {
             s.log.push(target.n + ' — HP ' + (target.hp | 0) + ' > CD ' + atkSkill.hpThreshold + ': ' +
                 (atkSkill.n || 'magia') + ' SEM EFEITO.');
+            try {
+                var _thrUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
+                var _thrEl = _thrUid ? document.querySelector('[data-unit-id="' + _thrUid + '"]') : null;
+                if (_thrEl && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(_thrEl, '🛡️ ACIMA DO LIMIAR (>' + atkSkill.hpThreshold + ' PV)!', 'save-pass');
+                }
+            } catch (_eThr) {}
             /* Skip afterAttackEnemyDebuff entirely — atkSkill.afterAttackEnemyDebuff
                fica null-equivalent pra este hit. */
             atkSkill = Object.assign({}, atkSkill, { afterAttackEnemyDebuff: null });
@@ -44585,6 +45074,13 @@ async function playTurn(aIdx, tIdx, opts) {
                 s.log.push(target.n + ' — tipo incompatível (requer ' +
                     atkSkill.requiresTargetTag.join('/') + '): ' +
                     (atkSkill.n || 'magia') + ' SEM EFEITO (alvo inválido).');
+                try {
+                    var _tagUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
+                    var _tagEl = _tagUid ? document.querySelector('[data-unit-id="' + _tagUid + '"]') : null;
+                    if (_tagEl && typeof spawnSkillImpactLabel === 'function') {
+                        spawnSkillImpactLabel(_tagEl, '🚫 TIPO INVÁLIDO!', 'save-pass');
+                    }
+                } catch (_eTag) {}
                 atkSkill = Object.assign({}, atkSkill, { afterAttackEnemyDebuff: null });
             }
         }
@@ -45151,14 +45647,22 @@ async function runNpcSegmentUntilPlayerTurn() {
             // Adormecido / Atordoado (Sono arcano etc.) — pula o turno e consome 1
             // contador do status. Mostra float label narrativo sobre o card.
             var skSt = (c.se || []).find(function (st) { return st && st.skipTurn; });
+            var _skipReasonTxt = (skSt && skSt.n) ? skSt.n.toUpperCase() : 'INCAPACITADO';
             if (skSt) {
                 skSt.turnsLeft = (skSt.turnsLeft | 0) - 1;
                 if (skSt.turnsLeft <= 0) {
                     c.se = (c.se || []).filter(function (st) { return st !== skSt; });
                 }
             }
-            s.log.push(c.n + ' está ' + (skSt && skSt.n ? skSt.n.toLowerCase() : 'incapacitado') + ' e perde o turno.');
+            s.log.push(c.n + ' está ' + _skipReasonTxt.toLowerCase() + ' e perde o turno.');
             render(s);
+            try {
+                var _skpUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, s.active_idx) : (c.id || ('enemy_' + s.active_idx));
+                var _skpEl = _skpUid ? document.querySelector('[data-unit-id="' + _skpUid + '"]') : null;
+                if (_skpEl && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(_skpEl, '◈ TURNO PERDIDO (' + _skipReasonTxt + ')!', 'save-fail');
+                }
+            } catch (_eSkpLbl) {}
             await sleep(550);
         } else if (c && c.hp > 0 && c.alive) {
             simLogPushTurnHeader(s, c);
@@ -47575,8 +48079,7 @@ async function __combatAnimateOneEvent(ev) {
     if (kind === 'summon_cast' || kind === 'summon_pack_cast' || kind === 'summon_undead_cast'
             || kind === 'summon_elemental_cast' || kind === 'summon_fey_cast' || kind === 'summon_celestial_cast' || kind === 'summon_greater_elemental_cast' || kind === 'summon_greater_fey_cast' || kind === 'summon_greater_undead_cast'
             || kind === 'summon_attack' || kind === 'summon_expire') {
-        /* [C-REM:SUMMON] Summon events: flash caster + render (com o novo order
-           do server contendo os summons spawnados). Fase 3 fará VFX dedicado. */
+        /* [C-REM:SUMMON] Summon events: flash caster + floating label + render. */
         var scUid = 'player';
         if (ev.aIdx != null && currentState && currentState.order) {
             var scU = currentState.order[ev.aIdx];
@@ -47584,7 +48087,15 @@ async function __combatAnimateOneEvent(ev) {
             else if (scU && scU.t === 'e') scUid = 'enemy_' + ev.aIdx;
         }
         var scEl = document.querySelector('[data-unit-id="' + scUid + '"]');
-        if (scEl) scEl.classList.add('buff-flash');
+        if (scEl) {
+            scEl.classList.add('buff-flash');
+            if (typeof spawnSkillImpactLabel === 'function' && kind !== 'summon_attack') {
+                var _sumTxt = kind === 'summon_expire'
+                    ? '💨 INVOCAÇÃO DISSIPADA!'
+                    : '🐾 +' + (ev.summonCount || ev.count || 1) + ' ' + String(ev.summonName || ev.summonKind || 'INVOCADO').toUpperCase() + '!';
+                spawnSkillImpactLabel(scEl, _sumTxt, kind === 'summon_expire' ? 'miss' : 'buff');
+            }
+        }
         setTimeout(function () { if (scEl) scEl.classList.remove('buff-flash'); }, 520);
         console.info('[C-REM:SUMMON] kind=' + kind
             + ' caster=' + (ev.actorName || '?')
@@ -47600,13 +48111,23 @@ async function __combatAnimateOneEvent(ev) {
         return;
     }
     if (kind === 'condition_save') {
-        /* [C-REM:COND_SAVE] Condition save — flash alvo. */
+        /* [C-REM:COND_SAVE] Condition save — flash alvo + floating label. */
         var csUid = 'enemy_' + ev.tIdx;
         var csU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
         if (csU && csU.t === 'p') csUid = 'player';
         else if (csU && csU.t === 'a') csUid = 'ally_' + ev.tIdx;
         var csEl = document.querySelector('[data-unit-id="' + csUid + '"]');
-        if (csEl) csEl.classList.add(ev.saveSuccess ? 'buff-flash' : 'dodged');
+        if (csEl) {
+            csEl.classList.add(ev.saveSuccess ? 'buff-flash' : 'dodged');
+            if (typeof spawnSkillImpactLabel === 'function') {
+                var _csCond = String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase();
+                spawnSkillImpactLabel(
+                    csEl,
+                    ev.saveSuccess ? ('🛡️ LIBERTO (' + _csCond + ')!') : ('⛓️ MANTEVE ' + _csCond),
+                    ev.saveSuccess ? 'buff' : 'miss'
+                );
+            }
+        }
         setTimeout(function () {
             if (csEl) csEl.classList.remove('buff-flash', 'dodged');
         }, 420);
@@ -47615,15 +48136,26 @@ async function __combatAnimateOneEvent(ev) {
         return;
     }
     if (kind === 'concentration_save' || kind === 'concentration_lost') {
-        /* Flash caster + pausa curta + VFX temático. */
+        /* Flash caster + pausa curta + VFX temático + floating label. */
         var ccUid = 'player';
-        if (ev.tIdx != null && currentState && currentState.order) {
-            var ccU = currentState.order[ev.tIdx];
-            if (ccU && ccU.t === 'a') ccUid = 'ally_' + ev.tIdx;
-            else if (ccU && ccU.t === 'e') ccUid = 'enemy_' + ev.tIdx;
+        var _ccIdx = ev.tIdx != null ? ev.tIdx : ev.aIdx;
+        if (_ccIdx != null && currentState && currentState.order) {
+            var ccU = currentState.order[_ccIdx];
+            if (ccU && ccU.t === 'a') ccUid = 'ally_' + _ccIdx;
+            else if (ccU && ccU.t === 'e') ccUid = 'enemy_' + _ccIdx;
         }
         var ccEl = document.querySelector('[data-unit-id="' + ccUid + '"]');
-        if (ccEl) ccEl.classList.add(kind === 'concentration_lost' ? 'dodged' : 'buff-flash');
+        if (ccEl) {
+            ccEl.classList.add(kind === 'concentration_lost' ? 'dodged' : 'buff-flash');
+            if (typeof spawnSkillImpactLabel === 'function') {
+                var _ccSpell = ev.spellName ? ' (' + ev.spellName + ')' : '';
+                spawnSkillImpactLabel(
+                    ccEl,
+                    kind === 'concentration_lost' ? ('💔 CONCENTRAÇÃO QUEBRADA' + _ccSpell + '!') : ('◈ CONCENTRAÇÃO MANTIDA!'),
+                    kind === 'concentration_lost' ? 'miss' : 'buff'
+                );
+            }
+        }
         setTimeout(function () {
             if (ccEl) ccEl.classList.remove('dodged', 'buff-flash');
         }, 420);
@@ -47638,6 +48170,74 @@ async function __combatAnimateOneEvent(ev) {
         }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 360); });
+        return;
+    }
+    if (kind === 'legendary_resistance_used' || kind === 'save_result' || kind === 'condition_apply'
+            || kind === 'condition_expire' || kind === 'banished' || kind === 'maze_banish' || kind === 'maze_escape'
+            || kind === 'instant_kill' || kind === 'power_word_kill' || kind === 'destroy_undead'
+            || kind === 'time_stop' || kind === 'wildshape_transform' || kind === 'wildshape_revert'
+            || kind === 'sanctuary_save' || kind === 'rebuke_damage' || kind === 'turn_skipped') {
+        var _evIdx = ev.tIdx != null ? ev.tIdx : ev.aIdx;
+        var _evUid = 'player';
+        if (_evIdx != null && currentState && currentState.order) {
+            var _evU = currentState.order[_evIdx];
+            if (_evU && _evU.t === 'a') _evUid = 'ally_' + _evIdx;
+            else if (_evU && _evU.t === 'e') _evUid = 'enemy_' + _evIdx;
+        }
+        var _evEl = document.querySelector('[data-unit-id="' + _evUid + '"]');
+        if (_evEl && typeof spawnSkillImpactLabel === 'function') {
+            var _lblTxt = '';
+            var _lblTone = 'buff';
+            if (kind === 'legendary_resistance_used') {
+                _lblTxt = '👑 RESISTÊNCIA LENDÁRIA!' + (ev.remaining != null ? ' (' + ev.remaining + ' rest.)' : '');
+                _lblTone = 'buff';
+            } else if (kind === 'save_result') {
+                var _svAb = String(ev.saveAbility || ev.save || 'TR').toUpperCase();
+                _lblTxt = ev.saveSuccess ? ('🛡️ TR ' + _svAb + ' PASSOU!') : ('💥 TR ' + _svAb + ' FALHOU!');
+                _lblTone = ev.saveSuccess ? 'buff' : 'hit';
+            } else if (kind === 'condition_apply') {
+                _lblTxt = '⛓️ +' + String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase() + '!';
+                _lblTone = 'miss';
+            } else if (kind === 'condition_expire') {
+                _lblTxt = '✨ FIM: ' + String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase();
+                _lblTone = 'buff';
+            } else if (kind === 'banished' || kind === 'maze_banish') {
+                _lblTxt = kind === 'maze_banish' ? '🌀 BANIDO AO LABIRINTO!' : '🌀 BANIDO DO PLANO!';
+                _lblTone = 'crit';
+            } else if (kind === 'maze_escape') {
+                _lblTxt = '🌀 ESCAPOU DO LABIRINTO!';
+                _lblTone = 'buff';
+            } else if (kind === 'instant_kill' || kind === 'power_word_kill') {
+                _lblTxt = ev.disintegrated ? '💥 DESINTEGRADO EM CINZAS!' : '☠️ MORTE INSTANTÂNEA!';
+                _lblTone = 'crit';
+            } else if (kind === 'destroy_undead') {
+                _lblTxt = '☀️ MORTO-VIVO DESTRUÍDO!';
+                _lblTone = 'crit';
+            } else if (kind === 'time_stop') {
+                _lblTxt = '⏳ PARAR O TEMPO (+' + (ev.extraTurns || 2) + ' TURNOS)!';
+                _lblTone = 'buff';
+            } else if (kind === 'wildshape_transform') {
+                _lblTxt = '🐾 FORMA SELVAGEM: ' + String(ev.formName || 'FERA').toUpperCase() + '!';
+                _lblTone = 'buff';
+            } else if (kind === 'wildshape_revert') {
+                _lblTxt = '🐾 FORMA NORMAL RESTAURADA';
+                _lblTone = 'miss';
+            } else if (kind === 'sanctuary_save') {
+                _lblTxt = ev.saveSuccess === false ? '✨ SANTUÁRIO BLOQUEOU!' : '⚔️ SUPEROU SANTUÁRIO!';
+                _lblTone = ev.saveSuccess === false ? 'buff' : 'hit';
+            } else if (kind === 'rebuke_damage') {
+                _lblTxt = '🔥 -' + (ev.dmg || ev.damage || 0) + ' PV (REPREENSÃO)!';
+                _lblTone = 'hit';
+            } else if (kind === 'turn_skipped') {
+                _lblTxt = '◈ TURNO PERDIDO (' + String(ev.reason || ev.condName || 'INCAPACITADO').toUpperCase() + ')!';
+                _lblTone = 'miss';
+            }
+            if (_lblTxt) spawnSkillImpactLabel(_evEl, _lblTxt, _lblTone);
+            _evEl.classList.add(_lblTone === 'buff' ? 'buff-flash' : 'hit-shake');
+            setTimeout(function () { if (_evEl) _evEl.classList.remove('buff-flash', 'hit-shake'); }, 450);
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 380); });
         return;
     }
     /* Default: render + pequena pausa. */
