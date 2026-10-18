@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T17:32:58Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T18:13:42Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2415,6 +2415,206 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 @keyframes combatSkipBtnPopIn {
   0% { opacity: 0; transform: translateX(-50%) translateY(-14px) scale(0.88); }
   100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+/* =========================================================================
+   MOBILE-FIRST TACTICAL PREVIEW BAR (#bfTacticalPreviewBar)
+   Substitui tooltips flutuantes gigantes de mousehover por barra ancorada limpa
+   com suporte a 1º Toque (Preview no Mapa) e 2º Toque / Botão (Confirmação).
+   ========================================================================= */
+.bf-tactical-preview-bar {
+  display: none;
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 52px;
+  z-index: 145;
+  background: linear-gradient(180deg, rgba(24, 18, 12, 0.96) 0%, rgba(14, 10, 7, 0.98) 100%);
+  border: 1.5px solid rgba(196, 149, 58, 0.82);
+  border-radius: 9px;
+  padding: 6px 9px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.88), 0 0 12px rgba(196, 149, 58, 0.22);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  animation: bfTpbSlideUp 0.16s cubic-bezier(0.2, 0.85, 0.3, 1);
+}
+.bf-outer--selecting-target .bf-tactical-preview-bar {
+  bottom: 8px;
+}
+.bf-tactical-preview-bar.is-visible {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.bf-tactical-preview-bar.is-hazard {
+  border-color: rgba(239, 68, 68, 0.9);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.9), 0 0 14px rgba(239, 68, 68, 0.36);
+}
+@keyframes bfTpbSlideUp {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.bf-tpb-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.bf-tpb-title {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #f6e6bf;
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.bf-tpb-sub {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 9.5px;
+  color: #d4c8b0;
+  line-height: 1.25;
+}
+.bf-tpb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.bf-tpb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  line-height: 1.3;
+  background: rgba(45, 35, 24, 0.85);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  color: #ebd6a7;
+  white-space: nowrap;
+}
+.bf-tpb-chip--danger {
+  background: rgba(127, 29, 29, 0.88);
+  border-color: rgba(248, 113, 113, 0.85);
+  color: #fecaca;
+}
+.bf-tpb-chip--good {
+  background: rgba(20, 83, 45, 0.88);
+  border-color: rgba(74, 222, 128, 0.8);
+  color: #dcfce7;
+}
+.bf-tpb-chip--warn {
+  background: rgba(69, 26, 3, 0.88);
+  border-color: rgba(251, 191, 36, 0.8);
+  color: #fde68a;
+}
+.bf-tpb-chip--info {
+  background: rgba(23, 37, 84, 0.88);
+  border-color: rgba(96, 165, 250, 0.8);
+  color: #dbeafe;
+}
+.bf-tpb-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.bf-tpb-btn {
+  min-height: 29px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  touch-action: manipulation !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.bf-tpb-btn:active {
+  transform: scale(0.95);
+}
+.bf-tpb-btn--primary {
+  background: linear-gradient(180deg, #d4a44a 0%, #9b6c1b 100%);
+  border: 1px solid #ffd700;
+  color: #161008;
+  box-shadow: 0 2px 8px rgba(196, 149, 58, 0.45);
+}
+.bf-tpb-btn--danger {
+  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+  border: 1px solid #fca5a5;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.45);
+}
+.bf-tpb-btn--info {
+  background: rgba(42, 33, 24, 0.92);
+  border: 1px solid rgba(196, 149, 58, 0.65);
+  color: #ebd6a7;
+  padding: 4px 7px;
+}
+.bf-tpb-btn--close {
+  background: rgba(30, 24, 18, 0.85);
+  border: 1px solid rgba(160, 148, 132, 0.4);
+  color: #a09484;
+  padding: 4px 7px;
+}
+.hex-dest-reticle {
+  fill: rgba(212, 175, 55, 0.16);
+  stroke: #ffd700;
+  stroke-width: 2.2;
+  stroke-dasharray: 5 3;
+  animation: hexReticleSpin 4s linear infinite;
+}
+.hex-dest-reticle--hazard {
+  fill: rgba(239, 68, 68, 0.18);
+  stroke: #ff4757;
+}
+@keyframes hexReticleSpin {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -32; }
+}
+.battlefield-hex-arena .hex-tile.hex-tile--preview-dest {
+  stroke: #ffd700 !important;
+  stroke-width: 2.6 !important;
+  filter: brightness(1.22) drop-shadow(0 0 8px rgba(255, 215, 0, 0.65)) !important;
+}
+.battlefield-hex-arena .cell.hex-token.token--aim-preview {
+  transform: scale(1.1);
+  z-index: 58 !important;
+  filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.92)) !important;
+}
+/* Camada Tática (▦): exibe também os vetores e intenções de ameaça inimiga no celular sem precisar de hover */
+.bf-outer--tactical-layer .hex-threat-path {
+  opacity: 0.9 !important;
+  stroke-width: 2.3 !important;
+}
+.bf-outer--tactical-layer .hex-threat-badge {
+  opacity: 0.94 !important;
+}
+#turn-queue .tl-node {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#turn-queue .tl-node.tl-node--inspected {
+  transform: translateY(-2px) scale(1.08) !important;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.85) !important;
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 /* Barras de recurso (MP / Energia / Vigor / Furia) */
@@ -22339,7 +22539,7 @@ function buildTurnQueue(s) {
             nodeInner += '<span class="tl-conc-icon" title="Concentrando em ' + escHtml(entry.concentrationSpell) + '">◈</span>';
         }
 
-        parts.push('<div class="' + cls + '" id="' + id + '" title="' + escHtml(entry.n) + ' (Init: ' + initNum + ' · PV: ' + hpVal + '/' + entry.mhp + ')">' + nodeInner + '</div>');
+        parts.push('<div class="' + cls + '" id="' + id + '" data-order-idx="' + origIdx + '" title="' + escHtml(entry.n) + ' (Init: ' + initNum + ' · PV: ' + hpVal + '/' + entry.mhp + ')">' + nodeInner + '</div>');
     }
     parts.push('</div>');
     return parts.join('');
@@ -22784,33 +22984,40 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         }
     }
 
-    // Rótulo heráldico da área com geometria D&D 5e e contagem de alvos
+    // Micro-pílula compacta no mapa (detalhes completos vão para #bfTacticalPreviewBar no rodapé)
     var aoeMeters = formatHexDistanceMeters(radiusHex);
     var shapeLabelPt = (aoeShape === 'cone') ? '◢ Cone ' : ((aoeShape === 'line') ? '═ Linha ' : ((aoeShape === 'cube') ? '❖ Cubo ' : '◈ Esfera '));
-    var aoeLabel = shapeLabelPt + aoeMeters + ' (' + radiusHex + 'h)';
-    if (enemiesInAoe > 0) {
-        aoeLabel += ' · 🎯 ' + enemiesInAoe + (enemiesInAoe === 1 ? ' alvo' : ' alvos');
-    }
-    if (alliesInAoe > 0) {
-        aoeLabel += ' · ▲ ' + alliesInAoe + ' aliado(s) na área!';
-    }
-    var saveObj = skill.save || (skill.saveDc ? { dc: skill.saveDc, ability: skill.saveAbility } : null);
-    if (saveObj) {
-        var dcVal = saveObj.dc || (typeof simSpellSaveDc === 'function' && pCaster ? simSpellSaveDc(pCaster) : 13);
-        var abVal = String(saveObj.ability || 'DEX').toUpperCase();
-        aoeLabel += ' | CD ' + dcVal + ' ' + abVal;
-    }
-    var lblW = Math.max(96, aoeLabel.length * 6.0 + 20);
-    var lblH = 19;
+    var shortAoeBadge = (enemiesInAoe > 0)
+        ? ('💥 ' + enemiesInAoe + (enemiesInAoe === 1 ? ' alvo' : ' alvos'))
+        : (shapeLabelPt.trim() + ' ' + aoeMeters);
+    var lblW = Math.max(58, shortAoeBadge.length * 5.8 + 14);
+    var lblH = 16;
     var lblX = Math.round(pCenter.cx - lblW / 2);
-    var lblY = Math.round(pCenter.cy - (aoeShape === 'cone' || aoeShape === 'line' ? 38 : (radiusPx + 12)));
+    var lblY = Math.round(pCenter.cy - (aoeShape === 'cone' || aoeShape === 'line' ? 32 : (radiusPx + 10)));
 
     svgParts.push('<g class="hex-aoe-badge">' +
         '<rect x="' + lblX + '" y="' + lblY + '" width="' + lblW + '" height="' + lblH + '" rx="4" class="hex-aoe-badge-bg" />' +
-        '<text x="' + pCenter.cx + '" y="' + (lblY + 11) + '" class="hex-aoe-badge-text">' + escHtml(aoeLabel) + '</text>' +
+        '<text x="' + pCenter.cx + '" y="' + (lblY + 9) + '" class="hex-aoe-badge-text">' + escHtml(shortAoeBadge) + '</text>' +
         '</g>');
 
     layer.innerHTML = svgParts.join('');
+
+    var saveObj = skill.save || (skill.saveDc ? { dc: skill.saveDc, ability: skill.saveAbility } : null);
+    var saveStr = '';
+    if (saveObj) {
+        var dcVal = saveObj.dc || (typeof simSpellSaveDc === 'function' && pCaster ? simSpellSaveDc(pCaster) : 13);
+        var abVal = String(saveObj.ability || 'DEX').toUpperCase();
+        saveStr = 'CD ' + dcVal + ' ' + abVal;
+    }
+    return {
+        aoeShape: aoeShape,
+        shapeLabelPt: shapeLabelPt.trim(),
+        aoeMeters: aoeMeters,
+        radiusHex: radiusHex,
+        enemiesInAoe: enemiesInAoe,
+        alliesInAoe: alliesInAoe,
+        saveStr: saveStr
+    };
 }
 
 /**
@@ -23186,26 +23393,131 @@ function simFindOptimalHexPath(state, fromCol, fromRow, toCol, toRow, moverIdx) 
     return outPath;
 }
 
+/* ═══ BARRA DE PREVIEW TÁTICO MOBILE-FIRST (#bfTacticalPreviewBar) ═══
+ * Substitui banners SVG largos e tooltips invisíveis no celular por um HUD ancorado
+ * no rodapé do mapa (Padrão Into the Breach Mobile / XCOM 2 Mobile / Fire Emblem Heroes).
+ */
+var _previewMoveHex = null;
+var _previewAimTargetIdx = null;
+var _bfTacticalLayerActive = false;
+
+function hideBfTacticalPreviewBar() {
+    var bar = document.getElementById('bfTacticalPreviewBar');
+    if (bar) {
+        bar.classList.remove('bf-tactical-preview-bar--open', 'bf-tactical-preview-bar--hazard', 'bf-tactical-preview-bar--adv');
+        bar.innerHTML = '';
+    }
+    document.querySelectorAll('.hex-tile--preview-dest').forEach(function (el) {
+        el.classList.remove('hex-tile--preview-dest');
+    });
+    document.querySelectorAll('.token--aim-preview').forEach(function (el) {
+        el.classList.remove('token--aim-preview');
+    });
+    document.querySelectorAll('#turn-queue .tl-node--inspected').forEach(function (el) {
+        el.classList.remove('tl-node--inspected');
+    });
+}
+
+function showBfTacticalPreviewBar(config) {
+    var bar = document.getElementById('bfTacticalPreviewBar');
+    if (!bar || !config) return;
+    bar.classList.remove('bf-tactical-preview-bar--hazard', 'bf-tactical-preview-bar--adv');
+    if (config.tone === 'hazard') bar.classList.add('bf-tactical-preview-bar--hazard');
+    else if (config.tone === 'adv') bar.classList.add('bf-tactical-preview-bar--adv');
+
+    var chipsHtml = '';
+    if (Array.isArray(config.chips) && config.chips.length > 0) {
+        chipsHtml = '<div class="bf-tpb-chips">';
+        for (var ci = 0; ci < config.chips.length; ci++) {
+            var ch = config.chips[ci];
+            if (!ch || !ch.text) continue;
+            var chCls = 'bf-tpb-chip' + (ch.kind ? (' bf-tpb-chip--' + ch.kind) : '');
+            chipsHtml += '<span class="' + chCls + '">' + escHtml(ch.text) + '</span>';
+        }
+        chipsHtml += '</div>';
+    }
+
+    var actionsHtml = '<div class="bf-tpb-actions">';
+    if (config.primaryLabel && typeof config.onPrimary === 'function') {
+        var pCls = 'bf-tpb-btn ' + (config.primaryDanger ? 'bf-tpb-btn--danger' : 'bf-tpb-btn--primary');
+        actionsHtml += '<button type="button" class="' + pCls + '" data-tpb-act="primary">' + escHtml(config.primaryLabel) + '</button>';
+    }
+    if (config.infoLabel && typeof config.onInfo === 'function') {
+        actionsHtml += '<button type="button" class="bf-tpb-btn bf-tpb-btn--info" data-tpb-act="info" aria-label="Detalhes táticos">' + escHtml(config.infoLabel) + '</button>';
+    }
+    actionsHtml += '<button type="button" class="bf-tpb-btn bf-tpb-btn--close" data-tpb-act="close" aria-label="Fechar preview">✕</button>';
+    actionsHtml += '</div>';
+
+    bar.innerHTML =
+        '<div class="bf-tpb-body">' +
+            '<div class="bf-tpb-title">' + (config.titleHtml || escHtml(config.title || '')) + '</div>' +
+            chipsHtml +
+        '</div>' +
+        actionsHtml;
+    bar.classList.add('bf-tactical-preview-bar--open');
+
+    // Regra Soberana #20: Suporte omnidirecional (click, pointerup, touchend) com debounce de 180ms, sem stopPropagation em pointerdown/touchstart
+    function bindTpbBtn(sel, fn) {
+        var btn = bar.querySelector(sel);
+        if (!btn || typeof fn !== 'function') return;
+        var lastT = 0;
+        function handler(ev) {
+            var now = Date.now();
+            if (now - lastT < 180) return;
+            lastT = now;
+            if (ev && ev.cancelable && ev.type === 'touchend') ev.preventDefault();
+            fn(ev);
+        }
+        btn.addEventListener('click', handler);
+        btn.addEventListener('pointerup', handler);
+        btn.addEventListener('touchend', handler);
+    }
+
+    bindTpbBtn('[data-tpb-act="primary"]', config.onPrimary);
+    bindTpbBtn('[data-tpb-act="info"]', config.onInfo);
+    bindTpbBtn('[data-tpb-act="close"]', function () {
+        if (typeof config.onClose === 'function') {
+            config.onClose();
+        } else {
+            _previewMoveHex = null;
+            _previewAimTargetIdx = null;
+            clearMovementTrailPreview();
+            drawTacticalAimVector(null, null, null, null);
+            hideBfTacticalPreviewBar();
+        }
+    });
+}
+
 function clearMovementTrailPreview() {
     var layer = document.getElementById('hexMovementTrailLayer');
     if (layer) layer.innerHTML = '';
+    document.querySelectorAll('.hex-tile--preview-dest').forEach(function (el) {
+        el.classList.remove('hex-tile--preview-dest');
+    });
+    if (!_bfTacticalLayerActive && currentState && Array.isArray(currentState.order) && typeof setEnemyThreatHighlight === 'function') {
+        for (var i = 0; i < currentState.order.length; i++) {
+            if (currentState.order[i] && currentState.order[i].t === 'e') {
+                setEnemyThreatHighlight(i, false);
+            }
+        }
+    }
 }
 
 function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
     var layer = document.getElementById('hexMovementTrailLayer');
     if (!layer || !currentState) return;
     if (fromCol == null || fromRow == null || toCol == null || toRow == null) {
-        layer.innerHTML = '';
+        clearMovementTrailPreview();
         return;
     }
     if (fromCol === toCol && fromRow === toRow) {
-        layer.innerHTML = '';
+        clearMovementTrailPreview();
         return;
     }
     options = options || {};
     var line = simFindOptimalHexPath(currentState, fromCol, fromRow, toCol, toRow, currentState.p_idx);
     if (!line || line.length < 2) {
-        layer.innerHTML = '';
+        clearMovementTrailPreview();
         return;
     }
 
@@ -23219,6 +23531,15 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
     var totalCostHexes = 0;
     var provokedAoOList = [];
     var crossesHazard = false;
+
+    // Limpa realces de ameaça anteriores antes de destacar inimigos que fariam AoO nesta rota
+    if (!_bfTacticalLayerActive && Array.isArray(currentState.order) && typeof setEnemyThreatHighlight === 'function') {
+        for (var ti = 0; ti < currentState.order.length; ti++) {
+            if (currentState.order[ti] && currentState.order[ti].t === 'e') {
+                setEnemyThreatHighlight(ti, false);
+            }
+        }
+    }
 
     // Computa cada passo da rota (incluindo custo de subida PHB p. 182) e verifica Ataques de Oportunidade (PHB p. 195)
     for (var i = 0; i < line.length - 1; i++) {
@@ -23248,8 +23569,14 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
         var isStepHazard = (aooProvoked && aooProvoked.length > 0) || !!(dtStep && dtStep.hazard_kind);
         if (aooProvoked && aooProvoked.length > 0) {
             for (var ai = 0; ai < aooProvoked.length; ai++) {
+                var aooEntry = aooProvoked[ai];
+                var aooUnit = aooEntry.unit || aooEntry;
+                var aooIdx = (aooEntry.idx != null) ? aooEntry.idx : (currentState.order ? currentState.order.indexOf(aooUnit) : -1);
+                if (aooIdx >= 0 && typeof setEnemyThreatHighlight === 'function') {
+                    setEnemyThreatHighlight(aooIdx, true);
+                }
                 provokedAoOList.push({
-                    unit: aooProvoked[ai].unit || aooProvoked[ai],
+                    unit: aooUnit,
                     stepCol: curStep.col,
                     stepRow: curStep.row,
                     cx: pFrom.cx,
@@ -23264,38 +23591,30 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
 
         svgParts.push('<path d="' + segD + '" class="' + segClass + '" marker-end="' + segMarker + '" />');
 
-        // Nó intermediário com distância métrica a cada passo
+        // Nó intermediário discreto a cada passo
         if (i < line.length - 2) {
-            var stepDistM = formatHexDistanceMeters(totalCostHexes);
-            svgParts.push('<circle cx="' + pTo.cx + '" cy="' + pTo.cy + '" r="5" class="hex-move-node" />');
-            svgParts.push('<text x="' + pTo.cx + '" y="' + (pTo.cy - 7) + '" class="hex-move-node-label">' + stepDistM + '</text>');
+            svgParts.push('<circle cx="' + pTo.cx + '" cy="' + pTo.cy + '" r="4.5" class="hex-move-node" />');
         }
     }
 
-    // Marcadores pulsantes de alerta sobre cada hexágono de saída que provoca AoO
+    // Marcador compacto sobre cada hexágono de saída que provoca AoO (sem cobrir o token acima)
     for (var hi = 0; hi < provokedAoOList.length; hi++) {
         var hz = provokedAoOList[hi];
-        var hName = escHtml((hz.unit && hz.unit.n) || 'Inimigo');
         svgParts.push('<circle cx="' + hz.cx + '" cy="' + hz.cy + '" r="16" class="hex-move-hazard-ring" />');
         svgParts.push('<g class="hex-move-hazard-badge">' +
-            '<rect x="' + (hz.cx - 52) + '" y="' + (hz.cy - 30) + '" width="104" height="17" rx="4" class="hex-hazard-badge-bg" />' +
-            '<text x="' + hz.cx + '" y="' + (hz.cy - 19) + '" class="hex-hazard-badge-text">▲ AoO: ' + hName + '</text>' +
+            '<rect x="' + (hz.cx - 23) + '" y="' + (hz.cy + 10) + '" width="46" height="14" rx="4" class="hex-hazard-badge-bg" />' +
+            '<text x="' + hz.cx + '" y="' + (hz.cy + 18) + '" class="hex-hazard-badge-text">⚠️ AoO</text>' +
             '</g>');
     }
 
-    // Badge de Destino Final
+    // Destino Final: Retícula tática limpa + micro-pílula de distância (sem frase gigante no mapa)
     var dest = line[line.length - 1];
     var destCenter = hexCenter(dest.col, dest.row);
     var remainingMeters = formatHexDistanceMeters(Math.max(0, moveLeft - totalCostHexes));
     var totalM = formatHexDistanceMeters(totalCostHexes);
-    var destText = '⇥ ' + totalM + ' (' + totalCostHexes + 'h) · Restam ' + remainingMeters;
-    if (provokedAoOList.length > 0) {
-        destText = '▲ AoO (' + provokedAoOList.length + ') · ' + totalM + ' · Restam ' + remainingMeters;
-    } else if (crossesHazard) {
-        destText = '▲ Perigo na Rota · ' + totalM + ' · Restam ' + remainingMeters;
-    }
+    var isRouteHazard = (provokedAoOList.length > 0 || crossesHazard);
 
-    // D&D 5e (PHB p. 196 / DMG p. 251 / Solasta / BG3): Avalia Cobertura, Elevação e Flanqueamento no destino
+    // D&D 5e (PHB p. 196 / DMG p. 251): Avalia Cobertura, Elevação e Flanqueamento no destino
     var destElev = simGetHexElevation(currentState, dest.col, dest.row);
     var destCoverBonus = 0;
     var destFlanksEnemy = null;
@@ -23322,62 +23641,92 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
         }
     }
 
-    if (destFlanksEnemy) {
-        destText += ' · ▲ Flanqueia ' + destFlanksEnemy;
-    } else if (destElev > 0) {
-        destText += ' · ⛰️ Terreno Elevado (+2 Atq Dist.)';
-    } else if (destCoverBonus === 5) {
-        destText += ' · ⛨ ¾ Cob (+5 CA)';
-    } else if (destCoverBonus === 2) {
-        destText += ' · ⛨ ½ Cob (+2 CA)';
-    }
+    var reticleCls = 'hex-dest-reticle' + (isRouteHazard ? ' hex-dest-reticle--hazard' : '');
+    svgParts.push('<circle cx="' + destCenter.cx + '" cy="' + destCenter.cy + '" r="18" class="' + reticleCls + '" />');
 
-    var destBadgeW = Math.max(90, destText.length * 6.0 + 20);
-    var destBadgeH = 19;
+    var shortDestText = (provokedAoOList.length > 0 ? '⚠️ ' : '⇥ ') + totalM;
+    var destBadgeW = Math.max(46, shortDestText.length * 6.2 + 14);
+    var destBadgeH = 16;
     var destX = Math.round(destCenter.cx - destBadgeW / 2);
     var destY = Math.round(destCenter.cy - 24);
-
-    var destBgCls = 'hex-dest-badge-bg' + (provokedAoOList.length > 0 ? ' hex-dest-badge-bg--hazard' : '');
-    var destTextCls = 'hex-dest-badge-text' + (provokedAoOList.length > 0 ? ' hex-dest-badge-text--hazard' : '');
+    var destBgCls = 'hex-dest-badge-bg' + (isRouteHazard ? ' hex-dest-badge-bg--hazard' : '');
+    var destTextCls = 'hex-dest-badge-text' + (isRouteHazard ? ' hex-dest-badge-text--hazard' : '');
 
     svgParts.push('<g class="hex-dest-badge-group">' +
-        '<rect x="' + destX + '" y="' + destY + '" width="' + destBadgeW + '" height="' + destBadgeH + '" rx="5" class="' + destBgCls + '" />' +
-        '<text x="' + destCenter.cx + '" y="' + (destY + 11) + '" class="' + destTextCls + '">' + escHtml(destText) + '</text>' +
+        '<rect x="' + destX + '" y="' + destY + '" width="' + destBadgeW + '" height="' + destBadgeH + '" rx="4" class="' + destBgCls + '" />' +
+        '<text x="' + destCenter.cx + '" y="' + (destY + 9) + '" class="' + destTextCls + '">' + escHtml(shortDestText) + '</text>' +
         '</g>');
 
-    if (destFlanksEnemy) {
-        var flkLabel = '▲ FLANQUEIO (+VANT)';
-        var flkW = 94;
-        var flkH = 14;
-        var flkX = Math.round(destCenter.cx - flkW / 2);
-        var flkY = Math.round(destCenter.cy + 13);
-        svgParts.push('<g class="hex-dest-cover-group">' +
-            '<rect x="' + flkX + '" y="' + flkY + '" width="' + flkW + '" height="' + flkH + '" rx="3" fill="rgba(27,77,36,0.92)" stroke="#2ecc71" stroke-width="1" />' +
-            '<text x="' + destCenter.cx + '" y="' + (flkY + 8) + '" class="hex-dest-cover-text" fill="#c6f6d5">' + escHtml(flkLabel) + '</text>' +
-            '</g>');
-    } else if (destElev > 0) {
-        var elvLabel = '⛰️ +' + (destElev === 2 ? '3,0m' : '1,5m') + ' (+2 ATQ)';
-        var elvW = 86;
-        var elvH = 14;
-        var elvX = Math.round(destCenter.cx - elvW / 2);
-        var elvY = Math.round(destCenter.cy + 13);
-        svgParts.push('<g class="hex-dest-cover-group">' +
-            '<rect x="' + elvX + '" y="' + elvY + '" width="' + elvW + '" height="' + elvH + '" rx="3" fill="rgba(42,32,12,0.94)" stroke="#fbbf24" stroke-width="1" />' +
-            '<text x="' + destCenter.cx + '" y="' + (elvY + 8) + '" class="hex-dest-cover-text" fill="#fde68a">' + escHtml(elvLabel) + '</text>' +
-            '</g>');
-    } else if (destCoverBonus > 0) {
-        var covLabel = '⛨ +' + destCoverBonus + ' CA';
-        var covW = 46;
-        var covH = 13;
-        var covX = Math.round(destCenter.cx - covW / 2);
-        var covY = Math.round(destCenter.cy + 13);
-        svgParts.push('<g class="hex-dest-cover-group">' +
-            '<rect x="' + covX + '" y="' + covY + '" width="' + covW + '" height="' + covH + '" class="hex-dest-cover-pill" />' +
-            '<text x="' + destCenter.cx + '" y="' + (covY + 7) + '" class="hex-dest-cover-text">' + escHtml(covLabel) + '</text>' +
-            '</g>');
-    }
-
     layer.innerHTML = svgParts.join('');
+
+    // Destaca o hexágono de destino na grade
+    document.querySelectorAll('.hex-tile--preview-dest').forEach(function (el) {
+        el.classList.remove('hex-tile--preview-dest');
+    });
+    var destTileEl = document.querySelector('.hex-tile[data-col="' + dest.col + '"][data-row="' + dest.row + '"]');
+    if (destTileEl) destTileEl.classList.add('hex-tile--preview-dest');
+
+    // Popula o HUD tático ancorado (#bfTacticalPreviewBar) com todos os detalhes sem poluir o mapa
+    if (options.showBar !== false) {
+        var chips = [];
+        if (provokedAoOList.length > 0) {
+            var aooNames = [];
+            for (var pi = 0; pi < provokedAoOList.length; pi++) {
+                var uN = (provokedAoOList[pi].unit && provokedAoOList[pi].unit.n) || 'Inimigo';
+                if (aooNames.indexOf(uN) < 0) aooNames.push(uN);
+            }
+            chips.push({ kind: 'danger', text: '⚠️ AoO (' + provokedAoOList.length + '): ' + aooNames.join(', ') });
+        }
+        if (crossesHazard) {
+            chips.push({ kind: 'danger', text: '🔥 Cruza Terreno Perigoso' });
+        }
+        if (destFlanksEnemy) {
+            chips.push({ kind: 'good', text: '⚔ Flanqueia ' + destFlanksEnemy + ' (+Vantagem)' });
+        }
+        if (destElev > 0) {
+            chips.push({ kind: 'good', text: '⛰️ Elevado +' + (destElev === 2 ? '3m' : '1,5m') + ' (+2 Atq Dist.)' });
+        }
+        if (destCoverBonus > 0) {
+            chips.push({ kind: 'info', text: '⛨ Cobertura +' + destCoverBonus + ' CA' });
+        }
+        if (chips.length === 0) {
+            chips.push({ kind: 'good', text: '✓ Rota Segura' });
+        }
+
+        showBfTacticalPreviewBar({
+            tone: isRouteHazard ? 'hazard' : (destFlanksEnemy || destElev > 0 ? 'adv' : 'normal'),
+            title: '📍 Mover ' + totalM + ' (' + totalCostHexes + 'h) · Restam ' + remainingMeters,
+            chips: chips,
+            primaryLabel: isRouteHazard ? '⚠️ Mover' : '✓ Mover',
+            primaryDanger: isRouteHazard,
+            onPrimary: function () {
+                var tc = toCol, tr = toRow;
+                _previewMoveHex = null;
+                clearMovementTrailPreview();
+                hideBfTacticalPreviewBar();
+                if (isRouteHazard && typeof showMoveConfirm === 'function') {
+                    showMoveConfirm(tc, tr);
+                } else if (typeof handlePlayerMoveTo === 'function') {
+                    handlePlayerMoveTo(tc, tr);
+                }
+            },
+            infoLabel: 'ℹ',
+            onInfo: function () {
+                var tc = toCol, tr = toRow;
+                _previewMoveHex = null;
+                clearMovementTrailPreview();
+                hideBfTacticalPreviewBar();
+                if (typeof showMoveConfirm === 'function') {
+                    showMoveConfirm(tc, tr);
+                }
+            },
+            onClose: function () {
+                _previewMoveHex = null;
+                clearMovementTrailPreview();
+                hideBfTacticalPreviewBar();
+            }
+        });
+    }
 }
 
 /**
@@ -23691,60 +24040,37 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
 
     var pathD = 'M ' + pFrom.cx + ' ' + pFrom.cy + ' Q ' + midX + ' ' + midY + ' ' + pTo.cx + ' ' + pTo.cy;
 
-    var badgeText = '▸ ' + distMeters + ' (' + distHex + ' ' + (distHex === 1 ? 'hex' : 'hexes') + ')';
-    if (isShove) {
-        if (isOutOfReach) {
-            badgeText = '✕ Empurrão Fora de Alcance (Requer Adjacência 1,5m)';
-        } else if (isTotalCover) {
-            badgeText = '✕ Bloqueado: Cobertura Total (PHB p. 196)';
-        } else if (shoveDest && shoveDest.isBlocked) {
-            badgeText = '▸ Empurrão (PHB p. 195) | ✕ Recuo Bloqueado por ' + (shoveDest.collisionReason || 'Obstáculo');
-        } else if (shoveDest && (shoveDest.surface || shoveDest.hazard)) {
-            var hzName = shoveDest.surface ? ('Superfície de ' + (shoveDest.surface.type || 'fogo')) : (shoveDest.hazard.name || 'Terreno Perigoso');
-            badgeText = '▸ Empurrão (PHB p. 195) | ▲ Alvo Cai em ' + hzName + '!';
-        } else {
-            badgeText = '▸ Empurrão (PHB p. 195) | ⇥ Recuo 1,5m Desobstruído';
-        }
-    } else if (isOutOfReach) {
-        badgeText = '✕ Fora de Alcance (' + distMeters + ' > ' + formatHexDistanceMeters(reachLimit) + ')';
+    // Micro-pílula limpa no arco (detalhes completos vão para #bfTacticalPreviewBar)
+    var shortAimBadge = '🎯 ' + distMeters;
+    if (isOutOfReach) {
+        shortAimBadge = '✕ ' + distMeters;
     } else if (isTotalCover) {
-        badgeText = '✕ Bloqueado: Cobertura Total' + (coverEval && coverEval.blockerName ? ' (' + coverEval.blockerName + ')' : ' (PHB p. 196)');
-    } else {
-        if (canFlank) {
-            badgeText += ' | ▲ Flanqueado (Vantagem D&D 5e)';
-        } else if (advState === 'advantage') {
-            badgeText += ' | ▲ Vantagem';
-        } else if (advState === 'disadvantage') {
-            badgeText += ' | ▼ Desvantagem';
-        }
-        if (elevDelta > 0) {
-            badgeText += ' | ⛰️ Terreno Elevado (+2 Atq)';
-        } else if (elevDelta < 0) {
-            badgeText += ' | ▼ Terreno Baixo (-2 Atq)';
-        }
-        if (hasCover && coverText) {
-            badgeText += ' | ' + coverText;
-        }
+        shortAimBadge = '⛔ Bloq.';
+    } else if (isShove) {
+        shortAimBadge = '💨 ' + distMeters;
+    } else if (canFlank || advState === 'advantage') {
+        shortAimBadge = '▲ ' + distMeters;
+    } else if (advState === 'disadvantage') {
+        shortAimBadge = '▼ ' + distMeters;
     }
 
-    var textLen = badgeText.length;
-    var badgeW = Math.max(74, textLen * 6.2 + 18);
-    var badgeH = 18;
+    var badgeW = Math.max(48, shortAimBadge.length * 6.0 + 14);
+    var badgeH = 16;
     var badgeX = Math.round(midX - badgeW / 2);
     var badgeY = Math.round(midY - badgeH / 2);
 
     var svgHtml = '<path d="' + pathD + '" class="' + pathCls + '" marker-end="url(#' + markerId + ')" />';
 
-    // Destaque visual no hexágono bloqueador que fornece Cobertura na linha de tiro (PHB p. 196)
+    // Destaque visual compacto no hexágono bloqueador que fornece Cobertura na linha de tiro (PHB p. 196)
     if (coverEval && coverEval.cover !== 'none' && coverEval.blockerCol != null && coverEval.blockerRow != null) {
         var pBlk = hexCenter(coverEval.blockerCol, coverEval.blockerRow);
         var blkStroke = (coverEval.cover === 'total') ? '#ef4444' : ((coverEval.cover === 'three_quarters') ? '#fbbf24' : '#60a5fa');
-        var blkLabel = (coverEval.cover === 'total') ? '⛔ BLOQUEIA VISÃO' : ('⛨ +' + coverEval.bonus + ' CA (' + (coverEval.blockerName || 'Cobertura') + ')');
-        var blkW = Math.max(66, blkLabel.length * 5.2 + 12);
-        svgHtml += '<circle cx="' + pBlk.cx + '" cy="' + pBlk.cy + '" r="22" fill="none" stroke="' + blkStroke + '" stroke-width="2" stroke-dasharray="4 3" />';
+        var blkLabel = (coverEval.cover === 'total') ? '⛔ TOTAL' : ('⛨ +' + coverEval.bonus + ' CA');
+        var blkW = Math.max(46, blkLabel.length * 5.6 + 10);
+        svgHtml += '<circle cx="' + pBlk.cx + '" cy="' + pBlk.cy + '" r="20" fill="none" stroke="' + blkStroke + '" stroke-width="2" stroke-dasharray="4 3" />';
         svgHtml += '<g class="hex-cover-blocker-badge">' +
-            '<rect x="' + Math.round(pBlk.cx - blkW / 2) + '" y="' + Math.round(pBlk.cy - 34) + '" width="' + Math.round(blkW) + '" height="14" rx="4" fill="rgba(15,23,42,0.92)" stroke="' + blkStroke + '" stroke-width="1" />' +
-            '<text x="' + pBlk.cx + '" y="' + Math.round(pBlk.cy - 26) + '" fill="#e2e8f0" font-family="Cinzel, serif" font-size="7.5px" font-weight="700" text-anchor="middle" dominant-baseline="central">' + escHtml(blkLabel) + '</text>' +
+            '<rect x="' + Math.round(pBlk.cx - blkW / 2) + '" y="' + Math.round(pBlk.cy - 28) + '" width="' + Math.round(blkW) + '" height="13" rx="4" fill="rgba(15,23,42,0.92)" stroke="' + blkStroke + '" stroke-width="1" />' +
+            '<text x="' + pBlk.cx + '" y="' + Math.round(pBlk.cy - 21) + '" fill="#e2e8f0" font-family="Cinzel, serif" font-size="7.5px" font-weight="700" text-anchor="middle" dominant-baseline="central">' + escHtml(blkLabel) + '</text>' +
             '</g>';
     }
 
@@ -23754,17 +24080,6 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
         var fMidY = (pTo.cy + pPartner.cy) / 2 - 8;
         svgHtml += '<path d="M ' + pPartner.cx + ' ' + pPartner.cy + ' Q ' + fMidX + ' ' + fMidY + ' ' + pTo.cx + ' ' + pTo.cy + '" class="hex-flanking-vector" marker-end="url(#aimArrowGold)" />' +
             '<circle cx="' + pPartner.cx + '" cy="' + pPartner.cy + '" r="12" fill="none" stroke="#f1c40f" stroke-width="1.8" stroke-dasharray="3,3" opacity="0.85" />';
-
-        var partnerName = flankingInfo.partner.n ? flankingInfo.partner.n.split(' ')[0] : 'Aliado';
-        var partnerBadgeText = '▲ Pinça (' + partnerName + ')';
-        var pbW = Math.max(54, partnerBadgeText.length * 5.6 + 12);
-        var pbH = 14;
-        var pbX = Math.round(pPartner.cx - pbW / 2);
-        var pbY = Math.round(pPartner.cy - 16 - pbH);
-        svgHtml += '<g class="hex-flanking-badge">' +
-            '<rect x="' + pbX + '" y="' + pbY + '" width="' + pbW + '" height="' + pbH + '" class="hex-flanking-badge-bg" />' +
-            '<text x="' + pPartner.cx + '" y="' + (pbY + pbH / 2 + 1) + '" class="hex-flanking-badge-text">' + escHtml(partnerBadgeText) + '</text>' +
-            '</g>';
     }
 
     // Projeção tática de empurrão (destino, colisão e perigos ambientais)
@@ -23776,23 +24091,14 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
         var shoveBgCls = 'hex-shove-badge-bg' + (shoveDest.isBlocked ? ' hex-shove-badge-bg--blocked' : '');
         var shoveTextCls = 'hex-shove-badge-text' + (shoveDest.isBlocked ? ' hex-shove-badge-text--blocked' : '');
 
-        var destBadgeLabel = '⇥ Recuo (1,5m)';
-        if (shoveDest.isBlocked) {
-            destBadgeLabel = '✕ Bloqueado (' + (shoveDest.collisionReason || 'Obstruído') + ')';
-        } else if (shoveDest.surface) {
-            var sKind = String(shoveDest.surface.type || shoveDest.surface.surface_type || 'Superfície').toUpperCase();
-            destBadgeLabel = '▲ Recuo: ' + sKind;
-        } else if (shoveDest.hazard) {
-            destBadgeLabel = '▲ Recuo: ' + (shoveDest.hazard.name || 'Perigo');
-        }
-
-        var dblW = Math.max(68, destBadgeLabel.length * 6.0 + 14);
-        var dblH = 16;
+        var destBadgeLabel = shoveDest.isBlocked ? '✕ Bloq.' : '⇥ 1,5m';
+        var dblW = Math.max(46, destBadgeLabel.length * 6.0 + 12);
+        var dblH = 15;
         var dbX = Math.round(pDest.cx - dblW / 2);
-        var dbY = Math.round(pDest.cy - 12);
+        var dbY = Math.round(pDest.cy - 10);
 
         svgHtml += '<path d="M ' + pTo.cx + ' ' + pTo.cy + ' L ' + pDest.cx + ' ' + pDest.cy + '" class="' + shovePathCls + '" marker-end="' + shoveMarker + '" />';
-        svgHtml += '<circle cx="' + pDest.cx + '" cy="' + pDest.cy + '" r="22" class="' + shoveCircleCls + '" />';
+        svgHtml += '<circle cx="' + pDest.cx + '" cy="' + pDest.cy + '" r="20" class="' + shoveCircleCls + '" />';
         svgHtml += '<g class="hex-shove-badge">' +
             '<rect x="' + dbX + '" y="' + dbY + '" width="' + dblW + '" height="' + dblH + '" class="' + shoveBgCls + '" />' +
             '<text x="' + pDest.cx + '" y="' + (dbY + dblH / 2 + 1) + '" class="' + shoveTextCls + '">' + escHtml(destBadgeLabel) + '</text>' +
@@ -23801,7 +24107,7 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
 
     svgHtml += '<g class="hex-aim-badge-group">' +
         '<rect x="' + badgeX + '" y="' + badgeY + '" width="' + badgeW + '" height="' + badgeH + '" class="' + bgCls + '" />' +
-        '<text x="' + midX + '" y="' + (midY + 1) + '" class="' + textCls + '">' + escHtml(badgeText) + '</text>' +
+        '<text x="' + midX + '" y="' + (midY + 1) + '" class="' + textCls + '">' + escHtml(shortAimBadge) + '</text>' +
         '</g>';
 
     layer.innerHTML = svgHtml;
@@ -23819,11 +24125,138 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
         curSkNameLow.indexOf('fogo feérico') >= 0 || curSkNameLow.indexOf('despedaçar') >= 0 ||
         curSkNameLow.indexOf('crescimento espinhoso') >= 0 || curSkNameLow.indexOf('sono') >= 0
     ));
+    var aoeSummary = null;
     if (isCurSkillAoe) {
-        drawTacticalAoePreview(toCol, toRow, curSkill);
+        aoeSummary = drawTacticalAoePreview(toCol, toRow, curSkill);
     } else {
         clearTacticalAoePreview();
     }
+    return {
+        distHex: distHex,
+        distMeters: distMeters,
+        isOutOfReach: isOutOfReach,
+        isTotalCover: isTotalCover,
+        canFlank: canFlank,
+        flankingInfo: flankingInfo,
+        advState: advState,
+        elevDelta: elevDelta,
+        coverEval: coverEval,
+        shoveDest: shoveDest,
+        aoeSummary: aoeSummary
+    };
+}
+
+/**
+ * Projeta no tabuleiro a mira tática completa sobre `targetIdx` (arco balístico, cobertura, flanqueamento,
+ * raio AoE) e popula o HUD ancorado #bfTacticalPreviewBar com botão direto de confirmação.
+ */
+function previewTacticalTargetOnBoard(targetIdx) {
+    if (!currentState || !currentState.order || targetIdx == null || targetIdx < 0) return;
+    var pUnit = currentState.order[currentState.p_idx];
+    var tUnit = currentState.order[targetIdx];
+    if (!pUnit || !tUnit || !pUnit.pos || !tUnit.pos) return;
+
+    _previewAimTargetIdx = targetIdx;
+    document.querySelectorAll('.token--aim-preview').forEach(function (el) {
+        el.classList.remove('token--aim-preview');
+    });
+    var tUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(currentState, targetIdx) : ('enemy_' + targetIdx);
+    var tEl = tUid ? document.querySelector('[data-unit-id="' + tUid + '"]') : null;
+    if (tEl) tEl.classList.add('token--aim-preview');
+
+    var isShove = (_pendingSpecialAction === 'shove');
+    var reachInfo = simGetAttackReach(pUnit, _pendingSkill);
+    var covInfo = (!isShove && tUnit.t === 'e' && typeof simComputeCover === 'function')
+        ? simComputeCover(currentState, pUnit, tUnit)
+        : { cover: 'none', bonus: 0 };
+    var covLabel = (covInfo.cover === 'three_quarters')
+        ? '⛨ ¾ Cobertura (+5 CA)'
+        : ((covInfo.cover === 'half') ? '⛨ ½ Cobertura (+2 CA)' : '');
+    var flkInfo = (!isShove && !reachInfo.isRanged && tUnit.t === 'e' && typeof simCheckFlanking === 'function')
+        ? simCheckFlanking(pUnit, tUnit, currentState.order)
+        : null;
+    var advPreview = (!isShove && tUnit.t === 'e' && typeof simPeekAttackAdvState === 'function')
+        ? simPeekAttackAdvState(pUnit, tUnit, _pendingSkill)
+        : 'normal';
+
+    var aimRes = drawTacticalAimVector(pUnit.pos.col, pUnit.pos.row, tUnit.pos.col, tUnit.pos.row, {
+        reach: reachInfo.reach,
+        cover: covInfo.bonus > 0,
+        coverType: covInfo.cover,
+        coverText: covLabel,
+        advState: advPreview,
+        flankingInfo: flkInfo,
+        isShove: isShove,
+        skill: _pendingSkill
+    }) || {};
+
+    var actLabel = isShove
+        ? '💨 Empurrar'
+        : (_pendingSkill ? ('✨ ' + _pendingSkill.n) : '⚔ Atacar');
+
+    var chips = [];
+    chips.push({ kind: (aimRes.isOutOfReach || aimRes.isTotalCover) ? 'danger' : 'info', text: '📏 ' + (aimRes.distMeters || '1,5m') });
+
+    // Estimativa de acerto / CD se hostil
+    if (tUnit.t === 'e' && !isShove && typeof computeTargetHitPreview === 'function') {
+        var hpv = computeTargetHitPreview(pUnit, tUnit, _pendingSkill);
+        if (hpv && hpv.label) {
+            chips.push({ kind: hpv.mode === 'save' ? 'warn' : 'good', text: '🎲 ' + hpv.label });
+        }
+    }
+
+    if (aimRes.isOutOfReach) {
+        chips.push({ kind: 'danger', text: '✕ Fora de Alcance (Máx ' + formatHexDistanceMeters(reachInfo.reach) + ')' });
+    } else if (aimRes.isTotalCover) {
+        chips.push({ kind: 'danger', text: '⛔ Cobertura Total (' + ((aimRes.coverEval && aimRes.coverEval.blockerName) || 'Bloqueado') + ')' });
+    } else {
+        if (aimRes.canFlank) {
+            var pName = (flkInfo && flkInfo.partner && flkInfo.partner.n) ? flkInfo.partner.n.split(' ')[0] : 'Aliado';
+            chips.push({ kind: 'good', text: '▲ Flanqueio c/ ' + pName + ' (+Vantagem)' });
+        } else if (advPreview === 'advantage') {
+            chips.push({ kind: 'good', text: '▲ Vantagem' });
+        } else if (advPreview === 'disadvantage') {
+            chips.push({ kind: 'warn', text: '▼ Desvantagem' });
+        }
+        if (aimRes.elevDelta > 0) {
+            chips.push({ kind: 'good', text: '⛰️ Terreno Elevado (+2 Atq)' });
+        } else if (aimRes.elevDelta < 0) {
+            chips.push({ kind: 'warn', text: '▼ Terreno Baixo (-2 Atq)' });
+        }
+        if (covInfo.bonus > 0) {
+            chips.push({ kind: 'info', text: '⛨ +' + covInfo.bonus + ' CA (' + (covInfo.blockerName || 'Cobertura') + ')' });
+        }
+    }
+
+    if (aimRes.aoeSummary) {
+        var aoeS = aimRes.aoeSummary;
+        chips.push({
+            kind: 'info',
+            text: aoeS.shapeLabelPt + ' ' + aoeS.aoeMeters + (aoeS.enemiesInAoe > 0 ? (' · 🎯 ' + aoeS.enemiesInAoe + ' alvo(s)') : '')
+        });
+        if (aoeS.alliesInAoe > 0) {
+            chips.push({ kind: 'danger', text: '⚠️ ' + aoeS.alliesInAoe + ' aliado(s) na área!' });
+        }
+    }
+
+    var canExecute = !aimRes.isOutOfReach && !aimRes.isTotalCover;
+    showBfTacticalPreviewBar({
+        tone: (!canExecute || (aimRes.aoeSummary && aimRes.aoeSummary.alliesInAoe > 0)) ? 'hazard' : (aimRes.canFlank || advPreview === 'advantage' ? 'adv' : 'normal'),
+        title: actLabel + ' ▸ ' + (tUnit.n || 'Alvo'),
+        chips: chips,
+        primaryLabel: canExecute ? '⚔ Confirmar' : null,
+        onPrimary: canExecute ? function () {
+            var idx = targetIdx;
+            if (typeof showTargetConfirm === 'function') {
+                showTargetConfirm(idx);
+            }
+        } : null,
+        onClose: function () {
+            _previewAimTargetIdx = null;
+            drawTacticalAimVector(null, null, null, null);
+            hideBfTacticalPreviewBar();
+        }
+    });
 }
 
 /**
@@ -25887,13 +26320,18 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                             }
                         }
                     }
-                    distBadge = '<span class="token-dist-chip token-dist-chip--in" title="No Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')' + metaChips + '">' + _combatTargetIconSVG(10) + ' ' + distM + metaChips + '</span>';
+                    var shortMeta = '';
+                    if (metaChips.indexOf('Bloqueado') >= 0) shortMeta = ' · ⛔';
+                    else if (metaChips.indexOf('Flanqueado') >= 0 || metaChips.indexOf('Vant') >= 0) shortMeta = ' · ▲';
+                    else if (metaChips.indexOf('Desv') >= 0) shortMeta = ' · ▼';
+                    else if (metaChips.indexOf('Cob') >= 0) shortMeta = ' · ⛨';
+                    distBadge = '<span class="token-dist-chip token-dist-chip--in" title="No Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')' + metaChips + '">' + _combatTargetIconSVG(10) + ' ' + distM + shortMeta + '</span>';
                 } else {
                     classes += ' token--out-of-range';
-                    distBadge = '<span class="token-dist-chip token-dist-chip--out" title="Fora de Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">' + _combatWarningIconSVG(10) + ' ' + distM + ' · máx ' + reachMeta.meters + '</span>';
+                    distBadge = '<span class="token-dist-chip token-dist-chip--out" title="Fora de Alcance: ' + distM + ' (máximo ' + reachMeta.label + ')">' + _combatWarningIconSVG(10) + ' ' + distM + '</span>';
                 }
             } else {
-                distBadge = '<span class="token-dist-chip" title="Distância até você">' + distM + ' · ' + dist + 'h</span>';
+                distBadge = '<span class="token-dist-chip" title="Distância até você">' + distM + '</span>';
             }
         }
     }
@@ -27366,12 +27804,8 @@ function buildHexObstacleSvg(cx, cy, obsTile, curBiome, isDim) {
         svg += '<line x1="' + (cx - 12) + '" y1="' + (cy - 3) + '" x2="' + (cx + 12) + '" y2="' + (cy - 3) + '" stroke="rgba(253, 230, 138, 0.38)" stroke-width="1.1" />';
     }
 
-    // Etiqueta superior: ⛔ BLOQUEIO (Intransponível)
-    svg += '<rect x="' + (cx - 21) + '" y="' + (cy - 22) + '" width="42" height="10" rx="4" ry="4" fill="rgba(127, 29, 29, 0.92)" stroke="#f87171" stroke-width="0.8" />';
-    svg += '<text x="' + cx + '" y="' + (cy - 16.5) + '" fill="#fecaca" font-family="Cinzel, serif" font-size="6.3px" font-weight="800" text-anchor="middle" dominant-baseline="central">⛔ BLOQUEIO</text>';
-
-    // Etiqueta inferior: Grau de Cobertura D&D 5e
-    var covBadgeText = (cov === 'total') ? 'COB. TOTAL' : ((cov === 'three_quarters') ? '⛨ ¾ (+5 CA)' : '⛨ ½ (+2 CA)');
+    // Etiqueta única inferior: Grau de Cobertura / Bloqueio D&D 5e (sem segunda pílula redundante no topo)
+    var covBadgeText = (cov === 'total') ? '⛔ TOTAL' : ((cov === 'three_quarters') ? '⛨ ¾ (+5 CA)' : '⛨ ½ (+2 CA)');
     var covStroke = (cov === 'total') ? '#f87171' : ((cov === 'three_quarters') ? '#fbbf24' : '#60a5fa');
     var covBg = (cov === 'total') ? 'rgba(69, 10, 10, 0.92)' : ((cov === 'three_quarters') ? 'rgba(69, 26, 3, 0.92)' : 'rgba(23, 37, 84, 0.92)');
     var covTextCol = (cov === 'total') ? '#fca5a5' : ((cov === 'three_quarters') ? '#fde68a' : '#bfdbfe');
@@ -27594,7 +28028,8 @@ function buildBattlefield(s) {
         }
     }
 
-    var outerCls = 'bf-pan-outer' + (showTacticalLayer ? ' bf-outer--tactical-layer' : '');
+    _bfTacticalLayerActive = !!showTacticalLayer;
+    var outerCls = 'bf-pan-outer' + (showTacticalLayer ? ' bf-outer--tactical-layer' : '') + (_selectingTarget ? ' bf-outer--selecting-target' : '');
     var hudCollapsed = (!showHudLegends && !isPlayerBlinded);
     var hudCls = 'bf-hud-badges' + (hudCollapsed ? ' bf-hud-badges--collapsed' : '');
 
@@ -27973,6 +28408,7 @@ function buildBattlefield(s) {
     html += '</div>'; // .battlefield-hex-arena
     html += '</div>'; // .bf-pan-stage
     html += '</div>'; // .bf-pan-viewport
+    html += '<div id="bfTacticalPreviewBar" class="bf-tactical-preview-bar" role="region" aria-live="polite"></div>';
     html += '</div>'; // .bf-pan-outer
 
     return html;
@@ -32429,7 +32865,159 @@ function render(s) {
 var _lastCardActionTime = 0;
 var _lastTileActionTime = 0;
 
+function simDoesMovePathHaveHazardOrAoO(fromCol, fromRow, toCol, toRow) {
+    if (!currentState) return false;
+    var line = simFindOptimalHexPath(currentState, fromCol, fromRow, toCol, toRow, currentState.p_idx);
+    if (!line || line.length < 2) return false;
+    var difficultMap = simBuildDifficultTerrainLookup(currentState);
+    var surfaces = (currentState.battlefield && currentState.battlefield.surfaces) || [];
+    for (var i = 0; i < line.length - 1; i++) {
+        var curStep = line[i];
+        var nextStep = line[i + 1];
+        if (typeof simCheckOpportunityAttacks === 'function') {
+            var oas = simCheckOpportunityAttacks(currentState.p_idx, curStep.col, curStep.row, nextStep.col, nextStep.row);
+            if (oas && oas.length > 0) return true;
+        }
+        var dtStep = difficultMap[nextStep.col + ',' + nextStep.row];
+        if (dtStep && dtStep.hazard_kind) return true;
+        for (var si = 0; si < surfaces.length; si++) {
+            var sf = surfaces[si];
+            if (sf && sf.col === nextStep.col && sf.row === nextStep.row) return true;
+        }
+    }
+    return false;
+}
+
+function inspectHexTerrainOnBar(col, row) {
+    if (!currentState || !currentState.battlefield) return false;
+    var bf = currentState.battlefield;
+    var elev = simGetHexElevation(currentState, col, row);
+    var dtMap = simBuildDifficultTerrainLookup(currentState);
+    var dt = dtMap[col + ',' + row];
+    var surf = null;
+    if (Array.isArray(bf.surfaces)) {
+        for (var si = 0; si < bf.surfaces.length; si++) {
+            if (bf.surfaces[si] && bf.surfaces[si].col === col && bf.surfaces[si].row === row) {
+                surf = bf.surfaces[si];
+                break;
+            }
+        }
+    }
+    if (!elev && !dt && !surf) return false;
+
+    var title = '🗺️ Terreno Tático (' + col + ',' + row + ')';
+    var chips = [];
+    var tone = 'normal';
+
+    if (surf) {
+        var sKind = String(surf.type || surf.surface_type || 'elemental').toLowerCase();
+        title = '🔥 Superfície: ' + (surf.source || sKind.toUpperCase());
+        tone = 'hazard';
+        if (sKind.indexOf('fire') >= 0 || sKind.indexOf('fogo') >= 0) {
+            chips.push({ kind: 'danger', text: '🔥 Dano de Fogo ao entrar/iniciar turno' });
+        } else if (sKind.indexOf('ice') >= 0 || sKind.indexOf('gelo') >= 0) {
+            chips.push({ kind: 'warn', text: '❄️ Gelo Escorregadio (TR Destreza ou Caído)' });
+        } else if (sKind.indexOf('elec') >= 0) {
+            chips.push({ kind: 'danger', text: '⚡ Água Eletrizada (Dano Elétrico)' });
+        } else {
+            chips.push({ kind: 'danger', text: '☠️ Superfície Perigosa (' + (surf.turns || 1) + ' rodadas)' });
+        }
+    }
+    if (dt) {
+        if (!surf) title = '🌿 ' + (dt.name || 'Terreno Difícil');
+        chips.push({ kind: 'warn', text: '◆ Terreno Difícil: Custo 3m (2 hexes) por passo (PHB p. 190)' });
+        if (dt.hazard_kind === 'damage') {
+            tone = 'hazard';
+            chips.push({ kind: 'danger', text: '▲ Causa ' + (dt.damage_dice || '1d4') + ' de dano ao atravessar' });
+        } else if (dt.hazard_kind === 'save_prone') {
+            tone = 'hazard';
+            chips.push({ kind: 'warn', text: '❄️ Exige TR Destreza CD ' + (dt.save_dc || 10) + ' ou fica Caído' });
+        }
+    }
+    if (elev !== 0) {
+        if (elev > 0) {
+            var eM = (elev >= 2) ? '+3,0m' : '+1,5m';
+            if (!surf && !dt) title = '⛰️ Elevação Tática (' + eM + ')';
+            if (tone === 'normal') tone = 'adv';
+            chips.push({ kind: 'good', text: '▲ ' + eM + ': +2 em ataques à distância contra nível inferior (DMG p. 251)' });
+            chips.push({ kind: 'info', text: '⇥ Subir exige +1,5m de deslocamento extra (PHB p. 182)' });
+        } else {
+            if (!surf && !dt) title = '🕳️ Depressão Tática (-1,5m)';
+            chips.push({ kind: 'warn', text: '▼ -1,5m: -2 em ataques à distância contra nível superior' });
+        }
+    }
+
+    showBfTacticalPreviewBar({
+        tone: tone,
+        title: title,
+        chips: chips
+    });
+    return true;
+}
+
+function inspectTurnQueueUnitOnBar(orderIdx, nodeEl) {
+    if (!currentState || !currentState.order || !currentState.order[orderIdx]) return;
+    var u = currentState.order[orderIdx];
+    var uid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(currentState, orderIdx) : null;
+
+    document.querySelectorAll('#turn-queue .tl-node--inspected').forEach(function (el) {
+        el.classList.remove('tl-node--inspected');
+    });
+    if (nodeEl) nodeEl.classList.add('tl-node--inspected');
+
+    if (u.t === 'e' && typeof setEnemyThreatHighlight === 'function') {
+        setEnemyThreatHighlight(orderIdx, true);
+    } else if ((u.t === 'p' || u.t === 'a') && typeof setTargetThreatHighlight === 'function') {
+        setTargetThreatHighlight(orderIdx, true);
+    }
+
+    var displayAc = (typeof getEffectiveAc === 'function') ? getEffectiveAc(u) : (u.ac != null ? u.ac : 10);
+    var chips = [
+        { kind: (u.hp <= u.mhp * 0.3) ? 'danger' : 'good', text: '❤️ PV ' + (u.hp != null ? u.hp : 0) + '/' + (u.mhp || 0) },
+        { kind: 'info', text: '🛡️ CA ' + displayAc },
+        { kind: 'info', text: '⚡ Inic ' + (u.init != null ? u.init : '—') }
+    ];
+    if (u.t === 'e' && u.it && u.it.lb) {
+        var itTarget = u.it.targetName ? (' → ' + u.it.targetName) : '';
+        chips.push({ kind: 'danger', text: '🎯 Intenção: ' + (u.it.ic || '⚔') + ' ' + u.it.lb + itTarget + (u.it.dmg ? ' (~' + u.it.dmg + ')' : '') });
+    }
+    if (Array.isArray(u.se) && u.se.length > 0) {
+        var condNames = [];
+        for (var si = 0; si < u.se.length; si++) {
+            var st = u.se[si];
+            if (st && (st.n || st.dndCondition)) condNames.push(st.n || st.dndCondition);
+        }
+        if (condNames.length > 0) {
+            chips.push({ kind: 'warn', text: '✨ ' + condNames.slice(0, 3).join(', ') });
+        }
+    }
+
+    showBfTacticalPreviewBar({
+        tone: (u.t === 'e') ? 'hazard' : 'adv',
+        title: (u.t === 'e' ? '👹 ' : '🛡️ ') + (u.n || 'Combatente') + (u.cls ? (' · ' + u.cls) : ''),
+        chips: chips,
+        primaryLabel: uid ? '👁 Ficha' : null,
+        onPrimary: uid ? function () {
+            hideBfTacticalPreviewBar();
+            openUnitDetail(uid);
+        } : null,
+        onClose: function () {
+            if (u.t === 'e' && typeof setEnemyThreatHighlight === 'function' && !_bfTacticalLayerActive) {
+                setEnemyThreatHighlight(orderIdx, false);
+            } else if ((u.t === 'p' || u.t === 'a') && typeof setTargetThreatHighlight === 'function') {
+                setTargetThreatHighlight(orderIdx, false);
+            }
+            hideBfTacticalPreviewBar();
+        }
+    });
+}
+
 function bindActions() {
+    if (!_selectingTarget) {
+        _previewAimTargetIdx = null;
+    }
+    _previewMoveHex = null;
+
     var btns = document.querySelectorAll('[data-act]');
     for (var i = 0; i < btns.length; i++) btns[i].addEventListener('click', onBtnClick);
     /* Cards clicaveis -> popup de ficha OU selecao de alvo durante ataque */
@@ -32440,6 +33028,7 @@ function bindActions() {
                 card.__pDownX = ev.clientX;
                 card.__pDownY = ev.clientY;
                 card.__pDownTs = Date.now();
+                card.__pDownType = ev.pointerType || '';
             });
             var onCardTrigger = function (ev) {
                 var now = Date.now();
@@ -32475,9 +33064,16 @@ function bindActions() {
                 if (_selectingTarget && uid && uid.indexOf('enemy_') === 0) {
                     var idx = parseInt(uid.slice(6), 10);
                     if (_pendingSpecialAction === 'shove') {
+                        // No celular (touch), 1º toque em alvo diferente projeta o vetor de recuo e colisão no mapa antes do modal
+                        if (card.__pDownType === 'touch' && _previewAimTargetIdx !== idx && typeof previewTacticalTargetOnBoard === 'function') {
+                            previewTacticalTargetOnBoard(idx);
+                            return;
+                        }
                         _selectingTarget = false;
                         var _shoveTgt = idx;
                         _pendingSpecialAction = null;
+                        _previewAimTargetIdx = null;
+                        hideBfTacticalPreviewBar();
                         render(currentState);
                         showShoveChoiceModal(_shoveTgt).then(function(mode) {
                             if (!mode) {
@@ -32566,6 +33162,14 @@ function bindActions() {
                         }
                         return;
                     }
+                    // No celular (touch), tocar em um inimigo diferente primeiro projeta o arco balístico,
+                    // cobertura, flanqueamento e raio de explosão AoE no tabuleiro; 2º toque (ou botão Confirmar) abre o modal.
+                    if (card.__pDownType === 'touch' && _previewAimTargetIdx !== idx && typeof previewTacticalTargetOnBoard === 'function') {
+                        previewTacticalTargetOnBoard(idx);
+                        return;
+                    }
+                    _previewAimTargetIdx = null;
+                    hideBfTacticalPreviewBar();
                     showTargetConfirm(idx);
                     return;
                 }
@@ -32602,58 +33206,65 @@ function bindActions() {
                 }
 
                 if (!_selectingTarget || !currentState) return;
-                var pUnit = currentState.order[currentState.p_idx];
-                if (!pUnit || !pUnit.pos) return;
                 var tgtIdx = -1;
                 if (uid === 'player') tgtIdx = currentState.p_idx;
                 else if (uid && uid.indexOf('ally_') === 0) tgtIdx = parseInt(uid.slice(5), 10);
                 else if (uid && uid.indexOf('enemy_') === 0) tgtIdx = parseInt(uid.slice(6), 10);
-                if (tgtIdx >= 0 && currentState.order[tgtIdx]) {
-                    var tgtUnit = currentState.order[tgtIdx];
-                    if (tgtUnit.pos && tgtUnit.pos.col != null) {
-                        var reachInfo = (typeof simGetAttackReach === 'function')
-                            ? simGetAttackReach(pUnit, _pendingSkill)
-                            : { reach: 1, isRanged: false };
-                        var coverInfo = (typeof simComputeCover === 'function')
-                            ? simComputeCover(currentState, pUnit, tgtUnit)
-                            : { cover: 'none', bonus: 0 };
-                        var coverText = coverInfo.cover === 'half' ? '½ Cobertura (+2 CA)' : (coverInfo.cover === 'three_quarters' ? '¾ Cobertura (+5 CA)' : '');
-                        var advState = (typeof simPeekAttackAdvState === 'function')
-                            ? simPeekAttackAdvState(pUnit, tgtUnit, _pendingSkill)
-                            : 'normal';
-                        var flankingInfo = (!reachInfo.isRanged && typeof simCheckFlanking === 'function')
-                            ? simCheckFlanking(pUnit, tgtUnit, currentState.order)
-                            : null;
-                        drawTacticalAimVector(pUnit.pos.col, pUnit.pos.row, tgtUnit.pos.col, tgtUnit.pos.row, {
-                            reach: reachInfo.reach || 1,
-                            cover: coverInfo.cover !== 'none',
-                            coverText: coverText,
-                            coverType: coverInfo.cover,
-                            advState: advState,
-                            flankingInfo: flankingInfo,
-                            isShove: (_pendingSpecialAction === 'shove'),
-                            skill: _pendingSkill
-                        });
-                    }
+                if (tgtIdx >= 0 && currentState.order[tgtIdx] && typeof previewTacticalTargetOnBoard === 'function') {
+                    previewTacticalTargetOnBoard(tgtIdx);
                 }
             });
-            card.addEventListener('pointerleave', function () {
+            card.addEventListener('pointerleave', function (ev) {
+                if (ev && ev.pointerType === 'touch') return;
                 var uid = card.getAttribute('data-unit-id');
-                if (uid && uid.indexOf('enemy_') === 0) {
-                    var eIdx = parseInt(uid.slice(6), 10);
-                    if (!isNaN(eIdx) && typeof setEnemyThreatHighlight === 'function') setEnemyThreatHighlight(eIdx, false);
-                } else if (uid === 'player' || (uid && uid.indexOf('ally_') === 0)) {
-                    var myTgtIdx = (uid === 'player') ? (currentState ? currentState.p_idx : 0) : parseInt(uid.slice(5), 10);
-                    if (!isNaN(myTgtIdx) && typeof setTargetThreatHighlight === 'function') setTargetThreatHighlight(myTgtIdx, false);
-                }
-
-                if (_selectingTarget) {
-                    clearTacticalAimVector();
+                if (!_bfTacticalLayerActive) {
+                    if (uid && uid.indexOf('enemy_') === 0) {
+                        var eIdx = parseInt(uid.slice(6), 10);
+                        if (!isNaN(eIdx) && typeof setEnemyThreatHighlight === 'function') setEnemyThreatHighlight(eIdx, false);
+                    } else if (uid === 'player' || (uid && uid.indexOf('ally_') === 0)) {
+                        var myTgtIdx = (uid === 'player') ? (currentState ? currentState.p_idx : 0) : parseInt(uid.slice(5), 10);
+                        if (!isNaN(myTgtIdx) && typeof setTargetThreatHighlight === 'function') setTargetThreatHighlight(myTgtIdx, false);
+                    }
                 }
             });
         })(cards[j]);
     }
-    /* Hexágonos de movimentação alcançáveis no turno do jogador */
+
+    /* Ao entrar em modo _selectingTarget (Ataque / Magia / Empurrão), projeta imediatamente no tabuleiro
+       o arco de mira, cobertura, flanqueamento, área AoE e #bfTacticalPreviewBar no alvo primário,
+       garantindo que jogadores de celular vejam a geometria tática sem depender de mousehover! */
+    if (_selectingTarget && currentState && Array.isArray(currentState.order)) {
+        var isHealOrAllyPick = ((_pendingSkill && _pendingSkill.kind === 'heal') || _pendingHealItem ||
+            (_pendingSkill && _pendingSkill.targetAlly && (_pendingSkill.blessSpell || _pendingSkill.shieldSpell)));
+        var isMmPick = !!(_pendingSkill && _pendingSkill.magicMissiles);
+        var isSummonOrHelpPick = !!(_pendingSpecialAction === 'help' || _pendingAttachedSummon || _pendingPassiveSummonCmd || _pendingFocusFamiliar);
+        if (!isHealOrAllyPick && !isMmPick && !isSummonOrHelpPick && typeof previewTacticalTargetOnBoard === 'function') {
+            var autoTargetIdx = -1;
+            if (_previewAimTargetIdx != null && currentState.order[_previewAimTargetIdx] && currentState.order[_previewAimTargetIdx].alive) {
+                autoTargetIdx = _previewAimTargetIdx;
+            } else {
+                var pAuto = currentState.order[currentState.p_idx];
+                var bestDistAuto = 9999;
+                for (var aui = 0; aui < currentState.order.length; aui++) {
+                    var candU = currentState.order[aui];
+                    if (!candU || candU.t !== 'e' || !candU.alive || candU.isDead || !candU.pos) continue;
+                    var dAuto = (pAuto && pAuto.pos) ? hexDistance(pAuto.pos.col, pAuto.pos.row, candU.pos.col, candU.pos.row) : 1;
+                    if (dAuto < bestDistAuto) {
+                        bestDistAuto = dAuto;
+                        autoTargetIdx = aui;
+                    }
+                }
+            }
+            if (autoTargetIdx >= 0) {
+                previewTacticalTargetOnBoard(autoTargetIdx);
+            }
+        }
+    }
+
+    /* Hexágonos de movimentação alcançáveis no turno do jogador:
+       Padrão Mobile-First (Into the Breach / XCOM 2 Mobile / Fire Emblem):
+       - 1º toque no hexágono desenha a rota no mapa, destaca ameaças de AoO e abre #bfTacticalPreviewBar com [✓ Mover]
+       - 2º toque no mesmo hexágono (ou clique em [✓ Mover]) executa a movimentação (ou abre confirmação se houver AoO/perigo) */
     var reachableTiles = document.querySelectorAll('.hex-tile.hex-tile--reachable');
     for (var ri = 0; ri < reachableTiles.length; ri++) {
         (function (tile) {
@@ -32661,9 +33272,11 @@ function bindActions() {
                 tile.__pDownX = ev.clientX;
                 tile.__pDownY = ev.clientY;
                 tile.__pDownTs = Date.now();
+                tile.__pDownType = ev.pointerType || '';
             });
             tile.addEventListener('pointerenter', function (ev) {
                 if (ev.pointerType === 'touch') return;
+                if (_previewMoveHex) return; // Se já há destino fixado por toque/clique, preserva até trocar ou fechar
                 if (!currentState || currentState.ph !== 'active') return;
                 if (currentState.active_idx !== currentState.p_idx) return;
                 var pUnit = currentState.order[currentState.p_idx];
@@ -32671,31 +33284,51 @@ function bindActions() {
                 var tCol = parseInt(tile.getAttribute('data-col'), 10);
                 var tRow = parseInt(tile.getAttribute('data-row'), 10);
                 if (!isNaN(tCol) && !isNaN(tRow)) {
-                    drawMovementPathPreview(pUnit.pos.col, pUnit.pos.row, tCol, tRow);
+                    drawMovementPathPreview(pUnit.pos.col, pUnit.pos.row, tCol, tRow, { showBar: true });
                 }
             });
-            tile.addEventListener('pointerleave', function () {
+            tile.addEventListener('pointerleave', function (ev) {
+                if (ev && ev.pointerType === 'touch') return;
+                if (_previewMoveHex) return;
                 clearMovementTrailPreview();
+                hideBfTacticalPreviewBar();
             });
             var onTileTrigger = function (ev) {
-                clearMovementTrailPreview();
                 var now = Date.now();
-                if (now - _lastTileActionTime < 320) return;
+                if (now - _lastTileActionTime < 260) return;
                 if (window.__bfIsDragging) return;
                 if (window.__bfLastDragTs && (now - window.__bfLastDragTs < 500)) return;
                 if (typeof tile.__pDownX === 'number' && typeof tile.__pDownY === 'number') {
                     var tDx = Math.abs(ev.clientX - tile.__pDownX);
                     var tDy = Math.abs(ev.clientY - tile.__pDownY);
-                    if (tDx >= 4 || tDy >= 4) return;
+                    if (tDx >= 5 || tDy >= 5) return;
                 }
                 if (tile.__pDownTs && (now - tile.__pDownTs > 550)) return;
                 _lastTileActionTime = now;
                 if (ev && ev.cancelable && ev.type !== 'click') ev.preventDefault();
                 var tCol = parseInt(tile.getAttribute('data-col'), 10);
                 var tRow = parseInt(tile.getAttribute('data-row'), 10);
-                if (!isNaN(tCol) && !isNaN(tRow)) {
-                    showMoveConfirm(tCol, tRow);
+                if (isNaN(tCol) || isNaN(tRow) || !currentState) return;
+                var pUnit = currentState.order && currentState.order[currentState.p_idx];
+                if (!pUnit || !pUnit.pos) return;
+
+                // Se este hexágono já está pré-visualizado no mapa (2º toque no mesmo hexágono): confirma o movimento!
+                if (_previewMoveHex && _previewMoveHex.col === tCol && _previewMoveHex.row === tRow) {
+                    var hasRisk = simDoesMovePathHaveHazardOrAoO(pUnit.pos.col, pUnit.pos.row, tCol, tRow);
+                    _previewMoveHex = null;
+                    clearMovementTrailPreview();
+                    hideBfTacticalPreviewBar();
+                    if (hasRisk && typeof showMoveConfirm === 'function') {
+                        showMoveConfirm(tCol, tRow);
+                    } else if (typeof handlePlayerMoveTo === 'function') {
+                        handlePlayerMoveTo(tCol, tRow);
+                    }
+                    return;
                 }
+
+                // 1º toque: fixa o preview da rota no mapa e abre a barra tática inferior com [✓ Mover]
+                _previewMoveHex = { col: tCol, row: tRow };
+                drawMovementPathPreview(pUnit.pos.col, pUnit.pos.row, tCol, tRow, { showBar: true });
             };
             tile.addEventListener('click', onTileTrigger);
         })(reachableTiles[ri]);
@@ -32733,6 +33366,60 @@ function bindActions() {
                 }
             });
         })(obstacleTiles[obIdx]);
+    }
+    /* Hexágonos de terreno especial revelados fora do alcance imediato (elevações, terreno difícil, superfícies):
+       toque no celular exibe a regra D&D 5e na barra tática inferior */
+    var otherRevealedTiles = document.querySelectorAll('.hex-tile:not(.hex-tile--reachable):not(.hex-tile--obstacle):not(.hex-tile--fogged)');
+    for (var oti = 0; oti < otherRevealedTiles.length; oti++) {
+        (function (tEl) {
+            tEl.addEventListener('pointerdown', function (ev) {
+                tEl.__pDownX = ev.clientX;
+                tEl.__pDownY = ev.clientY;
+                tEl.__pDownTs = Date.now();
+            });
+            tEl.addEventListener('click', function (ev) {
+                var now = Date.now();
+                if (now - _lastTileActionTime < 260) return;
+                if (window.__bfIsDragging) return;
+                if (typeof tEl.__pDownX === 'number' && typeof tEl.__pDownY === 'number') {
+                    if (Math.abs(ev.clientX - tEl.__pDownX) >= 5 || Math.abs(ev.clientY - tEl.__pDownY) >= 5) return;
+                }
+                var c = parseInt(tEl.getAttribute('data-col'), 10);
+                var r = parseInt(tEl.getAttribute('data-row'), 10);
+                if (isNaN(c) || isNaN(r)) return;
+                if (inspectHexTerrainOnBar(c, r)) {
+                    _lastTileActionTime = now;
+                }
+            });
+        })(otherRevealedTiles[oti]);
+    }
+    /* Fila de Iniciativa (#turn-queue .tl-node[data-order-idx]): toque inspeciona combatente e destaca ameaça */
+    var tlNodes = document.querySelectorAll('#turn-queue .tl-node[data-order-idx]');
+    for (var tli = 0; tli < tlNodes.length; tli++) {
+        (function (nodeEl) {
+            nodeEl.addEventListener('click', function () {
+                var oIdx = parseInt(nodeEl.getAttribute('data-order-idx'), 10);
+                if (!isNaN(oIdx)) {
+                    inspectTurnQueueUnitOnBar(oIdx, nodeEl);
+                }
+            });
+        })(tlNodes[tli]);
+    }
+    /* Badges informativos de Clima, Visão e Escala: toque exibe a explicação D&D 5e na barra tática */
+    var infoBadges = document.querySelectorAll('.weather-badge, .bf-vision-badge, .bf-scale-badge');
+    for (var ibi = 0; ibi < infoBadges.length; ibi++) {
+        (function (bEl) {
+            bEl.style.cursor = 'pointer';
+            bEl.addEventListener('click', function () {
+                var tip = bEl.getAttribute('title') || '';
+                if (!tip) return;
+                showBfTacticalPreviewBar({
+                    tone: 'normal',
+                    title: '📜 Regra de Mesa D&D 5e',
+                    chips: [{ kind: 'info', text: tip }]
+                });
+            });
+        })(infoBadges[ibi]);
     }
     /* Linhas de loot clicáveis na tela de vitória (abre popup com descrição) */
     var lootRows = document.querySelectorAll('.rr-loot-row--clickable');
@@ -32880,6 +33567,17 @@ function showTargetActionMenu(targetIdx, uid) {
         return;
     }
 
+    // Destaca o vetor de ameaça tática do inimigo no mapa enquanto o menu está aberto (essencial no celular sem hover)
+    if (typeof setEnemyThreatHighlight === 'function') {
+        setEnemyThreatHighlight(targetIdx, true);
+    }
+    function closeTamOverlay() {
+        if (!_bfTacticalLayerActive && typeof setEnemyThreatHighlight === 'function') {
+            setEnemyThreatHighlight(targetIdx, false);
+        }
+        ov.remove();
+    }
+
     var ov = document.createElement('div');
     ov.className = 'target-action-menu-overlay';
     ov.id = 'targetActionMenuOverlay';
@@ -32946,8 +33644,13 @@ function showTargetActionMenu(targetIdx, uid) {
     html +=   '<button class="tam-close-btn" aria-label="Fechar">✕</button>';
     html += '</div>';
 
-    // Badges de Metadados / Condições / Traços D&D 5e do Inimigo
+    // Badges de Metadados / Intenção Tática / Condições / Traços D&D 5e do Inimigo
     var metaBadges = [];
+    if (u.it && u.it.lb) {
+        var itTgtStr = u.it.targetName ? (' → ' + u.it.targetName) : '';
+        var itDmgStr = u.it.dmg ? (' (~' + u.it.dmg + ' dano)') : '';
+        metaBadges.push('<span class="tam-meta-badge danger">🎯 Intenção: ' + escHtml((u.it.ic || '⚔') + ' ' + u.it.lb + itTgtStr + itDmgStr) + '</span>');
+    }
     if (isTotalCover) metaBadges.push('<span class="tam-meta-badge danger">✕ Cobertura Total</span>');
     else if (coverInfo.cover === 'half') metaBadges.push('<span class="tam-meta-badge warn">⛨ ½ Cobertura (+2 CA)</span>');
     else if (coverInfo.cover === 'three_quarters') metaBadges.push('<span class="tam-meta-badge warn">⛨ ¾ Cobertura (+5 CA)</span>');
@@ -33057,17 +33760,17 @@ function showTargetActionMenu(targetIdx, uid) {
 
     // Event listeners
     ov.addEventListener('click', function (e) {
-        if (e.target === ov) ov.remove();
+        if (e.target === ov) closeTamOverlay();
     });
     var closeBtn = sheet.querySelector('.tam-close-btn');
     if (closeBtn) {
-        closeBtn.addEventListener('click', function () { ov.remove(); });
+        closeBtn.addEventListener('click', function () { closeTamOverlay(); });
     }
 
     var atkBtn = sheet.querySelector('[data-tam-act="attack"]');
     if (atkBtn) {
         atkBtn.addEventListener('click', function () {
-            ov.remove();
+            closeTamOverlay();
             if (!isActionAvailable) {
                 if (typeof showFloatingToast === 'function') {
                     showFloatingToast('Ação principal já gasta neste turno!', 'warn');
@@ -33088,7 +33791,7 @@ function showTargetActionMenu(targetIdx, uid) {
     var skillsBtn = sheet.querySelector('[data-tam-act="skills"]');
     if (skillsBtn) {
         skillsBtn.addEventListener('click', function () {
-            ov.remove();
+            closeTamOverlay();
             if (!hasSkills) {
                 if (typeof showFloatingToast === 'function') {
                     showFloatingToast('Nenhuma habilidade disponível no momento.', 'warn');
@@ -33106,7 +33809,7 @@ function showTargetActionMenu(targetIdx, uid) {
     var shoveBtn = sheet.querySelector('[data-tam-act="shove"]');
     if (shoveBtn) {
         shoveBtn.addEventListener('click', function () {
-            ov.remove();
+            closeTamOverlay();
             if (!isActionAvailable) {
                 if (typeof showFloatingToast === 'function') {
                     showFloatingToast('Ação principal já gasta neste turno!', 'warn');
@@ -33139,7 +33842,7 @@ function showTargetActionMenu(targetIdx, uid) {
     var moveBtn = sheet.querySelector('[data-tam-act="move"]');
     if (moveBtn) {
         moveBtn.addEventListener('click', function () {
-            ov.remove();
+            closeTamOverlay();
             if (moveLeft <= 0) {
                 if (typeof showFloatingToast === 'function') {
                     showFloatingToast('Deslocamento esgotado neste turno!', 'warn');
@@ -33159,14 +33862,19 @@ function showTargetActionMenu(targetIdx, uid) {
                 }
                 return;
             }
-            showMoveConfirm(bestHex.col, bestHex.row);
+            if (p.pos && typeof drawMovementPathPreview === 'function') {
+                _previewMoveHex = { col: bestHex.col, row: bestHex.row };
+                drawMovementPathPreview(p.pos.col, p.pos.row, bestHex.col, bestHex.row, { showBar: true });
+            } else {
+                showMoveConfirm(bestHex.col, bestHex.row);
+            }
         });
     }
 
     var inspectBtn = sheet.querySelector('[data-tam-act="inspect"]');
     if (inspectBtn) {
         inspectBtn.addEventListener('click', function () {
-            ov.remove();
+            closeTamOverlay();
             openUnitDetail(uid);
         });
     }
