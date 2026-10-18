@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T03:53:32Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T15:23:35Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -11760,28 +11760,84 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .hex-tile--obstacle {
-  cursor: not-allowed !important;
+  cursor: pointer !important;
 }
 
 .battlefield-hex-arena .hex-tile--obstacle-total {
-  fill: rgba(35, 45, 60, 0.85) !important;
-  stroke: #718096 !important;
-  stroke-width: 2.2 !important;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.7));
+  fill: rgba(24, 30, 42, 0.94) !important;
+  stroke: #e53e3e !important;
+  stroke-width: 2.3 !important;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.85));
 }
 
 .battlefield-hex-arena .hex-tile--obstacle-three_quarters {
-  fill: rgba(55, 65, 80, 0.78) !important;
-  stroke: #cbd5e0 !important;
-  stroke-width: 2 !important;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+  fill: rgba(40, 48, 62, 0.88) !important;
+  stroke: #ecc94b !important;
+  stroke-width: 2.1 !important;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.75));
 }
 
 .battlefield-hex-arena .hex-tile--obstacle-half {
-  fill: rgba(70, 50, 30, 0.75) !important;
+  fill: rgba(58, 42, 26, 0.85) !important;
   stroke: #d69e2e !important;
+  stroke-width: 1.9 !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+}
+
+.battlefield-hex-arena .hex-tile--elev-1 {
+  stroke: #d4af37 !important;
   stroke-width: 1.8 !important;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+  filter: brightness(1.12) drop-shadow(0 3px 4px rgba(0, 0, 0, 0.65));
+}
+
+.battlefield-hex-arena .hex-tile--elev-2 {
+  stroke: #fbbf24 !important;
+  stroke-width: 2.2 !important;
+  filter: brightness(1.22) drop-shadow(0 5px 7px rgba(0, 0, 0, 0.8));
+}
+
+.battlefield-hex-arena .hex-tile--elev-neg {
+  stroke: #475569 !important;
+  stroke-width: 1.5 !important;
+  filter: brightness(0.78) saturate(0.88);
+}
+
+.battlefield-hex-arena .hex-elev-badge-bg {
+  fill: rgba(16, 12, 8, 0.88);
+  stroke: rgba(212, 175, 55, 0.72);
+  stroke-width: 0.9;
+  pointer-events: none;
+}
+
+.battlefield-hex-arena .hex-elev-badge-bg--high {
+  fill: rgba(38, 24, 6, 0.92);
+  stroke: #fbbf24;
+  stroke-width: 1.1;
+}
+
+.battlefield-hex-arena .hex-elev-badge-bg--low {
+  fill: rgba(15, 23, 42, 0.88);
+  stroke: #64748b;
+  stroke-width: 0.9;
+}
+
+.battlefield-hex-arena .hex-elev-badge-text {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  fill: #fde68a;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  letter-spacing: 0.3px;
+}
+
+.battlefield-hex-arena .hex-elev-badge-text--low {
+  fill: #94a3b8;
+}
+
+.battlefield-hex-arena .hex-obstacle-group {
+  pointer-events: none;
 }
 
 .battlefield-hex-arena .hex-obstacle-symbol {
@@ -11794,13 +11850,50 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .battlefield-hex-arena .hex-obstacle-label {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 8px;
-  font-weight: 700;
-  fill: #e2e8f0;
+  font-size: 7.5px;
+  font-weight: 800;
+  fill: #f8fafc;
   text-anchor: middle;
+  dominant-baseline: central;
   pointer-events: none;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.35px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
+}
+
+.battlefield-hex-arena .hex-obstacle-sub {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 6.8px;
+  font-weight: 800;
+  fill: #fca5a5;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  letter-spacing: 0.3px;
+}
+
+.token-elev-chip {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(45, 30, 8, 0.95), rgba(20, 14, 5, 0.96));
+  border: 1px solid #fbbf24;
+  color: #fde68a;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 18;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
+.token-elev-chip--low {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(9, 13, 24, 0.96));
+  border-color: #64748b;
+  color: #cbd5e1;
 }
 
 .battlefield-hex-arena .hex-tile--hazard {
@@ -21988,6 +22081,21 @@ function hexPolygonPoints(cx, cy) {
     ].join(' ');
 }
 
+function hexPolygonPointsScaled(cx, cy, scale) {
+    var sc = (typeof scale === 'number' && scale > 0) ? scale : 1;
+    var hw = (HEX_W / 2) * sc;
+    var qw = (HEX_W / 4) * sc;
+    var hh = (HEX_H / 2) * sc;
+    return [
+        (cx - qw).toFixed(1) + ',' + (cy - hh).toFixed(1),
+        (cx + qw).toFixed(1) + ',' + (cy - hh).toFixed(1),
+        (cx + hw).toFixed(1) + ',' + cy.toFixed(1),
+        (cx + qw).toFixed(1) + ',' + (cy + hh).toFixed(1),
+        (cx - qw).toFixed(1) + ',' + (cy + hh).toFixed(1),
+        (cx - hw).toFixed(1) + ',' + cy.toFixed(1)
+    ].join(' ');
+}
+
 function hexToCube(col, row) {
     var q = col;
     var r = row - Math.floor((col - (col & 1)) / 2);
@@ -22180,9 +22288,63 @@ function simBuildDifficultTerrainLookup(state) {
 }
 
 /**
+ * Converte s.battlefield.elevations num dicionário rápido {'col,row': elevObj}.
+ */
+function simBuildElevationsLookup(state) {
+    var map = {};
+    if (!state || !state.battlefield || !state.battlefield.elevations) return map;
+    var elList = state.battlefield.elevations;
+    if (Array.isArray(elList)) {
+        for (var i = 0; i < elList.length; i++) {
+            var el = elList[i];
+            if (el && el.col != null && el.row != null) {
+                map[el.col + ',' + el.row] = el;
+            }
+        }
+    } else if (typeof elList === 'object') {
+        return elList;
+    }
+    return map;
+}
+
+function simGetHexElevation(state, col, row) {
+    if (!state || !state.battlefield || !Array.isArray(state.battlefield.elevations)) return 0;
+    for (var i = 0; i < state.battlefield.elevations.length; i++) {
+        var el = state.battlefield.elevations[i];
+        if (el && el.col === col && el.row === row) {
+            return parseInt(el.elevation, 10) || 0;
+        }
+    }
+    return 0;
+}
+
+/**
+ * DMG p. 251 / BG3 / Solasta: Calcula o modificador tático posicional de Terreno Elevado (High Ground / Low Ground).
+ */
+function simCheckElevationTacticalModifier(state, attacker, target, isRanged) {
+    if (!attacker || !target || !attacker.pos || !target.pos) {
+        return { state: null, bonus: 0, atkElev: 0, tgtElev: 0 };
+    }
+    var atkElev = simGetHexElevation(state, attacker.pos.col, attacker.pos.row);
+    var tgtElev = simGetHexElevation(state, target.pos.col, target.pos.row);
+    if (!isRanged || atkElev === tgtElev) {
+        return { state: null, bonus: 0, atkElev: atkElev, tgtElev: tgtElev };
+    }
+    if (atkElev > tgtElev) {
+        return { state: 'high_ground', bonus: 2, atkElev: atkElev, tgtElev: tgtElev };
+    }
+    var feats = attacker.feats || [];
+    if (feats.indexOf('sharpshooter') >= 0 || attacker.ignores_cover) {
+        return { state: null, bonus: 0, atkElev: atkElev, tgtElev: tgtElev };
+    }
+    return { state: 'low_ground', bonus: -2, atkElev: atkElev, tgtElev: tgtElev };
+}
+
+/**
  * Pathfinder Tático D&D 5e (Dijkstra sobre grade hexagonal — Padrão Baldur's Gate 3 / Solasta):
- * - Desvia de obstáculos físicos (PHB p. 196) e espaços ocupados por criaturas hostis (PHB p. 191).
- * - Contabiliza custo 2 para Terreno Difícil e espaços de aliados, e custo 1 para terreno livre.
+ * - Desvia de obstáculos físicos intransponíveis (PHB p. 196) e espaços ocupados por criaturas hostis (PHB p. 191).
+ * - Contabiliza custo 2 para Terreno Difícil e espaços de aliados, custo 1 para terreno livre,
+ *   e +delta_elev para subida em hexágonos de altura superior (PHB p. 182 / p. 190).
  * - Minimiza custo de deslocamento e, como desempate tático, contorna Ataques de Oportunidade
  *   e perigos/superfícies elementais sempre que houver rota segura dentro do deslocamento.
  */
@@ -22196,6 +22358,7 @@ function simFindOptimalHexPath(state, fromCol, fromRow, toCol, toRow, moverIdx) 
     var bCols = state.battlefield.cols || HEX_COLS_DEFAULT;
     var bRows = state.battlefield.rows || HEX_ROWS_DEFAULT;
     var diffMap = simBuildDifficultTerrainLookup(state);
+    var elevMap = simBuildElevationsLookup(state);
 
     var obsMap = {};
     if (Array.isArray(state.battlefield.obstacles)) {
@@ -22220,6 +22383,7 @@ function simFindOptimalHexPath(state, fromCol, fromRow, toCol, toRow, moverIdx) 
     var mIdx = (moverIdx != null) ? moverIdx : (state.p_idx || 0);
     var mover = (state.order && state.order[mIdx]) || null;
     var moverFaction = (mover && mover.t === 'e') ? 'e' : 'party';
+    var ignoreClimb = !!(mover && (mover.has_lands_stride || ((mover.feats || []).indexOf('athlete') >= 0)));
 
     var hostileOcc = {};
     var allyOcc = {};
@@ -22238,7 +22402,7 @@ function simFindOptimalHexPath(state, fromCol, fromRow, toCol, toRow, moverIdx) 
     var startKey = fromCol + ',' + fromRow;
     var goalKey = toCol + ',' + toRow;
     if (obsMap[goalKey] || hostileOcc[goalKey] || allyOcc[goalKey]) {
-        return (typeof hexLine === 'function') ? hexLine(fromCol, fromRow, toCol, toRow) : [];
+        return [];
     }
 
     var distCost = {};
@@ -22256,6 +22420,9 @@ function simFindOptimalHexPath(state, fromCol, fromRow, toCol, toRow, moverIdx) 
         visited[cur.key] = true;
         if (cur.key === goalKey) break;
 
+        var curElevObj = elevMap[cur.key];
+        var curElev = curElevObj ? (parseInt(curElevObj.elevation, 10) || 0) : 0;
+
         var neighbors = hexNeighbors(cur.col, cur.row);
         for (var ni = 0; ni < neighbors.length; ni++) {
             var nb = neighbors[ni];
@@ -22267,6 +22434,13 @@ function simFindOptimalHexPath(state, fromCol, fromRow, toCol, toRow, moverIdx) 
             var dtObj = diffMap[nKey];
             var isAllySpace = !!allyOcc[nKey];
             var stepMoveCost = (dtObj || isAllySpace) ? 2 : 1;
+            if (!ignoreClimb) {
+                var nbElevObj = elevMap[nKey];
+                var nbElev = nbElevObj ? (parseInt(nbElevObj.elevation, 10) || 0) : 0;
+                if (nbElev > curElev) {
+                    stepMoveCost += (nbElev - curElev);
+                }
+            }
             var newMoveCost = cur.cost + stepMoveCost;
 
             // Penalidade tática secundária para contornar Ataques de Oportunidade e Perigos
@@ -22291,7 +22465,7 @@ function simFindOptimalHexPath(state, fromCol, fromRow, toCol, toRow, moverIdx) 
     }
 
     if (!prev[goalKey]) {
-        return (typeof hexLine === 'function') ? hexLine(fromCol, fromRow, toCol, toRow) : [];
+        return [];
     }
 
     var outPath = [];
@@ -23176,18 +23350,32 @@ function hexLine(c1, r1, c2, r2) {
 function calculateHexMovementCost(fromC, fromR, toC, toR, difficultMap) {
     if (typeof currentState !== 'undefined' && currentState && typeof simFindOptimalHexPath === 'function') {
         var moverIdx = (currentState.active_idx != null) ? currentState.active_idx : (currentState.p_idx || 0);
-        var optPath = simFindOptimalHexPath(currentState, moverIdx, fromC, fromR, toC, toR);
-        if (optPath && optPath.length > 1) {
-            var dtLookup = (typeof simBuildDifficultTerrainLookup === 'function')
-                ? simBuildDifficultTerrainLookup(currentState)
-                : (difficultMap || {});
-            var optCost = 0;
-            for (var oi = 1; oi < optPath.length; oi++) {
-                var ok = optPath[oi].col + ',' + optPath[oi].row;
-                optCost += dtLookup[ok] ? 2 : 1;
-            }
-            return optCost;
+        var moverUnit = (currentState.order && currentState.order[moverIdx]) ? currentState.order[moverIdx] : null;
+        var ignoreDiff = !!(moverUnit && moverUnit.has_lands_stride);
+        var ignoreClimb = !!(moverUnit && (moverUnit.has_lands_stride || ((moverUnit.feats || []).indexOf('athlete') >= 0)));
+        var optPath = simFindOptimalHexPath(currentState, fromC, fromR, toC, toR, moverIdx);
+        if (!optPath || optPath.length <= 1) {
+            return 999;
         }
+        var dtLookup = (typeof simBuildDifficultTerrainLookup === 'function')
+            ? simBuildDifficultTerrainLookup(currentState)
+            : (difficultMap || {});
+        var optCost = 0;
+        for (var oi = 1; oi < optPath.length; oi++) {
+            var prevStep = optPath[oi - 1];
+            var curStep = optPath[oi];
+            var ok = curStep.col + ',' + curStep.row;
+            var stepCost = (!ignoreDiff && dtLookup[ok]) ? 2 : 1;
+            if (!ignoreClimb && typeof simGetHexElevation === 'function') {
+                var ePrev = simGetHexElevation(currentState, prevStep.col, prevStep.row);
+                var eCur = simGetHexElevation(currentState, curStep.col, curStep.row);
+                if (eCur > ePrev) {
+                    stepCost += (eCur - ePrev);
+                }
+            }
+            optCost += stepCost;
+        }
+        return optCost;
     }
     var line = hexLine(fromC, fromR, toC, toR);
     var cost = 0;
@@ -23196,6 +23384,218 @@ function calculateHexMovementCost(fromC, fromR, toC, toR, difficultMap) {
         cost += (difficultMap && difficultMap[k]) ? 2 : 1;
     }
     return cost;
+}
+
+function getBiomeObstacles(biome, cols, rows) {
+    cols = cols || HEX_COLS_DEFAULT;
+    rows = rows || HEX_ROWS_DEFAULT;
+    var b = String(biome || 'forest').toLowerCase();
+    var catalog;
+    if (b.indexOf('forest') >= 0 || b.indexOf('floresta') >= 0 || b.indexOf('woods') >= 0 || b.indexOf('bosque') >= 0) {
+        catalog = [
+            { name: 'Carvalho Centenário', cover: 'total', blocks_los: true, symbol: '🌳', desc: 'Árvore colossal de tronco maciço — Obstáculo Intransponível e Cobertura Total (bloqueia linha de visão e projéteis)' },
+            { name: 'Monólito Silvestre', cover: 'total', blocks_los: true, symbol: '🗿', desc: 'Pedra ancestral coberta de hera — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Pedregulho Musgoso', cover: 'three_quarters', blocks_los: false, symbol: '🪨', desc: 'Rocha densa — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+            { name: 'Tronco Petrificado', cover: 'half', blocks_los: false, symbol: '🪵', desc: 'Madeira ancestral caída — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' },
+            { name: 'Raízes Gigantes', cover: 'half', blocks_los: false, symbol: '🌿', desc: 'Emaranhado lenhoso elevado — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+        ];
+    } else if (b.indexOf('cave') >= 0 || b.indexOf('caverna') >= 0 || b.indexOf('dungeon') >= 0 || b.indexOf('masmorra') >= 0 || b.indexOf('crypt') >= 0 || b.indexOf('ruins') >= 0 || b.indexOf('ruinas') >= 0) {
+        catalog = [
+            { name: 'Pilar Rúnico Intacto', cover: 'total', blocks_los: true, symbol: '🏛️', desc: 'Coluna de pedra maciça do chão ao teto — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Estalagmite Colossal', cover: 'total', blocks_los: true, symbol: '⛰️', desc: 'Formação mineral intransponível — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Sarcófago de Pedra', cover: 'three_quarters', blocks_los: false, symbol: '⚰️', desc: 'Túmulo pesado — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+            { name: 'Mureta Desmoronada', cover: 'half', blocks_los: false, symbol: '🧱', desc: 'Parede baixa de alvenaria — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' },
+            { name: 'Altar Profanado', cover: 'half', blocks_los: false, symbol: '⛩️', desc: 'Bloco ritualístico de granito — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+        ];
+    } else if (b.indexOf('mountain') >= 0 || b.indexOf('montanha') >= 0 || b.indexOf('hills') >= 0 || b.indexOf('colina') >= 0 || b.indexOf('snow') >= 0 || b.indexOf('ice') >= 0 || b.indexOf('gelo') >= 0) {
+        catalog = [
+            { name: 'Pináculo Rochoso', cover: 'total', blocks_los: true, symbol: '🏔️', desc: 'Agulha de granito — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Paredão Glacial', cover: 'total', blocks_los: true, symbol: '🧊', desc: 'Bloco maciço de gelo eterno — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Matacão Alpino', cover: 'three_quarters', blocks_los: false, symbol: '🪨', desc: 'Rocha de encosta — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+            { name: 'Crista de Xisto', cover: 'half', blocks_los: false, symbol: '⛰️', desc: 'Afloramento rochoso — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' },
+            { name: 'Parapeito Natural', cover: 'half', blocks_los: false, symbol: '🛡️', desc: 'Degrau de pedra — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+        ];
+    } else if (b.indexOf('swamp') >= 0 || b.indexOf('pantano') >= 0 || b.indexOf('pântano') >= 0 || b.indexOf('marsh') >= 0) {
+        catalog = [
+            { name: 'Cipreste Oco Gigante', cover: 'total', blocks_los: true, symbol: '🌲', desc: 'Árvore pantanosa descomunal — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Totem Afundado', cover: 'total', blocks_los: true, symbol: '🗿', desc: 'Monumento ancestral — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Cupinzeiro Petrificado', cover: 'three_quarters', blocks_los: false, symbol: '🪨', desc: 'Estrutura rígida — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+            { name: 'Barco Naufragado', cover: 'half', blocks_los: false, symbol: '🛶', desc: 'Casco apodrecido — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' },
+            { name: 'Raiz de Manguezal', cover: 'half', blocks_los: false, symbol: '🌿', desc: 'Arco de raízes densas — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+        ];
+    } else {
+        catalog = [
+            { name: 'Menir Ancestral', cover: 'total', blocks_los: true, symbol: '🗿', desc: 'Obelisco de pedra — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Torreão em Ruínas', cover: 'total', blocks_los: true, symbol: '🏛️', desc: 'Fragmento de muralha — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Carroça Tombada', cover: 'three_quarters', blocks_los: false, symbol: '🛞', desc: 'Estrutura de carvalho reforçado — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+            { name: 'Barricada de Madeira', cover: 'half', blocks_los: false, symbol: '🚧', desc: 'Estacas defensivas — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' },
+            { name: 'Afloramento de Pedra', cover: 'half', blocks_los: false, symbol: '🪨', desc: 'Rocha baixa — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+        ];
+    }
+
+    var coords;
+    if (cols >= 12 && rows >= 10) {
+        coords = [
+            [2, 3, 0],
+            [11, 3, 2],
+            [5, 5, 0],
+            [9, 5, 2],
+            [4, 7, 3],
+            [6, 5, 4],
+            [10, 7, 1],
+            [6, 6, 3],
+            [8, 6, 4]
+        ];
+    } else {
+        coords = [
+            [1, 3, 0],
+            [6, 3, 2],
+            [2, 5, 3],
+            [5, 5, 4],
+            [4, 4, 2]
+        ];
+    }
+
+    var obstacles = [];
+    for (var i = 0; i < coords.length; i++) {
+        var c = coords[i][0], r = coords[i][1], catIdx = coords[i][2];
+        if (c >= 0 && c < cols && r >= 0 && r < rows) {
+            var spec = catalog[catIdx % catalog.length];
+            obstacles.push({
+                col: c,
+                row: r,
+                name: spec.name,
+                cover: spec.cover,
+                blocks_los: spec.blocks_los,
+                blocks_movement: true,
+                impassable: true,
+                symbol: spec.symbol,
+                desc: spec.desc
+            });
+        }
+    }
+    return obstacles;
+}
+
+function getBiomeElevations(biome, cols, rows) {
+    cols = cols || HEX_COLS_DEFAULT;
+    rows = rows || HEX_ROWS_DEFAULT;
+    var b = String(biome || 'forest').toLowerCase();
+    var catalogPos1, catalogPos2, catalogNeg1;
+    if (b.indexOf('mountain') >= 0 || b.indexOf('montanha') >= 0 || b.indexOf('hills') >= 0 || b.indexOf('colina') >= 0) {
+        catalogPos1 = { name: 'Platô Rochoso (+1,5m)', elevation: 1, meters: '+1,5m', desc: 'Terreno Elevado (+2 em ataques à distância contra alvos abaixo; +1,5m custo de subida)' };
+        catalogPos2 = { name: 'Crista Dominante (+3,0m)', elevation: 2, meters: '+3,0m', desc: 'Terreno Muito Elevado (+2 em ataques à distância contra alvos abaixo; +3m custo de subida)' };
+        catalogNeg1 = { name: 'Ravina Rasa (-1,5m)', elevation: -1, meters: '-1,5m', desc: 'Depressão Tática (-2 em ataques à distância contra alvos em nível superior)' };
+    } else if (b.indexOf('cave') >= 0 || b.indexOf('caverna') >= 0 || b.indexOf('dungeon') >= 0 || b.indexOf('masmorra') >= 0 || b.indexOf('crypt') >= 0 || b.indexOf('ruins') >= 0 || b.indexOf('ruinas') >= 0) {
+        catalogPos1 = { name: 'Galeria Superior (+1,5m)', elevation: 1, meters: '+1,5m', desc: 'Patamar de pedra elevado (+2 em ataques à distância contra alvos abaixo)' };
+        catalogPos2 = { name: 'Altar Elevado (+3,0m)', elevation: 2, meters: '+3,0m', desc: 'Tribuna antiga dominante (+2 em ataques à distância contra alvos abaixo)' };
+        catalogNeg1 = { name: 'Fosso Antigo (-1,5m)', elevation: -1, meters: '-1,5m', desc: 'Piso rebaixado (-2 em ataques à distância contra alvos acima)' };
+    } else if (b.indexOf('swamp') >= 0 || b.indexOf('pantano') >= 0 || b.indexOf('pântano') >= 0) {
+        catalogPos1 = { name: 'Ribanceira Seca (+1,5m)', elevation: 1, meters: '+1,5m', desc: 'Elevação firme acima do pântano (+2 em ataques à distância contra alvos abaixo)' };
+        catalogPos2 = { name: 'Monte de Raízes (+3,0m)', elevation: 2, meters: '+3,0m', desc: 'Topo elevado de raízes antigas (+2 em ataques à distância contra alvos abaixo)' };
+        catalogNeg1 = { name: 'Vala Alagada (-1,5m)', elevation: -1, meters: '-1,5m', desc: 'Depressão lamacenta (-2 em ataques à distância contra alvos acima)' };
+    } else {
+        catalogPos1 = { name: 'Colina Tática (+1,5m)', elevation: 1, meters: '+1,5m', desc: 'Terreno Elevado (+2 em ataques à distância contra alvos abaixo; +1,5m custo de subida)' };
+        catalogPos2 = { name: 'Mirante Natural (+3,0m)', elevation: 2, meters: '+3,0m', desc: 'Ponto alto estratégico (+2 em ataques à distância contra alvos abaixo)' };
+        catalogNeg1 = { name: 'Vala Natural (-1,5m)', elevation: -1, meters: '-1,5m', desc: 'Leito rebaixado (-2 em ataques à distância contra alvos acima)' };
+    }
+
+    var rawCoords;
+    if (cols >= 12 && rows >= 10) {
+        rawCoords = [
+            [4, 4, catalogPos1],
+            [5, 4, catalogPos2],
+            [9, 4, catalogPos1],
+            [10, 4, catalogPos2],
+            [4, 6, catalogPos1],
+            [5, 6, catalogPos1],
+            [9, 6, catalogPos1],
+            [10, 6, catalogPos1],
+            [8, 5, catalogNeg1],
+            [6, 7, catalogPos1],
+            [8, 7, catalogPos1]
+        ];
+    } else {
+        rawCoords = [
+            [2, 4, catalogPos1],
+            [5, 4, catalogPos1],
+            [2, 6, catalogPos1],
+            [5, 6, catalogPos1]
+        ];
+    }
+
+    var elevations = [];
+    for (var i = 0; i < rawCoords.length; i++) {
+        var c = rawCoords[i][0], r = rawCoords[i][1], spec = rawCoords[i][2];
+        if (c >= 0 && c < cols && r >= 0 && r < rows) {
+            elevations.push({
+                col: c,
+                row: r,
+                elevation: spec.elevation,
+                meters: spec.meters,
+                name: spec.name,
+                desc: spec.desc
+            });
+        }
+    }
+    return elevations;
+}
+
+function getProceduralHexObstacle(col, row, biome) {
+    var bStr = String(biome || 'forest').toLowerCase();
+    var seed = 0;
+    for (var i = 0; i < bStr.length; i++) seed = (seed * 37 + bStr.charCodeAt(i)) & 0x7fffffff;
+    var h = (Math.imul(col ^ 0x27d4eb2d, 0x85ebca6b) ^ Math.imul(row ^ seed, 0xc2b2ae35)) >>> 0;
+    var rnd = (h % 1000) / 1000;
+    if (rnd < 0.075) {
+        var catalog = getBiomeObstacles(bStr, 20, 20);
+        if (!catalog || !catalog.length) return null;
+        var spec = catalog[h % catalog.length];
+        return {
+            col: col,
+            row: row,
+            name: spec.name,
+            cover: spec.cover,
+            blocks_los: spec.blocks_los,
+            blocks_movement: true,
+            impassable: true,
+            symbol: spec.symbol,
+            desc: spec.desc
+        };
+    }
+    return null;
+}
+
+function getProceduralHexElevation(col, row, biome) {
+    var bStr = String(biome || 'forest').toLowerCase();
+    var seed = 0;
+    for (var i = 0; i < bStr.length; i++) seed = (seed * 43 + bStr.charCodeAt(i)) & 0x7fffffff;
+    var h = (Math.imul(Math.floor(col / 2) ^ 0x165667b1, 0x27d4eb2d) ^ Math.imul(Math.floor(row / 2) ^ seed, 0x85ebca6b) ^ ((col + row) * 19)) >>> 0;
+    var rnd = (h % 1000) / 1000;
+    if (rnd < 0.14) {
+        var isHigh = (h % 5 === 0);
+        var elevLv = isHigh ? 2 : 1;
+        var meters = isHigh ? '+3,0m' : '+1,5m';
+        var name = isHigh ? 'Crista Dominante (+3,0m)' : 'Terreno Elevado (+1,5m)';
+        return {
+            col: col,
+            row: row,
+            elevation: elevLv,
+            meters: meters,
+            name: name,
+            desc: 'Terreno Elevado (+2 em ataques à distância contra alvos abaixo)'
+        };
+    } else if (rnd > 0.94) {
+        return {
+            col: col,
+            row: row,
+            elevation: -1,
+            meters: '-1,5m',
+            name: 'Depressão Tática (-1,5m)',
+            desc: 'Terreno Baixo (-2 em ataques à distância contra alvos acima)'
+        };
+    }
+    return null;
 }
 
 function assignInitialPositions(order, cols, rows, biome, weather, formation) {
@@ -23236,6 +23636,12 @@ function assignInitialPositions(order, cols, rows, biome, weather, formation) {
 
     var occupied = {};
     function key(c, r) { return c + ',' + r; }
+
+    // Reserva os hexágonos de obstáculos iniciais para que nenhuma unidade nasça em cima de um obstáculo intransponível
+    var defaultObs = getBiomeObstacles(biome, cols, rows);
+    for (var doi = 0; doi < defaultObs.length; doi++) {
+        occupied[key(defaultObs[doi].col, defaultObs[doi].row)] = true;
+    }
 
     order.forEach(function (c) {
         if (c && c.pos && c.pos.col != null && c.pos.row != null) {
@@ -23453,6 +23859,33 @@ function ensureProceduralBattlefield(s) {
     if (!s.battlefield.rows) s.battlefield.rows = HEX_ROWS_DEFAULT;
     if (!s.battlefield.difficult_terrain) s.battlefield.difficult_terrain = [];
     if (!s.battlefield.obstacles) s.battlefield.obstacles = [];
+    if (!s.battlefield.elevations) s.battlefield.elevations = [];
+
+    var biomeStr = s.biome || s.bio || 'forest';
+    var unitOccupiedMap = {};
+    (s.order || []).forEach(function (u) {
+        if (u && u.alive && !u.isDead && u.pos && u.pos.col != null && u.pos.row != null) {
+            unitOccupiedMap[u.pos.col + ',' + u.pos.row] = true;
+        }
+    });
+
+    var initializedBase = false;
+    if (s.battlefield.obstacles.length === 0 && !s.battlefield._obstaclesInitialized) {
+        s.battlefield._obstaclesInitialized = true;
+        var baseObs = getBiomeObstacles(biomeStr, s.battlefield.cols, s.battlefield.rows);
+        for (var boi = 0; boi < baseObs.length; boi++) {
+            var bo = baseObs[boi];
+            if (!unitOccupiedMap[bo.col + ',' + bo.row]) {
+                s.battlefield.obstacles.push(bo);
+            }
+        }
+        initializedBase = true;
+    }
+    if (s.battlefield.elevations.length === 0 && !s.battlefield._elevationsInitialized) {
+        s.battlefield._elevationsInitialized = true;
+        s.battlefield.elevations = getBiomeElevations(biomeStr, s.battlefield.cols, s.battlefield.rows);
+        initializedBase = true;
+    }
 
     var minC = Infinity, maxC = -Infinity, minR = Infinity, maxR = -Infinity;
     (s.order || []).forEach(function (u) {
@@ -23463,7 +23896,7 @@ function ensureProceduralBattlefield(s) {
             if (u.pos.row > maxR) maxR = u.pos.row;
         }
     });
-    if (minC === Infinity) return false;
+    if (minC === Infinity) return initializedBase;
 
     // A margem de segurança do tabuleiro DEVE comportar integralmente o raio de visão dos combatentes
     // (D&D 5e: visão de até 6 a 8 hexes / 9m a 12m).
@@ -23471,7 +23904,7 @@ function ensureProceduralBattlefield(s) {
     var requiredMargin = 7;
     (s.order || []).forEach(function (u) {
         if (u && (u.t === 'p' || u.t === 'a')) {
-            var vr = calcUnitVisionRange(u, s.weather, s.biome || s.bio);
+            var vr = calcUnitVisionRange(u, s.weather, biomeStr);
             if (vr + 1 > requiredMargin) requiredMargin = vr + 1;
         }
     });
@@ -23492,6 +23925,11 @@ function ensureProceduralBattlefield(s) {
         if (s.battlefield.obstacles) {
             s.battlefield.obstacles.forEach(function (obs) {
                 if (obs && obs.col != null) obs.col += shiftC;
+            });
+        }
+        if (s.battlefield.elevations) {
+            s.battlefield.elevations.forEach(function (el) {
+                if (el && el.col != null) el.col += shiftC;
             });
         }
         if (typeof window !== 'undefined' && window.__bfPanState && typeof window.__bfPanState.panX === 'number') {
@@ -23516,6 +23954,11 @@ function ensureProceduralBattlefield(s) {
                 if (obs && obs.row != null) obs.row += shiftR;
             });
         }
+        if (s.battlefield.elevations) {
+            s.battlefield.elevations.forEach(function (el) {
+                if (el && el.row != null) el.row += shiftR;
+            });
+        }
         if (typeof window !== 'undefined' && window.__bfPanState && typeof window.__bfPanState.panY === 'number') {
             window.__bfPanState.panY -= Math.round(shiftR * HEX_ROW_STEP * (window.__bfPanState.currentZoom || 1));
         }
@@ -23534,7 +23977,7 @@ function ensureProceduralBattlefield(s) {
         expanded = true;
     }
 
-    if (expanded) {
+    if (expanded || initializedBase) {
         var dtMap = {};
         s.battlefield.difficult_terrain.forEach(function (dt) {
             if (dt && dt.col != null && dt.row != null) dtMap[dt.col + ',' + dt.row] = true;
@@ -23545,21 +23988,49 @@ function ensureProceduralBattlefield(s) {
                 if (obs && obs.col != null && obs.row != null) obsMap[obs.col + ',' + obs.row] = true;
             });
         }
-        var biomeStr = s.biome || 'forest';
+        var elevMap = {};
+        if (s.battlefield.elevations) {
+            s.battlefield.elevations.forEach(function (el) {
+                if (el && el.col != null && el.row != null) elevMap[el.col + ',' + el.row] = true;
+            });
+        }
+        var liveOcc = {};
+        (s.order || []).forEach(function (u) {
+            if (u && u.alive && !u.isDead && u.pos && u.pos.col != null && u.pos.row != null) {
+                liveOcc[u.pos.col + ',' + u.pos.row] = true;
+            }
+        });
+
         for (var c = 0; c < s.battlefield.cols; c++) {
             for (var r = 0; r < s.battlefield.rows; r++) {
                 var k = c + ',' + r;
-                if (!dtMap[k] && !obsMap[k]) {
+                var isOuterRing = (c < minC - 1 || c > maxC + 1 || r < minR - 1 || r > maxR + 1);
+                if (!dtMap[k] && !obsMap[k] && !liveOcc[k]) {
+                    if (isOuterRing) {
+                        var pObs = getProceduralHexObstacle(c, r, biomeStr);
+                        if (pObs) {
+                            s.battlefield.obstacles.push(pObs);
+                            obsMap[k] = true;
+                            continue;
+                        }
+                    }
                     var feat = getProceduralHexFeature(c, r, biomeStr);
                     if (feat) {
                         s.battlefield.difficult_terrain.push(feat);
                         dtMap[k] = true;
                     }
                 }
+                if (isOuterRing && !elevMap[k] && !obsMap[k]) {
+                    var pElev = getProceduralHexElevation(c, r, biomeStr);
+                    if (pElev) {
+                        s.battlefield.elevations.push(pElev);
+                        elevMap[k] = true;
+                    }
+                }
             }
         }
     }
-    return expanded;
+    return expanded || initializedBase;
 }
 
 /* Botão temporário flutuante no topo central para pular movimentação (Ordem do Usuário 2026-10) */
@@ -23820,10 +24291,67 @@ function showOpportunityAttackHelpModal(provokingNames, provokingHostiles) {
 }
 
 /**
+ * D&D 5e (PHB p. 196): Inspeção tática de Obstáculo Intransponível / Cobertura no Mapa.
+ */
+function showObstacleInspectModal(obs, col, row) {
+    if (!obs) return;
+    var prev = document.getElementById('obstacle-inspect-overlay');
+    if (prev) prev.remove();
+
+    var ov = document.createElement('div');
+    ov.id = 'obstacle-inspect-overlay';
+    ov.className = 'target-confirm-overlay';
+
+    var card = document.createElement('div');
+    card.className = 'target-confirm-card';
+
+    var colLetter = String.fromCharCode(65 + (col | 0));
+    var coordStr = colLetter + ((row | 0) + 1);
+    var covType = obs.cover || 'half';
+    var covLabel = (covType === 'total') ? 'Cobertura Total (Bloqueio Completo)' : ((covType === 'three_quarters') ? 'Três Quartos de Cobertura (+5 CA e +5 Salv. DES)' : 'Meia Cobertura (+2 CA e +2 Salv. DES)');
+    var covColor = (covType === 'total') ? '#f87171' : ((covType === 'three_quarters') ? '#fbbf24' : '#60a5fa');
+    var losText = obs.blocks_los ? 'Sim — Bloqueia totalmente linha de visão e ataques diretos (PHB p. 196).' : 'Parcial — Permite linha de tiro, mas concede bônus defensivo às unidades abrigadas atrás dele.';
+
+    var html = '';
+    html += '<div class="tcc-title">Obstáculo Tático (Hexágono ' + coordStr + ')</div>';
+    html += '<div class="tcc-preview" style="padding:10px 14px;background:rgba(20,15,10,0.68);border:1px solid rgba(196,149,58,0.35);border-radius:6px;margin-bottom:12px;display:flex;align-items:center;">';
+    html += '<div style="font-size:28px;margin-right:12px;line-height:1;">' + escHtml(obs.symbol || '🪨') + '</div>';
+    html += '<div class="tcc-info">';
+    html += '<div class="tcc-name">' + escHtml(obs.name || 'Obstáculo Intransponível') + '</div>';
+    html += '<div class="tcc-stats"><span style="color:#f87171;font-weight:800;">⛔ Intransponível</span> · <span style="color:' + covColor + ';font-weight:700;">' + covLabel + '</span></div>';
+    html += '</div></div>';
+
+    html += '<div class="tcc-dmg" style="margin-bottom:12px;">';
+    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Movimentação</span><span class="tcc-dmg-val" style="color:#f87171;font-weight:700;">Bloqueado (Intransponível)</span></div>';
+    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Grau de Cobertura</span><span class="tcc-dmg-val" style="color:' + covColor + ';font-weight:700;">' + covLabel + '</span></div>';
+    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Linha de Visão</span><span class="tcc-dmg-val">' + losText + '</span></div>';
+    html += '</div>';
+
+    if (obs.desc) {
+        html += '<div style="background:rgba(30,24,18,0.65);border-left:3px solid ' + covColor + ';padding:8px 11px;margin-bottom:12px;font-size:11.5px;color:#e7e5e4;line-height:1.45;">';
+        html += escHtml(obs.desc);
+        html += '</div>';
+    }
+
+    html += '<div class="tcc-actions">';
+    html += '<button type="button" class="action-btn primary" data-act="close-obs">↩ Fechar Inspeção</button>';
+    html += '</div>';
+
+    setHTML(card, html);
+    ov.appendChild(card);
+    if (typeof mountInGameFrame === 'function') mountInGameFrame(ov);
+    else document.body.appendChild(ov);
+
+    function close() { try { ov.remove(); } catch (_) {} }
+    ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+    card.querySelector('[data-act="close-obs"]').addEventListener('click', close);
+}
+
+/**
  * D&D 5e: Confirmação tática de movimento no grid hexagonal.
  * Exibe quantidade de metros a movimentar, metros restantes após a ação,
- * benefícios táticos no destino (Flanqueamento, Cobertura, Alcance),
- * custo por terreno difícil e alerta de ataque de oportunidade se sair de combate corpo a corpo.
+ * benefícios táticos no destino (Flanqueamento, Cobertura, Terreno Elevado, Alcance),
+ * custo por terreno difícil/aclive e alerta de ataque de oportunidade se sair de combate corpo a corpo.
  */
 function showMoveConfirm(tCol, tRow) {
     if (!currentState || currentState.ph !== 'active') return;
@@ -23834,21 +24362,34 @@ function showMoveConfirm(tCol, tRow) {
     var fromCol = p.pos.col, fromRow = p.pos.row;
 
     var path = (typeof simFindOptimalHexPath === 'function')
-        ? simFindOptimalHexPath(currentState, currentState.p_idx, fromCol, fromRow, tCol, tRow)
+        ? simFindOptimalHexPath(currentState, fromCol, fromRow, tCol, tRow, currentState.p_idx)
         : ((typeof hexLine === 'function') ? hexLine(fromCol, fromRow, tCol, tRow) : null);
     if (!path || path.length <= 1) return;
 
     var difficultMap = (typeof simBuildDifficultTerrainLookup === 'function')
         ? simBuildDifficultTerrainLookup(currentState)
         : {};
+    var ignoreDiff = !!p.has_lands_stride;
+    var ignoreClimb = !!(p.has_lands_stride || ((p.feats || []).indexOf('athlete') >= 0));
 
     var totalCost = 0;
     var hasDifficult = false;
+    var hasClimbCost = false;
     for (var i = 1; i < path.length; i++) {
+        var prevCoord = path[i - 1];
         var stepCoord = path[i];
-        var isDiff = !!difficultMap[stepCoord.col + ',' + stepCoord.row];
+        var isDiff = !ignoreDiff && !!difficultMap[stepCoord.col + ',' + stepCoord.row];
         if (isDiff) hasDifficult = true;
-        totalCost += isDiff ? 2 : 1;
+        var stepCost = isDiff ? 2 : 1;
+        if (!ignoreClimb && typeof simGetHexElevation === 'function') {
+            var ePrev = simGetHexElevation(currentState, prevCoord.col, prevCoord.row);
+            var eCur = simGetHexElevation(currentState, stepCoord.col, stepCoord.row);
+            if (eCur > ePrev) {
+                stepCost += (eCur - ePrev);
+                hasClimbCost = true;
+            }
+        }
+        totalCost += stepCost;
     }
 
     var moveLeft = p.movement_left || 0;
@@ -23881,8 +24422,15 @@ function showMoveConfirm(tCol, tRow) {
     }
     var willTriggerOA = provokingHostiles.length > 0;
 
-    // Benefícios Táticos D&D 5e no hexágono de destino (Flanqueamento, Cobertura e Alcance)
+    // Benefícios Táticos D&D 5e no hexágono de destino (Flanqueamento, Cobertura, Terreno Elevado e Alcance)
     var destBenefits = [];
+    var destElev = (typeof simGetHexElevation === 'function') ? simGetHexElevation(currentState, tCol, tRow) : 0;
+    if (destElev > 0) {
+        var elevMetersStr = (destElev >= 2) ? '+3,0m' : '+1,5m';
+        destBenefits.push('⛰️ <strong>Terreno Elevado (' + elevMetersStr + ')</strong>: Concede <strong>+2 nas jogadas de ataque à distância</strong> contra alvos em nível inferior (DMG p. 251)');
+    } else if (destElev < 0) {
+        destBenefits.push('▼ <strong>Depressão Tática (-1,5m)</strong>: Atenção — ataques à distância contra alvos mais altos sofrem penalidade de -2');
+    }
     var mockSelf = Object.assign({}, p, { pos: { col: tCol, row: tRow } });
     if (currentState && currentState.order) {
         if (typeof simCheckFlanking === 'function') {
@@ -23927,18 +24475,23 @@ function showMoveConfirm(tCol, tRow) {
     var colLetter = String.fromCharCode(65 + tCol);
     var destCoordStr = colLetter + (tRow + 1);
 
+    var costExtraTag = '';
+    if (hasDifficult && hasClimbCost) costExtraTag = ' <span style="color:#f59e0b;font-size:11px;">(Terreno Difícil ◆ + Aclive ▲)</span>';
+    else if (hasDifficult) costExtraTag = ' <span style="color:#f59e0b;font-size:11px;">(Terreno Difícil ◆)</span>';
+    else if (hasClimbCost) costExtraTag = ' <span style="color:#fde68a;font-size:11px;">(Subida de Elevação ▲)</span>';
+
     var html = '';
     html += '<div class="tcc-title">Confirmar Movimento</div>';
     html += '<div class="tcc-preview" style="padding:10px 14px;background:rgba(20,15,10,0.6);border-radius:6px;margin-bottom:12px;display:flex;align-items:center;">';
     html += '<div style="margin-right:12px;color:var(--v-gold,#c4953a);display:flex;align-items:center;">' + _combatDistanceIconSVG(24) + '</div>';
     html += '<div class="tcc-info">';
-    html += '<div class="tcc-name">Destino: Hexágono ' + destCoordStr + '</div>';
+    html += '<div class="tcc-name">Destino: Hexágono ' + destCoordStr + (destElev > 0 ? ' (▲ +' + (destElev * 1.5).toFixed(1).replace('.', ',') + 'm)' : '') + '</div>';
     html += '<div class="tcc-stats"><span class="tcc-n-key">' + dM + '</span> (' + dHexes + ' hexes)</div>';
     html += '</div></div>';
 
     html += '<div class="tcc-dmg" style="margin-bottom:12px;">';
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância da rota</span><span class="tcc-dmg-val"><strong>' + dM + '</strong></span></div>';
-    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Custo de movimento</span><span class="tcc-dmg-val"><strong>' + costM + '</strong>' + (hasDifficult ? ' <span style="color:#f59e0b;font-size:11px;">(Terreno Difícil ◆)</span>' : '') + '</span></div>';
+    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Custo de movimento</span><span class="tcc-dmg-val"><strong>' + costM + '</strong>' + costExtraTag + '</span></div>';
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Disponível agora</span><span class="tcc-dmg-val">' + currentMoveM + '</span></div>';
     html += '<div class="tcc-dmg-row crit" style="border-top:1px dashed rgba(196,149,58,0.3);padding-top:6px;"><span class="tcc-dmg-lbl">Restará após mover</span><span class="tcc-dmg-val" style="color:#a3e635;font-weight:bold;">' + remainingAfterM + ' de ' + totalSpeedM + '</span></div>';
     html += '</div>';
@@ -24007,20 +24560,30 @@ async function handlePlayerMoveTo(tCol, tRow) {
     }
 
     var path = (typeof simFindOptimalHexPath === 'function')
-        ? simFindOptimalHexPath(currentState, currentState.p_idx, fromCol, fromRow, tCol, tRow)
+        ? simFindOptimalHexPath(currentState, fromCol, fromRow, tCol, tRow, currentState.p_idx)
         : hexLine(fromCol, fromRow, tCol, tRow);
     if (!path || path.length <= 1) return;
 
     var difficultMap = (typeof simBuildDifficultTerrainLookup === 'function')
         ? simBuildDifficultTerrainLookup(currentState)
         : {};
+    var ignoreDiff = !!p.has_lands_stride;
+    var ignoreClimb = !!(p.has_lands_stride || ((p.feats || []).indexOf('athlete') >= 0));
 
     var validPath = [path[0]];
     var totalCost = 0;
     var moveLeft = p.movement_left || 0;
     for (var i = 1; i < path.length; i++) {
+        var prevCoord = path[i - 1];
         var stepCoord = path[i];
-        var stepCost = (difficultMap[stepCoord.col + ',' + stepCoord.row]) ? 2 : 1;
+        var stepCost = (!ignoreDiff && difficultMap[stepCoord.col + ',' + stepCoord.row]) ? 2 : 1;
+        if (!ignoreClimb && typeof simGetHexElevation === 'function') {
+            var ePrev = simGetHexElevation(currentState, prevCoord.col, prevCoord.row);
+            var eCur = simGetHexElevation(currentState, stepCoord.col, stepCoord.row);
+            if (eCur > ePrev) {
+                stepCost += (eCur - ePrev);
+            }
+        }
         if (totalCost + stepCost > moveLeft) break;
         totalCost += stepCost;
         validPath.push(stepCoord);
@@ -24052,7 +24615,14 @@ async function handlePlayerMoveTo(tCol, tRow) {
         for (var sIdx = 0; sIdx < validPath.length - 1; sIdx++) {
             var curStep = validPath[sIdx];
             var nextStep = validPath[sIdx + 1];
-            var stepCost = (difficultMap[nextStep.col + ',' + nextStep.row]) ? 2 : 1;
+            var stepCost = (!ignoreDiff && difficultMap[nextStep.col + ',' + nextStep.row]) ? 2 : 1;
+            if (!ignoreClimb && typeof simGetHexElevation === 'function') {
+                var ePrev2 = simGetHexElevation(currentState, curStep.col, curStep.row);
+                var eCur2 = simGetHexElevation(currentState, nextStep.col, nextStep.row);
+                if (eCur2 > ePrev2) {
+                    stepCost += (eCur2 - ePrev2);
+                }
+            }
 
             // D&D 5e PHB p. 195: OA ocorre antes de sair do alcance do hostil
             var oas = (typeof simCheckOpportunityAttacks === 'function')
@@ -24129,7 +24699,7 @@ async function handlePlayerMoveTo(tCol, tRow) {
     var dHexes = actualReachedSteps;
     var dM = formatHexDistanceMeters(dHexes);
     var costM = formatHexDistanceMeters(actualSpentCost);
-    var costNote = (actualSpentCost !== dHexes) ? ' (custo: ' + costM + ' por terreno difícil)' : '';
+    var costNote = (actualSpentCost !== dHexes) ? ' (custo: ' + costM + ' por terreno difícil/elevação)' : '';
     currentState.log.push('Você se moveu ' + dM + costNote + '. Deslocamento restante: ' + formatHexDistanceMeters(p.movement_left || 0) + '.');
     if (typeof sendBattleCheckpoint === 'function') {
         try { sendBattleCheckpoint(currentState); } catch (_) {}
@@ -24169,7 +24739,15 @@ function findHexPathStep(startCol, startRow, targetCol, targetRow, maxSteps, occ
     if (stopAtReach == null) stopAtReach = 1;
     if (cols == null) cols = 8;
     if (rows == null) rows = 10;
-    var occ = occupiedSet || {};
+    var occ = Object.assign({}, occupiedSet || {});
+    if (typeof currentState !== 'undefined' && currentState && currentState.battlefield && Array.isArray(currentState.battlefield.obstacles)) {
+        for (var obi = 0; obi < currentState.battlefield.obstacles.length; obi++) {
+            var obItem = currentState.battlefield.obstacles[obi];
+            if (obItem && obItem.col != null && obItem.row != null) {
+                occ[obItem.col + ',' + obItem.row] = true;
+            }
+        }
+    }
     var dt = difficultMap || {};
 
     if (hexDistance(startCol, startRow, targetCol, targetRow) <= stopAtReach) {
@@ -24232,8 +24810,14 @@ function findHexPathStep(startCol, startRow, targetCol, targetRow, maxSteps, occ
     var stepsTaken = 0;
     var finalPath = [fullPath[0]];
     for (var p = 1; p < fullPath.length; p++) {
+        var prevCoord = fullPath[p - 1];
         var stepCoord = fullPath[p];
         var cost = (dt && dt[stepCoord.col + ',' + stepCoord.row]) ? 2 : 1;
+        if (typeof currentState !== 'undefined' && currentState && typeof simGetHexElevation === 'function') {
+            var ePrev = simGetHexElevation(currentState, prevCoord.col, prevCoord.row);
+            var eCur = simGetHexElevation(currentState, stepCoord.col, stepCoord.row);
+            if (eCur > ePrev) cost += (eCur - ePrev);
+        }
         if (stepsTaken + cost > maxSteps) break;
         stepsTaken += cost;
         finalPath.push(stepCoord);
@@ -24352,6 +24936,9 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                     if (!reachInfo.isRanged && typeof simCheckFlanking === 'function' && s && s.order) {
                         isFlanked = !!simCheckFlanking(pUnit, u, s.order);
                     }
+                    var elevMod = (typeof simCheckElevationTacticalModifier === 'function')
+                        ? simCheckElevationTacticalModifier(s, pUnit, u, !!reachInfo.isRanged)
+                        : { bonus: 0, state: 'flat' };
                     var metaChips = '';
                     if (tgtCover.cover === 'total') {
                         metaChips += ' · ✕ Bloqueado';
@@ -24359,6 +24946,11 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                         metaChips += ' · ⛨ ½ Cob';
                     } else if (tgtCover.cover === 'three_quarters') {
                         metaChips += ' · ⛨ ¾ Cob';
+                    }
+                    if (elevMod.state === 'high_ground') {
+                        metaChips += ' · ⛰️ +2 Alt';
+                    } else if (elevMod.state === 'low_ground') {
+                        metaChips += ' · ▼ -2 Alt';
                     }
                     if (isFlanked) {
                         metaChips += ' · ▲ Flanqueado';
@@ -24522,8 +25114,23 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
         }
     }
 
+    var unitElev = (u.pos && typeof simGetHexElevation === 'function') ? simGetHexElevation(s, u.pos.col, u.pos.row) : 0;
+    var elevChipHtml = '';
+    var elevYOffset = 0;
+    if (fogState !== 'shrouded' && unitElev !== 0) {
+        if (unitElev > 0) {
+            elevYOffset = -unitElev * 4;
+            var eMeters = (unitElev >= 2) ? '+3,0m' : '+1,5m';
+            var eArrows = (unitElev >= 2) ? '▲▲' : '▲';
+            elevChipHtml = '<div class="token-elev-chip" title="Terreno Elevado (' + eMeters + '): +2 nas jogadas de ataque à distância contra alvos em nível inferior">' + eArrows + ' ' + eMeters + '</div>';
+        } else {
+            elevYOffset = 3;
+            elevChipHtml = '<div class="token-elev-chip token-elev-chip--low" title="Depressão Tática (-1,5m): -2 nas jogadas de ataque à distância contra alvos mais altos">▼ -1,5m</div>';
+        }
+    }
+
     var tokenLeft = cx - Math.round(HEX_W / 2);
-    var tokenTop = cy - Math.round(HEX_H / 2);
+    var tokenTop = cy - Math.round(HEX_H / 2) + elevYOffset;
 
     var html = '<div class="' + classes + '" data-unit-id="' + uid + '" data-clickable="1"' + intentAttr + ' ' +
                'style="left:' + tokenLeft + 'px; top:' + tokenTop + 'px;">';
@@ -24574,9 +25181,10 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     html += '<span class="token-hp-text ' + hpCls + '">' + hpVal + '/' + u.mhp + '</span>';
     html += '</div>';
 
-    // Badges: AC, Init, Distance, Vantagem / Desvantagem, Concentração, Caído, Status e Death Saves D&D 5e
+    // Badges: AC, Init, Elevation, Distance, Vantagem / Desvantagem, Concentração, Caído, Status e Death Saves D&D 5e
     if (deathSavesBadge) html += deathSavesBadge;
     if (acBadge) html += acBadge;
+    if (elevChipHtml) html += elevChipHtml;
     if (initBadge) html += initBadge;
     if (distBadge) html += distBadge;
     if (advBadge) html += advBadge;
@@ -25617,6 +26225,118 @@ function buildPartyRhythmClockBadge(s) {
     '</div>';
 }
 
+function buildHexElevation25DSvg(cx, cy, elevObj, isOccupied, isDim) {
+    if (!elevObj || !elevObj.elevation) return '';
+    var elv = elevObj.elevation | 0;
+    var op = isDim ? '0.45' : '0.92';
+    var svg = '<g class="hex-elev-25d-group" opacity="' + op + '" pointer-events="none">';
+    var rx = Math.round(HEX_W / 2);
+    var qx = Math.round(HEX_W / 4);
+    var ry = Math.round(HEX_H / 2);
+
+    if (elv > 0) {
+        var depth = (elv >= 2) ? 8 : 5;
+        // Chanfro / Parede de Penhasco 2.5D na borda inferior do hexágono
+        var pLeftX = cx - rx, pLeftY = cy;
+        var pBotLeftX = cx - qx, pBotLeftY = cy + ry;
+        var pBotRightX = cx + qx, pBotRightY = cy + ry;
+        var pRightX = cx + rx, pRightY = cy;
+
+        var wallLeftPts = pLeftX + ',' + pLeftY + ' ' + pBotLeftX + ',' + pBotLeftY + ' ' + pBotLeftX + ',' + (pBotLeftY + depth) + ' ' + pLeftX + ',' + (pLeftY + depth);
+        var wallCenterPts = pBotLeftX + ',' + pBotLeftY + ' ' + pBotRightX + ',' + pBotRightY + ' ' + pBotRightX + ',' + (pBotRightY + depth) + ' ' + pBotLeftX + ',' + (pBotLeftY + depth);
+        var wallRightPts = pBotRightX + ',' + pBotRightY + ' ' + pRightX + ',' + pRightY + ' ' + pRightX + ',' + (pRightY + depth) + ' ' + pBotRightX + ',' + (pBotRightY + depth);
+
+        svg += '<polygon points="' + wallLeftPts + '" fill="rgba(18, 14, 10, 0.78)" stroke="rgba(212, 175, 55, 0.35)" stroke-width="0.7" />';
+        svg += '<polygon points="' + wallCenterPts + '" fill="rgba(12, 9, 6, 0.88)" stroke="rgba(212, 175, 55, 0.45)" stroke-width="0.8" />';
+        svg += '<polygon points="' + wallRightPts + '" fill="rgba(28, 22, 15, 0.74)" stroke="rgba(212, 175, 55, 0.35)" stroke-width="0.7" />';
+
+        // Anéis de contorno topográfico internos (Platô 2.5D)
+        var ring1 = hexPolygonPointsScaled(cx, cy - 2, 0.82);
+        svg += '<polygon points="' + ring1 + '" fill="rgba(253, 230, 138, 0.06)" stroke="rgba(251, 191, 36, 0.55)" stroke-width="1.1" stroke-dasharray="4 2" />';
+        if (elv >= 2) {
+            var ring2 = hexPolygonPointsScaled(cx, cy - 4, 0.64);
+            svg += '<polygon points="' + ring2 + '" fill="rgba(254, 240, 138, 0.08)" stroke="rgba(253, 224, 71, 0.72)" stroke-width="1.2" />';
+        }
+
+        // Selo de altitude quando não ocupado por token
+        if (!isOccupied) {
+            var lbl = (elv >= 2) ? '▲▲ +3m' : '▲ +1,5m';
+            var bw = (elv >= 2) ? 40 : 42;
+            var bx = Math.round(cx - bw / 2);
+            var by = cy - 7;
+            svg += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="13" rx="6" ry="6" class="hex-elev-badge-bg" />';
+            svg += '<text x="' + cx + '" y="' + (by + 7) + '" class="hex-elev-badge-text">' + lbl + '</text>';
+        }
+    } else {
+        // Depressão tática (-1,5m): borda chanfrada interna escura
+        var sinkRing = hexPolygonPointsScaled(cx, cy + 2, 0.80);
+        svg += '<polygon points="' + sinkRing + '" fill="rgba(5, 8, 15, 0.42)" stroke="rgba(56, 189, 248, 0.45)" stroke-width="1.1" stroke-dasharray="3 2" />';
+        if (!isOccupied) {
+            var bwLow = 40;
+            var bxLow = Math.round(cx - bwLow / 2);
+            var byLow = cy - 7;
+            svg += '<rect x="' + bxLow + '" y="' + byLow + '" width="' + bwLow + '" height="13" rx="6" ry="6" class="hex-elev-badge-bg hex-elev-badge-bg--low" />';
+            svg += '<text x="' + cx + '" y="' + (byLow + 7) + '" class="hex-elev-badge-text hex-elev-badge-text--low">▼ -1,5m</text>';
+        }
+    }
+
+    svg += '</g>';
+    return svg;
+}
+
+function buildHexObstacleSvg(cx, cy, obsTile, curBiome, isDim) {
+    if (!obsTile) return '';
+    var cov = obsTile.cover || 'half';
+    var nameLower = String(obsTile.name || '').toLowerCase();
+    var op = isDim ? '0.48' : '0.96';
+    var svg = '<g class="hex-obstacle-25d-group" opacity="' + op + '" pointer-events="none">';
+
+    // Sombra projetada no solo do hexágono
+    svg += '<ellipse cx="' + cx + '" cy="' + (cy + 6) + '" rx="20" ry="11" fill="rgba(0, 0, 0, 0.62)" />';
+
+    if (cov === 'total') {
+        if (nameLower.indexOf('carvalho') >= 0 || nameLower.indexOf('cipreste') >= 0 || nameLower.indexOf('árvore') >= 0 || nameLower.indexOf('arvore') >= 0) {
+            // Árvore Colossal 2.5D (Tronco + Copa Densa em Camadas)
+            svg += '<path d="M ' + (cx - 6) + ' ' + (cy + 8) + ' L ' + (cx - 4) + ' ' + (cy - 4) + ' L ' + (cx + 4) + ' ' + (cy - 4) + ' L ' + (cx + 7) + ' ' + (cy + 8) + ' Z" fill="#4a2e16" stroke="#291809" stroke-width="1" />';
+            svg += '<circle cx="' + (cx - 7) + '" cy="' + (cy - 6) + '" r="10" fill="#1e3f20" stroke="#112612" stroke-width="1" />';
+            svg += '<circle cx="' + (cx + 7) + '" cy="' + (cy - 5) + '" r="9.5" fill="#234924" stroke="#112612" stroke-width="1" />';
+            svg += '<circle cx="' + cx + '" cy="' + (cy - 10) + '" r="11.5" fill="#2d5a27" stroke="#4ade80" stroke-width="0.9" />';
+            svg += '<circle cx="' + (cx - 2) + '" cy="' + (cy - 12) + '" r="6" fill="rgba(134, 239, 172, 0.22)" />';
+        } else {
+            // Pilar / Monólito / Pináculo / Torreão 2.5D (Extrusão Vertical de Pedra/Runa)
+            svg += '<polygon points="' + (cx - 11) + ',' + (cy + 6) + ' ' + (cx - 8) + ',' + (cy - 16) + ' ' + (cx + 8) + ',' + (cy - 16) + ' ' + (cx + 11) + ',' + (cy + 6) + '" fill="#4b5563" stroke="#1f2937" stroke-width="1.2" />';
+            svg += '<polygon points="' + (cx - 8) + ',' + (cy - 16) + ' ' + cx + ',' + (cy - 21) + ' ' + (cx + 8) + ',' + (cy - 16) + ' ' + cx + ',' + (cy - 11) + '" fill="#9ca3af" stroke="#e5e7eb" stroke-width="0.9" />';
+            svg += '<polygon points="' + cx + ',' + (cy - 11) + ' ' + (cx + 8) + ',' + (cy - 16) + ' ' + (cx + 11) + ',' + (cy + 6) + ' ' + cx + ',' + (cy + 9) + '" fill="#374151" stroke="#111827" stroke-width="0.9" />';
+            // Runa ou fissura luminosa central
+            svg += '<path d="M ' + cx + ' ' + (cy - 9) + ' L ' + (cx - 3) + ' ' + (cy - 2) + ' L ' + (cx + 2) + ' ' + (cy + 1) + ' L ' + cx + ' ' + (cy + 6) + '" stroke="#f59e0b" stroke-width="1.3" fill="none" />';
+        }
+    } else if (cov === 'three_quarters') {
+        // Matacão / Sarcófago / Carroça (Rocha Facetada Densa 2.5D)
+        svg += '<polygon points="' + (cx - 14) + ',' + (cy + 5) + ' ' + (cx - 10) + ',' + (cy - 9) + ' ' + (cx + 3) + ',' + (cy - 12) + ' ' + (cx + 13) + ',' + (cy - 4) + ' ' + (cx + 14) + ',' + (cy + 6) + ' ' + (cx - 2) + ',' + (cy + 9) + '" fill="#57534e" stroke="#1c1917" stroke-width="1.2" />';
+        svg += '<polygon points="' + (cx - 10) + ',' + (cy - 9) + ' ' + (cx + 3) + ',' + (cy - 12) + ' ' + (cx + 8) + ',' + (cy - 3) + ' ' + (cx - 4) + ',' + (cy - 1) + '" fill="#78716c" stroke="#a8a29e" stroke-width="0.8" />';
+    } else {
+        // Meia Cobertura: Mureta / Tronco Petrificado / Barricada 2.5D
+        svg += '<rect x="' + (cx - 15) + '" y="' + (cy - 6) + '" width="30" height="11" rx="3" ry="3" fill="#6b4423" stroke="#291809" stroke-width="1.1" />';
+        svg += '<line x1="' + (cx - 12) + '" y1="' + (cy - 3) + '" x2="' + (cx + 12) + '" y2="' + (cy - 3) + '" stroke="rgba(253, 230, 138, 0.38)" stroke-width="1.1" />';
+    }
+
+    // Etiqueta superior: ⛔ BLOQUEIO (Intransponível)
+    svg += '<rect x="' + (cx - 21) + '" y="' + (cy - 22) + '" width="42" height="10" rx="4" ry="4" fill="rgba(127, 29, 29, 0.92)" stroke="#f87171" stroke-width="0.8" />';
+    svg += '<text x="' + cx + '" y="' + (cy - 16.5) + '" fill="#fecaca" font-family="Cinzel, serif" font-size="6.3px" font-weight="800" text-anchor="middle" dominant-baseline="central">⛔ BLOQUEIO</text>';
+
+    // Etiqueta inferior: Grau de Cobertura D&D 5e
+    var covBadgeText = (cov === 'total') ? 'COB. TOTAL' : ((cov === 'three_quarters') ? '⛨ ¾ (+5 CA)' : '⛨ ½ (+2 CA)');
+    var covStroke = (cov === 'total') ? '#f87171' : ((cov === 'three_quarters') ? '#fbbf24' : '#60a5fa');
+    var covBg = (cov === 'total') ? 'rgba(69, 10, 10, 0.92)' : ((cov === 'three_quarters') ? 'rgba(69, 26, 3, 0.92)' : 'rgba(23, 37, 84, 0.92)');
+    var covTextCol = (cov === 'total') ? '#fca5a5' : ((cov === 'three_quarters') ? '#fde68a' : '#bfdbfe');
+
+    svg += '<rect x="' + (cx - 22) + '" y="' + (cy + 10) + '" width="44" height="12" rx="5" ry="5" fill="' + covBg + '" stroke="' + covStroke + '" stroke-width="0.9" />';
+    svg += '<text x="' + cx + '" y="' + (cy + 16.2) + '" fill="' + covTextCol + '" font-family="Cinzel, serif" font-size="6.8px" font-weight="800" text-anchor="middle" dominant-baseline="central">' + covBadgeText + '</text>';
+
+    svg += '</g>';
+    return svg;
+}
+
 function buildBattlefield(s) {
     if (!s) return '';
     s.battlefield = s.battlefield || { cols: HEX_COLS_DEFAULT, rows: HEX_ROWS_DEFAULT };
@@ -25660,6 +26380,16 @@ function buildBattlefield(s) {
         s.battlefield.obstacles.forEach(function (obs) {
             if (obs && obs.col != null && obs.row != null) {
                 obstacleMap[obs.col + ',' + obs.row] = obs;
+            }
+        });
+    }
+
+    // Tactical Elevation map (D&D 5e High Ground / Low Ground - DMG p. 251)
+    var elevationMap = {};
+    if (s.battlefield && s.battlefield.elevations) {
+        s.battlefield.elevations.forEach(function (el) {
+            if (el && el.col != null && el.row != null && el.elevation) {
+                elevationMap[el.col + ',' + el.row] = el;
             }
         });
     }
@@ -25971,6 +26701,7 @@ function buildBattlefield(s) {
             var isInReach = inReachMap[hexKey] != null;
             var dtTile = difficultMap[hexKey];
             var obsTile = obstacleMap[hexKey];
+            var elevTile = elevationMap[hexKey];
             var occInfo = occupiedMap[hexKey];
 
             if (occInfo && occInfo.unit) {
@@ -25986,6 +26717,11 @@ function buildBattlefield(s) {
                 tileCls += ' hex-tile--difficult';
                 if (dtTile.hazard_kind) tileCls += ' hex-tile--hazard';
             }
+            if (elevTile && !obsTile) {
+                if (elevTile.elevation >= 2) tileCls += ' hex-tile--elev-2';
+                else if (elevTile.elevation === 1) tileCls += ' hex-tile--elev-1';
+                else if (elevTile.elevation < 0) tileCls += ' hex-tile--elev-neg';
+            }
             if (row < Math.floor(bRows / 2)) tileCls += ' hex-tile--enemy-zone';
             else tileCls += ' hex-tile--ally-zone';
             var hexDetails = getHexBiomeDetails(col, row, curBiome);
@@ -25993,6 +26729,11 @@ function buildBattlefield(s) {
             var tVar = bPalList[hexDetails.variant % bPalList.length];
             var polyStyle = 'fill:' + tVar.fill + '; stroke:' + tVar.stroke + ';';
             var terrainName = isFogged ? (isPlayerBlinded ? 'Escuridão Total (Cego)' : 'Névoa de Guerra') : escHtml(tVar.name);
+            if (!isFogged && obsTile) {
+                terrainName = escHtml((obsTile.name || 'Obstáculo Intransponível') + ' — ⛔ Intransponível (' + (obsTile.cover === 'total' ? 'Cobertura Total' : (obsTile.cover === 'three_quarters' ? '¾ Cobertura +5 CA' : '½ Cobertura +2 CA')) + ')');
+            } else if (!isFogged && elevTile) {
+                terrainName = escHtml((elevTile.name || 'Relevo Tático') + ' — ' + (elevTile.desc || ''));
+            }
 
             html += '<polygon points="' + pts + '" class="' + tileCls + '" data-col="' + col + '" data-row="' + row + '" style="' + polyStyle + '" data-terrain="' + terrainName + '" title="' + terrainName + '" />';
 
@@ -26002,18 +26743,20 @@ function buildBattlefield(s) {
                 if (microSvg) html += microSvg;
             }
 
+            // Relevos e Elevação 2.5D (Platôs, Cristas e Depressões Táticas)
+            if (elevTile && !obsTile && !isFogged) {
+                html += buildHexElevation25DSvg(center.cx, center.cy, elevTile, !!occInfo, isDim);
+            }
+
             // Subtle coordinate marker (oculto sob névoa)
-            if (!isFogged) {
+            if (!isFogged && !obsTile) {
                 var coordLabel = getHexColLetter(col) + (row + 1);
                 html += '<text x="' + center.cx + '" y="' + (center.cy - 18) + '" class="hex-coord">' + coordLabel + '</text>';
             }
 
-            // Se for obstáculo físico com cobertura (PHB p. 196)
+            // Se for obstáculo físico intransponível com cobertura 2.5D (PHB p. 196)
             if (obsTile && !isFogged) {
-                var obsSym = obsTile.symbol || '⛨';
-                var obsCov = (obsTile.cover === 'total') ? 'TOTAL' : ((obsTile.cover === 'three_quarters') ? '+5 CA' : '+2 CA');
-                html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-obstacle-symbol">' + obsSym + '</text>';
-                html += '<text x="' + center.cx + '" y="' + (center.cy + 17) + '" class="hex-obstacle-label">' + obsCov + '</text>';
+                html += buildHexObstacleSvg(center.cx, center.cy, obsTile, curBiome, isDim);
             } else if (dtTile && !occupiedMap[hexKey] && !isFogged) {
                 // Terreno Difícil (custo 3m / 2 hexes, PHB p. 190) ou Perigo Ativo (DMG p. 110-112)
                 if (dtTile.hazard_kind === 'damage') {
@@ -26035,7 +26778,7 @@ function buildBattlefield(s) {
             if (isReachable && !isFogged) {
                 var moveCostM = formatHexDistanceMeters(reachableMap[hexKey]);
                 var moveBadgeText = '⇥ ' + moveCostM;
-                var isDiff = !!dtTile;
+                var isDiff = !!dtTile || !!(elevTile && elevTile.elevation > 0);
                 var badgeW = moveBadgeText.length > 5 ? 44 : (moveBadgeText.length > 4 ? 38 : 32);
                 var badgeH = 16;
                 var bx = Math.round(center.cx - badgeW / 2);
@@ -30802,6 +31545,40 @@ function bindActions() {
             };
             tile.addEventListener('click', onTileTrigger);
         })(reachableTiles[ri]);
+    }
+    /* Hexágonos de obstáculos intransponíveis (clique para inspecionar cobertura e bloqueio D&D 5e) */
+    var obstacleTiles = document.querySelectorAll('.hex-tile.hex-tile--obstacle:not(.hex-tile--fogged)');
+    for (var obIdx = 0; obIdx < obstacleTiles.length; obIdx++) {
+        (function (obsTileEl) {
+            obsTileEl.addEventListener('pointerdown', function (ev) {
+                obsTileEl.__pDownX = ev.clientX;
+                obsTileEl.__pDownY = ev.clientY;
+                obsTileEl.__pDownTs = Date.now();
+            });
+            obsTileEl.addEventListener('click', function (ev) {
+                var now = Date.now();
+                if (now - _lastTileActionTime < 280) return;
+                if (window.__bfIsDragging) return;
+                if (typeof obsTileEl.__pDownX === 'number' && typeof obsTileEl.__pDownY === 'number') {
+                    if (Math.abs(ev.clientX - obsTileEl.__pDownX) >= 5 || Math.abs(ev.clientY - obsTileEl.__pDownY) >= 5) return;
+                }
+                _lastTileActionTime = now;
+                var oCol = parseInt(obsTileEl.getAttribute('data-col'), 10);
+                var oRow = parseInt(obsTileEl.getAttribute('data-row'), 10);
+                if (isNaN(oCol) || isNaN(oRow) || !currentState || !currentState.battlefield || !currentState.battlefield.obstacles) return;
+                var foundObs = null;
+                for (var k = 0; k < currentState.battlefield.obstacles.length; k++) {
+                    var item = currentState.battlefield.obstacles[k];
+                    if (item && item.col === oCol && item.row === oRow) {
+                        foundObs = item;
+                        break;
+                    }
+                }
+                if (foundObs && typeof showObstacleInspectModal === 'function') {
+                    showObstacleInspectModal(foundObs, oCol, oRow);
+                }
+            });
+        })(obstacleTiles[obIdx]);
     }
     /* Linhas de loot clicáveis na tela de vitória (abre popup com descrição) */
     var lootRows = document.querySelectorAll('.rr-loot-row--clickable');
