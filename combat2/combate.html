@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T02:54:24Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T03:26:19Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -18067,8 +18067,11 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         hp: hp, mhp: mhp, ac: ac, atk: atk,
         die: (cdef.cls === 'Monge') ? _simMonkMartialDie(lvl) : cdef.die,
         dmgMod: cdef.dmgMod, attr: cdef.attr,
-        dex: dex, wis: wis, intScore: intSc, cha: cha, str: strSc, con: conSc,
+        dex: dex, wis: wis, int: intSc, intScore: intSc, cha: cha, str: strSc, con: conSc,
         prof: (function (lv) { lv = Math.max(1, lv | 0); return 2 + Math.floor((lv - 1) / 4); })(lvl),
+        saving_throw_proficiencies: Array.isArray(spec.saving_throw_proficiencies) && spec.saving_throw_proficiencies.length
+            ? spec.saving_throw_proficiencies.slice()
+            : (typeof simClassSaveProficiencies === 'function' ? simClassSaveProficiencies(cdef.cls) : ['str', 'con']),
         alive: hp > 0,
         /* C4.9 #90 + itemBuffs 2026-07-01: seed pré-computado acima (_seSeed) —
            Exaustão real (PHB p.291) + buffs de item consumível. */
@@ -18100,7 +18103,10 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
         resistances: Array.isArray(spec.resistances_exact) ? spec.resistances_exact.slice() : [],
         vulnerabilities: Array.isArray(spec.vulnerabilities_exact) ? spec.vulnerabilities_exact.slice() : [],
         immunities: Array.isArray(spec.immunities_exact) ? spec.immunities_exact.slice() : [],
-        conditionImmunities: Array.isArray(spec.conditionImmunities_exact) ? spec.conditionImmunities_exact.slice() : []
+        conditionImmunities: Array.isArray(spec.conditionImmunities_exact) ? spec.conditionImmunities_exact.slice() : [],
+        condition_immunities: Array.isArray(spec.conditionImmunities_exact) ? spec.conditionImmunities_exact.slice() : [],
+        protect_player_when_low: !!spec.protect_player_when_low,
+        traits: Array.isArray(spec.traits_exact) ? spec.traits_exact.slice() : []
     };
 }
 
@@ -18161,11 +18167,31 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
     var ac = (spec.ac_exact != null) ? parseInt(spec.ac_exact, 10) : sc.ac;
     var atk = (spec.atk_exact != null) ? parseInt(spec.atk_exact, 10) : sc.atk;
     var die = (spec.die_exact != null) ? parseInt(spec.die_exact, 10) : sc.die;
+    var crVal = (spec.cr_exact != null) ? Number(spec.cr_exact) : (b.cr != null ? Number(b.cr) : null);
+    var profVal = (spec.prof_exact != null) ? (spec.prof_exact | 0) : (crVal != null ? (crVal < 5 ? 2 : (crVal < 9 ? 3 : (crVal < 13 ? 4 : (crVal < 17 ? 5 : 6)))) : (Math.floor((Math.max(1, sugLvl) - 1) / 4) + 2));
+    var legResVal = (spec.legendaryResistances_exact != null) ? (spec.legendaryResistances_exact | 0) : ((b.legendaryResistances | 0) || 0);
     var enemy = {
         t: 'e', n: n, hp: hp, mhp: mhp, ac: ac, atk: atk, die: die,
         dmgMod: (spec.dmgMod_exact != null) ? parseInt(spec.dmgMod_exact, 10) : sc.dmgMod,
-        attr: sc.attr, dex: (spec.dex_exact != null) ? parseInt(spec.dex_exact, 10) : sc.dex, con: sc.con,
-        wis: sc.wis != null ? sc.wis : 10, str: sc.str != null ? sc.str : 10, int: sc.int != null ? sc.int : 10, cha: sc.cha != null ? sc.cha : 10,
+        attr: sc.attr,
+        dex: (spec.dex_exact != null) ? parseInt(spec.dex_exact, 10) : sc.dex,
+        con: (spec.con_exact != null) ? parseInt(spec.con_exact, 10) : sc.con,
+        wis: (spec.wis_exact != null) ? parseInt(spec.wis_exact, 10) : (sc.wis != null ? sc.wis : 10),
+        str: (spec.str_exact != null) ? parseInt(spec.str_exact, 10) : (sc.str != null ? sc.str : 10),
+        int: (spec.int_exact != null) ? parseInt(spec.int_exact, 10) : (sc.int != null ? sc.int : 10),
+        cha: (spec.cha_exact != null) ? parseInt(spec.cha_exact, 10) : (sc.cha != null ? sc.cha : 10),
+        cr: crVal,
+        prof: profVal,
+        desc: (spec.desc_exact != null && String(spec.desc_exact).trim()) ? String(spec.desc_exact).trim() : (b.desc || ''),
+        dmgType: (spec.dmgType_exact && String(spec.dmgType_exact).trim()) || b.dmgType || 'slashing',
+        attackType: (spec.attackType_exact && String(spec.attackType_exact).trim()) || b.attackType || 'melee',
+        saving_throw_proficiencies: Array.isArray(spec.savingThrowProficiencies_exact) && spec.savingThrowProficiencies_exact.length
+            ? spec.savingThrowProficiencies_exact.slice()
+            : (Array.isArray(b.saving_throw_proficiencies) ? b.saving_throw_proficiencies.slice() : []),
+        packTactics: (spec.packTactics_exact != null) ? !!spec.packTactics_exact : !!b.packTactics,
+        traits: (Array.isArray(spec.traits_exact) && spec.traits_exact.length)
+            ? spec.traits_exact.map(function (_t) { return Object.assign({}, _t); })
+            : (Array.isArray(b.traits) ? b.traits.map(function (_t) { return Object.assign({}, _t); }) : []),
         ico: spec.ico_exact || sc.ico, alive: hp > 0,
         /* 2026-06-11 (user): status PRÉ-aplicado no inimigo via spec.se_exact
            (ex.: lobos Amedrontados no prólogo). Cópia defensiva. buildCell
@@ -18180,19 +18206,24 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
            template do bestiário → gateia bonusVsTag (Golpe Divino) / Turn Undead em
            REMOTE mesmo sem match de bestiário. Também alimenta o fallback heráldico. */
         tags: (Array.isArray(spec.tags_exact) && spec.tags_exact.length ? spec.tags_exact : (b.tags || [])),
-        xpReward: (spec.xpReward_exact != null ? parseInt(spec.xpReward_exact, 10) : 0),  /* #83: XP canônico D&D 5e (por CR) vindo do backend; 0 em LOCAL → computeRewards usa fallback */
+        xpReward: (spec.xpReward_exact != null ? parseInt(spec.xpReward_exact, 10) : (b.xp | 0)),
+        xp: (spec.xpReward_exact != null ? parseInt(spec.xpReward_exact, 10) : (b.xp | 0)),
         /* Auditoria 2026-07-03: olhar/sopro petrificante (Basilisco/Górgona). No acerto
            rola TR CON; falha → 'petrified' no player (repeatSave = recuperação + teto).
            Espelha combat2_resolve.enemy_condition_on_hit_debuff (motor = spec canônico). */
         conditionOnHit: (spec.conditionOnHit_exact || b.conditionOnHit || null),
         it: { ic: '', lb: 'ataca' },
         /* 2026-10-12: D&D 5e Resistências, Vulnerabilidades, Imunidades e Resistência Lendária */
-        resistances: Array.isArray(spec.resistances_exact) ? spec.resistances_exact.slice() : (b.resistances || []),
-        vulnerabilities: Array.isArray(spec.vulnerabilities_exact) ? spec.vulnerabilities_exact.slice() : (b.vulnerabilities || []),
-        immunities: Array.isArray(spec.immunities_exact) ? spec.immunities_exact.slice() : (b.immunities || []),
-        conditionImmunities: Array.isArray(spec.conditionImmunities_exact) ? spec.conditionImmunities_exact.slice() : (b.conditionImmunities || []),
-        legendaryResistances: (spec.legendaryResistances_exact != null) ? (spec.legendaryResistances_exact | 0) : ((b.legendaryResistances | 0) || 0),
-        legendaryResistancesUsed: 0
+        resistances: Array.isArray(spec.resistances_exact) && spec.resistances_exact.length ? spec.resistances_exact.slice() : (b.resistances || []),
+        vulnerabilities: Array.isArray(spec.vulnerabilities_exact) && spec.vulnerabilities_exact.length ? spec.vulnerabilities_exact.slice() : (b.vulnerabilities || []),
+        immunities: Array.isArray(spec.immunities_exact) && spec.immunities_exact.length ? spec.immunities_exact.slice() : (b.immunities || []),
+        conditionImmunities: Array.isArray(spec.conditionImmunities_exact) && spec.conditionImmunities_exact.length ? spec.conditionImmunities_exact.slice() : (b.conditionImmunities || []),
+        condition_immunities: Array.isArray(spec.conditionImmunities_exact) && spec.conditionImmunities_exact.length ? spec.conditionImmunities_exact.slice() : (b.conditionImmunities || []),
+        legendaryResistances: legResVal,
+        legendaryResistancesUsed: 0,
+        legendary_resistances: legResVal,
+        legendary_resistances_used: 0,
+        legendary_actions: Array.isArray(spec.legendaryActions_exact) ? spec.legendaryActions_exact.slice() : []
     };
     /* V1.7 Stage-CASTERS (2026-04-21) — propaga skills + res + caster flags.
        NPCs com isCaster:true têm arsenal mágico e AI decide entre weapon/spell
@@ -18206,7 +18237,7 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
         enemy.res = { type: baseRes.type, name: baseRes.name, ico: baseRes.ico, max: baseRes.max, value: baseRes.max };
         enemy.lvl = enemy.sugLvl;
         var lvlP = Math.max(1, enemy.sugLvl | 0);
-        enemy.prof = Math.floor((lvlP - 1) / 4) + 2;
+        if (!spec.prof_exact) enemy.prof = Math.floor((lvlP - 1) / 4) + 2;
     }
     /* Phase 1 MVP dungeons AAA (2026-04-25) — Boss heraldic flag.
        BESTIARY entries com `isBoss: true` (ou tag 'boss' como fallback) ativam
@@ -18231,7 +18262,7 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
             enemy.res = { type: b.res.type, name: b.res.name, ico: b.res.ico, max: b.res.max, value: b.res.max };
         }
         enemy.lvl = enemy.sugLvl;
-        enemy.prof = Math.floor((Math.max(1, enemy.sugLvl | 0) - 1) / 4) + 2;
+        if (!spec.prof_exact) enemy.prof = Math.floor((Math.max(1, enemy.sugLvl | 0) - 1) / 4) + 2;
     }
     return enemy;
 }
@@ -20270,44 +20301,31 @@ function simClassSaveProficiencies(cls) {
 }
 function simSaveMod(defender, ability) {
     var mod = Math.floor((simAbilityScore(defender, ability) - 10) / 2);
-    /* V1.7 Sprint-17 Ronda 26 (2026-04-21 QA PHB p.11) — prof bonus em saves proficientes
-       por classe. Aplica ANTES dos modificadores de buffs/debuffs. Só para entidades
-       com cls definido (players); NPCs usam prof implícito em attack/save via statblock. */
-    if (defender && defender.cls) {
-        var ab = (ability || '').toLowerCase();
-        var profs = simClassSaveProficiencies(defender.cls);
-        if (profs.indexOf(ab) >= 0) {
-            var profBonus = defender.prof != null ? (defender.prof | 0) : simProficiencyBonus(defender.lvl | 0);
-            mod += profBonus;
-        }
+    var ab = (ability || '').toLowerCase();
+    var profs = (defender && Array.isArray(defender.saving_throw_proficiencies) && defender.saving_throw_proficiencies.length)
+        ? defender.saving_throw_proficiencies
+        : (defender && defender.cls ? simClassSaveProficiencies(defender.cls) : []);
+    if (profs.indexOf(ab) >= 0) {
+        var profBonus = (defender && defender.prof != null) ? (defender.prof | 0) : simProficiencyBonus((defender && (defender.lvl || defender.sugLvl)) | 0);
+        mod += profBonus;
     }
     /* V1.7 Sprint-17 Ronda 14 (2026-04-21 QA PHB p.85) — saveBonus from buffs:
-       Aura de Proteção (Paladino nv 6+): +CHA mod em TODOS os saves de aliados em 3m.
-       Stub: carrier tem `saveBonusFromCasterCha:true` → computa CHA mod do próprio
-       carrier (assume self-cast Paladino). Min +1 per PHB.
-       V1.7 Sprint-17 Ronda 17 (2026-04-21 QA PHB p.219) — saveBonusDie:
-       Bless adds d4 em atk OR save (PHB). Sim auto-aplica ambos como stub
-       (mesmo buff roda d4 em atk E em save — overpowered vs PHB "ou", mas
-       flavor-fiel pro save). */
+       Aura de Proteção (Paladino nv 6+): +CHA mod em TODOS os saves de aliados em 3m. */
     if (defender && defender.se && defender.se.length) {
         var _abLower = (ability || '').toLowerCase();
         defender.se.forEach(function (st) {
             if (!st || (st.turnsLeft != null && st.turnsLeft <= 0)) return;
-            /* 2026-07-01 (itemBuffs): saveBonusAbility restringe o bônus a UM
-               atributo (Antídoto Potente = só CON). Sem o campo → todos (compat). */
             if (st.saveBonus && (!st.saveBonusAbility || String(st.saveBonusAbility).toLowerCase() === _abLower)) mod += (st.saveBonus | 0);
             if (st.saveBonusFromCasterCha) {
                 var chaScore = (defender.cha != null) ? defender.cha : 14;
                 var chaMod = Math.floor((chaScore - 10) / 2);
-                mod += Math.max(1, chaMod);  /* PHB min +1 */
+                mod += Math.max(1, chaMod);
             }
-            /* V1.7 Ronda 17 — saveBonusDie (Bless em saves) */
             if (st.saveBonusDie && st.saveBonusDie.d) {
                 var sbn = Math.max(1, st.saveBonusDie.n | 0);
                 var sbd = Math.max(2, st.saveBonusDie.d | 0);
                 for (var _sbi = 0; _sbi < sbn; _sbi++) mod += rollN(sbd);
             }
-            /* V1.7 Ronda 20 — savePenaltyDie (Bane -1d4 em saves PHB p.216) */
             if (st.savePenaltyDie && st.savePenaltyDie.d) {
                 var spn = Math.max(1, st.savePenaltyDie.n | 0);
                 var spd = Math.max(2, st.savePenaltyDie.d | 0);
@@ -20316,6 +20334,252 @@ function simSaveMod(defender, ability) {
         });
     }
     return mod;
+}
+
+/** Versão determinística (sem rolar dados aleatórios) do modificador de Salvaguarda D&D 5e para UI/Preview. */
+function simSaveModStatic(defender, ability) {
+    if (!defender) return { mod: 0, isProf: false, baseMod: 0, profBonus: 0, extraBonus: 0 };
+    var baseMod = Math.floor((simAbilityScore(defender, ability) - 10) / 2);
+    var ab = (ability || '').toLowerCase();
+    var profs = (Array.isArray(defender.saving_throw_proficiencies) && defender.saving_throw_proficiencies.length)
+        ? defender.saving_throw_proficiencies
+        : (defender.cls ? simClassSaveProficiencies(defender.cls) : []);
+    var isProf = profs.indexOf(ab) >= 0;
+    var profBonus = isProf ? ((defender.prof != null) ? (defender.prof | 0) : simProficiencyBonus((defender.lvl || defender.sugLvl || 1) | 0)) : 0;
+    var extraBonus = 0;
+    if (Array.isArray(defender.se)) {
+        defender.se.forEach(function (st) {
+            if (!st || (st.turnsLeft != null && st.turnsLeft <= 0)) return;
+            if (st.saveBonus && (!st.saveBonusAbility || String(st.saveBonusAbility).toLowerCase() === ab)) extraBonus += (st.saveBonus | 0);
+            if (st.saveBonusFromCasterCha) {
+                var chaScore = (defender.cha != null) ? defender.cha : 14;
+                extraBonus += Math.max(1, Math.floor((chaScore - 10) / 2));
+            }
+        });
+    }
+    return {
+        mod: baseMod + profBonus + extraBonus,
+        isProf: isProf,
+        baseMod: baseMod,
+        profBonus: profBonus,
+        extraBonus: extraBonus
+    };
+}
+
+/** Traduz tipo de dano D&D 5e para PT-BR com ícone e cor temática (Padrão BG3 / Solasta). */
+function simDmgTypeInfoPt(dt) {
+    var k = String(dt || 'slashing').toLowerCase().trim();
+    var MAP = {
+        'slashing':    { lb: 'Cortante',    ico: '⚔️', col: '#e2d6c5' },
+        'cortante':    { lb: 'Cortante',    ico: '⚔️', col: '#e2d6c5' },
+        'piercing':    { lb: 'Perfurante',  ico: '🏹', col: '#d8cfc0' },
+        'perfurante':  { lb: 'Perfurante',  ico: '🏹', col: '#d8cfc0' },
+        'bludgeoning': { lb: 'Contundente', ico: '🔨', col: '#c9bfb0' },
+        'contundente': { lb: 'Contundente', ico: '🔨', col: '#c9bfb0' },
+        'fire':        { lb: 'Fogo',        ico: '🔥', col: '#ff7043' },
+        'fogo':        { lb: 'Fogo',        ico: '🔥', col: '#ff7043' },
+        'cold':        { lb: 'Frio',        ico: '❄️', col: '#81d4fa' },
+        'frio':        { lb: 'Frio',        ico: '❄️', col: '#81d4fa' },
+        'lightning':   { lb: 'Elétrico',    ico: '⚡', col: '#ffd54f' },
+        'eletrico':    { lb: 'Elétrico',    ico: '⚡', col: '#ffd54f' },
+        'elétrico':    { lb: 'Elétrico',    ico: '⚡', col: '#ffd54f' },
+        'thunder':     { lb: 'Trovejante',  ico: '🌩️', col: '#b39ddb' },
+        'trovejante':  { lb: 'Trovejante',  ico: '🌩️', col: '#b39ddb' },
+        'acid':        { lb: 'Ácido',       ico: '🧪', col: '#aed581' },
+        'acido':       { lb: 'Ácido',       ico: '🧪', col: '#aed581' },
+        'ácido':       { lb: 'Ácido',       ico: '🧪', col: '#aed581' },
+        'poison':      { lb: 'Veneno',      ico: '☠️', col: '#81c784' },
+        'veneno':      { lb: 'Veneno',      ico: '☠️', col: '#81c784' },
+        'necrotic':    { lb: 'Necrótico',   ico: '💀', col: '#ce93d8' },
+        'necrotico':   { lb: 'Necrótico',   ico: '💀', col: '#ce93d8' },
+        'necrótico':   { lb: 'Necrótico',   ico: '💀', col: '#ce93d8' },
+        'radiant':     { lb: 'Radiante',    ico: '✨', col: '#ffe082' },
+        'radiante':    { lb: 'Radiante',    ico: '✨', col: '#ffe082' },
+        'force':       { lb: 'Energia',     ico: '💠', col: '#90caf9' },
+        'energia':     { lb: 'Energia',     ico: '💠', col: '#90caf9' },
+        'psychic':     { lb: 'Psíquico',    ico: '🧠', col: '#f48fb1' },
+        'psiquico':    { lb: 'Psíquico',    ico: '🧠', col: '#f48fb1' },
+        'psíquico':    { lb: 'Psíquico',    ico: '🧠', col: '#f48fb1' }
+    };
+    return MAP[k] || { lb: k ? (k.charAt(0).toUpperCase() + k.slice(1)) : 'Físico', ico: '⚔️', col: '#e2d6c5' };
+}
+
+/** Calcula a probabilidade exata de acerto e crítico no D&D 5e (PHB p.194) + breakdown estilo Solasta/BG3. */
+function simCalcHitChanceDnd5e(s, attacker, defender, skill) {
+    if (!attacker || !defender) return { hitPct: 50, critPct: 5, minD20: 11, totalAtk: 0, effectiveAc: 10, advState: 'normal', breakdown: '' };
+    if (skill && skill.autoHit) {
+        return {
+            hitPct: 100, critPct: 0, minD20: 1, totalAtk: 0, effectiveAc: defender.ac || 10,
+            advState: 'normal', autoHit: true,
+            breakdown: 'Acerto Automático (PHB p.257 — Mísseis Mágicos não exigem rolagem de ataque)'
+        };
+    }
+    var coverInfo = (typeof simComputeCover === 'function' && s) ? simComputeCover(s, attacker, defender) : { cover: 'none', bonus: 0, blocksLoS: false };
+    if (coverInfo.cover === 'total' || coverInfo.blocksLoS) {
+        return {
+            hitPct: 0, critPct: 0, minD20: 20, totalAtk: attacker.atk || 0, effectiveAc: (defender.ac || 10),
+            advState: 'disadvantage', blocked: true,
+            breakdown: 'Cobertura Total / Linha de Visão bloqueada (PHB p.196)'
+        };
+    }
+    var isSpellAtk = !!(skill && (skill.scale === 'cantrip' || skill.isSpell || skill.dmgType === 'fire' || skill.dmgType === 'cold' || skill.dmgType === 'radiant' || skill.dmgType === 'necrotic' || skill.dmgType === 'force' || skill.dmgType === 'lightning') && skill.cost !== undefined && (!skill.damageSpec || skill.n !== 'Ataque Poderoso'));
+    var baseAtk = (isSpellAtk && typeof simSpellAttackBonus === 'function') ? simSpellAttackBonus(attacker) : ((attacker.atk | 0) || 0);
+    var statusAtk = (!isSpellAtk && typeof getAtkFlatFromStatuses === 'function') ? (getAtkFlatFromStatuses(attacker) | 0) : 0;
+    var totalAtk = baseAtk + statusAtk;
+
+    var baseAc = (defender.ac | 0) || 10;
+    var statusAc = (typeof getStatusAcBonus === 'function') ? (getStatusAcBonus(defender) | 0) : 0;
+    var coverAc = (coverInfo.bonus | 0) || 0;
+    var effectiveAc = baseAc + statusAc + coverAc;
+
+    var advState = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(attacker, defender, skill) : 'normal';
+    var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(attacker, skill) : { reach: 1, isRanged: false };
+    if (!reachInfo.isRanged && typeof simCheckFlanking === 'function' && s && s.order && simCheckFlanking(attacker, defender, s.order)) {
+        if (advState === 'normal') advState = 'advantage';
+    }
+
+    /* PHB p.194: 1 natural sempre erra; 20 natural sempre acerta. */
+    var rawNeed = effectiveAc - totalAtk;
+    var minD20 = Math.max(2, Math.min(20, rawNeed));
+    var pSingle = (21 - minD20) / 20;
+    var critStart = (attacker.critRange && attacker.critRange >= 18 && attacker.critRange <= 20) ? (attacker.critRange | 0) : 20;
+    var pCritSingle = (21 - critStart) / 20;
+
+    var hitProb = pSingle;
+    var critProb = pCritSingle;
+    if (advState === 'advantage') {
+        hitProb = 1 - Math.pow(1 - pSingle, 2);
+        critProb = 1 - Math.pow(1 - pCritSingle, 2);
+    } else if (advState === 'disadvantage') {
+        hitProb = Math.pow(pSingle, 2);
+        critProb = Math.pow(pCritSingle, 2);
+    }
+
+    var profVal = (attacker.prof != null) ? (attacker.prof | 0) : (typeof simProficiencyBonus === 'function' ? simProficiencyBonus(attacker.lvl || 1) : 2);
+    var attrVal = baseAtk - profVal;
+    var atkParts = ['Prof +' + profVal];
+    if (attrVal !== 0) atkParts.push('Atrib ' + (attrVal >= 0 ? '+' : '') + attrVal + (attacker.attr ? ' ' + attacker.attr : ''));
+    if (statusAtk !== 0) atkParts.push('Buffs ' + (statusAtk >= 0 ? '+' : '') + statusAtk);
+
+    var acParts = ['Base ' + baseAc];
+    if (statusAc !== 0) acParts.push('Efeitos ' + (statusAc >= 0 ? '+' : '') + statusAc);
+    if (coverAc > 0) acParts.push('Cobertura +' + coverAc);
+
+    return {
+        hitPct: Math.round(hitProb * 100),
+        critPct: Math.round(critProb * 1000) / 10,
+        minD20: minD20,
+        totalAtk: totalAtk,
+        effectiveAc: effectiveAc,
+        advState: advState,
+        atkBreakdown: atkParts.join(' · '),
+        acBreakdown: acParts.join(' · '),
+        breakdown: 'd20 (' + minD20 + '+) + ' + totalAtk + ' [' + atkParts.join(', ') + '] vs CA ' + effectiveAc + ' [' + acParts.join(', ') + ']'
+    };
+}
+
+/** Calcula a probabilidade do alvo FALHAR no Teste de Resistência (sucesso da habilidade/magia para quem conjura). */
+function simCalcSaveFailChanceDnd5e(s, caster, defender, skill) {
+    if (!caster || !defender || !skill || !skill.save) return null;
+    var saveAb = (skill.save.ability || 'dex').toLowerCase();
+    var saveDc = (skill.save.dc | 0) || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(caster) : 13);
+    var svInfo = simSaveModStatic(defender, saveAb);
+    var coverInfo = (typeof simComputeCover === 'function' && s) ? simComputeCover(s, caster, defender) : { cover: 'none', bonus: 0 };
+    var coverBonus = (saveAb === 'dex' && coverInfo.bonus > 0) ? (coverInfo.bonus | 0) : 0;
+    var totalSaveMod = svInfo.mod + coverBonus;
+
+    /* Alvo passa se d20 + totalSaveMod >= saveDc => d20 >= saveDc - totalSaveMod */
+    var minPassD20 = Math.max(1, Math.min(21, saveDc - totalSaveMod));
+    var passSides = Math.max(0, Math.min(20, 21 - minPassD20));
+    var failProb = 1 - (passSides / 20);
+    var failPct = Math.round(Math.max(5, Math.min(95, failProb * 100)));
+
+    return {
+        failPct: failPct,
+        passPct: 100 - failPct,
+        saveAb: saveAb.toUpperCase(),
+        saveDc: saveDc,
+        targetSaveMod: totalSaveMod,
+        isTargetProf: svInfo.isProf,
+        coverBonus: coverBonus,
+        breakdown: 'Alvo rola 1d20 ' + (totalSaveMod >= 0 ? '+ ' + totalSaveMod : '- ' + Math.abs(totalSaveMod)) + (svInfo.isProf ? ' (Proficiente)' : '') + ' vs CD ' + saveDc
+    };
+}
+
+/** Retorna lista consolidada de Traços, Passivas e Características D&D 5e por Nível/Classe/Espécie para exibição na ficha. */
+function simResolveUnitTraitsDnd5e(u) {
+    if (!u) return [];
+    var out = [];
+    var seen = {};
+    function addTrait(n, ico, desc) {
+        if (!n || seen[n]) return;
+        seen[n] = true;
+        out.push({ n: n, ico: ico || '✦', desc: desc || '' });
+    }
+    if (Array.isArray(u.traits)) {
+        u.traits.forEach(function (tr) {
+            if (tr && tr.n) addTrait(tr.n, tr.ico, tr.desc);
+        });
+    }
+    if (u.t === 'p' || u.t === 'a') {
+        var lvl = Math.max(1, u.lvl | 0);
+        var cls = String(u.cls || '').trim();
+        var extraAtks = (typeof simClassExtraAttacks === 'function') ? simClassExtraAttacks(cls, lvl) : 0;
+        if (extraAtks > 0) {
+            var totAtks = 1 + extraAtks;
+            addTrait('Ataque Extra (' + totAtks + '×)', '⚔️', 'Realiza ' + totAtks + ' ataques com arma na ação Atacar (PHB p.72).');
+        }
+        if (u.critRange && u.critRange < 20) {
+            addTrait('Crítico Aprimorado (' + u.critRange + '–20)', '🎯', 'Acertos críticos nas rolagens naturais de ' + u.critRange + ' a 20 (PHB p.72).');
+        }
+        if (cls === 'Ladino') {
+            var snkDice = Math.ceil(lvl / 2);
+            addTrait('Ataque Furtivo (' + snkDice + 'd6)', '🗡️', '+' + snkDice + 'd6 de dano extra 1×/turno com Vantagem ou aliado adjacente ao alvo (PHB p.96).');
+            if (lvl >= 5) addTrait('Esquiva Sobrenatural (Nv 5)', '💨', 'Usa Reação para reduzir à metade o dano de um ataque que possa ver (PHB p.96).');
+            if (lvl >= 7) addTrait('Evasão (Nv 7)', '🛡️', 'TR de DES para metade do dano: 0 dano em sucesso, metade em falha (PHB p.96).');
+        }
+        if (cls === 'Monge') {
+            addTrait('Artes Marciais (1d' + (u.die || 4) + ')', '🥋', 'Dado de dano desarmado/monge escalado pelo nível (PHB p.78).');
+            if (lvl >= 3) addTrait('Defletir Projéteis (Nv 3)', '🏹', 'Reação para reduzir o dano de ataques à distância em 1d10 + DES + nível (PHB p.78).');
+            if (lvl >= 7) addTrait('Evasão (Nv 7)', '🛡️', 'TR de DES para metade do dano: 0 dano em sucesso, metade em falha (PHB p.79).');
+        }
+        if (cls === 'Paladino' && lvl >= 6) {
+            var chaMod = Math.max(1, Math.floor(((u.cha || 14) - 10) / 2));
+            addTrait('Aura de Proteção (+' + chaMod + ')', '✨', 'Concede +' + chaMod + ' em todos os Testes de Resistência a até 3m (PHB p.85).');
+        }
+        if (cls === 'Bárbaro') {
+            addTrait('Defesa Sem Armadura & Fúria', '🔥', 'Resistência a dano físico contundente, cortante e perfurante enquanto em Fúria (PHB p.48).');
+            if (lvl >= 2) addTrait('Sentido de Perigo (Nv 2)', '⚡', 'Vantagem em Testes de Resistência de Destreza contra efeitos visíveis (PHB p.48).');
+        }
+        if (u.arcaneWardMax > 0) {
+            addTrait('Égide Arcana (' + (u.arcaneWardHp || 0) + '/' + u.arcaneWardMax + ' PV)', '🛡️', 'Barreira mágica de Abjuração que absorve dano antes dos PV (PHB p.115).');
+        }
+        if (u.superiorityDice > 0) {
+            addTrait('Dados de Superioridade (' + u.superiorityDice + '×)', '⚔️', 'Manobras táticas do Mestre de Batalha (Ripostar, Aparar, Ataque de Derrubar — PHB p.73).');
+        }
+        if (u.wildShapeUses != null && cls === 'Druida' && lvl >= 2) {
+            addTrait('Forma Selvagem (' + u.wildShapeUses + ' usos)', '🐾', 'Transforma-se em besta com PV e ataques próprios (PHB p.66).');
+        }
+        if (u.protect_player_when_low) {
+            addTrait('Guarda-Costas Leal', '🛡️', 'Prioriza interceptar inimigos e proteger o aventureiro quando ferido.');
+        }
+    } else {
+        if ((u.multiAttack | 0) > 1) {
+            addTrait('Ataque Múltiplo (' + u.multiAttack + '×)', '⚔️', 'Realiza ' + u.multiAttack + ' ataques no mesmo turno de combate (MM p.11).');
+        }
+        if (u.packTactics) {
+            addTrait('Táticas de Matilha (MM p.341)', '🐺', 'Recebe Vantagem nas rolagens de ataque quando um aliado não-incapacitado está adjacente ao alvo.');
+        }
+        var legRes = (u.legendaryResistances | 0) || (u.legendary_resistances | 0) || 0;
+        if (legRes > 0) {
+            var legUsed = (u.legendaryResistancesUsed | 0) || (u.legendary_resistances_used | 0) || 0;
+            addTrait('Resistência Lendária (' + Math.max(0, legRes - legUsed) + '/' + legRes + ')', '👑', 'Pode converter uma falha em Teste de Resistência em sucesso automático (MM p.11).');
+        }
+        if (u.conditionOnHit && u.conditionOnHit.condition) {
+            addTrait('Efeito ao Atingir (CD ' + (u.conditionOnHit.dc || 12) + ')', '☠️', 'Ataques impõem Teste de Resistência contra ' + u.conditionOnHit.condition + '.');
+        }
+    }
+    return out;
 }
 
 /** Aliado/personagem que pode receber poção de cura (ferido ou inconsciente a 0 PV; PHB: cura com 0 PV acorda). */
@@ -21334,10 +21598,32 @@ function simLogPushTurnHeader(s, unit) {
     s.log.push('::SIM_TURN::' + rn + '|' + name);
 }
 
+/** Classifica linha do log em categoria tática D&D 5e para filtro e badge visual. */
+function simClassifyLogLineDnd5e(ln) {
+    if (!ln || typeof ln !== 'string') return { cat: 'other', badge: '' };
+    if (/CRITA|CRÍTICO|NAT 20/i.test(ln)) {
+        return { cat: 'atk', badge: '<span style="background:rgba(212,175,55,0.22);border:1px solid #ffd700;color:#ffd700;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">★ CRÍTICO</span>' };
+    }
+    if (/acerta|ataca|golpeia|dispara|morde|arranha|dano/i.test(ln) && !/cura|recupera/i.test(ln)) {
+        return { cat: 'atk', badge: '<span style="background:rgba(231,76,60,0.18);border:1px solid rgba(231,76,60,0.45);color:#ff8a80;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">⚔ ATQ</span>' };
+    }
+    if (/\berra\b|NAT 1|errou/i.test(ln)) {
+        return { cat: 'atk', badge: '<span style="background:rgba(140,140,140,0.18);border:1px solid rgba(160,160,160,0.4);color:#b0a89e;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">✕ ERRO</span>' };
+    }
+    if (/cura|recupera|Poção|Retomar o Fôlego|Cura Pelas Mãos/i.test(ln)) {
+        return { cat: 'heal', badge: '<span style="background:rgba(46,204,113,0.18);border:1px solid rgba(46,204,113,0.45);color:#7cdb7c;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">✚ CURA</span>' };
+    }
+    if (/\bTR\b|\bCD\b|Salvaguarda|Concentração|Caído|Amedrontad|Envenenad|Cego|Atordoad|Paralisad|Oculto|Esquivar|Desengajar/i.test(ln)) {
+        return { cat: 'cond', badge: '<span style="background:rgba(162,155,254,0.18);border:1px solid rgba(162,155,254,0.45);color:#c3b8ff;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">◈ REGRA</span>' };
+    }
+    return { cat: 'other', badge: '' };
+}
+
 /** Uma linha do array s.log -> HTML (marcadores internos + números). */
-function simBuildLogEntryHtml(ln) {
+function simBuildLogEntryHtml(ln, filterCat) {
     if (typeof ln !== 'string') ln = String(ln == null ? '' : ln);
     if (ln === '::SIM_OPEN::') {
+        if (filterCat && filterCat !== 'all') return '';
         return '<div class="lp-log-block lp-log-block--open" role="presentation"><div class="lp-log-open-line">Início do combate</div></div>';
     }
     var mRound = /^::SIM_ROUND::(\d+)$/.exec(ln);
@@ -21354,18 +21640,21 @@ function simBuildLogEntryHtml(ln) {
     }
     var mTurn = /^::SIM_TURN::(\d+)\|(.+)$/.exec(ln);
     if (mTurn) {
+        if (filterCat && filterCat !== 'all') return '';
         return '<div class="lp-log-turn" role="group" aria-label="Turno"><span class="lp-log-turn-r">R<span class="lp-num">' + escHtml(mTurn[1]) + '</span></span><span class="lp-log-turn-name">' + escHtml(mTurn[2]) + '</span></div>';
     }
-    return '<div class="lp-log-line">' + simHighlightNumbersInEscaped(escHtml(ln)) + '</div>';
+    var meta = simClassifyLogLineDnd5e(ln);
+    if (filterCat && filterCat !== 'all' && meta.cat !== filterCat) return '';
+    return '<div class="lp-log-line" data-log-cat="' + meta.cat + '">' + meta.badge + simHighlightNumbersInEscaped(escHtml(ln)) + '</div>';
 }
 
 /** HTML completo do log (ordem cronológica). */
-function simBuildCombatLogHtml(s) {
+function simBuildCombatLogHtml(s, filterCat) {
     var lines = (s && s.log) ? s.log.slice() : [];
     if (!lines.length) return '<div class="lp-empty">Sem entradas ainda.</div>';
     var html = '';
-    lines.forEach(function (ln) { html += simBuildLogEntryHtml(ln); });
-    return html;
+    lines.forEach(function (ln) { html += simBuildLogEntryHtml(ln, filterCat || 'all'); });
+    return html || '<div class="lp-empty">Nenhum registro nesta categoria.</div>';
 }
 
 /** Números em rolagens (innerHTML só com inteiros calculados no simulador). */
@@ -26850,6 +27139,38 @@ function _buildDndResourcesBarHtml(s, p, opts) {
             '<span class="dnd-mov-hexes">(' + movHexes + ' de ' + maxHexes + ' hexes)</span>' +
             '<div class="dnd-mov-track"><div class="dnd-mov-fill" style="width:' + movPct + '%;"></div></div>' +
             '</div>';
+        /* Barra tática D&D 5e por Nível/Classe (Padrão Solasta / BG3): Proficiência, CD, Concentração, Ataque Extra e Passivas */
+        var tacChips = [];
+        var pProf = (p.prof != null) ? (p.prof | 0) : (typeof simProficiencyBonus === 'function' ? simProficiencyBonus(p.lvl || 1) : 2);
+        tacChips.push('<span class="dnd-tac-chip" title="Bônus de Proficiência D&D 5e (Nível ' + (p.lvl || 1) + ')">✦ Prof +' + pProf + '</span>');
+        var isCasterCls = ['Mago', 'Clérigo', 'Druida', 'Bardo', 'Feiticeiro', 'Bruxo', 'Paladino', 'Patrulheiro'].indexOf(p.cls) >= 0;
+        if (isCasterCls && typeof simSpellSaveDc === 'function') {
+            tacChips.push('<span class="dnd-tac-chip" title="Classe de Dificuldade (CD) das suas magias (8 + Prof + Mod)">🔮 CD ' + simSpellSaveDc(p) + '</span>');
+        }
+        var extraAtksHud = (typeof simClassExtraAttacks === 'function') ? simClassExtraAttacks(p.cls, p.lvl || 1) : 0;
+        if (extraAtksHud > 0) {
+            tacChips.push('<span class="dnd-tac-chip dnd-tac-chip--gold" title="Ataque Extra D&D 5e (PHB p.72): ' + (1 + extraAtksHud) + ' ataques por ação Atacar">⚔ ' + (1 + extraAtksHud) + '× Ataques</span>');
+        }
+        if (p.cls === 'Ladino') {
+            var snkD = Math.ceil((p.lvl || 1) / 2);
+            tacChips.push('<span class="dnd-tac-chip dnd-tac-chip--gold" title="Ataque Furtivo D&D 5e (PHB p.96): +' + snkD + 'd6 com Vantagem ou aliado adjacente">🗡 Furtivo ' + snkD + 'd6</span>');
+        }
+        if (p.critRange && p.critRange < 20) {
+            tacChips.push('<span class="dnd-tac-chip dnd-tac-chip--gold" title="Crítico Aprimorado (PHB p.72)">🎯 Crítico ' + p.critRange + '–20</span>');
+        }
+        if (p.arcaneWardMax > 0) {
+            tacChips.push('<span class="dnd-tac-chip" style="border-color:rgba(100,181,246,0.55);color:#90caf9;" title="Égide Arcana (Escola de Abjuração — PHB p.115)">🛡 Égide ' + (p.arcaneWardHp || 0) + '/' + p.arcaneWardMax + '</span>');
+        }
+        if (p.superiorityDice > 0) {
+            tacChips.push('<span class="dnd-tac-chip dnd-tac-chip--gold" title="Dados de Superioridade (Mestre de Batalha — PHB p.73)">⚔ Sup: ' + p.superiorityDice + '</span>');
+        }
+        var concName = (p.concentrating && (p.concentrating.spellName || p.concentrating.n)) || (s && s.concentration && s.concentration.casterIdx === s.p_idx && s.concentration.spellName) || null;
+        if (concName) {
+            tacChips.push('<span class="dnd-tac-chip" style="background:rgba(46,125,50,0.28);border-color:rgba(129,199,132,0.65);color:#a5d6a7;" title="Concentração Ativa (PHB p.203): sofrer dano exige TR de CON">◈ Conc: ' + escHtml(concName) + '</span>');
+        }
+        if (tacChips.length) {
+            html += '<div class="dnd-tac-strip" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:3px 6px 1px;font-size:9.5px;">' + tacChips.join('') + '</div>';
+        }
     }
     return html;
 }
@@ -30381,7 +30702,7 @@ function showTargetActionMenu(targetIdx, uid) {
     html +=   '<button class="tam-close-btn" aria-label="Fechar">✕</button>';
     html += '</div>';
 
-    // Badges de Metadados / Condições
+    // Badges de Metadados / Condições / Traços D&D 5e do Inimigo
     var metaBadges = [];
     if (isTotalCover) metaBadges.push('<span class="tam-meta-badge danger">✕ Cobertura Total</span>');
     else if (coverInfo.cover === 'half') metaBadges.push('<span class="tam-meta-badge warn">⛨ ½ Cobertura (+2 CA)</span>');
@@ -30392,6 +30713,16 @@ function showTargetActionMenu(targetIdx, uid) {
     else if (advState === 'disadvantage') metaBadges.push('<span class="tam-meta-badge danger">▼ Desvantagem</span>');
 
     if (u.prone) metaBadges.push('<span class="tam-meta-badge warn">▾ Caído no Chão</span>');
+    if (u.packTactics) metaBadges.push('<span class="tam-meta-badge warn" title="Vantagem no ataque quando há aliado adjacente">🐺 Táticas de Matilha</span>');
+    if ((u.multiAttack | 0) > 1) metaBadges.push('<span class="tam-meta-badge danger" title="Realiza múltiplos ataques por turno">⚔ Ataque Múltiplo (' + u.multiAttack + '×)</span>');
+    if (u.vulnerabilities && u.vulnerabilities.length) {
+        var vList = u.vulnerabilities.map(function (v) { return simDmgTypeInfoPt(v).lb; }).join(', ');
+        metaBadges.push('<span class="tam-meta-badge good" title="Sofre o dobro de dano (2×)">▲ Vuln: ' + escHtml(vList) + '</span>');
+    }
+    if (u.resistances && u.resistances.length) {
+        var rList = u.resistances.slice(0, 2).map(function (r) { return simDmgTypeInfoPt(r).lb; }).join(', ') + (u.resistances.length > 2 ? '…' : '');
+        metaBadges.push('<span class="tam-meta-badge warn" title="Sofre metade do dano (½)">🛡 Res: ' + escHtml(rList) + '</span>');
+    }
 
     if (metaBadges.length > 0) {
         html += '<div class="tam-meta-row">' + metaBadges.join(' ') + '</div>';
@@ -30400,20 +30731,25 @@ function showTargetActionMenu(targetIdx, uid) {
     // Lista de Ações do Leque
     html += '<div class="tam-actions-list">';
 
-    // 1. ATACAR
+    // 1. ATACAR (com Cálculo Canônico de Chance de Acerto D&D 5e estilo BG3/Solasta)
     var atkDisabled = !isActionAvailable;
+    var hitCalc = (typeof simCalcHitChanceDnd5e === 'function') ? simCalcHitChanceDnd5e(s, p, u, null) : { hitPct: 65, critPct: 5, totalAtk: p.atk || 4 };
+    var hitCol = hitCalc.hitPct >= 75 ? '#68d391' : (hitCalc.hitPct >= 50 ? '#ffd54f' : (hitCalc.hitPct >= 30 ? '#ffb74d' : '#fc8181'));
     var atkReason = !isActionAvailable
         ? 'Ação principal já gasta neste turno'
-        : (!inAttackReach ? 'Fora de alcance (' + distM + ' · máx ' + reachMeta.label + ')' : (isTotalCover ? 'Linha de visão bloqueada' : 'No alcance tático'));
-    var atkWeapon = p.weapon || 'Arma';
-    var atkMod = (p.atk != null ? (p.atk >= 0 ? '+' : '') + p.atk : '+4');
-    var atkDie = p.die ? ('1d' + p.die) : 'Dano';
+        : (!inAttackReach ? 'Fora de alcance (' + distM + ' · máx ' + reachMeta.label + ')' : (isTotalCover ? 'Linha de visão bloqueada' : 'No alcance (' + reachMeta.label + ')'));
+    var atkWeapon = (p.main_hand && typeof p.main_hand === 'string') ? p.main_hand : (typeof p.weapon === 'string' ? p.weapon : 'Arma');
+    var atkMod = (hitCalc.totalAtk >= 0 ? '+' : '') + hitCalc.totalAtk;
+    var dmgModN = p.dmgMod || 0;
+    var atkDie = p.die ? ('1d' + p.die + (dmgModN > 0 ? '+' + dmgModN : (dmgModN < 0 ? dmgModN : ''))) : 'Dano';
+    var extraAtksTam = (typeof simClassExtraAttacks === 'function') ? simClassExtraAttacks(p.cls, p.lvl || 1) : 0;
+    var extraTagTam = extraAtksTam > 0 ? ' · ' + (1 + extraAtksTam) + '× golpes' : '';
 
     html += '<button type="button" class="tam-act-btn tam-act--attack' + (atkDisabled ? ' is-disabled' : '') + '" data-tam-act="attack">';
     html +=   '<div class="tam-act-ico">⚔</div>';
     html +=   '<div class="tam-act-text">';
-    html +=     '<div class="tam-act-label">Atacar com ' + escHtml(atkWeapon) + '</div>';
-    html +=     '<div class="tam-act-desc">' + atkMod + ' para acertar · ' + atkDie + ' · ' + atkReason + '</div>';
+    html +=     '<div class="tam-act-label" style="display:flex;align-items:center;justify-content:space-between;gap:6px;"><span>Atacar com ' + escHtml(atkWeapon) + '</span><span style="font-size:11px;font-weight:800;color:' + hitCol + ';background:rgba(0,0,0,0.45);border:1px solid ' + hitCol + ';border-radius:4px;padding:1px 6px;">🎯 ' + hitCalc.hitPct + '%</span></div>';
+    html +=     '<div class="tam-act-desc">' + atkMod + ' vs CA ' + hitCalc.effectiveAc + ' · Dano ' + atkDie + extraTagTam + ' · ' + atkReason + '</div>';
     html +=   '</div>';
     html +=   '<div class="tam-act-chev">▸</div>';
     html += '</button>';
@@ -32963,13 +33299,51 @@ function openCombatLog() {
     ov.className = 'list-panel-overlay';
     var card = document.createElement('div');
     card.className = 'list-panel-card list-panel-card--log';
-    var html = '<div class="lp-title">Log do combate</div><div class="lp-sub">Por rodada e turno · ordem cronológica</div>';
-    html += '<div class="lp-log-scroll">';
-    html += simBuildCombatLogHtml(s);
+
+    var lines = (s && s.log) ? s.log : [];
+    var cntAtk = 0, cntCrit = 0, cntHeal = 0, cntCond = 0;
+    for (var li = 0; li < lines.length; li++) {
+        var ln = String(lines[li] || '');
+        if (/^::/.test(ln)) continue;
+        if (/CRITA|CRÍTICO|NAT 20/i.test(ln)) cntCrit++;
+        var cl = simClassifyLogLineDnd5e(ln);
+        if (cl.cat === 'atk') cntAtk++;
+        else if (cl.cat === 'heal') cntHeal++;
+        else if (cl.cat === 'cond') cntCond++;
+    }
+
+    var html = '<div class="lp-title">Diário Tático de Combate</div>';
+    html += '<div class="lp-sub">Rodada ' + (s.rn || 1) + ' · ' + cntAtk + ' ataques' + (cntCrit ? ' (' + cntCrit + ' ★ crít.)' : '') + ' · ' + cntCond + ' testes/condições</div>';
+    html += '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin:4px 0 6px 0;" data-log-filters>';
+    html += '<button type="button" data-log-filter="all" style="background:rgba(212,175,55,0.25);border:1px solid #d4af37;color:#ffd700;border-radius:4px;padding:2px 7px;font-size:9.5px;font-weight:700;cursor:pointer;">Todos</button>';
+    html += '<button type="button" data-log-filter="atk" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:2px 7px;font-size:9.5px;font-weight:600;cursor:pointer;">⚔ Ataques (' + cntAtk + ')</button>';
+    html += '<button type="button" data-log-filter="heal" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:2px 7px;font-size:9.5px;font-weight:600;cursor:pointer;">✚ Curas (' + cntHeal + ')</button>';
+    html += '<button type="button" data-log-filter="cond" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:2px 7px;font-size:9.5px;font-weight:600;cursor:pointer;">◈ Regras & TRs (' + cntCond + ')</button>';
+    html += '</div>';
+    html += '<div class="lp-log-scroll" data-log-scroll>';
+    html += simBuildCombatLogHtml(s, 'all');
     html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
     setHTML(card, html);
     ov.appendChild(card);
     mountInGameFrame(ov);
+    var scrollEl = card.querySelector('[data-log-scroll]');
+    if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
+    var filterBtns = card.querySelectorAll('[data-log-filter]');
+    for (var bi = 0; bi < filterBtns.length; bi++) {
+        filterBtns[bi].addEventListener('click', function () {
+            var cat = this.getAttribute('data-log-filter') || 'all';
+            for (var bj = 0; bj < filterBtns.length; bj++) {
+                var active = filterBtns[bj] === this;
+                filterBtns[bj].style.background = active ? 'rgba(212,175,55,0.25)' : 'rgba(25,20,16,0.75)';
+                filterBtns[bj].style.borderColor = active ? '#d4af37' : 'rgba(196,149,58,0.35)';
+                filterBtns[bj].style.color = active ? '#ffd700' : '#d4c8b0';
+            }
+            if (scrollEl) {
+                setHTML(scrollEl, simBuildCombatLogHtml(s, cat));
+                scrollEl.scrollTop = scrollEl.scrollHeight;
+            }
+        });
+    }
     ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
     card.querySelector('[data-close]').addEventListener('click', function () { ov.remove(); });
 }
@@ -33656,14 +34030,47 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
         var resBadgeHtml = '<span class="lp-item-res-badge res-' + resKind + '" title="' +
             (resKind === 'bonus' ? 'Ação Bônus (▲)' : resKind === 'reaction' ? 'Reação ()' : 'Ação (◆)') +
             '" aria-hidden="true">' + resGlyph + '</span>';
+        /* Chips táticos compactos D&D 5e (Dano/Cura escalonado por nível, Tipo, Alcance, TR/CD, Concentração) */
+        var tacMetaParts = [];
+        if (sk.kind === 'attack') {
+            if (sk.autoHit && sk.magicMissiles) {
+                var mmCnt = (sk.magicMissiles.count || 3) + ((sk.magicMissiles.scaleByCasterLevel && pCur) ? Math.floor(Math.max(0, (pCur.lvl || 1) - 1) / 2) : 0);
+                tacMetaParts.push('<span style="color:#90caf9;font-weight:700;">' + mmCnt + '× (1d4+1) Energia · Auto-Acerto</span>');
+            } else if (typeof simTargetAttackDamagePreview === 'function' && pCur) {
+                var skPr = simTargetAttackDamagePreview(pCur, sk);
+                var dtInf = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(sk.dmgType || 'slashing') : { lb: 'Dano', ico: '⚔️', col: '#ffd54f' };
+                tacMetaParts.push('<span style="color:' + dtInf.col + ';font-weight:700;">' + escHtml(skPr.dmgFormula) + ' ' + dtInf.ico + ' ' + escHtml(dtInf.lb) + '</span>');
+            }
+            if (sk.save && sk.save.ability) {
+                var skDc = (sk.save.dc | 0) || (typeof simSpellSaveDc === 'function' && pCur ? simSpellSaveDc(pCur) : 13);
+                tacMetaParts.push('<span style="color:#ffd54f;">TR ' + escHtml(String(sk.save.ability).toUpperCase()) + ' CD ' + skDc + '</span>');
+            }
+        } else if (sk.kind === 'heal' && sk.healSpec) {
+            var hs = sk.healSpec;
+            var hForm = (hs.n > 0 && hs.d > 0) ? (hs.n + 'd' + hs.d + (hs.flat ? '+' + hs.flat : '') + (hs.modLevel && pCur ? '+' + (pCur.lvl || 1) : '')) : ('+' + (hs.flat || 5));
+            tacMetaParts.push('<span style="color:#81c784;font-weight:700;">💚 ' + escHtml(hForm) + (sk.tempHp ? ' PV Temp' : ' PV') + '</span>');
+        } else if (sk.buffSim && sk.buffSim.turns) {
+            tacMetaParts.push('<span style="color:#b39ddb;">⏱ ' + sk.buffSim.turns + ' rodadas</span>');
+        }
+        if (typeof formatDndActionReach === 'function' && pCur && sk.kind === 'attack') {
+            var rMeta = formatDndActionReach(pCur, sk);
+            if (rMeta && rMeta.meters) tacMetaParts.push('<span>⌖ ' + escHtml(rMeta.meters) + '</span>');
+        }
+        if (sk.concentration) {
+            tacMetaParts.push('<span style="color:#a5d6a7;font-weight:700;" title="Exige Concentração D&D 5e (PHB p.203)">◈ Conc.</span>');
+        }
+        if (sk.scale === 'cantrip') {
+            tacMetaParts.push('<span style="color:#ce93d8;">Truque</span>');
+        }
+        var tacLineHtml = tacMetaParts.length
+            ? '<div class="lp-item-dnd-meta" style="font-size:9.5px;color:var(--v-text-dim,#b5a692);display:flex;flex-wrap:wrap;gap:6px;margin-top:1px;line-height:1.2;">' + tacMetaParts.join('<span style="opacity:0.45;">·</span>') + '</div>'
+            : '';
         html += '<div class="lp-item-wrap" data-cat="' + cat + '">';
         html += '<button type="button" class="lp-item lp-item--' + theme + (canUse ? '' : ' disabled') + '" data-skill="' + i + '"' + (canUse ? '' : ' disabled') + (blockReason ? ' title="' + escHtml(blockReason) + '"' : '') + '>';
         html += '<div class="lp-item-ico">' + _skillIconHTML(sk) + '</div>';
         html += '<div class="lp-item-body">';
         html += '<div class="lp-item-name">' + escHtml(sk.n) + resBadgeHtml + '</div>';
-        /* X-6.5.51AT (2026-05-08): lp-item-desc REMOVIDO daqui — descrição
-           agora vive dentro do help card (lp-help-desc). Linha mais curta
-           permite mais skills por página. Ver openSkillHelpMini. */
+        html += tacLineHtml;
         if (blockReason) {
             html += '<div class="lp-item-block-chip">' + escHtml(blockReason) + '</div>';
         }
@@ -34039,6 +34446,50 @@ function showSkillUseConfirmPopup(skill) {
         var sub = document.createElement('div');
         sub.className = 'mm-confirm-sub';
         sub.textContent = skill.desc || '';
+
+        /* Bloco Tático D&D 5e (Padrão Solasta / BG3): Fórmula escalonada, Alcance, Salvaguarda/CD e Concentração */
+        var dndBox = document.createElement('div');
+        dndBox.className = 'mm-confirm-dnd-box';
+        dndBox.style.cssText = 'background:rgba(12,10,8,0.68);border:1px solid rgba(196,149,58,0.35);border-radius:8px;padding:7px 10px;margin:6px 0;font-size:11px;line-height:1.45;text-align:left;display:flex;flex-direction:column;gap:3px;';
+        var dndRows = [];
+        if (skill.kind === 'attack' && pCur) {
+            if (skill.autoHit && skill.magicMissiles) {
+                var mmCount = (skill.magicMissiles.count || 3) + (skill.magicMissiles.scaleByCasterLevel ? Math.floor(Math.max(0, (pCur.lvl || 1) - 1) / 2) : 0);
+                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Dano:</span> <strong style="color:#90caf9;">' + mmCount + '× (1d4 + 1) Energia</strong> <span style="opacity:0.85;">(Acerto Automático)</span></div>');
+            } else if (typeof simTargetAttackDamagePreview === 'function') {
+                var prConfirm = simTargetAttackDamagePreview(pCur, skill);
+                var dtConfirm = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(skill.dmgType || 'slashing') : { lb: 'Físico', ico: '⚔️', col: '#ffd54f' };
+                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Dano (Nv ' + (pCur.lvl || 1) + '):</span> <strong style="color:' + dtConfirm.col + ';">' + escHtml(prConfirm.dmgFormula) + '</strong> (' + prConfirm.minDmg + '–' + prConfirm.maxDmg + ') · ' + dtConfirm.ico + ' ' + escHtml(dtConfirm.lb) + '</div>');
+            }
+            if (skill.save && skill.save.ability) {
+                var dcConfirm = (skill.save.dc | 0) || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(pCur) : 13);
+                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Salvaguarda:</span> <strong style="color:#ffd54f;">TR ' + escHtml(String(skill.save.ability).toUpperCase()) + ' vs CD ' + dcConfirm + '</strong></div>');
+            } else if (!skill.autoHit) {
+                var isSpAtk = !!(skill.scale === 'cantrip' || skill.isSpell);
+                var atkBVal = (isSpAtk && typeof simSpellAttackBonus === 'function') ? simSpellAttackBonus(pCur) : (pCur.atk || 0);
+                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Rolagem:</span> <strong style="color:#e8c45a;">1d20 + ' + atkBVal + ' vs CA</strong></div>');
+            }
+            if (typeof formatDndActionReach === 'function') {
+                var rConfirm = formatDndActionReach(pCur, skill);
+                var aoeNote = skill.aoeRadius ? ' · Área: ' + formatHexDistanceMeters(skill.aoeRadius) + ' (' + skill.aoeRadius + 'h)' : '';
+                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Alcance:</span> <strong>' + escHtml(rConfirm.label) + aoeNote + '</strong></div>');
+            }
+        } else if (skill.kind === 'heal' && skill.healSpec) {
+            var hsC = skill.healSpec;
+            var hFormC = (hsC.n > 0 && hsC.d > 0) ? (hsC.n + 'd' + hsC.d + (hsC.flat ? ' + ' + hsC.flat : '') + (hsC.modLevel && pCur ? ' + ' + (pCur.lvl || 1) + ' (Nível)' : '')) : ('+' + (hsC.flat || 5));
+            dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Restauração:</span> <strong style="color:#81c784;">💚 ' + escHtml(hFormC) + (skill.tempHp ? ' PV Temporários' : ' PV') + '</strong></div>');
+        } else if (skill.buffSim && skill.buffSim.turns) {
+            dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Duração:</span> <strong style="color:#b39ddb;">⏱ ' + skill.buffSim.turns + ' rodadas</strong></div>');
+        }
+        if (skill.concentration) {
+            var activeConc = (pCur && pCur.concentrating && (pCur.concentrating.spellName || pCur.concentrating.n)) || (currentState && currentState.concentration && currentState.concentration.casterIdx === currentState.p_idx && currentState.concentration.spellName) || null;
+            if (activeConc) {
+                dndRows.push('<div style="color:#ffb74d;font-weight:700;margin-top:2px;">⚠️ Substituirá sua concentração ativa em "' + escHtml(activeConc) + '" (PHB p.203)</div>');
+            } else {
+                dndRows.push('<div style="color:#a5d6a7;">◈ Exige Concentração D&D 5e (PHB p.203)</div>');
+            }
+        }
+
         var btns = document.createElement('div');
         btns.className = 'mm-confirm-btns';
         var btnCancel = document.createElement('button');
@@ -34060,6 +34511,10 @@ function showSkillUseConfirmPopup(skill) {
         card.appendChild(nameEl);
         card.appendChild(meta);
         if (skill.desc) card.appendChild(sub);
+        if (dndRows.length) {
+            setHTML(dndBox, dndRows.join(''));
+            card.appendChild(dndBox);
+        }
         card.appendChild(btns);
         ov.appendChild(card);
         mountInGameFrame(ov);
@@ -35508,8 +35963,8 @@ function showTargetConfirm(tgtIdx) {
     var reductions = u.resistances || []; // ['fogo','frio'...]
     var immunities = u.immunities || [];
     var vulnerabilities = u.vulnerabilities || [];
-    var legRes = (u.legendaryResistances | 0) || 0;
-    var legResUsed = (u.legendaryResistancesUsed | 0) || 0;
+    var legRes = (u.legendaryResistances | 0) || (u.legendary_resistances | 0) || 0;
+    var legResUsed = (u.legendaryResistancesUsed | 0) || (u.legendary_resistances_used | 0) || 0;
 
     var html = '';
     html += '<div class="tcc-title">' + (skill ? 'Usar ' + escHtml(skill.n) : 'Atacar este alvo?') + '</div>';
@@ -35523,11 +35978,12 @@ function showTargetConfirm(tgtIdx) {
     /* 2026-06-07: retrato WebP (OpenAI) do alvo no popup de confirmação — antes era
        SVG cru (o "lobo tosco"). _combatPortraitHTML resolve a imagem (fallback SVG). */
     var _tccIconHtml = _combatPortraitHTML(_tccIconId, u, _tccUtype) || escHtml(u.ico || '?');
+    var _tccCrBadge = (u.cr != null) ? ' · <span style="color:#d4af37;font-size:10px;">ND ' + escHtml(String(u.cr)) + '</span>' : '';
     html += '<div class="tcc-preview">';
     html += '<div class="tcc-ico tcc-ico--svg">' + _tccIconHtml + '</div>';
     html += '<div class="tcc-info">';
     html += '<div class="tcc-name">' + escHtml(u.n) + '</div>';
-    html += '<div class="tcc-stats"><span class="tcc-n-ca">CA ' + u.ac + '</span> · <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' HP</span></div>';
+    html += '<div class="tcc-stats"><span class="tcc-n-ca">CA ' + u.ac + '</span> · <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' HP</span>' + _tccCrBadge + '</div>';
     html += '</div></div>';
 
     /* Bloco de previsao de dano */
@@ -35561,18 +36017,60 @@ function showTargetConfirm(tgtIdx) {
         ? ' <span style="color:var(--v-gold-bright,#e8c45a);font-weight:600;">· No Alcance (' + reachMeta.label + ') ✦</span>'
         : ' <span style="color:#ff6b6b;font-weight:700;">· Fora de Alcance (máx: ' + reachMeta.label + ') ▲</span>';
 
+    var rawDmgType = (skill && skill.dmgType) ? skill.dmgType : (p.dmgType || 'slashing');
+    var dmgTypeInfo = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(rawDmgType) : { pt: rawDmgType, col: '#e8c45a', ico: '⚔' };
+
     html += '<div class="tcc-dmg">';
+    var isSaveSpell = !!(skill && skill.save);
+    var isAutoHitSpell = !!(skill && (skill.autoHit || skill.magicMissiles));
+
+    /* Medidor Visual de Probabilidade D&D 5e (Padrão Baldur's Gate 3 / Solasta) */
+    if (isAutoHitSpell) {
+        html += '<div style="background:linear-gradient(90deg, rgba(162,155,254,0.22), rgba(20,16,12,0.75));border:1px solid rgba(162,155,254,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">'
+            + '<div><div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#d6bcfa;">✦ 100% ACERTO AUTOMÁTICO</div>'
+            + '<div style="font-size:9.5px;color:#b8a9c9;">Infalível (PHB p. 257 — Mísseis Mágicos atingem automaticamente)</div></div>'
+            + '</div>';
+    } else if (isSaveSpell && typeof simCalcSaveFailChanceDnd5e === 'function') {
+        var svProb = simCalcSaveFailChanceDnd5e(s, p, u, skill);
+        var svCol = svProb.failPct >= 65 ? '#7cdb7c' : (svProb.failPct >= 40 ? '#ffd54f' : '#ff8585');
+        html += '<div style="background:linear-gradient(90deg, rgba(40,32,20,0.85), rgba(20,16,12,0.75));border:1px solid rgba(212,175,55,0.45);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
+            + '<div style="display:flex;justify-content:space-between;align-items:baseline;">'
+            + '<span style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + svCol + ';">🎯 ' + svProb.failPct + '% CHANCE DE FALHA NO TR</span>'
+            + '<span style="font-size:9.5px;color:#c9b896;">Alvo resiste com ' + svProb.minRollToSave + '+ no d20</span>'
+            + '</div>'
+            + '<div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin:4px 0;">'
+            + '<div style="height:100%;width:' + svProb.failPct + '%;background:' + svCol + ';"></div>'
+            + '</div>'
+            + '<div style="font-size:9.5px;color:#a09484;">Salvaguarda do Alvo: <strong style="color:#e8dfc8;">' + escHtml(svProb.breakdown) + '</strong></div>'
+            + '</div>';
+    } else if (!isSaveSpell && typeof simCalcHitChanceDnd5e === 'function') {
+        var hitProb = simCalcHitChanceDnd5e(s, p, u, skill);
+        var hitCol = hitProb.pct >= 65 ? '#7cdb7c' : (hitProb.pct >= 40 ? '#ffd54f' : '#ff8585');
+        html += '<div style="background:linear-gradient(90deg, rgba(40,32,20,0.85), rgba(20,16,12,0.75));border:1px solid rgba(212,175,55,0.45);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
+            + '<div style="display:flex;justify-content:space-between;align-items:baseline;">'
+            + '<span style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + hitCol + ';">🎯 ' + hitProb.pct + '% CHANCE DE ACERTO</span>'
+            + '<span style="font-size:9.5px;color:#ffd700;">★ Crítico: ' + hitProb.critPct + '% (d20 ≥ ' + hitProb.critMin + ')</span>'
+            + '</div>'
+            + '<div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin:4px 0;">'
+            + '<div style="height:100%;width:' + hitProb.pct + '%;background:' + hitCol + ';"></div>'
+            + '</div>'
+            + '<div style="font-size:9.5px;color:#a09484;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;">'
+            + '<span>Rolagem: <strong style="color:#e8dfc8;">' + escHtml(hitProb.atkBreakdown) + '</strong></span>'
+            + '<span>Defesa: <strong style="color:#e8dfc8;">' + escHtml(hitProb.acBreakdown) + '</strong> (d20 ≥ ' + hitProb.neededRoll + ')</span>'
+            + '</div>'
+            + '</div>';
+    }
+
     if (distStr) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância</span><span class="tcc-dmg-val">' + distStr + reachStatusBadge + '</span></div>';
     }
-    var isSaveSpell = !!(skill && skill.save);
     if (isSaveSpell) {
         var saveAb = (skill.save.ability || 'con').toUpperCase();
         var saveDc = (skill.save.dc | 0) || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(p) : 13);
         var dexCoverNote = (saveAb === 'DEX' && coverInfo.bonus > 0) ? ' (+ ' + coverInfo.bonus + ' Cobertura no TR)' : '';
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Salvaguarda</span><span class="tcc-dmg-val"><span class="tcc-n-key">TR ' + saveAb + dexCoverNote + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CD ' + saveDc + '</span></span></div>';
         if (minDmg > 0 || maxDmg > 0) {
-            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (em falha)</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:10px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
         } else if (skill.afterAttackEnemyDebuff) {
             var debuffN = skill.afterAttackEnemyDebuff.n || 'Condição';
             var debuffTurns = skill.afterAttackEnemyDebuff.turns || 3;
@@ -35584,17 +36082,29 @@ function showTargetConfirm(tgtIdx) {
             acDisplay += ' <span style="font-size:10px;opacity:0.85;">(' + u.ac + ' + ' + coverInfo.bonus + ' ' + (coverInfo.cover === 'half' ? '½ Cobertura' : '¾ Cobertura') + ')</span>';
         }
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> ' + acDisplay + '</span></div>';
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span>)</span></div>';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:10px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
         html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
+        if (!skill && typeof simClassExtraAttacks === 'function') {
+            var _xAtks = simClassExtraAttacks(p.cls, p.lvl);
+            if (_xAtks >= 1) {
+                html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque Extra</span><span class="tcc-dmg-val" style="color:#7cdb7c;font-weight:700;">⚔ ' + (1 + _xAtks) + '× golpes nesta Ação de Ataque (PHB)</span></div>';
+            }
+        }
     }
+    var _fmtDmgListPt = function (arr) {
+        return arr.map(function (dt) {
+            var info = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(dt) : { pt: dt, ico: '' };
+            return (info.ico ? info.ico + ' ' : '') + info.pt;
+        }).join(', ');
+    };
     if (vulnerabilities.length) {
-        html += '<div class="tcc-dmg-row vulnerability" style="color:#ff6b6b;"><span class="tcc-dmg-lbl">▲ Vulnerável</span><span class="tcc-dmg-val">' + vulnerabilities.join(', ') + ' (2× dano)</span></div>';
+        html += '<div class="tcc-dmg-row vulnerability" style="color:#ff6b6b;"><span class="tcc-dmg-lbl">▲ Vulnerável</span><span class="tcc-dmg-val">' + escHtml(_fmtDmgListPt(vulnerabilities)) + ' (2× dano)</span></div>';
     }
     if (reductions.length) {
-        html += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">Resistente</span><span class="tcc-dmg-val">' + reductions.join(', ') + ' (½ dano)</span></div>';
+        html += '<div class="tcc-dmg-row reduction"><span class="tcc-dmg-lbl">Resistente</span><span class="tcc-dmg-val">' + escHtml(_fmtDmgListPt(reductions)) + ' (½ dano)</span></div>';
     }
     if (immunities.length) {
-        html += '<div class="tcc-dmg-row immunity"><span class="tcc-dmg-lbl">✦ Imune</span><span class="tcc-dmg-val">' + immunities.join(', ') + ' (0 dano)</span></div>';
+        html += '<div class="tcc-dmg-row immunity"><span class="tcc-dmg-lbl">✦ Imune</span><span class="tcc-dmg-val">' + escHtml(_fmtDmgListPt(immunities)) + ' (0 dano)</span></div>';
     }
     if (legRes > 0) {
         var _legLeft = Math.max(0, legRes - legResUsed);
@@ -39789,6 +40299,14 @@ function openUnitDetail(uid) {
     html += '</div></div>';
 
     /* Recursos & Status Vital */
+    var profBonus = (u.prof != null) ? u.prof : (u.cr != null ? (u.cr < 5 ? 2 : (u.cr < 9 ? 3 : 4)) : (Math.floor(((u.lvl || 1) - 1) / 4) + 2));
+    var uDmgMod = u.dmgMod || 0;
+    var uDmgModStr = uDmgMod > 0 ? '+' + uDmgMod : (uDmgMod < 0 ? String(uDmgMod) : '');
+    var uDmgTypeInfo = (typeof simDmgTypeInfoPt === 'function' && u.dmgType) ? simDmgTypeInfoPt(u.dmgType) : null;
+    var uAtksPerTurn = (u.t === 'e')
+        ? Math.max(1, u.multiAttack | 0)
+        : (1 + (typeof simClassExtraAttacks === 'function' ? simClassExtraAttacks(u.cls, u.lvl) : 0));
+
     html += '<div class="udc-section"><div class="udc-section-title">Recursos Vitais & Posição</div>';
     html += '<div class="udc-stats">';
     var hpPct = Math.round((u.hp / u.mhp) * 100);
@@ -39801,7 +40319,15 @@ function openUnitDetail(uid) {
     html += '<div class="udc-stat"><span class="udc-stat-lbl">CA</span><span class="udc-stat-val">' + u.ac + (acB ? ' +' + acB : '') + '</span></div>';
     var atkB = getAtkFlatFromStatuses(u);
     html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataque</span><span class="udc-stat-val">+' + u.atk + (atkB ? ' +' + atkB + ' temp' : '') + '</span></div>';
-    html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano</span><span class="udc-stat-val">' + (u.die ? ('1d' + u.die) : 'Arma') + '</span></div>';
+    html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano</span><span class="udc-stat-val">' + (u.die ? ('1d' + u.die + uDmgModStr) : 'Arma') + (uDmgTypeInfo ? ' <span style="font-size:9px;color:' + uDmgTypeInfo.col + ';">(' + escHtml(uDmgTypeInfo.pt) + ')</span>' : '') + '</span></div>';
+    html += '<div class="udc-stat"><span class="udc-stat-lbl">Proficiência</span><span class="udc-stat-val" style="color:#ffd700;">+' + profBonus + '</span></div>';
+    if (uAtksPerTurn > 1) {
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataques/Turno</span><span class="udc-stat-val" style="color:#7cdb7c;">' + uAtksPerTurn + '×</span></div>';
+    }
+    if (u.spellSaveDc || (u.spellSlots && u.spellSlots.max)) {
+        var uDc = u.spellSaveDc || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(u) : 12);
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">CD Magia</span><span class="udc-stat-val" style="color:#a29bfe;">CD ' + uDc + '</span></div>';
+    }
     if (u.speed != null) {
         html += '<div class="udc-stat"><span class="udc-stat-lbl">Deslocamento</span><span class="udc-stat-val">' + formatHexDistanceMeters(u.speed) + ' (' + u.speed + 'h)</span></div>';
     }
@@ -39822,6 +40348,13 @@ function openUnitDetail(uid) {
         }
     }
     html += '</div></div>';
+
+    /* Bestiário & Lore (quando presente em monstros/chefes) */
+    if (u.desc) {
+        html += '<div class="udc-section"><div class="udc-section-title">Bestiário & Lore</div>';
+        html += '<div style="font-size:10.5px; color:#d8cbb3; font-style:italic; line-height:1.4; background:rgba(20,16,12,0.55); border-left:2px solid #d4af37; padding:5px 8px; border-radius:0 4px 4px 0;">' + escHtml(u.desc) + '</div>';
+        html += '</div>';
+    }
 
     /* Atributos D&D 5e (6-way com ícones e modificadores) */
     var _attrBase = '../shared/img/levelup/attrs/';
@@ -39852,7 +40385,6 @@ function openUnitDetail(uid) {
 
     /* Salvaguardas D&D 5e */
     var profSaves = u.saving_throw_proficiencies || [];
-    var profBonus = (u.prof != null) ? u.prof : (u.cr != null ? (u.cr < 5 ? 2 : (u.cr < 9 ? 3 : 4)) : (Math.floor(((u.lvl || 1) - 1) / 4) + 2));
     html += '<div class="udc-section"><div class="udc-section-title">Salvaguardas D&D 5e</div>';
     html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">';
     for (var si2 = 0; si2 < statsData.length; si2++) {
@@ -39869,7 +40401,29 @@ function openUnitDetail(uid) {
     }
     html += '</div></div>';
 
+    /* Traços, Passivas & Regras D&D 5e (Monster Manual / Classes por Nível) */
+    var uTraits = (typeof simResolveUnitTraitsDnd5e === 'function') ? simResolveUnitTraitsDnd5e(u) : (u.traits || []);
+    if (uTraits && uTraits.length) {
+        html += '<div class="udc-section"><div class="udc-section-title">Traços & Características D&D 5e</div>';
+        html += '<div style="display:flex; flex-direction:column; gap:5px;">';
+        for (var ti = 0; ti < uTraits.length; ti++) {
+            var trObj = uTraits[ti];
+            if (!trObj || !trObj.n) continue;
+            html += '<div style="background:rgba(22,18,14,0.72); border:1px solid rgba(196,149,58,0.38); border-radius:5px; padding:4px 8px; font-size:10px; line-height:1.35;">'
+                + '<div style="color:#ffd700; font-weight:700;">' + escHtml(trObj.ico || '✦') + ' ' + escHtml(trObj.n) + '</div>'
+                + (trObj.desc ? '<div style="color:#d4c8b0; font-size:9.5px; margin-top:1px;">' + escHtml(trObj.desc) + '</div>' : '')
+                + '</div>';
+        }
+        html += '</div></div>';
+    }
+
     /* Defesas, Resistências e Imunidades */
+    var _udcFmtDmgList = function (arr) {
+        return arr.map(function (dt) {
+            var info = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(dt) : { pt: dt, ico: '' };
+            return (info.ico ? info.ico + ' ' : '') + info.pt;
+        }).join(', ');
+    };
     var hasRes = (u.resistances && u.resistances.length);
     var hasVuln = (u.vulnerabilities && u.vulnerabilities.length);
     var hasImm = (u.immunities && u.immunities.length);
@@ -39877,10 +40431,10 @@ function openUnitDetail(uid) {
     if (hasRes || hasVuln || hasImm || hasCondImm) {
         html += '<div class="udc-section"><div class="udc-section-title">Propriedades & Defesas</div>';
         html += '<div style="display:flex; flex-direction:column; gap:3px; font-size:10px; line-height:1.3;">';
-        if (hasVuln) html += '<div style="color:#ff8a4a;"><b>Vulnerável:</b> ' + escHtml(u.vulnerabilities.join(', ')) + '</div>';
-        if (hasRes) html += '<div style="color:#ffd700;"><b>Resistências:</b> ' + escHtml(u.resistances.join(', ')) + '</div>';
-        if (hasImm) html += '<div style="color:#7cdb7c;"><b>Imunidades a Dano:</b> ' + escHtml(u.immunities.join(', ')) + '</div>';
-        if (hasCondImm) html += '<div style="color:#9adfe8;"><b>Imunidades a Condições:</b> ' + escHtml(u.condition_immunities.join(', ')) + '</div>';
+        if (hasVuln) html += '<div style="color:#ff8a4a;"><b>▲ Vulnerável (2× dano):</b> ' + escHtml(_udcFmtDmgList(u.vulnerabilities)) + '</div>';
+        if (hasRes) html += '<div style="color:#ffd700;"><b>⛨ Resistências (½ dano):</b> ' + escHtml(_udcFmtDmgList(u.resistances)) + '</div>';
+        if (hasImm) html += '<div style="color:#7cdb7c;"><b>✦ Imunidades a Dano (0 dano):</b> ' + escHtml(_udcFmtDmgList(u.immunities)) + '</div>';
+        if (hasCondImm) html += '<div style="color:#9adfe8;"><b>◈ Imunidades a Condições:</b> ' + escHtml(u.condition_immunities.join(', ')) + '</div>';
         html += '</div></div>';
     }
 

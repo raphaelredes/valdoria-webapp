@@ -62,23 +62,61 @@ function _pickEnemyFantasyName(species, idx) {
 var BESTIARY = [
     /* V1.7 Sprint-17 Ronda 22 (2026-04-21 QA PHB MM creature types) — tags em todos
        os inimigos base. Enables: Divine Smite +1d8 vs undead/fiend, Hold Person
-       humanoid-only, Charm Person humanoid-only, futuras checagens de tipo. */
-    { n: 'Goblin',                    hp: 7,  ac: 15, atk: 4, die: 6,  dex: 14, ico: '', dmgMod: 2, attr: 'DEX', tags: ['humanoid'] },
-    { n: 'Orc',                       hp: 15, ac: 13, atk: 5, die: 12, dex: 12, ico: '', dmgMod: 3, attr: 'STR', tags: ['humanoid'] },
-    { n: 'Esqueleto',                 hp: 13, ac: 13, atk: 4, die: 6,  dex: 14, ico: '', dmgMod: 2, attr: 'STR', tags: ['undead'] },
-    { n: 'Aranha Gigante',            hp: 26, ac: 14, atk: 5, die: 8,  dex: 16, ico: '', dmgMod: 3, attr: 'STR', tags: ['beast'] },
-    { n: 'Sapo Gigante',              hp: 18, ac: 11, atk: 3, die: 6,  dex: 13, ico: '', dmgMod: 2, attr: 'STR', tags: ['beast'] },
-    { n: 'Homem-Lagarto',             hp: 22, ac: 15, atk: 4, die: 6,  dex: 10, ico: '', dmgMod: 2, attr: 'STR', tags: ['humanoid'] },
-    { n: 'Crocodilo',                 hp: 19, ac: 12, atk: 4, die: 10, dex: 10, ico: '', dmgMod: 2, attr: 'STR', tags: ['beast'] },
-    { n: 'Cobra Constritora Gigante', hp: 60, ac: 12, atk: 6, die: 10, dex: 14, ico: '', dmgMod: 4, attr: 'STR', tags: ['beast'] },
-    { n: 'Bruxa Verde',               hp: 82, ac: 17, atk: 6, die: 8,  dex: 12, ico: '‍', dmgMod: 3, attr: 'INT', tags: ['fey'] },
-    { n: 'Mímico',                    hp: 58, ac: 12, atk: 5, die: 8,  dex: 12, ico: '', dmgMod: 3, attr: 'STR', tags: ['monstrosity'] },
+       humanoid-only, Charm Person humanoid-only, futuras checagens de tipo.
+       V2.45 (2026-10): Enriquecido com atributos completos do Monster Manual D&D 5e,
+       ND (CR), XP, tipos de dano, resistências/vulnerabilidades/imunidades, traços e lore. */
+    { n: 'Goblin',                    hp: 7,  ac: 15, atk: 4, die: 6,  dex: 14, str: 8,  con: 10, int: 10, wis: 8,  cha: 8,  cr: 0.25, xp: 50,   dmgType: 'slashing',    ico: '', dmgMod: 2, attr: 'DEX', tags: ['humanoid'],
+      desc: 'Um batedor goblin de pele esverdeada e olhos vermelhos maliciosos, mestre em emboscadas furtivas.',
+      traits: [{ n: 'Escape Ágil (MM p.166)', ico: '💨', desc: 'Acostumado a desengajar e esconder-se rapidamente entre as sombras.' }] },
+    { n: 'Orc',                       hp: 15, ac: 13, atk: 5, die: 12, dex: 12, str: 16, con: 16, int: 7,  wis: 11, cha: 10, cr: 0.5,  xp: 100,  dmgType: 'slashing',    ico: '', dmgMod: 3, attr: 'STR', tags: ['humanoid'],
+      desc: 'Um saqueador orc de presas proeminentes e músculos marcados por cicatrizes, empunhando um machado grande.',
+      traits: [{ n: 'Agressivo (MM p.246)', ico: '🔥', desc: 'Avança com ferocidade implacável em direção ao adversário mais próximo.' }] },
+    { n: 'Esqueleto',                 hp: 13, ac: 13, atk: 4, die: 6,  dex: 14, str: 10, con: 15, int: 6,  wis: 8,  cha: 5,  cr: 0.25, xp: 50,   dmgType: 'piercing',    ico: '', dmgMod: 2, attr: 'STR', tags: ['undead'],
+      vulnerabilities: ['bludgeoning'], immunities: ['poison'], conditionImmunities: ['poisoned', 'exhaustion'],
+      desc: 'Ossos animados por necromancia profana, com órbitas brilhando em chamas azuladas frias.',
+      traits: [{ n: 'Natureza Morta-Viva (MM p.272)', ico: '💀', desc: 'Vulnerável a dano contundente; imune a veneno e exaustão.' }] },
+    { n: 'Aranha Gigante',            hp: 26, ac: 14, atk: 5, die: 8,  dex: 16, str: 14, con: 12, int: 2,  wis: 11, cha: 4,  cr: 1,    xp: 200,  dmgType: 'piercing',    ico: '', dmgMod: 3, attr: 'STR', tags: ['beast'],
+      desc: 'Predadora aracnídea de oito olhos reluzentes cujas presas gotejam veneno paralisante.',
+      traits: [
+        { n: 'Escalada de Aranha (MM p.328)', ico: '🕸️', desc: 'Move-se por superfícies difíceis e teias sem penalidade de movimento.' },
+        { n: 'Presas Venenosas (CD 11 CON)', ico: '🧪', desc: 'Suas mordidas injetam toxina corrosiva nas vítimas.' }
+      ] },
+    { n: 'Sapo Gigante',              hp: 18, ac: 11, atk: 3, die: 6,  dex: 13, str: 15, con: 13, int: 2,  wis: 10, cha: 3,  cr: 1,    xp: 200,  dmgType: 'piercing',    ico: '', dmgMod: 2, attr: 'STR', tags: ['beast'],
+      desc: 'Anfíbio colossal dos pântanos, capaz de saltar distâncias absurdas e capturar presas com sua língua pegajosa.',
+      traits: [{ n: 'Salto Parado & Anfíbio (MM p.329)', ico: '🐸', desc: 'Adaptação total à água e botes repentinos de longo alcance.' }] },
+    { n: 'Homem-Lagarto',             hp: 22, ac: 15, atk: 4, die: 6,  dex: 10, str: 15, con: 13, int: 7,  wis: 12, cha: 7,  cr: 0.5,  xp: 100,  dmgType: 'bludgeoning', ico: '', dmgMod: 2, attr: 'STR', tags: ['humanoid'],
+      desc: 'Guerreiro reptiliano de escamas espessas e escudo espinhoso, defensor implacável dos pântanos.',
+      traits: [
+        { n: 'Armadura Natural (CA 15)', ico: '🛡️', desc: 'Escamas rígidas e escudo pesado oferecem alta proteção física.' },
+        { n: 'Prender a Respiração (MM p.204)', ico: '🌊', desc: 'Capaz de emboscar submerso por até 15 minutos.' }
+      ] },
+    { n: 'Crocodilo',                 hp: 19, ac: 12, atk: 4, die: 10, dex: 10, str: 15, con: 14, int: 2,  wis: 10, cha: 5,  cr: 0.5,  xp: 100,  dmgType: 'piercing',    ico: '', dmgMod: 2, attr: 'STR', tags: ['beast'],
+      desc: 'Réptil encouraçado de mandíbulas esmagadoras que espreita nas águas turvas.',
+      traits: [{ n: 'Mandíbula Esmagadora (MM p.320)', ico: '🐊', desc: 'Mordida de alto impacto capaz de prender o alvo (CD 12 FOR).' }] },
+    { n: 'Cobra Constritora Gigante', hp: 60, ac: 12, atk: 6, die: 10, dex: 14, str: 19, con: 12, int: 1,  wis: 10, cha: 3,  cr: 2,    xp: 450,  dmgType: 'bludgeoning', ico: '', dmgMod: 4, attr: 'STR', tags: ['beast'],
+      desc: 'Serpente titânica de musculatura colossal capaz de triturar armaduras de aço em seu enlace.',
+      traits: [{ n: 'Constrição (MM p.324)', ico: '🐍', desc: 'Envolve a presa com força brutal (FOR 19), restringindo seus movimentos.' }] },
+    { n: 'Bruxa Verde',               hp: 82, ac: 17, atk: 6, die: 8,  dex: 12, str: 18, con: 16, int: 13, wis: 14, cha: 14, cr: 3,    xp: 700,  dmgType: 'slashing',    ico: '‍', dmgMod: 3, attr: 'INT', tags: ['fey'],
+      desc: 'Feérica ancestral e malévola de pele verrugosa que tece ilusões, maldições e tormentos nos pântanos.',
+      traits: [
+        { n: 'Passagem Invisível (MM p.177)', ico: '👁️', desc: 'Usa magia feérica para ocultar sua presença e emboscar viajantes.' },
+        { n: 'Garras de Ferro (FOR 18)', ico: '🩸', desc: 'Apesar da aparência decrépita, possui força física sobre-humana.' }
+      ] },
+    { n: 'Mímico',                    hp: 58, ac: 12, atk: 5, die: 8,  dex: 12, str: 17, con: 15, int: 5,  wis: 13, cha: 8,  cr: 2,    xp: 450,  dmgType: 'bludgeoning', ico: '', dmgMod: 3, attr: 'STR', tags: ['monstrosity'],
+      immunities: ['acid'], conditionImmunities: ['prone'],
+      desc: 'Predador metamorfo que assume a forma de baús e objetos inanimados para devorar aventureiros incautos.',
+      traits: [
+        { n: 'Adesivo & Agarre (MM p.220)', ico: '🪤', desc: 'Adere a qualquer coisa que o toque; imune a ácido e à condição prostrado.' },
+        { n: 'Mordida Ácida', ico: '🧪', desc: 'Mandíbulas repletas de presas e enzimas digestivas corrosivas.' }
+      ] },
     /* V1.7 Stage-CASTERS (2026-04-21) — Inimigos que castam magia (PHB Monster
        Manual). Cada um tem `isCaster:true`, pool `res` e arsenal `skills[]`
        espelhado das classes jogadoras. NPC AI escolhe entre weapon attack e
        spell baseado em MP disponível + chance de cast. */
-    { n: 'Acólito', hp: 9, ac: 10, atk: 2, die: 4, dex: 10, wis: 14, con: 10, int: 10, cha: 11, ico: '', dmgMod: 0, attr: 'WIS',
-      isCaster: true, sugLvl: 1,
+    { n: 'Acólito', hp: 9, ac: 10, atk: 2, die: 4, dex: 10, wis: 14, con: 10, int: 10, cha: 11, str: 10, cr: 0.25, xp: 50, dmgType: 'bludgeoning', ico: '', dmgMod: 0, attr: 'WIS',
+      isCaster: true, sugLvl: 1, tags: ['humanoid'], saving_throw_proficiencies: ['wis', 'cha'],
+      desc: 'Devoto iniciado nos mistérios divinos, capaz de canalizar preces de luz e restauração.',
+      traits: [{ n: 'Conjuração Divina (Nv 1)', ico: '✨', desc: 'Conjurador de 1º nível (SAB, CD 12): Chama Sagrada e Curar Ferimentos (MM p.342).' }],
       res: { type: 'mp', name: 'Mana', ico: '', max: 4 },
       castProb: 0.7,
       /* MM p.342: Acolyte — Spellcasting 1st level. Cantrips: light, sacred flame, thaumaturgy.
@@ -90,8 +128,10 @@ var BESTIARY = [
           healSpec: { n: 1, d: 8, flat: 2 } }
       ]
     },
-    { n: 'Aprendiz de Mago', hp: 9, ac: 10, atk: 4, die: 4, dex: 12, int: 15, con: 10, wis: 10, cha: 11, ico: '', dmgMod: 0, attr: 'INT',
-      isCaster: true, sugLvl: 1,
+    { n: 'Aprendiz de Mago', hp: 9, ac: 10, atk: 4, die: 4, dex: 12, int: 15, con: 10, wis: 10, cha: 11, str: 9, cr: 0.25, xp: 50, dmgType: 'piercing', ico: '', dmgMod: 0, attr: 'INT',
+      isCaster: true, sugLvl: 1, tags: ['humanoid'], saving_throw_proficiencies: ['int', 'wis'],
+      desc: 'Estudante das artes arcanas que domina projéteis de energia pura e chamas elementais.',
+      traits: [{ n: 'Conjuração Arcana (Nv 1)', ico: '🔮', desc: 'Conjurador de 1º nível (INT, CD 12): Raio de Fogo e Mísseis Mágicos.' }],
       res: { type: 'mp', name: 'Mana', ico: '', max: 5 },
       castProb: 0.8,
       /* MM Apprentice Wizard — Spellcasting 1st level. Cantrips: fire bolt, mage hand,
@@ -103,8 +143,13 @@ var BESTIARY = [
           autoHit: true, magicMissiles: { count: 3, perDart: { n: 1, d: 4, flat: 1 } } }
       ]
     },
-    { n: 'Cultista Fanático', hp: 33, ac: 13, atk: 4, die: 6, dex: 14, wis: 13, con: 10, int: 10, cha: 14, ico: '', dmgMod: 2, attr: 'WIS',
-      isCaster: true, sugLvl: 4,
+    { n: 'Cultista Fanático', hp: 33, ac: 13, atk: 4, die: 6, dex: 14, wis: 13, con: 12, int: 10, cha: 14, str: 11, cr: 2, xp: 450, dmgType: 'piercing', ico: '', dmgMod: 2, attr: 'WIS',
+      isCaster: true, sugLvl: 4, tags: ['humanoid'], saving_throw_proficiencies: ['wis', 'cha'],
+      desc: 'Líder de seita sombria cuja devoção fanática lhe concede poderes necróticos e resistência mental.',
+      traits: [
+        { n: 'Devoção Sombria (MM p.345)', ico: '🕯️', desc: 'Vantagem em salvaguardas contra ser enfeitiçado ou amedrontado.' },
+        { n: 'Conjuração Sombria (Nv 4)', ico: '☠️', desc: 'Canaliza Infligir Ferimentos (3d10 necrótico) e Chama Sagrada.' }
+      ],
       res: { type: 'mp', name: 'Mana', ico: '', max: 8 },
       castProb: 0.6,
       /* MM p.345: Cult Fanatic — Spellcasting 4th level. Cantrips: light, sacred flame,
@@ -116,8 +161,13 @@ var BESTIARY = [
           damageSpec: { n: 3, d: 10 } }
       ]
     },
-    { n: 'Mago Hostil', hp: 40, ac: 12, atk: 6, die: 4, dex: 14, int: 17, con: 11, wis: 12, cha: 11, ico: '‍', dmgMod: 0, attr: 'INT',
-      isCaster: true, sugLvl: 9,
+    { n: 'Mago Hostil', hp: 40, ac: 12, atk: 6, die: 4, dex: 14, int: 17, con: 11, wis: 12, cha: 11, str: 9, cr: 6, xp: 2300, dmgType: 'piercing', ico: '‍', dmgMod: 0, attr: 'INT',
+      isCaster: true, sugLvl: 9, tags: ['humanoid'], saving_throw_proficiencies: ['int', 'wis'],
+      desc: 'Arcanista veterano envolto em runas de proteção, capaz de dizimar esquadrões inteiros com Bola de Fogo.',
+      traits: [
+        { n: 'Conjuração Arcana (Nv 9)', ico: '🔥', desc: 'Conjurador de 9º nível (INT, CD 15, +7 ataque mágico — MM p.347).' },
+        { n: 'Reação: Escudo Arcano (+5 CA)', ico: '🛡️', desc: 'Conjura Escudo como reação ao ser atingido por um ataque.' }
+      ],
       res: { type: 'mp', name: 'Mana', ico: '', max: 15 },
       castProb: 0.85,
       /* MM p.347: Mage — Spellcasting 9th level. Cantrips: fire bolt, light, mage hand,
@@ -137,18 +187,37 @@ var BESTIARY = [
       ]
     },
     /* X-6.5.51AC (2026-05-04): 6 entries adicionadas pra fechar gap com ENEMIES_DB
-       em simuladores/exploracao.html (linhas 34685-34898). ANTES: encounters de Lobo/
-       Bandido/Orc Guerreiro/Fogo-Fátuo/Troll/Zumbi caiam em fallback BESTIARY[0]=Goblin
-       silenciosamente em buildEnemyFromSetup (combate.html:12834) porque lookup_name
-       resolvido via bestiary_name não existia. Issue #1 do fluxo travel→combat.
-       Stats canonicos PHB MM mantidos em sintonia com ENEMIES_DB pra coerência visual
-       (HP/CA exibidos na exploração devem bater com combate). */
-    { n: 'Lobo',                      hp: 11, ac: 13, atk: 4, die: 8,  dex: 15, str: 12, con: 12, wis: 12, int: 3,  cha: 6,  ico: '', dmgMod: 2, attr: 'STR', tags: ['beast'] },
-    { n: 'Bandido',                   hp: 11, ac: 12, atk: 3, die: 6,  dex: 12, str: 11, con: 12, wis: 10, int: 10, cha: 10, ico: '', dmgMod: 1, attr: 'DEX', tags: ['humanoid'] },
-    { n: 'Orc Guerreiro',             hp: 22, ac: 14, atk: 5, die: 12, dex: 12, str: 16, con: 16, wis: 11, int: 7,  cha: 10, ico: '', dmgMod: 3, attr: 'STR', tags: ['humanoid'] },
-    { n: 'Fogo-Fátuo',                hp: 22, ac: 19, atk: 4, die: 10, dex: 28, str: 1,  con: 10, wis: 14, int: 13, cha: 11, ico: '', dmgMod: 4, attr: 'DEX', tags: ['undead'] },
-    { n: 'Troll',                     hp: 84, ac: 15, atk: 7, die: 12, dex: 13, str: 18, con: 20, wis: 9,  int: 7,  cha: 7,  ico: '', dmgMod: 4, attr: 'STR', tags: ['giant'] },
-    { n: 'Zumbi',                     hp: 22, ac: 8,  atk: 3, die: 6,  dex: 6,  str: 13, con: 16, wis: 6,  int: 3,  cha: 5,  ico: '', dmgMod: 1, attr: 'STR', tags: ['undead'] },
+       em simuladores/exploracao.html (linhas 34685-34898). */
+    { n: 'Lobo',                      hp: 11, ac: 13, atk: 4, die: 8,  dex: 15, str: 12, con: 12, wis: 12, int: 3,  cha: 6,  cr: 0.25, xp: 50,   dmgType: 'piercing',    ico: '', dmgMod: 2, attr: 'STR', tags: ['beast'],
+      desc: 'Predador feroz das terras selvagens que caça em alcateia, cercando suas presas com precisão letal.',
+      traits: [
+        { n: 'Táticas de Matilha (MM p.341)', ico: '🐺', desc: 'Recebe Vantagem nas rolagens de ataque quando um aliado está adjacente ao alvo.' },
+        { n: 'Audição e Olfato Aguçados', ico: '👁️', desc: 'Sentidos apurados para rastrear presas na mata fechada.' }
+      ] },
+    { n: 'Bandido',                   hp: 11, ac: 12, atk: 3, die: 6,  dex: 12, str: 11, con: 12, wis: 10, int: 10, cha: 10, cr: 0.125, xp: 25,  dmgType: 'slashing',    ico: '', dmgMod: 1, attr: 'DEX', tags: ['humanoid'],
+      desc: 'Salteador de estradas de olhar calculista, armado com cimitarra e besta leve.',
+      traits: [{ n: 'Emboscada de Estrada (MM p.343)', ico: '🗡️', desc: 'Ataca viajantes em grupo visando alvos vulneráveis.' }] },
+    { n: 'Orc Guerreiro',             hp: 22, ac: 14, atk: 5, die: 12, dex: 12, str: 16, con: 16, wis: 11, int: 7,  cha: 10, cr: 0.5,  xp: 100,  dmgType: 'slashing',    ico: '', dmgMod: 3, attr: 'STR', tags: ['humanoid'],
+      desc: 'Veterano de guerra orc em cota de malha pesada, sedento por combate direto.',
+      traits: [{ n: 'Fúria de Batalha (MM p.246)', ico: '⚔️', desc: 'Desfere golpes brutais de machado grande (1d12 + FOR).' }] },
+    { n: 'Fogo-Fátuo',                hp: 22, ac: 19, atk: 4, die: 10, dex: 28, str: 1,  con: 10, wis: 14, int: 13, cha: 11, cr: 2,    xp: 450,  dmgType: 'lightning',   ico: '', dmgMod: 4, attr: 'DEX', tags: ['undead'],
+      immunities: ['lightning', 'poison'], resistances: ['acid', 'cold', 'fire', 'necrotic', 'thunder'], conditionImmunities: ['exhaustion', 'grappled', 'paralyzed', 'poisoned', 'prone', 'restrained', 'unconscious'],
+      desc: 'Orbe espectral de luz malévola que atrai viajantes para pântanos mortais e se alimenta de seu desespero.',
+      traits: [
+        { n: 'Incorpóreo & Esquivo (CA 19)', ico: '✨', desc: 'DES 28 (+9) e corpo espectral resistente a quase todos os elementos (MM p.301).' },
+        { n: 'Choque Elétrico', ico: '⚡', desc: 'Descarga elétrica letal ao toque.' }
+      ] },
+    { n: 'Troll',                     hp: 84, ac: 15, atk: 7, die: 12, dex: 13, str: 18, con: 20, wis: 9,  int: 7,  cha: 7,  cr: 5,    xp: 1800, dmgType: 'slashing',    ico: '', dmgMod: 4, attr: 'STR', tags: ['giant'],
+      vulnerabilities: ['fire', 'acid'], saving_throw_proficiencies: ['con'],
+      desc: 'Gigante monstruoso de carne esverdeada e borrachenta cujas feridas se fecham diante dos olhos.',
+      traits: [
+        { n: 'Regeneração (MM p.291)', ico: '🩸', desc: 'Regenera tecido rapidamente; vulnerável a fogo e ácido que suprimem sua cura.' },
+        { n: 'Garras e Mordida Voraz', ico: '👹', desc: 'Força descomunal (FOR 18, CON 20) capaz de dilacerar armaduras.' }
+      ] },
+    { n: 'Zumbi',                     hp: 22, ac: 8,  atk: 3, die: 6,  dex: 6,  str: 13, con: 16, wis: 6,  int: 3,  cha: 5,  cr: 0.25, xp: 50,   dmgType: 'bludgeoning', ico: '', dmgMod: 1, attr: 'STR', tags: ['undead'],
+      immunities: ['poison'], conditionImmunities: ['poisoned'], saving_throw_proficiencies: ['wis'],
+      desc: 'Cadáver reanimado que avança implacavelmente, ignorando ferimentos que derrubariam qualquer mortal.',
+      traits: [{ n: 'Fortitude de Morto-Vivo (MM p.316)', ico: '🧟', desc: 'CON 16 (+3) e imune a veneno; resiste a golpes fatais exceto dano radiante ou crítico.' }] },
 ];
 
 var CHAR_NAMES = ['Kael', 'Elara', 'Thorne', 'Miriel', 'Garrick', 'Sylas', 'Vaela', 'Rurik', 'Isen', 'Brynn'];
