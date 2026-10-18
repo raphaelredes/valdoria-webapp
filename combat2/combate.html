@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T16:12:47Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T16:32:44Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -3132,19 +3132,19 @@ html.sim-combat-root .bf-pan-viewport::-webkit-scrollbar {
   z-index: 100 !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: var(--v-space-sm, 6px) !important;
+  gap: 5px !important;
   pointer-events: auto !important;
   touch-action: manipulation !important;
 }
 .bf-zoom-btn {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--v-radius-sm, 6px);
   background: rgba(28,22,16,0.92);
   border: 1.5px solid rgba(196,149,58,0.65);
   color: #c4953a;
   font-family: 'Cinzel', serif;
-  font-size: calc(18px * var(--v-font-scale, 1));
+  font-size: calc(16px * var(--v-font-scale, 1));
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -3165,6 +3165,12 @@ html.sim-combat-root .bf-pan-viewport::-webkit-scrollbar {
   border-color: #fbd770;
   color: #fbd770;
   transform: scale(1.05);
+}
+.bf-zoom-btn.bf-zoom-btn--active {
+  background: linear-gradient(180deg, rgba(196,149,58,0.38), rgba(140,100,32,0.48));
+  border-color: #ffd700;
+  color: #fff3c4;
+  box-shadow: 0 0 10px rgba(255,215,0,0.45), 0 2px 6px rgba(0,0,0,0.6);
 }
 .bf-zoom-btn:active { transform: scale(0.92); }
 html.sim-combat-root .bf-pan-viewport:active { cursor: grabbing !important; }
@@ -11219,8 +11225,8 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .hex-tile:hover {
-  fill: rgba(196, 149, 58, 0.16) !important;
   stroke: rgba(255, 215, 0, 0.75) !important;
+  filter: brightness(1.14);
 }
 
 .battlefield-hex-arena .hex-tile--enemy-zone {
@@ -11232,84 +11238,82 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   stroke-dasharray: none;
 }
 
-/* Hexágonos de alcance tático D&D 5e — translúcido e sutil, terreno 100% visível por baixo sem opacidade pesada */
+/* Hexágonos de alcance tático D&D 5e:
+   Por padrão (Modo Terreno Limpo), preserva 100% da cor e iluminação do terreno igual ao turno dos inimigos.
+   Quando o botão de Camada Tática na direita da tela é ativado (.bf-outer--tactical-layer), exibe a camada tática de alcance. */
 .battlefield-hex-arena .hex-tile--reachable {
-  fill: rgba(212, 175, 55, 0.04) !important;
-  stroke: rgba(212, 175, 55, 0.48) !important;
-  stroke-width: 1.1px !important;
-  stroke-dasharray: 4 3;
   cursor: pointer !important;
-  filter: none !important;
+}
+
+.bf-outer--tactical-layer .battlefield-hex-arena .hex-tile--reachable {
+  fill: rgba(212, 175, 55, 0.04) !important;
+  stroke: rgba(212, 175, 55, 0.62) !important;
+  stroke-width: 1.2px !important;
+  stroke-dasharray: 4 3;
 }
 
 .battlefield-hex-arena .hex-tile--reachable:hover {
-  fill: rgba(220, 175, 75, 0.16) !important;
   stroke: #ffd700 !important;
-  stroke-width: 1.5px !important;
+  stroke-width: 1.6px !important;
   stroke-dasharray: none;
-  filter: drop-shadow(0 0 7px rgba(255, 215, 0, 0.50));
+  filter: brightness(1.18) drop-shadow(0 0 7px rgba(255, 215, 0, 0.50)) !important;
 }
 
 .battlefield-hex-arena .hex-tile--in-reach {
-  fill: rgba(220, 95, 65, 0.08) !important;
-  stroke: rgba(220, 95, 65, 0.55) !important;
+  stroke: rgba(220, 95, 65, 0.65) !important;
   stroke-width: 1.3px !important;
+}
+
+.bf-outer--tactical-layer .battlefield-hex-arena .hex-tile--in-reach {
+  fill: rgba(220, 95, 65, 0.08) !important;
 }
 
 .battlefield-hex-arena .hex-tile--occupied-player {
   stroke: rgba(255, 215, 0, 0.82) !important;
   stroke-width: 1.9px !important;
-  fill: rgba(255, 215, 0, 0.07) !important;
   filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.35));
 }
 
 .battlefield-hex-arena .hex-tile--occupied-ally {
   stroke: rgba(93, 173, 226, 0.82) !important;
   stroke-width: 1.9px !important;
-  fill: rgba(93, 173, 226, 0.07) !important;
   filter: drop-shadow(0 0 5px rgba(93, 173, 226, 0.35));
 }
 
 .battlefield-hex-arena .hex-tile--occupied-enemy {
   stroke: rgba(231, 76, 60, 0.82) !important;
   stroke-width: 1.9px !important;
-  fill: rgba(231, 76, 60, 0.07) !important;
   filter: drop-shadow(0 0 5px rgba(231, 76, 60, 0.35));
 }
 
 .battlefield-hex-arena .hex-tile--occupied-boss {
   stroke: rgba(243, 156, 18, 0.88) !important;
   stroke-width: 2.2px !important;
-  fill: rgba(243, 156, 18, 0.10) !important;
   filter: drop-shadow(0 0 7px rgba(243, 156, 18, 0.45));
 }
 
 .battlefield-hex-arena .hex-tile--in-reach.hex-tile--occupied-enemy {
   stroke: #ff5722 !important;
   stroke-width: 2.2px !important;
-  fill: rgba(255, 87, 34, 0.12) !important;
   filter: drop-shadow(0 0 6px rgba(255, 87, 34, 0.42));
 }
 
 .battlefield-hex-arena .hex-tile--in-reach.hex-tile--occupied-boss {
   stroke: #ff9800 !important;
   stroke-width: 2.5px !important;
-  fill: rgba(255, 152, 0, 0.15) !important;
   filter: drop-shadow(0 0 8px rgba(255, 152, 0, 0.50));
 }
 
 .battlefield-hex-arena .hex-tile--in-reach.hex-tile--occupied-ally {
   stroke: #00e5ff !important;
   stroke-width: 2.2px !important;
-  fill: rgba(0, 229, 255, 0.12) !important;
   filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.42));
 }
 
 .battlefield-hex-arena .hex-tile--stepping {
   stroke: #f1c40f !important;
   stroke-width: 2.2px !important;
-  fill: rgba(241, 196, 15, 0.14) !important;
-  filter: drop-shadow(0 0 7px rgba(241, 196, 15, 0.50));
+  filter: brightness(1.22) drop-shadow(0 0 7px rgba(241, 196, 15, 0.50));
 }
 
 /* Indicador de turno do jogador com botão no topo para encerrar turno sem rolagem */
@@ -11617,7 +11621,12 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .hex-badge-group {
+  display: none !important;
   pointer-events: none;
+}
+
+.bf-outer--tactical-layer .battlefield-hex-arena .hex-badge-group {
+  display: inline !important;
 }
 
 .battlefield-hex-arena .hex-badge-bg {
@@ -11657,27 +11666,71 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .hex-tile--difficult {
-  fill: rgba(68, 44, 25, 0.65) !important;
-  stroke: rgba(190, 120, 50, 0.5) !important;
+  stroke: rgba(190, 120, 50, 0.55) !important;
   stroke-dasharray: 4 2;
 }
 
+.bf-outer--tactical-layer .battlefield-hex-arena .hex-tile--difficult {
+  fill: rgba(68, 44, 25, 0.65) !important;
+}
+
 .battlefield-hex-arena .hex-tile--difficult.hex-tile--reachable {
-  fill: rgba(160, 110, 45, 0.38) !important;
   stroke: rgba(245, 158, 11, 0.85) !important;
+}
+
+.bf-outer--tactical-layer .battlefield-hex-arena .hex-tile--difficult.hex-tile--reachable {
+  fill: rgba(160, 110, 45, 0.38) !important;
 }
 
 /* Selos / Badges HUD de Escala e Visão Tática D&D 5e */
 .bf-hud-badges {
   position: absolute;
-  top: 10px;
-  left: 12px;
+  top: 8px;
+  left: 10px;
   z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 5px;
   pointer-events: none;
+}
+.bf-hud-toggle-btn {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  background: rgba(18, 14, 10, 0.85);
+  border: 1px solid rgba(196, 149, 58, 0.55);
+  border-radius: 6px;
+  color: #ebd6a7;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.bf-hud-toggle-btn:hover {
+  background: rgba(38, 28, 18, 0.95);
+  border-color: #ffd700;
+  color: #fff3c4;
+}
+.bf-hud-badges-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  pointer-events: none;
+}
+.bf-hud-badges--collapsed .bf-hud-badges-list {
+  display: none !important;
 }
 .bf-scale-badge {
   position: static;
@@ -26863,17 +26916,43 @@ function buildBattlefield(s) {
         ? 'VISÃO: <strong>0m (0 HEXES)</strong>'
         : 'VISÃO: <strong>' + partyVisionMeters + ' (' + maxPartyVr + ' HEXES)</strong>';
 
-    var html = '<div class="bf-pan-outer">';
-    html += '<div class="bf-zoom-controls" aria-label="Controles de zoom e câmera da mesa">';
+    var showTacticalLayer = false;
+    var showHudLegends = false;
+    if (typeof window !== 'undefined') {
+        if (typeof window.__bfShowTacticalLayer === 'boolean') {
+            showTacticalLayer = window.__bfShowTacticalLayer;
+        } else {
+            try { showTacticalLayer = (localStorage.getItem('valdoria_bf_tactical_layer') === '1'); } catch (_eL1) {}
+            window.__bfShowTacticalLayer = showTacticalLayer;
+        }
+        if (typeof window.__bfShowHudLegends === 'boolean') {
+            showHudLegends = window.__bfShowHudLegends;
+        } else {
+            try { showHudLegends = (localStorage.getItem('valdoria_bf_hud_legends') === '1'); } catch (_eL2) {}
+            window.__bfShowHudLegends = showHudLegends;
+        }
+    }
+
+    var outerCls = 'bf-pan-outer' + (showTacticalLayer ? ' bf-outer--tactical-layer' : '');
+    var hudCollapsed = (!showHudLegends && !isPlayerBlinded);
+    var hudCls = 'bf-hud-badges' + (hudCollapsed ? ' bf-hud-badges--collapsed' : '');
+
+    var html = '<div class="' + outerCls + '">';
+    html += '<div class="bf-zoom-controls" aria-label="Controles de zoom, camada tática e câmera da mesa">';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomIn" title="Aproximar (+)" aria-label="Aproximar">+</button>';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="zoomOut" title="Afastar (−)" aria-label="Afastar">−</button>';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="focusPlayer" title="Centralizar no seu Personagem (⌖)" aria-label="Focar Personagem">⌖</button>';
     html += '<button type="button" class="bf-zoom-btn" data-bf-zoom-act="fit" title="Visão Geral do Cenário (Ajustar)" aria-label="Visão Geral">⛶</button>';
+    html += '<button type="button" class="bf-zoom-btn' + (showTacticalLayer ? ' bf-zoom-btn--active' : '') + '" data-bf-zoom-act="toggleTacticalLayer" title="Camada de Alcance no Terreno: Mostrar ou ocultar a camada escura e custos de movimento no seu turno" aria-label="Camada de Alcance no Terreno" aria-pressed="' + (showTacticalLayer ? 'true' : 'false') + '">▦</button>';
+    html += '<button type="button" class="bf-zoom-btn' + (showHudLegends ? ' bf-zoom-btn--active' : '') + '" data-bf-zoom-act="toggleHudLegends" title="Mostrar ou ocultar as legendas no topo do mapa" aria-label="Legendas do Mapa" aria-pressed="' + (showHudLegends ? 'true' : 'false') + '">ℹ</button>';
     html += '</div>';
-    html += '<div class="bf-hud-badges">';
+    html += '<div class="' + hudCls + '">';
+    html += '<button type="button" class="bf-hud-toggle-btn" data-bf-zoom-act="toggleHudLegends" title="Mostrar ou ocultar as legendas informativas do topo do mapa" aria-expanded="' + (!hudCollapsed ? 'true' : 'false') + '">' + (!hudCollapsed ? '▴ Ocultar Legendas' : '▸ Legendas') + '</button>';
+    html += '<div class="bf-hud-badges-list">';
     html += '<div class="bf-scale-badge" title="Regras D&D 5e: 1 Hexágono = 1,5m (5 pés). Zoom tático de confronto!"><span class="bf-scale-icon">◈</span><span class="bf-scale-text">ESCALA D&D 5e: <strong>1 HEX = 1,5m (5 FT)</strong></span><span class="bf-scale-sub">ZOOM DE CONFRONTO</span></div>';
     html += '<div class="' + visionBadgeCls + '" title="' + visionTitle + '"><span class="bf-vision-icon">' + visionIcon + '</span><span class="bf-vision-text">' + visionText + '</span><span class="bf-vision-sub">' + visionConditionLabel + '</span></div>';
     html += buildPartyRhythmClockBadge(s);
+    html += '</div>';
     html += '</div>';
 
     // AI Turn Floating Banner (Padrão Larian / Feedback Visual de Automação)
@@ -30738,8 +30817,8 @@ function mountBattlefieldPanZoom() {
         }
     }
 
-    var zoomControls = (vp.parentElement && vp.parentElement.querySelector('.bf-zoom-controls')) || vp.querySelector('.bf-zoom-controls') || document.querySelector('.bf-zoom-controls');
-    var zoomBtns = zoomControls ? zoomControls.querySelectorAll('.bf-zoom-btn') : vp.querySelectorAll('.bf-zoom-btn');
+    var outerContainer = vp.closest ? vp.closest('.bf-pan-outer') : vp.parentElement;
+    var zoomBtns = outerContainer ? outerContainer.querySelectorAll('[data-bf-zoom-act]') : document.querySelectorAll('[data-bf-zoom-act]');
     zoomBtns.forEach(function (btn) {
         var lastActionTime = 0;
         var onTrigger = async function (ev) {
@@ -30785,6 +30864,41 @@ function mountBattlefieldPanZoom() {
                 await focusPlayer(true);
             } else if (act === 'fit') {
                 await fitOverview(true, 750);
+            } else if (act === 'toggleTacticalLayer') {
+                var nextTactical = !window.__bfShowTacticalLayer;
+                window.__bfShowTacticalLayer = nextTactical;
+                try { localStorage.setItem('valdoria_bf_tactical_layer', nextTactical ? '1' : '0'); } catch (_eS1) {}
+                var outerEl = document.querySelector('.bf-pan-outer');
+                if (outerEl) {
+                    if (nextTactical) outerEl.classList.add('bf-outer--tactical-layer');
+                    else outerEl.classList.remove('bf-outer--tactical-layer');
+                }
+                var tacBtns = document.querySelectorAll('[data-bf-zoom-act="toggleTacticalLayer"]');
+                tacBtns.forEach(function (b) {
+                    b.setAttribute('aria-pressed', nextTactical ? 'true' : 'false');
+                    if (nextTactical) b.classList.add('bf-zoom-btn--active');
+                    else b.classList.remove('bf-zoom-btn--active');
+                });
+            } else if (act === 'toggleHudLegends') {
+                var nextLegends = !window.__bfShowHudLegends;
+                window.__bfShowHudLegends = nextLegends;
+                try { localStorage.setItem('valdoria_bf_hud_legends', nextLegends ? '1' : '0'); } catch (_eS2) {}
+                var hudEl = document.querySelector('.bf-hud-badges');
+                if (hudEl) {
+                    if (nextLegends) hudEl.classList.remove('bf-hud-badges--collapsed');
+                    else hudEl.classList.add('bf-hud-badges--collapsed');
+                }
+                var legBtns = document.querySelectorAll('[data-bf-zoom-act="toggleHudLegends"]');
+                legBtns.forEach(function (b) {
+                    if (b.classList.contains('bf-hud-toggle-btn')) {
+                        b.textContent = nextLegends ? '▴ Ocultar Legendas' : '▸ Legendas';
+                        b.setAttribute('aria-expanded', nextLegends ? 'true' : 'false');
+                    } else {
+                        b.setAttribute('aria-pressed', nextLegends ? 'true' : 'false');
+                        if (nextLegends) b.classList.add('bf-zoom-btn--active');
+                        else b.classList.remove('bf-zoom-btn--active');
+                    }
+                });
             }
         };
         // Suporte omnidirecional a toque, clique e caneta sem engolir gestos
