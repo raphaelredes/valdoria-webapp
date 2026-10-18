@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T20:26:03Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T20:40:39Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -48802,6 +48802,7 @@ async function __combatAnimateOneEvent(ev) {
             await animHexTokenAttack(shElA, shElT, false);
         }
 
+        var _shResPart = (ev.actorTotal != null && ev.targetTotal != null) ? ' [' + ev.actorTotal + ' vs ' + ev.targetTotal + ']' : '';
         if (ev.success) {
             if (ev.effect === 'push') {
                 if (ev.fromCol != null && ev.fromRow != null && ev.toCol != null && ev.toRow != null && shElT) {
@@ -48814,8 +48815,10 @@ async function __combatAnimateOneEvent(ev) {
                         shTargetUnit.pos = { col: ev.toCol, row: ev.toRow };
                         if (typeof ensureProceduralBattlefield === 'function') ensureProceduralBattlefield(currentState);
                     }
-                    if (typeof spawnMissFloatLabel === 'function') {
-                        spawnMissFloatLabel(shElT, 'Empurrado! 1,5m');
+                    if (typeof spawnSkillImpactLabel === 'function') {
+                        spawnSkillImpactLabel(shElT, '💨 EMPURRADO 1,5m' + _shResPart + '!', 'attack');
+                    } else if (typeof spawnMissFloatLabel === 'function') {
+                        spawnMissFloatLabel(shElT, 'Empurrado! 1,5m' + _shResPart);
                     }
                     if (ev.hazardDamage != null && ev.hazardDamage > 0) {
                         if (shTargetUnit) {
@@ -48848,8 +48851,10 @@ async function __combatAnimateOneEvent(ev) {
                     shElT.classList.add('token-prone');
                     shElT.classList.add('miss-target-flash');
                     setTimeout(function () { shElT.classList.remove('miss-target-flash'); }, 350);
-                    if (typeof spawnMissFloatLabel === 'function') {
-                        spawnMissFloatLabel(shElT, 'Derrubado!');
+                    if (typeof spawnSkillImpactLabel === 'function') {
+                        spawnSkillImpactLabel(shElT, '▾ DERRUBADO NO CHÃO' + _shResPart + '!', 'attack');
+                    } else if (typeof spawnMissFloatLabel === 'function') {
+                        spawnMissFloatLabel(shElT, 'Derrubado!' + _shResPart);
                     }
                 }
             }
@@ -48858,8 +48863,11 @@ async function __combatAnimateOneEvent(ev) {
             if (shElT) {
                 shElT.classList.add('miss-target-flash');
                 setTimeout(function () { shElT.classList.remove('miss-target-flash'); }, 350);
-                if (typeof spawnMissFloatLabel === 'function') {
-                    spawnMissFloatLabel(shElT, 'Resistiu!');
+                var _shDefPart = (ev.targetTotal != null && ev.actorTotal != null) ? ' [' + ev.targetTotal + ' vs ' + ev.actorTotal + ']' : '';
+                if (typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(shElT, '🛡️ RESISTIU EMPURRÃO' + _shDefPart + '!', 'miss');
+                } else if (typeof spawnMissFloatLabel === 'function') {
+                    spawnMissFloatLabel(shElT, 'Resistiu!' + _shDefPart);
                 }
             }
         }
@@ -49373,6 +49381,9 @@ async function __combatAnimateOneEvent(ev) {
                 setTimeout(function () { if (_hLbl.parentNode) _hLbl.parentNode.removeChild(_hLbl); }, 1450);
             } catch (eHL) {}
         }
+        if (wasDown_h && elH && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elH, '✦ REANIMADO COM +' + (ev.healGained | 0) + ' PV!', 'buff'); } catch (eRnv) {}
+        }
         if (typeof sfxHeal === 'function') {
             try { sfxHeal(); } catch (_) {}
         }
@@ -49387,15 +49398,61 @@ async function __combatAnimateOneEvent(ev) {
     }
     if (kind === 'death_save') {
         render(currentState);
+        var targetUnit_ds = (currentState && currentState.order) ? currentState.order[ev.tIdx] : null;
         if (typeof showDice === 'function' && ev.d20 != null) {
             await new Promise(function (resD) {
                 try {
-                    showDice(ev.d20, resD, currentState.order[ev.tIdx], 'Teste de morte', {});
+                    var dsOpts = {
+                        postResult: function () {
+                            if (typeof describeDeathSavePreview === 'function' && targetUnit_ds) {
+                                return describeDeathSavePreview(targetUnit_ds, ev.d20);
+                            }
+                            var isNat20 = (ev.d20 === 20);
+                            var isNat1 = (ev.d20 === 1);
+                            var isSuccess = (ev.d20 >= 10);
+                            return {
+                                title: isNat20 ? '★ NATURAL 20' : (isNat1 ? 'NATURAL 1' : (isSuccess ? 'Sucesso no teste de morte' : 'Falha no teste de morte')),
+                                cls: isNat20 ? 'crit' : (isSuccess ? 'hit' : 'miss'),
+                                subStructured: {
+                                    kicker: 'SALVAGUARDA CONTRA A MORTE (PHB p. 197)',
+                                    rows: [
+                                        { label: 'd20 Rolado', value: String(ev.d20), type: isNat20 ? 'crit' : (isNat1 ? 'fumble' : (isSuccess ? 'bonus' : 'mod')) },
+                                        { label: 'CD de Sucesso', value: '10', type: 'target' }
+                                    ],
+                                    note: isNat20 ? 'Natural 20! O personagem recupera 1 PV de imediato e acorda.' : (isNat1 ? 'Natural 1! Conta como duas falhas no teste contra a morte.' : (isSuccess ? 'Sucesso: acumula +1 ponto de estabilização (3 para estabilizar).' : 'Falha: acumula +1 ponto de morte (3 para falecer).'))
+                                }
+                            };
+                        }
+                    };
+                    showDice(ev.d20, resD, targetUnit_ds, 'Teste contra a Morte', dsOpts);
                 } catch (eD) { resD(); }
             });
         } else {
             await new Promise(function (r) { setTimeout(r, 500); });
         }
+
+        var dsUid = (typeof unitUidForOrderIndex === 'function' && currentState)
+            ? unitUidForOrderIndex(currentState, ev.tIdx)
+            : (ev.tIdx === (currentState && currentState.p_idx) ? 'player' : 'ally_' + ev.tIdx);
+        var dsEl = document.querySelector('[data-unit-id="' + dsUid + '"]');
+        if (dsEl && typeof spawnSkillImpactLabel === 'function') {
+            if (ev.d20 === 20) {
+                spawnSkillImpactLabel(dsEl, '✦ NAT 20: VOLTOU COM 1 PV!', 'crit');
+            } else if (ev.d20 === 1) {
+                spawnSkillImpactLabel(dsEl, '✕ NAT 1: DUAS FALHAS!', 'fumble');
+            } else if (ev.d20 >= 10) {
+                var isStable = targetUnit_ds && targetUnit_ds.stable;
+                spawnSkillImpactLabel(dsEl, isStable ? '✦ ESTABILIZOU (3 SUCESSOS)!' : '🛡️ SUCESSO CONTRA A MORTE!', 'buff');
+            } else {
+                var isDead = targetUnit_ds && targetUnit_ds.isDead;
+                spawnSkillImpactLabel(dsEl, isDead ? '☠️ FALECEU (3 FALHAS)!' : '💥 FALHA CONTRA A MORTE!', 'miss');
+            }
+        }
+        if (ev.d20 === 20 && dsUid && typeof playBuffVfxOnCell === 'function') {
+            try { await playBuffVfxOnCell(dsUid, 'revive', { durationMs: 2200 }); } catch (eRv) {}
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 260); });
         return;
     }
     if (kind === 'buff' || kind === 'resource' || kind === 'item_use') {
