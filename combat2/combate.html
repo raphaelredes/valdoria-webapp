@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T20:49:08Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T21:03:52Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13281,6 +13281,12 @@ canvas#vfxCanvas,
   border-color: #f87171;
   color: #fecaca;
   box-shadow: 0 0 6px rgba(248, 113, 113, 0.4);
+}
+.token-cond-chip--rage {
+  background: linear-gradient(180deg, #381205, #1c0902);
+  border-color: #f97316;
+  color: #fed7aa;
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.45);
 }
 .token-cond-container {
   position: absolute;
@@ -26800,6 +26806,11 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                 condChipList.push({
                     html: '<div class="token-cond-chip token-cond-chip--bane" title="D&D 5e (PHB p. 216): Perdição (-1d4 em ataques e salvaguardas)">▼ Perdição (-1d4)</div>',
                     name: 'Perdição (-1d4)'
+                });
+            } else if (stId === 'furia' || stId === 'rage' || stObj.isRaging || stObj.rageResistance || stName.indexOf('fúria') >= 0 || stName.indexOf('furia') >= 0) {
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--rage" title="D&D 5e (PHB p. 48): Fúria Bárbara Ativa (Resistência a Concussão, Perfuração e Cortante)">🔥 Fúria</div>',
+                    name: 'Fúria'
                 });
             }
         }
@@ -49105,6 +49116,7 @@ async function __combatAnimateOneEvent(ev) {
 
                             // Ataque padrão (d20 vs CA)
                             var _kicker = ev.skillName ? (ev.skillName.toUpperCase() + ' • d20') : 'd20';
+                            if (ev.powerAttack) _kicker += ' [ATAQUE PODEROSO -5/+10]';
                             if (_advMode === 'advantage') _kicker = (ev.skillName ? (ev.skillName.toUpperCase() + ' • ') : '') + 'd20 (VANTAGEM)';
                             else if (_advMode === 'disadvantage') _kicker = (ev.skillName ? (ev.skillName.toUpperCase() + ' • ') : '') + 'd20 (DESVANTAGEM)';
                             var _rows = [];
@@ -49113,13 +49125,27 @@ async function __combatAnimateOneEvent(ev) {
                             } else {
                                 _rows.push({ l: 'Rolagem', v: String(ev.d20) });
                             }
-                            _rows.push({ l: 'Ataque', v: (ev.atk >= 0 ? '+' : '') + (ev.atk || 0) });
-                            _rows.push({ l: 'Total', v: String(ev.total || ev.d20 + (ev.atk || 0)) });
-                            _rows.push({ l: 'CA alvo', v: String(ev.ac || '?') });
+                            _rows.push({ l: 'Bônus Atk', v: (ev.atk >= 0 ? '+' : '') + (ev.atk || 0) });
+                            if (ev.archeryBonus) _rows.push({ l: 'Arquearia', v: '+' + ev.archeryBonus });
+                            if (ev.elevationBonus) _rows.push({ l: 'Desnível', v: (ev.elevationBonus > 0 ? '+' : '') + ev.elevationBonus });
+                            if (ev.blessRoll != null && ev.blessRoll > 0) _rows.push({ l: 'Bênção (1d4)', v: '+' + ev.blessRoll });
+                            if (ev.baneRoll != null && ev.baneRoll > 0) _rows.push({ l: 'Perdição (1d4)', v: '-' + ev.baneRoll });
+                            if (ev.bardicRoll != null && ev.bardicRoll > 0) _rows.push({ l: 'Insp. Bárdica', v: '+' + ev.bardicRoll });
+                            if (ev.atkBonusDice && ev.atkBonusDice.length) {
+                                ev.atkBonusDice.forEach(function (ab) {
+                                    if (ab && ab.n && ab.total) _rows.push({ l: ab.n, v: '+' + ab.total });
+                                });
+                            }
+                            _rows.push({ l: 'Total', v: String(ev.total || (ev.d20 + (ev.atk || 0))) });
+                            var _acText = String(ev.ac || '?');
+                            if (ev.coverBonus > 0) _acText += ' (⛨ +' + ev.coverBonus + ' Cobertura)';
+                            _rows.push({ l: 'CA Alvo', v: _acText });
 
                             var _cDtRem = String(ev.dmgType || '').toLowerCase().trim();
-                            var _isRemImm = false, _isRemVuln = false, _isRemRes = false;
-                            if (_cDtRem && tU) {
+                            var _isRemImm = !!(ev.damageImmunity || ev.naturesWardImmunity);
+                            var _isRemVuln = !!ev.damageVulnerability;
+                            var _isRemRes = !!(ev.damageResistance || ev.rageResisted || ev.bearTotemResist || ev.auraOfWarding || ev.spellResistance || ev.emptyBodyResistance || ev.fiendishResilience || ev.inuredToUndeathResist || ev.underwaterFireResistance || ev.dampenElements);
+                            if (_cDtRem && tU && !_isRemImm && !_isRemVuln && !_isRemRes) {
                                 if (tU.immunities && tU.immunities.some(function (im) { return String(im).toLowerCase().trim() === _cDtRem; })) _isRemImm = true;
                                 else if (tU.vulnerabilities && tU.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _cDtRem; })) _isRemVuln = true;
                                 else if (tU.resistances && tU.resistances.some(function (res) { return String(res).toLowerCase().trim() === _cDtRem; })) _isRemRes = true;
@@ -49127,14 +49153,28 @@ async function __combatAnimateOneEvent(ev) {
 
                             var _dtInfo = (typeof simDmgTypeInfoPt === 'function' && ev.dmgType) ? simDmgTypeInfoPt(ev.dmgType) : null;
                             var _dtLabel = _dtInfo ? (' (' + _dtInfo.ico + ' ' + _dtInfo.lb + ')') : '';
+                            var _tacticalTags = [];
+                            if (ev.sneakAttack) _tacticalTags.push('🗡️ Furtivo' + (ev.sneakTotal ? ' (+' + ev.sneakTotal + ')' : ''));
+                            if (ev.divineSmite) _tacticalTags.push('⚡ Punição Divina' + (ev.smiteTotal ? ' (+' + ev.smiteTotal + ')' : ''));
+                            if (ev.improvedDivineSmiteTotal) _tacticalTags.push('✨ Destruição Divina (+' + ev.improvedDivineSmiteTotal + ')');
+                            if (ev.actionSurge) _tacticalTags.push('⚡ Surto de Ação');
+                            if (ev.dmgBonusDice && ev.dmgBonusDice.length) {
+                                ev.dmgBonusDice.forEach(function (b) {
+                                    if (b && b.n && b.total) _tacticalTags.push(b.n + ' (+' + b.total + ')');
+                                });
+                            }
+                            var _tagSuffix = _tacticalTags.length ? (' • ' + _tacticalTags.join(' • ')) : '';
+
                             var _note = '';
                             if (ev.hit) {
-                                if (_isRemImm) _note = 'Dano: 0' + _dtLabel + ' · Imune!';
-                                else if (_isRemVuln) _note = 'Dano: ' + (ev.dmgTotal | 0) + _dtLabel + ' · Vulnerabilidade (2×)!';
-                                else if (_isRemRes) _note = 'Dano: ' + (ev.dmgTotal | 0) + _dtLabel + ' · Resistência (½)!';
-                                else _note = 'Dano: ' + (ev.dmgTotal | 0) + _dtLabel;
+                                if (_isRemImm) _note = 'Dano: 0' + _dtLabel + ' · Imune (0 Dano)!' + _tagSuffix;
+                                else if (_isRemVuln) _note = 'Dano: ' + (ev.dmgTotal | 0) + _dtLabel + ' · Vulnerabilidade (2×)!' + _tagSuffix;
+                                else if (_isRemRes) _note = 'Dano: ' + (ev.dmgTotal | 0) + _dtLabel + ' · Resistência (½)!' + _tagSuffix;
+                                else _note = 'Dano: ' + (ev.dmgTotal | 0) + _dtLabel + _tagSuffix;
                             } else {
-                                if (ev.d20 === 1) _note = 'Falha Crítica (Nat 1) — Errou automaticamente.';
+                                if (ev.shieldAbsorbed || ev.shieldBlocked) _note = '🛡️ Escudo Arcano (+5 CA) bloqueou o ataque!';
+                                else if (ev.wardingFlare) _note = '☀️ Clarão Protetor impôs desvantagem que causou o erro!';
+                                else if (ev.d20 === 1) _note = 'Falha Crítica (Nat 1) — Errou automaticamente.';
                                 else if (ev.total != null && ev.ac != null) _note = 'Total ' + ev.total + ' < CA ' + ev.ac + ' — Não superou a CA.';
                                 else _note = 'Não alcançou a CA.';
                             }
@@ -49356,14 +49396,20 @@ async function __combatAnimateOneEvent(ev) {
                     ? '⚡ GOLPE DE OPORTUNIDADE!'
                     : (ev.skillName ? ev.skillName.toUpperCase() + '!' : 'ATAQUE!'));
             spawnSkillImpactLabel(elT, _lblTxt, ev.crit ? 'crit' : 'attack');
+            if (ev.sneakAttack && ev.sneakTotal) {
+                spawnSkillImpactLabel(elT, '🗡️ ATAQUE FURTIVO (+' + (ev.sneakTotal | 0) + ')!', 'crit');
+            }
+            if (ev.divineSmite && ev.smiteTotal) {
+                spawnSkillImpactLabel(elT, '✦ PUNIÇÃO DIVINA (+' + (ev.smiteTotal | 0) + ')!', 'crit');
+            }
         }
         if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
             try {
-                var _isRemImm = false;
-                var _isRemVuln = false;
-                var _isRemRes = false;
+                var _isRemImm = !!(ev.damageImmunity || ev.naturesWardImmunity);
+                var _isRemVuln = !!ev.damageVulnerability;
+                var _isRemRes = !!(ev.damageResistance || ev.rageResisted || ev.bearTotemResist || ev.auraOfWarding || ev.spellResistance || ev.emptyBodyResistance || ev.fiendishResilience || ev.inuredToUndeathResist || ev.underwaterFireResistance || ev.dampenElements);
                 var _cDt = String(dmgType || '').toLowerCase().trim();
-                if (_cDt && tU) {
+                if (_cDt && tU && !_isRemImm && !_isRemVuln && !_isRemRes) {
                     if (tU.immunities && tU.immunities.some(function (im) { return String(im).toLowerCase().trim() === _cDt; })) {
                         _isRemImm = true;
                     } else if (tU.vulnerabilities && tU.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _cDt; })) {
@@ -49487,6 +49533,36 @@ async function __combatAnimateOneEvent(ev) {
         }
         if (window._combatVfx && elH) {
             try { window._combatVfx.healBurst(elH); } catch (_) {}
+        }
+        /* D&D 5e Curandeiro Abençoado (PHB p. 60 — Clérigo da Vida): autocura do conjurador ao curar aliado */
+        if (ev.blessedHealerGained && (ev.blessedHealerGained | 0) > 0 && ev.aIdx != null && ev.aIdx !== ev.tIdx) {
+            var bhUid = 'ally_' + ev.aIdx;
+            var aU_bh = currentState && currentState.order ? currentState.order[ev.aIdx] : null;
+            if (aU_bh && aU_bh.t === 'p') bhUid = 'player';
+            else if (aU_bh && aU_bh.t === 'a') bhUid = 'ally_' + ev.aIdx;
+            var elBh = document.querySelector('[data-unit-id="' + bhUid + '"]') || document.getElementById('token-cell-' + ev.aIdx) || document.querySelector('[data-turn-idx="' + ev.aIdx + '"]');
+            if (elBh) {
+                elBh.classList.add('heal-flash');
+                setTimeout(function () { if (elBh) elBh.classList.remove('heal-flash'); }, 620);
+                try {
+                    var _bhRect = elBh.getBoundingClientRect();
+                    var _bhLbl = document.createElement('div');
+                    _bhLbl.className = 'cell-float-label heal';
+                    _bhLbl.textContent = '+' + (ev.blessedHealerGained | 0) + ' PV';
+                    _bhLbl.style.left = (_bhRect.left + _bhRect.width / 2) + 'px';
+                    _bhLbl.style.top = (_bhRect.top - 8) + 'px';
+                    _bhLbl.style.setProperty('animation-duration', '1.4s', 'important');
+                    _bhLbl.style.setProperty('animation-iteration-count', '1', 'important');
+                    document.body.appendChild(_bhLbl);
+                    setTimeout(function () { if (_bhLbl.parentNode) _bhLbl.parentNode.removeChild(_bhLbl); }, 1450);
+                } catch (eBHL) {}
+                if (typeof spawnSkillImpactLabel === 'function') {
+                    try { spawnSkillImpactLabel(elBh, '✦ CURANDEIRO ABENÇOADO (+' + (ev.blessedHealerGained | 0) + ' PV)!', 'buff'); } catch (_) {}
+                }
+                if (window._combatVfx && typeof window._combatVfx.healBurst === 'function') {
+                    try { window._combatVfx.healBurst(elBh); } catch (_) {}
+                }
+            }
         }
         // Respiro visual para que a cura e as partículas sejam vistas antes do render recriar o DOM
         await new Promise(function (r) { setTimeout(r, 680); });
