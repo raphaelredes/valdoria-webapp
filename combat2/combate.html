@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T19:46:43Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T20:07:42Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2071,6 +2071,19 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .dmg-dice-summary .drl-num--total { font-size: calc(13px * var(--v-font-scale, 1)); color: #e8a070; border-color: rgba(224,96,64,.45); }
 .dmg-dice-summary .drl-num--partial { color: var(--v-text, #d4c8b0); }
 .dmg-dice-summary .drl-paren-mod { font-weight: 400; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); }
+.drl-sub--structured { width: 100%; max-width: 320px; margin: 4px auto 0; }
+.drl-structured-card { display: flex; flex-direction: column; gap: 4px; padding: 6px 10px; background: rgba(15, 12, 8, 0.88); border: 1px solid rgba(196, 149, 58, 0.45); border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.6); }
+.drl-structured-kicker { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: 10.5px; font-weight: 700; letter-spacing: 1px; color: var(--v-gold, #c4953a); text-transform: uppercase; text-align: center; border-bottom: 1px solid rgba(196, 149, 58, 0.2); padding-bottom: 3px; }
+.drl-structured-metrics { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 2px 0; }
+.drl-structured-cell { display: inline-flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(196, 149, 58, 0.25); border-radius: 4px; padding: 2px 6px; font-size: 11px; }
+.drl-structured-lbl { color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
+.drl-structured-val { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; color: var(--v-text, #f0e6d2); }
+.dice-result-label.hit .drl-structured-val { color: #b8e888; }
+.dice-result-label.crit .drl-structured-val { color: #ffd700; }
+.dice-result-label.miss .drl-structured-val { color: #d4c8b0; }
+.drl-structured-note { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 11.5px; color: #e4d8c8; text-align: center; margin-top: 2px; }
+.dice-result-label.hit .drl-structured-note { color: #a8d898; font-weight: 600; }
+.dice-result-label.miss .drl-structured-note { color: #c06a3a; font-style: italic; }
 .dice-heal-result-stack { display: flex; flex-direction: column; align-items: center; gap: var(--v-space-sm, 8px); width: 100%; max-width: min(100%, 320px); }
 .dice-init-cell-scene.dice-heal-scene-wrap { position: relative; }
 .cell-heal-gain-pill {
@@ -13264,6 +13277,14 @@ canvas#vfxCanvas,
 .token-cond-container .token-cond-chip {
   position: static;
 }
+.token-cond-chip--more {
+  background: rgba(32, 26, 18, 0.95);
+  border-color: var(--v-gold, #c4953a);
+  color: #ffd700;
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
+}
 
 /* Auras Visuais de Sentidos e Luz D&D 5e (PHB p. 183 / Solasta) */
 .token-darkvision-aura {
@@ -24407,17 +24428,23 @@ function previewTacticalTargetOnBoard(targetIdx) {
     }
 
     var canExecute = !aimRes.isOutOfReach && !aimRes.isTotalCover;
+    var canApproach = aimRes.isOutOfReach && !aimRes.isTotalCover && ((pUnit.movement_left || 0) > 0);
+    var pLabel = canExecute ? '⚔ Confirmar' : (canApproach ? '🏃 Avançar e Atacar' : null);
+    var pAction = (canExecute || canApproach) ? function () {
+        var idx = targetIdx;
+        _previewAimTargetIdx = null;
+        drawTacticalAimVector(null, null, null, null);
+        hideBfTacticalPreviewBar();
+        if (typeof showTargetConfirm === 'function') {
+            showTargetConfirm(idx);
+        }
+    } : null;
     showBfTacticalPreviewBar({
-        tone: (!canExecute || (aimRes.aoeSummary && aimRes.aoeSummary.alliesInAoe > 0)) ? 'hazard' : (aimRes.canFlank || advPreview === 'advantage' ? 'adv' : 'normal'),
+        tone: (!canExecute || (aimRes.aoeSummary && aimRes.aoeSummary.alliesInAoe > 0)) ? (canApproach ? 'normal' : 'hazard') : (aimRes.canFlank || advPreview === 'advantage' ? 'adv' : 'normal'),
         title: actLabel + ' ▸ ' + (tUnit.n || 'Alvo'),
         chips: chips,
-        primaryLabel: canExecute ? '⚔ Confirmar' : null,
-        onPrimary: canExecute ? function () {
-            var idx = targetIdx;
-            if (typeof showTargetConfirm === 'function') {
-                showTargetConfirm(idx);
-            }
-        } : null,
+        primaryLabel: pLabel,
+        onPrimary: pAction,
         onClose: function () {
             _previewAimTargetIdx = null;
             drawTacticalAimVector(null, null, null, null);
@@ -26622,11 +26649,14 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
         proneBadge = '<div class="token-prone-chip" title="D&D 5e (PHB p. 190 / p. 292): Caído no chão! Ataques corpo a corpo a 1,5m têm Vantagem; ataques à distância têm Desvantagem.">▾ Caído</div>';
     }
 
-    // Condições Ativas Adicionais D&D 5e (PHB p. 290-292) + Forma Selvagem + Aura de Proteção
-    var condBadges = '';
+    // Condições Ativas Adicionais D&D 5e (PHB p. 290-292) + Forma Selvagem + Aura de Proteção (Progressive Disclosure: max 2 + overflow)
+    var condChipList = [];
     if (fogState !== 'shrouded' && u.alive && !u.isDead && typeof _wsIsTransformed === 'function' && _wsIsTransformed(u)) {
         var _wsFormLbl = (u.wildShape && u.wildShape.form_name) || 'Forma Bestial';
-        condBadges += '<div class="token-cond-chip token-cond-chip--wildshape" title="D&D 5e (PHB p. 66): Forma Selvagem Ativa (' + escHtml(_wsFormLbl) + ')">🐾 ' + escHtml(_wsFormLbl) + '</div>';
+        condChipList.push({
+            html: '<div class="token-cond-chip token-cond-chip--wildshape" title="D&D 5e (PHB p. 66): Forma Selvagem Ativa (' + escHtml(_wsFormLbl) + ')">🐾 ' + escHtml(_wsFormLbl) + '</div>',
+            name: 'Forma Selvagem (' + _wsFormLbl + ')'
+        });
     }
     if (fogState !== 'shrouded' && u.alive && !u.isDead && (isPlayer || isAlly) && s && s.order) {
         var _palAuraBonus = 0;
@@ -26646,7 +26676,10 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
             }
         }
         if (_palAuraBonus > 0) {
-            condBadges += '<div class="token-cond-chip token-cond-chip--paladin-aura" title="D&D 5e (PHB p. 85): Aura de Proteção (+' + _palAuraBonus + ' em todos os Testes de Resistência)">⛨ Aura +' + _palAuraBonus + '</div>';
+            condChipList.push({
+                html: '<div class="token-cond-chip token-cond-chip--paladin-aura" title="D&D 5e (PHB p. 85): Aura de Proteção (+' + _palAuraBonus + ' em todos os Testes de Resistência)">⛨ Aura +' + _palAuraBonus + '</div>',
+                name: 'Aura de Proteção (+' + _palAuraBonus + ')'
+            });
         }
     }
     if (fogState !== 'shrouded' && u.alive && !u.isDead && isEnemy && s && s.order) {
@@ -26665,7 +26698,10 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
             if (markLabel) break;
         }
         if (markLabel) {
-            condBadges += '<div class="token-cond-chip token-cond-chip--frightened" style="border-color:#f59e0b;color:#fde68a;background:rgba(120,53,15,0.85);" title="Alvo Marcado (' + escHtml(markLabel) + '): Sofre bônus de ataque/dano do conjurador">⌖ ' + escHtml(markLabel) + '</div>';
+            condChipList.push({
+                html: '<div class="token-cond-chip token-cond-chip--frightened" style="border-color:#f59e0b;color:#fde68a;background:rgba(120,53,15,0.85);" title="Alvo Marcado (' + escHtml(markLabel) + '): Sofre bônus de ataque/dano do conjurador">⌖ ' + escHtml(markLabel) + '</div>',
+                name: 'Alvo Marcado (' + markLabel + ')'
+            });
         }
     }
     if (fogState !== 'shrouded' && u.alive && !u.isDead && u.se && u.se.length) {
@@ -26677,29 +26713,75 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
             if (stId === 'help_distracted' || stObj.targetedAdvantageByAlly) continue;
             if (stObj.prone || stId === 'prone') continue;
             if (stObj.regenPerTurn && stObj.regenPerTurn > 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--regen" title="D&D 5e: Regeneração Ativa (+' + stObj.regenPerTurn + ' PV/turno)">🌿 +' + stObj.regenPerTurn + ' PV</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--regen" title="D&D 5e: Regeneração Ativa (+' + stObj.regenPerTurn + ' PV/turno)">🌿 +' + stObj.regenPerTurn + ' PV</div>',
+                    name: 'Regeneração (+' + stObj.regenPerTurn + ' PV)'
+                });
             }
             if (stId === 'bless' || stName.indexOf('bênção') >= 0 || stName.indexOf('bencao') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--bless" title="D&D 5e: Bênção (+1d4 em ataques e salvaguardas)">✦ Bênção</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--bless" title="D&D 5e: Bênção (+1d4 em ataques e salvaguardas)">✦ Bênção</div>',
+                    name: 'Bênção'
+                });
             } else if (stId === 'blindness' || stObj.blind || stName.indexOf('cego') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--blind" title="D&D 5e (PHB p. 290): Cego">◉ Cego</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--blind" title="D&D 5e (PHB p. 290): Cego">◉ Cego</div>',
+                    name: 'Cego'
+                });
             } else if (stId.indexOf('poison') >= 0 || stName.indexOf('envenenad') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--poison" title="D&D 5e (PHB p. 292): Envenenado">▲ Envenenado</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--poison" title="D&D 5e (PHB p. 292): Envenenado">▲ Envenenado</div>',
+                    name: 'Envenenado'
+                });
             } else if (stObj.stunned || stId.indexOf('stun') >= 0 || stName.indexOf('atordo') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--stun" title="D&D 5e (PHB p. 290): Atordoado">◈ Atordoado</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--stun" title="D&D 5e (PHB p. 290): Atordoado">◈ Atordoado</div>',
+                    name: 'Atordoado'
+                });
             } else if (stObj.paralyzed || stId.indexOf('paraly') >= 0 || stName.indexOf('paralis') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--paralyzed" title="D&D 5e (PHB p. 291): Paralisado (Incapacitado; ataques a 1,5m são acertos críticos)">◈ Paralisado</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--paralyzed" title="D&D 5e (PHB p. 291): Paralisado (Incapacitado; ataques a 1,5m são acertos críticos)">◈ Paralisado</div>',
+                    name: 'Paralisado'
+                });
             } else if (stId.indexOf('fright') >= 0 || stId.indexOf('fear') >= 0 || stName.indexOf('amedront') >= 0 || stName.indexOf('medo') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--frightened" title="D&D 5e (PHB p. 290): Amedrontado (Desvantagem em ataques e testes)">▲ Amedrontado</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--frightened" title="D&D 5e (PHB p. 290): Amedrontado (Desvantagem em ataques e testes)">▲ Amedrontado</div>',
+                    name: 'Amedrontado'
+                });
             } else if (stId.indexOf('charm') >= 0 || stName.indexOf('enfeitiç') >= 0 || stName.indexOf('enfeitic') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--charmed" title="D&D 5e (PHB p. 291): Enfeitiçado">✦ Enfeitiçado</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--charmed" title="D&D 5e (PHB p. 291): Enfeitiçado">✦ Enfeitiçado</div>',
+                    name: 'Enfeitiçado'
+                });
             } else if (stObj.restrained || stId.indexOf('restrain') >= 0 || stName.indexOf('contido') >= 0 || stName.indexOf('impedido') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--restrained" title="D&D 5e (PHB p. 292): Contido (Deslocamento 0; ataques recebidos com Vantagem)">⛨ Contido</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--restrained" title="D&D 5e (PHB p. 292): Contido (Deslocamento 0; ataques recebidos com Vantagem)">⛨ Contido</div>',
+                    name: 'Contido'
+                });
             } else if (stId.indexOf('invis') >= 0 || stId === 'hidden' || stName.indexOf('invisív') >= 0 || stName.indexOf('invisiv') >= 0 || stName.indexOf('oculto') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--invisible" title="D&D 5e (PHB p. 291): Invisível / Oculto (Ataques com Vantagem; atacantes com Desvantagem)">✦ Invisível</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--invisible" title="D&D 5e (PHB p. 291): Invisível / Oculto (Ataques com Vantagem; atacantes com Desvantagem)">✦ Invisível</div>',
+                    name: 'Invisível'
+                });
             } else if (stId === 'shield' || stId === 'escudo_arcano' || stName.indexOf('escudo arcano') >= 0) {
-                condBadges += '<div class="token-cond-chip token-cond-chip--shield" title="D&D 5e: Escudo Arcano (+5 CA até próximo turno)">⛨ Escudo (+5 CA)</div>';
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--shield" title="D&D 5e: Escudo Arcano (+5 CA até próximo turno)">⛨ Escudo (+5 CA)</div>',
+                    name: 'Escudo Arcano'
+                });
             }
+        }
+    }
+
+    var condBadges = '';
+    if (condChipList.length > 0) {
+        if (condChipList.length <= 2) {
+            condBadges = condChipList.map(function (c) { return c.html; }).join('');
+        } else {
+            var firstTwo = condChipList.slice(0, 2).map(function (c) { return c.html; }).join('');
+            var remCount = condChipList.length - 2;
+            var remNames = condChipList.slice(2).map(function (c) { return c.name; }).join(', ');
+            var moreChip = '<div class="token-cond-chip token-cond-chip--more" title="Condições adicionais ativas: ' + escHtml(remNames) + '">+' + remCount + '</div>';
+            condBadges = firstTwo + moreChip;
         }
     }
 
@@ -43166,6 +43248,44 @@ function showDice(value, cb, actor, context, opts) {
                 sub.className = 'drl-sub';
                 if (info.subHtml) sub.innerHTML = info.subHtml;
                 else sub.textContent = info.sub;
+                resultEl.appendChild(sub);
+            } else if (info.subStructured) {
+                var sStruct = info.subStructured;
+                var sub = document.createElement('div');
+                sub.className = 'drl-sub drl-sub--structured';
+                var structWrap = document.createElement('div');
+                structWrap.className = 'drl-structured-card';
+                if (sStruct.kicker) {
+                    var kickerEl = document.createElement('div');
+                    kickerEl.className = 'drl-structured-kicker';
+                    kickerEl.textContent = sStruct.kicker;
+                    structWrap.appendChild(kickerEl);
+                }
+                if (Array.isArray(sStruct.rows) && sStruct.rows.length) {
+                    var rowsEl = document.createElement('div');
+                    rowsEl.className = 'drl-structured-metrics';
+                    sStruct.rows.forEach(function (r) {
+                        var cell = document.createElement('div');
+                        cell.className = 'drl-structured-cell';
+                        var lbl = document.createElement('span');
+                        lbl.className = 'drl-structured-lbl';
+                        lbl.textContent = r.l;
+                        var val = document.createElement('span');
+                        val.className = 'drl-structured-val';
+                        val.textContent = r.v;
+                        cell.appendChild(lbl);
+                        cell.appendChild(val);
+                        rowsEl.appendChild(cell);
+                    });
+                    structWrap.appendChild(rowsEl);
+                }
+                if (sStruct.note) {
+                    var noteEl = document.createElement('div');
+                    noteEl.className = 'drl-structured-note';
+                    noteEl.textContent = sStruct.note;
+                    structWrap.appendChild(noteEl);
+                }
+                sub.appendChild(structWrap);
                 resultEl.appendChild(sub);
             }
             resultEl.className = 'dice-result-label visible ' + (info.cls || '');
