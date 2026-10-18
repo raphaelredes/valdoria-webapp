@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T20:07:42Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T20:26:03Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -29611,7 +29611,11 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     }
     if (reductionMeta.saveSuccess) {
         var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
-        tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' Sucesso (½)</span>');
+        var svTxt = reductionMeta.saveNegates ? 'Sucesso (0 Dano)' : 'Sucesso (½)';
+        tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' ' + svTxt + '</span>');
+    }
+    if (reductionMeta.heavyArmorMaster > 0) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ Armadura Pesada (−' + reductionMeta.heavyArmorMaster + ')</span>');
     }
     if (reductionMeta.uncannyDodge) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--save">💨 Esquiva Sobrenatural (½)</span>');
@@ -29635,10 +29639,11 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         var reason = '';
         if (reductionMeta.isImmune) reason = 'Alvo imune a ' + dtInfo.lb;
         else if (reductionMeta.isVulnerable) reason = 'Vulnerabilidade dobra o dano de ' + dtInfo.lb;
-        else if (reductionMeta.saveSuccess) reason = 'O alvo se esquivou (TR bem-sucedido: metade)';
+        else if (reductionMeta.saveSuccess) reason = reductionMeta.saveNegates ? 'O alvo anulou o efeito no TR (0 dano)' : 'O alvo se esquivou (TR bem-sucedido: metade)';
         else if (reductionMeta.rageResisted) reason = 'A Fúria do alvo absorveu metade do golpe';
         else if (reductionMeta.isResistant) reason = 'Resistência do alvo reduziu o dano à metade';
         else if (reductionMeta.uncannyDodge) reason = 'Esquiva Sobrenatural reduziu o dano à metade';
+        else if (reductionMeta.heavyArmorMaster > 0) reason = 'Mestre de Armadura Pesada reduziu em ' + reductionMeta.heavyArmorMaster;
         else if (reductionMeta.halfDmg) reason = 'Reflexos rápidos reduziram o dano à metade';
         else if (reductionMeta.deflectReduction > 0) reason = 'Desviar Projéteis absorveu ' + reductionMeta.deflectReduction + ' de dano';
         else reason = 'O alvo reduziu parte do dano';
@@ -48935,46 +48940,106 @@ async function __combatAnimateOneEvent(ev) {
             return;
         }
 
-        /* 2) D20 animation se temos o valor. Pula em OAs (rapid-fire). */
+        /* 2) D20 animation se temos o valor de ataque OU salvaguarda (TR). Pula em OAs (rapid-fire). */
         if (kind === 'oa' && elA && typeof spawnSkillImpactLabel === 'function') {
             try { spawnSkillImpactLabel(elA, '⚡ ATAQUE DE OPORTUNIDADE!', 'attack'); } catch (eOaLbl) {}
         }
-        if (typeof showDice === 'function' && ev.d20 != null && kind !== 'oa') {
+        var isSaveRoll = (ev.d20 == null && ev.saveD20 != null);
+        var rollValueForDice = isSaveRoll ? ev.saveD20 : ev.d20;
+        if (typeof showDice === 'function' && rollValueForDice != null && kind !== 'oa') {
             var actorForDice = aU || { n: ev.actorName, t: (ev.actorName || '').indexOf('Orc') >= 0 ? 'e' : 'p' };
             var targetForDice = tU || { n: ev.targetName };
-            /* Passa combatTarget=targetForDice pra ativar layout VS (2 combatant
-               blocks lado-a-lado). Evita "WILZE..." truncado + meta em coluna
-               vertical em viewport baixo (Telegram WebApp desktop). */
+            var roller = isSaveRoll ? targetForDice : actorForDice;
+            var opponent = isSaveRoll ? actorForDice : targetForDice;
+            var abLabel = isSaveRoll ? (typeof simAbilityLabelPt === 'function' ? simAbilityLabelPt(ev.saveAbility) : String(ev.saveAbility || 'DES').toUpperCase()) : null;
+            var rollTitle = isSaveRoll ? ('TR de ' + abLabel + ' vs CD ' + (ev.saveDc || 10)) : (ev.skillName || null);
+            /* Passa combatTarget pra ativar layout VS (2 combatant blocks lado-a-lado). */
             await new Promise(function (rD) {
                 try {
                     var _advMode = ev.advMode || ev.adv || null;
                     var _raw1 = ev.d20Raw1 != null ? ev.d20Raw1 : ev.advRaw1;
                     var _raw2 = ev.d20Raw2 != null ? ev.d20Raw2 : ev.advRaw2;
-                    showDice(ev.d20, rD, actorForDice, ev.skillName || null, {
-                        combatTarget: targetForDice,
+                    showDice(rollValueForDice, rD, roller, rollTitle, {
+                        combatTarget: opponent,
                         advMode: _advMode,
                         advRaw1: _raw1,
                         advRaw2: _raw2,
                         postResult: function () {
-                            var _kicker = 'd20';
-                            if (_advMode === 'advantage') _kicker = 'd20 • VANTAGEM (2d20kh1)';
-                            else if (_advMode === 'disadvantage') _kicker = 'd20 • DESVANTAGEM (2d20kl1)';
+                            if (isSaveRoll) {
+                                var _kicker = 'TESTE DE RESISTÊNCIA DE ' + abLabel.toUpperCase();
+                                if (ev.coverBonus > 0) _kicker += ' • ⛨ +' + ev.coverBonus + ' COBERTURA';
+                                if (_advMode === 'advantage') _kicker += ' (VANTAGEM)';
+                                else if (_advMode === 'disadvantage') _kicker += ' (DESVANTAGEM)';
+
+                                var _rows = [];
+                                if (_advMode && _raw1 != null && _raw2 != null) {
+                                    _rows.push({ l: 'Dados', v: _raw1 + ' e ' + _raw2 + ' → ' + ev.saveD20 });
+                                } else {
+                                    _rows.push({ l: 'Rolagem', v: String(ev.saveD20) });
+                                }
+                                _rows.push({ l: 'Bônus TR', v: (ev.saveMod >= 0 ? '+' : '') + (ev.saveMod || 0) });
+                                _rows.push({ l: 'Total', v: String(ev.saveTotal || (ev.saveD20 + (ev.saveMod || 0))) });
+                                _rows.push({ l: 'CD Conjurador', v: String(ev.saveDc || 10) });
+
+                                var _ok = !!ev.saveSuccess;
+                                var _note = _ok
+                                    ? (ev.saveNegates ? 'Passou no TR — Anulou o efeito (0 Dano).' : 'Passou no TR — Sofre metade do dano (½).')
+                                    : 'Falhou no TR — Sofre dano integral.';
+
+                                return {
+                                    title: _ok ? (targetForDice.n + ' Resistiu') : (targetForDice.n + ' Falhou no TR'),
+                                    cls: _ok ? 'miss' : 'hit',
+                                    subStructured: {
+                                        kicker: _kicker,
+                                        rows: _rows,
+                                        note: _note
+                                    }
+                                };
+                            }
+
+                            // Ataque padrão (d20 vs CA)
+                            var _kicker = ev.skillName ? (ev.skillName.toUpperCase() + ' • d20') : 'd20';
+                            if (_advMode === 'advantage') _kicker = (ev.skillName ? (ev.skillName.toUpperCase() + ' • ') : '') + 'd20 (VANTAGEM)';
+                            else if (_advMode === 'disadvantage') _kicker = (ev.skillName ? (ev.skillName.toUpperCase() + ' • ') : '') + 'd20 (DESVANTAGEM)';
                             var _rows = [];
                             if (_advMode && _raw1 != null && _raw2 != null) {
                                 _rows.push({ l: 'Dados', v: _raw1 + ' e ' + _raw2 + ' → ' + ev.d20 });
                             } else {
                                 _rows.push({ l: 'Rolagem', v: String(ev.d20) });
                             }
-                            _rows.push({ l: 'Ataque', v: '+' + (ev.atk || 0) });
+                            _rows.push({ l: 'Ataque', v: (ev.atk >= 0 ? '+' : '') + (ev.atk || 0) });
                             _rows.push({ l: 'Total', v: String(ev.total || ev.d20 + (ev.atk || 0)) });
                             _rows.push({ l: 'CA alvo', v: String(ev.ac || '?') });
+
+                            var _cDtRem = String(ev.dmgType || '').toLowerCase().trim();
+                            var _isRemImm = false, _isRemVuln = false, _isRemRes = false;
+                            if (_cDtRem && tU) {
+                                if (tU.immunities && tU.immunities.some(function (im) { return String(im).toLowerCase().trim() === _cDtRem; })) _isRemImm = true;
+                                else if (tU.vulnerabilities && tU.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _cDtRem; })) _isRemVuln = true;
+                                else if (tU.resistances && tU.resistances.some(function (res) { return String(res).toLowerCase().trim() === _cDtRem; })) _isRemRes = true;
+                            }
+
+                            var _dtInfo = (typeof simDmgTypeInfoPt === 'function' && ev.dmgType) ? simDmgTypeInfoPt(ev.dmgType) : null;
+                            var _dtLabel = _dtInfo ? (' (' + _dtInfo.ico + ' ' + _dtInfo.lb + ')') : '';
+                            var _note = '';
+                            if (ev.hit) {
+                                if (_isRemImm) _note = 'Dano: 0' + _dtLabel + ' · Imune!';
+                                else if (_isRemVuln) _note = 'Dano: ' + (ev.dmgTotal | 0) + _dtLabel + ' · Vulnerabilidade (2×)!';
+                                else if (_isRemRes) _note = 'Dano: ' + (ev.dmgTotal | 0) + _dtLabel + ' · Resistência (½)!';
+                                else _note = 'Dano: ' + (ev.dmgTotal | 0) + _dtLabel;
+                            } else {
+                                if (ev.d20 === 1) _note = 'Falha Crítica (Nat 1) — Errou automaticamente.';
+                                else if (ev.total != null && ev.ac != null) _note = 'Total ' + ev.total + ' < CA ' + ev.ac + ' — Não superou a CA.';
+                                else _note = 'Não alcançou a CA.';
+                            }
+
                             return {
                                 title: ev.hit ? (ev.crit ? 'CRÍTICO' : 'Acertou') : 'Errou',
                                 cls: ev.hit ? (ev.crit ? 'crit' : 'hit') : 'miss',
                                 subStructured: {
                                     kicker: _kicker,
                                     rows: _rows,
-                                    note: ev.hit ? ('Dano: ' + (ev.dmgTotal | 0)) : 'Não alcançou a CA.'
+                                    note: _note
                                 }
                             };
                         }
@@ -48999,14 +49064,17 @@ async function __combatAnimateOneEvent(ev) {
                     try { spawnFumbleDramaticBanner(aU, tU, ev); } catch (eFB) {}
                 }
                 if (elA && typeof spawnSkillImpactLabel === 'function') {
-                    try { spawnSkillImpactLabel(elA, '✕ NAT 1 FALHA CRÍTICA!', 'fumble'); } catch (eFum) {}
+                    try { spawnSkillImpactLabel(elA, kind === 'oa' ? '⚡ NAT 1 ERROU OPORTUNIDADE!' : '✕ NAT 1 FALHA CRÍTICA!', 'fumble'); } catch (eFum) {}
                 }
                 if (elT && typeof spawnMissFloatLabel === 'function') {
-                    try { spawnMissFloatLabel(elT, 'Errou (Falha Crítica)'); } catch (eMS) {}
+                    try { spawnMissFloatLabel(elT, kind === 'oa' ? '⚡ Errou Oportunidade' : 'Errou (Falha Crítica)'); } catch (eMS) {}
                 }
             } else {
+                if (elA && kind === 'oa' && typeof spawnSkillImpactLabel === 'function') {
+                    try { spawnSkillImpactLabel(elA, '⚡ ERROU OPORTUNIDADE!', 'miss'); } catch (eOaMiss) {}
+                }
                 if (elT && typeof spawnMissFloatLabel === 'function') {
-                    try { spawnMissFloatLabel(elT, 'Errou'); } catch (eMS) {}
+                    try { spawnMissFloatLabel(elT, kind === 'oa' ? '⚡ Errou Oportunidade' : 'Errou'); } catch (eMS) {}
                 }
             }
             if (window._combatVfx && elT) {
@@ -49055,7 +49123,14 @@ async function __combatAnimateOneEvent(ev) {
                         appliedTotal: ev.dmgTotal != null ? (ev.dmgTotal | 0) : Math.max(0, (ev.oldHp | 0) - (ev.newHp | 0)),
                         isImmune: _isRemImm,
                         isVulnerable: _isRemVuln,
-                        isResistant: _isRemRes
+                        isResistant: _isRemRes,
+                        saveSuccess: ev.saveSuccess != null ? !!ev.saveSuccess : null,
+                        saveAbility: ev.saveAbility,
+                        saveNegates: !!ev.saveNegates,
+                        heavyArmorMaster: ev.heavyArmorMasterReduced | 0,
+                        uncannyDodge: !!ev.uncannyDodge,
+                        hasConcentration: !!(tUnit && tUnit.se && tUnit.se.some(function (st) { return st && st.concentration; })),
+                        concDc: Math.max(10, Math.floor((ev.dmgTotal || 0) / 2))
                     }
                 );
             } catch (eDmg) {
@@ -49170,8 +49245,10 @@ async function __combatAnimateOneEvent(ev) {
         // Labels de impacto DOM e Números de Dano Flutuante
         if (typeof spawnSkillImpactLabel === 'function' && elT) {
             var _lblTxt = (ev.d20 === 20 || ev.crit)
-                ? '✦ NAT 20 CRÍTICO!'
-                : (ev.skillName ? ev.skillName.toUpperCase() + '!' : 'ATAQUE!');
+                ? (kind === 'oa' ? '✦ NAT 20 OPORTUNIDADE!' : '✦ NAT 20 CRÍTICO!')
+                : (kind === 'oa'
+                    ? '⚡ GOLPE DE OPORTUNIDADE!'
+                    : (ev.skillName ? ev.skillName.toUpperCase() + '!' : 'ATAQUE!'));
             spawnSkillImpactLabel(elT, _lblTxt, ev.crit ? 'crit' : 'attack');
         }
         if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
@@ -49577,12 +49654,20 @@ async function __combatAnimateOneEvent(ev) {
         if (ccEl) {
             ccEl.classList.add(kind === 'concentration_lost' ? 'dodged' : 'buff-flash');
             if (typeof spawnSkillImpactLabel === 'function') {
-                var _ccSpell = ev.spellName ? ' (' + ev.spellName + ')' : '';
-                spawnSkillImpactLabel(
-                    ccEl,
-                    kind === 'concentration_lost' ? ('💔 CONCENTRAÇÃO QUEBRADA' + _ccSpell + '!') : ('◈ CONCENTRAÇÃO MANTIDA!'),
-                    kind === 'concentration_lost' ? 'miss' : 'buff'
-                );
+                var _concScore = (ev.saveTotal != null && ev.saveDc != null) ? ' [' + ev.saveTotal + ' vs CD ' + ev.saveDc + ']' : '';
+                var _ccTxt = '';
+                var _ccTone = 'buff';
+                if (kind === 'concentration_lost') {
+                    _ccTxt = '💔 CONCENTRAÇÃO QUEBRADA' + (ev.spellName ? ' (' + ev.spellName + ')' : '') + '!';
+                    _ccTone = 'miss';
+                } else if (ev.saveSuccess === false) {
+                    _ccTxt = '💥 CONCENTRAÇÃO FALHOU' + _concScore + '!';
+                    _ccTone = 'miss';
+                } else {
+                    _ccTxt = '◈ CONCENTRAÇÃO MANTIDA' + _concScore + '!';
+                    _ccTone = 'buff';
+                }
+                spawnSkillImpactLabel(ccEl, _ccTxt, _ccTone);
             }
         }
         setTimeout(function () {
@@ -49621,9 +49706,13 @@ async function __combatAnimateOneEvent(ev) {
                 _lblTxt = '👑 RESISTÊNCIA LENDÁRIA!' + (ev.remaining != null ? ' (' + ev.remaining + ' rest.)' : '');
                 _lblTone = 'buff';
             } else if (kind === 'save_result') {
-                var _svAb = String(ev.saveAbility || ev.save || 'TR').toUpperCase();
-                _lblTxt = ev.saveSuccess ? ('🛡️ TR ' + _svAb + ' PASSOU!') : ('💥 TR ' + _svAb + ' FALHOU!');
-                _lblTone = ev.saveSuccess ? 'buff' : 'hit';
+                var _svAb = String(ev.saveAbility || ev.ability || ev.save || 'TR').toUpperCase();
+                var _svTot = ev.total != null ? ev.total : ev.saveTotal;
+                var _svDc = ev.dc != null ? ev.dc : ev.saveDc;
+                var _svScore = (_svTot != null && _svDc != null) ? ' [' + _svTot + ' vs CD ' + _svDc + ']' : '';
+                var _svOk = ev.success !== undefined ? !!ev.success : !!ev.saveSuccess;
+                _lblTxt = _svOk ? ('🛡️ TR ' + _svAb + ' PASSOU' + _svScore + '!') : ('💥 TR ' + _svAb + ' FALHOU' + _svScore + '!');
+                _lblTone = _svOk ? 'buff' : 'hit';
             } else if (kind === 'condition_apply') {
                 _lblTxt = '⛓️ +' + String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase() + '!';
                 _lblTone = 'miss';
