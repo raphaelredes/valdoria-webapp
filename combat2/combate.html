@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T15:23:35Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T16:12:47Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -19817,6 +19817,12 @@ function _simAttackAdvState(actor, target, skill) {
             });
         }
     }
+    /* D&D 5e DMG p. 251: Flanqueamento em Grid Hexagonal (ataque corpo a corpo com aliado adjacente oposto) */
+    if (!isRanged && typeof simCheckFlanking === 'function' && currentState && currentState.order) {
+        if (simCheckFlanking(actor, target, currentState.order)) {
+            adv = true;
+        }
+    }
     if (adv && dis) return 'normal';
     if (adv) return 'advantage';
     if (dis) return 'disadvantage';
@@ -20131,8 +20137,9 @@ function _simExhaustionLevel(unit) {
 function resolveHit(a, d, r, opts) {
     opts = opts || {};
     var atkExtra = opts.atkExtra || 0;
-    if (!a || !d || !d.alive) return { hit: false, miss: true, reason: 'nulo', total: 0, effAc: getEffectiveAc(d), atkExtra: atkExtra };
-    var effAc = getEffectiveAc(d);
+    var acExtra = opts.acExtra || 0;
+    if (!a || !d || !d.alive) return { hit: false, miss: true, reason: 'nulo', total: 0, effAc: getEffectiveAc(d) + acExtra, atkExtra: atkExtra };
+    var effAc = getEffectiveAc(d) + acExtra;
     var total = r + a.atk + atkExtra;
     /* V1.7 Sprint-10 (2026-04-21 closeout) — PHB crit range estendido:
        Assassinato (PHB p.97) + outros buffs de crit estendido (critRange em se[]).
@@ -20494,31 +20501,45 @@ function simDmgTypeInfoPt(dt) {
         'psiquico':    { lb: 'Psíquico',    ico: '🧠', col: '#f48fb1' },
         'psíquico':    { lb: 'Psíquico',    ico: '🧠', col: '#f48fb1' }
     };
-    return MAP[k] || { lb: k ? (k.charAt(0).toUpperCase() + k.slice(1)) : 'Físico', ico: '⚔️', col: '#e2d6c5' };
+    var res = MAP[k] || { lb: k ? (k.charAt(0).toUpperCase() + k.slice(1)) : 'Físico', ico: '⚔️', col: '#e2d6c5' };
+    return { lb: res.lb, pt: res.lb, ico: res.ico, col: res.col };
 }
 
 /** Calcula a probabilidade exata de acerto e crítico no D&D 5e (PHB p.194) + breakdown estilo Solasta/BG3. */
 function simCalcHitChanceDnd5e(s, attacker, defender, skill) {
-    if (!attacker || !defender) return { hitPct: 50, critPct: 5, minD20: 11, totalAtk: 0, effectiveAc: 10, advState: 'normal', breakdown: '' };
+    if (!attacker || !defender) {
+        return {
+            hitPct: 50, pct: 50, critPct: 5, critMin: 20, minD20: 11, neededRoll: 11,
+            totalAtk: 0, effectiveAc: 10, advState: 'normal', atkBreakdown: '+0', acBreakdown: 'CA 10', breakdown: ''
+        };
+    }
     if (skill && skill.autoHit) {
         return {
-            hitPct: 100, critPct: 0, minD20: 1, totalAtk: 0, effectiveAc: defender.ac || 10,
-            advState: 'normal', autoHit: true,
+            hitPct: 100, pct: 100, critPct: 0, critMin: 20, minD20: 1, neededRoll: 1,
+            totalAtk: 0, effectiveAc: defender.ac || 10,
+            advState: 'normal', autoHit: true, atkBreakdown: 'Infalível', acBreakdown: 'Ignora CA',
             breakdown: 'Acerto Automático (PHB p.257 — Mísseis Mágicos não exigem rolagem de ataque)'
         };
     }
     var coverInfo = (typeof simComputeCover === 'function' && s) ? simComputeCover(s, attacker, defender) : { cover: 'none', bonus: 0, blocksLoS: false };
     if (coverInfo.cover === 'total' || coverInfo.blocksLoS) {
         return {
-            hitPct: 0, critPct: 0, minD20: 20, totalAtk: attacker.atk || 0, effectiveAc: (defender.ac || 10),
-            advState: 'disadvantage', blocked: true,
+            hitPct: 0, pct: 0, critPct: 0, critMin: 20, minD20: 20, neededRoll: 20,
+            totalAtk: attacker.atk || 0, effectiveAc: (defender.ac || 10),
+            advState: 'disadvantage', blocked: true, atkBreakdown: 'Bloqueado', acBreakdown: 'Cobertura Total',
             breakdown: 'Cobertura Total / Linha de Visão bloqueada (PHB p.196)'
         };
     }
+    var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(attacker, skill) : { reach: 1, isRanged: false };
+    var elevMod = (typeof simCheckElevationTacticalModifier === 'function' && s)
+        ? simCheckElevationTacticalModifier(s, attacker, defender, !!reachInfo.isRanged)
+        : { state: null, bonus: 0, atkElev: 0, tgtElev: 0 };
+    var elevBonus = (elevMod && elevMod.bonus) ? (elevMod.bonus | 0) : 0;
+
     var isSpellAtk = !!(skill && (skill.scale === 'cantrip' || skill.isSpell || skill.dmgType === 'fire' || skill.dmgType === 'cold' || skill.dmgType === 'radiant' || skill.dmgType === 'necrotic' || skill.dmgType === 'force' || skill.dmgType === 'lightning') && skill.cost !== undefined && (!skill.damageSpec || skill.n !== 'Ataque Poderoso'));
     var baseAtk = (isSpellAtk && typeof simSpellAttackBonus === 'function') ? simSpellAttackBonus(attacker) : ((attacker.atk | 0) || 0);
     var statusAtk = (!isSpellAtk && typeof getAtkFlatFromStatuses === 'function') ? (getAtkFlatFromStatuses(attacker) | 0) : 0;
-    var totalAtk = baseAtk + statusAtk;
+    var totalAtk = baseAtk + statusAtk + elevBonus;
 
     var baseAc = (defender.ac | 0) || 10;
     var statusAc = (typeof getStatusAcBonus === 'function') ? (getStatusAcBonus(defender) | 0) : 0;
@@ -20526,7 +20547,6 @@ function simCalcHitChanceDnd5e(s, attacker, defender, skill) {
     var effectiveAc = baseAc + statusAc + coverAc;
 
     var advState = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(attacker, defender, skill) : 'normal';
-    var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(attacker, skill) : { reach: 1, isRanged: false };
     if (!reachInfo.isRanged && typeof simCheckFlanking === 'function' && s && s.order && simCheckFlanking(attacker, defender, s.order)) {
         if (advState === 'normal') advState = 'advantage';
     }
@@ -20553,20 +20573,29 @@ function simCalcHitChanceDnd5e(s, attacker, defender, skill) {
     var atkParts = ['Prof +' + profVal];
     if (attrVal !== 0) atkParts.push('Atrib ' + (attrVal >= 0 ? '+' : '') + attrVal + (attacker.attr ? ' ' + attacker.attr : ''));
     if (statusAtk !== 0) atkParts.push('Buffs ' + (statusAtk >= 0 ? '+' : '') + statusAtk);
+    if (elevBonus !== 0) atkParts.push((elevBonus > 0 ? '⛰️ Elevado +' : '▼ Baixo ') + elevBonus);
 
     var acParts = ['Base ' + baseAc];
     if (statusAc !== 0) acParts.push('Efeitos ' + (statusAc >= 0 ? '+' : '') + statusAc);
     if (coverAc > 0) acParts.push('Cobertura +' + coverAc);
 
+    var finalHitPct = Math.round(hitProb * 100);
+    var finalCritPct = Math.round(critProb * 1000) / 10;
+
     return {
-        hitPct: Math.round(hitProb * 100),
-        critPct: Math.round(critProb * 1000) / 10,
+        hitPct: finalHitPct,
+        pct: finalHitPct,
+        critPct: finalCritPct,
+        critMin: critStart,
         minD20: minD20,
+        neededRoll: minD20,
         totalAtk: totalAtk,
         effectiveAc: effectiveAc,
         advState: advState,
-        atkBreakdown: atkParts.join(' · '),
-        acBreakdown: acParts.join(' · '),
+        elevMod: elevMod,
+        coverInfo: coverInfo,
+        atkBreakdown: (totalAtk >= 0 ? '+' : '') + totalAtk + ' (' + atkParts.join(' · ') + ')',
+        acBreakdown: 'CA ' + effectiveAc + ' (' + acParts.join(' · ') + ')',
         breakdown: 'd20 (' + minD20 + '+) + ' + totalAtk + ' [' + atkParts.join(', ') + '] vs CA ' + effectiveAc + ' [' + acParts.join(', ') + ']'
     };
 }
@@ -20590,12 +20619,13 @@ function simCalcSaveFailChanceDnd5e(s, caster, defender, skill) {
     return {
         failPct: failPct,
         passPct: 100 - failPct,
+        minRollToSave: Math.min(20, minPassD20),
         saveAb: saveAb.toUpperCase(),
         saveDc: saveDc,
         targetSaveMod: totalSaveMod,
         isTargetProf: svInfo.isProf,
         coverBonus: coverBonus,
-        breakdown: 'Alvo rola 1d20 ' + (totalSaveMod >= 0 ? '+ ' + totalSaveMod : '- ' + Math.abs(totalSaveMod)) + (svInfo.isProf ? ' (Proficiente)' : '') + ' vs CD ' + saveDc
+        breakdown: 'Alvo rola 1d20 ' + (totalSaveMod >= 0 ? '+ ' + totalSaveMod : '- ' + Math.abs(totalSaveMod)) + (svInfo.isProf ? ' (Proficiente)' : '') + (coverBonus > 0 ? ' (+' + coverBonus + ' Cob.)' : '') + ' vs CD ' + saveDc
     };
 }
 
@@ -22149,22 +22179,67 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
 
     var radiusHex = 0;
     var aoeType = 'arcane';
+    var aoeShape = skill.shape || 'sphere'; // 'sphere' | 'cone' | 'line' | 'cube'
     var skNameLow = String(skill.n || '').toLowerCase();
     var skDmgLow = String(skill.dmgType || '').toLowerCase();
+
     if (skill.fireball || skNameLow.indexOf('bola de fogo') >= 0 || skNameLow.indexOf('meteoro') >= 0) {
         radiusHex = 4; // 20 pés = 6m = 4 hexes (D&D 5e PHB p. 241)
         aoeType = 'fire';
-    } else if (skill.coneOfCold || (skill.shape === 'cone') || skNameLow.indexOf('mãos flamejantes') >= 0 || skNameLow.indexOf('sopro') >= 0 || skNameLow.indexOf('cone') >= 0) {
-        radiusHex = 3;
-        aoeType = (skDmgLow === 'fire' || skNameLow.indexOf('flamej') >= 0) ? 'fire' : 'cone';
-    } else if (skill.spiritGuardians || skill.holyNimbus || skill.requiresTargetTag) {
+        aoeShape = 'sphere';
+    } else if (skill.coneOfCold || skNameLow.indexOf('cone de frio') >= 0 || skNameLow.indexOf('medo') >= 0) {
+        radiusHex = 5; // Cone de Frio / Medo
+        aoeType = (skDmgLow === 'fire') ? 'fire' : 'cone';
+        aoeShape = 'cone';
+    } else if (
+        skill.shape === 'cone' ||
+        skNameLow.indexOf('mãos flamejantes') >= 0 ||
+        skNameLow.indexOf('maos flamejantes') >= 0 ||
+        skNameLow.indexOf('sopro') >= 0 ||
+        skNameLow.indexOf('rajada de veneno') >= 0 ||
+        skNameLow.indexOf('cone') >= 0
+    ) {
+        radiusHex = skill.aoeRadius || 3; // 15 pés = 4,5m = 3 hexes (PHB p. 256)
+        aoeType = (skDmgLow === 'fire' || skNameLow.indexOf('flamej') >= 0 || skNameLow.indexOf('fogo') >= 0) ? 'fire' : 'cone';
+        aoeShape = 'cone';
+    } else if (
+        skill.shape === 'line' ||
+        skNameLow.indexOf('relâmpago') >= 0 ||
+        skNameLow.indexOf('relampago') >= 0 ||
+        skNameLow.indexOf('linha') >= 0
+    ) {
+        radiusHex = skill.aoeRadius || 6; // Linha direcional D&D 5e (PHB p. 204)
+        aoeType = 'cone';
+        aoeShape = 'line';
+    } else if (
+        skill.shape === 'cube' ||
+        skNameLow.indexOf('onda de trovão') >= 0 ||
+        skNameLow.indexOf('onda de trovao') >= 0 ||
+        skNameLow.indexOf('fogo feérico') >= 0 ||
+        skNameLow.indexOf('fogo feerico') >= 0 ||
+        skNameLow.indexOf('teia') >= 0 ||
+        skNameLow.indexOf('graxa') >= 0
+    ) {
+        radiusHex = skill.aoeRadius || (skNameLow.indexOf('graxa') >= 0 ? 2 : 3);
+        aoeType = (skDmgLow === 'thunder') ? 'cone' : 'arcane';
+        aoeShape = 'cube';
+    } else if (skill.spiritGuardians || skill.holyNimbus || skill.requiresTargetTag || skNameLow.indexOf('expulsar') >= 0 || skNameLow.indexOf('destruição trovejante') >= 0) {
         radiusHex = 3; // 15 pés = 4,5m = 3 hexes (PHB p. 278)
         aoeType = 'radiant';
+        aoeShape = 'sphere';
+    } else if (skNameLow.indexOf('despedaçar') >= 0 || skNameLow.indexOf('despedacar') >= 0) {
+        radiusHex = 2; // 10 pés = 3m = 2 hexes (PHB p. 237)
+        aoeType = 'cone';
+        aoeShape = 'sphere';
+    } else if (skNameLow.indexOf('sono') >= 0 || skNameLow.indexOf('crescimento espinhoso') >= 0 || skNameLow.indexOf('emaranhar') >= 0) {
+        radiusHex = 4; // 20 pés = 6m = 4 hexes
+        aoeType = 'arcane';
+        aoeShape = 'sphere';
     } else if (skill.aoeRadius) {
         radiusHex = Math.max(1, skill.aoeRadius | 0);
     } else if (skill.radiusHexes) {
         radiusHex = Math.max(1, skill.radiusHexes | 0);
-    } else if (skill.isAoe || skill.aoe || skill.multiTarget) {
+    } else if (skill.isAoe || skill.aoe || skill.multiTarget || skill.sleepPool) {
         radiusHex = 3;
     }
 
@@ -22177,6 +22252,9 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         return;
     }
 
+    var pCaster = currentState.order && currentState.order[currentState.p_idx];
+    var casterPos = (pCaster && pCaster.pos && pCaster.pos.col != null) ? pCaster.pos : { col: centerCol, row: centerRow };
+    var pOrigin = hexCenter(casterPos.col, casterPos.row);
     var pCenter = hexCenter(centerCol, centerRow);
     var radiusPx = radiusHex * HEX_COL_STEP;
     var bCols = (currentState.battlefield && currentState.battlefield.cols) || HEX_COLS_DEFAULT;
@@ -22196,10 +22274,51 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
     var gradId = (aoeType === 'fire') ? 'aoeFireballGlow' : 'aoeArcaneGlow';
     var circleCls = 'hex-aoe-circle hex-aoe-circle--' + aoeType;
 
-    // Malha de hexágonos afetados dentro do raio (Padrão Solasta / BG3)
+    // Diretriz angular para Cone e Linha (originada no conjurador em direção ao hexágono mirado — PHB p. 204)
+    var dirAngle = Math.atan2(pCenter.cy - pOrigin.cy, pCenter.cx - pOrigin.cx);
+    var coneHalfAngle = Math.PI / 5.4; // ~33 graus de meia-abertura (cone D&D 5e: largura = distância da origem)
+
+    function isHexInAoeShape(hc, hr) {
+        if (hc === centerCol && hr === centerRow) return true;
+        if (aoeShape === 'cone') {
+            if (hc === casterPos.col && hr === casterPos.row) return false;
+            var dOrig = hexDistance(casterPos.col, casterPos.row, hc, hr);
+            if (dOrig < 1 || dOrig > radiusHex) return false;
+            var hPt = hexCenter(hc, hr);
+            var ang = Math.atan2(hPt.cy - pOrigin.cy, hPt.cx - pOrigin.cx);
+            var diff = Math.abs(ang - dirAngle);
+            if (diff > Math.PI) diff = 2 * Math.PI - diff;
+            return diff <= coneHalfAngle;
+        }
+        if (aoeShape === 'line') {
+            if (hc === casterPos.col && hr === casterPos.row) return false;
+            var dOrigL = hexDistance(casterPos.col, casterPos.row, hc, hr);
+            if (dOrigL < 1 || dOrigL > radiusHex) return false;
+            var hPtL = hexCenter(hc, hr);
+            var vx = hPtL.cx - pOrigin.cx;
+            var vy = hPtL.cy - pOrigin.cy;
+            var ux = Math.cos(dirAngle);
+            var uy = Math.sin(dirAngle);
+            var proj = vx * ux + vy * uy;
+            if (proj <= 0 || proj > radiusPx + 18) return false;
+            var perp = Math.abs(vx * (-uy) + vy * ux);
+            return perp <= (HEX_COL_STEP * 0.62);
+        }
+        if (aoeShape === 'cube') {
+            var dc = Math.abs(hc - centerCol);
+            var dr = Math.abs(hr - centerRow);
+            var cubeHalf = Math.max(1, Math.floor(radiusHex / 2));
+            return dc <= cubeHalf && dr <= cubeHalf;
+        }
+        return hexDistance(centerCol, centerRow, hc, hr) <= radiusHex;
+    }
+
+    // Malha de hexágonos afetados dentro da forma geométrica D&D 5e (Padrão Solasta / BG3)
+    var affectedHexMap = {};
     for (var hc = 0; hc < bCols; hc++) {
         for (var hr = 0; hr < bRows; hr++) {
-            if (hexDistance(centerCol, centerRow, hc, hr) <= radiusHex) {
+            if (isHexInAoeShape(hc, hr)) {
+                affectedHexMap[hc + ',' + hr] = true;
                 var hCen = hexCenter(hc, hr);
                 var hPts = hexPolygonPoints(hCen.cx, hCen.cy);
                 svgParts.push('<polygon points="' + hPts + '" fill="' + polyFill + '" stroke="' + polyStroke + '" stroke-width="1.5" stroke-dasharray="4 2" />');
@@ -22207,9 +22326,39 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         }
     }
 
-    // Círculo translúcido do raio de impacto
-    svgParts.push('<circle cx="' + pCenter.cx + '" cy="' + pCenter.cy + '" r="' + radiusPx + '" class="' + circleCls + '" fill="url(#' + gradId + ')" />');
-    svgParts.push('<circle cx="' + pCenter.cx + '" cy="' + pCenter.cy + '" r="' + radiusPx + '" class="hex-aoe-edge" />');
+    // Contorno geométrico da Área de Efeito (Cone, Linha, Cubo ou Esfera — PHB p. 204)
+    if (aoeShape === 'cone') {
+        var coneLenPx = Math.max(radiusPx, hexDistance(casterPos.col, casterPos.row, centerCol, centerRow) * HEX_COL_STEP);
+        var a1 = dirAngle - coneHalfAngle;
+        var a2 = dirAngle + coneHalfAngle;
+        var x1 = Math.round(pOrigin.cx + Math.cos(a1) * coneLenPx);
+        var y1 = Math.round(pOrigin.cy + Math.sin(a1) * coneLenPx);
+        var x2 = Math.round(pOrigin.cx + Math.cos(a2) * coneLenPx);
+        var y2 = Math.round(pOrigin.cy + Math.sin(a2) * coneLenPx);
+        var conePath = 'M ' + pOrigin.cx + ' ' + pOrigin.cy + ' L ' + x1 + ' ' + y1 +
+            ' A ' + Math.round(coneLenPx) + ' ' + Math.round(coneLenPx) + ' 0 0 1 ' + x2 + ' ' + y2 + ' Z';
+        svgParts.push('<path d="' + conePath + '" class="' + circleCls + '" fill="url(#' + gradId + ')" />');
+        svgParts.push('<path d="' + conePath + '" class="hex-aoe-edge" fill="none" stroke="' + polyStroke + '" stroke-width="2" stroke-dasharray="6 3" />');
+    } else if (aoeShape === 'line') {
+        var lineLenPx = radiusPx;
+        var nx = -Math.sin(dirAngle) * 20;
+        var ny = Math.cos(dirAngle) * 20;
+        var ex = pOrigin.cx + Math.cos(dirAngle) * lineLenPx;
+        var ey = pOrigin.cy + Math.sin(dirAngle) * lineLenPx;
+        var beamPts = Math.round(pOrigin.cx + nx) + ',' + Math.round(pOrigin.cy + ny) + ' ' +
+            Math.round(ex + nx) + ',' + Math.round(ey + ny) + ' ' +
+            Math.round(ex - nx) + ',' + Math.round(ey - ny) + ' ' +
+            Math.round(pOrigin.cx - nx) + ',' + Math.round(pOrigin.cy - ny);
+        svgParts.push('<polygon points="' + beamPts + '" class="' + circleCls + '" fill="url(#' + gradId + ')" />');
+        svgParts.push('<polygon points="' + beamPts + '" class="hex-aoe-edge" fill="none" stroke="' + polyStroke + '" stroke-width="2" stroke-dasharray="6 3" />');
+    } else if (aoeShape === 'cube') {
+        var halfSide = Math.max(36, Math.round(radiusPx * 0.72));
+        svgParts.push('<rect x="' + (pCenter.cx - halfSide) + '" y="' + (pCenter.cy - halfSide) + '" width="' + (halfSide * 2) + '" height="' + (halfSide * 2) + '" rx="6" class="' + circleCls + '" fill="url(#' + gradId + ')" />');
+        svgParts.push('<rect x="' + (pCenter.cx - halfSide) + '" y="' + (pCenter.cy - halfSide) + '" width="' + (halfSide * 2) + '" height="' + (halfSide * 2) + '" rx="6" class="hex-aoe-edge" />');
+    } else {
+        svgParts.push('<circle cx="' + pCenter.cx + '" cy="' + pCenter.cy + '" r="' + radiusPx + '" class="' + circleCls + '" fill="url(#' + gradId + ')" />');
+        svgParts.push('<circle cx="' + pCenter.cx + '" cy="' + pCenter.cy + '" r="' + radiusPx + '" class="hex-aoe-edge" />');
+    }
 
     // Destaque visual nos tokens situados dentro da área de efeito e contagem tática
     var enemiesInAoe = 0;
@@ -22219,10 +22368,10 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         for (var ti = 0; ti < currentState.order.length; ti++) {
             var tu = currentState.order[ti];
             if (!tu || !tu.alive || tu.isDead || !tu.pos) continue;
-            var td = hexDistance(centerCol, centerRow, tu.pos.col, tu.pos.row);
+            var inShape = !!affectedHexMap[tu.pos.col + ',' + tu.pos.row];
             var tuid = unitUidForOrderIndex(currentState, ti);
             var tEl = document.querySelector('.hex-token[data-unit-id="' + tuid + '"]');
-            if (td <= radiusHex) {
+            if (inShape) {
                 if (tEl) tEl.classList.add('token--aoe-targeted');
                 var tuCen = hexCenter(tu.pos.col, tu.pos.row);
                 if (tu.t === 'e') {
@@ -22238,9 +22387,10 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         }
     }
 
-    // Rótulo heráldico da área com contagem de alvos
+    // Rótulo heráldico da área com geometria D&D 5e e contagem de alvos
     var aoeMeters = formatHexDistanceMeters(radiusHex);
-    var aoeLabel = '◈ Área ' + aoeMeters + ' (' + radiusHex + 'h)';
+    var shapeLabelPt = (aoeShape === 'cone') ? '◢ Cone ' : ((aoeShape === 'line') ? '═ Linha ' : ((aoeShape === 'cube') ? '❖ Cubo ' : '◈ Esfera '));
+    var aoeLabel = shapeLabelPt + aoeMeters + ' (' + radiusHex + 'h)';
     if (enemiesInAoe > 0) {
         aoeLabel += ' · 🎯 ' + enemiesInAoe + (enemiesInAoe === 1 ? ' alvo' : ' alvos');
     }
@@ -22249,7 +22399,6 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
     }
     var saveObj = skill.save || (skill.saveDc ? { dc: skill.saveDc, ability: skill.saveAbility } : null);
     if (saveObj) {
-        var pCaster = currentState.order && currentState.order[currentState.p_idx];
         var dcVal = saveObj.dc || (typeof simSpellSaveDc === 'function' && pCaster ? simSpellSaveDc(pCaster) : 13);
         var abVal = String(saveObj.ability || 'DEX').toUpperCase();
         aoeLabel += ' | CD ' + dcVal + ' ' + abVal;
@@ -22257,7 +22406,7 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
     var lblW = Math.max(96, aoeLabel.length * 6.0 + 20);
     var lblH = 19;
     var lblX = Math.round(pCenter.cx - lblW / 2);
-    var lblY = Math.round(pCenter.cy - radiusPx - 12);
+    var lblY = Math.round(pCenter.cy - (aoeShape === 'cone' || aoeShape === 'line' ? 38 : (radiusPx + 12)));
 
     svgParts.push('<g class="hex-aoe-badge">' +
         '<rect x="' + lblX + '" y="' + lblY + '" width="' + lblW + '" height="' + lblH + '" rx="4" class="hex-aoe-badge-bg" />' +
@@ -22502,20 +22651,28 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
 
     var pUnit = currentState.order[currentState.p_idx];
     var moveLeft = pUnit ? (pUnit.movement_left || 0) : 6;
+    var ignoreClimb = !!(pUnit && (pUnit.has_lands_stride || ((pUnit.feats || []).indexOf('athlete') >= 0)));
     var difficultMap = simBuildDifficultTerrainLookup(currentState);
+    var elevMap = simBuildElevationsLookup(currentState);
 
     var svgParts = [];
     var totalCostHexes = 0;
     var provokedAoOList = [];
     var crossesHazard = false;
 
-    // Computa cada passo da rota e verifica Ataques de Oportunidade canônicos (PHB p. 195)
+    // Computa cada passo da rota (incluindo custo de subida PHB p. 182) e verifica Ataques de Oportunidade (PHB p. 195)
     for (var i = 0; i < line.length - 1; i++) {
         var curStep = line[i];
         var nextStep = line[i + 1];
+        var curKey = curStep.col + ',' + curStep.row;
         var nextKey = nextStep.col + ',' + nextStep.row;
         var dtStep = difficultMap[nextKey];
         var stepCost = dtStep ? 2 : 1;
+        if (!ignoreClimb) {
+            var curEl = elevMap[curKey] ? (parseInt(elevMap[curKey].elevation, 10) || 0) : 0;
+            var nxtEl = elevMap[nextKey] ? (parseInt(elevMap[nextKey].elevation, 10) || 0) : 0;
+            if (nxtEl > curEl) stepCost += (nxtEl - curEl);
+        }
         if (dtStep && dtStep.hazard_kind) crossesHazard = true;
         totalCostHexes += stepCost;
 
@@ -22578,7 +22735,8 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
         destText = '▲ Perigo na Rota · ' + totalM + ' · Restam ' + remainingMeters;
     }
 
-    // D&D 5e (PHB p. 196 / DMG p. 251 / Solasta / BG3): Avalia Cobertura e Flanqueamento no destino
+    // D&D 5e (PHB p. 196 / DMG p. 251 / Solasta / BG3): Avalia Cobertura, Elevação e Flanqueamento no destino
+    var destElev = simGetHexElevation(currentState, dest.col, dest.row);
     var destCoverBonus = 0;
     var destFlanksEnemy = null;
     if (currentState && Array.isArray(currentState.order)) {
@@ -22606,6 +22764,8 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
 
     if (destFlanksEnemy) {
         destText += ' · ▲ Flanqueia ' + destFlanksEnemy;
+    } else if (destElev > 0) {
+        destText += ' · ⛰️ Terreno Elevado (+2 Atq Dist.)';
     } else if (destCoverBonus === 5) {
         destText += ' · ⛨ ¾ Cob (+5 CA)';
     } else if (destCoverBonus === 2) {
@@ -22635,6 +22795,16 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
             '<rect x="' + flkX + '" y="' + flkY + '" width="' + flkW + '" height="' + flkH + '" rx="3" fill="rgba(27,77,36,0.92)" stroke="#2ecc71" stroke-width="1" />' +
             '<text x="' + destCenter.cx + '" y="' + (flkY + 8) + '" class="hex-dest-cover-text" fill="#c6f6d5">' + escHtml(flkLabel) + '</text>' +
             '</g>');
+    } else if (destElev > 0) {
+        var elvLabel = '⛰️ +' + (destElev === 2 ? '3,0m' : '1,5m') + ' (+2 ATQ)';
+        var elvW = 86;
+        var elvH = 14;
+        var elvX = Math.round(destCenter.cx - elvW / 2);
+        var elvY = Math.round(destCenter.cy + 13);
+        svgParts.push('<g class="hex-dest-cover-group">' +
+            '<rect x="' + elvX + '" y="' + elvY + '" width="' + elvW + '" height="' + elvH + '" rx="3" fill="rgba(42,32,12,0.94)" stroke="#fbbf24" stroke-width="1" />' +
+            '<text x="' + destCenter.cx + '" y="' + (elvY + 8) + '" class="hex-dest-cover-text" fill="#fde68a">' + escHtml(elvLabel) + '</text>' +
+            '</g>');
     } else if (destCoverBonus > 0) {
         var covLabel = '⛨ +' + destCoverBonus + ' CA';
         var covW = 46;
@@ -22655,22 +22825,23 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
  * - Meia Cobertura (+2 CA / +2 TR Dex): criatura interveniente ou obstáculo baixo.
  * - Três Quartos (+5 CA / +5 TR Dex): grande barreira ou fresta de flecha.
  * - Cobertura Total: obstáculo opaco bloqueia inteiramente a linha de visão.
+ * Retorna também as coordenadas e o nome da barreira/criatura bloqueadora para feedback tático.
  */
 function simComputeCover(state, attacker, target) {
     if (!attacker || !target || !attacker.pos || !target.pos) {
-        return { cover: 'none', bonus: 0, blocksLoS: false };
+        return { cover: 'none', bonus: 0, blocksLoS: false, blockerName: null, blockerCol: null, blockerRow: null };
     }
     var c1 = attacker.pos.col, r1 = attacker.pos.row;
     var c2 = target.pos.col, r2 = target.pos.row;
     if (c1 == null || r1 == null || c2 == null || r2 == null) {
-        return { cover: 'none', bonus: 0, blocksLoS: false };
+        return { cover: 'none', bonus: 0, blocksLoS: false, blockerName: null, blockerCol: null, blockerRow: null };
     }
     if (typeof hexDistance === 'function' && hexDistance(c1, r1, c2, r2) <= 1) {
-        return { cover: 'none', bonus: 0, blocksLoS: false };
+        return { cover: 'none', bonus: 0, blocksLoS: false, blockerName: null, blockerCol: null, blockerRow: null };
     }
     var line = (typeof hexLine === 'function') ? hexLine(c1, r1, c2, r2) : [];
     if (!line || line.length <= 2) {
-        return { cover: 'none', bonus: 0, blocksLoS: false };
+        return { cover: 'none', bonus: 0, blocksLoS: false, blockerName: null, blockerCol: null, blockerRow: null };
     }
     var intermediates = line.slice(1, -1);
     var interMap = {};
@@ -22678,8 +22849,15 @@ function simComputeCover(state, attacker, target) {
         interMap[intermediates[ii].col + ',' + intermediates[ii].row] = true;
     }
 
+    var feats = (attacker && attacker.feats) || [];
+    var ignoresPartialCover = !!(attacker && (attacker.ignores_cover || feats.indexOf('sharpshooter') >= 0 || feats.indexOf('spell_sniper') >= 0));
+
     var bestCover = 'none';
     var bestBonus = 0;
+    var blockerName = null;
+    var blockerCol = null;
+    var blockerRow = null;
+    var blockerKind = null;
 
     // 1. Obstáculos físicos no trajeto
     var obstacles = (state && state.battlefield && state.battlefield.obstacles) || [];
@@ -22690,31 +22868,59 @@ function simComputeCover(state, attacker, target) {
         if (interMap[oKey]) {
             var cov = obs.cover || 'half';
             if (cov === 'total') {
-                return { cover: 'total', bonus: 0, blocksLoS: true };
-            } else if (cov === 'three_quarters' && bestBonus < 5) {
+                return {
+                    cover: 'total',
+                    bonus: 0,
+                    blocksLoS: true,
+                    blockerName: obs.name || 'Obstáculo Opaco',
+                    blockerCol: obs.col,
+                    blockerRow: obs.row,
+                    blockerKind: 'obstacle'
+                };
+            } else if (!ignoresPartialCover && cov === 'three_quarters' && bestBonus < 5) {
                 bestCover = 'three_quarters';
                 bestBonus = 5;
-            } else if (cov === 'half' && bestBonus < 2) {
+                blockerName = obs.name || 'Barreira Pesada';
+                blockerCol = obs.col;
+                blockerRow = obs.row;
+                blockerKind = 'obstacle';
+            } else if (!ignoresPartialCover && cov === 'half' && bestBonus < 2) {
                 bestCover = 'half';
                 bestBonus = 2;
+                blockerName = obs.name || 'Obstáculo Baixo';
+                blockerCol = obs.col;
+                blockerRow = obs.row;
+                blockerKind = 'obstacle';
             }
         }
     }
 
     // 2. Criaturas intermediárias vivas (PHB p. 196: criaturas no caminho concedem Meia Cobertura)
-    if (bestBonus < 2 && state && state.order) {
+    if (!ignoresPartialCover && bestBonus < 2 && state && state.order) {
         for (var ci = 0; ci < state.order.length; ci++) {
             var c = state.order[ci];
             if (!c || c === attacker || c === target || !c.alive || c.isDead || (c.hp != null && c.hp <= 0)) continue;
             if (c.pos && interMap[c.pos.col + ',' + c.pos.row]) {
                 bestCover = 'half';
                 bestBonus = 2;
+                blockerName = c.n || 'Criatura no caminho';
+                blockerCol = c.pos.col;
+                blockerRow = c.pos.row;
+                blockerKind = 'unit';
                 break;
             }
         }
     }
 
-    return { cover: bestCover, bonus: bestBonus, blocksLoS: false };
+    return {
+        cover: bestCover,
+        bonus: bestBonus,
+        blocksLoS: false,
+        blockerName: blockerName,
+        blockerCol: blockerCol,
+        blockerRow: blockerRow,
+        blockerKind: blockerKind
+    };
 }
 
 /**
@@ -22854,6 +23060,24 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     var isFlanked = !!(flankingInfo && flankingInfo.flanking);
     var canFlank = !isShove && !isOutOfReach && !isTotalCover && isFlanked;
 
+    // Avalia Terreno Elevado / Terreno Baixo (DMG p. 251) e hexágono bloqueador de Cobertura (PHB p. 196)
+    var isRangedAim = !isShove && (reachLimit > 1 || distHex > 1);
+    var elevDelta = 0;
+    if (isRangedAim && currentState && typeof simGetHexElevation === 'function') {
+        var fromElev = simGetHexElevation(currentState, fromCol, fromRow);
+        var toElev = simGetHexElevation(currentState, toCol, toRow);
+        if (fromElev > toElev) elevDelta = 2;
+        else if (fromElev < toElev) elevDelta = -2;
+    }
+    var coverEval = null;
+    if (!isShove && currentState && typeof simComputeCover === 'function') {
+        coverEval = simComputeCover(
+            currentState,
+            { pos: { col: fromCol, row: fromRow } },
+            { pos: { col: toCol, row: toRow } }
+        );
+    }
+
     var shoveDest = null;
     if (isShove && !isOutOfReach && !isTotalCover && typeof simComputeShoveDestination === 'function') {
         shoveDest = simComputeShoveDestination(fromCol, fromRow, toCol, toRow, currentState);
@@ -22924,7 +23148,7 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
     } else if (isOutOfReach) {
         badgeText = '✕ Fora de Alcance (' + distMeters + ' > ' + formatHexDistanceMeters(reachLimit) + ')';
     } else if (isTotalCover) {
-        badgeText = '✕ Bloqueado: Cobertura Total (PHB p. 196)';
+        badgeText = '✕ Bloqueado: Cobertura Total' + (coverEval && coverEval.blockerName ? ' (' + coverEval.blockerName + ')' : ' (PHB p. 196)');
     } else {
         if (canFlank) {
             badgeText += ' | ▲ Flanqueado (Vantagem D&D 5e)';
@@ -22933,18 +23157,36 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
         } else if (advState === 'disadvantage') {
             badgeText += ' | ▼ Desvantagem';
         }
+        if (elevDelta > 0) {
+            badgeText += ' | ⛰️ Terreno Elevado (+2 Atq)';
+        } else if (elevDelta < 0) {
+            badgeText += ' | ▼ Terreno Baixo (-2 Atq)';
+        }
         if (hasCover && coverText) {
             badgeText += ' | ' + coverText;
         }
     }
 
     var textLen = badgeText.length;
-    var badgeW = Math.max(74, textLen * 6.5 + 18);
+    var badgeW = Math.max(74, textLen * 6.2 + 18);
     var badgeH = 18;
     var badgeX = Math.round(midX - badgeW / 2);
     var badgeY = Math.round(midY - badgeH / 2);
 
     var svgHtml = '<path d="' + pathD + '" class="' + pathCls + '" marker-end="url(#' + markerId + ')" />';
+
+    // Destaque visual no hexágono bloqueador que fornece Cobertura na linha de tiro (PHB p. 196)
+    if (coverEval && coverEval.cover !== 'none' && coverEval.blockerCol != null && coverEval.blockerRow != null) {
+        var pBlk = hexCenter(coverEval.blockerCol, coverEval.blockerRow);
+        var blkStroke = (coverEval.cover === 'total') ? '#ef4444' : ((coverEval.cover === 'three_quarters') ? '#fbbf24' : '#60a5fa');
+        var blkLabel = (coverEval.cover === 'total') ? '⛔ BLOQUEIA VISÃO' : ('⛨ +' + coverEval.bonus + ' CA (' + (coverEval.blockerName || 'Cobertura') + ')');
+        var blkW = Math.max(66, blkLabel.length * 5.2 + 12);
+        svgHtml += '<circle cx="' + pBlk.cx + '" cy="' + pBlk.cy + '" r="22" fill="none" stroke="' + blkStroke + '" stroke-width="2" stroke-dasharray="4 3" />';
+        svgHtml += '<g class="hex-cover-blocker-badge">' +
+            '<rect x="' + Math.round(pBlk.cx - blkW / 2) + '" y="' + Math.round(pBlk.cy - 34) + '" width="' + Math.round(blkW) + '" height="14" rx="4" fill="rgba(15,23,42,0.92)" stroke="' + blkStroke + '" stroke-width="1" />' +
+            '<text x="' + pBlk.cx + '" y="' + Math.round(pBlk.cy - 26) + '" fill="#e2e8f0" font-family="Cinzel, serif" font-size="7.5px" font-weight="700" text-anchor="middle" dominant-baseline="central">' + escHtml(blkLabel) + '</text>' +
+            '</g>';
+    }
 
     if (canFlank && flankingInfo.partner && flankingInfo.partner.pos) {
         var pPartner = hexCenter(flankingInfo.partner.pos.col, flankingInfo.partner.pos.row);
@@ -23004,9 +23246,20 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
 
     layer.innerHTML = svgHtml;
 
-    // Se a ação ou magia selecionada tiver área de efeito (ex.: Bola de Fogo), projeta o círculo
+    // Se a ação ou magia selecionada tiver área de efeito (Esfera, Cone, Linha ou Cubo D&D 5e), projeta a geometria
     var curSkill = options.skill || _pendingSkill;
-    if (curSkill && (curSkill.fireball || curSkill.aoeRadius || curSkill.isAoe || curSkill.aoe || curSkill.coneOfCold || curSkill.spiritGuardians)) {
+    var curSkNameLow = curSkill ? String(curSkill.n || '').toLowerCase() : '';
+    var isCurSkillAoe = !!(curSkill && (
+        curSkill.fireball || curSkill.aoeRadius || curSkill.radiusHexes ||
+        curSkill.isAoe || curSkill.aoe || curSkill.multiTarget ||
+        curSkill.coneOfCold || curSkill.spiritGuardians || curSkill.sleepPool ||
+        curSkill.shape === 'cone' || curSkill.shape === 'line' || curSkill.shape === 'cube' ||
+        curSkNameLow.indexOf('mãos flamejantes') >= 0 || curSkNameLow.indexOf('sopro') >= 0 ||
+        curSkNameLow.indexOf('onda de trovão') >= 0 || curSkNameLow.indexOf('relâmpago') >= 0 ||
+        curSkNameLow.indexOf('fogo feérico') >= 0 || curSkNameLow.indexOf('despedaçar') >= 0 ||
+        curSkNameLow.indexOf('crescimento espinhoso') >= 0 || curSkNameLow.indexOf('sono') >= 0
+    ));
+    if (isCurSkillAoe) {
         drawTacticalAoePreview(toCol, toRow, curSkill);
     } else {
         clearTacticalAoePreview();
@@ -23541,6 +23794,68 @@ function getBiomeElevations(biome, cols, rows) {
     return elevations;
 }
 
+/**
+ * PHB p. 190 (Terreno Difícil) + DMG p. 110-112 (Perigos Ambientais):
+ * Gera hexágonos iniciais de Terreno Difícil e Perigos Táticos no centro da arena.
+ */
+function getBiomeDifficultTerrain(biome, cols, rows) {
+    cols = cols || HEX_COLS_DEFAULT;
+    rows = rows || HEX_ROWS_DEFAULT;
+    var b = String(biome || 'forest').toLowerCase();
+    var dtPrimary, dtSecondary, dtHazard;
+
+    if (b.indexOf('swamp') >= 0 || b.indexOf('pantano') >= 0 || b.indexOf('pântano') >= 0) {
+        dtPrimary = { name: 'Lamaçal Profundo', cost: 2, kind: 'mud', desc: 'Terreno Difícil (PHB p. 190): cada 1,5m custa +1,5m extra de movimento.' };
+        dtSecondary = { name: 'Charco de Raízes', cost: 2, kind: 'roots', desc: 'Terreno Difícil (PHB p. 190): água turva e raízes submersas.' };
+        dtHazard = { name: 'Espinheiros Venenosos', cost: 2, kind: 'thorns', hazard_kind: 'damage', damage_dice: '1d4', damage_type: 'piercing', symbol: '▲', desc: 'Perigo Ambiental (DMG p. 110): 1d4 perfurante ao entrar + Terreno Difícil (3m).' };
+    } else if (b.indexOf('cave') >= 0 || b.indexOf('caverna') >= 0 || b.indexOf('dungeon') >= 0 || b.indexOf('masmorra') >= 0 || b.indexOf('crypt') >= 0 || b.indexOf('ruins') >= 0 || b.indexOf('ruinas') >= 0) {
+        dtPrimary = { name: 'Escombros de Pedra', cost: 2, kind: 'rubble', desc: 'Terreno Difícil (PHB p. 190): lajes quebradas exigem o dobro de movimento.' };
+        dtSecondary = { name: 'Entulho Antigo', cost: 2, kind: 'rubble', desc: 'Terreno Difícil (PHB p. 190): blocos desmoronados no piso.' };
+        dtHazard = { name: 'Estrepes Enferrujados', cost: 2, kind: 'spikes', hazard_kind: 'damage', damage_dice: '1d4', damage_type: 'piercing', symbol: '▲', desc: 'Perigo de Masmorra (PHB p. 151): 1d4 perfurante ao pisar + Terreno Difícil (3m).' };
+    } else if (b.indexOf('snow') >= 0 || b.indexOf('ice') >= 0 || b.indexOf('gelo') >= 0 || b.indexOf('mountain') >= 0 || b.indexOf('montanha') >= 0) {
+        dtPrimary = { name: 'Cascalho Íngreme', cost: 2, kind: 'rubble', desc: 'Terreno Difícil (PHB p. 190): pedras soltas reduzem o avanço.' };
+        dtSecondary = { name: 'Neve Fofa Profunda', cost: 2, kind: 'ice', desc: 'Terreno Difícil (PHB p. 190): neve acumulada exige esforço dobrado.' };
+        dtHazard = { name: 'Gelo Escorregadio', cost: 2, kind: 'ice', hazard_kind: 'save_prone', save_dc: 10, save_ability: 'dex', symbol: '❄', desc: 'Gelo Escorregadio (DMG p. 110): exige TR de Destreza CD 10 ao entrar ou cai Prostrado.' };
+    } else {
+        dtPrimary = { name: 'Raízes Emaranhadas', cost: 2, kind: 'roots', desc: 'Terreno Difícil (PHB p. 190): raízes densas custam 3m (2 hexes) para atravessar.' };
+        dtSecondary = { name: 'Mata Fechada', cost: 2, kind: 'roots', desc: 'Terreno Difícil (PHB p. 190): vegetação rasteira fechada.' };
+        dtHazard = { name: 'Sarça de Espinhos', cost: 2, kind: 'thorns', hazard_kind: 'damage', damage_dice: '1d4', damage_type: 'piercing', symbol: '▲', desc: 'Sarça Espinhosa (DMG p. 110): causa 1d4 perfurante ao entrar + Terreno Difícil (3m).' };
+    }
+
+    var rawCoords = (cols >= 12 && rows >= 10) ? [
+        [5, 5, dtPrimary],
+        [9, 5, dtSecondary],
+        [7, 6, dtHazard],
+        [4, 7, dtSecondary],
+        [10, 7, dtPrimary]
+    ] : [
+        [3, 4, dtPrimary],
+        [4, 5, dtHazard]
+    ];
+
+    var out = [];
+    for (var j = 0; j < rawCoords.length; j++) {
+        var dc = rawCoords[j][0], dr = rawCoords[j][1], dspec = rawCoords[j][2];
+        if (dc >= 0 && dc < cols && dr >= 0 && dr < rows) {
+            out.push({
+                col: dc,
+                row: dr,
+                name: dspec.name,
+                cost: dspec.cost || 2,
+                kind: dspec.kind,
+                hazard_kind: dspec.hazard_kind || null,
+                damage_dice: dspec.damage_dice || null,
+                damage_type: dspec.damage_type || null,
+                save_dc: dspec.save_dc || null,
+                save_ability: dspec.save_ability || null,
+                symbol: dspec.symbol || null,
+                desc: dspec.desc
+            });
+        }
+    }
+    return out;
+}
+
 function getProceduralHexObstacle(col, row, biome) {
     var bStr = String(biome || 'forest').toLowerCase();
     var seed = 0;
@@ -23884,6 +24199,23 @@ function ensureProceduralBattlefield(s) {
     if (s.battlefield.elevations.length === 0 && !s.battlefield._elevationsInitialized) {
         s.battlefield._elevationsInitialized = true;
         s.battlefield.elevations = getBiomeElevations(biomeStr, s.battlefield.cols, s.battlefield.rows);
+        initializedBase = true;
+    }
+    if (s.battlefield.difficult_terrain.length === 0 && !s.battlefield._difficultInitialized) {
+        s.battlefield._difficultInitialized = true;
+        var baseDt = getBiomeDifficultTerrain(biomeStr, s.battlefield.cols, s.battlefield.rows);
+        var curObsLookup = {};
+        for (var oi0 = 0; oi0 < s.battlefield.obstacles.length; oi0++) {
+            var ob0 = s.battlefield.obstacles[oi0];
+            if (ob0) curObsLookup[ob0.col + ',' + ob0.row] = true;
+        }
+        for (var dti = 0; dti < baseDt.length; dti++) {
+            var bdt = baseDt[dti];
+            var bdtKey = bdt.col + ',' + bdt.row;
+            if (!unitOccupiedMap[bdtKey] && !curObsLookup[bdtKey]) {
+                s.battlefield.difficult_terrain.push(bdt);
+            }
+        }
         initializedBase = true;
     }
 
@@ -26337,6 +26669,61 @@ function buildHexObstacleSvg(cx, cy, obsTile, curBiome, isDim) {
     return svg;
 }
 
+/**
+ * Renderiza Terreno Difícil (PHB p. 190) e Perigos Ambientais (DMG p. 110-112) em estilo vetorial 2.5D.
+ */
+function buildHexDifficultTerrain25DSvg(cx, cy, dtTile, curBiome, isDim) {
+    if (!dtTile) return '';
+    var op = isDim ? '0.45' : '0.92';
+    var nameLow = String(dtTile.name || '').toLowerCase();
+    var kind = dtTile.kind || '';
+    var svg = '<g class="hex-difficult-25d-group" opacity="' + op + '" pointer-events="none">';
+
+    if (dtTile.hazard_kind === 'damage') {
+        // Espinheiros / Estrepes / Sarça Cortante 2.5D
+        svg += '<ellipse cx="' + cx + '" cy="' + (cy - 2) + '" rx="17" ry="9" fill="rgba(127, 29, 29, 0.28)" stroke="rgba(239, 68, 68, 0.45)" stroke-width="0.9" stroke-dasharray="3 2" />';
+        svg += '<path d="M ' + (cx - 12) + ' ' + (cy + 2) + ' Q ' + (cx - 4) + ' ' + (cy - 9) + ' ' + (cx + 11) + ' ' + (cy - 1) + '" stroke="#5c2d16" stroke-width="2" fill="none" />';
+        svg += '<path d="M ' + (cx - 10) + ' ' + (cy - 5) + ' Q ' + (cx + 3) + ' ' + (cy + 4) + ' ' + (cx + 12) + ' ' + (cy - 6) + '" stroke="#4a2511" stroke-width="1.8" fill="none" />';
+        // Pontas de espinhos/estrepes carmesim
+        svg += '<polygon points="' + (cx - 7) + ',' + (cy - 2) + ' ' + (cx - 5) + ',' + (cy - 9) + ' ' + (cx - 3) + ',' + (cy - 2) + '" fill="#f87171" stroke="#7f1d1d" stroke-width="0.6" />';
+        svg += '<polygon points="' + cx + ',' + (cy - 1) + ' ' + (cx + 2) + ',' + (cy - 8) + ' ' + (cx + 4) + ',' + (cy - 1) + '" fill="#f87171" stroke="#7f1d1d" stroke-width="0.6" />';
+        svg += '<polygon points="' + (cx + 6) + ',' + (cy - 3) + ' ' + (cx + 8) + ',' + (cy - 9) + ' ' + (cx + 10) + ',' + (cy - 3) + '" fill="#fca5a5" stroke="#7f1d1d" stroke-width="0.6" />';
+        var hSym = dtTile.symbol || '▲';
+        var hDmg = dtTile.damage_dice || '1d4';
+        svg += '<text x="' + cx + '" y="' + (cy + 2) + '" class="hex-hazard-badge">' + hSym + ' ' + hDmg + '</text>';
+        svg += '<text x="' + cx + '" y="' + (cy + 15) + '" class="hex-diff-label">◆ 3m</text>';
+    } else if (dtTile.hazard_kind === 'save_prone') {
+        // Gelo Escorregadio 2.5D (DMG p. 110)
+        svg += '<polygon points="' + (cx - 15) + ',' + (cy - 2) + ' ' + (cx - 5) + ',' + (cy - 9) + ' ' + (cx + 11) + ',' + (cy - 7) + ' ' + (cx + 15) + ',' + (cy + 1) + ' ' + (cx + 3) + ',' + (cy + 7) + ' ' + (cx - 11) + ',' + (cy + 5) + '" fill="rgba(56, 189, 248, 0.25)" stroke="#7dd3fc" stroke-width="1" />';
+        svg += '<line x1="' + (cx - 9) + '" y1="' + (cy - 4) + '" x2="' + (cx + 8) + '" y2="' + (cy - 1) + '" stroke="rgba(224, 242, 254, 0.75)" stroke-width="1.1" />';
+        var hSym2 = dtTile.symbol || '❄';
+        var hDc = dtTile.save_dc || 10;
+        svg += '<text x="' + cx + '" y="' + (cy + 2) + '" class="hex-hazard-badge">' + hSym2 + ' CD ' + hDc + ' DES</text>';
+        svg += '<text x="' + cx + '" y="' + (cy + 15) + '" class="hex-diff-label">◆ 3m</text>';
+    } else if (kind === 'mud' || nameLow.indexOf('lama') >= 0 || nameLow.indexOf('charco') >= 0 || nameLow.indexOf('água') >= 0) {
+        // Lamaçal / Charco 2.5D
+        svg += '<ellipse cx="' + cx + '" cy="' + (cy - 2) + '" rx="16" ry="8.5" fill="rgba(58, 40, 22, 0.55)" stroke="rgba(161, 98, 7, 0.5)" stroke-width="1" />';
+        svg += '<ellipse cx="' + (cx - 4) + '" cy="' + (cy - 3) + '" rx="7" ry="3.5" fill="none" stroke="rgba(217, 119, 6, 0.45)" stroke-width="0.8" />';
+        svg += '<text x="' + cx + '" y="' + (cy + 4) + '" class="hex-diff-label">◆ 3m</text>';
+    } else if (kind === 'rubble' || nameLow.indexOf('escombro') >= 0 || nameLow.indexOf('entulho') >= 0 || nameLow.indexOf('pedra') >= 0 || nameLow.indexOf('cascalho') >= 0) {
+        // Escombros de Pedra / Cascalho 2.5D
+        svg += '<polygon points="' + (cx - 12) + ',' + (cy - 1) + ' ' + (cx - 8) + ',' + (cy - 7) + ' ' + (cx - 2) + ',' + (cy - 5) + ' ' + (cx - 3) + ',' + (cy + 1) + '" fill="#78716c" stroke="#292524" stroke-width="0.9" />';
+        svg += '<polygon points="' + (cx + 2) + ',' + (cy - 2) + ' ' + (cx + 6) + ',' + (cy - 8) + ' ' + (cx + 12) + ',' + (cy - 4) + ' ' + (cx + 9) + ',' + (cy + 1) + '" fill="#a8a29e" stroke="#292524" stroke-width="0.9" />';
+        svg += '<circle cx="' + (cx - 1) + '" cy="' + (cy - 7) + '" r="2.2" fill="#57534e" />';
+        svg += '<text x="' + cx + '" y="' + (cy + 5) + '" class="hex-diff-label">◆ 3m</text>';
+    } else {
+        // Raízes Emaranhadas / Mata Fechada 2.5D
+        svg += '<path d="M ' + (cx - 13) + ' ' + (cy - 1) + ' Q ' + (cx - 3) + ' ' + (cy - 8) + ' ' + (cx + 12) + ' ' + (cy - 2) + '" stroke="#6b4423" stroke-width="2" fill="none" />';
+        svg += '<path d="M ' + (cx - 10) + ' ' + (cy - 6) + ' Q ' + (cx + 2) + ' ' + (cy + 2) + ' ' + (cx + 11) + ' ' + (cy - 6) + '" stroke="#4a2e16" stroke-width="1.6" fill="none" />';
+        svg += '<circle cx="' + (cx - 6) + '" cy="' + (cy - 5) + '" r="2.5" fill="#2d5a27" />';
+        svg += '<circle cx="' + (cx + 6) + '" cy="' + (cy - 4) + '" r="2.5" fill="#3f6212" />';
+        svg += '<text x="' + cx + '" y="' + (cy + 5) + '" class="hex-diff-label">◆ 3m</text>';
+    }
+
+    svg += '</g>';
+    return svg;
+}
+
 function buildBattlefield(s) {
     if (!s) return '';
     s.battlefield = s.battlefield || { cols: HEX_COLS_DEFAULT, rows: HEX_ROWS_DEFAULT };
@@ -26731,6 +27118,8 @@ function buildBattlefield(s) {
             var terrainName = isFogged ? (isPlayerBlinded ? 'Escuridão Total (Cego)' : 'Névoa de Guerra') : escHtml(tVar.name);
             if (!isFogged && obsTile) {
                 terrainName = escHtml((obsTile.name || 'Obstáculo Intransponível') + ' — ⛔ Intransponível (' + (obsTile.cover === 'total' ? 'Cobertura Total' : (obsTile.cover === 'three_quarters' ? '¾ Cobertura +5 CA' : '½ Cobertura +2 CA')) + ')');
+            } else if (!isFogged && dtTile) {
+                terrainName = escHtml((dtTile.name || 'Terreno Difícil') + ' — ' + (dtTile.desc || 'Terreno Difícil (custo 3m / 2 hexes — PHB p. 190)'));
             } else if (!isFogged && elevTile) {
                 terrainName = escHtml((elevTile.name || 'Relevo Tático') + ' — ' + (elevTile.desc || ''));
             }
@@ -26758,20 +27147,7 @@ function buildBattlefield(s) {
             if (obsTile && !isFogged) {
                 html += buildHexObstacleSvg(center.cx, center.cy, obsTile, curBiome, isDim);
             } else if (dtTile && !occupiedMap[hexKey] && !isFogged) {
-                // Terreno Difícil (custo 3m / 2 hexes, PHB p. 190) ou Perigo Ativo (DMG p. 110-112)
-                if (dtTile.hazard_kind === 'damage') {
-                    var hSym = dtTile.symbol || '▲';
-                    var hDmg = dtTile.damage_dice || '1d4';
-                    html += '<text x="' + center.cx + '" y="' + (center.cy + 2) + '" class="hex-hazard-badge">' + hSym + ' ' + hDmg + '</text>';
-                    html += '<text x="' + center.cx + '" y="' + (center.cy + 15) + '" class="hex-diff-label">◆ 3m</text>';
-                } else if (dtTile.hazard_kind === 'save_prone') {
-                    var hSym2 = dtTile.symbol || '❄';
-                    var hDc = dtTile.save_dc || 10;
-                    html += '<text x="' + center.cx + '" y="' + (center.cy + 2) + '" class="hex-hazard-badge">' + hSym2 + ' CD ' + hDc + ' DES</text>';
-                    html += '<text x="' + center.cx + '" y="' + (center.cy + 15) + '" class="hex-diff-label">◆ 3m</text>';
-                } else {
-                    html += '<text x="' + center.cx + '" y="' + (center.cy + 3) + '" class="hex-diff-label">◆ 3m</text>';
-                }
+                html += buildHexDifficultTerrain25DSvg(center.cx, center.cy, dtTile, curBiome, isDim);
             }
 
             // Se for hexágono alcançável e não estiver sob névoa de guerra, exibe o custo de deslocamento com prefixo tático
@@ -37141,6 +37517,9 @@ function showTargetConfirm(tgtIdx) {
     if (!reachInfo.isRanged && typeof simCheckFlanking === 'function' && s && s.order) {
         isFlanked = !!simCheckFlanking(p, u, s.order);
     }
+    var elevMod = (typeof simCheckElevationTacticalModifier === 'function')
+        ? simCheckElevationTacticalModifier(s, p, u, !!reachInfo.isRanged)
+        : { bonus: 0, label: null };
     var advBadge = '';
     if (isFlanked) {
         advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Flanqueamento D&D 5e (DMG p. 251): Aliado em posição oposta">▲ FLANQUEADO (VANT)</span>';
@@ -37148,6 +37527,11 @@ function showTargetConfirm(tgtIdx) {
         advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;">▲ VANTAGEM</span>';
     } else if (advMode === 'disadvantage') {
         advBadge = ' <span class="badge dis" style="background:#4a1515;color:#fecaca;border:1px solid #e74c3c;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;">▼ DESVANTAGEM</span>';
+    }
+    if (elevMod.bonus > 0) {
+        advBadge += ' <span class="badge adv" style="background:#1b3a4d;color:#bee3f8;border:1px solid #63b3ed;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Terreno Elevado (+2 no ataque à distância)">⛰️ +' + elevMod.bonus + ' ELEV.</span>';
+    } else if (elevMod.bonus < 0) {
+        advBadge += ' <span class="badge dis" style="background:#4a2515;color:#fbd38d;border:1px solid #ed8936;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Terreno Baixo (-2 no ataque à distância)">▼ ' + elevMod.bonus + ' ELEV.</span>';
     }
 
     var coverInfo = (typeof simComputeCover === 'function') ? simComputeCover(s, p, u) : { cover: 'none', bonus: 0, blocksLoS: false };
@@ -37229,7 +37613,8 @@ function showTargetConfirm(tgtIdx) {
         if (coverInfo.bonus > 0) {
             acDisplay += ' <span style="font-size:10px;opacity:0.85;">(' + u.ac + ' + ' + coverInfo.bonus + ' ' + (coverInfo.cover === 'half' ? '½ Cobertura' : '¾ Cobertura') + ')</span>';
         }
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + p.atk + '</span> <span class="tcc-vs">vs</span> ' + acDisplay + '</span></div>';
+        var effAtkVal = (p.atk | 0) + (elevMod.bonus | 0);
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + effAtkVal + '</span> <span class="tcc-vs">vs</span> ' + acDisplay + '</span></div>';
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:10px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
         html += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
         if (!skill && typeof simClassExtraAttacks === 'function') {
@@ -37286,15 +37671,16 @@ function showTargetConfirm(tgtIdx) {
     }
 
     if (coverInfo.cover !== 'none' && !isSaveSpell) {
+        var blockerSuffix = coverInfo.blockerName ? ' (via ' + escHtml(coverInfo.blockerName) + ')' : '';
         if (isTotalCover) {
             html += '<div class="tcc-dmg-row" style="background:rgba(180,40,30,0.22);border:1px solid rgba(255,100,100,0.45);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-                '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">✕ <strong>Cobertura Total (PHB p. 196):</strong> Obstáculo opaco bloqueia inteiramente a linha de visão até o alvo.</span>' +
+                '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">✕ <strong>Cobertura Total' + blockerSuffix + ' (PHB p. 196):</strong> Obstáculo opaco bloqueia inteiramente a linha de visão até o alvo.</span>' +
                 '</div>';
         } else {
             var covLbl = coverInfo.cover === 'half' ? 'Meia Cobertura (+2 CA / TR Dex)' : 'Três Quartos de Cobertura (+5 CA / TR Dex)';
             var covDesc = coverInfo.cover === 'half' ? 'Criaturas ou obstáculos intermediários protegem o alvo (PHB p. 196).' : 'Grande barreira física ou fresta protege quase todo o corpo do alvo (PHB p. 196).';
             html += '<div class="tcc-dmg-row" style="background:rgba(40,65,95,0.25);border:1px solid rgba(90,145,210,0.35);border-radius:4px;padding:4px 8px;margin-top:4px;">' +
-                '<span style="color:#a5d8ff;font-size:11px;line-height:1.3;text-align:center;width:100%;">⛨ <strong>' + covLbl + ':</strong> ' + covDesc + '</span>' +
+                '<span style="color:#a5d8ff;font-size:11px;line-height:1.3;text-align:center;width:100%;">⛨ <strong>' + covLbl + blockerSuffix + ':</strong> ' + covDesc + '</span>' +
                 '</div>';
         }
     }
@@ -42596,7 +42982,11 @@ async function playTurn(aIdx, tIdx, opts) {
                     saveRoll = _simLuckyD20(_rsvLucky);
                 }
             }
-            saveMod = simSaveMod(target, atkSkill.save.ability);
+            var _svAb = String(atkSkill.save.ability || 'con').toLowerCase();
+            var _svCover = (_svAb === 'dex' && typeof simComputeCover === 'function')
+                ? simComputeCover(s, actor, target)
+                : { cover: 'none', bonus: 0 };
+            saveMod = simSaveMod(target, atkSkill.save.ability) + ((_svCover && _svCover.bonus) ? (_svCover.bonus | 0) : 0);
             saveTotal = saveRoll + saveMod;
             saveSuccess = saveTotal >= saveDc;
             r = null;
@@ -42605,20 +42995,31 @@ async function playTurn(aIdx, tIdx, opts) {
         }
     } else {
         // Vantagem/desvantagem via status (Surto de Ação, Ação Ardilosa,
-        // Juramento de Inimizade, Passo Oculto, Temerário, Zombaria, Prostrado, Rugido Feroz)
+        // Juramento de Inimizade, Passo Oculto, Temerário, Zombaria, Prostrado, Rugido Feroz, Flanqueamento)
         var advMode = _simAttackAdvState(actor, target, atkSkill);
         var d20Pack = _simRollD20WithAdv(advMode, _simIsLucky(actor));  // C1.5 #90
         r = d20Pack.r;
+        var _atkReach = (typeof simGetAttackReach === 'function') ? simGetAttackReach(actor, atkSkill) : { reach: 1, isRanged: false };
+        var _atkFlanked = (!(_atkReach && _atkReach.isRanged) && typeof simCheckFlanking === 'function' && s && s.order)
+            ? !!simCheckFlanking(actor, target, s.order)
+            : false;
+        var _atkCover = (typeof simComputeCover === 'function')
+            ? simComputeCover(s, actor, target)
+            : { cover: 'none', bonus: 0 };
+        var _atkElev = (typeof simCheckElevationTacticalModifier === 'function')
+            ? simCheckElevationTacticalModifier(s, actor, target, !!(_atkReach && _atkReach.isRanged))
+            : { bonus: 0, label: null };
         if (advMode !== 'normal') {
-            s.log.push(actor.n + ' — d20 com ' + (advMode === 'advantage' ? 'VANTAGEM' : 'DESVANTAGEM') +
+            var _flankLogNote = (_atkFlanked && advMode === 'advantage') ? ' [Flanqueamento]' : '';
+            s.log.push(actor.n + ' — d20 com ' + (advMode === 'advantage' ? 'VANTAGEM' : 'DESVANTAGEM') + _flankLogNote +
                 ' (' + d20Pack.raw1 + ' / ' + d20Pack.raw2 + ' → ' + r + ').');
         }
         // PHB: Bênção (1d4), Inspiração do Bardo (d6/d8/d10/d12) e demais atkBonusDie
         // rolam POR ataque e somam ao d20. Rollador generalizado.
         var atkBonusPack = simRollAttackBonusDice(actor);
-        atkExtra = atkBonusPack.total + atkItem;
-        hitRes = resolveHit(actor, target, r, { atkExtra: atkExtra });
-        effAc = hitRes.effAc != null ? hitRes.effAc : getEffectiveAc(target);
+        atkExtra = atkBonusPack.total + atkItem + (_atkElev.bonus | 0);
+        hitRes = resolveHit(actor, target, r, { atkExtra: atkExtra, acExtra: (_atkCover.bonus | 0) });
+        effAc = hitRes.effAc != null ? hitRes.effAc : (getEffectiveAc(target) + (_atkCover.bonus | 0));
         // Consome flags de "próximo ataque" após uso
         _simConsumeAdvanceFlags(actor, target);
     }
@@ -42627,6 +43028,24 @@ async function playTurn(aIdx, tIdx, opts) {
     var critDmgRuleLine = (dspecForCritRule && dspecForCritRule.n != null && dspecForCritRule.d != null)
         ? ('Natural 20 no d20: role <strong>+1d' + (dspecForCritRule.d | 0) + '</strong> extra (mesmo tipo da habilidade) antes de somar o modificador (D&D 5e).')
         : 'Natural 20 no d20: na rolagem de dano, role um dado de arma a mais antes de somar o modificador (D&D 5e).';
+
+    /* Badges táticos visuais para o card de resultado da rolagem de d20 */
+    var _tacticalDiceBadgesHtml = '';
+    if (typeof _atkFlanked !== 'undefined' && _atkFlanked) {
+        _tacticalDiceBadgesHtml += '<span style="display:inline-block;background:rgba(46,204,113,0.18);border:1px solid rgba(46,204,113,0.55);color:#a8f0c6;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin:2px 3px 0 0;">⚔️ Flanqueamento (Vantagem)</span>';
+    }
+    if (typeof _atkElev !== 'undefined' && _atkElev && _atkElev.bonus !== 0) {
+        var _elCol = _atkElev.bonus > 0 ? '#90cdf4' : '#fbd38d';
+        var _elBg = _atkElev.bonus > 0 ? 'rgba(66,153,225,0.18)' : 'rgba(237,137,54,0.18)';
+        var _elBd = _atkElev.bonus > 0 ? 'rgba(99,179,237,0.55)' : 'rgba(237,137,54,0.55)';
+        _tacticalDiceBadgesHtml += '<span style="display:inline-block;background:' + _elBg + ';border:1px solid ' + _elBd + ';color:' + _elCol + ';font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin:2px 3px 0 0;">' + (_atkElev.bonus > 0 ? '⛰️ Terreno Elevado (+2 Atq)' : '▼ Terreno Baixo (-2 Atq)') + '</span>';
+    }
+    if (typeof _atkCover !== 'undefined' && _atkCover && _atkCover.bonus > 0) {
+        _tacticalDiceBadgesHtml += '<span style="display:inline-block;background:rgba(74,144,226,0.18);border:1px solid rgba(116,185,255,0.55);color:#a5d8ff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin:2px 3px 0 0;">⛨ ' + (_atkCover.cover === 'half' ? 'Meia Cobertura (+2 CA)' : '¾ Cobertura (+5 CA)') + '</span>';
+    }
+    if (_tacticalDiceBadgesHtml) {
+        _tacticalDiceBadgesHtml = '<div style="margin-top:4px;display:flex;flex-wrap:wrap;justify-content:center;gap:2px;">' + _tacticalDiceBadgesHtml + '</div>';
+    }
 
     /* OVERLAY 1: d20 vs CA, TR, ou mensagem de acerto automático */
     if (!skipDiceThisActor) {
@@ -42644,6 +43063,9 @@ async function playTurn(aIdx, tIdx, opts) {
                 simAutoHitTutorialMarkSeen(skName);
             }
         } else if (atkSkill && atkSkill.save) {
+            var _svCoverBadge = (typeof _svCover !== 'undefined' && _svCover && _svCover.bonus > 0)
+                ? '<div style="margin-top:4px;"><span style="display:inline-block;background:rgba(74,144,226,0.18);border:1px solid rgba(116,185,255,0.55);color:#a5d8ff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;">⛨ +' + _svCover.bonus + ' Cobertura no TR de Destreza (PHB p. 196)</span></div>'
+                : '';
             await new Promise(function (x) {
                 showDice(saveRoll, x, target, null, {
                     combatTarget: actor,
@@ -42652,6 +43074,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         return {
                             title: saveSuccess ? 'Passou na resistência' : 'Falhou na resistência',
                             subHtml: simFormatVsDcHTML(saveRoll, saveMod, saveTotal, saveDc, saveSuccess) +
+                                _svCoverBadge +
                                 '<div class="drl-crit-rule">' + (atkSkill.saveNegates ? (escHtml(atkSkill.n || 'Magia') + ': nenhum dano se passar na resistência.') : (escHtml(atkSkill.n || 'Bola de Fogo') + ': metade do dano se passar na resistência.')) + '</div>',
                             cls: saveSuccess ? 'miss' : 'hit'
                         };
@@ -42673,23 +43096,24 @@ async function playTurn(aIdx, tIdx, opts) {
                             return {
                                 title: 'ACERTO CRÍTICO' + _oaSuffix,
                                 subHtml: simFormatVsAcHTML(20, atkShown, hitRes.total, effAc, true) +
+                                    _tacticalDiceBadgesHtml +
                                     '<div class="drl-crit-rule">' + critDmgRuleLine + '</div>',
                                 cls: 'crit'
                             };
                         }
                         if (hitRes.hit) {
-                            return { title: 'ACERTOU' + _oaSuffix, subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, true), cls: 'hit' };
+                            return { title: 'ACERTOU' + _oaSuffix, subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, true) + _tacticalDiceBadgesHtml, cls: 'hit' };
                         }
                         if (hitRes.reason === 'falha_critica') {
                             return {
                                 title: 'FALHA CRÍTICA' + _oaSuffix,
-                                subHtml: simFormatD20EqualsHTML(1) + ' <span class="drl-miss-strong">— falha automática</span>',
+                                subHtml: simFormatD20EqualsHTML(1) + ' <span class="drl-miss-strong">— falha automática</span>' + _tacticalDiceBadgesHtml,
                                 cls: 'miss'
                             };
                         }
                         return {
                             title: '' + target.n.toUpperCase() + ' DESVIOU' + _oaSuffix,
-                            subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, false),
+                            subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, false) + _tacticalDiceBadgesHtml,
                             cls: 'miss'
                         };
                     }
