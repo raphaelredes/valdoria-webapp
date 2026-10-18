@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T21:03:52Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T21:18:03Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1862,6 +1862,11 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     background: rgba(159, 122, 234, 0.2);
     border: 1px solid rgba(183, 148, 244, 0.65);
     color: #e9d8fd;
+}
+.dmg-pill--temphp {
+    background: rgba(56, 189, 248, 0.18);
+    border: 1px solid rgba(56, 189, 248, 0.65);
+    color: #bae6fd;
 }
 .dmg-inspect-toggle-btn {
     display: inline-block;
@@ -13287,6 +13292,24 @@ canvas#vfxCanvas,
   border-color: #f97316;
   color: #fed7aa;
   box-shadow: 0 0 6px rgba(249, 115, 22, 0.45);
+}
+.token-cond-chip--petrified {
+  background: linear-gradient(180deg, #262626, #141414);
+  border-color: #a3a3a3;
+  color: #e5e5e5;
+  box-shadow: 0 0 6px rgba(163, 163, 163, 0.4);
+}
+.token-cond-chip--surprised {
+  background: linear-gradient(180deg, #2e2609, #141002);
+  border-color: #eab308;
+  color: #fef08a;
+  box-shadow: 0 0 6px rgba(234, 179, 8, 0.4);
+}
+.token-cond-chip--incapacitated {
+  background: linear-gradient(180deg, #261616, #140808);
+  border-color: #ef4444;
+  color: #fca5a5;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
 }
 .token-cond-container {
   position: absolute;
@@ -26812,6 +26835,21 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                     html: '<div class="token-cond-chip token-cond-chip--rage" title="D&D 5e (PHB p. 48): Fúria Bárbara Ativa (Resistência a Concussão, Perfuração e Cortante)">🔥 Fúria</div>',
                     name: 'Fúria'
                 });
+            } else if (stObj.petrified || stId.indexOf('petrif') >= 0 || stName.indexOf('petrificad') >= 0) {
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--petrified" title="D&D 5e (PHB p. 291): Petrificado (Incapacitado; ataques recebidos com Vantagem; resistência a todo dano; imune a veneno)">🗿 Petrificado</div>',
+                    name: 'Petrificado'
+                });
+            } else if (stId === 'surpreso' || stId === 'surprised' || stName.indexOf('surpreso') >= 0 || stName.indexOf('surprised') >= 0) {
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--surprised" title="D&D 5e (PHB p. 189): Surpreso (Não pode agir nem se mover no 1º turno; sem reações)">⚡ Surpreso</div>',
+                    name: 'Surpreso'
+                });
+            } else if (stObj.incapacitated || stId.indexOf('incapacit') >= 0 || stName.indexOf('incapacitad') >= 0) {
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--incapacitated" title="D&D 5e (PHB p. 290): Incapacitado (Não pode realizar ações nem reações)">🚫 Incapacitado</div>',
+                    name: 'Incapacitado'
+                });
             }
         }
     }
@@ -29667,6 +29705,9 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     if (reductionMeta.deflectReduction > 0) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--save">✋ Desviar Projéteis (−' + reductionMeta.deflectReduction + ')</span>');
     }
+    if (reductionMeta.tempHpAbsorbed > 0) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--temphp">🛡️ PV Temp (−' + reductionMeta.tempHpAbsorbed + ')</span>');
+    }
     if (reductionMeta.hasConcentration) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--conc">🧠 TR CON CD ' + (reductionMeta.concDc || 10) + ' (Concentração)</span>');
     }
@@ -29688,8 +29729,9 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         else if (reductionMeta.isResistant) reason = 'Resistência do alvo reduziu o dano à metade';
         else if (reductionMeta.uncannyDodge) reason = 'Esquiva Sobrenatural reduziu o dano à metade';
         else if (reductionMeta.heavyArmorMaster > 0) reason = 'Mestre de Armadura Pesada reduziu em ' + reductionMeta.heavyArmorMaster;
-        else if (reductionMeta.halfDmg) reason = 'Reflexos rápidos reduziram o dano à metade';
         else if (reductionMeta.deflectReduction > 0) reason = 'Desviar Projéteis absorveu ' + reductionMeta.deflectReduction + ' de dano';
+        else if (reductionMeta.tempHpAbsorbed > 0) reason = 'PV temporários absorveram ' + reductionMeta.tempHpAbsorbed + ' de dano';
+        else if (reductionMeta.halfDmg) reason = 'Reflexos rápidos reduziram o dano à metade';
         else reason = 'O alvo reduziu parte do dano';
 
         var reductionLine = document.createElement('div');
@@ -49275,6 +49317,9 @@ async function __combatAnimateOneEvent(ev) {
                         saveNegates: !!ev.saveNegates,
                         heavyArmorMaster: ev.heavyArmorMasterReduced | 0,
                         uncannyDodge: !!ev.uncannyDodge,
+                        rageResisted: !!(ev.rageResisted || ev.bearTotemResist),
+                        deflectReduction: (ev.deflectReduction || (ev.deflectMissiles && ev.deflectMissiles.reduced) || 0) | 0,
+                        tempHpAbsorbed: (ev.tempHpAbsorbed != null ? ev.tempHpAbsorbed : (tUnit && tUnit.tempHp ? Math.min(tUnit.tempHp, (ev.dmgTotal || 0) - Math.max(0, (ev.oldHp || 0) - (ev.newHp || 0))) : 0)) | 0,
                         hasConcentration: !!(tUnit && tUnit.se && tUnit.se.some(function (st) { return st && st.concentration; })),
                         concDc: Math.max(10, Math.floor((ev.dmgTotal || 0) / 2))
                     }
@@ -49401,6 +49446,22 @@ async function __combatAnimateOneEvent(ev) {
             }
             if (ev.divineSmite && ev.smiteTotal) {
                 spawnSkillImpactLabel(elT, '✦ PUNIÇÃO DIVINA (+' + (ev.smiteTotal | 0) + ')!', 'crit');
+            }
+            if (ev.uncannyDodge) {
+                spawnSkillImpactLabel(elT, '🛡️ ESQUIVA SOBRENATURAL (½ DANO)!', 'buff');
+            }
+            if (ev.heavyArmorMasterReduced > 0) {
+                spawnSkillImpactLabel(elT, '🛡️ ARMADURA PESADA (-' + (ev.heavyArmorMasterReduced | 0) + ')!', 'buff');
+            }
+            var _deflectAmt = (ev.deflectReduction || (ev.deflectMissiles && ev.deflectMissiles.reduced) || 0) | 0;
+            if (_deflectAmt > 0) {
+                spawnSkillImpactLabel(elT, '✋ DESVIAR PROJÉTEIS (-' + _deflectAmt + ')!', 'buff');
+            }
+            if (ev.parry && ev.parry.reduced > 0) {
+                spawnSkillImpactLabel(elT, '⚔️ APARAR (-' + (ev.parry.reduced | 0) + ')!', 'buff');
+            }
+            if (ev.tempHpAbsorbed > 0) {
+                spawnSkillImpactLabel(elT, '🛡️ PV TEMP ABSORVEU ' + (ev.tempHpAbsorbed | 0) + '!', 'buff');
             }
         }
         if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
@@ -49922,7 +49983,7 @@ async function __combatAnimateOneEvent(ev) {
             || kind === 'instant_kill' || kind === 'power_word_kill' || kind === 'destroy_undead'
             || kind === 'time_stop' || kind === 'wildshape_transform' || kind === 'wildshape_revert'
             || kind === 'sanctuary_save' || kind === 'rebuke_damage' || kind === 'turn_skipped') {
-        var _evIdx = ev.tIdx != null ? ev.tIdx : ev.aIdx;
+        var _evIdx = kind === 'rebuke_damage' ? ev.aIdx : (ev.tIdx != null ? ev.tIdx : ev.aIdx);
         var _evUid = 'player';
         if (_evIdx != null && currentState && currentState.order) {
             var _evU = currentState.order[_evIdx];
@@ -49975,8 +50036,22 @@ async function __combatAnimateOneEvent(ev) {
                 _lblTxt = ev.saveSuccess === false ? '✨ SANTUÁRIO BLOQUEOU!' : '⚔️ SUPEROU SANTUÁRIO!';
                 _lblTone = ev.saveSuccess === false ? 'buff' : 'hit';
             } else if (kind === 'rebuke_damage') {
-                _lblTxt = '🔥 -' + (ev.dmg || ev.damage || 0) + ' PV (REPREENSÃO)!';
+                var _rDmg = ev.dmgTotal != null ? ev.dmgTotal : (ev.dmg || ev.damage || 0);
+                var _svTxt = ev.saveSuccess ? ' (TR Metade)' : '';
+                _lblTxt = '🔥 -' + _rDmg + ' PV REPREENSÃO' + _svTxt + '!';
                 _lblTone = 'hit';
+                if (typeof _spawnFloatingDmgNumber === 'function' && _evU) {
+                    try {
+                        _spawnFloatingDmgNumber(_evU, _rDmg, { crit: false, dmgType: 'fire' });
+                    } catch (eF) {}
+                }
+                if (ev.newHp != null && _evU) {
+                    _evU.hp = ev.newHp;
+                    _evU.alive = _evU.hp > 0;
+                }
+                if (window._combatVfx && _evEl && typeof window._combatVfx.impact === 'function') {
+                    try { window._combatVfx.impact(_evEl, 'fire', { crit: false }); } catch (eRbVfx) {}
+                }
             } else if (kind === 'turn_skipped') {
                 _lblTxt = '◈ TURNO PERDIDO (' + String(ev.reason || ev.condName || 'INCAPACITADO').toUpperCase() + ')!';
                 _lblTone = 'miss';
