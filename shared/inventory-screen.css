@@ -102,7 +102,7 @@
 
   --vinv-gold-glow: var(--v-gold-40);
 
-  --vinv-font: var(--v-font, 'MedievalSharp', 'Cinzel', 'Georgia', serif);
+  --vinv-font: var(--v-font, 'Nunito', sans-serif);
 
   --vinv-font-display: var(--v-font-display, 'Cinzel', 'Georgia', serif);
 
