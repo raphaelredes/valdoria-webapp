@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T03:26:19Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T03:53:32Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -22041,22 +22041,28 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
 
     var radiusHex = 0;
     var aoeType = 'arcane';
-    if (skill.fireball) {
+    var skNameLow = String(skill.n || '').toLowerCase();
+    var skDmgLow = String(skill.dmgType || '').toLowerCase();
+    if (skill.fireball || skNameLow.indexOf('bola de fogo') >= 0 || skNameLow.indexOf('meteoro') >= 0) {
         radiusHex = 4; // 20 pés = 6m = 4 hexes (D&D 5e PHB p. 241)
         aoeType = 'fire';
-    } else if (skill.coneOfCold || (skill.shape === 'cone')) {
+    } else if (skill.coneOfCold || (skill.shape === 'cone') || skNameLow.indexOf('mãos flamejantes') >= 0 || skNameLow.indexOf('sopro') >= 0 || skNameLow.indexOf('cone') >= 0) {
         radiusHex = 3;
-        aoeType = 'cone';
-    } else if (skill.spiritGuardians) {
+        aoeType = (skDmgLow === 'fire' || skNameLow.indexOf('flamej') >= 0) ? 'fire' : 'cone';
+    } else if (skill.spiritGuardians || skill.holyNimbus || skill.requiresTargetTag) {
         radiusHex = 3; // 15 pés = 4,5m = 3 hexes (PHB p. 278)
         aoeType = 'radiant';
     } else if (skill.aoeRadius) {
         radiusHex = Math.max(1, skill.aoeRadius | 0);
     } else if (skill.radiusHexes) {
         radiusHex = Math.max(1, skill.radiusHexes | 0);
-    } else if (skill.isAoe || skill.aoe) {
+    } else if (skill.isAoe || skill.aoe || skill.multiTarget) {
         radiusHex = 3;
     }
+
+    if (skDmgLow === 'fire') aoeType = 'fire';
+    else if (skDmgLow === 'radiant') aoeType = 'radiant';
+    else if (skDmgLow === 'cold' || skDmgLow === 'lightning' || skDmgLow === 'thunder') aoeType = 'cone';
 
     if (radiusHex <= 0) {
         clearTacticalAoePreview();
@@ -22065,34 +22071,42 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
 
     var pCenter = hexCenter(centerCol, centerRow);
     var radiusPx = radiusHex * HEX_COL_STEP;
+    var bCols = (currentState.battlefield && currentState.battlefield.cols) || HEX_COLS_DEFAULT;
+    var bRows = (currentState.battlefield && currentState.battlefield.rows) || HEX_ROWS_DEFAULT;
+
+    var polyFill = 'rgba(0, 229, 255, 0.16)';
+    var polyStroke = '#00e5ff';
+    if (aoeType === 'fire') {
+        polyFill = 'rgba(255, 87, 34, 0.22)';
+        polyStroke = '#ff7043';
+    } else if (aoeType === 'radiant') {
+        polyFill = 'rgba(255, 215, 0, 0.20)';
+        polyStroke = '#ffd700';
+    }
 
     var svgParts = [];
     var gradId = (aoeType === 'fire') ? 'aoeFireballGlow' : 'aoeArcaneGlow';
     var circleCls = 'hex-aoe-circle hex-aoe-circle--' + aoeType;
 
+    // Malha de hexágonos afetados dentro do raio (Padrão Solasta / BG3)
+    for (var hc = 0; hc < bCols; hc++) {
+        for (var hr = 0; hr < bRows; hr++) {
+            if (hexDistance(centerCol, centerRow, hc, hr) <= radiusHex) {
+                var hCen = hexCenter(hc, hr);
+                var hPts = hexPolygonPoints(hCen.cx, hCen.cy);
+                svgParts.push('<polygon points="' + hPts + '" fill="' + polyFill + '" stroke="' + polyStroke + '" stroke-width="1.5" stroke-dasharray="4 2" />');
+            }
+        }
+    }
+
     // Círculo translúcido do raio de impacto
     svgParts.push('<circle cx="' + pCenter.cx + '" cy="' + pCenter.cy + '" r="' + radiusPx + '" class="' + circleCls + '" fill="url(#' + gradId + ')" />');
     svgParts.push('<circle cx="' + pCenter.cx + '" cy="' + pCenter.cy + '" r="' + radiusPx + '" class="hex-aoe-edge" />');
 
-    // Rótulo heráldico da área
-    var aoeMeters = formatHexDistanceMeters(radiusHex);
-    var aoeLabel = '◈ Área ' + aoeMeters + ' (' + radiusHex + 'h)';
-    if (skill.saveDc && skill.saveAbility) {
-        aoeLabel += ' | CD ' + skill.saveDc + ' ' + String(skill.saveAbility).toUpperCase();
-    }
-    var lblW = Math.max(86, aoeLabel.length * 6.2 + 18);
-    var lblH = 18;
-    var lblX = Math.round(pCenter.cx - lblW / 2);
-    var lblY = Math.round(pCenter.cy - radiusPx - 10);
-
-    svgParts.push('<g class="hex-aoe-badge">' +
-        '<rect x="' + lblX + '" y="' + lblY + '" width="' + lblW + '" height="' + lblH + '" rx="4" class="hex-aoe-badge-bg" />' +
-        '<text x="' + pCenter.cx + '" y="' + (lblY + 10) + '" class="hex-aoe-badge-text">' + escHtml(aoeLabel) + '</text>' +
-        '</g>');
-
-    layer.innerHTML = svgParts.join('');
-
-    // Destaque visual nos tokens situados dentro da área de efeito
+    // Destaque visual nos tokens situados dentro da área de efeito e contagem tática
+    var enemiesInAoe = 0;
+    var alliesInAoe = 0;
+    var isHelpfulAoe = (skill.kind === 'heal' || skill.kind === 'buff' || skill.blessSpell);
     if (currentState && currentState.order) {
         for (var ti = 0; ti < currentState.order.length; ti++) {
             var tu = currentState.order[ti];
@@ -22100,15 +22114,193 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
             var td = hexDistance(centerCol, centerRow, tu.pos.col, tu.pos.row);
             var tuid = unitUidForOrderIndex(currentState, ti);
             var tEl = document.querySelector('.hex-token[data-unit-id="' + tuid + '"]');
-            if (tEl) {
-                if (td <= radiusHex) {
-                    tEl.classList.add('token--aoe-targeted');
-                } else {
-                    tEl.classList.remove('token--aoe-targeted');
+            if (td <= radiusHex) {
+                if (tEl) tEl.classList.add('token--aoe-targeted');
+                var tuCen = hexCenter(tu.pos.col, tu.pos.row);
+                if (tu.t === 'e') {
+                    enemiesInAoe++;
+                    svgParts.push('<circle cx="' + tuCen.cx + '" cy="' + tuCen.cy + '" r="24" fill="none" stroke="#ff5252" stroke-width="2" stroke-dasharray="5 3" />');
+                } else if ((tu.t === 'p' || tu.t === 'a') && !isHelpfulAoe && skill.SculptSpells !== true) {
+                    alliesInAoe++;
+                    svgParts.push('<circle cx="' + tuCen.cx + '" cy="' + tuCen.cy + '" r="24" fill="rgba(255,152,0,0.18)" stroke="#ffab00" stroke-width="2" />');
                 }
+            } else if (tEl) {
+                tEl.classList.remove('token--aoe-targeted');
             }
         }
     }
+
+    // Rótulo heráldico da área com contagem de alvos
+    var aoeMeters = formatHexDistanceMeters(radiusHex);
+    var aoeLabel = '◈ Área ' + aoeMeters + ' (' + radiusHex + 'h)';
+    if (enemiesInAoe > 0) {
+        aoeLabel += ' · 🎯 ' + enemiesInAoe + (enemiesInAoe === 1 ? ' alvo' : ' alvos');
+    }
+    if (alliesInAoe > 0) {
+        aoeLabel += ' · ▲ ' + alliesInAoe + ' aliado(s) na área!';
+    }
+    var saveObj = skill.save || (skill.saveDc ? { dc: skill.saveDc, ability: skill.saveAbility } : null);
+    if (saveObj) {
+        var pCaster = currentState.order && currentState.order[currentState.p_idx];
+        var dcVal = saveObj.dc || (typeof simSpellSaveDc === 'function' && pCaster ? simSpellSaveDc(pCaster) : 13);
+        var abVal = String(saveObj.ability || 'DEX').toUpperCase();
+        aoeLabel += ' | CD ' + dcVal + ' ' + abVal;
+    }
+    var lblW = Math.max(96, aoeLabel.length * 6.0 + 20);
+    var lblH = 19;
+    var lblX = Math.round(pCenter.cx - lblW / 2);
+    var lblY = Math.round(pCenter.cy - radiusPx - 12);
+
+    svgParts.push('<g class="hex-aoe-badge">' +
+        '<rect x="' + lblX + '" y="' + lblY + '" width="' + lblW + '" height="' + lblH + '" rx="4" class="hex-aoe-badge-bg" />' +
+        '<text x="' + pCenter.cx + '" y="' + (lblY + 11) + '" class="hex-aoe-badge-text">' + escHtml(aoeLabel) + '</text>' +
+        '</g>');
+
+    layer.innerHTML = svgParts.join('');
+}
+
+/**
+ * Converte s.battlefield.difficult_terrain (Array ou Map) num dicionário rápido {'col,row': dtObj}.
+ */
+function simBuildDifficultTerrainLookup(state) {
+    var map = {};
+    if (!state || !state.battlefield || !state.battlefield.difficult_terrain) return map;
+    var dtList = state.battlefield.difficult_terrain;
+    if (Array.isArray(dtList)) {
+        for (var i = 0; i < dtList.length; i++) {
+            var dt = dtList[i];
+            if (dt && dt.col != null && dt.row != null) {
+                map[dt.col + ',' + dt.row] = dt;
+            }
+        }
+    } else if (typeof dtList === 'object') {
+        return dtList;
+    }
+    return map;
+}
+
+/**
+ * Pathfinder Tático D&D 5e (Dijkstra sobre grade hexagonal — Padrão Baldur's Gate 3 / Solasta):
+ * - Desvia de obstáculos físicos (PHB p. 196) e espaços ocupados por criaturas hostis (PHB p. 191).
+ * - Contabiliza custo 2 para Terreno Difícil e espaços de aliados, e custo 1 para terreno livre.
+ * - Minimiza custo de deslocamento e, como desempate tático, contorna Ataques de Oportunidade
+ *   e perigos/superfícies elementais sempre que houver rota segura dentro do deslocamento.
+ */
+function simFindOptimalHexPath(state, fromCol, fromRow, toCol, toRow, moverIdx) {
+    if (fromCol == null || fromRow == null || toCol == null || toRow == null) return [];
+    if (fromCol === toCol && fromRow === toRow) return [{ col: fromCol, row: fromRow }];
+    if (!state || !state.battlefield || typeof hexNeighbors !== 'function') {
+        return (typeof hexLine === 'function') ? hexLine(fromCol, fromRow, toCol, toRow) : [{ col: fromCol, row: fromRow }, { col: toCol, row: toRow }];
+    }
+
+    var bCols = state.battlefield.cols || HEX_COLS_DEFAULT;
+    var bRows = state.battlefield.rows || HEX_ROWS_DEFAULT;
+    var diffMap = simBuildDifficultTerrainLookup(state);
+
+    var obsMap = {};
+    if (Array.isArray(state.battlefield.obstacles)) {
+        for (var oi = 0; oi < state.battlefield.obstacles.length; oi++) {
+            var obs = state.battlefield.obstacles[oi];
+            if (obs && obs.col != null && obs.row != null) {
+                obsMap[obs.col + ',' + obs.row] = obs;
+            }
+        }
+    }
+
+    var surfMap = {};
+    if (Array.isArray(state.battlefield.surfaces)) {
+        for (var si = 0; si < state.battlefield.surfaces.length; si++) {
+            var sf = state.battlefield.surfaces[si];
+            if (sf && sf.col != null && sf.row != null) {
+                surfMap[sf.col + ',' + sf.row] = sf;
+            }
+        }
+    }
+
+    var mIdx = (moverIdx != null) ? moverIdx : (state.p_idx || 0);
+    var mover = (state.order && state.order[mIdx]) || null;
+    var moverFaction = (mover && mover.t === 'e') ? 'e' : 'party';
+
+    var hostileOcc = {};
+    var allyOcc = {};
+    if (Array.isArray(state.order)) {
+        for (var ui = 0; ui < state.order.length; ui++) {
+            if (ui === mIdx) continue;
+            var u = state.order[ui];
+            if (!u || !u.alive || u.isDead || (u.hp != null && u.hp <= 0) || !u.pos) continue;
+            var uKey = u.pos.col + ',' + u.pos.row;
+            var uFac = (u.t === 'e') ? 'e' : 'party';
+            if (uFac !== moverFaction) hostileOcc[uKey] = u;
+            else allyOcc[uKey] = u;
+        }
+    }
+
+    var startKey = fromCol + ',' + fromRow;
+    var goalKey = toCol + ',' + toRow;
+    if (obsMap[goalKey] || hostileOcc[goalKey] || allyOcc[goalKey]) {
+        return (typeof hexLine === 'function') ? hexLine(fromCol, fromRow, toCol, toRow) : [];
+    }
+
+    var distCost = {};
+    var tacScore = {};
+    var prev = {};
+    var visited = {};
+    distCost[startKey] = 0;
+    tacScore[startKey] = 0;
+    var pq = [{ col: fromCol, row: fromRow, key: startKey, cost: 0, score: 0 }];
+
+    while (pq.length > 0) {
+        pq.sort(function (a, b) { return a.score - b.score; });
+        var cur = pq.shift();
+        if (visited[cur.key]) continue;
+        visited[cur.key] = true;
+        if (cur.key === goalKey) break;
+
+        var neighbors = hexNeighbors(cur.col, cur.row);
+        for (var ni = 0; ni < neighbors.length; ni++) {
+            var nb = neighbors[ni];
+            if (nb.col < 0 || nb.col >= bCols || nb.row < 0 || nb.row >= bRows) continue;
+            var nKey = nb.col + ',' + nb.row;
+            if (visited[nKey]) continue;
+            if (obsMap[nKey] || hostileOcc[nKey]) continue;
+
+            var dtObj = diffMap[nKey];
+            var isAllySpace = !!allyOcc[nKey];
+            var stepMoveCost = (dtObj || isAllySpace) ? 2 : 1;
+            var newMoveCost = cur.cost + stepMoveCost;
+
+            // Penalidade tática secundária para contornar Ataques de Oportunidade e Perigos
+            var penalty = 0;
+            if (typeof simCheckOpportunityAttacks === 'function' && state === currentState) {
+                var oas = simCheckOpportunityAttacks(mIdx, cur.col, cur.row, nb.col, nb.row);
+                if (oas && oas.length > 0) penalty += oas.length * 0.45;
+            }
+            if (dtObj && dtObj.hazard_kind) penalty += 0.30;
+            if (surfMap[nKey]) penalty += 0.25;
+            // Leve preferência pela diretriz geométrica para evitar zigue-zague desnecessário
+            penalty += hexDistance(nb.col, nb.row, toCol, toRow) * 0.01;
+
+            var newScore = newMoveCost + (cur.score - cur.cost) + penalty;
+            if (tacScore[nKey] === undefined || newScore < tacScore[nKey]) {
+                distCost[nKey] = newMoveCost;
+                tacScore[nKey] = newScore;
+                prev[nKey] = { col: cur.col, row: cur.row, key: cur.key };
+                pq.push({ col: nb.col, row: nb.row, key: nKey, cost: newMoveCost, score: newScore });
+            }
+        }
+    }
+
+    if (!prev[goalKey]) {
+        return (typeof hexLine === 'function') ? hexLine(fromCol, fromRow, toCol, toRow) : [];
+    }
+
+    var outPath = [];
+    var trace = { col: toCol, row: toRow, key: goalKey };
+    while (trace) {
+        outPath.unshift({ col: trace.col, row: trace.row });
+        trace = prev[trace.key];
+    }
+    return outPath;
 }
 
 function clearMovementTrailPreview() {
@@ -22128,7 +22320,7 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
         return;
     }
     options = options || {};
-    var line = (typeof hexLine === 'function') ? hexLine(fromCol, fromRow, toCol, toRow) : [];
+    var line = simFindOptimalHexPath(currentState, fromCol, fromRow, toCol, toRow, currentState.p_idx);
     if (!line || line.length < 2) {
         layer.innerHTML = '';
         return;
@@ -22136,18 +22328,21 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
 
     var pUnit = currentState.order[currentState.p_idx];
     var moveLeft = pUnit ? (pUnit.movement_left || 0) : 6;
-    var difficultMap = (currentState.battlefield && currentState.battlefield.difficult_terrain) || {};
+    var difficultMap = simBuildDifficultTerrainLookup(currentState);
 
     var svgParts = [];
     var totalCostHexes = 0;
     var provokedAoOList = [];
+    var crossesHazard = false;
 
     // Computa cada passo da rota e verifica Ataques de Oportunidade canônicos (PHB p. 195)
     for (var i = 0; i < line.length - 1; i++) {
         var curStep = line[i];
         var nextStep = line[i + 1];
         var nextKey = nextStep.col + ',' + nextStep.row;
-        var stepCost = (difficultMap && difficultMap[nextKey]) ? 2 : 1;
+        var dtStep = difficultMap[nextKey];
+        var stepCost = dtStep ? 2 : 1;
+        if (dtStep && dtStep.hazard_kind) crossesHazard = true;
         totalCostHexes += stepCost;
 
         var pFrom = hexCenter(curStep.col, curStep.row);
@@ -22159,11 +22354,11 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
             aooProvoked = simCheckOpportunityAttacks(currentState.p_idx, curStep.col, curStep.row, nextStep.col, nextStep.row);
         }
 
-        var isStepHazard = aooProvoked && aooProvoked.length > 0;
-        if (isStepHazard) {
+        var isStepHazard = (aooProvoked && aooProvoked.length > 0) || !!(dtStep && dtStep.hazard_kind);
+        if (aooProvoked && aooProvoked.length > 0) {
             for (var ai = 0; ai < aooProvoked.length; ai++) {
                 provokedAoOList.push({
-                    unit: aooProvoked[ai],
+                    unit: aooProvoked[ai].unit || aooProvoked[ai],
                     stepCol: curStep.col,
                     stepRow: curStep.row,
                     cx: pFrom.cx,
@@ -22205,33 +22400,45 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
     var destText = '⇥ ' + totalM + ' (' + totalCostHexes + 'h) · Restam ' + remainingMeters;
     if (provokedAoOList.length > 0) {
         destText = '▲ AoO (' + provokedAoOList.length + ') · ' + totalM + ' · Restam ' + remainingMeters;
+    } else if (crossesHazard) {
+        destText = '▲ Perigo na Rota · ' + totalM + ' · Restam ' + remainingMeters;
     }
 
-    // D&D 5e (PHB p. 196 / Solasta / BG3): Avalia se o destino de movimento concede Cobertura contra inimigos à distância
+    // D&D 5e (PHB p. 196 / DMG p. 251 / Solasta / BG3): Avalia Cobertura e Flanqueamento no destino
     var destCoverBonus = 0;
-    if (state && Array.isArray(state.order) && typeof simComputeCover === 'function') {
-        var phantomTarget = { pos: { col: dest.col, row: dest.row } };
-        for (var eci = 0; eci < state.order.length; eci++) {
-            var candEnemy = state.order[eci];
+    var destFlanksEnemy = null;
+    if (currentState && Array.isArray(currentState.order)) {
+        var phantomMover = { t: pUnit ? pUnit.t : 'p', alive: true, pos: { col: dest.col, row: dest.row } };
+        for (var eci = 0; eci < currentState.order.length; eci++) {
+            var candEnemy = currentState.order[eci];
             if (!candEnemy || candEnemy.t !== 'e') continue;
             var isEnemyAlive = (candEnemy.alive !== false) && !candEnemy.isDead && (typeof candEnemy.hp !== 'number' || candEnemy.hp > 0);
             if (!isEnemyAlive || !candEnemy.pos) continue;
-            if (hexDistance(candEnemy.pos.col, candEnemy.pos.row, dest.col, dest.row) > 1) {
-                var covEval = simComputeCover(state, candEnemy, phantomTarget);
+            var dToEn = hexDistance(candEnemy.pos.col, candEnemy.pos.row, dest.col, dest.row);
+            if (dToEn > 1 && typeof simComputeCover === 'function') {
+                var covEval = simComputeCover(currentState, candEnemy, phantomMover);
                 if (covEval && covEval.bonus > destCoverBonus) {
                     destCoverBonus = covEval.bonus;
+                }
+            }
+            if (dToEn === 1 && !destFlanksEnemy && typeof simCheckFlanking === 'function') {
+                var flk = simCheckFlanking(phantomMover, candEnemy, currentState.order);
+                if (flk && flk.flanking) {
+                    destFlanksEnemy = candEnemy.n || 'Inimigo';
                 }
             }
         }
     }
 
-    if (destCoverBonus === 5) {
+    if (destFlanksEnemy) {
+        destText += ' · ▲ Flanqueia ' + destFlanksEnemy;
+    } else if (destCoverBonus === 5) {
         destText += ' · ⛨ ¾ Cob (+5 CA)';
     } else if (destCoverBonus === 2) {
         destText += ' · ⛨ ½ Cob (+2 CA)';
     }
 
-    var destBadgeW = Math.max(90, destText.length * 6.2 + 20);
+    var destBadgeW = Math.max(90, destText.length * 6.0 + 20);
     var destBadgeH = 19;
     var destX = Math.round(destCenter.cx - destBadgeW / 2);
     var destY = Math.round(destCenter.cy - 24);
@@ -22244,7 +22451,17 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
         '<text x="' + destCenter.cx + '" y="' + (destY + 11) + '" class="' + destTextCls + '">' + escHtml(destText) + '</text>' +
         '</g>');
 
-    if (destCoverBonus > 0) {
+    if (destFlanksEnemy) {
+        var flkLabel = '▲ FLANQUEIO (+VANT)';
+        var flkW = 94;
+        var flkH = 14;
+        var flkX = Math.round(destCenter.cx - flkW / 2);
+        var flkY = Math.round(destCenter.cy + 13);
+        svgParts.push('<g class="hex-dest-cover-group">' +
+            '<rect x="' + flkX + '" y="' + flkY + '" width="' + flkW + '" height="' + flkH + '" rx="3" fill="rgba(27,77,36,0.92)" stroke="#2ecc71" stroke-width="1" />' +
+            '<text x="' + destCenter.cx + '" y="' + (flkY + 8) + '" class="hex-dest-cover-text" fill="#c6f6d5">' + escHtml(flkLabel) + '</text>' +
+            '</g>');
+    } else if (destCoverBonus > 0) {
         var covLabel = '⛨ +' + destCoverBonus + ' CA';
         var covW = 46;
         var covH = 13;
@@ -22957,6 +23174,21 @@ function hexLine(c1, r1, c2, r2) {
 }
 
 function calculateHexMovementCost(fromC, fromR, toC, toR, difficultMap) {
+    if (typeof currentState !== 'undefined' && currentState && typeof simFindOptimalHexPath === 'function') {
+        var moverIdx = (currentState.active_idx != null) ? currentState.active_idx : (currentState.p_idx || 0);
+        var optPath = simFindOptimalHexPath(currentState, moverIdx, fromC, fromR, toC, toR);
+        if (optPath && optPath.length > 1) {
+            var dtLookup = (typeof simBuildDifficultTerrainLookup === 'function')
+                ? simBuildDifficultTerrainLookup(currentState)
+                : (difficultMap || {});
+            var optCost = 0;
+            for (var oi = 1; oi < optPath.length; oi++) {
+                var ok = optPath[oi].col + ',' + optPath[oi].row;
+                optCost += dtLookup[ok] ? 2 : 1;
+            }
+            return optCost;
+        }
+    }
     var line = hexLine(fromC, fromR, toC, toR);
     var cost = 0;
     for (var i = 1; i < line.length; i++) {
@@ -23407,6 +23639,8 @@ async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
                 break;
             }
 
+            var prevCoord = path[p - 1] || stepCoord;
+            var prevCenter = hexCenter(prevCoord.col, prevCoord.row);
             var stepCoord = path[p];
             var stepCenter = hexCenter(stepCoord.col, stepCoord.row);
             var targetLeft = (stepCenter.cx - Math.round(HEX_W / 2)) + 'px';
@@ -23424,7 +23658,7 @@ async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
                 try { sfxStep(); } catch (_) {}
             }
 
-            // Highlight sutil do hexágono pisado
+            // Highlight sutil do hexágono pisado + anel de poeira tática
             var stepTile = document.querySelector('.hex-grid-svg polygon[data-col="' + stepCoord.col + '"][data-row="' + stepCoord.row + '"]');
             if (stepTile) {
                 stepTile.classList.add('hex-tile--stepping');
@@ -23432,9 +23666,28 @@ async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
                     setTimeout(function () { el.classList.remove('hex-tile--stepping'); }, Math.round(stepMs * 0.9));
                 })(stepTile);
             }
+            var moveLayerSvg = document.querySelector('.hex-movement-path-layer');
+            if (moveLayerSvg) {
+                try {
+                    var dustRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dustRing.setAttribute('cx', stepCenter.cx);
+                    dustRing.setAttribute('cy', stepCenter.cy + 10);
+                    dustRing.setAttribute('r', '10');
+                    dustRing.setAttribute('fill', 'none');
+                    dustRing.setAttribute('stroke', 'rgba(235, 200, 130, 0.55)');
+                    dustRing.setAttribute('stroke-width', '1.8');
+                    dustRing.setAttribute('stroke-dasharray', '3 3');
+                    moveLayerSvg.appendChild(dustRing);
+                    setTimeout(function () {
+                        if (dustRing && dustRing.parentNode) dustRing.parentNode.removeChild(dustRing);
+                    }, Math.round(stepMs * 0.95));
+                } catch (_) {}
+            }
 
-            // FASE 1: Translação contínua de left/top com passada natural e leve elevação
-            var stepCadenceDeg = (p % 2 === 1) ? 2.5 : -2.5;
+            // FASE 1: Translação contínua de left/top com inclinação direcional rumo ao vetor de movimento
+            var moveDx = stepCenter.cx - prevCenter.cx;
+            var leanBias = (moveDx > 4) ? 4 : ((moveDx < -4) ? -4 : 0);
+            var stepCadenceDeg = leanBias + ((p % 2 === 1) ? 2.5 : -2.5);
             tokenEl.style.transition = 'left ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), top ' + stepMs + 'ms cubic-bezier(0.25, 0.1, 0.25, 1), transform ' + Math.round(stepMs * 0.5) + 'ms cubic-bezier(0.2, 0.8, 0.3, 1), filter ' + Math.round(stepMs * 0.5) + 'ms ease-out';
             tokenEl.style.left = targetLeft;
             tokenEl.style.top = targetTop;
@@ -23569,6 +23822,7 @@ function showOpportunityAttackHelpModal(provokingNames, provokingHostiles) {
 /**
  * D&D 5e: Confirmação tática de movimento no grid hexagonal.
  * Exibe quantidade de metros a movimentar, metros restantes após a ação,
+ * benefícios táticos no destino (Flanqueamento, Cobertura, Alcance),
  * custo por terreno difícil e alerta de ataque de oportunidade se sair de combate corpo a corpo.
  */
 function showMoveConfirm(tCol, tRow) {
@@ -23579,15 +23833,14 @@ function showMoveConfirm(tCol, tRow) {
     if (!p.pos) p.pos = { col: 0, row: 0 };
     var fromCol = p.pos.col, fromRow = p.pos.row;
 
-    var path = (typeof hexLine === 'function') ? hexLine(fromCol, fromRow, tCol, tRow) : null;
+    var path = (typeof simFindOptimalHexPath === 'function')
+        ? simFindOptimalHexPath(currentState, currentState.p_idx, fromCol, fromRow, tCol, tRow)
+        : ((typeof hexLine === 'function') ? hexLine(fromCol, fromRow, tCol, tRow) : null);
     if (!path || path.length <= 1) return;
 
-    var difficultMap = {};
-    if (currentState.battlefield && currentState.battlefield.difficult_terrain) {
-        currentState.battlefield.difficult_terrain.forEach(function (dt) {
-            if (dt && dt.col != null && dt.row != null) difficultMap[dt.col + ',' + dt.row] = dt;
-        });
-    }
+    var difficultMap = (typeof simBuildDifficultTerrainLookup === 'function')
+        ? simBuildDifficultTerrainLookup(currentState)
+        : {};
 
     var totalCost = 0;
     var hasDifficult = false;
@@ -23609,7 +23862,7 @@ function showMoveConfirm(tCol, tRow) {
     var currentMoveM = formatHexDistanceMeters(moveLeft);
     var totalSpeedM = formatHexDistanceMeters(p.speed || 6);
 
-    // D&D 5e PHB p. 195: Checa se sair do hex atual provoca Ataque de Oportunidade
+    // D&D 5e PHB p. 195: Checa se o percurso provoca Ataque de Oportunidade
     var provokingHostiles = [];
     var provokingNames = [];
     if (typeof simCheckOpportunityAttacks === 'function') {
@@ -23627,6 +23880,39 @@ function showMoveConfirm(tCol, tRow) {
         }
     }
     var willTriggerOA = provokingHostiles.length > 0;
+
+    // Benefícios Táticos D&D 5e no hexágono de destino (Flanqueamento, Cobertura e Alcance)
+    var destBenefits = [];
+    var mockSelf = Object.assign({}, p, { pos: { col: tCol, row: tRow } });
+    if (currentState && currentState.order) {
+        if (typeof simCheckFlanking === 'function') {
+            var flankedEnemies = [];
+            for (var fi = 0; fi < currentState.order.length; fi++) {
+                var fUnit = currentState.order[fi];
+                if (fUnit && fUnit.t === 'e' && fUnit.alive && !fUnit.isDead && fUnit.pos) {
+                    if (simCheckFlanking(mockSelf, fUnit, currentState.order)) {
+                        flankedEnemies.push(fUnit.n);
+                    }
+                }
+            }
+            if (flankedEnemies.length > 0) {
+                destBenefits.push('▲ <strong>Flanqueia ' + escHtml(flankedEnemies.join(', ')) + '</strong>: confere Vantagem (2d20kh1) em ataques corpo a corpo (DMG p. 251)');
+            }
+        }
+        if (typeof simComputeCover === 'function') {
+            var bestCovBonus = 0;
+            for (var ci = 0; ci < currentState.order.length; ci++) {
+                var cUnit = currentState.order[ci];
+                if (cUnit && cUnit.t === 'e' && cUnit.alive && !cUnit.isDead && cUnit.pos) {
+                    var cInfo = simComputeCover(currentState, cUnit, mockSelf);
+                    if (cInfo && cInfo.bonus > bestCovBonus && cInfo.bonus < 99) bestCovBonus = cInfo.bonus;
+                }
+            }
+            if (bestCovBonus > 0) {
+                destBenefits.push('⛨ <strong>Cobertura Tática (+' + bestCovBonus + ' CA / DES)</strong> contra disparos e magias inimigas (PHB p. 196)');
+            }
+        }
+    }
 
     var prev = document.getElementById('move-confirm-overlay');
     if (prev) prev.remove();
@@ -23651,11 +23937,20 @@ function showMoveConfirm(tCol, tRow) {
     html += '</div></div>';
 
     html += '<div class="tcc-dmg" style="margin-bottom:12px;">';
-    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância</span><span class="tcc-dmg-val"><strong>' + dM + '</strong></span></div>';
+    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância da rota</span><span class="tcc-dmg-val"><strong>' + dM + '</strong></span></div>';
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Custo de movimento</span><span class="tcc-dmg-val"><strong>' + costM + '</strong>' + (hasDifficult ? ' <span style="color:#f59e0b;font-size:11px;">(Terreno Difícil ◆)</span>' : '') + '</span></div>';
     html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Disponível agora</span><span class="tcc-dmg-val">' + currentMoveM + '</span></div>';
     html += '<div class="tcc-dmg-row crit" style="border-top:1px dashed rgba(196,149,58,0.3);padding-top:6px;"><span class="tcc-dmg-lbl">Restará após mover</span><span class="tcc-dmg-val" style="color:#a3e635;font-weight:bold;">' + remainingAfterM + ' de ' + totalSpeedM + '</span></div>';
     html += '</div>';
+
+    if (destBenefits.length > 0) {
+        html += '<div style="background:rgba(22,60,34,0.45);border:1px solid rgba(74,222,128,0.45);border-radius:6px;padding:8px 11px;margin-bottom:12px;font-size:11.5px;color:#d1fae5;line-height:1.45;">';
+        html += '<div style="font-weight:800;color:#4ade80;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;font-size:10.5px;">✦ Ganho Posicional no Destino</div>';
+        for (var bi = 0; bi < destBenefits.length; bi++) {
+            html += '<div style="margin-top:2px;">' + destBenefits[bi] + '</div>';
+        }
+        html += '</div>';
+    }
 
     if (willTriggerOA) {
         html += '<div class="tcc-oa-banner">';
@@ -23711,15 +24006,14 @@ async function handlePlayerMoveTo(tCol, tRow) {
         return;
     }
 
-    var path = hexLine(fromCol, fromRow, tCol, tRow);
+    var path = (typeof simFindOptimalHexPath === 'function')
+        ? simFindOptimalHexPath(currentState, currentState.p_idx, fromCol, fromRow, tCol, tRow)
+        : hexLine(fromCol, fromRow, tCol, tRow);
     if (!path || path.length <= 1) return;
 
-    var difficultMap = {};
-    if (currentState.battlefield && currentState.battlefield.difficult_terrain) {
-        currentState.battlefield.difficult_terrain.forEach(function (dt) {
-            if (dt && dt.col != null && dt.row != null) difficultMap[dt.col + ',' + dt.row] = dt;
-        });
-    }
+    var difficultMap = (typeof simBuildDifficultTerrainLookup === 'function')
+        ? simBuildDifficultTerrainLookup(currentState)
+        : {};
 
     var validPath = [path[0]];
     var totalCost = 0;
@@ -24152,6 +24446,25 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
 
     // Condições Ativas Adicionais D&D 5e (PHB p. 290-292)
     var condBadges = '';
+    if (fogState !== 'shrouded' && u.alive && !u.isDead && isEnemy && s && s.order) {
+        var markLabel = null;
+        for (var mi = 0; mi < s.order.length; mi++) {
+            var mUnit = s.order[mi];
+            if (mUnit && (mUnit.t === 'p' || mUnit.t === 'a') && mUnit.alive && mUnit.se) {
+                for (var msi = 0; msi < mUnit.se.length; msi++) {
+                    var mSt = mUnit.se[msi];
+                    if (mSt && mSt.markedTargetName === u.n) {
+                        markLabel = mSt.n || 'Marca';
+                        break;
+                    }
+                }
+            }
+            if (markLabel) break;
+        }
+        if (markLabel) {
+            condBadges += '<div class="token-cond-chip token-cond-chip--frightened" style="border-color:#f59e0b;color:#fde68a;background:rgba(120,53,15,0.85);" title="Alvo Marcado (' + escHtml(markLabel) + '): Sofre bônus de ataque/dano do conjurador">⌖ ' + escHtml(markLabel) + '</div>';
+        }
+    }
     if (fogState !== 'shrouded' && u.alive && !u.isDead && u.se && u.se.length) {
         for (var ci = 0; ci < u.se.length; ci++) {
             var stObj = u.se[ci];
@@ -35390,8 +35703,8 @@ async function useSkill(skill, opts) {
                 return;
             }
             /* V1.7 Sprint-17 Ronda 10 (2026-04-21 QA PHB p.251) — Hunter's Mark/Hex
-               target-specific: se skill.targetEnemy, auto-pick primeiro inimigo vivo
-               e injeta markedTargetName no sim (buff bônus só aplica contra ele). */
+               target-specific: respeita window._preselectedTargetIdx se válido, ou
+               auto-pick primeiro inimigo vivo, e injeta markedTargetName no sim. */
             var simForCast = sim;
             if (skill.targetEnemy) {
                 var _enemyIdxs = [];
@@ -35405,12 +35718,70 @@ async function useSkill(skill, opts) {
                     render(s);
                     return;
                 }
-                var _markedIdx = _enemyIdxs[0];  /* auto-pick 1º — futuro: picker */
+                var _markedIdx = _enemyIdxs[0];
+                if (typeof window._preselectedTargetIdx === 'number' && _enemyIdxs.indexOf(window._preselectedTargetIdx) >= 0) {
+                    _markedIdx = window._preselectedTargetIdx;
+                }
                 var _markedName = s.order[_markedIdx].n;
                 simForCast = Object.assign({}, sim, { markedTargetOnly: true, markedTargetName: _markedName });
-                s.log.push(p.n + ' marca ' + _markedName + ' com ' + skill.n + ' (bônus ativado contra o alvo marcado).');
+                s.log.push('⌖ ' + p.n + ' marca ' + _markedName + ' com ' + skill.n + ' (bônus ativado contra o alvo marcado).');
             }
             pushBuffSim(p, simForCast, skill.ico, skill.n);
+
+            // D&D 5e PHB p. 195 / p. 260: Teletransporte real no grid hexagonal (Passo Brumoso / Passo das Sombras)
+            var _skLow = String(skill.n || '').toLowerCase();
+            var _isMisty = (_skLow.indexOf('passo brumoso') >= 0 || _skLow.indexOf('misty step') >= 0 || (sim && sim.vfx === 'misty_step'));
+            var _isShadow = (_skLow.indexOf('passo das sombras') >= 0 || _skLow.indexOf('shadow step') >= 0 || (sim && sim.vfx === 'shadow_step'));
+            if ((_isMisty || _isShadow) && p.pos && s.battlefield) {
+                var _tpMaxRange = _isShadow ? 12 : 6;
+                var _tpFrom = { col: p.pos.col, row: p.pos.row };
+                var _bfCols = s.battlefield.cols || 10;
+                var _bfRows = s.battlefield.rows || 8;
+                var _occTp = {};
+                (s.order || []).forEach(function (u) {
+                    if (u && u.alive && !u.isDead && u.pos) _occTp[u.pos.col + ',' + u.pos.row] = true;
+                });
+                (s.battlefield.obstacles || []).forEach(function (ob) {
+                    if (ob && ob.col != null && ob.row != null && ob.blocks_movement !== false) _occTp[ob.col + ',' + ob.row] = true;
+                });
+                var _hostilesTp = (s.order || []).filter(function (u) { return u && u.t === 'e' && u.alive && !u.isDead && u.pos; });
+                var _bestTp = null;
+                var _bestScore = -999999;
+                for (var _tc = 1; _tc < _bfCols - 1; _tc++) {
+                    for (var _tr = 1; _tr < _bfRows - 1; _tr++) {
+                        if (_tc === _tpFrom.col && _tr === _tpFrom.row) continue;
+                        if (_occTp[_tc + ',' + _tr]) continue;
+                        var _dCast = hexDistance(_tpFrom.col, _tpFrom.row, _tc, _tr);
+                        if (_dCast < 2 || _dCast > _tpMaxRange) continue;
+                        var _minHDist = 99;
+                        for (var _hi = 0; _hi < _hostilesTp.length; _hi++) {
+                            var _hd = hexDistance(_tc, _tr, _hostilesTp[_hi].pos.col, _hostilesTp[_hi].pos.row);
+                            if (_hd < _minHDist) _minHDist = _hd;
+                        }
+                        var _sc = 0;
+                        if (_isShadow) {
+                            _sc = (_minHDist === 1) ? (100 + _dCast) : (50 - Math.abs(_minHDist - 1) * 10);
+                        } else {
+                            _sc = (_minHDist >= 3 && _minHDist <= 5) ? (100 + _minHDist * 5) : (_minHDist * 10);
+                        }
+                        if (_sc > _bestScore) {
+                            _bestScore = _sc;
+                            _bestTp = { col: _tc, row: _tr };
+                        }
+                    }
+                }
+                if (_bestTp) {
+                    var _tpTokenEl = document.querySelector('[data-unit-id="' + uid + '"]');
+                    if (_tpTokenEl && typeof animHexTokenTeleport === 'function') {
+                        await animHexTokenTeleport(_tpTokenEl, _tpFrom, _bestTp, _isShadow ? 'shadow' : 'misty');
+                    }
+                    p.pos = { col: _bestTp.col, row: _bestTp.row };
+                    ensureProceduralBattlefield(s);
+                    var _tpColL = String.fromCharCode(65 + _bestTp.col) + (_bestTp.row + 1);
+                    s.log.push('✨ ' + p.n + ' teletransporta-se para o hexágono ' + _tpColL + ' sem provocar ataques de oportunidade!');
+                }
+            }
+
             /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — buff log com duração + efeitos
                principais em vez de "efeito registrado na ficha" genérico. */
             var _bfEffects = [];
@@ -36785,6 +37156,39 @@ function playHitVFX(uid, crit, dmgType, opts) {
                 window._combatVfx.meleeSlash(fromEl, el, dmgType, { crit: !!crit });
             } else {
                 window._combatVfx.impact(el, dmgType, { crit: !!crit });
+            }
+            // Superfícies Elementais no Tabuleiro Hexagonal (Fogo, Gelo, Eletricidade, Veneno/Ácido)
+            if (skill && currentState && currentState.order && typeof simApplyHexSurface === 'function') {
+                var _hitUnit = null;
+                for (var _hui = 0; _hui < currentState.order.length; _hui++) {
+                    var _hu = currentState.order[_hui];
+                    if (_hu && (_hu.id === uid || (typeof unitUidForOrderIndex === 'function' && unitUidForOrderIndex(currentState, _hui) === uid))) {
+                        _hitUnit = _hu;
+                        break;
+                    }
+                }
+                if (_hitUnit && _hitUnit.pos) {
+                    var _hc = _hitUnit.pos.col, _hr = _hitUnit.pos.row;
+                    if (skName === 'Bola de Fogo' || dmgType === 'fire') {
+                        simApplyHexSurface(currentState, _hc, _hr, 'fire', 2, skName || 'Chamas');
+                        if (skName === 'Bola de Fogo' && typeof hexNeighbors === 'function') {
+                            var _adjH = hexNeighbors(_hc, _hr);
+                            for (var _ahi = 0; _ahi < _adjH.length; _ahi++) {
+                                simApplyHexSurface(currentState, _adjH[_ahi].col, _adjH[_ahi].row, 'fire', 2, 'Bola de Fogo');
+                            }
+                        }
+                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                    } else if (skName === 'Raio Gélido' || dmgType === 'cold') {
+                        simApplyHexSurface(currentState, _hc, _hr, 'ice', 2, skName || 'Gelo');
+                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                    } else if (dmgType === 'lightning') {
+                        simApplyHexSurface(currentState, _hc, _hr, 'electrified_water', 2, skName || 'Eletricidade');
+                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                    } else if (dmgType === 'poison' || dmgType === 'acid') {
+                        simApplyHexSurface(currentState, _hc, _hr, 'poison', 2, skName || 'Ácido/Veneno');
+                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                    }
+                }
             }
             // 2) overlays pós-impacto
             if (opts.sneakAttack) {
@@ -44379,12 +44783,36 @@ if (typeof document !== 'undefined') {
     }
 })();
 
-/** Anima o token atacante avançando (lunge) em direção ao alvo para combate corpo a corpo,
- *  ou pulsando com energia para ataques à distância/magias. */
+/** Anima o token atacante avançando (lunge) em direção ao alvo para combate corpo a corpo
+ *  (com arco de impacto direcional e recuo tático no token atingido),
+ *  ou conjurando com círculo rúnico sob os pés para ataques à distância/magias. */
 async function animHexTokenAttack(fromEl, targetEl, isRanged) {
     if (!fromEl) return;
     if (isRanged || !targetEl) {
         fromEl.classList.add('token-casting');
+        try {
+            var rCast = fromEl.getBoundingClientRect();
+            var runeEl = document.createElement('div');
+            runeEl.style.position = 'fixed';
+            runeEl.style.left = (rCast.left + rCast.width / 2 - 34) + 'px';
+            runeEl.style.top = (rCast.top + rCast.height / 2 - 22) + 'px';
+            runeEl.style.width = '68px';
+            runeEl.style.height = '44px';
+            runeEl.style.borderRadius = '50%';
+            runeEl.style.border = '2px dashed rgba(168, 85, 247, 0.85)';
+            runeEl.style.boxShadow = '0 0 18px rgba(168, 85, 247, 0.65), inset 0 0 12px rgba(245, 158, 11, 0.45)';
+            runeEl.style.pointerEvents = 'none';
+            runeEl.style.zIndex = '54';
+            runeEl.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+            runeEl.style.transform = 'scale(0.6) rotate(0deg)';
+            runeEl.style.opacity = '1';
+            document.body.appendChild(runeEl);
+            requestAnimationFrame(function () {
+                runeEl.style.transform = 'scale(1.35) rotate(90deg)';
+                runeEl.style.opacity = '0';
+            });
+            setTimeout(function () { if (runeEl.parentNode) runeEl.parentNode.removeChild(runeEl); }, 520);
+        } catch (_) {}
         await new Promise(function (r) { setTimeout(r, 520); });
         fromEl.classList.remove('token-casting');
         return;
@@ -44395,17 +44823,61 @@ async function animHexTokenAttack(fromEl, targetEl, isRanged) {
         var dx = (rT.left + rT.width / 2) - (rA.left + rA.width / 2);
         var dy = (rT.top + rT.height / 2) - (rA.top + rA.height / 2);
         var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        var lungeDist = Math.min(24, Math.max(12, dist * 0.35));
-        var lx = (dx / dist) * lungeDist;
-        var ly = (dy / dist) * lungeDist;
+        var ux = dx / dist;
+        var uy = dy / dist;
+        var lungeDist = Math.min(26, Math.max(14, dist * 0.38));
+        var lx = ux * lungeDist;
+        var ly = uy * lungeDist;
 
         fromEl.style.zIndex = '55';
-        fromEl.style.transition = 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2)';
-        fromEl.style.transform = 'translate(' + lx.toFixed(1) + 'px, ' + ly.toFixed(1) + 'px) scale(1.12)';
-        await new Promise(function (r) { setTimeout(r, 220); });
-        fromEl.style.transition = 'transform 0.28s ease-in';
+        fromEl.style.transition = 'transform 0.20s cubic-bezier(0.2, 0.9, 0.3, 1.25)';
+        fromEl.style.transform = 'translate(' + lx.toFixed(1) + 'px, ' + ly.toFixed(1) + 'px) scale(1.14)';
+        await new Promise(function (r) { setTimeout(r, 190); });
+
+        // Recuo físico (Hit-Recoil) no token alvo + Onda de Choque no ponto de contato
+        try {
+            var recoilX = (ux * 8).toFixed(1);
+            var recoilY = (uy * 8).toFixed(1);
+            targetEl.style.transition = 'transform 0.12s cubic-bezier(0.1, 0.9, 0.2, 1)';
+            targetEl.style.transform = 'translate(' + recoilX + 'px, ' + recoilY + 'px) scale(0.94)';
+            setTimeout(function () {
+                if (targetEl) {
+                    targetEl.style.transition = 'transform 0.22s ease-out';
+                    targetEl.style.transform = 'translate(0, 0) scale(1)';
+                    setTimeout(function () {
+                        if (targetEl) {
+                            targetEl.style.transition = '';
+                            targetEl.style.transform = '';
+                        }
+                    }, 220);
+                }
+            }, 130);
+
+            var shockRing = document.createElement('div');
+            shockRing.style.position = 'fixed';
+            shockRing.style.left = (rT.left + rT.width / 2 - 24) + 'px';
+            shockRing.style.top = (rT.top + rT.height / 2 - 24) + 'px';
+            shockRing.style.width = '48px';
+            shockRing.style.height = '48px';
+            shockRing.style.borderRadius = '50%';
+            shockRing.style.border = '2.5px solid rgba(251, 191, 36, 0.9)';
+            shockRing.style.boxShadow = '0 0 16px rgba(239, 68, 68, 0.75)';
+            shockRing.style.pointerEvents = 'none';
+            shockRing.style.zIndex = '99990';
+            shockRing.style.transition = 'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease-out';
+            shockRing.style.transform = 'scale(0.35)';
+            shockRing.style.opacity = '1';
+            document.body.appendChild(shockRing);
+            requestAnimationFrame(function () {
+                shockRing.style.transform = 'scale(1.65)';
+                shockRing.style.opacity = '0';
+            });
+            setTimeout(function () { if (shockRing.parentNode) shockRing.parentNode.removeChild(shockRing); }, 340);
+        } catch (_) {}
+
+        fromEl.style.transition = 'transform 0.26s ease-in';
         fromEl.style.transform = 'translate(0, 0) scale(1)';
-        await new Promise(function (r) { setTimeout(r, 200); });
+        await new Promise(function (r) { setTimeout(r, 210); });
         fromEl.style.transition = '';
         fromEl.style.transform = '';
         fromEl.style.zIndex = '';
@@ -44415,6 +44887,75 @@ async function animHexTokenAttack(fromEl, targetEl, isRanged) {
             fromEl.style.transform = '';
             fromEl.style.zIndex = '';
         }
+    }
+}
+
+/** Anima teletransporte tático na grade hexagonal (Passo Brumoso / Passo das Sombras — PHB p. 195 / p. 260) */
+async function animHexTokenTeleport(tokenEl, fromPos, toPos, theme) {
+    if (!tokenEl || !toPos) return;
+    var isShadow = (theme === 'shadow');
+    var ringColor = isShadow ? 'rgba(139, 92, 246, 0.9)' : 'rgba(186, 230, 253, 0.95)';
+    var glowColor = isShadow ? 'rgba(88, 28, 135, 0.85)' : 'rgba(56, 189, 248, 0.8)';
+
+    function spawnPortalBurst(col, row) {
+        try {
+            var tile = document.querySelector('.hex-grid-svg polygon[data-col="' + col + '"][data-row="' + row + '"]');
+            if (!tile) return;
+            var rect = tile.getBoundingClientRect();
+            var burst = document.createElement('div');
+            burst.style.position = 'fixed';
+            burst.style.left = (rect.left + rect.width / 2 - 28) + 'px';
+            burst.style.top = (rect.top + rect.height / 2 - 28) + 'px';
+            burst.style.width = '56px';
+            burst.style.height = '56px';
+            burst.style.borderRadius = '50%';
+            burst.style.border = '3px solid ' + ringColor;
+            burst.style.boxShadow = '0 0 22px ' + glowColor + ', inset 0 0 14px ' + ringColor;
+            burst.style.pointerEvents = 'none';
+            burst.style.zIndex = '99995';
+            burst.style.transition = 'transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s ease-out';
+            burst.style.transform = 'scale(0.3)';
+            burst.style.opacity = '1';
+            document.body.appendChild(burst);
+            requestAnimationFrame(function () {
+                burst.style.transform = 'scale(1.55)';
+                burst.style.opacity = '0';
+            });
+            setTimeout(function () { if (burst.parentNode) burst.parentNode.removeChild(burst); }, 440);
+        } catch (_) {}
+    }
+
+    try {
+        if (fromPos && fromPos.col != null) spawnPortalBurst(fromPos.col, fromPos.row);
+        tokenEl.style.zIndex = '65';
+        tokenEl.style.transition = 'transform 0.22s ease-in, opacity 0.22s ease-in, filter 0.22s ease-in';
+        tokenEl.style.transform = 'scale(0.25) translateY(-16px)';
+        tokenEl.style.opacity = '0';
+        tokenEl.style.filter = 'brightness(2.2) blur(3px)';
+        await new Promise(function (r) { setTimeout(r, 230); });
+
+        var destCenter = hexCenter(toPos.col, toPos.row);
+        tokenEl.style.transition = 'none';
+        tokenEl.style.left = (destCenter.cx - Math.round(HEX_W / 2)) + 'px';
+        tokenEl.style.top = (destCenter.cy - Math.round(HEX_H / 2)) + 'px';
+        void tokenEl.offsetWidth;
+
+        if (typeof window.bfCameraFocusCoord === 'function') {
+            try { window.bfCameraFocusCoord(toPos.col, toPos.row, null, 280); } catch (_) {}
+        }
+        spawnPortalBurst(toPos.col, toPos.row);
+
+        tokenEl.style.transition = 'transform 0.26s cubic-bezier(0.2, 0.9, 0.3, 1.15), opacity 0.24s ease-out, filter 0.26s ease-out';
+        tokenEl.style.transform = 'scale(1) translateY(0px)';
+        tokenEl.style.opacity = '1';
+        tokenEl.style.filter = 'brightness(1) blur(0px)';
+        await new Promise(function (r) { setTimeout(r, 280); });
+    } catch (_) {} finally {
+        tokenEl.style.transition = '';
+        tokenEl.style.transform = '';
+        tokenEl.style.opacity = '';
+        tokenEl.style.filter = '';
+        tokenEl.style.zIndex = '';
     }
 }
 
@@ -45163,6 +45704,14 @@ async function __combatAnimateOneEvent(ev) {
             }
             if ((ev.subtype === 'resource' || ev.resGained != null) && _tU.res && ev.resGained != null) {
                 _tU.res.value = Math.min(_tU.res.max, (_tU.res.value | 0) + (ev.resGained | 0));
+            }
+        }
+        if (ev.teleportedTo && typeof animHexTokenTeleport === 'function' && elA) {
+            var _tpTheme = (ev.vfx === 'shadow_step' || String(ev.skillName || '').toLowerCase().indexOf('sombra') >= 0) ? 'shadow' : 'misty';
+            await animHexTokenTeleport(elA, ev.teleportedFrom, ev.teleportedTo, _tpTheme);
+            if (_tU) {
+                _tU.pos = { col: ev.teleportedTo.col, row: ev.teleportedTo.row };
+                if (typeof ensureProceduralBattlefield === 'function') ensureProceduralBattlefield(currentState);
             }
         }
         if (elA) elA.classList.add('buff-flash');
