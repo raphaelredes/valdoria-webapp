@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T18:13:42Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T18:56:51Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -5160,17 +5160,18 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
    constrained pelo sim-frame), nao 90vh (que sobreestima em viewports
    desktop > 800px). User feedback: "popup ao clicar nos cards está
    estourando o limite vertical da tela". */
-.unit-detail-overlay { background: rgba(15,12,8,.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: var(--v-space-lg, 12px); animation: udcFadeIn .25s ease; box-sizing: border-box; }
+.unit-detail-overlay { background: rgba(15,12,8,.88); display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; z-index: 95000 !important; padding: 12px 12px calc(24px + env(safe-area-inset-bottom, 0px)) 12px !important; animation: udcFadeIn .25s ease; box-sizing: border-box !important; }
 @keyframes udcFadeIn { from { opacity: 0; } to { opacity: 1; } }
 /* X-6.5.51x (2026-04-25): responsivo touch-aware. Antes: max-width:360px hardcoded.
    X-6.5.51AB (2026-04-26): max-height: calc(100% - 8px) garante que card NUNCA
    exceda o overlay (que tem altura == sim-frame-h). Antes 90vh deixava
-   card maior que o frame em viewports desktop. */
-.unit-detail-card { width: 100%; max-width: calc(var(--sim-frame-w) - 24px); max-height: 100%; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2a2420)); border: 1px solid var(--v-gold, #c4953a); border-radius: 12px; padding: 14px var(--v-space-xl, 16px) var(--v-space-lg, 12px); position: relative; box-shadow: 0 12px 40px rgba(0,0,0,.7), 0 0 30px rgba(196,149,58,.2); animation: udcPop .35s cubic-bezier(.34,1.56,.64,1); box-sizing: border-box; }
+   card maior que o frame em viewports desktop.
+   2026-10-18: centralizado no viewport visível mobile e acima do .sim-action-dock (92200). */
+.unit-detail-card { width: 100%; max-width: min(calc(var(--sim-frame-w, 430px) - 20px), calc(100% - 8px)); max-height: min(76dvh, calc(100% - 32px)) !important; min-height: 0 !important; margin: auto !important; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2a2420)); border: 1px solid var(--v-gold, #c4953a); border-radius: 12px; padding: 0 var(--v-space-xl, 16px) var(--v-space-lg, 14px); position: relative; box-shadow: 0 12px 40px rgba(0,0,0,.85), 0 0 30px rgba(196,149,58,.25); animation: udcPop .3s cubic-bezier(.34,1.56,.64,1); box-sizing: border-box; }
 @keyframes udcPop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.udc-close { position: absolute; top: 6px; right: 8px; background: transparent; border: none; color: var(--v-text-dim, #a09484); font-size: calc(24px * var(--v-font-scale, 1)); line-height: 1; cursor: pointer; padding: var(--v-space-sm, 4px) var(--v-space-md-lg, 10px); transition: color .15s; }
-.udc-close:hover { color: var(--v-gold, #c4953a); }
-.udc-header { display: flex; align-items: center; gap: var(--v-space-lg, 12px); padding-bottom: var(--v-space-lg, 12px); border-bottom: 1px solid rgba(196,149,58,.2); margin-bottom: var(--v-space-lg, 12px); }
+.udc-close { position: sticky; top: 8px; float: right; z-index: 6; margin-top: 8px; margin-right: -6px; background: rgba(20,16,12,.85); border: 1px solid rgba(196,149,58,.35); border-radius: 50%; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; color: var(--v-text-dim, #a09484); font-size: calc(20px * var(--v-font-scale, 1)); line-height: 1; cursor: pointer; padding: 0; transition: color .15s, border-color .15s; }
+.udc-close:hover { color: var(--v-gold, #c4953a); border-color: var(--v-gold, #c4953a); }
+.udc-header { position: sticky; top: 0; z-index: 4; background: linear-gradient(180deg, var(--v-bg-raised, #332a22) 88%, rgba(42,36,32,0.96) 100%); display: flex; align-items: center; gap: var(--v-space-lg, 12px); padding-top: 12px; padding-bottom: var(--v-space-lg, 12px); padding-right: 32px; border-bottom: 1px solid rgba(196,149,58,.25); margin-bottom: var(--v-space-lg, 12px); }
 .udc-ico { font-size: calc(36px * var(--v-font-scale, 1)); line-height: 1; flex-shrink: 0; filter: drop-shadow(0 0 8px rgba(196,149,58,.4)); }
 /* Crest heraldico (SVG) no header da ficha — tinta via currentColor da cls-X */
 .udc-ico--heraldic { width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; color: color-mix(in srgb, var(--card-accent, #c4953a) 55%, #fff 45%); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--card-accent, #c4953a) 60%, transparent)) drop-shadow(0 1px 2px rgba(0,0,0,.85)); }
@@ -5257,7 +5258,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 }
 .enemy-hover-stat-card {
     position: fixed;
-    z-index: 10050;
+    z-index: 95050;
     pointer-events: none;
     background: linear-gradient(180deg, rgba(34,28,23,0.97) 0%, rgba(18,14,11,0.98) 100%);
     border: 1px solid var(--v-gold, #c4953a);
@@ -5354,7 +5355,9 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 
 /* ==========================================================================
    TARGET ACTION MENU (Leque de Ações do Alvo ao Clicar - Smartphone First)
-   Substitui mouse hover e oferece ergonomia tática direta para toque mobile
+   Substitui mouse hover e oferece ergonomia tática direta para toque mobile.
+   2026-10-18: Centralizado no viewport visível (nunca colado/cortado na base)
+   e posicionado acima do .sim-action-dock (z-index 95000 > 92200).
    ========================================================================== */
 .target-action-menu-overlay {
     position: absolute;
@@ -5363,49 +5366,37 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(10, 8, 5, 0.78);
+    background: rgba(10, 8, 5, 0.82);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
-    z-index: 10040;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0;
-    box-sizing: border-box;
+    z-index: 95000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 12px 12px calc(24px + env(safe-area-inset-bottom, 0px)) 12px !important;
+    box-sizing: border-box !important;
     animation: udcFadeIn .18s ease;
-}
-
-@media (min-width: 601px) {
-    .target-action-menu-overlay {
-        justify-content: center;
-        padding: 16px;
-    }
 }
 
 .target-action-menu-sheet {
     width: 100%;
-    max-width: 440px;
+    max-width: min(420px, calc(100% - 8px));
     background: linear-gradient(180deg, #251d16 0%, #17120d 100%);
     border: 1px solid var(--v-gold, #c4953a);
-    border-bottom: none;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.88), 0 0 16px rgba(196, 149, 58, 0.25);
-    padding: 14px 16px 20px 16px;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(196, 149, 58, 0.3);
+    padding: 14px 16px 16px 16px;
     box-sizing: border-box;
-    max-height: 85vh;
+    max-height: min(76dvh, calc(100% - 32px)) !important;
+    min-height: 0 !important;
+    margin: auto !important;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     color: #e6ded0;
-    animation: tamSheetSlideUp .22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@media (min-width: 601px) {
-    .target-action-menu-sheet {
-        border-bottom: 1px solid var(--v-gold, #c4953a);
-        border-radius: 12px;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(196, 149, 58, 0.3);
-    }
+    animation: udcPop .22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes tamSheetSlideUp {
@@ -6111,7 +6102,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .etc-actions .action-btn { flex: 1; }
 
 /* Popup de confirmacao de alvo */
-.target-confirm-overlay { background: rgba(15,12,8,.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; animation: udcFadeIn .2s ease; }
+.target-confirm-overlay { background: rgba(15,12,8,.85); display: flex; align-items: center; justify-content: center; z-index: 95000; padding: 20px; animation: udcFadeIn .2s ease; }
 .target-confirm-card { width: 100%; max-width: 320px; padding: var(--v-space-xl, 16px) 18px; background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2a2420)); border: 1px solid #c06a3a; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.7), 0 0 24px rgba(192,106,58,.3); animation: udcPop .3s cubic-bezier(.34,1.56,.64,1); }
 .tcc-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); letter-spacing: 2.5px; text-transform: uppercase; text-align: center; padding-bottom: var(--v-space-md-lg, 10px); border-bottom: 1px solid rgba(192,106,58,.25); margin-bottom: var(--v-space-lg, 12px); }
 .tcc-preview { display: flex; align-items: center; gap: var(--v-space-lg, 12px); padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px); background: rgba(15,12,8,.4); border: 1px solid rgba(192,106,58,.3); border-radius: 8px; margin-bottom: 14px; }
@@ -6885,7 +6876,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
    disponível no #app (pedido do autor). */
 
 /* Popup de lista (Habilidades / Mochila) */
-.list-panel-overlay { position: relative; background: rgba(15,12,8,.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; animation: udcFadeIn .2s ease; }
+.list-panel-overlay { position: relative; background: rgba(15,12,8,.85); display: flex; align-items: center; justify-content: center; z-index: 95000; padding: 20px; animation: udcFadeIn .2s ease; }
 /* GLOBAL HARDENING: tudo dentro de #app DEVE respeitar o limite do frame.
    overflow:hidden no #app + max-width 430px garante que nenhum overlay
    escape horizontalmente. max-height 100% + overflow interno garante scroll
@@ -24672,10 +24663,11 @@ function getBiomeObstacles(biome, cols, rows) {
     } else {
         catalog = [
             { name: 'Menir Ancestral', cover: 'total', blocks_los: true, symbol: '🗿', desc: 'Obelisco de pedra — Obstáculo Intransponível e Cobertura Total' },
-            { name: 'Torreão em Ruínas', cover: 'total', blocks_los: true, symbol: '🏛️', desc: 'Fragmento de muralha — Obstáculo Intransponível e Cobertura Total' },
-            { name: 'Carroça Tombada', cover: 'three_quarters', blocks_los: false, symbol: '🛞', desc: 'Estrutura de carvalho reforçado — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
-            { name: 'Barricada de Madeira', cover: 'half', blocks_los: false, symbol: '🚧', desc: 'Estacas defensivas — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' },
-            { name: 'Afloramento de Pedra', cover: 'half', blocks_los: false, symbol: '🪨', desc: 'Rocha baixa — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+            { name: 'Carvalho Solitário', cover: 'total', blocks_los: true, symbol: '🌳', desc: 'Árvore antiga de tronco espesso — Obstáculo Intransponível e Cobertura Total' },
+            { name: 'Penedo de Campo', cover: 'three_quarters', blocks_los: false, symbol: '🪨', desc: 'Rocha maciça de campo — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+            { name: 'Mureta de Pedra Seca', cover: 'half', blocks_los: false, symbol: '🧱', desc: 'Muro baixo de pedras — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' },
+            { name: 'Afloramento de Pedra', cover: 'half', blocks_los: false, symbol: '🪨', desc: 'Rocha baixa — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' },
+            { name: 'Tronco Caído Maciço', cover: 'half', blocks_los: false, symbol: '🪵', desc: 'Tronco antigo tombado — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
         ];
     }
 
@@ -24684,21 +24676,18 @@ function getBiomeObstacles(biome, cols, rows) {
         coords = [
             [2, 3, 0],
             [11, 3, 2],
-            [5, 5, 0],
-            [9, 5, 2],
+            [5, 5, 1],
+            [9, 5, 4],
             [4, 7, 3],
-            [6, 5, 4],
-            [10, 7, 1],
-            [6, 6, 3],
-            [8, 6, 4]
+            [10, 7, 2],
+            [6, 6, 5]
         ];
     } else {
         coords = [
             [1, 3, 0],
             [6, 3, 2],
             [2, 5, 3],
-            [5, 5, 4],
-            [4, 4, 2]
+            [5, 5, 4]
         ];
     }
 
@@ -24855,10 +24844,35 @@ function getProceduralHexObstacle(col, row, biome) {
     for (var i = 0; i < bStr.length; i++) seed = (seed * 37 + bStr.charCodeAt(i)) & 0x7fffffff;
     var h = (Math.imul(col ^ 0x27d4eb2d, 0x85ebca6b) ^ Math.imul(row ^ seed, 0xc2b2ae35)) >>> 0;
     var rnd = (h % 1000) / 1000;
-    if (rnd < 0.075) {
-        var catalog = getBiomeObstacles(bStr, 20, 20);
-        if (!catalog || !catalog.length) return null;
-        var spec = catalog[h % catalog.length];
+    if (rnd < 0.032) {
+        var naturalCatalog;
+        if (bStr.indexOf('cave') >= 0 || bStr.indexOf('caverna') >= 0 || bStr.indexOf('dungeon') >= 0 || bStr.indexOf('masmorra') >= 0 || bStr.indexOf('crypt') >= 0 || bStr.indexOf('ruins') >= 0 || bStr.indexOf('ruinas') >= 0) {
+            naturalCatalog = [
+                { name: 'Pilar de Pedra Rúnica', cover: 'total', blocks_los: true, symbol: '🏛️', desc: 'Coluna de pedra maciça — Obstáculo Intransponível e Cobertura Total' },
+                { name: 'Escombros de Cantaria', cover: 'three_quarters', blocks_los: false, symbol: '🪨', desc: 'Bloco desmoronado — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+                { name: 'Mureta Desmoronada', cover: 'half', blocks_los: false, symbol: '🧱', desc: 'Parede baixa de alvenaria — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+            ];
+        } else if (bStr.indexOf('mountain') >= 0 || bStr.indexOf('montanha') >= 0 || bStr.indexOf('hills') >= 0 || bStr.indexOf('colina') >= 0 || bStr.indexOf('snow') >= 0 || bStr.indexOf('ice') >= 0) {
+            naturalCatalog = [
+                { name: 'Pináculo Rochoso', cover: 'total', blocks_los: true, symbol: '🏔️', desc: 'Agulha de granito — Obstáculo Intransponível e Cobertura Total' },
+                { name: 'Matacão Alpino', cover: 'three_quarters', blocks_los: false, symbol: '🪨', desc: 'Rocha de encosta — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+                { name: 'Crista de Xisto', cover: 'half', blocks_los: false, symbol: '⛰️', desc: 'Afloramento rochoso — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+            ];
+        } else if (bStr.indexOf('swamp') >= 0 || bStr.indexOf('pantano') >= 0 || bStr.indexOf('pântano') >= 0) {
+            naturalCatalog = [
+                { name: 'Cipreste Pantanoso', cover: 'total', blocks_los: true, symbol: '🌲', desc: 'Árvore pantanosa descomunal — Obstáculo Intransponível e Cobertura Total' },
+                { name: 'Pedregulho Submerso', cover: 'three_quarters', blocks_los: false, symbol: '🪨', desc: 'Rocha enlameada — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+                { name: 'Raiz de Manguezal', cover: 'half', blocks_los: false, symbol: '🌿', desc: 'Arco de raízes densas — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+            ];
+        } else {
+            naturalCatalog = [
+                { name: 'Carvalho Centenário', cover: 'total', blocks_los: true, symbol: '🌳', desc: 'Árvore de tronco maciço — Obstáculo Intransponível e Cobertura Total' },
+                { name: 'Penedo de Campo', cover: 'three_quarters', blocks_los: false, symbol: '🪨', desc: 'Rocha densa — Obstáculo Intransponível e Cobertura de Três Quartos (+5 CA e +5 Salv. DES)' },
+                { name: 'Afloramento de Pedra', cover: 'half', blocks_los: false, symbol: '🪨', desc: 'Rocha baixa — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' },
+                { name: 'Tronco Caído', cover: 'half', blocks_los: false, symbol: '🪵', desc: 'Madeira ancestral caída — Obstáculo Intransponível e Meia Cobertura (+2 CA e +2 Salv. DES)' }
+            ];
+        }
+        var spec = naturalCatalog[(h >>> 7) % naturalCatalog.length];
         return {
             col: col,
             row: row,
@@ -25144,6 +25158,7 @@ function calcUnitVisionRange(u, weather, biome) {
     if (curWeather === 'fog' || curWeather === 'f' || curWeather === 'nevoa') baseR = 3;
     else if (curWeather === 'storm' || curWeather === 't' || curWeather === 'tempestade') baseR = 4;
     else if (curWeather === 'snow' || curWeather === 'neve') baseR = 4;
+    else if (curWeather === 'snow' || curWeather === 'neve') baseR = 4;
     else if (curWeather === 'rain' || curWeather === 'r' || curWeather === 'chuva') baseR = 5;
     else if (curBiome.indexOf('cave') >= 0 || curBiome.indexOf('masmorra') >= 0 || curBiome.indexOf('dungeon') >= 0 || curBiome.indexOf('caverna') >= 0) baseR = 5;
     else baseR = 6;
@@ -25169,6 +25184,10 @@ function ensureProceduralBattlefield(s) {
     if (!s.battlefield.obstacles) s.battlefield.obstacles = [];
     if (!s.battlefield.elevations) s.battlefield.elevations = [];
 
+    var oldCols = s.battlefield.cols;
+    var oldRows = s.battlefield.rows;
+    var hadCoreObstacles = s.battlefield.obstacles.length > 0;
+
     var biomeStr = s.biome || s.bio || 'forest';
     var unitOccupiedMap = {};
     (s.order || []).forEach(function (u) {
@@ -25187,6 +25206,7 @@ function ensureProceduralBattlefield(s) {
                 s.battlefield.obstacles.push(bo);
             }
         }
+        hadCoreObstacles = s.battlefield.obstacles.length > 0;
         initializedBase = true;
     }
     if (s.battlefield.elevations.length === 0 && !s.battlefield._elevationsInitialized) {
@@ -25235,11 +25255,15 @@ function ensureProceduralBattlefield(s) {
     });
 
     var expanded = false;
+    var totalShiftC = 0;
+    var totalShiftR = 0;
 
     // Expansão para a esquerda se a margem for menor que o alcance de visão
     if (minC < requiredMargin) {
         var shiftC = requiredMargin - minC;
+        totalShiftC += shiftC;
         s.battlefield.cols += shiftC;
+        minC += shiftC;
         maxC += shiftC;
         (s.order || []).forEach(function (u) {
             if (u && u.pos && u.pos.col != null) u.pos.col += shiftC;
@@ -25266,7 +25290,9 @@ function ensureProceduralBattlefield(s) {
     // Expansão para cima se a margem for menor que o alcance de visão
     if (minR < requiredMargin) {
         var shiftR = requiredMargin - minR;
+        totalShiftR += shiftR;
         s.battlefield.rows += shiftR;
+        minR += shiftR;
         maxR += shiftR;
         (s.order || []).forEach(function (u) {
             if (u && u.pos && u.pos.row != null) u.pos.row += shiftR;
@@ -25326,10 +25352,17 @@ function ensureProceduralBattlefield(s) {
             }
         });
 
+        var coreMinC = totalShiftC;
+        var coreMaxC = totalShiftC + oldCols - 1;
+        var coreMinR = totalShiftR;
+        var coreMaxR = totalShiftR + oldRows - 1;
+
         for (var c = 0; c < s.battlefield.cols; c++) {
             for (var r = 0; r < s.battlefield.rows; r++) {
                 var k = c + ',' + r;
-                var isOuterRing = (c < minC - 1 || c > maxC + 1 || r < minR - 1 || r > maxR + 1);
+                var inOldCore = hadCoreObstacles && (c >= coreMinC && c <= coreMaxC && r >= coreMinR && r <= coreMaxR);
+                if (inOldCore) continue;
+                var isOuterRing = (c < minC - 2 || c > maxC + 2 || r < minR - 2 || r > maxR + 2);
                 if (!dtMap[k] && !obsMap[k] && !liveOcc[k]) {
                     if (isOuterRing) {
                         var pObs = getProceduralHexObstacle(c, r, biomeStr);
@@ -41881,10 +41914,65 @@ function showFireballSpellOverlay(actor, target, dart, s) {
  *
  * O helper faz fallback pra body se #app não existir (guard raríssimo).
  */
+function _clampModalOverlayToViewport(ov, cardEl) {
+    if (!ov) return;
+    try {
+        var appEl = document.getElementById('app');
+        if (!appEl) return;
+        var vv = window.visualViewport;
+        var tgH = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.viewportStableHeight) || 0;
+        var winH = window.innerHeight || (document.documentElement ? document.documentElement.clientHeight : 0) || 0;
+        var visH = (vv && vv.height > 100) ? vv.height : (winH || tgH || 680);
+        if (tgH > 100 && tgH < visH) visH = tgH;
+        var visTop = (vv && typeof vv.offsetTop === 'number') ? vv.offsetTop : 0;
+
+        var appRect = appEl.getBoundingClientRect();
+        var topInApp = Math.max(0, Math.round(visTop - appRect.top));
+        var bottomInApp = Math.min(appRect.height, Math.round((visTop + visH) - appRect.top));
+        var availH = Math.max(260, bottomInApp - topInApp);
+
+        ov.style.setProperty('top', topInApp + 'px', 'important');
+        ov.style.setProperty('bottom', 'auto', 'important');
+        ov.style.setProperty('height', availH + 'px', 'important');
+        ov.style.setProperty('max-height', availH + 'px', 'important');
+
+        if (!cardEl) {
+            cardEl = ov.querySelector('.unit-detail-card, .target-action-menu-sheet, .target-confirm-card, .list-panel-card, .iop-card');
+        }
+        if (cardEl) {
+            var maxCardH = Math.max(220, Math.floor(availH * 0.82) - 16);
+            cardEl.style.setProperty('max-height', maxCardH + 'px', 'important');
+            cardEl.style.setProperty('margin-top', 'auto', 'important');
+            cardEl.style.setProperty('margin-bottom', 'auto', 'important');
+            cardEl.scrollTop = 0;
+        }
+    } catch (_eClamp) {
+        /* Fail-safe: regras de CSS padrão garantem fallback limpo */
+    }
+}
+
 function mountInGameFrame(el) {
     if (!el) return;
     var host = document.getElementById('app') || document.body;
     host.appendChild(el);
+    if (el.classList && (
+        el.classList.contains('unit-detail-overlay') ||
+        el.classList.contains('target-action-menu-overlay') ||
+        el.classList.contains('target-confirm-overlay') ||
+        el.classList.contains('list-panel-overlay')
+    )) {
+        _clampModalOverlayToViewport(el);
+        var _onVpChange = function () {
+            if (!el.isConnected) {
+                window.removeEventListener('resize', _onVpChange);
+                if (window.visualViewport) window.visualViewport.removeEventListener('resize', _onVpChange);
+                return;
+            }
+            _clampModalOverlayToViewport(el);
+        };
+        window.addEventListener('resize', _onVpChange, { passive: true });
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', _onVpChange, { passive: true });
+    }
 }
 
 /** Mísseis orbitando o dado de dano em 2.5D — 3 keyframes distintos (--1..--3)
