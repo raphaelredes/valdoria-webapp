@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-18T21:41:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-18T22:38:16Z - do not edit directly, edit source -->
 
 
 
@@ -39645,6 +39645,22 @@ function openEventModal() {
       btn.appendChild(tag);
     }
 
+    if (ch.consume_item) {
+      const itTag = document.createElement('span');
+      itTag.className = 'class-tag consume-tag';
+      const itName = typeof ch.consume_item === 'string' ? ch.consume_item : (ch.consume_item.item || 'Item');
+      const itQty = typeof ch.consume_item === 'object' ? (ch.consume_item.qty || 1) : 1;
+      itTag.textContent = '🪢 Consome: ' + itQty + 'x ' + itName;
+      btn.appendChild(itTag);
+    } else if (ch.requires_item) {
+      const reqTag = document.createElement('span');
+      reqTag.className = 'class-tag req-tag';
+      const reqName = typeof ch.requires_item === 'string' ? ch.requires_item : (ch.requires_item.item || 'Item');
+      const reqQty = typeof ch.requires_item === 'object' ? (ch.requires_item.qty || 1) : 1;
+      reqTag.textContent = '📦 Requer: ' + reqQty + 'x ' + reqName;
+      btn.appendChild(reqTag);
+    }
+
     btn.addEventListener('click', () => {
       if (btn.classList.contains('locked')) {
         dmNarrate({ text: 'Sem aliados por perto — esta ação exige uma segunda pessoa.', type: 'ambient' });
@@ -40416,6 +40432,15 @@ function _explEventHeaderNpc(ev) {
   var portrait = _explResolveFallbackEventPortrait(ev);
   if (ev && ev.npc && ev.npc.name) {
     var npc = Object.assign({}, ev.npc);
+    if (!npc.desc) {
+      var parts = [];
+      if (npc.race) parts.push(npc.race + (npc.subrace ? ' (' + npc.subrace + ')' : ''));
+      if (npc.npc_class) parts.push(npc.npc_class);
+      else if (npc.class) parts.push(npc.class);
+      if (npc.alignment) parts.push(npc.alignment);
+      if (npc.cr) parts.push('ND ' + npc.cr);
+      if (parts.length) npc.desc = parts.join(' · ');
+    }
     if (!npc.portrait) npc.portrait = portrait;
     else npc.portrait = _explNormImgPath(npc.portrait);
     return npc;
@@ -40499,10 +40524,27 @@ function checkPlayerAdvantageClient(advCondition, player) {
 }
 
 function _explEventBodyNode(ev) {
+  // Clima e período do dia: seleciona variante contextual se presente
+  var curWx = (window.S && window.S.weather) || 's';
+  var wxMap = { s: 'clear', clear: 'clear', r: 'rain', rain: 'rain', t: 'storm', storm: 'storm', f: 'fog', fog: 'fog', snow: 'snow' };
+  var wxKey = wxMap[curWx] || 'clear';
+  var dpKey = (window.S && window.S.dayPhase) || 'day';
+  var chosenScript = null;
+  if (ev.script_by_weather && typeof ev.script_by_weather === 'object') {
+    chosenScript = ev.script_by_weather[wxKey + '_' + dpKey] || ev.script_by_weather[wxKey] || ev.script_by_weather['clear'];
+  } else if (ev.weather_scripts && typeof ev.weather_scripts === 'object') {
+    chosenScript = ev.weather_scripts[wxKey + '_' + dpKey] || ev.weather_scripts[wxKey] || ev.weather_scripts['clear'];
+  }
+  if (!chosenScript && ev.script_by_day_phase && typeof ev.script_by_day_phase === 'object') {
+    chosenScript = ev.script_by_day_phase[dpKey];
+  }
+
   // Copia o script (NAO muta o ev do servidor). Fallback ao texto plano.
-  var script = (Array.isArray(ev.script) && ev.script.length)
-    ? ev.script.slice()
-    : [{ type: 'narration', text: ev.text || ev.title || '' }];
+  var script = (Array.isArray(chosenScript) && chosenScript.length)
+    ? chosenScript.slice()
+    : ((Array.isArray(ev.script) && ev.script.length)
+      ? ev.script.slice()
+      : [{ type: 'narration', text: ev.text || ev.title || '' }]);
   // Tech callout (mecanica) como linha de narracao — paridade com openEventModal.
   if (ev.tech && ev.tech.text) {
     script.push({ type: 'narration', text: '<b>' + (ev.tech.label || 'Mecanica') + '</b> — ' + ev.tech.text });
@@ -40557,6 +40599,21 @@ function _explEventBodyNode(ev) {
     if (ch.is_thought || ch.thought) c.is_thought = true;
     if (ch.desc) c.desc = ch.desc;
     if (ch.badge) c.badge = ch.badge;
+
+    // Transparência pré-clique de consumo ou posse de itens
+    if (ch.consume_item) {
+      var itName = typeof ch.consume_item === 'string' ? ch.consume_item : (ch.consume_item.item || ch.consume_item.name || 'Item');
+      var itQty = typeof ch.consume_item === 'object' ? (ch.consume_item.qty || 1) : 1;
+      var cWarn = '[Consome: ' + itQty + 'x ' + itName + ']';
+      c.desc = c.desc ? (c.desc + ' · ' + cWarn) : cWarn;
+      if (!c.badge) c.badge = 'Consome ' + itName;
+    } else if (ch.requires_item) {
+      var rName = typeof ch.requires_item === 'string' ? ch.requires_item : (ch.requires_item.item || ch.requires_item.name || 'Item');
+      var rQty = typeof ch.requires_item === 'object' ? (ch.requires_item.qty || 1) : 1;
+      var rWarn = '[Requer: ' + rQty + 'x ' + rName + ']';
+      c.desc = c.desc ? (c.desc + ' · ' + rWarn) : rWarn;
+    }
+
     displayed.push(c);
   });
   // PADRAO_DADOS: com 1 choice EXIBIDA (botao inline, SEM badge) anuncia o teste
@@ -40661,6 +40718,16 @@ function _explEventVEncResolve(ev, ch) {
     _explSyncStateFromServer(res.state);
     if (res.combat_redirect) { oc._combat_redirect = res.combat_redirect; }
     if (oc.flavor && !oc.text) { oc.text = oc.flavor; }
+    if (oc.chain && oc.chain.choices) {
+      S._eventChain = Object.assign({}, oc.chain, {
+        resolved: null, __remote: true, __venc: true
+      });
+    }
+    if (Array.isArray(oc.consumed_items)) {
+      oc.consumed_items.forEach(function (ci) {
+        if (typeof _deductSharedInventory === 'function') _deductSharedInventory(ci.item, ci.qty || 1);
+      });
+    }
     // Fecha o corpo ANTES do dado (o #dice-overlay aparece limpo, sem o card atras).
     try { window.vEncounter.close(); } catch (_) {}
     if (oc.check && realCh.skill) {
@@ -42718,7 +42785,117 @@ function classCanTakeChoice(ch, clsKey, bg, align, allies) {
     if (!anyMatch) return false;
   }
 
+  // Checagem de itens requeridos ou consumidos
+  if (ch.requires_item) {
+    if (!hasRequiredItem(ch.requires_item)) return false;
+  }
+  if (ch.consume_item) {
+    if (!hasRequiredItem(ch.consume_item)) return false;
+  }
+
   return true;
+}
+
+function hasRequiredItem(req) {
+  if (!req) return true;
+  if (Array.isArray(req)) {
+    return req.every(function (r) { return hasRequiredItem(r); });
+  }
+  var targetName = '';
+  var targetQty = 1;
+  if (typeof req === 'string') {
+    targetName = req;
+    targetQty = 1;
+  } else if (req && typeof req === 'object') {
+    targetName = req.item || req.item_id || req.name || req.id || '';
+    targetQty = Number(req.qty || req.q || req.count || 1);
+  }
+  if (!targetName) return true;
+
+  var norm = function (s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-_]/g, ' ').trim();
+  };
+  var targetNorm = norm(targetName);
+  var inv = (typeof _readSharedInventory === 'function') ? _readSharedInventory() : [];
+  var count = 0;
+  for (var i = 0; i < inv.length; i++) {
+    var entry = inv[i];
+    var eName = '';
+    var eQty = 1;
+    if (typeof entry === 'string') {
+      eName = entry;
+      eQty = 1;
+    } else if (entry && typeof entry === 'object') {
+      eName = entry.i || entry.name || entry.item || entry.id || '';
+      eQty = Number(entry.q || entry.qty || entry.count || 1);
+    }
+    var eNorm = norm(eName);
+    if (eNorm === targetNorm || eNorm.indexOf(targetNorm) !== -1 || targetNorm.indexOf(eNorm) !== -1) {
+      count += eQty;
+    }
+  }
+  return count >= targetQty;
+}
+
+function _deductSharedInventory(itemName, qty) {
+  qty = Number(qty || 1);
+  if (!itemName || qty <= 0) return;
+  var norm = function (s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-_]/g, ' ').trim();
+  };
+  var targetNorm = norm(itemName);
+
+  if (Array.isArray(window.__EXPLORE_SERVER_INV)) {
+    var rem = qty;
+    for (var i = 0; i < window.__EXPLORE_SERVER_INV.length && rem > 0; i++) {
+      var it = window.__EXPLORE_SERVER_INV[i];
+      var itName = norm(it && (it.i || it.name || it.item || it.id || ''));
+      if (itName === targetNorm || itName.indexOf(targetNorm) !== -1 || targetNorm.indexOf(itName) !== -1) {
+        var curQ = Number(it.q || it.qty || 1);
+        var take = Math.min(curQ, rem);
+        it.q = curQ - take;
+        rem -= take;
+      }
+    }
+    window.__EXPLORE_SERVER_INV = window.__EXPLORE_SERVER_INV.filter(function (it) {
+      return Number(it.q || it.qty || 0) > 0;
+    });
+  }
+
+  try {
+    var raw = localStorage.getItem(SHARED_INVENTORY_KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        var remL = qty;
+        var nextL = [];
+        for (var j = 0; j < parsed.length; j++) {
+          var itemL = parsed[j];
+          var lName = typeof itemL === 'string' ? itemL : (itemL.name || itemL.id || itemL.i || '');
+          var lNorm = norm(lName);
+          if (remL > 0 && (lNorm === targetNorm || lNorm.indexOf(targetNorm) !== -1 || targetNorm.indexOf(lNorm) !== -1)) {
+            if (typeof itemL === 'string') {
+              remL -= 1;
+            } else {
+              var qL = Number(itemL.count || itemL.qty || itemL.q || 1);
+              var takeL = Math.min(qL, remL);
+              qL -= takeL;
+              remL -= takeL;
+              if (qL > 0) {
+                if (itemL.count !== undefined) itemL.count = qL;
+                else if (itemL.qty !== undefined) itemL.qty = qL;
+                else itemL.q = qL;
+                nextL.push(itemL);
+              }
+            }
+          } else {
+            nextL.push(itemL);
+          }
+        }
+        localStorage.setItem(SHARED_INVENTORY_KEY, JSON.stringify(nextL));
+      }
+    }
+  } catch (_) {}
 }
 
 function startQuest(q) {
