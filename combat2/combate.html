@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T16:32:44Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T16:59:19Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13358,6 +13358,28 @@ canvas#vfxCanvas,
   0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 107, 43, 0.7)); }
   50% { filter: drop-shadow(0 0 14px rgba(255, 179, 71, 0.95)); }
 }
+@keyframes aoeExecBurstFade {
+  0% { opacity: 0; transform: scale(0.92); }
+  18% { opacity: 1; transform: scale(1.02); }
+  55% { opacity: 0.92; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.04); }
+}
+@keyframes aoeBurstTileFlash {
+  0% { opacity: 0.1; stroke-width: 1px; }
+  25% { opacity: 0.88; stroke-width: 2.6px; }
+  70% { opacity: 0.55; stroke-width: 1.8px; }
+  100% { opacity: 0; stroke-width: 0.8px; }
+}
+.hex-aoe-exec-burst {
+  pointer-events: none;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: aoeExecBurstFade 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.hex-aoe-burst-tile {
+  pointer-events: none;
+  animation: aoeBurstTileFlash 0.9s ease-out forwards;
+}
 
 .token-init-chip {
   position: absolute;
@@ -21089,12 +21111,25 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
                 }
             }
         }
-        if (uid && window._combatVfx) {
-            ensureCombatVfxRuntime();
-            var el = document.querySelector('[data-unit-id="' + uid + '"]');
+        if (uid) {
+            var el = document.querySelector('[data-unit-id="' + uid + '"]') || document.querySelector('[data-uid="' + uid + '"]');
             if (el) {
-                if (success) window._combatVfx.concentrationSave(el);
-                else window._combatVfx.concentrationLost(el);
+                if (window._combatVfx) {
+                    ensureCombatVfxRuntime();
+                    if (success) window._combatVfx.concentrationSave(el);
+                    else window._combatVfx.concentrationLost(el);
+                }
+                if (typeof spawnSkillImpactLabel === 'function') {
+                    setTimeout(function () {
+                        try {
+                            spawnSkillImpactLabel(
+                                el,
+                                success ? ('✦ CONCENTRAÇÃO MANTIDA (CD ' + dc + ')') : '💥 CONCENTRAÇÃO QUEBRADA!',
+                                success ? 'attack' : 'condition'
+                            );
+                        } catch (_eCL) {}
+                    }, 280);
+                }
             }
         }
     } catch (eVfx) { console.warn('[SIM]', 'concentration_vfx_failed', eVfx || ''); }
@@ -21124,6 +21159,15 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
                         if ((_lkT.se || []).length < _lkBefore) {
                             currentState.log.push((_lkT.n || '?') + ' se liberta — a concentração de ' +
                                 (target.n || '?') + ' foi quebrada (PHB p.203).');
+                            try {
+                                var _lkUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(currentState, x.linkedTargetIdx) : null;
+                                var _lkEl = _lkUid ? (document.querySelector('[data-unit-id="' + _lkUid + '"]') || document.querySelector('[data-uid="' + _lkUid + '"]')) : null;
+                                if (_lkEl && typeof spawnSkillImpactLabel === 'function') {
+                                    setTimeout(function () {
+                                        try { spawnSkillImpactLabel(_lkEl, '🔓 LIBERTO DA CONCENTRAÇÃO!', 'attack'); } catch (_eLk) {}
+                                    }, 450);
+                                }
+                            } catch (_eLkOuter) {}
                         }
                     }
                     return false;
@@ -21131,6 +21175,12 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
                 return true;
             });
             currentState.log.push(target.n + ' PERDE concentração (' + roll + '+' + conMod + '=' + total + ' vs CD ' + dc + ') — ' + lost.join(', ') + '.');
+            try {
+                var tethersLayer = document.getElementById('hexConcentrationTethersLayer');
+                if (tethersLayer && typeof buildHexConcentrationTethersSvg === 'function') {
+                    tethersLayer.innerHTML = buildHexConcentrationTethersSvg(currentState);
+                }
+            } catch (_eTeth) {}
         }
     }
 }
@@ -22222,17 +22272,17 @@ function clearTacticalAoePreview() {
     }
 }
 
-function drawTacticalAoePreview(centerCol, centerRow, skill) {
-    var layer = document.getElementById('hexAoeVisualLayer');
-    if (!layer || !currentState || !skill) return;
-    if (centerCol == null || centerRow == null) {
-        clearTacticalAoePreview();
-        return;
-    }
-
+/**
+ * Calcula a geometria canônica D&D 5e (PHB p. 204-205) de habilidades em área (Cone, Linha, Cubo, Esfera/Cilindro)
+ * no grid hexagonal, retornando os hexágonos e unidades afetados tanto para o preview quanto para a execução.
+ */
+function simComputeSkillAoeGeometry(caster, centerCol, centerRow, skill) {
+    if (!currentState || !skill || centerCol == null || centerRow == null) return null;
     var radiusHex = 0;
     var aoeType = 'arcane';
-    var aoeShape = skill.shape || 'sphere'; // 'sphere' | 'cone' | 'line' | 'cube'
+    var rawShape = String(skill.aoeShape || skill.shape || 'sphere').toLowerCase();
+    if (rawShape === 'cylinder' || rawShape === 'storm') rawShape = 'sphere';
+    var aoeShape = rawShape;
     var skNameLow = String(skill.n || '').toLowerCase();
     var skDmgLow = String(skill.dmgType || '').toLowerCase();
 
@@ -22245,27 +22295,27 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         aoeType = (skDmgLow === 'fire') ? 'fire' : 'cone';
         aoeShape = 'cone';
     } else if (
-        skill.shape === 'cone' ||
+        rawShape === 'cone' ||
         skNameLow.indexOf('mãos flamejantes') >= 0 ||
         skNameLow.indexOf('maos flamejantes') >= 0 ||
         skNameLow.indexOf('sopro') >= 0 ||
         skNameLow.indexOf('rajada de veneno') >= 0 ||
         skNameLow.indexOf('cone') >= 0
     ) {
-        radiusHex = skill.aoeRadius || 3; // 15 pés = 4,5m = 3 hexes (PHB p. 256)
+        radiusHex = Math.min(6, Math.max(2, (skill.aoeRadius | 0) || 3)); // 15 pés = 4,5m = 3 hexes (PHB p. 256)
         aoeType = (skDmgLow === 'fire' || skNameLow.indexOf('flamej') >= 0 || skNameLow.indexOf('fogo') >= 0) ? 'fire' : 'cone';
         aoeShape = 'cone';
     } else if (
-        skill.shape === 'line' ||
+        rawShape === 'line' ||
         skNameLow.indexOf('relâmpago') >= 0 ||
         skNameLow.indexOf('relampago') >= 0 ||
         skNameLow.indexOf('linha') >= 0
     ) {
-        radiusHex = skill.aoeRadius || 6; // Linha direcional D&D 5e (PHB p. 204)
+        radiusHex = Math.min(6, Math.max(3, (skill.aoeRadius | 0) || 6)); // Linha direcional D&D 5e (PHB p. 204)
         aoeType = 'cone';
         aoeShape = 'line';
     } else if (
-        skill.shape === 'cube' ||
+        rawShape === 'cube' ||
         skNameLow.indexOf('onda de trovão') >= 0 ||
         skNameLow.indexOf('onda de trovao') >= 0 ||
         skNameLow.indexOf('fogo feérico') >= 0 ||
@@ -22273,7 +22323,7 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         skNameLow.indexOf('teia') >= 0 ||
         skNameLow.indexOf('graxa') >= 0
     ) {
-        radiusHex = skill.aoeRadius || (skNameLow.indexOf('graxa') >= 0 ? 2 : 3);
+        radiusHex = Math.min(5, Math.max(2, (skill.aoeRadius | 0) || (skNameLow.indexOf('graxa') >= 0 ? 2 : 3)));
         aoeType = (skDmgLow === 'thunder') ? 'cone' : 'arcane';
         aoeShape = 'cube';
     } else if (skill.spiritGuardians || skill.holyNimbus || skill.requiresTargetTag || skNameLow.indexOf('expulsar') >= 0 || skNameLow.indexOf('destruição trovejante') >= 0) {
@@ -22285,14 +22335,14 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         aoeType = 'cone';
         aoeShape = 'sphere';
     } else if (skNameLow.indexOf('sono') >= 0 || skNameLow.indexOf('crescimento espinhoso') >= 0 || skNameLow.indexOf('emaranhar') >= 0) {
-        radiusHex = 4; // 20 pés = 6m = 4 hexes
+        radiusHex = 3; // Área circular tática no grid
         aoeType = 'arcane';
         aoeShape = 'sphere';
     } else if (skill.aoeRadius) {
-        radiusHex = Math.max(1, skill.aoeRadius | 0);
+        radiusHex = Math.min(5, Math.max(1, skill.aoeRadius | 0));
     } else if (skill.radiusHexes) {
-        radiusHex = Math.max(1, skill.radiusHexes | 0);
-    } else if (skill.isAoe || skill.aoe || skill.multiTarget || skill.sleepPool) {
+        radiusHex = Math.min(5, Math.max(1, skill.radiusHexes | 0));
+    } else if (skill.isAoe || skill.aoe || skill.multiTarget || skill.sleepPool || skill.sleepHpPool) {
         radiusHex = 3;
     }
 
@@ -22300,12 +22350,9 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
     else if (skDmgLow === 'radiant') aoeType = 'radiant';
     else if (skDmgLow === 'cold' || skDmgLow === 'lightning' || skDmgLow === 'thunder') aoeType = 'cone';
 
-    if (radiusHex <= 0) {
-        clearTacticalAoePreview();
-        return;
-    }
+    if (radiusHex <= 0) return null;
 
-    var pCaster = currentState.order && currentState.order[currentState.p_idx];
+    var pCaster = caster || (currentState.order && currentState.order[currentState.p_idx]);
     var casterPos = (pCaster && pCaster.pos && pCaster.pos.col != null) ? pCaster.pos : { col: centerCol, row: centerRow };
     var pOrigin = hexCenter(casterPos.col, casterPos.row);
     var pCenter = hexCenter(centerCol, centerRow);
@@ -22315,19 +22362,26 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
 
     var polyFill = 'rgba(0, 229, 255, 0.16)';
     var polyStroke = '#00e5ff';
-    if (aoeType === 'fire') {
-        polyFill = 'rgba(255, 87, 34, 0.22)';
+    if (skDmgLow === 'fire' || aoeType === 'fire') {
+        polyFill = 'rgba(255, 87, 34, 0.24)';
         polyStroke = '#ff7043';
-    } else if (aoeType === 'radiant') {
-        polyFill = 'rgba(255, 215, 0, 0.20)';
+    } else if (skDmgLow === 'radiant' || aoeType === 'radiant') {
+        polyFill = 'rgba(255, 215, 0, 0.22)';
         polyStroke = '#ffd700';
+    } else if (skDmgLow === 'lightning') {
+        polyFill = 'rgba(64, 196, 255, 0.24)';
+        polyStroke = '#40c4ff';
+    } else if (skDmgLow === 'thunder') {
+        polyFill = 'rgba(179, 157, 219, 0.24)';
+        polyStroke = '#b39ddb';
+    } else if (skDmgLow === 'poison' || skDmgLow === 'acid') {
+        polyFill = 'rgba(105, 240, 174, 0.22)';
+        polyStroke = '#69f0ae';
+    } else if (skDmgLow === 'necrotic') {
+        polyFill = 'rgba(186, 104, 200, 0.22)';
+        polyStroke = '#ce93d8';
     }
 
-    var svgParts = [];
-    var gradId = (aoeType === 'fire') ? 'aoeFireballGlow' : 'aoeArcaneGlow';
-    var circleCls = 'hex-aoe-circle hex-aoe-circle--' + aoeType;
-
-    // Diretriz angular para Cone e Linha (originada no conjurador em direção ao hexágono mirado — PHB p. 204)
     var dirAngle = Math.atan2(pCenter.cy - pOrigin.cy, pCenter.cx - pOrigin.cx);
     var coneHalfAngle = Math.PI / 5.4; // ~33 graus de meia-abertura (cone D&D 5e: largura = distância da origem)
 
@@ -22366,17 +22420,86 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         return hexDistance(centerCol, centerRow, hc, hr) <= radiusHex;
     }
 
-    // Malha de hexágonos afetados dentro da forma geométrica D&D 5e (Padrão Solasta / BG3)
     var affectedHexMap = {};
+    var affectedHexes = [];
     for (var hc = 0; hc < bCols; hc++) {
         for (var hr = 0; hr < bRows; hr++) {
             if (isHexInAoeShape(hc, hr)) {
                 affectedHexMap[hc + ',' + hr] = true;
-                var hCen = hexCenter(hc, hr);
-                var hPts = hexPolygonPoints(hCen.cx, hCen.cy);
-                svgParts.push('<polygon points="' + hPts + '" fill="' + polyFill + '" stroke="' + polyStroke + '" stroke-width="1.5" stroke-dasharray="4 2" />');
+                affectedHexes.push({ col: hc, row: hr });
             }
         }
+    }
+
+    var affectedEnemyIdxs = [];
+    var affectedAllyIdxs = [];
+    if (currentState && currentState.order) {
+        for (var ti = 0; ti < currentState.order.length; ti++) {
+            var tu = currentState.order[ti];
+            if (!tu || !tu.alive || tu.isDead || !tu.pos) continue;
+            if (affectedHexMap[tu.pos.col + ',' + tu.pos.row]) {
+                if (tu.t === 'e') affectedEnemyIdxs.push(ti);
+                else if (tu.t === 'p' || tu.t === 'a') affectedAllyIdxs.push(ti);
+            }
+        }
+    }
+
+    return {
+        aoeShape: aoeShape,
+        aoeType: aoeType,
+        radiusHex: radiusHex,
+        radiusPx: radiusPx,
+        casterPos: casterPos,
+        pOrigin: pOrigin,
+        pCenter: pCenter,
+        dirAngle: dirAngle,
+        coneHalfAngle: coneHalfAngle,
+        polyFill: polyFill,
+        polyStroke: polyStroke,
+        affectedHexMap: affectedHexMap,
+        affectedHexes: affectedHexes,
+        affectedEnemyIdxs: affectedEnemyIdxs,
+        affectedAllyIdxs: affectedAllyIdxs
+    };
+}
+
+function drawTacticalAoePreview(centerCol, centerRow, skill) {
+    var layer = document.getElementById('hexAoeVisualLayer');
+    if (!layer || !currentState || !skill) return;
+    if (centerCol == null || centerRow == null) {
+        clearTacticalAoePreview();
+        return;
+    }
+
+    var pCaster = currentState.order && currentState.order[currentState.p_idx];
+    var geo = simComputeSkillAoeGeometry(pCaster, centerCol, centerRow, skill);
+    if (!geo || geo.radiusHex <= 0) {
+        clearTacticalAoePreview();
+        return;
+    }
+
+    var aoeShape = geo.aoeShape;
+    var aoeType = geo.aoeType;
+    var radiusHex = geo.radiusHex;
+    var radiusPx = geo.radiusPx;
+    var casterPos = geo.casterPos;
+    var pOrigin = geo.pOrigin;
+    var pCenter = geo.pCenter;
+    var dirAngle = geo.dirAngle;
+    var coneHalfAngle = geo.coneHalfAngle;
+    var polyFill = geo.polyFill;
+    var polyStroke = geo.polyStroke;
+    var affectedHexMap = geo.affectedHexMap;
+
+    var svgParts = [];
+    var gradId = (aoeType === 'fire') ? 'aoeFireballGlow' : 'aoeArcaneGlow';
+    var circleCls = 'hex-aoe-circle hex-aoe-circle--' + aoeType;
+
+    for (var hi = 0; hi < geo.affectedHexes.length; hi++) {
+        var hx = geo.affectedHexes[hi];
+        var hCen = hexCenter(hx.col, hx.row);
+        var hPts = hexPolygonPoints(hCen.cx, hCen.cy);
+        svgParts.push('<polygon points="' + hPts + '" fill="' + polyFill + '" stroke="' + polyStroke + '" stroke-width="1.5" stroke-dasharray="4 2" />');
     }
 
     // Contorno geométrico da Área de Efeito (Cone, Linha, Cubo ou Esfera — PHB p. 204)
@@ -22467,6 +22590,169 @@ function drawTacticalAoePreview(centerCol, centerRow, skill) {
         '</g>');
 
     layer.innerHTML = svgParts.join('');
+}
+
+/**
+ * Dispara a explosão/onda geométrica SVG na camada #hexAoeVisualLayer durante a execução de magias/habilidades
+ * em área (Cone, Linha, Cubo, Esfera — PHB p. 204) e propaga superfícies elementais nos hexágonos atingidos.
+ */
+function spawnHexAoeExecutionBurst(actor, target, skill) {
+    if (!currentState || !target || !target.pos || !skill) return;
+    var geo = simComputeSkillAoeGeometry(actor, target.pos.col, target.pos.row, skill);
+    if (!geo || geo.radiusHex <= 0) return;
+    var layer = document.getElementById('hexAoeVisualLayer');
+    if (layer) {
+        var svgParts = ['<g class="hex-aoe-exec-burst">'];
+        var gradId = (geo.aoeType === 'fire') ? 'aoeFireballGlow' : 'aoeArcaneGlow';
+        for (var hi = 0; hi < geo.affectedHexes.length; hi++) {
+            var hx = geo.affectedHexes[hi];
+            var hCen = hexCenter(hx.col, hx.row);
+            var hPts = hexPolygonPoints(hCen.cx, hCen.cy);
+            svgParts.push('<polygon points="' + hPts + '" class="hex-aoe-burst-tile" fill="' + geo.polyFill + '" stroke="' + geo.polyStroke + '" />');
+        }
+        if (geo.aoeShape === 'cone') {
+            var coneLenPx = Math.max(geo.radiusPx, hexDistance(geo.casterPos.col, geo.casterPos.row, target.pos.col, target.pos.row) * HEX_COL_STEP);
+            var a1 = geo.dirAngle - geo.coneHalfAngle;
+            var a2 = geo.dirAngle + geo.coneHalfAngle;
+            var x1 = Math.round(geo.pOrigin.cx + Math.cos(a1) * coneLenPx);
+            var y1 = Math.round(geo.pOrigin.cy + Math.sin(a1) * coneLenPx);
+            var x2 = Math.round(geo.pOrigin.cx + Math.cos(a2) * coneLenPx);
+            var y2 = Math.round(geo.pOrigin.cy + Math.sin(a2) * coneLenPx);
+            var conePath = 'M ' + geo.pOrigin.cx + ' ' + geo.pOrigin.cy + ' L ' + x1 + ' ' + y1 +
+                ' A ' + Math.round(coneLenPx) + ' ' + Math.round(coneLenPx) + ' 0 0 1 ' + x2 + ' ' + y2 + ' Z';
+            svgParts.push('<path d="' + conePath + '" fill="url(#' + gradId + ')" stroke="' + geo.polyStroke + '" stroke-width="2.8" />');
+        } else if (geo.aoeShape === 'line') {
+            var lineLenPx = geo.radiusPx;
+            var nx = -Math.sin(geo.dirAngle) * 22;
+            var ny = Math.cos(geo.dirAngle) * 22;
+            var ex = geo.pOrigin.cx + Math.cos(geo.dirAngle) * lineLenPx;
+            var ey = geo.pOrigin.cy + Math.sin(geo.dirAngle) * lineLenPx;
+            var beamPts = Math.round(geo.pOrigin.cx + nx) + ',' + Math.round(geo.pOrigin.cy + ny) + ' ' +
+                Math.round(ex + nx) + ',' + Math.round(ey + ny) + ' ' +
+                Math.round(ex - nx) + ',' + Math.round(ey - ny) + ' ' +
+                Math.round(geo.pOrigin.cx - nx) + ',' + Math.round(geo.pOrigin.cy - ny);
+            svgParts.push('<polygon points="' + beamPts + '" fill="url(#' + gradId + ')" stroke="' + geo.polyStroke + '" stroke-width="2.8" />');
+            svgParts.push('<line x1="' + geo.pOrigin.cx + '" y1="' + geo.pOrigin.cy + '" x2="' + Math.round(ex) + '" y2="' + Math.round(ey) + '" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" opacity="0.85" />');
+        } else if (geo.aoeShape === 'cube') {
+            var halfSide = Math.max(36, Math.round(geo.radiusPx * 0.72));
+            svgParts.push('<rect x="' + (geo.pCenter.cx - halfSide) + '" y="' + (geo.pCenter.cy - halfSide) + '" width="' + (halfSide * 2) + '" height="' + (halfSide * 2) + '" rx="8" fill="url(#' + gradId + ')" stroke="' + geo.polyStroke + '" stroke-width="2.8" />');
+        } else {
+            svgParts.push('<circle cx="' + geo.pCenter.cx + '" cy="' + geo.pCenter.cy + '" r="' + geo.radiusPx + '" fill="url(#' + gradId + ')" stroke="' + geo.polyStroke + '" stroke-width="2.8" />');
+        }
+        svgParts.push('</g>');
+        layer.innerHTML = svgParts.join('');
+        setTimeout(function () {
+            var lyr = document.getElementById('hexAoeVisualLayer');
+            if (lyr && lyr.querySelector('.hex-aoe-exec-burst')) {
+                lyr.innerHTML = '';
+            }
+        }, 950);
+    }
+
+    // Propaga superfícies elementais / terreno nos hexágonos atingidos pela área (até 7 hexes ao redor do centro)
+    if (typeof simApplyHexSurface === 'function') {
+        var skName = String(skill.n || '');
+        var skNameLow = skName.toLowerCase();
+        var dtLow = String(skill.dmgType || '').toLowerCase();
+        var surfKind = null;
+        if (dtLow === 'fire' || skNameLow.indexOf('fogo') >= 0 || skNameLow.indexOf('chama') >= 0 || skNameLow.indexOf('meteoro') >= 0) {
+            surfKind = 'fire';
+        } else if (dtLow === 'cold' || skNameLow.indexOf('frio') >= 0 || skNameLow.indexOf('gelo') >= 0 || skNameLow.indexOf('nevasca') >= 0 || skNameLow.indexOf('graxa') >= 0) {
+            surfKind = 'ice';
+        } else if (dtLow === 'lightning' || skNameLow.indexOf('relâmpago') >= 0 || skNameLow.indexOf('relampago') >= 0) {
+            surfKind = 'electrified_water';
+        } else if (dtLow === 'poison' || dtLow === 'acid' || skNameLow.indexOf('veneno') >= 0 || skNameLow.indexOf('ácido') >= 0 || skNameLow.indexOf('espinho') >= 0 || skNameLow.indexOf('emaranhar') >= 0 || skNameLow.indexOf('teia') >= 0) {
+            surfKind = 'poison';
+        }
+        if (surfKind) {
+            var maxSurfHexes = Math.min(geo.affectedHexes.length, 7);
+            for (var si = 0; si < maxSurfHexes; si++) {
+                simApplyHexSurface(currentState, geo.affectedHexes[si].col, geo.affectedHexes[si].row, surfKind, 2, skName || 'Área Elemental');
+            }
+            if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+        }
+    }
+}
+
+/**
+ * Empurrão tático forçado no grid hexagonal (ex.: Onda de Trovão, Destruição Trovejante — PHB p. 282).
+ * Afasta o alvo da origem do conjurador em até `pushHexes` hexágonos (padrão 2 hexes = 3m),
+ * respeitando limites do mapa, unidades vivas e obstáculos bloqueantes.
+ */
+async function simApplyTacticalKnockback(s, actor, target, pushHexes, reasonLabel) {
+    if (!s || !actor || !target || !actor.pos || !target.pos || !target.alive || target.isDead) return 0;
+    var maxPush = Math.max(1, pushHexes | 0 || 2);
+    var bCols = (s.battlefield && s.battlefield.cols) || HEX_COLS_DEFAULT;
+    var bRows = (s.battlefield && s.battlefield.rows) || HEX_ROWS_DEFAULT;
+    var occ = {};
+    (s.order || []).forEach(function (u) {
+        if (u && u !== target && u.alive && !u.isDead && u.pos) {
+            occ[u.pos.col + ',' + u.pos.row] = true;
+        }
+    });
+    if (s.battlefield && Array.isArray(s.battlefield.obstacles)) {
+        s.battlefield.obstacles.forEach(function (ob) {
+            if (ob && ob.col != null && ob.row != null && ob.blocks_movement !== false) {
+                occ[ob.col + ',' + ob.row] = true;
+            }
+        });
+    }
+
+    var curCol = target.pos.col;
+    var curRow = target.pos.row;
+    var path = [{ col: curCol, row: curRow }];
+    var originCen = hexCenter(actor.pos.col, actor.pos.row);
+    var startCen = hexCenter(curCol, curRow);
+    var pushAngle = Math.atan2(startCen.cy - originCen.cy, startCen.cx - originCen.cx);
+
+    for (var step = 0; step < maxPush; step++) {
+        var curDist = hexDistance(actor.pos.col, actor.pos.row, curCol, curRow);
+        var neighbors = (typeof hexNeighbors === 'function') ? hexNeighbors(curCol, curRow) : [];
+        var bestN = null;
+        var bestScore = -999999;
+        for (var ni = 0; ni < neighbors.length; ni++) {
+            var nb = neighbors[ni];
+            if (nb.col < 1 || nb.col >= bCols - 1 || nb.row < 1 || nb.row >= bRows - 1) continue;
+            if (occ[nb.col + ',' + nb.row]) continue;
+            var nbDist = hexDistance(actor.pos.col, actor.pos.row, nb.col, nb.row);
+            if (nbDist <= curDist) continue;
+            var nbCen = hexCenter(nb.col, nb.row);
+            var ang = Math.atan2(nbCen.cy - originCen.cy, nbCen.cx - originCen.cx);
+            var diff = Math.abs(ang - pushAngle);
+            if (diff > Math.PI) diff = 2 * Math.PI - diff;
+            var score = (nbDist * 100) - (diff * 40);
+            if (score > bestScore) {
+                bestScore = score;
+                bestN = nb;
+            }
+        }
+        if (!bestN) break;
+        curCol = bestN.col;
+        curRow = bestN.row;
+        path.push({ col: curCol, row: curRow });
+    }
+
+    var pushedSteps = path.length - 1;
+    if (pushedSteps <= 0) return 0;
+
+    var tIdx = s.order ? s.order.indexOf(target) : -1;
+    var tUid = (tIdx >= 0 && typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : (target.id || null);
+    var tEl = tUid ? (document.querySelector('.hex-token[data-unit-id="' + tUid + '"]') || document.querySelector('[data-unit-id="' + tUid + '"]')) : null;
+    if (tEl && typeof animateUnitHexMovement === 'function') {
+        try { await animateUnitHexMovement(tEl, path, 220); } catch (_eAnim) {}
+    }
+    target.pos = { col: curCol, row: curRow };
+    if (typeof ensureProceduralBattlefield === 'function') ensureProceduralBattlefield(s);
+    var metersStr = formatHexDistanceMeters(pushedSteps);
+    if (s.log) {
+        s.log.push('💨 ' + target.n + ' é empurrado ' + metersStr + ' para trás' + (reasonLabel ? ' (' + reasonLabel + ')' : '') + '!');
+    }
+    render(s);
+    var tElAfter = tUid ? (document.querySelector('[data-unit-id="' + tUid + '"]') || document.querySelector('.hex-token[data-unit-id="' + tUid + '"]')) : null;
+    if (tElAfter && typeof spawnSkillImpactLabel === 'function') {
+        try { spawnSkillImpactLabel(tElAfter, '💨 EMPURRADO ' + metersStr.toUpperCase() + '!', 'condition'); } catch (_eLbl) {}
+    }
+    return pushedSteps;
 }
 
 /**
@@ -35054,6 +35340,28 @@ async function confirmAndAttack(tgtIdx) {
         }
         extras = _rayCount - 1;  /* total = 1 + extras = _rayCount atk rolls */
     }
+    if (skill && !skill.multiRayAttack && (skill.multiTarget || skill.isAoe || skill.aoe || skill.coneOfCold || skill.aoeShape || skill.shape || skill.aoeRadius)) {
+        var tPrimary = currentState.order[tgtIdx];
+        var aoeTargetIdxs = [tgtIdx];
+        if (tPrimary && tPrimary.pos && typeof simComputeSkillAoeGeometry === 'function') {
+            var geoAoe = simComputeSkillAoeGeometry(p, tPrimary.pos.col, tPrimary.pos.row, skill);
+            if (geoAoe && Array.isArray(geoAoe.affectedEnemyIdxs)) {
+                for (var gIdx = 0; gIdx < geoAoe.affectedEnemyIdxs.length; gIdx++) {
+                    var candIdx = geoAoe.affectedEnemyIdxs[gIdx];
+                    if (aoeTargetIdxs.indexOf(candIdx) < 0) aoeTargetIdxs.push(candIdx);
+                }
+            }
+        }
+        for (var ai = 0; ai < aoeTargetIdxs.length; ai++) {
+            var aoeTgt = aoeTargetIdxs[ai];
+            var uAoE = currentState.order[aoeTgt];
+            if (!uAoE || !uAoE.alive || uAoE.hp <= 0) continue;
+            await playTurn(currentState.p_idx, aoeTgt, { skill: skill, aoeSecondary: ai > 0 });
+            if (await checkEndWithPacing(currentState)) return;
+        }
+        await _maybeAdvanceOrStay();
+        return;
+    }
     var total = 1 + extras;
     for (var i = 0; i < total; i++) {
         // Retarget automático se alvo atual morreu.
@@ -35068,7 +35376,7 @@ async function confirmAndAttack(tgtIdx) {
             if (alt < 0) break;
             curTgt = alt;
         }
-        await playTurn(currentState.p_idx, curTgt, skill ? { skill: skill } : { attackIndex: i + 1, attackTotal: total });
+        await playTurn(currentState.p_idx, curTgt, skill ? { skill: skill, aoeSecondary: i > 0 } : { attackIndex: i + 1, attackTotal: total });
         if (await checkEndWithPacing(currentState)) return;
     }
     /* V1 Invocações Phase 4 (2026-04-19, b) — PHB p.189: respeita recursos restantes.
@@ -38434,36 +38742,43 @@ function playHitVFX(uid, crit, dmgType, opts) {
             } else {
                 window._combatVfx.impact(el, dmgType, { crit: !!crit });
             }
-            // Superfícies Elementais no Tabuleiro Hexagonal (Fogo, Gelo, Eletricidade, Veneno/Ácido)
-            if (skill && currentState && currentState.order && typeof simApplyHexSurface === 'function') {
+            // Superfícies Elementais e Explosão Geométrica AoE no Tabuleiro Hexagonal (Cone, Linha, Cubo, Esfera — PHB p. 204)
+            if (skill && currentState && currentState.order) {
                 var _hitUnit = null;
+                var _actUnit = null;
                 for (var _hui = 0; _hui < currentState.order.length; _hui++) {
                     var _hu = currentState.order[_hui];
-                    if (_hu && (_hu.id === uid || (typeof unitUidForOrderIndex === 'function' && unitUidForOrderIndex(currentState, _hui) === uid))) {
-                        _hitUnit = _hu;
-                        break;
-                    }
+                    if (!_hu) continue;
+                    var _hUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(currentState, _hui) : _hu.id;
+                    if (_hu.id === uid || _hUid === uid) _hitUnit = _hu;
+                    if (actorUid && (_hu.id === actorUid || _hUid === actorUid)) _actUnit = _hu;
                 }
                 if (_hitUnit && _hitUnit.pos) {
-                    var _hc = _hitUnit.pos.col, _hr = _hitUnit.pos.row;
-                    if (skName === 'Bola de Fogo' || dmgType === 'fire') {
-                        simApplyHexSurface(currentState, _hc, _hr, 'fire', 2, skName || 'Chamas');
-                        if (skName === 'Bola de Fogo' && typeof hexNeighbors === 'function') {
-                            var _adjH = hexNeighbors(_hc, _hr);
-                            for (var _ahi = 0; _ahi < _adjH.length; _ahi++) {
-                                simApplyHexSurface(currentState, _adjH[_ahi].col, _adjH[_ahi].row, 'fire', 2, 'Bola de Fogo');
+                    var _isAoeSkill = !!(skill.multiTarget || skill.isAoe || skill.aoe || skill.coneOfCold || skill.aoeShape || skill.shape || skill.aoeRadius || skill.fireball);
+                    if (_isAoeSkill && typeof spawnHexAoeExecutionBurst === 'function') {
+                        try { spawnHexAoeExecutionBurst(_actUnit, _hitUnit, skill); } catch (_eAoeB) {}
+                    }
+                    if (typeof simApplyHexSurface === 'function') {
+                        var _hc = _hitUnit.pos.col, _hr = _hitUnit.pos.row;
+                        if (skName === 'Bola de Fogo' || dmgType === 'fire') {
+                            simApplyHexSurface(currentState, _hc, _hr, 'fire', 2, skName || 'Chamas');
+                            if (skName === 'Bola de Fogo' && typeof hexNeighbors === 'function') {
+                                var _adjH = hexNeighbors(_hc, _hr);
+                                for (var _ahi = 0; _ahi < _adjH.length; _ahi++) {
+                                    simApplyHexSurface(currentState, _adjH[_ahi].col, _adjH[_ahi].row, 'fire', 2, 'Bola de Fogo');
+                                }
                             }
+                            if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                        } else if (skName === 'Raio Gélido' || dmgType === 'cold') {
+                            simApplyHexSurface(currentState, _hc, _hr, 'ice', 2, skName || 'Gelo');
+                            if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                        } else if (dmgType === 'lightning') {
+                            simApplyHexSurface(currentState, _hc, _hr, 'electrified_water', 2, skName || 'Eletricidade');
+                            if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
+                        } else if (dmgType === 'poison' || dmgType === 'acid') {
+                            simApplyHexSurface(currentState, _hc, _hr, 'poison', 2, skName || 'Ácido/Veneno');
+                            if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
                         }
-                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
-                    } else if (skName === 'Raio Gélido' || dmgType === 'cold') {
-                        simApplyHexSurface(currentState, _hc, _hr, 'ice', 2, skName || 'Gelo');
-                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
-                    } else if (dmgType === 'lightning') {
-                        simApplyHexSurface(currentState, _hc, _hr, 'electrified_water', 2, skName || 'Eletricidade');
-                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
-                    } else if (dmgType === 'poison' || dmgType === 'acid') {
-                        simApplyHexSurface(currentState, _hc, _hr, 'poison', 2, skName || 'Ácido/Veneno');
-                        if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
                     }
                 }
             }
@@ -39119,6 +39434,17 @@ function applyMagicMissileDartImpact(dart, s, _staleTargetEl) {
         }
     }
     render(s);
+    if (isFireball && typeof spawnHexAoeExecutionBurst === 'function') {
+        try {
+            spawnHexAoeExecutionBurst(s.order[s.p_idx], t, {
+                n: 'Bola de Fogo',
+                fireball: true,
+                dmgType: 'fire',
+                aoeRadius: dart.aoeRadius || 4,
+                aoeShape: 'sphere'
+            });
+        } catch (_eFbBurst) {}
+    }
     var uid = unitUidForOrderIndex(s, dart.tIdx);
     var el = uid ? document.querySelector('[data-unit-id="' + uid + '"]') : null;
     if (el) {
@@ -40179,16 +40505,31 @@ async function playTurnUndead(casterIdx, undeadIdxs, skill) {
     var aed = skill.afterAttackEnemyDebuff || {};
     s.log.push(caster.n + ' ergue o símbolo sagrado e canaliza poder divino contra os mortos-vivos (CD ' + dc + ').');
     render(s);
+    if (typeof spawnHexAoeExecutionBurst === 'function') {
+        try {
+            spawnHexAoeExecutionBurst(caster, caster, {
+                n: skill.n || 'Expulsar Mortos-Vivos',
+                aoeShape: skill.aoeShape || 'sphere',
+                aoeRadius: skill.aoeRadius || 6,
+                dmgType: 'radiant'
+            });
+        } catch (eTuBurst) {}
+    }
     await sleep(500);
     for (var i = 0; i < undeadIdxs.length; i++) {
         var u = s.order[undeadIdxs[i]];
         if (!u || !u.alive) continue;
+        var _uUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, undeadIdxs[i]) : u.uid;
+        var _elU = _uUid ? document.querySelector('[data-unit-id="' + _uUid + '"]') : null;
         var _mode = (typeof _simSaveAdvState === 'function') ? _simSaveAdvState(u, 'wis') : 'normal';
         var _roll = (typeof _simRollD20WithAdv === 'function') ? _simRollD20WithAdv(_mode, false).r : rollN(20);
         var _mod = (typeof simSaveMod === 'function') ? simSaveMod(u, 'wis') : 0;
         var _total = _roll + _mod;
         if (_total >= dc) {
             s.log.push('  → ' + u.n + ' — TR SAB ' + _roll + '+' + _mod + '=' + _total + ' vs CD ' + dc + ' (resiste à expulsão).');
+            if (_elU && typeof spawnSkillImpactLabel === 'function') {
+                try { spawnSkillImpactLabel(_elU, '🛡️ RESISTIU!', 'buff'); } catch (eTuRes) {}
+            }
         } else {
             u.se = u.se || [];
             u.se.push({
@@ -40199,10 +40540,14 @@ async function playTurnUndead(casterIdx, undeadIdxs, skill) {
             });
             s.log.push('  → ' + u.n + ' — TR SAB ' + _roll + '+' + _mod + '=' + _total + ' vs CD ' + dc + ' (falha): EXPULSO — foge e perde o turno!');
             if (typeof playBuffVfxOnCell === 'function') { try { playBuffVfxOnCell(u.uid, 'sanctuary'); } catch (e) {} }
+            if (_elU) {
+                if (typeof spawnSkillImpactFlash === 'function') { try { spawnSkillImpactFlash(_elU, 'condition'); } catch (eTuFl) {} }
+                if (typeof spawnSkillImpactLabel === 'function') { try { spawnSkillImpactLabel(_elU, '» EXPULSO!', 'condition'); } catch (eTuLb) {} }
+            }
         }
     }
     render(s);
-    await sleep(700);
+    await sleep(1100);
 }
 
 async function playFireballSpellTurn(aIdx, tIdx, skill) {
@@ -42938,10 +43283,20 @@ async function playTurn(aIdx, tIdx, opts) {
         }
     }
 
-    /* Custo de skill descontado antes da rolagem (sem mensagem separada
-       — o context ja anuncia a habilidade no overlay do dado) */
-    if (opts.skill) {
-        actor.res.value = Math.max(0, actor.res.value - opts.skill.cost);
+    /* Feedback visual de Reação de Ataque de Oportunidade no atacante (PHB p. 195) */
+    if (opts.oa) {
+        try {
+            var _oaActorUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (actor.id || null);
+            var _oaActorEl = _oaActorUid ? (document.querySelector('[data-unit-id="' + _oaActorUid + '"]') || document.querySelector('[data-uid="' + _oaActorUid + '"]')) : null;
+            if (_oaActorEl && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(_oaActorEl, '⚡ ATAQUE DE OPORTUNIDADE!', 'crit');
+            }
+        } catch (_eOaLbl) {}
+    }
+
+    /* Custo de skill descontado antes da rolagem (sem mensagem separada e apenas 1x em magias AoE) */
+    if (opts.skill && !opts.aoeSecondary && actor.res) {
+        actor.res.value = Math.max(0, actor.res.value - (opts.skill.cost | 0));
         render(s);
     }
 
@@ -43287,9 +43642,14 @@ async function playTurn(aIdx, tIdx, opts) {
                 var _nUidS = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
                 if (_nUidS) {
                     try {
-                        var _elNS = document.querySelector('[data-uid="' + _nUidS + '"]');
-                        if (_elNS && window._combatVfx && window._combatVfx.buffArcaneShield) {
-                            window._combatVfx.buffArcaneShield(_elNS);
+                        var _elNS = document.querySelector('[data-unit-id="' + _nUidS + '"]') || document.querySelector('[data-uid="' + _nUidS + '"]');
+                        if (_elNS) {
+                            if (window._combatVfx && window._combatVfx.buffArcaneShield) {
+                                window._combatVfx.buffArcaneShield(_elNS);
+                            }
+                            if (typeof spawnSkillImpactLabel === 'function') {
+                                spawnSkillImpactLabel(_elNS, '🛡️ ESCUDO ARCANO (+5 CA)!', 'attack');
+                            }
                         }
                     } catch (_eVN) {}
                 }
@@ -43376,9 +43736,14 @@ async function playTurn(aIdx, tIdx, opts) {
                         ? unitUidForOrderIndex(s, tIdx) : null;
                     if (_tUidSh) {
                         try {
-                            var _elSh = document.querySelector('[data-uid="' + _tUidSh + '"]');
-                            if (_elSh && window._combatVfx && window._combatVfx.buffArcaneShield) {
-                                window._combatVfx.buffArcaneShield(_elSh);
+                            var _elSh = document.querySelector('[data-unit-id="' + _tUidSh + '"]') || document.querySelector('[data-uid="' + _tUidSh + '"]');
+                            if (_elSh) {
+                                if (window._combatVfx && window._combatVfx.buffArcaneShield) {
+                                    window._combatVfx.buffArcaneShield(_elSh);
+                                }
+                                if (typeof spawnSkillImpactLabel === 'function') {
+                                    spawnSkillImpactLabel(_elSh, '🛡️ ESCUDO ARCANO (+5 CA)!', 'attack');
+                                }
                             }
                         } catch (_eVfx) {}
                     }
@@ -43470,9 +43835,14 @@ async function playTurn(aIdx, tIdx, opts) {
                 var _newHit = _newTotal >= effAc;
                 if (_cUidA) {
                     try {
-                        var _elC = document.querySelector('[data-uid="' + _cUidA + '"]');
-                        if (_elC && window._combatVfx && window._combatVfx.damageType) {
-                            window._combatVfx.damageType(_elC, 'psychic');
+                        var _elC = document.querySelector('[data-unit-id="' + _cUidA + '"]') || document.querySelector('[data-uid="' + _cUidA + '"]');
+                        if (_elC) {
+                            if (window._combatVfx && window._combatVfx.damageType) {
+                                window._combatVfx.damageType(_elC, 'psychic');
+                            }
+                            if (typeof spawnSkillImpactLabel === 'function') {
+                                spawnSkillImpactLabel(_elC, '🎵 PALAVRAS CORTANTES (−' + _cutRoll + ')!', 'condition');
+                            }
                         }
                     } catch (_eVCP) {}
                 }
@@ -43532,9 +43902,14 @@ async function playTurn(aIdx, tIdx, opts) {
                 /* VFX: dodge shimmer no player */
                 if (_uUidT) {
                     try {
-                        var _elU = document.querySelector('[data-uid="' + _uUidT + '"]');
-                        if (_elU && window._combatVfx && window._combatVfx.dodgeEvade) {
-                            window._combatVfx.dodgeEvade(_elU);
+                        var _elU = document.querySelector('[data-unit-id="' + _uUidT + '"]') || document.querySelector('[data-uid="' + _uUidT + '"]');
+                        if (_elU) {
+                            if (window._combatVfx && window._combatVfx.dodgeEvade) {
+                                window._combatVfx.dodgeEvade(_elU);
+                            }
+                            if (typeof spawnSkillImpactLabel === 'function') {
+                                spawnSkillImpactLabel(_elU, '💨 ESQUIVA SOBRENATURAL (½ DANO)!', 'attack');
+                            }
                         }
                     } catch (_eVU2) {}
                 }
@@ -43597,9 +43972,14 @@ async function playTurn(aIdx, tIdx, opts) {
                     _deflectReduction = _deflRoll + _dexMod + _monkLvl;
                     if (_dUidT) {
                         try {
-                            var _elD = document.querySelector('[data-uid="' + _dUidT + '"]');
-                            if (_elD && window._combatVfx && window._combatVfx.buffArcaneShield) {
-                                window._combatVfx.buffArcaneShield(_elD);
+                            var _elD = document.querySelector('[data-unit-id="' + _dUidT + '"]') || document.querySelector('[data-uid="' + _dUidT + '"]');
+                            if (_elD) {
+                                if (window._combatVfx && window._combatVfx.buffArcaneShield) {
+                                    window._combatVfx.buffArcaneShield(_elD);
+                                }
+                                if (typeof spawnSkillImpactLabel === 'function') {
+                                    spawnSkillImpactLabel(_elD, '✋ DESVIAR PROJÉTEIS (−' + _deflectReduction + ')!', 'attack');
+                                }
                             }
                         } catch (_eVD2) {}
                     }
@@ -44146,10 +44526,15 @@ async function playTurn(aIdx, tIdx, opts) {
                 var _aUidRP = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : null;
                 if (_aUidRP) {
                     try {
-                        var _elRP = document.querySelector('[data-uid="' + _aUidRP + '"]');
-                        if (_elRP && window._combatVfx) {
-                            if (window._combatVfx.damageType) window._combatVfx.damageType(_elRP, 'fire');
-                            else if (window._combatVfx.critBurst) window._combatVfx.critBurst(_elRP);
+                        var _elRP = document.querySelector('[data-unit-id="' + _aUidRP + '"]') || document.querySelector('[data-uid="' + _aUidRP + '"]');
+                        if (_elRP) {
+                            if (window._combatVfx) {
+                                if (window._combatVfx.damageType) window._combatVfx.damageType(_elRP, 'fire');
+                                else if (window._combatVfx.critBurst) window._combatVfx.critBurst(_elRP);
+                            }
+                            if (typeof spawnSkillImpactLabel === 'function') {
+                                spawnSkillImpactLabel(_elRP, '🔥 REPREENSÃO INFERNAL!', 'crit');
+                            }
                         }
                     } catch (_eVfxRP) {}
                 }
@@ -44416,6 +44801,14 @@ async function playTurn(aIdx, tIdx, opts) {
                 if (s && s.log) {
                     s.log.push(target.n + ' — ' + (_smBuff.n || 'smite') + ' aplica: ' + (_nhd.n || 'condição') + '.');
                 }
+                var _tUidSm = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
+                var _tElSm = _tUidSm ? (document.querySelector('[data-unit-id="' + _tUidSm + '"]') || document.querySelector('[data-uid="' + _tUidSm + '"]')) : null;
+                if (_tElSm && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(_tElSm, (_nhd.ico || '✦') + ' ' + String(_nhd.n || 'EFEITO').toUpperCase() + '!', 'condition');
+                }
+                if (/trovejante|thunderous/i.test(String(_smBuff.n || '') + ' ' + String(_nhd.n || '')) && typeof simApplyTacticalKnockback === 'function') {
+                    await simApplyTacticalKnockback(s, actor, target, 2, _smBuff.n || 'Destruição Trovejante');
+                }
             }
             /* PHB: rider CONSOME no primeiro hit. Remove smite do actor.se. */
             actor.se.splice(_smIdx, 1);
@@ -44423,6 +44816,17 @@ async function playTurn(aIdx, tIdx, opts) {
                 s.log.push(actor.n + ' — ' + (_smBuff.n || 'smite') + ' consumida no acerto.');
             }
             break;  /* 1 rider por hit */
+        }
+    }
+
+    /* Empurrão tático D&D 5e no grid hexagonal (Onda de Trovão, Lufada de Vento, Repulsão — PHB p. 282):
+       em falha no TR (ou acerto sem TR), empurra o alvo 3m (2 hexes) para longe do conjurador. */
+    if (hitRes.hit && atkSkill && (!atkSkill.save || saveSuccess === false) && target && target.alive && !target.isDead) {
+        var _skPushName = String(atkSkill.n || '');
+        if (atkSkill.pushHexes || /onda de trov|thunderwave|lufada de vento|gust of wind|repuls/i.test(_skPushName)) {
+            if (typeof simApplyTacticalKnockback === 'function') {
+                await simApplyTacticalKnockback(s, actor, target, atkSkill.pushHexes || 2, atkSkill.n);
+            }
         }
     }
     if (atkSkill && atkSkill.save && saveRoll != null) {
@@ -45015,10 +45419,17 @@ async function runNpcSegmentUntilPlayerTurn() {
                                 }
                                 /* VFX arcano no caster inimigo — cast fumaça desaparecer */
                                 var _cUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, s.active_idx) : null;
-                                if (_cUid && window._combatVfx && window._combatVfx.buffArcaneShield) {
+                                if (_cUid) {
                                     try {
-                                        var _cEl = document.querySelector('[data-uid="' + _cUid + '"]');
-                                        if (_cEl) window._combatVfx.buffArcaneShield(_cEl);
+                                        var _cEl = document.querySelector('[data-unit-id="' + _cUid + '"]') || document.querySelector('[data-uid="' + _cUid + '"]');
+                                        if (_cEl) {
+                                            if (window._combatVfx && window._combatVfx.buffArcaneShield) {
+                                                window._combatVfx.buffArcaneShield(_cEl);
+                                            }
+                                            if (typeof spawnSkillImpactLabel === 'function') {
+                                                spawnSkillImpactLabel(_cEl, _csSuccess ? '✨ CONTRAMÁGICA!' : '✕ CONTRAMÁGICA FALHOU!', _csSuccess ? 'attack' : 'condition');
+                                            }
+                                        }
                                     } catch (_eV) {}
                                 }
                                 render(s);
@@ -46609,6 +47020,9 @@ async function __combatAnimateOneEvent(ev) {
         }
 
         /* 2) D20 animation se temos o valor. Pula em OAs (rapid-fire). */
+        if (kind === 'oa' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '⚡ ATAQUE DE OPORTUNIDADE!', 'attack'); } catch (eOaLbl) {}
+        }
         if (typeof showDice === 'function' && ev.d20 != null && kind !== 'oa') {
             var actorForDice = aU || { n: ev.actorName, t: (ev.actorName || '').indexOf('Orc') >= 0 ? 'e' : 'p' };
             var targetForDice = tU || { n: ev.targetName };
@@ -46750,6 +47164,27 @@ async function __combatAnimateOneEvent(ev) {
             }
             if (typeof spawnCritDramaticBanner === 'function') {
                 spawnCritDramaticBanner(aUnit || aU, tUnit || tU, ev);
+            }
+        }
+
+        // Onda geométrica AoE no tabuleiro hexagonal (Esfera, Cone, Linha, Cubo)
+        if (typeof spawnHexAoeExecutionBurst === 'function') {
+            var _remCastU = aUnit || aU;
+            var _remTgtU = tUnit || tU;
+            var _remMatchedSk = null;
+            if (_remCastU && _remCastU.skills && ev.skillName) {
+                for (var _rsi = 0; _rsi < _remCastU.skills.length; _rsi++) {
+                    if (_remCastU.skills[_rsi] && _remCastU.skills[_rsi].n === ev.skillName) {
+                        _remMatchedSk = _remCastU.skills[_rsi];
+                        break;
+                    }
+                }
+            }
+            if (!_remMatchedSk && isFireball) {
+                _remMatchedSk = { n: 'Bola de Fogo', aoeShape: 'sphere', aoeRadius: 4, dmgType: 'fire' };
+            }
+            if (_remMatchedSk && (_remMatchedSk.aoeShape || _remMatchedSk.shape)) {
+                try { spawnHexAoeExecutionBurst(_remCastU, _remTgtU, _remMatchedSk); } catch (eRemAoe) {}
             }
         }
 
