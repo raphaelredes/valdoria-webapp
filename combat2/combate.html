@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T20:40:39Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T20:49:08Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -13263,6 +13263,24 @@ canvas#vfxCanvas,
   border-color: #3b82f6;
   color: #bfdbfe;
   box-shadow: 0 0 6px rgba(59, 130, 246, 0.45);
+}
+.token-cond-chip--dodge {
+  background: linear-gradient(180deg, #1e293b, #0f172a);
+  border-color: #38bdf8;
+  color: #bae6fd;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
+}
+.token-cond-chip--disengage {
+  background: linear-gradient(180deg, #14282e, #081418);
+  border-color: #2dd4bf;
+  color: #99f6e4;
+  box-shadow: 0 0 6px rgba(45, 212, 191, 0.4);
+}
+.token-cond-chip--bane {
+  background: linear-gradient(180deg, #2d1010, #140505);
+  border-color: #f87171;
+  color: #fecaca;
+  box-shadow: 0 0 6px rgba(248, 113, 113, 0.4);
 }
 .token-cond-container {
   position: absolute;
@@ -26767,6 +26785,21 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                 condChipList.push({
                     html: '<div class="token-cond-chip token-cond-chip--shield" title="D&D 5e: Escudo Arcano (+5 CA até próximo turno)">⛨ Escudo (+5 CA)</div>',
                     name: 'Escudo Arcano'
+                });
+            } else if (stId === 'esquiva' || stName.indexOf('esquiv') >= 0) {
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--dodge" title="D&D 5e (PHB p. 192): Esquivar (Atacantes têm Desvantagem; Vantagem em TR de Destreza)">🛡️ Esquiva</div>',
+                    name: 'Esquiva'
+                });
+            } else if (stId === 'acao_desengajar' || u.disengaged || stName.indexOf('desengajar') >= 0) {
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--disengage" title="D&D 5e (PHB p. 192): Desengajado (Não provoca Ataques de Oportunidade)">💨 Desengajado</div>',
+                    name: 'Desengajado'
+                });
+            } else if (stId === 'bane' || stName.indexOf('perdição') >= 0 || stName.indexOf('perdicao') >= 0) {
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--bane" title="D&D 5e (PHB p. 216): Perdição (-1d4 em ataques e salvaguardas)">▼ Perdição (-1d4)</div>',
+                    name: 'Perdição (-1d4)'
                 });
             }
         }
@@ -48873,6 +48906,71 @@ async function __combatAnimateOneEvent(ev) {
         }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 260); });
+        return;
+    }
+    if (kind === 'dodge') {
+        var dActorIdx = ev.actorIdx != null ? ev.actorIdx : (currentState ? currentState.p_idx : 0);
+        var dActorUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, dActorIdx)
+            : (dActorIdx === (currentState && currentState.p_idx) ? 'player' : 'enemy_' + dActorIdx);
+        var dEl = document.querySelector('[data-unit-id="' + dActorUid + '"]');
+        if (dEl) {
+            dEl.classList.add('buff-flash');
+            setTimeout(function () { if (dEl) dEl.classList.remove('buff-flash'); }, 450);
+            if (typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(dEl, '🛡️ ESQUIVAR (DESVANTAGEM NOS ATAQUES)!', 'buff');
+            }
+        }
+        if (window._combatVfx && dEl && typeof window._combatVfx.dodgeEvade === 'function') {
+            try { window._combatVfx.dodgeEvade(dEl); } catch (_) {}
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 260); });
+        return;
+    }
+    if (kind === 'dash') {
+        var dsActorIdx = ev.actorIdx != null ? ev.actorIdx : (currentState ? currentState.p_idx : 0);
+        var dsActorUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, dsActorIdx)
+            : (dsActorIdx === (currentState && currentState.p_idx) ? 'player' : 'enemy_' + dsActorIdx);
+        var dsEl = document.querySelector('[data-unit-id="' + dsActorUid + '"]');
+        if (dsEl) {
+            dsEl.classList.add('buff-flash');
+            setTimeout(function () { if (dsEl) dsEl.classList.remove('buff-flash'); }, 400);
+            var dashBonusM = (ev.movementAddedFeet != null) ? ' (+' + (ev.movementAddedFeet * 0.3).toFixed(1) + 'm)' : '';
+            if (typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(dsEl, '🏃 DISPARADA' + dashBonusM + '!', 'buff');
+            }
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 220); });
+        return;
+    }
+    if (kind === 'disengage') {
+        var dgActorIdx = ev.actorIdx != null ? ev.actorIdx : (currentState ? currentState.p_idx : 0);
+        var dgActorUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, dgActorIdx)
+            : (dgActorIdx === (currentState && currentState.p_idx) ? 'player' : 'enemy_' + dgActorIdx);
+        var dgEl = document.querySelector('[data-unit-id="' + dgActorUid + '"]');
+        if (dgEl) {
+            dgEl.classList.add('buff-flash');
+            setTimeout(function () { if (dgEl) dgEl.classList.remove('buff-flash'); }, 400);
+            if (typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(dgEl, '💨 DESENGAJOU (SEM OPORTUNIDADE)!', 'buff');
+            }
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 220); });
+        return;
+    }
+    if (kind === 'action_fizzle') {
+        var fzUid = 'player';
+        var fzEl = document.querySelector('[data-unit-id="' + fzUid + '"]');
+        if (fzEl && typeof spawnSkillImpactLabel === 'function') {
+            spawnSkillImpactLabel(fzEl, '✕ AÇÃO JÁ GASTA NESTE TURNO!', 'miss');
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 220); });
         return;
     }
     if (kind === 'attack' || kind === 'oa' || kind === 'skill') {
