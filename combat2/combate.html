@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T18:56:51Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-18T19:25:37Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1810,6 +1810,150 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     color: #e8a070;
     font-style: normal;
     letter-spacing: 0.5px;
+}
+/* D&D 5e: Pílulas táticas de dano, tipo e regras especiais (resumo compacto) */
+.dmg-dice-summary .dmg-tactical-pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    margin: 6px 0 2px;
+}
+.dmg-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: calc(10px * var(--v-font-scale, 1));
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0.2px;
+}
+.dmg-pill--type {
+    background: rgba(0, 0, 0, 0.45);
+}
+.dmg-pill--crit {
+    background: rgba(224, 96, 64, 0.2);
+    border: 1px solid rgba(224, 96, 64, 0.65);
+    color: #ffab91;
+}
+.dmg-pill--resist {
+    background: rgba(237, 137, 54, 0.18);
+    border: 1px solid rgba(237, 137, 54, 0.6);
+    color: #fbd38d;
+}
+.dmg-pill--vuln {
+    background: rgba(229, 62, 62, 0.18);
+    border: 1px solid rgba(229, 62, 62, 0.6);
+    color: #feb2b2;
+}
+.dmg-pill--immune {
+    background: rgba(160, 174, 192, 0.18);
+    border: 1px solid rgba(160, 174, 192, 0.6);
+    color: #e2e8f0;
+}
+.dmg-pill--save {
+    background: rgba(66, 153, 225, 0.18);
+    border: 1px solid rgba(66, 153, 225, 0.6);
+    color: #90cdf4;
+}
+.dmg-pill--conc {
+    background: rgba(159, 122, 234, 0.2);
+    border: 1px solid rgba(183, 148, 244, 0.65);
+    color: #e9d8fd;
+}
+.dmg-inspect-toggle-btn {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(196, 149, 58, 0.35);
+    color: var(--v-gold, #c4953a);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: calc(10px * var(--v-font-scale, 1));
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: all 0.2s ease;
+}
+.dmg-inspect-toggle-btn:hover, .dmg-inspect-toggle-btn:active {
+    background: rgba(196, 149, 58, 0.18);
+    border-color: var(--v-gold, #c4953a);
+}
+.dmg-math-breakdown {
+    display: none;
+    max-height: 110px;
+    overflow-y: auto;
+    background: rgba(10, 8, 6, 0.7);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-top: 6px;
+    text-align: left;
+    font-size: calc(10.5px * var(--v-font-scale, 1));
+    line-height: 1.45;
+    color: var(--v-text, #d4c8b0);
+}
+.dmg-math-breakdown.is-open {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+.dmg-math-breakdown-row {
+    margin: 2px 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+.dmg-math-breakdown-row strong {
+    color: var(--v-gold, #c4953a);
+}
+/* D&D 5e: Pips visuais de Testes contra a Morte */
+.death-saves-modal-tracker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 6px 0;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(196, 149, 58, 0.3);
+    border-radius: 6px;
+}
+.ds-modal-group {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.ds-modal-pip {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+.ds-modal-pip--success.active {
+    background: #48bb78;
+    border-color: #68d391;
+    box-shadow: 0 0 8px rgba(72, 187, 120, 0.7);
+}
+.ds-modal-pip--fail.active {
+    background: #e53e3e;
+    border-color: #fc8181;
+    box-shadow: 0 0 8px rgba(229, 62, 62, 0.7);
+}
+.tam-meta-toast {
+    margin: 4px 12px 6px;
+    padding: 6px 10px;
+    background: rgba(20, 16, 12, 0.95);
+    border: 1px solid var(--v-gold, #c4953a);
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--v-text, #d4c8b0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    animation: fadeIn 0.2s ease;
 }
 /* Dano: animação pop no nome do alvo (wrapper do overlay após refator 2026-04-19) */
 .dice-init-cell-scene .cell.dmg-header-target-pop,
@@ -21650,7 +21794,7 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
 
 function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
     dmgMeta = dmgMeta || {};
-    var damageApplied = Math.max(0, oldHp - newHp);
+    var damageApplied = (dmgMeta && dmgMeta.rawDmg != null) ? (dmgMeta.rawDmg | 0) : Math.max(0, oldHp - newHp);
     /* 2026-04-27: Wet status (D&D 5e DMG p.110 "Wet").
        MOLHADO → vulnerabilidade a frio (×2) + resistência a fogo (÷2).
        Aplica ANTES de outras reduções (Reflexos Evasivos etc.) seguindo PHB
@@ -22040,19 +22184,51 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
 function describeDeathSavePreview(u, r) {
     ensureDeathSaves(u);
     var s0 = u.deathSaves.s | 0, f0 = u.deathSaves.f | 0;
+    var ns = (r === 20 ? 3 : (r >= 10 ? Math.min(3, s0 + 1) : s0));
+    var nf = (r === 1 ? Math.min(3, f0 + 2) : (r < 10 && r !== 20 ? Math.min(3, f0 + 1) : f0));
+
+    var sPips = '';
+    for (var i = 1; i <= 3; i++) {
+        sPips += '<span class="ds-modal-pip ds-modal-pip--success' + (i <= ns ? ' active' : '') + '"></span>';
+    }
+    var fPips = '';
+    for (var j = 1; j <= 3; j++) {
+        fPips += '<span class="ds-modal-pip ds-modal-pip--fail' + (j <= nf ? ' active' : '') + '"></span>';
+    }
+
+    var trackerHtml = '<div class="death-saves-modal-tracker">' +
+        '<div class="ds-modal-group"><span style="font-size:10px;font-weight:700;color:#68d391;margin-right:2px;">Sucessos:</span>' + sPips + '</div>' +
+        '<div class="ds-modal-group"><span style="font-size:10px;font-weight:700;color:#fc8181;margin-right:2px;">Falhas:</span>' + fPips + '</div>' +
+        '</div>';
+
     if (r === 20) {
-        return { title: '★ NATURAL 20', subHtml: 'Você recupera 1 PV e volta à consciência.', cls: 'hit' };
+        return {
+            title: '★ NATURAL 20',
+            subHtml: simFormatD20EqualsHTML(r) + ' <strong style="color:#ffd700;">— Levanta com 1 PV!</strong>' + trackerHtml + '<div class="drl-crit-rule">D&D 5e (PHB p. 197): 20 Natural no teste contra a morte recupera 1 PV de imediato e acorda.</div>',
+            cls: 'crit'
+        };
     }
     if (r === 1) {
-        var nf2 = Math.min(3, f0 + 2);
-        return { title: 'NATURAL 1', subHtml: simFormatD20EqualsHTML(r) + ' — duas falhas (total ' + nf2 + '/3).', cls: 'miss' };
+        return {
+            title: 'NATURAL 1',
+            subHtml: simFormatD20EqualsHTML(r) + ' <span class="drl-miss-strong">— duas falhas críticas!</span>' + trackerHtml + '<div class="drl-crit-rule">D&D 5e (PHB p. 197): 1 Natural conta como duas falhas no teste contra a morte.</div>',
+            cls: 'miss'
+        };
     }
     if (r >= 10) {
-        var ns = Math.min(3, s0 + 1);
-        return { title: 'Sucesso no teste de morte', subHtml: simFormatD20EqualsHTML(r) + ' — sucessos ' + ns + '/3 até estabilizar.', cls: 'hit' };
+        var isStableNow = (ns >= 3);
+        return {
+            title: isStableNow ? 'ESTABILIZOU (3 Sucessos)' : 'Sucesso no teste de morte',
+            subHtml: simFormatD20EqualsHTML(r) + ' <span style="color:#68d391;font-weight:700;">≥10 Sucesso</span>' + trackerHtml + '<div class="drl-crit-rule">' + (isStableNow ? 'Estabilizado a 0 PV — não precisa mais rolar salvaguardas.' : 'Acumula ' + ns + '/3 sucessos para estabilizar (PHB p. 197).') + '</div>',
+            cls: 'hit'
+        };
     }
-    var nf = Math.min(3, f0 + 1);
-    return { title: 'Falha no teste de morte', subHtml: simFormatD20EqualsHTML(r) + ' — falhas ' + nf + '/3.', cls: 'miss' };
+    var isDeadNow = (nf >= 3);
+    return {
+        title: isDeadNow ? 'FALECIMENTO (3 Falhas)' : 'Falha no teste de morte',
+        subHtml: simFormatD20EqualsHTML(r) + ' <span class="drl-miss-strong">&lt;10 Falha</span>' + trackerHtml + '<div class="drl-crit-rule">' + (isDeadNow ? 'Três falhas acumuladas resultam em morte (PHB p. 197).' : 'Acumula ' + nf + '/3 falhas (PHB p. 197).') + '</div>',
+        cls: 'miss'
+    };
 }
 
 /** Aplica resultado do d20 após o overlay (deve coincidir com describeDeathSavePreview). */
@@ -29304,8 +29480,15 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     var sumDice = rolls.reduce(function (a, b) { return a + b; }, 0);
     var total = Math.max(1, sumDice + mod);
     reductionMeta = reductionMeta || {};
+
+    var dtKey = String(reductionMeta.dmgType || actor.dmgType || 'slashing').toLowerCase().trim();
+    var dtInfo = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(dtKey) : { lb: 'Cortante', ico: '⚔️', col: '#e2d6c5' };
+
     var box = document.createElement('div');
     box.className = 'dmg-dice-summary' + (crit ? ' is-crit' : '');
+
+    var dtBadgeHtml = '<span class="dmg-pill dmg-pill--type" style="border:1px solid ' + dtInfo.col + ';color:' + dtInfo.col + ';"><span aria-hidden="true">' + dtInfo.ico + '</span> ' + escHtml(dtInfo.lb) + '</span>';
+
     if (crit && rolls.length > 1) {
         var l1 = document.createElement('div');
         l1.className = 'dmg-sum-line';
@@ -29317,51 +29500,137 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         box.appendChild(l2);
         var l3 = document.createElement('div');
         l3.className = 'dmg-sum-line';
-        l3.innerHTML = 'Total: ' + simRollSpan(sumDice, 'drl-num--partial') + ' + ' + simRollSpan(mod, 'drl-num--mod') + ' (' + escHtml(String(attr)) + ') = ' + simRollSpan(total, 'drl-num--total') + ' de dano';
+        l3.innerHTML = 'Total: ' + simRollSpan(sumDice, 'drl-num--partial') + ' + ' + simRollSpan(mod, 'drl-num--mod') + ' (' + escHtml(String(attr)) + ') = ' + simRollSpan(total, 'drl-num--total') + ' ' + dtBadgeHtml;
         box.appendChild(l3);
     } else {
         var one = document.createElement('div');
         one.className = 'dmg-sum-line';
         if (rolls.length <= 1) {
-            one.innerHTML = '1d' + die + ': ' + simRollSpan(rolls[0] || 0, 'drl-num--die') + (mod ? ' + ' + simRollSpan(mod, 'drl-num--mod') + ' (<span class="drl-paren-mod">' + escHtml(String(attr)) + '</span>)' : '') + ' = ' + simRollSpan(total, 'drl-num--total') + ' de dano';
+            one.innerHTML = '1d' + die + ': ' + simRollSpan(rolls[0] || 0, 'drl-num--die') + (mod ? ' + ' + simRollSpan(mod, 'drl-num--mod') + ' (<span class="drl-paren-mod">' + escHtml(String(attr)) + '</span>)' : '') + ' = ' + simRollSpan(total, 'drl-num--total') + ' ' + dtBadgeHtml;
         } else {
             var rbits = rolls.map(function (v) { return simRollSpan(v, 'drl-num--die'); }).join(' + ');
-            one.innerHTML = rolls.length + 'd' + die + ': ' + rbits + ' = ' + simRollSpan(sumDice, 'drl-num--partial') + (mod ? ' + ' + simRollSpan(mod, 'drl-num--mod') + ' (' + escHtml(String(attr)) + ')' : '') + ' = ' + simRollSpan(total, 'drl-num--total') + ' de dano';
+            one.innerHTML = rolls.length + 'd' + die + ': ' + rbits + ' = ' + simRollSpan(sumDice, 'drl-num--partial') + (mod ? ' + ' + simRollSpan(mod, 'drl-num--mod') + ' (' + escHtml(String(attr)) + ')' : '') + ' = ' + simRollSpan(total, 'drl-num--total') + ' ' + dtBadgeHtml;
         }
         box.appendChild(one);
     }
-    // Linha de redução — quando o dano aplicado é menor que o rolado.
-    // Texto em linguagem clara para qualquer jogador (sem jargão D&D).
-    if (reductionMeta && typeof reductionMeta.appliedTotal === 'number' && reductionMeta.appliedTotal < total) {
+
+    // Pílulas táticas D&D 5e (Resistência, Vulnerabilidade, Imunidade, TR, Concentração, Evasão)
+    var tacticalPills = [];
+    if (crit) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico (Dados Dobrados)</span>');
+    }
+    if (reductionMeta.isImmune) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--immune">🚫 Imunidade a ' + escHtml(dtInfo.lb) + ' (0 Dano)</span>');
+    } else if (reductionMeta.isVulnerable) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">💥 Vulnerabilidade (2× Dano)</span>');
+    } else if (reductionMeta.isResistant || reductionMeta.rageResisted) {
+        var rSrc = reductionMeta.rageResisted ? 'Fúria' : 'Resistência';
+        tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ ' + rSrc + ' a ' + escHtml(dtInfo.lb) + ' (½)</span>');
+    }
+    if (reductionMeta.saveSuccess) {
+        var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
+        tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' Sucesso (½)</span>');
+    }
+    if (reductionMeta.uncannyDodge) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--save">💨 Esquiva Sobrenatural (½)</span>');
+    }
+    if (reductionMeta.deflectReduction > 0) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--save">✋ Desviar Projéteis (−' + reductionMeta.deflectReduction + ')</span>');
+    }
+    if (reductionMeta.hasConcentration) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--conc">🧠 TR CON CD ' + (reductionMeta.concDc || 10) + ' (Concentração)</span>');
+    }
+
+    if (tacticalPills.length > 0) {
+        var pillRow = document.createElement('div');
+        pillRow.className = 'dmg-tactical-pills';
+        pillRow.innerHTML = tacticalPills.join(' ');
+        box.appendChild(pillRow);
+    }
+
+    // Linha de redução — quando o dano aplicado difere do total rolado.
+    if (reductionMeta && typeof reductionMeta.appliedTotal === 'number' && reductionMeta.appliedTotal !== total) {
         var reason = '';
-        if (reductionMeta.saveSuccess) reason = 'O alvo se esquivou e sofreu metade do dano';
+        if (reductionMeta.isImmune) reason = 'Alvo imune a ' + dtInfo.lb;
+        else if (reductionMeta.isVulnerable) reason = 'Vulnerabilidade dobra o dano de ' + dtInfo.lb;
+        else if (reductionMeta.saveSuccess) reason = 'O alvo se esquivou (TR bem-sucedido: metade)';
         else if (reductionMeta.rageResisted) reason = 'A Fúria do alvo absorveu metade do golpe';
-        else if (reductionMeta.halfDmg) reason = 'O alvo usou reflexos rápidos e sofreu metade';
+        else if (reductionMeta.isResistant) reason = 'Resistência do alvo reduziu o dano à metade';
+        else if (reductionMeta.uncannyDodge) reason = 'Esquiva Sobrenatural reduziu o dano à metade';
+        else if (reductionMeta.halfDmg) reason = 'Reflexos rápidos reduziram o dano à metade';
+        else if (reductionMeta.deflectReduction > 0) reason = 'Desviar Projéteis absorveu ' + reductionMeta.deflectReduction + ' de dano';
         else reason = 'O alvo reduziu parte do dano';
+
         var reductionLine = document.createElement('div');
         reductionLine.className = 'dmg-sum-line dmg-sum-reduction';
         reductionLine.innerHTML = '<span class="dmg-reduction-arrow">▸</span> ' + escHtml(reason) +
             ': <span class="dmg-reduction-before">' + total + ' →</span> ' +
-            simRollSpan(reductionMeta.appliedTotal, 'drl-num--total') + ' <span class="dmg-reduction-label">de dano real</span>';
+            simRollSpan(reductionMeta.appliedTotal, 'drl-num--total') + ' <span class="dmg-reduction-label">' + escHtml(dtInfo.lb) + '</span>';
         box.appendChild(reductionLine);
     }
+
+    // Progressive Disclosure: botão compacto para visualizar a fórmula detalhada pontualmente
+    var toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.className = 'dmg-inspect-toggle-btn';
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    toggleBtn.innerHTML = 'ℹ️ Detalhes da Regra';
+
+    var breakdownEl = document.createElement('div');
+    breakdownEl.className = 'dmg-math-breakdown';
+
+    var rowsHtml = '';
+    rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dados de Dano:</span><strong>' + rolls.length + 'd' + die + ' [' + rolls.join('+') + '] = ' + sumDice + '</strong></div>';
+    if (mod) rowsHtml += '<div class="dmg-math-breakdown-row"><span>Modificador:</span><strong>+' + mod + ' (' + escHtml(String(attr)) + ')</strong></div>';
+    rowsHtml += '<div class="dmg-math-breakdown-row"><span>Tipo de Dano:</span><strong>' + dtInfo.ico + ' ' + escHtml(dtInfo.lb) + '</strong></div>';
+    if (reductionMeta && typeof reductionMeta.appliedTotal === 'number' && reductionMeta.appliedTotal !== total) {
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dano Final D&D 5e:</span><strong style="color:#e8a070;">' + total + ' → ' + reductionMeta.appliedTotal + '</strong></div>';
+    }
+    if (reductionMeta && reductionMeta.hasConcentration) {
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Salvaguarda de Concentração:</span><strong>TR CON CD ' + (reductionMeta.concDc || 10) + ' (PHB p. 203)</strong></div>';
+    }
+    breakdownEl.innerHTML = rowsHtml;
+
+    toggleBtn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        var isOpen = breakdownEl.classList.contains('is-open');
+        if (isOpen) {
+            breakdownEl.classList.remove('is-open');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.innerHTML = 'ℹ️ Detalhes da Regra';
+        } else {
+            breakdownEl.classList.add('is-open');
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            toggleBtn.innerHTML = '▲ Ocultar Detalhes';
+        }
+    });
+
+    box.appendChild(toggleBtn);
+    box.appendChild(breakdownEl);
     parent.appendChild(box);
 }
 
 /** Linhas do resumo ao pular animação de ataque: mesma grelha que «Ordem de iniciativa» (pos · ico · nome · pastilha). */
-function simBuildAttackSkipRows(r, atkShown, hitRes, effAc, actor, target, dmgRolls, die, dmgMod, dmgItem, dmgSpecFlat, total, oldHp, newHp, spellMeta) {
+function simBuildAttackSkipRows(r, atkShown, hitRes, effAc, actor, target, dmgRolls, die, dmgMod, dmgItem, dmgSpecFlat, total, oldHp, newHp, spellMeta, reductionMeta) {
     spellMeta = spellMeta || null;
+    reductionMeta = reductionMeta || null;
     var sumD = dmgRolls.reduce(function (a, b) { return a + b; }, 0);
     var attr = actor.attr || 'bônus de dano';
+    var dtKey = String((reductionMeta && reductionMeta.dmgType) || actor.dmgType || 'slashing').toLowerCase().trim();
+    var dtInfo = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(dtKey) : { lb: 'Cortante', ico: '⚔️' };
+
     var parts = dmgRolls.length + 'd' + die + ': [' + dmgRolls.join(', ') + '] = ' + sumD;
     if (dmgMod) parts += ' + ' + dmgMod + ' (' + attr + ')';
     if (dmgItem) parts += ' + ' + dmgItem + ' (efeitos)';
-    if (dmgSpecFlat) parts += ' + ' + dmgSpecFlat + ' (fixo da habilidade)';
-    parts += ' = ' + total + ' de dano';
-    /* Phase 5b polish v6 (2026-04-26): heraldic icons em vez de emojis.
-       User feedback "icones tosco de Windows, sem fallback, somente heraldicos
-       no combate sempre". Cada row passa `icoClass` (heraldic SVG id) +
-       `clsSlug` (cls-XX para colorir via currentColor). */
+    if (dmgSpecFlat) parts += ' + ' + dmgSpecFlat + ' (fixo)';
+    parts += ' · ' + dtInfo.lb;
+    if (reductionMeta && reductionMeta.isImmune) parts += ' [Imune: 0 dano]';
+    else if (reductionMeta && reductionMeta.isVulnerable) parts += ' [Vulnerabilidade 2×]';
+    else if (reductionMeta && (reductionMeta.isResistant || reductionMeta.rageResisted)) parts += ' [Resistência ½]';
+    else if (reductionMeta && reductionMeta.saveSuccess) parts += ' [TR Sucesso ½]';
+    else if (reductionMeta && reductionMeta.uncannyDodge) parts += ' [Esquiva ½]';
+    if (reductionMeta && reductionMeta.hasConcentration) parts += ' [TR CON CD ' + (reductionMeta.concDc || 10) + ']';
+
     var actorUtype = actor.t === 'p' ? 'player' : (actor.t === 'a' ? 'ally' : 'enemy');
     var targetUtype = target.t === 'p' ? 'player' : (target.t === 'a' ? 'ally' : 'enemy');
     var actorIcoCls = (typeof _heraldicIconOf === 'function') ? _heraldicIconOf(actor, actorUtype) : null;
@@ -29385,17 +29654,9 @@ function simBuildAttackSkipRows(r, atkShown, hitRes, effAc, actor, target, dmgRo
         vsTitle = 'Teste vs CA';
     }
     return [
-        /* 2026-06-11 (user): as linhas dos COMBATENTES (ator/alvo) mostram agora
-           o RETRATO REAL do card (mesma resolução de _combatPortraitHTML: retrato
-           custom → WebP de inimigo → PNG de classe → heráldico só como fallback).
-           Antes renderizavam o ícone heráldico de classe cru — "imagens SVG em vez
-           das imagens corretas dos cards". `unit`/`utype` viajam pro renderer. */
         { icoClass: actorIcoCls, clsSlug: actorClsSlug, unit: actor, utype: actorUtype, name: actor.n + ' → ' + target.n, roll: atkRes, longName: false },
-        /* d20/ic-sword: o renderer (showAttackSkipSummaryIOPLayout) troca estes
-           dois por IMAGENS OpenAI low (dice-d20.webp / damage-sword.webp),
-           2026-06-12 (user). icoClass continua sendo a chave de roteamento. */
         { icoClass: 'ic-d20', name: vsTitle, roll: vs, longName: false },
-        { icoClass: 'ic-sword', name: parts, roll: String(total) + ' PV', longName: true },
+        { icoClass: 'ic-sword', name: parts, roll: String(total) + ' PV ' + dtInfo.lb, longName: true },
         { icoClass: targetIcoCls, clsSlug: targetClsSlug, unit: target, utype: targetUtype, name: 'PV ' + target.n, roll: oldHp + ' → ' + newHp, longName: false }
     ];
 }
@@ -33703,6 +33964,22 @@ function showTargetActionMenu(targetIdx, uid) {
         var rList = u.resistances.slice(0, 2).map(function (r) { return simDmgTypeInfoPt(r).lb; }).join(', ') + (u.resistances.length > 2 ? '…' : '');
         metaBadges.push('<span class="tam-meta-badge warn" title="Sofre metade do dano (½)">🛡 Res: ' + escHtml(rList) + '</span>');
     }
+    if (u.immunities && u.immunities.length) {
+        var imList = u.immunities.slice(0, 2).map(function (im) { return (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(im).lb : im; }).join(', ') + (u.immunities.length > 2 ? '…' : '');
+        metaBadges.push('<span class="tam-meta-badge" style="background:rgba(160,174,192,0.2);border-color:rgba(203,213,225,0.6);color:#f1f5f9;" title="D&D 5e: Imune — não sofre dano deste tipo">🚫 Imune: ' + escHtml(imList) + '</span>');
+    }
+    var concBuff = (u.se || []).find(function (st) { return st && st.concentration; });
+    if (concBuff) {
+        metaBadges.push('<span class="tam-meta-badge" style="background:rgba(159,122,234,0.22);border-color:rgba(183,148,244,0.7);color:#e9d8fd;" title="D&D 5e (PHB p. 203): Dano força TR CON (CD 10 ou metade do dano) para quebrar">🧠 Conc: ' + escHtml(concBuff.n || 'Magia') + '</span>');
+    }
+    (u.se || []).forEach(function (st) {
+        if (!st || st.concentration) return;
+        var cName = st.dndCondition || st.condName || st.n || '';
+        if (cName) {
+            var cIco = st.ico || '✦';
+            metaBadges.push('<span class="tam-meta-badge warn" title="Condição D&D 5e ativa">' + escHtml(cIco + ' ' + cName) + '</span>');
+        }
+    });
 
     if (metaBadges.length > 0) {
         html += '<div class="tam-meta-row">' + metaBadges.join(' ') + '</div>';
@@ -33904,6 +34181,23 @@ function showTargetActionMenu(targetIdx, uid) {
         });
     }
 
+    sheet.querySelectorAll('.tam-meta-badge[title]').forEach(function (b) {
+        b.style.cursor = 'pointer';
+        b.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var tText = b.getAttribute('title');
+            if (!tText) return;
+            var prevToast = sheet.querySelector('.tam-meta-toast');
+            if (prevToast) prevToast.remove();
+            var toast = document.createElement('div');
+            toast.className = 'tam-meta-toast';
+            toast.textContent = tText;
+            var metaRow = sheet.querySelector('.tam-meta-row');
+            if (metaRow) metaRow.insertAdjacentElement('afterend', toast);
+            setTimeout(function () { if (toast.isConnected) toast.remove(); }, 3500);
+        });
+    });
+
     var inspectBtn = sheet.querySelector('[data-tam-act="inspect"]');
     if (inspectBtn) {
         inspectBtn.addEventListener('click', function () {
@@ -33974,6 +34268,33 @@ function showAllyActionMenu(targetIdx, uid) {
     html +=   '</div>';
     html +=   '<button class="tam-close-btn" aria-label="Fechar">✕</button>';
     html += '</div>';
+
+    // Badges de Condições, Concentração e Estado de Vida do Companheiro
+    var allyBadges = [];
+    if (u.hp <= 0 && u.dying && !u.stable) {
+        var ds = u.deathSaves || { s: 0, f: 0 };
+        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e (PHB p. 197): Caído a 0 PV fazendo testes de morte">💀 Inconsciente (' + ds.s + 'S / ' + ds.f + 'F)</span>');
+    } else if (u.hp <= 0 && u.stable) {
+        allyBadges.push('<span class="tam-meta-badge good" title="D&D 5e (PHB p. 197): Estabilizado a 0 PV">✦ Estável (0 PV)</span>');
+    }
+    if (u.tempHp > 0) {
+        allyBadges.push('<span class="tam-meta-badge good" title="Pontos de vida temporários ativos">🛡 +' + u.tempHp + ' PV Temp</span>');
+    }
+    var aConcBuff = (u.se || []).find(function (st) { return st && st.concentration; });
+    if (aConcBuff) {
+        allyBadges.push('<span class="tam-meta-badge" style="background:rgba(159,122,234,0.22);border-color:rgba(183,148,244,0.7);color:#e9d8fd;" title="D&D 5e (PHB p. 203): Concentrando em magia ativa">🧠 Conc: ' + escHtml(aConcBuff.n || 'Magia') + '</span>');
+    }
+    (u.se || []).forEach(function (st) {
+        if (!st || st.concentration) return;
+        var cName = st.dndCondition || st.condName || st.n || '';
+        if (cName) {
+            var cIco = st.ico || '✦';
+            allyBadges.push('<span class="tam-meta-badge warn" title="Condição ativa">' + escHtml(cIco + ' ' + cName) + '</span>');
+        }
+    });
+    if (allyBadges.length > 0) {
+        html += '<div class="tam-meta-row">' + allyBadges.join(' ') + '</div>';
+    }
 
     // Lista de Ações do Companheiro
     html += '<div class="tam-actions-list">';
@@ -34092,6 +34413,23 @@ function showAllyActionMenu(targetIdx, uid) {
             });
         });
     }
+
+    sheet.querySelectorAll('.tam-meta-badge[title]').forEach(function (b) {
+        b.style.cursor = 'pointer';
+        b.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var tText = b.getAttribute('title');
+            if (!tText) return;
+            var prevToast = sheet.querySelector('.tam-meta-toast');
+            if (prevToast) prevToast.remove();
+            var toast = document.createElement('div');
+            toast.className = 'tam-meta-toast';
+            toast.textContent = tText;
+            var metaRow = sheet.querySelector('.tam-meta-row');
+            if (metaRow) metaRow.insertAdjacentElement('afterend', toast);
+            setTimeout(function () { if (toast.isConnected) toast.remove(); }, 3500);
+        });
+    });
 
     var inspectBtn = sheet.querySelector('[data-tam-act="inspect"]');
     if (inspectBtn) {
@@ -43202,12 +43540,7 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
                        adiciona classe ao resultEl pra colorir o total/dado em cor da classe. */
                     var summonSlugCls = (opts && opts.summonCasterCls) ? (' summon-' + opts.summonCasterCls) : '';
                     resultEl.className = 'dice-result-label visible dmg-result-stack' + (crit ? ' dmg-crit-summary' : '') + summonSlugCls;
-                    appendDamageRollSummary(resultEl, rolls, die, dmgMod, crit, actor, {
-                        appliedTotal: opts && opts.appliedTotal,
-                        saveSuccess: opts && opts.saveSuccess,
-                        rageResisted: opts && opts.rageResisted,
-                        halfDmg: opts && opts.halfDmg
-                    });
+                    appendDamageRollSummary(resultEl, rolls, die, dmgMod, crit, actor, opts || {});
                     var cellRoot = getDiceCombatOverlayTargetCell(ov);
                     if (cellRoot) cellRoot.classList.add('dmg-header-target-pop');
 
@@ -44588,6 +44921,9 @@ async function playTurn(aIdx, tIdx, opts) {
     var saveTotal = null;
     var saveDc = null;
     var saveSuccess = null;
+    var saveAdvMode = 'normal';
+    var saveRaw1 = null;
+    var saveRaw2 = null;
 
     if (atkSkill && atkSkill.autoHit) {
         r = null;
@@ -44685,6 +45021,9 @@ async function playTurn(aIdx, tIdx, opts) {
                 /* Path legacy preservado pra compat (Contramágica buff carrega flag). Helper
                    também lê magicSaveAdvantage, então consistente. */
                 var r1ms = _simLuckyD20(_rsvLucky), r2ms = _simLuckyD20(_rsvLucky);
+                saveAdvMode = 'advantage';
+                saveRaw1 = r1ms;
+                saveRaw2 = r2ms;
                 saveRoll = Math.max(r1ms, r2ms);
                 if (s && s.log) s.log.push(target.n + ' — salvaguarda com vantagem (Contramágica/Proteção): ' + r1ms + '/' + r2ms + ' → ' + saveRoll + '.');
             } else {
@@ -44697,16 +45036,22 @@ async function playTurn(aIdx, tIdx, opts) {
                     else _saveAdvMode = 'advantage';
                     if (s && s.log) s.log.push(target.n + ' — ' + _rsvAdv.label + ': vantagem no TR.');
                 }
+                saveAdvMode = _saveAdvMode;
                 if (_saveAdvMode === 'advantage') {
                     var _sr1a = _simLuckyD20(_rsvLucky), _sr2a = _simLuckyD20(_rsvLucky);
+                    saveRaw1 = _sr1a;
+                    saveRaw2 = _sr2a;
                     saveRoll = Math.max(_sr1a, _sr2a);
                     if (s && s.log) s.log.push(target.n + ' — TR com VANTAGEM (' + _sr1a + '/' + _sr2a + ' → ' + saveRoll + ').');
                 } else if (_saveAdvMode === 'disadvantage') {
                     var _sr1b = _simLuckyD20(_rsvLucky), _sr2b = _simLuckyD20(_rsvLucky);
+                    saveRaw1 = _sr1b;
+                    saveRaw2 = _sr2b;
                     saveRoll = Math.min(_sr1b, _sr2b);
                     if (s && s.log) s.log.push(target.n + ' — TR com DESVANTAGEM (Exhaustion/Restrained — ' + _sr1b + '/' + _sr2b + ' → ' + saveRoll + ').');
                 } else {
                     saveRoll = _simLuckyD20(_rsvLucky);
+                    saveRaw1 = saveRoll;
                 }
             }
             var _svAb = String(atkSkill.save.ability || 'con').toLowerCase();
@@ -44793,16 +45138,38 @@ async function playTurn(aIdx, tIdx, opts) {
             var _svCoverBadge = (typeof _svCover !== 'undefined' && _svCover && _svCover.bonus > 0)
                 ? '<div style="margin-top:4px;"><span style="display:inline-block;background:rgba(74,144,226,0.18);border:1px solid rgba(116,185,255,0.55);color:#a5d8ff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;">⛨ +' + _svCover.bonus + ' Cobertura no TR de Destreza (PHB p. 196)</span></div>'
                 : '';
+            var _svAblName = _saveAbl ? _saveAbl.toUpperCase() : 'TR';
+            var _svTacticalPills = [];
+            _svTacticalPills.push('<span class="dmg-pill dmg-pill--save">🛡️ TR ' + _svAblName + ' (CD ' + saveDc + ')</span>');
+            if (_autoFailSave) {
+                _svTacticalPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Auto-falha (Incapacitado)</span>');
+            } else if (saveAdvMode === 'advantage') {
+                _svTacticalPills.push('<span class="dmg-pill dmg-pill--type">✨ Vantagem no TR</span>');
+            } else if (saveAdvMode === 'disadvantage') {
+                _svTacticalPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Desvantagem no TR</span>');
+            }
+            if (saveSuccess) {
+                _svTacticalPills.push('<span class="dmg-pill dmg-pill--resist">✓ ' + (atkSkill.saveNegates ? 'Anulado (0 Dano)' : 'Metade do Dano (½)') + '</span>');
+            } else {
+                _svTacticalPills.push('<span class="dmg-pill dmg-pill--crit">✗ Dano Integral</span>');
+            }
+            var _svPillRowHtml = '<div class="dmg-tactical-pills" style="margin-top:4px;justify-content:center;">' + _svTacticalPills.join(' ') + '</div>';
+
             await new Promise(function (x) {
                 showDice(saveRoll, x, target, null, {
                     combatTarget: actor,
                     skill: atkSkill,
+                    advMode: saveAdvMode,
+                    advRaw1: saveRaw1,
+                    advRaw2: saveRaw2,
                     postResult: function () {
+                        var _resTitle = saveSuccess ? (target.n.toUpperCase() + ' RESISTIU') : (target.n.toUpperCase() + ' FALHOU NO TR');
                         return {
-                            title: saveSuccess ? 'Passou na resistência' : 'Falhou na resistência',
+                            title: _resTitle,
                             subHtml: simFormatVsDcHTML(saveRoll, saveMod, saveTotal, saveDc, saveSuccess) +
                                 _svCoverBadge +
-                                '<div class="drl-crit-rule">' + (atkSkill.saveNegates ? (escHtml(atkSkill.n || 'Magia') + ': nenhum dano se passar na resistência.') : (escHtml(atkSkill.n || 'Bola de Fogo') + ': metade do dano se passar na resistência.')) + '</div>',
+                                _svPillRowHtml +
+                                '<div class="drl-crit-rule">' + (atkSkill.saveNegates ? (escHtml(atkSkill.n || 'Magia') + ': nenhum dano se passar na resistência (D&D 5e PHB p. 196).') : (escHtml(atkSkill.n || 'Magia') + ': metade do dano se passar na resistência (D&D 5e PHB p. 196).')) + '</div>',
                             cls: saveSuccess ? 'miss' : 'hit'
                         };
                     }
@@ -45522,9 +45889,95 @@ async function playTurn(aIdx, tIdx, opts) {
             }
         }
     }
+    var critForDeath = !spellNoWeaponCrit && hitRes.crit;
+    var dmgTypeFinal = (atkSkill && atkSkill.dmgType) ? atkSkill.dmgType : (actor.dmgType || resolveSkillHitDmgType(actor, atkSkill) || 'slashing');
+    var _dtCanon = String(dmgTypeFinal).toLowerCase().trim();
+
+    var _isTargetImmune = false;
+    var _isTargetVulnerable = false;
+    var _isTargetResistant = !!rageResisted;
+
+    var expectedDmg = total;
+
+    // 1. Wet status (DMG p.110)
+    if (expectedDmg > 0 && target && target.wetTurns > 0) {
+        if (_dtCanon === 'cold') {
+            _isTargetVulnerable = true;
+            expectedDmg = expectedDmg * 2;
+        } else if (_dtCanon === 'fire') {
+            _isTargetResistant = true;
+            expectedDmg = Math.floor(expectedDmg / 2);
+        }
+    }
+
+    // 2. Traço racial (Tiefling fogo, Anão/Stout veneno, Draconato)
+    if (expectedDmg > 0 && typeof _simRacialResists === 'function' && _simRacialResists(target, _dtCanon)) {
+        _isTargetResistant = true;
+        expectedDmg = Math.max(1, Math.floor(expectedDmg / 2));
+    }
+
+    // 3. Imunidades, Vulnerabilidades e Resistências de Criatura (PHB p. 197 & MM p. 11)
+    if (expectedDmg > 0 && target) {
+        if (target.immunities && target.immunities.some(function (im) { return String(im).toLowerCase().trim() === _dtCanon; })) {
+            _isTargetImmune = true;
+            expectedDmg = 0;
+        } else if (target.vulnerabilities && target.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _dtCanon; })) {
+            _isTargetVulnerable = true;
+            expectedDmg = expectedDmg * 2;
+        } else if (target.resistances && target.resistances.some(function (res) { return String(res).toLowerCase().trim() === _dtCanon; })) {
+            _isTargetResistant = true;
+            expectedDmg = Math.max(1, Math.floor(expectedDmg / 2));
+        }
+    }
+
+    // 4. Reflexos Evasivos (halfDmg)
+    var _targetHasHalfDmg = target && target.se && target.se.some(function (st) {
+        return st && st.halfDmg && (st.turnsLeft == null || st.turnsLeft > 0);
+    });
+    if (expectedDmg > 0 && _targetHasHalfDmg) {
+        expectedDmg = Math.max(0, Math.floor(expectedDmg / 2));
+    }
+
+    // 5. PV Temporários (absorção)
+    var _tempHpAbsorbed = 0;
+    if (expectedDmg > 0 && target && target.tempHp > 0) {
+        _tempHpAbsorbed = Math.min(target.tempHp, expectedDmg);
+    }
+    var _expectedHpDmg = Math.max(0, expectedDmg - _tempHpAbsorbed);
+
+    // 6. Concentração ativa (PHB p. 203)
+    var _hasTargetConcentration = false;
+    if (target && target.se) {
+        for (var _tsci = 0; _tsci < target.se.length; _tsci++) {
+            if (target.se[_tsci] && target.se[_tsci].concentration && (target.se[_tsci].turnsLeft == null || target.se[_tsci].turnsLeft > 0)) {
+                _hasTargetConcentration = true;
+                break;
+            }
+        }
+    }
+    var _targetConcDc = Math.max(10, Math.floor(expectedDmg / 2));
+
     var oldHp = target.hp;
-    var newHp = Math.max(0, target.hp - total);
+    var newHp = Math.max(0, target.hp - _expectedHpDmg);
     var dmgModForDiceUi = dmgMod + dmgItem + dmgSpecFlat + dmgBonusExtra;
+
+    var reductionMeta = {
+        appliedTotal: expectedDmg,
+        rawTotal: total,
+        dmgType: dmgTypeFinal,
+        isImmune: _isTargetImmune,
+        isVulnerable: _isTargetVulnerable,
+        isResistant: _isTargetResistant,
+        rageResisted: rageResisted,
+        uncannyDodge: _uncannyDodgeHalve,
+        deflectReduction: _deflectReduction,
+        hasConcentration: _hasTargetConcentration,
+        concDc: _targetConcDc,
+        saveSuccess: (atkSkill && atkSkill.save) ? saveSuccess : null,
+        saveAbility: (atkSkill && atkSkill.save && atkSkill.save.ability) ? atkSkill.save.ability : null,
+        halfDmg: _targetHasHalfDmg,
+        tempHpAbsorbed: _tempHpAbsorbed
+    };
 
     /* OVERLAY 2: dado de dano + card real do alvo com HP animado (opcional se o jogador confirmou pular no d20) */
     if (!skipDmgAnim) {
@@ -45533,16 +45986,6 @@ async function playTurn(aIdx, tIdx, opts) {
             // 3 mísseis orbitando ao redor do dado durante a rolagem.
             dmgOpts = { magicMissile: true, dartCount: mmPack.count | 0 || 3 };
         }
-        // Passa meta de redução para o overlay mostrar "X → Y de dano real"
-        // quando salvaguarda passa, Fúria resiste, ou Reflexos Evasivos ativos.
-        var reductionMeta = {
-            appliedTotal: total,
-            saveSuccess: (atkSkill && atkSkill.save) ? saveSuccess : null,
-            rageResisted: rageResisted,
-            halfDmg: target.se && target.se.some(function (st) {
-                return st && st.halfDmg && (st.turnsLeft == null || st.turnsLeft > 0);
-            })
-        };
         dmgOpts = Object.assign(dmgOpts || {}, reductionMeta);
         /* V1 Invocações Phase 4 (2026-04-19, b) — propaga skill pro tema do dice popup. */
         if (atkSkill) dmgOpts.skill = atkSkill;
@@ -45561,13 +46004,11 @@ async function playTurn(aIdx, tIdx, opts) {
             };
         }
         await showAttackSkipSummaryIOPLayout(simBuildAttackSkipRows(
-            r, atkShown, hitRes, effAc, actor, target, dmgRolls, dmgDieDisplay, dmgMod, dmgItem, dmgSpecFlat, total, oldHp, newHp, spellSkipMeta
+            r, atkShown, hitRes, effAc, actor, target, dmgRolls, dmgDieDisplay, dmgMod, dmgItem, dmgSpecFlat, expectedDmg, oldHp, newHp, spellSkipMeta, reductionMeta
         ));
     }
 
     /* Aplica de fato + VFX (0 PV: teste de morte / falhas automáticas, PHB simplificado) */
-    var critForDeath = !spellNoWeaponCrit && hitRes.crit;
-    var dmgTypeFinal = (atkSkill && atkSkill.dmgType) ? atkSkill.dmgType : (actor.dmgType || '');
     /* 2026-06-07 (user): se uma reação de Repreensão Infernal vai ser oferecida ao
        player, ADIA a animação do dano sofrido (FCT) pra DEPOIS do popup — o jogador
        decide ANTES de ver a animação de dano e da repreensão. */
@@ -45606,6 +46047,7 @@ async function playTurn(aIdx, tIdx, opts) {
     applyHpAfterDamage(s, target, oldHp, newHp, {
         deathFailCrit: !!critForDeath,
         dmgType: dmgTypeFinal,
+        rawDmg: total,
         /* V1.7 Sprint-17 Ronda 13 (2026-04-21 QA PHB p.96) — contexto de save pra Evasion.
            Se skill teve save:{ability:'dex'} E save falhou, contexto aplica halfDmgDexSaveOnly. */
         saveAbility: atkSkill && atkSkill.save ? atkSkill.save.ability : null,
@@ -45614,7 +46056,7 @@ async function playTurn(aIdx, tIdx, opts) {
     });
 
     /* D&D 5e PHB p. 233: Desintegrar — se reduzir o alvo a 0 PV, desintegra em cinzas */
-    if (total > 0 && newHp <= 0 && atkSkill && atkSkill.disintegrateOnKill) {
+    if (total > 0 && (target.hp <= 0 || newHp <= 0) && atkSkill && atkSkill.disintegrateOnKill) {
         target.isDead = true;
         target.dying = false;
         target.alive = false;
@@ -48413,6 +48855,13 @@ async function __combatAnimateOneEvent(ev) {
             var dmgDieSize = (ev.dmgDie | 0) || 6;
             var spellTheme = isFireball ? 'fire' : (isRayOfFrost ? 'cold' : (ev.dmgType || 'default'));
             var spellVariant = isFireball ? 'fireball' : (isRayOfFrost ? 'ice' : null);
+            var _cDtRem = String(ev.dmgType || '').toLowerCase().trim();
+            var _isRemImm = false, _isRemVuln = false, _isRemRes = false;
+            if (_cDtRem && tUnit) {
+                if (tUnit.immunities && tUnit.immunities.some(function (im) { return String(im).toLowerCase().trim() === _cDtRem; })) _isRemImm = true;
+                else if (tUnit.vulnerabilities && tUnit.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _cDtRem; })) _isRemVuln = true;
+                else if (tUnit.resistances && tUnit.resistances.some(function (res) { return String(res).toLowerCase().trim() === _cDtRem; })) _isRemRes = true;
+            }
             try {
                 await showDamageDice(
                     ev.dmgRolls,
@@ -48423,7 +48872,17 @@ async function __combatAnimateOneEvent(ev) {
                     ev.oldHp | 0,
                     ev.newHp | 0,
                     dmgModCombined,
-                    { theme: spellTheme, variant: spellVariant, dartCount: spellVariant ? 1 : 0, skill: ev.skillName }
+                    {
+                        theme: spellTheme,
+                        variant: spellVariant,
+                        dartCount: spellVariant ? 1 : 0,
+                        skill: ev.skillName,
+                        dmgType: ev.dmgType,
+                        appliedTotal: ev.dmgTotal != null ? (ev.dmgTotal | 0) : Math.max(0, (ev.oldHp | 0) - (ev.newHp | 0)),
+                        isImmune: _isRemImm,
+                        isVulnerable: _isRemVuln,
+                        isResistant: _isRemRes
+                    }
                 );
             } catch (eDmg) {
                 console.warn('[C-REM:DMG] showDamageDice falhou', eDmg && eDmg.message);
