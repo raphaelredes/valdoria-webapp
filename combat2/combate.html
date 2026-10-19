@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T04:04:40Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T04:27:02Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -5292,6 +5292,8 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   text-align: left;
 }
 .udc-sfx-row.debuff { border-left-color: rgba(200,100,100,.75); }
+.udc-sfx-row.buff { border-left-color: rgba(94,234,212,.75); }
+.udc-sfx-row.neutral { border-left-color: rgba(160,148,132,.75); }
 .udc-sfx-ico { font-size: calc(20px * var(--v-font-scale, 1)); line-height: 1; flex-shrink: 0; }
 .udc-sfx-name { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); letter-spacing: 1px; }
 .udc-sfx-turns { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text, #d4c8b0); margin-top: var(--v-space-xs, 2px); }
@@ -41335,26 +41337,91 @@ function appendMagicMissileVSCarousel(parent, actor, groupList, s) {
     };
 }
 
-/** Resumo final do volley: por alvo com dardos + dano. */
+/** Resumo final do volley: por alvo com dardos + dano (Progressive Disclosure D&D 5e). */
 function appendMagicMissileVolleySummary(parent, groupList, darts, s) {
+    var total = darts.reduce(function (a, d) { return a + d.dmg; }, 0);
+
     var titleEl = document.createElement('div');
     titleEl.className = 'drl-rollup mm-summary-title';
-    titleEl.textContent = 'Volley de Mísseis Mágicos';
+    titleEl.textContent = 'Mísseis Mágicos — ' + total + ' PV de Força';
     parent.appendChild(titleEl);
-    var total = darts.reduce(function (a, d) { return a + d.dmg; }, 0);
-    groupList.forEach(function (g) {
+
+    var structCard = document.createElement('div');
+    structCard.className = 'drl-structured-card';
+
+    var kicker = document.createElement('div');
+    kicker.className = 'drl-structured-kicker';
+    kicker.textContent = '✨ Evocação de 1º Círculo · Acerto Automático';
+    structCard.appendChild(kicker);
+
+    var metrics = document.createElement('div');
+    metrics.className = 'drl-structured-metrics';
+
+    var cellDarts = document.createElement('div');
+    cellDarts.className = 'drl-structured-cell';
+    cellDarts.innerHTML = '<span class="drl-structured-lbl">Dardos</span><span class="drl-structured-val">' + darts.length + '×</span>';
+    metrics.appendChild(cellDarts);
+
+    var cellDmg = document.createElement('div');
+    cellDmg.className = 'drl-structured-cell';
+    cellDmg.innerHTML = '<span class="drl-structured-lbl">Dano Total</span><span class="drl-structured-val" style="color:#c084fc;">' + total + ' PV</span>';
+    metrics.appendChild(cellDmg);
+
+    structCard.appendChild(metrics);
+
+    var pillsWrap = document.createElement('div');
+    pillsWrap.className = 'drl-structured-pills';
+    pillsWrap.innerHTML = [
+        '<span class="dmg-pill dmg-pill--type">✨ Dano de Força</span>',
+        '<span class="dmg-pill dmg-pill--buff">🎯 100% Acerto Automático</span>',
+        '<span class="dmg-pill dmg-pill--crit">1d4+1 por Dardo</span>'
+    ].join(' ');
+    structCard.appendChild(pillsWrap);
+
+    var toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.className = 'drl-structured-toggle-btn';
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    toggleBtn.textContent = 'ℹ️ Detalhes da Regra';
+
+    var detailsBody = document.createElement('div');
+    detailsBody.className = 'drl-structured-details-body';
+
+    var dRows = [
+        { l: 'Magia', v: 'Mísseis Mágicos (1º Círculo)' },
+        { l: 'Total de Dardos', v: darts.length + ' dardo(s) de força mística' }
+    ];
+
+    groupList.forEach(function (g, gIdx) {
         var t = s.order[g.tIdx];
-        var row = document.createElement('div');
-        row.className = 'drl-rollup mm-summary-row';
-        row.textContent = '▸ ' + (t ? t.n : '?') + ' — ' + g.darts.length + ' dardo' +
-            (g.darts.length > 1 ? 's' : '') + ' (' + g.darts.map(function (d) { return d.dmg; }).join(' + ') +
-            ') = ' + g.total + ' PV';
-        parent.appendChild(row);
+        var tName = t ? t.n : ('Alvo #' + (gIdx + 1));
+        var dartMath = g.darts.map(function (d) { return d.dmg; }).join(' + ');
+        dRows.push({
+            l: 'Alvo: ' + tName,
+            v: g.darts.length + ' dardo(s) (' + dartMath + ') = ' + g.total + ' PV'
+        });
     });
-    var totalRow = document.createElement('div');
-    totalRow.className = 'drl-rollup mm-summary-total';
-    totalRow.textContent = 'Total: ' + total + ' PV de força';
-    parent.appendChild(totalRow);
+
+    dRows.push({
+        l: 'Regra D&D 5e',
+        v: 'PHB p. 257: Três dardos de força brilhante atingem alvos visíveis simultaneamente sem rolagem de ataque ou salvaguarda.'
+    });
+
+    detailsBody.innerHTML = dRows.map(function (rw) {
+        return '<div class="drl-details-row"><span>' + escHtml(rw.l) + ':</span> <strong>' + escHtml(rw.v) + '</strong></div>';
+    }).join('');
+
+    toggleBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = detailsBody.classList.toggle('is-open');
+        toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'ℹ️ Detalhes da Regra';
+    });
+
+    structCard.appendChild(toggleBtn);
+    structCard.appendChild(detailsBody);
+
+    parent.appendChild(structCard);
 }
 
 /** Fly-out em rajada: clona cada orbit-missile em #app, anima para o card do alvo,
@@ -42616,19 +42683,78 @@ function showRayOfFrostOverlay(actor, target, dart, s) {
         function showSummary() {
             resultEl.className = 'dice-result-label visible dmg-result-stack';
             while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
+
             var titleEl = document.createElement('div');
             titleEl.className = 'drl-rollup mm-summary-title mm-summary-title--ice';
-            titleEl.textContent = 'Raio Gélido — ' + dart.dmg + ' de frio';
+            titleEl.textContent = 'Raio Gélido — ' + dart.dmg + ' PV de Frio';
             resultEl.appendChild(titleEl);
-            var row = document.createElement('div');
-            row.className = 'drl-rollup mm-summary-row';
-            row.textContent = '▸ ' + (target.n || '?') + ' (' + dart.rolls.join(' + ') +
-                (dart.flat ? ' + ' + dart.flat : '') + ') = ' + dart.dmg + ' PV';
-            resultEl.appendChild(row);
-            var rowEff = document.createElement('div');
-            rowEff.className = 'drl-rollup mm-summary-row';
-            rowEff.textContent = '▸ Deslocamento reduzido por 1 turno';
-            resultEl.appendChild(rowEff);
+
+            var structCard = document.createElement('div');
+            structCard.className = 'drl-structured-card';
+
+            var kicker = document.createElement('div');
+            kicker.className = 'drl-structured-kicker';
+            kicker.textContent = '❄️ Truque de Evocação · Ataque Mágico à Distância';
+            structCard.appendChild(kicker);
+
+            var metrics = document.createElement('div');
+            metrics.className = 'drl-structured-metrics';
+
+            var cellDmg = document.createElement('div');
+            cellDmg.className = 'drl-structured-cell';
+            cellDmg.innerHTML = '<span class="drl-structured-lbl">Dano de Frio</span><span class="drl-structured-val" style="color:#93c5fd;">' + dart.dmg + ' PV</span>';
+            metrics.appendChild(cellDmg);
+
+            var cellSlow = document.createElement('div');
+            cellSlow.className = 'drl-structured-cell';
+            cellSlow.innerHTML = '<span class="drl-structured-lbl">Lentidão</span><span class="drl-structured-val" style="color:#38bdf8;">−3m (2h)</span>';
+            metrics.appendChild(cellSlow);
+
+            structCard.appendChild(metrics);
+
+            var pillsWrap = document.createElement('div');
+            pillsWrap.className = 'drl-structured-pills';
+            pillsWrap.innerHTML = [
+                '<span class="dmg-pill dmg-pill--type">❄️ Dano de Frio</span>',
+                '<span class="dmg-pill dmg-pill--debuff">❄️ −3m Deslocamento (1 Turno)</span>',
+                '<span class="dmg-pill dmg-pill--hit">🎯 Ataque Mágico</span>'
+            ].join(' ');
+            structCard.appendChild(pillsWrap);
+
+            var toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'drl-structured-toggle-btn';
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.textContent = 'ℹ️ Detalhes da Regra';
+
+            var detailsBody = document.createElement('div');
+            detailsBody.className = 'drl-structured-details-body';
+
+            var rollBreakdown = dart.rolls.join(' + ') + (dart.flat ? (' + ' + dart.flat) : '') + ' = ' + dart.dmg + ' PV';
+            var dRows = [
+                { l: 'Magia', v: 'Raio Gélido (Truque de Evocação)' },
+                { l: 'Alvo Atingido', v: target ? target.n : 'Alvo' },
+                { l: 'Rolagem de Dano', v: dart.rolls.length + 'd' + dart.d + ': (' + rollBreakdown + ')' },
+                { l: 'Efeito Secundário', v: 'Velocidade do alvo é reduzida em 3 metros (10 pés / 2 hexes) até o início do seu próximo turno.' },
+                { l: 'Regra D&D 5e', v: 'PHB p. 271: Um feixe gélido de luz atinge o alvo, causando dano de frio e desacelerando seu movimento com geada mística.' }
+            ];
+
+            detailsBody.innerHTML = dRows.map(function (rw) {
+                return '<div class="drl-details-row"><span>' + escHtml(rw.l) + ':</span> <strong>' + escHtml(rw.v) + '</strong></div>';
+            }).join('');
+
+            toggleBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var isOpen = detailsBody.classList.toggle('is-open');
+                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'ℹ️ Detalhes da Regra';
+            });
+
+            structCard.appendChild(toggleBtn);
+            structCard.appendChild(detailsBody);
+
+            resultEl.appendChild(structCard);
+
             setTimeout(function () { continueBtn.style.display = ''; }, 400);
         }
         continueBtn.addEventListener('click', async function () {
@@ -42916,18 +43042,94 @@ function showFireballSpellOverlay(actor, target, dart, s) {
                     dice.fusionTo(dart.dmg, function () {
                         resultEl.className = 'dice-result-label visible dmg-result-stack';
                         while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
+
+                        var sv = dart.targetSave || {};
+                        var finalDmg = (sv.finalDmg != null) ? sv.finalDmg : (sv.success ? Math.floor(dart.dmg / 2) : dart.dmg);
+                        var svTotalStr = sv.total != null ? String(sv.total) : '?';
+                        var svDcStr = sv.dc != null ? String(sv.dc) : '?';
+
                         var titleEl = document.createElement('div');
                         titleEl.className = 'drl-rollup mm-summary-title mm-summary-title--fire';
-                        titleEl.textContent = 'Bola de Fogo — ' + dart.dmg + ' rolado (' + diceBadgeText + ')';
+                        titleEl.textContent = 'Bola de Fogo — ' + finalDmg + ' PV de Fogo';
                         resultEl.appendChild(titleEl);
-                        var sv = dart.targetSave;
-                        var row = document.createElement('div');
-                        row.className = 'drl-rollup mm-summary-row';
-                        var svText = (sv && sv.success)
-                            ? ' ▸ TR DES ' + sv.total + ' vs CD ' + sv.dc + ' (Sucesso: metade do dano) → ' + sv.finalDmg + ' PV'
-                            : ' ▸ TR DES ' + (sv ? sv.total : '?') + ' vs CD ' + (sv ? sv.dc : '?') + ' (Falha: dano cheio) → ' + (sv ? sv.finalDmg : dart.dmg) + ' PV';
-                        row.textContent = (target.n || '?') + svText;
-                        resultEl.appendChild(row);
+
+                        var structCard = document.createElement('div');
+                        structCard.className = 'drl-structured-card';
+
+                        var kicker = document.createElement('div');
+                        kicker.className = 'drl-structured-kicker';
+                        kicker.textContent = '🔥 Evocação de 3º Círculo · Área Esfera 6m (4 Hexes)';
+                        structCard.appendChild(kicker);
+
+                        var metrics = document.createElement('div');
+                        metrics.className = 'drl-structured-metrics';
+
+                        var cellRolled = document.createElement('div');
+                        cellRolled.className = 'drl-structured-cell';
+                        cellRolled.innerHTML = '<span class="drl-structured-lbl">Rolado</span><span class="drl-structured-val">' + dart.dmg + ' (' + diceBadgeText + ')</span>';
+                        metrics.appendChild(cellRolled);
+
+                        var cellSave = document.createElement('div');
+                        cellSave.className = 'drl-structured-cell';
+                        cellSave.innerHTML = '<span class="drl-structured-lbl">TR DES</span><span class="drl-structured-val" style="color:' + (sv.success ? '#7cdb7c' : '#ff8a4a') + ';">' + svTotalStr + ' vs CD ' + svDcStr + '</span>';
+                        metrics.appendChild(cellSave);
+
+                        var cellFinal = document.createElement('div');
+                        cellFinal.className = 'drl-structured-cell';
+                        cellFinal.innerHTML = '<span class="drl-structured-lbl">Dano Final</span><span class="drl-structured-val" style="color:#ff6b6b;font-weight:800;">' + finalDmg + ' PV</span>';
+                        metrics.appendChild(cellFinal);
+
+                        structCard.appendChild(metrics);
+
+                        var pillsWrap = document.createElement('div');
+                        pillsWrap.className = 'drl-structured-pills';
+                        var fbPills = [
+                            '<span class="dmg-pill dmg-pill--type">🔥 Dano de Fogo</span>'
+                        ];
+                        if (sv.success) {
+                            fbPills.push('<span class="dmg-pill dmg-pill--save">✓ TR Sucesso (Metade do Dano)</span>');
+                        } else {
+                            fbPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ TR Falha (Dano Total)</span>');
+                        }
+                        fbPills.push('<span class="dmg-pill dmg-pill--resist">CD ' + svDcStr + ' Destreza</span>');
+                        pillsWrap.innerHTML = fbPills.join(' ');
+                        structCard.appendChild(pillsWrap);
+
+                        var toggleBtn = document.createElement('button');
+                        toggleBtn.type = 'button';
+                        toggleBtn.className = 'drl-structured-toggle-btn';
+                        toggleBtn.setAttribute('aria-expanded', 'false');
+                        toggleBtn.textContent = 'ℹ️ Detalhes da Regra';
+
+                        var detailsBody = document.createElement('div');
+                        detailsBody.className = 'drl-structured-details-body';
+
+                        var rollMath = dart.rolls.join(' + ') + (dart.flat ? (' + ' + dart.flat) : '') + ' = ' + dart.dmg + ' PV';
+                        var dRows = [
+                            { l: 'Magia', v: 'Bola de Fogo (3º Círculo)' },
+                            { l: 'Alvo', v: target ? target.n : 'Alvo' },
+                            { l: 'Salvaguarda', v: 'TR Destreza ' + svTotalStr + ' vs CD ' + svDcStr + ' (' + (sv.success ? 'Sucesso: sofre metade' : 'Falha: sofre dano total') + ')' },
+                            { l: 'Rolagem de Dano', v: diceBadgeText + ': (' + rollMath + ')' },
+                            { l: 'Resolução D&D 5e', v: sv.success ? (dart.dmg + ' / 2 = ' + finalDmg + ' PV de fogo') : (dart.dmg + ' PV de fogo pleno') },
+                            { l: 'Regra D&D 5e', v: 'PHB p. 241: Cada criatura em uma esfera de 6m de raio deve fazer uma salvaguarda de Destreza. Sofre 8d6 de dano de fogo se falhar, ou metade se obtiver sucesso.' }
+                        ];
+
+                        detailsBody.innerHTML = dRows.map(function (rw) {
+                            return '<div class="drl-details-row"><span>' + escHtml(rw.l) + ':</span> <strong>' + escHtml(rw.v) + '</strong></div>';
+                        }).join('');
+
+                        toggleBtn.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            var isOpen = detailsBody.classList.toggle('is-open');
+                            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                            toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'ℹ️ Detalhes da Regra';
+                        });
+
+                        structCard.appendChild(toggleBtn);
+                        structCard.appendChild(detailsBody);
+
+                        resultEl.appendChild(structCard);
+
                         setTimeout(function () { continueBtn.style.display = ''; }, 400);
                     });
                 }, 800);
@@ -44663,6 +44865,290 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
     });
 }
 
+/**
+ * Retorna metadados canônicos D&D 5e (PHB) para condições, debuffs e buffs táticos.
+ * Utilizado pelo inspetor de combatentes (openUnitDetail) e pelos cards visuais de combate.
+ * Retorna { name, rule, ico, kind } onde kind é 'buff' | 'debuff' | 'neutral'.
+ */
+function simGetDndConditionRule(st) {
+    if (!st) return null;
+    if (typeof st === 'object' && st.condRule) {
+        return {
+            name: st.dndCondition || st.n || 'Efeito',
+            rule: st.condRule,
+            ico: st.ico || '✦',
+            kind: st.kind || 'debuff'
+        };
+    }
+    var rawKey = (typeof st === 'string')
+        ? st
+        : (st.dndCondition || st.id || st.n || '');
+    var key = String(rawKey).toLowerCase().trim()
+        .replace(/[^a-z0-9áéíóúâêôãõç_ -]/g, '');
+
+    var rules = {
+        blinded: {
+            name: 'Cego',
+            rule: 'PHB p. 290: Falha automática em testes que exigem visão. Ataques contra o combatente têm Vantagem; ataques do próprio combatente têm Desvantagem.',
+            ico: '🚫',
+            kind: 'debuff'
+        },
+        charmed: {
+            name: 'Enfeitiçado',
+            rule: 'PHB p. 290: Não pode atacar o encantador ou tê-lo como alvo de habilidades nocivas. O encantador tem Vantagem em testes sociais contra o alvo.',
+            ico: '💕',
+            kind: 'debuff'
+        },
+        deafened: {
+            name: 'Surdo',
+            rule: 'PHB p. 290: Falha automática em testes de habilidade que exigem audição.',
+            ico: '🔇',
+            kind: 'debuff'
+        },
+        frightened: {
+            name: 'Amedrontado',
+            rule: 'PHB p. 290: Desvantagem em testes de habilidade e jogadas de ataque enquanto a fonte do medo estiver na linha de visão. Não pode se aproximar da fonte voluntariamente.',
+            ico: '😱',
+            kind: 'debuff'
+        },
+        grappled: {
+            name: 'Agarrado',
+            rule: 'PHB p. 290: Deslocamento reduzido a 0. A condição encerra se o agarrador for incapacitado ou se um efeito afastar os combatentes.',
+            ico: '✊',
+            kind: 'debuff'
+        },
+        incapacitated: {
+            name: 'Incapacitado',
+            rule: 'PHB p. 290: Não pode realizar ações nem reações no seu turno ou fora dele.',
+            ico: '💫',
+            kind: 'debuff'
+        },
+        invisible: {
+            name: 'Invisível',
+            rule: 'PHB p. 291: Impossível de ser visto sem sentidos especiais. Ataques contra têm Desvantagem; jogadas de ataque do combatente invisível têm Vantagem.',
+            ico: '👻',
+            kind: 'buff'
+        },
+        paralyzed: {
+            name: 'Paralisado',
+            rule: 'PHB p. 291: Incapacitado e imóvel. Falha automática em TRs de FOR e DES. Ataques contra têm Vantagem; qualquer acerto a menos de 1,5m (1 hex) é acerto crítico automático.',
+            ico: '⚡',
+            kind: 'debuff'
+        },
+        petrified: {
+            name: 'Petrificado',
+            rule: 'PHB p. 291: Transformado em substância sólida inanimada. Peso decuplica, incapacitado, resistência a todo dano, imune a veneno e doenças.',
+            ico: '🗿',
+            kind: 'debuff'
+        },
+        poisoned: {
+            name: 'Envenenado',
+            rule: 'PHB p. 292: Desvantagem em jogadas de ataque e testes de habilidade.',
+            ico: '🧪',
+            kind: 'debuff'
+        },
+        prone: {
+            name: 'Caído no Chão',
+            rule: 'PHB p. 292: Desvantagem nas próprias jogadas de ataque. Ataques corpo a corpo a até 1,5m têm Vantagem; ataques à distância têm Desvantagem. Rastejar custa o dobro; levantar custa metade do deslocamento.',
+            ico: '▾',
+            kind: 'debuff'
+        },
+        restrained: {
+            name: 'Contido',
+            rule: 'PHB p. 292: Deslocamento reduzido a 0. Ataques contra têm Vantagem; ataques do alvo têm Desvantagem. Desvantagem em TRs de Destreza.',
+            ico: '🕸️',
+            kind: 'debuff'
+        },
+        stunned: {
+            name: 'Atordoado',
+            rule: 'PHB p. 292: Incapacitado, imóvel e balbuciante. Falha automática em TRs de FOR e DES. Ataques contra têm Vantagem.',
+            ico: '💫',
+            kind: 'debuff'
+        },
+        unconscious: {
+            name: 'Inconsciente',
+            rule: 'PHB p. 292: Incapacitado, larga pertences e cai de bruços. Falha automática em TRs de FOR e DES. Ataques contra têm Vantagem; acertos a até 1,5m são acertos críticos automáticos.',
+            ico: '💤',
+            kind: 'debuff'
+        },
+        exhaustion: {
+            name: 'Exaustão',
+            rule: 'PHB p. 291: Níveis cumulativos de penalidade em testes, deslocamento, PV máximo e jogadas de ataque.',
+            ico: '⏳',
+            kind: 'debuff'
+        },
+        dodge: {
+            name: 'Esquiva',
+            rule: 'PHB p. 192: Até o início do próximo turno, ataques contra o combatente têm Desvantagem e testes de Destreza têm Vantagem.',
+            ico: '💨',
+            kind: 'buff'
+        },
+        bless: {
+            name: 'Bênção',
+            rule: 'PHB p. 219: Adiciona 1d4 a todas as jogadas de ataque e salvaguardas enquanto a bênção durar.',
+            ico: '✨',
+            kind: 'buff'
+        },
+        bane: {
+            name: 'Perdição',
+            rule: 'PHB p. 264: Subtrai 1d4 de todas as jogadas de ataque e salvaguardas enquanto a perdição durar.',
+            ico: '💀',
+            kind: 'debuff'
+        },
+        sanctuary: {
+            name: 'Santuário',
+            rule: 'PHB p. 276: Qualquer criatura que tentar atacar ou mirar o protegido com magia nociva deve passar num TR de Sabedoria ou perder a ação contra este alvo.',
+            ico: '🛡️',
+            kind: 'buff'
+        },
+        shield: {
+            name: 'Escudo Arcano',
+            rule: 'PHB p. 238: +5 na Classe de Armadura até o início do próximo turno e imunidade total a Mísseis Mágicos.',
+            ico: '🛡️',
+            kind: 'buff'
+        },
+        rage: {
+            name: 'Fúria',
+            rule: 'PHB p. 48: Vantagem em testes de FOR, bônus de dano com armas de FOR e resistência a dano contundente, perfurante e cortante.',
+            ico: '💢',
+            kind: 'buff'
+        },
+        hunters_mark: {
+            name: 'Marca do Caçador',
+            rule: 'PHB p. 257: +1d6 de dano adicional sempre que acertar o alvo com arma, e Vantagem em testes de Percepção e Sobrevivência para rastreá-lo.',
+            ico: '🏹',
+            kind: 'buff'
+        },
+        faerie_fire: {
+            name: 'Fogo das Fadas',
+            rule: 'PHB p. 242: Alvo brilha em luz suave; qualquer ataque contra ele tem Vantagem se o atacante puder vê-lo; anula benefícios de invisibilidade.',
+            ico: '✨',
+            kind: 'debuff'
+        },
+        turned: {
+            name: 'Expulso',
+            rule: 'PHB p. 59: O morto-vivo deve usar seus turnos para fugir o mais longe possível e não pode realizar reações. Encerra se sofrer qualquer dano.',
+            ico: '»',
+            kind: 'debuff'
+        },
+        concentration: {
+            name: 'Concentração Ativa',
+            rule: 'PHB p. 203: Manter magia ativa exige concentração. Sofrer dano exige TR de CON (CD 10 ou metade do dano sofrido). Conjurar outra magia de concentração encerra a atual.',
+            ico: '✦',
+            kind: 'buff'
+        },
+        reaction_spent: {
+            name: 'Reação Utilizada',
+            rule: 'PHB p. 190: Cada combatente possui 1 reação por rodada. Recuperada no início do seu próximo turno.',
+            ico: '⚡',
+            kind: 'neutral'
+        },
+        surprised: {
+            name: 'Surpreso',
+            rule: 'PHB p. 189: Não pode se mover nem agir na primeira rodada do combate, e não pode realizar reações até que seu primeiro turno termine.',
+            ico: '⚠️',
+            kind: 'debuff'
+        }
+    };
+
+    var aliases = {
+        'cego': 'blinded',
+        'cegueira': 'blinded',
+        'enfeiticado': 'charmed',
+        'enfeitiçado': 'charmed',
+        'encantado': 'charmed',
+        'charm': 'charmed',
+        'surdo': 'deafened',
+        'surdez': 'deafened',
+        'amedrontado': 'frightened',
+        'apavorado': 'frightened',
+        'medo': 'frightened',
+        'fear': 'frightened',
+        'agarrado': 'grappled',
+        'grapple': 'grappled',
+        'incapacitado': 'incapacitated',
+        'invisivel': 'invisible',
+        'invisível': 'invisible',
+        'paralisado': 'paralyzed',
+        'paralisia': 'paralyzed',
+        'petrificado': 'petrified',
+        'petrificacao': 'petrified',
+        'petrificação': 'petrified',
+        'envenenado': 'poisoned',
+        'veneno': 'poisoned',
+        'poison': 'poisoned',
+        'caido': 'prone',
+        'caído': 'prone',
+        'prostrado': 'prone',
+        'prone_downed': 'prone',
+        'contido': 'restrained',
+        'impedido': 'restrained',
+        'atordoado': 'stunned',
+        'atordoamento': 'stunned',
+        'inconsciente': 'unconscious',
+        'exaustao': 'exhaustion',
+        'exaustão': 'exhaustion',
+        'esquiva': 'dodge',
+        'esquivar': 'dodge',
+        'bencao': 'bless',
+        'bênção': 'bless',
+        'perdicao': 'bane',
+        'perdição': 'bane',
+        'santuario': 'sanctuary',
+        'santuário': 'sanctuary',
+        'escudo': 'shield',
+        'escudo arcano': 'shield',
+        'shield': 'shield',
+        'furia': 'rage',
+        'fúria': 'rage',
+        'marca_do_cacador': 'hunters_mark',
+        'marca do caçador': 'hunters_mark',
+        'hunter_mark': 'hunters_mark',
+        'fogo das fadas': 'faerie_fire',
+        'faerie fire': 'faerie_fire',
+        'expulso': 'turned',
+        'concentracao': 'concentration',
+        'concentração': 'concentration',
+        'concentrating': 'concentration',
+        'reacao gasta': 'reaction_spent',
+        'reação gasta': 'reaction_spent',
+        'reacao utilizada': 'reaction_spent',
+        'reação utilizada': 'reaction_spent',
+        'surpreso': 'surprised'
+    };
+
+    var matchedKey = rules[key] ? key : (aliases[key] || null);
+    if (!matchedKey) {
+        for (var aKey in aliases) {
+            if (key.indexOf(aKey) >= 0) {
+                matchedKey = aliases[aKey];
+                break;
+            }
+        }
+    }
+
+    if (matchedKey && rules[matchedKey]) {
+        var base = rules[matchedKey];
+        return {
+            name: (typeof st === 'object' && (st.dndCondition || st.n)) || base.name,
+            rule: base.rule,
+            ico: (typeof st === 'object' && st.ico) || base.ico,
+            kind: (typeof st === 'object' && st.kind) || base.kind
+        };
+    }
+
+    if (typeof st === 'object') {
+        return {
+            name: st.dndCondition || st.n || 'Efeito',
+            rule: st.condRule || (st.desc || (st.turnsLeft != null ? ('Duração: ' + st.turnsLeft + ' turno(s)') : 'Efeito ativo')),
+            ico: st.ico || '✦',
+            kind: st.kind || 'neutral'
+        };
+    }
+
+    return null;
+}
+
 function openUnitDetail(uid) {
     removeEnemyHoverStatHint();
     if (!currentState) return;
@@ -44928,32 +45414,122 @@ function openUnitDetail(uid) {
     }
 
     /* Condição (PV + efeitos D&D / simulador com duração em turnos ou rodadas) */
-    html += '<div class="udc-section"><div class="udc-section-title">Condição</div>';
+    html += '<div class="udc-section"><div class="udc-section-title">Condição & Efeitos D&D 5e</div>';
     var conds = [];
-    if (!u.alive) conds.push({ ico: '', n: 'Inconsciente' });
-    else if (hpPct <= 25) conds.push({ ico: '', n: 'Ferido grave' });
-    else if (hpPct <= 60) conds.push({ ico: '', n: 'Ferido' });
-    else conds.push({ ico: '', n: 'Saudável' });
+    if (!u.alive || (u.hp != null && u.hp <= 0)) conds.push({ ico: '☠️', n: 'Inconsciente (0 PV)' });
+    else if (hpPct <= 25) conds.push({ ico: '⚠️', n: 'Ferido grave (≤25%)' });
+    else if (hpPct <= 60) conds.push({ ico: '🩸', n: 'Ferido (≤60%)' });
+    else conds.push({ ico: '💚', n: 'Saudável' });
     html += '<div class="udc-conds">';
     conds.forEach(function (c) { html += '<span class="udc-cond"><span>' + c.ico + '</span> ' + escHtml(c.n) + '</span>'; });
     html += '</div>';
+
+    /* Salvaguardas contra a Morte (Death Saves D&D 5e) se caído a 0 PV */
+    if ((!u.alive || (u.hp != null && u.hp <= 0) || u.dying) && (u.t === 'p' || u.t === 'a')) {
+        var dsSucc = (u.death_saves && u.death_saves.successes) || 0;
+        var dsFail = (u.death_saves && u.death_saves.failures) || 0;
+        html += '<div style="margin-top:6px; background:rgba(20,16,12,0.65); border:1px solid rgba(224,124,124,0.45); border-radius:6px; padding:6px 8px; font-size:10.5px;">';
+        html += '<div style="display:flex; justify-content:space-between; align-items:center;">';
+        html += '<span style="font-weight:700; color:#ffd700;">Salvaguardas de Morte</span>';
+        html += '<span><span style="color:#7cdb7c;">' + dsSucc + '/3 ✔</span> <span style="color:#666;margin:0 3px;">|</span> <span style="color:#e07c7c;">' + dsFail + '/3 ✖</span></span>';
+        html += '</div>';
+        html += '<div style="color:var(--v-text-dim,#a09484); font-size:9.5px; margin-top:2px;">PHB p. 197: 3 sucessos estabilizam; 3 falhas causam óbito. 1 natural = 2 falhas; 20 natural recupera 1 PV.</div>';
+        html += '</div>';
+    }
+
+    /* Compilação de efeitos ativos (u.se + flags de Caído, Concentração, Reação, Surpreso) */
+    var allEffects = [];
     if (u.se && u.se.length) {
-        html += '<div class="udc-sfx-list">';
         u.se.forEach(function (st) {
             if (!st) return;
             if (st.decOn && !st.tickCombat2) {
                 if (!st.turnsLeft) return;
             }
-            var rowCls = st.kind === 'debuff' ? ' udc-sfx-row debuff' : ' udc-sfx-row';
+            allEffects.push(st);
+        });
+    }
+
+    // Flag Caído / Prone (PHB p. 190 / p. 292)
+    var isProne = !!(u.prone || allEffects.some(function (st) {
+        return st && (st.prone || st.id === 'prone' || String(st.n || '').toLowerCase() === 'caído');
+    }));
+    if (isProne && !allEffects.some(function (st) { return st && (st.prone || st.id === 'prone' || st.id === 'prone_downed'); })) {
+        allEffects.push({
+            id: 'prone',
+            n: 'Caído no Chão',
+            ico: '▾',
+            kind: 'debuff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('prone').rule : null)
+        });
+    }
+
+    // Concentração ativa (PHB p. 203)
+    var concStEntry = allEffects.find(function (st) {
+        return st && (st.concentration || st.concentrating || st.isConcentrating || st.isConcentration);
+    });
+    var isConcentrating = !!(u.concentrationSpell || u.concentrating || concStEntry);
+    var concSpellName = u.concentrationSpell || (u.concentrating && (u.concentrating.spellName || u.concentrating.n)) || (concStEntry && (concStEntry.n || concStEntry.id)) || null;
+    if (isConcentrating && !concStEntry) {
+        allEffects.push({
+            id: 'concentration',
+            n: 'Concentração Ativa' + (concSpellName ? ': ' + concSpellName : ''),
+            ico: '✦',
+            kind: 'buff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('concentration').rule : null)
+        });
+    }
+
+    // Reação Gasta na rodada (PHB p. 190)
+    var hasReactionSpent = !!(u.reactionSpent || u.reaction_spent);
+    if (hasReactionSpent && !allEffects.some(function (st) { return st && (st.id === 'reaction_spent' || st.id === 'reactionSpent'); })) {
+        allEffects.push({
+            id: 'reaction_spent',
+            n: 'Reação Utilizada',
+            ico: '⚡',
+            kind: 'neutral',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('reaction_spent').rule : null)
+        });
+    }
+
+    // Surpreso (PHB p. 189)
+    if (u.surprised && !allEffects.some(function (st) { return st && st.id === 'surprised'; })) {
+        allEffects.push({
+            id: 'surprised',
+            n: 'Surpreso',
+            ico: '⚠️',
+            kind: 'debuff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('surprised').rule : null)
+        });
+    }
+
+    if (allEffects.length) {
+        html += '<div class="udc-sfx-list">';
+        allEffects.forEach(function (st) {
+            if (!st) return;
+            var ruleInfo = (typeof simGetDndConditionRule === 'function') ? simGetDndConditionRule(st) : null;
+            var effectiveKind = (ruleInfo && ruleInfo.kind) || st.kind || 'neutral';
+            var rowCls = 'udc-sfx-row ' + effectiveKind;
+            var dispIco = (ruleInfo && ruleInfo.ico) || st.ico || '✦';
+            var dispName = (ruleInfo && ruleInfo.name) || st.dndCondition || st.n || 'Efeito';
+            var turnLbl = (st.turnsLeft != null)
+                ? formatTurnsLeftLabel(st)
+                : (st.repeatSave ? 'Salvaguarda no fim de cada turno' : (st.id === 'reaction_spent' ? 'Recupera no início do próximo turno' : (st.id === 'surprised' ? 'Até o fim da 1ª rodada' : 'Ativo')));
+            var ruleText = st.condRule || (ruleInfo && ruleInfo.rule) || '';
+
             html += '<div class="' + rowCls.trim() + '">';
-            html += '<div class="udc-sfx-ico">' + escHtml(st.ico || '·') + '</div><div>';
-            html += '<div class="udc-sfx-name">' + escHtml(st.dndCondition || st.n || 'Efeito') + '</div>';
-            var turnLbl = (st.turnsLeft != null) ? formatTurnsLeftLabel(st) : (st.repeatSave ? 'Salvaguarda no fim de cada turno' : 'Ativo');
+            html += '<div class="udc-sfx-ico">' + escHtml(dispIco) + '</div><div>';
+            html += '<div class="udc-sfx-name">' + escHtml(dispName) + '</div>';
             html += '<div class="udc-sfx-turns">' + escHtml(turnLbl) + '</div>';
-            if (st.condRule) html += '<div class="udc-sfx-rule">' + escHtml(st.condRule) + '</div>';
+            if (ruleText) html += '<div class="udc-sfx-rule">' + escHtml(ruleText) + '</div>';
             html += '</div></div>';
         });
         html += '</div>';
+    } else {
+        html += '<div class="udc-empty" style="padding:6px 0 2px;font-size:10px;color:var(--v-text-dim,#a09484);">— sem condições ou efeitos ativos —</div>';
     }
     html += '</div>';
 
