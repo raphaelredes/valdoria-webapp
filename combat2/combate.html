@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T11:34:39Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T11:59:34Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1714,8 +1714,12 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   align-self: center;
 }
 .dice-canvas-holder { width: 180px; height: 180px; position: relative; z-index: 2; }
-.dice-canvas-holder canvas { display: block; width: 180px; height: 180px; max-width: 100%; }
 .dice-result-label { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(16px * var(--v-font-scale, 1)); color: var(--v-text, #d4c8b0); letter-spacing: 2px; opacity: 0; transition: opacity .3s ease; text-shadow: 0 0 12px rgba(196,149,58,.4); min-height: 22px; display: flex; flex-direction: column; gap: var(--v-space-sm, 4px); align-items: center; max-width: 280px; text-align: center; }
+.dice-result-label.drl-has-structured,
+.dice-result-label:has(.drl-sub--structured),
+.dice-result-label:has(.dmg-dice-summary) {
+  max-width: min(calc(100vw - 20px), 340px);
+}
 /* Iniciativa: resultado d20 numa unica linha (evita empilhar label / = / valor por flex-direction column no pai). */
 .dice-result-label.drl-init-result { flex-direction: row; flex-wrap: nowrap; align-items: baseline; justify-content: center; gap: 0.35em; white-space: nowrap; max-width: 100%; }
 .dice-result-label.drl-init-result .drl-init-d20-line { display: inline-flex; flex-direction: row; flex-wrap: nowrap; align-items: baseline; gap: 0.2em; font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: var(--v-font-lg, 16px); letter-spacing: 0.08em; color: var(--v-text, #d4c8b0); }
@@ -1932,26 +1936,34 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     color: #fef08a;
 }
 .dmg-inspect-toggle-btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(196, 149, 58, 0.35);
     color: var(--v-gold, #c4953a);
     border-radius: 4px;
-    padding: 2px 8px;
-    font-size: calc(10px * var(--v-font-scale, 1));
+    padding: 4px 10px;
+    font-size: calc(10.5px * var(--v-font-scale, 1));
     font-weight: 600;
     cursor: pointer;
     margin-top: 5px;
+    min-height: 28px;
+    line-height: 1.4;
+    touch-action: manipulation;
     transition: all 0.2s ease;
 }
 .dmg-inspect-toggle-btn:hover, .dmg-inspect-toggle-btn:active {
-    background: rgba(196, 149, 58, 0.18);
+    background: rgba(196, 149, 58, 0.22);
     border-color: var(--v-gold, #c4953a);
+    transform: scale(0.98);
 }
 .dmg-math-breakdown {
     display: none;
-    max-height: 110px;
+    max-height: min(28vh, 140px);
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     background: rgba(10, 8, 6, 0.7);
     border: 1px solid rgba(196, 149, 58, 0.3);
     border-radius: 6px;
@@ -21063,21 +21075,26 @@ function _simSaveAdvDetails(defender, ability, skill) {
 
     var adv = advReasons.length > 0;
     var dis = disReasons.length > 0;
+    var state = 'normal';
     var mode = 'normal';
     var reason = '';
 
     if (adv && dis) {
+        state = 'cancelled';
         mode = 'normal';
         reason = 'Vantagem e Desvantagem se anulam (PHB p. 173)';
     } else if (adv) {
+        state = 'advantage';
         mode = 'advantage';
         reason = advReasons.join(' · ');
     } else if (dis) {
+        state = 'disadvantage';
         mode = 'disadvantage';
         reason = disReasons.join(' · ');
     }
 
     return {
+        state: state,
         mode: mode,
         reason: reason,
         advReasons: advReasons,
@@ -30943,10 +30960,20 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     if (reductionMeta.saveSuccess === true) {
         var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
         var svTxt = reductionMeta.saveNegates ? 'Sucesso (0 Dano)' : 'Sucesso (½)';
+        if (reductionMeta.evasion || reductionMeta.evasionUsed) {
+            svTxt = 'Sucesso • Evasão (0 Dano)';
+        }
         tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' ' + svTxt + '</span>');
     } else if (reductionMeta.saveSuccess === false) {
         var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
-        tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">✗ Falha TR ' + abLabel + ' (Dano Pleno)</span>');
+        if (reductionMeta.evasion || reductionMeta.evasionUsed) {
+            tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' Falha • Evasão (½)</span>');
+        } else {
+            tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">✗ Falha TR ' + abLabel + ' (Dano Pleno)</span>');
+        }
+    }
+    if (reductionMeta.evasion || reductionMeta.evasionUsed) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--buff">🛡️ Evasão (PHB p. 96)</span>');
     }
     if (reductionMeta.aoeSharedDamage) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--type">💥 Dano de Área (D&D 5e)</span>');
@@ -31019,6 +31046,7 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         var reason = '';
         if (reductionMeta.isImmune) reason = 'Alvo imune a ' + dtInfo.lb;
         else if (reductionMeta.isVulnerable) reason = 'Vulnerabilidade dobra o dano de ' + dtInfo.lb;
+        else if (reductionMeta.evasion || reductionMeta.evasionUsed) reason = reductionMeta.saveSuccess ? 'Evasão anulou completamente o dano (0 dano)' : 'Evasão reduziu o dano à metade';
         else if (reductionMeta.saveSuccess) reason = reductionMeta.saveNegates ? 'O alvo anulou o efeito no TR (0 dano)' : 'O alvo se esquivou (TR bem-sucedido: metade)';
         else if (reductionMeta.rageResisted) reason = 'A Fúria do alvo absorveu metade do golpe';
         else if (reductionMeta.isResistant) reason = 'Resistência do alvo reduziu o dano à metade';
@@ -31093,6 +31121,11 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         var svResultTxt = reductionMeta.saveSuccess
             ? (reductionMeta.saveNegates ? 'Sucesso no TR — Efeito anulado (0 dano)' : 'Sucesso no TR — Dano reduzido à metade (½)')
             : 'Falha no TR — Sofre dano pleno';
+        if (reductionMeta.evasion || reductionMeta.evasionUsed) {
+            svResultTxt = reductionMeta.saveSuccess
+                ? 'Sucesso no TR — Evasão anulou o dano (0 dano, PHB p. 96)'
+                : 'Falha no TR — Evasão garantiu metade do dano (½, PHB p. 96)';
+        }
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Salvaguarda ' + abLabel + ':</span><strong>' + svResultTxt + '</strong></div>';
     }
     breakdownEl.innerHTML = rowsHtml;
@@ -31153,7 +31186,11 @@ function simBuildAttackSkipRows(r, atkShown, hitRes, effAc, actor, target, dmgRo
         parts += ' [Imune: 0 dano]';
     } else {
         if (reductionMeta && reductionMeta.saveSuccess) {
-            parts += (reductionMeta.saveNegates ? ' [TR Sucesso: 0 dano]' : ' [TR Sucesso ½]');
+            var svSkipTxt = reductionMeta.saveNegates ? ' [TR Sucesso: 0 dano]' : ' [TR Sucesso ½]';
+            if (reductionMeta.evasion || reductionMeta.evasionUsed) svSkipTxt = ' [Evasão: 0 dano]';
+            parts += svSkipTxt;
+        } else if (reductionMeta && (reductionMeta.evasion || reductionMeta.evasionUsed)) {
+            parts += ' [Evasão: ½ dano]';
         }
         if (reductionMeta && (reductionMeta.isResistant || reductionMeta.rageResisted)) {
             parts += ' [Resistência ½]';
@@ -48633,6 +48670,8 @@ async function playTurn(aIdx, tIdx, opts) {
                 _svTacticalPills.push('<span class="dmg-pill dmg-pill--type">✨ Vantagem no TR</span>');
             } else if (saveAdvMode === 'disadvantage') {
                 _svTacticalPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Desvantagem no TR</span>');
+            } else if (_saveDetails && _saveDetails.state === 'cancelled') {
+                _svTacticalPills.push('<span class="dmg-pill dmg-pill--type">⚖️ Vantagem/Desvantagem Anuladas (PHB p. 173)</span>');
             }
             var hasEvasion = (target.se || []).some(function (st) { return st && st.halfDmgDexSaveOnly; });
             if (hasEvasion && _svAb === 'dex') {
@@ -48689,7 +48728,9 @@ async function playTurn(aIdx, tIdx, opts) {
                         if (_svCover && _svCover.bonus > 0) {
                             _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + _svCover.bonus + ' (' + (_svCover.cover === 'half' ? 'Meia' : '¾') + ' Cobertura, PHB p. 196)' });
                         }
-                        if (_saveDetails.reason) {
+                        if (_saveDetails && _saveDetails.state === 'cancelled') {
+                            _detailsRows.push({ l: 'Anulação Mútua', v: 'Vantagem (' + (_saveDetails.advReasons || []).join(', ') + ') e Desvantagem (' + (_saveDetails.disReasons || []).join(', ') + ') anulam-se mutuamente (PHB p. 173)' });
+                        } else if (_saveDetails.reason) {
                             _detailsRows.push({ l: 'Circunstância Tática', v: _saveDetails.reason });
                         }
 
@@ -48803,6 +48844,13 @@ async function playTurn(aIdx, tIdx, opts) {
                         if (opts.aoeSecondary) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--type">💥 Alvo em Área</span>');
                         }
+                        if (advMode === 'advantage') {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--buff">🎲 Vantagem' + (advDetails && advDetails.reason ? ' (' + advDetails.reason + ')' : '') + '</span>');
+                        } else if (advMode === 'disadvantage') {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Desvantagem' + (advDetails && advDetails.reason ? ' (' + advDetails.reason + ')' : '') + '</span>');
+                        } else if (advDetails && advDetails.state === 'cancelled') {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--type">⚖️ Vantagem/Desvantagem Anuladas (PHB p. 173)</span>');
+                        }
                         if (_atkFlanked) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--type">⚔️ Flanqueamento</span>');
                         }
@@ -48862,8 +48910,10 @@ async function playTurn(aIdx, tIdx, opts) {
                                 }
                             });
                         }
-                        if (advDetails && advDetails.reason) {
-                            _detailsRows.push({ l: 'Circunstância Tática', v: advDetails.reason });
+                        if (advDetails && advDetails.state === 'cancelled') {
+                            _detailsRows.push({ l: 'Anulação Mútua', v: 'Vantagens (' + (advDetails.advReasons || []).join(', ') + ') e Desvantagens (' + (advDetails.disReasons || []).join(', ') + ') anulam-se mutuamente (D&D 5e PHB p. 173).' });
+                        } else if (advDetails && advDetails.reason) {
+                            _detailsRows.push({ l: (advMode === 'advantage' ? 'Motivo da Vantagem' : (advMode === 'disadvantage' ? 'Motivo da Desvantagem' : 'Circunstância Tática')), v: advDetails.reason });
                         }
 
                         var _subHtml = '';
@@ -49692,6 +49742,8 @@ async function playTurn(aIdx, tIdx, opts) {
         concRes: _localConcRes,
         saveSuccess: (atkSkill && atkSkill.save) ? saveSuccess : null,
         saveAbility: (atkSkill && atkSkill.save && atkSkill.save.ability) ? atkSkill.save.ability : null,
+        saveNegates: !!(atkSkill && atkSkill.saveNegates),
+        evasion: !!(atkSkill && atkSkill.save && String(atkSkill.save.ability || '').toLowerCase() === 'dex' && (target.se || []).some(function (st) { return st && st.halfDmgDexSaveOnly; })),
         halfDmg: _targetHasHalfDmg,
         tempHpAbsorbed: _tempHpAbsorbed,
         multiSeqText: (function () {
@@ -52660,10 +52712,10 @@ async function __combatAnimateOneEvent(ev) {
             /* Passa combatTarget pra ativar layout VS (2 combatant blocks lado-a-lado). */
             await new Promise(function (rD) {
                 try {
-                    var _advMode = ev.advMode || ev.adv || null;
+                    var _advMode = ev.advMode || ev.adv || (ev.advCancelled ? 'cancelled' : null);
                     var _raw1 = ev.d20Raw1 != null ? ev.d20Raw1 : ev.advRaw1;
                     var _raw2 = ev.d20Raw2 != null ? ev.d20Raw2 : ev.advRaw2;
-                    var _advReason = ev.advReason || (ev.advReasons && ev.advReasons.length ? ev.advReasons.join(' · ') : (ev.disReasons && ev.disReasons.length ? ev.disReasons.join(' · ') : null));
+                    var _advReason = ev.advReason || (ev.advReasons && ev.advReasons.length && ev.disReasons && ev.disReasons.length ? 'Vantagem e Desvantagem se anulam (PHB p. 173)' : (ev.advReasons && ev.advReasons.length ? ev.advReasons.join(' · ') : (ev.disReasons && ev.disReasons.length ? ev.disReasons.join(' · ') : null)));
                     showDice(rollValueForDice, rD, roller, rollTitle, {
                         combatTarget: opponent,
                         advMode: _advMode,
@@ -52676,6 +52728,7 @@ async function __combatAnimateOneEvent(ev) {
                                 if (ev.coverBonus > 0) _kicker += ' • ⛨ +' + ev.coverBonus + ' COBERTURA';
                                 if (_advMode === 'advantage') _kicker += ' (VANTAGEM)';
                                 else if (_advMode === 'disadvantage') _kicker += ' (DESVANTAGEM)';
+                                else if (_advMode === 'cancelled') _kicker += ' (ANULADA)';
 
                                 var _rows = [];
                                 if (_advMode && _raw1 != null && _raw2 != null) {
@@ -52698,6 +52751,16 @@ async function __combatAnimateOneEvent(ev) {
                                 } else {
                                     _savePills.push('<span class="dmg-pill dmg-pill--crit">✗ Dano Integral</span>');
                                 }
+                                if (_advMode === 'advantage') {
+                                    _savePills.push('<span class="dmg-pill dmg-pill--buff">✨ Vantagem no TR</span>');
+                                } else if (_advMode === 'disadvantage') {
+                                    _savePills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Desvantagem no TR</span>');
+                                } else if (_advMode === 'cancelled') {
+                                    _savePills.push('<span class="dmg-pill dmg-pill--type">⚖️ Vantagem/Desvantagem Anuladas (PHB p. 173)</span>');
+                                }
+                                if (ev.legendaryResistanceUsed) {
+                                    _savePills.push('<span class="dmg-pill dmg-pill--buff">👑 Resistência Lendária (MM p. 11)</span>');
+                                }
                                 if (ev.coverBonus > 0) {
                                     _savePills.push('<span class="dmg-pill dmg-pill--resist">⛨ Cobertura (+' + ev.coverBonus + ')</span>');
                                 }
@@ -52714,6 +52777,12 @@ async function __combatAnimateOneEvent(ev) {
                                     { l: 'CD Alvo', v: String(ev.saveDc || 10) },
                                     { l: 'Modificador', v: (ev.saveMod >= 0 ? '+' : '') + (ev.saveMod || 0) }
                                 ];
+                                if (_advMode === 'cancelled') {
+                                    _saveDetailsRows.push({ l: 'Anulação Mútua', v: 'Vantagem e Desvantagem anulam-se mutuamente no TR (D&D 5e PHB p. 173)' });
+                                }
+                                if (ev.legendaryResistanceUsed) {
+                                    _saveDetailsRows.push({ l: 'Resistência Lendária', v: 'Chefe usou 1 uso diário para escolher ter sucesso no TR (D&D 5e MM p. 11)' });
+                                }
                                 if (ev.coverBonus > 0) {
                                     _saveDetailsRows.push({ l: 'Bônus de Cobertura', v: '+' + ev.coverBonus + ' no TR (PHB p. 196)' });
                                 }
@@ -52754,6 +52823,7 @@ async function __combatAnimateOneEvent(ev) {
                             if (ev.powerAttack) _kicker += ' [ATAQUE PODEROSO -5/+10]';
                             if (_advMode === 'advantage') _kicker = (ev.skillName ? (ev.skillName.toUpperCase() + ' • ') : '') + 'd20 (VANTAGEM)';
                             else if (_advMode === 'disadvantage') _kicker = (ev.skillName ? (ev.skillName.toUpperCase() + ' • ') : '') + 'd20 (DESVANTAGEM)';
+                            else if (_advMode === 'cancelled' || ev.advCancelled) _kicker = (ev.skillName ? (ev.skillName.toUpperCase() + ' • ') : '') + 'd20 (ANULADA)';
                             var _rows = [];
                             if (_advMode && _raw1 != null && _raw2 != null) {
                                 _rows.push({ l: 'Dados', v: _raw1 + ' e ' + _raw2 + ' → ' + ev.d20 });
@@ -52815,6 +52885,8 @@ async function __combatAnimateOneEvent(ev) {
                                 _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">🎲 Vantagem' + (_advReason ? ' (' + _advReason + ')' : '') + '</span>');
                             } else if (_advMode === 'disadvantage') {
                                 _tacticalPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Desvantagem' + (_advReason ? ' (' + _advReason + ')' : '') + '</span>');
+                            } else if (_advMode === 'cancelled' || ev.advCancelled) {
+                                _tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚖️ Vantagem/Desvantagem Anuladas (PHB p. 173)</span>');
                             }
                             if (_isRemImm) _tacticalPills.push('<span class="dmg-pill dmg-pill--immune">🚫 Imune a ' + (_dtInfo ? _dtInfo.lb : 'Dano') + '</span>');
                             else if (_isRemVuln) _tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">💥 Vulnerabilidade (2×)</span>');
@@ -52851,8 +52923,17 @@ async function __combatAnimateOneEvent(ev) {
                                 { l: 'Defensor', v: targetForDice.n || 'Defensor' },
                                 { l: 'CA Base do Alvo', v: String(ev.ac || '?') }
                             ];
+                            if (_advMode === 'cancelled' || ev.advCancelled) {
+                                _detailsRows.push({ l: 'Anulação Mútua', v: 'Vantagem e Desvantagem anulam-se mutuamente (D&D 5e PHB p. 173)' });
+                            }
                             if (_advMode && _advReason) {
-                                _detailsRows.push({ l: (_advMode === 'advantage' ? 'Motivo da Vantagem' : 'Motivo da Desvantagem'), v: _advReason });
+                                _detailsRows.push({ l: (_advMode === 'advantage' ? 'Motivo da Vantagem' : (_advMode === 'disadvantage' ? 'Motivo da Desvantagem' : 'Regra de Anulação')), v: _advReason });
+                            }
+                            if (ev.advReasons && ev.advReasons.length && (_advMode === 'cancelled' || ev.advCancelled)) {
+                                _detailsRows.push({ l: 'Fontes de Vantagem', v: ev.advReasons.join(' · ') });
+                            }
+                            if (ev.disReasons && ev.disReasons.length && (_advMode === 'cancelled' || ev.advCancelled)) {
+                                _detailsRows.push({ l: 'Fontes de Desvantagem', v: ev.disReasons.join(' · ') });
                             }
                             if (ev.multiAttackTotal > 1) {
                                 _detailsRows.push({ l: 'Ataque Múltiplo', v: (ev.multiAttackCurrent || 1) + ' de ' + ev.multiAttackTotal + ' (D&D 5e MM p. 11)' });
@@ -52999,6 +53080,7 @@ async function __combatAnimateOneEvent(ev) {
                         saveSuccess: ev.saveSuccess != null ? !!ev.saveSuccess : null,
                         saveAbility: ev.saveAbility,
                         saveNegates: !!ev.saveNegates,
+                        evasion: !!ev.evasionUsed,
                         aoeSharedDamage: !!ev.aoeSharedDamage,
                         heavyArmorMaster: ev.heavyArmorMasterReduced | 0,
                         uncannyDodge: !!ev.uncannyDodge,
