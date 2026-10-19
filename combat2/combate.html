@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T20:44:11Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T21:35:09Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -44779,12 +44779,45 @@ function playHitVFX(uid, crit, dmgType, opts) {
                 window._combatVfx.magicMissiles(fromEl, el, _mmN);
             } else if (skName === 'Bola de Fogo') {
                 window._combatVfx.fireballAoE(el);
-            } else if (skName === 'Raio Gélido' && fromEl) {
+            } else if ((skName === 'Mãos Flamejantes' || skName === 'Chamas das Mãos') && fromEl && typeof window._combatVfx.burningHands === 'function') {
+                window._combatVfx.burningHands(fromEl, el);
+            } else if ((skName === 'Onda de Trovão' || skName === 'Destruição Trovejante') && typeof window._combatVfx.thunderwave === 'function') {
+                window._combatVfx.thunderwave(el);
+                if (typeof _shakeAppSim === 'function') _shakeAppSim('heavy');
+            } else if (skName === 'Choque Elétrico' && fromEl && typeof window._combatVfx.shockingGrasp === 'function') {
+                window._combatVfx.shockingGrasp(fromEl, el);
+            } else if ((skName === 'Raio Gélido' || skName === 'Raio de Gelo') && fromEl) {
                 window._combatVfx.rayOfFrost(fromEl, el, { crit: !!crit });
+            } else if ((skName === 'Explosão Arcana' || skName === 'Disparo Místico') && fromEl && typeof window._combatVfx.eldritchBlast === 'function') {
+                window._combatVfx.eldritchBlast(fromEl, el, { crit: !!crit });
+            } else if (skName === 'Chama Sagrada' && typeof window._combatVfx.sacredFlame === 'function') {
+                window._combatVfx.sacredFlame(el);
+            } else if ((skName === 'Invocar Raio' || skName === 'Relâmpago' || skName === 'Tempestade da Vingança') && typeof window._combatVfx.callLightning === 'function') {
+                window._combatVfx.callLightning(el);
+            } else if (skName === 'Feixe Lunar' && typeof window._combatVfx.moonbeam === 'function') {
+                window._combatVfx.moonbeam(el);
+            } else if (skName === 'Chicote Espinhoso' && fromEl && typeof window._combatVfx.thornWhip === 'function') {
+                window._combatVfx.thornWhip(fromEl, el);
+            } else if (skName === 'Desintegrar' && fromEl && typeof window._combatVfx.disintegrate === 'function') {
+                window._combatVfx.disintegrate(fromEl, el);
+            } else if (skName === 'Dedo da Morte' && fromEl && typeof window._combatVfx.fingerOfDeath === 'function') {
+                window._combatVfx.fingerOfDeath(fromEl, el);
+            } else if ((skName === 'Chuva de Meteoros' || skName === 'Tempestade de Fogo') && typeof window._combatVfx.meteorSwarm === 'function') {
+                window._combatVfx.meteorSwarm(el);
+            } else if (skName === 'Palavra de Poder: Matar' && typeof window._combatVfx.powerWordKill === 'function') {
+                window._combatVfx.powerWordKill(el);
+            } else if ((skName === 'Golpe Atordoante' || skName === 'Técnica da Palma Aberta' || skName === 'Palma Trêmula') && fromEl && typeof window._combatVfx.kiStrike === 'function') {
+                window._combatVfx.kiStrike(fromEl, el);
             } else if (skName === 'Disparo Rápido' && fromEl) {
                 window._combatVfx.arrowVolley(fromEl, el, 2, dmgType, { crit: !!crit });
             } else if (skName === 'Rajada de Flechas' && fromEl) {
                 window._combatVfx.arrowVolley(fromEl, el, 3, dmgType, { crit: !!crit });
+            } else if (skName === 'Salva de Disparos' && fromEl) {
+                window._combatVfx.arrowVolley(fromEl, el, 4, dmgType, { crit: !!crit });
+            } else if (skName === 'Flecha de Ácido' && fromEl && typeof window._combatVfx.acidSplash === 'function') {
+                window._combatVfx.acidSplash(fromEl, el);
+            } else if (skName === 'Raio Doentio' && fromEl && typeof window._combatVfx.poisonRay === 'function') {
+                window._combatVfx.poisonRay(fromEl, el);
             } else if (skName === 'Investida Furiosa') {
                 /* Phase 5b polish v4 (2026-04-26) — user feedback "barra vermelha
                    tosca, quero pegadas correndo nível AAA". VFX REDESIGN:
@@ -44865,7 +44898,7 @@ function playHitVFX(uid, crit, dmgType, opts) {
             if (opts.sneakAttack) {
                 try { window._combatVfx.shadowStrike(el); } catch (e0) {}
             }
-            if (dmgType === 'radiant') {
+            if (dmgType === 'radiant' || opts.divineSmite || (skill && (skill.divineSmite || skName.indexOf('Divin') >= 0 || skName.indexOf('Fulminante') >= 0 || skName === 'Explosão Solar'))) {
                 setTimeout(function () { try { window._combatVfx.radiantBurst(el); } catch (e1) {} }, 80);
             }
             if (crit) {
@@ -45690,10 +45723,12 @@ function applyMagicMissileDartImpact(dart, s, _staleTargetEl) {
         ensureCombatVfxRuntime();
         try {
             if (window._combatVfx) {
-                if (isFireball && window._combatVfx.fireballExplosion) {
-                    window._combatVfx.fireballExplosion(el);
+                if (isFireball) {
+                    if (typeof window._combatVfx.fireballAoE === 'function') window._combatVfx.fireballAoE(el);
+                    else if (typeof window._combatVfx.fireballExplosion === 'function') window._combatVfx.fireballExplosion(el);
+                    else window._combatVfx.impact(el, 'fire', {});
                 } else {
-                    window._combatVfx.impact(el, isFireball ? 'fire' : 'force', {});
+                    window._combatVfx.impact(el, 'force', {});
                 }
             }
         } catch (e) {}
@@ -47810,24 +47845,54 @@ function simAutoHitTutorialMarkSeen(skillName) {
     } catch (e) {}
 }
 
-/** VFX específicos de cast de buff. Awaitable. Cada skill tem visual próprio. */
+/** VFX específicos de cast de buff/cura/utilidade. Awaitable. Cada skill tem visual próprio. */
 function playSkillCastVFX(uid, skillName) {
-    var el = document.querySelector('[data-unit-id="' + uid + '"]');
+    var el = document.querySelector('[data-unit-id="' + uid + '"]') || document.querySelector('[data-uid="' + uid + '"]');
     if (!el) return Promise.resolve();
     ensureCombatVfxRuntime();
     try {
         if (window._combatVfx) {
-            if (skillName === 'Santuário') window._combatVfx.sanctuary(el);
-            else if (skillName === 'Fúria') window._combatVfx.buffRage(el);
-            else if (skillName === 'Escudo Arcano') window._combatVfx.buffArcaneShield(el);
-            else if (skillName === 'Postura Defensiva' || skillName === 'Aura de Proteção') {
+            var sk = String(skillName || '').trim();
+            if (sk === 'Santuário') {
+                window._combatVfx.sanctuary(el);
+            } else if (sk === 'Fúria' || sk === 'Temerário' || sk === 'Retaliação') {
+                window._combatVfx.buffRage(el);
+            } else if (sk === 'Surto de Ação' || sk === 'Grito de Reunião' || sk === 'Comando de Ataque') {
+                if (typeof window._combatVfx.buffRally === 'function') window._combatVfx.buffRally(el);
+                else window._combatVfx.buffRage(el);
+            } else if (sk === 'Escudo Arcano' || sk === 'Contramágica' || sk.indexOf('Metamagia') >= 0) {
+                window._combatVfx.buffArcaneShield(el);
+            } else if (sk === 'Postura Defensiva' || sk === 'Aura de Proteção' || sk === 'Escudo da Fé' || sk === 'Defesa Paciente' || sk === 'Sentido do Perigo' || sk === 'Armadura de Agathys') {
                 window._combatVfx.buffDefense(el);
-            }
-            else if (skillName === 'Bênção' || skillName === 'Inspiração' || skillName === 'Marca do Caçador') {
+            } else if (sk === 'Bênção' || sk === 'Inspiração' || sk === 'Inspiração de Combate' || sk === 'Marca do Caçador' || sk === 'Perícia Incomparável') {
                 window._combatVfx.buffBless(el);
-            }
-            else if (skillName === 'Esquiva' || skillName === 'Passos Silenciosos') {
+            } else if (sk === 'Esquiva' || sk === 'Passos Silenciosos' || sk === 'Ação Ardilosa' || sk === 'Passo Oculto' || sk === 'Passar sem Rastro' || sk === 'Passo do Vento' || sk === 'Passo das Sombras' || sk === 'Invisibilidade' || sk === 'Corpo Vazio') {
                 window._combatVfx.buffStealth(el);
+            } else if (sk === 'Passo Brumoso') {
+                window._combatVfx.buffStealth(el);
+                if (typeof window._combatVfx.flash === 'function') window._combatVfx.flash('rgba(180,220,255,0.25)', 260);
+            } else if (sk === 'Segundo Fôlego') {
+                window._combatVfx.healSelf(el);
+            } else if (sk === 'Curar Ferimentos' || sk === 'Palavra de Cura' || sk === 'Cura' || sk === 'Cura da Companhia' || sk === 'Cura da Forma de Combate' || sk === 'Regeneração' || sk === 'Imposição das Mãos' || sk === 'Cura pelas Mãos' || sk === 'Integridade Corporal') {
+                window._combatVfx.heal(el);
+                setTimeout(function () { try { window._combatVfx.healBurst(el); } catch (_) {} }, 200);
+            } else if (sk === 'Perdição' || sk === 'Maldição' || sk === 'Maldição de Bruxo' || sk === 'Comando' || sk === 'Amedrontar' || sk === 'Presença Dracônica' || sk === 'Presença Feérica') {
+                window._combatVfx.debuff(el);
+            } else if (sk === 'Fogo das Fadas') {
+                window._combatVfx.radiantBurst(el);
+            } else if (sk === 'Lâmina Sombria') {
+                window._combatVfx.shadowStrike(el);
+            } else if (sk === 'Forma Selvagem') {
+                if (typeof window._combatVfx.wildShapeTransform === 'function') window._combatVfx.wildShapeTransform(el);
+                else window._combatVfx.buff(el);
+            } else if (sk === 'Reverter Forma') {
+                if (typeof window._combatVfx.wildShapeRevert === 'function') window._combatVfx.wildShapeRevert(el);
+                else window._combatVfx.buff(el);
+            } else if (sk === 'Parar o Tempo') {
+                if (typeof window._combatVfx.flash === 'function') window._combatVfx.flash('rgba(140,200,255,0.45)', 800);
+                window._combatVfx.buffArcaneShield(el);
+            } else {
+                window._combatVfx.buff(el);
             }
         }
     } catch (e) {
@@ -51447,8 +51512,8 @@ async function playTurn(aIdx, tIdx, opts) {
                     try {
                         var _elC = document.querySelector('[data-unit-id="' + _cUidA + '"]') || document.querySelector('[data-uid="' + _cUidA + '"]');
                         if (_elC) {
-                            if (window._combatVfx && window._combatVfx.damageType) {
-                                window._combatVfx.damageType(_elC, 'psychic');
+                            if (window._combatVfx) {
+                                if (typeof window._combatVfx.impact === 'function') window._combatVfx.impact(_elC, 'psychic');
                             }
                             if (typeof spawnSkillImpactLabel === 'function') {
                                 spawnSkillImpactLabel(_elC, '🎵 PALAVRAS CORTANTES (−' + _cutRoll + ')!', 'condition');
@@ -51663,7 +51728,7 @@ async function playTurn(aIdx, tIdx, opts) {
                     try {
                         var _elR = document.querySelector('[data-uid="' + _aUidR + '"]');
                         if (_elR && window._combatVfx) {
-                            if (window._combatVfx.damageType) window._combatVfx.damageType(_elR, 'fire');
+                            if (typeof window._combatVfx.impact === 'function') window._combatVfx.impact(_elR, 'fire');
                             else if (window._combatVfx.critBurst) window._combatVfx.critBurst(_elR);
                         }
                     } catch (_eVfxR) {}
@@ -52299,7 +52364,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         var _elRP = document.querySelector('[data-unit-id="' + _aUidRP + '"]') || document.querySelector('[data-uid="' + _aUidRP + '"]');
                         if (_elRP) {
                             if (window._combatVfx) {
-                                if (window._combatVfx.damageType) window._combatVfx.damageType(_elRP, 'fire');
+                                if (typeof window._combatVfx.impact === 'function') window._combatVfx.impact(_elRP, 'fire');
                                 else if (window._combatVfx.critBurst) window._combatVfx.critBurst(_elRP);
                             }
                             if (typeof spawnSkillImpactLabel === 'function') {
@@ -55641,12 +55706,48 @@ async function __combatAnimateOneEvent(ev) {
                         }
                         if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
                     }
-                } else if (isRayOfFrost && elA) {
+                } else if (ev.skillName === 'Mãos Flamejantes' && elA && typeof window._combatVfx.burningHands === 'function') {
+                    window._combatVfx.burningHands(elA, elT);
+                } else if ((ev.skillName === 'Onda de Trovão' || ev.skillName === 'Destruição Trovejante') && typeof window._combatVfx.thunderwave === 'function') {
+                    window._combatVfx.thunderwave(elT);
+                } else if (ev.skillName === 'Choque Elétrico' && elA && typeof window._combatVfx.shockingGrasp === 'function') {
+                    window._combatVfx.shockingGrasp(elA, elT);
+                } else if ((isRayOfFrost || ev.skillName === 'Raio Gélido' || ev.skillName === 'Raio de Gelo') && elA) {
                     window._combatVfx.rayOfFrost(elA, elT, { crit: !!ev.crit });
                     if (tUnit && tUnit.pos && typeof simApplyHexSurface === 'function' && currentState) {
                         simApplyHexSurface(currentState, tUnit.pos.col, tUnit.pos.row, 'ice', 2, 'Raio de Gelo');
                         if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
                     }
+                } else if ((ev.skillName === 'Explosão Arcana' || ev.skillName === 'Disparo Místico') && elA && typeof window._combatVfx.eldritchBlast === 'function') {
+                    window._combatVfx.eldritchBlast(elA, elT, { crit: !!ev.crit });
+                } else if (ev.skillName === 'Chama Sagrada' && typeof window._combatVfx.sacredFlame === 'function') {
+                    window._combatVfx.sacredFlame(elT);
+                } else if ((ev.skillName === 'Invocar Raio' || ev.skillName === 'Relâmpago') && typeof window._combatVfx.callLightning === 'function') {
+                    window._combatVfx.callLightning(elT);
+                } else if (ev.skillName === 'Feixe Lunar' && typeof window._combatVfx.moonbeam === 'function') {
+                    window._combatVfx.moonbeam(elT);
+                } else if (ev.skillName === 'Chicote Espinhoso' && elA && typeof window._combatVfx.thornWhip === 'function') {
+                    window._combatVfx.thornWhip(elA, elT);
+                } else if (ev.skillName === 'Desintegrar' && elA && typeof window._combatVfx.disintegrate === 'function') {
+                    window._combatVfx.disintegrate(elA, elT);
+                } else if (ev.skillName === 'Dedo da Morte' && elA && typeof window._combatVfx.fingerOfDeath === 'function') {
+                    window._combatVfx.fingerOfDeath(elA, elT);
+                } else if ((ev.skillName === 'Chuva de Meteoros' || ev.skillName === 'Tempestade de Fogo') && typeof window._combatVfx.meteorSwarm === 'function') {
+                    window._combatVfx.meteorSwarm(elT);
+                } else if (ev.skillName === 'Palavra de Poder: Matar' && typeof window._combatVfx.powerWordKill === 'function') {
+                    window._combatVfx.powerWordKill(elT);
+                } else if ((ev.skillName === 'Golpe Atordoante' || ev.skillName === 'Palma Trêmula') && elA && typeof window._combatVfx.kiStrike === 'function') {
+                    window._combatVfx.kiStrike(elA, elT);
+                } else if (ev.skillName === 'Disparo Rápido' && elA) {
+                    window._combatVfx.arrowVolley(elA, elT, 2, dmgType, { crit: !!ev.crit });
+                } else if (ev.skillName === 'Rajada de Flechas' && elA) {
+                    window._combatVfx.arrowVolley(elA, elT, 3, dmgType, { crit: !!ev.crit });
+                } else if (ev.skillName === 'Salva de Disparos' && elA) {
+                    window._combatVfx.arrowVolley(elA, elT, 4, dmgType, { crit: !!ev.crit });
+                } else if (ev.skillName === 'Flecha de Ácido' && elA && typeof window._combatVfx.acidSplash === 'function') {
+                    window._combatVfx.acidSplash(elA, elT);
+                } else if (ev.skillName === 'Raio Doentio' && elA && typeof window._combatVfx.poisonRay === 'function') {
+                    window._combatVfx.poisonRay(elA, elT);
                 } else if (dmgType === 'lightning' && tUnit && tUnit.pos && typeof simApplyHexSurface === 'function' && currentState) {
                     simApplyHexSurface(currentState, tUnit.pos.col, tUnit.pos.row, 'electrified_water', 2, 'Eletricidade');
                     if (typeof refreshHexSurfacesLayerLive === 'function') refreshHexSurfacesLayerLive();
@@ -55663,7 +55764,7 @@ async function __combatAnimateOneEvent(ev) {
                 if (ev.crit && window._combatVfx.critBurst) {
                     window._combatVfx.critBurst(elT, dmgType);
                 }
-                if ((ev.divineSmite || dmgType === 'radiant') && typeof window._combatVfx.radiantBurst === 'function') {
+                if ((ev.divineSmite || dmgType === 'radiant' || (ev.skillName && (ev.skillName.indexOf('Divin') >= 0 || ev.skillName.indexOf('Fulminante') >= 0))) && typeof window._combatVfx.radiantBurst === 'function') {
                     window._combatVfx.radiantBurst(elT);
                 }
                 if (ev.sneakAttack && typeof window._combatVfx.shadowStrike === 'function') {
