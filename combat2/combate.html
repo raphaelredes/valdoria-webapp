@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T04:27:02Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T04:55:08Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -24258,18 +24258,22 @@ function simComputeCover(state, attacker, target) {
 }
 
 /**
- * Avalia o estado de Vantagem / Desvantagem D&D 5e (PHB p. 173) de forma pura para HUD e UI.
+ * Avalia detalhadamente as fontes canônicas de Vantagem e Desvantagem D&D 5e (PHB p. 173).
+ * Retorna as razões discriminadas e detecta quando ambos ocorrem, anulando-se mutuamente ('cancelled').
  */
-function simPeekAttackAdvState(actor, target, skill) {
-    if (!actor || !target) return 'normal';
-    var adv = false, dis = false;
+function _simAttackAdvDetails(actor, target, skill) {
+    if (!actor || !target) {
+        return { state: 'normal', adv: false, dis: false, advReasons: [], disReasons: [] };
+    }
+    var advReasons = [];
+    var disReasons = [];
 
     // Ataque à distância com inimigo hostil adjacente consciente (PHB p. 195)
     var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(actor, skill) : null;
     var isRanged = reachInfo ? reachInfo.isRanged : (actor.is_ranged || actor.ranged);
     if (isRanged && typeof simHasHostileAdjacent === 'function' && currentState && currentState.order) {
         if (simHasHostileAdjacent(actor, currentState.order)) {
-            dis = true;
+            disReasons.push('Inimigo hostil adjacente (ataque à distância, PHB p. 195)');
         }
     }
 
@@ -24281,7 +24285,7 @@ function simPeekAttackAdvState(actor, target, skill) {
 
     // Assassinar (PHB p. 97)
     if (typeof _subclassKeyNorm === 'function' && _subclassKeyNorm(actor.subclass) === 'assassin' && currentState && (currentState.rn | 0) <= 1) {
-        adv = true;
+        advReasons.push('Assassinar no 1º turno (PHB p. 97)');
     }
 
     // Buffs no atacante
@@ -24293,12 +24297,18 @@ function simPeekAttackAdvState(actor, target, skill) {
                 if (st.markedTargetOnly && st.markedTargetName && target.n !== st.markedTargetName) {
                     // diferente do marcado
                 } else {
-                    adv = true;
+                    advReasons.push(st.n ? ('Efeito ativo: ' + st.n) : 'Vantagem no ataque');
                 }
             }
-            if (st.atkDisadvantage) dis = true;
-            if (st.attackAdvantage) adv = true;
-            if (st.prone && isRanged) dis = true;
+            if (st.atkDisadvantage) {
+                disReasons.push(st.n ? ('Efeito ativo: ' + st.n) : 'Desvantagem no ataque');
+            }
+            if (st.attackAdvantage) {
+                advReasons.push(st.n ? ('Efeito ativo: ' + st.n) : 'Vantagem no ataque');
+            }
+            if (st.prone && isRanged) {
+                disReasons.push('Atacante caído no chão (ataque à distância, PHB p. 292)');
+            }
         }
     }
 
@@ -24307,28 +24317,34 @@ function simPeekAttackAdvState(actor, target, skill) {
         for (var ti = 0; ti < target.se.length; ti++) {
             var tst = target.se[ti];
             if (!tst) continue;
-            if (tst.enemyAtkDisadvantage) dis = true;
-            if (tst.selfAtkVulnerable) adv = true;
+            if (tst.enemyAtkDisadvantage) {
+                disReasons.push(tst.n ? ('Defesa do alvo: ' + tst.n) : 'Desvantagem no ataque');
+            }
+            if (tst.selfAtkVulnerable) {
+                advReasons.push(tst.n ? ('Vulnerabilidade do alvo: ' + tst.n) : 'Vantagem no ataque');
+            }
             if (tst.targetedAdvantage || tst.targetedAdvantageByAlly || tst.id === 'help_distracted') {
                 if (targetProne && simDist !== null) {
-                    if (simDist <= 1) adv = true;
-                    else dis = true;
+                    if (simDist <= 1) advReasons.push('Alvo vulnerável / Ajudado (PHB p. 192)');
+                    else disReasons.push('Alvo caído à distância (PHB p. 292)');
                 } else {
-                    adv = true;
+                    advReasons.push('Ajudado por aliado / Distraído (PHB p. 192)');
                 }
             }
-            if (tst.attackerDisadvantage) dis = true;
+            if (tst.attackerDisadvantage) {
+                disReasons.push(tst.n ? ('Efeito no alvo: ' + tst.n) : 'Desvantagem no ataque');
+            }
         }
     }
 
     // Alvo Caído (PHB p. 190 / 292)
     if (targetProne) {
         if (simDist !== null) {
-            if (simDist <= 1) adv = true;
-            else dis = true;
+            if (simDist <= 1) advReasons.push('Alvo caído no chão (corpo a corpo ≤ 1,5m, PHB p. 292)');
+            else disReasons.push('Alvo caído no chão (à distância > 1,5m, PHB p. 292)');
         } else {
-            if (isRanged) dis = true;
-            else adv = true;
+            if (isRanged) disReasons.push('Alvo caído no chão (à distância, PHB p. 292)');
+            else advReasons.push('Alvo caído no chão (corpo a corpo, PHB p. 292)');
         }
     }
 
@@ -24339,30 +24355,52 @@ function simPeekAttackAdvState(actor, target, skill) {
             var a = currentState.order[pi];
             if (a && a !== actor && a.alive && (a.t === 'p' || a.t === 'a')) alliesAlive++;
         }
-        if (alliesAlive >= 1) adv = true;
+        if (alliesAlive >= 1) advReasons.push('Táticas de Matilha (aliado consciente adjacente)');
     }
 
     // Exaustão nv 3+
     if (typeof _simExhaustionLevel === 'function' && _simExhaustionLevel(actor) >= 3) {
-        dis = true;
+        disReasons.push('Exaustão Nível 3+ (PHB p. 291)');
     }
 
     // First attack advantage (leitura sem consumo)
     if (actor.firstAttackAdvantage) {
-        adv = true;
+        advReasons.push('Vantagem no primeiro ataque');
     }
 
     // Flanqueamento D&D 5e (DMG p. 251): ataque corpo a corpo com aliado adjacente oposto
     if (!isRanged && typeof simCheckFlanking === 'function' && currentState && currentState.order) {
         if (simCheckFlanking(actor, target, currentState.order)) {
-            adv = true;
+            advReasons.push('Flanqueamento com aliado oposto (DMG p. 251)');
         }
     }
 
-    if (adv && dis) return 'normal';
-    if (adv) return 'advantage';
-    if (dis) return 'disadvantage';
-    return 'normal';
+    var hasAdv = advReasons.length > 0;
+    var hasDis = disReasons.length > 0;
+    var state = 'normal';
+    if (hasAdv && hasDis) {
+        state = 'cancelled';
+    } else if (hasAdv) {
+        state = 'advantage';
+    } else if (hasDis) {
+        state = 'disadvantage';
+    }
+
+    return {
+        state: state,
+        adv: hasAdv,
+        dis: hasDis,
+        advReasons: advReasons,
+        disReasons: disReasons
+    };
+}
+
+/**
+ * Avalia o estado de Vantagem / Desvantagem D&D 5e (PHB p. 173) de forma pura para HUD e UI.
+ */
+function simPeekAttackAdvState(actor, target, skill) {
+    var details = _simAttackAdvDetails(actor, target, skill);
+    return (details.state === 'cancelled') ? 'normal' : details.state;
 }
 
 function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
@@ -34423,9 +34461,10 @@ function showTargetActionMenu(targetIdx, uid) {
         : { cover: 'none', bonus: 0 };
     var isTotalCover = (coverInfo.cover === 'total');
 
-    var advState = (typeof simPeekAttackAdvState === 'function')
-        ? simPeekAttackAdvState(p, u, null)
-        : 'normal';
+    var advDetails = (typeof _simAttackAdvDetails === 'function')
+        ? _simAttackAdvDetails(p, u, null)
+        : { state: 'normal', adv: false, dis: false, advReasons: [], disReasons: [] };
+    var advState = (advDetails.state === 'cancelled') ? 'normal' : advDetails.state;
 
     var isFlanked = (!reachMeta.isRanged && typeof simCheckFlanking === 'function' && s.order)
         ? !!simCheckFlanking(p, u, s.order)
@@ -34471,7 +34510,8 @@ function showTargetActionMenu(targetIdx, uid) {
     else if (coverInfo.cover === 'half') metaBadges.push('<span class="tam-meta-badge warn">⛨ ½ Cobertura (+2 CA)</span>');
     else if (coverInfo.cover === 'three_quarters') metaBadges.push('<span class="tam-meta-badge warn">⛨ ¾ Cobertura (+5 CA)</span>');
 
-    if (isFlanked) metaBadges.push('<span class="tam-meta-badge good">▲ Flanqueado (Vantagem)</span>');
+    if (advDetails.state === 'cancelled') metaBadges.push('<span class="tam-meta-badge" style="background:rgba(74,85,104,0.3);border-color:#718096;color:#e2e8f0;" title="D&D 5e (PHB p. 173): Vantagem e Desvantagem ativas se anulam mutuamente">⚖️ Vant/Desv Anuladas</span>');
+    else if (isFlanked) metaBadges.push('<span class="tam-meta-badge good">▲ Flanqueado (Vantagem)</span>');
     else if (advState === 'advantage') metaBadges.push('<span class="tam-meta-badge good">▲ Vantagem</span>');
     else if (advState === 'disadvantage') metaBadges.push('<span class="tam-meta-badge danger">▼ Desvantagem</span>');
 
@@ -34489,6 +34529,15 @@ function showTargetActionMenu(targetIdx, uid) {
     if (u.immunities && u.immunities.length) {
         var imList = u.immunities.slice(0, 2).map(function (im) { return (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(im).lb : im; }).join(', ') + (u.immunities.length > 2 ? '…' : '');
         metaBadges.push('<span class="tam-meta-badge" style="background:rgba(160,174,192,0.2);border-color:rgba(203,213,225,0.6);color:#f1f5f9;" title="D&D 5e: Imune — não sofre dano deste tipo">🚫 Imune: ' + escHtml(imList) + '</span>');
+    }
+    var condImms = [].concat(u.condition_immunities || [], u.conditionImmunities || []);
+    if (condImms.length > 0) {
+        var ciLabels = condImms.slice(0, 3).map(function (c) {
+            var rule = (typeof simGetDndConditionRule === 'function') ? simGetDndConditionRule(c) : null;
+            return rule ? rule.name : c;
+        });
+        var ciText = ciLabels.join(', ') + (condImms.length > 3 ? '…' : '');
+        metaBadges.push('<span class="tam-meta-badge" style="background:rgba(147,51,234,0.2);border-color:rgba(168,85,247,0.6);color:#f3e8ff;" title="D&D 5e: Imune a condições — ' + escHtml(condImms.join(', ')) + '">🚫 Imunidade: ' + escHtml(ciText) + '</span>');
     }
     var concBuff = (u.se || []).find(function (st) { return st && st.concentration; });
     if (concBuff) {
@@ -34862,7 +34911,24 @@ function showAllyActionMenu(targetIdx, uid) {
         html += '</button>';
     }
 
-    // 3. INSPECIONAR FICHA
+    // 3. ESTABILIZAR COM MEDICINA (CD 10 - PHB p. 197)
+    var isDowned = (!isSelf && ((u.hp | 0) <= 0 || u.dying) && !u.stable);
+    if (isDowned) {
+        var stabDisabled = !isActionAvailable || !isAdjacent;
+        var stabDesc = !isActionAvailable
+            ? 'Ação principal já gasta neste turno'
+            : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Teste de Sabedoria (Medicina) CD 10 para estabilizar a 0 PV');
+        html += '<button type="button" class="tam-act-btn' + (stabDisabled ? ' is-disabled' : '') + '" data-tam-act="stabilize">';
+        html +=   '<div class="tam-act-ico">🩹</div>';
+        html +=   '<div class="tam-act-text">';
+        html +=     '<div class="tam-act-label">Estabilizar com Medicina (CD 10)</div>';
+        html +=     '<div class="tam-act-desc">' + stabDesc + '</div>';
+        html +=   '</div>';
+        html +=   '<div class="tam-act-chev">▸</div>';
+        html += '</button>';
+    }
+
+    // 4. INSPECIONAR FICHA
     html += '<button type="button" class="tam-act-btn" data-tam-act="inspect">';
     html +=   '<div class="tam-act-ico">👁</div>';
     html +=   '<div class="tam-act-text">';
@@ -34933,6 +34999,32 @@ function showAllyActionMenu(targetIdx, uid) {
                     void passPlayerMetaAction('help', { target: targetIdx });
                 }
             });
+        });
+    }
+
+    var stabBtn = sheet.querySelector('[data-tam-act="stabilize"]');
+    if (stabBtn) {
+        stabBtn.addEventListener('click', function () {
+            ov.remove();
+            if (!isActionAvailable) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Ação principal já gasta neste turno!', 'warn');
+                }
+                return;
+            }
+            if (!isAdjacent) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('▲ Companheiro fora do alcance corpo a corpo (1,5m)!', 'warn');
+                }
+                return;
+            }
+            _actionTaken = true;
+            render(currentState);
+            if (window.__COMBAT_MODE === 'remote' || window.__COMBAT_REMOTE_ACTIVE) {
+                void __combatRemoteAction({ type: 'stabilize_ally', target: targetIdx });
+            } else if (typeof runPlayerStabilizeAlly === 'function') {
+                void runPlayerStabilizeAlly(targetIdx);
+            }
         });
     }
 
@@ -37097,6 +37189,97 @@ async function runPlayerStabilizeMedicine() {
     await runNpcsUntilPlayer();
 }
 
+/**
+ * O jogador administra primeiros socorros em um companheiro caído a 0 PV (PHB p. 197).
+ * Teste de Sabedoria (Medicina) CD 10.
+ */
+async function runPlayerStabilizeAlly(targetIdx) {
+    var s = currentState;
+    if (!s || s.ph !== 'active') return;
+    var p = s.order[s.p_idx];
+    if (!p) return;
+    var target = (targetIdx != null && s.order[targetIdx]) ? s.order[targetIdx] : null;
+    if (!target) return;
+    if (target.isDead || target.stable || ((target.hp | 0) > 0 && !target.dying)) {
+        if (typeof showFloatingToast === 'function') {
+            showFloatingToast('O companheiro não necessita de estabilização.', 'info');
+        }
+        return;
+    }
+
+    p.actionSpent = true;
+    s.action_used = true;
+    s.actionUsed = true;
+    _actionSheetOpen = false;
+
+    simLogPushTurnHeader(s, p);
+    var DC = 10;
+    var mod = (typeof simWisMod === 'function') ? simWisMod(p) : 0;
+    var r = rollN(20);
+    var tot = r + mod;
+
+    await new Promise(function (done) {
+        showDice(r, done, p, 'Medicina · CD ' + DC, {
+            postResult: function () {
+                var ok = tot >= DC;
+                var detailsRows = [
+                    { l: 'Socorrista', v: p.n },
+                    { l: 'Alvo', v: target.n },
+                    { l: 'Perícia', v: 'Sabedoria (Medicina)' },
+                    { l: 'CD Alvo', v: '10' },
+                    { l: 'Regra D&D 5e', v: 'PHB p. 197: Teste de Sabedoria (Medicina) CD 10 para estabilizar criatura inconsciente a 0 PV.' },
+                    { l: 'Efeito', v: ok ? 'Estabiliza a 0 PV e encerra os testes contra a morte.' : 'Permanece instável, devendo rolar novo teste contra a morte no seu turno.' }
+                ];
+                var pills = [
+                    ok ? '<span class="dmg-pill dmg-pill--save">✓ Sucesso (≥10)</span>' : '<span class="dmg-pill dmg-pill--crit">✗ Falhou (<10)</span>',
+                    ok ? '<span class="dmg-pill dmg-pill--buff">✦ Estabilizado</span>' : '<span class="dmg-pill dmg-pill--vuln">Instável</span>',
+                    '<span class="dmg-pill dmg-pill--type">Socorrista: ' + escHtml(p.n) + '</span>'
+                ];
+                return {
+                    title: ok ? 'COMPANHEIRO ESTABILIZADO!' : 'FALHA NO SOCORRO',
+                    cls: ok ? 'hit' : 'miss',
+                    subStructured: {
+                        kicker: '🩺 SABEDORIA (MEDICINA) — CD 10 (PHB p. 197)',
+                        rows: [
+                            { l: 'Rolagem d20', v: String(r) },
+                            { l: 'Mod SAB', v: (mod >= 0 ? '+' : '') + mod },
+                            { l: 'Total', v: String(tot) },
+                            { l: 'CD Alvo', v: '10' }
+                        ],
+                        pills: pills,
+                        note: ok
+                            ? (p.n + ' prestou primeiros socorros e estabilizou ' + target.n + ' com sucesso!')
+                            : (p.n + ' tentou estancar os ferimentos de ' + target.n + ', mas não conseguiu estabilizá-lo.'),
+                        details: { rows: detailsRows }
+                    },
+                    subHtml: simFormatVsDcHTML(r, mod, tot, DC, ok) +
+                        '<div class="drl-crit-rule">Sabedoria (Medicina) CD 10. Socorrista: ' + escHtml(p.n) + ' · alvo: ' + escHtml(target.n) + '.</div>'
+                };
+            }
+        });
+    });
+
+    if (tot >= DC) {
+        if (typeof stabilizeUnit === 'function') stabilizeUnit(s, target, p.n);
+        else {
+            target.stable = true;
+            target.dying = false;
+        }
+        var tgtUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, targetIdx) : null;
+        if (tgtUid && typeof playBuffVfxOnCell === 'function') {
+            await playBuffVfxOnCell(tgtUid, 'silent', { durationMs: 1400 });
+        }
+    } else {
+        s.log.push(p.n + ' — Medicina SAB d20 ' + r + '+' + mod + '=' + tot + ' vs CD ' + DC + ' FALHA → ' + target.n + ' continua instável.');
+    }
+
+    render(s);
+    if (await checkEndWithPacing(s)) return;
+    if ((p.movement_left || 0) <= 0) {
+        await runNpcsUntilPlayer();
+    }
+}
+
 async function passDownedPlayerSlot() {
     var s = currentState;
     if (!s || s.ph !== 'active') return;
@@ -37158,32 +37341,90 @@ async function passPlayerMetaAction(kind, opts) {
         render(s);
     } else if (kind === 'shove') {
         p.actionSpent = true;
-        var sTgt = (opts.target != null && s.order[opts.target]) ? s.order[opts.target] : null;
+        var sTgtIdx = (opts.target != null && s.order[opts.target]) ? opts.target : null;
+        var sTgt = (sTgtIdx != null) ? s.order[sTgtIdx] : null;
         var sMode = opts.shove_mode || 'prone';
         if (sTgt) {
-            if (sMode === 'prone') {
-                if (!sTgt.se) sTgt.se = [];
-                sTgt.se.push({ id: 'prone', n: 'Caído', dndCondition: 'Ataques corpo a corpo têm Vantagem; ataques à distância têm Desvantagem. Gasta metade do movimento para levantar.' });
-                s.log.push(p.n + ' empurra ' + sTgt.n + ' e o derruba no chão (Caído)!');
-            } else {
-                var shDest = (p.pos && sTgt.pos && typeof simComputeShoveDestination === 'function')
-                    ? simComputeShoveDestination(p.pos.col, p.pos.row, sTgt.pos.col, sTgt.pos.row, s)
-                    : null;
-                if (shDest && !shDest.isBlocked) {
-                    sTgt.pos = { col: shDest.destCol, row: shDest.destRow };
-                    if (typeof ensureProceduralBattlefield === 'function') ensureProceduralBattlefield(s);
-                    var extraNote = '';
-                    if (shDest.surface) {
-                        extraNote = ' sobre superfície de ' + (shDest.surface.type || 'fogo');
-                    } else if (shDest.hazard) {
-                        extraNote = ' sobre ' + (shDest.hazard.name || 'terreno perigoso');
+            // Teste resistido D&D 5e (PHB p. 195)
+            // Atacante: Força (Atletismo)
+            var pProf = (p.prof != null ? p.prof : (typeof simProfBonus === 'function' ? simProfBonus(p.lvl || 1) : 2));
+            var pStrMod = (typeof simAttrMod === 'function' ? simAttrMod(p.str || 10) : Math.floor(((p.str || 10) - 10) / 2));
+            var pCls = String(p.cls || '').toLowerCase();
+            var hasAthletics = (pCls === 'guerreiro' || pCls === 'barbaro' || pCls === 'paladino') || ((p.proficiencies || []).indexOf('athletics') !== -1);
+            var atkMod = pStrMod + (hasAthletics ? pProf : 0);
+            var d20Atk = rollN(20);
+            var totAtk = d20Atk + atkMod;
+
+            // Defensor: Força (Atletismo) ou Destreza (Acrobacia)
+            var defProf = (sTgt.prof != null ? sTgt.prof : (typeof simProfBonus === 'function' ? simProfBonus(sTgt.lvl || 1) : 2));
+            var defStrMod = (typeof simAttrMod === 'function' ? simAttrMod(sTgt.str || 10) : Math.floor(((sTgt.str || 10) - 10) / 2));
+            var defDexMod = (typeof simAttrMod === 'function' ? simAttrMod(sTgt.dex || 10) : Math.floor(((sTgt.dex || 10) - 10) / 2));
+            var defHasAth = (sTgt.proficiencies || []).indexOf('athletics') !== -1;
+            var defHasAcro = (sTgt.proficiencies || []).indexOf('acrobatics') !== -1;
+            var defMod = Math.max(defStrMod + (defHasAth ? defProf : 0), defDexMod + (defHasAcro ? defProf : 0));
+            var d20Def = rollN(20);
+            var totDef = d20Def + defMod;
+            var success = (totAtk >= totDef);
+
+            var sTgtUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, sTgtIdx) : null;
+            var sTgtEl = sTgtUid ? document.querySelector('[data-unit-id="' + sTgtUid + '"]') : null;
+            var pUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, s.p_idx) : 'player';
+            var pEl = document.querySelector('[data-unit-id="' + pUid + '"]');
+
+            if (pEl && sTgtEl && typeof animHexTokenAttack === 'function') {
+                await animHexTokenAttack(pEl, sTgtEl, false);
+            }
+
+            var resPart = ' [' + totAtk + ' vs ' + totDef + ']';
+            if (success) {
+                if (sMode === 'prone') {
+                    sTgt.prone = true;
+                    if (!sTgt.se) sTgt.se = [];
+                    if (!sTgt.se.some(function (st) { return st && (st.prone || st.id === 'prone'); })) {
+                        sTgt.se.push({ id: 'prone', n: 'Caído', prone: true, kind: 'debuff', ico: '', dndCondition: 'Ataques corpo a corpo têm Vantagem; ataques à distância têm Desvantagem. Gasta metade do movimento para levantar.' });
                     }
-                    s.log.push(p.n + ' empurra ' + sTgt.n + ' 1,5m para trás' + extraNote + '!');
-                } else if (shDest && shDest.isBlocked) {
-                    s.log.push(p.n + ' tenta empurrar ' + sTgt.n + ', mas o recuo é bloqueado por ' + (shDest.collisionReason || 'obstáculo') + '!');
+                    if (sTgtEl) {
+                        sTgtEl.classList.add('token-prone');
+                        if (typeof spawnSkillImpactLabel === 'function') {
+                            spawnSkillImpactLabel(sTgtEl, '▾ DERRUBADO NO CHÃO' + resPart + '!', 'attack');
+                        }
+                    }
+                    s.log.push(p.n + ' empurra ' + sTgt.n + ' e o derruba no chão (Caído)' + resPart + '!');
                 } else {
-                    s.log.push(p.n + ' empurra ' + sTgt.n + ' 1,5m para trás!');
+                    var shDest = (p.pos && sTgt.pos && typeof simComputeShoveDestination === 'function')
+                        ? simComputeShoveDestination(p.pos.col, p.pos.row, sTgt.pos.col, sTgt.pos.row, s)
+                        : null;
+                    if (shDest && !shDest.isBlocked) {
+                        sTgt.pos = { col: shDest.destCol, row: shDest.destRow };
+                        if (typeof ensureProceduralBattlefield === 'function') ensureProceduralBattlefield(s);
+                        if (sTgtEl && typeof spawnSkillImpactLabel === 'function') {
+                            spawnSkillImpactLabel(sTgtEl, '💨 EMPURRADO 1,5m' + resPart + '!', 'attack');
+                        }
+                        var extraNote = '';
+                        if (shDest.surface) {
+                            extraNote = ' sobre superfície de ' + (shDest.surface.type || 'fogo');
+                        } else if (shDest.hazard) {
+                            extraNote = ' sobre ' + (shDest.hazard.name || 'terreno perigoso');
+                        }
+                        s.log.push(p.n + ' empurra ' + sTgt.n + ' 1,5m para trás' + extraNote + resPart + '!');
+                    } else if (shDest && shDest.isBlocked) {
+                        if (sTgtEl && typeof spawnSkillImpactLabel === 'function') {
+                            spawnSkillImpactLabel(sTgtEl, '💥 RECUO BLOQUEADO!', 'miss');
+                        }
+                        s.log.push(p.n + ' empurra ' + sTgt.n + ', mas o recuo é bloqueado por ' + (shDest.collisionReason || 'obstáculo') + resPart + '!');
+                    } else {
+                        s.log.push(p.n + ' empurra ' + sTgt.n + ' 1,5m para trás' + resPart + '!');
+                    }
                 }
+            } else {
+                if (sTgtEl) {
+                    sTgtEl.classList.add('miss-target-flash');
+                    setTimeout(function () { sTgtEl.classList.remove('miss-target-flash'); }, 350);
+                    if (typeof spawnSkillImpactLabel === 'function') {
+                        spawnSkillImpactLabel(sTgtEl, '🛡️ RESISTIU EMPURRÃO [' + totDef + ' vs ' + totAtk + ']!', 'miss');
+                    }
+                }
+                s.log.push(p.n + ' tenta empurrar ' + sTgt.n + ', mas o alvo resiste ao teste oposto [' + totDef + ' vs ' + totAtk + ']!');
             }
         }
         render(s);
@@ -40050,7 +40291,10 @@ function showTargetConfirm(tgtIdx) {
     html += '</div></div>';
 
     /* Bloco de previsao de dano */
-    var advMode = (typeof simPeekAttackAdvState === 'function') ? simPeekAttackAdvState(p, u, skill) : 'normal';
+    var advDetails = (typeof _simAttackAdvDetails === 'function')
+        ? _simAttackAdvDetails(p, u, skill)
+        : { state: 'normal', adv: false, dis: false, advReasons: [], disReasons: [] };
+    var advMode = (advDetails.state === 'cancelled') ? 'normal' : advDetails.state;
     var isFlanked = false;
     var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(p, skill) : { reach: 1, isRanged: false };
     if (!reachInfo.isRanged && typeof simCheckFlanking === 'function' && s && s.order) {
@@ -40060,7 +40304,9 @@ function showTargetConfirm(tgtIdx) {
         ? simCheckElevationTacticalModifier(s, p, u, !!reachInfo.isRanged)
         : { bonus: 0, label: null };
     var advBadge = '';
-    if (isFlanked) {
+    if (advDetails.state === 'cancelled') {
+        advBadge = ' <span class="badge" style="background:#2d3748;color:#e2e8f0;border:1px solid #718096;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="D&D 5e (PHB p. 173): Vantagem e Desvantagem ativas se anulam mutuamente">⚖️ VANT & DESV ANULADAS</span>';
+    } else if (isFlanked) {
         advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Flanqueamento D&D 5e (DMG p. 251): Aliado em posição oposta">▲ FLANQUEADO (VANT)</span>';
     } else if (advMode === 'advantage') {
         advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;">▲ VANTAGEM</span>';
@@ -40094,6 +40340,33 @@ function showTargetConfirm(tgtIdx) {
     html += '<div class="tcc-dmg">';
     var isSaveSpell = !!(skill && skill.save);
     var isAutoHitSpell = !!(skill && (skill.autoHit || skill.magicMissiles));
+
+    /* Banner Informativo de Área de Efeito (PHB p. 204-205) */
+    if (skill && typeof simComputeSkillAoeGeometry === 'function' && u.pos && u.pos.col != null) {
+        var aoeGeo = simComputeSkillAoeGeometry(p, u.pos.col, u.pos.row, skill);
+        if (aoeGeo && aoeGeo.radiusHex > 0) {
+            var aoeShapePt = {
+                sphere: 'Esfera',
+                cone: 'Cone',
+                line: 'Linha',
+                cube: 'Cubo'
+            }[aoeGeo.aoeShape] || 'Área';
+            var aoeRadiusM = formatHexDistanceMeters(aoeGeo.radiusHex);
+            var nEnemies = (aoeGeo.affectedEnemyIdxs || []).length;
+            var nAllies = (aoeGeo.affectedAllyIdxs || []).length;
+            var ffWarning = (nAllies > 0)
+                ? '<div style="color:#fca5a5;font-weight:700;margin-top:2px;">⚠️ ALERTA DE FOGO AMIGO: ' + nAllies + ' companheiro(s) no raio de explosão!</div>'
+                : '';
+            html += '<div style="background:linear-gradient(90deg, rgba(234,88,12,0.22), rgba(20,16,12,0.85));border:1px solid rgba(251,146,60,0.6);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
+                + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+                + '<span style="font-family:Cinzel,serif;font-size:12px;font-weight:800;color:#fdba74;">💥 ' + aoeShapePt.toUpperCase() + ' DE ' + aoeRadiusM + ' (' + aoeGeo.radiusHex + ' hexes)</span>'
+                + '<span style="font-size:9.5px;color:#fed7aa;background:rgba(0,0,0,0.4);border:1px solid rgba(251,146,60,0.4);padding:1px 6px;border-radius:4px;">🎯 ' + nEnemies + ' Alvo(s) Hostil(is)</span>'
+                + '</div>'
+                + '<div style="font-size:9px;color:#fdba74;opacity:0.9;margin-top:2px;">D&D 5e (PHB p. 204): Afeta todas as criaturas na área a partir do ponto de mira.</div>'
+                + ffWarning
+                + '</div>';
+        }
+    }
 
     /* Medidor Visual de Probabilidade & Limiares D&D 5e (Padrão Baldur's Gate 3 / Solasta) */
     if (skill && skill.powerWordKill) {
@@ -40301,6 +40574,18 @@ function showTargetConfirm(tgtIdx) {
                 '<span style="color:#ff8585;font-size:11px;line-height:1.3;text-align:center;width:100%;">▲ Alvo além do alcance máximo de ' + reachMeta.label + '. Deslocamento esgotado neste turno.</span>' +
                 '</div>';
         }
+    }
+
+    if (advDetails.state === 'cancelled') {
+        drawerHtml += '<div class="tcc-dmg-row" style="background:rgba(45,55,72,0.35);border:1px solid rgba(113,128,150,0.5);border-radius:4px;padding:5px 8px;margin-top:4px;display:flex;flex-direction:column;gap:3px;">'
+            + '<div style="font-size:10.5px;color:#e2e8f0;font-weight:700;">⚖️ Anulação Mútua D&D 5e (PHB p. 173):</div>'
+            + '<div style="font-size:9.5px;color:#86efac;">▲ <strong>Vantagem:</strong> ' + escHtml(advDetails.advReasons.join('; ')) + '</div>'
+            + '<div style="font-size:9.5px;color:#fca5a5;">▼ <strong>Desvantagem:</strong> ' + escHtml(advDetails.disReasons.join('; ')) + '</div>'
+            + '</div>';
+    } else if (advDetails.state === 'advantage' && advDetails.advReasons.length > 0) {
+        drawerHtml += '<div class="tcc-dmg-row" style="color:#86efac;"><span class="tcc-dmg-lbl">▲ Razão Vantagem</span><span class="tcc-dmg-val">' + escHtml(advDetails.advReasons.join('; ')) + '</span></div>';
+    } else if (advDetails.state === 'disadvantage' && advDetails.disReasons.length > 0) {
+        drawerHtml += '<div class="tcc-dmg-row" style="color:#fca5a5;"><span class="tcc-dmg-lbl">▼ Razão Desvantagem</span><span class="tcc-dmg-val">' + escHtml(advDetails.disReasons.join('; ')) + '</span></div>';
     }
 
     if (drawerHtml) {
@@ -50335,6 +50620,45 @@ async function __combatAnimateOneEvent(ev) {
                     spawnSkillImpactLabel(shElT, '🛡️ RESISTIU EMPURRÃO' + _shDefPart + '!', 'miss');
                 } else if (typeof spawnMissFloatLabel === 'function') {
                     spawnMissFloatLabel(shElT, 'Resistiu!' + _shDefPart);
+                }
+            }
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 260); });
+        return;
+    }
+    if (kind === 'medicine_stabilize') {
+        var medTIdx = ev.tIdx != null ? ev.tIdx : (ev.targetIdx != null ? ev.targetIdx : 0);
+        var medTargetUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, medTIdx)
+            : (medTIdx === (currentState && currentState.p_idx) ? 'player' : 'ally_' + medTIdx);
+        var medTargetUnit = (currentState && currentState.order) ? currentState.order[medTIdx] : null;
+        var medTEl = document.querySelector('[data-unit-id="' + medTargetUid + '"]');
+
+        var medResPart = (ev.total != null ? ' (' + ev.total + ' vs CD 10)' : '');
+        if (ev.success) {
+            if (medTargetUnit) {
+                medTargetUnit.stable = true;
+                medTargetUnit.dying = false;
+            }
+            if (medTEl) {
+                if (typeof playBuffVfxOnCell === 'function') {
+                    await playBuffVfxOnCell(medTargetUid, 'silent', { durationMs: 1400 });
+                }
+                if (typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(medTEl, '✦ ESTABILIZADO' + medResPart + '!', 'buff');
+                } else if (typeof spawnMissFloatLabel === 'function') {
+                    spawnMissFloatLabel(medTEl, 'Estabilizado!');
+                }
+            }
+        } else {
+            if (medTEl) {
+                medTEl.classList.add('miss-target-flash');
+                setTimeout(function () { medTEl.classList.remove('miss-target-flash'); }, 350);
+                if (typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(medTEl, '✗ FALHA NO SOCORRO' + medResPart, 'miss');
+                } else if (typeof spawnMissFloatLabel === 'function') {
+                    spawnMissFloatLabel(medTEl, 'Falhou!');
                 }
             }
         }
