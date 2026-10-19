@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T10:59:54Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T11:34:39Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1564,6 +1564,7 @@ canvas#vfxCanvas {
 #app .resolution-screen,
 #app .ds2-screen,
 #app .initiative-order-overlay,
+#app .v8-cond-popup-overlay,
 #app .mm-confirm-overlay {
   position: absolute !important;
   inset: 0 !important;
@@ -1910,6 +1911,16 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     border: 1px solid rgba(183, 148, 244, 0.65);
     color: #e9d8fd;
 }
+.dmg-pill--conc-pass {
+    background: rgba(37, 99, 235, 0.22);
+    border: 1px solid rgba(96, 165, 250, 0.7);
+    color: #bfdbfe;
+}
+.dmg-pill--conc-fail {
+    background: rgba(220, 38, 38, 0.22);
+    border: 1px solid rgba(248, 113, 113, 0.7);
+    color: #fecaca;
+}
 .dmg-pill--temphp {
     background: rgba(56, 189, 248, 0.18);
     border: 1px solid rgba(56, 189, 248, 0.65);
@@ -2143,9 +2154,14 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .dice-result-label.miss .drl-structured-note { color: #c06a3a; font-style: italic; }
 .drl-structured-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 3px 0; }
 .drl-structured-tracker { display: flex; justify-content: center; margin: 4px 0 2px; }
+.drl-step-pips { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; background: rgba(0,0,0,0.45); border: 1px solid rgba(196,149,58,0.35); border-radius: 12px; }
+.drl-step-pip { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 700; font-family: var(--v-font-display, 'Cinzel'), serif; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: var(--v-text-dim, #a09484); }
+.drl-step-pip.is-done { background: rgba(46,204,113,0.22); border-color: rgba(46,204,113,0.7); color: #a8f0c6; }
+.drl-step-pip.is-current { background: rgba(243,156,18,0.32); border-color: rgba(243,156,18,0.9); color: #ffd680; box-shadow: 0 0 8px rgba(243,156,18,0.6); }
+.drl-step-pip-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--v-gold, #c4953a); margin-right: 3px; }
 .drl-structured-toggle-btn { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 11px; color: var(--v-gold, #c4953a); background: rgba(196, 149, 58, 0.1); border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 4px; padding: 2px 8px; margin: 4px auto 0; cursor: pointer; transition: background 0.2s, border-color 0.2s; display: inline-flex; align-items: center; gap: 4px; }
 .drl-structured-toggle-btn:hover { background: rgba(196, 149, 58, 0.22); border-color: rgba(196, 149, 58, 0.5); }
-.drl-structured-details-body { display: none; flex-direction: column; gap: 2px; background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(196, 149, 58, 0.2); border-radius: 4px; padding: 4px 8px; margin-top: 4px; text-align: left; animation: ctFade 0.2s ease; width: 100%; box-sizing: border-box; }
+.drl-structured-details-body { display: none; flex-direction: column; gap: 2px; background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(196, 149, 58, 0.2); border-radius: 4px; padding: 4px 8px; margin-top: 4px; text-align: left; animation: ctFade 0.2s ease; width: 100%; box-sizing: border-box; max-height: 160px; overflow-y: auto; overscroll-behavior: contain; }
 .drl-structured-details-body.is-open { display: flex; }
 .drl-details-row { display: flex; justify-content: space-between; font-size: 11px; font-family: var(--v-font, 'MedievalSharp'), serif; color: var(--v-text-dim, #a09484); }
 .drl-details-row span { color: var(--v-text-dim, #a09484); }
@@ -3378,15 +3394,20 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   position: fixed; inset: 0;
   background: radial-gradient(ellipse at center, rgba(30,22,14,0.72), rgba(0,0,0,0.88));
   display: flex; align-items: center; justify-content: center;
-  z-index: 9800;
+  z-index: 100600 !important;
   animation: v8CondOvIn 0.22s ease-out;
-  padding: 20px;
+  padding: 16px;
+  box-sizing: border-box;
 }
 @keyframes v8CondOvIn { from { opacity: 0; } to { opacity: 1; } }
 .v8-cond-popup-card {
-  /* X-6.5.51x (2026-04-25): responsivo touch-aware via --sim-frame-w token */
-  width: 100%;
-  max-width: calc(var(--sim-frame-w) - 24px);
+  /* Responsivo touch-aware via --sim-frame-w token com scroll interno seguro */
+  width: min(94vw, 340px);
+  max-height: min(85vh, 480px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
   padding: var(--v-space-xl, 16px) 18px 14px;
   background: linear-gradient(180deg, var(--v-bg-raised, #3a2e1e), var(--v-bg, #2a2014));
   border: 2px solid var(--v-gold, #c4953a);
@@ -3481,8 +3502,12 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   font-style: italic;
 }
 .v8-cond-popup-btn {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
   padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
   font-family: var(--v-font-display, 'Cinzel'), serif;
   font-weight: 700;
@@ -10259,6 +10284,18 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     border: 1px solid #60a5fa;
     color: #dbeafe;
     box-shadow: 0 0 6px rgba(96, 165, 250, 0.45);
+}
+.floating-dmg .fct-mod--conc-broken {
+    background: rgba(127, 29, 29, 0.92);
+    border: 1px solid #ef4444;
+    color: #fecaca;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+.floating-dmg .fct-mod--conc-pass {
+    background: rgba(30, 58, 138, 0.92);
+    border: 1px solid #60a5fa;
+    color: #bfdbfe;
+    box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
 }
 
 /* Death Saving Throws D&D 5e HUD nos Tokens (PHB p. 197-198) */
@@ -21705,6 +21742,27 @@ function simDmgTypeInfoPt(dt) {
     return { lb: res.lb, pt: res.lb, ico: res.ico, col: res.col };
 }
 
+/** Helper visual D&D 5e: constrói um rastreador compacto de passos para ataques múltiplos, sequências de raios e alvos em área. */
+function simBuildStepTrackerHtml(cur, total, label) {
+    if (!total || total <= 1) return '';
+    cur = Math.max(1, Math.min(total, cur | 0 || 1));
+    var pipsHtml = '';
+    for (var i = 1; i <= total; i++) {
+        var cls = 'drl-step-pip';
+        var sym = String(i);
+        if (i < cur) {
+            cls += ' is-done';
+            sym = '✓';
+        } else if (i === cur) {
+            cls += ' is-current';
+            sym = '🎯';
+        }
+        pipsHtml += '<span class="' + cls + '" aria-label="' + escHtml(label || 'Passo') + ' ' + i + ' de ' + total + '">' + sym + '</span>';
+    }
+    var lblText = label ? ('<span class="drl-step-pip-label">' + escHtml(label) + ' ' + cur + '/' + total + ':</span>') : '';
+    return '<div class="drl-step-pips" role="group" aria-label="Sequência tática">' + lblText + pipsHtml + '</div>';
+}
+
 /** Calcula a probabilidade exata de acerto e crítico no D&D 5e (PHB p.194) + breakdown estilo Solasta/BG3. */
 function simCalcHitChanceDnd5e(s, attacker, defender, skill) {
     if (!attacker || !defender) {
@@ -22292,7 +22350,7 @@ function addDeathFailuresAndMaybeDie(s, u, n) {
  *  no simulador — log narrativo; o motor emite eventos estruturados.
  */
 function simCheckConcentrationOnDamage(target, damageAmount) {
-    if (!target || !target.se || damageAmount <= 0) return;
+    if (!target || !target.se || damageAmount <= 0) return null;
     var hasConc = false;
     var concSpellName = '';
     for (var i = 0; i < target.se.length; i++) {
@@ -22302,7 +22360,7 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
             break;
         }
     }
-    if (!hasConc) return;
+    if (!hasConc) return null;
     var dc = Math.max(10, Math.floor(damageAmount / 2));
     /* V1.7 Sprint-17 Ronda 28 (2026-04-21 QA PHB p.204) — Concentração usa simSaveMod
        para incluir proficiency em CON quando a classe tem (Bárbaro/Guerreiro/Feiticeiro).
@@ -22396,6 +22454,15 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
             } catch (_eTeth) {}
         }
     }
+    return {
+        tested: true,
+        dc: dc,
+        roll: roll,
+        mod: conMod,
+        total: total,
+        success: success,
+        spellName: concSpellName
+    };
 }
 
 /* Spawna número flutuante de dano acima do card — padrão AAA (BG3/Divinity/Octopath).
@@ -22502,6 +22569,11 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
         if (opts.vulnerable) {
             fctInner += '<span class="fct-mod-tag fct-mod--vuln">×2 Vulnerabilidade</span>';
         }
+    }
+    if (opts.concBroken) {
+        fctInner += '<span class="fct-mod-tag fct-mod--conc-broken">💥 Quebrou Concentração</span>';
+    } else if (opts.concPass) {
+        fctInner += '<span class="fct-mod-tag fct-mod--conc-pass">✦ Manteve Concentração</span>';
     }
     lbl.innerHTML = fctInner;
     if (typeof mountInGameFrame === 'function') mountInGameFrame(lbl);
@@ -22658,6 +22730,11 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
     // 2026-06-07: dmgMeta.deferFct adia o FCT (a animação do dano sofrido) — usado
     // quando uma reação (ex.: Repreensão Infernal) vai abrir um popup ANTES: o
     // chamador dispara o FCT só depois que o jogador decide.
+    var _concRes = (dmgMeta && dmgMeta.concRes) || target._lastConcRes || null;
+    if (!_concRes && damageApplied > 0 && !dmgMeta.skipConcentrationCheck) {
+        _concRes = simCheckConcentrationOnDamage(target, damageApplied);
+        target._lastConcRes = _concRes;
+    }
     if ((damageApplied > 0 || _isTargetImmune) && !dmgMeta.deferFct) {
         _spawnFloatingDmgNumber(target, damageApplied, {
             crit: !!dmgMeta.deathFailCrit,
@@ -22667,6 +22744,8 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             vulnerable: _isTargetVulnerable,
             saveHalved: !!dmgMeta.saveHalved,
             saveNegated: !!dmgMeta.saveNegated,
+            concPass: !!(_concRes && _concRes.success),
+            concBroken: !!(_concRes && !_concRes.success),
             /* V1 Invocações Phase 4 — summon damage herda cor da classe do conjurador */
             summonCasterCls: dmgMeta.summonCasterCls || null
         });
@@ -22826,8 +22905,9 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
         return;
     }
     target.hp = newHp;
-    if (damageApplied > 0) {
-        simCheckConcentrationOnDamage(target, damageApplied);
+    if (damageApplied > 0 && !_concRes && !dmgMeta.skipConcentrationCheck) {
+        _concRes = simCheckConcentrationOnDamage(target, damageApplied);
+        target._lastConcRes = _concRes;
     }
     /* 2026-06-07: aliado ESSENCIAL (ex.: Thorne no prólogo) NUNCA cai. Se o dano o
        levaria a 0, ele cambaleia mas resiste a 1 PV — sem dying/testes de morte.
@@ -30883,7 +30963,13 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     if (reductionMeta.tempHpAbsorbed > 0) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--temphp">🛡️ PV Temp (−' + reductionMeta.tempHpAbsorbed + ')</span>');
     }
-    if (reductionMeta.hasConcentration) {
+    if (reductionMeta.concRes && reductionMeta.concRes.tested) {
+        if (reductionMeta.concRes.success) {
+            tacticalPills.push('<span class="dmg-pill dmg-pill--conc-pass">✦ Concentração Mantida (TR ' + reductionMeta.concRes.total + ' vs CD ' + reductionMeta.concRes.dc + ')</span>');
+        } else {
+            tacticalPills.push('<span class="dmg-pill dmg-pill--conc-fail">💥 Concentração Quebrada (TR ' + reductionMeta.concRes.total + ' vs CD ' + reductionMeta.concRes.dc + ')</span>');
+        }
+    } else if (reductionMeta.hasConcentration) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--conc">🧠 TR CON CD ' + (reductionMeta.concDc || 10) + ' (Concentração)</span>');
     }
     // Bônus de habilidades (Marca do Caçador, Punição Divina, etc.)
@@ -30914,6 +31000,12 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     }
     if (reductionMeta.oa) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚡ Reação (Oportunidade)</span>');
+    }
+    if (reductionMeta.stepTrackerHtml) {
+        var trackerWrap = document.createElement('div');
+        trackerWrap.className = 'drl-structured-tracker';
+        trackerWrap.innerHTML = reductionMeta.stepTrackerHtml;
+        box.appendChild(trackerWrap);
     }
     if (tacticalPills.length > 0) {
         var pillRow = document.createElement('div');
@@ -48695,13 +48787,17 @@ async function playTurn(aIdx, tIdx, opts) {
                         } else if (hitRes.reason === 'falha_critica' || r === 1) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Falha Crítica (Nat 1)</span>');
                         }
+                        var _trackerHtml = '';
                         if (opts.oa) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--type">⚡ Reação (Oportunidade)</span>');
                         } else if (opts.multiAttackTotal > 1) {
+                            _trackerHtml = simBuildStepTrackerHtml(opts.multiAttackCurrent, opts.multiAttackTotal, 'Ataque Múltiplo');
                             _attackPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Ataque Múltiplo (' + opts.multiAttackCurrent + '/' + opts.multiAttackTotal + ')</span>');
                         } else if (opts.rayTotal > 1) {
+                            _trackerHtml = simBuildStepTrackerHtml(opts.rayIndex, opts.rayTotal, 'Sequência de Raios');
                             _attackPills.push('<span class="dmg-pill dmg-pill--buff">✨ Raio (' + opts.rayIndex + '/' + opts.rayTotal + ')</span>');
                         } else if (opts.attackTotal > 1) {
+                            _trackerHtml = simBuildStepTrackerHtml(opts.attackIndex, opts.attackTotal, 'Ataque Extra');
                             _attackPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Ataque Extra (' + opts.attackIndex + '/' + opts.attackTotal + ')</span>');
                         }
                         if (opts.aoeSecondary) {
@@ -48788,6 +48884,7 @@ async function playTurn(aIdx, tIdx, opts) {
                             cls: _cls,
                             subStructured: {
                                 kicker: _kicker,
+                                trackerHtml: _trackerHtml || undefined,
                                 rows: _rows,
                                 pills: _attackPills,
                                 note: _note,
@@ -49564,6 +49661,11 @@ async function playTurn(aIdx, tIdx, opts) {
         }
     }
     var _targetConcDc = Math.max(10, Math.floor(expectedDmg / 2));
+    var _localConcRes = null;
+    if (_hasTargetConcentration && expectedDmg > 0 && typeof simCheckConcentrationOnDamage === 'function') {
+        _localConcRes = simCheckConcentrationOnDamage(target, expectedDmg);
+        target._lastConcRes = _localConcRes;
+    }
 
     var oldHp = target.hp;
     var newHp = Math.max(0, target.hp - _expectedHpDmg);
@@ -49587,6 +49689,7 @@ async function playTurn(aIdx, tIdx, opts) {
         deflectReduction: _deflectReduction,
         hasConcentration: _hasTargetConcentration,
         concDc: _targetConcDc,
+        concRes: _localConcRes,
         saveSuccess: (atkSkill && atkSkill.save) ? saveSuccess : null,
         saveAbility: (atkSkill && atkSkill.save && atkSkill.save.ability) ? atkSkill.save.ability : null,
         halfDmg: _targetHasHalfDmg,
@@ -49596,6 +49699,12 @@ async function playTurn(aIdx, tIdx, opts) {
             if (opts.rayTotal > 1) return 'Raio (' + opts.rayIndex + '/' + opts.rayTotal + ')';
             if (opts.attackTotal > 1) return 'Ataque Extra (' + opts.attackIndex + '/' + opts.attackTotal + ')';
             return null;
+        })(),
+        stepTrackerHtml: (function () {
+            if (opts.multiAttackTotal > 1) return simBuildStepTrackerHtml(opts.multiAttackCurrent, opts.multiAttackTotal, 'Ataque Múltiplo');
+            if (opts.rayTotal > 1) return simBuildStepTrackerHtml(opts.rayIndex, opts.rayTotal, 'Sequência de Raios');
+            if (opts.attackTotal > 1) return simBuildStepTrackerHtml(opts.attackIndex, opts.attackTotal, 'Ataque Extra');
+            return '';
         })(),
         oa: !!opts.oa,
         aoeSecondary: !!opts.aoeSecondary
@@ -49680,7 +49789,8 @@ async function playTurn(aIdx, tIdx, opts) {
         saveFailed: saveSuccess === false,
         saveHalved: !!(atkSkill && atkSkill.save && saveSuccess === true && !atkSkill.saveNegates),
         saveNegated: !!(atkSkill && atkSkill.save && saveSuccess === true && atkSkill.saveNegates),
-        deferFct: _rebukeWillOffer
+        deferFct: _rebukeWillOffer,
+        concRes: _localConcRes
     });
 
     /* D&D 5e PHB p. 233: Desintegrar — se reduzir o alvo a 0 PV, desintegra em cinzas */
@@ -49829,7 +49939,14 @@ async function playTurn(aIdx, tIdx, opts) {
             /* Popup fechado — agora anima o dano sofrido (FCT adiado) + impacto no player. */
             var _dmgDealtP = Math.max(0, oldHp - newHp);
             if (_dmgDealtP > 0 && typeof _spawnFloatingDmgNumber === 'function') {
-                try { _spawnFloatingDmgNumber(target, _dmgDealtP, { crit: !!critForDeath, dmgType: dmgTypeFinal }); } catch (_eF) {}
+                try {
+                    _spawnFloatingDmgNumber(target, _dmgDealtP, {
+                        crit: !!critForDeath,
+                        dmgType: dmgTypeFinal,
+                        concPass: !!(target._lastConcRes && target._lastConcRes.success),
+                        concBroken: !!(target._lastConcRes && !target._lastConcRes.success)
+                    });
+                } catch (_eF) {}
             }
             if (uidRTa && typeof playHitVFX === 'function' && !s._hitVfxPlayed) {
                 try {
@@ -52677,9 +52794,15 @@ async function __combatAnimateOneEvent(ev) {
                             } else if (ev.d20 === 1) {
                                 _tacticalPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Falha Crítica (Nat 1)</span>');
                             }
+                            var _trackerHtml = '';
                             if (ev.multiAttackTotal > 1) {
+                                _trackerHtml = simBuildStepTrackerHtml(ev.multiAttackCurrent || 1, ev.multiAttackTotal, 'Ataque Múltiplo');
                                 _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Ataque Múltiplo (' + (ev.multiAttackCurrent || 1) + '/' + ev.multiAttackTotal + ')</span>');
+                            } else if (ev.rayTotal > 1) {
+                                _trackerHtml = simBuildStepTrackerHtml(ev.rayIndex || 1, ev.rayTotal, 'Sequência de Raios');
+                                _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">✨ Raio (' + (ev.rayIndex || 1) + '/' + ev.rayTotal + ')</span>');
                             } else if (ev.attackTotal > 1) {
+                                _trackerHtml = simBuildStepTrackerHtml(ev.attackIndex || 1, ev.attackTotal, 'Ataque Extra');
                                 _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Ataque Extra (' + (ev.attackIndex || 1) + '/' + ev.attackTotal + ')</span>');
                             }
                             if (ev.sneakAttack) _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">🗡️ Furtivo' + (ev.sneakTotal ? ' (+' + ev.sneakTotal + ')' : '') + '</span>');
@@ -52733,6 +52856,8 @@ async function __combatAnimateOneEvent(ev) {
                             }
                             if (ev.multiAttackTotal > 1) {
                                 _detailsRows.push({ l: 'Ataque Múltiplo', v: (ev.multiAttackCurrent || 1) + ' de ' + ev.multiAttackTotal + ' (D&D 5e MM p. 11)' });
+                            } else if (ev.rayTotal > 1) {
+                                _detailsRows.push({ l: 'Sequência de Raios', v: (ev.rayIndex || 1) + ' de ' + ev.rayTotal + ' (D&D 5e PHB p. 273)' });
                             } else if (ev.attackTotal > 1) {
                                 _detailsRows.push({ l: 'Ataque Extra / Ação', v: (ev.attackIndex || 1) + ' de ' + ev.attackTotal + ' (D&D 5e PHB p. 72)' });
                             }
@@ -52774,6 +52899,7 @@ async function __combatAnimateOneEvent(ev) {
                                 cls: ev.hit ? (ev.crit ? 'crit' : 'hit') : 'miss',
                                 subStructured: {
                                     kicker: _kicker,
+                                    trackerHtml: _trackerHtml || undefined,
                                     rows: _rows,
                                     pills: _tacticalPills,
                                     note: _note,
@@ -52842,6 +52968,14 @@ async function __combatAnimateOneEvent(ev) {
                 else if (tUnit.vulnerabilities && tUnit.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _cDtRem; })) _isRemVuln = true;
                 else if (tUnit.resistances && tUnit.resistances.some(function (res) { return String(res).toLowerCase().trim() === _cDtRem; })) _isRemRes = true;
             }
+            var _remStepTracker = '';
+            if (ev.multiAttackTotal > 1) {
+                _remStepTracker = simBuildStepTrackerHtml(ev.multiAttackCurrent || 1, ev.multiAttackTotal, 'Ataque Múltiplo');
+            } else if (ev.rayTotal > 1) {
+                _remStepTracker = simBuildStepTrackerHtml(ev.rayIndex || 1, ev.rayTotal, 'Sequência de Raios');
+            } else if (ev.attackTotal > 1) {
+                _remStepTracker = simBuildStepTrackerHtml(ev.attackIndex || 1, ev.attackTotal, 'Ataque Extra');
+            }
             try {
                 await showDamageDice(
                     ev.dmgRolls,
@@ -52870,9 +53004,11 @@ async function __combatAnimateOneEvent(ev) {
                         uncannyDodge: !!ev.uncannyDodge,
                         rageResisted: !!(ev.rageResisted || ev.bearTotemResist),
                         deflectReduction: (ev.deflectReduction || (ev.deflectMissiles && ev.deflectMissiles.reduced) || 0) | 0,
-                        tempHpAbsorbed: (ev.tempHpAbsorbed != null ? ev.tempHpAbsorbed : (tUnit && tUnit.tempHp ? Math.min(tUnit.tempHp, (ev.dmgTotal || 0) - Math.max(0, (ev.oldHp || 0) - (ev.newHp || 0))) : 0)) | 0,
+                        tempHpAbsorbed: (ev.tempHpAbsorbed != null ? ev.tempHpAbsorbed : (tUnit && tUnit.tempHp ? Math.min(tUnit.tempHp, (ev.dmgTotal || 0) - Math.max(0, (ev.oldHp || 0) - (ev.newHp | 0))) : 0)) | 0,
                         hasConcentration: !!(tUnit && tUnit.se && tUnit.se.some(function (st) { return st && st.concentration; })),
-                        concDc: Math.max(10, Math.floor((ev.dmgTotal || 0) / 2))
+                        concDc: Math.max(10, Math.floor((ev.dmgTotal || 0) / 2)),
+                        stepTrackerHtml: _remStepTracker || undefined,
+                        concRes: ev.concRes || (ev.concentrationBroken != null ? { tested: true, success: !ev.concentrationBroken, dc: Math.max(10, Math.floor((ev.dmgTotal || 0) / 2)) } : undefined)
                     }
                 );
             } catch (eDmg) {
@@ -52988,6 +53124,8 @@ async function __combatAnimateOneEvent(ev) {
         var _attackSeqSuffix = '';
         if (ev.multiAttackTotal > 1) {
             _attackSeqSuffix = ' (' + (ev.multiAttackCurrent || 1) + '/' + ev.multiAttackTotal + ')';
+        } else if (ev.rayTotal > 1) {
+            _attackSeqSuffix = ' (' + (ev.rayIndex || 1) + '/' + ev.rayTotal + ')';
         } else if (ev.attackTotal > 1) {
             _attackSeqSuffix = ' (' + (ev.attackIndex || 1) + '/' + ev.attackTotal + ')';
         }
@@ -53053,7 +53191,9 @@ async function __combatAnimateOneEvent(ev) {
                     dmgType: dmgType,
                     immune: _isRemImm,
                     resisted: _isRemRes,
-                    vulnerable: _isRemVuln
+                    vulnerable: _isRemVuln,
+                    concPass: !!(ev.concRes ? ev.concRes.success : (ev.concentrationBroken === false)),
+                    concBroken: !!(ev.concRes ? !ev.concRes.success : (ev.concentrationBroken === true))
                 });
             } catch (eFCT) { console.warn('[C-REM:VFX] _spawnFloatingDmgNumber failed', eFCT); }
         }
