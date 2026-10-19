@@ -156,7 +156,7 @@
 
   justify-content: center;
 
-  z-index: 9000;
+  z-index: 99990 !important;
 
   /* Padding mínimo — painel ocupa ≥ 95% interno (regra: ≥90%) */
 
@@ -201,6 +201,8 @@
   max-height: 100% !important;
 
   transform: none !important;
+
+  z-index: 99990 !important;
 
 }
 

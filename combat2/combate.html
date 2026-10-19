@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T19:26:28Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T20:10:21Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -854,8 +854,49 @@ html body .va-backdrop {
    e intro popup usam.
 
    POSITION 2026-10-19 (feedback autor): integrado à coluna vertical de controles
-   à direita do mapa (.bf-zoom-controls em right:8px), eliminando sobreposição
-   com o botão ENCERRAR no canto inferior direito do action-dock. */
+   POSITION 2026-10-19: integrados à coluna vertical de controles à direita
+   do mapa (.bf-zoom-controls em right:8px), com o botão de velocidade imediatamente
+   acima do botão de volume, ambos fora da área do action-dock inferior. */
+#sim-speed-btn {
+    position: fixed !important;
+    top: 255px !important;
+    bottom: auto !important;
+    right: 8px !important;
+    left: auto !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: var(--v-radius-sm, 6px) !important;
+    background: rgba(28, 22, 16, 0.92) !important;
+    border: 1.5px solid rgba(196, 149, 58, 0.65) !important;
+    color: #ffd700 !important;
+    cursor: pointer;
+    z-index: 9500 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease;
+    font-family: var(--v-font-display, 'Cinzel'), serif;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+#sim-speed-btn:hover {
+    border-color: #ffd700 !important;
+    background: rgba(52, 40, 28, 0.96) !important;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.85), 0 0 12px rgba(196, 149, 58, 0.45);
+    color: #fff !important;
+    transform: scale(1.06);
+}
+#sim-speed-btn:active {
+    transform: scale(0.95);
+}
 #sim-vol-btn {
     position: fixed !important;
     top: 294px !important;
@@ -923,6 +964,7 @@ html body .va-backdrop {
 }
 /* Tela muito estreita: mantém alinhamento na barra lateral direita */
 @media (max-height: 600px) {
+    #sim-speed-btn { width: 32px !important; height: 32px !important; right: 8px !important; font-size: 10px; }
     #sim-vol-btn { width: 32px !important; height: 32px !important; right: 8px !important; }
     #sim-vol-btn svg { width: 15px; height: 15px; }
 }
@@ -1559,6 +1601,9 @@ canvas#vfxCanvas {
 #app .sim-skip-confirm-overlay,
 #app .flee-info-overlay,
 #app .list-panel-overlay,
+#app .vinv-overlay,
+#app .combat-log-overlay,
+#app .cell-inspect-modal,
 #app .iop-overlay,
 #app .resolution,
 #app .skill-overlay,
@@ -1579,6 +1624,17 @@ canvas#vfxCanvas {
   max-width: 100% !important;
   max-height: 100% !important;
   margin: 0 !important;
+  z-index: 99990 !important;
+}
+/* Mochila (vInventory) em tela cheia estrita sem vazar a barra inferior */
+#app .vinv-overlay {
+  background: #14100c !important;
+}
+#app .vinv-overlay .vinv-panel {
+  border-radius: 0 !important;
+  border: none !important;
+  height: 100% !important;
+  max-height: 100% !important;
 }
 /* Fallback (fora do simulator — quando não há #app ancestor): position fixed
    no viewport com cap canonical, posicionado top-center. */
@@ -28145,13 +28201,25 @@ function hideCombatSkipMovementButton() {
     }
 }
 
+function _getCombatSpeedMultiplier() {
+    try {
+        var val = parseFloat(localStorage.getItem('valdoria_combat_speed')) || 1;
+        if (val === 2 || val === 3 || val === 1) return val;
+    } catch (_) {}
+    return 1;
+}
+function _setCombatSpeedMultiplier(val) {
+    try { localStorage.setItem('valdoria_combat_speed', String(val)); } catch (_) {}
+    if (typeof _simSyncSpeedBtn === 'function') _simSyncSpeedBtn();
+}
+
 async function animateUnitHexMovement(tokenEl, path, stepDurationMs) {
     if (!tokenEl || !path || path.length <= 1) return;
-    /* REGRA DO USUÁRIO (2026-10): O ritmo padrão de movimentação é estritamente 800ms
-       por hexágono (salvo se _skipAllDiceAnim estiver ativo). NUNCA reduzir para manter
-       a clareza tática de acompanhamento para o jogador. Para avançar rápido, o jogador
-       usa o botão temporário no topo central 'Pular Movimento'. */
-    var stepMs = stepDurationMs || 800;
+    /* REGRA DO USUÁRIO (2026-10): Velocidade de movimentação reduzida pela metade
+       (base de 1600ms por hexágono em 1x, ajustável pelo botão de velocidade lateral: 1x, 2x, 3x). */
+    var _spMult = (typeof _getCombatSpeedMultiplier === 'function') ? _getCombatSpeedMultiplier() : 1;
+    var baseMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 1600;
+    var stepMs = stepDurationMs || Math.round(baseMs / _spMult);
     tokenEl.style.zIndex = '60';
     tokenEl.classList.add('token--walking');
 
@@ -28703,8 +28771,9 @@ async function handlePlayerMoveTo(tCol, tRow) {
     var tokenEl = (typeof getUnitTokenEl === 'function')
         ? getUnitTokenEl(currentState, currentState.p_idx)
         : document.querySelector('[data-unit-id="player"]');
-    /* REGRA DO USUÁRIO (2026-10): Ritmo padrão canônico de 800ms por hexágono */
-    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
+    /* REGRA DO USUÁRIO (2026-10): Velocidade reduzida pela metade (base 1600ms em 1x, ajustável pelo botão de velocidade) */
+    var _spMult = (typeof _getCombatSpeedMultiplier === 'function') ? _getCombatSpeedMultiplier() : 1;
+    var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : Math.round(1600 / _spMult);
 
     var actualReachedSteps = 0;
     var actualSpentCost = 0;
@@ -31734,84 +31803,147 @@ function _combatItemIconHTML(it) {
     } catch (e) { /* cai no fallback emoji */ }
     return fallback;
 }
+function _cleanCombatUnitName(name) {
+    if (!name) return '';
+    return String(name)
+        .replace(/\s*\(\d+\)$/, '')
+        .replace(/\s*#?\d+$/, '')
+        .replace(/\s+[IVXLCDMivxlcdm]+$/, '')
+        .trim();
+}
+
+function _resolveCombatPortraitUrl(portrait) {
+    if (!portrait) return '';
+    var p = String(portrait).trim();
+    if (!p) return '';
+    var loc = (typeof location !== 'undefined') ? location.href : '';
+    var isFile = (loc.indexOf('file://') === 0);
+    var prefix = isFile ? '../shared/img/' : '/shared/img/';
+
+    if (p.indexOf('http://') === 0 || p.indexOf('https://') === 0 || p.indexOf('data:') === 0) {
+        return p;
+    }
+    if (p.indexOf('/') === 0) {
+        return isFile ? '..' + p : p;
+    }
+    if (p.indexOf('../') === 0 || p.indexOf('./') === 0) {
+        return p;
+    }
+    if (!/\.[a-zA-Z0-9]+$/.test(p)) {
+        p += '.webp';
+    }
+    if (/^adv_\d+/i.test(p)) {
+        return prefix + 'adventurers/' + p;
+    }
+    if (/^npc[-_]/i.test(p)) {
+        return prefix + 'npcs/' + p;
+    }
+    return prefix + 'combat/' + p;
+}
+
 function _combatPortraitHTML(iconId, u, utype) {
-    /* #85 (user): retrato CUSTOM do NPC (ex.: Thorne = thorne-armeiro.webp) tem
-       prioridade sobre o ícone heráldico de classe. Cai pro SVG do iconId se a
-       imagem falhar (onerror). file:// usa ../shared; remoto usa /shared. */
-    /* #wildshape-death-portrait (2026-06-23, user "quando acaba a vida transformado a figura
-       não volta a ser do personagem"): unidade MORTA ainda em Forma Selvagem mostra o retrato
-       do PERSONAGEM (backup), NUNCA o do animal. Troca por uma cópia com o portrait do backup
-       (ou null → cai no ícone heráldico de classe). Defensivo: cobre qualquer caminho de morte
-       que não reverteu a forma antes do render (_localWildShapeRevert pode não rodar em todos). */
+    /* REGRA DO USUÁRIO (2026-10): Resolução estrita de retratos WebP autênticos.
+       Proibição absoluta de imagens SVG heráldicas genéricas em todos os combatentes. */
     if (u && u.wildShape && u._wsBackup && (u.isDead || (u.hp | 0) <= 0)) {
         u = Object.assign({}, u, { portrait: u._wsBackup.portrait || null });
     }
-    if (u && u.portrait) {
-        var pSrc = String(u.portrait);
-        var pLoc = (typeof location !== 'undefined') ? location.href : '';
-        if (pLoc.indexOf('file://') === 0 && pSrc.indexOf('/shared/') === 0) pSrc = '..' + pSrc;
-        return '<img class="c-portrait-img" src="' + pSrc + '" ' +
-               'alt="" loading="lazy" ' +
-               'onerror="this.onerror=null;this.outerHTML=\'<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + (iconId || 'ic-guerreiro') + '\\\'/></svg>\'">';
-    }
-    /* Per-enemy PNG check (priority over generic tag-based PNG).
-       2026-05-17 FIX: enemies podem ter NOME FANTASIA via ENEMY_NAME_POOLS
-       (ex: "Gnarl" = nome fantasia de Crocodilo). u.n=nome display vai
-       falhar lookup mas u.species=BESTIARY canonical resolve. Tenta NAME
-       primeiro (caso enemy seja boss/unique sem species), fallback species. */
-    if (utype === 'enemy' && u) {
-        var candidates = [];
-        if (u.n) candidates.push(_slugifyCombat(u.n));
-        if (u.species) candidates.push(_slugifyCombat(u.species));
-        for (var ci = 0; ci < candidates.length; ci++) {
-            var enemySlug = candidates[ci];
-            if (ENEMY_PNG_AVAILABLE[enemySlug]) {
-                var base = '/shared/img/combat/enemies/';
-                var loc = (typeof location !== 'undefined') ? location.href : '';
-                if (loc.indexOf('file://') === 0) {
-                    base = '../shared/img/combat/enemies/';
-                }
-                /* Variação por instância (2026-06-11): se há >1 variação no
-                   disco, escolhe uma estável por unidade. varIdx 0 = base
-                   ({slug}.webp); varIdx N = {slug}-(N+1).webp. onerror em
-                   cascata: variação → base → heráldico (faltar variação nunca
-                   quebra). */
-                var vCount = (typeof ENEMY_VARIATION_COUNT !== 'undefined' && ENEMY_VARIATION_COUNT[enemySlug]) || 1;
-                var vIdx = _enemyVariationIndex(u, enemySlug, vCount);
-                var baseSrc = base + enemySlug + '.webp';
-                var imgSrc = (vIdx > 0) ? (base + enemySlug + '-' + (vIdx + 1) + '.webp') : baseSrc;
-                var svgFb = '<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + (iconId || 'ic-inimigo') + '\\\'/></svg>';
-                var onErr;
-                if (vIdx > 0) {
-                    /* 1º erro: cai pra base e re-arma o handler pro heráldico.
-                       2º erro (base também falhou): vira heráldico. */
-                    onErr = 'this.onerror=function(){this.onerror=null;this.outerHTML=\'' + svgFb + '\'};this.src=\'' + baseSrc + '\'';
-                } else {
-                    onErr = 'this.onerror=null;this.outerHTML=\'' + svgFb + '\'';
-                }
-                return '<img class="c-portrait-img" src="' + imgSrc + '" ' +
-                       'alt="" loading="lazy" ' +
-                       'onerror="' + onErr + '">';
+
+    var loc = (typeof location !== 'undefined') ? location.href : '';
+    var isFile = (loc.indexOf('file://') === 0);
+    var baseCombat = isFile ? '../shared/img/combat/' : '/shared/img/combat/';
+    var baseEnemies = isFile ? '../shared/img/combat/enemies/' : '/shared/img/combat/enemies/';
+
+    // Fallbacks temáticos WebP de alta qualidade por família de criatura
+    var enemyCategoryFallback = baseCombat + 'inimigo.webp';
+    if (u) {
+        if (u.isBoss) {
+            enemyCategoryFallback = baseCombat + 'boss.webp';
+        } else {
+            var checkStr = ((u.species || '') + ' ' + (u.n || '') + ' ' + (u.creatureType || '')).toLowerCase();
+            if (/lobo|rato|urso|javali|aracn|aranha|crocodilo|alce|babuino|leao|tigre|texugo|serpente|cobra|aguia|estirge|morcego|sapo|rinoceronte|mamute|beast|animal/i.test(checkStr)) {
+                enemyCategoryFallback = baseCombat + 'enemy-beast.webp';
+            } else if (/esqueleto|zumbi|espectro|fantasma|vampiro|mumia|carnical|ghoul|banshee|vulto|necro|undead|morto/i.test(checkStr)) {
+                enemyCategoryFallback = baseCombat + 'enemy-undead.webp';
+            } else if (/bandido|orc|goblin|kobold|cultista|humano|elfo|anao|gnoll|berserker|veterano|gladiador|assassino|humanoid/i.test(checkStr)) {
+                enemyCategoryFallback = baseCombat + 'enemy-humanoid.webp';
+            } else if (/monstro|quimera|hidra|manticora|basilisco|grifo|gorgona|mimico|roper|monstrosity/i.test(checkStr)) {
+                enemyCategoryFallback = baseCombat + 'enemy-monstrosity.webp';
+            } else if (/fada|fey|pixie|satiro|driade/i.test(checkStr)) {
+                enemyCategoryFallback = baseCombat + 'enemy-fey.webp';
             }
         }
     }
-    /* Generic PNG fallback (classes + invocações + tag brasões) */
-    if (!iconId) return '';
-    var slug = String(iconId).replace(/^ic-/, '').replace(/_/g, '-');
-    if (COMBAT_PNG_AVAILABLE[slug]) {
-        var base2 = '/shared/img/combat/';
-        var loc2 = (typeof location !== 'undefined') ? location.href : '';
-        if (loc2.indexOf('file://') === 0) {
-            base2 = '../shared/img/combat/';
+
+    var clsSlug = '';
+    if (u && (u.cls || u.hero_class)) {
+        clsSlug = _slugifyCombat(u.cls || u.hero_class);
+    } else if (iconId) {
+        clsSlug = String(iconId).replace(/^ic-/, '').replace(/_/g, '-');
+    }
+    var playerAllyFallback = (clsSlug && COMBAT_PNG_AVAILABLE[clsSlug])
+        ? (baseCombat + clsSlug + '.webp')
+        : (baseCombat + 'guerreiro.webp');
+
+    // 1. Prioridade para portrait explícito (jogador, aliado, NPC ou monstro)
+    if (u && u.portrait) {
+        var pSrc = _resolveCombatPortraitUrl(u.portrait);
+        var pFallback = (utype === 'enemy' || (u && u.t === 'e')) ? enemyCategoryFallback : playerAllyFallback;
+        var onErr = 'this.onerror=null;this.src=\'' + pFallback + '\';';
+        return '<img class="c-portrait-img" src="' + pSrc + '" alt="" loading="lazy" onerror="' + onErr + '">';
+    }
+
+    // 2. Inimigo: busca por espécie, nome normalizado sem sufixos de instância e id
+    if ((utype === 'enemy' || (u && u.t === 'e')) && u) {
+        var candidates = [];
+        if (u.species) {
+            candidates.push(_slugifyCombat(u.species));
+            var cleanSp = _cleanCombatUnitName(u.species);
+            if (cleanSp !== u.species) candidates.push(_slugifyCombat(cleanSp));
         }
-        /* 2026-06-11 (user "popup mostra SVG em vez da imagem do card"): BUG raiz
-           — pedia `.png` mas TODOS os 20 retratos de classe são `.webp` (0 png no
-           dir). O onerror sempre disparava → heráldico, tanto no CARD da arena
-           quanto no popup. Os retratos de inimigo (acima) já usavam `.webp`. */
-        /* Invocações: até 5 variações cada (COMBAT_PNG_AVAILABLE[slug]=nº); classes=1
-           (base). Índice ESTÁVEL por unidade (hash do id → sem flicker entre renders).
-           onerror em cascata: variação → base → heráldico (variação faltando nunca
-           quebra). Auditoria 2026-07-03. */
+        if (u.n) {
+            var cleanN = _cleanCombatUnitName(u.n);
+            candidates.push(_slugifyCombat(cleanN));
+            if (cleanN !== u.n) candidates.push(_slugifyCombat(u.n));
+        }
+        if (u.id) {
+            var idClean = String(u.id).replace(/_\d+$/, '').replace(/-\d+$/, '').replace(/^enemy_/, '');
+            candidates.push(_slugifyCombat(idClean));
+        }
+        for (var ci = 0; ci < candidates.length; ci++) {
+            var enemySlug = candidates[ci];
+            if (!enemySlug) continue;
+            var cleanSlug = enemySlug.replace(/-\d+$/, '').replace(/-[ivxlcdm]+$/, '');
+            var matchedSlug = ENEMY_PNG_AVAILABLE[enemySlug] ? enemySlug : (ENEMY_PNG_AVAILABLE[cleanSlug] ? cleanSlug : null);
+            if (matchedSlug) {
+                var vCount = (typeof ENEMY_VARIATION_COUNT !== 'undefined' && ENEMY_VARIATION_COUNT[matchedSlug]) || 1;
+                var vIdx = _enemyVariationIndex(u, matchedSlug, vCount);
+                var baseSrc = baseEnemies + matchedSlug + '.webp';
+                var imgSrc = (vIdx > 0) ? (baseEnemies + matchedSlug + '-' + (vIdx + 1) + '.webp') : baseSrc;
+                var onErrEnemy;
+                if (vIdx > 0) {
+                    onErrEnemy = 'this.onerror=function(){this.onerror=null;this.src=\'' + enemyCategoryFallback + '\';};this.src=\'' + baseSrc + '\';';
+                } else {
+                    onErrEnemy = 'this.onerror=null;this.src=\'' + enemyCategoryFallback + '\';';
+                }
+                return '<img class="c-portrait-img" src="' + imgSrc + '" alt="" loading="lazy" onerror="' + onErrEnemy + '">';
+            }
+        }
+        // Se não houver match direto no bestiário, exibe o WebP temático da criatura (NUNCA SVG)
+        return '<img class="c-portrait-img" src="' + enemyCategoryFallback + '" alt="" loading="lazy">';
+    }
+
+    // 3. Jogador, Aliado ou Invocação (classes + invocações)
+    var slug = '';
+    if (u && u.summonKind) {
+        slug = _slugifyCombat(u.summonKind);
+    } else if (clsSlug) {
+        slug = clsSlug;
+    } else if (iconId) {
+        slug = String(iconId).replace(/^ic-/, '').replace(/_/g, '-');
+    }
+    if (!slug) slug = 'guerreiro';
+
+    if (COMBAT_PNG_AVAILABLE[slug]) {
         var _svc = COMBAT_PNG_AVAILABLE[slug] || 1;
         var _svIdx = 0;
         if (_svc > 1 && u) {
@@ -31820,16 +31952,17 @@ function _combatPortraitHTML(iconId, u, utype) {
             for (var _sk = 0; _sk < _sid.length; _sk++) { _sh = ((_sh << 5) - _sh + _sid.charCodeAt(_sk)) | 0; }
             _svIdx = Math.abs(_sh) % _svc;
         }
-        var _sBase = base2 + slug + '.webp';
-        var _sImg = (_svIdx > 0) ? (base2 + slug + '-' + (_svIdx + 1) + '.webp') : _sBase;
-        var _sSvg = '<svg viewBox=\\\'0 0 120 120\\\' aria-hidden=\\\'true\\\'><use href=\\\'#' + iconId + '\\\'/></svg>';
+        var _sBase = baseCombat + slug + '.webp';
+        var _sImg = (_svIdx > 0) ? (baseCombat + slug + '-' + (_svIdx + 1) + '.webp') : _sBase;
         var _sErr = (_svIdx > 0)
-            ? 'this.onerror=function(){this.onerror=null;this.outerHTML=\'' + _sSvg + '\'};this.src=\'' + _sBase + '\''
-            : 'this.onerror=null;this.outerHTML=\'' + _sSvg + '\'';
-        return '<img class="c-portrait-img" src="' + _sImg + '" ' +
-               'alt="" loading="lazy" onerror="' + _sErr + '">';
+            ? 'this.onerror=function(){this.onerror=null;this.src=\'' + playerAllyFallback + '\';};this.src=\'' + _sBase + '\';'
+            : 'this.onerror=null;this.src=\'' + playerAllyFallback + '\';';
+        return '<img class="c-portrait-img" src="' + _sImg + '" alt="" loading="lazy" onerror="' + _sErr + '">';
     }
-    return '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + iconId + '"/></svg>';
+
+    // Fallback final estrito WebP (NUNCA SVG)
+    var finalWebp = (utype === 'enemy' || (u && u.t === 'e')) ? enemyCategoryFallback : playerAllyFallback;
+    return '<img class="c-portrait-img" src="' + finalWebp + '" alt="" loading="lazy">';
 }
 
 function _heraldicClsSlugOf(u, utype) {
@@ -50429,8 +50562,9 @@ async function playTurn(aIdx, tIdx, opts) {
                             ? getUnitTokenEl(s, aIdx)
                             : document.querySelector('[data-unit-id="' + ((typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : (aIdx === s.p_idx ? 'player' : 'enemy_' + aIdx)) + '"]');
                         if (actorEl) {
-                            /* REGRA DO USUÁRIO (2026-10): Ritmo canônico de 800ms para permitir acompanhamento */
-                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
+                            /* REGRA DO USUÁRIO (2026-10): Velocidade reduzida pela metade (base 1600ms em 1x, ajustável pelo botão de velocidade) */
+                            var _spMult = (typeof _getCombatSpeedMultiplier === 'function') ? _getCombatSpeedMultiplier() : 1;
+                            var hopDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : Math.round(1600 / _spMult);
                             await animateUnitHexMovement(actorEl, stepRes.path, hopDurationMs);
                         }
                     }
@@ -53950,44 +54084,97 @@ function _simVolSyncIcon() {
         btn.classList.add('playing');
         btn.setAttribute('title', 'Volume: ' + Math.round(vol * 100) + '%');
     }
-    _simSyncVolBtnPosition();
+    _simSyncControlsPosition();
 }
-function _simSyncVolBtnPosition() {
-    var btn = document.getElementById('sim-vol-btn');
+
+function _simSyncControlsPosition() {
+    var speedBtn = document.getElementById('sim-speed-btn');
+    var volBtn = document.getElementById('sim-vol-btn');
     var appFrame = document.getElementById('app');
-    if (!btn || !appFrame) return;
+    if (!appFrame) return;
+
     var zc = appFrame.querySelector('.bf-zoom-controls');
+    var topPx = 54;
     if (zc) {
         var appRect = appFrame.getBoundingClientRect();
         var zcRect = zc.getBoundingClientRect();
         if (appRect.height > 0 && zcRect.height > 0) {
-            var topPx = Math.max(54, Math.round(zcRect.bottom - appRect.top + 5));
-            btn.style.setProperty('top', topPx + 'px', 'important');
-            btn.style.setProperty('bottom', 'auto', 'important');
-            btn.style.setProperty('right', '8px', 'important');
-            return;
+            topPx = Math.max(54, Math.round(zcRect.bottom - appRect.top + 5));
         }
     }
-    btn.style.setProperty('top', '10px', 'important');
-    btn.style.setProperty('bottom', 'auto', 'important');
-    btn.style.setProperty('right', '8px', 'important');
+
+    /* REGRA DO USUÁRIO (2026-10): Botão de velocidade posicionado logo acima do botão de volume na lateral direita */
+    if (speedBtn) {
+        speedBtn.style.setProperty('top', topPx + 'px', 'important');
+        speedBtn.style.setProperty('bottom', 'auto', 'important');
+        speedBtn.style.setProperty('right', '8px', 'important');
+    }
+    if (volBtn) {
+        var volTopPx = speedBtn ? (topPx + 39) : topPx;
+        volBtn.style.setProperty('top', volTopPx + 'px', 'important');
+        volBtn.style.setProperty('bottom', 'auto', 'important');
+        volBtn.style.setProperty('right', '8px', 'important');
+    }
 }
+function _simSyncVolBtnPosition() {
+    _simSyncControlsPosition();
+}
+
+function _simSyncSpeedBtn() {
+    var btn = document.getElementById('sim-speed-btn');
+    if (!btn) return;
+    var sp = (typeof _getCombatSpeedMultiplier === 'function') ? _getCombatSpeedMultiplier() : 1;
+    btn.textContent = sp + 'x';
+    btn.setAttribute('title', 'Velocidade do combate: ' + sp + 'x (clique para alternar 1x, 2x, 3x)');
+    _simSyncControlsPosition();
+}
+
+function simInstallSpeedBtn() {
+    if (document.getElementById('sim-speed-btn')) {
+        _simSyncSpeedBtn();
+        return;
+    }
+    var appFrame = document.getElementById('app');
+    if (!appFrame) {
+        setTimeout(simInstallSpeedBtn, 150);
+        return;
+    }
+    var btn = document.createElement('button');
+    btn.id = 'sim-speed-btn';
+    btn.setAttribute('aria-label', 'Velocidade do combate');
+    btn.setAttribute('type', 'button');
+    var sp = (typeof _getCombatSpeedMultiplier === 'function') ? _getCombatSpeedMultiplier() : 1;
+    btn.textContent = sp + 'x';
+    btn.setAttribute('title', 'Velocidade do combate: ' + sp + 'x (clique para alternar 1x, 2x, 3x)');
+    btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        var current = (typeof _getCombatSpeedMultiplier === 'function') ? _getCombatSpeedMultiplier() : 1;
+        var next = (current === 1) ? 2 : (current === 2 ? 3 : 1);
+        if (typeof _setCombatSpeedMultiplier === 'function') {
+            _setCombatSpeedMultiplier(next);
+        }
+        _simSyncSpeedBtn();
+        if (typeof sfxStep === 'function') { try { sfxStep(); } catch (_) {} }
+    });
+    appFrame.appendChild(btn);
+    _simSyncSpeedBtn();
+    requestAnimationFrame(_simSyncControlsPosition);
+}
+
 function simInstallVolumeBtn() {
     if (document.getElementById('sim-vol-btn')) {
         _simVolSyncIcon();
         return;
     }
-    /* REGRA SOBERANA (2026-04-21): TUDO dentro do frame #app (smartphone).
-       #app tem transform:translateZ(0) → vira containing block pra position:fixed
-       dos FILHOS, ancorando o fixed ao frame do smartphone (não à viewport).
-       Isso é o mesmo truque usado por dice-overlay, intro popup e outros.
-       Append em body está PROIBIDO pra elementos persistentes do jogo. */
     var appFrame = document.getElementById('app');
     if (!appFrame) {
-        /* #app ainda não montado — retry com backoff até existir. */
-        console.info('[SIM-VOL] #app null; retrying in 150ms');
         setTimeout(simInstallVolumeBtn, 150);
         return;
+    }
+    // Garante que o botão de velocidade também seja montado
+    if (!document.getElementById('sim-speed-btn')) {
+        simInstallSpeedBtn();
     }
     var btn = document.createElement('button');
     btn.id = 'sim-vol-btn';
@@ -53997,11 +54184,6 @@ function simInstallVolumeBtn() {
     btn.addEventListener('click', function (e) {
         e.stopPropagation();
         e.preventDefault();
-        /* V1.7 (2026-04-21 v3) — TOGGLE robusto de popup de volume.
-           Comportamento: clicar abre popup; clicar de novo fecha (toggle).
-           Estratégia: dispatcha click em #va-btn (audio-manager.js toggla
-           internamente via _togglePopup). Se o toggle falhar (edge case),
-           força o estado via classList em #va-popup + #va-backdrop. */
         var popup = document.getElementById('va-popup');
         var wasOpen = !!(popup && popup.classList.contains('open'));
         var vaBtn = document.getElementById('va-btn');
@@ -54014,17 +54196,12 @@ function simInstallVolumeBtn() {
         } else if (window.ValdoriaAudio && ValdoriaAudio.toggleMute) {
             try { ValdoriaAudio.toggleMute(); } catch (_eT) {}
         }
-        /* Verify + force-correct se o toggle não tomou efeito (guard pro bug
-           "popup não fecha ao clicar de novo" 2026-04-21). */
         setTimeout(function () {
             var popupNow = document.getElementById('va-popup');
             var backdropNow = document.getElementById('va-backdrop');
             var isOpenNow = !!(popupNow && popupNow.classList.contains('open'));
             if (wasOpen === isOpenNow) {
-                /* Toggle falhou — força o estado oposto no DOM. */
                 var targetOpen = !wasOpen;
-                console.warn('[SIM-VOL] vaBtn.click() did not toggle popup (wasOpen=' +
-                    wasOpen + ', isOpenNow=' + isOpenNow + ') \u2014 forcing to ' + targetOpen);
                 if (popupNow) popupNow.classList.toggle('open', targetOpen);
                 if (backdropNow) backdropNow.classList.toggle('open', targetOpen);
             }
@@ -54033,54 +54210,46 @@ function simInstallVolumeBtn() {
         setTimeout(_simVolSyncIcon, 450);
     });
     appFrame.appendChild(btn);
-    console.info('[SIM-VOL] #sim-vol-btn mounted INSIDE #app frame (aligned with .bf-zoom-controls)');
     _simVolSyncIcon();
-    requestAnimationFrame(_simSyncVolBtnPosition);
-    /* Sync periódico em caso de mudanças externas (popup abre sliders) */
+    requestAnimationFrame(_simSyncControlsPosition);
+
     if (!window._simVolSyncTimer) {
         window._simVolSyncTimer = setInterval(_simVolSyncIcon, 800);
     }
-    /* BUG 2026-04-21: render(s) faz setHTML(app, html) que apaga o botão.
-       MutationObserver detecta remoção e re-instala automaticamente.
-       Observa apenas direct children de #app (subtree:false) — eficiente. */
     if (!window._simVolObserver) {
         try {
             var obs = new MutationObserver(function () {
                 if (!document.getElementById('sim-vol-btn')) {
                     simInstallVolumeBtn();
-                } else {
-                    _simSyncVolBtnPosition();
                 }
+                if (!document.getElementById('sim-speed-btn')) {
+                    simInstallSpeedBtn();
+                }
+                _simSyncControlsPosition();
             });
             obs.observe(appFrame, { childList: true, subtree: false });
             window._simVolObserver = obs;
-            console.info('[SIM-VOL] MutationObserver instalado em #app — botão vai se auto-reinstalar após cada render()');
         } catch (_eO) {
             console.warn('[SIM-VOL] MutationObserver falhou:', _eO);
         }
     }
 }
 
-/* V1.7 (2026-04-21 v2) — Instalação redundante pra garantir que o botão
-   SEMPRE aparece, independente de qual boot path rodar primeiro:
-   · DOMContentLoaded (early)
-   · load (depois de assets)
-   · setTimeout 500ms (fallback) */
 if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
-            try { simInstallVolumeBtn(); } catch (_eV1) {}
+            try { simInstallSpeedBtn(); simInstallVolumeBtn(); } catch (_eV1) {}
         });
     } else {
         setTimeout(function () {
-            try { simInstallVolumeBtn(); } catch (_eV2) {}
+            try { simInstallSpeedBtn(); simInstallVolumeBtn(); } catch (_eV2) {}
         }, 0);
     }
     window.addEventListener('load', function () {
-        try { simInstallVolumeBtn(); } catch (_eV3) {}
+        try { simInstallSpeedBtn(); simInstallVolumeBtn(); } catch (_eV3) {}
     });
     setTimeout(function () {
-        try { simInstallVolumeBtn(); } catch (_eV4) {}
+        try { simInstallSpeedBtn(); simInstallVolumeBtn(); } catch (_eV4) {}
     }, 500);
 }
 
@@ -54090,36 +54259,29 @@ if (typeof document !== 'undefined') {
     function _ensureInit() {
         if (_alreadyInit) return;
         var app = document.getElementById('app');
-        if (!app) return; /* boot ainda não criou o frame */
+        if (!app) return;
         _alreadyInit = true;
         function _reposition() {
             var popup = document.getElementById('va-popup');
             var backdrop = document.getElementById('va-backdrop');
             if (!popup) return;
             var rect = app.getBoundingClientRect();
-            var btn = document.getElementById('sim-vol-btn');
             popup.style.setProperty('left', rect.left + 'px', 'important');
             popup.style.setProperty('right', 'auto', 'important');
             popup.style.setProperty('width', rect.width + 'px', 'important');
             popup.style.setProperty('max-width', rect.width + 'px', 'important');
             popup.style.setProperty('margin', '0', 'important');
-            if (btn) {
-                var br = btn.getBoundingClientRect();
-                if (br.top - rect.top < 220) {
-                    /* Abre logo abaixo do botão se estiver próximo ao topo */
-                    popup.style.setProperty('top', (br.bottom + 8) + 'px', 'important');
-                    popup.style.setProperty('bottom', 'auto', 'important');
-                } else {
-                    /* Abre acima do botão quando há espaço suficiente no topo */
-                    var bottomPx = window.innerHeight - br.top + 8;
-                    popup.style.setProperty('top', 'auto', 'important');
-                    popup.style.setProperty('bottom', bottomPx + 'px', 'important');
-                }
-            } else {
-                var fallbackBottom = window.innerHeight - rect.bottom + 56;
-                popup.style.setProperty('top', 'auto', 'important');
-                popup.style.setProperty('bottom', fallbackBottom + 'px', 'important');
-            }
+            popup.style.setProperty('z-index', '99995', 'important');
+
+            /* REGRA DO USUÁRIO (2026-10): Os controles do botão de volume devem aparecer
+               no mesmo local abaixo da tela, assim como aparece nas outras telas (cidade/exploracao),
+               logo acima da barra inferior (.opt1-action-dock), para não ficar no meio da tela. */
+            var dock = app.querySelector('.opt1-action-dock');
+            var dockH = dock ? (dock.getBoundingClientRect().height || 0) : 0;
+            var bottomPx = (window.innerHeight - rect.bottom) + Math.max(56, Math.round(dockH + 8));
+            popup.style.setProperty('top', 'auto', 'important');
+            popup.style.setProperty('bottom', bottomPx + 'px', 'important');
+
             if (backdrop) {
                 backdrop.style.setProperty('left', rect.left + 'px', 'important');
                 backdrop.style.setProperty('right', 'auto', 'important');
@@ -54129,6 +54291,7 @@ if (typeof document !== 'undefined') {
                 backdrop.style.setProperty('max-width', rect.width + 'px', 'important');
                 backdrop.style.setProperty('height', rect.height + 'px', 'important');
                 backdrop.style.setProperty('margin', '0', 'important');
+                backdrop.style.setProperty('z-index', '99994', 'important');
             }
         }
         function _attachAttrObs(popup) {
@@ -54451,8 +54614,9 @@ async function __combatAnimateOneEvent(ev) {
         if (tokenEl && ev.fromCol != null && ev.fromRow != null && ev.toCol != null && ev.toRow != null) {
             var path = hexLine(ev.fromCol, ev.fromRow, ev.toCol, ev.toRow);
             if (path && path.length > 1) {
-                /* REGRA DO USUÁRIO (2026-10): Ritmo canônico de 800ms para permitir acompanhamento */
-                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : 800;
+                /* REGRA DO USUÁRIO (2026-10): Velocidade reduzida pela metade (base 1600ms em 1x, ajustável pelo botão de velocidade) */
+                var _spMult = (typeof _getCombatSpeedMultiplier === 'function') ? _getCombatSpeedMultiplier() : 1;
+                var stepDurationMs = (typeof _skipAllDiceAnim !== 'undefined' && _skipAllDiceAnim) ? 160 : Math.round(1600 / _spMult);
                 await animateUnitHexMovement(tokenEl, path, stepDurationMs);
             }
         }
