@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T03:34:25Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T04:04:40Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -21769,7 +21769,18 @@ function addDeathFailuresAndMaybeDie(s, u, n) {
     ensureDeathSaves(u);
     var add = Math.max(0, n | 0);
     u.deathSaves.f = Math.min(3, (u.deathSaves.f | 0) + add);
-    s.log.push(u.n + ' sofre ' + add + ' falha(s) automática(s) no teste de morte (dano a 0 PV).');
+    s.log.push(u.n + ' sofre ' + add + ' falha(s) automática(s) no teste de morte (dano a 0 PV — D&D 5e PHB p. 197).');
+    try {
+        var _actorUid = (typeof unitUidForOrderIndex === 'function' && s && s.order) ? unitUidForOrderIndex(s, s.order.indexOf(u)) : (u.id || (u.t === 'p' ? 'p' : ''));
+        var _cellEl = _actorUid ? document.querySelector('[data-unit-id="' + _actorUid + '"]') : null;
+        if (_cellEl && typeof spawnSkillImpactLabel === 'function') {
+            if (u.deathSaves.f >= 3) {
+                spawnSkillImpactLabel(_cellEl, '☠️ ÓBITO (3 FALHAS)!', 'crit');
+            } else {
+                spawnSkillImpactLabel(_cellEl, '⚠️ +' + add + ' FALHA DE MORTE (' + u.deathSaves.f + '/3)!', 'save-fail');
+            }
+        }
+    } catch (_) {}
     if (u.deathSaves.f >= 3) {
         u.isDead = true;
         u.dying = false;
@@ -29911,6 +29922,12 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Subclasse (+' + reductionMeta.subclassBonusDmg + ')</span>');
     }
 
+    if (reductionMeta.multiSeqText) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ ' + escHtml(reductionMeta.multiSeqText) + '</span>');
+    }
+    if (reductionMeta.oa) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚡ Reação (Oportunidade)</span>');
+    }
     if (tacticalPills.length > 0) {
         var pillRow = document.createElement('div');
         pillRow.className = 'dmg-tactical-pills';
@@ -29952,6 +29969,12 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     breakdownEl.className = 'dmg-math-breakdown';
 
     var rowsHtml = '';
+    if (reductionMeta && reductionMeta.multiSeqText) {
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Sequência de Ataque:</span><strong>' + escHtml(reductionMeta.multiSeqText) + '</strong></div>';
+    }
+    if (reductionMeta && reductionMeta.oa) {
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Economia de Ação:</span><strong>Ataque de Oportunidade (Reação, PHB p. 195)</strong></div>';
+    }
     rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dados de Dano:</span><strong>' + rolls.length + 'd' + die + ' [' + rolls.join('+') + '] = ' + sumDice + '</strong></div>';
     var baseMod = (typeof reductionMeta.baseMod === 'number') ? reductionMeta.baseMod : mod;
     if (baseMod) rowsHtml += '<div class="dmg-math-breakdown-row"><span>Modificador:</span><strong>+' + baseMod + ' (' + escHtml(String(attr)) + ')</strong></div>';
@@ -30013,7 +30036,10 @@ function simBuildAttackSkipRows(r, atkShown, hitRes, effAc, actor, target, dmgRo
     var dtKey = String((reductionMeta && reductionMeta.dmgType) || actor.dmgType || 'slashing').toLowerCase().trim();
     var dtInfo = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(dtKey) : { lb: 'Cortante', ico: '⚔️' };
 
-    var parts = dmgRolls.length + 'd' + die + ': [' + dmgRolls.join(', ') + '] = ' + sumD;
+    var parts = '';
+    if (reductionMeta && reductionMeta.multiSeqText) parts += '[' + reductionMeta.multiSeqText + '] ';
+    if (reductionMeta && reductionMeta.oa) parts += '[Oportunidade] ';
+    parts += dmgRolls.length + 'd' + die + ': [' + dmgRolls.join(', ') + '] = ' + sumD;
     if (dmgMod) parts += ' + ' + dmgMod + ' (' + attr + ')';
     if (dmgItem) parts += ' + ' + dmgItem + ' (efeitos)';
     if (dmgSpecFlat) parts += ' + ' + dmgSpecFlat + ' (fixo)';
@@ -31428,12 +31454,59 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
                 advRaw1: rollObj.raw1,
                 advRaw2: rollObj.raw2,
                 postResult: function () {
-                    if (crit) return { title: '★ NATURAL 20 — CRÍTICO!', subHtml: 'd20=20 → ataque crítico.' + (advMode === 'advantage' ? ' (Pack Tactics: vantagem)' : ''), cls: 'crit' };
+                    var _kicker = '🐾 ATAQUE DE INVOCAÇÃO' + (advMode === 'advantage' ? ' (VANTAGEM)' : (advMode === 'disadvantage' ? ' (DESVANTAGEM)' : ''));
+                    var _rows = [];
+                    if (advMode !== 'normal' && rollObj.raw1 != null && rollObj.raw2 != null) {
+                        _rows.push({ l: 'Dados', v: rollObj.raw1 + ' e ' + rollObj.raw2 + ' → ' + d20 });
+                    } else {
+                        _rows.push({ l: 'Rolagem', v: String(d20) });
+                    }
+                    _rows.push({ l: 'Bônus Atk', v: (atk >= 0 ? '+' : '') + atk });
+                    _rows.push({ l: 'Total', v: String(total) });
+                    _rows.push({ l: 'CA Alvo', v: String(target.ac) });
+
+                    var _pills = [];
+                    if (crit) {
+                        _pills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                    } else if (d20 === 1) {
+                        _pills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Falha Crítica (Nat 1)</span>');
+                    }
+                    if (advMode === 'advantage') {
+                        _pills.push('<span class="dmg-pill dmg-pill--buff">🐺 Táticas de Matilha</span>');
+                    }
+                    _pills.push('<span class="dmg-pill dmg-pill--type">🐾 Invocação Aliada</span>');
+
+                    var _note = crit
+                        ? 'Natural 20! Acerto crítico automático e dados duplicados (D&D 5e PHB p. 194).'
+                        : (hit
+                            ? ('Total ' + total + ' ≥ CA ' + target.ac + ' — Golpe da criatura acertou!')
+                            : ('Total ' + total + ' < CA ' + target.ac + ' — O golpe da criatura não superou a CA.'));
+
+                    var _detailsRows = [
+                        { l: 'Criatura Atacante', v: summon.n },
+                        { l: 'Defensor', v: target.n },
+                        { l: 'CA Base do Alvo', v: String(target.ac) },
+                        { l: 'Regra D&D 5e', v: 'Ataque de criatura invocada (PHB p. 194 / MM p. 11)' }
+                    ];
+                    if (advMode === 'advantage') {
+                        _detailsRows.push({ l: 'Táticas de Matilha', v: 'Vantagem quando há pelo menos 1 aliado vivo adjacente (MM p. 341)' });
+                    }
+
+                    var _subHtml = crit
+                        ? simFormatVsAcHTML(20, atk, total, target.ac, true)
+                        : simFormatVsAcHTML(d20, atk, total, target.ac, hit);
+
                     return {
-                        title: hit ? 'ACERTOU' : 'ERROU',
-                        subHtml: simFormatVsAcHTML(d20, atk, total, target.ac, hit) +
-                            (advMode === 'advantage' ? '<div class="drl-crit-rule">Pack Tactics (PHB MM): vantagem se ≥1 aliado vivo.</div>' : ''),
-                        cls: hit ? 'hit' : 'miss'
+                        title: crit ? 'ACERTO CRÍTICO' : (hit ? 'ACERTOU' : 'ERROU'),
+                        cls: crit ? 'crit' : (hit ? 'hit' : 'miss'),
+                        subStructured: {
+                            kicker: _kicker,
+                            rows: _rows,
+                            pills: _pills,
+                            note: _note,
+                            details: { rows: _detailsRows }
+                        },
+                        subHtml: _subHtml
                     };
                 }
             });
@@ -31553,11 +31626,46 @@ async function _resolveAttachedSummonAttack(s, attachedIdx, targetIdx) {
             showDice(d20, done, swActor, null, {
                 combatTarget: target,
                 postResult: function () {
-                    if (crit) return { title: '★ NATURAL 20 — CRÍTICO!', subHtml: 'd20=20 → ataque crítico.', cls: 'crit' };
+                    var _kicker = '✨ ATAQUE MÁGICO • ' + escHtml(sw.name).toUpperCase();
+                    var _rows = [
+                        { l: 'Rolagem', v: String(d20) },
+                        { l: 'Bônus Atk', v: (atk >= 0 ? '+' : '') + atk },
+                        { l: 'Total', v: String(total) },
+                        { l: 'CA Alvo', v: String(target.ac) }
+                    ];
+                    var _pills = [];
+                    if (crit) {
+                        _pills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                    } else if (d20 === 1) {
+                        _pills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Falha Crítica (Nat 1)</span>');
+                    }
+                    _pills.push('<span class="dmg-pill dmg-pill--buff">✨ Ação Bônus</span>');
+                    _pills.push('<span class="dmg-pill dmg-pill--type">⚔️ Dano de Força</span>');
+
+                    var _note = crit
+                        ? 'Natural 20! Acerto crítico e dados de dano duplicados (D&D 5e PHB p. 194).'
+                        : (hit
+                            ? ('Total ' + total + ' ≥ CA ' + target.ac + ' — Arma espectral acerta em cheio!')
+                            : ('Total ' + total + ' < CA ' + target.ac + ' — Golpe da arma espectral não superou a CA.'));
+
+                    var _detailsRows = [
+                        { l: 'Magia', v: 'Arma Espiritual (D&D 5e PHB p. 280)' },
+                        { l: 'Defensor', v: target.n },
+                        { l: 'Tipo de Ataque', v: 'Ataque corpo a corpo com magia' },
+                        { l: 'Concentração', v: 'Não exige concentração (PHB p. 280)' }
+                    ];
+
                     return {
-                        title: hit ? 'ACERTOU' : 'ERROU',
-                        subHtml: simFormatVsAcHTML(d20, atk, total, target.ac, hit),
-                        cls: hit ? 'hit' : 'miss'
+                        title: crit ? 'ACERTO CRÍTICO' : (hit ? 'ACERTOU' : 'ERROU'),
+                        cls: crit ? 'crit' : (hit ? 'hit' : 'miss'),
+                        subStructured: {
+                            kicker: _kicker,
+                            rows: _rows,
+                            pills: _pills,
+                            note: _note,
+                            details: { rows: _detailsRows }
+                        },
+                        subHtml: simFormatVsAcHTML(d20, atk, total, target.ac, hit)
                     };
                 }
             });
@@ -35254,6 +35362,57 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             useLbl = 'Usar Escudo';
         }
 
+        var reactionPills = [];
+        reactionPills.push('<span class="dmg-pill dmg-pill--buff">⚡ 1 Reação / Rodada</span>');
+        if (skCost > 0) {
+            reactionPills.push('<span class="dmg-pill dmg-pill--type">💧 ' + (skCost | 0) + ' Mana</span>');
+        }
+
+        var ruleDetailText = '';
+        if (variant === 'mm') {
+            reactionPills.push('<span class="dmg-pill dmg-pill--immune">✨ Imunidade (0 Dano)</span>');
+            ruleDetailText = 'D&D 5e (PHB p. 275): Escudo Arcano impede que qualquer dardo de Mísseis Mágicos cause dano à criatura protegida.';
+        } else if (variant === 'crit') {
+            reactionPills.push('<span class="dmg-pill dmg-pill--vuln">⚠️ 20 Natural</span>');
+            reactionPills.push('<span class="dmg-pill dmg-pill--save">+5 CA Subsequente</span>');
+            ruleDetailText = 'D&D 5e (PHB p. 194): Crítico natural (20) acerta independentemente da CA. O bônus de +5 CA permanecerá ativo contra outros ataques até o seu próximo turno.';
+        } else if (variant === 'contramagica') {
+            reactionPills.push('<span class="dmg-pill dmg-pill--save">✨ Anulação Arcana</span>');
+            ruleDetailText = 'D&D 5e (PHB p. 228): Intercepta e encerra a conjuração inimiga no momento do disparo.';
+        } else if (variant === 'rebuke') {
+            reactionPills.push('<span class="dmg-pill dmg-pill--crit">🔥 2d10 Fogo no Inimigo</span>');
+            ruleDetailText = 'D&D 5e (PHB p. 250): Reação ao sofrer dano, envolvendo o agressor em chamas infernais (TR Destreza para metade).';
+        } else if (variant === 'deflect') {
+            reactionPills.push('<span class="dmg-pill dmg-pill--save">✋ Reduz 1d10+DES+Nível</span>');
+            ruleDetailText = 'D&D 5e (PHB p. 78): Monge usa reação para amortecer o projétil disparado à distância.';
+        } else if (variant === 'cutting') {
+            reactionPills.push('<span class="dmg-pill dmg-pill--save">🎭 Subtrai 1d6 do Ataque</span>');
+            ruleDetailText = 'D&D 5e (PHB p. 55): Bardo do Saber gasta 1 dado de inspiração para reduzir a rolagem de ataque de um oponente visível.';
+        } else if (variant === 'uncanny') {
+            reactionPills.push('<span class="dmg-pill dmg-pill--save">💨 Dano à Metade (½)</span>');
+            ruleDetailText = 'D&D 5e (PHB p. 96): Ladino desvia agilmente, absorvendo apenas metade do impacto de um ataque visível.';
+        } else {
+            // shield normal
+            if (effAc != null && total != null && (effAc + 5) > total) {
+                reactionPills.push('<span class="dmg-pill dmg-pill--save">🛡️ Anula o Ataque (+5 CA vira Erro)</span>');
+            } else if (effAc != null && total != null) {
+                reactionPills.push('<span class="dmg-pill dmg-pill--vuln">⚠️ Ataque ainda supera CA</span>');
+            }
+            ruleDetailText = 'D&D 5e (PHB p. 275): Concede +5 de CA retroativo contra o ataque que causou a reação e todos os ataques seguintes até o início do seu próximo turno.';
+        }
+
+        var dRows = [
+            { l: 'Combatente', v: (target && target.n) || 'Aventureiro' },
+            { l: 'Origem do Ataque', v: aName },
+            { l: 'Reação Tática', v: skName },
+            { l: 'Custo de Recursos', v: (skCost > 0 ? (skCost + ' Mana + 1 Reação') : '1 Reação') },
+            { l: 'Regra de Reação', v: 'PHB p. 190 — Você possui 1 reação por rodada. Ela se esgota até o início do seu próximo turno.' },
+            { l: 'Efeito Canônico', v: ruleDetailText }
+        ];
+        if (variant === 'shield' && effAc != null && total != null) {
+            dRows.splice(3, 0, { l: 'Cálculo de CA', v: 'CA ' + effAc + ' + 5 = ' + (effAc + 5) + ' vs Ataque ' + total + ((effAc + 5 > total) ? ' (TRANSFORMA EM ERRO)' : ' (ainda acerta)') });
+        }
+
         var html = '';
         html += '<div class="tcc-title"><span class="tcc-rx-hex"></span>' + titleTxt + '</div>';
         html += '<div class="tcc-rx-trigger">';
@@ -35261,11 +35420,18 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
         html += '<div class="tcc-rx-trigger-who">' + triggerWho + '</div>';
         if (mathHtml) html += '<div class="tcc-rx-math">' + mathHtml + '</div>';
         html += '</div>';
+        html += '<div class="drl-structured-pills" style="margin-bottom:8px;justify-content:center;">' + reactionPills.join(' ') + '</div>';
         html += '<div class="tcc-rx-effect">';
-        html += '<span class="tcc-rx-cost">' + (skCost | 0) + ' Mana</span>';
         html += '<p class="tcc-rx-effect-body">' + effectHtml + '</p>';
         html += '</div>';
         html += '<div class="tcc-rx-warn">' + warnHtml + '</div>';
+        html += '<div style="text-align:center;margin:6px 0 10px;">';
+        html += '<button type="button" class="dmg-inspect-toggle-btn" aria-expanded="false">ℹ️ Detalhes da Regra</button>';
+        html += '<div class="dmg-math-breakdown">';
+        dRows.forEach(function (rw) {
+            html += '<div class="dmg-math-breakdown-row"><span>' + esc(rw.l) + ':</span><strong>' + esc(rw.v) + '</strong></div>';
+        });
+        html += '</div></div>';
         html += '<div class="tcc-actions">';
         html += '<button type="button" class="action-btn" data-rs="0">' + esc(acceptLbl) + '</button>';
         html += '<button type="button" class="action-btn primary" data-rs="1">' + useLbl + '</button>';
@@ -35290,6 +35456,16 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             resolve(!!v);
         }
         ov.addEventListener('click', function (e) { if (e.target === ov) done(false); });
+        var toggleBtn = card.querySelector('.dmg-inspect-toggle-btn');
+        var detailsBody = card.querySelector('.dmg-math-breakdown');
+        if (toggleBtn && detailsBody) {
+            toggleBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var isOpen = detailsBody.classList.toggle('is-open');
+                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'ℹ️ Detalhes da Regra';
+            });
+        }
         card.querySelector('[data-rs="0"]').addEventListener('click', function () { done(false); });
         card.querySelector('[data-rs="1"]').addEventListener('click', function () { done(true); });
     });
@@ -37273,7 +37449,17 @@ async function confirmAndAttack(tgtIdx) {
             if (alt < 0) break;
             curTgt = alt;
         }
-        await playTurn(currentState.p_idx, curTgt, skill ? { skill: skill, aoeSecondary: i > 0 } : { attackIndex: i + 1, attackTotal: total });
+        await playTurn(currentState.p_idx, curTgt, skill ? {
+            skill: skill,
+            aoeSecondary: i > 0,
+            rayIndex: (skill.multiRayAttack ? i + 1 : undefined),
+            rayTotal: (skill.multiRayAttack ? total : undefined),
+            attackIndex: i + 1,
+            attackTotal: total
+        } : {
+            attackIndex: i + 1,
+            attackTotal: total
+        });
         if (await checkEndWithPacing(currentState)) return;
     }
     /* V1 Invocações Phase 4 (2026-04-19, b) — PHB p.189: respeita recursos restantes.
@@ -45497,6 +45683,21 @@ async function playTurn(aIdx, tIdx, opts) {
     var skipDiceThisActor = simShouldSkipDiceForActor(actor) || _skipAllDiceAnim;
     await sleep(_skipAllDiceAnim ? 60 : 200);
 
+    /* Feedback visual de impacto imediato no token para reações e ataques especiais */
+    if (opts.oa) {
+        var _actorUidOa = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : null;
+        var _actorElOa = _actorUidOa ? document.querySelector('[data-unit-id="' + _actorUidOa + '"]') : null;
+        if (_actorElOa && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(_actorElOa, '⚡ REAÇÃO: OPORTUNIDADE!', 'attack'); } catch (_) {}
+        }
+    } else if (opts.multiAttackTotal > 1) {
+        var _actorUidMa = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : null;
+        var _actorElMa = _actorUidMa ? document.querySelector('[data-unit-id="' + _actorUidMa + '"]') : null;
+        if (_actorElMa && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(_actorElMa, '⚔️ ATAQUE MÚLTIPLO (' + opts.multiAttackCurrent + '/' + opts.multiAttackTotal + ')', 'attack'); } catch (_) {}
+        }
+    }
+
     /* D&D 5e: Posicionamento e movimentação tática no grid hexagonal */
     if (actor && target && actor.pos && target.pos && !opts.oa) {
         var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(actor, opts.skill) : { reach: 1 };
@@ -45942,6 +46143,15 @@ async function playTurn(aIdx, tIdx, opts) {
                         }
 
                         var _kicker = (atkSkill ? (escHtml(atkSkill.n).toUpperCase() + ' • ') : '') + 'ATAQUE' + (advMode === 'advantage' ? ' (VANTAGEM)' : (advMode === 'disadvantage' ? ' (DESVANTAGEM)' : ''));
+                        if (opts.oa) {
+                            _kicker = '⚡ OPORTUNIDADE • ' + _kicker;
+                        } else if (opts.multiAttackTotal > 1) {
+                            _kicker = '⚔️ ATAQUE MÚLTIPLO (' + opts.multiAttackCurrent + '/' + opts.multiAttackTotal + ') • ' + _kicker;
+                        } else if (opts.rayTotal > 1) {
+                            _kicker = '✨ RAIO (' + opts.rayIndex + '/' + opts.rayTotal + ') • ' + _kicker;
+                        } else if (opts.attackTotal > 1) {
+                            _kicker = '⚔️ ATAQUE (' + opts.attackIndex + '/' + opts.attackTotal + ') • ' + _kicker;
+                        }
                         var _rows = [];
                         if (advMode !== 'normal' && d20Pack.raw1 != null && d20Pack.raw2 != null) {
                             _rows.push({ l: 'Dados', v: d20Pack.raw1 + ' e ' + d20Pack.raw2 + ' → ' + r });
@@ -45965,6 +46175,18 @@ async function playTurn(aIdx, tIdx, opts) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
                         } else if (hitRes.reason === 'falha_critica') {
                             _attackPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Falha Crítica (Nat 1)</span>');
+                        }
+                        if (opts.oa) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--type">⚡ Reação (Oportunidade)</span>');
+                        } else if (opts.multiAttackTotal > 1) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Ataque Múltiplo (' + opts.multiAttackCurrent + '/' + opts.multiAttackTotal + ')</span>');
+                        } else if (opts.rayTotal > 1) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--buff">✨ Raio (' + opts.rayIndex + '/' + opts.rayTotal + ')</span>');
+                        } else if (opts.attackTotal > 1) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Ataque Extra (' + opts.attackIndex + '/' + opts.attackTotal + ')</span>');
+                        }
+                        if (opts.aoeSecondary) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--type">💥 Alvo em Área</span>');
                         }
                         if (_atkFlanked) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--type">⚔️ Flanqueamento</span>');
@@ -45992,6 +46214,18 @@ async function playTurn(aIdx, tIdx, opts) {
                             { l: 'Defensor', v: target.n },
                             { l: 'CA Base do Alvo', v: String(target.ac) }
                         ];
+                        if (opts.oa) {
+                            _detailsRows.push({ l: 'Economia de Ação', v: 'Ataque de Oportunidade (Reação, PHB p. 195)' });
+                        } else if (opts.multiAttackTotal > 1) {
+                            _detailsRows.push({ l: 'Ataque Múltiplo', v: opts.multiAttackCurrent + ' de ' + opts.multiAttackTotal + ' (D&D 5e MM p. 11)' });
+                        } else if (opts.rayTotal > 1) {
+                            _detailsRows.push({ l: 'Sequência de Raios', v: opts.rayIndex + ' de ' + opts.rayTotal + ' (D&D 5e PHB p. 273)' });
+                        } else if (opts.attackTotal > 1) {
+                            _detailsRows.push({ l: 'Ataque Extra / Ação', v: opts.attackIndex + ' de ' + opts.attackTotal + ' (D&D 5e PHB p. 72)' });
+                        }
+                        if (opts.aoeSecondary) {
+                            _detailsRows.push({ l: 'Abrangência', v: 'Alvo adicional na área de efeito (D&D 5e PHB p. 204)' });
+                        }
                         if (_atkCover && _atkCover.bonus > 0) {
                             _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + _atkCover.bonus + ' CA (' + (_atkCover.cover === 'half' ? 'Meia' : '¾') + ' Cobertura, PHB p. 196)' });
                         }
@@ -46804,7 +47038,15 @@ async function playTurn(aIdx, tIdx, opts) {
         saveSuccess: (atkSkill && atkSkill.save) ? saveSuccess : null,
         saveAbility: (atkSkill && atkSkill.save && atkSkill.save.ability) ? atkSkill.save.ability : null,
         halfDmg: _targetHasHalfDmg,
-        tempHpAbsorbed: _tempHpAbsorbed
+        tempHpAbsorbed: _tempHpAbsorbed,
+        multiSeqText: (function () {
+            if (opts.multiAttackTotal > 1) return 'Ataque Múltiplo (' + opts.multiAttackCurrent + '/' + opts.multiAttackTotal + ')';
+            if (opts.rayTotal > 1) return 'Raio (' + opts.rayIndex + '/' + opts.rayTotal + ')';
+            if (opts.attackTotal > 1) return 'Ataque Extra (' + opts.attackIndex + '/' + opts.attackTotal + ')';
+            return null;
+        })(),
+        oa: !!opts.oa,
+        aoeSecondary: !!opts.aoeSecondary
     };
 
     /* OVERLAY 2: dado de dano + card real do alvo com HP animado (opcional se o jogador confirmou pular no d20) */
@@ -49708,13 +49950,35 @@ async function __combatAnimateOneEvent(ev) {
                                     ? (ev.saveNegates ? 'Passou no TR — Anulou o efeito (0 Dano).' : 'Passou no TR — Sofre metade do dano (½).')
                                     : 'Falhou no TR — Sofre dano integral.';
 
+                                var _savePills = [];
+                                if (_ok) {
+                                    _savePills.push('<span class="dmg-pill dmg-pill--resist">✓ ' + (ev.saveNegates ? 'Anulado (0 Dano)' : 'Metade do Dano (½)') + '</span>');
+                                } else {
+                                    _savePills.push('<span class="dmg-pill dmg-pill--crit">✗ Dano Integral</span>');
+                                }
+                                if (ev.coverBonus > 0) {
+                                    _savePills.push('<span class="dmg-pill dmg-pill--resist">⛨ Cobertura (+' + ev.coverBonus + ')</span>');
+                                }
+
+                                var _saveDetailsRows = [
+                                    { l: 'Defensor', v: targetForDice.n || 'Defensor' },
+                                    { l: 'Atributo do TR', v: abLabel },
+                                    { l: 'CD Alvo', v: String(ev.saveDc || 10) },
+                                    { l: 'Modificador', v: (ev.saveMod >= 0 ? '+' : '') + (ev.saveMod || 0) }
+                                ];
+                                if (ev.coverBonus > 0) {
+                                    _saveDetailsRows.push({ l: 'Bônus de Cobertura', v: '+' + ev.coverBonus + ' no TR (PHB p. 196)' });
+                                }
+
                                 return {
                                     title: _ok ? (targetForDice.n + ' Resistiu') : (targetForDice.n + ' Falhou no TR'),
                                     cls: _ok ? 'miss' : 'hit',
                                     subStructured: {
                                         kicker: _kicker,
                                         rows: _rows,
-                                        note: _note
+                                        pills: _savePills,
+                                        note: _note,
+                                        details: { rows: _saveDetailsRows }
                                     }
                                 };
                             }
@@ -49758,6 +50022,27 @@ async function __combatAnimateOneEvent(ev) {
 
                             var _dtInfo = (typeof simDmgTypeInfoPt === 'function' && ev.dmgType) ? simDmgTypeInfoPt(ev.dmgType) : null;
                             var _dtLabel = _dtInfo ? (' (' + _dtInfo.ico + ' ' + _dtInfo.lb + ')') : '';
+                            var _tacticalPills = [];
+                            if (ev.crit) {
+                                _tacticalPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                            } else if (ev.d20 === 1) {
+                                _tacticalPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Falha Crítica (Nat 1)</span>');
+                            }
+                            if (ev.multiAttackTotal > 1) {
+                                _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Ataque Múltiplo (' + (ev.multiAttackCurrent || 1) + '/' + ev.multiAttackTotal + ')</span>');
+                            } else if (ev.attackTotal > 1) {
+                                _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Ataque Extra (' + (ev.attackIndex || 1) + '/' + ev.attackTotal + ')</span>');
+                            }
+                            if (ev.sneakAttack) _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">🗡️ Furtivo' + (ev.sneakTotal ? ' (+' + ev.sneakTotal + ')' : '') + '</span>');
+                            if (ev.divineSmite) _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚡ Punição Divina' + (ev.smiteTotal ? ' (+' + ev.smiteTotal + ')' : '') + '</span>');
+                            if (ev.improvedDivineSmiteTotal) _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">✨ Destruição Divina (+' + ev.improvedDivineSmiteTotal + ')</span>');
+                            if (ev.actionSurge) _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚡ Surto de Ação</span>');
+                            if (ev.flanked) _tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚔️ Flanqueamento</span>');
+                            if (ev.coverBonus > 0) _tacticalPills.push('<span class="dmg-pill dmg-pill--resist">⛨ Cobertura (+' + ev.coverBonus + ' CA)</span>');
+                            if (_isRemImm) _tacticalPills.push('<span class="dmg-pill dmg-pill--immune">🚫 Imune a ' + (_dtInfo ? _dtInfo.lb : 'Dano') + '</span>');
+                            else if (_isRemVuln) _tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">💥 Vulnerabilidade (2×)</span>');
+                            else if (_isRemRes) _tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ Resistência (½)</span>');
+
                             var _tacticalTags = [];
                             if (ev.sneakAttack) _tacticalTags.push('🗡️ Furtivo' + (ev.sneakTotal ? ' (+' + ev.sneakTotal + ')' : ''));
                             if (ev.divineSmite) _tacticalTags.push('⚡ Punição Divina' + (ev.smiteTotal ? ' (+' + ev.smiteTotal + ')' : ''));
@@ -49784,13 +50069,31 @@ async function __combatAnimateOneEvent(ev) {
                                 else _note = 'Não alcançou a CA.';
                             }
 
+                            var _detailsRows = [
+                                { l: 'Atacante', v: actorForDice.n || 'Atacante' },
+                                { l: 'Defensor', v: targetForDice.n || 'Defensor' },
+                                { l: 'CA Base do Alvo', v: String(ev.ac || '?') }
+                            ];
+                            if (ev.multiAttackTotal > 1) {
+                                _detailsRows.push({ l: 'Ataque Múltiplo', v: (ev.multiAttackCurrent || 1) + ' de ' + ev.multiAttackTotal + ' (D&D 5e MM p. 11)' });
+                            } else if (ev.attackTotal > 1) {
+                                _detailsRows.push({ l: 'Ataque Extra / Ação', v: (ev.attackIndex || 1) + ' de ' + ev.attackTotal + ' (D&D 5e PHB p. 72)' });
+                            }
+                            if (ev.coverBonus > 0) _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + ev.coverBonus + ' CA (PHB p. 196)' });
+                            if (ev.elevationBonus) _detailsRows.push({ l: 'Desnível', v: (ev.elevationBonus > 0 ? '+' : '') + ev.elevationBonus });
+                            if (ev.blessRoll != null && ev.blessRoll > 0) _detailsRows.push({ l: 'Bênção', v: '+' + ev.blessRoll + ' (1d4)' });
+                            if (ev.bardicRoll != null && ev.bardicRoll > 0) _detailsRows.push({ l: 'Inspiração Bárdica', v: '+' + ev.bardicRoll });
+                            if (ev.dmgType && _dtInfo) _detailsRows.push({ l: 'Tipo de Dano', v: _dtInfo.ico + ' ' + _dtInfo.lb });
+
                             return {
                                 title: ev.hit ? (ev.crit ? 'CRÍTICO' : 'Acertou') : 'Errou',
                                 cls: ev.hit ? (ev.crit ? 'crit' : 'hit') : 'miss',
                                 subStructured: {
                                     kicker: _kicker,
                                     rows: _rows,
-                                    note: _note
+                                    pills: _tacticalPills,
+                                    note: _note,
+                                    details: { rows: _detailsRows }
                                 }
                             };
                         }
