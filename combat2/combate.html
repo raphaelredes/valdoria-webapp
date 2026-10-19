@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T05:30:59Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T05:45:46Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2620,15 +2620,21 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .bf-outer--selecting-target .bf-tactical-preview-bar {
   bottom: 8px;
 }
-.bf-tactical-preview-bar.is-visible {
+.bf-tactical-preview-bar.is-visible,
+.bf-tactical-preview-bar.bf-tactical-preview-bar--open {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
-.bf-tactical-preview-bar.is-hazard {
+.bf-tactical-preview-bar.is-hazard,
+.bf-tactical-preview-bar.bf-tactical-preview-bar--hazard {
   border-color: rgba(239, 68, 68, 0.9);
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.9), 0 0 14px rgba(239, 68, 68, 0.36);
+}
+.bf-tactical-preview-bar.bf-tactical-preview-bar--adv {
+  border-color: rgba(72, 187, 120, 0.9);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.9), 0 0 14px rgba(72, 187, 120, 0.36);
 }
 @keyframes bfTpbSlideUp {
   0% { opacity: 0; transform: translateY(6px); }
@@ -10041,7 +10047,8 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 10px rgba(180, 40, 40, 0.45);
     z-index: 30;
     white-space: nowrap;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
     animation: deathSavesPulse 2s ease-in-out infinite;
 }
 
@@ -10097,7 +10104,8 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     z-index: 28;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 6px rgba(72, 187, 120, 0.35);
     white-space: nowrap;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
 }
 
 /* Tracker de Iniciativa e Ordem de Turnos D&D 5e (Turn Tracker) */
@@ -13355,6 +13363,12 @@ canvas#vfxCanvas,
   border-color: #ef4444;
   color: #fca5a5;
   box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
+.token-cond-chip--reaction-spent {
+  background: linear-gradient(180deg, #2a2015, #140e08);
+  border-color: #f59e0b;
+  color: #fef3c7;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.35);
 }
 .token-cond-container {
   position: absolute;
@@ -22260,6 +22274,53 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             return;
         }
     }
+    /* D&D 5e PHB p. 49: Fúria Implacável (Bárbaro L11+) — ao cair a 0 PV em Fúria,
+       realiza TR de CON CD 10 (+5 para cada uso subsequente no combate). Em sucesso, fica com 1 PV! */
+    var _isBarbL11 = (target && (target.t === 'p' || target.t === 'a') && (target.cls === 'barbaro' || target.classId === 'barbaro') && ((target.lvl || target.level || 1) >= 11));
+    var _isRaging = target && target.se && target.se.some(function (x) { return x && (x.isRaging || x.rageResistance || x.id === 'furia'); });
+    if (newHp <= 0 && _isBarbL11 && _isRaging && oldHp > 0) {
+        var _rrDc = (target.relentlessRageDc | 0) || 10;
+        var _rrConMod = (typeof simAbilityModFromUnit === 'function') ? simAbilityModFromUnit(target, 'CON') : 3;
+        var _rrProf = (target.prof | 0) || 4;
+        var _rrTotMod = _rrConMod + _rrProf; // Bárbaro é proficiente em TR CON
+        var _rrRoll = (typeof rD === 'function') ? rD(20) : (Math.floor(Math.random() * 20) + 1);
+        var _rrTotal = _rrRoll + _rrTotMod;
+        if (_rrTotal >= _rrDc) {
+            target.hp = 1; target.alive = true; target.dying = false;
+            target.isDead = false; target.stable = false;
+            target.deathSaves = { s: 0, f: 0 };
+            target.relentlessRageDc = _rrDc + 5;
+            if (typeof clearDownedMeta === 'function') clearDownedMeta(target);
+            if (s && s.log) s.log.push('💥 ' + target.n + ' recusa-se a cair com Fúria Implacável (TR CON ' + _rrRoll + '+' + _rrTotMod + '=' + _rrTotal + ' vs CD ' + _rrDc + ') — mantém 1 PV! (Próxima CD: ' + (_rrDc + 5) + ').');
+            try {
+                var _rrUid = (target.t === 'p') ? 'player' : ('ally_' + (s && s.order ? s.order.indexOf(target) : ''));
+                var _rrEl = _rrUid ? document.querySelector('[data-unit-id="' + _rrUid + '"]') : null;
+                if (_rrEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_rrEl, '💥 FÚRIA IMPLACÁVEL (1 PV)!', 'boss');
+                if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell(_rrUid, 'fury', { durationMs: 2200 });
+            } catch (_eRr) {}
+            return;
+        } else if (s && s.log) {
+            s.log.push('💥 ' + target.n + ' falha no TR de Fúria Implacável (TR CON ' + _rrTotal + ' vs CD ' + _rrDc + ').');
+        }
+    }
+
+    /* D&D 5e PHB p. 87: Sentinela Imorredouro (Paladino dos Anciões L15+) — ao cair a 0 PV, fica com 1 PV (1x/combate). */
+    var _isPalL15 = (target && (target.t === 'p' || target.t === 'a') && (target.cls === 'paladino' || target.classId === 'paladino') && ((target.lvl || target.level || 1) >= 15) && (target.subclassId === 'ancient' || target.subclass === 'ancient' || target.subclassId === 'anciaos'));
+    if (newHp <= 0 && _isPalL15 && !target.undyingSentinelUsed && oldHp > 0) {
+        target.undyingSentinelUsed = true;
+        target.hp = 1; target.alive = true; target.dying = false;
+        target.isDead = false; target.stable = false;
+        target.deathSaves = { s: 0, f: 0 };
+        if (typeof clearDownedMeta === 'function') clearDownedMeta(target);
+        if (s && s.log) s.log.push('🌿 ' + target.n + ' recusa-se a sucumbir com SENTINELA IMORREDOURO (PHB p. 87) — a luz primordial o sustenta com 1 PV!');
+        try {
+            var _usUid = (target.t === 'p') ? 'player' : ('ally_' + (s && s.order ? s.order.indexOf(target) : ''));
+            var _usEl = _usUid ? document.querySelector('[data-unit-id="' + _usUid + '"]') : null;
+            if (_usEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_usEl, '🌿 SENTINELA IMORREDOURO (1 PV)!', 'buff');
+            if (typeof playBuffVfxOnCell === 'function') playBuffVfxOnCell(_usUid, 'bless', { durationMs: 2200 });
+        } catch (_eUs) {}
+        return;
+    }
     target.hp = newHp;
     if (damageApplied > 0) {
         simCheckConcentrationOnDamage(target, damageApplied);
@@ -23922,7 +23983,7 @@ var _bfTacticalLayerActive = false;
 function hideBfTacticalPreviewBar() {
     var bar = document.getElementById('bfTacticalPreviewBar');
     if (bar) {
-        bar.classList.remove('bf-tactical-preview-bar--open', 'bf-tactical-preview-bar--hazard', 'bf-tactical-preview-bar--adv');
+        bar.classList.remove('bf-tactical-preview-bar--open', 'is-visible', 'bf-tactical-preview-bar--hazard', 'bf-tactical-preview-bar--adv', 'is-hazard');
         bar.innerHTML = '';
     }
     document.querySelectorAll('.hex-tile--preview-dest').forEach(function (el) {
@@ -23972,7 +24033,7 @@ function showBfTacticalPreviewBar(config) {
             chipsHtml +
         '</div>' +
         actionsHtml;
-    bar.classList.add('bf-tactical-preview-bar--open');
+    bar.classList.add('bf-tactical-preview-bar--open', 'is-visible');
 
     // Regra Soberana #20: Suporte omnidirecional (click, pointerup, touchend) com debounce de 180ms, sem stopPropagation em pointerdown/touchstart
     function bindTpbBtn(sel, fn) {
@@ -27173,6 +27234,12 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                 });
             }
         }
+    }
+    if (fogState !== 'shrouded' && u.alive && !u.isDead && (u.reactionSpent || u.reaction_spent)) {
+        condChipList.push({
+            html: '<div class="token-cond-chip token-cond-chip--reaction-spent" title="D&D 5e (PHB p. 190): Reação Utilizada nesta rodada — A criatura não pode fazer Ataques de Oportunidade nem magias de reação até o próximo turno.">⚡ Sem Reação</div>',
+            name: 'Reação Utilizada'
+        });
     }
 
     var condBadges = '';
@@ -34004,6 +34071,56 @@ function bindActions() {
                     ev.preventDefault();
                 }
                 var uid = card.getAttribute('data-unit-id');
+                var clickedChip = (ev && ev.target && ev.target.closest) ? ev.target.closest(
+                    '.token-cond-chip, .token-conc-chip, .token-prone-chip, .token-adv-chip, .token-disadv-chip, .token-elev-chip, .token-death-saves, .token-stable-chip'
+                ) : null;
+                if (clickedChip) {
+                    var cTip = clickedChip.getAttribute('title') || clickedChip.textContent.trim();
+                    var cText = clickedChip.textContent.trim();
+                    var cTitle = '📜 Regra Tática D&D 5e';
+                    var cTone = 'adv';
+                    if (clickedChip.classList.contains('token-conc-chip')) {
+                        cTitle = '◈ Concentração (PHB p. 203)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-prone-chip')) {
+                        cTitle = '▾ Caído / Prone (PHB p. 292)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-death-saves')) {
+                        cTitle = '💀 Salvaguardas contra a Morte (PHB p. 197)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-stable-chip')) {
+                        cTitle = '✦ Estabilizado (PHB p. 197–198)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-elev-chip')) {
+                        cTitle = '⛰️ Terreno Elevado (Vantagem Tática)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--reaction-spent')) {
+                        cTitle = '⚡ Reação Utilizada (PHB p. 190)';
+                        cTone = 'warn';
+                    } else if (clickedChip.classList.contains('token-cond-chip')) {
+                        cTitle = '✨ ' + (cText || 'Condição D&D 5e');
+                        cTone = (clickedChip.classList.contains('token-cond-chip--frightened') ||
+                                 clickedChip.classList.contains('token-cond-chip--blind') ||
+                                 clickedChip.classList.contains('token-cond-chip--poison') ||
+                                 clickedChip.classList.contains('token-cond-chip--stun') ||
+                                 clickedChip.classList.contains('token-cond-chip--paralyzed') ||
+                                 clickedChip.classList.contains('token-cond-chip--restrained') ||
+                                 clickedChip.classList.contains('token-cond-chip--petrified') ||
+                                 clickedChip.classList.contains('token-cond-chip--incapacitated') ||
+                                 clickedChip.classList.contains('token-cond-chip--bane')) ? 'hazard' : 'adv';
+                    }
+                    showBfTacticalPreviewBar({
+                        tone: cTone,
+                        title: cTitle,
+                        chips: [{ kind: (cTone === 'hazard' ? 'danger' : (cTone === 'warn' ? 'warn' : 'good')), text: cTip || cText }],
+                        primaryLabel: '👁 Ver Ficha',
+                        onPrimary: function () {
+                            hideBfTacticalPreviewBar();
+                            openUnitDetail(uid);
+                        }
+                    });
+                    return;
+                }
                 var isAllyBuffPick = _selectingTarget && _pendingSkill && _pendingSkill.targetAlly &&
                     (_pendingSkill.blessSpell || _pendingSkill.shieldSpell);
                 if (_selectingTarget && (((_pendingSkill && _pendingSkill.kind === 'heal') || _pendingHealItem) || isAllyBuffPick)) {
