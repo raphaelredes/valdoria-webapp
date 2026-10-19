@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T18:54:30Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T19:26:28Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -853,25 +853,23 @@ html body .va-backdrop {
    ancora no frame #app (não na viewport). Isso é o mesmo truque que dice-overlay
    e intro popup usam.
 
-   POSITION 2026-04-21 (feedback autor): movido de top-right pra bottom-right,
-   ao lado do botão Agir (.sim-action-dock está em bottom:0). z-index 99999 >
-   action-dock (92200) > action-sheet (92100) — garante que o botão SEMPRE
-   fica por cima e clicável. pointer-events:auto !important também reforça a
-   captura de clique (solução pro bug "não clicável no bot DEV"). */
+   POSITION 2026-10-19 (feedback autor): integrado à coluna vertical de controles
+   à direita do mapa (.bf-zoom-controls em right:8px), eliminando sobreposição
+   com o botão ENCERRAR no canto inferior direito do action-dock. */
 #sim-vol-btn {
     position: fixed !important;
-    bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
-    right: 14px !important;
+    top: 294px !important;
+    bottom: auto !important;
+    right: 8px !important;
     left: auto !important;
-    top: auto !important;
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 50%;
-    background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2e2520));
-    border: 1px solid var(--v-border, #4a3828);
-    color: var(--v-gold, #c4953a);
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: var(--v-radius-sm, 6px) !important;
+    background: rgba(28, 22, 16, 0.92) !important;
+    border: 1.5px solid rgba(196, 149, 58, 0.65) !important;
+    color: #f3e5ab !important;
     cursor: pointer;
-    z-index: 99999 !important;
+    z-index: 9500 !important;
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -879,29 +877,24 @@ html body .va-backdrop {
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
-    box-shadow:
-        0 2px 10px rgba(0,0,0,.55),
-        0 0 14px rgba(196,149,58,.18),
-        inset 0 1px 0 rgba(220,200,150,.08);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease, opacity .18s ease;
     font-family: inherit;
     -webkit-tap-highlight-color: transparent;
 }
 #sim-vol-btn:hover {
-    border-color: rgba(196,149,58,.55);
-    box-shadow:
-        0 3px 14px rgba(0,0,0,.6),
-        0 0 20px rgba(196,149,58,.4),
-        inset 0 1px 0 rgba(240,220,170,.14);
-    color: #fff;
-    transform: scale(1.08);
+    border-color: #ffd700 !important;
+    background: rgba(52, 40, 28, 0.96) !important;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.85), 0 0 12px rgba(196, 149, 58, 0.45);
+    color: #fff !important;
+    transform: scale(1.06);
 }
 #sim-vol-btn:active {
     transform: scale(0.95);
 }
 #sim-vol-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
     display: block;
     stroke: currentColor;
     fill: none;
@@ -911,28 +904,27 @@ html body .va-backdrop {
     filter: drop-shadow(0 0 3px currentColor);
 }
 /* 2026-06-12 (user): ícones de volume viraram imagens OpenAI (low). */
-#sim-vol-btn img { width: 24px; height: 24px; display: block; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)); }
+#sim-vol-btn img { width: 20px; height: 20px; display: block; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)); }
 #sim-vol-btn.muted {
-    color: var(--v-text-dim, #a09484);
-    opacity: 0.6;
-    border-color: rgba(128, 116, 96, .35);
-    box-shadow: 0 2px 6px rgba(0,0,0,.45), inset 0 1px 0 rgba(120,110,95,.05);
+    color: var(--v-text-dim, #a09484) !important;
+    opacity: 0.72 !important;
+    border-color: rgba(128, 116, 96, 0.45) !important;
 }
 #sim-vol-btn.muted:hover {
-    color: var(--v-text, #d4c8b0);
-    opacity: 0.85;
+    color: var(--v-text, #d4c8b0) !important;
+    opacity: 0.92 !important;
 }
 #sim-vol-btn.playing {
     animation: simVolPulse 2.5s ease-in-out infinite;
 }
 @keyframes simVolPulse {
-    0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 14px rgba(196,149,58,.18), inset 0 1px 0 rgba(220,200,150,.08); }
-    50%      { box-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 22px rgba(196,149,58,.35), inset 0 1px 0 rgba(240,220,170,.14); }
+    0%, 100% { box-shadow: 0 3px 8px rgba(0,0,0,.85), 0 0 10px rgba(196,149,58,.15); }
+    50%      { box-shadow: 0 3px 8px rgba(0,0,0,.85), 0 0 16px rgba(196,149,58,.32); }
 }
-/* Tela muito estreita: botão menor */
+/* Tela muito estreita: mantém alinhamento na barra lateral direita */
 @media (max-height: 600px) {
-    #sim-vol-btn { width: 34px; height: 34px; top: 8px; right: 8px; }
-    #sim-vol-btn svg { width: 16px; height: 16px; }
+    #sim-vol-btn { width: 32px !important; height: 32px !important; right: 8px !important; }
+    #sim-vol-btn svg { width: 15px; height: 15px; }
 }
 
 /* 2. Popup "Combate Iniciado" (showIntroChoicePopup) — Opção 3 aprovada:
@@ -8939,9 +8931,9 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
 #turn-queue .tl-node.cls-inimigo .tl-ico { color: #c06a3a; }
 #turn-queue .tl-node.cls-boss .tl-ico { color: #a040a0; }
 #turn-queue .tl-node.cls-aliado .tl-ico { color: #6b9a6b; }
-/* Forecast: proximos turnos em cinza, podem mudar com habilidades/eventos */
-#turn-queue .tl-node.forecast { filter: grayscale(.85) brightness(.7); opacity: .5; }
-#turn-queue .tl-node.forecast:hover { opacity: .8; filter: grayscale(.5) brightness(.85); }
+/* Próximos turnos: retratos nítidos e coloridos (sem grayscale escuro que apaga os rostos) */
+#turn-queue .tl-node.forecast { filter: none; opacity: 0.94; }
+#turn-queue .tl-node.forecast:hover { opacity: 1; transform: translateY(-1px); }
 .tq-enter { animation: tqEnter .6s cubic-bezier(.34,1.56,.64,1); }
 @keyframes tqEnter {
     0%   { transform: translateX(-60px) scale(.25); opacity: 0; filter: drop-shadow(0 0 14px rgba(196,149,58,.9)); }
@@ -14962,32 +14954,33 @@ canvas#vfxCanvas,
 .turn-queue {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 48px 6px 10px;
-  background: linear-gradient(180deg, #221a13, #15100c);
-  border-bottom: 1px solid rgba(196, 149, 58, 0.35);
+  gap: 5px;
+  padding: 5px 10px;
+  background: linear-gradient(180deg, #241b14, #140f0b);
+  border-bottom: 1.5px solid rgba(196, 149, 58, 0.42);
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
-  min-height: 44px;
+  min-height: 46px;
   flex-shrink: 0;
   z-index: 100;
 }
 .turn-queue::-webkit-scrollbar { display: none; }
 
 .tl-unified-badge {
-  background: rgba(14, 10, 7, 0.85);
-  border: 1px solid rgba(196, 149, 58, 0.45);
+  background: linear-gradient(180deg, #1b140e, #100c08);
+  border: 1px solid rgba(196, 149, 58, 0.55);
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: 4px 7px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
   font-size: 11px;
   font-weight: 700;
   color: var(--v-gold, #c4953a);
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.65);
   user-select: none;
 }
 .tl-unified-badge .tl-ub-round {
@@ -14998,11 +14991,173 @@ canvas#vfxCanvas,
   font-size: 11px;
 }
 
-#turn-queue .tl-node.active-player-turn {
+/* Nodes da fila: moldura única limpa, sem círculo-dentro-de-quadrado */
+#turn-queue .tl-node {
+  min-width: 34px !important;
+  width: 34px;
+  height: 34px;
+  padding: 0 !important;
+  border-radius: 7px !important;
+  border: 1.5px solid rgba(196, 149, 58, 0.65) !important;
+  background: #18120d !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+}
+#turn-queue .tl-node.t-player {
+  border-color: rgba(232, 196, 90, 0.85) !important;
+}
+#turn-queue .tl-node.t-ally {
+  border-color: rgba(77, 163, 255, 0.85) !important;
+}
+#turn-queue .tl-node.t-enemy {
+  border-color: rgba(224, 82, 82, 0.78) !important;
+}
+#turn-queue .tl-node .tl-ico {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  border-radius: 5.5px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+#turn-queue .tl-node .tl-ico img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 5.5px !important;
+  display: block;
+}
+
+/* Card Spotlight do Combatente Ativo (Sempre na Posição #1 à Esquerda) */
+#turn-queue .tl-node.active {
+  width: auto !important;
+  min-width: 118px !important;
+  max-width: 162px;
+  height: 36px !important;
+  padding: 2px 8px 2px 3px !important;
+  gap: 6px;
+  justify-content: flex-start !important;
+  border-width: 1.5px !important;
   border-color: #ffd700 !important;
-  box-shadow: 0 0 14px rgba(255, 215, 0, 0.85), inset 0 0 6px rgba(255, 215, 0, 0.4);
-  background: linear-gradient(180deg, #3d2f20, #251c14);
-  transform: scale(1.1) translateY(-1px);
+  background: linear-gradient(90deg, rgba(62, 46, 26, 0.96), rgba(28, 20, 13, 0.96)) !important;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.45), inset 0 1px 0 rgba(255, 235, 160, 0.22) !important;
+  transform: none !important;
+  z-index: 10;
+}
+#turn-queue .tl-node.active.t-ally {
+  border-color: #60a5fa !important;
+  background: linear-gradient(90deg, rgba(24, 48, 78, 0.96), rgba(15, 26, 42, 0.96)) !important;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.45), inset 0 1px 0 rgba(147, 197, 253, 0.22) !important;
+}
+#turn-queue .tl-node.active.t-enemy {
+  border-color: #f87171 !important;
+  background: linear-gradient(90deg, rgba(68, 22, 22, 0.96), rgba(32, 12, 12, 0.96)) !important;
+  box-shadow: 0 0 12px rgba(248, 113, 113, 0.45), inset 0 1px 0 rgba(252, 165, 165, 0.2) !important;
+}
+#turn-queue .tl-node.active .tl-ico {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 5px !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+}
+#turn-queue .tl-node.active .tl-init-badge {
+  bottom: 1px;
+  left: 21px;
+  right: auto;
+  font-size: 7px;
+  padding: 0 2.5px;
+}
+#turn-queue .tl-node.active > .tl-hp-track {
+  display: none;
+}
+.tl-active-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+  line-height: 1.1;
+}
+.tl-active-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.tl-active-tag {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #ffd700;
+  white-space: nowrap;
+}
+#turn-queue .tl-node.active.t-ally .tl-active-tag { color: #93c5fd; }
+#turn-queue .tl-node.active.t-enemy .tl-active-tag { color: #fca5a5; }
+.tl-active-hp-txt {
+  font-size: 8px;
+  font-weight: 700;
+  color: #d6cbb9;
+  white-space: nowrap;
+}
+.tl-active-name {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fffdf9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 108px;
+  margin: 1px 0 2px 0;
+}
+.tl-active-hpbar {
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.tl-active-hpbar .tl-hp-fill {
+  height: 100%;
+}
+
+/* Separadores da fila cronológica (AGORA ▸ PRÓXIMOS | R+1) */
+.tl-queue-arrow {
+  color: rgba(196, 149, 58, 0.75);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 1px;
+  flex-shrink: 0;
+  user-select: none;
+}
+.tl-round-sep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 5px;
+  margin: 0 1px;
+  border-radius: 4px;
+  background: rgba(196, 149, 58, 0.14);
+  border: 1px dashed rgba(196, 149, 58, 0.45);
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #d4af37;
+  flex-shrink: 0;
+  user-select: none;
 }
 
 /* Live Combat Ticker */
@@ -24653,44 +24808,88 @@ function simFormatDamagePartialHTML(rollsSlice, dmgMod, attrLabel, isLastRoll) {
 
 function buildTurnQueue(s) {
     if (!s.order || !s.order.length) return '';
-    /* Fase init: mostra apenas combatentes com iniciativa ja revelada,
-       ordenados desc por init. Fase active/init_done: ordem fixa. */
-    var list;
+    var items = [];
     if (s.ph === 'init') {
-        list = s.order.filter(function (c) { return c.initRevealed; });
-        list.sort(function (a, b) { return b.init - a.init || initiativeTieOrder(a) - initiativeTieOrder(b); });
+        var initList = s.order.filter(function (c) { return c.initRevealed; });
+        initList.sort(function (a, b) { return b.init - a.init || initiativeTieOrder(a) - initiativeTieOrder(b); });
+        for (var ii = 0; ii < initList.length; ii++) {
+            items.push({ type: 'node', entry: initList[ii], origIdx: s.order.indexOf(initList[ii]), isActive: false });
+        }
+    } else if (s.ph === 'active') {
+        var actIdx = (typeof s.active_idx === 'number' && s.active_idx >= 0 && s.active_idx < s.order.length) ? s.active_idx : 0;
+        var _isQueueVisible = function (c, idx) {
+            if (!c) return false;
+            if (idx === actIdx) return true;
+            if (c.t === 'e' && (!c.alive || c.isDead || c.hp <= 0)) return false;
+            if (c.isDead) return false;
+            return true;
+        };
+        if (s.order[actIdx]) {
+            items.push({ type: 'node', entry: s.order[actIdx], origIdx: actIdx, isActive: true });
+        }
+        var restThisRound = [];
+        for (var rIdx = actIdx + 1; rIdx < s.order.length; rIdx++) {
+            if (_isQueueVisible(s.order[rIdx], rIdx)) {
+                restThisRound.push({ type: 'node', entry: s.order[rIdx], origIdx: rIdx, isActive: false });
+            }
+        }
+        var nextRoundList = [];
+        for (var nIdx = 0; nIdx < actIdx; nIdx++) {
+            if (_isQueueVisible(s.order[nIdx], nIdx)) {
+                nextRoundList.push({ type: 'node', entry: s.order[nIdx], origIdx: nIdx, isActive: false });
+            }
+        }
+        if (restThisRound.length > 0 || nextRoundList.length > 0) {
+            items.push({ type: 'arrow' });
+        }
+        for (var k1 = 0; k1 < restThisRound.length; k1++) items.push(restThisRound[k1]);
+        if (nextRoundList.length > 0) {
+            items.push({ type: 'round_sep', nextRn: (s.rn || 1) + 1 });
+            for (var k2 = 0; k2 < nextRoundList.length; k2++) items.push(nextRoundList[k2]);
+        }
     } else {
-        list = s.order.slice();
+        for (var oi = 0; oi < s.order.length; oi++) {
+            items.push({ type: 'node', entry: s.order[oi], origIdx: oi, isActive: false });
+        }
     }
+
     var parts = ['<div class="turn-queue" id="turn-queue">'];
     if (s.ph === 'active' && s.rn > 0) {
         var _hdrWKey = (typeof getBattlefieldWeatherKey === 'function') ? getBattlefieldWeatherKey(s) : 'clear';
         var _hdrWData = (typeof BATTLEFIELD_WEATHER_LABELS !== 'undefined' && BATTLEFIELD_WEATHER_LABELS[_hdrWKey]) || { icon: '☀️', label: 'Céu Limpo' };
         parts.push('<div class="tl-unified-badge" title="Rodada ' + s.rn + ' · Clima: ' + escHtml(_hdrWData.label) + '"><span class="tl-ub-round">R' + s.rn + '</span><span class="tl-ub-weather">' + _hdrWData.icon + '</span></div>');
     }
-    for (var i = 0; i < list.length; i++) {
-        var entry = list[i];
-        var origIdx = s.order.indexOf(entry);
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (item.type === 'arrow') {
+            parts.push('<div class="tl-queue-arrow" aria-hidden="true">▸</div>');
+            continue;
+        }
+        if (item.type === 'round_sep') {
+            parts.push('<div class="tl-round-sep" title="Início da Rodada ' + item.nextRn + '">R' + item.nextRn + '</div>');
+            continue;
+        }
+        var entry = item.entry;
+        var origIdx = item.origIdx;
+        var isActive = !!item.isActive;
         var entryUtype = entry.t === 'p' ? 'player' : (entry.t === 'a' ? 'ally' : 'enemy');
         var cls = 'tl-node';
         if (entry.t === 'e') cls += ' t-enemy';
         else if (entry.t === 'a') cls += ' t-ally';
-        /* V1 Invocações Phase 3 (2026-04-18) — slug heráldico (cls-mago, cls-druida, etc.)
-           para o turn queue herdar a cor de classe do card. */
+        else cls += ' t-player';
         var entrySlug = _heraldicClsSlugOf(entry, entryUtype);
         if (entrySlug) cls += ' ' + entrySlug;
-        if (origIdx === s.active_idx && (s.ph === 'active')) {
+        if (isActive && s.ph === 'active') {
             cls += ' active';
             if (entry.t === 'p') cls += ' active-player-turn';
+        } else if (s.ph === 'active') {
+            cls += ' forecast';
         }
-        /* Na fase ativa, os nao-ativos viram previsao em cinza (forecast)
-           — serao influenciaveis por condições/habilidades no futuro */
-        else if (s.ph === 'active') cls += ' forecast';
         if (entry.isDead || (entry.t === 'e' && !entry.alive)) cls += ' dead';
         else if ((entry.t === 'p' || entry.t === 'a') && entry.hp <= 0 && entry.dying && !entry.stable) cls += ' tl-dying';
         else if ((entry.t === 'p' || entry.t === 'a') && entry.hp <= 0 && entry.stable) cls += ' tl-stable';
-        /* ID estavel por nome — para FLIP animation comparar posicoes */
-        var id = 'tq-' + entry.n.replace(/[^a-zA-Z0-9]/g, '_');
+        /* ID estável por origIdx + nome — para FLIP animation comparar posições sem colisão */
+        var id = 'tq-' + origIdx + '-' + entry.n.replace(/[^a-zA-Z0-9]/g, '_');
         var heraldicId = _heraldicIconOf(entry, entryUtype);
         var iconHtml = _combatPortraitHTML(heraldicId, entry, entryUtype);
         if (!iconHtml) iconHtml = escHtml(entry.ico);
@@ -24699,10 +24898,23 @@ function buildTurnQueue(s) {
         var hpVal = (entry.hp != null) ? entry.hp : 0;
         var hpPct = (entry.mhp > 0) ? Math.max(0, Math.min(100, Math.round((hpVal / entry.mhp) * 100))) : 0;
         var hpCls = (typeof vBarHpClass === 'function') ? vBarHpClass(hpPct) : (hpPct > 50 ? 'high' : 'low');
+        var tempHpVal = (entry.tempHp && entry.tempHp > 0) ? (entry.tempHp | 0) : 0;
 
         var nodeInner = '<div class="tl-ico">' + iconHtml + '</div>';
         nodeInner += '<span class="tl-init-badge" title="Iniciativa: ' + initNum + '">' + initNum + '</span>';
-        nodeInner += '<div class="tl-hp-track"><div class="tl-hp-fill fill-' + hpCls + '" style="width:' + hpPct + '%;"></div></div>';
+        if (isActive && s.ph === 'active') {
+            var roleTag = entry.t === 'p' ? 'SUA VEZ' : (entry.t === 'a' ? 'ALIADO' : 'INIMIGO');
+            nodeInner += '<div class="tl-active-info">' +
+                '<div class="tl-active-top">' +
+                    '<span class="tl-active-tag">' + roleTag + '</span>' +
+                    '<span class="tl-active-hp-txt">' + hpVal + '/' + entry.mhp + (tempHpVal > 0 ? '+' + tempHpVal : '') + '</span>' +
+                '</div>' +
+                '<div class="tl-active-name">' + escHtml(entry.n) + '</div>' +
+                '<div class="tl-active-hpbar"><div class="tl-hp-fill fill-' + hpCls + '" style="width:' + hpPct + '%;"></div></div>' +
+            '</div>';
+        } else {
+            nodeInner += '<div class="tl-hp-track"><div class="tl-hp-fill fill-' + hpCls + '" style="width:' + hpPct + '%;"></div></div>';
+        }
         var concSt = (entry.se || []).find(function (st) {
             return st && (st.concentration || st.isConcentration || st.id === 'concentrating' || String(st.n || '').toLowerCase().indexOf('concentra') !== -1);
         });
@@ -24719,7 +24931,6 @@ function buildTurnQueue(s) {
             nodeInner += '<span class="tl-prone-icon" title="Caído no Chão (PHB p. 190 / 292)">▾</span>';
         }
 
-        var tempHpVal = (entry.tempHp && entry.tempHp > 0) ? (entry.tempHp | 0) : 0;
         if (tempHpVal > 0) {
             nodeInner += '<span class="tl-temphp-icon" title="+' + tempHpVal + ' PV Temp (PHB p. 198)">🛡</span>';
         }
@@ -53739,6 +53950,27 @@ function _simVolSyncIcon() {
         btn.classList.add('playing');
         btn.setAttribute('title', 'Volume: ' + Math.round(vol * 100) + '%');
     }
+    _simSyncVolBtnPosition();
+}
+function _simSyncVolBtnPosition() {
+    var btn = document.getElementById('sim-vol-btn');
+    var appFrame = document.getElementById('app');
+    if (!btn || !appFrame) return;
+    var zc = appFrame.querySelector('.bf-zoom-controls');
+    if (zc) {
+        var appRect = appFrame.getBoundingClientRect();
+        var zcRect = zc.getBoundingClientRect();
+        if (appRect.height > 0 && zcRect.height > 0) {
+            var topPx = Math.max(54, Math.round(zcRect.bottom - appRect.top + 5));
+            btn.style.setProperty('top', topPx + 'px', 'important');
+            btn.style.setProperty('bottom', 'auto', 'important');
+            btn.style.setProperty('right', '8px', 'important');
+            return;
+        }
+    }
+    btn.style.setProperty('top', '10px', 'important');
+    btn.style.setProperty('bottom', 'auto', 'important');
+    btn.style.setProperty('right', '8px', 'important');
 }
 function simInstallVolumeBtn() {
     if (document.getElementById('sim-vol-btn')) {
@@ -53801,8 +54033,9 @@ function simInstallVolumeBtn() {
         setTimeout(_simVolSyncIcon, 450);
     });
     appFrame.appendChild(btn);
-    console.info('[SIM-VOL] #sim-vol-btn mounted INSIDE #app frame (smartphone) at top:10 right:10 z-index:99999');
+    console.info('[SIM-VOL] #sim-vol-btn mounted INSIDE #app frame (aligned with .bf-zoom-controls)');
     _simVolSyncIcon();
+    requestAnimationFrame(_simSyncVolBtnPosition);
     /* Sync periódico em caso de mudanças externas (popup abre sliders) */
     if (!window._simVolSyncTimer) {
         window._simVolSyncTimer = setInterval(_simVolSyncIcon, 800);
@@ -53814,11 +54047,9 @@ function simInstallVolumeBtn() {
         try {
             var obs = new MutationObserver(function () {
                 if (!document.getElementById('sim-vol-btn')) {
-                    /* Botão foi apagado por render() — re-instala imediatamente.
-                       Como o botão vira child direto de #app, a flag
-                       _simVolObserver já existe → skip do setup de observer,
-                       mas o retry de createElement + appendChild roda. */
                     simInstallVolumeBtn();
+                } else {
+                    _simSyncVolBtnPosition();
                 }
             });
             obs.observe(appFrame, { childList: true, subtree: false });
@@ -53853,22 +54084,7 @@ if (typeof document !== 'undefined') {
     }, 500);
 }
 
-/* X-6.5.51AA (2026-04-25) — va-popup auto-positioner JS-driven.
-   Problema: CSS calc()-only (Pattern A puro X-6.5.51u) confiava em viewport
-   centering match com #app centering. Em viewport com #sim-log-panel à direita
-   (até 600px), o popup com `left:0+right:0+margin:auto+width:--sim-frame-w`
-   centra em VIEWPORT, não no `#app` real (que pode estar visualmente deslocado).
-   User reportou: popup escapando pra fora do frame.
-
-   Solução: JS lê `#app.getBoundingClientRect()` em runtime e seta inline style
-   com setProperty('important') — vence qualquer CSS externo. Reposiciona em:
-   · Criação lazy do popup (MutationObserver no body)
-   · Mudanças de class/style do popup (.open toggle)
-   · Resize/orientationchange do viewport
-   · Mudanças de layout via #app rect (a cada toggle)
-
-   Usa `#sim-vol-btn` rect como anchor inferior (botão é fixed dentro do #app via
-   transform:translateZ(0) containing block — sempre alinhado ao frame visual). */
+/* X-6.5.51AA (2026-04-25) — va-popup auto-positioner JS-driven. */
 (function () {
     var _alreadyInit = false;
     function _ensureInit() {
@@ -53882,22 +54098,28 @@ if (typeof document !== 'undefined') {
             if (!popup) return;
             var rect = app.getBoundingClientRect();
             var btn = document.getElementById('sim-vol-btn');
-            var bottomPx;
-            if (btn) {
-                var br = btn.getBoundingClientRect();
-                /* 8px de gap acima do botão */
-                bottomPx = window.innerHeight - br.top + 8;
-            } else {
-                /* fallback: 56px do bottom do #app */
-                bottomPx = window.innerHeight - rect.bottom + 56;
-            }
             popup.style.setProperty('left', rect.left + 'px', 'important');
             popup.style.setProperty('right', 'auto', 'important');
             popup.style.setProperty('width', rect.width + 'px', 'important');
             popup.style.setProperty('max-width', rect.width + 'px', 'important');
             popup.style.setProperty('margin', '0', 'important');
-            popup.style.setProperty('top', 'auto', 'important');
-            popup.style.setProperty('bottom', bottomPx + 'px', 'important');
+            if (btn) {
+                var br = btn.getBoundingClientRect();
+                if (br.top - rect.top < 220) {
+                    /* Abre logo abaixo do botão se estiver próximo ao topo */
+                    popup.style.setProperty('top', (br.bottom + 8) + 'px', 'important');
+                    popup.style.setProperty('bottom', 'auto', 'important');
+                } else {
+                    /* Abre acima do botão quando há espaço suficiente no topo */
+                    var bottomPx = window.innerHeight - br.top + 8;
+                    popup.style.setProperty('top', 'auto', 'important');
+                    popup.style.setProperty('bottom', bottomPx + 'px', 'important');
+                }
+            } else {
+                var fallbackBottom = window.innerHeight - rect.bottom + 56;
+                popup.style.setProperty('top', 'auto', 'important');
+                popup.style.setProperty('bottom', fallbackBottom + 'px', 'important');
+            }
             if (backdrop) {
                 backdrop.style.setProperty('left', rect.left + 'px', 'important');
                 backdrop.style.setProperty('right', 'auto', 'important');
