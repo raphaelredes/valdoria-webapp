@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T10:14:26Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T10:34:22Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -11557,9 +11557,43 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   letter-spacing: 0.18em;
   text-transform: uppercase;
   text-align: center;
-  margin: 0 0 var(--v-space-md, 10px);
-  padding-bottom: var(--v-space-sm, 8px);
+  margin: 0 0 var(--v-space-sm, 6px);
+  padding-bottom: var(--v-space-xs, 4px);
   border-bottom: 1px solid var(--v-border, #4a3828);
+}
+.sim-turn-economy-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0 0 var(--v-space-md, 10px) 0;
+  flex-wrap: wrap;
+}
+.sim-turn-economy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(30, 24, 20, 0.7);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  color: #d4c8b0;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+.sim-turn-economy-pill.available {
+  border-color: rgba(46, 204, 113, 0.5);
+  color: #c6f6d5;
+  background: rgba(46, 204, 113, 0.12);
+}
+.sim-turn-economy-pill.spent {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #8c827a;
+  text-decoration: line-through;
 }
 .sim-action-dock {
   position: fixed;
@@ -32967,7 +33001,7 @@ function _updateActionSheetState(s) {
        (pointer-events:none) quando p.actionSpent. É só preferência de UI: sempre ativo. */
     var ALWAYS_ACTIVE = { 'pass': true, 'toggle-skip-dice': true, 'log': true };
     /* Buttons que requerem ação principal (PHB) */
-    var ACTION_GATED = { 'attack': true, 'dodge': true, 'flee': true, 'bag': true, 'use-item': true, 'dash': true, 'disengage': true, 'shove': true, 'help': true };
+    var ACTION_GATED = { 'attack': true, 'dodge': true, 'flee': true, 'bag': true, 'use-item': true, 'shove': true, 'help': true, 'ready': true };
     for (var bi = 0; bi < mainBtns.length; bi++) {
         var btnEl = mainBtns[bi];
         var actName = btnEl.getAttribute('data-act') || '';
@@ -32992,16 +33026,21 @@ function _updateActionSheetState(s) {
                 btnEl.removeAttribute('aria-disabled');
                 btnEl.removeAttribute('title');
             }
-        } else if (actName === 'hide') {
-            var isRogueCunning = (p.cls || '').toLowerCase() === 'ladino' || (p.skills || []).some(function(s){ return s && s.n === 'Ação Ardilosa'; });
-            var hideSpent = isRogueCunning ? (!!p.bonusActionSpent && !!p.actionSpent) : !!p.actionSpent;
-            btnEl.classList.toggle('spent', hideSpent);
-            if (hideSpent) {
+        } else if (actName === 'dash' || actName === 'disengage' || actName === 'hide') {
+            /* D&D 5e (PHB p. 96): Ação Ardilosa permite Ladino nv 2+ usar Disparada, Desengajar ou Esconder como Ação Bônus */
+            var isRogueCunningAct = (((p.cls || '').toLowerCase() === 'ladino' && (p.lvl || 1) >= 2) || (p.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); }));
+            var actSpent = isRogueCunningAct ? (!!p.bonusActionSpent && !!p.actionSpent) : !!p.actionSpent;
+            btnEl.classList.toggle('spent', actSpent);
+            if (actSpent) {
                 btnEl.setAttribute('aria-disabled', 'true');
-                btnEl.setAttribute('title', isRogueCunning ? 'Ação e Ação Bônus esgotadas neste turno' : 'Ação principal já gasta neste turno');
+                btnEl.setAttribute('title', isRogueCunningAct ? 'Ação e Ação Bônus esgotadas neste turno' : 'Ação principal já gasta neste turno');
             } else {
                 btnEl.removeAttribute('aria-disabled');
-                btnEl.removeAttribute('title');
+                if (isRogueCunningAct && !p.bonusActionSpent) {
+                    btnEl.setAttribute('title', 'Ação Ardilosa (PHB p. 96): pode usar como Ação Bônus!');
+                } else {
+                    btnEl.removeAttribute('title');
+                }
             }
         } else if (ALWAYS_ACTIVE[actName]) {
             /* Passar/Pular dados/Log: nunca desabilitar (meta UI) */
@@ -33017,6 +33056,31 @@ function _updateActionSheetState(s) {
         } else {
             /* Fallback legado: trata como action-gated (não regrediu) */
             btnEl.classList.toggle('spent', !!p.actionSpent);
+        }
+    }
+    var ecoBar = document.querySelector('.sim-turn-economy-bar');
+    if (ecoBar) {
+        var actAvail = !p.actionSpent;
+        var bnsAvail = !p.bonusActionSpent;
+        var movLeft = (p.movement_left != null) ? p.movement_left : (p.speed || 6);
+        var rxAvail = !(p.reactionSpent || p.reaction_spent);
+        var pills = ecoBar.querySelectorAll('.sim-turn-economy-pill');
+        if (pills && pills.length >= 4) {
+            pills[0].className = 'sim-turn-economy-pill ' + (actAvail ? 'available' : 'spent');
+            pills[0].textContent = '◆ Ação' + (actAvail ? '' : ' ✕');
+            pills[0].title = actAvail ? 'Ação Principal disponível' : 'Ação Principal já gasta';
+
+            pills[1].className = 'sim-turn-economy-pill ' + (bnsAvail ? 'available' : 'spent');
+            pills[1].textContent = '▲ Bônus' + (bnsAvail ? '' : ' ✕');
+            pills[1].title = bnsAvail ? 'Ação Bônus disponível' : 'Ação Bônus já gasta';
+
+            pills[2].className = 'sim-turn-economy-pill ' + (movLeft > 0 ? 'available' : 'spent');
+            pills[2].textContent = '👣 ' + formatHexDistanceMeters(movLeft);
+            pills[2].title = 'Deslocamento restante no turno';
+
+            pills[3].className = 'sim-turn-economy-pill ' + (rxAvail ? 'available' : 'spent');
+            pills[3].textContent = '⚡ Reação' + (rxAvail ? '' : ' ✕');
+            pills[3].title = rxAvail ? 'Reação pronta (1 por rodada)' : 'Reação já gasta';
         }
     }
     var bonusGrid = document.getElementById('bonus-action-grid');
@@ -34581,6 +34645,16 @@ function render(s) {
                 }
                 html += '<div class="sim-action-sheet' + (_actionSheetOpen ? ' open' : '') + '">';
                 html += '<div class="sim-action-sheet-title">Escolha uma ação</div>';
+                var actAvail = pCur && !pCur.actionSpent;
+                var bnsAvail = pCur && !pCur.bonusActionSpent;
+                var movLeft = (pCur && pCur.movement_left != null) ? pCur.movement_left : (pCur && pCur.speed ? pCur.speed : 6);
+                var rxAvail = pCur && !(pCur.reactionSpent || pCur.reaction_spent);
+                html += '<div class="sim-turn-economy-bar" role="status" aria-label="Recursos do Turno D&D 5e">' +
+                    '<span class="sim-turn-economy-pill ' + (actAvail ? 'available' : 'spent') + '" title="' + (actAvail ? 'Ação Principal disponível' : 'Ação Principal já gasta') + '">◆ Ação' + (actAvail ? '' : ' ✕') + '</span>' +
+                    '<span class="sim-turn-economy-pill ' + (bnsAvail ? 'available' : 'spent') + '" title="' + (bnsAvail ? 'Ação Bônus disponível' : 'Ação Bônus já gasta') + '">▲ Bônus' + (bnsAvail ? '' : ' ✕') + '</span>' +
+                    '<span class="sim-turn-economy-pill ' + (movLeft > 0 ? 'available' : 'spent') + '" title="Deslocamento restante no turno">👣 ' + formatHexDistanceMeters(movLeft) + '</span>' +
+                    '<span class="sim-turn-economy-pill ' + (rxAvail ? 'available' : 'spent') + '" title="' + (rxAvail ? 'Reação pronta (1 por rodada)' : 'Reação já gasta') + '">⚡ Reação' + (rxAvail ? '' : ' ✕') + '</span>' +
+                    '</div>';
                 /* X-6.5.51AB (2026-04-26): texto explicativo verboso REMOVIDO.
                    "Sem grade de posicao..." consumia 2-3 linhas a cada abertura
                    do sheet — botoes (Atacar/Esquivar/Fugir/etc) ja sao self-
@@ -34628,15 +34702,15 @@ function render(s) {
                     var canStandSheet = (pCur.movement_left || 0) >= standCostHexesSheet;
                     html += '<button type="button" class="action-btn action-btn--stand-up primary' + (canStandSheet ? '' : ' spent') + '" style="grid-column: 1 / -1;" data-act="stand-up"' + (canStandSheet ? '' : ' aria-disabled="true" title="Deslocamento insuficiente para se levantar"') + '><span class="action-btn-label">▲ Levantar-se (' + standCostMSheet + ')</span></button>';
                 }
-                html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + '<span class="action-btn-label">Disparada</span>' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + '<span class="action-btn-label">Desengajar</span>' + actionGlyph + '</button>';
-                var isRogueCunningHide = pCur && ((pCur.cls || '').toLowerCase() === 'ladino' || (pCur.skills || []).some(function(s){ return s && s.n === 'Ação Ardilosa'; }));
-                var hideGlyph = isRogueCunningHide
-                    ? '<span class="action-btn-res-icon res-bonus" aria-hidden="true">▲</span>'
+                var isRogueCunningSheet = pCur && (((pCur.cls || '').toLowerCase() === 'ladino' && (pCur.lvl || 1) >= 2) || (pCur.skills || []).some(function(s){ return s && (s.n === 'Ação Ardilosa' || s.id === 'cunning_action'); }));
+                var cunningGlyph = isRogueCunningSheet
+                    ? '<span class="action-btn-res-icon res-bonus" aria-hidden="true" title="Ação Ardilosa (PHB p. 96): Ação Bônus">▲</span>'
                     : actionGlyph;
+                html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + '<span class="action-btn-label">Disparada</span>' + cunningGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + '<span class="action-btn-label">Desengajar</span>' + cunningGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="shove">' + _actBtnIco('acao-empurrar') + '<span class="action-btn-label">Empurrar</span>' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="help">' + _actBtnIco('acao-ajudar') + '<span class="action-btn-label">Ajudar</span>' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="hide">' + _actBtnIco('acao-esconder') + '<span class="action-btn-label">Esconder</span>' + hideGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="hide">' + _actBtnIco('acao-esconder') + '<span class="action-btn-label">Esconder</span>' + cunningGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="ready" title="Preparar uma ação para disparar como Reação (PHB p. 193)">' + _actBtnIco('alerta') + '<span class="action-btn-label">Preparar</span>' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="delay" title="Adiar iniciativa dentro do bloco compartilhado">' + _actBtnIco('tempo') + '<span class="action-btn-label">Adiar Vez</span></button>';
                 /* 2026-06-23: CD + chance aprox. direto no botão Fugir */
@@ -36464,31 +36538,94 @@ function __combatShowShieldPrompt(ev) {
         var ov = document.createElement('div');
         ov.className = 'target-confirm-overlay';
         var card = document.createElement('div');
-        card.className = 'target-confirm-card';
+        card.className = 'target-confirm-card target-confirm-card--reaction';
         var nm = ev.actorName || 'Inimigo';
-        var tot = (ev.d20 != null ? ev.d20 : '?')
-            + '+' + (ev.atk != null ? ev.atk : '?')
-            + '=' + (ev.total != null ? ev.total : '?');
         var esc = (typeof escHtml === 'function') ? escHtml : function (s) { return String(s); };
 
-        var title = 'Reação — D&D 5e';
-        var desc = '';
-        if (ev.subtype === 'uncanny_dodge' || ev.uncannyAvailable) {
-            title = 'Reação — Esquiva Sobrenatural';
-            desc = '<p class="c2-info-intro c2-info-intro--inline">Usar sua reação de Ladino para <strong>reduzir o dano deste ataque pela metade</strong> (PHB p.96)?</p>';
-        } else if (ev.subtype === 'rebuke' || ev.rebukeAvailable) {
-            title = 'Reação — Repreensão Infernal';
-            desc = '<p class="c2-info-intro c2-info-intro--inline">Usar sua reação para infligir 2d10 de dano de fogo no atacante (PHB p.250)?</p>';
-        } else {
-            title = 'Reação — Escudo Arcano';
-            desc = '<p class="c2-info-intro c2-info-intro--inline">Gastar <strong>' + (ev.shieldCost | 0) + '</strong> de mana para somar +5 à CA contra este ataque (PHB)?</p>';
+        var mathHtml = '';
+        if (ev.d20 != null) {
+            mathHtml = '<span>' + esc(ev.d20) + '</span>';
+            if (ev.atk != null) mathHtml += ' + <span>' + esc(ev.atk) + '</span>';
+            mathHtml += ' = <span>' + esc(ev.total != null ? ev.total : '?') + '</span>';
+            mathHtml += '<span class="tcc-rx-vs">vs CA</span>';
+            mathHtml += '<span class="tcc-rx-ac">' + esc(ev.ac != null ? ev.ac : '?') + '</span>';
         }
 
-        var html = '<div class="tcc-title">' + esc(title) + '</div>';
-        html += '<p class="c2-info-intro c2-info-intro--inline"><strong>'
-            + esc(nm) + '</strong> acerta em você (' + esc(tot)
-            + ' vs CA ' + (ev.ac != null ? ev.ac : '?') + ').</p>';
-        html += desc;
+        var title = 'Reação — D&D 5e';
+        var triggerLabel = 'Ataque Inimigo';
+        var triggerWho = '<strong>' + esc(nm) + '</strong> acerta em você (' + (ev.total != null ? ('total ' + esc(ev.total) + ' vs CA ' + esc(ev.ac != null ? ev.ac : '?')) : 'ataque confirmado') + ').';
+
+        var reactionPills = [];
+        reactionPills.push('<span class="dmg-pill dmg-pill--buff">⚡ 1 Reação / Rodada</span>');
+        if (ev.shieldAvailable || ev.subtype === 'shield') {
+            if (ev.shieldCost) reactionPills.push('<span class="dmg-pill dmg-pill--type">💧 ' + (ev.shieldCost | 0) + ' Mana</span>');
+            if (ev.ac != null && ev.total != null) {
+                if ((ev.ac + 5) > ev.total) {
+                    reactionPills.push('<span class="dmg-pill dmg-pill--save">🛡️ Escudo Anula (+5 CA vira Erro)</span>');
+                } else {
+                    reactionPills.push('<span class="dmg-pill dmg-pill--vuln">⚠️ Ataque ainda supera CA</span>');
+                }
+            }
+        }
+        if (ev.uncannyAvailable || ev.subtype === 'uncanny_dodge') {
+            reactionPills.push('<span class="dmg-pill dmg-pill--save">💨 Esquiva: ½ Dano</span>');
+        }
+        if (ev.rebukeAvailable || ev.subtype === 'rebuke') {
+            reactionPills.push('<span class="dmg-pill dmg-pill--crit">🔥 2d10 Fogo no Atacante</span>');
+        }
+
+        var comparisonHtml = '';
+        if ((ev.shieldAvailable || ev.subtype === 'shield') && ev.ac != null && ev.total != null) {
+            if ((ev.ac + 5) > ev.total) {
+                comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--win">🛡️ Com Escudo: CA ' + ev.ac + ' + 5 = <strong>' + (ev.ac + 5) + '</strong> &gt; ' + ev.total + ' → <strong>ATAQUE ERRA!</strong></div>';
+            } else {
+                comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--loss">⚠️ Com Escudo: CA ' + ev.ac + ' + 5 = <strong>' + (ev.ac + 5) + '</strong> ≤ ' + ev.total + ' → <strong>Ainda Acerta!</strong> (+5 CA protege próximos ataques)</div>';
+            }
+        }
+        if (ev.uncannyAvailable || ev.subtype === 'uncanny_dodge') {
+            comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--info">💨 Esquiva Sobrenatural (PHB p. 96): <strong>Reduz o dano sofrido à METADE (½)</strong> contra este ataque.</div>';
+        }
+        if (ev.rebukeAvailable || ev.subtype === 'rebuke') {
+            comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--chance">🔥 Repreensão Infernal (PHB p. 250): Contra-ataque de <strong>2d10 de fogo</strong> contra ' + esc(nm) + '.</div>';
+        }
+
+        var dRows = [
+            { l: 'Combatente', v: ev.targetName || 'Aventureiro' },
+            { l: 'Atacante', v: nm },
+            { l: 'Ataque Inimigo', v: String(ev.total != null ? ev.total : '?') + (ev.d20 != null ? (' (d20: ' + ev.d20 + ' + atk: ' + (ev.atk != null ? ev.atk : '?') + ')') : '') },
+            { l: 'Sua CA', v: String(ev.ac != null ? ev.ac : '?') },
+            { l: 'Regra de Reação', v: 'PHB p. 190 — Você possui 1 reação por rodada. Ela se esgota até o início do seu próximo turno.' }
+        ];
+        if (ev.shieldAvailable || ev.subtype === 'shield') {
+            dRows.push({ l: 'Escudo Arcano (PHB p. 275)', v: '+5 de CA retroativo contra o ataque-gatilho e todos os ataques seguintes até o início do seu próximo turno.' });
+        }
+        if (ev.uncannyAvailable || ev.subtype === 'uncanny_dodge') {
+            dRows.push({ l: 'Esquiva Sobrenatural (PHB p. 96)', v: 'Ladino usa reação ao ser atingido por um atacante visível para reduzir o dano à metade.' });
+        }
+        if (ev.rebukeAvailable || ev.subtype === 'rebuke') {
+            dRows.push({ l: 'Repreensão Infernal (PHB p. 250)', v: 'Reação imediata ao sofrer dano para banhar o atacante em chamas infernais (TR de Destreza para metade).' });
+        }
+
+        var html = '<div class="tcc-title"><span class="tcc-rx-hex"></span>' + esc(title) + '</div>';
+        html += '<div class="tcc-rx-trigger">';
+        html += '<span class="tcc-rx-trigger-label">' + esc(triggerLabel) + '</span>';
+        html += '<div class="tcc-rx-trigger-who">' + triggerWho + '</div>';
+        if (mathHtml) html += '<div class="tcc-rx-math">' + mathHtml + '</div>';
+        if (comparisonHtml) html += comparisonHtml;
+        html += '</div>';
+
+        if (reactionPills.length) {
+            html += '<div class="drl-structured-pills" style="margin-bottom:8px;justify-content:center;">' + reactionPills.join(' ') + '</div>';
+        }
+
+        html += '<div style="text-align:center;margin:6px 0 10px;">';
+        html += '<button type="button" class="dmg-inspect-toggle-btn" aria-expanded="false">ℹ️ Detalhes da Regra</button>';
+        html += '<div class="dmg-math-breakdown" style="display:none;">';
+        dRows.forEach(function (rw) {
+            html += '<div class="dmg-math-breakdown-row"><span>' + esc(rw.l) + ':</span><strong>' + esc(rw.v) + '</strong></div>';
+        });
+        html += '</div></div>';
+
         html += '<div class="tcc-actions">';
         html += '<button type="button" class="action-btn" data-rs="none">Não usar</button>';
         if (ev.shieldAvailable || ev.subtype === 'shield') {
@@ -36501,8 +36638,11 @@ function __combatShowShieldPrompt(ev) {
             html += '<button type="button" class="action-btn primary" data-rs="rebuke">Repreensão (2d10 Fogo)</button>';
         }
         html += '</div>';
+
         setHTML(card, html);
         ov.appendChild(card);
+        _reactionPromptOpen = true;
+
         if (typeof mountInGameFrame === 'function') {
             mountInGameFrame(ov);
         } else if (typeof vOverlay !== 'undefined' && vOverlay.add) {
@@ -36511,11 +36651,27 @@ function __combatShowShieldPrompt(ev) {
             var _appHost = document.getElementById('app') || document.body;
             _appHost.appendChild(ov);
         }
+
         function done(v) {
+            _reactionPromptOpen = false;
             try { ov.remove(); } catch (eR) {}
             resolve(v);
         }
+
         ov.addEventListener('click', function (e) { if (e.target === ov) done('none'); });
+
+        var toggleBtn = card.querySelector('.dmg-inspect-toggle-btn');
+        var detailsBody = card.querySelector('.dmg-math-breakdown');
+        if (toggleBtn && detailsBody) {
+            toggleBtn.addEventListener('click', function (evClick) {
+                evClick.stopPropagation();
+                var isOpen = detailsBody.style.display !== 'none';
+                detailsBody.style.display = isOpen ? 'none' : 'block';
+                toggleBtn.setAttribute('aria-expanded', !isOpen);
+                toggleBtn.textContent = isOpen ? 'ℹ️ Detalhes da Regra' : '▲ Ocultar Regras';
+            });
+        }
+
         card.querySelectorAll('button[data-rs]').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 done(btn.getAttribute('data-rs'));
@@ -37329,14 +37485,13 @@ function onBtnClick(ev) {
         /* Feedback imediato se clicar em botão desativado por gasto de ação */
         if (btn && btn.classList.contains('spent')) {
             var spentAct = btn.getAttribute('data-act');
-            if (spentAct === 'dash') {
+            if (spentAct === 'dash' || spentAct === 'disengage' || spentAct === 'hide') {
+                var pSpent = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
+                var isRogueSpent = pSpent && (((pSpent.cls || '').toLowerCase() === 'ladino' && (pSpent.lvl || 1) >= 2) || (pSpent.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); }));
                 if (typeof showToast === 'function') {
-                    showToast('Disparada consome uma Ação principal. Ação já utilizada neste turno.');
-                }
-                return;
-            } else if (spentAct === 'disengage') {
-                if (typeof showToast === 'function') {
-                    showToast('Desengajar consome uma Ação principal. Ação já utilizada neste turno.');
+                    showToast(isRogueSpent
+                        ? 'Ação Ardilosa indisponível: tanto a Ação principal quanto a Ação Bônus já foram gastas neste turno.'
+                        : 'Ação indisponível: sua Ação principal já foi gasta neste turno.');
                 }
                 return;
             } else if (spentAct === 'shove') {
@@ -37347,11 +37502,6 @@ function onBtnClick(ev) {
             } else if (spentAct === 'help') {
                 if (typeof showToast === 'function') {
                     showToast('Ajudar consome uma Ação principal. Ação já utilizada neste turno.');
-                }
-                return;
-            } else if (spentAct === 'hide') {
-                if (typeof showToast === 'function') {
-                    showToast('Esconder-se requer uma Ação disponível. Ações esgotadas neste turno.');
                 }
                 return;
             } else if (spentAct === 'attack' || spentAct === 'dodge' || spentAct === 'bag' || spentAct === 'flee') {
@@ -37385,16 +37535,22 @@ function onBtnClick(ev) {
         } else if (act === 'dash') {
             _actionSheetOpen = false;
             render(currentState);
+            var pCurDash = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
+            var isRogueDash = pCurDash && (((pCurDash.cls || '').toLowerCase() === 'ladino' && (pCurDash.lvl || 1) >= 2) || (pCurDash.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); }));
+            var useBonusDash = isRogueDash && !pCurDash.bonusActionSpent;
+            var dashCostDesc = isRogueDash
+                ? (useBonusDash ? '• Custo: Gasta sua Ação Bônus (via Ação Ardilosa de Ladino, PHB p. 96) — sua Ação principal continua intacta!' : '• Custo: Gasta sua Ação principal (Ação Bônus já utilizada).')
+                : '• Custo: Gasta sua Ação principal.';
             confirmSimDiceSkip(
-                'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno.\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n• Custo: Gasta sua Ação principal.',
-                'Disparada',
+                'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno.\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n' + dashCostDesc,
+                'Disparada' + (useBonusDash ? ' (Ação Bônus)' : ''),
                 '✔ Disparar',
                 '← Voltar às opções'
             ).then(function(ok) {
                 if (ok) {
                     _actionTaken = true;
                     render(currentState);
-                    void __combatRemoteAction({ type: 'dash' });
+                    void __combatRemoteAction({ type: 'dash', as_bonus: useBonusDash });
                 } else {
                     render(currentState);
                 }
@@ -37421,16 +37577,22 @@ function onBtnClick(ev) {
         } else if (act === 'disengage') {
             _actionSheetOpen = false;
             render(currentState);
+            var pCurDis = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
+            var isRogueDis = pCurDis && (((pCurDis.cls || '').toLowerCase() === 'ladino' && (pCurDis.lvl || 1) >= 2) || (pCurDis.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); }));
+            var useBonusDis = isRogueDis && !pCurDis.bonusActionSpent;
+            var disCostDesc = isRogueDis
+                ? (useBonusDis ? '• Custo: Gasta sua Ação Bônus (via Ação Ardilosa de Ladino, PHB p. 96) — sua Ação principal continua intacta!' : '• Custo: Gasta sua Ação principal (Ação Bônus já utilizada).')
+                : '• Custo: Gasta sua Ação principal.';
             confirmSimDiceSkip(
-                'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno.\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n• Custo: Gasta sua Ação principal.',
-                'Desengajar',
+                'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno.\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n' + disCostDesc,
+                'Desengajar' + (useBonusDis ? ' (Ação Bônus)' : ''),
                 '✔ Desengajar',
                 '← Voltar às opções'
             ).then(function(ok) {
                 if (ok) {
                     _actionTaken = true;
                     render(currentState);
-                    void __combatRemoteAction({ type: 'disengage' });
+                    void __combatRemoteAction({ type: 'disengage', as_bonus: useBonusDis });
                 } else {
                     render(currentState);
                 }
@@ -37493,11 +37655,14 @@ function onBtnClick(ev) {
         } else if (act === 'hide') {
             _actionSheetOpen = false;
             render(currentState);
+            var pCurH = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
+            var isRogueH = pCurH && (((pCurH.cls || '').toLowerCase() === 'ladino' && (pCurH.lvl || 1) >= 2) || (pCurH.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); }));
+            var useBonusH = isRogueH && !pCurH.bonusActionSpent;
             showHideConfirmModal().then(function(ok) {
                 if (ok) {
                     _actionTaken = true;
                     render(currentState);
-                    void __combatRemoteAction({ type: 'hide' });
+                    void __combatRemoteAction({ type: 'hide', as_bonus: useBonusH });
                 } else {
                     render(currentState);
                 }
@@ -37978,16 +38143,22 @@ function onBtnClick(ev) {
     if (act === 'dash') {
         _actionSheetOpen = false;
         render(currentState);
+        var pCurDashL = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
+        var isRogueDashL = pCurDashL && (((pCurDashL.cls || '').toLowerCase() === 'ladino' && (pCurDashL.lvl || 1) >= 2) || (pCurDashL.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); }));
+        var useBonusDashL = isRogueDashL && !pCurDashL.bonusActionSpent;
+        var dashCostDescL = isRogueDashL
+            ? (useBonusDashL ? '• Custo: Gasta sua Ação Bônus (via Ação Ardilosa de Ladino, PHB p. 96) — sua Ação principal continua intacta!' : '• Custo: Gasta sua Ação principal (Ação Bônus já utilizada).')
+            : '• Custo: Gasta sua Ação principal.';
         confirmSimDiceSkip(
-            'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno.\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n• Custo: Gasta sua Ação principal.',
-            'Disparada',
+            'O Que Está Sendo Escolhido:\nVocê ganha deslocamento adicional igual ao seu deslocamento base para este turno.\n\nConsequências & Benefícios:\n• Dobra sua capacidade de movimento neste turno.\n' + dashCostDescL,
+            'Disparada' + (useBonusDashL ? ' (Ação Bônus)' : ''),
             '✔ Disparar',
             '← Voltar às opções'
         ).then(function(ok) {
             if (ok) {
                 _actionTaken = true;
                 render(currentState);
-                void passPlayerMetaAction('dash');
+                void passPlayerMetaAction('dash', { as_bonus: useBonusDashL });
             } else {
                 render(currentState);
             }
@@ -37997,16 +38168,22 @@ function onBtnClick(ev) {
     if (act === 'disengage') {
         _actionSheetOpen = false;
         render(currentState);
+        var pCurDisL = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
+        var isRogueDisL = pCurDisL && (((pCurDisL.cls || '').toLowerCase() === 'ladino' && (pCurDisL.lvl || 1) >= 2) || (pCurDisL.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); }));
+        var useBonusDisL = isRogueDisL && !pCurDisL.bonusActionSpent;
+        var disCostDescL = isRogueDisL
+            ? (useBonusDisL ? '• Custo: Gasta sua Ação Bônus (via Ação Ardilosa de Ladino, PHB p. 96) — sua Ação principal continua intacta!' : '• Custo: Gasta sua Ação principal (Ação Bônus já utilizada).')
+            : '• Custo: Gasta sua Ação principal.';
         confirmSimDiceSkip(
-            'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno.\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n• Custo: Gasta sua Ação principal.',
-            'Desengajar',
+            'O Que Está Sendo Escolhido:\nSeu deslocamento não provocará Ataques de Oportunidade até o final do seu turno.\n\nConsequências & Benefícios:\n• Permite recuar ou atravessar áreas ameaçadas com segurança total.\n' + disCostDescL,
+            'Desengajar' + (useBonusDisL ? ' (Ação Bônus)' : ''),
             '✔ Desengajar',
             '← Voltar às opções'
         ).then(function(ok) {
             if (ok) {
                 _actionTaken = true;
                 render(currentState);
-                void passPlayerMetaAction('disengage');
+                void passPlayerMetaAction('disengage', { as_bonus: useBonusDisL });
             } else {
                 render(currentState);
             }
@@ -38586,21 +38763,35 @@ async function passPlayerMetaAction(kind, opts) {
         render(s);
         await playBuffVfxOnCell('player', 'dodge', { durationMs: 2400 });
     } else if (kind === 'dash') {
-        p.actionSpent = true;
+        var isRogueDashLocal = (p.cls || '').toLowerCase() === 'ladino' || (p.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); });
+        var useBonusDashLocal = !!(opts.as_bonus || (isRogueDashLocal && !p.bonusActionSpent));
+        if (useBonusDashLocal) {
+            p.bonusActionSpent = true;
+        } else {
+            p.actionSpent = true;
+        }
         var dashSpeed = p.speed || 6;
         p.movement_left = (p.movement_left || 0) + dashSpeed;
-        s.log.push(p.n + ' usa Disparada (deslocamento adicional +' + formatHexDistanceMeters(dashSpeed) + ').');
+        var dashBaStr = useBonusDashLocal ? ' (ação bônus — PHB p. 96)' : '';
+        s.log.push(p.n + ' usa Disparada' + dashBaStr + ' (deslocamento adicional +' + formatHexDistanceMeters(dashSpeed) + ').');
         render(s);
     } else if (kind === 'disengage') {
-        p.actionSpent = true;
+        var isRogueDisLocal = (p.cls || '').toLowerCase() === 'ladino' || (p.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); });
+        var useBonusDisLocal = !!(opts.as_bonus || (isRogueDisLocal && !p.bonusActionSpent));
+        if (useBonusDisLocal) {
+            p.bonusActionSpent = true;
+        } else {
+            p.actionSpent = true;
+        }
         pushBuffSim(p, {
             id: 'acao_desengajar',
             turns: 1,
             kind: 'buff',
-            condName: 'Desengajar (ação)',
+            condName: 'Desengajar' + (useBonusDisLocal ? ' (ação bônus)' : ' (ação)'),
             condRule: 'Seu deslocamento tático não provoca ataques de oportunidade até o encerramento do turno.'
         }, '', 'Desengajar');
-        s.log.push(p.n + ' usa Desengajar (não provoca Ataques de Oportunidade até o final do turno).');
+        var disBaStr = useBonusDisLocal ? ' (ação bônus — PHB p. 96)' : '';
+        s.log.push(p.n + ' usa Desengajar' + disBaStr + ' (não provoca Ataques de Oportunidade até o final do turno).');
         render(s);
     } else if (kind === 'shove') {
         p.actionSpent = true;
@@ -53002,6 +53193,15 @@ async function __combatAnimateOneEvent(ev) {
                                         { l: 'Resultado', v: isNat20 ? 'Natural 20 (Recupera 1 PV)' : (isNat1 ? 'Natural 1 (2 Falhas)' : (isSuccess ? 'Sucesso (≥10)' : 'Falha (<10)')) },
                                         { l: 'Progresso', v: nsF + '/3 S · ' + nfF + '/3 F' }
                                     ],
+                                    details: {
+                                        rows: [
+                                            { l: 'Regra D&D 5e', v: 'PHB p. 197: Salvaguarda contra a Morte ao iniciar turno com 0 PV' },
+                                            { l: 'Sucesso', v: 'Rolagem de 10 ou mais no d20. Três sucessos estabilizam o aventureiro com 0 PV.' },
+                                            { l: 'Falha', v: 'Rolagem de 9 ou menos no d20. Três falhas causam a morte definitiva.' },
+                                            { l: 'Extremos Críticos', v: '1 natural = 2 falhas imediatas; 20 natural = recupera 1 PV e recobra a consciência.' },
+                                            { l: 'Dano com 0 PV', v: 'Sofrer dano com 0 PV conta como 1 falha (ou 2 se for ataque crítico a até 1,5m).' }
+                                        ]
+                                    },
                                     note: isNat20 ? 'Natural 20! O personagem recupera 1 PV de imediato e acorda.' : (isNat1 ? 'Natural 1! Conta como duas falhas no teste contra a morte.' : (isSuccess ? 'Sucesso: acumula ponto de estabilização (3 para estabilizar).' : 'Falha: acumula ponto de morte (3 para falecer).'))
                                 }
                             };
@@ -53028,7 +53228,9 @@ async function __combatAnimateOneEvent(ev) {
         var dsUid = (typeof unitUidForOrderIndex === 'function' && currentState)
             ? unitUidForOrderIndex(currentState, ev.tIdx)
             : (ev.tIdx === (currentState && currentState.p_idx) ? 'player' : 'ally_' + ev.tIdx);
-        var dsEl = document.querySelector('[data-unit-id="' + dsUid + '"]');
+        var dsEl = (typeof getUnitTokenEl === 'function' && ev.tIdx != null)
+            ? (getUnitTokenEl(currentState, ev.tIdx) || document.querySelector('[data-unit-id="' + dsUid + '"]'))
+            : document.querySelector('[data-unit-id="' + dsUid + '"]');
         if (dsEl && typeof spawnSkillImpactLabel === 'function') {
             if (ev.d20 === 20) {
                 spawnSkillImpactLabel(dsEl, '✦ NAT 20: VOLTOU COM 1 PV!', 'crit');
