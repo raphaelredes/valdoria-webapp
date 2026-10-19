@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T02:34:23Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T03:15:40Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1868,6 +1868,11 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     border: 1px solid rgba(56, 189, 248, 0.65);
     color: #bae6fd;
 }
+.dmg-pill--buff {
+    background: rgba(217, 119, 6, 0.2);
+    border: 1px solid rgba(245, 158, 11, 0.65);
+    color: #fef08a;
+}
 .dmg-inspect-toggle-btn {
     display: inline-block;
     background: rgba(255, 255, 255, 0.06);
@@ -2089,6 +2094,14 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .drl-structured-note { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 11.5px; color: #e4d8c8; text-align: center; margin-top: 2px; }
 .dice-result-label.hit .drl-structured-note { color: #a8d898; font-weight: 600; }
 .dice-result-label.miss .drl-structured-note { color: #c06a3a; font-style: italic; }
+.drl-structured-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 3px 0; }
+.drl-structured-toggle-btn { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 11px; color: var(--v-gold, #c4953a); background: rgba(196, 149, 58, 0.1); border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 4px; padding: 2px 8px; margin: 4px auto 0; cursor: pointer; transition: background 0.2s, border-color 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+.drl-structured-toggle-btn:hover { background: rgba(196, 149, 58, 0.22); border-color: rgba(196, 149, 58, 0.5); }
+.drl-structured-details-body { display: none; flex-direction: column; gap: 2px; background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(196, 149, 58, 0.2); border-radius: 4px; padding: 4px 8px; margin-top: 4px; text-align: left; animation: ctFade 0.2s ease; width: 100%; box-sizing: border-box; }
+.drl-structured-details-body.is-open { display: flex; }
+.drl-details-row { display: flex; justify-content: space-between; font-size: 11px; font-family: var(--v-font, 'MedievalSharp'), serif; color: var(--v-text-dim, #a09484); }
+.drl-details-row span { color: var(--v-text-dim, #a09484); }
+.drl-details-row strong { color: var(--v-text, #f0e6d2); font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; }
 .dice-heal-result-stack { display: flex; flex-direction: column; align-items: center; gap: var(--v-space-sm, 8px); width: 100%; max-width: min(100%, 320px); }
 .dice-init-cell-scene.dice-heal-scene-wrap { position: relative; }
 .cell-heal-gain-pill {
@@ -2199,7 +2212,9 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 @keyframes advDieKeptPulse { 0%, 100% { filter: drop-shadow(0 0 14px currentColor) drop-shadow(0 0 26px currentColor); } 50% { filter: drop-shadow(0 0 22px currentColor) drop-shadow(0 0 40px currentColor) brightness(1.12); } }
 
 /* Label da adv ABOVE dos 2 dados (em vez de inline no badge) */
-.dice-canvas-holder--dual-label { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(14px * var(--v-font-scale, 1)); letter-spacing: 3px; text-transform: uppercase; margin: 0 auto var(--v-space-md, 8px); padding: 5px var(--v-space-xl, 16px); border-radius: var(--v-radius-pill, 20px); border: 1.5px solid; display: inline-block; animation: advBadgePulse 1.4s ease-in-out infinite; }
+.dice-canvas-holder--dual-label { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(14px * var(--v-font-scale, 1)); letter-spacing: 3px; text-transform: uppercase; margin: 0 auto var(--v-space-md, 8px); padding: 5px var(--v-space-xl, 16px); border-radius: var(--v-radius-pill, 20px); border: 1.5px solid; display: inline-flex; flex-direction: column; align-items: center; gap: 3px; animation: advBadgePulse 1.4s ease-in-out infinite; }
+.adv-label-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(13px * var(--v-font-scale, 1)); letter-spacing: 2.5px; text-transform: uppercase; }
+.adv-label-reason { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; opacity: 0.95; background: rgba(0, 0, 0, 0.45); padding: 1px 8px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.15); }
 .dice-canvas-holder--dual-label--advantage { color: #7bc47a; border-color: #7bc47a; background: rgba(40,90,50,.35); text-shadow: 0 0 8px rgba(123,196,122,.6); box-shadow: 0 0 14px rgba(123,196,122,.3); }
 .dice-canvas-holder--dual-label--disadvantage { color: #ff7a6a; border-color: #ff7a6a; background: rgba(90,30,25,.40); text-shadow: 0 0 8px rgba(255,122,106,.6); box-shadow: 0 0 14px rgba(255,122,106,.35); }
 
@@ -19797,7 +19812,7 @@ function simRollDamageBonusDice(actor, crit, target) {
         var sum = 0;
         for (var j = 0; j < diceCount; j++) { var r = rollN(d); rolls.push(r); sum += r; }
         total += sum;
-        entries.push({ id: st.id || 'buff', n: diceCount, d: d, rolls: rolls, total: sum });
+        entries.push({ id: st.id || 'buff', name: st.n || st.name || st.id || 'Bônus', n: diceCount, d: d, rolls: rolls, total: sum });
     }
     return { total: total, entries: entries };
 }
@@ -20278,8 +20293,9 @@ function formatTurnsLeftLabel(st) {
    halfDmg / selfAtkVulnerable de buffs/debuffs em actor.se e target.se.
    Cancelamento PHB: vantagem + desvantagem = rolagem normal.
    ============================================================ */
-function _simAttackAdvState(actor, target, skill) {
-    var adv = false, dis = false;
+function _simAttackAdvDetails(actor, target, skill) {
+    var advReasons = [];
+    var disReasons = [];
 
     /* D&D 5e Tactical Hex Grid (PHB p. 195):
        Desvantagem em ataques à distância quando há inimigo hostil a 5 pés (1 hex). */
@@ -20287,7 +20303,7 @@ function _simAttackAdvState(actor, target, skill) {
     var isRanged = reachInfo ? reachInfo.isRanged : (actor && (actor.is_ranged || actor.ranged));
     if (isRanged && typeof simHasHostileAdjacent === 'function' && currentState && currentState.order) {
         if (simHasHostileAdjacent(actor, currentState.order)) {
-            dis = true;
+            disReasons.push('🏹 Inimigo Adjacente (Disparo)');
         }
     }
 
@@ -20301,69 +20317,74 @@ function _simAttackAdvState(actor, target, skill) {
        (aprox. de 'criatura que ainda não agiu'). Espelha o motor. */
     if (actor && _subclassKeyNorm(actor.subclass) === 'assassin'
             && currentState && (currentState.rn | 0) <= 1) {
-        adv = true;
+        advReasons.push('🗡️ Emboscada de Assassino');
     }
     if (actor && actor.se) {
         actor.se.forEach(function (st) {
             if (!st) return;
             /* Flags no ATACANTE — buffs/debuffs que alteram SEUS ataques */
             if (st.atkAdvantage) {
-                /* V1.7 Sprint-17 Ronda 16 (2026-04-21 QA PHB p.88) — target-specific
-                   atkAdvantage: Juramento de Inimizade dá vantagem SÓ vs alvo marcado.
-                   Se buff tem markedTargetOnly + markedTargetName, checa target.n. */
                 if (st.markedTargetOnly && st.markedTargetName && target && target.n !== st.markedTargetName) {
                     /* atkAdvantage não aplica: target diferente do marcado */
                 } else {
-                    adv = true;
+                    advReasons.push(st.n ? ('✨ ' + st.n) : '✨ Vantagem no Ataque');
                 }
             }
-            if (st.atkDisadvantage) dis = true;
-            /* V1.7 Sprint-6 (2026-04-21 closeout) — PHB p.255 Invisibilidade:
-               "You have advantage on attack rolls" quando Invisível. Flag PHB. */
-            if (st.attackAdvantage) adv = true;
-            /* V1.7 Sprint-5/6 (2026-04-21 closeout) — PHB App.A conditions que
-               impõem desvantagem nos próprios ataques do afetado:
-               Cego (Blinded p.290), Envenenado (Poisoned p.292), Prostrado ranged (p.292),
-               Contido (Restrained p.291), Amedrontado com source vista (Frightened p.290). */
-            if (st.prone) dis = true;  /* Prone: atk roll com desvantagem (simplificação — PHB só afeta ranged) */
+            if (st.atkDisadvantage) {
+                disReasons.push(st.n ? ('⚠️ ' + st.n) : '⚠️ Desvantagem no Ataque');
+            }
+            /* V1.7 Sprint-6 (2026-04-21 closeout) — PHB p.255 Invisibilidade */
+            if (st.attackAdvantage) advReasons.push('👤 Atacante Invisível');
+            if (st.blinded || st.id === 'cego') disReasons.push('👁️ Atacante Cego');
+            if (st.poisoned || st.id === 'envenenado') disReasons.push('🧪 Atacante Envenenado');
+            if (st.frightened || st.id === 'amedrontado') disReasons.push('😱 Atacante Amedrontado');
+            if (st.restrained || st.id === 'contido') disReasons.push('🕸️ Atacante Contido');
+            if (st.prone) disReasons.push('⚠️ Atacante Caído');
         });
     }
     if (target && target.se) {
         target.se.forEach(function (st) {
             if (!st) return;
             /* Flags no ALVO — efeitos sobre o alvo que afetam ataques CONTRA ele */
-            // Buff no alvo que dá desvantagem a atacantes (Rugido Feroz legacy)
-            if (st.enemyAtkDisadvantage) dis = true;
-            // Temerário no alvo: atacante ganha vantagem (self vulnerable legacy)
-            if (st.selfAtkVulnerable) adv = true;
-            /* V1.7 Sprint-5/6 (2026-04-21 closeout) — PHB App.A targetedAdvantage:
-               ataques contra alvo ganham vantagem. Aplicado em:
-               Restrained (p.291), Paralyzed (p.291), Unconscious (p.292), Stunned (p.290),
-               Blinded (p.290), Charmed-helper (social), Prone melee (p.292). */
+            if (st.enemyAtkDisadvantage) disReasons.push('⚠️ Defesa Intimidante');
+            if (st.selfAtkVulnerable) advReasons.push('💥 Alvo Temerário');
             if (st.targetedAdvantage) {
                 if (targetProne && simDist !== null) {
-                    if (simDist <= 1) adv = true;
-                    else dis = true;
+                    if (simDist <= 1) advReasons.push('⚔️ Alvo Caído (Corpo a Corpo)');
+                    else disReasons.push('🏹 Alvo Caído (À Distância)');
                 } else {
-                    adv = true;
+                    var _condTag = st.paralyzed ? '⚡ Alvo Paralisado' :
+                                   st.stunned ? '💫 Alvo Atordoado' :
+                                   st.unconscious ? '💤 Alvo Inconsciente' :
+                                   st.restrained ? '🕸️ Alvo Contido' :
+                                   st.blinded ? '👁️ Alvo Cego' : '🎯 Alvo Vulnerável';
+                    advReasons.push(_condTag);
                 }
             }
-            /* V1.7 Sprint-6 (2026-04-21 closeout) — PHB p.255 Invisível (target):
-               "attack rolls against the creature have disadvantage" — flag PHB. */
-            if (st.attackerDisadvantage) dis = true;
+            if (st.attackerDisadvantage) {
+                if (st.invisible || st.id === 'invisivel') disReasons.push('👤 Alvo Invisível');
+                else if (st.dodge || st.id === 'esquiva') disReasons.push('💨 Alvo em Esquiva');
+                else disReasons.push('🛡️ Alvo com Defesa Evasiva');
+            }
         });
     }
     /* PHB p.292: Alvo prostrado (prone) — vantagem corpo a corpo (<= 1 hex / melee), desvantagem a distância (> 1 hex / ranged) */
     if (targetProne) {
         if (simDist !== null) {
-            if (simDist <= 1) adv = true;
-            else dis = true;
+            if (simDist <= 1) {
+                if (advReasons.indexOf('⚔️ Alvo Caído (Corpo a Corpo)') === -1) advReasons.push('⚔️ Alvo Caído (Corpo a Corpo)');
+            } else {
+                if (disReasons.indexOf('🏹 Alvo Caído (À Distância)') === -1) disReasons.push('🏹 Alvo Caído (À Distância)');
+            }
         } else {
-            if (isRanged) dis = true;
-            else adv = true;
+            if (isRanged) {
+                if (disReasons.indexOf('🏹 Alvo Caído (À Distância)') === -1) disReasons.push('🏹 Alvo Caído (À Distância)');
+            } else {
+                if (advReasons.indexOf('⚔️ Alvo Caído (Corpo a Corpo)') === -1) advReasons.push('⚔️ Alvo Caído (Corpo a Corpo)');
+            }
         }
     }
-    /* PHB p.72: Estilo de Luta Proteção (Protection Fighting Style) */
+    /* PHB p.72: Estilo de Luta Proteção */
     if (target && currentState && currentState.order) {
         var targetTeam = target.t;
         for (var pi = 0; pi < currentState.order.length; pi++) {
@@ -20376,16 +20397,14 @@ function _simAttackAdvState(actor, target, skill) {
                     });
                     if (!allyIncap && typeof hexDistance === 'function' && target.pos && ally.pos) {
                         if (hexDistance(target.pos.col, target.pos.row, ally.pos.col, ally.pos.row) <= 1) {
-                            dis = true;
+                            disReasons.push('🛡️ Estilo de Proteção do Aliado');
                         }
                     }
                 }
             }
         }
     }
-    /* G1 (escolha autor 2026-04-19) — Pack Tactics PHB MM p.341 (Wolf):
-       advantage no ataque sempre que ≥1 aliado vivo (combat2 abstrai posicionamento).
-       Aplicada no Animal Companion (Patrulheiro Beast Master). */
+    /* G1 Pack Tactics PHB MM p.341 */
     if (actor && actor.packTactics && currentState && currentState.order) {
         var alliesAlive = 0;
         for (var pi = 0; pi < currentState.order.length; pi++) {
@@ -20394,70 +20413,128 @@ function _simAttackAdvState(actor, target, skill) {
                 alliesAlive++;
             }
         }
-        if (alliesAlive >= 1) adv = true;
+        if (alliesAlive >= 1) advReasons.push('🐺 Táticas de Matilha');
     }
-    /* V1.7 Sprint-10 (2026-04-21 closeout) — PHB p.291 Exhaustion nv 3+:
-       desvantagem em rolagens de ataque. */
-    if (typeof _simExhaustionLevel === 'function' && _simExhaustionLevel(actor) >= 3) {
-        dis = true;
+    /* V1.7 Sprint-10 — PHB p.291 Exhaustion nv 3+ */
+    if (typeof _simExhaustionLevel === 'function') {
+        var _exLvl = _simExhaustionLevel(actor);
+        if (_exLvl >= 3) disReasons.push('Exaustão Nv ' + _exLvl);
     }
-    /* Phase 5b polish v3 (2026-04-26): firstAttackAdvantage da intro do encontro
-       de boss (Wis Insight ou Str Atletismo no brakthar_throne). Concede vantagem
-       no PRIMEIRO ataque do player no combate. Consumida apos uso. */
+    /* firstAttackAdvantage */
     if (actor && actor.firstAttackAdvantage) {
-        adv = true;
+        advReasons.push('⚡ Iniciativa Feroz');
+    }
+    /* D&D 5e DMG p. 251: Flanqueamento em Grid Hexagonal */
+    if (!isRanged && typeof simCheckFlanking === 'function' && currentState && currentState.order) {
+        if (simCheckFlanking(actor, target, currentState.order)) {
+            advReasons.push('⚔️ Flanqueamento');
+        }
+    }
+
+    // Deduplicate
+    advReasons = advReasons.filter(function(v, i, a) { return a.indexOf(v) === i; });
+    disReasons = disReasons.filter(function(v, i, a) { return a.indexOf(v) === i; });
+
+    var adv = advReasons.length > 0;
+    var dis = disReasons.length > 0;
+    var mode = 'normal';
+    var reason = '';
+
+    if (adv && dis) {
+        mode = 'normal';
+        reason = 'Vantagem e Desvantagem se anulam (PHB p. 173)';
+    } else if (adv) {
+        mode = 'advantage';
+        reason = advReasons.join(' · ');
+    } else if (dis) {
+        mode = 'disadvantage';
+        reason = disReasons.join(' · ');
+    }
+
+    return {
+        mode: mode,
+        reason: reason,
+        advReasons: advReasons,
+        disReasons: disReasons
+    };
+}
+
+function _simAttackAdvState(actor, target, skill) {
+    if (actor && actor.firstAttackAdvantage) {
         actor.firstAttackAdvantage = false;
         console.info('[PLAYER-BUFF] firstAttackAdvantage consumed for ' + actor.n);
-        // Remove condition badge
         if (Array.isArray(actor.se)) {
             actor.se = actor.se.filter(function (st) {
                 return !st || st.id !== 'first_atk_adv_pre';
             });
         }
     }
-    /* D&D 5e DMG p. 251: Flanqueamento em Grid Hexagonal (ataque corpo a corpo com aliado adjacente oposto) */
-    if (!isRanged && typeof simCheckFlanking === 'function' && currentState && currentState.order) {
-        if (simCheckFlanking(actor, target, currentState.order)) {
-            adv = true;
-        }
-    }
-    if (adv && dis) return 'normal';
-    if (adv) return 'advantage';
-    if (dis) return 'disadvantage';
-    return 'normal';
+    var details = _simAttackAdvDetails(actor, target, skill);
+    return details.mode;
 }
 
-/* V1.7 Sprint-17 Ronda 28 (2026-04-21 QA PHB p.173+p.291) — Save advantage/disadvantage helper.
-   Cancelamento PHB: vantagem + desvantagem = rolagem normal. Aplica:
-   - Exhaustion 3+ (PHB p.291): desvantagem em TRs
-   - Restrained + DEX save (PHB App.A): desvantagem
-   - Buffs com saveAdvantage (ex: Aura de Proteção futura, Heroísmo, etc.)
-   - Debuffs com saveDisadvantage (ex: Fear, Paralyzed aspects) */
-function _simSaveAdvState(defender, ability) {
-    if (!defender) return 'normal';
-    var adv = false, dis = false;
+function _simSaveAdvDetails(defender, ability, skill) {
+    if (!defender) return { mode: 'normal', reason: '', advReasons: [], disReasons: [] };
+    var advReasons = [];
+    var disReasons = [];
     var ab = (ability || '').toLowerCase();
+
     /* Exhaustion 3+: desvantagem em TRs */
-    if (typeof _simExhaustionLevel === 'function' && _simExhaustionLevel(defender) >= 3) {
-        dis = true;
+    if (typeof _simExhaustionLevel === 'function') {
+        var _exLvl = _simExhaustionLevel(defender);
+        if (_exLvl >= 3) disReasons.push('Exaustão Nv ' + _exLvl);
     }
     /* Status effects no defender */
     if (defender.se && defender.se.length) {
         defender.se.forEach(function (st) {
             if (!st || (st.turnsLeft != null && st.turnsLeft <= 0)) return;
             /* Restrained (PHB App.A): desvantagem em saves DES */
-            if (st.restrained && ab === 'dex') dis = true;
+            if (st.restrained && ab === 'dex') disReasons.push('🕸️ Contido (TR DES)');
             /* magicSaveAdvantage: saves contra magia com vantagem (Contramágica, Prot Magia) */
-            if (st.magicSaveAdvantage) adv = true;
+            if (st.magicSaveAdvantage) advReasons.push('✨ Resistência à Magia');
             /* Generic flags for future use */
-            if (st.saveAdvantage) adv = true;
-            if (st.saveDisadvantage) dis = true;
+            if (st.saveAdvantage) advReasons.push(st.n ? ('✨ ' + st.n) : '✨ Vantagem em TR');
+            if (st.saveDisadvantage) disReasons.push(st.n ? ('⚠️ ' + st.n) : '⚠️ Desvantagem em TR');
         });
     }
-    if (adv && dis) return 'normal';
-    if (adv) return 'advantage';
-    if (dis) return 'disadvantage';
-    return 'normal';
+
+    // Vantagem racial
+    if (typeof _simRacialSaveAdv === 'function') {
+        var rAdv = _simRacialSaveAdv(defender, ab, skill ? ((skill.n || '') + ' ' + (skill.dmgType || '')) : '');
+        if (rAdv && rAdv.adv) {
+            advReasons.push(rAdv.label || 'Vantagem Racial');
+        }
+    }
+
+    advReasons = advReasons.filter(function(v, i, a) { return a.indexOf(v) === i; });
+    disReasons = disReasons.filter(function(v, i, a) { return a.indexOf(v) === i; });
+
+    var adv = advReasons.length > 0;
+    var dis = disReasons.length > 0;
+    var mode = 'normal';
+    var reason = '';
+
+    if (adv && dis) {
+        mode = 'normal';
+        reason = 'Vantagem e Desvantagem se anulam (PHB p. 173)';
+    } else if (adv) {
+        mode = 'advantage';
+        reason = advReasons.join(' · ');
+    } else if (dis) {
+        mode = 'disadvantage';
+        reason = disReasons.join(' · ');
+    }
+
+    return {
+        mode: mode,
+        reason: reason,
+        advReasons: advReasons,
+        disReasons: disReasons
+    };
+}
+
+function _simSaveAdvState(defender, ability) {
+    return _simSaveAdvDetails(defender, ability).mode;
 }
 /* Rola d20 respeitando vantagem/desvantagem. Retorna { r, raw1, raw2, mode }. */
 // C1.3 #90: vantagem RACIAL em salvaguardas (PHB) — espelha o motor
@@ -21856,7 +21933,8 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
         fctInner += '<span class="fct-mod-tag fct-mod--vuln">×2 Vulnerabilidade</span>';
     }
     lbl.innerHTML = fctInner;
-    document.body.appendChild(lbl);
+    if (typeof mountInGameFrame === 'function') mountInGameFrame(lbl);
+    else (document.getElementById('app') || document.body).appendChild(lbl);
     setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 1400);
 }
 
@@ -29642,8 +29720,8 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     var attr = actor.attr || 'bônus de dano';
     var mod = dmgMod || 0;
     var sumDice = rolls.reduce(function (a, b) { return a + b; }, 0);
-    var total = Math.max(1, sumDice + mod);
     reductionMeta = reductionMeta || {};
+    var total = (typeof reductionMeta.rawTotal === 'number') ? reductionMeta.rawTotal : Math.max(1, sumDice + mod);
 
     var dtKey = String(reductionMeta.dmgType || actor.dmgType || 'slashing').toLowerCase().trim();
     var dtInfo = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(dtKey) : { lb: 'Cortante', ico: '⚔️', col: '#e2d6c5' };
@@ -29678,7 +29756,7 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         box.appendChild(one);
     }
 
-    // Pílulas táticas D&D 5e (Resistência, Vulnerabilidade, Imunidade, TR, Concentração, Evasão)
+    // Pílulas táticas D&D 5e (Resistência, Vulnerabilidade, Imunidade, TR, Concentração, Evasão, Buffs)
     var tacticalPills = [];
     if (crit) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico (Dados Dobrados)</span>');
@@ -29710,6 +29788,28 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     }
     if (reductionMeta.hasConcentration) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--conc">🧠 TR CON CD ' + (reductionMeta.concDc || 10) + ' (Concentração)</span>');
+    }
+    // Bônus de habilidades (Marca do Caçador, Punição Divina, etc.)
+    if (reductionMeta.bonusPack && reductionMeta.bonusPack.entries && reductionMeta.bonusPack.entries.length) {
+        for (var _bpi = 0; _bpi < reductionMeta.bonusPack.entries.length; _bpi++) {
+            var _bp = reductionMeta.bonusPack.entries[_bpi];
+            var _bpName = _bp.name || _bp.id || 'Bônus';
+            tacticalPills.push('<span class="dmg-pill dmg-pill--buff">✨ ' + escHtml(_bpName) + ' (+' + _bp.total + ')</span>');
+        }
+    }
+    // Bônus vs Tipo de Criatura (ex.: Divine Smite vs Morto-vivo/Ínfero)
+    if (reductionMeta.bonusVsTagEntry && reductionMeta.bonusVsTagEntry.total > 0) {
+        var _bvt = reductionMeta.bonusVsTagEntry;
+        tacticalPills.push('<span class="dmg-pill dmg-pill--buff">☠️ vs ' + escHtml(_bvt.tags) + ' (+' + _bvt.total + ')</span>');
+    }
+    // Bônus de Subclasse (Abatedor Colossal, Afinidade Elemental, etc.)
+    if (reductionMeta.subclassBonusList && reductionMeta.subclassBonusList.length) {
+        for (var _sbi = 0; _sbi < reductionMeta.subclassBonusList.length; _sbi++) {
+            var _sb = reductionMeta.subclassBonusList[_sbi];
+            tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ ' + escHtml(_sb.label) + '</span>');
+        }
+    } else if (reductionMeta.subclassBonusDmg > 0) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ Subclasse (+' + reductionMeta.subclassBonusDmg + ')</span>');
     }
 
     if (tacticalPills.length > 0) {
@@ -29754,7 +29854,29 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
 
     var rowsHtml = '';
     rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dados de Dano:</span><strong>' + rolls.length + 'd' + die + ' [' + rolls.join('+') + '] = ' + sumDice + '</strong></div>';
-    if (mod) rowsHtml += '<div class="dmg-math-breakdown-row"><span>Modificador:</span><strong>+' + mod + ' (' + escHtml(String(attr)) + ')</strong></div>';
+    var baseMod = (typeof reductionMeta.baseMod === 'number') ? reductionMeta.baseMod : mod;
+    if (baseMod) rowsHtml += '<div class="dmg-math-breakdown-row"><span>Modificador:</span><strong>+' + baseMod + ' (' + escHtml(String(attr)) + ')</strong></div>';
+    if (reductionMeta.bonusPack && reductionMeta.bonusPack.entries && reductionMeta.bonusPack.entries.length) {
+        for (var _bpi2 = 0; _bpi2 < reductionMeta.bonusPack.entries.length; _bpi2++) {
+            var _bp2 = reductionMeta.bonusPack.entries[_bpi2];
+            var _bpName2 = _bp2.name || _bp2.id || 'Bônus';
+            var _bpRollsStr = (_bp2.rolls && _bp2.rolls.length > 1) ? ' [' + _bp2.rolls.join('+') + ']' : '';
+            rowsHtml += '<div class="dmg-math-breakdown-row"><span>' + escHtml(_bpName2) + ':</span><strong>+' + _bp2.total + ' (' + _bp2.n + 'd' + _bp2.d + _bpRollsStr + ')</strong></div>';
+        }
+    }
+    if (reductionMeta.bonusVsTagEntry && reductionMeta.bonusVsTagEntry.total > 0) {
+        var _bvt2 = reductionMeta.bonusVsTagEntry;
+        var _bvtRollsStr = (_bvt2.rolls && _bvt2.rolls.length > 1) ? ' [' + _bvt2.rolls.join('+') + ']' : '';
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Bônus vs ' + escHtml(_bvt2.tags) + ':</span><strong>+' + _bvt2.total + ' (' + _bvt2.n + 'd' + _bvt2.d + _bvtRollsStr + ')</strong></div>';
+    }
+    if (reductionMeta.subclassBonusList && reductionMeta.subclassBonusList.length) {
+        for (var _sbi2 = 0; _sbi2 < reductionMeta.subclassBonusList.length; _sbi2++) {
+            var _sb2 = reductionMeta.subclassBonusList[_sbi2];
+            rowsHtml += '<div class="dmg-math-breakdown-row"><span>' + escHtml(_sb2.label) + ':</span><strong>+' + _sb2.val + '</strong></div>';
+        }
+    } else if (reductionMeta.subclassBonusDmg > 0) {
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Bônus de Subclasse:</span><strong>+' + reductionMeta.subclassBonusDmg + '</strong></div>';
+    }
     rowsHtml += '<div class="dmg-math-breakdown-row"><span>Tipo de Dano:</span><strong>' + dtInfo.ico + ' ' + escHtml(dtInfo.lb) + '</strong></div>';
     if (reductionMeta && typeof reductionMeta.appliedTotal === 'number' && reductionMeta.appliedTotal !== total) {
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dano Final D&D 5e:</span><strong style="color:#e8a070;">' + total + ' → ' + reductionMeta.appliedTotal + '</strong></div>';
@@ -29796,6 +29918,22 @@ function simBuildAttackSkipRows(r, atkShown, hitRes, effAc, actor, target, dmgRo
     if (dmgMod) parts += ' + ' + dmgMod + ' (' + attr + ')';
     if (dmgItem) parts += ' + ' + dmgItem + ' (efeitos)';
     if (dmgSpecFlat) parts += ' + ' + dmgSpecFlat + ' (fixo)';
+    if (reductionMeta && reductionMeta.bonusPack && reductionMeta.bonusPack.entries && reductionMeta.bonusPack.entries.length) {
+        for (var _bpi3 = 0; _bpi3 < reductionMeta.bonusPack.entries.length; _bpi3++) {
+            var _bp3 = reductionMeta.bonusPack.entries[_bpi3];
+            parts += ' + ' + _bp3.total + ' (' + (_bp3.name || 'bônus') + ')';
+        }
+    }
+    if (reductionMeta && reductionMeta.bonusVsTagEntry && reductionMeta.bonusVsTagEntry.total > 0) {
+        parts += ' + ' + reductionMeta.bonusVsTagEntry.total + ' (vs ' + reductionMeta.bonusVsTagEntry.tags + ')';
+    }
+    if (reductionMeta && reductionMeta.subclassBonusList && reductionMeta.subclassBonusList.length) {
+        for (var _sbi3 = 0; _sbi3 < reductionMeta.subclassBonusList.length; _sbi3++) {
+            parts += ' + ' + reductionMeta.subclassBonusList[_sbi3].val + ' (' + reductionMeta.subclassBonusList[_sbi3].label + ')';
+        }
+    } else if (reductionMeta && reductionMeta.subclassBonusDmg > 0) {
+        parts += ' + ' + reductionMeta.subclassBonusDmg + ' (subclasse)';
+    }
     parts += ' · ' + dtInfo.lb;
     if (reductionMeta && reductionMeta.isImmune) parts += ' [Imune: 0 dano]';
     else if (reductionMeta && reductionMeta.isVulnerable) parts += ' [Vulnerabilidade 2×]';
@@ -42814,7 +42952,8 @@ function spawnMissFloatLabel(el, customText) {
        (ver _spawnFloatingDmgNumber pra contexto completo). */
     lbl.style.setProperty('animation-duration', '1.25s', 'important');
     lbl.style.setProperty('animation-iteration-count', '1', 'important');
-    document.body.appendChild(lbl);
+    if (typeof mountInGameFrame === 'function') mountInGameFrame(lbl);
+    else (document.getElementById('app') || document.body).appendChild(lbl);
     setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 1300);
 }
 
@@ -42848,7 +42987,8 @@ function spawnSkillImpactLabel(el, text, kind) {
        (ver _spawnFloatingDmgNumber pra contexto). */
     lbl.style.setProperty('animation-duration', '1.0s', 'important');
     lbl.style.setProperty('animation-iteration-count', '1', 'important');
-    document.body.appendChild(lbl);
+    if (typeof mountInGameFrame === 'function') mountInGameFrame(lbl);
+    else (document.getElementById('app') || document.body).appendChild(lbl);
     setTimeout(function () { if (lbl.parentNode) lbl.parentNode.removeChild(lbl); }, 2500);
 }
 
@@ -43188,7 +43328,16 @@ function showDice(value, cb, actor, context, opts) {
         /* Label acima (substitui o antigo badge numérico — dados vão mostrar valores) */
         var advLabel = document.createElement('div');
         advLabel.className = 'dice-canvas-holder--dual-label dice-canvas-holder--dual-label--' + opts.advMode;
-        advLabel.textContent = (opts.advMode === 'advantage') ? 'VANTAGEM' : 'DESVANTAGEM';
+        var advTitle = document.createElement('span');
+        advTitle.className = 'adv-label-title';
+        advTitle.textContent = (opts.advMode === 'advantage') ? 'VANTAGEM' : 'DESVANTAGEM';
+        advLabel.appendChild(advTitle);
+        if (opts.advReason) {
+            var advReasonSpan = document.createElement('span');
+            advReasonSpan.className = 'adv-label-reason';
+            advReasonSpan.textContent = opts.advReason;
+            advLabel.appendChild(advReasonSpan);
+        }
         ov.appendChild(advLabel);
     }
     if (actor) {
@@ -43334,13 +43483,7 @@ function showDice(value, cb, actor, context, opts) {
             big.className = 'drl-big';
             big.textContent = info.title;
             resultEl.appendChild(big);
-            if (info.subHtml || info.sub) {
-                var sub = document.createElement('div');
-                sub.className = 'drl-sub';
-                if (info.subHtml) sub.innerHTML = info.subHtml;
-                else sub.textContent = info.sub;
-                resultEl.appendChild(sub);
-            } else if (info.subStructured) {
+            if (info.subStructured) {
                 var sStruct = info.subStructured;
                 var sub = document.createElement('div');
                 sub.className = 'drl-sub drl-sub--structured';
@@ -43370,13 +43513,48 @@ function showDice(value, cb, actor, context, opts) {
                     });
                     structWrap.appendChild(rowsEl);
                 }
+                if (Array.isArray(sStruct.pills) && sStruct.pills.length) {
+                    var pillsWrap = document.createElement('div');
+                    pillsWrap.className = 'drl-structured-pills';
+                    pillsWrap.innerHTML = sStruct.pills.join(' ');
+                    structWrap.appendChild(pillsWrap);
+                }
                 if (sStruct.note) {
                     var noteEl = document.createElement('div');
                     noteEl.className = 'drl-structured-note';
                     noteEl.textContent = sStruct.note;
                     structWrap.appendChild(noteEl);
                 }
+                if (sStruct.details && Array.isArray(sStruct.details.rows) && sStruct.details.rows.length) {
+                    var toggleBtn = document.createElement('button');
+                    toggleBtn.type = 'button';
+                    toggleBtn.className = 'drl-structured-toggle-btn';
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                    toggleBtn.textContent = 'ℹ️ Detalhes da Regra';
+                    var detailsBody = document.createElement('div');
+                    detailsBody.className = 'drl-structured-details-body';
+                    sStruct.details.rows.forEach(function (dRow) {
+                        var rowEl = document.createElement('div');
+                        rowEl.className = 'drl-details-row';
+                        rowEl.innerHTML = '<span>' + escHtml(dRow.l) + ':</span> <strong>' + escHtml(dRow.v) + '</strong>';
+                        detailsBody.appendChild(rowEl);
+                    });
+                    toggleBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        var isOpen = detailsBody.classList.toggle('is-open');
+                        toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                        toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'ℹ️ Detalhes da Regra';
+                    });
+                    structWrap.appendChild(toggleBtn);
+                    structWrap.appendChild(detailsBody);
+                }
                 sub.appendChild(structWrap);
+                resultEl.appendChild(sub);
+            } else if (info.subHtml || info.sub) {
+                var sub = document.createElement('div');
+                sub.className = 'drl-sub';
+                if (info.subHtml) sub.innerHTML = info.subHtml;
+                else sub.textContent = info.sub;
                 resultEl.appendChild(sub);
             }
             resultEl.className = 'dice-result-label visible ' + (info.cls || '');
@@ -45280,44 +45458,35 @@ async function playTurn(aIdx, tIdx, opts) {
                rerola nat-1 e vantagem RACIAL (Anão vs veneno, Gnomo INT/SAB/CAR,
                etc.) entram aqui como no motor (_apply_save_damage_shared_roll). */
             var _rsvLucky = _simIsLucky(target);
-            var _rsvAdv = _simRacialSaveAdv(target, _saveAbl,
-                (atkSkill.n || '') + ' ' + (atkSkill.dmgType || ''));
+            var _saveDetails = (typeof _simSaveAdvDetails === 'function')
+                ? _simSaveAdvDetails(target, atkSkill.save.ability, atkSkill)
+                : { mode: 'normal', reason: '', advReasons: [], disReasons: [] };
             if (hasMagicSaveAdv) {
-                /* Path legacy preservado pra compat (Contramágica buff carrega flag). Helper
-                   também lê magicSaveAdvantage, então consistente. */
-                var r1ms = _simLuckyD20(_rsvLucky), r2ms = _simLuckyD20(_rsvLucky);
-                saveAdvMode = 'advantage';
-                saveRaw1 = r1ms;
-                saveRaw2 = r2ms;
-                saveRoll = Math.max(r1ms, r2ms);
-                if (s && s.log) s.log.push(target.n + ' — salvaguarda com vantagem (Contramágica/Proteção): ' + r1ms + '/' + r2ms + ' → ' + saveRoll + '.');
-            } else {
-                var _saveAdvMode = (typeof _simSaveAdvState === 'function')
-                    ? _simSaveAdvState(target, atkSkill.save.ability) : 'normal';
-                /* PHB p.173: vantagem racial soma à equação adv/disadv — se o
-                   estado era desvantagem, cancela (normal); se normal, vira adv. */
-                if (_rsvAdv.adv) {
-                    if (_saveAdvMode === 'disadvantage') _saveAdvMode = 'normal';
-                    else _saveAdvMode = 'advantage';
-                    if (s && s.log) s.log.push(target.n + ' — ' + _rsvAdv.label + ': vantagem no TR.');
-                }
-                saveAdvMode = _saveAdvMode;
-                if (_saveAdvMode === 'advantage') {
-                    var _sr1a = _simLuckyD20(_rsvLucky), _sr2a = _simLuckyD20(_rsvLucky);
-                    saveRaw1 = _sr1a;
-                    saveRaw2 = _sr2a;
-                    saveRoll = Math.max(_sr1a, _sr2a);
-                    if (s && s.log) s.log.push(target.n + ' — TR com VANTAGEM (' + _sr1a + '/' + _sr2a + ' → ' + saveRoll + ').');
-                } else if (_saveAdvMode === 'disadvantage') {
-                    var _sr1b = _simLuckyD20(_rsvLucky), _sr2b = _simLuckyD20(_rsvLucky);
-                    saveRaw1 = _sr1b;
-                    saveRaw2 = _sr2b;
-                    saveRoll = Math.min(_sr1b, _sr2b);
-                    if (s && s.log) s.log.push(target.n + ' — TR com DESVANTAGEM (Exhaustion/Restrained — ' + _sr1b + '/' + _sr2b + ' → ' + saveRoll + ').');
+                _saveDetails.advReasons.push('✨ Resistência à Magia (Contramágica/Proteção)');
+                if (_saveDetails.mode === 'disadvantage') {
+                    _saveDetails.mode = 'normal';
+                    _saveDetails.reason = 'Vantagem e Desvantagem se anulam (PHB p. 173)';
                 } else {
-                    saveRoll = _simLuckyD20(_rsvLucky);
-                    saveRaw1 = saveRoll;
+                    _saveDetails.mode = 'advantage';
+                    _saveDetails.reason = _saveDetails.advReasons.join(' · ');
                 }
+            }
+            saveAdvMode = _saveDetails.mode;
+            if (saveAdvMode === 'advantage') {
+                var _sr1a = _simLuckyD20(_rsvLucky), _sr2a = _simLuckyD20(_rsvLucky);
+                saveRaw1 = _sr1a;
+                saveRaw2 = _sr2a;
+                saveRoll = Math.max(_sr1a, _sr2a);
+                if (s && s.log) s.log.push(target.n + ' — TR com VANTAGEM' + (_saveDetails.reason ? (' [' + _saveDetails.reason + ']') : '') + ': ' + _sr1a + '/' + _sr2a + ' → ' + saveRoll + '.');
+            } else if (saveAdvMode === 'disadvantage') {
+                var _sr1b = _simLuckyD20(_rsvLucky), _sr2b = _simLuckyD20(_rsvLucky);
+                saveRaw1 = _sr1b;
+                saveRaw2 = _sr2b;
+                saveRoll = Math.min(_sr1b, _sr2b);
+                if (s && s.log) s.log.push(target.n + ' — TR com DESVANTAGEM' + (_saveDetails.reason ? (' [' + _saveDetails.reason + ']') : '') + ': ' + _sr1b + '/' + _sr2b + ' → ' + saveRoll + '.');
+            } else {
+                saveRoll = _simLuckyD20(_rsvLucky);
+                saveRaw1 = saveRoll;
             }
             var _svAb = String(atkSkill.save.ability || 'con').toLowerCase();
             var _svCover = (_svAb === 'dex' && typeof simComputeCover === 'function')
@@ -45333,6 +45502,9 @@ async function playTurn(aIdx, tIdx, opts) {
     } else {
         // Vantagem/desvantagem via status (Surto de Ação, Ação Ardilosa,
         // Juramento de Inimizade, Passo Oculto, Temerário, Zombaria, Prostrado, Rugido Feroz, Flanqueamento)
+        var advDetails = (typeof _simAttackAdvDetails === 'function')
+            ? _simAttackAdvDetails(actor, target, atkSkill)
+            : { mode: 'normal', reason: '', advReasons: [], disReasons: [] };
         var advMode = _simAttackAdvState(actor, target, atkSkill);
         var d20Pack = _simRollD20WithAdv(advMode, _simIsLucky(actor));  // C1.5 #90
         r = d20Pack.r;
@@ -45347,7 +45519,7 @@ async function playTurn(aIdx, tIdx, opts) {
             ? simCheckElevationTacticalModifier(s, actor, target, !!(_atkReach && _atkReach.isRanged))
             : { bonus: 0, label: null };
         if (advMode !== 'normal') {
-            var _flankLogNote = (_atkFlanked && advMode === 'advantage') ? ' [Flanqueamento]' : '';
+            var _flankLogNote = advDetails.reason ? (' [' + advDetails.reason + ']') : ((_atkFlanked && advMode === 'advantage') ? ' [Flanqueamento]' : '');
             s.log.push(actor.n + ' — d20 com ' + (advMode === 'advantage' ? 'VANTAGEM' : 'DESVANTAGEM') + _flankLogNote +
                 ' (' + d20Pack.raw1 + ' / ' + d20Pack.raw2 + ' → ' + r + ').');
         }
@@ -45425,17 +45597,53 @@ async function playTurn(aIdx, tIdx, opts) {
                     combatTarget: actor,
                     skill: atkSkill,
                     advMode: saveAdvMode,
+                    advReason: _saveDetails.reason,
                     advRaw1: saveRaw1,
                     advRaw2: saveRaw2,
                     postResult: function () {
                         var _resTitle = saveSuccess ? (target.n.toUpperCase() + ' RESISTIU') : (target.n.toUpperCase() + ' FALHOU NO TR');
+                        var _kicker = '🛡️ TR ' + _svAblName + ' (CD ' + saveDc + ')';
+                        var _rows = [];
+                        if (saveAdvMode !== 'normal' && saveRaw1 != null && saveRaw2 != null) {
+                            _rows.push({ l: 'Dados', v: saveRaw1 + ' e ' + saveRaw2 + ' → ' + saveRoll });
+                        } else {
+                            _rows.push({ l: 'Rolagem', v: String(saveRoll) });
+                        }
+                        _rows.push({ l: 'Mod ' + _svAblName, v: (saveMod >= 0 ? '+' : '') + saveMod });
+                        _rows.push({ l: 'Total', v: String(saveTotal) });
+                        _rows.push({ l: 'CD Alvo', v: String(saveDc) });
+
+                        var _note = saveSuccess
+                            ? (atkSkill.saveNegates ? 'Passou na salvaguarda — Anulou o efeito (0 Dano, D&D 5e PHB p. 196).' : 'Passou na salvaguarda — Sofre metade do dano (½, D&D 5e PHB p. 196).')
+                            : 'Falhou na salvaguarda — Sofre dano integral (D&D 5e PHB p. 196).';
+
+                        var _detailsRows = [
+                            { l: 'Habilidade', v: atkSkill.n || 'Magia' },
+                            { l: 'Atributo do TR', v: _svAblName },
+                            { l: 'CD da Salvaguarda', v: String(saveDc) },
+                            { l: 'Modificador Base', v: (simSaveMod(target, atkSkill.save.ability) >= 0 ? '+' : '') + simSaveMod(target, atkSkill.save.ability) }
+                        ];
+                        if (_svCover && _svCover.bonus > 0) {
+                            _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + _svCover.bonus + ' (' + (_svCover.cover === 'half' ? 'Meia' : '¾') + ' Cobertura, PHB p. 196)' });
+                        }
+                        if (_saveDetails.reason) {
+                            _detailsRows.push({ l: 'Circunstância Tática', v: _saveDetails.reason });
+                        }
+
                         return {
                             title: _resTitle,
+                            cls: saveSuccess ? 'miss' : 'hit',
+                            subStructured: {
+                                kicker: _kicker,
+                                rows: _rows,
+                                pills: _svTacticalPills,
+                                note: _note,
+                                details: { rows: _detailsRows }
+                            },
                             subHtml: simFormatVsDcHTML(saveRoll, saveMod, saveTotal, saveDc, saveSuccess) +
                                 _svCoverBadge +
                                 _svPillRowHtml +
-                                '<div class="drl-crit-rule">' + (atkSkill.saveNegates ? (escHtml(atkSkill.n || 'Magia') + ': nenhum dano se passar na resistência (D&D 5e PHB p. 196).') : (escHtml(atkSkill.n || 'Magia') + ': metade do dano se passar na resistência (D&D 5e PHB p. 196).')) + '</div>',
-                            cls: saveSuccess ? 'miss' : 'hit'
+                                '<div class="drl-crit-rule">' + (atkSkill.saveNegates ? (escHtml(atkSkill.n || 'Magia') + ': nenhum dano se passar na resistência (D&D 5e PHB p. 196).') : (escHtml(atkSkill.n || 'Magia') + ': metade do dano se passar na resistência (D&D 5e PHB p. 196).')) + '</div>'
                         };
                     }
                 });
@@ -45447,33 +45655,116 @@ async function playTurn(aIdx, tIdx, opts) {
                     skill: atkSkill,
                     /* V1.7 (2026-04-21, QA) — passa vantagem/desvantagem visível. */
                     advMode: advMode,
+                    advReason: advDetails.reason,
                     advRaw1: d20Pack.raw1,
                     advRaw2: d20Pack.raw2,
                     postResult: function () {
                         var _oaSuffix = opts.oa ? ' (Oportunidade)' : '';
+                        var _title = '';
+                        var _cls = '';
                         if (hitRes.crit) {
-                            return {
-                                title: 'ACERTO CRÍTICO' + _oaSuffix,
-                                subHtml: simFormatVsAcHTML(20, atkShown, hitRes.total, effAc, true) +
-                                    _tacticalDiceBadgesHtml +
-                                    '<div class="drl-crit-rule">' + critDmgRuleLine + '</div>',
-                                cls: 'crit'
-                            };
+                            _title = 'ACERTO CRÍTICO' + _oaSuffix;
+                            _cls = 'crit';
+                        } else if (hitRes.hit) {
+                            _title = 'ACERTOU' + _oaSuffix;
+                            _cls = 'hit';
+                        } else if (hitRes.reason === 'falha_critica') {
+                            _title = 'FALHA CRÍTICA' + _oaSuffix;
+                            _cls = 'miss';
+                        } else {
+                            _title = target.n.toUpperCase() + ' DESVIOU' + _oaSuffix;
+                            _cls = 'miss';
                         }
-                        if (hitRes.hit) {
-                            return { title: 'ACERTOU' + _oaSuffix, subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, true) + _tacticalDiceBadgesHtml, cls: 'hit' };
+
+                        var _kicker = (atkSkill ? (escHtml(atkSkill.n).toUpperCase() + ' • ') : '') + 'ATAQUE' + (advMode === 'advantage' ? ' (VANTAGEM)' : (advMode === 'disadvantage' ? ' (DESVANTAGEM)' : ''));
+                        var _rows = [];
+                        if (advMode !== 'normal' && d20Pack.raw1 != null && d20Pack.raw2 != null) {
+                            _rows.push({ l: 'Dados', v: d20Pack.raw1 + ' e ' + d20Pack.raw2 + ' → ' + r });
+                        } else {
+                            _rows.push({ l: 'Rolagem', v: String(r) });
                         }
-                        if (hitRes.reason === 'falha_critica') {
-                            return {
-                                title: 'FALHA CRÍTICA' + _oaSuffix,
-                                subHtml: simFormatD20EqualsHTML(1) + ' <span class="drl-miss-strong">— falha automática</span>' + _tacticalDiceBadgesHtml,
-                                cls: 'miss'
-                            };
+                        _rows.push({ l: 'Bônus Atk', v: (actor.atk >= 0 ? '+' : '') + (actor.atk || 0) });
+                        if (atkExtra) {
+                            _rows.push({ l: 'Bônus Extra', v: (atkExtra > 0 ? '+' : '') + atkExtra });
                         }
+                        if (_atkElev && _atkElev.bonus !== 0) {
+                            _rows.push({ l: 'Desnível', v: (_atkElev.bonus > 0 ? '+' : '') + _atkElev.bonus });
+                        }
+                        _rows.push({ l: 'Total', v: String(hitRes.total) });
+                        var _acText = String(effAc);
+                        if (_atkCover && _atkCover.bonus > 0) _acText += ' (+' + _atkCover.bonus + ' Cob)';
+                        _rows.push({ l: 'CA Alvo', v: _acText });
+
+                        var _attackPills = [];
+                        if (hitRes.crit) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                        } else if (hitRes.reason === 'falha_critica') {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Falha Crítica (Nat 1)</span>');
+                        }
+                        if (_atkFlanked) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--type">⚔️ Flanqueamento</span>');
+                        }
+                        if (_atkElev && _atkElev.bonus !== 0) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--save">' + (_atkElev.bonus > 0 ? '⛰️ Terreno Elevado (+2)' : '▼ Terreno Baixo (-2)') + '</span>');
+                        }
+                        if (_atkCover && _atkCover.bonus > 0) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--resist">⛨ ' + (_atkCover.cover === 'half' ? 'Meia Cobertura (+2 CA)' : '¾ Cobertura (+5 CA)') + '</span>');
+                        }
+
+                        var _note = '';
+                        if (hitRes.crit) {
+                            _note = 'Natural 20! Acerto garantido e dados de dano duplicados (D&D 5e PHB p. 194).';
+                        } else if (hitRes.hit) {
+                            _note = 'Total ' + hitRes.total + ' ≥ CA ' + effAc + ' — Golpe acertou em cheio!';
+                        } else if (hitRes.reason === 'falha_critica') {
+                            _note = 'Natural 1! Erro automático feio independente de bônus (D&D 5e PHB p. 194).';
+                        } else {
+                            _note = 'Total ' + hitRes.total + ' < CA ' + effAc + ' — O golpe não superou a defesa do alvo.';
+                        }
+
+                        var _detailsRows = [
+                            { l: 'Atacante', v: actor.n },
+                            { l: 'Defensor', v: target.n },
+                            { l: 'CA Base do Alvo', v: String(target.ac) }
+                        ];
+                        if (_atkCover && _atkCover.bonus > 0) {
+                            _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + _atkCover.bonus + ' CA (' + (_atkCover.cover === 'half' ? 'Meia' : '¾') + ' Cobertura, PHB p. 196)' });
+                        }
+                        if (atkBonusPack && atkBonusPack.entries && atkBonusPack.entries.length) {
+                            atkBonusPack.entries.forEach(function (be) {
+                                if (be && be.n && be.total) {
+                                    _detailsRows.push({ l: be.n, v: '+' + be.total + ' no ataque' });
+                                }
+                            });
+                        }
+                        if (advDetails && advDetails.reason) {
+                            _detailsRows.push({ l: 'Circunstância Tática', v: advDetails.reason });
+                        }
+
+                        var _subHtml = '';
+                        if (hitRes.crit) {
+                            _subHtml = simFormatVsAcHTML(20, atkShown, hitRes.total, effAc, true) +
+                                _tacticalDiceBadgesHtml +
+                                '<div class="drl-crit-rule">' + critDmgRuleLine + '</div>';
+                        } else if (hitRes.hit) {
+                            _subHtml = simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, true) + _tacticalDiceBadgesHtml;
+                        } else if (hitRes.reason === 'falha_critica') {
+                            _subHtml = simFormatD20EqualsHTML(1) + ' <span class="drl-miss-strong">— falha automática</span>' + _tacticalDiceBadgesHtml;
+                        } else {
+                            _subHtml = simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, false) + _tacticalDiceBadgesHtml;
+                        }
+
                         return {
-                            title: '' + target.n.toUpperCase() + ' DESVIOU' + _oaSuffix,
-                            subHtml: simFormatVsAcHTML(r, atkShown, hitRes.total, effAc, false) + _tacticalDiceBadgesHtml,
-                            cls: 'miss'
+                            title: _title,
+                            cls: _cls,
+                            subStructured: {
+                                kicker: _kicker,
+                                rows: _rows,
+                                pills: _attackPills,
+                                note: _note,
+                                details: { rows: _detailsRows }
+                            },
+                            subHtml: _subHtml
                         };
                     }
                 });
@@ -46092,8 +46383,9 @@ async function playTurn(aIdx, tIdx, opts) {
        Cantrip/Evocação Potente, Afinidade Elemental) — espelha o motor
        combat2_subclass.subclass_attack_damage_bonus. */
     var subclassBonusDmg = 0;
+    var _sbList = [];
     if (!isMagicMissiles && hitRes.hit) {
-        var _sbList = _simSubclassDmgBonus(actor, target, atkSkill, s);
+        _sbList = _simSubclassDmgBonus(actor, target, atkSkill, s);
         for (var _sbi = 0; _sbi < _sbList.length; _sbi++) {
             subclassBonusDmg += _sbList[_sbi].val;
             if (s && s.log) s.log.push(actor.n + ' — ' + _sbList[_sbi].label + '!');
@@ -46224,11 +46516,17 @@ async function playTurn(aIdx, tIdx, opts) {
 
     var oldHp = target.hp;
     var newHp = Math.max(0, target.hp - _expectedHpDmg);
-    var dmgModForDiceUi = dmgMod + dmgItem + dmgSpecFlat + dmgBonusExtra;
+    var baseDmgMod = dmgMod + dmgItem + dmgSpecFlat;
+    var dmgModForDiceUi = baseDmgMod + dmgBonusExtra + bonusVsTagDmg + subclassBonusDmg;
 
     var reductionMeta = {
         appliedTotal: expectedDmg,
         rawTotal: total,
+        baseMod: baseDmgMod,
+        bonusPack: bonusPack,
+        bonusVsTagEntry: bonusVsTagEntry,
+        subclassBonusDmg: subclassBonusDmg,
+        subclassBonusList: _sbList || [],
         dmgType: dmgTypeFinal,
         isImmune: _isTargetImmune,
         isVulnerable: _isTargetVulnerable,
